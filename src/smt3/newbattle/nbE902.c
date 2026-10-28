@@ -98,7 +98,9 @@ typedef struct effBTLCutHandle_t effBTLCutHandle_t;
 typedef struct nbMainProcessData_t
 {
     nbFormation_t *form;
-    u8 unk_04[0xC];
+    u8 unk_04[0x4];
+    datUnitWork_t *work;
+    u8 unk_0C[0x4];
     nbParty_t *party;
     u8 unk_14[0x4];
     s16 playerpcnt;
@@ -356,6 +358,18 @@ extern u8 pNbCamera[];
 
 extern void nbCameraBoss_Ongy_BUNSIN_Run(u8 *pNbCamera);
 
+extern void nbCameraBoss_Ongy_BUNSIN_Set(u8 *pNbCamera);
+
+extern void nbLoadUnitGroup(s32 side, s32 stop, s32 anime);
+
+extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
+
+extern nbParty_t *nbGetPartyFromFormindex(s32 formindex);
+
+extern s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formindex);
+
+extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
+
 extern u32 dds3GetRandA(u8 *name);
 
 extern u8 dds3EffectBase[];
@@ -454,7 +468,45 @@ s32 nbE902_Wait1(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE902", SelectCopy);
+s32 SelectCopy(nbEventProcessData_t *ed)
+{
+    datUnitWork_t *work = nbGetUnitWorkFromFormindex(nbGetEventForm()->formindex);
+    nbParty_t *party = nbGetPartyFromFormindex(nbGetEventForm()->formindex);
+    s32 formindex;
+
+    for (formindex = 4; formindex < 14; formindex++) {
+        if (ed->data->form[formindex].stat & 8) {
+            s32 stockno = nbAppendEnemyDevilWork(ed->data, 0x10D, formindex);
+            datUnitWork_t *dst = &ed->data->work[stockno];
+            nbParty_t *dstparty;
+            s32 i;
+
+            dst->flag = work->flag;
+            dst->hp = work->hp;
+            dst->maxhp = work->maxhp;
+            dst->mp = work->mp;
+            dst->maxmp = work->maxmp;
+            dst->badstatus = work->badstatus;
+            nbAddUnitStock(ed->data, 1, stockno, formindex);
+            dstparty = nbGetPartyFromFormindex(formindex);
+            dstparty->flag = party->flag;
+            for (i = 0; i < 20; i++) {
+                dstparty->count[i] = party->count[i];
+            }
+            for (i = 0; i < 16; i++) {
+                dstparty->aisyo[i] = party->aisyo[i];
+            }
+            for (i = 0; i < 8; i++) {
+                dstparty->hojoskill[i] = party->hojoskill[i];
+            }
+        }
+    }
+    nbLoadUnitGroup(1, 0, 0);
+    nbSetEnemyFormation(ed->data);
+    nbCameraBoss_Ongy_BUNSIN_Set(pNbCamera);
+    nbFreeEffectSlot(ed);
+    return 0;
+}
 
 s32 Bunshin1(nbEventProcessData_t *ed)
 {
