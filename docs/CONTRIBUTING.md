@@ -21,6 +21,11 @@ policy permits:
 - Evidence-backed unused aggregates explaining frame gaps, a statement after
   the final call that blocks a tail call, and dead code whose trace survives
   in retail, under the specific conditions in the canonical rules.
+- Volatile VU0 scratch vectors and matrices under the canonical
+  [bare-address hardware hand-off idiom](https://github.com/Megami-Decomps/dds-decomp/blob/main/docs/idioms.md),
+  where only VU0 assembly observes their element stores.
+- Real constant endpoints in floating-point interpolation when the algorithm,
+  native operations and matched-family evidence meet the canonical rules.
 - A one-pass block or forward branch when a compiler trace or matched sibling
   establishes the required block shape.
 - Bounded search as a diagnostic aid. Reduce a hit to readable, ordinary C,
