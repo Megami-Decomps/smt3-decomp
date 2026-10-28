@@ -177,13 +177,53 @@ INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA28);
 
 INCLUDE_ASM(const s32, "result/rstinit", rstInit);
 
-INCLUDE_ASM(const s32, "result/rstinit", rstDestroyResult2);
+/* Resource prefix: allocations and texture are installed by rstInit. */
+typedef struct {
+    u8 unknown00[0x14];
+    sdfMemHandle_t *allocation;
+    u8 unknown18[0x22E0];
+    sdfMemHandle_t *scriptAllocation;
+    void *script;
+    sdfMemHandle_t *messageAllocation;
+    u8 unknown2304[8];
+    sdfTexHandle_t *texture;
+} rstResourceWork_t;
+
+extern void rstClearResultWork(void);
+extern void sdfTexFree(sdfTexHandle_t *texture);
+extern s32 fclDestroyMessage(void);
+extern void sdfMemFreeDirect(sdfMemHandle_t *allocation);
+extern void cmpModelFreeResource(void);
+extern void cmpResetDrawEnv(void);
+extern void rstSetPanelEffFlag(void);
+extern void rstSetStatusModelReady(s32 ready);
+extern s32 p2sdStopBGM(s32 id);
+
+/* KillProcess ignores this shutdown callback's return value. */
+void rstDestroyResult2(dds3ProcessID_t *id)
+{
+    if (GBWK_1 != NULL) {
+        rstClearResultWork();
+        sdfTexFree(((rstResourceWork_t *)GBWK_1)->texture);
+        fclDestroyMessage();
+        sdfMemFreeDirect(((rstResourceWork_t *)GBWK_1)->messageAllocation);
+        cmpModelFreeResource();
+        cmpResetDrawEnv();
+        sdfMemFreeDirect(((rstResourceWork_t *)GBWK_1)->scriptAllocation);
+        rstSetPanelEffFlag();
+        rstSetStatusModelReady(0);
+        sdfMemFreeDirect(((rstResourceWork_t *)GBWK_1)->allocation);
+        GBWK_1 = NULL;
+        gProcessStat_4 = 2;
+        p2sdStopBGM(0x2B0000);
+    }
+}
 
 extern u8 *rstInit(s32 mode);
 extern s32 rstCalc(dds3ProcessID_t *id);
 extern s32 rstDraw(dds3ProcessID_t *id);
 extern s32 rstUpdate(dds3ProcessID_t *id);
-extern s32 rstDestroyResult2(dds3ProcessID_t *id);
+extern void rstDestroyResult2(dds3ProcessID_t *id);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
                                          s32 shutdownTimer, dds3ProcessFunc_t process,
                                          dds3ProcessFunc_t shutdown, void *work);
@@ -196,7 +236,8 @@ void rstResult2ProcessStart(void)
     GBWK_1 = rstInit(0);
     dds3StartProcess(D_0054FCF0, 0x405, 1, 1, rstCalc, NULL, GBWK_1);
     dds3StartProcess(D_0053DA90, 0x2B15, 1, 1, rstDraw, NULL, GBWK_1);
-    dds3StartProcess(D_0053DAA0, 0x5211, 1, 1, rstUpdate, rstDestroyResult2, GBWK_1);
+    dds3StartProcess(D_0053DAA0, 0x5211, 1, 1, rstUpdate,
+                     (dds3ProcessFunc_t)rstDestroyResult2, GBWK_1);
     gProcessStat_4 = 1;
 }
 

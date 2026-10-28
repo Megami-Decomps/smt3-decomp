@@ -5486,7 +5486,7 @@
 0x0021F8D0 rstChkResult2Process __int64 __fastcall rstChkResult2Process(int)
 0x0021F8F0 rstCreateTargetList void rstCreateTargetList(rstData_t *pData)
 0x0021FA18 rstInit rstData_t *rstInit(cmpSeqInfo_t *pParentSeqInfo)
-0x0021FBB0 rstDestroyResult2 void *rstDestroyResult2(dds3ProcessID_t *PID)
+0x0021FBB0 rstDestroyResult2 void rstDestroyResult2(dds3ProcessID_t *id)
 0x0021FC50 rstResult2ProcessStart void rstResult2ProcessStart()
 0x0021FD00 rstResult2ProcessEnd __int64 rstResult2ProcessEnd()
 0x0021FD40 checkResultStat __int64 checkResultStat()
