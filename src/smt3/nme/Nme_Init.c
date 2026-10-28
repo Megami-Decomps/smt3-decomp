@@ -80,7 +80,12 @@ extern void frDelFontStyle(u8 styleNo);
 extern void nmeBuildNameFont(s8 mode, nmeWork_t *work);
 INCLUDE_ASM(const s32, "nme/Nme_Init", frAllocNameData);
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeStartFadeOut);
+extern u8 D_00552020[4];
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
+void nmeStartFadeOut(void)
+{
+    dds3FadeOut(D_00552020[0], D_00552020[1], D_00552020[2], 0x1E);
+}
 
 s32 nmeGetInputMode(nmeWork_t *work) {
     s32 inputPos;
@@ -174,7 +179,12 @@ s32 nmeCheckProcessStat(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", func_00298678);
+void func_00298678(void)
+{
+    if (nmeProcessId != NULL) {
+        nmeProcessId->sequence.flag |= 0x10;
+    }
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nme_298698);
 
