@@ -270,7 +270,7 @@ extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height, s32 *c
 extern void fclDrawSpriteAlpha(s32 x, s32 y, s32 z, u8 mode, s32 *colors,
     s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
 
-/* NON_MATCHING: 19 of 179 words differ, at the native 716-byte size. */
+/* NON_MATCHING: 7 of 179 words differ, at the native 716-byte size. */
 #ifdef NON_MATCHING
 void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 selected, s32 ot)
 {
@@ -286,7 +286,7 @@ void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 select
     case 1: {
         s32 fadedColor;
         s32 pulseColor;
-        s32 depth = z << 4;
+        s32 depth;
         half = width >> 1;
         blended = fclBlendColor(0x75FFFA2C, 0x2200842C, phase);
         fclDrawPanelSprite2(0x48, ot);
@@ -300,6 +300,7 @@ void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 select
         colors[2] = 0x2200842C;
         colors[3] = blended;
         cmpDrawBoxGDefault(x + (half << 4), y, z, half, height, colors, ot);
+        depth = z << 4;
         fclDrawPanelSprite2(0x44, ot);
         fadedColor = dds3GetConfigFadeAlpha() | 0x80808000;
         colors[0] = fadedColor;
