@@ -218,9 +218,18 @@ typedef struct
 
 typedef struct
 {
+    s16 n;
+    s16 m;
+    s16 a;
+    s16 b;
+} datSpecialSkill_t;
+
+typedef struct
+{
     datNormalSkill_t normal[288];
     u8 reserve[8];
     datNormalSkillVisual_t visual[288];
+    datSpecialSkill_t special[95];
 } datSkillTable_t;
 
 extern datSkillTable_t datSkillTable;

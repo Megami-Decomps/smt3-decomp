@@ -1435,3 +1435,17 @@ and `u16 bouga_cnt` at `0x1CF0` and `0x1CF2`. The recovered save-data layout,
 `datAddKotowariPoint` and `datGetKotowariLank` corroborate these boundaries;
 `tools/header_layout.c` checks the offsets and both array extents. The older
 three-byte/nine-byte partial view incorrectly grouped the same twelve bytes.
+
+### Special-skill table records (`newdata.h`)
+
+`datSkillTable` has 288 normal records of 0x3C bytes, eight reserved bytes,
+288 four-byte visual records, then 95 eight-byte special records at +0x4808.
+The complete 0x4B00-byte extent is bounded in
+`config/smt3/symbol_addrs.txt`. `datSetAutoKaifukuSkill` indexes the tail as
+`special[skill - 288]`, reading signed halfwords at offsets 0 and 2;
+`nbCheckBackAttack` and `nbCheckEscape` independently read slots 10 and 8.
+The recovered `datSpecialSkill_t` definition in `config/smt3/ida_members.txt`
+names its four signed halfwords `n`, `m`, `a` and `b`. The header preserves
+the normal and visual regions and appends this previously omitted tail.
+`tools/header_layout.c` checks both the individual record sizes and the
+region offsets and complete extent.

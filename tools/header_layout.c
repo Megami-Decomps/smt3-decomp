@@ -821,6 +821,16 @@ OFF(p105, nbMainProcessData_t, light, 0xA8);
 /* Keep the object non-empty so ee-as has something to assemble. */
 const s32 headerCheck = 1;
 
+/* Skill table: native normal/visual/special regions and bounded global. */
+SZ(ds01, datNormalSkill_t, 0x3C);
+SZ(ds02, datNormalSkillVisual_t, 4);
+SZ(ds03, datSpecialSkill_t, 8);
+OFF(ds04, datSpecialSkill_t, n, 0);
+OFF(ds05, datSpecialSkill_t, m, 2);
+OFF(ds06, datSkillTable_t, visual, 0x4388);
+OFF(ds07, datSkillTable_t, special, 0x4808);
+SZ(ds08, datSkillTable_t, 0x4B00);
+
 /* Shared name-entry work, verified by its init and draw access offsets. */
 OFF(nm01, nmeWork_t, memHandle, 0x14);
 OFF(nm02, nmeWork_t, targetNo, 0x18);
