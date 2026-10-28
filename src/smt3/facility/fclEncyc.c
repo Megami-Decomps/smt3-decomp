@@ -535,7 +535,41 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseRegistTop);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseRegistTop);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseRegistTop);
+void DrawPhaseRegistTop(fclEncyc_instance_tag *pinst)
+{
+    typedef struct
+    {
+        u8 flags;
+        u8 reserved0001[3];
+        u8 listWork[0x1198];
+        fclPanel_t listPanel;
+        frFontHandle_t *request;
+        frFontHandle_t *fonts[7];
+        s32 process;
+    } fclEncycRegistTopDrawWork_t;
+    extern void cmbDrawTopSprite(s32 x, s32 y, u32 z, s32 ot);
+    extern s32 func_001C7E38(void *request, s32 mode, s32 ot);
+    extern void DrawListWindowBack(void *obj, fclPanel_t *panel);
+    extern void drawRegistSprites(fclEncyc_instance_tag *pinst);
+    extern void DrawRegistListwinElem(fclEncyc_instance_tag *pinst);
+    extern void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 ot);
+    extern void lstDrawListWindowCursor(void *work, s32 ot);
+    extern void DrawRegistAllHelp(fclEncyc_instance_tag *pinst);
+    fclEncycRegistTopDrawWork_t *work = (fclEncycRegistTopDrawWork_t *)pinst->pwork;
+
+    if (work->request != NULL) {
+        cmbDrawTopSprite(0, 0x50, 0xFFFFF0, 0x47);
+        func_001C7E38(work->request, 0, 0x47);
+    }
+    DrawListWindowBack(work->listWork, &work->listPanel);
+    drawRegistSprites(pinst);
+    DrawRegistListwinElem(pinst);
+    fclDrawPhaseHeader(work->listWork, 0x26435480, 0, 0x47);
+    if ((s16)pinst->unk_58 == 0 && work->flags != 0) {
+        lstDrawListWindowCursor(work->listWork, 0x47);
+    }
+    DrawRegistAllHelp(pinst);
+}
 
 extern void ReleaseFontList(void **ppfont, s32 num);
 
