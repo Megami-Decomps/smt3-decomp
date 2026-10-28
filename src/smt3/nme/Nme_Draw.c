@@ -171,7 +171,34 @@ INCLUDE_ASM(const s32, "nme/Nme_Draw", func_0029A108);
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeStepCursor);
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDeleteChar);
+void nmeDeleteChar(s8 delta)
+{
+    s32 direction = delta;
+    s32 position = nmeGetCursorPos(nmeUpdateWork);
+    s32 mode = nmeGetInputMode(nmeUpdateWork);
+    s32 row = nmeUpdateWork->inputRowEnabled[mode];
+    s32 index;
+
+    if (row <= 0) {
+        return;
+    }
+    nmeUpdateWork->inputChars[mode][position][0] = 0x80;
+    nmeUpdateWork->inputChars[mode][position][1] = 0x80;
+    if (direction != 0) {
+        for (index = position + 1; index < nmeUpdateWork->inputRowEnabled[mode]; index++) {
+            nmeUpdateWork->inputChars[mode][index - 1][0] =
+                nmeUpdateWork->inputChars[mode][index][0];
+            nmeUpdateWork->inputChars[mode][index - 1][1] =
+                nmeUpdateWork->inputChars[mode][index][1];
+            nmeUpdateWork->inputChars[mode][index][0] = 0x80;
+            nmeUpdateWork->inputChars[mode][index][1] = 0x80;
+        }
+    }
+    if (nmeUpdateWork->inputRowEnabled[mode] - 1 >= position) {
+        nmeUpdateWork->inputRowEnabled[mode]--;
+    }
+    func_0029A108(mode);
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeConfirmChar);
 
