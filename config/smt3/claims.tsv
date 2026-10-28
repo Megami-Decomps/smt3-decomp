@@ -602,3 +602,4 @@ src/smt3/field/fldTest.c	redthing1	done	2026-10-28	1 fn / 868 B	Dante route move
 src/smt3/newbattle/NbNegoFlowInnen.c	redthing1	done	2026-10-28	1 fn / 152 B	Flow5_2 stock and event-bit candidate selection with separate stock-hit return; owner 19 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	HP/MP/level text row at exact 308-byte size; eight saved-register assignment words remain
 src/smt3/field/fldTest.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	patrol route reconstruction at native 720-byte size with two timer-load scheduling words unresolved; owner 35 match, 0 differ
+src/smt3/newbattle/nbUnitProcess.c	redthing1	done	2026-10-28	1 fn / 572 B	motion routing with complete visual motion bank, actual speed/wait fields and qualified category reuse; owner 36 match, 0 differ

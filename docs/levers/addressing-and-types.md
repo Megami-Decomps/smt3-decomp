@@ -1837,3 +1837,30 @@
   table adds two words. The mixed views preserve the real adjacent-entry
   relation and close the call scheduling too: the complete unit is 85 match,
   zero differ.
+
+
+## Complete model-visual motion banks
+
+`nbSetUnitMotion` matches all 572 bytes when its visual pointer uses the
+complete row: 0x2C bytes of model metadata, 26 motion records of 0x1C bytes,
+and three reserved words. The checked size is 0x310. `nbGetUnitVisual` indexes
+that stride, and the 0x49800-byte `datModelParamTable` contains 384 such rows.
+The native 26-entry motion switch and record indexing establish the consumed
+motion bank; the trailing words occupy the remaining 12 row bytes. This
+layout adds no runtime index clamp.
+
+The complete object view reproduces native address association: record
+accesses use a +0x30 base and +0x14/+0x16 timing loads. A pointer to the same
+0x1C-byte record at visual +0x2C reads the same fields but retains eight
+address/register differences. Direct array fields recover those bytes without
+a shifted record view. The controller speed, formation wait-motion index
+and post-callback timing reloads retain their actual fields.
+
+The requested and adjusted categories also share the motion scalar. Qualified
+traces of pinned cc1
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`
+show RTL uids 6/127 assigning pseudo 85, which global allocation keeps in
+$16. Splitting the input and adjusted category produces separate $22/$16
+allocations and 34 instruction differences at the same 572-byte size. Both
+traces pass hooked/unhooked and dump/plain output parity. The complete owner
+checks 36 match / 0 differ.

@@ -276,7 +276,118 @@ s32 nbSetNegoWaitMotion(nbFormation_t *form)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbSetUnitMotion);
+/* Complete motion-bank view of a native 0x310-byte model-visual row. */
+typedef struct {
+    sdfVector4_t center;
+    f32 formsize;
+    f32 formheight;
+    f32 formscale;
+    f32 oneshotr;
+    f32 allshotr;
+    u16 modelsize;
+    u16 shadowsize;
+    u16 badframe;
+    u16 autowait;
+    nbUnitMotion_t motions[26];
+    u32 reserved[3];
+} nbUnitVisualMotions_t;
+
+typedef char nbUnitVisualMotions_size_must_be_0x310[
+    sizeof(nbUnitVisualMotions_t) == 0x310 ? 1 : -1];
+
+extern s32 nbGetMotionNo(nbFormation_t *form, s32 motion);
+extern void evtSetUnitMotion(evtUnit_t *unit, s32 motion, s32 before, s32 smooth, s32 mode);
+extern void evtSetWaitHokanFrame(evtUnit_t *unit, s32 before, s32 smooth);
+
+void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate)
+{
+    nbMainProcessData_t *data;
+    datUnitWork_t *work;
+    nbUnitVisualMotions_t *visual;
+    evtUnit_t *unit;
+    s32 motionNo;
+    s32 before = 0;
+    s32 smooth = 0;
+    f32 speed;
+
+    data = nbGetMainProcessData();
+    unit = form->hunit;
+    work = nbGetUnitWorkPointer(data, &data->party[form->partyindex]);
+    if ((form->anime & 0x80) == 0) {
+        visual = (nbUnitVisualMotions_t *)nbGetUnitVisual(work);
+        /* Requested and adjusted categories share one scalar; qualified cc1
+         * allocation keeps both in $16. See docs/levers/addressing-and-types.md. */
+        motion = GetDyingBadWaitMotion(form, motion, work);
+        speed = nbGetMotionSpeed(form, motion, rate);
+        motionNo = nbGetMotionNo(form, motion);
+
+        switch (motion) {
+        case 0:
+        case 2:
+        case 13:
+        case 22:
+        case 23:
+            before = form->nexthokanb;
+            smooth = form->nexthokan;
+            break;
+        case 1:
+            before = 0;
+            smooth = 1;
+            break;
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+        case 21:
+        case 24:
+        case 25:
+            before = 0;
+            smooth = 0;
+            break;
+        case 14:
+        case 15:
+            before = 0;
+            smooth = 0xF;
+            break;
+        }
+
+        switch (motion) {
+        case 0:
+        case 2:
+        case 13:
+        case 22:
+            if (unit->owner->current.h.motionIndex != motionNo) {
+                evtSetUnitMotion(unit, motionNo, before, smooth, mode);
+            }
+            break;
+        default:
+            evtSetUnitMotion(unit, motionNo, before, smooth, mode);
+            break;
+        }
+
+        unit->owner->first->speed = speed;
+        form->motspeed = speed;
+        form->nexthokan = visual->motions[motion].hframe;
+        form->nexthokanb = visual->motions[motion].bframe;
+        if (mode == 0 || mode == 3) {
+            evtSetWaitHokanFrame(unit, form->nexthokanb, form->nexthokan);
+            form->nexthokan = visual->motions[form->waitmot].hframe;
+            form->nexthokanb = visual->motions[form->waitmot].bframe;
+        }
+    }
+}
+
 
 void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 ritu)
 {
