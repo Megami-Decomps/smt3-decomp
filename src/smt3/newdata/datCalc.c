@@ -1049,25 +1049,18 @@ s32 datAddDevil(s32 id, s32 sw)
     datPartyWork->stockcnt++;
     return i + 4;
 }
-/* NON_MATCHING: 12 of 26 words differ (first at +0x34). */
-#ifdef NON_MATCHING
 s32 datAddUniqueDevil(s32 id, s32 sw, s32 uid)
 {
     s32 index = datAddDevil(id, sw);
-    u8 *base = (u8 *)(index * 0xEC) + (u32)DDS3_GBWK;
-    datUnitWork_t *unit = (datUnitWork_t *)(base + 0xA54);
-    u32 flag = unit->flag;
+    u32 flag = datPartyWork->unitwork[index].flag;
 
-    *(u16 *)(base + 0xA76) = uid;
-    unit->flag = flag | 0x400;
+    datPartyWork->unitwork[index].uniqueid = uid;
+    datPartyWork->unitwork[index].flag = flag | 0x400;
     if (uid == 1) {
-        unit->flag = flag | 0x1400;
+        datPartyWork->unitwork[index].flag = flag | 0x1400;
     }
     return index;
 }
-#else
-INCLUDE_ASM(const s32, "newdata/datCalc", datAddUniqueDevil);
-#endif
 
 s32 datSearchUniqueDevilStock(s32 uid)
 {

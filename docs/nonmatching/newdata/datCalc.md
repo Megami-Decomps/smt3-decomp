@@ -20,23 +20,6 @@ arm; duplicating `return param - bonus` in both arms to invite cross-jumping;
 36 combinations of declaration order and initialisation order of the three
 locals.
 
-## datAddUniqueDevil (newdata/datCalc, 0x6C)
-
-12 of 26 words differ and the draft is one word short. Retail keeps
-`index * 0xEC + DDS3_GBWK` in one register, biases a second to `+ 0xA54` for
-the flag load at displacement 0, and then copies the first with
-`daddu $3, $4, $0` so `$4` can take the flag, storing `uniqueid` at
-displacement 0xA76 off the copy. ee-gcc coalesces that copy away in every
-spelling tried, and also schedules the `sh` above the `lw` where retail has
-the load first.
-
-Ruled out: `unit->uniqueid` off a single pointer (which puts the store at
-displacement 0x22 and loses the second base); a `u8 *base` local with the
-store written as `*(u16 *)(base + 0xA76)`; the same through a `u16 *` local;
-the store through `DDS3_GBWK->akuma[index]`, which forms the right address but
-does not add the copy; both orders of the flag read and the uniqueid store;
-and a `volatile` read of the flag to pin the order.
-
 ## datDeadNakama (newdata/datCalc, 0xC4)
 
 28 of 48 words differ and the draft is one word short. The loop body, the
