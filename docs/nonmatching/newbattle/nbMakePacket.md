@@ -163,31 +163,7 @@ Ruled out: a `while` loop, a `continue` in place of the `if` body, a `u32`
 index, a `goto` out of the loop, a `do`/`while (1)` with two `break`s, the
 format string in a local, and `i = 3` instead of `break`. Duplicating the
 `printf`/`nbRunAiSub` tail into the found and not-found paths runs over size.
-Varying `nbGetAiEntry`'s declaration (absent, K&R, `u32`) changes nothing,
-unlike the `nbMaeCheckDone` case below.
-
-## nbMaeCheckDone (newbattle/nbMakePacket, 0xC8)
-
-Byte-exact on its own. It is kept behind the fallback because compiling it
-turns `nbE905_End`, the only caller, from retail's `bnel $2, $0` into a plain
-`bne`: its `return 0` stops being annulled into the branch delay slot the
-moment the callee is a C definition in the unit rather than an `INCLUDE_ASM`
-declaration. That is the mirror image of the `slDrawWindow` finding in
-[matching levers](matching-levers.md): what the compiler can see of the rest
-of the unit changes the delay-slot decisions it makes for one function, and
-here seeing more makes it worse. The two cannot both match, and
-`nbE905_End` was already banked.
-
-Ruled out for keeping both: a K&R `s32 nbMaeCheckDone()` definition, which is
-what the implicit declaration gave the caller, and four shapes of
-`nbE905_End` itself (an `&&` chain, two early returns, a `ret` local, and a
-`return 0` inside the outer guard), none of which recover the `bnel`.
-
-Confirmed on the way: a six-entry jump table does come out of six `case`
-labels here, so `case_values_threshold` is not 10 for this shape. The switch
-needs an explicit empty `case 0:` alongside 1 to 5; without it ee-gcc builds
-a five-node compare tree instead of the table. `nbMaeFlag`, `nbMaeState`,
-`nbMaeCounter` and `D_00551540` are all `s32` sdata.
+Varying `nbGetAiEntry`'s declaration (absent, K&R, `u32`) changes nothing.
 
 ## Flow5_2 (newbattle/nbMakePacket, 0x98)
 

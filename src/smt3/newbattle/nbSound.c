@@ -661,8 +661,6 @@ void nbAllocMainProcessData(nbMainProcessData_t *data)
     }
 }
 
-#ifdef NON_MATCHING
-/* NON_MATCHING: exact on its own; its presence turns nbE905_End's bnel into bne. */
 s32 nbMaeCheckDone()
 {
     if (nbMaeLoadDone == 1) {
@@ -701,9 +699,6 @@ s32 nbMaeCheckDone()
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbSound", nbMaeCheckDone);
-#endif
 
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C38);
 
