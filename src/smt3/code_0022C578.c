@@ -1290,9 +1290,9 @@ s32 cmpStartSkillTokusyuMsg(u16 skill)
 }
 
 
-void cmpStartItemTokusyuMsg(u16 item)
+s32 cmpStartItemTokusyuMsg(u16 item)
 {
-    cmpStartSkillTokusyuMsg(datItemTable[item].skill);
+    return cmpStartSkillTokusyuMsg(datItemTable[item].skill);
 }
 
 // NON_MATCHING: 19 of 40 words match at the exact size; argument setup
