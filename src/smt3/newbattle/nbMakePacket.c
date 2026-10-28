@@ -373,6 +373,7 @@ extern void *memset(void *a, s32 b, u32 c);
 extern u32 f;
 
 extern void ToMatrix(void);
+extern f32 sdfAtan2(f32 aY, f32 aX);
 
 extern f32 nbMakeUnitMoveGetCyDist(nbFormation_t *i_form, nbFormation_t *t_form);
 
@@ -518,7 +519,76 @@ void nbAddHatudoEffectEndPacket(s32 startframe, s32 uniqueid)
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00544890);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbAddHatudoEffectKoukaPacket);
+extern void *effBTLSystemCut1Create(nbFormation_t *form, s32 index);
+struct effBTLCut_t;
+extern void effBTLCutSetCutEndFrame(struct effBTLCut_t *cut, s32 frame);
+extern nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se);
+
+nbKoukaPacket_t *nbAddHatudoEffectKoukaPacket(s32 startframe, s32 framelength,
+    s32 uniqueid, nbFormation_t *form, s32 type, s32 mottype, s32 skillid)
+{
+    s32 sound;
+    void *cut;
+
+    sound = 0;
+    if (type == 0) {
+        return NULL;
+    }
+    switch (nbGetUnitWorkFromFormindex(form->formindex)->id) {
+    case 0:
+        if (mottype == 12) {
+            type = 19;
+            framelength = 0x7FFF;
+        }
+        break;
+    case 0x123: type = 13; break;
+    case 0x102: type = 14; break;
+    case 0x124:
+        if (skillid == 0xA9) {
+            type = 20;
+            framelength += 10;
+        } else {
+            type = 15;
+        }
+        break;
+    case 0x103:
+        if (skillid == 0xAA) {
+            type = 21;
+            framelength += 10;
+        } else {
+            type = 16;
+        }
+        break;
+    case 0x125: type = 17; break;
+    case 0x108: type = 18; break;
+    case 0x156: type = 22; break;
+    case 0x157: type = 23; break;
+    case 0x158: type = 24; break;
+    }
+    switch (type) {
+    case 1: case 2: case 7: case 8: case 9: case 10: case 11: case 12: case 19:
+        sound = 0x1000B;
+        break;
+    case 3: sound = 0x1000C; break;
+    case 4: sound = 0x1000D; break;
+    case 5: sound = 0x1000E; break;
+    case 6: sound = 0x1000F; break;
+    case 13: sound = 0x1EB0002; break;
+    case 14: sound = 0x1EB0003; break;
+    case 20: case 21: sound = 0x1ED0002; break;
+    case 17: sound = 0x1EF0002; break;
+    case 18: sound = 0x1EF0003; break;
+    case 22: sound = 0x1F40001; break;
+    case 23: sound = 0x1F50001; break;
+    case 24: sound = 0; break;
+    }
+    if (sound != 0) {
+        nbAddSePacket(startframe, uniqueid, sound);
+    }
+    cut = effBTLSystemCut1Create(form, type);
+    effBTLCutSetCutEndFrame(cut, framelength);
+    return nbAddSkillEffectKoukaPacket1(startframe, framelength, uniqueid, cut);
+}
 
 nbKoukaPacket_t *nbAddTargetMoveKoukaPacket(s32 startframe, s32 uniqueid, s32 partyno,
                                             sdfVector4_t *pos, f32 speed)
@@ -1524,7 +1594,54 @@ s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMoveGetCyDist);
+f32 nbMakeUnitMoveGetCyDist(nbFormation_t *i_form, nbFormation_t *t_form)
+{
+    sdfVector4_t t_center;
+    sdfVector4_t i_center;
+    f32 angle;
+    f32 result;
+
+    SDF_VU0_LOADVECTOR(&i_form->rot);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&i_form->center);
+    SDF_VU0_SCALEVECTOR(i_form->scl);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_LOADVECTOR_B(&i_form->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&i_center);
+    i_center.y -= i_form->h * i_form->scl * 0.25f;
+
+    SDF_VU0_LOADVECTOR(&t_form->rot);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&t_form->center);
+    SDF_VU0_SCALEVECTOR(t_form->scl);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_LOADVECTOR_B(&t_form->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&t_center);
+    t_center.y -= t_form->h * t_form->scl * 0.25f;
+
+    angle = sdfAtan2(sdfFabs(t_center.y - i_center.y), 100.0f);
+
+    if (t_center.y < i_center.y) {
+        result = angle * 50.0f;
+        if (result > 50.0f) {
+            result = 50.0f;
+        }
+    } else {
+        result = angle * 100.0f;
+        if (result > 100.0f) {
+            result = 100.0f;
+        }
+    }
+
+    result += 100.0f;
+    result += i_form->center.z * i_form->scl;
+    if (result < (i_form->r - i_form->cr) * i_form->scl) {
+        result = (i_form->r - i_form->cr) * i_form->scl;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMovePacket);
 

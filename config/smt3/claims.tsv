@@ -525,3 +525,4 @@ src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	1 fn / 424 B	push collision with 
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 308 B	name-entry opposing gradient triangles with contiguous vertex colors; owner 337 match, 0 differ
 src/smt3/field/fldSky.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	sky gradient grid and fade reconstruction; native size with twelve temporary stack-location differences
 src/smt3/newbattle/nbMakePacket.c	redthing1	done	2026-10-28	1 fn / 416 B	press-count adjustment with native case transitions, bounded counts and qualified one-pass loop
+src/smt3/newbattle/nbMakePacket.c	redthing1	done	2026-10-28	1 fn / 756 B	activation effect cut overrides, sound mapping and cut end-frame publication; owner 72 match, 0 differ
