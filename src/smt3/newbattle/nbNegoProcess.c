@@ -983,7 +983,57 @@ s32 nbFlowFindUnitEntry(nbNegoProcessData_t *n)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbNegoDebugPrint);
+extern void *sdfGrAllocPacketBuff(u32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
+extern sdfGrOt_t D_002F67F8;
+extern char D_00544E98[];
+extern char D_00544EA8[];
+extern char D_00551148[];
+extern char D_00551150[];
+
+void nbNegoDebugPrint(nbNegoProcessData_t *n)
+{
+    sdfDrawTag_t *tag;
+    u32 packet;
+    s32 index;
+    s32 i;
+    s32 message;
+    s32 y;
+    u32 historyMessageId;
+
+    y = 0x7CE0;
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+
+    packet = (u32)sdfDevPrintf(0x7100, 0x7B60, 0x00FFFF80, 0, D_00544E98,
+                               (s32)(n->nownegoid >> 16), (s32)(n->nownegoid & 0xFFFF));
+    sdfDrawTagLink(tag, packet);
+    packet = (u32)sdfDevPrintf(0x7100, 0x7C80, 0x00FFFF80, 5, D_00551148);
+    sdfDrawTagLink(tag, packet);
+
+    index = (n->historyindex + 1) % 14;
+    for (i = 0; i < 14; i++) {
+        historyMessageId = n->history[index];
+        message = n->historymes[index];
+        if (message != 0) {
+            packet = (u32)sdfDevPrintf(0x7100, y, 0x00FFFF80, 0, D_00544EA8,
+                                       (s32)(historyMessageId >> 16), (s32)(historyMessageId & 0xFFFF), message);
+            sdfDrawTagLink(tag, packet);
+        } else {
+            packet = (u32)sdfDevPrintf(0x7100, y, 0x00FFFF80, 0, D_00551150,
+                                       (s32)(historyMessageId >> 16), (s32)(historyMessageId & 0xFFFF));
+            sdfDrawTagLink(tag, packet);
+        }
+        index = (index + 1) % 14;
+        y += 0x60;
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
+
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E98);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EA8);
 
 INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbNegoDebugPrint2);
 
