@@ -33,7 +33,7 @@ extern void evtFreeStage(void);
 
 extern void func_00116BB8(void);
 
-extern s32 dds3GlobalWorkInit(void);
+extern void dds3GlobalWorkInit(void);
 
 extern void sdfTexFree(sdfTexHandle_t *handle);
 extern void sdfTexFreeDelayed(sdfTexHandle_t *handle);
@@ -82,11 +82,11 @@ extern void stfLoadUITexture(s32 index);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
-s32 dds3CreateGameData(void)
+void dds3CreateGameData(s32 no)
 {
     evtFreeStage();
     func_00116BB8();
-    return dds3GlobalWorkInit();
+    dds3GlobalWorkInit();
 }
 
 extern s32 evtBitCheck(s32 eventNo);

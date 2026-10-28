@@ -46,9 +46,7 @@ typedef struct
     s16 half0C;
     s16 transition; /* 0xE: fldMainLoadStart */
     u8 unk10[0x24];
-    /* The IDB types this sdfMemHandle_t *; this unit only ever moves the word,
-     * so the declared type is left as the matching build has it. */
-    s32 memHandle;
+    sdfMemHandle_t *memHandle;
     s32 unk38;
     s32 playtime;
     s32 integers[256];

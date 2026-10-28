@@ -13,6 +13,30 @@ extern void dds3GlobalWorkUserInit2(s32 mode);
 
 extern void dds3GlobalWorkClearFlags(void);
 
+extern void dds3GlobalWorkUserInit(void);
+
+extern void func_00116C30(void);
+
+extern void func_00116BB8(void);
+
+extern s32 func_00116C08(dds3ProcessID_t *id);
+
+extern s32 dds3KillProcessName(char *name, s32 shutdowntimer);
+
+extern char D_0054EA08[];
+
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer, s32 shutdownTimer,
+                                         dds3ProcessFunc_t processFunc, dds3ProcessFunc_t shutdownFunc,
+                                         void *workData);
+
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
+
+extern void sdfMemUnlock(sdfMemHandle_t *aHandle);
+
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
+
 extern void evtInitGlobalWork(void);
 
 extern void datInitPlayer(void);
@@ -28,8 +52,6 @@ extern void fclEncycInitRecord(s32 mode);
 extern void NewGame2Push(void);
 
 extern void NewGame2Pop(void);
-
-extern void *sdfMemAllocDirect(s32 aSize);
 
 extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
 
@@ -135,7 +157,60 @@ extern void frSetDrawPosition(_FRQ *pFRQ, s32 X, s32 Y);
 
 extern _FRQ *frDestroyFontRequestAfter(_FRQ *pFRQ);
 
-INCLUDE_ASM(const s32, "kernel/dds3GlobalWork", dds3GlobalWorkInit);
+void dds3GlobalWorkInit(void)
+{
+    sdfMemHandle_t *handle = sdfMemAllocDirect(0x1A510);
+    dds3GlobalWork_t *work = sdfMemLock(handle);
+
+    memset(work, 0, 0x1A510);
+    work->memHandle = handle;
+    work->unk38 = 0;
+    work->playtime = 0;
+    dds3StartProcess(D_0054EA08, DDS3_PRIORITY_GLOBALWORK, 0, 0, func_00116C08, NULL, work);
+    DDS3_GBWK = work;
+    return func_00116C30();
+}
+
+void func_00116BB8(void)
+{
+    sdfMemHandle_t *handle;
+
+    dds3KillProcessName(D_0054EA08, 0);
+    dds3GlobalWorkUserInit();
+    handle = DDS3_GBWK->memHandle;
+    sdfMemUnlock(handle);
+    sdfMemFreeDirect(handle);
+    DDS3_GBWK = NULL;
+}
+
+s32 func_00116C08(dds3ProcessID_t *id)
+{
+    DDS3_GBWK->unk38++;
+    DDS3_GBWK->playtime++;
+    return 0;
+}
+
+/* Only the stock capacity word is described by this save-work view. */
+typedef struct
+{
+    u8 unk_00000[0xA50];
+    s32 maxstock;
+} dds3GlobalStockView_t;
+
+void func_00116C30(void)
+{
+    dds3GlobalWorkClearFlags();
+    evtInitGlobalWork();
+    ((dds3GlobalStockView_t *)DDS3_GBWK)->maxstock = 8;
+    datInitPlayer();
+    datInitBossPress();
+    dds3ClearStockTable();
+    DDS3_GBWK->heartsequip = 0;
+    DDS3_GBWK->heartscnt = 0;
+    frInitNameData();
+    fldGbInit_System(0);
+    fclEncycInitRecord(0);
+}
 
 void dds3GlobalWorkUserInit(void) {
 }
@@ -384,7 +459,7 @@ void dds3GlobalWorkUserInit2(s32 mode)
     DDS3_GBWK->playtime = 0;
     dds3GlobalWorkClearFlags();
     evtInitGlobalWork();
-    DDS3_GBWK->akuma[0].unk00 = 8;
+    ((dds3GlobalStockView_t *)DDS3_GBWK)->maxstock = 8;
     datInitPlayer();
     datInitBossPress();
     dds3ClearStockTable();
