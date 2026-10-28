@@ -138,7 +138,33 @@ INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", UpdateSelect);
 
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", OnOffTargetCursor);
 
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", DispTargetHelp);
+extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 index);
+extern void nbDispDevilName(s32 id);
+
+void DispTargetHelp(nbTarSelProcessData_t *process)
+{
+    s32 found = 0;
+    s32 state = process->stat;
+    s32 i;
+    datUnitWork_t *unit;
+
+    for (i = 0; i < 16; i++) {
+        if (state == 1 && process->ctype == 0 &&
+            (process->data->form[i].anime & 8) != 0) {
+            found = 1;
+            break;
+        }
+    }
+    if (found != 0 && process->statusTime == 0) {
+        unit = nbGetUnitWorkFromFormindex(i);
+        if (unit != NULL) {
+            nbDispDevilName(unit->id);
+        }
+    }
+    if (process->statusTime > 0) {
+        process->statusTime--;
+    }
+}
 
 void MemoryCommand_nbTarSelProcess(nbTarSelProcessData_t *process)
 {
