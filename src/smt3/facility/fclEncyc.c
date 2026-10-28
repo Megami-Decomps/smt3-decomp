@@ -1109,7 +1109,25 @@ void CalcConfirmStatus(fclEncyc_registconfirmwork_tag *work)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", GetValidUnitIndex);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", RegistAll);
+s32 RegistAll(fclEncyc_instance_tag *pinst)
+{
+    s32 count = pinst->unk_70;
+    u8 *index;
+    s32 registered = 0;
+
+    if (count > 0) {
+        s32 remaining;
+        index = pinst->unk_74;
+        remaining = count;
+        do {
+            if (fclEncycRegist(&encycSaveWork->party[*index++].unit, 1) == 1) {
+                registered++;
+            }
+            remaining--;
+        } while (remaining != 0);
+    }
+    return registered;
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", InitListWindow);
 
