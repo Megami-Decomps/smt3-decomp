@@ -8519,7 +8519,6 @@
 0x002BD318 sdfDevSetPrintCB void sdfDevSetPrintCB(sdfDevPrintCB_t *aCB, s32 aX, s32 aY, u32 aZ, s32 aAttr)
 0x002BD340 sdfPrintRpcFunc void *sdfPrintRpcFunc(u32 funcNo, void *data, s32 size)
 0x002BD398 sdfPrintRpcThread void sdfPrintRpcThread(void *dummy)
-0x002BD3E8 sdf_2BD3E8 void __fastcall sdf_2BD3E8(__int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, int)
 0x002BD3F8 sdfPrintIopInit void sdfPrintIopInit()
 0x002BD4A8 sdfPuts void sdfPuts(char *str)
 0x002BD550 sdfPrintf s32 sdfPrintf(char *str, void *LegacyParamArray)
