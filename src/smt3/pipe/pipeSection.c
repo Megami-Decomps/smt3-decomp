@@ -38,7 +38,8 @@ extern u16 myStatus;
 
 extern s32 datGetPlayerParam(s32 id);
 
-extern u8 camMode, CameraAction, offsetStep, offsetStepCount;
+extern s8 camMode, CameraAction;
+extern u8 offsetStep, offsetStepCount;
 
 extern s32 D_00551738, D_0055173C, D_00551744, D_00551748;
 
@@ -273,7 +274,55 @@ void pipeDataRelease(void)
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", pipeLoadSection);
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", pipeMainSection);
+extern s32 pipeIndex;
+extern void pipeOffset(void);
+extern void pipeStart(void);
+extern void pipeEnd(void);
+extern void PipeMain(void);
+extern void PipeCameraAction3(void);
+extern void PipeCameraAction(void);
+extern void PipeCamera(void);
+extern void CamActionQuake(void);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
+
+s32 pipeMainSection(void)
+{
+    pipeOffset();
+    switch (pipeIndex) {
+    case 0:
+        pipeStart();
+        pipeIndex = 1;
+        break;
+    case 1:
+        if (D_00528F58.tSize - 0x600 < offsetCount) {
+            dds3FadeOut(0xFF, 0xFF, 0xFF, 0x3C);
+            pipeIndex = 2;
+        }
+        /* Continue to the end threshold after the fade threshold. */
+    case 2:
+        if (D_00528F58.tSize - 0x400 < offsetCount) {
+            pipeEnd();
+            pipeIndex = 0;
+            return 1;
+        }
+        break;
+    }
+
+    PipeMain();
+    if (offsetCount < 0x320) {
+        if ((s8)camMode != 0) {
+            PipeCameraAction3();
+        } else {
+            PipeCameraAction();
+        }
+    } else {
+        PipeCamera();
+    }
+    if ((s8)CameraAction != 0) {
+        CamActionQuake();
+    }
+    return 0;
+}
 
 void pipeDrawSection(void)
 {
