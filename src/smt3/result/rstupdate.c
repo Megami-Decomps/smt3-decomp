@@ -366,7 +366,38 @@ INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqEvoAct);
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqEvo);
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqEvoAt);
+extern s32 rstChkEvoAct(void);
+extern void evtFreeStage(void);
+extern void fclFilterOFF(void);
+extern void func_0023FCC0(void);
+extern s32 fclChkMessage(void);
+extern s32 fclSetWorkValue(s8 index, s32 value);
+
+void rstUpdateSeqEvoAt(void)
+{
+    if (startPos->Flag != 0) {
+        if (rstChkEvoAct() != 0) {
+            return;
+        }
+        if (fclChkMessage() != 0) {
+            return;
+        }
+        evtFreeStage();
+        fclFilterOFF();
+        func_0023FCC0();
+        startPos->Flag = 2;
+        startPos->unk_0001 = 0x11;
+        startPos->unk_0004 = 1;
+    }
+    {
+        s32 message = fclChkMessage();
+        if (message == 0 || message == 3) {
+            fclSetWorkValue(1, 1);
+            fclSetWorkValue(2, 0);
+            startPos->Flag = 1;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqConfirm);
 
