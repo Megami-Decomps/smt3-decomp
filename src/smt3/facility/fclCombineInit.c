@@ -911,7 +911,38 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindCombineResult);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindUnlockedResult);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindBirthEntry);
+typedef struct {
+    u16 devilA;
+    u16 devilB;
+    u16 devilC;
+    u16 result;
+} cmbTripleEntry_t;
+
+extern cmbTripleEntry_t D_0032DBE0[];
+extern cmbPairEntry_t D_0032DC18[];
+extern cmbPairEntry_t D_0032DC90[];
+
+s32 cmbFindBirthEntry(u16 devilId)
+{
+    u32 i;
+
+    for (i = 0; i < 7; i++) {
+        if (devilId == D_0032DBE0[i].result) {
+            return 1;
+        }
+    }
+    for (i = 0; i < 19; i++) {
+        if (devilId == D_0032DC18[i].result) {
+            return 1;
+        }
+    }
+    for (i = 0; i < 2; i++) {
+        if (devilId == D_0032DC90[i].result) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindBirthResult);
 
