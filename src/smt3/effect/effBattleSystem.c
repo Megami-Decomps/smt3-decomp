@@ -2798,7 +2798,39 @@ void nbSetHelperViewer(void *pViewer)
     nbHelperViewer = pViewer;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", nb_175338);
+extern u8 D_00551DC0;
+extern u8 D_00551DC1;
+extern u8 D_00551DC2;
+extern u8 D_00551DC3;
+extern u8 D_00551DC4;
+extern u8 D_00551DC5;
+extern u8 D_00551DC6;
+extern u8 D_00551DC7;
+extern u8 D_00551DC8;
+extern u8 D_00551DC9;
+extern u8 D_00551DCA;
+extern u8 D_00551DCB;
+extern u8 D_00551DCC;
+
+s32 nb_175338(s32 value)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+
+    D_00551DC0 = (((s32)data->stat >> 16) ^ 1) & 1;
+    D_00551DC1 = (((s32)data->stat >> 17) ^ 1) & 1;
+    D_00551DC2 = (((s32)data->stat >> 18) ^ 1) & 1;
+    D_00551DC3 = (((s32)data->stat >> 19) ^ 1) & 1;
+    D_00551DC4 = ((s32)data->stat >> 22) & 1;
+    D_00551DC5 = ((s32)data->stat >> 25) & 1;
+    D_00551DC6 = ((s32)data->stat >> 23) & 1;
+    D_00551DC7 = ((s32)data->stat >> 26) & 1;
+    D_00551DC8 = ((s32)data->stat >> 27) & 1;
+    D_00551DC9 = ((s32)data->stat >> 28) & 1;
+    D_00551DCA = (((s32)data->stat >> 29) ^ 1) & 1;
+    D_00551DCB = ((s32)data->stat >> 30) & 1;
+    D_00551DCC = data->stat >> 31;
+    return value;
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", nb_175440);
 

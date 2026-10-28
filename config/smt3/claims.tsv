@@ -489,3 +489,4 @@ src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 512 B	result-update
 src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 520 B	evolution animation stages with distinct source work, unconditional timer reset and completion return; owner 33 match, 0 differ
 src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 444 B	evolution confirmation and decline with shared cursor transition and signed result state; owner 34 match, 0 differ
 src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	terminal event mode dispatch; exact-size eight-word scheduling/control-flow residual
+src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 264 B	battle debug flag snapshot with typed signed status extraction and native byte outputs; owner 285 match, 0 differ
