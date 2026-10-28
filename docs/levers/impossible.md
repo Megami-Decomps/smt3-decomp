@@ -83,17 +83,70 @@ unwritable too until the split is corrected:
 Both are `docs/tu-recovery.md` work, not matching work: drop the epilogue symbol
 from the split and the function above it compiles as one piece.
 
-## Handwritten assembly, found by an instruction cc1 never emits
+## Written in assembly, and reachable only through an asm macro
 
 ee-gcc 2.96 materialises a small constant with `addiu`, never `addi`, so an
-`addi rd, $0, imm` in a body means the body was written by hand. The split
-asm already marks each one `/* handwritten instruction */`; this is the list,
-so nobody spends a pass on one. Re-derive it with:
+`addi rd, $0, imm` in a body means the retail source was assembly, not C. The
+split asm already marks each one `/* handwritten instruction */`. Re-derive the
+list with:
 
     grep -rlE '\*/\s+(addi|subi) ' asm/smt3/nonmatchings/
 
-21 functions, 3864 bytes. Nineteen are the `corePkt*`
-VU1 packet builders in `sdf/sdfVu1`, which hand-assemble the DMA tags they emit.
+21 functions, 3864 bytes. Nineteen are the `corePkt*` VU1 packet builders in
+`sdf/sdfVu1`, which hand-assemble the DMA tags they emit.
+
+**These are not impossible, and they belong on the worklist rather than this
+page.** cc1 will never select the instruction from C, but `include/ps2asm.h`
+exists precisely to emit instructions cc1 never selects, and every VU0 and MMI
+match in the tree already works that way. No matched function contains `addi`
+yet, so the technique is untried here, not ruled out.
+
+What it takes: one macro per concrete operation, opcode and registers literal
+in the body, parameters bound through operand constraints. No macro parameter
+may form any part of an instruction, so a reusable `ADDI(rd, imm)` is not
+allowed; the macro has to name the one operation it performs, as
+`PS2_STORE_ZERO_QUAD` does. A function whose body is otherwise ordinary C with
+one such macro at the right point is a normal match.
+
+The 21 split into two kinds, and only one kind is worth a draft.
+
+**Five have a frame, callee-saved stores, and two bad instructions out of
+dozens.** These are compiled-looking bodies with one unreachable idiom, so
+nearly every word is ordinary C and a draft or a full match is in reach:
+
+| function | bad / total | saves |
+|---|---|---|
+| `release_movieobj2` | 2 of 151 | 5 |
+| `sdfTexSetPacket` | 2 of 91 | 1 |
+| `corePktVu0Run` | 2 of 77 | 3 |
+| `corePktEmitRefMapPass` | 2 of 73 | 2 |
+| `sdf_2BFC58` | 2 of 37 | 1 |
+
+**The other sixteen are frameless leaf routines with no callee-saved stores and
+5 to 23 percent unreachable instructions.** `corePktLoadVerts` is the shape: 13
+instructions, a `bne` back to the function's own label, and the delay slot
+carrying `addi $4, $4, 0x60`. Wrapping a whole body like that in one `__asm__`
+block would report a match while recording nothing the split asm does not
+already say, so leave them as `INCLUDE_ASM`.
+
+`sdfTexSetPacket` is the one to try first, because its unreachable instruction
+is inside an idiom that needs a macro anyway:
+
+    plzcw   $2, $5
+    andi    $2, $2, 0xFF
+    addi    $5, $0, 0x1F
+    subu    $5, $5, $2
+
+That is `31 - leading_zeros`, a floor-log2 of the texture dimension, and it
+appears twice, each time as four contiguous instructions with ordinary work
+scheduled between the two. `plzcw` is MMI and cc1 never selects it either, so
+one macro named for the whole operation covers the `addi` as a side effect. The
+risk is register binding: retail computes through `$5` and `$6`, the parameter
+registers, with `$2` as scratch.
+
+Where a match is not yet in reach, park a draft behind `#ifdef NON_MATCHING`
+carrying the logic in C, so the structure is recorded and the next person starts
+from it rather than from the assembly.
 
 `sdf/sdfDev9`:
 - `sdf_2BFC58` (148 B)

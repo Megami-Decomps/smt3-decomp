@@ -8,7 +8,7 @@ open the page and line it names.
 |---|---|---|
 | 245 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
 | 121 | [control-flow.md](control-flow.md) | Control flow |
-| 29 | [impossible.md](impossible.md) | Functions that cannot be written in C |
+| 35 | [impossible.md](impossible.md) | Functions that cannot be written in C |
 | 10 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 | 10 | [stores.md](stores.md) | Stores |
 | 4 | [float-literals.md](float-literals.md) | Float literals |

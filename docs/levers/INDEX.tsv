@@ -2,7 +2,7 @@ page	line	mnemonics	tell
 docs/levers/README.md	7		| Levers | Page | Section | |---|---|---|
 docs/levers/README.md	9		| 245 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
 docs/levers/README.md	10		| 121 | [control-flow.md](control-flow.md) | Control flow |
-docs/levers/README.md	11		| 29 | [impossible.md](impossible.md) | Functions that cannot be written in C |
+docs/levers/README.md	11		| 35 | [impossible.md](impossible.md) | Functions that cannot be written in C |
 docs/levers/README.md	12		| 10 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 docs/levers/README.md	13		| 10 | [stores.md](stores.md) | Stores |
 docs/levers/README.md	14		| 4 | [float-literals.md](float-literals.md) | Float literals |
@@ -405,27 +405,33 @@ docs/levers/impossible.md	45	mult mult1	func_00213DF0 uses mult1, the EE's secon
 docs/levers/impossible.md	50	$2 $3 $31 add addi addiu addu beqz j jal jr ld sd subu	fclDrawSpriteEx's split assembly holds two symbols, so writing C for one would drop the other's bytes.
 docs/levers/impossible.md	73	$29 $31 addiu jal jr ld	sdf/sdfPrint's sdf_2BD3E8 is three instructions, ld $31, 0x70($29), jr $31, addiu $29, $29, 0x80, with no prologue.
 docs/levers/impossible.md	79	$0 $16 $17 $18 $29 $31 addi addiu ld	sdf/sdfTmx's sdf_2C7BC4 is the same thing for SdfFileRpcServerThreadProc:
-docs/levers/impossible.md	99		sdf_2BFC58 (148 B) sdf/sdfMovie:
-docs/levers/impossible.md	101		release_movieobj2 (604 B) sdf/sdfTex:
-docs/levers/impossible.md	103		sdfTexSetPacket (364 B) sdf/sdfVu1:
-docs/levers/impossible.md	105		corePktVu0Run (308 B)
-docs/levers/impossible.md	106		corePktEmitRefMapPass (292 B)
-docs/levers/impossible.md	107		corePktXfmLightClipUV (252 B)
-docs/levers/impossible.md	108		corePktXfmLightClipUVPB (212 B)
-docs/levers/impossible.md	109		corePktSkinPointsAccum (204 B)
-docs/levers/impossible.md	110		corePktXfmLightClip (204 B)
-docs/levers/impossible.md	111		corePktXfmLightClipPB (164 B)
-docs/levers/impossible.md	112		corePktApplyFaceDivColor (156 B)
-docs/levers/impossible.md	113		corePktRelightBackFaces (144 B)
-docs/levers/impossible.md	114		corePktSkinPointsFirst (140 B)
-docs/levers/impossible.md	115		corePktMorphVertsNorms (116 B)
-docs/levers/impossible.md	116		corePktSkinVertAccum (100 B)
-docs/levers/impossible.md	117		corePktXfmUV (100 B)
-docs/levers/impossible.md	118		corePktSkinVertFirst (92 B)
-docs/levers/impossible.md	119		corePktLoadVertsNorms (76 B)
-docs/levers/impossible.md	120		corePktMorphVerts (76 B)
-docs/levers/impossible.md	121		corePktNormalizeNorms (60 B)
-docs/levers/impossible.md	122		corePktLoadVerts (52 B)
+docs/levers/impossible.md	117		| function | bad / total | saves | |---|---|---|
+docs/levers/impossible.md	119		| release_movieobj2 | 2 of 151 | 5 |
+docs/levers/impossible.md	120		| sdfTexSetPacket | 2 of 91 | 1 |
+docs/levers/impossible.md	121		| corePktVu0Run | 2 of 77 | 3 |
+docs/levers/impossible.md	122		| corePktEmitRefMapPass | 2 of 73 | 2 |
+docs/levers/impossible.md	123	$2 $4 $5 $6 addi bne plzcw	| sdf_2BFC58 | 2 of 37 | 1 | **The other sixteen are frameless leaf routines with no callee-saved stores and 5 to 23 percent unreachable instructions.**…
+docs/levers/impossible.md	152		sdf_2BFC58 (148 B) sdf/sdfMovie:
+docs/levers/impossible.md	154		release_movieobj2 (604 B) sdf/sdfTex:
+docs/levers/impossible.md	156		sdfTexSetPacket (364 B) sdf/sdfVu1:
+docs/levers/impossible.md	158		corePktVu0Run (308 B)
+docs/levers/impossible.md	159		corePktEmitRefMapPass (292 B)
+docs/levers/impossible.md	160		corePktXfmLightClipUV (252 B)
+docs/levers/impossible.md	161		corePktXfmLightClipUVPB (212 B)
+docs/levers/impossible.md	162		corePktSkinPointsAccum (204 B)
+docs/levers/impossible.md	163		corePktXfmLightClip (204 B)
+docs/levers/impossible.md	164		corePktXfmLightClipPB (164 B)
+docs/levers/impossible.md	165		corePktApplyFaceDivColor (156 B)
+docs/levers/impossible.md	166		corePktRelightBackFaces (144 B)
+docs/levers/impossible.md	167		corePktSkinPointsFirst (140 B)
+docs/levers/impossible.md	168		corePktMorphVertsNorms (116 B)
+docs/levers/impossible.md	169		corePktSkinVertAccum (100 B)
+docs/levers/impossible.md	170		corePktXfmUV (100 B)
+docs/levers/impossible.md	171		corePktSkinVertFirst (92 B)
+docs/levers/impossible.md	172		corePktLoadVertsNorms (76 B)
+docs/levers/impossible.md	173		corePktMorphVerts (76 B)
+docs/levers/impossible.md	174		corePktNormalizeNorms (60 B)
+docs/levers/impossible.md	175		corePktLoadVerts (52 B)
 docs/levers/stores.md	12	sw	Two unrelated member stores in front of an expression that loads a gp global decide the whole block's schedule, and the winning order is not the one the…
 docs/levers/stores.md	20	$0 jal sw	Where retail's last store before a jal is a constant store rather than the argument setup, hoist the argument into a local above the stores.
 docs/levers/stores.md	26	$0 sw	Two adjacent struct stores only reverse when neither value is a reload.
