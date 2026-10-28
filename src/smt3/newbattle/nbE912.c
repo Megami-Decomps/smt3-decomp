@@ -371,9 +371,69 @@ nbKoukaPacket_t *nbAddFadeOutKoukaPacket(s32 startframe, s32 uniqueid, s32 lengt
 
 nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *bed, s32 cutno, nbFormation_t *form);
 
+extern s8 D_00527530[];
+
+extern sdfVector4_t D_00527540[4][4];
+
+extern sdfVector4_t D_00527640;
+
+extern sdfVector4_t D_00527650;
+
+extern s32 evtUnitRotationTarget(evtUnitHandle_t *h, f32 *pos, f32 radio);
+
+extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32 unused,
+                            s32 frames, s32 directionOffset, void *callback, s32 unusedLast);
+
 nbFormation_t *nbGetEventForm();
 
-INCLUDE_ASM(const s32, "newbattle/nbE912", MoveSub);
+void MoveSub(nbEventProcessData_t *ed)
+{
+    sdfVector4_t target;
+    s32 list[4];
+    nbFormation_t *form;
+    evtUnitHandle_t *h;
+    s32 cnt;
+    s32 i;
+    s32 no;
+    s32 frames;
+    f32 len;
+    f32 len2;
+
+    cnt = 0;
+    for (i = 0; i < 4; i++) {
+        no = D_00527530[i];
+        if (ed->data->form[no].stat & 1) {
+            list[cnt] = no;
+            cnt++;
+        }
+    }
+    for (i = 0; i < cnt; i++) {
+        form = &ed->data->form[list[i]];
+        h = form->hunit;
+        SDF_VU0_LOADVECTOR(&D_00527540[cnt - 1][i]);
+        SDF_VU0_LOADVECTOR_B(&D_00527640);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_LOADVECTOR_B(&D_00527650);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(&target);
+        SDF_VU0_LOADVECTOR_B(&form->orgpos);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_GETLENGTH(len);
+        frames = len / 6.0f;
+        SDF_VU0_LOADVECTOR(&target);
+        SDF_VU0_LOADVECTOR_B(&form->pos);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_GETLENGTH(len2);
+        if (len2 <= 20.0f) {
+            evtUnitRotationTarget(h, (f32 *)&D_00527640, 0.1f);
+        } else {
+            if (len2 <= 50.0f) {
+                frames = frames * len2 / 50.0f;
+            }
+            evtSetUnitMove1(h, 0, (s128 *)&target, -1, frames, 9, NULL, 0);
+        }
+    }
+}
 
 s32 Move1(nbEventProcessData_t *ed)
 {
