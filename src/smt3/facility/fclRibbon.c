@@ -31,11 +31,23 @@ typedef struct
 
 typedef struct
 {
+    s32 pm[4];
+} sdfIVector4_t;
+
+/* Native entries embed four 16-byte rectangles and two texture handles. */
+typedef struct
+{
+    sdfIVector4_t pos_act;
+    sdfIVector4_t pos_deact;
+    sdfIVector4_t uv_act;
+    sdfIVector4_t uv_deact;
+    sdfTexHandle_t *tex[2];
+} fclribbon_elem_t;
+
+typedef struct
+{
     /* 0x00 */ void *allocation;
-    /* 0x04 */ s16 unk_04;
-    /* 0x06 */ s16 unk_06;
-    /* 0x08 */ s16 unk_08;
-    /* 0x0A */ s16 unk_0A;
+    /* 0x04 */ sdfTexHandle_t *tex[2];
     /* 0x0C */ s32 stat;
     /* 0x10 */ s16 act;
     /* 0x12 */ u16 deact;
@@ -43,6 +55,7 @@ typedef struct
     /* 0x18 */ s32 ctr_deact;
     /* 0x1C */ s32 ctr;
     /* 0x20 */ s32 num;
+    /* 0x24 */ fclribbon_elem_t pelem[0];
 } fclRibbon_t;
 
 extern void sdfMemFreeDirect(void *aHandle);
@@ -59,7 +72,28 @@ extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 extern void fclRbnRelease(fclRibbon_t *phandle);
 
-INCLUDE_ASM(const s32, "facility/fclRibbon", fclRbnInit);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+
+fclRibbon_t *fclRbnInit(s32 num, s32 act, sdfTexHandle_t *tex0, sdfTexHandle_t *tex1)
+{
+    sdfMemHandle_t *allocation;
+    fclRibbon_t *handle;
+
+    allocation = sdfMemAllocDirect(sizeof(*handle) + num * sizeof(fclribbon_elem_t));
+    handle = sdfMemLock(allocation);
+    handle->num = num;
+    handle->allocation = allocation;
+    handle->tex[0] = tex0;
+    handle->tex[1] = tex1;
+    handle->act = act;
+    handle->deact = -1;
+    handle->ctr_act = 0;
+    handle->ctr_deact = 0;
+    handle->ctr = 0;
+    handle->stat = 0;
+    return handle;
+}
 
 void fclRbnRelease(fclRibbon_t *phandle)
 {
@@ -92,7 +126,23 @@ void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclRibbon", fclRbnSetPara);
+void fclRbnSetPara(fclRibbon_t *handle, s32 index,
+    const sdfIVector4_t *pos_act, const sdfIVector4_t *pos_deact,
+    const sdfIVector4_t *uv_act, const sdfIVector4_t *uv_deact,
+    sdfTexHandle_t *tex_act, sdfTexHandle_t *tex_deact)
+{
+    fclribbon_elem_t *entry;
+
+    if (index >= 0 && index < handle->num) {
+        entry = &handle->pelem[index];
+        memcpy(&entry->pos_act, pos_act, sizeof(*pos_act));
+        memcpy(&entry->pos_deact, pos_deact, sizeof(*pos_deact));
+        memcpy(&entry->uv_act, uv_act, sizeof(*uv_act));
+        memcpy(&entry->uv_deact, uv_deact, sizeof(*uv_deact));
+        entry->tex[0] = tex_act;
+        entry->tex[1] = tex_deact;
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", dumpCursorInfo);
 
