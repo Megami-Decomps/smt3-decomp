@@ -265,6 +265,21 @@ extern void nbSetMesItem(s32 msgid, s32 it);
 extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
 extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
+struct nbKoukaPacket_t;
+extern s32 nbMakeNegoBackPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                nbFormation_t *target);
+extern s32 nbMakeNegoWorkPosPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                   nbFormation_t *target);
+extern s32 nbMakeNegoForwardPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                  nbFormation_t *target);
+extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 col,
+                                 s32 delay, s32 aframe, s32 colframe);
+extern struct nbKoukaPacket_t *nbAddHomeMoveKoukaPacket(s32 startframe, s32 uniqueid, s32 partyno,
+                                                f32 speed);
+extern void nbCameraSetTaizi(nbFormation_t *invoke, nbFormation_t *target);
+extern void nbFormDispOff2(nbFormation_t *form);
+extern void nbFormDispOn2(nbFormation_t *form);
+
 
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
@@ -1247,7 +1262,41 @@ INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00545068);
 
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_53);
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_74);
+s32 Flow6_74(nbNegoProcessData_t *n)
+{
+    nbFormation_t *form;
+
+    if ((n->stat & 8) == 0) {
+        nbAddNegoIdKouho(n, n->workid[6]);
+        return 0;
+    }
+
+    form = &n->data->form[n->data->party[n->hojopartyindex].formindex];
+    switch (n->nownegophase) {
+    case 0:
+        nbMakeNegoBackPacket(0, (s32)n->actdata, form, n->eform);
+        nbFormDispOff2(n->pform);
+        nbMakeNegoWorkPosPacket(0, (s32)n->actdata, n->pform, n->eform);
+        nbCameraSetTaizi(n->pform, n->eform);
+        n->waitframe = 10;
+        break;
+    case 1:
+        nbFormDispOff2(form);
+        nbMakeUnitFadeInPacket(1, (s32)n->actdata, form, 0, 0, 0, 0);
+        nbAddHomeMoveKoukaPacket(0, 0, n->hojopartyindex, 1.0f);
+        nbFormDispOn2(n->pform);
+        nbMakeNegoForwardPacket(0, (s32)n->actdata, n->pform, n->eform);
+        n->waitframe = 10;
+        break;
+    case 2:
+        nbAddNegoIdKouho(n, n->workid[6]);
+        n->stat &= ~8;
+        break;
+    }
+    return 0;
+}
+
+
 
 s32 Flow6_54(nbNegoProcessData_t *n)
 {
