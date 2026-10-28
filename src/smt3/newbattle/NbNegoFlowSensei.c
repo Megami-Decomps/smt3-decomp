@@ -416,28 +416,23 @@ s32 Flow13_12(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 4 of 46 words differ (first at +0x18). */
-#ifdef NON_MATCHING
 s32 Flow13_8(nbNegoProcessData_t *n)
 {
     switch (n->nownegophase) {
     case 0:
         n->waitframe = nbSetNegoNoMotion(n, n->eform);
         break;
-    case 2:
-        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x12B, 0);
-        break;
     case 1:
         nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x51, 0);
+        break;
+    case 2:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x12B, 0);
         break;
     case 3:
         return 1;
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowSensei", Flow13_8);
-#endif
 
 s32 Flow13_9(nbNegoProcessData_t *n)
 {
