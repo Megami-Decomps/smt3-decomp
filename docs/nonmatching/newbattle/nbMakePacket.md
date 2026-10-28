@@ -439,22 +439,23 @@ the `else` of the race `if`. The `||` chain must stay a chain: making the
 0x80 block an `else if` arm instead turns the ladder's `beq`s into `beql`s
 with `lw $3, 0x184($16)` hoisted into each slot, which costs 50 more words.
 
-## nbCollectBadCurseUnits (newbattle/nbMakePacket, 0xA4)
+## nbCollectBadCurseUnits (newbattle/nbEncProcess, 0xA4)
 
-30 of 41 words match, at the exact 164-byte size, and every differing word
-is a register name.
+23 of 41 words match at the exact 164-byte size; first difference is at
+entry. The guarded body scans the 16 formation records for status bit 4,
+collects signed-byte indices, chooses one with `dds3GetRandIntA`, then
+reloads the action's formation pointer and sets status bit 8.
 
-The 0x20-byte `s8 list[32]` gives retail's frame, the
-`ofs + (s32)a->data->form` integer form gives its `addu` operand order, and
-`dds3GetRandIntA(0, cnt)` indexing `list` gives the tail exactly. The
-allocator puts `i` in `$4` and `ofs` in `$6`, which is retail's pair
-swapped, and the three post-loop temporaries follow that choice.
-
-Ruled out for the register pair: `ofs = 0, i = 0` in the other order in the
-`for` init; the increment moved to the `for`'s third clause; `i * 0xF0`
-left for the strength reducer instead of an explicit `ofs`; plain
-`a->data->form[i]` indexing; `list[cnt] = i; cnt++;` split in two; an
-inverted test with `continue`; and `(s8)i` cast at the store.
+The native stack frame is 0x30 bytes; the typed 16-entry candidate list
+emits a 0x20-byte frame. An earlier `s8 list[32]` draft reproduced the
+frame but had no independent evidence for that capacity. The observed
+scan establishes 16 entries, so the preferred body retains that bound
+rather than enlarging it to obtain stack space. The remaining differences
+are frame/save offsets and allocation of the scan and selected-index
+registers. A source-level reason for the extra native stack space remains
+unresolved. The earlier integer pointer arithmetic and explicit byte
+offset have been replaced with indexing through the existing formation
+type; no new layout or field extent is introduced.
 
 ## ChkCost (newbattle/nbMakePacket, 0xC8)
 

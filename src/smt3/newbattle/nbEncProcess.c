@@ -531,26 +531,23 @@ void nbInitEncProcess(nbMainProcessData_t *data)
     data->encproc = id;
 }
 
-/* NON_MATCHING: 11 of 41 words differ (first at +0x28). */
+/* NON_MATCHING: 18 of 41 words differ (first at +0x0). */
 #ifdef NON_MATCHING
 void nbCollectBadCurseUnits(nbActionProcessData_t *a)
 {
-    s8 list[32];
-    nbFormation_t *form;
+    s8 candidates[16];
+    s32 count = 0;
     s32 i;
-    s32 cnt;
-    s32 ofs;
+    nbMainProcessData_t *data = a->data;
 
-    cnt = 0;
-    for (i = 0, ofs = 0; i < 0x10; i++) {
-        form = (nbFormation_t *)(ofs + (s32)a->data->form);
-        ofs += sizeof(nbFormation_t);
-        if (form->stat & 4) {
-            list[cnt++] = i;
+    for (i = 0; i < 16; i++) {
+        if ((data->form[i].stat & 4) != 0) {
+            candidates[count++] = i;
         }
     }
-    if (cnt > 0) {
-        a->data->form[list[dds3GetRandIntA(0, cnt)]].stat |= 8;
+    if (count > 0) {
+        s32 selected = candidates[dds3GetRandIntA(NULL, count)];
+        a->data->form[selected].stat |= 8;
     }
 }
 #else
