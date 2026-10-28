@@ -12,7 +12,62 @@ extern void nmeDeleteChar(s8 delta);
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDrawInputUBar);
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDrawFuncIcon);
+typedef struct {
+    void *res;
+    void *entries;
+} nmeSpriteTable_t;
+
+extern nmeSpriteTable_t GBWK_2 __attribute__((section(".data")));
+extern nmeWork_t *namelist_buttonAnim_end;
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page, s32 spriteId,
+                             s32 *texList, nmeSpriteTable_t *table, s32 ot);
+
+void nmeDrawFuncIcon(void)
+{
+    nmeSpriteTable_t *table = &GBWK_2;
+    s32 ot = 0x47;
+
+    fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 0,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 1,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 2,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 0x18,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+
+    if (namelist_buttonAnim_end->primaryCursorActive == 0 ||
+        (s8)namelist_buttonAnim_end->unk1B != 0) {
+        return;
+    }
+    switch (namelist_buttonAnim_end->cursor.unk_22 +
+            (u8)namelist_buttonAnim_end->cursor.unk_24) {
+    case 0:
+        fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 6,
+                         (s32 *)namelist_buttonAnim_end->textures, table, ot);
+        fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 3,
+                         (s32 *)namelist_buttonAnim_end->textures, table, ot);
+        break;
+    case 1:
+        fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 7,
+                         (s32 *)namelist_buttonAnim_end->textures, table, ot);
+        fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 4,
+                         (s32 *)namelist_buttonAnim_end->textures, table, ot);
+        break;
+    case 2:
+        fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 8,
+                         (s32 *)namelist_buttonAnim_end->textures, table, ot);
+        fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 5,
+                         (s32 *)namelist_buttonAnim_end->textures, table, ot);
+        break;
+    case 3:
+        fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 0x1A,
+                         (s32 *)namelist_buttonAnim_end->textures, table, ot);
+        fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 0x19,
+                         (s32 *)namelist_buttonAnim_end->textures, table, ot);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDrawInputPanel);
 
