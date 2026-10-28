@@ -219,9 +219,49 @@ void MoveDeactive(fclRibbon_t *phandle)
     }
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053D9D8);
+extern itfColor_t D_003323E8, D_003323F8;
+extern void itfMiscDrawSpritePrim(void *position, void *uv, void *color, s32 z,
+                                  sdfTexHandle_t *texture, s32 context, sdfDrawTag_t *tag);
 
-INCLUDE_ASM(const s32, "facility/fclRibbon", DrawBackFrame);
+void DrawBackFrame(fclRibbon_t *handle, s32 x, s32 y, u32 z, s32 alpha,
+                   s32 flag, sdfDrawTag_t *tag)
+{
+    itfColor_t color = {{128, 128, 128, 128}};
+    itfVertex_t pos[2];
+
+    if (flag & 1) {
+        pos[0].x = 0;
+        pos[0].y = y;
+        pos[1].x = 0x6A0;
+        pos[1].y = y + 0x128;
+        itfMiscDrawSpritePrim(pos, &D_003323E8, &color, z, handle->tex[0], 0, tag);
+
+        pos[0].x = 0x2000;
+        pos[1].x = 0x1960;
+        itfMiscDrawSpritePrim2(pos, &D_003323E8, &color, z, 0, tag);
+        pos[0].x = 0x6A0;
+        pos[0].y = y;
+        pos[1].x = 0x1960;
+        pos[1].y = y + 0x128;
+        itfMiscDrawSpritePrim2(pos, &D_003323F8, &color, z, 0, tag);
+    } else if (alpha > 0) {
+        color.components[3] = (128 * alpha) >> 7;
+        pos[0].x = x;
+        pos[0].y = y;
+        pos[1].x = x + 0x6A0;
+        pos[1].y = y + 0x128;
+        itfMiscDrawSpritePrim(pos, &D_003323E8, &color, z, handle->tex[0], 0, tag);
+
+        pos[0].x = x + 0x2000;
+        pos[1].x = x + 0x1960;
+        itfMiscDrawSpritePrim2(pos, &D_003323E8, &color, z, 0, tag);
+        pos[0].x = x + 0x6A0;
+        pos[0].y = y;
+        pos[1].x = x + 0x1960;
+        pos[1].y = y + 0x128;
+        itfMiscDrawSpritePrim2(pos, &D_003323F8, &color, z, 0, tag);
+    }
+}
 
 INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053D9E8);
 
