@@ -41,10 +41,17 @@ extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 typedef struct
 {
     /* 0x0000 */ u8 flags;
-    /* 0x0001 */ u8 reserved01[0x17];
+    /* 0x0001 */ u8 phase;
+    /* 0x0002 */ u8 reserved02;
+    /* 0x0003 */ u8 unk_0003;
+    /* 0x0004 */ s8 unk_0004;
+    /* 0x0005 */ u8 reserved05[0x0F];
+    /* 0x0014 */ sdfMemHandle_t *allocation;
     /* 0x0018 */ s8 unk_18;
     /* 0x0019 */ s8 unk_19;
-    /* 0x001A */ u8 unk_1A[0x16];
+    /* 0x001A */ s8 StartLevel;
+    /* 0x001B */ s8 LevelUpCnt;
+    /* 0x001C */ u8 reserved1C[0x14];
     /* 0x0030 */ datUnitWork_t *levelUpUnit[16];
     /* 0x0070 */ s8 levelUpCount;
     /* 0x0071 */ s8 levelUpStep;
@@ -54,14 +61,26 @@ typedef struct
     /* 0x0084 */ u16 evoID;
     /* 0x0086 */ u8 reserved86[0xE6];
     /* 0x016C */ datUnitWork_t *unit;
-    /* 0x0170 */ u8 unk_170[0x2175];
+    /* 0x0170 */ u8 unk_170[0xEC];
+    /* 0x025C */ u8 cursorLayout[0x38];
+    /* 0x0294 */ u8 reserved294[0x1014];
+    /* 0x12A8 */ u8 cursorInfo[0x38];
+    /* 0x12E0 */ u8 unk_12E0[0x1004];
+    /* 0x22E4 */ s8 unk_22E4;
     /* 0x22E5 */ s8 unk_22E5;
     /* 0x22E6 */ s8 unk_22E6;
     /* 0x22E7 */ u8 unk_22E7;
     /* 0x22E8 */ f32 unk_22E8;
     /* 0x22EC */ f32 unk_22EC;
-    /* 0x22F0 */ u8 unk_22F0[0x18];
-    /* 0x2308 */ s32 unk_2308;
+    /* 0x22F0 */ u8 unk_22F0[8];
+    /* 0x22F8 */ sdfMemHandle_t *scriptAllocation;
+    /* 0x22FC */ void *scriptData;
+    /* 0x2300 */ sdfMemHandle_t *messageAllocation;
+    /* 0x2304 */ void *messageData;
+    /* 0x2308 */ u8 reserved2308[4];
+    /* 0x230C */ s32 textureHandle;
+    /* 0x2310 */ s32 fadeFrames;
+    /* 0x2314 */ u32 reserved2314;
 } evtStartWork_t;
 
 extern evtStartWork_t *EventStart;
@@ -232,7 +251,60 @@ void rstCreateTargetList(evtStartWork_t *work)
 
 INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA28);
 
-INCLUDE_ASM(const s32, "result/rstinit", rstInit);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+typedef struct cmpSeqInfo_tag cmpSeqInfo_t;
+extern void cmpInitSeqInfo(cmpSeqInfo_t *work, cmpSeqInfo_t *parent);
+extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpModelInit(void);
+extern void rstClearHeartsMasterPhase(void);
+extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
+extern s8 fclInitMessage(void *data);
+extern void fclSetSelMessagePos(s8 pos);
+extern void *cmpStartProcessPanelEff(s32 parent);
+extern void rstSetResultWork(void *work);
+extern void rstSetStatusModelReady(s32 ready);
+extern s32 fclLoadTexture(char *path);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern void p2sdPlayBGM(s32 id);
+extern void rstCreateTargetList(evtStartWork_t *work);
+
+evtStartWork_t *rstInit(cmpSeqInfo_t *parent)
+{
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(0x2318);
+    evtStartWork_t *work = sdfMemLock(allocation);
+
+    memset(work, 0, 0x2318);
+    work->allocation = allocation;
+    cmpInitSeqInfo((cmpSeqInfo_t *)work, parent);
+    work->phase = 0;
+    work->unk_22E5 = -1;
+    work->unk_22E4 = -128;
+    work->unk_0004 = 1;
+    work->unk_72[0] = 1;
+    work->unk_0003 = 0;
+    work->LevelUpCnt = 0;
+    cmpInitCursorLayout(work->cursorLayout, 0, 0, 0, 0, 0);
+    cmpInitCursorRange(work->cursorLayout, 5, 5, 0);
+    cmpInitCursorRange(work->cursorInfo, 8, 8, 0);
+    cmpModelInit();
+    rstChkResult2Process(work);
+    rstClearHeartsMasterPhase();
+    work->scriptAllocation = sdfDevLoadFileEx("/result2/scr/message.bf", (u32 *)&work->scriptData, 0);
+    work->messageAllocation = sdfDevLoadFileEx("/result2/mes_data.bmd", (u32 *)&work->messageData, 0);
+    fclInitMessage(work->messageData);
+    fclSetSelMessagePos(0);
+    cmpStartProcessPanelEff(0);
+    rstSetStatusModelReady(1);
+    work->textureHandle = fclLoadTexture("/result2/tmx/lvup_02.tmx");
+    rstSetResultWork((void *)work->textureHandle);
+    rstCreateTargetList(work);
+    work->fadeFrames = 0x2B3;
+    dds3FadeIn(0, 0, 0, 0xF);
+    p2sdPlayBGM(0x2B0000);
+    return work;
+}
 
 /* Resource prefix: allocations and texture are installed by rstInit. */
 typedef struct {
@@ -276,7 +348,7 @@ void rstDestroyResult2(dds3ProcessID_t *id)
     }
 }
 
-extern evtStartWork_t *rstInit(s32 mode);
+extern evtStartWork_t *rstInit(cmpSeqInfo_t *parent);
 extern s32 rstCalc(dds3ProcessID_t *id);
 extern s32 rstDraw(dds3ProcessID_t *id);
 extern s32 rstUpdate(dds3ProcessID_t *id);
