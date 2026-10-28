@@ -341,3 +341,4 @@ src/smt3/effect/effEvent.c	redthing1	done	2026-10-28	1 fn / 2868 B	effEVECombPar
 src/smt3/newbattle/nbCameraHelper.c	redthing1	done	2026-10-28	0 matches; draft 269/270 words	dds3EffectFileListCreate; only loop annul bit remains, ASM fallback retained
 src/smt3/field/fldHit.c	redthing1	done	2026-10-28	1 fn / 5360 B	fldMakePlane; five collision passes and typed plane records
 src/smt3/kernel/dds3CreateData.c	redthing1	done	2026-10-28	2 fn / 328 B	staff draw and width wrappers; true font return types and trailing unused request contract; whole-unit 7 match, 0 differ
+src/smt3/facility/fclRagUpdate.c	redthing1	done	2026-10-28	1 fn / 320 B	Rag selection dispatch and sequence state writes; whole-unit 12 match, 0 differ

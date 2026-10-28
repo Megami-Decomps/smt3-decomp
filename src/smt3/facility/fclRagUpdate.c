@@ -70,7 +70,9 @@ typedef struct
     /* 0x0005 */ s8 unk_0005;
     /* 0x0006 */ u8 unk_0006[2];
     /* 0x0008 */ s32 unk_0008;
-    /* 0x000C */ u8 unk_000C[0x48];
+    /* 0x000C */ u8 unk_000C[0x0D];
+    /* 0x0019 */ s8 unk_0019;
+    /* 0x001A */ u8 unk_001A[0x3A];
     /* 0x0054 */ u16 unk_0054;
     /* 0x0056 */ u8 unk_0056[0xEA];
     /* 0x0140 */ cmpCursorInfo_t listCursor;
@@ -278,7 +280,49 @@ u16 ragCheckHeartsChoice(s8 index)
 INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragCheckHeartsChoice);
 #endif
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateCallSeq);
+extern void ragCreateAllList(s32 type, s32 count, void *work);
+
+s32 ragUpdateCallSeq(s32 SeqNo)
+{
+    u32 phase;
+
+    ragCreateAllList(1, ragUpdateWork->unk_0019, ragUpdateWork);
+    phase = (s32)ragUpdateWork->listCursor.unk_22 +
+            (u8)ragUpdateWork->listCursor.unk_24;
+    if (phase < 5) {
+        switch (phase) {
+        case 0:
+            fclScriptStart(ragUpdateWork->script, 1, &ragUpdateWork->scriptArg);
+            ragUpdateWork->unk_0001 = 1;
+            ragUpdateWork->unk_0004 = 1;
+            break;
+        case 1:
+            fclScriptStart(ragUpdateWork->script, 2, &ragUpdateWork->scriptArg);
+            ragUpdateWork->unk_0001 = 2;
+            ragUpdateWork->unk_0004 = 1;
+            break;
+        case 2:
+            fclScriptStart(ragUpdateWork->script, 3, &ragUpdateWork->scriptArg);
+            ragUpdateWork->unk_0001 = 3;
+            ragUpdateWork->unk_0004 = 1;
+            break;
+        case 3:
+            fclSetWorkValue(2, 1);
+            ragUpdateWork->unk_0005 = 1;
+            ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 0xB,
+                                                       &ragUpdateWork->scriptArg);
+            ragUpdateWork->unk_0001 = 4;
+            ragUpdateWork->unk_0003 = 4;
+            ragUpdateWork->unk_0004 = -1;
+            ragUpdateWork->unk_0002 = 0;
+            break;
+        case 4:
+            ragExit();
+            break;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqItem);
 
