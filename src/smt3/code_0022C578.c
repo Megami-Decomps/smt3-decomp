@@ -5125,7 +5125,43 @@ void cmpModelInitCore2(void)
     func_0023FCC0();
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", func_0023FCC0);
+extern u8 D_0053FFE8[];
+extern u8 D_0053FFF8[];
+extern u8 D_00540008[];
+extern u8 D_00540018[];
+extern f32 D_00345F60[];
+extern void dds3SetSoftenBias(s32 frame, f32 soften, f32 bias);
+extern void dds3SetLightColor(s32 frame, s32 number, f32 *color);
+extern void dds3SetLightDir(s32 frame, s32 number, f32 *direction);
+extern void dds3SetAmbientColor(s32 frame, f32 *color);
+extern void dds3SetFogColor(s32 frame, f32 *color);
+extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 nearPlane, f32 farPlane);
+extern void sdf3DSetCamera(sdf3DScreenParam_t *screenParam, void *camera);
+
+void func_0023FCC0(void)
+{
+    f32 lightColor[4];
+    f32 lightDirection[4];
+    f32 ambientColor[4];
+    f32 fogColor[4];
+
+    memcpy(lightColor, D_0053FFE8, sizeof(lightColor));
+    memcpy(lightDirection, D_0053FFF8, sizeof(lightDirection));
+    memcpy(ambientColor, D_00540008, sizeof(ambientColor));
+    memcpy(fogColor, D_00540018, sizeof(fogColor));
+    dds3SetSoftenBias(0, 5.0f, 0.0f);
+    dds3SetLightColor(0, 0, lightColor);
+    dds3SetLightDir(0, 0, lightDirection);
+    dds3SetAmbientColor(0, ambientColor);
+    dds3SetFogColor(0, fogColor);
+    dds3SetFogPara(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
+    dds3ScreenParam[3] = 0.7551904917f;
+    SDF_VU0_COPYVECTOR(aViewEye, &cmpStatusModelBasePos);
+    SDF_VU0_COPYVECTOR(aViewTarget, &cmpStatusModelPos);
+    SDF_VU0_COPYVECTOR(aViewDown, D_00345F60);
+    SDF_VU0_LOADMATRIX(&D_002FA240);
+    sdf3DSetCamera((sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+}
 
 void cmpModelInit(void)
 {
