@@ -5812,11 +5812,6 @@ void rstPrepareStatusModel(s32 group, s32 id, s32 blocking)
     printf(D_00540070, group, id);
 }
 
-/* NON_MATCHING: 4 of 46 words differ, exact size: the two constant-1 pseudos
- * swap $2 and $3. */
-// 42 of 46 words match at the exact size; two constants land in swapped
-// registers and the branch between them moves with them.
-#ifdef NON_MATCHING
 s32 cmpModelSetup(u16 id, s32 blocking)
 {
     s32 group;
@@ -5852,9 +5847,6 @@ s32 cmpModelSetup(u16 id, s32 blocking)
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpModelSetup);
-#endif
 
 extern char D_00540090[];
 
