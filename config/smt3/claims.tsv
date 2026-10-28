@@ -407,3 +407,4 @@ src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 304 B	encounter ite
 src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 316 B	stone-death probability with native parameter, level, status and minimum threshold; owner 43 match, 0 differ
 src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 364 B	status-modifier rate with moon adjustment and signed integer half-step; owner 44 match, 0 differ
 src/smt3/newbattle/nbUnitProcess.c	redthing1	done	2026-10-28	1 fn / 168 B	bad-status motion setup preserving party-table snapshot before state initialization; owner 29 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 512 B	explanation background plane and gradient rectangles; owner 97 match, 0 differ

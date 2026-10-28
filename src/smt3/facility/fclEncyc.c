@@ -2635,10 +2635,73 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadListwinElem);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadStatusMoney);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawExplainBack);
-
 typedef struct { s32 x, y; } fclEncycVertex_t;
 typedef struct { u32 components[4]; } fclEncycColor_t;
+extern u8 D_003323A8[];
+extern u8 D_003323B0[];
+extern sdfGrOt_t D_002F67F8;
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void itfMiscDrawSpritePlanePrim(fclEncycVertex_t *pos, fclEncycColor_t *color,
+                                      u32 z, s32 context, sdfDrawTag_t *tag);
+extern void itfMiscDrawRectanglePrim(fclEncycVertex_t *vertices, fclEncycColor_t *colors,
+                                   u8 *vertexIndex, u8 *colorIndex, u32 z, sdfDrawTag_t *tag);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *tag, s32 active, s32 context);
+
+void DrawExplainBack(s32 alpha)
+{
+    sdfDrawTag_t *tag;
+    s32 shade;
+    fclEncycVertex_t pos[4];
+    /* The initial plane corners share the first rectangle color slot. */
+    union {
+        fclEncycColor_t colors[2];
+        struct {
+            fclEncycVertex_t corners[2];
+            fclEncycColor_t color;
+        } plane;
+    } draw;
+    if (alpha <= 0) {
+        return;
+    }
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    shade = (alpha * 0x66) >> 7;
+    {
+        draw.plane.corners[0].x = 0;
+        draw.plane.corners[0].y = 0x280;
+        draw.plane.corners[1].x = 0x1110;
+        draw.plane.corners[1].y = 0xBD8;
+        draw.colors[1].components[0] = 0x17;
+        draw.colors[1].components[1] = 0x14;
+        draw.colors[1].components[2] = 0x10;
+        draw.colors[1].components[3] = shade;
+        itfMiscDrawSpritePlanePrim(draw.plane.corners, &draw.colors[1], 0xFFFFF, 0, tag);
+    }
+    {
+        draw.colors[0].components[0] = 0x17; draw.colors[0].components[1] = 0x14;
+        draw.colors[0].components[2] = 0x10; draw.colors[0].components[3] = 0;
+        pos[0].x = 0x1110; pos[0].y = 0x280;
+        pos[1].x = 0x1760; pos[1].y = 0x280;
+        pos[2].x = 0x1760; pos[2].y = 0xBD8;
+        pos[3].x = 0x1110; pos[3].y = 0xBD8;
+        itfMiscDrawRectanglePrim(pos, draw.colors, D_003323A8, D_003323B0, 0xFFFFF, tag);
+        itfMiscDrawAlphaPrim(tag, 1, 0);
+        draw.colors[0].components[0] = 0x10; draw.colors[0].components[1] = 0xE;
+        draw.colors[0].components[2] = 0xF; draw.colors[0].components[3] = 0;
+        draw.colors[1].components[0] = 0x10; draw.colors[1].components[1] = 0xE;
+        draw.colors[1].components[2] = 0xF; draw.colors[1].components[3] = shade;
+        pos[0].x = 0; pos[0].y = 0x2B8;
+        pos[1].x = 0xDE0; pos[1].y = 0x2B8;
+        pos[2].x = 0xDE0; pos[2].y = 0x3A8;
+        pos[3].x = 0; pos[3].y = 0x3A8;
+        itfMiscDrawRectanglePrim(pos, draw.colors, D_003323A8, D_003323B0, 0xFFFFF, tag);
+    }
+    itfMiscDrawAlphaPrim(tag, 0, 0);
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
+
+
+
 extern fclEncycVertex_t D_003323B8[2];
 extern fclEncycColor_t D_003323C8[1];
 extern sdfGrOt_t sdfGrOtTable[];
