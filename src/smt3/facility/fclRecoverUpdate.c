@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern s32 fclSetWorkValue(s8 index, s32 value);
 
@@ -376,7 +377,7 @@ void rcvUpdateSeqRevive(void)
 
 extern s32 dds3GetProcessStat(void *id);
 
-s32 rcvUpdateSeqDispel(void)
+s32 rcvUpdateSeqDispel(s32 arg)
 {
     if (dds3GetProcessStat((void *)rcvUpdateWork->scriptArg) == 2) {
         return 0;
@@ -526,7 +527,62 @@ void rcvUpdateSeqTalk(void)
     rcvUpdateWork->unk_0004 = -1;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdate);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void fclClearFlag(s8 index);
+extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
+
+s32 rcvUpdate(dds3ProcessID_t *id)
+{
+    s8 previous;
+    u8 flags;
+
+    rcvUpdateWork = dds3GetProcessData(id);
+    previous = rcvUpdateWork->unk_01;
+    rcvUpdatePanelAnim();
+    if (fclGetFlag(1) == 0) {
+        return 0;
+    }
+    flags = *((u8 *)rcvUpdateWork);
+    if (flags & 0x40) {
+        return -1;
+    }
+    if ((flags & 2) && (flags & 1)) {
+        switch (rcvUpdateWork->unk_01) {
+        case 0:
+            rcvUpdateSeqRoot();
+            break;
+        case 1:
+            rcvUpdateSeqAllRecover();
+            break;
+        case 2:
+            rcvUpdateSeqRecover();
+            break;
+        case 3:
+            rcvUpdateSeqStatusRecover();
+            break;
+        case 4:
+            rcvUpdateSeqRevive();
+            break;
+        case 5:
+            if (rcvUpdateSeqDispel(0) == 0) {
+                return 0;
+            }
+            break;
+        case 6:
+            rcvUpdateSeqTalk();
+            break;
+        case 7:
+            if (cmpChkSeqInfo((cmbGbWork_t *)rcvUpdateWork) == 2) {
+                fclClearFlag(1);
+                fclSetWorkValue(1, 0);
+                rcvUpdateWork->unk_00 |= 0x10;
+            }
+            break;
+        }
+    }
+    cmpUpdateSeqInfo(rcvUpdateWork, previous);
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", D_0053D4F0);
 
