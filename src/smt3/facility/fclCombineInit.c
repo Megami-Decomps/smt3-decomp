@@ -363,6 +363,12 @@ typedef struct
 
 typedef struct
 {
+    /* 0x0000 */ cmpCursorInfo_t cursor;
+    /* 0x0038 */ u8 unk_0038[0x1004];
+} cmbStockCursorGroup_t;
+
+typedef struct
+{
     /* 0x00000 */ u8 unk_00000;
     /* 0x00001 */ s8 unk_00001;
     /* 0x00002 */ u8 unk_00002;
@@ -373,7 +379,9 @@ typedef struct
     /* 0x00008 */ s32 unk_00008;
     /* 0x0000C */ u8 unk_0000C[0x10];
     /* 0x0001C */ cmpCursorInfo_t combineCursor;
-    /* 0x00054 */ u8 unk_00054[0x40BC];
+    /* 0x00054 */ u8 unk_00054[0x1004];
+    /* 0x01058 */ cmbStockCursorGroup_t stockCursorGroup[3];
+    /* 0x0410C */ u8 unk_0410C[4];
     /* 0x04110 */ cmbStockSlot_t stockSlot[3];
     /* 0x0411C */ u8 birthPanel[0x123EE];
     /* 0x1650A */ s8 unk_1650A;
@@ -386,7 +394,9 @@ typedef struct
     /* 0x1654C */ u32 *unk_1654C[5];
     /* 0x16560 */ u8 unk_16560[0x70];
     /* 0x165D0 */ s32 smoke[3];
-    /* 0x165DC */ u8 unk_165DC[0x1064];
+    /* 0x165DC */ u8 unk_165DC[0x11];
+    /* 0x165ED */ u8 stockCursorCount;
+    /* 0x165EE */ u8 unk_165EE[0x1052];
     /* 0x17640 */ cmpCursorInfo_t menuCursor;
     /* 0x17678 */ u8 unk_17678[0x3060];
     /* 0x1A6D8 */ s32 texHandle[7];
@@ -409,6 +419,10 @@ extern s32 dds3FadeCheck(void);
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
 extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
+
+extern void cmpClearCursorSlots(cmpCursorInfo_t *cursor);
+
+extern void cmbCreateLocalStock(void);
 
 extern s32 func_002043E0(u32 **work);
 
@@ -627,7 +641,20 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcRoot);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcDevSel1st);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbInitStockCursor);
+void cmbInitStockCursor(void)
+{
+    if (CMB_GBWK->unk_00004 != 0) {
+        cmbCreateLocalStock();
+    }
+
+    if (CMB_GBWK->unk_00004 == 1) {
+        cmpInitCursorRange(&CMB_GBWK->stockCursorGroup[1].cursor,
+                           CMB_GBWK->stockCursorCount, CMB_GBWK->stockCursorCount, 0);
+        cmpInitCursorLayout(&CMB_GBWK->stockCursorGroup[1].cursor, 0x2B, 0x80, 0x1C5,
+                            0x15, 0x17);
+        cmpClearCursorSlots(&CMB_GBWK->stockCursorGroup[1].cursor);
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSeqBuildResultTable);
 
