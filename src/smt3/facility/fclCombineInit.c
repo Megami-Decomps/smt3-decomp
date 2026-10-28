@@ -1198,13 +1198,41 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthDevil);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawUnitLevel);
 
+extern fclSpriteTbl_t cmbSpriteTable[];
+extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
+                             fclSpriteTbl_t *table, s32 OtNo);
+
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CB30);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CB48);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CB60);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockIcon);
+void cmbDrawStockIcon(s32 x, s32 y, s32 z, s8 icon, u32 ot)
+{
+    s32 spriteId = icon < 0 ? 0 : 1;
+
+    switch (icon) {
+    case 0:
+        spriteId = 2;
+        break;
+    case 5:
+        spriteId = 3;
+        break;
+    case 6:
+        spriteId = 4;
+        break;
+    case 2:
+        spriteId = 5;
+        break;
+    case 12:
+        spriteId = 6;
+        break;
+    default:
+        break;
+    }
+    fclDrawSpriteRes(x, y, z * 16, 0, 1, spriteId, CMB_GBWK->texHandle, cmbSpriteTable, ot);
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockEntry);
 
@@ -1247,11 +1275,6 @@ s32 cmbDrawPhaseDefault(s32 active)
 }
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawInfoSprite);
-
-extern fclSpriteTbl_t cmbSpriteTable[];
-
-extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
-                             fclSpriteTbl_t *table, s32 OtNo);
 
 /* Placement arguments are retained for callers; the header uses fixed coordinates. */
 void cmbDrawTopSprite(s32 unusedX, s32 unusedY, u32 unusedZ, s32 unusedOt)
