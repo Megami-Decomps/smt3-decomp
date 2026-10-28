@@ -23,8 +23,6 @@ extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
 
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
-extern s32 cmpMoveCursor(void *cursor, s8 direction);
-
 extern s32 fclBlendColor(s32 color, s32 mask, s32 alpha);
 
 extern s32 cmpDrawBoxF(s32 x, s32 y, s32 color, s32 w, s32 h, s32 arg6, s32 ot);
@@ -47,7 +45,9 @@ typedef struct
     /* 0x2214 */ s8 previousTerminalType;
     /* 0x2215 */ s8 unk_2215;
     /* 0x2216 */ s8 cursor;
-    /* 0x2217 */ u8 pad2217[9];
+    /* 0x2217 */ u8 pad2217;
+    /* 0x2218 */ void *scriptAllocationHandle;
+    /* 0x221C */ u32 scriptData;
     /* 0x2220 */ s32 ScriptPID;
     /* 0x2224 */ u8 unk_2224[0xC];
     /* 0x2230 */ s32 saveProcess;
@@ -58,6 +58,40 @@ typedef struct
 extern trmUpdateWork_t *trmUpdateWork;
 
 extern void fclTerminalSetMode(s32 mode, s32 id, trmUpdateWork_t *work);
+
+typedef struct
+{
+    u8 StepY[4];
+    s8 StopFlag;
+    u8 unk_05[3];
+    s32 CursorSize;
+    s32 CursorPos;
+    u16 unk_10;
+    u16 unk_12;
+    u16 unk_14;
+    u16 unk_16;
+    s32 unk_18;
+    s32 unk_1C;
+    u8 unk_20;
+    u8 unk_21;
+    s16 unk_22;
+    s8 unk_24;
+    s8 unk_25;
+    u8 unk_26;
+    u8 unk_27;
+    s32 unk_28;
+    s32 unk_2C;
+    s32 unk_30;
+    s32 unk_34;
+} cmpCursorInfo_t;
+
+typedef struct
+{
+    cmpCursorInfo_t cursor;
+    s8 unk_38;
+} cmpPadStopWork_t;
+
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
 
 s32 trmEndEvent(s32 BgmMode);
 
@@ -91,7 +125,48 @@ s32 trmGetJumpTerminalNo(void)
 INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmGetJumpTerminalNo);
 #endif
 
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateSeqTrans);
+extern s32 cmpGetPressedButton(s32 mask);
+extern s32 fclSetWorkValue(s8 index, s32 value);
+extern s32 fclScriptStart(s32 script, s32 entry, void *process);
+extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
+extern s32 cmpChkPadPressUpDown(void);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
+extern void cmpPlayCursorSE(u32 button);
+
+void trmUpdateSeqTrans(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+
+    switch (button) {
+    case 1:
+        fclSetWorkValue(0, trmGetJumpTerminalNo());
+        fclScriptStart(trmUpdateWork->scriptData, 3, &trmUpdateWork->ScriptPID);
+        trmUpdateWork->unk_0001 = 5;
+        trmUpdateWork->unk_0004 = button;
+        break;
+    case 2:
+        cmpResetCursorInfo((cmpCursorInfo_t *)((u8 *)trmUpdateWork + 0x11B4));
+        if (trmUpdateWork->TerminalType == 0) {
+            fclScriptStart(trmUpdateWork->scriptData, 0, &trmUpdateWork->ScriptPID);
+        } else {
+            fclScriptStart(trmUpdateWork->scriptData, 1, &trmUpdateWork->ScriptPID);
+        }
+        trmUpdateWork->unk_0001 = 0;
+        trmUpdateWork->unk_0004 = 2;
+        break;
+    case 0x10:
+        cmpMoveCursor((cmpCursorInfo_t *)((u8 *)trmUpdateWork + 0x11B4), -1);
+        break;
+    case 0x20:
+        cmpMoveCursor((cmpCursorInfo_t *)((u8 *)trmUpdateWork + 0x11B4), 1);
+        break;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor((cmpCursorInfo_t *)((u8 *)trmUpdateWork + 0x11B4), 0);
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)((u8 *)trmUpdateWork + 0x11B4), button, 0x30));
+}
 
 void trmActInitMisc(void)
 {
