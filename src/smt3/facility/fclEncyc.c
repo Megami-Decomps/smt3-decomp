@@ -942,7 +942,27 @@ void initViewCamera(cmpVec4_t *v)
     SDF_VU0_COPYVECTOR(&v[1], &cmpStatusModelPos);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", InitModelPosRot);
+extern void rstGetEvoModelParam(u16 id, f32 *out);
+extern void cmpGetModelPosRot(u16 id, f32 *out);
+extern void mdlSetPosition(void *model);
+extern void mdlSetRotate(void *model);
+extern void FromEuler(f32 x, f32 y, f32 z);
+
+void InitModelPosRot(void *model, s32 id)
+{
+    cmpVec4_t vector;
+    s32 modelId = id;
+
+    rstGetEvoModelParam((u16)modelId, &vector.x);
+    SDF_VU0_LOADVECTOR(&vector);
+    mdlSetPosition(model);
+    cmpGetModelPosRot((u16)modelId, &vector.x);
+    vector.x *= 0.017453292f;
+    vector.y *= 0.017453292f;
+    vector.z *= 0.017453292f;
+    FromEuler(vector.x, vector.y, vector.z);
+    mdlSetRotate(model);
+}
 
 void RequestChangeMotion(motionWork_t *pinst, s32 flag)
 {
