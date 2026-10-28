@@ -10,7 +10,21 @@ extern s32 nmeGetCursorPos(nmeWork_t *work);
 extern void nmeStepCursor(s8 delta);
 extern void nmeDeleteChar(s8 delta);
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDrawInputUBar);
+extern void nmeDrawNameText(s32 x, s32 y, s32 width, s32 height, u32 color, s32 mode);
+extern void nmeDrawNameString(s32 x, s32 y, u32 color, s32 mode);
+
+void nmeDrawInputUBar(s8 mode)
+{
+    switch (mode) {
+    case 0:
+    case 1:
+        return nmeDrawNameText(0x2A, 0x96, 0xF4, 0x96, 0xA09DC380, 0);
+    case 2:
+        nmeDrawNameText(0x2A, 0x54, 0xF4, 0x54, 0x5A503980, 1);
+        nmeDrawNameString(0x83, 0x9A, 0xA09DC380, 0);
+        break;
+    }
+}
 
 typedef struct {
     void *res;
