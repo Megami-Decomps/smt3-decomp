@@ -2407,7 +2407,22 @@ char *effMakeBedPath(char *path)
     return path;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_174D38);
+extern void dds3EffectFileListWindowDraw(void *window);
+extern u32 dds3EffectFileListWindowGetState(void *window);
+extern u32 dds3EffectFileListWindowGetFilename(void *window, char *filename);
+extern void *func_001AA310(void *viewer);
+extern char D_0056AA38[];
+extern char *D_0054F0F8;
+
+void eff_174D38(void)
+{
+    dds3EffectFileListWindowDraw(D_00551DA4);
+    if (dds3EffectFileListWindowGetState(D_00551DA4) == 1) {
+        dds3EffectFileListWindowGetFilename(D_00551DA4, D_0056AA38);
+        D_0054F0F8 = D_0056AA38;
+        nbHelperViewer = func_001AA310(nbHelperViewer);
+    }
+}
 
 void eff_174D98(void)
 {
