@@ -443,7 +443,11 @@ typedef struct
     /* 0x165ED */ u8 stockCursorCount;
     /* 0x165EE */ u8 unk_165EE[0x1052];
     /* 0x17640 */ cmpCursorInfo_t menuCursor;
-    /* 0x17678 */ u8 unk_17678[0x3060];
+    /* 0x17678 */ u8 reserved17678[0x1004];
+    /* 0x1867C */ cmbListWork_t eligibleList;
+    /* 0x18810 */ u8 reserved18810[0x1004];
+    /* 0x19814 */ datUnitWork_t eligibleStock[16];
+    /* 0x1A6D4 */ s32 eligibleCount;
     /* 0x1A6D8 */ s32 texHandle[7];
     /* 0x1A6F4 */ fclSprite_t backgroundSprite;
     /* 0x1A718 */ u8 *table;
@@ -3830,7 +3834,30 @@ s32 func_00206910(datUnitWork_t *unit)
 void func_00206940(void) {
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", shop_206948);
+void shop_206948(void)
+{
+    s32 i;
+
+    CMB_GBWK->eligibleCount = 0;
+    for (i = 0; i < 16; i++) {
+        datUnitWork_t *unit = &cmbGlobalWork->party[i].unit;
+
+        if (func_00206910(unit) != 0) {
+            cmbGbWork_t *work = CMB_GBWK;
+            s32 *count = &work->eligibleCount;
+            s32 countValue = *count;
+            datUnitWork_t *destination = &work->eligibleStock[countValue];
+            /* Qualified cc1probe: sched1 uids 64/86/89 share count pseudo
+             * 100 for the row offset and published successor (native $3).
+             * Splitting the successor into another value restores nine
+             * differences; see docs/CONTRIBUTING.md, shared temporaries. */
+            countValue++;
+            *count = countValue;
+            cmbCopyCustomDevilToStock(destination, unit);
+        }
+    }
+    func_00206888(0, 0, 0, (s8)CMB_GBWK->eligibleCount, 8, &CMB_GBWK->eligibleList);
+}
 
 void func_00206A28(void) {
 }
