@@ -1051,7 +1051,34 @@ s8 cmbCountSkills(cmbUnit_t *unit)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbLookupCombine);
+/* Race IDs index both matrices from one, not zero. */
+extern u8 D_0032D270[2][32][32];
+
+s32 cmbLookupCombine(u16 devilA, u16 devilB, s8 flag)
+{
+    u8 race[2];
+    u8 temp;
+    datDevilInfo_t *first = &datDevilTable[devilA];
+    datDevilInfo_t *second = &datDevilTable[devilB];
+
+    race[0] = first->race;
+    race[1] = second->race;
+    if (race[0] == 0x26) {
+        race[0] = 0x13;
+    }
+    if (race[1] == 0x26) {
+        race[1] = 0x13;
+    }
+    if (race[0] < race[1]) {
+        temp = race[1];
+        race[1] = race[0];
+        race[0] = temp;
+    }
+    if (flag != 0) {
+        return D_0032D270[1][race[1] - 1][race[0] - 1];
+    }
+    return D_0032D270[0][race[1] - 1][race[0] - 1];
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcResultLevel);
 
