@@ -54,14 +54,32 @@ typedef struct trmPanelPos_t {
     u8 unk14[0xC];
 } trmPanelPos_t;
 
+typedef struct trmListCursor_t {
+    s32 rowStep;
+    u8 unk04[0x1E];
+    s16 rowBase;
+    u8 unk24[2];
+    u8 visibleCount;
+    u8 unk27[0x11];
+} trmListCursor_t;
+
+typedef struct trmListWork_t {
+    u8 unk00[0x40];
+    trmPanelPos_t panel;
+    u8 unk60[0xFC];
+    trmListCursor_t cursor;
+} trmListWork_t;
+
 typedef struct trmDrawWork_t {
     u8 unk00[0x1C];
-    /* List-window header prefix; cursor and trailing storage follow. */
     u8 listHeader[0x15C];
-    u8 unk0178[0x2079];
+    u8 unk0178[0xEE0];
+    trmListWork_t terminalList;
+    u8 unk11EC[0x1005];
     s8 terminalType;
     u16 terminalNo;
-    u8 unk21F4[0x44];
+    s8 terminalIndices[0x21];
+    u8 unk2215[0x23];
     s32 texHandle;
 } trmDrawWork_t;
 
@@ -102,7 +120,43 @@ void trmDrawListRow(trmPanelPos_t *panel, s32 ot)
     frDestroyFontRequestAfter(font);
 }
 
-INCLUDE_ASM(const s32, "facility/fclTerminalCalc", trmDrawList);
+extern char *trmMenuTextTable[];
+extern s32 trmDrawListText(trmPanelPos_t *panel, char *text, s32 *textures,
+                          fclSpriteTbl_t *table, s32 ot);
+extern void lstDrawListWindow(trmListWork_t *list, s8 noCursor, s32 ot);
+extern void lstDrawListWindowCursor(trmListWork_t *list, s32 ot);
+extern s32 cmpDrawListItemBox(trmListCursor_t *cursor, s32 row, s32 slot, s32 mode, s32 width);
+
+void trmDrawList(void)
+{
+    trmPanelPos_t panel;
+    trmListCursor_t *cursor = &trmDrawWork->terminalList.cursor;
+    s32 row = 0;
+    s32 baseX;
+    s32 y;
+    s32 z;
+
+    fclInitPanelPos(0, 0xF8, 0xFFFFF, 0, 0, 0, &panel);
+    trmDrawListText(&panel, trmMenuTextTable[12], &trmDrawWork->texHandle, D_003308F8, 0x47);
+    fclInitPanelPos(0xC80, 0x100, 0xFFFFF, 0x80, 0, 0, &panel);
+    trmDrawListRow(&panel, 0x47);
+    lstDrawListWindow(&trmDrawWork->terminalList, 0, 0x47);
+    baseX = trmDrawWork->terminalList.panel.x;
+    y = trmDrawWork->terminalList.panel.y;
+    z = trmDrawWork->terminalList.panel.z;
+    if (cursor->visibleCount != 0) {
+        s32 x = baseX + 0x330;
+        do {
+            s32 color = cmpDrawListItemBox(cursor, row, row, 0, 0x100);
+            trmFreeListFont(x, y + 0x48, z, color,
+                           trmDrawWork->terminalIndices[cursor->rowBase + row], 0, 0x47);
+            row++;
+            y += cursor->rowStep << 3;
+        } while (row < cursor->visibleCount);
+    }
+    lstDrawListWindowCursor(&trmDrawWork->terminalList, 0x47);
+}
+
 
 void trmUpdateListSelection(void)
 {
