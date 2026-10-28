@@ -1012,6 +1012,7 @@ typedef struct {
     /* 0xA54 */ datUnitWork_t unitwork[16];
     /* 0x1914 */ s8 stocklist[16];
     /* 0x1924 */ s32 stockcnt;
+    /* 0x1928 */ u8 unknown1928[0xA0];
 } datPartyWork_t;
 
 /* The same persistent-work pointer, through its recovered party/stock view. */
@@ -1368,7 +1369,22 @@ void datInitPlayer(void)
     evtBitOn(0xC04);
 }
 #else
-INCLUDE_ASM(const s32, "newdata/datCalc", datInitPlayer);
+void datInitPlayer(void)
+{
+    datPartyWork_t *party;
+    s32 i;
+
+    memset(datPartyWork->unitwork, 0, sizeof(datPartyWork->unitwork));
+    datPartyWork->unitwork[0] = D_003493C0;
+    party = datPartyWork;
+    party->stocklist[0] = 0;
+    party->stockcnt = 1;
+    DDS3_GBWK->maka = 0;
+    for (i = 0; i < 0xA0; i++) {
+        datPartyWork->unknown1928[i] = 0;
+    }
+    evtBitOn(0xC04);
+}
 #endif
 
 void datInitBossPress(void)

@@ -454,3 +454,4 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 188 B	Hearts triangle-
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 260 B	Hearts removal confirmation and message phases; owner 331 match, 0 differ
 src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 480 B	control-table write dispatch with native copy lengths and shared IOP transfer
 src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 472 B	control-table read dispatch with native zero-fill case and synchronized snapshot
+src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 300 B	player template copy, stock initialization and native persistent-work clears; owner 73 match, 0 differ
