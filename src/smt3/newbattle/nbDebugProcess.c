@@ -403,9 +403,40 @@ INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", nbDebugStockSelect);
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
+extern const char *nbBadStatusNames[12];
+extern const char D_00551358[];
+extern const char D_00551360[];
 extern sdfGrOt_t D_002F67F8;
 
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", DispBadStatus);
+void DispBadStatus(s32 x, s32 y, u32 status, s32 color)
+{
+    s32 i;
+    u32 bit;
+    sdfDrawTag_t *tag;
+    const char **name;
+
+    i = 0;
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    bit = 1;
+    name = nbBadStatusNames;
+    while (i < 12) {
+        if ((status & (bit << i)) != 0) {
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, color,
+                                                  D_00551358, *name));
+            break;
+        }
+        name++;
+        i++;
+    }
+    if (i == 12) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, color, D_00551360));
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
+
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", DispHpMpBad2);
 
