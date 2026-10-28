@@ -436,7 +436,39 @@ void func_002109E0(void)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", trm_210A00);
+extern void scrSetIntReturnValue(s32 value);
+
+s32 trm_210A00(void)
+{
+    s32 result = 0;
+
+    switch (gProcessStat_3) {
+    case 0:
+    case 1:
+        gCallMode = 1;
+        switch (trmGetMode()) {
+        case 1:
+            trmCreateTerminalList(GBWK_3->terminalType, GBWK_3->terminalNo);
+            fclSetTerminalMode(2);
+            break;
+        case 3:
+            fclSetTerminalMode(4);
+            scrSetIntReturnValue(2);
+            return 1;
+        case 4:
+            fclSetTerminalMode(2);
+            GBWK_3->unk_01 = 0;
+            GBWK_3->unk_04 = 1;
+            break;
+        }
+        break;
+    case 2:
+        result = 1;
+        break;
+    }
+    scrSetIntReturnValue(result ^ 1);
+    return result;
+}
 
 s32 trm_210AF8(void)
 {

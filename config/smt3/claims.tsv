@@ -386,3 +386,5 @@ src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	normal skill set
 src/smt3/facility/fclShare.c	redthing1	done	2026-10-28	0 matches	pad wrapper remains assembly
 src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	next-order helper remains assembly; signed cursor and full-width increment recovered
 src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	1 fn / 220 B	command reset and command-window flag; owner 23 match, 0 differ
+src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	3 fn / 600 B	terminal BGM selector, jump diagnostics, script-state callback; owner 26 match, 0 differ
+src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	order insertion remains assembly; owner 28 match, 0 differ
