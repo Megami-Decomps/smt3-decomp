@@ -266,6 +266,7 @@ src/smt3/newbattle/nbMaeProcess.c	redthing1	done	2026-10-28	3 fn / 140 B	02Loop,
 src/smt3/sdf/sdfFileIO.c	redthing1	done	2026-10-28	1 fallback	last AnalyzeFileName fallback after exact request unlink/dequeue/free reconstruction
 src/smt3/kernel/dds3AdminiProcess.c	redthing1	done	2026-10-28	5 drafts	store-order and wrapper sweeps exhausted; see docs/nonmatching/kernel/dds3AdminiProcess.md
 src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	1 fn / 256 B	pending requests and retained buffers use their file and memory provider types
+src/smt3/field/fldCamera.c	redthing1	done	2026-10-28	1 fn / 380 B	follow-camera eye and target parameters through four-field table rows
 src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	19 functions / 5244 B	sdfFileRpcHandleCmd matched from address-paired C donor
 src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	2 fn / 256 B	fclBlendColor and func_00213DF0; unsigned packed color arithmetic
 src/smt3/newbattle/nbMaeProcess.c	redthing1	done	2026-10-28	3 fn / 284 B	remaining callbacks matched; unit has no assembly fallbacks

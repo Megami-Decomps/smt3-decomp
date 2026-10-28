@@ -142,36 +142,6 @@ address setup stays in the merge); duplicating only the `prev` block, only
 stores crossed with both orders of the write-back pair and six arrangements of
 the three statement blocks.
 
-## fldCamGetPhokanParam (field/fldDraw, 0x17C)
-
-92 of 95 words match, at the exact 380-byte size. Every instruction is retail's; the
-three differing words are `addu` operand order on two of the four
-`fldCamParamTable` row addresses.
-
-Retail forms the row three different ways in one function. The `[0]` column,
-which multiplies the sine and the cosine, comes out `addu rd, index, base`; the
-`[1]` and `[2]` columns come out `addu rd, base, index` with the 4 or 8 left in
-the load displacement. The draft gets `[0]` right and `[1]` wrong, and in the
-target block it computes the row once and copies it (`move v0, v1`) where retail
-computes a second `addu` with the operands the other way round, which is why the
-two were not CSEd together in retail at all.
-
-Confirmed on the way: `D_0054C2D0` is a `.lit4` entry holding `3.14f`; the angle
-is `fldCamPitch * 3.14f / 180.0f`, written inline at both of the eye block's
-calls and assigned to one local for the target block's two, which is retail's
-`$f20` and its two `mov.s $f12, $f20`; the radius is `80.0f`; `[3]` of both
-vectors is `1.0f`; and the eye uses `-sin`/`-cos` while the target uses `+sin`
-/`+cos` scaled by `[0]`.
-
-Ruled out for the operand order: every combination of three spellings of the
-`[1]`/`[2]` access (plain subscript, `*(f32 *)((u8 *)table + i * 16 + 4)`,
-`((f32 *)((u8 *)table + i * 16))[1]`, `((f32 *)table + i * 4)[1]`) with three of
-the `[0]` access (`table[i][0]`, `*table[i]`,
-`*(f32 *)((u8 *)(i * 16) + (u32)table)`); every cast form is four words longer
-rather than closer. A `struct { f32 distance, height, targetHeight, fovy; }`
-declaration is the untried lever, and needs the unit's two later
-`extern f32 fldCamParamTable[][4];` declarations changed with it.
-
 ## fldEveHit_ChkDir2 (field/fldDraw, 0x264)
 
 121 of 153 words match, at the exact 612-byte size. Its sibling
@@ -451,4 +421,3 @@ the branched-to arm rather than the fall-through, which costs another 8 bytes;
 `if (fldDoor_GetHasigoTbl(0) != 0) { return 0x69; }` for the `case 5` select,
 which gives `movz` against retail's `movn`; and `goto ret0` on either of the
 two trailing `return 0`s.
-
