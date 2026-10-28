@@ -2302,7 +2302,51 @@ void InitCameraForViewMode(fclEncyc_instance_tag *pinst)
     work->cameraAngle = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", SetBoundControl);
+typedef struct
+{
+    fclEncyc_readmainwork_tag phase;
+    f32 rotationMin;
+    f32 rotationMax;
+    f32 radiusMin;
+    f32 radiusMax;
+    s32 reserved0040[2];
+    s32 positionMinX;
+    s32 positionMinY;
+    s32 positionMaxX;
+    s32 positionMaxY;
+} fclEncycBoundWork_t;
+
+typedef struct
+{
+    f32 radius;
+    f32 farRadius;
+    f32 rotation;
+    s16 offsetX;
+    s16 offsetY;
+} fclEncycViewParam_t;
+
+extern fclEncycViewParam_t D_00331218[];
+extern datUnitVisual_t datModelParamTable[];
+
+void SetBoundControl(fclEncyc_instance_tag *pinst)
+{
+    fclEncycBoundWork_t *work = (fclEncycBoundWork_t *)pinst->pwork;
+    u16 id = *(u16 *)((u8 *)encycSaveWork + work->phase.recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    work->rotationMin = -D_00331218[id].rotation;
+    work->rotationMax = D_00331218[id].rotation;
+    work->radiusMin = pinst->camera[1].w + datModelParamTable[id].formsize + 80.0f + D_00331218[id].radius;
+    if (D_00331218[id].farRadius > 0.0f) {
+        work->radiusMax = pinst->camera[1].w + datModelParamTable[id].formsize + 80.0f + D_00331218[id].farRadius;
+    } else {
+        work->radiusMax = work->phase.cameraRadius + work->phase.cameraRadius;
+    }
+    work->positionMinX = -D_00331218[id].offsetX;
+    work->positionMinY = -D_00331218[id].offsetY;
+    work->positionMaxX = D_00331218[id].offsetX;
+    work->positionMaxY = D_00331218[id].offsetY;
+}
+
+
 
 void initViewCamera(cmpVec4_t *v)
 {

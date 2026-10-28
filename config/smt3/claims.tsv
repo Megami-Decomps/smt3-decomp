@@ -398,3 +398,4 @@ src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	1 fn / 512 B	sequ
 src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	0 matches	music setup remains assembly; owner 23 match, 0 differ
 src/smt3/facility/fclRecoverCalc.c	redthing1	done	2026-10-28	0 matches	heal mask and stock construction remain assembly; owner 20 match, 0 differ
 src/smt3/facility/fclTerminalUpdate.c	redthing1	done	2026-10-28	1 fn / 344 B	transfer sequence; owner 9 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 264 B	view bounds from native model and camera parameters; owner 93 match, 0 differ
