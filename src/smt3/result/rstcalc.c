@@ -75,13 +75,20 @@ typedef struct
     /* 0x0000 */ u8 unk_00[0x18];
     /* 0x0018 */ s8 unk_18;
     /* 0x0019 */ s8 unk_19;
-    /* 0x001A */ u8 unk_1A[0x16];
+    /* 0x001A */ s8 StartLevel;
+    /* 0x001B */ s8 unk_1B;
+    /* 0x001C */ u8 unk_1C[4];
+    /* 0x0020 */ u8 EventNums;
+    /* 0x0021 */ u8 unk_21[6];
+    /* 0x0027 */ s8 unk_27;
+    /* 0x0028 */ u8 unk_28[8];
     /* 0x0030 */ datUnitWork_t *levelUpUnit[16];
     /* 0x0070 */ s8 levelUpCount;
     /* 0x0071 */ s8 levelUpStep;
     /* 0x0072 */ u8 unk_72[0xFA];
     /* 0x016C */ datUnitWork_t *unit;
-    /* 0x0170 */ u8 unk_170[0x2175];
+    /* 0x0170 */ datUnitWork_t workStock;
+    /* 0x025C */ u8 unk_25C[0x2089];
     /* 0x22E5 */ s8 unk_22E5;
     /* 0x22E6 */ s8 unk_22E6;
     /* 0x22E7 */ u8 unk_22E7;
@@ -250,7 +257,21 @@ INCLUDE_ASM(const s32, "result/rstcalc", rstSetLevelUpCount);
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstSetCurrentDevil);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstInitWorkStock);
+extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
+extern void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst);
+
+void rstInitWorkStock(s8 IkenieChk)
+{
+    datUnitWork_t defaultWork;
+
+    EventStart->EventNums = 0;
+    cmbCopyCustomDevilToStock(&EventStart->workStock, EventStart->unit);
+    EventStart->workStock.level = EventStart->StartLevel + 1;
+    if (IkenieChk != 0 && (EventStart->unit->flag & 0x200) != 0) {
+        cmbCopyDefaultDevilToStock(EventStart->unit->id, &defaultWork);
+        EventStart->workStock.level = defaultWork.level;
+    }
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstCreateBeforeSkillList);
 
@@ -1085,7 +1106,6 @@ INCLUDE_ASM(const s32, "result/rstcalc", rstRollComment);
 
 INCLUDE_ASM(const s32, "result/rstcalc", func_00223890);
 
-extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
 
 /* NON_MATCHING: 10 of 32 words differ, 128 against retail's 132 bytes; the
  * level read copied into its own register in retail. */
