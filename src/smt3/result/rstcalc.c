@@ -160,7 +160,9 @@ typedef struct
     /* 0x129F */ u8 unk_129F[6];
     /* 0x12A5 */ u8 unk_12A5[0x103F];
     /* 0x22E4 */ u8 unk_22E4;
-    /* 0x22E5 */ u8 unk_22E5[0x2F];
+    /* 0x22E5 */ u8 unk_22E5[0x23];
+    /* 0x2308 */ s32 unk_2308;
+    /* 0x230C */ u8 unk_230C[8];
     /* 0x2314 */ s32 fadeColor;
 } rstDrawWork_t;
 
@@ -1482,7 +1484,18 @@ void rstDrawStatusRow(s8 mode, s8 row, s8 flags)
                        0xA09DC380, 2, row, flags);
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstDrawStatusRow2);
+void rstDrawStatusRow2(s8 mode, s8 row, s8 selected)
+{
+    if (rstDrawWork->unk_2308 == 0) {
+        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
+                           -1, 3, (s32)rstDrawWork->unk_129F, mode,
+                           0xA09DC380, 2, row, 0);
+    } else {
+        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
+                           selected, 3, (s32)rstDrawWork->unk_129F, mode,
+                           0xA09DC380, 2, row, 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstDrawStatusPanel);
 
