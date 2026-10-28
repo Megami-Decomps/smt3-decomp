@@ -3181,7 +3181,46 @@ void campDhDrawHelpTextAlt(s32 x, s32 y, s32 z, s32 alpha)
     cmpDrawBoxGDefault(x + 0x1710, y + 0xAF8, 0, 52, 5, colors, 0x47);
 }
 
+/* NON_MATCHING: 4 of 86 words differ; see docs/nonmatching/code_0022C578.md. */
+#ifdef NON_MATCHING
+extern void frEnableMode(s32 flag);
+extern u8 frDisableMode(u8 flag);
+extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type,
+    frFontHandle_t *previous);
+extern void frSetFontSpace(frFontHandle_t *font, s32 space);
+extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
+extern void frSetPriority(frFontHandle_t *font, u32 priority);
+extern void frSetMessageStepY(u32 step);
+extern void frSetMessageDefStepY(void);
+extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work,
+    fclPanelPos_t *pPanelPos);
+
+void campDhDrawHelpText(s32 x, s32 y, s32 z, s32 alpha, s8 index)
+{
+    fclPanelPos_t panel;
+    frFontHandle_t *font;
+    u32 fontX = x + 0x2A0;
+    u32 fontY = y + 0x7F0;
+
+    if (index != 0) {
+        frEnableMode(1);
+        font = frLinkFontString((u8 *)pstr[index], 0, 0, 0, NULL);
+        frDisableMode(1);
+        frSetFontSpace(font, 3);
+        frSetDrawPosition(font, fontX, fontY);
+        frSetPriority(font, 0);
+        frSetFontColor(font, fclBlendColor(0x7475FF80, 0x7475FF00, alpha));
+        func_001C7E38(font, 1, 0x47);
+        frDestroyFontRequestAfter(font);
+        fclInitPanelPos(x + 0xA00, y + 0x990, 0, 0, 0, 0, &panel);
+        frSetMessageStepY(22);
+        cmpDrawHelp(&panel, (u16)index, 2, 1, alpha, 0x47);
+        frSetMessageDefStepY();
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHelpText);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHeartsGauge);
 
