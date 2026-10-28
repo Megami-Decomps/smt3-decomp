@@ -8681,7 +8681,6 @@
 0x002C22E0 sdfFileRpcCallback __int64 __fastcall sdfFileRpcCallback(__int64, __int64)
 0x002C2338 sdfFileRpcHandleCmd __int64 __fastcall sdfFileRpcHandleCmd(__int64, int)
 0x002C2580 SifRpcServerThreadProc void __noreturn SifRpcServerThreadProc()
-0x002C2608 sdf_2C2608 void __fastcall sdf_2C2608(__int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, __int64, int)
 0x002C2618 sdf_2C2618 __int64 __fastcall sdf_2C2618(__int64, int)
 0x002C27F8 sdf_2C27F8 __int64 __fastcall sdf_2C27F8(__int64)
 0x002C29D0 sdfDumpHexLine __int64 __fastcall sdfDumpHexLine(unsigned __int8 *, __int64)
