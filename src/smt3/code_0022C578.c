@@ -1025,7 +1025,7 @@ extern void cmpCalcSequence();
 
 extern void camp_draw_Process();
 
-extern void camp_update_Process();
+extern s32 camp_update_Process(void);
 
 extern void *cmpStartProcessPanelEff(s32 parent);
 
@@ -2490,7 +2490,76 @@ s32 campUpdateEffects(void)
     return func_00232198();
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_update_Process);
+extern void fclUpdateMessage(void);
+extern s32 cmpUpdateSeqInfo(cmbGbWork_t *work, s8 value);
+
+s32 camp_update_Process(void)
+{
+    s8 state = campWork->unk_0001;
+
+    if ((campWork->unk_0000 & 0x40) != 0) {
+        return -1;
+    }
+    switch (state) {
+    case 0:
+        if (campDebugCheckPad(0) == 0) {
+            cmpUpdateRoot();
+        }
+        break;
+    case 1:
+        cmpUpdateItem();
+        break;
+    case 2:
+        break;
+    case 3:
+        cmpUpdateParty();
+        break;
+    case 5:
+        if (campDebugCheckPad(1) == 0) {
+            cmpUpdateProcessStatus();
+        }
+        break;
+    case 4:
+        campCloseInfoWindow();
+        break;
+    case 6:
+        campShowStock();
+        break;
+    case 7:
+        cmpUpdateLoad();
+        break;
+    case 8:
+        campUpdateStockSelect(0);
+        break;
+    case 9:
+        campUpdateStockSelect(1);
+        break;
+    case 11:
+        campUpdateStockCursor();
+        break;
+    case 10:
+        cmpUpdateSkillSelect();
+        break;
+    case 12:
+    case 13:
+        break;
+    case 14:
+        campWaitSelMessage();
+        break;
+    case 15:
+        break;
+    case 16:
+        cmpUpdateDestroyItemConfirm();
+        break;
+    default:
+        break;
+    }
+    fclUpdateMessage();
+    campUpdateEffects();
+    cmpUpdateSeqInfo((cmbGbWork_t *)campWork, state);
+    return 0;
+}
+
 
 s32 cmpStockEffIsActive(u8 *work)
 {

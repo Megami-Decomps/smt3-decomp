@@ -588,3 +588,4 @@ src/smt3/newbattle/nbSkillError.c	redthing1	done	2026-10-28	1 fn / 328 B	model-p
 src/smt3/pipe/pipeCamera.c	redthing1	done	2026-10-28	1 fn / 368 B	viewport matrix with pre-normalization eye snapshot and normalized vector providers; owner 5 match, 0 differ
 src/smt3/newbattle/NbNegoFlowFullMoon.c	redthing1	done	2026-10-28	1 fn / 204 B	Flow2_2 full-moon message dispatch with word ID and native halfword comparisons
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 428 B	camp allocation and four cursor-page initialization with native data-backed tables and flag storage; owner 349 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 352 B	camp phase dispatch with signed entry snapshot, native negative skip return and exact jump table; owner 350 match, 0 differ
