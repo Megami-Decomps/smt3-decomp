@@ -10,7 +10,7 @@ typedef struct
     u8 flag;
     u8 unk_01[3];
     u8 race;
-    u8 unk_05;
+    u8 level;
     u8 unk_06[54];
 } datDevilInfo_t;
 
@@ -1110,7 +1110,7 @@ s32 cmbChkDevilEvo(datUnitWork_t *unit)
         if (p[-1] == 5) {
             datDevilInfo_t *info = &datDevilTable[*(u16 *)p];
 
-            return (s8)info->unk_05;
+            return (s8)info->level;
         }
         p += 4;
     }
@@ -1171,7 +1171,24 @@ s32 datCalcDevilExp(s32 level)
     return exp;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", datCopyDevilWorkEntry);
+extern s32 datCalcDevilExp(s32 level);
+
+s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level)
+{
+    s32 exp = datCalcDevilExp(level);
+    s32 baseLevel;
+    s32 scaled;
+    f32 rate;
+
+    if ((work->flag & 4) != 0) {
+        return exp;
+    }
+    baseLevel = datDevilTable[work->id].level;
+    rate = 2.7f - (f32)baseLevel * 0.017f;
+    scaled = (s32)((f32)exp * rate);
+    scaled = (s32)((f32)scaled - (f32)datCalcDevilExp(baseLevel) * rate);
+    return scaled + work->hensinmaeexp;
+}
 
 s32 datAdvanceDevilLevel(datUnitWork_t *work)
 {
