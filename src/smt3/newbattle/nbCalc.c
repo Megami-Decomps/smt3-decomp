@@ -104,8 +104,9 @@ typedef struct nbMainProcessData_t
     u8 unk_1C[0x4];
     nbStatWork_t *statwork;
     void *statbuf;
-    s32 unk_28;
-    u8 unk_2C[0x8];
+    s32 encpackno;
+    s32 packno;
+    s32 packindex;
     s32 encno;
     u8 unk_38[0x8];
     s32 actionstackp;
@@ -302,7 +303,8 @@ typedef struct
     u8 itemcnt;
     u8 unk_04[0x2];
     u16 id[11];
-    u8 unk_1C[0x6];
+    u8 unk_1C[0x4];
+    /* 0x20 */ u16 senseiFlags;
     u8 unk_22;
     u8 unk_23;
     u16 mae;
@@ -1115,7 +1117,93 @@ s32 nbGetParamAvg2(nbMainProcessData_t *data, s32 side, s32 paratype)
     return sum / cnt;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbCheckSensei);
+typedef struct {
+    u16 encountid;
+    u16 ritu;
+    u8 sensei;
+    u8 renzokuritu;
+    u16 renzokuindex;
+} datEncountRitu_t;
+
+typedef struct {
+    s32 normalritu;
+    datEncountRitu_t ritu[12];
+} datEncountTbl_t;
+
+typedef struct {
+    u16 stageid;
+    u16 areaid;
+    u16 btlsound;
+    u16 moonchk;
+    u16 table2;
+    u16 eventbit1;
+    u16 eventbit2;
+    u8 table1[4];
+    u8 reserved12[2];
+    datEncountTbl_t enctable[4];
+} nbEncountEntry_t;
+
+typedef struct { f32 factor[6]; } nbCheckSenseiFactors_t;
+
+extern nbEncountEntry_t nbEncountTable[];
+extern const nbCheckSenseiFactors_t D_00544D58;
+extern char D_00544D70[];
+
+s32 nbCheckSensei(nbMainProcessData_t *data)
+{
+    nbCheckSenseiFactors_t factors = D_00544D58;
+    nbEncountForm_t *form = &nbEncountFormTable[data->encno];
+    datUnitWork_t *player;
+    u16 senseiFlags = form->senseiFlags;
+    s32 enemyLevel = 0;
+    s32 enemyParam4 = 0;
+    s32 enemyParam5 = 0;
+    s32 playerLevel;
+    s32 playerParam4;
+    s32 playerParam5;
+    s32 threshold;
+    s32 roll;
+    u8 weight;
+
+    if (senseiFlags & 4) {
+        return 0;
+    }
+    if (senseiFlags & 2) {
+        return 1;
+    }
+
+    enemyLevel = nbGetLvAvg2(data, 1);
+    enemyParam4 = nbGetParamAvg2(data, 1, 4);
+    enemyParam5 = nbGetParamAvg2(data, 1, 5);
+    player = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
+    playerLevel = player->level;
+    playerParam4 = datGetParam(player, 4);
+    playerParam5 = datGetParam(player, 5);
+
+    threshold = playerLevel + playerParam5 / 2 + playerParam4 -
+                (enemyLevel + enemyParam5 / 2 + enemyParam4) + 0x48;
+    if (threshold < 0x46) {
+        threshold = 0x46;
+    }
+    if (threshold >= 0x56) {
+        threshold = 0x55;
+    }
+
+    weight = nbEncountTable[data->encpackno].enctable[data->packno].ritu[data->packindex].sensei;
+    if (playerLevel < enemyLevel + 0xF) {
+        threshold = (s32)((f32)threshold * factors.factor[weight]);
+    }
+
+    roll = dds3GetRandIntA(0, 0x80);
+    printf(D_00544D70, playerLevel, enemyLevel, weight, threshold, roll);
+    if (roll < threshold) {
+        return 0;
+    }
+    if (evtBitCheck(0xAF2) != 0 && (dds3GetRandIntA(0, 0x80) & 1) != 0) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbCheckBackAttack);
 
