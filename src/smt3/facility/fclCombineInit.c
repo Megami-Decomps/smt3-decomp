@@ -430,7 +430,9 @@ typedef struct
     /* 0x1651C */ void *explainData;
     /* 0x16520 */ u8 unk_16520[4];
     /* 0x16524 */ cmbActionData_t actionData[5];
-    /* 0x16588 */ u8 reserved16588[0x48];
+    /* 0x16588 */ u8 reserved16588[8];
+    /* 0x16590 */ f32 modelMark[3][4];
+    /* 0x165C0 */ f32 cameraPosition[4];
     /* 0x165D0 */ s32 smoke[3];
     /* 0x165DC */ s32 actionTargetIndex;
     /* 0x165E0 */ s8 actionPhase;
@@ -3172,7 +3174,7 @@ extern void mdlSetPosition(struct mdlObj_t *model);
 extern void mdlSetScale(struct mdlObj_t *model);
 extern void mdlLink(struct mdlObj_t *model, void *ot);
 
-void cmbDrawActionModel(struct mdlObj_t *model, u16 id, f32 *position, f32 *rotation, void *ot)
+void cmbDrawActionModel(struct mdlObj_t *model, u16 id, f32 *position, u32 color, void *ot)
 {
     /* VU0 consumes these stores through the bare-address vector load. */
     volatile f32 scale[4] __attribute__((aligned(16)));
@@ -3306,7 +3308,57 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE10);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE38);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbLoadTargetModel);
+extern void cmbGetModelMarkPos(f32 (*positions)[4], f32 *sizes, s32 *found);
+extern void cmbDrawModelPanel(f32 (*positions)[4], f32 *sizes, u32 color,
+                              f32 scale, s32 *found, s32 ot);
+extern void cmbDrawFullScreenPanel(s32 flags);
+extern void mdlSetColorWithEffect(struct mdlObj_t *model, u32 color);
+extern f32 cmbActionTargetModel[3];
+extern f32 cmbTargetModelId;
+extern s8 cmbActionMode;
+extern char D_0053CE48[];
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE48);
+
+void cmbLoadTargetModel(s32 drawTarget, s32 drawModels, f32 scale)
+{
+    f32 positions[3][4] __attribute__((aligned(16)));
+    f32 sizes[3];
+    s32 found[3];
+    void *modelOt[4];
+    s32 i;
+
+    cmbGetModelMarkPos(positions, sizes, found);
+    if (drawModels != 0) {
+        if (scale != 0.0f) {
+            cmpDrawSpriteFlag(0, 0, 0x11);
+            cmpDrawSpriteFlag(0, 1, 0x11);
+            cmbDrawModelPanel(positions, sizes, 0, scale, found, 0x12);
+            cmpDrawSpriteFlag(1, 0, 0x16);
+            cmpDrawSpriteFlag(1, 1, 0x16);
+        }
+        for (i = 0; i < 3; i++) {
+            if (found[i] != 0) {
+                u32 color;
+                if (cmbActionMode != 0) {
+                    CMB_GBWK->modelMark[2][1] -= cmbTargetModelId;
+                }
+                color = fclBlendColor(0x80000000, 0x80808080, (s32)cmbActionTargetModel[i]);
+                mdlSetColorWithEffect(CMB_GBWK->actionData[i].model, color);
+                cmbGetSceneModel((cmbSceneModelOwner_t *)CMB_GBWK->actionData[i].model, D_0053CE48);
+                cmbInitModelOt((u16)CMB_GBWK->actionData[i].id, modelOt);
+                cmbDrawActionModel(CMB_GBWK->actionData[i].model,
+                    (u16)CMB_GBWK->actionData[i].id, CMB_GBWK->modelMark[i], 0x80808080, modelOt);
+            }
+        }
+    }
+    if (drawModels != 0 && scale != 0.0f) {
+        cmbDrawFullScreenPanel(0x1B);
+    }
+    cmbDrawTargetModel(positions, sizes, found, drawTarget, scale);
+    cmpDrawSpriteFlag(0, 0, 0x21);
+    cmpDrawSpriteFlag(0, 1, 0x21);
+}
 
 extern void *dds3SearchSceneBasic(void *pBasic, u32 serialID, s32 type);
 
