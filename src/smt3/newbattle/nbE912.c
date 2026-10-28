@@ -401,6 +401,8 @@ extern nbKoukaPacket_t *D_00527660[];
 
 extern nbKoukaPacket_t *D_00527664[];
 
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+
 extern s32 (*D_00527670[])(nbEventProcessData_t *e);
 
 extern void dds3DeleteSceneBasicData(void *basic);
