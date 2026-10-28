@@ -6,6 +6,7 @@
 #include "event.h"
 #include "kernel.h"
 #include "font.h"
+#include "kernel_draw.h"
 
 typedef struct
 {
@@ -2393,7 +2394,22 @@ void MoveScreenOffset(fclEncyc_instance_tag *pinst)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", SetCameraLightParam);
+extern sdf3DScreenParam_t dds3ScreenParam;
+extern void func_0021B480(fclEncyc_instance_tag *pinst);
+extern void func_0023FCC0(void);
+
+void SetCameraLightParam(fclEncyc_instance_tag *pinst)
+{
+    dds3ScreenParam.ox = pinst->screenOfsX;
+    dds3ScreenParam.oy = pinst->screenOfsY;
+    if ((pinst->stat & 0x10) != 0) {
+        func_0021B480(pinst);
+    } else {
+        func_0023FCC0();
+    }
+}
+
+INCLUDE_ASM(const s32, "facility/fclEncyc", func_0021B480);
 
 typedef struct
 {
