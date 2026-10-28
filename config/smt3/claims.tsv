@@ -257,3 +257,4 @@ coverage sweep (58 units)	z14	done	2026-10-27	104 fn / 53856 B	two sessions ran 
 tools/find_similar.py	z15	done	2026-10-27	6 fn / 1940 B	harness work: template search, 6 functions as validation
 coverage sweep, second batch	z16	done	2026-10-28	76 fn / 46156 B	37 units finishable; 21 handwritten now excluded
 asm routines (21 functions)	z17	done	2026-10-28	15 reference impls, 2 drafts, 0 matches	PS2_WORD_BIT_LENGTH reaches addi; schedule is what blocks the two drafts
+coverage sweep, third batch	z18	open	2026-10-28	see queue3.txt	cheapest first from nbMakaProcess onward
