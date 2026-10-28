@@ -287,7 +287,46 @@ void rstUpdateSeqPlayerLevelUpOnly(void)
     }
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqDevilParam);
+extern char *cmpGetParamName(s8 index);
+extern s32 sprintf(char *buffer, const char *format, ...);
+extern char D_0054FD00[]; /* "%d", padded eight-byte small-data span. */
+
+void rstUpdateSeqDevilParam(void)
+{
+    s32 index;
+    char buffer[16];
+
+    if (fclChkMessage() != 0) {
+        return;
+    }
+    fclSetMessageVar_20743088(1, (s32)text2[startPos->pCurrentStock->id]);
+    index = startPos->Flag;
+    if (index < 6) {
+        do {
+            if ((s8)startPos->unk_129F[index] > 0) {
+                fclSetMessageVar_20743088(8, (s32)cmpGetParamName((s8)index));
+                sprintf(buffer, D_0054FD00, (s8)startPos->unk_129F[index]);
+                fclSetMessageVar_20743088(9, (s32)buffer);
+                if (startPos->Flag == 0) {
+                    fclStartMessage(3);
+                } else {
+                    fclStartMessage(5);
+                }
+                startPos->Flag = index + 1;
+                return;
+            }
+            index++;
+        } while (index < 6);
+    }
+    if (startPos->Flag == 0) {
+        fclStartMessage(4);
+        startPos->Flag = 1;
+    } else {
+        rstSetMaxHpMp(0, startPos->pCurrentStock);
+        startPos->unk_0001 = (u8)startPos->unk_0001 + 1;
+        startPos->unk_0004 = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqGift);
 
