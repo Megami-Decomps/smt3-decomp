@@ -268,26 +268,6 @@ three words. Writing the selection out in both arms is what should produce the
 merge and does not here; a `use_hi` flag local and a `goto` funnel were not
 tried and are the next things to measure.
 
-## Flow15_6 (newbattle/nbMakePacket, 0x100)
-
-19 of 62 words differ, two words short of retail's 64. Every instruction
-matches in order; all nineteen differing words are branch offsets shifted
-by the two missing words.
-
-Case order is the lever here: with `case 2` last (any order of 0, 1 and 3
-before it) the second dispatch test comes out as retail's plain
-`beq $3, $2` with `addiu $2, $0, 3` in the slot. With `case 2` anywhere
-else that test becomes `beql` with the arm's `lw 0x184` annulled, costing
-four words.
-
-The two missing words are retail's `b` out of the last arm plus a
-duplicated `lw 0x184`: retail jumps the `case 2` arm over the
-cases-0-and-3 join block, where ee-gcc lets the arm fall into it and
-reuses the load.
-
-Ruled out: `default: break;` after `case 2`; `default: mes = 0;` in place
-of the leading `mes = 0`; and an empty `case 4:` after `case 2`.
-
 ## Flow10_1 (newbattle/nbMakePacket, 0x100)
 
 15 of 63 words differ, one word short of retail's 64.

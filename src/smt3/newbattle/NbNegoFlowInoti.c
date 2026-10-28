@@ -355,8 +355,6 @@ s32 Flow15_1(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowInoti", Flow15_5);
 
-/* NON_MATCHING: 19 of 62 words differ (first at +0x3C); two words short. */
-#ifdef NON_MATCHING
 s32 Flow15_6(nbNegoProcessData_t *n)
 {
     s32 mes;
@@ -364,29 +362,26 @@ s32 Flow15_6(nbNegoProcessData_t *n)
     mes = 0;
     nbAddNegoIdKouho(n, 0xF0007);
     switch (n->requesttype) {
-    case 0:
-        mes = 0x10A;
-        break;
     case 1:
         mes = 0x10B;
         nbSetMesMakka(n->flowmsg[n->ekucyo], n->requestdata);
         nbSetMesMakka(n->helpmsg, n->requestdata);
-        break;
-    case 3:
-        mes = 0x10D;
         break;
     case 2:
         mes = 0x10C;
         nbSetMesItem(n->flowmsg[n->ekucyo], n->requestdata);
         nbSetMesItem(n->helpmsg, n->requestdata);
         break;
+    case 3:
+        mes = 0x10D;
+        break;
+    case 0:
+        mes = 0x10A;
+        break;
     }
     nbDispNegoMessage(n, n->flowmsg[n->ekucyo], mes, 0);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowInoti", Flow15_6);
-#endif
 
 s32 Flow15_7(nbNegoProcessData_t *n)
 {
