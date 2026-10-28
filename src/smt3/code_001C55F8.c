@@ -31,13 +31,16 @@ typedef struct nbCamera_t {
 typedef struct effPartHandle_t effPartHandle_t;
 
 typedef struct nbCameraHelper_tag {
-    u8 unk00[0x30];
-    u32 unk30;
-    s32 unk34;
-    effPartHandle_t *hPart;
+    sdfVector4_t target;
+    sdfVector4_t eye;
+    sdfVector4_t up;
+    s32 frame;
+    s32 frameMax;
+    effPartHandle_t *hPB;
 } nbCameraHelper_tag;
 
 extern void *sdfChipAllocDirect(s32 aSize);
+extern void dds3EffectPartDraw(effPartHandle_t *hEffPart);
 
 extern effPartHandle_t *nbCameraHelperFileLoadPB(const char *pFilename);
 
@@ -157,24 +160,54 @@ nbCameraHelper_tag *nbCameraHelperCreate(const char *pFilename)
 {
     nbCameraHelper_tag *pHelper = sdfChipAllocDirect(0x3C);
 
-    pHelper->hPart = nbCameraHelperFileLoadPB(pFilename);
-    pHelper->unk30 = 0;
-    pHelper->unk34 = nbCameraHelperLength(pHelper);
+    pHelper->hPB = nbCameraHelperFileLoadPB(pFilename);
+    pHelper->frame = 0;
+    pHelper->frameMax = nbCameraHelperLength(pHelper);
     return pHelper;
 }
 
 void nbCameraHelperDelete(nbCameraHelper_tag *hCameraHelper)
 {
-    dds3EffectPartDelete(hCameraHelper->hPart);
+    dds3EffectPartDelete(hCameraHelper->hPB);
     sdfChipFreeDirect(hCameraHelper);
 }
 
 u16 nbCameraHelperLength(nbCameraHelper_tag *hCameraHelper)
 {
-    return dds3EffectPartGetHandle(hCameraHelper->hPart)->first->frameLength;
+    return dds3EffectPartGetHandle(hCameraHelper->hPB)->first->frameLength;
 }
 
-INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperRun);
+void nbCameraHelperRun(nbCameraHelper_tag *hCameraHelper)
+{
+    mdlObj_t *model;
+    nbCamera_t *camera;
+    s32 frameMax = hCameraHelper->frameMax;
+    f32 length;
+
+    if (hCameraHelper->frame < frameMax) {
+        camera = &pNbCamera;
+        dds3EffectPartDraw(hCameraHelper->hPB);
+        model = dds3EffectPartGetHandle(hCameraHelper->hPB);
+        if (sdfModelGetMarkPos(model->inner, 0) == 0) {
+            printf(D_00535850);
+        }
+        SDF_VU0_STOREVECTOR(camera);
+        SDF_VU0_STOREVECTOR(&hCameraHelper->target);
+        if (sdfModelGetMarkPos(model->inner, 1) == 0) {
+            printf(D_00535878);
+        }
+        SDF_VU0_STOREVECTOR(&hCameraHelper->eye);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(camera);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_GETLENGTH(length);
+        camera->distance = length;
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(&camera->direction);
+        camera->fovy = 0.7853981f;
+        hCameraHelper->frame++;
+    }
+}
 
 void nbCameraHelperModelSetSub(mdlObj_t *hModel, u32 target, u32 eye)
 {

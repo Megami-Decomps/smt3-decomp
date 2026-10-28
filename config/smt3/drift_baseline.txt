@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1116 members, 506 adopted constants.
+# 0 types, 1113 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -660,9 +660,6 @@ member nbBlurParam_t.unk1C
 member nbBlurParam_t.unk28
 member nbBlurParam_t.unk2C
 member nbCameraHelper_effFLWinHandle_t.unk10
-member nbCameraHelper_tag.unk00
-member nbCameraHelper_tag.unk30
-member nbCameraHelper_tag.unk34
 member nbCameraSkillPtr_t.unk00
 member nbCameraStateEntry_t.unk00
 member nbCameraStateEntry_t.unk0D
