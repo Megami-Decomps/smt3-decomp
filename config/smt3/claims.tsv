@@ -256,3 +256,4 @@ src/smt3/code_0022C578.c	z13	done	2026-10-27	290 match / 32 drafts	fourth pass m
 coverage sweep (58 units)	z14	done	2026-10-27	104 fn / 53856 B	two sessions ran this concurrently in one worktree; combined: 28 units to zero (sdfDevFile NbNegoFlowFight NbNegoFlowMukan nbE904-909 nbE914 pipeModel fldDraw nbE915 NbNegoFlowDouchara dds3StartMenu Nme_Update pbHelp fclTerminalDraw fclRecoverDraw pipeMain sdfDefaultMain sdfMisc mviManager sdfPrint); sdfQuat nbCallNewBattle nbCameraPressProcessRun parked; sdf_2BFC58 nbCameraPressProcessInit sdf_2BD3E8 sdf_2C7BC4 recorded impossible
 tools/find_similar.py	z15	done	2026-10-27	6 fn / 1940 B	harness work: template search, 6 functions as validation
 coverage sweep, second batch	z16	done	2026-10-28	76 fn / 46156 B	37 units finishable; 21 handwritten now excluded
+asm routines (21 functions)	z17	open	2026-10-28	5 match attempts / 15 reference impls	sdfTexSetPacket macro first; corePktLoadVerts already has a reference impl
