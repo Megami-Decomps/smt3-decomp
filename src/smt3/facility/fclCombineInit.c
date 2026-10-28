@@ -1470,13 +1470,13 @@ void cmbFreeSmokeEffect(void)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateIntroduce);
 
-extern void fclEncycStartProcess(void);
+extern void fclEncycStartProcess(s32 mode);
 
 extern void fclEncycSetTexHandle(s32 *texhandle);
 
-void cmbStartEncycView(void)
+void cmbStartEncycView(s32 mode)
 {
-    fclEncycStartProcess();
+    fclEncycStartProcess(mode);
     fclEncycSetTexHandle(CMB_GBWK->texHandle);
     fclEncycSetExplainData(CMB_GBWK->explainData);
 }

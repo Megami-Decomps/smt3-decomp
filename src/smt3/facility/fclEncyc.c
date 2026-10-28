@@ -236,7 +236,7 @@ extern void DrawBackBlackBoard(s32 y, s32 ratio);
 
 extern void fclRbnRelease(fclRibbon_t *phandle);
 
-extern void fclEncycStartProcess(void);
+extern void fclEncycStartProcess(s32 mode);
 
 extern void fclEncycSetTexHandle(s32 *texhandle);
 
@@ -274,7 +274,59 @@ void fclEncycInitRecord(s32 mode)
     g_pdebug = NULL;
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", fclEncycStartProcess);
+extern void *sdfMemAllocDirect(s32 size);
+extern s32 sdfMemLock(void *handle);
+extern void InitializeInstance(fclEncyc_instance_tag *pinst);
+extern s32 fclEncycGetNum(void);
+extern void CreateSortIndexByRace(s16 *indices);
+extern void CreateSortIndexByLevel(s16 *indices);
+extern s32 CALC_ENCYC_Process(void);
+extern s32 DRAW_ENCYC_Process(void);
+extern s32 UPDT_ENCYC_Process(void);
+extern s32 fclEncycDebugProc(void);
+extern void fclEncycDebugShutdown(void);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 start,
+    s32 shutdown, dds3ProcessFunc_t update, dds3ProcessFunc_t destroy, void *data);
+extern s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update,
+    dds3ProcessFunc_t destroy, void *data);
+extern char D_0053D718[], D_0053D738[], D_0053D748[], D_0053D758[];
+extern char D_0053D778[], D_0053D798[], D_0054FCB8[];
+
+void fclEncycStartProcess(s32 mode)
+{
+    void *handle = sdfMemAllocDirect(sizeof(fclEncyc_instance_tag));
+    fclEncyc_instance_tag *pinst = (fclEncyc_instance_tag *)sdfMemLock(handle);
+
+    pinst->memhandle = handle;
+    InitializeInstance(pinst);
+    if (mode != 0) pinst->stat |= 0x200;
+    pinst->unk_5A = pinst->unk_58 = (pinst->stat & 0x200) != 0 ? 3 : 0;
+    if (pinst->stat & 0x200) {
+        s32 count = fclEncycGetNum();
+        s32 ratio = fclEncycGetRatio();
+        printf(D_0053D718, count, 0xB8, ratio);
+        CreateSortIndexByRace(pinst->entries.read.sorted[0]);
+        CreateSortIndexByLevel(pinst->entries.read.sorted[1]);
+    }
+    pinst->procid[0] = dds3StartProcess(D_0053D738, 0x407, 0, 0,
+        (dds3ProcessFunc_t)CALC_ENCYC_Process, NULL, NULL);
+    pinst->procid[1] = dds3StartProcess(D_0053D748, 0x2B17, 0, 0,
+        (dds3ProcessFunc_t)DRAW_ENCYC_Process, NULL, NULL);
+    pinst->procid[2] = dds3StartProcess(D_0053D758, 0x5213, 0, 0,
+        (dds3ProcessFunc_t)UPDT_ENCYC_Process, NULL, NULL);
+    fclEncycAllocEntry(D_0053D768, (dds3ProcessFunc_t)fclEncycDebugProc,
+        (dds3ProcessFunc_t)fclEncycDebugShutdown, NULL);
+    printf(D_0053D778, mode != 0 ? D_0054FCB8 : D_0053D798);
+    g_pinst = pinst;
+}
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D718);
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D738);
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D748);
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D758);
 
 INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D768);
 
