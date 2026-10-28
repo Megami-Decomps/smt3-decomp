@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1113 members, 506 adopted constants.
+# 0 types, 1103 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -143,8 +143,7 @@ member cmpCursorInfo_t.unk_28
 member cmpCursorInfo_t.unk_2C
 member cmpCursorInfo_t.unk_30
 member cmpCursorInfo_t.unk_34
-member cmpCursorPos_t.unk_00
-member cmpCursorPos_t.unk_05
+member cmpCursorPos_t.unk_07
 member cmpCursorSlot_t.unk_02
 member cmpDHWindow_t.unk_00
 member cmpDHWindow_t.unk_04
@@ -447,14 +446,8 @@ member fclEncyc_instance_tag.unk_6D
 member fclEncyc_instance_tag.unk_70
 member fclEncyc_instance_tag.unk_74
 member fclEncyc_instance_tag.unk_84
-member fclEncyc_readmainwork_tag.unk_00
-member fclEncyc_readmainwork_tag.unk_0C
-member fclEncyc_readmainwork_tag.unk_10
-member fclEncyc_readmainwork_tag.unk_14
-member fclEncyc_readmainwork_tag.unk_18
-member fclEncyc_readmainwork_tag.unk_1C
 member fclEncyc_readmainwork_tag.unk_1E
-member fclEncyc_readmainwork_tag.unk_20
+member fclEncyc_registconfirmwork_tag.unk_27
 member fclItemList_t.unk_01
 member fclPanelAnim_t.unk_01
 member fclPanelAnim_t.unk_04
@@ -510,7 +503,6 @@ member fldAddressProcessData_t.unk08
 member fldAddressProcessData_t.unk0C
 member fldAnahoriAkuma_t.unk00
 member fldAnahoriAkuma_t.unk0C
-member fldAnahoriAkuma_t.unk14
 member fldAnahoriAkuma_t.unk1B
 member fldAreaWork_t.unk58
 member fldAreaWork_t.unkC4
@@ -595,6 +587,7 @@ member itfMesResource_t.unk1D
 member itfMesResource_t.unkC
 member itfpanel_t.unk31
 member lstListWindow_t.unk_0000
+member lstListWindow_t.unk_160
 member lstWindowWork_t.unk_08
 member lstWindowWork_t.unk_0C
 member lstWindowWork_t.unk_164
@@ -715,7 +708,6 @@ member nbPacEntry_t.unk_00
 member nbPacHandle_t.unk_00
 member nbPanelFlashData_t.unk_20
 member nbStatWork_t.unk_02
-member nbTarSelProcessData_t.unk00
 member nbTextBox_t.unk_00
 member nbUnitMotion_t.unk00
 member nbUnitMotion_t.unk04
@@ -1108,8 +1100,6 @@ member tagPipePosTable_t.unk08
 member tagPipeTexture.unk0C
 member tagpipeBasic.unk08
 member tagpipeParts.unk05
-member trmCalcWork_t.unk_0000
-member trmCalcWork_t.unk_2217
 member trmUpdateWork_t.unk_0000
 member trmUpdateWork_t.unk_0001
 member trmUpdateWork_t.unk_0002
