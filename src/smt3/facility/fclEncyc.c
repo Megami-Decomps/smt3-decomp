@@ -155,7 +155,9 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00000 */ u8 reserved00000[0xA54];
+    /* 0x00000 */ u8 reserved00000[0xA48];
+    /* 0x00A48 */ s32 maka;
+    /* 0x00A4C */ u8 reserved00A4C[8];
     /* 0x00A54 */ dds3PartyUnit_t party[16];
     /* 0x01914 */ s8 stock[0x10];
     /* 0x01924 */ s32 stockCount;
@@ -2151,7 +2153,87 @@ s32 GetDevilParam(fclencyceelem_t *pelem, s32 type)
     return sum;
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", PrepSummon);
+extern s32 datSearchDevilStock(s32 devilId);
+extern s32 datCheckStockFull(void);
+extern s32 evtBitCheck(s32 eventNo);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void itfMesMngSetVar(s32 id, s32 index, s32 value, s32 type);
+
+typedef struct
+{
+    u8 reserved0000[0xCC];
+    s32 messageId;
+} fclEncycSummonMessageWork_t;
+
+s32 PrepSummon(fclEncyc_readmainwork_tag *phase)
+{
+    fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)phase;
+    fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)encycSaveWork +
+                              phase->recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    s32 devilId = record->id;
+    s32 level = record->level;
+    s32 param0 = GetDevilParam(record, 0);
+    s32 param2 = GetDevilParam(record, 2);
+    s32 param3 = GetDevilParam(record, 3);
+    s32 param4 = GetDevilParam(record, 4);
+    s32 param5 = GetDevilParam(record, 5);
+    s32 price = GetPriceForSummon(devilId, record->exp, level,
+                                  param0, param2, param3, param4, param5);
+    s32 ratio = fclEncycGetRatio();
+    s32 success = 0;
+    s32 scriptEntry;
+    fclEncycSummonMessageWork_t *messageWork;
+
+    if (ratio >= 100) {
+        price >>= 1;
+    }
+    if (record->id == 0xC0) {
+        price = 0;
+    }
+    phase->flags &= ~4;
+    phase->mak = price;
+
+    if (record->id == 0xC0) {
+        fclSetWorkValue(8, 4);
+        scriptEntry = 0x12;
+        phase->flags |= 4;
+    } else if (datSearchDevilStock(record->id) >= 0) {
+        fclSetWorkValue(8, 1);
+        scriptEntry = 0x12;
+        phase->flags |= 4;
+    } else if ((record->id == 0xC2 && datSearchDevilStock(0xCF) >= 0) ||
+               (record->id == 0xCF && datSearchDevilStock(0xC2) >= 0)) {
+        fclSetWorkValue(8, 1);
+        scriptEntry = 0x12;
+        phase->flags |= 4;
+    } else if (datCheckStockFull() != 0) {
+        fclSetWorkValue(8, 2);
+        scriptEntry = 0x12;
+        phase->flags |= 4;
+    } else if (evtBitCheck(0x8A0) == 0 &&
+               encycSaveWork->party[0].unit.level < record->level) {
+        fclSetWorkValue(8, 3);
+        scriptEntry = 0x12;
+        phase->flags |= 4;
+    } else {
+        scriptEntry = 0x11;
+        if (encycSaveWork->maka < price) {
+            fclSetWorkValue(8, 0);
+            scriptEntry = 0x12;
+        } else {
+            success = 1;
+        }
+    }
+
+    fclClearFlag(0);
+    work->messageProcess = NULL;
+    fclScriptStart(CMB_GBWK->script, scriptEntry, &work->messageProcess);
+    messageWork = dds3GetProcessData(work->messageProcess);
+    itfMesMngSetVar(messageWork->messageId, 0, price, 0);
+    itfMesMngSetVar(messageWork->messageId, 1, record->id, 1);
+    return success;
+}
+
 
 extern s32 sprintf(char *out, const char *format, ...);
 extern void *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
