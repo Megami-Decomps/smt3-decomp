@@ -5,6 +5,7 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "font.h"
+#include "kernel.h"
 
 s32 fclGetFlag(s8 index);
 
@@ -179,7 +180,13 @@ typedef struct {
     u8 reserved25[0x13];
 } shopChoiceCursor_t;
 typedef struct shopDrawWork_t {
-    u8 reserved0000[0x24];
+    u8 flags;
+    s8 phase;
+    u8 reserved02;
+    s8 previousPhase;
+    u8 reserved04[0x18];
+    s32 paymentRemaining;
+    u8 reserved20[4];
     s8 choiceCount;
     u8 reserved0025[0x1083];
     s32 panelOriginX;
@@ -414,7 +421,56 @@ s32 shopUpdateItemListDefault(void)
     return shopUpdateItemList(0);
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopCalc", shop_draw_Process);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern s32 fclChkDbgProcess(void);
+extern void cmpUpdateTerminate(void *work);
+
+s32 shop_draw_Process(dds3ProcessID_t *id)
+{
+    fclPanelPos_t pos;
+    shopDrawWork = dds3GetProcessData(id);
+    if (fclChkDbgProcess() != 0) return 0;
+    if (fclGetFlag(1) == 0) return 0;
+    if ((((shopDrawWork_t *)shopDrawWork)->flags & 0x20) != 0) {
+        cmpUpdateTerminate(shopDrawWork);
+        return -1;
+    }
+    fclInitPanelPos(0, 0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
+    shopDrawPanelRow(&pos, 0x80808080, ((shopDrawWork_t *)shopDrawWork)->paymentRemaining, 0x47);
+    if ((((shopDrawWork_t *)shopDrawWork)->flags & 2) != 0) {
+        switch (((shopDrawWork_t *)shopDrawWork)->phase) {
+        case 0: shopUpdateItemList(1); break;
+        case 1:
+            if (fclGetFlag(0) != 0) shopDrawPanelMode0(0);
+            else shopDrawPanelMode0(2);
+            break;
+        case 2:
+            if (fclGetFlag(0) != 0) shopDrawPanelMode1(0);
+            else shopDrawPanelMode1(2);
+            break;
+        case 3:
+        case 4: shopUpdateItemList(0); break;
+        case 5:
+            if (fclGetFlag(0) == 0) shopDrawPanelMode0(2);
+            else shopDrawChoiceCount(0);
+            break;
+        case 6:
+            if (fclGetFlag(0) == 0) shopDrawPanelMode1(2);
+            else shopDrawChoiceCount(1);
+            break;
+        case 7: shopDrawPhase7(); break;
+        case 8:
+        case 9:
+            if (((shopDrawWork_t *)shopDrawWork)->previousPhase == 5) shopDrawPricePanel(0);
+            else shopDrawPricePanel(1);
+            break;
+        case 10:
+        case 11: shopUpdateItemListDefault(); break;
+        }
+    }
+    return 0;
+}
+
 INCLUDE_SDATA(const s32, "facility/fclShopCalc", D_0054FB60);
 
 INCLUDE_SDATA(const s32, "facility/fclShopCalc", D_0054FB68);
