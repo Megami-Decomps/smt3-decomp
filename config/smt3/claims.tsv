@@ -405,3 +405,4 @@ src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 260 B	debug view-k
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 516 B	debug model-bound display with native float promotion; owner 96 match, 0 differ
 src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 304 B	encounter item collection with typed reward bytes and four-slot insertion; owner 42 match, 0 differ
 src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 316 B	stone-death probability with native parameter, level, status and minimum threshold; owner 43 match, 0 differ
+src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 364 B	status-modifier rate with moon adjustment and signed integer half-step; owner 44 match, 0 differ

@@ -787,7 +787,46 @@ s32 nbSetHojoAddCounter(s32 formindex, s32 type, s32 point, s32 nvirtual)
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbSetHojoKouka);
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetHojoRitu);
+f32 nbGetHojoRitu(s32 formindex, s32 type)
+{
+    datUnitWork_t *work;
+    s32 count;
+    s32 moon;
+    f32 ritu;
+
+    work = nbGetUnitWorkFromFormindex(formindex);
+    ritu = 1.0f;
+    count = nbGetHojoCounter(formindex, type);
+    if (work->id == 0x125) {
+        moon = evtGetAgeOfMoon() - 4;
+        count += moon / 2;
+    }
+    if (type < 8) {
+        if (type < 6) {
+            if (count < 0) {
+                ritu = ((f32)count + 8.0f) * 0.125f;
+            } else if (count > 0) {
+                ritu = ((f32)(2 * count) + 8.0f) * 0.125f;
+            }
+        } else {
+            if (count < 0) {
+                ritu = ((f32)((-count) * 2) + 8.0f) * 0.125f;
+            } else if (count > 0) {
+                ritu = ((f32)(-count) + 8.0f) * 0.125f;
+            }
+        }
+    } else {
+        if (count < 0) {
+            ritu = ((f32)count + 8.0f) * 0.125f;
+        } else if (count > 0) {
+            ritu = ((f32)(2 * count) + 8.0f) * 0.125f;
+        }
+    }
+    if (type == 4 && nbGetHojoCounter(formindex, 15) > 0) {
+        ritu *= 2.5f;
+    }
+    return ritu;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetButuriAttack);
 
