@@ -23,7 +23,13 @@ u8 nmeCharToIndex(u8 lead, u8 trail) {
     return (u8)(index - 0x4A);
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeDecodeChar);
+extern const u8 D_005276F8[][2];
+
+u32 nmeDecodeChar(s8 code)
+{
+    s32 index = code - 0x20;
+    return ((u32)D_005276F8[index][0] << 8) | D_005276F8[index][1];
+}
 
 extern void frDelFontStyle(u8 styleNo);
 extern void nmeBuildNameFont(s8 mode, nmeWork_t *work);
