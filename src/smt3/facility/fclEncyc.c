@@ -665,14 +665,47 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadTop);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadTop);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseReadTop);
-
 typedef struct fclEncycReadTopWork_t {
-    u8 reserved0000[0x11D8];
+    u8 reserved0000[0x1198];
+    fclPanel_t listPanel;
     fclRibbon_t *ribbon;
     frFontHandle_t *requests[3];
     void *fontList[8];
 } fclEncycReadTopWork_t;
+
+extern void DrawListWindowBack(void *obj, fclPanel_t *panel);
+
+void DrawPhaseReadTop(fclEncyc_instance_tag *pinst)
+{
+    extern void cmbDrawTopSprite(s32 x, s32 y, u32 z, s32 ot);
+    extern s32 func_001C7E38(void *request, s32 mode, s32 ot);
+    extern void fclRbnDraw(fclRibbon_t *ribbon, s32 x, s32 y, u32 z,
+                           s32 alpha, s32 mode, s32 width, s32 ot);
+    extern void DrawReadListwinCaption(fclEncyc_instance_tag *pinst);
+    extern void DrawReadListwinElem(fclEncyc_instance_tag *pinst);
+    extern void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 ot);
+    extern void lstDrawListWindowCursor(void *work, s32 ot);
+    fclEncycReadTopWork_t *work = (fclEncycReadTopWork_t *)pinst->pwork;
+
+    if (work->requests[0] != NULL) {
+        cmbDrawTopSprite(0, 0x50, 0xFFFFF0, 0x47);
+        func_001C7E38(work->requests[0], 0, 0x47);
+    }
+    fclRbnDraw(work->ribbon, 0, 0x238, 0xFFFFF0, 0x80, 0, 0xF0, 0x47);
+    DrawListWindowBack(work, &work->listPanel);
+    DrawReadListwinCaption(pinst);
+    DrawReadListwinElem(pinst);
+    fclDrawPhaseHeader((u8 *)work, 0x26435480, 0, 0x47);
+    lstDrawListWindowCursor(work, 0x47);
+    if (work->requests[1] != NULL) {
+        func_001C7E38(work->requests[1], 0, 0x47);
+    }
+    if (work->requests[2] != NULL) {
+        func_001C7E38(work->requests[2], 0, 0x47);
+    }
+}
+
+
 
 void DestPhaseReadTop(fclEncyc_instance_tag *pinst)
 {
@@ -768,7 +801,6 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseReadView);
 INCLUDE_ASM(const s32, "facility/fclEncyc", AcceptKeyRegistConfirm);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcConfirmStatus);
-
 INCLUDE_ASM(const s32, "facility/fclEncyc", GetValidUnitIndex);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", RegistAll);
