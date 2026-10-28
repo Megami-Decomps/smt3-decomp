@@ -2792,9 +2792,23 @@ typedef struct
     /* 0x30 */ s32 unk_30;
 } campDhEntry_t;
 
-extern s32 campDhRollRatio(void);
+extern void campDhRollRatio(campDhEntry_t *entry);
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhGetEntryRatio);
+void campDhGetEntryRatio(campDhEntry_t *entry)
+{
+    if (entry->unk_14 > 0) {
+        entry->unk_14--;
+    } else if (entry->unk_28 == 0) {
+        campDhRollRatio(entry);
+        /* Retail uses jal plus the shared epilogue. The matched
+         * cmpUpdateStatusModelLoad sibling uses the same post-call reset
+         * to keep the final call from becoming a sibling call. */
+        entry = NULL;
+    } else {
+        entry->unk_28--;
+        entry->unk_18 += entry->unk_20;
+    }
+}
 
 /* NON_MATCHING: 4 of 38 words differ, exact size; all four are a register pair. */
 #ifdef NON_MATCHING
