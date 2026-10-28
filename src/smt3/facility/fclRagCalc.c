@@ -211,8 +211,6 @@ s32 ragCalc(dds3ProcessID_t *id)
 
 INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawFrameEdge);
 
-INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawListFrame);
-
 typedef struct
 {
     /* 0x0000 */ u8 unk_00[3];
@@ -224,6 +222,20 @@ typedef struct
 extern ragDrawWork_t *ragDrawWork;
 
 extern fclSpriteTbl_t D_003306B8[];
+
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void ragDrawFrameEdge(fclPanelPos_t *pos, u8 kind, u8 item, s32 ot);
+
+void ragDrawListFrame(fclPanelPos_t *pos, s8 kind, u8 item, s32 ot)
+{
+    cmpDrawBoxF(0xEA0, 0x660, pos->unk_08, 0x9A, 9, 0x0B192C6E, ot);
+    fclDrawSpriteRes(0, 0, pos->unk_08 << 4, NULL, 0, 5,
+                     ragDrawWork->texHandle, D_003306B8, ot);
+    cmpDrawBoxF(0x18C0, 0x660, pos->unk_08, 0x4F, 9, 0x0B192C6E, ot);
+    fclDrawSpriteRes(0, 0, pos->unk_08 << 4, NULL, 0, 6,
+                     ragDrawWork->texHandle, D_003306B8, ot);
+    ragDrawFrameEdge(pos, kind, item, ot);
+}
 
 void ragDrawHeartsFooter(fclPanel_t *panel, s32 id)
 {
@@ -252,8 +264,6 @@ INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawListRows);
 INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawHeartsList);
 
 extern void ragDrawListRows(lstWork_t *list, s32 kind, u8 *rows, s32 mode, s32 ot);
-
-extern void ragDrawListFrame(fclPanelPos_t *pos, s32 kind, u8 item, s32 ot);
 
 extern s32 D_003305E8[];
 

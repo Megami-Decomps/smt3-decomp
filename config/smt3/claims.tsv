@@ -572,3 +572,4 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	f
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 100 B	camera-point lookup with typed scene/resource providers and successful-hit vector copy; owner 164 match, 0 differ
 src/smt3/effect/effPCPBoss.c	redthing1	done	2026-10-28	1 fn / 588 B	camera-facing screen crack model, native projection scale and paired GS packet passes
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / guarded draft improved	stock-index shared result closes register differences, leaving three commutative address-add words at native 128-byte size; owner 343 match, 0 differ
+src/smt3/facility/fclRagCalc.c	redthing1	done	2026-10-28	1 fn / 272 B	rag list frame draws with signed-byte wrapper mode and unsigned edge-selector tag; owner 4 match, 0 differ
