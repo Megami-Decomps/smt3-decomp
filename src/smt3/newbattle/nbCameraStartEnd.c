@@ -68,6 +68,9 @@ extern void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera);
 
 extern void nbCameraState_Start_Animation(nbCamera_t *pNbCamera);
 
+extern u8 D_0056B270[];
+extern void *memcpy(void *dst, const void *src, u32 size);
+
 INCLUDE_ASM(const s32, "newbattle/nbCameraStartEnd", nbCameraState_Start_Set);
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraStartEnd", nbCameraState_Start_Animation);
@@ -134,7 +137,10 @@ void nb_1B3490(void)
     func_001B3468(&pNbCamera);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraStartEnd", func_001B34B0);
+void func_001B34B0(const void *src)
+{
+    memcpy(D_0056B270, src, 0x58);
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbCameraStartEnd", D_00534630);
 
