@@ -685,7 +685,57 @@ void nbCopyPackData(nbStatWork_t *stat, void *src, u32 size, s32 unitid)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbAddFormEntry);
+/* Pack descriptors follow the header at 0x20; offsets are buffer-relative. */
+typedef struct {
+    s32 type;
+    u32 size;
+    u32 reserved08;
+    u32 offset;
+} nbPackEntry_t;
+
+extern nbStatWork_t *nbSetFormEntry(s32 id);
+extern char D_005464E0[];
+
+typedef struct {
+    u8 reserved00[0x10];
+    s32 entryCount;
+    u8 reserved14[0xC];
+    nbPackEntry_t entries[0];
+} nbPackHeader_t;
+
+void nbAddFormEntry(void *buffer, s32 group, s32 id)
+{
+    nbPackHeader_t *header = buffer;
+    s32 i = 0;
+    s32 motion = 0;
+    nbStatWork_t *stat = nbSetFormEntry(id);
+    nbPackEntry_t *entries = header->entries;
+
+    for (; i < header->entryCount; i++) {
+        nbPackEntry_t *entry = &entries[i];
+        void *data = (u8 *)buffer + entry->offset;
+        u32 size = entry->size;
+
+        switch (entry->type) {
+        case 0:
+            nbDecodeModelPack(data, size, group, id);
+            break;
+        case 1:
+            if (stat != NULL) {
+                nbLoadMotionData(stat, data, size, motion, id);
+            }
+            motion++;
+            break;
+        case 2:
+            if (stat != NULL) {
+                nbCopyPackData(stat, data, size, id);
+            }
+            break;
+        }
+    }
+    printf(D_005464E0, group, id);
+}
+
 
 s32 nbCheckModelPackLoaded(nbFormation_t *form, s32 group, s32 id)
 {
