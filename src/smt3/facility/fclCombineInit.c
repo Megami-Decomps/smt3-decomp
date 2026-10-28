@@ -1979,7 +1979,32 @@ s32 cmbFindCameraPoint(char *name, u128 *out)
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindCameraPoint);
 #endif
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawActionModel);
+extern datUnitVisual_t datModelParamTable[];
+extern void mdlSetPosition(struct mdlObj_t *model);
+extern void mdlSetScale(struct mdlObj_t *model);
+extern void mdlLink(struct mdlObj_t *model, void *ot);
+
+void cmbDrawActionModel(struct mdlObj_t *model, u16 id, f32 *position, f32 *rotation, void *ot)
+{
+    /* VU0 consumes these stores through the bare-address vector load. */
+    volatile f32 scale[4] __attribute__((aligned(16)));
+    f32 value;
+    datUnitVisual_t *params;
+
+    if (model != NULL) {
+        SDF_VU0_LOADVECTOR(position);
+        mdlSetPosition(model);
+        params = &datModelParamTable[id];
+        scale[3] = 1.0f;
+        value = params->formscale;
+        scale[2] = value;
+        scale[0] = value;
+        scale[1] = value;
+        SDF_VU0_LOADVECTOR(scale);
+        mdlSetScale(model);
+        mdlLink(model, ot);
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetModelMarkPos);
 
