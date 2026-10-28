@@ -369,7 +369,75 @@ void ActionCrush(tagPipeObject *object) {
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", ActionBound);
+extern f32 vecAngleBetween(f32 *a, f32 *b);
+
+void ActionBound(tagPipeObject *object) {
+    f32 velocity[3];
+    f32 newPosition[4];
+    f32 angledVelocity[4];
+    f32 newX;
+    f32 newY;
+    f32 angle;
+    s32 count;
+    u8 id;
+
+    velocity[0] = object->vpos[0];
+    velocity[1] = object->vpos[1];
+    velocity[2] = 0.0f;
+    vecNormalize(velocity);
+    id = object->id;
+
+    if (id == 0x80) {
+        count = object->count;
+        if (count >= 6) {
+            vecScale(velocity, 150.0f);
+        } else {
+            vecScale(velocity, (f32)(count * 30));
+        }
+    } else {
+        count = object->count;
+        if (count >= 6) {
+            vecScale(velocity, 50.0f);
+        } else {
+            vecScale(velocity, (f32)(count * 10));
+        }
+    }
+
+    newX = object->pos[0] + velocity[0];
+    newY = object->pos[1] + velocity[1];
+    object->pos[0] = newX;
+    object->pos[1] = newY;
+    if (!(newX * newX + newY * newY <= 250000.0f)) {
+        newPosition[0] = newX;
+        newPosition[1] = newY;
+        newPosition[2] = 0x1.999998p-4f;
+        angledVelocity[0] = object->vpos[0];
+        angledVelocity[1] = object->vpos[1];
+        angledVelocity[2] = 0x1.999998p-4f;
+        angle = vecAngleBetween(newPosition, angledVelocity);
+        if (newPosition[0] != 0.0f && angledVelocity[0] != 0.0f &&
+            newPosition[1] / newPosition[0] <
+                angledVelocity[1] / angledVelocity[0]) {
+            angle = -angle;
+        }
+        angle = angle + angle;
+        vecRotate2D(angledVelocity, angle);
+
+        velocity[0] = object->pos[0];
+        velocity[1] = object->pos[1];
+        velocity[2] = 0.0f;
+        object->vpos[0] = -angledVelocity[0];
+        object->vpos[1] = -angledVelocity[1];
+        vecNormalize(velocity);
+        vecScale(velocity, 500.0f);
+        object->pos[0] = velocity[0];
+        object->pos[1] = velocity[1];
+    }
+
+    if (object->count != 0) {
+        object->count--;
+    }
+}
 
 void ActionAbsorp(tagPipeObject *objPtr)
 {
