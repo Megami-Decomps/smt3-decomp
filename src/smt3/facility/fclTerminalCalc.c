@@ -2,6 +2,7 @@
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
+#include "kernel.h"
 #include "ps2asm.h"
 #include "event.h"
 
@@ -9,7 +10,73 @@ extern void frDestroyFontRequestAfter(void *pFRQ);
 
 extern void func_001C7E38(void *frq, s32 mode, s32 arg);
 
-INCLUDE_ASM(const s32, "facility/fclTerminalCalc", trmCalc);
+typedef struct trmCalcWork_t {
+    /* 0x0000 */ u8 flags;
+    /* 0x0001 */ s8 sequence;
+    /* 0x0002 */ u8 reserved02[2];
+    /* 0x0004 */ s8 actionPending;
+    /* 0x0005 */ u8 reserved05[0x21EC];
+    /* 0x21F1 */ s8 terminalType;
+    /* 0x21F2 */ u16 terminalNo;
+    /* 0x21F4 */ s8 terminalList[0x20];
+    /* 0x2214 */ s8 previousTerminalType;
+    /* 0x2215 */ s8 terminalCommandCount;
+    /* 0x2216 */ s8 cursor;
+    /* 0x2217 */ u8 pad2217;
+    /* 0x2218 */ void *scriptAllocation;
+    /* 0x221C */ s32 scriptData;
+    /* 0x2220 */ s32 scriptPID;
+} trmCalcWork_t;
+
+extern trmCalcWork_t *trmCalcWork;
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern s32 fclChkDbgProcess(void);
+extern s32 trmChkEventWait(void);
+extern s8 trmStartEvent(void);
+extern s8 trmGetCallMode(void);
+extern void trmResetCursor(void);
+extern void fclClearFlag(s8 index);
+extern s32 fclScriptStart(s32 scriptData, s32 start, void *process);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern void cmpUpdateTerminate(void *work);
+
+s32 trmCalc(dds3ProcessID_t *id)
+{
+    trmCalcWork = dds3GetProcessData(id);
+    if (fclChkDbgProcess() != 0) {
+        return 0;
+    }
+    if (trmChkEventWait() != 0) {
+        return 0;
+    }
+
+    if (trmCalcWork->actionPending == 1) {
+        switch (trmCalcWork->sequence) {
+        case 0: {
+            s32 start = trmCalcWork->terminalType != 0;
+            if (trmStartEvent() != 0) return 0;
+            trmCalcWork->scriptPID = fclScriptStart(trmCalcWork->scriptData, start, NULL);
+            if (trmGetCallMode() == 0) dds3FadeIn(0, 0, 0, 0x14);
+            break;
+        }
+        case 4:
+            break;
+        case 5:
+            fclClearFlag(2);
+            break;
+        case 6:
+            trmResetCursor();
+            break;
+        }
+    }
+    trmCalcWork->actionPending = 0;
+
+    if ((trmCalcWork->flags & 0x10) != 0) {
+        cmpUpdateTerminate(trmCalcWork);
+        return -1;
+    }
+    return 0;
+}
 
 extern char D_00311450[][0x20];
 
