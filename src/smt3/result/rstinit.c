@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -178,7 +179,26 @@ INCLUDE_ASM(const s32, "result/rstinit", rstInit);
 
 INCLUDE_ASM(const s32, "result/rstinit", rstDestroyResult2);
 
-INCLUDE_ASM(const s32, "result/rstinit", rstResult2ProcessStart);
+extern u8 *rstInit(s32 mode);
+extern s32 rstCalc(dds3ProcessID_t *id);
+extern s32 rstDraw(dds3ProcessID_t *id);
+extern s32 rstUpdate(dds3ProcessID_t *id);
+extern s32 rstDestroyResult2(dds3ProcessID_t *id);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
+                                         s32 shutdownTimer, dds3ProcessFunc_t process,
+                                         dds3ProcessFunc_t shutdown, void *work);
+
+void rstResult2ProcessStart(void)
+{
+    if (GBWK_1 != NULL) {
+        return;
+    }
+    GBWK_1 = rstInit(0);
+    dds3StartProcess(D_0054FCF0, 0x405, 1, 1, rstCalc, NULL, GBWK_1);
+    dds3StartProcess(D_0053DA90, 0x2B15, 1, 1, rstDraw, NULL, GBWK_1);
+    dds3StartProcess(D_0053DAA0, 0x5211, 1, 1, rstUpdate, rstDestroyResult2, GBWK_1);
+    gProcessStat_4 = 1;
+}
 
 void rstResult2ProcessEnd(void)
 {
