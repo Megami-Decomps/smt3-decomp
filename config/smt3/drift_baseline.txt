@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1115 members, 506 adopted constants.
+# 0 types, 1125 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -418,6 +418,9 @@ member evtStartWork_t.unk_170
 member evtStartWork_t.unk_18
 member evtStartWork_t.unk_19
 member evtStartWork_t.unk_1A
+member evtStartWork_t.unk_1B
+member evtStartWork_t.unk_1C
+member evtStartWork_t.unk_21
 member evtStartWork_t.unk_22E5
 member evtStartWork_t.unk_22E6
 member evtStartWork_t.unk_22E7
@@ -425,6 +428,9 @@ member evtStartWork_t.unk_22E8
 member evtStartWork_t.unk_22EC
 member evtStartWork_t.unk_22F0
 member evtStartWork_t.unk_2308
+member evtStartWork_t.unk_25C
+member evtStartWork_t.unk_27
+member evtStartWork_t.unk_28
 member evtStartWork_t.unk_72
 member evtTargetInfo_t.unk60
 member evtUnitHandle_t.unk_00
@@ -806,6 +812,7 @@ member rcvUpdateWork_t.unk_0058
 member rcvUpdateWork_t.unk_01
 member rcvUpdateWork_t.unk_02
 member rcvUpdateWork_t.unk_03
+member rcvUpdateWork_t.unk_44D4
 member rcvWork_t.unk_0001
 member rcvWork_t.unk_0018
 member rcvWork_t.unk_44C8
@@ -1112,6 +1119,9 @@ member tagPipePosTable_t.unk08
 member tagPipeTexture.unk0C
 member tagpipeBasic.unk08
 member tagpipeParts.unk05
+member trmTerminalWork_t.unk_01
+member trmTerminalWork_t.unk_03
+member trmTerminalWork_t.unk_04
 member trmUpdateWork_t.unk_0000
 member trmUpdateWork_t.unk_0001
 member trmUpdateWork_t.unk_0002
