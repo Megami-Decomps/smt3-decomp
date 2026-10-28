@@ -150,7 +150,48 @@ INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536498);
 
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_005364C0);
 
-INCLUDE_ASM(const s32, "pb/pbMCard", pbReadMCard);
+extern const char D_0054F608[];
+extern const char D_00536498[];
+extern const char D_005364C0[];
+const char D_005364E8[40] __attribute__((aligned(8))) = "\tregist read command. return = %d\n";
+const char D_00536510[40] __attribute__((aligned(8))) = "\tcan't read a file < %s > err = %d\n";
+extern const char D_00536538[];
+extern const char D_00536560[];
+extern s32 sceMcOpen(s32 port, s32 slot, char *name, s32 flags);
+extern s32 sceMcClose(s32 fd);
+extern s32 sceMcRead(s32 fd, void *buffer, s32 size);
+
+s32 pbReadMCard(s32 port, s32 slot, char *fileName, void *buffer, s32 size)
+{
+    s32 fd;
+    s32 readResult;
+    s32 commandResult;
+
+    printf(D_0054F608);
+    commandResult = sceMcOpen(port, slot, fileName, 3);
+    printf(D_00536498, commandResult);
+    sceMcSync(0, NULL, &fd);
+    if (fd < 0) {
+        printf(D_005364C0, fileName, fd);
+        return fd;
+    }
+
+    commandResult = sceMcRead(fd, buffer, size);
+    printf(D_005364E8, commandResult);
+    sceMcSync(0, NULL, &readResult);
+    if (readResult < 0) {
+        printf(D_00536510, fileName, readResult);
+    }
+
+    commandResult = sceMcClose(fd);
+    printf(D_00536538, commandResult);
+    sceMcSync(0, NULL, &commandResult);
+    if (commandResult < 0) {
+        printf(D_00536560, fileName, commandResult);
+    }
+    printf(D_0054F608);
+    return readResult;
+}
 
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536538);
 
