@@ -3,7 +3,53 @@
 #include "libsdf.h"
 #include "kernel.h"
 
-INCLUDE_ASM(const s32, "interface/frName", frInitNameData);
+typedef struct
+{
+    u8 reserved0000[0x1D7C];
+    u8 nameBitmap[0x4800];
+    u8 nameCounts[4][2];
+    u8 nameGlyphCodes[4][16][2];
+    u8 cNames[4][20];
+    u8 cNameCounts[4];
+} frNameGlobalWork_t;
+
+extern frNameGlobalWork_t *frNameGlobalWork asm("DDS3_GBWK");
+extern s32 D_0056BD50[4];
+extern const char *D_003263B0[4];
+extern void frAllocNameData(void);
+
+extern void frTransNameImage(s8 target, s8 type);
+extern frFontHandle_t *frCreateNameHandle(s8 target, s8 glyph, frFontHandle_t *chain);
+
+void frInitNameData(void)
+{
+    char name[3] = "\x80\x80";
+    s32 i;
+    s8 nameLength;
+    s8 secondLength;
+    s8 cNameLength;
+
+    for (i = 3; i >= 0; i--) {
+        D_0056BD50[i] = 0;
+    }
+    memset(frNameGlobalWork->nameBitmap, 0x11, sizeof(frNameGlobalWork->nameBitmap));
+    frAllocNameData();
+
+    i = 0;
+    do {
+        nameLength = (s8)strlen(name);
+        memcpy(frNameGlobalWork->nameGlyphCodes[i][0], name, nameLength);
+        frNameGlobalWork->nameCounts[i][0] = nameLength / 2;
+        secondLength = (s8)strlen(name);
+        memcpy((u8 *)frNameGlobalWork->nameGlyphCodes[i][0] + nameLength,
+               name, secondLength);
+        frNameGlobalWork->nameCounts[i][1] = secondLength / 2;
+        cNameLength = (s8)strlen(D_003263B0[i]);
+        memcpy(frNameGlobalWork->cNames[i], D_003263B0[i], cNameLength);
+        frNameGlobalWork->cNameCounts[i] = cNameLength / 2;
+        i++;
+    } while (i <= 0);
+}
 
 INCLUDE_ASM(const s32, "interface/frName", frSetNameData);
 
@@ -12,17 +58,6 @@ INCLUDE_ASM(const s32, "interface/frName", frTransNameImage);
 INCLUDE_ASM(const s32, "interface/frName", frRestoreNameImage);
 
 INCLUDE_ASM(const s32, "interface/frName", frCreateNameHandle);
-
-typedef struct
-{
-    u8 unk_00000[0x657C];
-    u8 nameCounts[4][2];
-} frNameGlobalWork_t;
-
-extern frNameGlobalWork_t *frNameGlobalWork asm("DDS3_GBWK");
-
-extern void frTransNameImage(s8 target, s8 type);
-extern frFontHandle_t *frCreateNameHandle(s8 target, s8 glyph, frFontHandle_t *chain);
 
 frFontHandle_t *frGetName1NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption)
 {
@@ -64,8 +99,6 @@ frFontHandle_t *frGetNameFRQ(s8 target, frFontHandle_t *chain, s32 firstOption)
 }
 
 INCLUDE_ASM(const s32, "interface/frName", frGetCNameFRQ);
-
-INCLUDE_SDATA(const s32, "interface/frName", D_0054F440);
 
 INCLUDE_SDATA(const s32, "interface/frName", D_0054F448);
 
