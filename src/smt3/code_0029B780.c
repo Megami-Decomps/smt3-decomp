@@ -14,6 +14,19 @@ extern s32 dds3GetGlobalConfigFlag(s32 index);
 
 extern void dds3PadVibrationSet(s32 port, s32 strength, s32 frames);
 
+typedef struct dds3ConfigWork_t {
+    u8 prefix[0x14];
+    void *memHandle;
+    s8 mode;
+    u8 reserved19[3];
+    u8 cursorAndItems[0x1084];
+    s32 animationPhase;
+    void *textureHandle;
+} dds3ConfigWork_t;
+
+typedef char dds3ConfigWork_size_must_be_0x10A8[
+    sizeof(dds3ConfigWork_t) == 0x10A8 ? 1 : -1];
+
 typedef struct fclRagTex_t {
     u8 unk00[0x20];
     void (*calcSizes)();
@@ -76,6 +89,9 @@ extern s32 printf(const char *fmt, ...);
 extern void *sdfMemAllocDirect(s32 aSize);
 
 extern void *sdfMemLock(void *aHandle);
+extern void cmpInitSeqInfo(void *work, s32 seq);
+extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
 
 void slKillLoadProcess(void)
 {
@@ -244,7 +260,28 @@ void dds3FreeConfigTexture(void *handle)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3AllocConfigWork);
+void *dds3AllocConfigWork(s32 mode)
+{
+    void *handle;
+    dds3ConfigWork_t *work;
+
+    handle = sdfMemAllocDirect(sizeof(*work));
+    work = (dds3ConfigWork_t *)sdfMemLock(handle);
+    memset(work, 0, sizeof(*work));
+    work->memHandle = handle;
+    cmpInitSeqInfo(work, 0);
+    work->mode = mode;
+    cmpInitCursorLayout(work->cursorAndItems, 0, 0, 0, 0, 0);
+    cmpInitCursorRange(work->cursorAndItems, 4, 4, 0);
+    dds3InitConfigItems((u8 *)work);
+    work->animationPhase = 0;
+    if (mode == 1) {
+        work->textureHandle = cfgTexLoad();
+    } else {
+        work->textureHandle = NULL;
+    }
+    return work;
+}
 
 INCLUDE_RODATA(const s32, "code_0029B780", D_00548858);
 
