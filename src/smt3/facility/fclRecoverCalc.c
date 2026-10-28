@@ -196,7 +196,16 @@ s32 rcvGetPriceForUnit(datUnitWork_t *work)
     return price;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvGetRecoverPrice);
+s32 rcvGetRecoverPrice(datUnitWork_t *work, u8 type)
+{
+    switch (type) {
+    case 7: return rcvGetPriceForUnit(work);
+    case 1: return rcvCalcPriceRecover(work);
+    case 2: return rcvGetStatusPrice(work);
+    case 4: return rcvGetRevivePrice(work);
+    default: return -1;
+    }
+}
 
 s32 rcvAppAllRecover(datUnitWork_t *pStock)
 {
