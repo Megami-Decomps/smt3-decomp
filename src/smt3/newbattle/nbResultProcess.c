@@ -208,7 +208,59 @@ s32 GetAddExp(s32 index, s32 cap)
     return exp;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultAddExp);
+extern s32 nbGetKakutokuMaka(nbMainProcessData_t *data);
+extern s32 nbGetKakutokuExp(nbMainProcessData_t *data);
+extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
+extern void datAddMaka(s32 addmaka);
+extern void datAddItem(s32 id, s32 num);
+extern void datAddExp(datUnitWork_t *work, s32 exp);
+
+void nbResultAddExp(void)
+{
+    nbMainProcessData_t *data;
+    datUnitWork_t *unit;
+    s32 i;
+    s32 exp;
+    s32 addExp;
+    const datSpecialSkill_t *specialSkills;
+    u32 flag;
+
+    data = nbGetMainProcessData();
+    for (i = 0; i < 4; i++) {
+        if (data->item[i] != 0) {
+            if (data->itemcnt[i] != 0) {
+                datAddItem(data->item[i], data->itemcnt[i]);
+            }
+        }
+    }
+
+    datAddMaka(nbGetKakutokuMaka(data));
+
+    /* Passive skill 0x162 follows the 0x120 normal-skill entries. */
+    specialSkills = datSkillTable.special;
+    for (i = 0; i < 16; i++) {
+        exp = nbGetKakutokuExp(data);
+        unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + i;
+        flag = unit->flag;
+        if ((flag & 1) != 0) {
+            if ((flag & 2) == 0) {
+                if (datCheckSyojiSkill(unit, 0x162) == 0) {
+                    continue;
+                }
+                if (exp >= 1) {
+                    exp /= specialSkills[0x162 - 0x120].n;
+                }
+            }
+            if ((unit->badstatus & 0xFFF) != 0x800 && unit->hp != 0) {
+                addExp = GetAddExp(i, exp);
+                datAddExp(unit, addExp);
+            }
+        }
+    }
+}
+
+
+
 
 INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultProcess2);
 
