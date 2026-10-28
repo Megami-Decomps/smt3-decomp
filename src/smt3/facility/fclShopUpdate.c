@@ -130,7 +130,7 @@ typedef struct
     /* 0x1A720 */ fclRibbon_t *ribbon;
 } cmbGbWork_t;
 
-extern s32 datAddItem(s32 id, s32 num);
+extern void datAddItem(s32 id, s32 num);
 
 typedef struct
 {
@@ -144,7 +144,11 @@ typedef struct
     /* 0x0008 */ s32 unk_0008;
     /* 0x000C */ u8 unk_000C[8];
     /* 0x0014 */ void *allocation;
-    /* 0x0018 */ u8 unk_0018[0x14];
+    /* 0x0018 */ u8 reserved18;
+    /* 0x0019 */ s8 itemType;
+    /* 0x001A */ u8 reserved1A[6];
+    /* 0x0020 */ s32 totalPay;
+    /* 0x0024 */ u8 reserved24[8];
     /* 0x002C */ cmpCursorInfo_t listCursor;
     /* 0x0064 */ u8 unk_0064[0x2324];
     /* 0x2388 */ void *unk_2388;
@@ -161,7 +165,7 @@ extern void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor);
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
-u8 shpAddServiceTicket(s32 Nums)
+s32 shpAddServiceTicket(s32 Nums)
 {
     datAddItem(0x3D, Nums);
     return cmbGlobalWork->unk_1965;
@@ -198,7 +202,42 @@ void shpServiceTicketItem(void)
     shopUpdateWork->unk_0001 = 0xB;
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpServiceTicket);
+extern s32 printf(const char *format, ...);
+extern void fclClearFlag(s8 index);
+extern s32 fclSetWorkValue(s8 index, s32 value);
+extern s32 fclScriptStart(s32 script, s32 entry, void *process);
+extern s32 evtBitCheck(s32 eventNo);
+extern u16 shpGetItemFromItemBox(s32 slot);
+extern char D_0053D080[]; /* "Total pay : %d\n" */
+
+void shpServiceTicket(void)
+{
+    printf(D_0053D080, shopUpdateWork->totalPay);
+    cmpMoveCursorListEnd(&shopUpdateWork->listCursor);
+    fclClearFlag(4);
+    fclClearFlag(5);
+
+    fclSetWorkValue(4, shpGetItemFromItemBox(0));
+    fclSetWorkValue(5, shpGetItemFromItemBox(1));
+    fclSetWorkValue(6, shpGetItemFromItemBox(2));
+
+    if (shopUpdateWork->itemType == 1 && evtBitCheck(0x931) == 0) {
+        shpExit();
+        return;
+    }
+
+    if (shopUpdateWork->totalPay >= 0x3E8) {
+        shpAddServiceTicket(1);
+        shopUpdateWork->unk_0005 = 1;
+        shopUpdateWork->unk_0008 = fclScriptStart(shopUpdateWork->script, 0xB,
+                                                  &shopUpdateWork->scriptArg);
+        shopUpdateWork->unk_0001 = 0xA;
+    } else if (shpAddServiceTicket(0) >= 0xA) {
+        shpServiceTicketItem();
+    } else {
+        shpExit();
+    }
+}
 
 void shpUpdateServiceTicket(void)
 {
@@ -286,6 +325,8 @@ extern s32 shpUpdateSeqConfirm(s8 mode);
 extern s32 shpUpdateSeqPay(void);
 extern s32 shpUpdateServiceTicketItem(void);
 
+INCLUDE_RODATA(const s32, "facility/fclShopUpdate", D_0053D080);
+
 s32 shop_update_Process(dds3ProcessID_t *id)
 {
     shpUpdateWork_t *work;
@@ -364,7 +405,6 @@ s32 shop_update_Process(dds3ProcessID_t *id)
     cmpUpdateSeqInfo(shopUpdateWork, previous);
     return 0;
 }
-
 
 INCLUDE_RODATA(const s32, "facility/fclShopUpdate", D_0053D0C0);
 
