@@ -4,6 +4,9 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "draw3d.h"
+
+extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *packet, s32 prim, s32 count, s64 registers, s32 loops);
 
 typedef struct
 {
@@ -455,7 +458,7 @@ extern s32 cmpModelHandle;
 
 extern fclRibbon_t *g_pdebug;
 
-extern s32 cmpDrawBoxLine();
+extern void cmpDrawBoxLine();
 
 extern s32 cmpGetCursorSlotValue(s8 index, cmpCursorSlot_t *slot);
 
@@ -705,7 +708,7 @@ extern cmpVec4_t cmpStatusModelPos;
 
 extern cmpVec4_t cmpStatusModelBasePos;
 
-extern s32 cmpDrawTriG(s32 a, s32 b, s32 c, s32 *colors);
+extern void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot);
 
 extern u32 fclBlendColor(u32 color, u32 mask, u32 alpha);
 
@@ -3293,17 +3296,41 @@ void func_00239F88(s32 *work, s32 value)
     work[3] = value;
 }
 
-s32 cmp_239FA0(s32 a, s32 b, s32 c, s32 color)
+void cmp_239FA0(const u32 *xs, const u32 *ys, u32 z, u32 color, u32 ot)
 {
-    s32 colors[3];
+    u32 colors[3];
 
     colors[2] = color;
     colors[1] = color;
     colors[0] = color;
-    return cmpDrawTriG(a, b, c, colors);
+    cmpDrawTriG(xs, ys, z, colors, ot);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawTriG);
+void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot)
+{
+    void *packet;
+    struct { u64 colorChannels[2]; u64 packedXY; u64 depth; } *prim;
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *otp;
+
+    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(6, 1));
+    sdf2DMakePrimPacketHeader(packet, 0x14B, 6, 0x515151, 1);
+    prim = sdf2DGetPrimPtr(packet);
+    cmpExpandColor(prim[0].colorChannels, colors[0]);
+    prim[0].packedXY = (xs[0] + 0x7000) | ((u64)(ys[0] + 0x7900) << 32);
+    prim[0].depth = z;
+    cmpExpandColor(prim[1].colorChannels, colors[1]);
+    prim[1].packedXY = (xs[1] + 0x7000) | ((u64)(ys[1] + 0x7900) << 32);
+    prim[1].depth = z;
+    cmpExpandColor(prim[2].colorChannels, colors[2]);
+    prim[2].packedXY = (xs[2] + 0x7000) | ((u64)(ys[2] + 0x7900) << 32);
+    prim[2].depth = z;
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
+    sdfDrawTagInit(tag);
+    sdfDrawTagLink(tag, packet);
+    otp = &sdfGrOtTable[ot];
+    otp->regFunc(otp, tag);
+}
 
 s32 cmpDrawBoxSolid(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h)
 {
@@ -3352,9 +3379,74 @@ void cmpDrawPanelEffCell(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h)
     cmpDrawBoxLine(a, b, c, d, e, f, pair, h);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawBoxLine);
+void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+                    const u32 *colors, s32 surfaceIndex)
+{
+    sdfDrawTag_t *list;
+    sdfGrOt_t *surface;
+    void *packet;
+    u64 *prim;
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDraw3DPoly);
+    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, 1));
+    sdf2DMakePrimPacketHeader(packet, 0x149, 4, 0x5151, 1);
+    prim = sdf2DGetPrimPtr(packet);
+    cmpExpandColor(prim, colors[0]);
+    prim[2] = (x0 + 0x7000) | ((u64)(y0 + 0x7900) << 32);
+    prim[3] = z0;
+    cmpExpandColor(prim + 4, colors[1]);
+    prim[6] = (x1 + 0x7000) | ((u64)(y1 + 0x7900) << 32);
+    prim[7] = z1;
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, packet);
+    surface = &sdfGrOtTable[surfaceIndex];
+    surface->regFunc(surface, list);
+}
+
+void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
+                   const u32 *colors, s32 unused, sdfMat_t *asset, s32 surfaceIndex)
+{
+    sdf3DPrimPolyParm_t request;
+    u32 vertexColors[3];
+    f32 textureCoordinates[3][2];
+    sdfVector4_t positions[3] __attribute__((aligned(16)));
+    sdfDrawTag_t *list;
+    sdfGrOt_t *surface;
+    u32 firstColor, secondColor, thirdColor;
+
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
+    sdfDrawTagInit(list);
+    sdf3DPrimLinkResetTm(list, 0);
+    if (asset != NULL) {
+        sdf3DPrimLinkMat(list, asset, 0);
+    }
+    memset(&request, 0, sizeof(request));
+    firstColor = colors[0];
+    secondColor = colors[1];
+    thirdColor = colors[2];
+    request.faceCount = 1;
+    request.pointCount = 3;
+    request.color = firstColor;
+    request.vertex = positions;
+    request.normal = NULL;
+    request.uv = NULL;
+    vertexColors[0] = firstColor;
+    vertexColors[1] = secondColor;
+    vertexColors[2] = thirdColor;
+    request.vertexColor = vertexColors;
+    SDF_VU0_COPYVECTOR(&positions[0], first);
+    SDF_VU0_COPYVECTOR(&positions[1], second);
+    SDF_VU0_COPYVECTOR(&positions[2], third);
+    textureCoordinates[0][0] = 0.0f;
+    textureCoordinates[0][1] = 0.0f;
+    textureCoordinates[1][0] = 0.0f;
+    textureCoordinates[1][1] = 0.0f;
+    textureCoordinates[2][0] = 0.0f;
+    textureCoordinates[2][1] = 0.0f;
+    sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(&request));
+    surface = &sdfGrOtTable[surfaceIndex];
+    surface->regFunc(surface, list);
+}
 
 void cmpDisableRGB(s32 ot)
 {
