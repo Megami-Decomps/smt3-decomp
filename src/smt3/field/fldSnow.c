@@ -72,7 +72,7 @@ extern f32 gFldSnowW;
 
 extern void fldSnowSeedReset(void);
 
-extern s32 dds3GetRandA(s32 name);
+extern u32 dds3GetRandA(void *name);
 
 extern u32 sdfTexGetPacket(sdfTexHandle_t *aHandle);
 
@@ -254,6 +254,110 @@ void func_00151018(s32 index) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldSnow", fldSnowSeedReset);
+typedef struct {
+    dds3Basic_t *handle;
+    dds3Basic_t *handle2;
+    s8 moveFlag;
+    s8 rotFlag;
+} fldUnitControl_t;
+
+extern fldUnitControl_t *fldGetUnitControl(void);
+extern void dds3GetPosPoseSet(dds3Basic_t *basic);
+extern void *memset(void *dst, s32 value, u32 size);
+
+void fldSnowSeedReset(void)
+{
+    fldSeedWork_t *seed;
+    s32 i;
+    s32 attempt;
+    /* Shared spawn X survives the second RNG call in both modes. Qualified
+     * cc1probe --alloc --no-dumps assigns its pseudo 87 to $f20; see
+     * docs/cc1probe.md. */
+    f32 x;
+    f32 drift;
+
+    if (gFldSeedBuff == NULL) {
+        return;
+    }
+
+    if (gFldSnowMode == 0) {
+        for (i = 0; i < gFldSnowLife; i++) {
+            for (attempt = 0; attempt < 2; attempt++) {
+                if ((dds3GetRandA(NULL) & 3) == 0) {
+                    u32 randomValue;
+                    f32 z;
+
+                    randomValue = dds3GetRandA(NULL) & 0xFF;
+                    x = gFldSnowX + (f32)randomValue * gFldSnowW;
+                    randomValue = dds3GetRandA(NULL) & 0xFF;
+                    z = gFldSnowZ + (f32)randomValue * gFldSnowW;
+                    fldInitSnowSeed(x, gFldSnowY, z);
+                }
+            }
+
+            drift = 0.125f;
+            for (seed = gFldSeedBuff, attempt = 0; attempt < 700; attempt++, seed++) {
+                if ((seed->flg & 1) != 0) {
+                    seed->life--;
+                    seed->y += gFldSnowSpd + (f32)(s8)seed->spdx * drift;
+                    if (seed->life < 0x40) {
+                        seed->alp -= 2;
+                    }
+                    if (seed->life <= 0) {
+                        seed->flg = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    if (gFldSnowMode != 1) {
+        return;
+    }
+
+    {
+        sdfVector4_t base;
+        fldUnitControl_t *control;
+
+        memset(&base, 0, sizeof(base));
+        base.w = 1.0f;
+        control = fldGetUnitControl();
+        if (control != NULL) {
+            dds3GetPosPoseSet(control->handle);
+            SDF_VU0_STOREVECTOR_NOMEM(&base);
+        }
+
+        for (i = 0; i < gFldSnowLife * 2; i++) {
+            for (attempt = 0; attempt < 12; attempt++) {
+                if ((dds3GetRandA(NULL) & 3) == 0) {
+                    u32 randomValue;
+                    f32 z;
+
+                    fldGlobalBase.x = base.x;
+                    fldGlobalBase.z = base.z;
+                    randomValue = dds3GetRandA(NULL) & 0xFF;
+                    x = base.x + gFldSnowX + (f32)randomValue * gFldSnowW;
+                    randomValue = dds3GetRandA(NULL) & 0xFF;
+                    z = base.z + gFldSnowZ + (f32)randomValue * gFldSnowW;
+                    fldInitSnowSeed(x, gFldSnowY, z);
+                }
+            }
+
+            drift = 0.125f;
+            for (seed = gFldSeedBuff, attempt = 0; attempt < 700; attempt++, seed++) {
+                if ((seed->flg & 1) != 0) {
+                    seed->life--;
+                    seed->y += gFldSnowSpd - (f32)(s8)seed->spdx * drift;
+                    if (seed->life < 0x40) {
+                        seed->alp -= 2;
+                    }
+                    if (seed->life <= 0) {
+                        seed->flg = 0;
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "field/fldSnow", fldSnowTask);
