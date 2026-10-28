@@ -1283,8 +1283,6 @@ void nbCameraState_SkillAttack_Init(void)
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraState_SkillAttack_Init);
 #endif
 
-/* NON_MATCHING: 6 of 91 words differ (first at +0xB8). */
-#ifdef NON_MATCHING
 void nbCameraState_SkillAttack_Calc(void)
 {
     nbCameraSkillInfo_t work;
@@ -1331,9 +1329,6 @@ void nbCameraState_SkillAttack_Calc(void)
     }
     nbCameraShot_GroundCollision(&pNbCamera);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraState_SkillAttack_Calc);
-#endif
 
 /* NON_MATCHING: 1 of 30 words differ (first at +0x48). */
 #ifdef NON_MATCHING

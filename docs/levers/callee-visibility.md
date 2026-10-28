@@ -68,3 +68,14 @@ form with that restore. This relies on ordinary same-unit C visibility, with no
 `nothrow` attribute or stub.
 
 Reproduce the qualified trace with `tools/cc1probe.sh src/smt3/field/fldAutoMap.c --func fldAutoMapModelLoad --reorg --out /tmp/automap-reorg`; require `verify: OK` before using its instruction IDs.
+
+### Skill-attack camera scheduling
+
+The unchanged `nbCameraState_SkillAttack_Calc` draft becomes exact at 364 bytes
+with the matched `nbCameraShot_GroundCollision` definition visible earlier in
+`newbattle/nbCameraSkill`. Hiding only that definition behind its assembly
+fallback restores all six old differences: the attack-step branch gains an
+annul bit, and the camera-argument move and following call/branch shift out of
+the native delay slots. The isolated promotion preserves all 29 C functions
+in the owner. Check recently matched callees before rewriting a parked caller;
+this case needs no new declaration, attribute or control-flow adjustment.

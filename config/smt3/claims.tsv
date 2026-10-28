@@ -518,3 +518,4 @@ src/smt3/kernel/dds3TitleMain.c	redthing1	done	2026-10-28	1 fn / 108 B	toggle an
 src/smt3/pb/pbDebugMode.c	redthing1	done	2026-10-28	1 fn / 432 B	debug menu cursor wrapping, cancel/confirm phases and menu text rendering; owner 9 match, 0 differ
 src/smt3/pb/pbMain.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	editor constructor/state dispatch with accurate sound return and exact-size three-word flag-load residual
 src/smt3/facility/fclDraw.c	redthing1	done	2026-10-28	1 fn / 376 B	shop count sprite/font rendering with native OT and numeric X-derived baseline; owner 27 match, 0 differ
+src/smt3/newbattle/nbCameraSkill.c	redthing1	done	2026-10-28	1 fn / 364 B	skill-attack camera state with actual ground-collision C provider; isolated owner 29 match, 0 differ

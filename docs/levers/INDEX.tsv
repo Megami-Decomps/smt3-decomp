@@ -9,8 +9,8 @@ docs/levers/README.md	14		| 4 | [float-literals.md](float-literals.md) | Float l
 docs/levers/README.md	15		| 3 | [scheduling.md](scheduling.md) | Store scheduling |
 docs/levers/README.md	16		| 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
 docs/levers/README.md	17		| 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
-docs/levers/README.md	18		| 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
-docs/levers/README.md	19		| 1 | [callee-visibility.md](callee-visibility.md) | Callee visibility:
+docs/levers/README.md	18		| 2 | [callee-visibility.md](callee-visibility.md) | Callee visibility:
+docs/levers/README.md	19		| 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
 docs/levers/README.md	20		| 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
 docs/levers/README.md	21		| 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
 docs/levers/README.md	22		| 0 | [second-label.md](second-label.md) | A second label in the split assembly:
@@ -271,6 +271,7 @@ docs/levers/addressing-and-types.md	1807		**Which subexpression cse keeps decide
 docs/levers/addressing-and-types.md	1814	addu daddu sw	**A clamped accumulator that retail copies with a daddu at the merge is read back through the struct, not held in a local.** if (p->alpha < 0x100) { p->alpha…
 docs/levers/addressing-and-types.md	1824		An independent symbol view and an array-derived pointer can both be needed for one global span.
 docs/levers/callee-visibility.md	51	$16 $29 bne sh	### One-pass model-load phase in fldAutoMap fldAutoMapModelLoad is 100 bytes and exact when its 372-byte provider, fldAmModelLoadFile, is a visible C…
+docs/levers/callee-visibility.md	72		### Skill-attack camera scheduling The unchanged nbCameraState_SkillAttack_Calc draft becomes exact at 364 bytes with the matched nbCameraShot_GroundCollision…
 docs/levers/control-flow.md	6		| two early return <same constant> reached by separate ifs, with the constant's block laid out **after** the body | nest the two tests and give them one…
 docs/levers/control-flow.md	7	j jal	| jal and a fallthrough for the **last** switch arm while the other arms sibcall with j, where the switch value is a call result | give the call result a…
 docs/levers/control-flow.md	8	beqz bnez	| the opposite arm falls through (bnez where you emit beqz) | invert the if condition |
