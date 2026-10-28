@@ -5,6 +5,7 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "event.h"
+#include "font.h"
 
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
@@ -287,7 +288,7 @@ typedef struct nbEventProcessData_t {
 
 extern void nbSetTargetProcess(s32 act, s32 partyindex, s32 ctype, s32 crule, s32 carea);
 
-extern u32 menucur;
+extern s32 menucur;
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -400,6 +401,10 @@ void SetMotion(nbMainProcessData_t *data, nbFormation_t *form, s32 motion, s32 m
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", nbDebugStockSelect);
 
+extern s32 sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern sdfGrOt_t D_002F67F8;
+
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", DispBadStatus);
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", DispHpMpBad2);
@@ -421,7 +426,44 @@ void DispHpMpBad(nbDebugProcessData_t *d)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMenu);
+extern const char *D_004F06D8[];
+typedef struct frFontRequest_t frFontRequest_t;
+extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
+                                        const char *text, frFontRequest_t *request);
+extern s32 frDrawFont(frFontHandle_t *request);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
+extern void dds3ConsPanelTagLinkZ(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy, s32 z);
+extern s32 dds3SelectMenu(s32 pad, s32 listsx, s32 listsy, s32 winsx, s32 winsy,
+                         s32 *basex, s32 *basey, s32 *x, s32 *y);
+
+s32 SelectMenu(nbDebugProcessData_t *d)
+{
+    const char **label = D_004F06D8;
+    s32 i;
+    s32 x = 200;
+    s32 y = 50 * 16;
+    s32 result;
+    sdfDrawTag_t *tag;
+
+    for (i = 0; i < 5; i++, label++, y += 12 * 16) {
+        u32 color = i == menucur ? 0xFF0080 : 0xFFFFFF80;
+        frFontRequest_t *request = frwGetSmallFontFRQ(x * 16, y, 0xFF0001, color, *label, NULL);
+        frDrawFont((frFontHandle_t *)request);
+        frDestroyFontRequestAfter((frFontHandle_t *)request);
+    }
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    dds3ConsPanelTagLinkZ(tag, x - 8, 0x5C, 10, 12, 0xFF0000);
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+    if ((s8)dds3PadButtonState[3] < 0) {
+        return -1;
+    }
+    result = dds3SelectMenu(0, 1, 5, 1, 5, NULL, NULL, NULL, &menucur);
+    if (result == -1 || result == 1) {
+        return result;
+    }
+    return 0;
+}
 
 s32 SelectHpMp(nbDebugProcessData_t *d)
 {
