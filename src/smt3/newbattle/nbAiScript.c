@@ -168,7 +168,7 @@ typedef struct nbActionProcessData_t
     s32 target;
     s32 select;
     u8 unk_40[0x28];
-    s32 unk_68;
+    s32 massuruid;
     u8 unk_6C[0x124];
     u32 aiselect;
     s32 aijokentbl;
@@ -874,7 +874,7 @@ s32 nbCommand_BTL_TAIKYO(void)
     a = scrGetData();
     a->data->negoresult = 2;
     a->data->negoeformindex = a->form->formindex;
-    a->unk_68 = 0;
+    a->massuruid = 0;
     return 1;
 }
 
@@ -885,7 +885,7 @@ s32 nbCommand_BTL_ALLTAIKYO(void)
     a = scrGetData();
     a->data->negoresult = 6;
     a->data->negoeformindex = a->form->formindex;
-    a->unk_68 = 0;
+    a->massuruid = 0;
     return 1;
 }
 
@@ -896,7 +896,7 @@ s32 nbCommand_BTL_PRESS(void)
     a = scrGetData();
     a->data->negoresult = 4;
     a->data->negoeformindex = a->form->formindex;
-    a->unk_68 = 0;
+    a->massuruid = 0;
     return 1;
 }
 
@@ -907,7 +907,7 @@ s32 nbCommand_BTL_NAKAMA(void)
     a = scrGetData();
     a->data->negoresult = 3;
     a->data->negoeformindex = a->form->formindex;
-    a->unk_68 = 0;
+    a->massuruid = 0;
     return 1;
 }
 

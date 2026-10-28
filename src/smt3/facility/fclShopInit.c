@@ -40,8 +40,8 @@ typedef struct
     /* 0x00 */ u8 StepY[4];
     /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
-    /* 0x08 */ s32 unk_08;
-    /* 0x0C */ s32 unk_0C;
+    /* 0x08 */ s32 CursorSize;
+    /* 0x0C */ s32 CursorPos;
     /* 0x10 */ u16 unk_10;
     /* 0x12 */ u16 unk_12;
     /* 0x14 */ u16 unk_14;

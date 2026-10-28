@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 895 members, 506 adopted constants.
+# 0 types, 883 members, 506 adopted constants.
 
 
 member dds3ModelResrc_t.unk_AC
@@ -32,7 +32,6 @@ member campDhEntry_t.unk_28
 member campDhEntry_t.unk_2C
 member campDhEntry_t.unk_30
 member campDhTimerWork_t.unk_0000
-member campDhTimerWork_t.unk_0028
 member campDhTimerWork_t.unk_1C
 member campDhTimerWork_t.unk_20
 member campDhTimerWork_t.unk_24
@@ -42,7 +41,6 @@ member campDhWork_t.unk_20
 member campDhWork_t.unk_30
 member campInfoWork_t.unk_00
 member campInfoWork_t.unk_0002
-member campInfoWork_t.unk_0018
 member campInfoWork_t.unk_0032
 member campInfoWork_t.unk_01
 member campInfoWork_t.unk_1160
@@ -119,8 +117,6 @@ member cmbUnlockEntry_t.unk_02
 member cmbWork_t.unk_01
 member cmbWork_t.unk_1C
 member cmpCursorInfo_t.unk_05
-member cmpCursorInfo_t.unk_08
-member cmpCursorInfo_t.unk_0C
 member cmpCursorInfo_t.unk_10
 member cmpCursorInfo_t.unk_12
 member cmpCursorInfo_t.unk_14
@@ -171,7 +167,6 @@ member cmpPanelEffAnim_t.unk_14
 member cmpPanelEffAnim_t.unk_28
 member cmpPanelEffState_t.unk_00
 member cmpPanelEffView_t.unk_0000
-member cmpPanelEffView_t.unk_0009
 member cmpPanelEffView_t.unk_000C
 member cmpPanelEff_t.unk_01
 member cmpPanelEff_t.unk_04
@@ -250,7 +245,6 @@ member dds3ModelBasicWorkData_t.unk10
 member dds3MovieEntry_t.unk_00
 member dds3NeedleModelPart_tag.unk0C
 member dds3Polygon_t.unk02
-member dds3Polygon_t.unk08
 member dds3RipBlurParam_t.unk2C
 member dds3SceneBasic_t.unk24
 member dds3SpPolyLoopWork_t.unk00
@@ -264,7 +258,6 @@ member dds3TitleWork_t.unk_18
 member dds3TitleWork_t.unk_20
 member dds3TitleWork_t.unk_30
 member dds3TitleWork_t.unk_34
-member dds3TrackPoly_t.unk28
 member dds3UnitObjectBasicWorkData_t.unk18
 member effBTLAimParams_t.unk03
 member effBTLBank_t.unk00
@@ -637,7 +630,6 @@ member nbActionProcessData_t.unk190
 member nbActionProcessData_t.unk78
 member nbActionProcessData_t.unk_08
 member nbActionProcessData_t.unk_40
-member nbActionProcessData_t.unk_68
 member nbActionProcessData_t.unk_6C
 member nbAkumaSelect_t.unk00
 member nbAkumaSelect_t.unk0A
@@ -679,8 +671,6 @@ member nbEventEntry_t.unk_0C
 member nbEventEntry_t.unk_10
 member nbEventProcessData_t.unk_18
 member nbInnenRec_t.unk_06
-member nbMainProcessData_t.unk134
-member nbMainProcessData_t.unk140
 member nbMainProcessData_t.unk_04
 member nbMainProcessData_t.unk_11C
 member nbMainProcessData_t.unk_130
@@ -705,7 +695,6 @@ member nbMakaProcessData_t.unk_14
 member nbNegoSkillEntry_t.unk_00
 member nbPacEntry_t.unk_00
 member nbPacHandle_t.unk_00
-member nbPanelFlashData_t.unk_20
 member nbParty_t.unk04
 member nbStatWork_t.unk_02
 member nbTarSelProcessData_t.unk00
@@ -888,7 +877,6 @@ member tagPipeLinkData.unk0C
 member tagPipePosTable_t.unk08
 member tagPipeTexture.unk0C
 member tagpipeBasic.unk08
-member tagpipeParts.unk05
 member trmCalcWork_t.unk_0000
 member trmCalcWork_t.unk_2217
 member trmUpdateWork_t.unk_0000

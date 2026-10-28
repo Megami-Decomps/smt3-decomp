@@ -101,8 +101,8 @@ typedef struct
     /* 0x00 */ u8 StepY[4];
     /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
-    /* 0x08 */ s32 unk_08;
-    /* 0x0C */ s32 unk_0C;
+    /* 0x08 */ s32 CursorSize;
+    /* 0x0C */ s32 CursorPos;
     /* 0x10 */ u16 unk_10;
     /* 0x12 */ u16 unk_12;
     /* 0x14 */ u16 unk_14;
@@ -261,7 +261,7 @@ extern void cmpDrawScrollBar(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g
 
 void fcl_2129A0(s32 a, s32 b, cmpCursorInfo_t *cursor, s32 d)
 {
-    cmpDrawScrollBar(cursor->unk_08 * 16, cursor->unk_0C * 8, a, cursor->unk_10,
+    cmpDrawScrollBar(cursor->CursorSize * 16, cursor->CursorPos * 8, a, cursor->unk_10,
                      cursor->unk_14, 0x80808080, 0x100, 0, cursor, 0, d);
 }
 

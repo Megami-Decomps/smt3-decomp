@@ -179,7 +179,7 @@ typedef struct nbMainProcessData_t
     struct effBTL_t *HatudoEff;         /* 0x11C */
     void *pnltex[4];                       /* 0x120 */
     s32 mesmngid;                          /* 0x130 */
-    u8 unk134[4];
+    u8 flyh_akey[4];
     void *eventPack;                       /* 0x138 */
     sdfMemHandle_t *eventMemory;
     u32 unk140;

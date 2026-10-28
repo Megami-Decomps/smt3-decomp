@@ -331,8 +331,8 @@ typedef struct
     /* 0x00 */ u8 StepY[4];
     /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
-    /* 0x08 */ s32 unk_08;
-    /* 0x0C */ s32 unk_0C;
+    /* 0x08 */ s32 CursorSize;
+    /* 0x0C */ s32 CursorPos;
     /* 0x10 */ u16 unk_10;
     /* 0x12 */ u16 unk_12;
     /* 0x14 */ u16 unk_14;
@@ -5450,8 +5450,8 @@ void cmpSetCursorRow(s8 row, cmpCursorInfo_t *cursor)
 
 void cmpResetCursorInfo(cmpCursorInfo_t *cursor)
 {
-    cursor->unk_08 = cursor->unk_18;
-    cursor->unk_0C = cursor->unk_1C;
+    cursor->CursorSize = cursor->unk_18;
+    cursor->CursorPos = cursor->unk_1C;
     cmpResetCursorPos(0, cursor);
     cmpUpdateCursorScroll(cursor, 1);
     cmpClearCursorSlots(cursor);
