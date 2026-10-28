@@ -141,7 +141,29 @@ s8 shpCalcPayOfMoney(s32 index, s8 kind)
     return maxQuantity;
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopCalc", shpChkChoiceMax);
+extern s32 datGetItemSlotIndex(u16 item);
+
+s8 shpChkChoiceMax(s32 index, s8 kind, s8 preserveTotal)
+{
+    s32 savedTotal = shopProcWork->paymentTotal;
+    s32 maxQuantity;
+    if (kind == 0) {
+        u16 item = shpGetItemPrice(shopProcWork->itemTop + shopProcWork->itemOffset, 0);
+        if (datGetItemSlotIndex(item) != 0) {
+            maxQuantity = shpCalcPayOfMoney(index, 0);
+            if (maxQuantity >= 2) maxQuantity = 1;
+        } else {
+            maxQuantity = shpCalcPayOfMoney(index, 0);
+        }
+    } else {
+        u16 item;
+        shpCalcPayOfMoney(index, 1);
+        item = shpGetItemPrice(shopProcWork->itemTop + shopProcWork->itemOffset, 1);
+        maxQuantity = shopMoneyGlobal->items[item];
+    }
+    if (preserveTotal != 0) shopProcWork->paymentTotal = savedTotal;
+    return maxQuantity;
+}
 
 INCLUDE_ASM(const s32, "facility/fclShopCalc", shop_Process);
 
