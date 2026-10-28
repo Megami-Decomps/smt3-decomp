@@ -297,7 +297,50 @@ void ActionRot(tagPipeObject *objPtr) {
     objPtr->pos[1] = vector.y;
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", ActionHm);
+extern f32 vecNormalize(f32 *vector);
+extern void vecScale(f32 *vector, f32 scale);
+
+void ActionHm(tagPipeObject *object) {
+    tagPipeObject *data = objMyData();
+    f32 vector[3];
+    f32 speed;
+    f32 newX;
+    f32 newY;
+    f32 radiusSquared;
+    u8 action = object->action;
+
+    if (action < 10) {
+        speed = 4.0f;
+    } else {
+        speed = 8.0f;
+    }
+    if (action == 7 || action == 9) {
+        speed = -speed;
+    }
+    vector[0] = data->pos[0] - object->pos[0];
+    vector[1] = data->pos[1] - object->pos[1];
+    vector[2] = 0.0f;
+    vecNormalize(vector);
+    vecScale(vector, speed);
+    newX = object->pos[0] + vector[0];
+    newY = object->pos[1] + vector[1];
+    object->pos[0] = newX;
+    object->pos[1] = newY;
+
+    action = object->action;
+    if (action == 10 || action == 8) {
+        radiusSquared = newX * newX + newY * newY;
+        if (!(radiusSquared <= 250000.0f)) {
+            vector[0] = newX;
+            vector[1] = newY;
+            vector[2] = 0.0f;
+            vecNormalize(vector);
+            vecScale(vector, 500.0f);
+            object->pos[0] = vector[0];
+            object->pos[1] = vector[1];
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionSlide);
 
