@@ -56,11 +56,26 @@ typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCam
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
-typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbGroupData_t;
+typedef struct { u16 kind; s16 x, y; u16 outline_num; u8 unk08[0x88]; } pbBlockEntry_t;
+
+typedef struct
+{
+    s32 value;
+    u16 grpID;
+    u16 num;
+    u8 unk08[0xA];
+    s16 cellX, cellY;
+    u8 unk16[0x9A];
+    pbBlockEntry_t *blk;
+    u8 unkB4[4];
+    f32 rot;
+    u8 unkBC[8];
+    f32 x, y, z;
+} pbGroupData_t;
 
 typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
-typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
+typedef struct { u32 count; pbGroupData_t *group[0x40]; sdfMat_t *mat; } pbBlockDB_t;
 
 typedef struct { u8 flag[4]; void *block, *floor, *chara; } pbRecordSlot_t;
 
@@ -79,6 +94,7 @@ struct pbProcHandle_t
 };
 
 extern void sdfChipFreeDelayedDirect(void *aPtr);
+extern s32 printf(const char *format, ...);
 
 extern pbMapWork_t *D_0054F5C4;
 
@@ -164,7 +180,27 @@ void pbDeleteGroupEntry(pbProcHandle_t *panel, u32 group) {
 }
 
 
-INCLUDE_ASM(const s32, "pb/pbGameDraw", pbDumpBlockData);
+void pbDumpBlockData(pbProcHandle_t *p) {
+    pbBlockDB_t *db = p->data.blockDB;
+    char names[7][32] = {
+        "FLOOR", "WALL", "NORMAL BLOCK CORE", "NORMAL BLOCK",
+        "ROUND BLOCK CORE", "ROUND BLOCK", "EXIT"
+    };
+    u32 i = 0, j;
+
+    printf("\n(( block data ))\n");
+    for (; i < db->count; i++) {
+        printf("ID = %d, (core x,y) = (%d, %d) %dblocks\n",
+               db->group[i]->grpID, db->group[i]->cellX,
+               db->group[i]->cellY, db->group[i]->num);
+        for (j = 0; j < db->group[i]->num; j++) {
+            printf("\t(x,y) = (%d, %d) type = %s : outline = %d\n",
+                   db->group[i]->blk[j].x, db->group[i]->blk[j].y,
+                   names[db->group[i]->blk[j].kind],
+                   db->group[i]->blk[j].outline_num >> 1);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "pb/pbGameDraw", pbRebuildOutline);
 
