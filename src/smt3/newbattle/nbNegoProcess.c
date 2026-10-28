@@ -316,7 +316,7 @@ typedef struct nbKoukaPacket_t
 
 extern s32 printf(const char *format, ...);
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *aLimit, u32 name);
 
 extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 
@@ -478,6 +478,7 @@ extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 typedef struct { s16 jouken[3]; u8 pad[0xC6]; } nbInfoSelectEntry_t;
 
 extern nbInfoSelectEntry_t InfoSelectTable[];
+extern s32 nbCheckSelectMesJoukenAri(s32 index, s32 limit);
 
 extern void nbAddNegoIdKouho(nbNegoProcessData_t *n, u32 id);
 
@@ -620,7 +621,7 @@ s32 nbGetNegoYaruMakkaA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t 
 {
     s32 maka;
 
-    maka = (datDevilTable[b->id].dropmakka * (dds3GetRandIntA(0, 4) + 5) + 5) / 10 * 10;
+    maka = (datDevilTable[b->id].dropmakka * ((s32)dds3GetRandIntA(0, 4) + 5) + 5) / 10 * 10;
     return maka != 0 ? maka : 1;
 }
 
@@ -629,7 +630,7 @@ s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t 
     s32 maka;
 
     maka = nbGetNegoKureMakkaA(n, a, b);
-    maka = (maka * (dds3GetRandIntA(0, 30) + 40) / 100 + 5) / 10 * 10;
+    maka = (maka * ((s32)dds3GetRandIntA(0, 30) + 40) / 100 + 5) / 10 * 10;
     return maka != 0 ? maka : 1;
 }
 
@@ -637,7 +638,7 @@ s32 nbGetNegoKureMakkaA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t 
 {
     s32 maka;
 
-    maka = (s32)((f32)(b->level * (dds3GetRandIntA(0, 10) + 21)) * 0.8f);
+    maka = (s32)((f32)(b->level * ((s32)dds3GetRandIntA(0, 10) + 21)) * 0.8f);
     maka = (maka + 5) / 10 * 10;
     return maka != 0 ? maka : 1;
 }
@@ -647,31 +648,31 @@ s32 nbGetNegoKureMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t 
     s32 maka;
 
     maka = nbGetNegoKureMakkaA(n, a, b);
-    maka = (maka * (dds3GetRandIntA(0, 20) + 50) / 100 + 5) / 10 * 10;
+    maka = (maka * ((s32)dds3GetRandIntA(0, 20) + 50) / 100 + 5) / 10 * 10;
     return maka != 0 ? maka : 1;
 }
 
 s32 nbGetNegoKureHpA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
 {
     if (evtBitCheck(8) != 0) {
-        return b->maxhp * (dds3GetRandIntA(0, 10) + 20) / 100;
+        return b->maxhp * ((s32)dds3GetRandIntA(0, 10) + 20) / 100;
     }
-    return b->maxhp * (dds3GetRandIntA(0, 8) + 14) / 100;
+    return b->maxhp * ((s32)dds3GetRandIntA(0, 8) + 14) / 100;
 }
 
 s32 nbGetNegoKureHpB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
 {
-    return b->maxhp * (dds3GetRandIntA(0, 10) + 10) / 100;
+    return b->maxhp * ((s32)dds3GetRandIntA(0, 10) + 10) / 100;
 }
 
 s32 nbGetNegoKureMpA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
 {
-    return b->maxmp * (dds3GetRandIntA(0, 30) + 10) / 100;
+    return b->maxmp * ((s32)dds3GetRandIntA(0, 30) + 10) / 100;
 }
 
 s32 nbGetNegoKureMpB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
 {
-    return b->maxmp * (dds3GetRandIntA(0, 10) + 10) / 100;
+    return b->maxmp * ((s32)dds3GetRandIntA(0, 10) + 10) / 100;
 }
 
 s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
@@ -871,14 +872,72 @@ s32 nbGetNegoYaruStone(datUnitWork_t *w)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbGetInfoMsg);
+extern char D_00544E48[];
+extern char D_00544E70[];
 
-s32 nbCheckSelectMesJoukenAri(s32 index)
+s32 nbGetInfoMsg(s32 infotype)
+{
+    /* Both lists reserve the full 60-message table; each type scans 30 rows. */
+    s32 normalList[60];
+    s32 conditionList[60];
+    s32 base;
+    s32 normalCount;
+    s32 conditionCount;
+    s32 i;
+    s32 id;
+    s32 useConditionList;
+    s32 selected;
+
+    base = 0;
+    if (infotype == 2) {
+        base = 30;
+    }
+    normalCount = 0;
+    conditionCount = 0;
+    for (i = 0; i < 30; i++) {
+        if (InfoSelectTable[i + base].jouken[0] == 0) {
+            normalList[normalCount++] = i + base;
+        }
+    }
+
+    for (i = 0; i < 30; i++) {
+        id = i + base;
+        if (nbCheckSelectMesJoukenAri(id, 100) == 1) {
+            conditionList[conditionCount++] = id;
+        }
+    }
+
+    useConditionList = 0;
+    if (conditionCount != 0) {
+        if (dds3GetRandIntA(NULL, 10) < 2) {
+            useConditionList = 0;
+        } else {
+            useConditionList = 1;
+        }
+    }
+    if (useConditionList == 0) {
+        selected = normalList[dds3GetRandIntA(NULL, normalCount)];
+    } else {
+        selected = conditionList[dds3GetRandIntA(NULL, conditionCount)];
+    }
+
+    printf(D_00544E48, useConditionList, selected);
+    printf(D_00544E70, normalCount, conditionCount);
+    return selected;
+}
+
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E48);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E70);
+
+
+/* The caller passes 100; this provider checks its fixed three condition entries. */
+s32 nbCheckSelectMesJoukenAri(s32 index, s32 limit)
 {
     s32 i;
     s32 ret;
     s32 jouken;
 
+    (void)limit;
     ret = 0;
     for (i = 0; i < 3; i++) {
         jouken = InfoSelectTable[index].jouken[i];
