@@ -227,6 +227,9 @@ typedef struct
 
 extern s8 cmbAddLevelUpParamEx(void *work, s8 mode);
 
+extern void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst);
+extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
+
 extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 
 extern s32 cmpDrawSpriteFlag(u8 id, s32 flag, s32 arg);
@@ -1211,9 +1214,29 @@ s32 cmbStoreBirthDevil(u16 devilId, cmbUnit_t *list, u8 count)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbAddDevilToStock);
+s32 cmbAddDevilToStock(u16 devilId, cmbUnit_t *list, u8 count)
+{
+    s8 slot = cmbFindStockSlot(list, count);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbAddCustomDevilToStock);
+    if (slot < 0) {
+        return -1;
+    }
+    cmbFindStockEnd((s8)(slot - count + 0x10));
+    cmbCopyDefaultDevilToStock(devilId, &list[slot].unit);
+    return slot;
+}
+
+s32 cmbAddCustomDevilToStock(datUnitWork_t *custom, cmbUnit_t *list, u8 count)
+{
+    s8 slot = cmbFindStockSlot(list, count);
+
+    if (slot < 0) {
+        return -1;
+    }
+    cmbFindStockEnd((s8)(slot - count + 0x10));
+    cmbCopyCustomDevilToStock(&list[slot].unit, custom);
+    return slot;
+}
 
 extern s32 cmbCopyEvoDevil(datUnitWork_t *unit, u16 skill);
 
