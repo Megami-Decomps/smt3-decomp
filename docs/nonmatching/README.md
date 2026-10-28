@@ -9,6 +9,7 @@ page and line to open. Conventions are in
 |---|---|---|
 | 48 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 34 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
+| 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 13 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 8 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
@@ -50,7 +51,6 @@ page and line to open. Conventions are in
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
-| 1 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
 | 1 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |

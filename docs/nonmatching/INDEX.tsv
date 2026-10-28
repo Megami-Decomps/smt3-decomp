@@ -267,6 +267,22 @@ FromEulerXYZ	sdf/sdfQuat	0x118	60 of 70 words match	docs/nonmatching/sdf/sdfQuat
 FromEuler	sdf/sdfQuat	0x114	59 of 69 words match	docs/nonmatching/sdf/sdfQuat.md	9
 sdfTexSetPacket	sdfTex	0x168	15 of 90 words match	docs/nonmatching/sdf/sdfTex.md	5
 corePktLoadVerts	sdfVu1	0x2C		docs/nonmatching/sdf/sdfVu1.md	5
+The corePkt VU1 packet builders written in assembly				docs/nonmatching/sdf/sdfVu1.md	28
+corePktLoadVertsNorms	sdfVu1	0x44		docs/nonmatching/sdf/sdfVu1.md	48
+corePktMorphVerts	sdfVu1	0x44		docs/nonmatching/sdf/sdfVu1.md	54
+corePktMorphVertsNorms	sdfVu1	0x6C		docs/nonmatching/sdf/sdfVu1.md	61
+corePktNormalizeNorms	sdfVu1	0x34		docs/nonmatching/sdf/sdfVu1.md	66
+corePktSkinVertFirst	sdfVu1	0x58		docs/nonmatching/sdf/sdfVu1.md	73
+corePktSkinVertAccum	sdfVu1	0x60		docs/nonmatching/sdf/sdfVu1.md	83
+corePktSkinPointsFirst	sdfVu1	0x84		docs/nonmatching/sdf/sdfVu1.md	88
+corePktSkinPointsAccum	sdfVu1	0xC4		docs/nonmatching/sdf/sdfVu1.md	101
+corePktXfmUV	sdfVu1	0x60		docs/nonmatching/sdf/sdfVu1.md	109
+corePktXfmLightClip	sdfVu1	0xD0		docs/nonmatching/sdf/sdfVu1.md	116
+corePktXfmLightClipPB	sdfVu1	0xA8		docs/nonmatching/sdf/sdfVu1.md	133
+corePktXfmLightClipUV	sdfVu1	0xFC		docs/nonmatching/sdf/sdfVu1.md	139
+corePktXfmLightClipUVPB	sdfVu1	0xD4		docs/nonmatching/sdf/sdfVu1.md	146
+corePktRelightBackFaces	sdfVu1	0x8C		docs/nonmatching/sdf/sdfVu1.md	151
+corePktApplyFaceDivColor	sdfVu1	0x98		docs/nonmatching/sdf/sdfVu1.md	158
 What cracked the scmd family				docs/nonmatching/sdk/libcdvd.md	3
 The scmd template, for the next pass				docs/nonmatching/sdk/libcdvd.md	24
 sceDmaPutEnv			21 of 118 words differ	docs/nonmatching/sdk/libdma.md	3
