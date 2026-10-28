@@ -320,12 +320,12 @@ tagPipeObject *objMyData(void)
     return NULL;
 }
 
-INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548B50);
-
 extern s32 mymdlAddObject(tagpipeBasic *work, u16 count);
 extern void mymdlSetMotion(tagpipeBasic *work, f32 frame);
 extern void mymdlAlphaSet(tagpipeBasic *work, u8 alpha);
 extern tagpipeBasic *MyLine;
+
+INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548B50);
 
 const char D_00548B60[24] = "EML %d ADD OBJECT\n";
 const char D_00548B78[24] = "EMS %d ADD OBJECT\n";
@@ -376,7 +376,62 @@ void objMdlAdd(tagPipeObject *objPtr)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlDel);
+extern void objMdlSclSet(tagPipeObject *object, f32 scale);
+extern void objMdlAlphaSet(tagPipeObject *object, u8 alpha);
+
+const char D_00548C20[24] = "EML %d DEL OBJECT\n";
+const char D_00548C38[24] = "EMS %d DEL OBJECT\n";
+const char D_00548C50[24] = "DRBOX %d DEL OBJECT\n";
+const char D_00548C68[24] = "DMaka %d DEL OBJECT\n";
+const char D_00548C80[24] = "Maka1 %d DEL OBJECT\n";
+const char D_00548C98[24] = "ZMaka %d DEL OBJECT\n";
+const char D_00548CB0[24] = "RBOX %d DEL OBJECT\n";
+const char D_00548CC8[24] = "MY %d DEL OBJECT\n";
+
+extern void objMdlSclSet(tagPipeObject *objPtr, f32 scale);
+extern void objMdlAlphaSet(tagPipeObject *objPtr, u8 alpha);
+extern tagpipeBasic *MyLine;
+
+void objMdlDel(tagPipeObject *objPtr) {
+    if (objPtr->mdl == 0xFF) {
+        return;
+    }
+
+    objMdlSclSet(objPtr, 1.0f);
+    objMdlAlphaSet(objPtr, 0x80);
+
+    switch ((u8)objPtr->id) {
+    case 1:
+        mymdlDelObject(&PipeEML[objPtr->mdl]);
+        return DEBUG_PRINT(D_00548C20, objPtr->mdl);
+    case 2:
+        mymdlDelObject(&PipeEMS[objPtr->mdl]);
+        return DEBUG_PRINT(D_00548C38, objPtr->mdl);
+    case 12:
+        mymdlDelObject(&PipeDRBOX[objPtr->mdl]);
+        return DEBUG_PRINT(D_00548C50, objPtr->mdl);
+    case 11:
+        mymdlDelObject(&PipeDMaka[objPtr->mdl]);
+        return DEBUG_PRINT(D_00548C68, objPtr->mdl);
+    case 5:
+    case 6:
+        mymdlDelObject(&PipeMaka1[objPtr->mdl]);
+        return DEBUG_PRINT(D_00548C80, objPtr->mdl);
+    case 9:
+        mymdlDelObject(&PipeZMaka[objPtr->mdl]);
+        return DEBUG_PRINT(D_00548C98, objPtr->mdl);
+    case 10:
+        mymdlDelObject(&PipeRBOX[objPtr->mdl]);
+        return DEBUG_PRINT(D_00548CB0, objPtr->mdl);
+    case 128:
+        mymdlDelObject(MyLine);
+        mymdlDelObject(basicMy);
+        DEBUG_PRINT(D_00548CC8, objPtr->mdl);
+        break;
+    default:
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlPosSet);
 
