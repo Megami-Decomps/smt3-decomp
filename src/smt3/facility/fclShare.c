@@ -174,7 +174,19 @@ void fclDrawSprite(s32 X, s32 Y, fclSprite_t *pSprite)
     fclDrawSpriteEx(X, Y, pSprite->unk_04, pSprite->unk_06, pSprite, 0x47);
 }
 
-INCLUDE_ASM(const s32, "facility/fclShare", fclDrawSpriteEx);
+extern void func_002146F8(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
+                         u8 FlipFlag, s32 OtNo);
+
+void fclDrawSpriteEx(s32 X, s32 Y, s32 W, s32 H, fclSprite_t *pSprite, s32 OtNo)
+{
+    func_002146F8(X, Y, W, H, NULL, pSprite, 0, OtNo);
+}
+
+void func_002146F8(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
+                   u8 FlipFlag, s32 OtNo)
+{
+    fclDrawSpriteCore(X << 4, Y << 3, W, H, pCol, pSprite, FlipFlag, 0, 1, OtNo);
+}
 
 /* NON_MATCHING: 111 of 180 words differ (first at +0x20). */
 #ifdef NON_MATCHING
