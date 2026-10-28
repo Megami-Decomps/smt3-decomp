@@ -973,6 +973,8 @@ extern void camp_draw_Process();
 
 extern void camp_update_Process();
 
+extern void *cmpStartProcessPanelEff(s32 parent);
+
 void cmpProcessStart(void)
 {
     cmpinit();
@@ -4866,8 +4868,7 @@ void cmpClearPanelEffSlots(cmpPanelEff_t *list)
 
 /* NON_MATCHING: 3 of 38 words differ, exact size; all three are one register name. */
 #ifdef NON_MATCHING
-cmpPanelEff_t *cmpAllocPanelEffWork(value)
-s32 value;
+cmpPanelEff_t *cmpAllocPanelEffWork(s32 value)
 {
     cmpPanelEff_t *work;
     void *chunk;
@@ -4898,11 +4899,11 @@ void camp_update_paneleff_Shutdown(void)
     }
 }
 
-extern cmpPanelEff_t *cmpAllocPanelEffWork();
+extern cmpPanelEff_t *cmpAllocPanelEffWork(s32 value);
 
-void *cmpStartProcessPanelEff(void)
+void *cmpStartProcessPanelEff(s32 parent)
 {
-    cmpPanelEff_t *work = cmpAllocPanelEffWork();
+    cmpPanelEff_t *work = cmpAllocPanelEffWork(parent);
 
     cmpPanelEffList = work;
     return dds3StartProcess("camp_update_paneleff", 0x520B, 1, 1, camp_update_paneleff_Process,
