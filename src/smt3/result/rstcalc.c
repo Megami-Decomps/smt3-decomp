@@ -1232,7 +1232,24 @@ s32 rstFindPowerUpSkill(u16 skillId)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstRollPowerUpSkill);
+s32 rstRollPowerUpSkill(u16 skill, datUnitWork_t *unit)
+{
+    s32 i;
+
+    for (i = 0; i < 0x40; i++) {
+        u16 candidate = D_00339658[dds3GetRandA(0) % 0xE3].devilId;
+        s32 candidatePower = cmbFindEvoEntry(candidate);
+
+        if (cmbChkSkillOwner(candidate, unit) < 0 &&
+            cmbCopyEvoDevil(unit, candidate) != 0 && skill != candidate) {
+            if (candidatePower <= cmbFindEvoEntry(skill) + 1 &&
+                candidatePower >= cmbFindEvoEntry(skill) + 1) {
+                return candidate;
+            }
+        }
+    }
+    return 0;
+}
 
 s32 datCalcDevilExp(s32 level)
 {
