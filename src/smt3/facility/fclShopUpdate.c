@@ -158,9 +158,11 @@ typedef struct
     /* 0x0014 */ void *allocation;
     /* 0x0018 */ u8 reserved18;
     /* 0x0019 */ s8 itemType;
-    /* 0x001A */ u8 reserved1A[6];
+    /* 0x001A */ u8 reserved1A[2];
+    /* 0x001C */ s32 paymentRemaining;
     /* 0x0020 */ s32 totalPay;
-    /* 0x0024 */ u8 reserved24[8];
+    /* 0x0024 */ s8 quantity;
+    /* 0x0025 */ u8 reserved25[7];
     /* 0x002C */ cmpCursorInfo_t listCursor;
     /* 0x0064 */ u8 unk_0064[0x1004];
     /* 0x1068 */ shpSellListWindow_t sellList;
@@ -304,7 +306,63 @@ void shpUpdateSeqSell(void)
         (cmpPadStopWork_t *)&shopUpdateWork->sellList.listCursor, button, 0x30));
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqBuyNums);
+extern s32 fclScriptStart(s32 script, s32 entry, void *process);
+extern s8 shpCalcPayOfMoney(s32 index, s8 kind);
+extern void func_002413B8(u32 button, s8 mode);
+
+void shpUpdateSeqBuyNums(void)
+{
+    shpUpdateWork_t *work;
+    s32 button = cmpGetPressedButton(0x333) & 0xFFFF;
+
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+
+    switch (button) {
+    case 1:
+        fclSetWorkValue(0, shopUpdateWork->paymentRemaining);
+        fclSetWorkValue(7, 0);
+        fclScriptStart(shopUpdateWork->script, 6, &shopUpdateWork->scriptArg);
+        shopUpdateWork->unk_0001 = 8;
+        shopUpdateWork->unk_0004 = button;
+        break;
+    case 2:
+        fclScriptStart(shopUpdateWork->script, 1, &shopUpdateWork->scriptArg);
+        shopUpdateWork->quantity = 1;
+        shopUpdateWork->unk_0001 = 1;
+        shopUpdateWork->unk_0004 = button;
+        break;
+    case 0x10:
+        shopUpdateWork->quantity++;
+        break;
+    case 0x20:
+        shopUpdateWork->quantity--;
+        break;
+    case 0x100:
+        shopUpdateWork->quantity -= 10;
+        break;
+    case 0x200:
+        shopUpdateWork->quantity += 10;
+        break;
+    }
+
+    work = shopUpdateWork;
+    {
+        s8 maxQuantity = shpChkChoiceMax(-1, 0, 0);
+        if (maxQuantity < work->quantity) {
+            shopUpdateWork->quantity = shpChkChoiceMax(-1, 0, 0);
+            button = 0;
+        }
+    }
+    if (shopUpdateWork->quantity <= 0) {
+        shopUpdateWork->quantity = 1;
+        button = 0;
+    }
+
+    shpCalcPayOfMoney(-1, 0);
+    func_002413B8(button, 3);
+}
 
 INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqSellNums);
 
@@ -437,7 +495,7 @@ extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
 extern s32 shpUpdateSeqRoot(void);
 extern void shpUpdateSeqBuy(void);
 extern void shpUpdateSeqSell(void);
-extern s32 shpUpdateSeqBuyNums(void);
+extern void shpUpdateSeqBuyNums(void);
 extern s32 shpUpdateSeqSellNums(void);
 extern s32 shpUpdateSeqConfirm(s8 mode);
 extern s32 shpUpdateSeqPay(void);
