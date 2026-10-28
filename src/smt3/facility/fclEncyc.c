@@ -977,7 +977,40 @@ void InitPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
     SetScreenOffset(pinst, 1);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseRegistConfirm);
+extern void CalcConfirmStatus(fclEncyc_registconfirmwork_tag *work);
+extern void fclRbnCalc(fclRibbon_t *ribbon);
+extern void CalcMoveRegistKeyHelp(fclEncyc_registconfirmwork_tag *work);
+extern void AcceptKeyRegistConfirm(fclEncyc_instance_tag *pinst);
+extern s32 fclChkMessageDraw(void *process);
+extern s32 fclGetFlag(s8 index);
+extern void AdjustStackCursor(s32 numlist, s16 *pindex, s16 *pshift);
+
+void CalcPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
+{
+    fclEncycConfirmDrawWork_t *work = (fclEncycConfirmDrawWork_t *)pinst->pwork;
+    s32 index;
+
+    CalcConfirmStatus(&work->phase);
+    fclRbnCalc(work->ribbon);
+    CalcMoveRegistKeyHelp(&work->phase);
+    if (work->phase.period == 0) {
+        AcceptKeyRegistConfirm(pinst);
+        /* cc1probe --jump: sibling keeps call 66 and reset 70 of work
+         * (pseudo 85); life deletes reset 70 after the call choice. Hooked,
+         * unhooked and plain outputs agree. Keep the native jal/epilogue. */
+        work = NULL;
+    } else if (fclChkMessageDraw(work->messageProcess) == 0) {
+        if (fclGetFlag(0) != 0) {
+            index = work->phase.unitIndex;
+            fclEncycRegist(&encycSaveWork->party[index].unit, 1);
+            AdjustStackCursor(pinst->unk_70 - 1, &pinst->lw_cur[0], &pinst->lw_cur[1]);
+            pinst->unk_5A = (pinst->unk_70 < 2) ? 8 : 0;
+        } else {
+            pinst->unk_5A = 0;
+        }
+        pinst->stat |= 2;
+    }
+}
 
 typedef struct fclEncycModelLink_t {
     sdfGrOt_t *tables[4];

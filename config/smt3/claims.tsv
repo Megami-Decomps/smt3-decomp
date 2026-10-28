@@ -273,6 +273,7 @@ src/smt3/newbattle/nbAi.c	redthing1	done	2026-10-28	1 fn / 188 B	three-entry AI 
 src/smt3/newbattle/nbAi.c	redthing1	done	2026-10-28	1 fn / 336 B	AI target selection; skill-specific random dispatch, selection marks and fallback command
 src/smt3/interface/itfMesManager.c	redthing1	done	2026-10-28	1 fn / 216 B	message and speaker vertical movement; recover separate tail helper boundary
 src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	1 fn / 360 B	name character deletion; shift live row and preserve count/global reloads
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 228 B	registration confirmation; qualified local reset preserves native callback call shape
 src/smt3/newbattle/nbHelpProcess.c	redthing1	done	2026-10-28	1 fn / 336 B	three-part help panel geometry with signed width, opacity and typed sprite resources
 src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	19 functions / 5244 B	sdfFileRpcHandleCmd matched from address-paired C donor
 src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	2 fn / 256 B	fclBlendColor and func_00213DF0; unsigned packed color arithmetic
