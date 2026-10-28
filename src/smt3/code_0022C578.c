@@ -5619,7 +5619,36 @@ void cmpSetModelRotate(void *model)
     mdlSetRotate(model);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetStatusModelParam);
+extern f32 dds3QuakeOffset[];
+
+void cmpSetStatusModelParam(void)
+{
+    sdfVector4_t target;
+    sdfVector4_t eye;
+    u32 frame = dds3GetFrameID();
+
+    SDF_VU0_COPYVECTOR(aViewEye, &cmpStatusModelBasePos);
+    SDF_VU0_COPYVECTOR(aViewTarget, &cmpStatusModelPos);
+    SDF_VU0_COPYVECTOR(aViewDown, D_00345F60);
+    sdf3DMakeScreenParam((sdf3DScreenParam_t *)dds3ScreenParam);
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SCALEVECTOR(600.0f);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_LOADVECTOR_B(dds3QuakeOffset);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&target);
+    SDF_VU0_LOADVECTOR(aViewEye);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&eye);
+    LookAtMatrix((f32 *)&target, (f32 *)&eye, aViewDown);
+    SDF_VU0_STOREMATRIX_NOMEM(&D_002FA240);
+    sdf3DMakeViewportPacket((sdf3DViewportPacket_t *)((u8 *)&dds3DrawEnv[frame] + 0x1520),
+                          (sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+    sdf3DSetCamera((sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+}
 
 extern void cmpSetStatusModelPose(s32 model);
 
