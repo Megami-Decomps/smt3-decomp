@@ -197,7 +197,42 @@ INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536538);
 
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536560);
 
-INCLUDE_ASM(const s32, "pb/pbMCard", pbWriteMCard);
+extern s32 sceMcWrite(s32 fd, void *buffer, s32 size);
+const char D_00536588[40] __attribute__((aligned(8))) = "\tregist write command. return = %d\n";
+const char D_005365B0[40] __attribute__((aligned(8))) = "\tcan't write a file < %s > err = %d\n";
+
+s32 pbWriteMCard(s32 port, s32 slot, char *fileName, s32 flags,
+                 void *buffer, s32 size)
+{
+    s32 fd;
+    s32 writeSync;
+    s32 commandResult;
+
+    printf(D_0054F608);
+    commandResult = sceMcOpen(port, slot, fileName, flags);
+    printf(D_00536498, commandResult);
+    sceMcSync(0, NULL, &fd);
+    if (fd < 0) {
+        printf(D_005364C0, fileName, fd);
+        return fd;
+    }
+
+    commandResult = sceMcWrite(fd, buffer, size);
+    printf(D_00536588, commandResult);
+    sceMcSync(0, NULL, &writeSync);
+    if (writeSync < 0) {
+        printf(D_005365B0, fileName, writeSync);
+    }
+
+    commandResult = sceMcClose(fd);
+    printf(D_00536538, commandResult);
+    sceMcSync(0, NULL, &commandResult);
+    if (commandResult < 0) {
+        printf(D_00536560, fileName, commandResult);
+    }
+    printf(D_0054F608);
+    return writeSync;
+}
 
 INCLUDE_ASM(const s32, "pb/pbMCard", pb_draw_error_Process);
 
