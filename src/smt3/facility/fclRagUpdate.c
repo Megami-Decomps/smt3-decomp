@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern s32 evtStartEvent(s32 no);
 
@@ -565,7 +566,49 @@ void ragUpdateSeqErr(void)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdate);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern s32 fclChkDbgProcess(void);
+extern void ragUpdateSeqRoot(void);
+extern void ragUpdateSeqItem(void);
+extern void ragUpdateSeqStatus(void);
+extern s32 ragUpdateSeqConfirm(void);
+extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
+
+s32 ragUpdate(dds3ProcessID_t *id)
+{
+    s8 previous;
+    u8 flags;
+    ragUpdateWork = dds3GetProcessData(id);
+    previous = ragUpdateWork->unk_0001;
+    if (fclChkDbgProcess() != 0) return 0;
+    ragUpdateSeqMitama();
+    if (fclGetFlag(1) == 0) return 0;
+    flags = ragUpdateWork->unk_0000;
+    if (flags & 0x40) return -1;
+    if ((flags & 2) && (flags & 1)) {
+        switch (ragUpdateWork->unk_0001) {
+        case 0: ragUpdateSeqRoot(); break;
+        case 1: ragUpdateSeqItem(); break;
+        case 2: ragUpdateSeq2(); break;
+        case 3: ragUpdateSeq3(); break;
+        case 4: ragUpdateSeqTalk(); break;
+        case 5:
+            if (cmpChkSeqInfo((cmbGbWork_t *)ragUpdateWork) == 2) {
+                fclClearFlag(1);
+                fclSetWorkValue(1, 0);
+                ragUpdateWork->unk_0000 |= 0x10;
+            }
+            break;
+        case 6: ragUpdateSeqErr(); break;
+        case 7: ragUpdateSeqStatus(); break;
+        case 8:
+            if (ragUpdateSeqConfirm() == 0) return 0;
+            break;
+        }
+    }
+    cmpUpdateSeqInfo(ragUpdateWork, previous);
+    return 0;
+}
 
 s32 fclStartRecoverEvent(s8 value)
 {
