@@ -382,32 +382,6 @@ written as a braced `else` block rather than a flattened `else if`. The
 documented rule that declaration order is inert for register allocation
 holds here.
 
-## Flow1_32 (newbattle/nbMakePacket, 0x400)
-
-231 of 252 words match, four words short of retail's 256.
-
-Twelve `id`-pair arms in the Flow4_1 shape returning 2, then a twelve-term
-`||` chain over `n->ework->id` in retail's unsorted order giving the flat
-`beq` ladder and message 0x80, then the `datGetRace(n->ework) == 0x13 ||
-== 0x12 || n->ework->id == 0x9A` test against `negoreqtype` from
-`Flow1_33` giving message 0x127, then message 0x20. Every word up to
-+0x2CC matches.
-
-What is left is which pair of the three message blocks cross-jumps. All
-three end in the same `addu`, `daddu $7`, `jal nbDispNegoMessage`,
-`lw $5, 0x1B0($3)`, `addiu $2, 0x1` tail. Retail merges the 0x80 block into
-the 0x127 block's tail and leaves the 0x20 block its own full copy; ee-gcc
-merges the 0x127 block into the 0x20 block's and leaves 0x80 its own, which
-is one tail fewer overall.
-
-Ruled out: the three blocks as separate `if`s with a `return` in each; as an
-`if`/`else if`/`else` with one `return` at the end, and with a `return` in
-each arm; the 0x20 block hoisted in front of the 0x127 one by inverting the
-race test; the race test split into two nested `if`s; and the 0x20 block as
-the `else` of the race `if`. The `||` chain must stay a chain: making the
-0x80 block an `else if` arm instead turns the ladder's `beq`s into `beql`s
-with `lw $3, 0x184($16)` hoisted into each slot, which costs 50 more words.
-
 ## nbCollectBadCurseUnits (newbattle/nbEncProcess, 0xA4)
 
 23 of 41 words match at the exact 164-byte size; first difference is at

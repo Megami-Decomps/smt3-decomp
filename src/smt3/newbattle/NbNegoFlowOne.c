@@ -591,8 +591,6 @@ s32 Flow1_33(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 21 of 252 words differ (first at +0x2CC). */
-#ifdef NON_MATCHING
 s32 Flow1_32(nbNegoProcessData_t *n)
 {
     if (n->ework->id == 0x3 && n->pwork->id == n->ework->id) {
@@ -644,6 +642,9 @@ s32 Flow1_32(nbNegoProcessData_t *n)
         nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x7F, 0);
         return 2;
     }
+    /* Qualified cc1probe --jump: .27.jump2 merges message 0x80 into
+     * 0x127's call tail and keeps 0x20 separate. RTL/assembly parity
+     * verified; this completion block follows CONTRIBUTING's forward-branch rule. */
     if (n->ework->id == 0x96 ||
         n->ework->id == 0x1D ||
         n->ework->id == 0x3 ||
@@ -658,21 +659,19 @@ s32 Flow1_32(nbNegoProcessData_t *n)
         n->ework->id == 0x99) {
         n->waitframe = 0xF;
         nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x80, 0);
-        return 1;
+        goto complete;
     }
     if ((datGetRace(n->ework) == 0x13 || datGetRace(n->ework) == 0x12 ||
          n->ework->id == 0x9A) && n->negoreqtype == 0) {
         n->waitframe = 0xF;
         nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x127, 0);
-        return 1;
+        goto complete;
     }
     n->waitframe = 0xF;
     nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x20, 0);
+complete:
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_32);
-#endif
 
 s32 Flow1_12(nbNegoProcessData_t *n)
 {
