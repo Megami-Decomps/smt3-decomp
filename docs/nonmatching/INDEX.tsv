@@ -187,6 +187,7 @@ gameKey1	pb/pbGame	0x2A8	150 of 168 words differ	docs/nonmatching/pb/pbGame.md	5
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame.md	34
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md	59
 roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/nonmatching/pb/pbGame.md	79
+pbEditInitProc	pb/pbMain	0x148	79 of 82 words match	docs/nonmatching/pb/pbMain.md	5
 cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/nonmatching/result/rstcalc.md	5
 cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/nonmatching/result/rstcalc.md	27
 datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/nonmatching/result/rstcalc.md	49
