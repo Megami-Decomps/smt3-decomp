@@ -549,7 +549,50 @@ s32 SelectHpMp(nbDebugProcessData_t *d)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectBad);
+extern s32 badcur;
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 bad);
+
+s32 SelectBad(nbDebugProcessData_t *d)
+{
+    s32 i;
+    s32 y;
+    sdfDrawTag_t *tag;
+    datUnitWork_t *work;
+    s32 color;
+    s32 result;
+
+    i = 0;
+    y = 100;
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    work = nbGetUnitWorkFromFormindex(d->form->formindex);
+    dds3ConsPanelTagLinkZ(tag, 0x160, 0x5C, 10, 15, 0xFEFFFE);
+    for (; i < 13; i++) {
+        color = i == badcur ? 4 : 0;
+        if (i == 0) {
+            DispBadStatus(0x168, y, 0, color);
+        } else {
+            DispBadStatus(0x168, y, 1u << (i - 1), color);
+        }
+        y += 12;
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+    result = dds3SelectMenu(0, 1, 13, 1, 13, NULL, NULL, NULL, &badcur);
+    if (result == -1) {
+        return -1;
+    }
+    if (result != 1) {
+        return 0;
+    }
+    if (badcur == 0) {
+        nbMakeBadKaifukuPacket(0, 0, d->form);
+    } else {
+        work->badstatus &= 0xF000;
+        nbMakeBadDamagePacket(0, 0, d->form, 1u << (badcur - 1));
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMotData);
 
