@@ -69,7 +69,8 @@ typedef struct
     /* 0x0054 */ s32 stat;
     /* 0x0058 */ u16 unk_58;
     /* 0x005A */ u16 unk_5A;
-    /* 0x005C */ u8 unk_5C[8];
+    /* 0x005C */ s32 selectedIndex;
+    /* 0x0060 */ u8 reserved0060[4];
     /* 0x0064 */ s16 lw_cur[4];
     /* 0x006C */ u8 unk_6C;
     /* 0x006D */ u8 unk_6D;
@@ -275,7 +276,7 @@ void fclEncycInitRecord(s32 mode)
 }
 
 extern void *sdfMemAllocDirect(s32 size);
-extern s32 sdfMemLock(void *handle);
+extern void *sdfMemLock(void *handle);
 extern void InitializeInstance(fclEncyc_instance_tag *pinst);
 extern s32 fclEncycGetNum(void);
 extern void CreateSortIndexByRace(s16 *indices);
@@ -587,19 +588,20 @@ void InitializeInstance(fclEncyc_instance_tag *pinst)
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
-extern s32 sdfMemLock(void *aHandle);
+extern void *sdfMemLock(void *aHandle);
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
-extern s32 sdfMemLock(void *aHandle);
+extern void *sdfMemLock(void *aHandle);
 
-void allocPhaseBuffer(fclEncyc_instance_tag *work, s32 aSize)
+void *allocPhaseBuffer(fclEncyc_instance_tag *work, s32 aSize)
 {
     void *buf = sdfMemAllocDirect(aSize);
-    s32 lock = sdfMemLock(buf);
+    void *locked = sdfMemLock(buf);
 
     work->allocation = buf;
-    work->pwork = lock;
+    work->pwork = (s32)locked;
+    return locked;
 }
 
 void ReleaseWork(fclEncyc_instance_tag *pinst)
@@ -768,9 +770,9 @@ void DestPhaseRegistTop(fclEncyc_instance_tag *pinst)
     ReleaseWork(pinst);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseRegistConfirm);
-
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseRegistConfirm);
+typedef struct {
+    s32 pm[4];
+} sdfIVector4_t;
 
 typedef struct fclEncycConfirmDrawWork_t {
     fclEncyc_registconfirmwork_tag phase;
@@ -778,6 +780,97 @@ typedef struct fclEncycConfirmDrawWork_t {
     fclRibbon_t *ribbon;
     void *messageProcess;
 } fclEncycConfirmDrawWork_t;
+
+extern fclRibbon_t *fclRbnInit(s32 num, s32 active,
+                               sdfTexHandle_t *tex0, sdfTexHandle_t *tex1);
+extern void fclRbnSetPara(fclRibbon_t *handle, s32 index,
+                          const sdfIVector4_t *posActive, const sdfIVector4_t *posDeactive,
+                          const sdfIVector4_t *uvActive, const sdfIVector4_t *uvDeactive,
+                          sdfTexHandle_t *texActive, sdfTexHandle_t *texDeactive);
+extern void dds3VisibleSceneBasic(void *scene, s32 visible);
+extern void *dds3GetActiveScene(void);
+extern void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag);
+extern void ChangeDevilObjectRegistConfirm(s32 unitIndex,
+                                           fclEncyc_instance_tag *pinst);
+extern void *allocPhaseBuffer(fclEncyc_instance_tag *work, s32 size);
+
+void InitPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
+{
+    fclEncycConfirmDrawWork_t *work;
+    sdfIVector4_t vectors[4];
+    void *scene;
+
+    work = (fclEncycConfirmDrawWork_t *)allocPhaseBuffer(pinst, 0x208);
+
+    work->phase.statusAlpha = 0xC0;
+    work->phase.xRecord = 0xB4;
+    work->phase.incRecord = 0x28;
+    work->phase.registX = 0x1370;
+    work->phase.registY = 0xD20;
+    work->phase.registInc = 0x20;
+    work->phase.dispregist = 1;
+    work->phase.flag = 0;
+    work->phase.period = 0;
+    work->phase.xNow = 0;
+    work->phase.incNow = 0;
+    work->phase.registAlpha = 0;
+    work->messageProcess = NULL;
+
+    scene = dds3GetActiveScene();
+    if (scene != NULL) {
+        dds3VisibleSceneBasic(scene, 0);
+    }
+    ChangeDevilObjectRegistConfirm(pinst->selectedIndex, pinst);
+
+    work->ribbon = fclRbnInit(2, 1,
+        (sdfTexHandle_t *)pinst->texHandle[2],
+        (sdfTexHandle_t *)pinst->texHandle[3]);
+
+    vectors[0].pm[0] = 0x790;
+    vectors[0].pm[1] = 0x18;
+    vectors[0].pm[2] = 0xF20;
+    vectors[0].pm[3] = 0x100;
+    vectors[1].pm[0] = 0x7D0;
+    vectors[1].pm[1] = 0x40;
+    vectors[1].pm[2] = 0xEE0;
+    vectors[1].pm[3] = 0xE0;
+    vectors[2].pm[0] = 0x10;
+    vectors[2].pm[1] = 0x210;
+    vectors[2].pm[2] = 0x7A0;
+    vectors[2].pm[3] = 0x3E0;
+    vectors[3].pm[0] = 0x10;
+    vectors[3].pm[1] = 0x3F0;
+    vectors[3].pm[2] = 0x720;
+    vectors[3].pm[3] = 0x530;
+    fclRbnSetPara(work->ribbon, 0, &vectors[0], &vectors[1],
+                  &vectors[2], &vectors[3],
+                  (sdfTexHandle_t *)pinst->texHandle[4],
+                  (sdfTexHandle_t *)pinst->texHandle[4]);
+
+    vectors[0].pm[0] = 0x10C0;
+    vectors[0].pm[1] = 0x18;
+    vectors[0].pm[2] = 0x18B0;
+    vectors[0].pm[3] = 0x100;
+    vectors[1].pm[0] = 0x10F0;
+    vectors[1].pm[1] = 0x40;
+    vectors[1].pm[2] = 0x1880;
+    vectors[1].pm[3] = 0xE0;
+    vectors[2].pm[0] = 0x7B0;
+    vectors[2].pm[1] = 0x210;
+    vectors[2].pm[2] = 0xFA0;
+    vectors[2].pm[3] = 0x3E0;
+    vectors[3].pm[0] = 0x730;
+    vectors[3].pm[1] = 0x3F0;
+    vectors[3].pm[2] = 0xEC0;
+    vectors[3].pm[3] = 0x530;
+    fclRbnSetPara(work->ribbon, 1, &vectors[0], &vectors[1],
+                  &vectors[2], &vectors[3],
+                  (sdfTexHandle_t *)pinst->texHandle[4],
+                  (sdfTexHandle_t *)pinst->texHandle[4]);
+    SetScreenOffset(pinst, 1);
+}
+
+INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseRegistConfirm);
 
 typedef struct fclEncycModelLink_t {
     sdfGrOt_t *tables[4];
