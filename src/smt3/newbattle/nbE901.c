@@ -6,7 +6,7 @@
 #include "newdata.h"
 
 /* The model owner behind a unit handle; only the root node is named. */
-typedef struct { u8 unk_00[0x18]; struct sdfModelRootNode_t *inner; } nbUnitOwner_t;
+typedef struct { u8 reserved00[0x18]; struct sdfModelRootNode_t *inner; } nbUnitOwner_t;
 
 typedef struct evtUnitHandle_t
 {

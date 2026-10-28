@@ -14,7 +14,7 @@ typedef struct evtFrameInfo_t {
 } evtFrameInfo_t;
 
 typedef struct {
-    u8 unk00[0x1C];
+    u8 reserved00[0x1C];
     evtFrameInfo_t *p;
 } evtViewerObject_s;
 
@@ -26,9 +26,9 @@ typedef struct {
     s32 firstframe;
     s32 lastframe;
     s32 nowframe;
-    u8 unk1C[0x221C];
+    u8 reserved1C[0x221C];
     s32 framedisp;                  /* 0x2238 */
-    u8 unk223C[0x48];
+    u8 reserved223C[0x48];
     s32 menusw;                     /* 0x2284 */
     u8 unk2288[0x78];
     s32 frameFirst;                 /* 0x2300 */
