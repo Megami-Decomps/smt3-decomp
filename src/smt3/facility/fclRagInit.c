@@ -2,6 +2,7 @@
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
+#include "fclRag.h"
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
@@ -781,7 +782,33 @@ s32 ragFindItemSlot(ragItemReq_t *req)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", ragSetSeqPhase2);
+extern void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst);
+extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
+
+void ragSetSeqPhase2(ragOffer_t *offer, datUnitWork_t *unit)
+{
+    s32 i;
+    ragCustomUnit_t *custom;
+
+    cmbCopyDefaultDevilToStock(offer->devilId, unit);
+    custom = &offer->unit;
+    if (offer->custom == 0) {
+        return;
+    }
+    unit->level = custom->level;
+    i = 0;
+    do {
+        unit->param[i] = custom->params[i];
+        i++;
+    } while (i < 6);
+    unit->skillcnt = 0;
+    for (i = 0; i < 8; i++) {
+        if ((unit->skill[i] = custom->skills[i]) != 0) {
+            unit->skillcnt++;
+        }
+    }
+    unit->exp = datCopyDevilWorkEntry(unit, unit->level);
+}
 
 extern campStatusPanel_t *ragCalcWork;
 

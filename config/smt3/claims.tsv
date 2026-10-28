@@ -530,3 +530,4 @@ src/smt3/newbattle/nbMakePacket.c	redthing1	done	2026-10-28	1 fn / 756 B	activat
 coverage sweep, fourth batch	z19	open	2026-10-28	55 fn / 68680 B	33 units finishable; no sub-agents
 src/smt3/facility/fclDraw.c	redthing1	done	2026-10-28	1 fn / 420 B	item count/help rendering with typed inventory quantities and reused panel pointer; owner 28 match, 0 differ
 src/smt3/newbattle/nbCameraBoss.c	redthing1	done	2026-10-28	1 fn / 264 B	E915 camera target/direction interpolation with one binary32 blend factor; owner 101 match, 0 differ
+src/smt3/facility/fclRagInit.c	redthing1	done	2026-10-28	1 fn / 196 B	custom unit setup with shared 0x2C offer records and single-read skill publication; owners 23 and 18 match, 0 differ

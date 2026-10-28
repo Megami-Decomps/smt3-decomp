@@ -2,6 +2,7 @@
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
+#include "fclRag.h"
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
@@ -271,18 +272,6 @@ s8 ragChkDevilLevelErr(datUnitWork_t *stock)
         return 0;
     }
 }
-
-typedef struct {
-    u16 devilId;
-    s8 custom;
-    u8 reserved03;
-    u8 level;
-    u8 reserved05[5];
-    u8 params[6];
-    u16 skills[8];
-    u8 reserved20[12];
-} ragOffer_t;
-extern void ragSetSeqPhase2(ragOffer_t *offer, datUnitWork_t *unit);
 
 void ragSetSeqPhase(s8 phase)
 {
