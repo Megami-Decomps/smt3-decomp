@@ -45,7 +45,7 @@ typedef struct
 {
     /* 0x00 */ void *unk_00;
     /* 0x04 */ void *unk_04;
-    /* 0x08 */ void *unk_08;
+    /* 0x08 */ sdfMemHandle_t *unk_08;
     /* 0x0C */ u8 unk_0C[0x34];
     /* 0x40 */ s32 unk_40;
     /* 0x44 */ s32 unk_44;
@@ -66,6 +66,14 @@ typedef struct
 } mselGlobalWork_t;
 
 extern mselGlobalWork_t *gGlobal;
+
+extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
+extern s32 sprintf(char *buffer, const char *format, ...);
+extern char D_0054FD50[];
+extern char D_0054FD58[];
+extern char *datExplainTable[];
+extern char *text2[];
+
 
 extern void frDestroyFontRequestAfter(void *pFRQ);
 
@@ -186,7 +194,80 @@ void mselToggleFlag(u8 *toggle, s32 *value, s8 dir)
 INCLUDE_ASM(const s32, "kernel/dds3TitleMain", mselToggleFlag);
 #endif
 
-INCLUDE_ASM(const s32, "kernel/dds3TitleMain", mselMakeSaveText);
+/* Layout recovered from facility/fclEncyc.c; native indexes these rows with
+ * a 0xB0 stride from offset 0x10 of the handle's data. */
+typedef struct fclencyceelem_t {
+    u16 id;
+    u16 reserved0;
+    u16 maxhp;
+    u16 maxmp;
+    u32 exp;
+    u16 level;
+    s8 param[6];
+    s8 skillparam[6];
+    u16 skillcnt;
+    u16 skill[24];
+    s8 mitamaparam[6];
+    s8 levelupparam[6];
+    u16 keisyoskill[24];
+    u8 keiattr[24];
+    u16 hensinmae;
+    u16 reserved1;
+    u32 flag;
+    u32 reserved2;
+    u32 hensinmaeexp;
+} fclencyceelem_t;
+
+typedef struct mselSaveData_t {
+    u8 header[0x10];
+    fclencyceelem_t records[1];
+} mselSaveData_t;
+
+typedef struct datDevilFormat_t {
+    u32 flag;
+    u8 race, level;
+    u16 hp, maxhp, mp, maxmp;
+    s16 aisyoid;
+    s8 param[6];
+    u16 skill[8];
+    s16 keisyotype;
+    u16 keisyoform, dropmakka, dropexp;
+    u8 dropitem[2], droppoint[2];
+    u16 specialbit;
+    u8 specialitem, specialpoint, hougyokupoint, masekipoint;
+    s8 attackattr;
+    u8 attackcnt, attackinterval, reserve1;
+} datDevilFormat_t;
+extern datDevilFormat_t datDevilTable[];
+
+void mselMakeSaveText(s32 *devilIds, u32 color, u32 nameColor)
+{
+    s32 index;
+    s32 devilId;
+    s32 level;
+    s32 y;
+    char text[0x20];
+    mselSaveData_t *saveData;
+
+    saveData = (mselSaveData_t *)sdfMemGetPtr(gGlobal->unk_08);
+    for (index = 0; index < 5; index++) {
+        devilId = devilIds[index];
+        y = 0x32 + index * 0x10;
+        if (devilId != -1) {
+            fclencyceelem_t *record = &saveData->records[devilId];
+            mselDrawMenuText(0x64, y, color, (s32)datExplainTable[datDevilTable[record->id].race]);
+            mselDrawMenuText(0xA4, y, nameColor, (s32)text2[record->id]);
+            sprintf(text, D_0054FD50);
+            mselDrawMenuText(0x140, y, color, (s32)text);
+            level = record->level;
+            if (level >= 0x64) {
+                level = 0x63;
+            }
+            sprintf(text, D_0054FD58, level);
+            mselDrawSaveNum(0x15A, y + 2, color, (s32)text);
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DE50);
 
