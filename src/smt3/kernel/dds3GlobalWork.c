@@ -5,6 +5,7 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "field.h"
+#include "fpu.h"
 
 extern s32 evtBitCheck(s32 no);
 
@@ -600,7 +601,91 @@ u64 *dds3PrimLine(s32 aX0, s32 aY0, s32 aZ0, s32 aColor0, s32 aX1, s32 aY1, s32 
     return packet;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3GlobalWork", dds3PrimLine3D);
+extern f32 D_00529630[4];
+extern sdfMatrix4_t D_002FA240;
+extern const f32 D_002FA820[13][4];
+extern const f32 D_002FA920[4];
+extern const u8 D_002FA8F0[20][2];
+extern void MultMatrixRev(const void *aMatrix);
+
+void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
+{
+    u64 xyz[13];
+    u64 color[13];
+    volatile f32 axis[4] __attribute__((aligned(16)));
+    volatile s32 point[4] __attribute__((aligned(16)));
+    u64 *packet;
+    u64 *endColor;
+    u64 *endXyz;
+    const f32 (*outline)[4];
+    const u8 (*pair)[2];
+    s32 i;
+    s32 shade;
+
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_SET_ROW2();
+    SDF_VU0_STOREVECTOR(axis);
+    if (ffabsf(axis[0]) < 0.000001f && ffabsf(axis[2]) < 0.000001f) {
+        axis[2] = -axis[1];
+        axis[0] = 0.0f;
+        axis[1] = 0.0f;
+        SDF_VU0_LOADVECTOR_B(axis);
+    } else {
+        SDF_VU0_LOADVECTOR_B(D_00529630);
+    }
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_SET_ROW0();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_GET_ROW2();
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_SET_ROW1();
+    SDF_VU0_RESET_ROW3();
+    MultMatrixRev(&D_002FA240);
+    SDF_VU0_LOADVECTOR(D_002FA920);
+    SDF_VU0_SCALE_XYZ_REV();
+    axis[0] = (f32)x;
+    axis[1] = (f32)y;
+    axis[2] = 160.0f;
+    SDF_VU0_LOAD_ROW3(axis);
+
+    shade = highlighted ? 0x101 : 0x10101;
+    outline = D_002FA820;
+    for (i = 0; i != 13; i++) {
+        SDF_VU0_LOADVECTOR(outline[i]);
+        SDF_VU0_APPLYMATRIX_XYZ1();
+        SDF_VU0_FTOI0();
+        SDF_VU0_STOREVECTOR(point);
+        xyz[i] = (((u32)point[0] & 0xFFFF) | ((u32)point[1] << 16)) | ((u64)z << 32);
+        color[i] = (u32)(shade * point[2] | 0x80000000) | ((u64)0x3F800000 << 32);
+    }
+
+    packet = (u64 *)sdfGrAllocPacketBuff(0x2C0);
+    packet[0] = 0x2B;
+    packet[1] = 0x5000002B00000000ULL;
+    packet[2] = 0x1400000000000001ULL;
+    packet[3] = 0;
+    packet[4] = 0x189;
+    packet[5] = 0;
+    packet[6] = 0x4400000000008014ULL;
+    packet[7] = 0x5151;
+    endColor = packet + 10;
+    endXyz = packet + 11;
+    pair = D_002FA8F0;
+    for (i = 0; i != 20; i++) {
+        s32 index = pair[i][0];
+
+        endColor[i * 4 - 2] = color[index];
+        endXyz[i * 4 - 2] = xyz[index];
+        index = pair[i][1];
+        endColor[i * 4] = color[index];
+        endXyz[i * 4] = xyz[index];
+    }
+    return packet;
+}
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA08);
 
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", slNewGameBit2211);
