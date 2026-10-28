@@ -108,68 +108,32 @@ allowed; the macro has to name the one operation it performs, as
 `PS2_STORE_ZERO_QUAD` does. A function whose body is otherwise ordinary C with
 one such macro at the right point is a normal match.
 
-The 21 split into two kinds, and only one kind is worth a draft.
+The 21 split into two kinds, and the batch has now been worked through.
 
-**Five have a frame, callee-saved stores, and two bad instructions out of
-dozens.** These are compiled-looking bodies with one unreachable idiom, so
-nearly every word is ordinary C and a draft or a full match is in reach:
+**The macro technique works.** `PS2_WORD_BIT_LENGTH` in `include/ps2asm.h`
+emits retail's four-instruction `plzcw`/`andi`/`addi`/`subu` idiom exactly, in
+retail's order, with the right register roles, at the point in the body the C
+puts it, and does so in two different functions. `addi` is not a reason to
+skip anything. What it costs is the schedule: cc1 models the block as one insn
+with unit latency. See [asm-macros.md](asm-macros.md).
 
-| function | bad / total | saves |
-|---|---|---|
-| `release_movieobj2` | 2 of 151 | 5 |
-| `sdfTexSetPacket` | 2 of 91 | 1 |
-| `corePktVu0Run` | 2 of 77 | 3 |
-| `corePktEmitRefMapPass` | 2 of 73 | 2 |
-| `sdf_2BFC58` | 2 of 37 | 1 |
+**Of the five with a frame, only two are compiled-looking bodies.** The "two
+bad instructions out of dozens" count undercounts the other three, because the
+instructions cc1 cannot select are not only `addi`:
 
-**The other sixteen are frameless leaf routines with no callee-saved stores and
-5 to 23 percent unreachable instructions.** `corePktLoadVerts` is the shape: 13
-instructions, a `bne` back to the function's own label, and the delay slot
-carrying `addi $4, $4, 0x60`. Wrapping a whole body like that in one `__asm__`
-block would report a match while recording nothing the split asm does not
-already say, so leave them as `INCLUDE_ASM`.
+| function | what it really is |
+|---|---|
+| `sdfTexSetPacket` | ordinary C plus the bit-length idiom. Draft at the exact size and dataflow; [../nonmatching/sdf/sdfTex.md](../nonmatching/sdf/sdfTex.md) |
+| `release_movieobj2` | ordinary C plus the idiom twice. Draft, 148 of 150 instructions; [../nonmatching/sdf/sdfMovie.md](../nonmatching/sdf/sdfMovie.md) |
+| `corePktVu0Run` | assembly throughout: `ctc2`, `vlqi`, `vilwr`, `cfc2`, `pextlb`, and a poll loop on the VIF1 and DMA status registers at 0x10008000 and 0x10003800. The frame exists because it needs `$16`-`$18`, not because it was compiled. |
+| `corePktEmitRefMapPass` | assembly throughout: a dozen VU0 macro-mode ops on vf24-vf26 and vf10, two `pextlb`/`pextlh`/`vitof0` colour unpacks, and a tail `j corePktEmitTexTrisCtx2`. The frame is for the `jal corePktLerpUVColorChain`. |
+| `sdf_2BFC58` | a computed `jr` into an unrolled `sq` block, as above. |
 
-`sdfTexSetPacket` is the one to try first, because its unreachable instruction
-is inside an idiom that needs a macro anyway:
-
-    plzcw   $2, $5
-    andi    $2, $2, 0xFF
-    addi    $5, $0, 0x1F
-    subu    $5, $5, $2
-
-That is `31 - leading_zeros`, a floor-log2 of the texture dimension, and it
-appears twice, each time as four contiguous instructions with ordinary work
-scheduled between the two. `plzcw` is MMI and cc1 never selects it either, so
-one macro named for the whole operation covers the `addi` as a side effect. The
-risk is register binding: retail computes through `$5` and `$6`, the parameter
-registers, with `$2` as scratch.
-
-Where a match is not yet in reach, park a draft behind `#ifdef NON_MATCHING`
-carrying the logic in C, so the structure is recorded and the next person starts
-from it rather than from the assembly.
-
-`sdf/sdfDev9`:
-- `sdf_2BFC58` (148 B)
-`sdf/sdfMovie`:
-- `release_movieobj2` (604 B)
-`sdf/sdfTex`:
-- `sdfTexSetPacket` (364 B)
-`sdf/sdfVu1`:
-- `corePktVu0Run` (308 B)
-- `corePktEmitRefMapPass` (292 B)
-- `corePktXfmLightClipUV` (252 B)
-- `corePktXfmLightClipUVPB` (212 B)
-- `corePktSkinPointsAccum` (204 B)
-- `corePktXfmLightClip` (204 B)
-- `corePktXfmLightClipPB` (164 B)
-- `corePktApplyFaceDivColor` (156 B)
-- `corePktRelightBackFaces` (144 B)
-- `corePktSkinPointsFirst` (140 B)
-- `corePktMorphVertsNorms` (116 B)
-- `corePktSkinVertAccum` (100 B)
-- `corePktXfmUV` (100 B)
-- `corePktSkinVertFirst` (92 B)
-- `corePktLoadVertsNorms` (76 B)
-- `corePktMorphVerts` (76 B)
-- `corePktNormalizeNorms` (60 B)
-- `corePktLoadVerts` (52 B)
+**The other sixteen are frameless leaf routines**, `corePktLoadVerts` and the
+fifteen beside it. Every one now carries a C reference implementation behind
+`#ifdef NON_MATCHING` recording the record layout, the stream strides and the
+alignment reasons, with no word count because there is nothing to be close to:
+[../nonmatching/sdf/sdfVu1.md](../nonmatching/sdf/sdfVu1.md). One of them,
+`corePktSkinVertFirst`, turns out to carry a register slip in retail: it
+branches on the destination pointer instead of the count and stores through
+the weight pointer instead of the destination.

@@ -42,6 +42,7 @@ page and line to open. Conventions are in
 | 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 2 | sdf/sdfQuat | [sdf/sdfQuat.md](sdf/sdfQuat.md) |
+| 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
 | 2 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
@@ -52,7 +53,6 @@ page and line to open. Conventions are in
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
-| 1 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |
 | 1 | script/scrParameterCommand | [script/scrParameterCommand.md](script/scrParameterCommand.md) |
 | 1 | rstupdate | [result/rstupdate.md](result/rstupdate.md) |
