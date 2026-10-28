@@ -1,6 +1,7 @@
 #include "common.h"
 #include "basic.h"
 #include "model.h"
+#include "ps2asm.h"
 
 typedef struct {
     /* 0x00 */ dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
@@ -53,6 +54,20 @@ extern sdfModelOt_t D_002F69B8[];
 extern sdfModelOt_t dds3MatterDrawParam;
 
 extern dds3Basic_t *D_0054EAE8;
+
+extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
+
+extern void dds3OffPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
+
+extern void dds3GetRotPoseSet(dds3Basic_t *pBasic);
+
+extern void dds3GetTMPoseSet(dds3Basic_t *pBasic);
+
+extern void dds3GetPosPoseSet(dds3Basic_t *pBasic);
+
+extern s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z);
+
+extern void sdfModelEvalTm(sdfModelRootNode_t *aRoot);
 
 dds3ObjectBaseControlWorkData_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *pBasic) {
     const dds3MatterObjectBasicWorkData_t *work = pBasic->workdata;
@@ -143,7 +158,107 @@ void dds3MatterObjectBasicDestructor(dds3Basic_t *aPtr) {
     sdfChipFreeDirect(work);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3MatterObjectBasic", dds3MatterObjectBasicMainProcedure);
+s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *aPtr) {
+    f32 x;
+    f32 y;
+    f32 z;
+    dds3MatterObjectBasicWorkData_t *work = aPtr->workdata;
+    sdfModelRootNode_t *model;
+    s32 alpha;
+    dds3PoseSet_t *pose;
+
+    switch (work->alpmode) {
+    case 0:
+        aPtr->color = 0x80808080;
+        break;
+    case 1:
+        aPtr->color = 0x80808080;
+        break;
+    case 2:
+        aPtr->color = 0x00808080;
+        break;
+    case 3:
+        alpha = *((u8 *)&aPtr->color + 3);
+        if (alpha < 0x80) {
+            alpha += 8;
+        }
+        if (alpha > 0x80) {
+            alpha = 0x80;
+        }
+        aPtr->color = (alpha << 24) | 0x808080;
+        break;
+    case 4:
+        alpha = *((u8 *)&aPtr->color + 3);
+        if (alpha > 0x40) {
+            alpha -= 8;
+        }
+        if (alpha < 0x40) {
+            alpha = 0x40;
+        }
+        aPtr->color = (alpha << 24) | 0x808080;
+        break;
+    case 5:
+        alpha = *((u8 *)&aPtr->color + 3);
+        if (alpha < 0x80) {
+            alpha += 4;
+        }
+        if (alpha > 0x80) {
+            alpha = 0x80;
+        }
+        aPtr->color = (alpha << 24) | 0x808080;
+        break;
+    case 6:
+        alpha = *((u8 *)&aPtr->color + 3);
+        alpha = (alpha != 0) ? alpha - 4 : 0;
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        aPtr->color = (alpha << 24) | 0x808080;
+        break;
+    case 7:
+        alpha = *((u8 *)&aPtr->color + 3);
+        if (alpha < 0x80) {
+            alpha += 2;
+        }
+        if (alpha > 0x80) {
+            alpha = 0x80;
+        }
+        aPtr->color = (alpha << 24) | 0x808080;
+        break;
+    case 8:
+        alpha = *((u8 *)&aPtr->color + 3);
+        alpha = (alpha != 0) ? alpha - 2 : 0;
+        if (alpha <= 0) {
+            alpha = 0;
+        }
+        aPtr->color = (alpha << 24) | 0x808080;
+        break;
+    }
+    model = dds3ObjectBaseGetModelHandle(aPtr);
+    if (model != NULL) {
+        dds3OffPoseSetFlag(aPtr->poseset, 1);
+        dds3GetRotPoseSet(aPtr);
+        SDF_VU0_STOREVECTOR(&model->rotate);
+        dds3GetTMPoseSet(aPtr);
+        dds3GetPosPoseSet(aPtr);
+        if (fldDoor_Step(aPtr->serialID, &x, &y, &z) != 0) {
+            pose = aPtr->poseset;
+            pose->pos.x = work->base_pos[0] + work->move_pos[0] + x;
+            pose->pos.y = work->base_pos[1] + work->move_pos[1] + y;
+            pose->pos.z = work->base_pos[2] + work->move_pos[2] + z;
+        } else {
+            pose = aPtr->poseset;
+            pose->pos.x = work->base_pos[0] + work->move_pos[0];
+            pose->pos.y = work->base_pos[1] + work->move_pos[1];
+            pose->pos.z = work->base_pos[2] + work->move_pos[2];
+        }
+        SDF_VU0_SET_ROW3();
+        SDF_VU0_STOREMATRIX(&model->tm);
+        dds3SetRadiusPoseSet(pose);
+        sdfModelEvalTm(model);
+    }
+    return 1;
+}
 
 s32 dds3MatterObjectBasicDrawProcedure(dds3Basic_t *aPtr) {
     dds3MatterObjectBasicWorkData_t *work = aPtr->workdata;
