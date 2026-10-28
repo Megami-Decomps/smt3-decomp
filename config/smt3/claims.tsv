@@ -301,3 +301,4 @@ src/smt3/facility/fclRecoverCalc.c	redthing1	open	2026-10-28	2 fn / 340 B	price 
 src/smt3/kernel/dds3GlobalWork.c	redthing1	open	2026-10-28	dds3PrimLine3D	VU0 basis transform and packet reconstruction
 src/smt3/event/evtCommand.c	redthing1	open	2026-10-28	evtCommand_MODEL_RGB	color-command sibling and packing-contract review
 src/smt3/sdf/sdf3D.c	redthing1	done	2026-10-28	1 fn / 696 B	sdf3DMakeLightParallelPacket; VU scratch and shared scalar/packet helpers
+src/smt3/sdf/sdfQuat.c	redthing1	done	2026-10-28	2 fn / 556 B	FromEulerXYZ and FromEuler; ordered VU quaternion scratch

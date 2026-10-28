@@ -39,7 +39,6 @@ page and line to open. Conventions are in
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
-| 2 | sdf/sdfQuat | [sdf/sdfQuat.md](sdf/sdfQuat.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
 | 2 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |

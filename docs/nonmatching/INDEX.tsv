@@ -236,8 +236,6 @@ sdfModelTempPacketLinkOt	sdf/sdfModel	0x468	twenty-seven of 282 words differ	doc
 sdfModelLinkOt	sdf/sdfModel	0x480	Sixty-nine of 288 words differ	docs/nonmatching/sdf/sdfModel.md	179
 movieWaitSema	sdf/sdfMovie	212 bytes	Thirty-nine of fifty-three words differ	docs/nonmatching/sdf/sdfMovie.md	5
 release_movieobj2	sdf/sdfMovie	596 bytes	1 of 150 words match	docs/nonmatching/sdf/sdfMovie.md	53
-FromEulerXYZ	sdf/sdfQuat	0x118	60 of 70 words match	docs/nonmatching/sdf/sdfQuat.md	5
-FromEuler	sdf/sdfQuat	0x114	59 of 69 words match	docs/nonmatching/sdf/sdfQuat.md	9
 sdfTexSetPacket	sdfTex	0x168	15 of 90 words match	docs/nonmatching/sdf/sdfTex.md	5
 corePktLoadVerts	sdfVu1	0x2C		docs/nonmatching/sdf/sdfVu1.md	5
 The corePkt VU1 packet builders written in assembly				docs/nonmatching/sdf/sdfVu1.md	28
