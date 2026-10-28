@@ -288,7 +288,35 @@ INCLUDE_ASM(const s32, "pipe/pipeSection", ActionBound);
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionAbsorp);
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", ActionDeath);
+extern void pipeEffSet(tagPipeObject *object, s32 type);
+extern u8 objMake(tagPipeObject *object, s32 offset, u8 id, u8 way, u8 action, u8 value);
+extern s32 objAdd(tagPipeObject *object);
+extern void objMdlAlphaSet(tagPipeObject *object, u8 value);
+
+void ActionDeath(tagPipeObject *object)
+{
+    object->flags &= 0xEFFF;
+    if (object->count == 0) {
+        if ((object->flags & 0x2000) == 0) {
+            pipeEffSet(object, 4);
+            object->flags |= 0x3000;
+            object->count = 0x80;
+            if (object->flags & 0x4000) {
+                tagPipeObject effect;
+
+                objMake(&effect, object->offset + 0x28, 9, 0, 0x15, 0);
+                effect.pos[0] = object->pos[0];
+                effect.pos[1] = object->pos[1];
+                effect.count = 0xA0;
+                objAdd(&effect);
+            }
+        }
+    } else {
+        object->count -= 0x20;
+    }
+    object->offset += 6;
+    objMdlAlphaSet(object, (u8)object->count);
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionZMotion);
 
