@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "font.h"
 
 typedef struct
 {
@@ -20,6 +21,17 @@ typedef struct
 } cmbUnit_t;
 
 extern datDevilInfo_t datDevilTable[];
+
+extern s32 sprintf(char *buf, const char *fmt, ...);
+extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                              const char *text, frFontHandle_t *previous);
+extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, s32 color,
+                                            char *text, frFontHandle_t *previous);
+extern frFontHandle_t *frwGetSmallCaptionFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                                  const char *text, frFontHandle_t *previous);
+extern void frSetDrawPosition(frFontHandle_t *request, u32 x, u32 y);
+extern void func_001C7E38(frFontHandle_t *request, s32 mode, s32 kind);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 
 extern void sortSkillList(cmbUnit_t *unit);
 
@@ -131,8 +143,8 @@ typedef struct
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
                              fclSpriteTbl_t *table, s32 OtNo);
 
-extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
-                            s32 arg);
+extern s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *texList,
+                            fclSpriteTbl_t *table, s32 ot);
 
 extern void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 id);
 
@@ -254,7 +266,15 @@ void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s
                       &sprite, sprite.Flag, 0, 1, OtNo);
 }
 
-INCLUDE_ASM(const s32, "facility/fclDraw", fcl_212910);
+void fcl_212910(s32 x, s32 y, s32 *color, u8 page, u16 spriteId, s32 *texList,
+                fclSpriteTbl_t *table)
+{
+    fclSprite_t sprite;
+
+    fclSetupSprite(0, &sprite, page, spriteId, texList, table);
+    fclDrawSpriteCore(x + sprite.X, y + sprite.Y, sprite.unk_04, sprite.unk_06,
+                      color, &sprite, sprite.Flag, 0, 1, 7);
+}
 
 extern void cmpDrawScrollBar(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h,
                              cmpCursorInfo_t *cursor, s32 j, s32 k);
@@ -265,13 +285,43 @@ void fcl_2129A0(s32 a, s32 b, cmpCursorInfo_t *cursor, s32 d)
                      cursor->unk_14, 0x80808080, 0x100, 0, cursor, 0, d);
 }
 
-INCLUDE_ASM(const s32, "facility/fclDraw", fcl_2129F8);
+void fcl_2129F8(s32 x, s32 y, s32 priority, u32 color, s32 value, s32 kind)
+{
+    char text[0x80];
+    frFontHandle_t *request;
 
-INCLUDE_ASM(const s32, "facility/fclDraw", fclDrawStrCenterTarget);
+    sprintf(text, "%d", value);
+    request = frwGetSmallNumFontFRQ(x, y, priority, color, text, NULL);
+    frSetDrawPosition(request, x - ((request->advance >> 1) << 4), y);
+    func_001C7E38(request, 1, kind);
+    frDestroyFontRequestAfter(request);
+}
+
+s32 fclDrawStrCenterTarget(s32 x, s32 y, s32 priority, u16 width, u16 unused1, u32 unused2,
+                           const char *text, s32 kind)
+{
+    frFontHandle_t *request;
+
+    request = frwGetSmallCaptionFontFRQ(x, y, priority, 0xDEFFA180, text, NULL);
+    frSetDrawPosition(request, x + (((s32)width - request->advance) >> 1) * 16,
+                      y);
+    func_001C7E38(request, 1, kind);
+    return frDestroyFontRequestAfter(request);
+}
 
 INCLUDE_ASM(const s32, "facility/fclDraw", fclDrawCaption);
 
-INCLUDE_ASM(const s32, "facility/fclDraw", trmDrawListText);
+s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *texList,
+                    fclSpriteTbl_t *table, s32 ot)
+{
+    frFontHandle_t *request;
+
+    request = frwGetSmallFontFRQ2(0x270, panel->unk_04, panel->unk_08,
+                                  0xA09DC380, text, NULL);
+    fclDrawSpriteRes(0, 0, 0xFFFFF, NULL, 0, 0, texList, table, ot);
+    func_001C7E38(request, 1, ot);
+    return frDestroyFontRequestAfter(request);
+}
 
 INCLUDE_ASM(const s32, "facility/fclDraw", trm_212CB8);
 
@@ -428,8 +478,6 @@ void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count)
     }
     qsort(list, count, 8, cmbSetEvoResult);
 }
-INCLUDE_SDATA(const s32, "facility/fclDraw", D_0054FC38);
-
 INCLUDE_SDATA(const s32, "facility/fclDraw", D_0054FC40);
 
 INCLUDE_SDATA(const s32, "facility/fclDraw", D_0054FC48);
