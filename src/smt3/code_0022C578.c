@@ -4048,7 +4048,32 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawParamPanel);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusValue);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusBars);
+void cmpDrawStatusBars(s32 x, s32 y, u8 *alpha)
+{
+    s32 colors[4];
+    u32 a = 0x80;
+    u32 color;
+    u32 scaled;
+
+    if (alpha != NULL) {
+        a = *alpha;
+    }
+    color = (a >> 1) | 0x80808000;
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    fclDrawSpriteRes(x << 4, y << 3, 0, colors, 1, 8, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(x << 4, y << 3, 0, colors, 1, 9, D_00345D88, fclSpriteTable, 0x47);
+    scaled = a * 3;
+    color = ((scaled + (scaled << 4)) >> 7) | 0x80808000;
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    fclDrawSpriteRes(x << 4, y << 3, 0, colors, 1, 10, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(x << 4, y << 3, 0, colors, 1, 11, D_00345D88, fclSpriteTable, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillRowText);
 
