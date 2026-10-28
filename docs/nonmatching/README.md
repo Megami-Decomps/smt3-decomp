@@ -43,6 +43,7 @@ page and line to open. Conventions are in
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
+| 2 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
@@ -70,4 +71,3 @@ page and line to open. Conventions are in
 | 1 | effect/effPCPBezier | [effect/effPCPBezier.md](effect/effPCPBezier.md) |
 | 1 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
-| 1 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |

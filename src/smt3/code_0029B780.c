@@ -248,7 +248,61 @@ INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigBar);
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigValue);
 
+/* NON_MATCHING: 41 of 145 words differ, first at +0x50; exact 580-byte size. */
+#ifdef NON_MATCHING
+typedef struct fclSpriteRes_t fclSpriteRes_t;
+typedef struct fclSpriteEntry_t fclSpriteEntry_t;
+typedef struct {
+    fclSpriteRes_t *res;
+    fclSpriteEntry_t *entries;
+} fclSpriteTbl_t;
+
+extern fclSpriteTbl_t dds3ConfigLayoutTable[];
+extern s32 D_00345D88[];
+extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *colors,
+    s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors,
+    s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
+extern s32 dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
+extern void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot);
+extern s32 dds3DrawConfigLabel(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
+
+void dds3DrawConfigText(s32 x, s32 y, s32 z, s32 count, s32 index, s32 value, s32 ot)
+{
+    s32 drawOptions = index < 3;
+    s32 selected = index == (*(s16 *)(GBWK + 0x3E) + GBWK[0x40]);
+    s32 colors[4];
+    s32 color;
+    s32 startY;
+    s32 i;
+
+    dds3DrawConfigValue(x, y, z, index, selected, ot);
+    if (drawOptions && value >= 0)
+        dds3DrawConfigBar(x, y, z, index, value, ot);
+    color = dds3GetConfigFadeAlpha() | 0x80808000;
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    if (drawOptions) {
+        y += 0xA8;
+        startY = y;
+        for (i = 0; i < count; i++) {
+            fclDrawSpriteFilter(x, y, z << 4, 0, colors, 0, 0,
+                               D_00345D88, dds3ConfigLayoutTable, ot);
+            fclDrawSpriteFilter(x, y, z << 4, 0, colors, 0, 1,
+                               D_00345D88, dds3ConfigLayoutTable, ot);
+            y += 0xB0;
+        }
+        dds3DrawConfigLabel(x + 0x540, startY + 8, z, index, selected, ot);
+        fclDrawSpriteRes(0, y, z << 4, colors, 0, 10, D_00345D88, dds3ConfigLayoutTable, ot);
+        fclDrawSpriteRes(0, y, z << 4, colors, 0, 11, D_00345D88, dds3ConfigLayoutTable, ot);
+        fclDrawSpriteRes(0, y, z << 4, colors, 0, 12, D_00345D88, dds3ConfigLayoutTable, ot);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigText);
+#endif
 
 s32 dds3DrawConfigBackground(s32 flags)
 {
