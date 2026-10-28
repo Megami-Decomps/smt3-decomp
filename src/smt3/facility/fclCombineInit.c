@@ -418,7 +418,9 @@ typedef struct
     /* 0x0001C */ cmpCursorInfo_t combineCursor;
     /* 0x00054 */ u8 unk_00054[0x1004];
     /* 0x01058 */ cmbStockCursorGroup_t stockCursorGroup[3];
-    /* 0x0410C */ u8 unk_0410C[4];
+    /* 0x0410C */ u8 unk_0410C[2];
+    /* 0x0410E */ u8 evoCandidateCount;
+    /* 0x0410F */ u8 reserved0410F;
     /* 0x04110 */ cmbStockSlot_t stockSlot[3];
     /* 0x0411C */ u8 birthPanel[0x2C9];
     /* 0x043E5 */ s8 resultIndex[2][12][12];
@@ -451,6 +453,7 @@ typedef struct
 extern cmbGbWork_t *CMB_GBWK;
 
 extern s32 datAddItem(s32 id, s32 num);
+extern s8 cmbCountEvoCandidates(datUnitWork_t *list, u8 count);
 
 extern s32 cmpStatSetTimer(s32 kind, s8 index);
 
@@ -735,7 +738,22 @@ void cmbBuildResultRow(s32 mode)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCreateCombineResultTable);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCreateLocalStock);
+void cmbCreateLocalStock(void)
+{
+    s32 i;
+
+    CMB_GBWK->stockCursorCount = 0;
+    CMB_GBWK->evoCandidateCount =
+        cmbCountEvoCandidates(&cmbGlobalWork->party[4].unit, 12);
+
+    for (i = 4; i < 16; i++) {
+        if ((cmbGlobalWork->party[i].unit.flag & 1) != 0 &&
+            (cmbGlobalWork->party[i].unit.badstatus & 0x800) == 0 &&
+            (cmbGlobalWork->party[i].unit.flag & 0x10) == 0) {
+            CMB_GBWK->unk_165EE[(s8)CMB_GBWK->stockCursorCount++] = i;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcRoot);
 
