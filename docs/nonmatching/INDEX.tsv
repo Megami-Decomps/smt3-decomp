@@ -249,6 +249,7 @@ cmbGetHeartsParamByIndex	rstcalc	0x58	8 of 22 words differ	docs/nonmatching/resu
 cmbCountEvoReady	rstcalc	0x84	9 of 34 words match	docs/nonmatching/result/rstcalc.md	115
 cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/nonmatching/result/rstcalc.md	141
 rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/nonmatching/result/rstcalc.md	170
+rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/nonmatching/result/rstdraw.md	5
 rstBuildDestroyList	rstupdate	0x64	1 of 24 words matches	docs/nonmatching/result/rstupdate.md	5
 DispBaseData	script/scrParameterCommand	764 bytes	seventy of 190 words differ	docs/nonmatching/script/scrParameterCommand.md	5
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/nonmatching/sdf/sdfGraph.md	5
