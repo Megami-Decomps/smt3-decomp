@@ -5502,8 +5502,6 @@ void cmpClearPanelEffSlots(cmpPanelEff_t *list)
     }
 }
 
-/* NON_MATCHING: 3 of 38 words differ, exact size; all three are one register name. */
-#ifdef NON_MATCHING
 cmpPanelEff_t *cmpAllocPanelEffWork(s32 value)
 {
     cmpPanelEff_t *work;
@@ -5523,9 +5521,6 @@ cmpPanelEff_t *cmpAllocPanelEffWork(s32 value)
     }
     return work;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpAllocPanelEffWork);
-#endif
 
 void camp_update_paneleff_Shutdown(void)
 {
