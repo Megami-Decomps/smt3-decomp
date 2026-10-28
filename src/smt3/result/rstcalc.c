@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 #include "font.h"
 
 typedef struct
@@ -87,8 +88,11 @@ typedef struct
 typedef struct
 {
     /* 0x0000 */ u8 flags;
-    /* 0x0001 */ u8 phase;
-    /* 0x0002 */ u8 reserved02[0x16];
+    /* 0x0001 */ s8 phase;
+    /* 0x0002 */ u8 reserved02[2];
+    /* 0x0004 */ s8 stepFlag;
+    /* 0x0005 */ u8 drawFlag;
+    /* 0x0006 */ u8 reserved06[0x12];
     /* 0x0018 */ s8 unk_18;
     /* 0x0019 */ s8 unk_19;
     /* 0x001A */ s8 StartLevel;
@@ -100,11 +104,25 @@ typedef struct
     /* 0x0024 */ u16 heartsSkill;
     /* 0x0026 */ s8 RecoverFlag;
     /* 0x0027 */ s8 HeartsSkFlag;
-    /* 0x0028 */ u8 unk_28[8];
+    /* 0x0028 */ s8 heartsResult;
+    /* 0x0029 */ s8 heartsEvent;
+    /* 0x002A */ u16 bonusParamIndex;
+    /* 0x002C */ s8 defaultSkillResult;
+    /* 0x002D */ u8 reserved2D[3];
     /* 0x0030 */ datUnitWork_t *levelUpUnit[16];
     /* 0x0070 */ s8 levelUpCount;
     /* 0x0071 */ s8 levelUpStep;
-    /* 0x0072 */ u8 unk_72[0xFA];
+    /* 0x0072 */ u8 stockIndex;
+    /* 0x0073 */ s8 powerState;
+    /* 0x0074 */ s8 powerSlot;
+    /* 0x0075 */ u8 reserved75;
+    /* 0x0076 */ u16 powerSkill;
+    /* 0x0078 */ s32 counter;
+    /* 0x007C */ s8 evoPhase;
+    /* 0x007D */ u8 reserved7D;
+    /* 0x007E */ s8 evoResult;
+    /* 0x007F */ u8 reserved7F;
+    /* 0x0080 */ datUnitWork_t evoWork;
     /* 0x016C */ datUnitWork_t *unit;
     /* 0x0170 */ datUnitWork_t workStock;
     /* 0x025C */ u8 unk_25C[0x103C];
@@ -769,7 +787,7 @@ void rstInitSkillAct(s8 Pos)
     p2sdPlaySE(0x2B0003, 0x7F, 0x3F);
 }
 
-void func_002215B8(void) {
+void func_002215B8(datUnitWork_t *unit) {
 }
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstFindRegisteredDevil);
@@ -814,7 +832,188 @@ s32 rstShakePad(void)
 
 INCLUDE_RODATA(const s32, "result/rstcalc", D_0053DAB0);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstCalc);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void rstDrawEvoModel(void);
+extern s32 dds3FadeCheck(void);
+extern s32 cmpLoadStatusModel(void);
+extern void cmpUpdateTerminate(void *work);
+extern void rstInitEvoAct(void);
+extern s32 rstFindRegisteredDevil(void);
+extern s32 rstCalcSkillPowerUpCore(void);
+extern s32 rstFindDevilSlot(void);
+extern s32 rstCalcEvo(void);
+extern char *pstr[];
+extern char *text1[];
+extern s32 fclStartSelMessage(s32 id);
+extern void rstAddAsignParam(void);
+
+s32 rstCalc(dds3ProcessID_t *id)
+{
+    s32 process = 1;
+    EventStart = dds3GetProcessData(id);
+    if (EventStart->stepFlag == 1) {
+        switch (EventStart->phase) {
+        case 0:
+            cmpStatSetTimer(0, 0);
+            EventStart->HeartsSkFlag = 0;
+            EventStart->unk_129D[1] = 0;
+            if (rstCalcSeqPlayerLevelUp() != 0)
+                break;
+            process = 0;
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 1:
+            if (process) {
+                EventStart->heartsSkill = rstChkHeartsSkill(&cmbGlobalWork->party[0].unit);
+                if (EventStart->heartsSkill != 0) {
+                    EventStart->heartsResult = rstChkAddSkill(EventStart->heartsSkill);
+                    rstInitSkillAct(8);
+                    break;
+                }
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 2:
+            if (process) {
+                EventStart->heartsEvent = rstFindRegisteredDevil();
+                if (EventStart->heartsEvent >= 0) {
+                    EventStart->powerState = rstCalcSkillPowerUpCore();
+                    if (EventStart->heartsEvent == 1) {
+                        if (EventStart->powerState >= 3) {
+                            EventStart->heartsEvent = 0;
+                            EventStart->powerState = -1;
+                        } else if (EventStart->powerState <= 0) {
+                            EventStart->heartsEvent = 0;
+                            EventStart->powerState = -1;
+                        }
+                    }
+                    EventStart->unk_129D[1] = 0;
+                    rstShakePad();
+                    fclSetMessageVar_20743088(12, (s32)pstr[cmbGlobalWork->equipHearts]);
+                    fclStartMessage(28);
+                    fclStartSelMessage(43);
+                }
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 3:
+            if (process && EventStart->heartsEvent >= 0)
+                break;
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 4:
+            if (process)
+                EventStart->heartsEvent = rstFindDevilSlot();
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 5:
+            if (process && EventStart->heartsEvent >= 0) {
+                EventStart->unk_129D[1] = 0;
+                break;
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+            goto next_devil;
+        case 7:
+            rstInitWorkStock(1);
+            EventStart->unit->flag &= ~0x200;
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 8:
+            EventStart->defaultSkillResult = rstGetDefaultSkill();
+            if (EventStart->defaultSkillResult != 0) {
+                rstInitSkillAct(8);
+                break;
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 9:
+            rstInitWorkStock(0);
+            EventStart->powerState = rstCalcSkillPowerUp();
+            if (EventStart->powerState != 0) {
+                EventStart->unk_129D[1] = 0;
+                fclSetMessageVar_20743088(15, (s32)text1[EventStart->unit->skill[EventStart->powerSlot]]);
+                fclSetMessageVar_20743088(16, (s32)text1[EventStart->powerSkill]);
+                fclStartMessage(13);
+                fclStartSelMessage(43);
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 10:
+            if (EventStart->powerState != 0)
+                break;
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 11:
+            if (rstPickRandomComment() != 0) {
+                fclSetMessageVar_20743088(1, (s32)text2[EventStart->unit->id]);
+                fclStartMessage(24);
+                break;
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 12:
+            if (EventStart->commentId != 0) {
+                EventStart->unk_129D[1] = 0;
+                fclStartMessage(25);
+                fclStartSelMessage(43);
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 13:
+            if (EventStart->commentId != 0)
+                break;
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 14:
+            {
+                evtStartWork_t *work = EventStart;
+                if (work->powerState == 0 && work->commentId == 0)
+                    func_002215B8(work->unit);
+                work->phase = (u8)work->phase + 1;
+            }
+        case 15:
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 16:
+            rstInitWorkStock(0);
+            if (rstCalcEvo() == 0) {
+                fclSetMessageVar_20743088(1, (s32)text2[EventStart->unit->id]);
+                if (rstCalcSeqEvoAt() >= 0) {
+                    fclStartMessage(18);
+                    EventStart->drawFlag = 1;
+                    EventStart->phase = 18;
+                    EventStart->unk_129D[1] = 0;
+                    rstInitEvoAct();
+                    break;
+                }
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 17:
+            if (EventStart->evoResult == 0) {
+                rstInitEvoAct();
+                EventStart->unk_129D[1] = 0;
+                break;
+            }
+            rstAddAsignParam();
+            EventStart->phase = 6;
+        case 6:
+next_devil:
+            if (rstCalcSeqDevilLevelUp() != 0)
+                return 0;
+            break;
+        case 20:
+            EventStart->evoPhase = 0;
+            break;
+        case 21:
+            EventStart->unk_129D[1] = 0;
+            rstCalcSeqDestroySkill();
+            break;
+        case 22:
+        case 24:
+            EventStart->unk_129D[1] = 0;
+            break;
+        }
+    }
+    rstDrawEvoModel();
+    EventStart->stepFlag = 0;
+    if (dds3FadeCheck() != 0)
+        return 0;
+    if ((EventStart->flags & 0x10) != 0) {
+        if (cmpLoadStatusModel() != 0)
+            return 0;
+        cmpUpdateTerminate(EventStart);
+        return -1;
+    }
+    return 0;
+}
+
 
 extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
 
