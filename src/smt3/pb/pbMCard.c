@@ -66,6 +66,10 @@ struct pbProcHandle_t
 extern void sdfChipFreeDelayedDirect(void *aPtr);
 
 extern s32 sceMcGetInfo(s32 a, s32 b, s32 *c, s32 *d, s32 *e);
+extern s32 sceSifLoadModule(const char *path, s32 argSize, const char *args);
+extern s32 sceMcInit(void);
+extern s32 printf(const char *format, ...);
+extern const char D_0054F600[];
 
 extern pbProcHandle_t *record;
 
@@ -83,7 +87,19 @@ extern void sceMcGetDir(s32 a, s32 b, const char *c, u32 d, s32 e, void *f);
 
 extern void sceMcSync(s32 a, s32 *b, s32 *c);
 
-INCLUDE_ASM(const s32, "pb/pbMCard", pbInitMCard);
+void pbInitMCard(void)
+{
+    while (sceSifLoadModule("host0:/usr/local/sce/iop/modules/sio2man.irx", 0, NULL) < 0) {
+        printf("Can't load module sio2man\n");
+    }
+    while (sceSifLoadModule("host0:/usr/local/sce/iop/modules/mcman.irx", 0, NULL) < 0) {
+        printf("Can't load module mcman\n");
+    }
+    while (sceSifLoadModule("host0:/usr/local/sce/iop/modules/mcserv.irx", 0, NULL) < 0) {
+        printf("Can't load module mcserv\n");
+    }
+    printf(D_0054F600, sceMcInit());
+}
 
 s32 pbGetFormatStatusMCard(s32 port, s32 slot, pbMCardInfo_t *stat) {
     return sceMcGetInfo(port, slot, NULL, NULL, &stat->format);
