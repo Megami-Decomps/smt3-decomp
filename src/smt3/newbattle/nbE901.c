@@ -5,10 +5,13 @@
 #include "ps2asm.h"
 #include "newdata.h"
 
+/* The model owner behind a unit handle; only the root node is named. */
+typedef struct { u8 unk_00[0x18]; struct sdfModelRootNode_t *inner; } nbUnitOwner_t;
+
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];
-    dds3Basic_t *basic;
+    nbUnitOwner_t *owner;
     u8 unk_90[0x14];
     u32 flags;
 } evtUnitHandle_t;
@@ -342,6 +345,14 @@ extern void nbCameraBoss_Sp_DOUTYO_Run(u8 *pNbCamera);
 
 extern void nbCameraBoss_Sp_DOUTYO_Set(u8 *pNbCamera);
 
+extern void nbCameraBoss_Sp_DOUTYO_TPFix_Set(u8 *pNbCamera);
+
+extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
+
+extern s32 sdfModelGetMarkPos(struct sdfModelRootNode_t *aRoot, s32 aId);
+
+extern s32 evtUnitRotationTarget(evtUnitHandle_t *h, f32 *pos, f32 radio);
+
 extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                                s32 type);
 
@@ -445,12 +456,57 @@ s32 SetUp1(nbEventProcessData_t *ed)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE901", SyuGo);
+s32 SyuGo(nbEventProcessData_t *e)
+{
+    sdfVector4_t v;
+    sdfVector4_t vec1;
+    sdfVector4_t vec2;
+    evtUnitHandle_t *h;
+    nbFormation_t *form;
+    s32 i;
+    s32 ofs;
+    s32 mark;
+
+    memset(&vec1, 0, sizeof(vec1));
+    vec1.z = -100.0f;
+    memset(&vec2, 0, sizeof(vec2));
+    vec2.z = -5000.0f;
+    if (e->seqtime == 2) {
+        nbCameraBoss_Sp_DOUTYO_TPFix_Set(pNbCamera);
+    }
+    if (e->seqtime == 5) {
+        e->data->press4_p = 0;
+        e->data->pressturn = 0;
+    }
+    if (e->seqtime >= 0x38) {
+        nbFreeEffectSlot(e);
+    }
+    h = dds3GetUnitHandleObjectBasic(D_005515B4);
+    i = 0;
+    mark = 5;
+    ofs = 0;
+    for (; i < 6; i++) {
+        form = (nbFormation_t *)((u8 *)e->data->form + ofs + 0x3C0);
+        if (form->stat & 1) {
+            sdfModelGetMarkPos(h->owner->inner, mark - i);
+            SDF_VU0_STOREVECTOR(&v);
+            nbSetFormPos(form, &v);
+            if (e->seqtime < 0x33) {
+                evtUnitRotationTarget(form->hunit, (f32 *)&vec1, 0.08f);
+            } else {
+                evtUnitRotationTarget(form->hunit, (f32 *)&vec2, 0.05f);
+            }
+        }
+        ofs += 0xF0;
+    }
+    return 0;
+}
 
 s32 SyuGo2(nbEventProcessData_t *ed)
 {
     s32 i;
     s32 ofs;
+    s32 mark;
     nbFormation_t *form;
 
     if (ed->seqtime >= 0xB) {
