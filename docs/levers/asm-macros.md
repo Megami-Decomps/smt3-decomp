@@ -55,3 +55,20 @@ compare the tree. For the eight fields of a GS `TEX0`, 96 of the 40320 orders
 give retail's tree and 4 of those also give the tree of the second expression
 in the same function. All of them are the GS fields written most significant
 first, which is what the retail source did.
+
+## SDK scalar scratch in a VU0 scale
+
+`nbMakeNegoBackPacket` uses the existing `SDF_VU0_SCALEVECTOR_V0` primitive
+for the SDK's `mfc1 $2; qmtc2.ni $2, vf2` transfer. The allocator-selected
+primitive uses `$3` here and leaves two words different in the 260-byte body.
+The fixed SDK scratch convention follows the canonical
+[inline-asm rules](https://github.com/Megami-Decomps/dds-decomp/blob/main/docs/idioms.md#inline-asm-cop2-and-mmi).
+
+This use has a finite emission audit: the preceding call's return is unused;
+the radius and scale product is in `$f0`; no unrelated `$2` value crosses the
+transfer; and the next `$2` use is a fresh position-address definition. The
+three stack vectors are initialized or produced before their VU consumers,
+and the resulting position is stored before its packet call. The complete
+owner and retail checksum qualify this emitted sequence. Reaudit changes to
+the source, compiler or macros; the legacy scratch convention does not supply
+a general C memory or register guarantee.

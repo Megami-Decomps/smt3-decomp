@@ -1683,8 +1683,6 @@ s32 nbMakeNegoWorkPosPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
     return 1;
 }
 
-/* NON_MATCHING: 2 of 65 words differ (first at +0x8C). */
-#ifdef NON_MATCHING
 s32 nbMakeNegoBackPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                          nbFormation_t *target)
 {
@@ -1701,7 +1699,8 @@ s32 nbMakeNegoBackPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
     SDF_VU0_STOREVECTOR(&v);
     nbMakeUnitMoveGetCyDist(form, target);
     SDF_VU0_LOADVECTOR(&v);
-    SDF_VU0_SCALEVECTOR(form->r * form->scl);
+    /* SDK VU0 scalar scratch; see docs/levers/asm-macros.md. */
+    SDF_VU0_SCALEVECTOR_V0(form->r * form->scl);
     SDF_VU0_LOADVECTOR_B(&form->pos);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&pos);
@@ -1709,9 +1708,6 @@ s32 nbMakeNegoBackPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
     nbMakeUnitFadeOutPacket(startframe, uniqueid, form, 0, 4, 5, 5);
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeNegoBackPacket);
-#endif
 
 s32 nbMakeNegoForwardPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                             nbFormation_t *target)

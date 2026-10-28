@@ -505,40 +505,6 @@ before the product; and the word-indexed forms
 `(command * 196 + 4) * 4`. All seven give the identical 24-word diff, so the
 fold is not reachable from the address expression.
 
-## nbMakeNegoBackPacket (newbattle/nbMakePacket, 0x104)
-
-63 of 65 words match, at the exact 260-byte size.
-
-Every instruction is retail's. The two differing words are the GPR that
-`SDF_VU0_SCALEVECTOR` moves the binary32 bits through: retail uses `$2` for
-both the `mfc1` and the `qmtc2.ni`, and also for the `addiu $2, $16, 0x20` that
-follows it, where ee-gcc takes `$3` for the bits and leaves `$2` for the
-address. The macro deliberately lets cc1 choose that register, and nothing in
-this function steers it.
-
-Its sibling `nbMakeNegoForwardPacket` matches with the same macro getting `$2`,
-so the shape is right and only the allocation differs. The difference between
-them is that Forward feeds `nbMakeUnitMoveGetCyDist`'s `f32` return into the
-scale through two named locals, which is what gives Forward one more pseudo at
-that point.
-
-Three source facts were pinned here and carried over to the matching sibling:
-`extern void ToMatrix(void)` and an `f32` return on
-`nbMakeUnitMoveGetCyDist` are both needed, or cc1 treats `$2` as holding a call
-result and avoids it for the `&dir` address as well;
-`SDF_VU0_STOREVECTOR_NOMEM(&pos)` is required, because the plain store's
-`memory` clobber lets cc1 share one `addiu $29, 0x10` pseudo in a callee-saved
-register where retail rematerialises the address for the store and again for
-the packet argument; and the three frame vectors must be declared `v`, `pos`,
-`dir` so they land at `0x00`, `0x10` and `0x20`.
-
-Ruled out for the scratch register: a `f32` local for the product, for the whole
-scale, and an assignment inside the macro argument; `SDF_VU0_STOREVECTOR`,
-`_MEMOPS` and `_RWADDR` for the `pos` store; a `nbFormation_t *` local aliasing
-`form`; hoisting `&form->pos` into a local before the scale;
-`SDF_VU0_LOADVECTOR_B_RWADDR`; and `void`, `s32` and `f32` returns on
-`nbMakeUnitMoveGetCyDist`. All give the identical two-word diff.
-
 ## nbPickAiAction (newbattle/nbMakePacket, 0x118)
 
 68 of 70 words match, at the exact 280-byte size.
