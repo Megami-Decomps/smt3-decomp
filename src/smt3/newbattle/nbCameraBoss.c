@@ -1449,7 +1449,105 @@ void nbCameraBoss_Kagu_E909_Set(void)
     pNbCamera.frame = 0;
 }
 
+extern sdfVector4_t D_00325A00;
+
+extern sdfVector4_t D_00325A10;
+
+extern sdfVector4_t nbCameraKaguVec;
+
+extern sdfVector4_t nbCameraKaguVec2;
+
+extern f32 D_00551E78;
+
+extern f32 D_00551E7C;
+
+extern s32 D_00551E80;
+
+extern s32 D_00551E84;
+
+extern void nbCameraShot_All_Set3(nbCamera_t *pNbCamera, sdfVector4_t *pTarget);
+
+extern s32 nbCameraBoss_BSKAGU_Command_Set(nbCamera_t *pNbCamera);
+
+/* NON_MATCHING: 44 of 180 words differ; 720 emitted against retail 724. Retail
+ * copies the frame counter into a second register before the int-to-float
+ * conversion; the draft converts the loaded register directly. */
+#ifdef NON_MATCHING
+void nbCameraBoss_Kagu_E909_Run(void)
+{
+    nbMainProcessData_t *pData;
+    nbFormation_t *pBase;
+    nbCamera_t *pCamera = &pNbCamera;
+    f32 rate;
+    s32 frame;
+    sdfVector4_t pos;
+
+    pData = nbGetMainProcessData();
+    pBase = &pData->form[4];
+    switch (pCamera->frame) {
+    case 0:
+        effBTLModelGetSphereCenter(pBase);
+        SDF_VU0_STOREVECTOR_NOMEM(&pos);
+        nbCameraShot_All_Set3(pCamera, &pos);
+        nbCameraShot_GroundCollision(pCamera);
+        SDF_VU0_COPYVECTOR(&D_00325A00, &pCamera->target);
+        SDF_VU0_COPYVECTOR(&D_00325A10, &pCamera->direction);
+        D_00551E78 = pCamera->distance;
+        nbCameraKaguVec.x = -0.02f;
+        nbCameraKaguVec.y = 0.18f;
+        nbCameraKaguVec.z = 0.98f;
+        nbCameraKaguVec2.x = 55.08f;
+        nbCameraKaguVec2.y = -1304.78f;
+        nbCameraKaguVec2.z = -2177.2896f;
+        D_00551E7C = 1.0f;
+        D_00551E84 = 120;
+        D_00551E80 = 0;
+        break;
+    case 135:
+        nbCameraBoss_BSKAGU_Command_Set(pCamera);
+        SDF_VU0_COPYVECTOR(&nbCameraKaguVec2, &pCamera->target);
+        SDF_VU0_COPYVECTOR(&nbCameraKaguVec, &pCamera->direction);
+        D_00551E7C = pCamera->distance;
+        D_00325A10.x = 0.01f;
+        D_00325A10.y = 0.3f;
+        D_00325A10.z = 0.95f;
+        D_00325A00.x = 9.0999985f;
+        D_00325A00.y = -1650.4699f;
+        D_00325A00.z = -636.35f;
+        effBTLModelGetSphereCenter(pBase);
+        SDF_VU0_STOREVECTOR_NOMEM(&pos);
+        pos.x = pos.x - nbCameraKaguVec.x * 800.0f;
+        pos.y = pos.y - 350.0f;
+        SDF_VU0_LOADVECTOR(&pos);
+        SDF_VU0_LOADVECTOR_B(&D_00325A00);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(&D_00325A10);
+        D_00551E78 = 700.0f;
+        D_00551E84 = 70;
+        D_00551E80 = 0;
+        break;
+    }
+    frame = D_00551E80;
+    rate = (f32)frame / (f32)D_00551E84;
+    if (rate > 1.0f) {
+        rate = 1.0f;
+    }
+    SDF_VU0_LOADVECTOR(&D_00325A00);
+    SDF_VU0_LOADVECTOR_B(&nbCameraKaguVec2);
+    VU0_LERP_VF10_VF11(rate);
+    SDF_VU0_STOREVECTOR(pCamera);
+    SDF_VU0_LOADVECTOR(&D_00325A10);
+    SDF_VU0_LOADVECTOR_B(&nbCameraKaguVec);
+    VU0_LERP_VF10_VF11(rate);
+    SDF_VU0_STOREVECTOR(&pCamera->direction);
+    pCamera->fovy = 0.69813163f;
+    pCamera->distance = D_00551E78 + (D_00551E7C - D_00551E78) * rate;
+    D_00551E80 = frame + 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Kagu_E909_Run);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Kagu_Attack_Set);
 

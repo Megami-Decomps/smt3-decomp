@@ -130,3 +130,25 @@ of the locals; `u32` for the id; `pos`, `dir` and `center` as `f32[4]` instead o
 in place first (exact size, 41 of 134 words differ, but it emits three extra
 `dir` stores retail does not have); `do { } while (0)` around the three
 component assignments.
+
+## nbCameraBoss_Kagu_E909_Run (newbattle/nbCameraBoss, 0x2D4)
+
+44 of 180 words differ; 720 bytes emitted against retail's 724.
+
+Everything up to the shared tail matches, including the two-case `switch` on
+`pNbCamera.frame` that puts both arms out of line, and the four interpolation
+endpoints in `D_00325A00`, `D_00325A10`, `nbCameraKaguVec` and
+`nbCameraKaguVec2`.
+
+The one missing word is a register copy. Retail loads the frame counter with
+`lw $2, %gp_rel(D_00551E80)`, then `daddu $4, $2, $0` before `mtc1 $4, $f0` and
+`cvt.s.w`, and both the conversion and the trailing `addiu $2, $4, 1` read `$4`,
+so `$2` dies at the copy. The draft loads straight into `$4` and converts that,
+one word shorter, and every word after shifts.
+
+Ruled out: reading the global once against twice; `frame / (f32)len` without
+the cast, `(f32)frame` assigned to a float local first, and a second `s32`
+local copied from `frame` before the cast (all coalesce the same way);
+`frame = frame + 1; D_00551E80 = frame;` instead of one expression;
+`D_00551E80++`; `u32` for the counter (which reverses the clamp and runs two
+words long).
