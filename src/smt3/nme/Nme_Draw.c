@@ -63,7 +63,38 @@ INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursor);
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursor2);
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeResetCursor);
+extern s8 cmpGetCursorRow(cmpCursorInfo_t *cursor);
+extern s32 nmeGetRowCount(s8 mode);
+extern void nmeInitCursor(s8 mode, nmeWork_t *work);
+
+s32 nmeResetCursor(cmpCursorInfo_t *cursor, s8 delta)
+{
+    s8 mode = (s8)((u8)nmeUpdateWork->modeCursor.unk_22 +
+                   (u8)nmeUpdateWork->modeCursor.unk_24);
+
+    if (cmpGetCursorRow(cursor) != 0) {
+        return 0;
+    }
+    if (delta > 0) {
+        s32 cursorRow = cursor->unk_22;
+        cursorRow += (u8)cursor->unk_24;
+        if (cursorRow == nmeGetRowCount(mode) - 1) {
+            nmeUpdateWork->primaryCursorActive = 1;
+            nmeInitCursor(-1, nmeUpdateWork);
+            return 1;
+        }
+    }
+    if (delta < 0 && cursor->unk_22 + (u8)cursor->unk_24 == 0) {
+        if (mode == 3) {
+            nmeUpdateWork->alternateCursorActive = 1;
+        } else {
+            nmeUpdateWork->primaryCursorActive = 1;
+            nmeInitCursor(-1, nmeUpdateWork);
+        }
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeFindNextChar);
 
