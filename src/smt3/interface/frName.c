@@ -38,7 +38,19 @@ frFontHandle_t *frGetName1NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption
 }
 
 
-INCLUDE_ASM(const s32, "interface/frName", frGetName2NFRQ);
+frFontHandle_t *frGetName2NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption)
+{
+    s8 glyph = (s8)frNameGlobalWork->nameCounts[target][0];
+    s32 i = 0;
+
+    frTransNameImage(target, 1);
+    for (; i < frNameGlobalWork->nameCounts[target][1]; i++, glyph++) {
+        chain = frCreateNameHandle(target, glyph, chain);
+        chain->lastChild->renderValueOrSetupOrShade.setupBytes.firstOption = firstOption;
+    }
+    return chain;
+}
+
 
 extern frFontHandle_t *frGetName1NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
 extern frFontHandle_t *frGetName2NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
