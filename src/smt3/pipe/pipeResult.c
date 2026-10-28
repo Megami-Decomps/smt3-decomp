@@ -13,6 +13,14 @@ extern void pipeMessStartIdx(void);
 extern void datPartyDamagePipe(s32 big, s32 sml);
 extern s32 pipeMessDraw(void);
 
+extern u8 ResultIndex;
+extern u8 pipeResultFlag;
+extern void pipeMessInit(void);
+extern void pipeFreeMessage(void);
+extern s32 pipeResultDraw(void);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
+
 extern s32 fclChkMessage(void);
 
 extern void fclUpdateMessage(void);
@@ -42,7 +50,43 @@ extern s32 sprintf(char *buf, const char *fmt, ...);
 extern void fclSetMessageVar_20743088(s8 Index, char *pStr);
 
 
-INCLUDE_ASM(const s32, "pipe/pipeResult", pipeResultSection);
+s32 pipeResultSection(void)
+{
+    s32 finished = 0;
+
+    switch (ResultIndex) {
+    case 0:
+        pipeMessInit();
+        pipeResultFlag = 0;
+        ResultIndex = 1;
+        break;
+    case 1:
+        dds3FadeIn(0xFF, 0xFF, 0xFF, 0x1E);
+        ResultIndex = 2;
+        pipeResultFlag = 0;
+        break;
+    case 2:
+        if (pipeResultDraw() != 0) {
+            ResultIndex = 3;
+        }
+        break;
+    case 3:
+        dds3FadeOut(0xFF, 0xFF, 0xFF, 0x1E);
+        ResultIndex = 0xFF;
+        pipeResultFlag = 0;
+        break;
+    case 0xFF:
+        if (pipeResultFlag < 0x1F) {
+            pipeResultFlag++;
+            break;
+        }
+        ResultIndex = 0;
+        finished = 1;
+        pipeFreeMessage();
+        break;
+    }
+    return finished;
+}
 
 s32 pipeResultDraw(void)
 {
