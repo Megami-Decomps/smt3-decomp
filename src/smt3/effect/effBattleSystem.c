@@ -2390,9 +2390,46 @@ INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLCutDebugPrint);
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174AB8);
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174BB0);
+extern void effBTLModelGetSphereCenter(nbFormation_t *formation);
+extern void effDebugWireframeCylinderDraw(sdfVector4_t *center, u32 color, f32 radius, f32 height);
+extern void effDebugPointDraw(sdfVector4_t *point);
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174C50);
+void func_00174BB0(u32 color)
+{
+    sdfVector4_t center;
+    nbFormation_t *formation;
+    s32 i;
+
+    formation = nbGetMainProcessData()->form;
+    for (i = 31; i >= 0; i--, formation++) {
+        if ((formation->stat & 3) == 3) {
+            effBTLModelGetSphereCenter(formation);
+            SDF_VU0_STOREVECTOR(&center);
+            effDebugWireframeCylinderDraw(&center, color,
+                formation->r * formation->scl, formation->h * formation->scl);
+            effDebugPointDraw(&center);
+        }
+    }
+}
+
+extern f32 func_0016CEC8(s32 side);
+extern void effDebugWireframeSphereDraw(sdfVector4_t *center, u32 color, f32 radius);
+extern void effDebugPointDraw(sdfVector4_t *point);
+
+void func_00174C50(u32 color)
+{
+    sdfVector4_t center;
+    f32 radius;
+
+    radius = func_0016CEC8(0x100);
+    SDF_VU0_STOREVECTOR(&center);
+    effDebugWireframeSphereDraw(&center, color, radius);
+    effDebugPointDraw(&center);
+    radius = func_0016CEC8(0x200);
+    SDF_VU0_STOREVECTOR(&center);
+    effDebugWireframeSphereDraw(&center, color, radius);
+    effDebugPointDraw(&center);
+}
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A40);
 
