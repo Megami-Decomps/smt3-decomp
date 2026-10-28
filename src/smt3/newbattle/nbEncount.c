@@ -304,7 +304,7 @@ extern nbEncountForm_t nbEncountFormTable[];
 
 extern datDevilFormat_t datDevilTable[];
 
-extern void *nbEncountCalc(s32 id, f32 length);
+extern u32 nbEncountCalc(s32 id, f32 length);
 
 extern s32 nbEncountMax;
 
@@ -328,8 +328,32 @@ typedef struct nbEventProcessData_t {
     void *mem;
 } nbEventProcessData_t;
 
-/* 420-byte entries; only the field this unit reads is named. */
-typedef struct { u8 unk_00[0x4]; u16 unk_04; u8 pad[0x19E]; } nbEncountEntry_t;
+typedef struct datEncountRitu_t {
+    u16 encountid;
+    u16 ritu;
+    u8 sensei;
+    u8 renzokuritu;
+    u16 renzokuindex;
+} datEncountRitu_t;
+
+typedef struct datEncountTbl_t {
+    s32 normalritu;
+    datEncountRitu_t ritu[12];
+} datEncountTbl_t;
+
+/* Native encounter packs embed their four table selectors and four rows. */
+typedef struct nbEncountEntry_t {
+    u16 stageid;
+    u16 areaid;
+    u16 btlsound;
+    u16 moonchk;
+    u16 table2;
+    u16 eventbit1;
+    u16 eventbit2;
+    u8 table1[4];
+    u8 reserved12[2];
+    datEncountTbl_t enctable[4];
+} nbEncountEntry_t;
 
 extern nbEncountEntry_t nbEncountTable[];
 
@@ -379,14 +403,111 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 INCLUDE_ASM(const s32, "newbattle/nbEncount", nbGetEncountJoken);
 
-INCLUDE_ASM(const s32, "newbattle/nbEncount", nbGetEncountMax);
+extern s32 nbGetEncountJoken(s32 id);
+
+extern s32 D_0054FF1C;
+extern s32 dds3GetRandIntA(s32 minimum, s32 range);
+extern s32 printf(const char *format, ...);
+extern char D_00545BA0[];
+
+s32 nbGetEncountMax(s32 id)
+{
+    s32 condition;
+    s32 total;
+    s32 i;
+    s32 maximum;
+
+    if (id == 0) {
+        return 0;
+    }
+    condition = nbGetEncountJoken(id);
+    total = 0;
+    for (i = 0; i < 12; i++) {
+        total += nbEncountTable[id].enctable[condition].ritu[i].ritu;
+    }
+    if (total == 0) {
+        return 0;
+    }
+    if (nbEncountMax > 0) {
+        return nbEncountMax;
+    }
+    maximum = D_0054FF1C - nbEncountTable[id].enctable[condition].normalritu * 48 / 100;
+    nbEncountMax = dds3GetRandIntA(0, maximum * 2 - 32) + 16;
+    printf(D_00545BA0, nbEncountMax, maximum);
+    return nbEncountMax;
+}
 
 u16 nbGetEncountCnt(void)
 {
     return DDS3_GBWK->encountCount;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbEncount", nbEncountCalc);
+extern s32 nbCheckEncountLevel(s32 table);
+extern void fclClearTerminalState(void);
+
+u32 nbEncountCalc(s32 id, f32 length)
+{
+    s32 condition;
+    s32 maximum;
+    /* Reuse the integer count for movement chunks and encounter-weight totals.
+     * cc1probe --func nbEncountCalc --alloc on this unit passed hooked,
+     * unhooked and plain-output parity. Expansion uids 110/281/488 share
+     * pseudo 88; global allocation gives it priority 5744 versus 3879 for
+     * the loop index. Splitting the counts reverses their register homes. */
+    s32 count;
+    s32 i;
+    s32 random;
+    s32 encounter;
+    s32 cumulative;
+
+    if (id == 0 || length == 0.0f) {
+        return 0;
+    }
+    condition = nbGetEncountJoken(id);
+    maximum = nbGetEncountMax(id);
+    if (maximum == 0) {
+        return 0;
+    }
+    DDS3_GBWK->encountkyori += length;
+    if (DDS3_GBWK->encountkyori < 100.0f) {
+        return 0;
+    }
+    count = DDS3_GBWK->encountkyori / 100.0f;
+    DDS3_GBWK->encountkyori -= count * 100.0f;
+    for (i = 0; i < count; i++) {
+        if (DDS3_GBWK->maFlags & 2) {
+            random = dds3GetRandIntA(0, 7);
+            DDS3_GBWK->encountCount = DDS3_GBWK->encountCount + random + 6;
+        } else {
+            random = dds3GetRandIntA(0, 3);
+            DDS3_GBWK->encountCount = DDS3_GBWK->encountCount + random + 2;
+        }
+    }
+    if (DDS3_GBWK->encountCount > 65000) {
+        DDS3_GBWK->encountCount = 65000;
+    }
+    if (DDS3_GBWK->encountCount < maximum) {
+        return 0;
+    }
+    random = dds3GetRandIntA(0, 1000);
+    count = 0;
+    for (i = 0; i < 12; i++) {
+        if (nbEncountTable[id].enctable[condition].ritu[i].encountid != 0) {
+            cumulative = count + nbEncountTable[id].enctable[condition].ritu[i].ritu;
+            if (random < cumulative) {
+                encounter = nbEncountTable[id].enctable[condition].ritu[i].encountid;
+                if ((DDS3_GBWK->maFlags & 1) && nbCheckEncountLevel(encounter) == 0) {
+                    fclClearTerminalState();
+                    return 0;
+                }
+                nbEncountMax = 0;
+                return ((u32)condition << 24) | (i << 16) | encounter;
+            }
+            count = cumulative;
+        }
+    }
+    return 0;
+}
 
 s32 nbCheckEncountLevel(s32 tbl)
 {
@@ -441,7 +562,7 @@ s32 func_0028CFC8(s32 tableno, s32 encno)
 
     v = 0;
     if (tableno > 0) {
-        v = nbEncountTable[tableno].unk_04;
+        v = nbEncountTable[tableno].btlsound;
     }
     if (nbEncountFormTable[encno].mae != 0) {
         v = nbEncountFormTable[encno].mae;

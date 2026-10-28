@@ -347,3 +347,4 @@ src/smt3/kernel/dds3CreateData.c	redthing1	done	2026-10-28	1 fn / 708 B	staff as
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 216 B	cmpFindFreeStockSlot; actual signed-byte args and list index
 src/smt3/code_0029B780.c	redthing1	done	2026-10-28	1 fn / 212 B	dds3AllocConfigWork; typed 0x10A8 config owner and cursor span
 src/smt3/facility/fclShopInit.c	redthing1	done	2026-10-28	1 fn / 220 B	shpFindItemSlot; signed item count and corrected count-helper contract
+src/smt3/newbattle/nbEncount.c	redthing1	done	2026-10-28	2 fn / 872 B	encounter threshold and distance/weighted selection; owner 9 match, 0 differ; packed integer consumer corrected

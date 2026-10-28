@@ -318,9 +318,9 @@ extern s32 dds3SearchProcessPriority(s32 priority);
 
 extern void nbExit(void);
 
-extern void *nbEncountCalc(s32 id, f32 length);
+extern u32 nbEncountCalc(s32 id, f32 length);
 
-extern void nbCallNewBattle(s32 encpack, void *data);
+extern void nbCallNewBattle(s32 encpack, s32 code);
 
 extern s32 pack;
 
@@ -509,14 +509,14 @@ void *TestProcess2(void)
 
 void *TestProcess6(void)
 {
-    void *next;
+    u32 encounter;
 
     DrawTest();
-    next = nbEncountCalc(pack, 100.0f);
-    if (next == NULL) {
-        return next;
+    encounter = nbEncountCalc(pack, 100.0f);
+    if (encounter == 0) {
+        return NULL;
     }
-    nbCallNewBattle(pack, next);
+    nbCallNewBattle(pack, encounter);
     return TestProcess2;
 }
 
