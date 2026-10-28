@@ -54,6 +54,7 @@ page and line to open. Conventions are in
 | 1 | sdf/sdfFileIO | [sdf/sdfFileIO.md](sdf/sdfFileIO.md) |
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
 | 1 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
+| 1 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
 | 1 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
 | 1 | pb/pbGameDraw | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
 | 1 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |

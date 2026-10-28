@@ -206,7 +206,38 @@ s32 pbAddRecord_flor(pbProcHandle_t *panel, pbGroupData_t *group)
     return position;
 }
 
+#ifdef NON_MATCHING
+/* 73 of 81 words match; coordinate/slot address setup differs. See docs/nonmatching/pb/pbRecord.md. */
+extern void pbGetMyCharcterPos2(pbProcHandle_t *panel, s16 *x, s16 *y);
+extern u32 pbMyCharacterDispStat(pbProcHandle_t *panel);
+
+s32 pbAddRecord_char(pbProcHandle_t *panel, s32 currentChar,
+                     pbProcHandle_t **characters)
+{
+    pbRecord_t *rec = panel->data.record;
+    s16 x, y;
+    u32 i;
+
+    rec->slot[rec->pos].flag[1] = D_0054F5C4->pcharNum;
+    if (rec->slot[rec->pos].characters != NULL) {
+        sdfChipFreeDelayedDirect(rec->slot[rec->pos].characters);
+    }
+    rec->slot[rec->pos].characters = sdfChipAllocDirect(
+        D_0054F5C4->pcharNum * sizeof(pbRecordCharacter_t));
+    rec->slot[rec->pos].flag[0] = currentChar;
+
+    for (i = 0; i < D_0054F5C4->pcharNum; i++) {
+        pbGetMyCharcterPos2(*characters, &x, &y);
+        ((pbRecordCharacter_t *)rec->slot[rec->pos].characters)[i].x = x;
+        ((pbRecordCharacter_t *)rec->slot[rec->pos].characters)[i].y = y;
+        ((pbRecordCharacter_t *)rec->slot[rec->pos].characters)[i].status =
+            pbMyCharacterDispStat(*characters++);
+    }
+    return rec->pos;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_char);
+#endif
 
 extern s32 printf(const char *format, ...);
 
