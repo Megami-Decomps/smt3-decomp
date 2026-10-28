@@ -1256,7 +1256,31 @@ INCLUDE_ASM(const s32, "result/rstcalc", datAddHeartsEntry);
 
 INCLUDE_ASM(const s32, "result/rstcalc", func_00222610);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstCheckHeartsSlot);
+/* Interior row label: the 66-byte stride is not a multiple of the
+ * four-byte skill-entry stride. */
+extern u8 D_00339E10[];
+
+u16 rstCheckHeartsSlot(u8 id, datUnitWork_t *unit)
+{
+    s32 index = datGetDevilSlotState(id);
+    u8 *entry;
+    u16 skill;
+
+    if (index < 8) {
+        entry = D_00339E10 + index * 4 + id * sizeof(datRaceEntry_t);
+        do {
+            skill = *(u16 *)(entry + 12);
+            if (skill != 0 && *(s8 *)(entry + 10) != 0 &&
+                unit->level >= *(s8 *)(entry + 10)) {
+                if (cmbChkSkillOwner(skill, unit) < 0)
+                    return skill;
+            }
+            index++;
+            entry += 4;
+        } while (index < 8);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", cmbInitStockUnit);
 
