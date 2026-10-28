@@ -522,7 +522,38 @@ void ragUpdateReturn(void)
     ragUpdateWork->unk_0004 = 1;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqStatus);
+extern s32 cmpLoadStatusModel(void);
+extern void ragUpdateReturn(void);
+extern s8 ragChkDevilLevelErr(datUnitWork_t *stock);
+
+void ragUpdateSeqStatus(void)
+{
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+
+    if (cmpLoadStatusModel() == 0) {
+        switch (button) {
+        case 1:
+            if (ragChkDevilLevelErr(&ragUpdateWork->previewUnit) != 0) {
+                return;
+            }
+            fclSetWorkValue(8, ragUpdateWork->previewUnit.id);
+            fclSetWorkValue(9, 1);
+            fclScriptStart(ragUpdateWork->script, 8,
+                                                     &ragUpdateWork->scriptArg);
+            ragUpdateWork->unk_0001 = 8;
+            ragUpdateWork->unk_0004 = -1;
+            break;
+        case 2:
+            ragUpdateReturn();
+            break;
+        case 0x10:
+        case 0x20:
+            button = 0;
+            break;
+        }
+    }
+    cmpPlayCursorSE(button);
+}
 
 INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqConfirm);
 
