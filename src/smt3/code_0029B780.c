@@ -222,7 +222,25 @@ INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigLabel);
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigCursor);
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigItem);
+extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
+extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+
+s32 dds3DrawConfigItem(s32 x, s32 y, s32 z, s32 ot)
+{
+    s32 phase = dds3GetConfigAnimPhase();
+    u32 color0 = fclBlendColor(0x9195EE20, 0x20, 0x100 - phase / 2);
+
+    phase = dds3GetConfigAnimPhase();
+    {
+        u32 color1 = fclBlendColor(0x6D6D9580, 0x20, 0x100 - phase / 2);
+        fclDrawPanelSprite2(0x44, ot);
+        cmpDrawBoxF(x, y, z, 0x200, 3, color0, ot);
+        cmpDrawBoxF(x, y + 0x18, z, 0x200, 0xC, color1, ot);
+        cmpDrawBoxF(x, y + 0x998, z, 0x200, 0xC, color1, ot);
+        return cmpDrawBoxF(x, y + 0x9F8, z, 0x200, 3, color0, ot);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigSlider);
 

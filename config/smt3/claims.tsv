@@ -364,3 +364,4 @@ src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 236 B	sdfSndInitCmdIF; 
 src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 280 B	Kotowari ranking with recovered four-byte save arrays; owner 68 match, 0 differ
 src/smt3/effect/effBattleLight.c	redthing1	done	2026-10-28	2 fn / 764 B	point-light and model-color callbacks; native timing gate and vector ABI; owner 13 match, 0 differ
 src/smt3/field/fldFileResolver.c	redthing1	done	2026-10-28	1 fn / 576 B	FL1 resource resolution and effect-file loading; owner 34 match, 0 differ
+src/smt3/code_0029B780.c	redthing1	done	2026-10-28	1 fn / 304 B	dds3DrawConfigItem; phase-based colors and panel box strips
