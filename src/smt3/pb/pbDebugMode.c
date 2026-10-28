@@ -82,7 +82,15 @@ struct pbProcHandle_t
             pbViewCamWork_t *viewCam; } data;
 };
 
-typedef struct { sdfMemHandle_t *allocation; u16 unk04, unk06, unk08, level, stage; } pbDebugWork_t;
+typedef struct
+{
+    sdfMemHandle_t *allocation;
+    s16 phase;
+    s16 menuCursor;
+    s16 systemFileNum;
+    s16 level;
+    s16 stage;
+} pbDebugWork_t;
 
 extern u8 D_0054F584;
 
@@ -133,7 +141,31 @@ extern s32 D_0054F510;
 extern void *D_0054F514;
 
 
-INCLUDE_ASM(const s32, "pb/pbDebugMode", pbDebugProc);
+typedef s32 (*pbDebugProcStep_t)(pbDebugWork_t *work, sdfDrawTag_t *tag);
+
+extern pbDebugProcStep_t DebugProcTable[];
+extern sdfGrOt_t sdfGrOtTable[];
+extern sdfDrawTag_t *sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void InitializeDebug_pbDebugMode(void);
+
+/* D_002F6938 is sdfGrOtTable[81]; its regFunc accepts this draw tag. */
+PS2_SYMBOL_AT(sdfGrOt_t, pbDebugModeOt81, sdfGrOtTable, 0xA20);
+
+dds3ProcessFunc_t *pbDebugProc(dds3ProcessID_t *proc_id)
+{
+    sdfDrawTag_t *tag;
+    s32 result;
+
+    if (g_pdebug_0 == NULL) {
+        InitializeDebug_pbDebugMode();
+    }
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    result = DebugProcTable[g_pdebug_0->phase](g_pdebug_0, tag);
+    pbDebugModeOt81.regFunc(&pbDebugModeOt81, tag);
+    return (dds3ProcessFunc_t *)(result != 0 ? -1 : 0);
+}
 
 void pbDebugShutdown(void) {
     ReleaseDebug_pbDebugMode();
@@ -142,9 +174,9 @@ void pbDebugShutdown(void) {
 void InitializeDebug_pbDebugMode(void) {
     sdfMemHandle_t *handle = sdfMemAllocDirect(0x10);
     pbDebugWork_t *work = sdfMemLock(handle);
-    work->unk04 = 0;
-    work->unk06 = 0;
-    work->unk08 = 0;
+    work->phase = 0;
+    work->menuCursor = 0;
+    work->systemFileNum = 0;
     work->allocation = handle;
     work->level = D_0054F5C4->level;
     work->stage = D_0054F5C4->stage;
