@@ -2490,7 +2490,31 @@ void cmbDrawStockPanel3(void)
                           0x47);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStatus);
+extern void cmpDrawStatusCom(s32 unit, s8 mode, s8 second, s8 third);
+extern void fclRbnDraw(fclRibbon_t *ribbon, s32 x, s32 y, u32 z,
+                      s32 alpha, s32 flag, s32 width, s32 ot);
+
+void cmbDrawStatus(void)
+{
+    cmbGbWork_t *work = CMB_GBWK;
+    s32 slot = 0;
+    switch ((s8)work->unk_00003) {
+    case 5:
+        slot = (s8)work->unk_165EE[work->stockCursorGroup[0].cursor.unk_22 +
+                              (u8)work->stockCursorGroup[0].cursor.unk_24];
+        break;
+    case 6:
+        slot = (s8)work->unk_165EE[work->stockCursorGroup[1].cursor.unk_22 +
+                              (u8)work->stockCursorGroup[1].cursor.unk_24];
+        break;
+    case 8:
+        slot = (s8)work->unk_165EE[work->stockCursorGroup[2].cursor.unk_22 +
+                              (u8)work->stockCursorGroup[2].cursor.unk_24];
+        break;
+    }
+    cmpDrawStatusCom((s32)&cmbGlobalWork->party[slot].unit, 1, 0, 0);
+    fclRbnDraw(CMB_GBWK->ribbon, 0, 0x98, 0, 0x80, 2, -0x80, 0x47);
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevilMaskBG);
 
