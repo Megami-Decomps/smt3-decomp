@@ -158,22 +158,21 @@ nbDrawMakaNum	newbattle/nbMakaProcess	0x2B4	136 of 173 words match	docs/nonmatch
 nbGetVirtualAisyo	newbattle/nbMakePacket	0xAC	39 of 43 words match	docs/nonmatching/newbattle/nbMakePacket.md	5
 Flow1_11	newbattle/nbMakePacket	0xC8	19 of 48 words match	docs/nonmatching/newbattle/nbMakePacket.md	25
 nbClearActionFlags	newbattle/nbMakePacket	0xE0	18 of 56 words match	docs/nonmatching/newbattle/nbMakePacket.md	39
-Flow5_2	newbattle/nbMakePacket	0x98	17 of 35 words differ	docs/nonmatching/newbattle/nbMakePacket.md	60
-Flow10_21	newbattle/nbMakePacket	0x98	11 of 37 words differ	docs/nonmatching/newbattle/nbMakePacket.md	82
-Flow10_10	newbattle/nbMakePacket	0x90	15 of 35 words differ	docs/nonmatching/newbattle/nbMakePacket.md	101
-nbCheckBattleSkillError1	newbattle/nbSkillError	0x48	1 of 18 words differ	docs/nonmatching/newbattle/nbMakePacket.md	117
-nbSetBadCurseTimer	newbattle/nbMakePacket	0x2C	2 of 11 words differ	docs/nonmatching/newbattle/nbMakePacket.md	142
-Flow5_6, Flow5_18	newbattle/nbMakePacket	0xD8 each	23 of 52 words match	docs/nonmatching/newbattle/nbMakePacket.md	159
-Flow6_37	newbattle/nbMakePacket	0x10C	58 of 67 words match	docs/nonmatching/newbattle/nbMakePacket.md	196
-Flow6_43	newbattle/nbMakePacket	0x10C	45 of 68 words match	docs/nonmatching/newbattle/nbMakePacket.md	223
-Flow7_20	newbattle/nbMakePacket	0x130	49 of 76 words match	docs/nonmatching/newbattle/nbMakePacket.md	245
-Flow10_1	newbattle/nbMakePacket	0x100	15 of 63 words differ	docs/nonmatching/newbattle/nbMakePacket.md	271
-Flow9_16	newbattle/nbMakePacket	0x168	45 of 89 words differ	docs/nonmatching/newbattle/nbMakePacket.md	292
-Flow6_65	newbattle/nbMakePacket	0x190	79 of 100 words differ	docs/nonmatching/newbattle/nbMakePacket.md	305
-nbCollectBadCurseUnits	newbattle/nbEncProcess	0xA4	23 of 41 words match	docs/nonmatching/newbattle/nbMakePacket.md	326
-ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/nonmatching/newbattle/nbMakePacket.md	344
-nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/nonmatching/newbattle/nbMakePacket.md	365
-nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	393
+Flow10_21	newbattle/nbMakePacket	0x98	11 of 37 words differ	docs/nonmatching/newbattle/nbMakePacket.md	60
+Flow10_10	newbattle/nbMakePacket	0x90	15 of 35 words differ	docs/nonmatching/newbattle/nbMakePacket.md	79
+nbCheckBattleSkillError1	newbattle/nbSkillError	0x48	1 of 18 words differ	docs/nonmatching/newbattle/nbMakePacket.md	95
+nbSetBadCurseTimer	newbattle/nbMakePacket	0x2C	2 of 11 words differ	docs/nonmatching/newbattle/nbMakePacket.md	120
+Flow5_6, Flow5_18	newbattle/nbMakePacket	0xD8 each	23 of 52 words match	docs/nonmatching/newbattle/nbMakePacket.md	137
+Flow6_37	newbattle/nbMakePacket	0x10C	58 of 67 words match	docs/nonmatching/newbattle/nbMakePacket.md	174
+Flow6_43	newbattle/nbMakePacket	0x10C	45 of 68 words match	docs/nonmatching/newbattle/nbMakePacket.md	201
+Flow7_20	newbattle/nbMakePacket	0x130	49 of 76 words match	docs/nonmatching/newbattle/nbMakePacket.md	223
+Flow10_1	newbattle/nbMakePacket	0x100	15 of 63 words differ	docs/nonmatching/newbattle/nbMakePacket.md	249
+Flow9_16	newbattle/nbMakePacket	0x168	45 of 89 words differ	docs/nonmatching/newbattle/nbMakePacket.md	270
+Flow6_65	newbattle/nbMakePacket	0x190	79 of 100 words differ	docs/nonmatching/newbattle/nbMakePacket.md	283
+nbCollectBadCurseUnits	newbattle/nbEncProcess	0xA4	23 of 41 words match	docs/nonmatching/newbattle/nbMakePacket.md	304
+ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/nonmatching/newbattle/nbMakePacket.md	322
+nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/nonmatching/newbattle/nbMakePacket.md	343
+nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	371
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	5
 DispComm1PanelComm	newbattle/nbStageProcess	0xE0	53 of 56 words match	docs/nonmatching/newbattle/nbStageProcess.md	20
 CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/nonmatching/newbattle/nbStageProcess.md	44

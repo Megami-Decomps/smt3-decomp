@@ -57,28 +57,6 @@ declaration orders leave it unchanged. This is the ruled-out
 register-permutation class, kept only so the next reader does not redo the
 decode.
 
-## Flow5_2 (newbattle/nbMakePacket, 0x98)
-
-17 of 35 words differ, three words short of retail's 152.
-
-Both `nbAddNegoIdKouho` ids, the `datSearchDevilStock(n->ework->id)` call and
-the `evtBitCheck`/`evtBitOn` pair on `n->innen_id + 0xB00` are confirmed, as
-are the three `nextnegoid` assignments (`nextkouho[1]` on the stock hit and on
-the bit hit, `nextkouho[0]` otherwise).
-
-Two things are still wrong. ee-gcc emits `bgezl` out of the
-`datSearchDevilStock` test where retail has a plain `bltz` with the shared
-`return 0`'s zero annulled into its slot, and it reads `n->innen_id` once where
-retail reads it twice, once into `$4` for each of the two calls. Retail
-materialises the zero three times, once per exit path, so the source has one
-textual `return 0` reached from all three arms.
-
-Ruled out: `>= 0` and `< 0` for the first test, an `if`/`else if`/`else` chain
-and an early `return 0` per arm (both leave the `bgezl`), and nesting the bit
-test inside the `< 0` arm. Two distinct `s32` locals for the two `innen_id`
-reads is the next thing to try, per the two-reads row of
-[matching levers](matching-levers.md).
-
 ## Flow10_21 (newbattle/nbMakePacket, 0x98)
 
 11 of 37 words differ, one word short of retail's 152.

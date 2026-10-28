@@ -353,8 +353,6 @@ s32 Flow5_1(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 17 of 35 words differ (first at +0x38). */
-#ifdef NON_MATCHING
 s32 Flow5_2(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x50003);
@@ -363,17 +361,14 @@ s32 Flow5_2(nbNegoProcessData_t *n)
         n->nextnegoid = n->nextkouho[1];
         return 0;
     }
-    if (evtBitCheck(n->innen_id + 0xB00) != 0) {
+    if (evtBitCheck(n->innen_id + 0xB00) == 0) {
+        n->nextnegoid = n->nextkouho[0];
+        evtBitOn(n->innen_id + 0xB00);
+    } else {
         n->nextnegoid = n->nextkouho[1];
-        return 0;
     }
-    n->nextnegoid = n->nextkouho[0];
-    evtBitOn(n->innen_id + 0xB00);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowInnen", Flow5_2);
-#endif
 
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowInnen", Flow5_3);
 
