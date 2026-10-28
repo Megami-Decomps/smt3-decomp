@@ -29,7 +29,7 @@ typedef struct
     s32 pcharNum;
     u8 unk004[0x14];
     s16 exitX, exitY;
-    u8 unk01C[0x320];
+    u16 map[20][20];
     s32 charIndex;
     void *baseTex;
     void *tex344, *tex348, *tex34C;
@@ -39,6 +39,8 @@ typedef struct
     u8 unk35C[4];
     s32 menuState;
     struct pbProcHandle_t *helpProc;
+    u8 reserved368[4];
+    s32 drawCount;
 } pbMapWork_t;
 
 typedef struct { u8 unk00[4]; u16 group; } pbGroupEntry_t;
@@ -131,6 +133,20 @@ extern void func_001D2D00(pbProcHandle_t *panel, s32 arg);
 extern f32 D_00326C60[];
 
 extern u32 pbMyCharacterDispStat(pbProcHandle_t *p);
+
+extern s32 (*D_0054F5B0[])(s16 x, s16 y, s32 mode);
+
+extern s32 sdfGrAllocPacketBuff(s32 size);
+
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+
+extern void sdf3DPrimLinkMat(sdfDrawTag_t *tag, sdfMat_t *mat,
+                             s32 (*allocator)(s32));
+
+extern sdfGrOt_t sdfGrOtTable[85];
+
+extern s32 pbDrawMapBlock(s32 x, s32 y, s32 drawFlags, s32 special,
+                          sdfDrawTag_t *tag);
 
 void pbSetModelPos(mdlObj_t *aHandle, const f32 *pos) {
     SDF_VU0_LOADVECTOR(pos);
@@ -304,7 +320,77 @@ void pb_draw_exit_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(panel);
 }
 
+/* NON_MATCHING: 7 of 133 words differ; see docs/nonmatching/pb/pbModel.md. */
+#ifdef NON_MATCHING
+s32 pb_draw_mapbase_Process(dds3ProcessID_t *id)
+{
+    s32 (*callbacks[2])(s16 x, s16 y, s32 mode);
+    pbProcHandle_t *panel;
+    pbExit_t *work;
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    s32 callbackResult = 0x1F;
+    s32 row;
+    u16 state;
+
+    __builtin_memcpy(callbacks, D_0054F5B0, sizeof(callbacks));
+    panel = id->workdata;
+    state = panel->state;
+    work = panel->data.mat;
+
+    switch (state) {
+    case 1:
+        if (panel != NULL) {
+            panel->flags = 0;
+        }
+        break;
+    case 5:
+        return -1;
+    }
+
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdf3DPrimLinkMat(tag, work->mat, NULL);
+
+    for (row = 0; row < 20; row++) {
+        s32 col;
+        for (col = 0; col < 20; col++) {
+            u16 tile = D_0054F5C4->map[row][col];
+
+            if ((tile & 0x800) == 0) {
+                if (work->flg == 0) {
+                    callbackResult = callbacks[work->value]((s16)col, (s16)row, 0);
+                }
+                {
+                    s32 drawCount = pbDrawMapBlock(col, row,
+                                                   callbackResult, 0, tag);
+                    pbMapWork_t *mapWork = D_0054F5C4;
+                    mapWork->drawCount = mapWork->drawCount + drawCount;
+                }
+            }
+
+            if ((D_0054F5C4->map[row][col] >> 13) == 1) {
+                if (work->flg == 0) {
+                    callbackResult = callbacks[work->value]((s16)col, (s16)row, 2);
+                }
+                {
+                    s32 drawCount = pbDrawMapBlock(col, row,
+                                                   callbackResult, 1, tag);
+                    pbMapWork_t *mapWork = D_0054F5C4;
+                    mapWork->drawCount = mapWork->drawCount + drawCount;
+                }
+            }
+        }
+    }
+
+    ot = &sdfGrOtTable[0x27];
+    ot->regFunc(ot, tag);
+    return 0;
+}
+
+#else
 INCLUDE_ASM(const s32, "pb/pbModel", pb_draw_mapbase_Process);
+#endif
 
 void pb_draw_mapbase_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
