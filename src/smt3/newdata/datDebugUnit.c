@@ -16,7 +16,7 @@ extern void DispUnit1(s32 unit, s32 mode, s32 entry, sdfDrawTag_t *tag);
 extern sdfGrOt_t D_002F6938;
 const char D_005431C8[] = "     ID     LV  HP       MP     STAT";
 
-dds3ProcessFunc_t *datDebugUnitProcess(dds3ProcessID_t *id)
+s32 datDebugUnitProcess(dds3ProcessID_t *id)
 {
     sdfDrawTag_t *unitList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTag_t *panelList;
@@ -37,7 +37,7 @@ dds3ProcessFunc_t *datDebugUnitProcess(dds3ProcessID_t *id)
     dds3ConsPanelTagLink(panelList, 0x18, 0x72, 0x25, entry - 9);
     D_002F6938.regFunc(&D_002F6938, panelList);
     D_002F6938.regFunc(&D_002F6938, unitList);
-    return NULL;
+    return 0;
 }
 
 INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_005431F0);

@@ -6207,7 +6207,7 @@
 0x00246038 datBossRashChk s32 datBossRashChk(s32 eid)
 0x002460B0 DispList void DispList(s32 x, s32 y, sdfDrawTag_t *tag)
 0x00246248 DispUnit1 void DispUnit1(s32 i, s32 x, s32 y, sdfDrawTag_t *tag)
-0x00246550 datDebugUnitProcess dds3ProcessFunc_t *datDebugUnitProcess(dds3ProcessID_t *id)
+0x00246550 datDebugUnitProcess int datDebugUnitProcess(dds3ProcessID_t *id)
 0x00246668 datDebugDrawSelectMenu __int64 datDebugDrawSelectMenu()
 0x00246898 nb_246898 void nb_246898()
 0x002468B0 nb_2468B0 void nb_2468B0()
