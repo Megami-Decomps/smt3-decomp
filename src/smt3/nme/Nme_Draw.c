@@ -71,7 +71,44 @@ void nmeDrawFuncIcon(void)
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDrawInputPanel);
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDraw);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void cmpUpdateTerminate(void *work);
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void nmeDrawBlendText(s32 sprite, s32 page, sdfTexHandle_t **textures, nmeSpriteTable_t *table, u32 color, s32 animation, s32 ot);
+extern void nmeDrawNamePanel(void);
+extern void nmeDrawInputPanel(void);
+extern void nmeDrawCursor(void);
+extern void nmeDrawModeTabs(s8 mode);
+extern void nmeDrawInputUBar(s8 mode);
+extern void nmeDrawButtonGuide(void);
+
+s32 nmeDraw(dds3ProcessID_t *id)
+{
+    nmeWork_t *work = dds3GetProcessData(id);
+    nmeSpriteTable_t *table;
+    namelist_buttonAnim_end = work;
+    if (work->sequence.flag & 0x20) {
+        cmpUpdateTerminate(work);
+        return -1;
+    }
+    cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, 0x80, 0x47);
+    table = &GBWK_2;
+    nmeDrawBlendText(2, 1, namelist_buttonAnim_end->textures, table,
+                     0x80808080, namelist_buttonAnim_end->animation, 0x47);
+    fclDrawSpriteRes(0, 0, 0, 0, 2, 0,
+                     (s32 *)namelist_buttonAnim_end->textures, table, 0x47);
+    nmeDrawNamePanel();
+    nmeDrawInputPanel();
+    nmeDrawCursor();
+    nmeDrawFuncIcon();
+    if ((s8)namelist_buttonAnim_end->unk1B == 0) {
+        nmeDrawModeTabs(namelist_buttonAnim_end->inputMode);
+        nmeDrawInputUBar(namelist_buttonAnim_end->inputMode);
+    } else {
+        nmeDrawButtonGuide();
+    }
+    return 0;
+}
 
 s32 nmeGetCursorPos(nmeWork_t *work) {
     s32 mode = nmeGetInputMode(work);
