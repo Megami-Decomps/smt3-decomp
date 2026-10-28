@@ -1411,3 +1411,13 @@ at `0x51B4`. The input cursor is at `0x1058`, confirmed by `nmeSyncCursor` calli
 reads and writes its signed timing value at `0x51C4`. Draw callbacks use
 `nmeUpdateWork`, distinct from the persistent `nmeProcessId` pointer. Unrecovered spans remain padding. `tools/header_layout.c` checks
 these offsets with the EE compiler.
+
+The allocator clears the three signed input-row flags at `0x514D`. Cursor
+initialization clears the alternate-cursor flag at `0x514C`; input dispatch
+uses it to select the alternate movement handler. Input helpers index three
+`0x20`-byte rows of two-byte character codes at `0x5152`, ending before the
+texture handles. The shared layout checks these boundaries as well.
+
+`nmeInitNameBuffer` initializes the mode cursor at `0x1C` and clears the
+primary movement-handler flag at `0x30D0`. Input dispatch tests that flag
+before calling `nmeMoveCursor`; `0x514C` selects `nmeMoveCursor2` instead.

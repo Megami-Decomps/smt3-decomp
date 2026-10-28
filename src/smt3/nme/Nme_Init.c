@@ -98,7 +98,38 @@ void nmeFreeNameTextures(nmeWork_t *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeLoadFont);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void cmpInitSeqInfo(void *work, s32 parent);
+extern void nmeInitNameBuffer(s8 mode, nmeWork_t *work);
+extern void nmeInitCursor(s8 mode, nmeWork_t *work);
+extern void nmeTexLoad(s8 mode, nmeWork_t *work);
+extern void frLoadFontData(s32 style, const char *filename);
+extern char D_00548768[];
+
+nmeWork_t *nmeLoadFont(s8 target, s8 mode, s32 parent)
+{
+    sdfMemHandle_t *handle = sdfMemAllocDirect(0x51C8);
+    nmeWork_t *work = sdfMemLock(handle);
+
+    memset(work, 0, 0x51C8);
+    work->memHandle = handle;
+    cmpInitSeqInfo(work, parent);
+    work->sequence.current = 0;
+    work->entryMode = mode;
+    work->sequence.change = 1;
+    work->targetNo = target;
+    work->sequence.last = 0;
+    work->inputRowEnabled[0] = 0;
+    work->inputRowEnabled[1] = 0;
+    work->inputRowEnabled[2] = 0;
+    nmeInitNameBuffer(0, work);
+    nmeInitCursor(4, work);
+    nmeInitNameRows(target, work);
+    frLoadFontData(4, D_00548768);
+    nmeTexLoad(target, work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeBuildNameFont);
 

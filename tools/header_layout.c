@@ -823,3 +823,8 @@ OFF(nm06, nmeWork_t, animation, 0x51C4);
 OFF(nm07, nmeWork_t, inputCursor, 0x1058);
 OFF(nm08, nmeWork_t, nameCursor, 0x2094);
 SZ(nm09, nmeWork_t, 0x51C8);
+OFF(nm10, nmeWork_t, inputRowEnabled, 0x514D);
+OFF(nm11, nmeWork_t, alternateCursorActive, 0x514C);
+OFF(nm12, nmeWork_t, inputChars, 0x5152);
+OFF(nm13, nmeWork_t, modeCursor, 0x1C);
+OFF(nm14, nmeWork_t, primaryCursorActive, 0x30D0);
