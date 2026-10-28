@@ -422,7 +422,63 @@ void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
 void nbSetModelHandleOnce(nbFormation_t *form, NB_FILEHANDLE_T *packh);
 
-INCLUDE_ASM(const s32, "newbattle/nbE901", RunUgou);
+extern s32 nbCameraBoss_Sp_DOUTYO_TP_Set(u8 *pNbCamera);
+extern s32 D_005515C0;
+extern char *text1[];
+extern void nbPanelAllShow(void);
+extern s32 dds3GetRandIntA(s32 minimum, s32 range);
+extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+
+s32 RunUgou(nbEventProcessData_t *e)
+{
+    s32 list[16];
+    s32 count = 0;
+    nbFormation_t *lead;
+    s32 *p;
+    s32 tmp;
+    s32 i;
+
+    nbPanelAllShow();
+    nbResetAllFormPosRot();
+    p = list;
+    for (i = 4; i < 14; i++) {
+        if (e->data->form[i].stat & 1) {
+            *p++ = i;
+            count++;
+        }
+    }
+    lead = &e->data->form[list[count / 2]];
+    if (count < 4) {
+        D_005515BC = 0x112;
+        D_005515C0 = 0x128;
+    } else if (count < 6) {
+        D_005515BC = 0x111;
+        D_005515C0 = 0x127;
+    } else {
+        D_005515BC = 0x110;
+        D_005515C0 = 0x126;
+    }
+    tmp = list[0];
+    list[0] = list[count / 2];
+    list[count / 2] = tmp;
+    nbAddMotionKoukaPacket(0, 0, lead, 0x10);
+    for (i = 1; i < count; i++) {
+        s32 wait = dds3GetRandIntA(0, 0xF);
+
+        nbAddMotionKoukaPacket(wait + 0xF, 0, &e->data->form[list[i]], 0x10);
+    }
+    effBTLSkillStart(0xE8, 0);
+    nbCameraBoss_Sp_DOUTYO_TP_Set(pNbCamera);
+    nbDispText(text1[0xE8], NULL, 0, 0x5A, 0x89FEFF80);
+    if (evtBitCheck(0xC0F) != 0) {
+        e->pfile = (nbPacHandle_t *)nbMakeModelPackName(D_005515C0);
+    } else {
+        mdlPrepare(1, D_005515C0, 0);
+    }
+    nbFreeEffectSlot(e);
+    return 0;
+}
+
 
 s32 Wait1_nbE901(nbEventProcessData_t *e)
 {
