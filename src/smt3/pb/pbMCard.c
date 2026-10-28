@@ -146,13 +146,13 @@ s32 pbMkdirMCard(s32 port, s32 slot, const char *dirName) {
     return result;
 }
 
+extern const char D_0054F608[];
+extern const char D_00536498[];
+extern const char D_005364C0[];
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536498);
 
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_005364C0);
 
-extern const char D_0054F608[];
-extern const char D_00536498[];
-extern const char D_005364C0[];
 const char D_005364E8[40] __attribute__((aligned(8))) = "\tregist read command. return = %d\n";
 const char D_00536510[40] __attribute__((aligned(8))) = "\tcan't read a file < %s > err = %d\n";
 extern const char D_00536538[];
@@ -193,11 +193,11 @@ s32 pbReadMCard(s32 port, s32 slot, char *fileName, void *buffer, s32 size)
     return readResult;
 }
 
+extern s32 sceMcWrite(s32 fd, void *buffer, s32 size);
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536538);
 
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536560);
 
-extern s32 sceMcWrite(s32 fd, void *buffer, s32 size);
 const char D_00536588[40] __attribute__((aligned(8))) = "\tregist write command. return = %d\n";
 const char D_005365B0[40] __attribute__((aligned(8))) = "\tcan't write a file < %s > err = %d\n";
 
