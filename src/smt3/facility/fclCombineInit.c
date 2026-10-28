@@ -104,9 +104,9 @@ extern datDevilInfo_t datDevilTable[];
 
 extern u32 dds3GetRandA(void *state);
 
-extern s32 datGetMaxHp(datUnitWork_t *work);
+extern u32 datGetMaxHp(datUnitWork_t *work);
 
-extern s32 datGetMaxMp(datUnitWork_t *work);
+extern u32 datGetMaxMp(datUnitWork_t *work);
 
 extern s32 cmbLookupCombine(u16 devilA, u16 devilB, s8 flag);
 
@@ -1224,7 +1224,31 @@ s8 cmbFindSkillSlot(cmbUnit_t *unit)
     return count;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCopyDefaultDevilToStock);
+extern void cmbInitStockUnit(u16 id, datUnitWork_t *unit);
+
+void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst)
+{
+    datDevilInfo_t *entry;
+    const u8 *sourceParam;
+    s8 *destParam;
+    s32 i;
+
+    memset(dst, 0, sizeof(*dst));
+    dst->flag = 1;
+    dst->id = devilId;
+    entry = &datDevilTable[devilId];
+    sourceParam = &entry->unk_06[0xA];
+    destParam = dst->param;
+    dst->level = entry->unk_05;
+    for (i = 0; i < 6; i++) {
+        *destParam++ = *sourceParam++;
+    }
+    dst->hp = datGetMaxHp(dst);
+    dst->maxhp = dst->hp;
+    dst->mp = datGetMaxMp(dst);
+    dst->maxmp = dst->mp;
+    cmbInitStockUnit(devilId, dst);
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCopyCustomDevilToStock);
 
