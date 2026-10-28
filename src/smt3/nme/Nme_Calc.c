@@ -96,7 +96,58 @@ void nmeDrawTextBox(s32 x, s32 y, s32 z)
     cmpDrawBoxGDefault(x, y, z, 0x4F, 0x16, colors, 0x47);
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawColoredText);
+typedef struct {
+    const char *question;
+    const char *yes;
+    const char *no;
+} nmeColoredTextStrings_t;
+
+extern const nmeColoredTextStrings_t D_005487F8;
+extern void cmpSetSkillListRows(s32 rows);
+extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
+                                             const char *text, frFontHandle_t *previous);
+extern void frSetDrawPosition(frFontHandle_t *request, u32 x, u32 y);
+extern void frSetPriority(frFontHandle_t *request, u32 priority);
+extern void frSetFontColorNo(frFontHandle_t *request, u8 colorNo);
+extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
+extern u8 frDisableMode(u8 flag);
+
+void nmeDrawColoredText(s8 selected)
+{
+    nmeColoredTextStrings_t text = D_005487F8;
+    frFontHandle_t *request;
+
+    cmpSetSkillListRows(0x18);
+    request = frwGetSmallFontFRQ2(0x97, 0x101, 0xFF, 0x80808080, text.question, NULL);
+    frSetDrawPosition(request, 0x970, 0x808);
+    frSetPriority(request, 0xFF0);
+    func_001C7E38(request, 0, 0x47);
+    frDestroyFontRequestAfter(request);
+
+    request = frwGetSmallFontFRQ2(0x9D, 0x122, 0xFF, 0x80808080, text.yes, NULL);
+    frSetDrawPosition(request, 0x9D0, 0x910);
+    if (selected == 0) {
+        frSetFontColorNo(request, 1);
+        nmeDrawTextBox(0x9A0, 0x920, 0xFF);
+    }
+    frSetPriority(request, 0xFF0);
+    func_001C7E38(request, 0, 0x47);
+    frDestroyFontRequestAfter(request);
+
+    request = frwGetSmallFontFRQ2(0x9D, 0x13D, 0xFF, 0x80808080, text.no, NULL);
+    frSetDrawPosition(request, 0x9D0, 0x9E8);
+    if (selected == 1) {
+        frSetFontColorNo(request, 1);
+        nmeDrawTextBox(0x9A0, 0x9F0, 0xFF);
+    }
+    frSetPriority(request, 0xFF0);
+    func_001C7E38(request, 0, 0x47);
+    frDestroyFontRequestAfter(request);
+
+    frDisableMode(1);
+    cmpSetSkillListRows(-1);
+}
 
 extern void nmeDrawNameText(s32 x, s32 y, s32 width, s32 height, u32 color, s32 mode);
 extern void nmeDrawNameString(s32 x, s32 y, u32 color, s32 mode);
