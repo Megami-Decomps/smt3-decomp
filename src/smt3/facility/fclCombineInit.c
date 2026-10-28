@@ -1999,7 +1999,39 @@ void cmbDrawDevilNameLevel(s32 x, s32 y, s32 priority, datUnitWork_t *work, s32 
     frDestroyFontRequestAfter(request);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultIcon);
+extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *color,
+                                s32 id, s32 spriteId, s32 *texs,
+                                fclSpriteTbl_t *table, s32 ot);
+
+void cmbDrawResultIcon(s8 mode, s32 z, s32 unused2, s32 unused3, s32 alpha, s32 ot)
+{
+    s32 color[4];
+    u32 blend = fclBlendColor(0x80808080, 0, alpha);
+
+    color[0] = blend;
+    color[1] = blend;
+    color[2] = blend;
+    color[3] = blend;
+    if (mode == 0) {
+        fclDrawSpriteFilter(0, 0, z << 4, 0, color, 0, 9,
+                            CMB_GBWK->texHandle, cmbSpriteTable, ot);
+        fclDrawSpriteFilter(0, 0, z << 4, 0, color, 0, 10,
+                            CMB_GBWK->texHandle, cmbSpriteTable, ot);
+        fclDrawSpriteRes(0, 0, z << 4, color, 0, 0xE, CMB_GBWK->texHandle,
+                         cmbSpriteTable, ot);
+        fclDrawSpriteRes(0xB4, 0, z << 4, color, 0, 0x10, CMB_GBWK->texHandle,
+                         cmbSpriteTable, ot);
+    } else {
+        fclDrawSpriteRes(0, 0, z << 4, color, 0, 0xB, CMB_GBWK->texHandle,
+                         cmbSpriteTable, ot);
+        fclDrawSpriteRes(0, 0, z << 4, color, 0, 0xC, CMB_GBWK->texHandle,
+                         cmbSpriteTable, ot);
+        fclDrawSpriteRes(0, 0, z << 4, color, 0, 0xF, CMB_GBWK->texHandle,
+                         cmbSpriteTable, ot);
+        fclDrawSpriteRes(0xB4, 0, z << 4, color, 0, 0x11, CMB_GBWK->texHandle,
+                         cmbSpriteTable, ot);
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultHeader);
 
