@@ -1242,7 +1242,36 @@ s32 rstCalcEvoLevelDiff(datUnitWork_t *a, datUnitWork_t *b, datUnitWork_t *c, s3
     return (limit < diff) ? limit : diff;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", cmbCopyEvoDevilToStock);
+extern void cmbClearUnitSkills(datUnitWork_t *unit);
+
+void cmbCopyEvoDevilToStock(datUnitWork_t *unit, datUnitWork_t *source)
+{
+    datUnitWork_t work;
+    s32 i;
+
+    cmbCopyCustomDevilToStock(&work, source);
+    cmbClearUnitSkills(&work);
+    if (work.flag & 0x200) {
+        unit->flag |= 0x200;
+    }
+    if (unit->hensinmae != 0) {
+        work.hensinmae = unit->hensinmae;
+    } else {
+        work.hensinmae = unit->id;
+    }
+    work.flag = unit->flag;
+    work.uniqueid = unit->uniqueid;
+    work.exp += unit->exp;
+    work.hensinmaeexp = unit->exp;
+    for (i = 0; i < unit->skillcnt; i++) {
+        if (cmbCopyEvoDevil(&work, unit->skill[i]) != 0) {
+            work.skill[work.skillcnt++] = unit->skill[i];
+        }
+    }
+    cmbCopyCustomDevilToStock(unit, &work);
+    unit->hp = unit->maxhp;
+    unit->mp = unit->maxmp;
+}
 
 typedef struct
 {
