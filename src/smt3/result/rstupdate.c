@@ -22,7 +22,7 @@ typedef struct
     /* 0x20 */ u8 unk_20;
     /* 0x21 */ u8 unk_21;
     /* 0x22 */ s16 unk_22;
-    /* 0x24 */ s8 unk_24;
+    /* 0x24 */ u8 unk_24; /* cursor page offset, with byte-wrapped updates */
     /* 0x25 */ s8 unk_25;
     /* 0x26 */ u8 unk_26;
     /* 0x27 */ u8 unk_27;
@@ -784,7 +784,76 @@ s32 rstUpdateSeqConfirm(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqDestroySkill);
+extern s32 cmpGetPressedButton(s32 mask);
+extern s32 cmpChkPadPressUpDown(void);
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
+extern void cmpPlayCursorSE(u32 button);
+extern s32 fclChkMessage(void);
+extern s32 fclStartSelMessage(s32 message);
+extern char *text1[];
+
+s32 rstUpdateSeqDestroySkill(void)
+{
+    u16 button = (u16)cmpGetPressedButton(0xF3);
+    u8 cursorIndex = (u8)((u8)startPos->cursorInfo.unk_22 +
+                          (u8)startPos->cursorInfo.unk_24);
+
+    if (fclChkMessage() != 0)
+        return 0;
+
+    switch (button) {
+    case 1:
+        startPos->selectedSkill =
+            rstSkillSlotIsFull(startPos->pCurrentStock,
+                               (void *)&startPos->cursorInfo);
+        fclSetMessageVar_20743088(10, (s32)text1[startPos->selectedSkill]);
+        fclStartMessage(8);
+        fclStartSelMessage(0x2B);
+        startPos->unk_0001 = 0x16;
+        startPos->unk_0004 = (s8)button;
+        break;
+    case 2:
+        return 0;
+    case 0x40:
+        if (cursorIndex < 8) {
+            if (cursorIndex < 4)
+                startPos->cursorInfo.unk_24 = 8;
+            else
+                startPos->cursorInfo.unk_24 -= 4;
+        } else {
+            startPos->cursorInfo.unk_24 -= 4;
+        }
+        break;
+    case 0x80:
+        if (cursorIndex < 8) {
+            if (cursorIndex < 4)
+                startPos->cursorInfo.unk_24 += 4;
+            else
+                startPos->cursorInfo.unk_24 = 8;
+        } else {
+            startPos->cursorInfo.unk_24 = 0;
+        }
+        break;
+    case 0x10:
+        if (startPos->cursorInfo.unk_22 + (u8)startPos->cursorInfo.unk_24 == 8)
+            return 0;
+        cmpMoveCursor(&startPos->cursorInfo, -1);
+        break;
+    case 0x20:
+        if (startPos->cursorInfo.unk_22 + (u8)startPos->cursorInfo.unk_24 == 8)
+            return 0;
+        cmpMoveCursor(&startPos->cursorInfo, 1);
+        break;
+    default:
+        break;
+    }
+
+    if (cmpChkPadPressUpDown() == 0)
+        cmpMoveCursor(&startPos->cursorInfo, 0);
+    cmpPlayCursorSE(button);
+    return 1;
+}
+
 
 extern u16 rstChkHeartsSkill(datUnitWork_t *unit);
 extern s32 datGetDevilSlotState(u8 devilId);
@@ -1215,7 +1284,7 @@ extern void rstUpdateSeqAsignPlayerParam(datUnitWork_t *unit);
 extern void rstUpdateSeqSkillPowerUp(void);
 extern void rstUpdateSeqEvo(void);
 extern void rstUpdateSeqEvoAct(void);
-extern void rstUpdateSeqDestroySkill(void);
+extern s32 rstUpdateSeqDestroySkill(void);
 extern void fclUpdateMessage(void);
 extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
 
