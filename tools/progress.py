@@ -32,6 +32,10 @@ def version_stats(version):
     drafts = draft_functions(version)
     for unit in (ROOT / "src" / version).rglob("*.c"):
         name = unit.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
+        # Match the primary report's game scope. SDK/runtime reconstructions
+        # have their own category and must not move the game-code denominator.
+        if name.startswith("sdk/"):
+            continue
         full = ROOT / "asm" / version / f"{name}.s"
         if not full.exists():
             continue
