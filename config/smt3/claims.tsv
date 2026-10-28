@@ -609,3 +609,4 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 380 B	stock-panel setu
 coverage sweep, claim-free queue	z20	done	2026-10-29	3 fn / 3616 B	3 units closed: nbCameraNego, dds3PadManager, pbMenu; two stfMain drafts parked
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	registration sprites at native 620-byte size; two color-address/texture-load scheduling words remain
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 364 B	status process input and signed selection wrapping; explicit no-input dispatch and callback-sensitive model loading
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 444 B	HP and MP gauge drawing with callback-sensitive field reads and native signed integer ratios; owner 355 match, 0 differ

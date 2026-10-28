@@ -5841,7 +5841,38 @@ void campDrawStatusRow2(s32 x, s32 y, u32 color, datUnitWork_t *unit)
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStatusRow2);
 #endif
 
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStatusRow3);
+extern void fclDrawSpriteRect(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color,
+                              s32 id, s32 idx, s32 *texList,
+                              fclSpriteTbl_t *table, s32 ot);
+
+void campDrawStatusRow3(s32 x, s32 y, s32 color, datUnitWork_t *unit)
+{
+    s32 colors[4] = { color, color, color, color };
+    s32 ratio;
+
+    fclDrawSpriteRes(x, y, 0x10, colors, 0, 0x15,
+                     D_00345D88, fclSpriteTable, 0x47);
+
+    ratio = 1000 * unit->hp / unit->maxhp;
+    if (ratio != 0) {
+        fclDrawSpriteRect(x, y, 0x10, ratio, 1000, colors, 0, 0x14,
+                          D_00345D88, fclSpriteTable, 0x47);
+    }
+
+    fclDrawSpriteRes(x, y, 0x10, colors, 0, 0x17,
+                     D_00345D88, fclSpriteTable, 0x47);
+
+    ratio = 1000 * unit->mp / unit->maxmp;
+    if (ratio != 0) {
+        if ((unit->badstatus & 0x800) != 0) {
+            fclDrawSpriteRect(x, y, 0x10, ratio, 1000, colors, 0, 0x18,
+                              D_00345D88, fclSpriteTable, 0x47);
+        } else {
+            fclDrawSpriteRect(x, y, 0x10, ratio, 1000, colors, 0, 0x16,
+                              D_00345D88, fclSpriteTable, 0x47);
+        }
+    }
+}
 
 s32 campGetCursorColorSel(s32 color, cmpCursorSlot_t *slot)
 {
