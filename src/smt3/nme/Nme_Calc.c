@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kernel.h"
+#include "nme.h"
 
 /* Name-entry work is 0x51C8 bytes; its sequence flag is the first byte. */
 typedef struct {
@@ -11,6 +12,17 @@ extern nmeCalcWork_t *D_00552024;
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern s32 dds3FadeCheck(void);
 extern void cmpUpdateTerminate(void *work);
+
+typedef struct {
+    void *res;
+    void *entries;
+} nmeSpriteTable_t;
+
+/* This descriptor is in .data, outside the GP-relative range. */
+extern nmeSpriteTable_t GBWK_2 __attribute__((section(".data")));
+extern nmeWork_t *namelist_buttonAnim_end;
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page, s32 spriteId,
+                             s32 *texList, nmeSpriteTable_t *table, s32 ot);
 
 s32 nmeCalc(dds3ProcessID_t *id)
 {
@@ -25,9 +37,31 @@ s32 nmeCalc(dds3ProcessID_t *id)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawCharRow);
+void nmeDrawCharRow(s32 x, s32 y)
+{
+    nmeSpriteTable_t *table = &GBWK_2;
+    s32 ot = 0x47;
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawSymbolRow);
+    fclDrawSpriteRes(x, y, 0, 0, 3, 0x12,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(x, y, 0, 0, 3, 0x13,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(x, y, 0, 0, 3, 0x14,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+}
+
+void nmeDrawSymbolRow(s32 x, s32 y)
+{
+    nmeSpriteTable_t *table = &GBWK_2;
+    s32 ot = 0x47;
+
+    fclDrawSpriteRes(x, y, 0, 0, 3, 0x12,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(x, y, 0, 0, 3, 0x1B,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(x, y, 0, 0, 3, 0x1C,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameText);
 
@@ -63,7 +97,18 @@ void nmeDrawCursor(void)
     nmeDrawCursorAt(0x29, 0xDA, 0, 0, 0x47);
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawTabSprite);
+void nmeDrawTabSprite(s32 x, s32 y)
+{
+    nmeSpriteTable_t *table = &GBWK_2;
+    s32 ot = 0x47;
+
+    fclDrawSpriteRes(x, y, 0, 0, 3, 0xF,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(x, y, 0, 0, 3, 0x10,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(x, y, 0, 0, 3, 0x11,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawModeTabs);
 

@@ -350,3 +350,6 @@ src/smt3/facility/fclShopInit.c	redthing1	done	2026-10-28	1 fn / 220 B	shpFindIt
 src/smt3/newbattle/nbEncount.c	redthing1	done	2026-10-28	2 fn / 872 B	encounter threshold and distance/weighted selection; owner 9 match, 0 differ; packed integer consumer corrected
 src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	2 fn / 852 B	physical/magic attack formulas, true conversion helpers and literal ownership; owner 67 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 176 B	cmpSetItSkMessageVar; dynamic encoded-name buffer and real message value contract
+src/smt3/nme/Nme_Init.c	redthing1	open	2026-10-28	1 fn / 240 B	work allocation matched; cursor initialization and startup follow-up
+src/smt3/nme/Nme_Draw.c	redthing1	open	2026-10-28	cursor editing and movement	shared name work and actual helper contracts
+src/smt3/nme/Nme_Calc.c	redthing1	open	2026-10-28	3 fn / 588 B	character symbol and tab drawing; typed textures and data descriptor
