@@ -25,7 +25,6 @@ page and line to open. Conventions are in
 | 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 4 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
-| 4 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 3 | newbattle/nbCameraCommand | [newbattle/nbCameraCommand.md](newbattle/nbCameraCommand.md) |
@@ -37,6 +36,7 @@ page and line to open. Conventions are in
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 3 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
+| 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 2 | sdf/sdfQuat | [sdf/sdfQuat.md](sdf/sdfQuat.md) |

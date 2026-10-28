@@ -15,6 +15,7 @@ open the page and line it names.
 | 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
 | 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
 | 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
+| 1 | [callee-visibility.md](callee-visibility.md) | Callee visibility: the cause of most one-word branch-likely misses |
 | 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
 | 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
 | 0 | [second-label.md](second-label.md) | A second label in the split assembly: which kind matters |
@@ -24,7 +25,6 @@ open the page and line it names.
 | 0 | [local-const-arrays.md](local-const-arrays.md) | Function-local constant arrays |
 | 0 | [handle-registers.md](handle-registers.md) | `lw $4` against `lw $2` plus `move $4, $2` |
 | 0 | [cross-block-locals.md](cross-block-locals.md) | Two cross-block locals whose registers come out swapped |
-| 0 | [callee-visibility.md](callee-visibility.md) | Callee visibility: the cause of most one-word branch-likely misses |
 | 0 | [callee-definition.md](callee-definition.md) | A caller can need its callee's definition, not just a prototype |
 | 0 | [block-locals.md](block-locals.md) | A block-local whose live range reaches the end of the block costs a register |
 | 0 | [asm-macros.md](asm-macros.md) | Reaching an instruction cc1 never selects, and what it costs |

@@ -289,3 +289,4 @@ src/smt3/facility/fclPanel.c	redthing1	done	2026-10-28	3 fn / 752 B	creation, gr
 src/smt3/facility/fclShare.c	redthing1	done	2026-10-28	1 fn / 148 B	animation switch/callback/phase return; consumer declarations corrected
 src/smt3/pb/pbRecord.c	redthing1	done	2026-10-28	0 matches	record field offsets recovered; candidate argument/temporary layouts unresolved
 src/smt3/sdf/sdfCd.c	redthing1	done	2026-10-28	3 fn / 704 B	streaming retry, direct file lookup and load start; mode output is a byte
+src/smt3/field/fldAutoMap.c	redthing1	done	2026-10-28	2 fn / 472 B	fldAmModelLoadFile and fldAutoMapModelLoad; real provider visibility closes caller
