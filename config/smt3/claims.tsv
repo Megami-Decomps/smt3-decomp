@@ -479,3 +479,4 @@ src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 560 B	item and Hear
 src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 508 B	skill replacement confirmation, cursor-byte selection and apply/cancel transitions; owner 31 match, 0 differ
 src/smt3/interface/frName.c	redthing1	done	2026-10-28	0 matches / 2 guarded drafts	font-image reference release and C-name conversion; exact-size 12-word and 4-word residuals
 src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 512 B	result-update dispatcher with native phase jump table, early returns and previous-state callbacks; owner 32 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 520 B	evolution animation stages with distinct source work, unconditional timer reset and completion return; owner 33 match, 0 differ

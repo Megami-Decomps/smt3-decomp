@@ -94,7 +94,10 @@ typedef struct
     /* 0x002C */ s8 DefaultSkillResult;
     /* 0x002D */ u8 reserved2D[0x4B];
     /* 0x0078 */ s32 unk_78;
-    /* 0x007C */ u8 unk_7C[0xF0];
+    /* 0x007C */ s8 evoPhase;
+    /* 0x007D */ u8 unk_7D;
+    /* 0x007E */ u8 unk_7E[2];
+    /* 0x0080 */ datUnitWork_t evoWork;
     /* 0x016C */ datUnitWork_t *pCurrentStock;
     /* 0x0170 */ u8 unk_170[0x1128];
     /* 0x1298 */ s8 giftKind;
@@ -512,7 +515,77 @@ void rstStartEvoActSE(void)
     startPos->unk_78 = -1;
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqEvoAct);
+extern s32 rstChkEvoAct(void);
+extern s32 fclGetFlag(s8 index);
+extern s32 fclSetWorkValue(s8 index, s32 value);
+extern void rstPrepareStatusModel(s32 group, s32 id, s32 blocking);
+extern s32 cmpModelSetup(u16 id, s32 blocking);
+extern void cmpModelInitCore2(void);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern s32 dds3FadeCheck(void);
+extern s32 fclEncycRegist(datUnitWork_t *entry, s32 store);
+extern void cmbCopyEvoDevilToStock(datUnitWork_t *destination, datUnitWork_t *source);
+extern f32 dds3ScreenParam[];
+
+void rstUpdateSeqEvoAct(void)
+{
+    switch (startPos->evoPhase) {
+    case 0:
+        startPos->unk_78 = 0;
+        if (startPos->unk_22E4 != 0) {
+            startPos->unk_22E4 -= 4;
+        } else {
+            startPos->evoPhase++;
+        }
+        break;
+    case 1:
+        rstPrepareStatusModel(6, startPos->evoWork.id, 0);
+        startPos->evoPhase++;
+        break;
+    case 2:
+        rstStartEvoActSE();
+        if (fclGetFlag(0) != 0) {
+            cmpModelSetup(startPos->evoWork.id, 1);
+            startPos->evoPhase++;
+        }
+        break;
+    case 3:
+        if (fclGetFlag(1) != 0) {
+            rstStartIntroduce(startPos->evoWork.id);
+            startPos->evoPhase++;
+        }
+        break;
+    case 4:
+        if (fclChkMessage() != 0) {
+            return;
+        }
+        startPos->unk_7D = 1;
+        fclSetWorkValue(3, 0);
+        startPos->evoPhase++;
+        break;
+    case 5:
+        if (dds3FadeCheck() != 0) {
+            break;
+        }
+        if (rstChkEvoAct() != 0) {
+            return;
+        }
+        startPos->unk_22E4 = 0x80;
+        cmpModelInitCore2();
+        dds3FadeIn(0, 0, 0, 0xF);
+        fclSetMessageVar_20743088(0x11,
+                                  (s32)text2[startPos->pCurrentStock->id]);
+        fclSetMessageVar_20743088(0x12, (s32)text2[startPos->evoWork.id]);
+        rstChkResult2Process((u8 *)startPos);
+        cmbCopyEvoDevilToStock(startPos->pCurrentStock, &startPos->evoWork);
+        fclEncycRegist(startPos->pCurrentStock, 0);
+        startPos->unk_0001 = 0x11;
+        return;
+    }
+    /* Exact retail divisor (0x3F999999), below the modern 1.2f value. */
+    dds3ScreenParam[4] =
+        (dds3ScreenParam[4] - 2048.0f) / 0x1.333332p+0f + 2048.0f;
+}
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqEvo);
 
