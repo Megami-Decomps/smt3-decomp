@@ -471,7 +471,33 @@ void fclEncycDebugRegist(void)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", fclEncycDebugProc);
+typedef s32 (*fclEncycDebugStep_t)(fclEncyc_instance_tag *, fclRibbon_t *, sdfDrawTag_t *);
+
+extern fclEncycDebugStep_t D_00332218[];
+
+void InitializeDebug_fclEncyc(void);
+extern void *sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern sdfGrOt_t sdfGrOtTable[];
+PS2_SYMBOL_AT(sdfGrOt_t, fclEncycDebugOt81, sdfGrOtTable, 0xA20);
+
+s32 fclEncycDebugProc(void)
+{
+    sdfDrawTag_t *tag;
+    s32 result;
+
+    if (g_pinst == NULL) {
+        return 0;
+    }
+    if (g_pdebug == NULL) {
+        InitializeDebug_fclEncyc();
+    }
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    result = D_00332218[g_pdebug->unk_04](g_pinst, g_pdebug, tag);
+    fclEncycDebugOt81.regFunc(&fclEncycDebugOt81, tag);
+    return result != 0 ? -1 : 0;
+}
 
 void fclEncycDebugShutdown(void)
 {
