@@ -45,7 +45,11 @@ typedef struct evtViewerObject_s {
     s32 nameindex;
     s32 fileindex;
     s32 unitHandle;                /* 0x0C */
-    u8 unk10[8];
+    union {
+        u8 unk10[8];
+        /* Effect tracks carry their loaded resource at 0x10. */
+        struct { void *effectData; u8 unk14[4]; } effect;
+    };
     s32 childCount;                /* 0x18 */
     evtFrameInfo_t *p;      /* 0x1C */
     evtFrameInfo_t *lastChild;     /* 0x20 */
@@ -625,7 +629,75 @@ void LinkEffectBasic(dds3Basic_t *eff, s32 nameindex, s32 posindex, s32 basefram
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", AddEffectTable2);
+extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *effdata, void *pos, void *rot);
+extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 type, void *effdata);
+extern s32 dds3EffectObjectPresetMG12(dds3Basic_t *eff);
+extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *eff, dds3Basic_t *p1,
+                                    dds3Basic_t *p2, dds3Basic_t *p3, dds3Basic_t *p4);
+
+s32 AddEffectTable2(s32 nowframe, evtViewerObject_s *object, evtFrameInfo_t *frame)
+{
+    f32 position[4];
+    f32 scale[4];
+    dds3Basic_t *effect;
+    s32 index;
+    s32 type;
+
+    effect = NULL;
+    memset(position, 0, sizeof(position));
+    memset(scale, 0, sizeof(scale));
+    scale[3] = 1.0f;
+
+    index = 0;
+    while (index < 0x7F && viewerinfo->effectBasic[index] != NULL) {
+        index++;
+    }
+    if (index == 0x7F) {
+        return -1;
+    }
+
+    type = object->type;
+    switch (type) {
+    case 3:
+        effect = dds3AddD3PEffectObjectBasic2(object->effect.effectData, position, scale);
+        if (frame->param.sb[4] != 0) {
+            dds3EffectObjectPresetMG12(effect);
+        }
+        LinkEffectBasic(effect, (s16)frame->param.sh[3], frame->param.sb[5], frame->frame);
+        break;
+    case 20:
+    case 21: {
+        dds3Basic_t *part0;
+        dds3Basic_t *part1;
+        dds3Basic_t *part2;
+        dds3Basic_t *part3;
+
+        switch (type) {
+        case 20:
+            effect = dds3AddMG12EffectObjectBasic2(1, object->effect.effectData);
+            break;
+        case 21:
+            effect = dds3AddMG12EffectObjectBasic2(2, object->effect.effectData);
+            break;
+        }
+        part0 = SearchBasicFromNameIndex_evtEventViewer(frame->param.sb[4]);
+        part1 = SearchBasicFromNameIndex_evtEventViewer(frame->param.sb[5]);
+        part2 = SearchBasicFromNameIndex_evtEventViewer(frame->param.sb[6]);
+        part3 = SearchBasicFromNameIndex_evtEventViewer(frame->param.sb[7]);
+        dds3EffectObjectSetMG12Pos(effect, part0, part1, part2, part3);
+        if (frame->param.sb[1] != 0) {
+            dds3EffectObjectPresetMG12(effect);
+        }
+        break;
+    }
+    }
+
+    viewerinfo->effectBasic[index] = effect;
+    if (effect != NULL) {
+        dds3EffectObjectBasicStatOn(effect, 1);
+    }
+    return index;
+}
 
 void DelEffectTable_evtEventViewer(s32 index)
 {
