@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kernel.h"
+#include "basic.h"
 
 /* evtAddFrameInfo allocates a 0x20-byte key; only the list and the frame
  * number are needed here. */
@@ -13,10 +14,29 @@ typedef struct evtFrameInfo_t {
     struct evtFrameInfo_t *prev;
 } evtFrameInfo_t;
 
-typedef struct {
-    u8 reserved00[0x1C];
+/* Shared track prefix recovered by evtEventViewer. */
+typedef struct evtViewerObject_s {
+    s32 type;
+    s32 nameindex;
+    s32 fileindex;
+    s32 unitHandle;
+    union {
+        u8 unk10[8];
+        struct { void *effectData; u8 unk14[4]; } effect;
+    };
+    s32 childCount;
     evtFrameInfo_t *p;
+    evtFrameInfo_t *lastChild;
+    struct evtViewerObject_s *next;
+    struct evtViewerObject_s *prev;
 } evtViewerObject_s;
+
+typedef struct {
+    u16 mode;
+    u16 unk02;
+    u16 unk04;
+    u16 unk06;
+} evtViewerMenuEntry_t;
 
 typedef struct {
     void *block;
@@ -26,9 +46,20 @@ typedef struct {
     s32 firstframe;
     s32 lastframe;
     s32 nowframe;
-    u8 reserved1C[0x221C];
+    s32 oldframe;
+    s32 nametablecnt;
+    char nametable[256][32];
+    dds3Basic_t *activecamera;
+    u8 freecamera[4];
+    dds3Basic_t *gamecamera;
+    s32 objcnt;
+    evtViewerObject_s *firstobjinfo;
+    evtViewerObject_s *lastTrack;
+    void *effectBasic[0x7F];
     s32 framedisp;                  /* 0x2238 */
-    u8 reserved223C[0x48];
+    evtViewerMenuEntry_t menuStack[8];
+    s32 sp;
+    s32 nowmenu;
     s32 menusw;                     /* 0x2284 */
     u8 unk2288[0x78];
     s32 frameFirst;                 /* 0x2300 */

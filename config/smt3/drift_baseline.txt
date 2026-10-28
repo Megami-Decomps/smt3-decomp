@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1107 members, 506 adopted constants.
+# 0 types, 1103 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -423,10 +423,8 @@ member evtUnitHandle_t.unk_90
 member evtViewerGroup_t.unk08
 member evtViewerInfo_t.unk0000
 member evtViewerInfo_t.unk001C
-member evtViewerInfo_t.unk1C
 member evtViewerInfo_t.unk2024
 member evtViewerInfo_t.unk2038
-member evtViewerInfo_t.unk223C
 member evtViewerInfo_t.unk2284
 member evtViewerInfo_t.unk2288
 member evtViewerInfo_t.unk22E1
@@ -435,7 +433,6 @@ member evtViewerMenuEntry_t.unk02
 member evtViewerMenuEntry_t.unk04
 member evtViewerMenuEntry_t.unk06
 member evtViewerMovieWork_t.unk00
-member evtViewerObject_s.unk00
 member evtViewerUnit_t.unk00
 member evtViewerUnit_t.unk10
 member fclEncyc_instance_tag.unk_00
@@ -707,7 +704,6 @@ member nbStatWork_t.unk_02
 member nbStockGlobalWork_t.unk_00000
 member nbTarSelProcessData_t.unk0F
 member nbTextBox_t.unk_00
-member nbUnitOwner_t.unk_00
 member nmeWork_t.unk1B
 member p2sdLoadEntry_t.unk0
 member p2sdLoadEntry_t.unk4

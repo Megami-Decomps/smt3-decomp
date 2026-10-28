@@ -4,14 +4,12 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
-
-/* The model owner behind a unit handle; only the root node is named. */
-typedef struct { u8 reserved00[0x18]; struct sdfModelRootNode_t *inner; } nbUnitOwner_t;
+#include "model.h"
 
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];
-    nbUnitOwner_t *owner;
+    mdlObj_t *owner;
     u8 unk_90[0x14];
     u32 flags;
 } evtUnitHandle_t;
