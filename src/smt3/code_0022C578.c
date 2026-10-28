@@ -1784,7 +1784,107 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_0053F4F0);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053F500);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCalcSkill);
+extern void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func,
+                                 void *data, s32 value, s32 alpha);
+extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
+extern void cmpDrawSkillList();
+
+void cmpCalcSkill(void)
+{
+    u32 index = (u8)cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
+    datUnitWork_t *unit;
+    s32 cursor;
+    s32 oldCount;
+    s32 newCount;
+    s8 selected;
+    s32 i;
+
+    if (campWork->unk_0004 != 0) {
+        switch (campWork->previousPhase) {
+        case 0:
+        case 2:
+            cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 1);
+            campWork->unk_0001 = 8;
+            cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0,
+                                cmpUpdateListSelection,
+                                (u8 *)campWork + 0x1C, 0, 0);
+            cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 1);
+            break;
+        case 8:
+            if (campWork->unk_0004 == 1) {
+                unit = &cmbGlobalWork->party[index].unit;
+                cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, NULL, NULL, 0, 0);
+                campWork->unk_0001 = 10;
+                cmpInitSelectCursor((s8)unit->skillcnt);
+                cmpInitSkillCursor(unit);
+                cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0x120, 0x288,
+                                    cmpDrawSkillList, campWork->unk_410C,
+                                    &cmbGlobalWork->party[index].unit, 0);
+            } else {
+                cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
+                campWork->unk_0001 = 0;
+                cmpInitStockCursorPos();
+            }
+            break;
+        case 9:
+            if (campWork->unk_0004 == 2) {
+                cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
+                campWork->unk_0001 = 10;
+            } else {
+                if (cmpUseSkill() != 0) {
+                    campWork->unk_0001 = 9;
+                } else {
+                    campWork->unk_0001 = 10;
+                    cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0x120, 0x288,
+                                        cmpDrawSkillList, campWork->unk_410C,
+                                        &cmbGlobalWork->party[index].unit, 0);
+                    cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
+                }
+            }
+            break;
+        case 10:
+            if (campWork->unk_0004 == 1) {
+                if (cmpGetSkillTargetArea(cmpGetSelectSkillID()) == 0) {
+                    cmpUseSkill();
+                    campWork->unk_0001 = 10;
+                } else {
+                    cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 1);
+                    campWork->unk_0001 = 9;
+                }
+            } else {
+                cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0,
+                                    cmpUpdateListSelection,
+                                    (u8 *)campWork + 0x1C, 0, 0);
+                cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 1);
+                campWork->unk_0001 = 8;
+            }
+            break;
+        }
+        campWork->previousPhase = 2;
+    }
+    if (campWork->unk_0001 == 9) {
+        cmpSetSkillTSL(cmpGetSelectSkillID());
+        return;
+    }
+    /* Preserve the current list selection across the rebuild. */
+    cursor = ((cmpStockWork_t *)&campWork->stock[0])->info[0].unk_0E;
+    oldCount = campWork->stock[0].PartyCnt + (s8)campWork->stock[0].unk_03[0];
+    selected = campWork->stock[0].ListIdx[
+        cursor + ((cmpStockWork_t *)&campWork->stock[0])->info[0].unk_10];
+    campWork->stock[0].count = 0xF;
+    cmpBuildStockNameList(&campWork->stock[0]);
+    cmpReCalcStockCursorPos(0);
+    newCount = campWork->stock[0].PartyCnt;
+    newCount += (s8)campWork->stock[0].unk_03[0];
+    if (newCount != oldCount) {
+        for (i = 0; i < newCount; i++) {
+            if (campWork->stock[0].ListIdx[i] == selected) {
+                ((cmpStockWork_t *)&campWork->stock[0])->info[0].unk_10 = i;
+                break;
+            }
+        }
+    }
+}
 
 extern char *D_00330914[];
 
