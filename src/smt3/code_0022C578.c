@@ -2726,11 +2726,62 @@ s32 camp_calc_stock_Process(s32 id)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStockPanel);
+/* The renderer narrows active internally; this caller passes the s32 result. */
+extern void campDrawStockSlots(s8 *indices, s32 active, s8 *flags, cmpLocalStock_t *stock);
+
+void campDrawStockPanel(cmpLocalStock_t *stock, s32 mode)
+{
+    s8 indices[3];
+    s8 flags[3];
+    s8 state = *((s8 *)stock + 0x2124);
+
+    switch (state - 1) {
+    case 0:
+        indices[0] = cmpGetStockInfoIndex(stock, 0, 1);
+        indices[1] = cmpGetStockInfoIndex(stock, 0, 1);
+        indices[2] = -1;
+        flags[0] = 0;
+        flags[1] = 0;
+        flags[2] = 0;
+        break;
+    case 1:
+        indices[0] = -1;
+        indices[1] = cmpGetStockInfoIndex(stock, 0, 1);
+        indices[2] = -1;
+        flags[0] = 0;
+        flags[1] = 0;
+        flags[2] = 0;
+        break;
+    case 2:
+        indices[0] = cmpGetStockInfoIndex(stock, 1, 1);
+        indices[1] = cmpGetStockInfoIndex(stock, 1, 1);
+        indices[2] = cmpGetStockInfoIndex(stock, 0, 1);
+        flags[0] = 1;
+        flags[1] = 1;
+        flags[2] = 0;
+        break;
+    case 4:
+        indices[0] = cmpGetStockInfoIndex(stock, 1, 1);
+        indices[1] = cmpGetStockInfoIndex(stock, 1, 1);
+        indices[2] = -1;
+        flags[0] = 1;
+        flags[1] = 1;
+        flags[2] = 0;
+        break;
+    case 3:
+    default:
+        indices[0] = -1;
+        indices[1] = -1;
+        indices[2] = -1;
+        flags[0] = 0;
+        flags[1] = 0;
+        flags[2] = 0;
+        break;
+    }
+    campDrawStockSlots(indices, cmpStockEffIsActive((u8 *)stock), flags, stock);
+}
 
 extern cmpInfoWindow_t *D_00551FA0;
-
-extern void campDrawStockPanel(s32 panel, s32 mode);
 
 s32 camp_draw_stock_Process(s32 id)
 {
@@ -2742,7 +2793,7 @@ s32 camp_draw_stock_Process(s32 id)
         return -1;
     }
     if ((window->flags & 2) != 0) {
-        campDrawStockPanel(window->unk_1C, 0);
+        campDrawStockPanel((cmpLocalStock_t *)window->unk_1C, 0);
     }
     return 0;
 }
