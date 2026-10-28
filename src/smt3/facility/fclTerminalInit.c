@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -25,14 +26,38 @@ extern s32 scrGetIntPara(s32 n);
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_0000[0x2216];
-    /* 0x2216 */ s8 cursor;
-    /* 0x2217 */ s8 unk_2217;
+    u8 pad_0000[0x2216];
+    s8 cursor;
+    u8 pad_2217;
 } trmCalcWork_t;
 
 extern trmCalcWork_t *trmCalcWork;
 
-extern u8 *GBWK_3;
+typedef struct
+{
+    u8 terminalFlags;              /* 0x0000 */
+    u8 pad_0001[0x13];
+    void *allocation;               /* 0x0014 */
+    u8 pad_0018[0x25];
+    u8 terminalReferenceCount;      /* 0x003D */
+    u8 pad_003E[0x21B3];
+    s8 terminalType;                /* 0x21F1 */
+    u16 terminalNo;                 /* 0x21F2 */
+    s8 terminalList[0x20];          /* 0x21F4 */
+    s8 previousTerminalType;        /* 0x2214 */
+    s8 terminalCommandCount;        /* 0x2215 */
+    s8 cursor;                      /* 0x2216 */
+    u8 pad_2217[1];
+    void *scriptAllocationHandle;     /* 0x2218 */
+    u8 pad_221C[4];
+    s32 ScriptPID;                  /* 0x2220 */
+    u8 pad_2224[0xC];
+    s32 saveProcess;                /* 0x2230 */
+    u8 pad_2234[4];
+    s32 texHandle[1];               /* 0x2238 */
+} trmTerminalWork_t;
+
+extern trmTerminalWork_t *GBWK_3;
 
 extern s32 printf(const char *fmt, ...);
 
@@ -102,8 +127,8 @@ s32 trmEndEvent(s32 BgmMode)
     if (BgmMode != 0) {
         trmEndBGM();
     }
-    fclScriptForcedEnd(*(u8 **)(GBWK_3 + 0x2220));
-    *(s32 *)(GBWK_3 + 0x2220) = 0;
+    fclScriptForcedEnd((u8 *)GBWK_3->ScriptPID);
+    GBWK_3->ScriptPID = 0;
     fclSetTerminalMode(0);
     if (trmCreateEventProcessName(0, name) != 0) {
         dds3KillProcessName(name, 0);
@@ -138,44 +163,22 @@ s32 trmChkEventWait(void)
 void trmSetProcessTerm(void)
 {
     if (gCallMode != 0) {
-        fclScriptForcedEnd(*(u8 **)(GBWK_3 + 0x2220));
+        fclScriptForcedEnd((u8 *)GBWK_3->ScriptPID);
         fclSetTerminalMode(5);
         gProcessStat_3 = 2;
         gCallMode = 0;
     }
 }
 
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000;
-    /* 0x0001 */ s8 unk_0001;
-    /* 0x0002 */ u8 unk_0002[2];
-    /* 0x0004 */ s8 unk_0004;
-    /* 0x0005 */ u8 unk_0005[0x38];
-    /* 0x003D */ s8 unk_003D;
-    /* 0x003E */ u8 unk_003E[0x1198];
-    /* 0x11D6 */ s16 unk_11D6;
-    /* 0x11D8 */ u8 unk_11D8;
-    /* 0x11D9 */ u8 unk_11D9[0x1018];
-    /* 0x21F1 */ s8 TerminalType;
-    /* 0x21F2 */ u16 TerminalNo;
-    /* 0x21F4 */ s8 TerminalList[0x21];
-    /* 0x2215 */ s8 unk_2215;
-    /* 0x2216 */ u8 unk_2216[0xA];
-    /* 0x2220 */ s32 ScriptPID;
-    /* 0x2224 */ u8 unk_2224[0xC];
-    /* 0x2230 */ s32 saveProcess;
-    /* 0x2234 */ u8 unk_2234[4];
-    /* 0x2238 */ s32 texHandle[1];
-} trmUpdateWork_t;
+typedef trmTerminalWork_t trmUpdateWork_t;
 
 extern trmUpdateWork_t *trmUpdateWork;
 
 INCLUDE_RODATA(const s32, "facility/fclTerminalInit", D_0053D5B0);
 
 INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalScanCommands);
-
 INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalInitList);
+
 
 extern u32 trmMenuTextTable[];
 
@@ -242,18 +245,62 @@ extern void fclTerminalInitList(void *list, s8 count, s32 handle);
 
 void fclTerminalSetMode(s32 mode, s32 id, trmUpdateWork_t *work)
 {
-    work->TerminalType = mode;
-    work->TerminalNo = id;
+    work->terminalType = mode;
+    work->terminalNo = id;
     fclTerminalScanCommands(work);
     fclTerminalResetCommands(mode, id, (u8 *)work + 0x18, work);
-    fclTerminalInitList((u8 *)work + 0x1058, work->unk_2215, work->texHandle[0]);
+    fclTerminalInitList((u8 *)work + 0x1058, work->terminalCommandCount, work->texHandle[0]);
 }
 
 INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclAllocTerminalWork);
 
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclDestroyTerminal);
+extern void sdfMemFreeDirect(void *handle);
+extern void fldProcSetTerminal(s8 type, u16 id);
+extern void fldProc_CallSisetuReturn(void);
+extern s32 evtBitCheck(s32 eventNo);
 
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalProcessStart);
+void fclDestroyTerminal(dds3ProcessID_t *id)
+{
+    if (GBWK_3 != NULL) {
+        gProcessStat_3 = 0;
+        fclTerminalFreeTextures(GBWK_3);
+        fldProcSetTerminal(GBWK_3->terminalType, GBWK_3->terminalNo);
+        fclScriptForcedEnd((u8 *)GBWK_3->ScriptPID);
+        sdfMemFreeDirect(GBWK_3->scriptAllocationHandle);
+        sdfMemFreeDirect(GBWK_3->allocation);
+        GBWK_3 = NULL;
+        if (evtBitCheck(58) == 0) {
+            fldProc_CallSisetuReturn();
+        }
+        trmEndBGM();
+    }
+}
+
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
+                                         s32 shutdownTimer,
+                                         dds3ProcessFunc_t process,
+                                         dds3ProcessFunc_t shutdown, void *data);
+extern s32 trmCalc(dds3ProcessID_t *id);
+extern s32 trmDraw(dds3ProcessID_t *id);
+extern s32 trmUpdate(dds3ProcessID_t *id);
+extern void FclDebug(s32 mode, void *work);
+extern trmTerminalWork_t *fclAllocTerminalWork(s32 type, s32 no, s32 mode);
+
+void fclTerminalProcessStart(s32 terminalType, s32 terminalNo)
+{
+    if (GBWK_3 == NULL) {
+        trmTerminalWork_t *work =
+            fclAllocTerminalWork(terminalType, terminalNo, 0);
+        GBWK_3 = work;
+        FclDebug(1, work);
+        dds3StartProcess(D_0053D640, 0x404, 1, 1, trmCalc, NULL, GBWK_3);
+        dds3StartProcess(D_0053D650, 0x2B14, 1, 1, trmDraw, NULL, GBWK_3);
+        dds3StartProcess(D_0053D660, 0x5210, 1, 1, trmUpdate,
+                         (dds3ProcessFunc_t)fclDestroyTerminal, GBWK_3);
+        gCallMode = 0;
+        gProcessStat_3 = 1;
+    }
+}
 
 void fclTerminalProcessEnd(void)
 {
@@ -277,7 +324,7 @@ s32 trmCheckProcessStat(void)
 void func_002109E0(void)
 {
     if (GBWK_3 != NULL) {
-        *GBWK_3 |= 0x10;
+        GBWK_3->terminalFlags |= 0x10;
     }
 }
 
@@ -308,8 +355,8 @@ s32 func_00210B68(void)
     s32 count;
 
     fclTerminalCommandCount[0] &= 0xFD;
-    count = GBWK_3[0x3D];
-    GBWK_3[0x3D] = count - 1;
+    count = GBWK_3->terminalReferenceCount;
+    GBWK_3->terminalReferenceCount = count - 1;
     return 1;
 }
 
@@ -318,15 +365,15 @@ s32 func_00210B90(void)
     s32 count;
 
     fclTerminalCommandCount[0] |= 2;
-    count = GBWK_3[0x3D];
-    GBWK_3[0x3D] = count + 1;
+    count = GBWK_3->terminalReferenceCount;
+    GBWK_3->terminalReferenceCount = count + 1;
     return 1;
 }
 
 void trmResetCursor(void)
 {
     trmCalcWork->cursor = -1;
-    trmCalcWork->unk_2217 = 0;
+    trmCalcWork->pad_2217 = 0;
 }
 
 INCLUDE_RODATA(const s32, "facility/fclTerminalInit", D_0053D640);
