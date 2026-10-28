@@ -979,7 +979,24 @@ void PushListwinCursor(fclEncyc_instance_tag *pinst, lstListWindow_t *plistwin, 
     pinst->lw_cur[Stack * 2 + 1] = cur->Shift;
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", PopListwinCursor);
+/* The native tail target at 0x00219600 shares the PopListwinCursor assembly span. */
+void func_00219600(lstListWindow_t *plistwin, s32 index, s32 shift);
+
+void PopListwinCursor(fclEncyc_instance_tag *pinst, lstListWindow_t *plistwin, s32 Stack)
+{
+    func_00219600(plistwin, pinst->lw_cur[Stack * 2], pinst->lw_cur[Stack * 2 + 1]);
+}
+
+void func_00219600(lstListWindow_t *plistwin, s32 index, s32 shift)
+{
+    cmpCursorPos_t *cursor = &plistwin->cursorPos;
+    cmpCursorSize_t *size = &plistwin->cursorSize;
+
+    cursor->DrawShift = shift;
+    cursor->Shift = shift;
+    cursor->Index = index;
+    size->Y = shift * plistwin->StepY + size->DefY;
+}
 
 void AdjustStackCursor(s32 numlist, s16 *pindex, s16 *pshift)
 {
