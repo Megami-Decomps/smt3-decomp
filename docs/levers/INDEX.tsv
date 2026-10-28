@@ -21,7 +21,8 @@ docs/levers/README.md	26		| 0 | [cross-block-locals.md](cross-block-locals.md) |
 docs/levers/README.md	27		| 0 | [callee-visibility.md](callee-visibility.md) | Callee visibility:
 docs/levers/README.md	28		| 0 | [callee-definition.md](callee-definition.md) | A caller can need its callee's definition, not just a prototype |
 docs/levers/README.md	29		| 0 | [block-locals.md](block-locals.md) | A block-local whose live range reaches the end of the block costs a register |
-docs/levers/README.md	30		| 0 | [arithmetic.md](arithmetic.md) | Arithmetic |
+docs/levers/README.md	30		| 0 | [asm-macros.md](asm-macros.md) | Reaching an instruction cc1 never selects, and what it costs |
+docs/levers/README.md	31		| 0 | [arithmetic.md](arithmetic.md) | Arithmetic |
 docs/levers/addressing-and-types.md	4	sll	A struct pointer local is what keeps two index scalings apart.
 docs/levers/addressing-and-types.md	11	slti sltu	A u8 field compared against a small constant folds to sltu, since cc1 knows the promoted value is non-negative.
 docs/levers/addressing-and-types.md	15	lw	A byte offset added to a **reloaded** global on every iteration is a second variable in the for init, not an expression.

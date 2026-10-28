@@ -27,4 +27,5 @@ open the page and line it names.
 | 0 | [callee-visibility.md](callee-visibility.md) | Callee visibility: the cause of most one-word branch-likely misses |
 | 0 | [callee-definition.md](callee-definition.md) | A caller can need its callee's definition, not just a prototype |
 | 0 | [block-locals.md](block-locals.md) | A block-local whose live range reaches the end of the block costs a register |
+| 0 | [asm-macros.md](asm-macros.md) | Reaching an instruction cc1 never selects, and what it costs |
 | 0 | [arithmetic.md](arithmetic.md) | Arithmetic |

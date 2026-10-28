@@ -228,6 +228,14 @@
 /* Leading sign bits minus one of a word; cc1 has no clz builtin. */
 #define MMI_PLZCW(out, in) __asm__ volatile ("plzcw %0, %1" : "=r" (out) : "r" (in))
 
+/* Bit length of a non-negative word: the index of its highest set bit plus one.
+ * 31 - plzcw is the whole operation, so the 31 arrives through the one addi
+ * cc1 never selects. Passed dim - 1 it gives log2 of a power-of-two dimension. */
+#define PS2_WORD_BIT_LENGTH(x) ({ s32 ps2Bits = (x); s32 ps2Lzc; __asm__ ( \
+    ".set noreorder\n\tplzcw %1, %0\n\tandi %1, %1, 0xFF\n\t" \
+    "addi %0, $0, 0x1F\n\tsubu %0, %0, %1\n\t.set reorder" \
+    : "+r" (ps2Bits), "=&r" (ps2Lzc)); ps2Bits; })
+
 /* RGBA8888 word -> four float lanes in vf10: bytes to halfwords to words,
  * then vitof0. */
 #define SDF_VU0_dds3ColorItoF(rgba) do { u32 ps2Lanes; __asm__ volatile ( \
