@@ -371,9 +371,120 @@ nbKoukaPacket_t *nbAddFadeOutKoukaPacket(s32 startframe, s32 uniqueid, s32 lengt
 
 nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *bed, s32 cutno, nbFormation_t *form);
 
+extern s8 D_00527530[];
+
+extern sdfVector4_t D_00527540[4][4];
+
+extern sdfVector4_t D_00527640;
+
+extern sdfVector4_t D_00527650;
+
+extern s32 evtUnitRotationTarget(evtUnitHandle_t *h, f32 *pos, f32 radio);
+
+extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32 unused,
+                            s32 frames, s32 directionOffset, void *callback, s32 unusedLast);
+
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                               s32 motion);
+
+extern nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                             s32 sw);
+
+extern nbKoukaPacket_t *nbAddUnitAKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                              u32 a, s32 frame);
+
+extern u32 effBTLCutGetFrame(effBTLCutHandle_t *hBTLCutEffect);
+
+extern void effBTLCutSetDrawEndFrame(effBTLCutHandle_t *hBTLCutEffect, u32 frame);
+
+extern nbKoukaPacket_t *D_00527660[];
+
+extern nbKoukaPacket_t *D_00527664[];
+
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+
+extern s32 (*D_00527670[])(nbEventProcessData_t *e);
+
+extern void dds3DeleteSceneBasicData(void *basic);
+
+extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *b);
+
+extern void nbCameraHelperModelSet(dds3Basic_t *hModel);
+
+extern void nbCameraSetState(s32 state);
+
+extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
+
+extern dds3Basic_t *dds3GetActiveScene(void);
+
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
+
+extern void nbAllFormDispOn(void);
+
+extern void nbGroupFormDispOff(s32 group);
+
+extern void nbCameraBoss_BSALBI_E912_Set(void);
+
+extern void nbCameraBoss_BSALBI_E912_Run(void);
+
+extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
+
+extern dds3Basic_t *D_00551630;
+
+extern dds3Basic_t *D_00551634;
+
+extern dds3Basic_t *D_00551638;
+
 nbFormation_t *nbGetEventForm();
 
-INCLUDE_ASM(const s32, "newbattle/nbE912", MoveSub);
+void MoveSub(nbEventProcessData_t *ed)
+{
+    sdfVector4_t target;
+    s32 list[4];
+    nbFormation_t *form;
+    evtUnitHandle_t *h;
+    s32 cnt;
+    s32 i;
+    s32 no;
+    s32 frames;
+    f32 len;
+    f32 len2;
+
+    cnt = 0;
+    for (i = 0; i < 4; i++) {
+        no = D_00527530[i];
+        if (ed->data->form[no].stat & 1) {
+            list[cnt] = no;
+            cnt++;
+        }
+    }
+    for (i = 0; i < cnt; i++) {
+        form = &ed->data->form[list[i]];
+        h = form->hunit;
+        SDF_VU0_LOADVECTOR(&D_00527540[cnt - 1][i]);
+        SDF_VU0_LOADVECTOR_B(&D_00527640);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_LOADVECTOR_B(&D_00527650);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(&target);
+        SDF_VU0_LOADVECTOR_B(&form->orgpos);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_GETLENGTH(len);
+        frames = len / 6.0f;
+        SDF_VU0_LOADVECTOR(&target);
+        SDF_VU0_LOADVECTOR_B(&form->pos);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_GETLENGTH(len2);
+        if (len2 <= 20.0f) {
+            evtUnitRotationTarget(h, (f32 *)&D_00527640, 0.1f);
+        } else {
+            if (len2 <= 50.0f) {
+                frames = frames * len2 / 50.0f;
+            }
+            evtSetUnitMove1(h, 0, (s128 *)&target, -1, frames, 9, NULL, 0);
+        }
+    }
+}
 
 s32 Move1(nbEventProcessData_t *ed)
 {
@@ -384,7 +495,45 @@ s32 Move1(nbEventProcessData_t *ed)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE912", nbE912_Effect1);
+s32 nbE912_Effect1(nbEventProcessData_t *e)
+{
+    nbFormation_t *form;
+    s32 i;
+    s32 no;
+
+    form = &e->data->form[6];
+    switch (e->seqtime) {
+    case 1:
+        for (i = 0; i < 4; i++) {
+            no = D_00527530[i];
+            if (e->data->form[no].stat & 1) {
+                nbAddMotionKoukaPacket(0, 0, &e->data->form[no], 0x10);
+            }
+        }
+        nbAddFormOnOffPacket(1, 0, form, 1);
+        nbAddUnitAKoukaPacket(0, 0, form, 0, 0);
+        break;
+    case 2:
+        D_00527660[0] = nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x390, 1), 2, form);
+        break;
+    case 0x27:
+        D_00527664[0] = nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x390, 2), 2, form);
+        break;
+    case 0x36:
+        nbAddUnitAKoukaPacket(1, 0, form, 0x80000000, 0);
+        evtSetUnitMotion(form->hunit, 0x11, 0, 0, 0);
+        break;
+    case 0x6D:
+        effBTLCutSetDrawEndFrame(D_00527660[0]->cuteff,
+                                 effBTLCutGetFrame(D_00527660[0]->cuteff) + 0x20);
+        effBTLCutSetDrawEndFrame(D_00527660[1]->cuteff,
+                                 effBTLCutGetFrame(D_00527660[1]->cuteff) + 0x20);
+        nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x390, 3), 2, form);
+        nbFreeEffectSlot(e);
+        break;
+    }
+    return 0;
+}
 
 s32 nbE912_End(nbEventProcessData_t *e)
 {
@@ -396,7 +545,63 @@ s32 nbE912_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE912", nb_295D98);
+s32 nb_295D98(dds3ProcessID_t *id)
+{
+    nbEventProcessData_t *e;
+    evtUnitHandle_t *unit;
+    s32 serial;
+
+    e = dds3GetProcessData(id);
+    if (D_00527670[e->seq](e) != 0) {
+        D_00551630 = NULL;
+        if (D_00551634 != NULL) {
+            dds3DeleteSceneBasicData(D_00551634);
+            D_00551634 = NULL;
+        }
+        if (D_00551638 != NULL) {
+            dds3DeleteSceneBasicData(D_00551638);
+            D_00551638 = NULL;
+        }
+        return -1;
+    }
+    if (e->time > 0 && D_00551630 != NULL) {
+        unit = dds3GetUnitHandleObjectBasic(D_00551630);
+        if (unit->basic != NULL) {
+            nbCameraHelperModelSet(unit->basic);
+        }
+    }
+    switch (e->time) {
+    case 0:
+        nbCameraSetState(0x17);
+        nbAllFormDispOn();
+        nbGroupFormDispOff(0);
+        D_00551630 = NULL;
+        D_00551634 = NULL;
+        D_00551638 = NULL;
+        nbCameraBoss_BSALBI_E912_Set();
+        break;
+    case 0x3C:
+        nbCameraSetState(0x17);
+        serial = evtInitMotionSeProcess(e->eventrid, 4);
+        D_00551634 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551634), 0, 0, 0, 2);
+        D_00551630 = D_00551634;
+        break;
+    case 0xD2:
+        serial = evtInitMotionSeProcess(e->eventrid, 5);
+        D_00551638 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551638), 0, 0, 0, 2);
+        D_00551630 = D_00551638;
+        break;
+    default:
+        if (e->time < 0x3C) {
+            nbCameraBoss_BSALBI_E912_Run();
+        }
+        break;
+    }
+    nbUpdateEventProcessData(id);
+    return 0;
+}
 
 s32 nbE913_Test(nbEventProcessData_t *e)
 {

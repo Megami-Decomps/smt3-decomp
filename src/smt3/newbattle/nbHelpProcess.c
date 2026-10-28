@@ -201,7 +201,7 @@ typedef struct nbHelpProcessData_t
     char *text2;
     s32 text3;
     s32 time;
-    u8 textmax[0x4];
+    _FRQ *textmax;
     s32 textwidth;
     s32 nextwidth;
     u32 textcol;
@@ -365,6 +365,28 @@ extern void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker);
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, void *drawExit,
                                          void *deleteExit, void *p);
+
+extern void nbPnl_setOt(s32 otofs);
+
+extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte,
+                           s32 ztst);
+
+extern void nbPnl_rsetAlpha(s32 mode);
+
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba,
+                        void *hTex);
+
+extern void cmpSetSkillListRows(s32 rows);
+
+extern void itfMesMngSetMesPosition(s32 id, s32 x, s32 y);
+
+extern void itfMesMngRequestMessage(s32 msg, s32 id, s32 flag);
+
+extern void frSetFontColor(_FRQ *pFRQ, u32 Color);
+
+extern void frDrawFontEx(_FRQ *pFRQ, s32 Mode);
+
+extern s32 frSetDrawPosition(_FRQ *pFRQ, s32 X, s32 Y);
 
 extern s32 nbHelpProcess1(dds3ProcessID_t *id);
 
@@ -584,9 +606,96 @@ void nbHelpOff(void)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbHelpProcess", nbDrawHelpPanel);
+void nbDrawHelpPanel(nbHelpProcessData_t *w)
+{
+    nbMainProcessData_t *data;
+    s32 cx;
+    s32 hw;
+    s32 ex;
+    u32 col;
 
-INCLUDE_ASM(const s32, "newbattle/nbHelpProcess", nbHelpProcess1);
+    cx = 0x100;
+    data = nbGetMainProcessData();
+    nbPnl_setOt(0x47);
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    hw = w->textwidth / 2 + 0x60;
+    col = (w->msgid << 24) | 0x808080;
+    if (hw < 0x88) {
+        hw = 0x88;
+    }
+    ex = hw - 0x88;
+    if (hw < 0x89) {
+        ex = 0;
+    }
+    nbPnlSprite(cx - hw, 0x4D, 0x88, 0x21, 1, 0x5F, 0x88, 0x21, col, data->pnltex[0]);
+    nbPnlSprite(hw + cx, 0x6E, -0x88, -0x21, 1, 0x5F, 0x88, 0x21, col, data->pnltex[0]);
+    nbPnlSprite(cx - ex, 0x4D, ex * 2, 0x21, 0x87, 0x5F, 1, 0x21, col, data->pnltex[0]);
+}
+
+s32 nbHelpProcess1(dds3ProcessID_t *id)
+{
+    nbHelpProcessData_t *w;
+    s32 x;
+
+    w = dds3GetProcessData(id);
+    if (w->text1 == NULL && (w->type != 1 || w->reqmsgid < 0)) {
+        goto ret0;
+    }
+    cmpSetSkillListRows(0x14);
+    x = 0x100 - w->textwidth / 2;
+    switch (w->type) {
+    case 1:
+        itfMesMngSetMesPosition(w->reqmsgid, x << 4, 0x2A0);
+        itfMesMngRequestMessage(w->reqmsgid, w->mesid, 0);
+        break;
+    case 2:
+        w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
+        frSetFontColor(w->textmax, w->msgid | 0x80808000);
+        frDrawFontEx(w->textmax, 1);
+        frDestroyFontRequestAfter(w->textmax);
+        w->textmax = NULL;
+        x += w->nextwidth;
+        w->textmax = frGetCNameFRQ(0, 1, 0, 0);
+        frSetDrawPosition(w->textmax, x << 4, 0x2A0);
+        frSetFontColor(w->textmax, w->msgid | 0x80808000);
+        frDrawFontEx(w->textmax, 1);
+        frDestroyFontRequestAfter(w->textmax);
+        w->textmax = NULL;
+        break;
+    case 0:
+        w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
+        frSetFontColor(w->textmax, w->msgid | 0x80808000);
+        frDrawFontEx(w->textmax, 1);
+        frDestroyFontRequestAfter(w->textmax);
+        w->textmax = NULL;
+        if (w->text2 != NULL) {
+            x += w->nextwidth;
+            w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text2, 0);
+            frSetFontColor(w->textmax, w->msgid | 0x80808000);
+            frDrawFontEx(w->textmax, 1);
+            frDestroyFontRequestAfter(w->textmax);
+            w->textmax = NULL;
+        }
+        break;
+    }
+    if (w->type != 1) {
+        nbDrawHelpPanel(w);
+    }
+    cmpSetSkillListRows(-1);
+    w->text3++;
+    if (w->time > 0) {
+        if (w->text3 > w->time) {
+            nbHelpOff();
+            goto ret0;
+        }
+    }
+    if (w->type == 1) {
+        nbDrawHelpPanel(w);
+    }
+ret0:
+    return 0;
+}
 
 void nbHelpShutdown(dds3ProcessID_t *id)
 {
