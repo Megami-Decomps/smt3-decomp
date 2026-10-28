@@ -2,22 +2,6 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
-## Flow2_13 (newbattle/nbMakePacket, 0xC8)
-
-44 of 50 words match, at the exact 200-byte size.
-
-The inner dispatch is a `switch` over `qtype` with cases 1-3 written before
-case 0, which is what gives retail's `beql`, `bltz`, `slti` tree instead of a
-folded `sltiu` range test. What is left is cross-jumping: ee-gcc merges the
-two `movn` tails of the `qindex` arms into one shared instruction, where
-retail duplicates the `movn` into the branch delay slot of the first arm's
-`b`. The two delay-slot fills around the `mes = 0xA` arm are also swapped.
-
-Ruled out: nested `if`s in place of both ternaries; the `qindex` test
-inverted so the other arm falls through; and a pre-set `mes` overwritten in
-the second arm. The `== 0 ? low : high` form of the ternary is required, as
-`!= 0 ? high : low` gives `movz` with the constants swapped.
-
 ## Flow2_2 (newbattle/nbMakePacket, 0xCC)
 
 22 of 48 words match, one word short of retail's 204.
