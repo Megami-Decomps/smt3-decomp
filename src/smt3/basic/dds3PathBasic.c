@@ -49,7 +49,59 @@ dds3Basic_t *dds3AddPathBasic(s32 serialID, void *pData, const char *pName)
     return object;
 }
 
+/* NON_MATCHING: 109 of 115 words match at the exact size; the table->count reload
+ * after the spline call is placed in the shared tail, not in the position arm. */
+#ifdef NON_MATCHING
+dds3PathBasicControl_t *dds3AllocPathBasicWorkData(dds3Basic_t *basic)
+{
+    dds3PathCurveTable_t *table = (dds3PathCurveTable_t *)basic->workdata;
+    dds3PathCurveEntry_t *entry;
+    dds3PathBasicControl_t *work;
+    u32 last;
+    u32 i;
+
+    if (table->count == 0) {
+        return NULL;
+    }
+    work = sdfChipAllocDirect(sizeof(*work));
+    entry = table->entries;
+    memset(work, 0, sizeof(*work));
+    work->direction = 0;
+    work->frame = 0.0f;
+    work->frameMax = 0.0f;
+    for (i = 0; i < table->count; i++, entry++) {
+        fldResourcePathData_t *keys = entry->keys;
+
+        switch (entry->kind) {
+        case DDS3_PATH_CURVE_SCALAR:
+            work->pFovy = keys;
+            work->flag |= DDS3_PATH_SCALAR_CHANNEL;
+            break;
+        case DDS3_PATH_CURVE_POSITION:
+            work->pTransrate = keys;
+            work->flag |= DDS3_PATH_POSITION_CHANNEL;
+            work->pSplineHandle = dds3AllocSplineHandle(keys->data.position, keys->count, 1);
+            break;
+        case DDS3_PATH_CURVE_ROTATION:
+            work->pRotation = keys;
+            work->flag |= DDS3_PATH_ROTATION_CHANNEL;
+            break;
+        case DDS3_PATH_CURVE_WORLD_TRANSFORM:
+            work->pLight = keys;
+            work->flag |= DDS3_PATH_WORLD_TRANSFORM_CHANNEL;
+            break;
+        }
+        last = keys->frames[keys->count - 1];
+        if (work->frameMax < (f32)last) {
+            work->frameMax = (f32)last;
+        }
+    }
+    return work;
+}
+
+#else
 INCLUDE_ASM(const s32, "basic/dds3PathBasic", dds3AllocPathBasicWorkData);
+#endif
 
 void dds3DeletePathControl(dds3PathBasicControl_t *work)
 {

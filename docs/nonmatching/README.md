@@ -68,3 +68,4 @@ page and line to open. Conventions are in
 | 1 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 1 | event/evtCommand | [event/evtCommand.md](event/evtCommand.md) |
 | 1 | effect/effPCPBezier | [effect/effPCPBezier.md](effect/effPCPBezier.md) |
+| 1 | basic/dds3PathBasic | [basic/dds3PathBasic.md](basic/dds3PathBasic.md) |

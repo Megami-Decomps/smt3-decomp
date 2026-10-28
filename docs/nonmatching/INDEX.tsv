@@ -1,4 +1,5 @@
 function	unit	size	distance	page	line
+dds3AllocPathBasicWorkData	basic/dds3PathBasic	0x1CC	109 of 115 words match	docs/nonmatching/basic/dds3PathBasic.md	5
 fldRunTamaFree	code_00116AD0	0xBC	27 of 47 words differ	docs/nonmatching/code_00116AD0.md	5
 fldRunEffSet	code_00116AD0	0x12C	67 of 73 words differ	docs/nonmatching/code_00116AD0.md	48
 fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/nonmatching/code_00116AD0.md	69
