@@ -384,7 +384,34 @@ void objMdlColorSet(tagPipeObject *objPtr, u32 color)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlAlphaSet);
+extern void mymdlAlphaSet(tagpipeBasic *work, u8 alpha);
+
+void objMdlAlphaSet(tagPipeObject *objPtr, u8 alpha) {
+    switch ((u8)objPtr->id) {
+    case 1:
+        return mymdlAlphaSet(&PipeEML[objPtr->mdl], alpha);
+    case 2:
+        return mymdlAlphaSet(&PipeEMS[objPtr->mdl], alpha);
+    case 5:
+    case 6:
+        return mymdlAlphaSet(&PipeMaka1[objPtr->mdl], alpha);
+    case 12:
+        return mymdlAlphaSet(&PipeDRBOX[objPtr->mdl], alpha);
+    case 11:
+        return mymdlAlphaSet(&PipeDMaka[objPtr->mdl], alpha);
+    case 9:
+        return mymdlAlphaSet(&PipeZMaka[objPtr->mdl], alpha);
+    case 10:
+        return mymdlAlphaSet(&PipeRBOX[objPtr->mdl], alpha);
+    case 128:
+        return mymdlAlphaSet(basicMy, alpha);
+    case 129:
+        mymdlAlphaSet(MyLine, alpha);
+        break;
+    default:
+        break;
+    }
+}
 
 void objMdlMotion(tagPipeObject *objPtr, s32 motion, f32 speed)
 {
