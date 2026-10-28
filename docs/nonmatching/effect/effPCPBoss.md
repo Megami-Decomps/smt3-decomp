@@ -162,3 +162,38 @@ Ruled out: `colors` moved to the front and the back of the run; `uv[6]` beside
 the points (73 words, it takes `0($29)`); and the whole primitive block written
 through a local `effPCPBossWork_t *`, which is far worse because the pointer
 then comes from a pseudo rather than a `%hi`/`%lo` pair.
+
+## effPCPBossKAGUInvokeDraw (effect/effPCPBoss, 0x2E0)
+
+181 of 184 words match at the exact 736-byte size; first difference +0x1A4.
+The normal build retains the assembly fallback. The guarded body scans for
+an eligible invoke model, preserves the signed lifetime/fade calculation,
+captures marks 20 through 27 and center mark 0, and updates six nine-point
+poly lists for each requested group. Each group repeats the same six direction
+templates. The fourth direction component is an additive radius offset; the
+VU operation multiplies W by zero before scaling and adding the center.
+
+The structured parameter view preserves the original 0x3C0-byte region: 54
+four-float direction records, the existing 0x54-byte thunder header, then
+limit/fade-in/fade-out words at +0x3B4/+0x3B8/+0x3BC. The raw byte member
+remains available to the matched constructor. Output slots start at +0x3C4;
+handles are reloaded before parameter lookup, color update, and drawing.
+
+Only address expressions remain different: the draft copies the center's
+already-computed stack address into the loop pointer, where native computes
+it again from SP. Its output-slot cursor starts at the work base and adds
+0x3C4; native starts four bytes later and adds 0x3C0. Both yield the same
+addresses. Separating the center from the eight mark vectors does not change
+these choices; moving the slot increment before the callbacks grows the
+body and spills the count. No biased pointer or artificial clobber is used
+to force the native forms. The unresolved question is the ordinary source
+lifetime that produces those two address materializations.
+
+The shared unsigned loop index is live in two disjoint phases: capturing eight
+marks, then traversing the requested groups. Qualified compiler tracing
+(`cc1probe.sh --cflag -DNON_MATCHING --alloc --sched --no-dumps`) verifies
+ordinary/probed parity. Pseudo 97 supplies the mark bound 8 (UID 242), resets
+at UID 541, then supplies the group bound (UID 324). Global allocation combines
+16 references, live length 114 and four crossed calls (priority 5614), assigning
+it `$19`. Independent review confirms that each phase defines the value before
+use, the type is truthful, and no address escapes or artificial uses are added.

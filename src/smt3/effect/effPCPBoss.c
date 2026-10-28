@@ -270,7 +270,18 @@ typedef struct effPCPBossThunderbolt_t
 
 typedef struct effPCPBossKAGUInvoke_t
 {
-    u8 param[0x3C0];
+    union
+    {
+        u8 param[0x3C0];
+        struct
+        {
+            f32 directions[6][9][4];
+            effPCPBossThunderHead_t head;
+            s32 limit;
+            s32 fadeIn;
+            s32 fadeOut;
+        } draw;
+    };
     s32 pTPList;
     void *point[26];
     s32 frame;
@@ -1559,7 +1570,111 @@ void effPCPBossKAGUInvokeDelete(effPCPBossKAGUInvoke_t *hData)
     sdfMemFreeDirect(hData->handle);
 }
 
+/* NON_MATCHING: 3 of 184 words differ (first at +0x1A4). */
+#ifdef NON_MATCHING
+void effPCPBossKAGUInvokeDraw(effPCPBossKAGUInvoke_t *hData)
+{
+    effPCPBossUnit_t *model;
+    effPCPBossUnit_t *found;
+    effPCPBossVector_t marks[8];
+    effPCPBossVector_t center;
+    effPCPBossVector_t *centerPtr;
+    u128 *param;
+    s32 frame;
+    s32 limit;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 rest;
+    s32 i;
+    s32 id;
+    u32 count;
+    u32 index;
+    u32 listIndex;
+    u32 slot;
+    u32 vertex;
+    void **list;
+    f32 blend;
+    f32 distance;
+    f32 scale;
+    u32 color;
+
+    if (effBTLSkillCheckRun() != 0) {
+        model = effBTLSkillGetInvokeFormation();
+    } else {
+        found = NULL;
+        model = *nbGetMainProcessData();
+        for (i = 0; i < 0x20; i++) {
+            if ((model->flags & 3) == 3) {
+                id = effBTLModelGetID(model);
+                if (id == 0x125 || id == 0x108) {
+                    found = model;
+                    break;
+                }
+            }
+            model++;
+        }
+        if (found == NULL) {
+            return;
+        }
+    }
+
+    frame = hData->frame;
+    limit = hData->draw.limit;
+    fadeIn = hData->draw.fadeIn;
+    fadeOut = hData->draw.fadeOut;
+    if (frame < limit) {
+        if (frame < fadeIn && fadeIn != 0) {
+            blend = (f32)frame / (f32)fadeIn;
+        } else {
+            rest = limit - frame;
+            if (fadeOut >= rest && fadeOut != 0) {
+                blend = (f32)rest / (f32)fadeOut;
+            } else {
+                blend = 1.0f;
+            }
+        }
+        color = effColorBlend(hData->color & 0xFFFFFF, hData->color, blend);
+
+        for (index = 0; index < 8; index++) {
+            effBTLModelGetMarkPosition2(model, 0x14 + index);
+            SDF_VU0_STOREVECTOR(&marks[index]);
+        }
+        effBTLModelGetMarkPosition2(model, 0);
+        SDF_VU0_STOREVECTOR(&center);
+        centerPtr = &center;
+
+        SDF_VU0_LOADVECTOR_B(centerPtr);
+        SDF_VU0_LOADVECTOR(&marks[0]);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_GETLENGTH(distance);
+        count = (u32)hData->pTPList;
+        slot = 0;
+        distance -= 200.0f;
+
+        for (index = 0; index < count; index++) {
+            for (listIndex = 0; listIndex < 6; listIndex++) {
+                list = &hData->point[slot];
+                param = effPCP_ThunderPolyListGetParam(*list);
+                SDF_VU0_LOADVECTOR_B(centerPtr);
+                for (vertex = 0; vertex < 9; vertex++) {
+                    SDF_VU0_LOADVECTOR(&hData->draw.directions[listIndex][vertex][0]);
+                    SDF_VU0_VECTOR_W_SET_ZERO();
+                    scale = distance + hData->draw.directions[listIndex][vertex][3];
+                    SDF_VU0_SCALEVECTOR_BITS(scale);
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_STOREVECTOR(&param[vertex]);
+                }
+                effPCP_ThunderPolyListSetColor(*list, color);
+                effPCP_ThunderPolyListDraw(*list);
+                slot++;
+            }
+        }
+    }
+    hData->frame++;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUInvokeDraw);
+#endif
 
 void effPCPBossKAGUInvokeSetColor(effPCPBossKAGUInvoke_t *hData, u32 abgr)
 {
