@@ -151,7 +151,39 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
-INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperFileLoadPB);
+extern void *sdfFileOpen(const char *path);
+extern u32 sdfFileLength(void *file);
+extern s32 sdfFileRead(void *file, void *buffer, s32 size);
+extern void sdfFileClose(void *file);
+extern void *memcpy(void *dst, const void *src, u32 size);
+extern effPartHandle_t *dds3EffectPartCreate(u16 type, void *data);
+extern void mdlSingleMotion(mdlObj_t *model, s32 group, s32 number);
+
+effPartHandle_t *nbCameraHelperFileLoadPB(const char *filename)
+{
+    struct {
+        u32 size;
+        u8 reserved[12];
+    } header;
+    void *file = sdfFileOpen(filename);
+    sdfMemHandle_t *allocation;
+    void *data;
+    effPartHandle_t *part;
+
+    header.size = sdfFileLength(file);
+    allocation = sdfMemAllocDirect(header.size + sizeof(header));
+    data = sdfMemLock(allocation);
+    /* As in effBTLSystem_Part_DataLoad, only the header size is initialized. */
+    memcpy(data, &header, sizeof(header));
+    sdfFileRead(file, (u8 *)data + sizeof(header), header.size);
+    sdfFileClose(file);
+    part = dds3EffectPartCreate(3, data);
+    mdlSingleMotion(dds3EffectPartGetHandle(part), 0, 0);
+    sdfMemFreeDirect(allocation);
+    printf("nbCameraHelper:file[%s]\n", filename);
+    return part;
+}
+
 
 /* Called above its definition, where ee-gcc assumed int. */
 u16 nbCameraHelperLength(nbCameraHelper_tag *hCameraHelper);
