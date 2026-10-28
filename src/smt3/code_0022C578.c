@@ -385,7 +385,8 @@ typedef struct
 {
     /* 0x0000 */ u8 unk_0000;
     /* 0x0001 */ s8 unk_0001;
-    /* 0x0002 */ u8 unk_0002[2];
+    /* 0x0002 */ u8 unk_0002;
+    /* 0x0003 */ s8 previousPhase;
     /* 0x0004 */ s8 unk_0004;
     /* 0x0005 */ u8 unk_0005[0xF];
     /* 0x0014 */ void *allocation;
@@ -1873,7 +1874,107 @@ s32 cmpCalcStockControl(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCalcParty);
+extern void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func,
+                                 void *data, s32 value, s32 alpha);
+extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
+extern s32 fclStartMessage(s32 message);
+extern s32 fclStartSelMessage(s32 message);
+extern void fclSetMessageInvalid(s8 mode);
+
+s32 cmpCalcParty(void)
+{
+    s32 selectedIndex = cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
+    s8 status;
+    s8 phase;
+
+    status = campWork->unk_0004;
+    if (status != 0) {
+        phase = campWork->previousPhase;
+        switch (phase) {
+        case 0:
+            cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0,
+                                cmpUpdateListSelection,
+                                (u8 *)campWork + 0x2094, 0, 0);
+            break;
+        case 3:
+            break;
+        case 8: {
+            s32 selectedCount;
+
+            if (status == 1) {
+                selectedCount = campWork->page[1].cursor.unk_22 +
+                                (u8)campWork->page[1].cursor.unk_24;
+                switch (selectedCount) {
+                case 0:
+                    if (camp_H_cmpLocalStock_t__ctor() == 3) {
+                        campWork->unk_0001 = 8;
+                        goto finish;
+                    }
+                    /* Fall through. */
+                case 1:
+                    if (cmpCalcStockControl() != 0) {
+                        campWork->unk_0001 = 8;
+                    } else {
+                        cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
+                        campWork->unk_0001 = 3;
+                    }
+                    goto finish;
+                default:
+                    goto finish;
+                case 2:
+                    break;
+                }
+
+                if ((cmbGlobalWork->party[selectedIndex].unit.flag & 1) == 0) {
+                    campWork->unk_0001 = 8;
+                    goto finish;
+                }
+                if ((cmbGlobalWork->party[selectedIndex].unit.flag & 0x800) != 0) {
+                    datUnitWork_t *unit = cmpGetSelectSrcStock();
+
+                    fclSetMessageVar_20743088(0, (s32)text2[unit->id]);
+                    fclStartMessage(0xA);
+                    campWork->unk_0001 = 8;
+                    goto finish;
+                }
+
+                campWork->unk_0018[0] = 0;
+                fclSetMessageInvalid(0);
+                fclStartMessage(6);
+                fclStartSelMessage(0xB);
+                campWork->unk_0001 = 0xE;
+                campWork->unk_0004 = status;
+                return 1;
+            } else {
+                cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
+                campWork->unk_0001 = 3;
+            }
+            break;
+        }
+        case 9:
+            if (status == 1) {
+                if (cmpCalcStockControl() != 0) {
+                    campWork->unk_0001 = 8;
+                } else {
+                    cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
+                    campWork->unk_0001 = 3;
+                }
+            } else {
+                campWork->unk_0001 = 8;
+            }
+            cmpSetPartyDSL();
+            break;
+        }
+
+finish:
+        if (campWork->unk_0001 == 3) {
+            cmpInitLocalStock();
+            cmpInitDrawList();
+        }
+        campWork->previousPhase = 3;
+    }
+    return 0;
+}
 
 extern void dds3ConfigProcessStart(s32 Mode);
 
