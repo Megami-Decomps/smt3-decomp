@@ -2180,7 +2180,49 @@ void ReleaseFontList(void **ppfont, s32 num)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CreateFontExplain);
+typedef struct itfMesResource_t itfMesResource_t;
+extern s32 itfMesMngInitialize(itfMesResource_t *resource);
+extern void itfMesMngSetMesPosition(s32 id, s32 x, s32 y);
+extern void itfMesMngMarkBitStat(s32 id, u32 flags);
+extern void itfMesMngSetDefaultSpeed(s32 id, u8 speed);
+extern s32 itfMesMngRequestMessage(s32 id, s32 entryIndex, s32 itemIndex);
+extern u8 frEnableMode(s32 flags);
+extern u8 frDisableMode(u8 flags);
+extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type,
+                                       frFontHandle_t *parent);
+extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
+extern void frSetPriority(frFontHandle_t *font, u32 priority);
+extern void frSetFontSpace(frFontHandle_t *font, s32 spacing);
+extern u8 *datExplainTable[];
+extern u8 *text2[];
+
+void CreateFontExplain(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
+    u16 id = ((fclencyceelem_t *)((u8 *)encycSaveWork +
+              work->phase.recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90))->id;
+    frFontHandle_t *font;
+
+    if (work->phase.msgid < 0) {
+        work->phase.msgid = itfMesMngInitialize(pinst->explainData);
+        itfMesMngSetMesPosition(work->phase.msgid, 0x200, 0x3C0);
+    }
+    itfMesMngMarkBitStat(work->phase.msgid, 0x400000);
+    itfMesMngSetDefaultSpeed(work->phase.msgid, 0xD);
+    itfMesMngRequestMessage(work->phase.msgid, id, 0);
+    frEnableMode(1);
+    font = frLinkFontString(datExplainTable[datDevilTable[id].race], 0, 3, 0, NULL);
+    frSetDrawPosition(font, 0xC0, 0x2E0);
+    frSetPriority(font, 0xFFFFF0);
+    frSetFontSpace(font, 3);
+    font = frLinkFontString(text2[id], 0, 3, 0, font);
+    frSetDrawPosition(font, 0x550, 0x2E0);
+    frSetPriority(font, 0xFFFFF0);
+    frSetFontSpace(font, 3);
+    frDisableMode(1);
+    work->explainFont = font;
+}
+
 
 extern void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker);
 

@@ -42,3 +42,17 @@ retail's `lui $3`, until `nbCameraBoss_Sp_DOUTYO_TP_Set` was declared
 `extern s32` instead of `extern void`; an unprototyped `extern s32 f();` does it
 too. Before chasing a lone base-register difference after a call, check the
 callee's declared return type.
+
+The byte-returning font-mode provider supplies another measured case.
+`frEnableMode(s32)` returns the previous shared flag byte as `u8`: native loads
+it into `$2`, ORs the mask into `$4`, and returns with the byte store in the
+delay slot. Its corrected C definition and all callers remain byte-identical.
+
+In `facility/fclEncyc`, the ordinary `CreateFontExplain` body matches all
+392 bytes with that return contract. A control changing only its declaration
+to `void` still emits 392 bytes but differs in eight of 98 words: the race-table
+index takes `$2` and the address/result takes `$3`, opposite retail. Qualified
+`cc1probe --alloc --no-dumps` runs preserve hooked/unhooked output in both forms.
+The value-returning call reserves `$2`, so the exact form places the following
+index in `$3`. This example uses the provider's native byte result; return
+types must follow the actual contract.
