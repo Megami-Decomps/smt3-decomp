@@ -68,7 +68,7 @@ typedef struct
     /* 0x3C */ u8 unk_3C[6];
 } datRaceEntry_t;
 
-extern void rstSetMaxHpMp(s32 Mode, s32 pStock);
+extern void rstSetMaxHpMp(s8 Mode, datUnitWork_t *pStock);
 
 typedef struct
 {
@@ -249,11 +249,32 @@ s32 rstChkParamLimitAll(datUnitWork_t *unit)
             return 0;
         }
     }
-    rstSetMaxHpMp(0, (s32)unit);
+    rstSetMaxHpMp(0, unit);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstSetLevelUpCount);
+extern void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst);
+extern void rstAddExp(s32 count, datUnitWork_t *unit);
+s32 rstSetLevelUpCount(datUnitWork_t *unit)
+{
+    datUnitWork_t copy;
+    s32 offset = 0;
+    EventStart->StartLevel = unit->level;
+    EventStart->LevelUpCnt = cmbGetLevelUpCount(unit, 0);
+    EventStart->unk_18 = EventStart->unk_19 = EventStart->LevelUpCnt;
+    if (unit->flag & 0x200) {
+        cmbCopyDefaultDevilToStock(unit->id, &copy);
+        offset = unit->level - copy.level;
+    }
+    rstAddExp(EventStart->LevelUpCnt, unit);
+    if ((unit->badstatus & 0x800) == 0 && EventStart->LevelUpCnt != 0) {
+        EventStart->LevelUpCnt += offset;
+        EventStart->StartLevel -= offset;
+        rstSetMaxHpMp(0, unit);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstSetCurrentDevil);
 
