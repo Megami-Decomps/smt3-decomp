@@ -97,7 +97,8 @@ typedef struct
     /* 0x0028 */ s8 HeartsSkillResult;
     /* 0x0029 */ s8 heartsEvent;
     /* 0x002A */ u16 bonusParamIndex;
-    /* 0x002C */ u8 reserved2C[0x4C];
+    /* 0x002C */ s8 DefaultSkillResult;
+    /* 0x002D */ u8 reserved2D[0x4B];
     /* 0x0078 */ s32 unk_78;
     /* 0x007C */ u8 unk_7C[0xF0];
     /* 0x016C */ datUnitWork_t *pCurrentStock;
@@ -297,7 +298,40 @@ INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqDevilParam);
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqGift);
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqDefaultSkill);
+extern s32 rstWaitConfirmButton(void);
+extern s8 fclEndMessage(void);
+extern char *text1[];
+extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
+
+void rstUpdateSeqDefaultSkill(void)
+{
+    s32 state = rstWaitConfirmButton();
+
+    if (state == 1) {
+        return;
+    }
+    if (state == 2) {
+        fclSetMessageVar_20743088(10, (s32)text1[startPos->EventParam]);
+        fclStartMessage(6);
+        rstClearFlag(1);
+        return;
+    }
+    if (fclChkMessage() != 0) {
+        return;
+    }
+    if (startPos->DefaultSkillResult == 2) {
+        fclEndMessage();
+        fclStartMessage(7);
+        cmpResetCursorInfo(&startPos->cursorInfo);
+        startPos->cursorInfo.unk_24 = 8;
+        startPos->unk_0001 = 0x15;
+        startPos->unk_0004 = 1;
+    } else {
+        rstAddSkill();
+        startPos->unk_0004 = 1;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqSkillPowerUp);
 
