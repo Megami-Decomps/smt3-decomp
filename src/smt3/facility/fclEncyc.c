@@ -1007,9 +1007,50 @@ void CreateSortIndexByLevel(s16 *pout)
     qsort(pout, count, 2, cmpLevelOrder);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", cmpRaceOrder);
+typedef struct {
+    u32 flag;
+    u8 race;
+    u8 reserved05[0x37];
+} fclEncycDevilFormat_t;
+extern fclEncycDevilFormat_t datDevilTable[];
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", cmpLevelOrder);
+s32 cmpRaceOrder(const void *a, const void *b)
+{
+    fclencyceelem_t *left = (fclencyceelem_t *)((u8 *)encycSaveWork + *(const s16 *)a * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    fclencyceelem_t *right = (fclencyceelem_t *)((u8 *)encycSaveWork + *(const s16 *)b * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    s32 result;
+    s32 l = datDevilTable[left->id].race;
+    s32 r = datDevilTable[right->id].race;
+    if (l < r) result = -1;
+    else if (l > r) result = 1;
+    else {
+        s32 tieL = left->level;
+        s32 tieR = right->level;
+        if (tieL > tieR) result = -1;
+        else if (tieL < tieR) result = 1;
+        else result = 0;
+    }
+    return result;
+}
+
+s32 cmpLevelOrder(const void *a, const void *b)
+{
+    fclencyceelem_t *left = (fclencyceelem_t *)((u8 *)encycSaveWork + *(const s16 *)a * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    fclencyceelem_t *right = (fclencyceelem_t *)((u8 *)encycSaveWork + *(const s16 *)b * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    s32 result;
+    s32 l = right->level;
+    s32 r = left->level;
+    if (l < r) result = -1;
+    else if (l > r) result = 1;
+    else {
+        s32 tieL = datDevilTable[left->id].race;
+        s32 tieR = datDevilTable[right->id].race;
+        if (tieL < tieR) result = -1;
+        else if (tieL > tieR) result = 1;
+        else result = 0;
+    }
+    return result;
+}
 
 void FillIndex(s16 *pout, s32 num)
 {
