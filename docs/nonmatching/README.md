@@ -70,7 +70,6 @@ page and line to open. Conventions are in
 | 1 | facility/fclRagDraw | [facility/fclRagDraw.md](facility/fclRagDraw.md) |
 | 1 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 1 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
-| 1 | event/evtUnitManager | [event/evtUnitManager.md](event/evtUnitManager.md) |
 | 1 | event/evtPicture | [event/evtPicture.md](event/evtPicture.md) |
 | 1 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 1 | event/evtCommand | [event/evtCommand.md](event/evtCommand.md) |

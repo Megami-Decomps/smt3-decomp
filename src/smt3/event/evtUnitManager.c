@@ -401,30 +401,30 @@ void evtUnlinkExternalLightPacket(evtUnit_t *h) {
 }
 
 /* vu0 routine: pack the base light and ambient vectors into the unit's colours. */
-/* NON_MATCHING: 3 of 37 words differ (first at +0x10). */
-#ifdef NON_MATCHING
 void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 argb) {
     evtColorWork_t work[2];
-    u32 scale;
-    s32 light;
-    s32 ambient;
+    union {
+        f32 value;
+        u32 bits;
+    } scale;
+    u32 light;
+    u32 ambient;
 
-    scale = 0x43000000;
-    h->color08 = lrgb;
     h->colorDuration = frame;
+    h->color08 = lrgb;
     h->color58 = argb;
+    scale.value = 128.0f;
     GetBaseLightRGB(h);
-    MMI_RGBA_PACK_UNIT(light, scale);
-    h->firstCurrent = light;
+    MMI_RGBA_PACK_UNIT(light, scale.bits);
+    /* Retail retains this colour-slot store in the ambient call delay slot,
+     * as does DDS evtInitializeUnitColorTransition. */
     work[0].word = light;
+    h->firstCurrent = light;
     GetBaseAmbientRGB(h);
-    MMI_RGBA_PACK_UNIT(ambient, scale);
+    MMI_RGBA_PACK_UNIT(ambient, scale.bits);
     h->color54 = ambient;
     h->flags = (h->flags | 0x800) & ~0x1000;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtUnitManager", evtSetUnitLightAndAmbient);
-#endif
 
 /* vu0 routine: normalise the target direction and retain the current source. */
 void evtSetUnitLightDir(evtUnit_t *h, s32 frame) {

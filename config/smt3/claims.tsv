@@ -258,3 +258,8 @@ tools/find_similar.py	z15	done	2026-10-27	6 fn / 1940 B	harness work: template s
 coverage sweep, second batch	z16	done	2026-10-28	76 fn / 46156 B	37 units finishable; 21 handwritten now excluded
 asm routines (21 functions)	z17	done	2026-10-28	15 reference impls, 2 drafts, 0 matches	PS2_WORD_BIT_LENGTH reaches addi; schedule is what blocks the two drafts
 coverage sweep, third batch	z18	open	2026-10-28	see queue3.txt	cheapest first from nbMakaProcess onward
+src/smt3/effect/billManager.c	redthing1	done	2026-10-28	0 matches	retained original drafts; animation visibility changes P2ADraw annulment
+src/smt3/effect/effMagatuhi.c	redthing1	done	2026-10-28	0 matches	retained original draw drafts; first differing instruction at +0x3C
+src/smt3/event/evtUnitManager.c	redthing1	done	2026-10-28	1 fn / 148 B	evtSetUnitLightAndAmbient; float scale union and parameter store order
+src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	1 fn / 148 B	shuffleIndices; unsigned random indices and guarded countdown loop
+src/smt3/newbattle/nbMaeProcess.c	redthing1	done	2026-10-28	3 fn / 140 B	02Loop, 02Step, and Process0 transition callbacks

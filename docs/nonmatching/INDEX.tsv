@@ -93,7 +93,6 @@ evtHokanColor	event/evtPolygonMovie	0xC8	40 of 49 words match	docs/nonmatching/e
 evtHokanFilter	event/evtPolygonMovie	0x120	71 of 72 words match	docs/nonmatching/event/evtPolygonMovie.md	28
 evtGetPolygonMovieWorkData2	event/evtPolygonMovie	0xF0	58 of 60 words match	docs/nonmatching/event/evtPolygonMovie.md	46
 CheckLoad_evtPolygonMovie	event/evtPolygonMovie	0x110	36 of 68 words match	docs/nonmatching/event/evtPolygonMovie.md	66
-evtSetUnitLightAndAmbient	event/evtUnitManager	0x94	34 of 37 words match	docs/nonmatching/event/evtUnitManager.md	5
 func_00206308, func_002065C8	fclCombineInit	0x2C0 each	35 of 176 words differ	docs/nonmatching/facility/fclCombineInit.md	5
 cmbFindCameraPoint	fclCombineInit	0x64	9 of 25 words differ	docs/nonmatching/facility/fclCombineInit.md	43
 cmbDrawFullScreenPanel	fclCombineInit	0x68	20 of 26 words match	docs/nonmatching/facility/fclCombineInit.md	66
