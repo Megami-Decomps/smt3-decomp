@@ -1838,6 +1838,8 @@ s32 AcceptKeyChangeSort(fclEncyc_instance_tag *pinst)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyChangeListIndex);
 
+INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyEdgeListCursor);
+
 typedef struct {
     u8 StepY[4];
     s8 StopFlag;
