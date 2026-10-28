@@ -78,7 +78,11 @@ typedef struct nbParty_t
 /* A loaded pac file; only the chain down to the decoded buffer is named. */
 typedef struct { u8 unk_00[0x8]; void *buf; } nbPacEntry_t;
 
-typedef struct { u8 unk_00[0x60]; nbPacEntry_t *entry; } nbPacHandle_t;
+struct NB_FILEHANDLE_T {
+    u8 reserved00[0x60];
+    nbPacEntry_t *entry;
+};
+typedef NB_FILEHANDLE_T nbPacHandle_t;
 
 /* 0xE0 bytes; only the field this unit reads is named. */
 typedef struct
@@ -129,13 +133,9 @@ typedef struct nbMainProcessData_t
     u8 itemcnt[4];
     u32 maka;
     u32 exp;
-    u8 unk_A8[0xC];
-    nbPacHandle_t *formpack;
-    u8 unk_B8[0x4];
+    u8 unk_A8[0x14];
     dds3ProcessID_t *MainProcessID;
-    u8 unk_C0[0x1C];
-    void *packdata;
-    u8 unk_E0[0x14];
+    u8 unk_C0[0x34];
     dds3ProcessID_t *koukaproc;
     dds3ProcessID_t *negoproc;
     u8 unk_FC[0x4];
@@ -626,13 +626,13 @@ s32 nbMakeModelPackName(s32 no)
 }
 
 /* s32 with no return blocks the sibling call retail does not take. */
-s32 nbLoadModelPackIfEnabled(nbMainProcessData_t *data, void *buf, s32 no)
+s32 nbLoadModelPackIfEnabled(nbFormation_t *form, s32 group, s32 no)
 {
-    if (data->formpack == NULL) {
+    if (form->packh == NULL) {
         if (evtBitCheck(0xC0F)) {
-            data->formpack = (nbPacHandle_t *)nbMakeModelPackName(no);
+            form->packh = (nbPacHandle_t *)nbMakeModelPackName(no);
         } else {
-            mdlPrepare(buf, no, 0);
+            mdlPrepare(group, no, 0);
             nbLoadMidiFile(no);
         }
     }
@@ -683,19 +683,19 @@ void nbCopyPackData(nbStatWork_t *stat, void *src, u32 size, s32 unitid)
 
 INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbAddFormEntry);
 
-s32 nbCheckModelPackLoaded(nbMainProcessData_t *data, s32 group, s32 id)
+s32 nbCheckModelPackLoaded(nbFormation_t *form, s32 group, s32 id)
 {
     void *buf;
 
     if (evtBitCheck(0xC0F) != 0) {
-        if (pacCheckEnd(data->formpack) == 0) {
+        if (pacCheckEnd(form->packh) == 0) {
             goto zero;
         }
-        buf = data->formpack->entry->buf;
+        buf = form->packh->entry->buf;
         nbAddFormEntry(sdfMemLock(buf), group, id);
         sdfMemFreeDirect(buf);
-        pacFileHandleFree_(data->formpack);
-        data->formpack = NULL;
+        pacFileHandleFree_(form->packh);
+        form->packh = NULL;
         return 1;
     }
     if (mdlPrepare(group, id, 0) == 0) {
