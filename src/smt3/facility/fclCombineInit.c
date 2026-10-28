@@ -33,6 +33,10 @@ extern cmbUnlockEntry_t D_0032DCC0[];
 
 extern cmbUnlockEntry_t D_0032DBB8[];
 
+extern u16 D_0032DCA0[];
+
+extern s8 cmbCheckEvoUnlocked(u16 devilId, datUnitWork_t *list, u8 count);
+
 extern s8 gProcessStat_0;
 
 extern cmpSkillList_t *cmpSkillCursor;
@@ -857,7 +861,20 @@ s32 cmbSkipRand(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindSpecialEntry);
+s32 cmbFindSpecialEntry(u16 devilId)
+{
+    s32 i;
+    u16 candidate;
+
+    for (i = 13; i >= 0; i--) {
+        candidate = D_0032DCA0[i];
+        if (cmbCheckEvoUnlocked(candidate, (datUnitWork_t *)&DDS3_GBWK->akuma[0].flag, 16) < 0 &&
+            candidate != devilId) {
+            return candidate;
+        }
+    }
+    return candidate;
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbBuildDevilEntry);
 
