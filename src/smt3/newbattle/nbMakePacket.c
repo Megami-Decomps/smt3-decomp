@@ -1528,7 +1528,43 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMoveGetCyDist);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMovePacket);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeNegoWorkPosPacket);
+s32 nbMakeNegoWorkPosPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                            nbFormation_t *target)
+{
+    sdfVector4_t direction;
+    sdfVector4_t pos;
+    sdfVector4_t axis;
+    f32 distance;
+    f32 targetRadius;
+    f32 formRadius;
+    f32 scale;
+
+    memset(&axis, 0, sizeof(axis));
+    axis.z = 1.0f;
+    SDF_VU0_LOADVECTOR(&target->rot);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&axis);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&direction);
+
+    distance = nbMakeUnitMoveGetCyDist(form, target);
+    SDF_VU0_LOADVECTOR(&direction);
+    formRadius = form->r * form->scl;
+    targetRadius = target->r * target->scl;
+    scale = targetRadius + (formRadius + formRadius) + 100.0f + distance;
+    SDF_VU0_SCALEVECTOR(scale);
+    SDF_VU0_LOADVECTOR_B(&target->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    nbAddTargetMoveKoukaPacket(startframe, uniqueid, form->partyindex, &pos, 1.0f);
+
+    SDF_VU0_LOADVECTOR(&direction);
+    SDF_VU0_SCALEVECTOR_V0(-1.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    nbAddRotKoukaPacket(startframe, uniqueid, form->partyindex, &pos, 0x64);
+    nbMakeUnitFadeOutPacket(startframe, uniqueid, form, 0, 0, 0, 0);
+    return 1;
+}
 
 /* NON_MATCHING: 2 of 65 words differ (first at +0x8C). */
 #ifdef NON_MATCHING
