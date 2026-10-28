@@ -73,7 +73,7 @@ typedef struct
     /* 0x0060 */ u8 reserved0060[4];
     /* 0x0064 */ s16 lw_cur[4];
     /* 0x006C */ u8 unk_6C;
-    /* 0x006D */ u8 unk_6D;
+    /* 0x006D */ s8 unk_6D;
     /* 0x006E */ u16 modelId;
     /* 0x0070 */ s32 unk_70;
     /* 0x0074 */ union {
@@ -2748,7 +2748,42 @@ INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D858);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcRegister);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcViewkey);
+extern s8 dds3PadButtonState[];
+extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,
+                                  s32 width, s32 height);
+extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr,
+                          const char *format, ...);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern char D_0053D898[];
+
+s32 DebugProcViewkey(fclEncyc_instance_tag *pinst, fclRibbon_t *work,
+                     sdfDrawTag_t *tag)
+{
+    if (((u32)(s32)dds3PadButtonState[0x33] >> 31) | (((u8)dds3PadButtonState[0x31] >> 1) & 1)) {
+        work->unk_04 = 0;
+    }
+
+    if (((u8)dds3PadButtonState[0x37] & 2) != 0) {
+        pinst->unk_6D++;
+        if ((s8)pinst->unk_6D >= 3) {
+            pinst->unk_6D = 0;
+        }
+    }
+
+    if (((u8)dds3PadButtonState[0x36] & 2) != 0) {
+        pinst->unk_6D--;
+        if ((s8)pinst->unk_6D < 0) {
+            pinst->unk_6D = 2;
+        }
+    }
+
+    dds3ConsPanelTagLink(tag, 0x10, 0x10, 0x16, 3);
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7A00, 0x00FFFFF0, 0,
+                                          D_0053D898, (s8)pinst->unk_6D));
+    return 0;
+}
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D898);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcDispBound);
 
