@@ -905,7 +905,38 @@ void DrawPhaseReadExplain(fclEncyc_instance_tag *pinst)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadView);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseReadView);
+extern void InitModelPosRot(void *model, s32 id);
+extern void mdlLink(void *model, fclEncycModelLink_t *links);
+
+void DrawPhaseReadView(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
+
+    DrawBackBlackBoard(work->boardY, work->boardAlpha);
+    if ((pinst->stat & 0x10) != 0) {
+        void *model = (void *)cmpGetEncycWork();
+
+        if (model != NULL) {
+            if ((pinst->stat & 0x400) == 0) {
+                u16 modelId = *(u16 *)((u8 *)encycSaveWork +
+                                       work->phase.recordIndex * 0xB0 + 0x11E90);
+                InitModelPosRot(model, modelId);
+                pinst->stat |= 0x400;
+            }
+            mdlLink(model, D_002F69B8);
+        }
+    } else {
+        if (cmpGetEncycWork() != 0) {
+            pinst->stat |= 0x400;
+        }
+        cmpDrawStatusComEx((s32)&work->unit, (u8)work->phase.statusAlpha, -1,
+                           0, 0, 0, 0xA09DC380, 1, 0, 0);
+    }
+    DrawExplainBack(work->explainAlpha);
+    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY,
+               0xFFFFF0, work->phase.ribbonAlpha, 4, 0x3A0, 0x47);
+    DrawReadMainHelp(pinst);
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", AcceptKeyRegistConfirm);
 
