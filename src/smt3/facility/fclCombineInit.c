@@ -1918,13 +1918,42 @@ void cmbDrawStockText(s32 unused0, s32 unused1, s32 z, s32 ot)
                      cmbSpriteTable, ot);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockBg);
+void cmbDrawStockBg(s32 x, s32 y, s32 z, u8 mode, s32 ot)
+{
+    s32 i;
+    s32 j;
+
+    cmpDrawBoxF(0x2A0, 0x400, z, 0x1C7, 0x113, 0x2C303880, ot);
+    if (mode == 0) {
+        for (i = 0; i < 12; i++) {
+            cmpDrawBoxF(0x2B0, 0x408 + i * 0xB8, z, 0xD5, 0x14, 0x1B1A1773, ot);
+        }
+        for (i = 0; i < 12; i++) {
+            s32 column = 0x1030 + i * 0x140;
+            for (j = 0; j < 12; j++) {
+                cmpDrawBoxF(column, 0x408 + j * 0xB8, z, 0x11, 0x14, 0x1B1A1773, ot);
+            }
+        }
+    } else {
+        for (i = 0; i < 12; i++) {
+            cmpDrawBoxF(0x2B0, 0x408 + i * 0xB8, z, 0x1C5, 0x14, 0x1B1A1773, ot);
+        }
+    }
+    if (mode == 0) {
+        for (i = 0; i < 12; i++) {
+            cmpDrawBoxF(0x1000 + i * 0x140, 0x408, z, 3, 0x111, 0x29282880, ot);
+        }
+    }
+    for (i = 0; i < 11; i++) {
+        fclDrawSpriteRes(0x2B0, 0x4A8 + i * 0xB8, z << 4, 0, 0, 0,
+                         CMB_GBWK->texHandle, cmbSpriteTable, ot);
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawListPanel);
 
 extern void cmbDrawListPanel(s32 x, s32 y, s32 z, s32 ot);
 extern void cmbDrawStockBox(s32 x, s32 y, s32 z, s32 color, s8 count, s32 ot);
-extern void cmbDrawStockBg(s32 x, s32 y, s32 z, u8 mode, s32 ot);
 
 void cmbDrawStockList(s32 x, s32 y, s32 z, s32 color, s8 count, u8 mode, s32 ot)
 {
