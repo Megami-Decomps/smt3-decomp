@@ -1074,11 +1074,93 @@ void RunLoad(nbMainProcessData_t *data, nbFormation_t *form)
     }
 }
 
+extern sdfVector4_t D_003FA7B0;
+extern void RunSake(nbMainProcessData_t *data, nbFormation_t *form);
+extern void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork_t *work);
+
 INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", D_00543720);
 
 INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", D_00543730);
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbUnitProcess2);
+void *nbUnitProcess2(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        nbFormation_t *form = &data->form[i];
+        datUnitWork_t *work = nbGetUnitWorkFromFormindex(i);
+        u32 stat = form->stat;
+        if ((stat & 1) != 0) {
+            switch (form->type) {
+            case 0:
+                if (work != NULL && ((work->badstatus & 0xFFF) == 1 ||
+                                     (work->badstatus & 0xFFF) == 0x10)) {
+                    RunBadAction(data, form);
+                    stat = form->stat;
+                }
+                break;
+            case 1:
+            case 3:
+                RunDamage(data, form);
+                stat = form->stat;
+                break;
+            case 2:
+                RunSake(data, form);
+                stat = form->stat;
+                break;
+            case 4:
+                RunLoad(data, form);
+                stat = form->stat;
+                break;
+            }
+            if ((stat & 0x80) != 0 && (form->stat & 2) != 0 && form->type != 3) {
+                if (form->hunit->owner->first->stat == 5) {
+                    if (form->hunit->motionSetup.motionId != 0) {
+                        nbSetUnitMotion(form, 0, 3, 1.0f);
+                    } else if (form->autotime != 0) {
+                        form->autotime--;
+                    } else {
+                        nbSetUnitMotion(form, 0, 3, 1.0f);
+                    }
+                }
+            }
+            UpdateFormAnime(data, form, work);
+            /* Qualified cc1probe: the one-pass eligibility block retains
+             * separate signed type checks (rtl.00 through sched2), matching
+             * retail. The equivalent combined condition folds to an unsigned
+             * range test and is eight bytes shorter. Hooked/unhooked and
+             * dump/plain outputs agree; see docs/CONTRIBUTING.md. */
+            do {
+                if (form->type < 5) {
+                    if (form->type > 0) {
+                        break;
+                    }
+                }
+                if (work == NULL || ((work->badstatus & 0xFFF) != 1 &&
+                                     (work->badstatus & 0xFFF) != 0x10)) {
+                    UpdateFormPosRot(form);
+                }
+            } while (0);
+            if (form->basic != NULL) {
+                SDF_VU0_LOADVECTOR(&D_003FA7B0);
+                SDF_VU0_SCALEVECTOR(form->scl);
+                form->basic->poseset->flag = (form->basic->poseset->flag | 1) & ~2;
+                SDF_VU0_STOREVECTOR(&form->basic->poseset->scl);
+                if (form->basic != NULL) {
+                    if ((form->stat & 0x2000) != 0) {
+                        ((dds3UnitObjectBasicWorkData_t *)form->basic->workdata)->rotationFlags |= 1;
+                    } else {
+                        ((dds3UnitObjectBasicWorkData_t *)form->basic->workdata)->rotationFlags &= ~1;
+                    }
+                    form->basic->poseset->flag = (form->basic->poseset->flag | 1) & ~2;
+                }
+            }
+            form->time++;
+        }
+    }
+    return NULL;
+}
 
 void *nbUnitShutdown(dds3ProcessID_t *id)
 {
