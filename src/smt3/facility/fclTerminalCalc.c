@@ -50,4 +50,36 @@ INCLUDE_ASM(const s32, "facility/fclTerminalCalc", trmDrawList);
 
 INCLUDE_ASM(const s32, "facility/fclTerminalCalc", trmUpdateListSelection);
 
-INCLUDE_ASM(const s32, "facility/fclTerminalCalc", trmDrawSeq0);
+typedef struct trmPanelPos_t {
+    s32 x;
+    s32 y;
+    s32 z;
+    s16 width;
+    s16 height;
+    s32 flags;
+    u8 unk14[0xC];
+} trmPanelPos_t;
+
+typedef struct trmDrawWork_t {
+    u8 unk00[0x1C];
+    /* List-window header prefix; cursor and trailing storage follow. */
+    u8 listHeader[0x15C];
+} trmDrawWork_t;
+
+extern trmDrawWork_t *trmDrawWork;
+extern void fclInitPanelPos(s32 x, s32 y, s32 z, s16 width, s16 height,
+                           s32 flags, trmPanelPos_t *panel);
+extern s32 cmpUpdateListSelection(trmPanelPos_t *panel, u8 *list, s32 row,
+                                  s32 mode, s32 width, s32 ot);
+extern void trmDrawListRow(trmPanelPos_t *panel, s32 ot);
+
+void trmDrawSeq0(s8 mode)
+{
+    trmPanelPos_t panel;
+
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, &panel);
+    cmpUpdateListSelection(&panel, trmDrawWork->listHeader, 0, 3, 0x100, 0x47);
+    cmpUpdateListSelection(&panel, trmDrawWork->listHeader, 0, mode, 0x100, 0x47);
+    fclInitPanelPos(0xC80, 0x100, 0xFFFFF, 0x80, 0, 0, &panel);
+    trmDrawListRow(&panel, 0x47);
+}
