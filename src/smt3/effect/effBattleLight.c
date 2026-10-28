@@ -7,6 +7,13 @@
 #include "ps2asm.h"
 
 extern u32 effBTLPointLightProcess;
+extern u32 effColorBlend(u32 first, u32 second, f32 rate);
+extern u32 effBTLPartGetScalePtrSub(s32 selector);
+extern void evtUnitLightOn(evtUnit_t *unit);
+extern void evtSetUnitLightAndAmbient(evtUnit_t *unit, s32 frame, u32 diffuse, u32 ambient);
+extern void evtSetUnitLightDir(evtUnit_t *unit, s32 frame);
+extern void effBTLPartGetPointLightPtr(nbFormation_t *formation,
+                                     effBTLAimParams_t *position, sdfVector4_t *direction);
 
 typedef struct
 {
@@ -218,9 +225,105 @@ void effBTLPointLightEnd(void)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleLight", effBTLPointLightMain);
+void effBTLPointLightMain(void)
+{
+    nbFormation_t *formation;
+    effBattleLight_effBTLPointLight_tag *light;
+    effBattleLight_effBTLPointLight_Base_tag *base;
+    evtUnit_t *unit;
+    sdfVector4_t direction;
+    u32 frame;
+    u32 start;
+    u32 end;
+    u32 first;
+    u32 second;
+    u32 secondStart;
+    u32 i;
 
-INCLUDE_ASM(const s32, "effect/effBattleLight", effBTLModelColorMain);
+    formation = nbGetMainProcessData()->form;
+    light = effBTLPointLight;
+    base = effBTLPointLightBase;
+    for (i = 0; i < 32; i++) {
+        if ((formation->stat & 3) == 3 && (s32)light->light_frame >= 0) {
+            frame = light->light_frame;
+            start = light->param.color_anim;
+            end = light->param.unknown18;
+            first = effBTLPartGetScalePtrSub(light->param.unknown14);
+            second = effBTLPartGetScalePtrSub(light->param.unknown1C);
+            if (start < end && end >= second) {
+                secondStart = end - second;
+                if (start < secondStart) {
+                    unit = formation->hunit;
+                    if (unit != NULL) {
+                        if (frame == start) {
+                            evtUnitLightOn(unit);
+                            evtSetUnitLightAndAmbient(unit, first, light->param.diffuse,
+                                                      light->param.ambient);
+                            effBTLPartGetPointLightPtr(formation, (effBTLAimParams_t *)&light->param,
+                                                      &direction);
+                            SDF_VU0_LOADVECTOR(&direction);
+                            evtSetUnitLightDir(unit, first);
+                        }
+                        if (frame == secondStart) {
+                            evtSetUnitLightAndAmbient(unit, second, base->unknown10, base->unknown14);
+                            SDF_VU0_LOADVECTOR(&base->position);
+                            evtSetUnitLightDir(unit, second);
+                        }
+                        light->light_frame++;
+                    }
+                }
+            }
+        }
+        formation++;
+        light++;
+        base++;
+    }
+}
+
+void effBTLModelColorMain(void)
+{
+    nbFormation_t *formation;
+    effBattleLight_effBTLPointLight_tag *light;
+    u32 frame;
+    u32 start;
+    u32 end;
+    u32 secondStart;
+    u32 first;
+    u32 second;
+    u32 color;
+    u32 i;
+
+    formation = nbGetMainProcessData()->form;
+    light = effBTLPointLight;
+    for (i = 0; i < 32; i++) {
+        if ((formation->stat & 3) == 3 && (s32)light->model_frame >= 0) {
+            frame = light->model_frame;
+            start = light->model.unknown04;
+            end = light->model.unknown0C;
+            first = effBTLPartGetScalePtrSub(light->model.unknown08);
+            second = effBTLPartGetScalePtrSub(light->model.unknown10);
+            if (start < end && end >= second) {
+                secondStart = end - second;
+                if (start < secondStart && formation->hunit != NULL) {
+                    if (frame == start) {
+                        if ((formation->modelcol & 0xFFFFFF) != 0x808080) {
+                            color = effColorBlend(light->model.unknown00, formation->modelcol, 0.5f);
+                            evtSetUnitColorRGB(formation->hunit, first, color);
+                        } else {
+                            evtSetUnitColorRGB(formation->hunit, first, light->model.unknown00);
+                        }
+                    }
+                    if (frame == secondStart) {
+                        evtSetUnitColorRGB(formation->hunit, second, formation->modelcol);
+                    }
+                    light->model_frame++;
+                }
+            }
+        }
+        formation++;
+        light++;
+    }
+}
 
 void effBTLPointLightRun(void)
 {
