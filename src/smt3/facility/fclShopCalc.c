@@ -359,7 +359,77 @@ void shopDrawRowText(s32 x, s32 y, s32 z, u32 color, u16 item, s32 count, s32 ot
 
 INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawBuyRow);
 
-INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawSellRow);
+typedef struct
+{
+    s32 rowHeight;
+    u8 reserved04[0x1E];
+    s16 selectedTop;
+    u8 selectedOffset;
+    u8 reserved25;
+    u8 rowCount;
+} shopDrawCursor_t;
+
+typedef struct
+{
+    s32 x;
+    s32 y;
+    s32 z;
+    s16 width;
+    s16 height;
+    s32 color;
+} shopDrawListPanel_t;
+
+typedef struct
+{
+    u8 reserved00[0x40];
+    shopDrawListPanel_t panel;
+    u8 reserved54[0x108];
+    shopDrawCursor_t cursor;
+} shopDrawListWork_t;
+
+extern void lstDrawListWindow(void *work, s8 noCursor, s32 ot);
+extern void lstDrawListWindowCursor(void *work, s32 ot);
+extern s32 cmpDrawListItemBox(void *cursor, s32 row, s32 slot, s32 mode, s32 height);
+extern s32 cmpItemHasFlag(u16 item, s8 which);
+extern s32 fclDrawPanel(fclPanel_t *panel, s32 ot);
+extern void fclDrawPriceText(fclPanelPos_t *panel, u16 item, s32 ot);
+
+void shopDrawSellRow(s32 row, u8 *work, s8 mode, s32 id)
+{
+    shopDrawListWork_t *list = (shopDrawListWork_t *)work;
+    shopDrawCursor_t *cursor = &list->cursor;
+    s32 x = list->panel.x;
+    s32 y = list->panel.y;
+    s32 z = list->panel.z;
+    s32 i;
+
+    lstDrawListWindow(work, mode, id);
+    for (i = 0; i < cursor->rowCount; i++) {
+        u16 item = shpGetItemPrice(cursor->selectedTop + i, 1);
+        u32 price = shpGetSellPrice(cursor->selectedTop + i, 1);
+        s32 boxMode = cmpItemHasFlag(item, 1) == 0;
+        s32 color;
+
+        if (mode != 0) boxMode |= 2;
+        color = cmpDrawListItemBox(cursor, i, i, boxMode, 0x100);
+        shopDrawRowText(x, y, z, color, item, price, id);
+        y += cursor->rowHeight * 8;
+    }
+
+    shopDrawRowBox((fclPanelPos_t *)&list->panel, 1, id);
+    fclDrawPanel((fclPanel_t *)(shopDrawWork + 0x239C), 0x47);
+    {
+        fclPanelPos_t panel;
+        u16 item;
+
+        fclInitPanelPos(0x1470, 0x3B0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&panel);
+        item = shpGetItemPrice(cursor->selectedTop + cursor->selectedOffset, 1);
+        fclDrawPriceText(&panel, item, 0x47);
+    }
+    fclDrawPhaseHeader(shopDrawWork + 0x239C, 0x1121D33, 1, 0x47);
+    if (mode == 0) lstDrawListWindowCursor(work, id);
+}
+
 
 extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
                                   s32 mode, s32 b, s32 id);
