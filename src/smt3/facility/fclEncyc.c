@@ -176,7 +176,7 @@ typedef struct
     /* 0x14 */ s32 ribbonWidth;
     /* 0x18 */ s32 ribbonHeight;
     /* 0x1C */ s16 ribbonAlpha;
-    /* 0x1E */ u8 unk_1E[2];
+    /* 0x1E */ s16 statusAlpha;
     /* 0x20 */ s32 ribbonVelocity;
     /* 0x24 */ s32 ribbon_accel;
     /* 0x28 */ f32 cameraRadius;
@@ -631,7 +631,6 @@ void DrawPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
     DrawRegistKeyHelp(pinst);
 }
 
-
 extern void fclRbnRelease(fclRibbon_t *phandle);
 
 void DestPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
@@ -739,8 +738,6 @@ void DrawPhaseReadTop(fclEncyc_instance_tag *pinst)
     }
 }
 
-
-
 void DestPhaseReadTop(fclEncyc_instance_tag *pinst)
 {
     fclEncycReadTopWork_t *work = (fclEncycReadTopWork_t *)pinst->pwork;
@@ -804,7 +801,63 @@ void DestPhaseReadStatus(fclEncyc_instance_tag *pinst)
     ReleaseWork(pinst);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadSummon);
+typedef struct fclEncycReadStatusWork_t {
+    fclEncyc_readmainwork_tag phase;
+    u8 reserved0030[0x28];
+    s32 boardY;
+    s16 boardAlpha;
+    s16 explainAlpha;
+    u8 reserved0060[0x20];
+    fclRibbon_t *ribbon;
+    void *countFont;
+    void *explainFont;
+    void *messageProcess;
+    datUnitWork_t unit;
+} fclEncycReadStatusWork_t;
+
+struct fclEncycReadHelpWork_t;
+extern void FadeOutRibbon(fclEncyc_readmainwork_tag *work);
+extern void fclRbnCalc(fclRibbon_t *ribbon);
+extern s32 CalcFadeAlpha(s16 *alpha, s32 mode, s32 maximum, s32 step);
+extern void CalcMoveReadMainHelp(struct fclEncycReadHelpWork_t *work);
+extern void MoveScreenOffset(fclEncyc_instance_tag *pinst);
+extern void drawSummonCount(void **font, s32 x, s32 y, s32 releasePrevious);
+extern void ExecSummon(s32 recordIndex);
+extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
+
+void CalcPhaseReadSummon(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
+
+    if (work->phase.ribbonAlpha > 0) {
+        if (!(work->phase.flags & 4)) {
+            FadeOutRibbon(&work->phase);
+        }
+        fclRbnCalc(work->ribbon);
+    }
+    CalcFadeAlpha(&work->phase.statusAlpha, 1, 0x80, 0x10);
+    CalcFadeAlpha(&work->boardAlpha, 0, 0x80, 8);
+    CalcFadeAlpha(&work->explainAlpha, 0, 0x80, 8);
+    CalcMoveReadMainHelp((struct fclEncycReadHelpWork_t *)work);
+    MoveScreenOffset(pinst);
+    if (fclChkMessageDraw(work->messageProcess) != 0) {
+        if ((work->phase.flags & 3) == 1 && fclGetFlag(0) != 0) {
+            DDS3_GBWK->maka -= work->phase.mak;
+            drawSummonCount(&work->countFont, 0x1D00, 0xA0, 1);
+            work->phase.flags |= 2;
+            ExecSummon(work->phase.recordIndex);
+            p2sdPlaySE(0x11, 0x7F, 0x3F);
+        }
+    } else {
+        if ((work->phase.flags & 3) == 3) {
+            pinst->unk_5A = 3;
+            pinst->stat |= 2;
+        } else {
+            work->phase.flags |= 0x10;
+            pinst->unk_5A = 4;
+        }
+    }
+}
 
 void DrawPhaseReadSummon(fclEncyc_instance_tag *pinst)
 {
@@ -858,7 +911,6 @@ void CalcConfirmStatus(fclEncyc_registconfirmwork_tag *work)
         work->incNow -= 4;
     }
 }
-
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", GetValidUnitIndex);
 
