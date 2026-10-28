@@ -897,7 +897,39 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbAddBirthDevilToStock);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbStartResultScript);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcIntroduce);
+typedef struct
+{
+    s32 messageId;
+    u8 reserved04[0x2C];
+} cmbMasterText_t;
+
+extern cmbMasterText_t master_text[];
+
+extern void cmbRunActionSe(s32 enabled, s32 mode);
+extern s32 cmbChkPolygonMovie(void);
+extern void *cmbUpdateIntroduceModel(cmbActionData_t *work);
+
+s32 cmbCalcIntroduce(void)
+{
+    if (cmbChkPolygonMovie() != 0) {
+        return 0;
+    }
+    if (CMB_GBWK->actionFrame != 0 && (s8)CMB_GBWK->birthPanel[0x2C5] != 0) {
+        cmbUpdateIntroduceModel(&CMB_GBWK->actionData[3]);
+        cmbRunActionSe(0, 1);
+        CMB_GBWK->birthPanel[0x2C5] = 0;
+    }
+    if (CMB_GBWK->actionFrame < 150) {
+        return 0;
+    }
+    if (CMB_GBWK->unk_00004 != 0) {
+        fclSetWorkValue(8, master_text[((datUnitWork_t *)CMB_GBWK->birthPanel)->id].messageId);
+        fclSetWorkValue(9, ((datUnitWork_t *)CMB_GBWK->birthPanel)->id);
+        fclSetWorkValue(10, datDevilTable[((datUnitWork_t *)CMB_GBWK->birthPanel)->id].race);
+        fclScriptStart(CMB_GBWK->script, 0xC, &CMB_GBWK->scriptArg);
+    }
+    return 1;
+}
 
 s32 cmbSeqStartScript(void)
 {
@@ -2472,7 +2504,52 @@ void cmbFreeSmokeEffect(void)
     effEVECombParSmokeDelete(CMB_GBWK->smoke[2]);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateIntroduce);
+void cmbUpdateIntroduce(void)
+{
+    s32 frame;
+    s32 processStat;
+
+    if (cmbChkPolygonMovie() != 0) {
+        return;
+    }
+    frame = CMB_GBWK->actionFrame;
+    if (frame < 150) {
+        CMB_GBWK->actionFrame = frame + 1;
+        return;
+    }
+    if (frame < 1000) {
+        CMB_GBWK->actionFrame = frame + 1;
+    }
+    processStat = dds3GetProcessStat(CMB_GBWK->scriptArg);
+    if (processStat != 0) {
+        return;
+    }
+    if (dds3FadeCheck() != 0) {
+        return;
+    }
+    fclSetWorkValue(4, 0);
+    if (cmbChkActScript() != 0) {
+        return;
+    }
+    if (CMB_GBWK->introductionFlag == 0) {
+        cmbFreeIntroduceModels();
+        cmbFreeSmokeEffect();
+        fclFreeStage();
+        CMB_GBWK->introductionFlag = 1;
+        return;
+    }
+    fclCombineLoadTextures();
+    CMB_GBWK->unk_0410C[0] = 0;
+    CMB_GBWK->unk_0410C[1] = fclCombineCheckMoonPhase();
+    evtBitOn(0x915);
+    cmbActionBGM(0);
+    {
+        cmbGbWork_t *work = CMB_GBWK;
+        work->unk_00001 = 0;
+        work->scriptArg = NULL;
+    }
+    CMB_GBWK->unk_00004 = 1;
+}
 
 extern void fclEncycStartProcess(s32 mode);
 
