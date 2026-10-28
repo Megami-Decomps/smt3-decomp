@@ -782,7 +782,53 @@ void InitPhaseRegistTop(fclEncyc_instance_tag *pinst)
     SetScreenOffset(pinst, 0);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseRegistTop);
+extern s32 AcceptKeyListWindow(lstListWindow_t *list, s32 mode);
+extern void PushListwinCursor(fclEncyc_instance_tag *, lstListWindow_t *, s32);
+extern void CalcListElemColor(lstListWindow_t *list, frFontHandle_t **fonts,
+                              s32 count, u32 color);
+extern s32 fclGetFlag(s8 index);
+
+void CalcPhaseRegistTop(fclEncyc_instance_tag *pinst)
+{
+    fclEncycRegistAllWork_t *work = (fclEncycRegistAllWork_t *)pinst->pwork;
+    lstListWindow_t *list = &work->listWindow;
+    s32 action;
+
+    if (work->flags == 0) {
+        if (fclGetFlag(0) == 0) return;
+        work->flags = 1;
+    }
+    action = AcceptKeyListWindow(list, 0);
+    switch (action) {
+    case -1:
+        pinst->unk_5A = 8;
+        pinst->stat |= 2;
+        break;
+    case 1:
+        {
+            s32 position = list->cursorPos.Index + list->cursorPos.Shift;
+            s32 selectedIndex;
+            PushListwinCursor(pinst, list, 0);
+            selectedIndex = pinst->entries.regist.validUnit[position];
+            pinst->unk_5A = action;
+            pinst->stat |= 2;
+            pinst->selectedIndex = selectedIndex;
+        }
+        break;
+    case 2:
+        drawRegistList(pinst);
+        break;
+    case 3:
+        drawRegistList(pinst);
+        dds3KillProcess(work->process, 0);
+        fclClearFlag(0);
+        work->process = NULL;
+        fclScriptStart(CMB_GBWK->script, 0x13, &work->process);
+        pinst->unk_5A = 2;
+        break;
+    }
+    CalcListElemColor(list, work->fonts, 7, 0);
+}
 
 void DrawPhaseRegistTop(fclEncyc_instance_tag *pinst)
 {
