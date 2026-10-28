@@ -391,7 +391,9 @@ typedef struct
     /* 0x00005 */ s8 unk_00005;
     /* 0x00006 */ u8 unk_00006[2];
     /* 0x00008 */ s32 unk_00008;
-    /* 0x0000C */ u8 unk_0000C[0x10];
+    /* 0x0000C */ u8 unk_0000C[8];
+    /* 0x00014 */ void *resourceHandle;
+    /* 0x00018 */ u8 unk_00018[4];
     /* 0x0001C */ cmpCursorInfo_t combineCursor;
     /* 0x00054 */ u8 unk_00054[0x1004];
     /* 0x01058 */ cmbStockCursorGroup_t stockCursorGroup[3];
@@ -403,10 +405,11 @@ typedef struct
     /* 0x04506 */ u16 resultId[2][12][12];
     /* 0x04746 */ u8 reserved04746[0x11DC4];
     /* 0x1650A */ s8 unk_1650A;
-    /* 0x1650B */ u8 unk_1650B[5];
+    /* 0x1650B */ u8 unk_1650B;
+    /* 0x1650C */ void *resourceHandle_1650C;
     /* 0x16510 */ s32 script;
-    /* 0x16514 */ s32 scriptArg;
-    /* 0x16518 */ u8 unk_16518[4];
+    /* 0x16514 */ u8 *scriptArg;
+    /* 0x16518 */ void *resourceHandle_16518;
     /* 0x1651C */ void *explainData;
     /* 0x16520 */ u8 unk_16520[0x2C];
     /* 0x1654C */ u32 *unk_1654C[5];
@@ -420,7 +423,7 @@ typedef struct
     /* 0x1A6D8 */ s32 texHandle[7];
     /* 0x1A6F4 */ u8 unk_1A6F4[0x24];
     /* 0x1A718 */ u8 *table;
-    /* 0x1A71C */ s32 unk_1A71C;
+    /* 0x1A71C */ void *panel;
     /* 0x1A720 */ fclRibbon_t *ribbon;
 } cmbGbWork_t;
 
@@ -589,7 +592,31 @@ void fclCombineInitRagTex(u8 *work)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", fclUpdateInit);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", fclCombineDestroy);
+extern s32 fclDestroyPanel(void *pPanel);
+extern void cmpSetSkillCursor(cmpSkillList_t *list);
+extern void fclCombineBGM(s8 Mode);
+extern void evtDisableMoonDraw(void);
+
+void fclCombineDestroy(void)
+{
+    if (CMB_GBWK == NULL) {
+        return;
+    }
+    fclCombineTexFree();
+    fclDestroyPanel(CMB_GBWK->panel);
+    cmpSetSkillCursor(NULL);
+    cmpModelFreeResource();
+    cmpResetDrawEnv();
+    fclScriptForcedEnd(CMB_GBWK->scriptArg);
+    sdfMemFreeDirect(CMB_GBWK->resourceHandle_1650C);
+    sdfMemFreeDirect(CMB_GBWK->resourceHandle_16518);
+    fclCombineInitWork();
+    fclCombineBGM(1);
+    sdfMemFreeDirect(CMB_GBWK->resourceHandle);
+    CMB_GBWK = NULL;
+    gProcessStat_0 = 2;
+    evtDisableMoonDraw();
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", fclCombineCalc);
 
