@@ -27,7 +27,7 @@ Ruled out:
   over size.
 - Naming the two high words in locals before the stores, which fixes the load
   order and loses the stores instead.
-- A separate `src` local per header group, 15 words out. Naming the third
-  group's offset in a local is what closes the second group's five words, and
-  both groups need the same `offset = header[k + 1];` statement ahead of the
-  count.
+- A separate `src` local per header group, 15 words out. What closes the
+  second group's five words is naming its offset in a local
+  (`offset = header[3];` ahead of the count); the first and third groups match
+  with the offset read inline.
