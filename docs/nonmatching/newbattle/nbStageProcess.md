@@ -41,21 +41,6 @@ adds an `xori`; `(s32)` casts on either operand; and two distinct `s32` locals
 for the two tests, which does defeat the range fold but leaves the same
 encoding.
 
-## nbSetWaitMotion (newbattle/nbStageProcess, 0xD8)
-
-8 of 54 words differ, at the exact 216-byte size, with the same instruction multiset.
-
-Retail reads the visual's motion speed and multiplies it by `ritu` before it
-loads `form->hunit` for the first call, so the `jal evtSetWaitMotion` delay
-slot carries the motion-number argument. The draft schedules the `lwc1` into
-that delay slot and leaves the `mul.s` after the call, which rotates the four
-words either side of it.
-
-Ruled out: the multiply split into `speed = *(f32 *)...; speed *= ritu;`; a
-`datUnitVisual_t *visual` local; reusing `ritu` as the destination (which
-loses the saved fp register entirely); and moving `form->waitmot = mot;` above
-the two calls.
-
 ## CheckSenseiNego (newbattle/nbStageProcess, 0x130)
 
 57 of 74 words differ, 296 bytes against the native 300.

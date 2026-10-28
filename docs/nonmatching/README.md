@@ -10,7 +10,7 @@ page and line to open. Conventions are in
 | 28 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 27 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
-| 14 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
+| 13 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 11 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 7 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 6 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |

@@ -144,13 +144,15 @@ extern s32 mdlGetMinorNum(mdlObj_t *aHandle);
 /* The 0x1C-byte motion records at datUnitVisual_t +0x2C; the shared view splits
  * the same bytes as part[], six bytes later. */
 typedef struct nbUnitMotion_t {
-    u16 unk00;
+    s16 movetype;
     u16 actframe;
-    u8 unk04[8];
-    f32 r;
+    s32 se_no;
+    f32 motionsp;
+    f32 atarisize;
     f32 movey;
     f32 movez;
-    u8 unk18[4];
+    s16 bframe;
+    s16 hframe;
 } nbUnitMotion_t;
 
 extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 ritu);
@@ -276,33 +278,37 @@ s32 nbSetNegoWaitMotion(nbFormation_t *form)
 
 INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbSetUnitMotion);
 
-/* NON_MATCHING: 8 of 54 words differ (first at +0x8C). */
-
-#ifdef NON_MATCHING
-
 void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 ritu)
 {
-    datUnitWork_t *work = nbGetUnitWorkFromFormindex(form->formindex);
-    s32 mot = GetDyingBadWaitMotion(form, motion, work);
-    s32 no;
+    datUnitWork_t *work;
+    datUnitVisual_t *visual;
+    nbUnitMotion_t *motionRecord;
+    s32 selectedMotion;
+    s32 unitid;
+    s32 motionNo;
     f32 speed;
 
-    if (nbGetUnitID(work) == 0) {
-        no = D_003493A0[mot];
+    work = nbGetUnitWorkFromFormindex(form->formindex);
+    selectedMotion = GetDyingBadWaitMotion(form, motion, work);
+    unitid = nbGetUnitID(work);
+    if (unitid == 0) {
+        motionNo = D_003493A0[selectedMotion];
     } else {
-        no = D_0034F1C0[mot];
+        motionNo = D_0034F1C0[selectedMotion];
     }
-    speed = *(f32 *)nbGetUnitVisual(work)->part[mot].unk02 * ritu;
-    evtSetWaitMotion(form->hunit, no);
+    /* The loop-end note keeps the multiply before both callbacks in sched2.
+     * Qualified cc1 trace: multiply133 precedes loop-end232 and call161;
+     * plain, dump and hooked output agree. See docs/CONTRIBUTING.md. */
+    do {
+        visual = nbGetUnitVisual(work);
+        motionRecord = (nbUnitMotion_t *)(selectedMotion * sizeof(nbUnitMotion_t) +
+                                         (u32)visual + 0x2C);
+        speed = motionRecord->motionsp * ritu;
+    } while (0);
+    evtSetWaitMotion(form->hunit, motionNo);
     evtSetWaitMotionSpeed(form->hunit, speed);
-    form->waitmot = mot;
+    form->waitmot = selectedMotion;
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbSetWaitMotion);
-
-#endif
 
 s32 nbCalcUnitVisual(nbFormation_t *form, s32 part)
 {
