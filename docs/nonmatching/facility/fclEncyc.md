@@ -43,3 +43,27 @@ the output. Grouping the two corners and UV record into one primitive object
 is also inert. The retained draft uses the two ordinary local records and the
 existing drawing-provider contracts. No synthetic dependencies, register
 constraints or compiler options are introduced.
+
+## DebugProcMenu_fclEncyc (facility/fclEncyc, 0x1A8)
+
+The draft emits the native 424 bytes; 103 of 106 words match. It wraps the
+three menu choices on horizontal input, returns one on cancellation, selects
+the debug state on confirmation, then draws the three labels and selection
+marker. The label table occupies sixteen bytes: three text pointers and a
+null trailing entry. Its storage remains assembly-owned.
+
+The allocator requests twelve bytes for the debug dispatcher work. A dedicated
+work type now describes those bytes, with state and selection halfwords,
+instead of borrowing the larger ribbon work type. The dispatcher and existing
+debug callbacks use the same complete twelve-byte object.
+
+Only +0x11C through +0x124 differ. Native prepares X before the color's low
+half and zero attribute; C prepares the color, attribute and X in that order.
+Qualified plain/hooked/unhooked scheduling traces agree: sched1 ties their
+priority and register weight, but X has two dependents versus three for the
+other argument setups. Sched2 retains that ordering through its original-order
+tie break. These are independent constant arguments to the same print call.
+
+Capturing the returned packet or the label pointer in a local does not change
+the result. The retained source uses the direct print/link expression. Provider
+coordinate and color parameters follow the unsigned 32-bit C definition.

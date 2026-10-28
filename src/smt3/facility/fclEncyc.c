@@ -147,7 +147,17 @@ typedef struct
     /* 0x54 */ s32 unk_54;
 } motionWork_t;
 
-extern fclRibbon_t *g_pdebug;
+/* The debug dispatcher owns a separate twelve-byte work allocation. */
+typedef struct
+{
+    void *allocation;
+    s16 state;
+    s16 selection;
+    s16 reserved08;
+    s16 reserved0A;
+} fclEncycDebugWork_t;
+
+extern fclEncycDebugWork_t *g_pdebug;
 
 typedef struct
 {
@@ -537,7 +547,7 @@ void fclEncycDebugRegist(void)
     }
 }
 
-typedef s32 (*fclEncycDebugStep_t)(fclEncyc_instance_tag *, fclRibbon_t *, sdfDrawTag_t *);
+typedef s32 (*fclEncycDebugStep_t)(fclEncyc_instance_tag *, fclEncycDebugWork_t *, sdfDrawTag_t *);
 
 extern fclEncycDebugStep_t D_00332218[];
 
@@ -560,7 +570,7 @@ s32 fclEncycDebugProc(void)
     }
     tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    result = D_00332218[g_pdebug->unk_04](g_pinst, g_pdebug, tag);
+    result = D_00332218[g_pdebug->state](g_pinst, g_pdebug, tag);
     fclEncycDebugOt81.regFunc(&fclEncycDebugOt81, tag);
     return result != 0 ? -1 : 0;
 }
@@ -3117,13 +3127,13 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadMainHelp);
 void InitializeDebug_fclEncyc(void)
 {
     void *buf = sdfMemAllocDirect(0xC);
-    fclRibbon_t *work = (fclRibbon_t *)sdfMemLock(buf);
+    fclEncycDebugWork_t *work = (fclEncycDebugWork_t *)sdfMemLock(buf);
 
     work->allocation = buf;
-    work->unk_04 = 0;
-    work->unk_06 = 0;
-    work->unk_08 = 0;
-    work->unk_0A = 0;
+    work->state = 0;
+    work->selection = 0;
+    work->reserved08 = 0;
+    work->reserved0A = 0;
     g_pdebug = work;
 }
 
@@ -3135,7 +3145,66 @@ void ReleaseDebug_fclEncyc(void)
     }
 }
 
+extern s8 dds3PadButtonState[];
+extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 width, s32 height);
+extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr, const char *format, ...);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern const char *D_003323D8[4];
+extern char D_0054FCE0[];
+
+#ifdef NON_MATCHING
+/* 103 of 106 words match; three argument-setup instructions reorder.
+ * See docs/nonmatching/facility/fclEncyc.md. */
+s32 DebugProcMenu_fclEncyc(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
+                          sdfDrawTag_t *tag)
+{
+    s32 i;
+    s32 y;
+    const char **label;
+
+    if (((u8)dds3PadButtonState[0x36] & 2) != 0) {
+        work->selection--;
+        if (work->selection < 0) {
+            work->selection = 2;
+        }
+    } else if (((u8)dds3PadButtonState[0x37] & 2) != 0) {
+        work->selection++;
+        if (work->selection >= 3) {
+            work->selection = 0;
+        }
+    }
+
+    if (dds3PadButtonState[0x33] < 0) {
+        return 1;
+    }
+    if (dds3PadButtonState[0x31] < 0) {
+        switch (work->selection) {
+        case 0:
+            work->state = 1;
+            break;
+        case 1:
+            work->state = 2;
+            break;
+        case 2:
+            work->state = 3;
+            break;
+        }
+    }
+
+    dds3ConsPanelTagLink(tag, 0x10, 0x10, 0x16, 5);
+    y = 0x7A00;
+    label = D_003323D8;
+    for (i = 2; i >= 0; i--) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7380, y, 0xFFFFF0, 0, *label++));
+        y += 0x60;
+    }
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7A00 + work->selection * 0x60,
+                                         0xFFFFF0, 0, D_0054FCE0));
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcMenu_fclEncyc);
+#endif
 
 INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D828);
 
@@ -3150,16 +3219,16 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcRegister);
 extern s8 dds3PadButtonState[];
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,
                                   s32 width, s32 height);
-extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr,
+extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr,
                           const char *format, ...);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
 extern char D_0053D898[];
 
-s32 DebugProcViewkey(fclEncyc_instance_tag *pinst, fclRibbon_t *work,
+s32 DebugProcViewkey(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
                      sdfDrawTag_t *tag)
 {
     if (((u32)(s32)dds3PadButtonState[0x33] >> 31) | (((u8)dds3PadButtonState[0x31] >> 1) & 1)) {
-        work->unk_04 = 0;
+        work->state = 0;
     }
 
     if (((u8)dds3PadButtonState[0x37] & 2) != 0) {
@@ -3191,11 +3260,11 @@ extern const char D_0053D8F0[];
 extern u64 sdfFloatToULong(f32 value);
 EQUATE_FPTODP();
 
-s32 DebugProcDispBound(fclEncyc_instance_tag *pinst, fclRibbon_t *debugWork,
+s32 DebugProcDispBound(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *debugWork,
                        sdfDrawTag_t *tag)
 {
     if (((u32)(s32)dds3PadButtonState[0x33] >> 31) | (((u8)dds3PadButtonState[0x31] >> 1) & 1)) {
-        debugWork->unk_04 = 0;
+        debugWork->state = 0;
     }
 
     dds3ConsPanelTagLink(tag, 0x10, 0x10, 0x16, 7);
