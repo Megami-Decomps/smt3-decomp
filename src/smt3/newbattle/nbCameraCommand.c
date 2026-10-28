@@ -118,6 +118,9 @@ extern void effBTLModelSetPosition(nbFormation_t *formation, sdfVector4_t *posit
 extern void nbCameraShot_GroundCollision(nbCamera_t *camera);
 extern sdfVector4_t D_00325960;
 
+extern s32 nbCameraBoss_Command_Init(nbCamera_t *camera);
+extern void nbCameraShot_CommandFixPos_Calc2(nbCamera_t *camera, nbFormation_t *formation);
+
 extern nbCamera_t pNbCamera;
 
 extern s32 nbCameraState_CommandRoot_OrderIndex;
@@ -210,7 +213,22 @@ void nbCameraCommandSetFixPosition(void)
     effBTLModelAllShow();
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_CommandFixPos_Set2);
+void nbCameraShot_CommandFixPos_Set2(nbCamera_t *pNbCamera)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    nbFormation_t *formation;
+
+    if (data != NULL && data->orderindex != -1) {
+        formation = &data->form[data->party[data->order[data->orderindex]].formindex];
+        if ((formation->stat & 0x200) == 0) {
+            if (nbCameraBoss_Command_Init(pNbCamera) == 0) {
+                nbCameraShot_CommandFixPos_Calc2(pNbCamera, formation);
+            }
+        }
+    }
+}
+
+INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_CommandFixPos_Calc2);
 
 void nbCameraShot_CommandFixPos_Set(nbCamera_t *pNbCamera)
 {

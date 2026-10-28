@@ -12,3 +12,4 @@
 0x0016E120	effBTLModelInvokeGroupHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokeGroupHide
 0x0016E1F8	effBTLModelTargetGroupHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelTargetGroupHide
 0x0016E2A0	effBTLModelInvokePartyShow	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokePartyShow
+0x001B9240	nbCameraShot_CommandFixPos_Calc2	inferred	Independent retail prologue at the tail-call target after Set2; camera/formation arguments and calculation flow agree with smt-ret/smt3-reconstructed-sources src/nbCameraCommand.c
