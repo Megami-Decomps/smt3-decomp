@@ -2774,25 +2774,74 @@ void campDhUpdateIcons(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhRollRatio);
-
 typedef struct
 {
-    /* 0x00 */ u8 unk_00;
+    /* 0x00 */ s8 unk_00;
     /* 0x01 */ s8 unk_01;
-    /* 0x02 */ u8 unk_02[0xE];
+    /* 0x02 */ u8 unk_02[6];
+    /* 0x08 */ s8 mode;
+    /* 0x09 */ s8 direction;
+    /* 0x0A */ u8 unk_0A[2];
+    /* 0x0C */ s32 directionTimer;
     /* 0x10 */ s32 unk_10;
     /* 0x14 */ s32 unk_14;
     /* 0x18 */ f32 unk_18;
-    /* 0x1C */ u8 unk_1C[4];
+    /* 0x1C */ f32 unk_1C;
     /* 0x20 */ f32 unk_20;
-    /* 0x24 */ u8 unk_24[4];
+    /* 0x24 */ s32 unk_24;
     /* 0x28 */ s32 unk_28;
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
 } campDhEntry_t;
 
-extern void campDhRollRatio(campDhEntry_t *entry);
+extern u32 dds3GetRandA(void *state);
+
+void campDhRollRatio(campDhEntry_t *entry)
+{
+    s32 frames;
+    s32 delay;
+
+    if (entry->unk_00 == 1) {
+        if (entry->directionTimer > 0) {
+            entry->directionTimer--;
+        }
+        if (entry->directionTimer == 0) {
+            switch (entry->direction) {
+            case 1: entry->unk_1C = -10.0f; break;
+            case 2: entry->unk_1C = 10.0f; break;
+            default: entry->unk_1C = 0.0f; break;
+            }
+        }
+        entry->unk_00 = 0;
+        entry->unk_20 = entry->unk_1C - entry->unk_18;
+        frames = dds3GetRandA(NULL) % 5 + 1;
+        entry->unk_24 = frames;
+        entry->unk_28 = frames;
+        entry->unk_20 /= (f32)frames;
+    } else {
+        switch (entry->mode) {
+        case 1: delay = (dds3GetRandA(NULL) & 31) + 20; break;
+        case 2: delay = dds3GetRandA(NULL) & 7; break;
+        default: return;
+        }
+        entry->unk_14 = delay;
+        entry->unk_00 = 1;
+        entry->unk_1C = entry->unk_18;
+        entry->unk_20 = (f32)(dds3GetRandA(NULL) % 40) - 20.0f;
+        frames = dds3GetRandA(NULL) % 5 + 1;
+        entry->unk_24 = frames;
+        entry->unk_28 = frames;
+        entry->unk_20 /= (f32)frames;
+        if (entry->mode == 2) {
+            if (entry->directionTimer <= 0) {
+                entry->direction = dds3GetRandA(NULL) % 3;
+                entry->directionTimer = dds3GetRandA(NULL) % 10;
+            }
+        } else {
+            entry->directionTimer = -1;
+        }
+    }
+}
 
 void campDhGetEntryRatio(campDhEntry_t *entry)
 {
