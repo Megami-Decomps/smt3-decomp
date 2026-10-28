@@ -528,7 +528,7 @@ extern void cmpUpdateTerminate(cmpInfoWindow_t *window);
 
 extern void fclEncycSetExplainData(void *pbmd);
 
-extern void frDestroyFontRequestAfter(void *pFRQ);
+extern s32 frDestroyFontRequestAfter(void *pFRQ);
 
 extern u8 D_00551F18[4];
 extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
@@ -2375,7 +2375,38 @@ void cmbDrawStockList(s32 x, s32 y, s32 z, s32 color, s8 count, u8 mode, s32 ot)
     cmbDrawStockBg(x + 0x120, y + 0x70, z, mode, ot);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawDevilStats);
+extern char D_0054FB18[];
+extern char D_0054FB10[];
+extern char *datExplainTable[];
+extern char *text2[];
+extern s32 sprintf(char *out, const char *format, ...);
+extern void *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color, const char *text, void *previous);
+extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color, const char *text, void *previous);
+extern s32 func_001C7E38(void *request, s8 mode, u32 ot);
+extern u16 datGetLevelForDraw(datUnitWork_t *work);
+
+void cmbDrawDevilStats(s32 x, s32 y, s32 z, datUnitWork_t *unit, s32 unused, u32 alpha, s32 ot)
+{
+    char text[64];
+    void *request;
+    u32 color = fclBlendColor(0x89FEFF80, 0, alpha);
+
+    sprintf(text, D_0054FB18, datExplainTable[datDevilTable[unit->id].race]);
+    request = frwGetSmallFontFRQ2(x + 0x300, y + 0x148, z, color, text, NULL);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+
+    sprintf(text, D_0054FB18, text2[unit->id]);
+    request = frwGetSmallFontFRQ2(x + 0x780, y + 0x148, z, color, text, NULL);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+
+    sprintf(text, D_0054FB10, datGetLevelForDraw(unit));
+    request = frwGetSmallNumFontFRQ(x + 0xFC0, y + 0x168, z, color, text, NULL);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+}
+
 
 extern char D_0054FB10[];
 extern s32 sprintf(char *out, const char *fmt, ...);
