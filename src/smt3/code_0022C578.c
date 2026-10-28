@@ -4152,7 +4152,46 @@ s32 cmpGetPanelAlphaOrDefault(u8 *alpha, s32 color)
     return (color & ~0xFF) | value;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", rstDrawNumber);
+extern s32 cmpStatTimer;
+extern void cmpGetGaugeBlinkAlpha(s32 frame, s8 state, u32 *colors);
+extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *colors,
+                                s32 page, s32 spriteId, s32 *texList,
+                                fclSpriteTbl_t *table, s32 ot);
+extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
+                                              u32 color, const char *text,
+                                              frFontHandle_t *previous);
+extern char D_0054FE98[];
+
+void rstDrawNumber(s32 x, s32 y, s8 number)
+{
+    u32 colors[4];
+    char text[0x10];
+    frFontHandle_t *font;
+    s32 yBase = y - 0x14;
+    s32 spriteY = yBase << 3;
+
+    fclDrawSpriteFilter(x << 4, spriteY, 0, 0, NULL, 6, 0,
+                        D_00345D88, fclSpriteTable, 0x47);
+    if (number > 0) {
+        if (cmpStatTimer < 0x18) {
+            cmpStatTimer++;
+        }
+    } else if (cmpStatTimer > 0) {
+        cmpStatTimer--;
+    }
+    cmpGetGaugeBlinkAlpha(cmpStatTimer, 2, colors);
+    fclDrawSpriteRes((x + 0x7E) << 4, (yBase + 0x92) << 3, 0, (s32 *)colors,
+                     6, 1, D_00345D88, fclSpriteTable, 0x47);
+    if (number >= 10) {
+        fclDrawSpriteRes(x << 4, spriteY, 0, (s32 *)colors,
+                         6, 1, D_00345D88, fclSpriteTable, 0x47);
+    }
+    sprintf(text, D_0054FE98, number);
+    font = frwGetSmallNumFontFRQ(x + 0x7B0, yBase + 0x420, 0xFFFF,
+                                 0xA09DC380, text, NULL);
+    func_001C7E38(font, 1, 0x47);
+    frDestroyFontRequestAfter(font);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusIconRow);
 
