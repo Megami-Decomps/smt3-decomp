@@ -1,6 +1,7 @@
 #include "common.h"
 #include "nb.h"
 #include "effBattle.h"
+#include "newdata.h"
 
 nbMainProcessData_t *nbGetMainProcessData(void);
 
@@ -11,12 +12,51 @@ extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTime
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 extern s32 nbAtoProcess1(dds3ProcessID_t *id);
 extern char D_005510C8[];
+extern u32 dds3GetProcessRunTime(dds3ProcessID_t *id);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
+extern void nbSetDevilNameMes(s32 hmsg, s32 no, datUnitWork_t *work);
+extern void nbDispMsgHelp(s32 msgid, s32 no, s32 msgtype);
+extern void nbCameraSetState(u16 state);
 
-INCLUDE_ASM(const s32, "newbattle/nbAtoProcess", nbAtoStoneProcess);
+s32 nbAtoStoneProcess(dds3ProcessID_t *id)
+{
+    s32 runtime = dds3GetProcessRunTime(id);
+    nbMainProcessData_t *data = nbGetMainProcessData();
+
+    switch (runtime) {
+    case 10:
+        nbCameraSetState(0x14);
+        return 0;
+    case 30:
+        nbSetDevilNameMes(data->mesmngid, 0, (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54));
+        nbDispMsgHelp(data->mesmngid, 0x3A, 1);
+        return 0;
+    case 70:
+        dds3FadeOut(0xFF, 0xFF, 0xFF, 0x1E);
+        return 0;
+    case 100:
+        return -1;
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbAtoProcess", nbAtoGameoverProcess);
 
-INCLUDE_ASM(const s32, "newbattle/nbAtoProcess", nbAtoGameover2Process);
+s32 nbAtoGameover2Process(dds3ProcessID_t *id)
+{
+    u32 runtime = dds3GetProcessRunTime(id);
+
+    switch (runtime) {
+    case 10:
+        dds3FadeOut(0xFF, 0xFF, 0xFF, 30);
+        return 0;
+    case 40:
+        return -1;
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbAtoProcess", nbAtoProcess1);
 

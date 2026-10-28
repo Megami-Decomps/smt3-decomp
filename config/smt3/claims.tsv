@@ -307,3 +307,4 @@ src/smt3/newbattle/nbMainProcess.c	redthing1	done	2026-10-28	1 fn / 516 B	battle
 src/smt3/newbattle/nbHelpProcess.c	redthing1	done	2026-10-28	1 fn / 652 B	help text and message drawing lifecycle; complete unit 14 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	3 fn / 1092 B	cmpDrawTriG, cmpDrawBoxLine, cmpDraw3DPoly; typed primitive packets
 src/smt3/interface/frWrap.c	redthing1	done	2026-10-28	4 fn / 808 B	number and caption font-chain helpers; whole-unit 24 match, 0 differ
+src/smt3/newbattle/nbAtoProcess.c	redthing1	open	2026-10-28	2 fn / 300 B	stone and game-over callbacks; whole-unit 5 match, 0 differ; remaining siblings under review
