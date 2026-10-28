@@ -847,7 +847,35 @@ s32 datCheckStockFull(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datSetDevilWork);
+void datSetDevilWork(s32 id, datUnitWork_t *work)
+{
+    s32 i;
+    s32 skillcnt;
+    s32 maxHp;
+    s32 maxMp;
+
+    memset(work, 0, sizeof(*work));
+    work->flag = 1;
+    work->id = id;
+    work->level = datDevilTable[id].level;
+    work->exp = 0;
+    for (i = 0; i < 6; i++) {
+        work->param[i] = datDevilTable[id].param[i];
+    }
+    skillcnt = 0;
+    for (i = 0; i < 24; i++) {
+        if (datLevelUpTable[id].skill[i].kind == 0 && datLevelUpTable[id].skill[i].type == 1) {
+            work->skill[skillcnt++] = datLevelUpTable[id].skill[i].skill;
+        }
+    }
+    maxHp = datGetMaxHp(work);
+    work->maxhp = maxHp;
+    work->hp = maxHp;
+    maxMp = datGetMaxMp(work);
+    work->maxmp = maxMp;
+    work->mp = maxMp;
+    work->skillcnt = skillcnt;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datAddDevil);
 
