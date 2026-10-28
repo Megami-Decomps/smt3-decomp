@@ -134,6 +134,18 @@ extern void datAddItem(s32 id, s32 num);
 
 typedef struct
 {
+    /* 0x0000 */ u8 reserved0000[0x15C];
+    /* 0x015C */ cmpCursorInfo_t listCursor;
+} shpSellListWindow_t;
+
+typedef struct
+{
+    /* 0x0000 */ cmpCursorInfo_t cursor;
+    /* 0x0038 */ s8 delay;
+} cmpPadStopWork_t;
+
+typedef struct
+{
     /* 0x0000 */ u8 unk_0000;
     /* 0x0001 */ s8 unk_0001;
     /* 0x0002 */ s8 unk_0002;
@@ -150,7 +162,9 @@ typedef struct
     /* 0x0020 */ s32 totalPay;
     /* 0x0024 */ u8 reserved24[8];
     /* 0x002C */ cmpCursorInfo_t listCursor;
-    /* 0x0064 */ u8 unk_0064[0x2324];
+    /* 0x0064 */ u8 unk_0064[0x1004];
+    /* 0x1068 */ shpSellListWindow_t sellList;
+    /* 0x11FC */ u8 reserved11FC[0x118C];
     /* 0x2388 */ void *unk_2388;
     /* 0x238C */ s32 script;
     /* 0x2390 */ s32 scriptArg;
@@ -184,7 +198,56 @@ void shpExit(void)
 
 INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqBuy);
 
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqSell);
+extern s32 cmpGetPressedButton(s32 mask);
+extern s32 fclGetFlag(s8 index);
+extern u16 shpGetItemPrice(s32 index, s8 sell);
+extern s8 shpCalcPayOfMoney(s32 index, s8 kind);
+extern s32 cmpItemHasFlag(u16 item, s8 which);
+extern s32 fclScriptStart(s32 script, s32 entry, void *process);
+extern void lstMoveCursor2(shpSellListWindow_t *list, s8 direction);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
+extern void cmpPlayCursorSE(u32 button);
+
+void shpUpdateSeqSell(void)
+{
+    u16 button = (u16)cmpGetPressedButton(0x33);
+    cmpCursorInfo_t *cursor = &shopUpdateWork->sellList.listCursor;
+    s32 selected = cursor->unk_22 + (u8)cursor->unk_24;
+    u16 item = shpGetItemPrice(selected, 1);
+    s32 sellEnabled = fclGetFlag(0);
+
+    if (sellEnabled == 0) {
+        return;
+    }
+
+    switch (button) {
+    case 1:
+        shpCalcPayOfMoney(-1, 1);
+        if (cmpItemHasFlag(item, 1) == 0) {
+            button = 0x8000;
+        } else {
+            fclScriptStart(shopUpdateWork->script, 4, &shopUpdateWork->scriptArg);
+            shopUpdateWork->unk_0001 = 6;
+            shopUpdateWork->unk_0004 = button;
+        }
+        break;
+    case 2:
+        fclScriptStart(shopUpdateWork->script, 8, &shopUpdateWork->scriptArg);
+        shopUpdateWork->unk_0001 = 0;
+        shopUpdateWork->unk_0004 = button;
+        break;
+    case 0x10:
+        lstMoveCursor2(&shopUpdateWork->sellList, -1);
+        break;
+    case 0x20:
+        lstMoveCursor2(&shopUpdateWork->sellList, 1);
+        break;
+    }
+
+    lstMoveCursor2(&shopUpdateWork->sellList, 0);
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&shopUpdateWork->sellList.listCursor, button, 0x30));
+}
 
 INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqBuyNums);
 
@@ -318,7 +381,7 @@ extern void fclClearFlag(s8 index);
 extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
 extern s32 shpUpdateSeqRoot(void);
 extern s32 shpUpdateSeqBuy(void);
-extern s32 shpUpdateSeqSell(void);
+extern void shpUpdateSeqSell(void);
 extern s32 shpUpdateSeqBuyNums(void);
 extern s32 shpUpdateSeqSellNums(void);
 extern s32 shpUpdateSeqConfirm(s8 mode);
