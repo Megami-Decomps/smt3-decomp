@@ -89,7 +89,12 @@ typedef struct
     /* 0x0072 */ u8 unk_72[0xFA];
     /* 0x016C */ datUnitWork_t *unit;
     /* 0x0170 */ datUnitWork_t workStock;
-    /* 0x025C */ u8 unk_25C[0x1043];
+    /* 0x025C */ u8 unk_25C[0x103C];
+    /* 0x1298 */ u8 commentFromUnit;
+    /* 0x1299 */ u8 unk_1299;
+    /* 0x129A */ u16 commentId;
+    /* 0x129C */ u8 commentMessage;
+    /* 0x129D */ u8 unk_129D[2];
     /* 0x129F */ u8 bonusParam[6];
     /* 0x12A5 */ u8 reserved12A5[0x1040];
     /* 0x22E5 */ s8 unk_22E5;
@@ -399,7 +404,38 @@ s32 rstCalcSeqPlayerLevelUp(void)
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstCalcSeqDevilLevelUp);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstPickRandomComment);
+typedef struct
+{
+    s32 mesno;
+    u8 unk_04[0x2C];
+} datMasterText_t;
+
+extern datMasterText_t master_text[];
+extern s32 datFindCommentEntry(u16 devilId);
+extern s32 cmbChkGetHearts(s32 rawId);
+extern s32 rstRollComment(void);
+
+s32 rstPickRandomComment(void)
+{
+    s32 id;
+
+    if (dds3GetRandA(NULL) % 3 == 0) {
+        id = datFindCommentEntry(EventStart->unit->id);
+        if (id == 0 || cmbChkGetHearts(id) != 0) {
+            EventStart->commentFromUnit = 0;
+            EventStart->commentId = rstRollComment();
+        } else {
+            EventStart->commentFromUnit = 1;
+            EventStart->commentId = id;
+        }
+        EventStart->commentMessage = master_text[EventStart->unit->id].mesno * 4;
+        EventStart->commentMessage += dds3GetRandA(NULL) & 3;
+        EventStart->commentMessage += 0x2C;
+        return 1;
+    }
+    EventStart->commentId = 0;
+    return 0;
+}
 
 extern s32 rstCalcEventInfo(u8 *eventInfo);
 s32 rstGetDefaultSkill(void)

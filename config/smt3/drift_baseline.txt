@@ -402,6 +402,8 @@ member effSub_t.unk21
 member effSub_t.unk41
 member effTrackPolyParams_t.unk1C
 member evtStartWork_t.unk_00
+member evtStartWork_t.unk_1299
+member evtStartWork_t.unk_129D
 member evtStartWork_t.unk_170
 member evtStartWork_t.unk_18
 member evtStartWork_t.unk_19
