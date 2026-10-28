@@ -228,11 +228,102 @@ s32 rcvUpdateData(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdateCallSeq);
+extern void rcvCreateLocalStock(void *stock, s8 mask);
+
+s32 rcvUpdateCallSeq(s8 sequence)
+{
+    s32 check = 0;
+    s32 notice = 0;
+    s32 script = 0;
+
+    switch (sequence) {
+    case 0:
+        script = 5;
+        check = 2;
+        break;
+    case 1:
+        script = 1;
+        notice = 8;
+        rcvCreateLocalStock((u8 *)rcvUpdateWork + 0x10BE, 7);
+        break;
+    case 2:
+        script = 1;
+        rcvCreateLocalStock((u8 *)rcvUpdateWork + 0x10BE, 1);
+        break;
+    case 3:
+        script = 1;
+        rcvCreateLocalStock((u8 *)rcvUpdateWork + 0x10BE, 2);
+        break;
+    case 4:
+        script = 3;
+        notice = 10;
+        rcvCreateLocalStock((u8 *)rcvUpdateWork + 0x10BE, 4);
+        break;
+    case 5:
+        script = 2;
+        notice = 9;
+        check = 1;
+        *((u8 *)rcvUpdateWork + 0x10BC) = 0;
+        break;
+    case 6:
+        fclSetWorkValue(2, 1);
+        rcvUpdateWork->unk_0005 = 1;
+        rcvUpdateWork->unk_0008 = fclScriptStart(rcvUpdateWork->script, 6,
+                                                  &rcvUpdateWork->scriptArg);
+        rcvUpdateWork->unk_01 = 6;
+        rcvUpdateWork->unk_03 = 6;
+        rcvUpdateWork->unk_0004 = -1;
+        rcvUpdateWork->unk_02 = 0;
+        return 0;
+    case 7:
+        rcvExit();
+        check = 2;
+        break;
+    }
+    switch (check) {
+    case 0:
+        if (rcvUpdateWork->partyCount + rcvUpdateWork->reserveCount == 0) {
+            if (rcvUpdateWork->unk_01 != 0) {
+                rcvUpdateCallSeq(0);
+                return 0;
+            }
+            rcvUpdateWork->unk_0005 = 1;
+            rcvUpdateWork->unk_0008 = fclScriptStart(rcvUpdateWork->script, notice,
+                                                      &rcvUpdateWork->scriptArg);
+            rcvUpdateWork->unk_01 = 6;
+            rcvUpdateWork->unk_03 = 6;
+            rcvUpdateWork->unk_0004 = -1;
+            rcvUpdateWork->unk_02 = 0;
+            return 0;
+        }
+        break;
+    case 1:
+        if (!(DDS3_GBWK->akuma[0].badstatus & 0x8000)) {
+            if (rcvUpdateWork->unk_01 != 0) {
+                rcvUpdateCallSeq(0);
+                return 0;
+            }
+            rcvUpdateWork->unk_0005 = 1;
+            rcvUpdateWork->unk_0008 = fclScriptStart(rcvUpdateWork->script, notice,
+                                                      &rcvUpdateWork->scriptArg);
+            rcvUpdateWork->unk_01 = 6;
+            rcvUpdateWork->unk_03 = 6;
+            rcvUpdateWork->unk_0004 = -1;
+            rcvUpdateWork->unk_02 = 0;
+            return 0;
+        }
+        break;
+    }
+    if (rcvUpdateWork->unk_01 != sequence) {
+        fclScriptStart(rcvUpdateWork->script, script, &rcvUpdateWork->scriptArg);
+    }
+    rcvUpdateWork->unk_01 = sequence;
+    return 1;
+}
 
 extern void lstMoveCursor2(lstWork_t *pListWindow, s8 Dir);
 extern s32 rcvUpdateData(void);
-extern s32 rcvUpdateCallSeq(s32 SeqNo);
+extern s32 rcvUpdateCallSeq(s8 SeqNo);
 
 void rcvUpdateSeqAllRecover(void)
 {
@@ -506,7 +597,7 @@ void rcvUpdateSeqRoot(void)
         (cmpPadStopWork_t *)&rcvUpdateWork->listCursor, button, 0x30));
 }
 
-extern s32 rcvUpdateCallSeq(s32 SeqNo);
+extern s32 rcvUpdateCallSeq(s8 SeqNo);
 
 void rcvUpdateSeqTalk(void)
 {

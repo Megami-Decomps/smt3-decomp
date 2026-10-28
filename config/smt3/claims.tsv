@@ -394,3 +394,5 @@ src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	2 fn / 624 B	reco
 src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	1 fn / 200 B	MIDI load-state helper; former caller is a separate unit; owner 22 match, 0 differ
 src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	2 fn / 884 B	root menu and process callbacks; owner 12 match, 0 differ
 src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	1 fn / 216 B	form resource release; owner 23 match, 0 differ
+src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	1 fn / 512 B	sequence-call dispatcher completes owner; 13 match, 0 differ
+src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	0 matches	music setup remains assembly; owner 23 match, 0 differ
