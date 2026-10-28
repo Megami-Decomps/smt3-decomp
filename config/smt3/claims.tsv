@@ -313,3 +313,4 @@ src/smt3/newbattle/nbEventProcess.c	redthing1	open	2026-10-28	1 fn / 300 B	nbEve
 src/smt3/pipe/pipeResult.c	redthing1	open	2026-10-28	1 fn / 136 B	message completion and damage dispatch; whole-unit 7 match, 0 differ; section and initialization follow-up
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	2 fn / 160 B	paired battle light snapshots; complete unit 276 match, 0 differ
 src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	2 fn / 72 B	name-entry sequence flag and fade-out RGB helper; bounded 4-byte color state
+src/smt3/pipe/pipeMakaAnim.c	redthing1	done	2026-10-28	1 fn / 124 B	makaAdd; typed free-slot scan and normal or special-position setup; whole-unit 7 match, 0 differ

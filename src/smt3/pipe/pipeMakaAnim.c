@@ -52,7 +52,30 @@ void makaInit(void)
     work = NULL;
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaAdd);
+void makaAdd(f32 x, f32 y, s32 amount)
+{
+    s32 posX = (s32)x;
+    s32 posY = (s32)y;
+    tagMakaObject_t *object = makaWork;
+    s32 remaining = 15;
+
+    while (--remaining != -1) {
+        if (object->maka == 0) {
+            if (amount & 0x80000000) {
+                object->pos[0] = 256;
+                object->pos[1] = 188;
+                object->count = 16;
+            } else {
+                object->pos[0] = posX;
+                object->pos[1] = posY;
+                object->count = 15;
+            }
+            object->maka = amount;
+            break;
+        }
+        object++;
+    }
+}
 
 s32 makaGetBarWidth(s32 maka)
 {
