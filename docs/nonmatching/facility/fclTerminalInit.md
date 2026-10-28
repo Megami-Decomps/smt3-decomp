@@ -33,3 +33,24 @@ function. Also ruled out: both sides indexed (`tex[i] = ...D_00330808[i]`),
 which spends a fourth saved register on the shared `i * 4`; and
 `D_00330808[(u8)i]` with a signed counter, which is 10 of 28 words match and
 one word long.
+
+## trmStartEvent (facility/fclTerminalInit, 0x84)
+
+The mode switch emits the exact 132 bytes: 25 of 33 words match.
+Mode 0 requests an event with `trmGetEventNo(1, GBWK_3)`: a negative event
+returns zero; otherwise it starts the event, sets terminal mode 1 and returns
+one. Modes 1 and 5 return one without mutation; every other mode returns zero.
+The provider returns a signed byte from `trmGetMode`, a signed word from
+`trmGetEventNo`, and no value from `evtStartEvent` or `fclSetTerminalMode`.
+
+The eight residual words occupy three windows: `+0x24`, `+0x30` and `+0x38`
+change the branch-likely choice and hoist the terminal-work load into the
+mode dispatch; `+0x50` through `+0x5C` rotate that load, the event request
+and the argument move around its negative-result guard; `+0x68` fills the
+event-start delay slot differently. The calls and mode/event tests are
+accounted for; the remaining source/control-flow premise is unresolved.
+
+An if/else mode dispatch emitted 120 bytes; only 4 of 30 words match.
+A switch returning through a shared result local emitted 152 bytes and added
+a saved register. Neither is a closer reconstruction. The explicit switch
+with early returns is the preferred draft; production retains assembly.
