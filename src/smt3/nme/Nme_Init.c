@@ -1,18 +1,62 @@
 #include "common.h"
+#include "kernel.h"
+#include "libsdf.h"
 
 typedef struct {
-    u8 unk00[0x51B4];
-    void *textures[4];
-} nmeTextureWork_t;
+    u8 flag;
+    s8 current, next, last, change, messageFlag;
+    u8 unk06[2];
+    dds3ProcessID_t *messageProcess;
+    s32 timer;
+    void *parent;
+} cmpSeqInfo_t;
+
+typedef struct
+{
+    /* 0x00 */ u8 StepY[4];
+    /* 0x04 */ s8 StopFlag;
+    /* 0x05 */ u8 unk_05[3];
+    /* 0x08 */ s32 CursorSize;
+    /* 0x0C */ s32 CursorPos;
+    /* 0x10 */ u16 unk_10;
+    /* 0x12 */ u16 unk_12;
+    /* 0x14 */ u16 unk_14;
+    /* 0x16 */ u16 unk_16;
+    /* 0x18 */ s32 unk_18;
+    /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ u8 unk_20;
+    /* 0x21 */ u8 unk_21;
+    /* 0x22 */ s16 unk_22;
+    /* 0x24 */ s8 unk_24;
+    /* 0x25 */ s8 unk_25;
+    /* 0x26 */ u8 unk_26;
+    /* 0x27 */ u8 unk_27;
+    /* 0x28 */ s32 unk_28;
+    /* 0x2C */ s32 unk_2C;
+    /* 0x30 */ s32 unk_30;
+    /* 0x34 */ s32 unk_34;
+} cmpCursorInfo_t;
 
 typedef struct {
-    u8 unk00[0x1A];
+    cmpSeqInfo_t sequence;
+    sdfMemHandle_t *memHandle;
+    s8 targetNo;
+    s8 entryMode;
     s8 inputMode;
-    u8 unk1B[0x5150 - 0x1B];
+    u8 unk1B;
+    u8 unk1C[0x1060];
+    s8 cursorMode;
+    u8 unk107D[0x2057];
+    cmpCursorInfo_t cursor;
+    u8 unk310C[0x2044];
     s8 inputPos;
-} nmeInputModeWork_t;
+    u8 unk5151[0x63];
+    sdfTexHandle_t *textures[4];
+    s32 baseRate;
+} nmeWork_t;
 
-extern void sdfTexFree(void *aHandle);
+extern void sdfTexFree(sdfTexHandle_t *aHandle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern void dds3KillProcessName(const char *name, s32 shutdowntimer);
 
@@ -32,11 +76,13 @@ u8 nmeCharToIndex(u8 lead, u8 trail) {
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeDecodeChar);
 
+extern void frDelFontStyle(u8 styleNo);
+extern void nmeBuildNameFont(s8 mode, nmeWork_t *work);
 INCLUDE_ASM(const s32, "nme/Nme_Init", frAllocNameData);
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeStartFadeOut);
 
-s32 nmeGetInputMode(nmeInputModeWork_t *work) {
+s32 nmeGetInputMode(nmeWork_t *work) {
     s32 inputPos;
 
     if (work->inputMode < 2) {
@@ -52,17 +98,17 @@ s32 nmeGetMaxNameLen(s32 mode) {
     return 8;
 }
 
-s8 nmeGetModeFlag(nmeInputModeWork_t *work) {
+s8 nmeGetModeFlag(nmeWork_t *work) {
     return nmeGetMaxNameLen(nmeGetInputMode(work));
 }
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameRow);
 
 extern void nmeInitNameRow(s8 mode, s32 row, void *data);
-void nmeInitNameRows(s8 mode, void *data) {
-    nmeInitNameRow(mode, 0, data);
-    nmeInitNameRow(mode, 1, data);
-    nmeInitNameRow(mode, 2, data);
+void nmeInitNameRows(s8 mode, nmeWork_t *work) {
+    nmeInitNameRow(mode, 0, work);
+    nmeInitNameRow(mode, 1, work);
+    nmeInitNameRow(mode, 2, work);
 }
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeGetRowCount);
@@ -77,7 +123,7 @@ INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548768);
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeTexLoad);
 
-void nmeFreeNameTextures(nmeTextureWork_t *work) {
+void nmeFreeNameTextures(nmeWork_t *work) {
     s32 textureIndex;
     for (textureIndex = 0; textureIndex < 4; textureIndex++) {
         sdfTexFree(work->textures[textureIndex]);
@@ -88,7 +134,23 @@ INCLUDE_ASM(const s32, "nme/Nme_Init", nmeLoadFont);
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeBuildNameFont);
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeDestroyName);
+extern nmeWork_t *nmeProcessId;
+extern u32 dds3KernelDebugSignOrg;
+extern u32 dds3KernelDebugSign;
+extern void dds3FadeClear(void);
+
+void nmeDestroyName(dds3ProcessID_t *processId) {
+    if (nmeProcessId != NULL) {
+        nmeBuildNameFont(nmeProcessId->targetNo, nmeProcessId);
+        nmeFreeNameTextures(nmeProcessId);
+        frDelFontStyle(4);
+        sdfMemFreeDirect(nmeProcessId->memHandle);
+        nmeProcessId = NULL;
+        gProcessStat = 2;
+        dds3KernelDebugSign = dds3KernelDebugSignOrg;
+        dds3FadeClear();
+    }
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeStartProcesses);
 
