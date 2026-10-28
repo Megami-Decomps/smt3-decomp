@@ -51,35 +51,35 @@ typedef struct trmPanelPos_t {
     s16 width;
     s16 height;
     s32 flags;
-    u8 unk14[0xC];
+    u8 reserved14[0xC];
 } trmPanelPos_t;
 
 typedef struct trmListCursor_t {
     s32 rowStep;
-    u8 unk04[0x1E];
+    u8 reserved04[0x1E];
     s16 rowBase;
-    u8 unk24[2];
+    u8 reserved24[2];
     u8 visibleCount;
-    u8 unk27[0x11];
+    u8 reserved27[0x11];
 } trmListCursor_t;
 
 typedef struct trmListWork_t {
-    u8 unk00[0x40];
+    u8 reserved00[0x40];
     trmPanelPos_t panel;
-    u8 unk60[0xFC];
+    u8 reserved60[0xFC];
     trmListCursor_t cursor;
 } trmListWork_t;
 
 typedef struct trmDrawWork_t {
-    u8 unk00[0x1C];
+    u8 reserved00[0x1C];
     u8 listHeader[0x15C];
-    u8 unk0178[0xEE0];
+    u8 reserved0178[0xEE0];
     trmListWork_t terminalList;
-    u8 unk11EC[0x1005];
+    u8 reserved11EC[0x1005];
     s8 terminalType;
     u16 terminalNo;
     s8 terminalIndices[0x21];
-    u8 unk2215[0x23];
+    u8 reserved2215[0x23];
     s32 texHandle;
 } trmDrawWork_t;
 

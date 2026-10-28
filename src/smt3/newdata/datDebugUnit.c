@@ -12,7 +12,7 @@ extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...
 extern const char D_00550EB0[];
 
 typedef struct {
-    u8 unk0000[0x1914];
+    u8 reserved0000[0x1914];
     u8 stock[16];
     s32 stockCount;
 } datDebugStockWorkView_t;

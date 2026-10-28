@@ -47,12 +47,12 @@ typedef struct
     /* 0x0008 */ s32 unk_0008;
     /* 0x000C */ s32 unk_000C;
     /* 0x0010 */ sdfTexHandle_t *textureHandle;
-    /* 0x0014 */ u8 unk_0014[0xD0];
-    /* 0x00E4 */ s32 unk_00E4;
-    /* 0x00E8 */ s32 unk_00E8;
-    /* 0x00EC */ s32 unk_00EC;
-    /* 0x00F0 */ s32 unk_00F0;
-    /* 0x00F4 */ s32 unk_00F4;
+    /* 0x0014 */ u8 reserved0014[0xD0];
+    /* 0x00E4 */ s32 reserved00E4;
+    /* 0x00E8 */ s32 reserved00E8;
+    /* 0x00EC */ s32 scrollY;
+    /* 0x00F0 */ s32 reserved00F0;
+    /* 0x00F4 */ s32 reserved00F4;
     /* 0x00F8 */ f32 initFloat;
     /* 0x00FC */ s32 unk_00FC;
     /* 0x0100 */ s32 unk_0100;
@@ -86,7 +86,7 @@ void GetoStaffUI(void) {
     s32 drawY;
 
     if (fieldCount < 15) {
-        elapsed = oStaff_UI->unk_00EC - 0x780;
+        elapsed = oStaff_UI->scrollY - 0x780;
         if (elapsed >= 0) {
             field = elapsed / 0x450;
             if (field >= fieldCount) {
@@ -101,7 +101,7 @@ void GetoStaffUI(void) {
     }
 
     ObjDispOff();
-    drawY = oStaff_UI->unk_00EC;
+    drawY = oStaff_UI->scrollY;
     if (drawY < 0x1CB9) {
         return;
     }
@@ -157,8 +157,8 @@ s32 stfShutDown(void) {
     oStaff_UI = work;
     work->allocation = handle;
     work->initFloat = 0.09999999404f;
-    work->unk_000C = work->unk_0008 = work->unk_0004 = work->unk_00F4 =
-        work->unk_00F0 = work->unk_00EC = work->unk_00E8 = work->unk_00E4 = 0;
+    work->unk_000C = work->unk_0008 = work->unk_0004 = work->reserved00F4 =
+        work->reserved00F0 = work->scrollY = work->reserved00E8 = work->reserved00E4 = 0;
     stfFreeFiles();
     p2sdLoadPcmFile("STAFF.ADB", 0x7F);
     dds3VblanksPerFrame = 1;

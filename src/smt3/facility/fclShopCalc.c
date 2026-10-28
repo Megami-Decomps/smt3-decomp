@@ -108,7 +108,7 @@ extern s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *tex,
                            fclSpriteTbl_t *table, s32 ot);
 
 typedef struct shopDrawWork_t {
-    u8 unk0000[0x2394];
+    u8 reserved0000[0x2394];
     s32 texHandle[2];
 } shopDrawWork_t;
 

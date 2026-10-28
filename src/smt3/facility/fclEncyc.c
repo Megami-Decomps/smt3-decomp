@@ -144,17 +144,17 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00000 */ u8 unk_00000[0xA54];
+    /* 0x00000 */ u8 reserved00000[0xA54];
     /* 0x00A54 */ dds3PartyUnit_t party[16];
     /* 0x01914 */ s8 stock[0x10];
     /* 0x01924 */ s32 stockCount;
-    /* 0x01928 */ u8 unk_01928[0x3D];
-    /* 0x01965 */ u8 unk_1965;
-    /* 0x01966 */ u8 unk_01966[0x394];
+    /* 0x01928 */ u8 reserved01928[0x3D];
+    /* 0x01965 */ u8 reserved1965;
+    /* 0x01966 */ u8 reserved01966[0x394];
     /* 0x01CFA */ u8 equipHearts;
-    /* 0x01CFB */ u8 unk_01CFB[0x40];
+    /* 0x01CFB */ u8 reserved01CFB[0x40];
     /* 0x01D3B */ u8 devilSlot[0x100];
-    /* 0x01E3B */ u8 unk_01E3B[0x10045];
+    /* 0x01E3B */ u8 reserved01E3B[0x10045];
     /* 0x11E80 */ s32 encycNum;
 } encycSaveWork_t;
 
@@ -616,17 +616,17 @@ void DestPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
 
 typedef struct
 {
-    u8 unk0000;
-    u8 unk0001[3];
+    u8 reserved0000;
+    u8 reserved0001[3];
     lstListWindow_t listWindow;
-    u8 unk0188[0x1058];
+    u8 reserved0188[0x1058];
     frFontHandle_t *fonts[7];
     void *process;
 } fclEncycRegistAllWork_t;
 
 typedef struct
 {
-    u8 unk0000[0x16510];
+    u8 reserved0000[0x16510];
     s32 script;
 } fclEncycRegistAllGlobalWork_t;
 
@@ -653,7 +653,7 @@ void CalcPhaseRegistAll(fclEncyc_instance_tag *pinst)
         pinst->stat |= 2;
         pinst->unk_5A = 8;
     } else {
-        work->unk0000 = 0;
+        work->reserved0000 = 0;
         fclClearFlag(0);
         work->process = 0;
         fclScriptStart(CMB_GBWK->script, 0xF, &work->process);
@@ -668,7 +668,7 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadTop);
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseReadTop);
 
 typedef struct fclEncycReadTopWork_t {
-    u8 unk0000[0x11D8];
+    u8 reserved0000[0x11D8];
     fclRibbon_t *ribbon;
     frFontHandle_t *requests[3];
     void *fontList[8];
@@ -1184,13 +1184,13 @@ typedef struct fclEncycHelpPanel_t {
     s32 y;
     s32 speed;
     s16 alpha;
-    u8 unk0E[2];
+    u8 reserved0E[2];
 } fclEncycHelpPanel_t;
 
 typedef struct fclEncycReadHelpWork_t {
-    u8 unk00[2];
+    u8 reserved00[2];
     u16 flags;
-    u8 unk04[0x5C];
+    u8 reserved04[0x5C];
     fclEncycHelpPanel_t panels[2];
 } fclEncycReadHelpWork_t;
 
