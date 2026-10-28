@@ -82,7 +82,7 @@ typedef struct
     u8 takaraOpen[0x20];           /* 0x11A58 */
     s16 previewX;                 /* 0x11A78: slSetTmnlID */
     s16 previewY;
-    u8 unk11A7C[4];
+    s32 moonAnahoriCount;
     u8 takaraOpenEx[0x20];         /* 0x11A80 */
 } dds3GlobalWork_t;
 

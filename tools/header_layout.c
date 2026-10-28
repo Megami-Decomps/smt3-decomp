@@ -641,6 +641,7 @@ OFF(p10, dds3GlobalWork_t, floats, 0x440);
 OFF(p11, dds3GlobalWork_t, EventBit, 0x840);
 OFF(p12, dds3GlobalWork_t, moonFlags, 0xA40);
 OFF(p13, dds3GlobalWork_t, moonTimer, 0xA44);
+OFF(gb_moon_anahori, dds3GlobalWork_t, moonAnahoriCount, 0x11A7C);
 OFF(p14, dds3GlobalWork_t, maka, 0xA48);
 /* Native Kotowari accesses and the recovered save-data layout agree here. */
 OFF(gb_negoques, dds3GlobalWork_t, negoques, 0x1CE8);

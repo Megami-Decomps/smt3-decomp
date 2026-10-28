@@ -197,7 +197,7 @@ void evtInitMoonProcess(void)
         evtDisableMoonDraw();
         evtSetAgeOfMoon(0);
         DDS3_GBWK->unkA42[0] = 0;
-        *(s32 *)&DDS3_GBWK->unk11A7C[0] = 0;
+        DDS3_GBWK->moonAnahoriCount = 0;
     }
 }
 
