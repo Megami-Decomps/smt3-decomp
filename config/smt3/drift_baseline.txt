@@ -128,7 +128,6 @@ member cmbSmokeParam_t.unk_01
 member cmbSmokeParam_t.unk_08
 member cmbStockCursorGroup_t.unk_0038
 member cmbStockSlot_t.unk_01
-member cmbUnitSkills_t.unk_00
 member cmbUnlockEntry_t.unk_02
 member cmbWork_t.unk_01
 member cmbWork_t.unk_1C
@@ -812,6 +811,7 @@ member rstDrawWork_t.unk_007E
 member rstDrawWork_t.unk_129E
 member rstDrawWork_t.unk_129F
 member rstDrawWork_t.unk_12A5
+member rstDrawWork_t.unk_12CD
 member rstDrawWork_t.unk_16C
 member rstDrawWork_t.unk_170
 member rstDrawWork_t.unk_1B

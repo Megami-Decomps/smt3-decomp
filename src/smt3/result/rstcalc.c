@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "font.h"
 
 typedef struct
 {
@@ -150,17 +151,26 @@ extern void rstSetDestroySkillMaxHpMp(void);
 
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
+typedef struct {
+    u8 unk_00[0x22];
+    u8 unk_22;
+    u8 unk_23;
+    u8 unk_24;
+} rstSkillSlot_t;
+
 typedef struct
 {
     /* 0x0000 */ u8 unk_0000[0x7C];
     /* 0x007C */ s8 unk_7C;
     /* 0x007D */ s8 unk_7D;
     /* 0x007E */ u8 unk_007E[0xEE];
-    /* 0x016C */ void *unk_16C;
+    /* 0x016C */ datUnitWork_t *unk_16C;
     /* 0x0170 */ u8 unk_170[0x112E];
     /* 0x129E */ s8 unk_129E;
     /* 0x129F */ u8 unk_129F[6];
-    /* 0x12A5 */ u8 unk_12A5[0x103F];
+    /* 0x12A5 */ u8 unk_12A5[3];
+    /* 0x12A8 */ rstSkillSlot_t skillSlot;
+    /* 0x12CD */ u8 unk_12CD[0x1017];
     /* 0x22E4 */ u8 unk_22E4;
     /* 0x22E5 */ u8 unk_22E5[0x23];
     /* 0x2308 */ s32 unk_2308;
@@ -1554,7 +1564,37 @@ void rstDrawStatusRow2(s8 mode, s8 row, s8 selected)
     }
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstDrawStatusPanel);
+extern s32 fclChkMessage(void);
+extern void cmpDrawStatusBars(s32 x, s32 y, s32 z);
+extern u16 rstSkillSlotIsFull(datUnitWork_t *unit, rstSkillSlot_t *slot);
+extern frFontHandle_t *frGetHelpPos(s32 x, s32 y, s32 priority, s32 bank, s32 index);
+extern void frSetFontColor(frFontHandle_t *request, u32 color);
+extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
+
+s32 rstDrawStatusPanel(s8 mode, s8 showHelp)
+{
+    s8 selected = rstDrawWork->skillSlot.unk_22 + rstDrawWork->skillSlot.unk_24;
+    frFontHandle_t *request;
+
+    if (showHelp == 0 || fclChkMessage() != 0) {
+        selected = -1;
+    }
+    if (selected >= 0) {
+        u16 skill;
+
+        cmpDrawStatusBars(0x46, 0x22, 0);
+        cmpDrawStatusBars(0x46, 0x22, 0);
+        skill = rstSkillSlotIsFull(rstDrawWork->unk_16C, &rstDrawWork->skillSlot);
+        request = frGetHelpPos(0x180, 0x9A0, 0xFFFFF, 0, skill);
+        frSetFontColor(request, 0x80C08080);
+        func_001C7E38(request, 1, 0x47);
+        frDestroyFontRequestAfter(request);
+    }
+    cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, 0x80, selected, showHelp,
+                       (s32)rstDrawWork->unk_129F, mode, 0xA09DC380, 2, 2, 0);
+    return 1;
+}
 
 extern void *dds3SearchSceneBasic(void *pBasic, u32 serialID, s32 type);
 
