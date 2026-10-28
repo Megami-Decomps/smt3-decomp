@@ -144,6 +144,7 @@ nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	56 of 58 words match	docs
 nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	29 of 30 words match	docs/nonmatching/newbattle/nbCameraSkill.md	28
 nbCameraShot_All_Set2	newbattle/nbCameraSkill	0x248	16 of 125 words match	docs/nonmatching/newbattle/nbCameraSkill.md	51
 nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	117 of 137 words match	docs/nonmatching/newbattle/nbCameraSkill.md	88
+Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/nonmatching/newbattle/nbE911.md	5
 nbGetEncountJoken	newbattle/nbEncount	0x174	24 of 66 words match	docs/nonmatching/newbattle/nbEncount.md	5
 nbCallNewBattle	newbattle/nbInit	0xA0	29 of 40 words differ	docs/nonmatching/newbattle/nbInit.md	5
 nbMainProcess1	newbattle/nbMainProcess	0x420	113 of 263 words match	docs/nonmatching/newbattle/nbMainProcess.md	5

@@ -413,7 +413,89 @@ extern void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
+/* The two light basics this fade reaches; neither is written anywhere in the
+ * image, so only the chain down to the faded packet word is named. */
+typedef struct { u8 unk_00[0x2C]; u32 color; } nbE911Prim_t;
+typedef struct { u8 unk_00[0x28]; nbE911Prim_t *prim; } nbE911Work_t;
+typedef struct { u8 unk_00[0x18]; nbE911Work_t *work; } nbE911Light_t;
+
+extern nbE911Light_t *D_00551618;
+extern nbE911Light_t *D_0055161C;
+
+extern s32 nbCheckLoad(nbFormation_t *form);
+extern void nbFormDispOn(s32 formindex);
+extern void nbAddUnitAKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                  s32 a, s32 b);
+extern void nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                   s32 a, s32 b, s32 c, s32 d);
+extern void nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                   s32 a);
+extern void dds3SetQuake(s32 power, s32 time);
+
+#ifdef NON_MATCHING
+/* NON_MATCHING: 94 of 114 words match at the exact 456-byte size. */
+s32 Effect2(nbEventProcessData_t *e)
+{
+    nbFormation_t *forms = e->data->form;
+    nbFormation_t *form = NULL;
+    s32 t = e->seqtime;
+
+    switch (t) {
+    case 0:
+        break;
+    case 0x4B:
+        form = &forms[4];
+        if (nbCheckLoad(form) != 0) {
+            e->seqtime--;
+            form = NULL;
+        }
+        break;
+    case 0x53:
+        form = &forms[6];
+        if (nbCheckLoad(form) != 0) {
+            e->seqtime--;
+            form = NULL;
+        }
+        break;
+    case 0x8C:
+        nbFreeEffectSlot(e);
+        break;
+    }
+    if (form != NULL) {
+        nbFormDispOn(form->formindex);
+        nbAddUnitAKoukaPacket(0, 0, form, 0, 0);
+        nbMakeUnitFadeInPacket(1, 0, form, 0, 0xF, 0xF, 0x14);
+        nbAddHitEffKoukaPacket(1, 0, form, 4);
+        dds3SetQuake(0xA, 0x258);
+    }
+    t = e->seqtime;
+    if (t >= 0x3D && t <= 0x48) {
+        s32 div = 12;
+        s32 alpha = ((0x48 - t) << 7) / div;
+
+        if (D_00551618 != NULL) {
+            nbE911Prim_t *prim = D_00551618->work->prim;
+
+            prim->color = (alpha << 24) | (prim->color & 0xFFFFFF);
+            t = e->seqtime;
+        }
+    }
+    if (t >= 0x45 && t <= 0x50) {
+        s32 div = 12;
+        s32 alpha = ((0x50 - t) << 7) / div;
+
+        if (D_0055161C != NULL) {
+            nbE911Prim_t *prim = D_0055161C->work->prim;
+
+            prim->color = (alpha << 24) | (prim->color & 0xFFFFFF);
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbE911", Effect2);
+#endif
+
 
 s32 nbE911_End(nbEventProcessData_t *e)
 {
