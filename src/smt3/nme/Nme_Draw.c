@@ -192,11 +192,24 @@ INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeFindNextChar);
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursorWrap);
 
-u32 nmeInputIsLocked(void) {
+u32 nmeInputIsLocked(s32 row) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeCheckInputMode);
+s32 nmeCheckInputMode(u8 mode)
+{
+    if (mode < 2) {
+        if (nmeUpdateWork->inputRowEnabled[0] == 0 ||
+            nmeUpdateWork->inputRowEnabled[1] == 0) return 0;
+        if (nmeInputIsLocked(0) == 0) return 1;
+        if (nmeInputIsLocked(1) != 0) return 0;
+    } else {
+        if (nmeUpdateWork->inputRowEnabled[2] == 0) return 0;
+        if (nmeInputIsLocked(2) != 0) return 0;
+    }
+    return 1;
+}
+
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeUpdateInput);
 
