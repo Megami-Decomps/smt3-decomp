@@ -16,6 +16,8 @@ extern s32 dds3GetGlobalConfigFlag(u32 flag);
 
 extern void dds3GetVibrationLevel(void);
 
+extern int printf(const char *fmt, ...);
+
 extern void sdfPadSetAct0(s32 pad, u16 value);
 
 extern void sdfPadSetAct1(s32 pad, u8 value);
@@ -36,7 +38,38 @@ INCLUDE_ASM(const s32, "kernel/dds3PadManager", dds3PadInitialize);
 
 INCLUDE_ASM(const s32, "kernel/dds3PadManager", dds3RunProcessList);
 
+#ifdef NON_MATCHING
+/* 27 of 29 words at the exact size; the printf tail loads the level through the
+   pointer register instead of $gp, which reverses it with the format lui. */
+void dds3GetVibrationLevel(void) {
+    u8 target = dds3PadVibrationMode[1];
+    s32 diff;
+    s32 step;
+
+    if (dds3PadVibrationState[1] < target) {
+        diff = target - dds3PadVibrationState[1];
+        step = dds3PadVibrationState[1] + 32;
+        if (diff > 32) {
+            dds3PadVibrationState[1] = step;
+        } else {
+            dds3PadVibrationState[1] = target;
+        }
+    } else if (dds3PadVibrationState[1] > target) {
+        diff = dds3PadVibrationState[1] - target;
+        step = dds3PadVibrationState[1] + 0xE0;
+        if (diff > 32) {
+            dds3PadVibrationState[1] = step;
+        } else {
+            dds3PadVibrationState[1] = target;
+        }
+    } else {
+        dds3PadVibrationState[1] = target;
+    }
+    printf("PadActPow:%02x/%02x\n", dds3PadVibrationState[1], target);
+}
+#else
 INCLUDE_ASM(const s32, "kernel/dds3PadManager", dds3GetVibrationLevel);
+#endif
 
 void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
     if (dds3GetGlobalConfigFlag(0) == 0) {
