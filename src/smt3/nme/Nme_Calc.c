@@ -67,7 +67,21 @@ INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameText);
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameString);
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawEditIcons);
+void nmeDrawEditIcons(void)
+{
+    s32 colors[4];
+    nmeSpriteTable_t *table = &GBWK_2;
+
+    colors[0] = 0x80808079;
+    colors[1] = 0x80808079;
+    colors[2] = 0x80808079;
+    colors[3] = 0x80808079;
+
+    fclDrawSpriteRes(0, 0, 0x10, colors, 3, 0x19,
+                     (s32 *)namelist_buttonAnim_end->textures, table, 0x47);
+    fclDrawSpriteRes(0, 0, 0x10, colors, 3, 0x1A,
+                     (s32 *)namelist_buttonAnim_end->textures, table, 0x47);
+}
 
 void nmeDrawTextBox(s32 x, s32 y, s32 z)
 {
@@ -97,7 +111,7 @@ void nmeDrawCursor(void)
     nmeDrawCursorAt(0x29, 0xDA, 0, 0, 0x47);
 }
 
-void nmeDrawTabSprite(s32 x, s32 y)
+void nmeDrawTabSprite(s32 x, s32 y, s32 unused)
 {
     nmeSpriteTable_t *table = &GBWK_2;
     s32 ot = 0x47;
@@ -110,7 +124,23 @@ void nmeDrawTabSprite(s32 x, s32 y)
                      (s32 *)namelist_buttonAnim_end->textures, table, ot);
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawModeTabs);
+void nmeDrawModeTabs(s8 mode)
+{
+    nmeDrawTabSprite(0x540, 0x3D8, 0);
+    switch (mode) {
+    case 0:
+    case 1:
+        fclDrawSpriteRes(0, 0, 0, 0, 3, 0x15,
+                         (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+        break;
+    case 2:
+        fclDrawSpriteRes(0, 0, 0, 0, 3, 0x16,
+                         (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+        break;
+    default:
+        break;
+    }
+}
 
 INCLUDE_RODATA(const s32, "nme/Nme_Calc", D_005487F8);
 

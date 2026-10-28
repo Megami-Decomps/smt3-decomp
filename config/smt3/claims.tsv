@@ -371,3 +371,7 @@ src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	1 fn / 352 B	model-mar
 src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	0 matches	boss-record and automatic-recovery attempts remain assembly; owner 69 match, 0 differ
 src/smt3/facility/fclRagUpdate.c	redthing1	done	2026-10-28	0 matches	phase and choice helpers remain assembly; owner 13 match, 0 differ
 src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	1 fn / 480 B	party-position vectors with XYZ rotation and native selector table; owner 65 match, 0 differ
+src/smt3/interface/frName.c	redthing1	done	2026-10-28	0 matches	handle and restoration drafts remain unqualified
+src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	2 fn / 352 B	edit icons and mode tabs; unused third tab-draw argument established
+src/smt3/effect/billManager.c	redthing1	done	2026-10-28	0 matches	qualified reorg traces isolate annul eligibility; fallback retained
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	2 fn / 340 B	font-data bootstrap and script status entry; actual narrow arguments
