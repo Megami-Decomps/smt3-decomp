@@ -342,7 +342,7 @@ extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
 
 extern s32 evtGetAgeOfMoon(void);
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 extern s32 nbCheckSkillCost(s32 formindex, s32 nskill);
 
@@ -362,7 +362,7 @@ extern f32 nbGetHojoRitu(s32 formindex, s32 type);
 
 extern char D_00544D30[];
 
-extern s32 sdfFloatToULong(f32 value);
+extern long sdfFloatToULong(f32 value);
 
 extern s32 nbGetLvAvg(nbMainProcessData_t *data, s32 side);
 
@@ -585,7 +585,7 @@ s32 nbCheckStoneDead(s32 nskill, s32 dformindex)
         chance = 20;
     }
     printf(D_00544BF8, chance);
-    return dds3GetRandIntA(0, 100) < chance;
+    return (s32)dds3GetRandIntA(0, 100) < chance;
 }
 
 void nbSetBadStat(s32 formindex, s32 sw, s32 badstat)
@@ -1259,7 +1259,7 @@ s32 nbCheckRenzokuEncount(nbMainProcessData_t *data)
             rate *= 5;
         }
         printf(D_00544DF0, rate, nextIndex);
-        if (dds3GetRandIntA(0, 100) >= rate) {
+        if ((s32)dds3GetRandIntA(0, 100) >= rate) {
             return 0;
         }
         data->packindex = nextIndex;
@@ -1361,7 +1361,7 @@ s32 nbCheckBadPanicAction(datUnitWork_t *w)
     } else {
         ritu = 30;
     }
-    hit = dds3GetRandIntA(0, 100) < ritu;
+    hit = (s32)dds3GetRandIntA(0, 100) < ritu;
     if (hit) {
         return 0;
     }
