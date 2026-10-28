@@ -33,21 +33,3 @@ function. Also ruled out: both sides indexed (`tex[i] = ...D_00330808[i]`),
 which spends a fourth saved register on the shared `i * 4`; and
 `D_00330808[(u8)i]` with a signed counter, which is 10 of 28 words match and
 one word long.
-
-## fclTerminalInitMenu (fclTerminalInit, 0x7C)
-
-27 of 31 words match, at the exact 124-byte size, with zero instruction
-differences. Picks the terminal menu's text table, with the second group of
-four entries when the current event is 0x296, hands it to the cursor window,
-and sets the command bit and the work's enable byte.
-
-The four differing words are the two registers of the `fclTerminalCommandCount`
-read-modify-write: retail holds the `$28`-relative address in `$2` and the byte
-in `$3`, this holds the address in `$3` and the byte in `$2`. All four remaining
-words are a register name.
-
-Ruled out: writing the work's `+0x25` byte before the command bit, which costs
-four more words; the command bit spelled `x = x | 2` instead of `x |= 2`; a `u8
-*` work parameter with `work[0x25]`; an `s8 *` local for the work byte, which
-adds 12 bytes; and testing `!= 0x296` with the arms exchanged, which reaches
-only 24 matching.

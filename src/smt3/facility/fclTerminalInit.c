@@ -335,8 +335,6 @@ extern u32 trmMenuTextTable[];
 extern void fclInitCursorWindow(void *cursor, void *data, u8 count);
 extern void fclSetCursorList(void *cursor, s32 count);
 
-/* NON_MATCHING: 4 of 31 words differ (first at +0x54). */
-#ifdef NON_MATCHING
 void fclTerminalInitMenu(s32 id, void *commands, void *work)
 {
     u32 *table;
@@ -351,9 +349,6 @@ void fclTerminalInitMenu(s32 id, void *commands, void *work)
     fclTerminalCommandCount[0] |= 2;
     *((s8 *)commands + 0x25) = 1;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalInitMenu);
-#endif
 
 typedef struct
 {
