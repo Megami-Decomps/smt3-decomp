@@ -132,7 +132,7 @@ typedef struct nbMainProcessData_t
     u8 unk_A8[0xC];
     nbPacHandle_t *formpack;
     u8 unk_B8[0x4];
-    dds3ProcessID_t *mainproc;
+    dds3ProcessID_t *MainProcessID;
     u8 unk_C0[0x1C];
     void *packdata;
     u8 unk_E0[0x14];
@@ -1174,7 +1174,7 @@ void nbInitPanelProcess(nbMainProcessData_t *data)
     s32 i;
 
     id = dds3StartProcess(D_00545488, 0x3F9, 1, 1, nbPanelRunProcess, nbPanelShutdown, NULL);
-    dds3LinkProcess(data->mainproc, id);
+    dds3LinkProcess(data->MainProcessID, id);
     data->pnlproc = id;
     dds3LinkProcess(id, dds3StartProcess(D_00545498, 0x2B0E, 1, 1, nbPanelDrawProcess, NULL,
                                          NULL));

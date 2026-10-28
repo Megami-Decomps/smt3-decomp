@@ -20,7 +20,7 @@ typedef struct frFontRequest_t
     u8 unk0C[0x10];
     frFontChild_t *firstChild;
     void *lastChild;
-    struct frFontRequest_t *previous;
+    struct frFontRequest_t *prev;
     u8 unk28[0x1C];
 } frFontRequest_t;
 
@@ -231,7 +231,7 @@ void itfMiscSetRatioRGB(itfColorVector_t *output, s32 scaleX, s32 scaleY, s32 sc
 
 /* Replace each child color; parent color words are not modified. */
 void itfMiscChangeFontVertexColor(frFontRequest_t *pfont, u32 color) {
-    for (; pfont != NULL; pfont = pfont->previous) {
+    for (; pfont != NULL; pfont = pfont->prev) {
         frFontChild_t *child;
         for (child = pfont->firstChild; child != NULL; child = child->next) {
             child->parentDimensionsOrRenderWord.renderWord = color;
@@ -241,7 +241,7 @@ void itfMiscChangeFontVertexColor(frFontRequest_t *pfont, u32 color) {
 
 /* Clear each child's low byte, then OR unmasked bits into the full color word. */
 void itfMiscChangeFontAlpha(frFontRequest_t *pfont, u32 alpha) {
-    for (; pfont != NULL; pfont = pfont->previous) {
+    for (; pfont != NULL; pfont = pfont->prev) {
         frFontChild_t *child;
         for (child = pfont->firstChild; child != NULL; child = child->next) {
             child->parentDimensionsOrRenderWord.renderWord = (child->parentDimensionsOrRenderWord.renderWord & ~ITF_BYTE_MASK) | alpha;
@@ -251,7 +251,7 @@ void itfMiscChangeFontAlpha(frFontRequest_t *pfont, u32 alpha) {
 
 /* Translate parent entries only; child coordinates are left unchanged. */
 void itfMiscMoveFontPosition(frFontRequest_t *pfont, u32 ofsx, u32 ofsy) {
-    for (; pfont != NULL; pfont = pfont->previous) {
+    for (; pfont != NULL; pfont = pfont->prev) {
         pfont->x += ofsx;
         pfont->y += ofsy;
     }

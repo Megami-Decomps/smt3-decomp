@@ -132,7 +132,7 @@ typedef struct nbMainProcessData_t
     u8 unk_A8[0xC];
     nbPacHandle_t *formpack;
     u8 unk_B8[0x4];
-    dds3ProcessID_t *mainproc;
+    dds3ProcessID_t *MainProcessID;
     u8 unk_C0[0x1C];
     void *packdata;
     u8 unk_E0[0x14];
@@ -552,7 +552,7 @@ void nbInitEventProcess(nbMainProcessData_t *data)
     data->stat |= 0x1000;
     data->endtype = 0;
     id = dds3StartProcess(D_00545DC8, 0x3F9, 1, 1, nbEventProcess1, nbEventShutdown, e);
-    dds3LinkProcess(data->mainproc, id);
+    dds3LinkProcess(data->MainProcessID, id);
     data->eventproc = id;
 }
 

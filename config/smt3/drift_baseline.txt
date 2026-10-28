@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 883 members, 506 adopted constants.
+# 0 types, 881 members, 506 adopted constants.
 
 
 member dds3ModelResrc_t.unk_AC
@@ -431,7 +431,6 @@ member evtViewerUnit_t.unk10
 member fclEncyc_instance_tag.unk_00
 member fclEncyc_instance_tag.unk_28
 member fclEncyc_instance_tag.unk_364
-member fclEncyc_instance_tag.unk_36C
 member fclEncyc_instance_tag.unk_58
 member fclEncyc_instance_tag.unk_5A
 member fclEncyc_instance_tag.unk_5C
@@ -448,7 +447,6 @@ member fclEncyc_readmainwork_tag.unk_18
 member fclEncyc_readmainwork_tag.unk_1C
 member fclEncyc_readmainwork_tag.unk_1E
 member fclEncyc_readmainwork_tag.unk_20
-member fclEncyc_readmainwork_tag.unk_24
 member fclItemList_t.unk_01
 member fclPanelAnim_t.unk_01
 member fclPanelAnim_t.unk_04

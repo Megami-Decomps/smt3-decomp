@@ -243,7 +243,7 @@ typedef struct {
 
 /* Bezier parameter head: particle count and delay spread at their native offsets. */
 typedef struct {
-    f32 controlPoints[EFF_MAGATUHI_CONTROL_POINT_COUNT][EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 point[EFF_MAGATUHI_CONTROL_POINT_COUNT][EFF_MAGATUHI_VECTOR_WORD_COUNT];
     u8 loop;            /* 0x40 restart finished particles */
     u8 pad41[3];
     s32 life;    /* 0x44 frames a particle lives */
@@ -1314,8 +1314,8 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
     scale[0] = pMagaPoint4->param.jitterScales[0] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
-    SDF_VU0_LOADVECTOR(pMagaPoint4->param.controlPoints[0]);
-    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.controlPoints[1]);
+    SDF_VU0_LOADVECTOR(pMagaPoint4->param.point[0]);
+    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.point[1]);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(viewDirection);
@@ -1333,8 +1333,8 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
     scale[0] = pMagaPoint4->param.jitterScales[1] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
-    SDF_VU0_LOADVECTOR(pMagaPoint4->param.controlPoints[1]);
-    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.controlPoints[2]);
+    SDF_VU0_LOADVECTOR(pMagaPoint4->param.point[1]);
+    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.point[2]);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(viewDirection);
@@ -1352,8 +1352,8 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
     scale[0] = pMagaPoint4->param.jitterScales[2] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
-    SDF_VU0_LOADVECTOR(pMagaPoint4->param.controlPoints[2]);
-    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.controlPoints[3]);
+    SDF_VU0_LOADVECTOR(pMagaPoint4->param.point[2]);
+    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.point[3]);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(viewDirection);
@@ -1376,7 +1376,7 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
     SDF_VU0_LOADVECTOR(lastNormal);
     SDF_VU0_LOADVECTOR_B(scale);
     SDF_VU0_MULVECTOR();
-    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.controlPoints[3]);
+    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.point[3]);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(point);
     slot->controlPoints[3][0] = point[0];
@@ -1438,9 +1438,9 @@ void effMagaP4SetPoint(effMagatuhiCallback_t *hEffect, effMagatuhiRowsSrc_t *pP4
     u32 controlPointIndex;
 
     for (controlPointIndex = 0; controlPointIndex < EFF_MAGATUHI_CONTROL_POINT_COUNT; controlPointIndex++) {
-        dst->param.controlPoints[controlPointIndex][0] = pP4Point->controlPoints[controlPointIndex][0];
-        dst->param.controlPoints[controlPointIndex][1] = pP4Point->controlPoints[controlPointIndex][1];
-        dst->param.controlPoints[controlPointIndex][2] = pP4Point->controlPoints[controlPointIndex][2];
+        dst->param.point[controlPointIndex][0] = pP4Point->controlPoints[controlPointIndex][0];
+        dst->param.point[controlPointIndex][1] = pP4Point->controlPoints[controlPointIndex][1];
+        dst->param.point[controlPointIndex][2] = pP4Point->controlPoints[controlPointIndex][2];
         dst->param.jitterScales[controlPointIndex] = pP4Point->jitterScales[controlPointIndex];
     }
 }

@@ -20,7 +20,7 @@ typedef struct frFontRequest_t
     u8 unk0C[0x10];
     frFontChild_t *firstChild;
     void *lastChild;
-    struct frFontRequest_t *previous;
+    struct frFontRequest_t *prev;
     u8 unk28[0x1C];
 } frFontRequest_t;
 

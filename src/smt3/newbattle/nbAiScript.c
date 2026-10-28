@@ -132,7 +132,7 @@ typedef struct nbMainProcessData_t
     u8 unk_A8[0xC];
     nbPacHandle_t *formpack;
     u8 unk_B8[0x4];
-    dds3ProcessID_t *mainproc;
+    dds3ProcessID_t *MainProcessID;
     u8 unk_C0[0x1C];
     void *packdata;
     u8 unk_E0[0x14];
@@ -976,13 +976,13 @@ void nbInitAiScript(nbActionProcessData_t *a, s32 no)
     dds3ProcessID_t *proc;
     scrProcessWork_s *w;
 
-    proc = scrStartScript2(a->data->mainproc->priority - 1, scrEmbedded_4F0800, no);
+    proc = scrStartScript2(a->data->MainProcessID->priority - 1, scrEmbedded_4F0800, no);
     scrSetUserData(proc, a);
     w = dds3GetProcessData(proc);
     if (w->MesHandle >= 0) {
         itfMesMngSetVar(w->MesHandle, 0, a->work->id, 1);
     }
-    dds3LinkProcess(a->data->mainproc, proc);
+    dds3LinkProcess(a->data->MainProcessID, proc);
     a->data->aiproc = proc;
 }
 INCLUDE_SDATA(const s32, "newbattle/nbAiScript", btl_ai_rot_cnt);

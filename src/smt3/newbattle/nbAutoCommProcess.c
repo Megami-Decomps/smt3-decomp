@@ -132,7 +132,7 @@ typedef struct nbMainProcessData_t
     u8 unk_A8[0xC];
     nbPacHandle_t *formpack;
     u8 unk_B8[0x4];
-    dds3ProcessID_t *mainproc;
+    dds3ProcessID_t *MainProcessID;
     u8 unk_C0[0x1C];
     void *packdata;
     u8 unk_E0[0x14];
@@ -356,7 +356,7 @@ void nbInitAutoCommProcess(nbMainProcessData_t *data)
     dds3ProcessID_t *proc;
 
     proc = dds3StartProcess(D_005458A0, 0x2B0E, 1, 1, nbAutoCommProcess1, NULL, data);
-    dds3LinkProcess(data->mainproc, proc);
+    dds3LinkProcess(data->MainProcessID, proc);
     data->autocommproc = proc;
 }
 

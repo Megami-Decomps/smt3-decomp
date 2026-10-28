@@ -887,7 +887,7 @@ struct effPCPDistortionBlurExpParam_t {
     s32 fade_out;
     s32 area_s;
     s32 area_e;
-    dds3Effect_DistortionBlurParam_t res;
+    dds3Effect_DistortionBlurParam_t DistBlur;
 };
 
 
@@ -1378,7 +1378,7 @@ struct effPCPThunderSphereExpParam_t {
     s32 fade_out;
     s32 radius_s;
     s32 radius_e;
-    effPCPThunderSpherePolyParam_t res;
+    effPCPThunderSpherePolyParam_t ThunderSpherePoly;
 };
 
 /* Shared by ref-counted trail tasks; constructors allocate this full record. */
@@ -4449,7 +4449,7 @@ effPCPDistortionBlurExp_tag *effPCPDistortionBlurExpCreate(effPCPDistortionBlurE
     effPCPDistortionBlurExp_tag *work;
 
     work = sdfChipAllocDirect(sizeof(effPCPDistortionBlurExp_tag));
-    work->resource.scatter = dds3EffectDistortionBlurCreate(&pParam->res);
+    work->resource.scatter = dds3EffectDistortionBlurCreate(&pParam->DistBlur);
     work->type = pParam->type;
     work->life = pParam->life;
     work->fade_in = pParam->fade_in;
@@ -4458,7 +4458,7 @@ effPCPDistortionBlurExp_tag *effPCPDistortionBlurExpCreate(effPCPDistortionBlurE
     work->area_e = pParam->area_e;
     work->abgr = 0x80808080;
     work->frame = 0;
-    work->abgr_base = pParam->res.abgr;
+    work->abgr_base = pParam->DistBlur.abgr;
     return work;
 }
 
@@ -4475,7 +4475,7 @@ void effPCPDistortionBlurExpCopy(effPCPDistortionBlurExp_tag *work) {
     params.fade_out = work->fade_out;
     params.area_s = work->area_s;
     params.area_e = work->area_e;
-    params.res = work->resource.scatter->params;
+    params.DistBlur = work->resource.scatter->params;
     effPCPDistortionBlurExpCreate(&params);
 }
 
@@ -5693,9 +5693,9 @@ effPCPThunderSphereExp_tag *effPCPThunderSphereExpCreate(effPCPThunderSphereExpP
     effPCPThunderSphereExp_tag *work = sdfChipAllocDirect(sizeof(effPCPThunderSphereExp_tag));
     effPCPThunderSpherePoly_t *handle;
 
-    pParam->res.width = (f32)pParam->radius_s;
-    pParam->res.height = (f32)pParam->radius_s;
-    handle = effPCPThunderSpherePolyCreate(&pParam->res);
+    pParam->ThunderSpherePoly.width = (f32)pParam->radius_s;
+    pParam->ThunderSpherePoly.height = (f32)pParam->radius_s;
+    handle = effPCPThunderSpherePolyCreate(&pParam->ThunderSpherePoly);
     work->life = pParam->life;
     work->fade_in = pParam->fade_in;
     work->fade_out = pParam->fade_out;
@@ -5704,9 +5704,9 @@ effPCPThunderSphereExp_tag *effPCPThunderSphereExpCreate(effPCPThunderSphereExpP
     work->abgr = 0x80808080;
     work->frame = 0;
     work->scale = 1.0f;
-    work->pos[0] = pParam->res.origin[0];
-    work->pos[1] = pParam->res.origin[1];
-    work->pos[2] = pParam->res.origin[2];
+    work->pos[0] = pParam->ThunderSpherePoly.origin[0];
+    work->pos[1] = pParam->ThunderSpherePoly.origin[1];
+    work->pos[2] = pParam->ThunderSpherePoly.origin[2];
     work->pThunderSpherePoly = handle;
     return work;
 }
@@ -5724,7 +5724,7 @@ effPCPThunderSphereExp_tag *effPCPThunderSphereExpCopy(effPCPThunderSphereExp_ta
     params.fade_out = work->fade_out;
     params.radius_s = work->radius_s;
     params.radius_e = work->radius_e;
-    params.res = *res;
+    params.ThunderSpherePoly = *res;
     return effPCPThunderSphereExpCreate(&params);
 }
 

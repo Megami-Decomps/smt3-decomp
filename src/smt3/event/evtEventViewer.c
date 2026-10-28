@@ -33,7 +33,7 @@ typedef struct evtFrameInfo_t {
         s32 sw[3];
         f32 sf[3];
     } param;                       /* 0x08 */
-    void *payload;                 /* 0x14 */
+    void *work;                 /* 0x14 */
     struct evtFrameInfo_t *next;   /* 0x18 */
     struct evtFrameInfo_t *prev;   /* 0x1C */
 } evtFrameInfo_t;
@@ -338,11 +338,11 @@ evtFrameInfo_t *evtGetSelectFrameInfo(void)
 void DelFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f)
 {
     UnlinkFrameInfo(parent, f);
-    if (f->payload != NULL) {
+    if (f->work != NULL) {
         if (parent->type != 0x12) {
-            sdfChipFreeDirect(f->payload);
+            sdfChipFreeDirect(f->work);
         }
-        f->payload = NULL;
+        f->work = NULL;
     }
     sdfChipFreeDirect(f);
 }
@@ -652,10 +652,10 @@ void *AddBED(void *data, s32 cutno, s32 nameindex, s32 posindex, s32 baseframe)
 
 void DelBED(evtFrameInfo_t *frame)
 {
-    if (frame->payload != NULL) {
-        dds3DeleteSceneBasicData(frame->payload);
+    if (frame->work != NULL) {
+        dds3DeleteSceneBasicData(frame->work);
     }
-    frame->payload = NULL;
+    frame->work = NULL;
 }
 
 void DrawEffect(void)

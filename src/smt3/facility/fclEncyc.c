@@ -37,11 +37,11 @@ typedef struct
     /* 0x0024 */ f32 screenOfsY;
     /* 0x0028 */ u8 unk_28[0x10];
     /* 0x0038 */ s32 texHandle[7];
-    /* 0x0054 */ s32 flags;
+    /* 0x0054 */ s32 stat;
     /* 0x0058 */ u16 unk_58;
     /* 0x005A */ u16 unk_5A;
     /* 0x005C */ u8 unk_5C[8];
-    /* 0x0064 */ s16 listCursor[4];
+    /* 0x0064 */ s16 lw_cur[4];
     /* 0x006C */ u8 unk_6C;
     /* 0x006D */ u8 unk_6D;
     /* 0x006E */ u16 modelId;
@@ -51,7 +51,7 @@ typedef struct
     /* 0x0360 */ void *explainData;
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
-    /* 0x036C */ s32 unk_36C;
+    /* 0x036C */ s32 pwork;
 } fclEncyc_instance_tag;
 
 extern fclEncyc_instance_tag *g_pinst;
@@ -148,7 +148,7 @@ typedef struct
     /* 0x1C */ s16 unk_1C;
     /* 0x1E */ u8 unk_1E[2];
     /* 0x20 */ s32 unk_20;
-    /* 0x24 */ s32 unk_24;
+    /* 0x24 */ s32 ribbon_accel;
 } fclEncyc_readmainwork_tag;
 
 extern s32 dds3KillProcess(s32 id, s32 shutdowntimer);
@@ -396,18 +396,18 @@ void InitializeInstance(fclEncyc_instance_tag *pinst)
 {
     pinst->unk_6D = 1;
     pinst->modelId = -1;
-    pinst->flags = 0;
+    pinst->stat = 0;
     pinst->unk_58 = 0;
     pinst->unk_5A = 0;
-    pinst->listCursor[0] = 0;
-    pinst->listCursor[1] = 0;
-    pinst->listCursor[2] = 0;
-    pinst->listCursor[3] = 0;
+    pinst->lw_cur[0] = 0;
+    pinst->lw_cur[1] = 0;
+    pinst->lw_cur[2] = 0;
+    pinst->lw_cur[3] = 0;
     pinst->unk_6C = 0;
     pinst->unk_70 = 0;
     pinst->explainData = NULL;
     pinst->unk_364 = 0;
-    pinst->unk_36C = 0;
+    pinst->pwork = 0;
     SetScreenOffset(pinst, 0);
 }
 
@@ -425,14 +425,14 @@ void allocPhaseBuffer(fclEncyc_instance_tag *work, s32 aSize)
     s32 lock = sdfMemLock(buf);
 
     work->allocation = buf;
-    work->unk_36C = lock;
+    work->pwork = lock;
 }
 
 void ReleaseWork(fclEncyc_instance_tag *pinst)
 {
-    if (pinst->unk_36C != 0) {
+    if (pinst->pwork != 0) {
         sdfMemFreeDirect(pinst->allocation);
-        pinst->unk_36C = 0;
+        pinst->pwork = 0;
     }
 }
 
@@ -450,7 +450,7 @@ s32 DRAW_ENCYC_Process(void)
     if (work == NULL) {
         return 0;
     }
-    if ((work->flags & 0x20) == 0) {
+    if ((work->stat & 0x20) == 0) {
         return 0;
     }
     SetCameraLightParam(work);
@@ -473,7 +473,7 @@ extern void ReleaseFontList(void **ppfont, s32 num);
 
 void DestPhaseRegistTop(fclEncyc_instance_tag *pinst)
 {
-    s32 base = pinst->unk_36C;
+    s32 base = pinst->pwork;
 
     if (*(void **)(base + 0x11DC) != NULL)
     {
@@ -500,7 +500,7 @@ void DestPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
 {
     void *scene;
 
-    fclRbnRelease(*(fclRibbon_t **)(pinst->unk_36C + 0x200));
+    fclRbnRelease(*(fclRibbon_t **)(pinst->pwork + 0x200));
     cmpResetDrawEnv();
     scene = dds3GetActiveScene();
     if (scene != NULL)
@@ -526,11 +526,11 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadStatus);
 
 void DrawPhaseReadStatus(fclEncyc_instance_tag *pinst)
 {
-    s32 base = pinst->unk_36C;
+    s32 base = pinst->pwork;
 
     DrawBackBlackBoard(*(s32 *)(base + 0x58), *(s16 *)(base + 0x5C));
     if (cmpGetEncycWork() != 0) {
-        pinst->flags |= 0x400;
+        pinst->stat |= 0x400;
     }
     cmpDrawStatusComEx(base + 0x90, *(u8 *)(base + 0x1E), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
     DrawExplainBack(*(s16 *)(base + 0x5E));
@@ -544,7 +544,7 @@ void DrawPhaseReadStatus(fclEncyc_instance_tag *pinst)
 
 void DestPhaseReadStatus(fclEncyc_instance_tag *pinst)
 {
-    s32 base = pinst->unk_36C;
+    s32 base = pinst->pwork;
     void *scene;
 
     ReleaseFontExplain(pinst, 1);
@@ -566,11 +566,11 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadSummon);
 
 void DrawPhaseReadSummon(fclEncyc_instance_tag *pinst)
 {
-    s32 base = pinst->unk_36C;
+    s32 base = pinst->pwork;
 
     DrawBackBlackBoard(*(s32 *)(base + 0x58), *(s16 *)(base + 0x5C));
     if (cmpGetEncycWork() != 0) {
-        pinst->flags |= 0x400;
+        pinst->stat |= 0x400;
     }
     cmpDrawStatusComEx(base + 0x90, *(u8 *)(base + 0x1E), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
     DrawExplainBack(*(s16 *)(base + 0x5E));
@@ -604,8 +604,8 @@ void PushListwinCursor(fclEncyc_instance_tag *pinst, lstListWindow_t *plistwin, 
 {
     cmpCursorPos_t *cur = &plistwin->cursorPos;
 
-    pinst->listCursor[Stack * 2] = cur->Index;
-    pinst->listCursor[Stack * 2 + 1] = cur->Shift;
+    pinst->lw_cur[Stack * 2] = cur->Index;
+    pinst->lw_cur[Stack * 2 + 1] = cur->Shift;
 }
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", PopListwinCursor);
@@ -638,7 +638,7 @@ void ResetReadMainRibbon(fclEncyc_readmainwork_tag *pwork)
     pwork->unk_18 = 0xA8;
     pwork->unk_1C = 0x80;
     pwork->unk_20 = 0;
-    pwork->unk_24 = 0x100;
+    pwork->ribbon_accel = 0x100;
 }
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", AcceptKeyChangeSort);
@@ -737,7 +737,7 @@ extern void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker);
 
 void ReleaseFontExplain(fclEncyc_instance_tag *pinst, s32 release_mesmng)
 {
-    s32 base = pinst->unk_36C;
+    s32 base = pinst->pwork;
 
     itfMesMngRequestMessageRelease(*(s32 *)(base + 8), 0);
     if (*(void **)(base + 0x88) != NULL)
@@ -759,8 +759,8 @@ void FadeOutRibbon(fclEncyc_readmainwork_tag *pwork)
     }
     pwork->unk_20 += 0x20;
     pwork->unk_0C -= pwork->unk_20;
-    pwork->unk_14 -= pwork->unk_24;
-    pwork->unk_24 -= 0x20;
+    pwork->unk_14 -= pwork->ribbon_accel;
+    pwork->ribbon_accel -= 0x20;
 }
 
 void FadeInRibbon(fclEncyc_readmainwork_tag *pwork)
@@ -769,10 +769,10 @@ void FadeInRibbon(fclEncyc_readmainwork_tag *pwork)
     if (pwork->unk_1C >= 0x81) {
         pwork->unk_1C = 0x80;
     }
-    pwork->unk_24 += 0x20;
+    pwork->ribbon_accel += 0x20;
     pwork->unk_0C += pwork->unk_20;
     pwork->unk_20 -= 0x20;
-    pwork->unk_14 += pwork->unk_24;
+    pwork->unk_14 += pwork->ribbon_accel;
 }
 
 s32 GetDevilParam(fclencyceelem_t *pelem, s32 type)
@@ -828,7 +828,7 @@ void RequestModelLoad(fclEncyc_instance_tag *pinst, s32 id)
         }
     }
     *(u16 *)((u8 *)pinst + 0x6E) = id;
-    pinst->flags |= 4;
+    pinst->stat |= 4;
 }
 
 void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag)
@@ -847,7 +847,7 @@ void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag)
 
 void MoveScreenOffset(fclEncyc_instance_tag *pinst)
 {
-    if ((pinst->flags & 8) != 0) {
+    if ((pinst->stat & 8) != 0) {
         pinst->screenOfsX -= 16.0f;
         if (pinst->screenOfsX < 2048.0f) {
             pinst->screenOfsX = 2048.0f;
@@ -900,7 +900,7 @@ extern void RequestModelLoad(fclEncyc_instance_tag *pinst, s32 id);
 
 void ChangeDevilObjectReadMain(s32 recindex, fclEncyc_instance_tag *pinst)
 {
-    s32 base = pinst->unk_36C;
+    s32 base = pinst->pwork;
     u16 *record = (u16 *)((u8 *)DDS3_GBWK + recindex * 0xB0 + 0x11E90);
 
     *(u16 *)base = recindex;

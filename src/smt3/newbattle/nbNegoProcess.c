@@ -134,7 +134,7 @@ typedef struct nbMainProcessData_t
     u8 unk_A8[0xC];
     nbPacHandle_t *formpack;
     u8 unk_B8[0x4];
-    dds3ProcessID_t *mainproc;
+    dds3ProcessID_t *MainProcessID;
     u8 unk_C0[0x1C];
     void *packdata;
     u8 unk_E0[0x14];
@@ -1012,7 +1012,7 @@ void nbInitNegoProcess(nbActionProcessData_t *actdata, s32 pformindex, s32 eform
     nbSetAllHojoSkillWork(n);
     p2sdBgmVolDown();
     id = dds3StartProcess(D_00551160, 0x3F9, 1, 1, nbNegoProcess1, nbNegoShutdown, n);
-    dds3LinkProcess(actdata->data->mainproc, id);
+    dds3LinkProcess(actdata->data->MainProcessID, id);
     actdata->data->negoproc = id;
 }
 INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", D_00551148);

@@ -132,7 +132,7 @@ typedef struct nbMainProcessData_t
     u8 unk_A8[0xC];
     nbPacHandle_t *formpack;
     u8 unk_B8[0x4];
-    dds3ProcessID_t *mainproc;
+    dds3ProcessID_t *MainProcessID;
     u8 unk_C0[0x1C];
     void *packdata;
     u8 unk_E0[0x14];
@@ -565,7 +565,7 @@ void nbStartEventPacks(nbMainProcessData_t *data)
     for (i = 0; i < 16; i++) {
         if (nbEventEntryTable[i].encno != 0 && nbEventEntryTable[i].encno == data->encno) {
             if (nbEventEntryTable[i].rid != 0) {
-                dds3LinkProcess(data->mainproc,
+                dds3LinkProcess(data->MainProcessID,
                                 evtLoadEventPack(nbEventEntryTable[i].rid));
             }
             if (nbEventEntryTable[i].unk_0C != 0) {
