@@ -111,7 +111,11 @@ typedef struct nbActionProcessData_t {
 struct nbParty_t {
     u16 flag;
     s16 formindex;
-    u8 unk04[0x7C];
+    s16 statindex;
+    u16 partyindex;
+    s16 count[20];
+    u32 aisyo[16];
+    u16 hojoskill[8];
 };
 
 /* 60-byte rows; this unit reads only the base hp and mp pairs. */

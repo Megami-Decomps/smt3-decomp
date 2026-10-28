@@ -37,7 +37,11 @@ typedef struct nbCamera_t {
 struct nbParty_t {
     u16 flag;
     s16 formindex;
-    u8 unk04[0x7C];
+    s16 statindex;
+    u16 partyindex;
+    s16 count[20];
+    u32 aisyo[16];
+    u16 hojoskill[8];
 };
 
 /* The per-shot parameters the nbCameraShot_*_Set2 family reads; 0x30 on the
@@ -163,7 +167,8 @@ extern void effBTLModelLook2(nbFormation_t *pFormation, sdfVector4_t *pTargetPos
 extern void SetRotateMatrixY(f32 aAngle);
 
 typedef struct nbCamera_AllTable_t {
-    u8 unk00[8];
+    f32 distance;
+    f32 up;
     f32 radius;
 } nbCamera_AllTable_t;
 

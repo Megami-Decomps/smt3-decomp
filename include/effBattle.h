@@ -34,28 +34,28 @@ typedef struct effBTL_SkillPartsList_t {
 } effBTL_SkillPartsList_t;
 
 typedef struct effBTL_SkillCutTable_t {
-    s32 frame;
-    u8 unk04[2];
-    u16 shake;
-    u16 shakeFrame;
-    u16 shakeFade;
-    u8 colorKeys[0x24];
-    u8 rgbKeys[0x18];
-    s32 callbackFrame; /* 0x48 */
-    u8 unk4C[0x20];
-    u16 count; /* 0x6C */
-    u8 unk6E[2];
-    s32 colorRampEndFrame;
-    u8 actorScaleEnabled;
-    u8 unk75[3];
-    effBTL_SkillPartsList_t entries[1]; /* 0x78: variable-length serialized entries */
+    s32 frame;              /* 0x00 */
+    u8 pad04[2];
+    u16 shake;                     /* 0x06: screen-shake amount; 31 or more logs and caps at 300 frames */
+    u16 shakeFrame;                /* 0x08: frame at which the shake starts */
+    u16 shakeFade;                 /* 0x0A: fade applied with the shake */
+    u8 colorKeys[0x24];            /* 0x0C: colour keyframes read by the unit colour keyframe routine */
+    u8 rgbKeys[0x18];              /* 0x30: RGB keyframes read by the unit RGB keyframe routine */
+    s32 callbackFrame;             /* 0x48 */
+    u8 pad4C[0x20];
+    u16 count;                     /* 0x6C */
+    u8 pad6E[2];
+    s32 colorRampEndFrame;         /* 0x70 */
+    u8 actorScaleEnabled;          /* 0x74 */
+    u8 pad75[3];
+    effBTL_SkillPartsList_t entries[1];     /* 0x78 */
 } effBTL_SkillCutTable_t;
 
 /* Each BED bank reserves sixty entries, for a native stride of 0x618. */
 typedef struct effBTLBank_t {
-    u8 unk00[8];
-    effBTL_SkillCutTable_t list;
-    u8 unk98[0x580];
+    u8 pad00[8];
+    effBTL_SkillCutTable_t list;       /* 0x08 */
+    u8 pad98[0x580];
 } effBTLBank_t;
 
 /* effBTLCreate allocates 0xC44 bytes; its two banks occupy 0xC30. */

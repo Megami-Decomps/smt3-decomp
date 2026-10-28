@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 881 members, 506 adopted constants.
+# 0 types, 872 members, 506 adopted constants.
 
 
 member dds3ModelResrc_t.unk_AC
@@ -196,7 +196,6 @@ member cmpStockWork_t.unk_00AC
 member datCommentEntry_t.unk_03
 member datDevilAI_t.unk_00
 member datDevilAI_t.unk_A4
-member datDevilFormat_t.unk_04
 member datDevilInfo_t.unk_01
 member datDevilInfo_t.unk_05
 member datDevilInfo_t.unk_06
@@ -260,8 +259,6 @@ member dds3TitleWork_t.unk_30
 member dds3TitleWork_t.unk_34
 member dds3UnitObjectBasicWorkData_t.unk18
 member effBTLAimParams_t.unk03
-member effBTLBank_t.unk00
-member effBTLBank_t.unk98
 member effBTLCut_t.unk16
 member effBTLLightWork_t.unk00
 member effBTLModelColorParam_t.unknown00
@@ -272,10 +269,6 @@ member effBTLModelColorParam_t.unknown10
 member effBTLModelColorParam_t.unknown14
 member effBTLModelColorParam_t.unknown18
 member effBTLSystemFunc_t.unknown30
-member effBTL_SkillCutTable_t.unk04
-member effBTL_SkillCutTable_t.unk4C
-member effBTL_SkillCutTable_t.unk6E
-member effBTL_SkillCutTable_t.unk75
 member effBTL_SkillLight_t.unknown01
 member effBTL_SkillLight_t.unknown02
 member effBTL_SkillLight_t.unknown03
@@ -649,7 +642,6 @@ member nbCameraSkillPtr_t.unk00
 member nbCameraStateEntry_t.unk00
 member nbCameraStateEntry_t.unk0D
 member nbCameraUnitWork_t.unk00
-member nbCamera_AllTable_t.unk00
 member nbDeadEvent_t.unk04
 member nbDevilData_t.unk02
 member nbDevilInfo_t.unk05
@@ -693,7 +685,6 @@ member nbMakaProcessData_t.unk_14
 member nbNegoSkillEntry_t.unk_00
 member nbPacEntry_t.unk_00
 member nbPacHandle_t.unk_00
-member nbParty_t.unk04
 member nbStatWork_t.unk_02
 member nbTarSelProcessData_t.unk00
 member nbTextBox_t.unk_00
