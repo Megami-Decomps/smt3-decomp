@@ -2859,7 +2859,20 @@ INCLUDE_ASM(const s32, "code_0022C578", fclDrawArrowCursor);
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawPanel);
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawQuadGauge);
+extern const u32 D_0053FDC0[];
+extern const u32 D_0053FDD8[];
+
+void campDhDrawQuadGauge(s32 ratio)
+{
+    u32 coordinates[6];
+    u32 colors[3];
+
+    memcpy(coordinates, D_0053FDC0, sizeof(coordinates));
+    memcpy(colors, D_0053FDD8, sizeof(colors));
+    coordinates[1] -= (0x100 - ratio) << 5;
+    colors[0] = fclBlendColor(colors[0], 0, 0x100);
+    cmpDrawTriG(coordinates, coordinates + 3, 0, colors, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHelpTextAlt);
 
