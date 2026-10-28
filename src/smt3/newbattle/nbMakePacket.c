@@ -373,6 +373,7 @@ extern void *memset(void *a, s32 b, u32 c);
 extern u32 f;
 
 extern void ToMatrix(void);
+extern f32 sdfAtan2(f32 aY, f32 aX);
 
 extern f32 nbMakeUnitMoveGetCyDist(nbFormation_t *i_form, nbFormation_t *t_form);
 
@@ -1593,7 +1594,54 @@ s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMoveGetCyDist);
+f32 nbMakeUnitMoveGetCyDist(nbFormation_t *i_form, nbFormation_t *t_form)
+{
+    sdfVector4_t t_center;
+    sdfVector4_t i_center;
+    f32 angle;
+    f32 result;
+
+    SDF_VU0_LOADVECTOR(&i_form->rot);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&i_form->center);
+    SDF_VU0_SCALEVECTOR(i_form->scl);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_LOADVECTOR_B(&i_form->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&i_center);
+    i_center.y -= i_form->h * i_form->scl * 0.25f;
+
+    SDF_VU0_LOADVECTOR(&t_form->rot);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&t_form->center);
+    SDF_VU0_SCALEVECTOR(t_form->scl);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_LOADVECTOR_B(&t_form->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&t_center);
+    t_center.y -= t_form->h * t_form->scl * 0.25f;
+
+    angle = sdfAtan2(sdfFabs(t_center.y - i_center.y), 100.0f);
+
+    if (t_center.y < i_center.y) {
+        result = angle * 50.0f;
+        if (result > 50.0f) {
+            result = 50.0f;
+        }
+    } else {
+        result = angle * 100.0f;
+        if (result > 100.0f) {
+            result = 100.0f;
+        }
+    }
+
+    result += 100.0f;
+    result += i_form->center.z * i_form->scl;
+    if (result < (i_form->r - i_form->cr) * i_form->scl) {
+        result = (i_form->r - i_form->cr) * i_form->scl;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMovePacket);
 
