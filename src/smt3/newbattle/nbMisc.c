@@ -664,7 +664,38 @@ s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formindex)
     return i;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMisc", nbGetRandamStock);
+typedef struct
+{
+    u8 unk_00000[0xA54];
+    datUnitWork_t unitwork[16];
+} nbStockGlobalWork_t;
+
+extern nbStockGlobalWork_t *nbStockGlobalWork asm("DDS3_GBWK");
+extern u32 dds3GetRandIntA(void *state, u32 limit);
+
+s32 nbGetRandamStock(void)
+{
+    s32 entries[16];
+    u32 count = 0;
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        if ((nbStockGlobalWork->unitwork[i].flag & 1) != 0 &&
+            (nbStockGlobalWork->unitwork[i].flag & 2) == 0 &&
+            (nbStockGlobalWork->unitwork[i].flag & 0x10) == 0 &&
+            (nbStockGlobalWork->unitwork[i].badstatus & 0xFFF) != 0x800 &&
+            nbStockGlobalWork->unitwork[i].hp != 0) {
+            entries[count++] = i;
+        }
+    }
+    {
+        s32 selected = -1;
+        if (count != 0) {
+            selected = entries[dds3GetRandIntA(NULL, count)];
+        }
+        return selected;
+    }
+}
 
 void nbSetMainPhase(s32 encno)
 {
