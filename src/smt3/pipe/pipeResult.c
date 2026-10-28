@@ -5,6 +5,13 @@
 #include "motion.h"
 
 extern void (*D_00551828)(void);
+extern s32 GetRBoxNum(void);
+extern s32 GetDamage(void);
+extern s8 pipeMessCount;
+extern s8 messCount;
+extern void pipeMessStartIdx(void);
+extern void datPartyDamagePipe(s32 big, s32 sml);
+extern s32 pipeMessDraw(void);
 
 extern s32 fclChkMessage(void);
 
@@ -37,7 +44,22 @@ extern void fclSetMessageVar_20743088(s8 Index, char *pStr);
 
 INCLUDE_ASM(const s32, "pipe/pipeResult", pipeResultSection);
 
-INCLUDE_ASM(const s32, "pipe/pipeResult", pipeResultDraw);
+s32 pipeResultDraw(void)
+{
+    s32 rbox = GetRBoxNum();
+    s32 damage = GetDamage();
+
+    if (pipeMessDraw() != 0) {
+        if (messCount < pipeMessCount + rbox + 1) {
+            pipeMessStartIdx();
+            messCount++;
+        } else {
+            datPartyDamagePipe((u32)damage >> 16, damage & 0xFFFF);
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeResult", pipeMessStartIdx);
 
