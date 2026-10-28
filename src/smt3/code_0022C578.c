@@ -3160,7 +3160,47 @@ void cmpStepHeartsAttachCursor(s32 step)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateHeartsAttachConfirm);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateHeartsRemoveConfirm);
+extern s32 fclChkSelMessage(void);
+extern s8 fclGetSelMessagePos(void);
+extern s8 fclEndMessage(void);
+extern void fclSetMessageInvalid(s8 mode);
+extern s32 fclStartMessage(s32 message);
+extern void datRemoveHearts(void);
+
+void cmpUpdateHeartsRemoveConfirm(void)
+{
+    s8 phase = ((s8 *)campDhUpdateWork)[0x18];
+
+    if (phase > 0) {
+        if (phase == 1) {
+            fclSetMessageVar_20743088(0xC, (s32)pstr[*((u8 *)DDS3_GBWK + 0x1CFA)]);
+            fclSetMessageInvalid(1);
+            fclStartMessage(5);
+            datRemoveHearts();
+            ((s8 *)campDhUpdateWork)[0x18] = 2;
+        }
+        if (fclChkMessage() != 0) {
+            return;
+        }
+        campDhUpdateWork->unk_01[0] = 4;
+        campDhUpdateWork->unk_04 = 1;
+        return;
+    }
+    if (fclChkSelMessage() != 0) {
+        return;
+    }
+    switch (fclGetSelMessagePos()) {
+    case 0:
+        ((s8 *)campDhUpdateWork)[0x18] = 1;
+        break;
+    case 1:
+        if (((s8 *)campDhUpdateWork)[0x18] == 0) {
+            ((s8 *)campDhUpdateWork)[0x18] = 2;
+        }
+        fclEndMessage();
+        break;
+    }
+}
 
 s32 campDhWaitMessageEnd(void)
 {
