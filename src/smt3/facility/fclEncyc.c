@@ -610,7 +610,40 @@ void ReleaseWork(fclEncyc_instance_tag *pinst)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CALC_ENCYC_Process);
+extern void (*D_00332228[])(fclEncyc_instance_tag *);
+extern void (*CalcPhaseTable[])(fclEncyc_instance_tag *);
+extern s32 cmpModelSetup(u16 id, s32 blocking);
+extern s32 cmpGetEncycWork(void);
+extern void ChangeModelMotion(s32 id, s32 model, s32 flags);
+
+s32 CALC_ENCYC_Process(void)
+{
+    fclEncyc_instance_tag *pinst = g_pinst;
+    void (*phase)(fclEncyc_instance_tag *);
+    s32 ready;
+
+    if (pinst == NULL) return 0;
+    if (!(pinst->stat & 1)) {
+        phase = D_00332228[(s16)pinst->unk_58];
+        if (phase != NULL) phase(pinst);
+        pinst->stat |= 1;
+    }
+    ready = cmpLoadStatusModel();
+    if ((pinst->stat & 4) && ready != 1) {
+        if (cmpModelSetup(pinst->modelId, 0) == 1) {
+            pinst->stat &= ~0x400;
+        }
+        pinst->stat &= ~4;
+    }
+    if ((pinst->stat & 0x40) && cmpGetEncycWork() != 0) {
+        ChangeModelMotion((s16)pinst->modelId, cmpGetEncycWork(), pinst->stat);
+        pinst->stat &= ~0x40;
+    }
+    phase = CalcPhaseTable[(s16)pinst->unk_58];
+    if (phase != NULL) phase(pinst);
+    pinst->stat |= 0x20;
+    return 0;
+}
 
 extern void SetCameraLightParam(fclEncyc_instance_tag *pinst);
 
