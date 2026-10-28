@@ -171,37 +171,6 @@ between them; `*(s32 *)p` for the `step` store; `nbBadCurseTimer++` in place of
 the index local; and both store orders, which only swap the registers the
 timer and the table base get.
 
-## Flow1_23 (newbattle/nbMakePacket, 0xD8)
-
-24 of 54 words match, at the exact 216-byte size.
-
-The structure is settled: `nbGetUnitWorkPointer(n->data,
-&n->data->party[n->boupartyindex])` before a two-case `switch` over
-`nownegophase`, with `case 0` setting `waitframe` from `nbSetNegoNoMotion` and
-`case 1` reading the `master_text` row for the returned unit's id. Every
-instruction is present in retail's order.
-
-What differs is one register. Retail keeps the work pointer in `$6`, reached
-through an explicit `daddu $6, $2, $0` copy of the call's result, and spends
-`$2` on the dispatch's compare constant and the default arm's zero. ee-gcc
-coalesces the work pointer into `$2` instead, which also makes `case 1`'s
-first instruction read `$2`, so the `$2 = 0` of the default arm is no longer
-safe in the second dispatch test's delay slot and the branch comes out `beql`
-with `case 1`'s load annulled where retail has a plain `beq`. The annul bit
-and the register are therefore one fact, not two.
-
-Ruled out: an `s32 phase` local for the switch value, used in the `!= phase`
-test as well; a separate `id` local for `work->id`; a `nbMainProcessData_t *`
-local for `n->data`; assigning `phase` before the call rather than after; an
-`if`/`if` chain in place of the `switch` (39 of 52); `return 0` against
-`break` in `case 0` (one word better, kept); and a `nbMasterTextEntry_t *`
-row pointer against the subscript written twice (identical).
-
-Confirmed on the way: `nbMasterTextEntry_t` carries an `s32` message index at
-`+0x00` and a `u8` negotiation phase at `+0x08`, inside what was
-`unk_00[0x9]`; retail reads the first as a `flowmsg` subscript and compares
-the second against `nownegophase`.
-
 ## Flow5_6, Flow5_18 (newbattle/nbMakePacket, 0xD8 each)
 
 23 of 52 words match each, two words short of retail's 216.

@@ -810,13 +810,12 @@ s32 Flow1_21(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_22);
 
-/* NON_MATCHING: 30 of 54 words differ (first at +0x34). */
-#ifdef NON_MATCHING
 s32 Flow1_23(nbNegoProcessData_t *n)
 {
     datUnitWork_t *work;
     datDevilNegoFormat_t *mt;
     s32 *msg;
+    u32 messageOffset;
 
     work = nbGetUnitWorkPointer(n->data, &n->data->party[n->boupartyindex]);
     switch (n->nownegophase) {
@@ -825,19 +824,18 @@ s32 Flow1_23(nbNegoProcessData_t *n)
         return 0;
     case 1:
         mt = &master_text[work->id];
-        if (mt->phase != n->nownegophase) {
-            return 4;
+        if (mt->phase == n->nownegophase) {
+            /* Form the byte offset within the actual negotiation work first. */
+            messageOffset = mt->mesno * sizeof(n->flowmsg[0]) +
+                            (u32)&((nbNegoProcessData_t *)0)->flowmsg;
+            msg = (s32 *)((u32)n + messageOffset);
+            nbSetNegoMesVar(*msg, n->pwork, work);
+            nbDispNegoMessage(n, *msg, 0x10, 0);
         }
-        msg = &n->flowmsg[mt->mesno];
-        nbSetNegoMesVar(*msg, n->pwork, n->ework);
-        nbDispNegoMessage(n, *msg, 0x10, 0);
         return 4;
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_23);
-#endif
 
 s32 Flow1_24(nbNegoProcessData_t *n)
 {
