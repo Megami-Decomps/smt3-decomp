@@ -135,7 +135,113 @@ void dds3UnitObjectBasicDestructor(dds3Basic_t *aPtr) {
     sdfChipFreeDirect(aPtr->workdata);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3UnitObjectBasic", dds3UnitObjectBasicMainProcedure);
+extern s32 evtUnitManagerPrimaryFunc(dds3PoseSet_t *pose, dds3Basic_t *basic);
+extern void dds3BackupPoseSet(dds3PoseSet_t *pose);
+extern void dds3GetSclPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *scale);
+extern void dds3AddRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+extern void dds3GetPosPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *position);
+extern s32 dds3CheckPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
+extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
+extern s32 mdlGetMajorNum(mdlObj_t *model);
+extern s32 mdlGetMinorNum(mdlObj_t *model);
+extern void mdlSetScale(mdlObj_t *model);
+extern void mdlSetRotate(mdlObj_t *model);
+extern void mdlSetPosition(mdlObj_t *model);
+extern f32 sdfSin(f32 angle);
+extern void FromRotation(f32 angle);
+extern void Mult(void);
+extern void Normalize(void);
+extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
+extern void dds3UnitObjectBasicEL_Link(dds3Basic_t *basic);
+extern const f32 D_00530D60[4];
+extern const f32 D_00530D70[4];
+
+s32 dds3UnitObjectBasicMainProcedure(dds3Basic_t *basic) {
+    dds3UnitObjectBasicWorkData_t *work;
+    mdlObj_t *model;
+    sdfVector4_t rotationAxis = *(const sdfVector4_t *)D_00530D70;
+    dds3PoseSet_t callbackPose;
+    s32 deform = 0;
+    s32 fixedModel = 0;
+
+    work = basic->workdata;
+    if (work->hUnit != NULL) {
+        dds3BackupPoseSet(&callbackPose);
+        if (evtUnitManagerPrimaryFunc(&callbackPose, basic) != 0) {
+            dds3GetSclPoseSetMCR(basic, &callbackPose.scl);
+            dds3AddRotPoseSet(basic, &callbackPose.rot);
+            dds3GetPosPoseSetMCR(basic, &callbackPose.pos);
+        }
+    }
+
+    model = work->pObjectBaseControlWorkData->pModel;
+    if (model != NULL && dds3CheckPoseSetFlag(basic->poseset, 1) == 1) {
+        dds3OffPoseSetFlag(basic->poseset, 1);
+
+        if (work->hUnit != NULL) {
+            if (work->hUnit->motionState == 0 || work->hUnit->motionState == 3) {
+                u32 motionFlag = work->hUnit->flags & 0x40;
+                deform = motionFlag != 0;
+            }
+            if (work->hUnit->flags & 0x400000) {
+                deform = 1;
+            }
+        }
+
+        if (mdlGetMajorNum(model) == 1) {
+            s32 minor = mdlGetMinorNum(model);
+            switch (minor) {
+            case 0xC0:
+            case 0x153:
+            case 0x154:
+            case 0x155:
+                    fixedModel = 1;
+                    break;
+            }
+        }
+
+        SDF_VU0_LOADVECTOR(&basic->poseset->scl);
+        if (!fixedModel && work->hUnit != NULL && deform) {
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADIDENTITYVECTOR();
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_SETVECTOR_X(sdfSin(work->hUnit->wobblePhase) * 0.01f);
+            SDF_VU0_SETVECTOR_Y(sdfSin(work->hUnit->wobblePhase) * 0.004f);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_ADDVECTOR();
+        }
+        mdlSetScale(model);
+
+        SDF_VU0_LOADVECTOR(&basic->poseset->rot);
+        Normalize();
+        if (!fixedModel && work->hUnit != NULL && deform) {
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(&rotationAxis);
+            FromRotation(sdfSin(work->hUnit->wobblePhase) * 0.006f);
+            Mult();
+        }
+        if (work->rotationFlags & 1) {
+            SDF_VU0_LOADVECTOR_B(D_00530D60);
+            Mult();
+        }
+        mdlSetRotate(model);
+
+        if (dds3CheckPoseSetFlag(basic->poseset, 8) != 0) {
+            SDF_VU0_LOADVECTOR(&basic->poseset->pos2);
+            SDF_VU0_VECTOR_W_SET_ONE();
+        } else {
+            SDF_VU0_LOADVECTOR(&basic->poseset->pos);
+            SDF_VU0_VECTOR_W_SET_ONE();
+        }
+        mdlSetPosition(model);
+        dds3SetRadiusPoseSet(basic->poseset);
+    }
+
+    if (!dds3ObjectBaseCheckFlag(basic, 0x100)) {
+        dds3UnitObjectBasicEL_Link(basic);
+    }
+    return 1;
+}
 
 extern sdfModelOt_t D_002F69B8[];
 extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
