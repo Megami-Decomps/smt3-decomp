@@ -2862,7 +2862,28 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateTimeTable);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbStartSmokeEffect);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSetActionWorkValues);
+void cmbSetActionWorkValues(void)
+{
+    if (CMB_GBWK->stockSlot[2].index >= 0) {
+        fclSetWorkValue(2, 1);
+    } else {
+        fclSetWorkValue(2, 0);
+    }
+    fclSetWorkValue(3, (s8)CMB_GBWK->birthPanel[0x2C5]);
+    if (datDevilTable[((datUnitWork_t *)CMB_GBWK->birthPanel)->id].race != 0x26) {
+        fclSetWorkValue(7, 0);
+    } else if ((s8)CMB_GBWK->birthPanel[0x2C4] != 2) {
+        fclSetWorkValue(7, cmbGetSpecialItemId());
+    } else {
+        fclSetWorkValue(7, -1);
+    }
+    fclClearFlag(3);
+    fclClearFlag(4);
+    fclSetWorkValue(4, 1);
+    fclSetWorkValue(5,
+                    datModelParamTable[((datUnitWork_t *)CMB_GBWK->birthPanel)->id].modelsize);
+    fclSetWorkValue(6, ((datUnitWork_t *)CMB_GBWK->birthPanel)->id);
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbRunActionSe);
 
