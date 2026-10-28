@@ -343,6 +343,12 @@ extern nbEncountForm_t nbEncountFormTable[];
 extern nbParty_t *nbGetPartyFromFormindex(s32 formindex);
 
 extern s32 nbGetButuriAttack(s32 nskill, s32 sformindex, s32 dformindex, s32 waza);
+extern s32 nbGetMagicAttack(s32 nskill, s32 sformindex, s32 dformindex, s32 waza);
+
+typedef struct sdfRandCB_t sdfRandCB_t;
+
+extern f32 dds3GetRandFloatA(sdfRandCB_t *state);
+extern s32 evtBitCheck(s32 no);
 
 extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
 
@@ -582,7 +588,150 @@ f32 nbGetAisyoRitu(s32 nskill, s32 sformindex, s32 dformindex)
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaHp);
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaMp);
+s32 nbGetKoukaMp(s32 sw, s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s32 cnt)
+{
+    datUnitWork_t *dwork;
+    s32 mpbase;
+    s32 mpn;
+    s32 result;
+    s32 adjusted;
+    s32 amount;
+
+    nbGetUnitWorkFromFormindex(sformindex);
+    dwork = nbGetUnitWorkFromFormindex(dformindex);
+    mpbase = datSkillTable.normal[nskill].mpbase;
+    mpn = datSkillTable.normal[nskill].mpn;
+    result = -1;
+    adjusted = -1;
+    amount = 0;
+
+    switch (datSkillTable.normal[nskill].mptype) {
+    case 0:
+        break;
+    case 5:
+        result = mpn + mpbase;
+        break;
+    case 15:
+        result = dds3GetRandIntA(0, mpn) + mpbase;
+        break;
+    case 9:
+        result = (dwork->mp * mpn) / 100 + mpbase;
+        break;
+    case 11:
+        result = (dwork->maxmp * mpn) / 100 + mpbase;
+        break;
+    case 2:
+        switch (datSkillTable.normal[nskill].koukatype) {
+        case 0:
+            amount = nbGetButuriKaifuku(nskill, sformindex, dformindex, mpn);
+            break;
+        case 1:
+            amount = nbGetMagicKaifuku(nskill, sformindex, dformindex, mpn);
+            break;
+        }
+        result = amount + mpbase;
+        break;
+    case 7:
+        result = nbGetMaxHpWazaPoint(nskill, sformindex, dformindex, mpn) + mpbase;
+        break;
+    case 4:
+    case 13:
+        adjusted = mpn + mpbase;
+        break;
+    case 8:
+        adjusted = (dwork->mp * mpn) / 100 + mpbase;
+        break;
+    case 10:
+        adjusted = (dwork->maxmp * mpn) / 100 + mpbase;
+        break;
+    case 1:
+    case 12:
+    case 14:
+        switch (datSkillTable.normal[nskill].koukatype) {
+        case 0:
+            amount = nbGetButuriAttack(nskill, sformindex, dformindex, mpn);
+            break;
+        case 1:
+            amount = nbGetMagicAttack(nskill, sformindex, dformindex, mpn);
+            break;
+        }
+        if (datSkillTable.normal[nskill].mptype == 6) {
+            amount = (s32)(f32)amount;
+        }
+        adjusted = amount + mpbase;
+        if (datSkillTable.normal[nskill].mptype == 14 && cnt >= 2) {
+            adjusted /= cnt;
+        }
+        break;
+    case 6:
+        adjusted = nbGetMaxHpWazaPoint(nskill, sformindex, dformindex, mpn) + mpbase;
+        break;
+    case 3:
+        {
+            s32 remaining;
+
+            remaining = mpn + mpbase;
+            if (remaining < dwork->mp) {
+                adjusted = dwork->mp - remaining;
+            }
+        }
+        break;
+    }
+    switch (datSkillTable.normal[nskill].mptype) {
+    case 1:
+    case 2:
+    case 6:
+    case 7:
+    case 12:
+    case 14:
+        if (adjusted > 0) {
+            switch (datSkillTable.normal[nskill].koukatype) {
+            case 0:
+                {
+                    f32 spread;
+                    f32 base;
+
+                    spread = dds3GetRandFloatA(0);
+                    base = (f32)adjusted;
+                    spread -= 0.5f;
+                    spread += spread;
+                    spread *= 0.04999999702f;
+                    adjusted = (s32)(base + base * spread);
+                }
+                break;
+            case 1:
+                {
+                    f32 spread;
+                    f32 base;
+
+                    spread = dds3GetRandFloatA(0);
+                    base = (f32)adjusted;
+                    spread -= 0.5f;
+                    spread += spread;
+                    spread *= 0.04999999702f;
+                    adjusted = (s32)(base + base * spread);
+                }
+                break;
+            }
+            if (adjusted < 0) {
+                adjusted = 0;
+            }
+            adjusted = (s32)((f32)adjusted * ritu);
+            if (evtBitCheck(0xAF2) != 0 && nbCheckFormationPlayerSide(sformindex) == 0) {
+                adjusted = (s32)((f32)adjusted * 0.6999999881f);
+            }
+        }
+        break;
+    }
+
+    if (sw != 0) {
+        if (dwork->mp < adjusted) {
+            adjusted = dwork->mp;
+        }
+        return adjusted;
+    }
+    return result;
+}
 
 f32 nbGetHpDrainRitu(s32 nskill, s32 sformindex, s32 dformindex)
 {
