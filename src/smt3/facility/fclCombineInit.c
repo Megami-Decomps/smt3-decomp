@@ -1309,7 +1309,48 @@ s32 cmbFindSpecialEntry(u16 devilId)
     return candidate;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbBuildDevilEntry);
+s32 cmbBuildDevilEntry(u16 devilId)
+{
+    datUnitWork_t unit;
+    datUnitWork_t *leader = &cmbGlobalWork->party[0].unit;
+    datDevilInfo_t *table = datDevilTable;
+    s32 found = 0;
+    s8 attempt = 1;
+    u16 candidate;
+
+    do {
+        candidate = dds3GetRandA(0) % 0xA8 + 1;
+        cmbCopyDefaultDevilToStock(candidate, &unit);
+        if (table[candidate].race == 0x21) {
+            continue;
+        }
+        if (cmbDevilIsUnlocked(candidate) != 0) {
+            continue;
+        }
+        {
+            s32 bound = leader->level + 3;
+            if (unit.level > bound) {
+                continue;
+            }
+            bound = leader->level - 15;
+            if (unit.level < bound) {
+                continue;
+            }
+        }
+        if (cmbCheckEvoUnlocked(candidate, &cmbGlobalWork->party[0].unit, 16) >= 0) {
+            continue;
+        }
+        if (cmbDevilIsSpecial(candidate) != 0 || candidate == devilId) {
+            continue;
+        }
+        found = 1;
+        break;
+    } while (attempt++ < 16);
+    if (found == 0) {
+        return cmbFindSpecialEntry(devilId);
+    }
+    return candidate;
+}
 
 void cmbCalcUnitParam(cmbUnit_t *unit)
 {
