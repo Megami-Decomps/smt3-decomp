@@ -795,7 +795,41 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C950);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C988);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSeqSetPhase);
+extern datUnitWork_t *cmbGetBirthDevilPanel(void);
+extern u16 cmpGetStatusModelId(void);
+extern void cmpSetModelReloadFlag(void);
+extern void campFreeStatusModel(void);
+
+void cmbSeqSetPhase(void)
+{
+    if (CMB_GBWK->unk_00004 == 1) {
+        CMB_GBWK->unk_1650A = 3;
+    }
+
+    switch ((s8)CMB_GBWK->unk_00001) {
+    case 7:
+    case 8:
+    case 10:
+    case 11:
+    case 15: {
+        u16 modelId = cmbGetBirthDevilPanel()->id;
+        if (modelId != cmpGetStatusModelId()) {
+            cmpSetModelReloadFlag();
+        }
+        campFreeStatusModel();
+        /* Qualified cc1probe: reset uid89 survives sibling-call selection and
+         * is deleted in life analysis, keeping the native jal and epilogue. */
+        modelId = 0;
+        break;
+    }
+    case 9:
+    case 12:
+    case 13:
+    case 14:
+    default:
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcSequence);
 
