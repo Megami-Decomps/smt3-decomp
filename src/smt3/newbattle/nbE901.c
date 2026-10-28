@@ -5,10 +5,13 @@
 #include "ps2asm.h"
 #include "newdata.h"
 
+/* The model owner behind a unit handle; only the root node is named. */
+typedef struct { u8 unk_00[0x18]; struct sdfModelRootNode_t *inner; } nbUnitOwner_t;
+
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];
-    dds3Basic_t *basic;
+    nbUnitOwner_t *owner;
     u8 unk_90[0x14];
     u32 flags;
 } evtUnitHandle_t;
@@ -340,6 +343,21 @@ extern u8 pNbCamera[];
 
 extern void nbCameraBoss_Sp_DOUTYO_Run(u8 *pNbCamera);
 
+extern void nbCameraBoss_Sp_DOUTYO_Set(u8 *pNbCamera);
+
+extern void nbCameraBoss_Sp_DOUTYO_TPFix_Set(u8 *pNbCamera);
+
+extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
+
+extern s32 sdfModelGetMarkPos(struct sdfModelRootNode_t *aRoot, s32 aId);
+
+extern s32 evtUnitRotationTarget(evtUnitHandle_t *h, f32 *pos, f32 radio);
+
+extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                               s32 type);
+
+extern void dds3SetQuake(s32 frame, s32 range);
+
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
 extern s32 D_005515BC;
@@ -438,12 +456,57 @@ s32 SetUp1(nbEventProcessData_t *ed)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE901", SyuGo);
+s32 SyuGo(nbEventProcessData_t *e)
+{
+    sdfVector4_t v;
+    sdfVector4_t vec1;
+    sdfVector4_t vec2;
+    evtUnitHandle_t *h;
+    nbFormation_t *form;
+    s32 i;
+    s32 ofs;
+    s32 mark;
+
+    memset(&vec1, 0, sizeof(vec1));
+    vec1.z = -100.0f;
+    memset(&vec2, 0, sizeof(vec2));
+    vec2.z = -5000.0f;
+    if (e->seqtime == 2) {
+        nbCameraBoss_Sp_DOUTYO_TPFix_Set(pNbCamera);
+    }
+    if (e->seqtime == 5) {
+        e->data->press4_p = 0;
+        e->data->pressturn = 0;
+    }
+    if (e->seqtime >= 0x38) {
+        nbFreeEffectSlot(e);
+    }
+    h = dds3GetUnitHandleObjectBasic(D_005515B4);
+    i = 0;
+    mark = 5;
+    ofs = 0;
+    for (; i < 6; i++) {
+        form = (nbFormation_t *)((u8 *)e->data->form + ofs + 0x3C0);
+        if (form->stat & 1) {
+            sdfModelGetMarkPos(h->owner->inner, mark - i);
+            SDF_VU0_STOREVECTOR(&v);
+            nbSetFormPos(form, &v);
+            if (e->seqtime < 0x33) {
+                evtUnitRotationTarget(form->hunit, (f32 *)&vec1, 0.08f);
+            } else {
+                evtUnitRotationTarget(form->hunit, (f32 *)&vec2, 0.05f);
+            }
+        }
+        ofs += 0xF0;
+    }
+    return 0;
+}
 
 s32 SyuGo2(nbEventProcessData_t *ed)
 {
     s32 i;
     s32 ofs;
+    s32 mark;
     nbFormation_t *form;
 
     if (ed->seqtime >= 0xB) {
@@ -508,7 +571,43 @@ s32 Wait2_nbE901(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE901", Syutugen2);
+s32 Syutugen2(nbEventProcessData_t *ed)
+{
+    sdfVector4_t pos;
+    sdfVector4_t pos2;
+    nbFormation_t *form;
+    sdfVector4_t *op;
+
+    if (ed->seqtime == 3) {
+        nbAddHitEffKoukaPacket(0, 0, nbGetEventForm(), 4);
+    }
+    if (ed->seqtime == 5) {
+        dds3SetQuake(0x1E, 0x258);
+    }
+    form = nbGetEventForm();
+    SDF_VU0_COPYVECTOR(&pos, &form->pos);
+    pos.y = pos.y + 150.0f;
+    if (pos.y > 0.0f) {
+        pos.y = 0.0f;
+        nbFreeEffectSlot(ed);
+    }
+    nbSetFormPos(form, &pos);
+    if (ed->seqtime >= 4) {
+        if (ed->seqtime == 4) {
+            SDF_VU0_LOADVECTOR(&form->pos);
+            SDF_VU0_STOREVECTOR(&pos);
+            op = &pos2;
+            SDF_VU0_STOREVECTOR_RWADDR(op);
+            pos.y = 0.0f;
+            nbSetFormPos(form, &pos);
+            nbCameraBoss_Sp_DOUTYO_Set(pNbCamera);
+            nbSetFormPos(form, &pos2);
+        } else {
+            nbCameraBoss_Sp_DOUTYO_Run(pNbCamera);
+        }
+    }
+    return 0;
+}
 
 s32 End(nbEventProcessData_t *ed)
 {
