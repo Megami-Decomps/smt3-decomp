@@ -1260,7 +1260,87 @@ s32 Flow6_52(nbNegoProcessData_t *n)
 
 INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00545068);
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_53);
+extern void nbCameraSetHojo(nbFormation_t *hojo, nbFormation_t *target1,
+                            nbFormation_t *target2);
+extern void nbDispSkillName(s32 id);
+extern char D_00545068[];
+
+s32 Flow6_53(nbNegoProcessData_t *n)
+{
+    s32 message;
+    s32 skill;
+    nbFormation_t *form;
+
+    message = 0;
+    skill = n->hojoskillid;
+    form = &n->data->form[n->data->party[n->hojopartyindex].formindex];
+
+    switch (skill) {
+    case 0x199:
+        message = 0xC;
+        break;
+    case 0x19A:
+        message = 0xD;
+        break;
+    case 0x1A2:
+        message = 0xE;
+        break;
+    case 0x19B:
+        message = 0xF;
+        break;
+    case 0x19C:
+        message = 0x10;
+        break;
+    case 0x1A4:
+        message = 0x11;
+        break;
+    case 0x19D:
+        message = 0x12;
+        break;
+    case 0x19E:
+        message = 0x13;
+        break;
+    case 0x19F:
+        message = 0x14;
+        break;
+    case 0x1A3:
+        message = 0x15;
+        break;
+    }
+
+    switch (n->nownegophase) {
+    case 0:
+        nbCameraSetHojo(form, n->pform, n->eform);
+        nbDispNegoMessage(n, n->helpmsg, message, 0);
+        break;
+    case 1:
+        nbClsNegoMessage(n);
+        nbCameraSetTaizi(n->pform, n->eform);
+        nbMakeNegoBackPacket(0, (s32)n->actdata, n->pform, n->eform);
+        nbFormDispOff2(form);
+        nbMakeNegoWorkPosPacket(0, (s32)n->actdata, form, n->eform);
+        n->waitframe = 10;
+        break;
+    case 2:
+        nbFormDispOff2(n->pform);
+        nbMakeUnitFadeInPacket(1, (s32)n->actdata, n->pform, 0, 0, 0, 0);
+        nbMakeNegoForwardPacket(0, (s32)n->actdata, form, n->eform);
+        n->stat |= 8;
+        nbFormDispOn2(form);
+        nbCameraSetTaizi(form, n->eform);
+        n->waitframe = 5;
+        break;
+    case 3:
+        nbDispSkillName(skill);
+        printf(D_00545068, n->hojopartyindex, n->hojoskillid);
+        n->waitframe = 0x3C;
+        break;
+    case 4:
+        nbAddNegoIdKouho(n, 0x60036);
+        break;
+    }
+    return 0;
+}
 
 s32 Flow6_74(nbNegoProcessData_t *n)
 {
