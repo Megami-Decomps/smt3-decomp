@@ -27,7 +27,27 @@ INCLUDE_ASM(const s32, "nme/Nme_Init", nmeDecodeChar);
 
 extern void frDelFontStyle(u8 styleNo);
 extern void nmeBuildNameFont(s8 mode, nmeWork_t *work);
-INCLUDE_ASM(const s32, "nme/Nme_Init", frAllocNameData);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void frLoadFontData(s32 style, const char *filename);
+extern void nmeInitNameRows(s8 target, nmeWork_t *work);
+extern char D_00548768[];
+
+void frAllocNameData(void)
+{
+    s8 target = 0;
+    sdfMemHandle_t *handle = sdfMemAllocDirect(0x51C8);
+    nmeWork_t *work = sdfMemLock(handle);
+
+    memset(work, 0, 0x51C8);
+    frLoadFontData(4, D_00548768);
+    for (; target < 4; target++) {
+        nmeInitNameRows(target, work);
+        nmeBuildNameFont(target, work);
+    }
+    frDelFontStyle(4);
+    sdfMemFreeDirect(handle);
+}
 
 extern u8 D_00552020[4];
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
@@ -226,7 +246,31 @@ void func_00298678(void)
     }
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nme_298698);
+extern s32 scrGetIntPara(s32 index);
+extern void scrSetIntReturnValue(s32 value);
+extern void nmeStartProcesses(s8 target, s8 mode, s32 unused);
+
+s32 nme_298698(void)
+{
+    s32 done = 0;
+
+    switch (gProcessStat) {
+    case 0: {
+        s8 target = scrGetIntPara(0);
+        s8 mode = scrGetIntPara(1);
+        nmeStartProcesses(target, mode, 0);
+        break;
+    }
+    case 1:
+        break;
+    case 2:
+        gProcessStat = 0;
+        done = 1;
+        break;
+    }
+    scrSetIntReturnValue(!done);
+    return done;
+}
 
 INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548768);
 
