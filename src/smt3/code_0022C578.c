@@ -394,8 +394,9 @@ typedef struct
     /* 0x82AC */ cmpLocalStock_t drawStock;
     /* 0x8302 */ u8 unk_8302;
     /* 0x8303 */ s8 unk_8303;
-    /* 0x8304 */ u16 itemId[1];
-    /* 0x8306 */ u8 unk_8306[0x142];
+    /* 0x8304 */ u16 itemId[0xA0];
+    /* 0x8444 */ u8 itemMode;
+    /* 0x8445 */ u8 unk_8445[3];
     /* 0x8448 */ u8 crossPanel[0x20];
     /* 0x8468 */ s32 unk_8468;
     /* 0x846C */ u8 unk_846C[0x34];
@@ -516,9 +517,8 @@ typedef struct
     /* 0x00A54 */ dds3PartyUnit_t party[16];
     /* 0x01914 */ s8 stock[0x10];
     /* 0x01924 */ s32 stockCount;
-    /* 0x01928 */ u8 unk_01928[0x3D];
-    /* 0x01965 */ u8 unk_1965;
-    /* 0x01966 */ u8 unk_01966[0x394];
+    /* 0x01928 */ u8 itemQuantity[0xA0];
+    /* 0x019C8 */ u8 unk_019C8[0x332];
     /* 0x01CFA */ u8 equipHearts;
     /* 0x01CFB */ u8 unk_01CFB[0x40];
     /* 0x01D3B */ u8 devilSlot[0x100];
@@ -1210,7 +1210,37 @@ s32 cmpFindItemMsgIndex(s32 which, u16 id)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCreateLocalItem);
+void cmpCreateLocalItem(u8 mode)
+{
+    s32 i;
+
+    memset(campWork->itemId, 0, sizeof(campWork->itemId));
+    campWork->unk_8302 = 0;
+    campWork->itemMode = mode;
+    switch (mode) {
+    case 0:
+        for (i = 1; i < 0x60; i++) {
+            if (cmbGlobalWork->itemQuantity[i] != 0) {
+                campWork->itemId[campWork->unk_8302++] = i;
+            }
+        }
+        break;
+    case 1:
+        for (i = 0x60; i < 0x70; i++) {
+            if (cmbGlobalWork->itemQuantity[i] != 0) {
+                campWork->itemId[campWork->unk_8302++] = i;
+            }
+        }
+        break;
+    default:
+        for (i = 0; i < 0x30; i++) {
+            if (evtBitCheck(i + 0x3D0) != 0) {
+                campWork->itemId[campWork->unk_8302++] = i + 0x70;
+            }
+        }
+        break;
+    }
+}
 
 extern s32 fldEsutoMaChk(void);
 extern s32 fldRiberaMaChk(void);
@@ -1824,7 +1854,7 @@ void cmpCalcLoad(void)
 
 extern s32 fclChkMessage(void);
 
-extern void cmpCreateLocalItem(s32 mode);
+extern void cmpCreateLocalItem(u8 mode);
 
 extern void cmpChangeCursorListNums(s32 count, u8 *cursor);
 
