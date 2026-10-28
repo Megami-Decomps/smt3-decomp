@@ -228,7 +228,6 @@ cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/nonmatching/result/rst
 rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/nonmatching/result/rstcalc.md	170
 rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/nonmatching/result/rstdraw.md	5
 rstBuildDestroyList	rstupdate	0x64	1 of 24 words matches	docs/nonmatching/result/rstupdate.md	5
-DispBaseData	script/scrParameterCommand	764 bytes	seventy of 190 words differ	docs/nonmatching/script/scrParameterCommand.md	5
 sdfFileCmdAnalyzeFileName	sdf/sdfFileIO	0x120	65 of 72 words matching	docs/nonmatching/sdf/sdfFileIO.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/nonmatching/sdf/sdfGraph.md	5
 sdfModelSetOneSkinDrawPacket	sdf/sdfModel	0x180	Three of ninety words match	docs/nonmatching/sdf/sdfModel.md	5
