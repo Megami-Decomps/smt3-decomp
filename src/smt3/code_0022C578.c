@@ -1022,7 +1022,7 @@ extern char D_0053F500[];
 
 extern void cmpinit();
 
-extern void cmpCalcSequence();
+extern s32 cmpCalcSequence(void);
 
 extern s32 camp_draw_Process(void);
 
@@ -2119,7 +2119,98 @@ void cmpUpdateList(void)
     campWork->unk_8303 = 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCalcSequence);
+/* The cursor initializer only mutates slots; its return register is unused. */
+extern void cmpSetIniStockRecoverEff(u8 *work);
+
+s32 cmpCalcSequence(void)
+{
+    s8 phase = campWork->unk_0001;
+    s32 result = 0;
+
+    switch (phase) {
+    case 0:
+        cmpCalcRoot();
+        break;
+    case 1:
+        result = cmpCalcItem();
+        break;
+    case 2:
+        cmpCalcSkill();
+        break;
+    case 3:
+        result = cmpCalcParty();
+        break;
+    case 5:
+        if (campWork->unk_0004 == 1) {
+            if ((s8)campWork->statusPhase == 0) {
+                cmpSetCrossGeneralVal(campWork->crossPanel, 1);
+            } else {
+                cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0, NULL, NULL, 0, 0);
+                campWork->unk_8468 = 0x200;
+            }
+        }
+        if (campWork->unk_0004 == 2 && (s8)campWork->statusPhase == 0) {
+            cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0, cmpUpdateListSelection,
+                                 (u8 *)campWork + 0x1C, 0, 0);
+            cmpSetCrossGeneralVal(campWork->crossPanel, 1);
+            break;
+        }
+        break;
+    case 4:
+        if (campWork->unk_0004 != 0) {
+            cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0, NULL, NULL, 0, 0);
+        }
+        break;
+    case 6:
+        cmpCalcConfig();
+        break;
+    case 7:
+        cmpCalcLoad();
+        break;
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+        break;
+    case 12:
+        if (campWork->unk_0004 == 1) {
+            cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0, NULL, NULL, 0, 0);
+        }
+        break;
+    case 13:
+        break;
+    case 14:
+        if (campWork->unk_0004 == 1 && (s8)campWork->unk_0018[0] == 1) {
+            s8 index = cmpGetStockInfoIndex(campWork->stock, 0, 0);
+            datUnitWork_t *unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + index;
+
+            cmpSetIniStockRecoverEff((u8 *)campWork->stock);
+            fclSetMessageVar_20743088(0, (s32)text2[unit->id]);
+            fclSetMessageInvalid(1);
+            if ((unit->badstatus & 0x800) != 0) {
+                fclStartMessage(8);
+            } else {
+                fclStartMessage(7);
+            }
+        }
+        break;
+    case 15:
+    case 16:
+        break;
+    default:
+        break;
+    }
+    cmpUpdateList();
+    if (result != 0) {
+        return 0;
+    }
+    campWork->unk_0004 = 0;
+    if ((campWork->unk_0000 & 0x10) != 0) {
+        cmpUpdateTerminate((cmpInfoWindow_t *)campWork);
+        return -1;
+    }
+    return 0;
+}
 
 void nmeMakeGradColors(s32 *color0, s32 *color1, s32 red, s32 green, s32 blue)
 {
