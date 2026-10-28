@@ -2236,7 +2236,105 @@ s32 nbCameraBoss_Lusi_Cut1_Set(nbCamera_t *pNbCamera)
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Lusi_Cut1_Set);
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Lusi_TWORLD_Set);
+s32 nbCameraBoss_Lusi_TWORLD_Set(nbCamera_t *pNbCamera)
+{
+    s32 type;
+    s32 frame;
+    f32 rate;
+    f32 deg;
+    sdfVector4_t start;
+    sdfVector4_t end;
+
+    frame = pNbCamera->frame;
+    if ((u32)frame < 51) {
+        if (frame == 0) {
+            effBTLModelAllShow();
+            frame = pNbCamera->frame;
+        }
+        rate = 1.0f - (f32)frame / 50.0f;
+        rate = rate * rate;
+        if (rate > 1.0f) {
+            rate = 1.0f;
+        }
+        start.x = 52.289998f;
+        start.y = -196.19999f;
+        start.z = -1015.08f;
+        end.x = -28.659998f;
+        end.y = -257.36997f;
+        end.z = -1595.0799f;
+        SDF_VU0_LOADVECTOR(&start);
+        SDF_VU0_LOADVECTOR_B(&end);
+        VU0_LERP_VF10_VF11(rate);
+        SDF_VU0_STOREVECTOR(pNbCamera);
+        start.x = 0.0f;
+        start.y = -0.19f;
+        start.z = 0.97999996f;
+        end.x = 0.0099999998f;
+        end.y = -0.19f;
+        end.z = 0.97999996f;
+        SDF_VU0_LOADVECTOR(&start);
+        SDF_VU0_LOADVECTOR_B(&end);
+        VU0_LERP_VF10_VF11(rate);
+        SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+        pNbCamera->distance = 1.0f;
+        deg = rate * -49.0f + 89.0f;
+        pNbCamera->fovy = deg * 0.017453291f;
+    }
+    if ((u32)(frame - 51) < 71) {
+        rate = (f32)(frame - 51) / 70.0f;
+        rate = rate * rate;
+        if (rate > 1.0f) {
+            rate = 1.0f;
+        }
+        start.x = 52.289998f;
+        start.y = -196.19999f;
+        start.z = -1015.08f;
+        end.x = -45.39f;
+        end.y = -4.5599995f;
+        end.z = -4345.1397f;
+        SDF_VU0_LOADVECTOR(&start);
+        SDF_VU0_LOADVECTOR_B(&end);
+        VU0_LERP_VF10_VF11(rate);
+        SDF_VU0_STOREVECTOR(pNbCamera);
+        start.x = 0.0f;
+        start.y = -0.19f;
+        start.z = 0.97999996f;
+        end.x = 0.0f;
+        end.y = -0.24f;
+        end.z = 0.96999997f;
+        SDF_VU0_LOADVECTOR(&start);
+        SDF_VU0_LOADVECTOR_B(&end);
+        VU0_LERP_VF10_VF11(rate);
+        SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+        pNbCamera->distance = 1.0f;
+        deg = rate * -74.0f + 89.0f;
+        pNbCamera->fovy = deg * 0.017453291f;
+    }
+    if (frame == 140) {
+        type = dds3GetRandIntA(0, 2);
+        switch (type) {
+        case 0:
+            pNbCamera->direction.x = 0.19f;
+            pNbCamera->direction.y = -0.18f;
+            pNbCamera->direction.z = 0.96999997f;
+            pNbCamera->target.x = -600.43f;
+            pNbCamera->target.y = -27.499999f;
+            pNbCamera->target.z = -1957.3699f;
+            break;
+        case 1:
+            pNbCamera->direction.x = -0.29999999f;
+            pNbCamera->direction.y = -0.16f;
+            pNbCamera->direction.z = 0.94f;
+            pNbCamera->target.x = 974.53992f;
+            pNbCamera->target.y = -52.089997f;
+            pNbCamera->target.z = -2023.9599f;
+            break;
+        }
+        pNbCamera->distance = 1.0f;
+        pNbCamera->fovy = 0.78539807f;
+    }
+    return 1;
+}
 
 s32 nbCameraBoss_Lusi_OHNOOH_Set(nbCamera_t *pNbCamera)
 {
