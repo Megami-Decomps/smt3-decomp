@@ -102,7 +102,7 @@ typedef struct pmdProcessWork_t {
 
 extern sdfGrOt_t sdfGrOtTable[];
 
-void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag);
+void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag);
 
 extern void *sdfGrAllocPacketBuff(u32 aSize);
 

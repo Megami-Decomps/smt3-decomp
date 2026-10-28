@@ -81,7 +81,26 @@ void nbSetTarSelJyokyoTime(s32 time)
 
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", AnimeTargetCursor);
 
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", nbDrawTargetCursor);
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                        u32 rgba, sdfTexHandle_t *texture);
+
+void nbDrawTargetCursor(nbMainProcessData_t *data, s32 x, s32 y)
+{
+    nbTarSelProcessData_t *process = GetTarSelProcessData();
+    s32 size;
+    u32 colorMask = 0xFFFFFF;
+    u32 color;
+
+    size = (s32)(process->scale_a * 53.0f);
+    color = ((u32)process->alpha_a << 24) | 0x808080;
+    nbPnlSprite(x - size / 2, y - size / 2, size, size, 0xCA, 0x15, 0x35, 0x35,
+                color, data->pnltex[3]);
+
+    size = (s32)(process->scale_b * 53.0f);
+    color = (color & colorMask) | ((u32)process->alpha_b << 24);
+    nbPnlSprite(x - size / 2, y - size / 2, size, size, 0xCA, 0x15, 0x35, 0x35,
+                color, data->pnltex[3]);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", CheckFormCursor);
 

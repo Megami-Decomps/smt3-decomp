@@ -19,7 +19,7 @@ extern void MultMatrixRev(f32 *aMatrix);
 
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, s32 aId);
 
-extern void nbDrawTargetCursor(s32 type, s32 x, s32 y);
+extern void nbDrawTargetCursor(nbMainProcessData_t *data, s32 x, s32 y);
 
 extern nbFormation_t *nbGetEventForm();
 
@@ -153,7 +153,7 @@ typedef struct nbEncountForm_t {
     u8 unk05[0x21];
 } nbEncountForm_t;
 
-void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag);
+void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag);
 
 void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
                         sdfVector4_t *center, f32 r, f32 scl, f32 h);
@@ -511,7 +511,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawRotatedModelX);
 
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawRotatedModel);
 
-void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag)
+void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag)
 {
     s32 pos[4];
 
@@ -520,7 +520,7 @@ void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag)
         sdfModelGetMarkPos(form->hunit->owner->inner, 0);
     }
     if (nbClipEffectNum(pos) != 0) {
-        nbDrawTargetCursor(type, pos[0] >> 4, pos[1] >> 3);
+        nbDrawTargetCursor(data, pos[0] >> 4, pos[1] >> 3);
     }
 }
 
