@@ -1,5 +1,15 @@
 #include "common.h"
 
+typedef struct {
+    u8 unknown[0x51C4];
+    s32 animation;
+} nmeWork_t;
+
+extern nmeWork_t *nmeUpdateWork;
+extern s32 nmeGetCursorPos(nmeWork_t *work);
+extern void nmeStepCursor(s8 delta);
+extern void nmeDeleteChar(s8 delta);
+
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDrawInputUBar);
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDrawFuncIcon);
@@ -18,7 +28,13 @@ INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDeleteChar);
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeConfirmChar);
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeBackspace);
+void nmeBackspace(void)
+{
+    if (nmeGetCursorPos(nmeUpdateWork) > 0) {
+        nmeStepCursor(-1);
+    }
+    nmeDeleteChar(1);
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursorBy);
 
@@ -42,4 +58,11 @@ INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeCheckInputMode);
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeUpdateInput);
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeAdvanceAnim);
+void nmeAdvanceAnim(void)
+{
+    nmeWork_t *work = nmeUpdateWork;
+    work->animation += 2;
+    if (work->animation >= 0x900) {
+        work->animation = 0;
+    }
+}

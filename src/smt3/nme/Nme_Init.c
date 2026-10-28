@@ -116,7 +116,21 @@ void nmeInitNameRows(s8 mode, nmeWork_t *work) {
     nmeInitNameRow(mode, 2, work);
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeGetRowCount);
+s32 nmeGetRowCount(s8 mode)
+{
+    switch (mode) {
+    case 0:
+        return 0xF;
+    case 1:
+        return 0xF;
+    case 2:
+        return 0x10;
+    case 3:
+        return 0xF;
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameBuffer);
 

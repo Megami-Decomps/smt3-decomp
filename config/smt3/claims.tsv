@@ -315,3 +315,6 @@ src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	2 fn / 160 B	paired 
 src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	2 fn / 72 B	name-entry sequence flag and fade-out RGB helper; bounded 4-byte color state
 src/smt3/pipe/pipeMakaAnim.c	redthing1	done	2026-10-28	1 fn / 124 B	makaAdd; typed free-slot scan and normal or special-position setup; whole-unit 7 match, 0 differ
 src/smt3/field/fldTitle.c	redthing1	open	2026-10-28	1 fn / 300 B	four texture resources and title process startup; whole-unit 5 match, 0 differ; mini-title follow-up
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	1 fn / 80 B	nmeGetRowCount; sparse input-mode switch
+src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	2 fn / 88 B	backspace dispatch and name animation step
+src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	1 fn / 80 B	nmeCalc; fade gate and sequence termination flag
