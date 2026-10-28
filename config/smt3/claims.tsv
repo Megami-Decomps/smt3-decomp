@@ -452,3 +452,4 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 468 B	Hearts grid curs
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 572 B	status-window phase and model input dispatch; owner 329 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 188 B	Hearts triangle-gauge vertex and color setup; owner 330 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 260 B	Hearts removal confirmation and message phases; owner 331 match, 0 differ
+src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 480 B	control-table write dispatch with native copy lengths and shared IOP transfer
