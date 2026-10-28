@@ -27,13 +27,6 @@ typedef struct
     s8 count;
 } cmpSkillList_t;
 
-typedef struct
-{
-    /* 0x00 */ u8 unk_00[0x38];
-    /* 0x38 */ u16 skillCount;
-    /* 0x3A */ u16 skill[12];
-} cmbUnitSkills_t;
-
 extern char D_0053C938[];
 
 extern char D_0054FB00[];
@@ -1373,10 +1366,11 @@ void cmbClearStockEntry(cmbUnit_t *unit)
     memset(unit, 0, 0xEC);
 }
 
-void cmbClearUnitSkills(cmbUnitSkills_t *unit)
+void cmbClearUnitSkills(datUnitWork_t *unit)
 {
-    memset(unit->skill, 0, sizeof(unit->skill));
-    unit->skillCount = 0;
+    /* The native clear covers the first twelve skill entries. */
+    memset(unit->skill, 0, 12 * sizeof(unit->skill[0]));
+    unit->skillcnt = 0;
 }
 
 void cmbClearSkillSlots(cmbUnit_t *unit)
