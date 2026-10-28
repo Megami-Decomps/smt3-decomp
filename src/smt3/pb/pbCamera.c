@@ -69,13 +69,36 @@ extern void mdlFree(mdlObj_t *aHandle);
 
 extern pbProcHandle_t *blockDB;
 
+extern sdfVector4_t aViewEye, aViewTarget;
+
 INCLUDE_ASM(const s32, "pb/pbCamera", pbRotateXCamera);
 
 INCLUDE_ASM(const s32, "pb/pbCamera", pbRotateYCamera);
 
 INCLUDE_ASM(const s32, "pb/pbCamera", pb_1D2838);
 
-INCLUDE_ASM(const s32, "pb/pbCamera", pbSetViewRotation);
+extern void SetRotateMatrixY(f32 angle);
+extern void SetRotateMatrixX_B(f32 angle);
+extern void MultMatrixNoArg(void);
+
+void pbSetViewRotation(f32 angle, f32 radius, f32 degree)
+{
+    sdfVector4_t offset;
+
+    offset.x = 0.0f;
+    offset.y = 0.0f;
+    offset.z = -radius;
+    offset.w = 1.0f;
+    SetRotateMatrixY(angle);
+    SetRotateMatrixX_B(-degree);
+    MultMatrixNoArg();
+    SDF_VU0_LOADVECTOR(&offset);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&offset);
+    aViewEye.x = offset.x + aViewTarget.x;
+    aViewEye.y = offset.y + aViewTarget.y;
+    aViewEye.z = offset.z + aViewTarget.z;
+}
 
 INCLUDE_ASM(const s32, "pb/pbCamera", pb_draw_mycharacter_Process);
 
