@@ -31,3 +31,14 @@ the declaration's name string in `expand_function_start` and emits a leading
 function something else and carry the retail name with an assembler alias,
 `s32 sdfDefaultMain(void) asm("main");`, declared above the definition.
 `sdf/sdfDefaultMain` is exact that way and 8 bytes long without it.
+
+## A `void` callee frees `$2` for the next pseudo
+
+The register the allocator gives the pseudo after a call depends on whether the
+callee's declaration returns a value: a value-returning call keeps `$2` out of
+the way even when the result is dropped, so the next address temp lands in `$3`.
+`RunUgou` in `newbattle/nbE901` was two words out, `lui $2, %hi(text1)` against
+retail's `lui $3`, until `nbCameraBoss_Sp_DOUTYO_TP_Set` was declared
+`extern s32` instead of `extern void`; an unprototyped `extern s32 f();` does it
+too. Before chasing a lone base-register difference after a call, check the
+callee's declared return type.
