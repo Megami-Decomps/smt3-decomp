@@ -169,10 +169,9 @@ Flow6_65	newbattle/nbMakePacket	0x190	79 of 100 words differ	docs/nonmatching/ne
 Flow1_32	newbattle/nbMakePacket	0x400	231 of 252 words match	docs/nonmatching/newbattle/nbMakePacket.md	484
 nbCollectBadCurseUnits	newbattle/nbMakePacket	0xA4	30 of 41 words match	docs/nonmatching/newbattle/nbMakePacket.md	510
 ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/nonmatching/newbattle/nbMakePacket.md	527
-nbCheckPackLoad	newbattle/nbMakePacket	0x100	62 of 64 words match	docs/nonmatching/newbattle/nbMakePacket.md	548
-nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/nonmatching/newbattle/nbMakePacket.md	570
-nbMakeNegoBackPacket	newbattle/nbMakePacket	0x104	63 of 65 words match	docs/nonmatching/newbattle/nbMakePacket.md	598
-nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	632
+nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/nonmatching/newbattle/nbMakePacket.md	548
+nbMakeNegoBackPacket	newbattle/nbMakePacket	0x104	63 of 65 words match	docs/nonmatching/newbattle/nbMakePacket.md	576
+nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	610
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	5
 DispComm1PanelComm	newbattle/nbStageProcess	0xE0	53 of 56 words match	docs/nonmatching/newbattle/nbStageProcess.md	20
 nbSetWaitMotion	newbattle/nbStageProcess	0xD8	8 of 54 words differ	docs/nonmatching/newbattle/nbStageProcess.md	44

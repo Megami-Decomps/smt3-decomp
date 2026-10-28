@@ -545,28 +545,6 @@ Ruled out for the `xori`: `ailevel < 3`, `!(ailevel >= 3)`,
 and `(ailevel >= 3) ? ret : (ailevel != 0)` as a ternary. All five give the
 same two-instruction form.
 
-## nbCheckPackLoad (newbattle/nbMakePacket, 0x100)
-
-62 of 64 words match, at the exact 256-byte size.
-
-The outer loop counts `i` from 9 down to 0 with a separate `ofs` stepped by
-`sizeof(nbStatWork_t)`, and `(nbStatWork_t *)((s32)data->statwork + ofs)`
-gives retail's `addu` operand order and its reload of `statwork` per
-iteration. The inner loop over `file[0..0x19]` and the `motfile` block that
-follows it are the same three calls.
-
-The two differing words are a delay-slot swap in the array block only:
-retail loads `fileHandleFree`'s argument before the `jal` and fills the slot
-with the `buf[j]` store, where ee-gcc fills the slot with the argument load
-and stores `buf[j]` ahead of the call. The identical `motfile` block comes
-out with retail's order, so the difference is the inner loop's two pointer
-induction variables, not the statement order.
-
-Ruled out: a `void *h` local for `fileGetMemHandle`'s result stored after
-the free, which costs 58 more words; the same local stored before the free;
-a local holding `file[j]` for both calls, equally bad; the two `if`s folded
-into one `&&`; and `file[j] = NULL` moved in front of the free.
-
 ## nbSetActionCommand (newbattle/nbMakePacket, 0x100)
 
 38 of 62 words match, two words short of retail's 256.

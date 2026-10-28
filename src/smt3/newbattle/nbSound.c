@@ -16,6 +16,7 @@ typedef struct evtUnitHandle_t
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
 typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
+typedef struct fileRequest fileRequest_t;
 
 typedef struct
 {
@@ -86,10 +87,10 @@ typedef struct
     s16 id;
     u16 unk_02;
     s32 refcnt;
-    void *file[26];
-    void *buf[26];
-    void *motfile;
-    void *motbuf;
+    fileRequest_t *file[26];
+    sdfMemHandle_t *buf[26];
+    fileRequest_t *motfile;
+    sdfMemHandle_t *motbuf;
 } nbStatWork_t;
 
 /* Only the fields this unit touches are named; the rest of the layout is unconfirmed. */
@@ -358,11 +359,11 @@ extern s32 (*D_00527688[])(nbEventProcessData_t *e);
 
 extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
-extern s32 pacFileCheckEnd(void *pacFileHandle);
+extern s32 pacFileCheckEnd(const fileRequest_t *pacFileHandle);
 
-extern void *fileGetMemHandle(void *fileHandle);
+extern sdfMemHandle_t *fileGetMemHandle(const fileRequest_t *fileHandle);
 
-extern s32 fileHandleFree(void *fileHandle);
+extern s32 fileHandleFree(fileRequest_t *fileHandle);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
@@ -535,7 +536,7 @@ nbStatWork_t *nbSetFormEntry(s32 id)
 
 extern char D_00575450[];
 extern s32 sprintf(char *str, const char *format, ...);
-extern void *fileLoad(const char *path);
+extern fileRequest_t *fileLoad(const char *path);
 
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545BC0);
 
@@ -568,8 +569,6 @@ s32 nbLoadMidiFile(s32 no)
     return 1;
 }
 
-/* NON_MATCHING: 2 of 64 words differ (first at +0x74). */
-#ifdef NON_MATCHING
 void nbCheckPackLoad(nbMainProcessData_t *data)
 {
     nbStatWork_t *stat;
@@ -601,9 +600,6 @@ void nbCheckPackLoad(nbMainProcessData_t *data)
         ofs += sizeof(nbStatWork_t);
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbSound", nbCheckPackLoad);
-#endif
 
 s32 nbFindFreeFormSlot(void)
 {
