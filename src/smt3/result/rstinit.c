@@ -112,6 +112,9 @@ extern s32 fclSetWorkValue(s8 index, s32 value);
 extern void rstGetEvoModelParam(u16 id, f32 *out);
 extern datUnitVisual_t datModelParamTable[];
 extern void evtStartEvent(s32 no);
+extern s32 cmpGetEncycWork(void);
+extern void mdlSmoothSingleMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
+extern void mdlSmoothLoopMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
 
 void rstInitEvoAct(void)
 {
@@ -330,7 +333,34 @@ void func_0021FE30(s8 a, s8 b, f32 x, f32 y)
     EventStart->unk_22E6 = b;
 }
 
-INCLUDE_ASM(const s32, "result/rstinit", rstDrawEvoModel);
+void rstDrawEvoModel(void)
+{
+    mdlObj_t *model;
+    s8 mode;
+
+    /* The native query precedes the state guard; fetch the model again below. */
+    cmpGetEncycWork();
+    if (EventStart->unk_22E5 < 0 || EventStart->unit->id == 0) {
+        return;
+    }
+    model = (mdlObj_t *)cmpGetEncycWork();
+    if (model == NULL) {
+        return;
+    }
+    mode = EventStart->unk_22E6;
+    if (mode == 0) {
+        mdlSmoothSingleMotion(model, 0, EventStart->unk_22E5,
+                              EventStart->unk_22E8, EventStart->unk_22E8);
+        func_0021FE30(0xD, 1, EventStart->unk_22EC, 0.0f);
+        return;
+    }
+    if (model->first->stat == 5 || mode == 2) {
+        mdlSmoothLoopMotion(model, 0, EventStart->unk_22E5,
+                            EventStart->unk_22E8, EventStart->unk_22E8);
+        func_0021FE30(-1, 0, 0.0f, 0.0f);
+        return;
+    }
+}
 
 void rstSetEvoState(void)
 {
