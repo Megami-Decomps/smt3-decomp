@@ -16,6 +16,18 @@ has an entry here. `python3 tools/progress.py` counts the drafts as their own
 measure, apart from the matched functions and bytes, and the progress site
 shows the same count and marks the drafted functions in each unit.
 
+## A draft can be a reference implementation instead
+
+Not every draft is a near-match. Where the retail body is assembly, a C body
+that says what the routine does is still worth parking: the split asm records
+the instructions, not the intent. Label such an entry **reference
+implementation, not a match candidate** and give no word count, since there is
+nothing to be close to. `corePktLoadVerts` in
+[nonmatching/sdf/sdfVu1.md](nonmatching/sdf/sdfVu1.md) is the example.
+
+The same rule as every other draft still applies: it has to compile, which
+`python3 tools/check_nonmatching.py` enforces in CI.
+
 **Write the measurement as "N of M words match", never "N of M words".** The
 bare form is ambiguous and has already misled: an entry reading "10 of 146"
 was taken for a near miss when it meant ten words matching out of 146, a

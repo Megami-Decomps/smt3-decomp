@@ -259,6 +259,7 @@ sdfModelLinkOt	sdf/sdfModel	0x480	Sixty-nine of 288 words differ	docs/nonmatchin
 movieWaitSema	sdf/sdfMovie	212 bytes	Thirty-nine of fifty-three words differ	docs/nonmatching/sdf/sdfMovie.md	5
 FromEulerXYZ	sdf/sdfQuat	0x118	60 of 70 words match	docs/nonmatching/sdf/sdfQuat.md	5
 FromEuler	sdf/sdfQuat	0x114	59 of 69 words match	docs/nonmatching/sdf/sdfQuat.md	9
+corePktLoadVerts	sdfVu1	0x2C		docs/nonmatching/sdf/sdfVu1.md	5
 What cracked the scmd family				docs/nonmatching/sdk/libcdvd.md	3
 The scmd template, for the next pass				docs/nonmatching/sdk/libcdvd.md	24
 sceDmaPutEnv			21 of 118 words differ	docs/nonmatching/sdk/libdma.md	3
