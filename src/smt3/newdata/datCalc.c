@@ -26,7 +26,7 @@ extern f32 sdfDoubleToULong(f64 value);
 EQUATE_DPTOFP();
 EQUATE_FPTODP();
 extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
-extern void func_0022E168(u16 devilId);
+extern s32 func_0022E168(u16 devilId);
 typedef struct
 {
     /* 0x00 */ u16 unk00;

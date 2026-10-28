@@ -1540,7 +1540,31 @@ void cmpRemoveStockDevilEntry(void)
     func_0022E168(cmbGlobalWork->party[index].unit.id);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", func_0022E168);
+s32 func_0022E168(u16 devilId)
+{
+    s32 i;
+    s32 result;
+    s32 stockIndex = 0;
+    s32 found = 0;
+    s32 removeIndex = 0;
+
+    for (i = 0; i < cmbGlobalWork->stockCount; ++i) {
+        removeIndex = i;
+        stockIndex = (u8)cmbGlobalWork->stock[i];
+        if (cmbGlobalWork->party[stockIndex].unit.id == devilId) {
+            found = 1;
+            break;
+        }
+    }
+    result = 0;
+    if (found != 0) {
+        memset(&cmbGlobalWork->party[stockIndex].unit, 0, sizeof(datUnitWork_t));
+        cmpRemoveStockSlot((s8)removeIndex);
+        cmpRebuildStockList();
+        result = 1;
+    }
+    return result;
+}
 
 void cmp_22E258(void *work)
 {
