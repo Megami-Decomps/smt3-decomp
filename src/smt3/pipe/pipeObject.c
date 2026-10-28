@@ -768,7 +768,61 @@ void objVisibleAll(s8 value)
     value = 0;
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", mdlTask);
+typedef struct tagPipePathNode {
+    f32 position[3]; u32 opaque0C; f32 direction[3]; u32 opaque1C;
+} tagPipePathNode;
+typedef struct tagPipePosTable {
+    sdfMemHandle_t *aHandle; s32 tSize; tagPipePathNode *points; u32 opaque0C;
+} tagPipePosTable;
+extern tagPipePosTable D_00528F58;
+extern void vecTranslate(f32 *, f32 *, f32 *);
+extern f32 vecNormalize(f32 *);
+extern void mtxRotateX(sdfMatrix4_t *, f32);
+extern void mtxRotateY(sdfMatrix4_t *, f32);
+extern void mtxRotateZ(sdfMatrix4_t *, f32);
+extern void mtxStore(sdfMatrix4_t *, sdfMatrix4_t *);
+extern void vecDistance(f32 [4], f32 [4][4]);
+extern void dds3SetRotPoseSet(void *, sdfVector4_t *);
+
+void mdlTask(tagPipeObject *objPtr, tagpipeBasic *basicPtr, f32 x, f32 y, f32 z) {
+    f32 cross[4];
+    f32 direction[4];
+    f32 position[4];
+    f32 translated[4];
+    sdfMatrix4_t matrix;
+    f32 radians;
+    tagPipePathNode *node;
+    tagPipePathNode *nextNode;
+
+    getPosTranslate(objPtr, translated);
+    /* Preserve the index-first EE address sum; see
+     * docs/levers/addressing-and-types.md. */
+    node = (tagPipePathNode *)((u32)offsetCount * sizeof(tagPipePathNode) + (u32)D_00528F58.points);
+    nextNode = node + 1;
+    position[0] = node->direction[0];
+    radians = 0x1.1df46ap-6f;
+    position[1] = node->direction[1];
+    position[2] = node->direction[2];
+    direction[0] = nextNode->position[0] - node->position[0];
+    direction[1] = nextNode->position[1] - node->position[1];
+    direction[2] = nextNode->position[2] - node->position[2];
+    vecTranslate(cross, direction, position);
+    vecNormalize(cross);
+    vecNormalize(direction);
+    vecNormalize(position);
+    memset(&matrix, 0, 0x40);
+    matrix.m[0] = cross[0]; matrix.m[1] = cross[1]; matrix.m[2] = cross[2];
+    matrix.m[4] = direction[0]; matrix.m[5] = direction[1]; matrix.m[6] = direction[2];
+    matrix.m[8] = position[0]; matrix.m[9] = position[1]; matrix.m[10] = position[2];
+    matrix.m[15] = 1.0f;
+    mtxRotateX(&matrix, x * radians);
+    mtxRotateY(&matrix, y * radians);
+    mtxRotateZ(&matrix, z * radians);
+    mtxStore(&matrix, &matrix);
+    vecDistance(basicPtr->rot, (f32 (*)[4])matrix.m);
+    dds3SetRotPoseSet(basicPtr->base, (sdfVector4_t *)basicPtr->rot);
+}
+
 
 void partsInit(void)
 {
