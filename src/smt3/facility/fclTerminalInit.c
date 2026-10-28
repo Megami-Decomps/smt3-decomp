@@ -94,7 +94,92 @@ void fclSetTerminalMode(s8 mode)
     trmMode = mode;
 }
 
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", trmGetEventNo);
+extern void cmpSetCursorFlag(void *cursor, u8 *flags);
+
+s32 trmGetEventNo(s32 update, trmTerminalWork_t *work)
+{
+    s32 event = -1;
+
+    if (work->terminalType == 0) {
+        switch (work->terminalNo) {
+        case 1:
+            if (!evtBitCheck(0xD)) {
+                if (evtBitCheck(9)) {
+                    gCommandFlag[0] |= 2;
+                    if (update != 0) {
+                        work->terminalReferenceCount++;
+                    }
+                } else {
+                    gCommandFlag[0] |= 2;
+                    if (update != 0) {
+                        work->terminalReferenceCount++;
+                    }
+                    event = 0x26B;
+                }
+            }
+            break;
+        case 2:
+            if (!evtBitCheck(0xD)) {
+                if (evtBitCheck(9) && evtBitCheck(0xA)) {
+                    event = 0x26F;
+                    gCommandFlag[0] |= 2;
+                    if (update != 0) {
+                        work->terminalReferenceCount++;
+                    }
+                } else {
+                    gCommandFlag[0] |= 2;
+                    if (update != 0) {
+                        work->terminalReferenceCount++;
+                    }
+                }
+            }
+            break;
+        case 3:
+            if (!evtBitCheck(0x34) && evtBitCheck(0xE)) {
+                event = 0x280;
+            }
+            break;
+        case 9:
+            if (!evtBitCheck(0x53)) {
+                if (evtBitCheck(0x4F)) {
+                    event = 0x296;
+                } else if (evtBitCheck(0x4B)) {
+                    event = 0x294;
+                } else if (evtBitCheck(0x44)) {
+                    event = 0x290;
+                } else if (evtBitCheck(0x3E)) {
+                    event = 0x28C;
+                } else {
+                    event = 0x286;
+                }
+            }
+            break;
+        case 18:
+        case 19:
+        case 23:
+        case 24:
+            event = 0x326;
+            gCommandFlag[0] |= 2;
+            if (update != 0) {
+                work->terminalReferenceCount++;
+            }
+            break;
+        }
+        if (event < 0) {
+            event = 0x324;
+        }
+    } else {
+        event = 0x325;
+        if (!evtBitCheck(0xD)) {
+            gCommandFlag[0] |= 2;
+            if (update != 0) {
+                work->terminalReferenceCount++;
+            }
+        }
+    }
+    cmpSetCursorFlag((u8 *)work + 0x1C, gCommandFlag);
+    return event;
+}
 
 extern char D_0053D5B0[]; /* "e%d_main" */
 
