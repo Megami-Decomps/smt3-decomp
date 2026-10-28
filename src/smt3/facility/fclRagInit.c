@@ -359,7 +359,67 @@ s8 ragBuildList3(u8 index, u8 *work)
 INCLUDE_ASM(const s32, "facility/fclRagInit", ragBuildList3);
 #endif
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", ragCreateAllList);
+typedef struct {
+    u8 reserved00[0x1A];
+    s8 heartItems[32];
+    s8 heartCount;
+    s8 list2[8];
+    s8 list2Count;
+    s8 list3[8];
+    s8 list3Count;
+    u8 reserved4D[0xF3];
+    cmpCursorInfo_t cursor;
+    u8 reserved178[0x1004];
+    lstWork_t heartWindow;
+    u8 reserved1310[0x1004];
+    lstWork_t window2;
+    u8 reserved24A8[0x1004];
+    lstWork_t window3;
+} ragListWork_t;
+typedef struct {
+    u8 reserved00[2];
+    s16 eventBit;
+    u8 hearts[2];
+    u8 list2[2];
+    u8 list3[2];
+} ragListConfig_t;
+extern ragListConfig_t gCommandFlag_0[];
+extern u8 ragListFlags[3];
+extern s32 ragBuildHeartsList(u8 type, u8 *work);
+extern s8 ragBuildList2(u8 type, u8 *work);
+extern s8 ragBuildList3(u8 type, u8 *work);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
+
+void ragCreateAllList(s32 onlyHearts, s32 type, ragListWork_t *work)
+{
+    s32 active;
+    if (gCommandFlag_0[type].eventBit >= 0) {
+        active = evtBitCheck(gCommandFlag_0[type].eventBit) != 0;
+    } else {
+        active = 0;
+    }
+    work->heartCount = ragBuildHeartsList(gCommandFlag_0[type].hearts[active], (u8 *)work);
+    if (gCommandFlag_0[type].hearts[active] == 0) {
+        ragListFlags[0] |= 2;
+        work->cursor.unk_21++;
+    }
+    ragInitHeartsList(work->heartCount, &work->heartWindow);
+    if (onlyHearts == 0) {
+        work->list2Count = ragBuildList2(gCommandFlag_0[type].list2[active], (u8 *)work);
+        if (gCommandFlag_0[type].list2[active] == 0) {
+            ragListFlags[1] |= 2;
+            work->cursor.unk_21++;
+        }
+        ragInitList2(work->list2Count, &work->window2);
+        work->list3Count = ragBuildList3(gCommandFlag_0[type].list3[active], (u8 *)work);
+        if (gCommandFlag_0[type].list3[active] == 0) {
+            ragListFlags[2] |= 2;
+            work->cursor.unk_21++;
+        }
+        cmpSetCursorFlag(&work->cursor, (s32)ragListFlags);
+        ragInitList3(work->list3Count, &work->window3);
+    }
+}
 
 INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D140);
 
