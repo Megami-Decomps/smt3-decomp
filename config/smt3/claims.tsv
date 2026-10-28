@@ -278,3 +278,4 @@ src/smt3/newbattle/nbCameraCommand.c	redthing1	done	2026-10-28	0 matches	retaine
 src/smt3/newbattle/nbResultProcess.c	redthing1	done	2026-10-28	5 fn / 396 B	texture cleanup, experience cap and result lifecycle; typed process slot
 src/smt3/newbattle/nbTarSelProcess.c	redthing1	done	2026-10-28	5 fn / 280 B	status accessors, automatic selection, shutdown and process creation
 src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	2 fn / 148 B	character-code indexing and three-row initialization
+src/smt3/event/evtMoon.c	redthing1	done	2026-10-28	1 fn / 300 B	evtMoonProcess1; PAC texture-list transfer into six owned handles

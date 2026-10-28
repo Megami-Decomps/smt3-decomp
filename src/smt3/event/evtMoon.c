@@ -7,19 +7,51 @@ extern f32 gMoonCnt;
 
 extern dds3ProcessID_t *moonprocess_id;
 extern char D_0054F780[]; /* "moon" */
+extern char D_0053B1F8[]; /* "/fld/f/bin/moon.LB" */
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
                                          s32 shutdownTimer, dds3ProcessFunc_t process,
                                          dds3ProcessFunc_t shutdown, void *data);
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
+extern void *sdfChipAllocDirect(s32 size);
 extern void sdfChipFreeDirect(void *ptr);
 extern void sdfTexFreeDelayed(sdfTexHandle_t *handle);
+extern void *pacLoad(const char *filename);
+extern void pacSync(void *handle);
+extern s32 pacFileHandleFree_(void *handle);
 
 typedef struct
 {
-    sdfTexHandle_t *textures[6];
+    sdfTexHandle_t *MoonTmx1;
+    sdfTexHandle_t *MoonTmx2;
+    sdfTexHandle_t *MoonTmx3;
+    sdfTexHandle_t *MoonTmx4;
+    sdfTexHandle_t *MoonTmx5;
+    sdfTexHandle_t *MoonTmx6;
 } evtMoonProcessData_t;
 
+typedef struct evtMoonPacRequest_t
+{
+    u8 kind;
+    u8 state;
+    u8 retryCount;
+    u8 mode;
+    struct evtMoonPacRequest_t *next;
+    char *name;
+    void *deviceRequest;
+    s32 transferBytes;
+    s32 totalBytes;
+    void *callback;
+    void *callbackArg;
+    sdfMemHandle_t *allocationHandle;
+    u32 retainedAddress;
+    u32 transferAddress;
+    struct evtMoonPacRequest_t *completionNext;
+    sdfPacDecodeCb_t packet;
+} evtMoonPacRequest_t;
+
 s32 evtMoonProcess1(dds3ProcessID_t *id);
+extern s32 evtMoonProcess2(dds3ProcessID_t *id);
 void evtMoonShutdown(dds3ProcessID_t *id);
 
 INCLUDE_ASM(const s32, "event/evtMoon", evtDeadMoonDraw);
@@ -81,29 +113,76 @@ INCLUDE_ASM(const s32, "event/evtMoon", evtMoonProcess2);
 
 INCLUDE_ASM(const s32, "event/evtMoon", evtMoonAddMove);
 
-INCLUDE_ASM(const s32, "event/evtMoon", evtMoonProcess1);
+INCLUDE_RODATA(const s32, "event/evtMoon", D_0053B1F8);
+
+s32 evtMoonProcess1(dds3ProcessID_t *id)
+{
+    evtMoonProcessData_t *work = sdfChipAllocDirect(sizeof(*work));
+    evtMoonPacRequest_t *request;
+    sdfPacDecodeResrc_t *entry;
+    s32 index = 0;
+
+    work->MoonTmx1 = NULL;
+    work->MoonTmx2 = NULL;
+    work->MoonTmx3 = NULL;
+    work->MoonTmx4 = NULL;
+    work->MoonTmx5 = NULL;
+    work->MoonTmx6 = NULL;
+    request = pacLoad(D_0053B1F8);
+    pacSync(request);
+    entry = request->packet.resrcHead;
+    if (entry != NULL) {
+        do {
+            switch (index) {
+            case 0:
+                work->MoonTmx1 = entry->resrc;
+                break;
+            case 1:
+                work->MoonTmx2 = entry->resrc;
+                break;
+            case 2:
+                work->MoonTmx3 = entry->resrc;
+                break;
+            case 3:
+                work->MoonTmx4 = entry->resrc;
+                break;
+            case 4:
+                work->MoonTmx5 = entry->resrc;
+                break;
+            case 5:
+                work->MoonTmx6 = entry->resrc;
+                break;
+            }
+            entry = entry->next;
+            index++;
+        } while (entry != NULL);
+    }
+    pacFileHandleFree_(request);
+    dds3SetProcessData(id, work);
+    return (s32)evtMoonProcess2;
+}
 
 void evtMoonShutdown(dds3ProcessID_t *id)
 {
     evtMoonProcessData_t *work = dds3GetProcessData(id);
 
-    if (work->textures[0] != NULL) {
-        sdfTexFreeDelayed(work->textures[0]);
+    if (work->MoonTmx1 != NULL) {
+        sdfTexFreeDelayed(work->MoonTmx1);
     }
-    if (work->textures[1] != NULL) {
-        sdfTexFreeDelayed(work->textures[1]);
+    if (work->MoonTmx2 != NULL) {
+        sdfTexFreeDelayed(work->MoonTmx2);
     }
-    if (work->textures[2] != NULL) {
-        sdfTexFreeDelayed(work->textures[2]);
+    if (work->MoonTmx3 != NULL) {
+        sdfTexFreeDelayed(work->MoonTmx3);
     }
-    if (work->textures[3] != NULL) {
-        sdfTexFreeDelayed(work->textures[3]);
+    if (work->MoonTmx4 != NULL) {
+        sdfTexFreeDelayed(work->MoonTmx4);
     }
-    if (work->textures[4] != NULL) {
-        sdfTexFreeDelayed(work->textures[4]);
+    if (work->MoonTmx5 != NULL) {
+        sdfTexFreeDelayed(work->MoonTmx5);
     }
-    if (work->textures[5] != NULL) {
-        sdfTexFreeDelayed(work->textures[5]);
+    if (work->MoonTmx6 != NULL) {
+        sdfTexFreeDelayed(work->MoonTmx6);
     }
     sdfChipFreeDirect(work);
     moonprocess_id = NULL;
