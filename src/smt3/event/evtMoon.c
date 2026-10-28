@@ -6,6 +6,21 @@
 extern f32 gMoonCnt;
 
 extern dds3ProcessID_t *moonprocess_id;
+extern char D_0054F780[]; /* "moon" */
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
+                                         s32 shutdownTimer, dds3ProcessFunc_t process,
+                                         dds3ProcessFunc_t shutdown, void *data);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void sdfChipFreeDirect(void *ptr);
+extern void sdfTexFreeDelayed(sdfTexHandle_t *handle);
+
+typedef struct
+{
+    sdfTexHandle_t *textures[6];
+} evtMoonProcessData_t;
+
+s32 evtMoonProcess1(dds3ProcessID_t *id);
+void evtMoonShutdown(dds3ProcessID_t *id);
 
 INCLUDE_ASM(const s32, "event/evtMoon", evtDeadMoonDraw);
 
@@ -40,7 +55,11 @@ void evtDisableMoonCalc(void)
     DDS3_GBWK->moonFlags &= ~1;
 }
 
-INCLUDE_ASM(const s32, "event/evtMoon", evtEnableMoonDraw);
+void evtEnableMoonDraw(void)
+{
+    DDS3_GBWK->moonFlags |= 2;
+    gMoonCnt = 1.0f;
+}
 
 void evtDisableMoonDraw(void)
 {
@@ -64,9 +83,44 @@ INCLUDE_ASM(const s32, "event/evtMoon", evtMoonAddMove);
 
 INCLUDE_ASM(const s32, "event/evtMoon", evtMoonProcess1);
 
-INCLUDE_ASM(const s32, "event/evtMoon", evtMoonShutdown);
+void evtMoonShutdown(dds3ProcessID_t *id)
+{
+    evtMoonProcessData_t *work = dds3GetProcessData(id);
 
-INCLUDE_ASM(const s32, "event/evtMoon", evtInitMoonProcess);
+    if (work->textures[0] != NULL) {
+        sdfTexFreeDelayed(work->textures[0]);
+    }
+    if (work->textures[1] != NULL) {
+        sdfTexFreeDelayed(work->textures[1]);
+    }
+    if (work->textures[2] != NULL) {
+        sdfTexFreeDelayed(work->textures[2]);
+    }
+    if (work->textures[3] != NULL) {
+        sdfTexFreeDelayed(work->textures[3]);
+    }
+    if (work->textures[4] != NULL) {
+        sdfTexFreeDelayed(work->textures[4]);
+    }
+    if (work->textures[5] != NULL) {
+        sdfTexFreeDelayed(work->textures[5]);
+    }
+    sdfChipFreeDirect(work);
+    moonprocess_id = NULL;
+}
+
+void evtInitMoonProcess(void)
+{
+    if (moonprocess_id == NULL) {
+        moonprocess_id = dds3StartProcess(D_0054F780, 0x2B0B, 1, 1, evtMoonProcess1,
+                                          (dds3ProcessFunc_t)evtMoonShutdown, NULL);
+        evtEnableMoonCalc();
+        evtDisableMoonDraw();
+        evtSetAgeOfMoon(0);
+        DDS3_GBWK->unkA42[0] = 0;
+        *(s32 *)&DDS3_GBWK->unk11A7C[0] = 0;
+    }
+}
 
 void evt_1EB030(void)
 {
