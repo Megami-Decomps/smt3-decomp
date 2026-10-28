@@ -616,3 +616,4 @@ src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	0 matches / result 
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 364 B	smoke position and drawing with callback-sensitive handle reloads and native SDK vector copies for debug axes
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	debug menu at native 424-byte size with three argument-setup words unresolved; recovered complete twelve-byte debug work
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 480 B	stock cursor routing with distinct pre-action and fresh post-callback categories; owner 358 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 672 B	camp number display and signed RootTimer fade state with live callback reads; owner 360 match, 0 differ

@@ -412,7 +412,7 @@ typedef struct
     /* 0x846C */ u8 unk_846C[0x34];
     /* 0x84A0 */ s32 effectStep;
     /* 0x84A4 */ void *dhProcess;
-    /* 0x84A8 */ u8 reserved84A8[4];
+    /* 0x84A8 */ s32 RootTimer;
     /* 0x84AC */ s32 fadeStep;
     /* 0x84B0 */ s32 stockAlpha[16];
     /* 0x84F0 */ s8 stockStep[16];
@@ -2461,7 +2461,83 @@ void campDrawStockCursor(void)
 }
 
 
-INCLUDE_ASM(const s32, "code_0022C578", campDrawNumber);
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors, s32 page,
+                             s32 spriteId, s32 *texList,
+                             fclSpriteTbl_t *table, s32 ot);
+extern frFontRequest_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                         const char *text, frFontRequest_t *previous);
+extern char D_0054FE70[];
+
+void campDrawNumber(void)
+{
+    s32 timer = campWork->RootTimer;
+    char text[0x20];
+    s32 colors[4];
+    void *font;
+    s32 fade;
+    u32 fontColor;
+    s32 phase;
+    s32 stepMode;
+
+    if (timer != 0 && timer != 0x200) {
+        if (timer < 0x100) {
+            fade = timer / 2;
+        } else {
+            timer %= 0x100;
+            fade = (0x100 - timer) / 2;
+        }
+        colors[0] = 0x80808000 | fade;
+        colors[1] = 0x80808000 | fade;
+        colors[2] = 0x80808000 | fade;
+        colors[3] = 0x80808000 | fade;
+        fclDrawSpriteRes(0, 0, 0, colors, 0, 0x1A,
+                         D_00345D88, fclSpriteTable, 0x47);
+        fontColor = 0xA09DC300 | fade;
+        sprintf(text, D_0054FE70, DDS3_GBWK->maka);
+        font = frwGetNumFontFRQ(0x3C0, 0xC90, 0xFFFFF,
+                                fontColor, text, NULL);
+        func_001C7E38(font, 1, 0x47);
+        frDestroyFontRequestAfter(font);
+    }
+
+    phase = campWork->unk_0001;
+    switch (phase) {
+    case 4:
+    case 6:
+    case 7:
+        stepMode = 0;
+        break;
+    default:
+        stepMode = 1;
+        break;
+    }
+    if ((s8)campWork->statusPhase != 0) {
+        stepMode = 0;
+        campWork->RootTimer = 0x200;
+    }
+
+    if (stepMode != 0) {
+        if (campWork->RootTimer > 0x100) {
+            campWork->RootTimer = 0x200 - campWork->RootTimer;
+        }
+        if (campWork->RootTimer < 0x100) {
+            campWork->RootTimer += 0x2A;
+        }
+        if (campWork->RootTimer > 0x100) {
+            campWork->RootTimer = 0x100;
+        }
+    } else {
+        if (campWork->RootTimer < 0x100) {
+            campWork->RootTimer = 0x200 - campWork->RootTimer;
+        }
+        if ((u32)(campWork->RootTimer - 0x100) < 0x100) {
+            campWork->RootTimer += 0x2A;
+        }
+        if (campWork->RootTimer > 0x200) {
+            campWork->RootTimer = 0x200;
+        }
+    }
+}
 
 extern void fclDrawSpriteFull(s32 x, s32 y, s32 d, s32 w, s32 h, u8 mode, s32 *color, s32 id,
                               u16 spriteId, s32 *texList, fclSpriteTbl_t *table, s32 OtNo);
@@ -3581,8 +3657,7 @@ void fclGetArrowCursorTarget(s32 x, s32 y, s32 z, u32 color, s32 extra)
 }
 
 extern s32 datDevilIsRegistered(u8 devilId);
-extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *color, s32 page, s32 spriteId,
-    s32 *texList, fclSpriteTbl_t *table, s32 ot);
+
 
 void fclDrawArrowCursorIcon(s32 x, s32 y, s32 z, s8 index, s32 extra)
 {
