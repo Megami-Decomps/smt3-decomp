@@ -480,7 +480,45 @@ void shpUpdateServiceTicket(void)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateServiceTicketItem);
+extern s8 fclGetWorkValue(s8 index);
+extern s32 datAddHearts(s32 slot);
+
+void shpUpdateServiceTicketItem(void)
+{
+    s32 info = cmpChkSeqInfo((cmbGbWork_t *)shopUpdateWork);
+    s8 selection;
+    u16 item;
+    s32 slot;
+
+    if (info == 2) {
+        selection = 0;
+        if (fclGetFlag(4) != 0) {
+            selection = 1;
+        }
+        if (fclGetFlag(5) != 0) {
+            selection = 2;
+        }
+        switch (selection) {
+        case 0:
+            item = fclGetWorkValue(4);
+            break;
+        case 1:
+            item = fclGetWorkValue(5);
+            break;
+        default:
+            item = fclGetWorkValue(6);
+            break;
+        }
+        slot = datGetItemSlotIndex(item);
+        if (slot != 0) {
+            datAddHearts(slot);
+        } else {
+            datAddItem(item, 1);
+        }
+        shpAddServiceTicket(-10);
+        shpExit();
+    }
+}
 
 extern void fclCreateItemListEx(fclItemList_t *list, s8 kind);
 extern void cmpChangeCursorListNums(s32 count, u8 *cursor);
@@ -614,7 +652,6 @@ extern void shpUpdateSeqBuyNums(void);
 extern void shpUpdateSeqSellNums(void);
 extern s32 shpUpdateSeqConfirm(s8 mode);
 extern s32 shpUpdateSeqPay(void);
-extern s32 shpUpdateServiceTicketItem(void);
 
 INCLUDE_RODATA(const s32, "facility/fclShopUpdate", D_0053D080);
 
