@@ -12,7 +12,16 @@ INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameString);
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawEditIcons);
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawTextBox);
+void nmeDrawTextBox(s32 x, s32 y, s32 z)
+{
+    s32 colors[4];
+
+    colors[0] = 0x45202680;
+    colors[1] = 0;
+    colors[2] = 0x45202680;
+    colors[3] = 0;
+    cmpDrawBoxGDefault(x, y, z, 0x4F, 0x16, colors, 0x47);
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawColoredText);
 
@@ -26,7 +35,10 @@ INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawCharCell);
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawCursorAt);
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawCursor);
+void nmeDrawCursor(void)
+{
+    nmeDrawCursorAt(0x29, 0xDA, 0, 0, 0x47);
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawTabSprite);
 

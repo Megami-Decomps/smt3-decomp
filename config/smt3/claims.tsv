@@ -271,3 +271,4 @@ src/smt3/newbattle/nbMaeProcess.c	redthing1	done	2026-10-28	3 fn / 284 B	remaini
 src/smt3/facility/fclTerminalUpdate.c	redthing1	done	2026-10-28	3 fn / 480 B	Act/cursor/list helpers matched; confirm sequence remains assembly
 src/smt3/newbattle/nbCameraCommand.c	redthing1	done	2026-10-28	1 fn / 100 B	FixPos wrapper matched; three state drafts retained
 src/smt3/facility/fclShopInit.c	redthing1	open	2026-10-28	textures/items/prices	bounded ordinary shop helper reconstruction
+src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	2 fn / 104 B	nmeDrawCursor and nmeDrawTextBox wrappers; whole-unit check 2 match, 0 differ
