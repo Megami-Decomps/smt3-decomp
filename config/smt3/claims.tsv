@@ -447,3 +447,4 @@ src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 264 B	bounded skill-u
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 272 B	eligible skill collection and random selection with signed byte output index; owner 69 match, 0 differ
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 148 B	level-table kind count using recovered 102-byte records and signed low-byte level selection; owner 70 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 468 B	Hearts grid cursor wrap and special-entry transitions; owner 326 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 572 B	status-window phase and model input dispatch; owner 329 match, 0 differ

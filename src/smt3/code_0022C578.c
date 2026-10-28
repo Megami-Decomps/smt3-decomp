@@ -396,7 +396,8 @@ typedef struct
     /* 0x8303 */ s8 unk_8303;
     /* 0x8304 */ u16 itemId[0xA0];
     /* 0x8444 */ u8 itemMode;
-    /* 0x8445 */ u8 unk_8445[3];
+    /* 0x8445 */ u8 statusPhase;
+    /* 0x8446 */ u8 reserved8446[2];
     /* 0x8448 */ u8 crossPanel[0x20];
     /* 0x8468 */ s32 unk_8468;
     /* 0x846C */ u8 unk_846C[0x34];
@@ -2219,7 +2220,60 @@ INCLUDE_ASM(const s32, "code_0022C578", campUpdateStockCursor);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateSkillSelect);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateProcessStatus);
+extern u8 cmpClearStatusFlags(void);
+extern void *cmpStartProcessStatus(s8 arg, cmpSeqInfo_t *parent);
+extern void cmpSetStatusWindowHidden(void);
+extern void cmpMoveStockCursor(s8 index, s8 direction, u8 *stock);
+
+void cmpUpdateProcessStatus(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+    u8 index = cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
+
+    if ((s8)campWork->statusPhase != 0 && (s8)campWork->statusPhase < 3) {
+        campWork->statusPhase++;
+    }
+    switch (button) {
+    case 1:
+        if (cmpClearStatusFlags() != 0) {
+            cmpStartProcessStatus((s8)index, NULL);
+            campWork->unk_0004 = button;
+            campWork->statusPhase = button;
+        } else if ((s8)campWork->statusPhase != 0) {
+            button = 0;
+        }
+        break;
+    case 2:
+        if ((s8)campWork->statusPhase == 3) {
+            if (cmpLoadStatusModel() == 0) {
+                campWork->drawPhase = 1;
+                cmpSetStatusWindowHidden();
+                campWork->unk_0004 = button;
+                campWork->statusPhase = 0;
+            } else {
+                button = 0x8000;
+            }
+        } else if ((s8)campWork->statusPhase == 0) {
+            cmpDisableInfoWindow();
+            campWork->unk_0001 = 0;
+            campWork->unk_0004 = button;
+            campWork->statusPhase = 0;
+        }
+        break;
+    case 0x10:
+        if ((s8)campWork->statusPhase == 0) {
+            cmpMoveStockCursor(0, -1, (u8 *)&campWork->stock[0]);
+        }
+        break;
+    case 0x20:
+        if ((s8)campWork->statusPhase == 0) {
+            cmpMoveStockCursor(0, 1, (u8 *)&campWork->stock[0]);
+        }
+        break;
+    }
+    cmpMoveCursor2((cmpCursorInfo_t *)campWork->unk_6230, 0);
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop((cmpPadStopWork_t *)campWork->unk_6230, button, 0x30));
+}
 
 void cmpRemoveStockDevil(void)
 {
