@@ -340,6 +340,13 @@ extern u8 pNbCamera[];
 
 extern void nbCameraBoss_Sp_DOUTYO_Run(u8 *pNbCamera);
 
+extern void nbCameraBoss_Sp_DOUTYO_Set(u8 *pNbCamera);
+
+extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                               s32 type);
+
+extern void dds3SetQuake(s32 frame, s32 range);
+
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
 extern s32 D_005515BC;
@@ -508,7 +515,43 @@ s32 Wait2_nbE901(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE901", Syutugen2);
+s32 Syutugen2(nbEventProcessData_t *ed)
+{
+    sdfVector4_t pos;
+    sdfVector4_t pos2;
+    nbFormation_t *form;
+    sdfVector4_t *op;
+
+    if (ed->seqtime == 3) {
+        nbAddHitEffKoukaPacket(0, 0, nbGetEventForm(), 4);
+    }
+    if (ed->seqtime == 5) {
+        dds3SetQuake(0x1E, 0x258);
+    }
+    form = nbGetEventForm();
+    SDF_VU0_COPYVECTOR(&pos, &form->pos);
+    pos.y = pos.y + 150.0f;
+    if (pos.y > 0.0f) {
+        pos.y = 0.0f;
+        nbFreeEffectSlot(ed);
+    }
+    nbSetFormPos(form, &pos);
+    if (ed->seqtime >= 4) {
+        if (ed->seqtime == 4) {
+            SDF_VU0_LOADVECTOR(&form->pos);
+            SDF_VU0_STOREVECTOR(&pos);
+            op = &pos2;
+            SDF_VU0_STOREVECTOR_RWADDR(op);
+            pos.y = 0.0f;
+            nbSetFormPos(form, &pos);
+            nbCameraBoss_Sp_DOUTYO_Set(pNbCamera);
+            nbSetFormPos(form, &pos2);
+        } else {
+            nbCameraBoss_Sp_DOUTYO_Run(pNbCamera);
+        }
+    }
+    return 0;
+}
 
 s32 End(nbEventProcessData_t *ed)
 {
