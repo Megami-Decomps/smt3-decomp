@@ -419,7 +419,8 @@ typedef struct
     /* 0x043E5 */ s8 resultIndex[2][12][12];
     /* 0x04505 */ u8 reserved04505;
     /* 0x04506 */ u16 resultId[2][12][12];
-    /* 0x04746 */ u8 reserved04746[0x11DC4];
+    /* 0x04746 */ u8 reserved04746[0x11DC2];
+    /* 0x16508 */ u8 displayFlags[2];
     /* 0x1650A */ s8 unk_1650A;
     /* 0x1650B */ u8 unk_1650B;
     /* 0x1650C */ void *resourceHandle_1650C;
@@ -700,7 +701,71 @@ void fclCombineInitRagTex(u8 *work)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", fclUpdateInit);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void *sdfDevLoadFileEx(char *name, void **data, s32 *size);
+extern void cmpInitSeqInfo(void *work, void *parent);
+extern void fclInitCursorWindow(void *work, void *data, u8 count);
+extern void fclSetCursorList(void *work, s32 mode);
+extern void evtDisableMoonCalc(void);
+extern void cmpModelInit(void);
+extern fclPanel_t *fclCreatePanel(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color, s8 type, s8 speed);
+extern char D_0053C890[];
+extern char D_0053C8B8[];
+extern u8 D_0032D1A8[];
+extern u8 D_0032D1B8[];
+extern u8 D_0032D1C8[];
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C890);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C8B8);
+
+void fclUpdateInit(void)
+{
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(0x1A770);
+    void *locked = sdfMemLock(allocation);
+
+    CMB_GBWK = locked;
+    memset(CMB_GBWK, 0, 0x1A770);
+    CMB_GBWK->resourceHandle = allocation;
+    cmpInitSeqInfo(CMB_GBWK, NULL);
+
+    CMB_GBWK->resourceHandle_1650C =
+        sdfDevLoadFileEx(D_0053C890, (void **)&CMB_GBWK->script, NULL);
+    CMB_GBWK->resourceHandle_16518 =
+        sdfDevLoadFileEx(D_0053C8B8, &CMB_GBWK->explainData, NULL);
+    CMB_GBWK->unk_00001 = 0;
+    CMB_GBWK->unk_00003 = 0;
+    CMB_GBWK->unk_00004 = 1;
+
+    fclInitCursorWindow((u8 *)CMB_GBWK + 0x18, D_0032D1A8, 4);
+    fclSetCursorList((u8 *)CMB_GBWK + 0x18, 0x19);
+    fclInitCursorWindow((u8 *)CMB_GBWK + 0x165FC, D_0032D1B8, 3);
+    fclSetCursorList((u8 *)CMB_GBWK + 0x165FC, 0x19);
+    fclInitCursorWindow((u8 *)CMB_GBWK + 0x1763C, D_0032D1C8, 8);
+    fclSetCursorList((u8 *)CMB_GBWK + 0x1763C, 0x19);
+
+    memset(D_00551F18, 0, 4);
+    memset(cmbMenuEntryTable, 0, 8);
+    CMB_GBWK->displayFlags[0] = 0;
+    CMB_GBWK->displayFlags[1] = 0;
+    CMB_GBWK->unk_1650B = 0;
+    evtDisableMoonCalc();
+    cmpModelInit();
+    cmpResetDrawEnv();
+    fclCombineSetTable();
+
+    CMB_GBWK->panel = fclCreatePanel(0, 0x320, 0, 0, 0x13A, 0, 0, 0x1D);
+    fclCombineLoadTextures();
+    fclCombineInitRagTex((u8 *)CMB_GBWK);
+    CMB_GBWK->unk_0410C[1] = fclCombineCheckMoonPhase();
+    fclCombineBGM(0);
+    fclSetWorkValue(2, 0);
+    if (evtBitCheck(0x915) == 0) {
+        CMB_GBWK->unk_0410C[0] = 1;
+    }
+    fclCombineEventStart(1);
+}
 
 extern s32 fclDestroyPanel(void *pPanel);
 extern void cmpSetSkillCursor(cmpSkillList_t *list);

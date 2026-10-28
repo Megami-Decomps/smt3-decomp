@@ -548,3 +548,4 @@ src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 732 B	fusion
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 452 B	arrow cursor label with conditional expanding highlight, signed alpha colors and fixed-point offsets; owner 341 match, 0 differ
 src/smt3/facility/fclRibbon.c	redthing1	done	2026-10-28	1 fn / 492 B	opaque or alpha-scaled ribbon frame with rebuilt center rectangle; owner 11 match, 0 differ
 src/smt3/facility/fclRibbon.c	redthing1	done	2026-10-28	1 fn / 372 B	four background rectangles with native UV and texture selection; owner 12 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 608 B	fusion allocation, script/message loading, cursor/panel initialization and event setup; owner 159 match, 0 differ
