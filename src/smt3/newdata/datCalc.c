@@ -936,7 +936,6 @@ void datSetDevilWork(s32 id, datUnitWork_t *work)
 }
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datAddDevil);
-
 /* NON_MATCHING: 12 of 26 words differ (first at +0x34). */
 #ifdef NON_MATCHING
 s32 datAddUniqueDevil(s32 id, s32 sw, s32 uid)
@@ -1154,7 +1153,34 @@ void datAddKotowariPoint(s32 type, s32 point)
     }
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetKotowariLank);
+s32 datGetKotowariLank(s32 lank)
+{
+    s32 rank[4];
+    s32 i;
+    s32 j;
+
+    for (i = 1; i < 4; i++) {
+        rank[i] = i;
+    }
+    for (i = 1; i < 3; i++) {
+        for (j = i + 1; j < 4; j++) {
+            s32 left = DDS3_GBWK->kotowari[rank[i]];
+            s32 right = DDS3_GBWK->kotowari[rank[j]];
+            s32 temp;
+
+            if (left > right) {
+                continue;
+            }
+            if (left == right && dds3GetRandIntA(0, 100) < 50) {
+                continue;
+            }
+            temp = rank[i];
+            rank[i] = rank[j];
+            rank[j] = temp;
+        }
+    }
+    return rank[lank + 1];
+}
 
 s32 datGetSkillCost(datUnitWork_t *w, s32 nskill)
 {

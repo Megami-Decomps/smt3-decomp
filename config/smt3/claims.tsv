@@ -361,3 +361,4 @@ src/smt3/effect/billManager.c	redthing1	done	2026-10-28	1 fn / 1404 B	P2A polygo
 src/smt3/facility/fclRagUpdate.c	redthing1	done	2026-10-28	1 fn / 160 B	selected-item lookup through typed storage and list cursors; whole-unit 13 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	2 fn / 568 B	cmpUseItem and cmpUseSkill; real error/status consumers and recovery skill argument
 src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 236 B	sdfSndInitCmdIF; thread descriptor and command/RPC thread startup
+src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 280 B	Kotowari ranking with recovered four-byte save arrays; owner 68 match, 0 differ

@@ -1425,3 +1425,12 @@ before calling `nmeMoveCursor`; `0x514C` selects `nmeMoveCursor2` instead.
 Cursor wrapping uses a fifth cursor prefix at `0x4110`, with its scroll/row
 fields at `0x4132`/`0x4134`. Each prefix remains separate from the unrecovered
 slot storage that follows it; no layout for those slots is inferred here.
+
+### Persistent negotiation and Kotowari fields
+
+The persistent-work negotiation and Kotowari span is two four-byte arrays:
+`negoques` at `0x1CE8` and `kotowari` at `0x1CEC`, followed by `u16 wakimi_id`
+and `u16 bouga_cnt` at `0x1CF0` and `0x1CF2`. The recovered save-data layout,
+`datAddKotowariPoint` and `datGetKotowariLank` corroborate these boundaries;
+`tools/header_layout.c` checks the offsets and both array extents. The older
+three-byte/nine-byte partial view incorrectly grouped the same twelve bytes.

@@ -69,8 +69,10 @@ typedef struct
     u8 item[19];
     u8 boss_press[160];            /* 0x19C8 */
     u8 syakkincnt[640];
-    u8 negoques[3];                /* 0x1CE8 */
-    u8 kotowari[9];                /* 0x1CEB */
+    u8 negoques[4];                /* 0x1CE8 */
+    u8 kotowari[4];                /* 0x1CEC */
+    u16 wakimi_id;                 /* 0x1CF0 */
+    u16 bouga_cnt;                 /* 0x1CF2 */
     f32 encountkyori;              /* 0x1CF4 */
     u16 encountCount;              /* 0x1CF8 */
     u8 heartsequip;

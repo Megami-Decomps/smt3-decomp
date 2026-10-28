@@ -642,6 +642,13 @@ OFF(p11, dds3GlobalWork_t, EventBit, 0x840);
 OFF(p12, dds3GlobalWork_t, moonFlags, 0xA40);
 OFF(p13, dds3GlobalWork_t, moonTimer, 0xA44);
 OFF(p14, dds3GlobalWork_t, maka, 0xA48);
+/* Native Kotowari accesses and the recovered save-data layout agree here. */
+OFF(gb_negoques, dds3GlobalWork_t, negoques, 0x1CE8);
+OFF(gb_kotowari, dds3GlobalWork_t, kotowari, 0x1CEC);
+OFF(gb_wakimi, dds3GlobalWork_t, wakimi_id, 0x1CF0);
+OFF(gb_bouga, dds3GlobalWork_t, bouga_cnt, 0x1CF2);
+ASSERT_AT(gb_negoques_count, sizeof(((dds3GlobalWork_t *)0)->negoques) == 4);
+ASSERT_AT(gb_kotowari_count, sizeof(((dds3GlobalWork_t *)0)->kotowari) == 4);
 OFF(p15, dds3GlobalWork_t, encountkyori, 0x1CF4);
 OFF(p16, dds3GlobalWork_t, encountCount, 0x1CF8);
 OFF(p17, dds3GlobalWork_t, previewX, 0x11A78);
