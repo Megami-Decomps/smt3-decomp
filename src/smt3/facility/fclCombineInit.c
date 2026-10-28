@@ -15,6 +15,13 @@ typedef struct
 
 typedef struct
 {
+    u16 devilId;
+    u16 selector[2];
+    u8 percent;
+} cmbEvoTableEntry_t;
+
+typedef struct
+{
     u16 skill[8];
     s8 count;
 } cmpSkillList_t;
@@ -32,7 +39,7 @@ extern char D_0054FB00[];
 
 extern cmbUnlockEntry_t D_0032DCC0[];
 
-extern cmbUnlockEntry_t D_0032DBB8[];
+extern cmbEvoTableEntry_t D_0032DBB8[];
 
 extern u16 D_0032DCA0[];
 
@@ -110,7 +117,7 @@ extern u32 datGetMaxMp(datUnitWork_t *work);
 
 extern s32 cmbLookupCombine(u16 devilA, u16 devilB, s8 flag);
 
-extern s32 cmbCalcResultLevel(cmbUnit_t *unitA, cmbUnit_t *unitB, s32 mode, s8 flag);
+extern s32 cmbCalcResultLevel(cmbUnit_t *unitA, cmbUnit_t *unitB, cmbUnit_t *unitC, s8 flag);
 
 extern s32 cmbGetRaceCombineResult(s32 race, u8 level);
 
@@ -890,7 +897,35 @@ s32 cmbApplyPercent(s32 base, s32 value, s32 max, u8 percent)
     return (max < base + value) ? max - base : value;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetEvoTable);
+s32 cmbGetEvoTable(u16 devilId, datUnitWork_t *unit)
+{
+    s8 index = cmbFindEvoIndex(devilId);
+    cmbEvoTableEntry_t *entry;
+    s32 i;
+    u8 percent;
+
+    if (index < 0) {
+        return 0;
+    }
+    entry = &D_0032DBB8[index];
+    percent = entry->percent;
+    for (i = 0; i < 2; i++) {
+        s32 selector = (s8)entry->selector[i];
+        s8 param;
+
+        if (selector <= 0) {
+            continue;
+        }
+        if (selector >= 7) {
+            continue;
+        }
+        param = selector - 1;
+        unit->mitamaparam[param] =
+            cmbApplyPercent(unit->param[param], unit->mitamaparam[param], 0x28,
+                            percent);
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetCombineRace);
 
