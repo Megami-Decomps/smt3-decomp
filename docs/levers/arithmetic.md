@@ -50,3 +50,28 @@ first) while naming the intermediate,
 
 gives retail's `and $13, $2, $8`. That one word was the whole of `sdfPadWork`'s
 remaining difference.
+
+
+## A redundant `andi 0xFFFF` means the masked value's source has two assignments
+
+cc1 drops a 16-bit truncation whose operand it can already bound, so
+`u16 w = (c << 8) | p[1];` with `c` a byte load emits the `or` alone. Retail's
+extra `andi $4, $2, 0xFFFF` is therefore not an explicit mask in the source but
+a `nonzero_bits` failure: a pseudo with more than one assignment has no known
+bit range, so everything computed from it has to be truncated. Assigning the
+pair back to the byte variable is what does it:
+
+    u32 c = src[i];
+    if (c < 0x80) {
+        buf[i] = c;
+    } else {
+        u32 v = src[i + 1] | (c << 8);
+
+        c = (u16)v;
+
+`frwGetSmallFontFRQ2` in `interface/frWrap` needs both halves of that: the
+intermediate `v` so the `or` lands in the second byte's register, and the
+truncation into the twice-assigned `c` so the `andi` survives. Writing the pair
+into a fresh `u16` is two words short of retail, and `(u8 *)` indexing is what
+gives `lbu` plus `sltiu` where a `u8` local folds the `< 0x80` test into a sign
+test on `lb`.
