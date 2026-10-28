@@ -467,7 +467,28 @@ void nbSetDamage2(nbFormation_t *form, f32 range)
     form->addmovet = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbSetBadstatMotion);
+void nbSetBadstatMotion(nbFormation_t *form, s32 type, f32 range)
+{
+    datUnitWork_t *work;
+    nbMainProcessData_t *data;
+    struct nbParty_t *party;
+
+    data = nbGetMainProcessData();
+    party = data->party;
+    form->type = 3;
+    form->time = 0;
+    form->damageRange = range;
+    form->damageFrames = 0;
+    work = nbGetUnitWorkPointer(data, &party[form->partyindex]);
+    if ((form->stat & 0x40) != 0) {
+        s32 badframe;
+
+        nbSetUnitMotion(form, 1, 0, 1.0f);
+        badframe = nbGetUnitVisual(work)->badframe;
+        form->damageFrames = badframe + 10;
+        *(s32 *)&form->addmovet = badframe;
+    }
+}
 
 void nbSetBadstatMotion2(nbFormation_t *form)
 {
