@@ -67,6 +67,7 @@ page and line to open. Conventions are in
 | 1 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 1 | dds3TitleMain | [kernel/dds3TitleMain.md](kernel/dds3TitleMain.md) |
 | 1 | kernel/dds3PadManager | [kernel/dds3PadManager.md](kernel/dds3PadManager.md) |
+| 1 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 1 | kernel/dds3KernelCore | [kernel/dds3KernelCore.md](kernel/dds3KernelCore.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
