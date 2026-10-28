@@ -84,6 +84,7 @@ dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/n
 dds3ParticleColorAnim	effect/parManager	0x14C	64 of 83 words match	docs/nonmatching/effect/parManager.md	91
 evtCommand_MODEL_RGB	event/evtCommand	188 bytes	Two of forty-seven words differ	docs/nonmatching/event/evtCommand.md	5
 evtEventViewerProcess3	event/evtEventViewer	0x16C	88 of 91 words match	docs/nonmatching/event/evtEventViewer.md	5
+FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/nonmatching/event/evtEventViewerFrameVar.md	5
 func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/nonmatching/event/evtEventViewerMenu.md	5
 evtFrameListHead	event/evtEventViewerMenu	0x138	39 of 78 words differ	docs/nonmatching/event/evtEventViewerMenu.md	24
 evtSaveViewerHeader	event/evtEventViewerMenu	0x400	254 of 256 words match	docs/nonmatching/event/evtEventViewerMenu.md	43
