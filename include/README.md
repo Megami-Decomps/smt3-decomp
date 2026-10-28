@@ -1047,7 +1047,7 @@ one:
   the frame set's with `sb`. A type copied from the wrong one of the two would
   move every pointer in the frame set.
 
-## fpu.h: shared scalar square roots
+## fpu.h: shared scalar FPU helpers
 
 `fsqrtf` and `frsqrtf` follow DDS's documented scalar FPU convention. They
 emit the bare EE `sqrt.s` and numerator-over-square-root `rsqrt.s`, without
@@ -1055,8 +1055,12 @@ the errno-checking library path or gcc's extra hazard nops. The evidence for
 the compiler distinction is DDS `docs/idioms.md`, "Square roots: sqrt.s";
 it is not a claim that every SMT3 square-root site has been audited.
 New callers share these helpers rather than spelling scalar FPU asm locally.
-Absolute values in the DDS ports use the declared C `fabsf` operation;
-functions that require a different scheduling boundary stay `INCLUDE_ASM`.
+`ffabsf` supplies the documented inline `abs.s` boundary when a unit requires
+it. In `sdf3DMakeLightParallelPacket`, builtin `fabsf` schedules the axis load
+ahead of the threshold literal; the shared helper reproduces retail ordering.
+DDS `docs/idioms.md`, "Absolute values: ffabsf versus builtin fabsf", records
+the paired convention and its kernel exception. Select it from local evidence
+rather than replacing unrelated absolute-value calls.
 
 ## ps2asm.h: the EE extension macros
 
@@ -1199,11 +1203,19 @@ names rather than one name and an `#undef`:
 | `SDF_VU0_SCALEVECTOR_V0`, `SDF_VU0_SCALEVECTOR_B_V0`, `SDF_VU0_SETVECTOR_Y_V0` | the scalar reaches vf2.x through `$2`, not a register cc1 picks |
 | `SDF_VU0_STOREMATRIX_NOMEM`, `SDF_VU0_STOREVECTOR_NOMEM`, `SDF_VU0_STOREVECTOR_B_NOMEM` | the same stores without the `memory` clobber |
 | `SDF_VU0_COPYVECTOR_MEMOPS`, `SDF_VU0_LOADMATRIX_B_MEMOPS` | the memory is a declared `"m"` operand rather than a clobber |
+| `SDF_VU0_COPYVECTOR_F32` | four aligned float elements are explicit read/write operands; unrelated memory is not clobbered |
+| `SDF_VU0_STOREVECTOR_F32`, `SDF_VU0_LOADVECTOR_B_F32` | explicit volatile four-float scratch operands, with the address also in a GPR |
 | `SDF_VU0_STORE_ROW0`, `_VF29`, `_VF30` | these clobber memory; the `_NOMEM` forms beside them do not |
 | `SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED`, `SDF_VU0_SUBVECTOR_EXTENDED` | an empty operand list rather than a basic asm |
 
-Every operation is defined once, in `ps2asm.h`: 221 macros there and no asm
-macro left in any unit. The five that used to stay local for a differing operand
+The parallel-light packet uses an aligned volatile axis scratch consumed by
+VU0 loads. This follows the matched rotation/Euler/quaternion scratch convention
+in DDS `docs/idioms.md`: component writes remain ordered before `lqc2`. Its
+identity path uses `SDF_MMI_STORE_UNIT_MATRIX`; a plain C scalar initialization
+emits 728 bytes for the function instead of retail's 696, while the shared
+VF0/MMI lane-shuffle operation reproduces the native sequence.
+
+Every operation is defined once in `ps2asm.h`, and units reuse those macros. The five that used to stay local for a differing operand
 section are now named for what differs -- `SDF_VU0_SCALEVECTOR_V0`,
 `SDF_VU0_SCALEVECTOR_B_V0` and `SDF_VU0_SETVECTOR_Y_V0` carry the scalar through `$2`
 rather than a register cc1 picks -- so nothing needs an `#undef` any more.

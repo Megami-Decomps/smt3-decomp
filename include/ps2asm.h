@@ -53,6 +53,11 @@ typedef struct {
     ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
 #define SDF_VU0_STOREVECTOR_MEMOPS(lvalue) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf10, %0\n\t.set reorder" : "=m" (lvalue))
+/* Explicit, volatile four-f32 scratch storage at a 16-byte-aligned address.
+ * As with the copy helper, address expressions must have no side effects. */
+#define SDF_VU0_STOREVECTOR_F32(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, 0(%1)\n\t.set reorder" \
+    : "=m" (*(volatile ps2asm_float_vector4_t *)(dst)) : "r" (dst))
 /* vf0 is the constant (0,0,0,1), so this clears xyz and sets w to one. */
 #define SDF_VU0_STOREVECTOR_ZERO(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf0, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
@@ -61,6 +66,9 @@ typedef struct {
     ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (src))
 #define SDF_VU0_LOADVECTOR_B_MEMOPS(lvalue) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf11, %0\n\t.set reorder" : : "m" (lvalue))
+#define SDF_VU0_LOADVECTOR_B_F32(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf11, 0(%1)\n\t.set reorder" \
+    : : "m" (*(const volatile ps2asm_float_vector4_t *)(src)), "r" (src))
 #define SDF_VU0_STOREVECTOR_B(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
 #define SDF_VU0_STOREVECTOR_B_MEMOPS(lvalue) __asm__ volatile ( \
@@ -231,6 +239,14 @@ typedef struct {
  * operation"), so every lane op is written out. Operands are u128/s128. */
 #define MMI_PEXTLW(out, a, b) __asm__ volatile ("pextlw %0, %1, %2" : "=r" (out) : "r" (a), "r" (b))
 #define MMI_PEXTUW(out, a, b) __asm__ volatile ("pextuw %0, %1, %2" : "=r" (out) : "r" (a), "r" (b))
+/* Store the unit matrix represented by VU0's constant vf0 using the retail
+ * MMI lane-shuffle sequence. */
+#define SDF_MMI_STORE_UNIT_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $5, vf0\n\tpextuw $4, $0, $5\n\t" \
+    "pextuw $2, $0, $4\n\tpextuw $3, $4, $0\n\t" \
+    "sq $2, 0(%0)\n\tsq $3, 0x10(%0)\n\t" \
+    "sq $4, 0x20(%0)\n\tsq $5, 0x30(%0)\n\t.set reorder" \
+    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
 #define MMI_PCPYLD(out, a, b) __asm__ volatile ("pcpyld %0, %1, %2" : "=r" (out) : "r" (a), "r" (b))
 #define MMI_PCPYUD(out, a, b) __asm__ volatile ("pcpyud %0, %1, %2" : "=r" (out) : "r" (a), "r" (b))
 #define MMI_PADDW(out, a, b) __asm__ volatile ("paddw %0, %1, %2" : "=r" (out) : "r" (a), "r" (b))
@@ -509,6 +525,12 @@ typedef struct {
     "lw $4, 0x20(%0)\n\tlw $5, 0x30(%0)\n\t" \
     "pextlw $2, $3, $2\n\tpextlw $4, $5, $4\n\t" \
     "pcpyld $2, $4, $2\n\tqmtc2.ni $2, vf10\n\t.set reorder" \
+    : : "r" (src) : "$2", "$3", "$4", "$5", "memory")
+#define SDF_VU0_LOADVECTOR_B_MTXCOL(src) __asm__ volatile ( \
+    ".set noreorder\n\tlw $2, 0(%0)\n\tlw $3, 0x10(%0)\n\t" \
+    "lw $4, 0x20(%0)\n\tlw $5, 0x30(%0)\n\t" \
+    "pextlw $2, $3, $2\n\tpextlw $4, $5, $4\n\t" \
+    "pcpyld $2, $4, $2\n\tqmtc2.ni $2, vf11\n\t.set reorder" \
     : : "r" (src) : "$2", "$3", "$4", "$5", "memory")
 #define SDF_VU0_LOAD_ROW3(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf31, 0(%0)\n\t.set reorder" \

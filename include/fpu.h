@@ -25,4 +25,15 @@ static inline float frsqrtf(float numerator, float x)
     return result;
 }
 
+/* Preserve the SDK inline-asm scheduling boundary around abs.s. Independent
+ * constant loads and argument moves may cross builtin fabsf calls, but stay
+ * ordered around this helper. */
+static inline float ffabsf(float x)
+{
+    float result;
+    __asm__(".set noreorder\n\tabs.s %0, %1\n\t.set reorder"
+            : "=f" (result) : "f" (x));
+    return result;
+}
+
 #endif /* FPU_H */
