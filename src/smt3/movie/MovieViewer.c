@@ -77,7 +77,9 @@ extern s32 dds3WaitMovieEnd(void);
  * D_00343E40; only the two frame counters are read here. */
 typedef struct
 {
-    /* 0x00 */ u8 unk_00[0x64];
+    /* 0x00 */ u8 unk_00[0x3A];
+    /* 0x3A */ u8 viewerStep;
+    /* 0x3B */ u8 unk_3B[0x29];
     /* 0x64 */ s32 frameCount;
     /* 0x68 */ s32 unk_68;
     /* 0x6C */ s32 frameIndex;
@@ -89,6 +91,47 @@ extern movieDecodeWork_t movieDecodeWork asm("D_00343E40");
 extern sdfDrawTag_t *movieViewerFrame[];
 
 extern void *dds3PrimFrameRect(s32 aX, s32 aY, s32 aZ, s32 aW, s32 aH, u32 aBgCol, u32 aFrameCol);
+
+/* The viewer process' own state; the draw tag at 0x10 is movieViewerFrame[0]. */
+typedef struct
+{
+    /* 0x00 */ void *proc;
+    /* 0x04 */ s32 unk_04;
+    /* 0x08 */ s16 scrollTop;
+    /* 0x0A */ s16 cursor;
+    /* 0x0C */ s16 count;
+    /* 0x0E */ s8 playing;
+    /* 0x0F */ s8 unk_0F;
+    /* 0x10 */ sdfDrawTag_t *tag;
+} movieViewerProcWork_t;
+
+extern movieViewerProcWork_t movieViewerWork;
+
+extern s8 dds3PadButtonState[];
+
+extern u8 D_00343EF0[];
+
+extern u16 D_005518D8[2];
+
+extern u16 D_00551F96;
+
+extern s32 movieViewerPhase;
+
+extern sdfGrOt_t D_002F67F8;
+
+extern char *movieViewerStep(void);
+
+extern void moviePlayFile_27041744(char *path, u8 *arg);
+
+extern s32 dds3PlayMovieByIndex(s32 index);
+
+extern sdfDrawTag_t *sdfPrimAllocDrawTag(void *aAllocator);
+
+extern void movieDebugDrawInfo(void);
+
+extern char *strcpy(char *dst, const char *src);
+
+extern char *strcat(char *dst, const char *src);
 
 extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, ...);
 
@@ -108,26 +151,86 @@ void MovieViewerDrawFrameInfo(void)
     }
 }
 
+/* NON_MATCHING: 6 of 144 words match; 576 bytes against retail's 588. Retail
+ * reaches D_00343E7A as a split high/%lo store, which no spelling reproduces. */
+#ifdef NON_MATCHING
+s32 MovieViewerProc(void)
+{
+    char path[0x80];
+    char *entry;
+    s32 phase;
+
+    movieDecodeWork.viewerStep = dds3PadButtonState[0x2D] != 0 ? 1 : 0x1E;
+    if (movieViewerWork.playing != 0) {
+        if (dds3WaitMovieEnd() != 0) {
+            movieViewerWork.playing = 0;
+        } else if (((D_005518D8[0] ^ D_00551F96) & D_005518D8[0]) != 0) {
+            movieViewerWork.playing = 0;
+        }
+    } else if (dds3PadButtonState[0x21] < 0) {
+        entry = movieViewerStep();
+        if (entry != NULL) {
+            movieStop();
+            strcpy(path, "pfs0:/movie/");
+            strcat(path, entry + 4);
+            moviePlayFile_27041744(path, D_00343EF0);
+            movieViewerWork.playing = 1;
+        } else {
+            movieStop();
+            dds3PlayMovieByIndex(movieViewerPhase);
+            phase = movieViewerPhase + 1;
+            if (phase >= 0x19) {
+                phase = 0;
+            }
+            if (phase == 0xA || phase == 0xE || phase == 0x12) {
+                movieViewerPhase = phase + 1;
+            } else {
+                movieViewerPhase = phase;
+            }
+        }
+    } else {
+        if (dds3PadButtonState[0x27] & 2) {
+            if (movieViewerWork.cursor < movieViewerWork.count - 1) {
+                movieViewerWork.cursor++;
+                if (movieViewerWork.scrollTop < movieViewerWork.cursor - 7) {
+                    movieViewerWork.scrollTop = movieViewerWork.cursor - 7;
+                }
+            }
+        }
+        if (dds3PadButtonState[0x26] & 2) {
+            if (movieViewerWork.cursor > 0) {
+                movieViewerWork.cursor--;
+                if (movieViewerWork.cursor < movieViewerWork.scrollTop) {
+                    movieViewerWork.scrollTop = movieViewerWork.cursor;
+                }
+            }
+        }
+    }
+    movieViewerWork.tag = sdfPrimAllocDrawTag(NULL);
+    movieDebugDrawInfo();
+    MovieViewerDrawFrameInfo();
+    D_002F67F8.regFunc(&D_002F67F8, movieViewerWork.tag);
+    D_00551F96 = D_005518D8[0];
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "movie/MovieViewer", MovieViewerProc);
+#endif
 
 extern void movieViewerScanDir(void);
 
 extern s32 MovieViewerProc(void);
-
-extern void *movieViewerWork[];
 
 extern char D_0053F418[];
 
 void InitMovieViewer(void)
 {
     movieViewerScanDir();
-    movieViewerWork[0] =
+    movieViewerWork.proc =
         dds3StartProcess(D_0053F418, 0x2B02, 1, 0, MovieViewerProc, NULL, NULL);
 }
 
 extern char D_0053F418[];
-
-extern void *movieViewerWork[];
 
 extern void movieViewerFree(void);
 
@@ -137,7 +240,7 @@ void FinishMovieViewer(void)
 
     if (proc != NULL) {
         dds3KillProcess((s32)proc, 0);
-        movieViewerWork[0] = NULL;
+        movieViewerWork.proc = NULL;
         movieStop();
     }
     movieViewerFree();

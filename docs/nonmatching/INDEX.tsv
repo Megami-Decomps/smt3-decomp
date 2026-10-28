@@ -154,6 +154,7 @@ slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/nonmatching/mc/
 slDrawWindow	mc/slMain	0x4EC	87 of 313 words match	docs/nonmatching/mc/slMain.md	41
 slDrawInfo	mc/slMain	0x2F4	183 of 189 words match	docs/nonmatching/mc/slMain.md	71
 slDrawError	mc/slMain	0x4AC	293 of 299 words match	docs/nonmatching/mc/slMain.md	91
+MovieViewerProc	movie/MovieViewer	0x24C	6 of 144 words match	docs/nonmatching/movie/MovieViewer.md	5
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	5
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	48
 nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	77
