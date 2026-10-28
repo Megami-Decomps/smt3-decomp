@@ -100,3 +100,32 @@ Confirmed on the way: `pbBlockObj_t` carries the rotation as an `f32` at
 `0xB8`, the `.lit4` entries the function reads are `0.39269909f`,
 `6.28318501f` and `-6.28318501f` in that order, and `work->step` has to be
 read into a `u32` local for retail's `sltiu`.
+
+## pbInitGame (pb/pbGame, 0x290)
+
+152 of 164 words match, 12 differ, at the exact 656-byte size. The draft
+restores the saved 20-by-20 map, validates it, initializes the exit and
+character panels, refreshes motion, calls the selected character callback,
+clears the record, and optionally starts the stage script.
+
+The work prefix contains four registration bytes at +4, four pairs of signed
+coordinates at +8, exit coordinates at +0x18/+0x1A, and the map at +0x1C.
+Character retirement uses the original slot index. Creation uses a separate
+compact output cursor, advanced only for registered characters. The constructor
+receives parent, color index and motion zero; its USA provider ignores the last
+two arguments. Record clearing follows both callback paths. Script startup
+passes zero as its third argument. Work and character-slot loads after callbacks
+remain observable reloads.
+
+A qualified `cc1probe --alloc --no-dumps` run has identical hooked/unhooked
+output. The loop index has 13 references over a live range of 92, priority 4239;
+the output cursor has 10 references over 68, priority 4411. The cursor therefore
+gets saved register 17 and the index 18, opposite retail. The map-copy dispatch,
+other registers and branch layout match. See [compiler traces](../../cc1probe.md).
+
+An indexed compact output adds four bytes. Early cursor initialization hoists
+its address and grows the function. A shared loop-index/script-label scalar
+fixes the loop registers but changes the final label register; it remains five
+words short of exact. Explicit postincrement in the final draw call, a do-loop,
+and carrying map-validation status in the index do not close the gap. The
+preferred draft keeps the separate index, cursor and script-label values.

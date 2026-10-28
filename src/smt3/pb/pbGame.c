@@ -616,7 +616,88 @@ void deleteGame(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(panel);
 }
 
+/* NON_MATCHING: 12 of 164 words differ at the exact 656-byte size.
+ * The slot index and compact write cursor exchange saved registers. */
+#ifdef NON_MATCHING
+/* Initializer fields in the work allocation; the map starts at +0x1C. */
+typedef struct
+{
+    s32 pcharNum;
+    u8 pcharReg[4];
+    s16 pcharPos[4][2];
+    s16 exitX, exitY;
+    pbMapBlock_t map;
+} pbMapWorkInitView_t;
+
+extern s32 D_00551EF4;
+extern u32 pbMoveCharList;
+extern u32 pbMapIsValid(void);
+extern void dds3FadeIn2(s32 frame);
+extern void pbSetViewRotation(f32 angle, f32 radius, f32 degree);
+extern void pbSetExitPos(pbProcHandle_t *panel, s32 x, s32 y);
+extern void pbSetExitDisp(pbProcHandle_t *panel, s8 sw);
+extern pbProcHandle_t *pbInitMyCharacterDraw(pbProcHandle_t *parent, u32 color, u32 motion);
+extern void pbSetPanelValue(pbProcHandle_t *panel, s8 value);
+extern void pbGetCellY(pbProcHandle_t *panel, s16 cx, s16 cy);
+extern void pbClearRecord(pbProcHandle_t *panel);
+extern void dds3SetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type);
+extern s32 fclSetWorkValue(s8 index, s32 value);
+extern s16 GetStageScriptLabel(void);
+extern void pbInitGameCamera(void);
+
+void pbInitGame(pbProcHandle_t *panel, dds3ProcessID_t *id)
+{
+    u32 i;
+    pbProcHandle_t **write;
+    s32 scriptLabel;
+    pbCharacterFunc_t characterFunc;
+
+    D_00551EF4 = 2;
+    pbMoveCharList = 1;
+    current_char = 0;
+    pbSetViewRotation(cameraAngle, cameraRadius, cameraDegree);
+    pbGameKeyState = 0;
+    ((pbMapWorkInitView_t *)D_0054F5C4)->map = D_00327458;
+    if (pbMapIsValid()) {
+        return;
+    }
+
+    dds3FadeIn2(0x1E);
+    pbSetExitPos((pbProcHandle_t *)goal, ((pbMapWorkInitView_t *)D_0054F5C4)->exitX, ((pbMapWorkInitView_t *)D_0054F5C4)->exitY);
+    pbSetExitDisp((pbProcHandle_t *)goal, 1);
+    write = mychar;
+    for (i = 0; i < 4; i++) {
+        if (mychar[i] != NULL) {
+            mychar[i]->flags = 0x50000;
+            mychar[i] = NULL;
+        }
+        if (((pbMapWorkInitView_t *)D_0054F5C4)->pcharReg[i] != 0) {
+            *write = pbInitMyCharacterDraw(panel, (u32)i, 0);
+            pbSetPanelValue(*write, 1);
+            pbGetCellY(*write, ((pbMapWorkInitView_t *)D_0054F5C4)->pcharPos[i][0],
+                       ((pbMapWorkInitView_t *)D_0054F5C4)->pcharPos[i][1]);
+            write++;
+        }
+    }
+    updateMotion();
+    characterFunc = pbCharacterTable[D_0054F5C4->charIndex];
+    if (characterFunc != NULL) {
+        characterFunc();
+    }
+    pbClearRecord(record);
+    scriptLabel = GetStageScriptLabel();
+    if (scriptLabel >= 0) {
+        fclClearFlag(0);
+        fclSetWorkValue(0, scriptLabel);
+        scr_msg = scrStartScript2(0x3EE, D_0054F5C4->giveupScript, 0);
+        dds3SetProcessFlag(id, 0x10, 2);
+    } else {
+        pbMoveCharList = 0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbGame", pbInitGame);
+#endif
 
 s32 moveChar(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
