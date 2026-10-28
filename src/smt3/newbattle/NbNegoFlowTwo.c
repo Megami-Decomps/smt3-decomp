@@ -258,7 +258,7 @@ extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t 
 
 extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 extern void nbSetMesItem(s32 msgid, s32 it);
 
@@ -441,7 +441,7 @@ s32 Flow6_4(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x60005);
     nbAddNegoIdKouho(n, 0x90001);
-    if (dds3GetRandIntA(0, 100) < 65) {
+    if ((s32)dds3GetRandIntA(0, 100) < 65) {
         n->nextnegoid = n->nextkouho[1];
     } else {
         n->nextnegoid = n->nextkouho[0];
@@ -474,7 +474,7 @@ s32 Flow6_7(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x60008);
     nbAddNegoIdKouho(n, 0xA0001);
-    if (dds3GetRandIntA(0, 100) < 70) {
+    if ((s32)dds3GetRandIntA(0, 100) < 70) {
         n->nextnegoid = n->nextkouho[1];
     } else {
         n->nextnegoid = n->nextkouho[0];
@@ -621,7 +621,7 @@ s32 Flow6_12(nbNegoProcessData_t *n)
             ritu = 0;
         }
     }
-    if (dds3GetRandIntA(0, 0x64) < ritu) {
+    if ((s32)dds3GetRandIntA(0, 0x64) < ritu) {
         n->nextnegoid = n->nextkouho[1];
     } else {
         n->nextnegoid = n->nextkouho[0];
@@ -635,7 +635,7 @@ s32 Flow6_13(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0x6000E);
     n->nextnegoid = n->nextkouho[0];
     if (datCheckDying(n->ework) != 0) {
-        if (dds3GetRandIntA(0, 100) < 70) {
+        if ((s32)dds3GetRandIntA(0, 100) < 70) {
             n->nextnegoid = n->nextkouho[1];
         }
     }
@@ -1054,7 +1054,56 @@ s32 Flow6_38(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_39);
+extern s32 nbGetNegoTuikaRequestType(s32 tuikareqtype);
+extern s32 nbGetKureItemB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
+extern s32 nbGetNegoKureMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
+
+s32 Flow6_39(nbNegoProcessData_t *n)
+{
+    s32 requestType;
+
+    nbAddNegoIdKouho(n, 0x60028);
+    if (n->ework->id == 0x5C && evtBitCheck(8) == 0 && n->negoreqtype == 0) {
+        if (dds3GetRandIntA(NULL, 1) == 0) n->requesttype = 3;
+    } else {
+        requestType = nbGetNegoTuikaRequestType(master_text[n->ework->id].tuikareqtype);
+        switch (requestType) {
+        case 0:
+            n->requesttype = 1;
+            break;
+        case 1:
+            n->requesttype = 0;
+            break;
+        case 2:
+            n->requesttype = 3;
+            break;
+        }
+    }
+
+    n->requestdata = 0;
+    if (n->negoreqtype == 4) {
+        n->requesttype = 0;
+    }
+
+    if (n->prevreqtype != 3 && n->requesttype == 3) {
+        if (dds3GetRandIntA(NULL, 2) == 0) n->requesttype = 1;
+        else n->requesttype = 0;
+    }
+    switch (n->requesttype) {
+    case 0:
+        n->requestdata = nbGetKureItemB(n, n->pwork, n->ework);
+        if (n->requestdata == 0) n->requestdata = 0x10;
+        break;
+    case 1:
+        n->requestdata = nbGetNegoKureMakkaB(n, n->pwork, n->ework);
+        break;
+    case 3:
+        break;
+    }
+
+    n->prevreqtype = n->requesttype;
+    return 0;
+}
 
 s32 Flow6_40(nbNegoProcessData_t *n)
 {
@@ -1432,7 +1481,7 @@ s32 Flow6_57(nbNegoProcessData_t *n)
          n->ework->id == 0x5A || n->ework->id == 0x5B || n->ework->id == 0x5C)) {
         ritu = 0;
     }
-    if (dds3GetRandIntA(0, 0x64) < ritu) {
+    if ((s32)dds3GetRandIntA(0, 0x64) < ritu) {
         n->hojoseikou = 1;
         n->nextnegoid = n->nextkouho[0];
     } else {
@@ -1582,7 +1631,7 @@ s32 Flow6_65(nbNegoProcessData_t *n)
             n->nextnegoid = n->nextkouho[1];
         }
     } else {
-        n->nextnegoid = dds3GetRandIntA(0, 0x64) < ritu ? n->nextkouho[0] : n->nextkouho[1];
+        n->nextnegoid = (s32)dds3GetRandIntA(0, 0x64) < ritu ? n->nextkouho[0] : n->nextkouho[1];
     }
     return 0;
 }
