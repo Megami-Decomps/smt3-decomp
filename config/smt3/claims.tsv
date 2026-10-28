@@ -267,3 +267,7 @@ src/smt3/sdf/sdfFileIO.c	redthing1	done	2026-10-28	1 fallback	last AnalyzeFileNa
 src/smt3/kernel/dds3AdminiProcess.c	redthing1	done	2026-10-28	5 drafts	store-order and wrapper sweeps exhausted; see docs/nonmatching/kernel/dds3AdminiProcess.md
 src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	19 functions / 5244 B	sdfFileRpcHandleCmd matched from address-paired C donor
 src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	2 fn / 256 B	fclBlendColor and func_00213DF0; unsigned packed color arithmetic
+src/smt3/newbattle/nbMaeProcess.c	redthing1	done	2026-10-28	3 fn / 284 B	remaining callbacks matched; unit has no assembly fallbacks
+src/smt3/facility/fclTerminalUpdate.c	redthing1	done	2026-10-28	3 fn / 480 B	Act/cursor/list helpers matched; confirm sequence remains assembly
+src/smt3/newbattle/nbCameraCommand.c	redthing1	done	2026-10-28	1 fn / 100 B	FixPos wrapper matched; three state drafts retained
+src/smt3/facility/fclShopInit.c	redthing1	open	2026-10-28	textures/items/prices	bounded ordinary shop helper reconstruction
