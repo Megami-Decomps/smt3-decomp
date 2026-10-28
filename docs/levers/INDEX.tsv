@@ -6,10 +6,10 @@ docs/levers/README.md	11		| 14 | [impossible.md](impossible.md) | Functions that
 docs/levers/README.md	12		| 10 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 docs/levers/README.md	13		| 10 | [stores.md](stores.md) | Stores |
 docs/levers/README.md	14		| 4 | [float-literals.md](float-literals.md) | Float literals |
-docs/levers/README.md	15		| 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
-docs/levers/README.md	16		| 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
-docs/levers/README.md	17		| 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
-docs/levers/README.md	18		| 1 | [scheduling.md](scheduling.md) | Store scheduling |
+docs/levers/README.md	15		| 3 | [scheduling.md](scheduling.md) | Store scheduling |
+docs/levers/README.md	16		| 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
+docs/levers/README.md	17		| 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
+docs/levers/README.md	18		| 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
 docs/levers/README.md	19		| 1 | [callee-visibility.md](callee-visibility.md) | Callee visibility:
 docs/levers/README.md	20		| 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
 docs/levers/README.md	21		| 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
@@ -417,6 +417,8 @@ docs/levers/impossible.md	128	$16 $18 cfc2 ctc2 pextlb	| corePktVu0Run | assembl
 docs/levers/impossible.md	129	j jal pextlb pextlh vitof0	| corePktEmitRefMapPass | assembly throughout:
 docs/levers/impossible.md	130	jr	| sdf_2BFC58 | a computed jr into an unrolled sq block, as above.
 docs/levers/scheduling.md	3	and sh	### A final member store ends the object pointer's live range pipeLoadEffect in pipe/pipeEffect initializes a free effect slot after loading its handle.
+docs/levers/scheduling.md	31		### Initialize the counter before the offset snapshot In pipeGetObjData (pipe/pipeEffect), the mode-6 loop needs i = 4 before offset = offsetCount + 4,…
+docs/levers/scheduling.md	39		### Initialize the cursor after clearing its temporary buffer pipeEffDraw2Doffset clears a four-float position buffer before assigning its effect cursor from…
 docs/levers/stores.md	12	sw	Two unrelated member stores in front of an expression that loads a gp global decide the whole block's schedule, and the winning order is not the one the…
 docs/levers/stores.md	20	$0 jal sw	Where retail's last store before a jal is a constant store rather than the argument setup, hoist the argument into a local above the stores.
 docs/levers/stores.md	26	$0 sw	Two adjacent struct stores only reverse when neither value is a reload.

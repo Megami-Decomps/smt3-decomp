@@ -27,3 +27,22 @@ This is ordinary member initialization, with every stored value consumed by
 the effect's lifetime. No artificial use, dependency or volatile access is
 needed. Keep the resource-table base separately from the advancing slot
 pointer, and retain the native byte-sized predecrement free-slot scan.
+
+### Initialize the counter before the offset snapshot
+
+In `pipeGetObjData` (`pipe/pipeEffect`), the mode-6 loop needs `i = 4`
+before `offset = offsetCount + 4`, followed by `for (; i != 0xFF; i--)`.
+Putting the counter assignment in the `for` initializer permutes nine
+preheader instructions. The earlier assignment closes all nine while the
+other two arms remain exact.
+
+### Initialize the cursor after clearing its temporary buffer
+
+`pipeEffDraw2Doffset` clears a four-float position buffer before assigning
+its effect cursor from the input parameter. That source order retains the
+native argument copy through `v0`, its delayed move to the saved cursor,
+and the loop alignment. Initializing the cursor before `memset` removes
+eight bytes. Separate local snapshots of the effect's X and Y coordinates
+also preserve both loads before writing the temporary `tagPipeObject`.
+The translated position buffer and object occupy 0x10 and 0x20 bytes;
+no unused frame padding is needed.

@@ -12,10 +12,10 @@ open the page and line it names.
 | 10 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 | 10 | [stores.md](stores.md) | Stores |
 | 4 | [float-literals.md](float-literals.md) | Float literals |
+| 3 | [scheduling.md](scheduling.md) | Store scheduling |
 | 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
 | 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
 | 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
-| 1 | [scheduling.md](scheduling.md) | Store scheduling |
 | 1 | [callee-visibility.md](callee-visibility.md) | Callee visibility: the cause of most one-word branch-likely misses |
 | 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
 | 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
