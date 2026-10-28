@@ -3002,7 +3002,37 @@ void fclGetArrowCursorEntry(s32 x, s32 y, s32 z, s8 index)
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawBackground);
 
-INCLUDE_ASM(const s32, "code_0022C578", fclDrawArrowCursorLabel);
+void fclDrawArrowCursorLabel(s32 x, s32 y, s32 z, s8 index, s32 *color, s32 alpha)
+{
+    s32 colors[4];
+    s32 offsetX;
+    s32 offsetY;
+    s32 phase;
+    s32 width;
+    s32 height;
+
+    fclCalcArrowCursorOffset(index, &offsetX, &offsetY);
+    if (alpha >= 0) {
+        if (alpha <= 256) {
+            colors[0] = 0x80808000 | ((256 - alpha) / 2);
+            phase = alpha * 240 / 256;
+        } else {
+            colors[0] = 0x80808000 | (alpha / 2 - 128);
+            phase = 0;
+        }
+        width = (s32)((f32)phase * 1.5f);
+        height = (s32)((f32)phase * 0.8f);
+        colors[1] = colors[0];
+        colors[2] = colors[0];
+        colors[3] = colors[0];
+        fclDrawSpriteSize(x + offsetX * 16 - width,
+            y + offsetY * 8 - (height >> 1), 0, (width >> 3) + 63,
+            (height >> 3) + 63, colors, 8, 36,
+            (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    }
+    fclDrawSpriteRes(x + offsetX * 16, y + offsetY * 8, 0, color, 8, 36,
+        (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", fclDrawArrowCursor);
 

@@ -545,3 +545,4 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 320 B	arrow cursor ent
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 460 B	fusion state dispatch with preserved phase snapshot and conditional sequence-info publication; owner 157 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 256 B	arrow cursor icon ownership and registration sprite states with signed provider ID; owner 340 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 732 B	fusion action initialization, playback readiness, completion and skip handling; owner 158 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 452 B	arrow cursor label with conditional expanding highlight, signed alpha colors and fixed-point offsets; owner 341 match, 0 differ
