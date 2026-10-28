@@ -19,6 +19,8 @@ extern f32 aViewTarget[4];
 extern f32 aViewEye[4];
 extern f32 aViewDown[4];
 extern f32 effBTL_Ptr_D[];
+extern f32 D_0031B990[];
+extern void MultMatrixNoArg(void);
 extern u8 effBTLModelShowFlag[];
 extern f32 D_0031B900[];
 extern f32 D_0031B910[];
@@ -967,7 +969,81 @@ void effBTLPartGetPositionPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPos
     SDF_VU0_STOREVECTOR(pPos);
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetModelPositionPtr);
+void effBTLPartGetModelPositionPtr(nbFormation_t *formation, effBTLAimParams_t *request) {
+    sdfVector4_t result;
+    sdfVector4_t direction;
+    sdfVector4_t center;
+    f32 radius;
+    f32 halfHeight;
+    f32 vertical;
+    u32 aimMode;
+    u32 directionMode;
+
+    aimMode = request->aimMode;
+    directionMode = request->directionMode;
+    if (request->rangeOverride == 0) {
+        radius = formation->r * formation->scl;
+    } else {
+        radius = (f32)request->rangeOverride;
+    }
+    halfHeight = formation->h * 0.5f;
+    effBTLPartPtrGetModelCenter(formation);
+    SDF_VU0_STOREVECTOR(&center);
+    if (aimMode == 5) {
+        if (directionMode == 8 || directionMode == 10) {
+            vertical = -1.0f;
+            if (request->rangeOverride != 0) {
+                vertical = -radius;
+            }
+        } else {
+            vertical = -1.0f;
+        }
+    } else {
+        vertical = center.y - D_0031B990[aimMode] * halfHeight;
+        if (directionMode == 8 || directionMode == 10) {
+            if (request->rangeOverride != 0) {
+                vertical -= radius;
+            }
+        }
+    }
+    if (directionMode == 9 || aimMode == 4) {
+        f32 zero;
+        /* The camera offset shares one floating zero for its x/y stores. */
+        direction.z = -(radius > halfHeight ? radius : halfHeight);
+        zero = 0.0f;
+        direction.y = zero;
+        direction.x = zero;
+        center.y = vertical;
+        LookAtMatrix(&center, aViewEye, aViewDown);
+        ReverseMatrix();
+        SDF_VU0_LOADVECTOR(&direction);
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_LOADVECTOR_B(&center);
+        SDF_VU0_ADDVECTOR();
+    } else {
+        if (directionMode == 8 || directionMode == 10) {
+            result.x = center.x;
+            result.y = vertical;
+            result.z = center.z;
+        } else {
+            direction.x = 0.0f;
+            direction.z = 1.0f;
+            direction.y = 0.0f;
+            SDF_VU0_LOADVECTOR(&formation->rot);
+            ToMatrix();
+            SetRotateMatrixY_B(effBTL_Ptr_D[directionMode]);
+            MultMatrixNoArg();
+            SDF_VU0_LOADVECTOR(&direction);
+            SDF_VU0_APPLYMATRIX_XYZ();
+            SDF_VU0_STOREVECTOR(&direction);
+            result.x = center.x + radius * direction.x;
+            result.y = vertical + radius * direction.y;
+            result.z = center.z + radius * direction.z;
+        }
+        SDF_VU0_LOADVECTOR_MEMOPS(result);
+    }
+}
 
 void effBTLPartGetPartyPositionPtr(u32 group, effBTLAimParams_t *pPosPtr) {
     /* The native scratch vectors leave w untouched. */
