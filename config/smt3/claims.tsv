@@ -431,3 +431,4 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 344 B	gauge blink colo
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 168 B	phase-three text draw dispatch; owner 316 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 288 B	party selection input and cursor dispatch; owner 318 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 268 B	status allocation and active-party slot initialization; owner 319 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 200 B	weighted comment selection with native level/count eligibility and sixteen retries; owner 66 match, 0 differ

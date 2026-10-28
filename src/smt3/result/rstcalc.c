@@ -1268,7 +1268,27 @@ s32 func_00223788(u16 devilId)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstRollComment);
+s32 rstRollComment(void)
+{
+    s8 attempt;
+    u32 i;
+    s32 draw;
+    cmbMitamaEntry_t *entry;
+
+    for (attempt = 0; attempt < 16; attempt++) {
+        draw = dds3GetRandA(NULL) % D_00339D10[37].unk_02;
+        for (i = 0, entry = D_00339D10; i < 38; i++, entry++) {
+            if (draw < entry->unk_02) {
+                u16 id = entry->devilId;
+                if (cmbGlobalWork->party[0].unit.level >= entry->unk_04 &&
+                    cmbGlobalWork->unk_01928[id] <= entry->unk_05) {
+                    return id;
+                }
+            }
+        }
+    }
+    return D_00339D10[0].devilId;
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", func_00223890);
 
