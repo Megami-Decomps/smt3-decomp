@@ -51,25 +51,6 @@ The `stagemajor` range test needs an `s32` local: used directly, the `u16`
 field gives `ori 0xFF10`, `addu`, `andi 0xFFFF`, `sltiu 7` instead of
 retail's `addiu -0xF0`, `sltiu 7`.
 
-## Flow13_8 (newbattle/nbMakePacket, 0xB8)
-
-42 of 46 words match, at the exact 184-byte size.
-
-Four cases over 0 to 3, with `case 3` a bare `return 1`, give retail's
-dispatch tree and both `nbDispNegoMessage` blocks. What the source cannot
-have both ways is the case label order: written 0, 1, 2, 3 the bodies land in
-retail's order but ee-gcc turns the first dispatch test into a `beql` that
-annuls `case 1`'s first load, and every later word shifts; written 0, 2, 1, 3
-the dispatch is retail's plain `beq` with the following `slti` in the slot but
-the two message blocks swap places, which is the four words kept here, two
-branch offsets and the two message constants.
-
-Ruled out: all 24 case label orders; every mix of `break` and `return 0` in
-the arms; a `u32` and an `s32` phase local; `case 3` lifted out in front of
-the switch as an `if`; and reaching one message block through a `goto`, both
-from a label inside the switch (which loses the plain `beq`) and from one
-after it.
-
 ## nbClearActionFlags (newbattle/nbMakePacket, 0xE0)
 
 18 of 56 words match, at the exact 224-byte size and with the same instruction
