@@ -89,7 +89,6 @@ ragCheckHeartsChoice	fclRagUpdate	0x80	22 of 29 words match	docs/nonmatching/fac
 fclDrawSpriteAngleCore	fclShare	0x4A8	212 of 298 words match	docs/nonmatching/facility/fclShare.md	5
 fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/nonmatching/facility/fclShare.md	50
 fclTerminalLoadTextures	fclTerminalInit	0x70	16 of 27 words match	docs/nonmatching/facility/fclTerminalInit.md	5
-trmStartEvent	facility/fclTerminalInit	0x84	25 of 33 words match	docs/nonmatching/facility/fclTerminalInit.md	37
 fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	40 of 42 words match	docs/nonmatching/field/fldAutoMap.md	5
 fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244	10 of 146 words match	docs/nonmatching/field/fldAutoMap.md	32
 fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/nonmatching/field/fldAutoMap.md	79

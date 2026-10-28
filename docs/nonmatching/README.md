@@ -40,7 +40,6 @@ page and line to open. Conventions are in
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
 | 2 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 2 | interface/frName | [interface/frName.md](interface/frName.md) |
-| 2 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 2 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
@@ -73,6 +72,7 @@ page and line to open. Conventions are in
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
+| 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 1 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 1 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 1 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |

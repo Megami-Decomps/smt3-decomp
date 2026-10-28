@@ -225,31 +225,31 @@ void trmEndBGM(void)
     p2sdStopBGM(0x20001);
 }
 
-/* NON_MATCHING: 8 of 33 words differ at the exact 132-byte size. */
-#ifdef NON_MATCHING
 s8 trmStartEvent(void)
 {
+    s32 event;
+    s8 result;
     switch (trmGetMode()) {
-    case 0: {
-        s32 event = trmGetEventNo(1, GBWK_3);
-
-        if (event < 0) {
-            return 0;
+    case 0:
+        event = trmGetEventNo(1, GBWK_3);
+        if (event >= 0) {
+            evtStartEvent(event);
+            fclSetTerminalMode(1);
+            result = 1;
+        } else {
+            result = 0;
         }
-        evtStartEvent(event);
-        fclSetTerminalMode(1);
-        return 1;
-    }
+        break;
     case 1:
     case 5:
-        return 1;
+        result = 1;
+        break;
     default:
-        return 0;
+        result = 0;
+        break;
     }
+    return result;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", trmStartEvent);
-#endif
 
 s32 trmEndEvent(s32 BgmMode)
 {
