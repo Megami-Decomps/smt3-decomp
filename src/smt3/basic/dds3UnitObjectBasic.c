@@ -26,6 +26,14 @@ extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *pObjectBasic);
 
 extern void dds3FreePoseSet(dds3Basic_t *basic);
 
+extern void *sdfChipAllocDirect(u32 aSize);
+
+extern void *memset(void *a, s32 b, u32 c);
+
+extern void dds3InitPoseSet(dds3Basic_t *basic);
+
+extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, u32 flag);
+
 extern void evtDeleteUnitHandle(struct evtUnit_t *h);
 
 extern void dds3ObjectBaseFreeModelHandle(dds3Basic_t *pObjectBasic);
@@ -94,7 +102,22 @@ void dds3UnitObjectBasicSetOt(dds3Basic_t *aPtr, s32 idx) {
     ((dds3UnitObjectBasicWorkData_t *)aPtr->workdata)->ot = idx;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3UnitObjectBasic", dds3UnitObjectBasicConstructor);
+s32 dds3UnitObjectBasicConstructor(dds3Basic_t *aPtr) {
+    dds3UnitObjectBasicWorkData_t *work;
+    void *allocation;
+
+    dds3InitPoseSet(aPtr);
+    allocation = sdfChipAllocDirect(sizeof(dds3UnitObjectBasicWorkData_t));
+    aPtr->workdata = allocation;
+    memset(allocation, 0, sizeof(dds3UnitObjectBasicWorkData_t));
+    work = aPtr->workdata;
+    work->pObjectBaseControlWorkData = dds3ObjectBaseInitControlWorkData(aPtr);
+    work->hUnit = NULL;
+    work->EL_serialID = -1;
+    work->ot = -1;
+    dds3ObjectBaseOnFlag(aPtr, 0x42);
+    return 1;
+}
 
 void dds3UnitObjectBasicDestructor(dds3Basic_t *aPtr) {
     dds3UnitObjectBasicWorkData_t *work;
