@@ -68,6 +68,7 @@ page and line to open. Conventions are in
 | 1 | kernel/dds3KernelCore | [kernel/dds3KernelCore.md](kernel/dds3KernelCore.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
+| 1 | field/fldFileResolver | [field/fldFileResolver.md](field/fldFileResolver.md) |
 | 1 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
 | 1 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 1 | facility/fclRagDraw | [facility/fclRagDraw.md](facility/fclRagDraw.md) |

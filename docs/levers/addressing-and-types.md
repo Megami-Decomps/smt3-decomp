@@ -1820,3 +1820,12 @@
   coalesces the copy away and is one instruction short per ramp.
   `campDhFindVisibleIcon` has two of them and went from 26 of 60 words to exact.
 
+- A struct's trailing filler has to be sized from the real member sizes, not
+  from the address range: `sdfDrawTag_t` is 0x20 and `sdfModelDrawEnv_t`
+  0x1B0, so eleven of them plus a 0x40 head leaves 0x910, not 0x900, inside
+  `dds3DrawEnv`'s 0x1BE0 stride. Get it wrong by 0x10 and gcc stops
+  synthesising the stride out of shifts and emits a `mult` against an
+  `addiu`-materialised constant, which is the symptom to look for. Measuring
+  it is one compile: a scratch unit with `s32 f(void) { return sizeof(T); }`
+  and `s32 g(void) { return (s32)&((T *)0)->member; }`, then read the two
+  `li` immediates out of `objdump -dz`.
