@@ -8,6 +8,22 @@ extern u8 dds3PadVibrationMode[2];
 
 extern s32 dds3PadVibrationTable[2];
 
+extern u8 dds3PadButtonState[64];
+
+extern u8 dds3PadButtonPrev[64];
+
+extern u32 D_002F56C0[64];
+
+extern u32 D_002F57C0[4];
+
+extern u8 dds3PadStickPrev[8];
+
+extern s8 dds3PadStickStatusPrev[4];
+
+extern u8 dds3PadStickState[8];
+
+extern u8 dds3PadStickStatusState[4];
+
 extern u32 dds3GetProcessRunTime(dds3ProcessID_t *id);
 
 extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
@@ -34,7 +50,36 @@ s32 dds3PadVibrationTest(dds3ProcessID_t *task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3PadManager", dds3PadInitialize);
+void dds3PadInitialize(void) {
+    s32 pad;
+    s32 half;
+    s32 key;
+
+    for (pad = 0; pad < 2; pad++) {
+        for (half = 0; half < 2; half++) {
+            for (key = 0; key < 16; key++) {
+                D_002F56C0[pad * 16 + half * 32 + key] = 0;
+                dds3PadButtonPrev[pad * 16 + half * 32 + key] = 0;
+                dds3PadButtonState[pad * 16 + half * 32 + key] = 0;
+            }
+        }
+        for (key = 0; key < 2; key++) {
+            D_002F57C0[pad * 2 + key] = 0;
+            dds3PadStickPrev[pad * 4 + key * 2] = 0;
+            dds3PadStickPrev[pad * 4 + key * 2 + 1] = 0;
+            dds3PadStickStatusPrev[pad * 2 + key] = 0;
+            dds3PadStickState[pad * 4 + key * 2] = 0;
+            dds3PadStickState[pad * 4 + key * 2 + 1] = 0;
+            dds3PadStickStatusState[pad * 2 + key] = 0;
+        }
+    }
+    dds3PadVibrationState[0] = 0;
+    dds3PadVibrationMode[0] = 0;
+    dds3PadVibrationTable[0] = 0;
+    dds3PadVibrationState[1] = 0;
+    dds3PadVibrationMode[1] = 0;
+    dds3PadVibrationTable[1] = 0;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3PadManager", dds3RunProcessList);
 
