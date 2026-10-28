@@ -803,7 +803,10 @@ void DestPhaseReadStatus(fclEncyc_instance_tag *pinst)
 
 typedef struct fclEncycReadStatusWork_t {
     fclEncyc_readmainwork_tag phase;
-    u8 reserved0030[0x28];
+    u8 reserved0030[0x10];
+    s32 unk_040;
+    s32 unk_044;
+    u8 reserved0048[0x10];
     s32 boardY;
     s16 boardAlpha;
     s16 explainAlpha;
@@ -877,7 +880,71 @@ void DrawPhaseReadSummon(fclEncyc_instance_tag *pinst)
     DrawReadMainHelp(pinst);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadExplain);
+extern s32 cmpGetPressedButton(s32 mask);
+extern void cmpPlayCursorSE(u32 button);
+extern void fclRbnSwitchActive(fclRibbon_t *ribbon, s32 index);
+extern void ReleaseFontExplain(fclEncyc_instance_tag *pinst, s32 release_mesmng);
+extern void InitCameraForViewMode(fclEncyc_instance_tag *pinst);
+extern void SetBoundControl(fclEncyc_instance_tag *pinst);
+extern void RequestChangeMotion(motionWork_t *pinst, s32 flag);
+extern void CirculateDevilObject(fclEncyc_instance_tag *pinst, s32 direction);
+extern void CreateFontExplain(fclEncyc_instance_tag *pinst);
+extern void ResetReadMainRibbon(fclEncyc_readmainwork_tag *work);
+extern s32 dds3KernelDebugSign;
+
+void CalcPhaseReadExplain(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
+    u32 button;
+
+    fclRbnCalc(work->ribbon);
+    CalcFadeAlpha(&work->phase.statusAlpha, 0, 0x80, 0x10);
+    CalcFadeAlpha(&work->boardAlpha, 1, 0x80, 8);
+    CalcFadeAlpha(&work->explainAlpha, 1, 0x80, 8);
+    CalcMoveReadMainHelp((struct fclEncycReadHelpWork_t *)work);
+    button = cmpGetPressedButton(0x30032);
+    switch (button) {
+    case 2:
+        pinst->unk_5A = 3;
+        pinst->stat |= 2;
+        break;
+    case 0x20000:
+        fclRbnSwitchActive(work->ribbon, 1);
+        ReleaseFontExplain(pinst, 0);
+        work->phase.flags |= 0x10;
+        pinst->unk_5A = 4;
+        break;
+    case 0x10000:
+        ResetReadMainRibbon(&work->phase);
+        ReleaseFontExplain(pinst, 0);
+        InitCameraForViewMode(pinst);
+        SetBoundControl(pinst);
+        work->unk_040 = 0;
+        work->unk_044 = 0;
+        fclRbnSwitchActive(work->ribbon, 2);
+        pinst->stat |= 8;
+        dds3KernelDebugSign = 0;
+        work->phase.flags |= 8;
+        work->boardY = 0xC00;
+        RequestChangeMotion((motionWork_t *)pinst, 1);
+        work->phase.flags &= ~0x10;
+        pinst->unk_5A = 7;
+        break;
+    case 0x10:
+        ReleaseFontExplain(pinst, 0);
+        CirculateDevilObject(pinst, 0);
+        CreateFontExplain(pinst);
+        break;
+    case 0x20:
+        ReleaseFontExplain(pinst, 0);
+        CirculateDevilObject(pinst, 1);
+        CreateFontExplain(pinst);
+        break;
+    default:
+        break;
+    }
+    cmpPlayCursorSE(button);
+}
 
 extern s32 cmpGetEncycWork(void);
 extern void cmpDrawStatusComEx(s32 unit, u8 alpha, s8 kind, s8 mode,
