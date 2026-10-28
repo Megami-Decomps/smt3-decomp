@@ -46,6 +46,20 @@ count reproduces the native extent. All 22 remaining differences occur in the
 two player-follow blocks: the global offset and player-pointer registers,
 counter narrowing, and load/store scheduling differ. Native stores the counter
 before loading the player's Y coordinate and carries the player pointer in a
-separate register. These are observed differences, not an isolated compiler
-diagnosis. A raw word count snapshot loses two instructions per block; checking
-the pre-decrement before copying Y gives 188 matching words instead of 189.
+separate register. A raw word count snapshot loses two instructions per block;
+checking the pre-decrement before copying Y gives 188 matching words instead of
+189. Capturing the stored pre-decrement result after X also loses two words per
+block; an unsigned halfword snapshot does not close the gap.
+
+A qualified pinned-compiler `--alloc --no-dumps` trace identifies the current
+allocation in the first follow block (local-alloc block 11). Call-result pseudo
+116 has the `$2` suggestion and is assigned `$2`, retaining the player pointer
+through the count load. Offset pseudo 117 has live interval `[6,16]` and no
+suggestion, and receives `$4`. Halfword count pseudo 121 has interval `[10,28]`
+and receives `$3`. The suggested call-result quantity is allocated before the
+unsuggested quantities; the count's priority is 15000 versus the offset's 2000.
+This accounts for the current pointer/count register arrangement. It does not
+establish an ordinary source change that produces the native copy into `$4`.
+Hooked/unhooked assembly and normal-output parity passed without RTL dumps
+using compiler SHA-256
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
