@@ -196,13 +196,36 @@ INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcRadius);
 
 INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcDegree);
 
-INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcStage);
-
 extern s8 dds3PadButtonState[];
 extern void pbLoadSystemData(s32 num);
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, void *drawTag);
+extern void pbRoundStagePrev(s16 *level, s16 *stage);
+extern void pbRoundStageNext(s16 *level, s16 *stage);
+extern void pbGotoNewStage(void);
+
+s32 DebugProcStage(pbDebugWork_t *work, sdfDrawTag_t *tag)
+{
+    if (dds3PadButtonState[0x36] & 2) {
+        pbRoundStagePrev(&work->level, &work->stage);
+    }
+    if (dds3PadButtonState[0x37] & 2) {
+        pbRoundStageNext(&work->level, &work->stage);
+    }
+    if (dds3PadButtonState[0x33] < 0) {
+        work->phase = 0;
+    } else if (dds3PadButtonState[0x31] < 0) {
+        D_0054F5C4->level = work->level;
+        D_0054F5C4->stage = work->stage;
+        pbGotoNewStage();
+    }
+    dds3ConsPanelTagLink(tag, 16, 16, 24, 3);
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x7A00, 0xFFFFF0, 0,
+                                     "STAGE : %d -%2d", work->level + 1,
+                                     work->stage + 1));
+    return 0;
+}
 
 s32 DebugProcFree(pbDebugWork_t *work, sdfDrawTag_t *tag)
 {
