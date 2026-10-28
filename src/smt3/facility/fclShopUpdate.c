@@ -132,6 +132,12 @@ typedef struct
 
 extern void datAddItem(s32 id, s32 num);
 
+typedef struct {
+    u8 count;
+    u8 reserved01;
+    u16 item[0xA0];
+} fclItemList_t;
+
 typedef struct
 {
     /* 0x0000 */ u8 reserved0000[0x15C];
@@ -166,7 +172,11 @@ typedef struct
     /* 0x002C */ cmpCursorInfo_t listCursor;
     /* 0x0064 */ u8 unk_0064[0x1004];
     /* 0x1068 */ shpSellListWindow_t sellList;
-    /* 0x11FC */ u8 reserved11FC[0x118C];
+    /* 0x11FC */ u8 reserved11FC[0x1044];
+    /* 0x2240 */ u8 itemCount;
+    /* 0x2241 */ u8 reserved2241;
+    /* 0x2242 */ fclItemList_t sellItems;
+    /* 0x2384 */ u8 reserved2384[4];
     /* 0x2388 */ void *unk_2388;
     /* 0x238C */ s32 script;
     /* 0x2390 */ s32 scriptArg;
@@ -472,7 +482,74 @@ void shpUpdateServiceTicket(void)
 
 INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateServiceTicketItem);
 
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqRoot);
+extern void fclCreateItemListEx(fclItemList_t *list, s8 kind);
+extern void cmpChangeCursorListNums(s32 count, u8 *cursor);
+extern void fclShopInitItemList(void *list);
+extern void shpFindItemSlot(shpUpdateWork_t *work);
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
+extern s32 cmpChkPadPressUpDown(void);
+
+void shpUpdateSeqRoot(void)
+{
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+    fclSetWorkValue(2, 0);
+    if (fclGetFlag(0) == 0) return;
+    switch (button) {
+    case 1: {
+        s32 itemIndex;
+        fclShopInitItemList((u8 *)shopUpdateWork + 0x1068);
+        shpFindItemSlot(shopUpdateWork);
+        itemIndex = shopUpdateWork->listCursor.unk_22 +
+                    (u8)shopUpdateWork->listCursor.unk_24 + 1;
+        switch (itemIndex) {
+        case 1:
+            cmpChangeCursorListNums(shopUpdateWork->itemCount,
+                                    (u8 *)&shopUpdateWork->sellList.listCursor);
+            shopUpdateWork->quantity = 1;
+            shpCalcPayOfMoney(-1, 0);
+            fclScriptStart(shopUpdateWork->script, 1, &shopUpdateWork->scriptArg);
+            shopUpdateWork->unk_0001 = 1;
+            shopUpdateWork->unk_0004 = button;
+            break;
+        case 2:
+            fclCreateItemListEx(&shopUpdateWork->sellItems, 1);
+            cmpChangeCursorListNums(shopUpdateWork->sellItems.count,
+                                    (u8 *)&shopUpdateWork->sellList.listCursor);
+            if (shopUpdateWork->sellItems.count == 0) return;
+            shopUpdateWork->quantity = 1;
+            shpCalcPayOfMoney(-1, 1);
+            fclScriptStart(shopUpdateWork->script, 3, &shopUpdateWork->scriptArg);
+            shopUpdateWork->unk_0001 = 2;
+            shopUpdateWork->unk_0004 = button;
+            break;
+        case 3: {
+            s32 result;
+            shpUpdateWork_t *work;
+            fclSetWorkValue(2, 1);
+            shopUpdateWork->unk_0005 = button;
+            result = fclScriptStart(shopUpdateWork->script, 9, &shopUpdateWork->scriptArg);
+            work = shopUpdateWork;
+            work->unk_0001 = 3;
+            work->unk_0008 = result;
+            shopUpdateWork->unk_0003 = 3;
+            shopUpdateWork->unk_0004 = -1;
+            shopUpdateWork->unk_0002 = 0;
+            break;
+        }
+        case 4: shpServiceTicket(); break;
+        }
+        break;
+    }
+    case 2: shpServiceTicket(); break;
+    case 0x10: cmpMoveCursor(&shopUpdateWork->listCursor, -1); break;
+    case 0x20: cmpMoveCursor(&shopUpdateWork->listCursor, 1); break;
+    }
+    if (cmpChkPadPressUpDown() == 0)
+        cmpMoveCursor(&shopUpdateWork->listCursor, 0);
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&shopUpdateWork->listCursor, button, 0x30));
+}
+
 
 void shopCheckSeqInfo(void)
 {
@@ -530,7 +607,7 @@ extern s32 fclChkDbgProcess(void);
 extern s32 fclGetFlag(s8 index);
 extern void fclClearFlag(s8 index);
 extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
-extern s32 shpUpdateSeqRoot(void);
+extern void shpUpdateSeqRoot(void);
 extern void shpUpdateSeqBuy(void);
 extern void shpUpdateSeqSell(void);
 extern void shpUpdateSeqBuyNums(void);
