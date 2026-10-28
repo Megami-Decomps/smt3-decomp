@@ -52,6 +52,9 @@ quickstart.
 - [Reading progress](progress.md): how progress would be measured and what
   counts.
 
+- [Compiler decision traces](cc1probe.md): observe the real ee-gcc through the
+  canonical unit wrapper and qualify debugger output against ordinary compilation.
+
 ## Builds
 
 - [Building](building.md): requirements, build targets, generated files, and
