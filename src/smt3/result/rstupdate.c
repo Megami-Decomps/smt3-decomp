@@ -95,7 +95,9 @@ typedef struct
     /* 0x0026 */ s8 RecoverFlag;
     /* 0x0027 */ s8 HeartsSkFlag;
     /* 0x0028 */ s8 HeartsSkillResult;
-    /* 0x0029 */ u8 unk_29[0x4F];
+    /* 0x0029 */ u8 reserved29;
+    /* 0x002A */ u16 bonusParamIndex;
+    /* 0x002C */ u8 reserved2C[0x4C];
     /* 0x0078 */ s32 unk_78;
     /* 0x007C */ u8 unk_7C[0xF0];
     /* 0x016C */ datUnitWork_t *pCurrentStock;
@@ -473,7 +475,28 @@ void rstUpdateSeqHeartsSkill(void)
     }
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstStandbyHeartsAddPoint);
+extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
+extern s8 cmbAddLevelUpParamEx(datUnitWork_t *work, s8 mode);
+extern s32 cmbGetParamBase(datUnitWork_t *unit, s32 index);
+
+s32 rstStandbyHeartsAddPoint(void)
+{
+    datUnitWork_t copy;
+    s8 index;
+
+    cmbCopyCustomDevilToStock(&copy, startPos->pCurrentStock);
+    index = cmbAddLevelUpParamEx(&copy, 0);
+    if (index < 0) {
+        return 0;
+    }
+    if (cmbGetParamBase(startPos->pCurrentStock, index) >= 0x28) {
+        return 0;
+    }
+    startPos->unk_129F[index] = 1;
+    startPos->bonusParamIndex = index;
+    rstSetMaxHpMp(1, startPos->pCurrentStock);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstStandbyHeartsSkillPowerUp);
 
