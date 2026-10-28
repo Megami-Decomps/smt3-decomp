@@ -22,3 +22,9 @@ Ruled out: the work pointer as a local against `(u8 *)ragDrawWork` written out
 at every use; declaring the local before and after the scroll read; a separate
 local for the cursor byte; and `s16` against `s32` for the scroll. All five give
 the same ten words, so nothing in the source reaches the choice.
+
+The header text and sprite-table arguments use the matched `trmDrawListText`
+provider's pointer types and integer return contract. The final caption object
+is a pointer table, and the other caption is read as a pointer from the packed
+exchange data. Correcting these declarations preserves both ten-word residuals;
+it does not justify splitting a new data owner to alter address reuse.

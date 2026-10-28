@@ -116,7 +116,7 @@ extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spri
 
 void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 
-extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
+extern s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *tex, fclSpriteTbl_t *table,
                             s32 arg);
 
 extern void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 id);
@@ -265,7 +265,7 @@ INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawHeartsList);
 
 extern void ragDrawListRows(lstWork_t *list, s32 kind, u8 *rows, s32 mode, s32 ot);
 
-extern s32 D_003305E8[];
+extern char *D_003305E8[];
 
 /* NON_MATCHING: 10 of 84 words differ, the work pointer in the other
  * caller-saved register in each of the two blocks that load it. */
@@ -281,7 +281,7 @@ void ragDrawList2(s8 mode)
     fclDrawPanel((fclPanel_t *)(work + 0x4700), 0x47);
     fclUpdatePanel((fclPanel_t *)((u8 *)ragDrawWork + 0x4700));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, *(s32 *)(ragHeartsTable + 0x8BC), ragDrawWork->texHandle, (char *)D_003306B8, 0x47);
+    trmDrawListText(&pos, *(char **)(ragHeartsTable + 0x8BC), ragDrawWork->texHandle, D_003306B8, 0x47);
     ragDrawListRows((lstWork_t *)((u8 *)ragDrawWork + 0x2314), 1, rows, mode, 0x47);
     fclDrawPanel((fclPanel_t *)((u8 *)ragDrawWork + 0x46C0), 0x47);
     fclInitPanelPos(*(s32 *)((u8 *)ragDrawWork + 0x46C0), *(s32 *)((u8 *)ragDrawWork + 0x46C4),
@@ -307,7 +307,7 @@ void ragDrawList3(s8 mode)
     fclDrawPanel((fclPanel_t *)(work + 0x4700), 0x47);
     fclUpdatePanel((fclPanel_t *)((u8 *)ragDrawWork + 0x4700));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, D_003305E8[0], ragDrawWork->texHandle, (char *)D_003306B8, 0x47);
+    trmDrawListText(&pos, D_003305E8[0], ragDrawWork->texHandle, D_003306B8, 0x47);
     ragDrawListRows((lstWork_t *)((u8 *)ragDrawWork + 0x34AC), 2, rows, mode, 0x47);
     fclDrawPanel((fclPanel_t *)((u8 *)ragDrawWork + 0x46C0), 0x47);
     fclInitPanelPos(*(s32 *)((u8 *)ragDrawWork + 0x46C0), *(s32 *)((u8 *)ragDrawWork + 0x46C4),
