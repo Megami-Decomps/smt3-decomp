@@ -4189,7 +4189,62 @@ void campDhEquipHearts(void)
     }
 }
 
+/* NON_MATCHING: 143 of 146 words match at 584 bytes; the default-input
+ * tail branch schedules its argument move and saved-register restore differently. */
+#ifdef NON_MATCHING
+void campDhUpdateCursor(void)
+{
+    u16 button = (u16)cmpGetPressedButton(0xF3);
+    s32 entry;
+
+    if (campDhIconIsReady() == 0) {
+        return;
+    }
+    ((campDhWork_t *)campDhUpdateWork)->flags |= 1;
+
+    switch (button) {
+    case 1:
+        entry = campDhFindEntry();
+        switch (entry) {
+        case 0:
+        case 2:
+        case 3:
+        case 4:
+            ((u8 *)campDhUpdateWork)[0x18] = 0;
+            ((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts = cmbGlobalWork->equipHearts;
+            ((campDhSavedUnit_t *)campDhUpdateWork)->unit = cmbGlobalWork->party[0].unit;
+            campDhEquipHearts();
+            ((u8 *)campDhUpdateWork)[1] = 1;
+            ((u8 *)campDhUpdateWork)[4] = 1;
+            break;
+        case 1:
+            button = 0x8000;
+            break;
+        default:
+            break;
+        }
+        break;
+    case 2:
+        campHideInfoWindow();
+        break;
+    case 0x10:
+        campDhApplyEntry(0x10);
+        break;
+    case 0x20:
+        campDhApplyEntry(0x20);
+        break;
+    case 0x40:
+        campDhApplyEntry(0x40);
+        break;
+    case 0x80:
+        campDhApplyEntry(0x80);
+        break;
+    }
+    cmpPlayCursorSE(button);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDhUpdateCursor);
+#endif
 
 s32 cmpUnloadStatusModel(void)
 {
