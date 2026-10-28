@@ -882,7 +882,44 @@ s32 Flow1_24(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_25);
+extern struct nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame,
+                                                  s32 uniqueid, nbFormation_t *form,
+                                                  s32 type);
+extern void nbCameraSetBougai(nbFormation_t *form);
+extern s32 nbMemoryLoadNegoSe(nbFormation_t *form);
+
+s32 Flow1_25(nbNegoProcessData_t *n)
+{
+    datUnitWork_t *work;
+    nbFormation_t *form;
+    datDevilNegoFormat_t *mt;
+    s32 *msg;
+    u32 messageOffset;
+    s32 phase;
+
+    work = nbGetUnitWorkPointer(n->data, &n->data->party[n->boupartyindex]);
+    phase = n->nownegophase;
+    form = &n->data->form[n->data->party[n->boupartyindex].formindex];
+
+    switch (phase) {
+    case 0:
+        nbAddMojiEffKoukaPacket(0, 0x1E, (s32)n->actdata, form, 0);
+        nbCameraSetBougai(form);
+        nbMemoryLoadNegoSe(form);
+        return 0;
+    case 1:
+        nbSetNegoNoMotion(n, form);
+        mt = &master_text[work->id];
+        /* Keep the message-array offset grouped before adding the work base. */
+        messageOffset = mt->mesno * sizeof(n->flowmsg[0]) +
+                        (u32)&((nbNegoProcessData_t *)0)->flowmsg;
+        msg = (s32 *)((u32)n + messageOffset);
+        nbSetNegoMesVar(*msg, n->pwork, work);
+        nbDispNegoMessage(n, *msg, 0x11, 0);
+        return 4;
+    }
+    return 0;
+}
 
 s32 Flow1_26(nbNegoProcessData_t *n)
 {
