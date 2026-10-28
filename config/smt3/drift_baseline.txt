@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1127 members, 506 adopted constants.
+# 0 types, 1116 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -36,6 +36,8 @@ member campDhEntry_t.unk_24
 member campDhEntry_t.unk_28
 member campDhEntry_t.unk_2C
 member campDhEntry_t.unk_30
+member campDhSavedUnit_t.unk_00
+member campDhSavedUnit_t.unk_33
 member campDhTimerWork_t.unk_0000
 member campDhTimerWork_t.unk_002C
 member campDhTimerWork_t.unk_1C
@@ -116,6 +118,7 @@ member cmbGlobalWork_t.unk_01CFB
 member cmbGlobalWork_t.unk_01D7B
 member cmbGlobalWork_t.unk_01E3B
 member cmbGlobalWork_t.unk_1965
+member cmbListWork_t.unk_0000
 member cmbMitamaEntry_t.unk_02
 member cmbMitamaEntry_t.unk_04
 member cmbMitamaEntry_t.unk_05
@@ -244,13 +247,11 @@ member datUnitVisualPart_t.unk1A
 member datUnitVisual_t.unk182
 member datUnitVisual_t.unk30
 member dds3AdminiData_t.unk0B
-member dds3DrawBank_t.unk0040
 member dds3EventObjectBasicWorkData_t.unk04
 member dds3GlobalStockView_t.unk_00000
 member dds3GlobalWorkView_t.unk_00000
 member dds3GlobalWorkView_t.unk_01928
 member dds3GlobalWork_t.unk10
-member dds3GlobalWork_t.unk11A7C
 member dds3GlobalWork_t.unk1910
 member dds3GlobalWork_t.unk1914
 member dds3GlobalWork_t.unk38
@@ -276,7 +277,6 @@ member dds3TitleWork_t.unk_18
 member dds3TitleWork_t.unk_20
 member dds3TitleWork_t.unk_30
 member dds3TitleWork_t.unk_34
-member dds3UnitObjectBasicWorkData_t.unk18
 member effBTLAimParams_t.unk03
 member effBTLCut_t.unk120
 member effBTLCut_t.unk16
@@ -457,7 +457,6 @@ member fclEncyc_instance_tag.unk_6D
 member fclEncyc_instance_tag.unk_70
 member fclEncyc_instance_tag.unk_74
 member fclEncyc_instance_tag.unk_84
-member fclEncyc_readmainwork_tag.unk_1E
 member fclEncyc_registconfirmwork_tag.unk_27
 member fclGlobalWorkItemInventory_t.unk_00000
 member fclItemList_t.unk_01
@@ -582,7 +581,6 @@ member frFontChild_t.unk14
 member frFontRequest_t.unk00
 member frFontRequest_t.unk0C
 member frFontRequest_t.unk28
-member frNameGlobalWork_t.unk_00000
 member frPackedHeader_t.unk00
 member frRelativeImage_t.unk08
 member frTextIndex_t.unk00
@@ -774,7 +772,6 @@ member ragGlobalWorkData_t.unk_00000
 member ragGlobalWorkData_t.unk_00A51
 member ragGlobalWorkData_t.unk_01914
 member ragItemReq_t.unk_03
-member ragListWindow_t.unk_00000
 member ragUpdateWork_t.unk_0000
 member ragUpdateWork_t.unk_0001
 member ragUpdateWork_t.unk_0002
@@ -784,13 +781,6 @@ member ragUpdateWork_t.unk_0005
 member ragUpdateWork_t.unk_0006
 member ragUpdateWork_t.unk_0008
 member ragUpdateWork_t.unk_000C
-member ragUpdateWork_t.unk_004D
-member ragUpdateWork_t.unk_0054
-member ragUpdateWork_t.unk_0056
-member ragUpdateWork_t.unk_0178
-member ragUpdateWork_t.unk_1310
-member ragUpdateWork_t.unk_24A8
-member ragUpdateWork_t.unk_3640
 member ragUpdateWork_t.unk_4650
 member ragUpdateWork_t.unk_465C
 member rcvCalcWork_t.unk0015
@@ -862,7 +852,6 @@ member rstWork_t.unk_22E5
 member rstWork_t.unk_2308
 member rstWork_t.unk_230C
 member rstWork_t.unk_2310
-member rstWork_t.unk_29
 member rstWork_t.unk_78
 member rstWork_t.unk_7C
 member sceHSynChanSet_t.unk00
