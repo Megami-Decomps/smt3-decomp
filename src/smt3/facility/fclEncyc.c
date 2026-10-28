@@ -583,7 +583,34 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadTop);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseReadTop);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DestPhaseReadTop);
+typedef struct fclEncycReadTopWork_t {
+    u8 unk0000[0x11D8];
+    fclRibbon_t *ribbon;
+    frFontHandle_t *requests[3];
+    void *fontList[8];
+} fclEncycReadTopWork_t;
+
+void DestPhaseReadTop(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadTopWork_t *work = (fclEncycReadTopWork_t *)pinst->pwork;
+
+    fclRbnRelease(work->ribbon);
+    if (work->requests[0] != NULL) {
+        frDestroyFontRequestAfter(work->requests[0]);
+        work->requests[0] = NULL;
+    }
+    if (work->requests[1] != NULL) {
+        frDestroyFontRequestAfter(work->requests[1]);
+        work->requests[1] = NULL;
+    }
+    if (work->requests[2] != NULL) {
+        frDestroyFontRequestAfter(work->requests[2]);
+        work->requests[2] = NULL;
+    }
+    ReleaseFontList(work->fontList, 8);
+    ReleaseWork(pinst);
+}
+
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadStatus);
 
