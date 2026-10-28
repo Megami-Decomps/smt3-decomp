@@ -268,7 +268,33 @@ nbCommSelProcessData_t *GetCommSelProcessData(void)
     return dds3GetProcessData(dds3SearchProcessName(D_005441A8));
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispPanelCursor);
+void DispPanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 c)
+{
+    s32 margin = 0;
+    s32 listCount;
+    s32 blink;
+
+    if (type == 3) {
+        margin = 0x2B - (s32)(s->smritu * 43.0f);
+    }
+    listCount = GetCommListCnt(s, type);
+    blink = s->data->battletime % 0x19 < 0xE;
+    if (s->nowlisty[type] > 0 && blink) {
+        nbPnlSprite(ox + 0xE, oy - margin + 0x166, 7, 9, 0x53, 0x4E, 7, 9, c,
+                    s->data->pnltex[0]);
+    } else {
+        nbPnlSprite(ox + 0xE, oy - margin + 0x166, 7, 9, 0x4B, 0x4E, 7, 9, c,
+                    s->data->pnltex[0]);
+    }
+
+    if (s->nowlisty[type] < s->commcnt[type] - listCount && blink) {
+        nbPnlSprite(ox + 0xE, oy + 0x1A5, 7, -9, 0x53, 0x4E, 7, 9, c,
+                    s->data->pnltex[0]);
+    } else {
+        nbPnlSprite(ox + 0xE, oy + 0x1A5, 7, -9, 0x4B, 0x4E, 7, 9, c,
+                    s->data->pnltex[0]);
+    }
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbCommSelProcess", D_005441A8);
 
