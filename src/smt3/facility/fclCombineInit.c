@@ -2648,7 +2648,87 @@ s32 cmbUpdateModelLoad(void)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateSequence);
+extern void cmbUpdateRoot(void);
+extern void cmbUpdateMenuCursor(void);
+extern void cmbUpdateResultCursor(void);
+extern void cmbUpdateStockCursor(void);
+extern void cmbChangeSequence(void);
+extern void cmbUpdateStockCursor2(void);
+extern void cmbUpdateBirthDevil(void);
+extern void cmbUpdateAction(void);
+extern s32 cmpUpdateSeqInfo(cmbGbWork_t *work, s8 previous);
+
+s32 cmbUpdateSequence(void)
+{
+    s32 updateInfo = 1;
+    s8 previous = CMB_GBWK->unk_00001;
+
+    if (CMB_GBWK->unk_00000 & 0x40) {
+        return -1;
+    }
+    cmbUpdatePanelAnim();
+    cmbUpdateModelLoad();
+    switch ((s8)CMB_GBWK->unk_00001) {
+    case 0:
+        if (cmbHandleDebugExit() == 0) {
+            cmbUpdateRoot();
+        }
+        break;
+    case 3:
+        cmbUpdateMenuCursor();
+        break;
+    case 4:
+        if (cmpChkSeqInfo(CMB_GBWK) == 2) {
+            fclClearFlag(1);
+            fclSetWorkValue(1, 0);
+            CMB_GBWK->unk_00000 |= 0x10;
+        }
+        break;
+    case 2:
+        cmbUpdateResultCursor();
+        break;
+    case 5:
+        cmbUpdateStockCursor();
+        break;
+    case 6:
+        cmbChangeSequence();
+        break;
+    case 9:
+        cmbWaitCancelButton();
+        break;
+    case 10:
+        cmbUpdateBirthDevil();
+        break;
+    case 7:
+        updateInfo = cmbUpdateSacConfirm();
+        break;
+    case 8:
+        cmbUpdateStockCursor2();
+        break;
+    case 11:
+        updateInfo = cmbUpdateDecideDevil();
+        break;
+    case 13:
+        if (fclCombineChkEventStat() == 0) {
+            cmbUpdateAction();
+        }
+        break;
+    case 15:
+        cmbSeqAfterBirth();
+        break;
+    case 14:
+        cmbUpdateIntroduce();
+        break;
+    case 16:
+        cmbSeqReturnToPrev();
+        break;
+    }
+    if (updateInfo == 0) {
+        return 0;
+    }
+    cmpUpdateSeqInfo(CMB_GBWK, previous);
+    return 0;
+}
 
 void func_00203F18(u16 index, u8 type)
 {
