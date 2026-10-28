@@ -41,7 +41,7 @@ extern s32 fldWmapEnabled;
 
 extern u8 cmpLoadState;
 
-extern u32 cmbBirthPanel;
+extern datUnitWork_t *cmbBirthPanel;
 
 extern u16 rstHeartsMasterPhase;
 
@@ -3283,7 +3283,7 @@ void campDrawSkillPanel(void)
     campWork->drawPhase = 0;
 }
 
-void cmbSetBirthPanel(u32 panel)
+void cmbSetBirthPanel(datUnitWork_t *panel)
 {
     cmbBirthPanel = panel;
 }
@@ -3402,7 +3402,27 @@ INCLUDE_ASM(const s32, "code_0022C578", rstDrawNumber);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusIconRow);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusIcons);
+extern void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color,
+                                 datUnitWork_t *unit, s32 flags, s32 ot);
+
+void cmpDrawStatusIcons(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
+{
+    s32 hpIconFlags;
+    s32 mpIconFlags;
+
+    if (mode == 3) {
+        hpIconFlags = cmbBirthPanel->maxhp != unit->maxhp ? 4 : 1;
+        mpIconFlags = cmbBirthPanel->maxmp != unit->maxmp ? 8 : 2;
+    } else {
+        hpIconFlags = 1;
+        mpIconFlags = 2;
+    }
+
+    fclDrawSpriteRes(x, y, 0xFFFF, colors, 2, 3, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(x, y, 0xFFFF, colors, 2, 7, D_00345D88, fclSpriteTable, 0x47);
+    cmpDrawStatusIconRow(x + 0x2B0, y + 0x3C8, 0xFFFF, colors[0], unit, hpIconFlags, 0x47);
+    cmpDrawStatusIconRow(x + 0x960, y + 0x3C8, 0xFFFF, colors[0], unit, mpIconFlags, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusName);
 
