@@ -2446,7 +2446,64 @@ void SetCameraLightParam(fclEncyc_instance_tag *pinst)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", func_0021B480);
+extern dds3DrawBank_t dds3DrawEnv[];
+extern sdfMatrix4_t D_002FA240;
+extern sdfVector4_t aViewEye, aViewTarget, aViewDown;
+extern sdfVector4_t D_003322D0, D_003322E0, D_003322F0, D_00332300;
+extern sdfVector4_t D_00345F60;
+extern f32 dds3QuakeOffset[4];
+extern u32 dds3GetFrameID(void);
+extern void dds3SetSoftenBias(s32 frame, f32 soften, f32 bias);
+extern void dds3SetLightColor(s32 frame, s32 no, f32 *color);
+extern void dds3SetLightDir(s32 frame, s32 no, f32 *direction);
+extern void dds3SetAmbientColor(s32 frame, f32 *color);
+extern void dds3SetFogColor(s32 frame, f32 *color);
+extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 nearPlane, f32 farPlane);
+extern void sdf3DMakeScreenParam(sdf3DScreenParam_t *param);
+extern void LookAtMatrix(const void *target, const void *eye, const void *up);
+extern void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *packet,
+                                   sdf3DScreenParam_t *param, void *camera);
+extern void sdf3DSetCamera(sdf3DScreenParam_t *param, void *camera);
+
+void func_0021B480(fclEncyc_instance_tag *pinst)
+{
+    sdfVector4_t target;
+    sdfVector4_t eye;
+    u32 frame;
+
+    frame = dds3GetFrameID();
+    dds3SetSoftenBias(0, 5.0f, 0.0f);
+    dds3SetLightColor(0, 0, &D_003322D0.x);
+    dds3SetLightDir(0, 0, &D_003322E0.x);
+    dds3SetAmbientColor(0, &D_003322F0.x);
+    dds3SetFogColor(0, &D_00332300.x);
+    dds3SetFogPara(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
+    dds3ScreenParam.fovy = 0.7551905f;
+
+    SDF_VU0_COPYVECTOR(&aViewEye, &pinst->camera[0]);
+    SDF_VU0_COPYVECTOR(&aViewTarget, &pinst->camera[1]);
+    SDF_VU0_COPYVECTOR(&aViewDown, &D_00345F60);
+    sdf3DMakeScreenParam(&dds3ScreenParam);
+
+    SDF_VU0_LOADVECTOR(&aViewTarget);
+    SDF_VU0_LOADVECTOR_B(&aViewEye);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SCALEVECTOR(600.0f);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_LOADVECTOR_B(dds3QuakeOffset);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&target);
+    SDF_VU0_LOADVECTOR(&aViewEye);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&eye);
+    LookAtMatrix((f32 *)&target, (f32 *)&eye, (f32 *)&aViewDown);
+    SDF_VU0_STOREMATRIX_NOMEM(&D_002FA240);
+    sdf3DMakeViewportPacket(&dds3DrawEnv[frame].viewport,
+                            &dds3ScreenParam, &D_002FA240);
+    sdf3DSetCamera(&dds3ScreenParam, &D_002FA240);
+}
+
 
 typedef struct
 {
