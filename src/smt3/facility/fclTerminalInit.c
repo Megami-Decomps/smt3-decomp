@@ -36,7 +36,11 @@ extern trmCalcWork_t *trmCalcWork;
 typedef struct
 {
     u8 terminalFlags;              /* 0x0000 */
-    u8 pad_0001[0x13];
+    u8 unk_01;
+    u8 pad_0002;
+    u8 unk_03;
+    u8 unk_04;
+    u8 pad_0005[0xF];
     void *allocation;               /* 0x0014 */
     u8 pad_0018[0x25];
     u8 terminalReferenceCount;      /* 0x003D */
@@ -49,7 +53,7 @@ typedef struct
     s8 cursor;                      /* 0x2216 */
     u8 pad_2217[1];
     void *scriptAllocationHandle;     /* 0x2218 */
-    u8 pad_221C[4];
+    u32 scriptData;
     s32 ScriptPID;                  /* 0x2220 */
     u8 pad_2224[0xC];
     s32 saveProcess;                /* 0x2230 */
@@ -177,7 +181,22 @@ extern trmUpdateWork_t *trmUpdateWork;
 INCLUDE_RODATA(const s32, "facility/fclTerminalInit", D_0053D5B0);
 
 INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalScanCommands);
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalInitList);
+
+extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, void *work);
+extern void fclSetPanelTex(void *panel, s32 a2, s32 a3, s32 a4, s32 a5, s32 tex);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
+
+void fclTerminalInitList(void *list, s8 count, s32 handle)
+{
+    void *cursor;
+
+    lstInitListWindow(0, 0x298, 0xFFFFF, 0x129, 0xD3, 0x19191E59, 1, list);
+    fclSetPanelTex(list, 0, 0, 0, 0, handle);
+    cursor = (u8 *)list + 0x15C;
+    cmpInitCursorRange(cursor, (u8)count, 7, 0);
+    cmpInitCursorLayout(cursor, 0x2E, 7, 0x98, 0x19, 0x1D);
+}
 
 
 extern u32 trmMenuTextTable[];
@@ -252,7 +271,36 @@ void fclTerminalSetMode(s32 mode, s32 id, trmUpdateWork_t *work)
     fclTerminalInitList((u8 *)work + 0x1058, work->terminalCommandCount, work->texHandle[0]);
 }
 
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclAllocTerminalWork);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void *memset(void *dst, s32 value, u32 size);
+extern void cmpInitSeqInfo(void *work, s32 seq);
+extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
+extern void fclTerminalLoadTextures(void *work);
+extern void fclClearTerminalState(void);
+
+trmTerminalWork_t *fclAllocTerminalWork(s32 type, s32 no, s32 mode)
+{
+    trmTerminalWork_t *work;
+    sdfMemHandle_t *allocation;
+
+    allocation = sdfMemAllocDirect(0x223C);
+    work = sdfMemLock(allocation);
+    memset(work, 0, 0x223C);
+    work->allocation = allocation;
+    cmpInitSeqInfo(work, mode);
+    work->unk_01 = 0;
+    work->unk_03 = 0;
+    work->unk_04 = 1;
+    work->ScriptPID = 0;
+    work->scriptAllocationHandle = sdfDevLoadFileEx("/facility/scr/terminal/message.bf",
+                                                      &work->scriptData, 0);
+    fclSetTerminalMode(0);
+    fclTerminalLoadTextures(work);
+    fclTerminalSetMode(type, no, work);
+    fclClearTerminalState();
+    return work;
+}
 
 extern void sdfMemFreeDirect(void *handle);
 extern void fldProcSetTerminal(s8 type, u16 id);
