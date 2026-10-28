@@ -1528,7 +1528,19 @@ void cmpApplyStockRemove(void)
     datAllClearCommMemory();
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpRemoveStockDevilEntry);
+extern s32 func_0022E168(u16 devilId);
+
+void cmpRemoveStockDevilEntry(void)
+{
+    s8 index = cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
+
+    if (index < 0) {
+        return;
+    }
+    func_0022E168(cmbGlobalWork->party[index].unit.id);
+}
+
+INCLUDE_ASM(const s32, "code_0022C578", func_0022E168);
 
 void cmp_22E258(void *work)
 {
