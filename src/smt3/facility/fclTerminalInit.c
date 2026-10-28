@@ -353,7 +353,7 @@ void fclTerminalInitMenu(s32 id, void *commands, void *work)
 typedef struct
 {
     s16 field;
-    s16 jumpEvent;
+    s16 jumpTerminalNo;
 } trmFieldEntry_t;
 
 extern trmFieldEntry_t fldAllCnt[];
@@ -363,10 +363,10 @@ s32 fclTerminalDumpJump(trmTerminalWork_t *work)
 {
     s32 i;
 
-    printf("jump:%x %x\n", fldAllCnt[work->terminalNo].jumpEvent, work->terminalNo);
+    printf("jump:%x %x\n", fldAllCnt[work->terminalNo].jumpTerminalNo, work->terminalNo);
     for (i = 0; i < work->terminalCommandCount; i++) {
         printf(D_0054FC28, work->terminalList[i]);
-        if (work->terminalList[i] == fldAllCnt[work->terminalNo].jumpEvent) {
+        if (work->terminalList[i] == fldAllCnt[work->terminalNo].jumpTerminalNo) {
             return 1;
         }
     }
