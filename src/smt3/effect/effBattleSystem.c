@@ -2832,7 +2832,76 @@ s32 nb_175338(s32 value)
     return value;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", nb_175440);
+void nb_175440(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+
+    if (D_00551DC0 != 0) {
+        data->stat &= ~0x00010000;
+    } else {
+        data->stat |= 0x00010000;
+    }
+    if (D_00551DC1 != 0) {
+        data->stat &= ~0x00020000;
+    } else {
+        data->stat |= 0x00020000;
+    }
+    if (D_00551DC2 != 0) {
+        data->stat &= ~0x00040000;
+    } else {
+        data->stat |= 0x00040000;
+    }
+    if (D_00551DC3 != 0) {
+        data->stat &= ~0x00080000;
+    } else {
+        data->stat |= 0x00080000;
+    }
+    if (D_00551DC4 != 0) {
+        data->stat |= 0x00400000;
+    } else {
+        data->stat &= ~0x00400000;
+    }
+    if (D_00551DC5 != 0) {
+        data->stat |= 0x02000000;
+    } else {
+        data->stat &= ~0x02000000;
+    }
+    if (D_00551DC6 != 0) {
+        data->stat |= 0x00800000;
+    } else {
+        data->stat &= ~0x00800000;
+    }
+    if (D_00551DC7 != 0) {
+        data->stat |= 0x04000000;
+    } else {
+        data->stat &= ~0x04000000;
+    }
+    if (D_00551DC8 != 0) {
+        data->stat |= 0x08000000;
+    } else {
+        data->stat &= ~0x08000000;
+    }
+    if (D_00551DC9 != 0) {
+        data->stat |= 0x10000000;
+    } else {
+        data->stat &= ~0x10000000;
+    }
+    if (D_00551DCA != 0) {
+        data->stat &= ~0x20000000;
+    } else {
+        data->stat |= 0x20000000;
+    }
+    if (D_00551DCB != 0) {
+        data->stat |= 0x40000000;
+    } else {
+        data->stat &= ~0x40000000;
+    }
+    if (D_00551DCC != 0) {
+        data->stat |= 0x80000000;
+    } else {
+        data->stat &= ~0x80000000;
+    }
+}
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A60);
 
