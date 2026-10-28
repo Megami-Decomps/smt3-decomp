@@ -295,6 +295,8 @@ src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 192 B	rstUpdateSeqE
 src/smt3/pipe/pipeEffect.c	redthing1	done	2026-10-28	0 new matches	pipeEffLoad independently published in b6fde46; kept main version
 src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	typed order/stock trials remain control-flow and allocation residuals
 src/smt3/sdf/sdfCd.c	redthing1	done	2026-10-28	2 fn / 636 B	indexed lookup and tray wait; translation unit has no function fallbacks
-src/smt3/interface/frName.c	redthing1	open	2026-10-28	name image and request helpers	fresh typed reconstruction
-src/smt3/facility/fclRagInit.c	redthing1	open	2026-10-28	2 fn / 352 B	process startup and confirmation lookup matched; allocator follow-up active
-src/smt3/facility/fclRecoverCalc.c	redthing1	open	2026-10-28	recovery prices quantities and healing	fresh typed reconstruction
+src/smt3/interface/frName.c	redthing1	done	2026-10-28	0 matches	name image and request trials remain assembly
+src/smt3/facility/fclRagInit.c	redthing1	open	2026-10-28	3 fn / 748 B	startup lookup and allocator matched; row conversion follow-up active
+src/smt3/facility/fclRecoverCalc.c	redthing1	done	2026-10-28	1 fn / 132 B	rcvGetRecoverPrice sparse switch; price and healing trials remain assembly
+src/smt3/kernel/dds3GlobalWork.c	redthing1	open	2026-10-28	dds3PrimLine3D	VU0 basis transform and packet reconstruction
+src/smt3/event/evtCommand.c	redthing1	open	2026-10-28	evtCommand_MODEL_RGB	color-command sibling and packing-contract review

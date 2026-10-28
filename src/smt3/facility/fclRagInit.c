@@ -394,18 +394,108 @@ INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D188);
 
 INCLUDE_ASM(const s32, "facility/fclRagInit", fclRagUpdateInit);
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", fclAllocRagWork);
+typedef struct ragPanel
+{
+    s32 X;
+    s32 Y;
+    s32 Z;
+    s16 W;
+    s16 H;
+    s32 Col;
+    u8 Spd;
+    u8 reserved15[3];
+    s32 Timer;
+    s32 Timer2;
+    s32 Flag;
+    u8 reserved24[0x10];
+    s32 TexHandle;
+    void (*draw)(struct ragPanel *panel, s32 id);
+    void (*update)(struct ragPanel *panel);
+} ragPanel_t;
 
-typedef struct
+typedef struct ragSprite
+{
+    s32 tex;
+    u16 width;
+    u16 height;
+    u16 u0;
+    u16 v0;
+    u16 u1;
+    u16 v1;
+    s32 X;
+    s32 Y;
+    s32 Z;
+    u8 color[4];
+    u8 flags;
+} ragSprite_t;
+
+typedef struct fclRagWork
 {
     /* 0x0000 */ u8 flags;
-    /* 0x0001 */ u8 unk_0001[0x13];
+    /* 0x0001 */ u8 sequenceFlag;
+    /* 0x0002 */ u8 reserved02;
+    /* 0x0003 */ u8 reserved03;
+    /* 0x0004 */ u8 workStatus;
+    /* 0x0005 */ u8 reserved05[0xF];
     /* 0x0014 */ void *allocation;
-    /* 0x0018 */ u8 unk_0018[0x462C];
-    /* 0x4644 */ void *unk_4644;
-    /* 0x4648 */ s32 unk_4648;
-    /* 0x464C */ s32 unk_464C;
+    /* 0x0018 */ u8 reserved18;
+    /* 0x0019 */ s8 ragType;
+    /* 0x001A */ u8 reserved1A[0x462A];
+    /* 0x4644 */ void *messageFile;
+    /* 0x4648 */ u32 messageData;
+    /* 0x464C */ u8 *forcedEndScript;
+    /* 0x4650 */ s32 backgroundTexture;
+    /* 0x4654 */ s32 texture[2];
+    /* 0x465C */ ragSprite_t messageSprite;
+    /* 0x4680 */ ragPanel_t panel[3];
+    /* 0x4740 */ fclRagTex_t textureCalc[2];
 } fclRagWork_t;
+
+extern void *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(void *handle);
+extern void *sdfDevLoadFileEx(const char *name, u32 *data, u32 *size);
+extern void cmpInitSeqInfo(void *work, s32 seq);
+extern void fclRagUpdateInit(s8 type, fclRagWork_t *work);
+extern void fclInitPanel(ragPanel_t *panel, s32 x, s32 y, s32 z, s32 w,
+                         s32 h, s32 color, s8 speed, s8 type);
+extern void evtDisableMoonCalc(void);
+extern void cmpModelInit(void);
+extern void cmpResetDrawEnv(void);
+extern void fclRagLoadTextures(u8 *work);
+extern void fclRagTexLoad(u8 *work);
+extern void p2sdPlayBGM(s32 id);
+extern char D_0053D1D0[];
+
+fclRagWork_t *fclAllocRagWork(s8 type, s32 seq)
+{
+    void *handle = sdfMemAllocDirect(0x4788);
+    fclRagWork_t *work = sdfMemLock(handle);
+
+    memset(work, 0, 0x4788);
+    work->allocation = handle;
+    cmpInitSeqInfo(work, seq);
+    work->sequenceFlag = 0;
+    work->ragType = type;
+    work->workStatus = 1;
+    work->reserved03 = 0;
+    work->forcedEndScript = NULL;
+    fclRagUpdateInit(type, work);
+    fclInitPanel(&work->panel[0], 0xF60, 0x280, 0xFFFFF, 0xE5, 0x6B,
+                 0x161E2766, 2, 0x10);
+    fclInitPanel(&work->panel[1], 0xEA0, 0x6E0, 0xFFFFF, 0xF1, 0x51,
+                 0x101E3159, 4, 0x10);
+    fclInitPanel(&work->panel[2], 0, 0x190, 0xFFFFF, 0x200, 0x109,
+                 0, 0, 0x1D);
+    work->messageFile = sdfDevLoadFileEx(D_0053D1D0, &work->messageData, NULL);
+    evtDisableMoonCalc();
+    fclRagLoadTextures((u8 *)work);
+    cmpModelInit();
+    cmpResetDrawEnv();
+    fclRagTexLoad((u8 *)work);
+    p2sdPlayBGM(0x390000);
+    fclSetWorkValue(2, 0);
+    return work;
+}
 
 extern void fclRagTexFree(u8 *pData);
 
@@ -417,8 +507,8 @@ void fclDestroyRag(void)
         return;
     }
     fclRagTexFree(GBWK_0);
-    fclScriptForcedEnd(((fclRagWork_t *)GBWK_0)->unk_464C);
-    sdfMemFreeDirect(((fclRagWork_t *)GBWK_0)->unk_4644);
+    fclScriptForcedEnd(((fclRagWork_t *)GBWK_0)->forcedEndScript);
+    sdfMemFreeDirect(((fclRagWork_t *)GBWK_0)->messageFile);
     fclRagEventEnd();
     sdfMemFreeDirect(((fclRagWork_t *)GBWK_0)->allocation);
     GBWK_0 = NULL;
@@ -427,7 +517,7 @@ void fclDestroyRag(void)
     p2sdStopBGM(0x390000);
 }
 
-extern u8 *fclAllocRagWork(s8 type, void *arg);
+extern fclRagWork_t *fclAllocRagWork(s8 type, s32 seq);
 extern void FclDebug(s32 mode, void *work);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority,
                                           s32 startTimer, s32 shutdownTimer,
@@ -441,7 +531,7 @@ extern s32 ragUpdate(dds3ProcessID_t *id);
 void fclRagProcessStart(s8 Signal)
 {
     if (GBWK_0 == NULL) {
-        GBWK_0 = fclAllocRagWork(Signal, NULL);
+        GBWK_0 = (u8 *)fclAllocRagWork(Signal, 0);
         FclDebug(2, GBWK_0);
         dds3StartProcess(D_0054FB98, 0x403, 1, 1, ragCalc, NULL, GBWK_0);
         dds3StartProcess(D_0053D1F0, 0x2B13, 1, 1, ragDraw, NULL, GBWK_0);
@@ -536,6 +626,8 @@ void ragUpdateScene(void)
         }
     }
 }
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1D0);
 
 INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1F0);
 
