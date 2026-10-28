@@ -1,5 +1,6 @@
 #include "common.h"
 #include "ps2asm.h"
+#include "fpu.h"
 #include "model.h"
 #include "draw3d.h"
 
@@ -618,7 +619,7 @@ extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern sdfModelOt_t D_002F69B8[];
 extern f32 aViewEye[4], aViewTarget[4];
 extern sdf3DScreenParam_t dds3ScreenParam;
-extern void effPCP_BED_MatrixToQuaternion(const void *pMatrix);
+extern void effPCP_BED_MatrixToQuaternion(f32 matrix[4][4]);
 extern void *effPCPHelperBEDGetModel(void *pHelperBED);
 extern void effPCPHelperBEDDelete(void *hData);
 extern void effPCPHelperBEDDraw(void *hData);
@@ -3137,7 +3138,46 @@ void effPCP_BED_Delete(effPCP_BED_tag *hData)
     sdfChipFreeDirect(hData);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_MatrixToQuaternion);
+void effPCP_BED_MatrixToQuaternion(f32 matrix[4][4])
+{
+    f32 quaternion[4] __attribute__((aligned(16)));
+    f32 trace = matrix[0][0] + matrix[1][1] + matrix[2][2] + matrix[3][3];
+    f32 scale;
+    s32 i;
+    s32 j;
+    s32 k;
+
+    if (trace >= 1.0f) {
+        scale = 2.0f * fsqrtf(trace);
+        quaternion[3] = scale * 0.25f;
+        quaternion[0] = (matrix[1][2] - matrix[2][1]) / scale;
+        quaternion[1] = (matrix[2][0] - matrix[0][2]) / scale;
+        quaternion[2] = (matrix[0][1] - matrix[1][0]) / scale;
+    } else {
+        i = matrix[0][0] > matrix[1][1] ? 0 : 1;
+        if (matrix[i][i] < matrix[2][2]) {
+            i = 2;
+        }
+        j = (i + 1) % 3;
+        k = (j + 1) % 3;
+        trace = matrix[i][i] - matrix[j][j] - matrix[k][k] + 1.0f;
+        if (trace != 0.0f) {
+            scale = 2.0f * fsqrtf(trace);
+            quaternion[i] = scale * 0.25f;
+            quaternion[j] = (matrix[j][i] + matrix[i][j]) / scale;
+            quaternion[k] = (matrix[k][i] + matrix[i][k]) / scale;
+            quaternion[3] = (matrix[j][k] - matrix[k][j]) / scale;
+        } else {
+            quaternion[i] = 1.0f;
+            quaternion[j] = 0.0f;
+            quaternion[k] = 0.0f;
+            quaternion[3] = 0.0f;
+        }
+    }
+    quaternion[0] = -quaternion[0];
+    quaternion[1] = -quaternion[1];
+    SDF_VU0_LOADVECTOR_MEMOPS(*(const u128 *)quaternion);
+}
 
 void effPCP_BED_Draw(effPCP_BED_tag *hData)
 {
@@ -3165,7 +3205,7 @@ void effPCP_BED_Draw(effPCP_BED_tag *hData)
     }
     color = effColorBlend(hData->abgr & 0xFFFFFF, hData->abgr, blend);
     SDF_VU0_COPYVECTOR(place.payload, hData->pos);
-    effPCP_BED_MatrixToQuaternion(hData);
+    effPCP_BED_MatrixToQuaternion((f32 (*)[4])hData->matrix);
     SDF_VU0_STOREVECTOR(&place.payload[4]);
     place.payload[8] = 100.0f;
     place.payload[9] = 100.0f;
@@ -3243,7 +3283,7 @@ void effPCP_HBED2_SetRotateMatrix(effPCP_HBED2_tag *hData, const void *pMatrix)
 {
     void *model = effPCPHelperBEDGetModel(hData->pHelperBED);
 
-    effPCP_BED_MatrixToQuaternion(pMatrix);
+    effPCP_BED_MatrixToQuaternion((f32 (*)[4])pMatrix);
     mdlSetRotate(model);
 }
 
