@@ -51,7 +51,6 @@ page and line to open. Conventions are in
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |
 | 1 | sdf/sdfFileIO | [sdf/sdfFileIO.md](sdf/sdfFileIO.md) |
-| 1 | rstupdate | [result/rstupdate.md](result/rstupdate.md) |
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |

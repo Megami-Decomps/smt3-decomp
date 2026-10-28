@@ -200,31 +200,21 @@ void rstAddSkill(void)
     rstSetMaxHpMp(1, startPos->pCurrentStock);
 }
 
-/* NON_MATCHING: 1 of 24 words matches positionally, 23 of 24 with the register
- * names ignored; 96 bytes against retail's 100. */
-#ifdef NON_MATCHING
 s32 rstBuildDestroyList(void)
 {
     datUnitWork_t *unit = startPos->pCurrentStock;
     s32 i;
     s8 count = 0;
-    u16 skill;
-
     for (i = 0; i < unit->skillcnt; i++) {
-        skill = unit->skill[i];
-
-        if (skill != 0) {
-            count++;
+        if (unit->skill[i] != 0) {
+            u16 skill = unit->skill[i];
             unit->skill[i] = 0;
-            unit->skill[count - 1] = skill;
+            unit->skill[count++] = skill;
         }
     }
     unit->skillcnt = count;
     return count;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstupdate", rstBuildDestroyList);
-#endif
 
 typedef struct
 {
