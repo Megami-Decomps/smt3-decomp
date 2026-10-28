@@ -98,13 +98,24 @@ extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 extern s32 sprintf(char *out, const char *fmt, ...);
 
 typedef struct {
-    u8 reserved00[0x1C];
-    s32 paymentTotal;
-    u8 reserved20[4];
-    s8 quantity;
-    u8 reserved25[0x11C1];
-    s16 itemTop;
-    u8 itemOffset;
+    /* 0x0000 */ u8 flags;
+    /* 0x0001 */ s8 state;
+    /* 0x0002 */ u8 reserved0002[2];
+    /* 0x0004 */ s8 step;
+    /* 0x0005 */ u8 reserved0005[0x13];
+    /* 0x0018 */ s8 started;
+    /* 0x0019 */ u8 reserved0019[3];
+    /* 0x001C */ s32 paymentTotal;
+    /* 0x0020 */ u8 reserved0020[4];
+    /* 0x0024 */ s8 quantity;
+    /* 0x0025 */ u8 reserved0025[0x11C1];
+    /* 0x11E6 */ s16 itemTop;
+    /* 0x11E8 */ u8 itemOffset;
+    /* 0x11E9 */ u8 reserved11E9[0x11A3];
+    /* 0x238C */ s32 script;
+    /* 0x2390 */ s32 scriptProc;
+    /* 0x2394 */ u8 reserved2394[0x60];
+    /* 0x23F4 */ s32 unk_23F4;
 } shpPaymentWork_t;
 
 typedef struct {
@@ -166,7 +177,55 @@ s8 shpChkChoiceMax(s32 index, s8 kind, s8 preserveTotal)
     return maxQuantity;
 }
 
+extern s32 fclChkDbgProcess(void);
+extern void shopStartEvent(s32 mode);
+extern s32 dds3GetProcessStat(void *id);
+extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
+extern void fclClearFlag(s8 index);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+
+#ifdef NON_MATCHING
+/* NON_MATCHING: 37 of 64 words match at the exact 256-byte size. */
+s32 shop_Process(dds3ProcessID_t *id)
+{
+    shopProcWork = dds3GetProcessData(id);
+    if (fclChkDbgProcess() != 0) {
+        return 0;
+    }
+    if (shopProcWork->started == 0) {
+        shopStartEvent(1);
+        shopProcWork->started = 1;
+    }
+    if (fclGetFlag(1) == 0) {
+        return 0;
+    }
+    switch (shopProcWork->state) {
+    case 0:
+        shopProcWork->unk_23F4 = 0;
+        if (shopProcWork->step == 1) {
+            if (dds3GetProcessStat((void *)shopProcWork->scriptProc) != 2) {
+                shopProcWork->scriptProc =
+                    fclScriptStart(shopProcWork->script, 0, NULL);
+            }
+        }
+        break;
+    case 8:
+        if (shopProcWork->step == 1) {
+            fclClearFlag(2);
+        }
+        break;
+    }
+    shopProcWork->step = 0;
+    if ((shopProcWork->flags & 0x10) == 0) {
+        return 0;
+    }
+    cmpUpdateTerminate();
+    return -1;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclShopCalc", shop_Process);
+#endif
+
 
 void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 

@@ -1446,26 +1446,7 @@ s32 nbGetEscapeSwitch(nbMainProcessData_t *data)
     return nbEncountFormTable[data->encno].esc != 1;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D00);
-
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D10);
-
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D20);
-
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D28);
-
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D30);
-
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D58);
-
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D70);
-
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DA8);
-
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DE0);
-
 extern const char D_00544DF0[];
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DF0);
 extern void nbSetMainPhase(s32 encno);
 
 s32 nbCheckRenzokuEncount(nbMainProcessData_t *data)
@@ -1681,6 +1662,26 @@ s32 nbGetKakutokuMaka(nbMainProcessData_t *data)
     }
     return maka;
 }
+
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D00);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D10);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D20);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D28);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D30);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D58);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D70);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DA8);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DE0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DF0);
 
 INCLUDE_SDATA(const s32, "newbattle/nbCalc", D_00551140);
 

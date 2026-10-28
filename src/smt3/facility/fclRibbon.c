@@ -352,8 +352,5 @@ void DrawHexagonElem(sdfIVector3_t *std_pos, itfColor_t *color, u32 z, sdfDrawTa
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", DrawElem);
 
-
-
-
 INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053DA08);
 

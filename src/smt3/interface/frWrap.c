@@ -202,39 +202,39 @@ frFontRequest_t *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, const char
 }
 
 frFontRequest_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
-                                     const u8 *text, frFontRequest_t *previous)
+                                      const char *text, frFontRequest_t *previous)
 {
-    u8 converted[0x400];
-    s32 length = strlen((const char *)text);
-    s32 position = 0;
+    char buf[0x400];
     frFontRequest_t *request;
+    const u8 *src = (const u8 *)text;
+    s32 len = strlen(text);
+    s32 i = 0;
 
-    converted[length] = 0;
-    while (position < length) {
-        /* The character's byte and packed forms share one u16. Qualified cc1
-         * RTL uids 60/94 share pseudo 96; global allocation gives it $4
-         * (16 references, live length 14). Splitting the forms gives separate
-         * pseudos, removes the narrowing and emits 364 rather than 372 bytes. */
-        u16 code = text[position];
+    buf[len] = 0;
+    if (len > 0) {
+        do {
+            u32 c = src[i];
 
-        if (code < 0x80) {
-            converted[position] = code;
-        } else {
-            code = (code << 8) | text[position + 1];
-            if (code != 0xFFFF) {
-                converted[position] = (u8)(code >> 8);
-                converted[position + 1] = (u8)code;
+            if (c < 0x80) {
+                buf[i] = c;
             } else {
-                converted[position] = 0x80;
-                converted[position + 1] = 0x80;
-            }
-            position++;
-        }
-        position++;
-    }
+                u32 v = src[i + 1] | (c << 8);
 
+                c = (u16)v;
+                if (c != 0xFFFF) {
+                    buf[i] = c >> 8;
+                    buf[i + 1] = c;
+                } else {
+                    buf[i] = 0x80;
+                    buf[i + 1] = 0x80;
+                }
+                i++;
+            }
+            i++;
+        } while (i < len);
+    }
     frEnableMode(1);
-    request = frLinkFontString((char *)converted, 1, 0, 0, NULL);
+    request = frLinkFontString(buf, 1, 0, 0, 0);
     frEnableMode(2);
     frDisableMode(1);
     frSetDrawPosition(request, x, y);
@@ -243,6 +243,7 @@ frFontRequest_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
     frSetFontSpace(request, 3);
     return frCombineFontRequestEx(previous, request, 0);
 }
+
 
 frFontRequest_t *frwGetSmallFontNoPropFRQ(s32 x, s32 y, s32 depth, u32 colors,
                                        const char *text, frFontRequest_t *previous)

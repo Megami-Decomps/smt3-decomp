@@ -234,7 +234,97 @@ s32 pbWriteMCard(s32 port, s32 slot, char *fileName, s32 flags,
     return writeSync;
 }
 
+/* The error strings start at D_003278D4; each 0x84-byte row is preceded by its
+ * own attribute word, which is why the row before supplies it. */
+typedef struct { char text[0x80]; s32 attr; } pbErrorRow_t;
+
+extern pbErrorRow_t D_003278D4[];
+
+typedef struct
+{
+    s32 pcharNum;
+    u8 unk004[0x14];
+    s16 exitX, exitY;
+    u8 unk01C[0x320];
+    s32 charIndex;
+    void *baseTex;
+    sdfTexHandle_t *tex344;
+} pbMapWork_t;
+
+extern pbMapWork_t *D_0054F5C4;
+
+extern sdfGrOt_t sdfGrOtTable[];
+
+PS2_SYMBOL_AT(sdfGrOt_t, pbErrorOt39, sdfGrOtTable, 0x4E0);
+
+extern void rsetOtOfs(u32 ofs);
+extern void rsetAlpha(s32 alpha);
+extern void rsetTest(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h);
+extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                        u32 rgba, sdfTexHandle_t *th);
+extern s32 strlen(const char *str);
+extern sdfDrawTag_t *sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfPrimSetOpaquePacket(sdfDrawTag_t *packet);
+extern u32 dds3PrimFrameRect(s32 x, s32 y, s32 z, s32 w, s32 h, u32 bg, u32 frame);
+extern u32 sdfDevPrintf(s32 x, s32 y, u32 z, s32 attr, const char *format, ...);
+
+#ifdef NON_MATCHING
+/* NON_MATCHING: 27 of 135 words match; 536 bytes emitted against retail 540. */
+s32 pb_draw_error_Process(dds3ProcessID_t *id)
+{
+    pbProcHandle_t *panel = id->workdata;
+    pbErrorWork_t *error = panel->data.error;
+    sdfDrawTag_t *tag;
+    sdfDrawTag_t *packet;
+    s32 x;
+    s32 len;
+    s32 half;
+    s32 pitch = 0xC0;
+
+    switch (panel->state) {
+    case 1:
+        if (panel != NULL) {
+            panel->flags = 0;
+        }
+        break;
+    case 5:
+        return -1;
+    }
+    if ((u32)error->unk04 >= (u32)error->timer) {
+        return -1;
+    }
+    if (error->code == 9) {
+        rsetOtOfs(0x47);
+        rsetAlpha(0);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        DrwSprite2D(0, 0xC3, 0x200, 0x3A, 0, 0x1C4, 0x200, 0x3A, 0x80808080,
+                    D_0054F5C4->tex344);
+    } else {
+        len = strlen(D_003278D4[error->code].text);
+        half = (0x200 - len * 12) >> 1;
+        x = half << 4;
+        tag = sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(tag);
+        packet = sdfGrAllocPacketBuff(0x40);
+        sdfPrimSetOpaquePacket(packet);
+        sdfDrawTagLink(tag, (u32)packet);
+        sdfDrawTagLink(tag, dds3PrimFrameRect(x + 0x6FD0, 0x7FB8, 0xFFFF7F,
+                                              len * pitch + 0x60, 0x90,
+                                              0x20000000, 0x40008000));
+        sdfDrawTagLink(tag, sdfDevPrintf(x + 0x7000, 0x7FD0, 0xFFFF80,
+                                         D_003278D4[error->code - 1].attr,
+                                         D_003278D4[error->code].text));
+        pbErrorOt39.regFunc(&pbErrorOt39, tag);
+    }
+    error->unk04++;
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbMCard", pb_draw_error_Process);
+#endif
+
 
 void pb_draw_error_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;

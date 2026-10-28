@@ -722,10 +722,6 @@ extern u8 D_0032D1A8[];
 extern u8 D_0032D1B8[];
 extern u8 D_0032D1C8[];
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C890);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C8B8);
-
 void fclUpdateInit(void)
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(0x1A770);
@@ -798,6 +794,10 @@ void fclCombineDestroy(void)
     gProcessStat_0 = 2;
     evtDisableMoonDraw();
 }
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C890);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C8B8);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", fclCombineCalc);
 
@@ -3305,28 +3305,6 @@ void cmbInitModelOt(s32 unused, void *table)
     sdfModelOtInit(table, ot, &ot[1], &ot[21], &ot[22]);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD28);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD38);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD48);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD58);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD68);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD80);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDA8);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDC8);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDE8);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE10);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE38);
-
 extern void cmbGetModelMarkPos(f32 (*positions)[4], f32 *sizes, s32 *found);
 extern void cmbDrawModelPanel(f32 (*positions)[4], f32 *sizes, u32 color,
                               f32 scale, s32 *found, s32 ot);
@@ -3336,8 +3314,6 @@ extern f32 cmbActionTargetModel[3];
 extern f32 cmbTargetModelId;
 extern s8 cmbActionMode;
 extern char D_0053CE48[];
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE48);
 
 void cmbLoadTargetModel(s32 drawTarget, s32 drawModels, f32 scale)
 {
@@ -3425,6 +3401,30 @@ datUnitWork_t *cmbGetBirthDevilPanel(void)
     return panel;
 }
 
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD28);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD38);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD48);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD58);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD68);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD80);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDA8);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDC8);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDE8);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE10);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE38);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE48);
+
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateTimeTable);
 
 typedef struct effEVECombParSmokeParam_t {
@@ -3504,9 +3504,6 @@ extern void fclCombineBGM(s8 Mode);
 
 extern const char D_0053CEB0[];
 extern const char D_0053CEC8[];
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEB0);
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEC8);
 
 s32 cmbActionBGM(s32 mode)
 {
@@ -3900,6 +3897,10 @@ s32 shopStartEvent(s8 value)
     fclClearFlag(1);
     return evtStartEvent(0x322);
 }
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEB0);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEC8);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEE0);
 

@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1103 members, 506 adopted constants.
+# 0 types, 1118 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -399,15 +399,12 @@ member effSub_t.unk0
 member effSub_t.unk21
 member effSub_t.unk41
 member effTrackPolyParams_t.unk1C
-member evtStartWork_t.unk_0003
-member evtStartWork_t.unk_0004
 member evtStartWork_t.unk_1299
 member evtStartWork_t.unk_129D
-member evtStartWork_t.unk_12E0
 member evtStartWork_t.unk_170
 member evtStartWork_t.unk_18
 member evtStartWork_t.unk_19
-member evtStartWork_t.unk_22E4
+member evtStartWork_t.unk_1A
 member evtStartWork_t.unk_22E5
 member evtStartWork_t.unk_22E6
 member evtStartWork_t.unk_22E7
@@ -658,6 +655,9 @@ member nbDeadEvent_t.unk04
 member nbDevilData_t.unk02
 member nbDevilInfo_t.unk05
 member nbDevilInfo_t.unk0E
+member nbE911Light_t.unk_00
+member nbE911Prim_t.unk_00
+member nbE911Work_t.unk_00
 member nbEncountEntry_t.unk_04
 member nbEncountForm_t.unk00
 member nbEncountForm_t.unk05
@@ -748,6 +748,10 @@ member pipeBlurParam_t.unk18
 member pipeBlurParam_t.unk1C
 member pipeBlurParam_t.unk28
 member pipeBlurParam_t.unk2C
+member pipeLinkTable_t.unk_00
+member pipeLinkTable_t.unk_04
+member pipeLinkTable_t.unk_08
+member pipeLinkTable_t.unk_0C
 member ragDrawWork_t.unk_00
 member ragDrawWork_t.unk_0004
 member ragDrawWork_t.unk_0056
@@ -821,6 +825,14 @@ member rstDrawWork_t.unk_7D
 member rstMotionReq_t.unk_00
 member rstMotionReq_t.unk_01
 member rstMotionReq_t.unk_02
+member rstResourceWork_t.unk_0001
+member rstResourceWork_t.unk_0003
+member rstResourceWork_t.unk_0004
+member rstResourceWork_t.unk_001B
+member rstResourceWork_t.unk_0072
+member rstResourceWork_t.unk_22E4
+member rstResourceWork_t.unk_22E5
+member rstResourceWork_t.unk_2310
 member rstSkillSlot_t.unk_00
 member rstSkillSlot_t.unk_22
 member rstSkillSlot_t.unk_23
@@ -1061,7 +1073,10 @@ member sdfSndWorkArea_t.unk1D4
 member sdfSndWorkArea_t.unk90
 member sdfTextureOffsetListHeader_t.unknown00
 member shopProcWork_t.unk_00
+member shopProcWork_t.unk_1A
 member shpItemEntry_t.unk_00
+member shpItemTableEntry_t.unk_00
+member shpPaymentWork_t.unk_23F4
 member shpUpdateWork_t.unk_0000
 member shpUpdateWork_t.unk_0001
 member shpUpdateWork_t.unk_0002

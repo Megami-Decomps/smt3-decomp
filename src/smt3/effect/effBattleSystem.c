@@ -2361,9 +2361,6 @@ extern void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number)
 extern u32 dds3EffectPCPDataGetSize(dds3EffectPCPData_t *hPCPData, u32 number);
 
 extern const char D_00533990[], D_005339A0[];
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533990);
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005339A0);
-
 void effBTLSystemInit(void)
 {
     dds3EffectPCPData_t *archiveData;
@@ -2451,6 +2448,10 @@ void effBTLSystemInit(void)
     } while (i >= 0);
     sdfMemFreeDirect(archiveHandle);
 }
+
+INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533990);
+
+INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005339A0);
 
 void effBTLSystemEnd(void)
 {

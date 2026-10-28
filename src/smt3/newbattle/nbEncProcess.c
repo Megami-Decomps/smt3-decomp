@@ -836,8 +836,6 @@ INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbSetBadCurseTimer);
 
 INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbInitBadCurseState);
 
-INCLUDE_RODATA(const s32, "newbattle/nbEncProcess", D_00545D40);
-
 extern void nbInitBadCurseState(nbActionProcessData_t *a);
 
 /* NON_MATCHING: 13 of 93 words differ; see docs/nonmatching/newbattle/nbEncProcess.md. */
@@ -904,6 +902,8 @@ s32 nbApplyBadCurse(nbActionProcessData_t *a)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "newbattle/nbEncProcess", D_00545D40);
+
 INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbApplyBadCurse);
 #endif
 INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", readbasetime);

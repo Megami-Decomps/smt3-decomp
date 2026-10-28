@@ -271,6 +271,17 @@ Writing the five arms out separately also gives a table, but the duplicated
 bodies are not cross-jumped and the function is eight instructions long.
 `cmpUpdatePanelEffSlots` and `cmpFindPanelEffSlot` both need this.
 
+The node count also decides where a comparison tree is rooted, and three nodes
+is a special case: `balance_case_nodes` has a literal "if there are just three
+nodes, split at the middle one", so a three-case switch always tests the middle
+value first. Retail rooting such a tree at the *lowest* value, with the
+`index <= low` test to the default after it, means its switch had a fourth
+label. `Effect2` in `newbattle/nbE911` switches on 0x4B, 0x53 and 0x8C and
+needs a fourth empty case ahead of them to get retail's `beq 0x4B` root; with
+three it tests 0x53 first and the whole dispatch is 22 words out. The bisect
+for four or more nodes is by count, never by the cost table, since
+`estimate_case_costs` gives up as soon as one case value exceeds 127.
+
 Where a value computed from a parameter lands in the callee-saved register the
 parameter's own prologue copy occupies, and the copy is a separate `daddu`
 before the shift that overwrites it, the parameter is live across the call: the

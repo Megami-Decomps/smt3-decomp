@@ -65,7 +65,9 @@ extern s8 shpProcessStat;
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_00[0x2200];
+    /* 0x0000 */ u8 unk_00[0x19];
+    /* 0x0019 */ s8 itemType;
+    /* 0x001A */ u8 unk_1A[0x21E6];
     /* 0x2200 */ u16 price[0x22];
     /* 0x2244 */ u16 sellPrice[0x22];
 } shopProcWork_t;
@@ -439,7 +441,51 @@ void shpFindItemSlot(shpUpdateWork_t *work)
     fclSetWorkValue(4, work->hasMissingHeart);
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopInit", shpGetSellPrice);
+typedef struct
+{
+    /* 0x00 */ u16 unk_00;
+    /* 0x02 */ u16 skill;
+    /* 0x04 */ u32 price;
+} shpItemTableEntry_t;
+
+extern shpItemTableEntry_t datItemTable[];
+
+typedef struct
+{
+    /* 0x00 */ u16 base;
+    /* 0x02 */ struct
+    {
+        u16 id;
+        u16 price;
+    } items[32];
+} shpPriceRow_t;
+
+extern shpPriceRow_t D_0032F680[];
+
+s32 shpGetSellPrice(s32 index, s8 sell)
+{
+    u16 item = shpGetItemPrice(index, sell);
+    s32 ret;
+
+    if (sell == 0) {
+        s32 row = (u8)shpItemIsUnlocked(shopProcWork->itemType);
+        u16 fallback = D_0032F680[row].base;
+        u32 price = D_0032F680[row].items[index].price;
+        u32 base = datItemTable[item].price;
+        s32 div = 100;
+
+        if (price == 0) {
+            price = fallback;
+        }
+        ret = base * price / div;
+        if (evtBitCheck(0xAF2) == 0) {
+            ret *= 3;
+        }
+    } else {
+        ret = datItemTable[item].price >> 1;
+    }
+    return ret;
+}
 
 INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053CFD0);
 

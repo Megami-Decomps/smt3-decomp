@@ -49,14 +49,17 @@ page and line to open. Conventions are in
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
+| 1 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
 | 1 | sdf/sdfIpu | [sdf/sdfIpu.md](sdf/sdfIpu.md) |
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |
 | 1 | sdf/sdfFileIO | [sdf/sdfFileIO.md](sdf/sdfFileIO.md) |
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
 | 1 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
+| 1 | pipe/pipePosTable | [pipe/pipePosTable.md](pipe/pipePosTable.md) |
 | 1 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
 | 1 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 1 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
+| 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 | pb/pbGameDraw | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
 | 1 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 1 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
@@ -66,6 +69,7 @@ page and line to open. Conventions are in
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
 | 1 | newbattle/nbEncount | [newbattle/nbEncount.md](newbattle/nbEncount.md) |
 | 1 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
+| 1 | newbattle/nbE911 | [newbattle/nbE911.md](newbattle/nbE911.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
 | 1 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 1 | movie/MovieViewer | [movie/MovieViewer.md](movie/MovieViewer.md) |
@@ -75,6 +79,7 @@ page and line to open. Conventions are in
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
+| 1 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 1 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 1 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 1 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
@@ -85,3 +90,4 @@ page and line to open. Conventions are in
 | 1 | effect/effPCPBezier | [effect/effPCPBezier.md](effect/effPCPBezier.md) |
 | 1 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
+| 1 | code_001C55F8 | [code_001C55F8.md](code_001C55F8.md) |

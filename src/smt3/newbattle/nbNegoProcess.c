@@ -926,9 +926,6 @@ s32 nbGetInfoMsg(s32 infotype)
     return selected;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E48);
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E70);
-
 
 /* The caller passes 100; this provider checks its fixed three condition entries. */
 s32 nbCheckSelectMesJoukenAri(s32 index, s32 limit)
@@ -1031,14 +1028,6 @@ void nbNegoDebugPrint(nbNegoProcessData_t *n)
     }
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
-
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E98);
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EA8);
-
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EB8);
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544ED8);
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EF0);
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F00);
 
 extern char D_00544EB8[];
 extern char D_00544ED8[];
@@ -1202,6 +1191,22 @@ void nbNegoShutdown(dds3ProcessID_t *id)
     sdfChipFreeDirect(process);
     p2sdBgmVolUp();
 }
+
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E48);
+
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E70);
+
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E98);
+
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EA8);
+
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EB8);
+
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544ED8);
+
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EF0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F00);
 
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F10);
 

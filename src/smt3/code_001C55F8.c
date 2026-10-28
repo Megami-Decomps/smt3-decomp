@@ -93,9 +93,9 @@ extern sdfMemHandle_t *D_0054F3E0;
 
 extern sdfMemHandle_t *D_0054F3E4;
 
-extern void *nbCameraHelperViewerState;
+extern sdfVector4_t *nbCameraHelperViewerState;
 
-extern void *nbCameraHelperViewerHandle;
+extern sdfVector4_t *nbCameraHelperViewerHandle;
 
 extern u8 D_0054F370;
 
@@ -369,6 +369,52 @@ s32 nbCameraHelperViewer_Init(s32 pData)
     return pData;
 }
 
+extern u8 D_0054F3E8;
+extern u8 D_0054F3E9;
+extern const char D_005358E0[];
+extern s32 sprintf(char *buf, const char *fmt, ...);
+extern void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *text);
+extern void effDebugLineDraw2(sdfVector4_t *from, sdfVector4_t *to, u32 mode);
+extern void effDebugPointDraw2(sdfVector4_t *point, u32 color);
+extern s32 nbCameraCheckNiidaCamera(void);
+
+#ifdef NON_MATCHING
+/* NON_MATCHING: 48 of 83 words match; 332 bytes emitted against retail 336. */
+void nbCameraHelperViewer_Draw(void *pData)
+{
+    char buf[0x70];
+    u16 frame;
+    s32 last;
+    u16 i;
+    sdfVector4_t *eye;
+    sdfVector4_t *target;
+    if (D_0054F3DC == NULL) {
+        return;
+    }
+    if (D_0054F3E8 != 0) {
+        sprintf(buf, D_005358E0, D_0054F3DC->frame,
+                nbCameraHelperLength(D_0054F3DC));
+        effDebugStringDraw(0x12C, 0x3C, 0, buf);
+    }
+    frame = D_0054F3DC->frame;
+    eye = &D_0054F3DC->eye;
+    target = &D_0054F3DC->target;
+    SDF_VU0_COPYVECTOR(&nbCameraHelperViewerState[frame - 1], eye);
+    SDF_VU0_COPYVECTOR(&nbCameraHelperViewerHandle[frame - 1], target);
+    if (D_0054F3E9 != 0 && nbCameraCheckNiidaCamera() == 0) {
+        last = frame - 1;
+        for (i = 0; i < last; i++) {
+            effDebugLineDraw2(&nbCameraHelperViewerState[i],
+                              &nbCameraHelperViewerState[i + 1], 0x80804000);
+            effDebugLineDraw2(&nbCameraHelperViewerHandle[i],
+                              &nbCameraHelperViewerHandle[i + 1], 0x80004080);
+        }
+        effDebugPointDraw2(&D_0054F3DC->eye, 0x80800000);
+        effDebugPointDraw2(&D_0054F3DC->target, 0x80000080);
+    }
+    nbCameraHelperRun(D_0054F3DC);
+}
+#else
 INCLUDE_RODATA(const s32, "code_001C55F8", D_00535850);
 
 INCLUDE_RODATA(const s32, "code_001C55F8", D_00535878);
@@ -382,6 +428,8 @@ INCLUDE_RODATA(const s32, "code_001C55F8", D_005358C0);
 INCLUDE_RODATA(const s32, "code_001C55F8", D_005358D0);
 
 INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperViewer_Draw);
+#endif
+
 
 void nbCameraHelperViewer_End(void) {
 }
