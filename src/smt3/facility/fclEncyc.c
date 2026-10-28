@@ -2037,7 +2037,28 @@ void DebugRemoveRecord(s32 id)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DebugUpdateListwin);
+extern void cmpChangeCursorListNums(s32 count, void *cursor);
+
+void DebugUpdateListwin(fclEncyc_instance_tag *pinst)
+{
+    s32 count = encycSaveWork->encycNum;
+    fclEncycReadTopWork_t *work = (fclEncycReadTopWork_t *)pinst->pwork;
+
+    s32 *stepY;
+    cmpCursorPos_t *pos;
+    cmpCursorSize_t *size;
+
+    if (count <= 0) count = 1;
+    stepY = &work->list.StepY;
+    pos = &work->list.cursorPos;
+    size = &work->list.cursorSize;
+    cmpChangeCursorListNums((u8)count, stepY);
+    pos->ShiftMax = count < 9 ? count : 8;
+    size->Y = pos->Shift * *stepY + size->DefY;
+    CreateFontListRead(work, (s8)pinst->unk_6C, (s8)pinst->unk_6C != 0
+                      ? pinst->entries.read.sorted[1] : pinst->entries.read.sorted[0]);
+    drawEncycRatio(&work->requests[2], 1);
+}
 INCLUDE_SDATA(const s32, "facility/fclEncyc", g_pinst);
 
 INCLUDE_SDATA(const s32, "facility/fclEncyc", g_pdebug);
