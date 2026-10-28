@@ -1410,7 +1410,7 @@ void rstClearSkillSlot(cmbUnit_t *unit, u8 slot)
 
 s8 rstAddSkillToSlot(u16 skill, datUnitWork_t *unit);
 
-void cmbReplaceSkill(u16 skill, cmbUnit_t *unit)
+s8 cmbReplaceSkill(u16 skill, cmbUnit_t *unit)
 {
     s32 slot;
     u16 selected;
@@ -1422,10 +1422,7 @@ void cmbReplaceSkill(u16 skill, cmbUnit_t *unit)
     }
     selected = unit->unit.keisyoskill[slot];
     rstClearSkillSlot(unit, slot);
-    rstAddSkillToSlot(selected, &unit->unit);
-    /* Qualified cc1probe: reset uid120 survives sibling-call selection and
-     * is deleted in life analysis, preserving retail's jal and epilogue. */
-    slot = 0;
+    return rstAddSkillToSlot(selected, &unit->unit);
 }
 
 s8 cmbChkSkillOwner(u16 skill, datUnitWork_t *unit);
