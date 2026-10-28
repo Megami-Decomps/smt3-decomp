@@ -166,3 +166,22 @@ out of the declarations, a `u8 *` walk reading `p[6]`/`p[7]` instead of a
 typed `entry[1]`, and nested `if`s instead of the `&&`. All nine compile to
 the same three-word swap. This is the same register exchange recorded above
 for `cmpFindKugatatiMsgEntry`, which walks the same table.
+
+## datAddHeartsEntry (result/rstcalc, 0xC0)
+
+43 of 48 words match at the native 192-byte size. Production remains
+assembly-backed.
+
+Eight four-byte records start at row offset 0x1A in the 66-byte race rows.
+Each record has a condition byte and a skill halfword at +2. A zero
+condition grants a nonzero skill immediately. The typed draft preserves the
+unsigned-byte ID normalization, zero-ID return, count postincrement before
+`datAddHeartsSlot`, signed-byte callback ID, and signed low-byte count return.
+
+The postincrement expression `work->skill[work->skillcnt++] = skill` preserves
+the native copy of the old count before incrementing it; separate count/local
+statements removed that instruction and emitted four fewer bytes. The five
+remaining words swap the saved-register roles of the signed ID and the skill
+array base and move their setup. An explicit signed-ID local adds eight bytes;
+an explicit skill pointer or the existing interior table symbol does not
+resolve the register roles. No artificial copies are retained.

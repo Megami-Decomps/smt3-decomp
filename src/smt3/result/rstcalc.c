@@ -1252,7 +1252,35 @@ void datAddHeartsSlot(s8 id, u16 value)
     (*(u8 *)(id + (s32)gbwk + 0x1D3B))++;
 }
 
+/* NON_MATCHING: 5 of 48 words differ; see docs/nonmatching/result/rstcalc.md. */
+#ifdef NON_MATCHING
+typedef struct datHeartsEntry_t {
+    u8 condition;
+    u16 skill;
+} datHeartsEntry_t;
+
+s32 datAddHeartsEntry(u8 id, datUnitWork_t *work)
+{
+    datHeartsEntry_t *entry;
+    s32 i;
+
+    if (id == 0) {
+        return 0;
+    }
+    entry = (datHeartsEntry_t *)&D_00339E00[id].unk_1A[0];
+    for (i = 7; i >= 0; i--) {
+        u16 skill = entry->skill;
+        if (skill != 0 && entry->condition == 0) {
+            work->skill[work->skillcnt++] = skill;
+            datAddHeartsSlot((s8)id, skill);
+        }
+        entry++;
+    }
+    return (s8)work->skillcnt;
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", datAddHeartsEntry);
+#endif
 
 INCLUDE_ASM(const s32, "result/rstcalc", func_00222610);
 
