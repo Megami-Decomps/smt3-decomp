@@ -263,4 +263,4 @@ src/smt3/effect/effMagatuhi.c	redthing1	done	2026-10-28	0 matches	retained origi
 src/smt3/event/evtUnitManager.c	redthing1	done	2026-10-28	1 fn / 148 B	evtSetUnitLightAndAmbient; float scale union and parameter store order
 src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	1 fn / 148 B	shuffleIndices; unsigned random indices and guarded countdown loop
 src/smt3/newbattle/nbMaeProcess.c	redthing1	done	2026-10-28	3 fn / 140 B	02Loop, 02Step, and Process0 transition callbacks
-src/smt3/sdf/sdfFileIO.c	redthing1	done	2026-10-28	1 fallback	matched request unlink, dequeue and release; whole unit exact
+src/smt3/sdf/sdfFileIO.c	redthing1	done	2026-10-28	1 fallback	last AnalyzeFileName fallback after exact request unlink/dequeue/free reconstruction
