@@ -71,45 +71,6 @@ block written y, x, z, which is the draft); `node = control->camera;` as its
 own statement before each of the three uses; and a separate `dds3Basic_t *`
 local for the camera.
 
-## resetCamTgtPlayer (field/fldDraw, 0x1F8)
-
-90 of 126 words match, at the exact 504-byte size, and every instruction in the
-function is the one retail emits. Two things differ and nothing else.
-
-The first is a three-way rotation of the fp registers the eye block uses for
-`fldGlobalBase.y`, `D_002FC9C0[1]` and `D_002FC9C0[2]`: retail numbers them
-`$f3`, `$f4`, `$f5` and the draft gives `$f4`, `$f5`, `$f3`. The second is
-where the scheduler puts `lw $4, 0x78($19)`, the `control->camera` argument of
-each of the three calls: retail fills the `div.s` hazard slot with it and
-leaves the `swc1` to `camAngle` for the `jal` delay slot, while the draft puts
-the `lw` in the delay slot and the `sub.s` for `eye.f[2]` in the hazard slot.
-The whole tail from the second `dds3SetPosPoseSet` to the epilogue, the
-`sqrt.s`, the `GetSphericalPosMove` argument setup and the `fldCamPitch`
-store, is byte-identical.
-
-`-fno-gcse` and `-fno-expensive-optimizations` leave the difference exactly
-where it is; `-fno-schedule-insns` and `-fno-schedule-insns2` make it much
-worse. So this is register allocation plus the list scheduler's tie-break, not
-anything the source states.
-
-Confirmed on the way: `D_0054C2E8` is a `.lit4` entry holding `3.14f`;
-`fldCamParamTable[fldGlobalBase.cameraParamIndex][1]` is the height offset
-added to `fldGlobalBase.y`; the eye and target vectors are both written as the
-degenerate lerp `a + (b - a)` with no factor, which is what retail's bare
-`sub.s`/`add.s` pair per component is; and the two angle fields written here
-are `fldGlobalBase.camAngle` at `0x124` and `camAngle2` at `0x128`, both taking
-`EulerAngleAxisY() * 180.0f / 3.14f`.
-
-Ruled out: six orderings of the three eye components; the `camAngle` stores
-before, after and in either order relative to the eye block; seven spellings
-of the angle expression (inline, three statements, a named `180.0f` local
-assigned before the leading calls, a named `3.14f` local, and the
-`180.0f / 3.14f` constant folded together, which costs the whole function); a
-`f32 *` local for `D_002FC9C0`; a `* 1.0f` factor on each lerp; a local for
-the parameter-table height and for `y + height`; `node = control->camera;` as
-its own statement before each of the four uses; and `dx`/`dy`/`dz` locals for
-the three deltas, which costs another 19 words.
-
 ## fldPlayerCalcHasigo (field/fldDraw, 0xE8)
 
 14 of 58 words differ, at the exact 232-byte size, and every instruction through the
