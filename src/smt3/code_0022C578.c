@@ -4965,7 +4965,16 @@ void cmpGetModelPosRot(u16 id, f32 *out)
     out[2] = cmpModelParamTable[id].pos[2];
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpModelInitCore2);
+extern void func_0023FCC0(void);
+
+void cmpModelInitCore2(void)
+{
+    dds3ScreenParam[4] = 2188.0f;
+    dds3ScreenParam[5] = 2048.0f;
+    func_0023FCC0();
+}
+
+INCLUDE_ASM(const s32, "code_0022C578", func_0023FCC0);
 
 void cmpModelInit(void)
 {
