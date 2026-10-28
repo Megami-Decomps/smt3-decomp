@@ -443,7 +443,9 @@ typedef struct
     /* 0x165E8 */ f32 actionZoom;
     /* 0x165EC */ s8 introductionFlag;
     /* 0x165ED */ u8 stockCursorCount;
-    /* 0x165EE */ u8 unk_165EE[0x1052];
+    /* 0x165EE */ u8 unk_165EE[0x12];
+    /* 0x16600 */ cmpCursorInfo_t resultCursor;
+    /* 0x16638 */ u8 reserved16638[0x1008];
     /* 0x17640 */ cmpCursorInfo_t menuCursor;
     /* 0x17678 */ u8 reserved17678[0x1004];
     /* 0x1867C */ cmbListWork_t eligibleList;
@@ -2905,7 +2907,81 @@ void cmbStartEncycView(s32 mode)
     fclEncycSetExplainData(CMB_GBWK->explainData);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateResultCursor);
+extern s32 fclEncycWork(void);
+extern s32 fclEncycCheckRegistable(void);
+extern s32 fclEncycGetNum(void);
+extern void cmbStartEncycView(s32 mode);
+
+void cmbUpdateResultCursor(void)
+{
+    s32 nextPhase;
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+    if (fclEncycWork() != 0) return;
+    if (fclGetFlag(0) == 0) return;
+    /* Qualified cc1probe --alloc --no-dumps assigns this live phase
+     * value (pseudo 84) to $17; see docs/cc1probe.md. */
+    nextPhase = 2;
+    switch (button) {
+    case 1: {
+        s32 selected = CMB_GBWK->resultCursor.unk_22 + (u8)CMB_GBWK->resultCursor.unk_24;
+        s32 mode;
+        s32 scriptIndex;
+        s32 scriptResult;
+        cmbGbWork_t *work;
+        cmbGbWork_t *errorWork;
+        switch (selected) {
+        case 0:
+            if (fclEncycCheckRegistable() != 0) {
+                mode = 0;
+                goto openEncyc;
+            }
+            errorWork = CMB_GBWK;
+            scriptIndex = 0x14;
+            goto scriptError;
+        case 1:
+            if (fclEncycGetNum() == 0) goto error21;
+            mode = 1;
+            break;
+        default:
+            CMB_GBWK->unk_00001 = 0;
+            goto remember;
+        }
+openEncyc:
+        cmbStartEncycView(mode);
+        fclScriptForcedEnd(CMB_GBWK->scriptArg);
+remember:
+        CMB_GBWK->unk_00004 = button;
+        break;
+error21:
+        errorWork = CMB_GBWK;
+        scriptIndex = 0x15;
+scriptError:
+        errorWork->unk_00005 = button;
+        scriptResult = fclScriptStart(CMB_GBWK->script, scriptIndex, &CMB_GBWK->scriptArg);
+        work = CMB_GBWK;
+        work->unk_00001 = 0x10;
+        work->unk_00008 = scriptResult;
+        CMB_GBWK->unk_00003 = 0x10;
+        CMB_GBWK->unk_00004 = -1;
+        CMB_GBWK->unk_00002 = nextPhase;
+        break;
+    }
+    case 2:
+        CMB_GBWK->unk_00001 = 0;
+        CMB_GBWK->unk_00004 = 1;
+        break;
+    case 0x10:
+        cmpMoveCursor(&CMB_GBWK->resultCursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&CMB_GBWK->resultCursor, 1);
+        break;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&CMB_GBWK->resultCursor, 0);
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop((cmpPadStopWork_t *)&CMB_GBWK->resultCursor, button, 0x30));
+}
 
 extern s8 FclDebug(s8 mode, void *work);
 
