@@ -198,7 +198,36 @@ INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcDegree);
 
 INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcStage);
 
-INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcFree);
+extern s8 dds3PadButtonState[];
+extern void pbLoadSystemData(s32 num);
+extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
+extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, void *drawTag);
+
+s32 DebugProcFree(pbDebugWork_t *work, sdfDrawTag_t *tag)
+{
+    if (dds3PadButtonState[0x36] & 2) {
+        work->systemFileNum--;
+        if (work->systemFileNum < 0) {
+            work->systemFileNum = 49;
+        }
+    }
+    if (dds3PadButtonState[0x37] & 2) {
+        work->systemFileNum++;
+        if (work->systemFileNum >= 50) {
+            work->systemFileNum = 0;
+        }
+    }
+    if (dds3PadButtonState[0x33] < 0) {
+        work->phase = 0;
+    } else if (dds3PadButtonState[0x31] < 0) {
+        pbLoadSystemData(work->systemFileNum);
+    }
+    dds3ConsPanelTagLink(tag, 16, 16, 24, 3);
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x7A00, 0xFFFFF0, 0,
+                                     "DATA SELECT : %2d", work->systemFileNum));
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "pb/pbDebugMode", D_00536690);
 
