@@ -262,7 +262,44 @@ void nmeDestroyName(dds3ProcessID_t *processId) {
     }
 }
 
+#ifdef NON_MATCHING
+/* 69 of 71 words match; white RGB store order differs. See docs/nonmatching/nme/Nme_Init.md. */
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority,
+                                      s32 startTimer, s32 shutdownTimer,
+                                      dds3ProcessFunc_t process,
+                                      dds3ProcessFunc_t shutdown,
+                                      void *workdata);
+extern s32 nmeCalc(dds3ProcessID_t *processId);
+extern s32 nmeDraw(dds3ProcessID_t *processId);
+extern s32 nmeUpdate(dds3ProcessID_t *processId);
+extern void dds3FadeIn(s32 red, s32 green, s32 blue, s32 frames);
+
+void nmeStartProcesses(s8 target, s8 mode, s32 unused)
+{
+    if (nmeProcessId != NULL) {
+        return;
+    }
+    nmeProcessId = nmeLoadFont(target, mode, 0);
+    dds3StartProcess(D_00551690, 0x406, 1, 1, nmeCalc, NULL, nmeProcessId);
+    dds3StartProcess(D_005487C8, 0x2B16, 1, 1, nmeDraw, NULL, nmeProcessId);
+    dds3StartProcess(D_005487D8, 0x5212, 1, 1, nmeUpdate,
+                     (dds3ProcessFunc_t)nmeDestroyName,
+                     nmeProcessId);
+    gProcessStat = 1;
+    dds3KernelDebugSignOrg = dds3KernelDebugSign;
+    dds3KernelDebugSign = 0;
+    if (evtBitCheck(0x12) == 0) {
+        D_00552020[0] = D_00552020[1] = D_00552020[2] = -1;
+    } else {
+        D_00552020[0] = 0;
+        D_00552020[1] = 0;
+        D_00552020[2] = 0;
+    }
+    dds3FadeIn(D_00552020[0], D_00552020[1], D_00552020[2], 0x1E);
+}
+#else
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeStartProcesses);
+#endif
 
 void nmeNameProcessEnd(void) {
     dds3KillProcessName(D_00551690, 1);
