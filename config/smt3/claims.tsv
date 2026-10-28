@@ -311,3 +311,4 @@ src/smt3/newbattle/nbAtoProcess.c	redthing1	open	2026-10-28	2 fn / 300 B	stone a
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 336 B	cmpDrawSetup3DView; double-buffered camera and light packets
 src/smt3/newbattle/nbEventProcess.c	redthing1	open	2026-10-28	1 fn / 300 B	nbEventProcess3 recovery loop and event dispatch; whole-unit 21 match, 0 differ
 src/smt3/pipe/pipeResult.c	redthing1	open	2026-10-28	1 fn / 136 B	message completion and damage dispatch; whole-unit 7 match, 0 differ; section and initialization follow-up
+src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	2 fn / 160 B	paired battle light snapshots; complete unit 276 match, 0 differ

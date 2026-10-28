@@ -5,6 +5,7 @@
 #include "nb.h"
 #include "effBattle.h"
 #include "ps2asm.h"
+#include "draw3d.h"
 
 typedef struct
 {
@@ -2519,9 +2520,37 @@ INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174DC0);
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_174E88);
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00175030);
+typedef struct {
+    sdf3DLight_t *parallel[4];
+    sdfVector4_t ambient;
+    sdf3DFogParam_t fog;
+} dds3LightState_t;
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_175070);
+extern dds3LightState_t dds3LightParam;
+PS2_SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
+extern sdfVector4_t D_0056AC40;
+extern sdfVector4_t D_0056AC50;
+extern u8 D_0054F18A;
+extern u8 D_0054F18B;
+extern void dds3UnlinkSceneLight(dds3Basic_t *light);
+
+s32 func_00175030(void)
+{
+    SDF_VU0_COPYVECTOR(&D_0056AC40, dds3LightParam.parallel[0]);
+    SDF_VU0_COPYVECTOR(&D_0056AC50, &dds3AmbientColor);
+    D_0054F18B = 1;
+    return 0;
+}
+
+void eff_175070(void)
+{
+    if (D_0054F18A == 0) {
+        dds3UnlinkSceneLight(nbGetMainProcessData()->light[1]);
+        SDF_VU0_COPYVECTOR(dds3LightParam.parallel[0], &D_0056AC40);
+        SDF_VU0_COPYVECTOR(&dds3AmbientColor, &D_0056AC50);
+        D_0054F18B = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", func_001750D0);
 
