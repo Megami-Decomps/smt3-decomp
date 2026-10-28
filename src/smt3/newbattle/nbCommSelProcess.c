@@ -744,7 +744,76 @@ void nbCloseCommSel(void)
     s->animeflag = (s->animeflag | 2) & ~1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", nbCommSelProcess1);
+void *nbCommSelProcess1(dds3ProcessID_t *id)
+{
+    nbCommSelProcessData_t *s;
+    nbActionProcessData_t *act;
+    u32 actstat;
+    u32 animeFlags;
+    s32 resetStat3 = 0;
+    s32 animation;
+    s32 ox;
+    s32 oy;
+    s32 alpha;
+
+    s = dds3GetProcessData(id);
+    AnimeCommandList(s);
+
+    switch (s->stat) {
+    case 1:
+        s->stat = 2;
+        break;
+    case 2:
+        if ((s->act->stat & 0x80) != 0) {
+            SelectCommandListAuto(s);
+        } else {
+            SelectCommandList(s);
+        }
+        if (s->stat == 3 && (s->act->stat & 0x80) == 0) {
+            resetStat3 = 1;
+            s->stat = 2;
+        }
+        break;
+    case 3:
+        break;
+    case 4:
+        if ((s->animeflag & 2) == 0) {
+            return (void *)-1;
+        }
+        break;
+    }
+
+    act = s->act;
+    animeFlags = s->animeflag;
+    animation = animeFlags & 0x10;
+    if (animation == 0) {
+        s->drawtype = s->nowtype;
+        s->drawcursor = s->nowcursor[s->drawtype];
+        s->drawlisty = s->nowlisty[s->drawtype];
+    }
+
+    actstat = act->stat;
+    if ((actstat & 0x80) != 0 && animation == 0) {
+        return NULL;
+    }
+    ox = s->ox;
+    oy = s->oy;
+    alpha = s->alpha;
+    s->animeflag = animeFlags & ~0x20;
+    if ((animeFlags & 2) == 0 && s->stat == 2 && s->drawtype != 3) {
+        s->animeflag |= 0x20;
+    }
+    DispCommandPanel(s, s->drawtype, ox, oy, alpha);
+    nbPnl_setOt(0x47);
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    DispCommandList2(s, s->drawtype, ox, oy, alpha);
+
+    if (resetStat3 != 0) {
+        s->stat = 3;
+    }
+    return NULL;
+}
 
 void nbCommSelShutdown(dds3ProcessID_t *id)
 {
