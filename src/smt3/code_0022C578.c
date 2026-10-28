@@ -3430,7 +3430,28 @@ void campDrawInfoPanel(void)
     campWork->drawPhase = 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", campDrawSeq3);
+void campDrawSeq3(s8 phase)
+{
+    if (phase != 0) {
+        if (phase != 2) {
+            if (phase != 3) {
+                return;
+            }
+        }
+    }
+
+    switch (phase) {
+    case 0:
+        campDrawText(3, 0);
+        /* fall through */
+    case 3:
+        campWork->drawPhase = 0;
+        break;
+    case 2:
+        campWork->drawPhase = 2;
+        break;
+    }
+}
 
 extern char *text1[];
 
