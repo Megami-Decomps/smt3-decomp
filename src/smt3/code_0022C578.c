@@ -1876,7 +1876,33 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpCalcSequence);
 
 INCLUDE_ASM(const s32, "code_0022C578", nmeMakeGradColors);
 
-INCLUDE_ASM(const s32, "code_0022C578", nmeDrawQuadPanel);
+extern const s32 D_0053F6E8[];
+extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+
+void nmeDrawQuadPanel(s32 color0, s32 color1, s32 alpha, s32 ot)
+{
+    u32 coords[12];
+    u32 colors[6];
+    s32 xOffset = alpha << 4;
+    s32 yOffset = alpha << 3;
+
+    memcpy(coords, D_0053F6E8, sizeof(coords));
+    colors[0] = color0;
+    colors[1] = 0;
+    colors[2] = 0;
+    colors[3] = color1;
+    colors[4] = 0;
+    colors[5] = 0;
+
+    fclDrawPanelSprite2(0x48, ot);
+    coords[1] += xOffset;
+    coords[5] += yOffset;
+    cmpDrawTriG(coords, coords + 3, 0, colors, ot);
+    coords[7] -= xOffset;
+    coords[11] -= yOffset;
+    cmpDrawTriG(coords + 6, coords + 9, 0, colors + 3, ot);
+    fclDrawPanelSprite2(0x44, ot);
+}
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053F590);
 
