@@ -140,6 +140,7 @@ DrawMesFlow	interface/itfMesManager	0x18C	Thirty-seven of ninety-nine words matc
 DrawSelectCursor	interface/itfMesManager	0x2FC		docs/nonmatching/interface/itfMesManager.md	44
 DrawMsgMng_Process	interface/itfMesManager	0x70	Twenty-four of twenty-eight words match	docs/nonmatching/interface/itfMesManager.md	79
 itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/nonmatching/interface/itfMesManager.md	97
+lstDrawListWindow	interface/lstListWindow	0x84	26 of 33 words match	docs/nonmatching/interface/lstListWindow.md	5
 fclEncycFindFreeSlot	kernel/dds3AdminiProcess	0x1C4	111 of 113 words match	docs/nonmatching/kernel/dds3AdminiProcess.md	5
 fclEncycFreeEntries	kernel/dds3AdminiProcess	0x1E8	120 of 122 words match	docs/nonmatching/kernel/dds3AdminiProcess.md	31
 fcl_103420, fclEncycAllocEntry and fcl_103560	kernel/dds3AdminiProcess	0x94, 0xA8, 0xAC	32 of 43 words match	docs/nonmatching/kernel/dds3AdminiProcess.md	54
