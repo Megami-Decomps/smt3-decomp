@@ -153,6 +153,10 @@ typedef struct nbMainProcessData_t
     s32 unk_134;
     nbPacHandle_t *modelpack;
     void *modelpackbuf;
+    u32 unk140;
+    u32 d31_rebehansya;
+    u32 d31_andahansya;
+    u32 d31_kantuu; /* Native affinity override flag at 0x14C. */
 } nbMainProcessData_t;
 
 typedef struct
@@ -312,6 +316,8 @@ typedef struct
 
 extern s32 printf(const char *format, ...);
 
+extern nbMainProcessData_t *nbGetMainProcessData(void);
+
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
 extern u32 nbGetBadStat(s32 formindex);
@@ -339,6 +345,8 @@ extern nbParty_t *nbGetPartyFromFormindex(s32 formindex);
 extern s32 nbGetButuriAttack(s32 nskill, s32 sformindex, s32 dformindex, s32 waza);
 
 extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
+
+extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
 
 extern s32 evtGetAgeOfMoon(void);
 
@@ -498,7 +506,79 @@ void nbAddHpMp(s32 formindex, s32 type, s32 n)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetAisyoRitu);
+f32 nbGetAisyoRitu(s32 nskill, s32 sformindex, s32 dformindex)
+{
+    nbMainProcessData_t *mainData;
+    datUnitWork_t *source;
+    datUnitWork_t *target;
+    s32 skillattr;
+    s32 ratio;
+    u32 aisyo;
+    f32 ritu;
+
+    mainData = nbGetMainProcessData();
+    source = nbGetUnitWorkFromFormindex(sformindex);
+    target = nbGetUnitWorkFromFormindex(dformindex);
+    skillattr = nbGetNormalSkillAttr(nskill);
+    ritu = 1.0f;
+
+    switch (skillattr) {
+    case -1:
+    case 12:
+    case 13:
+    case 14:
+        break;
+    default:
+        aisyo = nbGetAisyo(nskill, dformindex, skillattr);
+        ratio = aisyo & 0xFFFF;
+        if ((aisyo & 0x60000) != 0) {
+            if (ratio == 0) {
+                ratio = 100;
+            }
+        }
+        if ((target->badstatus & 0xFFF) == 2 &&
+            datSkillTable.normal[nskill].koukatype == 0 && ratio < 100) {
+            ratio = 100;
+        }
+        if (datCheckSyojiSkill(source, 0x165) != 0 &&
+            datSkillTable.normal[nskill].koukatype == 0 && ratio < 100) {
+            ratio = 100;
+            mainData->d31_kantuu = 1;
+        }
+        ritu = (f32)ratio * 0.01f;
+        break;
+    }
+
+    if (datCheckSyojiSkill(source, 0x169) != 0) {
+        ritu *= 1.5f;
+    } else {
+        switch (skillattr) {
+        case 1:
+            if (nbHatudoCheckSkill(source, 0x135) != 0) {
+                ritu *= 1.5f;
+            }
+            break;
+        case 2:
+            if (nbHatudoCheckSkill(source, 0x136) != 0) {
+                ritu *= 1.5f;
+            }
+            break;
+        case 3:
+            if (nbHatudoCheckSkill(source, 0x137) != 0) {
+                ritu *= 1.5f;
+            }
+            break;
+        case 4:
+            if (nbHatudoCheckSkill(source, 0x138) != 0) {
+                ritu *= 1.5f;
+            }
+            break;
+        default:
+            return ritu;
+        }
+    }
+    return ritu;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaHp);
 
