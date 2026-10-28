@@ -5,6 +5,13 @@ typedef struct {
     void *textures[4];
 } nmeTextureWork_t;
 
+typedef struct {
+    u8 unk00[0x1A];
+    s8 inputMode;
+    u8 unk1B[0x5150 - 0x1B];
+    s8 inputPos;
+} nmeInputModeWork_t;
+
 extern void sdfTexFree(void *aHandle);
 
 extern void dds3KillProcessName(const char *name, s32 shutdowntimer);
@@ -29,13 +36,25 @@ INCLUDE_ASM(const s32, "nme/Nme_Init", frAllocNameData);
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeStartFadeOut);
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeGetInputMode);
+s32 nmeGetInputMode(nmeInputModeWork_t *work) {
+    s32 inputPos;
 
-u32 nmeGetMaxNameLen(void) {
+    if (work->inputMode < 2) {
+        if (work->inputMode >= 0) {
+            inputPos = work->inputPos;
+            return inputPos / 8 != 0;
+        }
+    }
+    return 2;
+}
+
+s32 nmeGetMaxNameLen(s32 mode) {
     return 8;
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeGetModeFlag);
+s8 nmeGetModeFlag(nmeInputModeWork_t *work) {
+    return nmeGetMaxNameLen(nmeGetInputMode(work));
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameRow);
 
