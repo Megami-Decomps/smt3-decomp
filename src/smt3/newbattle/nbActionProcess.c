@@ -659,7 +659,7 @@ void SetTarget_nbActionProcess(nbActionProcessData_t *a)
     carea = 0;
     switch (work->nowcommand) {
     case 6:
-        *(s32 *)a->data->TarSelType = 1;
+        a->data->TarSelType = 1;
         break;
     case 0:
     case 1:
@@ -671,9 +671,9 @@ void SetTarget_nbActionProcess(nbActionProcessData_t *a)
     case 8:
     default:
         if (a->work->nowcommand == 1 && a->work->nowindex == 0xDF) {
-            *(s32 *)a->data->TarSelType = 1;
+            a->data->TarSelType = 1;
         } else {
-            *(s32 *)a->data->TarSelType = 0;
+            a->data->TarSelType = 0;
         }
         break;
     }

@@ -61,13 +61,47 @@ extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
 extern s32 effBTLDebug_CameraAllTableCheck(void);
 
-extern u8 nbCameraCRSetPlayerFormRequestFlag;
+extern s8 nbCameraCRSetPlayerFormRequestFlag;
 
 extern void effBTLModelAllPopPosition(void);
 
 extern void effBTLModelAllPopRotate(void);
 
 extern void effBTLModelAllShow(void);
+
+extern s32 effBTLModelGetGroupNumber(u32 group);
+
+extern nbMainProcessData_t *nbGetMainProcessData(void);
+
+extern s32 nbGetActionSeq(dds3ProcessID_t *id);
+
+extern void dds3CrossfadeStart(s32 frames);
+
+extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
+
+extern void nbCameraState_InvokeTargetSelect_SearchSet(void);
+
+extern nbFormation_t *effBTLSkillGetTargetFormation(s32 number);
+
+extern u32 effBTLSkillGetInvokeParty(void);
+
+extern u32 effBTLSkillGetTargetParty(void);
+
+extern u32 effBTLSkillGetTargetNumber(void);
+
+extern void nbCameraShot_AllParty_Set(nbCamera_t *pNbCamera);
+
+extern void nbCameraShot_Summon_Set(nbCamera_t *pNbCamera);
+
+extern void nbCameraCommand_GroundCollision(nbCamera_t *pNbCamera);
+
+extern void nbCameraState_Command_KORONZCheck(void);
+
+extern nbCamera_t pNbCamera;
+
+extern s32 nbCameraState_CommandRoot_OrderIndex;
+
+void nbCameraState_CommandRoot_Init(void);
 
 /* 12-byte rows; nbCameraGetModelAllTable indexes them by unit work slot. */
 typedef struct nbCamera_AllTable_t {
@@ -157,7 +191,18 @@ void nbCameraCommandSetFixPosition(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_CommandFixPos_Set2);
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_CommandFixPos_Set);
+void nbCameraShot_CommandFixPos_Set(nbCamera_t *pNbCamera)
+{
+    s32 playerGroupCount = effBTLModelGetGroupNumber(0x100);
+    s32 enemyGroupCount = effBTLModelGetGroupNumber(0x200);
+
+    /* Retail tests these counts and uses two distinct epilogues to tail-call Set2. */
+    if (playerGroupCount == 1 && enemyGroupCount == playerGroupCount) {
+        nbCameraShot_CommandFixPos_Set2(pNbCamera);
+    } else {
+        nbCameraShot_CommandFixPos_Set2(pNbCamera);
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_AllParty_Set);
 
@@ -194,11 +239,87 @@ void nbCameraCRSetPlayerFormRequest(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraCommand_GroundCollision);
 
+/* NON_MATCHING: 4 bytes over; the formation-call delay slot differs. */
+#ifdef NON_MATCHING
+void nbCameraState_CommandRoot_Init(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+
+    if (pNbCamera.state_old == 1) {
+        dds3CrossfadeStart(4);
+    } else if (pNbCamera.state_old == 10) {
+        dds3CrossfadeStart(4);
+    } else if (pNbCamera.state_old == 17) {
+        dds3CrossfadeStart(8);
+    }
+    if (nbCameraCRSetPlayerFormRequestFlag != 0) {
+        nbSetPlayerFormation(data, 0);
+        nbCameraCRSetPlayerFormRequestFlag = 0;
+    }
+    nbCameraCommandSetFixPosition();
+    nbCameraShot_CommandFixPos_Set(&pNbCamera);
+    nbCameraCommand_GroundCollision(&pNbCamera);
+    nbCameraState_Command_KORONZCheck();
+    nbCameraState_CommandRoot_OrderIndex = data->orderindex;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraState_CommandRoot_Init);
+#endif
 
+/* NON_MATCHING: 1 of 32 words differ (beql vs retail beq). */
+#ifdef NON_MATCHING
+void nbCameraState_CommandRoot_Calc(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    dds3ProcessID_t *id = data->ActionProcessID[data->NowActionProcess];
+
+    if (id == NULL) return;
+    if (nbGetActionSeq(id) != 1) return;
+    if (nbCameraState_CommandRoot_OrderIndex == data->orderindex) return;
+    nbCameraState_CommandRoot_Init();
+    dds3CrossfadeStart(4);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraState_CommandRoot_Calc);
+#endif
 
+/* NON_MATCHING: the 284-byte body is exact-sized; dispatch branches differ. */
+#ifdef NON_MATCHING
+void nbCameraState_CommandTargetSel_Init(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    u32 invokeParty;
+    u32 targetParty;
+    u32 targetNumber;
+    u32 flags = 0;
+    u32 i;
+
+    nbCameraState_InvokeTargetSelect_SearchSet();
+    invokeParty = effBTLSkillGetInvokeParty();
+    targetParty = effBTLSkillGetTargetParty();
+    targetNumber = effBTLSkillGetTargetNumber();
+    for (i = 0; i < targetNumber; i++) {
+        flags |= effBTLSkillGetTargetFormation(i)->stat & 0x300;
+    }
+    if (data->TarSelType != 1) {
+        if (flags == 0x300) {
+            nbCameraShot_AllParty_Set(&pNbCamera);
+        } else if (invokeParty == targetParty) {
+            nbCameraShot_FriendParty_Set(&pNbCamera);
+        } else {
+            nbCameraCommandSetFixPosition();
+            nbCameraShot_CommandFixPos_Set(&pNbCamera);
+            nbCameraCommand_GroundCollision(&pNbCamera);
+            nbCameraState_Command_KORONZCheck();
+        }
+    } else {
+        nbCameraShot_Summon_Set(&pNbCamera);
+    }
+    nbCameraCommand_GroundCollision(&pNbCamera);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraState_CommandTargetSel_Init);
+#endif
 
 void nbCameraState_CommandTargetSel_Calc(void) {
 }
