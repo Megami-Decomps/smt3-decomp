@@ -357,6 +357,7 @@ src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 216 B	race c
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 220 B	first-devil selection initialization; owner 128 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 180 B	stock scrollbar with native row callback; owner 129 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 300 B	custom stock copy with maximum-stat refresh and HP/MP clamps; owner 130 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 220 B	stock-list panel, frame/text dispatch and background placement; owner 131 match, 0 differ
 src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	1 fn / 168 B	panel animation state callback; switch fallthrough and qualified reorg trace; whole-unit 8 match, 0 differ
 src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	2 fn / 404 B	list initialization and work allocator; recovered prefix bytes and script data output; whole-unit 22 match, 0 differ
 src/smt3/pipe/pipeEffect.c	redthing1	done	2026-10-28	1 fn / 160 B	free effect slot allocation with typed initialization and qualified scheduler evidence; whole-unit 8 match, 0 differ

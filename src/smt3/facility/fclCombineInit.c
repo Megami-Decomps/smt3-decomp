@@ -1649,7 +1649,21 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockBg);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawListPanel);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockList);
+extern void cmbDrawListPanel(s32 x, s32 y, s32 z, s32 ot);
+extern void cmbDrawStockBox(s32 x, s32 y, s32 z, s32 color, s8 count, s32 ot);
+extern void cmbDrawStockBg(s32 x, s32 y, s32 z, u8 mode, s32 ot);
+
+void cmbDrawStockList(s32 x, s32 y, s32 z, s32 color, s8 count, u8 mode, s32 ot)
+{
+    cmbDrawListPanel(0, 0x320, z, ot);
+    cmbDrawStockBox(x, y, z, color, count, ot);
+    if (mode == 0) {
+        cmbDrawStockFrame(x + 0xEA0, y, z, ot);
+    } else {
+        cmbDrawStockText(x + 0xEA0, y, z, ot);
+    }
+    cmbDrawStockBg(x + 0x120, y + 0x70, z, mode, ot);
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawDevilStats);
 
@@ -1748,9 +1762,6 @@ void cmbDrawStockPanel1(void)
                               0x47);
     }
 }
-
-extern void cmbDrawStockList(s32 x, s32 y, s32 color, s32 a, s8 count, s32 b,
-                             s32 flags);
 
 extern void cmbDrawStockEntry(s32 x, s32 y, s32 color, s8 count, s32 color2,
                               u8 *rows, s32 mode, s32 flags);
