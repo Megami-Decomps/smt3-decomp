@@ -464,8 +464,8 @@ extern u32 fclBlendColor(u32 color, u32 mask, u32 alpha);
 typedef struct
 {
     /* 0x00 */ s32 handle;
-    /* 0x04 */ s32 lock;
-    /* 0x08 */ s32 unk_08;
+    /* 0x04 */ void *lock;
+    /* 0x08 */ s32 size;
     /* 0x0C */ s16 id;
     /* 0x0E */ u8 unk_0E[2];
     /* 0x10 */ struct mdlObj_t *model;
@@ -789,16 +789,16 @@ s32 cmbSeqStartScript(void)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbRunBirthDevilStep);
 
+extern datUnitWork_t *cmbGetBirthDevilPanel(void);
+extern u16 cmpGetStatusModelId(void);
+extern void cmpSetModelReloadFlag(void);
+extern void campFreeStatusModel(void);
+
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C938);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C950);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C988);
-
-extern datUnitWork_t *cmbGetBirthDevilPanel(void);
-extern u16 cmpGetStatusModelId(void);
-extern void cmpSetModelReloadFlag(void);
-extern void campFreeStatusModel(void);
 
 void cmbSeqSetPhase(void)
 {
@@ -1877,14 +1877,16 @@ void cmbInitActionData(s32 id, cmbActionData_t *data)
 
 extern char D_0053CD80[];
 
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+
 void cmbLoadActionModel(s32 id, cmbActionData_t *data)
 {
     s32 handle;
 
     cmbInitActionData(id, data);
-    handle = cmbMakeModelPath(id, &data->unk_08);
+    handle = cmbMakeModelPath(id, &data->size);
     data->handle = handle;
-    data->lock = sdfMemLock((void *)handle);
+    data->lock = sdfMemLock((sdfMemHandle_t *)handle);
     printf(D_0053CD80, (u16)data->id);
 }
 
@@ -1925,21 +1927,53 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDA8);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDC8);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetActionModelHandle);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDE8);
 
-extern void cmbGetActionModelHandle(void);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE10);
+
+extern struct mdlObj_t *mdlLoad(u32 major, u32 minor);
+extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
+extern char D_0053CDE8[];
+extern char D_0053CE10[];
+
+struct mdlObj_t *cmbGetActionModelHandle(cmbActionData_t *data)
+{
+    struct mdlObj_t *model = data->model;
+
+    if (data->handle == 0) {
+        if (model == NULL) {
+            data->model = mdlLoad(6, (u16)data->id);
+            printf(D_0053CDE8, (u16)data->id);
+            model = data->model;
+        }
+    } else {
+        if (model != NULL) {
+            sdfMemFreeDirect((void *)data->handle);
+            data->handle = 0;
+        } else {
+            mdlPackDecode(6, (u16)data->id, 0x101, (const u8 *)data->lock,
+                          data->size);
+            data->model = mdlLoad(6, (u16)data->id);
+            sdfMemFreeDirect((void *)data->handle);
+            data->handle = 0;
+            printf(D_0053CE10, (u16)data->id);
+        }
+        model = data->model;
+    }
+    return model;
+}
 
 extern void mdlLoopMotion(void *aHandle, s32 aGroup, s32 aNumber);
 
-void *cmbUpdateIntroduceModel(void *work)
+void *cmbUpdateIntroduceModel(cmbActionData_t *work)
 {
-    void *model;
+    struct mdlObj_t *model;
 
-    cmbGetActionModelHandle();
-    model = *(void **)((u8 *)work + 0x10);
+    cmbGetActionModelHandle(work);
+    model = work->model;
     if (model != NULL) {
         mdlLoopMotion(model, 0, 0xD);
-        model = *(void **)((u8 *)work + 0x10);
+        model = work->model;
         *(s32 *)model &= ~1;
     }
     return model;
