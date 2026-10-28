@@ -2437,7 +2437,36 @@ void effBTLCutSetMax(u8 cut, u32 max)
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLCutDebugPrint);
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174AB8);
+extern s32 effBTLModelGetMarkPosition(nbFormation_t *formation, s32 mark);
+extern void effDebugPointDraw2(sdfVector4_t *point, u32 color);
+extern void effDebugWireframeSphereDraw(sdfVector4_t *center, u32 color, f32 radius);
+extern void effDebugPointDraw(sdfVector4_t *point);
+
+void func_00174AB8(u32 color1, u32 color3)
+{
+    nbFormation_t *formation;
+    sdfVector4_t center;
+    s32 i;
+
+    formation = nbGetMainProcessData()->form;
+    for (i = 31; i >= 0; i--, formation++) {
+        if ((formation->stat & 3) == 3) {
+            if (effBTLModelGetMarkPosition(formation, 1) != 0) {
+                SDF_VU0_STOREVECTOR(&center);
+                effDebugPointDraw2(&center, color1);
+                effDebugWireframeSphereDraw(&center, color1,
+                    formation->oneshotr * formation->scl);
+            }
+            if (effBTLModelGetMarkPosition(formation, 3) != 0) {
+                SDF_VU0_STOREVECTOR(&center);
+                effDebugPointDraw2(&center, color3);
+                effDebugWireframeSphereDraw(&center, color3,
+                    formation->allshotr * formation->scl);
+            }
+            effDebugPointDraw(&center);
+        }
+    }
+}
 
 extern void effBTLModelGetSphereCenter(nbFormation_t *formation);
 extern void effDebugWireframeCylinderDraw(sdfVector4_t *center, u32 color, f32 radius, f32 height);
