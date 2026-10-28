@@ -219,7 +219,37 @@ s32 dds3GetGlobalConfigFlag(s32 index)
     return dds3GetConfigFlag(index, (s32 *)(DDS3_GBWK + 0x11AB8));
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigLabel);
+typedef struct frTextBank_t frTextBank_t;
+extern u8 *MessageNumSearch(s32 index, frTextBank_t *bank, s32 size);
+extern frTextBank_t itfMesEmbedded_528D68;
+extern void frSetMessageStepY(u32 step);
+extern void frSetMessageDefStepY(void);
+extern frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 style,
+    s32 a, s32 b, s32 alpha, u8 *text, frFontHandle_t *previous);
+extern void frSetFontColor(frFontHandle_t *font, u32 color);
+extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *font);
+
+s32 dds3DrawConfigLabel(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
+{
+    s32 selectedColor = 0x58606080;
+    s32 color;
+    u8 alpha = dds3GetConfigFadeAlpha();
+    u8 *text;
+    frFontHandle_t *font;
+
+    if (selected != 0) {
+        selectedColor = 0xA09DC380;
+    }
+    color = (selectedColor & ~0xFF) | alpha;
+    text = MessageNumSearch(index, &itfMesEmbedded_528D68, 0);
+    frSetMessageStepY(0x16);
+    font = MessageRequestNS(x, y, z, 1, 0, 0, 0x80, text, NULL);
+    frSetMessageDefStepY();
+    frSetFontColor(font, color);
+    func_001C7E38(font, 1, ot);
+    return frDestroyFontRequestAfter(font);
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigCursor);
 
@@ -263,7 +293,6 @@ extern const s32 D_00548888[3][4];
 extern void *memcpy(void *destination, const void *source, u32 size);
 
 extern void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot);
-extern s32 dds3DrawConfigLabel(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
 
 /* NON_MATCHING: 4 of 113 words differ; exact 452-byte size. */
 #ifdef NON_MATCHING
