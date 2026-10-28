@@ -467,7 +467,8 @@ typedef struct
     /* 0x04 */ s32 lock;
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ s16 id;
-    /* 0x0E */ u8 unk_0E[6];
+    /* 0x0E */ u8 unk_0E[2];
+    /* 0x10 */ struct mdlObj_t *model;
 } cmbActionData_t;
 
 typedef struct
@@ -1214,6 +1215,7 @@ s32 cmbStoreBirthDevil(u16 devilId, cmbUnit_t *list, u8 count)
     return -1;
 }
 
+
 s32 cmbAddDevilToStock(u16 devilId, cmbUnit_t *list, u8 count)
 {
     s8 slot = cmbFindStockSlot(list, count);
@@ -1795,6 +1797,27 @@ void cmbLoadActionModel(s32 id, cmbActionData_t *data)
     printf(D_0053CD80, (u16)data->id);
 }
 
+extern void mdlFree(struct mdlObj_t *model);
+extern char D_0053CDA8[];
+extern char D_0053CDC8[];
+
+void cmbFreeActionModel(void *model)
+{
+    cmbActionData_t *data = model;
+
+    if (data->handle != 0) {
+        sdfMemFreeDirect((void *)data->handle);
+        data->handle = 0;
+        printf(D_0053CDA8, (u16)data->id);
+    } else if (data->model != NULL) {
+        mdlFree(data->model);
+        data->model = NULL;
+        while (sdfDelayedResrcCheck() != 0) {
+        }
+        printf(D_0053CDC8, (u16)data->id);
+    }
+}
+
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD28);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD38);
@@ -1807,7 +1830,9 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD68);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD80);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFreeActionModel);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDA8);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDC8);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetActionModelHandle);
 
