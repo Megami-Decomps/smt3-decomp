@@ -510,3 +510,4 @@ src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	2 fn / 628 B	directional and sign
 src/smt3/kernel/dds3TitleMain.c	redthing1	done	2026-10-28	1 fn / 560 B	title animation with native unsigned angle clamp, sine alpha pulse and reloaded text colors; owner 9 match, 0 differ
 src/smt3/kernel/dds3TitleMain.c	redthing1	done	2026-10-28	1 fn / 880 B	title cursor alpha pulse, selection sprites and native return/break text dispatch; owner 10 match, 0 differ
 src/smt3/kernel/dds3TitleMain.c	redthing1	done	2026-10-28	1 fn / 108 B	toggle and packed-alpha update with direct signed clamp expression; owner 11 match, 0 differ
+src/smt3/pb/pbDebugMode.c	redthing1	done	2026-10-28	1 fn / 432 B	debug menu cursor wrapping, cancel/confirm phases and menu text rendering; owner 9 match, 0 differ

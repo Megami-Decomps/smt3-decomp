@@ -190,7 +190,62 @@ void ReleaseDebug_pbDebugMode(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcMenu_pbDebugMode);
+extern s8 dds3PadButtonState[];
+extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
+extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, void *drawTag);
+
+extern char *pbDebugMenuTextTable[];
+extern char D_0054F618[];
+
+s32 DebugProcMenu_pbDebugMode(pbDebugWork_t *work, sdfDrawTag_t *tag)
+{
+    s32 i;
+    s32 y;
+
+    if ((dds3PadButtonState[0x36] & 2) != 0) {
+        work->menuCursor--;
+        if (work->menuCursor < 0) {
+            work->menuCursor = 3;
+        }
+    } else if ((dds3PadButtonState[0x37] & 2) != 0) {
+        work->menuCursor++;
+        if (work->menuCursor >= 4) {
+            work->menuCursor = 0;
+        }
+    }
+
+    if (dds3PadButtonState[0x33] < 0) {
+        return 1;
+    }
+    if (dds3PadButtonState[0x31] < 0) {
+        switch (work->menuCursor) {
+        case 0:
+            work->phase = 1;
+            break;
+        case 1:
+            work->phase = 2;
+            break;
+        case 2:
+            work->phase = 3;
+            break;
+        case 3:
+            work->phase = 4;
+            break;
+        }
+    }
+
+    dds3ConsPanelTagLink(tag, 16, 16, 24, 6);
+    y = 0x7A00;
+    for (i = 0; i < 4; i++) {
+        sdfDrawTagLink(tag, sdfDevPrintf(0x7380, y, 0xFFFFF0, 0,
+                                         pbDebugMenuTextTable[i]));
+        y += 0x60;
+    }
+    y = 0x7A00 + work->menuCursor * 0x60;
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, y, 0xFFFFF0, 0, D_0054F618));
+    return 0;
+}
 
 extern void pbGetCameraParam(f32 *out);
 extern void pbSetCameraRadius(f32 radius);
@@ -199,10 +254,6 @@ extern void pbSetCameraDegreeInit(f32 degree);
 /* Historical name for the runtime float-to-soft-double promotion helper. */
 extern f64 sdfFloatToULong(f32 value);
 extern char D_0054F620[];
-extern s8 dds3PadButtonState[];
-extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
-extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, void *drawTag);
 
 s32 DebugProcRadius(pbDebugWork_t *work, sdfDrawTag_t *tag)
 {
