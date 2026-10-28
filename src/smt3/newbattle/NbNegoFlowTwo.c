@@ -474,7 +474,81 @@ s32 Flow6_8(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_9);
+typedef struct { u8 rate; u8 item; } nbMasterTextKouho_t;
+typedef struct {
+    s32 mesno;
+    u8 unk_04[4];
+    u8 phase;
+    u8 honboutype;
+    u8 unk_0A;
+    u8 requestType;
+    u8 unk_0C[8];
+    u16 negorate;
+    nbMasterTextKouho_t itema[4];
+    nbMasterTextKouho_t itemb[4];
+    nbMasterTextKouho_t stone[4];
+    u8 unk_2E[2];
+} datDevilNegoFormat_t;
+
+extern datDevilNegoFormat_t master_text[];
+extern s32 nbGetNegoRequestType(s32 reqtype);
+extern char D_00544FF0[];
+extern s32 printf(const char *format, ...);
+
+INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00544FF0);
+
+s32 Flow6_9(nbNegoProcessData_t *n)
+{
+    s32 requestType;
+    s32 overrideType;
+
+    nbAddNegoIdKouho(n, 0x60011);
+    nbAddNegoIdKouho(n, 0x60015);
+    nbAddNegoIdKouho(n, 0x6000B);
+    nbAddNegoIdKouho(n, 0x6000A);
+    nbAddNegoIdKouho(n, 0x6000C);
+
+    do {
+        requestType = nbGetNegoRequestType(master_text[n->ework->id].requestType);
+    } while ((u32)n->prevreqtype >= 2 &&
+             (requestType == 4 || requestType == n->prevreqtype));
+
+    overrideType = n->negoreqtype;
+    n->requestdata = 0;
+    if (overrideType == 4) {
+        requestType = 0;
+    }
+    if (overrideType == 5) {
+        requestType = 5;
+    }
+    n->requesttype = requestType;
+    printf(D_00544FF0, requestType);
+
+    if ((u32)requestType < 6) {
+        switch (requestType) {
+        case 0:
+            n->nextnegoid = n->nextkouho[0];
+            break;
+        case 1:
+            n->nextnegoid = n->nextkouho[0];
+            break;
+        case 2:
+            n->nextnegoid = n->nextkouho[1];
+            break;
+        case 3:
+            n->nextnegoid = n->nextkouho[2];
+            break;
+        case 4:
+            n->nextnegoid = n->nextkouho[3];
+            break;
+        case 5:
+            n->nextnegoid = n->nextkouho[4];
+            break;
+        }
+    }
+    n->prevreqtype = requestType;
+    return 0;
+}
 
 s32 Flow6_10(nbNegoProcessData_t *n)
 {
