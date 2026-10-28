@@ -1070,7 +1070,38 @@ void cmbGetDevilIdAndRace(cmbUnit_t *unit, u16 *devilId, u8 *race)
     *race = datDevilTable[unit->unit.id].race;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCheckUnlockedPair);
+s32 cmbCheckUnlockedPair(u16 first, u16 second)
+{
+    cmbPairEntry_t *table = D_0032DB78;
+    s32 pass;
+
+    for (pass = 0; pass < 2; pass++) {
+        u32 i = 0;
+        cmbPairEntry_t *entry = table;
+
+        for (; i < 3; i++, entry++) {
+            s32 matched = 0;
+            if (entry->devilA == first) {
+                matched++;
+            }
+            if (entry->devilB == second) {
+                matched++;
+            }
+            if (matched == 2) {
+                u16 result = entry->result;
+                if (cmbDevilIsUnlocked(result) == 0) {
+                    return result;
+                }
+            }
+        }
+        {
+            u16 swap = first;
+            first = second;
+            second = swap;
+        }
+    }
+    return 0;
+}
 
 s32 cmbEntryIsValid(u16 devilId)
 {
