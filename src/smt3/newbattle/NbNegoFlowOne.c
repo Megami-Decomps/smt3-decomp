@@ -1009,7 +1009,73 @@ s32 Flow1_30(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_31);
+extern s32 nbGetMotionNo(nbFormation_t *form, s32 motion);
+extern s32 nbMakeUnitMovePacket(s32 startframe, s32 uniqueid,
+                                nbFormation_t *form, u16 targetMask, s32 type,
+                                f32 speed);
+extern void nbCameraSetTaizi(nbFormation_t *invoke, nbFormation_t *target);
+extern void nbResetFormPosRot(nbFormation_t *form);
+extern void nbFormDispOn2(nbFormation_t *form);
+
+s32 Flow1_31(nbNegoProcessData_t *n)
+{
+    s32 i;
+
+    switch (n->nownegophase) {
+    case 0:
+        switch (n->negotype) {
+        case 0:
+        case 6:
+            nbGetMotionNo(n->pform, 0);
+            n->pform->cr = 100.0f / n->pform->scl;
+            n->eform->cr = 100.0f / n->eform->scl;
+            nbMakeUnitMovePacket(0, (s32)n->actdata, n->pform,
+                                 (u16)n->actdata->select, 3, 1.0f);
+            nbCameraSetTaizi(n->pform, n->eform);
+            break;
+        case 1:
+        case 2:
+        case 3:
+            nbGetMotionNo(n->eform, 0);
+            n->pform->cr = 100.0f / n->pform->scl;
+            n->eform->cr = 100.0f / n->eform->scl;
+            nbMakeUnitMovePacket(0, (s32)n->actdata, n->eform,
+                                 (u16)n->actdata->select, 3, 1.0f);
+            nbCameraSetTaizi(n->pform, n->eform);
+            break;
+        case 4:
+            nbGetMotionNo(n->eform, 0);
+            n->pform->cr = 100.0f / n->pform->scl;
+            n->eform->cr = 100.0f / n->eform->scl;
+            nbMakeUnitMovePacket(0, (s32)n->actdata, n->eform,
+                                 (u16)n->actdata->select, 3, 1.0f);
+            nbCameraSetTaizi(n->pform, n->eform);
+            break;
+        }
+        for (i = 0; i < 4; i++) {
+            nbResetFormPosRot(&n->data->form[i]);
+        }
+        nbFormDispOn2(n->pform);
+        nbFormDispOn2(n->eform);
+        break;
+    case 1:
+        break;
+    case 2:
+        if (n->flag1_6 == 1) {
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], n->temp_param[0], 0);
+            n->flag1_6 = 0;
+        }
+        if (n->flag1_39 == 1) {
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], n->temp_param[0], 0);
+            return 1;
+        }
+        break;
+    case 3:
+        nbAddNegoIdKouho(n, n->workid[3]);
+        break;
+    }
+    return 0;
+}
 
 s32 Flow1_34(nbNegoProcessData_t *n)
 {
