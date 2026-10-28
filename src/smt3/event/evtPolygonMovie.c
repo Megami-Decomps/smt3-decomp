@@ -1669,7 +1669,7 @@ evtPolygonMovieWork_t *evtGetPolygonMovieWorkData2(s32 eventno, s32 cutno, s32 t
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtGetPolygonMovieWorkData2);
 #endif
 
-void evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno)
+dds3ProcessID_t *evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno)
 {
     char pm1file[64];
     char pm2file[64];
@@ -1686,6 +1686,7 @@ void evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno)
     work->processId = dds3StartProcess("PolygonMovie", priority, 1, 1,
                                        (dds3ProcessFunc_t)evtPolygonMovieProcess1,
                                        (dds3ProcessFunc_t)evtPolygonMovieShutdown, work);
+    return work->processId;
 }
 
 INCLUDE_SDATA(const s32, "event/evtPolygonMovie", evtCameraFrameState);
