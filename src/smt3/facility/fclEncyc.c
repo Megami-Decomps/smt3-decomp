@@ -99,7 +99,7 @@ typedef struct
     /* 0x20 */ s32 num;
 } fclRibbon_t;
 
-extern s32 GetValidUnitIndex(s32 pindex);
+extern s32 GetValidUnitIndex(u8 *pindex);
 
 extern void ReleaseDebug_fclEncyc(void);
 
@@ -1107,7 +1107,36 @@ void CalcConfirmStatus(fclEncyc_registconfirmwork_tag *work)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", GetValidUnitIndex);
+extern s32 CompareUnitToRecord(datUnitWork_t *unit, fclencyceelem_t *record);
+
+s32 GetValidUnitIndex(u8 *pindex)
+{
+    datUnitWork_t *unit = &encycSaveWork->party[4].unit;
+    s32 index = 4;
+    s32 count = 0;
+    s32 writeIndices = pindex != NULL;
+
+    do {
+        s32 flags = unit->flag;
+        s32 unavailable = flags & 0x10;
+        flags &= 1;
+        if (flags && !unavailable && !(unit->badstatus & 0x800)) {
+            s32 recordIndex = fclEncycSearch(unit->id);
+            fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)encycSaveWork + recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+            if (CompareUnitToRecord(unit, record) != 0) {
+                count++;
+                if (writeIndices) {
+                    *pindex++ = index;
+                } else {
+                    break;
+                }
+            }
+        }
+        index++;
+        unit++;
+    } while (index < 16);
+    return count;
+}
 
 s32 RegistAll(fclEncyc_instance_tag *pinst)
 {
