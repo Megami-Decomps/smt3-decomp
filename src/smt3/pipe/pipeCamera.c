@@ -43,7 +43,42 @@ INCLUDE_ASM(const s32, "pipe/pipeCamera", PipeCameraAction2);
 
 INCLUDE_ASM(const s32, "pipe/pipeCamera", PipeCameraAction3);
 
-INCLUDE_ASM(const s32, "pipe/pipeCamera", CamActionQuake);
+typedef struct tagPipeQuakeWeights { s8 values[6]; } tagPipeQuakeWeights;
+typedef struct tagPipePathNode { f32 position[3]; u32 opaque0C; f32 direction[3]; u32 opaque1C; } tagPipePathNode;
+typedef struct tagPipePosTable { sdfMemHandle_t *aHandle; s32 tSize; tagPipePathNode *points; u32 opaque0C; } tagPipePosTable;
+extern s8 CameraAction;
+extern s32 offsetCount;
+extern tagPipePosTable D_00528F58;
+extern void vecSet(f32 *, f32, f32, f32);
+extern f32 vecNormalize(f32 *);
+extern void vecScale(f32 *, f32);
+
+void CamActionQuake(void)
+{
+    tagPipeQuakeWeights weights = {{30, -30, 20, -20, 10, -10}};
+    f32 vector[3];
+
+    if (CameraAction != 0) {
+        /* Preserve the index-first EE address sum; see
+         * docs/levers/addressing-and-types.md. */
+        tagPipePathNode *node = (tagPipePathNode *)(
+            (u32)offsetCount * sizeof(tagPipePathNode) + (u32)D_00528F58.points);
+        s32 action;
+
+        vecSet(vector, node->direction[0], node->direction[1], node->direction[2]);
+        vecNormalize(vector);
+        action = CameraAction;
+        vecScale(vector, (f32)weights.values[6 - action]);
+        CameraAction--;
+        pipeCamShakeVec[0] += vector[0];
+        pipeCamShakeVec[1] += vector[1];
+        pipeCamShakeVec[2] += vector[2];
+        pipeCamShake[0] += vector[0];
+        pipeCamShake[1] += vector[1];
+        pipeCamShake[2] += vector[2];
+    }
+}
+
 
 void AddCamera(void) {
     dds3Basic_t *scene;
@@ -99,8 +134,6 @@ s32 pipeCheckLevel(s32 level, s32 type)
     }
     return ret;
 }
-INCLUDE_SDATA(const s32, "pipe/pipeCamera", D_005517F0);
-
 INCLUDE_SDATA(const s32, "pipe/pipeCamera", pipe_Camera);
 
 INCLUDE_SDATA(const s32, "pipe/pipeCamera", D_005517FC);
