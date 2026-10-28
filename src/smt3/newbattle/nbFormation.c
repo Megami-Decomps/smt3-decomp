@@ -315,7 +315,10 @@ extern void nbResetFormPosRot(nbFormation_t *form);
 
 extern void nbSetPartyFormation(nbMainProcessData_t *data, s32 group);
 
-extern void nbCopyFormation(void *data, s32 sindex, s32 dindex);
+extern void nbCopyFormation(nbMainProcessData_t *data, s32 sindex, s32 dindex);
+extern effBTLSysHandle_t *effBTLSystemCreate(nbFormation_t *pFormation, s32 id);
+extern void effBTLSystemDelete2(effBTLSysHandle_t *hEffBTLSys);
+extern s32 effBTLSystemGetID(effBTLSysHandle_t *hEffBTLSys);
 
 extern void nbFormatFormation(nbMainProcessData_t *data, s32 index);
 
@@ -665,7 +668,32 @@ void nbFormatFormation(nbMainProcessData_t *data, s32 index)
     SDF_VU0_COPYVECTOR(&form->orgrot, &D_00526430);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbFormation", nbCopyFormation);
+void nbCopyFormation(nbMainProcessData_t *data, s32 sindex, s32 dindex)
+{
+    nbFormation_t *src;
+    nbFormation_t *dst;
+    s32 effectId = -1;
+
+    if (sindex == dindex) {
+        return;
+    }
+
+    src = &data->form[sindex];
+    dst = &data->form[dindex];
+    if (src->badeff != NULL) {
+        effectId = effBTLSystemGetID(src->badeff);
+        effBTLSystemDelete2(src->badeff);
+        src->badeff = NULL;
+    }
+    if (src->stat & 0x40) {
+        data->party[src->partyindex].formindex = dindex;
+    }
+    *dst = *src;
+    dst->formindex = dindex;
+    if (effectId >= 0) {
+        dst->badeff = effBTLSystemCreate(dst, effectId);
+    }
+}
 
 void nbMoveFormation(void *data, s32 sindex, s32 dindex)
 {
