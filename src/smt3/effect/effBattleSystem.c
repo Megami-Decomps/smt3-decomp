@@ -2314,7 +2314,37 @@ INCLUDE_ASM(const s32, "effect/effBattleSystem", effCAMPBadCreate);
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", effCAMPBadDraw);
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effCAMPBadDelete);
+typedef struct
+{
+    sdfVector4_t pos;
+    sdfVector4_t rot;
+    sdfVector4_t center;
+    f32 radius;
+    f32 height;
+    f32 scale;
+    mdlObj_t *hModel;
+} effCAMPBadParams_t;
+
+typedef struct
+{
+    nbFormation_t formation;
+    effCAMPBadParams_t params;
+    effBTLSystemHandle_t *hEffBTLSys;
+    u32 id;
+    s32 frame;
+} effBattleSystem_effCAMPBad_tag;
+
+void effCAMPBadDelete(effBattleSystem_effCAMPBad_tag *work)
+{
+    effBTLSystemDelete(work->hEffBTLSys);
+    if (work->params.hModel != NULL) {
+        mdlSetColor(work->params.hModel, 0x80808080);
+    }
+    if (D_0031BF00[work->id].partHandleDelete != NULL) {
+        D_0031BF00[work->id].partHandleDelete();
+    }
+    sdfChipFreeDirect(work);
+}
 
 void func_00174858(void) {
 }
