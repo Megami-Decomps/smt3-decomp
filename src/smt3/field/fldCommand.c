@@ -886,7 +886,67 @@ s32 fldCommand_FLD_MODEL_ON(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_FLD_MODEL_OFF);
+s32 fldCommand_FLD_MODEL_OFF(void) {
+    s32 debugWorld;
+    s32 debugStage;
+    s32 debugMode;
+    char *debugName;
+    s32 world;
+    s32 stage;
+    s32 mode;
+    char *name;
+    s32 room;
+    dds3BasicArrayHandle_t *list;
+    dds3Basic_t *node;
+
+    debugWorld = scrGetIntPara(0);
+    debugStage = scrGetIntPara(1);
+    debugName = scrGetStrPara(2);
+    debugMode = scrGetIntPara(3);
+    printf("OFF %d %d %s %d\n", debugWorld, debugStage, debugName, debugMode);
+    world = scrGetIntPara(0);
+    if (world == 0) {
+        world = fldGlobalBase.area;
+    }
+    stage = scrGetIntPara(1);
+    if (stage == 0) {
+        stage = fldGlobalBase.floor + 1;
+    }
+    mode = scrGetIntPara(3);
+    name = scrGetStrPara(2);
+    if (name == NULL) {
+        for (room = 0; room < 16; room++) {
+            fldSetModelFlag(world, stage, room, 1);
+        }
+    } else {
+        room = fldCommand_GetHojiID(name);
+        fldSetModelFlag(world, stage, room, 1);
+    }
+    if (world == fldGlobalBase.area && stage == fldGlobalBase.floor + 1) {
+        list = dds3SceneBasicGetList(dds3GetControlScene(), 6);
+        if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)list) != 0) {
+            dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
+            do {
+                node = (dds3Basic_t *)(u32)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
+                if (((fldMatterWork_t *)node->workdata)->roomNumber == (u32)room) {
+                    switch (mode) {
+                    case 0:
+                        dds3MatterObjectBasicSetAlpMode(node, 2);
+                        break;
+                    case 1:
+                        dds3MatterObjectBasicSetAlpMode(node, 6);
+                        break;
+                    case 2:
+                        dds3MatterObjectBasicSetAlpMode(node, 8);
+                        break;
+                    }
+                }
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
+            dds3FreeBasicArrayHandle(list);
+        }
+    }
+    return 1;
+}
 
 s32 fldCommand_FLD_ANIME_ON(void) {
     s32 world;
