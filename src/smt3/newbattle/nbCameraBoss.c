@@ -311,7 +311,67 @@ void nbCameraBoss_InvokeTarget_Set(nbCamera_t *pNbCamera, f32 rotate, f32 ratio)
     nbCameraShot_GroundCollision(pNbCamera);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_TargetInvoke_Set);
+void nbCameraBoss_TargetInvoke_Set(nbCamera_t *pNbCamera, f32 rotate, f32 ratio)
+{
+    nbFormation_t *pTarget;
+    nbFormation_t *pInvoke;
+    f32 rot;
+    f32 length;
+    f32 height;
+    f32 len;
+    sdfVector4_t pos;
+    sdfVector4_t center;
+
+    effBTLModelAllShow();
+    effBTLSkillGetInvokeParty();
+    pTarget = effBTLSkillGetTargetFormation(0);
+    pInvoke = effBTLSkillGetInvokeFormation();
+    if (pInvoke->pos.x < pTarget->pos.x) {
+        rot = -rotate * 0.017453292f;
+    } else {
+        rot = rotate * 0.017453292f;
+    }
+    pNbCamera->fovy = 0.69813163f;
+    effBTLModelGetSphereCenter(pTarget);
+    SDF_VU0_STOREVECTOR_NOMEM(&center);
+    center.y = center.y - pTarget->r * pTarget->scl * 0.5f;
+    effBTLModelGetSphereCenter(pInvoke);
+    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    pos.y = pos.y + pInvoke->r * pInvoke->scl * 0.5f;
+    SDF_VU0_LOADVECTOR(&pos);
+    SDF_VU0_LOADVECTOR_B(&center);
+    VU0_LERP_VF10_VF11(0.5f);
+    SDF_VU0_STOREVECTOR(&pNbCamera->target);
+    SDF_VU0_LOADVECTOR(&center);
+    SDF_VU0_LOADVECTOR_B(&pos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(len);
+    length = len + pTarget->r * pTarget->scl + pInvoke->r * pInvoke->scl;
+    SetRotateMatrixY(rot);
+    SDF_VU0_LOADVECTOR(&pos);
+    SDF_VU0_LOADVECTOR_B(&center);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+    length = length * sdfSin(sdfFabs(rot));
+    length = length * 1.15f;
+    height = effBTLModelGetHeight(pTarget) - pTarget->r * pTarget->scl * 0.5f;
+    if (height > length) {
+        length = height;
+    }
+    height = effBTLModelGetHeight(pInvoke) - pInvoke->r * pTarget->scl * 0.5f;
+    if (height > length) {
+        length = height;
+    }
+    pNbCamera->distance = length * ratio / sdfAtan(0.34906582f);
+    if (nbCameraBoss_CheckRotate(pTarget) != 0) {
+        effBTLModelGetSphereCenter(pInvoke);
+        SDF_VU0_STOREVECTOR_NOMEM(&pos);
+        effBTLModelLook(pTarget, &pos);
+    }
+    nbCameraShot_GroundCollision(pNbCamera);
+}
 
 s32 nbCameraBoss_Foru_SIMON_Set(nbCamera_t *pNbCamera)
 {
