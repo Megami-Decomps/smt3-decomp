@@ -5,6 +5,7 @@
 0x0016CE90	effBTLModelGroupGetSphereOld	inferred	Independent retail prologue and return; arguments and calls agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelGroupGetSphereOld
 0x0016CEC8	effBTLModelGroupGetSphere2	inferred	Independent retail prologue and return; arguments and calls agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelGroupGetSphere2
 0x0016CEE0	effBTLModelGroupGetSphereExp	inferred	Independent retail prologue and return; arguments and calls agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelGroupGetSphereExp
+0x0016D150	effBTLModelGroupGetVectorSphere	inferred	HD function identity; native target/eye transform, projected farthest pair, world-space midpoint and radius agree.
 0x0016DFF8	effBTLModelInvokeShow	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokeShow
 0x0016E050	effBTLModelTargetShow	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelTargetShow
 0x0016E0A8	effBTLModelInvokeHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokeHide

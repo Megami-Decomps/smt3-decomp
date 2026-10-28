@@ -378,7 +378,8 @@ f32 effBTLModelGroupGetSphere2(u32 group) {
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphereExp);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", eff_16D150);
+/* Returns world-space radius in f0 and the selected midpoint in vf10. */
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetVectorSphere);
 
 void effBTLModelGroupGetDirection(u32 group, sdfVector4_t *pDirection) {
     if (group & 0x100) {
