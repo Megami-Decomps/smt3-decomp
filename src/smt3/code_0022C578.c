@@ -127,7 +127,7 @@ extern campInfoWork_t *campInfoWork;
 
 extern s8 cmpParamGaugeState[2];
 
-extern u8 cmpStatusModelReady;
+extern s8 cmpStatusModelReady;
 
 typedef struct
 {
@@ -5587,7 +5587,29 @@ void cmpResetStatusModelPos(void)
     cmpStatusModelBasePos.x = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetStatusModelPose);
+void cmpSetStatusModelPose(s32 model)
+{
+    sdfVector4_t pos;
+    f32 scale;
+
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+    pos.x = cmpModelParamTable[cmpStatusModelId].evo[0];
+    pos.y = cmpModelParamTable[cmpStatusModelId].evo[1];
+    if (cmpStatusModelReady == 0) {
+        cmpGetStatusModelScale((void *)model, 0);
+        pos.z = cmpModelParamTable[cmpStatusModelId].evo[2];
+        cmpResetStatusModelPos();
+    } else {
+        scale = cmpGetStatusModelScale((void *)model, 1);
+        pos.z = 0.0f;
+        pos.x -= cmpModelParamTable[cmpStatusModelId].evo[0] - cmpModelParamTable[cmpStatusModelId].evo[0] * scale;
+        pos.y -= cmpModelParamTable[cmpStatusModelId].evo[1] - cmpModelParamTable[cmpStatusModelId].evo[1] * scale;
+        cmpStatusModelBasePos.z = (-400.0f - cmpModelParamTable[cmpStatusModelId].evo[2]) * scale;
+    }
+    SDF_VU0_LOADVECTOR_MEMOPS(pos);
+    mdlSetPosition((void *)model);
+}
 
 void cmpSetModelRotate(void *model)
 {
