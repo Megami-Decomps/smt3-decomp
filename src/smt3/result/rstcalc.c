@@ -378,7 +378,35 @@ s32 rstChkBeforeSkillOwner(u16 SkillID, s8 LevelOfs, s32 pStock)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstAutoAsignDevilParam);
+extern void rstChkResult2Process(u8 *work);
+extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
+
+void rstAutoAsignDevilParam(void)
+{
+    datUnitWork_t work;
+    s32 i;
+    s32 param;
+    s32 value;
+    u8 *bonus;
+
+    rstChkResult2Process((u8 *)EventStart);
+    i = 0;
+    cmbCopyCustomDevilToStock(&work, EventStart->unit);
+    if (EventStart->unk_18 > 0) {
+        do {
+            param = cmbAddLevelUpParamEx(&work, 0);
+            if (param >= 0) {
+                value = datGetParam(&work, param);
+                /* Integer address form: docs/levers/addressing-and-types.md. */
+                bonus = (u8 *)((u32)param + (u32)EventStart + 0x129F);
+                if (value + (s8)*bonus < 0x28) {
+                    (*bonus)++;
+                }
+            }
+            i++;
+        } while (i < EventStart->unk_18);
+    }
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstCalcEventInfo);
 
