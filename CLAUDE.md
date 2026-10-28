@@ -12,6 +12,15 @@ for one version. DDS1/2 are built on this engine, so its findings about ee-gcc 2
 ee-as and the sdf engine usually transfer. When a doc states something that was
 measured on DDS and not on this ELF, it says so; keep that distinction when editing.
 
+## Matching policy
+
+Follow `docs/CONTRIBUTING.md`, which adopts dds-decomp's current matching rules
+as the single canonical policy, including its evidence-backed permissions.
+Ordinary C need not reproduce the original source spelling. Compiler traces,
+live scalar reuse, one-pass blocks and the narrow frame/dead-code exceptions
+are permitted under that policy's conditions; exact complete-unit and retail
+checksum checks remain required.
+
 ## The ELF is reproduced as a flat image
 
 Every file-backed section has the same vram minus file offset delta, `0xff000`, so
@@ -22,8 +31,10 @@ the retail file. That only holds while the splat config covers all of
 added without keeping that coverage breaks the checksum in a way the per-unit diff
 will not show.
 
-`.vutext` and `.vudata` are VU1 microcode and its data. They stay binary blobs and
-must never be disassembled as MIPS.
+`.vutext` contains VU microcode together with VIF packets and data; `.vudata`
+is VU data. They must never be disassembled as MIPS. The VU instructions are
+assembled from `src/smt3/sdf/vu/` by `tools/vuas.py`; preserve the surrounding
+data and full-image coverage. See `docs/vu/README.md`.
 
 ## Names come from the IDB, boundaries do not
 
@@ -51,9 +62,9 @@ it in the IDB, re-run `tools/ida_symbols.py`, and verify the build still matches
 Rename only what the code proves: an allocation site, an init function, a stride, a
 caller. Confirmed cases so far are recorded in `docs/idb-corrections.md`.
 
-`.text` is split into 204 units, 195 under recovered names and the rest still called
-`code_<vram>`. Twelve of them are the Sony SDK and C runtime under `src/smt3/sdk/`,
-which `config/smt3/compilers.txt` builds with ee-gcc 2.9 rather than 2.96; see
+`.text` is split into named units and `code_<vram>` placeholders in
+`config/smt3/SLUS_209.11.yaml`. Sony SDK and C runtime units under `src/smt3/sdk/`
+are built by `config/smt3/compilers.txt` with ee-gcc 2.9 rather than 2.96; see
 `docs/sdk-matching.md`. Moving a boundary or naming a unit needs evidence from
 `tools/find_tus.py`, the IDB or an HD source run, not a guess, and the relinked image
 must stay byte-identical afterwards: see `docs/tu-recovery.md`.

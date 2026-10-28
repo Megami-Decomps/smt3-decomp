@@ -51,7 +51,7 @@ The checksum covers the whole file, so a failure is not necessarily in the
 function you just wrote.
 
 1. Check the unit first:
-   `python tools/check_unit.py src/smt3/main/code_<vram>.c -v`. A clean unit that
+   `python tools/check_unit.py src/smt3/<dir>/<unit>.c -v`. A clean unit that
    still breaks the link points at data, not codegen.
 2. Re-run `python configure.py` after any change to a `config/smt3/` file or
    after renaming a symbol. Splat output and the ninja graph are generated, and
@@ -118,16 +118,16 @@ config/versions.json        serial, SHA-1, gp and disc-image glob of each versio
 config/smt3/SLUS_209.11.yaml splat config
 config/smt3/symbol_addrs.txt names and addresses
 config/smt3/cflags.txt      per-unit compiler options, with evidence
-src/smt3/main/code_<vram>.c C units; INCLUDE_ASM marks functions not decompiled yet
+src/smt3/<dir>/<unit>.c C units; INCLUDE_ASM marks functions not decompiled yet
 include/                    common.h, include_asm.h and shared headers
 tools/                      build, checking, splitting and analysis tools
 docs/                       this documentation
 asm/ build/ orig/           generated or extracted locally (git-ignored)
 ```
 
-`.text` is a single splat segment, and its C units are `code_<vram>`. No
-original source file boundaries have been recovered in this repo; see
-[Names](names.md).
+`.text` is in the `main` splat segment, split into named C units and
+`code_<vram>` placeholders. Preserve the configured boundaries; see
+[TU recovery](tu-recovery.md).
 
 ## Comparison tools
 
