@@ -329,3 +329,4 @@ src/smt3/field/fldTitle.c	redthing1	done	2026-10-28	1 fn / 300 B	four texture re
 src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	1 fn / 308 B	full recovery input callback; whole-unit 7 match, 0 differ; panel animation remains assembly
 src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	1 fn / 260 B	MIDI motion-resource loop and file-load contracts; whole-unit 21 match, 0 differ
 src/smt3/field/fldCommand.c	redthing1	done	2026-10-28	1 fn / 544 B	model-OFF command with existing model-ON contracts; whole-unit 87 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 132 B	cmbGetSceneModel; typed scene and unit model lookup

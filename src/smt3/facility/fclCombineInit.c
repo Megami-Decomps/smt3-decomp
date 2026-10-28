@@ -1,4 +1,5 @@
 #include "common.h"
+#include "basic.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -1662,7 +1663,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawModelAt);
 
 extern void *dds3GetControlScene(void);
 
-extern void *dds3SceneBasicSearchNameAndType(void *scene, s32 type, char *name);
+extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
 
 extern void *dds3PointBasicGetResource(void *pPointBasic);
 
@@ -1708,7 +1709,46 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawModelPanel);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawTargetModel);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetSceneModel);
+typedef struct
+{
+    u8 unk_00[0x80];
+    u32 modelValue;
+} cmbSceneModel_t;
+
+typedef struct
+{
+    u8 unk_00[0x18];
+    cmbSceneModel_t *model;
+} cmbSceneModelOwner_t;
+
+extern dds3Basic_t *dds3GetActiveScene(void);
+extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type,
+                                                    const char *name);
+extern evtUnit_t *evtGetUnitHandle2(dds3Basic_t *unit);
+
+s32 cmbGetSceneModel(cmbSceneModelOwner_t *work, const char *name)
+{
+    dds3Basic_t *scene = dds3GetActiveScene();
+    dds3Basic_t *basic;
+    evtUnit_t *unit;
+
+    if (scene == NULL) {
+        return 0;
+    }
+    basic = dds3SceneBasicSearchNameAndType(scene, 5, name);
+    if (basic == NULL) {
+        return 0;
+    }
+    unit = evtGetUnitHandle2(basic);
+    if (unit == NULL) {
+        return 0;
+    }
+    if (unit->value == 0) {
+        return 0;
+    }
+    work->model->modelValue = unit->value;
+    return 1;
+}
 
 extern void sdfModelOtInit(void *aModelOt, sdfGrOt_t *aOt0, sdfGrOt_t *aOt1, sdfGrOt_t *aOt2,
                            sdfGrOt_t *aOt3);
@@ -1728,15 +1768,15 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbLoadTargetModel);
 
 extern void *dds3SearchSceneBasic(void *pBasic, u32 serialID, s32 type);
 
-extern evtUnit_t *evtGetUnitHandle2(void *unit);
+extern evtUnit_t *evtGetUnitHandle2(dds3Basic_t *unit);
 
 /* Called above its definition, where ee-gcc assumed int. */
-void *dds3GetActiveScene(void);
+dds3Basic_t *dds3GetActiveScene(void);
 
 s32 cmbFindUnitScene(void *work)
 {
-    void *scene = dds3GetActiveScene();
-    void *basic;
+    dds3Basic_t *scene = dds3GetActiveScene();
+    dds3Basic_t *basic;
     evtUnit_t *unit;
 
     if (scene == NULL) {
