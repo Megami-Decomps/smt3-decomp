@@ -63,7 +63,7 @@ extern void itfMesMngSetVarImmediate(s32 id, s8 index, s32 pstr);
 
 extern s32 itfMesMngGetSelectNo(s32 msgid);
 
-extern s32 itfMesMngGetSelPhase(s32 msgid);
+extern s16 itfMesMngGetSelPhase(s32 msgid);
 
 extern s32 fclWorkValue[16];
 
