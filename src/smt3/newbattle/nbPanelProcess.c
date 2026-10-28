@@ -121,7 +121,13 @@ typedef struct nbMainProcessData_t
     u32 stat;
     u8 unk_64[0x4];
     u8 turn;
-    u8 unk_69[0xF];
+    s8 phase;
+    s8 nextphase;
+    u8 esccnt;
+    u16 phasetime;
+    u16 framePadding;
+    u32 battletime;
+    f32 press3;
     s16 press4_p;
     s16 pressturn;
     u16 stagemajor;
@@ -1211,7 +1217,107 @@ void nbPanelAutoInit(void)
     PanelAutoShow = 1;
 }
 
+/* NON_MATCHING: 226 of 232 words match at the native 928-byte size.
+ * Six background-sprite argument loads remain reordered; see
+ * docs/nonmatching/newbattle/nbPanelProcess.md. */
+#ifdef NON_MATCHING
+extern f32 sdfSin(f32 angle);
+extern nbPanelProcess_nbPanelXYZ_t D_004F05D8[];
+extern nbPanelProcess_nbPanelXYZ_t D_004F0600[];
+extern nbPanelProcess_nbPanelTMXuv_t D_004EFE60[];
+extern void nbPanelPolygonDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *geometry,
+                               u32 color0, u32 color1, u32 color2, u32 color3);
+
+void nbPanelAuto(nbMainProcessData_t *p)
+{
+    u32 color;
+    u32 baseColor;
+
+    if (p->phase < 3) {
+        PanelAutoABGR = 0x40808080;
+    } else if (PanelAutoABGR != 0x80808080) {
+        PanelAutoABGR += 0x04000000;
+    }
+
+    baseColor = PanelAutoBaseColor;
+    if (PanelAutoShow == 0) {
+        if ((baseColor & 0xFF000000) == 0) {
+            return;
+        }
+        baseColor -= 0x10000000;
+        PanelAutoBaseColor = baseColor;
+    } else if ((baseColor & 0xFF000000) != 0x80000000) {
+        baseColor += 0x10000000;
+        PanelAutoBaseColor = baseColor;
+    }
+    nbPanelBaseColorSet(baseColor);
+    nbPnl_rsetAlpha(0);
+
+    color = PanelAutoABGR;
+    if ((p->stat & 0x40) != 0) {
+        {
+            nbPanelProcess_nbPanelXYZ_t *geometry = &D_004F05D8[1];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFE60[2];
+            sdfTexHandle_t *texture = p->pnltex[1];
+            u32 drawColor = effMagaCylinderCalcColor(color, nbPanelBaseABGR);
+            nbPnlSprite(geometry->x + 0x1C1, geometry->y + 0x12,
+                        geometry->w, geometry->h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, drawColor, texture);
+        }
+        {
+            f32 angle = (f32)p->battletime * 0.2f;
+            nbPanelProcess_nbPanelXYZ_t *geometry = &D_004F0600[1];
+            s32 pulse = (s32)(sdfSin(angle) * 64.0f) + 0x50;
+            u32 pulseColor = effMagaCylinderCalcColor(pulse, color >> 24);
+            pulseColor = (pulseColor << 24) | 0x00483902;
+            nbPanelPolygonDraw(0x1C1, 0x12, geometry,
+                               0x00483902, pulseColor, 0x00483902, pulseColor);
+            nbPanelPolygonDraw(0x1C1, 0x12, geometry - 1,
+                               0x00483902, 0x60483902, 0x00483902, 0x60483902);
+        }
+        {
+            f32 angle = (f32)p->battletime * 0.2f;
+            nbPanelProcess_nbPanelXYZ_t *geometry = &D_004F05D8[0];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFE60[1];
+            s32 pulse = (s32)(sdfSin(angle) * 48.0f) + 0xA0;
+            u32 pulseColor = (u32)pulse + (color & 0xFF000000);
+            sdfTexHandle_t *texture;
+            u32 drawColor;
+            pulseColor += ((u32)pulse << 16) + ((u32)pulse << 8);
+            texture = p->pnltex[2];
+            drawColor = effMagaCylinderCalcColor(pulseColor, nbPanelBaseABGR);
+            nbPnlSprite(geometry->x + 0x1C1, geometry->y + 0x12,
+                        geometry->w, geometry->h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, drawColor, texture);
+        }
+    } else {
+        nbPanelProcess_nbPanelXYZ_t *geometry = &D_004F05D8[1];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFE60[2];
+        nbPanelProcess_nbPanelXYZ_t *lower;
+        nbPanelProcess_nbPanelTMXuv_t *lowerUV;
+        {
+            sdfTexHandle_t *texture = p->pnltex[1];
+            u32 drawColor = effMagaCylinderCalcColor(color, nbPanelBaseABGR);
+            lower = geometry - 1;
+            lowerUV = uv - 2;
+            nbPnlSprite(geometry->x + 0x1C1, geometry->y + 0x12,
+                        geometry->w, geometry->h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, drawColor, texture);
+        }
+        {
+            sdfTexHandle_t *texture = p->pnltex[2];
+            u32 drawColor = effMagaCylinderCalcColor(color, nbPanelBaseABGR);
+            nbPnlSprite(lower->x + 0x1C1, lower->y + 0x12,
+                        lower->w, lower->h,
+                        lowerUV->u0, lowerUV->v0, lowerUV->u1, lowerUV->v1,
+                        drawColor, texture);
+        }
+    }
+    nbPanelBaseColorSet(0x80808080);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelAuto);
+#endif
 
 void nbPanelDraw(s32 flag)
 {

@@ -180,6 +180,7 @@ nbCollectBadCurseUnits	newbattle/nbEncProcess	0xA4	23 of 41 words match	docs/non
 ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/nonmatching/newbattle/nbMakePacket.md	322
 nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/nonmatching/newbattle/nbMakePacket.md	343
 nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	371
+nbPanelAuto (0x3A0)				docs/nonmatching/newbattle/nbPanelProcess.md	5
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	5
 DispComm1PanelComm	newbattle/nbStageProcess	0xE0	53 of 56 words match	docs/nonmatching/newbattle/nbStageProcess.md	20
 CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/nonmatching/newbattle/nbStageProcess.md	44

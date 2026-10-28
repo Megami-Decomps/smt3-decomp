@@ -11,6 +11,14 @@ D_0032D270 = 0x0032D270; // type:u8 size:0x800
 
 D_00551B54 = 0x00551B54; // type:u8 size:0x1
 
+// nbPanelAuto submits two 0x14-byte polygon rows, at 0x004F0614 then
+// 0x004F0600. The first row is otherwise folded into the preceding sprite.
+D_004F0600 = 0x004F0600; // type:s32 size:0x28
+
+// Three UV rows used by nbPanelAuto: the lower normal/effect sprites and
+// their common background, at 0x004EFE60, 0x004EFE70 and 0x004EFE80.
+D_004EFE60 = 0x004EFE60; // type:s32 size:0x30
+
 // pb_proc_menu_Process indexes two bytes here by the menu panel's mode word,
 // as the item count of that menu; they read 8 and 4. splat otherwise folds
 // them into the D_0054F5C4 word run, which leaves no symbol to reference.
