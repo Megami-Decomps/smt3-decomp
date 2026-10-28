@@ -2360,7 +2360,117 @@ void MoveScreenOffset(fclEncyc_instance_tag *pinst)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", SetCameraLightParam);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", ControlModel);
+typedef struct
+{
+    fclEncyc_readmainwork_tag phase;
+    f32 rotationMin;
+    f32 rotationMax;
+    f32 radiusMin;
+    f32 radiusMax;
+    s32 viewOffsetX;
+    s32 viewOffsetY;
+    s32 positionMinX;
+    s32 positionMinY;
+    s32 positionMaxX;
+    s32 positionMaxY;
+} fclEncycBoundWork_t;
+
+extern void InitCameraForViewMode(fclEncyc_instance_tag *pinst);
+extern void InitModelPosRot(void *model, s32 id);
+extern void mdlGetRotate(void *model);
+extern void mdlSetRotate(void *model);
+extern void mdlGetPosition(void *model);
+extern void mdlSetPosition(void *model);
+extern void FromRotation_B(f32 angle);
+extern void Mult(void);
+extern f32 sdfSin(f32 angle);
+extern f32 sdfCos(f32 angle);
+extern f32 D_00529630[4];
+extern f32 D_00332310[4];
+extern f32 D_00332320[4];
+
+void ControlModel(fclEncyc_instance_tag *pinst, s32 modelHandle, s32 key)
+{
+    fclEncycBoundWork_t *work = (fclEncycBoundWork_t *)pinst->pwork;
+    mdlObj_t *model = (mdlObj_t *)modelHandle;
+
+    if (model == NULL) {
+        return;
+    }
+    if ((key & 1) != 0) {
+        u16 id;
+        encycSaveWork_t *save;
+
+        InitCameraForViewMode(pinst);
+        save = encycSaveWork;
+        id = *(u16 *)((u8 *)save + work->phase.recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+        InitModelPosRot(model, id);
+        work->viewOffsetX = 0;
+        work->viewOffsetY = 0;
+        return;
+    }
+
+    mdlGetRotate(model);
+    if ((key & 2) != 0) {
+        SDF_VU0_LOADVECTOR_B(D_00529630);
+        FromRotation_B(-0.034906583f);
+        Mult();
+    } else if ((key & 4) != 0) {
+        SDF_VU0_LOADVECTOR_B(D_00529630);
+        FromRotation_B(0.034906583f);
+        Mult();
+    }
+    mdlSetRotate(model);
+
+    if ((key & 8) != 0) {
+        work->phase.cameraAngle += 0.034906583f;
+        if (work->phase.cameraAngle > work->rotationMax) {
+            work->phase.cameraAngle = work->rotationMax;
+        }
+    } else if ((key & 0x10) != 0) {
+        work->phase.cameraAngle -= 0.034906583f;
+        if (work->phase.cameraAngle < work->rotationMin) {
+            work->phase.cameraAngle = work->rotationMin;
+        }
+    }
+
+    if ((key & 0x200) != 0) {
+        work->phase.cameraRadius -= 5.0f;
+        if (work->phase.cameraRadius < work->radiusMin) {
+            work->phase.cameraRadius = work->radiusMin;
+        }
+    } else if ((key & 0x400) != 0) {
+        work->phase.cameraRadius += 5.0f;
+        if (work->phase.cameraRadius > work->radiusMax) {
+            work->phase.cameraRadius = work->radiusMax;
+        }
+    }
+
+    pinst->camera[0].y = sdfSin(work->phase.cameraAngle) * work->phase.cameraRadius + pinst->camera[1].y;
+    pinst->camera[0].z = -sdfCos(work->phase.cameraAngle) * work->phase.cameraRadius + pinst->camera[1].z;
+
+    mdlGetPosition(model);
+    if ((key & 0x20) != 0 && work->viewOffsetX > work->positionMinX) {
+        SDF_VU0_LOADVECTOR_B(D_00332310);
+        SDF_VU0_SUBVECTOR();
+        work->viewOffsetX--;
+    } else if ((key & 0x40) != 0 && work->viewOffsetX < work->positionMaxX) {
+        SDF_VU0_LOADVECTOR_B(D_00332310);
+        SDF_VU0_ADDVECTOR();
+        work->viewOffsetX++;
+    }
+    if ((key & 0x80) != 0 && work->viewOffsetY > work->positionMinY) {
+        SDF_VU0_LOADVECTOR_B(D_00332320);
+        SDF_VU0_SUBVECTOR();
+        work->viewOffsetY--;
+    } else if ((key & 0x100) != 0 && work->viewOffsetY < work->positionMaxY) {
+        SDF_VU0_LOADVECTOR_B(D_00332320);
+        SDF_VU0_ADDVECTOR();
+        work->viewOffsetY++;
+    }
+    mdlSetPosition(model);
+}
+
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", GetViewModeKey);
 
@@ -2383,20 +2493,6 @@ void InitCameraForViewMode(fclEncyc_instance_tag *pinst)
     pinst->camera[1].z = model.z;
     work->cameraAngle = 0.0f;
 }
-
-typedef struct
-{
-    fclEncyc_readmainwork_tag phase;
-    f32 rotationMin;
-    f32 rotationMax;
-    f32 radiusMin;
-    f32 radiusMax;
-    s32 reserved0040[2];
-    s32 positionMinX;
-    s32 positionMinY;
-    s32 positionMaxX;
-    s32 positionMaxY;
-} fclEncycBoundWork_t;
 
 typedef struct
 {
