@@ -5358,7 +5358,57 @@ void cmpUpdateStatusModelLoad(u16 id)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_update_status_Process);
+extern s32 campStatusIsActive(void);
+
+s32 camp_update_status_Process(s32 id)
+{
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+    u16 slot;
+
+    cmpStatusPhase = dds3GetProcessData(id);
+    if (campStatusIsActive() != 0) {
+        return 0;
+    }
+    if (cmpStatusWindowHidden != 0) {
+        return 0;
+    }
+    if ((cmpStatusPhase->flags & 0x40) != 0) {
+        return -1;
+    }
+
+    switch (button) {
+    case 0:
+        break;
+    case 0x10:
+        if (cmpStatusPhase->slotCount != 1) {
+            cmpStatusPhase->slotCursor--;
+            if (cmpStatusPhase->slotCursor < 0) {
+                cmpStatusPhase->slotCursor = cmpStatusPhase->slotCount - 1;
+            }
+            cmpSetModelReloadFlag();
+        }
+        break;
+    case 0x20:
+        if (cmpStatusPhase->slotCount != 1) {
+            cmpStatusPhase->slotCursor++;
+            if (cmpStatusPhase->slotCursor > cmpStatusPhase->slotCount - 1) {
+                cmpStatusPhase->slotCursor = 0;
+            }
+            cmpSetModelReloadFlag();
+        }
+        break;
+    }
+
+    if (cmpGetStatusModelFlag() == 1) {
+        if (cmpChkPadPressUpDown() != 0) {
+            return 0;
+        }
+    }
+
+    slot = cmpStatusPhase->slot[cmpStatusPhase->slotCursor];
+    cmpUpdateStatusModelLoad(cmbGlobalWork->party[slot].unit.id);
+    return 0;
+}
 
 void *cmpAllocInfoProcess(void *param, s32 pParent)
 {
