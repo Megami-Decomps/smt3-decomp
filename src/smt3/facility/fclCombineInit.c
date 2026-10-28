@@ -2737,7 +2737,22 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawFullScreenPanel);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawModelPanel);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawTargetModel);
+extern void cmbDrawModelAt(u8 index, f32 *position, f32 firstOffset, f32 secondOffset);
+
+void cmbDrawTargetModel(f32 (*positions)[4], f32 *sizes, s32 *enabled,
+                        s32 draw, f32 scale)
+{
+    s32 i = 0;
+
+    for (; i < 2; i++) {
+        if (enabled[i] != 0 && CMB_GBWK->actionZoom > 0.5f && draw != 0) {
+            f32 value = sizes[i] * scale;
+            f32 offset = cmbGetModelScaleById(CMB_GBWK->actionData[i].id);
+            cmbDrawModelAt(i, *positions, sizes[i], value + offset);
+        }
+        positions++;
+    }
+}
 
 typedef struct
 {
