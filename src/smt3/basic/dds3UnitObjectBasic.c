@@ -1,5 +1,8 @@
 #include "common.h"
 #include "basic.h"
+#include "event.h"
+#include "model.h"
+#include "ps2asm.h"
 
 typedef struct {
     u8 unk00[0x64];
@@ -134,7 +137,68 @@ void dds3UnitObjectBasicDestructor(dds3Basic_t *aPtr) {
 
 INCLUDE_ASM(const s32, "basic/dds3UnitObjectBasic", dds3UnitObjectBasicMainProcedure);
 
-INCLUDE_ASM(const s32, "basic/dds3UnitObjectBasic", dds3UnitObjectBasicDrawProcedure);
+extern sdfModelOt_t D_002F69B8[];
+extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
+extern void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic);
+extern void fldSdwDraw(dds3Basic_t *basic);
+extern void dds3DrawUnitObjectShadow(s32 alpha, f32 x, f32 y, f32 z, f32 radius);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
+extern s32 dds3CheckPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
+
+s32 dds3UnitObjectBasicDrawProcedure(dds3Basic_t *basic) {
+    sdfVector4_t worldPosition;
+    dds3UnitObjectBasicWorkData_t *work;
+    dds3ObjectBaseControlWorkData_t *control;
+    sdfModelRootNode_t *modelRoot;
+    struct evtUnit_t *unit;
+    s32 alpha;
+
+    memset(&worldPosition, 0, sizeof(worldPosition));
+    worldPosition.w = 1.0f;
+    if (dds3ObjectBaseCheckFlag(basic, 1)) {
+        return 1;
+    }
+
+    unit = dds3GetUnitHandleObjectBasic(basic);
+    if (dds3ObjectBaseCheckFlag(basic, 0x200) && unit != NULL &&
+        (unit->owner->flags & 1) == 0) {
+        fldSdwDraw(basic);
+    }
+
+    work = basic->workdata;
+    if (work->ot == -1) {
+        dds3ObjectBaseModelLinkOt(&D_002F69B8[0], basic);
+    } else {
+        dds3ObjectBaseModelLinkOt(&D_002F69B8[work->ot], basic);
+    }
+
+    if (!dds3ObjectBaseCheckFlag(basic, 0x400) ||
+        dds3ObjectBaseCheckFlag(basic, 0x1000) || unit == NULL) {
+        return 1;
+    }
+
+    control = dds3UnitObjectBasicGetControlWorkData(basic);
+    modelRoot = ((mdlObj_t *)control->pModel)->inner;
+    alpha = ((const u8 *)&modelRoot->color)[3];
+    if (sdfModelGetMarkPos(unit->owner->inner, 0) != 0) {
+        SDF_VU0_STOREVECTOR(&worldPosition);
+        dds3DrawUnitObjectShadow(alpha, worldPosition.x, basic->poseset->pos.y,
+                                 worldPosition.z, basic->poseset->r);
+    } else {
+        if (dds3CheckPoseSetFlag(basic->poseset, 8)) {
+            worldPosition.x = basic->poseset->pos2.x;
+            worldPosition.y = basic->poseset->pos2.y;
+            worldPosition.z = basic->poseset->pos2.z;
+        } else {
+            worldPosition.x = basic->poseset->pos.x;
+            worldPosition.y = basic->poseset->pos.y;
+            worldPosition.z = basic->poseset->pos.z;
+        }
+        dds3DrawUnitObjectShadow(alpha, worldPosition.x, worldPosition.y,
+                                 worldPosition.z, basic->poseset->r);
+    }
+    return 1;
+}
 
 void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *unitBasic) {
     dds3UnitObjectBasicWorkData_t *work;
