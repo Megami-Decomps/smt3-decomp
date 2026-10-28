@@ -280,3 +280,28 @@ computation belongs **inside** the guarded block after it, not before.
 it hoisted above the call the scheduler produces the same instruction count but
 a different register for every local, 47 of 60 words out.
 
+
+### Shared switch assignment and branch annulment
+
+`rcvUpdatePanelAnim` in `facility/fclRecoverUpdate` needs phases 1–4 to
+fall through to phase 5's single `active = 0` statement after their flag guard.
+Separate identical assignments leave one differing word: plain `beq` instead
+of retail's `beql` at +0x28, with the same zero assignment in the delay slot.
+
+Both forms were traced with:
+
+```
+tools/cc1probe.sh <candidate.c> \
+    --as-unit src/smt3/facility/fclRecoverUpdate.c \
+    --func rcvUpdatePanelAnim --reorg --no-dumps --out /tmp/recovery-panel
+```
+
+Both returned `verify: OK`: hooked and unhooked assembly matched the plain
+compilation. In the separate-assignment form, reorg's first delay pass fills
+branch uid76 from zero assignment uid48. With switch fallthrough, branch uid70
+has no such predecessor assignment; `fill_slots_from_thread` at reorg.c:3009
+instead takes the shared zero assignment uid42 from its target. The opposite
+path keeps `$16` live, so that target fill must annul. Both equality branches
+have the same probability 3999 and `mostly_true_jump` result 0: prediction
+annotations are not needed. The ordinary fallthrough reproduces all 168 bytes;
+the complete unit and retail-image checksum remain the qualification.

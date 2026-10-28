@@ -11,6 +11,21 @@ s32 fclGetFlag(s8 index);
 
 typedef struct
 {
+    u8 animState;
+    u8 unk_01[3];
+    s32 target;
+    u8 unk_08[0xC];
+    s32 phase;
+    s32 phaseStep;
+    s32 unk_1C;
+    void (*calcSizes)();
+} fclPanelAnim_t;
+
+extern void fclSetPanelAnimState(fclPanelAnim_t *anim, u8 state);
+extern s32 fclRunPanelAnim(fclPanelAnim_t *anim);
+
+typedef struct
+{
     /* 0x00 */ void *allocation;
     /* 0x04 */ s16 unk_04;
     /* 0x06 */ s16 unk_06;
@@ -71,6 +86,8 @@ typedef struct
     /* 0x0058 */ u8 unk_0058[0x4474];
     /* 0x44CC */ s32 script;
     /* 0x44D0 */ s32 scriptArg;
+    /* 0x44D4 */ u8 unk_44D4[0x4C];
+    /* 0x4520 */ fclPanelAnim_t panelAnim;
 } rcvUpdateWork_t;
 
 extern rcvUpdateWork_t *rcvUpdateWork;
@@ -308,7 +325,37 @@ s32 rcvIsHealPhase(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdatePanelAnim);
+void rcvUpdatePanelAnim(void)
+{
+    s32 active;
+
+    switch (rcvUpdateWork->unk_01) {
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        if (fclGetFlag(0) == 0) {
+            return;
+        }
+        /* Fall through to the inactive panel state. */
+    case 5:
+        active = 0;
+        break;
+    default:
+        active = 1;
+        break;
+    }
+    if (rcvIsHealPhase()) {
+        active = 0;
+    }
+    if (active == 0) {
+        fclSetPanelAnimState(&rcvUpdateWork->panelAnim, 2);
+    } else {
+        fclSetPanelAnimState(&rcvUpdateWork->panelAnim, 1);
+    }
+    fclRunPanelAnim(&rcvUpdateWork->panelAnim);
+}
+
 
 INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdateSeqRoot);
 
