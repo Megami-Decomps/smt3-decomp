@@ -2603,7 +2603,66 @@ s32 cmbStockIsLocked(s32 index)
     return flag != 0;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateStockCursor);
+typedef struct cmpPadStopWork_t cmpPadStopWork_t;
+extern s32 cmpGetPressedButton(s32 mask);
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
+extern s32 cmpChkPadPressUpDown(void);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
+extern void cmpPlayCursorSE(u32 button);
+
+void cmbUpdateStockCursor(void)
+{
+    s32 button = cmpGetPressedButton(0x237) & 0xFFFF;
+    switch (button) {
+    case 1: {
+        s8 selected;
+        if ((s8)CMB_GBWK->birthPanel[0x2C8] < (s8)CMB_GBWK->stockCursorCount) {
+            button = 0;
+            break;
+        }
+        selected = (s8)((u8)CMB_GBWK->stockCursorGroup[0].cursor.unk_22 +
+                                                (u8)CMB_GBWK->stockCursorGroup[0].cursor.unk_24);
+        CMB_GBWK->stockSlot[0].unk_01 = selected;
+        CMB_GBWK->stockSlot[0].index = CMB_GBWK->unk_165EE[selected];
+        if (cmbStockIsLocked(CMB_GBWK->stockSlot[0].index)) {
+            button = 0x8000;
+            break;
+        }
+        CMB_GBWK->displayFlags[0] = 0;
+        CMB_GBWK->unk_00001 = 6;
+        CMB_GBWK->unk_00004 = button;
+        break;
+    }
+    case 2:
+        CMB_GBWK->displayFlags[0] = 0;
+        CMB_GBWK->unk_00001 = 0;
+        CMB_GBWK->unk_00004 = button;
+        break;
+    case 0x10:
+        cmpMoveCursor(&CMB_GBWK->stockCursorGroup[0].cursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&CMB_GBWK->stockCursorGroup[0].cursor, 1);
+        break;
+    case 0x200:
+        CMB_GBWK->displayFlags[0] = 0;
+        CMB_GBWK->unk_00001 = 9;
+        CMB_GBWK->unk_00004 = 1;
+        break;
+    }
+    if (button == 4) {
+        if ((s8)CMB_GBWK->displayFlags[0] == 0) {
+            CMB_GBWK->displayFlags[0] = 1;
+        } else {
+            CMB_GBWK->displayFlags[0] = 0;
+        }
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&CMB_GBWK->stockCursorGroup[0].cursor, 0);
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop((cmpPadStopWork_t *)&CMB_GBWK->stockCursorGroup[0].cursor,
+                                            button, 0x30));
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbChangeSequence);
 
