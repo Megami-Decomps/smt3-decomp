@@ -83,7 +83,34 @@ void nmeDrawFuncIcon(void)
     }
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDrawInputPanel);
+extern void nmeDrawPanelSprites(void);
+
+void nmeDrawInputPanel(void)
+{
+    nmeSpriteTable_t *table;
+    s32 ot = 0x47;
+
+    nmeDrawPanelSprites();
+    table = &GBWK_2;
+    fclDrawSpriteRes(0xE40, 0xCE0, 0, 0, 3, 3,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0xE40, 0xCE0, 0, 0, 3, 4,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0x1350, 0xCE0, 0, 0, 3, 3,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0x1350, 0xCE0, 0, 0, 3, 4,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0x1860, 0xCE0, 0, 0, 3, 3,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0x1860, 0xCE0, 0, 0, 3, 4,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0x2D0, 0, 0, 0, 0, 0x25,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0x2D0, 0, 0, 0, 0, 0x26,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0x320, 0, 0, 0, 0, 0x27,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+}
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern void cmpUpdateTerminate(void *work);
