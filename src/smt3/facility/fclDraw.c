@@ -309,7 +309,24 @@ s32 fclDrawStrCenterTarget(s32 x, s32 y, s32 priority, u16 width, u16 unused1, u
     return frDestroyFontRequestAfter(request);
 }
 
-INCLUDE_ASM(const s32, "facility/fclDraw", fclDrawCaption);
+s32 fclDrawCaption(fclPanelPos_t *panel, const char *text, s32 ot)
+{
+    frFontHandle_t *request;
+    frFontHandle_t *glyph;
+    s32 width;
+
+    request = frwGetSmallFontFRQ2(0x100, panel->unk_04 + 0x10, panel->unk_08,
+                                  0xA09DC380, text, NULL);
+    width = 0;
+    for (glyph = request; glyph != NULL; glyph = glyph->previous) {
+        width += glyph->advance;
+        width = width + glyph->glyphCodeOrContext.byteRoles.spacing + 3;
+    }
+    cmpDrawBoxF(0, panel->unk_04, panel->unk_08, width + 0x20, 0x1A,
+                0x30303080, ot);
+    func_001C7E38(request, 1, ot);
+    return frDestroyFontRequestAfter(request);
+}
 
 s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *texList,
                     fclSpriteTbl_t *table, s32 ot)
