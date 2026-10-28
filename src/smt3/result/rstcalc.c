@@ -483,7 +483,40 @@ s32 rstChkSkillPowerUp1(void)
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstChkSkillPowerUp2);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstRndGetPowerUpSkill);
+extern s32 rstFindPowerUpSkill(u16 skillId);
+
+u16 rstRndGetPowerUpSkill(datUnitWork_t *unit, s8 *pIdx)
+{
+    u16 skillList[24];
+    s8 indexList[24];
+    s8 skillCount = 0;
+    s32 i;
+
+    for (i = 0; i < unit->skillcnt; i++) {
+        u16 skill = unit->skill[i];
+        s32 powerUpSkill;
+
+        if (skill == 0) {
+            continue;
+        }
+        powerUpSkill = rstFindPowerUpSkill(skill);
+        if (powerUpSkill != 0) {
+            skillList[skillCount] = powerUpSkill;
+            indexList[skillCount] = i;
+            skillCount++;
+        }
+    }
+    if (skillCount == 0) {
+        return 0;
+    }
+    {
+        s8 index = dds3GetRandA(NULL) % skillCount;
+        if (pIdx != NULL) {
+            *pIdx = indexList[index];
+        }
+        return skillList[index];
+    }
+}
 
 s32 rstChkDevilSkillPowerUp(datUnitWork_t *pStock)
 {
