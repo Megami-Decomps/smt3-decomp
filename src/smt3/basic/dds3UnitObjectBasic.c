@@ -1,5 +1,8 @@
 #include "common.h"
 #include "basic.h"
+#include "model.h"
+#include "event.h"
+#include "ps2asm.h"
 
 typedef struct {
     u8 unk00[0x64];
@@ -33,6 +36,20 @@ extern void *memset(void *a, s32 b, u32 c);
 extern void dds3InitPoseSet(dds3Basic_t *basic);
 
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, u32 flag);
+
+extern s32 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
+
+extern void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic);
+
+extern void fldSdwDraw(dds3Basic_t *basic);
+
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, s32 aId);
+
+extern void dds3DrawUnitObjectShadow(s32 fade, f32 x, f32 y, f32 z, f32 radius);
+
+extern s32 dds3CheckPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
+
+extern sdfModelOt_t D_002F69B8[];
 
 extern void evtDeleteUnitHandle(struct evtUnit_t *h);
 
@@ -139,7 +156,55 @@ void dds3UnitObjectBasicDestructor(dds3Basic_t *aPtr) {
 
 INCLUDE_ASM(const s32, "basic/dds3UnitObjectBasic", dds3UnitObjectBasicMainProcedure);
 
-INCLUDE_ASM(const s32, "basic/dds3UnitObjectBasic", dds3UnitObjectBasicDrawProcedure);
+s32 dds3UnitObjectBasicDrawProcedure(dds3Basic_t *aPtr) {
+    sdfVector4_t pos = {0.0f, 0.0f, 0.0f, 1.0f};
+    dds3UnitObjectBasicWorkData_t *work;
+    dds3ObjectBaseControlWorkData_t *control;
+    struct evtUnit_t *hUnit;
+    s32 fade;
+
+    if (dds3ObjectBaseCheckFlag(aPtr, 1) != 0) {
+        return 1;
+    }
+    hUnit = dds3GetUnitHandleObjectBasic(aPtr);
+    if (dds3ObjectBaseCheckFlag(aPtr, 0x200) != 0 && hUnit != NULL &&
+        !(hUnit->owner->flags & 1)) {
+        fldSdwDraw(aPtr);
+    }
+    work = aPtr->workdata;
+    if (work->ot == -1) {
+        dds3ObjectBaseModelLinkOt(&D_002F69B8[0], aPtr);
+    } else {
+        dds3ObjectBaseModelLinkOt(&D_002F69B8[work->ot], aPtr);
+    }
+    if (dds3ObjectBaseCheckFlag(aPtr, 0x400) == 0) {
+        return 1;
+    }
+    if (dds3ObjectBaseCheckFlag(aPtr, 0x1000) != 0) {
+        return 1;
+    }
+    if (hUnit == NULL) {
+        return 1;
+    }
+    control = dds3UnitObjectBasicGetControlWorkData(aPtr);
+    fade = *((u8 *)&((mdlObj_t *)control->pModel)->inner->color + 3);
+    if (sdfModelGetMarkPos(hUnit->owner->inner, 0) != 0) {
+        SDF_VU0_STOREVECTOR_MEMOPS(pos);
+        dds3DrawUnitObjectShadow(fade, pos.x, aPtr->poseset->pos.y, pos.z, aPtr->poseset->r);
+    } else {
+        if (dds3CheckPoseSetFlag(aPtr->poseset, 8) != 0) {
+            pos.x = aPtr->poseset->pos2.x;
+            pos.y = aPtr->poseset->pos2.y;
+            pos.z = aPtr->poseset->pos2.z;
+        } else {
+            pos.x = aPtr->poseset->pos.x;
+            pos.y = aPtr->poseset->pos.y;
+            pos.z = aPtr->poseset->pos.z;
+        }
+        dds3DrawUnitObjectShadow(fade, pos.x, pos.y, pos.z, aPtr->poseset->r);
+    }
+    return 1;
+}
 
 void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *unitBasic) {
     dds3UnitObjectBasicWorkData_t *work;
