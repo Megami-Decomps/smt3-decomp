@@ -303,3 +303,4 @@ src/smt3/event/evtCommand.c	redthing1	open	2026-10-28	evtCommand_MODEL_RGB	color
 src/smt3/sdf/sdf3D.c	redthing1	done	2026-10-28	1 fn / 696 B	sdf3DMakeLightParallelPacket; VU scratch and shared scalar/packet helpers
 src/smt3/sdf/sdfQuat.c	redthing1	done	2026-10-28	2 fn / 556 B	FromEulerXYZ and FromEuler; ordered VU quaternion scratch
 src/smt3/sdf/sdf3D.c	redthing1	done	2026-10-28	1 fn / 480 B	sdf3DMakeScreenParam; perspective and clip-to-screen mapping
+src/smt3/newbattle/nbMainProcess.c	redthing1	done	2026-10-28	1 fn / 516 B	battle debug camera selection and display; complete unit 42 match, 0 differ
