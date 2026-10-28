@@ -6,7 +6,7 @@
 #include "field.h"
 #include "ps2asm.h"
 
-typedef struct fldFileRequest_t fldFileRequest_t;
+typedef struct fileRequest fileRequest_t;
 
 enum sl_mc_result
 {
@@ -133,7 +133,7 @@ s32 slExitToTitle2(void);
 
 extern char D_005328D0[];
 
-fldFileRequest_t *fileLoad(const char *filename);
+fileRequest_t *fileLoad(const char *filename);
 
 extern sdfMemHandle_t *D_00551D44;
 
@@ -273,15 +273,15 @@ extern s32 gslAnimCnt;
 
 extern s32 slDraw(s32);
 
-s32 pacFileCheckEnd(const fldFileRequest_t *pacFileHandle);
+s32 pacFileCheckEnd(const fileRequest_t *pacFileHandle);
 
-sdfMemHandle_t *fileGetMemHandle(const fldFileRequest_t *fileHandle);
+sdfMemHandle_t *fileGetMemHandle(const fileRequest_t *fileHandle);
 
-u8 *fileGetLoadPtr(const fldFileRequest_t *fileHandle);
+u8 *fileGetLoadPtr(const fileRequest_t *fileHandle);
 
-u32 fileGetLoadSize(const fldFileRequest_t *fileHandle);
+u32 fileGetLoadSize(const fileRequest_t *fileHandle);
 
-s32 fileHandleFree(fldFileRequest_t *fileHandle);
+s32 fileHandleFree(fileRequest_t *fileHandle);
 
 extern char D_00532948[];
 
@@ -567,17 +567,16 @@ extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, void **dataOut, s32 fl
 
 extern void evtBitOn(s32 no);
 
-extern void dds3StartProcess(const char *v1, s32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
-                             s32 (*drawExit)(dds3ProcessID_t *), s32 (*deleteExit)(void), void *p);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
+                             s32 (*drawExit)(dds3ProcessID_t *),
+                             s32 (*deleteExit)(dds3ProcessID_t *), void *p);
+
+void slShutDownProcess(dds3ProcessID_t *id);
+void func_00157058(void);
 
 extern void *dds3GetActiveScene(void);
 
 extern void dds3VisibleSceneBasic(void *basic, s32 visible);
-
-extern s32 slShutDownProcess(void);
-
-
-
 
 void mcMakeFileName(char *path, s32 num) {
     if (slDDS3To31Flg != 0) {
@@ -2134,12 +2133,12 @@ s32 slCalc(dds3ProcessID_t *id) {
         cur = (s32 (*)())next;
     }
     proc_func_ans = cur;
-    if (job != 0 && pacFileCheckEnd((fldFileRequest_t *)job) != 0) {
+    if (job != 0 && pacFileCheckEnd((fileRequest_t *)job) != 0) {
         baseIconFileHandle = 0;
-        D_00551D44 = fileGetMemHandle((fldFileRequest_t *)(u32)job);
-        D_00551D48 = (u32)fileGetLoadPtr((fldFileRequest_t *)(u32)job);
-        D_00551D4C = fileGetLoadSize((fldFileRequest_t *)(u32)job);
-        fileHandleFree((fldFileRequest_t *)(u32)job);
+        D_00551D44 = fileGetMemHandle((fileRequest_t *)(u32)job);
+        D_00551D48 = (u32)fileGetLoadPtr((fileRequest_t *)(u32)job);
+        D_00551D4C = fileGetLoadSize((fileRequest_t *)(u32)job);
+        fileHandleFree((fileRequest_t *)(u32)job);
     }
     return 0;
 }
@@ -2213,7 +2212,8 @@ void fmProcTrigSequence(s32 mode) {
             proc_func_ans = (s32 (*)(dds3ProcessID_t *))slBootProc1st;
         }
     }
-    dds3StartProcess(D_00532948, 0x2B0A, 0, 0, slCalc, slShutDownProcess, NULL);
+    dds3StartProcess(D_00532948, 0x2B0A, 0, 0, slCalc,
+                     (s32 (*)(dds3ProcessID_t *))slShutDownProcess, NULL);
     slProcShutDownFlg = 1;
     dds3FadeIn(0, 0, 0, 8);
     slSetInfo(0);
@@ -2249,7 +2249,52 @@ void fmProcTrigSequence(s32 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "mc/slMain", slShutDownProcess);
+/* KillProcess passes this callback's process ID but discards its return. */
+void slShutDownProcess(dds3ProcessID_t *id) {
+    func_00157058();
+}
+
+/* ExitBootMc, ExitEndSave, and the neighboring exit path call this leaf. */
+void func_00157050(void) {}
+
+extern void sdfTexFreeDelayed(sdfTexHandle_t *handle);
+extern void fileSync(fileRequest_t *fileHandle);
+extern void sdfMemFreeHandleDirect(sdfMemHandle_t **aHandlePtr);
+extern s32 dds3KillProcessName(char *name, s32 shutdowntimer);
+
+/* Shared cleanup entry used by the callback wrapper and three exit paths. */
+void func_00157058(void) {
+    dds3Basic_t *scene;
+
+    if (slProcShutDownFlg == 0) {
+        return;
+    }
+
+    slProcShutDownFlg = 0;
+    if (_saveUI != NULL) {
+        sdfTexFreeDelayed(_saveUI);
+        _saveUI = NULL;
+    }
+    if (slProcPtr != NULL) {
+        sdfTexFreeDelayed(slProcPtr);
+        slProcPtr = NULL;
+    }
+    if (dds3SearchProcessName(D_005328C0) == NULL) {
+        scene = dds3GetActiveScene();
+        if (scene != NULL) {
+            dds3VisibleSceneBasic(scene, 1);
+        }
+    }
+    if (baseIconFileHandle != 0) {
+        fileSync((fileRequest_t *)baseIconFileHandle);
+        D_00551D44 = fileGetMemHandle((fileRequest_t *)baseIconFileHandle);
+        fileHandleFree((fileRequest_t *)baseIconFileHandle);
+        baseIconFileHandle = 0;
+    }
+    sdfMemFreeHandleDirect(&D_00551D44);
+    dds3KillProcessName(D_00532948, 1);
+    dds3SoftResetOn();
+}
 
 u32 fmShutDown2(void) {
     return 1;
