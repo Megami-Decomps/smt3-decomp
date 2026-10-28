@@ -2663,8 +2663,9 @@ void campDhDrawHeartsIcon(s32 a, s32 b, s32 c, s8 d, s32 e)
     campDhDrawHeartsGauge((u8 *)work + 0x1F78, d);
 }
 
-/* NON_MATCHING: 2 of 28 words differ (first at +0x38). */
-#ifdef NON_MATCHING
+extern void campDhDrawBoxSprite(s32 alpha);
+extern void campDhDrawPanel(s32 x, s32 y, s32 unused, s32 alpha);
+
 void campDhDrawIcon(void)
 {
     campDhDrawBoxSprite(campDhDrawWork->unk_1C);
@@ -2674,9 +2675,6 @@ void campDhDrawIcon(void)
     }
     campDhDrawBox(campDhDrawWork->fadeAlpha);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawIcon);
-#endif
 
 extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
 
