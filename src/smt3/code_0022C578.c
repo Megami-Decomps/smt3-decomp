@@ -3163,7 +3163,48 @@ void cmpExpandColor(u64 *dst, u32 color)
     dst[1] = ((wide & 0xFF00) >> 8) | ((u64)(color & 0xFF) << 32);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSetup3DView);
+typedef struct
+{
+    sdf3DLight_t *parallel[4];
+    sdfVector4_t ambient;
+    sdf3DFogParam_t fog;
+} dds3LightState_t;
+
+extern sdfDrawTag_t D_00574A60[2];
+extern sdf3DInitPacket_t D_00574AA0[2];
+extern sdfDrawTag_t D_00574AE0[2];
+extern sdf3DLightParallelPacket_t D_00574B20[2];
+extern sdf3DViewportPacket_t D_00574CE0[2];
+extern sdfMatrix4_t D_002FA240;
+extern dds3LightState_t dds3LightParam;
+PS2_SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
+extern f32 aViewDown[4];
+extern void LookAtMatrix(f32 *, f32 *, f32 *);
+extern void sdf3DMakeScreenParam(sdf3DScreenParam_t *);
+extern void sdfDrawTagInit(sdfDrawTag_t *);
+extern void sdf3DLinkInitPacket(sdfDrawTag_t *, sdf3DInitPacket_t *);
+extern void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *, sdf3DScreenParam_t *, sdfMatrix4_t *);
+extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
+extern void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *, sdf3DLight_t **, sdfVector4_t *);
+
+void cmpDrawSetup3DView(void)
+{
+    s32 i;
+
+    sdf3DMakeScreenParam((sdf3DScreenParam_t *)dds3ScreenParam);
+    LookAtMatrix(aViewTarget, aViewEye, aViewDown);
+    SDF_VU0_STOREMATRIX(&D_002FA240);
+    for (i = 0; i < 2; i++) {
+        sdfDrawTagInit(&D_00574A60[i]);
+        sdf3DLinkInitPacket(&D_00574A60[i], &D_00574AA0[i]);
+        sdf3DMakeViewportPacket(&D_00574CE0[i], (sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+        sdfDrawTagLink(&D_00574A60[i], (u32)&D_00574CE0[i]);
+        sdfDrawTagInit(&D_00574AE0[i]);
+        sdf3DMakeLightParallelPacket(&D_00574B20[i], dds3LightParam.parallel, &dds3AmbientColor);
+        sdfDrawTagLink(&D_00574AE0[i], (u32)&D_00574B20[i]);
+    }
+}
+
 
 s32 cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
 {
