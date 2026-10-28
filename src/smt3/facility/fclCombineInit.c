@@ -2021,7 +2021,24 @@ s32 cmbDrawPhaseDefault(s32 active)
     cmpUpdateListSelection(&pos, (u8 *)CMB_GBWK + 0x1C, 0, mode, 0x100, 0x47);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawInfoSprite);
+extern s32 fclDrawPanelSprite(s32 id, s32 arg);
+
+void cmbDrawInfoSprite(s32 unusedX, s32 unusedY, s32 z, s32 unusedOt)
+{
+    s32 i;
+
+    fclDrawPanelSprite(0x30000, 0x47);
+    for (i = 0; i < 2; i++) {
+        fclDrawSpriteRes(0, 0, z, NULL, 0, 0x1F, CMB_GBWK->texHandle,
+                         cmbSpriteTable, 0x47);
+        fclDrawSpriteRes(0, 0, z, NULL, 0, 0x20, CMB_GBWK->texHandle,
+                         cmbSpriteTable, 0x47);
+    }
+    for (i = 0x15; i < 0x1F; i++) {
+        fclDrawSpriteRes(0, 0, z, NULL, 0, (u16)i, CMB_GBWK->texHandle,
+                         cmbSpriteTable, 0x47);
+    }
+}
 
 /* Placement arguments are retained for callers; the header uses fixed coordinates. */
 void cmbDrawTopSprite(s32 unusedX, s32 unusedY, u32 unusedZ, s32 unusedOt)
