@@ -323,6 +323,10 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern void *nbEventProcess3(dds3ProcessID_t *id);
 
+extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+extern void nbGetEventEntry(nbMainProcessData_t *data);
+
 extern char D_00545DB0[];
 
 extern void pacFileHandleFree_(void *pacHandle);
@@ -487,7 +491,41 @@ s32 nbGetDeadEventFadeStopFrame(s32 eventno)
     return nbEventEntryTable[eventno % 100].fadestopframe;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbEventProcess", nbEventProcess3);
+void *nbEventProcess3(dds3ProcessID_t *id)
+{
+    nbEventProcessData_t *event = dds3GetProcessData(id);
+    nbMainProcessData_t *data = event->data;
+    s32 i;
+
+    for (i = 4; i < 14; i++) {
+        nbFormation_t *form = &data->form[i];
+        datUnitWork_t *unit;
+
+        if (form->stat & 1) {
+            unit = nbGetUnitWorkFromFormindex(i);
+            if (unit != NULL && (unit->badstatus & 0xFFF) != 0) {
+                nbMakeBadKaifukuPacket(0, 0, form);
+            }
+        }
+    }
+    ResetWaitMotion(event);
+    {
+        u32 clearMask = ~8u;
+        nbFormation_t *form = data->form;
+        i = 13;
+        do {
+            i--;
+            form->stat &= clearMask;
+            form++;
+        } while (i >= 0);
+    }
+    if (nbEventEntryTable[data->eventno].unk_04 != 0) {
+        event->unk_18 = NULL;
+        nbGetEventEntry(data);
+        return (void *)nbEventEntryTable[data->eventno].unk_04;
+    }
+    return (void *)-1;
+}
 
 void *nbEventProcess1(dds3ProcessID_t *id)
 {
