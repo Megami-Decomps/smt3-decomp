@@ -55,7 +55,31 @@ INCLUDE_ASM(const s32, "interface/frName", frSetNameData);
 
 INCLUDE_ASM(const s32, "interface/frName", frTransNameImage);
 
+extern GsFont_t *pFont[4][16];
+extern void fmRetFontMem(FontMem_t *memory);
+
+/* NON_MATCHING: 12 of 54 words differ, exact size; count/counter setup ordering. */
+#ifdef NON_MATCHING
+void frRestoreNameImage(s8 target)
+{
+    s32 index;
+    s32 count = frNameGlobalWork->nameCounts[target][0] +
+                frNameGlobalWork->nameCounts[target][1];
+
+    if (D_0056BD50[target] != 0) {
+        if (--D_0056BD50[target] == 0) {
+            for (index = 0; index < count; index++) {
+                if (pFont[target][index] != NULL) {
+                    fmRetFontMem(pFont[target][index]->font_mem);
+                }
+            }
+            printf("NAME[%d] : Restore. \n", target);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "interface/frName", frRestoreNameImage);
+#endif
 
 INCLUDE_ASM(const s32, "interface/frName", frCreateNameHandle);
 
@@ -98,7 +122,43 @@ frFontHandle_t *frGetNameFRQ(s8 target, frFontHandle_t *chain, s32 firstOption)
     return frGetName1NFRQ(target, name, firstOption);
 }
 
+extern void frEnableMode(s32 flag);
+extern u8 frDisableMode(u8 flag);
+extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type, frFontHandle_t *chain);
+extern void frSetFontSpace(frFontHandle_t *font, s32 spacing);
+
+/* NON_MATCHING: 4 of 86 words differ, exact size; empty-name loop setup. */
+#ifdef NON_MATCHING
+frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 firstOption)
+{
+    u8 text[frNameGlobalWork->cNameCounts[target] * 2 + 1];
+    u8 *out = text;
+    s32 length = 0;
+    s32 i;
+    frFontHandle_t *font;
+
+    for (i = 0; i < frNameGlobalWork->cNameCounts[target]; i++) {
+        u8 first = frNameGlobalWork->cNames[target][i * 2];
+        if (first == 0) {
+            *out = frNameGlobalWork->cNames[target][i * 2 + 1];
+        } else {
+            *out++ = first;
+            length++;
+            *out = frNameGlobalWork->cNames[target][i * 2 + 1];
+        }
+        out++;
+        length++;
+    }
+    text[length] = 0;
+    frEnableMode(1);
+    font = frLinkFontString(text, style, firstOption, 0, chain);
+    frDisableMode(1);
+    frSetFontSpace(font, 4);
+    return font;
+}
+#else
 INCLUDE_ASM(const s32, "interface/frName", frGetCNameFRQ);
+#endif
 
 INCLUDE_SDATA(const s32, "interface/frName", D_0054F448);
 

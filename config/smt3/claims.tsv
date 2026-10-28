@@ -475,3 +475,4 @@ src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 332 B	Hearts master
 src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 328 B	Hearts event choice and panel completion transitions with shared state update; owner 29 match, 0 differ
 src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 560 B	item and Hearts gift selection, message progression and motion transitions; owner 30 match, 0 differ
 src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 508 B	skill replacement confirmation, cursor-byte selection and apply/cancel transitions; owner 31 match, 0 differ
+src/smt3/interface/frName.c	redthing1	done	2026-10-28	0 matches / 2 guarded drafts	font-image reference release and C-name conversion; exact-size 12-word and 4-word residuals

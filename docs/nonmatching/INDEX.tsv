@@ -112,6 +112,8 @@ fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/nonmatching/field/fl
 frPreCalcStrWidth	interface/frFont	0xF8	Fifty-four of sixty-two words match	docs/nonmatching/interface/frFont.md	5
 frAnalyzeTag	interface/frFont	0x518		docs/nonmatching/interface/frFont.md	48
 frAnalyzeMessage	interface/frFont	0x200		docs/nonmatching/interface/frFont.md	100
+frRestoreNameImage	interface/frName	0xD8	42 of 54 words match	docs/nonmatching/interface/frName.md	5
+frGetCNameFRQ	interface/frName	0x158	82 of 86 words match	docs/nonmatching/interface/frName.md	28
 DrawMesFlow	interface/itfMesManager	0x18C	Thirty-seven of ninety-nine words match	docs/nonmatching/interface/itfMesManager.md	5
 DrawSelectCursor	interface/itfMesManager	0x2FC		docs/nonmatching/interface/itfMesManager.md	44
 DrawMsgMng_Process	interface/itfMesManager	0x70	Twenty-four of twenty-eight words match	docs/nonmatching/interface/itfMesManager.md	79
