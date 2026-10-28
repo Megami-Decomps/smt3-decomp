@@ -380,4 +380,4 @@ src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	1 fn / 616 B	model-pos
 src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	1 fn / 512 B	world-position provider with camera and direction paths; owner 67 match, 0 differ
 src/smt3/facility/fclRagInit.c	redthing1	done	2026-10-28	0 matches	preview-loop and texture-load attempts remain assembly; owner 19 match, 0 differ
 src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	7 fn / 792 B	visibility callbacks recovered from one span; owner 74 match, 0 differ
-src/smt3/effect/effBattleMisc.c	redthing1	active	2026-10-28	sphere boundary and contract recovery	separate wrappers and bounds core; correct inferred helper pairings
+src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	3 fn / 100 B	sphere wrappers and corrected helper pairings; bounds core remains assembly; owner 77 match, 0 differ

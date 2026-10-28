@@ -61,6 +61,8 @@ extern void SetRotateMatrixX(f32 aAngle);
 extern void SetRotateMatrixY_B(f32 aAngle);
 extern void MultMatrixRevNoArg(void);
 extern f32 effBTLModelGroupGetSphere(u32 group);
+f32 effBTLModelGroupGetSphere2(u32 group);
+f32 effBTLModelGroupGetSphereExp(u32 group, u32 model);
 extern f32 effLinePointLength(sdfVector4_t *pDir, sdfVector4_t *pLinePos, sdfVector4_t *pPos);
 extern void SetRotateMatrixY(f32 aAngle);
 extern f32 sdfSin(f32 aRadius);
@@ -355,11 +357,24 @@ f32 effBTLModelGroupGetWidthX(u32 group) {
     return max - min;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphere);
+f32 effBTLModelGroupGetSphere(u32 group) {
+    return effBTLModelGroupGetSphere2(group);
+}
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphereOld);
+f32 effBTLModelGroupGetSphereOld(u32 group) {
+    sdfVector4_t center;
+    f32 radius;
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphere2);
+    effBTLModelGroupGetCenter(group);
+    SDF_VU0_STOREVECTOR_MEMOPS(center);
+    radius = effBTLModelGroupGetMaxLength(&center, group);
+    SDF_VU0_LOADVECTOR_MEMOPS(center);
+    return radius;
+}
+
+f32 effBTLModelGroupGetSphere2(u32 group) {
+    return effBTLModelGroupGetSphereExp(group, 1);
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphereExp);
 
