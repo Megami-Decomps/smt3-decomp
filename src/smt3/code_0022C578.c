@@ -110,7 +110,12 @@ typedef struct
     /* 0x0005 */ u8 unk_0005[0xF];
     /* 0x0014 */ void *allocation;
     /* 0x0018 */ s8 unk_18;
-    /* 0x0019 */ u8 unk_0019[0x17];
+    /* 0x0019 */ u8 unk_0019[3];
+    /* 0x001C */ s32 reserved001C;
+    /* 0x0020 */ s32 entryStep;
+    /* 0x0024 */ s32 targetPhase;
+    /* 0x0028 */ u8 reserved0028[4];
+    /* 0x002C */ s32 fadeAlpha;
     /* 0x0030 */ s8 unk_30;
     /* 0x0031 */ s8 unk_31;
     /* 0x0032 */ u8 unk_0032[0x112E];
@@ -2810,7 +2815,37 @@ void cmpInitDHWindow(u8 *base)
     dh->unk_00 = 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpinitDH);
+extern void cmpInitSeqInfo(cmpSeqInfo_t *work, cmpSeqInfo_t *parent);
+extern void cmpInitHeartsIcon(campInfoWork_t *work);
+extern s8 fclGetCurrentSelMessagePos(void);
+
+campInfoWork_t *cmpinitDH(cmpSeqInfo_t *parent)
+{
+    campInfoWork_t *work;
+    if (campInfoWork == NULL) {
+        void *allocation = sdfMemAllocDirect(0x1F8C);
+        work = sdfMemLock(allocation);
+        memset(work, 0, 0x1F8C);
+        work->allocation = allocation;
+        work->fadeAlpha = 0x100;
+        cmpLoadDHTextures((cmpDhWork_t *)work);
+    } else {
+        work = campInfoWork;
+    }
+    work->reserved001C = 0;
+    work->entryStep = 0;
+    work->targetPhase = 0;
+    cmpInitSeqInfo((cmpSeqInfo_t *)work, parent);
+    work->unk_00 &= ~1;
+    cmpInitHeartsIconTable(work);
+    cmpInitHeartsIcon(work);
+    cmpInitDHWindow((u8 *)work);
+    cmpSetDHEntry(*(s8 *)((u8 *)work + work->unk_31 * 0x34 + 0x1280));
+    work->unk_30 = fclGetCurrentSelMessagePos();
+    fclSetSelMessagePos(0);
+    work->unk_04 = 0;
+    return work;
+}
 
 extern void campDhFreeResources(campInfoWork_t *work);
 
@@ -2826,7 +2861,7 @@ void camp_update_dh_Shutdown(void)
     }
 }
 
-extern campInfoWork_t *cmpinitDH();
+extern campInfoWork_t *cmpinitDH(cmpSeqInfo_t *parent);
 
 extern void camp_calc_dh_Process();
 
@@ -2842,7 +2877,7 @@ void *cmpStartProcessDH(cmpSeqInfo_t *parent)
 {
     void *proc;
 
-    campInfoWork = cmpinitDH();
+    campInfoWork = cmpinitDH(parent);
     cmpSetStockVisible(0);
     proc = dds3StartProcess("camp_calc_dh", 0x3F0, 1, 1, camp_calc_dh_Process, NULL, campInfoWork);
     dds3StartProcess("camp_draw_dh", 0x2B05, 1, 1, camp_draw_dh_Process, NULL, campInfoWork);
