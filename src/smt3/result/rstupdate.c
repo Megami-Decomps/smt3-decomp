@@ -95,7 +95,12 @@ typedef struct
     /* 0x0078 */ s32 unk_78;
     /* 0x007C */ u8 unk_7C[0xF0];
     /* 0x016C */ datUnitWork_t *pCurrentStock;
-    /* 0x0170 */ u8 unk_170[0x112E];
+    /* 0x0170 */ u8 unk_170[0x1128];
+    /* 0x1298 */ s8 giftKind;
+    /* 0x1299 */ u8 reserved1299;
+    /* 0x129A */ u16 giftId;
+    /* 0x129C */ u8 giftMessage;
+    /* 0x129D */ s8 giftStep;
     /* 0x129E */ s8 Flag;
     /* 0x129F */ u8 unk_129F[6];
     /* 0x12A5 */ u8 unk_12A5[3];
@@ -330,7 +335,85 @@ void rstUpdateSeqDevilParam(void)
     }
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqGift);
+extern char *pStr[];
+extern char *pstr[];
+extern void datAddItem(s32 id, s32 count);
+extern s32 datAddHearts(s32 id);
+extern void rstSetMotionReqFromTbl(s8 type);
+extern s32 fclChkSelMessage(void);
+extern s8 fclGetSelMessagePos(void);
+
+void rstUpdateSeqGift(void)
+{
+    if (startPos->giftId == 0) {
+        if (startPos->Flag > 0) {
+            switch (startPos->Flag) {
+            case 1:
+                fclStartMessage(startPos->giftMessage);
+                break;
+            case 2:
+                fclStartMessage(27);
+                break;
+            case 3:
+                fclStartMessage(26);
+                break;
+            }
+            startPos->Flag = 0;
+        }
+        switch (fclChkMessage()) {
+        case 2:
+            if (startPos->giftStep == 0) {
+                p2sdPlaySE(25, 127, 63);
+                return;
+            }
+            break;
+        case 0:
+            if (startPos->giftStep > 0) {
+                startPos->unk_0001 = (u8)startPos->unk_0001 + 1;
+                startPos->unk_0004 = 1;
+            } else {
+                startPos->Flag = 3;
+                startPos->giftStep = (u8)startPos->giftStep + 1;
+            }
+            break;
+        }
+    } else {
+        if (fclChkSelMessage() != 0)
+            return;
+        switch (fclGetSelMessagePos()) {
+        case 0:
+            fclEndMessage();
+            fclSetMessageVar_20743088(1, (s32)text2[startPos->pCurrentStock->id]);
+            if (startPos->giftKind == 0) {
+                fclSetMessageVar_20743088(2, (s32)pStr[startPos->giftId]);
+                datAddItem(startPos->giftId, 1);
+            } else {
+                fclSetMessageVar_20743088(2, (s32)pstr[startPos->giftId]);
+                datAddHearts(startPos->giftId);
+            }
+            startPos->Flag = 1;
+            {
+                rstWork_t *work = startPos;
+                work->giftId = 0;
+                work->giftStep = 0;
+            }
+            rstSetMotionReqFromTbl(1);
+            break;
+        case 2:
+            break;
+        case 1:
+            fclEndMessage();
+            startPos->Flag = 2;
+            {
+                rstWork_t *work = startPos;
+                work->giftStep = 1;
+                work->giftId = 0;
+            }
+            rstSetMotionReqFromTbl(4);
+            break;
+        }
+    }
+}
 
 extern s32 rstWaitConfirmButton(void);
 extern s8 fclEndMessage(void);

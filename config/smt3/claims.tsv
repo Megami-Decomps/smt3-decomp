@@ -473,3 +473,4 @@ src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 160 B	parameter con
 src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 348 B	devil parameter message iteration with signed bonuses and current cursor reload after callbacks; owner 27 match, 0 differ
 src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 332 B	Hearts mastery registration, class-change notification and bonus application; owner 28 match, 0 differ
 src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 328 B	Hearts event choice and panel completion transitions with shared state update; owner 29 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 560 B	item and Hearts gift selection, message progression and motion transitions; owner 30 match, 0 differ
