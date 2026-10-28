@@ -62,9 +62,8 @@ typedef struct {
     s8 alternateCursorActive;
     s8 inputRowEnabled[3];
     s8 inputPos;
-    u8 reserved5151;
     u8 inputChars[3][16][2];
-    u8 reserved51B2[2];
+    u8 reserved51B1[3];
     sdfTexHandle_t *textures[4];
     s32 animation;
 } nmeWork_t;
