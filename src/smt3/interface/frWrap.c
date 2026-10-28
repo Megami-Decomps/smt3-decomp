@@ -189,7 +189,11 @@ frFontRequest_t *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, const char
 
 INCLUDE_ASM(const s32, "interface/frWrap", frwGetSmallFontFRQ2);
 
-INCLUDE_ASM(const s32, "interface/frWrap", frwGetSmallFontNoPropFRQ);
+frFontRequest_t *frwGetSmallFontNoPropFRQ(s32 x, s32 y, s32 depth, u32 colors,
+                                        const char *text, frFontRequest_t *previous)
+{
+    return frwGetFontEx(x, y, depth, colors, text, 3, 1, previous);
+}
 
 INCLUDE_ASM(const s32, "interface/frWrap", frwGetSmallNumFontFRQ);
 
