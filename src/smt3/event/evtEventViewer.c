@@ -103,7 +103,7 @@ struct evtViewerInfo_t {
     s32 nowmenu;                     /* 0x2280 */
     s32 menusw;                   /* 0x2284 */
     u32 word2288;
-    u8 unk228C[4];
+    u8 reserved228C[4];
     s32 drawblur2;                      /* 0x2290 */
     s32 drawmblur;                      /* 0x2294 */
     s32 drawdblur;                 /* 0x2298 */
