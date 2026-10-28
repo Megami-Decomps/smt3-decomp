@@ -560,3 +560,5 @@ src/smt3/newbattle/nbNegoProcess.c	redthing1	done	2026-10-28	1 fn / 508 B	next-n
 src/smt3/newbattle/nbFormation.c	redthing1	done	2026-10-28	1 fn / 404 B	two-pass motion restart with recovered model owner and visual records; owner 28 match, 0 differ
 src/smt3/facility/fclPanel.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	type-zero gradient at native size with six-word color scheduling residual
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 612 B	target model rendering with color/scale/enable/OT call order, typed mark vectors and callback reloads; owner 162 match, 0 differ
+src/smt3/newbattle/NbNegoFlowOne.c	redthing1	done	2026-10-28	1 fn / 216 B	Flow1_23 selected-unit message dispatch and typed message offset
+src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 596 B	effect package family and cut resource initialization with native packed-model prefix

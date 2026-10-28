@@ -333,3 +333,23 @@ Reset UID 149 follows ordinary call UID 145 in `.01.sibling` and remains
 in `.11.cfg`; it disappears in `.13.life`. The in-range call UID 110 is
 already a sibling call and remains one. Removing the reset makes the
 otherwise exact initializer eight bytes short. The complete unit stays exact.
+
+## effBTLSystemInit: one live counter across two loops
+
+The family loop uses `i` from 0 through 29; the later cut loop resets it to
+24 and decrements through 0. Both values have real loop consumers, disjoint
+lifetimes and a truthful signed type; the address never escapes. Separating
+the cut counter changes 12 of 149 instruction words at the same 596-byte size.
+
+A qualified `cc1probe.sh --alloc --sched --no-dumps` trace verifies ordinary
+and probed output parity. The shared counter is pseudo 87: UID 68 compares it
+with 30, UID 341 increments it, and UID 356 resets it to 24. Global allocation
+uses its combined 14 references, live length 218 and 16 crossed calls
+(priority 1926), assigning it `$22`. This establishes shared pseudo ownership,
+rather than inferring reuse from the native register alone. Independent native
+review and the complete owner check confirm both loops and callback ordering.
+
+In the ordinary-part branch, read the archive pointer before publishing the
+locked data pointer. That consumed snapshot preserves the native load before
+the store; reading the archive afterward swaps the two instructions. The
+scheduler trace places archive load UID 265 before data store UID 268.

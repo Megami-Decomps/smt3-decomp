@@ -2340,7 +2340,117 @@ void effBTLEncountEnd(void)
     effBTLSkillEnd();
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSystemInit);
+typedef struct
+{
+    u32 size;
+    u32 offset;
+    u32 type;
+    u32 reserve;
+} dds3EffectPCPData_Part_t;
+
+typedef struct
+{
+    u32 kateg;
+    u32 param;
+    u32 part;
+    u32 reserve;
+    dds3EffectPCPData_Part_t pcpData[1];
+} dds3EffectPCPData_t;
+
+extern void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number);
+extern u32 dds3EffectPCPDataGetSize(dds3EffectPCPData_t *hPCPData, u32 number);
+
+extern const char D_00533990[], D_005339A0[];
+INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533990);
+INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005339A0);
+
+void effBTLSystemInit(void)
+{
+    dds3EffectPCPData_t *archiveData;
+    void *archiveHandle;
+    u32 archiveIndex;
+    s32 i;
+    u32 partIndex;
+    u32 size;
+    void *data;
+    effBattleSystem_effBTLSystem_Part_tag *part;
+    effBattleSystem_effBTLSystem_Cut1_tag *cut;
+
+    printf(D_00533990, D_005339A0);
+    archiveHandle = sdfDevLoadFileEx(D_005339A0, (u32 *)&archiveData, NULL);
+    archiveIndex = 0;
+    i = 0;
+    while (i < 0x1E) {
+        if (D_0031BF00[i].pPartList != NULL) {
+            part = D_0031BF00[i].pPartList;
+            partIndex = 0;
+            if (D_0031BF00[i].unknown30 != 0) {
+                do {
+                    if (part->type == 3) {
+                        struct {
+                            u32 fileSize;
+                            u8 reserved[0xC];
+                        } modelHeader;
+                        void *source;
+
+                        size = dds3EffectPCPDataGetSize(archiveData, archiveIndex);
+
+                        part->hMem = sdfMemAllocDirect(size + 0x10);
+                        part->pData = sdfMemLock(part->hMem);
+                        /* Packed model header: only the length is initialized. */
+                        modelHeader.fileSize = size;
+                        memcpy(part->pData, &modelHeader, sizeof(modelHeader));
+                        data = part->pData;
+                        source = dds3EffectPCPDataGetData(archiveData, archiveIndex);
+                        memcpy((u8 *)data + sizeof(modelHeader), source, size);
+                    } else {
+                        void *source;
+                        dds3EffectPCPData_t *package;
+
+                        size = dds3EffectPCPDataGetSize(archiveData, archiveIndex);
+
+                        part->hMem = sdfMemAllocDirect(size);
+                        data = sdfMemLock(part->hMem);
+                        package = archiveData;
+                        part->pData = data;
+                        source = dds3EffectPCPDataGetData(package, archiveIndex);
+                        memcpy(data, source, size);
+                    }
+                    part->refCount = 0;
+                    archiveIndex++;
+                    part++;
+                    partIndex++;
+                } while (partIndex < (u32)D_0031BF00[i].unknown30);
+            }
+        }
+        i++;
+    }
+
+    cut = effBTLSystemCut1Data;
+    /* Reuse the loop counter for the 25 cut entries, in descending order. */
+    i = 0x18;
+    do {
+        if (cut->fileName != NULL) {
+            void *source;
+
+            size = dds3EffectPCPDataGetSize(archiveData, archiveIndex);
+
+            cut->hMem = sdfMemAllocDirect(size);
+            data = sdfMemLock(cut->hMem);
+            cut->pData = data;
+            source = dds3EffectPCPDataGetData(archiveData, archiveIndex++);
+            memcpy(data, source, size);
+        } else {
+            cut->hMem = NULL;
+            cut->pData = NULL;
+        }
+        cut->hBTLEffect = NULL;
+        cut->use = 0;
+        cut++;
+        i--;
+    } while (i >= 0);
+    sdfMemFreeDirect(archiveHandle);
+}
 
 void effBTLSystemEnd(void)
 {
