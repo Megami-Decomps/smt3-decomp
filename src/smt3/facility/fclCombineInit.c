@@ -102,7 +102,7 @@ extern cmbPairEntry_t D_0032DB90[];
 
 extern datDevilInfo_t datDevilTable[];
 
-extern s32 dds3GetRandA(s32 name);
+extern u32 dds3GetRandA(void *state);
 
 extern s32 datGetMaxHp(datUnitWork_t *work);
 
@@ -1328,7 +1328,29 @@ s32 cmbApplyEvoResult(datUnitWork_t *unit)
     return total;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbPickEvoResult);
+s32 cmbPickEvoResult(datUnitWork_t *unit)
+{
+    s32 cumulative = 0;
+    s32 totalWeight = cmbApplyEvoResult(unit);
+    s32 pick;
+    s32 i;
+    u16 *skill;
+
+    if (totalWeight == 0) {
+        return 0;
+    }
+    i = 0;
+    pick = dds3GetRandA(0) % (u32)totalWeight;
+    skill = unit->keisyoskill;
+    for (; i < 24; i++) {
+        cumulative += cmbCopyEvoDevil(unit, *skill);
+        if (pick < cumulative) {
+            return *skill;
+        }
+        skill++;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcInheritCount);
 
