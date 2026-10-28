@@ -291,3 +291,7 @@ src/smt3/pb/pbRecord.c	redthing1	done	2026-10-28	0 matches	record field offsets 
 src/smt3/sdf/sdfCd.c	redthing1	done	2026-10-28	3 fn / 704 B	streaming retry, direct file lookup and load start; mode output is a byte
 src/smt3/field/fldAutoMap.c	redthing1	done	2026-10-28	2 fn / 472 B	fldAmModelLoadFile and fldAutoMapModelLoad; real provider visibility closes caller
 src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 1752 B	sdfGrFlushOtChain VIF/DMA traversal; whole unit 58 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 192 B	rstUpdateSeqEvoAt; hearts helpers retain their assembly fallbacks
+src/smt3/pipe/pipeEffect.c	redthing1	done	2026-10-28	0 new matches	pipeEffLoad independently published in b6fde46; kept main version
+src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	typed order/stock trials remain control-flow and allocation residuals
+src/smt3/sdf/sdfCd.c	redthing1	done	2026-10-28	2 fn / 636 B	indexed lookup and tray wait; translation unit has no function fallbacks
