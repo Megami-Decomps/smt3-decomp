@@ -79,7 +79,8 @@ typedef struct
     /* 0x001B */ s8 LevelUpCnt;
     /* 0x001C */ u8 unk_1C[4];
     /* 0x0020 */ u8 EventNums;
-    /* 0x0021 */ u8 unk_21[6];
+    /* 0x0021 */ u8 unk_21[5];
+    /* 0x0026 */ s8 RecoverFlag;
     /* 0x0027 */ s8 HeartsSkFlag;
     /* 0x0028 */ u8 unk_28[8];
     /* 0x0030 */ datUnitWork_t *levelUpUnit[16];
@@ -88,7 +89,9 @@ typedef struct
     /* 0x0072 */ u8 unk_72[0xFA];
     /* 0x016C */ datUnitWork_t *unit;
     /* 0x0170 */ datUnitWork_t workStock;
-    /* 0x025C */ u8 unk_25C[0x2089];
+    /* 0x025C */ u8 unk_25C[0x1043];
+    /* 0x129F */ u8 bonusParam[6];
+    /* 0x12A5 */ u8 reserved12A5[0x1040];
     /* 0x22E5 */ s8 unk_22E5;
     /* 0x22E6 */ s8 unk_22E6;
     /* 0x22E7 */ u8 unk_22E7;
@@ -255,7 +258,27 @@ void rstSetDestroySkillMaxHpMp(void)
     printf(D_0053DAB0, skill, hpChange, mpChange);
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstSetMaxHpMp);
+extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
+extern u32 datGetMaxHp(datUnitWork_t *unit);
+extern u32 datGetMaxMp(datUnitWork_t *unit);
+void rstSetMaxHpMp(s8 mode, datUnitWork_t *unit)
+{
+    datUnitWork_t copy;
+    s32 i;
+    cmbCopyCustomDevilToStock(&copy, unit);
+    for (i = 0; i < 6; i++) {
+        copy.param[i] += EventStart->bonusParam[i];
+    }
+    if (mode == 0 && EventStart->RecoverFlag != 0) {
+        unit->maxhp = unit->hp = datGetMaxHp(&copy);
+        unit->maxmp = unit->mp = datGetMaxMp(&copy);
+    } else {
+        unit->maxhp = datGetMaxHp(&copy);
+        unit->maxmp = datGetMaxMp(&copy);
+    }
+    if (unit->hp > unit->maxhp) unit->hp = unit->maxhp;
+    if (unit->mp > unit->maxmp) unit->mp = unit->maxmp;
+}
 
 extern s32 cmbGetParamBase(datUnitWork_t *unit, s32 index);
 
