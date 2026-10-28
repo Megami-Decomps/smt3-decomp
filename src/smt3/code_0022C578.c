@@ -1346,9 +1346,47 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpGetKugatatiMsg);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpStartItemMsg);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUseItem);
+extern s32 datGetItemSkillNo(s32 itemid);
+extern s32 cmpStartItemMsg(u16 item, s32 errorFlags);
+extern s32 cmpUseItemTokusyu(u16 item, s32 target, s32 user);
+extern s32 cmpRecover(u16 skill, datUnitWork_t *stock, datUnitWork_t *target);
+extern void cmpSetStockRecoverEff(s32 effect, s32 skill, cmpLocalStock_t *stock);
+extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
 
-s32 cmpGetSelectSkillID(void)
+s32 cmpUseItem(void)
+{
+    u16 itemId = cmpGetSelectItemID();
+    datUnitWork_t *stock = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
+    datUnitWork_t *target = cmpGetSelectDstStock();
+    u16 skill = datGetItemSkillNo(itemId);
+    u16 currentItem;
+    s32 errorFlags;
+    s32 message;
+    s32 effect;
+
+    cmpSetItSkMessageVar(target);
+    errorFlags = cmpGetItSkErrSelFlag(skill);
+    currentItem = cmpGetSelectItemID();
+    message = cmpStartItemMsg(currentItem, errorFlags);
+    switch (message) {
+    case 1:
+        p2sdPlaySE(0xD, 0x7F, 0x3F);
+        return 2;
+    case 2:
+        return message;
+    default:
+        break;
+    }
+    effect = cmpUseItemTokusyu(itemId, (s32)stock, (s32)target);
+    if (effect == 0 && skill != 0) {
+        cmpRecover(skill, stock, target);
+    }
+    cmpSetStockRecoverEff(effect, skill, campWork->stock);
+    campWork->unk_8303 = 1;
+    return cmpDestroyItem(0) != 0;
+}
+
+u16 cmpGetSelectSkillID(void)
 {
     datUnitWork_t *unit =
         &cmbGlobalWork->party[cmpGetStockInfoIndex(campWork->stock, 0, 0)].unit;
@@ -1356,7 +1394,44 @@ s32 cmpGetSelectSkillID(void)
     return unit->skill[campWork->itemCursor + campWork->itemScroll];
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUseSkill);
+extern s32 cmpAddCost(u16 skill, datUnitWork_t *unit);
+extern s32 cmpGetSkillEntry(u16 skill, datUnitWork_t *unit);
+extern s32 cmpStartSkillMsg(u16 skill, s32 errorFlags);
+extern s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, s32 target);
+
+s32 cmpUseSkill(void)
+{
+    u16 skill = cmpGetSelectSkillID();
+    datUnitWork_t *user = cmpGetSelectSrcStock();
+    datUnitWork_t *target = cmpGetSelectDstStock();
+    s32 errorFlags;
+    u16 messageSkill;
+    s32 messageMode;
+    s32 effect;
+
+    cmpSetItSkMessageVar(target);
+    errorFlags = cmpGetItSkErrSelFlag(skill);
+    messageSkill = cmpGetSelectSkillID();
+    messageMode = cmpStartSkillMsg(messageSkill, errorFlags);
+    switch (messageMode) {
+    case 1:
+        p2sdPlaySE(0xD, 0x7F, 0x3F);
+        return 2;
+    case 2:
+        return messageMode;
+    default:
+        break;
+    }
+    if (cmpAddCost(skill, user) == 0) {
+        return 0;
+    }
+    effect = cmpUseSkillTokusyu(skill, user, (s32)target);
+    if (effect == 0) {
+        cmpRecover(skill, user, target);
+    }
+    cmpSetStockRecoverEff(effect, skill, campWork->stock);
+    return cmpGetSkillEntry(skill, user) != 0;
+}
 
 /* NON_MATCHING: 1 of 38 words differs, exact size: xori against retail's sltiu. */
 #ifdef NON_MATCHING
