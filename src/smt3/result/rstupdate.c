@@ -107,7 +107,9 @@ typedef struct
     /* 0x12A8 */ cmpCursorInfo_t cursorInfo;
     /* 0x12E0 */ u8 unk_12E0[0x1004];
     /* 0x22E4 */ u8 unk_22E4;
-    /* 0x22E5 */ u8 unk_22E5[0x0F];
+    /* 0x22E5 */ u8 unk_22E5[0x0B];
+    /* 0x22F0 */ u16 selectedSkill;
+    /* 0x22F2 */ u8 reserved22F2[2];
     /* 0x22F4 */ s32 panelEffectIndex;
     /* 0x22F8 */ u8 reserved22F8[0x10];
     /* 0x2308 */ s32 unk_2308;
@@ -604,7 +606,71 @@ s8 rstGetHeartsSkill(s8 type)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqDestroyConfirm);
+extern char *text1[];
+
+s32 rstUpdateSeqDestroyConfirm(void)
+{
+    s32 slot;
+
+    if (startPos->Flag > 0) {
+        switch (startPos->Flag) {
+        case 1:
+        case 2:
+            if (startPos->pCurrentStock->id == 0)
+                fclStartMessage(9);
+            else
+                fclStartMessage(10);
+            startPos->unk_0005[0] = 1;
+            break;
+        case 3:
+            if (fclChkMessage() != 0)
+                return 1;
+            if (startPos->pCurrentStock->id == 0) {
+                startPos->unk_0001 = 1;
+                startPos->unk_0004 = 1;
+            } else {
+                startPos->unk_0001 = 8;
+                startPos->unk_0004 = 1;
+            }
+            break;
+        }
+        startPos->Flag = 3;
+    }
+    if (fclChkSelMessage() != 0)
+        return 0;
+    switch (fclGetSelMessagePos()) {
+    case 0:
+        fclEndMessage();
+        if (startPos->pCurrentStock->id == 0)
+            rstGetHeartsSkill(1);
+        /* This cursor position uses the low byte of the +0x22 field. */
+        slot = (s8)(((u8 *)&startPos->cursorInfo)[0x22] +
+                    (u8)startPos->cursorInfo.unk_24);
+        if (slot < 8) {
+            startPos->pCurrentStock->skill[slot] = 0;
+            rstBuildDestroyList();
+            rstAddSkill();
+            startPos->Flag = 1;
+        } else {
+            rstSetMaxHpMp(1, startPos->pCurrentStock);
+            {
+                s32 count = startPos->LevelUpCnt;
+                startPos->LevelUpCnt = count - 1;
+            }
+            startPos->Flag = 2;
+        }
+        fclSetMessageVar_20743088(10, (s32)text1[startPos->selectedSkill]);
+        break;
+    case 2:
+        break;
+    case 1:
+        fclEndMessage();
+        startPos->unk_0001 = 21;
+        startPos->unk_0004 = 2;
+        break;
+    }
+    return 1;
+}
 
 extern s32 rstWaitConfirmButton(void);
 extern s32 fclChkMessage(void);
