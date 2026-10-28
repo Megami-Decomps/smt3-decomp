@@ -4,7 +4,9 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## dds3UpdateConfig (kernel/dds3ConfigMain, 0x1EC)
 
-30 of 121 words match; the draft emits 476 bytes against retail's 492.
+27 of 119 overlapping words match; the draft emits 476 bytes against
+retail's 492, leaving 16 bytes uncovered. The older 30/121 measurement
+does not describe the current guarded source.
 
 The structure is retail's. What differs is one load: retail reloads `GBWK[0]`
 inside the arm that sets bit 4, and the delay slot of each `beql` into that arm
@@ -30,3 +32,10 @@ Pinned down on the way:
 - The config-flag arms share one tail: case 0x40 proceeds when the flag reads
   0, case 0x80 when it reads nonzero, and both then skip row 3. A `goto` into
   the 0x80 arm's tail from the 0x40 arm gives retail's single shared block.
+
+A provider/layout audit confirms the actual config allocation is 0x10A8
+bytes, with mode at +0x18 and a 0x38-byte cursor at +0x1C. The button provider
+returns s32, narrowed by the caller; cursor movement takes a cursor pointer
+and s8 direction. Reconstructing those typed views leaves the same 476-byte,
+27-word match. Caching the work pointer instead adds 12 bytes. These facts do
+not supply a source-supported reload or register-order change.

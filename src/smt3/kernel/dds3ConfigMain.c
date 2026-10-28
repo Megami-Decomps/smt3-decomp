@@ -132,7 +132,7 @@ s32 dds3DrawConfig(void *PID)
     return 0;
 }
 
-/* NON_MATCHING: 30 of 121 words match; 476 bytes against retail's 492, because the
+/* NON_MATCHING: 27 of 119 overlapping words match; 476 bytes against retail's 492;
  * entry read of GBWK[0] is reused in the switch arms instead of reloaded. */
 #ifdef NON_MATCHING
 s32 dds3UpdateConfig(void *PID)

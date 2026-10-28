@@ -15,6 +15,16 @@ together, not anything the field order states. `fclEncycFreeEntries` in the
 same unit stops on the identical pair, which is evidence the two share one
 cause.
 
+A current-unit `cc1probe --sched --alloc --no-dumps` run, with
+`-DNON_MATCHING` and function filtering, passes hooked/unhooked output parity
+(`verify: OK`). In sched2, task store UID245 and update store UID266 are
+both ready with priority 1, register weight -1 and cost 2. The dependent-count
+comparison chooses update first: two dependents versus task's one. The cause
+of that dependency-graph asymmetry remains unresolved; it is not evidence for
+adding an artificial source dependency. A single block clear of the six
+contiguous runtime fields instead emits 428 bytes and changes the frame,
+so it does not close this residual.
+
 The copy loop needed `while ((table[slot].name[i] = name[i]) != '\0')`: the
 assignment as the condition is what gives retail's one `lbu`, `sll 24`,
 branch, store-in-delay. A separate `char c` local gives `lb` plus a bare
