@@ -663,7 +663,61 @@ s32 fldCommand_SET_FIX_CAMERA(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_SET_CHASE_CAMERA);
+extern f32 fldCamPitch;
+extern f32 D_002FC9C0[];
+extern f32 fldCamTarget[];
+extern f32 sdfSin(f32 angle);
+extern f32 sdfCos(f32 angle);
+extern s32 fldPlayerFastSet(void);
+extern void fldCamSetChase(void);
+extern void resetCamNormal(void);
+
+s32 fldCommand_SET_CHASE_CAMERA(void) {
+    f32 angle;
+    f32 result;
+    f32 cameraPos[4];
+    f32 targetPos[4];
+
+    fldGlobalBase.mode = 0;
+
+    angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
+    fldCamPitch = -fldGlobalBase.camAngle;
+    result = sdfSin(angle);
+    cameraPos[0] = fldGlobalBase.x - result;
+    cameraPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+
+    angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
+    result = sdfCos(angle);
+    cameraPos[2] = fldGlobalBase.z + result;
+
+    angle = fldCamPitch * 3.14f / 180.0f;
+    {
+        f32 sine = sdfSin(angle);
+        targetPos[0] = fldGlobalBase.x + sine * 550.0f;
+    }
+    targetPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+
+    angle = fldCamPitch * 3.14f / 180.0f;
+    {
+        f32 cosine = sdfCos(angle);
+        targetPos[2] = fldGlobalBase.z + cosine * 550.0f;
+    }
+
+    D_002FC9C0[0] = cameraPos[0];
+    D_002FC9C0[1] = cameraPos[1];
+    D_002FC9C0[2] = cameraPos[2];
+    fldCamTarget[0] = targetPos[0];
+    fldCamTarget[1] = targetPos[1];
+    fldCamTarget[2] = targetPos[2];
+
+    fldPlayerFastSet();
+    if (fldGlobalBase.area < 10) {
+        fldCamSetChase();
+    } else {
+        resetCamNormal();
+    }
+    return 1;
+}
 
 s32 func_00158548(void) {
     fldCamMode[0] = 3;
