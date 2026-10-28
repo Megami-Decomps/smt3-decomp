@@ -724,7 +724,50 @@ s32 func_00158548(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_CAM_DIR);
+s32 fldCommand_CAM_DIR(void) {
+    s32 parameter;
+    f32 angle;
+    f32 cameraPos[4];
+    f32 targetPos[4];
+
+    parameter = scrGetIntPara(0);
+    if (parameter < 0) {
+        fldCamPitch = -fldGlobalBase.camAngle;
+    } else {
+        parameter = scrGetIntPara(0);
+        fldCamPitch = (f32)(s32)((u32)parameter * -45u);
+    }
+
+    angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
+    cameraPos[0] = fldGlobalBase.x - sdfSin(angle);
+    cameraPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+
+    angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
+    cameraPos[2] = fldGlobalBase.z + sdfCos(angle);
+
+    angle = fldCamPitch * 3.14f / 180.0f;
+    {
+        f32 sine = sdfSin(angle);
+        targetPos[0] = fldGlobalBase.x + sine * 550.0f;
+    }
+    targetPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+
+    angle = fldCamPitch * 3.14f / 180.0f;
+    {
+        f32 cosine = sdfCos(angle);
+        targetPos[2] = fldGlobalBase.z + cosine * 550.0f;
+    }
+
+    D_002FC9C0[0] = cameraPos[0];
+    D_002FC9C0[1] = cameraPos[1];
+    D_002FC9C0[2] = cameraPos[2];
+    fldCamTarget[0] = targetPos[0];
+    fldCamTarget[1] = targetPos[1];
+    fldCamTarget[2] = targetPos[2];
+
+    resetCamNormal();
+    return 1;
+}
 
 s32 fldCommand_CAM_SEL_PHOKAN(void) {
     f32 pos[4];
