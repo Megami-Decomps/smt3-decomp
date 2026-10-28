@@ -1836,7 +1836,90 @@ s32 AcceptKeyChangeSort(fclEncyc_instance_tag *pinst)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyChangeListIndex);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", AcceptKeyListWindow);
+typedef struct {
+    u8 StepY[4];
+    s8 StopFlag;
+    u8 reserved005[3];
+    s32 CursorSize;
+    s32 CursorPos;
+    u16 reserved010[4];
+    s32 reserved018[2];
+    u8 reserved020[2];
+    s16 reserved022;
+    s8 reserved024[2];
+    u8 reserved026[2];
+    s32 reserved028[4];
+} cmpCursorInfo_t;
+
+typedef struct {
+    cmpCursorInfo_t cursor;
+    s8 delay;
+} cmpPadStopWork_t;
+
+extern s8 dds3PadButtonState[];
+extern void lstMoveCursor(lstListWindow_t *list, s8 direction);
+extern s32 lstPageUp(lstListWindow_t *list);
+extern s32 lstPageDown(lstListWindow_t *list);
+extern s32 cmpGetPressedButton(s32 mask);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
+extern void cmpPlayCursorSE(u32 button);
+extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
+
+s32 AcceptKeyListWindow(lstListWindow_t *list, s32 mode)
+{
+    s32 action = 0;
+    cmpCursorInfo_t *cursor = (cmpCursorInfo_t *)&list->StepY;
+    s32 pageMove = 0;
+    u32 button;
+
+    if (mode != 0) {
+        if (dds3PadButtonState[0x26] == 0 && dds3PadButtonState[0x27] == 0 &&
+            dds3PadButtonState[0x24] == 0 && dds3PadButtonState[0x25] == 0) {
+            lstMoveCursor(list, 0);
+        }
+    } else {
+        if (dds3PadButtonState[0x26] == 0 && dds3PadButtonState[0x27] == 0) {
+            lstMoveCursor(list, 0);
+        }
+    }
+    button = cmpGetPressedButton(mode != 0 ? 0xF3 : 0x3B);
+    switch (button) {
+    case 1:
+        action = 1;
+        break;
+    case 2:
+        action = -1;
+        break;
+    case 0x10:
+        action = cursor->StopFlag != 0 ? 0 : 2;
+        lstMoveCursor(list, -1);
+        break;
+    case 0x20:
+        action = cursor->StopFlag != 0 ? 0 : 2;
+        lstMoveCursor(list, 1);
+        break;
+    case 0x40:
+        action = 2;
+        pageMove = lstPageUp(list);
+        break;
+    case 0x80:
+        action = 2;
+        pageMove = lstPageDown(list);
+        break;
+    case 8:
+        p2sdPlaySE(8, 0x7F, 0x3F);
+        action = 3;
+        break;
+    default:
+        break;
+    }
+    button = cmpDisablePadBitStop((cmpPadStopWork_t *)cursor, button, 0x30);
+    if (mode != 0 && pageMove == 0) {
+        button &= ~0xC0;
+    }
+    cmpPlayCursorSE(button);
+    return action;
+}
 
 extern s32 cmpRaceOrder(const void *a, const void *b);
 
