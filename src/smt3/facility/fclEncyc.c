@@ -220,6 +220,7 @@ extern void FillIndex(s16 *pout, s32 num);
 extern void fclEncycSetExplainData(void *pbmd);
 
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *pFRQ);
+extern void DrawBackBlackBoard(s32 y, s32 ratio);
 
 extern void fclRbnRelease(fclRibbon_t *phandle);
 
@@ -1131,7 +1132,33 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadStatusMoney);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawExplainBack);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawBackBlackBoard);
+typedef struct { s32 x, y; } fclEncycVertex_t;
+typedef struct { u32 components[4]; } fclEncycColor_t;
+extern fclEncycVertex_t D_003323B8[2];
+extern fclEncycColor_t D_003323C8[1];
+extern sdfGrOt_t sdfGrOtTable[];
+extern void *sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void itfMiscDrawSpritePlanePrim(fclEncycVertex_t *pos, fclEncycColor_t *color,
+                                       u32 z, s32 context, sdfDrawTag_t *tag);
+
+void DrawBackBlackBoard(s32 y, s32 ratio)
+{
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+
+    if (ratio <= 0) {
+        return;
+    }
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    D_003323B8[1].y = y;
+    D_003323C8[0].components[3] = (ratio * 0x33) >> 7;
+    itfMiscDrawSpritePlanePrim(D_003323B8, D_003323C8, 1, 0, tag);
+    ot = &sdfGrOtTable[8];
+    ot->regFunc(ot, tag);
+}
+
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawRegistAllHelp);
 
