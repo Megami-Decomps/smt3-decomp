@@ -1874,7 +1874,19 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_0053F6E8);
 
 INCLUDE_ASM(const s32, "code_0022C578", nmeDrawGradQuad);
 
-INCLUDE_ASM(const s32, "code_0022C578", nmeDrawBlendQuad);
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB28);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB50);
+
+void nmeDrawBlendQuad(s32 alpha, s32 ot)
+{
+    u32 coords[2][3] = {{0x2000, 0xC80, 0x2000}, {0xE00, 0xE00, 0x9C0}};
+    u32 colors[3];
+
+    memset(colors, 0, sizeof(colors));
+    colors[0] = fclBlendColor(0x59, 0x26, 0x100 - alpha);
+    cmpDrawTriG(coords[0], coords[1], 0, colors, ot);
+}
 
 s32 nmeDrawBox(s32 color, s32 unused, s32 flag)
 {
@@ -2007,11 +2019,11 @@ void campDrawFade(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB28);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB50);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB68);
+
+
+
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_draw_Process);
 
