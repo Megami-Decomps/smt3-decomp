@@ -219,7 +219,7 @@ extern void FillIndex(s16 *pout, s32 num);
 
 extern void fclEncycSetExplainData(void *pbmd);
 
-extern void frDestroyFontRequestAfter(void *pFRQ);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *pFRQ);
 
 extern void fclRbnRelease(fclRibbon_t *phandle);
 
@@ -854,7 +854,27 @@ s32 GetDevilParam(fclencyceelem_t *pelem, s32 type)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", PrepSummon);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", drawSummonCount);
+extern s32 sprintf(char *out, const char *format, ...);
+extern void *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                              const char *text, void *previous);
+extern char D_0054FCD8[];
+
+void drawSummonCount(void **font, s32 x, s32 y, s32 releasePrevious)
+{
+    char text[16];
+
+    if (releasePrevious != 0) {
+        if (*font != NULL) {
+            frDestroyFontRequestAfter(*font);
+        }
+        *font = NULL;
+    }
+    sprintf(text, D_0054FCD8, DDS3_GBWK->maka);
+    {
+        void *previous = *font;
+        *font = frwGetNumFontFRQ(x, y, 0x00FFFFF0, 0xA09DC380, text, previous);
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", drawEncycRatio);
 
