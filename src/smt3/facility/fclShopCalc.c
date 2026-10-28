@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "font.h"
 
 s32 fclGetFlag(s8 index);
 
@@ -202,7 +203,29 @@ void shopDrawRowBox(fclPanelPos_t *panel, s32 mode, s32 ot)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawRowText);
+extern char *pStr[];
+extern char D_0054FB60[];
+extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 z, u32 color, const char *text, frFontHandle_t *chain);
+extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 z, u32 color, const char *text, frFontHandle_t *chain);
+extern s32 fclDrawListSprite(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 blend, s32 ot);
+
+void shopDrawRowText(s32 x, s32 y, s32 z, u32 color, u16 item, s32 count, s32 ot)
+{
+    char text[16];
+    frFontHandle_t *request;
+
+    request = frwGetSmallFontFRQ2(x + 0x240, y + 0x68, z, color, pStr[item], NULL);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+    sprintf(text, D_0054FB60, count);
+    request = frwGetSmallNumFontFRQ(x + 0x9C0, y + 0x80, z, color, text, NULL);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+    fclDrawSpriteRes(x + 0xE50, y + 0x98, z << 4, NULL, 0, 2,
+                     ((shopDrawWork_t *)shopDrawWork)->texHandle, shopSpriteTable, ot);
+    fclDrawListSprite(x + 0x1F0, y + 0x128, z, 0x104, 2, 0x22242F80, 0, ot);
+}
+
 
 INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawBuyRow);
 
