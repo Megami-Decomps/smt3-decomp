@@ -722,7 +722,65 @@ void RunBadAction(nbMainProcessData_t *data, nbFormation_t *form)
     dds3SetPosPoseSet(form->basic, &pos);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", RunDamage);
+void RunDamage(nbMainProcessData_t *data, nbFormation_t *form)
+{
+    sdfVector4_t pos;
+    dds3Basic_t *basic = form->basic;
+    f32 offset;
+
+    if (basic == NULL) {
+        form->type = 0;
+        form->time = 0;
+        return;
+    }
+
+    switch (form->type) {
+    case 1:
+        if (form->badframe > 0 && form->badframe == form->time) {
+            form->hunit->owner->first->speed = 0.0f;
+        }
+        if (form->time >= (u32)form->damageFrames) {
+            form->type = 0;
+            form->time = 0;
+            SDF_VU0_COPYVECTOR(&pos, &form->pos);
+            dds3SetPosPoseSet(basic, &pos);
+            if ((form->anime & 0x80) == 0 &&
+                form->hunit->owner->first->speed == 0.0f) {
+                nbSetUnitMotion(form, 0, 1, 1.0f);
+            }
+            return;
+        }
+        break;
+    case 3:
+        form->anime |= 0x80;
+        if (form->badframe > 0 && form->badframe == form->time) {
+            form->hunit->owner->first->speed = 0.0f;
+        }
+        if (form->time >= (u32)form->damageFrames) {
+            form->type = 0;
+            form->time = 0;
+            SDF_VU0_COPYVECTOR(&pos, &form->pos);
+            dds3SetPosPoseSet(basic, &pos);
+            return;
+        }
+        break;
+    }
+
+    offset = dds3GetRandFloatA(0) * form->damageRange;
+    if ((form->time & 1) != 0) {
+        offset = -offset;
+    }
+    SDF_VU0_COPYVECTOR(&pos, &form->pos);
+    pos.x += offset;
+    dds3SetPosPoseSet(form->basic, &pos);
+
+    if (form->damageRange > 0.0f) {
+        form->damageRange -= 0.7f;
+        if (form->damageRange < 0.0f) {
+            form->damageRange = 0.0f;
+        }
+    }
+}
 
 s32 nbCheckModelLoad(nbMainProcessData_t *data, s32 major, s32 minor)
 {
