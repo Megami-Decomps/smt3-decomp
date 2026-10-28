@@ -952,7 +952,50 @@ void datSetDevilWork(s32 id, datUnitWork_t *work)
     work->skillcnt = skillcnt;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datAddDevil);
+/* Partial view of the persistent party and stock records. */
+typedef struct {
+    u8 unknown00[0xA50];
+    /* 0xA50 */ s32 maxstock;
+    /* 0xA54 */ datUnitWork_t unitwork[16];
+    /* 0x1914 */ s8 stocklist[16];
+    /* 0x1924 */ s32 stockcnt;
+} datPartyWork_t;
+
+/* The same persistent-work pointer, through its recovered party/stock view. */
+extern datPartyWork_t *datPartyWork asm("DDS3_GBWK");
+
+s32 datAddDevil(s32 id, s32 sw)
+{
+    s32 partyCount = 0;
+    s32 registerEntry = 1;
+    s32 i;
+    datUnitWork_t *party;
+
+    if (id < 0) {
+        registerEntry = 0;
+        id &= 0x7FFFFFFF;
+    }
+    party = datPartyWork->unitwork;
+    for (i = 15; i >= 0; i--, party++) {
+        if (party->flag & 1) {
+            if (party->flag & 2) partyCount++;
+        }
+    }
+    for (i = 0; i < datPartyWork->maxstock; i++) {
+        if ((datPartyWork->unitwork[i + 4].flag & 1) == 0) break;
+    }
+    if (i == datPartyWork->maxstock) return -1;
+    datSetDevilWork(id, &datPartyWork->unitwork[i + 4]);
+    if (registerEntry) {
+        fclEncycRegist(&datPartyWork->unitwork[i + 4], 0);
+    }
+    if (sw && partyCount < 4) {
+        datPartyWork->unitwork[i + 4].flag |= 2;
+    }
+    datPartyWork->stocklist[datPartyWork->stockcnt] = i + 4;
+    datPartyWork->stockcnt++;
+    return i + 4;
+}
 /* NON_MATCHING: 12 of 26 words differ (first at +0x34). */
 #ifdef NON_MATCHING
 s32 datAddUniqueDevil(s32 id, s32 sw, s32 uid)

@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1107 members, 506 adopted constants.
+# 0 types, 1108 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -232,6 +232,7 @@ member datLevelUpRecord_t.unk00
 member datMasterText_t.unk_04
 member datModelParam_t.unk00
 member datModelParam_t.unk1C
+member datPartyWork_t.unknown00
 member datRaceEntry_t.unk_01
 member datRaceEntry_t.unk_04
 member datRaceEntry_t.unk_19
