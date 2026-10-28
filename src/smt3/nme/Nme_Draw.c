@@ -258,7 +258,42 @@ void nmeFindNextChar(void)
     func_002413B8(button, 1);
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursorWrap);
+extern void nmeStartFadeOut(void);
+extern void nmeInitNameBuffer(s8 mode, nmeWork_t *work);
+
+void nmeMoveCursorWrap(void)
+{
+    u16 button = (u16)cmpGetPressedButton(0x33);
+
+    switch (button) {
+    case 1:
+        if (nmeUpdateWork->wrapCursor.unk_22 +
+            (u8)nmeUpdateWork->wrapCursor.unk_24 == 0) {
+            nmeUpdateWork->unk1B = 2;
+            nmeUpdateWork->sequence.flag |= 0x10;
+            nmeStartFadeOut();
+        } else {
+            nmeInitNameBuffer(0, nmeUpdateWork);
+        }
+        break;
+    case 2:
+        nmeInitNameBuffer(0, nmeUpdateWork);
+        break;
+    case 0x10:
+        cmpMoveCursor(&nmeUpdateWork->wrapCursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&nmeUpdateWork->wrapCursor, 1);
+        break;
+    }
+
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&nmeUpdateWork->wrapCursor, 0);
+    }
+    button = (u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&nmeUpdateWork->wrapCursor, button, 0x30);
+    func_002413B8(button, 2);
+}
 
 u32 nmeInputIsLocked(s32 row) {
     return 0;
@@ -285,7 +320,6 @@ extern void nmeMoveCursorWrap(void);
 extern void nmeMoveCursor2(void);
 extern s32 nmeMoveCursor(void);
 extern void nmeFindNextChar(void);
-extern void nmeInitNameBuffer(s8 mode, nmeWork_t *work);
 extern void nmeInitNameRows(s8 mode, nmeWork_t *work);
 extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
