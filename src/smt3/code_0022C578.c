@@ -5607,7 +5607,37 @@ void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags)
     }
 }
 
+extern char D_0054FED0[]; /* padded eight-byte "%3d" object */
+extern char D_0054FED8[];
+extern u16 datGetLevelForDraw(datUnitWork_t *work);
+
+/* NON_MATCHING: 8 of 77 words differ at the exact 308-byte size. */
+#ifdef NON_MATCHING
+void campDrawStatusRow2(s32 x, s32 y, u32 color, datUnitWork_t *unit)
+{
+    char text[0x20];
+    frFontHandle_t *font;
+    s32 drawX;
+    s32 drawY;
+    u16 level;
+
+    drawX = x + 0xA40;
+    sprintf(text, D_0054FED0, (u16)unit->hp);
+    font = frwGetSmallNumFontFRQ(drawX, y, 0xFFFFF, color, text, NULL);
+    drawX = x + 0xDD0;
+    sprintf(text, D_0054FED0, (u16)unit->mp);
+    font = frwGetSmallNumFontFRQ(drawX, y, 0xFFFFF, color, text, font);
+    level = datGetLevelForDraw(unit);
+    drawX = x + 0x10A0;
+    drawY = y + 0x28;
+    sprintf(text, D_0054FED8, level);
+    font = frwGetSmallNumFontFRQ(drawX, drawY, 0xFFFFF, color, text, font);
+    func_001C7E38(font, 1, 0x47);
+    frDestroyFontRequestAfter(font);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStatusRow2);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStatusRow3);
 

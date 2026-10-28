@@ -600,3 +600,4 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	c
 src/smt3/newbattle/NbNegoFlowInoti.c	redthing1	done	2026-10-28	1 fn / 256 B	Flow15_6 request message dispatch with native switch layout and callback argument reloads; owner 16 match, 0 differ
 src/smt3/field/fldTest.c	redthing1	done	2026-10-28	1 fn / 868 B	Dante route movement with fresh route-cell reads and qualified last-use reset-store scheduling; owner 35 match, 0 differ
 src/smt3/newbattle/NbNegoFlowInnen.c	redthing1	done	2026-10-28	1 fn / 152 B	Flow5_2 stock and event-bit candidate selection with separate stock-hit return; owner 19 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	HP/MP/level text row at exact 308-byte size; eight saved-register assignment words remain
