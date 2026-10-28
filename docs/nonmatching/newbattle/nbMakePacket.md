@@ -107,22 +107,6 @@ declaration orders leave it unchanged. This is the ruled-out
 register-permutation class, kept only so the next reader does not redo the
 decode.
 
-## nbRunAi (newbattle/nbMakePacket, 0xBC)
-
-46 of 47 words match, at the exact 188-byte size.
-
-The one differing word is the loop-exit branch: retail emits a plain
-`beqz $2, .L00287D40` with `lui $4, %hi(D_00545840)` in its delay slot, and
-ee-gcc emits `beql` with the same instruction annulled. Every other word,
-including the `$18` induction pointer, the `id * 164` shift chain and the
-`j nbRunAiSub` sibcall, is identical.
-
-Ruled out: a `while` loop, a `continue` in place of the `if` body, a `u32`
-index, a `goto` out of the loop, a `do`/`while (1)` with two `break`s, the
-format string in a local, and `i = 3` instead of `break`. Duplicating the
-`printf`/`nbRunAiSub` tail into the found and not-found paths runs over size.
-Varying `nbGetAiEntry`'s declaration (absent, K&R, `u32`) changes nothing.
-
 ## Flow5_2 (newbattle/nbMakePacket, 0x98)
 
 17 of 35 words differ, three words short of retail's 152.

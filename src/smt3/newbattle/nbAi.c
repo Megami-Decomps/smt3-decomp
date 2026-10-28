@@ -1531,8 +1531,8 @@ INCLUDE_ASM(const s32, "newbattle/nbAi", nbSetAiTarget);
 
 INCLUDE_ASM(const s32, "newbattle/nbAi", nbRunAiSub);
 
-/* NON_MATCHING: 1 of 47 words differ (first at +0x3C). */
-#ifdef NON_MATCHING
+INCLUDE_RODATA(const s32, "newbattle/nbAi", D_00545840);
+
 void nbRunAi(nbActionProcessData_t *a)
 {
     s32 i;
@@ -1548,9 +1548,6 @@ void nbRunAi(nbActionProcessData_t *a)
     printf(D_00545840, no);
     nbRunAiSub(a, no);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", nbRunAi);
-#endif
 
 INCLUDE_RODATA(const s32, "newbattle/nbAi", D_00545850);
 

@@ -269,6 +269,7 @@ src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	1 fn / 256 B	pending requ
 src/smt3/field/fldCamera.c	redthing1	done	2026-10-28	1 fn / 380 B	follow-camera eye and target parameters through four-field table rows
 src/smt3/field/fldCamera.c	redthing1	done	2026-10-28	1 fn / 504 B	player target reset using provider vector types and native eye/target dataflow
 src/smt3/interface/frName.c	redthing1	done	2026-10-28	1 fn / 252 B	lazy image translation through four targets and sixteen inline glyph bitmaps
+src/smt3/newbattle/nbAi.c	redthing1	done	2026-10-28	1 fn / 188 B	three-entry AI selection and native script dispatch; exact provider context
 src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	19 functions / 5244 B	sdfFileRpcHandleCmd matched from address-paired C donor
 src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	2 fn / 256 B	fclBlendColor and func_00213DF0; unsigned packed color arithmetic
 src/smt3/newbattle/nbMaeProcess.c	redthing1	done	2026-10-28	3 fn / 284 B	remaining callbacks matched; unit has no assembly fallbacks
