@@ -3,6 +3,23 @@
 #include "ps2asm.h"
 
 extern s32 evtBitCheck(s32 no);
+typedef struct datTakaraSagasiItem_t {
+    u16 item;
+    u16 par;
+} datTakaraSagasiItem_t;
+
+typedef struct datTakaraSagasiTable_t {
+    u32 flag;
+    datTakaraSagasiItem_t itemtbl[8];
+} datTakaraSagasiTable_t;
+
+/* FLD_SAGASI_AKUMA reads four inline 0x24-byte groups and their weights. */
+typedef struct datTakaraSagasi_t {
+    u32 flag;
+    datTakaraSagasiTable_t tbl[4];
+} datTakaraSagasi_t;
+extern datTakaraSagasi_t datSagasiSkillTable;
+extern void datDebugPrintf(const char *format, ...);
 extern s32 GetButuriAttack(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza);
 extern f64 sdfFloatToULong(f32 value);
 extern f32 sdfDoubleToULong(f64 value);
@@ -1100,7 +1117,36 @@ s32 datCheckSkillInParty(s32 skillid)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datCheckSkillTakaraSagasi);
+s32 datCheckSkillTakaraSagasi(void)
+{
+    s32 i;
+
+    if (datSagasiSkillTable.flag != 0 && evtBitCheck(datSagasiSkillTable.flag) == 0) {
+        return 0;
+    }
+    for (i = 0; i < 16; i++) {
+        datUnitWork_t *unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54 + i * 0xEC);
+        s32 luck;
+        s32 random;
+
+        if ((unit->flag & 1) == 0) {
+            continue;
+        }
+        if ((unit->flag & 2) == 0) {
+            continue;
+        }
+        luck = (unit->param[5] << 7) / 100;
+        if (datCheckSyojiSkill(unit, 0x161) == 0) {
+            continue;
+        }
+        random = dds3GetRandIntA(0, 0x20);
+        datDebugPrintf("dvl:%d  luc:%d  rnd:%d\n", unit->id, luck, random);
+        if (luck >= random) {
+            return unit->id;
+        }
+    }
+    return 0;
+}
 
 void datClearCommMemory(datUnitWork_t *work)
 {
