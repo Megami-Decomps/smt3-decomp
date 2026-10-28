@@ -463,6 +463,11 @@ s32 nbCheckBattleSkillError1(s32 nskill)
 INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbCheckBattleSkillError1);
 #endif
 
+extern s32 cmpAnyButtonGuideActive(datUnitWork_t **list, s32 count);
+extern s32 cmpButtonGuideShowDone(datUnitWork_t **list, s32 count);
+extern s32 cmpButtonGuideHideDone(datUnitWork_t **list, s32 count);
+extern s32 cmpFindButtonGuideByFlag(datUnitWork_t **list, s32 count, s32 mask);
+
 s32 nbCheckBattleSkillError2(s32 nskill, u32 select)
 {
     datUnitWork_t *unitList[32];
@@ -570,9 +575,119 @@ s32 nbCheckBattleSkillError2(s32 nskill, u32 select)
 
 INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbCheckBattleSkillError3);
 
-INCLUDE_RODATA(const s32, "newbattle/nbSkillError", D_00546138);
+s32 cmpClearButtonGuide(s32 skill, u32 select)
+{
+    /* Same unit-list capacity as nbCheckBattleSkillError2. */
+    datUnitWork_t *unitList[32];
+    datUnitWork_t *unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
+    s32 unitCount = 0;
+    s32 i;
+    s32 result = 0;
 
-INCLUDE_ASM(const s32, "newbattle/nbSkillError", cmpClearButtonGuide);
+    for (i = 0; i < 16; i++, unit++) {
+        if ((select & (1u << i)) != 0 && (unit->flag & 1) != 0) {
+            unitList[unitCount++] = unit;
+        }
+    }
+
+    printf("\xA4\xB9\xA4\xAD\xA4\xEB\xA4\xB9\xA4\xAD\xA4\xEB\xA1\xE1%d\n", skill);
+
+    /* These skills perform their specific validation below. */
+    switch (skill) {
+    case 0x31:
+    case 0x32:
+    case 0x49:
+    case 0x4A:
+    case 0x4B:
+    case 0x4C:
+        break;
+    default:
+        if (unitCount == 1 && cmpAnyButtonGuideActive(unitList, 1) != 0) {
+            return 1;
+        }
+        break;
+    }
+
+    switch (skill) {
+    case 0x24:
+    case 0x25:
+    case 0x26:
+    case 0x27:
+    case 0x28:
+    case 0x29:
+    case 0x51:
+    case 0x5E:
+        if (cmpButtonGuideShowDone(unitList, unitCount) != 0) {
+            result = 1;
+        }
+        break;
+    case 0x2A:
+    case 0x52:
+    case 0x53:
+    case 0x54:
+    case 0x5D:
+        if (cmpButtonGuideHideDone(unitList, unitCount) != 0) {
+            result = 1;
+        }
+        break;
+    case 0x2B:
+    case 0x2C:
+    case 0x2D:
+    case 0x2E:
+    case 0x2F:
+    case 0x30:
+    case 0x58:
+        if (cmpFindButtonGuideByFlag(unitList, unitCount,
+                                    datSkillTable.normal[skill].basstatus) == 0) {
+            result = 1;
+        }
+        break;
+    case 0x31:
+    case 0x32:
+        if (cmpAnyButtonGuideActive(unitList, unitCount) == 0) {
+            return 1;
+        }
+        break;
+    case 0x49:
+        if ((DDS3_GBWK->maFlags & 1) != 0) {
+            return 4;
+        }
+        break;
+    case 0x4A:
+        if ((DDS3_GBWK->maFlags & 2) != 0) {
+            return 4;
+        }
+        break;
+    case 0x4B:
+        if ((DDS3_GBWK->maFlags & 4) != 0) {
+            return 4;
+        }
+        break;
+    case 0x4C:
+        if ((DDS3_GBWK->maFlags & 8) != 0) {
+            return 4;
+        }
+        break;
+    case 0x50:
+    case 0x55:
+    case 0x56:
+    case 0x5C:
+    case 0xED:
+    case 0xEE:
+    case 0xEF:
+    case 0xF0:
+    case 0xF6:
+    case 0xF8:
+        if (cmpButtonGuideShowDone(unitList, unitCount) != 0) {
+            result = cmpButtonGuideHideDone(unitList, unitCount) != 0;
+        }
+        break;
+    default:
+        break;
+    }
+    return result;
+}
+
 
 void nbLoadDefaultModelPack(nbMainProcessData_t *data)
 {

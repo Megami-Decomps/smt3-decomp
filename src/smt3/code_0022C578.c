@@ -1426,7 +1426,7 @@ s32 cmpStartItemTokusyuMsg(u16 item)
 // NON_MATCHING: 19 of 40 words match at the exact size; argument setup
 // and default-mode scheduling differ before the tokusyu message call.
 #ifdef NON_MATCHING
-extern s32 cmpClearButtonGuide(s32 skill, s32 errorFlags);
+extern s32 cmpClearButtonGuide(s32 skill, u32 select);
 
 s32 cmpStartSkillMsg(u16 skill, s32 errorFlags)
 {
