@@ -85,6 +85,18 @@ typedef struct
 
 extern ragUpdateWork_t *ragUpdateWork;
 
+typedef struct
+{
+    u8 unk_00000[0xA50];
+    u8 maxstock;
+    u8 unk_00A51[3];
+    datUnitWork_t unitwork[16];
+    u8 unk_01914[0x14];
+    u8 item[0xA0];
+} ragGlobalWorkData_t;
+
+extern ragGlobalWorkData_t *ragGlobalWork asm("DDS3_GBWK");
+
 extern s32 fclRunPanelAnim(void *work);
 
 typedef struct
@@ -159,6 +171,15 @@ typedef struct
     /* 0x03 */ u8 unk_03;
 } ragItemReq_t;
 
+typedef struct
+{
+    datUnitWork_t unit;
+} cmbUnit_t;
+
+s8 cmbFindStockSlot(cmbUnit_t *list, u8 count);
+
+s8 ragUseItemOnUnit(u16 id, datUnitWork_t *unit, u8 count);
+
 s32 ragFindItemSlot(ragItemReq_t *req);
 
 extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
@@ -172,11 +193,63 @@ void ragExit(void)
     ragUpdateWork->unk_0001 = 5;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragChkItemErr);
+s8 ragChkItemErr(u16 itemId)
+{
+    if (ragGlobalWork->item[itemId] >= 0x63) {
+        ragUpdateWork->unk_0005 = 1;
+        ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 4,
+                                                 &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0002 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0003 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0001 = 6;
+        ragUpdateWork->unk_0004 = -1;
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragCheckItemUse);
+s32 ragCheckItemUse(u16 itemId)
+{
+    if (cmbFindStockSlot((cmbUnit_t *)&ragGlobalWork->unitwork[4],
+                         ragGlobalWork->maxstock) < 0) {
+        ragUpdateWork->unk_0005 = 1;
+        ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 6,
+                                                 &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0002 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0003 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0001 = 6;
+        ragUpdateWork->unk_0004 = -1;
+        return 1;
+    }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragChkDevilLevelErr);
+    if (ragUseItemOnUnit(itemId, ragGlobalWork->unitwork, 16) >= 0) {
+        ragUpdateWork->unk_0005 = 1;
+        ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 5,
+                                                 &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0002 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0003 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0001 = 6;
+        ragUpdateWork->unk_0004 = -1;
+        return 2;
+    }
+    return 0;
+}
+
+s8 ragChkDevilLevelErr(datUnitWork_t *stock)
+{
+    if (ragGlobalWork->unitwork[0].level < stock->level) {
+        ragUpdateWork->unk_0005 = 1;
+        ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 7,
+                                                 &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0002 = ragUpdateWork->unk_0003;
+        ragUpdateWork->unk_0003 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0001 = 6;
+        ragUpdateWork->unk_0004 = -1;
+        return 1;
+    } else {
+        return 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragSetSeqPhase);
 
@@ -213,7 +286,7 @@ extern ragItemReq_t *ragGetConfirmEntry(s32 kind, u8 flag);
 
 extern void ragSetSeqPhase(s32 phase);
 
-extern s32 ragCheckItemUse(s32 item);
+extern s32 ragCheckItemUse(u16 item);
 
 extern s32 cmpModelSetup(s32 a, s32 b);
 
