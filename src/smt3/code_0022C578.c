@@ -401,7 +401,7 @@ typedef struct
     /* 0x846C */ u8 unk_846C[0x34];
     /* 0x84A0 */ s32 effectStep;
     /* 0x84A4 */ void *dhProcess;
-    /* 0x84A8 */ u8 unk_84A8[4];
+    /* 0x84A8 */ u8 reserved84A8[4];
     /* 0x84AC */ s32 fadeStep;
     /* 0x84B0 */ s32 stockAlpha[16];
     /* 0x84F0 */ s8 stockStep[16];
