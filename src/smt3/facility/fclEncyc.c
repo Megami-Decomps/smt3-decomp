@@ -810,7 +810,9 @@ typedef struct fclEncycReadStatusWork_t {
     s32 boardY;
     s16 boardAlpha;
     s16 explainAlpha;
-    u8 reserved0060[0x20];
+    u8 reserved0060[0x0E];
+    s16 viewIdleTimer;
+    u8 reserved0070[0x10];
     fclRibbon_t *ribbon;
     void *countFont;
     void *explainFont;
@@ -970,7 +972,80 @@ void DrawPhaseReadExplain(fclEncyc_instance_tag *pinst)
     func_001C7E38(work->explainFont, 0, 0x47);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadView);
+extern s32 GetViewModeKey(fclEncyc_instance_tag *pinst);
+extern void ControlModel(fclEncyc_instance_tag *pinst, s32 model, s32 key);
+extern void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag);
+extern void CalcMoveViewModeRibbon(fclEncyc_readmainwork_tag *work);
+
+void CalcPhaseReadView(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
+    u32 button;
+
+    fclRbnCalc(work->ribbon);
+    if (CalcFadeAlpha(&work->phase.statusAlpha, 0, 0x80, 0x10) == 0) {
+        pinst->stat |= 0x10;
+    }
+    CalcFadeAlpha(&work->boardAlpha, 1, 0x80, 8);
+    CalcFadeAlpha(&work->explainAlpha, 0, 0x80, 8);
+    CalcMoveReadMainHelp((struct fclEncycReadHelpWork_t *)work);
+    CalcMoveViewModeRibbon(&work->phase);
+    MoveScreenOffset(pinst);
+
+    if ((pinst->stat & 0x10) != 0) {
+        button = GetViewModeKey(pinst);
+        ControlModel(pinst, cmpGetEncycWork(), button);
+        if (button == 0) {
+            if (work->viewIdleTimer < 0) {
+                work->phase.flags = (work->phase.flags | 8) & ~0x20;
+            } else {
+                work->viewIdleTimer--;
+            }
+        } else {
+            work->viewIdleTimer = 0x14;
+            work->phase.flags = (work->phase.flags & ~8) | 0x20;
+        }
+    }
+
+    button = cmpGetPressedButton(0x30002);
+    switch (button) {
+    case 2:
+        pinst->stat |= 0x100;
+        dds3KernelDebugSign = 1;
+        RequestChangeMotion((motionWork_t *)pinst, 0);
+        pinst->stat |= 2;
+        pinst->unk_5A = 3;
+        break;
+    case 0x10000:
+        ResetReadMainRibbon(&work->phase);
+        work->phase.flags &= ~0x20;
+        fclRbnSwitchActive(work->ribbon, 1);
+        SetScreenOffset(pinst, 1);
+        pinst->stat &= ~8;
+        pinst->stat &= ~0x10;
+        dds3KernelDebugSign = 1;
+        RequestChangeMotion((motionWork_t *)pinst, 0);
+        work->phase.flags = (work->phase.flags & ~8) | 0x10;
+        pinst->unk_5A = 4;
+        break;
+    case 0x20000:
+        ResetReadMainRibbon(&work->phase);
+        work->phase.flags &= ~0x20;
+        SetScreenOffset(pinst, 1);
+        pinst->stat &= ~8;
+        pinst->stat &= ~0x10;
+        dds3KernelDebugSign = 1;
+        RequestChangeMotion((motionWork_t *)pinst, 0);
+        work->phase.flags &= ~8;
+        fclRbnSwitchActive(work->ribbon, 0);
+        CreateFontExplain(pinst);
+        work->boardY = 0xD70;
+        work->phase.flags &= ~0x10;
+        pinst->unk_5A = 6;
+        break;
+    }
+    cmpPlayCursorSE(button);
+}
 
 extern void InitModelPosRot(void *model, s32 id);
 extern void mdlLink(void *model, fclEncycModelLink_t *links);
