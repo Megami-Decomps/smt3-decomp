@@ -68,6 +68,21 @@ extern void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera);
 
 extern void nbCameraState_Start_Animation(nbCamera_t *pNbCamera);
 
+/* Same 0x38-byte Bezier segment consumed by nbCameraLerpVec in effMath.c. */
+typedef struct dds3Bezier4PPart_t {
+    f32 controlPoints[4][3];
+    f32 t;
+    f32 step;
+} dds3Bezier4PPart_t;
+
+extern dds3Bezier4PPart_t nbCameraBAState;
+extern dds3Bezier4PPart_t nbCameraStartBAState;
+extern s32 nbCameraLerpVec(dds3Bezier4PPart_t *slot, f32 *out);
+extern f32 D_00551DFC;
+extern f32 D_00551E00;
+extern s32 D_0054F380;
+extern void effBTLModelAllShow(void);
+
 extern u8 D_0056B270[];
 extern void *memcpy(void *dst, const void *src, u32 size);
 
@@ -77,7 +92,62 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraStartEnd", nbCameraState_Start_Animati
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraStartEnd", nbCameraState_Start_BA_Set);
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraStartEnd", nbCameraState_Start_BA_Animation);
+void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    f32 battlePos[4];
+    f32 startPos[4];
+    s32 pending;
+    u32 i;
+
+    data = nbGetMainProcessData();
+    form = data->form + 4;
+    pending = 0;
+    for (i = 0; i < 10; i++, form++) {
+        if ((form->stat & 0x201) == 0x201 && form->hunit == NULL) {
+            pending = 1;
+            break;
+        }
+    }
+
+    if (pending == 0) {
+        nbCameraStartBAState.step += D_00551DFC;
+        nbCameraBAState.step += D_00551DFC;
+        if (nbCameraStartBAState.step >= D_00551E00) {
+            nbCameraStartBAState.step = D_00551E00;
+            nbCameraBAState.step = D_00551E00;
+        }
+    }
+
+    nbCameraLerpVec(&nbCameraStartBAState, startPos);
+    nbCameraLerpVec(&nbCameraBAState, battlePos);
+    if (nbCameraStartBAState.t > 0.75f) {
+        nbCameraStartBAState.step *= 0.9649999738f;
+        if (nbCameraStartBAState.step < 0.0009999999311f) {
+            nbCameraStartBAState.step = 0.0f;
+        }
+        nbCameraBAState.step *= 0.9649999738f;
+        if (nbCameraBAState.step < 0.0009999999311f) {
+            nbCameraBAState.step = 0.0f;
+        }
+    }
+
+    SDF_VU0_LOADVECTOR_B(startPos);
+    SDF_VU0_LOADVECTOR(battlePos);
+    SDF_VU0_STOREVECTOR(&pNbCamera->target);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(pNbCamera->distance);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+
+    if (nbCameraStartBAState.t >= 1.0f || nbCameraStartBAState.step == 0.0f) {
+        nbCameraStartState = 5;
+        data->stat |= 0x2000;
+    }
+    effBTLModelAllShow();
+    D_0054F380++;
+}
 
 void nbCameraState_Start_Init(void)
 {
