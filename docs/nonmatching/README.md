@@ -44,6 +44,7 @@ page and line to open. Conventions are in
 | 2 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 2 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
+| 2 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
@@ -84,7 +85,6 @@ page and line to open. Conventions are in
 | 1 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 1 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 1 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
-| 1 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 1 | event/evtPicture | [event/evtPicture.md](event/evtPicture.md) |
 | 1 | event/evtEventViewerFrameVar | [event/evtEventViewerFrameVar.md](event/evtEventViewerFrameVar.md) |
 | 1 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |

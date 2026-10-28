@@ -607,3 +607,4 @@ src/smt3/field/fldTest.c	redthing1	done	2026-10-28	1 fn / 1048 B	Dante path walk
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 192 B	datAddHeartsEntry complete race-row condition records and skill append; owner 82 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 380 B	stock-panel setup with repeated index callbacks and complete per-case index/flag arrays; owner 353 match, 0 differ
 coverage sweep, claim-free queue	z20	done	2026-10-29	3 fn / 3616 B	3 units closed: nbCameraNego, dds3PadManager, pbMenu; two stfMain drafts parked
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	registration sprites at native 620-byte size; two color-address/texture-load scheduling words remain

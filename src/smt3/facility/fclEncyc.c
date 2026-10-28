@@ -2866,7 +2866,70 @@ void DrawListWindowBack(void *obj, fclPanel_t *plistwin)
     lstDrawListWindow(obj, 0, 0x47);
 }
 
+typedef struct { s32 x, y; } fclEncycVertex_t;
+typedef struct { s32 left, right; } fclEncycStrip_t;
+typedef struct { u32 components[4]; } fclEncycColor_t;
+extern fclEncycColor_t D_00332330;
+extern fclEncycStrip_t D_00332340[5];
+extern fclEncycColor_t g_uv_summon_back[];
+extern sdfGrOt_t D_002F67F8;
+extern void itfMiscDrawSpritePlanePrim(fclEncycVertex_t *, fclEncycColor_t *, u32, s32, sdfDrawTag_t *);
+extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
+extern void itfMiscDrawSpritePrim2(fclEncycVertex_t *, fclEncycColor_t *, fclEncycColor_t *, u32, s32, sdfDrawTag_t *);
+
+#ifdef NON_MATCHING
+/* 153 of 155 words match; color-address/texture-load scheduling differs.
+ * See docs/nonmatching/facility/fclEncyc.md. */
+void drawRegistSprites(fclEncyc_instance_tag *pinst)
+{
+    fclEncycVertex_t pos[2];
+    fclEncycColor_t uv;
+    sdfDrawTag_t *tag;
+    fclEncycStrip_t *strip;
+    s32 i;
+
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    pos[0].y = 0x218;
+    pos[1].y = 0x260;
+    strip = D_00332340;
+    for (i = 4; i >= 0; i--, strip++) {
+        pos[0].x = strip->left;
+        pos[1].x = strip->right;
+        itfMiscDrawSpritePlanePrim(pos, &D_00332330, 0xFFFFF0, 0, tag);
+    }
+
+    pos[0].x = 0x690; pos[0].y = 0x1F8;
+    pos[1].x = 0x920; pos[1].y = 0x270;
+    uv.components[0] = 0x10; uv.components[1] = 0x160;
+    uv.components[2] = 0x2F0; uv.components[3] = 0x250;
+    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
+                         (sdfTexHandle_t *)pinst->texHandle[0], 0, tag);
+
+    pos[0].x = 0xBD0; pos[1].x = 0xED0;
+    uv.components[0] = 0x300; uv.components[2] = 0x600;
+    itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
+
+    pos[0].x = 0x11D0; pos[1].x = 0x1570;
+    uv.components[0] = 0xA50; uv.components[1] = 0x640;
+    uv.components[2] = 0xDF0; uv.components[3] = 0x730;
+    itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
+
+    pos[0].x = 0x1A50; pos[1].x = 0x1C00;
+    uv.components[0] = 0x610; uv.components[1] = 0x160;
+    uv.components[2] = 0x7C0; uv.components[3] = 0x250;
+    itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
+
+    pos[0].x = 0x1620; pos[1].x = 0x19C0;
+    uv.components[0] = 0xC40; uv.components[1] = 0x150;
+    uv.components[2] = 0xFF0; uv.components[3] = 0x240;
+    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
+                         (sdfTexHandle_t *)pinst->texHandle[1], 0, tag);
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", drawRegistSprites);
+#endif
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawRegistListwinElem);
 
@@ -2876,8 +2939,6 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadListwinElem);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadStatusMoney);
 
-typedef struct { s32 x, y; } fclEncycVertex_t;
-typedef struct { u32 components[4]; } fclEncycColor_t;
 extern u8 D_003323A8[];
 extern u8 D_003323B0[];
 extern sdfGrOt_t D_002F67F8;
