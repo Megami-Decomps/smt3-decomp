@@ -145,8 +145,8 @@ nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/n
 nbCameraState_CommandRoot_Init	newbattle/nbCameraCommand	0xD0		docs/nonmatching/newbattle/nbCameraCommand.md	3
 nbCameraState_CommandRoot_Calc	newbattle/nbCameraCommand	0x80	1 of 32 words differ	docs/nonmatching/newbattle/nbCameraCommand.md	11
 nbCameraState_CommandTargetSel_Init	newbattle/nbCameraCommand	0x11C		docs/nonmatching/newbattle/nbCameraCommand.md	19
-dds3EffectFileListCreate	newbattle/nbCameraHelper	1080 bytes	Six of 270 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	5
-dds3EffectFileListWindowDrawSprite	newbattle/nbCameraHelper	280 bytes	Two of 70 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	44
+dds3EffectFileListCreate	newbattle/nbCameraHelper	1080 bytes	269 of 270 words match	docs/nonmatching/newbattle/nbCameraHelper.md	5
+dds3EffectFileListWindowDrawSprite	newbattle/nbCameraHelper	280 bytes	Two of 70 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	21
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/nonmatching/newbattle/nbCameraPress.md	5
 nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	56 of 58 words match	docs/nonmatching/newbattle/nbCameraSkill.md	5
 nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	29 of 30 words match	docs/nonmatching/newbattle/nbCameraSkill.md	28
