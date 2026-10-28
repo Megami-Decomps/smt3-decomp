@@ -88,8 +88,8 @@ typedef struct
     /* 0x004D */ u8 reserved004D[3];
     /* 0x0050 */ datUnitWork_t previewUnit;
     /* 0x013C */ u8 reserved013C[4];
-    /* 0x0140 */ cmpCursorInfo_t listCursor;
-    /* 0x0178 */ u8 unk_0178[0x1004];
+    /* 0x0140 */ cmpPadStopWork_t listCursor;
+    /* 0x017C */ u8 reserved017C[0x1000];
     /* 0x117C */ ragListWindow_t heartListWindow;
     /* 0x1310 */ u8 reserved1310[0x1004];
     /* 0x2314 */ ragListWindow_t itemList2Window;
@@ -181,7 +181,7 @@ extern void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor);
 
 extern s32 cmpGetPressedButton(s32 mask);
 
-extern s32 cmpPlayCursorSE(s32 button);
+extern void cmpPlayCursorSE(u32 button);
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
@@ -207,7 +207,7 @@ extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
 
 void ragExit(void)
 {
-    cmpMoveCursorListEnd(&ragUpdateWork->listCursor);
+    cmpMoveCursorListEnd(&ragUpdateWork->listCursor.cursor);
     ragUpdateWork->unk_0005 = 1;
     ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 0xC,
                                              &ragUpdateWork->scriptArg);
@@ -360,8 +360,8 @@ s32 ragUpdateCallSeq(s32 SeqNo)
     u32 phase;
 
     ragCreateAllList(1, ragUpdateWork->ragType, ragUpdateWork);
-    phase = (s32)ragUpdateWork->listCursor.unk_22 +
-            (u8)ragUpdateWork->listCursor.unk_24;
+    phase = (s32)ragUpdateWork->listCursor.cursor.unk_22 +
+            (u8)ragUpdateWork->listCursor.cursor.unk_24;
     if (phase < 5) {
         switch (phase) {
         case 0:
@@ -531,7 +531,41 @@ void ragUpdateSeqMitama(void)
     fclRunPanelAnim(ragUpdateWork->seqMitama);
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqRoot);
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 dir);
+
+void ragUpdateSeqRoot(void)
+{
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+
+    fclSetWorkValue(2, 0);
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+
+    switch (button) {
+    case 1: {
+        s8 sequence = (s8)((u8)ragUpdateWork->listCursor.cursor.unk_22 +
+                           (u8)ragUpdateWork->listCursor.cursor.unk_24 + 1);
+        ragUpdateCallSeq(sequence);
+        break;
+    }
+    case 2:
+        ragExit();
+        break;
+    case 16:
+        cmpMoveCursor(&ragUpdateWork->listCursor.cursor, -1);
+        break;
+    case 32:
+        cmpMoveCursor(&ragUpdateWork->listCursor.cursor, 1);
+        break;
+    }
+
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&ragUpdateWork->listCursor.cursor, 0);
+    }
+    button = cmpDisablePadBitStop(&ragUpdateWork->listCursor, button, 0x30);
+    cmpPlayCursorSE((u16)button);
+}
 
 void ragUpdateSeqTalk(void)
 {
