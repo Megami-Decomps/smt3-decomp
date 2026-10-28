@@ -367,4 +367,4 @@ src/smt3/field/fldFileResolver.c	redthing1	done	2026-10-28	1 fn / 576 B	FL1 reso
 src/smt3/code_0029B780.c	redthing1	done	2026-10-28	1 fn / 304 B	dds3DrawConfigItem; phase-based colors and panel box strips
 src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 244 B	sdfSndInit; map setup, IOP allocation persistence, transfer and synchronization
 src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 284 B	treasure-search skill check with native inline item-table layout; owner 69 match, 0 differ
-src/smt3/effect/effBattleMisc.c	redthing1	active	2026-10-28	position helpers	model party world and mark vector providers
+src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	1 fn / 352 B	model-mark position provider with native model and skill exceptions; owner 64 match, 0 differ

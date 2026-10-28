@@ -29,6 +29,8 @@ extern f32 D_0031B970[];
 extern f32 D_0031B980[];
 extern sdfVector4_t effBTLPartCenterOffset[32];
 extern nbMainProcessData_t *nbGetMainProcessData(void);
+extern s32 effBTLSkillCheckRun(void);
+extern s32 effBTLSkillGetID(void);
 extern void ToMatrix(void);
 extern void InversMatrix(void);
 extern f32 effBTLModelGroupGetSphereExp(sdfVector4_t *group, u32 model);
@@ -978,7 +980,45 @@ void effBTLPartGetTargetPartyPositionPtr(u32 pFormation, void *pPosPtr) {
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetWorldPositionPtr);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetModelMarkPositionPtr);
+void effBTLPartGetModelMarkPositionPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPosPtr) {
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 modelId;
+    s32 skillId;
+    s32 modelIndex;
+    s32 skillRuns;
+
+    if ((data->stat & 0x1000) == 0 && pPosPtr->aimMode < 2) {
+        modelId = effBTLModelGetID(pFormation);
+        skillId = effBTLSkillGetID();
+        modelIndex = modelId - 0x102;
+        if ((u32)modelIndex < 0x40) {
+            switch (modelIndex) {
+            case 1:
+            case 34:
+                effBTLModelGetSphereCenter(pFormation);
+                return;
+            case 0:
+            case 33:
+                effBTLModelGetSphereCenter(pFormation);
+                return;
+            case 6:
+            case 35:
+                skillRuns = effBTLSkillCheckRun();
+                if (skillRuns != 0 &&
+                    (skillId == 0xFE || skillId == 0xF1 || skillId == 0xDD))
+                    break;
+                effBTLModelGetSphereCenter(pFormation);
+                return;
+            case 63:
+                effBTLModelGetSphereCenter(pFormation);
+                return;
+            }
+        }
+    }
+    if (effBTLModelGetMarkPosition(pFormation, pPosPtr->aimMode) == 0) {
+        effBTLModelGetSphereCenter(pFormation);
+    }
+}
 
 f32 effBTLPartGetRadiusPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPosPtr) {
     sdfVector4_t center;
