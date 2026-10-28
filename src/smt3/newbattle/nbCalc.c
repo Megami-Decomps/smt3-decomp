@@ -549,7 +549,42 @@ s32 nbGetDeadType(s32 nskill, s32 sformindex, s32 dformindex)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbCheckStoneDead);
+extern char D_00544BF8[];
+
+s32 nbCheckStoneDead(s32 nskill, s32 dformindex)
+{
+    datUnitWork_t *work;
+    s32 skillattr;
+    s32 param;
+    s32 chance;
+    f32 divisor;
+    f32 rate;
+
+    work = nbGetUnitWorkFromFormindex(dformindex);
+    if (work == NULL) {
+        return 0;
+    }
+    if (nbGetBadStat(dformindex) != 0x400) {
+        return 0;
+    }
+    skillattr = nbGetNormalSkillAttr(nskill);
+    if (skillattr != 0 && skillattr != 4) {
+        return 0;
+    }
+    param = datGetParam(work, 5);
+    divisor = ((f32)work->level + 20.0f) / 5.0f;
+    rate = (f32)param / divisor;
+    if ((work->flag & 4) != 0) {
+        chance = 100.0f - rate * 40.0f;
+    } else {
+        chance = 100.0f - rate * 20.0f;
+    }
+    if (chance < 20) {
+        chance = 20;
+    }
+    printf(D_00544BF8, chance);
+    return dds3GetRandIntA(0, 100) < chance;
+}
 
 void nbSetBadStat(s32 formindex, s32 sw, s32 badstat)
 {
