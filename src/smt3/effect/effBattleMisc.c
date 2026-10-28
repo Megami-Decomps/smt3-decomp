@@ -13,6 +13,11 @@ extern u32 D_00317740[]; /* 0, 5, 15, 30 frames */
 extern void (*GetPositionPtrTable[])(void *owner, effBTLAimParams_t *request);
 extern u32 effBTLSkillGetInvokeParty(void);
 extern u32 effBTLSkillGetTargetParty(void);
+extern nbFormation_t *effBTLSkillGetInvokeFormation(void);
+extern nbFormation_t *effBTLSkillGetTargetFormation(s32 number);
+extern u32 effBTLSkillGetTargetNumber(void);
+extern u32 effBTLSkillGetTargetBit(void);
+void effBTLModelInvokePartyShow(void);
 extern void effBTLPartGetPartyPositionPtr(u32 group, effBTLAimParams_t *pPosPtr);
 extern void effBTLPartPtrModelGroupGetCenterAndHeight(u32 group, sdfVector4_t *center, f32 *heightAverage, f32 *heightMax, f32 *frontMax);
 extern f32 aViewTarget[4];
@@ -738,13 +743,47 @@ void effBTLModelAllHide(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelInvokeShow);
+void effBTLModelInvokeShow(void)
+{
+    if (nbGetMainProcessData()->formationtype == 4 && effBTLSkillGetInvokeParty() == 0x200) {
+        effBTLModelInvokePartyShow();
+    } else {
+        effBTLModelShow(effBTLSkillGetInvokeFormation());
+    }
+}
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelTargetShow);
+void effBTLModelTargetShow(void)
+{
+    u32 count;
+    u32 i;
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelInvokeHide);
+    i = 0;
+    count = effBTLSkillGetTargetNumber();
+    if (count != 0) {
+        do {
+            effBTLModelShow(effBTLSkillGetTargetFormation(i++));
+        } while (i < count);
+    }
+}
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelTargetHide);
+void effBTLModelInvokeHide(void)
+{
+    effBTLModelHide(effBTLSkillGetInvokeFormation());
+}
+
+void effBTLModelTargetHide(void)
+{
+    u32 count;
+    u32 i;
+
+    i = 0;
+    count = effBTLSkillGetTargetNumber();
+    if (count != 0) {
+        do {
+            effBTLModelHide(effBTLSkillGetTargetFormation(i++));
+        } while (i < count);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelInvokeGroupHide);
 
