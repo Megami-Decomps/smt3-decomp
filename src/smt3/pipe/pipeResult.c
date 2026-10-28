@@ -105,7 +105,41 @@ s32 pipeResultDraw(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeResult", pipeMessStartIdx);
+extern u8 messIdx;
+extern s32 GetMaka(void);
+extern s32 pipeStartMessage(void);
+extern void pipeSetMessageNum(s32 num);
+extern void pipeStartRandomMessage(s32 index, s8 value);
+extern s32 pipeGetRandomMessage(void);
+extern void datAddMaka(s32 addmaka);
+extern void datAddItem(s32 id, s32 num);
+extern void DEBUG_PRINT(const char *format, ...);
+
+void pipeMessStartIdx(void)
+{
+    switch (messIdx) {
+    case 0:
+        pipeStartMessage();
+        messIdx = 1;
+        DEBUG_PRINT("complete\n");
+        return;
+    case 1: {
+        s32 maka = GetMaka();
+        pipeSetMessageNum(maka);
+        datAddMaka(maka);
+        messIdx = 2;
+        DEBUG_PRINT("MAKA add\n");
+        return;
+    }
+    case 2: {
+        s32 item = pipeGetRandomMessage();
+        DEBUG_PRINT("B rBox %x \n", item);
+        pipeStartRandomMessage(item, 1);
+        datAddItem(item, 1);
+        DEBUG_PRINT("rBox open\n");
+    }
+    }
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeResult", pipeMessInit);
 
