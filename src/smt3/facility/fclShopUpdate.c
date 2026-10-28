@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern s32 fclSetWorkValue(s8 index, s32 value);
 
@@ -136,7 +137,7 @@ typedef struct
     /* 0x0000 */ u8 unk_0000;
     /* 0x0001 */ s8 unk_0001;
     /* 0x0002 */ s8 unk_0002;
-    /* 0x0003 */ u8 unk_0003;
+    /* 0x0003 */ s8 unk_0003;
     /* 0x0004 */ s8 unk_0004;
     /* 0x0005 */ s8 unk_0005;
     /* 0x0006 */ u8 unk_0006[2];
@@ -271,7 +272,99 @@ void shopUpdatePanelAnim(void)
     fclRunPanelAnim(&shopUpdateWork->anim);
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shop_update_Process);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern s32 fclChkDbgProcess(void);
+extern s32 fclGetFlag(s8 index);
+extern void fclClearFlag(s8 index);
+extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
+extern s32 shpUpdateSeqRoot(void);
+extern s32 shpUpdateSeqBuy(void);
+extern s32 shpUpdateSeqSell(void);
+extern s32 shpUpdateSeqBuyNums(void);
+extern s32 shpUpdateSeqSellNums(void);
+extern s32 shpUpdateSeqConfirm(s8 mode);
+extern s32 shpUpdateSeqPay(void);
+extern s32 shpUpdateServiceTicketItem(void);
+
+s32 shop_update_Process(dds3ProcessID_t *id)
+{
+    shpUpdateWork_t *work;
+    s8 previous;
+
+    shopUpdateWork = dds3GetProcessData(id);
+    previous = shopUpdateWork->unk_0001;
+    if (fclChkDbgProcess() != 0) {
+        return 0;
+    }
+
+    shopUpdatePanelAnim();
+    if (fclGetFlag(1) == 0) {
+        return 0;
+    }
+
+    work = shopUpdateWork;
+    if ((work->unk_0000 & 0x40) != 0) {
+        return -1;
+    }
+    if ((work->unk_0000 & 2) != 0 && (work->unk_0000 & 1) != 0) {
+        switch (work->unk_0001) {
+        case 0:
+            shpUpdateSeqRoot();
+            break;
+        case 1:
+            shpUpdateSeqBuy();
+            break;
+        case 2:
+            shpUpdateSeqSell();
+            break;
+        case 3:
+            shopCheckSeqInfo();
+            break;
+        case 4:
+            if (cmpChkSeqInfo((cmbGbWork_t *)work) == 2) {
+                fclClearFlag(1);
+                fclSetWorkValue(1, 0);
+                shopUpdateWork->unk_0000 |= 0x10;
+            }
+            break;
+        case 5:
+            shpUpdateSeqBuyNums();
+            break;
+        case 6:
+            shpUpdateSeqSellNums();
+            break;
+        case 7:
+            shopStartScript();
+            break;
+        case 8: {
+            s32 result;
+
+            if (work->unk_0003 == 5) {
+                result = shpUpdateSeqConfirm(0);
+            } else {
+                result = shpUpdateSeqConfirm(1);
+            }
+            if (result == 0) {
+                return 0;
+            }
+            break;
+        }
+        case 9:
+            shpUpdateSeqPay();
+            break;
+        case 10:
+            shpUpdateServiceTicket();
+            break;
+        case 11:
+            shpUpdateServiceTicketItem();
+            break;
+        }
+    }
+
+    cmpUpdateSeqInfo(shopUpdateWork, previous);
+    return 0;
+}
+
 
 INCLUDE_RODATA(const s32, "facility/fclShopUpdate", D_0053D0C0);
 
