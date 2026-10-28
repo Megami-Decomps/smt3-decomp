@@ -63,6 +63,9 @@ jobs:
       - name: Compile the non-matching drafts
         run: python3 tools/check_nonmatching.py
 
+      - name: Compile the IRX non-matching drafts
+        run: python3 tools/check_irx_nonmatching.py
+
       # The retail executable is copyrighted and is never committed here. A
       # fork or a public clone has no way to obtain it, so the build, checksum
       # and report steps below are skipped instead of pretending to verify
