@@ -202,7 +202,61 @@ s32 nmeResetCursor(cmpCursorInfo_t *cursor, s8 delta)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeFindNextChar);
+typedef struct {
+    cmpCursorInfo_t cursor;
+    s8 unk_38;
+} cmpPadStopWork_t;
+
+extern s32 cmpGetPressedButton(s32 mask);
+extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s32 mode);
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
+extern s32 cmpChkPadPressUpDown(void);
+extern s32 cmpGetPadUpDown(void);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
+extern void nmeConfirmChar(void);
+extern void func_002413B8(u32 button, s8 mode);
+
+void nmeFindNextChar(void)
+{
+    u16 button = (u16)cmpGetPressedButton(0xF3);
+
+    switch (button) {
+    case 1:
+        nmeConfirmChar();
+        break;
+    case 2:
+        nmeBackspace();
+        break;
+    case 0x10:
+        cmpFindNextCursorItem(&nmeUpdateWork->inputCursor, -1, 0);
+        break;
+    case 0x20:
+        cmpFindNextCursorItem(&nmeUpdateWork->inputCursor, 1, 0);
+        break;
+    case 0x40:
+        if (nmeResetCursor(&nmeUpdateWork->nameCursor, -1) == 0) {
+            cmpMoveCursor(&nmeUpdateWork->nameCursor, -1);
+        }
+        break;
+    case 0x80:
+        if (nmeResetCursor(&nmeUpdateWork->nameCursor, 1) == 0) {
+            cmpMoveCursor(&nmeUpdateWork->nameCursor, 1);
+        }
+        break;
+    }
+
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&nmeUpdateWork->inputCursor, 0);
+    }
+    button = (u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&nmeUpdateWork->inputCursor, button, 0x30);
+    if (cmpGetPadUpDown() == 0) {
+        cmpMoveCursor(&nmeUpdateWork->nameCursor, 0);
+    }
+    button = (u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&nmeUpdateWork->nameCursor, button, 0xC0);
+    func_002413B8(button, 1);
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursorWrap);
 
