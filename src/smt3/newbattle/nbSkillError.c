@@ -362,7 +362,70 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 s32 nbGetMotionTable(s32 unitid, s32 index);
 
-INCLUDE_ASM(const s32, "newbattle/nbSkillError", CheckHojo);
+extern s32 nbGetHojoCounterMax(s32 type);
+extern s32 nbGetHojoCounterMin(s32 type);
+
+s32 CheckHojo(nbParty_t **list, s32 cnt, u32 hojo)
+{
+    s32 i;
+
+    for (i = 0; i < cnt; i++) {
+        nbParty_t *party = list[i];
+
+        if ((hojo & 1) != 0 && party->count[4] != nbGetHojoCounterMax(4)) {
+            return 1;
+        }
+        if ((hojo & 2) != 0 && party->count[4] != nbGetHojoCounterMin(4)) {
+            return 1;
+        }
+        if ((hojo & 4) != 0 && party->count[5] != nbGetHojoCounterMax(5)) {
+            return 1;
+        }
+        if ((hojo & 8) != 0 && party->count[5] != nbGetHojoCounterMin(5)) {
+            return 1;
+        }
+        if ((hojo & 0x10) != 0 && party->count[6] != nbGetHojoCounterMax(6)) {
+            return 1;
+        }
+        if ((hojo & 0x20) != 0 && party->count[6] != nbGetHojoCounterMin(6)) {
+            return 1;
+        }
+        if ((hojo & 0x40) != 0 && party->count[7] != nbGetHojoCounterMax(7)) {
+            return 1;
+        }
+        if ((hojo & 0x80) != 0 && party->count[7] != nbGetHojoCounterMin(7)) {
+            return 1;
+        }
+        if ((hojo & 0x100) != 0 && party->count[8] != nbGetHojoCounterMax(8)) {
+            return 1;
+        }
+        if ((hojo & 0x200) != 0 && party->count[8] != nbGetHojoCounterMin(8)) {
+            return 1;
+        }
+        if ((hojo & 0x1000) != 0 && party->count[9] != nbGetHojoCounterMax(9)) {
+            return 1;
+        }
+        if ((hojo & 0x2000) != 0 && party->count[10] != nbGetHojoCounterMax(10)) {
+            return 1;
+        }
+        if ((hojo & 0x4000) != 0 && party->count[11] != nbGetHojoCounterMax(11)) {
+            return 1;
+        }
+        if ((hojo & 0x8000) != 0 && party->count[12] != nbGetHojoCounterMax(12)) {
+            return 1;
+        }
+        if ((hojo & 0x10000) != 0 && party->count[13] != nbGetHojoCounterMax(13)) {
+            return 1;
+        }
+        if ((hojo & 0x20000) != 0 && party->count[14] != nbGetHojoCounterMax(14)) {
+            return 1;
+        }
+        if ((hojo & 0x1000000) != 0 && party->count[15] != nbGetHojoCounterMax(15)) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 /* s32 with no return keeps the one shared epilogue retail has. */
 s32 nbDispSkillErrorMessage(s32 err)
