@@ -50,7 +50,15 @@ typedef struct
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_00[0x20];
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+    /* 0x8 */ f32 z;
+    /* 0xC */ f32 w;
+} cmpVec4_t;
+
+typedef struct
+{
+    /* 0x0000 */ cmpVec4_t camera[2];
     /* 0x0020 */ f32 screenOfsX;
     /* 0x0024 */ f32 screenOfsY;
     /* 0x0028 */ sdfMemHandle_t *memhandle;
@@ -171,6 +179,8 @@ typedef struct
     /* 0x1E */ u8 unk_1E[2];
     /* 0x20 */ s32 ribbonVelocity;
     /* 0x24 */ s32 ribbon_accel;
+    /* 0x28 */ f32 cameraRadius;
+    /* 0x2C */ f32 cameraAngle;
 } fclEncyc_readmainwork_tag;
 
 /* The confirmation phase keeps the animated coordinates inline in native
@@ -198,14 +208,6 @@ extern s32 cmpLoadStatusModel(void);
 extern void cmpModelFreeResource(void);
 extern s32 fclEncycFreeEntries(const char *name);
 extern char D_0053D768[];
-
-typedef struct
-{
-    /* 0x0 */ f32 x;
-    /* 0x4 */ f32 y;
-    /* 0x8 */ f32 z;
-    /* 0xC */ f32 w;
-} cmpVec4_t;
 
 extern cmpVec4_t cmpStatusModelPos;
 
@@ -623,7 +625,6 @@ void CalcPhaseRegistAll(fclEncyc_instance_tag *pinst)
     }
 }
 
-
 INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadTop);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadTop);
@@ -657,7 +658,6 @@ void DestPhaseReadTop(fclEncyc_instance_tag *pinst)
     ReleaseFontList(work->fontList, 8);
     ReleaseWork(pinst);
 }
-
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadStatus);
 
@@ -1040,7 +1040,23 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", GetViewModeKey);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", GetAnalogPad);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", InitCameraForViewMode);
+extern void rstGetEvoModelParam(u16 id, f32 *out);
+extern void initViewCamera(cmpVec4_t *camera);
+
+void InitCameraForViewMode(fclEncyc_instance_tag *pinst)
+{
+    fclEncyc_readmainwork_tag *work = (fclEncyc_readmainwork_tag *)pinst->pwork;
+    cmpVec4_t model;
+    u16 modelId = *(u16 *)((u8 *)encycSaveWork + work->recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+
+    rstGetEvoModelParam(modelId, &model.x);
+    initViewCamera(pinst->camera);
+    work->cameraRadius = model.z - pinst->camera[0].z;
+    pinst->camera[1].x = cmpStatusModelPos.x;
+    pinst->camera[1].y = cmpStatusModelPos.y;
+    pinst->camera[1].z = model.z;
+    work->cameraAngle = 0.0f;
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", SetBoundControl);
 
@@ -1193,7 +1209,6 @@ void CalcMoveReadMainHelp(fclEncycReadHelpWork_t *work)
     work->panels[0].alpha = primaryAlpha;
 }
 
-
 void CalcMoveViewModeRibbon(fclEncyc_readmainwork_tag *pwork)
 {
     s32 alpha = pwork->ribbonAlpha;
@@ -1270,7 +1285,6 @@ void DrawBackBlackBoard(s32 y, s32 ratio)
     ot->regFunc(ot, tag);
 }
 
-
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawRegistAllHelp);
 
 typedef struct {
@@ -1319,7 +1333,6 @@ void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst)
     ot = &sdfGrOtTable[0x47];
     ot->regFunc(ot, tag);
 }
-
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadMainHelp);
 
