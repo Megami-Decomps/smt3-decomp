@@ -517,7 +517,69 @@ void objMdlDel(tagPipeObject *objPtr) {
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlPosSet);
+extern void getPosTranslate(tagPipeObject *object, f32 *position);
+extern void mymdlPosSet(tagpipeBasic *work, f32 x, f32 y, f32 z);
+extern void mdlTask(tagPipeObject *object, tagpipeBasic *model, f32 x, f32 y, f32 z);
+extern void eglSetOt(u32 ot);
+extern void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
+extern f32 D_00551744, D_00551748;
+extern tagpipeBasic *MyLine;
+
+void objMdlPosSet(tagPipeObject *object)
+{
+    f32 position[3];
+
+    if (object->mdl == 0xFF) {
+        return;
+    }
+    getPosTranslate(object, position);
+    switch ((u8)object->id) {
+    case 1:
+        mymdlPosSet(&PipeEML[object->mdl], position[0], position[1], position[2]);
+        break;
+    case 2:
+        mymdlPosSet(&PipeEMS[object->mdl], position[0], position[1], position[2]);
+        break;
+    case 5:
+    case 6:
+        mymdlPosSet(&PipeMaka1[object->mdl], position[0], position[1], position[2]);
+        break;
+    case 12:
+        mdlTask(object, &PipeDRBOX[object->mdl], 90.0f, 180.0f, 0.0f);
+        mymdlPosSet(&PipeDRBOX[object->mdl], position[0], position[1], position[2]);
+        break;
+    case 11:
+        mdlTask(object, &PipeDMaka[object->mdl], 90.0f, 180.0f, 0.0f);
+        mymdlPosSet(&PipeDMaka[object->mdl], position[0], position[1], position[2]);
+        break;
+    case 9:
+        mymdlPosSet(&PipeZMaka[object->mdl], position[0], position[1], position[2]);
+        break;
+    case 10:
+        mymdlPosSet(&PipeRBOX[object->mdl], position[0], position[1], position[2]);
+        break;
+    case 128:
+        mdlTask(object, basicMy, D_00551748, D_00551744, 0.0f);
+        mdlTask(object, MyLine, -90.0f, 0.0f, 0.0f);
+        mymdlPosSet(basicMy, position[0], position[1], position[2]);
+        mymdlPosSet(MyLine, position[0], position[1], position[2]);
+        eglSetOt(0x32);
+        eglLinkTest(1, 5, 0x80, 1, 0, 0, 1, 1);
+        eglSetOt(0x33);
+        eglLinkTest(1, 5, 0x80, 1, 0, 0, 1, 1);
+        eglSetOt(0x34);
+        eglLinkTest(1, 5, 0x80, 1, 0, 0, 1, 1);
+        eglSetOt(0x35);
+        eglLinkTest(1, 5, 0x80, 1, 0, 0, 1, 1);
+        eglSetOt(0x36);
+        eglLinkTest(1, 5, 0x80, 1, 0, 0, 1, 1);
+        eglSetOt(0x37);
+        eglLinkTest(1, 5, 0x80, 1, 0, 0, 1, 3);
+        break;
+    default:
+        break;
+    }
+}
 
 extern tagpipeBasic *MyLine;
 extern void mymdlSclSet(tagpipeBasic *work, f32 scale);
