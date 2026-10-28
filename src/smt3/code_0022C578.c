@@ -1728,7 +1728,37 @@ s32 cmpCalcDestroyItem(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcItem);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetPartyDSL);
+s32 cmpSetPartyDSL(void)
+{
+    switch (campWork->page[1].cursor.unk_22 + (u8)campWork->page[1].cursor.unk_24)
+    {
+    case 0:
+        if (cmpStartStockMsg(0) == 0) {
+            return 0;
+        }
+        campWork->stock[0].count = 0xA;
+        cmpBuildStockNameList(&campWork->stock[0]);
+        cmpReCalcStockCursorPos(2);
+        break;
+    case 1:
+        if (camp_H_cmpLocalStock_t__ctor() == 0) {
+            return 0;
+        }
+        campWork->stock[0].count = 0x19;
+        cmpBuildStockNameList(&campWork->stock[0]);
+        cmpReCalcStockCursorPos(2);
+        break;
+    case 2:
+        if (cmpStartStockMsg(1) == 0) {
+            return 0;
+        }
+        campWork->stock[0].count = 0x8B;
+        cmpBuildStockNameList(&campWork->stock[0]);
+        cmpReCalcStockCursorPos(2);
+        break;
+    }
+    return 1;
+}
 
 s32 cmpCalcStockControl(void)
 {
