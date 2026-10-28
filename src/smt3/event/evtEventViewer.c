@@ -1,6 +1,7 @@
 #include "common.h"
 #include "basic.h"
 #include "event.h"
+#include "kernel.h"
 
 /* The viewer's current menu, which EnterMain switches on to decide what Enter does
  * from each one. Names from the IDB. */
@@ -103,7 +104,8 @@ struct evtViewerInfo_t {
     s32 nowmenu;                     /* 0x2280 */
     s32 menusw;                   /* 0x2284 */
     u32 word2288;
-    u8 reserved228C[4];
+    /* Cancelled and cleared by the menu-step handler. */
+    dds3ProcessID_t *menuProcess;
     s32 drawblur2;                      /* 0x2290 */
     s32 drawmblur;                      /* 0x2294 */
     s32 drawdblur;                 /* 0x2298 */
