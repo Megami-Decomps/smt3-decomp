@@ -236,7 +236,47 @@ void nmeDeleteChar(s8 delta)
     func_0029A108(mode);
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeConfirmChar);
+extern const u8 *D_005276B8[];
+extern void func_0029A108(s32 mode);
+
+void nmeConfirmChar(void)
+{
+    nmeWork_t *work = nmeUpdateWork;
+    s32 modeSelect = (s8)((u8)work->modeCursor.unk_22 +
+                          (u8)work->modeCursor.unk_24);
+    s32 inputRow = work->inputCursor.unk_22 +
+                   (u8)work->inputCursor.unk_24;
+    s32 nameColumn = work->nameCursor.unk_22 +
+                     (u8)work->nameCursor.unk_24;
+    const u8 *charTable;
+    u8 char0;
+    u8 char1;
+    /* One position workspace covers the table offset and then the edit cursor.
+     * Qualified cc1 allocation traces keep both phases in one pseudo; splitting
+     * them restores eight differing words (plain/dump/hooked output parity). */
+    s32 position;
+    s32 mode;
+
+    if (modeSelect != 2) {
+        position = ((inputRow * 16) + nameColumn) * 2 + 2;
+    } else {
+        position = ((inputRow * 16) + nameColumn) * 2;
+    }
+    charTable = D_005276B8[modeSelect];
+    char0 = charTable[position];
+    char1 = charTable[position + 1];
+
+    position = nmeGetCursorPos(nmeUpdateWork);
+    mode = nmeGetInputMode(nmeUpdateWork);
+    nmeUpdateWork->inputChars[mode][position][0] = char0;
+    nmeUpdateWork->inputChars[mode][position][1] = char1;
+    if (nmeUpdateWork->inputRowEnabled[mode] == position) {
+        nmeUpdateWork->inputRowEnabled[mode] =
+            (u8)nmeUpdateWork->inputRowEnabled[mode] + 1;
+    }
+    nmeStepCursor(1);
+    func_0029A108(mode);
+}
 
 void nmeBackspace(void)
 {
