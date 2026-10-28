@@ -569,3 +569,4 @@ src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	1 fn / 132 B	mode/
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 252 B	help-gradient bars with signed alpha scaling and three native color-corner patterns; owner 344 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 280 B	help message drawing with native backdrop gate, signed alpha and real font-provider contracts; owner 345 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	font-help lifecycle at native 344-byte size with four-word captured-coordinate register residual
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 100 B	camera-point lookup with typed scene/resource providers and successful-hit vector copy; owner 164 match, 0 differ

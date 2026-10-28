@@ -76,9 +76,8 @@ evtSaveViewerHeader	event/evtEventViewerMenu	0x400	254 of 256 words match	docs/n
 evtMenuDisp	event/evtEventViewerMenu	0x1C0	63 of 112 words match	docs/nonmatching/event/evtEventViewerMenu.md	70
 evtPictureProcess1	event/evtPicture	0x228		docs/nonmatching/event/evtPicture.md	5
 func_00206308, func_002065C8	fclCombineInit	0x2C0 each	35 of 176 words differ	docs/nonmatching/facility/fclCombineInit.md	5
-cmbFindCameraPoint	fclCombineInit	0x64	9 of 25 words differ	docs/nonmatching/facility/fclCombineInit.md	43
-cmbDrawFullScreenPanel	fclCombineInit	0x68	20 of 26 words match	docs/nonmatching/facility/fclCombineInit.md	66
-cmbDrawResultFooter	fclCombineInit	0x74	25 of 29 words match	docs/nonmatching/facility/fclCombineInit.md	85
+cmbDrawFullScreenPanel	fclCombineInit	0x68	20 of 26 words match	docs/nonmatching/facility/fclCombineInit.md	43
+cmbDrawResultFooter	fclCombineInit	0x74	25 of 29 words match	docs/nonmatching/facility/fclCombineInit.md	62
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/nonmatching/facility/fclEncyc.md	5
 fclDrawPanel	fclPanel	0x54	8 of 21 words differ	docs/nonmatching/facility/fclPanel.md	5
 fclDrawPanelType0Grad	facility/fclPanel	0x100	6 of 64 words differ	docs/nonmatching/facility/fclPanel.md	27

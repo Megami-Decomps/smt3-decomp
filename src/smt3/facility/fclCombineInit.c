@@ -3149,29 +3149,22 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawModelPoly);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawModelAt);
 
-extern void *dds3GetControlScene(void);
-
+extern dds3Basic_t *dds3GetControlScene(void);
 extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
+typedef struct fldResourcePoint_t fldResourcePoint_t;
+extern fldResourcePoint_t *dds3PointBasicGetResource(dds3Basic_t *pPointBasic);
 
-extern void *dds3PointBasicGetResource(void *pPointBasic);
-
-/* NON_MATCHING: 9 of 25 words differ (first at +0x20). */
-#ifdef NON_MATCHING
-s32 cmbFindCameraPoint(char *name, u128 *out)
+s32 cmbFindCameraPoint(const char *name, f32 *out)
 {
-    s32 found = (s32)dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x11, name);
-    void *basic = (void *)found;
+    dds3Basic_t *scene = dds3GetControlScene();
+    dds3Basic_t *basic = dds3SceneBasicSearchNameAndType(scene, 0x11, name);
 
-    if (basic != NULL) {
-        found = 1;
-        basic = dds3PointBasicGetResource(basic);
-        SDF_VU0_COPYVECTOR(out, basic);
+    if (basic == NULL) {
+        return 0;
     }
-    return found;
+    SDF_VU0_COPYVECTOR(out, dds3PointBasicGetResource(basic));
+    return 1;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindCameraPoint);
-#endif
 
 extern datUnitVisual_t datModelParamTable[];
 extern void mdlSetPosition(struct mdlObj_t *model);

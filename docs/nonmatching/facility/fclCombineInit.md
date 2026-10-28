@@ -40,29 +40,6 @@ copy's two pointers; and the first six bytes as a single block move, which
 ee-gcc compiles with `lh` rather than retail's `lhu` whether the alignment
 comes from the type or from an `aligned(4)` field, so it cannot be one.
 
-## cmbFindCameraPoint (fclCombineInit, 0x64)
-
-9 of 25 words differ, at the exact 100-byte size. Looks up a type-0x11 scene basic by
-name, and on a hit copies the point resource's quadword to the caller's vector
-and returns 1.
-
-The quadword copy is `SDF_VU0_COPYVECTOR(out, basic)`, and the result variable
-has to be the search result itself so that the failure path returns the `$2`
-the call already left at zero.
-
-Retail copies that result into `$3` before the null test and passes the copy to
-`dds3PointBasicGetResource`, so the pointer and the return value are two live
-pseudos from the first call onwards. Written as `void *basic = (void *)found;`
-gcc coalesces the copy away, because the two hold the same value until `found`
-is set to 1; moving `found = 1;` above the second call does keep both live and
-reaches the exact size, but then gcc parks the pointer in `$16` and hoists the
-constant, which is the draft's nine words.
-
-Ruled out: a separate local for the resource pointer instead of reusing
-`basic`; the pointer declared first with `found` cast from it; both as separate
-declarations with the assignments split out; and the test written on `found`
-rather than on the pointer. All four coalesce the copy and run one word short.
-
 ## cmbDrawFullScreenPanel (fclCombineInit, 0x68)
 
 20 of 26 words match, at the exact 104-byte size. Calls `cmpDisableRGB`, draws
