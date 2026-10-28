@@ -180,29 +180,30 @@ into the `else` arm as well as setting it before the dispatch, and materialises
 `else` arm's values as defaults before the test instead reaches only 23 of 32
 words, because the `flowmsg` load then happens before the stores.
 
-## nbCheckBattleSkillError1 (newbattle/nbMakePacket, 0x48)
+## nbCheckBattleSkillError1 (newbattle/nbSkillError, 0x48)
 
-1 of 18 words differ, at the exact 72-byte size.
+1 of 18 words differ, at the exact 72-byte size. The nested signed range checks
+accept skills 0x31 and 0x32; a zero `nbFindStockSkillError()` result then returns
+2, and every other path returns 0.
 
-The structure is settled: `if (id < 0x33) { if (id >= 0x31) { if
-(nbFindStockSkillError() == 0) { return 2; } } } return 0;`, with exactly one
-textual `return 0`, which is what gives retail's three separate
-`daddu $2, $0, $0` (two in branch delay slots, one its own block placed after
-the `return 2` tail) and leaves the `id < 0x31` compare in `$2` rather than
-`$3`. Writing any of the exits as its own `return 0` or `goto zero` instead
-hoists one zero into `$2` above the first branch and costs eight bytes.
+The remaining word is the lower-bound gate at +0x14, before the helper call:
+retail uses `bnez $2, +9` (`0x14400009`) and C emits `bnel $2, $0, +9`
+(`0x54400009`). Both test the same `nskill < 0x31` boolean and target. Retail
+executes the delay-slot zero of `$2` on the call path; the likely branch annuls
+it there, and the helper overwrites that value. The residual is branch scheduling,
+not a reversed range condition.
 
-The one differing word is the `nbFindStockSkillError` test: retail emits a
-plain `bne $2, $0` and ee-gcc a `bnel`. The callee is still `INCLUDE_ASM`, so
-this is the `slDrawWindow` row of [matching levers](matching-levers.md):
-decompile `nbFindStockSkillError` and this should come out. It was attempted
-and set aside at 19 of 21 words, 76 bytes against retail's 88. Retail keeps the
-unit index and the byte offset as two induction variables and recomputes both
-table bases per iteration (`addu $3, $8, $5` off `DDS3_GBWK + 4` for the flag,
-`addu $4, $6, $5` off `DDS3_GBWK` for the badstatus at `0x12`); every shape
-tried (`ofs` as a local, `w[i]`, a biased `0xA50` base, two raw pointer
-expressions, `&&` for the nested tests) lets gcc fold the address into one
-strength-reduced giv with negative displacements instead.
+`nbFindStockSkillError` is already ordinary C in `newbattle/nbEventProcess.c`
+and matches its full 88-byte extent. It keeps separate overlapping unit/status
+views, an index and a byte offset. The old advice to decompile that helper is
+obsolete: it is compiled in a separate unit, and requalifying the current caller
+still leaves this one word.
+
+An initialized common result emits 56 bytes; early-return guard clauses emit
+64. A single-pass validation block with common failure breaks reaches 72 bytes
+but differs in five words, including the likely branch. Those forms do not close
+the existing source. Keep the typed range reconstruction; further changes need
+evidence about the caller's scheduling or original compilation context.
 
 ## nbSetBadCurseTimer (newbattle/nbMakePacket, 0x2C)
 
