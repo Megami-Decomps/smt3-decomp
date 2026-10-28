@@ -4,6 +4,12 @@
 #include "nb.h"
 #include "model.h"
 #include "motion.h"
+#include "fpu.h"
+
+extern u64 sdfFloatToULong(f32);
+extern s32 printf(const char *, ...);
+extern char D_00534BB8[]; /* Padded ground-collision diagnostic. */
+EQUATE_FPTODP();
 
 typedef struct nbCameraAnim_t {
     s32 rotate_f;
@@ -237,7 +243,30 @@ void nbCameraCRSetPlayerFormRequest(void)
     nbCameraCRSetPlayerFormRequestFlag = TRUE;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraCommand_GroundCollision);
+void nbCameraCommand_GroundCollision(nbCamera_t *pNbCamera)
+{
+    sdfVector4_t point;
+    /* Only bare-address VU0 loads observe this scratch vector. */
+    volatile sdfVector4_t scale;
+    f32 height;
+    f32 distance;
+
+    scale.z = -pNbCamera->distance;
+    scale.x = -pNbCamera->distance;
+    scale.y = -pNbCamera->distance;
+    SDF_VU0_LOADVECTOR(&pNbCamera->direction);
+    SDF_VU0_LOADVECTOR_B(&scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(pNbCamera);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&point);
+    if (point.y > -20.0f) {
+        printf(D_00534BB8, point.y);
+        height = point.y - -20.0f;
+        distance = ffabsf(height / pNbCamera->direction.y);
+        pNbCamera->distance -= fsqrtf(height * height + distance * distance);
+    }
+}
 
 /* NON_MATCHING: 4 bytes over; the formation-call delay slot differs. */
 #ifdef NON_MATCHING
@@ -325,3 +354,5 @@ void nbCameraState_CommandTargetSel_Calc(void) {
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraState_Command_KORONZCheck);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCameraCommand", D_00534BB8);
