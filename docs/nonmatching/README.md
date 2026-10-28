@@ -72,4 +72,3 @@ page and line to open. Conventions are in
 | 1 | effect/effPCPBezier | [effect/effPCPBezier.md](effect/effPCPBezier.md) |
 | 1 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
-| 1 | basic/dds3PathBasic | [basic/dds3PathBasic.md](basic/dds3PathBasic.md) |
