@@ -412,19 +412,18 @@ s32 Flow1_3(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 46 of 72 words differ (first at +0x28); at the exact size. */
-#ifdef NON_MATCHING
 s32 Flow1_4(nbNegoProcessData_t *n)
 {
     switch (n->nownegophase) {
     case 0:
         n->waitframe = 0x1E;
         break;
-    case 1:
-        if (n->ework->id != 0x96 && n->ework->id != 0x1D && n->ework->id != 3 &&
-            n->ework->id != 8 && n->ework->id != 0xD && n->ework->id != 0xA &&
-            n->ework->id != 5 && n->ework->id != 4 && n->ework->id != 0x10 &&
-            n->ework->id != 0x18 && n->ework->id != 0x1E && n->ework->id != 0x99 &&
+    case 1: {
+        u16 enemy = n->ework->id;
+        if (enemy != 0x96 && enemy != 0x1D && enemy != 3 &&
+            enemy != 8 && enemy != 0xD && enemy != 0xA &&
+            enemy != 5 && enemy != 4 && enemy != 0x10 &&
+            enemy != 0x18 && enemy != 0x1E && enemy != 0x99 &&
             evtGetAgeOfMoon() == 8) {
             nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x98, 0);
         } else {
@@ -432,11 +431,9 @@ s32 Flow1_4(nbNegoProcessData_t *n)
         }
         return 1;
     }
+    }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_4);
-#endif
 
 s32 Flow1_5(nbNegoProcessData_t *n)
 {
