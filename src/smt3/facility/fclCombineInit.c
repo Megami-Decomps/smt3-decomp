@@ -473,6 +473,8 @@ extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 
 extern void fclScriptForcedEnd(u8 *PID);
 
+extern void cmbCreateCombineResultTable(s32 mode);
+
 extern u32 fclBlendColor(u32 color, u32 mask, u32 alpha);
 
 typedef struct
@@ -494,9 +496,9 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(cmpCursorInfo_t *cur, u8 count, u8 visible, s32 layout);
 
-extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
+extern void cmpInitCursorLayout(cmpCursorInfo_t *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 extern void cmpModelFreeResource(void);
 
@@ -750,7 +752,28 @@ void cmbCreateLocalStock(void)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcRoot);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcDevSel1st);
+void cmbCalcDevSel1st(void)
+{
+    if (CMB_GBWK->unk_00004 != 0) {
+        cmbCreateLocalStock();
+    }
+    if (CMB_GBWK->unk_00004 != 0) {
+        *(s8 *)((u8 *)CMB_GBWK + 0x43E4) = 0;
+    }
+    cmbCreateCombineResultTable(0);
+    if (CMB_GBWK->unk_00004 != 1) {
+        return;
+    }
+    cmpInitCursorRange(&CMB_GBWK->stockCursorGroup[0].cursor, CMB_GBWK->stockCursorCount,
+                       CMB_GBWK->stockCursorCount, 0);
+    cmpInitCursorLayout(&CMB_GBWK->stockCursorGroup[0].cursor, 0x2B, 0x80, 0x1C5, 0x15, 0x17);
+    cmpClearCursorSlots(&CMB_GBWK->stockCursorGroup[0].cursor);
+    CMB_GBWK->stockSlot[0].index = -1;
+    CMB_GBWK->stockSlot[1].index = -1;
+    CMB_GBWK->stockSlot[2].index = -1;
+    evtDisableMoonDraw();
+    fclScriptForcedEnd(CMB_GBWK->scriptArg);
+}
 
 void cmbInitStockCursor(void)
 {
@@ -766,8 +789,6 @@ void cmbInitStockCursor(void)
         cmpClearCursorSlots(&CMB_GBWK->stockCursorGroup[1].cursor);
     }
 }
-
-extern void cmbCreateCombineResultTable(s32 mode);
 
 void cmbSeqBuildResultTable(void)
 {
