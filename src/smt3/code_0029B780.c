@@ -63,7 +63,7 @@ extern void *fclLoadTexture(char *pFileName);
 
 extern void fclSetPanelAnimState(u8 *panel, s8 state);
 
-extern s32 fclRunPanelAnim(u8 *panel);
+extern s32 fclRunPanelAnim(void *work);
 
 extern s32 dds3KillProcess(void *id, s32 shutdowntimer);
 

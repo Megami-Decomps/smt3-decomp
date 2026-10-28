@@ -11,11 +11,12 @@ typedef struct
 {
     /* 0x00 */ u8 animState;
     /* 0x01 */ u8 unk_01[3];
-    /* 0x04 */ s32 unk_04;
+    /* 0x04 */ s32 target;
     /* 0x08 */ u8 unk_08[0xC];
-    /* 0x14 */ s32 unk_14;
-    /* 0x18 */ s32 unk_18;
+    /* 0x14 */ s32 phase;
+    /* 0x18 */ s32 phaseStep;
     /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ void (*calcSizes)();
 } fclPanelAnim_t;
 
 typedef struct
@@ -55,7 +56,7 @@ extern void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 
 
 extern void fclDrawSpriteEx(s32 X, s32 Y, s32 W, s32 H, fclSprite_t *pSprite, s32 OtNo);
 
-extern void fclRunPanelAnim(void *work);
+extern s32 fclRunPanelAnim(void *work);
 
 extern sdfGrOt_t sdfGrOtTable[85];
 
@@ -434,7 +435,32 @@ void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, v
     calc(tex);
 }
 
-INCLUDE_ASM(const s32, "facility/fclShare", fclRunPanelAnim);
+s32 fclRunPanelAnim(void *work)
+{
+    fclPanelAnim_t *anim = work;
+    u8 state = anim->animState;
+
+    switch (state) {
+    case 0:
+        break;
+    case 1:
+        anim->phase += anim->phaseStep;
+        if (anim->phase > 0x200) {
+            anim->phase = 0x200;
+        }
+        break;
+    case 2:
+        anim->phase -= anim->phaseStep;
+        if (anim->phase < 0) {
+            anim->phase = 0;
+        }
+        break;
+    default:
+        break;
+    }
+    anim->calcSizes(anim);
+    return anim->phase;
+}
 
 void fclSetPanelAnimState(fclPanelAnim_t *anim, u8 state)
 {
@@ -443,12 +469,12 @@ void fclSetPanelAnimState(fclPanelAnim_t *anim, u8 state)
 
 s32 fclGetPanelAnimTarget(fclPanelAnim_t *anim)
 {
-    return anim->unk_04;
+    return anim->target;
 }
 
 s32 fclGetPanelAnimPhase(fclPanelAnim_t *anim)
 {
-    return anim->unk_14;
+    return anim->phase;
 }
 
 void func_00215188(fclPanelAnim_t *anim, s32 value)

@@ -85,7 +85,7 @@ typedef struct
  * partial views; the alias holds them apart until one covers the object. */
 extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
 
-extern void fclRunPanelAnim(void *work);
+extern s32 fclRunPanelAnim(void *work);
 
 typedef struct
 {

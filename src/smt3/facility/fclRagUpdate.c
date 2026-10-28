@@ -85,7 +85,7 @@ typedef struct
 
 extern ragUpdateWork_t *ragUpdateWork;
 
-extern void fclRunPanelAnim(void *work);
+extern s32 fclRunPanelAnim(void *work);
 
 typedef struct
 {
