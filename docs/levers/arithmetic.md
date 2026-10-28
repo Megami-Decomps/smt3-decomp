@@ -52,12 +52,11 @@ gives retail's `and $13, $2, $8`. That one word was the whole of `sdfPadWork`'s
 remaining difference.
 
 
-## A redundant `andi 0xFFFF` means the masked value's source has two assignments
+## A redundant `andi 0xFFFF` can reflect value width or repeated assignments
 
 cc1 drops a 16-bit truncation whose operand it can already bound, so
 `u16 w = (c << 8) | p[1];` with `c` a byte load emits the `or` alone. Retail's
-extra `andi $4, $2, 0xFFFF` is therefore not an explicit mask in the source but
-a `nonzero_bits` failure: a pseudo with more than one assignment has no known
+extra `andi $4, $2, 0xFFFF` can come from a `nonzero_bits` failure: a pseudo with more than one assignment has no known
 bit range, so everything computed from it has to be truncated. Assigning the
 pair back to the byte variable is what does it:
 
@@ -75,3 +74,19 @@ truncation into the twice-assigned `c` so the `andi` survives. Writing the pair
 into a fresh `u16` is two words short of retail, and `(u8 *)` indexing is what
 gives `lbu` plus `sltiu` where a `u8` local folds the `< 0x80` test into a sign
 test on `lb`.
+
+
+A single wide local can also retain a narrowing instruction. `Flow2_2` in
+`newbattle/NbNegoFlowFullMoon` loads the actual `u16` ID into a `u32` local,
+uses `(u16)(devilId - 0x24)` for its range test, then compares `(u16)devilId`
+with the individual IDs. The matched source has only one ID assignment.
+Changing that local to `u16` removes retail's extra `andi` and differs by
+12 of 51 words at the same 204-byte size.
+
+Qualified `cc1probe --alloc --cse` runs on both forms pass hooked/unhooked
+RTL and assembly, and dumped/plain assembly parity. In `.00.rtl`, the wide
+form's UID 33 explicitly zero-extends the HI subregister of ID pseudo 86;
+the narrow control compares pseudo 86 directly. CSE shares the wide form's
+three ID narrowings through pseudo 93. Thus a repeated assignment is one
+explanation for a redundant narrowing, not a requirement to infer from the
+instruction alone. Preserve real data widths and explicit format conversions.

@@ -2,21 +2,6 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
-## Flow2_2 (newbattle/nbMakePacket, 0xCC)
-
-22 of 48 words match, one word short of retail's 204.
-
-The structure, case order and constants are right. Two allocation
-differences remain: ee-gcc keeps `n->ework` in `$2` and the id in `$5`, where
-retail loads the id over the pointer in `$3`; and it emits a plain `bne` out
-of the `id` range test, where retail uses `bnel` with `dds3GetRandIntA`'s
-first argument annulled into the delay slot.
-
-The `(u16)` arithmetic is confirmed right: retail's `ori 0xFFDC`, `addu`,
-`andi 0xFFFF`, `sltiu 4` is what the natural `id >= 0x24 && id < 0x28` range
-test on the `u16` field produces, and the later `andi $3, 0xFFFF` on the id
-itself comes from the same narrowing.
-
 ## nbGetVirtualAisyo (newbattle/nbMakePacket, 0xAC)
 
 39 of 43 words match, at the exact 172-byte size.

@@ -254,7 +254,7 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 extern void nbCameraSetTarget(nbFormation_t *pTargetForm);
 
@@ -341,7 +341,27 @@ void nbSetMesMakka(s32 msgid, s32 i);
 
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowFullMoon", Flow2_1);
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowFullMoon", Flow2_2);
+s32 Flow2_2(nbNegoProcessData_t *n)
+{
+    s32 message;
+    u32 devilId;
+
+    switch (n->nownegophase) {
+    case 0:
+        devilId = n->ework->id;
+        if (!((u16)(devilId - 0x24) < 4 || (u16)devilId == 0x6E ||
+              (u16)devilId == 0x90 || (u16)devilId == 0x9A)) {
+            n->waitframe = nbSetNegoNoMotion(n, n->eform);
+            return 0;
+        }
+        /* Fall through to the immediate message for these unit IDs. */
+    case 1:
+        message = dds3GetRandIntA(NULL, 2) + 0x1A;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], message, 0);
+        return 1;
+    }
+    return 0;
+}
 
 s32 Flow2_3(nbNegoProcessData_t *n)
 {
@@ -477,7 +497,7 @@ s32 Flow2_10(nbNegoProcessData_t *n)
         n->nextnegoid = n->nextkouho[0];
         return 0;
     }
-    if (dds3GetRandIntA(0, 0x64) < ritu) {
+    if ((s32)dds3GetRandIntA(NULL, 0x64) < ritu) {
         nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x29, 0);
         n->nextnegoid = n->nextkouho[0];
     } else {
