@@ -84,9 +84,9 @@ typedef struct
     /* 0x0043 */ s8 itemList2Count;
     /* 0x0044 */ s8 itemList3[8];
     /* 0x004C */ s8 itemList3Count;
-    /* 0x004D */ u8 reserved004D[7];
-    /* 0x0054 */ u16 unk_0054;
-    /* 0x0056 */ u8 unk_0056[0xEA];
+    /* 0x004D */ u8 reserved004D[3];
+    /* 0x0050 */ datUnitWork_t previewUnit;
+    /* 0x013C */ u8 reserved013C[4];
     /* 0x0140 */ cmpCursorInfo_t listCursor;
     /* 0x0178 */ u8 unk_0178[0x1004];
     /* 0x117C */ ragListWindow_t heartListWindow;
@@ -271,7 +271,36 @@ s8 ragChkDevilLevelErr(datUnitWork_t *stock)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragSetSeqPhase);
+typedef struct {
+    u16 devilId;
+    s8 custom;
+    u8 reserved03;
+    u8 level;
+    u8 reserved05[5];
+    u8 params[6];
+    u16 skills[8];
+    u8 reserved20[12];
+} ragOffer_t;
+extern void ragSetSeqPhase2(ragOffer_t *offer, datUnitWork_t *unit);
+
+void ragSetSeqPhase(s8 phase)
+{
+    s8 index;
+    switch (phase) {
+    case 2:
+        index = (u8)ragUpdateWork->itemList2Window.listCursor.unk_22 +
+                (u8)ragUpdateWork->itemList2Window.listCursor.unk_24;
+        ragSetSeqPhase2(&((ragOffer_t *)(ragHeartsTable + 0x160))[
+            (u8)ragUpdateWork->itemList2[index]], &ragUpdateWork->previewUnit);
+        return;
+    case 3:
+        index = (u8)ragUpdateWork->itemList3Window.listCursor.unk_22 +
+                (u8)ragUpdateWork->itemList3Window.listCursor.unk_24;
+        ragSetSeqPhase2(&((ragOffer_t *)(ragHeartsTable + 0x500))[
+            (u8)ragUpdateWork->itemList3[index]], &ragUpdateWork->previewUnit);
+        break;
+    }
+}
 
 s32 ragGetHeartsFlag(s8 index)
 {
@@ -312,7 +341,7 @@ u16 ragCheckHeartsChoice(s8 index)
     if (index != 1) {
         if (index > 0) {
             if (index < 4) {
-                return ragUpdateWork->unk_0054;
+                return ragUpdateWork->previewUnit.id;
             }
         }
         return 0;
@@ -371,7 +400,7 @@ INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqItem);
 
 extern ragItemReq_t *ragGetConfirmEntry(s32 kind, u8 flag);
 
-extern void ragSetSeqPhase(s32 phase);
+extern void ragSetSeqPhase(s8 phase);
 
 extern s32 ragCheckItemUse(u16 item);
 
@@ -398,11 +427,11 @@ void ragUpdateSeq2(void)
             break;
         }
         ragSetSeqPhase(2);
-        if (ragCheckItemUse(ragUpdateWork->unk_0054) != 0) {
+        if (ragCheckItemUse(ragUpdateWork->previewUnit.id) != 0) {
             break;
         }
         fclScriptForcedEnd((u8 *)ragUpdateWork->scriptArg);
-        cmpModelSetup(ragUpdateWork->unk_0054, 0);
+        cmpModelSetup(ragUpdateWork->previewUnit.id, 0);
         ragUpdateWork->unk_0001 = 7;
         ragUpdateWork->unk_0004 = button;
         break;
@@ -442,11 +471,11 @@ void ragUpdateSeq3(void)
             break;
         }
         ragSetSeqPhase(3);
-        if (ragCheckItemUse(ragUpdateWork->unk_0054) != 0) {
+        if (ragCheckItemUse(ragUpdateWork->previewUnit.id) != 0) {
             break;
         }
         fclScriptForcedEnd((u8 *)ragUpdateWork->scriptArg);
-        cmpModelSetup(ragUpdateWork->unk_0054, 0);
+        cmpModelSetup(ragUpdateWork->previewUnit.id, 0);
         ragUpdateWork->unk_0001 = 7;
         ragUpdateWork->unk_0004 = button;
         break;
