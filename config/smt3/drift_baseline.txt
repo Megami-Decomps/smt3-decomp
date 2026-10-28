@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1126 members, 506 adopted constants.
+# 0 types, 1121 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -98,8 +98,6 @@ member cmbGbWork_t.unk_00008
 member cmbGbWork_t.unk_0000C
 member cmbGbWork_t.unk_00054
 member cmbGbWork_t.unk_0410C
-member cmbGbWork_t.unk_04505
-member cmbGbWork_t.unk_04746
 member cmbGbWork_t.unk_1650A
 member cmbGbWork_t.unk_1650B
 member cmbGbWork_t.unk_16518
@@ -123,8 +121,6 @@ member cmbMitamaEntry_t.unk_04
 member cmbMitamaEntry_t.unk_05
 member cmbPairResult_t.unk_02
 member cmbRaceSortEntry_t.unk_02
-member cmbSceneModelOwner_t.unk_00
-member cmbSceneModel_t.unk_00
 member cmbSlotParam_t.unk_00
 member cmbSlotParam_t.unk_04
 member cmbSmokeParam_t.unk_01
@@ -418,7 +414,6 @@ member evtStartWork_t.unk_170
 member evtStartWork_t.unk_18
 member evtStartWork_t.unk_19
 member evtStartWork_t.unk_1A
-member evtStartWork_t.unk_1B
 member evtStartWork_t.unk_1C
 member evtStartWork_t.unk_21
 member evtStartWork_t.unk_22E5
@@ -429,7 +424,6 @@ member evtStartWork_t.unk_22EC
 member evtStartWork_t.unk_22F0
 member evtStartWork_t.unk_2308
 member evtStartWork_t.unk_25C
-member evtStartWork_t.unk_27
 member evtStartWork_t.unk_28
 member evtStartWork_t.unk_72
 member evtTargetInfo_t.unk60
@@ -678,7 +672,6 @@ member nbDeadEvent_t.unk04
 member nbDevilData_t.unk02
 member nbDevilInfo_t.unk05
 member nbDevilInfo_t.unk0E
-member nbEncountEntry_t.unk_00
 member nbEncountEntry_t.unk_04
 member nbEncountForm_t.unk00
 member nbEncountForm_t.unk05
@@ -728,9 +721,6 @@ member nbUnitMotion_t.unk00
 member nbUnitMotion_t.unk04
 member nbUnitMotion_t.unk18
 member nmeWork_t.unk1B
-member nmeWork_t.unk1C
-member nmeWork_t.unk310C
-member nmeWork_t.unk5151
 member p2sdLoadEntry_t.unk0
 member p2sdLoadEntry_t.unk4
 member p2sdLoadEntry_t.unk5
@@ -783,6 +773,7 @@ member ragGlobalWorkData_t.unk_00000
 member ragGlobalWorkData_t.unk_00A51
 member ragGlobalWorkData_t.unk_01914
 member ragItemReq_t.unk_03
+member ragListWindow_t.unk_00000
 member ragUpdateWork_t.unk_0000
 member ragUpdateWork_t.unk_0001
 member ragUpdateWork_t.unk_0002
@@ -792,9 +783,13 @@ member ragUpdateWork_t.unk_0005
 member ragUpdateWork_t.unk_0006
 member ragUpdateWork_t.unk_0008
 member ragUpdateWork_t.unk_000C
+member ragUpdateWork_t.unk_004D
 member ragUpdateWork_t.unk_0054
 member ragUpdateWork_t.unk_0056
 member ragUpdateWork_t.unk_0178
+member ragUpdateWork_t.unk_1310
+member ragUpdateWork_t.unk_24A8
+member ragUpdateWork_t.unk_3640
 member ragUpdateWork_t.unk_4650
 member ragUpdateWork_t.unk_465C
 member rcvDrawWork_t.unk_0000
