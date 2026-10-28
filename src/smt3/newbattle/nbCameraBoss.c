@@ -1889,6 +1889,8 @@ void nbCameraBoss_BSBERU_E915_2_Set(void)
     nbCameraBoss_BSBERU_E915_Frame++;
 }
 
+extern const f32 D_0054F3C8[];
+
 extern void effBTLModelLoadRotate(nbFormation_t *form);
 
 extern void nbSetFormRot(nbFormation_t *form, sdfVector4_t *rot);
@@ -1940,7 +1942,7 @@ s32 nbCameraBoss_Beru_HAENO1_Set(nbCamera_t *pNbCamera)
             effBTLModelAllHide();
             effBTLModelInvokeShow();
             pNbCamera->direction.x = -0.3f;
-            pNbCamera->direction.y = -0.0f;
+            pNbCamera->direction.y = D_0054F3C8[0];
             pNbCamera->direction.z = 0.96f;
             pNbCamera->target.x = 319.26996f;
             pNbCamera->target.y = -169.19f;
