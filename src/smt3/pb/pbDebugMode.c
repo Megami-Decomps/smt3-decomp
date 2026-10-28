@@ -192,15 +192,87 @@ void ReleaseDebug_pbDebugMode(void) {
 
 INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcMenu_pbDebugMode);
 
-INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcRadius);
-
-INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcDegree);
-
+extern void pbGetCameraParam(f32 *out);
+extern void pbSetCameraRadius(f32 radius);
+extern void pbSetCameraDegree(f32 degree);
+extern void pbSetCameraDegreeInit(f32 degree);
+/* Historical name for the runtime float-to-soft-double promotion helper. */
+extern f64 sdfFloatToULong(f32 value);
+extern char D_0054F620[];
 extern s8 dds3PadButtonState[];
-extern void pbLoadSystemData(s32 num);
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, void *drawTag);
+
+s32 DebugProcRadius(pbDebugWork_t *work, sdfDrawTag_t *tag)
+{
+    f32 camera[3];
+    f64 radiusValue;
+    char *format;
+
+    pbGetCameraParam(camera);
+    if (dds3PadButtonState[0x33] < 0) {
+        work->phase = 0;
+    }
+    if (dds3PadButtonState[0x36] || dds3PadButtonState[0x34]) {
+        camera[1] -= 5.0f;
+        if (camera[1] < 50.0f) {
+            camera[1] = 50.0f;
+        }
+        pbSetCameraRadius(camera[1]);
+    } else if (dds3PadButtonState[0x37] || dds3PadButtonState[0x35]) {
+        camera[1] += 5.0f;
+        if (1500.0f < camera[1]) {
+            camera[1] = 1500.0f;
+        }
+        pbSetCameraRadius(camera[1]);
+    }
+    dds3ConsPanelTagLink(tag, 16, 16, 24, 4);
+    format = D_0054F620;
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x7A00, 0xFFFFF0, 0,
+                                     "CAMERA RADIUS (LENGTH)"));
+    radiusValue = sdfFloatToULong(camera[1]);
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7980, 0x7A60, 0xFFFFF0, 0,
+                                     format, radiusValue));
+    return 0;
+}
+
+s32 DebugProcDegree(pbDebugWork_t *work, sdfDrawTag_t *tag)
+{
+    f32 camera[3];
+    f64 degreeValue;
+    char *format;
+
+    pbGetCameraParam(camera);
+    if (dds3PadButtonState[0x33] < 0) {
+        work->phase = 0;
+    }
+    if (dds3PadButtonState[0x36] || dds3PadButtonState[0x34]) {
+        camera[2] += 0.01f;
+        if (1.560796142f < camera[2]) {
+            camera[2] = 1.560796142f;
+        }
+        pbSetCameraDegree(camera[2]);
+        pbSetCameraDegreeInit(camera[2]);
+    } else if (dds3PadButtonState[0x37] || dds3PadButtonState[0x35]) {
+        camera[2] -= 0.01f;
+        if (camera[2] < 0.0f) {
+            camera[2] = 0.0f;
+        }
+        pbSetCameraDegree(camera[2]);
+        pbSetCameraDegreeInit(camera[2]);
+    }
+    dds3ConsPanelTagLink(tag, 16, 16, 24, 4);
+    format = D_0054F620;
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x7A00, 0xFFFFF0, 0,
+                                     "CAMERA DEGREE (RADIAN)"));
+    degreeValue = sdfFloatToULong(camera[2]);
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7980, 0x7A60, 0xFFFFF0, 0,
+                                     format, degreeValue));
+    return 0;
+}
+
+extern void pbLoadSystemData(s32 num);
 extern void pbRoundStagePrev(s16 *level, s16 *stage);
 extern void pbRoundStageNext(s16 *level, s16 *stage);
 extern void pbGotoNewStage(void);
