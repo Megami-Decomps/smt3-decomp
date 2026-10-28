@@ -364,3 +364,27 @@ In the ordinary-part branch, read the archive pointer before publishing the
 locked data pointer. That consumed snapshot preserves the native load before
 the store; reading the archive afterward swaps the two instructions. The
 scheduler trace places archive load UID 265 before data store UID 268.
+
+
+## RGB command setter after the duration read
+
+`evtCommand_MODEL_RGB` matches all 188 bytes with an explicit duration read
+followed by a one-pass block containing only the color setter. The original
+color carrier, VU/MMI packing, providers and return value stay the same.
+
+Qualified exact/control traces of pinned cc1
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`
+show loop-begin/end notes 106/126 around argument setup and the setter.
+Those notes survive through `rtl.29.dbr`. In `sched2`, the exact form issues
+the unit copy (uid112, priority 8) before the duration copy (uid114, priority
+7). The no-block control has equal-priority copies uid117/119; the
+`last_insn_class` comparison favors the duration copy because it depends on
+the preceding `scrGetIntPara` result. Both forms emit 188 bytes, but that
+control reverses two instruction words at +0x94/+0x98. Hooked/unhooked
+outputs and dump/plain compilation agree for both traces.
+
+The block begins after the duration read. Putting that read inside the
+block fixes the argument copies but exchanges the preceding color store
+and parameter-index setup instead. Including the carrier store in that
+block leaves four differences. Only the final setter needs the block.
+The complete owner checks 162 match / 0 differ.

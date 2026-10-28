@@ -86,7 +86,6 @@ page and line to open. Conventions are in
 | 1 | event/evtPicture | [event/evtPicture.md](event/evtPicture.md) |
 | 1 | event/evtEventViewerFrameVar | [event/evtEventViewerFrameVar.md](event/evtEventViewerFrameVar.md) |
 | 1 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
-| 1 | event/evtCommand | [event/evtCommand.md](event/evtCommand.md) |
 | 1 | effect/effPCPBezier | [effect/effPCPBezier.md](effect/effPCPBezier.md) |
 | 1 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
