@@ -170,6 +170,29 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          dds3ProcessFunc_t deleteExit, void *p);
 evtPolygonMovieWork_t *evtGetPolygonMovieWorkData1(evtPolygonMovieWork_t *wdata, void *pm1data, void *pm2data);
 s32 evtPolygonMovieProcess1(dds3ProcessID_t *id);
+typedef struct pmdUnitTable_t {
+    s32 NameIndex, FileIndex, MajorNum, MinorNum, DataOffset, DataSize, Reserve1, Reserve2;
+} pmdUnitTable_t;
+typedef struct pmdCameraTable_t {
+    s32 NameIndex, Reserve1, Reserve2, Reserve3;
+} pmdCameraTable_t;
+typedef struct pmdStageTable_t {
+    s32 NameIndex, FileIndex, MajorNum, MinorNum;
+} pmdStageTable_t;
+extern s32 dds3GetMapNo(dds3Basic_t *scene);
+extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, s32 pF1, s32 pF2, const void *pTB, s32 pBF);
+extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
+extern s32 evtSetRegistUnit(s32 major, s32 minor);
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serial, s32 type);
+extern evtUnit_t *evtGetUnitHandle(s32 serial);
+extern void mdlSmoothSingleMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
+extern dds3ObjectBaseControlWorkData_t *dds3GetCameraObjectBaseControlWorkData(dds3Basic_t *basic);
+extern void dds3MoverBasicSetPath(dds3Basic_t *mover, dds3Basic_t *path);
+extern void dds3MoverBasicMakePath(dds3Basic_t *mover);
+extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
+extern u32 dds3DrawFlag;
+extern char D_0053BAF8[];
+extern char D_0053BB20[];
 void evtPolygonMovieShutdown(dds3ProcessID_t *id);
 void SetPMFileName(s32 eventno, s32 cutno, char *pm1file, char *pm2file);
 evtPolygonMovieWork_t *InitPolygonMovieWorkData(void);
@@ -1184,7 +1207,110 @@ INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BAF8);
 
 INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BB20);
 
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtPolygonMovieProcess1);
+s32 evtPolygonMovieProcess1(dds3ProcessID_t *id)
+{
+    evtPolygonMovieWork_t *work;
+    dds3Basic_t *basic;
+    dds3Basic_t *path;
+    dds3Basic_t *mover;
+    dds3SceneBasic_t *sceneWork;
+    evtUnit_t *unit;
+    dds3UnitObjectBasicWorkData_t *unitWork;
+    mdlObj_t *model;
+    s32 i;
+    s32 serial;
+    s32 mapNo;
+    s32 major;
+    s32 minor;
+    char pathName[64];
+
+    work = dds3GetProcessData(id);
+    CheckLoad_evtPolygonMovie(work);
+    if ((work->movieFlags & 8) == 0) {
+        return 0;
+    }
+    if ((work->movieFlags & 1) != 0) {
+        return 0;
+    }
+    printf(D_0053BAF8, work->eventNo, work->cutNo);
+    if (work->stageTable != NULL) {
+        major = ((pmdStageTable_t *)work->stageTable)->MajorNum;
+        minor = ((pmdStageTable_t *)work->stageTable)->MinorNum;
+        mapNo = (major << 16) + minor;
+        printf(D_0053BB20, major, minor);
+        if (dds3GetMapNo(dds3GetControlScene()) != mapNo) {
+            evtLoadArea_FromMemory(major, minor, (s32)work->stageF1, (s32)work->stageF2,
+                                   work->stageTB, 0);
+        }
+    }
+    sceneWork = (dds3SceneBasic_t *)dds3GetActiveScene()->workdata;
+    for (i = 0; i < work->unitCount; i++) {
+        major = ((pmdUnitTable_t *)work->unitTable)[i].MajorNum;
+        minor = ((pmdUnitTable_t *)work->unitTable)[i].MinorNum;
+        mdlPackDecode(major, minor, 0x101,
+                      (u8 *)work->header1 + ((pmdUnitTable_t *)work->unitTable)[i].DataOffset,
+                      ((pmdUnitTable_t *)work->unitTable)[i].DataSize);
+        serial = evtSetRegistUnit(major, minor);
+        basic = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        basic->name = work->nameTable1[((pmdUnitTable_t *)work->unitTable)[i].NameIndex];
+        unit = evtGetUnitHandle(serial);
+        mdlSmoothSingleMotion(unit->owner, 0, 0, 0.0f, 0.0f);
+    }
+    for (i = 0; i < work->cameraCount; i++) {
+        if (((pmdCameraTable_t *)work->cameraTable)[i].NameIndex >= 0) {
+            basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 4,
+                                                    work->nameTable[((pmdCameraTable_t *)work->cameraTable)[i].NameIndex]);
+            if (basic != NULL) {
+                sprintf(pathName, "%s_MOTION", basic->name);
+                path = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x10, pathName);
+                if (path != NULL) {
+                    mover = (dds3Basic_t *)dds3GetCameraObjectBaseControlWorkData(basic)->pBasic[1];
+                    dds3MoverBasicSetPath(mover, path);
+                    dds3MoverBasicMakePath(mover);
+                }
+            }
+        }
+    }
+    basic = sceneWork->basictable[16].firstbasic;
+    if (basic != NULL) {
+        for (; basic != NULL; basic = basic->next) {
+            if (basic->name != NULL) {
+                for (path = sceneWork->basictable[9].firstbasic; path != NULL; path = path->next) {
+                    if (path->name != NULL) {
+                        sprintf(pathName, "%s_MOTION", path->name);
+                        if (strcmp(basic->name, pathName) == 0) {
+                            evtPathLinkAndMake(basic, path);
+                        }
+                    }
+                }
+            }
+        }
+        for (basic = sceneWork->basictable[16].firstbasic; basic != NULL; basic = basic->next) {
+            if (basic->name != NULL) {
+                for (path = sceneWork->basictable[7].firstbasic; path != NULL; path = path->next) {
+                    if (path->name != NULL) {
+                        sprintf(pathName, "%s_MOTION", path->name);
+                        if (strcmp(basic->name, pathName) == 0) {
+                            evtPathLinkAndMake(basic, path);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    work->nowFrame = work->cutInfo->FirstFrame;
+    if (work->nowFrame > 0) {
+        for (basic = sceneWork->basictable[5].firstbasic; basic != NULL; basic = basic->next) {
+            unitWork = basic->workdata;
+            model = unitWork->pObjectBaseControlWorkData->pModel;
+            sdfMotionSeek(model->first, (f32)work->nowFrame);
+        }
+    }
+    dds3DrawFlag |= 0x02000000;
+    return (s32)evtPolygonMovieProcess2;
+
+}
+
 
 void evtPolygonMovieShutdown(dds3ProcessID_t *id)
 {
