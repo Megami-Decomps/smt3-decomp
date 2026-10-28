@@ -169,7 +169,37 @@ INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_char);
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbDumpRecordData);
 
-INCLUDE_ASM(const s32, "pb/pbRecord", pb_draw_help_Process);
+extern s8 dds3PadButtonState[];
+extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
+extern void dds3ResetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type);
+extern void rsetOtOfs(u32 offset);
+extern void rsetAlpha(s32 mode);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail,
+                     s32 date, s32 datm, s32 zte, s32 ztst);
+extern void DrwSprite2D(s32 x, s32 y, s32 width, s32 height,
+                        s32 u, s32 v, s32 uw, s32 vh, u32 color,
+                        sdfTexHandle_t *texture);
+
+s32 pb_draw_help_Process(dds3ProcessID_t *id)
+{
+    pbProcHandle_t *panel = id->workdata;
+
+    if ((s8)dds3PadButtonState[0x21] < 0 ||
+        (s8)dds3PadButtonState[0x23] < 0 ||
+        (s8)dds3PadButtonState[0x20] < 0) {
+        p2sdPlaySE(0x340006, 0x7F, 0x3F);
+        dds3ResetProcessFlag(panel->id, 0x10, 1);
+        return -1;
+    }
+
+    rsetOtOfs(0x47);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
+                0x80808080, (sdfTexHandle_t *)D_0054F5C4->tex34C);
+    return 0;
+}
+
 
 void pb_draw_help_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;

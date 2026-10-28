@@ -419,3 +419,4 @@ src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 440 B	registration
 src/smt3/kernel/ModeSelect.c	redthing1	done	2026-10-28	1 fn / 256 B	mode selector allocation, resources and process startup with forwarded mode; owner 12 match, 0 differ
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 152 B	debug sphere-distance labels with float varargs and recovered menu-item records; owner 280 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 136 B	integer pulse interpolation; owner 314 match, 0 differ
+src/smt3/pb/pbRecord.c	redthing1	done	2026-10-28	1 fn / 236 B	help display and dismissal callback; owner 7 match, 0 differ
