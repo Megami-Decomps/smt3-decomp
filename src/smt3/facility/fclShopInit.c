@@ -97,9 +97,15 @@ typedef struct
     /* 0x0008 */ s32 unk_0008;
     /* 0x000C */ u8 unk_000C[8];
     /* 0x0014 */ void *allocation;
-    /* 0x0018 */ u8 unk_0018[0x14];
+    /* 0x0018 */ u8 pad_0018;
+    /* 0x0019 */ s8 itemType;
+    /* 0x001A */ u8 pad_001A[0x12];
     /* 0x002C */ cmpCursorInfo_t listCursor;
-    /* 0x0064 */ u8 unk_0064[0x2324];
+    /* 0x0064 */ u8 pad_0064[0x219C];
+    /* 0x2200 */ u16 itemSlots[32];
+    /* 0x2240 */ s8 itemCount;
+    /* 0x2241 */ s8 hasMissingHeart;
+    /* 0x2242 */ u8 pad_2242[0x146];
     /* 0x2388 */ void *unk_2388;
     /* 0x238C */ s32 script;
     /* 0x2390 */ s32 scriptArg;
@@ -307,10 +313,10 @@ s32 id;
 
 extern u16 D_0032F682[];
 
-s32 shpCountUnlockedItems(void)
+s32 shpCountUnlockedItems(s32 itemType)
 {
     s32 count = 0;
-    u16 *row = &D_0032F682[(u8)shpItemIsUnlocked() * 65];
+    u16 *row = &D_0032F682[(u8)shpItemIsUnlocked(itemType) * 65];
     s32 i;
 
     for (i = 0; i < 32; i++)
@@ -324,7 +330,33 @@ s32 shpCountUnlockedItems(void)
     return count;
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopInit", shpFindItemSlot);
+extern s32 datGetItemSlotIndex(u16 id);
+extern s32 cmbChkGetHearts(s8 id);
+extern s32 fclSetWorkValue(s8 index, s32 value);
+
+void shpFindItemSlot(shpUpdateWork_t *work)
+{
+    u16 *row = &D_0032F682[(u8)shpItemIsUnlocked(work->itemType) * 65];
+    s32 i;
+
+    work->itemCount = 0;
+    work->hasMissingHeart = 0;
+    for (i = 0; i < shpCountUnlockedItems(work->itemType); i++) {
+        u16 item = *row;
+        s32 slot;
+
+        row += 2;
+        slot = datGetItemSlotIndex(item);
+        if (slot != 0) {
+            if (cmbChkGetHearts((s8)slot) != 0) {
+                continue;
+            }
+            work->hasMissingHeart = 1;
+        }
+        work->itemSlots[work->itemCount++] = item;
+    }
+    fclSetWorkValue(4, work->hasMissingHeart);
+}
 
 INCLUDE_ASM(const s32, "facility/fclShopInit", shpGetSellPrice);
 
