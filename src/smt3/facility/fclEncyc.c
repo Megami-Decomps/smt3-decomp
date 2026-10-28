@@ -711,22 +711,81 @@ s32 UPDT_ENCYC_Process(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseRegistTop);
+typedef struct
+{
+    u8 reserved0000[0x16510];
+    s32 script;
+} fclEncycRegistAllGlobalWork_t;
+
+extern fclEncycRegistAllGlobalWork_t *CMB_GBWK;
+
+typedef struct
+{
+    u8 flags;
+    u8 reserved0001[3];
+    lstListWindow_t listWindow;
+    u8 reserved0188[0x1014];
+    fclPanel_t listPanel;
+    frFontHandle_t *request;
+    frFontHandle_t *fonts[7];
+    void *process;
+} fclEncycRegistAllWork_t;
+
+extern void InitListWindow(lstListWindow_t *work, fclPanel_t *panel,
+    const s32 geometry[4], const s32 cursor[4], const s32 panelRange[4],
+    s32 count, s32 visible, s32 layout);
+extern void PopListwinCursor(fclEncyc_instance_tag *, lstListWindow_t *, s32);
+extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 z, u32 color,
+    const char *text, frFontHandle_t *previous);
+extern const char *D_00330A10[];
+extern void drawRegistList(fclEncyc_instance_tag *pinst);
+extern void fclClearFlag(s8 index);
+extern s32 fclScriptStart(s32 script, s32 start, void *pid);
+extern void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag);
+
+void InitPhaseRegistTop(fclEncyc_instance_tag *pinst)
+{
+    fclEncycRegistAllWork_t *work;
+    lstListWindow_t *list;
+    s32 geometry[4];
+    s32 cursor[4];
+    s32 panelRange[4];
+    s32 i;
+
+    pinst->unk_70 = GetValidUnitIndex(pinst->entries.regist.validUnit);
+    work = allocPhaseBuffer(pinst, 0x1200);
+    list = &work->listWindow;
+    geometry[0] = 0x18;
+    geometry[1] = 0x54;
+    geometry[2] = 0x1D0;
+    geometry[3] = 0xD1;
+    cursor[0] = 0x46;
+    cursor[1] = 0xB;
+    cursor[2] = 0x15D;
+    cursor[3] = 0x15;
+    panelRange[0] = 0;
+    panelRange[1] = 0x31;
+    panelRange[2] = 0x200;
+    panelRange[3] = 0x104;
+    InitListWindow(list, &work->listPanel, geometry, cursor, panelRange,
+                   pinst->unk_70, 7, 0x1C);
+    PopListwinCursor(pinst, list, 0);
+    work->request = NULL;
+    for (i = 6; i >= 0; i--) work->fonts[i] = NULL;
+    work->request = frwGetSmallFontFRQ2(0x290, 0x90, 0xFFFFF0, 0xA09DC380,
+                                      D_00330A10[0], NULL);
+    drawRegistList(pinst);
+    work->flags = 0;
+    fclClearFlag(0);
+    work->process = NULL;
+    fclScriptStart(CMB_GBWK->script, 0xF, &work->process);
+    SetScreenOffset(pinst, 0);
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseRegistTop);
 
 void DrawPhaseRegistTop(fclEncyc_instance_tag *pinst)
 {
-    typedef struct
-    {
-        u8 flags;
-        u8 reserved0001[3];
-        u8 listWork[0x1198];
-        fclPanel_t listPanel;
-        frFontHandle_t *request;
-        frFontHandle_t *fonts[7];
-        s32 process;
-    } fclEncycRegistTopDrawWork_t;
     extern void cmbDrawTopSprite(s32 x, s32 y, u32 z, s32 ot);
     extern s32 func_001C7E38(void *request, s32 mode, s32 ot);
     extern void DrawListWindowBack(void *obj, fclPanel_t *panel);
@@ -735,18 +794,18 @@ void DrawPhaseRegistTop(fclEncyc_instance_tag *pinst)
     extern void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 ot);
     extern void lstDrawListWindowCursor(void *work, s32 ot);
     extern void DrawRegistAllHelp(fclEncyc_instance_tag *pinst);
-    fclEncycRegistTopDrawWork_t *work = (fclEncycRegistTopDrawWork_t *)pinst->pwork;
+    fclEncycRegistAllWork_t *work = (fclEncycRegistAllWork_t *)pinst->pwork;
 
     if (work->request != NULL) {
         cmbDrawTopSprite(0, 0x50, 0xFFFFF0, 0x47);
         func_001C7E38(work->request, 0, 0x47);
     }
-    DrawListWindowBack(work->listWork, &work->listPanel);
+    DrawListWindowBack(&work->listWindow, &work->listPanel);
     drawRegistSprites(pinst);
     DrawRegistListwinElem(pinst);
-    fclDrawPhaseHeader(work->listWork, 0x26435480, 0, 0x47);
+    fclDrawPhaseHeader((u8 *)&work->listWindow, 0x26435480, 0, 0x47);
     if ((s16)pinst->unk_58 == 0 && work->flags != 0) {
-        lstDrawListWindowCursor(work->listWork, 0x47);
+        lstDrawListWindowCursor(&work->listWindow, 0x47);
     }
     DrawRegistAllHelp(pinst);
 }
@@ -919,24 +978,6 @@ void DestPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
     ReleaseWork(pinst);
 }
 
-typedef struct
-{
-    u8 reserved0000;
-    u8 reserved0001[3];
-    lstListWindow_t listWindow;
-    u8 reserved0188[0x1058];
-    frFontHandle_t *fonts[7];
-    void *process;
-} fclEncycRegistAllWork_t;
-
-typedef struct
-{
-    u8 reserved0000[0x16510];
-    s32 script;
-} fclEncycRegistAllGlobalWork_t;
-
-extern fclEncycRegistAllGlobalWork_t *CMB_GBWK;
-
 extern s32 fclChkMessageDraw(void *PID);
 extern s32 fclGetFlag(s8 index);
 extern void fclClearFlag(s8 index);
@@ -958,7 +999,7 @@ void CalcPhaseRegistAll(fclEncyc_instance_tag *pinst)
         pinst->stat |= 2;
         pinst->unk_5A = 8;
     } else {
-        work->reserved0000 = 0;
+        work->flags = 0;
         fclClearFlag(0);
         work->process = 0;
         fclScriptStart(CMB_GBWK->script, 0xF, &work->process);
@@ -1470,20 +1511,20 @@ extern void lstInitListWindow(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 color, s8 style, lstListWindow_t *work);
 extern void cmpInitCursorLayout(void *cursor, s32 x, s32 y, s32 width,
                                 s32 height, s32 mode);
-extern void cmpInitCursorRange(void *cursor, u8 index, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
 extern void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 width,
                          s32 height, s32 color, s8 type, s8 speed);
 
 void InitListWindow(lstListWindow_t *work, fclPanel_t *panel,
                     const s32 listGeometry[4], const s32 cursorLayout[4],
-                    const s32 panelAndRange[4], s32 cursorIndex,
+                    const s32 panelAndRange[4], s32 listCount,
                     s32 visibleCount, s32 cursorLayoutMode)
 {
     lstInitListWindow(listGeometry[0] << 4, listGeometry[1] << 3, 0x00FFFFF0,
                       listGeometry[2], listGeometry[3], 0x80808080, 0, work);
     cmpInitCursorLayout((u8 *)work + 0x15C, cursorLayout[0], cursorLayout[1],
                         cursorLayout[2], cursorLayout[3], cursorLayoutMode);
-    cmpInitCursorRange((u8 *)work + 0x15C, (u8)cursorIndex, (u8)visibleCount, 0);
+    cmpInitCursorRange((u8 *)work + 0x15C, (u8)listCount, (u8)visibleCount, 0);
     fclInitPanel(panel, panelAndRange[0] << 4, panelAndRange[1] << 3, 0xFFFFF,
                  panelAndRange[2], panelAndRange[3], 0x80808080, 0, 0x10);
     work->flags = 0x10000;
