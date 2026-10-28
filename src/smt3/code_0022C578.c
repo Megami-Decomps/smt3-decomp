@@ -400,7 +400,8 @@ typedef struct
     /* 0x8468 */ s32 unk_8468;
     /* 0x846C */ u8 unk_846C[0x34];
     /* 0x84A0 */ s32 effectStep;
-    /* 0x84A4 */ u8 unk_84A4[8];
+    /* 0x84A4 */ void *dhProcess;
+    /* 0x84A8 */ u8 unk_84A8[4];
     /* 0x84AC */ s32 fadeStep;
     /* 0x84B0 */ s32 stockAlpha[16];
     /* 0x84F0 */ s8 stockStep[16];
@@ -1638,7 +1639,7 @@ void cmpInitRootCursorPos(void)
     cmpResetCursorInfo(&campWork->page[2].cursor);
 }
 
-void cmpInitSelectCursor(u8 index)
+void cmpInitSelectCursor(s32 index)
 {
     cmpInitCursorRange(campWork->unk_410C, index, 8, 0);
     cmpInitCursorLayout(campWork->unk_410C, 0, 0, 0, 0, 0x17);
@@ -2072,7 +2073,50 @@ s32 campDebugCheckPad(s8 key)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateRoot);
+extern void *cmpStartProcessDH(cmpSeqInfo_t *parent);
+
+void cmpUpdateRoot(void)
+{
+    u16 button = cmpGetPressedButton(0x3B);
+    switch (button) {
+    case 1:
+        campWork->unk_0001 = ((u8 *)campWork)[0x3E] + ((u8 *)campWork)[0x40] + 1;
+        campWork->unk_0004 = 1;
+        switch (campWork->unk_0001) {
+        case 5:
+            campWork->drawPhase = 1;
+            campWork->stock[0].count = 0xCF;
+            break;
+        case 4:
+            cmpInitSelectCursor((s8)DDS3_GBWK->heartscnt);
+            campWork->dhProcess = cmpStartProcessDH(NULL);
+            /* fall through */
+        default:
+            campWork->stock[0].count = 0xF;
+            break;
+        }
+        cmpBuildStockNameList(&campWork->stock[0]);
+        cmpReCalcStockCursorPos(2);
+        break;
+    case 2:
+    case 8:
+        button = 0;
+        campWork->unk_0000 |= 0x10;
+        cmpDisableInfoWindow();
+        break;
+    case 0x10:
+        cmpMoveCursor((cmpCursorInfo_t *)((u8 *)campWork + 0x1C), -1);
+        break;
+    case 0x20:
+        cmpMoveCursor((cmpCursorInfo_t *)((u8 *)campWork + 0x1C), 1);
+        break;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor((cmpCursorInfo_t *)((u8 *)campWork + 0x1C), 0);
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop((cmpPadStopWork_t *)((u8 *)campWork + 0x1C), button, 0x30));
+}
+
 
 void cmpUpdateItem(void)
 {
@@ -2634,7 +2678,7 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_0053FD60);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FD78);
 
-void *cmpStartProcessDH(void)
+void *cmpStartProcessDH(cmpSeqInfo_t *parent)
 {
     void *proc;
 
