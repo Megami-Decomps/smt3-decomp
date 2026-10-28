@@ -673,6 +673,7 @@ member nbEncountForm_t.unk00
 member nbEncountForm_t.unk05
 member nbEncountForm_t.unk_00
 member nbEncountForm_t.unk_02
+member nbEncountForm_t.unk_04
 member nbEncountForm_t.unk_05
 member nbEncountForm_t.unk_1C
 member nbEncountForm_t.unk_22

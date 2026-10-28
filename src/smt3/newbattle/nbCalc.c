@@ -298,7 +298,9 @@ typedef struct
 {
     s8 backAttack;
     s8 esc;
-    u8 unk_02[0x4];
+    u8 item;
+    u8 itemcnt;
+    u8 unk_04[0x2];
     u16 id[11];
     u8 unk_1C[0x6];
     u8 unk_22;
@@ -838,7 +840,45 @@ s32 nbCheckSkillUse(s32 formindex, s32 nskill)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetEncountTableItem);
+void nbGetEncountTableItem(nbMainProcessData_t *data)
+{
+    u8 item;
+    u8 itemcnt;
+    s32 i;
+    nbEncountForm_t *encount;
+
+    if (data->encno <= 0 || datBossRashChk(data->encno) != 0) {
+        return;
+    }
+    encount = &nbEncountFormTable[data->encno];
+    item = encount->item;
+    itemcnt = encount->itemcnt;
+    if (item == 0 || itemcnt == 0) {
+        return;
+    }
+    for (i = 0; i < 4; i++) {
+        if (data->item[i] == item) {
+            u8 count = data->itemcnt[i];
+
+            count = count + itemcnt;
+            data->itemcnt[i] = count;
+            return;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (data->item[i] == 0) {
+            data->item[i] = item;
+            data->itemcnt[i] = itemcnt;
+            return;
+        }
+    }
+    for (i = 3; i > 0; i--) {
+        data->item[i] = data->item[i - 1];
+        data->itemcnt[i] = data->itemcnt[i - 1];
+    }
+    data->item[0] = item;
+    data->itemcnt[0] = itemcnt;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetExpMakaItem);
 
