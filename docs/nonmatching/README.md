@@ -27,7 +27,6 @@ page and line to open. Conventions are in
 | 4 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
-| 3 | newbattle/nbCameraCommand | [newbattle/nbCameraCommand.md](newbattle/nbCameraCommand.md) |
 | 3 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 3 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
@@ -55,6 +54,7 @@ page and line to open. Conventions are in
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
+| 1 | newbattle/nbCameraCommand | [newbattle/nbCameraCommand.md](newbattle/nbCameraCommand.md) |
 | 1 | movie/MovieViewer | [movie/MovieViewer.md](movie/MovieViewer.md) |
 | 1 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 1 | dds3TitleMain | [kernel/dds3TitleMain.md](kernel/dds3TitleMain.md) |

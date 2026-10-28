@@ -301,8 +301,6 @@ void nbCameraCommand_GroundCollision(nbCamera_t *pNbCamera)
     }
 }
 
-/* NON_MATCHING: 4 bytes over; the formation-call delay slot differs. */
-#ifdef NON_MATCHING
 void nbCameraState_CommandRoot_Init(void)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
@@ -324,12 +322,7 @@ void nbCameraState_CommandRoot_Init(void)
     nbCameraState_Command_KORONZCheck();
     nbCameraState_CommandRoot_OrderIndex = data->orderindex;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraState_CommandRoot_Init);
-#endif
 
-/* NON_MATCHING: 1 of 32 words differ (beql vs retail beq). */
-#ifdef NON_MATCHING
 void nbCameraState_CommandRoot_Calc(void)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
@@ -341,9 +334,6 @@ void nbCameraState_CommandRoot_Calc(void)
     nbCameraState_CommandRoot_Init();
     dds3CrossfadeStart(4);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraState_CommandRoot_Calc);
-#endif
 
 /* NON_MATCHING: the 284-byte body is exact-sized; dispatch branches differ. */
 #ifdef NON_MATCHING
