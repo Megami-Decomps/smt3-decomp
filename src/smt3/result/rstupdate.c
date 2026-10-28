@@ -500,7 +500,22 @@ s32 rstStandbyHeartsAddPoint(void)
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstStandbyHeartsSkillPowerUp);
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstSetHeartsRecover);
+void rstSetHeartsRecover(void)
+{
+    s32 i;
+
+    startPos->RecoverFlag = 1;
+    for (i = 0; i < cmbGlobalWork->stockCount; i++) {
+        s8 stockIndex = cmbGlobalWork->stock[i];
+        datUnitWork_t *unit = &cmbGlobalWork->party[(s32)stockIndex].unit;
+
+        if ((unit->flag & 2) != 0) {
+            unit->hp = unit->maxhp;
+            unit->mp = unit->maxmp;
+            unit->badstatus &= 0x8000;
+        }
+    }
+}
 
 void rstSetHeartsRecoverPlayer(void)
 {
