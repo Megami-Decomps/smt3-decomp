@@ -1907,7 +1907,28 @@ void nmeDrawSizedSprite(u8 id, u16 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 colo
                       texs, tbl, ot);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", nmeLerp);
+s32 nmeLerp(s32 amplitude, s32 frame, s32 period)
+{
+    s32 offset = (frame * 2) % period;
+    s32 halfPeriod = period / 2;
+    s32 halfAmplitude = amplitude / 2;
+    s32 quarter = period / 4;
+    s32 square = quarter * quarter;
+    s32 descending;
+    s32 value;
+
+    if (offset >= halfPeriod) {
+        offset = period - offset;
+    }
+    if (offset >= quarter) {
+        offset = halfPeriod - offset;
+        descending = 0;
+    } else {
+        descending = 1;
+    }
+    value = halfAmplitude * (offset * offset) / square;
+    return descending ? amplitude - value : value;
+}
 
 s32 nmeLerp2(s32 scale, s32 value, s32 range)
 {
