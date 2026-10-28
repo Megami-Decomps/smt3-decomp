@@ -158,7 +158,7 @@ typedef struct nbMainProcessData_t
     dds3ProcessID_t *MainProcessID;
     dds3ProcessID_t *maeProcess;            /* 0x0C0 */
     dds3ProcessID_t *AtoProcessID;
-    u8 ResultProcessID[4];
+    dds3ProcessID_t *ResultProcessID;
     dds3ProcessID_t *StageProcessID;          /* 0x0CC */
     dds3ProcessID_t *UnitProcessID;
     dds3ProcessID_t *ActionProcessID[4];

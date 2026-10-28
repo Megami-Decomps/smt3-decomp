@@ -1121,7 +1121,7 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
         }
         break;
     case RESULT:
-        if (*(s32 *)data->ResultProcessID == 0) {
+        if (data->ResultProcessID == 0) {
             nbSetNextPhase(NB_PHASE_END);
             next = 1;
         }

@@ -270,6 +270,11 @@ src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	2 fn / 256 B	fclBlendColor
 src/smt3/newbattle/nbMaeProcess.c	redthing1	done	2026-10-28	3 fn / 284 B	remaining callbacks matched; unit has no assembly fallbacks
 src/smt3/facility/fclTerminalUpdate.c	redthing1	done	2026-10-28	3 fn / 480 B	Act/cursor/list helpers matched; confirm sequence remains assembly
 src/smt3/newbattle/nbCameraCommand.c	redthing1	done	2026-10-28	1 fn / 100 B	FixPos wrapper matched; three state drafts retained
-src/smt3/facility/fclShopInit.c	redthing1	open	2026-10-28	textures/items/prices	bounded ordinary shop helper reconstruction
+src/smt3/facility/fclShopInit.c	redthing1	done	2026-10-28	0 matches	three ordinary trials parked; production unchanged
 src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	2 fn / 104 B	nmeDrawCursor and nmeDrawTextBox wrappers; whole-unit check 2 match, 0 differ
 src/smt3/event/evtMoon.c	redthing1	done	2026-10-28	3 fn / 324 B	evtEnableMoonDraw, evtInitMoonProcess, and evtMoonShutdown; process lifecycle via dds3ProcessID_t and six sdfTexHandle_t owners; whole-unit check 12 match, 0 differ
+src/smt3/facility/fclShopCalc.c	redthing1	done	2026-10-28	0 matches	ordinary price/count trials remain short; production unchanged
+src/smt3/newbattle/nbCameraCommand.c	redthing1	done	2026-10-28	0 matches	retained published drafts; pointer/state/forward-branch forms did not resolve delay slot
+src/smt3/newbattle/nbResultProcess.c	redthing1	done	2026-10-28	5 fn / 396 B	texture cleanup, experience cap and result lifecycle; typed process slot
+src/smt3/newbattle/nbTarSelProcess.c	redthing1	done	2026-10-28	5 fn / 280 B	status accessors, automatic selection, shutdown and process creation
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	2 fn / 148 B	character-code indexing and three-row initialization

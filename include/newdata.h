@@ -31,7 +31,8 @@ typedef struct
     u16 hp;
     u8 unk0C[6];
     u16 badstatus;
-    u8 unk14[6];
+    u32 exp;
+    u8 pad18[2];
     s8 level;
     u8 unk1B[0xD1];
 } fldAnahoriAkuma_t;
