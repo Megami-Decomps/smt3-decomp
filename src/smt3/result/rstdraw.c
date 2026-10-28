@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 typedef struct
 {
@@ -31,7 +32,15 @@ typedef struct
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_0000[0x7C];
+    /* 0x0000 */ u8 flags;
+    /* 0x0001 */ s8 phase;
+    /* 0x0002 */ u8 unk_0002[0x19];
+    /* 0x001B */ u8 unk_1B;
+    /* 0x001C */ u8 unk_001C[0xD];
+    /* 0x0029 */ s8 unk_29;
+    /* 0x002A */ u8 unk_002A[0x4A];
+    /* 0x0074 */ s8 unk_74;
+    /* 0x0075 */ u8 unk_0075[0x7];
     /* 0x007C */ s8 unk_7C;
     /* 0x007D */ s8 unk_7D;
     /* 0x007E */ u8 unk_007E[0xEE];
@@ -41,7 +50,8 @@ typedef struct
     /* 0x129F */ u8 unk_129F[6];
     /* 0x12A5 */ u8 unk_12A5[0x103F];
     /* 0x22E4 */ u8 unk_22E4;
-    /* 0x22E5 */ u8 unk_22E5[0x2F];
+    /* 0x22E5 */ u8 unk_22E5[0x2B];
+    /* 0x2310 */ s32 unk_2310;
     /* 0x2314 */ s32 fadeColor;
 } rstDrawWork_t;
 
@@ -49,9 +59,93 @@ extern rstDrawWork_t *rstDrawWork;
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+
+extern void nmeDrawFrame(s32 type, s32 color);
+
+extern void rstDrawGetCursorRow(void);
+
+extern void rstDrawStatusRow(s8 row, s8 mode, s8 flag);
+
+extern void rstDrawStatusRow2(s8 row, s8 mode, s8 flag);
+
+extern void rstDrawStatusPanel(s8 row, s8 mode);
+
+extern s32 rstResetEncycPanel(void);
+
+extern s32 rstResetEncycPanel2(void);
+
 void rstDrawEvoBgFade(void)
 {
     cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, rstDrawWork->fadeColor, 7);
 }
 
+/* NON_MATCHING: 103 of 116 words match at the exact size; retail keeps a register
+ * copy of the work pointer that the C coalesces away. */
+#ifdef NON_MATCHING
+s32 rstDraw(dds3ProcessID_t *id)
+{
+    rstDrawWork = dds3GetProcessData(id);
+    if (rstDrawWork->flags & 0x20) {
+        cmpUpdateTerminate();
+        return -1;
+    }
+    nmeDrawFrame(0x10, rstDrawWork->unk_2310);
+    rstDrawEvoBgFade();
+    if (rstDrawWork->flags & 2) {
+        switch (rstDrawWork->phase) {
+        case 0:
+        case 24:
+            rstDrawGetCursorRow();
+            break;
+        case 1:
+            rstDrawStatusRow(-rstDrawWork->unk_1B, 2, 1);
+            break;
+        case 3:
+            if (rstDrawWork->unk_29 == 1) {
+                rstDrawStatusRow2(-rstDrawWork->unk_1B, 0, rstDrawWork->unk_74);
+            } else {
+                rstDrawStatusRow(-rstDrawWork->unk_1B, 2, 0);
+            }
+            break;
+        case 5:
+            rstDrawStatusRow(-rstDrawWork->unk_1B, 5, 0);
+            break;
+        case 6:
+            rstDrawStatusRow(-rstDrawWork->unk_1B, 2, 0);
+            break;
+        case 7:
+        case 8:
+            rstDrawStatusRow(-rstDrawWork->unk_1B, 2, 1);
+            break;
+        case 10:
+            rstDrawStatusRow2(-rstDrawWork->unk_1B, 2, rstDrawWork->unk_74);
+            break;
+        case 11:
+        case 12:
+        case 13:
+            rstDrawStatusRow(-rstDrawWork->unk_1B, 2, 0);
+            break;
+        case 17:
+        case 18:
+            rstResetEncycPanel();
+            rstDrawStatusRow(-rstDrawWork->unk_1B, 2, 0);
+            break;
+        case 20:
+            rstResetEncycPanel2();
+            rstDrawStatusRow(-rstDrawWork->unk_1B, 0, 1);
+            break;
+        case 21:
+            rstDrawStatusPanel(-rstDrawWork->unk_1B, 1);
+            break;
+        case 22:
+            rstDrawStatusPanel(-rstDrawWork->unk_1B, 0);
+            break;
+        }
+    }
+    cmpFindPanelEffSlot(0x48);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "result/rstdraw", rstDraw);
+#endif

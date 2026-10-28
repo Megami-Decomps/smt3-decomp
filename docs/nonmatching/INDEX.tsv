@@ -1,4 +1,5 @@
 function	unit	size	distance	page	line
+dds3AllocPathBasicWorkData	basic/dds3PathBasic	0x1CC	109 of 115 words match	docs/nonmatching/basic/dds3PathBasic.md	5
 fldRunTamaFree	code_00116AD0	0xBC	27 of 47 words differ	docs/nonmatching/code_00116AD0.md	5
 fldRunEffSet	code_00116AD0	0x12C	67 of 73 words differ	docs/nonmatching/code_00116AD0.md	48
 fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/nonmatching/code_00116AD0.md	69
@@ -100,6 +101,7 @@ cmbDrawResultFooter	fclCombineInit	0x74	25 of 29 words match	docs/nonmatching/fa
 cmbActionBGM	fclCombineInit	0x68	22 of 25 words match	docs/nonmatching/facility/fclCombineInit.md	106
 fclDrawPanel	fclPanel	0x54	8 of 21 words differ	docs/nonmatching/facility/fclPanel.md	5
 ragDrawList2, ragDrawList3	fclRagCalc	0x150 each	10 of 84 words differ	docs/nonmatching/facility/fclRagCalc.md	5
+ragDraw	facility/fclRagDraw	0x120	69 of 72 words match	docs/nonmatching/facility/fclRagDraw.md	5
 ragBuildList2, ragBuildList3	fclRagInit	0x174 each	22 of 93 words differ	docs/nonmatching/facility/fclRagInit.md	5
 ragGetListItem2	fclRagInit	0xCC	29 of 51 words match	docs/nonmatching/facility/fclRagInit.md	49
 ragGetListItem3	fclRagInit	0xCC	29 of 51 words match	docs/nonmatching/facility/fclRagInit.md	76
@@ -139,9 +141,11 @@ DrawMesFlow	interface/itfMesManager	0x18C	Thirty-seven of ninety-nine words matc
 DrawSelectCursor	interface/itfMesManager	0x2FC		docs/nonmatching/interface/itfMesManager.md	44
 DrawMsgMng_Process	interface/itfMesManager	0x70	Twenty-four of twenty-eight words match	docs/nonmatching/interface/itfMesManager.md	79
 itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/nonmatching/interface/itfMesManager.md	97
+lstDrawListWindow	interface/lstListWindow	0x84	26 of 33 words match	docs/nonmatching/interface/lstListWindow.md	5
 fclEncycFindFreeSlot	kernel/dds3AdminiProcess	0x1C4	111 of 113 words match	docs/nonmatching/kernel/dds3AdminiProcess.md	5
 fclEncycFreeEntries	kernel/dds3AdminiProcess	0x1E8	120 of 122 words match	docs/nonmatching/kernel/dds3AdminiProcess.md	31
 fcl_103420, fclEncycAllocEntry and fcl_103560	kernel/dds3AdminiProcess	0x94, 0xA8, 0xAC	32 of 43 words match	docs/nonmatching/kernel/dds3AdminiProcess.md	54
+dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC	30 of 121 words match	docs/nonmatching/kernel/dds3ConfigMain.md	5
 RunningProcess	kernel/dds3KernelCore	0x124	33 of 73 words match	docs/nonmatching/kernel/dds3KernelCore.md	5
 dds3InitZClearDrawTag	kernel/dds3KernelDraw	0x15C	Sixty-six of 87 words match	docs/nonmatching/kernel/dds3KernelDraw.md	5
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/nonmatching/kernel/dds3KernelDraw.md	48
@@ -151,6 +155,7 @@ slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/nonmatching/mc/
 slDrawWindow	mc/slMain	0x4EC	87 of 313 words match	docs/nonmatching/mc/slMain.md	41
 slDrawInfo	mc/slMain	0x2F4	183 of 189 words match	docs/nonmatching/mc/slMain.md	71
 slDrawError	mc/slMain	0x4AC	293 of 299 words match	docs/nonmatching/mc/slMain.md	91
+MovieViewerProc	movie/MovieViewer	0x24C	6 of 144 words match	docs/nonmatching/movie/MovieViewer.md	5
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	5
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	48
 nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	77
@@ -248,6 +253,7 @@ cmbGetHeartsParamByIndex	rstcalc	0x58	8 of 22 words differ	docs/nonmatching/resu
 cmbCountEvoReady	rstcalc	0x84	9 of 34 words match	docs/nonmatching/result/rstcalc.md	115
 cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/nonmatching/result/rstcalc.md	141
 rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/nonmatching/result/rstcalc.md	170
+rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/nonmatching/result/rstdraw.md	5
 rstBuildDestroyList	rstupdate	0x64	1 of 24 words matches	docs/nonmatching/result/rstupdate.md	5
 DispBaseData	script/scrParameterCommand	764 bytes	seventy of 190 words differ	docs/nonmatching/script/scrParameterCommand.md	5
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/nonmatching/sdf/sdfGraph.md	5

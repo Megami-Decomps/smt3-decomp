@@ -36,3 +36,17 @@ inside an `if` is the initialiser of the local the `if` updates:
 Computing the whole value inside the branch leaves the `lui`/`ori` there and
 costs `campDrawFade` 20 of its 58 words.
 
+
+## Commutative operand order follows the source only between named locals
+
+`and rd, rs, rt` with two register operands keeps the source's order when both
+sides are plain locals, and swaps when one side is a sub-expression: `fold`
+ranks a `BIT_XOR_EXPR` above a `VAR_DECL` and puts it first. So
+`pressed = (current ^ previous) & current` gives `and $13, $8, $2` (the local
+first) while naming the intermediate,
+
+    changed = current ^ previous;
+    pressed = changed & current;
+
+gives retail's `and $13, $2, $8`. That one word was the whole of `sdfPadWork`'s
+remaining difference.

@@ -14,3 +14,14 @@ the same structure inside a `for (;;)` with `break` is 64 of 71 words out. A
 `do`/`while` or a `for` with `goto done` in place of the `break` both work as
 well, so it is the `break` reaching the loop's own exit machinery that rotates
 it.
+
+## `i < K` reverses the loop, `i != K` does not
+
+A counted loop whose bound is a literal gets reversed into a countdown when the
+counter is dead outside the loop and every use is strength-reduced away:
+`for (k = 0; k < 16; k++)` comes out as `li $10, 15` / `addiu $10, $10, -1`.
+Writing the same bound as `k != 0x10` blocks `check_dbra_loop` and keeps
+retail's ascending counter compared against a register holding the bound.
+`sdfPadWork`'s inner loop over the 16 button masks is 78 of 89 words out with
+`<` and matches with `!=`; its outer loop over the two pads already used `!=`
+and never reversed.
