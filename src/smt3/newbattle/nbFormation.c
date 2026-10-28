@@ -4,11 +4,13 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
+#include "model.h"
+#include "motion.h"
 
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];
-    dds3Basic_t *basic;
+    mdlObj_t *owner;
     u8 unk_90[0x14];
     u32 flags;
 } evtUnitHandle_t;
@@ -406,7 +408,7 @@ void nbFormDispOff(s32 formindex)
     if (f->basic == NULL) {
         return;
     }
-    f->hunit->basic->flag |= 1;
+    f->hunit->owner->flags |= 1;
     dds3ObjectBaseOnFlag(f->basic, 0x1000);
 }
 
@@ -429,7 +431,7 @@ void nbFormDispOn(s32 formindex)
     if (f->basic == NULL) {
         return;
     }
-    f->hunit->basic->flag &= ~1;
+    f->hunit->owner->flags &= ~1;
     dds3ObjectBaseOffFlag(f->basic, 0x1000);
 }
 
@@ -534,7 +536,55 @@ void nbDoubleFormExceptedDispOff(nbFormation_t *form1, nbFormation_t *form2)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbFormation", nbRestartMotion);
+extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
+extern datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
+extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate);
+
+void nbRestartMotion(void)
+{
+    nbMainProcessData_t *data;
+    /* Qualified cc1 allocation trace: both passes assign pseudo 85 (UIDs
+     * 45/165), allocated to $16. Hooked and plain output agree; one form
+     * iterator keeps the shared live range. See docs/cc1probe.md. */
+    nbFormation_t *form;
+    s32 i = 0;
+
+    data = nbGetMainProcessData();
+
+    for (; i < 16; i++) {
+        form = &data->form[i];
+        if ((form->stat & 1) == 0) continue;
+        if ((form->stat & 2) == 0) continue;
+        if ((form->stat & 0x8000) != 0) {
+            datUnitVisual_t *visual = nbGetUnitVisual(nbGetUnitWorkFromFormindex(i));
+            form->r = visual->formsize;
+            form->cr = 0.0f;
+            SDF_VU0_COPYVECTOR(&form->center, &visual->center);
+            form->scl = visual->formscale;
+            form->h = visual->formheight;
+            form->oneshotr = visual->oneshotr;
+            form->allshotr = visual->allshotr;
+            form->stat &= ~0x8000;
+        }
+    }
+
+    for (i = 0; i < 16; i++) {
+        form = &data->form[i];
+        if ((form->stat & 1) == 0) continue;
+        if ((form->stat & 2) == 0) continue;
+        if ((form->stat & 0x4000) != 0) {
+            evtUnitHandle_t *hunit = form->hunit;
+            hunit->flags &= ~0x400000;
+            hunit->flags &= ~0x40;
+            hunit->flags |= 0x20;
+            form->nexthokanb = 0;
+            form->nexthokan = 0;
+            hunit->owner->first->speed = form->motspeed;
+            form->stat &= ~0x4000;
+            nbSetUnitMotion(form, 0, 1, 1.0f);
+        }
+    }
+}
 
 void nbSetFormPos(nbFormation_t *form, sdfVector4_t *pos)
 {
