@@ -601,7 +601,31 @@ s32 cmbChkGeneralStat(void)
     return 2;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", fclCombineCheckMoonPhase);
+s32 fclCombineCheckMoonPhase(void)
+{
+    s32 found = 0;
+    s32 i;
+    dds3PartyUnit_t *party;
+
+    if (evtGetAgeOfMoon() != 0) {
+        return 0;
+    }
+    i = 0;
+    party = cmbGlobalWork->party;
+    for (; i < 16; i++, party++) {
+        if (party->unit.flag & 1) {
+            switch (party->unit.id) {
+            case 0x51:
+                found |= 1;
+                break;
+            case 0x52:
+                found |= 2;
+                break;
+            }
+        }
+    }
+    return found == 3 ? 0 : found;
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", fclCombineBGM);
 
