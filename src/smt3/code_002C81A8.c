@@ -178,7 +178,7 @@ extern _glue *__sfmoreglue(_reent *r, s32 n);
 
 extern s32 __sigtramp_r(_reent *r, s32 sig);
 
-extern void *libc_2D2648(void *fn);
+extern void *__deregister_frame_info(void *fn);
 
 extern void free(void *ptr);
 
@@ -200,9 +200,9 @@ extern s32 close(s32 fd);
 
 extern _Bigint *_Balloc(_reent *r, s32 k);
 
-extern s32 registerAtExit(void *fn, void *entry);
+extern s32 __register_frame_info(void *fn, void *entry);
 
-extern s32 libc_2D25B0(void *fn, void *entry);
+extern s32 __register_frame_info_table(void *fn, void *entry);
 
 extern s32 write(s32 fd, const void *buf, s32 count);
 
@@ -244,7 +244,7 @@ extern const double D_0054B930[];
 
 extern void abort(void);
 
-extern s32 initAtExit(void);
+extern s32 __do_global_ctors(void);
 
 extern s32 atexit(void (*fn)(void));
 
@@ -618,7 +618,7 @@ INCLUDE_ASM(const s32, "code_002C81A8", scalbnf);
 
 INCLUDE_ASM(const s32, "code_002C81A8", copysignf);
 
-void runAtExitList(void) {
+void __do_global_dtors(void) {
     void (**p)(void);
 
     while (*D_0052BB28 != NULL) {
@@ -628,16 +628,16 @@ void runAtExitList(void) {
     }
     if (D_0052BB2C == 0) {
         D_0052BB2C = 1;
-        libc_2D2648(D_0052D940);
+        __deregister_frame_info(D_0052D940);
     }
 }
 
-INCLUDE_ASM(const s32, "code_002C81A8", initAtExit);
+INCLUDE_ASM(const s32, "code_002C81A8", __do_global_ctors);
 
-void initFloatOnce(void) {
+void __main(void) {
     if (D_0059AD58 == 0) {
         D_0059AD58 = 1;
-        initAtExit();
+        __do_global_ctors();
     }
 }
 
@@ -756,7 +756,7 @@ INCLUDE_ASM(const s32, "code_002C81A8", libc_2D1EA8);
 
 INCLUDE_ASM(const s32, "code_002C81A8", libc_2D1FA0);
 
-s32 registerAtExit(void *fn, void *entry) {
+s32 __register_frame_info(void *fn, void *entry) {
     object *e = entry;
 
     e->fde_begin = fn;
@@ -773,11 +773,11 @@ s32 registerAtExit(void *fn, void *entry) {
     return;
 }
 
-s32 libc_2D2580(void *fn) {
-    return registerAtExit(fn, malloc(0x18));
+s32 __register_frame(void *fn) {
+    return __register_frame_info(fn, malloc(0x18));
 }
 
-s32 libc_2D25B0(void *fn, void *entry) {
+s32 __register_frame_info_table(void *fn, void *entry) {
     object *e = entry;
 
     e->fde_begin = fn;
@@ -794,14 +794,14 @@ s32 libc_2D25B0(void *fn, void *entry) {
     return;
 }
 
-s32 libc_2D2618(void *fn) {
-    return libc_2D25B0(fn, malloc(0x18));
+s32 __register_frame_table(void *fn) {
+    return __register_frame_info_table(fn, malloc(0x18));
 }
 
-INCLUDE_ASM(const s32, "code_002C81A8", libc_2D2648);
+INCLUDE_ASM(const s32, "code_002C81A8", __deregister_frame_info);
 
-void ctime_4(void *fn) {
-    free(libc_2D2648(fn));
+void __deregister_frame(void *fn) {
+    free(__deregister_frame_info(fn));
 }
 
 s32 libc_2D2728(u32 *p) {

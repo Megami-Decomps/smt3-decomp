@@ -962,3 +962,32 @@ The same evidence fixed four record names in the C, which needed no IDB change:
 `frame-dwarf2.o` makes `AtExitEntry` that file's `struct object` and `AtExitList`
 its `fde_vector`, and `_df_to_usi.o` makes the soft-float pair `fp-bit.c`'s
 `fp_number_type`.
+
+## Applied on 2026-10-28: libgcc's ctor/dtor and EH frame registration
+
+`frame-dwarf2.o` accounts for fourteen functions in the region, so the object
+cannot name any one of them; these came from the bodies instead, each of which
+is gcc's own definition verbatim.
+
+| Address | Old | New | Proof |
+| --- | --- | --- | --- |
+| 0x002D13C8 | `runAtExitList` | `__do_global_dtors` | walks a null-terminated function table, then under a one-shot `completed` guard calls `__deregister_frame_info(__EH_FRAME_BEGIN__)` |
+| 0x002D1458 | `initAtExit` | `__do_global_ctors` | calls `__register_frame_info(EH frame, &object)`, walks the ctor list, tail-calls `atexit` with 0x002D13C8 |
+| 0x002D1518 | `initFloatOnce` | `__main` | the `initialized` guard calling `__do_global_ctors` once; byte-matches `__main.o`, as 0x002D1458 does |
+| 0x002D2518 | `registerAtExit` | `__register_frame_info` | stores the FDE base at +8, clears pc_begin, pc_end, fde_array and count, pushes on the object list |
+| 0x002D2580 | `libc_2D2580` | `__register_frame` | `__register_frame_info(begin, malloc(0x18))`, and 0x18 is `sizeof(struct object)` |
+| 0x002D25B0 | `libc_2D25B0` | `__register_frame_info_table` | the same, and also stores the base into `fde_array` |
+| 0x002D2618 | `libc_2D2618` | `__register_frame_table` | `__register_frame_info_table(begin, malloc(0x18))` |
+| 0x002D2648 | `libc_2D2648` | `__deregister_frame_info` | returns the object its caller frees |
+| 0x002D2708 | `ctime_4` | `__deregister_frame` | `free(__deregister_frame_info(begin))`, which is the whole function |
+
+`ctime_4` was the one plainly wrong recovered name here: the body has nothing to
+do with `ctime`. The three addresses 0x002D13C8, 0x002D1458 and 0x002D1518 also
+run in libgcc2.c's own source order for `#ifdef L__main`.
+
+Still unnamed in `frame-dwarf2.o`: 0x002D1E50, 0x002D1EA8, 0x002D1FA0,
+0x002D2728, 0x002D2768, 0x002D27F8, 0x002D2850, 0x002D29B8, 0x002D2B60,
+0x002D2C70 and 0x002D31E0. These are the sort and search internals
+(`decode_uleb128`, `fde_split`, `frame_heapsort`, `fde_merge`, `search_object`,
+`execute_cfa_program` and friends); 0x002D2768 reads like `add_fdes` but its
+first argument is the FDE rather than the object, so the match is not settled.
