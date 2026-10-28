@@ -552,3 +552,4 @@ src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 608 B	fusion
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 76 B	camera dispatcher separated from independently framed tail target
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	native-size list-selection clamp, truthful cursor subobjects and eighteen instruction-word residual
 src/smt3/newbattle/NbNegoFlowOne.c	redthing1	done	2026-10-28	1 fn / 216 B	Flow1_23 selected-unit message dispatch and typed message offset
+src/smt3/pb/pbRecord.c	redthing1	done	2026-10-28	1 fn / 768 B	pbDumpRecordData native block-name rows and callback-sensitive snapshot diagnostics

@@ -72,6 +72,7 @@ typedef struct
     f32 x, y, z;
 } pbGroupData_t;
 typedef struct { s16 x, y; u16 status; } pbRecordCell_t;
+typedef struct { s32 status; s16 x, y; } pbRecordCharacter_t;
 
 typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
@@ -207,7 +208,51 @@ s32 pbAddRecord_flor(pbProcHandle_t *panel, pbGroupData_t *group)
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_char);
 
-INCLUDE_ASM(const s32, "pb/pbRecord", pbDumpRecordData);
+extern s32 printf(const char *format, ...);
+
+void pbDumpRecordData(pbProcHandle_t *panel)
+{
+    pbRecord_t *rec = panel->data.record;
+    char names[7][32] = {
+        "FLOOR", "WALL", "NORMAL BLOCK CORE", "NORMAL BLOCK",
+        "ROUND BLOCK CORE", "ROUND BLOCK", "EXIT"
+    };
+    u32 i;
+    u32 j;
+
+    printf("\n(( record data ))\n");
+    printf("stack point = %d\n", rec->pos);
+    for (i = 0; i < 30; i++) {
+        pbRecordCell_t *blocks;
+        pbRecordCell_t *floors;
+
+        if (rec->pos == (s32)i) {
+            printf(">>>stack %d\n", i);
+        } else {
+            printf("---stack %d\n", i);
+        }
+        printf("\t<character = %d>\n", rec->slot[i].flag[1]);
+        printf("\tcurrent char = %d\n", rec->slot[i].flag[0]);
+        for (j = 0; j < rec->slot[i].flag[1]; j++) {
+            pbRecordCharacter_t *characters = (pbRecordCharacter_t *)rec->slot[i].characters;
+            printf("\t  (x,y) = (%d, %d)\n", characters[j].x, characters[j].y);
+        }
+        blocks = (pbRecordCell_t *)rec->slot[i].blocks;
+        printf("\t<block = %d>\n", rec->slot[i].flag[2]);
+        for (j = 0; j < rec->slot[i].flag[2]; j++) {
+            u16 status = blocks[j].status;
+            printf("\t  (x,y) = (%d,%d) %s : grpid = %d\n",
+                   blocks[j].x, blocks[j].y, names[status >> 13], status & 0x7FF);
+        }
+        floors = (pbRecordCell_t *)rec->slot[i].floors;
+        printf("\t<floor = %d>\n", rec->slot[i].flag[3]);
+        for (j = 0; j < rec->slot[i].flag[3]; j++) {
+            u16 status = floors[j].status;
+            printf("\t  (x,y) = (%d,%d) %s : grpid = %d\n",
+                   floors[j].x, floors[j].y, names[status >> 13], status & 0x7FF);
+        }
+    }
+}
 
 extern s8 dds3PadButtonState[];
 extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
