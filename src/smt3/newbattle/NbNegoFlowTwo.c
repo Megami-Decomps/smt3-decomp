@@ -474,20 +474,25 @@ s32 Flow6_8(nbNegoProcessData_t *n)
     return 0;
 }
 
-typedef struct { u8 rate; u8 item; } nbMasterTextKouho_t;
+typedef struct { u8 ritu; u8 item; } datNegoPresent_t;
 typedef struct {
-    s32 mesno;
-    u8 unk_04[4];
-    u8 phase;
+    u32 kucyo;
+    u32 tokucyo;
+    u8 tokuboutype;
     u8 honboutype;
-    u8 unk_0A;
-    u8 requestType;
-    u8 unk_0C[8];
-    u16 negorate;
-    nbMasterTextKouho_t itema[4];
-    nbMasterTextKouho_t itemb[4];
-    nbMasterTextKouho_t stone[4];
-    u8 unk_2E[2];
+    u8 fighttype;
+    u8 reqtype;
+    u8 tuikareqtype;
+    u8 privatesel;
+    u8 privateselindex;
+    u8 senseitype;
+    u8 inotitype;
+    u8 binjotype;
+    u16 mukantype;
+    u16 mukanindex;
+    datNegoPresent_t itema[4];
+    datNegoPresent_t itemb[4];
+    datNegoPresent_t stone[4];
 } datDevilNegoFormat_t;
 
 extern datDevilNegoFormat_t master_text[];
@@ -509,7 +514,7 @@ s32 Flow6_9(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0x6000C);
 
     do {
-        requestType = nbGetNegoRequestType(master_text[n->ework->id].requestType);
+        requestType = nbGetNegoRequestType(master_text[n->ework->id].reqtype);
     } while ((u32)n->prevreqtype >= 2 &&
              (requestType == 4 || requestType == n->prevreqtype));
 
