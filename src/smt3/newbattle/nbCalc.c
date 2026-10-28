@@ -350,6 +350,12 @@ typedef struct sdfRandCB_t sdfRandCB_t;
 extern f32 dds3GetRandFloatA(sdfRandCB_t *state);
 extern s32 evtBitCheck(s32 no);
 
+extern u32 nbGetKoukaBadDamage(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s32 nvirtual);
+
+extern u32 nbGetKoukaBadKaifuku(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s32 nvirtual);
+
+extern s32 nbSetHojoKouka(s32 formindex, u32 hojotype, s32 hojopoint, s32 nvirtual);
+
 extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
 
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
@@ -1298,7 +1304,69 @@ s32 nbGetMaxHpWazaPoint(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetVirtualAisyo);
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetVirtualKoukaPoint);
+s32 nbGetVirtualKoukaPoint(s32 nskill, s32 sformindex, s32 dformindex)
+{
+    datUnitWork_t *target;
+    f32 ritu;
+    u32 badDamage;
+    u32 badKaifuku;
+    s32 hpDamage;
+    s32 hpKaifuku;
+    s32 mpDamage;
+    s32 mpKaifuku;
+    s32 hojo;
+    s32 room;
+    s32 result;
+
+    nbGetUnitWorkFromFormindex(sformindex);
+    target = nbGetUnitWorkFromFormindex(dformindex);
+    ritu = nbGetAisyoRitu(nskill, sformindex, dformindex);
+    badDamage = nbGetKoukaBadDamage(nskill, sformindex, dformindex, ritu, 1);
+    badKaifuku = nbGetKoukaBadKaifuku(nskill, sformindex, dformindex, ritu, 1);
+    hpDamage = nbGetKoukaHp(1, nskill, sformindex, dformindex, ritu, 1);
+    hpKaifuku = nbGetKoukaHp(0, nskill, sformindex, dformindex, ritu, 1);
+    if (hpKaifuku > 0) {
+        room = target->maxhp - target->hp;
+        if (room < hpKaifuku) {
+            hpKaifuku = room;
+        }
+    }
+    mpDamage = nbGetKoukaMp(1, nskill, sformindex, dformindex, ritu, 1);
+    mpKaifuku = nbGetKoukaMp(0, nskill, sformindex, dformindex, ritu, 1);
+    if (mpKaifuku > 0) {
+        room = target->maxmp - target->mp;
+        if (room < mpKaifuku) {
+            mpKaifuku = room;
+        }
+    }
+
+    hojo = 0;
+    if (datSkillTable.normal[nskill].hojotype != 0) {
+        hojo = nbSetHojoKouka(dformindex, datSkillTable.normal[nskill].hojotype,
+                              datSkillTable.normal[nskill].hojopoint, 1);
+    }
+
+    result = 0;
+    if (badDamage != 0) {
+        result++;
+    }
+    if (badKaifuku != 0) {
+        result++;
+    }
+    if (hpDamage >= 2) {
+        result += hpDamage;
+    }
+    if (hpKaifuku >= 2) {
+        result += hpKaifuku;
+    }
+    if (mpDamage >= 2) {
+        result += mpDamage;
+    }
+    if (mpKaifuku >= 2) {
+        result += mpKaifuku;
+    }
+    return result + hojo;
+}
 
 s32 nbCheckSkillCost(s32 formindex, s32 nskill)
 {
