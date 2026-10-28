@@ -98,6 +98,12 @@ sceDmaChanRegs = 0x00529F70; // size:0x28
 
 
 // Names from tools/names.py (provenance: name_sources.txt)
+effBTLModelGroupGetMaxLength = 0x0016CB98; // type:func size:0x128
+effBTLModelGroupGetWidthX = 0x0016CD98; // type:func size:0xE0
+effBTLModelGroupGetSphere = 0x0016CE78; // type:func size:0x14
+effBTLModelGroupGetSphereOld = 0x0016CE90; // type:func size:0x38
+effBTLModelGroupGetSphere2 = 0x0016CEC8; // type:func size:0x18
+effBTLModelGroupGetSphereExp = 0x0016CEE0; // type:func size:0x270
 effBTLModelInvokeShow = 0x0016DFF8; // type:func size:0x58
 effBTLModelTargetShow = 0x0016E050; // type:func size:0x58
 effBTLModelInvokeHide = 0x0016E0A8; // type:func size:0x20
@@ -2012,10 +2018,7 @@ effBTLModelGetMarkPositionEvalTm = 0x0016C980; // type:func size:0x78
 effBTLModelGetMarkMatrix = 0x0016C9F8; // type:func size:0x44
 effBTLModelGetMarkMatrix2 = 0x0016CA40; // type:func size:0x38
 effBTLModelGroupGetCenter = 0x0016CA78; // type:func size:0x120
-effBTLModelGroupGetSphereExp = 0x0016CB98; // type:func size:0x128
 effBTLModelGroupGetLineMaxLength = 0x0016CCC0; // type:func size:0xD4
-effBTLModelGroupGetMaxLength = 0x0016CD98; // type:func size:0xE0
-effBTLModelGroupGetSphere = 0x0016CE78; // type:func size:0x2D8
 eff_16D150 = 0x0016D150; // type:func size:0x2CC
 effBTLModelGroupGetDirection = 0x0016D420; // type:func size:0x44
 effBTLModelLook = 0x0016D468; // type:func size:0xAC

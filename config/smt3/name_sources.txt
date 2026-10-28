@@ -1,4 +1,10 @@
 # addr	name	evidence|inferred	note
+0x0016CB98	effBTLModelGroupGetMaxLength	inferred	Retail takes center pointer and group mask, computes distance plus radius and scales a single member by 1.33; matches reconstructed HD GroupGetMaxLength
+0x0016CD98	effBTLModelGroupGetWidthX	inferred	Retail scans X extrema and returns their span; matches reconstructed HD GroupGetWidthX
+0x0016CE78	effBTLModelGroupGetSphere	inferred	Retail wrapper tail-calls GroupGetSphere2; excludes following four-byte alignment
+0x0016CE90	effBTLModelGroupGetSphereOld	inferred	Independent retail prologue and return; arguments and calls agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelGroupGetSphereOld
+0x0016CEC8	effBTLModelGroupGetSphere2	inferred	Independent retail prologue and return; arguments and calls agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelGroupGetSphere2
+0x0016CEE0	effBTLModelGroupGetSphereExp	inferred	Independent retail prologue and return; arguments and calls agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelGroupGetSphereExp
 0x0016DFF8	effBTLModelInvokeShow	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokeShow
 0x0016E050	effBTLModelTargetShow	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelTargetShow
 0x0016E0A8	effBTLModelInvokeHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokeHide

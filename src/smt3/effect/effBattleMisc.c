@@ -41,7 +41,7 @@ extern s32 effBTLSkillCheckRun(void);
 extern s32 effBTLSkillGetID(void);
 extern void ToMatrix(void);
 extern void InversMatrix(void);
-extern f32 effBTLModelGroupGetSphereExp(sdfVector4_t *group, u32 model);
+extern f32 effBTLModelGroupGetMaxLength(sdfVector4_t *group, u32 model);
 extern void nbLoadUnitPos(nbFormation_t *form);
 extern void effBTLModelLoadRotate(nbFormation_t *form);
 extern void mdlGetPosition(mdlObj_t *aHandle);
@@ -255,7 +255,7 @@ void effBTLModelGroupGetCenter(u32 group) {
     SDF_VU0_MULVECTOR();
 }
 
-f32 effBTLModelGroupGetSphereExp(sdfVector4_t *group, u32 model) {
+f32 effBTLModelGroupGetMaxLength(sdfVector4_t *group, u32 model) {
     nbFormation_t *form;
     f32 max;
     f32 length;
@@ -316,7 +316,7 @@ f32 effBTLModelGroupGetLineMaxLength(sdfVector4_t *pVec, sdfVector4_t *pPos, u32
     return max;
 }
 
-f32 effBTLModelGroupGetMaxLength(u32 group) {
+f32 effBTLModelGroupGetWidthX(u32 group) {
     sdfVector4_t pos;
     nbFormation_t *form;
     f32 max;
@@ -356,6 +356,12 @@ f32 effBTLModelGroupGetMaxLength(u32 group) {
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphere);
+
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphereOld);
+
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphere2);
+
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphereExp);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", eff_16D150);
 
@@ -1374,18 +1380,18 @@ f32 effBTLPartGetRadiusPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPosPtr
         party = effBTLSkillGetInvokeParty();
         effBTLModelGroupGetCenter(party);
         SDF_VU0_STOREVECTOR_MEMOPS(center);
-        radius = effBTLModelGroupGetSphereExp(&center, party);
+        radius = effBTLModelGroupGetMaxLength(&center, party);
         break;
     case 2:
         party = effBTLSkillGetTargetParty();
         effBTLModelGroupGetCenter(party);
         SDF_VU0_STOREVECTOR_MEMOPS(center);
-        radius = effBTLModelGroupGetSphereExp(&center, party);
+        radius = effBTLModelGroupGetMaxLength(&center, party);
         break;
     case 3:
         effBTLModelGroupGetCenter(0x700);
         SDF_VU0_STOREVECTOR_MEMOPS(center);
-        radius = effBTLModelGroupGetSphereExp(&center, 0x700);
+        radius = effBTLModelGroupGetMaxLength(&center, 0x700);
         break;
     }
     return radius;

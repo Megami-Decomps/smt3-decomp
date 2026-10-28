@@ -2461,7 +2461,7 @@ void func_00174BB0(u32 color)
     }
 }
 
-extern f32 func_0016CEC8(s32 side);
+extern f32 effBTLModelGroupGetSphere2(u32 group);
 extern void effDebugWireframeSphereDraw(sdfVector4_t *center, u32 color, f32 radius);
 extern void effDebugPointDraw(sdfVector4_t *point);
 
@@ -2470,11 +2470,11 @@ void func_00174C50(u32 color)
     sdfVector4_t center;
     f32 radius;
 
-    radius = func_0016CEC8(0x100);
+    radius = effBTLModelGroupGetSphere2(0x100);
     SDF_VU0_STOREVECTOR(&center);
     effDebugWireframeSphereDraw(&center, color, radius);
     effDebugPointDraw(&center);
-    radius = func_0016CEC8(0x200);
+    radius = effBTLModelGroupGetSphere2(0x200);
     SDF_VU0_STOREVECTOR(&center);
     effDebugWireframeSphereDraw(&center, color, radius);
     effDebugPointDraw(&center);
