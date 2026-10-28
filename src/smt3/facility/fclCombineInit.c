@@ -2434,7 +2434,31 @@ void cmbStartEncycView(s32 mode)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateResultCursor);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbHandleDebugExit);
+extern s8 FclDebug(s8 mode, void *work);
+
+s32 cmbHandleDebugExit(void)
+{
+    s32 result = 0;
+    s8 debugResult = FclDebug(0, CMB_GBWK);
+
+    if (debugResult == -1) {
+        return result;
+    }
+    if (debugResult < 0) {
+        result = 1;
+    } else if (debugResult != 0) {
+        result = 1;
+    } else {
+        evtDisableMoonDraw();
+        fclScriptForcedEnd(CMB_GBWK->scriptArg);
+        CMB_GBWK->scriptArg = NULL;
+        fclCombineInitWork();
+        CMB_GBWK->unk_00001 = 13;
+        CMB_GBWK->unk_00004 = 1;
+        result = 1;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdatePanelAnim);
 
