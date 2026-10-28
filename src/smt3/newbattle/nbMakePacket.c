@@ -517,12 +517,12 @@ void nbAddHatudoEffectEndPacket(s32 startframe, s32 uniqueid)
     nbAddKoukaPacket(nbGetKoukaProcessData(), startframe, 0, uniqueid)->type = 58;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00544890);
-
 extern void *effBTLSystemCut1Create(nbFormation_t *form, s32 index);
 struct effBTLCut_t;
 extern void effBTLCutSetCutEndFrame(struct effBTLCut_t *cut, s32 frame);
 extern nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00544890);
 
 nbKoukaPacket_t *nbAddHatudoEffectKoukaPacket(s32 startframe, s32 framelength,
     s32 uniqueid, nbFormation_t *form, s32 type, s32 mottype, s32 skillid)

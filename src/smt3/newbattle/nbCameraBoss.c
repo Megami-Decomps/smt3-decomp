@@ -498,7 +498,69 @@ s32 nbCameraBoss_Sp_PSYSTL_Run(nbCamera_t *pNbCamera)
     return 1;
 }
 
+/* NON_MATCHING: 68 of 131 words differ; 524 emitted against retail 536. Retail
+ * reloads pos.y from the frame for the clamp, which reorders the whole block. */
+#ifdef NON_MATCHING
+s32 nbCameraBoss_BSMIZ_Command_Set(nbCamera_t *pNbCamera)
+{
+    nbMainProcessData_t *pData;
+    nbFormation_t *pBase;
+    nbFormation_t *pForm;
+    s32 id;
+    f32 length;
+    sdfVector4_t pos;
+    sdfVector4_t base;
+    sdfVector4_t center;
+    sdfVector4_t dir;
+
+    pData = nbGetMainProcessData();
+    if (pData == NULL) {
+        return 0;
+    }
+    if (pData->orderindex == -1) {
+        return 0;
+    }
+    pBase = &pData->form[4];
+    pForm = &pData->form[pData->party[pData->order[pData->orderindex]].formindex];
+    id = effBTLModelGetID(pForm);
+    effBTLModelGetSphereCenter(pBase);
+    SDF_VU0_STOREVECTOR_NOMEM(&base);
+    if (id == 50 || id == 74) {
+        base.y = base.y + pBase->h * pBase->scl * 0.18f;
+    }
+    SDF_VU0_COPYVECTOR(pNbCamera, &base);
+    effBTLModelGetSphereCenter(pForm);
+    SDF_VU0_STOREVECTOR_NOMEM(&center);
+    center.y = -effBTLModelGetHeight(pForm);
+    SDF_VU0_LOADVECTOR(&center);
+    SDF_VU0_LOADVECTOR_B(&base);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&dir);
+    if (id == 50 || id == 74) {
+        length = 560.0f;
+    } else {
+        length = 550.0f;
+    }
+    pos.x = center.x + dir.x * length;
+    pos.y = center.y + dir.y * length;
+    pos.z = center.z + dir.z * length;
+    if (pos.y > -1.5f) {
+        pos.y = -1.5f;
+    }
+    SDF_VU0_LOADVECTOR(pNbCamera);
+    SDF_VU0_LOADVECTOR_B(&pos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(pNbCamera->distance);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+    pNbCamera->fovy = 0.69813163f;
+    effBTLModelLook(pForm, &pNbCamera->target);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_BSMIZ_Command_Set);
+#endif
 
 s32 nbCameraBoss_BSONGY_Command_Set(nbCamera_t *pNbCamera)
 {

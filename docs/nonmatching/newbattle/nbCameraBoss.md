@@ -100,3 +100,33 @@ whatever makes that first `return 1` a bare jump to the shared exit.
 
 The jump table differs as a consequence; the case set itself is confirmed by
 the default entries, which all resolve to the one default block.
+
+## nbCameraBoss_BSMIZ_Command_Set (newbattle/nbCameraBoss, 0x218)
+
+68 of 131 words differ; 524 bytes emitted against retail's 536.
+
+The body came off the matched sibling `nbCameraBoss_BSSAMA_Command_Set`, which
+has the same shape plus an `effBTLModelGetID` test. Everything up to the
+`length` choice matches except two callee-saved names: retail holds
+`pNbCamera` in `$18` and the model id in `$17`, the draft the other way round.
+That swap is a live-length tie-break and follows the one real difference.
+
+Retail reloads `pos.y` from the frame for the `> -1.5f` clamp after storing all
+three components, then uses `bc1tl` with the clamp store in the delay slot. The
+draft keeps `pos.y` in a register, so the whole scale-and-add block schedules
+`pos.y` first and the clamp folds into it, and retail's `b` to the join plus its
+`nop` are three words the draft never emits. The HD reconstruction of this
+function also reads `pos.y` back through a separate accessor, so the reload is
+in the original, but nothing in C reproduces it here: the matched
+`BSSAMA_Command_Set` has the identical clamp over a literal distance and keeps
+the value in a register, as the draft does.
+
+Ruled out: `if/else`, `?:`, reversed `!=` tests, nested `if`, and a `switch` with
+cases 50 and 74 for the 560/550 choice (all identical output); declaration order
+of the locals; `u32` for the id; `pos`, `dir` and `center` as `f32[4]` instead of
+`sdfVector4_t`; `volatile pos`; `pBase`/`pForm` assignment order;
+`STOREVECTOR` against `STOREVECTOR_NOMEM` on each of the three stored vectors;
+`length * dir.x` and `dir.x * length + center.x` operand orders; scaling `dir`
+in place first (exact size, 41 of 134 words differ, but it emits three extra
+`dir` stores retail does not have); `do { } while (0)` around the three
+component assignments.
