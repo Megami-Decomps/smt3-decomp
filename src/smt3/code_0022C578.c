@@ -1023,7 +1023,7 @@ extern void cmpinit();
 
 extern void cmpCalcSequence();
 
-extern void camp_draw_Process();
+extern s32 camp_draw_Process(void);
 
 extern s32 camp_update_Process(void);
 
@@ -2203,7 +2203,57 @@ void campDrawFade(void)
 
 
 
+#ifdef NON_MATCHING
+/* Two argument-setup words differ; see docs/nonmatching/code_0022C578.md. */
+struct campCrossPanel_t;
+extern void campRunPanelCallback(struct campCrossPanel_t *panel);
+extern void campDrawSkillPanel(void);
+extern void campDrawInfoPanel(void);
+extern void campDrawSeq3(s8 phase);
+extern void campDrawStockRow(s8 mode);
+extern void campDrawNumber(void);
+extern s32 fclDrawPanelSprite(s32 id, s32 ot);
+extern void cmpFindPanelEffSlot(s32 ot);
+
+s32 camp_draw_Process(void)
+{
+    if (campWork->unk_0001 != 7) {
+        nmeDrawFrame(0x10, campWork->effectStep);
+    }
+    if ((campWork->unk_0000 & 0x20) != 0) {
+        cmpUpdateTerminate((cmpInfoWindow_t *)campWork);
+        return -1;
+    }
+    campRunPanelCallback((struct campCrossPanel_t *)campWork->crossPanel);
+    switch (campWork->unk_0001) {
+    case 0: campDrawSkillPanel(); break;
+    case 1: campDrawInfoPanel(); break;
+    case 3: campDrawSeq3(0); break;
+    case 5: campDrawText(2, 0); break;
+    case 4: campDrawText(0xA, 0); break;
+    case 8: campDrawStockRow(0); break;
+    case 9: campDrawStockRow(1); break;
+    case 11: campDrawStockCursor(); break;
+    case 10: campDrawSetPhase(); break;
+    case 14:
+        if (*(s8 *)campWork->unk_0018 == 0) {
+            campDrawSeq3(2);
+        } else {
+            campDrawSeq3(3);
+        }
+        break;
+    case 16: campDrawStockCursor(); break;
+    }
+    campDrawNumber();
+    fclDrawPanelSprite(0x33001, 0x48);
+    cmpFindPanelEffSlot(0x48);
+    fclDrawPanelSprite(0x5101B, 0x48);
+    campDrawFade();
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", camp_draw_Process);
+#endif
 
 extern u32 dds3DebugSign;
 
@@ -5296,7 +5346,7 @@ void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func, void *data, s32
     }
 }
 
-typedef struct
+typedef struct campCrossPanel_t
 {
     /* 0x00 */ void (*func)();
     /* 0x04 */ u8 pos[0x14];

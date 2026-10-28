@@ -596,3 +596,4 @@ src/smt3/code_0029B780.c	redthing1	done	2026-10-28	0 matches / guarded draft imp
 src/smt3/newbattle/NbNegoFlowTwo.c	redthing1	done	2026-10-28	1 fn / 284 B	Flow6_28 level and event eligibility with callback-sensitive snapshots; owner 68 match, 0 differ
 src/smt3/newbattle/NbNegoFlowTwo.c	redthing1	done	2026-10-28	1 fn / 280 B	Flow6_32 support-skill message selection with qualified shared fallback completion; owner 69 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 420 B	numeric status sprite/font drawing with signed-byte input and native blink timer and coordinates; owner 351 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	camp drawing dispatch preserves full table and native callback/termination semantics; two argument-setup words remain at 416 B
