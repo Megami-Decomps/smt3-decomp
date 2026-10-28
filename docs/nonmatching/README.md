@@ -15,12 +15,12 @@ page and line to open. Conventions are in
 | 8 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 6 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 6 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
-| 6 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 6 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 5 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 5 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
+| 5 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |

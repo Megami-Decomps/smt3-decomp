@@ -11,12 +11,11 @@ fldCommand_DIR_HIT_CNTR	code_00144798	0xC0	32 of 42 words differ	docs/nonmatchin
 fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/nonmatching/code_00144798.md	55
 nbCameraBoss_BSKAGU_EP_IT_Set	code_001B0858	0x144	19 of 79 words before the first difference	docs/nonmatching/code_001B0858.md	5
 nbCameraBoss_Sukady_DAIJIS_Set	code_001B0858	0x134	4 of 77 words differ	docs/nonmatching/code_001B0858.md	25
-pbSetPanelModel	code_001D1470	0x60	2 of 23 words match	docs/nonmatching/code_001D1470.md	5
-moveBlock	code_001D1470	0x8C	30 of 31 words differ	docs/nonmatching/code_001D1470.md	25
-pbInitGameCamera	code_001D1470	0x94	26 of 38 words differ	docs/nonmatching/code_001D1470.md	48
-pbStartErrorDraw	code_001D1470	0xBC	2 of 47 words differ	docs/nonmatching/code_001D1470.md	68
-pbInitMapBaseDraw	code_001D1470	0xC4	3 of 49 words differ	docs/nonmatching/code_001D1470.md	99
-func_001D4EB0, func_001D4C08	code_001D1470	0x58 and 0x94	36 of 37 words match	docs/nonmatching/code_001D1470.md	121
+moveBlock	code_001D1470	0x8C	30 of 31 words differ	docs/nonmatching/code_001D1470.md	5
+pbInitGameCamera	code_001D1470	0x94	26 of 38 words differ	docs/nonmatching/code_001D1470.md	28
+pbStartErrorDraw	code_001D1470	0xBC	2 of 47 words differ	docs/nonmatching/code_001D1470.md	48
+pbInitMapBaseDraw	code_001D1470	0xC4	3 of 49 words differ	docs/nonmatching/code_001D1470.md	79
+func_001D4EB0, func_001D4C08	code_001D1470	0x58 and 0x94	36 of 37 words match	docs/nonmatching/code_001D1470.md	101
 func_002429C0	code_0022C578	0x54	19 of 21 words match	docs/nonmatching/code_0022C578.md	5
 cmp_241A10	code_0022C578	0x74	19 of 28 words match	docs/nonmatching/code_0022C578.md	25
 cmpClearCursorSlots	code_0022C578	0x54	18 of 21 words differ	docs/nonmatching/code_0022C578.md	50

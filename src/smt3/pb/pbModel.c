@@ -285,19 +285,13 @@ s32 pbGetMyCharcterRot(pbProcHandle_t *p) {
 }
 
 
-/* NON_MATCHING: 2 of 23 words; the index and work pseudos swap saved registers. */
-#ifdef NON_MATCHING
 void pbSetPanelModel(pbProcHandle_t *panel, s32 index) {
-    pbPanelModel_t *work;
+    pbMyChar_t *chara = panel->data.chara;
     if (panel != NULL) {
-        work = panel->data.model;
         pbSetModelRotate((mdlObj_t *)pbGetPanelField(panel), 0.0f, D_00326C60[index], 0.0f);
-        work->modelIndex = index;
+        chara->dir = index;
     }
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbModel", pbSetPanelModel);
-#endif
 
 
 INCLUDE_ASM(const s32, "pb/pbModel", pb_draw_exit_Process);
