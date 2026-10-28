@@ -301,7 +301,30 @@ INCLUDE_ASM(const s32, "pipe/pipeSection", ActionHm);
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionSlide);
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", ActionCrush);
+extern tagPipeObject *HITCHECK_CUR(tagPipeObject *object, f32 extension);
+extern f32 vecNormalize(f32 *vector);
+
+void ActionCrush(tagPipeObject *object) {
+    tagPipeObject *hit;
+    f32 vector[3];
+
+    object->offset += 11;
+    while ((hit = HITCHECK_CUR(object, 0.0f)) != NULL) {
+        vector[0] = object->pos[0] - hit->pos[0];
+        vector[1] = object->pos[1] - hit->pos[1];
+        vector[2] = 1.0f;
+        vecNormalize(vector);
+        if (hit->id < 3) {
+            hit->action = 17;
+            hit->count = 50;
+            hit->vpos[0] = -vector[0];
+            hit->vpos[1] = -vector[1];
+        }
+    }
+    if (object->count != 0) {
+        object->count--;
+    }
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionBound);
 
