@@ -165,6 +165,20 @@ extern s32 nbMakeUnitFadeInPacket(s32 startframe, void *uniqueid, nbFormation_t 
 
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, struct nbParty_t *party);
 
+extern void dds3DeleteSceneBasicData(struct dds3Basic_t *basic);
+
+extern void effBTLSystemDelete2(struct effBTLSysHandle_t *hEffBTLSys);
+
+extern void nbSetFormationSideFlag(nbFormation_t *form, s32 index);
+
+extern void nbGetFormEntry(s32 id);
+
+extern u32 datGetMaxHp(datUnitWork_t *work);
+
+extern u32 datGetMaxMp(datUnitWork_t *work);
+
+extern void datClearCommMemory(datUnitWork_t *work);
+
 datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 
 s32 nbGetUnitID(datUnitWork_t *work);
@@ -331,7 +345,90 @@ void func_0024D938(void)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbReturnUnit);
+void nbReturnUnit(s32 partyno, s32 lost, s32 dead)
+{
+    nbMainProcessData_t *data;
+    struct nbParty_t *party;
+    nbFormation_t *form;
+    datUnitWork_t *work;
+    u16 id;
+    u16 partyFlags;
+    u16 badstatus;
+
+    data = nbGetMainProcessData();
+    party = &data->party[partyno];
+    partyFlags = party->flag;
+    if ((partyFlags & 1) != 0) {
+        if ((party->flag & 8) == 0) {
+            form = &data->form[party->formindex];
+            if ((form->stat & 2) != 0) {
+                dds3DeleteSceneBasicData(form->basic);
+                form->basic = NULL;
+                form->serial = 0;
+                form->hunit = NULL;
+            }
+            if ((form->anime & 0x100) != 0 && form->badeff != NULL) {
+                effBTLSystemDelete2(form->badeff);
+                form->badeff = NULL;
+            }
+            form->partyindex = 0;
+            form->stat = 0;
+            form->flag = 0;
+            form->anime = 0;
+            form->type = 0;
+            nbSetFormationSideFlag(form, party->formindex);
+            party->flag |= 8;
+        }
+
+        work = nbGetUnitWorkPointer(data, party);
+        id = work->id;
+        if ((party->flag & 2) != 0) {
+            work->flag = 0;
+        } else if ((party->flag & 4) == 0) {
+            if (lost != 0) {
+                work->flag = 0;
+            } else {
+                work->flag &= ~2u;
+            }
+
+            if (dead != 0) {
+                badstatus = work->badstatus;
+                if ((badstatus & 0xFFF) == 0x200) {
+                    work->badstatus = badstatus & 0xFDFF;
+                    work->maxhp = datGetMaxHp(work);
+                    work->maxmp = datGetMaxMp(work);
+                }
+                work->badstatus = 0x800;
+                work->hp = 0;
+            } else {
+                badstatus = work->badstatus;
+                switch (badstatus & 0xFFF) {
+                case 1:
+                case 2:
+                case 4:
+                case 8:
+                case 16:
+                case 128:
+                    work->badstatus = badstatus & 0xF000;
+                    break;
+                default:
+                    break;
+                }
+            }
+            datClearCommMemory(work);
+        }
+
+        nbGetFormEntry(id);
+        if ((party->flag & 2) != 0) {
+            data->enemypcnt--;
+        } else if ((party->flag & 4) == 0) {
+            data->playerpcnt--;
+        }
+        party->flag = 0;
+        party->formindex = -1;
+        party->statindex = -1;
+    }
+}
 
 void nb_24DBF0(s32 partyno, s32 noeffect)
 {
