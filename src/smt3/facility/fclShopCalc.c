@@ -103,16 +103,21 @@ INCLUDE_ASM(const s32, "facility/fclShopCalc", shop_Process);
 
 void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 
-extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
-                            s32 arg);
+extern s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *tex,
+                           fclSpriteTbl_t *table, s32 ot);
+
+typedef struct shopDrawWork_t {
+    u8 unk0000[0x2394];
+    s32 texHandle[2];
+} shopDrawWork_t;
 
 extern u8 *shopDrawWork;
 
-extern char shopSpriteTable[];
+extern fclSpriteTbl_t shopSpriteTable[];
 
-extern s32 D_0032FA90[];
+extern char *D_0032FA90[];
 
-extern s32 D_0032FA94[];
+extern char *D_0032FA94[];
 
 extern void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 id);
 
@@ -155,10 +160,10 @@ void shopDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
     colors[2] = color;
     colors[3] = color;
     fclDrawSpriteFilter(pos->unk_00 + target + 0x10D0, pos->unk_04 + 0x168, pos->unk_08 << 4, 1,
-                        colors, 0, 1, (s32 *)(shopDrawWork + 0x2394),
+                        colors, 0, 1, ((shopDrawWork_t *)shopDrawWork)->texHandle,
                         (fclSpriteTbl_t *)shopSpriteTable, ot);
     fclDrawSpriteFilter(pos->unk_00 + target + 0x10D0, pos->unk_04 + 0x168, pos->unk_08 << 4, 1,
-                        colors, 0, 0xA, (s32 *)(shopDrawWork + 0x2394),
+                        colors, 0, 0xA, ((shopDrawWork_t *)shopDrawWork)->texHandle,
                         (fclSpriteTbl_t *)shopSpriteTable, ot);
     fclDrawSpriteFilter(pos->unk_00 + target + 0x1E40, pos->unk_04 + 0x1A0, pos->unk_08 << 4, 1,
                         colors, 0xA, 1, D_00345D88, fclSpriteTable, ot);
@@ -172,7 +177,30 @@ void shopDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
 
 INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawPrice);
 
-INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawRowBox);
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,
+                             s32 spriteId, s32 *textures, fclSpriteTbl_t *table, s32 ot);
+
+void shopDrawRowBox(fclPanelPos_t *panel, s32 mode, s32 ot)
+{
+    cmpDrawBoxF(0x2E0, 0x308, panel->unk_08, 0x74, 9, 0x19191E59, ot);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 5,
+                     ((shopDrawWork_t *)shopDrawWork)->texHandle, shopSpriteTable, ot);
+    cmpDrawBoxF(0xA60, 0x308, panel->unk_08, 0x58, 9, 0x19191E59, ot);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 6,
+                     ((shopDrawWork_t *)shopDrawWork)->texHandle, shopSpriteTable, ot);
+    cmpDrawBoxF(0x13E0, 0x308, panel->unk_08, 0xBD, 9, 0x141E80, ot);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 9,
+                     ((shopDrawWork_t *)shopDrawWork)->texHandle, shopSpriteTable, ot);
+    cmpDrawBoxF(0x1020, 0x308, panel->unk_08, 0x2E, 9, 0x19191E59, ot);
+    if (mode == 0) {
+        fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 7,
+                         ((shopDrawWork_t *)shopDrawWork)->texHandle, shopSpriteTable, ot);
+    } else {
+        fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 8,
+                         ((shopDrawWork_t *)shopDrawWork)->texHandle, shopSpriteTable, ot);
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawRowText);
 
@@ -210,7 +238,7 @@ s32 shopDrawPanelMode0(s8 mode)
     fclDrawPanel((fclPanel_t *)(shopDrawWork + 0x23DC), 0x47);
     fclUpdatePanel((fclPanel_t *)(shopDrawWork + 0x23DC));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, D_0032FA90[0], (s32 *)(shopDrawWork + 0x2394),
+    trmDrawListText(&pos, D_0032FA90[0], ((shopDrawWork_t *)shopDrawWork)->texHandle,
                     shopSpriteTable, 0x47);
     fclInitPanelPos(0, 0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
     shopDrawItemCount(&pos, 0x80808080, 0x47);
@@ -225,7 +253,7 @@ s32 shopDrawPanelMode1(s8 mode)
     fclDrawPanel((fclPanel_t *)(shopDrawWork + 0x23DC), 0x47);
     fclUpdatePanel((fclPanel_t *)(shopDrawWork + 0x23DC));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, D_0032FA94[0], (s32 *)(shopDrawWork + 0x2394),
+    trmDrawListText(&pos, D_0032FA94[0], ((shopDrawWork_t *)shopDrawWork)->texHandle,
                     shopSpriteTable, 0x47);
     fclInitPanelPos(0, 0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
     shopDrawItemCount(&pos, 0x80808080, 0x47);
