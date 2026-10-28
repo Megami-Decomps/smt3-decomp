@@ -1651,8 +1651,6 @@ extern void cmpCreateLocalItem(s32 mode);
 
 extern void cmpChangeCursorListNums(s32 count, u8 *cursor);
 
-/* NON_MATCHING: 1 of 27 words differ (first at +0x18). */
-#ifdef NON_MATCHING
 void cmpUpdateList(void)
 {
     if (campWork->unk_8303 == 0) {
@@ -1665,9 +1663,6 @@ void cmpUpdateList(void)
     cmpChangeCursorListNums(campWork->unk_8302, campWork->unk_410C);
     campWork->unk_8303 = 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateList);
-#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcSequence);
 
@@ -5409,8 +5404,6 @@ void cmp_241A10(cmpCursorInfo_t *cursor)
 INCLUDE_ASM(const s32, "code_0022C578", cmp_241A10);
 #endif
 
-/* NON_MATCHING: 3 of 26 words differ (first at +0x20). */
-#ifdef NON_MATCHING
 s32 cmp_241A88(cmpCursorInfo_t *cursor, s32 index)
 {
     u8 *flags = (u8 *)cursor->unk_2C;
@@ -5431,9 +5424,6 @@ s32 cmp_241A88(cmpCursorInfo_t *cursor, s32 index)
     cmpUpdateCursorScroll(cursor, 1);
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmp_241A88);
-#endif
 
 void cmpResetCursorPos(s16 value, cmpCursorInfo_t *cursor)
 {
