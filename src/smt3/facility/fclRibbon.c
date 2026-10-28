@@ -263,9 +263,31 @@ void DrawBackFrame(fclRibbon_t *handle, s32 x, s32 y, u32 z, s32 alpha,
     }
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053D9E8);
+extern itfColor_t D_00332408, D_00332418, D_00332428;
 
-INCLUDE_ASM(const s32, "facility/fclRibbon", DrawBack);
+void DrawBack(fclRibbon_t *handle, s32 x, s32 y, u32 z, s32 alpha, sdfDrawTag_t *tag)
+{
+    itfColor_t color = {{128, 128, 128, 128}};
+    itfVertex_t position[2];
+
+    color.components[3] = (128 * alpha) >> 7;
+    position[0].x = x;
+    position[0].y = y + 0x90;
+    position[1].x = x + 0x6E0;
+    position[1].y = y + 0xA0;
+    itfMiscDrawSpritePrim(position, &D_00332408, &color, z, handle->tex[0], 0, tag);
+    position[0].x = x + 0x2000;
+    position[1].x = x + 0x1920;
+    itfMiscDrawSpritePrim2(position, &D_00332408, &color, z, 0, tag);
+    position[0].x = x + 0x1E0;
+    position[0].y = y + 0x30;
+    position[1].x = x + 0x500;
+    position[1].y = y + 0xF8;
+    itfMiscDrawSpritePrim2(position, &D_00332418, &color, z, 0, tag);
+    position[0].x = x + 0x1B00;
+    position[1].x = x + 0x1E20;
+    itfMiscDrawSpritePrim2(position, &D_00332428, &color, z, 0, tag);
+}
 
 extern void DrawHexagonElem(sdfIVector3_t *position, itfColor_t *color,
                             u32 z, sdfDrawTag_t *tag);
