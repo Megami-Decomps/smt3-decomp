@@ -5500,6 +5500,8 @@ s32 cmpGetSkillTargetArea(u16 skillId)
     return 0;
 }
 
+extern s32 cmbGetParamBase(datUnitWork_t *unit, s32 index);
+
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFE8);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFF8);
@@ -5536,11 +5538,34 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_005400D0);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_005400E0);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUseItemKou);
+s32 cmpUseItemKou(u16 item, datUnitWork_t *unit)
+{
+    s32 index = -1;
+
+    switch (item) {
+    case 0x26: index = 0; break;
+    case 0x28: index = 2; break;
+    case 0x29: index = 3; break;
+    case 0x2A: index = 4; break;
+    case 0x2B: index = 5; break;
+    }
+    if (index >= 0) {
+        if (cmbGetParamBase(unit, index) < 40) {
+            unit->param[index]++;
+        }
+        unit->maxhp = datGetMaxHp(unit);
+        unit->maxmp = datGetMaxMp(unit);
+        if ((unit->badstatus & 0x800) == 0) {
+            unit->hp = unit->maxhp;
+        }
+        return index;
+    }
+    return -1;
+}
 
 s32 cmpUseItemTokusyu(u16 item, s32 target, s32 user)
 {
-    if (cmpUseItemKou(item, user) >= 0)
+    if (cmpUseItemKou(item, (datUnitWork_t *)user) >= 0)
     {
         p2sdPlaySE(0x10, 0x7F, 0x3F);
         return 3;
