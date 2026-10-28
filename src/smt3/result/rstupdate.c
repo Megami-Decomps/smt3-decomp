@@ -33,13 +33,6 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00 */ u8 unk_00[0x38];
-    /* 0x38 */ u16 skillCount;
-    /* 0x3A */ u16 skill[12];
-} cmbUnitSkills_t;
-
-typedef struct
-{
     u8 flag;
     u8 unk_01[3];
     u8 race;
@@ -225,11 +218,11 @@ typedef struct
     /* 0x24 */ u8 unk_24;
 } rstSkillSlot_t;
 
-u16 rstSkillSlotIsFull(cmbUnitSkills_t *skills, rstSkillSlot_t *slot)
+u16 rstSkillSlotIsFull(datUnitWork_t *skills, rstSkillSlot_t *slot)
 {
     s8 index = slot->unk_22 + slot->unk_24;
 
-    if (index >= skills->skillCount) {
+    if (index >= skills->skillcnt) {
         if (startPos->pCurrentStock->id == 0) {
             return startPos->GetHeartsSkill;
         }
