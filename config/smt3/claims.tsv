@@ -307,10 +307,10 @@ src/smt3/newbattle/nbMainProcess.c	redthing1	done	2026-10-28	1 fn / 516 B	battle
 src/smt3/newbattle/nbHelpProcess.c	redthing1	done	2026-10-28	1 fn / 652 B	help text and message drawing lifecycle; complete unit 14 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	3 fn / 1092 B	cmpDrawTriG, cmpDrawBoxLine, cmpDraw3DPoly; typed primitive packets
 src/smt3/interface/frWrap.c	redthing1	done	2026-10-28	4 fn / 808 B	number and caption font-chain helpers; whole-unit 24 match, 0 differ
-src/smt3/newbattle/nbAtoProcess.c	redthing1	open	2026-10-28	2 fn / 300 B	stone and game-over callbacks; whole-unit 5 match, 0 differ; remaining siblings under review
+src/smt3/newbattle/nbAtoProcess.c	redthing1	done	2026-10-28	2 fn / 300 B	stone and game-over callbacks; whole-unit 5 match, 0 differ; remaining siblings under review
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 336 B	cmpDrawSetup3DView; double-buffered camera and light packets
-src/smt3/newbattle/nbEventProcess.c	redthing1	open	2026-10-28	1 fn / 300 B	nbEventProcess3 recovery loop and event dispatch; whole-unit 21 match, 0 differ
-src/smt3/pipe/pipeResult.c	redthing1	open	2026-10-28	1 fn / 136 B	message completion and damage dispatch; whole-unit 7 match, 0 differ; section and initialization follow-up
+src/smt3/newbattle/nbEventProcess.c	redthing1	done	2026-10-28	1 fn / 300 B	nbEventProcess3 recovery loop and event dispatch; whole-unit 21 match, 0 differ
+src/smt3/pipe/pipeResult.c	redthing1	done	2026-10-28	1 fn / 136 B	message completion and damage dispatch; whole-unit 7 match, 0 differ; section and initialization follow-up
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	2 fn / 160 B	paired battle light snapshots; complete unit 276 match, 0 differ
 src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	2 fn / 72 B	name-entry sequence flag and fade-out RGB helper; bounded 4-byte color state
 src/smt3/pipe/pipeMakaAnim.c	redthing1	done	2026-10-28	1 fn / 124 B	makaAdd; typed free-slot scan and normal or special-position setup; whole-unit 7 match, 0 differ
@@ -325,3 +325,5 @@ src/smt3/event/evtEventViewer.c	redthing1	done	2026-10-28	0 matches	frame dispat
 src/smt3/newbattle/nbCameraPress.c	redthing1	done	2026-10-28	0 matches	initialization tail-branch residual
 src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	0 new matches	shared work layout; flag fade and row-count helpers already published
 src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	2 fn / 128 B	cursor position and synchronization; retained published backspace and animation helpers
+src/smt3/field/fldTitle.c	redthing1	done	2026-10-28	1 fn / 300 B	four texture resources and title process startup; whole-unit 5 match, 0 differ; mini-title follow-up
+src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	1 fn / 308 B	full recovery input callback; whole-unit 7 match, 0 differ; panel animation remains assembly

@@ -151,15 +151,54 @@ INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdateData);
 
 INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdateCallSeq);
 
-INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdateSeqAllRecover);
+extern void lstMoveCursor2(lstWork_t *pListWindow, s8 Dir);
+extern s32 rcvUpdateData(void);
+extern s32 rcvUpdateCallSeq(s32 SeqNo);
+
+void rcvUpdateSeqAllRecover(void)
+{
+    u32 button = cmpGetPressedButton(0x33);
+
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+    switch (cmpChkSeqInfo((cmbGbWork_t *)rcvUpdateWork)) {
+    case 1:
+        return;
+    case 2:
+        rcvUpdateCallSeq(0);
+        rcvUpdateWork->unk_0004 = 1;
+        return;
+    }
+    switch (button) {
+    case 1:
+        if (rcvUpdateData() == 0) {
+            button = 0x8000;
+        } else {
+            rcvUpdateCallSeq(1);
+            rcvUpdateWork->unk_0004 = button;
+        }
+        break;
+    case 2:
+        rcvUpdateCallSeq(0);
+        rcvUpdateWork->unk_0004 = button;
+        break;
+    case 0x10:
+        lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), -1);
+        break;
+    case 0x20:
+        lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), 1);
+        break;
+    }
+    lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), 0);
+    cmpPlayCursorSE(cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)((u8 *)rcvUpdateWork + 0x128C), button, 0x30));
+}
 
 extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
-extern void lstMoveCursor2(lstWork_t *pListWindow, s8 Dir);
 
-extern s32 rcvUpdateData(void);
 
-extern s32 rcvUpdateCallSeq(s32 SeqNo);
 
 void rcvUpdateSeqRecover(void)
 {
