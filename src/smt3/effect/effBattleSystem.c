@@ -2626,7 +2626,29 @@ void eff_1757A8(void)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_1757D8);
+extern s8 dds3PadBitTable[];
+extern void *dblurUpdateHandle(void *viewer);
+
+void eff_1757D8(void)
+{
+    nbMainProcessData_t *work;
+
+    if (dds3DebugSign != 0) {
+        if (dds3PadBitTable[14] < 0) {
+            D_0054F1DF ^= 1;
+            work = nbGetMainProcessData();
+            if (D_0054F1DF != 0) {
+                work->stat |= 0x200000;
+            } else {
+                work->stat &= ~0x200000;
+            }
+        }
+        if (D_0054F1DF != 0) {
+            nbHelperViewer = dblurUpdateHandle(nbHelperViewer);
+        }
+        func_001750D0(0);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", dds3_175878);
 
