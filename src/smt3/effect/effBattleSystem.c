@@ -2404,7 +2404,34 @@ typedef struct
 extern void mdlSetColor(mdlObj_t *model, u32 color);
 extern u32 effColorBlend(u32 color1, u32 color2, f32 ratio);
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effCAMPBadCreate);
+void *effCAMPBadCreate(effCAMPBadParams_t *params, s32 id)
+{
+    effBattleSystem_effCAMPBad_tag *work;
+    work = sdfChipAllocDirect(0x13C);
+    memcpy(&work->params, params, sizeof(work->params));
+    work->id = id;
+    work->frame = 0;
+    memset(&work->formation, 0, sizeof(work->formation));
+    SDF_VU0_COPYVECTOR(&work->formation.pos, &work->params.pos);
+    SDF_VU0_COPYVECTOR(&work->formation.rot, &work->params.rot);
+    SDF_VU0_COPYVECTOR(&work->formation.center, &work->params.center);
+    work->formation.r = work->params.r;
+    work->formation.h = work->params.h;
+    work->formation.scl = work->params.scl;
+    if (D_0031BF00[work->id].partHandleCreate != NULL) {
+        D_0031BF00[work->id].partHandleCreate();
+    }
+    work->hEffBTLSys = effBTLSystemCreate(&work->formation, work->id);
+    switch (work->id) {
+    case 7:
+        ((effBattleSystem_effBTLSystem_Poison_tag *)work->hEffBTLSys->hEffect)->hModel = work->params.hModel;
+        break;
+    case 6:
+        ((effBattleSystem_effBTLSystem_Close_tag *)work->hEffBTLSys->hEffect)->hModel = work->params.hModel;
+        break;
+    }
+    return work;
+}
 
 void effCAMPBadDraw(effBattleSystem_effCAMPBad_tag *work)
 {
