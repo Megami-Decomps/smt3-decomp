@@ -17,7 +17,7 @@ extern char D_00311850[][0x20];
 
 extern void *frwGetSmallFontFRQ2(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
 
-void *trmGetListFont(s32 x, s32 y, s32 color, s32 d, s8 index, s8 which, s32 arg6)
+void *trmGetListFont(s32 x, s32 y, s32 color, s32 d, s8 index, s8 which)
 {
     char *text;
 
@@ -32,21 +32,17 @@ void *trmGetListFont(s32 x, s32 y, s32 color, s32 d, s8 index, s8 which, s32 arg
     return frwGetSmallFontFRQ2(x, y, color, d, text, 0);
 }
 
-extern void *trmGetListFont(s32 a, s32 b, s32 c, s32 d, s8 e, s8 f, s32 g);
+extern void *trmGetListFont(s32 a, s32 b, s32 c, s32 d, s8 e, s8 f);
 
 extern void func_001C7E38(void *frq, s32 mode, s32 arg);
 
 void trmFreeListFont(s32 a, s32 b, s32 c, s32 d, s8 e, s8 f, s32 g)
 {
-    void *frq = trmGetListFont(a, b, c, d, e, f, g);
+    void *frq = trmGetListFont(a, b, c, d, e, f);
 
     func_001C7E38(frq, 1, g);
     frDestroyFontRequestAfter(frq);
 }
-
-INCLUDE_ASM(const s32, "facility/fclTerminalCalc", trmDrawListRow);
-
-INCLUDE_ASM(const s32, "facility/fclTerminalCalc", trmDrawList);
 
 typedef struct trmPanelPos_t {
     s32 x;
@@ -64,6 +60,9 @@ typedef struct trmDrawWork_t {
     u8 listHeader[0x15C];
     u8 unk0178[0x2079];
     s8 terminalType;
+    u16 terminalNo;
+    u8 unk21F4[0x44];
+    s32 texHandle;
 } trmDrawWork_t;
 
 extern trmDrawWork_t *trmDrawWork;
@@ -71,7 +70,39 @@ extern void fclInitPanelPos(s32 x, s32 y, s32 z, s16 width, s16 height,
                            s32 flags, trmPanelPos_t *panel);
 extern s32 cmpUpdateListSelection(trmPanelPos_t *panel, u8 *list, s32 row,
                                   s32 mode, s32 width, s32 ot);
-extern void trmDrawListRow(trmPanelPos_t *panel, s32 ot);
+extern u32 frGetStrWidth2(void *request);
+extern void frSetDrawPosition(void *request, s32 x, s32 y);
+extern void func_001C7E38(void *frq, s32 mode, s32 arg);
+typedef struct {
+    void *res;
+    void *entries;
+} fclSpriteTbl_t;
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,
+                             s32 spriteId, s32 *texList, fclSpriteTbl_t *table, s32 ot);
+extern void fclDrawSpriteSize(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color,
+                              s32 id, s32 idx, s32 *texList, fclSpriteTbl_t *table, s32 ot);
+extern fclSpriteTbl_t D_003308F8[];
+
+void trmDrawListRow(trmPanelPos_t *panel, s32 ot)
+{
+    u32 width;
+    s32 center;
+    void *font;
+
+    font = trmGetListFont(0, 0, panel->z, 0xA09DC380,
+                          (s8)trmDrawWork->terminalNo, trmDrawWork->terminalType);
+    width = frGetStrWidth2(font);
+    center = ((0x1EC - width) << 4);
+    fclDrawSpriteRes(center - 0x450, 0xC8, panel->z << 4, NULL, 0, 1,
+                     &trmDrawWork->texHandle, D_003308F8, ot);
+    fclDrawSpriteSize(center + 0x450, 0xC8, panel->z << 4, width - 0x31, 0x21,
+                      NULL, 0, 2, &trmDrawWork->texHandle, D_003308F8, ot);
+    frSetDrawPosition(font, center, 0xF8);
+    func_001C7E38(font, 0, ot);
+    frDestroyFontRequestAfter(font);
+}
+
+INCLUDE_ASM(const s32, "facility/fclTerminalCalc", trmDrawList);
 
 void trmUpdateListSelection(void)
 {
