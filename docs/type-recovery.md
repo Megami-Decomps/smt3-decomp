@@ -581,12 +581,22 @@ the name is stale or the struct has a packing rule not modelled here.
 
 `config/smt3/drift_baseline.txt` has two halves, checked in opposite directions.
 
-`type` and `member` rows list the invented names that existed when the check landed,
-258 types and 618 members. A name **not** in the baseline fails, so the tree as it
-stands passes and only new drift breaks the build. The half only ever shrinks: fix
-one, then `--update`.
+`type` and `member` rows record existing unresolved names: currently zero
+invented types and 1,113 unnamed members. A name **not** in the baseline fails.
+Name recovery shrinks this inventory; later reconstructed layouts can add
+unresolved fields only after deliberate layout and provenance review. Never
+refresh the baseline merely to accept a recovered member losing its name.
 
-`enum` rows list the 481 HD enum members the tree has adopted. One of these going
+The baseline was reconciled after source expansion exposed 241 unrecorded
+members: 198 in the new IRX interface headers and 43 in game layouts. The game
+members trace to source splits and recovered types, imports and incomplete
+drafts, including `e45754d`, `dad3590`, `4fb76f6`, `b67ea10`, `0d4899f`,
+`51cf920`, `62e6057` and `1a70a02`. They were already unresolved in those
+layouts; recording them does not recover a name. The regression check still
+rejects any newly introduced placeholder absent from the reviewed inventory.
+Zero invented types is a valid state, not a reason for a baseline test to fail.
+
+`enum` rows list the 506 HD enum members the tree has adopted. One of these going
 **missing** fails, so a constant that has been named cannot quietly go back to a
 literal. Adoption counts either spelling: the reconstruction strips an enum's prefix
 off its members, and the tree re-adds it, so `NB_PHASE`'s `NON` is declared here as

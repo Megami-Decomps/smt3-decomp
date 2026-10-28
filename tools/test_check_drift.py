@@ -144,9 +144,10 @@ class BaselineTests(unittest.TestCase):
         new = sorted(set(found) - baseline)
         self.assertEqual(new, [], f"new drift: {new[:10]}")
 
-    def test_the_baseline_holds_both_kinds(self) -> None:
+    def test_the_baseline_holds_members_and_only_supported_record_kinds(self) -> None:
         baseline = check_drift.load_baseline()
-        self.assertTrue(any(k.startswith("type ") for k in baseline))
+        # Recovering the last invented type is success, so no type row is required.
+        self.assertTrue(all(k.startswith(("type ", "member ", "enum ")) for k in baseline))
         self.assertTrue(any(k.startswith("member ") for k in baseline))
 
     def test_an_external_name_is_never_reported(self) -> None:
