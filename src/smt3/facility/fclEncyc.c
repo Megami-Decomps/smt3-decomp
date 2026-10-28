@@ -73,8 +73,16 @@ typedef struct
     /* 0x006D */ u8 unk_6D;
     /* 0x006E */ u16 modelId;
     /* 0x0070 */ s32 unk_70;
-    /* 0x0074 */ u8 unk_74[0x10];
-    /* 0x0084 */ u8 unk_84[0x2DC];
+    /* 0x0074 */ union {
+        struct {
+            u8 validUnit[0x10];
+            u8 reserved0084[0x2DC];
+        } regist;
+        struct {
+            u8 reserved0074[0x0C];
+            s16 sorted[2][0xB8];
+        } read;
+    } entries;
     /* 0x0360 */ void *explainData;
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
@@ -743,7 +751,8 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadTop);
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadTop);
 
 typedef struct fclEncycReadTopWork_t {
-    u8 reserved0000[0x1198];
+    lstListWindow_t list;
+    u8 reserved0184[0x1014];
     fclPanel_t listPanel;
     fclRibbon_t *ribbon;
     frFontHandle_t *requests[3];
@@ -1190,7 +1199,7 @@ s32 RegistAll(fclEncyc_instance_tag *pinst)
 
     if (count > 0) {
         s32 remaining;
-        index = pinst->unk_74;
+        index = pinst->entries.regist.validUnit;
         remaining = count;
         do {
             if (fclEncycRegist(&encycSaveWork->party[*index++].unit, 1) == 1) {
@@ -1262,7 +1271,38 @@ void ResetReadMainRibbon(fclEncyc_readmainwork_tag *pwork)
     pwork->ribbon_accel = 0x100;
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", AcceptKeyChangeSort);
+extern void ApplyChangeListIndex(void *work, s16 *indices, s32 recordIndex);
+extern void CreateFontListRead(void *work, s32 sort, s16 *indices);
+extern void cmpClearCursorSlots(void *cursor);
+
+s32 AcceptKeyChangeSort(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadTopWork_t *work = (fclEncycReadTopWork_t *)pinst->pwork;
+    u32 button = cmpGetPressedButton(0x30000);
+    s32 changed = 0;
+
+    if (button == 0x10000 || button == 0x20000) {
+        s32 position;
+        pinst->unk_6C ^= 1;
+        position = work->list.cursorPos.Index + work->list.cursorPos.Shift;
+        if (pinst->unk_6C == 0) {
+            ApplyChangeListIndex(work, pinst->entries.read.sorted[0],
+                                 pinst->entries.read.sorted[1][position]);
+        } else {
+            ApplyChangeListIndex(work, pinst->entries.read.sorted[1],
+                                 pinst->entries.read.sorted[0][position]);
+        }
+        changed = 1;
+        fclRbnSwitchActive(work->ribbon, (s8)pinst->unk_6C);
+    }
+    if (changed) {
+        cmpPlayCursorSE(button);
+        CreateFontListRead(work, (s8)pinst->unk_6C, (s8)pinst->unk_6C != 0
+                           ? pinst->entries.read.sorted[1] : pinst->entries.read.sorted[0]);
+        cmpClearCursorSlots((u8 *)work + 0x15C);
+    }
+    return changed;
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyChangeListIndex);
 
