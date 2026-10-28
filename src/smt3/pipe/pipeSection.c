@@ -786,7 +786,56 @@ void ActionDeath(tagPipeObject *object)
     objMdlAlphaSet(object, (u8)object->count);
 }
 
+/* NON_MATCHING: 6 of 80 words differ; see docs/nonmatching/pipe/pipeSection.md. */
+#ifdef NON_MATCHING
+extern void objMdlSclSet(tagPipeObject *object, f32 scale);
+
+void ActionZMotion(tagPipeObject *object)
+{
+    tagPipeObject *data;
+    s16 count;
+    s16 limitedCount;
+    s32 complement;
+    f32 countWeight;
+    f32 complementWeight;
+
+    data = objMyData();
+    count = object->count;
+    limitedCount = count;
+    if (limitedCount >= 0x65) {
+        limitedCount = 0x64;
+    }
+    if (limitedCount >= 0) {
+        complement = 100 - limitedCount;
+        complementWeight = (f32)complement;
+        countWeight = (f32)limitedCount;
+        object->offset = data->offset;
+        object->pos[0] = (object->pos[0] * countWeight +
+                          data->pos[0] * complementWeight) / 100.0f;
+        object->pos[1] = (object->pos[1] * countWeight +
+                          data->pos[1] * complementWeight) / 100.0f;
+        if (count > 0) {
+            object->count = (s16)((f32)count - 8.33333301544189453125f);
+        }
+        if (object->count < 0) {
+            object->count = 0;
+        }
+    }
+    countWeight = (f32)limitedCount;
+    if (countWeight <= 66.66666412353515625f && 50.000003814697265625f <= countWeight) {
+        objMdlSclSet(object,
+                     ((countWeight - 50.000003814697265625f) / 16.666660308837890625f) *
+                         0.800000011920928955078125f + 0.199999988079071044921875f);
+        /* Like ObjectDraw, retain jal plus epilogue. Qualified cc1probe:
+         * reset187 survives sibling selection, then disappears in life13;
+         * the no-reset control tail-calls. Output parity passes. See
+         * docs/CONTRIBUTING.md for this narrow local-reset exception. */
+        limitedCount = 0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionZMotion);
+#endif
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionKey);
 
