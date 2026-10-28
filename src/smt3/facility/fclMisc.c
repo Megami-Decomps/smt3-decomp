@@ -9,6 +9,8 @@ void fclFreeStage(void);
 
 extern s32 dds3GetProcessStat(void *id);
 
+extern u32 dds3GetRandA(void *name);
+
 extern s32 fclSetWorkValue(s8 index, s32 value);
 
 s32 fclGetFlag(s8 index);
@@ -293,7 +295,24 @@ s32 func_00213CD8(u8 *list, s32 count, u8 value)
     return kept;
 }
 
-INCLUDE_ASM(const s32, "facility/fclMisc", shuffleIndices);
+void shuffleIndices(s8 *order, s32 count, s32 rounds)
+{
+    s32 n;
+
+    if (rounds <= 0) {
+        return;
+    }
+    n = rounds;
+    while (n != 0) {
+        s32 first = (u32)dds3GetRandA(0) % (u32)count;
+        s32 second = (u32)dds3GetRandA(0) % (u32)count;
+        u8 value = order[first];
+
+        order[first] = order[second];
+        order[second] = value;
+        n--;
+    }
+}
 
 extern char *text2[];
 
