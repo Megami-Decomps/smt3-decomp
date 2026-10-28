@@ -10,7 +10,7 @@ extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 void fclFreeStage(void);
 
-extern s32 dds3GetRandA(s32 name);
+extern u32 dds3GetRandA(void *state);
 
 extern s32 evtStartEvent(s32 no);
 

@@ -16,7 +16,7 @@ typedef struct
 
 extern datDevilInfo_t datDevilTable[];
 
-extern s32 dds3GetRandA(s32 name);
+extern u32 dds3GetRandA(void *state);
 
 extern s32 evtBitCheck(s32 no);
 
