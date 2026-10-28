@@ -5063,7 +5063,37 @@ s32 cmpPrepareStatusModel(s32 group, s32 id, s32 blocking)
     D_0054FEE0 = mdlPrepare(group, id, blocking);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCreateBadEffect);
+typedef struct
+{
+    sdfVector4_t pos;
+    sdfVector4_t rot;
+    sdfVector4_t center;
+    f32 r;
+    f32 h;
+    f32 scl;
+    void *hModel;
+} cmpBadEffectParams_t;
+
+extern datUnitVisual_t datModelParamTable[];
+
+void cmpCreateBadEffect(u16 id, void *model, u8 *buffer)
+{
+    sdfVector4_t pos __attribute__((aligned(16)));
+    sdfVector4_t rot __attribute__((aligned(16)));
+    sdfVector4_t center __attribute__((aligned(16)));
+    cmpBadEffectParams_t *params = (cmpBadEffectParams_t *)buffer;
+
+    memset(&pos, 0, sizeof(pos));
+    memset(&rot, 0, sizeof(rot));
+    memset(&center, 0, sizeof(center));
+    SDF_VU0_COPYVECTOR(&params->pos, &pos);
+    SDF_VU0_COPYVECTOR(&params->rot, &rot);
+    SDF_VU0_COPYVECTOR(&params->center, &center);
+    params->hModel = model;
+    params->r = datModelParamTable[id].formsize;
+    params->h = datModelParamTable[id].formheight;
+    params->scl = 1.0f;
+}
 
 extern void *hCAMPBadEffect;
 
@@ -5098,7 +5128,7 @@ s32 cmpBadEffSetup(u16 id, u32 flag)
     default:
         return 0;
     }
-    cmpCreateBadEffect(id, cmpEncycWork, D_00349300);
+    cmpCreateBadEffect(id, (void *)cmpEncycWork, D_00349300);
     hCAMPBadEffect = effCAMPBadCreate(D_00349300, kind);
     printf(D_00540040);
     return 1;
