@@ -2759,9 +2759,24 @@ s32 campDhFindEntry(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpReturnParamDH);
+/* The Hearts panel keeps the pre-selection equipment byte and a complete
+ * player unit snapshot, restored after the confirmation message. */
+typedef struct
+{
+    u8 unk_00[0x32];
+    s8 equipHearts;
+    u8 unk_33;
+    datUnitWork_t unit;
+} campDhSavedUnit_t;
 
 extern void datEquipHearts(s32 HeartsID);
+
+void cmpReturnParamDH(void)
+{
+    datEquipHearts(((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts);
+    cmbGlobalWork->party[0].unit = ((campDhSavedUnit_t *)campDhUpdateWork)->unit;
+}
+
 
 void campDhEquipHearts(void)
 {
