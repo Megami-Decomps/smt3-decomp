@@ -481,7 +481,248 @@ dds3Basic_t *fldGetModelRange_From_MatterName(const char *matterName) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldMakeResouceBasicFL1);
+typedef struct fldSpawnBatchFL1_t {
+    u32 kind;
+    u32 count;
+    fldFileResource_t *entries;
+} fldSpawnBatchFL1_t;
+
+typedef struct fldBillConfigView_t {
+    u32 flags;
+    u32 kind;
+    u32 resourceIndex;
+    f32 width;
+} fldBillConfigView_t;
+
+typedef struct fldLightDataView_t {
+    u8 pad00[0x64];
+    u32 flags;
+} fldLightDataView_t;
+
+typedef struct fldCollisionDescriptor_t fldCollisionDescriptor_t;
+
+typedef struct fldSpawnCollisionView_t {
+    u32 kind;
+    u32 word04;
+    fldCollisionDescriptor_t *header;
+} fldSpawnCollisionView_t;
+
+enum {
+    FLD_SPAWN_BATCH_KIND_SCRIPT_RESOURCE = 2,
+    FLD_SPAWN_BATCH_KIND_COLLISION = 3,
+    FLD_SPAWN_BATCH_KIND_PATH = 9,
+    FLD_SPAWN_BATCH_KIND_BILLBOARD_EFFECT = 11,
+    FLD_SPAWN_BATCH_KIND_LIGHT = 12
+};
+
+typedef struct fldResourceEffect_t fldResourceEffect_t;
+typedef struct fldResourceLight_t {
+    u32 resv, Flag, AnimeType;
+    f32 InsideR, OutsideR, Soften, Bias;
+    f32 DiffuseR, DiffuseG, DiffuseB;
+    f32 AmbientR, AmbientG, AmbientB;
+} fldResourceLight_t;
+
+extern dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *, void *, s32);
+extern dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *, void *, s32);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *, void *, s32);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *, void *, s32);
+extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *, void *, void *);
+extern dds3Basic_t *dds3AddESPEffectObjectBasic(const char *, void *, void *, f32);
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, s32);
+extern void dds3EffectObjectBasicStatOff(dds3Basic_t *, s32);
+extern void dds3EffectObjectBasicSetFldEx(dds3Basic_t *, fldResourceEffect_t *);
+extern dds3Basic_t *dds3AddLightObjectBasic(s32);
+extern void dds3SetPosPoseSet(dds3Basic_t *, const sdfVector4_t *);
+extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
+extern void dds3SetLightObjectResoruce(dds3Basic_t *, fldResourceLight_t *);
+extern dds3Basic_t *dds3AddPathBasic(s32, void *, const char *);
+extern void fldMakePlane(fldCollisionDescriptor_t *, f32 *, u32, s32, s32);
+extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, f32 *, const char *);
+extern void dds3SetPathBasicSpline(dds3Basic_t *, u32);
+
+void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
+    fldSpawnBatchFL1_t *batch;
+    f32 position[4];
+    f32 rotation[4];
+    char path[64];
+    char directory[32];
+    s8 loaded[4];
+    void *cached[4];
+    u32 cacheCount = sizeof(loaded);
+    u32 batchIndex;
+    u32 resourceCount;
+    u32 resourceIndex;
+    fldFileResource_t *resource;
+    dds3Basic_t *spawnedObject;
+    u32 pathIndex;
+
+    batch = (fldSpawnBatchFL1_t *)typeTable;
+    memset(loaded, 0, cacheCount);
+    memset(cached, 0, cacheCount * sizeof(*cached));
+    D_00551C8C = NULL;
+    D_00551C90 = 0;
+    for (batchIndex = 0; batchIndex < batchCount; batchIndex++, batch++) {
+        resource = batch->entries;
+        resourceCount = batch->count;
+        switch (batch->kind) {
+        case 0:
+        case 1:
+            break;
+        case FLD_SPAWN_BATCH_KIND_SCRIPT_RESOURCE:
+            D_00551C8C = resource;
+            D_00551C90 = resourceCount;
+            break;
+        case FLD_SPAWN_BATCH_KIND_BILLBOARD_EFFECT:
+            for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
+                fldBillConfigView_t *config;
+                /* The resolver stores these borrowed string addresses as 32-bit words. */
+                const char * const *resourcePathSuffixes;
+                u32 cacheByteOffset;
+                if (resource->transform != NULL) {
+                    position[0] = resource->transform[0];
+                    position[1] = resource->transform[1];
+                    position[2] = resource->transform[2];
+                    position[3] = 0.0f;
+                    rotation[0] = resource->transform[4];
+                    rotation[1] = resource->transform[5];
+                    rotation[2] = resource->transform[6];
+                    rotation[3] = resource->transform[7];
+                } else {
+                    position[0] = 0.0f;
+                    position[1] = 0.0f;
+                    position[2] = 0.0f;
+                    position[3] = 0.0f;
+                    rotation[0] = 0.0f;
+                    rotation[1] = 0.0f;
+                    rotation[2] = 0.0f;
+                    rotation[3] = 0.0f;
+                }
+                config = resource->data;
+                switch (config->kind) {
+                case 0:
+                case 3:
+                    resourcePathSuffixes = (const char * const *)fldResolverFL1Data;
+                    cacheByteOffset = config->resourceIndex * sizeof(*cached);
+                    if (loaded[config->resourceIndex] == 0) {
+                        fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor);
+                        sprintf(path, D_0054EBC0, directory,
+                                     resourcePathSuffixes[((fldBillConfigView_t *)resource->data)->resourceIndex]);
+                        spawnedObject = dds3AddTMXEffectObjectBasic(path, position, (s32)rotation);
+                        dds3EffectObjectBasicStatOn(spawnedObject, 1);
+                        dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
+                        loaded[((fldBillConfigView_t *)resource->data)->resourceIndex] = 1;
+                        cached[((fldBillConfigView_t *)resource->data)->resourceIndex] = spawnedObject;
+                    } else {
+                        spawnedObject = dds3AddTMXEffectObjectBasic3(*(void **)((u8 *)&cached + cacheByteOffset), position, (s32)rotation);
+                        dds3EffectObjectBasicStatOn(spawnedObject, 1);
+                        dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
+                    }
+                    break;
+                case 1:
+                    resourcePathSuffixes = (const char * const *)fldResolverFL1Data;
+                    cacheByteOffset = config->resourceIndex * sizeof(*cached);
+                    if (loaded[config->resourceIndex] == 0) {
+                        fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor);
+                        sprintf(path, D_0054EBC0, directory,
+                                     resourcePathSuffixes[((fldBillConfigView_t *)resource->data)->resourceIndex]);
+                        spawnedObject = dds3AddP2AEffectObjectBasic(path, position, (s32)rotation);
+                        dds3EffectObjectBasicStatOn(spawnedObject, 1);
+                        loaded[((fldBillConfigView_t *)resource->data)->resourceIndex] = 1;
+                        cached[((fldBillConfigView_t *)resource->data)->resourceIndex] = spawnedObject;
+                        dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
+                    } else {
+                        spawnedObject = dds3AddP2AEffectObjectBasic3(*(void **)((u8 *)&cached + cacheByteOffset), position, (s32)rotation);
+                        dds3EffectObjectBasicStatOn(spawnedObject, 1);
+                        dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
+                    }
+                    break;
+                case 2:
+                    if (D_0055DAA8[config->resourceIndex] != NULL) {
+                        spawnedObject = dds3AddD3PEffectObjectBasic2(D_0055DAA8[config->resourceIndex], position, rotation);
+                        dds3EffectObjectBasicStatOn(spawnedObject, 1);
+                        dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
+                    }
+                    break;
+                case 100:
+                    spawnedObject = dds3AddESPEffectObjectBasic(resource->name, position, rotation, config->width * 0.5f);
+                    dds3EffectObjectBasicStatOff(spawnedObject, 1);
+                    break;
+                }
+            }
+            break;
+        case FLD_SPAWN_BATCH_KIND_LIGHT:
+            for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
+                if (resource->transform != NULL) {
+                    position[0] = resource->transform[0];
+                    position[1] = resource->transform[1];
+                    position[2] = resource->transform[2];
+                    position[3] = 0.0f;
+                    rotation[0] = resource->transform[4];
+                    rotation[1] = resource->transform[5];
+                    rotation[2] = resource->transform[6];
+                    rotation[3] = resource->transform[7];
+                } else {
+                    position[0] = 0.0f;
+                    position[1] = 0.0f;
+                    position[2] = 0.0f;
+                    position[3] = 0.0f;
+                    rotation[0] = 0.0f;
+                    rotation[1] = 0.0f;
+                    rotation[2] = 0.0f;
+                    rotation[3] = 0.0f;
+                }
+                spawnedObject = dds3AddLightObjectBasic(resource->id);
+                dds3SetUnitObjectId(spawnedObject, (u32)resource->name);
+                dds3SetPosPoseSet(spawnedObject, (const sdfVector4_t *)position);
+                /* The light resource also supplies the pose's outer radius. */
+                dds3GetRadiusPoseSet(spawnedObject, ((fldResourceLight_t *)resource->data)->OutsideR);
+                dds3SetLightObjectResoruce(spawnedObject, resource->data);
+                if ((u32)fldGlobalBase.area - 200U < 300U) {
+                    ((fldLightDataView_t *)spawnedObject->workdata)->flags |= 8;
+                    dds3SetUnitObjectId(spawnedObject, (u32)"BTL_DEF_LIGHT");
+                }
+            }
+            break;
+        case FLD_SPAWN_BATCH_KIND_PATH:
+            for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
+                dds3AddPathBasic(resource->id, resource->data, resource->name);
+            }
+            break;
+        case FLD_SPAWN_BATCH_KIND_COLLISION:
+            for (resourceIndex = 0, pathIndex = 1; resourceIndex < resourceCount; resourceIndex++, resource++, pathIndex++) {
+                resource->id |= 0x20000;
+                if (resource->transform != NULL) {
+                    position[0] = resource->transform[0];
+                    position[1] = resource->transform[1];
+                    position[2] = resource->transform[2];
+                    position[3] = 0.0f;
+                    rotation[0] = resource->transform[4];
+                    rotation[1] = resource->transform[5];
+                    rotation[2] = resource->transform[6];
+                    rotation[3] = resource->transform[7];
+                } else {
+                    position[0] = 0.0f;
+                    position[1] = 0.0f;
+                    position[2] = 0.0f;
+                    position[3] = 0.0f;
+                    rotation[0] = 0.0f;
+                    rotation[1] = 0.0f;
+                    rotation[2] = 0.0f;
+                    rotation[3] = 0.0f;
+                }
+                if (((fldSpawnCollisionView_t *)resource->data)->kind == 0) {
+                    s32 room = fldCommand_GetHojiID(resource->name);
+                    fldMakePlane(((fldSpawnCollisionView_t *)resource->data)->header, position,
+                                  resource->id, room, -1);
+                    spawnedObject = dds3AddModelRangeBasicNew(resource->id, resource->data, position, resource->name);
+                    dds3SetPathBasicSpline(spawnedObject, pathIndex);
+                }
+            }
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldMakeResouceBasicFL2);
 
