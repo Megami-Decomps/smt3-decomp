@@ -368,7 +368,60 @@ void updateMotion(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", hitCheck);
+extern s32 pbFindProcHandle(s16 px, s16 py);
+extern s8 goalHitCheck(s16 x, s16 y);
+extern u32 pushCheck(s32 direction, u32 grpID, pbGroupData_t **pGroup);
+s32 roundCheck(s32 direction, u32 grpID, pbGroupData_t **pGroup);
+
+s32 hitCheck(s32 direction, pbGroupData_t **pGroup)
+{
+    s16 x, y;
+    s16 targetX, targetY;
+    u16 block;
+    u32 kind;
+    s32 status = 1;
+
+    *pGroup = NULL;
+    pbGetMyCharcterPos2(mychar[current_char], &x, &y);
+    targetX = (s16)(x + pbKeyTable[direction][0]);
+    targetY = (s16)(y + pbKeyTable[direction][1]);
+    if (goalHitCheck(x, y) != 0) {
+        return 6;
+    }
+    if ((u16)targetX >= 20 || targetY < 0 || targetY >= 20) {
+        return 1;
+    }
+    if (pbFindProcHandle(targetX, targetY) == 1) {
+        return 1;
+    }
+    block = D_0054F5C4->area.map.blk[targetY][targetX];
+    if ((block & 0x800) != 0) {
+        return 1;
+    }
+
+    kind = block >> 13;
+    switch (kind) {
+    case 0:
+        status = 0;
+        break;
+    case 1:
+        status = 1;
+        break;
+    case 2:
+    case 3:
+        status = pushCheck(direction, D_0054F5C4->area.map.blk[targetY][targetX] & 0x7FF, pGroup);
+        break;
+    case 4:
+        status = 2;
+        break;
+    case 5:
+        status = roundCheck(direction, D_0054F5C4->area.map.blk[targetY][targetX] & 0x7FF, pGroup);
+        break;
+    default:
+        break;
+    }
+    return status;
+}
 
 extern void *pbSearchGroupDB(pbProcHandle_t *p, u32 grpID);
 extern s32 pbFindProcHandle(s16 px, s16 py);
