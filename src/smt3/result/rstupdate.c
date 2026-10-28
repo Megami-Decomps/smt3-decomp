@@ -102,7 +102,9 @@ typedef struct
     /* 0x12A8 */ cmpCursorInfo_t cursorInfo;
     /* 0x12E0 */ u8 unk_12E0[0x1004];
     /* 0x22E4 */ u8 unk_22E4;
-    /* 0x22E5 */ u8 unk_22E5[0x23];
+    /* 0x22E5 */ u8 unk_22E5[0x0F];
+    /* 0x22F4 */ s32 panelEffectIndex;
+    /* 0x22F8 */ u8 reserved22F8[0x10];
     /* 0x2308 */ s32 unk_2308;
     /* 0x230C */ s32 unk_230C;
     /* 0x2310 */ u32 unk_2310;
@@ -613,7 +615,8 @@ INCLUDE_ASM(const s32, "result/rstupdate", rstStandbyHeartsEvent);
 
 extern void datOverwriteBadStat(datUnitWork_t *work, u32 badstatus);
 
-s32 rstSetHeartsEvent(void)
+/* The caller supplies the event; the current event remains in shared state. */
+s32 rstSetHeartsEvent(s8 event)
 {
     s32 result = -1;
 
@@ -646,7 +649,50 @@ s32 rstSetHeartsEvent(void)
     return result;
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqHeartsEvent);
+extern s32 rstStandbyHeartsEvent(s8 event);
+extern s8 rstGetPanelEffState(s32 index);
+
+void rstUpdateSeqHeartsEvent(void)
+{
+    if (startPos->Flag > 0) {
+        switch (startPos->Flag) {
+        case 1:
+            if (rstStandbyHeartsEvent(startPos->heartsEvent) == 0)
+                return;
+            break;
+        case 2:
+            fclStartMessage(29);
+            startPos->unk_0005[0] = 1;
+            break;
+        case 3:
+            if (fclChkMessage() != 0)
+                return;
+            if (rstGetPanelEffState(startPos->panelEffectIndex) != 0)
+                return;
+            rstSetHeartsEvent(startPos->heartsEvent);
+            startPos->unk_0004 = 1;
+            return;
+        default:
+            break;
+        }
+        startPos->Flag = 3;
+    }
+    if (fclChkSelMessage() != 0)
+        return;
+    switch (fclGetSelMessagePos()) {
+    case 0:
+        fclEndMessage();
+        startPos->Flag = 1;
+        break;
+    case 2:
+        break;
+    case 1:
+        fclEndMessage();
+        startPos->Flag = 2;
+        startPos->heartsEvent = -1;
+        break;
+    }
+}
 
 extern char *pstr[];
 extern s32 datGetPlayerLNDLevel(datUnitWork_t *unit);
