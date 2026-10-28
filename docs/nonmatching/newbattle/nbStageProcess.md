@@ -2,22 +2,6 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
-## nbAddOrder (newbattle/nbStageProcess, 0x9C)
-
-17 of 37 words match, 148 bytes against the native 156.
-
-Retail keeps the start index and the loop counter in two registers with a
-copy between them: `$4` holds `orderindex + 1` and is used only to form the
-`&data->order[start]` address, and `$5` is the counter, set from `$4` by a
-`daddu`. The draft coalesces both into `$4`, so the loop body is one
-instruction shorter and `ee-as` then pads it with one nop fewer, which is
-where the 8-byte size difference comes from.
-
-Ruled out: an explicit `s8 *p` walking the array alongside the counter; a
-separate `start` local with `data->order[start + (i - start)]`; a `while (i <
-12)` head test; a `u32` counter; and the plain `for (i = ...; i < 12; i++)`
-form, which gcc rotates and which costs a duplicated test.
-
 ## nbSetNextOrder (newbattle/nbStageProcess, 0xAC)
 
 10 of 44 words match, 176 bytes against the native 172.

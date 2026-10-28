@@ -273,7 +273,32 @@ s32 nbGetUnitID(datUnitWork_t *work);
 
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/nbMisc", nbAddOrder);
+void nbAddOrder(s32 findex)
+{
+    nbMainProcessData_t *data;
+    s32 start;
+    s32 i;
+    s32 partyIndex;
+    u32 stat;
+
+    data = nbGetMainProcessData();
+    stat = data->form[findex].stat;
+    if ((stat & 1) == 0) {
+        return;
+    }
+    if ((stat & 0x40) == 0) {
+        return;
+    }
+    start = data->orderindex + 1;
+    partyIndex = data->form[findex].partyindex;
+    for (i = start; i < 12; i++) {
+        if (data->order[i] < 0) {
+            data->order[i] = partyIndex;
+            nbSortOrder(start);
+            break;
+        }
+    }
+}
 
 void nbSortOrder(s32 start)
 {
