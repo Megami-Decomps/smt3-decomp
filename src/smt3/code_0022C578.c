@@ -2929,7 +2929,55 @@ void fclDrawArrowCursorBox(s32 x, s32 y, s32 z, s32 w, s32 h, u32 color,
         (u16)id, (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", fclGetArrowCursorEntry);
+typedef struct
+{
+    /* 0x00 */ s8 unk_00;
+    /* 0x01 */ s8 unk_01;
+    /* 0x02 */ u8 unk_02[2];
+    /* 0x04 */ u32 color;
+    /* 0x08 */ s8 mode;
+    /* 0x09 */ s8 direction;
+    /* 0x0A */ u8 unk_0A[2];
+    /* 0x0C */ s32 directionTimer;
+    /* 0x10 */ s32 unk_10;
+    /* 0x14 */ s32 unk_14;
+    /* 0x18 */ f32 unk_18;
+    /* 0x1C */ f32 unk_1C;
+    /* 0x20 */ f32 unk_20;
+    /* 0x24 */ s32 unk_24;
+    /* 0x28 */ s32 unk_28;
+    /* 0x2C */ s32 unk_2C;
+    /* 0x30 */ s32 unk_30;
+} campDhEntry_t;
+
+void fclGetArrowCursorEntry(s32 x, s32 y, s32 z, s8 index)
+{
+    campDhEntry_t *entry;
+    s32 inset;
+
+    entry = (campDhEntry_t *)((u8 *)campDhDrawWork + 0x1278) + index;
+    inset = 0;
+    if (entry->unk_01 < 0) {
+        return;
+    }
+    if (entry->mode < 3) {
+        if (entry->mode > 0) {
+            inset = (s32)((entry->unk_18 - entry->unk_1C) / 10.0f);
+            inset *= 8;
+        }
+    }
+    fclDrawArrowCursorBox(x - inset, y - (inset >> 1), 0,
+        (inset >> 3) + 27, (inset >> 3) + 28, entry->color, entry->unk_01,
+        0, 256, entry->unk_18);
+    x -= 64;
+    y -= 32;
+    if (entry->mode == 2) {
+        f32 angle = entry->unk_18;
+        fclDrawArrowCursorBox(x - inset, y - (inset >> 1), 0,
+            (inset >> 3) + 35, (inset >> 3) + 36, entry->color, entry->unk_01,
+            1, entry->unk_2C, angle);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawBackground);
 
@@ -3427,26 +3475,6 @@ void campDhUpdateIcons(void)
         }
     }
 }
-
-typedef struct
-{
-    /* 0x00 */ s8 unk_00;
-    /* 0x01 */ s8 unk_01;
-    /* 0x02 */ u8 unk_02[6];
-    /* 0x08 */ s8 mode;
-    /* 0x09 */ s8 direction;
-    /* 0x0A */ u8 unk_0A[2];
-    /* 0x0C */ s32 directionTimer;
-    /* 0x10 */ s32 unk_10;
-    /* 0x14 */ s32 unk_14;
-    /* 0x18 */ f32 unk_18;
-    /* 0x1C */ f32 unk_1C;
-    /* 0x20 */ f32 unk_20;
-    /* 0x24 */ s32 unk_24;
-    /* 0x28 */ s32 unk_28;
-    /* 0x2C */ s32 unk_2C;
-    /* 0x30 */ s32 unk_30;
-} campDhEntry_t;
 
 extern u32 dds3GetRandA(void *state);
 
