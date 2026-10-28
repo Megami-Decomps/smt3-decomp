@@ -313,3 +313,5 @@ void pipeLoadEffect(s32 effectID, PIPE_EFF_t *effects, u8 maxSize, f32 x, f32 y)
 
 INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffDraw2Doffset);
 
+INCLUDE_SDATA(const s32, "pipe/pipeEffect", pipeBulrLimitValue);
+

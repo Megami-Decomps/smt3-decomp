@@ -853,3 +853,53 @@ s32 texRelease(tagPipeTexture *texPtr)
     return 1;
 }
 
+INCLUDE_SDATA(const s32, "pipe/pipeObject", hWorkArea);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", WorkAreaPtr);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", PartsWork);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeCur);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeCur2);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeLine);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", ObjWork);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", basicMy);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", MyLine);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeEMS);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeEML);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeRBOX);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeMaka1);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeZMaka);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeDMaka);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeDRBOX);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", MakaTex);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", makaWork);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_CELL01_D3P);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_BREAK01_D3P);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_BREAK02_D3P);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_DAMAGE01_D3P);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_DAMAGE03_D3P);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_ATTACK01_D3P);
+
+INCLUDE_SDATA(const s32, "pipe/pipeObject", D_005517DC);
+

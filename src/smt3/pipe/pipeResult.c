@@ -188,3 +188,19 @@ s32 pipeGetRandomMessage(void)
 {
     return D_00529240[pipeMessMax - 1][dds3GetRandA(NULL) % 10];
 }
+INCLUDE_SDATA(const s32, "pipe/pipeResult", ResultIndex);
+
+INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551801);
+
+INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551808);
+
+INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessData);
+
+INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551810);
+
+INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessCount);
+
+INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551815);
+
+INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551818);
+

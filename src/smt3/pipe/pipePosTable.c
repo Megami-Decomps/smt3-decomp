@@ -68,3 +68,7 @@ void func_002A2F48(void) {
 
 void func_002A2F50(void) {
 }
+INCLUDE_SDATA(const s32, "pipe/pipePosTable", D_005517E0);
+
+INCLUDE_SDATA(const s32, "pipe/pipePosTable", D_005517E8);
+

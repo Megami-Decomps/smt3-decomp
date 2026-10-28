@@ -272,7 +272,59 @@ void pipeDataRelease(void)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", pipeLoadSection);
+typedef struct tagPipeMidiList {
+    s32 entries[2];
+} tagPipeMidiList;
+extern u32 pipeLoadState;
+extern s32 pipeFileLoad(char *filename, tagPipePosTable_t *pos, tagPipeTable_t *objects, tagPipeLinkInfo *links);
+extern s32 sprintf(char *buffer, const char *format, ...);
+extern s32 p2sdLoadCheckMidi(s32 midi);
+extern void p2sdLoadSMGFile(s32 midi);
+const char D_00548948[24] = "/pipe/PIPE_%02d.DAT";
+const char D_00548960[40] = "PosTableData Loading [%s]....OK\n";
+const char D_00548988[40] = "ObjectData Loading [%s]....OK\n";
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeLoadState);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551724);
+
+s32 pipeLoadSection(s32 index)
+{
+    tagPipeMidiList midiList = {{0x670000, 0x9530000}};
+    s32 *midi = midiList.entries;
+    char filename[32];
+
+    if (pipeLoadState == 0) {
+        pipeDataRelease();
+        sprintf(filename, D_00548948, index + 1);
+        if (pipeFileLoad(filename, &D_00528F58, &D_00528F68, &linkHeader00)) {
+            DEBUG_PRINT(D_00548960, filename);
+            DEBUG_PRINT(D_00548988, filename);
+            pipeLoadState = 1;
+        }
+    }
+    if (pipeLoadState == 1) {
+        if (p2sdLoadCheckMidi(*midi) != 0) {
+            pipeLoadState = 0xFF;
+        } else {
+            p2sdLoadSMGFile(*midi);
+            pipeLoadState = 2;
+        }
+    } else if (pipeLoadState == 2) {
+        if (p2sdLoadCheckMidi(*midi) == 1) {
+            if (*midi == 0x9530000) {
+                pipeLoadState = 0xFF;
+            } else {
+                pipeLoadState = 1;
+            }
+        }
+    }
+    if (pipeLoadState == 0xFF) {
+        pipeLoadState = 0;
+        return 1;
+    }
+    return 0;
+}
 
 extern s32 pipeIndex;
 extern void pipeOffset(void);
@@ -776,3 +828,53 @@ void PlayerStatusSetUp(void)
         }
     }
 }
+INCLUDE_SDATA(const s32, "pipe/pipeSection", pbHitCheckCur);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", offsetCount);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551738);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", D_0055173C);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551740);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551744);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551748);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeIndex);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", attackCount);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551751);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", myMaka);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", ZmakaCount);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", playerDAMAGE);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", rBoxNum);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", offsetStep);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", offsetStepCount);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", CameraAction);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", camMode);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551765);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", myStatus);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeObjList);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeObjTail);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551770);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeMyMakaCount);
+
+INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551778);
+
