@@ -56,6 +56,9 @@ extern f32 effBTLModelGroupGetSphere(u32 group);
 extern void effBTLModelGroupGetDirection(u32 group, f32 *pDirection);
 
 extern f32 sdfAtan(f32 aX);
+extern u32 effBTLModelGetInvokeGroupNumber(void);
+extern f32 nbCameraGetSummonNear(void);
+extern f32 nbCameraGetSummonFar(void);
 
 extern void SetRotateMatrixX(f32 aAngle);
 
@@ -236,7 +239,37 @@ void nbCameraShot_FriendParty_Set(nbCamera_t *pNbCamera)
     SDF_VU0_STOREVECTOR(&pNbCamera->direction);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_Summon_Set);
+void nbCameraShot_Summon_Set(nbCamera_t *pNbCamera)
+{
+    u32 party;
+    f32 radius;
+    f32 nearDistance;
+    f32 offset;
+
+    effBTLModelAllPopPosition();
+    effBTLModelAllPopRotate();
+    effBTLModelAllShow();
+    party = effBTLSkillGetInvokeParty();
+    radius = effBTLModelGroupGetSphere(party);
+    SDF_VU0_STOREVECTOR(pNbCamera);
+    pNbCamera->target.x = 0.0f;
+    if (radius < 250.0f) {
+        radius = 250.0f;
+    }
+    if (effBTLModelGetInvokeGroupNumber() < 4) {
+        nearDistance = nbCameraGetSummonNear();
+        offset = nearDistance + nbCameraGetSummonFar() * 0.5f;
+        pNbCamera->target.x += offset;
+        radius += offset;
+    }
+    pNbCamera->fovy = 0.69813163f;
+    pNbCamera->distance = radius / sdfAtan(0.49567342f);
+    effBTLModelGroupGetDirection(party, &pNbCamera->direction);
+    SetRotateMatrixX(-0.26179934f);
+    SDF_VU0_LOADVECTOR(&pNbCamera->direction);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+}
 
 void nbCameraCRSetPlayerFormRequest(void)
 {
