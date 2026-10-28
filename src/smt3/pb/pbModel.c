@@ -183,7 +183,8 @@ extern void mdlSetScale(mdlObj_t *model);
 extern const sdfVector4_t D_00535C58;
 extern char D_00535C68[];
 
-pbProcHandle_t *pbInitMyCharacterDraw(pbProcHandle_t *parent)
+/* The USA constructor ignores the color and motion arguments supplied by its caller. */
+pbProcHandle_t *pbInitMyCharacterDraw(pbProcHandle_t *parent, u32 color, u32 motion)
 {
     /* Only the bare-address VU0 load observes this scale vector. */
     volatile sdfVector4_t scale __attribute__((aligned(16))) = D_00535C58;
