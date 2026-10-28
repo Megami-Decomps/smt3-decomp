@@ -507,7 +507,39 @@ s32 fclChkSelMessage(void)
     return itfMesMngGetSelPhase(gMsgID) >= 0;
 }
 
-INCLUDE_ASM(const s32, "facility/fclMisc", fclUpdateMessage);
+extern s8 itfMesMngGetPhase(s32 msgid);
+extern s32 itfMesMngSetSelectDefKey(s32 id, s32 key, s32 index);
+extern void itfMesMngSetSelect(s32 id, s32 selno);
+extern void itfMesMngRequestSelect(s32 id, s32 select);
+
+void fclUpdateMessage(void)
+{
+    if (gMsgID < 0) {
+        return;
+    }
+    switch (gMsgFlag) {
+    case 0:
+        break;
+    case 1:
+        if (itfMesMngGetPhase(gMsgID) < 0) {
+            gMsgFlag = 2;
+        }
+        break;
+    case 2:
+        if (gSelMsgNo >= 0) {
+            itfMesMngSetSelectDefKey(gMsgID, 3, 1);
+            itfMesMngSetSelect(gMsgID, gSelMsgPos);
+            itfMesMngRequestSelect(gMsgID, gSelMsgNo);
+            gSelMsgNo = -1;
+        }
+        if (gMsgInvFlag == 0 && fclChkSelMessage() == 0) {
+            gMsgFlag = 3;
+        }
+        break;
+    case 3:
+        return (void)fclEndMessageEx(1);
+    }
+}
 
 void fclSetMessageVar_20743088(s8 Index, s32 pStr)
 {
