@@ -5,7 +5,9 @@
 #include "motion.h"
 
 
-extern f32 pipeCamShakeVec[], pipeCamShake[], pipeCameraPos[];
+/* The eye snapshot is read by aligned LD pairs at the native global base. */
+extern f32 pipeCamShakeVec[] __attribute__((aligned(8)));
+extern f32 pipeCamShake[], pipeCameraPos[];
 
 extern dds3Basic_t *pipe_Camera;
 
@@ -33,7 +35,45 @@ extern void dds3SetPosPoseSet(void *pBasic, f32 *pos);
 
 extern void CalcCamera(void);
 
-INCLUDE_ASM(const s32, "pipe/pipeCamera", getViewPortMatrix);
+extern void *memset(void *, s32, u32);
+extern void *memcpy(void *, const void *, u32);
+extern f32 vecNormalize(f32 *);
+extern void vecTranslate(f32 *, f32 *, f32 *);
+extern f32 vecDot(f32 *, f32 *);
+
+void getViewPortMatrix(sdfMatrix4_t *matrix)
+{
+    sdfVector4_t right;
+    sdfVector4_t up;
+    sdfVector4_t direction;
+    sdfVector4_t eye;
+
+    memcpy(&eye, pipeCamShakeVec, sizeof(eye));
+    direction.x = pipeCamShakeVec[0] - pipeCamShake[0];
+    direction.y = pipeCamShakeVec[1] - pipeCamShake[1];
+    direction.z = pipeCamShakeVec[2] - pipeCamShake[2];
+    vecNormalize(&direction.x);
+
+    vecTranslate(&right.x, pipeCameraPos, &direction.x);
+    vecNormalize(&right.x);
+    vecTranslate(&up.x, &direction.x, &right.x);
+    vecNormalize(&up.x);
+
+    memset(matrix, 0, sizeof(*matrix));
+    matrix->m[0] = right.x;
+    matrix->m[4] = right.y;
+    matrix->m[8] = right.z;
+    matrix->m[1] = up.x;
+    matrix->m[5] = up.y;
+    matrix->m[9] = up.z;
+    matrix->m[2] = direction.x;
+    matrix->m[6] = direction.y;
+    matrix->m[10] = direction.z;
+    matrix->m[12] = -vecDot(&right.x, &eye.x);
+    matrix->m[13] = -vecDot(&up.x, &eye.x);
+    matrix->m[14] = -vecDot(&direction.x, &eye.x);
+    matrix->m[15] = 1.0f;
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeCamera", PipeCamera);
 
