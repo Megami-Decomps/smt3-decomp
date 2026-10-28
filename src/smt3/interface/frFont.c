@@ -375,7 +375,7 @@ void frSetFontColorNo(frFontHandle_t *pFRQ, u8 ColorNo);
 
 void frSetFontColor(frFontHandle_t *pFRQ, u32 Color);
 
-void frEnableMode(s32 Flag);
+u8 frEnableMode(s32 Flag);
 
 u8 frDisableMode(u8 Flag);
 
@@ -1253,10 +1253,13 @@ void frSetFontColor(frFontHandle_t *pFRQ, u32 Color) {
     }
 }
 
-/* OR the requested mask into the shared byte, preserving implicit narrowing. */
-void frEnableMode(s32 Flag) {
-    Flag |= gModeFlag;
+/* Enable mask bits and return the previous shared flag byte. */
+u8 frEnableMode(s32 Flag) {
+    u8 previousFlags = gModeFlag;
+
+    Flag |= previousFlags;
     gModeFlag = Flag;
+    return previousFlags;
 }
 
 /* Clear flag bits from the shared font flag byte; returns the previous value. */

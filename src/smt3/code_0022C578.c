@@ -3948,7 +3948,7 @@ void campDhDrawHelpTextAlt(s32 x, s32 y, s32 z, s32 alpha)
 
 /* NON_MATCHING: 4 of 86 words differ; see docs/nonmatching/code_0022C578.md. */
 #ifdef NON_MATCHING
-extern void frEnableMode(s32 flag);
+extern u8 frEnableMode(s32 flag);
 extern u8 frDisableMode(u8 flag);
 extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type,
     frFontHandle_t *previous);

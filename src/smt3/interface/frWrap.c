@@ -71,7 +71,7 @@ extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern void frSetWhiteSpaceW(s32 StyleNo, s32 Width);
 
-extern void frEnableMode(s32 Flag);
+extern u8 frEnableMode(s32 Flag);
 
 extern u8 frDisableMode(u8 Flag);
 

@@ -143,7 +143,7 @@ frFontHandle_t *frGetNameFRQ(s8 target, frFontHandle_t *chain, s32 firstOption)
     return frGetName1NFRQ(target, name, firstOption);
 }
 
-extern void frEnableMode(s32 flag);
+extern u8 frEnableMode(s32 flag);
 extern u8 frDisableMode(u8 flag);
 extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type, frFontHandle_t *chain);
 extern void frSetFontSpace(frFontHandle_t *font, s32 spacing);

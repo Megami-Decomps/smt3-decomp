@@ -360,7 +360,7 @@ extern s32 slFormatStart(void);
 
 extern s32 slFormatCancel(void);
 
-extern void frEnableMode(s32 Flag);
+extern u8 frEnableMode(s32 Flag);
 
 extern void frDisableMode(s32 Flag);
 
