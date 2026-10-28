@@ -157,7 +157,77 @@ void nbCameraState_NegoTaizi_Init(void)
     effBTLModelInvokeGroupHide();
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraNego", nbCameraState_NegoTaizi_Calc);
+extern u32 effBTLSkillGetTargetParty(void);
+extern nbFormation_t *effBTLSkillGetInvokeFormation(void);
+extern void SetRotateMatrixY(f32 angle);
+extern f32 sdfSin(f32 angle);
+extern f32 effBTLModelGetHeight(nbFormation_t *pFormation);
+extern void nbCameraShot_GroundCollision(nbCamera_t *pCamera);
+
+void nbCameraState_NegoTaizi_Calc(void)
+{
+    nbCamera_t *pCamera = &pNbCamera;
+    nbFormation_t *pTarget;
+    nbFormation_t *pInvoke;
+    sdfVector4_t targetCenter;
+    sdfVector4_t invokeCenter;
+    f32 angle;
+    f32 length;
+    f32 range;
+    f32 height;
+
+    effBTLSkillGetTargetParty();
+    pTarget = effBTLSkillGetTargetFormation(0);
+    pInvoke = effBTLSkillGetInvokeFormation();
+    if ((pTarget->stat & 3) != 3 || (pInvoke->stat & 3) != 3) {
+        return;
+    }
+
+    pCamera->fovy = 0x1.657182p-1f;
+    effBTLModelGetSphereCenter(pInvoke);
+    SDF_VU0_STOREVECTOR(&invokeCenter);
+    invokeCenter.y -= pInvoke->r * 0.5f;
+    effBTLModelGetSphereCenter(pTarget);
+    SDF_VU0_STOREVECTOR(&targetCenter);
+    SDF_VU0_LOADVECTOR(&targetCenter);
+    SDF_VU0_LOADVECTOR_B(&invokeCenter);
+    VU0_LERP_VF10_VF11(0.5f);
+    SDF_VU0_STOREVECTOR(&pCamera->target);
+
+    if (pCamera->frame == 0) {
+        if (invokeCenter.x > targetCenter.x) {
+            pCamera->angle = 0x1.0c152p-1f;
+        } else {
+            pCamera->angle = -0x1.0c152p-1f;
+        }
+    }
+    angle = pCamera->angle;
+
+    SDF_VU0_LOADVECTOR(&invokeCenter);
+    SDF_VU0_LOADVECTOR_B(&targetCenter);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
+    range = length + pInvoke->r * pInvoke->scl + pTarget->r * pTarget->scl;
+    SetRotateMatrixY(angle);
+    SDF_VU0_LOADVECTOR(&targetCenter);
+    SDF_VU0_LOADVECTOR_B(&invokeCenter);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&pCamera->direction);
+
+    range *= sdfSin(sdfFabs(angle));
+    height = effBTLModelGetHeight(pInvoke) - pInvoke->r * pInvoke->scl * 0.5f;
+    if (range < height) {
+        range = height;
+    }
+    height = effBTLModelGetHeight(pTarget) - pTarget->r * pInvoke->scl * 0.5f;
+    if (range < height) {
+        range = height;
+    }
+    pCamera->distance = (range * 0.5f) / sdfAtan(pCamera->fovy * 0.5f);
+    nbCameraShot_GroundCollision(pCamera);
+}
 
 void nbCameraState_NegoTarget_Init(void)
 {
