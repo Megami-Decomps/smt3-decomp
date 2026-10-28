@@ -562,3 +562,4 @@ src/smt3/facility/fclPanel.c	redthing1	done	2026-10-28	0 matches / 1 guarded dra
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 612 B	target model rendering with color/scale/enable/OT call order, typed mark vectors and callback reloads; owner 162 match, 0 differ
 src/smt3/newbattle/NbNegoFlowOne.c	redthing1	done	2026-10-28	1 fn / 216 B	Flow1_23 selected-unit message dispatch and typed message offset
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 596 B	effect package family and cut resource initialization with native packed-model prefix
+src/smt3/newbattle/nbTest.c	redthing1	done	2026-10-28	1 fn / 372 B	debug battle setup with bounded inventory array and active-party recovery excluding status 0x800; owner 13 match, 0 differ

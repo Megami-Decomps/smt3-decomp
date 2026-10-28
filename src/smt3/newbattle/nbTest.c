@@ -408,7 +408,53 @@ void nbInitPlayer(void)
 void DrawTest(void) {
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbTest", TestProcess5);
+typedef struct {
+    u8 reserved0000[0x1928];
+    u8 quantity[0xA0];
+} testInventory_t;
+
+void *TestProcess5(void)
+{
+    s32 i;
+
+    evtBitOn(0xC00);
+    evtBitOn(0xC01);
+    evtBitOff(0xC02);
+    evtBitOff(0xC03);
+    evtBitOff(0xC04);
+    evtBitOff(0xC05);
+    evtBitOn(0xC06);
+    evtBitOn(0xC07);
+    evtBitOn(0xC0A);
+    evtBitOn(0xC0C);
+    effBTLSetFieldColor(1);
+    evtBitOff(0xC0D);
+    evtBitOff(0xC10);
+    evtBitOff(0xC12);
+    nbSetBattleDummy(D_00551500, D_005267D0, D_005267E0, test2_dvllist, test2_pdummy);
+
+    ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))[7].hp = 0;
+    DDS3_GBWK->maka = 0x15F90;
+    ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))[7].badstatus = 0x800;
+    for (i = 0; i < 0xA0; i++) {
+        ((testInventory_t *)DDS3_GBWK)->quantity[i] = 9;
+    }
+
+    for (i = 0; i < 16; i++) {
+        datUnitWork_t *unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + i;
+        if ((unit->flag & 1) != 0 && unit->badstatus != 0x800) {
+            u16 maxHp = unit->maxhp;
+            u16 maxMp = unit->maxmp;
+            unit->badstatus = 0;
+            unit->hp = maxHp;
+            unit->mp = maxMp;
+        }
+    }
+
+    *(s32 *)((u8 *)DDS3_GBWK + 0x11AB8) |= 0xC;
+    return TestProcess1;
+}
+
 
 void *TestProcess4(void)
 {
