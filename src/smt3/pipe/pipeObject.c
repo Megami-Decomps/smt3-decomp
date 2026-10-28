@@ -328,7 +328,34 @@ INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlDel);
 
 INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlPosSet);
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlSclSet);
+extern tagpipeBasic *MyLine;
+extern void mymdlSclSet(tagpipeBasic *work, f32 scale);
+
+void objMdlSclSet(tagPipeObject *object, f32 scale) {
+    switch ((u8)object->id) {
+    case 1:
+        return mymdlSclSet(&PipeEML[object->mdl], scale);
+    case 2:
+        return mymdlSclSet(&PipeEMS[object->mdl], scale);
+    case 5:
+    case 6:
+        return mymdlSclSet(&PipeMaka1[object->mdl], scale);
+    case 12:
+        return mymdlSclSet(&PipeDRBOX[object->mdl], scale);
+    case 11:
+        return mymdlSclSet(&PipeDMaka[object->mdl], scale);
+    case 9:
+        return mymdlSclSet(&PipeZMaka[object->mdl], scale);
+    case 10:
+        return mymdlSclSet(&PipeRBOX[object->mdl], scale);
+    case 0x80:
+        mymdlSclSet(basicMy, scale);
+        mymdlSclSet(MyLine, scale);
+        break;
+    default:
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlColorSet);
 
