@@ -51,6 +51,7 @@ typedef struct PIPE_EFF_t {
 
 
 extern void dds3EffectDelete(void *pData);
+extern void *dds3EffectLoad(void *pD3P);
 void pipeEffCreateLoadFile(PIPE_EFF_t *effect, const char *path, u8 maxSize);
 
 extern s32 offsetCount;
@@ -236,7 +237,24 @@ INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeGetObjData);
 
 INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffSet);
 
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeLoadEffect);
+void pipeLoadEffect(s32 effectID, PIPE_EFF_t *effects, u8 maxSize, f32 x, f32 y)
+{
+    PIPE_EFF_t *first = effects;
+
+    maxSize--;
+    while (--maxSize != 0xFF) {
+        if (effects->d3p == NULL) {
+            void *handle = dds3EffectLoad(first->ptr);
+            effects->pos2[0] = x;
+            effects->d3p = handle;
+            effects->pos2[1] = y;
+            effects->offset = effectID;
+            effects->count = 14;
+            break;
+        }
+        effects++;
+    }
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffDraw2Doffset);
 
