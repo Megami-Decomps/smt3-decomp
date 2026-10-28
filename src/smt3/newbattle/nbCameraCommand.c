@@ -335,8 +335,6 @@ void nbCameraState_CommandRoot_Calc(void)
     dds3CrossfadeStart(4);
 }
 
-/* NON_MATCHING: the 284-byte body is exact-sized; dispatch branches differ. */
-#ifdef NON_MATCHING
 void nbCameraState_CommandTargetSel_Init(void)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
@@ -353,7 +351,9 @@ void nbCameraState_CommandTargetSel_Init(void)
     for (i = 0; i < targetNumber; i++) {
         flags |= effBTLSkillGetTargetFormation(i)->stat & 0x300;
     }
-    if (data->TarSelType != 1) {
+    if (data->TarSelType == 1) {
+        nbCameraShot_Summon_Set(&pNbCamera);
+    } else {
         if (flags == 0x300) {
             nbCameraShot_AllParty_Set(&pNbCamera);
         } else if (invokeParty == targetParty) {
@@ -364,14 +364,9 @@ void nbCameraState_CommandTargetSel_Init(void)
             nbCameraCommand_GroundCollision(&pNbCamera);
             nbCameraState_Command_KORONZCheck();
         }
-    } else {
-        nbCameraShot_Summon_Set(&pNbCamera);
     }
     nbCameraCommand_GroundCollision(&pNbCamera);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraState_CommandTargetSel_Init);
-#endif
 
 void nbCameraState_CommandTargetSel_Calc(void) {
 }

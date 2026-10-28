@@ -54,7 +54,6 @@ page and line to open. Conventions are in
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
-| 1 | newbattle/nbCameraCommand | [newbattle/nbCameraCommand.md](newbattle/nbCameraCommand.md) |
 | 1 | movie/MovieViewer | [movie/MovieViewer.md](movie/MovieViewer.md) |
 | 1 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 1 | dds3TitleMain | [kernel/dds3TitleMain.md](kernel/dds3TitleMain.md) |
