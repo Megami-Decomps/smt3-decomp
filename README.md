@@ -45,10 +45,11 @@ and VU0 microcode is assembled from the annotated listings in
 `src/smt3/sdf/vu/`: all 2,061 instructions, 16,488 bytes, are reproduced
 (see [VU microcode](docs/vu/README.md)).
 
-Measured on 2026-10-28, the linked-image report verifies 985,208 of 1,851,268
-game-code bytes (53.22%) and 7,456 of 9,022 game functions (82.64%) from C.
-The remaining 1,566 game functions use assembly, including 261 with retained
-non-matching drafts. SDK/runtime reconstruction is a separate category.
+At the verified [9161bc10 snapshot](https://github.com/Megami-Decomps/smt3-decomp/commit/9161bc10ac7f40db219d44bb918570479156fc8c)
+(2026-10-28), the linked-image report verifies 1,227,692 of 1,851,228 game-code
+bytes (66.32%) and 8,238 of 9,045 game functions (91.08%) from C. The remaining
+807 game functions use assembly, including 228 with retained non-matching
+drafts. SDK/runtime reconstruction is a separate category.
 Function coverage runs ahead of byte coverage because small functions count
 as much as large ones; neither drafts nor assembly fallbacks earn C credit.
 
