@@ -17,7 +17,7 @@ typedef struct tagPipeObject {
     f32 w;
     f32 pos[2];
     f32 vpos[2];
-    s8 id;
+    u8 id;
     u8 action;
     u8 enabled;
     u8 mdl;
@@ -348,7 +348,28 @@ s8 ObjectSound(void)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", MySound);
+void MySound(tagPipeObject *objPtr)
+{
+    if (objPtr->flags & 1) {
+        p2sdPlaySE(0x670004, 0x7F, 0x3F);
+    }
+    if (objPtr->flags & 2) {
+        p2sdPlaySE(0x670005, 0x7F, 0x3F);
+    }
+    if (objPtr->flags & 4) {
+        p2sdPlaySE(0x670006, 0x7F, 0x3F);
+    }
+    if (objPtr->flags & 8) {
+        p2sdPlaySE(0x670002, 0x7F, 0x3F);
+    }
+    if (objPtr->flags & 0x10) {
+        p2sdPlaySE(0x670009, 0x7F, 0x3F);
+    }
+    if (objPtr->flags & 0x40) {
+        p2sdPlaySE(0x09530000, 0x7F, 0x3F);
+    }
+    objPtr->flags &= 0xFFA0;
+}
 
 void EmSound(tagPipeObject *objPtr)
 {
