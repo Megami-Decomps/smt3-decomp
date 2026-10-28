@@ -4800,7 +4800,28 @@ s32 campDrawStockCell(s32 color, s8 index, s8 row)
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockStatus);
 
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStockLabel);
+extern void campDrawStockStatus(s32 x, s32 y, s32 z, s32 color,
+                                s8 cursorMode, s8 detailMode,
+                                datUnitWork_t *unit, cmpCursorSlot_t *cursor,
+                                s32 alpha);
+
+s32 campDrawStockLabel(s32 x, s32 y, s32 z, s8 slot, s8 row,
+                       cmpCursorSlot_t *cursor, s8 cursorMode, s32 alpha)
+{
+    datUnitWork_t *unit = &cmbGlobalWork->party[cmbGlobalWork->stock[slot]].unit;
+    s32 rowY = y + row * 0xC0;
+    s32 color = 0xA09DC380;
+
+    if (unit->flag & 6) {
+        if (unit->badstatus & 0x800) {
+            color = 0x754B3D80;
+        }
+        campDrawStockStatus(x + 0xD20, y + rowY + 0x120, 0, color,
+                            cursorMode, 0, unit, cursor, alpha);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockLabel2);
 
