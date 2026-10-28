@@ -2,37 +2,54 @@
 #include "kernel.h"
 #include "nb.h"
 
-typedef struct
-{
-    nbMainProcessData_t *mainData;
-    u32 pad_004;
-    u8 state;
-    u8 pad_009[3];
-    u8 targetArea;
-    u8 pad_00D;
-    s8 targetForm;
-    u8 pad_00F;
-    s16 partyIndex;
-    u8 pad_012[0x1A];
+struct nbParty_t {
+    u16 flag;
+    s16 formindex;
+    s16 statindex;
+    u16 partyindex;
+    s16 count[20];
+    u32 aisyo[16];
+    u16 hojoskill[8];
+};
+
+typedef struct nbTarSelProcessData_t {
+    nbMainProcessData_t *data;
+    void *act;
+    u8 stat;
+    s8 ctype;
+    u8 crule;
+    u8 carea;
+    u8 nowcarea;
+    s8 nowno;
+    s8 nowform;
+    u8 unk0F;
+    s16 partyindex;
+    s8 friendcnt;
+    s8 enemycnt;
+    s8 friendno[12];
+    s8 enemyno[12];
     s32 statusTime;
-    u8 pad_030[4];
-    u32 pad_034;
-    u32 pad_038;
-    f32 pad_03C;
-    f32 pad_040;
+    s32 time;
+    s32 alpha_a;
+    s32 alpha_b;
+    f32 scale_a;
+    f32 scale_b;
 } nbTarSelProcessData_t;
 
 extern char D_005442B8[];
 extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern void sdfChipFreeDirect(void *ptr);
+extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, struct nbParty_t *party);
+extern void *sdfChipAllocDirect(u32 size);
+extern void *memset(void *dest, s32 value, u32 size);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 mode,
                                          s32 flag, dds3ProcessFunc_t process,
                                          dds3ProcessFunc_t shutdown, void *data);
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 extern s32 nbTarSelProcess1(dds3ProcessID_t *id);
 extern nbTarSelProcessData_t *InitTarSelProcessData(nbMainProcessData_t *data);
-extern datUnitWork_t *MemoryCommand_nbTarSelProcess(nbTarSelProcessData_t *process);
+extern void MemoryCommand_nbTarSelProcess(nbTarSelProcessData_t *process);
 
 nbTarSelProcessData_t *GetTarSelProcessData(void)
 {
@@ -41,12 +58,12 @@ nbTarSelProcessData_t *GetTarSelProcessData(void)
 
 s32 nbGetTarSelStat(void)
 {
-    return GetTarSelProcessData()->state;
+    return GetTarSelProcessData()->stat;
 }
 
 void nbSetTarSelStat(s32 stat)
 {
-    GetTarSelProcessData()->state = stat;
+    GetTarSelProcessData()->stat = stat;
 }
 
 void nbSetTarSelJyokyoTime(s32 time)
@@ -66,9 +83,29 @@ INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", SetCursor);
 
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", nbSetTargetProcess);
 
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", CheckFriend);
+s32 CheckFriend(nbTarSelProcessData_t *t, s32 formindex)
+{
+    if ((t->data->stat & 8) != 0) {
+        if ((u32)(formindex - 4) < 0xA) {
+            return 1;
+        }
+    } else if (formindex < 4) {
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", CheckEnemy);
+s32 CheckEnemy(nbTarSelProcessData_t *t, s32 formindex)
+{
+    if ((t->data->stat & 8) != 0) {
+        if (formindex < 4) {
+            return 1;
+        }
+    } else if ((u32)(formindex - 4) < 0xA) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", UpdateSelect);
 
@@ -76,15 +113,22 @@ INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", OnOffTargetCursor);
 
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", DispTargetHelp);
 
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", MemoryCommand_nbTarSelProcess);
+void MemoryCommand_nbTarSelProcess(nbTarSelProcessData_t *process)
+{
+    nbMainProcessData_t *data = process->data;
+    datUnitWork_t *work = nbGetUnitWorkPointer(data, &data->party[process->partyindex]);
+
+    work->nowtarea = process->nowcarea;
+    work->nowtform = process->nowform;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", CursorSelect);
 
 void CursorSelectAuto(nbTarSelProcessData_t *process)
 {
-    if (process->state == 1) {
+    if (process->stat == 1) {
         MemoryCommand_nbTarSelProcess(process);
-        process->state = 0;
+        process->stat = 0;
     }
 }
 
@@ -94,11 +138,24 @@ void nbTarSelShutdown(dds3ProcessID_t *id)
 {
     nbTarSelProcessData_t *process = dds3GetProcessData(id);
 
-    process->mainData->tarSelProcess = 0;
+    process->data->tarSelProcess = 0;
     sdfChipFreeDirect(process);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", InitTarSelProcessData);
+nbTarSelProcessData_t *InitTarSelProcessData(nbMainProcessData_t *data)
+{
+    nbTarSelProcessData_t *process = sdfChipAllocDirect(sizeof(*process));
+
+    memset(process, 0, sizeof(*process));
+    process->act = NULL;
+    process->data = data;
+    process->alpha_a = 0x80;
+    process->scale_a = 1.0f;
+    process->alpha_b = 0x80;
+    process->scale_b = 1.0f;
+    process->stat = 0;
+    return process;
+}
 
 void nbInitTarSelProcess(nbMainProcessData_t *data)
 {
