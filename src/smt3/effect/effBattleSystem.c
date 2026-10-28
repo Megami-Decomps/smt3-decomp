@@ -2310,18 +2310,14 @@ void effBTLSystemPartHandleDelete(void)
     printf("effBTLSys:PartHandleDelete\n");
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effCAMPBadCreate);
-
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effCAMPBadDraw);
-
 typedef struct
 {
     sdfVector4_t pos;
     sdfVector4_t rot;
     sdfVector4_t center;
-    f32 radius;
-    f32 height;
-    f32 scale;
+    f32 r;
+    f32 h;
+    f32 scl;
     mdlObj_t *hModel;
 } effCAMPBadParams_t;
 
@@ -2333,6 +2329,28 @@ typedef struct
     u32 id;
     s32 frame;
 } effBattleSystem_effCAMPBad_tag;
+
+extern void mdlSetColor(mdlObj_t *model, u32 color);
+extern u32 effColorBlend(u32 color1, u32 color2, f32 ratio);
+
+INCLUDE_ASM(const s32, "effect/effBattleSystem", effCAMPBadCreate);
+
+void effCAMPBadDraw(effBattleSystem_effCAMPBad_tag *work)
+{
+    u32 color;
+
+    if (D_0031BF00[work->id].draw != NULL) {
+        D_0031BF00[work->id].draw(work->hEffBTLSys->hEffect);
+    }
+    if (work->params.hModel != NULL) {
+        color = D_0031BF00[work->id].rgba;
+        if (work->frame < 8) {
+            color = effColorBlend(0x80808080, color, work->frame * 0.125f);
+        }
+        mdlSetColor(work->params.hModel, color);
+    }
+    work->frame++;
+}
 
 void effCAMPBadDelete(effBattleSystem_effCAMPBad_tag *work)
 {
