@@ -388,3 +388,22 @@ block fixes the argument copies but exchanges the preceding color store
 and parameter-index setup instead. Including the carrier store in that
 block leaves four differences. Only the final setter needs the block.
 The complete owner checks 162 match / 0 differ.
+
+### A shared selection store can need a separate completion block
+
+`Flow6_32` selects a negotiation candidate after a support-skill message. The
+random route and unmatched-skill fallback share one store; successful message
+paths use a separate store after the callback. Separate early returns emitted
+280 bytes with 63 of 70 instruction words matching. One forward branch from
+the fallback to the random route's completion reproduces all 280 bytes.
+
+Qualified pinned-compiler `--jump` traces show the distinction in the final
+cross-jump pass. The control merges return tails at jump UIDs 422 and 439 into
+UID 450. In the matching source, `rtl.27.jump2` retains message-success
+load/store UIDs 430/432 separately from fallback load UID 417 and random load
+UID 442, which reach common label 443/store 446. Message-call suffixes still
+merge at UID 406. Both control and candidate passed hooked/unhooked assembly
+and RTL parity, and dump/plain assembly parity; the commented final source
+was independently qualified. This is the one-forward-branch permission in
+[the matching policy](../CONTRIBUTING.md#matching-rules), not a general reason
+to replace ordinary returns with jumps.

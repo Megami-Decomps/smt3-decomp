@@ -1025,13 +1025,17 @@ s32 Flow6_31(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 7 of 70 words differ (first at +0x40). */
-#ifdef NON_MATCHING
 s32 Flow6_32(nbNegoProcessData_t *n)
 {
+    /* The qualified --jump trace shows one nextId store shared by the random and
+     * unmatched-skill routes, while message success stores next[0] separately.
+     * This forward branch supplies that native completion shape (SMT3 matching
+     * policy in docs/CONTRIBUTING.md: one forward branch with trace evidence). */
+    u32 nextId;
+
     nbAddNegoIdKouho(n, 0x90001);
     nbAddNegoIdKouho(n, 0x60022);
-    if (!((u32)dds3GetRandIntA(0, 0xA) < 2)) {
+    if (!((u32)dds3GetRandIntA(NULL, 0xA) < 2)) {
         if (n->hojoskillid == 0x1A2) {
             nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x6E, 0);
         } else if (n->hojoskillid == 0x1A4) {
@@ -1045,18 +1049,17 @@ s32 Flow6_32(nbNegoProcessData_t *n)
         } else if (n->hojoskillid == 0x1A3) {
             nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x73, 0);
         } else {
-            n->nextnegoid = n->nextkouho[0];
-            return 0;
+            nextId = n->nextkouho[0];
+            goto storeNextId;
         }
         n->nextnegoid = n->nextkouho[0];
         return 0;
     }
-    n->nextnegoid = n->nextkouho[1];
+    nextId = n->nextkouho[1];
+storeNextId:
+    n->nextnegoid = nextId;
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_32);
-#endif
 
 s32 Flow6_33(nbNegoProcessData_t *n)
 {

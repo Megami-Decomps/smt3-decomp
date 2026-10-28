@@ -193,30 +193,6 @@ Confirmed on the way: `nbInnenRec_t`'s `phase[13]` entries are
 `{u16 item; u16 cnt;}`, not `{u16 item; u16 pad;}`: retail passes the second
 halfword as `datAddItem`'s count argument.
 
-## Flow6_32 (newbattle/nbMakePacket, 0x118)
-
-63 of 70 words match, at the exact 280-byte size.
-
-The body is settled. The `(u32)dds3GetRandIntA(0, 0xA) < 2` arm has to be
-written **last**, with the whole `hojoskillid` chain nested inside
-`if (!(... < 2))`, which is what gives retail's `bnel` to a block placed after
-the chain; written as an early `return 0` at the top the arm stays inline and
-the function is 54 of 69 words out. The six `hojoskillid` arms are an
-`if`/`else if` chain with the whole `nbDispNegoMessage` call written out in
-each, not a `mes` local: retail duplicates `lw $2, 0x184` and
-`daddu $4, $16, $0` per arm and cross-jumps only the suffix from
-`daddu $7, $0, $0` onwards, which is what the duplicated call produces.
-
-The seven remaining words are the shared store block at the end. Retail
-annuls `lw $2, nextkouho[n]` into both branch delay slots and reaches
-`sw $2, 0x1C($16)` with the zero materialised **after** the store; ee-gcc
-loads into `$3`, materialises the zero first and pays a `nop` for it. That is
-the register-allocation residual class.
-
-Ruled out: an `if`/`else` for the rand test with one trailing `return 0`
-(13 of 70 and over size), and the natural early-`return 0` form of the rand
-arm (54 of 69).
-
 ## Flow6_37 (newbattle/nbMakePacket, 0x10C)
 
 58 of 67 words match, at the exact 268-byte size.
