@@ -1217,7 +1217,74 @@ s32 nbPickAiAction(nbActionProcessData_t *a, s32 tbl)
 INCLUDE_ASM(const s32, "newbattle/nbAi", nbPickAiAction);
 #endif
 
+extern void nbSetNormalSkill0(datUnitWork_t *work);
+
+/* NON_MATCHING: 4 of 114 words differ (first at +0x168). */
+#ifdef NON_MATCHING
+void SetKoudou(nbActionProcessData_t *a, s32 tbl, s32 kou)
+{
+    s32 id;
+    datDevilAITbl_t *entry;
+    datUnitWork_t *work;
+    u16 skill;
+
+    id = a->work->id;
+    entry = (datDevilAITbl_t *)(D_00398A08 + (id * 164 + tbl * 40 + kou * 8));
+    a->work->nowcommand = 0;
+    a->work->nowindex = 0;
+    skill = entry->skill;
+    switch (skill) {
+    case 0x8000:
+        a->work->nowcommand = 0;
+        work = a->work;
+        nbSetNormalSkill0(work);
+        return;
+    case 0x8001:
+        a->work->nowcommand = 7;
+        return;
+    case 0x8002:
+        a->work->nowcommand = 3;
+        return;
+    case 0x8003:
+        a->work->nowcommand = 9;
+        return;
+    }
+    if (entry->skill & 0x8000) {
+        a->work->nowcommand = 1;
+        switch (entry->skill & 0xF000) {
+
+        case 0x9000:
+            a->work->nowindex = 226;
+            break;
+        case 0xA000:
+            a->work->nowindex = 227;
+            break;
+        case 0xB000:
+            a->work->nowindex = 229;
+            break;
+        case 0xC000:
+            a->work->nowindex = 230;
+            break;
+        case 0xF000:
+            a->work->nowindex = 222;
+            break;
+        case 0xD000:
+            a->work->nowindex = 252;
+            break;
+        case 0xE000:
+            a->work->nowcommand = 9;
+            a->data->eventno = entry->skill & 0xFFF;
+            break;
+        }
+        a->aisummonid = entry->skill & 0xFFF;
+    } else {
+        a->work->nowcommand = 1;
+        a->work->nowindex = entry->skill;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbAi", SetKoudou);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbAi", Sel_AI);
 
