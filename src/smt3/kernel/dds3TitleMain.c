@@ -56,7 +56,11 @@ typedef struct
     /* 0x5C */ u8 unk_5C[4];
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ s32 tover[5];
-    /* 0x78 */ u8 unk_78[0x10];
+    /* 0x78 */ u8 Zalpha_cnt;
+    /* 0x79 */ u8 reserved79[3];
+    /* 0x7C */ u32 Z_RGBA;
+    /* 0x80 */ u32 ZNalpha_cnt;
+    /* 0x84 */ u32 ZN_RGBA;
     /* 0x88 */ s8 unk_88;
     /* 0x89 */ u8 unk_89[3];
     /* 0x8C */ s32 unk_8C;
@@ -162,7 +166,34 @@ void mselDrawBackground(void)
                   gGlobal->unk_48);
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3TitleMain", mselDrawTitleAnim2);
+extern f32 sdfSin(f32 angle);
+extern void mselToggleFlag(u8 *toggle, s32 *value, s8 dir);
+extern void mselMakeSaveText(s32 *devilIds, u32 color, u32 nameColor);
+
+void mselDrawTitleAnim2(s32 animate)
+{
+    eglSetOt(0x47);
+    eglLinkTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    eglLinkAlpha(0);
+    eglLinkSprite(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
+                  0x80808080, 0x80808080, 0x80808080, 0x80808080,
+                  gGlobal->unk_48);
+    mselToggleFlag(&gGlobal->Zalpha_cnt, (s32 *)&gGlobal->Z_RGBA, 0);
+    mselToggleFlag((u8 *)&gGlobal->unk_88, &gGlobal->unk_8C, 1);
+    if (animate == 0) {
+        mselMakeSaveText(gGlobal->tover, gGlobal->Z_RGBA, gGlobal->Z_RGBA);
+    } else {
+        gGlobal->ZNalpha_cnt = (gGlobal->ZNalpha_cnt + 10) % 360;
+        gGlobal->ZNalpha_cnt = gGlobal->ZNalpha_cnt <= 0 ? 0 :
+            (gGlobal->ZNalpha_cnt <= 180 ? gGlobal->ZNalpha_cnt : 180);
+        gGlobal->ZN_RGBA = (u32)((sdfSin((f32)((gGlobal->ZNalpha_cnt + 90) % 360) /
+                                       180.0f * 0x1.921f9ep+1f) + 1.0f) *
+                                0.5f * 127.0f + 128.0f);
+        mselMakeSaveText(gGlobal->tover, gGlobal->Z_RGBA,
+                         (gGlobal->Z_RGBA & 0xFFFFFF00) | gGlobal->ZN_RGBA);
+    }
+    mselMakeSaveText(gGlobal->unk_94, gGlobal->unk_8C, gGlobal->unk_8C);
+}
 
 /* NON_MATCHING: 13 of 27 words differ (first at +0x14). */
 #ifdef NON_MATCHING

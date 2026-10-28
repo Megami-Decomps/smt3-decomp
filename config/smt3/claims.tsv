@@ -506,3 +506,4 @@ src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 1404 B	result calcula
 src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	2 fn / 584 B	paired character camera updates using four-lane vectors and target-offset array; owner 53 match, 0 differ
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 204 B	Hearts skill eligibility scan from current slot, signed level threshold and duplicate ownership check; owner 81 match, 0 differ
 src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	2 fn / 628 B	directional and signed grid-coordinate camera updates; owner 55 match, 0 differ
+src/smt3/kernel/dds3TitleMain.c	redthing1	done	2026-10-28	1 fn / 560 B	title animation with native unsigned angle clamp, sine alpha pulse and reloaded text colors; owner 9 match, 0 differ
