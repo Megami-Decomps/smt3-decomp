@@ -78,7 +78,7 @@ struct pbProcHandle_t
             pbViewCamWork_t *viewCam; } data;
 };
 
-extern s32 pbMoveChar;
+extern pbProcHandle_t *pbMoveChar;
 
 extern void sdfChipFreeDelayedDirect(void *aPtr);
 
@@ -122,7 +122,7 @@ extern void sdfFileCmdReadFile(char *aFileName, void *aBuffer, s32 aLength, void
 
 extern s32 pbLoadSystemDataDone(s32 handle, s32 status);
 
-extern s32 pbGetMoveChar(void);
+extern pbProcHandle_t *pbGetMoveChar(void);
 
 extern char D_00535DE0[];
 
@@ -185,7 +185,7 @@ void pb_draw_bg_Shutdown(dds3ProcessID_t *id) {
 INCLUDE_RODATA(const s32, "pb/pbMain", D_00535DE0);
 
 typedef struct { dds3ProcessID_t *id; } pbMapEditorState_t;
-extern s32 pbMoveChar;
+extern pbProcHandle_t *pbMoveChar;
 extern s32 pbEditorState;
 extern s32 pbEditWork;
 /* Only the process-link prefix is used here. The unsized view preserves its
@@ -236,7 +236,7 @@ dds3ProcessID_t *pbStartMapEditor(s32 mode, s32 stage) {
     return mapState->id;
 }
 
-s32 pbGetMoveChar(void) {
+pbProcHandle_t *pbGetMoveChar(void) {
     return pbMoveChar;
 }
 
