@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 typedef struct
 {
@@ -893,7 +894,77 @@ void rstUpdateBgTimer(void)
     }
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdate);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern s32 dds3FadeCheck(void);
+extern s32 cmpLoadStatusModel(void);
+extern void rstUpdateSeqAsignPlayerParam(datUnitWork_t *unit);
+extern void rstUpdateSeqSkillPowerUp(void);
+extern void rstUpdateSeqEvo(void);
+extern void rstUpdateSeqEvoAct(void);
+extern void rstUpdateSeqDestroySkill(void);
+extern void fclUpdateMessage(void);
+extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
+
+s32 rstUpdate(dds3ProcessID_t *id)
+{
+    s8 previous;
+    u8 flags;
+    u8 enabled;
+
+    startPos = dds3GetProcessData(id);
+    previous = startPos->unk_0001;
+    if (dds3FadeCheck() != 0)
+        return 0;
+    if (cmpLoadStatusModel() != 0)
+        return 0;
+    flags = startPos->unk_0000;
+    if ((flags & 0x40) != 0)
+        return -1;
+    if ((flags & 2) != 0) {
+        enabled = flags & 1;
+        if (enabled != 0) {
+            switch (startPos->unk_0001) {
+            case 0:
+                if ((s8)startPos->AsignParamMax != 0)
+                    rstUpdateSeqAsignPlayerParam(&cmbGlobalWork->party[0].unit);
+                else
+                    rstUpdateSeqPlayerLevelUpOnly();
+                break;
+            case 1: rstUpdateSeqHeartsSkill(); break;
+            case 3: rstUpdateSeqHeartsEvent(); break;
+            case 5: rstUpdateSeqHeartsMaster(); break;
+            case 6: rstUpdateSeqDevilParam(); break;
+            case 8: rstUpdateSeqDefaultSkill(); break;
+            case 10: rstUpdateSeqSkillPowerUp(); break;
+            case 11:
+                if (fclChkMessage() == 0) {
+                    startPos->unk_0001 = (u8)startPos->unk_0001 + 1;
+                    startPos->unk_0004 = 1;
+                }
+                break;
+            case 13: rstUpdateSeqGift(); break;
+            case 17: rstUpdateSeqEvo(); break;
+            case 18: rstUpdateSeqEvoAt(); break;
+            case 20: rstUpdateSeqEvoAct(); break;
+            case 21: rstUpdateSeqDestroySkill(); break;
+            case 22:
+                if (rstUpdateSeqDestroyConfirm() == 0)
+                    return 0;
+                break;
+            case 24:
+                if (rstUpdateSeqConfirm() == 0)
+                    return 0;
+                break;
+            }
+        }
+    }
+    fclUpdateMessage();
+    rstUpdateBgTimer();
+    rstUpdateEvoBgFade();
+    cmpUpdateSeqInfo(startPos, previous);
+    return 0;
+}
+
 
 void func_002262C8(void) {
 }
