@@ -972,7 +972,25 @@ s8 *datFindKugatatiEntry(datUnitWork_t *unit, u8 *outcount)
 INCLUDE_ASM(const s32, "result/rstcalc", datFindKugatatiEntry);
 #endif
 
-INCLUDE_ASM(const s32, "result/rstcalc", cmbCopyEvoStats);
+/* Header row contains sixteen source keys; each following row starts with its target key. */
+extern s16 cmbEvoStatTable[][17];
+
+u8 cmbCopyEvoStats(s16 first, s16 second)
+{
+    u8 column;
+    u8 row;
+    for (column = 0; column < 16; column++) {
+        if (cmbEvoStatTable[0][column + 1] == first) {
+            break;
+        }
+    }
+    for (row = 0; row < 13; row++) {
+        if (cmbEvoStatTable[row + 1][0] == second) {
+            break;
+        }
+    }
+    return (u8)cmbEvoStatTable[row + 1][column + 1];
+}
 
 s32 cmbCheckEvoPair(u16 maskA, u16 maskB)
 {
