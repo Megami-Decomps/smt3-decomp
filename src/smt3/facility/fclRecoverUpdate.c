@@ -369,7 +369,42 @@ void rcvUpdateSeqRevive(void)
         (cmpPadStopWork_t *)((u8 *)rcvUpdateWork + 0x128C), button, 0x30));
 }
 
-INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdateSeqDispel);
+extern s32 dds3GetProcessStat(void *id);
+
+s32 rcvUpdateSeqDispel(void)
+{
+    if (dds3GetProcessStat((void *)rcvUpdateWork->scriptArg) == 2) {
+        return 0;
+    }
+    switch (fclGetFlag(2)) {
+    case 0:
+        if (rcvUpdateData() == 0) {
+            rcvUpdateWork->unk_0005 = 1;
+            rcvUpdateWork->unk_0008 = fclScriptStart(rcvUpdateWork->script, 11,
+                                                    &rcvUpdateWork->scriptArg);
+            rcvUpdateWork->unk_01 = 6;
+            rcvUpdateWork->unk_03 = 5;
+            rcvUpdateWork->unk_0004 = -1;
+            rcvUpdateWork->unk_02 = 0;
+        } else {
+            rcvUpdateWork->unk_0005 = 1;
+            rcvUpdateWork->unk_0008 = fclScriptStart(rcvUpdateWork->script, 4,
+                                                    &rcvUpdateWork->scriptArg);
+            rcvUpdateWork->unk_01 = 6;
+            rcvUpdateWork->unk_03 = 6;
+            rcvUpdateWork->unk_0004 = -1;
+            rcvUpdateWork->unk_02 = 0;
+        }
+        break;
+    case 1:
+        rcvUpdateCallSeq(rcvUpdateWork->unk_03);
+        rcvUpdateWork->unk_0004 = 2;
+        break;
+    case 2:
+        break;
+    }
+    return 1;
+}
 
 s32 rcvIsHealPhase(void)
 {
