@@ -4,14 +4,8 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
-
-typedef struct evtUnitHandle_t
-{
-    u8 unk_00[0x8C];
-    dds3Basic_t *basic;
-    u8 unk_90[0x14];
-    u32 flags;
-} evtUnitHandle_t;
+#include "event.h"
+#include "model.h"
 
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
@@ -39,7 +33,7 @@ typedef struct
     u32 anime;
     dds3Basic_t *basic;
     s32 serial;
-    evtUnitHandle_t *hunit;
+    evtUnit_t *hunit;
     s16 partyindex;
     s16 formindex;
     u32 autotime;
@@ -324,7 +318,9 @@ extern s32 evtBitCheck(s32 no);
 
 extern void nbLoadUnitGroup(s32 side, s32 stop, s32 anime);
 
-extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
+extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
+
+extern void evtSetUnitMotion(evtUnit_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -336,9 +332,10 @@ extern void dds3DeleteSceneBasicData(void *basic);
 
 extern void *bedbasic;
 
-extern u8 pNbCamera[];
+typedef struct nbCamera_t nbCamera_t;
 
-extern void nbCameraBoss_Sp_DOUTYO_Run(u8 *pNbCamera);
+extern nbCamera_t pNbCamera;
+extern s32 nbCameraBoss_Sp_DOUTYO_Run(nbCamera_t *pNbCamera);
 
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
@@ -438,7 +435,51 @@ s32 SetUp1(nbEventProcessData_t *ed)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE901", SyuGo);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
+extern s32 evtUnitRotationTarget(evtUnit_t *unit, f32 *target, f32 ratio);
+extern s32 nbCameraBoss_Sp_DOUTYO_TPFix_Set(nbCamera_t *camera);
+
+s32 SyuGo(nbEventProcessData_t *e)
+{
+    sdfVector4_t markPosition;
+    sdfVector4_t position;
+    sdfVector4_t rotation;
+    evtUnit_t *unit;
+    s32 i;
+
+    memset(&position, 0, sizeof(position));
+    position.z = -100.0f;
+    memset(&rotation, 0, sizeof(rotation));
+    rotation.z = -5000.0f;
+
+    if (e->seqtime == 2) {
+        nbCameraBoss_Sp_DOUTYO_TPFix_Set(&pNbCamera);
+    }
+    if (e->seqtime == 5) {
+        e->data->press4_p = 0;
+        e->data->pressturn = 0;
+    }
+    if (e->seqtime >= 0x38) {
+        nbFreeEffectSlot(e);
+    }
+
+    unit = dds3GetUnitHandleObjectBasic(D_005515B4);
+    for (i = 0; i < 6; i++) {
+        nbFormation_t *form = e->data->form + 4 + i;
+
+        if ((form->stat & 1) != 0) {
+            sdfModelGetMarkPos(unit->owner->inner, 5 - i);
+            SDF_VU0_STOREVECTOR(&markPosition);
+            nbSetFormPos(form, &markPosition);
+            if (e->seqtime < 0x33) {
+                evtUnitRotationTarget(form->hunit, &position.x, 0.08f);
+            } else {
+                evtUnitRotationTarget(form->hunit, &rotation.x, 0.04999999702f);
+            }
+        }
+    }
+    return 0;
+}
 
 s32 SyuGo2(nbEventProcessData_t *ed)
 {
@@ -512,7 +553,7 @@ INCLUDE_ASM(const s32, "newbattle/nbE901", Syutugen2);
 
 s32 End(nbEventProcessData_t *ed)
 {
-    nbCameraBoss_Sp_DOUTYO_Run(pNbCamera);
+    nbCameraBoss_Sp_DOUTYO_Run(&pNbCamera);
     if (ed->seqtime < 0x6F) {
         return 0;
     }
