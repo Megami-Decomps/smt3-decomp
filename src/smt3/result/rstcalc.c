@@ -228,7 +228,32 @@ s16 rstGetEquipHeartsAisyo(void)
     return datGetDevilParam(cmbGlobalWork->equipHearts);
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstSetDestroySkillMaxHpMp);
+extern u32 datGetMaxHp(datUnitWork_t *work);
+extern u32 datGetMaxMp(datUnitWork_t *work);
+extern s32 printf(const char *format, ...);
+extern char D_0053DAB0[];
+
+void rstSetDestroySkillMaxHpMp(void)
+{
+    datUnitWork_t *unit = EventStart->unit;
+    datUnitWork_t work;
+    u16 skill = unit->id == 0 ? *(u16 *)&EventStart->unk_21[3] :
+                               *(u16 *)&EventStart->unk_21[1];
+    s32 hpChange;
+    s32 mpChange;
+
+    work = *unit;
+    work.skillcnt = 0;
+    hpChange = datGetMaxHp(&work);
+    mpChange = datGetMaxMp(&work);
+    work.skillcnt = 1;
+    work.skill[0] = skill;
+    hpChange = datGetMaxHp(&work) - hpChange;
+    mpChange = datGetMaxMp(&work) - mpChange;
+    unit->maxhp += hpChange;
+    unit->maxmp += mpChange;
+    printf(D_0053DAB0, skill, hpChange, mpChange);
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstSetMaxHpMp);
 
@@ -558,6 +583,8 @@ s32 rstShakePad(void)
 {
     return dds3PadVibrationSet(1, 0xFF, 0x1E);
 }
+
+INCLUDE_RODATA(const s32, "result/rstcalc", D_0053DAB0);
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstCalc);
 
