@@ -1646,7 +1646,7 @@ s32 cmbApplyEvoResult(datUnitWork_t *unit)
     return total;
 }
 
-s32 cmbPickEvoResult(datUnitWork_t *unit)
+u16 cmbPickEvoResult(datUnitWork_t *unit)
 {
     s32 cumulative = 0;
     s32 totalWeight = cmbApplyEvoResult(unit);
@@ -1670,7 +1670,46 @@ s32 cmbPickEvoResult(datUnitWork_t *unit)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcInheritCount);
+void cmbCalcInheritCount(cmbUnit_t *unitA, cmbUnit_t *unitB, cmbUnit_t *unitC,
+                         cmbUnit_t *result, cmpSkillList_t *out)
+{
+    s8 count = (s8)unitA->unit.skillcnt;
+    f32 average;
+    u16 skill;
+
+    count += unitB->unit.skillcnt;
+    if (unitC != NULL) {
+        count = (s8)(count + (u8)unitC->unit.skillcnt);
+        average = (count + 0x1.599998p+1f) / 0x1.d99998p+1f;
+    } else {
+        average = (count + 0x1.599998p+1f) / 0x1.d99998p+1f;
+    }
+    count = (s8)(s32)average;
+
+    if (out != NULL) {
+        out->count = 0;
+    }
+    if (cmbFindSkillSlot(result) == 0) {
+        return;
+    }
+    if (result->unit.skillcnt + count >= 9) {
+        count = 8 - (u8)result->unit.skillcnt;
+    }
+    while (count > 0) {
+        skill = cmbPickEvoResult(&result->unit);
+        if (skill == 0) {
+            count--;
+            continue;
+        }
+        if (cmbReplaceSkill(skill, result) < 0) {
+            continue;
+        }
+        if (out != NULL) {
+            out->skill[(s8)out->count++] = skill;
+        }
+        count--;
+    }
+}
 
 s32 cmbGetSpecialItemId(void)
 {
