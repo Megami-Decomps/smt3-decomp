@@ -1,8 +1,8 @@
 #include "common.h"
+#include "basic.h"
 #include "newdata.h"
 #include "kernel.h"
 #include "libsdf.h"
-#include "basic.h"
 
 typedef void (*evtOtRegFunc_t)(sdfGrOt_t *, sdfDrawTag_t *);
 
@@ -45,34 +45,28 @@ extern void evtBitAllOff(void);
 
 extern void evtDebugPrintCamera(void);
 
-extern s32 evtDebugCameraPage;
-
-extern char *D_0054F788;
-
-extern char D_0054F790[];
+s32 EventDebugProcess1(dds3ProcessID_t *id);
 
 extern dds3Basic_t *dds3GetActiveScene(void);
-
-extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pBasic);
-
-extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
-
-extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *pBasic);
-
+extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *scene);
+extern dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_t *camera);
+extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
 extern void dds3SetScreenFovy(f32 fovy);
-
-extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
-
-s32 EventDebugProcess1(dds3ProcessID_t *id);
+extern void *dds3FontReqAllocDrawTag(void);
+extern const char D_0054F790[];
+extern const char *D_0054F788;
+extern u32 evtDebugCameraPage;
+extern sdfGrOt_t D_002F6978;
 
 void evtDebugPrintCamera(void)
 {
-    dds3Basic_t *scene = dds3GetActiveScene();
+    dds3Basic_t *scene;
     dds3Basic_t *camera;
-    char *name;
+    dds3Basic_t *nextCamera;
+    const char *cameraName;
     sdfDrawTag_t *tag;
-    sdfGrOt_t *ot;
 
+    scene = dds3GetActiveScene();
     if (scene == NULL) {
         return;
     }
@@ -86,37 +80,41 @@ void evtDebugPrintCamera(void)
     if (evtDebugCameraPage == 0) {
         return;
     }
+
     camera = dds3GetActiveCameraSceneBasic(scene);
     if (camera == NULL) {
         return;
     }
     if ((s8)dds3PadButtonState[0x20] < 0) {
-        if (camera->next != NULL) {
-            camera = camera->next;
+        nextCamera = camera->next;
+        if (nextCamera != NULL) {
+            camera = nextCamera;
         } else {
-            camera = ((dds3SceneBasic_t *)scene->workdata)
-                         ->basictable[BASIC_TYPE_CAMERAOBJECT].firstbasic;
+            dds3SceneBasic_t *sceneWork = scene->workdata;
+            camera = sceneWork->basictable[4].firstbasic;
         }
         dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
     } else if ((s8)dds3PadButtonState[0x22] < 0) {
-        if (camera->prev != NULL) {
-            camera = camera->prev;
+        nextCamera = camera->prev;
+        if (nextCamera != NULL) {
+            camera = nextCamera;
         } else {
-            camera = ((dds3SceneBasic_t *)scene->workdata)
-                         ->basictable[BASIC_TYPE_CAMERAOBJECT].lastbasic;
+            dds3SceneBasic_t *sceneWork = scene->workdata;
+            camera = sceneWork->basictable[4].lastbasic;
         }
         dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
     }
-    name = D_0054F788;
+
+    cameraName = D_0054F788;
     if (camera->name != NULL) {
-        name = camera->name;
+        cameraName = camera->name;
     }
     tag = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(tag, sdfDevPrintf(0x8680, 0x79C0, 0xFF0000, 5, D_0054F790, name));
-    ot = &sdfGrOtTable[83];
-    ((evtOtRegFunc_t)ot->regFunc)(ot, tag);
+    sdfDrawTagLink(tag, sdfDevPrintf(0x8680, 0x79C0, 0x00FF0000, 5,
+                                     D_0054F790, cameraName));
+    D_002F6978.regFunc(&D_002F6978, tag);
 }
 
 /* After launching a test script, keep the test task idle and return 0. */

@@ -17,7 +17,7 @@ extern u8 pipeInitDone;
 
 extern s32 MainPipe(void *aProcId);
 
-extern s32 pipeInitSection(void);
+extern void pipeInitSection(void);
 
 extern s32 pipeCheckLevel(s32 level, s32 type);
 
@@ -130,4 +130,18 @@ s32 ChkPipe(void)
 
 void DEBUG_PRINT(const char *str, ...) {
 }
+
+INCLUDE_SDATA(const s32, "pipe/pipeMain", mapIndex);
+
+INCLUDE_SDATA(const s32, "pipe/pipeMain", mapPrev);
+
+INCLUDE_SDATA(const s32, "pipe/pipeMain", debugMode);
+
+INCLUDE_SDATA(const s32, "pipe/pipeMain", D_00551711);
+
+INCLUDE_SDATA(const s32, "pipe/pipeMain", SectionIndex);
+
+INCLUDE_SDATA(const s32, "pipe/pipeMain", pipeInitDone);
+
+INCLUDE_SDATA(const s32, "pipe/pipeMain", D_00551719);
 

@@ -268,7 +268,33 @@ nbCommSelProcessData_t *GetCommSelProcessData(void)
     return dds3GetProcessData(dds3SearchProcessName(D_005441A8));
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispPanelCursor);
+void DispPanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 c)
+{
+    s32 margin = 0;
+    s32 listCount;
+    s32 blink;
+
+    if (type == 3) {
+        margin = 0x2B - (s32)(s->smritu * 43.0f);
+    }
+    listCount = GetCommListCnt(s, type);
+    blink = s->data->battletime % 0x19 < 0xE;
+    if (s->nowlisty[type] > 0 && blink) {
+        nbPnlSprite(ox + 0xE, oy - margin + 0x166, 7, 9, 0x53, 0x4E, 7, 9, c,
+                    s->data->pnltex[0]);
+    } else {
+        nbPnlSprite(ox + 0xE, oy - margin + 0x166, 7, 9, 0x4B, 0x4E, 7, 9, c,
+                    s->data->pnltex[0]);
+    }
+
+    if (s->nowlisty[type] < s->commcnt[type] - listCount && blink) {
+        nbPnlSprite(ox + 0xE, oy + 0x1A5, 7, -9, 0x53, 0x4E, 7, 9, c,
+                    s->data->pnltex[0]);
+    } else {
+        nbPnlSprite(ox + 0xE, oy + 0x1A5, 7, -9, 0x4B, 0x4E, 7, 9, c,
+                    s->data->pnltex[0]);
+    }
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbCommSelProcess", D_005441A8);
 
@@ -718,7 +744,76 @@ void nbCloseCommSel(void)
     s->animeflag = (s->animeflag | 2) & ~1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", nbCommSelProcess1);
+void *nbCommSelProcess1(dds3ProcessID_t *id)
+{
+    nbCommSelProcessData_t *s;
+    nbActionProcessData_t *act;
+    u32 actstat;
+    u32 animeFlags;
+    s32 resetStat3 = 0;
+    s32 animation;
+    s32 ox;
+    s32 oy;
+    s32 alpha;
+
+    s = dds3GetProcessData(id);
+    AnimeCommandList(s);
+
+    switch (s->stat) {
+    case 1:
+        s->stat = 2;
+        break;
+    case 2:
+        if ((s->act->stat & 0x80) != 0) {
+            SelectCommandListAuto(s);
+        } else {
+            SelectCommandList(s);
+        }
+        if (s->stat == 3 && (s->act->stat & 0x80) == 0) {
+            resetStat3 = 1;
+            s->stat = 2;
+        }
+        break;
+    case 3:
+        break;
+    case 4:
+        if ((s->animeflag & 2) == 0) {
+            return (void *)-1;
+        }
+        break;
+    }
+
+    act = s->act;
+    animeFlags = s->animeflag;
+    animation = animeFlags & 0x10;
+    if (animation == 0) {
+        s->drawtype = s->nowtype;
+        s->drawcursor = s->nowcursor[s->drawtype];
+        s->drawlisty = s->nowlisty[s->drawtype];
+    }
+
+    actstat = act->stat;
+    if ((actstat & 0x80) != 0 && animation == 0) {
+        return NULL;
+    }
+    ox = s->ox;
+    oy = s->oy;
+    alpha = s->alpha;
+    s->animeflag = animeFlags & ~0x20;
+    if ((animeFlags & 2) == 0 && s->stat == 2 && s->drawtype != 3) {
+        s->animeflag |= 0x20;
+    }
+    DispCommandPanel(s, s->drawtype, ox, oy, alpha);
+    nbPnl_setOt(0x47);
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    DispCommandList2(s, s->drawtype, ox, oy, alpha);
+
+    if (resetStat3 != 0) {
+        s->stat = 3;
+    }
+    return NULL;
+}
 
 void nbCommSelShutdown(dds3ProcessID_t *id)
 {

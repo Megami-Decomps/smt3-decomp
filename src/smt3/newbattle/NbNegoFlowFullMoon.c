@@ -504,8 +504,32 @@ s32 Flow2_12(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowFullMoon", Flow2_13);
+s32 Flow2_13(nbNegoProcessData_t *n)
+{
+    s32 mes = 0;
 
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x2000E);
+        switch (n->qtype) {
+        case 0:
+            if (n->qindex == 0) mes = n->nowselect == 0 ? 0xE : 0x10;
+            else mes = n->nowselect == 0 ? 0x14 : 0x16;
+            break;
+        case 1:
+        case 2:
+        case 3:
+            mes = 0xA;
+            break;
+        }
+        nbDispNegoMessage(n, n->questionmsg, mes, 0);
+        break;
+    }
+    return 0;
+}
 s32 Flow2_14(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x2000F);

@@ -11,34 +11,58 @@ import re
 from pathlib import Path
 
 
-def find(text, name):
-    """The definition of `name` in `text`, or None if this file only declares it."""
-    for m in re.finditer(r"(?<!\w)" + re.escape(name) + r"\s*\(", text):
+def code_view(text):
+    # Preserve offsets while hiding comments and literals, so call-shaped text
+    # in either cannot look like a function definition or affect brace pairing.
+    return re.sub(
+        r'/\*.*?\*/|//[^\n]*|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'',
+        lambda match: re.sub(r"[^\n]", " ", match.group()),
+        text,
+        flags=re.S,
+    )
+
+
+def definitions(text, code=None):
+    """Return function definitions in one source file, excluding declarations."""
+    if code is None:
+        code = code_view(text)
+    found = {}
+    candidate = re.compile(r"^[\w \t*\n]*?(\w+)[ \t]*(?:\n[ \t]*)?\(", re.M)
+    for m in candidate.finditer(code):
+        name = m.group(1)
+        if not code[m.start():m.start(1)].strip():
+            continue
         depth, i = 0, m.end() - 1
-        while i < len(text):
-            if text[i] == "(":
+        while i < len(code):
+            if code[i] == "(":
                 depth += 1
-            elif text[i] == ")":
+            elif code[i] == ")":
                 depth -= 1
                 if depth == 0:
                     break
             i += 1
         j = i + 1
-        while j < len(text) and text[j] in " \t\r\n":
+        while j < len(code) and code[j] in " \t\r\n":
             j += 1
-        if j >= len(text) or text[j] != "{":
+        if j >= len(code) or code[j] != "{":
             continue
         start = text.rfind("\n\n", 0, m.start()) + 2
         depth, k = 0, j
-        while k < len(text):
-            if text[k] == "{":
+        while k < len(code):
+            if code[k] == "{":
                 depth += 1
-            elif text[k] == "}":
+            elif code[k] == "}":
                 depth -= 1
                 if depth == 0:
-                    return text[start:k + 1]
+                    found.setdefault(name, text[start:k + 1])
+                    break
             k += 1
-    return None
+    return found
+
+
+def find(text, name):
+    """The definition of `name` in `text`, or None if this file only declares it."""
+    return definitions(text).get(name)
 
 
 def main():

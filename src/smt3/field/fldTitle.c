@@ -14,6 +14,14 @@ enum sl_slot_flag
 };
 
 extern char D_005327B0[];
+extern s32 sprintf(char *destination, const char *format, ...);
+extern s32 fldTitleState, D_0054EF8C, D_0054EF90, D_0054EF94;
+extern void *sdfDevLoadFileEx(const char *name, u32 *data, u32 *size);
+extern sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *texture);
+extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 a, s32 b,
+    dds3ProcessFunc_t process, dds3ProcessFunc_t shutdown, void *work);
+extern s32 fldTitle_Process(dds3ProcessID_t *id);
 
 dds3ProcessID_t *dds3SearchProcessName(const char *namestr);
 
@@ -67,7 +75,38 @@ void fldTitle_Shutdown(void) {
 
 INCLUDE_RODATA(const s32, "field/fldTitle", D_005327B0);
 
-INCLUDE_ASM(const s32, "field/fldTitle", fldTitleStart);
+void fldTitleStart(s32 fld, s32 waittime)
+{
+    char path[32];
+    u32 data;
+    sdfMemHandle_t *allocation;
+
+    D_0054EF90 = fld;
+    D_0054EF94 = waittime;
+    fldTitleState = 0;
+    D_0054EF8C = 0;
+    sprintf(path, "/fld/f/pnl/df%03d.tmx", fld);
+    allocation = (sdfMemHandle_t *)sdfDevLoadFileEx(path, &data, NULL);
+    D_0054EF98 = sdfTexSet((const TMX_HEADER_t *)data);
+    sdfMemFreeDirect(allocation);
+
+    allocation = (sdfMemHandle_t *)sdfDevLoadFileEx("/fld/f/pnl/dun_01.tmx", &data, NULL);
+    D_0054EF9C = sdfTexSet((const TMX_HEADER_t *)data);
+    sdfMemFreeDirect(allocation);
+
+    allocation = (sdfMemHandle_t *)sdfDevLoadFileEx("/fld/f/pnl/dun_02.tmx", &data, NULL);
+    D_0054EFA0 = sdfTexSet((const TMX_HEADER_t *)data);
+    sdfMemFreeDirect(allocation);
+
+    allocation = (sdfMemHandle_t *)sdfDevLoadFileEx("/fld/f/pnl/dun_03.tmx", &data, NULL);
+    D_0054EFA4 = sdfTexSet((const TMX_HEADER_t *)data);
+    sdfMemFreeDirect(allocation);
+
+    if (!fldTitleChk()) {
+        dds3StartProcess(D_005327B0, 0x2B0A, 0, 1, fldTitle_Process,
+                         (dds3ProcessFunc_t)fldTitle_Shutdown, NULL);
+    }
+}
 
 s32 fldTitleMiniChk(void) {
     return dds3SearchProcessName(D_00532820) != 0;

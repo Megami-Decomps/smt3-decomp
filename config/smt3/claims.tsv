@@ -258,3 +258,270 @@ tools/find_similar.py	z15	done	2026-10-27	6 fn / 1940 B	harness work: template s
 coverage sweep, second batch	z16	done	2026-10-28	76 fn / 46156 B	37 units finishable; 21 handwritten now excluded
 asm routines (21 functions)	z17	done	2026-10-28	15 reference impls, 2 drafts, 0 matches	PS2_WORD_BIT_LENGTH reaches addi; schedule is what blocks the two drafts
 coverage sweep, third batch	z18	open	2026-10-28	see queue3.txt	cheapest first from nbMakaProcess onward
+src/smt3/effect/billManager.c	redthing1	done	2026-10-28	0 matches	retained original drafts; animation visibility changes P2ADraw annulment
+src/smt3/effect/effMagatuhi.c	redthing1	done	2026-10-28	0 matches	retained original draw drafts; first differing instruction at +0x3C
+src/smt3/event/evtUnitManager.c	redthing1	done	2026-10-28	1 fn / 148 B	evtSetUnitLightAndAmbient; float scale union and parameter store order
+src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	1 fn / 148 B	shuffleIndices; unsigned random indices and guarded countdown loop
+src/smt3/newbattle/nbMaeProcess.c	redthing1	done	2026-10-28	3 fn / 140 B	02Loop, 02Step, and Process0 transition callbacks
+src/smt3/sdf/sdfFileIO.c	redthing1	done	2026-10-28	1 fallback	last AnalyzeFileName fallback after exact request unlink/dequeue/free reconstruction
+src/smt3/kernel/dds3AdminiProcess.c	redthing1	done	2026-10-28	5 drafts	store-order and wrapper sweeps exhausted; see docs/nonmatching/kernel/dds3AdminiProcess.md
+src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	1 fn / 256 B	pending requests and retained buffers use their file and memory provider types
+src/smt3/field/fldCamera.c	redthing1	done	2026-10-28	1 fn / 380 B	follow-camera eye and target parameters through four-field table rows
+src/smt3/field/fldCamera.c	redthing1	done	2026-10-28	1 fn / 504 B	player target reset using provider vector types and native eye/target dataflow
+src/smt3/interface/frName.c	redthing1	done	2026-10-28	1 fn / 252 B	lazy image translation through four targets and sixteen inline glyph bitmaps
+src/smt3/newbattle/nbAi.c	redthing1	done	2026-10-28	1 fn / 188 B	three-entry AI selection and native script dispatch; exact provider context
+src/smt3/newbattle/nbAi.c	redthing1	done	2026-10-28	1 fn / 336 B	AI target selection; skill-specific random dispatch, selection marks and fallback command
+src/smt3/interface/itfMesManager.c	redthing1	done	2026-10-28	1 fn / 216 B	message and speaker vertical movement; recover separate tail helper boundary
+src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	1 fn / 360 B	name character deletion; shift live row and preserve count/global reloads
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 228 B	registration confirmation; qualified local reset preserves native callback call shape
+src/smt3/newbattle/nbHelpProcess.c	redthing1	done	2026-10-28	1 fn / 336 B	three-part help panel geometry with signed width, opacity and typed sprite resources
+src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	19 functions / 5244 B	sdfFileRpcHandleCmd matched from address-paired C donor
+src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	2 fn / 256 B	fclBlendColor and func_00213DF0; unsigned packed color arithmetic
+src/smt3/newbattle/nbMaeProcess.c	redthing1	done	2026-10-28	3 fn / 284 B	remaining callbacks matched; unit has no assembly fallbacks
+src/smt3/facility/fclTerminalUpdate.c	redthing1	done	2026-10-28	3 fn / 480 B	Act/cursor/list helpers matched; confirm sequence remains assembly
+src/smt3/newbattle/nbCameraCommand.c	redthing1	done	2026-10-28	1 fn / 100 B	FixPos wrapper matched; three state drafts retained
+src/smt3/facility/fclShopInit.c	redthing1	done	2026-10-28	0 matches	three ordinary trials parked; production unchanged
+src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	2 fn / 104 B	nmeDrawCursor and nmeDrawTextBox wrappers; whole-unit check 2 match, 0 differ
+src/smt3/event/evtMoon.c	redthing1	done	2026-10-28	3 fn / 324 B	evtEnableMoonDraw, evtInitMoonProcess, and evtMoonShutdown; process lifecycle via dds3ProcessID_t and six sdfTexHandle_t owners; whole-unit check 12 match, 0 differ
+src/smt3/facility/fclShopCalc.c	redthing1	done	2026-10-28	0 matches	ordinary price/count trials remain short; production unchanged
+src/smt3/newbattle/nbCameraCommand.c	redthing1	done	2026-10-28	0 matches	retained published drafts; pointer/state/forward-branch forms did not resolve delay slot
+src/smt3/newbattle/nbResultProcess.c	redthing1	done	2026-10-28	5 fn / 396 B	texture cleanup, experience cap and result lifecycle; typed process slot
+src/smt3/newbattle/nbTarSelProcess.c	redthing1	done	2026-10-28	5 fn / 280 B	status accessors, automatic selection, shutdown and process creation
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	2 fn / 148 B	character-code indexing and three-row initialization
+src/smt3/event/evtMoon.c	redthing1	done	2026-10-28	1 fn / 300 B	evtMoonProcess1; PAC texture-list transfer into six owned handles
+src/smt3/effect/polyManager.c	redthing1	done	2026-10-28	3 functions / 1804 B	dds3TrackPolyVCRefresh_ParType2, Set_AcuteW, Set2_Acute matched from current DDS C bodies
+src/smt3/effect/polyManager.c	redthing1	done	2026-10-28	1 fn / 344 B	dds3SpPoly_Ring_Old_New matched from immutable DDS C donor using typed no-global-clobber copy contract; whole-unit 84 match, 0 differ
+src/smt3/newbattle/nbAtoProcess.c	redthing1	done	2026-10-28	1 fn / 92 B	three boot resource loads; process initializer already matched on main
+src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	2 fn / 320 B	terminal process startup/destruction with recovered work layout
+src/smt3/kernel/dds3CreateData.c	redthing1	done	2026-10-28	2 fn / 416 B	UI field setup and font cleanup; natural texture-loader draft retained
+src/smt3/interface/frWrap.c	redthing1	done	2026-10-28	1 fn / 32 B	fixed-mode font request wrapper
+src/smt3/facility/fclPanel.c	redthing1	done	2026-10-28	3 fn / 752 B	creation, gradient background and edges; full unit exact
+src/smt3/facility/fclShare.c	redthing1	done	2026-10-28	1 fn / 148 B	animation switch/callback/phase return; consumer declarations corrected
+src/smt3/pb/pbRecord.c	redthing1	done	2026-10-28	0 matches	record field offsets recovered; candidate argument/temporary layouts unresolved
+src/smt3/sdf/sdfCd.c	redthing1	done	2026-10-28	3 fn / 704 B	streaming retry, direct file lookup and load start; mode output is a byte
+src/smt3/field/fldAutoMap.c	redthing1	done	2026-10-28	2 fn / 472 B	fldAmModelLoadFile and fldAutoMapModelLoad; real provider visibility closes caller
+src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 1752 B	sdfGrFlushOtChain VIF/DMA traversal; whole unit 58 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 192 B	rstUpdateSeqEvoAt; hearts helpers retain their assembly fallbacks
+src/smt3/pipe/pipeEffect.c	redthing1	done	2026-10-28	0 new matches	pipeEffLoad independently published in b6fde46; kept main version
+src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	typed order/stock trials remain control-flow and allocation residuals
+src/smt3/sdf/sdfCd.c	redthing1	done	2026-10-28	2 fn / 636 B	indexed lookup and tray wait; translation unit has no function fallbacks
+src/smt3/interface/frName.c	redthing1	done	2026-10-28	0 matches	name image and request trials remain assembly
+src/smt3/facility/fclRagInit.c	redthing1	done	2026-10-28	3 fn / 748 B	startup lookup and allocator matched; row conversion follow-up active
+src/smt3/facility/fclRecoverCalc.c	redthing1	done	2026-10-28	2 fn / 340 B	price dispatch and unsigned HP MP formula matched; full-heal follow-up active
+src/smt3/kernel/dds3GlobalWork.c	redthing1	done	2026-10-28	dds3PrimLine3D	VU0 basis transform and packet reconstruction
+src/smt3/event/evtCommand.c	redthing1	done	2026-10-28	evtCommand_MODEL_RGB	color-command sibling and packing-contract review
+src/smt3/sdf/sdf3D.c	redthing1	done	2026-10-28	1 fn / 696 B	sdf3DMakeLightParallelPacket; VU scratch and shared scalar/packet helpers
+src/smt3/sdf/sdfQuat.c	redthing1	done	2026-10-28	2 fn / 556 B	FromEulerXYZ and FromEuler; ordered VU quaternion scratch
+src/smt3/sdf/sdf3D.c	redthing1	done	2026-10-28	1 fn / 480 B	sdf3DMakeScreenParam; perspective and clip-to-screen mapping
+src/smt3/newbattle/nbMainProcess.c	redthing1	done	2026-10-28	1 fn / 516 B	battle debug camera selection and display; complete unit 42 match, 0 differ
+src/smt3/newbattle/nbHelpProcess.c	redthing1	done	2026-10-28	1 fn / 652 B	help text and message drawing lifecycle; complete unit 14 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	3 fn / 1092 B	cmpDrawTriG, cmpDrawBoxLine, cmpDraw3DPoly; typed primitive packets
+src/smt3/interface/frWrap.c	redthing1	done	2026-10-28	4 fn / 808 B	number and caption font-chain helpers; whole-unit 24 match, 0 differ
+src/smt3/newbattle/nbAtoProcess.c	redthing1	done	2026-10-28	2 fn / 300 B	stone and game-over callbacks; whole-unit 5 match, 0 differ; remaining siblings under review
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 336 B	cmpDrawSetup3DView; double-buffered camera and light packets
+src/smt3/newbattle/nbEventProcess.c	redthing1	done	2026-10-28	1 fn / 300 B	nbEventProcess3 recovery loop and event dispatch; whole-unit 21 match, 0 differ
+src/smt3/pipe/pipeResult.c	redthing1	done	2026-10-28	1 fn / 136 B	message completion and damage dispatch; whole-unit 7 match, 0 differ; section and initialization follow-up
+src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	2 fn / 160 B	paired battle light snapshots; complete unit 276 match, 0 differ
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	2 fn / 72 B	name-entry sequence flag and fade-out RGB helper; bounded 4-byte color state
+src/smt3/pipe/pipeMakaAnim.c	redthing1	done	2026-10-28	1 fn / 124 B	makaAdd; typed free-slot scan and normal or special-position setup; whole-unit 7 match, 0 differ
+src/smt3/field/fldTitle.c	redthing1	open	2026-10-28	1 fn / 300 B	four texture resources and title process startup; whole-unit 5 match, 0 differ; mini-title follow-up
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	1 fn / 80 B	nmeGetRowCount; sparse input-mode switch
+src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	2 fn / 88 B	backspace dispatch and name animation step
+src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	1 fn / 80 B	nmeCalc; fade gate and sequence termination flag
+src/smt3/newbattle/nbResultProcess.c	redthing1	done	2026-10-28	1 fn / 108 B	nbResultFindBestScore; four result records and capped global score
+src/smt3/field/fldSe.c	redthing1	done	2026-10-28	0 matches	BGM bit-check branch and tail-call residual
+src/smt3/kernel/dds3PadManager.c	redthing1	done	2026-10-28	0 matches	vibration smoothing control-flow residual
+src/smt3/event/evtEventViewer.c	redthing1	done	2026-10-28	0 matches	frame dispatch register and loop residual
+src/smt3/newbattle/nbCameraPress.c	redthing1	done	2026-10-28	0 matches	initialization tail-branch residual
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	0 new matches	shared work layout; flag fade and row-count helpers already published
+src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	2 fn / 128 B	cursor position and synchronization; retained published backspace and animation helpers
+src/smt3/field/fldTitle.c	redthing1	done	2026-10-28	1 fn / 300 B	four texture resources and title process startup; whole-unit 5 match, 0 differ; mini-title follow-up
+src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	1 fn / 308 B	full recovery input callback; whole-unit 7 match, 0 differ; panel animation remains assembly
+src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	1 fn / 260 B	MIDI motion-resource loop and file-load contracts; whole-unit 21 match, 0 differ
+src/smt3/field/fldCommand.c	redthing1	done	2026-10-28	1 fn / 544 B	model-OFF command with existing model-ON contracts; whole-unit 87 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 132 B	cmbGetSceneModel; typed scene and unit model lookup
+src/smt3/facility/fclShare.c	redthing1	done	2026-10-28	1 fallback / 92 B	fclDrawSpriteEx wrapper and local sprite-core helper
+src/smt3/newbattle/nbResultProcess.c	redthing1	done	2026-10-28	4 new fn / 732 B	caption allocation, level-up timer, shutdown and unit cleanup; recover EXP row types for published completion check; owner 11 match, 0 differ
+src/smt3/facility/fclDraw.c	redthing1	done	2026-10-28	4 fn / 652 B	sprite wrapper, centered number/caption and list text; owner 25 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 112 B	typed fusion result matrices and reset; owner 100 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 140 B	unordered devil pair result lookup; owner 105 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 132 B	stock caption box and sprite; owner 106 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	2 fn / 288 B	default and custom devil insertion; owner 112 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 148 B	action model release with delayed cleanup; owner 113 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	2 fn / 304 B	skill-slot insertion and inherited-skill replacement; owner 115 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 152 B	sequence phase model cleanup; owner 116 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 152 B	action model position, scale and link; owner 117 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 168 B	weighted inherited skill selection; owner 118 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 188 B	action model acquisition and typed work pointer caller; owner 119 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 184 B	default stock unit copy; owner 120 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 184 B	birth entry table lookup; owner 121 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 216 B	evolution parameter application; owner 122 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 140 B	action animation frame and ramp update; owner 123 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 204 B	filtered local stock construction; owner 124 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 220 B	unlocked pair lookup in both input orders; owner 125 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 212 B	stock frame box and sprite strip; owner 126 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 216 B	race combination lookup with one-based matrix storage; owner 127 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 220 B	first-devil selection initialization; owner 128 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 180 B	stock scrollbar with native row callback; owner 129 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 300 B	custom stock copy with maximum-stat refresh and HP/MP clamps; owner 130 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 220 B	stock-list panel, frame/text dispatch and background placement; owner 131 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 140 B	new-moon active-party pair presence scan and exclusive-result mask; owner 132 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 172 B	occupied stock compaction with custom copy and vacated-record clear; owner 133 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 268 B	moon-interval and race lookup with item and unlock eligibility; owner 134 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 400 B	three-devil rules in both orientations and eligible pair fallback; owner 135 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 324 B	devil and ordered-race rule lookup with eligibility checks; owner 136 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 364 B	inheritance attempt count, replacement retries and successful skill output; owner 137 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 352 B	sacrifice EXP bonus, capped level gains and parameter growth; owner 138 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 244 B	devil name and level font requests at fixed panel coordinates; owner 139 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 348 B	random devil selection with level bounds, eligibility and fallback; owner 140 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 484 B	stock display background rows, cells, rails and sprite strips; owner 141 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 284 B	information panel sprite group with repeated overlay pairs; owner 142 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 520 B	result icon tint array and mode-dependent filtered/direct sprites; owner 143 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 252 B	texture batch loading, panel texture and background sprite setup; owner 144 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 192 B	BGM track selection and play, stop or fade dispatch; owner 145 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 284 B	action work values from stock selection and birth record; owner 146 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	2 fn / 1036 B	action initialization and scaled smoke creation with returned handles; owner 148 match, 0 differ
+src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	1 fn / 168 B	panel animation state callback; switch fallthrough and qualified reorg trace; whole-unit 8 match, 0 differ
+src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	2 fn / 404 B	list initialization and work allocator; recovered prefix bytes and script data output; whole-unit 22 match, 0 differ
+src/smt3/pipe/pipeEffect.c	redthing1	done	2026-10-28	1 fn / 160 B	free effect slot allocation with typed initialization and qualified scheduler evidence; whole-unit 8 match, 0 differ
+src/smt3/effect/effEvent.c	redthing1	done	2026-10-28	1 fn / 2868 B	effEVECombParSmokeDraw; current batched smoke sibling and adjacent OT views
+src/smt3/newbattle/nbCameraHelper.c	redthing1	done	2026-10-28	0 matches; draft 269/270 words	dds3EffectFileListCreate; only loop annul bit remains, ASM fallback retained
+src/smt3/field/fldHit.c	redthing1	done	2026-10-28	1 fn / 5360 B	fldMakePlane; five collision passes and typed plane records
+src/smt3/kernel/dds3CreateData.c	redthing1	done	2026-10-28	2 fn / 328 B	staff draw and width wrappers; true font return types and trailing unused request contract; whole-unit 7 match, 0 differ
+src/smt3/facility/fclRagUpdate.c	redthing1	done	2026-10-28	1 fn / 320 B	Rag selection dispatch and sequence state writes; whole-unit 12 match, 0 differ
+src/smt3/pipe/pipeSection.c	redthing1	done	2026-10-28	1 fn / 212 B	death-action effect lifecycle and alpha update; whole-unit 15 match, 0 differ
+src/smt3/kernel/dds3CreateData.c	redthing1	done	2026-10-28	1 fn / 708 B	staff asset initialization; paired texture arrays and padded path pool preserved; whole-unit 8 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 216 B	cmpFindFreeStockSlot; actual signed-byte args and list index
+src/smt3/code_0029B780.c	redthing1	done	2026-10-28	1 fn / 212 B	dds3AllocConfigWork; typed 0x10A8 config owner and cursor span
+src/smt3/facility/fclShopInit.c	redthing1	done	2026-10-28	1 fn / 220 B	shpFindItemSlot; signed item count and corrected count-helper contract
+src/smt3/newbattle/nbEncount.c	redthing1	done	2026-10-28	2 fn / 872 B	encounter threshold and distance/weighted selection; owner 9 match, 0 differ; packed integer consumer corrected
+src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	2 fn / 852 B	physical/magic attack formulas, true conversion helpers and literal ownership; owner 67 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 176 B	cmpSetItSkMessageVar; dynamic encoded-name buffer and real message value contract
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	1 fn / 240 B	work allocation matched; cursor initialization and startup follow-up
+src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	cursor editing and movement	shared name work and actual helper contracts
+src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	3 fn / 588 B	character symbol and tab drawing; typed textures and data descriptor
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	3 fn / 668 B	allocation textures and name cursor initialization; remaining setup and startup stay assembly
+src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	0 matches	input-mode and editing residuals retain assembly
+src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	3 fn / 588 B	character symbol and tab drawing; typed textures and data descriptor
+src/smt3/interface/frFont.c	redthing1	done	2026-10-28	1 fn / 604 B	atlas glyph DMA GIF packet builder with actual packet views; whole-unit 74 match, 0 differ
+src/smt3/effect/billManager.c	redthing1	done	2026-10-28	1 fn / 1404 B	P2A polygon renderer, typed resource result and established aligned VU scratch; whole-unit 61 match, 0 differ
+src/smt3/facility/fclRagUpdate.c	redthing1	done	2026-10-28	1 fn / 160 B	selected-item lookup through typed storage and list cursors; whole-unit 13 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	2 fn / 568 B	cmpUseItem and cmpUseSkill; real error/status consumers and recovery skill argument
+src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 236 B	sdfSndInitCmdIF; thread descriptor and command/RPC thread startup
+src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 280 B	Kotowari ranking with recovered four-byte save arrays; owner 68 match, 0 differ
+src/smt3/effect/effBattleLight.c	redthing1	done	2026-10-28	2 fn / 764 B	point-light and model-color callbacks; native timing gate and vector ABI; owner 13 match, 0 differ
+src/smt3/field/fldFileResolver.c	redthing1	done	2026-10-28	1 fn / 576 B	FL1 resource resolution and effect-file loading; owner 34 match, 0 differ
+src/smt3/code_0029B780.c	redthing1	done	2026-10-28	1 fn / 304 B	dds3DrawConfigItem; phase-based colors and panel box strips
+src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 244 B	sdfSndInit; map setup, IOP allocation persistence, transfer and synchronization
+src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 284 B	treasure-search skill check with native inline item-table layout; owner 69 match, 0 differ
+src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	1 fn / 352 B	model-mark position provider with native model and skill exceptions; owner 64 match, 0 differ
+src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	0 matches	boss-record and automatic-recovery attempts remain assembly; owner 69 match, 0 differ
+src/smt3/facility/fclRagUpdate.c	redthing1	done	2026-10-28	0 matches	phase and choice helpers remain assembly; owner 13 match, 0 differ
+src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	1 fn / 480 B	party-position vectors with XYZ rotation and native selector table; owner 65 match, 0 differ
+src/smt3/interface/frName.c	redthing1	done	2026-10-28	0 matches	handle and restoration drafts remain unqualified
+src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	2 fn / 352 B	edit icons and mode tabs; unused third tab-draw argument established
+src/smt3/effect/billManager.c	redthing1	done	2026-10-28	0 matches	qualified reorg traces isolate annul eligibility; fallback retained
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	2 fn / 340 B	font-data bootstrap and script status entry; actual narrow arguments
+src/smt3/facility/fclRagInit.c	redthing1	done	2026-10-28	0 matches	preview-record setup remains assembly; owner 19 match, 0 differ
+src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	1 fn / 616 B	model-position provider with native camera and rotation paths; owner 66 match, 0 differ
+src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	1 fn / 512 B	world-position provider with camera and direction paths; owner 67 match, 0 differ
+src/smt3/facility/fclRagInit.c	redthing1	done	2026-10-28	0 matches	preview-loop and texture-load attempts remain assembly; owner 19 match, 0 differ
+src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	7 fn / 792 B	visibility callbacks recovered from one span; owner 74 match, 0 differ
+src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	3 fn / 100 B	sphere wrappers and corrected helper pairings; bounds core remains assembly; owner 77 match, 0 differ
+src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	1 fn / 228 B	message-state switch and actual narrow provider result; owner 41 match, 0 differ
+src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	normal skill setup remains assembly; owner 28 match, 0 differ
+src/smt3/facility/fclShare.c	redthing1	done	2026-10-28	0 matches	pad wrapper remains assembly
+src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	next-order helper remains assembly; signed cursor and full-width increment recovered
+src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	1 fn / 220 B	command reset and command-window flag; owner 23 match, 0 differ
+src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	3 fn / 600 B	terminal BGM selector, jump diagnostics, script-state callback; owner 26 match, 0 differ
+src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	order insertion remains assembly; owner 28 match, 0 differ
+src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	3 fn / 888 B	event bit guards, command scan and menu setup; owner 29 match, 0 differ
+src/smt3/facility/fclTerminalUpdate.c	redthing1	done	2026-10-28	0 matches	save entry and jump selector remain assembly; owner 8 match, 0 differ
+src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	2 fn / 624 B	recovery application and dispel scripts; owner 10 match, 0 differ
+src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	1 fn / 200 B	MIDI load-state helper; former caller is a separate unit; owner 22 match, 0 differ
+src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	2 fn / 884 B	root menu and process callbacks; owner 12 match, 0 differ
+src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	1 fn / 216 B	form resource release; owner 23 match, 0 differ
+src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	1 fn / 512 B	sequence-call dispatcher completes owner; 13 match, 0 differ
+src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	0 matches	music setup remains assembly; owner 23 match, 0 differ
+src/smt3/facility/fclRecoverCalc.c	redthing1	done	2026-10-28	0 matches	heal mask and stock construction remain assembly; owner 20 match, 0 differ
+src/smt3/facility/fclTerminalUpdate.c	redthing1	done	2026-10-28	1 fn / 344 B	transfer sequence; owner 9 match, 0 differ
+src/smt3/facility/fclTerminalUpdate.c	redthing1	done	2026-10-28	4 fn / 1600 B	confirmation, movie activities and process callback; owner 13 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 264 B	view bounds from native model and camera parameters; owner 93 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 672 B	summon pricing, availability and script preparation; owner 94 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 260 B	debug view-key selection; owner 95 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 516 B	debug model-bound display with native float promotion; owner 96 match, 0 differ
+src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 304 B	encounter item collection with typed reward bytes and four-slot insertion; owner 42 match, 0 differ
+src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 316 B	stone-death probability with native parameter, level, status and minimum threshold; owner 43 match, 0 differ
+src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 364 B	status-modifier rate with moon adjustment and signed integer half-step; owner 44 match, 0 differ
+src/smt3/newbattle/nbUnitProcess.c	redthing1	done	2026-10-28	1 fn / 692 B	formation update dispatcher; native state snapshots, motion gates and scale publication; owner 35 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 512 B	explanation background plane and gradient rectangles; owner 97 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 756 B	model view rotation, camera bounds and VU position control; owner 98 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 440 B	registration-all help sprites; owner 99 match, 0 differ
+src/smt3/kernel/ModeSelect.c	redthing1	done	2026-10-28	1 fn / 256 B	mode selector allocation, resources and process startup with forwarded mode; owner 12 match, 0 differ
+src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 152 B	debug sphere-distance labels with float varargs and recovered menu-item records; owner 280 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 136 B	integer pulse interpolation; owner 314 match, 0 differ
+src/smt3/pb/pbRecord.c	redthing1	done	2026-10-28	1 fn / 236 B	help display and dismissal callback; owner 7 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 204 B	evolution-stat lookup using native signed table keys and byte result; owner 65 match, 0 differ
+src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 344 B	maximum-HP skill power with native floating constants and ordered rate scaling; owner 45 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 344 B	gauge blink color interpolation; owner 315 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 168 B	phase-three text draw dispatch; owner 316 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 288 B	party selection input and cursor dispatch; owner 318 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 268 B	status allocation and active-party slot initialization; owner 319 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 200 B	weighted comment selection with native level/count eligibility and sixteen retries; owner 66 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 252 B	result comment source and message setup with native random gate and work fields; owner 67 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 372 B	root menu input and process dispatch; owner 320 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 372 B	cross-panel callback transition and native record copy; owner 321 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 292 B	item-list scrollbar and arrow input records; owner 322 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 340 B	status-model position and scaled camera-base update; owner 323 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 372 B	status-model camera vectors and viewport setup; owner 324 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 344 B	status-icon color and changed HP/MP limit comparison; owner 325 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 264 B	bounded skill-up candidate selection with native eligibility and rank gates; owner 68 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 272 B	eligible skill collection and random selection with signed byte output index; owner 69 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 148 B	level-table kind count using recovered 102-byte records and signed low-byte level selection; owner 70 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 468 B	Hearts grid cursor wrap and special-entry transitions; owner 326 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 572 B	status-window phase and model input dispatch; owner 329 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 188 B	Hearts triangle-gauge vertex and color setup; owner 330 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 260 B	Hearts removal confirmation and message phases; owner 331 match, 0 differ
+src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	1 fn / 156 B	queue insertion with preloaded formation party index and native sort start
+src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 480 B	control-table write dispatch with native copy lengths and shared IOP transfer
+src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	1 fn / 472 B	control-table read dispatch with native zero-fill case and synchronized snapshot
+src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 300 B	player template copy, stock initialization and native persistent-work clears; owner 73 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 196 B	devil level-up sequence setup and exhausted-stock fade transition; owner 74 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 180 B	automatic devil parameter bonus assignment with signed selection and native cap; owner 75 match, 0 differ
+src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 196 B	ascending active-companion scan, death status and party-flag removal
+src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 276 B	pipe damage components, event scaling and nonfatal HP clamp
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	2 fn / 668 B	Hearts attachment status and confirmation with qualified local resets; owner 333 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 220 B	message-state status rendering with signed cursor row and native display-mode argument; owner 76 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 284 B	animated frame interpolation and drawing; owner 334 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 164 B	evolution event eligibility using level-table records and native positive-difference thresholds; owner 78 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 160 B	parameter confirmation apply/reset transitions with native three-node selection dispatch; owner 26 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 348 B	devil parameter message iteration with signed bonuses and current cursor reload after callbacks; owner 27 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 332 B	Hearts mastery registration, class-change notification and bonus application; owner 28 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 328 B	Hearts event choice and panel completion transitions with shared state update; owner 29 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 560 B	item and Hearts gift selection, message progression and motion transitions; owner 30 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 508 B	skill replacement confirmation, cursor-byte selection and apply/cancel transitions; owner 31 match, 0 differ
+src/smt3/interface/frName.c	redthing1	done	2026-10-28	0 matches / 2 guarded drafts	font-image reference release and C-name conversion; exact-size 12-word and 4-word residuals
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 512 B	result-update dispatcher with native phase jump table, early returns and previous-state callbacks; owner 32 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 520 B	evolution animation stages with distinct source work, unconditional timer reset and completion return; owner 33 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 444 B	evolution confirmation and decline with shared cursor transition and signed result state; owner 34 match, 0 differ
+src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	terminal event mode dispatch; exact-size eight-word scheduling/control-flow residual
+src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 264 B	battle debug flag snapshot with typed signed status extraction and native byte outputs; owner 285 match, 0 differ
+src/smt3/code_001C55F8.c	redthing1	done	2026-10-28	1 fn / 224 B	camera helper file load and effect-part creation; owner 11 match, 0 differ
+src/smt3/code_001C55F8.c	redthing1	done	2026-10-28	1 fn / 252 B	PB file selection and viewer callback replacement; owner 12 match, 0 differ
+src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 656 B	battle status update from thirteen native byte controls with exact flag polarity and read/write order; owner 286 match, 0 differ
+src/smt3/facility/fclPanel.c	redthing1	done	2026-10-28	1 fn / 416 B	panel corner drawing with cached right-edge coordinate and native flip flags; owner 15 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 1404 B	result calculation dispatcher with signed phase jump table, shared level-up transitions and native callback reloads; owner 80 match, 0 differ
+src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	2 fn / 584 B	paired character camera updates using four-lane vectors and target-offset array; owner 53 match, 0 differ
+src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 204 B	Hearts skill eligibility scan from current slot, signed level threshold and duplicate ownership check; owner 81 match, 0 differ
+src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	2 fn / 628 B	directional and signed grid-coordinate camera updates; owner 55 match, 0 differ
+src/smt3/kernel/dds3TitleMain.c	redthing1	done	2026-10-28	1 fn / 560 B	title animation with native unsigned angle clamp, sine alpha pulse and reloaded text colors; owner 9 match, 0 differ
+src/smt3/kernel/dds3TitleMain.c	redthing1	done	2026-10-28	1 fn / 880 B	title cursor alpha pulse, selection sprites and native return/break text dispatch; owner 10 match, 0 differ
+src/smt3/kernel/dds3TitleMain.c	redthing1	done	2026-10-28	1 fn / 108 B	toggle and packed-alpha update with direct signed clamp expression; owner 11 match, 0 differ
+src/smt3/pb/pbDebugMode.c	redthing1	done	2026-10-28	1 fn / 432 B	debug menu cursor wrapping, cancel/confirm phases and menu text rendering; owner 9 match, 0 differ
+src/smt3/pb/pbMain.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	editor constructor/state dispatch with accurate sound return and exact-size three-word flag-load residual
+src/smt3/facility/fclDraw.c	redthing1	done	2026-10-28	1 fn / 376 B	shop count sprite/font rendering with native OT and numeric X-derived baseline; owner 27 match, 0 differ
+src/smt3/newbattle/nbCameraSkill.c	redthing1	done	2026-10-28	1 fn / 364 B	skill-attack camera state with actual ground-collision C provider; isolated owner 29 match, 0 differ
+src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	1 fn / 424 B	push collision with signed coordinate wrapping and live group reloads; owner 56 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 308 B	name-entry opposing gradient triangles with contiguous vertex colors; owner 337 match, 0 differ
+src/smt3/field/fldSky.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	sky gradient grid and fade reconstruction; native size with twelve temporary stack-location differences
+src/smt3/newbattle/nbMakePacket.c	redthing1	done	2026-10-28	1 fn / 416 B	press-count adjustment with native case transitions, bounded counts and qualified one-pass loop

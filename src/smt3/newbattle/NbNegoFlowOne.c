@@ -412,19 +412,18 @@ s32 Flow1_3(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 46 of 72 words differ (first at +0x28); at the exact size. */
-#ifdef NON_MATCHING
 s32 Flow1_4(nbNegoProcessData_t *n)
 {
     switch (n->nownegophase) {
     case 0:
         n->waitframe = 0x1E;
         break;
-    case 1:
-        if (n->ework->id != 0x96 && n->ework->id != 0x1D && n->ework->id != 3 &&
-            n->ework->id != 8 && n->ework->id != 0xD && n->ework->id != 0xA &&
-            n->ework->id != 5 && n->ework->id != 4 && n->ework->id != 0x10 &&
-            n->ework->id != 0x18 && n->ework->id != 0x1E && n->ework->id != 0x99 &&
+    case 1: {
+        u16 enemy = n->ework->id;
+        if (enemy != 0x96 && enemy != 0x1D && enemy != 3 &&
+            enemy != 8 && enemy != 0xD && enemy != 0xA &&
+            enemy != 5 && enemy != 4 && enemy != 0x10 &&
+            enemy != 0x18 && enemy != 0x1E && enemy != 0x99 &&
             evtGetAgeOfMoon() == 8) {
             nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x98, 0);
         } else {
@@ -432,11 +431,9 @@ s32 Flow1_4(nbNegoProcessData_t *n)
         }
         return 1;
     }
+    }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_4);
-#endif
 
 s32 Flow1_5(nbNegoProcessData_t *n)
 {
@@ -842,7 +839,50 @@ s32 Flow1_23(nbNegoProcessData_t *n)
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_23);
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_24);
+s32 Flow1_24(nbNegoProcessData_t *n)
+{
+    datUnitWork_t *work;
+    s32 chance;
+    s32 i;
+
+    nbAddNegoIdKouho(n, 0x1001B);
+    nbAddNegoIdKouho(n, 0x10019);
+    n->nextnegoid = n->nextkouho[0];
+    chance = 0x32 / (n->data->enemypcnt - 1);
+
+    for (i = 4; i < 14; i++) {
+        nbParty_t *party = &n->data->party[i];
+        u16 flags = party->flag;
+
+        if ((flags & 1) == 0) {
+            continue;
+        }
+        if ((flags & 2) == 0) {
+            continue;
+        }
+        if (flags & 0x38) {
+            continue;
+        }
+        if (i == n->epartyindex) {
+            continue;
+        }
+
+        work = nbGetUnitWorkPointer(n->data, party);
+        if (datCheckTalk(work) == 0) {
+            continue;
+        }
+        if (master_text[work->id].phase == 2) {
+            continue;
+        }
+        if (dds3GetRandIntA(0, 100) >= chance) {
+            continue;
+        }
+        n->nextnegoid = n->nextkouho[1];
+        n->boupartyindex = i;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_25);
 
@@ -898,8 +938,6 @@ s32 Flow1_28(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 18 of 29 words differ (first at +0x1C). */
-#ifdef NON_MATCHING
 s32 Flow1_29(nbNegoProcessData_t *n)
 {
     switch (n->nownegophase) {
@@ -912,9 +950,6 @@ s32 Flow1_29(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_29);
-#endif
 
 s32 Flow1_30(nbNegoProcessData_t *n)
 {

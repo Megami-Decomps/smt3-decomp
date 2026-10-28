@@ -1,5 +1,7 @@
 #include "common.h"
 #include "basic.h"
+#include "event.h"
+#include "kernel.h"
 
 /* The viewer's current menu, which EnterMain switches on to decide what Enter does
  * from each one. Names from the IDB. */
@@ -44,7 +46,11 @@ typedef struct evtViewerObject_s {
     s32 nameindex;
     s32 fileindex;
     s32 unitHandle;                /* 0x0C */
-    u8 unk10[8];
+    union {
+        u8 unk10[8];
+        /* Effect tracks carry their loaded resource at 0x10. */
+        struct { void *effectData; u8 unk14[4]; } effect;
+    };
     s32 childCount;                /* 0x18 */
     evtFrameInfo_t *p;      /* 0x1C */
     evtFrameInfo_t *lastChild;     /* 0x20 */
@@ -97,7 +103,9 @@ struct evtViewerInfo_t {
     s32 sp;                      /* 0x227C */
     s32 nowmenu;                     /* 0x2280 */
     s32 menusw;                   /* 0x2284 */
-    u8 unk2288[8];
+    s32 fldfilter;
+    /* Cancelled and cleared by the menu-step handler. */
+    dds3ProcessID_t *menuProcess;
     s32 drawblur2;                      /* 0x2290 */
     s32 drawmblur;                      /* 0x2294 */
     s32 drawdblur;                 /* 0x2298 */
@@ -139,7 +147,7 @@ extern evtViewerInfo_t *viewerinfo;
 extern void *memset(void *a, s32 b, u32 c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void evtFreePolygonMovieWorkData(void *wdata);
-extern void *dds3SceneBasicSearchNameAndType(void *scene, s32 type, const char *name);
+extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
 extern void *dds3AddBEDEffectObjectBasic2(void *data, f32 *pos, f32 *rot);
 extern void dds3EffectObjectBasicStatOn(void *basic, s32 s);
 extern void dds3StartBEDEffectObjectBasic(void *basic, s32 cutno);
@@ -624,7 +632,75 @@ void LinkEffectBasic(dds3Basic_t *eff, s32 nameindex, s32 posindex, s32 basefram
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", AddEffectTable2);
+extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *effdata, void *pos, void *rot);
+extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 type, void *effdata);
+extern s32 dds3EffectObjectPresetMG12(dds3Basic_t *eff);
+extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *eff, dds3Basic_t *p1,
+                                    dds3Basic_t *p2, dds3Basic_t *p3, dds3Basic_t *p4);
+
+s32 AddEffectTable2(s32 nowframe, evtViewerObject_s *object, evtFrameInfo_t *frame)
+{
+    f32 position[4];
+    f32 scale[4];
+    dds3Basic_t *effect;
+    s32 index;
+    s32 type;
+
+    effect = NULL;
+    memset(position, 0, sizeof(position));
+    memset(scale, 0, sizeof(scale));
+    scale[3] = 1.0f;
+
+    index = 0;
+    while (index < 0x7F && viewerinfo->effectBasic[index] != NULL) {
+        index++;
+    }
+    if (index == 0x7F) {
+        return -1;
+    }
+
+    type = object->type;
+    switch (type) {
+    case 3:
+        effect = dds3AddD3PEffectObjectBasic2(object->effect.effectData, position, scale);
+        if (frame->param.sb[4] != 0) {
+            dds3EffectObjectPresetMG12(effect);
+        }
+        LinkEffectBasic(effect, (s16)frame->param.sh[3], frame->param.sb[5], frame->frame);
+        break;
+    case 20:
+    case 21: {
+        dds3Basic_t *part0;
+        dds3Basic_t *part1;
+        dds3Basic_t *part2;
+        dds3Basic_t *part3;
+
+        switch (type) {
+        case 20:
+            effect = dds3AddMG12EffectObjectBasic2(1, object->effect.effectData);
+            break;
+        case 21:
+            effect = dds3AddMG12EffectObjectBasic2(2, object->effect.effectData);
+            break;
+        }
+        part0 = SearchBasicFromNameIndex_evtEventViewer(frame->param.sb[4]);
+        part1 = SearchBasicFromNameIndex_evtEventViewer(frame->param.sb[5]);
+        part2 = SearchBasicFromNameIndex_evtEventViewer(frame->param.sb[6]);
+        part3 = SearchBasicFromNameIndex_evtEventViewer(frame->param.sb[7]);
+        dds3EffectObjectSetMG12Pos(effect, part0, part1, part2, part3);
+        if (frame->param.sb[1] != 0) {
+            dds3EffectObjectPresetMG12(effect);
+        }
+        break;
+    }
+    }
+
+    viewerinfo->effectBasic[index] = effect;
+    if (effect != NULL) {
+        dds3EffectObjectBasicStatOn(effect, 1);
+    }
+    return index;
+}
 
 void DelEffectTable_evtEventViewer(s32 index)
 {
@@ -706,7 +782,105 @@ void SetActiveCamera(void)
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrame1);
+extern void evtEffectLoopControl(dds3Basic_t *effect, s32 sw);
+extern s32 evtPlaySe(s32 eventNo, s32 soundNo);
+extern void dds3SetQuake(s32 frame, s32 range);
+extern void dds3StopQuake(void);
+
+void RunFrame1(evtViewerObject_s *track, evtFrameInfo_t *frameInfo, s32 nowFrame)
+{
+    switch (track->type) {
+    /* Other viewer track kinds do no work in this frame pass. */
+    case 0:
+    case 1:
+    case 2:
+    case 4:
+    case 6:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 19:
+    case 22:
+    case 23:
+        break;
+    case 3:
+    case 20:
+    case 21: {
+        dds3Basic_t *effect;
+
+        if (nowFrame >= frameInfo->frame) {
+            if (frameInfo->param.sb[0] < 0) {
+                frameInfo->param.sb[0] = AddEffectTable2(nowFrame, track, frameInfo);
+            }
+        }
+        if (frameInfo->param.sb[0] < 0) {
+            break;
+        }
+        effect = viewerinfo->effectBasic[frameInfo->param.sb[0]];
+        if (effect == NULL) {
+            return;
+        }
+
+        if (nowFrame >= frameInfo->index && frameInfo->index != 0) {
+            evtEffectLoopControl(effect, 0);
+            frameInfo->param.sw[2] = 1;
+        } else if (frameInfo->param.sw[2] == 1) {
+            DelEffectTable_evtEventViewer(frameInfo->param.sb[0]);
+            frameInfo->param.sb[0] = -1;
+            frameInfo->param.sb[0] = AddEffectTable2(nowFrame, track, frameInfo);
+            frameInfo->param.sw[2] = 0;
+        }
+
+        if (track->type == 21) {
+            dds3Basic_t *part0;
+            dds3Basic_t *part1;
+            dds3Basic_t *part2;
+            dds3Basic_t *part3;
+
+            effect = viewerinfo->effectBasic[frameInfo->param.sb[0]];
+            if (effect == NULL) {
+                return;
+            }
+            part0 = SearchBasicFromNameIndex_evtEventViewer(frameInfo->param.sb[4]);
+            part1 = SearchBasicFromNameIndex_evtEventViewer(frameInfo->param.sb[5]);
+            part2 = SearchBasicFromNameIndex_evtEventViewer(frameInfo->param.sb[6]);
+            part3 = SearchBasicFromNameIndex_evtEventViewer(frameInfo->param.sb[7]);
+            dds3EffectObjectSetMG12Pos(effect, part0, part1, part2, part3);
+            return;
+        }
+        break;
+    }
+    case 18:
+        if (nowFrame == frameInfo->frame) {
+            DelBED(frameInfo);
+            frameInfo->work = AddBED(track->effect.effectData, frameInfo->param.sb[4],
+                                     (s16)frameInfo->param.sh[1], -1,
+                                     frameInfo->frame);
+        }
+        break;
+    case 5:
+        evtPlaySe(D_0054F824, (s16)frameInfo->param.sh[0]);
+        return;
+    case 7:
+        if (frameInfo->index == 0 && (s16)frameInfo->param.sh[0] == 0) {
+            viewerinfo->flags &= ~2;
+            dds3StopQuake();
+            return;
+        }
+        if (nowFrame == frameInfo->frame) {
+            viewerinfo->flags |= 2;
+            dds3SetQuake(frameInfo->index, (s16)frameInfo->param.sh[0]);
+        }
+        break;
+    }
+}
 
 void OutFrame1(evtViewerObject_s *track, evtFrameInfo_t *node)
 {
@@ -731,7 +905,85 @@ void OutFrame1(evtViewerObject_s *track, evtFrameInfo_t *node)
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrame2);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrame3);
+extern evtUnit_t *evtGetUnitHandle2(dds3Basic_t *basic);
+extern void evtLinkLightObjectBasic(evtUnit_t *unit, dds3Basic_t *light,
+                                    s32 frame);
+extern void evtUnlinkLightObjectBasic(evtUnit_t *unit, s32 frame);
+extern dds3Basic_t *dds3GetActiveScene(void);
+
+void RunFrame3(s32 nowframe) {
+    dds3Basic_t *scene;
+    dds3SceneBasic_t *sceneWork;
+    dds3Basic_t *outerBasic;
+    evtViewerObject_s *track;
+    evtFrameInfo_t *frameInfo;
+    evtFrameInfo_t *bestFrame;
+    dds3Basic_t *lightBasic;
+    evtUnit_t *unit;
+    s32 bestFrameNumber;
+
+    if (dds3GetActiveScene() == NULL) {
+        return;
+    }
+    scene = dds3GetActiveScene();
+    sceneWork = scene->workdata;
+    for (outerBasic = sceneWork->basictable[BASIC_TYPE_UNITOBJECT].firstbasic;
+         outerBasic != NULL; outerBasic = outerBasic->next) {
+        if (outerBasic->name == NULL) {
+            continue;
+        }
+        bestFrame = NULL;
+        lightBasic = NULL;
+        bestFrameNumber = -1;
+        for (track = viewerinfo->firstobjinfo; track != NULL;
+             track = track->next) {
+            if (track->type != 9) {
+                continue;
+            }
+            for (frameInfo = track->p; frameInfo != NULL;
+                 frameInfo = frameInfo->next) {
+                dds3Basic_t *namedBasic;
+
+                if (nowframe < (s32)frameInfo->frame ||
+                    (s16)frameInfo->param.sh[0] < 0) {
+                    continue;
+                }
+                scene = dds3GetActiveScene();
+                namedBasic = dds3SceneBasicSearchNameAndType(
+                    scene, BASIC_TYPE_UNITOBJECT,
+                    viewerinfo->nametable[
+                        (s16)frameInfo->param.sh[0]]);
+                if (outerBasic != namedBasic ||
+                    (s32)frameInfo->frame <= bestFrameNumber) {
+                    continue;
+                }
+                bestFrameNumber = frameInfo->frame;
+                bestFrame = frameInfo;
+                lightBasic = (dds3Basic_t *)track->unitHandle;
+            }
+        }
+
+        unit = evtGetUnitHandle2(outerBasic);
+        if (bestFrame != NULL) {
+            if ((s16)bestFrame->param.sh[1] != 0) {
+                if (unit->currentTransitionValue != (s32)lightBasic ||
+                    (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION) == 0) {
+                    evtLinkLightObjectBasic(unit, lightBasic, bestFrame->index);
+                }
+            } else {
+                if ((unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION) == 0) {
+                    continue;
+                }
+                if ((unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_OUT) != 0) {
+                    continue;
+                }
+                evtUnlinkLightObjectBasic(unit, bestFrame->index);
+            }
+        } else if (unit->currentTransitionValue != 0) {
+            evtUnlinkLightObjectBasic(unit, 0);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrameUnit);
 
@@ -949,7 +1201,94 @@ s32 EnterMain(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", EnterSelect);
+s32 EnterSelect(s32 unused, s32 menuMode)
+{
+    s32 completed = 0;
+    evtFrameInfo_t *node;
+    switch (menuMode) {
+    case 1:
+        switch (viewerinfo->fileMode) {
+        case 3:
+            if (viewerinfo->select_y == 0) {
+                completed = 1;
+                evtSetFirstFrame();
+            } else {
+                PopMenu();
+            }
+            break;
+        case 4:
+            if (viewerinfo->select_y == 0) {
+                completed = 1;
+                evtSetLastFrame();
+            } else {
+                PopMenu();
+            }
+            break;
+        }
+        break;
+    case 5:
+        node = evtGetSelectFrameInfo();
+        switch (viewerinfo->framelist_type) {
+        case -1:
+            if (viewerinfo->select_y == 0) DelFrameInfo2();
+            break;
+        case 5:
+            switch (viewerinfo->framelist_target->type) {
+            case 8:
+                node->param.sh[2] = viewerinfo->select_y;
+                break;
+            case 10:
+                node->nameIndex = viewerinfo->select_y;
+                break;
+            case 11: case 13: case 14: case 15: case 16: case 17: case 23:
+                node->param.sh[0] = viewerinfo->select_y;
+                break;
+            }
+            break;
+        case 11:
+            switch (viewerinfo->framelist_target->type) {
+            case 9:
+                node->param.sh[1] = viewerinfo->select_y;
+                break;
+            case 22:
+                node->param.sh[0] = viewerinfo->select_y;
+                break;
+            }
+            break;
+        case 16:
+            switch (viewerinfo->framelist_target->type) {
+            case 3:
+                node->param.sb[4] = viewerinfo->select_y;
+                break;
+            case 20: case 21:
+                node->param.sb[1] = viewerinfo->select_y;
+                break;
+            }
+            break;
+        case 12:
+            switch (viewerinfo->framelist_target->type) {
+            case 6:
+                node->param.sh[0] = viewerinfo->select_y;
+                break;
+            case 12:
+                node->param.sh[0] = viewerinfo->select_y;
+                viewerinfo->fldfilter = 0;
+                break;
+            case 19:
+                node->param.sh[0] = viewerinfo->select_y;
+                break;
+            case 1:
+                node->param.sb[0] = viewerinfo->select_y;
+                break;
+            }
+            break;
+        }
+        evtRunFrame(viewerinfo->nowframe);
+        PopMenu();
+        break;
+    }
+    return completed ? -1 : 0;
+}
 
 s32 EnterObjList(void)
 {

@@ -10,6 +10,9 @@
 extern void Mult(void);
 
 extern f32 D_00543720[];
+extern char D_00543730[];
+
+extern f32 D_003FA7A0[];
 
 extern u8 D_003493A0[];
 
@@ -99,7 +102,7 @@ typedef struct pmdProcessWork_t {
 
 extern sdfGrOt_t sdfGrOtTable[];
 
-void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag);
+void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag);
 
 extern void *sdfGrAllocPacketBuff(u32 aSize);
 
@@ -141,13 +144,15 @@ extern s32 mdlGetMinorNum(mdlObj_t *aHandle);
 /* The 0x1C-byte motion records at datUnitVisual_t +0x2C; the shared view splits
  * the same bytes as part[], six bytes later. */
 typedef struct nbUnitMotion_t {
-    u16 unk00;
+    s16 movetype;
     u16 actframe;
-    u8 unk04[8];
-    f32 r;
+    s32 se_no;
+    f32 motionsp;
+    f32 atarisize;
     f32 movey;
     f32 movez;
-    u8 unk18[4];
+    s16 bframe;
+    s16 hframe;
 } nbUnitMotion_t;
 
 extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 ritu);
@@ -164,6 +169,55 @@ extern s32 nbMakeUnitFadeInPacket(s32 startframe, void *uniqueid, nbFormation_t 
                                   s32 delay, s32 aframe, s32 colframe);
 
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, struct nbParty_t *party);
+
+extern void dds3DeleteSceneBasicData(struct dds3Basic_t *basic);
+
+extern void effBTLSystemDelete2(struct effBTLSysHandle_t *hEffBTLSys);
+
+extern void nbSetFormationSideFlag(nbFormation_t *form, s32 index);
+
+extern void nbGetFormEntry(s32 id);
+
+extern u32 datGetMaxHp(datUnitWork_t *work);
+
+extern u32 datGetMaxMp(datUnitWork_t *work);
+
+extern void datClearCommMemory(datUnitWork_t *work);
+
+extern s32 evtSetRegistUnit(s32 major, s32 minor);
+
+extern dds3Basic_t *dds3GetActiveScene(void);
+
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serial, s32 type);
+
+extern void dds3LinkLightObjectToUnitObject(dds3Basic_t *light, dds3Basic_t *unit, s32 flag);
+
+extern void dds3SetRotPoseSet(dds3Basic_t *basic, u128 *rot);
+
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *basic, s32 flag);
+
+extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 flag);
+
+extern void evtSetUnitColorRGB(struct evtUnit_t *unit, s32 frame, u32 rgb);
+
+extern void evtSetUnitColorA(struct evtUnit_t *unit, s32 frame, u32 alpha);
+
+extern void nbFormDispOff(s32 formindex);
+
+extern u32 nbGetModelColor(nbFormation_t *form);
+
+extern void mdlSetEffectScale(mdlObj_t *model, f32 scale);
+
+extern void nbLoadModelPackIfEnabled(nbFormation_t *form, s32 group, s32 no);
+extern s32 nbCheckModelPackLoaded(nbFormation_t *form, s32 group, s32 id);
+extern s32 nbLoadMidiFile(s32 no);
+extern void sdfMotionSeek(sdfMotionCtrlr_t *ctrlr, f32 frame);
+extern struct nbKoukaPacket_t *nbAddBadEffKoukaPacket(s32 startframe, s32 uniqueid,
+                                                   nbFormation_t *form, u32 bad);
+extern struct nbKoukaPacket_t *nbAddBadMotKoukaPacket(s32 startframe, s32 uniqueid,
+                                                   nbFormation_t *form, s32 badstat);
+extern s32 dds3GetRandIntA(s32 minimum, s32 range);
+extern s32 printf(const char *format, ...);
 
 datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 
@@ -224,33 +278,37 @@ s32 nbSetNegoWaitMotion(nbFormation_t *form)
 
 INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbSetUnitMotion);
 
-/* NON_MATCHING: 8 of 54 words differ (first at +0x8C). */
-
-#ifdef NON_MATCHING
-
 void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 ritu)
 {
-    datUnitWork_t *work = nbGetUnitWorkFromFormindex(form->formindex);
-    s32 mot = GetDyingBadWaitMotion(form, motion, work);
-    s32 no;
+    datUnitWork_t *work;
+    datUnitVisual_t *visual;
+    nbUnitMotion_t *motionRecord;
+    s32 selectedMotion;
+    s32 unitid;
+    s32 motionNo;
     f32 speed;
 
-    if (nbGetUnitID(work) == 0) {
-        no = D_003493A0[mot];
+    work = nbGetUnitWorkFromFormindex(form->formindex);
+    selectedMotion = GetDyingBadWaitMotion(form, motion, work);
+    unitid = nbGetUnitID(work);
+    if (unitid == 0) {
+        motionNo = D_003493A0[selectedMotion];
     } else {
-        no = D_0034F1C0[mot];
+        motionNo = D_0034F1C0[selectedMotion];
     }
-    speed = *(f32 *)nbGetUnitVisual(work)->part[mot].unk02 * ritu;
-    evtSetWaitMotion(form->hunit, no);
+    /* The loop-end note keeps the multiply before both callbacks in sched2.
+     * Qualified cc1 trace: multiply133 precedes loop-end232 and call161;
+     * plain, dump and hooked output agree. See docs/CONTRIBUTING.md. */
+    do {
+        visual = nbGetUnitVisual(work);
+        motionRecord = (nbUnitMotion_t *)(selectedMotion * sizeof(nbUnitMotion_t) +
+                                         (u32)visual + 0x2C);
+        speed = motionRecord->motionsp * ritu;
+    } while (0);
+    evtSetWaitMotion(form->hunit, motionNo);
     evtSetWaitMotionSpeed(form->hunit, speed);
-    form->waitmot = mot;
+    form->waitmot = selectedMotion;
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbSetWaitMotion);
-
-#endif
 
 s32 nbCalcUnitVisual(nbFormation_t *form, s32 part)
 {
@@ -331,7 +389,90 @@ void func_0024D938(void)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbReturnUnit);
+void nbReturnUnit(s32 partyno, s32 lost, s32 dead)
+{
+    nbMainProcessData_t *data;
+    struct nbParty_t *party;
+    nbFormation_t *form;
+    datUnitWork_t *work;
+    u16 id;
+    u16 partyFlags;
+    u16 badstatus;
+
+    data = nbGetMainProcessData();
+    party = &data->party[partyno];
+    partyFlags = party->flag;
+    if ((partyFlags & 1) != 0) {
+        if ((party->flag & 8) == 0) {
+            form = &data->form[party->formindex];
+            if ((form->stat & 2) != 0) {
+                dds3DeleteSceneBasicData(form->basic);
+                form->basic = NULL;
+                form->serial = 0;
+                form->hunit = NULL;
+            }
+            if ((form->anime & 0x100) != 0 && form->badeff != NULL) {
+                effBTLSystemDelete2(form->badeff);
+                form->badeff = NULL;
+            }
+            form->partyindex = 0;
+            form->stat = 0;
+            form->flag = 0;
+            form->anime = 0;
+            form->type = 0;
+            nbSetFormationSideFlag(form, party->formindex);
+            party->flag |= 8;
+        }
+
+        work = nbGetUnitWorkPointer(data, party);
+        id = work->id;
+        if ((party->flag & 2) != 0) {
+            work->flag = 0;
+        } else if ((party->flag & 4) == 0) {
+            if (lost != 0) {
+                work->flag = 0;
+            } else {
+                work->flag &= ~2u;
+            }
+
+            if (dead != 0) {
+                badstatus = work->badstatus;
+                if ((badstatus & 0xFFF) == 0x200) {
+                    work->badstatus = badstatus & 0xFDFF;
+                    work->maxhp = datGetMaxHp(work);
+                    work->maxmp = datGetMaxMp(work);
+                }
+                work->badstatus = 0x800;
+                work->hp = 0;
+            } else {
+                badstatus = work->badstatus;
+                switch (badstatus & 0xFFF) {
+                case 1:
+                case 2:
+                case 4:
+                case 8:
+                case 16:
+                case 128:
+                    work->badstatus = badstatus & 0xF000;
+                    break;
+                default:
+                    break;
+                }
+            }
+            datClearCommMemory(work);
+        }
+
+        nbGetFormEntry(id);
+        if ((party->flag & 2) != 0) {
+            data->enemypcnt--;
+        } else if ((party->flag & 4) == 0) {
+            data->playerpcnt--;
+        }
+        party->flag = 0;
+        party->formindex = -1;
+        party->statindex = -1;
+    }
+}
 
 void nb_24DBF0(s32 partyno, s32 noeffect)
 {
@@ -445,14 +586,14 @@ void nbSetDamage(nbFormation_t *form, f32 range, s32 week)
     form->type = 1;
     form->damageFrames = 20;
     form->time = 0;
-    *(s32 *)&form->addmovet = 0;
+    form->badframe = 0;
     work = nbGetUnitWorkFromFormindex(form->formindex);
     if ((form->stat & 0x40) != 0) {
         nbSetUnitMotion(form, 1, 0, 1.0f);
         if (week == 0) {
             s32 badframe = nbGetUnitVisual(work)->badframe;
 
-            *(s32 *)&form->addmovet = badframe;
+            form->badframe = badframe;
             form->damageFrames = badframe + 10;
         }
     }
@@ -467,7 +608,28 @@ void nbSetDamage2(nbFormation_t *form, f32 range)
     form->addmovet = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbSetBadstatMotion);
+void nbSetBadstatMotion(nbFormation_t *form, s32 type, f32 range)
+{
+    datUnitWork_t *work;
+    nbMainProcessData_t *data;
+    struct nbParty_t *party;
+
+    data = nbGetMainProcessData();
+    party = data->party;
+    form->type = 3;
+    form->time = 0;
+    form->damageRange = range;
+    form->damageFrames = 0;
+    work = nbGetUnitWorkPointer(data, &party[form->partyindex]);
+    if ((form->stat & 0x40) != 0) {
+        s32 badframe;
+
+        nbSetUnitMotion(form, 1, 0, 1.0f);
+        badframe = nbGetUnitVisual(work)->badframe;
+        form->damageFrames = badframe + 10;
+        form->badframe = badframe;
+    }
+}
 
 void nbSetBadstatMotion2(nbFormation_t *form)
 {
@@ -585,7 +747,83 @@ s32 nbCheckLoadGroup(s32 side)
     return 0;
 }
 
+/* NON_MATCHING: 14 of 152 words differ; see docs/nonmatching/newbattle/nbUnitProcess.md. */
+#ifdef NON_MATCHING
+void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork_t *work)
+{
+    u32 anime;
+    u32 phaseBits;
+    f32 phase;
+    f32 inversePhase;
+    f32 blend;
+    f32 power;
+    f32 step;
+    s32 motionIndex;
+
+    if ((form->stat & 2) != 0 && (data->stat & 0x1000) == 0 &&
+        mdlGetNumOfCut(form->hunit->owner, 0) >= 0x17) {
+        if (datCheckDying(work) != 0) {
+            motionIndex = form->hunit->owner->current.h.motionIndex;
+            if (motionIndex != 0x16 && (motionIndex == 0 || motionIndex == 2)) {
+                nbSetWaitMotion(form, 0, 1.0f);
+                nbSetUnitMotion(form, 0, 1, 1.0f);
+            }
+        } else if (form->hunit->owner->current.h.motionIndex == 0x16) {
+            nbSetWaitMotion(form, 0, 1.0f);
+            nbSetUnitMotion(form, 0, 1, 1.0f);
+        }
+    }
+
+    anime = form->anime;
+    if ((anime & 0x60) != 0) {
+        phase = form->range;
+        power = form->shakePower;
+        step = (1.0f - phase) * power;
+        form->shakePower = power + 0.02f;
+        if (step < 0.01f) {
+            step = 0.01f;
+        }
+        form->range = phase + step;
+        if (form->range > 1.0f) {
+            form->range = 1.0f;
+        }
+        SDF_VU0_LOADVECTOR(&form->startpos);
+        blend = form->range;
+        inversePhase = 1.0f - blend;
+        PS2_FLOAT_BITS(phaseBits, inversePhase);
+        SDF_VU0_SCALEVECTOR_BITS(phaseBits);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        if ((anime & 0x20) != 0) {
+            SDF_VU0_LOADVECTOR(&form->tarpos);
+        } else {
+            SDF_VU0_LOADVECTOR(&form->orgpos);
+        }
+        PS2_FLOAT_BITS(phaseBits, blend);
+        SDF_VU0_SCALEVECTOR_BITS(phaseBits);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_STOREVECTOR(&form->pos);
+        if (form->basic != NULL) {
+            dds3SetPosPoseSet(form->basic, &form->pos);
+            anime = form->anime;
+            blend = form->range;
+        }
+        if (blend >= 1.0f) {
+            if ((anime & 0x40) != 0) {
+                form->stat &= ~0x10;
+            }
+            form->anime = anime & ~0x20;
+            form->anime &= ~0x40;
+            anime = form->anime;
+        }
+    }
+    if ((anime & 0x400) != 0) {
+        nbSetHpScale(form);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", UpdateFormAnime);
+#endif
 
 void UpdateFormPosRot(nbFormation_t *form)
 {
@@ -701,7 +939,65 @@ void RunBadAction(nbMainProcessData_t *data, nbFormation_t *form)
     dds3SetPosPoseSet(form->basic, &pos);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", RunDamage);
+void RunDamage(nbMainProcessData_t *data, nbFormation_t *form)
+{
+    sdfVector4_t pos;
+    dds3Basic_t *basic = form->basic;
+    f32 offset;
+
+    if (basic == NULL) {
+        form->type = 0;
+        form->time = 0;
+        return;
+    }
+
+    switch (form->type) {
+    case 1:
+        if (form->badframe > 0 && form->badframe == form->time) {
+            form->hunit->owner->first->speed = 0.0f;
+        }
+        if (form->time >= (u32)form->damageFrames) {
+            form->type = 0;
+            form->time = 0;
+            SDF_VU0_COPYVECTOR(&pos, &form->pos);
+            dds3SetPosPoseSet(basic, &pos);
+            if ((form->anime & 0x80) == 0 &&
+                form->hunit->owner->first->speed == 0.0f) {
+                nbSetUnitMotion(form, 0, 1, 1.0f);
+            }
+            return;
+        }
+        break;
+    case 3:
+        form->anime |= 0x80;
+        if (form->badframe > 0 && form->badframe == form->time) {
+            form->hunit->owner->first->speed = 0.0f;
+        }
+        if (form->time >= (u32)form->damageFrames) {
+            form->type = 0;
+            form->time = 0;
+            SDF_VU0_COPYVECTOR(&pos, &form->pos);
+            dds3SetPosPoseSet(basic, &pos);
+            return;
+        }
+        break;
+    }
+
+    offset = dds3GetRandFloatA(0) * form->damageRange;
+    if ((form->time & 1) != 0) {
+        offset = -offset;
+    }
+    SDF_VU0_COPYVECTOR(&pos, &form->pos);
+    pos.x += offset;
+    dds3SetPosPoseSet(form->basic, &pos);
+
+    if (form->damageRange > 0.0f) {
+        form->damageRange -= 0.7f;
+        if (form->damageRange < 0.0f) {
+            form->damageRange = 0.0f;
+        }
+    }
+}
 
 s32 nbCheckModelLoad(nbMainProcessData_t *data, s32 major, s32 minor)
 {
@@ -721,11 +1017,70 @@ s32 nbCheckModelLoad(nbMainProcessData_t *data, s32 major, s32 minor)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", RegistUnit);
-
-s32 CheckLoad_nbUnitProcess(pmdProcessWork_t *wdata)
+void RegistUnit(nbMainProcessData_t *data, s32 major, s32 minor, nbFormation_t *form,
+                datUnitWork_t *work)
 {
-    nbFormation_t *form = wdata->form;
+    dds3Basic_t *basic;
+    datUnitVisual_t *visual;
+    f32 radius = 50.0f;
+    s32 serial;
+
+    serial = evtSetRegistUnit(major, minor);
+    form->stat |= 2;
+    basic = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+    form->serial = serial;
+    form->basic = basic;
+    form->hunit = ((dds3UnitObjectBasicWorkData_t *)basic->workdata)->hUnit;
+    form->hunit->flags |= 0x200000;
+    if (data->light[0] != NULL) {
+        dds3LinkLightObjectToUnitObject(data->light[0], basic, 1);
+    }
+    nbSetWaitMotion(form, 0, 1.0f);
+    nbSetUnitMotion(form, 0, 1, 1.0f);
+    form->modelcol = nbGetModelColor(form);
+    if (minor == 0x129) {
+        form->anime |= 0x400;
+    }
+    dds3SetPosPoseSet(basic, &form->pos);
+    if (form->partyindex < 4) {
+        dds3SetRotPoseSet(basic, (u128 *)D_003FA7A0);
+    }
+    if ((form->anime & 0x200) == 0) {
+        evtSetUnitColorRGB(form->hunit, 0, 0);
+        evtSetUnitColorA(form->hunit, 0, 0);
+    } else {
+        nbFormDispOff(form->formindex);
+    }
+    visual = nbGetUnitVisual(work);
+    if (visual->shadowsize == 0) {
+        dds3ObjectBaseOffFlag(basic, 0x400);
+    } else {
+        dds3ObjectBaseOnFlag(basic, 0x400);
+        switch (visual->shadowsize) {
+        case 1:
+            radius = 50.0f;
+            break;
+        case 2:
+            radius = 100.0f;
+            break;
+        case 3:
+            radius = 200.0f;
+            break;
+        case 4:
+            radius = 300.0f;
+            break;
+        }
+        basic->poseset->r = radius;
+    }
+    if (form->scl != 1.0f) {
+        mdlSetEffectScale(form->hunit->owner, form->scl);
+    }
+    form->flag = (form->flag & ~2u) | 4;
+}
+
+s32 CheckLoad_nbUnitProcess(nbMainProcessData_t *data)
+{
+    nbFormation_t *form = data->form;
     s32 i;
 
     for (i = 0; i < 16; i++) {
@@ -737,13 +1092,151 @@ s32 CheckLoad_nbUnitProcess(pmdProcessWork_t *wdata)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", RunLoad);
+void RunLoad(nbMainProcessData_t *data, nbFormation_t *form)
+{
+    datUnitWork_t *work;
+    s32 unitid;
+    u32 flag;
+    u32 random;
+    f32 frame;
+    u32 badstatus;
+
+    work = nbGetUnitWorkFromFormindex(form->formindex);
+    unitid = nbGetUnitID(work);
+    flag = form->flag;
+    if ((flag & 1) != 0) {
+        if (CheckLoad_nbUnitProcess(data) != 0) {
+            return;
+        }
+        if (nbCheckModelLoad(data, 1, unitid) != 0) {
+            printf(D_00543730);
+            form->flag &= ~1;
+            RegistUnit(data, 1, unitid, form, work);
+            nbLoadMidiFile(unitid);
+            flag = form->flag;
+        } else {
+            form->flag = (form->flag & ~1) | 0x12;
+            flag = form->flag;
+        }
+    }
+
+    if ((flag & 2) != 0) {
+        if ((flag & 0x10) != 0) {
+            nbLoadModelPackIfEnabled(form, 1, unitid);
+            form->flag &= ~0x10;
+        }
+        if (nbCheckModelPackLoaded(form, 1, unitid) != 0) {
+            RegistUnit(data, 1, unitid, form, work);
+        }
+    }
+
+    if ((form->flag & 0xC) == 4) {
+        random = dds3GetRandIntA(0, form->hunit->owner->first->frameLength);
+        frame = (f32)random;
+        sdfMotionSeek(form->hunit->owner->first, frame);
+        if ((form->anime & 0x200) != 0) {
+            nbFormDispOff(form->formindex);
+            form->anime &= ~0x200;
+        } else {
+            nbMakeUnitFadeInPacket(0, 0, form, 0, 0xF, 0xF, 0x14);
+        }
+        badstatus = work->badstatus & 0xFFF;
+        if (badstatus != 0) {
+            nbAddBadEffKoukaPacket(1, 0, form, badstatus);
+            nbAddBadMotKoukaPacket(1, 0, form, work->badstatus & 0xFFF);
+        }
+        form->type = 0;
+        form->flag &= ~4;
+    }
+}
+
+extern sdfVector4_t D_003FA7B0;
+extern void RunSake(nbMainProcessData_t *data, nbFormation_t *form);
+extern void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork_t *work);
 
 INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", D_00543720);
 
 INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", D_00543730);
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbUnitProcess2);
+void *nbUnitProcess2(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        nbFormation_t *form = &data->form[i];
+        datUnitWork_t *work = nbGetUnitWorkFromFormindex(i);
+        u32 stat = form->stat;
+        if ((stat & 1) != 0) {
+            switch (form->type) {
+            case 0:
+                if (work != NULL && ((work->badstatus & 0xFFF) == 1 ||
+                                     (work->badstatus & 0xFFF) == 0x10)) {
+                    RunBadAction(data, form);
+                    stat = form->stat;
+                }
+                break;
+            case 1:
+            case 3:
+                RunDamage(data, form);
+                stat = form->stat;
+                break;
+            case 2:
+                RunSake(data, form);
+                stat = form->stat;
+                break;
+            case 4:
+                RunLoad(data, form);
+                stat = form->stat;
+                break;
+            }
+            if ((stat & 0x80) != 0 && (form->stat & 2) != 0 && form->type != 3) {
+                if (form->hunit->owner->first->stat == 5) {
+                    if (form->hunit->motionSetup.motionId != 0) {
+                        nbSetUnitMotion(form, 0, 3, 1.0f);
+                    } else if (form->autotime != 0) {
+                        form->autotime--;
+                    } else {
+                        nbSetUnitMotion(form, 0, 3, 1.0f);
+                    }
+                }
+            }
+            UpdateFormAnime(data, form, work);
+            /* Qualified cc1probe: the one-pass eligibility block retains
+             * separate signed type checks (rtl.00 through sched2), matching
+             * retail. The equivalent combined condition folds to an unsigned
+             * range test and is eight bytes shorter. Hooked/unhooked and
+             * dump/plain outputs agree; see docs/CONTRIBUTING.md. */
+            do {
+                if (form->type < 5) {
+                    if (form->type > 0) {
+                        break;
+                    }
+                }
+                if (work == NULL || ((work->badstatus & 0xFFF) != 1 &&
+                                     (work->badstatus & 0xFFF) != 0x10)) {
+                    UpdateFormPosRot(form);
+                }
+            } while (0);
+            if (form->basic != NULL) {
+                SDF_VU0_LOADVECTOR(&D_003FA7B0);
+                SDF_VU0_SCALEVECTOR(form->scl);
+                form->basic->poseset->flag = (form->basic->poseset->flag | 1) & ~2;
+                SDF_VU0_STOREVECTOR(&form->basic->poseset->scl);
+                if (form->basic != NULL) {
+                    if ((form->stat & 0x2000) != 0) {
+                        ((dds3UnitObjectBasicWorkData_t *)form->basic->workdata)->rotationFlags |= 1;
+                    } else {
+                        ((dds3UnitObjectBasicWorkData_t *)form->basic->workdata)->rotationFlags &= ~1;
+                    }
+                    form->basic->poseset->flag = (form->basic->poseset->flag | 1) & ~2;
+                }
+            }
+            form->time++;
+        }
+    }
+    return NULL;
+}
 
 void *nbUnitShutdown(dds3ProcessID_t *id)
 {

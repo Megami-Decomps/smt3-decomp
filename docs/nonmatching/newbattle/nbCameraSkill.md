@@ -48,36 +48,6 @@ Ruled out for the operand order, all giving the identical `addu $16, $2, $16`:
 `id * 4 + (u32)pVisual`. Subscripting (`pVisual[id].hatudo`) instead of
 assigning the pointer costs two more words by moving the result into `$3`.
 
-## nbCameraState_SkillAttack_Calc (newbattle/nbCameraSkill, 0x170)
-
-85 of 91 words match, at the exact 364-byte size.
-
-Two delay slots that retail fills from in front of the branch and ee-as
-leaves empty here, because cc1 placed the instruction after the branch
-instead.
-
-The first is `nbCameraSkillAttackStep`: retail has a plain
-`bnez` with `addiu $2, $2, -1` in its slot, so the decrement was computed
-before the test; the draft's decrement sits in the `else` arm, so ee-as makes
-the branch a `bnel`. Computing `step - 1` into a second local before the test
-does produce the plain `bnez`, but the subtraction then uses `$3` instead of
-retail's `$2`, which costs two words instead of one, so the plain form is
-kept. `--nbCameraSkillAttackStep == 0` as the `else if` condition changes
-nothing.
-
-The second is the `nbCameraModelMotionCr < 450.0f` test inside the
-`step == 0` arm: retail fills the `bc1t` slot with `daddu $4, $18`, the
-`pCamera` argument of the fall-through call, so cc1 had hoisted that argument
-above the branch; the draft emits it inside the arm and the slot stays a
-`nop`, rotating the five words of that block by one. Inverting the test to
-`>= 450.0f` so the arms swap gives eight differing words instead of six.
-
-Everything else is exact, including both `effBTLSkillGetInvokeParty` and
-`effBTLSkillGetTargetParty` being called before the `stat & 0x200` test
-rather than short-circuited, `effBTLModelGroupPopPosition(targetParty)`
-reusing the `$4` the target-party call left, and the `AttackTuibi_Set` arm
-written last so the two guards branch forward to it.
-
 ## nbCameraShot_All_Set2 (newbattle/nbCameraSkill, 0x248)
 
 16 of 125 words match, 500 bytes against retail's 584.
@@ -139,5 +109,5 @@ call, where the draft materialises it after.
 Ruled out for the arm order: inverting the test so the `printf` arm is the
 `if` body, hoisting `nbCameraSkillAttackStep = 0xB;` below the `if`/`else`
 (47 words out), and a `char *msg = D_005349A0;` local for the format string.
-This is the same delay-slot-placement class as the
-`nbCameraState_SkillAttack_Calc` draft below.
+The matching `nbCameraState_SkillAttack_Calc` needed its actual ground-collision
+callee visible as C; see [callee visibility](../../levers/callee-visibility.md).

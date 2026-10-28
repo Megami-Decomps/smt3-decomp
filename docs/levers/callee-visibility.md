@@ -47,3 +47,35 @@ retail's `bne`, and compiling the parked `evtHokanColor` draft unguarded makes
 it byte-exact while `evtHokanColor` itself stays 9 words out. So the mechanism
 also tells you which pair to attack: a one-word annul miss next to a parked
 draft is a reason to spend the budget on the draft rather than on the caller.
+
+### One-pass model-load phase in `fldAutoMap`
+
+`fldAutoMapModelLoad` is 100 bytes and exact when its 372-byte provider,
+`fldAmModelLoadFile`, is a visible C definition earlier in `field/fldAutoMap`.
+With only the caller body changed to ordinary nested `if`s, it grows to 108
+bytes. The matching source wraps only the model-load phase after
+`fldAutoMapFontInit` in a one-pass `do` block, with `break` for the re-read
+`area < 10` case. That gives ee-gcc the basic-block boundary it needs without
+changing the phase's behavior.
+
+The qualified final-source reorg trace (`verify: OK`) shows
+`NOTE_INSN_LOOP_BEG` uid44 and `NOTE_INSN_LOOP_END` uid81 around that phase;
+the phase is a separate block (uid47), its threshold branch is uid56, and the
+provider call is uid60. At reorg, the visible call has no EH region and
+`mark_target_live_regs` reports only `$29` live. The restore of `$16` (uid111)
+is therefore eligible for the branch delay slot; cc1 emits the retail `bne`
+form with that restore. This relies on ordinary same-unit C visibility, with no
+`nothrow` attribute or stub.
+
+Reproduce the qualified trace with `tools/cc1probe.sh src/smt3/field/fldAutoMap.c --func fldAutoMapModelLoad --reorg --out /tmp/automap-reorg`; require `verify: OK` before using its instruction IDs.
+
+### Skill-attack camera scheduling
+
+The unchanged `nbCameraState_SkillAttack_Calc` draft becomes exact at 364 bytes
+with the matched `nbCameraShot_GroundCollision` definition visible earlier in
+`newbattle/nbCameraSkill`. Hiding only that definition behind its assembly
+fallback restores all six old differences: the attack-step branch gains an
+annul bit, and the camera-argument move and following call/branch shift out of
+the native delay slots. The isolated promotion preserves all 29 C functions
+in the owner. Check recently matched callees before rewriting a parked caller;
+this case needs no new declaration, attribute or control-flow adjustment.

@@ -1243,308 +1243,276 @@ typedef struct effEveBillBatch_t {
     s32 count;
 } effEveBillBatch_t;
 
+extern sdfGrOt_t sdfGrOtTable[85];
+
 PS2_SYMBOL_AT(sdfGrOt_t, effEveCPSmokeOt1, sdfGrOtTable, 0x600);
-PS2_SYMBOL_AT(sdfGrOt_t, effEveCPSmokeOt2, sdfGrOtTable, 0x620);
 
 /* vu0 routine: advance every live particle of one smoke set and batch two
- * textured quads per particle into the two ordering tables. */
-/* NON_MATCHING: 493 of 711 words differ (first at +0x214). */
-#ifdef NON_MATCHING
-void effEVECombParSmokeDraw(effEVECombParSmoke_t *pCombParSmoke) {
-    effEveBillBatch_t batch1;
-    effEveBillBatch_t batch2;
+ * textured quads per particle into the two ordering tables. VIF consumes XYZ;
+ * native leaves position.w untouched before its full-quadword add/copies. */
+void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
+    effEveBillBatch_t primary, secondary;
     f32 matrix[4][4];
-    f32 offset[EFF_EVENT_VECTOR_COMPONENTS];
-    f32 origin[EFF_EVENT_VECTOR_COMPONENTS];
-    f32 side[EFF_EVENT_VECTOR_COMPONENTS];
-    sdfDrawTag_t *tag1;
-    sdfDrawTag_t *tag2;
-    sdfTexHandle_t *tex1;
-    sdfTexHandle_t *tex2;
-    sdfDrawTag_t *tagGs;
-    u8 repeat;
-    u32 i;
-    u32 count;
-    s32 duration;
-    s32 fadeIn;
-    s32 fadeOut;
-    s32 colorStartAge;
-    s32 colorTransitionFrames;
+    f32 position[4], origin[4], lateral[4];
+    sdfDrawTag_t *primaryList, *secondaryList;
+    sdfGrOt_t *surface;
+    sdfTexHandle_t *primaryTexture, *secondaryTexture;
     effEVECombParSmokePart_t *particle;
+    s32 repeat;
+    u32 index, particleCount;
+    s32 duration, fadeIn, fadeOut, colorStart, colorFrames;
     u32 color;
-    f32 growth;
-    f32 swayPhaseStep;
-    f32 swayAmplitudeStep;
-    f32 drift;
-    f32 wave;
-    f32 ratio;
-    f32 scaleX;
-    f32 scaleY;
-    u32 color1;
-    u32 color2;
-    s32 age;
-    s32 remaining;
-    s32 n;
-    void *packet;
-    s32 uvWidth;
-    s32 uvHeight;
-    f32 halfWidth;
-    f32 halfHeight;
-    f32 cosine;
-    f32 cx;
-    f32 cy;
-    f32 px;
-    f32 py;
-    f32 sine;
-    u64 *gs;
-    f32 *op;
-
-    batch1.count = 0;
-    batch2.count = 0;
-    tag1 = sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit(tag1);
-    tag2 = sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit(tag2);
-    tex1 = (sdfTexHandle_t *)dds3BillboardGetTex((void *)hEffEveCPSmokeBill01Tex);
-    packet = sdfGrAllocPacketBuff(0x20);
-    sdf3DMakeDirectRefPacket(packet, (u32)sdfTexGetPacket(tex1), sdfTexGetPacketLength(tex1));
-    sdfDrawTagLinkRef(tag1, (u32)packet);
-    tex2 = (sdfTexHandle_t *)dds3BillboardGetTex((void *)hEffEveCPSmokeBill02Tex);
-    packet = sdfGrAllocPacketBuff(0x20);
-    sdf3DMakeDirectRefPacket(packet, (u32)sdfTexGetPacket(tex2), sdfTexGetPacketLength(tex2));
-    sdfDrawTagLinkRef(tag2, (u32)packet);
+    f32 acceleration, swayPhaseStep, swayAmplitudeStep;
+    struct DmaPacketHeader *texturePacket;
+    const sdfTexPacket_t *textureBuffer;
+    s32 textureBytes;
+    u8 *geometryPacket;
+    sdfDrawTag_t *stateList;
+    u64 *statePacket;
+    primary.count = 0;
+    secondary.count = 0;
+    primaryList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(primaryList);
+    secondaryList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(secondaryList);
+    primaryTexture = (sdfTexHandle_t *)dds3BillboardGetTex((void *)hEffEveCPSmokeBill01Tex);
+    texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
+    textureBuffer = sdfTexGetPacket(primaryTexture);
+    textureBytes = sdfTexGetPacketLength(primaryTexture);
+    sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
+    sdfDrawTagLinkRef(primaryList, (u32)texturePacket);
+    secondaryTexture = (sdfTexHandle_t *)dds3BillboardGetTex((void *)hEffEveCPSmokeBill02Tex);
+    texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
+    textureBuffer = sdfTexGetPacket(secondaryTexture);
+    textureBytes = sdfTexGetPacketLength(secondaryTexture);
+    sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
+    sdfDrawTagLinkRef(secondaryList, (u32)texturePacket);
     SDF_VU0_STOREIDENTITY(matrix);
-    packet = sdfGrAllocPacketBuff(0x38);
-    sdfBillBoardMakeTMPacket(packet, &matrix[0][0]);
-    sdfDrawTagLink(tag1, (u32)packet);
-    packet = sdfGrAllocPacketBuff(0x38);
-    sdfBillBoardMakeTMPacket(packet, &matrix[0][0]);
-    sdfDrawTagLink(tag2, (u32)packet);
+    geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
+    sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
+    sdfDrawTagLink(primaryList, (u32)geometryPacket);
+    geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
+    sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
+    sdfDrawTagLink(secondaryList, (u32)geometryPacket);
     SDF_VU0_LOADVECTOR(aViewTarget);
     SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(aViewDown);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(side);
-    growth = pCombParSmoke->head.accelerationPercent / 100.0f + 1.0f;
-    particle = pCombParSmoke->pPart;
-    count = pCombParSmoke->head.number;
-    repeat = pCombParSmoke->head.repeat;
-    duration = pCombParSmoke->head.duration;
-    fadeIn = pCombParSmoke->head.fade_in;
-    fadeOut = pCombParSmoke->head.fade_out;
-    colorStartAge = pCombParSmoke->head.colorStartAge;
-    colorTransitionFrames = pCombParSmoke->head.colorTransitionFrames;
-    color = pCombParSmoke->head.color;
-    swayPhaseStep = pCombParSmoke->head.swayPhaseStep;
-    swayAmplitudeStep = pCombParSmoke->head.swayAmplitudeStep;
-    SDF_VU0_COPYVECTOR(origin, pCombParSmoke);
-    i = 0;
-    for (; i < count; i++, particle++) {
-        age = particle->frame;
+    SDF_VU0_STOREVECTOR(lateral);
+    particle = work->pPart;
+    particleCount = work->head.number;
+    acceleration = work->head.accelerationPercent / 100.0f + 1.0f;
+    repeat = work->head.repeat;
+    duration = work->head.duration;
+    fadeIn = work->head.fade_in;
+    fadeOut = work->head.fade_out;
+    colorStart = work->head.colorStartAge;
+    colorFrames = work->head.colorTransitionFrames;
+    color = work->head.color;
+    swayPhaseStep = work->head.swayPhaseStep;
+    swayAmplitudeStep = work->head.swayAmplitudeStep;
+    SDF_VU0_COPYVECTOR(origin, work->head.position);
+    for (index = 0; index < particleCount; index++, particle++) {
+        s32 age = particle->frame;
         if (age == 0) {
-            effEVECombParSmokePartInit(pCombParSmoke, i);
+            effEVECombParSmokePartInit(work, index);
         }
         if (age > 0 && age <= duration) {
+            f32 swaySine, sway, alpha, transition;
+            f32 modulationX, scaleX, scaleY, phaseCosine;
+            f32 halfWidth, halfHeight;
+            u32 primaryColor, secondaryColor;
+            s32 slot;
+            s16 u, v;
             if (particle->wait >= 0) {
-                drift = particle->shift_s;
-                particle->pos[0] += side[0] * drift;
-                particle->pos[1] += side[1] * drift;
-                particle->pos[2] += side[2] * drift;
-                wave = particle->amplitude * sdfSin(particle->angle);
+                f32 lateralSpeed = particle->shift_s;
+                particle->pos[0] += lateral[0] * lateralSpeed;
+                particle->pos[1] += lateral[1] * lateralSpeed;
+                particle->pos[2] += lateral[2] * lateralSpeed;
+                swaySine = sdfSin(particle->angle);
+                sway = particle->amplitude * swaySine;
                 particle->motion[1] += particle->up_s;
-                offset[0] = particle->pos[0] + particle->motion[0] * wave;
-                offset[1] = particle->pos[1] + particle->motion[1];
-                offset[2] = particle->pos[2] + particle->motion[2] * wave;
-                particle->up_s *= growth;
-                particle->shift_s *= growth;
+                position[0] = particle->pos[0] + particle->motion[0] * sway;
+                position[1] = particle->pos[1] + particle->motion[1];
+                position[2] = particle->pos[2] + particle->motion[2] * sway;
+                particle->up_s *= acceleration;
+                particle->shift_s *= acceleration;
                 particle->amplitude += swayAmplitudeStep;
                 particle->angle += swayPhaseStep;
             } else {
                 particle->wait++;
-                offset[0] = particle->pos[0];
-                offset[1] = particle->pos[1];
-                offset[2] = particle->pos[2];
+                position[0] = particle->pos[0];
+                position[1] = particle->pos[1];
+                position[2] = particle->pos[2];
             }
             if (age < fadeIn) {
-                ratio = (f32)age / (f32)fadeIn;
+                alpha = (f32)age / (f32)fadeIn;
+            } else if (duration - age <= fadeOut) {
+                alpha = (f32)(duration - age) / (f32)fadeOut;
             } else {
-                remaining = duration - age;
-                if (remaining <= fadeOut) {
-                    ratio = (f32)remaining / (f32)fadeOut;
-                } else {
-                    ratio = 1.0f;
-                }
+                alpha = 1.0f;
             }
-            if (age < colorStartAge) {
-                u32 base = color & 0xFF000000;
-
-                color1 = effColorBlend(base & 0xFFFFFF, base, ratio);
-            } else if (age < colorStartAge + colorTransitionFrames) {
-                u32 base;
-                f32 rise;
-
-                if (colorTransitionFrames > 0) {
-                    rise = (f32)(age - colorStartAge) / (f32)colorTransitionFrames;
-                    if (1.0f < rise) {
-                        rise = 1.0f;
-                    }
+            if (age < colorStart) {
+                primaryColor = effColorBlend(0, color & 0xFF000000, alpha);
+            } else if (age < colorStart + colorFrames) {
+                if (colorFrames > 0) {
+                    transition = (f32)(age - colorStart) / (f32)colorFrames;
+                    if (1.0f < transition) transition = 1.0f;
                 } else {
-                    rise = 1.0f;
+                    transition = 1.0f;
                 }
-                base = effColorBlend(color & 0xFF000000, color, rise);
-                color1 = effColorBlend(base & 0xFFFFFF, base, ratio);
+                primaryColor = effColorBlend(color & 0xFF000000, color, transition);
+                primaryColor = effColorBlend(primaryColor & 0xFFFFFF, primaryColor, alpha);
             } else {
-                color1 = effColorBlend(color & 0xFFFFFF, color, ratio);
+                primaryColor = effColorBlend(color & 0xFFFFFF, color, alpha);
             }
-            color2 = effColorBlend(color & 0xFFFFFF, color, ratio);
+            secondaryColor = effColorBlend(color & 0xFFFFFF, color, alpha);
             scaleY = particle->scale;
-            scaleX = scaleY + particle->scaleAmplitudeX * sdfCos(particle->s_w_r);
-            scaleY = scaleY + particle->scaleAmplitudeY * sdfCos(particle->s_h_r);
-            op = offset;
-            SDF_VU0_LOADVECTOR_RWADDR(op);
+            phaseCosine = sdfCos(particle->s_w_r);
+            modulationX = particle->scaleAmplitudeX * phaseCosine;
+            phaseCosine = sdfCos(particle->s_h_r);
+            scaleX = scaleY + modulationX;
+            scaleY = scaleY + particle->scaleAmplitudeY * phaseCosine;
+            SDF_VU0_LOADVECTOR(position);
             SDF_VU0_LOADVECTOR_B(origin);
             SDF_VU0_ADDVECTOR();
-            op = offset;
-            SDF_VU0_STOREVECTOR_RWADDR(op);
-
-            n = batch1.count;
-            op = offset;
-            SDF_VU0_COPYVECTOR_RWSRC(&batch1.centre[n], op);
-            batch1.color[n] = color1;
-            uvWidth = (s16)((u16)tex1->width << 4);
-            uvHeight = (s16)((u16)tex1->height << 4);
-            batch1.uv[n][0] = 0;
-            batch1.uv[n][1] = 0;
-            batch1.uv[n][2] = uvWidth;
-            batch1.uv[n][3] = 0;
-            batch1.uv[n][4] = uvWidth;
-            batch1.uv[n][5] = uvHeight;
-            batch1.uv[n][6] = 0;
-            batch1.uv[n][7] = uvHeight;
-            cx = 0.0f;
-            cy = 0.0f;
-            halfWidth = (uvWidth >> 5) * 0.0625f * scaleX;
-            halfHeight = (uvHeight >> 5) * 0.0625f * scaleY;
+            SDF_VU0_STOREVECTOR(position);
+            {
+                f32 cosine, sine, cornerX, cornerY;
+                f32 center = 0.0f;
+            slot = primary.count;
+            SDF_VU0_COPYVECTOR(&primary.centre[slot], position);
+            u = (s16)((u16)primaryTexture->width << 4);
+            v = (s16)((u16)primaryTexture->height << 4);
+            primary.color[slot] = primaryColor;
+            primary.uv[slot][0] = 0;
+            primary.uv[slot][1] = 0;
+            primary.uv[slot][2] = u;
+            primary.uv[slot][3] = 0;
+            primary.uv[slot][4] = u;
+            primary.uv[slot][5] = v;
+            primary.uv[slot][6] = 0;
+            primary.uv[slot][7] = v;
+            halfWidth = (f32)(u >> 5) * 0.0625f * scaleX;
+            halfHeight = (f32)(v >> 5) * 0.0625f * scaleY;
             cosine = sdfCos(particle->roll);
             sine = sdfSin(particle->roll);
-            px = cx - halfWidth;
-            py = cy - halfHeight;
-            batch1.corner[n][0] = px * cosine - py * sine;
-            batch1.corner[n][1] = px * sine + py * cosine;
-            px = cx + halfWidth;
-            batch1.corner[n][2] = px * cosine - py * sine;
-            batch1.corner[n][3] = px * sine + py * cosine;
-            py = cy + halfHeight;
-            batch1.corner[n][4] = px * cosine - py * sine;
-            batch1.corner[n][5] = px * sine + py * cosine;
-            px = cx - halfWidth;
-            batch1.corner[n][6] = px * cosine - py * sine;
-            batch1.corner[n][7] = px * sine + py * cosine;
-            batch1.count++;
-
-            n = batch2.count;
-            op = offset;
-            SDF_VU0_COPYVECTOR_RWSRC(&batch2.centre[n], op);
-            batch2.color[n] = color2;
-            uvWidth = (s16)((u16)tex2->width << 4);
-            uvHeight = (s16)((u16)tex2->height << 4);
-            batch2.uv[n][0] = 0;
-            batch2.uv[n][1] = 0;
-            batch2.uv[n][2] = uvWidth;
-            batch2.uv[n][3] = 0;
-            batch2.uv[n][4] = uvWidth;
-            batch2.uv[n][5] = uvHeight;
-            batch2.uv[n][6] = 0;
-            batch2.uv[n][7] = uvHeight;
-            halfWidth = (uvWidth >> 5) * 0.0625f * scaleX;
-            halfHeight = (uvHeight >> 5) * 0.0625f * scaleY;
-            cosine = sdfCos(particle->roll);
-            sine = sdfSin(particle->roll);
-            px = cx - halfWidth;
-            py = cy - halfHeight;
-            batch2.corner[n][0] = px * cosine - py * sine;
-            batch2.corner[n][1] = px * sine + py * cosine;
-            px = cx + halfWidth;
-            batch2.corner[n][2] = px * cosine - py * sine;
-            batch2.corner[n][3] = px * sine + py * cosine;
-            py = cy + halfHeight;
-            batch2.corner[n][4] = px * cosine - py * sine;
-            batch2.corner[n][5] = px * sine + py * cosine;
-            px = cx - halfWidth;
-            batch2.corner[n][6] = px * cosine - py * sine;
-            batch2.corner[n][7] = px * sine + py * cosine;
-            batch2.count++;
-
-            if (batch1.count == 15) {
-                sdfDrawTagLink(tag1, (u32)sdfBillBoardMakeN(batch1.centre, batch1.color,
-                                                            batch1.uv, batch1.corner, 15, NULL));
-                batch1.count = 0;
+            cornerX = center - halfWidth;
+            cornerY = center - halfHeight;
+            primary.corner[slot][0] = cornerX * cosine - cornerY * sine;
+            primary.corner[slot][1] = cornerX * sine + cornerY * cosine;
+            cornerX = halfWidth + center;
+            cornerY = center - halfHeight;
+            primary.corner[slot][2] = cornerX * cosine - cornerY * sine;
+            primary.corner[slot][3] = cornerX * sine + cornerY * cosine;
+            cornerX = halfWidth + center;
+            cornerY = halfHeight + center;
+            primary.corner[slot][4] = cornerX * cosine - cornerY * sine;
+            primary.corner[slot][5] = cornerX * sine + cornerY * cosine;
+            cornerX = center - halfWidth;
+            cornerY = halfHeight + center;
+            primary.corner[slot][6] = cornerX * cosine - cornerY * sine;
+            primary.corner[slot][7] = cornerX * sine + cornerY * cosine;
+            primary.count++;
             }
-            if (batch2.count == 15) {
-                sdfDrawTagLink(tag2, (u32)sdfBillBoardMakeN(batch2.centre, batch2.color,
-                                                            batch2.uv, batch2.corner, 15, NULL));
-                batch2.count = 0;
+            {
+                f32 cosine, sine, cornerX, cornerY;
+                f32 center = 0.0f;
+            slot = secondary.count;
+            SDF_VU0_COPYVECTOR(&secondary.centre[slot], position);
+            u = (s16)((u16)secondaryTexture->width << 4);
+            v = (s16)((u16)secondaryTexture->height << 4);
+            secondary.color[slot] = secondaryColor;
+            secondary.uv[slot][0] = 0;
+            secondary.uv[slot][1] = 0;
+            secondary.uv[slot][2] = u;
+            secondary.uv[slot][3] = 0;
+            secondary.uv[slot][4] = u;
+            secondary.uv[slot][5] = v;
+            secondary.uv[slot][6] = 0;
+            secondary.uv[slot][7] = v;
+            halfWidth = (f32)(u >> 5) * 0.0625f * scaleX;
+            halfHeight = (f32)(v >> 5) * 0.0625f * scaleY;
+            cosine = sdfCos(particle->roll);
+            sine = sdfSin(particle->roll);
+            cornerX = center - halfWidth;
+            cornerY = center - halfHeight;
+            secondary.corner[slot][0] = cornerX * cosine - cornerY * sine;
+            secondary.corner[slot][1] = cornerX * sine + cornerY * cosine;
+            cornerX = halfWidth + center;
+            cornerY = center - halfHeight;
+            secondary.corner[slot][2] = cornerX * cosine - cornerY * sine;
+            secondary.corner[slot][3] = cornerX * sine + cornerY * cosine;
+            cornerX = halfWidth + center;
+            cornerY = halfHeight + center;
+            secondary.corner[slot][4] = cornerX * cosine - cornerY * sine;
+            secondary.corner[slot][5] = cornerX * sine + cornerY * cosine;
+            cornerX = center - halfWidth;
+            cornerY = halfHeight + center;
+            secondary.corner[slot][6] = cornerX * cosine - cornerY * sine;
+            secondary.corner[slot][7] = cornerX * sine + cornerY * cosine;
+            secondary.count++;
+            }
+            if (primary.count == 15) {
+                sdfDrawTagLink(primaryList, (u32)sdfBillBoardMakeN(primary.centre,
+                    primary.color, primary.uv, primary.corner[0], 15, 0));
+                primary.count = 0;
+            }
+            if (secondary.count == 15) {
+                sdfDrawTagLink(secondaryList, (u32)sdfBillBoardMakeN(secondary.centre,
+                    secondary.color, secondary.uv, secondary.corner[0], 15, 0));
+                secondary.count = 0;
             }
             particle->s_w_r += particle->scalePhaseStepX;
             particle->s_h_r += particle->scalePhaseStepY;
             particle->roll += particle->roll_s;
         }
-        if (duration == age && repeat != 0) {
-            particle->frame = 0;
-        } else {
-            particle->frame++;
-        }
+        if (duration == age && repeat) particle->frame = 0;
+        else particle->frame++;
     }
-    if (batch1.count > 0) {
-        sdfDrawTagLink(tag1, (u32)sdfBillBoardMakeN(batch1.centre, batch1.color, batch1.uv,
-                                                    batch1.corner, batch1.count, NULL));
+    if (primary.count > 0) {
+        sdfDrawTagLink(primaryList, (u32)sdfBillBoardMakeN(primary.centre,
+            primary.color, primary.uv, primary.corner[0], primary.count, 0));
     }
-    if (batch2.count > 0) {
-        sdfDrawTagLink(tag2, (u32)sdfBillBoardMakeN(batch2.centre, batch2.color, batch2.uv,
-                                                    batch2.corner, batch2.count, NULL));
+    if (secondary.count > 0) {
+        sdfDrawTagLink(secondaryList, (u32)sdfBillBoardMakeN(secondary.centre,
+            secondary.color, secondary.uv, secondary.corner[0], secondary.count, 0));
     }
-    tagGs = sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit(tagGs);
-    gs = sdfGrAllocPacketBuff(0x40);
-    gs[0] = 3;
-    gs[1] = 0x5000000310000000;
-    gs[2] = 0x1000000000008002;
-    gs[3] = 0xE;
-    if (pCombParSmoke->Ztest != 0) {
-        gs[4] = 0x51801;
-    } else {
-        gs[4] = 0x31801;
-    }
-    gs[5] = 0x47;
-    gs[6] = 0x44;
-    gs[7] = 0x42;
-    sdfDrawTagLink(tagGs, (u32)gs);
-    effEveCPSmokeOt1.regFunc(&effEveCPSmokeOt1, tagGs);
-    tagGs = sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit(tagGs);
-    gs = sdfGrAllocPacketBuff(0x40);
-    gs[0] = 3;
-    gs[1] = 0x5000000310000000;
-    gs[2] = 0x1000000000008002;
-    gs[3] = 0xE;
-    if (pCombParSmoke->Ztest != 0) {
-        gs[4] = 0x51801;
-    } else {
-        gs[4] = 0x31801;
-    }
-    gs[5] = 0x47;
-    gs[6] = 0x42;
-    gs[7] = 0x42;
-    sdfDrawTagLink(tagGs, (u32)gs);
-    effEveCPSmokeOt2.regFunc(&effEveCPSmokeOt2, tagGs);
-    effEveCPSmokeOt1.regFunc(&effEveCPSmokeOt1, tag1);
-    effEveCPSmokeOt2.regFunc(&effEveCPSmokeOt2, tag2);
+    stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(stateList);
+    statePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+    statePacket[0] = 3;
+    statePacket[1] = 0x5000000310000000ULL;
+    statePacket[2] = 0x1000000000008002ULL;
+    statePacket[3] = 0xE;
+    if (work->Ztest) statePacket[4] = 0x51801;
+    else statePacket[4] = 0x31801;
+    statePacket[5] = 0x47;
+    statePacket[6] = 0x44;
+    statePacket[7] = 0x42;
+    sdfDrawTagLink(stateList, (u32)statePacket);
+    effEveCPSmokeOt1.regFunc(&effEveCPSmokeOt1, stateList);
+    stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(stateList);
+    statePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+    statePacket[0] = 3;
+    statePacket[1] = 0x5000000310000000ULL;
+    statePacket[2] = 0x1000000000008002ULL;
+    statePacket[3] = 0xE;
+    if (work->Ztest) statePacket[4] = 0x51801;
+    else statePacket[4] = 0x31801;
+    statePacket[5] = 0x47;
+    statePacket[6] = 0x42;
+    statePacket[7] = 0x42;
+    sdfDrawTagLink(stateList, (u32)statePacket);
+    surface = &sdfGrOtTable[49];
+    surface->regFunc(surface, stateList);
+    (surface - 1)->regFunc(surface - 1, primaryList);
+    surface->regFunc(surface, secondaryList);
 }
-#else
-INCLUDE_ASM(const s32, "effect/effEvent", effEVECombParSmokeDraw);
-#endif
+
 
 /* vu0 routine: copy one quadword of position between unaligned records. */
 void effEVECombParSmokeSetPosition(void *pCombParSmoke, void *pPos) {

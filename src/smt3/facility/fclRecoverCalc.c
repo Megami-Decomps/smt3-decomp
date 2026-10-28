@@ -5,9 +5,9 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern s32 datGetMaxHp(datUnitWork_t *work);
+extern u32 datGetMaxHp(datUnitWork_t *work);
 
-extern s32 datGetMaxMp(datUnitWork_t *work);
+extern u32 datGetMaxMp(datUnitWork_t *work);
 
 s32 fclGetFlag(s8 index);
 
@@ -133,8 +133,8 @@ extern s32 sprintf(char *out, const char *fmt, ...);
 
 void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 
-extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
-                            s32 arg);
+extern s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *tex,
+                            fclSpriteTbl_t *table, s32 ot);
 
 extern void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 id);
 
@@ -156,7 +156,18 @@ extern s32 D_00345D88[];
 extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
                                   s32 mode, s32 b, s32 id);
 
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvCalcPriceRecover);
+s32 rcvCalcPriceRecover(datUnitWork_t *work)
+{
+    u32 reviveHp = 0;
+    s32 hpCost;
+    u32 mpCost;
+    if (work->badstatus & 0x800) {
+        reviveHp = ((u32)datGetMaxHp(work) + 9) / 10;
+    }
+    hpCost = datGetMaxHp(work) - (work->hp + reviveHp);
+    mpCost = datGetMaxMp(work) - work->mp;
+    return (f32)hpCost + (f32)mpCost * 2.5f;
+}
 
 s32 rcvGetStatusPrice(datUnitWork_t *work)
 {
@@ -196,7 +207,16 @@ s32 rcvGetPriceForUnit(datUnitWork_t *work)
     return price;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvGetRecoverPrice);
+s32 rcvGetRecoverPrice(datUnitWork_t *work, u8 type)
+{
+    switch (type) {
+    case 7: return rcvGetPriceForUnit(work);
+    case 1: return rcvCalcPriceRecover(work);
+    case 2: return rcvGetStatusPrice(work);
+    case 4: return rcvGetRevivePrice(work);
+    default: return -1;
+    }
+}
 
 s32 rcvAppAllRecover(datUnitWork_t *pStock)
 {
@@ -232,7 +252,66 @@ INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvFullHeal);
 
 INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvCreateLocalStock);
 
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvCalc);
+typedef struct rcvCalcWork_t {
+    u8 flags;
+    s8 sequence;
+    s8 partyCount;
+    s8 reserveCount;
+    s8 sequenceChanged;
+    s8 stock[16];
+    u8 unk0015[0xB];
+    cmpCursorInfo_t cursor;
+    u8 unk0058[0x1004];
+    s32 recoverPrices[16];
+    u8 unk109C[0x3430];
+    s32 script;
+    s32 scriptProcess;
+    u8 unk44D4[0x24];
+    s32 unk44F8;
+} rcvCalcWork_t;
+
+typedef struct cmpInfoWindow_t cmpInfoWindow_t;
+extern rcvCalcWork_t *rcvCalcState;
+extern void *dds3GetProcessData(s32 id);
+extern s32 dds3GetProcessStat(s32 id);
+extern void cmpClearCursorSlots(cmpCursorInfo_t *cursor);
+extern s32 fclScriptStart(s32 script, s32 entry, void *process);
+extern void fclClearFlag(s8 index);
+extern void cmpUpdateTerminate(cmpInfoWindow_t *window);
+
+s32 rcvCalc(s32 id)
+{
+    rcvCalcWork_t *work;
+    rcvCalcState = dds3GetProcessData(id);
+    if (fclGetFlag(1) == 0) {
+        return 0;
+    }
+    work = rcvCalcState;
+    switch (work->sequence) {
+    case 0:
+        work->unk44F8 = 0;
+        cmpClearCursorSlots(&work->cursor);
+        if (rcvCalcState->sequenceChanged == 1) {
+            if (dds3GetProcessStat(rcvCalcState->scriptProcess) != 2) {
+                rcvCalcState->scriptProcess = fclScriptStart(rcvCalcState->script, 0, NULL);
+            }
+        }
+        break;
+    case 5:
+        if (work->sequenceChanged == 1) {
+            work->recoverPrices[0] = rcvGetHealCost();
+            fclClearFlag(2);
+        }
+        break;
+    }
+    rcvCalcState->sequenceChanged = 0;
+    if (rcvCalcState->flags & 0x10) {
+        cmpUpdateTerminate((cmpInfoWindow_t *)rcvCalcState);
+        return -1;
+    }
+    return 0;
+}
+
 
 typedef struct
 {
@@ -246,15 +325,15 @@ extern rcvDrawWork_t *rcvDrawWork;
 
 extern void rcvDrawPanelAt(lstWork_t *list, s32 flag, s32 arg);
 
-extern s32 D_003306F0[];
+extern char *D_003306F0[];
 
-extern s32 D_003306F4[];
+extern char *D_003306F4[];
 
-extern s32 D_003306F8[];
+extern char *D_003306F8[];
 
-extern s32 D_003306FC[];
+extern char *D_003306FC[];
 
-extern char D_00330800[];
+extern fclSpriteTbl_t D_00330800[];
 
 extern char D_0054FBF0[];
 
@@ -274,9 +353,9 @@ void rcvDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
     colors[2] = color;
     colors[3] = color;
     fclDrawSpriteFilter(pos->unk_00 + target + 0x10D0, pos->unk_04 + 0x168, pos->unk_08 << 4, 1,
-                        colors, 0, 1, rcvDrawWork->texHandle, (fclSpriteTbl_t *)D_00330800, ot);
+                        colors, 0, 1, rcvDrawWork->texHandle, D_00330800, ot);
     fclDrawSpriteFilter(pos->unk_00 + target + 0x10D0, pos->unk_04 + 0x168, pos->unk_08 << 4, 1,
-                        colors, 0, 0xA, rcvDrawWork->texHandle, (fclSpriteTbl_t *)D_00330800, ot);
+                        colors, 0, 0xA, rcvDrawWork->texHandle, D_00330800, ot);
     fclDrawSpriteFilter(pos->unk_00 + target + 0x1E40, pos->unk_04 + 0x1A0, pos->unk_08 << 4, 1,
                         colors, 0xA, 1, D_00345D88, fclSpriteTable, ot);
     color = (color & 0xFF) | 0xA09DC300;
@@ -287,7 +366,26 @@ void rcvDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
     frDestroyFontRequestAfter(frq);
 }
 
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawRowBox);
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,
+                            s32 spriteId, s32 *textures, fclSpriteTbl_t *table, s32 ot);
+
+void rcvDrawRowBox(fclPanelPos_t *panel, s32 ot)
+{
+    cmpDrawBoxF(0x400, 0x308, panel->unk_08, 0x74, 9, 0x19191E59, ot);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 6,
+                     rcvDrawWork->texHandle, D_00330800, ot);
+    cmpDrawBoxF(0xBA0, 0x308, panel->unk_08, 0x52, 9, 0x19191E59, ot);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 7,
+                     rcvDrawWork->texHandle, D_00330800, ot);
+    cmpDrawBoxF(0x1180, 0x308, panel->unk_08, 0x52, 9, 0x19191E59, ot);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 8,
+                     rcvDrawWork->texHandle, D_00330800, ot);
+    cmpDrawBoxF(0x1740, 0x308, panel->unk_08, 0x64, 9, 0x19191E59, ot);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 9,
+                     rcvDrawWork->texHandle, D_00330800, ot);
+}
+
 
 INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawRowText);
 
@@ -329,7 +427,19 @@ void rcvDrawSeq4(void)
     trmDrawListText(&panel, D_003306FC[0], rcvDrawWork->texHandle, D_00330800, 0x47);
 }
 
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawItemList);
+extern char *D_00330700[];
+
+void rcvDrawItemList(void)
+{
+    fclPanelPos_t panel;
+
+    fclGetFlag(0);
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, (fclPanel_t *)&panel);
+    shopDrawItemCount(&panel, 0x80808080, 0x47);
+    fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&panel);
+    trmDrawListText(&panel, D_00330700[0], rcvDrawWork->texHandle, D_00330800, 0x47);
+}
+
 
 void rcvUpdateItemList(s32 active)
 {

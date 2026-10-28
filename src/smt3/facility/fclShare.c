@@ -11,11 +11,12 @@ typedef struct
 {
     /* 0x00 */ u8 animState;
     /* 0x01 */ u8 unk_01[3];
-    /* 0x04 */ s32 unk_04;
+    /* 0x04 */ s32 target;
     /* 0x08 */ u8 unk_08[0xC];
-    /* 0x14 */ s32 unk_14;
-    /* 0x18 */ s32 unk_18;
+    /* 0x14 */ s32 phase;
+    /* 0x18 */ s32 phaseStep;
     /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ void (*calcSizes)();
 } fclPanelAnim_t;
 
 typedef struct
@@ -55,7 +56,7 @@ extern void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 
 
 extern void fclDrawSpriteEx(s32 X, s32 Y, s32 W, s32 H, fclSprite_t *pSprite, s32 OtNo);
 
-extern void fclRunPanelAnim(void *work);
+extern s32 fclRunPanelAnim(void *work);
 
 extern sdfGrOt_t sdfGrOtTable[85];
 
@@ -173,7 +174,19 @@ void fclDrawSprite(s32 X, s32 Y, fclSprite_t *pSprite)
     fclDrawSpriteEx(X, Y, pSprite->unk_04, pSprite->unk_06, pSprite, 0x47);
 }
 
-INCLUDE_ASM(const s32, "facility/fclShare", fclDrawSpriteEx);
+extern void func_002146F8(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
+                         u8 FlipFlag, s32 OtNo);
+
+void fclDrawSpriteEx(s32 X, s32 Y, s32 W, s32 H, fclSprite_t *pSprite, s32 OtNo)
+{
+    func_002146F8(X, Y, W, H, NULL, pSprite, 0, OtNo);
+}
+
+void func_002146F8(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
+                   u8 FlipFlag, s32 OtNo)
+{
+    fclDrawSpriteCore(X << 4, Y << 3, W, H, pCol, pSprite, FlipFlag, 0, 1, OtNo);
+}
 
 /* NON_MATCHING: 111 of 180 words differ (first at +0x20). */
 #ifdef NON_MATCHING
@@ -402,7 +415,18 @@ void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
 INCLUDE_ASM(const s32, "facility/fclShare", fclDrawSpriteAngleCore);
 #endif
 
-INCLUDE_ASM(const s32, "facility/fclShare", func_00214FD8);
+extern u8 dds3PadButtonState[0x40];
+
+/* Both native mode paths test the same signed pad-state byte. */
+s32 func_00214FD8(s32 mode)
+{
+    if (mode == 0) {
+        if ((s8)dds3PadButtonState[0x22] < 0) return 1;
+    } else {
+        if ((s8)dds3PadButtonState[0x22] < 0) return 1;
+    }
+    return 0;
+}
 
 s32 fclRagCalcTexSize(s32 size, s32 mode)
 {
@@ -434,7 +458,32 @@ void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, v
     calc(tex);
 }
 
-INCLUDE_ASM(const s32, "facility/fclShare", fclRunPanelAnim);
+s32 fclRunPanelAnim(void *work)
+{
+    fclPanelAnim_t *anim = work;
+    u8 state = anim->animState;
+
+    switch (state) {
+    case 0:
+        break;
+    case 1:
+        anim->phase += anim->phaseStep;
+        if (anim->phase > 0x200) {
+            anim->phase = 0x200;
+        }
+        break;
+    case 2:
+        anim->phase -= anim->phaseStep;
+        if (anim->phase < 0) {
+            anim->phase = 0;
+        }
+        break;
+    default:
+        break;
+    }
+    anim->calcSizes(anim);
+    return anim->phase;
+}
 
 void fclSetPanelAnimState(fclPanelAnim_t *anim, u8 state)
 {
@@ -443,12 +492,12 @@ void fclSetPanelAnimState(fclPanelAnim_t *anim, u8 state)
 
 s32 fclGetPanelAnimTarget(fclPanelAnim_t *anim)
 {
-    return anim->unk_04;
+    return anim->target;
 }
 
 s32 fclGetPanelAnimPhase(fclPanelAnim_t *anim)
 {
-    return anim->unk_14;
+    return anim->phase;
 }
 
 void func_00215188(fclPanelAnim_t *anim, s32 value)

@@ -31,11 +31,23 @@ typedef struct
 
 typedef struct
 {
+    s32 pm[4];
+} sdfIVector4_t;
+
+/* Native entries embed four 16-byte rectangles and two texture handles. */
+typedef struct
+{
+    sdfIVector4_t pos_act;
+    sdfIVector4_t pos_deact;
+    sdfIVector4_t uv_act;
+    sdfIVector4_t uv_deact;
+    sdfTexHandle_t *tex[2];
+} fclribbon_elem_t;
+
+typedef struct
+{
     /* 0x00 */ void *allocation;
-    /* 0x04 */ s16 unk_04;
-    /* 0x06 */ s16 unk_06;
-    /* 0x08 */ s16 unk_08;
-    /* 0x0A */ s16 unk_0A;
+    /* 0x04 */ sdfTexHandle_t *tex[2];
     /* 0x0C */ s32 stat;
     /* 0x10 */ s16 act;
     /* 0x12 */ u16 deact;
@@ -43,7 +55,24 @@ typedef struct
     /* 0x18 */ s32 ctr_deact;
     /* 0x1C */ s32 ctr;
     /* 0x20 */ s32 num;
+    /* 0x24 */ fclribbon_elem_t pelem[0];
 } fclRibbon_t;
+
+typedef struct
+{
+    s32 pm[3];
+} sdfIVector3_t;
+
+typedef struct
+{
+    s32 x;
+    s32 y;
+} itfVertex_t;
+
+typedef struct
+{
+    u32 components[4];
+} itfColor_t;
 
 extern void sdfMemFreeDirect(void *aHandle);
 
@@ -53,13 +82,41 @@ extern void MoveDeactive(fclRibbon_t *phandle);
 
 extern void fclRbnRelease(fclRibbon_t *phandle);
 
+extern itfColor_t D_00332438;
+
+extern itfColor_t D_00332448;
+
+extern void itfMiscDrawSpritePrim2(itfVertex_t *pos, itfColor_t *uv, itfColor_t *color,
+                                   u32 z, s32 context, sdfDrawTag_t *pdrawtag);
+
 extern void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 extern void fclRbnRelease(fclRibbon_t *phandle);
 
-INCLUDE_ASM(const s32, "facility/fclRibbon", fclRbnInit);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+
+fclRibbon_t *fclRbnInit(s32 num, s32 act, sdfTexHandle_t *tex0, sdfTexHandle_t *tex1)
+{
+    sdfMemHandle_t *allocation;
+    fclRibbon_t *handle;
+
+    allocation = sdfMemAllocDirect(sizeof(*handle) + num * sizeof(fclribbon_elem_t));
+    handle = sdfMemLock(allocation);
+    handle->num = num;
+    handle->allocation = allocation;
+    handle->tex[0] = tex0;
+    handle->tex[1] = tex1;
+    handle->act = act;
+    handle->deact = -1;
+    handle->ctr_act = 0;
+    handle->ctr_deact = 0;
+    handle->ctr = 0;
+    handle->stat = 0;
+    return handle;
+}
 
 void fclRbnRelease(fclRibbon_t *phandle)
 {
@@ -77,7 +134,39 @@ void fclRbnCalc(fclRibbon_t *phandle)
     phandle->ctr = (phandle->ctr - 2) & 0x7F;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRibbon", fclRbnDraw);
+extern void *sdfGrAllocPacketBuff(u32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern sdfGrOt_t sdfGrOtTable[85];
+extern void DrawBackFrame(fclRibbon_t *handle, s32 x, s32 y, u32 z,
+    s32 alpha, s32 flag, sdfDrawTag_t *tag);
+extern void DrawBack(fclRibbon_t *handle, s32 x, s32 y, u32 z,
+    s32 alpha, sdfDrawTag_t *tag);
+extern void DrawHexagon(fclRibbon_t *handle, s32 x, s32 y, u32 z,
+    s32 alpha, s32 width, s32 fixed, sdfDrawTag_t *tag);
+extern void DrawElem(fclRibbon_t *handle, s32 x, s32 y, u32 z,
+    s32 alpha, sdfDrawTag_t *tag);
+
+void fclRbnDraw(fclRibbon_t *handle, s32 x, s32 y, u32 z,
+    s32 alpha, s32 flag, s32 width, s32 ot)
+{
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *entry;
+
+    if (alpha != 0 || (flag & 1) != 0) {
+        tag = sdfGrAllocPacketBuff(sizeof(*tag));
+        sdfDrawTagInit(tag);
+        DrawBackFrame(handle, x, y, z, alpha, flag, tag);
+        if (alpha > 0) {
+            if ((flag & 2) == 0) {
+                DrawBack(handle, x, y, z, alpha, tag);
+            }
+            DrawHexagon(handle, x, y, z, alpha, width, flag & 4, tag);
+            DrawElem(handle, x, y, z, alpha, tag);
+        }
+        entry = &sdfGrOtTable[ot];
+        entry->regFunc(entry, tag);
+    }
+}
 
 void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index)
 {
@@ -92,7 +181,23 @@ void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclRibbon", fclRbnSetPara);
+void fclRbnSetPara(fclRibbon_t *handle, s32 index,
+    const sdfIVector4_t *pos_act, const sdfIVector4_t *pos_deact,
+    const sdfIVector4_t *uv_act, const sdfIVector4_t *uv_deact,
+    sdfTexHandle_t *tex_act, sdfTexHandle_t *tex_deact)
+{
+    fclribbon_elem_t *entry;
+
+    if (index >= 0 && index < handle->num) {
+        entry = &handle->pelem[index];
+        memcpy(&entry->pos_act, pos_act, sizeof(*pos_act));
+        memcpy(&entry->pos_deact, pos_deact, sizeof(*pos_deact));
+        memcpy(&entry->uv_act, uv_act, sizeof(*uv_act));
+        memcpy(&entry->uv_deact, uv_deact, sizeof(*uv_deact));
+        entry->tex[0] = tex_act;
+        entry->tex[1] = tex_deact;
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", dumpCursorInfo);
 
@@ -120,7 +225,24 @@ INCLUDE_ASM(const s32, "facility/fclRibbon", DrawBack);
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", DrawHexagon);
 
-INCLUDE_ASM(const s32, "facility/fclRibbon", DrawHexagonElem);
+void DrawHexagonElem(sdfIVector3_t *std_pos, itfColor_t *color, u32 z, sdfDrawTag_t *pdrawtag)
+{
+    itfVertex_t pos[2];
+
+    pos[0].x = std_pos->pm[0] - 320;
+    pos[0].y = std_pos->pm[2];
+    pos[1].x = std_pos->pm[0];
+    pos[1].y = std_pos->pm[2] + 160;
+    itfMiscDrawSpritePrim2(pos, &D_00332438, color, z, 0, pdrawtag);
+
+    pos[0].x = std_pos->pm[0];
+    pos[1].x = std_pos->pm[1];
+    itfMiscDrawSpritePrim2(pos, &D_00332448, color, z, 0, pdrawtag);
+
+    pos[0].x = std_pos->pm[1] + 320;
+    pos[1].x = std_pos->pm[1];
+    itfMiscDrawSpritePrim2(pos, &D_00332438, color, z, 0, pdrawtag);
+}
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", DrawElem);
 

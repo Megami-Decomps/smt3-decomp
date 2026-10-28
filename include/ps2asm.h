@@ -24,6 +24,19 @@
     ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
     : : "r" (dst), "r" (src) : "$2", "memory")
 
+/* Copy exactly four 16-byte-aligned f32 elements with explicit memory
+ * operands, without a global memory clobber. Addresses must have no evaluation
+ * side effects because each is used by both an address and memory operand;
+ * source and destination may alias. */
+typedef struct {
+    f32 components[4];
+} ps2asm_float_vector4_t;
+#define SDF_VU0_COPYVECTOR_F32(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tlq $2, 0(%2)\n\tsq $2, 0(%1)\n\t.set reorder" \
+    : "=m" (*(ps2asm_float_vector4_t *)(dst)) \
+    : "r" (dst), "r" (src), "m" (*(const ps2asm_float_vector4_t *)(src)) \
+    : "$2")
+
 /* sq $0: EE GCC materialises a C 128-bit zero in a register first. */
 #define PS2_STORE_ZERO_QUAD(dst) __asm__ volatile ( \
     "sq $0, 0(%0)" : : "r" (dst) : "memory")
@@ -40,6 +53,11 @@
     ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
 #define SDF_VU0_STOREVECTOR_MEMOPS(lvalue) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf10, %0\n\t.set reorder" : "=m" (lvalue))
+/* Explicit, volatile four-f32 scratch storage at a 16-byte-aligned address.
+ * As with the copy helper, address expressions must have no side effects. */
+#define SDF_VU0_STOREVECTOR_F32(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, 0(%1)\n\t.set reorder" \
+    : "=m" (*(volatile ps2asm_float_vector4_t *)(dst)) : "r" (dst))
 /* vf0 is the constant (0,0,0,1), so this clears xyz and sets w to one. */
 #define SDF_VU0_STOREVECTOR_ZERO(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf0, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
@@ -48,6 +66,9 @@
     ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (src))
 #define SDF_VU0_LOADVECTOR_B_MEMOPS(lvalue) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf11, %0\n\t.set reorder" : : "m" (lvalue))
+#define SDF_VU0_LOADVECTOR_B_F32(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf11, 0(%1)\n\t.set reorder" \
+    : : "m" (*(const volatile ps2asm_float_vector4_t *)(src)), "r" (src))
 #define SDF_VU0_STOREVECTOR_B(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
 #define SDF_VU0_STOREVECTOR_B_MEMOPS(lvalue) __asm__ volatile ( \
@@ -218,6 +239,14 @@
  * operation"), so every lane op is written out. Operands are u128/s128. */
 #define MMI_PEXTLW(out, a, b) __asm__ volatile ("pextlw %0, %1, %2" : "=r" (out) : "r" (a), "r" (b))
 #define MMI_PEXTUW(out, a, b) __asm__ volatile ("pextuw %0, %1, %2" : "=r" (out) : "r" (a), "r" (b))
+/* Store the unit matrix represented by VU0's constant vf0 using the retail
+ * MMI lane-shuffle sequence. */
+#define SDF_MMI_STORE_UNIT_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $5, vf0\n\tpextuw $4, $0, $5\n\t" \
+    "pextuw $2, $0, $4\n\tpextuw $3, $4, $0\n\t" \
+    "sq $2, 0(%0)\n\tsq $3, 0x10(%0)\n\t" \
+    "sq $4, 0x20(%0)\n\tsq $5, 0x30(%0)\n\t.set reorder" \
+    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
 #define MMI_PCPYLD(out, a, b) __asm__ volatile ("pcpyld %0, %1, %2" : "=r" (out) : "r" (a), "r" (b))
 #define MMI_PCPYUD(out, a, b) __asm__ volatile ("pcpyud %0, %1, %2" : "=r" (out) : "r" (a), "r" (b))
 #define MMI_PADDW(out, a, b) __asm__ volatile ("paddw %0, %1, %2" : "=r" (out) : "r" (a), "r" (b))
@@ -496,6 +525,12 @@
     "lw $4, 0x20(%0)\n\tlw $5, 0x30(%0)\n\t" \
     "pextlw $2, $3, $2\n\tpextlw $4, $5, $4\n\t" \
     "pcpyld $2, $4, $2\n\tqmtc2.ni $2, vf10\n\t.set reorder" \
+    : : "r" (src) : "$2", "$3", "$4", "$5", "memory")
+#define SDF_VU0_LOADVECTOR_B_MTXCOL(src) __asm__ volatile ( \
+    ".set noreorder\n\tlw $2, 0(%0)\n\tlw $3, 0x10(%0)\n\t" \
+    "lw $4, 0x20(%0)\n\tlw $5, 0x30(%0)\n\t" \
+    "pextlw $2, $3, $2\n\tpextlw $4, $5, $4\n\t" \
+    "pcpyld $2, $4, $2\n\tqmtc2.ni $2, vf11\n\t.set reorder" \
     : : "r" (src) : "$2", "$3", "$4", "$5", "memory")
 #define SDF_VU0_LOAD_ROW3(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf31, 0(%0)\n\t.set reorder" \
@@ -1293,6 +1328,69 @@ __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vaddx.y vf10, vf0, vf2x\n\t.set reorder" \
     : : "f" (f))
+/* Packed-palette tinting used by sdfTexSetClutColor and the DDS counterpart.
+ * vf2x holds the blend amount, vf3.xyz the tint normalized by 255; the loop
+ * primitives preserve source alpha in vf6w. Scalar C cannot emit the packed
+ * byte expansion, VU accumulator blend, or PPAC5. Loops and palette addressing
+ * remain C; these primitives cover only the native COP2/MMI conversion.
+ */
+#define MMI_PALETTE_TINT_SETUP(amount, tint, unit) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmtc2.ni %0, vf2\n\t" \
+    "pextlb $2, $0, %1\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, vf3\n\t" \
+    "vitof0.xyzw vf3, vf3\n\t" \
+    "qmtc2.ni %2, vf4\n\t" \
+    "vmulx.xyz vf3, vf3, vf4x\n\t" \
+    ".set reorder" \
+    : : "r"(amount), "r"(tint), "r"(unit) : "$2")
+
+#define MMI_PALETTE_TINT_RGBA(value, color) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pextlb $2, $0, %1\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, vf5\n\t" \
+    "vitof0.xyzw vf5, vf5\n\t" \
+    "qmtc2.ni %0, vf4\n\t" \
+    "vitof0.xyzw vf4, vf4\n\t" \
+    "vmove.w vf6, vf5\n\t" \
+    "vmulx.xyz vf4, vf3, vf4x\n\t" \
+    "vmulaw.xyz ACC, vf5, vf0w\n\t" \
+    "vmaddax.xyz ACC, vf4, vf2x\n\t" \
+    "vmsubx.xyz vf6, vf5, vf2x\n\t" \
+    "vftoi0.xyzw vf6, vf6\n\t" \
+    "qmfc2.ni $2, vf6\n\t" \
+    "ppach $2, $0, $2\n\t" \
+    "ppacb %0, $0, $2\n\t" \
+    ".set reorder" \
+    : "+r"(value) : "r"(color) : "$2")
+
+#define MMI_PALETTE_TINT_RGB5(color, value, mask) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pext5 $2, %0\n\t" \
+    "srl $3, $2, 5\n\t" \
+    "and $3, $3, %2\n\t" \
+    "or $2, $2, $3\n\t" \
+    "pextlb $2, $0, $2\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, vf5\n\t" \
+    "vitof0.xyzw vf5, vf5\n\t" \
+    "qmtc2.ni %1, vf4\n\t" \
+    "vitof0.xyzw vf4, vf4\n\t" \
+    "vmove.w vf6, vf5\n\t" \
+    "vmulx.xyz vf4, vf3, vf4x\n\t" \
+    "vmulaw.xyz ACC, vf5, vf0w\n\t" \
+    "vmaddax.xyz ACC, vf4, vf2x\n\t" \
+    "vmsubx.xyz vf6, vf5, vf2x\n\t" \
+    "vftoi0.xyzw vf6, vf6\n\t" \
+    "qmfc2.ni $2, vf6\n\t" \
+    "ppach $2, $0, $2\n\t" \
+    "ppacb $2, $0, $2\n\t" \
+    "ppac5 %0, $2\n\t" \
+    ".set reorder" \
+    : "+r"(color) : "r"(value), "r"(mask) : "$2", "$3")
+
 /* ---- sequences that units wrote out in place ---- */
 
 /* ---- sequences that units wrote out in place ---- */
@@ -1438,5 +1536,9 @@ __asm__ volatile ( \
  * cannot share it: every unit that passes a float to a varargs call needs its
  * own, after declaring sdfFloatToULong. */
 #define EQUATE_FPTODP() __asm__("fptodp = sdfFloatToULong")
+
+/* The reverse conversion is named dptofp by ee-gcc; the native routine
+ * returns its float in $f0 despite the inherited sdfDoubleToULong name. */
+#define EQUATE_DPTOFP() __asm__("dptofp = sdfDoubleToULong")
 
 #endif /* PS2ASM_H */

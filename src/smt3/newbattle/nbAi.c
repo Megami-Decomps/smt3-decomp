@@ -1156,8 +1156,6 @@ s32 nbAiChkJoken(nbActionProcessData_t *a, u32 jo)
     return 1;
 }
 
-/* NON_MATCHING: 11 of 54 words differ (first at +0x78). */
-#ifdef NON_MATCHING
 s32 nbGetAiEntry(nbActionProcessData_t *a, s32 index)
 {
     u32 j1;
@@ -1167,20 +1165,16 @@ s32 nbGetAiEntry(nbActionProcessData_t *a, s32 index)
     j1 = D_003989E0[a->work->id].entry[index].joken[0];
     j2 = D_003989E0[a->work->id].entry[index].joken[1];
     a->aijokentbl = index;
-    if (nbAiChkJoken(a, j1) == 0) {
-        return 0;
+    if (nbAiChkJoken(a, j1) != 0) {
+        if (nbAiChkJoken(a, j2) != 0) {
+            if ((j1 >> 16) == 4 || (j2 >> 16) == 4) {
+                nbSetHojoCounter(a->form->formindex, index + 1, 0);
+            }
+            return 1;
+        }
     }
-    if (nbAiChkJoken(a, j2) == 0) {
-        return 0;
-    }
-    if ((j1 >> 16) == 4 || (j2 >> 16) == 4) {
-        nbSetHojoCounter(a->form->formindex, index + 1, 0);
-    }
-    return 1;
+    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", nbGetAiEntry);
-#endif
 
 /* NON_MATCHING: 2 of 70 words differ (first at +0xB8). */
 #ifdef NON_MATCHING
@@ -1223,7 +1217,74 @@ s32 nbPickAiAction(nbActionProcessData_t *a, s32 tbl)
 INCLUDE_ASM(const s32, "newbattle/nbAi", nbPickAiAction);
 #endif
 
+extern void nbSetNormalSkill0(datUnitWork_t *work);
+
+/* NON_MATCHING: 4 of 114 words differ (first at +0x168). */
+#ifdef NON_MATCHING
+void SetKoudou(nbActionProcessData_t *a, s32 tbl, s32 kou)
+{
+    s32 id;
+    datDevilAITbl_t *entry;
+    datUnitWork_t *work;
+    u16 skill;
+
+    id = a->work->id;
+    entry = (datDevilAITbl_t *)(D_00398A08 + (id * 164 + tbl * 40 + kou * 8));
+    a->work->nowcommand = 0;
+    a->work->nowindex = 0;
+    skill = entry->skill;
+    switch (skill) {
+    case 0x8000:
+        a->work->nowcommand = 0;
+        work = a->work;
+        nbSetNormalSkill0(work);
+        return;
+    case 0x8001:
+        a->work->nowcommand = 7;
+        return;
+    case 0x8002:
+        a->work->nowcommand = 3;
+        return;
+    case 0x8003:
+        a->work->nowcommand = 9;
+        return;
+    }
+    if (entry->skill & 0x8000) {
+        a->work->nowcommand = 1;
+        switch (entry->skill & 0xF000) {
+
+        case 0x9000:
+            a->work->nowindex = 226;
+            break;
+        case 0xA000:
+            a->work->nowindex = 227;
+            break;
+        case 0xB000:
+            a->work->nowindex = 229;
+            break;
+        case 0xC000:
+            a->work->nowindex = 230;
+            break;
+        case 0xF000:
+            a->work->nowindex = 222;
+            break;
+        case 0xD000:
+            a->work->nowindex = 252;
+            break;
+        case 0xE000:
+            a->work->nowcommand = 9;
+            a->data->eventno = entry->skill & 0xFFF;
+            break;
+        }
+        a->aisummonid = entry->skill & 0xFFF;
+    } else {
+        a->work->nowcommand = 1;
+        a->work->nowindex = entry->skill;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbAi", SetKoudou);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbAi", Sel_AI);
 
@@ -1533,12 +1594,59 @@ s32 ChkClose(nbActionProcessData_t *a)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbAi", nbSetAiTarget);
+extern s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command);
+extern void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
+                             s32 *crule, s32 *carea, s32 mode);
+extern s32 nbSetSelectOkMark(s32 partyindex, s32 ctype, s32 crule, s32 carea);
+extern s32 SetSingleTarget2(nbActionProcessData_t *a, s32 code, s32 n);
+
+s32 nbSetAiTarget(nbActionProcessData_t *a, s32 code, s32 n)
+{
+    s32 ctype;
+    s32 crule;
+    s32 carea;
+    s32 result = 0;
+    switch (a->work->nowcommand) {
+    case 0:
+    case 1:
+    case 5:
+        if (a->work->nowcommand == 1) {
+            switch (a->work->nowindex) {
+            case 0xDE:
+            case 0xE2:
+            case 0xE3:
+            case 0xE4:
+            case 0xE5:
+            case 0xE6:
+            case 0xFC:
+                nbSetActionCommand(a->data, a->aisummonid);
+                code = TAR_CODE_RND;
+                break;
+            }
+        }
+        nbSetTargetSkill(a, a->work, &ctype, &crule, &carea, 0);
+        nbSetSelectOkMark(a->partyindex, ctype, crule, carea);
+        switch (ctype) {
+        case 0:
+            result = SetSingleTarget2(a, code, n);
+            break;
+        case 1:
+        case 2:
+            result = SetGroupTarget2(a, code, n);
+            break;
+        }
+        break;
+    }
+    if (result != 0) {
+        a->work->nowcommand = 3;
+        a->work->nowindex = 0;
+    }
+    return result;
+}
+
 
 INCLUDE_ASM(const s32, "newbattle/nbAi", nbRunAiSub);
 
-/* NON_MATCHING: 1 of 47 words differ (first at +0x3C). */
-#ifdef NON_MATCHING
 void nbRunAi(nbActionProcessData_t *a)
 {
     s32 i;
@@ -1554,9 +1662,8 @@ void nbRunAi(nbActionProcessData_t *a)
     printf(D_00545840, no);
     nbRunAiSub(a, no);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", nbRunAi);
-#endif
+
+INCLUDE_RODATA(const s32, "newbattle/nbAi", D_00545840);
 
 INCLUDE_RODATA(const s32, "newbattle/nbAi", D_00545850);
 

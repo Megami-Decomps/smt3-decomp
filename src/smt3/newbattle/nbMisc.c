@@ -19,7 +19,7 @@ extern void MultMatrixRev(f32 *aMatrix);
 
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, s32 aId);
 
-extern void nbDrawTargetCursor(s32 type, s32 x, s32 y);
+extern void nbDrawTargetCursor(nbMainProcessData_t *data, s32 x, s32 y);
 
 extern nbFormation_t *nbGetEventForm();
 
@@ -153,7 +153,7 @@ typedef struct nbEncountForm_t {
     u8 unk05[0x21];
 } nbEncountForm_t;
 
-void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag);
+void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag);
 
 void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
                         sdfVector4_t *center, f32 r, f32 scl, f32 h);
@@ -273,7 +273,32 @@ s32 nbGetUnitID(datUnitWork_t *work);
 
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/nbMisc", nbAddOrder);
+void nbAddOrder(s32 findex)
+{
+    nbMainProcessData_t *data;
+    s32 start;
+    s32 i;
+    s32 partyIndex;
+    u32 stat;
+
+    data = nbGetMainProcessData();
+    stat = data->form[findex].stat;
+    if ((stat & 1) == 0) {
+        return;
+    }
+    if ((stat & 0x40) == 0) {
+        return;
+    }
+    start = data->orderindex + 1;
+    partyIndex = data->form[findex].partyindex;
+    for (i = start; i < 12; i++) {
+        if (data->order[i] < 0) {
+            data->order[i] = partyIndex;
+            nbSortOrder(start);
+            break;
+        }
+    }
+}
 
 void nbSortOrder(s32 start)
 {
@@ -486,7 +511,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawRotatedModelX);
 
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawRotatedModel);
 
-void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag)
+void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag)
 {
     s32 pos[4];
 
@@ -495,7 +520,7 @@ void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag)
         sdfModelGetMarkPos(form->hunit->owner->inner, 0);
     }
     if (nbClipEffectNum(pos) != 0) {
-        nbDrawTargetCursor(type, pos[0] >> 4, pos[1] >> 3);
+        nbDrawTargetCursor(data, pos[0] >> 4, pos[1] >> 3);
     }
 }
 
@@ -664,7 +689,38 @@ s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formindex)
     return i;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMisc", nbGetRandamStock);
+typedef struct
+{
+    u8 unk_00000[0xA54];
+    datUnitWork_t unitwork[16];
+} nbStockGlobalWork_t;
+
+extern nbStockGlobalWork_t *nbStockGlobalWork asm("DDS3_GBWK");
+extern u32 dds3GetRandIntA(void *state, u32 limit);
+
+s32 nbGetRandamStock(void)
+{
+    s32 entries[16];
+    u32 count = 0;
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        if ((nbStockGlobalWork->unitwork[i].flag & 1) != 0 &&
+            (nbStockGlobalWork->unitwork[i].flag & 2) == 0 &&
+            (nbStockGlobalWork->unitwork[i].flag & 0x10) == 0 &&
+            (nbStockGlobalWork->unitwork[i].badstatus & 0xFFF) != 0x800 &&
+            nbStockGlobalWork->unitwork[i].hp != 0) {
+            entries[count++] = i;
+        }
+    }
+    {
+        s32 selected = -1;
+        if (count != 0) {
+            selected = entries[dds3GetRandIntA(NULL, count)];
+        }
+        return selected;
+    }
+}
 
 void nbSetMainPhase(s32 encno)
 {

@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -33,7 +34,7 @@ typedef struct
     /* 0x036C */ s32 pwork;
 } fclEncyc_instance_tag;
 
-extern s32 mselShutDown(void);
+extern dds3ProcessID_t *mselShutDown(u32 mode);
 
 extern char D_0053DF08[];
 
@@ -48,10 +49,11 @@ typedef struct
     /* 0x40 */ s32 unk_40;
     /* 0x44 */ s32 unk_44;
     /* 0x48 */ s32 unk_48;
-    /* 0x4C */ u8 unk_4C[8];
+    /* 0x4C */ s32 unk_4C;
+    /* 0x50 */ s32 unk_50;
     /* 0x54 */ s32 cursor;
     /* 0x58 */ void *unk_58;
-    /* 0x5C */ u8 unk_5C[4];
+    /* 0x5C */ void *unk_5C;
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ s32 tover[5];
     /* 0x78 */ u8 unk_78[0x10];
@@ -66,6 +68,7 @@ typedef struct
 extern mselGlobalWork_t *gGlobal;
 
 s32 fclDestroyMessage(void);
+s8 fclInitMessage(void *data);
 
 s32 fclLoadTexture(char *pFileName);
 
@@ -103,7 +106,37 @@ void mselCountSaves(void)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/ModeSelect", mselFindSaveSlot);
+void mselFindSaveSlot(s32 *first, s32 *second, u32 start, u32 end, s8 reverse)
+{
+    u32 i;
+
+    if (reverse != 0) {
+        i = start;
+        if (start < end) {
+            for (; i < end; i++) {
+                if (first != NULL) {
+                    first[i - 1] = first[i];
+                }
+                if (second != NULL) {
+                    second[i - 1] = second[i];
+                }
+            }
+        }
+    } else {
+        i = end - 1;
+        if (i >= start) {
+            do {
+                if (first != NULL) {
+                    first[i] = first[i - 1];
+                }
+                if (second != NULL) {
+                    second[i] = second[i - 1];
+                }
+                i--;
+            } while (i >= start);
+        }
+    }
+}
 
 extern char D_0053DEC0[];
 
@@ -138,7 +171,44 @@ INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DEC0);
 
 INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DED8);
 
-INCLUDE_ASM(const s32, "kernel/ModeSelect", mselShutDown);
+const char D_0053DEF0[] = "/title/mseldata.bmd";
+
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void *sdfDevLoadFileEx(const char *path, u32 *address, u32 *size);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer, s32 shutdownTimer,
+                                         dds3ProcessFunc_t processFunc, dds3ProcessFunc_t shutdownFunc, void *work);
+extern s32 mselMain(dds3ProcessID_t *id);
+extern u32 dds3BackColor;
+
+dds3ProcessID_t *mselShutDown(u32 mode)
+{
+    sdfMemHandle_t *handle;
+    u32 *work;
+    s32 i;
+    void *fileHandle;
+
+    handle = sdfMemAllocDirect(0xB4);
+    work = sdfMemLock(handle);
+    gGlobal = (mselGlobalWork_t *)work;
+    gGlobal->unk_00 = handle;
+    gGlobal->unk_4C = 0;
+    gGlobal->unk_50 = 0;
+    gGlobal->cursor = 0;
+    for (i = 0; i < 5; i++) {
+        gGlobal->tover[i] = -1;
+    }
+    gGlobal->unk_60 = 0;
+    mselLoadBackground();
+    gGlobal->unk_A8 = mode;
+    gGlobal->unk_04 = sdfMemAllocDirect(0x1A510);
+    gGlobal->unk_08 = sdfMemAllocDirect(0x7E90);
+    fileHandle = sdfDevLoadFileEx(D_0053DEF0, (u32 *)&gGlobal->unk_5C, NULL);
+    gGlobal->unk_58 = fileHandle;
+    fclInitMessage(gGlobal->unk_5C);
+    dds3BackColor = 0x80000000;
+    return dds3StartProcess(D_0053DF08, 0x2B19, 0, 0, mselMain, NULL, NULL);
+}
 
 extern void mselFreeTextures(void);
 
@@ -159,9 +229,9 @@ INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DF08);
 
 INCLUDE_ASM(const s32, "kernel/ModeSelect", mselMain);
 
-s32 mselExit(void)
+s32 mselExit(u32 mode)
 {
-    mselShutDown();
+    mselShutDown(mode);
     return -1;
 }
 

@@ -26,9 +26,8 @@ Matching builds verify the reconstruction against the original executable.
 ## Status and versions
 
 Unfinished functions use assembly extracted from the original executable, so a
-matching build does not mean the decompilation is complete. Nearly all of the
-code is still assembly; names, types and source organization are being
-recovered.
+matching build does not mean the decompilation is complete. The remaining code
+uses assembly fallbacks while its source, names and types are recovered.
 
 | Version | Game | Serial | ELF SHA-1 |
 |---|---|---|---|
@@ -40,15 +39,18 @@ also has to reproduce `.vutext`, `.vudata`, `.ctors`, `.dtors`, `.eh_frame`,
 the `.DVP.*` VU overlay tables and the section-header region byte for byte.
 
 The build is verified: `ninja` relinks the split objects and `objcopy`s the
-result into a file byte-identical to the retail executable, reproduced from a
-clean tree. `.text` is split into 98 translation units, 71 of them under their
-recovered names. The VU1 and VU0 microcode in `.vutext` is not a blob either:
-all 2,061 instructions are assembled from the annotated listings in
-`src/smt3/sdf/vu/` (see [VU microcode](docs/vu/README.md)). 4,331 of the 9,694 functions are still `INCLUDE_ASM`
-fallbacks; 5,363 are in C, which is 593,740 of 1,976,292 code bytes, verified
-against the linked image rather than against objdiff's base objects. 588 of
-those 5,363 are two-instruction functions of 8 bytes each, 4,704 bytes in
-total, so the function share runs well ahead of the byte share.
+result into a file byte-identical to the retail executable. The configured
+C units comprise 293 game/engine units and 12 SDK/runtime units. The VU1
+and VU0 microcode is assembled from the annotated listings in
+`src/smt3/sdf/vu/`: all 2,061 instructions, 16,488 bytes, are reproduced
+(see [VU microcode](docs/vu/README.md)).
+
+Measured on 2026-10-28, the linked-image report verifies 985,208 of 1,851,268
+game-code bytes (53.22%) and 7,456 of 9,022 game functions (82.64%) from C.
+The remaining 1,566 game functions use assembly, including 261 with retained
+non-matching drafts. SDK/runtime reconstruction is a separate category.
+Function coverage runs ahead of byte coverage because small functions count
+as much as large ones; neither drafts nor assembly fallbacks earn C credit.
 
 The badges above track matched game and engine code bytes and function
 counts. Assembly fallbacks earn zero credit, and SDK/runtime code, handwritten

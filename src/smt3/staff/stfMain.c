@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -45,7 +46,14 @@ typedef struct
     /* 0x0004 */ s32 unk_0004;
     /* 0x0008 */ s32 unk_0008;
     /* 0x000C */ s32 unk_000C;
-    /* 0x0010 */ u8 unk_0010[0xEC];
+    /* 0x0010 */ sdfTexHandle_t *textureHandle;
+    /* 0x0014 */ u8 reserved0014[0xD0];
+    /* 0x00E4 */ s32 reserved00E4;
+    /* 0x00E8 */ s32 reserved00E8;
+    /* 0x00EC */ s32 scrollY;
+    /* 0x00F0 */ s32 reserved00F0;
+    /* 0x00F4 */ s32 reserved00F4;
+    /* 0x00F8 */ f32 initFloat;
     /* 0x00FC */ s32 unk_00FC;
     /* 0x0100 */ s32 unk_0100;
     /* 0x0104 */ s32 unk_0104;
@@ -64,7 +72,51 @@ extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 INCLUDE_ASM(const s32, "staff/stfMain", stfMain2);
 
-INCLUDE_ASM(const s32, "staff/stfMain", GetoStaffUI);
+extern void stfGetUIField(s32, s32, s32);
+extern void ObjDispOff(void);
+extern void rsetOtOfs(u32);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void rsetAlpha(s32);
+extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, u32, sdfTexHandle_t *);
+
+void GetoStaffUI(void) {
+    s32 elapsed;
+    s32 field;
+    s32 fieldCount = oStaff_UI->unk_0110;
+    s32 drawY;
+
+    if (fieldCount < 15) {
+        elapsed = oStaff_UI->scrollY - 0x780;
+        if (elapsed >= 0) {
+            field = elapsed / 0x450;
+            if (field >= fieldCount) {
+                field = 1;
+                if ((fieldCount & 1) == 0) {
+                    field = -1;
+                }
+                stfGetUIField(fieldCount, 0, field);
+                oStaff_UI->unk_0110++;
+            }
+        }
+    }
+
+    ObjDispOff();
+    drawY = oStaff_UI->scrollY;
+    if (drawY < 0x1CB9) {
+        return;
+    }
+    drawY -= 0x1CB8;
+    drawY = 0x1C0 - (drawY / 2);
+    if (drawY < -0x3F) {
+        return;
+    }
+
+    rsetOtOfs(0x47);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    rsetAlpha(0);
+    DrwSprite2D(0x108, drawY, 0x100, 0x80, 0, 0, 0x100, 0x80, 0x80808080,
+                oStaff_UI->textureHandle);
+}
 
 INCLUDE_ASM(const s32, "staff/stfMain", ObjDispOff);
 
@@ -86,7 +138,33 @@ void stfDestroy(void)
     oStaff_UI = NULL;
 }
 
-INCLUDE_ASM(const s32, "staff/stfMain", stfShutDown);
+extern void stfFreeFiles(void);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern s32 p2sdLoadPcmFile(const char *name, u8 channel);
+extern u32 dds3BackColor;
+extern s32 stfMain2(dds3ProcessID_t *id);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer, s32 drawTimer,
+                              dds3ProcessFunc_t drawExit, dds3ProcessFunc_t deleteExit, void *work);
+
+s32 stfShutDown(void) {
+    sdfMemHandle_t *handle;
+    stfUiWork_t *work;
+
+    dds3BackColor = 0x80000000;
+    handle = sdfMemAllocDirect(0x11C);
+    work = sdfMemLock(handle);
+    oStaff_UI = work;
+    work->allocation = handle;
+    work->initFloat = 0.09999999404f;
+    work->unk_000C = work->unk_0008 = work->unk_0004 = work->reserved00F4 =
+        work->reserved00F0 = work->scrollY = work->reserved00E8 = work->reserved00E4 = 0;
+    stfFreeFiles();
+    p2sdLoadPcmFile("STAFF.ADB", 0x7F);
+    dds3VblanksPerFrame = 1;
+    return (s32)dds3StartProcess(D_0053F100, 0x2B19, 0, 0,
+                                 stfMain2, (dds3ProcessFunc_t)stfDestroy, NULL);
+}
 
 s32 stfExit(void)
 {

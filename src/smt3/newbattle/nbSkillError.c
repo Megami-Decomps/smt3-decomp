@@ -78,7 +78,11 @@ typedef struct nbParty_t
 /* A loaded pac file; only the chain down to the decoded buffer is named. */
 typedef struct { u8 unk_00[0x8]; void *buf; } nbPacEntry_t;
 
-typedef struct { u8 unk_00[0x60]; nbPacEntry_t *entry; } nbPacHandle_t;
+struct NB_FILEHANDLE_T {
+    u8 reserved00[0x60];
+    nbPacEntry_t *entry;
+};
+typedef NB_FILEHANDLE_T nbPacHandle_t;
 
 /* 0xE0 bytes; only the field this unit reads is named. */
 typedef struct
@@ -129,13 +133,9 @@ typedef struct nbMainProcessData_t
     u8 itemcnt[4];
     u32 maka;
     u32 exp;
-    u8 unk_A8[0xC];
-    nbPacHandle_t *formpack;
-    u8 unk_B8[0x4];
+    u8 unk_A8[0x14];
     dds3ProcessID_t *MainProcessID;
-    u8 unk_C0[0x1C];
-    void *packdata;
-    u8 unk_E0[0x14];
+    u8 unk_C0[0x34];
     dds3ProcessID_t *koukaproc;
     dds3ProcessID_t *negoproc;
     u8 unk_FC[0x4];
@@ -326,7 +326,7 @@ extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
 extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
-extern void nbLoadMidiFile(s32 no);
+extern s32 nbLoadMidiFile(s32 no);
 
 extern s32 (*D_004EF4B0[])(nbNegoProcessData_t *n);
 
@@ -362,7 +362,70 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 s32 nbGetMotionTable(s32 unitid, s32 index);
 
-INCLUDE_ASM(const s32, "newbattle/nbSkillError", CheckHojo);
+extern s32 nbGetHojoCounterMax(s32 type);
+extern s32 nbGetHojoCounterMin(s32 type);
+
+s32 CheckHojo(nbParty_t **list, s32 cnt, u32 hojo)
+{
+    s32 i;
+
+    for (i = 0; i < cnt; i++) {
+        nbParty_t *party = list[i];
+
+        if ((hojo & 1) != 0 && party->count[4] != nbGetHojoCounterMax(4)) {
+            return 1;
+        }
+        if ((hojo & 2) != 0 && party->count[4] != nbGetHojoCounterMin(4)) {
+            return 1;
+        }
+        if ((hojo & 4) != 0 && party->count[5] != nbGetHojoCounterMax(5)) {
+            return 1;
+        }
+        if ((hojo & 8) != 0 && party->count[5] != nbGetHojoCounterMin(5)) {
+            return 1;
+        }
+        if ((hojo & 0x10) != 0 && party->count[6] != nbGetHojoCounterMax(6)) {
+            return 1;
+        }
+        if ((hojo & 0x20) != 0 && party->count[6] != nbGetHojoCounterMin(6)) {
+            return 1;
+        }
+        if ((hojo & 0x40) != 0 && party->count[7] != nbGetHojoCounterMax(7)) {
+            return 1;
+        }
+        if ((hojo & 0x80) != 0 && party->count[7] != nbGetHojoCounterMin(7)) {
+            return 1;
+        }
+        if ((hojo & 0x100) != 0 && party->count[8] != nbGetHojoCounterMax(8)) {
+            return 1;
+        }
+        if ((hojo & 0x200) != 0 && party->count[8] != nbGetHojoCounterMin(8)) {
+            return 1;
+        }
+        if ((hojo & 0x1000) != 0 && party->count[9] != nbGetHojoCounterMax(9)) {
+            return 1;
+        }
+        if ((hojo & 0x2000) != 0 && party->count[10] != nbGetHojoCounterMax(10)) {
+            return 1;
+        }
+        if ((hojo & 0x4000) != 0 && party->count[11] != nbGetHojoCounterMax(11)) {
+            return 1;
+        }
+        if ((hojo & 0x8000) != 0 && party->count[12] != nbGetHojoCounterMax(12)) {
+            return 1;
+        }
+        if ((hojo & 0x10000) != 0 && party->count[13] != nbGetHojoCounterMax(13)) {
+            return 1;
+        }
+        if ((hojo & 0x20000) != 0 && party->count[14] != nbGetHojoCounterMax(14)) {
+            return 1;
+        }
+        if ((hojo & 0x1000000) != 0 && party->count[15] != nbGetHojoCounterMax(15)) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 /* s32 with no return keeps the one shared epilogue retail has. */
 s32 nbDispSkillErrorMessage(s32 err)
@@ -400,7 +463,110 @@ s32 nbCheckBattleSkillError1(s32 nskill)
 INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbCheckBattleSkillError1);
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbCheckBattleSkillError2);
+s32 nbCheckBattleSkillError2(s32 nskill, u32 select)
+{
+    datUnitWork_t *unitList[32];
+    nbParty_t *partyList[32];
+    nbMainProcessData_t *data;
+    datUnitWork_t *unit;
+    nbParty_t *party;
+    s32 unitCount;
+    s32 partyCount;
+    s32 i;
+    s32 result = 0;
+
+    data = nbGetMainProcessData();
+    if ((data->stat & 0x08000000) != 0) {
+        return 0;
+    }
+    unitCount = 0;
+    partyCount = 0;
+    for (i = 0; i < 16; i++) {
+        if ((select & (1 << i)) != 0) {
+            unit = nbGetUnitWorkFromFormindex(i);
+            if (unit != NULL) {
+                unitList[unitCount++] = unit;
+            }
+            party = nbGetPartyFromFormindex(i);
+            if (party != NULL) {
+                partyList[partyCount++] = party;
+            }
+        }
+    }
+    if (unitCount == 0) {
+        return 0;
+    }
+
+    switch (nskill) {
+    case 36:
+    case 37:
+    case 38:
+    case 39:
+    case 40:
+    case 41:
+    case 81:
+    case 94:
+        if (cmpButtonGuideShowDone(unitList, unitCount) != 0) {
+            result = 1;
+        }
+        break;
+    case 43:
+    case 44:
+    case 45:
+    case 46:
+    case 47:
+    case 48:
+    case 88:
+        if (cmpFindButtonGuideByFlag(unitList, unitCount,
+                                     datSkillTable.normal[nskill].basstatus) == 0) {
+            result = 1;
+        }
+        break;
+    case 51:
+    case 85:
+    case 86:
+    case 92:
+    case 237:
+    case 238:
+    case 239:
+    case 240:
+    case 246:
+    case 248:
+        if (cmpButtonGuideShowDone(unitList, unitCount) == 0) {
+            break;
+        }
+        /* fall through */
+    case 42:
+    case 82:
+    case 83:
+    case 84:
+    case 93:
+        if (cmpButtonGuideHideDone(unitList, unitCount) != 0) {
+            result = 1;
+        }
+        break;
+    case 68:
+    case 69:
+    case 70:
+    case 224:
+        if (CheckHojo(partyList, partyCount,
+                      datSkillTable.normal[nskill].hojotype) == 0) {
+            result = 4;
+        }
+        break;
+    case 218:
+        if (cmpButtonGuideShowDone(unitList, unitCount) != 0) {
+            if (cmpFindButtonGuideByFlag(unitList, unitCount,
+                                         datSkillTable.normal[nskill].basstatus) == 0) {
+                result = 1;
+            }
+        }
+        break;
+    default:
+        break;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbCheckBattleSkillError3);
 
@@ -459,15 +625,19 @@ s32 nbMakeModelPackName(s32 no)
     return h;
 }
 
-/* s32 with no return blocks the sibling call retail does not take. */
-s32 nbLoadModelPackIfEnabled(nbMainProcessData_t *data, void *buf, s32 no)
+/* The local parameter reset retains retail's jal and shared epilogue.
+ * Qualified cc1 trace: reset insn92 survives sibling-call selection and is
+ * removed in life analysis; hooked, dump and plain assembly agree.
+ * See the post-call-reset rule in docs/CONTRIBUTING.md. */
+void nbLoadModelPackIfEnabled(nbFormation_t *form, s32 group, s32 no)
 {
-    if (data->formpack == NULL) {
+    if (form->packh == NULL) {
         if (evtBitCheck(0xC0F)) {
-            data->formpack = (nbPacHandle_t *)nbMakeModelPackName(no);
+            form->packh = (nbPacHandle_t *)nbMakeModelPackName(no);
         } else {
-            mdlPrepare(buf, no, 0);
+            mdlPrepare(group, no, 0);
             nbLoadMidiFile(no);
+            form = NULL;
         }
     }
 }
@@ -504,32 +674,32 @@ void nbLoadMotionData(nbStatWork_t *stat, void *src, u32 size, s32 motion, s32 u
     }
 }
 
-void nbCopyPackData(nbMainProcessData_t *data, void *src, u32 size)
+void nbCopyPackData(nbStatWork_t *stat, void *src, u32 size, s32 unitid)
 {
     void *p;
 
-    if (data != NULL) {
+    if (stat != NULL) {
         p = sdfMemAllocDirect(size);
         memcpy(sdfMemLock(p), src, size);
-        data->packdata = p;
+        stat->motbuf = p;
     }
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbAddFormEntry);
 
-s32 nbCheckModelPackLoaded(nbMainProcessData_t *data, s32 group, s32 id)
+s32 nbCheckModelPackLoaded(nbFormation_t *form, s32 group, s32 id)
 {
     void *buf;
 
     if (evtBitCheck(0xC0F) != 0) {
-        if (pacCheckEnd(data->formpack) == 0) {
+        if (pacCheckEnd(form->packh) == 0) {
             goto zero;
         }
-        buf = data->formpack->entry->buf;
+        buf = form->packh->entry->buf;
         nbAddFormEntry(sdfMemLock(buf), group, id);
         sdfMemFreeDirect(buf);
-        pacFileHandleFree_(data->formpack);
-        data->formpack = NULL;
+        pacFileHandleFree_(form->packh);
+        form->packh = NULL;
         return 1;
     }
     if (mdlPrepare(group, id, 0) == 0) {

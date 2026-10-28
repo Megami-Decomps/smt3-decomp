@@ -2,22 +2,6 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
-## nbAddOrder (newbattle/nbStageProcess, 0x9C)
-
-17 of 37 words match, 148 bytes against the native 156.
-
-Retail keeps the start index and the loop counter in two registers with a
-copy between them: `$4` holds `orderindex + 1` and is used only to form the
-`&data->order[start]` address, and `$5` is the counter, set from `$4` by a
-`daddu`. The draft coalesces both into `$4`, so the loop body is one
-instruction shorter and `ee-as` then pads it with one nop fewer, which is
-where the 8-byte size difference comes from.
-
-Ruled out: an explicit `s8 *p` walking the array alongside the counter; a
-separate `start` local with `data->order[start + (i - start)]`; a `while (i <
-12)` head test; a `u32` counter; and the plain `for (i = ...; i < 12; i++)`
-form, which gcc rotates and which costs a duplicated test.
-
 ## nbSetNextOrder (newbattle/nbStageProcess, 0xAC)
 
 10 of 44 words match, 176 bytes against the native 172.
@@ -32,41 +16,6 @@ copying it, where the draft loads straight into `$4`.
 Ruled out: `data->orderindex` used directly in the loop rather than an `s8`
 local; an `s32` local, which drops the `sll 24`/`sra 24` pair retail has; and
 a `do`/`while` on `data->order[data->orderindex] < 0`.
-
-## nbGetRandamStock (newbattle/nbStageProcess, 0xB4)
-
-4 of 44 words match, 176 bytes against the native 180.
-
-The same mechanism as `fldStatusSet` above, over the same records. Retail
-keeps one induction variable holding the byte offset into `dds3GlobalWork_t`,
-starting at `0xA50` and stepping `0xEC`, plus two base registers, `DDS3_GBWK`
-for the `badstatus` and `hp` reads and `DDS3_GBWK + 4` for the flag, and adds
-a base per use. Every source shape tried folds the base into the induction
-variable instead, giving two induction pointers and one `addu` fewer.
-
-Ruled out: all accesses inline through `DDS3_GBWK->akuma[i]`; all accesses
-through a `fldAnahoriAkuma_t *` local; the flag inline with the other two
-through a local, which is the split retail's two bases suggest; and a
-`dds3GlobalWork_t *` local for the whole loop.
-
-## nbSetBadstatMotion (newbattle/nbStageProcess, 0xA8)
-
-6 of 42 words differ, at the exact 168-byte size.
-
-Retail holds `data` in `$4` and `data->party` in `$6`, computing the party
-address as `addu $5, $6, $5` with the two `nbGetUnitWorkPointer` arguments in
-their final registers before the four constant stores are emitted. The draft
-loads `data->party` into `$4` first, so the `daddu $4, $2, $0` that moves
-`data` into place lands one instruction later and the three following stores
-shift with it. The instruction multiset is identical; only the order and two
-register numbers differ.
-
-Ruled out: the party argument inlined at the call; a `struct nbParty_t *`
-local assigned just before the call rather than at its declaration; and all
-24 orders of the four constant stores in each of those three shapes.
-`nbSetBadstatMotion2`, which is the same shape without the float argument and
-the `work` local, matches with the argument hoisted into a local above the
-stores, so the difference is register pressure from `$17` holding `work`.
 
 ## DispComm1PanelComm (newbattle/nbStageProcess, 0xE0)
 
@@ -91,21 +40,6 @@ early return; an explicit `s32` local holding the comparison result, which
 adds an `xori`; `(s32)` casts on either operand; and two distinct `s32` locals
 for the two tests, which does defeat the range fold but leaves the same
 encoding.
-
-## nbSetWaitMotion (newbattle/nbStageProcess, 0xD8)
-
-8 of 54 words differ, at the exact 216-byte size, with the same instruction multiset.
-
-Retail reads the visual's motion speed and multiplies it by `ritu` before it
-loads `form->hunit` for the first call, so the `jal evtSetWaitMotion` delay
-slot carries the motion-number argument. The draft schedules the `lwc1` into
-that delay slot and leaves the `mul.s` after the call, which rotates the four
-words either side of it.
-
-Ruled out: the multiply split into `speed = *(f32 *)...; speed *= ritu;`; a
-`datUnitVisual_t *visual` local; reusing `ritu` as the destination (which
-loses the saved fp register entirely); and moving `form->waitmot = mot;` above
-the two calls.
 
 ## CheckSenseiNego (newbattle/nbStageProcess, 0x130)
 

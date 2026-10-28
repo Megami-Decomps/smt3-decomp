@@ -82,7 +82,15 @@ struct pbProcHandle_t
             pbViewCamWork_t *viewCam; } data;
 };
 
-typedef struct { sdfMemHandle_t *allocation; u16 unk04, unk06, unk08, level, stage; } pbDebugWork_t;
+typedef struct
+{
+    sdfMemHandle_t *allocation;
+    s16 phase;
+    s16 menuCursor;
+    s16 systemFileNum;
+    s16 level;
+    s16 stage;
+} pbDebugWork_t;
 
 extern u8 D_0054F584;
 
@@ -133,7 +141,31 @@ extern s32 D_0054F510;
 extern void *D_0054F514;
 
 
-INCLUDE_ASM(const s32, "pb/pbDebugMode", pbDebugProc);
+typedef s32 (*pbDebugProcStep_t)(pbDebugWork_t *work, sdfDrawTag_t *tag);
+
+extern pbDebugProcStep_t DebugProcTable[];
+extern sdfGrOt_t sdfGrOtTable[];
+extern sdfDrawTag_t *sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void InitializeDebug_pbDebugMode(void);
+
+/* D_002F6938 is sdfGrOtTable[81]; its regFunc accepts this draw tag. */
+PS2_SYMBOL_AT(sdfGrOt_t, pbDebugModeOt81, sdfGrOtTable, 0xA20);
+
+dds3ProcessFunc_t *pbDebugProc(dds3ProcessID_t *proc_id)
+{
+    sdfDrawTag_t *tag;
+    s32 result;
+
+    if (g_pdebug_0 == NULL) {
+        InitializeDebug_pbDebugMode();
+    }
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    result = DebugProcTable[g_pdebug_0->phase](g_pdebug_0, tag);
+    pbDebugModeOt81.regFunc(&pbDebugModeOt81, tag);
+    return (dds3ProcessFunc_t *)(result != 0 ? -1 : 0);
+}
 
 void pbDebugShutdown(void) {
     ReleaseDebug_pbDebugMode();
@@ -142,9 +174,9 @@ void pbDebugShutdown(void) {
 void InitializeDebug_pbDebugMode(void) {
     sdfMemHandle_t *handle = sdfMemAllocDirect(0x10);
     pbDebugWork_t *work = sdfMemLock(handle);
-    work->unk04 = 0;
-    work->unk06 = 0;
-    work->unk08 = 0;
+    work->phase = 0;
+    work->menuCursor = 0;
+    work->systemFileNum = 0;
     work->allocation = handle;
     work->level = D_0054F5C4->level;
     work->stage = D_0054F5C4->stage;
@@ -158,15 +190,190 @@ void ReleaseDebug_pbDebugMode(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcMenu_pbDebugMode);
+extern s8 dds3PadButtonState[];
+extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
+extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, void *drawTag);
 
-INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcRadius);
+extern char *pbDebugMenuTextTable[];
+extern char D_0054F618[];
 
-INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcDegree);
+s32 DebugProcMenu_pbDebugMode(pbDebugWork_t *work, sdfDrawTag_t *tag)
+{
+    s32 i;
+    s32 y;
 
-INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcStage);
+    if ((dds3PadButtonState[0x36] & 2) != 0) {
+        work->menuCursor--;
+        if (work->menuCursor < 0) {
+            work->menuCursor = 3;
+        }
+    } else if ((dds3PadButtonState[0x37] & 2) != 0) {
+        work->menuCursor++;
+        if (work->menuCursor >= 4) {
+            work->menuCursor = 0;
+        }
+    }
 
-INCLUDE_ASM(const s32, "pb/pbDebugMode", DebugProcFree);
+    if (dds3PadButtonState[0x33] < 0) {
+        return 1;
+    }
+    if (dds3PadButtonState[0x31] < 0) {
+        switch (work->menuCursor) {
+        case 0:
+            work->phase = 1;
+            break;
+        case 1:
+            work->phase = 2;
+            break;
+        case 2:
+            work->phase = 3;
+            break;
+        case 3:
+            work->phase = 4;
+            break;
+        }
+    }
+
+    dds3ConsPanelTagLink(tag, 16, 16, 24, 6);
+    y = 0x7A00;
+    for (i = 0; i < 4; i++) {
+        sdfDrawTagLink(tag, sdfDevPrintf(0x7380, y, 0xFFFFF0, 0,
+                                         pbDebugMenuTextTable[i]));
+        y += 0x60;
+    }
+    y = 0x7A00 + work->menuCursor * 0x60;
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, y, 0xFFFFF0, 0, D_0054F618));
+    return 0;
+}
+
+extern void pbGetCameraParam(f32 *out);
+extern void pbSetCameraRadius(f32 radius);
+extern void pbSetCameraDegree(f32 degree);
+extern void pbSetCameraDegreeInit(f32 degree);
+/* Historical name for the runtime float-to-soft-double promotion helper. */
+extern f64 sdfFloatToULong(f32 value);
+extern char D_0054F620[];
+
+s32 DebugProcRadius(pbDebugWork_t *work, sdfDrawTag_t *tag)
+{
+    f32 camera[3];
+    f64 radiusValue;
+    char *format;
+
+    pbGetCameraParam(camera);
+    if (dds3PadButtonState[0x33] < 0) {
+        work->phase = 0;
+    }
+    if (dds3PadButtonState[0x36] || dds3PadButtonState[0x34]) {
+        camera[1] -= 5.0f;
+        if (camera[1] < 50.0f) {
+            camera[1] = 50.0f;
+        }
+        pbSetCameraRadius(camera[1]);
+    } else if (dds3PadButtonState[0x37] || dds3PadButtonState[0x35]) {
+        camera[1] += 5.0f;
+        if (1500.0f < camera[1]) {
+            camera[1] = 1500.0f;
+        }
+        pbSetCameraRadius(camera[1]);
+    }
+    dds3ConsPanelTagLink(tag, 16, 16, 24, 4);
+    format = D_0054F620;
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x7A00, 0xFFFFF0, 0,
+                                     "CAMERA RADIUS (LENGTH)"));
+    radiusValue = sdfFloatToULong(camera[1]);
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7980, 0x7A60, 0xFFFFF0, 0,
+                                     format, radiusValue));
+    return 0;
+}
+
+s32 DebugProcDegree(pbDebugWork_t *work, sdfDrawTag_t *tag)
+{
+    f32 camera[3];
+    f64 degreeValue;
+    char *format;
+
+    pbGetCameraParam(camera);
+    if (dds3PadButtonState[0x33] < 0) {
+        work->phase = 0;
+    }
+    if (dds3PadButtonState[0x36] || dds3PadButtonState[0x34]) {
+        camera[2] += 0.01f;
+        if (1.560796142f < camera[2]) {
+            camera[2] = 1.560796142f;
+        }
+        pbSetCameraDegree(camera[2]);
+        pbSetCameraDegreeInit(camera[2]);
+    } else if (dds3PadButtonState[0x37] || dds3PadButtonState[0x35]) {
+        camera[2] -= 0.01f;
+        if (camera[2] < 0.0f) {
+            camera[2] = 0.0f;
+        }
+        pbSetCameraDegree(camera[2]);
+        pbSetCameraDegreeInit(camera[2]);
+    }
+    dds3ConsPanelTagLink(tag, 16, 16, 24, 4);
+    format = D_0054F620;
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x7A00, 0xFFFFF0, 0,
+                                     "CAMERA DEGREE (RADIAN)"));
+    degreeValue = sdfFloatToULong(camera[2]);
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7980, 0x7A60, 0xFFFFF0, 0,
+                                     format, degreeValue));
+    return 0;
+}
+
+extern void pbLoadSystemData(s32 num);
+extern void pbRoundStagePrev(s16 *level, s16 *stage);
+extern void pbRoundStageNext(s16 *level, s16 *stage);
+extern void pbGotoNewStage(void);
+
+s32 DebugProcStage(pbDebugWork_t *work, sdfDrawTag_t *tag)
+{
+    if (dds3PadButtonState[0x36] & 2) {
+        pbRoundStagePrev(&work->level, &work->stage);
+    }
+    if (dds3PadButtonState[0x37] & 2) {
+        pbRoundStageNext(&work->level, &work->stage);
+    }
+    if (dds3PadButtonState[0x33] < 0) {
+        work->phase = 0;
+    } else if (dds3PadButtonState[0x31] < 0) {
+        D_0054F5C4->level = work->level;
+        D_0054F5C4->stage = work->stage;
+        pbGotoNewStage();
+    }
+    dds3ConsPanelTagLink(tag, 16, 16, 24, 3);
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x7A00, 0xFFFFF0, 0,
+                                     "STAGE : %d -%2d", work->level + 1,
+                                     work->stage + 1));
+    return 0;
+}
+
+s32 DebugProcFree(pbDebugWork_t *work, sdfDrawTag_t *tag)
+{
+    if (dds3PadButtonState[0x36] & 2) {
+        work->systemFileNum--;
+        if (work->systemFileNum < 0) {
+            work->systemFileNum = 49;
+        }
+    }
+    if (dds3PadButtonState[0x37] & 2) {
+        work->systemFileNum++;
+        if (work->systemFileNum >= 50) {
+            work->systemFileNum = 0;
+        }
+    }
+    if (dds3PadButtonState[0x33] < 0) {
+        work->phase = 0;
+    } else if (dds3PadButtonState[0x31] < 0) {
+        pbLoadSystemData(work->systemFileNum);
+    }
+    dds3ConsPanelTagLink(tag, 16, 16, 24, 3);
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x7A00, 0xFFFFF0, 0,
+                                     "DATA SELECT : %2d", work->systemFileNum));
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "pb/pbDebugMode", D_00536690);
 

@@ -17,6 +17,7 @@
 #include "nb.h"
 #include "effect.h"
 #include "field.h"
+#include "nme.h"
 
 #define ASSERT_AT(line, cond) typedef char static_assert_##line[(cond) ? 1 : -1]
 #define SZ(line, type, bytes) ASSERT_AT(line, sizeof(type) == (bytes))
@@ -640,7 +641,15 @@ OFF(p10, dds3GlobalWork_t, floats, 0x440);
 OFF(p11, dds3GlobalWork_t, EventBit, 0x840);
 OFF(p12, dds3GlobalWork_t, moonFlags, 0xA40);
 OFF(p13, dds3GlobalWork_t, moonTimer, 0xA44);
+OFF(gb_moon_anahori, dds3GlobalWork_t, moonAnahoriCount, 0x11A7C);
 OFF(p14, dds3GlobalWork_t, maka, 0xA48);
+/* Native Kotowari accesses and the recovered save-data layout agree here. */
+OFF(gb_negoques, dds3GlobalWork_t, negoques, 0x1CE8);
+OFF(gb_kotowari, dds3GlobalWork_t, kotowari, 0x1CEC);
+OFF(gb_wakimi, dds3GlobalWork_t, wakimi_id, 0x1CF0);
+OFF(gb_bouga, dds3GlobalWork_t, bouga_cnt, 0x1CF2);
+ASSERT_AT(gb_negoques_count, sizeof(((dds3GlobalWork_t *)0)->negoques) == 4);
+ASSERT_AT(gb_kotowari_count, sizeof(((dds3GlobalWork_t *)0)->kotowari) == 4);
 OFF(p15, dds3GlobalWork_t, encountkyori, 0x1CF4);
 OFF(p16, dds3GlobalWork_t, encountCount, 0x1CF8);
 OFF(p17, dds3GlobalWork_t, previewX, 0x11A78);
@@ -811,3 +820,30 @@ OFF(p105, nbMainProcessData_t, light, 0xA8);
 
 /* Keep the object non-empty so ee-as has something to assemble. */
 const s32 headerCheck = 1;
+
+/* Skill table: native normal/visual/special regions and bounded global. */
+SZ(ds01, datNormalSkill_t, 0x3C);
+SZ(ds02, datNormalSkillVisual_t, 4);
+SZ(ds03, datSpecialSkill_t, 8);
+OFF(ds04, datSpecialSkill_t, n, 0);
+OFF(ds05, datSpecialSkill_t, m, 2);
+OFF(ds06, datSkillTable_t, visual, 0x4388);
+OFF(ds07, datSkillTable_t, special, 0x4808);
+SZ(ds08, datSkillTable_t, 0x4B00);
+
+/* Shared name-entry work, verified by its init and draw access offsets. */
+OFF(nm01, nmeWork_t, memHandle, 0x14);
+OFF(nm02, nmeWork_t, targetNo, 0x18);
+OFF(nm03, nmeWork_t, cursor, 0x30D4);
+OFF(nm04, nmeWork_t, inputPos, 0x5150);
+OFF(nm05, nmeWork_t, textures, 0x51B4);
+OFF(nm06, nmeWork_t, animation, 0x51C4);
+OFF(nm07, nmeWork_t, inputCursor, 0x1058);
+OFF(nm08, nmeWork_t, nameCursor, 0x2094);
+SZ(nm09, nmeWork_t, 0x51C8);
+OFF(nm10, nmeWork_t, inputRowEnabled, 0x514D);
+OFF(nm11, nmeWork_t, alternateCursorActive, 0x514C);
+OFF(nm12, nmeWork_t, inputChars, 0x5151);
+OFF(nm13, nmeWork_t, modeCursor, 0x1C);
+OFF(nm14, nmeWork_t, primaryCursorActive, 0x30D0);
+OFF(nm15, nmeWork_t, wrapCursor, 0x4110);

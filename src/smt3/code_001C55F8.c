@@ -31,13 +31,16 @@ typedef struct nbCamera_t {
 typedef struct effPartHandle_t effPartHandle_t;
 
 typedef struct nbCameraHelper_tag {
-    u8 unk00[0x30];
-    u32 unk30;
-    s32 unk34;
-    effPartHandle_t *hPart;
+    sdfVector4_t target;
+    sdfVector4_t eye;
+    sdfVector4_t up;
+    s32 frame;
+    s32 frameMax;
+    effPartHandle_t *hPB;
 } nbCameraHelper_tag;
 
 extern void *sdfChipAllocDirect(s32 aSize);
+extern void dds3EffectPartDraw(effPartHandle_t *hEffPart);
 
 extern effPartHandle_t *nbCameraHelperFileLoadPB(const char *pFilename);
 
@@ -148,7 +151,39 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
-INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperFileLoadPB);
+extern void *sdfFileOpen(const char *path);
+extern u32 sdfFileLength(void *file);
+extern s32 sdfFileRead(void *file, void *buffer, s32 size);
+extern void sdfFileClose(void *file);
+extern void *memcpy(void *dst, const void *src, u32 size);
+extern effPartHandle_t *dds3EffectPartCreate(u16 type, void *data);
+extern void mdlSingleMotion(mdlObj_t *model, s32 group, s32 number);
+
+effPartHandle_t *nbCameraHelperFileLoadPB(const char *filename)
+{
+    struct {
+        u32 size;
+        u8 reserved[12];
+    } header;
+    void *file = sdfFileOpen(filename);
+    sdfMemHandle_t *allocation;
+    void *data;
+    effPartHandle_t *part;
+
+    header.size = sdfFileLength(file);
+    allocation = sdfMemAllocDirect(header.size + sizeof(header));
+    data = sdfMemLock(allocation);
+    /* As in effBTLSystem_Part_DataLoad, only the header size is initialized. */
+    memcpy(data, &header, sizeof(header));
+    sdfFileRead(file, (u8 *)data + sizeof(header), header.size);
+    sdfFileClose(file);
+    part = dds3EffectPartCreate(3, data);
+    mdlSingleMotion(dds3EffectPartGetHandle(part), 0, 0);
+    sdfMemFreeDirect(allocation);
+    printf("nbCameraHelper:file[%s]\n", filename);
+    return part;
+}
+
 
 /* Called above its definition, where ee-gcc assumed int. */
 u16 nbCameraHelperLength(nbCameraHelper_tag *hCameraHelper);
@@ -157,24 +192,54 @@ nbCameraHelper_tag *nbCameraHelperCreate(const char *pFilename)
 {
     nbCameraHelper_tag *pHelper = sdfChipAllocDirect(0x3C);
 
-    pHelper->hPart = nbCameraHelperFileLoadPB(pFilename);
-    pHelper->unk30 = 0;
-    pHelper->unk34 = nbCameraHelperLength(pHelper);
+    pHelper->hPB = nbCameraHelperFileLoadPB(pFilename);
+    pHelper->frame = 0;
+    pHelper->frameMax = nbCameraHelperLength(pHelper);
     return pHelper;
 }
 
 void nbCameraHelperDelete(nbCameraHelper_tag *hCameraHelper)
 {
-    dds3EffectPartDelete(hCameraHelper->hPart);
+    dds3EffectPartDelete(hCameraHelper->hPB);
     sdfChipFreeDirect(hCameraHelper);
 }
 
 u16 nbCameraHelperLength(nbCameraHelper_tag *hCameraHelper)
 {
-    return dds3EffectPartGetHandle(hCameraHelper->hPart)->first->frameLength;
+    return dds3EffectPartGetHandle(hCameraHelper->hPB)->first->frameLength;
 }
 
-INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperRun);
+void nbCameraHelperRun(nbCameraHelper_tag *hCameraHelper)
+{
+    mdlObj_t *model;
+    nbCamera_t *camera;
+    s32 frameMax = hCameraHelper->frameMax;
+    f32 length;
+
+    if (hCameraHelper->frame < frameMax) {
+        camera = &pNbCamera;
+        dds3EffectPartDraw(hCameraHelper->hPB);
+        model = dds3EffectPartGetHandle(hCameraHelper->hPB);
+        if (sdfModelGetMarkPos(model->inner, 0) == 0) {
+            printf(D_00535850);
+        }
+        SDF_VU0_STOREVECTOR(camera);
+        SDF_VU0_STOREVECTOR(&hCameraHelper->target);
+        if (sdfModelGetMarkPos(model->inner, 1) == 0) {
+            printf(D_00535878);
+        }
+        SDF_VU0_STOREVECTOR(&hCameraHelper->eye);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(camera);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_GETLENGTH(length);
+        camera->distance = length;
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(&camera->direction);
+        camera->fovy = 0.7853981f;
+        hCameraHelper->frame++;
+    }
+}
 
 void nbCameraHelperModelSetSub(mdlObj_t *hModel, u32 target, u32 eye)
 {
@@ -219,7 +284,59 @@ s32 nbCameraHelperViewer_PB_Init(s32 pData)
     return pData;
 }
 
-INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperViewer_PB_Draw);
+/* Callback slots follow the viewer record used by func_001AA310. */
+typedef struct effDebugViewer_t {
+    u8 reserved00[0x18];
+    struct effDebugViewer_t *replacement;
+    void *createParam;
+    u8 reserved20[0xC];
+    s32 (*create)(void *);
+    u8 reserved30[4];
+    void (*destroy)(void *);
+    s32 *handle;
+} effDebugViewer_t;
+
+extern effDebugViewer_t nbCameraHelperViewerPBParam;
+extern char D_0056B470[];
+extern void dds3EffectFileListWindowDraw(void *window);
+extern u32 dds3EffectFileListWindowGetState(void *window);
+extern u32 dds3EffectFileListWindowGetFilename(void *window, char *filename);
+extern void nbSetHelperViewer(void *viewer);
+
+void nbCameraHelperViewer_PB_Draw(void *pData)
+{
+    effDebugViewer_t *viewer = NULL;
+
+    dds3EffectFileListWindowDraw(nbCameraHelperViewerPBWork);
+    if (dds3EffectFileListWindowGetState(nbCameraHelperViewerPBWork) == 1) {
+        void (*destroy)(void *);
+        s32 (*create)(void *);
+
+        dds3EffectFileListWindowGetFilename(nbCameraHelperViewerPBWork, D_0056B470);
+        nbCameraHelperViewerMode = D_0056B470;
+        destroy = nbCameraHelperViewerPBParam.destroy;
+        if (destroy != NULL) {
+            if (nbCameraHelperViewerPBParam.handle != NULL) {
+                destroy((void *)*nbCameraHelperViewerPBParam.handle);
+            } else {
+                destroy(NULL);
+            }
+        }
+        if (nbCameraHelperViewerPBParam.replacement != NULL) {
+            viewer = nbCameraHelperViewerPBParam.replacement;
+        }
+        create = viewer->create;
+        if (create != NULL) {
+            if (viewer->createParam != NULL) {
+                *viewer->handle = create(viewer->createParam);
+            } else {
+                create(NULL);
+            }
+        }
+        nbSetHelperViewer(viewer);
+    }
+}
+
 
 void nbCameraHelperViewer_PB_End(void *pData)
 {

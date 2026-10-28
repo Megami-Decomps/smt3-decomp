@@ -14,6 +14,19 @@ extern s32 dds3GetGlobalConfigFlag(s32 index);
 
 extern void dds3PadVibrationSet(s32 port, s32 strength, s32 frames);
 
+typedef struct dds3ConfigWork_t {
+    u8 prefix[0x14];
+    void *memHandle;
+    s8 mode;
+    u8 reserved19[3];
+    u8 cursorAndItems[0x1084];
+    s32 animationPhase;
+    void *textureHandle;
+} dds3ConfigWork_t;
+
+typedef char dds3ConfigWork_size_must_be_0x10A8[
+    sizeof(dds3ConfigWork_t) == 0x10A8 ? 1 : -1];
+
 typedef struct fclRagTex_t {
     u8 unk00[0x20];
     void (*calcSizes)();
@@ -63,7 +76,7 @@ extern void *fclLoadTexture(char *pFileName);
 
 extern void fclSetPanelAnimState(u8 *panel, s8 state);
 
-extern s32 fclRunPanelAnim(u8 *panel);
+extern s32 fclRunPanelAnim(void *work);
 
 extern s32 dds3KillProcess(void *id, s32 shutdowntimer);
 
@@ -76,6 +89,9 @@ extern s32 printf(const char *fmt, ...);
 extern void *sdfMemAllocDirect(s32 aSize);
 
 extern void *sdfMemLock(void *aHandle);
+extern void cmpInitSeqInfo(void *work, s32 seq);
+extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
 
 void slKillLoadProcess(void)
 {
@@ -206,7 +222,25 @@ INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigLabel);
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigCursor);
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigItem);
+extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
+extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+
+s32 dds3DrawConfigItem(s32 x, s32 y, s32 z, s32 ot)
+{
+    s32 phase = dds3GetConfigAnimPhase();
+    u32 color0 = fclBlendColor(0x9195EE20, 0x20, 0x100 - phase / 2);
+
+    phase = dds3GetConfigAnimPhase();
+    {
+        u32 color1 = fclBlendColor(0x6D6D9580, 0x20, 0x100 - phase / 2);
+        fclDrawPanelSprite2(0x44, ot);
+        cmpDrawBoxF(x, y, z, 0x200, 3, color0, ot);
+        cmpDrawBoxF(x, y + 0x18, z, 0x200, 0xC, color1, ot);
+        cmpDrawBoxF(x, y + 0x998, z, 0x200, 0xC, color1, ot);
+        return cmpDrawBoxF(x, y + 0x9F8, z, 0x200, 3, color0, ot);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigSlider);
 
@@ -214,7 +248,61 @@ INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigBar);
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigValue);
 
+/* NON_MATCHING: 41 of 145 words differ, first at +0x50; exact 580-byte size. */
+#ifdef NON_MATCHING
+typedef struct fclSpriteRes_t fclSpriteRes_t;
+typedef struct fclSpriteEntry_t fclSpriteEntry_t;
+typedef struct {
+    fclSpriteRes_t *res;
+    fclSpriteEntry_t *entries;
+} fclSpriteTbl_t;
+
+extern fclSpriteTbl_t dds3ConfigLayoutTable[];
+extern s32 D_00345D88[];
+extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *colors,
+    s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors,
+    s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
+extern s32 dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
+extern void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot);
+extern s32 dds3DrawConfigLabel(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
+
+void dds3DrawConfigText(s32 x, s32 y, s32 z, s32 count, s32 index, s32 value, s32 ot)
+{
+    s32 drawOptions = index < 3;
+    s32 selected = index == (*(s16 *)(GBWK + 0x3E) + GBWK[0x40]);
+    s32 colors[4];
+    s32 color;
+    s32 startY;
+    s32 i;
+
+    dds3DrawConfigValue(x, y, z, index, selected, ot);
+    if (drawOptions && value >= 0)
+        dds3DrawConfigBar(x, y, z, index, value, ot);
+    color = dds3GetConfigFadeAlpha() | 0x80808000;
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    if (drawOptions) {
+        y += 0xA8;
+        startY = y;
+        for (i = 0; i < count; i++) {
+            fclDrawSpriteFilter(x, y, z << 4, 0, colors, 0, 0,
+                               D_00345D88, dds3ConfigLayoutTable, ot);
+            fclDrawSpriteFilter(x, y, z << 4, 0, colors, 0, 1,
+                               D_00345D88, dds3ConfigLayoutTable, ot);
+            y += 0xB0;
+        }
+        dds3DrawConfigLabel(x + 0x540, startY + 8, z, index, selected, ot);
+        fclDrawSpriteRes(0, y, z << 4, colors, 0, 10, D_00345D88, dds3ConfigLayoutTable, ot);
+        fclDrawSpriteRes(0, y, z << 4, colors, 0, 11, D_00345D88, dds3ConfigLayoutTable, ot);
+        fclDrawSpriteRes(0, y, z << 4, colors, 0, 12, D_00345D88, dds3ConfigLayoutTable, ot);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigText);
+#endif
 
 s32 dds3DrawConfigBackground(s32 flags)
 {
@@ -244,7 +332,28 @@ void dds3FreeConfigTexture(void *handle)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3AllocConfigWork);
+void *dds3AllocConfigWork(s32 mode)
+{
+    void *handle;
+    dds3ConfigWork_t *work;
+
+    handle = sdfMemAllocDirect(sizeof(*work));
+    work = (dds3ConfigWork_t *)sdfMemLock(handle);
+    memset(work, 0, sizeof(*work));
+    work->memHandle = handle;
+    cmpInitSeqInfo(work, 0);
+    work->mode = mode;
+    cmpInitCursorLayout(work->cursorAndItems, 0, 0, 0, 0, 0);
+    cmpInitCursorRange(work->cursorAndItems, 4, 4, 0);
+    dds3InitConfigItems((u8 *)work);
+    work->animationPhase = 0;
+    if (mode == 1) {
+        work->textureHandle = cfgTexLoad();
+    } else {
+        work->textureHandle = NULL;
+    }
+    return work;
+}
 
 INCLUDE_RODATA(const s32, "code_0029B780", D_00548858);
 
@@ -275,162 +384,4 @@ INCLUDE_SDATA(const s32, "code_0029B780", D_005516F0);
 INCLUDE_SDATA(const s32, "code_0029B780", dds3ConfigValue);
 
 INCLUDE_SDATA(const s32, "code_0029B780", dds3ConfigBackup);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551700);
-
-INCLUDE_SDATA(const s32, "code_0029B780", mapIndex);
-
-INCLUDE_SDATA(const s32, "code_0029B780", mapPrev);
-
-INCLUDE_SDATA(const s32, "code_0029B780", debugMode);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551711);
-
-INCLUDE_SDATA(const s32, "code_0029B780", SectionIndex);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipeInitDone);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551719);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipeLoadState);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551724);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551728);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pbHitCheckCur);
-
-INCLUDE_SDATA(const s32, "code_0029B780", offsetCount);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551738);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_0055173C);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551740);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551744);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551748);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipeIndex);
-
-INCLUDE_SDATA(const s32, "code_0029B780", attackCount);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551751);
-
-INCLUDE_SDATA(const s32, "code_0029B780", myMaka);
-
-INCLUDE_SDATA(const s32, "code_0029B780", ZmakaCount);
-
-INCLUDE_SDATA(const s32, "code_0029B780", playerDAMAGE);
-
-INCLUDE_SDATA(const s32, "code_0029B780", rBoxNum);
-
-INCLUDE_SDATA(const s32, "code_0029B780", offsetStep);
-
-INCLUDE_SDATA(const s32, "code_0029B780", offsetStepCount);
-
-INCLUDE_SDATA(const s32, "code_0029B780", CameraAction);
-
-INCLUDE_SDATA(const s32, "code_0029B780", camMode);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551765);
-
-INCLUDE_SDATA(const s32, "code_0029B780", myStatus);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipeObjList);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipeObjTail);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551770);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipeMyMakaCount);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551778);
-
-INCLUDE_SDATA(const s32, "code_0029B780", hWorkArea);
-
-INCLUDE_SDATA(const s32, "code_0029B780", WorkAreaPtr);
-
-INCLUDE_SDATA(const s32, "code_0029B780", PartsWork);
-
-INCLUDE_SDATA(const s32, "code_0029B780", PipeCur);
-
-INCLUDE_SDATA(const s32, "code_0029B780", PipeCur2);
-
-INCLUDE_SDATA(const s32, "code_0029B780", PipeLine);
-
-INCLUDE_SDATA(const s32, "code_0029B780", ObjWork);
-
-INCLUDE_SDATA(const s32, "code_0029B780", basicMy);
-
-INCLUDE_SDATA(const s32, "code_0029B780", MyLine);
-
-INCLUDE_SDATA(const s32, "code_0029B780", PipeEMS);
-
-INCLUDE_SDATA(const s32, "code_0029B780", PipeEML);
-
-INCLUDE_SDATA(const s32, "code_0029B780", PipeRBOX);
-
-INCLUDE_SDATA(const s32, "code_0029B780", PipeMaka1);
-
-INCLUDE_SDATA(const s32, "code_0029B780", PipeZMaka);
-
-INCLUDE_SDATA(const s32, "code_0029B780", PipeDMaka);
-
-INCLUDE_SDATA(const s32, "code_0029B780", PipeDRBOX);
-
-INCLUDE_SDATA(const s32, "code_0029B780", MakaTex);
-
-INCLUDE_SDATA(const s32, "code_0029B780", makaWork);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipe_CELL01_D3P);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipe_BREAK01_D3P);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipe_BREAK02_D3P);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipe_DAMAGE01_D3P);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipe_DAMAGE03_D3P);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipe_ATTACK01_D3P);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_005517DC);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_005517E0);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_005517E8);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_005517F0);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipe_Camera);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_005517FC);
-
-INCLUDE_SDATA(const s32, "code_0029B780", ResultIndex);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551801);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551808);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipeMessData);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551810);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipeMessCount);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551815);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551818);
-
-INCLUDE_SDATA(const s32, "code_0029B780", pipeBulrLimitValue);
-
-INCLUDE_SDATA(const s32, "code_0029B780", sdfDmacHandlerTable);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551824);
-
-INCLUDE_SDATA(const s32, "code_0029B780", D_00551828);
-
-INCLUDE_SDATA(const s32, "code_0029B780", sdfVblankFlag);
 

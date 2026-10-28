@@ -42,7 +42,7 @@ typedef struct
     u8 *giveupScript;
     s16 level, stage;
     u8 unk35C[4];
-    s32 menuState;
+    struct pbProcHandle_t *menuProc;
     struct pbProcHandle_t *helpProc;
 } pbMapWork_t;
 
@@ -318,7 +318,10 @@ extern u8 pbRotRKeyAct(void);
 
 extern pbProcHandle_t *moveViewCamera;
 
-extern sdfVector4_t aViewEye, aViewTarget, pbGameCameraParam, pbCameraVec;
+extern f32 aViewEye[4], aViewTarget[4];
+extern sdfVector4_t pbGameCameraParam;
+/* Two target-offset rows; pbCameraVec2 names the second row. */
+extern f32 pbCameraVec[][4];
 
 extern sdfVector4_t pbInitCameraParam, pbCameraVec2;
 
@@ -367,7 +370,48 @@ void updateMotion(void) {
 
 INCLUDE_ASM(const s32, "pb/pbGame", hitCheck);
 
-INCLUDE_ASM(const s32, "pb/pbGame", pushCheck);
+extern void *pbSearchGroupDB(pbProcHandle_t *p, u32 grpID);
+extern s32 pbFindProcHandle(s16 px, s16 py);
+
+u32 pushCheck(s32 direction, u32 grpID, pbGroupData_t **pGroup)
+{
+    pbGroupData_t *group;
+    s16 baseX, baseY;
+    s32 x, y;
+    u32 status = 3;
+    u32 i;
+    u16 block;
+
+    group = pbSearchGroupDB(blockDB, grpID);
+    *pGroup = group;
+    baseX = (s16)(group->cellX + pbKeyTable[direction][0]);
+    baseY = (s16)(group->cellY + pbKeyTable[direction][1]);
+    i = 0;
+    if (group->num != 0) {
+        do {
+            x = (s16)((*pGroup)->blk[i].x + baseX);
+            y = (s16)((*pGroup)->blk[i].y + baseY);
+            if ((u16)x >= 20 || y < 0 || y >= 20) {
+                status = 2;
+                break;
+            }
+            if (pbFindProcHandle(x, y) == 1) {
+                status = 2;
+                break;
+            }
+            block = D_0054F5C4->area.map.blk[y][x];
+            if ((block >> 13) == 1) {
+                status = 2;
+            } else if ((block >> 13) >= 2) {
+                if ((block & 0x7FF) != (*pGroup)->grpID) {
+                    status = 2;
+                }
+            }
+            i++;
+        } while (i < (*pGroup)->num);
+    }
+    return status;
+}
 
 INCLUDE_ASM(const s32, "pb/pbGame", roundCheck);
 
@@ -591,7 +635,50 @@ s32 moveChar(dds3ProcessID_t *id) {
     return ((u16)step < 4) ? 0 : -1;
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", deleteMoveChar);
+extern void pbMoveMyCharcter2(pbProcHandle_t *p, s16 x, s16 y);
+extern void pbSetPanelValue(pbProcHandle_t *panel, s8 value);
+extern pbProcHandle_t *pbStartClear(pbProcHandle_t *parent);
+extern void pbClearRecord(pbProcHandle_t *panel);
+extern void pbNextCharacter(void);
+extern void func_001D2D00(pbProcHandle_t *panel, s32 arg);
+extern s32 getCharacterNum(void);
+extern s32 p2sdPlaySE(s32 id, s32 volume, s32 pan);
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 timer);
+extern pbProcHandle_t *pbGetMoveChar(void);
+extern pbProcHandle_t *moveC;
+extern u32 pbMoveCharList;
+extern pbMapWork_t *D_0054F5C4;
+extern pbProcHandle_t *record;
+
+void deleteMoveChar(dds3ProcessID_t *id)
+{
+    pbProcHandle_t *panel = id->workdata;
+    pbMoveCharWork_t *work = panel->data.moveChar;
+    s16 position[2];
+    s16 deltaX = (s16)((f32)pbKeyTable[work->dir][0] * work->speed);
+    s16 deltaY = (s16)((f32)pbKeyTable[work->dir][1] * work->speed);
+
+    pbMoveMyCharcter2(mychar[current_char], deltaX, deltaY);
+    pbGetMyCharcterPos2(mychar[current_char], &position[0], &position[1]);
+    if (goalHitCheck(position[0], position[1])) {
+        p2sdPlaySE(0x34000A, 0x7F, 0x3F);
+        if ((u32)getCharacterNum() < 2) {
+            if (D_0054F5C4->menuProc != NULL) {
+                dds3KillProcess(D_0054F5C4->menuProc->id, 0);
+            }
+            pbMoveCharList = 1;
+            func_001D2D00(mychar[current_char], 0);
+            pbStartClear(pbGetMoveChar());
+            pbClearRecord(record);
+        } else {
+            pbSetPanelValue(mychar[current_char], 0);
+            pbNextCharacter();
+        }
+    }
+    sdfChipFreeDelayedDirect(work);
+    sdfChipFreeDelayedDirect(panel);
+    moveC = NULL;
+}
 
 void setMoveBlockData(pbGroupData_t *grp, s32 dir) {
     u32 i = 0;
@@ -1058,17 +1145,95 @@ void pbRoundCamera(s32 dir) {
 
 void pbSetGameCamera0(void) {
     SDF_VU0_COPYVECTOR(&aViewEye, &pbGameCameraParam);
-    SDF_VU0_COPYVECTOR(&aViewTarget, &pbCameraVec);
+    SDF_VU0_COPYVECTOR(&aViewTarget, &pbCameraVec[0]);
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbSetGameCamera1);
+extern void pbGetMyCharcterPos(pbProcHandle_t *character, sdfVector4_t *position);
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbSetGameCamera2);
+void pbSetGameCamera1(void)
+{
+    f32 eye[4];
+    f32 target[4];
+    u32 i;
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbSetGameCamera3);
+    if (mychar[current_char] != NULL) {
+        memset(&eye, 0, sizeof(eye));
+        memset(&target, 0, sizeof(target));
+        pbGetMyCharcterPos(mychar[current_char], (sdfVector4_t *)target);
+        for (i = 0; i < 4; i++) {
+            target[i] += pbCameraVec[1][i];
+        }
+        for (i = 0; i < 4; i++) {
+            eye[i] = aViewEye[i] - aViewTarget[i] + target[i];
+        }
+        SDF_VU0_COPYVECTOR(&aViewEye, &eye);
+        SDF_VU0_COPYVECTOR(&aViewTarget, &target);
+    }
+}
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbSetGameCamera4);
+void pbSetGameCamera2(void)
+{
+    f32 eye[4];
+    f32 target[4];
+    u32 i;
 
+    if (mychar[current_char] != NULL) {
+        memset(&eye, 0, sizeof(eye));
+        memset(&target, 0, sizeof(target));
+        pbGetMyCharcterPos(mychar[current_char], (sdfVector4_t *)target);
+        for (i = 0; i < 4; i++) {
+            target[i] += pbCameraVec[1][i];
+        }
+        for (i = 0; i < 4; i++) {
+            eye[i] = aViewEye[i] - aViewTarget[i] + target[i];
+        }
+        SDF_VU0_COPYVECTOR(&aViewEye, &eye);
+        SDF_VU0_COPYVECTOR(&aViewTarget, &target);
+    }
+}
+
+extern s32 pbGetMyCharcterRot(pbProcHandle_t *character);
+
+void pbSetGameCamera3(void)
+{
+    f32 eye[4];
+    f32 target[4];
+    s32 direction;
+
+    if (mychar[current_char] != NULL) {
+        memset(&eye, 0, sizeof(eye));
+        memset(&target, 0, sizeof(target));
+        pbGetMyCharcterPos(mychar[current_char], (sdfVector4_t *)target);
+        SDF_VU0_COPYVECTOR(&eye, &target);
+        direction = pbGetMyCharcterRot(mychar[current_char]);
+        eye[0] += (f32)pbKeyTable[direction][0] * 160.0f;
+        eye[2] += (f32)pbKeyTable[direction][1] * 160.0f;
+        eye[1] -= 60.0f;
+        target[1] -= 40.0f;
+        SDF_VU0_COPYVECTOR(&aViewEye, &eye);
+        SDF_VU0_COPYVECTOR(&aViewTarget, &target);
+    }
+}
+
+void pbSetGameCamera4(s16 x, s16 y)
+{
+    f32 eye[4];
+    f32 target[4];
+    u32 i;
+
+    memset(&eye, 0, sizeof(eye));
+    memset(&target, 0, sizeof(target));
+    target[0] = x * 40 - 380;
+    target[2] = y * 40 - 380;
+    for (i = 0; i < 4; i++) {
+        target[i] += pbCameraVec[1][i];
+    }
+    for (i = 0; i < 4; i++) {
+        eye[i] = aViewEye[i] - aViewTarget[i] + target[i];
+    }
+    SDF_VU0_COPYVECTOR(&aViewEye, &eye);
+    SDF_VU0_COPYVECTOR(&aViewTarget, &target);
+}
 
 /* NON_MATCHING: 26 of 38 words; gcc range-tests case 0 where retail compares it. */
 #ifdef NON_MATCHING
@@ -1162,6 +1327,11 @@ dds3ProcessID_t *pbGetMessageScriptProc(void) {
     return scr_msg;
 }
 
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 timer);
+extern void evtBitOn(s32 no);
+extern s32 printf(const char *format, ...);
+extern pbProcHandle_t *pbGetMoveChar(void);
+
 INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F40);
 
 INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F48);
@@ -1178,7 +1348,25 @@ INCLUDE_RODATA(const s32, "pb/pbGame", D_00535FA8);
 
 INCLUDE_RODATA(const s32, "pb/pbGame", D_00535FC8);
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbGotoNewStage);
+void pbGotoNewStage(void)
+{
+    s32 number = GetStageNumber();
+
+    if (scr_msg != NULL) {
+        dds3KillProcess(scr_msg, 0);
+        dds3ResetProcessFlag(dds3SearchProcessName(D_00535EF8), 0x10, 2);
+        scr_msg = NULL;
+    }
+    if (number < 0) {
+        evtBitOn(GetAllStageClearBit());
+        printf("****** CONGRATULATIONS !! ******\n");
+        if (pbGetMoveChar() != NULL) {
+            pbGetMoveChar()->flags = 0x60000;
+        }
+    } else {
+        pbLoadSystemData(number);
+    }
+}
 
 void pbRoundStageNext(s16 *plevel, s16 *pstage) {
     pbLevel_t *lv = pbLevelTable[*plevel];

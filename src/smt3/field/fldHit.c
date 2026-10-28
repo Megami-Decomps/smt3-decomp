@@ -188,9 +188,606 @@ void fldClearMatterFlags(void) {
 }
 
 void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
-                   u32 id, s32 sceneFlag, s32 ownerIndex);
+                   u32 id, s32 sceneFlag, s32 ownerIndex) {
+    f32 vertices[4][4];
+    f32 copiedVertices[4][4];
+    /* Retail never touches the fourth row at SP+0xB0..0xBF. The DDS1
+     * fldBuildCollisionRecordsFromGeometry twin has the same gap. Three rows
+     * shrink the frame to 0x190 instead of the native 0x1A0. */
+    f32 edgeTriangle[4][4];
+    f32 center[3];
+    f32 capturedPlane[4];
+    f32 minimum[2];
+    f32 maximum[2];
+    collision_s *record;
+    s32 pass;
+    s32 remaining;
+    f32 (*sourceVertices)[4];
+    void *stopData;
+    s32 trianglesRemaining;
+    fldCollisionFace_t *face;
+    f32 *planeX;
+    f32 *planeY;
+    f32 *planeZ;
+    f32 *limit0;
+    f32 *limit1;
+    f32 *limit2;
+    f32 *limit3;
+    f32 absX;
+    f32 absY;
+    f32 absZ;
+    f32 runningMinimum;
+    s32 i;
+    s32 component;
+    if (fldMatterTable == 0) {
+        fldAllocPlaneTable();
+    }
+    for (pass = 0; pass < 5; pass++) {
+        s32 faceCount;
+        fldCollisionFace_t *firstFace;
+        sourceVertices = geometry->vertices;
+        faceCount = geometry->faceCount;
+        firstFace = geometry->faces;
+        stopData = geometry->stopData;
+        trianglesRemaining = geometry->triangleCount;
+        if (faceCount > 0) {
+            face = firstFace;
+            remaining = faceCount;
+            for (; remaining != 0; remaining--, face++, trianglesRemaining--) {
+                u32 vertexIndex;
+                record = &((collision_s *)fldMatterTable)[D_0054EDA0];
+                record->numedges = trianglesRemaining > 0 ? 3 : 4;
+                vertexIndex = face->vertexIndices[0];
+                vertices[0][0] = sourceVertices[vertexIndex][0] + translation[0];
+                vertices[0][1] = sourceVertices[vertexIndex][1] + translation[1];
+                vertices[0][2] = sourceVertices[vertexIndex][2] + translation[2];
+                vertexIndex = face->vertexIndices[1];
+                vertices[1][0] = sourceVertices[vertexIndex][0] + translation[0];
+                vertices[1][1] = sourceVertices[vertexIndex][1] + translation[1];
+                vertices[1][2] = sourceVertices[vertexIndex][2] + translation[2];
+                vertexIndex = face->vertexIndices[2];
+                vertices[2][0] = sourceVertices[vertexIndex][0] + translation[0];
+                vertices[2][1] = sourceVertices[vertexIndex][1] + translation[1];
+                vertices[2][2] = sourceVertices[vertexIndex][2] + translation[2];
+                if (record->numedges == 3) {
+                    for (i = 0; i < 3; i++) {
+                        copiedVertices[i][0] = vertices[i][0];
+                        copiedVertices[i][1] = vertices[i][1];
+                        copiedVertices[i][2] = vertices[i][2];
+                    }
+                } else {
+                    vertexIndex = face->vertexIndices[3];
+                    vertices[3][0] = sourceVertices[vertexIndex][0] + translation[0];
+                    vertices[3][1] = sourceVertices[vertexIndex][1] + translation[1];
+                    vertices[3][2] = sourceVertices[vertexIndex][2] + translation[2];
+                    for (i = 0; i < 4; i++) {
+                        copiedVertices[i][0] = vertices[i][0];
+                        copiedVertices[i][1] = vertices[i][1];
+                        copiedVertices[i][2] = vertices[i][2];
+                    }
+                }
+                fldMakeEveHitPlanes(copiedVertices[0], &capturedPlane[0],
+                                     &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                for (i = 0; i < 3; i++) {
+                    record->normal[i] = capturedPlane[i];
+                }
+                record->normal[3] = 0.0f;
+                for (i = 0; i < record->numedges; i++) {
+                    for (component = 0; component < 3; component++) {
+                        record->max[i][component] = copiedVertices[i][component];
+                    }
+                    record->max[i][3] = 1.0f;
+                }
+                record->num = fldVecDot(record->normal, record->max[0]);
+                absX = record->normal[0];
+                absX = ffabsf(absX);
+                absY = ffabsf(record->normal[1]);
+                absZ = ffabsf(record->normal[2]);
+                if (pass == 0) {
+                    if (!(absX < absY) || !(absZ < absY)) continue;
+                    if (record->normal[1] > 0.0f) continue;
+                    if (record->normal[1] > -0.98f) continue;
+                } else if (pass == 1) {
+                    if (!(absX < absY) || !(absZ < absY)) continue;
+                    if (record->normal[1] > 0.0f) continue;
+                    if (record->normal[1] <= -0.98f) continue;
+                } else if (pass == 2) {
+                    if (!(absY <= absX) || !(absZ <= absX)) continue;
+                } else if (pass == 3) {
+                    if (!(absX < absZ) || !(absY <= absZ)) continue;
+                } else if (pass == 4) {
+                    if (!(absX <= absY) || !(absZ <= absY)) continue;
+                    if (record->normal[1] <= 0.0f) continue;
+                }
+                if (absY <= absX && absZ <= absX) {
+                    record->mode2D = 0;
+                    runningMinimum = vertices[0][1];
+                    minimum[0] = runningMinimum;
+                    minimum[1] = vertices[0][2];
+                    maximum[0] = minimum[0];
+                    maximum[1] = minimum[1];
+                    for (i = 1; i < record->numedges; i++) {
+                        if (vertices[i][1] < runningMinimum) {
+                            runningMinimum = vertices[i][1];
+                            minimum[0] = runningMinimum;
+                        }
+                        if (vertices[i][2] < minimum[1]) minimum[1] = vertices[i][2];
+                        if (vertices[i][1] > maximum[0]) maximum[0] = vertices[i][1];
+                        if (vertices[i][2] > maximum[1]) maximum[1] = vertices[i][2];
+                    }
+                    record->min[0] = runningMinimum;
+                    record->min[1] = minimum[1];
+                    record->min[2] = maximum[0];
+                    record->min[3] = maximum[1];
+                    if (record->numedges == 3) {
+                        center[0] = 0.0f;
+                        center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1]) / 3.0f;
+                        center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2]) / 3.0f;
+                    } else {
+                        center[0] = 0.0f;
+                        center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1] + vertices[3][1]) * 0.25f;
+                        center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2] + vertices[3][2]) * 0.25f;
+                    }
+                    edgeTriangle[0][0] = 0.0f;
+                    edgeTriangle[0][1] = vertices[0][1];
+                    edgeTriangle[0][2] = vertices[0][2];
+                    edgeTriangle[1][0] = 0.0f;
+                    edgeTriangle[1][1] = vertices[1][1];
+                    edgeTriangle[1][2] = vertices[1][2];
+                    edgeTriangle[2][0] = 10.0f;
+                    edgeTriangle[2][1] = vertices[1][1];
+                    edgeTriangle[2][2] = vertices[1][2];
+                    planeX = &record->e_normal[0][0];
+                    planeY = &record->e_normal[0][1];
+                    planeZ = &record->e_normal[0][2];
+                    limit0 = &record->e_num[0];
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit0 = fldVecDot(planeX, edgeTriangle[0]);
+                    if (fldVecDot(center, planeX) - *limit0 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit0 = fldVecDot(planeX, edgeTriangle[0]);
+                    }
+                    edgeTriangle[0][0] = 0.0f;
+                    edgeTriangle[0][1] = vertices[1][1];
+                    edgeTriangle[0][2] = vertices[1][2];
+                    edgeTriangle[1][0] = 0.0f;
+                    edgeTriangle[1][1] = vertices[2][1];
+                    edgeTriangle[1][2] = vertices[2][2];
+                    edgeTriangle[2][0] = 10.0f;
+                    edgeTriangle[2][1] = vertices[2][1];
+                    edgeTriangle[2][2] = vertices[2][2];
+                    planeX = &record->e_normal[1][0];
+                    planeY = &record->e_normal[1][1];
+                    planeZ = &record->e_normal[1][2];
+                    limit1 = &record->e_num[1];
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit1 = fldVecDot(planeX, edgeTriangle[1]);
+                    if (fldVecDot(center, planeX) - *limit1 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit1 = fldVecDot(planeX, edgeTriangle[1]);
+                    }
+                    if (record->numedges == 3) {
+                        edgeTriangle[0][0] = 0.0f;
+                        edgeTriangle[0][1] = vertices[2][1];
+                        edgeTriangle[0][2] = vertices[2][2];
+                        edgeTriangle[1][0] = 0.0f;
+                        edgeTriangle[1][1] = vertices[0][1];
+                        edgeTriangle[1][2] = vertices[0][2];
+                        edgeTriangle[2][0] = 10.0f;
+                        edgeTriangle[2][1] = vertices[0][1];
+                        edgeTriangle[2][2] = vertices[0][2];
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        }
+                    } else {
+                        edgeTriangle[0][0] = 0.0f;
+                        edgeTriangle[0][1] = vertices[2][1];
+                        edgeTriangle[0][2] = vertices[2][2];
+                        edgeTriangle[1][0] = 0.0f;
+                        edgeTriangle[1][1] = vertices[3][1];
+                        edgeTriangle[1][2] = vertices[3][2];
+                        edgeTriangle[2][0] = 10.0f;
+                        edgeTriangle[2][1] = vertices[3][1];
+                        edgeTriangle[2][2] = vertices[3][2];
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        }
+                        edgeTriangle[0][0] = 0.0f;
+                        edgeTriangle[0][1] = vertices[3][1];
+                        edgeTriangle[0][2] = vertices[3][2];
+                        edgeTriangle[1][0] = 0.0f;
+                        edgeTriangle[1][1] = vertices[0][1];
+                        edgeTriangle[1][2] = vertices[0][2];
+                        edgeTriangle[2][0] = 10.0f;
+                        edgeTriangle[2][1] = vertices[0][1];
+                        edgeTriangle[2][2] = vertices[0][2];
+                        planeX = &record->e_normal[3][0];
+                        planeY = &record->e_normal[3][1];
+                        planeZ = &record->e_normal[3][2];
+                        limit3 = &record->e_num[3];
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit3 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit3 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit3 = fldVecDot(planeX, edgeTriangle[2]);
+                        }
+                    }
+                }
+                else if (absX <= absY && absZ <= absY) {
+                    record->mode2D = 1;
+                    runningMinimum = vertices[0][0];
+                    minimum[0] = runningMinimum;
+                    minimum[1] = vertices[0][2];
+                    maximum[0] = minimum[0];
+                    maximum[1] = minimum[1];
+                    for (i = 1; i < record->numedges; i++) {
+                        if (vertices[i][0] < runningMinimum) {
+                            runningMinimum = vertices[i][0];
+                            minimum[0] = runningMinimum;
+                        }
+                        if (vertices[i][2] < minimum[1]) minimum[1] = vertices[i][2];
+                        if (vertices[i][0] > maximum[0]) maximum[0] = vertices[i][0];
+                        if (vertices[i][2] > maximum[1]) maximum[1] = vertices[i][2];
+                    }
+                    record->min[0] = runningMinimum;
+                    record->min[1] = minimum[1];
+                    record->min[2] = maximum[0];
+                    record->min[3] = maximum[1];
+                    if (record->numedges == 3) {
+                        center[1] = 0.0f;
+                        center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0]) / 3.0f;
+                        center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2]) / 3.0f;
+                    } else {
+                        center[1] = 0.0f;
+                        center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0] + vertices[3][0]) * 0.25f;
+                        center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2] + vertices[3][2]) * 0.25f;
+                    }
+                    edgeTriangle[0][0] = vertices[0][0];
+                    edgeTriangle[0][1] = 0.0f;
+                    edgeTriangle[0][2] = vertices[0][2];
+                    edgeTriangle[1][0] = vertices[1][0];
+                    edgeTriangle[1][1] = 0.0f;
+                    edgeTriangle[1][2] = vertices[1][2];
+                    edgeTriangle[2][0] = vertices[1][0];
+                    edgeTriangle[2][1] = 10.0f;
+                    edgeTriangle[2][2] = vertices[1][2];
+                    planeX = &record->e_normal[0][0];
+                    planeY = &record->e_normal[0][1];
+                    planeZ = &record->e_normal[0][2];
+                    limit0 = &record->e_num[0];
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit0 = fldVecDot(planeX, edgeTriangle[0]);
+                    if (fldVecDot(center, planeX) - *limit0 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit0 = fldVecDot(planeX, edgeTriangle[0]);
+                    }
+                    edgeTriangle[0][0] = vertices[1][0];
+                    edgeTriangle[0][1] = 0.0f;
+                    edgeTriangle[0][2] = vertices[1][2];
+                    edgeTriangle[1][0] = vertices[2][0];
+                    edgeTriangle[1][1] = 0.0f;
+                    edgeTriangle[1][2] = vertices[2][2];
+                    edgeTriangle[2][0] = vertices[2][0];
+                    edgeTriangle[2][1] = 10.0f;
+                    edgeTriangle[2][2] = vertices[2][2];
+                    planeX = &record->e_normal[1][0];
+                    planeY = &record->e_normal[1][1];
+                    planeZ = &record->e_normal[1][2];
+                    limit1 = &record->e_num[1];
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit1 = fldVecDot(planeX, edgeTriangle[1]);
+                    if (fldVecDot(center, planeX) - *limit1 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit1 = fldVecDot(planeX, edgeTriangle[1]);
+                    }
+                    if (record->numedges == 3) {
+                        edgeTriangle[0][0] = vertices[2][0];
+                        edgeTriangle[0][1] = 0.0f;
+                        edgeTriangle[0][2] = vertices[2][2];
+                        edgeTriangle[1][0] = vertices[0][0];
+                        edgeTriangle[1][1] = 0.0f;
+                        edgeTriangle[1][2] = vertices[0][2];
+                        edgeTriangle[2][0] = vertices[0][0];
+                        edgeTriangle[2][1] = 10.0f;
+                        edgeTriangle[2][2] = vertices[0][2];
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        }
+                    } else {
+                        edgeTriangle[0][0] = vertices[2][0];
+                        edgeTriangle[0][1] = 0.0f;
+                        edgeTriangle[0][2] = vertices[2][2];
+                        edgeTriangle[1][0] = vertices[3][0];
+                        edgeTriangle[1][1] = 0.0f;
+                        edgeTriangle[1][2] = vertices[3][2];
+                        edgeTriangle[2][0] = vertices[3][0];
+                        edgeTriangle[2][1] = 10.0f;
+                        edgeTriangle[2][2] = vertices[3][2];
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        }
+                        edgeTriangle[0][0] = vertices[3][0];
+                        edgeTriangle[0][1] = 0.0f;
+                        edgeTriangle[0][2] = vertices[3][2];
+                        edgeTriangle[1][0] = vertices[0][0];
+                        edgeTriangle[1][1] = 0.0f;
+                        edgeTriangle[1][2] = vertices[0][2];
+                        edgeTriangle[2][0] = vertices[0][0];
+                        edgeTriangle[2][1] = 10.0f;
+                        edgeTriangle[2][2] = vertices[0][2];
+                        planeX = &record->e_normal[3][0];
+                        planeY = &record->e_normal[3][1];
+                        planeZ = &record->e_normal[3][2];
+                        limit3 = &record->e_num[3];
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit3 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit3 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit3 = fldVecDot(planeX, edgeTriangle[2]);
+                        }
+                    }
+                }
+                else {
+                    record->mode2D = 2;
+                    runningMinimum = vertices[0][0];
+                    minimum[0] = runningMinimum;
+                    minimum[1] = vertices[0][1];
+                    maximum[0] = minimum[0];
+                    maximum[1] = minimum[1];
+                    for (i = 1; i < record->numedges; i++) {
+                        if (vertices[i][0] < runningMinimum) {
+                            runningMinimum = vertices[i][0];
+                            minimum[0] = runningMinimum;
+                        }
+                        if (vertices[i][1] < minimum[1]) minimum[1] = vertices[i][1];
+                        if (vertices[i][0] > maximum[0]) maximum[0] = vertices[i][0];
+                        if (vertices[i][1] > maximum[1]) maximum[1] = vertices[i][1];
+                    }
+                    record->min[0] = runningMinimum;
+                    record->min[1] = minimum[1];
+                    record->min[2] = maximum[0];
+                    record->min[3] = maximum[1];
+                    if (record->numedges == 3) {
+                        center[2] = 0.0f;
+                        center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0]) / 3.0f;
+                        center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1]) / 3.0f;
+                    } else {
+                        center[2] = 0.0f;
+                        center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0] + vertices[3][0]) * 0.25f;
+                        center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1] + vertices[3][1]) * 0.25f;
+                    }
+                    edgeTriangle[0][0] = vertices[0][0];
+                    edgeTriangle[0][1] = vertices[0][1];
+                    edgeTriangle[0][2] = 0.0f;
+                    edgeTriangle[1][0] = vertices[1][0];
+                    edgeTriangle[1][1] = vertices[1][1];
+                    edgeTriangle[1][2] = 0.0f;
+                    edgeTriangle[2][0] = vertices[1][0];
+                    edgeTriangle[2][1] = vertices[1][1];
+                    edgeTriangle[2][2] = 10.0f;
+                    planeX = &record->e_normal[0][0];
+                    planeY = &record->e_normal[0][1];
+                    planeZ = &record->e_normal[0][2];
+                    limit0 = &record->e_num[0];
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit0 = fldVecDot(planeX, edgeTriangle[0]);
+                    if (fldVecDot(center, planeX) - *limit0 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit0 = fldVecDot(planeX, edgeTriangle[0]);
+                    }
+                    edgeTriangle[0][0] = vertices[1][0];
+                    edgeTriangle[0][1] = vertices[1][1];
+                    edgeTriangle[0][2] = 0.0f;
+                    edgeTriangle[1][0] = vertices[2][0];
+                    edgeTriangle[1][1] = vertices[2][1];
+                    edgeTriangle[1][2] = 0.0f;
+                    edgeTriangle[2][0] = vertices[2][0];
+                    edgeTriangle[2][1] = vertices[2][1];
+                    edgeTriangle[2][2] = 10.0f;
+                    planeX = &record->e_normal[1][0];
+                    planeY = &record->e_normal[1][1];
+                    planeZ = &record->e_normal[1][2];
+                    limit1 = &record->e_num[1];
+                    fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit1 = fldVecDot(planeX, edgeTriangle[1]);
+                    if (fldVecDot(center, planeX) - *limit1 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit1 = fldVecDot(planeX, edgeTriangle[1]);
+                    }
+                    if (record->numedges == 3) {
+                        edgeTriangle[0][0] = vertices[2][0];
+                        edgeTriangle[0][1] = vertices[2][1];
+                        edgeTriangle[0][2] = 0.0f;
+                        edgeTriangle[1][0] = vertices[0][0];
+                        edgeTriangle[1][1] = vertices[0][1];
+                        edgeTriangle[1][2] = 0.0f;
+                        edgeTriangle[2][0] = vertices[0][0];
+                        edgeTriangle[2][1] = vertices[0][1];
+                        edgeTriangle[2][2] = 10.0f;
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        }
+                    } else {
+                        edgeTriangle[0][0] = vertices[2][0];
+                        edgeTriangle[0][1] = vertices[2][1];
+                        edgeTriangle[0][2] = 0.0f;
+                        edgeTriangle[1][0] = vertices[3][0];
+                        edgeTriangle[1][1] = vertices[3][1];
+                        edgeTriangle[1][2] = 0.0f;
+                        edgeTriangle[2][0] = vertices[3][0];
+                        edgeTriangle[2][1] = vertices[3][1];
+                        edgeTriangle[2][2] = 10.0f;
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldVecDot(planeX, edgeTriangle[2]);
+                        }
+                        edgeTriangle[0][0] = vertices[3][0];
+                        edgeTriangle[0][1] = vertices[3][1];
+                        edgeTriangle[0][2] = 0.0f;
+                        edgeTriangle[1][0] = vertices[0][0];
+                        edgeTriangle[1][1] = vertices[0][1];
+                        edgeTriangle[1][2] = 0.0f;
+                        edgeTriangle[2][0] = vertices[0][0];
+                        edgeTriangle[2][1] = vertices[0][1];
+                        edgeTriangle[2][2] = 10.0f;
+                        planeX = &record->e_normal[3][0];
+                        planeY = &record->e_normal[3][1];
+                        planeZ = &record->e_normal[3][2];
+                        limit3 = &record->e_num[3];
+                        fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit3 = fldVecDot(planeX, edgeTriangle[2]);
+                        if (fldVecDot(center, planeX) - *limit3 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit3 = fldVecDot(planeX, edgeTriangle[2]);
+                        }
+                    }
+                }
+                record->blockID = fldPlaneCount;
+                record->resID = id;
+                record->matter = 0;
+                record->pFace = face;
+                record->pTome = stopData;
+                record->hojiID = sceneFlag;
+                record->npcID = ownerIndex;
+                record->hitflag = 0;
+                D_0054EDA0++;
+            }
+        }
+    }
+    fldPlaneCount++;
+}
 
-INCLUDE_ASM(const s32, "field/fldHit", fldMakePlane);
 
 s32 HitPositionInside2(f32 *fret, s32 mode2D, s32 numE, f32 *pos, collision_s *r, f32 collision) {
     f32 probe[3];

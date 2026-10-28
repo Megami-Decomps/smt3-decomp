@@ -154,7 +154,7 @@ extern s32 nbCameraBoss_BSARI_MASEHA_Type;
 
 extern void nbResetAllFormPosRot(void);
 
-extern void func_0016E120(void);
+extern void effBTLModelInvokeGroupHide(void);
 
 extern void nbCameraShot_All_Set2(nbCamera_t *pNbCamera, void *pNBSInfo);
 
@@ -202,7 +202,7 @@ extern u32 effBTLSkillGetID(void);
 
 extern void effBTLSkillSetFormationInfo(s32 InvokeID, u32 TargetBit);
 
-extern void func_0016E1F8(void);
+extern void effBTLModelTargetGroupHide(void);
 
 extern void nbCameraShot_TargetParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
 
@@ -399,7 +399,7 @@ s32 nbCameraBoss_Sp_DOUTYO_TP_Set(nbCamera_t *pNbCamera)
     }
     angle = 0.61086512f;
     effBTLSkillSetFormationInfo(effBTLSkillGetInvokeFormation()->formindex, mask);
-    func_0016E1F8();
+    effBTLModelTargetGroupHide();
     work.angleH = angle;
     if (dds3GetRandA(dds3EffectBase) & 1) {
         work.angleW = -0.61086512f;
@@ -827,7 +827,7 @@ s32 nbCameraBoss_Bsnet_Attack_Set(nbCamera_t *pNbCamera)
     f32 distance;
 
     effBTLModelTargetPartyShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pTarget = effBTLSkillGetTargetFormation(0);
     pInvoke = effBTLSkillGetInvokeFormation();
     effBTLModelGetMarkPosition2(pInvoke, 0x14);
@@ -901,7 +901,7 @@ s32 nbCameraBoss_BSALBI_InvokeTargetParty_Set(nbCamera_t *pNbCamera)
     type = dds3GetRandIntA(0, 2);
     switch (type) {
     case 0:
-        func_0016E120();
+        effBTLModelInvokeGroupHide();
         pNbCamera->direction.x = -0.31f;
         pNbCamera->direction.y = 0.36f;
         pNbCamera->direction.z = -0.88f;
@@ -2325,7 +2325,7 @@ s32 nbCameraBoss_BSARI1_Cut23_EX01_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x < pTarget->orgpos.x) {
@@ -2356,7 +2356,7 @@ s32 nbCameraBoss_BSARI1_Cut23_EX02_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x < pTarget->orgpos.x) {
@@ -2387,7 +2387,7 @@ s32 nbCameraBoss_BSARI1_Cut23_EX03_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pTarget->orgpos.x > pInvoke->orgpos.x) {
@@ -2432,7 +2432,7 @@ s32 nbCameraBoss_BSARI2_Cut23_EX01_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x < pTarget->orgpos.x) {
@@ -2485,7 +2485,7 @@ s32 nbCameraBoss_BSARI2_Cut23_EX02_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x < pTarget->orgpos.x) {
@@ -2513,7 +2513,7 @@ s32 nbCameraBoss_BSARI2_Cut23_EX02_Set(nbCamera_t *pNbCamera)
 s32 nbCameraBoss_BSARI2_Cut23_EX03_Set(nbCamera_t *pNbCamera)
 {
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pNbCamera->direction.x = 0.49f;
     pNbCamera->direction.y = 0.36f;
     pNbCamera->direction.z = 0.8f;
@@ -2635,7 +2635,7 @@ s32 nbCameraBoss_BSNET1_Cut23_EX02_Set(nbCamera_t *pNbCamera)
     u32 n;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x < pTarget->orgpos.x) {
@@ -2883,7 +2883,7 @@ s32 nbCameraBoss_BSKAGU_Cut23_EX01_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x < pTarget->orgpos.x) {
@@ -2916,7 +2916,7 @@ s32 nbCameraBoss_BSKAGU_Cut23_EX02_Set(nbCamera_t *pNbCamera)
     u32 n;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x < pTarget->orgpos.x) {
@@ -3070,7 +3070,7 @@ s32 nbCameraBoss_BSPISH_Cut23_EX01_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pTarget->orgpos.x > pInvoke->orgpos.x) {
@@ -3117,7 +3117,7 @@ s32 nbCameraBoss_BSPISH_Cut23_EX02_Set(nbCamera_t *pNbCamera)
     u32 n;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x < pTarget->orgpos.x) {
@@ -3184,7 +3184,7 @@ s32 nbCameraBoss_BSPISH_Cut23_EX03_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pTarget->orgpos.x > pInvoke->orgpos.x) {
@@ -3229,7 +3229,7 @@ s32 nbCameraBoss_BSMETA_Cut23_EX01_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x < pTarget->orgpos.x) {
@@ -3288,7 +3288,7 @@ s32 nbCameraBoss_BSMETA_Cut23_EX02_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x < pTarget->orgpos.x) {
@@ -3347,7 +3347,7 @@ s32 nbCameraBoss_BSBERU_Cut23_EX01_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x >= pTarget->orgpos.x) {
@@ -3406,7 +3406,7 @@ s32 nbCameraBoss_BSBERU_Cut23_EX02_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x >= pTarget->orgpos.x) {
@@ -3465,7 +3465,7 @@ s32 nbCameraBoss_BSLUSI_Cut23_EX01_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pTarget->orgpos.x <= pInvoke->orgpos.x) {
@@ -3510,7 +3510,7 @@ s32 nbCameraBoss_BSLUSI_Cut23_EX02_Set(nbCamera_t *pNbCamera)
     nbFormation_t *pTarget;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     if (pInvoke->orgpos.x >= pTarget->orgpos.x) {

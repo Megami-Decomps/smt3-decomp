@@ -16,6 +16,7 @@ typedef struct evtUnitHandle_t
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
 typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
+typedef struct fileRequest fileRequest_t;
 
 typedef struct
 {
@@ -86,10 +87,10 @@ typedef struct
     s16 id;
     u16 unk_02;
     s32 refcnt;
-    void *file[26];
-    void *buf[26];
-    void *motfile;
-    void *motbuf;
+    fileRequest_t *file[26];
+    sdfMemHandle_t *buf[26];
+    fileRequest_t *motfile;
+    sdfMemHandle_t *motbuf;
 } nbStatWork_t;
 
 /* Only the fields this unit touches are named; the rest of the layout is unconfirmed. */
@@ -330,7 +331,7 @@ extern void sdfMemFreeDirect(void *aHandle);
 
 extern void p2sdSetPcmBuffer(void *buf, u32 size);
 
-extern void datDebugPrintf(const char *format);
+extern void datDebugPrintf(const char *format, ...);
 
 extern char D_00545BC0[];
 
@@ -358,15 +359,15 @@ extern s32 (*D_00527688[])(nbEventProcessData_t *e);
 
 extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
-extern s32 pacFileCheckEnd(void *pacFileHandle);
+extern s32 pacFileCheckEnd(const fileRequest_t *pacFileHandle);
 
-extern void *fileGetMemHandle(void *fileHandle);
+extern sdfMemHandle_t *fileGetMemHandle(const fileRequest_t *fileHandle);
 
-extern void fileHandleFree(void *fileHandle);
+extern s32 fileHandleFree(fileRequest_t *fileHandle);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
-extern void nbLoadMidiFile(s32 no);
+extern s32 nbLoadMidiFile(s32 no);
 
 extern u32 sdfMemGetSize(void *aHandle);
 
@@ -533,16 +534,41 @@ nbStatWork_t *nbSetFormEntry(s32 id)
     return stat;
 }
 
+extern char D_00575450[];
+extern s32 sprintf(char *str, const char *format, ...);
+extern fileRequest_t *fileLoad(const char *path);
+
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545BC0);
 
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545BD0);
 
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545BE0);
 
-INCLUDE_ASM(const s32, "newbattle/nbSound", nbLoadMidiFile);
+s32 nbLoadMidiFile(s32 no)
+{
+    nbStatWork_t *stat;
+    s32 i;
+    s32 id;
 
-/* NON_MATCHING: 2 of 64 words differ (first at +0x74). */
-#ifdef NON_MATCHING
+    (void)nbGetMainProcessData();
+    stat = nbSetFormEntry(no);
+    if (stat == NULL) {
+        return 1;
+    }
+    for (i = 0; i < 0x1A; i++) {
+        id = nbLoadMotionByIndex(no, i);
+        if (id != 0) {
+            sprintf(D_00575450, "/sound/MIDI%04X.SMG", (u32)id >> 16);
+            stat->file[i] = fileLoad(D_00575450);
+            datDebugPrintf("load %s\n", D_00575450);
+        }
+    }
+    id = nbMakeSeId(no);
+    sprintf(D_00575450, "/sound/MIDI%04X.SMG", (u32)id >> 16);
+    stat->motfile = fileLoad(D_00575450);
+    return 1;
+}
+
 void nbCheckPackLoad(nbMainProcessData_t *data)
 {
     nbStatWork_t *stat;
@@ -574,9 +600,6 @@ void nbCheckPackLoad(nbMainProcessData_t *data)
         ofs += sizeof(nbStatWork_t);
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbSound", nbCheckPackLoad);
-#endif
 
 s32 nbFindFreeFormSlot(void)
 {
@@ -607,7 +630,39 @@ s32 nbFindFormIndex(s32 id)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbSound", nbFreeFormResources);
+void nbFreeFormResources(nbMainProcessData_t *data, s32 index)
+{
+    nbStatWork_t *stat = &data->statwork[index];
+    s32 i;
+
+    if (stat->id == 0) {
+        return;
+    }
+    for (i = 0; i < 0x1A; i++) {
+        void *file;
+
+        if (stat->buf[i] != NULL) {
+            sdfMemFreeDirect(stat->buf[i]);
+        }
+        file = stat->file[i];
+        stat->buf[i] = NULL;
+        if (file != NULL) {
+            fileHandleFree(file);
+        }
+        stat->file[i] = NULL;
+    }
+    if (stat->motbuf != NULL) {
+        sdfMemFreeDirect(stat->motbuf);
+    }
+    stat->motbuf = NULL;
+    if (stat->motfile != NULL) {
+        fileHandleFree(stat->motfile);
+    }
+    stat->motfile = NULL;
+    stat->unk_02 = 0;
+    stat->id = 0;
+    stat->refcnt = 0;
+}
 
 void nbFreeAllFormResources(nbMainProcessData_t *data)
 {
@@ -634,8 +689,6 @@ void nbAllocMainProcessData(nbMainProcessData_t *data)
     }
 }
 
-#ifdef NON_MATCHING
-/* NON_MATCHING: exact on its own; its presence turns nbE905_End's bnel into bne. */
 s32 nbMaeCheckDone()
 {
     if (nbMaeLoadDone == 1) {
@@ -674,9 +727,6 @@ s32 nbMaeCheckDone()
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbSound", nbMaeCheckDone);
-#endif
 
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C38);
 

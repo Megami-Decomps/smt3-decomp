@@ -107,10 +107,18 @@ typedef struct nbDevilData_t {
 typedef struct datDevilNegoFormat_t {
     u8 unk00[0xF];
     u8 talkflag;
-    u8 unk10[0x20];
+    u8 unk10[2];
+    u16 mukantype;
+    u8 unk14[0x1C];
 } datDevilNegoFormat_t;
 
 extern datDevilNegoFormat_t master_text[];
+
+/* Persistent unit work begins four bytes into the save record array. */
+typedef struct dds3LiveBattleUnitsView_t {
+    u8 unk00[0xA54];
+    datUnitWork_t units[16];
+} dds3LiveBattleUnitsView_t;
 
 extern char D_00543880[];
 
@@ -293,7 +301,9 @@ extern s32 nbMakeDeadPacket(s32 startframe, nbActionProcessData_t *uniqueid, nbF
 
 extern void sdfChipFreeDirect(void *aPtr);
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
+extern s32 datSearchDevilStock(s32 id);
+extern s32 nbSetHojoAddCounter(s32 formindex, s32 type, s32 point, s32 nvirtual);
 
 s32 CheckTimeListDead(nbActionProcessData_t *a, s32 formindex);
 
@@ -659,7 +669,7 @@ void SetTarget_nbActionProcess(nbActionProcessData_t *a)
     carea = 0;
     switch (work->nowcommand) {
     case 6:
-        *(s32 *)a->data->TarSelType = 1;
+        a->data->TarSelType = 1;
         break;
     case 0:
     case 1:
@@ -671,9 +681,9 @@ void SetTarget_nbActionProcess(nbActionProcessData_t *a)
     case 8:
     default:
         if (a->work->nowcommand == 1 && a->work->nowindex == 0xDF) {
-            *(s32 *)a->data->TarSelType = 1;
+            a->data->TarSelType = 1;
         } else {
-            *(s32 *)a->data->TarSelType = 0;
+            a->data->TarSelType = 0;
         }
         break;
     }
@@ -952,7 +962,40 @@ s32 CheckArrCounter(nbActionProcessData_t *a)
 
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckCounter);
 
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckMukanNego);
+s32 CheckMukanNego(nbActionProcessData_t *a)
+{
+    s32 assistCount = 0;
+    s32 i;
+    s32 rate;
+
+    if (((u32)(u16)a->data->StageMajor - 0xF0u) < 7u) return 0;
+    if ((a->data->stat & 1) != 0) return 0;
+    if ((a->party->flag & 2) == 0) return 0;
+    if (master_text[a->work->id].mukantype == 0) return 0;
+    if (datSearchDevilStock(a->work->id) >= 0) return 0;
+    if (evtGetAgeOfMoon() == 8) return 0;
+    if (datCheckTalk(a->work) == 0) return 0;
+    if (datCheckTalk(((dds3LiveBattleUnitsView_t *)DDS3_GBWK)->units) == 0) return 0;
+    if (a->data->enemypcnt < 2) return 0;
+    if (nbGetHojoCounter(a->form->formindex, 0x10) != 0) return 0;
+    if ((a->data->stat & 0x2000000) == 0 && a->data->turn < 3) return 0;
+
+    for (i = 4; i < 14; i++) {
+        if ((a->data->form[i].stat & 1) != 0) {
+            if ((a->data->form[i].stat & 0x40) != 0) {
+                if (nbGetHojoCounter(i, 0x10) == 0) {
+                    assistCount++;
+                }
+            }
+        }
+    }
+    if (assistCount != 1) return 0;
+
+    rate = (a->data->stat & 0x2000000) == 0 ? 5 : 100;
+    if ((s32)dds3GetRandIntA(NULL, 100) >= rate) return 0;
+    nbSetHojoAddCounter(a->form->formindex, 0x10, 1, 0);
+    return 1;
+}
 
 /* NON_MATCHING: 57 of 74 words differ (first at +0x4). */
 
@@ -998,7 +1041,7 @@ s32 CheckSenseiNego(nbActionProcessData_t *a)
     } else {
         rate = 21 / a->data->enemypcnt;
     }
-    if (dds3GetRandIntA(0, 0x64) < rate) {
+    if ((s32)dds3GetRandIntA(NULL, 0x64) < rate) {
         a->data->stat |= 0x100;
         return 1;
     }

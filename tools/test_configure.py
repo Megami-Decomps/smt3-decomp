@@ -483,6 +483,25 @@ class ObjdiffProgressTests(unittest.TestCase):
                 self.assertIn(dependency, dependencies)
 
 
+class ProgressScopeTests(unittest.TestCase):
+    def test_sdk_sources_and_drafts_do_not_enter_game_coverage(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for unit, function in (("kernel/unit", "game_function"), ("sdk/libc", "sdk_function")):
+                src = root / f"src/{VERSION}/{unit}.c"
+                asm = root / f"asm/{VERSION}/{unit}.s"
+                src.parent.mkdir(parents=True, exist_ok=True)
+                asm.parent.mkdir(parents=True, exist_ok=True)
+                src.write_text(f'INCLUDE_ASM(const s32, "{unit}", {function});\n')
+                asm.write_text(f"glabel {function}\n"
+                               "    /* 000000 00100000 0800E003 */ jr $ra\n"
+                               "    /* 000004 00100004 00000000 */ nop\n"
+                               f"endlabel {function}\n")
+            with patch.object(progress, "ROOT", root), \
+                    patch.object(progress, "draft_functions", return_value={"sdk/libc": {"sdk_function"}}):
+                self.assertEqual(progress.version_stats(VERSION), (1, 0, 0, 8, 0, 0))
+
+
 class ProgressLabelTests(unittest.TestCase):
     # 4 functions and 100 bytes, 2 functions and 25 bytes of them in C, and a
     # draft for one of the two functions that are left.

@@ -4,12 +4,13 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 void fclFreeStage(void);
 
-extern s32 dds3GetRandA(s32 name);
+extern u32 dds3GetRandA(void *state);
 
 extern s32 evtStartEvent(s32 no);
 
@@ -358,11 +359,141 @@ s8 ragBuildList3(u8 index, u8 *work)
 INCLUDE_ASM(const s32, "facility/fclRagInit", ragBuildList3);
 #endif
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", ragCreateAllList);
+typedef struct {
+    u8 reserved00[0x1A];
+    s8 heartItems[32];
+    s8 heartCount;
+    s8 list2[8];
+    s8 list2Count;
+    s8 list3[8];
+    s8 list3Count;
+    u8 reserved4D[0xF3];
+    cmpCursorInfo_t cursor;
+    u8 reserved178[0x1004];
+    lstWork_t heartWindow;
+    u8 reserved1310[0x1004];
+    lstWork_t window2;
+    u8 reserved24A8[0x1004];
+    lstWork_t window3;
+} ragListWork_t;
+typedef struct {
+    u8 reserved00[2];
+    s16 eventBit;
+    u8 hearts[2];
+    u8 list2[2];
+    u8 list3[2];
+} ragListConfig_t;
+extern ragListConfig_t gCommandFlag_0[];
+extern u8 ragListFlags[5];
+extern s32 ragBuildHeartsList(u8 type, u8 *work);
+extern s8 ragBuildList2(u8 type, u8 *work);
+extern s8 ragBuildList3(u8 type, u8 *work);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D140);
+void ragCreateAllList(s32 onlyHearts, s32 type, ragListWork_t *work)
+{
+    s32 active;
+    if (gCommandFlag_0[type].eventBit >= 0) {
+        active = evtBitCheck(gCommandFlag_0[type].eventBit) != 0;
+    } else {
+        active = 0;
+    }
+    work->heartCount = ragBuildHeartsList(gCommandFlag_0[type].hearts[active], (u8 *)work);
+    if (gCommandFlag_0[type].hearts[active] == 0) {
+        ragListFlags[0] |= 2;
+        work->cursor.unk_21++;
+    }
+    ragInitHeartsList(work->heartCount, &work->heartWindow);
+    if (onlyHearts == 0) {
+        work->list2Count = ragBuildList2(gCommandFlag_0[type].list2[active], (u8 *)work);
+        if (gCommandFlag_0[type].list2[active] == 0) {
+            ragListFlags[1] |= 2;
+            work->cursor.unk_21++;
+        }
+        ragInitList2(work->list2Count, &work->window2);
+        work->list3Count = ragBuildList3(gCommandFlag_0[type].list3[active], (u8 *)work);
+        if (gCommandFlag_0[type].list3[active] == 0) {
+            ragListFlags[2] |= 2;
+            work->cursor.unk_21++;
+        }
+        cmpSetCursorFlag(&work->cursor, (s32)ragListFlags);
+        ragInitList3(work->list3Count, &work->window3);
+    }
+}
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", fclRagLoadTextures);
+typedef struct fclPanel
+{
+    s32 X;
+    s32 Y;
+    s32 Z;
+    s16 W;
+    s16 H;
+    s32 Col;
+    u8 Spd;
+    u8 reserved15[3];
+    s32 Timer;
+    s32 Timer2;
+    s32 Flag;
+    u8 reserved24[0x10];
+    s32 TexHandle;
+    void (*draw)(struct fclPanel *panel, s32 id);
+    void (*update)(struct fclPanel *panel);
+} fclPanel_t;
+
+typedef struct
+{
+    s32 tex;
+    u16 unk_04;
+    u16 unk_06;
+    u16 unk_08;
+    u16 unk_0A;
+    u16 unk_0C;
+    u16 unk_0E;
+    s32 X;
+    s32 Y;
+    s32 Z;
+    u8 color[4];
+    u8 Flag;
+} fclSprite_t;
+
+typedef struct
+{
+    u8 reserved0000[0x14];
+    void *allocation;
+    u8 reserved0018[0x462C];
+    void *messageFile;
+    u32 script;
+    s32 scriptArg;
+    s32 backgroundTexture;
+    s32 texture[2];
+    fclSprite_t messageSprite;
+    fclPanel_t panel[3];
+} ragLoadTextureWork_t;
+
+extern char *D_0032FC28[];
+extern char D_0053D150[];
+extern char D_0053D170[];
+extern s32 fclLoadTexture(char *filename);
+extern void fclSetPanelTex(fclPanel_t *panel, s32 u0, s32 v0, s32 u1, s32 v1,
+                           s32 texture);
+extern void fclSetSprite(fclSprite_t *sprite, s32 width, s32 height, s32 z,
+                         s32 u0, s32 v0, s32 u1, s32 v1, s32 color, s32 texture);
+
+void fclRagLoadTextures(u8 *data)
+{
+    ragLoadTextureWork_t *work = (ragLoadTextureWork_t *)data;
+    s8 i;
+
+    for (i = 0; (u8)i < 2; i++) {
+        work->texture[i] = fclLoadTexture(D_0032FC28[i]);
+    }
+    fclSetPanelTex(&work->panel[2], 0, 0, 0x100, 0x80, work->texture[1]);
+    work->backgroundTexture = fclLoadTexture(D_0053D150);
+    fclSetSprite(&work->messageSprite, 0x200, 0x1C0, 0, 5, 5, 0x1FB, 0xFB,
+                 0x80808080, work->backgroundTexture);
+    printf(D_0053D170);
+}
+
 
 extern char D_0053D188[];
 
@@ -389,22 +520,156 @@ void fclRagTexLoad(u8 *pData)
     }
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D188);
+typedef struct ragPanel
+{
+    s32 X;
+    s32 Y;
+    s32 Z;
+    s16 W;
+    s16 H;
+    s32 Col;
+    u8 Spd;
+    u8 reserved15[3];
+    s32 Timer;
+    s32 Timer2;
+    s32 Flag;
+    u8 reserved24[0x10];
+    s32 TexHandle;
+    void (*draw)(struct ragPanel *panel, s32 id);
+    void (*update)(struct ragPanel *panel);
+} ragPanel_t;
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", fclRagUpdateInit);
+typedef struct ragSprite
+{
+    s32 tex;
+    u16 width;
+    u16 height;
+    u16 u0;
+    u16 v0;
+    u16 u1;
+    u16 v1;
+    s32 X;
+    s32 Y;
+    s32 Z;
+    u8 color[4];
+    u8 flags;
+} ragSprite_t;
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", fclAllocRagWork);
-
-typedef struct
+typedef struct fclRagWork
 {
     /* 0x0000 */ u8 flags;
-    /* 0x0001 */ u8 unk_0001[0x13];
+    /* 0x0001 */ u8 sequenceFlag;
+    /* 0x0002 */ u8 reserved02;
+    /* 0x0003 */ u8 reserved03;
+    /* 0x0004 */ u8 workStatus;
+    /* 0x0005 */ u8 reserved05[0xF];
     /* 0x0014 */ void *allocation;
-    /* 0x0018 */ u8 unk_0018[0x462C];
-    /* 0x4644 */ void *unk_4644;
-    /* 0x4648 */ s32 unk_4648;
-    /* 0x464C */ s32 unk_464C;
+    /* 0x0018 */ u8 reserved18;
+    /* 0x0019 */ s8 ragType;
+    /* 0x001A */ u8 reserved1A[0x462A];
+    /* 0x4644 */ void *messageFile;
+    /* 0x4648 */ u32 messageData;
+    /* 0x464C */ u8 *forcedEndScript;
+    /* 0x4650 */ s32 backgroundTexture;
+    /* 0x4654 */ s32 texture[2];
+    /* 0x465C */ ragSprite_t messageSprite;
+    /* 0x4680 */ ragPanel_t panel[3];
+    /* 0x4740 */ fclRagTex_t textureCalc[2];
 } fclRagWork_t;
+
+extern void fclInitCursorWindow(void *work, void *data, u8 count);
+extern void fclSetCursorList(void *work, s32 mode);
+extern char D_0054FB88[];
+extern char D_0054FB90[];
+extern char D_0053D1A0[];
+extern char D_0053D1B0[];
+extern char D_0053D1C0[];
+
+void fclRagUpdateInit(s8 type, fclRagWork_t *owner)
+{
+    ragListWork_t *work = (ragListWork_t *)owner;
+    u8 *items;
+    s32 i;
+
+    ragCreateAllList(0, type, work);
+    fclInitCursorWindow((u8 *)work + 0x13C, ragHeartsTable + 0x8A0, 5);
+    fclSetCursorList((u8 *)work + 0x13C, 0x19);
+    memset(ragListFlags, 0, sizeof(ragListFlags));
+    printf(D_0054FB88);
+    printf(D_0053D1A0);
+    items = (u8 *)work->heartItems;
+    for (i = 31; i >= 0; i--) {
+        printf(D_0054FB90, *items++);
+    }
+    printf(D_0054FB88);
+    i = 0;
+    printf(D_0053D1B0);
+    if (work->list2Count > 0) {
+        items = (u8 *)work->list2;
+        do {
+            printf(D_0054FB90, *items++);
+            i++;
+        } while (i < work->list2Count);
+    }
+    printf(D_0054FB88);
+    i = 0;
+    printf(D_0053D1C0);
+    if (work->list3Count > 0) {
+        items = (u8 *)work->list3;
+        do {
+            printf(D_0054FB90, *items++);
+            i++;
+        } while (i < work->list3Count);
+    }
+    printf(D_0054FB88);
+    printf(D_0054FB88);
+}
+
+extern void *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(void *handle);
+extern void *sdfDevLoadFileEx(const char *name, u32 *data, u32 *size);
+extern void cmpInitSeqInfo(void *work, s32 seq);
+extern void fclRagUpdateInit(s8 type, fclRagWork_t *work);
+extern void fclInitPanel(ragPanel_t *panel, s32 x, s32 y, s32 z, s32 w,
+                         s32 h, s32 color, s8 type, s8 speed);
+extern void evtDisableMoonCalc(void);
+extern void cmpModelInit(void);
+extern void cmpResetDrawEnv(void);
+extern void fclRagLoadTextures(u8 *work);
+extern void fclRagTexLoad(u8 *work);
+extern void p2sdPlayBGM(s32 id);
+extern char D_0053D1D0[];
+
+fclRagWork_t *fclAllocRagWork(s8 type, s32 seq)
+{
+    void *handle = sdfMemAllocDirect(0x4788);
+    fclRagWork_t *work = sdfMemLock(handle);
+
+    memset(work, 0, 0x4788);
+    work->allocation = handle;
+    cmpInitSeqInfo(work, seq);
+    work->sequenceFlag = 0;
+    work->ragType = type;
+    work->workStatus = 1;
+    work->reserved03 = 0;
+    work->forcedEndScript = NULL;
+    fclRagUpdateInit(type, work);
+    fclInitPanel(&work->panel[0], 0xF60, 0x280, 0xFFFFF, 0xE5, 0x6B,
+                 0x161E2766, 2, 0x10);
+    fclInitPanel(&work->panel[1], 0xEA0, 0x6E0, 0xFFFFF, 0xF1, 0x51,
+                 0x101E3159, 4, 0x10);
+    fclInitPanel(&work->panel[2], 0, 0x190, 0xFFFFF, 0x200, 0x109,
+                 0, 0, 0x1D);
+    work->messageFile = sdfDevLoadFileEx(D_0053D1D0, &work->messageData, NULL);
+    evtDisableMoonCalc();
+    fclRagLoadTextures((u8 *)work);
+    cmpModelInit();
+    cmpResetDrawEnv();
+    fclRagTexLoad((u8 *)work);
+    p2sdPlayBGM(0x390000);
+    fclSetWorkValue(2, 0);
+    return work;
+}
 
 extern void fclRagTexFree(u8 *pData);
 
@@ -416,8 +681,8 @@ void fclDestroyRag(void)
         return;
     }
     fclRagTexFree(GBWK_0);
-    fclScriptForcedEnd(((fclRagWork_t *)GBWK_0)->unk_464C);
-    sdfMemFreeDirect(((fclRagWork_t *)GBWK_0)->unk_4644);
+    fclScriptForcedEnd(((fclRagWork_t *)GBWK_0)->forcedEndScript);
+    sdfMemFreeDirect(((fclRagWork_t *)GBWK_0)->messageFile);
     fclRagEventEnd();
     sdfMemFreeDirect(((fclRagWork_t *)GBWK_0)->allocation);
     GBWK_0 = NULL;
@@ -426,7 +691,29 @@ void fclDestroyRag(void)
     p2sdStopBGM(0x390000);
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", fclRagProcessStart);
+extern fclRagWork_t *fclAllocRagWork(s8 type, s32 seq);
+extern void FclDebug(s32 mode, void *work);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority,
+                                          s32 startTimer, s32 shutdownTimer,
+                                          dds3ProcessFunc_t process,
+                                          dds3ProcessFunc_t shutdown,
+                                          void *work);
+extern s32 ragCalc(dds3ProcessID_t *id);
+extern s32 ragDraw(dds3ProcessID_t *id);
+extern s32 ragUpdate(dds3ProcessID_t *id);
+
+void fclRagProcessStart(s8 Signal)
+{
+    if (GBWK_0 == NULL) {
+        GBWK_0 = (u8 *)fclAllocRagWork(Signal, 0);
+        FclDebug(2, GBWK_0);
+        dds3StartProcess(D_0054FB98, 0x403, 1, 1, ragCalc, NULL, GBWK_0);
+        dds3StartProcess(D_0053D1F0, 0x2B13, 1, 1, ragDraw, NULL, GBWK_0);
+        dds3StartProcess(D_0053D200, 0x520F, 1, 1, ragUpdate,
+                         (dds3ProcessFunc_t)fclDestroyRag, GBWK_0);
+        gProcessStat_1 = 1;
+    }
+}
 
 void fclRagProcessEnd(void)
 {
@@ -457,7 +744,19 @@ void func_0020ADE0(void)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", ragGetConfirmEntry);
+u16 *ragGetConfirmEntry(s8 kind, u8 index)
+{
+    switch (kind) {
+    case 0:
+        return (u16 *)(ragHeartsTable + 0x2 + index * 0xE);
+    case 1:
+        return (u16 *)(ragHeartsTable + 0x180 + index * 0x2C);
+    case 2:
+        return (u16 *)(ragHeartsTable + 0x520 + index * 0x2C);
+    default:
+        return NULL;
+    }
+}
 
 typedef struct
 {
@@ -501,6 +800,22 @@ void ragUpdateScene(void)
         }
     }
 }
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D140);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D150);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D170);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D188);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1A0);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1B0);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1C0);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1D0);
 
 INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1F0);
 

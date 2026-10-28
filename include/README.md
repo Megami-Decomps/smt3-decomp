@@ -800,6 +800,7 @@ record scalar also preserves upstream's matched packet constructors.
 | `sdfModelDrawEnvSet_t` | 96 | `sdfModelSetDrawEnv` strides the four sets by 0x60 |
 | `sdfModelDrawEnvTerm_t` | 48 | the same function's tail, a draw tag then a DMA tag at +0x20 |
 | `sdfModelDrawEnv_t` | 432 | four sets then the terminator at +0x180 |
+| `dds3DrawBank_t` | 7136 | `dds3FirstProcess` strides frame banks by 0x1BE0 and initializes 11 contiguous 432-byte model environments at +0x40 |
 
 `sdfGrFrameSet_t` is confirmed field by field three times over.
 `sdfGrSetFrameSetMode` writes `w` +0, `h` +2 and `buffH` +4 as `sh` and
@@ -1047,7 +1048,7 @@ one:
   the frame set's with `sb`. A type copied from the wrong one of the two would
   move every pointer in the frame set.
 
-## fpu.h: shared scalar square roots
+## fpu.h: shared scalar FPU helpers
 
 `fsqrtf` and `frsqrtf` follow DDS's documented scalar FPU convention. They
 emit the bare EE `sqrt.s` and numerator-over-square-root `rsqrt.s`, without
@@ -1055,8 +1056,12 @@ the errno-checking library path or gcc's extra hazard nops. The evidence for
 the compiler distinction is DDS `docs/idioms.md`, "Square roots: sqrt.s";
 it is not a claim that every SMT3 square-root site has been audited.
 New callers share these helpers rather than spelling scalar FPU asm locally.
-Absolute values in the DDS ports use the declared C `fabsf` operation;
-functions that require a different scheduling boundary stay `INCLUDE_ASM`.
+`ffabsf` supplies the documented inline `abs.s` boundary when a unit requires
+it. In `sdf3DMakeLightParallelPacket`, builtin `fabsf` schedules the axis load
+ahead of the threshold literal; the shared helper reproduces retail ordering.
+DDS `docs/idioms.md`, "Absolute values: ffabsf versus builtin fabsf", records
+the paired convention and its kernel exception. Select it from local evidence
+rather than replacing unrelated absolute-value calls.
 
 ## ps2asm.h: the EE extension macros
 
@@ -1199,11 +1204,19 @@ names rather than one name and an `#undef`:
 | `SDF_VU0_SCALEVECTOR_V0`, `SDF_VU0_SCALEVECTOR_B_V0`, `SDF_VU0_SETVECTOR_Y_V0` | the scalar reaches vf2.x through `$2`, not a register cc1 picks |
 | `SDF_VU0_STOREMATRIX_NOMEM`, `SDF_VU0_STOREVECTOR_NOMEM`, `SDF_VU0_STOREVECTOR_B_NOMEM` | the same stores without the `memory` clobber |
 | `SDF_VU0_COPYVECTOR_MEMOPS`, `SDF_VU0_LOADMATRIX_B_MEMOPS` | the memory is a declared `"m"` operand rather than a clobber |
+| `SDF_VU0_COPYVECTOR_F32` | four aligned float elements are explicit read/write operands; unrelated memory is not clobbered |
+| `SDF_VU0_STOREVECTOR_F32`, `SDF_VU0_LOADVECTOR_B_F32` | explicit volatile four-float scratch operands, with the address also in a GPR |
 | `SDF_VU0_STORE_ROW0`, `_VF29`, `_VF30` | these clobber memory; the `_NOMEM` forms beside them do not |
 | `SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED`, `SDF_VU0_SUBVECTOR_EXTENDED` | an empty operand list rather than a basic asm |
 
-Every operation is defined once, in `ps2asm.h`: 221 macros there and no asm
-macro left in any unit. The five that used to stay local for a differing operand
+The parallel-light packet uses an aligned volatile axis scratch consumed by
+VU0 loads. This follows the matched rotation/Euler/quaternion scratch convention
+in DDS `docs/idioms.md`: component writes remain ordered before `lqc2`. Its
+identity path uses `SDF_MMI_STORE_UNIT_MATRIX`; a plain C scalar initialization
+emits 728 bytes for the function instead of retail's 696, while the shared
+VF0/MMI lane-shuffle operation reproduces the native sequence.
+
+Every operation is defined once in `ps2asm.h`, and units reuse those macros. The five that used to stay local for a differing operand
 section are now named for what differs -- `SDF_VU0_SCALEVECTOR_V0`,
 `SDF_VU0_SCALEVECTOR_B_V0` and `SDF_VU0_SETVECTOR_Y_V0` carry the scalar through `$2`
 rather than a register cc1 picks -- so nothing needs an `#undef` any more.
@@ -1388,3 +1401,51 @@ To compile one header on its own, which is also worth doing when adding a type:
 printf '#include "model.h"\nconst int ok = 1;\n' > /tmp/only_model.c
 tools/cc.sh -Wall /tmp/only_model.c -o /tmp/only_model.o
 ```
+
+### Name entry work (`nme.h`)
+
+`nmeWork_t` shares the existing `Nme_Init` work view with `Nme_Draw`.
+The initializer and cleanup establish the allocation handle at `0x14`, target
+at `0x18`, cursor at `0x30D4`, input position at `0x5150` and texture handles
+at `0x51B4`. The input cursor is at `0x1058`, confirmed by `nmeSyncCursor` calling
+`cmpSetCursorRow`; `nmeInitNameCursor` initializes another at `0x2094`. The animation helper
+reads and writes its signed timing value at `0x51C4`. Draw callbacks use
+`nmeUpdateWork`, distinct from the persistent `nmeProcessId` pointer. Unrecovered spans remain padding. `tools/header_layout.c` checks
+these offsets with the EE compiler.
+
+The allocator clears the three signed input-row flags at `0x514D`. Cursor
+initialization clears the alternate-cursor flag at `0x514C`; input dispatch
+uses it to select the alternate movement handler. Input helpers index three
+`0x20`-byte rows of two-byte character codes at `0x5152`, ending before the
+texture handles. The shared layout checks these boundaries as well.
+
+`nmeInitNameBuffer` initializes the mode cursor at `0x1C` and clears the
+primary movement-handler flag at `0x30D0`. Input dispatch tests that flag
+before calling `nmeMoveCursor`; `0x514C` selects `nmeMoveCursor2` instead.
+
+Cursor wrapping uses a fifth cursor prefix at `0x4110`, with its scroll/row
+fields at `0x4132`/`0x4134`. Each prefix remains separate from the unrecovered
+slot storage that follows it; no layout for those slots is inferred here.
+
+### Persistent negotiation and Kotowari fields
+
+The persistent-work negotiation and Kotowari span is two four-byte arrays:
+`negoques` at `0x1CE8` and `kotowari` at `0x1CEC`, followed by `u16 wakimi_id`
+and `u16 bouga_cnt` at `0x1CF0` and `0x1CF2`. The recovered save-data layout,
+`datAddKotowariPoint` and `datGetKotowariLank` corroborate these boundaries;
+`tools/header_layout.c` checks the offsets and both array extents. The older
+three-byte/nine-byte partial view incorrectly grouped the same twelve bytes.
+
+### Special-skill table records (`newdata.h`)
+
+`datSkillTable` has 288 normal records of 0x3C bytes, eight reserved bytes,
+288 four-byte visual records, then 95 eight-byte special records at +0x4808.
+The complete 0x4B00-byte extent is bounded in
+`config/smt3/symbol_addrs.txt`. `datSetAutoKaifukuSkill` indexes the tail as
+`special[skill - 288]`, reading signed halfwords at offsets 0 and 2;
+`nbCheckBackAttack` and `nbCheckEscape` independently read slots 10 and 8.
+The recovered `datSpecialSkill_t` definition in `config/smt3/ida_members.txt`
+names its four signed halfwords `n`, `m`, `a` and `b`. The header preserves
+the normal and visual regions and appends this previously omitted tail.
+`tools/header_layout.c` checks both the individual record sizes and the
+region offsets and complete extent.

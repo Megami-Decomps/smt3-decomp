@@ -66,6 +66,10 @@ struct pbProcHandle_t
 extern void sdfChipFreeDelayedDirect(void *aPtr);
 
 extern s32 sceMcGetInfo(s32 a, s32 b, s32 *c, s32 *d, s32 *e);
+extern s32 sceSifLoadModule(const char *path, s32 argSize, const char *args);
+extern s32 sceMcInit(void);
+extern s32 printf(const char *format, ...);
+extern const char D_0054F600[];
 
 extern pbProcHandle_t *record;
 
@@ -83,7 +87,19 @@ extern void sceMcGetDir(s32 a, s32 b, const char *c, u32 d, s32 e, void *f);
 
 extern void sceMcSync(s32 a, s32 *b, s32 *c);
 
-INCLUDE_ASM(const s32, "pb/pbMCard", pbInitMCard);
+void pbInitMCard(void)
+{
+    while (sceSifLoadModule("host0:/usr/local/sce/iop/modules/sio2man.irx", 0, NULL) < 0) {
+        printf("Can't load module sio2man\n");
+    }
+    while (sceSifLoadModule("host0:/usr/local/sce/iop/modules/mcman.irx", 0, NULL) < 0) {
+        printf("Can't load module mcman\n");
+    }
+    while (sceSifLoadModule("host0:/usr/local/sce/iop/modules/mcserv.irx", 0, NULL) < 0) {
+        printf("Can't load module mcserv\n");
+    }
+    printf(D_0054F600, sceMcInit());
+}
 
 s32 pbGetFormatStatusMCard(s32 port, s32 slot, pbMCardInfo_t *stat) {
     return sceMcGetInfo(port, slot, NULL, NULL, &stat->format);
@@ -130,17 +146,93 @@ s32 pbMkdirMCard(s32 port, s32 slot, const char *dirName) {
     return result;
 }
 
+extern const char D_0054F608[];
+extern const char D_00536498[];
+extern const char D_005364C0[];
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536498);
 
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_005364C0);
 
-INCLUDE_ASM(const s32, "pb/pbMCard", pbReadMCard);
+const char D_005364E8[40] __attribute__((aligned(8))) = "\tregist read command. return = %d\n";
+const char D_00536510[40] __attribute__((aligned(8))) = "\tcan't read a file < %s > err = %d\n";
+extern const char D_00536538[];
+extern const char D_00536560[];
+extern s32 sceMcOpen(s32 port, s32 slot, char *name, s32 flags);
+extern s32 sceMcClose(s32 fd);
+extern s32 sceMcRead(s32 fd, void *buffer, s32 size);
 
+s32 pbReadMCard(s32 port, s32 slot, char *fileName, void *buffer, s32 size)
+{
+    s32 fd;
+    s32 readResult;
+    s32 commandResult;
+
+    printf(D_0054F608);
+    commandResult = sceMcOpen(port, slot, fileName, 3);
+    printf(D_00536498, commandResult);
+    sceMcSync(0, NULL, &fd);
+    if (fd < 0) {
+        printf(D_005364C0, fileName, fd);
+        return fd;
+    }
+
+    commandResult = sceMcRead(fd, buffer, size);
+    printf(D_005364E8, commandResult);
+    sceMcSync(0, NULL, &readResult);
+    if (readResult < 0) {
+        printf(D_00536510, fileName, readResult);
+    }
+
+    commandResult = sceMcClose(fd);
+    printf(D_00536538, commandResult);
+    sceMcSync(0, NULL, &commandResult);
+    if (commandResult < 0) {
+        printf(D_00536560, fileName, commandResult);
+    }
+    printf(D_0054F608);
+    return readResult;
+}
+
+extern s32 sceMcWrite(s32 fd, void *buffer, s32 size);
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536538);
 
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536560);
 
-INCLUDE_ASM(const s32, "pb/pbMCard", pbWriteMCard);
+const char D_00536588[40] __attribute__((aligned(8))) = "\tregist write command. return = %d\n";
+const char D_005365B0[40] __attribute__((aligned(8))) = "\tcan't write a file < %s > err = %d\n";
+
+s32 pbWriteMCard(s32 port, s32 slot, char *fileName, s32 flags,
+                 void *buffer, s32 size)
+{
+    s32 fd;
+    s32 writeSync;
+    s32 commandResult;
+
+    printf(D_0054F608);
+    commandResult = sceMcOpen(port, slot, fileName, flags);
+    printf(D_00536498, commandResult);
+    sceMcSync(0, NULL, &fd);
+    if (fd < 0) {
+        printf(D_005364C0, fileName, fd);
+        return fd;
+    }
+
+    commandResult = sceMcWrite(fd, buffer, size);
+    printf(D_00536588, commandResult);
+    sceMcSync(0, NULL, &writeSync);
+    if (writeSync < 0) {
+        printf(D_005365B0, fileName, writeSync);
+    }
+
+    commandResult = sceMcClose(fd);
+    printf(D_00536538, commandResult);
+    sceMcSync(0, NULL, &commandResult);
+    if (commandResult < 0) {
+        printf(D_00536560, fileName, commandResult);
+    }
+    printf(D_0054F608);
+    return writeSync;
+}
 
 INCLUDE_ASM(const s32, "pb/pbMCard", pb_draw_error_Process);
 

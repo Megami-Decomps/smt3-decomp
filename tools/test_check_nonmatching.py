@@ -1,12 +1,57 @@
 #!/usr/bin/env python3
 """Pin the draft accounting, which has misread the tree in both directions."""
+import contextlib
+import io
 import re
+import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_nonmatching as cn
+import check_irx_nonmatching as irx
+
+
+class CompilerFailures(unittest.TestCase):
+    def ee_result(self, status, stderr="", stdout=""):
+        result = subprocess.CompletedProcess([], status, stdout, stderr)
+        with patch.object(cn.subprocess, "run", return_value=result):
+            return cn.compile_unit(Path("src/smt3/unit.c"))
+
+    def irx_result(self, status, stderr="", stdout=""):
+        result = subprocess.CompletedProcess([], status, stdout, stderr)
+        with patch.object(irx.irx_config, "load", return_value={}), \
+                patch.object(irx.irx_config, "path", return_value=Path("unit.c")), \
+                patch.object(irx.subprocess, "run", return_value=result), \
+                contextlib.redirect_stdout(io.StringIO()):
+            return irx.check("test", Path("shim"))
+
+    def test_ee_warning_with_a_successful_exit_is_allowed(self):
+        self.assertEqual(self.ee_result(0, "unit.c:3: warning: unused variable\n"), "")
+
+    def test_ee_failure_without_a_source_diagnostic_is_reported(self):
+        for stderr in ("", "cc1: internal compiler error\n",
+                       "unit.c:3: warning: unused variable\n"):
+            with self.subTest(stderr=stderr):
+                self.assertIn("status 1", self.ee_result(1, stderr))
+
+    def test_ee_signal_and_loader_diagnostic_are_preserved(self):
+        diagnostic = "ld-linux.so.2: cannot load shared object\n"
+        self.assertIn(diagnostic.strip(), self.ee_result(-11, diagnostic))
+
+    def test_ee_source_error_is_preserved(self):
+        diagnostic = "unit.c:3: syntax error"
+        self.assertEqual(self.ee_result(1, diagnostic), diagnostic)
+
+    def test_irx_failure_without_an_error_diagnostic_is_reported(self):
+        for stderr in ("", "cc1: terminated\n", "unit.c:3: warning: unused variable\n"):
+            with self.subTest(stderr=stderr):
+                self.assertGreater(self.irx_result(1, stderr), 0)
+
+    def test_irx_warning_with_a_successful_exit_is_allowed(self):
+        self.assertEqual(self.irx_result(0, "unit.c:3: warning: unused variable\n"), 0)
 
 
 class DraftNames(unittest.TestCase):

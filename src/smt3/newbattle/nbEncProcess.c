@@ -434,7 +434,54 @@ void *nbEncProcess2_6(dds3ProcessID_t *id)
     return nbEncProcess3;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbEncProcess2_55);
+extern s32 evtGetAgeOfMoon(void);
+extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, u32 flag);
+extern void nbGroupFormDispOn(s32 side);
+extern void dds3FadeIn2(s32 frame);
+extern s32 nbGetEncountOn(void);
+extern void nbSetEncountMode(s32 mode);
+extern s32 nbGetJyokyoMes(nbMainProcessData_t *data, s32 jyokyomes);
+extern void nbDispMsgHelp(s32 msgid, s32 no, s32 msgtype);
+extern void *nbEncProcess2_6(dds3ProcessID_t *id);
+
+void *nbEncProcess2_55(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 stat = data->stat;
+    s32 showGroup;
+    s32 i;
+
+    /* Keep mask definitions on their respective stat paths. Qualified
+     * alloc/reorg traces show that an early mask overlaps the first test
+     * in $2; these definitions remove that conflict and retain annulment. */
+
+    if ((stat & 0x400) != 0) {
+        for (i = 4; i < 14; i++) {
+            nbFormation_t *form = &data->form[i];
+
+            if ((form->stat & 1) != 0 && evtGetAgeOfMoon() == 8) {
+                dds3ObjectBaseOnFlag(form->basic, 0x400);
+                form->basic->poseset->r = 200.0f;
+            }
+        }
+        stat = data->stat;
+        showGroup = stat & 0x800;
+    } else {
+        showGroup = stat & 0x800;
+    }
+    if (showGroup != 0) {
+        nbGroupFormDispOn(1);
+        dds3FadeIn2(0);
+        if (nbGetEncountOn() != 0) {
+            nbSetEncountMode(1);
+        }
+    }
+    if ((data->stat & 0x10) != 0) {
+        nbDispMsgHelp(data->unk_130, nbGetJyokyoMes(data, 6), 1);
+    }
+    return nbEncProcess2_6;
+}
+
 
 INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbEncProcess2_5);
 

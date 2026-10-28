@@ -1,11 +1,11 @@
 #include "common.h"
+#include "kernel.h"
+#include "libsdf.h"
+#include "nme.h"
 
-typedef struct {
-    u8 unk00[0x51B4];
-    void *textures[4];
-} nmeTextureWork_t;
 
-extern void sdfTexFree(void *aHandle);
+extern void sdfTexFree(sdfTexHandle_t *aHandle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern void dds3KillProcessName(const char *name, s32 shutdowntimer);
 
@@ -17,50 +17,244 @@ extern char D_005487D8[];
 
 extern s8 gProcessStat;
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeCharToIndex);
+u8 nmeCharToIndex(u8 lead, u8 trail) {
+    s32 value = (((s32)lead << 8) | trail) - 0x8080;
+    s32 index = ((u32)(value & 0xFF00) >> 1) + (value & 0x7F);
+    return (u8)(index - 0x4A);
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeDecodeChar);
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", frAllocNameData);
+extern void frDelFontStyle(u8 styleNo);
+extern void nmeBuildNameFont(s8 mode, nmeWork_t *work);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void frLoadFontData(s32 style, const char *filename);
+extern void nmeInitNameRows(s8 target, nmeWork_t *work);
+extern char D_00548768[];
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeStartFadeOut);
+void frAllocNameData(void)
+{
+    s8 target = 0;
+    sdfMemHandle_t *handle = sdfMemAllocDirect(0x51C8);
+    nmeWork_t *work = sdfMemLock(handle);
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeGetInputMode);
+    memset(work, 0, 0x51C8);
+    frLoadFontData(4, D_00548768);
+    for (; target < 4; target++) {
+        nmeInitNameRows(target, work);
+        nmeBuildNameFont(target, work);
+    }
+    frDelFontStyle(4);
+    sdfMemFreeDirect(handle);
+}
 
-u32 nmeGetMaxNameLen(void) {
+extern u8 D_00552020[4];
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
+void nmeStartFadeOut(void)
+{
+    dds3FadeOut(D_00552020[0], D_00552020[1], D_00552020[2], 0x1E);
+}
+
+s32 nmeGetInputMode(nmeWork_t *work) {
+    s32 inputPos;
+
+    if (work->inputMode < 2) {
+        if (work->inputMode >= 0) {
+            inputPos = work->inputPos;
+            return inputPos / 8 != 0;
+        }
+    }
+    return 2;
+}
+
+s32 nmeGetMaxNameLen(s32 mode) {
     return 8;
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeGetModeFlag);
+s8 nmeGetModeFlag(nmeWork_t *work) {
+    return nmeGetMaxNameLen(nmeGetInputMode(work));
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameRow);
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameRows);
+extern void nmeInitNameRow(s8 mode, s32 row, void *data);
+void nmeInitNameRows(s8 mode, nmeWork_t *work) {
+    nmeInitNameRow(mode, 0, work);
+    nmeInitNameRow(mode, 1, work);
+    nmeInitNameRow(mode, 2, work);
+}
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeGetRowCount);
+s32 nmeGetRowCount(s8 mode)
+{
+    switch (mode) {
+    case 0:
+        return 0xF;
+    case 1:
+        return 0xF;
+    case 2:
+        return 0x10;
+    case 3:
+        return 0xF;
+    default:
+        return 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameBuffer);
+void nmeInitNameBuffer(s8 mode, nmeWork_t *work) {
+    work->inputMode = mode;
+    work->inputPos = 0;
+    work->primaryCursorActive = 0;
+    work->alternateCursorActive = 0;
+    work->unk1B = 0;
+    nmeInitNameCursor(2, work);
+    switch (mode) {
+    case 0:
+    case 1:
+        cmpInitCursorRange(&work->modeCursor, 4, 4, 0);
+        return cmpInitCursorLayout(&work->modeCursor, 0, 0, 0, 0, 0);
+    case 2:
+        cmpInitCursorRange(&work->modeCursor, 3, 3, 0);
+        cmpInitCursorLayout(&work->modeCursor, 0, 0, 0, 0, 0);
+        break;
+    }
+}
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameCursor);
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitCursor);
+extern const char *D_005276C4 __attribute__((section(".data")));
+extern u32 strlen(const char *string);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548768);
+void nmeInitNameCursor(s8 mode, nmeWork_t *work)
+{
+    u16 inputCount = 0;
+    u8 rowCount = nmeGetRowCount(mode);
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeTexLoad);
+    switch (mode) {
+    case 0:
+        inputCount = 6;
+        break;
+    case 1:
+        inputCount = 6;
+        break;
+    case 2:
+        inputCount = 6;
+        break;
+    case 3: {
+        u32 length = strlen(D_005276C4);
+        work->alternateCursorActive = 0;
+        inputCount = length / 32;
+        break;
+    }
+    }
+    cmpInitCursorRange(&work->inputCursor, inputCount, 6, 0);
+    cmpInitCursorLayout(&work->inputCursor, 0, 0, 0, 0, 0);
+    cmpInitCursorRange(&work->nameCursor, rowCount, rowCount, 0);
+    cmpInitCursorLayout(&work->nameCursor, 0, 0, 0, 0, 0);
+}
 
-void nmeFreeNameTextures(nmeTextureWork_t *work) {
+extern void cmpResetCursorPos(s16 value, cmpCursorInfo_t *cursor);
+
+void nmeInitCursor(s8 mode, nmeWork_t *work)
+{
+    cmpCursorInfo_t *cursor = &work->cursor;
+    s8 row;
+
+    cmpInitCursorRange(cursor, 4, 4, 0);
+    cmpInitCursorLayout(cursor, 0, 0, 0, 0, 0);
+    row = work->inputCursor.unk_24;
+    if (row < 6) {
+        if (row >= 3) {
+            return cmpResetCursorPos(row - 2, cursor);
+        }
+    }
+    cmpResetCursorPos(0, cursor);
+    /* Qualified cc1probe --jump: this reset follows the nonsibling call in
+     * .01.sibling and .11.cfg, then disappears in .13.life (verify: OK).
+     * It retains the native jal/epilogue under the CONTRIBUTING exception. */
+    row = 0;
+}
+
+
+extern char D_00548780[];
+extern char D_00548798[];
+extern char D_005487B0[];
+extern char *nmeCharTexFile[4];
+extern char *D_005276B0 __attribute__((section(".data")));
+extern s32 fclLoadTexture(char *filename);
+extern s32 evtBitCheck(s32 bit);
+
+void nmeTexLoad(s8 mode, nmeWork_t *work)
+{
+    work->textures[0] = (sdfTexHandle_t *)fclLoadTexture(D_00548780);
+    work->textures[1] = (sdfTexHandle_t *)fclLoadTexture(D_00548798);
+    work->textures[2] = (sdfTexHandle_t *)fclLoadTexture(D_005487B0);
+    if (evtBitCheck(0x8B0) != 0 && mode == 0) {
+        work->textures[3] = (sdfTexHandle_t *)fclLoadTexture(D_005276B0);
+    } else {
+        work->textures[3] = (sdfTexHandle_t *)fclLoadTexture(nmeCharTexFile[mode]);
+    }
+}
+
+void nmeFreeNameTextures(nmeWork_t *work) {
     s32 textureIndex;
     for (textureIndex = 0; textureIndex < 4; textureIndex++) {
         sdfTexFree(work->textures[textureIndex]);
     }
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeLoadFont);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void cmpInitSeqInfo(void *work, s32 parent);
+extern void nmeInitNameBuffer(s8 mode, nmeWork_t *work);
+extern void nmeInitCursor(s8 mode, nmeWork_t *work);
+extern void nmeTexLoad(s8 mode, nmeWork_t *work);
+extern void frLoadFontData(s32 style, const char *filename);
+extern char D_00548768[];
+
+nmeWork_t *nmeLoadFont(s8 target, s8 mode, s32 parent)
+{
+    sdfMemHandle_t *handle = sdfMemAllocDirect(0x51C8);
+    nmeWork_t *work = sdfMemLock(handle);
+
+    memset(work, 0, 0x51C8);
+    work->memHandle = handle;
+    cmpInitSeqInfo(work, parent);
+    work->sequence.current = 0;
+    work->entryMode = mode;
+    work->sequence.change = 1;
+    work->targetNo = target;
+    work->sequence.last = 0;
+    work->inputRowEnabled[0] = 0;
+    work->inputRowEnabled[1] = 0;
+    work->inputRowEnabled[2] = 0;
+    nmeInitNameBuffer(0, work);
+    nmeInitCursor(4, work);
+    nmeInitNameRows(target, work);
+    frLoadFontData(4, D_00548768);
+    nmeTexLoad(target, work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeBuildNameFont);
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeDestroyName);
+extern u32 dds3KernelDebugSignOrg;
+extern u32 dds3KernelDebugSign;
+extern void dds3FadeClear(void);
+
+void nmeDestroyName(dds3ProcessID_t *processId) {
+    if (nmeProcessId != NULL) {
+        nmeBuildNameFont(nmeProcessId->targetNo, nmeProcessId);
+        nmeFreeNameTextures(nmeProcessId);
+        frDelFontStyle(4);
+        sdfMemFreeDirect(nmeProcessId->memHandle);
+        nmeProcessId = NULL;
+        gProcessStat = 2;
+        dds3KernelDebugSign = dds3KernelDebugSignOrg;
+        dds3FadeClear();
+    }
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeStartProcesses);
 
@@ -84,9 +278,46 @@ s32 nmeCheckProcessStat(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", func_00298678);
+void func_00298678(void)
+{
+    if (nmeProcessId != NULL) {
+        nmeProcessId->sequence.flag |= 0x10;
+    }
+}
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nme_298698);
+extern s32 scrGetIntPara(s32 index);
+extern void scrSetIntReturnValue(s32 value);
+extern void nmeStartProcesses(s8 target, s8 mode, s32 unused);
+
+s32 nme_298698(void)
+{
+    s32 done = 0;
+
+    switch (gProcessStat) {
+    case 0: {
+        s8 target = scrGetIntPara(0);
+        s8 mode = scrGetIntPara(1);
+        nmeStartProcesses(target, mode, 0);
+        break;
+    }
+    case 1:
+        break;
+    case 2:
+        gProcessStat = 0;
+        done = 1;
+        break;
+    }
+    scrSetIntReturnValue(!done);
+    return done;
+}
+
+INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548768);
+
+INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548780);
+
+INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548798);
+
+INCLUDE_RODATA(const s32, "nme/Nme_Init", D_005487B0);
 
 INCLUDE_RODATA(const s32, "nme/Nme_Init", D_005487C8);
 

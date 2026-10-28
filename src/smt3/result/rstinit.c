@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -39,14 +40,19 @@ extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_00[0x18];
+    /* 0x0000 */ u8 flags;
+    /* 0x0001 */ u8 reserved01[0x17];
     /* 0x0018 */ s8 unk_18;
     /* 0x0019 */ s8 unk_19;
     /* 0x001A */ u8 unk_1A[0x16];
     /* 0x0030 */ datUnitWork_t *levelUpUnit[16];
     /* 0x0070 */ s8 levelUpCount;
     /* 0x0071 */ s8 levelUpStep;
-    /* 0x0072 */ u8 unk_72[0xFA];
+    /* 0x0072 */ u8 unk_72[0x0B];
+    /* 0x007D */ u8 reserved7D;
+    /* 0x007E */ u8 reserved7E[6];
+    /* 0x0084 */ u16 evoID;
+    /* 0x0086 */ u8 reserved86[0xE6];
     /* 0x016C */ datUnitWork_t *unit;
     /* 0x0170 */ u8 unk_170[0x2175];
     /* 0x22E5 */ s8 unk_22E5;
@@ -86,7 +92,7 @@ typedef struct
  * partial views; the alias holds them apart until one covers the object. */
 extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
 
-extern u8 *GBWK_1;
+extern evtStartWork_t *GBWK_1;
 
 extern s32 printf(const char *fmt, ...);
 
@@ -101,8 +107,31 @@ extern char D_0053DA90[];
 extern char D_0053DAA0[];
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
+extern void fclClearFlag(s8 index);
+extern s32 fclSetWorkValue(s8 index, s32 value);
+extern void rstGetEvoModelParam(u16 id, f32 *out);
+extern datUnitVisual_t datModelParamTable[];
+extern void evtStartEvent(s32 no);
+extern s32 cmpGetEncycWork(void);
+extern void mdlSmoothSingleMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
+extern void mdlSmoothLoopMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
 
-INCLUDE_ASM(const s32, "result/rstinit", rstInitEvoAct);
+void rstInitEvoAct(void)
+{
+    f32 modelParam[3];
+
+    fclClearFlag(0);
+    fclClearFlag(1);
+    fclSetWorkValue(2, 1);
+    fclSetWorkValue(3, 1);
+    fclSetWorkValue(4, GBWK_1->unit->id);
+    fclSetWorkValue(5, GBWK_1->evoID);
+    rstGetEvoModelParam(GBWK_1->evoID, modelParam);
+    modelParam[1] *= datModelParamTable[GBWK_1->evoID].formscale;
+    fclSetWorkValue(6, (s32)modelParam[1]);
+    evtStartEvent(0x329);
+    GBWK_1->reserved7D = 0;
+}
 
 s32 rstChkEvoAct(void)
 {
@@ -170,15 +199,104 @@ void rstChkResult2Process(u8 *work)
     memset(&work[0x129F], 0, 6);
 }
 
-INCLUDE_ASM(const s32, "result/rstinit", rstCreateTargetList);
+extern void rstPrepareStatusModel(s32 group, s32 id, s32 blocking);
+
+void rstCreateTargetList(evtStartWork_t *work)
+{
+    s32 useFirstUnit = 1;
+    s32 i;
+
+    if (rstChkLevelUpTarget(&cmbGlobalWork->party[0].unit) != 0) {
+        rstPrepareStatusModel(6, 0, 1);
+        useFirstUnit = 0;
+    }
+
+    work->levelUpCount = 0;
+    work->levelUpStep = 0;
+    i = 1;
+    while (i < cmbGlobalWork->stockCount) {
+        u8 stockIndex = (u8)cmbGlobalWork->stock[i];
+        datUnitWork_t *unit = &cmbGlobalWork->party[stockIndex].unit;
+        i++;
+
+        if (rstChkLevelUpTarget(unit) != 0) {
+            work->levelUpUnit[work->levelUpCount++] = unit;
+        }
+    }
+
+    if (useFirstUnit != 0 && work->levelUpCount != 0) {
+        datUnitWork_t *unit = work->levelUpUnit[work->levelUpStep++];
+        rstPrepareStatusModel(6, unit->id, 1);
+    }
+}
 
 INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA28);
 
 INCLUDE_ASM(const s32, "result/rstinit", rstInit);
 
-INCLUDE_ASM(const s32, "result/rstinit", rstDestroyResult2);
+/* Resource prefix: allocations and texture are installed by rstInit. */
+typedef struct {
+    u8 reserved00[0x14];
+    sdfMemHandle_t *allocation;
+    u8 reserved18[0x22E0];
+    sdfMemHandle_t *scriptAllocation;
+    void *script;
+    sdfMemHandle_t *messageAllocation;
+    u8 reserved2304[8];
+    sdfTexHandle_t *texture;
+} rstResourceWork_t;
 
-INCLUDE_ASM(const s32, "result/rstinit", rstResult2ProcessStart);
+extern void rstClearResultWork(void);
+extern void sdfTexFree(sdfTexHandle_t *texture);
+extern s32 fclDestroyMessage(void);
+extern void sdfMemFreeDirect(sdfMemHandle_t *allocation);
+extern void cmpModelFreeResource(void);
+extern void cmpResetDrawEnv(void);
+extern void rstSetPanelEffFlag(void);
+extern void rstSetStatusModelReady(s32 ready);
+extern s32 p2sdStopBGM(s32 id);
+
+/* KillProcess ignores this shutdown callback's return value. */
+void rstDestroyResult2(dds3ProcessID_t *id)
+{
+    if (GBWK_1 != NULL) {
+        rstClearResultWork();
+        sdfTexFree(((rstResourceWork_t *)GBWK_1)->texture);
+        fclDestroyMessage();
+        sdfMemFreeDirect(((rstResourceWork_t *)GBWK_1)->messageAllocation);
+        cmpModelFreeResource();
+        cmpResetDrawEnv();
+        sdfMemFreeDirect(((rstResourceWork_t *)GBWK_1)->scriptAllocation);
+        rstSetPanelEffFlag();
+        rstSetStatusModelReady(0);
+        sdfMemFreeDirect(((rstResourceWork_t *)GBWK_1)->allocation);
+        GBWK_1 = NULL;
+        gProcessStat_4 = 2;
+        p2sdStopBGM(0x2B0000);
+    }
+}
+
+extern evtStartWork_t *rstInit(s32 mode);
+extern s32 rstCalc(dds3ProcessID_t *id);
+extern s32 rstDraw(dds3ProcessID_t *id);
+extern s32 rstUpdate(dds3ProcessID_t *id);
+extern void rstDestroyResult2(dds3ProcessID_t *id);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
+                                         s32 shutdownTimer, dds3ProcessFunc_t process,
+                                         dds3ProcessFunc_t shutdown, void *work);
+
+void rstResult2ProcessStart(void)
+{
+    if (GBWK_1 != NULL) {
+        return;
+    }
+    GBWK_1 = rstInit(0);
+    dds3StartProcess(D_0054FCF0, 0x405, 1, 1, rstCalc, NULL, GBWK_1);
+    dds3StartProcess(D_0053DA90, 0x2B15, 1, 1, rstDraw, NULL, GBWK_1);
+    dds3StartProcess(D_0053DAA0, 0x5211, 1, 1, rstUpdate,
+                     (dds3ProcessFunc_t)rstDestroyResult2, GBWK_1);
+    gProcessStat_4 = 1;
+}
 
 void rstResult2ProcessEnd(void)
 {
@@ -204,7 +322,7 @@ s32 checkResultStat(void)
 void rstSetLevelUpFlag(void)
 {
     if (GBWK_1 != NULL) {
-        *GBWK_1 |= 0x10;
+        GBWK_1->flags |= 0x10;
     }
 }
 
@@ -244,7 +362,34 @@ void func_0021FE30(s8 a, s8 b, f32 x, f32 y)
     EventStart->unk_22E6 = b;
 }
 
-INCLUDE_ASM(const s32, "result/rstinit", rstDrawEvoModel);
+void rstDrawEvoModel(void)
+{
+    mdlObj_t *model;
+    s8 mode;
+
+    /* The native query precedes the state guard; fetch the model again below. */
+    cmpGetEncycWork();
+    if (EventStart->unk_22E5 < 0 || EventStart->unit->id == 0) {
+        return;
+    }
+    model = (mdlObj_t *)cmpGetEncycWork();
+    if (model == NULL) {
+        return;
+    }
+    mode = EventStart->unk_22E6;
+    if (mode == 0) {
+        mdlSmoothSingleMotion(model, 0, EventStart->unk_22E5,
+                              EventStart->unk_22E8, EventStart->unk_22E8);
+        func_0021FE30(0xD, 1, EventStart->unk_22EC, 0.0f);
+        return;
+    }
+    if (model->first->stat == 5 || mode == 2) {
+        mdlSmoothLoopMotion(model, 0, EventStart->unk_22E5,
+                            EventStart->unk_22E8, EventStart->unk_22E8);
+        func_0021FE30(-1, 0, 0.0f, 0.0f);
+        return;
+    }
+}
 
 void rstSetEvoState(void)
 {

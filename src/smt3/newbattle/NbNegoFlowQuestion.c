@@ -254,7 +254,7 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 typedef struct { u16 type; u8 lo; u8 hi; } nbNegoRateEntry_t;
 
@@ -357,8 +357,6 @@ s32 Flow7_3(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 1 of 84 words differs (first at +0xC8); the annul bit of one branch. */
-#ifdef NON_MATCHING
 s32 Flow7_11(nbNegoProcessData_t *n)
 {
     s32 mes;
@@ -397,9 +395,6 @@ s32 Flow7_11(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowQuestion", Flow7_11);
-#endif
 
 s32 Flow7_15(nbNegoProcessData_t *n)
 {
@@ -499,7 +494,7 @@ s32 Flow7_20(nbNegoProcessData_t *n)
         rate = 0x32;
         break;
     }
-    if (dds3GetRandIntA(0, 0x64) < rate) {
+    if ((s32)dds3GetRandIntA(0, 0x64) < rate) {
         n->nextnegoid = n->nextkouho[0];
     } else {
         n->nextnegoid = n->nextkouho[1];
@@ -510,7 +505,57 @@ s32 Flow7_20(nbNegoProcessData_t *n)
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowQuestion", Flow7_20);
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowQuestion", Flow7_22);
+extern s8 D_003E28B2[];
+extern s8 D_003E28BE[];
+extern s8 D_003E28CA[];
+extern void datAddKotowariPoint(s32 type, s32 point);
+
+s32 Flow7_22(nbNegoProcessData_t *n)
+{
+    s32 playerParam;
+    s32 enemyParam;
+    s32 threshold = 0x46;
+    s32 value = 0;
+    s32 random;
+
+    nbAddNegoIdKouho(n, 0x70019);
+    nbAddNegoIdKouho(n, 0x7001A);
+
+    playerParam = datGetParam(n->pwork, 1);
+    enemyParam = datGetParam(n->ework, 1);
+    if (playerParam < enemyParam) threshold = 0x1E;
+    switch (n->aisyo) {
+    case 1:
+        threshold = 0x50;
+        break;
+    case 2:
+        threshold = 0x14;
+        break;
+    }
+
+    switch (n->qtype) {
+    case 1:
+        value = D_003E28BE[2 * (3 * n->qindex + 36 * n->ekucyo + n->nowselect)];
+        break;
+    case 2:
+        value = D_003E28CA[2 * (3 * n->qindex + 36 * n->ekucyo + n->nowselect)];
+        break;
+    case 3:
+        value = D_003E28B2[2 * (3 * n->qindex + 36 * n->ekucyo + n->nowselect)];
+        break;
+    default:
+        break;
+    }
+
+    if (n->qtype < 4) {
+        if (n->qtype > 0) datAddKotowariPoint(value, 1);
+    }
+
+    random = dds3GetRandIntA(0, 100);
+    if (random < threshold) n->nextnegoid = n->nextkouho[0];
+    else n->nextnegoid = n->nextkouho[1];
+    return 0;
+}
 
 s32 Flow7_23(nbNegoProcessData_t *n)
 {

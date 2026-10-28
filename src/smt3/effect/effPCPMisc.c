@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
 #include "sdf_types.h"
@@ -4967,7 +4968,53 @@ void effPCPAgiraoFireSetColor(effPCPAgiraoFire_tag *hData, u32 abgr) {
     hData->color = abgr;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballCreate);
+effPCPAgiFireball_tag *effPCPAgiFireballCreate(
+    const effPCPAgiFireballParam_t *pParam, const effPCPAgiFireballPartList_t *pPart)
+{
+    effPCPAgiFireball_tag *work;
+    dds3ModelHandle_t *model;
+    u32 i;
+    u32 j;
+    u32 n;
+
+    work = sdfChipAllocDirect(sizeof(effPCPAgiFireball_tag));
+    memset(work, 0, 0x10C);
+    work->param = *pParam;
+    work->frame = 0;
+    work->color = 0x80808080;
+    work->mode = 0;
+    SDF_VU0_STOREIDENTITY(work->matrix);
+    work->headHandle = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, pPart->pHelper);
+    work->handleA[0] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pAttach[0]);
+    work->handleA[1] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pAttach[1]);
+    work->handleA[2] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pAttach[2]);
+    work->handleA[3] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pAttach[3]);
+    work->handleA[4] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, pPart->pAttach[4]);
+    model = dds3EffectPartGetHandle(work->headHandle);
+    work->count = model->first->frameCount;
+    for (i = 0; i < 3; i++) {
+        if (work->param.TrackCount[i] > 0) {
+            n = work->count * work->param.TrackCount[i];
+            work->alloc[i] = sdfMemAllocDirect(n * 4);
+            work->list[i] = (effPartHandle_t **)sdfMemLock(work->alloc[i]);
+            work->list[i][0] = dds3EffectPartCreate(
+                EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pTrack[i]);
+            for (j = 1; j < n; j++) {
+                work->list[i][j] = NULL;
+            }
+        } else {
+            work->alloc[i] = NULL;
+        }
+    }
+    work->handleB[0] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pStart[0]);
+    work->handleB[1] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pStart[1]);
+    work->handleB[2] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pStart[2]);
+    work->handleB[3] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pStart[3]);
+    work->handleB[4] = dds3EffectPartCreate(
+        EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, pPart->pStart[4]);
+    work->tailHandle = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pOkSmoke);
+    return work;
+}
 
 effPCPAgiFireball_tag *effPCPAgiFireballCreatePCF(void *parameterTable) {
     effPCPAgiFireballPartList_t set;
@@ -5141,7 +5188,32 @@ effPCPAgiFireball2_tag *effPCPAgiFireball2Create(effPCPAgiFireball2Param_t *pAFB
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireball2CreatePCF);
+void effPCPAgiFireball2CreatePCF(void *args) {
+    effPCPBlockSetInputs_t set;
+    void **group;
+    void *first;
+    s32 idx;
+    u32 i;
+    u32 j;
+
+    idx = 1;
+    first = dds3EffectPCPDataGetData(args, 0);
+    for (i = 0; i < 3; i++) {
+        set.head[i] = dds3EffectPCPDataGetData(args, idx++);
+    }
+    group = &set.selected.pAttach[0];
+    for (j = 0; j < 5; j++) {
+        group[j] = dds3EffectPCPDataGetData(args, idx++);
+    }
+    for (j = 0; j < 3; j++) {
+        set.selected.pTrack[j] = dds3EffectPCPDataGetData(args, idx++);
+    }
+    for (j = 0; j < 5; j++) {
+        set.selected.pStart[j] = dds3EffectPCPDataGetData(args, idx++);
+    }
+    set.selected.pOkSmoke = dds3EffectPCPDataGetData(args, idx);
+    effPCPAgiFireball2Create(first, &set);
+}
 
 effPCPAgiFireball2_tag *effPCPAgiFireball2Copy(effPCPAgiFireball2_tag *src) {
     effPCPAgiFireball2_tag *work;
@@ -6365,7 +6437,125 @@ void effPCPRadiateThunderPartInit(effPCPRadiateThunder_tag *pRadiateThunder, s32
 
 void effPCPRadiateThunderDraw(effPCPRadiateThunder_tag *hData);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderDraw);
+void effPCPRadiateThunderDraw(effPCPRadiateThunder_tag *work)
+{
+    f32 point[3];
+    f32 origin[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    effPartHandle_t **followers = NULL;
+    u32 repeat;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    u32 count;
+    u32 color;
+    f32 angularDamping;
+    f32 startRadialBlend;
+    f32 endRadialBlend;
+    effPCPRadiateThunderPart_tag *entry;
+    f32 length;
+    u32 i;
+    s32 frame;
+
+    count = work->param.number;
+    repeat = work->param.repeat;
+    duration = work->param.life;
+    fadeIn = work->param.fadeIn;
+    fadeOut = work->param.fadeOut;
+    angularDamping = work->param.angularDamping;
+    startRadialBlend = work->param.startRadialBlend;
+    endRadialBlend = work->param.endRadialBlend;
+    entry = work->pPart;
+    color = work->abgr;
+    length = work->height;
+    SDF_VU0_COPYVECTOR(origin, work->param.origin);
+    if (duration == 0) {
+        return;
+    }
+    for (i = 0; i < count; i++, entry++) {
+        frame = entry->frame;
+        if (frame <= duration) {
+            if (work->phAttach != NULL) {
+                followers = work->phAttach + i;
+            }
+            if (frame == 0) {
+                effPCPRadiateThunderPartInit(work, i);
+                frame = entry->frame;
+            }
+            if (frame >= 0) {
+                s32 elapsedFrames = entry->frame;
+                f32 angle = entry->radian;
+                f32 radius = entry->radius;
+                f32 cosine;
+                f32 sine;
+                f32 blend;
+                f32 radialHeight;
+                f32 fade;
+                u32 fadedColor;
+                effPCP_ThunderPolyParam_t *fragment;
+
+                cosine = sdfCos(angle);
+                sine = sdfSin(angle);
+                point[0] = origin[0] + cosine * radius;
+                point[1] = origin[1];
+                point[2] = origin[2] + sine * radius;
+                entry->radius += entry->radius_s;
+                entry->radian += entry->radian_s;
+                entry->radian_s *= angularDamping;
+                fragment = effPCP_ThunderPolyGetParam(entry->pThunderPoly);
+                blend = startRadialBlend +
+                        (endRadialBlend - startRadialBlend) * ((f32)frame / (f32)duration);
+                radialHeight = 1.0f - ffabsf(blend);
+                direction[0] = cosine * blend;
+                direction[1] = radialHeight;
+                direction[2] = sine * blend;
+                SDF_VU0_LOADVECTOR(direction);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_STOREVECTOR(direction);
+                fragment->start[0] = point[0] + direction[0] * length;
+                fragment->start[1] = point[1] + direction[1] * length;
+                fragment->start[2] = point[2] + direction[2] * length;
+                fragment->end[0] = point[0];
+                fragment->end[1] = point[1];
+                fragment->end[2] = point[2];
+                if (elapsedFrames < fadeIn && fadeIn != 0) {
+                    fade = (f32)elapsedFrames / (f32)fadeIn;
+                } else {
+                    s32 remainingFrames = duration - frame;
+
+                    if (remainingFrames <= fadeOut && fadeOut != 0) {
+                        fade = (f32)remainingFrames / (f32)fadeOut;
+                    } else {
+                        fade = 1.0f;
+                    }
+                }
+                fadedColor = effColorBlend(color & 0xFFFFFF, color, fade);
+                effPCP_ThunderPolySetColor(entry->pThunderPoly, fadedColor);
+                effPCP_ThunderPolyDraw(entry->pThunderPoly);
+                if (work->phAttach != NULL) {
+                    u32 followerIndex;
+
+                    for (followerIndex = 0;
+                         followerIndex < ARRAY_COUNT(work->param.activeGroups);
+                         followerIndex++) {
+                        if (*followers != 0) {
+                            dds3EffectPartSetPosition(*followers, fragment->end);
+                            dds3EffectPartSetColor(*followers, fadedColor);
+                            dds3EffectPartDraw(*followers);
+                        }
+                        followers += count;
+                    }
+                }
+                frame = entry->frame;
+            }
+            if (repeat != 0 && frame >= duration) {
+                entry->frame = 0;
+            } else {
+                entry->frame = frame + 1;
+            }
+        }
+    }
+}
 
 void effPCPRadiateThunderSetPosition(effPCPRadiateThunder_tag *hData, const void *pPos) {
     SDF_VU0_COPYVECTOR(hData, pPos);

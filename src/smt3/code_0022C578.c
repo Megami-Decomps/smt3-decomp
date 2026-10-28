@@ -4,6 +4,9 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "draw3d.h"
+
+extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *packet, s32 prim, s32 count, s64 registers, s32 loops);
 
 typedef struct
 {
@@ -38,7 +41,7 @@ extern s32 fldWmapEnabled;
 
 extern u8 cmpLoadState;
 
-extern u32 cmbBirthPanel;
+extern datUnitWork_t *cmbBirthPanel;
 
 extern u16 rstHeartsMasterPhase;
 
@@ -124,7 +127,7 @@ extern campInfoWork_t *campInfoWork;
 
 extern s8 cmpParamGaugeState[2];
 
-extern u8 cmpStatusModelReady;
+extern s8 cmpStatusModelReady;
 
 typedef struct
 {
@@ -221,11 +224,17 @@ typedef struct
     /* 0x04 */ s8 unk_04;
     /* 0x05 */ u8 unk_05[0xF];
     /* 0x14 */ void *allocation;
-    /* 0x18 */ u16 slot[10];
-    /* 0x2C */ s32 fadeAlpha;
-    /* 0x30 */ s8 unk_30;
-    /* 0x31 */ s8 unk_31;
-    /* 0x32 */ u8 unk_32[7];
+    union {
+        /* 0x18 */ u16 slot[16];
+        struct {
+            u16 reserved0018[10];
+            /* 0x2C */ s32 fadeAlpha;
+            /* 0x30 */ s8 unk_30;
+            /* 0x31 */ s8 unk_31;
+            /* 0x32 */ u8 unk_32[6];
+        };
+    };
+    /* 0x38 */ s8 slotCount;
     /* 0x39 */ s8 slotCursor;
 } campStatusPanel_t;
 
@@ -385,13 +394,16 @@ typedef struct
     /* 0x82AC */ cmpLocalStock_t drawStock;
     /* 0x8302 */ u8 unk_8302;
     /* 0x8303 */ s8 unk_8303;
-    /* 0x8304 */ u16 itemId[1];
-    /* 0x8306 */ u8 unk_8306[0x142];
+    /* 0x8304 */ u16 itemId[0xA0];
+    /* 0x8444 */ u8 itemMode;
+    /* 0x8445 */ u8 statusPhase;
+    /* 0x8446 */ u8 reserved8446[2];
     /* 0x8448 */ u8 crossPanel[0x20];
     /* 0x8468 */ s32 unk_8468;
     /* 0x846C */ u8 unk_846C[0x34];
     /* 0x84A0 */ s32 effectStep;
-    /* 0x84A4 */ u8 unk_84A4[8];
+    /* 0x84A4 */ void *dhProcess;
+    /* 0x84A8 */ u8 reserved84A8[4];
     /* 0x84AC */ s32 fadeStep;
     /* 0x84B0 */ s32 stockAlpha[16];
     /* 0x84F0 */ s8 stockStep[16];
@@ -455,7 +467,7 @@ extern s32 cmpModelHandle;
 
 extern fclRibbon_t *g_pdebug;
 
-extern s32 cmpDrawBoxLine();
+extern void cmpDrawBoxLine();
 
 extern s32 cmpGetCursorSlotValue(s8 index, cmpCursorSlot_t *slot);
 
@@ -506,9 +518,8 @@ typedef struct
     /* 0x00A54 */ dds3PartyUnit_t party[16];
     /* 0x01914 */ s8 stock[0x10];
     /* 0x01924 */ s32 stockCount;
-    /* 0x01928 */ u8 unk_01928[0x3D];
-    /* 0x01965 */ u8 unk_1965;
-    /* 0x01966 */ u8 unk_01966[0x394];
+    /* 0x01928 */ u8 itemQuantity[0xA0];
+    /* 0x019C8 */ u8 unk_019C8[0x332];
     /* 0x01CFA */ u8 equipHearts;
     /* 0x01CFB */ u8 unk_01CFB[0x40];
     /* 0x01D3B */ u8 devilSlot[0x100];
@@ -705,9 +716,9 @@ extern cmpVec4_t cmpStatusModelPos;
 
 extern cmpVec4_t cmpStatusModelBasePos;
 
-extern s32 cmpDrawTriG(s32 a, s32 b, s32 c, s32 *colors);
+extern void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot);
 
-extern s32 fclBlendColor(s32 color, s32 mask, s32 alpha);
+extern u32 fclBlendColor(u32 color, u32 mask, u32 alpha);
 
 extern void cmpUpdatePanelEffSlots(void);
 
@@ -771,7 +782,7 @@ extern s32 cmpGetPressedButton(s32 mask);
 
 extern s32 cmpLoadStatusModel(void);
 
-extern s32 cmpPlayCursorSE(s32 button);
+extern void cmpPlayCursorSE(u32 button);
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
@@ -827,11 +838,11 @@ s32 fclLoadTexture(char *pFileName);
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
-extern s32 sdfMemLock(void *aHandle);
+extern void *sdfMemLock(void *aHandle);
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
-extern s32 sdfMemLock(void *aHandle);
+extern void *sdfMemLock(void *aHandle);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
@@ -970,6 +981,8 @@ extern void camp_draw_Process();
 
 extern void camp_update_Process();
 
+extern void *cmpStartProcessPanelEff(s32 parent);
+
 void cmpProcessStart(void)
 {
     cmpinit();
@@ -1039,7 +1052,7 @@ s32 cmpSetStockRemoveEff(u8 *work)
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetStockRemoveEff);
 #endif
 
-extern s32 cmpFindFreeStockSlot(s32 index, s32 room);
+extern s32 cmpFindFreeStockSlot(s8 index, s8 room);
 
 /* NON_MATCHING: 12 of 32 words differ (first at +0x50). */
 #ifdef NON_MATCHING
@@ -1113,7 +1126,29 @@ u16 cmpGetSelectItemID(void)
     return campWork->itemId[campWork->itemCursor + campWork->itemScroll];
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetItSkMessageVar);
+/* Encoded player name and glyph count written by frInitNameData. */
+typedef struct {
+    u8 reserved00[0x6604];
+    u8 nameBytes[0x50];
+    u8 nameLength;
+} cmpSavedNameView_t;
+
+extern char *text2[];
+extern void fclSetMessageVar_20743088(s8 index, s32 value);
+
+void cmpSetItSkMessageVar(datUnitWork_t *unit)
+{
+    char name[((cmpSavedNameView_t *)DDS3_GBWK)->nameLength * 2 + 1];
+
+    memcpy(name, ((cmpSavedNameView_t *)DDS3_GBWK)->nameBytes,
+           ((cmpSavedNameView_t *)DDS3_GBWK)->nameLength * 2);
+    name[((cmpSavedNameView_t *)DDS3_GBWK)->nameLength * 2] = 0;
+    if (unit->id != 0) {
+        fclSetMessageVar_20743088(0, (s32)text2[unit->id]);
+    } else {
+        fclSetMessageVar_20743088(0, (s32)name);
+    }
+}
 
 extern s32 cmpGetSkillTargetArea(u16 skillId);
 
@@ -1176,7 +1211,37 @@ s32 cmpFindItemMsgIndex(s32 which, u16 id)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCreateLocalItem);
+void cmpCreateLocalItem(u8 mode)
+{
+    s32 i;
+
+    memset(campWork->itemId, 0, sizeof(campWork->itemId));
+    campWork->unk_8302 = 0;
+    campWork->itemMode = mode;
+    switch (mode) {
+    case 0:
+        for (i = 1; i < 0x60; i++) {
+            if (cmbGlobalWork->itemQuantity[i] != 0) {
+                campWork->itemId[campWork->unk_8302++] = i;
+            }
+        }
+        break;
+    case 1:
+        for (i = 0x60; i < 0x70; i++) {
+            if (cmbGlobalWork->itemQuantity[i] != 0) {
+                campWork->itemId[campWork->unk_8302++] = i;
+            }
+        }
+        break;
+    default:
+        for (i = 0; i < 0x30; i++) {
+            if (evtBitCheck(i + 0x3D0) != 0) {
+                campWork->itemId[campWork->unk_8302++] = i + 0x70;
+            }
+        }
+        break;
+    }
+}
 
 extern s32 fldEsutoMaChk(void);
 extern s32 fldRiberaMaChk(void);
@@ -1227,12 +1292,14 @@ void cmpStartItemTokusyuMsg(u16 item)
     cmpStartSkillTokusyuMsg(datItemTable[item].skill);
 }
 
-// 19 of 40 words match at the exact size; retail calls the tokusyu
-// message before deciding the mode, this decides it first.
+// NON_MATCHING: 19 of 40 words match at the exact size; argument setup
+// and default-mode scheduling differ before the tokusyu message call.
 #ifdef NON_MATCHING
-s32 cmpStartSkillMsg(u16 skill)
+extern s32 cmpClearButtonGuide(s32 skill, s32 errorFlags);
+
+s32 cmpStartSkillMsg(u16 skill, s32 errorFlags)
 {
-    s32 guide = cmpClearButtonGuide(skill);
+    s32 guide = cmpClearButtonGuide(skill, errorFlags);
     s32 mode;
     s32 index;
 
@@ -1321,9 +1388,47 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpGetKugatatiMsg);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpStartItemMsg);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUseItem);
+extern s32 datGetItemSkillNo(s32 itemid);
+extern s32 cmpStartItemMsg(u16 item, s32 errorFlags);
+extern s32 cmpUseItemTokusyu(u16 item, s32 target, s32 user);
+extern void cmpRecover(u16 skill, datUnitWork_t *stock, datUnitWork_t *target);
+extern void cmpSetStockRecoverEff(s32 effect, s32 skill, cmpLocalStock_t *stock);
+extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
 
-s32 cmpGetSelectSkillID(void)
+s32 cmpUseItem(void)
+{
+    u16 itemId = cmpGetSelectItemID();
+    datUnitWork_t *stock = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
+    datUnitWork_t *target = cmpGetSelectDstStock();
+    u16 skill = datGetItemSkillNo(itemId);
+    u16 currentItem;
+    s32 errorFlags;
+    s32 message;
+    s32 effect;
+
+    cmpSetItSkMessageVar(target);
+    errorFlags = cmpGetItSkErrSelFlag(skill);
+    currentItem = cmpGetSelectItemID();
+    message = cmpStartItemMsg(currentItem, errorFlags);
+    switch (message) {
+    case 1:
+        p2sdPlaySE(0xD, 0x7F, 0x3F);
+        return 2;
+    case 2:
+        return message;
+    default:
+        break;
+    }
+    effect = cmpUseItemTokusyu(itemId, (s32)stock, (s32)target);
+    if (effect == 0 && skill != 0) {
+        cmpRecover(skill, stock, target);
+    }
+    cmpSetStockRecoverEff(effect, skill, campWork->stock);
+    campWork->unk_8303 = 1;
+    return cmpDestroyItem(0) != 0;
+}
+
+u16 cmpGetSelectSkillID(void)
 {
     datUnitWork_t *unit =
         &cmbGlobalWork->party[cmpGetStockInfoIndex(campWork->stock, 0, 0)].unit;
@@ -1331,7 +1436,44 @@ s32 cmpGetSelectSkillID(void)
     return unit->skill[campWork->itemCursor + campWork->itemScroll];
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUseSkill);
+extern s32 cmpAddCost(u16 skill, datUnitWork_t *unit);
+extern s32 cmpGetSkillEntry(u16 skill, datUnitWork_t *unit);
+extern s32 cmpStartSkillMsg(u16 skill, s32 errorFlags);
+extern s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, s32 target);
+
+s32 cmpUseSkill(void)
+{
+    u16 skill = cmpGetSelectSkillID();
+    datUnitWork_t *user = cmpGetSelectSrcStock();
+    datUnitWork_t *target = cmpGetSelectDstStock();
+    s32 errorFlags;
+    u16 messageSkill;
+    s32 messageMode;
+    s32 effect;
+
+    cmpSetItSkMessageVar(target);
+    errorFlags = cmpGetItSkErrSelFlag(skill);
+    messageSkill = cmpGetSelectSkillID();
+    messageMode = cmpStartSkillMsg(messageSkill, errorFlags);
+    switch (messageMode) {
+    case 1:
+        p2sdPlaySE(0xD, 0x7F, 0x3F);
+        return 2;
+    case 2:
+        return messageMode;
+    default:
+        break;
+    }
+    if (cmpAddCost(skill, user) == 0) {
+        return 0;
+    }
+    effect = cmpUseSkillTokusyu(skill, user, (s32)target);
+    if (effect == 0) {
+        cmpRecover(skill, user, target);
+    }
+    cmpSetStockRecoverEff(effect, skill, campWork->stock);
+    return cmpGetSkillEntry(skill, user) != 0;
+}
 
 /* NON_MATCHING: 1 of 38 words differs, exact size: xori against retail's sltiu. */
 #ifdef NON_MATCHING
@@ -1426,7 +1568,43 @@ void cmpApplyStockRemove(void)
     datAllClearCommMemory();
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpRemoveStockDevilEntry);
+extern s32 func_0022E168(u16 devilId);
+
+void cmpRemoveStockDevilEntry(void)
+{
+    s8 index = cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
+
+    if (index < 0) {
+        return;
+    }
+    func_0022E168(cmbGlobalWork->party[index].unit.id);
+}
+
+s32 func_0022E168(u16 devilId)
+{
+    s32 i;
+    s32 result;
+    s32 stockIndex = 0;
+    s32 found = 0;
+    s32 removeIndex = 0;
+
+    for (i = 0; i < cmbGlobalWork->stockCount; ++i) {
+        removeIndex = i;
+        stockIndex = (u8)cmbGlobalWork->stock[i];
+        if (cmbGlobalWork->party[stockIndex].unit.id == devilId) {
+            found = 1;
+            break;
+        }
+    }
+    result = 0;
+    if (found != 0) {
+        memset(&cmbGlobalWork->party[stockIndex].unit, 0, sizeof(datUnitWork_t));
+        cmpRemoveStockSlot((s8)removeIndex);
+        cmpRebuildStockList();
+        result = 1;
+    }
+    return result;
+}
 
 void cmp_22E258(void *work)
 {
@@ -1492,7 +1670,7 @@ void cmpInitRootCursorPos(void)
     cmpResetCursorInfo(&campWork->page[2].cursor);
 }
 
-void cmpInitSelectCursor(u8 index)
+void cmpInitSelectCursor(s32 index)
 {
     cmpInitCursorRange(campWork->unk_410C, index, 8, 0);
     cmpInitCursorLayout(campWork->unk_410C, 0, 0, 0, 0, 0x17);
@@ -1577,9 +1755,9 @@ s32 cmpCalcDestroyItem(void)
         return 0;
     }
     campWork->unk_0018[0] = 0;
-    fclSetMessageVar_20743088(2, pStr[id]);
+    fclSetMessageVar_20743088(2, (s32)pStr[id]);
     sprintf(buf, D_0054FE40, D_00330914[0], DDS3_GBWK->stocklist[id + 4]);
-    fclSetMessageVar_20743088(0xB, buf);
+    fclSetMessageVar_20743088(0xB, (s32)buf);
     fclSetMessageInvalid(0);
     fclStartMessage(9);
     fclStartSelMessage(0xB);
@@ -1588,7 +1766,37 @@ s32 cmpCalcDestroyItem(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcItem);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetPartyDSL);
+s32 cmpSetPartyDSL(void)
+{
+    switch (campWork->page[1].cursor.unk_22 + (u8)campWork->page[1].cursor.unk_24)
+    {
+    case 0:
+        if (cmpStartStockMsg(0) == 0) {
+            return 0;
+        }
+        campWork->stock[0].count = 0xA;
+        cmpBuildStockNameList(&campWork->stock[0]);
+        cmpReCalcStockCursorPos(2);
+        break;
+    case 1:
+        if (camp_H_cmpLocalStock_t__ctor() == 0) {
+            return 0;
+        }
+        campWork->stock[0].count = 0x19;
+        cmpBuildStockNameList(&campWork->stock[0]);
+        cmpReCalcStockCursorPos(2);
+        break;
+    case 2:
+        if (cmpStartStockMsg(1) == 0) {
+            return 0;
+        }
+        campWork->stock[0].count = 0x8B;
+        cmpBuildStockNameList(&campWork->stock[0]);
+        cmpReCalcStockCursorPos(2);
+        break;
+    }
+    return 1;
+}
 
 s32 cmpCalcStockControl(void)
 {
@@ -1647,12 +1855,10 @@ void cmpCalcLoad(void)
 
 extern s32 fclChkMessage(void);
 
-extern void cmpCreateLocalItem(s32 mode);
+extern void cmpCreateLocalItem(u8 mode);
 
 extern void cmpChangeCursorListNums(s32 count, u8 *cursor);
 
-/* NON_MATCHING: 1 of 27 words differ (first at +0x18). */
-#ifdef NON_MATCHING
 void cmpUpdateList(void)
 {
     if (campWork->unk_8303 == 0) {
@@ -1665,15 +1871,38 @@ void cmpUpdateList(void)
     cmpChangeCursorListNums(campWork->unk_8302, campWork->unk_410C);
     campWork->unk_8303 = 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateList);
-#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcSequence);
 
 INCLUDE_ASM(const s32, "code_0022C578", nmeMakeGradColors);
 
-INCLUDE_ASM(const s32, "code_0022C578", nmeDrawQuadPanel);
+extern const s32 D_0053F6E8[];
+extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+
+void nmeDrawQuadPanel(s32 color0, s32 color1, s32 alpha, s32 ot)
+{
+    u32 coords[12];
+    u32 colors[6];
+    s32 xOffset = alpha << 4;
+    s32 yOffset = alpha << 3;
+
+    memcpy(coords, D_0053F6E8, sizeof(coords));
+    colors[0] = color0;
+    colors[1] = 0;
+    colors[2] = 0;
+    colors[3] = color1;
+    colors[4] = 0;
+    colors[5] = 0;
+
+    fclDrawPanelSprite2(0x48, ot);
+    coords[1] += xOffset;
+    coords[5] += yOffset;
+    cmpDrawTriG(coords, coords + 3, 0, colors, ot);
+    coords[7] -= xOffset;
+    coords[11] -= yOffset;
+    cmpDrawTriG(coords + 6, coords + 9, 0, colors + 3, ot);
+    fclDrawPanelSprite2(0x44, ot);
+}
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053F590);
 
@@ -1709,7 +1938,19 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_0053F6E8);
 
 INCLUDE_ASM(const s32, "code_0022C578", nmeDrawGradQuad);
 
-INCLUDE_ASM(const s32, "code_0022C578", nmeDrawBlendQuad);
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB28);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB50);
+
+void nmeDrawBlendQuad(s32 alpha, s32 ot)
+{
+    u32 coords[2][3] = {{0x2000, 0xC80, 0x2000}, {0xE00, 0xE00, 0x9C0}};
+    u32 colors[3];
+
+    memset(colors, 0, sizeof(colors));
+    colors[0] = fclBlendColor(0x59, 0x26, 0x100 - alpha);
+    cmpDrawTriG(coords[0], coords[1], 0, colors, ot);
+}
 
 s32 nmeDrawBox(s32 color, s32 unused, s32 flag)
 {
@@ -1730,7 +1971,28 @@ void nmeDrawSizedSprite(u8 id, u16 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 colo
                       texs, tbl, ot);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", nmeLerp);
+s32 nmeLerp(s32 amplitude, s32 frame, s32 period)
+{
+    s32 offset = (frame * 2) % period;
+    s32 halfPeriod = period / 2;
+    s32 halfAmplitude = amplitude / 2;
+    s32 quarter = period / 4;
+    s32 square = quarter * quarter;
+    s32 descending;
+    s32 value;
+
+    if (offset >= halfPeriod) {
+        offset = period - offset;
+    }
+    if (offset >= quarter) {
+        offset = halfPeriod - offset;
+        descending = 0;
+    } else {
+        descending = 1;
+    }
+    value = halfAmplitude * (offset * offset) / square;
+    return descending ? amplitude - value : value;
+}
 
 s32 nmeLerp2(s32 scale, s32 value, s32 range)
 {
@@ -1744,7 +2006,21 @@ s32 nmeLerp2(s32 scale, s32 value, s32 range)
     return scale * rem / quarter;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", nmeDrawFrame);
+extern void nmeDrawGradQuad(s32 x, s32 alpha, s32 ot);
+extern void nmeDrawQuadPanel(s32 color0, s32 color1, s32 alpha, s32 ot);
+
+void nmeDrawFrame(s32 type, s32 frame)
+{
+    s32 move = nmeLerp(0x12C, frame % 0x300, 0x300);
+    s32 pulse = nmeLerp(0x32, frame % 0x100, 0x100);
+    s32 alpha = nmeLerp2(0x100, frame % 0x300, 0x300);
+
+    nmeDrawSizedSprite(0, 0, D_00345D88, fclSpriteTable, 0x80808040, 0, 7);
+    nmeDrawBox(0x40, pulse, 7);
+    nmeDrawBlendQuad(pulse, 7);
+    nmeDrawGradQuad(move, 0x100 - alpha, 7);
+    nmeDrawQuadPanel(0x9192FF4C, 0x88D8FC33, pulse, 7);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", nmeDrawBlendText);
 
@@ -1842,11 +2118,11 @@ void campDrawFade(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB28);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB50);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB68);
+
+
+
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_draw_Process);
 
@@ -1868,7 +2144,50 @@ s32 campDebugCheckPad(s8 key)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateRoot);
+extern void *cmpStartProcessDH(cmpSeqInfo_t *parent);
+
+void cmpUpdateRoot(void)
+{
+    u16 button = cmpGetPressedButton(0x3B);
+    switch (button) {
+    case 1:
+        campWork->unk_0001 = ((u8 *)campWork)[0x3E] + ((u8 *)campWork)[0x40] + 1;
+        campWork->unk_0004 = 1;
+        switch (campWork->unk_0001) {
+        case 5:
+            campWork->drawPhase = 1;
+            campWork->stock[0].count = 0xCF;
+            break;
+        case 4:
+            cmpInitSelectCursor((s8)DDS3_GBWK->heartscnt);
+            campWork->dhProcess = cmpStartProcessDH(NULL);
+            /* fall through */
+        default:
+            campWork->stock[0].count = 0xF;
+            break;
+        }
+        cmpBuildStockNameList(&campWork->stock[0]);
+        cmpReCalcStockCursorPos(2);
+        break;
+    case 2:
+    case 8:
+        button = 0;
+        campWork->unk_0000 |= 0x10;
+        cmpDisableInfoWindow();
+        break;
+    case 0x10:
+        cmpMoveCursor((cmpCursorInfo_t *)((u8 *)campWork + 0x1C), -1);
+        break;
+    case 0x20:
+        cmpMoveCursor((cmpCursorInfo_t *)((u8 *)campWork + 0x1C), 1);
+        break;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor((cmpCursorInfo_t *)((u8 *)campWork + 0x1C), 0);
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop((cmpPadStopWork_t *)((u8 *)campWork + 0x1C), button, 0x30));
+}
+
 
 void cmpUpdateItem(void)
 {
@@ -1899,7 +2218,41 @@ void cmpUpdateItem(void)
 }
 
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateParty);
+extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
+
+void cmpUpdateParty(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+
+    switch (button) {
+    case 1:
+        cmpInitStockCursorPos();
+        if (cmpSetPartyDSL() != 0) {
+            cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 1);
+            campWork->unk_0001 = 8;
+        } else {
+            button = 0x8000;
+        }
+        break;
+    case 2:
+        campWork->unk_0001 = 0;
+        campWork->unk_0004 = button;
+        cmpDisableInfoWindow();
+        break;
+    case 0x10:
+        cmpMoveCursor(&campWork->page[1].cursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&campWork->page[1].cursor, 1);
+        break;
+    }
+
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&campWork->page[1].cursor, 0);
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&campWork->page[1], button, 0x30));
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campUpdateStockSelect);
 
@@ -1907,7 +2260,60 @@ INCLUDE_ASM(const s32, "code_0022C578", campUpdateStockCursor);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateSkillSelect);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateProcessStatus);
+extern u8 cmpClearStatusFlags(void);
+extern void *cmpStartProcessStatus(s8 arg, cmpSeqInfo_t *parent);
+extern void cmpSetStatusWindowHidden(void);
+extern void cmpMoveStockCursor(s8 index, s8 direction, u8 *stock);
+
+void cmpUpdateProcessStatus(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+    u8 index = cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
+
+    if ((s8)campWork->statusPhase != 0 && (s8)campWork->statusPhase < 3) {
+        campWork->statusPhase++;
+    }
+    switch (button) {
+    case 1:
+        if (cmpClearStatusFlags() != 0) {
+            cmpStartProcessStatus((s8)index, NULL);
+            campWork->unk_0004 = button;
+            campWork->statusPhase = button;
+        } else if ((s8)campWork->statusPhase != 0) {
+            button = 0;
+        }
+        break;
+    case 2:
+        if ((s8)campWork->statusPhase == 3) {
+            if (cmpLoadStatusModel() == 0) {
+                campWork->drawPhase = 1;
+                cmpSetStatusWindowHidden();
+                campWork->unk_0004 = button;
+                campWork->statusPhase = 0;
+            } else {
+                button = 0x8000;
+            }
+        } else if ((s8)campWork->statusPhase == 0) {
+            cmpDisableInfoWindow();
+            campWork->unk_0001 = 0;
+            campWork->unk_0004 = button;
+            campWork->statusPhase = 0;
+        }
+        break;
+    case 0x10:
+        if ((s8)campWork->statusPhase == 0) {
+            cmpMoveStockCursor(0, -1, (u8 *)&campWork->stock[0]);
+        }
+        break;
+    case 0x20:
+        if ((s8)campWork->statusPhase == 0) {
+            cmpMoveStockCursor(0, 1, (u8 *)&campWork->stock[0]);
+        }
+        break;
+    }
+    cmpMoveCursor2((cmpCursorInfo_t *)campWork->unk_6230, 0);
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop((cmpPadStopWork_t *)campWork->unk_6230, button, 0x30));
+}
 
 void cmpRemoveStockDevil(void)
 {
@@ -2165,7 +2571,7 @@ s32 camp_update_stock_Process(s32 id)
 INCLUDE_ASM(const s32, "code_0022C578", camp_update_stock_Process);
 #endif
 
-void cmpSetDHEntry(void) {
+void cmpSetDHEntry(s8 id) {
 }
 
 extern s32 cmpHeartsIconIsVisible(s8 index);
@@ -2339,7 +2745,7 @@ s32 cmpSetHeartsSequenceRemove(void)
     if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) == 0)
     {
         campInfoWork->unk_18 = 0;
-        fclSetMessageVar_20743088(0xC, pstr[cmbGlobalWork->equipHearts]);
+        fclSetMessageVar_20743088(0xC, (s32)pstr[cmbGlobalWork->equipHearts]);
         fclSetMessageInvalid(0);
         fclStartMessage(4);
         campInfoWork->unk_01 = 3;
@@ -2396,7 +2802,7 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_0053FD60);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FD78);
 
-void *cmpStartProcessDH(void)
+void *cmpStartProcessDH(cmpSeqInfo_t *parent)
 {
     void *proc;
 
@@ -2493,7 +2899,20 @@ INCLUDE_ASM(const s32, "code_0022C578", fclDrawArrowCursor);
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawPanel);
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawQuadGauge);
+extern const u32 D_0053FDC0[];
+extern const u32 D_0053FDD8[];
+
+void campDhDrawQuadGauge(s32 ratio)
+{
+    u32 coordinates[6];
+    u32 colors[3];
+
+    memcpy(coordinates, D_0053FDC0, sizeof(coordinates));
+    memcpy(colors, D_0053FDD8, sizeof(colors));
+    coordinates[1] -= (0x100 - ratio) << 5;
+    colors[0] = fclBlendColor(colors[0], 0, 0x100);
+    cmpDrawTriG(coordinates, coordinates + 3, 0, colors, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHelpTextAlt);
 
@@ -2506,10 +2925,13 @@ typedef struct
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 unk_01[0x1B];
     /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ u8 unk_20[0xC];
+    /* 0x20 */ s32 entryStep;
+    /* 0x24 */ u8 reserved24[8];
     /* 0x2C */ s32 fadeAlpha;
     /* 0x30 */ s8 unk_30;
     /* 0x31 */ s8 iconIndex;
+    /* 0x32 */ u8 reserved32[0x1146];
+    /* 0x1178 */ s32 cursorAlpha[64];
 } campDhWork_t;
 
 extern campDhWork_t *campDhDrawWork;
@@ -2528,8 +2950,9 @@ void campDhDrawHeartsIcon(s32 a, s32 b, s32 c, s8 d, s32 e)
     campDhDrawHeartsGauge((u8 *)work + 0x1F78, d);
 }
 
-/* NON_MATCHING: 2 of 28 words differ (first at +0x38). */
-#ifdef NON_MATCHING
+extern void campDhDrawBoxSprite(s32 alpha);
+extern void campDhDrawPanel(s32 x, s32 y, s32 unused, s32 alpha);
+
 void campDhDrawIcon(void)
 {
     campDhDrawBoxSprite(campDhDrawWork->unk_1C);
@@ -2539,9 +2962,6 @@ void campDhDrawIcon(void)
     }
     campDhDrawBox(campDhDrawWork->fadeAlpha);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawIcon);
-#endif
 
 extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
 
@@ -2591,7 +3011,64 @@ s32 camp_draw_dh_Process(s32 id)
 }
 
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhApplyEntry);
+void campDhApplyEntry(s32 button)
+{
+    s8 index = ((campDhWork_t *)campDhUpdateWork)->iconIndex;
+    s32 visible;
+
+    ((campDhWork_t *)campDhUpdateWork)->cursorAlpha[index] = 0x80;
+    visible = cmpHeartsIconIsVisible(cmpGetHeartsIconId(0x18)) != 0;
+    if (index != 0x18) {
+        if (button & 0x10) {
+            if (index / 8 == 0) {
+                if (visible != 0 && (u32)(index - 3) < 2) {
+                    index = 0x18;
+                } else {
+                    index += 0x10;
+                }
+            } else {
+                index -= 8;
+            }
+        }
+        if (button & 0x20) {
+            if ((s8)(index / 8) == 2) {
+                if (visible != 0 && (u8)(index - 0x13) < 2) {
+                    index = 0x18;
+                } else {
+                    index -= 0x10;
+                }
+            } else {
+                index += 8;
+            }
+        }
+        if (button & 0x40) {
+            if ((index & 7) == 0) {
+                index += 7;
+            } else {
+                index--;
+            }
+        }
+        if (button & 0x80) {
+            if ((s8)(index % 8) == 7) {
+                index -= 7;
+            } else {
+                index++;
+            }
+        }
+    } else {
+        if (button & 0x10) index = 0x13;
+        if (button & 0x20) index = 3;
+        if (button & 0x40) index = 0x13;
+        if (button & 0x80) index = 0x14;
+    }
+    {
+        campDhWork_t *work = (campDhWork_t *)campDhUpdateWork;
+        work->cursorAlpha[index] = 0;
+        work->iconIndex = index;
+        work->entryStep = 0;
+    }
+    cmpSetDHEntry(*(s8 *)((u8 *)campDhUpdateWork + ((campDhWork_t *)campDhUpdateWork)->iconIndex * 0x34 + 0x1280));
+}
 
 s32 campDhFindEntry(void)
 {
@@ -2626,9 +3103,24 @@ s32 campDhFindEntry(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpReturnParamDH);
+/* The Hearts panel keeps the pre-selection equipment byte and a complete
+ * player unit snapshot, restored after the confirmation message. */
+typedef struct
+{
+    u8 unk_00[0x32];
+    s8 equipHearts;
+    u8 unk_33;
+    datUnitWork_t unit;
+} campDhSavedUnit_t;
 
 extern void datEquipHearts(s32 HeartsID);
+
+void cmpReturnParamDH(void)
+{
+    datEquipHearts(((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts);
+    cmbGlobalWork->party[0].unit = ((campDhSavedUnit_t *)campDhUpdateWork)->unit;
+}
+
 
 void campDhEquipHearts(void)
 {
@@ -2656,7 +3148,59 @@ s32 cmpUnloadStatusModel(void)
     campDhUpdateWork->unk_04 = 1;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateHeartsAttachStatus);
+extern s8 cmpGetStatusModelFlag(void);
+extern s32 fclStartSelMessage(s32 message);
+extern void fclSetMessageInvalid(s8 mode);
+extern s32 fclStartMessage(s32 message);
+
+void cmpUpdateHeartsAttachStatus(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+
+    if (cmpGetStatusModelFlag() != 1) {
+        cmpUpdateStatusModelLoad(0);
+    }
+    if (cmpLoadStatusModel() != 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+        if (((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts != 0) {
+            if (DDS3_GBWK->heartsequip == ((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts) {
+                fclSetMessageVar_20743088(0xC, (s32)pstr[DDS3_GBWK->heartsequip]);
+                fclSetMessageInvalid(1);
+                fclStartMessage(0);
+                campDhUpdateWork->unk_01[0] = 4;
+                campDhUpdateWork->unk_04 = button;
+                break;
+            } else if ((*(u16 *)((u8 *)DDS3_GBWK + 0xA62) & 0x8000) != 0) {
+                fclSetMessageInvalid(1);
+                fclStartMessage(1);
+                campDhUpdateWork->unk_01[0] = 4;
+                campDhUpdateWork->unk_04 = button;
+                break;
+            }
+        }
+        fclSetMessageVar_20743088(0xC, (s32)pstr[DDS3_GBWK->heartsequip]);
+        fclSetMessageInvalid(0);
+        fclStartMessage(2);
+        fclStartSelMessage(0xB);
+        campDhUpdateWork->unk_01[0] = 2;
+        campDhUpdateWork->unk_04 = 1;
+        break;
+    case 2:
+        cmpReturnParamDH();
+        cmpUnloadStatusModel();
+        break;
+    case 0x10:
+    case 0x20:
+        return;
+    }
+    cmpPlayCursorSE(button);
+    /* Like cmpUpdateHeartsAttachConfirm, resetting the handled input retains
+     * the native jal plus epilogue; the reset is deleted later. */
+    button = 0;
+}
 
 /* campDhUpdateWork, as this unit's animation and icon code reads it. The two
  * were separate structs whose 0x28-byte prefixes agreed, so they are one here.
@@ -2706,9 +3250,93 @@ void cmpStepHeartsAttachCursor(s32 step)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateHeartsAttachConfirm);
+extern s32 fclChkSelMessage(void);
+extern s8 fclGetSelMessagePos(void);
+extern s8 fclEndMessage(void);
+extern void fclSetMessageInvalid(s8 mode);
+extern s32 fclStartMessage(s32 message);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateHeartsRemoveConfirm);
+extern void cmpStepHeartsAttachCursor(s32 step);
+
+void cmpUpdateHeartsAttachConfirm(void)
+{
+    s32 cancelled = 1;
+
+    if (((s8 *)campDhUpdateWork)[0x18] > 0) {
+        if (((s8 *)campDhUpdateWork)[0x18] == 1) {
+            cmpStepHeartsAttachCursor(0);
+            p2sdPlaySE(0x18, 0x7F, 0x3F);
+            fclSetMessageVar_20743088(0xC, (s32)pstr[DDS3_GBWK->heartsequip]);
+            fclSetMessageInvalid(1);
+            fclStartMessage(3);
+            ((s8 *)campDhUpdateWork)[0x18] = 2;
+        }
+        cmpStepHeartsAttachCursor(1);
+        if (fclChkMessage() == 0) {
+            cmpUnloadStatusModel();
+        }
+    } else if (fclChkSelMessage() == 0) {
+        switch (fclGetSelMessagePos()) {
+        case 0:
+            cancelled = 0;
+            /* fall through */
+        case 1:
+            fclEndMessage();
+            if (cancelled != 0) {
+                cmpUnloadStatusModel();
+                cmpReturnParamDH();
+                /* The qualified cc1 trace retains this choice reset through
+                 * sibling-call selection and deletes it in the life pass. */
+                cancelled = 0;
+            } else {
+                ((s8 *)campDhUpdateWork)[0x18] = 1;
+            }
+            break;
+        }
+    }
+}
+
+extern s32 fclChkSelMessage(void);
+extern s8 fclGetSelMessagePos(void);
+extern s8 fclEndMessage(void);
+extern void fclSetMessageInvalid(s8 mode);
+extern s32 fclStartMessage(s32 message);
+extern void datRemoveHearts(void);
+
+void cmpUpdateHeartsRemoveConfirm(void)
+{
+    s8 phase = ((s8 *)campDhUpdateWork)[0x18];
+
+    if (phase > 0) {
+        if (phase == 1) {
+            fclSetMessageVar_20743088(0xC, (s32)pstr[*((u8 *)DDS3_GBWK + 0x1CFA)]);
+            fclSetMessageInvalid(1);
+            fclStartMessage(5);
+            datRemoveHearts();
+            ((s8 *)campDhUpdateWork)[0x18] = 2;
+        }
+        if (fclChkMessage() != 0) {
+            return;
+        }
+        campDhUpdateWork->unk_01[0] = 4;
+        campDhUpdateWork->unk_04 = 1;
+        return;
+    }
+    if (fclChkSelMessage() != 0) {
+        return;
+    }
+    switch (fclGetSelMessagePos()) {
+    case 0:
+        ((s8 *)campDhUpdateWork)[0x18] = 1;
+        break;
+    case 1:
+        if (((s8 *)campDhUpdateWork)[0x18] == 0) {
+            ((s8 *)campDhUpdateWork)[0x18] = 2;
+        }
+        fclEndMessage();
+        break;
+    }
+}
 
 s32 campDhWaitMessageEnd(void)
 {
@@ -2776,37 +3404,106 @@ void campDhUpdateIcons(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhRollRatio);
-
 typedef struct
 {
-    /* 0x00 */ u8 unk_00;
+    /* 0x00 */ s8 unk_00;
     /* 0x01 */ s8 unk_01;
-    /* 0x02 */ u8 unk_02[0xE];
+    /* 0x02 */ u8 unk_02[6];
+    /* 0x08 */ s8 mode;
+    /* 0x09 */ s8 direction;
+    /* 0x0A */ u8 unk_0A[2];
+    /* 0x0C */ s32 directionTimer;
     /* 0x10 */ s32 unk_10;
     /* 0x14 */ s32 unk_14;
     /* 0x18 */ f32 unk_18;
-    /* 0x1C */ u8 unk_1C[4];
+    /* 0x1C */ f32 unk_1C;
     /* 0x20 */ f32 unk_20;
-    /* 0x24 */ u8 unk_24[4];
+    /* 0x24 */ s32 unk_24;
     /* 0x28 */ s32 unk_28;
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
 } campDhEntry_t;
 
-extern s32 campDhRollRatio(void);
+extern u32 dds3GetRandA(void *state);
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhGetEntryRatio);
+void campDhRollRatio(campDhEntry_t *entry)
+{
+    s32 frames;
+    s32 delay;
 
-/* NON_MATCHING: 4 of 38 words differ, exact size; all four are a register pair. */
-#ifdef NON_MATCHING
+    if (entry->unk_00 == 1) {
+        if (entry->directionTimer > 0) {
+            entry->directionTimer--;
+        }
+        if (entry->directionTimer == 0) {
+            switch (entry->direction) {
+            case 1: entry->unk_1C = -10.0f; break;
+            case 2: entry->unk_1C = 10.0f; break;
+            default: entry->unk_1C = 0.0f; break;
+            }
+        }
+        entry->unk_00 = 0;
+        entry->unk_20 = entry->unk_1C - entry->unk_18;
+        frames = dds3GetRandA(NULL) % 5 + 1;
+        entry->unk_24 = frames;
+        entry->unk_28 = frames;
+        entry->unk_20 /= (f32)frames;
+    } else {
+        switch (entry->mode) {
+        case 1: delay = (dds3GetRandA(NULL) & 31) + 20; break;
+        case 2: delay = dds3GetRandA(NULL) & 7; break;
+        default: return;
+        }
+        entry->unk_14 = delay;
+        entry->unk_00 = 1;
+        entry->unk_1C = entry->unk_18;
+        entry->unk_20 = (f32)(dds3GetRandA(NULL) % 40) - 20.0f;
+        frames = dds3GetRandA(NULL) % 5 + 1;
+        entry->unk_24 = frames;
+        entry->unk_28 = frames;
+        entry->unk_20 /= (f32)frames;
+        if (entry->mode == 2) {
+            if (entry->directionTimer <= 0) {
+                entry->direction = dds3GetRandA(NULL) % 3;
+                entry->directionTimer = dds3GetRandA(NULL) % 10;
+            }
+        } else {
+            entry->directionTimer = -1;
+        }
+    }
+}
+
+void campDhGetEntryRatio(campDhEntry_t *entry)
+{
+    if (entry->unk_14 > 0) {
+        entry->unk_14--;
+    } else if (entry->unk_28 == 0) {
+        campDhRollRatio(entry);
+        /* Retail uses jal plus the shared epilogue. The matched
+         * cmpUpdateStatusModelLoad sibling uses the same post-call reset
+         * to keep the final call from becoming a sibling call. */
+        entry = NULL;
+    } else {
+        entry->unk_28--;
+        entry->unk_18 += entry->unk_20;
+    }
+}
+
+typedef struct
+{
+    u8 unk_0000[0x1278];
+    campDhEntry_t entries[25];
+} campDhEntryWork_t;
+
+extern campDhEntryWork_t *campDhEntryWork asm("campDhUpdateWork");
+
 void campDhScanEntries(void)
 {
     s32 ofs;
     s32 i;
 
-    for (ofs = 0, i = 0x18; i >= 0; i--, ofs += 0x34) {
-        campDhEntry_t *entry = (campDhEntry_t *)((u8 *)campDhUpdateWork + ofs + 0x1278);
+    for (ofs = 0, i = 0x18; i >= 0; i--, ofs += sizeof(campDhEntry_t)) {
+        campDhEntry_t *entry = (campDhEntry_t *)((u8 *)campDhEntryWork->entries + ofs);
 
         if (entry->unk_01 < 0) {
             continue;
@@ -2821,9 +3518,7 @@ void campDhScanEntries(void)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDhScanEntries);
-#endif
+
 
 typedef struct
 {
@@ -2921,7 +3616,7 @@ void campDrawSkillPanel(void)
     campWork->drawPhase = 0;
 }
 
-void cmbSetBirthPanel(u32 panel)
+void cmbSetBirthPanel(datUnitWork_t *panel)
 {
     cmbBirthPanel = panel;
 }
@@ -2986,7 +3681,45 @@ s32 func_00235E60(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpGetGaugeBlinkAlpha);
+void cmpGetGaugeBlinkAlpha(s32 frame, s8 state, u32 *colors)
+{
+    s32 ratio = 0;
+    u32 color;
+    if (frame % 0x30 < 0x18) {
+        switch (state) {
+        case 0:
+        case 3:
+            break;
+        case 1:
+        case 4:
+        case 5:
+            ratio = 0x100 - (frame % 0x18) * 10;
+            break;
+        case 2:
+            ratio = (frame % 0x18) * 10;
+            break;
+        }
+    } else {
+        switch (state) {
+        case 0:
+        case 3:
+            break;
+        case 1:
+        case 4:
+        case 5:
+            ratio = 0x100 - (0x18 - cmpStatusAnimCount[0] % 0x18) * 10;
+            break;
+        case 2:
+            ratio = (0x18 - frame % 0x18) * 10;
+            break;
+        }
+    }
+    color = fclBlendColor(0x80808080, 0x80808000, ratio);
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+}
 
 s32 cmpGetPanelAlphaOrDefault(u8 *alpha, s32 color)
 {
@@ -3002,7 +3735,27 @@ INCLUDE_ASM(const s32, "code_0022C578", rstDrawNumber);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusIconRow);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusIcons);
+extern void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color,
+                                 datUnitWork_t *unit, s32 flags, s32 ot);
+
+void cmpDrawStatusIcons(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
+{
+    s32 hpIconFlags;
+    s32 mpIconFlags;
+
+    if (mode == 3) {
+        hpIconFlags = cmbBirthPanel->maxhp != unit->maxhp ? 4 : 1;
+        mpIconFlags = cmbBirthPanel->maxmp != unit->maxmp ? 8 : 2;
+    } else {
+        hpIconFlags = 1;
+        mpIconFlags = 2;
+    }
+
+    fclDrawSpriteRes(x, y, 0xFFFF, colors, 2, 3, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(x, y, 0xFFFF, colors, 2, 7, D_00345D88, fclSpriteTable, 0x47);
+    cmpDrawStatusIconRow(x + 0x2B0, y + 0x3C8, 0xFFFF, colors[0], unit, hpIconFlags, 0x47);
+    cmpDrawStatusIconRow(x + 0x960, y + 0x3C8, 0xFFFF, colors[0], unit, mpIconFlags, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusName);
 
@@ -3083,7 +3836,26 @@ void cmpDrawItemListHeader(s32 x, s32 y, s32 c, u16 index)
     frDestroyFontRequestAfter(frq);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawItemListScrollBar);
+/* Called before its definition without a parameter prototype. */
+extern void cmpDrawScrollThumb();
+
+void cmpDrawItemListScrollBar(s32 alpha, cmpCursorInfo_t *cursor)
+{
+    if (cursor->unk_20 != 0) {
+        if (cursor->unk_22 != 0) {
+            cmpDrawScrollThumb(0, 0, 0x10, 0x80808080, 0, alpha, 0x47);
+        } else {
+            cmpDrawScrollThumb(0, 0, 0x10, 0x80808080, 2, alpha, 0x47);
+        }
+        if (cursor->unk_22 + cursor->unk_26 != cursor->unk_20) {
+            cmpDrawScrollThumb(0, 0, 0x10, 0x80808080, 1, alpha, 0x47);
+        } else {
+            cmpDrawScrollThumb(0, 0, 0x10, 0x80808080, 3, alpha, 0x47);
+        }
+        cmpDrawScrollBar(0, 0x280, 0x10, 0xA4, 0x16, 0x80808080, alpha,
+                         cursor->unk_24, cursor, 0, 0x47);
+    }
+}
 
 /* NON_MATCHING: 2 of 46 words differ (first at +0x90), exact size; the last
    call's two argument setups are scheduled the other way round. */
@@ -3114,7 +3886,28 @@ void campDrawInfoPanel(void)
     campWork->drawPhase = 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", campDrawSeq3);
+void campDrawSeq3(s8 phase)
+{
+    if (phase != 0) {
+        if (phase != 2) {
+            if (phase != 3) {
+                return;
+            }
+        }
+    }
+
+    switch (phase) {
+    case 0:
+        campDrawText(3, 0);
+        /* fall through */
+    case 3:
+        campWork->drawPhase = 0;
+        break;
+    case 2:
+        campWork->drawPhase = 2;
+        break;
+    }
+}
 
 extern char *text1[];
 
@@ -3165,7 +3958,48 @@ void cmpExpandColor(u64 *dst, u32 color)
     dst[1] = ((wide & 0xFF00) >> 8) | ((u64)(color & 0xFF) << 32);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSetup3DView);
+typedef struct
+{
+    sdf3DLight_t *parallel[4];
+    sdfVector4_t ambient;
+    sdf3DFogParam_t fog;
+} dds3LightState_t;
+
+extern sdfDrawTag_t D_00574A60[2];
+extern sdf3DInitPacket_t D_00574AA0[2];
+extern sdfDrawTag_t D_00574AE0[2];
+extern sdf3DLightParallelPacket_t D_00574B20[2];
+extern sdf3DViewportPacket_t D_00574CE0[2];
+extern sdfMatrix4_t D_002FA240;
+extern dds3LightState_t dds3LightParam;
+PS2_SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
+extern f32 aViewDown[4];
+extern void LookAtMatrix(f32 *, f32 *, f32 *);
+extern void sdf3DMakeScreenParam(sdf3DScreenParam_t *);
+extern void sdfDrawTagInit(sdfDrawTag_t *);
+extern void sdf3DLinkInitPacket(sdfDrawTag_t *, sdf3DInitPacket_t *);
+extern void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *, sdf3DScreenParam_t *, sdfMatrix4_t *);
+extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
+extern void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *, sdf3DLight_t **, sdfVector4_t *);
+
+void cmpDrawSetup3DView(void)
+{
+    s32 i;
+
+    sdf3DMakeScreenParam((sdf3DScreenParam_t *)dds3ScreenParam);
+    LookAtMatrix(aViewTarget, aViewEye, aViewDown);
+    SDF_VU0_STOREMATRIX(&D_002FA240);
+    for (i = 0; i < 2; i++) {
+        sdfDrawTagInit(&D_00574A60[i]);
+        sdf3DLinkInitPacket(&D_00574A60[i], &D_00574AA0[i]);
+        sdf3DMakeViewportPacket(&D_00574CE0[i], (sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+        sdfDrawTagLink(&D_00574A60[i], (u32)&D_00574CE0[i]);
+        sdfDrawTagInit(&D_00574AE0[i]);
+        sdf3DMakeLightParallelPacket(&D_00574B20[i], dds3LightParam.parallel, &dds3AmbientColor);
+        sdfDrawTagLink(&D_00574AE0[i], (u32)&D_00574B20[i]);
+    }
+}
+
 
 s32 cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
 {
@@ -3298,17 +4132,41 @@ void func_00239F88(s32 *work, s32 value)
     work[3] = value;
 }
 
-s32 cmp_239FA0(s32 a, s32 b, s32 c, s32 color)
+void cmp_239FA0(const u32 *xs, const u32 *ys, u32 z, u32 color, u32 ot)
 {
-    s32 colors[3];
+    u32 colors[3];
 
     colors[2] = color;
     colors[1] = color;
     colors[0] = color;
-    return cmpDrawTriG(a, b, c, colors);
+    cmpDrawTriG(xs, ys, z, colors, ot);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawTriG);
+void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot)
+{
+    void *packet;
+    struct { u64 colorChannels[2]; u64 packedXY; u64 depth; } *prim;
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *otp;
+
+    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(6, 1));
+    sdf2DMakePrimPacketHeader(packet, 0x14B, 6, 0x515151, 1);
+    prim = sdf2DGetPrimPtr(packet);
+    cmpExpandColor(prim[0].colorChannels, colors[0]);
+    prim[0].packedXY = (xs[0] + 0x7000) | ((u64)(ys[0] + 0x7900) << 32);
+    prim[0].depth = z;
+    cmpExpandColor(prim[1].colorChannels, colors[1]);
+    prim[1].packedXY = (xs[1] + 0x7000) | ((u64)(ys[1] + 0x7900) << 32);
+    prim[1].depth = z;
+    cmpExpandColor(prim[2].colorChannels, colors[2]);
+    prim[2].packedXY = (xs[2] + 0x7000) | ((u64)(ys[2] + 0x7900) << 32);
+    prim[2].depth = z;
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
+    sdfDrawTagInit(tag);
+    sdfDrawTagLink(tag, packet);
+    otp = &sdfGrOtTable[ot];
+    otp->regFunc(otp, tag);
+}
 
 s32 cmpDrawBoxSolid(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h)
 {
@@ -3357,9 +4215,74 @@ void cmpDrawPanelEffCell(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h)
     cmpDrawBoxLine(a, b, c, d, e, f, pair, h);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawBoxLine);
+void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+                    const u32 *colors, s32 surfaceIndex)
+{
+    sdfDrawTag_t *list;
+    sdfGrOt_t *surface;
+    void *packet;
+    u64 *prim;
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDraw3DPoly);
+    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, 1));
+    sdf2DMakePrimPacketHeader(packet, 0x149, 4, 0x5151, 1);
+    prim = sdf2DGetPrimPtr(packet);
+    cmpExpandColor(prim, colors[0]);
+    prim[2] = (x0 + 0x7000) | ((u64)(y0 + 0x7900) << 32);
+    prim[3] = z0;
+    cmpExpandColor(prim + 4, colors[1]);
+    prim[6] = (x1 + 0x7000) | ((u64)(y1 + 0x7900) << 32);
+    prim[7] = z1;
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, packet);
+    surface = &sdfGrOtTable[surfaceIndex];
+    surface->regFunc(surface, list);
+}
+
+void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
+                   const u32 *colors, s32 unused, sdfMat_t *asset, s32 surfaceIndex)
+{
+    sdf3DPrimPolyParm_t request;
+    u32 vertexColors[3];
+    f32 textureCoordinates[3][2];
+    sdfVector4_t positions[3] __attribute__((aligned(16)));
+    sdfDrawTag_t *list;
+    sdfGrOt_t *surface;
+    u32 firstColor, secondColor, thirdColor;
+
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
+    sdfDrawTagInit(list);
+    sdf3DPrimLinkResetTm(list, 0);
+    if (asset != NULL) {
+        sdf3DPrimLinkMat(list, asset, 0);
+    }
+    memset(&request, 0, sizeof(request));
+    firstColor = colors[0];
+    secondColor = colors[1];
+    thirdColor = colors[2];
+    request.faceCount = 1;
+    request.pointCount = 3;
+    request.color = firstColor;
+    request.vertex = positions;
+    request.normal = NULL;
+    request.uv = NULL;
+    vertexColors[0] = firstColor;
+    vertexColors[1] = secondColor;
+    vertexColors[2] = thirdColor;
+    request.vertexColor = vertexColors;
+    SDF_VU0_COPYVECTOR(&positions[0], first);
+    SDF_VU0_COPYVECTOR(&positions[1], second);
+    SDF_VU0_COPYVECTOR(&positions[2], third);
+    textureCoordinates[0][0] = 0.0f;
+    textureCoordinates[0][1] = 0.0f;
+    textureCoordinates[1][0] = 0.0f;
+    textureCoordinates[1][1] = 0.0f;
+    textureCoordinates[2][0] = 0.0f;
+    textureCoordinates[2][1] = 0.0f;
+    sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(&request));
+    surface = &sdfGrOtTable[surfaceIndex];
+    surface->regFunc(surface, list);
+}
 
 void cmpDisableRGB(s32 ot)
 {
@@ -3566,7 +4489,44 @@ s32 func_0023AD30(void)
     return cmbGlobalWork->party[panel->slot[panel->slotCursor]].unit.id;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpInitStatus);
+extern void cmpInitSeqInfo(cmpSeqInfo_t *pSeq, cmpSeqInfo_t *pParent);
+extern void cmpModelInit(void);
+
+campStatusPanel_t *cmpInitStatus(s8 arg, cmpSeqInfo_t *pParent)
+{
+    campStatusPanel_t *work;
+    void *allocation;
+    s32 i;
+
+    if (cmpStatusWindowHidden == 0) {
+        allocation = sdfMemAllocDirect(sizeof(*work));
+        work = sdfMemLock(allocation);
+        work->allocation = allocation;
+    } else {
+        work = cmpStatusPhase;
+    }
+
+    cmpInitSeqInfo((cmpSeqInfo_t *)work, pParent);
+    work->slotCount = 0;
+    work->slotCursor = 0;
+    for (i = 0; i < 16; i++) {
+        if (DDS3_GBWK->akuma[i].flag & 1) {
+            if (i == arg) {
+                work->slotCursor = work->slotCount;
+            }
+            work->slot[work->slotCount++] = i;
+        }
+    }
+
+    if (cmpStatusWindowHidden == 0) {
+        cmpSetStatusModelFlag(1);
+        cmpModelInit();
+    }
+    cmpModelInitCore2();
+    cmpClearStatusModelLoadState();
+    return work;
+}
+
 
 void camp_update_status_Shutdown(void)
 {
@@ -3579,7 +4539,7 @@ void camp_update_status_Shutdown(void)
     }
 }
 
-extern campStatusPanel_t *cmpInitStatus(s8 arg);
+extern campStatusPanel_t *cmpInitStatus(s8 arg, cmpSeqInfo_t *pParent);
 
 extern s32 camp_calc_status_Process(s32 id);
 extern s32 camp_draw_status_Process(s32 id);
@@ -3587,11 +4547,11 @@ extern s32 camp_update_status_Process(s32 id);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FEB8);
 
-void *cmpStartProcessStatus(s8 arg)
+void *cmpStartProcessStatus(s8 arg, cmpSeqInfo_t *pParent)
 {
     void *proc = NULL;
 
-    cmpStatusPhase = cmpInitStatus(arg);
+    cmpStatusPhase = cmpInitStatus(arg, pParent);
     cmpSetStockVisible(0);
     if (cmpStatusWindowHidden == 0) {
         proc = dds3StartProcess("camp_calc_status", 0x3F1, 1, 1, camp_calc_status_Process, NULL,
@@ -3836,7 +4796,20 @@ void campInitPanelPos(void *panel, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
     work[0x24] = 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetAfterCrossFunc);
+void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func, void *data, s32 value, s32 alpha)
+{
+    u8 *work = panel;
+    if (*(void **)(work + 0x44) != data) {
+        memcpy(work, work + 0x2C, 0x58);
+        work[0x24] = -1;
+        fclInitPanelPos(x, y, 0x10, 0, 0, 0, (fclPanelPos_t *)(work + 0x30));
+        *(void **)(work + 0x2C) = func;
+        *(s32 *)(work + 0x4C) = alpha;
+        *(void **)(work + 0x44) = data;
+        *(s32 *)(work + 0x48) = value;
+        work[0x50] = 0;
+    }
+}
 
 typedef struct
 {
@@ -3881,17 +4854,17 @@ void campRunPanelCallback(campCrossPanel_t *panel)
 }
 
 
-void fclInitCursorWindow(void *work, s32 flag, u8 count)
+void fclInitCursorWindow(void *work, void *data, u8 count)
 {
     cmpCursorInfo_t *cursor = (cmpCursorInfo_t *)((u8 *)work + 4);
 
-    cmpInitCursorRange(cursor, count, count, flag);
+    cmpInitCursorRange(cursor, count, count, (s32)data);
     cmpInitCursorLayout(cursor, 0, 0, 0, 0, 0x17);
 }
 
-void fclSetCursorList(void **work, void *list)
+void fclSetCursorList(void *work, s32 mode)
 {
-    work[1] = list;
+    *(s32 *)((u8 *)work + 4) = mode;
 }
 
 s32 cmpCursorBlinkColor(s32 timer)
@@ -3966,7 +4939,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawScrollBar);
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
                              fclSpriteTbl_t *table, s32 OtNo);
 
-void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s8 kind)
+void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s32 kind)
 {
     s32 clip[4];
 
@@ -3974,7 +4947,7 @@ void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s8 kind)
     clip[1] = color;
     clip[2] = color;
     clip[3] = color;
-    switch (kind) {
+    switch ((s8)kind) {
     case 0:
         fclDrawSpriteRes(x, y, 0x10, clip, 7, 0, D_00345D88, fclSpriteTable, 0x47);
         break;
@@ -4130,7 +5103,28 @@ s32 campDrawStockCell(s32 color, s8 index, s8 row)
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockStatus);
 
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStockLabel);
+extern void campDrawStockStatus(s32 x, s32 y, s32 z, s32 color,
+                                s8 cursorMode, s8 detailMode,
+                                datUnitWork_t *unit, cmpCursorSlot_t *cursor,
+                                s32 alpha);
+
+s32 campDrawStockLabel(s32 x, s32 y, s32 z, s8 slot, s8 row,
+                       cmpCursorSlot_t *cursor, s8 cursorMode, s32 alpha)
+{
+    datUnitWork_t *unit = &cmbGlobalWork->party[cmbGlobalWork->stock[slot]].unit;
+    s32 rowY = y + row * 0xC0;
+    s32 color = 0xA09DC380;
+
+    if (unit->flag & 6) {
+        if (unit->badstatus & 0x800) {
+            color = 0x754B3D80;
+        }
+        campDrawStockStatus(x + 0xD20, y + rowY + 0x120, 0, color,
+                            cursorMode, 0, unit, cursor, alpha);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockLabel2);
 
@@ -4161,7 +5155,28 @@ INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow1);
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow2);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpFindFreeStockSlot);
+s32 cmpFindFreeStockSlot(s8 index, s8 room)
+{
+    s8 slot = 0;
+
+    if (index < 0) {
+        return -1;
+    }
+    if (room != 0) {
+        while (campWork->drawStock.ListIdx[slot] != index) {
+            slot++;
+        }
+    } else {
+        while (campWork->drawStock.ListIdx[slot] != index) {
+            slot++;
+        }
+        slot -= campWork->drawStock.PartyCnt;
+        if (slot < 0) {
+            slot = 0;
+        }
+    }
+    return slot;
+}
 
 void cmpScaleColorByPhase(s8 phase, u32 *colors, s32 scale)
 {
@@ -4513,10 +5528,7 @@ void cmpClearPanelEffSlots(cmpPanelEff_t *list)
     }
 }
 
-/* NON_MATCHING: 3 of 38 words differ, exact size; all three are one register name. */
-#ifdef NON_MATCHING
-cmpPanelEff_t *cmpAllocPanelEffWork(value)
-s32 value;
+cmpPanelEff_t *cmpAllocPanelEffWork(s32 value)
 {
     cmpPanelEff_t *work;
     void *chunk;
@@ -4535,9 +5547,6 @@ s32 value;
     }
     return work;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpAllocPanelEffWork);
-#endif
 
 void camp_update_paneleff_Shutdown(void)
 {
@@ -4547,11 +5556,11 @@ void camp_update_paneleff_Shutdown(void)
     }
 }
 
-extern cmpPanelEff_t *cmpAllocPanelEffWork();
+extern cmpPanelEff_t *cmpAllocPanelEffWork(s32 value);
 
-void *cmpStartProcessPanelEff(void)
+void *cmpStartProcessPanelEff(s32 parent)
 {
-    cmpPanelEff_t *work = cmpAllocPanelEffWork();
+    cmpPanelEff_t *work = cmpAllocPanelEffWork(parent);
 
     cmpPanelEffList = work;
     return dds3StartProcess("camp_update_paneleff", 0x520B, 1, 1, camp_update_paneleff_Process,
@@ -4650,7 +5659,52 @@ void cmpGetModelPosRot(u16 id, f32 *out)
     out[2] = cmpModelParamTable[id].pos[2];
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpModelInitCore2);
+extern void func_0023FCC0(void);
+
+void cmpModelInitCore2(void)
+{
+    dds3ScreenParam[4] = 2188.0f;
+    dds3ScreenParam[5] = 2048.0f;
+    func_0023FCC0();
+}
+
+extern u8 D_0053FFE8[];
+extern u8 D_0053FFF8[];
+extern u8 D_00540008[];
+extern u8 D_00540018[];
+extern f32 D_00345F60[];
+extern void dds3SetSoftenBias(s32 frame, f32 soften, f32 bias);
+extern void dds3SetLightColor(s32 frame, s32 number, f32 *color);
+extern void dds3SetLightDir(s32 frame, s32 number, f32 *direction);
+extern void dds3SetAmbientColor(s32 frame, f32 *color);
+extern void dds3SetFogColor(s32 frame, f32 *color);
+extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 nearPlane, f32 farPlane);
+extern void sdf3DSetCamera(sdf3DScreenParam_t *screenParam, void *camera);
+
+void func_0023FCC0(void)
+{
+    f32 lightColor[4];
+    f32 lightDirection[4];
+    f32 ambientColor[4];
+    f32 fogColor[4];
+
+    memcpy(lightColor, D_0053FFE8, sizeof(lightColor));
+    memcpy(lightDirection, D_0053FFF8, sizeof(lightDirection));
+    memcpy(ambientColor, D_00540008, sizeof(ambientColor));
+    memcpy(fogColor, D_00540018, sizeof(fogColor));
+    dds3SetSoftenBias(0, 5.0f, 0.0f);
+    dds3SetLightColor(0, 0, lightColor);
+    dds3SetLightDir(0, 0, lightDirection);
+    dds3SetAmbientColor(0, ambientColor);
+    dds3SetFogColor(0, fogColor);
+    dds3SetFogPara(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
+    dds3ScreenParam[3] = 0.7551904917f;
+    SDF_VU0_COPYVECTOR(aViewEye, &cmpStatusModelBasePos);
+    SDF_VU0_COPYVECTOR(aViewTarget, &cmpStatusModelPos);
+    SDF_VU0_COPYVECTOR(aViewDown, D_00345F60);
+    SDF_VU0_LOADMATRIX(&D_002FA240);
+    sdf3DSetCamera((sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+}
 
 void cmpModelInit(void)
 {
@@ -4689,7 +5743,37 @@ s32 cmpPrepareStatusModel(s32 group, s32 id, s32 blocking)
     D_0054FEE0 = mdlPrepare(group, id, blocking);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCreateBadEffect);
+typedef struct
+{
+    sdfVector4_t pos;
+    sdfVector4_t rot;
+    sdfVector4_t center;
+    f32 r;
+    f32 h;
+    f32 scl;
+    void *hModel;
+} cmpBadEffectParams_t;
+
+extern datUnitVisual_t datModelParamTable[];
+
+void cmpCreateBadEffect(u16 id, void *model, u8 *buffer)
+{
+    sdfVector4_t pos __attribute__((aligned(16)));
+    sdfVector4_t rot __attribute__((aligned(16)));
+    sdfVector4_t center __attribute__((aligned(16)));
+    cmpBadEffectParams_t *params = (cmpBadEffectParams_t *)buffer;
+
+    memset(&pos, 0, sizeof(pos));
+    memset(&rot, 0, sizeof(rot));
+    memset(&center, 0, sizeof(center));
+    SDF_VU0_COPYVECTOR(&params->pos, &pos);
+    SDF_VU0_COPYVECTOR(&params->rot, &rot);
+    SDF_VU0_COPYVECTOR(&params->center, &center);
+    params->hModel = model;
+    params->r = datModelParamTable[id].formsize;
+    params->h = datModelParamTable[id].formheight;
+    params->scl = 1.0f;
+}
 
 extern void *hCAMPBadEffect;
 
@@ -4724,7 +5808,7 @@ s32 cmpBadEffSetup(u16 id, u32 flag)
     default:
         return 0;
     }
-    cmpCreateBadEffect(id, cmpEncycWork, D_00349300);
+    cmpCreateBadEffect(id, (void *)cmpEncycWork, D_00349300);
     hCAMPBadEffect = effCAMPBadCreate(D_00349300, kind);
     printf(D_00540040);
     return 1;
@@ -4754,11 +5838,6 @@ void rstPrepareStatusModel(s32 group, s32 id, s32 blocking)
     printf(D_00540070, group, id);
 }
 
-/* NON_MATCHING: 4 of 46 words differ, exact size: the two constant-1 pseudos
- * swap $2 and $3. */
-// 42 of 46 words match at the exact size; two constants land in swapped
-// registers and the branch between them moves with them.
-#ifdef NON_MATCHING
 s32 cmpModelSetup(u16 id, s32 blocking)
 {
     s32 group;
@@ -4794,9 +5873,6 @@ s32 cmpModelSetup(u16 id, s32 blocking)
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpModelSetup);
-#endif
 
 extern char D_00540090[];
 
@@ -4872,7 +5948,29 @@ void cmpResetStatusModelPos(void)
     cmpStatusModelBasePos.x = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetStatusModelPose);
+void cmpSetStatusModelPose(s32 model)
+{
+    sdfVector4_t pos;
+    f32 scale;
+
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+    pos.x = cmpModelParamTable[cmpStatusModelId].evo[0];
+    pos.y = cmpModelParamTable[cmpStatusModelId].evo[1];
+    if (cmpStatusModelReady == 0) {
+        cmpGetStatusModelScale((void *)model, 0);
+        pos.z = cmpModelParamTable[cmpStatusModelId].evo[2];
+        cmpResetStatusModelPos();
+    } else {
+        scale = cmpGetStatusModelScale((void *)model, 1);
+        pos.z = 0.0f;
+        pos.x -= cmpModelParamTable[cmpStatusModelId].evo[0] - cmpModelParamTable[cmpStatusModelId].evo[0] * scale;
+        pos.y -= cmpModelParamTable[cmpStatusModelId].evo[1] - cmpModelParamTable[cmpStatusModelId].evo[1] * scale;
+        cmpStatusModelBasePos.z = (-400.0f - cmpModelParamTable[cmpStatusModelId].evo[2]) * scale;
+    }
+    SDF_VU0_LOADVECTOR_MEMOPS(pos);
+    mdlSetPosition((void *)model);
+}
 
 void cmpSetModelRotate(void *model)
 {
@@ -4882,7 +5980,36 @@ void cmpSetModelRotate(void *model)
     mdlSetRotate(model);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetStatusModelParam);
+extern f32 dds3QuakeOffset[];
+
+void cmpSetStatusModelParam(void)
+{
+    sdfVector4_t target;
+    sdfVector4_t eye;
+    u32 frame = dds3GetFrameID();
+
+    SDF_VU0_COPYVECTOR(aViewEye, &cmpStatusModelBasePos);
+    SDF_VU0_COPYVECTOR(aViewTarget, &cmpStatusModelPos);
+    SDF_VU0_COPYVECTOR(aViewDown, D_00345F60);
+    sdf3DMakeScreenParam((sdf3DScreenParam_t *)dds3ScreenParam);
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SCALEVECTOR(600.0f);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_LOADVECTOR_B(dds3QuakeOffset);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&target);
+    SDF_VU0_LOADVECTOR(aViewEye);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&eye);
+    LookAtMatrix((f32 *)&target, (f32 *)&eye, aViewDown);
+    SDF_VU0_STOREMATRIX_NOMEM(&D_002FA240);
+    sdf3DMakeViewportPacket((sdf3DViewportPacket_t *)((u8 *)&dds3DrawEnv[frame] + 0x1520),
+                          (sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+    sdf3DSetCamera((sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+}
 
 extern void cmpSetStatusModelPose(s32 model);
 
@@ -4892,7 +6019,7 @@ extern void cmpSetStatusModelParam(void);
 
 extern void effCAMPBadDraw(void *hCAMPBadEffect);
 
-s32 cmpDrawStatusModel(s32 scene)
+s32 cmpDrawStatusModel(void *scene)
 {
     s32 err = cmpLoadStatusModel();
 
@@ -5054,6 +6181,8 @@ s32 cmpGetSkillTargetArea(u16 skillId)
     return 0;
 }
 
+extern s32 cmbGetParamBase(datUnitWork_t *unit, s32 index);
+
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFE8);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFF8);
@@ -5090,11 +6219,34 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_005400D0);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_005400E0);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUseItemKou);
+s32 cmpUseItemKou(u16 item, datUnitWork_t *unit)
+{
+    s32 index = -1;
+
+    switch (item) {
+    case 0x26: index = 0; break;
+    case 0x28: index = 2; break;
+    case 0x29: index = 3; break;
+    case 0x2A: index = 4; break;
+    case 0x2B: index = 5; break;
+    }
+    if (index >= 0) {
+        if (cmbGetParamBase(unit, index) < 40) {
+            unit->param[index]++;
+        }
+        unit->maxhp = datGetMaxHp(unit);
+        unit->maxmp = datGetMaxMp(unit);
+        if ((unit->badstatus & 0x800) == 0) {
+            unit->hp = unit->maxhp;
+        }
+        return index;
+    }
+    return -1;
+}
 
 s32 cmpUseItemTokusyu(u16 item, s32 target, s32 user)
 {
-    if (cmpUseItemKou(item, user) >= 0)
+    if (cmpUseItemKou(item, (datUnitWork_t *)user) >= 0)
     {
         p2sdPlaySE(0x10, 0x7F, 0x3F);
         return 3;
@@ -5159,7 +6311,15 @@ char *cmpGetParamName(s8 index)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpGetPressedButton);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpPlayCursorSE);
+void func_002413B8(u32 button, s8 mode);
+
+/* This UI entry fixes the shared cursor-sound helper's mode at zero. */
+void cmpPlayCursorSE(u32 button)
+{
+    func_002413B8(button, 0);
+}
+
+INCLUDE_ASM(const s32, "code_0022C578", func_002413B8);
 
 s32 cmpChkPadPressUpDown(void)
 {
@@ -5409,8 +6569,6 @@ void cmp_241A10(cmpCursorInfo_t *cursor)
 INCLUDE_ASM(const s32, "code_0022C578", cmp_241A10);
 #endif
 
-/* NON_MATCHING: 3 of 26 words differ (first at +0x20). */
-#ifdef NON_MATCHING
 s32 cmp_241A88(cmpCursorInfo_t *cursor, s32 index)
 {
     u8 *flags = (u8 *)cursor->unk_2C;
@@ -5431,9 +6589,6 @@ s32 cmp_241A88(cmpCursorInfo_t *cursor, s32 index)
     cmpUpdateCursorScroll(cursor, 1);
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmp_241A88);
-#endif
 
 void cmpResetCursorPos(s16 value, cmpCursorInfo_t *cursor)
 {
@@ -5443,7 +6598,7 @@ void cmpResetCursorPos(s16 value, cmpCursorInfo_t *cursor)
     cursor->unk_22 = value;
 }
 
-void cmpSetCursorRow(s8 row, cmpCursorInfo_t *cursor)
+void cmpSetCursorRow(s32 row, cmpCursorInfo_t *cursor)
 {
     cursor->unk_24 = row;
 }
@@ -5789,13 +6944,13 @@ void cmpDebugDumpCount(void)
     }
 }
 
-void cmpInitSeqInfo(cmpSeqInfo_t *pSeq, s32 pParent)
+void cmpInitSeqInfo(cmpSeqInfo_t *pSeq, cmpSeqInfo_t *pParent)
 {
     pSeq->unk_00 = 3;
     pSeq->unk_02 = -1;
     pSeq->unk_05 = 0;
     pSeq->unk_0C = 0;
-    pSeq->unk_10 = pParent;
+    pSeq->unk_10 = (s32)pParent;
 }
 
 s32 cmpChkSeqInfo(cmbGbWork_t *work)

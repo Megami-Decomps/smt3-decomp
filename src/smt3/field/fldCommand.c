@@ -663,14 +663,111 @@ s32 fldCommand_SET_FIX_CAMERA(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_SET_CHASE_CAMERA);
+extern f32 fldCamPitch;
+extern f32 D_002FC9C0[];
+extern f32 fldCamTarget[];
+extern f32 sdfSin(f32 angle);
+extern f32 sdfCos(f32 angle);
+extern s32 fldPlayerFastSet(void);
+extern void fldCamSetChase(void);
+extern void resetCamNormal(void);
+
+s32 fldCommand_SET_CHASE_CAMERA(void) {
+    f32 angle;
+    f32 result;
+    f32 cameraPos[4];
+    f32 targetPos[4];
+
+    fldGlobalBase.mode = 0;
+
+    angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
+    fldCamPitch = -fldGlobalBase.camAngle;
+    result = sdfSin(angle);
+    cameraPos[0] = fldGlobalBase.x - result;
+    cameraPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+
+    angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
+    result = sdfCos(angle);
+    cameraPos[2] = fldGlobalBase.z + result;
+
+    angle = fldCamPitch * 3.14f / 180.0f;
+    {
+        f32 sine = sdfSin(angle);
+        targetPos[0] = fldGlobalBase.x + sine * 550.0f;
+    }
+    targetPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+
+    angle = fldCamPitch * 3.14f / 180.0f;
+    {
+        f32 cosine = sdfCos(angle);
+        targetPos[2] = fldGlobalBase.z + cosine * 550.0f;
+    }
+
+    D_002FC9C0[0] = cameraPos[0];
+    D_002FC9C0[1] = cameraPos[1];
+    D_002FC9C0[2] = cameraPos[2];
+    fldCamTarget[0] = targetPos[0];
+    fldCamTarget[1] = targetPos[1];
+    fldCamTarget[2] = targetPos[2];
+
+    fldPlayerFastSet();
+    if (fldGlobalBase.area < 10) {
+        fldCamSetChase();
+    } else {
+        resetCamNormal();
+    }
+    return 1;
+}
 
 s32 func_00158548(void) {
     fldCamMode[0] = 3;
     return 1;
 }
 
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_CAM_DIR);
+s32 fldCommand_CAM_DIR(void) {
+    s32 parameter;
+    f32 angle;
+    f32 cameraPos[4];
+    f32 targetPos[4];
+
+    parameter = scrGetIntPara(0);
+    if (parameter < 0) {
+        fldCamPitch = -fldGlobalBase.camAngle;
+    } else {
+        parameter = scrGetIntPara(0);
+        fldCamPitch = (f32)(s32)((u32)parameter * -45u);
+    }
+
+    angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
+    cameraPos[0] = fldGlobalBase.x - sdfSin(angle);
+    cameraPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+
+    angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
+    cameraPos[2] = fldGlobalBase.z + sdfCos(angle);
+
+    angle = fldCamPitch * 3.14f / 180.0f;
+    {
+        f32 sine = sdfSin(angle);
+        targetPos[0] = fldGlobalBase.x + sine * 550.0f;
+    }
+    targetPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+
+    angle = fldCamPitch * 3.14f / 180.0f;
+    {
+        f32 cosine = sdfCos(angle);
+        targetPos[2] = fldGlobalBase.z + cosine * 550.0f;
+    }
+
+    D_002FC9C0[0] = cameraPos[0];
+    D_002FC9C0[1] = cameraPos[1];
+    D_002FC9C0[2] = cameraPos[2];
+    fldCamTarget[0] = targetPos[0];
+    fldCamTarget[1] = targetPos[1];
+    fldCamTarget[2] = targetPos[2];
+
+    resetCamNormal();
+    return 1;
+}
 
 s32 fldCommand_CAM_SEL_PHOKAN(void) {
     f32 pos[4];
@@ -719,9 +816,44 @@ s32 fldCommand_SET_NPC_CAMERA(void) {
     return 1;
 }
 
+extern void evtDisableMoonDraw(void);
+extern void evtEnableMoonDraw(void);
+extern void evtDisableMoonDraw2(void);
+extern void evtEnableMoonDraw2(void);
+
 INCLUDE_RODATA(const s32, "field/fldCommand", D_00532980);
 
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_SET_ALLPANEL);
+s32 fldCommand_SET_ALLPANEL(void)
+{
+    s32 mode = scrGetIntPara(0);
+
+    fldGlobalBase.word90 = mode;
+    fldGlobalBase.word94 = 0;
+    switch (mode) {
+        case 0:
+            evtDisableMoonDraw();
+            break;
+        case 1:
+            evtEnableMoonDraw();
+            break;
+        case 2:
+            evtDisableMoonDraw2();
+            fldGlobalBase.word94 = 15;
+            break;
+        case 3:
+            evtEnableMoonDraw2();
+            fldGlobalBase.word94 = 0;
+            break;
+        /* Reserved modes retain the native eight-entry dispatch table. */
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        default:
+            break;
+    }
+    return 1;
+}
 
 void fldPanelSet(void) {
 }
@@ -851,7 +983,67 @@ s32 fldCommand_FLD_MODEL_ON(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_FLD_MODEL_OFF);
+s32 fldCommand_FLD_MODEL_OFF(void) {
+    s32 debugWorld;
+    s32 debugStage;
+    s32 debugMode;
+    char *debugName;
+    s32 world;
+    s32 stage;
+    s32 mode;
+    char *name;
+    s32 room;
+    dds3BasicArrayHandle_t *list;
+    dds3Basic_t *node;
+
+    debugWorld = scrGetIntPara(0);
+    debugStage = scrGetIntPara(1);
+    debugName = scrGetStrPara(2);
+    debugMode = scrGetIntPara(3);
+    printf("OFF %d %d %s %d\n", debugWorld, debugStage, debugName, debugMode);
+    world = scrGetIntPara(0);
+    if (world == 0) {
+        world = fldGlobalBase.area;
+    }
+    stage = scrGetIntPara(1);
+    if (stage == 0) {
+        stage = fldGlobalBase.floor + 1;
+    }
+    mode = scrGetIntPara(3);
+    name = scrGetStrPara(2);
+    if (name == NULL) {
+        for (room = 0; room < 16; room++) {
+            fldSetModelFlag(world, stage, room, 1);
+        }
+    } else {
+        room = fldCommand_GetHojiID(name);
+        fldSetModelFlag(world, stage, room, 1);
+    }
+    if (world == fldGlobalBase.area && stage == fldGlobalBase.floor + 1) {
+        list = dds3SceneBasicGetList(dds3GetControlScene(), 6);
+        if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)list) != 0) {
+            dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
+            do {
+                node = (dds3Basic_t *)(u32)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
+                if (((fldMatterWork_t *)node->workdata)->roomNumber == (u32)room) {
+                    switch (mode) {
+                    case 0:
+                        dds3MatterObjectBasicSetAlpMode(node, 2);
+                        break;
+                    case 1:
+                        dds3MatterObjectBasicSetAlpMode(node, 6);
+                        break;
+                    case 2:
+                        dds3MatterObjectBasicSetAlpMode(node, 8);
+                        break;
+                    }
+                }
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
+            dds3FreeBasicArrayHandle(list);
+        }
+    }
+    return 1;
+}
 
 s32 fldCommand_FLD_ANIME_ON(void) {
     s32 world;
@@ -1513,7 +1705,52 @@ s32 fldCommand_FLD_MODEL_LIGHT(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_FLD_SAGASI_AKUMA);
+typedef struct {
+    u16 item;
+    u16 par;
+} datTakaraSagasiItem_t;
+
+typedef struct {
+    u32 flag;
+    datTakaraSagasiItem_t itemtbl[8];
+} datTakaraSagasiTable_t;
+
+typedef struct {
+    u32 flag;
+    datTakaraSagasiTable_t tbl[4];
+} datTakaraSagasi_t;
+
+extern datTakaraSagasi_t datSagasiSkillTable;
+extern u32 fldEncountSagasiFlag;
+
+s32 fldCommand_FLD_SAGASI_AKUMA(void)
+{
+    if (scrGetIntPara(0) == 0) {
+        scrSetIntReturnValue(fldEncountSagasiFlag);
+    } else {
+        s32 groupIndex;
+
+        for (groupIndex = 0; groupIndex < 4; groupIndex++) {
+            s32 itemIndex;
+            s32 random;
+
+            if (datSagasiSkillTable.tbl[groupIndex].flag != 0 &&
+                evtBitCheck(datSagasiSkillTable.tbl[groupIndex].flag) == 0) {
+                continue;
+            }
+            random = dds3GetRandIntA(
+                0, datSagasiSkillTable.tbl[groupIndex].itemtbl[7].par);
+            for (itemIndex = 0; itemIndex < 8; itemIndex++) {
+                if (datSagasiSkillTable.tbl[groupIndex].itemtbl[itemIndex].par >= random) {
+                    scrSetIntReturnValue(datSagasiSkillTable.tbl[groupIndex].itemtbl[itemIndex].item);
+                    return 1;
+                }
+            }
+        }
+        scrSetIntReturnValue(3);
+    }
+    return 1;
+}
 
 u32 fldCommand_FLD_ANAHORI_INIT(void) {
     fldAnahoriSelectInit();

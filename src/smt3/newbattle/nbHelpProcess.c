@@ -147,7 +147,7 @@ typedef struct nbMainProcessData_t
     dds3ProcessID_t *encproc;
     dds3ProcessID_t *eventproc;
     u8 unk_11C[0x4];
-    void *pnltex[4];
+    sdfTexHandle_t *pnltex[4];
     s32 unk_130;
     s32 unk_134;
     nbPacHandle_t *modelpack;
@@ -209,7 +209,7 @@ typedef struct nbHelpProcessData_t
     s32 mesid;
     s32 nextmeshandle;
     s32 nextmesid;
-    s32 msgid;
+    s32 panelAlpha;
 } nbHelpProcessData_t;
 
 /* 0x1A4 bytes; only the fields this unit touches are named. */
@@ -334,7 +334,7 @@ extern s32 itfMesMngGetWidth(s32 id, s32 message, s32 page);
 
 extern _FRQ *frwGetSmallFontFRQ(s32 X, s32 Y, u32 Pri, u32 Color, char *pStr, s32 pFRQ);
 
-extern _FRQ *frGetCNameFRQ(s8 no, s32 style, s32 colorno, s32 tp);
+extern _FRQ *frGetCNameFRQ(s8 no, s8 style, _FRQ *chain, s8 tp);
 
 extern s32 frGetStrWidth2(_FRQ *pFRQ);
 
@@ -365,28 +365,6 @@ extern void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker);
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, void *drawExit,
                                          void *deleteExit, void *p);
-
-extern void nbPnl_setOt(s32 otofs);
-
-extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte,
-                           s32 ztst);
-
-extern void nbPnl_rsetAlpha(s32 mode);
-
-extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba,
-                        void *hTex);
-
-extern void cmpSetSkillListRows(s32 rows);
-
-extern void itfMesMngSetMesPosition(s32 id, s32 x, s32 y);
-
-extern void itfMesMngRequestMessage(s32 msg, s32 id, s32 flag);
-
-extern void frSetFontColor(_FRQ *pFRQ, u32 Color);
-
-extern void frDrawFontEx(_FRQ *pFRQ, s32 Mode);
-
-extern s32 frSetDrawPosition(_FRQ *pFRQ, s32 X, s32 Y);
 
 extern s32 nbHelpProcess1(dds3ProcessID_t *id);
 
@@ -606,32 +584,49 @@ void nbHelpOff(void)
     }
 }
 
+extern void nbPnl_setOt(s32 ot);
+extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail,
+                         s32 date, s32 datm, s32 zte, s32 ztst);
+extern void nbPnl_rsetAlpha(s32 mode);
+
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v,
+                        s32 uw, s32 vh, s32 rgba, sdfTexHandle_t *texture);
+
 void nbDrawHelpPanel(nbHelpProcessData_t *w)
 {
     nbMainProcessData_t *data;
-    s32 cx;
-    s32 hw;
-    s32 ex;
-    u32 col;
+    s32 halfWidth;
+    s32 sideWidth;
+    s32 centerX = 0x100;
+    u32 color;
 
-    cx = 0x100;
     data = nbGetMainProcessData();
     nbPnl_setOt(0x47);
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
-    hw = w->textwidth / 2 + 0x60;
-    col = (w->msgid << 24) | 0x808080;
-    if (hw < 0x88) {
-        hw = 0x88;
+    halfWidth = w->textwidth / 2;
+    color = ((u32)w->panelAlpha << 24) | 0x808080;
+    halfWidth += 0x60;
+    if (halfWidth < 0x88) {
+        halfWidth = 0x88;
     }
-    ex = hw - 0x88;
-    if (hw < 0x89) {
-        ex = 0;
+    sideWidth = halfWidth - 0x88;
+    if (halfWidth < 0x89) {
+        sideWidth = 0;
     }
-    nbPnlSprite(cx - hw, 0x4D, 0x88, 0x21, 1, 0x5F, 0x88, 0x21, col, data->pnltex[0]);
-    nbPnlSprite(hw + cx, 0x6E, -0x88, -0x21, 1, 0x5F, 0x88, 0x21, col, data->pnltex[0]);
-    nbPnlSprite(cx - ex, 0x4D, ex * 2, 0x21, 0x87, 0x5F, 1, 0x21, col, data->pnltex[0]);
+    nbPnlSprite(centerX - halfWidth, 0x4D, 0x88, 0x21, 1, 0x5F, 0x88, 0x21, color, data->pnltex[0]);
+    nbPnlSprite(halfWidth + centerX, 0x6E, -0x88, -0x21, 1, 0x5F, 0x88, 0x21, color, data->pnltex[0]);
+    nbPnlSprite(centerX - sideWidth, 0x4D, sideWidth * 2, 0x21, 0x87, 0x5F, 1, 0x21, color,
+                data->pnltex[0]);
 }
+
+extern void cmpSetSkillListRows(s32 rows);
+extern void itfMesMngSetMesPosition(s32 id, s32 x, s32 y);
+extern void itfMesMngRequestMessage(s32 id, s32 message, s32 page);
+extern void frSetFontColor(_FRQ *font, u32 color);
+extern s32 frDrawFontEx(_FRQ *font, s8 mode);
+extern void frSetDrawPosition(_FRQ *font, u32 x, u32 y);
+extern void nbDrawHelpPanel(nbHelpProcessData_t *w);
 
 s32 nbHelpProcess1(dds3ProcessID_t *id)
 {
@@ -639,61 +634,55 @@ s32 nbHelpProcess1(dds3ProcessID_t *id)
     s32 x;
 
     w = dds3GetProcessData(id);
-    if (w->text1 == NULL && (w->type != 1 || w->reqmsgid < 0)) {
-        goto ret0;
-    }
-    cmpSetSkillListRows(0x14);
-    x = 0x100 - w->textwidth / 2;
-    switch (w->type) {
-    case 1:
-        itfMesMngSetMesPosition(w->reqmsgid, x << 4, 0x2A0);
-        itfMesMngRequestMessage(w->reqmsgid, w->mesid, 0);
-        break;
-    case 2:
-        w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
-        frSetFontColor(w->textmax, w->msgid | 0x80808000);
-        frDrawFontEx(w->textmax, 1);
-        frDestroyFontRequestAfter(w->textmax);
-        w->textmax = NULL;
-        x += w->nextwidth;
-        w->textmax = frGetCNameFRQ(0, 1, 0, 0);
-        frSetDrawPosition(w->textmax, x << 4, 0x2A0);
-        frSetFontColor(w->textmax, w->msgid | 0x80808000);
-        frDrawFontEx(w->textmax, 1);
-        frDestroyFontRequestAfter(w->textmax);
-        w->textmax = NULL;
-        break;
-    case 0:
-        w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
-        frSetFontColor(w->textmax, w->msgid | 0x80808000);
-        frDrawFontEx(w->textmax, 1);
-        frDestroyFontRequestAfter(w->textmax);
-        w->textmax = NULL;
-        if (w->text2 != NULL) {
-            x += w->nextwidth;
-            w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text2, 0);
-            frSetFontColor(w->textmax, w->msgid | 0x80808000);
+    if (w->text1 != NULL || (w->type == 1 && w->reqmsgid >= 0)) {
+        cmpSetSkillListRows(20);
+        x = 256 - w->textwidth / 2;
+        switch (w->type) {
+        case 1:
+            itfMesMngSetMesPosition(w->reqmsgid, x << 4, 0x2A0);
+            itfMesMngRequestMessage(w->reqmsgid, w->mesid, 0);
+            break;
+        case 2:
+            w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
+            frSetFontColor(w->textmax, w->panelAlpha | 0x80808000);
             frDrawFontEx(w->textmax, 1);
             frDestroyFontRequestAfter(w->textmax);
             w->textmax = NULL;
+            x += w->nextwidth;
+            w->textmax = frGetCNameFRQ(0, 1, 0, 0);
+            frSetDrawPosition(w->textmax, x << 4, 0x2A0);
+            frSetFontColor(w->textmax, w->panelAlpha | 0x80808000);
+            frDrawFontEx(w->textmax, 1);
+            frDestroyFontRequestAfter(w->textmax);
+            w->textmax = NULL;
+            break;
+        case 0:
+            w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
+            frSetFontColor(w->textmax, w->panelAlpha | 0x80808000);
+            frDrawFontEx(w->textmax, 1);
+            frDestroyFontRequestAfter(w->textmax);
+            w->textmax = NULL;
+            if (w->text2 != NULL) {
+                x += w->nextwidth;
+                w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text2, 0);
+                frSetFontColor(w->textmax, w->panelAlpha | 0x80808000);
+                frDrawFontEx(w->textmax, 1);
+                frDestroyFontRequestAfter(w->textmax);
+                w->textmax = NULL;
+            }
+            break;
         }
-        break;
-    }
-    if (w->type != 1) {
-        nbDrawHelpPanel(w);
-    }
-    cmpSetSkillListRows(-1);
-    w->text3++;
-    if (w->time > 0) {
-        if (w->text3 > w->time) {
+        if (w->type != 1) {
+            nbDrawHelpPanel(w);
+        }
+        cmpSetSkillListRows(-1);
+        w->text3++;
+        if (w->time > 0 && w->text3 > w->time) {
             nbHelpOff();
-            goto ret0;
+        } else if (w->type == 1) {
+            nbDrawHelpPanel(w);
         }
     }
-    if (w->type == 1) {
-        nbDrawHelpPanel(w);
-    }
-ret0:
     return 0;
 }
 
@@ -720,7 +709,7 @@ nbHelpProcessData_t *nbAllocHelpWork(void)
     w = sdfChipAllocDirect(sizeof(nbHelpProcessData_t));
     memset(w, 0, sizeof(nbHelpProcessData_t));
     w->reqmsgid = -1;
-    w->msgid = 0x80;
+    w->panelAlpha = 0x80;
     return w;
 }
 

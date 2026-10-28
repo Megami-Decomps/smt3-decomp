@@ -298,7 +298,9 @@ typedef struct
 {
     s8 backAttack;
     s8 esc;
-    u8 unk_02[0x4];
+    u8 item;
+    u8 itemcnt;
+    u8 unk_04[0x2];
     u16 id[11];
     u8 unk_1C[0x6];
     u8 unk_22;
@@ -547,7 +549,42 @@ s32 nbGetDeadType(s32 nskill, s32 sformindex, s32 dformindex)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbCheckStoneDead);
+extern char D_00544BF8[];
+
+s32 nbCheckStoneDead(s32 nskill, s32 dformindex)
+{
+    datUnitWork_t *work;
+    s32 skillattr;
+    s32 param;
+    s32 chance;
+    f32 divisor;
+    f32 rate;
+
+    work = nbGetUnitWorkFromFormindex(dformindex);
+    if (work == NULL) {
+        return 0;
+    }
+    if (nbGetBadStat(dformindex) != 0x400) {
+        return 0;
+    }
+    skillattr = nbGetNormalSkillAttr(nskill);
+    if (skillattr != 0 && skillattr != 4) {
+        return 0;
+    }
+    param = datGetParam(work, 5);
+    divisor = ((f32)work->level + 20.0f) / 5.0f;
+    rate = (f32)param / divisor;
+    if ((work->flag & 4) != 0) {
+        chance = 100.0f - rate * 40.0f;
+    } else {
+        chance = 100.0f - rate * 20.0f;
+    }
+    if (chance < 20) {
+        chance = 20;
+    }
+    printf(D_00544BF8, chance);
+    return dds3GetRandIntA(0, 100) < chance;
+}
 
 void nbSetBadStat(s32 formindex, s32 sw, s32 badstat)
 {
@@ -750,7 +787,46 @@ s32 nbSetHojoAddCounter(s32 formindex, s32 type, s32 point, s32 nvirtual)
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbSetHojoKouka);
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetHojoRitu);
+f32 nbGetHojoRitu(s32 formindex, s32 type)
+{
+    datUnitWork_t *work;
+    s32 count;
+    s32 moon;
+    f32 ritu;
+
+    work = nbGetUnitWorkFromFormindex(formindex);
+    ritu = 1.0f;
+    count = nbGetHojoCounter(formindex, type);
+    if (work->id == 0x125) {
+        moon = evtGetAgeOfMoon() - 4;
+        count += moon / 2;
+    }
+    if (type < 8) {
+        if (type < 6) {
+            if (count < 0) {
+                ritu = ((f32)count + 8.0f) * 0.125f;
+            } else if (count > 0) {
+                ritu = ((f32)(2 * count) + 8.0f) * 0.125f;
+            }
+        } else {
+            if (count < 0) {
+                ritu = ((f32)((-count) * 2) + 8.0f) * 0.125f;
+            } else if (count > 0) {
+                ritu = ((f32)(-count) + 8.0f) * 0.125f;
+            }
+        }
+    } else {
+        if (count < 0) {
+            ritu = ((f32)count + 8.0f) * 0.125f;
+        } else if (count > 0) {
+            ritu = ((f32)(2 * count) + 8.0f) * 0.125f;
+        }
+    }
+    if (type == 4 && nbGetHojoCounter(formindex, 15) > 0) {
+        ritu *= 2.5f;
+    }
+    return ritu;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetButuriAttack);
 
@@ -781,7 +857,35 @@ s32 nbGetMagicKaifuku(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetMaxHpWazaPoint);
+s32 nbGetMaxHpWazaPoint(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
+{
+    datUnitWork_t *swork;
+    datUnitWork_t *dwork;
+    f32 sritu;
+    f32 dritu;
+    f32 value;
+    f32 base;
+    f32 penalty;
+
+    swork = nbGetUnitWorkFromFormindex(sformindex);
+    dwork = nbGetUnitWorkFromFormindex(dformindex);
+    sritu = nbGetHojoRitu(sformindex, 4);
+    dritu = nbGetHojoRitu(dformindex, 7);
+    if (swork->flag & 0x20) {
+        base = (f32)datGetBaseMaxHp(swork) / 0x1.166666p+6f;
+        penalty = 50.0f / (swork->level + 10);
+        base = base * (f32)waza;
+        base = base * 0x1.333332p-1f;
+        value = base - penalty;
+        if (!evtBitCheck(0xAF2)) {
+            value = value * 0x1.570a3cp+0f;
+        }
+    } else {
+        value = ((f32)swork->maxhp / 0x1.166666p+6f) * (f32)waza * 0x1.999998p-1f;
+    }
+    value = (value * sritu) * dritu;
+    return value;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetVirtualAisyo);
 
@@ -838,7 +942,45 @@ s32 nbCheckSkillUse(s32 formindex, s32 nskill)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetEncountTableItem);
+void nbGetEncountTableItem(nbMainProcessData_t *data)
+{
+    u8 item;
+    u8 itemcnt;
+    s32 i;
+    nbEncountForm_t *encount;
+
+    if (data->encno <= 0 || datBossRashChk(data->encno) != 0) {
+        return;
+    }
+    encount = &nbEncountFormTable[data->encno];
+    item = encount->item;
+    itemcnt = encount->itemcnt;
+    if (item == 0 || itemcnt == 0) {
+        return;
+    }
+    for (i = 0; i < 4; i++) {
+        if (data->item[i] == item) {
+            u8 count = data->itemcnt[i];
+
+            count = count + itemcnt;
+            data->itemcnt[i] = count;
+            return;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (data->item[i] == 0) {
+            data->item[i] = item;
+            data->itemcnt[i] = itemcnt;
+            return;
+        }
+    }
+    for (i = 3; i > 0; i--) {
+        data->item[i] = data->item[i - 1];
+        data->itemcnt[i] = data->itemcnt[i - 1];
+    }
+    data->item[0] = item;
+    data->itemcnt[0] = itemcnt;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetExpMakaItem);
 

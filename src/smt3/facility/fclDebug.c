@@ -7,7 +7,8 @@
 
 extern u32 fclDbgPID;
 
-s32 FclDebug(void)
+/* The retail debug hook keeps its mode/work API and returns disabled status. */
+s8 FclDebug(s8 mode, void *work)
 {
     return -1;
 }

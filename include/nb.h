@@ -69,7 +69,10 @@ typedef struct nbFormation_t
         f32 range;
         s32 shakePhase;
     };
-    f32 addmovet;
+    union {
+        f32 addmovet;
+        s32 badframe;
+    };
     f32 movet;
     sdfVector4_t tarpos;
     sdfVector4_t startpos;
@@ -140,7 +143,7 @@ typedef struct nbMainProcessData_t
     s16 press4_ten;
     s16 StageMajor;                             /* 0x07C: stagemajor */
     s16 StageMinor;                             /* 0x07E: stageminor */
-    u8 TarSelType[4];
+    s32 TarSelType;
     s32 nakamayobi;                        /* 0x084 */
     s32 eventno;                           /* 0x088 */
     s32 eventrid;
@@ -152,13 +155,13 @@ typedef struct nbMainProcessData_t
     u32 maka;
     u32 exp;
     struct dds3Basic_t *light[2];          /* 0x0A8 */
-    u8 gamecamera[4];
+    struct dds3Basic_t *gamecamera;         /* 0x0B0 */
     s32 niidacamera;
     u8 eventcamera[4];
     dds3ProcessID_t *MainProcessID;
     dds3ProcessID_t *maeProcess;            /* 0x0C0 */
     dds3ProcessID_t *AtoProcessID;
-    u8 ResultProcessID[4];
+    dds3ProcessID_t *ResultProcessID;
     dds3ProcessID_t *StageProcessID;          /* 0x0CC */
     dds3ProcessID_t *UnitProcessID;
     dds3ProcessID_t *ActionProcessID[4];

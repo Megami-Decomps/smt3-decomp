@@ -5,52 +5,59 @@ it, decompile it, verify it, and name it.
 
 ## Matching rules
 
-A function counts as decompiled only when it compiles to exactly the retail
-bytes, and it has to reach that the way the original developers would have.
+The [dds-decomp matching rules](https://github.com/Megami-Decomps/dds-decomp/blob/main/docs/CONTRIBUTING.md#matching-rules)
+are the canonical policy for this project and apply here in full, including
+both their permissions and their evidence requirements. The linked policy is
+the source of truth for every condition summarized below.
 
-- **No fakematches.** Inline asm is allowed only for COP2/VU0 and MMI
-  sequences gcc 2.96 cannot emit from C, kept small inside real C. Not
-  allowed:
-  - register pinning (`register x asm("$n")`)
-  - computed gotos or label tables standing in for a `switch`
-  - dummy variables, dead stores or `volatile` added to steer codegen
-  - one-off inline wrappers that exist only to change codegen
-  - self-cancelling statements (`x++; x--;`), `^ 0`, `* 1`, full-width masks,
-    chained assignments that only share a register
-  - reading a typed struct through a flat word array or cursor
-  - permuter output landed as it came out. A decomp-permuter hit is a hint:
-    reduce it to the smallest change that still matches, land it only if it is
-    code a person would write, and say in the commit message what the change
-    gives the compiler. `tools/perm_unit.py` runs the permuter inside the real
-    unit with only those kinds of mutations enabled.
-- **Plausible source.** Use structs for recurring layouts, real types (no `u64`
-  unless the value is 64-bit), meaningful parameter and local names, and
-  natural loops and switches.
-- **Compiler flags need evidence.** Every unit builds with `-O2 -G8` until a
-  contiguous run of functions in one file is shown to need something else. One
-  function that matches under some option is not evidence.
-- **Close is not matched.** A near miss stays `INCLUDE_ASM`. Save its best C
-  outside the build with a note on the remaining difference.
+Plausible, ordinary source must compile to the exact retail bytes. Matching
+establishes the reconstructed behavior and compiler properties; it does not
+establish the original source spelling or variable names. In particular, the
+policy permits:
 
-Narrow exceptions exist for frame gaps from unused locals, a statement that
-blocks a tail call, and dead code that retail still shows. They are written up
-with their conditions and required citations in
-[dds-decomp's matching rules](https://github.com/Megami-Decomps/dds-decomp/blob/main/docs/CONTRIBUTING.md#matching-rules);
-the same rules apply here. Before starting, read
-[dds-decomp `docs/idioms.md`](https://github.com/Megami-Decomps/dds-decomp/blob/main/docs/idioms.md),
-which lists the source shapes confirmed to produce specific ee-gcc 2.96
-sequences on this engine.
+- Ordinary C justified by a qualified trace of the real compiler, including
+  live scratch scalar reuse across disjoint phases under its semantic-review,
+  truthful-type and output-parity requirements.
+- Evidence-backed unused aggregates explaining frame gaps, a statement after
+  the final call that blocks a tail call, and dead code whose trace survives
+  in retail, under the specific conditions in the canonical rules.
+- Volatile VU0 scratch vectors and matrices under the canonical
+  [bare-address hardware hand-off idiom](https://github.com/Megami-Decomps/dds-decomp/blob/main/docs/idioms.md),
+  where only VU0 assembly observes their element stores.
+- Real constant endpoints in floating-point interpolation when the algorithm,
+  native operations and matched-family evidence meet the canonical rules.
+- A one-pass block or forward branch when a compiler trace or matched sibling
+  establishes the required block shape.
+- Bounded search as a diagnostic aid. Reduce a hit to readable, ordinary C,
+  explain the compiler property, and qualify it independently before landing.
+
+These permissions retain the prohibitions on fakematches, register pinning,
+artificial dependencies, false types, dummy uses and unsupported compiler flags.
+A close reconstruction remains `INCLUDE_ASM` with its best draft preserved.
+
+For SMT3, use the existing COP2/VU0 and MMI macros in `include/ps2asm.h` and
+check the complete affected units with `tools/check_unit.py`, then the full
+retail checksum build with `ninja`. An unchanged DDS donor does not need
+donor-side requalification; changes made to DDS itself must pass its own checks too.
+
+Before starting, read
+[dds-decomp `docs/idioms.md`](https://github.com/Megami-Decomps/dds-decomp/blob/main/docs/idioms.md)
+for confirmed source shapes, and [the local matching levers](matching-levers.md)
+for SMT3 measurements. The [compiler trace guide](cc1probe.md)
+explains `tools/cc1probe.sh` and output-parity qualification; a trace measured
+on DDS is a lead until the relevant property is established for the SMT3 unit.
 
 ## 1. Pick a function
 
 Every retail function belongs to a C unit under `src/smt3/`. A function that is
-not done yet is an `INCLUDE_ASM(const s32, "main/code_<vram>", NAME);` line, and
-its assembly is in `asm/smt3/nonmatchings/main/code_<vram>/NAME.s`.
+not done yet is an `INCLUDE_ASM(const s32, "<dir>/<unit>", NAME);` line, and
+its assembly is in `asm/smt3/nonmatchings/<dir>/<unit>/NAME.s`.
 
-`.text` is currently one `main` segment split into `code_<vram>` units: no original
-file boundaries have been recovered in this repo yet. See [Names](names.md) for
-what is known about the original file names and why they are not used as unit
-names yet. The Sony SDK libraries are prebuilt archives and stay assembly.
+The `main` segment is split into named translation units where the evidence
+supports them, with `code_<vram>` placeholders for the rest. Preserve the
+configured boundaries; see [TU recovery](tu-recovery.md). Sony SDK and runtime
+units under `src/smt3/sdk/` use their configured compiler and remain outside
+game-code progress; see [SDK matching](sdk-matching.md).
 
 ```sh
 python tools/progress.py
@@ -125,15 +132,19 @@ one line in the source and the detail in
 ## 3. Verify
 
 ```sh
-python tools/check_unit.py src/smt3/main/code_<vram>.c [-v] [--func NAME]
+python tools/check_unit.py src/smt3/<dir>/<unit>.c [-v] [--func NAME]
 ```
 
 The unit is clean when this ends in `N match, 0 differ`. Always check the whole
 unit after an edit: a changed declaration, or even a new name, can change how
-other functions in the same unit compile. Then build:
+other functions in the same unit compile. Then run the build and the checks
+used by CI:
 
 ```sh
 ninja     # fails unless the ELF is byte-identical to retail
+(for test in tools/test_*.py; do python3 "$test" || exit; done)
+python3 tools/check_nonmatching.py
+python3 tools/check_irx_nonmatching.py
 ```
 
 A unit that checks clean on its own but breaks the build is usually a data
@@ -166,7 +177,7 @@ flag facts instead of a standalone file's.
 
 ```sh
 export DECOMP_PERMUTER=../decomp-permuter       # default: next to this repo
-python3 tools/perm_unit.py import src/smt3/code_<vram>.c NAME draft.c
+python3 tools/perm_unit.py import src/smt3/<dir>/<unit>.c NAME draft.c
 $DECOMP_PERMUTER/permuter.py build/permuter/smt3_NAME -j8 --best-only --stop-on-zero
 ```
 

@@ -110,13 +110,7 @@ extern void pb_load_mapdata_Shutdown(dds3ProcessID_t *id);
 
 extern u8 pbMapPathIdx, pbMenuIndex, pbMenuState;
 
-extern u8 pbMapNo;
-
 extern void *memset(void *a, s32 b, u32 c);
-
-extern void *memcpy(void *a, const void *b, u32 c);
-
-extern u8 D_00327458[];
 
 extern s32 pb_proc_menu_Process(dds3ProcessID_t *id);
 
@@ -154,7 +148,10 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 extern char D_00535E10[], D_00535EC8[];
 
 
-void pbMakeMapPath(pbProcHandle_t *parent) {
+extern u8 pbMapNo;
+
+void pbMakeMapPath(pbProcHandle_t *parent)
+{
     if (pbMapPathIdx == 3) {
         dds3FadeOut(0, 0, 0, 1);
         if (pbMapNo < 30) {
@@ -236,36 +233,40 @@ void pb_proc_menu_Shutdown(dds3ProcessID_t *id) {
     D_0054F5C4->menuState = 0;
 }
 
-s32 pb_load_mapdata_Process(dds3ProcessID_t *id) {
-    dds3ProcessID_t *parent = id->parent;
-    pbProcHandle_t *panel;
-    pbPanelValue_t *work;
-    s32 ret = 0;
+extern void *memcpy(void *dst, const void *src, u32 size);
+typedef struct { u16 cells[20][20]; } pbMapBlock_t;
+extern pbMapBlock_t D_00327458;
 
-    if (parent != NULL) {
-        panel = parent->workdata;
-        work = panel->data.value;
-        if (pbLoadState == 1) {
-            dds3ResetProcessFlag(panel->id, 0x10, 1);
-            panel->flags = 0x50000;
+s32 pb_load_mapdata_Process(dds3ProcessID_t *id) {
+    s32 result = 0;
+    pbProcHandle_t *parent;
+    pbPanelValue_t *panelValue;
+
+    if (id->parent != NULL) {
+        s8 loadState;
+        parent = id->parent->workdata;
+        loadState = pbLoadState;
+        panelValue = parent->data.value;
+        if (loadState == 1) {
+            dds3ResetProcessFlag(parent->id, 0x10, 1);
+            parent->flags = 0x50000;
             if (pbGetMoveChar() != 0) {
                 ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x10000;
             }
-            if (work->value == 1) {
-                memcpy(D_00327458, D_0054F5C4->unk01C, 0x320);
+            if (panelValue->value == loadState) {
+                memcpy(&D_00327458, D_0054F5C4->unk01C, 0x320);
             }
-            ret = -1;
+            result = -1;
         }
-    } else {
-        if (pbLoadState == 1) {
-            if (pbGetMoveChar() != 0) {
-                ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x10000;
-            }
-            memcpy(D_00327458, D_0054F5C4->unk01C, 0x320);
-            ret = -1;
+    } else if (pbLoadState == 1) {
+        if (pbGetMoveChar() != 0) {
+            ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x10000;
         }
+        memcpy(&D_00327458, D_0054F5C4->unk01C, 0x320);
+        result = -1;
     }
-    return ret;
+
+    return result;
 }
 
 void pb_load_mapdata_Shutdown(dds3ProcessID_t *id) {

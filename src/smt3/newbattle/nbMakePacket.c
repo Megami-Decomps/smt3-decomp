@@ -1397,7 +1397,82 @@ s32 nbMakePressPacket(s32 startframe, s32 uniqueid, f32 press)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeNewPressPacket);
+s32 nbMakeNewPressPacket(s32 startframe, s32 uniqueid, s32 type)
+{
+    nbMainProcessData_t *data;
+    s32 press, turns;
+    s32 deltaTurns, deltaPress;
+    s32 totalPress, totalTurns;
+    s32 i;
+
+    data = nbGetMainProcessData();
+    press = data->press4_p;
+    turns = data->pressturn;
+    deltaPress = 0;
+    deltaTurns = 0;
+    totalPress = 0;
+    totalTurns = 0;
+    /* Qualified cc1 loop notes 54/337 retain the retail back edge at 0x2644D8. */
+    for (i = 0; i < 1; i++) {
+        s32 noHalfTurn = press == 0;
+        s32 hasHalfTurn = press < turns;
+        switch (type) {
+        case 0: case 8: case 9: case 10: case 11: case 12:
+            if (hasHalfTurn) {
+                deltaTurns = -1;
+            } else {
+                deltaPress = -1;
+                deltaTurns = -1;
+            }
+            break;
+        case 1:
+            if (hasHalfTurn) deltaTurns = -1;
+            else deltaPress = -1;
+            break;
+        case 2: case 3:
+            if (noHalfTurn) deltaTurns = -1;
+            else deltaPress = -1;
+            break;
+        case 4: case 5:
+            if (hasHalfTurn) {
+                deltaTurns = -2;
+                if (press > turns - 2) deltaPress = -(press - turns + 2);
+            } else {
+                deltaTurns = -2;
+                deltaPress = -2;
+            }
+            break;
+        case 6: case 7: case 13: case 14:
+            deltaTurns = -10;
+            deltaPress = -10;
+            break;
+        case 15:
+            deltaTurns = 2;
+            deltaPress = 0;
+            break;
+        case 16:
+            deltaTurns = 4;
+            deltaPress = 0;
+            break;
+        case 17:
+            deltaTurns = 3;
+            deltaPress = 0;
+            break;
+        }
+        press += deltaPress;
+        turns += deltaTurns;
+        if (press < 0) press = 0;
+        if (turns < 0) turns = 0;
+        totalPress += deltaPress;
+        totalTurns += deltaTurns;
+        if (press > 7) press = 7;
+        if (turns > 7) turns = 7;
+        if (data->press4_p + totalPress > 8) totalPress = 8 - data->press4_p;
+        if (data->pressturn + totalTurns > 8) totalTurns = 8 - data->pressturn;
+    }
+    nbAddNewPressPacket(startframe, uniqueid, totalPress, totalTurns);
+    return 1;
+}
 
 s32 nbMakeFlyBadPacket(s32 startframe, s32 uniqueid, nbFormation_t *form)
 {
@@ -1453,7 +1528,43 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMoveGetCyDist);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMovePacket);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeNegoWorkPosPacket);
+s32 nbMakeNegoWorkPosPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                            nbFormation_t *target)
+{
+    sdfVector4_t direction;
+    sdfVector4_t pos;
+    sdfVector4_t axis;
+    f32 distance;
+    f32 targetRadius;
+    f32 formRadius;
+    f32 scale;
+
+    memset(&axis, 0, sizeof(axis));
+    axis.z = 1.0f;
+    SDF_VU0_LOADVECTOR(&target->rot);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&axis);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&direction);
+
+    distance = nbMakeUnitMoveGetCyDist(form, target);
+    SDF_VU0_LOADVECTOR(&direction);
+    formRadius = form->r * form->scl;
+    targetRadius = target->r * target->scl;
+    scale = targetRadius + (formRadius + formRadius) + 100.0f + distance;
+    SDF_VU0_SCALEVECTOR(scale);
+    SDF_VU0_LOADVECTOR_B(&target->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    nbAddTargetMoveKoukaPacket(startframe, uniqueid, form->partyindex, &pos, 1.0f);
+
+    SDF_VU0_LOADVECTOR(&direction);
+    SDF_VU0_SCALEVECTOR_V0(-1.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    nbAddRotKoukaPacket(startframe, uniqueid, form->partyindex, &pos, 0x64);
+    nbMakeUnitFadeOutPacket(startframe, uniqueid, form, 0, 0, 0, 0);
+    return 1;
+}
 
 /* NON_MATCHING: 2 of 65 words differ (first at +0x8C). */
 #ifdef NON_MATCHING

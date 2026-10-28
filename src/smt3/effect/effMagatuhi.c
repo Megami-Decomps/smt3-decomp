@@ -1545,8 +1545,6 @@ void effMagaCylinderPartInit(effMagaCylinder_tag *pMagaCylinder, s32 index) {
     effMagaCylinderSetPart(pMagaCylinder->pMagatuhi->valueWork, index, 0);
 }
 
-/* NON_MATCHING: 40 of 172 words differ (first at +0x3C). */
-#ifdef NON_MATCHING
 void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
@@ -1554,22 +1552,22 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
     effMagaCylinderPart_tag *particle;
     u8 respawn;
     u32 count;
-    u32 tintColor;
     s32 life, spread, fadeIn, fadeOut;
+    u32 tintColor;
     f32 angle, radius, fade;
     s32 age;
     u32 i;
 
-    count = pData->param.particleCount;
-    valueWork = pData->pMagatuhi->valueWork;
     particle = pData->pPart;
+    count = pData->param.particleCount;
     respawn = pData->param.loop;
-    tintColor = pData->abgr;
     life = pData->param.life;
     spread = pData->param.timing;
     fadeIn = pData->param.fade_in;
     fadeOut = pData->param.fade_out;
-    SDF_VU0_COPYVECTOR(origin, pData->param.origin);
+    tintColor = pData->abgr;
+    valueWork = pData->pMagatuhi->valueWork;
+    SDF_VU0_COPYVECTOR_MEMOPS(origin, pData->param.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->frame;
@@ -1608,9 +1606,6 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
     }
     effMagaCylinderDrawTrack(pData->pMagatuhi);
 }
-#else
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaCylinderDraw);
-#endif
 
 /* Copy the ring origin as one quadword, including its fourth component. */
 void effMagaCylinderSetPosition(effMagaCylinder_tag *pData, void *pPos) {
@@ -1750,8 +1745,6 @@ void effMagaSpiralPartInit(effMagaSpiral_tag *pMagaSpiral, s32 index) {
     effMagaCylinderSetPart(pMagaSpiral->pMagatuhi->valueWork, index, 0);
 }
 
-/* NON_MATCHING: 40 of 176 words differ (first at +0x3C). */
-#ifdef NON_MATCHING
 void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
@@ -1759,22 +1752,22 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
     effMagaSpiralPart_tag *particle;
     u8 respawn;
     u32 count;
-    u32 tintColor;
     s32 life, spread, fadeIn, fadeOut;
+    u32 tintColor;
     f32 angle, radius, fade;
     s32 age;
     u32 i;
 
-    count = pData->param.particleCount;
-    valueWork = pData->pMagatuhi->valueWork;
     particle = pData->pPart;
+    count = pData->param.particleCount;
     respawn = pData->param.loop;
-    tintColor = pData->abgr;
     life = pData->param.life;
     spread = pData->param.timing;
     fadeIn = pData->param.fade_in;
     fadeOut = pData->param.fade_out;
-    SDF_VU0_COPYVECTOR(origin, pData->param.origin);
+    tintColor = pData->abgr;
+    valueWork = pData->pMagatuhi->valueWork;
+    SDF_VU0_COPYVECTOR_MEMOPS(origin, pData->param.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->frame;
@@ -1814,9 +1807,6 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
     }
     effMagaCylinderDrawTrack(pData->pMagatuhi);
 }
-#else
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSpiralDraw);
-#endif
 
 /* Copy the orbit origin as one quadword, preserving the source w. */
 void effMagaSpiralSetPosition(effMagaSpiral_tag *pData, void *pPos) {
@@ -1978,8 +1968,6 @@ void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
     effMagaCylinderSetPart(pMagaSmoke->pMagatuhi->valueWork, index, 0);
 }
 
-/* NON_MATCHING: 42 of 182 words differ (first at +0x3C). */
-#ifdef NON_MATCHING
 void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
@@ -1987,24 +1975,25 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
     effMagaSmokePart_tag *particle;
     u8 respawn;
     u32 count;
-    u32 tintColor;
     s32 life, spread, fadeIn, fadeOut;
-    f32 angleStep, scaleStep, radial, fade;
+    u32 tintColor;
+    f32 radial, fade;
+    f32 angleStep, scaleStep;
     s32 age;
     u32 i;
 
-    count = pData->param.particleCount;
-    valueWork = pData->pMagatuhi->valueWork;
     particle = pData->pPart;
-    respawn = pData->param.loop;
     tintColor = pData->abgr;
+    count = pData->param.particleCount;
+    respawn = pData->param.loop;
     life = pData->param.lifetimeFrames;
     spread = pData->param.delaySpread;
     angleStep = pData->param.angleStep;
     scaleStep = pData->param.scaleStep;
     fadeIn = pData->param.fadeIn;
     fadeOut = pData->param.fadeOut;
-    SDF_VU0_COPYVECTOR(origin, pData->param.origin);
+    valueWork = pData->pMagatuhi->valueWork;
+    SDF_VU0_COPYVECTOR_MEMOPS(origin, pData->param.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->age;
@@ -2043,9 +2032,6 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
     }
     effMagaCylinderDrawTrack(pData->pMagatuhi);
 }
-#else
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSmokeDraw);
-#endif
 
 /* Copy the drift origin as one quadword, preserving the source w. */
 void effMagaSmokeSetPosition(effMagaSmoke_tag *pData, void *pPos) {

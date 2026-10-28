@@ -9,6 +9,8 @@ void fclFreeStage(void);
 
 extern s32 dds3GetProcessStat(void *id);
 
+extern u32 dds3GetRandA(void *name);
+
 extern s32 fclSetWorkValue(s8 index, s32 value);
 
 s32 fclGetFlag(s8 index);
@@ -61,7 +63,7 @@ extern void itfMesMngSetVarImmediate(s32 id, s8 index, s32 pstr);
 
 extern s32 itfMesMngGetSelectNo(s32 msgid);
 
-extern s32 itfMesMngGetSelPhase(s32 msgid);
+extern s16 itfMesMngGetSelPhase(s32 msgid);
 
 extern s32 fclWorkValue[16];
 
@@ -95,6 +97,14 @@ typedef struct
  * partial views; the alias holds them apart until one covers the object. */
 extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
 
+typedef struct
+{
+    u8 unk_00000[0x1928];
+    u8 item[0xA0];
+} fclGlobalWorkItemInventory_t;
+
+extern fclGlobalWorkItemInventory_t *fclGlobalWorkItems asm("DDS3_GBWK");
+
 extern s32 datAddItem(s32 id, s32 num);
 
 extern s32 dds3KillProcess(s32 id, s32 shutdowntimer);
@@ -103,7 +113,7 @@ extern s32 fclChkMessage(void);
 
 extern void fclScriptForcedEnd(u8 *PID);
 
-extern s32 fclBlendColor(s32 color, s32 mask, s32 alpha);
+extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
 
 extern s8 gMsgFlag;
 
@@ -260,7 +270,19 @@ void func_00213BB8(fclItemList_t *list)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclMisc", fclCreateItemListEx);
+extern s32 cmpItemHasFlag(u16 item, s8 which);
+
+void fclCreateItemListEx(fclItemList_t *list, s8 which)
+{
+    s32 item;
+
+    list->count = 0;
+    for (item = 1; item < 0xA0; item++) {
+        if (fclGlobalWorkItems->item[item] != 0 && cmpItemHasFlag(item, which) != 0) {
+            list->item[list->count++] = item;
+        }
+    }
+}
 
 s32 cmpItemOrder(u8 *a, u8 *b)
 {
@@ -293,7 +315,24 @@ s32 func_00213CD8(u8 *list, s32 count, u8 value)
     return kept;
 }
 
-INCLUDE_ASM(const s32, "facility/fclMisc", shuffleIndices);
+void shuffleIndices(s8 *order, s32 count, s32 rounds)
+{
+    s32 n;
+
+    if (rounds <= 0) {
+        return;
+    }
+    n = rounds;
+    while (n != 0) {
+        s32 first = (u32)dds3GetRandA(0) % (u32)count;
+        s32 second = (u32)dds3GetRandA(0) % (u32)count;
+        u8 value = order[first];
+
+        order[first] = order[second];
+        order[second] = value;
+        n--;
+    }
+}
 
 extern char *text2[];
 
@@ -307,20 +346,52 @@ char *func_00213DC0(datUnitWork_t *unit)
     return text2[unit->id];
 }
 
-INCLUDE_ASM(const s32, "facility/fclMisc", func_00213DF0);
+u32 func_00213DF0(u32 color, u32 scaleFactor)
+{
+    u32 red = color >> 24;
+    u32 green = (color >> 16) & 0xFF;
+    u32 blue = (color & 0xFF00) >> 8;
+    u32 alpha = color & 0xFF;
 
-INCLUDE_ASM(const s32, "facility/fclMisc", fclBlendColor);
+    red = (red * scaleFactor) >> 8;
+    green = (green * scaleFactor) >> 8;
+    blue = (blue * scaleFactor) >> 8;
+    return (red << 24) | (green << 16) | (blue << 8) | alpha;
+}
 
-extern s32 itfMesMngInitialize(void);
+u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight)
+{
+    u32 a0 = firstColor >> 24;
+    u32 r0 = (firstColor & 0xFF0000) >> 16;
+    u32 g0 = (firstColor & 0xFF00) >> 8;
+    u32 b0 = firstColor & 0xFF;
+    u32 a1 = secondColor >> 24;
+    u32 r1 = (secondColor & 0xFF0000) >> 16;
+    u32 g1 = (secondColor & 0xFF00) >> 8;
+    u32 b1 = secondColor & 0xFF;
+    u32 inv;
+
+    if (weight > 0x100) {
+        weight = 0x200 - weight;
+    }
+    inv = 0x100 - weight;
+    a0 = (a0 * weight + a1 * inv) >> 8;
+    r0 = (r0 * weight + r1 * inv) >> 8;
+    g0 = (g0 * weight + g1 * inv) >> 8;
+    b0 = (b0 * weight + b1 * inv) >> 8;
+    return (a0 << 24) | (r0 << 16) | (g0 << 8) | b0;
+}
+
+extern s32 itfMesMngInitialize(void *data);
 
 extern void itfMesMngChangeWindowType(s32 id, s32 type, s32 alpha);
 
-s32 fclInitMessage(void)
+s8 fclInitMessage(void *pData)
 {
     s32 ret;
 
     if (gMsgID < 0) {
-        gMsgID = itfMesMngInitialize();
+        gMsgID = itfMesMngInitialize(pData);
         itfMesMngChangeWindowType(gMsgID, 2, 0);
         ret = 1;
     } else {
@@ -436,7 +507,39 @@ s32 fclChkSelMessage(void)
     return itfMesMngGetSelPhase(gMsgID) >= 0;
 }
 
-INCLUDE_ASM(const s32, "facility/fclMisc", fclUpdateMessage);
+extern s8 itfMesMngGetPhase(s32 msgid);
+extern s32 itfMesMngSetSelectDefKey(s32 id, s32 key, s32 index);
+extern void itfMesMngSetSelect(s32 id, s32 selno);
+extern void itfMesMngRequestSelect(s32 id, s32 select);
+
+void fclUpdateMessage(void)
+{
+    if (gMsgID < 0) {
+        return;
+    }
+    switch (gMsgFlag) {
+    case 0:
+        break;
+    case 1:
+        if (itfMesMngGetPhase(gMsgID) < 0) {
+            gMsgFlag = 2;
+        }
+        break;
+    case 2:
+        if (gSelMsgNo >= 0) {
+            itfMesMngSetSelectDefKey(gMsgID, 3, 1);
+            itfMesMngSetSelect(gMsgID, gSelMsgPos);
+            itfMesMngRequestSelect(gMsgID, gSelMsgNo);
+            gSelMsgNo = -1;
+        }
+        if (gMsgInvFlag == 0 && fclChkSelMessage() == 0) {
+            gMsgFlag = 3;
+        }
+        break;
+    case 3:
+        return (void)fclEndMessageEx(1);
+    }
+}
 
 void fclSetMessageVar_20743088(s8 Index, s32 pStr)
 {

@@ -35,6 +35,13 @@ typedef struct
 
 typedef struct
 {
+    u8 opaque00[4];
+    fldAmAreaData_t *areaTable; /* 0x04: first relocated area row */
+    s32 areaCount;              /* 0x08: number of area rows */
+} fldAmInfoHeader_t;
+
+typedef struct
+{
     s32 unk00;
     s32 id;
     s32 activationState;
@@ -470,16 +477,16 @@ void fldAutoMapFontInit(s32 bank) {
 }
 
 
-/* NON_MATCHING: 24 of 91 words, two alignment nops short; saved registers are swapped. */
-#ifdef NON_MATCHING
 void fldAmModelLoadFile(void) {
-    fldAreaWork_t *work = &fldGlobalBase;
     char path[0x80];
     char dir[0x40];
+    fldAreaWork_t *work = &fldGlobalBase;
     u8 *data;
-    const char *fmt;
+    u8 *transferStart;
     s32 floor;
-    u32 *info;
+    fldAmInfoHeader_t *info;
+    fldAmAreaData_t *rows;
+    s32 count;
 
     fldMakeFilePath(dir, work->area, 1);
     if (work->area == 0x19 && work->floor + 1 >= 0x11) {
@@ -487,30 +494,29 @@ void fldAmModelLoadFile(void) {
     } else if (fldGlobalBase.area == 0x22) {
         floor = fldGlobalBase.floor + 1;
         if (floor < 4) {
-            fmt = "%sf%03d.amb";
+            sprintf(path, "%sf%03d.amb", dir, 0x22);
         } else if (floor < 0xB) {
-            fmt = "%sf%03db.amb";
+            sprintf(path, "%sf%03db.amb", dir, 0x22);
         } else if (floor < 0x13) {
-            fmt = "%sf%03dc.amb";
+            sprintf(path, "%sf%03dc.amb", dir, 0x22);
         } else if (floor < 0x1A) {
-            fmt = "%sf%03dd.amb";
+            sprintf(path, "%sf%03dd.amb", dir, 0x22);
         } else {
             goto plain;
         }
-        sprintf(path, fmt, dir, 0x22);
     } else {
     plain:
         sprintf(path, "%sf%03d.amb", dir, fldGlobalBase.area);
     }
     fldAutoMapBuf = sdfDevLoadFileEx(path, &data, 0);
-    fldAddressResolver(data, data + 8);
-    info = (u32 *)fldGetInfoHeader(data + 8);
-    fldAutoMapData = info[2];
-    fldAutoMapHeader = (fldAmAreaData_t *)info[1];
+    transferStart = data + 8;
+    fldAddressResolver(data, transferStart);
+    info = (fldAmInfoHeader_t *)fldGetInfoHeader(transferStart);
+    rows = info->areaTable;
+    count = info->areaCount;
+    fldAutoMapData = count;
+    fldAutoMapHeader = rows;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAmModelLoadFile);
-#endif
 
 
 void fldAmbLoadFromMem(u8 *data, sdfMemHandle_t *mh) {
@@ -533,7 +539,23 @@ void fldAmbLoadFromMem(u8 *data, sdfMemHandle_t *mh) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapModelLoad);
+void fldAutoMapModelLoad(void) {
+    fldAreaWork_t *work = &fldGlobalBase;
+
+    if (work->area < 200) {
+        fldAutoMapFontInit(work->area % 100);
+        /* Keep the one-pass model phase visible as one block; see
+         * docs/levers/callee-visibility.md for the matched call delay slot. */
+        do {
+            s32 area = fldGlobalBase.area;
+            if (area >= 10) {
+                fldAmModelLoadFile();
+            } else {
+                break;
+            }
+        } while (0);
+    }
+}
 
 void fldAutoMapFileFree(void) {
     if (fldAutoMapBuf != 0) {

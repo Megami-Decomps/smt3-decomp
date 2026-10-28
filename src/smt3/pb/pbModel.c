@@ -153,7 +153,51 @@ void func_001D2B68(void) {
 void func_001D2B70(void) {
 }
 
-INCLUDE_ASM(const s32, "pb/pbModel", pbInitMyCharacterDraw);
+extern void *sdfChipAllocDirect(s32 size);
+extern void *memset(void *dst, s32 value, u32 size);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
+    s32 shutdownTimer, dds3ProcessFunc_t process, dds3ProcessFunc_t shutdown, void *data);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
+extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
+extern s32 pb_draw_mycharacter_Process(dds3ProcessID_t *id);
+extern void pb_draw_mycharacter_Shutdown(dds3ProcessID_t *id);
+extern mdlObj_t *mdlLoad(u32 major, u32 minor);
+extern void mdlLoopMotion(mdlObj_t *model, s32 group, s32 number);
+extern void mdlSetScale(mdlObj_t *model);
+extern const sdfVector4_t D_00535C58;
+extern char D_00535C68[];
+
+pbProcHandle_t *pbInitMyCharacterDraw(pbProcHandle_t *parent)
+{
+    /* Only the bare-address VU0 load observes this scale vector. */
+    volatile sdfVector4_t scale __attribute__((aligned(16))) = D_00535C58;
+    pbProcHandle_t *panel;
+    pbMyChar_t *chara;
+
+    panel = sdfChipAllocDirect(sizeof(*panel));
+    panel->id = dds3StartProcess(D_00535C68, 0x2AFD, 1, 1,
+        pb_draw_mycharacter_Process, (dds3ProcessFunc_t)pb_draw_mycharacter_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->id, panel->id);
+    }
+    panel->flags = 0x10000;
+    panel->data.chara = sdfChipAllocDirect(sizeof(*chara));
+    chara = panel->data.chara;
+    memset(chara, 0, sizeof(*chara));
+    dds3SetProcessData(panel->id, panel);
+    chara->flg = 1;
+    chara->y = 0;
+    chara->x = 0;
+    chara->dir = -1;
+    chara->pos.x = -380.0f;
+    chara->pos.z = -380.0f;
+    chara->pos.w = 1.0f;
+    chara->model = mdlLoad(6, 0x150);
+    mdlLoopMotion(chara->model, 0, 0);
+    SDF_VU0_LOADVECTOR(&scale);
+    mdlSetScale(chara->model);
+    return panel;
+}
 
 s32 pbGetPanelField(pbProcHandle_t *panel) {
     pbMyChar_t *chara = panel->data.chara;
@@ -241,19 +285,13 @@ s32 pbGetMyCharcterRot(pbProcHandle_t *p) {
 }
 
 
-/* NON_MATCHING: 2 of 23 words; the index and work pseudos swap saved registers. */
-#ifdef NON_MATCHING
 void pbSetPanelModel(pbProcHandle_t *panel, s32 index) {
-    pbPanelModel_t *work;
+    pbMyChar_t *chara = panel->data.chara;
     if (panel != NULL) {
-        work = panel->data.model;
         pbSetModelRotate((mdlObj_t *)pbGetPanelField(panel), 0.0f, D_00326C60[index], 0.0f);
-        work->modelIndex = index;
+        chara->dir = index;
     }
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbModel", pbSetPanelModel);
-#endif
 
 
 INCLUDE_ASM(const s32, "pb/pbModel", pb_draw_exit_Process);
@@ -311,7 +349,23 @@ INCLUDE_ASM(const s32, "pb/pbModel", func_001D35F0);
 
 INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapPoly);
 
-INCLUDE_ASM(const s32, "pb/pbModel", pb_1D3940);
+extern void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag);
+
+void pb_1D3940(s32 x, s32 y, sdfDrawTag_t *tag)
+{
+    sdfVector4_t rotation __attribute__((aligned(16)));
+    sdfVector4_t position __attribute__((aligned(16)));
+    sdfVector4_t geometry __attribute__((aligned(16)));
+
+    memset(&rotation, 0, 0x10);
+    memset(&position, 0, 0x10);
+    memset(&geometry, 0, 0x10);
+    geometry.y = 20.0f;
+    position.x = x * 40 - 380;
+    position.z = y * 40 - 380;
+    pbSetPrimMatrix(&rotation, &position.x, tag);
+    pbDrawMapPoly(&geometry, tag);
+}
 
 INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C80);
 

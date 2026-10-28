@@ -8,22 +8,6 @@ extern u8 dds3PadVibrationMode[2];
 
 extern s32 dds3PadVibrationTable[2];
 
-extern u8 dds3PadButtonState[64];
-
-extern u8 dds3PadButtonPrev[64];
-
-extern u32 D_002F56C0[64];
-
-extern u32 D_002F57C0[4];
-
-extern u8 dds3PadStickPrev[8];
-
-extern s8 dds3PadStickStatusPrev[4];
-
-extern u8 dds3PadStickState[8];
-
-extern u8 dds3PadStickStatusState[4];
-
 extern u32 dds3GetProcessRunTime(dds3ProcessID_t *id);
 
 extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
@@ -32,13 +16,20 @@ extern s32 dds3GetGlobalConfigFlag(u32 flag);
 
 extern void dds3GetVibrationLevel(void);
 
-extern int printf(const char *fmt, ...);
-
 extern void sdfPadSetAct0(s32 pad, u16 value);
 
 extern void sdfPadSetAct1(s32 pad, u8 value);
 
 extern void sdfPadSetAct(s32 pad, s32 value0, s32 value1);
+
+extern u8 dds3PadButtonState[64];
+extern u8 dds3PadButtonPrev[64];
+extern u32 D_002F56C0[64];
+extern u32 D_002F57C0[4];
+extern u8 dds3PadStickPrev[8];
+extern s8 dds3PadStickStatusPrev[4];
+extern u8 dds3PadStickState[8];
+extern u8 dds3PadStickStatusState[4];
 
 void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
 
@@ -83,38 +74,31 @@ void dds3PadInitialize(void) {
 
 INCLUDE_ASM(const s32, "kernel/dds3PadManager", dds3RunProcessList);
 
-#ifdef NON_MATCHING
-/* 27 of 29 words at the exact size; the printf tail loads the level through the
-   pointer register instead of $gp, which reverses it with the format lui. */
-void dds3GetVibrationLevel(void) {
-    u8 target = dds3PadVibrationMode[1];
-    s32 diff;
-    s32 step;
+extern u8 dds3PadVibrationLevel;
+extern u8 D_00551B91;
+extern s32 printf(const char *format, ...);
 
-    if (dds3PadVibrationState[1] < target) {
-        diff = target - dds3PadVibrationState[1];
-        step = dds3PadVibrationState[1] + 32;
-        if (diff > 32) {
-            dds3PadVibrationState[1] = step;
+void dds3GetVibrationLevel(void)
+{
+    u8 target = dds3PadVibrationLevel;
+    u8 *level = dds3PadVibrationState + 1;
+    if (target > *level) {
+        if (target - *level > 0x20) {
+            *level += 0x20;
         } else {
-            dds3PadVibrationState[1] = target;
+            *level = target;
         }
-    } else if (dds3PadVibrationState[1] > target) {
-        diff = dds3PadVibrationState[1] - target;
-        step = dds3PadVibrationState[1] + 0xE0;
-        if (diff > 32) {
-            dds3PadVibrationState[1] = step;
+    } else if (target < *level) {
+        if (*level - target > 0x20) {
+            *level -= 0x20;
         } else {
-            dds3PadVibrationState[1] = target;
+            *level = target;
         }
     } else {
-        dds3PadVibrationState[1] = target;
+        *level = target;
     }
-    printf("PadActPow:%02x/%02x\n", dds3PadVibrationState[1], target);
+    printf("PadActPow:%02x/%02x\n", D_00551B91, target);
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3PadManager", dds3GetVibrationLevel);
-#endif
 
 void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
     if (dds3GetGlobalConfigFlag(0) == 0) {

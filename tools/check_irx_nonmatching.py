@@ -50,6 +50,11 @@ def check(module: str, shim: Path) -> int:
          "-I", str(ROOT / "include" / "irx"), str(src)],
         capture_output=True, text=True, cwd=ROOT)
     bad = [l for l in out.stderr.splitlines() if ": error:" in l or "error:" in l]
+    if out.returncode and not bad:
+        bad = [f"compiler exited with status {out.returncode}"]
+        detail = (out.stderr or out.stdout).strip()
+        if detail:
+            bad.append(detail)
     print(f"{module}: {'ok' if not bad else str(len(bad)) + ' error(s)'}")
     for line in bad[:20]:
         print("   " + line)

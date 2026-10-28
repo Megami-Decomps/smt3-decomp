@@ -2,6 +2,7 @@
 #include "basic.h"
 #include "kernel.h"
 #include "newdata.h"
+#include "ps2asm.h"
 
 extern sdfGrOt_t sdfGrOtTable[];
 
@@ -27,7 +28,9 @@ extern s32 evtSceneDispProcess(void *id);
 
 extern s32 DispBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *tag);
 
-extern s32 sdfFloatToULong(f32 value);
+extern f64 sdfFloatToULong(f32 value);
+
+EQUATE_FPTODP();
 
 extern char D_0054E9A8[];
 
@@ -35,68 +38,50 @@ extern char D_0054E9B0[];
 
 extern char D_0054E9B8[];
 
-/* NON_MATCHING: 170 of 190 words differ, one word short; retail spills the
- * label column and keeps the value column, and this keeps the label column. */
+s32 DispBaseData(dds3Basic_t *node, s32 x, s32 y, sdfDrawTag_t *list) {
+    dds3PoseSet_t *transform;
+    s32 labelX;
+    s32 valueX;
+    s32 positionY;
+    s32 rotationY;
+    s32 scaleY;
+    s32 lines;
 
-#ifdef NON_MATCHING
-
-s32 DispBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *tag)
-{
-    s32 valueX = ((x + 7) * 3 << 6) + 0x7000;
-    s32 labelX = (x * 3 << 6) + 0x7000;
-    dds3PoseSet_t *pose;
-    void *command;
-    char *format;
-    s32 v0;
-    s32 v1;
-    s32 v2;
-
-    command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, "ID    : 0x%05X", basic->serialID);
-    sdfDrawTagLink(tag, (u32)command);
-    y++;
-    command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, "NAME  : %s", basic->name);
-    sdfDrawTagLink(tag, (u32)command);
-    y++;
-    pose = basic->poseset;
-    if (pose == NULL) {
-        return 2;
+    x *= 12;
+    labelX = (x << 4) + 0x7000;
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
+        (y++ * 6 << 4) + 0x7900, 0xFEFFFF, 0, "ID    : 0x%05X", node->serialID));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
+        (y++ * 6 << 4) + 0x7900, 0xFEFFFF, 0, "NAME  : %s", node->name));
+    transform = node->poseset;
+    lines = 2;
+    if (transform != NULL) {
+        y++;
+        positionY = (y * 6 << 4) + 0x7900;
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
+            positionY, 0xFEFFFF, 0, D_0054E9A8));
+        valueX = ((x + 84) << 4) + 0x7000;
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(valueX,
+            positionY, 0xFEFFFF, 0xE, "%3.2f %3.2f %3.2f",
+            transform->pos.x, transform->pos.y, transform->pos.z));
+        y += 2;
+        rotationY = (y * 6 << 4) + 0x7900;
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
+            rotationY, 0xFEFFFF, 0, D_0054E9B0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(valueX,
+            rotationY, 0xFEFFFF, 0xE, "%3.2f %3.2f %3.2f %3.2f",
+            transform->rot.x, transform->rot.y, transform->rot.z, transform->rot.w));
+        y += 2;
+        scaleY = (y * 6 << 4) + 0x7900;
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
+            scaleY, 0xFEFFFF, 0, D_0054E9B8));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(valueX,
+            scaleY, 0xFEFFFF, 0xE, "%3.1f %3.1f %3.1f",
+            transform->scl.x, transform->scl.y, transform->scl.z));
+        lines = 8;
     }
-    y++;
-    command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, D_0054E9A8);
-    sdfDrawTagLink(tag, (u32)command);
-    format = "%3.2f %3.2f %3.2f";
-    v0 = sdfFloatToULong(pose->pos.x);
-    v1 = sdfFloatToULong(pose->pos.y);
-    v2 = sdfFloatToULong(pose->pos.z);
-    command = sdfDevPrintf(valueX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0xE, format, v0, v1, v2);
-    sdfDrawTagLink(tag, (u32)command);
-    y += 2;
-    command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, D_0054E9B0);
-    sdfDrawTagLink(tag, (u32)command);
-    format = "%3.2f %3.2f %3.2f %3.2f";
-    v0 = sdfFloatToULong(pose->rot.x);
-    v1 = sdfFloatToULong(pose->rot.y);
-    v2 = sdfFloatToULong(pose->rot.z);
-    command = sdfDevPrintf(valueX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0xE, format, v0, v1, v2,
-                           sdfFloatToULong(pose->rot.w));
-    sdfDrawTagLink(tag, (u32)command);
-    y += 2;
-    command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, D_0054E9B8);
-    sdfDrawTagLink(tag, (u32)command);
-    format = "%3.1f %3.1f %3.1f";
-    v0 = sdfFloatToULong(pose->scl.x);
-    v1 = sdfFloatToULong(pose->scl.y);
-    v2 = sdfFloatToULong(pose->scl.z);
-    command = sdfDevPrintf(valueX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0xE, format, v0, v1, v2);
-    sdfDrawTagLink(tag, (u32)command);
-    return 8;
+    return lines;
 }
-
-#else
-
-INCLUDE_ASM(const s32, "basic/dds3DbgBasic", DispBaseData);
-
-#endif
 
 u32 DispObjectBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *tag) {
     dds3ObjectBaseControlWorkData_t *handle;

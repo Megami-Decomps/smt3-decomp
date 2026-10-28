@@ -71,45 +71,6 @@ block written y, x, z, which is the draft); `node = control->camera;` as its
 own statement before each of the three uses; and a separate `dds3Basic_t *`
 local for the camera.
 
-## resetCamTgtPlayer (field/fldDraw, 0x1F8)
-
-90 of 126 words match, at the exact 504-byte size, and every instruction in the
-function is the one retail emits. Two things differ and nothing else.
-
-The first is a three-way rotation of the fp registers the eye block uses for
-`fldGlobalBase.y`, `D_002FC9C0[1]` and `D_002FC9C0[2]`: retail numbers them
-`$f3`, `$f4`, `$f5` and the draft gives `$f4`, `$f5`, `$f3`. The second is
-where the scheduler puts `lw $4, 0x78($19)`, the `control->camera` argument of
-each of the three calls: retail fills the `div.s` hazard slot with it and
-leaves the `swc1` to `camAngle` for the `jal` delay slot, while the draft puts
-the `lw` in the delay slot and the `sub.s` for `eye.f[2]` in the hazard slot.
-The whole tail from the second `dds3SetPosPoseSet` to the epilogue, the
-`sqrt.s`, the `GetSphericalPosMove` argument setup and the `fldCamPitch`
-store, is byte-identical.
-
-`-fno-gcse` and `-fno-expensive-optimizations` leave the difference exactly
-where it is; `-fno-schedule-insns` and `-fno-schedule-insns2` make it much
-worse. So this is register allocation plus the list scheduler's tie-break, not
-anything the source states.
-
-Confirmed on the way: `D_0054C2E8` is a `.lit4` entry holding `3.14f`;
-`fldCamParamTable[fldGlobalBase.cameraParamIndex][1]` is the height offset
-added to `fldGlobalBase.y`; the eye and target vectors are both written as the
-degenerate lerp `a + (b - a)` with no factor, which is what retail's bare
-`sub.s`/`add.s` pair per component is; and the two angle fields written here
-are `fldGlobalBase.camAngle` at `0x124` and `camAngle2` at `0x128`, both taking
-`EulerAngleAxisY() * 180.0f / 3.14f`.
-
-Ruled out: six orderings of the three eye components; the `camAngle` stores
-before, after and in either order relative to the eye block; seven spellings
-of the angle expression (inline, three statements, a named `180.0f` local
-assigned before the leading calls, a named `3.14f` local, and the
-`180.0f / 3.14f` constant folded together, which costs the whole function); a
-`f32 *` local for `D_002FC9C0`; a `* 1.0f` factor on each lerp; a local for
-the parameter-table height and for `y + height`; `node = control->camera;` as
-its own statement before each of the four uses; and `dx`/`dy`/`dz` locals for
-the three deltas, which costs another 19 words.
-
 ## fldPlayerCalcHasigo (field/fldDraw, 0xE8)
 
 14 of 58 words differ, at the exact 232-byte size, and every instruction through the
@@ -141,36 +102,6 @@ address setup stays in the merge); duplicating only the `prev` block, only
 `ctl->handle` at three positions; and all six orders of the three position
 stores crossed with both orders of the write-back pair and six arrangements of
 the three statement blocks.
-
-## fldCamGetPhokanParam (field/fldDraw, 0x17C)
-
-92 of 95 words match, at the exact 380-byte size. Every instruction is retail's; the
-three differing words are `addu` operand order on two of the four
-`fldCamParamTable` row addresses.
-
-Retail forms the row three different ways in one function. The `[0]` column,
-which multiplies the sine and the cosine, comes out `addu rd, index, base`; the
-`[1]` and `[2]` columns come out `addu rd, base, index` with the 4 or 8 left in
-the load displacement. The draft gets `[0]` right and `[1]` wrong, and in the
-target block it computes the row once and copies it (`move v0, v1`) where retail
-computes a second `addu` with the operands the other way round, which is why the
-two were not CSEd together in retail at all.
-
-Confirmed on the way: `D_0054C2D0` is a `.lit4` entry holding `3.14f`; the angle
-is `fldCamPitch * 3.14f / 180.0f`, written inline at both of the eye block's
-calls and assigned to one local for the target block's two, which is retail's
-`$f20` and its two `mov.s $f12, $f20`; the radius is `80.0f`; `[3]` of both
-vectors is `1.0f`; and the eye uses `-sin`/`-cos` while the target uses `+sin`
-/`+cos` scaled by `[0]`.
-
-Ruled out for the operand order: every combination of three spellings of the
-`[1]`/`[2]` access (plain subscript, `*(f32 *)((u8 *)table + i * 16 + 4)`,
-`((f32 *)((u8 *)table + i * 16))[1]`, `((f32 *)table + i * 4)[1]`) with three of
-the `[0]` access (`table[i][0]`, `*table[i]`,
-`*(f32 *)((u8 *)(i * 16) + (u32)table)`); every cast form is four words longer
-rather than closer. A `struct { f32 distance, height, targetHeight, fovy; }`
-declaration is the untried lever, and needs the unit's two later
-`extern f32 fldCamParamTable[][4];` declarations changed with it.
 
 ## fldEveHit_ChkDir2 (field/fldDraw, 0x264)
 
@@ -451,4 +382,3 @@ the branched-to arm rather than the fall-through, which costs another 8 bytes;
 `if (fldDoor_GetHasigoTbl(0) != 0) { return 0x69; }` for the `case 5` select,
 which gives `movz` against retail's `movn`; and `goto ret0` on either of the
 two trailing `return 0`s.
-

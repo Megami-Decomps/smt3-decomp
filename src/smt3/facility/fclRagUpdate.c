@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern s32 evtStartEvent(s32 no);
 
@@ -62,19 +63,39 @@ typedef struct
 
 typedef struct
 {
+    u8 reserved00000[0x15C];
+    cmpCursorInfo_t listCursor;
+} ragListWindow_t;
+
+typedef struct
+{
     /* 0x0000 */ u8 unk_0000;
     /* 0x0001 */ s8 unk_0001;
     /* 0x0002 */ s8 unk_0002;
-    /* 0x0003 */ u8 unk_0003;
+    /* 0x0003 */ s8 unk_0003;
     /* 0x0004 */ s8 unk_0004;
     /* 0x0005 */ s8 unk_0005;
     /* 0x0006 */ u8 unk_0006[2];
     /* 0x0008 */ s32 unk_0008;
-    /* 0x000C */ u8 unk_000C[0x48];
-    /* 0x0054 */ u16 unk_0054;
-    /* 0x0056 */ u8 unk_0056[0xEA];
-    /* 0x0140 */ cmpCursorInfo_t listCursor;
-    /* 0x0178 */ u8 unk_0178[0x44D0];
+    /* 0x000C */ u8 unk_000C[0x0D];
+    /* 0x0019 */ s8 ragType;
+    /* 0x001A */ s8 heartItems[0x20];
+    /* 0x003A */ s8 heartItemCount;
+    /* 0x003B */ s8 itemList2[8];
+    /* 0x0043 */ s8 itemList2Count;
+    /* 0x0044 */ s8 itemList3[8];
+    /* 0x004C */ s8 itemList3Count;
+    /* 0x004D */ u8 reserved004D[3];
+    /* 0x0050 */ datUnitWork_t previewUnit;
+    /* 0x013C */ u8 reserved013C[4];
+    /* 0x0140 */ cmpPadStopWork_t listCursor;
+    /* 0x017C */ u8 reserved017C[0x1000];
+    /* 0x117C */ ragListWindow_t heartListWindow;
+    /* 0x1310 */ u8 reserved1310[0x1004];
+    /* 0x2314 */ ragListWindow_t itemList2Window;
+    /* 0x24A8 */ u8 reserved24A8[0x1004];
+    /* 0x34AC */ ragListWindow_t itemList3Window;
+    /* 0x3640 */ u8 reserved3640[0x1008];
     /* 0x4648 */ s32 script;
     /* 0x464C */ s32 scriptArg;
     /* 0x4650 */ s32 unk_4650;
@@ -85,7 +106,19 @@ typedef struct
 
 extern ragUpdateWork_t *ragUpdateWork;
 
-extern void fclRunPanelAnim(void *work);
+typedef struct
+{
+    u8 unk_00000[0xA50];
+    u8 maxstock;
+    u8 unk_00A51[3];
+    datUnitWork_t unitwork[16];
+    u8 unk_01914[0x14];
+    u8 item[0xA0];
+} ragGlobalWorkData_t;
+
+extern ragGlobalWorkData_t *ragGlobalWork asm("DDS3_GBWK");
+
+extern s32 fclRunPanelAnim(void *work);
 
 typedef struct
 {
@@ -148,7 +181,7 @@ extern void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor);
 
 extern s32 cmpGetPressedButton(s32 mask);
 
-extern s32 cmpPlayCursorSE(s32 button);
+extern void cmpPlayCursorSE(u32 button);
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
@@ -159,29 +192,144 @@ typedef struct
     /* 0x03 */ u8 unk_03;
 } ragItemReq_t;
 
+typedef struct
+{
+    datUnitWork_t unit;
+} cmbUnit_t;
+
+s8 cmbFindStockSlot(cmbUnit_t *list, u8 count);
+
+s8 ragUseItemOnUnit(u16 id, datUnitWork_t *unit, u8 count);
+
 s32 ragFindItemSlot(ragItemReq_t *req);
 
 extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
 
 void ragExit(void)
 {
-    cmpMoveCursorListEnd(&ragUpdateWork->listCursor);
+    cmpMoveCursorListEnd(&ragUpdateWork->listCursor.cursor);
     ragUpdateWork->unk_0005 = 1;
     ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 0xC,
                                              &ragUpdateWork->scriptArg);
     ragUpdateWork->unk_0001 = 5;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragChkItemErr);
+s8 ragChkItemErr(u16 itemId)
+{
+    if (ragGlobalWork->item[itemId] >= 0x63) {
+        ragUpdateWork->unk_0005 = 1;
+        ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 4,
+                                                 &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0002 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0003 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0001 = 6;
+        ragUpdateWork->unk_0004 = -1;
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragCheckItemUse);
+s32 ragCheckItemUse(u16 itemId)
+{
+    if (cmbFindStockSlot((cmbUnit_t *)&ragGlobalWork->unitwork[4],
+                         ragGlobalWork->maxstock) < 0) {
+        ragUpdateWork->unk_0005 = 1;
+        ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 6,
+                                                 &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0002 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0003 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0001 = 6;
+        ragUpdateWork->unk_0004 = -1;
+        return 1;
+    }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragChkDevilLevelErr);
+    if (ragUseItemOnUnit(itemId, ragGlobalWork->unitwork, 16) >= 0) {
+        ragUpdateWork->unk_0005 = 1;
+        ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 5,
+                                                 &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0002 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0003 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0001 = 6;
+        ragUpdateWork->unk_0004 = -1;
+        return 2;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragSetSeqPhase);
+s8 ragChkDevilLevelErr(datUnitWork_t *stock)
+{
+    if (ragGlobalWork->unitwork[0].level < stock->level) {
+        ragUpdateWork->unk_0005 = 1;
+        ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 7,
+                                                 &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0002 = ragUpdateWork->unk_0003;
+        ragUpdateWork->unk_0003 = ragUpdateWork->unk_0001;
+        ragUpdateWork->unk_0001 = 6;
+        ragUpdateWork->unk_0004 = -1;
+        return 1;
+    } else {
+        return 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragGetHeartsFlag);
+typedef struct {
+    u16 devilId;
+    s8 custom;
+    u8 reserved03;
+    u8 level;
+    u8 reserved05[5];
+    u8 params[6];
+    u16 skills[8];
+    u8 reserved20[12];
+} ragOffer_t;
+extern void ragSetSeqPhase2(ragOffer_t *offer, datUnitWork_t *unit);
 
+void ragSetSeqPhase(s8 phase)
+{
+    s8 index;
+    switch (phase) {
+    case 2:
+        index = (u8)ragUpdateWork->itemList2Window.listCursor.unk_22 +
+                (u8)ragUpdateWork->itemList2Window.listCursor.unk_24;
+        ragSetSeqPhase2(&((ragOffer_t *)(ragHeartsTable + 0x160))[
+            (u8)ragUpdateWork->itemList2[index]], &ragUpdateWork->previewUnit);
+        return;
+    case 3:
+        index = (u8)ragUpdateWork->itemList3Window.listCursor.unk_22 +
+                (u8)ragUpdateWork->itemList3Window.listCursor.unk_24;
+        ragSetSeqPhase2(&((ragOffer_t *)(ragHeartsTable + 0x500))[
+            (u8)ragUpdateWork->itemList3[index]], &ragUpdateWork->previewUnit);
+        break;
+    }
+}
+
+s32 ragGetHeartsFlag(s8 index)
+{
+    s32 flag;
+
+    flag = 0;
+    switch (index) {
+    case 1: {
+        s32 entry = ragUpdateWork->heartListWindow.listCursor.unk_22 +
+                    (u8)ragUpdateWork->heartListWindow.listCursor.unk_24;
+        flag = ragUpdateWork->heartItems[entry];
+        break;
+    }
+    case 2: {
+        s32 entry = ragUpdateWork->itemList2Window.listCursor.unk_22 +
+                    (u8)ragUpdateWork->itemList2Window.listCursor.unk_24;
+        flag = ragUpdateWork->itemList2[entry];
+        break;
+    }
+    case 3: {
+        s32 entry = ragUpdateWork->itemList3Window.listCursor.unk_22 +
+                    (u8)ragUpdateWork->itemList3Window.listCursor.unk_24;
+        flag = ragUpdateWork->itemList3[entry];
+        break;
+    }
+    }
+    return flag;
+}
 extern s32 ragGetHeartsFlag(s8 index);
 
 /* NON_MATCHING: 22 of 29 words match, 116 bytes against retail's 128; retail
@@ -194,7 +342,7 @@ u16 ragCheckHeartsChoice(s8 index)
     if (index != 1) {
         if (index > 0) {
             if (index < 4) {
-                return ragUpdateWork->unk_0054;
+                return ragUpdateWork->previewUnit.id;
             }
         }
         return 0;
@@ -205,23 +353,123 @@ u16 ragCheckHeartsChoice(s8 index)
 INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragCheckHeartsChoice);
 #endif
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateCallSeq);
+extern void ragCreateAllList(s32 type, s32 count, void *work);
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqItem);
+s32 ragUpdateCallSeq(s32 SeqNo)
+{
+    u32 phase;
+
+    ragCreateAllList(1, ragUpdateWork->ragType, ragUpdateWork);
+    phase = (s32)ragUpdateWork->listCursor.cursor.unk_22 +
+            (u8)ragUpdateWork->listCursor.cursor.unk_24;
+    if (phase < 5) {
+        switch (phase) {
+        case 0:
+            fclScriptStart(ragUpdateWork->script, 1, &ragUpdateWork->scriptArg);
+            ragUpdateWork->unk_0001 = 1;
+            ragUpdateWork->unk_0004 = 1;
+            break;
+        case 1:
+            fclScriptStart(ragUpdateWork->script, 2, &ragUpdateWork->scriptArg);
+            ragUpdateWork->unk_0001 = 2;
+            ragUpdateWork->unk_0004 = 1;
+            break;
+        case 2:
+            fclScriptStart(ragUpdateWork->script, 3, &ragUpdateWork->scriptArg);
+            ragUpdateWork->unk_0001 = 3;
+            ragUpdateWork->unk_0004 = 1;
+            break;
+        case 3:
+            fclSetWorkValue(2, 1);
+            ragUpdateWork->unk_0005 = 1;
+            ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 0xB,
+                                                       &ragUpdateWork->scriptArg);
+            ragUpdateWork->unk_0001 = 4;
+            ragUpdateWork->unk_0003 = 4;
+            ragUpdateWork->unk_0004 = -1;
+            ragUpdateWork->unk_0002 = 0;
+            break;
+        case 4:
+            ragExit();
+            break;
+        }
+    }
+    return 1;
+}
 
 extern ragItemReq_t *ragGetConfirmEntry(s32 kind, u8 flag);
+extern u16 ragCheckHeartsChoice(s8 index);
+extern s32 datGetItemSlotIndex(u16 id);
+extern s32 cmbChkGetHearts(s32 rawId);
+extern void lstMoveCursor(lstWork_t *pListWindow, s8 Dir);
+extern s32 cmpChkPadPressUpDown(void);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
-extern void ragSetSeqPhase(s32 phase);
+void ragUpdateSeqItem(void)
+{
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+    ragItemReq_t *entry = ragGetConfirmEntry(0, ragGetHeartsFlag(1));
 
-extern s32 ragCheckItemUse(s32 item);
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+
+    switch (button) {
+    case 1: {
+        const u8 *heartTable = ragHeartsTable;
+        s32 blocked = ragFindItemSlot(entry) == 0;
+        s32 heartFlag = ragGetHeartsFlag(1);
+        u16 item = *(u16 *)(heartTable + heartFlag * 14);
+        s32 slot = datGetItemSlotIndex(item);
+
+        if (slot != 0 && cmbChkGetHearts(slot) != 0) {
+            blocked = button;
+        }
+        if (blocked != 0) {
+            button = 0x8000;
+            break;
+        }
+        if (ragChkItemErr(ragCheckHeartsChoice(1)) != 0) {
+            break;
+        }
+        fclSetWorkValue(8, ragCheckHeartsChoice(1));
+        fclSetWorkValue(9, 0);
+        fclScriptStart(ragUpdateWork->script, 8, &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0001 = 8;
+        ragUpdateWork->unk_0004 = button;
+        break;
+    }
+    case 2:
+        fclScriptStart(ragUpdateWork->script, 0xA, &ragUpdateWork->scriptArg);
+        cmpResetCursorInfo(&ragUpdateWork->heartListWindow.listCursor);
+        ragUpdateWork->unk_0001 = 0;
+        ragUpdateWork->unk_0004 = button;
+        break;
+    case 0x10:
+        lstMoveCursor((lstWork_t *)&ragUpdateWork->heartListWindow, -1);
+        break;
+    case 0x20:
+        lstMoveCursor((lstWork_t *)&ragUpdateWork->heartListWindow, 1);
+        break;
+    }
+
+    if (cmpChkPadPressUpDown() == 0) {
+        lstMoveCursor((lstWork_t *)&ragUpdateWork->heartListWindow, 0);
+    }
+    button = cmpDisablePadBitStop((cmpPadStopWork_t *)&ragUpdateWork->heartListWindow.listCursor,
+                                  button, 0x30);
+    cmpPlayCursorSE((u16)button);
+}
+
+
+extern void ragSetSeqPhase(s8 phase);
+
+extern s32 ragCheckItemUse(u16 item);
 
 extern s32 cmpModelSetup(s32 a, s32 b);
 
-extern void lstMoveCursor(lstWork_t *pListWindow, s8 Dir);
 
-extern s32 cmpChkPadPressUpDown(void);
 
-extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
 void ragUpdateSeq2(void)
 {
@@ -238,11 +486,11 @@ void ragUpdateSeq2(void)
             break;
         }
         ragSetSeqPhase(2);
-        if (ragCheckItemUse(ragUpdateWork->unk_0054) != 0) {
+        if (ragCheckItemUse(ragUpdateWork->previewUnit.id) != 0) {
             break;
         }
         fclScriptForcedEnd((u8 *)ragUpdateWork->scriptArg);
-        cmpModelSetup(ragUpdateWork->unk_0054, 0);
+        cmpModelSetup(ragUpdateWork->previewUnit.id, 0);
         ragUpdateWork->unk_0001 = 7;
         ragUpdateWork->unk_0004 = button;
         break;
@@ -282,11 +530,11 @@ void ragUpdateSeq3(void)
             break;
         }
         ragSetSeqPhase(3);
-        if (ragCheckItemUse(ragUpdateWork->unk_0054) != 0) {
+        if (ragCheckItemUse(ragUpdateWork->previewUnit.id) != 0) {
             break;
         }
         fclScriptForcedEnd((u8 *)ragUpdateWork->scriptArg);
-        cmpModelSetup(ragUpdateWork->unk_0054, 0);
+        cmpModelSetup(ragUpdateWork->previewUnit.id, 0);
         ragUpdateWork->unk_0001 = 7;
         ragUpdateWork->unk_0004 = button;
         break;
@@ -311,9 +559,59 @@ void ragUpdateSeq3(void)
         0xFFFF);
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateReturn);
+void ragUpdateReturn(void)
+{
+    s32 last = ragUpdateWork->unk_0003;
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqStatus);
+    switch (last) {
+    case 1:
+        fclScriptStart(ragUpdateWork->script, 1, &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0001 = last;
+        break;
+    case 2:
+        fclScriptStart(ragUpdateWork->script, 2, &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0001 = last;
+        break;
+    case 3:
+        fclScriptStart(ragUpdateWork->script, 3, &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0001 = last;
+        break;
+    }
+    ragUpdateWork->unk_0004 = 1;
+}
+
+extern s32 cmpLoadStatusModel(void);
+extern void ragUpdateReturn(void);
+extern s8 ragChkDevilLevelErr(datUnitWork_t *stock);
+
+void ragUpdateSeqStatus(void)
+{
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+
+    if (cmpLoadStatusModel() == 0) {
+        switch (button) {
+        case 1:
+            if (ragChkDevilLevelErr(&ragUpdateWork->previewUnit) != 0) {
+                return;
+            }
+            fclSetWorkValue(8, ragUpdateWork->previewUnit.id);
+            fclSetWorkValue(9, 1);
+            fclScriptStart(ragUpdateWork->script, 8,
+                                                     &ragUpdateWork->scriptArg);
+            ragUpdateWork->unk_0001 = 8;
+            ragUpdateWork->unk_0004 = -1;
+            break;
+        case 2:
+            ragUpdateReturn();
+            break;
+        case 0x10:
+        case 0x20:
+            button = 0;
+            break;
+        }
+    }
+    cmpPlayCursorSE(button);
+}
 
 INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqConfirm);
 
@@ -322,7 +620,41 @@ void ragUpdateSeqMitama(void)
     fclRunPanelAnim(ragUpdateWork->seqMitama);
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqRoot);
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 dir);
+
+void ragUpdateSeqRoot(void)
+{
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+
+    fclSetWorkValue(2, 0);
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+
+    switch (button) {
+    case 1: {
+        s8 sequence = (s8)((u8)ragUpdateWork->listCursor.cursor.unk_22 +
+                           (u8)ragUpdateWork->listCursor.cursor.unk_24 + 1);
+        ragUpdateCallSeq(sequence);
+        break;
+    }
+    case 2:
+        ragExit();
+        break;
+    case 16:
+        cmpMoveCursor(&ragUpdateWork->listCursor.cursor, -1);
+        break;
+    case 32:
+        cmpMoveCursor(&ragUpdateWork->listCursor.cursor, 1);
+        break;
+    }
+
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&ragUpdateWork->listCursor.cursor, 0);
+    }
+    button = cmpDisablePadBitStop(&ragUpdateWork->listCursor, button, 0x30);
+    cmpPlayCursorSE((u16)button);
+}
 
 void ragUpdateSeqTalk(void)
 {
@@ -357,7 +689,49 @@ void ragUpdateSeqErr(void)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdate);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern s32 fclChkDbgProcess(void);
+extern void ragUpdateSeqRoot(void);
+extern void ragUpdateSeqItem(void);
+extern void ragUpdateSeqStatus(void);
+extern s32 ragUpdateSeqConfirm(void);
+extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
+
+s32 ragUpdate(dds3ProcessID_t *id)
+{
+    s8 previous;
+    u8 flags;
+    ragUpdateWork = dds3GetProcessData(id);
+    previous = ragUpdateWork->unk_0001;
+    if (fclChkDbgProcess() != 0) return 0;
+    ragUpdateSeqMitama();
+    if (fclGetFlag(1) == 0) return 0;
+    flags = ragUpdateWork->unk_0000;
+    if (flags & 0x40) return -1;
+    if ((flags & 2) && (flags & 1)) {
+        switch (ragUpdateWork->unk_0001) {
+        case 0: ragUpdateSeqRoot(); break;
+        case 1: ragUpdateSeqItem(); break;
+        case 2: ragUpdateSeq2(); break;
+        case 3: ragUpdateSeq3(); break;
+        case 4: ragUpdateSeqTalk(); break;
+        case 5:
+            if (cmpChkSeqInfo((cmbGbWork_t *)ragUpdateWork) == 2) {
+                fclClearFlag(1);
+                fclSetWorkValue(1, 0);
+                ragUpdateWork->unk_0000 |= 0x10;
+            }
+            break;
+        case 6: ragUpdateSeqErr(); break;
+        case 7: ragUpdateSeqStatus(); break;
+        case 8:
+            if (ragUpdateSeqConfirm() == 0) return 0;
+            break;
+        }
+    }
+    cmpUpdateSeqInfo(ragUpdateWork, previous);
+    return 0;
+}
 
 s32 fclStartRecoverEvent(s8 value)
 {

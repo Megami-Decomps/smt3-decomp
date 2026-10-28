@@ -56,14 +56,7 @@ typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCam
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
-typedef struct
-{
-    u16 kind;
-    s16 x, y;
-    u16 outline;
-    u8 unk08[8];
-    sdfVector4_t vtx[8];
-} pbBlockEntry_t;
+typedef struct { u16 kind; s16 x, y; u16 outline_num; u8 unk08[0x88]; } pbBlockEntry_t;
 
 typedef struct
 {
@@ -82,7 +75,7 @@ typedef struct
 
 typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
-typedef struct { u32 count; pbGroupData_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
+typedef struct { u32 count; pbGroupData_t *group[0x40]; sdfMat_t *mat; } pbBlockDB_t;
 
 typedef struct { u8 flag[4]; void *block, *floor, *chara; } pbRecordSlot_t;
 
@@ -101,12 +94,9 @@ struct pbProcHandle_t
 };
 
 extern void sdfChipFreeDelayedDirect(void *aPtr);
+extern s32 printf(const char *format, ...);
 
 extern pbMapWork_t *D_0054F5C4;
-
-extern sdfVector4_t D_00327780[];
-
-extern u8 pbGetBlockAt(s16 x, s16 y, s16 grp);
 
 extern pbProcHandle_t *record;
 
@@ -190,66 +180,29 @@ void pbDeleteGroupEntry(pbProcHandle_t *panel, u32 group) {
 }
 
 
-void pbDumpBlockData(pbProcHandle_t *h)
-{
-    pbBlockDB_t *db = h->data.blockDB;
-    char names[7][0x20] = { "FLOOR", "WALL", "NORMAL BLOCK CORE", "NORMAL BLOCK",
-                            "ROUND BLOCK CORE", "ROUND BLOCK", "EXIT" };
-    u32 i;
-    u32 j;
+void pbDumpBlockData(pbProcHandle_t *p) {
+    pbBlockDB_t *db = p->data.blockDB;
+    char names[7][32] = {
+        "FLOOR", "WALL", "NORMAL BLOCK CORE", "NORMAL BLOCK",
+        "ROUND BLOCK CORE", "ROUND BLOCK", "EXIT"
+    };
+    u32 i = 0, j;
 
     printf("\n(( block data ))\n");
-    for (i = 0; i < db->count; i++) {
-        printf("ID = %d, (core x,y) = (%d, %d) %dblocks\n", db->entry[i]->grpID, db->entry[i]->cellX,
-               db->entry[i]->cellY, db->entry[i]->num);
-        for (j = 0; j < db->entry[i]->num; j++) {
-            printf("\t(x,y) = (%d, %d) type = %s : outline = %d\n", db->entry[i]->blk[j].x,
-                   db->entry[i]->blk[j].y, names[db->entry[i]->blk[j].kind],
-                   db->entry[i]->blk[j].outline / 2);
+    for (; i < db->count; i++) {
+        printf("ID = %d, (core x,y) = (%d, %d) %dblocks\n",
+               db->group[i]->grpID, db->group[i]->cellX,
+               db->group[i]->cellY, db->group[i]->num);
+        for (j = 0; j < db->group[i]->num; j++) {
+            printf("\t(x,y) = (%d, %d) type = %s : outline = %d\n",
+                   db->group[i]->blk[j].x, db->group[i]->blk[j].y,
+                   names[db->group[i]->blk[j].kind],
+                   db->group[i]->blk[j].outline_num >> 1);
         }
     }
 }
 
-#ifdef NON_MATCHING
-/* NON_MATCHING: 16 of 95 words match at 380 bytes against retail 392; gcc
-   splits the D_00327780 address across the loop and will not keep one
-   address pseudo for the six vertex stores. */
-void pbRebuildOutline(pbGroupData_t *g)
-{
-    sdfVector4_t *tpl;
-    sdfVector4_t *v;
-    f32 bx;
-    f32 by;
-    s32 mask;
-    s32 n;
-    s32 i;
-    s32 k;
-
-    for (i = 0; i < g->num; i++) {
-        g->blk[i].outline = 0;
-        bx = (f32)(g->blk[i].x * 40);
-        by = (f32)(g->blk[i].y * 40);
-        mask = pbGetBlockAt(g->cellX + g->blk[i].x, g->cellY + g->blk[i].y, g->grpID);
-        tpl = D_00327780;
-        for (k = 0; k < 4; k++) {
-            if ((mask >> k) & 1) {
-                n = g->blk[i].outline;
-                v = (sdfVector4_t *)(n * 16 + (s32)&g->blk[i]);
-                g->blk[i].outline = n + 2;
-                v[1].x = tpl[0].x + bx;
-                v[1].y = tpl[0].y;
-                v[1].z = tpl[0].z + by;
-                v[2].x = tpl[1].x + bx;
-                v[2].y = tpl[1].y;
-                v[2].z = tpl[1].z + by;
-            }
-            tpl += 2;
-        }
-    }
-}
-#else
 INCLUDE_ASM(const s32, "pb/pbGameDraw", pbRebuildOutline);
-#endif
 
 pbProcHandle_t *pbStartDrawMapCursor(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);

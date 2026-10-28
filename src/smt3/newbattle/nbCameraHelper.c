@@ -99,91 +99,68 @@ typedef struct
     void *privateData;
 } dds3EffectDirEnt_t;
 
+typedef enum EffResourceKind {
+    EFF_RESOURCE_KIND_NONE = 0, EFF_RESOURCE_KIND_TMX = 1, EFF_RESOURCE_KIND_P2A = 2,
+    EFF_RESOURCE_KIND_D3P = 4, EFF_RESOURCE_KIND_BED = 8, EFF_RESOURCE_KIND_PB = 0x10,
+    EFF_RESOURCE_KIND_PCF = 0x20
+} EffResourceKind;
+
+extern s32 dds3EffectDirRead(s32 directory, dds3EffectDirEnt_t *entry);
+
 /* One node per file whose extension matches a requested type bit. The 0x10
  * types use a two-character extension, so the dot sits one byte later. */
-/* NON_MATCHING: 6 of 270 words differ (first at +0xE4). */
+/* NON_MATCHING: 1 of 270 words differs (first at +0x3F8). */
 #ifdef NON_MATCHING
-nbCameraHelper_effFileListHandle_t *dds3EffectFileListCreate(char *path, s32 typeMask)
-{
+nbCameraHelper_effFileListHandle_t *dds3EffectFileListCreate(char *path, s32 typeMask) {
     dds3EffectDirEnt_t entry;
-    nbCameraHelper_effFileListHandle_t *root;
-    dds3EffectFileNode_t *previous;
-    dds3EffectFileNode_t *node;
     s32 directory;
+    nbCameraHelper_effFileListHandle_t *root;
+    dds3EffectFileNode_t *node;
+    dds3EffectFileNode_t *previous;
     s32 length;
-    s32 type;
-    char dot;
-    char period;
-
+    EffResourceKind type;
     directory = dds3EffectDirOpen(path);
-    root = (nbCameraHelper_effFileListHandle_t *)sdfChipAllocDirect(0xC);
+    root = sdfChipAllocDirect(sizeof(*root));
     if (sdfHddValid != 0) {
-        root->directoryPath = (char *)sdfChipAllocDirect(strlen(path) + 1);
+        root->directoryPath = sdfChipAllocDirect(strlen(path) + 1);
         strcpy(root->directoryPath, path);
     } else {
-        root->directoryPath = (char *)sdfChipAllocDirect(strlen(path) + 1);
+        root->directoryPath = sdfChipAllocDirect(strlen(path) + 1);
         strcpy(root->directoryPath, path);
     }
     previous = NULL;
     root->head = NULL;
     root->resourceCount = 0;
     while ((length = dds3EffectDirRead(directory, &entry)) > 0) {
-        if ((entry.flags & 0xF000) == 0x1000) {
-            continue;
-        }
-        if (length < 5) {
-            continue;
-        }
-        if (length >= 0x2F) {
-            continue;
-        }
-        if (typeMask & 0x10) {
-            period = '.';
-            dot = entry.name[length - 3];
-        } else {
-            period = '.';
-            dot = entry.name[length - 4];
-        }
-        if (dot != period) {
-            continue;
-        }
-        type = 0;
+        if ((entry.flags & 0xF000) == 0x1000) continue;
+        if (length < 5) continue;
+        if (length >= 0x2F) continue;
+        if ((typeMask & 0x10 ? entry.name[length - 3] : entry.name[length - 4]) != '.') continue;
+        type = EFF_RESOURCE_KIND_NONE;
         if ((typeMask & 1) &&
-            ((entry.name[length - 3] == 't' && entry.name[length - 2] == 'm' && entry.name[length - 1] == 'x') ||
-             (entry.name[length - 3] == 'T' && entry.name[length - 2] == 'M' && entry.name[length - 1] == 'X'))) {
-            type = 1;
-        } else if ((typeMask & 2) &&
-            ((entry.name[length - 3] == 'p' && entry.name[length - 2] == '2' && entry.name[length - 1] == 'a') ||
-             (entry.name[length - 3] == 'P' && entry.name[length - 2] == '2' && entry.name[length - 1] == 'A'))) {
-            type = 2;
-        } else if ((typeMask & 4) &&
-            ((entry.name[length - 3] == 'd' && entry.name[length - 2] == '3' && entry.name[length - 1] == 'p') ||
-             (entry.name[length - 3] == 'D' && entry.name[length - 2] == '3' && entry.name[length - 1] == 'P'))) {
-            type = 4;
-        } else if ((typeMask & 8) &&
-            ((entry.name[length - 3] == 'b' && entry.name[length - 2] == 'e' && entry.name[length - 1] == 'd') ||
-             (entry.name[length - 3] == 'B' && entry.name[length - 2] == 'E' && entry.name[length - 1] == 'D'))) {
-            type = 8;
-        } else if ((typeMask & 0x10) &&
-            ((entry.name[length - 2] == 'p' && entry.name[length - 1] == 'b') ||
-             (entry.name[length - 2] == 'P' && entry.name[length - 1] == 'B'))) {
-            type = 0x10;
-        } else if ((typeMask & 0x20) &&
-            ((entry.name[length - 3] == 'p' && entry.name[length - 2] == 'c' && entry.name[length - 1] == 'f') ||
-             (entry.name[length - 3] == 'P' && entry.name[length - 2] == 'C' && entry.name[length - 1] == 'F'))) {
-            type = 0x20;
-        }
-        if (type == 0) {
-            continue;
-        }
-        node = (dds3EffectFileNode_t *)sdfChipAllocDirect(0x3C);
+            ((entry.name[length-3]=='t' && entry.name[length-2]=='m' && entry.name[length-1]=='x') ||
+             (entry.name[length-3]=='T' && entry.name[length-2]=='M' && entry.name[length-1]=='X'))) type = EFF_RESOURCE_KIND_TMX;
+        else if ((typeMask & 2) &&
+            ((entry.name[length-3]=='p' && entry.name[length-2]=='2' && entry.name[length-1]=='a') ||
+             (entry.name[length-3]=='P' && entry.name[length-2]=='2' && entry.name[length-1]=='A'))) type = EFF_RESOURCE_KIND_P2A;
+        else if ((typeMask & 4) &&
+            ((entry.name[length-3]=='d' && entry.name[length-2]=='3' && entry.name[length-1]=='p') ||
+             (entry.name[length-3]=='D' && entry.name[length-2]=='3' && entry.name[length-1]=='P'))) type = EFF_RESOURCE_KIND_D3P;
+        else if ((typeMask & 8) &&
+            ((entry.name[length-3]=='b' && entry.name[length-2]=='e' && entry.name[length-1]=='d') ||
+             (entry.name[length-3]=='B' && entry.name[length-2]=='E' && entry.name[length-1]=='D'))) type = EFF_RESOURCE_KIND_BED;
+        else if ((typeMask & 0x10) &&
+            ((entry.name[length-2]=='p' && entry.name[length-1]=='b') ||
+             (entry.name[length-2]=='P' && entry.name[length-1]=='B'))) type = EFF_RESOURCE_KIND_PB;
+        else if ((typeMask & 0x20) &&
+            ((entry.name[length-3]=='p' && entry.name[length-2]=='c' && entry.name[length-1]=='f') ||
+             (entry.name[length-3]=='P' && entry.name[length-2]=='C' && entry.name[length-1]=='F'))) type = EFF_RESOURCE_KIND_PCF;
+        if (type == EFF_RESOURCE_KIND_NONE) continue;
+        node = sdfChipAllocDirect(sizeof(*node));
         node->type = type;
         strcpy(node->name, entry.name);
-        if (previous != NULL) {
-            previous->next = node;
-        } else {
-            root->head = node;
-        }
+        if (previous != NULL) previous->next = node;
+        else root->head = node;
         node->next = NULL;
         node->previous = previous;
         root->resourceCount++;

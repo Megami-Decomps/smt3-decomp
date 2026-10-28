@@ -34,20 +34,23 @@ which spends a fourth saved register on the shared `i * 4`; and
 `D_00330808[(u8)i]` with a signed counter, which is 10 of 28 words match and
 one word long.
 
-## fclTerminalInitMenu (fclTerminalInit, 0x7C)
+## trmStartEvent (facility/fclTerminalInit, 0x84)
 
-27 of 31 words match, at the exact 124-byte size, with zero instruction
-differences. Picks the terminal menu's text table, with the second group of
-four entries when the current event is 0x296, hands it to the cursor window,
-and sets the command bit and the work's enable byte.
+The mode switch emits the exact 132 bytes: 25 of 33 words match.
+Mode 0 requests an event with `trmGetEventNo(1, GBWK_3)`: a negative event
+returns zero; otherwise it starts the event, sets terminal mode 1 and returns
+one. Modes 1 and 5 return one without mutation; every other mode returns zero.
+The provider returns a signed byte from `trmGetMode`, a signed word from
+`trmGetEventNo`, and no value from `evtStartEvent` or `fclSetTerminalMode`.
 
-The four differing words are the two registers of the `fclTerminalCommandCount`
-read-modify-write: retail holds the `$28`-relative address in `$2` and the byte
-in `$3`, this holds the address in `$3` and the byte in `$2`. All four remaining
-words are a register name.
+The eight residual words occupy three windows: `+0x24`, `+0x30` and `+0x38`
+change the branch-likely choice and hoist the terminal-work load into the
+mode dispatch; `+0x50` through `+0x5C` rotate that load, the event request
+and the argument move around its negative-result guard; `+0x68` fills the
+event-start delay slot differently. The calls and mode/event tests are
+accounted for; the remaining source/control-flow premise is unresolved.
 
-Ruled out: writing the work's `+0x25` byte before the command bit, which costs
-four more words; the command bit spelled `x = x | 2` instead of `x |= 2`; a `u8
-*` work parameter with `work[0x25]`; an `s8 *` local for the work byte, which
-adds 12 bytes; and testing `!= 0x296` with the arms exchanged, which reaches
-only 24 matching.
+An if/else mode dispatch emitted 120 bytes; only 4 of 30 words match.
+A switch returning through a shared result local emitted 152 bytes and added
+a saved register. Neither is a closer reconstruction. The explicit switch
+with early returns is the preferred draft; production retains assembly.

@@ -780,7 +780,7 @@ void dds3TrackPolySet(parSystem_t *hTrackPoly, s32 number, const u128 *pV);
 void dds3TrackPolySet2(parSystem_t *hTrackPoly, s32 number, const u128 *pV);
 void Eff_ModelTrackPolyListVertexSet(effTrackPolyList_t *hMTPolyList, s32 index, const u128 *pVertex);
 void Eff_ModelTrackPolyListColorSet(effTrackPolyList_t *hMTPolyList, s32 index, u32 abgr);
-void func_00162270();
+void func_00162270(effParticleOverlay_t *effect);
 
 /* Both draw paths submit the resource owned by the selected particle kind. */
 static __inline__ void SubmitKindDrawing(dds3Particle_Effect_t *kind) {
@@ -2612,7 +2612,56 @@ void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", dds3Particle_SpiralRandomize);
+void dds3Particle_SpiralRandomize(effParticleOverlay_t *effect) {
+    func_00162270(effect);
+}
+
+void func_001621A0(f32 factor, effEmitterHead_t *head) {
+    head->scale[0] *= factor;
+    head->scale[1] *= factor;
+    head->scale[2] *= factor;
+}
+
+effEmitterHead_t *func_001621C8(effEmitterHead_t *source) {
+    effEmitterHead_t *clone = sdfChipAllocDirect(0x150);
+    /* This variant has no appended tail; retail retains the template-tail copy. */
+    s32 tailBytes = 0;
+
+    memset(clone, 0, 0x150);
+    memcpy(clone, source, source->templateSize);
+    memcpy((u8 *)clone + 0x150, (u8 *)source + source->templateSize, tailBytes);
+    clone->particleCount = 1;
+    clone->lifetimeFrames = 0;
+    dds3Particle_BasicCreate(clone);
+    return clone;
+}
+
+void func_00162248(effEmitterHead_t *object) {
+    dds3Particle_BasicDelete(object);
+    sdfChipFreeDirect(object);
+}
+
+void func_00162270(effParticleOverlay_t *effect) {
+    effParticleRecord_t *record = (effParticleRecord_t *)effect->buffer->pPhysics;
+    f32 jitter;
+
+    record->x = effect->x;
+    record->color = effect->color | (effect->alpha << 24);
+    record->frame = -1;
+    record->y = effect->y;
+    record->z = effect->z;
+    record->speed = 1.0f;
+    record->angle = 0.0f;
+    effect->lastSpeed = effect->speed;
+    jitter = effect->speedJitter;
+    record->speed = effect->speed * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
+    jitter = effect->angleJitter;
+    if (jitter != 0.0f) {
+        record->angle = (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+    } else {
+        record->angle = 0.0f;
+    }
+}
 
 /* Frame zero reinitializes to -1 before incrementing; refresh position and modulated packed color. */
 void dds3Particle_SpiralBlendColor(effParticleOverlay_t *effect) {
@@ -3419,17 +3468,11 @@ void dds3ParticleSetColorTable(dds3ParticleColorAnim_t *pColAnim, s32 frame) {
     pColAnim->b12 = ((f32)((a >> 16) & 0xFF) - (f32)((b >> 16) & 0xFF)) / span;
 }
 
-/* NON_MATCHING: 19 of 83 words differ (first at +0x98). */
-#ifdef NON_MATCHING
 u32 dds3ParticleColorAnim(dds3ParticleColorAnim_t *pColAnim, u32 color_now, s32 frame) {
-    u32 alpha;
-    u32 rgb;
     s32 components[3];
-    s32 red;
-    s32 green;
-    s32 blue;
-    u32 base;
-    f32 elapsed;
+    u32 alpha;
+    u32 sum;
+    f32 t;
 
     if (frame >= pColAnim->frame_end - pColAnim->alpha_e) {
         if (pColAnim->frame_end < frame) {
@@ -3437,44 +3480,44 @@ u32 dds3ParticleColorAnim(dds3ParticleColorAnim_t *pColAnim, u32 color_now, s32 
         }
         alpha = pColAnim->alpha_e_sub * (pColAnim->frame_end - frame);
         alpha &= 0xFF000000;
+    } else if (frame <= pColAnim->alpha_s) {
+        alpha = pColAnim->alpha_s_add * frame;
+        alpha &= 0xFF000000;
     } else {
-        if (frame <= pColAnim->alpha_s) {
-            alpha = pColAnim->alpha_s_add * frame;
-            alpha &= 0xFF000000;
-        } else {
-            alpha = pColAnim->alpha << 24;
-        }
+        alpha = pColAnim->alpha << 24;
     }
     if (pColAnim->type == 1) {
-        rgb = pColAnim->color0;
-    } else {
-        elapsed = (f32)frame;
-        if (frame < pColAnim->frame_h) {
-            base = pColAnim->color0;
-            red = (s32)(pColAnim->r01 * elapsed);
-            green = (s32)(pColAnim->g01 * elapsed);
-            blue = (s32)(pColAnim->b01 * elapsed);
-            components[2] = blue;
-            components[1] = green;
-            components[0] = red;
-            rgb = (base + red + (green << 8) + (blue << 16)) & 0xFFFFFF;
-        } else {
-            elapsed = elapsed - (f32)pColAnim->frame_h;
-            base = pColAnim->color1;
-            red = (s32)(pColAnim->r12 * elapsed);
-            green = (s32)(pColAnim->g12 * elapsed);
-            blue = (s32)(pColAnim->b12 * elapsed);
-            components[2] = blue;
-            components[1] = green;
-            components[0] = red;
-            rgb = (base + red + (green << 8) + (blue << 16)) & 0xFFFFFF;
-        }
+        return pColAnim->color0 | alpha;
     }
-    return rgb | alpha;
+    t = frame;
+    if (frame < pColAnim->frame_h) {
+        s32 red = pColAnim->r01 * t;
+        s32 green = pColAnim->g01 * t;
+        s32 blue = pColAnim->b01 * t;
+        sum = pColAnim->color0;
+        components[0] = red;
+        components[1] = green;
+        components[2] = blue;
+        sum += components[0];
+        sum += (u32)components[1] << 8;
+        sum += (u32)components[2] << 16;
+        return (sum & 0xFFFFFF) | alpha;
+    } else {
+        s32 red, green, blue;
+        t -= (f32)pColAnim->frame_h;
+        red = pColAnim->r12 * t;
+        green = pColAnim->g12 * t;
+        blue = pColAnim->b12 * t;
+        sum = pColAnim->color1;
+        components[0] = red;
+        components[1] = green;
+        components[2] = blue;
+        sum += components[0];
+        sum += (u32)components[1] << 8;
+        sum += (u32)components[2] << 16;
+        return (sum & 0xFFFFFF) | alpha;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "effect/parManager", dds3ParticleColorAnim);
-#endif
 
 /* Allocate contiguous point slabs, slot records and the trailing table header. */
 dds3Particle_BlurBuff_t *dds3Particle_BlurCreate(u32 number, u16 length, billHandle_t **pBill_Handle) {

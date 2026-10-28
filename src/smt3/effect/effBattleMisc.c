@@ -13,11 +13,19 @@ extern u32 D_00317740[]; /* 0, 5, 15, 30 frames */
 extern void (*GetPositionPtrTable[])(void *owner, effBTLAimParams_t *request);
 extern u32 effBTLSkillGetInvokeParty(void);
 extern u32 effBTLSkillGetTargetParty(void);
-extern void effBTLPartGetPartyPositionPtr(u32 group, void *pPosPtr);
+extern nbFormation_t *effBTLSkillGetInvokeFormation(void);
+extern nbFormation_t *effBTLSkillGetTargetFormation(s32 number);
+extern u32 effBTLSkillGetTargetNumber(void);
+extern u32 effBTLSkillGetTargetBit(void);
+void effBTLModelInvokePartyShow(void);
+extern void effBTLPartGetPartyPositionPtr(u32 group, effBTLAimParams_t *pPosPtr);
+extern void effBTLPartPtrModelGroupGetCenterAndHeight(u32 group, sdfVector4_t *center, f32 *heightAverage, f32 *heightMax, f32 *frontMax);
 extern f32 aViewTarget[4];
 extern f32 aViewEye[4];
 extern f32 aViewDown[4];
 extern f32 effBTL_Ptr_D[];
+extern f32 D_0031B990[];
+extern void MultMatrixNoArg(void);
 extern u8 effBTLModelShowFlag[];
 extern f32 D_0031B900[];
 extern f32 D_0031B910[];
@@ -29,9 +37,11 @@ extern f32 D_0031B970[];
 extern f32 D_0031B980[];
 extern sdfVector4_t effBTLPartCenterOffset[32];
 extern nbMainProcessData_t *nbGetMainProcessData(void);
+extern s32 effBTLSkillCheckRun(void);
+extern s32 effBTLSkillGetID(void);
 extern void ToMatrix(void);
 extern void InversMatrix(void);
-extern f32 effBTLModelGroupGetSphereExp(sdfVector4_t *group, u32 model);
+extern f32 effBTLModelGroupGetMaxLength(sdfVector4_t *group, u32 model);
 extern void nbLoadUnitPos(nbFormation_t *form);
 extern void effBTLModelLoadRotate(nbFormation_t *form);
 extern void mdlGetPosition(mdlObj_t *aHandle);
@@ -51,6 +61,8 @@ extern void SetRotateMatrixX(f32 aAngle);
 extern void SetRotateMatrixY_B(f32 aAngle);
 extern void MultMatrixRevNoArg(void);
 extern f32 effBTLModelGroupGetSphere(u32 group);
+f32 effBTLModelGroupGetSphere2(u32 group);
+f32 effBTLModelGroupGetSphereExp(u32 group, u32 model);
 extern f32 effLinePointLength(sdfVector4_t *pDir, sdfVector4_t *pLinePos, sdfVector4_t *pPos);
 extern void SetRotateMatrixY(f32 aAngle);
 extern f32 sdfSin(f32 aRadius);
@@ -61,6 +73,10 @@ extern f32 sdfAtan2(f32 aY, f32 aX);
 extern void nbFormDispOn2(nbFormation_t *form);
 extern void nbFormDispOff2(nbFormation_t *form);
 extern void effBTLModelGetCircumference(nbFormation_t *pFormation, sdfVector4_t *pDirection);
+extern dds3Basic_t *dds3GetActiveScene(void);
+extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pScene);
+extern void dds3CameraObjectBasicGetTargetPos(dds3Basic_t *pCamera);
+extern void dds3GetPosPoseSet(dds3Basic_t *pBasic);
 
 
 void effBTLModelGetSphereCenter(nbFormation_t *pFormation) {
@@ -241,7 +257,7 @@ void effBTLModelGroupGetCenter(u32 group) {
     SDF_VU0_MULVECTOR();
 }
 
-f32 effBTLModelGroupGetSphereExp(sdfVector4_t *group, u32 model) {
+f32 effBTLModelGroupGetMaxLength(sdfVector4_t *group, u32 model) {
     nbFormation_t *form;
     f32 max;
     f32 length;
@@ -302,7 +318,7 @@ f32 effBTLModelGroupGetLineMaxLength(sdfVector4_t *pVec, sdfVector4_t *pPos, u32
     return max;
 }
 
-f32 effBTLModelGroupGetMaxLength(u32 group) {
+f32 effBTLModelGroupGetWidthX(u32 group) {
     sdfVector4_t pos;
     nbFormation_t *form;
     f32 max;
@@ -341,7 +357,26 @@ f32 effBTLModelGroupGetMaxLength(u32 group) {
     return max - min;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphere);
+f32 effBTLModelGroupGetSphere(u32 group) {
+    return effBTLModelGroupGetSphere2(group);
+}
+
+f32 effBTLModelGroupGetSphereOld(u32 group) {
+    sdfVector4_t center;
+    f32 radius;
+
+    effBTLModelGroupGetCenter(group);
+    SDF_VU0_STOREVECTOR_MEMOPS(center);
+    radius = effBTLModelGroupGetMaxLength(&center, group);
+    SDF_VU0_LOADVECTOR_MEMOPS(center);
+    return radius;
+}
+
+f32 effBTLModelGroupGetSphere2(u32 group) {
+    return effBTLModelGroupGetSphereExp(group, 1);
+}
+
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphereExp);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", eff_16D150);
 
@@ -729,7 +764,122 @@ void effBTLModelAllHide(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelInvokeShow);
+void effBTLModelInvokeShow(void)
+{
+    if (nbGetMainProcessData()->formationtype == 4 && effBTLSkillGetInvokeParty() == 0x200) {
+        effBTLModelInvokePartyShow();
+    } else {
+        effBTLModelShow(effBTLSkillGetInvokeFormation());
+    }
+}
+
+void effBTLModelTargetShow(void)
+{
+    u32 count;
+    u32 i;
+
+    i = 0;
+    count = effBTLSkillGetTargetNumber();
+    if (count != 0) {
+        do {
+            effBTLModelShow(effBTLSkillGetTargetFormation(i++));
+        } while (i < count);
+    }
+}
+
+void effBTLModelInvokeHide(void)
+{
+    effBTLModelHide(effBTLSkillGetInvokeFormation());
+}
+
+void effBTLModelTargetHide(void)
+{
+    u32 count;
+    u32 i;
+
+    i = 0;
+    count = effBTLSkillGetTargetNumber();
+    if (count != 0) {
+        do {
+            effBTLModelHide(effBTLSkillGetTargetFormation(i++));
+        } while (i < count);
+    }
+}
+
+void effBTLModelInvokeGroupHide(void) {
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    nbFormation_t *invokeForm;
+    u32 invokeParty;
+    u32 stat;
+    s32 i;
+
+    data = nbGetMainProcessData();
+    invokeParty = effBTLSkillGetInvokeParty();
+    if (data->formationtype == 4 && invokeParty == 0x200) {
+        effBTLModelInvokePartyShow();
+        return;
+    }
+
+    invokeForm = effBTLSkillGetInvokeFormation();
+    form = data->form;
+    for (i = 0; i < 32; i++) {
+        stat = form->stat;
+        if ((stat & invokeParty) != 0 && (stat & 1) != 0 && (stat & 2) != 0) {
+            if (form != invokeForm) {
+                effBTLModelHide(form);
+            } else {
+                effBTLModelShow(form);
+            }
+        }
+        form++;
+    }
+}
+
+void effBTLModelTargetGroupHide(void) {
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    u32 targetParty;
+    u32 targetBit;
+    u32 stat;
+    s32 i;
+
+    targetParty = effBTLSkillGetTargetParty();
+    targetBit = effBTLSkillGetTargetBit();
+    data = nbGetMainProcessData();
+    form = data->form;
+    for (i = 0; i < 32; i++) {
+        stat = form->stat;
+        if ((stat & targetParty) != 0 && (stat & 1) != 0 && (stat & 2) != 0) {
+            if ((targetBit & 1) != 0) {
+                effBTLModelShow(form);
+            } else {
+                effBTLModelHide(form);
+            }
+        }
+        targetBit >>= 1;
+        form++;
+    }
+}
+
+void effBTLModelInvokePartyShow(void) {
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    u32 invokeParty;
+    u32 stat;
+    s32 i;
+
+    invokeParty = effBTLSkillGetInvokeParty();
+    data = nbGetMainProcessData();
+    form = data->form;
+    for (i = 0; i < 32; i++) {
+        stat = form->stat;
+        if ((stat & invokeParty) != 0 && (stat & 1) != 0 && (stat & 2) != 0) {
+            effBTLModelShow(form);
+        }
+        form++;
+    }
+}
 
 void effBTLModelTargetPartyShow(void) {
     nbFormation_t *form;
@@ -964,9 +1114,154 @@ void effBTLPartGetPositionPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPos
     SDF_VU0_STOREVECTOR(pPos);
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetModelPositionPtr);
+void effBTLPartGetModelPositionPtr(nbFormation_t *formation, effBTLAimParams_t *request) {
+    sdfVector4_t result;
+    sdfVector4_t direction;
+    sdfVector4_t center;
+    f32 radius;
+    f32 halfHeight;
+    f32 vertical;
+    u32 aimMode;
+    u32 directionMode;
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetPartyPositionPtr);
+    aimMode = request->aimMode;
+    directionMode = request->directionMode;
+    if (request->rangeOverride == 0) {
+        radius = formation->r * formation->scl;
+    } else {
+        radius = (f32)request->rangeOverride;
+    }
+    halfHeight = formation->h * 0.5f;
+    effBTLPartPtrGetModelCenter(formation);
+    SDF_VU0_STOREVECTOR(&center);
+    if (aimMode == 5) {
+        if (directionMode == 8 || directionMode == 10) {
+            vertical = -1.0f;
+            if (request->rangeOverride != 0) {
+                vertical = -radius;
+            }
+        } else {
+            vertical = -1.0f;
+        }
+    } else {
+        vertical = center.y - D_0031B990[aimMode] * halfHeight;
+        if (directionMode == 8 || directionMode == 10) {
+            if (request->rangeOverride != 0) {
+                vertical -= radius;
+            }
+        }
+    }
+    if (directionMode == 9 || aimMode == 4) {
+        f32 zero;
+        /* The camera offset shares one floating zero for its x/y stores. */
+        direction.z = -(radius > halfHeight ? radius : halfHeight);
+        zero = 0.0f;
+        direction.y = zero;
+        direction.x = zero;
+        center.y = vertical;
+        LookAtMatrix(&center, aViewEye, aViewDown);
+        ReverseMatrix();
+        SDF_VU0_LOADVECTOR(&direction);
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_LOADVECTOR_B(&center);
+        SDF_VU0_ADDVECTOR();
+    } else {
+        if (directionMode == 8 || directionMode == 10) {
+            result.x = center.x;
+            result.y = vertical;
+            result.z = center.z;
+        } else {
+            direction.x = 0.0f;
+            direction.z = 1.0f;
+            direction.y = 0.0f;
+            SDF_VU0_LOADVECTOR(&formation->rot);
+            ToMatrix();
+            SetRotateMatrixY_B(effBTL_Ptr_D[directionMode]);
+            MultMatrixNoArg();
+            SDF_VU0_LOADVECTOR(&direction);
+            SDF_VU0_APPLYMATRIX_XYZ();
+            SDF_VU0_STOREVECTOR(&direction);
+            result.x = center.x + radius * direction.x;
+            result.y = vertical + radius * direction.y;
+            result.z = center.z + radius * direction.z;
+        }
+        SDF_VU0_LOADVECTOR_MEMOPS(result);
+    }
+}
+
+void effBTLPartGetPartyPositionPtr(u32 group, effBTLAimParams_t *pPosPtr) {
+    /* The native scratch vectors leave w untouched. */
+    sdfVector4_t result;
+    sdfVector4_t direction;
+    sdfVector4_t center;
+    f32 heightAverage;
+    f32 heightMax;
+    f32 frontMax;
+    f32 radius;
+    f32 vertical;
+    u32 aimMode = pPosPtr->aimMode;
+    u32 directionMode = pPosPtr->directionMode;
+
+    radius = 500.0f;
+    (void)nbGetMainProcessData();
+    effBTLPartPtrModelGroupGetCenterAndHeight(group, &center, &heightAverage,
+                                               &heightMax, &frontMax);
+    if (pPosPtr->rangeOverride != 0) {
+        radius = (f32)pPosPtr->rangeOverride;
+    }
+
+    switch (aimMode) {
+    case 5:
+        if (directionMode == 8 || directionMode == 10) {
+            vertical = -1.0f;
+            if (pPosPtr->rangeOverride != 0) {
+                vertical = -radius;
+            }
+        } else {
+            vertical = -1.0f;
+        }
+        break;
+    case 0:
+    case 1:
+        vertical = center.y;
+        break;
+    case 2:
+        vertical = heightAverage;
+        break;
+    case 3:
+        vertical = heightMax;
+        break;
+    case 4:
+        vertical = 0.0f;
+        break;
+    default:
+        vertical = 0.0f;
+        break;
+    }
+
+    if (directionMode == 8) {
+        result.x = center.x;
+        result.y = vertical;
+        result.z = frontMax;
+    } else if (directionMode == 10) {
+        result.x = center.x;
+        result.y = vertical;
+        result.z = center.z;
+    } else {
+        direction.x = 0.0f;
+        direction.y = 0.0f;
+        direction.z = (group & 0x100) ? 1.0f : -1.0f;
+        SetRotateMatrixY(effBTL_Ptr_D[directionMode]);
+        SDF_VU0_LOADVECTOR(&direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(&direction);
+        result.x = center.x + radius * direction.x;
+        result.y = vertical + radius * direction.y;
+        result.z = frontMax + radius * direction.z;
+    }
+    SDF_VU0_LOADVECTOR_MEMOPS(result);
+}
 
 void effBTLPartGetInvokePartyPositionPtr(u32 pFormation, void *pPosPtr) {
     effBTLPartGetPartyPositionPtr(effBTLSkillGetInvokeParty(), pPosPtr);
@@ -976,9 +1271,115 @@ void effBTLPartGetTargetPartyPositionPtr(u32 pFormation, void *pPosPtr) {
     effBTLPartGetPartyPositionPtr(effBTLSkillGetTargetParty(), pPosPtr);
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetWorldPositionPtr);
+void effBTLPartGetWorldPositionPtr(nbFormation_t *formation, effBTLAimParams_t *request) {
+    sdfVector4_t result;
+    sdfVector4_t direction;
+    f32 radius;
+    f32 vertical;
+    u32 aimMode;
+    u32 directionMode;
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetModelMarkPositionPtr);
+    aimMode = request->aimMode;
+    directionMode = request->directionMode;
+    if ((formation->stat & 0x40) == 0) {
+        return;
+    }
+    (void)nbGetMainProcessData();
+    radius = 750.0f;
+    if (request->rangeOverride != 0) {
+        radius = (f32)request->rangeOverride;
+    }
+
+    if (directionMode == 9 || aimMode == 4) {
+        dds3Basic_t *camera;
+
+        camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
+        /* cc1probe --func effBTLPartGetWorldPositionPtr --sched --no-dumps,
+         * verify: OK. sched1 uid101 is the final use of 750 and wins by
+         * register weight; uid91/96 then keep source order: x, z, y. */
+        direction.z = 750.0f;
+        direction.y = 750.0f;
+        direction.x = 750.0f;
+        dds3CameraObjectBasicGetTargetPos(camera);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        dds3GetPosPoseSet(camera);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_LOADVECTOR_B(&direction);
+        SDF_VU0_MULVECTOR();
+    } else {
+        if (aimMode == 5) {
+            if (directionMode == 8 || directionMode == 10) {
+                vertical = -1.0f;
+                if (request->rangeOverride != 0) {
+                    vertical = -radius;
+                }
+            } else {
+                vertical = -1.0f;
+            }
+        } else {
+            vertical = D_0031B990[aimMode] * 250.0f;
+        }
+
+        if (directionMode == 8 || directionMode == 10) {
+            result.y = vertical;
+            result.x = 0.0f;
+            result.z = 0.0f;
+        } else {
+            direction.x = 0.0f;
+            direction.y = 0.0f;
+            direction.z = (formation->stat & 0x100) ? 1.0f : -1.0f;
+            SetRotateMatrixY(effBTL_Ptr_D[directionMode]);
+            SDF_VU0_LOADVECTOR(&direction);
+            SDF_VU0_APPLYMATRIX_XYZ();
+            SDF_VU0_STOREVECTOR(&direction);
+            result.x = radius * direction.x;
+            result.z = radius * direction.z;
+            result.y = radius * direction.y + vertical;
+        }
+        SDF_VU0_LOADVECTOR_MEMOPS(result);
+    }
+}
+
+void effBTLPartGetModelMarkPositionPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPosPtr) {
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 modelId;
+    s32 skillId;
+    s32 modelIndex;
+    s32 skillRuns;
+
+    if ((data->stat & 0x1000) == 0 && pPosPtr->aimMode < 2) {
+        modelId = effBTLModelGetID(pFormation);
+        skillId = effBTLSkillGetID();
+        modelIndex = modelId - 0x102;
+        if ((u32)modelIndex < 0x40) {
+            switch (modelIndex) {
+            case 1:
+            case 34:
+                effBTLModelGetSphereCenter(pFormation);
+                return;
+            case 0:
+            case 33:
+                effBTLModelGetSphereCenter(pFormation);
+                return;
+            case 6:
+            case 35:
+                skillRuns = effBTLSkillCheckRun();
+                if (skillRuns != 0 &&
+                    (skillId == 0xFE || skillId == 0xF1 || skillId == 0xDD))
+                    break;
+                effBTLModelGetSphereCenter(pFormation);
+                return;
+            case 63:
+                effBTLModelGetSphereCenter(pFormation);
+                return;
+            }
+        }
+    }
+    if (effBTLModelGetMarkPosition(pFormation, pPosPtr->aimMode) == 0) {
+        effBTLModelGetSphereCenter(pFormation);
+    }
+}
 
 f32 effBTLPartGetRadiusPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPosPtr) {
     sdfVector4_t center;
@@ -994,18 +1395,18 @@ f32 effBTLPartGetRadiusPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPosPtr
         party = effBTLSkillGetInvokeParty();
         effBTLModelGroupGetCenter(party);
         SDF_VU0_STOREVECTOR_MEMOPS(center);
-        radius = effBTLModelGroupGetSphereExp(&center, party);
+        radius = effBTLModelGroupGetMaxLength(&center, party);
         break;
     case 2:
         party = effBTLSkillGetTargetParty();
         effBTLModelGroupGetCenter(party);
         SDF_VU0_STOREVECTOR_MEMOPS(center);
-        radius = effBTLModelGroupGetSphereExp(&center, party);
+        radius = effBTLModelGroupGetMaxLength(&center, party);
         break;
     case 3:
         effBTLModelGroupGetCenter(0x700);
         SDF_VU0_STOREVECTOR_MEMOPS(center);
-        radius = effBTLModelGroupGetSphereExp(&center, 0x700);
+        radius = effBTLModelGroupGetMaxLength(&center, 0x700);
         break;
     }
     return radius;

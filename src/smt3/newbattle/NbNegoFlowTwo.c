@@ -258,13 +258,28 @@ extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t 
 
 extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 extern void nbSetMesItem(s32 msgid, s32 it);
 
 extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
 extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
+struct nbKoukaPacket_t;
+extern s32 nbMakeNegoBackPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                nbFormation_t *target);
+extern s32 nbMakeNegoWorkPosPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                   nbFormation_t *target);
+extern s32 nbMakeNegoForwardPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                  nbFormation_t *target);
+extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 col,
+                                 s32 delay, s32 aframe, s32 colframe);
+extern struct nbKoukaPacket_t *nbAddHomeMoveKoukaPacket(s32 startframe, s32 uniqueid, s32 partyno,
+                                                f32 speed);
+extern void nbCameraSetTaizi(nbFormation_t *invoke, nbFormation_t *target);
+extern void nbFormDispOff2(nbFormation_t *form);
+extern void nbFormDispOn2(nbFormation_t *form);
+
 
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
@@ -426,7 +441,7 @@ s32 Flow6_4(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x60005);
     nbAddNegoIdKouho(n, 0x90001);
-    if (dds3GetRandIntA(0, 100) < 65) {
+    if ((s32)dds3GetRandIntA(0, 100) < 65) {
         n->nextnegoid = n->nextkouho[1];
     } else {
         n->nextnegoid = n->nextkouho[0];
@@ -459,7 +474,7 @@ s32 Flow6_7(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x60008);
     nbAddNegoIdKouho(n, 0xA0001);
-    if (dds3GetRandIntA(0, 100) < 70) {
+    if ((s32)dds3GetRandIntA(0, 100) < 70) {
         n->nextnegoid = n->nextkouho[1];
     } else {
         n->nextnegoid = n->nextkouho[0];
@@ -474,7 +489,86 @@ s32 Flow6_8(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_9);
+typedef struct { u8 ritu; u8 item; } datNegoPresent_t;
+typedef struct {
+    u32 kucyo;
+    u32 tokucyo;
+    u8 tokuboutype;
+    u8 honboutype;
+    u8 fighttype;
+    u8 reqtype;
+    u8 tuikareqtype;
+    u8 privatesel;
+    u8 privateselindex;
+    u8 senseitype;
+    u8 inotitype;
+    u8 binjotype;
+    u16 mukantype;
+    u16 mukanindex;
+    datNegoPresent_t itema[4];
+    datNegoPresent_t itemb[4];
+    datNegoPresent_t stone[4];
+} datDevilNegoFormat_t;
+
+extern datDevilNegoFormat_t master_text[];
+extern s32 nbGetNegoRequestType(s32 reqtype);
+extern char D_00544FF0[];
+extern s32 printf(const char *format, ...);
+
+INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00544FF0);
+
+s32 Flow6_9(nbNegoProcessData_t *n)
+{
+    s32 requestType;
+    s32 overrideType;
+
+    nbAddNegoIdKouho(n, 0x60011);
+    nbAddNegoIdKouho(n, 0x60015);
+    nbAddNegoIdKouho(n, 0x6000B);
+    nbAddNegoIdKouho(n, 0x6000A);
+    nbAddNegoIdKouho(n, 0x6000C);
+
+    do {
+        requestType = nbGetNegoRequestType(master_text[n->ework->id].reqtype);
+    } while ((u32)n->prevreqtype >= 2 &&
+             (requestType == 4 || requestType == n->prevreqtype));
+
+    overrideType = n->negoreqtype;
+    n->requestdata = 0;
+    if (overrideType == 4) {
+        requestType = 0;
+    }
+    if (overrideType == 5) {
+        requestType = 5;
+    }
+    n->requesttype = requestType;
+    printf(D_00544FF0, requestType);
+
+    if ((u32)requestType < 6) {
+        switch (requestType) {
+        case 0:
+            n->nextnegoid = n->nextkouho[0];
+            break;
+        case 1:
+            n->nextnegoid = n->nextkouho[0];
+            break;
+        case 2:
+            n->nextnegoid = n->nextkouho[1];
+            break;
+        case 3:
+            n->nextnegoid = n->nextkouho[2];
+            break;
+        case 4:
+            n->nextnegoid = n->nextkouho[3];
+            break;
+        case 5:
+            n->nextnegoid = n->nextkouho[4];
+            break;
+        }
+    }
+    n->prevreqtype = requestType;
+    return 0;
+}
 
 s32 Flow6_10(nbNegoProcessData_t *n)
 {
@@ -527,7 +621,7 @@ s32 Flow6_12(nbNegoProcessData_t *n)
             ritu = 0;
         }
     }
-    if (dds3GetRandIntA(0, 0x64) < ritu) {
+    if ((s32)dds3GetRandIntA(0, 0x64) < ritu) {
         n->nextnegoid = n->nextkouho[1];
     } else {
         n->nextnegoid = n->nextkouho[0];
@@ -541,7 +635,7 @@ s32 Flow6_13(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0x6000E);
     n->nextnegoid = n->nextkouho[0];
     if (datCheckDying(n->ework) != 0) {
-        if (dds3GetRandIntA(0, 100) < 70) {
+        if ((s32)dds3GetRandIntA(0, 100) < 70) {
             n->nextnegoid = n->nextkouho[1];
         }
     }
@@ -851,8 +945,6 @@ s32 Flow6_32(nbNegoProcessData_t *n)
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_32);
 #endif
 
-/* NON_MATCHING: 35 of 56 words differ (first at +0x44); six words long. */
-#ifdef NON_MATCHING
 s32 Flow6_33(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x90001);
@@ -865,6 +957,8 @@ s32 Flow6_33(nbNegoProcessData_t *n)
         n->nextnegoid = n->nextkouho[2];
         return 0;
     }
+    /* Retail retains the dead sltiu at 0x00270D68 after these identical
+     * random-selection arms fold. Flow6_80 shows the live selection form. */
     if ((u32)dds3GetRandIntA(0, 0xA) < 5) {
         n->nextnegoid = n->nextkouho[1];
     } else {
@@ -872,9 +966,6 @@ s32 Flow6_33(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_33);
-#endif
 
 s32 Flow6_34(nbNegoProcessData_t *n)
 {
@@ -963,7 +1054,56 @@ s32 Flow6_38(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_39);
+extern s32 nbGetNegoTuikaRequestType(s32 tuikareqtype);
+extern s32 nbGetKureItemB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
+extern s32 nbGetNegoKureMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
+
+s32 Flow6_39(nbNegoProcessData_t *n)
+{
+    s32 requestType;
+
+    nbAddNegoIdKouho(n, 0x60028);
+    if (n->ework->id == 0x5C && evtBitCheck(8) == 0 && n->negoreqtype == 0) {
+        if (dds3GetRandIntA(NULL, 1) == 0) n->requesttype = 3;
+    } else {
+        requestType = nbGetNegoTuikaRequestType(master_text[n->ework->id].tuikareqtype);
+        switch (requestType) {
+        case 0:
+            n->requesttype = 1;
+            break;
+        case 1:
+            n->requesttype = 0;
+            break;
+        case 2:
+            n->requesttype = 3;
+            break;
+        }
+    }
+
+    n->requestdata = 0;
+    if (n->negoreqtype == 4) {
+        n->requesttype = 0;
+    }
+
+    if (n->prevreqtype != 3 && n->requesttype == 3) {
+        if (dds3GetRandIntA(NULL, 2) == 0) n->requesttype = 1;
+        else n->requesttype = 0;
+    }
+    switch (n->requesttype) {
+    case 0:
+        n->requestdata = nbGetKureItemB(n, n->pwork, n->ework);
+        if (n->requestdata == 0) n->requestdata = 0x10;
+        break;
+    case 1:
+        n->requestdata = nbGetNegoKureMakkaB(n, n->pwork, n->ework);
+        break;
+    case 3:
+        break;
+    }
+
+    n->prevreqtype = n->requesttype;
+    return 0;
+}
 
 s32 Flow6_40(nbNegoProcessData_t *n)
 {
@@ -1167,11 +1307,125 @@ s32 Flow6_52(nbNegoProcessData_t *n)
     return 0;
 }
 
+extern void nbCameraSetHojo(nbFormation_t *hojo, nbFormation_t *target1,
+                            nbFormation_t *target2);
+extern void nbDispSkillName(s32 id);
+extern char D_00545068[];
+
 INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00545068);
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_53);
+s32 Flow6_53(nbNegoProcessData_t *n)
+{
+    s32 message;
+    s32 skill;
+    nbFormation_t *form;
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_74);
+    message = 0;
+    skill = n->hojoskillid;
+    form = &n->data->form[n->data->party[n->hojopartyindex].formindex];
+
+    switch (skill) {
+    case 0x199:
+        message = 0xC;
+        break;
+    case 0x19A:
+        message = 0xD;
+        break;
+    case 0x1A2:
+        message = 0xE;
+        break;
+    case 0x19B:
+        message = 0xF;
+        break;
+    case 0x19C:
+        message = 0x10;
+        break;
+    case 0x1A4:
+        message = 0x11;
+        break;
+    case 0x19D:
+        message = 0x12;
+        break;
+    case 0x19E:
+        message = 0x13;
+        break;
+    case 0x19F:
+        message = 0x14;
+        break;
+    case 0x1A3:
+        message = 0x15;
+        break;
+    }
+
+    switch (n->nownegophase) {
+    case 0:
+        nbCameraSetHojo(form, n->pform, n->eform);
+        nbDispNegoMessage(n, n->helpmsg, message, 0);
+        break;
+    case 1:
+        nbClsNegoMessage(n);
+        nbCameraSetTaizi(n->pform, n->eform);
+        nbMakeNegoBackPacket(0, (s32)n->actdata, n->pform, n->eform);
+        nbFormDispOff2(form);
+        nbMakeNegoWorkPosPacket(0, (s32)n->actdata, form, n->eform);
+        n->waitframe = 10;
+        break;
+    case 2:
+        nbFormDispOff2(n->pform);
+        nbMakeUnitFadeInPacket(1, (s32)n->actdata, n->pform, 0, 0, 0, 0);
+        nbMakeNegoForwardPacket(0, (s32)n->actdata, form, n->eform);
+        n->stat |= 8;
+        nbFormDispOn2(form);
+        nbCameraSetTaizi(form, n->eform);
+        n->waitframe = 5;
+        break;
+    case 3:
+        nbDispSkillName(skill);
+        printf(D_00545068, n->hojopartyindex, n->hojoskillid);
+        n->waitframe = 0x3C;
+        break;
+    case 4:
+        nbAddNegoIdKouho(n, 0x60036);
+        break;
+    }
+    return 0;
+}
+
+s32 Flow6_74(nbNegoProcessData_t *n)
+{
+    nbFormation_t *form;
+
+    if ((n->stat & 8) == 0) {
+        nbAddNegoIdKouho(n, n->workid[6]);
+        return 0;
+    }
+
+    form = &n->data->form[n->data->party[n->hojopartyindex].formindex];
+    switch (n->nownegophase) {
+    case 0:
+        nbMakeNegoBackPacket(0, (s32)n->actdata, form, n->eform);
+        nbFormDispOff2(n->pform);
+        nbMakeNegoWorkPosPacket(0, (s32)n->actdata, n->pform, n->eform);
+        nbCameraSetTaizi(n->pform, n->eform);
+        n->waitframe = 10;
+        break;
+    case 1:
+        nbFormDispOff2(form);
+        nbMakeUnitFadeInPacket(1, (s32)n->actdata, form, 0, 0, 0, 0);
+        nbAddHomeMoveKoukaPacket(0, 0, n->hojopartyindex, 1.0f);
+        nbFormDispOn2(n->pform);
+        nbMakeNegoForwardPacket(0, (s32)n->actdata, n->pform, n->eform);
+        n->waitframe = 10;
+        break;
+    case 2:
+        nbAddNegoIdKouho(n, n->workid[6]);
+        n->stat &= ~8;
+        break;
+    }
+    return 0;
+}
+
+
 
 s32 Flow6_54(nbNegoProcessData_t *n)
 {
@@ -1227,7 +1481,7 @@ s32 Flow6_57(nbNegoProcessData_t *n)
          n->ework->id == 0x5A || n->ework->id == 0x5B || n->ework->id == 0x5C)) {
         ritu = 0;
     }
-    if (dds3GetRandIntA(0, 0x64) < ritu) {
+    if ((s32)dds3GetRandIntA(0, 0x64) < ritu) {
         n->hojoseikou = 1;
         n->nextnegoid = n->nextkouho[0];
     } else {
@@ -1377,7 +1631,7 @@ s32 Flow6_65(nbNegoProcessData_t *n)
             n->nextnegoid = n->nextkouho[1];
         }
     } else {
-        n->nextnegoid = dds3GetRandIntA(0, 0x64) < ritu ? n->nextkouho[0] : n->nextkouho[1];
+        n->nextnegoid = (s32)dds3GetRandIntA(0, 0x64) < ritu ? n->nextkouho[0] : n->nextkouho[1];
     }
     return 0;
 }

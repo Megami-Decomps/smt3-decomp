@@ -29,7 +29,7 @@ typedef struct
     s32 pcharNum;
     u8 unk004[0x14];
     s16 exitX, exitY;
-    u8 unk01C[0x320];
+    u16 map[20][20];
     s32 charIndex;
     void *baseTex;
     void *tex344, *tex348, *tex34C;
@@ -56,13 +56,28 @@ typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCam
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
-typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbGroupData_t;
+typedef struct { u16 kind; s16 x, y; u8 unk06[0x8A]; } pbBlockEntry_t;
+typedef struct
+{
+    s32 value;
+    u16 groupID;
+    u16 count;
+    u8 unk08[0xA];
+    s16 cellX, cellY;
+    u8 unk16[0x9A];
+    pbBlockEntry_t *blockEntries;
+    u8 unkB4[4];
+    f32 rotation;
+    u8 unkBC[8];
+    f32 x, y, z;
+} pbGroupData_t;
+typedef struct { s16 x, y; u16 status; } pbRecordCell_t;
 
 typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
 typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
 
-typedef struct { u8 flag[4]; void *block, *floor, *chara; } pbRecordSlot_t;
+typedef struct { u8 flag[4]; void *characters, *blocks, *floors; } pbRecordSlot_t;
 
 typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 
@@ -155,21 +170,76 @@ u32 pbPushRecord(pbProcHandle_t *p) {
 s8 pbCheckPopRecord(pbProcHandle_t *p) {
     pbRecord_t *rec = p->data.record;
     pbRecordSlot_t *slot = &rec->slot[(rec->pos + 29) % 30];
-    return slot->block != NULL;
+    return slot->characters != NULL;
 }
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbPopRecord);
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_blk);
 
-INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_flor);
+s32 pbAddRecord_flor(pbProcHandle_t *panel, pbGroupData_t *group)
+{
+    pbRecord_t *rec = panel->data.record;
+    pbRecordCell_t *cells;
+    pbBlockEntry_t *entry;
+    s32 position;
+    u32 i;
+
+    rec->slot[rec->pos].flag[3] = group->count;
+    if (rec->slot[rec->pos].floors != NULL) {
+        sdfChipFreeDelayedDirect(rec->slot[rec->pos].floors);
+    }
+    cells = sdfChipAllocDirect(group->count * sizeof(*cells));
+    position = rec->pos;
+    rec->slot[position].floors = cells;
+    i = 0;
+    if (group->count != 0) {
+        entry = group->blockEntries;
+        do {
+            cells[i].x = group->cellX + entry->x;
+            cells[i].y = group->cellY + entry->y;
+            cells[i].status = D_0054F5C4->map[cells[i].y][cells[i].x] & 0x800;
+            entry++;
+        } while (++i < group->count);
+    }
+    return position;
+}
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_char);
 
-
 INCLUDE_ASM(const s32, "pb/pbRecord", pbDumpRecordData);
 
-INCLUDE_ASM(const s32, "pb/pbRecord", pb_draw_help_Process);
+extern s8 dds3PadButtonState[];
+extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
+extern void dds3ResetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type);
+extern void rsetOtOfs(u32 offset);
+extern void rsetAlpha(s32 mode);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail,
+                     s32 date, s32 datm, s32 zte, s32 ztst);
+extern void DrwSprite2D(s32 x, s32 y, s32 width, s32 height,
+                        s32 u, s32 v, s32 uw, s32 vh, u32 color,
+                        sdfTexHandle_t *texture);
+
+s32 pb_draw_help_Process(dds3ProcessID_t *id)
+{
+    pbProcHandle_t *panel = id->workdata;
+
+    if ((s8)dds3PadButtonState[0x21] < 0 ||
+        (s8)dds3PadButtonState[0x23] < 0 ||
+        (s8)dds3PadButtonState[0x20] < 0) {
+        p2sdPlaySE(0x340006, 0x7F, 0x3F);
+        dds3ResetProcessFlag(panel->id, 0x10, 1);
+        return -1;
+    }
+
+    rsetOtOfs(0x47);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
+                0x80808080, (sdfTexHandle_t *)D_0054F5C4->tex34C);
+    return 0;
+}
+
 
 void pb_draw_help_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;

@@ -51,6 +51,8 @@ typedef struct PIPE_EFF_t {
 
 
 extern void dds3EffectDelete(void *pData);
+extern void *dds3EffectLoad(void *pD3P);
+void pipeEffCreateLoadFile(PIPE_EFF_t *effect, const char *path, u8 maxSize);
 
 extern s32 offsetCount;
 
@@ -58,7 +60,7 @@ extern PIPE_EFF_t *pipe_CELL01_D3P, *pipe_BREAK01_D3P, *pipe_BREAK02_D3P;
 
 extern PIPE_EFF_t *pipe_DAMAGE01_D3P, *pipe_DAMAGE03_D3P, *pipe_ATTACK01_D3P;
 
-extern void pipeGetObjData(PIPE_EFF_t *effect, s32 maxSize);
+extern void pipeGetObjData(PIPE_EFF_t *effect, u8 type);
 
 extern void pipeEffDraw2Doffset(PIPE_EFF_t *pEffect, u8 maxSize);
 
@@ -112,9 +114,53 @@ void pipeBulrLimit(void)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffCreateLoadFile);
+extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
 
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffLoad);
+void pipeEffCreateLoadFile(PIPE_EFF_t *effect, const char *path, u8 maxSize)
+{
+    PIPE_EFF_t *entry;
+    u8 i = maxSize - 1;
+
+    effect->mhFile = NULL;
+    effect->d3p = NULL;
+    effect->x = effect->y = effect->z = 0.0f;
+    effect->size = 0;
+    effect->ptr = NULL;
+    effect->mhFile = sdfDevLoadFileEx(path, (u32 *)&effect->ptr, (u32 *)&effect->size);
+
+    effect++;
+    entry = effect;
+    if (--i != 0xFF) {
+        do {
+            entry->mhFile = NULL;
+            entry->size = effect->size;
+            entry->d3p = NULL;
+            entry->x = entry->y = entry->z = 0.0f;
+            entry->ptr = NULL;
+            entry->pos2[0] = 0.0f;
+            entry->pos2[1] = 0.0f;
+            entry->offset = 0;
+            entry++;
+        } while (--i != 0xFF);
+    }
+}
+
+void pipeEffLoad(void)
+{
+    s32 maxSize = 10;
+
+    pipeEffCreateLoadFile(pipe_CELL01_D3P, "/pipe/CEL01.D3P", maxSize);
+    pipeEffCreateLoadFile(pipe_BREAK01_D3P, "/pipe/BRAKE01.D3P", maxSize);
+    pipeEffCreateLoadFile(pipe_BREAK02_D3P, "/pipe/BRAKE02.D3P", maxSize);
+    pipeEffCreateLoadFile(pipe_DAMAGE01_D3P, "/pipe/DAMAGE01.D3P", maxSize);
+    pipeEffCreateLoadFile(pipe_DAMAGE03_D3P, "/pipe/DAMAGE03.D3P", maxSize);
+    maxSize = 5;
+    pipeEffCreateLoadFile(pipe_ATTACK01_D3P, "/pipe/FPS3.D3P", maxSize);
+    /* Retail keeps a jal and epilogue after the final call. The same dead
+     * reset is present in pipeEffDraw and pipeEffCal; both sibling bodies
+     * match exactly with their native jal-plus-return sequences. */
+    maxSize = 0;
+}
 
 void pipeFreeEffects(PIPE_EFF_t *effect, u8 maxSize)
 {
@@ -173,17 +219,12 @@ void pipeEffCal(void)
     maxSize = 0;
 }
 
-/* NON_MATCHING: 9 of 71 words, exact size; the third arm materialises its
- * constants in a different order. */
-
-
-#ifdef NON_MATCHING
-void pipeGetObjData(PIPE_EFF_t *effect, s32 maxSize)
+void pipeGetObjData(PIPE_EFF_t *effect, u8 type)
 {
     PIPE_EFF_t *pEff = effect;
     u8 i;
 
-    if ((u8)maxSize == 2) {
+    if (type == 2) {
         s32 offset = offsetCount;
 
         for (i = 9; i != 0xFF; i--) {
@@ -192,18 +233,20 @@ void pipeGetObjData(PIPE_EFF_t *effect, s32 maxSize)
             }
             pEff++;
         }
-    } else if ((u8)maxSize == 4) {
+    } else if (type == 4) {
         for (i = 9; i != 0xFF; i--) {
             if (pEff->d3p != NULL) {
                 pEff->offset += 6;
             }
             pEff++;
         }
-    } else if ((u8)maxSize == 6) {
+    } else if (type == 6) {
         tagPipeObject *objPtr = objMyData();
-        s32 offset = offsetCount + 4;
+        s32 offset;
 
-        for (i = 4; i != 0xFF; i--) {
+        i = 4;
+        offset = offsetCount + 4;
+        for (; i != 0xFF; i--) {
             if (pEff->d3p != NULL) {
                 pEff->offset = offset;
                 pEff->pos2[0] = objPtr->pos[0] - 16.0f;
@@ -213,14 +256,101 @@ void pipeGetObjData(PIPE_EFF_t *effect, s32 maxSize)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeGetObjData);
-#endif
 
 
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffSet);
+void pipeLoadEffect(s32 effectID, PIPE_EFF_t *effects, u8 maxSize, f32 x, f32 y);
 
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeLoadEffect);
+void pipeEffSet(tagPipeObject *object, s32 type)
+{
+    switch ((s32)(u8)type) {
+    case 2:
+        pipeLoadEffect(object->offset, pipe_DAMAGE01_D3P, 10, object->pos[0], object->pos[1]);
+        pipeLoadEffect(object->offset, pipe_DAMAGE03_D3P, 10, object->pos[0], object->pos[1]);
+        break;
+    case 4:
+        pipeLoadEffect(object->offset + 5, pipe_BREAK01_D3P, 10, object->pos[0], object->pos[1]);
+        pipeLoadEffect(object->offset + 5, pipe_BREAK02_D3P, 10, object->pos[0], object->pos[1]);
+        pipeLoadEffect(object->offset + 5, pipe_CELL01_D3P, 10, object->pos[0], object->pos[1]);
+        break;
+    case 6: {
+        f32 x = object->pos[0] - 16.0f;
+        f32 y = object->pos[1] - 48.0f;
+        pipeLoadEffect(object->offset, pipe_ATTACK01_D3P, 5, x, y);
+        /* Like pipeEffLoad's maxSize reset, consume the local selector after
+         * the final load. Retail keeps jal and the common epilogue here. */
+        type = 0;
+        break;
+    }
+    default:
+        break;
+    }
+}
 
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffDraw2Doffset);
+void pipeLoadEffect(s32 effectID, PIPE_EFF_t *effects, u8 maxSize, f32 x, f32 y)
+{
+    PIPE_EFF_t *first = effects;
+
+    maxSize--;
+    while (--maxSize != 0xFF) {
+        if (effects->d3p == NULL) {
+            void *handle = dds3EffectLoad(first->ptr);
+            effects->pos2[0] = x;
+            effects->d3p = handle;
+            effects->pos2[1] = y;
+            effects->offset = effectID;
+            effects->count = 14;
+            break;
+        }
+        effects++;
+    }
+}
+
+extern void *memset(void *dest, s32 value, u32 size);
+extern s32 dds3EffectGetState(void *effect);
+extern void dds3EffectSetPosition(void *effect, const void *position);
+extern void dds3EffectDraw(void *effect);
+extern void getPosTranslate(tagPipeObject *object, f32 *position);
+
+void pipeEffDraw2Doffset(PIPE_EFF_t *pEffect, u8 maxSize)
+{
+    PIPE_EFF_t *effect;
+    f32 position[4];
+    tagPipeObject object;
+    u8 index;
+
+    memset(position, 0, 0x10);
+    effect = pEffect;
+    position[3] = 1.0f;
+    index = maxSize - 2;
+    if (index != 0xFF) {
+        do {
+            if (effect->d3p != NULL) {
+                if (dds3EffectGetState(effect->d3p) == 0) {
+                    dds3EffectDelete(effect->d3p);
+                    effect->d3p = NULL;
+                } else {
+                    f32 x = effect->pos2[0];
+                    f32 y = effect->pos2[1];
+                    object.pos[0] = x;
+                    object.pos[1] = y;
+                    object.offset = effect->offset;
+                    getPosTranslate(&object, position);
+                    dds3EffectSetPosition(effect->d3p, position);
+                    dds3EffectDraw(effect->d3p);
+                    if (maxSize == 5 && effect->count != 0) {
+                        effect->count--;
+                        if (effect->count == 0) {
+                            dds3EffectDelete(effect->d3p);
+                            effect->d3p = NULL;
+                        }
+                    }
+                }
+            }
+            index--;
+            effect++;
+        } while (index != 0xFF);
+    }
+}
+
+INCLUDE_SDATA(const s32, "pipe/pipeEffect", pipeBulrLimitValue);
 

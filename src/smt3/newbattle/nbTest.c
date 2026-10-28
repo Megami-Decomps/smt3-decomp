@@ -318,9 +318,9 @@ extern s32 dds3SearchProcessPriority(s32 priority);
 
 extern void nbExit(void);
 
-extern void *nbEncountCalc(s32 id, f32 length);
+extern u32 nbEncountCalc(s32 id, f32 length);
 
-extern void nbCallNewBattle(s32 encpack, void *data);
+extern void nbCallNewBattle(s32 encpack, s32 code);
 
 extern s32 pack;
 
@@ -343,6 +343,13 @@ typedef struct nbEventProcessData_t {
 } nbEventProcessData_t;
 
 extern void evtBitOn(s32 no);
+
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer, s32 shutdownTimer,
+                                         dds3ProcessFunc_t process, dds3ProcessFunc_t shutdown,
+                                         void *work);
+
+extern void nbSetBattleDummy(s32 count, void *devilList, void *skillList, void *passiveSkills,
+                             void *skillEntries);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -509,14 +516,14 @@ void *TestProcess2(void)
 
 void *TestProcess6(void)
 {
-    void *next;
+    u32 encounter;
 
     DrawTest();
-    next = nbEncountCalc(pack, 100.0f);
-    if (next == NULL) {
-        return next;
+    encounter = nbEncountCalc(pack, 100.0f);
+    if (encounter == 0) {
+        return NULL;
     }
-    nbCallNewBattle(pack, next);
+    nbCallNewBattle(pack, encounter);
     return TestProcess2;
 }
 
@@ -534,7 +541,21 @@ void nbExitBattleTest(void)
     dds3KillProcessName(D_00545B90, 1);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbTest", nbInitBattleTest);
+void nbInitBattleTest(void)
+{
+    dds3GlobalWork_t *work;
+
+    if (evtBitCheck(0xC08) == 0) {
+        nbSetBattleDummy(4, D_00526530, D_00526540, test_pskill, test_skilllist);
+        evtBitOn(0xC08);
+    }
+
+    work = DDS3_GBWK;
+    work->encountCount = 0;
+    work->encountkyori = 0.0f;
+    *(s32 *)((u8 *)work + 0x11AB8) |= 0xC;
+    dds3StartProcess(D_00545B90, 0x2B0C, 1, 1, TestProcess1, TestShutdown, NULL);
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbTest", D_00545B78);
 

@@ -33,44 +33,69 @@ typedef struct pmdEffectTable_t {
     s32 reserve;
 } pmdEffectTable_t;
 
+typedef struct pmdEntry_t {
+    u32 type;
+    u32 elementSize;
+    u32 value;
+    u32 offset;
+} pmdEntry_t;
+
+typedef struct pmdHeader_t {
+    u8 pad[0x10];
+    s32 count;
+    s32 kind;
+    u8 pad2[8];
+    pmdEntry_t entries[1];
+} pmdHeader_t;
+
 typedef struct evtPolygonMovieWork_t {
     u32 movieFlags;
     void *file04;
     sdfMemHandle_t *mem08;
     void *pm1data;
     void *header1;
-    u8 unk14[4];
+    pmdEntry_t *entryTable1;
     char (*nameTable1)[32];
-    u8 unk1C[0x24];
+    s32 nameCount1;
+    void *stageTable;
+    s32 stageCount;
+    void *stageF1;
+    void *stageF2;
+    void *stageTB;
+    void *unitTable;
+    s32 unitCount;
+    void *type9Data;
     pmdEffectTable_t *effectTable;
     s32 effectCount;
-    u8 unk48[4];
+    void *type8Data;
     void *file4C;
     sdfMemHandle_t *mem50;
     void *pm2data;
-    u8 unk58[8];
+    pmdHeader_t *header2;
+    pmdEntry_t *entryTable2;
     char (*nameTable)[32];
-    u8 unk64[4];
+    s32 nameCount2;
     pmdCutInfo_t *cutInfo;
     pmdFrameTable_t *frameTable;
     s32 frameCount;
-    u8 unk74[8];
+    void *cameraTable;
+    s32 cameraCount;
     f32 (*slightTable)[12];
-    u8 unk80[4];
+    s32 slightCount;
     pmdSceneFogTable_t *sfogTable;
-    u8 unk88[4];
+    s32 sfogCount;
     dds3Effect_Blur_t *blur2Table;
-    u8 unk90[4];
+    s32 blur2Count;
     dds3Effect_PartialMultiBlurParam_t *mblurTable;
-    u8 unk98[4];
+    s32 mblurCount;
     dds3Effect_DistortionBlurParam_t *dblurTable;
-    u8 unkA0[4];
+    s32 dblurCount;
     dds3Effect_Filter_t *filterTable;
-    u8 unkA8[4];
+    s32 filterCount;
     dds3Effect_PartialMultiFilterParam_t *mfilterTable;
-    u8 unkB0[4];
+    s32 mfilterCount;
     dds3Effect_RippleBlurParam_t *rblurTable;
-    u8 unkB8[4];
+    s32 rblurCount;
     s32 mesHandle;
     dds3ProcessID_t *processId;
     s32 eventNo;
@@ -135,15 +160,39 @@ extern void evtTransEventBgm(s32 eventNo, s32 bgm);
 extern void p2sdBgmVolDown(void);
 extern void p2sdBgmVolUp(void);
 extern void p2sdStopAllBgm(void);
-extern s32 pacFileCheckEnd(void);
+typedef struct fileRequest fileRequest_t;
+extern s32 pacFileCheckEnd(const fileRequest_t *pacFileHandle);
 extern sdfMemHandle_t *fileGetMemHandle(void *fileHandle);
 extern void *fileLoad(const char *filename);
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, void *data, s32 mode);
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
-void evtGetPolygonMovieWorkData1(evtPolygonMovieWork_t *wdata, void *pm1data, void *pm2data);
+evtPolygonMovieWork_t *evtGetPolygonMovieWorkData1(evtPolygonMovieWork_t *wdata, void *pm1data, void *pm2data);
 s32 evtPolygonMovieProcess1(dds3ProcessID_t *id);
+typedef struct pmdUnitTable_t {
+    s32 NameIndex, FileIndex, MajorNum, MinorNum, DataOffset, DataSize, Reserve1, Reserve2;
+} pmdUnitTable_t;
+typedef struct pmdCameraTable_t {
+    s32 NameIndex, Reserve1, Reserve2, Reserve3;
+} pmdCameraTable_t;
+typedef struct pmdStageTable_t {
+    s32 NameIndex, FileIndex, MajorNum, MinorNum;
+} pmdStageTable_t;
+extern s32 dds3GetMapNo(dds3Basic_t *scene);
+extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, s32 pF1, s32 pF2, const void *pTB, s32 pBF);
+extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
+extern s32 evtSetRegistUnit(s32 major, s32 minor);
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serial, s32 type);
+extern evtUnit_t *evtGetUnitHandle(s32 serial);
+extern void mdlSmoothSingleMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
+extern dds3ObjectBaseControlWorkData_t *dds3GetCameraObjectBaseControlWorkData(dds3Basic_t *basic);
+extern void dds3MoverBasicSetPath(dds3Basic_t *mover, dds3Basic_t *path);
+extern void dds3MoverBasicMakePath(dds3Basic_t *mover);
+extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
+extern u32 dds3DrawFlag;
+extern char D_0053BAF8[];
+extern char D_0053BB20[];
 void evtPolygonMovieShutdown(dds3ProcessID_t *id);
 void SetPMFileName(s32 eventno, s32 cutno, char *pm1file, char *pm2file);
 evtPolygonMovieWork_t *InitPolygonMovieWorkData(void);
@@ -282,21 +331,6 @@ extern f32 D_0032C810[4];
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 u32 sdfMemLock(struct sdfMemHandle_t *aHandle);
-
-typedef struct pmdEntry_t {
-    u32 type;
-    u32 elementSize;
-    u32 value;
-    u32 offset;
-} pmdEntry_t;
-
-typedef struct pmdHeader_t {
-    u8 pad[0x10];
-    s32 count;
-    s32 kind;
-    u8 pad2[8];
-    pmdEntry_t entries[1];
-} pmdHeader_t;
 
 sdfMemHandle_t *evtAllocMovieWork(pmdHeader_t **out);
 
@@ -1124,14 +1158,12 @@ s32 evtPolygonMovieProcess2(dds3ProcessID_t *id)
     return ret;
 }
 
-/* NON_MATCHING: 32 of 68 words differ (first at +0x24). */
-#ifdef NON_MATCHING
 void CheckLoad_evtPolygonMovie(evtPolygonMovieWork_t *work)
 {
     if ((work->movieFlags & 8) == 0) {
         if (work->movieFlags & 2) {
             if (work->file04 != NULL) {
-                if (pacFileCheckEnd() != 0) {
+                if (pacFileCheckEnd(work->file04) != 0) {
                     work->mem08 = fileGetMemHandle(work->file04);
                     work->pm1data = (void *)sdfMemLock(work->mem08);
                     fileHandleFree(work->file04);
@@ -1141,7 +1173,7 @@ void CheckLoad_evtPolygonMovie(evtPolygonMovieWork_t *work)
             }
         } else if (work->movieFlags & 4) {
             if (work->file4C != NULL) {
-                if (pacFileCheckEnd() != 0) {
+                if (pacFileCheckEnd(work->file4C) != 0) {
                     work->mem50 = fileGetMemHandle(work->file4C);
                     work->pm2data = (void *)sdfMemLock(work->mem50);
                     fileHandleFree(work->file4C);
@@ -1157,9 +1189,6 @@ void CheckLoad_evtPolygonMovie(evtPolygonMovieWork_t *work)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", CheckLoad_evtPolygonMovie);
-#endif
 
 s32 evtCheckPolygonMovieRun(dds3ProcessID_t *id)
 {
@@ -1178,7 +1207,110 @@ INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BAF8);
 
 INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BB20);
 
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtPolygonMovieProcess1);
+s32 evtPolygonMovieProcess1(dds3ProcessID_t *id)
+{
+    evtPolygonMovieWork_t *work;
+    dds3Basic_t *basic;
+    dds3Basic_t *path;
+    dds3Basic_t *mover;
+    dds3SceneBasic_t *sceneWork;
+    evtUnit_t *unit;
+    dds3UnitObjectBasicWorkData_t *unitWork;
+    mdlObj_t *model;
+    s32 i;
+    s32 serial;
+    s32 mapNo;
+    s32 major;
+    s32 minor;
+    char pathName[64];
+
+    work = dds3GetProcessData(id);
+    CheckLoad_evtPolygonMovie(work);
+    if ((work->movieFlags & 8) == 0) {
+        return 0;
+    }
+    if ((work->movieFlags & 1) != 0) {
+        return 0;
+    }
+    printf(D_0053BAF8, work->eventNo, work->cutNo);
+    if (work->stageTable != NULL) {
+        major = ((pmdStageTable_t *)work->stageTable)->MajorNum;
+        minor = ((pmdStageTable_t *)work->stageTable)->MinorNum;
+        mapNo = (major << 16) + minor;
+        printf(D_0053BB20, major, minor);
+        if (dds3GetMapNo(dds3GetControlScene()) != mapNo) {
+            evtLoadArea_FromMemory(major, minor, (s32)work->stageF1, (s32)work->stageF2,
+                                   work->stageTB, 0);
+        }
+    }
+    sceneWork = (dds3SceneBasic_t *)dds3GetActiveScene()->workdata;
+    for (i = 0; i < work->unitCount; i++) {
+        major = ((pmdUnitTable_t *)work->unitTable)[i].MajorNum;
+        minor = ((pmdUnitTable_t *)work->unitTable)[i].MinorNum;
+        mdlPackDecode(major, minor, 0x101,
+                      (u8 *)work->header1 + ((pmdUnitTable_t *)work->unitTable)[i].DataOffset,
+                      ((pmdUnitTable_t *)work->unitTable)[i].DataSize);
+        serial = evtSetRegistUnit(major, minor);
+        basic = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        basic->name = work->nameTable1[((pmdUnitTable_t *)work->unitTable)[i].NameIndex];
+        unit = evtGetUnitHandle(serial);
+        mdlSmoothSingleMotion(unit->owner, 0, 0, 0.0f, 0.0f);
+    }
+    for (i = 0; i < work->cameraCount; i++) {
+        if (((pmdCameraTable_t *)work->cameraTable)[i].NameIndex >= 0) {
+            basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 4,
+                                                    work->nameTable[((pmdCameraTable_t *)work->cameraTable)[i].NameIndex]);
+            if (basic != NULL) {
+                sprintf(pathName, "%s_MOTION", basic->name);
+                path = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x10, pathName);
+                if (path != NULL) {
+                    mover = (dds3Basic_t *)dds3GetCameraObjectBaseControlWorkData(basic)->pBasic[1];
+                    dds3MoverBasicSetPath(mover, path);
+                    dds3MoverBasicMakePath(mover);
+                }
+            }
+        }
+    }
+    basic = sceneWork->basictable[16].firstbasic;
+    if (basic != NULL) {
+        for (; basic != NULL; basic = basic->next) {
+            if (basic->name != NULL) {
+                for (path = sceneWork->basictable[9].firstbasic; path != NULL; path = path->next) {
+                    if (path->name != NULL) {
+                        sprintf(pathName, "%s_MOTION", path->name);
+                        if (strcmp(basic->name, pathName) == 0) {
+                            evtPathLinkAndMake(basic, path);
+                        }
+                    }
+                }
+            }
+        }
+        for (basic = sceneWork->basictable[16].firstbasic; basic != NULL; basic = basic->next) {
+            if (basic->name != NULL) {
+                for (path = sceneWork->basictable[7].firstbasic; path != NULL; path = path->next) {
+                    if (path->name != NULL) {
+                        sprintf(pathName, "%s_MOTION", path->name);
+                        if (strcmp(basic->name, pathName) == 0) {
+                            evtPathLinkAndMake(basic, path);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    work->nowFrame = work->cutInfo->FirstFrame;
+    if (work->nowFrame > 0) {
+        for (basic = sceneWork->basictable[5].firstbasic; basic != NULL; basic = basic->next) {
+            unitWork = basic->workdata;
+            model = unitWork->pObjectBaseControlWorkData->pModel;
+            sdfMotionSeek(model->first, (f32)work->nowFrame);
+        }
+    }
+    dds3DrawFlag |= 0x02000000;
+    return (s32)evtPolygonMovieProcess2;
+
+}
+
 
 void evtPolygonMovieShutdown(dds3ProcessID_t *id)
 {
@@ -1213,26 +1345,28 @@ u32 evtHokanUInt(s32 hokan, f32 ratio, u32 i1, u32 i2)
 }
 
 /* vu0 routine: blend two RGBA8888 colours by t */
-/* NON_MATCHING: 9 of 49 words differ (first at +0x4). */
-#ifdef NON_MATCHING
 u32 evtHokanColor(s32 hokan, f32 ratio, u32 c1, u32 c2)
 {
-    u32 color = c1;
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
 
     if (hokan) {
-        eeUnpackRGBAWordFloat(c1, 1.0f / 128.0f);
+        color1[0] = c1;
+        MMI_RGBA_UNPACK(color1, 1.0f / 128.0f);
         SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        eeUnpackRGBAWordFloat(c2, 1.0f / 128.0f);
+        color2[0] = c2;
+        MMI_RGBA_UNPACK(color2, 1.0f / 128.0f);
         SDF_VU0_SCALEVECTOR_BITS(ratio);
         SDF_VU0_ADDVECTOR();
-        color = eePackRGBAWord(128.0f);
+        MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        blended[0] = packed;
+        return blended[0];
     }
-    return color;
+    return c1;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtHokanColor);
-#endif
 
 /* vu0 routine: blend three rows of vectors a and b by t into out (missing input = default rows) */
 void evtHokanSceneLight(s32 hokan, f32 ratio, f32 *key1, f32 *key2, f32 *d)
@@ -1399,8 +1533,6 @@ void evtHokanMultBlur(s32 hokan, f32 ratio, dds3Effect_PartialMultiBlurParam_t *
 
 void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_Filter_t *key2, dds3Effect_Filter_t *d);
 
-/* NON_MATCHING: 1 of 72 words differ (first at +0xC0). */
-#ifdef NON_MATCHING
 void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_Filter_t *key2, dds3Effect_Filter_t *d)
 {
     s32 cornerIndex;
@@ -1423,9 +1555,6 @@ void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_
     d->abgr = evtHokanColor(hokan, ratio, key1->abgr, key2->abgr);
     d->blend = key1->blend;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtHokanFilter);
-#endif
 
 void evtHokanMultFilter(s32 hokan, f32 ratio, dds3Effect_PartialMultiFilterParam_t *key1, dds3Effect_PartialMultiFilterParam_t *key2, dds3Effect_PartialMultiFilterParam_t *d)
 {
@@ -1584,7 +1713,163 @@ evtPolygonMovieWork_t *InitPolygonMovieWorkData(void)
     return work;
 }
 
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtGetPolygonMovieWorkData1);
+evtPolygonMovieWork_t *evtGetPolygonMovieWorkData1(evtPolygonMovieWork_t *wdata, void *pm1data, void *pm2data)
+{
+    s32 i;
+
+    if (pm1data == NULL) {
+        return NULL;
+    }
+
+    wdata->mesHandle = -1;
+    wdata->nowFrame = 0;
+    wdata->effectBasicTable = sdfChipAllocDirect(0x1FC);
+    for (i = 0x7E; i >= 0; i--) {
+        wdata->effectBasicTable[i] = NULL;
+    }
+
+    wdata->header1 = pm1data;
+    wdata->entryTable1 = ((pmdHeader_t *)wdata->header1)->entries;
+    wdata->nameTable1 = NULL;
+    wdata->nameCount1 = 0;
+    wdata->stageTable = NULL;
+    wdata->stageCount = 0;
+    wdata->stageF1 = NULL;
+    wdata->stageF2 = NULL;
+    wdata->stageTB = NULL;
+    wdata->unitTable = NULL;
+    wdata->unitCount = 0;
+    wdata->type9Data = NULL;
+    wdata->effectTable = NULL;
+    wdata->effectCount = 0;
+    wdata->type8Data = NULL;
+
+    for (i = 0; i < ((pmdHeader_t *)wdata->header1)->count; i++) {
+        switch (wdata->entryTable1[i].type) {
+        case 2:
+            wdata->stageTable = (u8 *)pm1data + wdata->entryTable1[i].offset;
+            wdata->stageCount = wdata->entryTable1[i].value;
+            break;
+        case 10:
+            wdata->stageF1 = (u8 *)pm1data + wdata->entryTable1[i].offset;
+            break;
+        case 11:
+            wdata->stageF2 = (u8 *)pm1data + wdata->entryTable1[i].offset;
+            break;
+        case 12:
+            wdata->stageTB = (u8 *)pm1data + wdata->entryTable1[i].offset;
+            break;
+        case 3:
+            wdata->unitTable = (u8 *)pm1data + wdata->entryTable1[i].offset;
+            wdata->unitCount = wdata->entryTable1[i].value;
+            break;
+        case 9:
+            wdata->type9Data = (u8 *)pm1data + wdata->entryTable1[i].offset;
+            break;
+        case 1:
+            wdata->nameTable1 = (char (*)[32])((u8 *)pm1data + wdata->entryTable1[i].offset);
+            wdata->nameCount1 = wdata->entryTable1[i].value;
+            break;
+        case 7:
+            wdata->effectTable = (pmdEffectTable_t *)((u8 *)pm1data + wdata->entryTable1[i].offset);
+            wdata->effectCount = wdata->entryTable1[i].value;
+            break;
+        case 8:
+            wdata->type8Data = (u8 *)pm1data + wdata->entryTable1[i].offset;
+            break;
+        case 4:
+        case 5:
+        case 6:
+            break;
+        }
+    }
+
+    wdata->header2 = pm2data;
+    if (pm2data != NULL) {
+        wdata->entryTable2 = ((pmdHeader_t *)wdata->header2)->entries;
+    } else {
+        wdata->entryTable2 = NULL;
+    }
+    wdata->nameTable = NULL;
+    wdata->nameCount2 = 0;
+    wdata->cutInfo = NULL;
+    wdata->frameTable = NULL;
+    wdata->frameCount = 0;
+    wdata->cameraTable = NULL;
+    wdata->cameraCount = 0;
+    wdata->slightTable = NULL;
+    wdata->slightCount = 0;
+    wdata->sfogTable = NULL;
+    wdata->sfogCount = 0;
+    wdata->blur2Table = NULL;
+    wdata->blur2Count = 0;
+    wdata->mblurTable = NULL;
+    wdata->mblurCount = 0;
+    wdata->dblurTable = NULL;
+    wdata->dblurCount = 0;
+    wdata->filterTable = NULL;
+    wdata->filterCount = 0;
+    wdata->mfilterTable = NULL;
+    wdata->mfilterCount = 0;
+    wdata->rblurTable = NULL;
+    wdata->rblurCount = 0;
+
+    if (pm2data == NULL) {
+        return wdata;
+    }
+    for (i = 0; i < ((pmdHeader_t *)wdata->header2)->count; i++) {
+        switch (wdata->entryTable2[i].type) {
+        case 0:
+            wdata->cutInfo = (pmdCutInfo_t *)((u8 *)pm2data + wdata->entryTable2[i].offset);
+            break;
+        case 4:
+            wdata->frameTable = (pmdFrameTable_t *)((u8 *)pm2data + wdata->entryTable2[i].offset);
+            wdata->frameCount = wdata->entryTable2[i].value;
+            break;
+        case 1:
+            wdata->nameTable = (char (*)[32])((u8 *)pm2data + wdata->entryTable2[i].offset);
+            wdata->nameCount2 = wdata->entryTable2[i].value;
+            break;
+        case 5:
+            wdata->cameraTable = (u8 *)pm2data + wdata->entryTable2[i].offset;
+            wdata->cameraCount = wdata->entryTable2[i].value;
+            break;
+        case 13:
+            wdata->slightTable = (f32 (*)[12])((u8 *)pm2data + wdata->entryTable2[i].offset);
+            wdata->slightCount = wdata->entryTable2[i].value;
+            break;
+        case 14:
+            wdata->sfogTable = (pmdSceneFogTable_t *)((u8 *)pm2data + wdata->entryTable2[i].offset);
+            wdata->sfogCount = wdata->entryTable2[i].value;
+            break;
+        case 15:
+            wdata->blur2Table = (dds3Effect_Blur_t *)((u8 *)pm2data + wdata->entryTable2[i].offset);
+            wdata->blur2Count = wdata->entryTable2[i].value;
+            break;
+        case 16:
+            wdata->mblurTable = (dds3Effect_PartialMultiBlurParam_t *)((u8 *)pm2data + wdata->entryTable2[i].offset);
+            wdata->mblurCount = wdata->entryTable2[i].value;
+            break;
+        case 17:
+            wdata->dblurTable = (dds3Effect_DistortionBlurParam_t *)((u8 *)pm2data + wdata->entryTable2[i].offset);
+            wdata->dblurCount = wdata->entryTable2[i].value;
+            break;
+        case 18:
+            wdata->filterTable = (dds3Effect_Filter_t *)((u8 *)pm2data + wdata->entryTable2[i].offset);
+            wdata->filterCount = wdata->entryTable2[i].value;
+            break;
+        case 19:
+            wdata->mfilterTable = (dds3Effect_PartialMultiFilterParam_t *)((u8 *)pm2data + wdata->entryTable2[i].offset);
+            wdata->mfilterCount = wdata->entryTable2[i].value;
+            break;
+        case 20:
+            wdata->rblurTable = (dds3Effect_RippleBlurParam_t *)((u8 *)pm2data + wdata->entryTable2[i].offset);
+            wdata->rblurCount = wdata->entryTable2[i].value;
+            break;
+        }
+    }
+    return wdata;
+}
 
 void evtFreePolygonMovieWorkData(evtPolygonMovieWork_t *wdata)
 {
@@ -1634,8 +1919,6 @@ void SetPMFileName(s32 eventno, s32 cutno, char *pm1file, char *pm2file)
     sprintf(pm2file, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2", eventno / 10 * 10, eventno, eventno, cutno, eventno, cutno);
 }
 
-/* NON_MATCHING: 2 of 60 words differ (first at +0x5C). */
-#ifdef NON_MATCHING
 evtPolygonMovieWork_t *evtGetPolygonMovieWorkData2(s32 eventno, s32 cutno, s32 type)
 {
     char pm1file[64];
@@ -1668,11 +1951,8 @@ evtPolygonMovieWork_t *evtGetPolygonMovieWorkData2(s32 eventno, s32 cutno, s32 t
     work->cutNo = cutno;
     return work;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtGetPolygonMovieWorkData2);
-#endif
 
-void evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno)
+dds3ProcessID_t *evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno)
 {
     char pm1file[64];
     char pm2file[64];
@@ -1689,6 +1969,7 @@ void evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno)
     work->processId = dds3StartProcess("PolygonMovie", priority, 1, 1,
                                        (dds3ProcessFunc_t)evtPolygonMovieProcess1,
                                        (dds3ProcessFunc_t)evtPolygonMovieShutdown, work);
+    return work->processId;
 }
 
 INCLUDE_SDATA(const s32, "event/evtPolygonMovie", evtCameraFrameState);

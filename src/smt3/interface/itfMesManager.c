@@ -2249,6 +2249,26 @@ void CalcMessage(instanceMes_tag *pinst) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", CalcSelect);
 
+void func_001D0518(instanceMes_tag *pinst, s32 y)
+{
+    Speaker_tag *speaker = &pinst->speaker;
+    message_tag *message = &pinst->message;
+    window_tag *window = &pinst->window;
+
+    message->y += y;
+    ChangeFontPosition(message->pfont, 0, y);
+    if (window->mes != NULL) {
+        itfPnlSetPositionOffset(window->mes, 0, y, 0, 0, 0);
+    }
+    if (window->spk != NULL) {
+        itfPnlSetPositionOffset(window->spk, 0, y, 0, y, 0);
+    }
+    if (speaker->pfont != NULL) {
+        speaker->y += y;
+        ChangeFontPosition(speaker->pfont, 0, y);
+    }
+}
+
 s32 SelectItem(instanceMes_tag *pinst) {
     select_tag *sel = &pinst->select;
     s32 dir = 0;

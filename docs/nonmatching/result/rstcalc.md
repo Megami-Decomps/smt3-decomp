@@ -2,24 +2,6 @@
 
 Conventions and the reason these are kept: [../../nonmatching.md](../../nonmatching.md).
 
-## rstDrawStatusRow (rstcalc, 0x5C)
-
-21 of 23 words match, at the exact 92-byte size. A pure call wrapper around
-`cmpDrawStatusComEx`.
-
-The two differing words are the `sra` halves of the two `s8` arguments that
-travel on the stack, emitted in the opposite order: retail sign-extends the
-second parameter and then the third, this emits the third and then the
-second. Both `sll` halves, both stack stores, the eight register arguments
-and the frame are identical, so nothing but the schedule is left.
-
-Ruled out: `s8` parameters against `s32` parameters with `(s8)` casts at the
-call; `(s32)` casts on the two stack arguments; `s32` locals copied from the
-parameters and passed instead; an `s8` local for the first parameter; a local
-for the colour constant; a `rstDrawWork_t *` local for the global; and
-renaming the parameters, which changes nothing because the `sll` order
-already matches.
-
 ## cmpFindKugatatiMsgEntry (rstcalc, 0x60)
 
 12 of 24 words differ, at the exact 96-byte size. Scans a devil's 24 level-up
@@ -66,28 +48,26 @@ declaring the `datDevilInfo_t *` at function scope instead of inside the
 
 ## datFindKugatatiEntry (rstcalc, 0x74)
 
-28 of 28 words differ, at the exact 112-byte size. Scans a devil's 24 level-up
-records for ones whose byte at +6 equals the unit's level, returns a pointer
-to the first match and, when the second argument is not NULL, writes the match
-count through it.
+The guarded typed lookup emits 108 bytes against 116 native bytes, with all
+27 emitted words differing. It scans 24 level-event records after a six-byte
+header. Each four-byte record contains a level byte, kind byte and u16 value;
+the lookup compares the level as a low byte, returns the first matching
+record and optionally writes the eight-bit match count.
 
-Everything in the body is settled: the 0x66 shift chain, the `u8` count with
-the `xor`-against-1 `movz` that stores the first match only, the
-`for (i = 23; i >= 0; i--)` downcounter with the decrement in the `bne` delay
-slot, and the `bnel` guarding the count store. The difference is which
-registers hold the table: retail hoists `%lo(datLevelUpTable)` into `$10`,
-derives `$12 = $10 + 6`, and keeps `0x66 * id + 4 * i` as a byte offset added
-to both, so the load is `lbu 6($6 + $10)` and the stored pointer is
-`$6 + $12`. This folds the row offset into one base pointer and reads at a
-displacement.
+The consumer `rstCalcEventInfo` now uses that record view directly. Its signed
+count/index, halfword value store and signed event-kind return are recovered;
+the lookup remains assembly-backed.
 
-Ruled out: the `cmpKugatatiEntry_t *` walk with `entry[1].value`, which is the
-draft and the only form at the exact size; `((u8 *)ofs + (u32)datLevelUpTable)[6]`
-with a `u32 ofs` byte offset, which rematerialises the `lui` inside the loop
-and runs two words long; the same with a `u8 *table` local, which merges the
-two bases into one induction pointer and comes out one word short; and the two
-bases as explicit locals, both as `u8 *`/`s8 *` and as `u32`, which adds a
-third induction variable and runs two words long.
+Native keeps `id * 0x66 + 4 * i` as a byte offset, the bare table base in `$10`
+and a separate `$12 = $10 + 6`. Its level load is `lbu 6($6 + $10)` and its
+returned entry address is `$6 + $12`. The typed pointer walk folds these into
+one induction pointer. The source-level representation preserving both native
+address forms is still unresolved; the size gap also remains.
+
+Typed nested-row indexing emitted 128 bytes. A direct byte-offset form emitted
+116 bytes but matched only two of 29 words, so correct size alone does not close
+this function. Earlier integer-address and explicit two-base forms either
+rematerialised the table inside the loop or added another induction variable.
 
 ## cmbGetHeartsParamByIndex (rstcalc, 0x58)
 

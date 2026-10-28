@@ -204,3 +204,5 @@ s32 dds3UpdateConfig(void *PID)
 INCLUDE_ASM(const s32, "kernel/dds3ConfigMain", dds3UpdateConfig);
 #endif
 
+INCLUDE_SDATA(const s32, "kernel/dds3ConfigMain", D_00551700);
+

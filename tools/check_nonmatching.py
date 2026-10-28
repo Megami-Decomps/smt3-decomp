@@ -77,8 +77,14 @@ def compile_unit(path: Path) -> str:
     # cc1 brackets its diagnostics with context lines that carry no line
     # number ("file: In function `x':", "file: At top level:"). Keeping those
     # made any unit that merely warns look like a failure.
-    return "\n".join(l for l in out.stderr.split("\n")
-                     if re.search(r":\d+: ", l) and "warning:" not in l)
+    diagnostics = "\n".join(l for l in out.stderr.split("\n")
+                            if re.search(r":\d+: ", l) and "warning:" not in l)
+    if out.returncode and not diagnostics:
+        detail = (out.stderr or out.stdout).strip()
+        diagnostics = f"compiler exited with status {out.returncode}"
+        if detail:
+            diagnostics += "\n" + detail
+    return diagnostics
 
 
 # An entry whose function is matched everywhere describes work that is already

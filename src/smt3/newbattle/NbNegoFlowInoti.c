@@ -426,7 +426,41 @@ s32 Flow15_8(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowInoti", Flow15_10);
+extern s32 nbSetNegoYesMotion(nbNegoProcessData_t *n, nbFormation_t *form);
+
+s32 Flow15_10(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xF000B);
+        nbAddNegoIdKouho(n, 0xF000C);
+        nbAddNegoIdKouho(n, 0xF000D);
+        nbAddNegoIdKouho(n, 0xF000E);
+        switch (n->requesttype) {
+        case 0:
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x117, 0);
+            n->nextnegoid = n->nextkouho[0];
+            break;
+        case 1:
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x10F, 0);
+            n->nextnegoid = n->nextkouho[1];
+            break;
+        case 2:
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x10F, 0);
+            n->nextnegoid = n->nextkouho[2];
+            break;
+        case 3:
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x10F, 0);
+            n->nextnegoid = n->nextkouho[3];
+            break;
+        }
+        break;
+    }
+    return 0;
+}
 
 s32 Flow15_11(nbNegoProcessData_t *n)
 {

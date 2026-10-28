@@ -68,7 +68,17 @@ void fclUpdatePanelType1(fclPanel_t *pPanel)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType2);
+void fclDrawPanelType2(fclPanel_t *panel, s32 ot)
+{
+    s32 color = panel->Col;
+
+    fclDrawPanelSprite2(0x44, ot);
+    cmpDrawBoxF(panel->X, panel->Y, panel->Z, (u16)panel->W,
+                (u16)panel->H - 0x1A, color, ot);
+    cmpDrawBoxF(panel->X,
+                       panel->Y + (s32)((u32)((u16)panel->H - 0x1A) << 3), panel->Z,
+                       (u16)panel->W, 0x1A, 0x3151A40, ot);
+}
 
 void fclUpdatePanelType2(fclPanel_t *pPanel)
 {
@@ -78,11 +88,98 @@ void fclUpdatePanelType2(fclPanel_t *pPanel)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelCorners);
+typedef struct
+{
+    s32 tex;
+    u16 width;
+    u16 height;
+    u16 u0;
+    u16 v0;
+    u16 u1;
+    u16 v1;
+    s32 X;
+    s32 Y;
+    s32 Z;
+    u8 color[4];
+    u8 flags;
+} fclSprite_t;
 
-INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType3BackGrad);
+extern void fclSetSprite(fclSprite_t *sprite, s32 width, s32 height, s32 z,
+                         s32 u0, s32 v0, s32 u1, s32 v1, s32 color,
+                         s32 texture);
+extern void fclDrawSpriteCore(s32 x, s32 y, s32 width, s32 height,
+                              s32 *color, fclSprite_t *sprite, u8 flip,
+                              u8 alpha, u8 filter, s32 ot);
 
-INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelEdges);
+void fclDrawPanelCorners(fclPanel_t *panel, s32 ot)
+{
+    fclSprite_t sprite;
+    s32 width = (u16)panel->W - 0x6B;
+    s32 bottom = (u16)panel->H - 3;
+    s32 rightX;
+
+    fclSetSprite(&sprite, 0x49, 4, panel->Z << 4, 0x94, 0x44,
+                 0xDD, 0x48, 0x80808080, panel->TexHandle);
+    rightX = panel->X + (width << 4);
+    fclDrawSpriteCore(rightX, panel->Y, 0x49, 4, NULL,
+                      &sprite, 0, 0, 1, ot);
+    fclDrawSpriteCore(rightX, panel->Y + (bottom << 3), 0x49, 4, NULL,
+                      &sprite, 2, 0, 1, ot);
+
+    fclSetSprite(&sprite, width, 3, panel->Z << 4, 0x94, 0x44,
+                 0x95, 0x48, 0x80808080, panel->TexHandle);
+    fclDrawSpriteCore(panel->X, panel->Y, width, 4, NULL, &sprite,
+                      0, 0, 1, ot);
+    fclDrawSpriteCore(panel->X, panel->Y + (bottom << 3), width, 4, NULL,
+                      &sprite, 2, 0, 1, ot);
+}
+
+extern s32 fclRagCalcTexSize(s32 size, s32 mode);
+extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 w, s32 h,
+                              s32 *colors, s32 ot);
+
+void fclDrawPanelType3BackGrad(fclPanel_t *panel, s32 ot)
+{
+    s32 colors[4];
+    s32 color = 40;
+    s32 width = (u16)panel->W - 70;
+    s32 texSize = fclRagCalcTexSize(100, 0x200 - panel->Timer2);
+    s32 heightOffset = 30;
+
+    colors[0] = 40;
+    colors[1] = 0;
+    colors[2] = 40;
+    colors[3] = 0;
+    cmpDrawBoxF(-texSize, panel->Y - 120, panel->Z, width,
+                (u16)panel->H + heightOffset, color, ot);
+    cmpDrawBoxGDefault((width << 4) - texSize, panel->Y - 120,
+                       panel->Z, 60, (u16)panel->H + heightOffset,
+                       colors, ot);
+}
+
+void fclDrawPanelEdges(fclPanel_t *panel, s32 ot)
+{
+    struct
+    {
+        fclSprite_t leftEdge;
+        fclSprite_t rightEdge;
+    } edges;
+    s32 y;
+
+    fclSetSprite(&edges.leftEdge, 53, 29, panel->Z << 4,
+                 3, 32, 56, 61, 0x80808080, panel->TexHandle);
+    fclSetSprite(&edges.rightEdge, 244, 29, panel->Z << 4,
+                 3, 1, 247, 30, 0x80808080, panel->TexHandle);
+
+    y = panel->Y + 48;
+    while (y < panel->Y + (((u16)panel->H - 9) << 3)) {
+        fclDrawSpriteCore(panel->X, y, 53, 29, NULL, &edges.leftEdge,
+                          0, 0, 1, ot);
+        fclDrawSpriteCore(panel->X + 0x350, y, 244, 29, NULL, &edges.rightEdge,
+                          0, 0, 1, ot);
+        y += 0xE8;
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType3);
 
@@ -107,9 +204,59 @@ void fclSetPanelTex(fclPanel_t *pPanel, s32 UV1, s32 UV2, s32 UV3, s32 UV4, s32 
     pPanel->TexHandle = TexHandle;
 }
 
-INCLUDE_ASM(const s32, "facility/fclPanel", fclInitPanel);
+extern void fclDrawPanelType0(fclPanel_t *panel, s32 ot);
+extern void fclDrawPanelType1(fclPanel_t *panel, s32 ot);
+extern void fclDrawPanelType3(fclPanel_t *panel, s32 ot);
 
-INCLUDE_ASM(const s32, "facility/fclPanel", fclCreatePanel);
+void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 w,
+                  s32 h, s32 color, s8 type, s8 speed)
+{
+    memset(panel, 0, sizeof(*panel));
+    panel->X = x;
+    panel->Y = y;
+    panel->Z = z;
+    panel->W = w;
+    panel->H = h;
+    panel->Col = color;
+    panel->Spd = speed;
+    panel->Timer = 0;
+    panel->Timer2 = 0;
+    panel->TexHandle = 0;
+
+    switch (type) {
+    case 0:
+        panel->draw = fclDrawPanelType0;
+        panel->update = fclUpdatePanelType0;
+        break;
+    case 1:
+        panel->draw = fclDrawPanelType1;
+        panel->update = fclUpdatePanelType1;
+        break;
+    case 2:
+        panel->draw = fclDrawPanelType2;
+        panel->update = fclUpdatePanelType2;
+        break;
+    case 3:
+        panel->draw = fclDrawPanelType3;
+        panel->update = fclUpdatePanelType3;
+        break;
+    default:
+        panel->draw = fclDrawPanelTypeDef;
+        panel->update = fclUpdatePanelTypeDef;
+        break;
+    }
+}
+
+extern void *sdfChipAllocDirect(s32 size);
+
+fclPanel_t *fclCreatePanel(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color,
+                           s8 type, s8 speed)
+{
+    fclPanel_t *panel = sdfChipAllocDirect(sizeof(*panel));
+
+    fclInitPanel(panel, x, y, z, w, h, color, type, speed);
+    return panel;
+}
 
 s32 fclDestroyPanel(void *pPanel)
 {

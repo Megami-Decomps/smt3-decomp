@@ -4,19 +4,21 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
+#include "font.h"
 
 typedef struct
 {
     u8 flag;
     u8 unk_01[3];
     u8 race;
-    u8 unk_05;
+    u8 level;
     u8 unk_06[54];
 } datDevilInfo_t;
 
 extern datDevilInfo_t datDevilTable[];
 
-extern s32 dds3GetRandA(s32 name);
+extern u32 dds3GetRandA(void *state);
 
 extern s32 evtBitCheck(s32 no);
 
@@ -68,20 +70,69 @@ typedef struct
     /* 0x3C */ u8 unk_3C[6];
 } datRaceEntry_t;
 
-extern void rstSetMaxHpMp(s32 Mode, s32 pStock);
+extern void rstSetMaxHpMp(s8 Mode, datUnitWork_t *pStock);
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_00[0x18];
+    u8 level;
+    u8 kind;
+    u16 value;
+} datLevelUpEntry_t;
+
+typedef struct
+{
+    u8 head[6];
+    datLevelUpEntry_t entry[24];
+} datLevelUp_t;
+
+typedef struct
+{
+    /* 0x0000 */ u8 flags;
+    /* 0x0001 */ s8 phase;
+    /* 0x0002 */ u8 reserved02[2];
+    /* 0x0004 */ s8 stepFlag;
+    /* 0x0005 */ u8 drawFlag;
+    /* 0x0006 */ u8 reserved06[0x12];
     /* 0x0018 */ s8 unk_18;
     /* 0x0019 */ s8 unk_19;
-    /* 0x001A */ u8 unk_1A[0x16];
+    /* 0x001A */ s8 StartLevel;
+    /* 0x001B */ s8 LevelUpCnt;
+    /* 0x001C */ datLevelUpEntry_t *eventEntries;
+    /* 0x0020 */ s8 EventNums;
+    /* 0x0021 */ s8 eventIndex;
+    /* 0x0022 */ u16 eventValue;
+    /* 0x0024 */ u16 heartsSkill;
+    /* 0x0026 */ s8 RecoverFlag;
+    /* 0x0027 */ s8 HeartsSkFlag;
+    /* 0x0028 */ s8 heartsResult;
+    /* 0x0029 */ s8 heartsEvent;
+    /* 0x002A */ u16 bonusParamIndex;
+    /* 0x002C */ s8 defaultSkillResult;
+    /* 0x002D */ u8 reserved2D[3];
     /* 0x0030 */ datUnitWork_t *levelUpUnit[16];
     /* 0x0070 */ s8 levelUpCount;
     /* 0x0071 */ s8 levelUpStep;
-    /* 0x0072 */ u8 unk_72[0xFA];
+    /* 0x0072 */ u8 stockIndex;
+    /* 0x0073 */ s8 powerState;
+    /* 0x0074 */ s8 powerSlot;
+    /* 0x0075 */ u8 reserved75;
+    /* 0x0076 */ u16 powerSkill;
+    /* 0x0078 */ s32 counter;
+    /* 0x007C */ s8 evoPhase;
+    /* 0x007D */ u8 reserved7D;
+    /* 0x007E */ s8 evoResult;
+    /* 0x007F */ u8 reserved7F;
+    /* 0x0080 */ datUnitWork_t evoWork;
     /* 0x016C */ datUnitWork_t *unit;
-    /* 0x0170 */ u8 unk_170[0x2175];
+    /* 0x0170 */ datUnitWork_t workStock;
+    /* 0x025C */ u8 unk_25C[0x103C];
+    /* 0x1298 */ u8 commentFromUnit;
+    /* 0x1299 */ u8 unk_1299;
+    /* 0x129A */ u16 commentId;
+    /* 0x129C */ u8 commentMessage;
+    /* 0x129D */ u8 unk_129D[2];
+    /* 0x129F */ u8 bonusParam[6];
+    /* 0x12A5 */ u8 reserved12A5[0x1040];
     /* 0x22E5 */ s8 unk_22E5;
     /* 0x22E6 */ s8 unk_22E6;
     /* 0x22E7 */ u8 unk_22E7;
@@ -133,19 +184,30 @@ extern void rstSetDestroySkillMaxHpMp(void);
 
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
+typedef struct {
+    u8 unk_00[0x22];
+    u8 unk_22;
+    u8 unk_23;
+    u8 unk_24;
+} rstSkillSlot_t;
+
 typedef struct
 {
     /* 0x0000 */ u8 unk_0000[0x7C];
     /* 0x007C */ s8 unk_7C;
     /* 0x007D */ s8 unk_7D;
     /* 0x007E */ u8 unk_007E[0xEE];
-    /* 0x016C */ void *unk_16C;
+    /* 0x016C */ datUnitWork_t *unk_16C;
     /* 0x0170 */ u8 unk_170[0x112E];
     /* 0x129E */ s8 unk_129E;
     /* 0x129F */ u8 unk_129F[6];
-    /* 0x12A5 */ u8 unk_12A5[0x103F];
+    /* 0x12A5 */ u8 unk_12A5[3];
+    /* 0x12A8 */ rstSkillSlot_t skillSlot;
+    /* 0x12CD */ u8 unk_12CD[0x1017];
     /* 0x22E4 */ u8 unk_22E4;
-    /* 0x22E5 */ u8 unk_22E5[0x2F];
+    /* 0x22E5 */ u8 unk_22E5[0x23];
+    /* 0x2308 */ s32 unk_2308;
+    /* 0x230C */ u8 unk_230C[8];
     /* 0x2314 */ s32 fadeColor;
 } rstDrawWork_t;
 
@@ -221,9 +283,54 @@ s16 rstGetEquipHeartsAisyo(void)
     return datGetDevilParam(cmbGlobalWork->equipHearts);
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstSetDestroySkillMaxHpMp);
+extern u32 datGetMaxHp(datUnitWork_t *work);
+extern u32 datGetMaxMp(datUnitWork_t *work);
+extern s32 printf(const char *format, ...);
+extern char D_0053DAB0[];
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstSetMaxHpMp);
+void rstSetDestroySkillMaxHpMp(void)
+{
+    datUnitWork_t *unit = EventStart->unit;
+    datUnitWork_t work;
+    u16 skill = unit->id == 0 ? EventStart->heartsSkill :
+                               EventStart->eventValue;
+    s32 hpChange;
+    s32 mpChange;
+
+    work = *unit;
+    work.skillcnt = 0;
+    hpChange = datGetMaxHp(&work);
+    mpChange = datGetMaxMp(&work);
+    work.skillcnt = 1;
+    work.skill[0] = skill;
+    hpChange = datGetMaxHp(&work) - hpChange;
+    mpChange = datGetMaxMp(&work) - mpChange;
+    unit->maxhp += hpChange;
+    unit->maxmp += mpChange;
+    printf(D_0053DAB0, skill, hpChange, mpChange);
+}
+
+extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
+extern u32 datGetMaxHp(datUnitWork_t *unit);
+extern u32 datGetMaxMp(datUnitWork_t *unit);
+void rstSetMaxHpMp(s8 mode, datUnitWork_t *unit)
+{
+    datUnitWork_t copy;
+    s32 i;
+    cmbCopyCustomDevilToStock(&copy, unit);
+    for (i = 0; i < 6; i++) {
+        copy.param[i] += EventStart->bonusParam[i];
+    }
+    if (mode == 0 && EventStart->RecoverFlag != 0) {
+        unit->maxhp = unit->hp = datGetMaxHp(&copy);
+        unit->maxmp = unit->mp = datGetMaxMp(&copy);
+    } else {
+        unit->maxhp = datGetMaxHp(&copy);
+        unit->maxmp = datGetMaxMp(&copy);
+    }
+    if (unit->hp > unit->maxhp) unit->hp = unit->maxhp;
+    if (unit->mp > unit->maxmp) unit->mp = unit->maxmp;
+}
 
 extern s32 cmbGetParamBase(datUnitWork_t *unit, s32 index);
 
@@ -242,15 +349,50 @@ s32 rstChkParamLimitAll(datUnitWork_t *unit)
             return 0;
         }
     }
-    rstSetMaxHpMp(0, (s32)unit);
+    rstSetMaxHpMp(0, unit);
     return 1;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstSetLevelUpCount);
+extern void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst);
+extern void rstAddExp(s32 count, datUnitWork_t *unit);
+s32 rstSetLevelUpCount(datUnitWork_t *unit)
+{
+    datUnitWork_t copy;
+    s32 offset = 0;
+    EventStart->StartLevel = unit->level;
+    EventStart->LevelUpCnt = cmbGetLevelUpCount(unit, 0);
+    EventStart->unk_18 = EventStart->unk_19 = EventStart->LevelUpCnt;
+    if (unit->flag & 0x200) {
+        cmbCopyDefaultDevilToStock(unit->id, &copy);
+        offset = unit->level - copy.level;
+    }
+    rstAddExp(EventStart->LevelUpCnt, unit);
+    if ((unit->badstatus & 0x800) == 0 && EventStart->LevelUpCnt != 0) {
+        EventStart->LevelUpCnt += offset;
+        EventStart->StartLevel -= offset;
+        rstSetMaxHpMp(0, unit);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstSetCurrentDevil);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstInitWorkStock);
+extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
+extern void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst);
+
+void rstInitWorkStock(s8 IkenieChk)
+{
+    datUnitWork_t defaultWork;
+
+    EventStart->EventNums = 0;
+    cmbCopyCustomDevilToStock(&EventStart->workStock, EventStart->unit);
+    EventStart->workStock.level = EventStart->StartLevel + 1;
+    if (IkenieChk != 0 && (EventStart->unit->flag & 0x200) != 0) {
+        cmbCopyDefaultDevilToStock(EventStart->unit->id, &defaultWork);
+        EventStart->workStock.level = defaultWork.level;
+    }
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstCreateBeforeSkillList);
 
@@ -278,9 +420,65 @@ s32 rstChkBeforeSkillOwner(u16 SkillID, s8 LevelOfs, s32 pStock)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstAutoAsignDevilParam);
+extern void rstChkResult2Process(u8 *work);
+extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstCalcEventInfo);
+void rstAutoAsignDevilParam(void)
+{
+    datUnitWork_t work;
+    s32 i;
+    s32 param;
+    s32 value;
+    u8 *bonus;
+
+    rstChkResult2Process((u8 *)EventStart);
+    i = 0;
+    cmbCopyCustomDevilToStock(&work, EventStart->unit);
+    if (EventStart->unk_18 > 0) {
+        do {
+            param = cmbAddLevelUpParamEx(&work, 0);
+            if (param >= 0) {
+                value = datGetParam(&work, param);
+                /* Integer address form: docs/levers/addressing-and-types.md. */
+                bonus = (u8 *)((u32)param + (u32)EventStart + 0x129F);
+                if (value + (s8)*bonus < 0x28) {
+                    (*bonus)++;
+                }
+            }
+            i++;
+        } while (i < EventStart->unk_18);
+    }
+}
+
+extern datLevelUpEntry_t *datFindKugatatiEntry(datUnitWork_t *unit, s8 *count);
+
+s32 rstCalcEventInfo(u8 *eventInfo)
+{
+    do {
+        if (EventStart->unit->level < EventStart->workStock.level) {
+            break;
+        }
+        if (EventStart->EventNums == 0) {
+            EventStart->eventIndex = 0;
+            EventStart->eventEntries = datFindKugatatiEntry(&EventStart->workStock,
+                                                           &EventStart->EventNums);
+        }
+        if (EventStart->eventEntries == NULL ||
+            EventStart->EventNums == EventStart->eventIndex) {
+            EventStart->EventNums = 0;
+            if (EventStart->workStock.level >= 99) {
+                break;
+            }
+            rstAddExp(1, &EventStart->workStock);
+        } else {
+            if (eventInfo != NULL) {
+                *(u16 *)eventInfo = EventStart->eventEntries[EventStart->eventIndex].value;
+            }
+            return (s8)EventStart->eventEntries[EventStart->eventIndex++].kind;
+        }
+    } while (EventStart->EventNums == 0);
+    return -1;
+}
 
 extern s32 rstSetLevelUpCount(datUnitWork_t *pStock);
 
@@ -307,11 +505,91 @@ s32 rstCalcSeqPlayerLevelUp(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstCalcSeqDevilLevelUp);
+extern s32 rstSetCurrentDevil(void);
+extern void rstAutoAsignDevilParam(void);
+extern void rstSetLevelUpFlag(void);
+extern s32 p2sdStopSe(s32 id);
+extern void p2sdPlayBGM(s32 id);
+extern void dds3FadeOut(s32, s32, s32, s32);
+extern void fclSetMessageVar_20743088(s8 index, s32 str);
+extern char *text2[];
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstPickRandomComment);
+s32 rstCalcSeqDevilLevelUp(void)
+{
+    if (rstSetCurrentDevil() != 0) {
+        cmpStatSetTimer(0, 0);
+        EventStart->unk_129D[1] = 0;
+        rstAutoAsignDevilParam();
+        rstAdvanceLevelUpStep();
+        cmpModelSetup(EventStart->unit->id, 0);
+        rstSetMotionReqFromTbl(0);
+        p2sdStopSe(0x2B0000);
+        p2sdPlayBGM(0x2B0000);
+        fclSetMessageVar_20743088(1, (s32)text2[EventStart->unit->id]);
+    } else {
+        EventStart->phase = 0x13;
+        rstSetLevelUpFlag();
+        dds3FadeOut(0, 0, 0, 15);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstGetDefaultSkill);
+typedef struct
+{
+    s32 mesno;
+    u8 unk_04[0x2C];
+} datMasterText_t;
+
+extern datMasterText_t master_text[];
+extern s32 datFindCommentEntry(u16 devilId);
+extern s32 cmbChkGetHearts(s32 rawId);
+extern s32 rstRollComment(void);
+
+s32 rstPickRandomComment(void)
+{
+    s32 id;
+
+    if (dds3GetRandA(NULL) % 3 == 0) {
+        id = datFindCommentEntry(EventStart->unit->id);
+        if (id == 0 || cmbChkGetHearts(id) != 0) {
+            EventStart->commentFromUnit = 0;
+            EventStart->commentId = rstRollComment();
+        } else {
+            EventStart->commentFromUnit = 1;
+            EventStart->commentId = id;
+        }
+        EventStart->commentMessage = master_text[EventStart->unit->id].mesno * 4;
+        EventStart->commentMessage += dds3GetRandA(NULL) & 3;
+        EventStart->commentMessage += 0x2C;
+        return 1;
+    }
+    EventStart->commentId = 0;
+    return 0;
+}
+
+extern s32 rstCalcEventInfo(u8 *eventInfo);
+s32 rstGetDefaultSkill(void)
+{
+    s32 eventType;
+    s32 canAdd;
+    while ((eventType = rstCalcEventInfo((u8 *)&EventStart->eventValue)) >= 0) {
+        if (eventType != 1 && eventType != 6) {
+            continue;
+        }
+        if (eventType == 6 && EventStart->unit->hensinmae == 0) {
+            continue;
+        }
+        if (eventType == 1 && EventStart->unit->hensinmae != 0) {
+            continue;
+        }
+        canAdd = rstChkAddSkill(EventStart->eventValue);
+        if (canAdd != 0) {
+            return (s8)canAdd;
+        }
+        EventStart->LevelUpCnt--;
+    }
+    return 0;
+}
 
 s32 rstChkSkillPowerUp1(void)
 {
@@ -335,7 +613,40 @@ s32 rstChkSkillPowerUp1(void)
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstChkSkillPowerUp2);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstRndGetPowerUpSkill);
+extern s32 rstFindPowerUpSkill(u16 skillId);
+
+u16 rstRndGetPowerUpSkill(datUnitWork_t *unit, s8 *pIdx)
+{
+    u16 skillList[24];
+    s8 indexList[24];
+    s8 skillCount = 0;
+    s32 i;
+
+    for (i = 0; i < unit->skillcnt; i++) {
+        u16 skill = unit->skill[i];
+        s32 powerUpSkill;
+
+        if (skill == 0) {
+            continue;
+        }
+        powerUpSkill = rstFindPowerUpSkill(skill);
+        if (powerUpSkill != 0) {
+            skillList[skillCount] = powerUpSkill;
+            indexList[skillCount] = i;
+            skillCount++;
+        }
+    }
+    if (skillCount == 0) {
+        return 0;
+    }
+    {
+        s8 index = dds3GetRandA(NULL) % skillCount;
+        if (pIdx != NULL) {
+            *pIdx = indexList[index];
+        }
+        return skillList[index];
+    }
+}
 
 s32 rstChkDevilSkillPowerUp(datUnitWork_t *pStock)
 {
@@ -384,7 +695,31 @@ s32 rstCalcSkillPowerUp(void)
     return result;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstChkEvoEvent);
+extern s32 rstCalcEvoLevelDiff(datUnitWork_t *, datUnitWork_t *, datUnitWork_t *, s32);
+extern s32 cmbChkEvoNeedFlag(u16 devilId);
+extern u8 datLevelUpTable[];
+
+s32 rstChkEvoEvent(datUnitWork_t *stock, datUnitWork_t *evo, s32 index)
+{
+    s32 diff;
+    s32 result;
+    s32 level;
+
+    if (index >= 0) {
+        /* Byte-table view, with the six-byte header and entry offset first;
+         * see docs/levers/addressing-and-types.md. */
+        level = datLevelUpTable[index * sizeof(datLevelUpEntry_t) +
+                               stock->id * sizeof(datLevelUp_t) + 6];
+    } else {
+        level = -1;
+    }
+    diff = rstCalcEvoLevelDiff((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54),
+                               stock, evo, level);
+    if (diff > 0)
+        return diff < 3 ? 1 : 2;
+    result = cmbChkEvoNeedFlag(evo->id) != 0 ? 3 : 0;
+    return result;
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstCalcEvo);
 
@@ -415,7 +750,26 @@ s32 rstCalcSeqDestroySkill(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstChkHeartsSkill);
+extern u16 rstCheckHeartsSlot(u8 id, datUnitWork_t *unit);
+
+u16 rstChkHeartsSkill(datUnitWork_t *unit)
+{
+    datUnitWork_t copy;
+    u16 skill;
+
+    cmbCopyCustomDevilToStock(&copy, unit);
+    skill = rstCheckHeartsSlot(DDS3_GBWK->heartsequip, &copy);
+    if (skill == 0x165 && evtBitCheck(0x8C1) == 0) {
+        return 0;
+    }
+    if (skill == 0) {
+        return 0;
+    }
+    if (cmbChkSkillOwner(skill, unit) >= 0) {
+        return 0;
+    }
+    return EventStart->HeartsSkFlag < EventStart->LevelUpCnt ? skill : 0;
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstRecalcHeartsSkill);
 
@@ -433,7 +787,7 @@ void rstInitSkillAct(s8 Pos)
     p2sdPlaySE(0x2B0003, 0x7F, 0x3F);
 }
 
-void func_002215B8(void) {
+void func_002215B8(datUnitWork_t *unit) {
 }
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstFindRegisteredDevil);
@@ -476,7 +830,190 @@ s32 rstShakePad(void)
     return dds3PadVibrationSet(1, 0xFF, 0x1E);
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstCalc);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void rstDrawEvoModel(void);
+extern s32 dds3FadeCheck(void);
+extern s32 cmpLoadStatusModel(void);
+extern void cmpUpdateTerminate(void *work);
+extern void rstInitEvoAct(void);
+extern s32 rstFindRegisteredDevil(void);
+extern s32 rstCalcSkillPowerUpCore(void);
+extern s32 rstFindDevilSlot(void);
+extern s32 rstCalcEvo(void);
+extern char *pstr[];
+extern char *text1[];
+extern s32 fclStartSelMessage(s32 id);
+extern void rstAddAsignParam(void);
+
+INCLUDE_RODATA(const s32, "result/rstcalc", D_0053DAB0);
+
+s32 rstCalc(dds3ProcessID_t *id)
+{
+    s32 process = 1;
+    EventStart = dds3GetProcessData(id);
+    if (EventStart->stepFlag == 1) {
+        switch (EventStart->phase) {
+        case 0:
+            cmpStatSetTimer(0, 0);
+            EventStart->HeartsSkFlag = 0;
+            EventStart->unk_129D[1] = 0;
+            if (rstCalcSeqPlayerLevelUp() != 0)
+                break;
+            process = 0;
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 1:
+            if (process) {
+                EventStart->heartsSkill = rstChkHeartsSkill(&cmbGlobalWork->party[0].unit);
+                if (EventStart->heartsSkill != 0) {
+                    EventStart->heartsResult = rstChkAddSkill(EventStart->heartsSkill);
+                    rstInitSkillAct(8);
+                    break;
+                }
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 2:
+            if (process) {
+                EventStart->heartsEvent = rstFindRegisteredDevil();
+                if (EventStart->heartsEvent >= 0) {
+                    EventStart->powerState = rstCalcSkillPowerUpCore();
+                    if (EventStart->heartsEvent == 1) {
+                        if (EventStart->powerState >= 3) {
+                            EventStart->heartsEvent = 0;
+                            EventStart->powerState = -1;
+                        } else if (EventStart->powerState <= 0) {
+                            EventStart->heartsEvent = 0;
+                            EventStart->powerState = -1;
+                        }
+                    }
+                    EventStart->unk_129D[1] = 0;
+                    rstShakePad();
+                    fclSetMessageVar_20743088(12, (s32)pstr[cmbGlobalWork->equipHearts]);
+                    fclStartMessage(28);
+                    fclStartSelMessage(43);
+                }
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 3:
+            if (process && EventStart->heartsEvent >= 0)
+                break;
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 4:
+            if (process)
+                EventStart->heartsEvent = rstFindDevilSlot();
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 5:
+            if (process && EventStart->heartsEvent >= 0) {
+                EventStart->unk_129D[1] = 0;
+                break;
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+            goto next_devil;
+        case 7:
+            rstInitWorkStock(1);
+            EventStart->unit->flag &= ~0x200;
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 8:
+            EventStart->defaultSkillResult = rstGetDefaultSkill();
+            if (EventStart->defaultSkillResult != 0) {
+                rstInitSkillAct(8);
+                break;
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 9:
+            rstInitWorkStock(0);
+            EventStart->powerState = rstCalcSkillPowerUp();
+            if (EventStart->powerState != 0) {
+                EventStart->unk_129D[1] = 0;
+                fclSetMessageVar_20743088(15, (s32)text1[EventStart->unit->skill[EventStart->powerSlot]]);
+                fclSetMessageVar_20743088(16, (s32)text1[EventStart->powerSkill]);
+                fclStartMessage(13);
+                fclStartSelMessage(43);
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 10:
+            if (EventStart->powerState != 0)
+                break;
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 11:
+            if (rstPickRandomComment() != 0) {
+                fclSetMessageVar_20743088(1, (s32)text2[EventStart->unit->id]);
+                fclStartMessage(24);
+                break;
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 12:
+            if (EventStart->commentId != 0) {
+                EventStart->unk_129D[1] = 0;
+                fclStartMessage(25);
+                fclStartSelMessage(43);
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 13:
+            if (EventStart->commentId != 0)
+                break;
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 14:
+            {
+                evtStartWork_t *work = EventStart;
+                if (work->powerState == 0 && work->commentId == 0)
+                    func_002215B8(work->unit);
+                work->phase = (u8)work->phase + 1;
+            }
+        case 15:
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 16:
+            rstInitWorkStock(0);
+            if (rstCalcEvo() == 0) {
+                fclSetMessageVar_20743088(1, (s32)text2[EventStart->unit->id]);
+                if (rstCalcSeqEvoAt() >= 0) {
+                    fclStartMessage(18);
+                    EventStart->drawFlag = 1;
+                    EventStart->phase = 18;
+                    EventStart->unk_129D[1] = 0;
+                    rstInitEvoAct();
+                    break;
+                }
+            }
+            EventStart->phase = (u8)EventStart->phase + 1;
+        case 17:
+            if (EventStart->evoResult == 0) {
+                rstInitEvoAct();
+                EventStart->unk_129D[1] = 0;
+                break;
+            }
+            rstAddAsignParam();
+            EventStart->phase = 6;
+        case 6:
+next_devil:
+            if (rstCalcSeqDevilLevelUp() != 0)
+                return 0;
+            break;
+        case 20:
+            EventStart->evoPhase = 0;
+            break;
+        case 21:
+            EventStart->unk_129D[1] = 0;
+            rstCalcSeqDestroySkill();
+            break;
+        case 22:
+        case 24:
+            EventStart->unk_129D[1] = 0;
+            break;
+        }
+    }
+    rstDrawEvoModel();
+    EventStart->stepFlag = 0;
+    if (dds3FadeCheck() != 0)
+        return 0;
+    if ((EventStart->flags & 0x10) != 0) {
+        if (cmpLoadStatusModel() != 0)
+            return 0;
+        cmpUpdateTerminate(EventStart);
+        return -1;
+    }
+    return 0;
+}
+
 
 extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
 
@@ -514,8 +1051,9 @@ s8 func_00221DB0(s8 index)
     return D_00339E00[index].unk_19;
 }
 
-s32 cmbChkGetHearts(s8 id)
+s32 cmbChkGetHearts(s32 rawId)
 {
+    s8 id = rawId;
     s32 i;
 
     for (i = 0; i < ((u8 *)cmbGlobalWork)[0x1D7B]; i++) {
@@ -539,7 +1077,26 @@ s32 datFindCommentEntry(u16 devilId)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", datGetPlayerLNDLevel);
+/* Callers supply a unit; the classification currently uses global state. */
+s32 datGetPlayerLNDLevel(datUnitWork_t *unit)
+{
+    u8 list;
+    s32 type = datGetPlayerLNDList(&list);
+    u8 result;
+
+    if (list == 0) {
+        return 0;
+    }
+    list--;
+    if (type == 1) {
+        result = (list * 3) + 1;
+    } else if (type == 4) {
+        result = (list * 3) + 3;
+    } else {
+        result = (list * 3) + 2;
+    }
+    return result;
+}
 
 s32 datGetDevilRace(s8 index)
 {
@@ -699,7 +1256,31 @@ INCLUDE_ASM(const s32, "result/rstcalc", datAddHeartsEntry);
 
 INCLUDE_ASM(const s32, "result/rstcalc", func_00222610);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstCheckHeartsSlot);
+/* Interior row label: the 66-byte stride is not a multiple of the
+ * four-byte skill-entry stride. */
+extern u8 D_00339E10[];
+
+u16 rstCheckHeartsSlot(u8 id, datUnitWork_t *unit)
+{
+    s32 index = datGetDevilSlotState(id);
+    u8 *entry;
+    u16 skill;
+
+    if (index < 8) {
+        entry = D_00339E10 + index * 4 + id * sizeof(datRaceEntry_t);
+        do {
+            skill = *(u16 *)(entry + 12);
+            if (skill != 0 && *(s8 *)(entry + 10) != 0 &&
+                unit->level >= *(s8 *)(entry + 10)) {
+                if (cmbChkSkillOwner(skill, unit) < 0)
+                    return skill;
+            }
+            index++;
+            entry += 4;
+        } while (index < 8);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", cmbInitStockUnit);
 
@@ -763,7 +1344,25 @@ s32 cmbChkEvoNeedFlag(u16 devilId)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", func_002229E8);
+extern u16 D_00339638[];
+
+s32 func_002229E8(u16 value)
+{
+    u16 *entry = D_00339638;
+    u32 i = 0;
+    u16 match;
+
+    /* Retail retains the unsigned one-entry loop and four-byte row stride. */
+    do {
+        match = entry[0];
+        entry += 2;
+        if (match == value) {
+            return 1;
+        }
+        i++;
+    } while (i < 1);
+    return 0;
+}
 
 typedef struct
 {
@@ -774,21 +1373,23 @@ typedef struct
 
 extern u8 datLevelUpTable[];
 
-/* NON_MATCHING: 28 of 28 words differ (first at +0x0). */
+/* NON_MATCHING: the native lookup retains a table offset and a separate
+ * address for the first matching entry. */
 #ifdef NON_MATCHING
-s8 *datFindKugatatiEntry(datUnitWork_t *unit, u8 *outcount)
+datLevelUpEntry_t *datFindKugatatiEntry(datUnitWork_t *unit, s8 *outcount)
 {
-    cmpKugatatiEntry_t *entry = (cmpKugatatiEntry_t *)&datLevelUpTable[unit->id * 0x66];
+    datLevelUp_t *table = (datLevelUp_t *)datLevelUpTable;
+    datLevelUpEntry_t *entry = table[unit->id].entry;
     u8 level = unit->level;
-    s8 *found = NULL;
+    datLevelUpEntry_t *found = NULL;
     u8 count = 0;
     s32 i;
 
     for (i = 23; i >= 0; i--) {
-        if ((u8)entry[1].value == level) {
+        if (entry->level == level) {
             count++;
             if (count == 1) {
-                found = &entry[1].value;
+                found = entry;
             }
         }
         entry++;
@@ -802,7 +1403,25 @@ s8 *datFindKugatatiEntry(datUnitWork_t *unit, u8 *outcount)
 INCLUDE_ASM(const s32, "result/rstcalc", datFindKugatatiEntry);
 #endif
 
-INCLUDE_ASM(const s32, "result/rstcalc", cmbCopyEvoStats);
+/* Header row contains sixteen source keys; each following row starts with its target key. */
+extern s16 cmbEvoStatTable[][17];
+
+u8 cmbCopyEvoStats(s16 first, s16 second)
+{
+    u8 column;
+    u8 row;
+    for (column = 0; column < 16; column++) {
+        if (cmbEvoStatTable[0][column + 1] == first) {
+            break;
+        }
+    }
+    for (row = 0; row < 13; row++) {
+        if (cmbEvoStatTable[row + 1][0] == second) {
+            break;
+        }
+    }
+    return (u8)cmbEvoStatTable[row + 1][column + 1];
+}
 
 s32 cmbCheckEvoPair(u16 maskA, u16 maskB)
 {
@@ -959,7 +1578,7 @@ s32 cmbChkDevilEvo(datUnitWork_t *unit)
         if (p[-1] == 5) {
             datDevilInfo_t *info = &datDevilTable[*(u16 *)p];
 
-            return (s8)info->unk_05;
+            return (s8)info->level;
         }
         p += 4;
     }
@@ -985,7 +1604,36 @@ s32 rstCalcEvoLevelDiff(datUnitWork_t *a, datUnitWork_t *b, datUnitWork_t *c, s3
     return (limit < diff) ? limit : diff;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", cmbCopyEvoDevilToStock);
+extern void cmbClearUnitSkills(datUnitWork_t *unit);
+
+void cmbCopyEvoDevilToStock(datUnitWork_t *unit, datUnitWork_t *source)
+{
+    datUnitWork_t work;
+    s32 i;
+
+    cmbCopyCustomDevilToStock(&work, source);
+    cmbClearUnitSkills(&work);
+    if (work.flag & 0x200) {
+        unit->flag |= 0x200;
+    }
+    if (unit->hensinmae != 0) {
+        work.hensinmae = unit->hensinmae;
+    } else {
+        work.hensinmae = unit->id;
+    }
+    work.flag = unit->flag;
+    work.uniqueid = unit->uniqueid;
+    work.exp += unit->exp;
+    work.hensinmaeexp = unit->exp;
+    for (i = 0; i < unit->skillcnt; i++) {
+        if (cmbCopyEvoDevil(&work, unit->skill[i]) != 0) {
+            work.skill[work.skillcnt++] = unit->skill[i];
+        }
+    }
+    cmbCopyCustomDevilToStock(unit, &work);
+    unit->hp = unit->maxhp;
+    unit->mp = unit->maxmp;
+}
 
 typedef struct
 {
@@ -1008,7 +1656,24 @@ s32 rstFindPowerUpSkill(u16 skillId)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstRollPowerUpSkill);
+s32 rstRollPowerUpSkill(u16 skill, datUnitWork_t *unit)
+{
+    s32 i;
+
+    for (i = 0; i < 0x40; i++) {
+        u16 candidate = D_00339658[dds3GetRandA(0) % 0xE3].devilId;
+        s32 candidatePower = cmbFindEvoEntry(candidate);
+
+        if (cmbChkSkillOwner(candidate, unit) < 0 &&
+            cmbCopyEvoDevil(unit, candidate) != 0 && skill != candidate) {
+            if (candidatePower <= cmbFindEvoEntry(skill) + 1 &&
+                candidatePower >= cmbFindEvoEntry(skill) + 1) {
+                return candidate;
+            }
+        }
+    }
+    return 0;
+}
 
 s32 datCalcDevilExp(s32 level)
 {
@@ -1020,7 +1685,24 @@ s32 datCalcDevilExp(s32 level)
     return exp;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", datCopyDevilWorkEntry);
+extern s32 datCalcDevilExp(s32 level);
+
+s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level)
+{
+    s32 exp = datCalcDevilExp(level);
+    s32 baseLevel;
+    s32 scaled;
+    f32 rate;
+
+    if ((work->flag & 4) != 0) {
+        return exp;
+    }
+    baseLevel = datDevilTable[work->id].level;
+    rate = 2.7f - (f32)baseLevel * 0.017f;
+    scaled = (s32)((f32)exp * rate);
+    scaled = (s32)((f32)scaled - (f32)datCalcDevilExp(baseLevel) * rate);
+    return scaled + work->hensinmaeexp;
+}
 
 s32 datAdvanceDevilLevel(datUnitWork_t *work)
 {
@@ -1063,11 +1745,54 @@ s32 func_00223788(u16 devilId)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstRollComment);
+s32 rstRollComment(void)
+{
+    s8 attempt;
+    u32 i;
+    s32 draw;
+    cmbMitamaEntry_t *entry;
 
-INCLUDE_ASM(const s32, "result/rstcalc", func_00223890);
+    for (attempt = 0; attempt < 16; attempt++) {
+        draw = dds3GetRandA(NULL) % D_00339D10[37].unk_02;
+        for (i = 0, entry = D_00339D10; i < 38; i++, entry++) {
+            if (draw < entry->unk_02) {
+                u16 id = entry->devilId;
+                if (cmbGlobalWork->party[0].unit.level >= entry->unk_04 &&
+                    cmbGlobalWork->unk_01928[id] <= entry->unk_05) {
+                    return id;
+                }
+            }
+        }
+    }
+    return D_00339D10[0].devilId;
+}
 
-extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
+s8 func_00223890(datUnitWork_t *unit, s32 rawLevel)
+{
+    u16 id = unit->id;
+    s32 count = 0;
+    s32 level;
+    s32 i;
+    datLevelUp_t *table;
+
+    /* The override is interpreted as a signed low byte before selection. */
+    if ((s8)rawLevel > 0) {
+        level = (s8)rawLevel;
+    } else {
+        level = (s8)unit->level;
+    }
+    table = (datLevelUp_t *)datLevelUpTable;
+    for (i = 0; i < 24; i++) {
+        if (level < table[id].entry[i].level) {
+            return count;
+        }
+        if (table[id].entry[i].kind == 3) {
+            count++;
+        }
+    }
+    return count;
+}
+
 
 /* NON_MATCHING: 10 of 32 words differ, 128 against retail's 132 bytes; the
  * level read copied into its own register in retail. */
@@ -1094,13 +1819,81 @@ s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp)
 INCLUDE_ASM(const s32, "result/rstcalc", cmbGetLevelUpCount);
 #endif
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstDrawGetCursorRow);
+extern void rstDrawNumber(s32 x, s32 y, s32 number);
+extern s32 fclChkMessage(void);
+extern void cmpDrawStatusComEx(s32 a, u8 alpha, s8 b, s8 c, s32 d,
+                               s8 e, s32 color, s8 f, s8 g, s8 h);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstDrawStatusRow);
+void rstDrawGetCursorRow(void)
+{
+    rstDrawWork_t *work;
+    s32 row;
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstDrawStatusRow2);
+    work = rstDrawWork;
+    row = (s8)(work->unk_170[0x10E] + work->unk_170[0x110]);
+    if ((s8)work->unk_0000[0x18] != 0) {
+        rstDrawNumber(0, 0, (s8)work->unk_0000[0x19]);
+    }
+    if (fclChkMessage() != 0 || (s8)rstDrawWork->unk_0000[0x18] == 0) {
+        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, 0x80, row, 0,
+                           (s32)rstDrawWork->unk_129F, 0, 0xA09DC380, 2, 0, 0);
+    } else {
+        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, 0x80, row, 2,
+                           (s32)rstDrawWork->unk_129F, 0, 0xA09DC380, 2, 0, 0);
+    }
+}
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstDrawStatusPanel);
+void rstDrawStatusRow(s8 mode, s8 row, s8 flags)
+{
+    cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
+                       -1, 0, (s32)rstDrawWork->unk_129F, mode,
+                       0xA09DC380, 2, row, flags);
+}
+
+void rstDrawStatusRow2(s8 mode, s8 row, s8 selected)
+{
+    if (rstDrawWork->unk_2308 == 0) {
+        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
+                           -1, 3, (s32)rstDrawWork->unk_129F, mode,
+                           0xA09DC380, 2, row, 0);
+    } else {
+        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
+                           selected, 3, (s32)rstDrawWork->unk_129F, mode,
+                           0xA09DC380, 2, row, 0);
+    }
+}
+
+extern s32 fclChkMessage(void);
+extern void cmpDrawStatusBars(s32 x, s32 y, s32 z);
+extern u16 rstSkillSlotIsFull(datUnitWork_t *unit, rstSkillSlot_t *slot);
+extern frFontHandle_t *frGetHelpPos(s32 x, s32 y, s32 priority, s32 bank, s32 index);
+extern void frSetFontColor(frFontHandle_t *request, u32 color);
+extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
+
+s32 rstDrawStatusPanel(s8 mode, s8 showHelp)
+{
+    s8 selected = rstDrawWork->skillSlot.unk_22 + rstDrawWork->skillSlot.unk_24;
+    frFontHandle_t *request;
+
+    if (showHelp == 0 || fclChkMessage() != 0) {
+        selected = -1;
+    }
+    if (selected >= 0) {
+        u16 skill;
+
+        cmpDrawStatusBars(0x46, 0x22, 0);
+        cmpDrawStatusBars(0x46, 0x22, 0);
+        skill = rstSkillSlotIsFull(rstDrawWork->unk_16C, &rstDrawWork->skillSlot);
+        request = frGetHelpPos(0x180, 0x9A0, 0xFFFFF, 0, skill);
+        frSetFontColor(request, 0x80C08080);
+        func_001C7E38(request, 1, 0x47);
+        frDestroyFontRequestAfter(request);
+    }
+    cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, 0x80, selected, showHelp,
+                       (s32)rstDrawWork->unk_129F, mode, 0xA09DC380, 2, 2, 0);
+    return 1;
+}
 
 extern void *dds3SearchSceneBasic(void *pBasic, u32 serialID, s32 type);
 

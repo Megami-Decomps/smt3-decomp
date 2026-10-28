@@ -41,7 +41,7 @@ separately, not folded into the main denominator, since no C can replace them:
 | `.DVP.*` overlay tables | generated data |
 
 The split between game code and SDK code is made: the SDK archives were
-signature-identified against this binary, and the 126,120 bytes they account
+signature-identified against this binary, and the 125,024 bytes they account
 for are 12 units under `src/smt3/sdk/`. The game-code figures below are
 therefore game code, not whole-binary. See [SDK and C runtime](sdk-matching.md).
 
@@ -58,9 +58,9 @@ times, then reconciles each result with `tools/production_report.py`:
 
 | File | Project | Units | Scope |
 |---|---|---|---|
-| `report.json` | `objdiff.json` | 102 | whole binary, all versions |
-| `build/smt3/report.all.json` | `build/smt3/objdiff.json` | 102 | whole binary, by category |
-| `build/smt3/report.json` | `build/smt3/progress/objdiff.json` | 92 | game-code units only |
+| `report.json` | `objdiff.json` | 315 | whole binary, all versions |
+| `build/smt3/report.all.json` | `build/smt3/objdiff.json` | 315 | whole binary, by category |
+| `build/smt3/report.json` | `build/smt3/progress/objdiff.json` | 293 | game-code units only |
 
 Each of the three is written three times over: `<file>.raw` is what objdiff
 measured, `<file>` is the same report with code credit replaced by what the
@@ -130,54 +130,42 @@ retail. Objdiff answers "does this C emit the retail instructions for this
 function in isolation". Only the checksum build answers "do the retail bytes at
 this address come from C".
 
-## Measured on 2026-10-18
+## Measured on 2026-10-28
 
-At `5facfbf7916836613449c922e26a4ec412207b32`, with the retail checksum
-verified in the same run.
+The full build reproduced retail SHA-1
+`5facfbf7916836613449c922e26a4ec412207b32`, and `ninja report` verified the
+following linked-image ownership:
 
-| Measure | Game code (98 units) | Whole binary (108 units) |
+| Measure | Game code (293 units) | Whole binary (315 units) |
 |---|---|---|
-| Code bytes matched | 593,740 / 1,976,292 (30.043%) | 593,740 / 2,036,072 (29.161%) |
-| Functions matched | 5,363 / 9,694 (55.32%) | 5,363 / 9,699 (55.29%) |
+| Code bytes matched | 985,208 / 1,851,268 (53.218%) | 1,003,620 / 2,036,072 (49.292%) |
+| Functions matched | 7,456 / 9,022 (82.642%) | 7,614 / 9,699 (78.503%) |
 
-`python tools/progress.py smt3` reports the same 5,363 functions and 593,740
-bytes from the source inventory alone, which is the cross-check that matters:
-the reconciler credits nothing that is still an `INCLUDE_ASM` line, and the
-source inventory credits nothing the link does not supply from C. 4,331
-`INCLUDE_ASM` lines remain in `src/smt3`. Its second line counts the
-non-matching drafts among those, which earn nothing in either measure.
+`python tools/progress.py smt3` reports the same game-code source coverage:
+7,456 functions and 985,208 bytes. Its inventory excludes `src/smt3/sdk/`,
+matching the primary report's scope. Of 1,566 game functions still assembled,
+261 have a non-matching draft, accounting for 96,960 of 866,060 remaining
+bytes. Those drafts earn zero credit.
 
-Raw objdiff, before reconciliation, reports 5,153 functions and 512,244 bytes
-for the same tree (`build/smt3/report.json.raw`). The 210-function, 81,496-byte gap
-is in the other direction from what the caveats below might suggest: those
-functions are exact in the linked image and imperfect in the `-DSKIP_ASM` base
-object, so raw objdiff understates them. Reconciliation moves credit both ways
-and only on evidence from the real link.
+The whole-binary source inventory is not a substitute for the ownership
+report: two SDK functions contain predominantly assembly and receive no C
+credit even though their source is written out. SDK/runtime units remain
+outside the game-code denominator in either case.
 
-588 of the 5,363 are two-instruction functions, 8 bytes each, 4,704 bytes in
-total: empty bodies that compile to `jr $ra; nop` and returns of a single
-value. The function percentage is the measure that flatters the work most,
-since an 8-byte function and a 120-byte one count the same; code bytes are the
-honest headline.
-
-No function anywhere is partially credited. A function left as `INCLUDE_ASM` is
-absent from the base object and has no C provider in the link, so it scores 0
-rather than part marks.
-
-Excluded from the game-code denominator:
-
-| Category | Units | Code bytes | Matched |
+| Excluded category | Units | Code bytes | Matched code bytes |
 |---|---|---|---|
-| `handwritten` (`asm/smt3/hand/crt0`) | 1 | 468 | 0 |
-| `vu1` (`.vutext`, `.vudata`) | 2 | 59,312 | 16,488 |
-| `data` (splat `.data`/`.rodata`/`.bss` segments) | 7 | 0 | n/a |
+| `sdk` | 12 | 125,024 | 18,412 |
+| `handwritten` | 1 | 468 | 0 |
+| `vu1` | 2 | 59,312 | 0 in the EE ownership report |
+| `data` | 7 | 0 | n/a |
 
-The `vu1` figure does not come from objdiff. splat gives all of `.vutext` one
-label, so objdiff scores the section as a single unmatched function; the 16,488
-bytes are what `src/smt3/sdf/vu` assembles, counted by
-`tools/vu_include.py --coverage`. They are every VU0 and VU1 instruction in the
-game, 2,061 of them. The other 42,824 bytes of the section are VIF headers,
-unpack data and the debug font texture, which never were instructions.
+The VU instructions have a separate verification path: all 2,061 instructions,
+16,488 bytes, assemble from `src/smt3/sdf/vu`. The rest of the VU section is
+VIF packets, unpack data and texture data, not instructions. The EE ownership
+report does not treat those source listings as C.
+
+No function receives partial credit. A fallback has no compiler-owned C span
+in the production link, so it earns zero even when a draft is close.
 
 ## Progress site
 

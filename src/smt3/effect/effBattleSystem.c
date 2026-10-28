@@ -5,6 +5,7 @@
 #include "nb.h"
 #include "effBattle.h"
 #include "ps2asm.h"
+#include "draw3d.h"
 
 typedef struct
 {
@@ -32,6 +33,16 @@ void effBTLSkillEnd(void);
 void *sdfChipAllocDirect(s32 aSize);
 
 void sdfChipFreeDirect(void *aPtr);
+
+extern void *sdfFileOpen(const char *path);
+extern u32 sdfFileLength(void *handle);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern s32 sdfFileRead(void *handle, void *dst, s32 size);
+extern void sdfFileClose(void *handle);
+extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
+extern s32 printf(const char *format, ...);
+extern char D_00533300[];
 
 void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
@@ -407,7 +418,34 @@ f32 effBTLSystem_GetScalePtr(nbFormation_t *pFormation)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSystem_Part_DataLoad);
+void effBTLSystem_Part_DataLoad(effBattleSystem_effBTLSystem_Part_tag *pPartList, u32 count)
+{
+    u32 i;
+
+    for (i = 0; i < count; i++) {
+        if (pPartList->type == 3) {
+            void *file = sdfFileOpen(pPartList->fileName);
+            u32 fileSize = sdfFileLength(file);
+            /* Retail copies the 16-byte header with only its length initialized. */
+            struct {
+                u32 fileSize;
+                u8 reserved[0xC];
+            } header;
+
+            header.fileSize = fileSize;
+            pPartList->hMem = sdfMemAllocDirect(fileSize + 0x10);
+            pPartList->pData = sdfMemLock(pPartList->hMem);
+            memcpy(pPartList->pData, &header, sizeof(header));
+            sdfFileRead(file, (u8 *)pPartList->pData + 0x10, header.fileSize);
+            sdfFileClose(file);
+        } else {
+            pPartList->hMem = sdfDevLoadFileEx(pPartList->fileName, (u32 *)&pPartList->pData, NULL);
+        }
+        pPartList->refCount = 0;
+        printf(D_00533300, pPartList->fileName);
+        pPartList++;
+    }
+}
 
 void effBTLSystem_Part_DataFree(effBattleSystem_effBTLSystem_Part_tag *pPartList, u32 count)
 {
@@ -2045,7 +2083,38 @@ void effBTLSystemDelete2(effBTLSystemHandle_t *hEffBTLSys)
     sdfChipFreeDirect(hEffBTLSys);
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSystemDraw);
+void effBTLSystemDraw(effBTLSystemHandle_t *hEffBTLSys)
+{
+    s32 family = hEffBTLSys->family;
+    evtUnit_t *unit;
+    u32 color;
+
+    if (family != 0x14) {
+        if ((((nbFormation_t *)hEffBTLSys->pFormation)->stat & 1) == 0) {
+            return;
+        }
+        unit = ((nbFormation_t *)hEffBTLSys->pFormation)->hunit;
+        if (unit == NULL) {
+            return;
+        }
+        if (family != 0xE && (unit->owner->flags & 1) != 0) {
+            return;
+        }
+    }
+
+    if (D_0031BF00[family].setColor != NULL &&
+        (((nbFormation_t *)hEffBTLSys->pFormation)->stat & 2) != 0 &&
+        ((nbFormation_t *)hEffBTLSys->pFormation)->hunit->owner != NULL) {
+        color = (mdlGetColor(((nbFormation_t *)hEffBTLSys->pFormation)->hunit->owner) &
+                 0xFF000000) |
+            0x00808080;
+        D_0031BF00[family].setColor(hEffBTLSys->hEffect, color);
+    }
+
+    if (D_0031BF00[family].draw != NULL) {
+        D_0031BF00[family].draw(hEffBTLSys->hEffect);
+    }
+}
 
 u32 effBTLSystemGetLength(effBTLSystemHandle_t *hEffBTLSys)
 {
@@ -2080,6 +2149,8 @@ void effBTLSystemCut1DataFree(void)
         }
     }
 }
+
+INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533300);
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533318);
 
@@ -2310,11 +2381,86 @@ void effBTLSystemPartHandleDelete(void)
     printf("effBTLSys:PartHandleDelete\n");
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effCAMPBadCreate);
+typedef struct
+{
+    sdfVector4_t pos;
+    sdfVector4_t rot;
+    sdfVector4_t center;
+    f32 r;
+    f32 h;
+    f32 scl;
+    mdlObj_t *hModel;
+} effCAMPBadParams_t;
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effCAMPBadDraw);
+typedef struct
+{
+    nbFormation_t formation;
+    effCAMPBadParams_t params;
+    effBTLSystemHandle_t *hEffBTLSys;
+    u32 id;
+    s32 frame;
+} effBattleSystem_effCAMPBad_tag;
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effCAMPBadDelete);
+extern void mdlSetColor(mdlObj_t *model, u32 color);
+extern u32 effColorBlend(u32 color1, u32 color2, f32 ratio);
+
+void *effCAMPBadCreate(effCAMPBadParams_t *params, s32 id)
+{
+    effBattleSystem_effCAMPBad_tag *work;
+    work = sdfChipAllocDirect(0x13C);
+    memcpy(&work->params, params, sizeof(work->params));
+    work->id = id;
+    work->frame = 0;
+    memset(&work->formation, 0, sizeof(work->formation));
+    SDF_VU0_COPYVECTOR(&work->formation.pos, &work->params.pos);
+    SDF_VU0_COPYVECTOR(&work->formation.rot, &work->params.rot);
+    SDF_VU0_COPYVECTOR(&work->formation.center, &work->params.center);
+    work->formation.r = work->params.r;
+    work->formation.h = work->params.h;
+    work->formation.scl = work->params.scl;
+    if (D_0031BF00[work->id].partHandleCreate != NULL) {
+        D_0031BF00[work->id].partHandleCreate();
+    }
+    work->hEffBTLSys = effBTLSystemCreate(&work->formation, work->id);
+    switch (work->id) {
+    case 7:
+        ((effBattleSystem_effBTLSystem_Poison_tag *)work->hEffBTLSys->hEffect)->hModel = work->params.hModel;
+        break;
+    case 6:
+        ((effBattleSystem_effBTLSystem_Close_tag *)work->hEffBTLSys->hEffect)->hModel = work->params.hModel;
+        break;
+    }
+    return work;
+}
+
+void effCAMPBadDraw(effBattleSystem_effCAMPBad_tag *work)
+{
+    u32 color;
+
+    if (D_0031BF00[work->id].draw != NULL) {
+        D_0031BF00[work->id].draw(work->hEffBTLSys->hEffect);
+    }
+    if (work->params.hModel != NULL) {
+        color = D_0031BF00[work->id].rgba;
+        if (work->frame < 8) {
+            color = effColorBlend(0x80808080, color, work->frame * 0.125f);
+        }
+        mdlSetColor(work->params.hModel, color);
+    }
+    work->frame++;
+}
+
+void effCAMPBadDelete(effBattleSystem_effCAMPBad_tag *work)
+{
+    effBTLSystemDelete(work->hEffBTLSys);
+    if (work->params.hModel != NULL) {
+        mdlSetColor(work->params.hModel, 0x80808080);
+    }
+    if (D_0031BF00[work->id].partHandleDelete != NULL) {
+        D_0031BF00[work->id].partHandleDelete();
+    }
+    sdfChipFreeDirect(work);
+}
 
 void func_00174858(void) {
 }
@@ -2386,13 +2532,109 @@ void effBTLCutSetMax(u8 cut, u32 max)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLCutDebugPrint);
+extern void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *text);
+extern char *D_0054F0F8;
+extern char D_0054F110[];
+extern char D_0054F118[];
+extern char D_0054F120[];
+extern char D_0054F128[];
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174AB8);
+void effBTLCutDebugPrint(void)
+{
+    char text[0x70];
+    nbMainProcessData_t *mainData;
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174BB0);
+    if (effBTLSkillActive == 0) {
+        return;
+    }
+    mainData = nbGetMainProcessData();
+    if (mainData->debug != 0) {
+        sprintf(text, D_0054F110, effBTLCutCount);
+        effDebugStringDraw(0x20, 0x166, 0, text);
+        sprintf(text, D_0054F118, effBTLCutMaxTable[0]);
+        effDebugStringDraw(0x20, 0x172, 0, text);
+        sprintf(text, D_0054F120, effBTLCutMaxTable[1]);
+        effDebugStringDraw(0x20, 0x17E, 0, text);
+        sprintf(text, D_0054F128, effBTLCutMaxTable[2]);
+        effDebugStringDraw(0x20, 0x18A, 0, text);
+        effDebugStringDraw(0x20, 0x1A2, 0,
+            effBTLFieldColorIsOn() ? D_0054F0F8 : effBedNameBuf);
+    }
+    effBTLCutCount++;
+}
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174C50);
+
+extern s32 effBTLModelGetMarkPosition(nbFormation_t *formation, s32 mark);
+extern void effDebugPointDraw2(sdfVector4_t *point, u32 color);
+extern void effDebugWireframeSphereDraw(sdfVector4_t *center, u32 color, f32 radius);
+extern void effDebugPointDraw(sdfVector4_t *point);
+
+void func_00174AB8(u32 color1, u32 color3)
+{
+    nbFormation_t *formation;
+    sdfVector4_t center;
+    s32 i;
+
+    formation = nbGetMainProcessData()->form;
+    for (i = 31; i >= 0; i--, formation++) {
+        if ((formation->stat & 3) == 3) {
+            if (effBTLModelGetMarkPosition(formation, 1) != 0) {
+                SDF_VU0_STOREVECTOR(&center);
+                effDebugPointDraw2(&center, color1);
+                effDebugWireframeSphereDraw(&center, color1,
+                    formation->oneshotr * formation->scl);
+            }
+            if (effBTLModelGetMarkPosition(formation, 3) != 0) {
+                SDF_VU0_STOREVECTOR(&center);
+                effDebugPointDraw2(&center, color3);
+                effDebugWireframeSphereDraw(&center, color3,
+                    formation->allshotr * formation->scl);
+            }
+            effDebugPointDraw(&center);
+        }
+    }
+}
+
+extern void effBTLModelGetSphereCenter(nbFormation_t *formation);
+extern void effDebugWireframeCylinderDraw(sdfVector4_t *center, u32 color, f32 radius, f32 height);
+extern void effDebugPointDraw(sdfVector4_t *point);
+
+void func_00174BB0(u32 color)
+{
+    sdfVector4_t center;
+    nbFormation_t *formation;
+    s32 i;
+
+    formation = nbGetMainProcessData()->form;
+    for (i = 31; i >= 0; i--, formation++) {
+        if ((formation->stat & 3) == 3) {
+            effBTLModelGetSphereCenter(formation);
+            SDF_VU0_STOREVECTOR(&center);
+            effDebugWireframeCylinderDraw(&center, color,
+                formation->r * formation->scl, formation->h * formation->scl);
+            effDebugPointDraw(&center);
+        }
+    }
+}
+
+extern f32 effBTLModelGroupGetSphere2(u32 group);
+extern void effDebugWireframeSphereDraw(sdfVector4_t *center, u32 color, f32 radius);
+extern void effDebugPointDraw(sdfVector4_t *point);
+
+void func_00174C50(u32 color)
+{
+    sdfVector4_t center;
+    f32 radius;
+
+    radius = effBTLModelGroupGetSphere2(0x100);
+    SDF_VU0_STOREVECTOR(&center);
+    effDebugWireframeSphereDraw(&center, color, radius);
+    effDebugPointDraw(&center);
+    radius = effBTLModelGroupGetSphere2(0x200);
+    SDF_VU0_STOREVECTOR(&center);
+    effDebugWireframeSphereDraw(&center, color, radius);
+    effDebugPointDraw(&center);
+}
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A40);
 
@@ -2407,7 +2649,22 @@ char *effMakeBedPath(char *path)
     return path;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_174D38);
+extern void dds3EffectFileListWindowDraw(void *window);
+extern u32 dds3EffectFileListWindowGetState(void *window);
+extern u32 dds3EffectFileListWindowGetFilename(void *window, char *filename);
+extern void *func_001AA310(void *viewer);
+extern char D_0056AA38[];
+extern char *D_0054F0F8;
+
+void eff_174D38(void)
+{
+    dds3EffectFileListWindowDraw(D_00551DA4);
+    if (dds3EffectFileListWindowGetState(D_00551DA4) == 1) {
+        dds3EffectFileListWindowGetFilename(D_00551DA4, D_0056AA38);
+        D_0054F0F8 = D_0056AA38;
+        nbHelperViewer = func_001AA310(nbHelperViewer);
+    }
+}
 
 void eff_174D98(void)
 {
@@ -2419,11 +2676,107 @@ INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174DC0);
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_174E88);
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00175030);
+typedef struct {
+    sdf3DLight_t *parallel[4];
+    sdfVector4_t ambient;
+    sdf3DFogParam_t fog;
+} dds3LightState_t;
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_175070);
+extern dds3LightState_t dds3LightParam;
+PS2_SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
+extern sdfVector4_t D_0056AC40;
+extern sdfVector4_t D_0056AC50;
+extern u8 D_0054F18A;
+extern u8 D_0054F18B;
+extern void dds3UnlinkSceneLight(dds3Basic_t *light);
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", func_001750D0);
+s32 func_00175030(void)
+{
+    SDF_VU0_COPYVECTOR(&D_0056AC40, dds3LightParam.parallel[0]);
+    SDF_VU0_COPYVECTOR(&D_0056AC50, &dds3AmbientColor);
+    D_0054F18B = 1;
+    return 0;
+}
+
+void eff_175070(void)
+{
+    if (D_0054F18A == 0) {
+        dds3UnlinkSceneLight(nbGetMainProcessData()->light[1]);
+        SDF_VU0_COPYVECTOR(dds3LightParam.parallel[0], &D_0056AC40);
+        SDF_VU0_COPYVECTOR(&dds3AmbientColor, &D_0056AC50);
+        D_0054F18B = 0;
+    }
+}
+
+typedef struct fldResourceLight_t {
+    u32 resv;
+    u32 Flag;
+    u32 AnimeType;
+    f32 InsideR;
+    f32 OutsideR;
+    f32 Soften;
+    f32 Bias;
+    f32 DiffuseR;
+    f32 DiffuseG;
+    f32 DiffuseB;
+    f32 AmbientR;
+    f32 AmbientG;
+    f32 AmbientB;
+} fldResourceLight_t;
+
+extern u8 D_0054F18B;
+extern u32 D_0054F18C;
+extern u32 D_0054F190;
+extern fldResourceLight_t D_0056AC60;
+extern dds3Effect_Filter_t D_0031CA90;
+extern void dds3SetLightObjectResoruce(dds3Basic_t *basic, fldResourceLight_t *resource);
+extern void dds3LinkSceneLight(dds3Basic_t *basic, s32 frame);
+extern void dds3EffectFilter(dds3Effect_Filter_t *params);
+
+void func_001750D0(s32 param)
+{
+    nbMainProcessData_t *mainData;
+    u32 color;
+    u32 redChannel;
+    u32 greenChannel;
+    u32 blueChannel;
+    f32 red;
+    f32 green;
+    f32 blue;
+    f32 scaleRed;
+    f32 scaleGreen;
+    f32 scaleBlue;
+
+    if (D_0054F18B != 0) {
+        color = D_0054F18C;
+        blueChannel = (color >> 16) & 0xFF;
+        blue = (f32)blueChannel / 255.0f;
+        greenChannel = (color >> 8) & 0xFF;
+        green = (f32)greenChannel / 255.0f;
+        redChannel = color & 0xFF;
+        red = (f32)redChannel / 255.0f;
+
+        color = D_0054F190;
+        blueChannel = (color >> 16) & 0xFF;
+        scaleBlue = (f32)blueChannel * 0.0078125f;
+        greenChannel = (color >> 8) & 0xFF;
+        scaleGreen = (f32)greenChannel * 0.0078125f;
+        redChannel = color & 0xFF;
+        scaleRed = (f32)redChannel * 0.0078125f;
+
+        D_0056AC60.DiffuseR = red * scaleRed;
+        D_0056AC60.DiffuseG = green * scaleGreen;
+        D_0056AC60.DiffuseB = blue * scaleBlue;
+        D_0056AC60.AmbientR = red * scaleRed;
+        D_0056AC60.AmbientG = green * scaleGreen;
+        D_0056AC60.AmbientB = blue * scaleBlue;
+
+        mainData = nbGetMainProcessData();
+        dds3SetLightObjectResoruce(mainData->light[1], &D_0056AC60);
+        dds3LinkSceneLight(mainData->light[1], 0);
+        dds3EffectFilter(&D_0031CA90);
+    }
+}
 
 u32 effBTLDebug_CameraAllEditCheck(void)
 {
@@ -2445,9 +2798,128 @@ void nbSetHelperViewer(void *pViewer)
     nbHelperViewer = pViewer;
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", nb_175338);
+extern u8 D_00551DC0;
+extern u8 D_00551DC1;
+extern u8 D_00551DC2;
+extern u8 D_00551DC3;
+extern u8 D_00551DC4;
+extern u8 D_00551DC5;
+extern u8 D_00551DC6;
+extern u8 D_00551DC7;
+extern u8 D_00551DC8;
+extern u8 D_00551DC9;
+extern u8 D_00551DCA;
+extern u8 D_00551DCB;
+extern u8 D_00551DCC;
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", nb_175440);
+s32 nb_175338(s32 value)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+
+    D_00551DC0 = (((s32)data->stat >> 16) ^ 1) & 1;
+    D_00551DC1 = (((s32)data->stat >> 17) ^ 1) & 1;
+    D_00551DC2 = (((s32)data->stat >> 18) ^ 1) & 1;
+    D_00551DC3 = (((s32)data->stat >> 19) ^ 1) & 1;
+    D_00551DC4 = ((s32)data->stat >> 22) & 1;
+    D_00551DC5 = ((s32)data->stat >> 25) & 1;
+    D_00551DC6 = ((s32)data->stat >> 23) & 1;
+    D_00551DC7 = ((s32)data->stat >> 26) & 1;
+    D_00551DC8 = ((s32)data->stat >> 27) & 1;
+    D_00551DC9 = ((s32)data->stat >> 28) & 1;
+    D_00551DCA = (((s32)data->stat >> 29) ^ 1) & 1;
+    D_00551DCB = ((s32)data->stat >> 30) & 1;
+    D_00551DCC = data->stat >> 31;
+    return value;
+}
+
+void nb_175440(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+
+    if (D_00551DC0 != 0) {
+        data->stat &= ~0x00010000;
+    } else {
+        data->stat |= 0x00010000;
+    }
+    if (D_00551DC1 != 0) {
+        data->stat &= ~0x00020000;
+    } else {
+        data->stat |= 0x00020000;
+    }
+    if (D_00551DC2 != 0) {
+        data->stat &= ~0x00040000;
+    } else {
+        data->stat |= 0x00040000;
+    }
+    if (D_00551DC3 != 0) {
+        data->stat &= ~0x00080000;
+    } else {
+        data->stat |= 0x00080000;
+    }
+    if (D_00551DC4 != 0) {
+        data->stat |= 0x00400000;
+    } else {
+        data->stat &= ~0x00400000;
+    }
+    if (D_00551DC5 != 0) {
+        data->stat |= 0x02000000;
+    } else {
+        data->stat &= ~0x02000000;
+    }
+    if (D_00551DC6 != 0) {
+        data->stat |= 0x00800000;
+    } else {
+        data->stat &= ~0x00800000;
+    }
+    if (D_00551DC7 != 0) {
+        data->stat |= 0x04000000;
+    } else {
+        data->stat &= ~0x04000000;
+    }
+    if (D_00551DC8 != 0) {
+        data->stat |= 0x08000000;
+    } else {
+        data->stat &= ~0x08000000;
+    }
+    if (D_00551DC9 != 0) {
+        data->stat |= 0x10000000;
+    } else {
+        data->stat &= ~0x10000000;
+    }
+    if (D_00551DCA != 0) {
+        data->stat &= ~0x20000000;
+    } else {
+        data->stat |= 0x20000000;
+    }
+    if (D_00551DCB != 0) {
+        data->stat |= 0x40000000;
+    } else {
+        data->stat &= ~0x40000000;
+    }
+    if (D_00551DCC != 0) {
+        data->stat |= 0x80000000;
+    } else {
+        data->stat &= ~0x80000000;
+    }
+}
+
+typedef struct
+{
+    char *label;
+    u8 type;
+    u8 pad5[3];
+    void *value;
+    void *value2;
+    s32 unk16;
+    s32 unk20;
+} effDebugMenuItem_t;
+
+extern effDebugMenuItem_t D_0031CF88[5];
+extern char D_0056A920[0x20];
+extern char D_0056A940[0x20];
+extern f32 effBTLModelGroupGetSphereOld(u32 group);
+extern f64 sdfFloatToULong(f32 value);
+EQUATE_FPTODP();
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A60);
 
@@ -2505,7 +2977,13 @@ INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533C00);
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533C10);
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLDebugPrintDistance);
+void effBTLDebugPrintDistance(void)
+{
+    sprintf(D_0056A920, "PLAYER:%-4.3f", effBTLModelGroupGetSphereOld(0x100) * 0.02f);
+    sprintf(D_0056A940, " ENEMY:%-4.3f", effBTLModelGroupGetSphereOld(0x200) * 0.02f);
+    D_0031CF88[3].label = D_0056A920;
+    D_0031CF88[4].label = D_0056A940;
+}
 
 void eff_175768(void)
 {
@@ -2526,9 +3004,81 @@ void eff_1757A8(void)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_1757D8);
+extern s8 dds3PadBitTable[];
+extern void *dblurUpdateHandle(void *viewer);
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", dds3_175878);
+void eff_1757D8(void)
+{
+    nbMainProcessData_t *work;
+
+    if (dds3DebugSign != 0) {
+        if (dds3PadBitTable[14] < 0) {
+            D_0054F1DF ^= 1;
+            work = nbGetMainProcessData();
+            if (D_0054F1DF != 0) {
+                work->stat |= 0x200000;
+            } else {
+                work->stat &= ~0x200000;
+            }
+        }
+        if (D_0054F1DF != 0) {
+            nbHelperViewer = dblurUpdateHandle(nbHelperViewer);
+        }
+        func_001750D0(0);
+    }
+}
+
+extern u8 D_0054F1BE;
+extern u8 D_0054F1BF;
+extern u8 D_0054F1C0;
+extern s8 dds3PadButtonState[];
+extern void effBTLCutDebugPrint(void);
+extern void effDebugAllocDrawTag(void);
+extern void effDebugDrawMenu(void *menu);
+extern void effDebugLinkDrawTag(void);
+extern void nbCameraSetTarget(nbFormation_t *target);
+
+void dds3_175878(void)
+{
+    nbMainProcessData_t *mainData;
+
+    if (dds3DebugSign == 0) {
+        return;
+    }
+    func_00174860();
+    effBTLCutDebugPrint();
+    if (D_0054F1BF != 0) {
+        func_00174AB8(0x10604020, 0x10204060);
+    }
+    if (D_0054F1BE != 0) {
+        func_00174BB0(0x80303030);
+    }
+    if (D_0054F1C0 != 0) {
+        func_00174C50(0x10206040);
+    }
+    if (D_0054F1DF != 0) {
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(nbHelperViewer);
+        effDebugLinkDrawTag();
+    }
+
+    mainData = nbGetMainProcessData();
+    if ((mainData->stat & 0x400000) == 0) {
+        return;
+    }
+    if (dds3PadButtonState[0x2B] >= 0) {
+        return;
+    }
+    if ((mainData->form[4].stat & 3) != 3) {
+        return;
+    }
+    nbCameraSetTarget(&mainData->form[4]);
+    /* Retail keeps jal plus the epilogue. Qualified ee-gcc traces (ordinary
+     * and probed output identical) retain this own-pointer reset after call
+     * insn 216 in cfg, then delete reset 220 in life. It therefore blocks
+     * sibling-call formation before disappearing; see CONTRIBUTING.md. */
+    mainData = NULL;
+}
 
 void InitModelCollisionEditorProcess(void)
 {

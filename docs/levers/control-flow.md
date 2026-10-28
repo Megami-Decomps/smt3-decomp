@@ -280,3 +280,56 @@ computation belongs **inside** the guarded block after it, not before.
 it hoisted above the call the scheduler produces the same instruction count but
 a different register for every local, 47 of 60 words out.
 
+
+### Shared switch assignment and branch annulment
+
+`rcvUpdatePanelAnim` in `facility/fclRecoverUpdate` needs phases 1–4 to
+fall through to phase 5's single `active = 0` statement after their flag guard.
+Separate identical assignments leave one differing word: plain `beq` instead
+of retail's `beql` at +0x28, with the same zero assignment in the delay slot.
+
+Both forms were traced with:
+
+```
+tools/cc1probe.sh <candidate.c> \
+    --as-unit src/smt3/facility/fclRecoverUpdate.c \
+    --func rcvUpdatePanelAnim --reorg --no-dumps --out /tmp/recovery-panel
+```
+
+Both returned `verify: OK`: hooked and unhooked assembly matched the plain
+compilation. In the separate-assignment form, reorg's first delay pass fills
+branch uid76 from zero assignment uid48. With switch fallthrough, branch uid70
+has no such predecessor assignment; `fill_slots_from_thread` at reorg.c:3009
+instead takes the shared zero assignment uid42 from its target. The opposite
+path keeps `$16` live, so that target fill must annul. Both equality branches
+have the same probability 3999 and `mostly_true_jump` result 0: prediction
+annotations are not needed. The ordinary fallthrough reproduces all 168 bytes;
+the complete unit and retail-image checksum remain the qualification.
+
+In camp `cmpUpdateHeartsAttachConfirm`, the cancellation path restores the
+previous parameters and resets its local choice with `cancelled = 0`. Retail
+has `jal cmpReturnParamDH` plus the shared epilogue; omitting the reset instead
+emits a sibling call and changes four words. The qualified compiler trace
+retains the reset through `rtl.01.sibling` and `rtl.11.cfg`, then deletes it in
+`rtl.13.life`. Hooked and unhooked output and dump/plain assembly agree. The
+result matches all 272 bytes. Reproduce with
+`tools/cc1probe.sh src/smt3/code_0022C578.c --func cmpUpdateHeartsAttachConfirm --reorg`.
+The same-unit `cmpUpdateHeartsAttachStatus` resets its handled button after
+`cmpPlayCursorSE` and preserves its native `jal` plus epilogue at 396 bytes.
+Both resets update their own completed local state, under the contributing
+rules' qualified post-call-statement exception.
+
+### Reset a consumed cursor-row local after the default call
+
+`nmeInitCursor` (`nme/Nme_Init`) resets its local `row` after the default
+`cmpResetCursorPos(0, cursor)` call. The reset is dead local state, not an
+observable work-record write. This uses the narrow post-call statement
+exception in CONTRIBUTING: retail has a `jal` and epilogue on that path,
+while rows 3 through 5 use the early tail return.
+
+A qualified `tools/cc1probe.sh src/smt3/nme/Nme_Init.c --func nmeInitCursor
+--jump` run reports `verify: OK`, including dumped/plain assembly parity.
+Reset UID 149 follows ordinary call UID 145 in `.01.sibling` and remains
+in `.11.cfg`; it disappears in `.13.life`. The in-range call UID 110 is
+already a sibling call and remains one. Removing the reset makes the
+otherwise exact initializer eight bytes short. The complete unit stays exact.

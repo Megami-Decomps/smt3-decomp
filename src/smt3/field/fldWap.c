@@ -640,9 +640,20 @@ INCLUDE_RODATA(const s32, "field/fldWap", jtbl_00531F40);
 
 INCLUDE_ASM(const s32, "field/fldWap", fldDoor_WarpEx);
 
-INCLUDE_ASM(const s32, "field/fldWap", fldSetTerminalState);
+extern s16 D_002FC1A0[][2];
+extern s16 fldAllCnt[][2];
 
-INCLUDE_ASM(const s32, "field/fldWap", fldSetTerminalIndex);
+void fldSetTerminalState(s32 type, s32 idx)
+{
+    if (type == 0) {
+        D_0054EDFC = 3;
+        D_0054EDF4 = D_002FC1A0[idx][0];
+        D_0054EE00 = idx;
+    } else {
+        D_0054EE00 = idx;
+        D_0054EDF4 = fldAllCnt[idx][0];
+    }
+}
 
 void fldDoor_SiseExit(void) {
     fldSceneParam_t record;
@@ -718,10 +729,6 @@ void fldDoor_SiseExit(void) {
         return;
     }
 }
-
-extern s16 D_002FC1A0[][2];
-
-extern s16 fldAllCnt[][2];
 
 extern void fldSetSceneParamLoad(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
                                  s32 bgm, s32 camMode, const char *camName);

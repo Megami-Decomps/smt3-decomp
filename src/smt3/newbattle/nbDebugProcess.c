@@ -4,14 +4,8 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
-
-typedef struct evtUnitHandle_t
-{
-    u8 unk_00[0x8C];
-    dds3Basic_t *basic;
-    u8 unk_90[0x14];
-    u32 flags;
-} evtUnitHandle_t;
+#include "event.h"
+#include "font.h"
 
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
@@ -39,7 +33,7 @@ typedef struct
     u32 anime;
     dds3Basic_t *basic;
     s32 serial;
-    evtUnitHandle_t *hunit;
+    evtUnit_t *hunit;
     s16 partyindex;
     s16 formindex;
     u32 autotime;
@@ -96,7 +90,9 @@ typedef struct
 typedef struct nbMainProcessData_t
 {
     nbFormation_t *form;
-    u8 unk_04[0xC];
+    sdfMemHandle_t *form_hndl;
+    datUnitWork_t *enemyunit;
+    sdfMemHandle_t *enemyunit_hndl;
     nbParty_t *party;
     u8 unk_14[0x4];
     s16 playerpcnt;
@@ -294,7 +290,7 @@ typedef struct nbEventProcessData_t {
 
 extern void nbSetTargetProcess(s32 act, s32 partyindex, s32 ctype, s32 crule, s32 carea);
 
-extern u32 menucur;
+extern s32 menucur;
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -317,6 +313,16 @@ typedef struct {
 extern void SetDvlChange(nbDebugProcessData_t *d);
 
 extern void DispHpMpBad2(nbDebugProcessData_t *d, nbFormation_t *form);
+
+extern s32 mdlGetNumOfCut(mdlObj_t *model, s32 group);
+extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate);
+extern s32 nbMemoryLoadNegoSe(nbFormation_t *form);
+extern s32 nbPlayMotionSe(nbFormation_t *form);
+extern s32 nbMemoryLoadMotionSe(nbFormation_t *form, s32 motion);
+extern s32 nbGetUnitFromAction(nbFormation_t *form, s32 motion);
+extern void nbDelAllUniqueIDKoukaPacket(s32 uniqueID);
+struct nbKoukaPacket_t;
+extern struct nbKoukaPacket_t *nbAddSePacketLock(s32 frame, s32 uniqueID, s32 sound);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -360,11 +366,79 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SetMotion);
+void SetMotion(nbMainProcessData_t *data, nbFormation_t *form, s32 motion, s32 mode)
+{
+    s32 sound = 0;
+
+    if (motion < mdlGetNumOfCut(form->hunit->owner, 0)) {
+        nbSetUnitMotion(form, motion, mode, 1.0f);
+        switch (motion) {
+        case 14:
+            if (nbMemoryLoadNegoSe(form) != 0) {
+                sound = nbPlayMotionSe(form);
+            }
+            break;
+        case 15:
+            if (nbMemoryLoadNegoSe(form) != 0) {
+                sound = nbPlayMotionSe(form) + 1;
+            }
+            break;
+        default:
+            if (nbMemoryLoadMotionSe(form, motion) != 0) {
+                sound = nbGetUnitFromAction(form, motion);
+            }
+            break;
+        }
+        if (sound > 0) {
+            data->stat &= ~0x200;
+            nbDelAllUniqueIDKoukaPacket(0x3039);
+            nbAddSePacketLock(1, 0x3039, sound);
+            /* Retail keeps a normal call and shared epilogue. This dead local
+             * reset survives cc1's sibling pass and is removed in the life pass
+             * (verified with compiler output parity). */
+            sound = 0;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", nbDebugStockSelect);
 
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", DispBadStatus);
+extern s32 sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
+extern const char *nbBadStatusNames[12];
+extern const char D_00551358[];
+extern const char D_00551360[];
+extern sdfGrOt_t D_002F67F8;
+
+void DispBadStatus(s32 x, s32 y, u32 status, s32 color)
+{
+    s32 i;
+    u32 bit;
+    sdfDrawTag_t *tag;
+    const char **name;
+
+    i = 0;
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    bit = 1;
+    name = nbBadStatusNames;
+    while (i < 12) {
+        if ((status & (bit << i)) != 0) {
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, color,
+                                                  D_00551358, *name));
+            break;
+        }
+        name++;
+        i++;
+    }
+    if (i == 12) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, color, D_00551360));
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
+
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", DispHpMpBad2);
 
@@ -385,7 +459,44 @@ void DispHpMpBad(nbDebugProcessData_t *d)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMenu);
+extern const char *D_004F06D8[];
+typedef struct frFontRequest_t frFontRequest_t;
+extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
+                                        const char *text, frFontRequest_t *request);
+extern s32 frDrawFont(frFontHandle_t *request);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
+extern void dds3ConsPanelTagLinkZ(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy, s32 z);
+extern s32 dds3SelectMenu(s32 pad, s32 listsx, s32 listsy, s32 winsx, s32 winsy,
+                         s32 *basex, s32 *basey, s32 *x, s32 *y);
+
+s32 SelectMenu(nbDebugProcessData_t *d)
+{
+    const char **label = D_004F06D8;
+    s32 i;
+    s32 x = 200;
+    s32 y = 50 * 16;
+    s32 result;
+    sdfDrawTag_t *tag;
+
+    for (i = 0; i < 5; i++, label++, y += 12 * 16) {
+        u32 color = i == menucur ? 0xFF0080 : 0xFFFFFF80;
+        frFontRequest_t *request = frwGetSmallFontFRQ(x * 16, y, 0xFF0001, color, *label, NULL);
+        frDrawFont((frFontHandle_t *)request);
+        frDestroyFontRequestAfter((frFontHandle_t *)request);
+    }
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    dds3ConsPanelTagLinkZ(tag, x - 8, 0x5C, 10, 12, 0xFF0000);
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+    if ((s8)dds3PadButtonState[3] < 0) {
+        return -1;
+    }
+    result = dds3SelectMenu(0, 1, 5, 1, 5, NULL, NULL, NULL, &menucur);
+    if (result == -1 || result == 1) {
+        return result;
+    }
+    return 0;
+}
 
 s32 SelectHpMp(nbDebugProcessData_t *d)
 {
@@ -440,7 +551,50 @@ s32 SelectHpMp(nbDebugProcessData_t *d)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectBad);
+extern s32 badcur;
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 bad);
+
+s32 SelectBad(nbDebugProcessData_t *d)
+{
+    s32 i;
+    s32 y;
+    sdfDrawTag_t *tag;
+    datUnitWork_t *work;
+    s32 color;
+    s32 result;
+
+    i = 0;
+    y = 100;
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    work = nbGetUnitWorkFromFormindex(d->form->formindex);
+    dds3ConsPanelTagLinkZ(tag, 0x160, 0x5C, 10, 15, 0xFEFFFE);
+    for (; i < 13; i++) {
+        color = i == badcur ? 4 : 0;
+        if (i == 0) {
+            DispBadStatus(0x168, y, 0, color);
+        } else {
+            DispBadStatus(0x168, y, 1u << (i - 1), color);
+        }
+        y += 12;
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+    result = dds3SelectMenu(0, 1, 13, 1, 13, NULL, NULL, NULL, &badcur);
+    if (result == -1) {
+        return -1;
+    }
+    if (result != 1) {
+        return 0;
+    }
+    if (badcur == 0) {
+        nbMakeBadKaifukuPacket(0, 0, d->form);
+    } else {
+        work->badstatus &= 0xF000;
+        nbMakeBadDamagePacket(0, 0, d->form, 1u << (badcur - 1));
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMotData);
 
@@ -453,7 +607,74 @@ void SetSelect(void)
     nbSetTargetProcess(0, 0, 0, 0, 3);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SetDvlChange);
+typedef struct
+{
+    /* 0x00 */ u32 flag;
+    /* 0x04 */ u8 race;
+    /* 0x05 */ u8 level;
+    /* 0x06 */ u16 hp;
+    /* 0x08 */ u16 maxhp;
+    /* 0x0A */ u16 mp;
+    /* 0x0C */ u16 maxmp;
+    /* 0x0E */ s16 aisyoid;
+    /* 0x10 */ s8 param[6];
+    /* 0x16 */ u16 skill[8];
+    /* 0x26 */ s16 keisyotype;
+    /* 0x28 */ u16 keisyoform;
+    /* 0x2A */ u16 dropmakka;
+    /* 0x2C */ u16 dropexp;
+    /* 0x2E */ u8 dropitem[2];
+    /* 0x30 */ u8 droppoint[2];
+    /* 0x32 */ u16 specialbit;
+    /* 0x34 */ u8 specialitem;
+    /* 0x35 */ u8 specialpoint;
+    /* 0x36 */ u8 hougyokupoint;
+    /* 0x37 */ u8 masekipoint;
+    /* 0x38 */ s8 attackattr;
+    /* 0x39 */ u8 attackcnt;
+    /* 0x3A */ u8 attackinterval;
+    /* 0x3B */ u8 reserve1;
+} datDevilFormat_t;
+
+extern datDevilFormat_t datDevilTable[];
+extern s32 devilbase;
+extern s32 devilcur;
+extern void nbReturnUnit(s32 partyindex, s32 lost, s32 dead);
+extern u64 sdfDelayedResrcCheck(void);
+extern void datSetDevilWork(s32 id, datUnitWork_t *work);
+extern void nbSummonUnit(s32 side, s32 stockno, s32 formindex);
+extern void nbSetEnemyFormation(nbMainProcessData_t *data);
+extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
+
+void SetDvlChange(nbDebugProcessData_t *d)
+{
+    datUnitWork_t *work;
+
+    nbReturnUnit(d->partyindex, 0, 0);
+    while (sdfDelayedResrcCheck() != 0) {
+    }
+    if (d->side == 1) {
+        work = &d->data->enemyunit[d->stockno];
+    } else {
+        work = (datUnitWork_t *)((u8 *)DDS3_GBWK + d->stockno * sizeof(datUnitWork_t) + 0xA54);
+    }
+    datSetDevilWork(devilbase + devilcur, work);
+    work->hp = work->maxhp = datDevilTable[devilbase + devilcur].maxhp;
+    work->mp = work->maxmp = datDevilTable[devilbase + devilcur].maxmp;
+    nbSummonUnit(d->side, d->stockno, d->formindex);
+    switch (d->side) {
+    case 1:
+        nbSetEnemyFormation(d->data);
+        break;
+    case 0:
+        nbSetPlayerFormation(d->data, 0);
+        /* Retail keeps jal and a shared epilogue. This dead local reset
+         * survives cc1 sibling selection and is deleted in the life pass
+         * (qualified trace with compiler output parity). */
+        work = NULL;
+        break;
+    }
+}
 
 void SetTarget_nbDebugProcess(nbDebugProcessData_t *a)
 {

@@ -31,7 +31,8 @@ typedef struct
     u16 hp;
     u8 unk0C[6];
     u16 badstatus;
-    u8 unk14[6];
+    u32 exp;
+    u8 pad18[2];
     s8 level;
     u8 unk1B[0xD1];
 } fldAnahoriAkuma_t;
@@ -45,9 +46,7 @@ typedef struct
     s16 half0C;
     s16 transition; /* 0xE: fldMainLoadStart */
     u8 unk10[0x24];
-    /* The IDB types this sdfMemHandle_t *; this unit only ever moves the word,
-     * so the declared type is left as the matching build has it. */
-    s32 memHandle;
+    sdfMemHandle_t *memHandle;
     s32 unk38;
     s32 playtime;
     s32 integers[256];
@@ -68,8 +67,10 @@ typedef struct
     u8 item[19];
     u8 boss_press[160];            /* 0x19C8 */
     u8 syakkincnt[640];
-    u8 negoques[3];                /* 0x1CE8 */
-    u8 kotowari[9];                /* 0x1CEB */
+    u8 negoques[4];                /* 0x1CE8 */
+    u8 kotowari[4];                /* 0x1CEC */
+    u16 wakimi_id;                 /* 0x1CF0 */
+    u16 bouga_cnt;                 /* 0x1CF2 */
     f32 encountkyori;              /* 0x1CF4 */
     u16 encountCount;              /* 0x1CF8 */
     u8 heartsequip;
@@ -81,7 +82,7 @@ typedef struct
     u8 takaraOpen[0x20];           /* 0x11A58 */
     s16 previewX;                 /* 0x11A78: slSetTmnlID */
     s16 previewY;
-    u8 unk11A7C[4];
+    s32 moonAnahoriCount;
     u8 takaraOpenEx[0x20];         /* 0x11A80 */
 } dds3GlobalWork_t;
 
@@ -217,9 +218,18 @@ typedef struct
 
 typedef struct
 {
+    s16 n;
+    s16 m;
+    s16 a;
+    s16 b;
+} datSpecialSkill_t;
+
+typedef struct
+{
     datNormalSkill_t normal[288];
     u8 reserve[8];
     datNormalSkillVisual_t visual[288];
+    datSpecialSkill_t special[95];
 } datSkillTable_t;
 
 extern datSkillTable_t datSkillTable;

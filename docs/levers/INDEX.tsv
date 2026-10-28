@@ -1,28 +1,29 @@
 page	line	mnemonics	tell
 docs/levers/README.md	7		| Levers | Page | Section | |---|---|---|
-docs/levers/README.md	9		| 246 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
-docs/levers/README.md	10		| 121 | [control-flow.md](control-flow.md) | Control flow |
+docs/levers/README.md	9		| 247 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
+docs/levers/README.md	10		| 123 | [control-flow.md](control-flow.md) | Control flow |
 docs/levers/README.md	11		| 14 | [impossible.md](impossible.md) | Functions that cannot be written in C |
 docs/levers/README.md	12		| 10 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 docs/levers/README.md	13		| 10 | [stores.md](stores.md) | Stores |
 docs/levers/README.md	14		| 4 | [float-literals.md](float-literals.md) | Float literals |
-docs/levers/README.md	15		| 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
-docs/levers/README.md	16		| 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
-docs/levers/README.md	17		| 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
-docs/levers/README.md	18		| 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
-docs/levers/README.md	19		| 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
-docs/levers/README.md	20		| 0 | [second-label.md](second-label.md) | A second label in the split assembly:
-docs/levers/README.md	21		| 0 | [rodata-placers.md](rodata-placers.md) | Do not run the rodata and sdata placers standalone |
-docs/levers/README.md	22		| 0 | [loop-rotation.md](loop-rotation.md) | A loop whose exit test is written first gets rotated;
-docs/levers/README.md	23		| 0 | [local-vectors.md](local-vectors.md) | Two local vectors:
-docs/levers/README.md	24		| 0 | [local-const-arrays.md](local-const-arrays.md) | Function-local constant arrays |
-docs/levers/README.md	25	$2 $4 lw move	| 0 | [handle-registers.md](handle-registers.md) | lw $4 against lw $2 plus move $4, $2 |
-docs/levers/README.md	26		| 0 | [cross-block-locals.md](cross-block-locals.md) | Two cross-block locals whose registers come out swapped |
-docs/levers/README.md	27		| 0 | [callee-visibility.md](callee-visibility.md) | Callee visibility:
-docs/levers/README.md	28		| 0 | [callee-definition.md](callee-definition.md) | A caller can need its callee's definition, not just a prototype |
-docs/levers/README.md	29		| 0 | [block-locals.md](block-locals.md) | A block-local whose live range reaches the end of the block costs a register |
-docs/levers/README.md	30		| 0 | [asm-macros.md](asm-macros.md) | Reaching an instruction cc1 never selects, and what it costs |
-docs/levers/README.md	31		| 0 | [arithmetic.md](arithmetic.md) | Arithmetic |
+docs/levers/README.md	15		| 3 | [scheduling.md](scheduling.md) | Store scheduling |
+docs/levers/README.md	16		| 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
+docs/levers/README.md	17		| 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
+docs/levers/README.md	18		| 2 | [callee-visibility.md](callee-visibility.md) | Callee visibility:
+docs/levers/README.md	19		| 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
+docs/levers/README.md	20		| 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
+docs/levers/README.md	21		| 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
+docs/levers/README.md	22		| 0 | [second-label.md](second-label.md) | A second label in the split assembly:
+docs/levers/README.md	23		| 0 | [rodata-placers.md](rodata-placers.md) | Do not run the rodata and sdata placers standalone |
+docs/levers/README.md	24		| 0 | [loop-rotation.md](loop-rotation.md) | A loop whose exit test is written first gets rotated;
+docs/levers/README.md	25		| 0 | [local-vectors.md](local-vectors.md) | Two local vectors:
+docs/levers/README.md	26		| 0 | [local-const-arrays.md](local-const-arrays.md) | Function-local constant arrays |
+docs/levers/README.md	27	$2 $4 lw move	| 0 | [handle-registers.md](handle-registers.md) | lw $4 against lw $2 plus move $4, $2 |
+docs/levers/README.md	28		| 0 | [cross-block-locals.md](cross-block-locals.md) | Two cross-block locals whose registers come out swapped |
+docs/levers/README.md	29		| 0 | [callee-definition.md](callee-definition.md) | A caller can need its callee's definition, not just a prototype |
+docs/levers/README.md	30		| 0 | [block-locals.md](block-locals.md) | A block-local whose live range reaches the end of the block costs a register |
+docs/levers/README.md	31		| 0 | [asm-macros.md](asm-macros.md) | Reaching an instruction cc1 never selects, and what it costs |
+docs/levers/README.md	32		| 0 | [arithmetic.md](arithmetic.md) | Arithmetic |
 docs/levers/addressing-and-types.md	4	sll	A struct pointer local is what keeps two index scalings apart.
 docs/levers/addressing-and-types.md	11	slti sltu	A u8 field compared against a small constant folds to sltu, since cc1 knows the promoted value is non-negative.
 docs/levers/addressing-and-types.md	15	lw	A byte offset added to a **reloaded** global on every iteration is a second variable in the for init, not an expression.
@@ -269,6 +270,9 @@ docs/levers/addressing-and-types.md	1800	addu	**The operand order of the addu th
 docs/levers/addressing-and-types.md	1807		**Which subexpression cse keeps decides how many address instructions there are.** Two accesses into the same strided element share whatever the first one…
 docs/levers/addressing-and-types.md	1814	addu daddu sw	**A clamped accumulator that retail copies with a daddu at the merge is read back through the struct, not held in a local.** if (p->alpha < 0x100) { p->alpha…
 docs/levers/addressing-and-types.md	1823	addiu li mult	A struct's trailing filler has to be sized from the real member sizes, not from the address range:
+docs/levers/addressing-and-types.md	1832		An independent symbol view and an array-derived pointer can both be needed for one global span.
+docs/levers/callee-visibility.md	51	$16 $29 bne sh	### One-pass model-load phase in fldAutoMap fldAutoMapModelLoad is 100 bytes and exact when its 372-byte provider, fldAmModelLoadFile, is a visible C…
+docs/levers/callee-visibility.md	72		### Skill-attack camera scheduling The unchanged nbCameraState_SkillAttack_Calc draft becomes exact at 364 bytes with the matched nbCameraShot_GroundCollision…
 docs/levers/control-flow.md	6		| two early return <same constant> reached by separate ifs, with the constant's block laid out **after** the body | nest the two tests and give them one…
 docs/levers/control-flow.md	7	j jal	| jal and a fallthrough for the **last** switch arm while the other arms sibcall with j, where the switch value is a call result | give the call result a…
 docs/levers/control-flow.md	8	beqz bnez	| the opposite arm falls through (bnez where you emit beqz) | invert the if condition |
@@ -390,6 +394,8 @@ docs/levers/control-flow.md	200	beq	**Three cases over 0, 1 and 2 come out teste
 docs/levers/control-flow.md	208	$0 $2 bne bnel daddu	**A guard whose early return is the else of the real body gets retail's branch-likely.** if (x != K) { return 0;
 docs/levers/control-flow.md	216	beq bne	**Where retail branches *to* an if's body, the test is inverted and the body is last.** fldPlayerCalc's world-map guard is beq fldWmWarpMode, 1 into a…
 docs/levers/control-flow.md	224	$0 addiu addu and beq bgez bltz sb sh slti sltiu	| beq against zero, then bltz, then slti on one value, where your if chain folds to a single sltiu | a switch with an **empty case 0:**, the real range as…
+docs/levers/control-flow.md	284	and beq beql sh	### Shared switch assignment and branch annulment rcvUpdatePanelAnim in facility/fclRecoverUpdate needs phases 1–4 to fall through to phase 5's single active…
+docs/levers/control-flow.md	322	jal sh	### Reset a consumed cursor-row local after the default call nmeInitCursor (nme/Nme_Init) resets its local row after the default cmpResetCursorPos(0, cursor)…
 docs/levers/cross-jumping.md	8	lui ori	Where retail computes a value in both arms of an if but converts or stores it once at the join, the source most likely duplicates the whole tail in both arms…
 docs/levers/cross-jumping.md	15	and div nop	The merge stops as soon as one register differs, which is why retail can keep two of three float-to-int conversions inside the arms and share only the third.
 docs/levers/float-literals.md	39	abs.s lh lhu lwc1 mtc1	Where retail loads every field of one struct before storing any of them into another, and the two pointed-to types are different alias sets so the scheduler…
@@ -413,6 +419,9 @@ docs/levers/impossible.md	127		| release_movieobj2 | ordinary C plus the idiom t
 docs/levers/impossible.md	128	$16 $18 cfc2 ctc2 pextlb	| corePktVu0Run | assembly throughout:
 docs/levers/impossible.md	129	j jal pextlb pextlh vitof0	| corePktEmitRefMapPass | assembly throughout:
 docs/levers/impossible.md	130	jr	| sdf_2BFC58 | a computed jr into an unrolled sq block, as above.
+docs/levers/scheduling.md	3	and sh	### A final member store ends the object pointer's live range pipeLoadEffect in pipe/pipeEffect initializes a free effect slot after loading its handle.
+docs/levers/scheduling.md	31		### Initialize the counter before the offset snapshot In pipeGetObjData (pipe/pipeEffect), the mode-6 loop needs i = 4 before offset = offsetCount + 4,…
+docs/levers/scheduling.md	39		### Initialize the cursor after clearing its temporary buffer pipeEffDraw2Doffset clears a four-float position buffer before assigning its effect cursor from…
 docs/levers/stores.md	12	sw	Two unrelated member stores in front of an expression that loads a gp global decide the whole block's schedule, and the winning order is not the one the…
 docs/levers/stores.md	20	$0 jal sw	Where retail's last store before a jal is a constant store rather than the argument setup, hoist the argument into a local above the stores.
 docs/levers/stores.md	26	$0 sw	Two adjacent struct stores only reverse when neither value is a reload.

@@ -50,7 +50,7 @@ extern void cmpUpdateTerminate();
 
 extern s32 fclGetFlag(s8 index);
 
-extern void trmDrawSeq0(s32 mode);
+extern void trmDrawSeq0(s8 mode);
 
 extern void trmDrawList(void);
 

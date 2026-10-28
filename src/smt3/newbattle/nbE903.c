@@ -4,14 +4,8 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
-
-typedef struct evtUnitHandle_t
-{
-    u8 unk_00[0x8C];
-    dds3Basic_t *basic;
-    u8 unk_90[0x14];
-    u32 flags;
-} evtUnitHandle_t;
+#include "event.h"
+#include "model.h"
 
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
@@ -39,7 +33,7 @@ typedef struct
     u32 anime;
     dds3Basic_t *basic;
     s32 serial;
-    evtUnitHandle_t *hunit;
+    evtUnit_t *hunit;
     s16 partyindex;
     s16 formindex;
     u32 autotime;
@@ -324,7 +318,7 @@ extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                                s32 motion);
 
-extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
+extern void evtSetUnitMotion(evtUnit_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -460,7 +454,88 @@ s32 nbE903_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE903", nbE903Process_1);
+extern s32 (*D_00527470[])(nbEventProcessData_t *);
+extern dds3Basic_t *D_005515C4;
+extern dds3Basic_t *D_005515C8;
+extern dds3Basic_t *D_005515CC;
+extern dds3Basic_t *D_005515D0;
+
+extern void nbCameraSetState(u16 state);
+extern void nbAllFormDispOn(void);
+extern void nbGroupFormDispOff(s32 side);
+extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
+extern dds3Basic_t *dds3GetActiveScene(void);
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serialID, s32 type);
+extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
+extern void nbCameraHelperModelSet(mdlObj_t *model);
+extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
+
+s32 nbE903Process_1(dds3ProcessID_t *id)
+{
+    nbEventProcessData_t *event = dds3GetProcessData(id);
+    s32 time;
+    s32 serial;
+    dds3Basic_t *scene;
+
+    if (D_00527470[event->seq](event) != 0) {
+        D_005515C4 = NULL;
+        if (D_005515C8 != NULL) {
+            dds3DeleteSceneBasicData(D_005515C8);
+            D_005515C8 = NULL;
+        }
+        if (D_005515CC != NULL) {
+            dds3DeleteSceneBasicData(D_005515CC);
+            D_005515CC = NULL;
+        }
+        if (D_005515D0 != NULL) {
+            dds3DeleteSceneBasicData(D_005515D0);
+            D_005515D0 = NULL;
+        }
+        return -1;
+    }
+
+    time = event->time;
+    if (time > 0 && D_005515C4 != NULL) {
+        evtUnit_t *unit = dds3GetUnitHandleObjectBasic(D_005515C4);
+        if (unit->owner != NULL) {
+            nbCameraHelperModelSet(unit->owner);
+        }
+        time = event->time;
+    }
+    switch (time) {
+    case 0:
+        nbCameraSetState(0x17);
+        nbAllFormDispOn();
+        nbGroupFormDispOff(0);
+        D_005515C4 = NULL;
+        D_005515C8 = NULL;
+        D_005515CC = NULL;
+        D_005515D0 = NULL;
+        serial = evtInitMotionSeProcess(event->eventrid, 9);
+        scene = dds3GetActiveScene();
+        D_005515C8 = dds3SearchSceneBasic(scene, serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_005515C8), 0, 0, 0, 2);
+        D_005515C4 = D_005515C8;
+        break;
+    case 0x32:
+        serial = evtInitMotionSeProcess(event->eventrid, 10);
+        scene = dds3GetActiveScene();
+        D_005515CC = dds3SearchSceneBasic(scene, serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_005515CC), 0, 0, 0, 2);
+        D_005515C4 = D_005515CC;
+        break;
+    case 0xBE:
+        serial = evtInitMotionSeProcess(event->eventrid, 11);
+        scene = dds3GetActiveScene();
+        D_005515D0 = dds3SearchSceneBasic(scene, serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_005515D0), 0, 0, 0, 2);
+        D_005515C4 = D_005515D0;
+        break;
+    }
+
+    nbUpdateEventProcessData(id);
+    return 0;
+}
 
 s32 Test(nbEventProcessData_t *ed)
 {

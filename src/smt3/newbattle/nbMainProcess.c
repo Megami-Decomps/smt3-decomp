@@ -1,5 +1,7 @@
 #include "common.h"
 #include "nb.h"
+#include "basic.h"
+#include "libsdf.h"
 #include "effBattle.h"
 
 extern dds3ProcessID_t *dds3SearchProcessPriority(u32 priority);
@@ -210,7 +212,7 @@ extern void nbSetPressMaePhase(nbMainProcessData_t *data);
 
 extern s8 dds3PadButtonState[64];
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 extern struct nbKoukaPacket_t *nbAddDeadPcmPacket(s32 startframe, s32 uniqueid,
                                                   nbFormation_t *form);
@@ -416,7 +418,85 @@ void nbDebugSelect(nbMainProcessData_t *data)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbDebugCamera);
+extern dds3Basic_t *dds3GetActiveScene(void);
+extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *scene);
+extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_t *camera);
+extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
+extern void dds3SetScreenFovy(f32 fovy);
+extern s32 D_00550F80;
+extern char *D_00550F78;
+extern char *D_00550F7C;
+extern char D_00550F88[];
+extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
+extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern sdfGrOt_t D_002F6978;
+
+void nbDebugCamera(nbMainProcessData_t *data)
+{
+    dds3Basic_t *scene;
+    dds3Basic_t *camera;
+    char *name;
+    sdfDrawTag_t *tag;
+
+    scene = dds3GetActiveScene();
+    if (scene == NULL || D_00550F80 == 0) {
+        return;
+    }
+    camera = dds3GetActiveCameraSceneBasic(scene);
+    if (camera == NULL) {
+        return;
+    }
+    if (dds3PadButtonState[0x29] != 0) {
+        if (dds3PadButtonState[0x24] < 0) {
+            if (data->stat & 0x20) {
+                data->stat &= ~0x20;
+                camera = ((dds3SceneBasic_t *)scene->workdata)->basictable[4].firstbasic;
+            } else {
+                if (camera->next != NULL) {
+                    camera = camera->next;
+                } else {
+                    if (data->gamecamera != NULL) {
+                        camera = data->gamecamera;
+                        data->stat |= 0x20;
+                    } else {
+                        camera = ((dds3SceneBasic_t *)scene->workdata)->basictable[4].firstbasic;
+                    }
+                }
+            }
+            dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
+            dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
+        } else if (dds3PadButtonState[0x25] < 0) {
+            if (data->stat & 0x20) {
+                data->stat &= ~0x20;
+                camera = ((dds3SceneBasic_t *)scene->workdata)->basictable[4].lastbasic;
+            } else {
+                if (camera->prev != NULL) {
+                    camera = camera->prev;
+                } else {
+                    if (data->gamecamera != NULL) {
+                        camera = data->gamecamera;
+                        data->stat |= 0x20;
+                    } else {
+                        camera = ((dds3SceneBasic_t *)scene->workdata)->basictable[4].lastbasic;
+                    }
+                }
+            }
+            dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
+            dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
+        }
+    }
+    if (camera->name != NULL) {
+        name = camera->name;
+    } else {
+        name = (data->stat & 0x20) ? D_00550F7C : D_00550F78;
+    }
+    if (data->debug == 1) {
+        tag = dds3FontReqAllocDrawTag();
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8680, 0x79C0, 0xFF0000, 5, D_00550F88, name));
+        D_002F6978.regFunc(&D_002F6978, tag);
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbDebugMainProcess);
 
@@ -1121,7 +1201,7 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
         }
         break;
     case RESULT:
-        if (*(s32 *)data->ResultProcessID == 0) {
+        if (data->ResultProcessID == 0) {
             nbSetNextPhase(NB_PHASE_END);
             next = 1;
         }
