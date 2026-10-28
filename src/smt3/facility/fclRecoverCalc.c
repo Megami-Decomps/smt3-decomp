@@ -5,9 +5,9 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern s32 datGetMaxHp(datUnitWork_t *work);
+extern u32 datGetMaxHp(datUnitWork_t *work);
 
-extern s32 datGetMaxMp(datUnitWork_t *work);
+extern u32 datGetMaxMp(datUnitWork_t *work);
 
 s32 fclGetFlag(s8 index);
 
