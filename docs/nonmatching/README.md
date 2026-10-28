@@ -13,11 +13,11 @@ page and line to open. Conventions are in
 | 13 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 11 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 7 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
+| 6 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 6 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 6 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 6 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 5 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
-| 5 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 5 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 5 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |

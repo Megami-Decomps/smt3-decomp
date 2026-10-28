@@ -1604,7 +1604,120 @@ s32 nbCameraBoss_Kagu_FLEACH_Set(nbCamera_t *pNbCamera)
     return 1;
 }
 
+extern u32 nbCameraBoss_Kagu_MJINKO_Type;
+
+/* NON_MATCHING: 39 of 199 words differ at retail's size. The shared tail of
+ * the type 0 and type 1 arms starts with the loads instead of the 1.0f the
+ * distance store needs, so the `b` into it keeps no delay nop. */
+#ifdef NON_MATCHING
+s32 nbCameraBoss_Kagu_MJINKO_Set(nbCamera_t *pNbCamera)
+{
+    f32 rate;
+    sdfVector4_t dirStart;
+    sdfVector4_t dirEnd;
+    sdfVector4_t posStart;
+    sdfVector4_t posEnd;
+
+    effBTLModelAllShow();
+    if (pNbCamera->frame == 0) {
+        if (nbCameraBossCutFlag == 1) {
+            if ((dds3GetRandA(dds3EffectBase) & 1) != 0) {
+                nbCameraBoss_Kagu_MJINKO_Type = 1;
+            } else {
+                nbCameraBoss_Kagu_MJINKO_Type = 2;
+            }
+        } else {
+            nbCameraBoss_Kagu_MJINKO_Type = 0;
+        }
+    }
+    switch (nbCameraBoss_Kagu_MJINKO_Type) {
+    case 0:
+        rate = (f32)pNbCamera->frame / 75.0f;
+        if (rate > 1.0f) {
+            rate = 1.0f;
+        }
+        dirStart.x = 0.13f;
+        dirStart.y = -0.00999999978f;
+        dirStart.z = 0.98999995f;
+        dirEnd.x = -0.269999981f;
+        dirEnd.y = -0.00999999978f;
+        dirEnd.z = 0.959999979f;
+        posStart.x = -493.849976f;
+        posStart.y = -356.28998f;
+        posStart.z = -1867.77991f;
+        posEnd.x = 694.0f;
+        posEnd.y = -355.029999f;
+        posEnd.z = -1961.52991f;
+        SDF_VU0_LOADVECTOR(&dirStart);
+        SDF_VU0_LOADVECTOR_B(&dirEnd);
+        VU0_LERP_VF10_VF11(rate);
+        SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+        SDF_VU0_LOADVECTOR(&posStart);
+        SDF_VU0_LOADVECTOR_B(&posEnd);
+        VU0_LERP_VF10_VF11(rate);
+        SDF_VU0_STOREVECTOR(pNbCamera);
+        pNbCamera->distance = 1.0f;
+        pNbCamera->target.x = pNbCamera->target.x + pNbCamera->direction.x;
+        pNbCamera->target.y = pNbCamera->target.y + pNbCamera->direction.y;
+        pNbCamera->target.z = pNbCamera->target.z + pNbCamera->direction.z;
+        pNbCamera->fovy = 0.698131621f;
+        break;
+    case 1:
+        rate = (f32)pNbCamera->frame / 75.0f;
+        if (rate > 1.0f) {
+            rate = 1.0f;
+        }
+        dirStart.x = -0.0199999996f;
+        dirStart.y = 0.0599999987f;
+        dirStart.z = 1.0f;
+        dirEnd.x = 0.39999998f;
+        dirEnd.y = 0.0599999987f;
+        dirEnd.z = 0.909999967f;
+        posStart.x = 112.829995f;
+        posStart.y = -508.589997f;
+        posStart.z = -2211.5799f;
+        posEnd.x = -1067.72f;
+        posEnd.y = -514.559998f;
+        posEnd.z = -2125.21f;
+        SDF_VU0_LOADVECTOR(&dirStart);
+        SDF_VU0_LOADVECTOR_B(&dirEnd);
+        VU0_LERP_VF10_VF11(rate);
+        SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+        SDF_VU0_LOADVECTOR(&posStart);
+        SDF_VU0_LOADVECTOR_B(&posEnd);
+        VU0_LERP_VF10_VF11(rate);
+        SDF_VU0_STOREVECTOR(pNbCamera);
+        pNbCamera->distance = 1.0f;
+        pNbCamera->target.x = pNbCamera->target.x + pNbCamera->direction.x;
+        pNbCamera->target.y = pNbCamera->target.y + pNbCamera->direction.y;
+        pNbCamera->target.z = pNbCamera->target.z + pNbCamera->direction.z;
+        pNbCamera->fovy = 0.698131621f;
+        break;
+    case 2:
+        if (pNbCamera->frame < 75) {
+            pNbCamera->direction.x = -0.25f;
+            pNbCamera->direction.y = 0.209999993f;
+            pNbCamera->direction.z = 0.939999998f;
+            pNbCamera->target.x = 902.299988f;
+            pNbCamera->target.y = -1260.7998f;
+            pNbCamera->target.z = -1761.79993f;
+        } else {
+            pNbCamera->direction.x = -0.179999992f;
+            pNbCamera->direction.y = 0.0899999961f;
+            pNbCamera->direction.z = 0.979999959f;
+            pNbCamera->target.x = 532.409912f;
+            pNbCamera->target.y = -458.449951f;
+            pNbCamera->target.z = -1987.56982f;
+        }
+        pNbCamera->distance = 1.0f;
+        pNbCamera->fovy = 0.698131621f;
+        break;
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Kagu_MJINKO_Set);
+#endif
 
 s32 nbCameraBoss_Pish_PRESS_Set(nbCamera_t *pNbCamera)
 {

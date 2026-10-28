@@ -152,3 +152,24 @@ local copied from `frame` before the cast (all coalesce the same way);
 `frame = frame + 1; D_00551E80 = frame;` instead of one expression;
 `D_00551E80++`; `u32` for the counter (which reverses the clamp and runs two
 words long).
+
+## nbCameraBoss_Kagu_MJINKO_Set (newbattle/nbCameraBoss, 0x31C)
+
+39 of 199 words differ at retail's exact 796 bytes.
+
+The dispatch, the three arms, the four stacked interpolation endpoints and every
+float literal match. `u32` on `nbCameraBoss_Kagu_MJINKO_Type` is what drops the
+range test out of the three-case `switch`, the way it does in
+`nbCameraBoss_Beru_HAENO1_Set`.
+
+What is left is one instruction's placement. The arms for type 0 and type 1 end
+with the same eight-statement tail, which gcc cross-jumps into one block.
+Retail's merged block begins with the `lui`/`mtc1` pair that materialises the
+`1.0f` for `distance`, so ee-as finds nothing to put in the delay slot of the
+`b` that reaches it and leaves a `nop`. The draft's merged block begins with the
+six `lwc1` loads of `target` and `direction`, ee-as hoists the first load into
+that delay slot, and every word of the tail then sits one position earlier.
+
+Ruled out: `distance = 1.0f` before, between and after the three component adds
+and the `fovy` store (all six orders of those three statements); computing the
+three sums into float locals and storing them after the `fovy` store.
