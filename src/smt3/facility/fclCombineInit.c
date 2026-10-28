@@ -1462,7 +1462,23 @@ void cmbClearSkillSlots(cmbUnit_t *unit)
     memset(unit->unit.keisyoskill, 0, sizeof(unit->unit.keisyoskill));
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmb_1FF0C8);
+void cmb_1FF0C8(cmbUnit_t *list, u8 count)
+{
+    u8 dst = 0;
+    s32 src = 0;
+    cmbUnit_t *entry;
+
+    for (; src < count; src++) {
+        entry = &list[src];
+        if (entry->unit.id != 0) {
+            if (dst < src) {
+                cmbCopyCustomDevilToStock(&list[dst].unit, &entry->unit);
+                cmbClearStockEntry(entry);
+            }
+            dst++;
+        }
+    }
+}
 
 void cmbApplyEvoUnlock(s8 id)
 {
