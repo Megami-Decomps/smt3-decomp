@@ -305,7 +305,52 @@ void pipeLoadEffect(s32 effectID, PIPE_EFF_t *effects, u8 maxSize, f32 x, f32 y)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffDraw2Doffset);
+extern void *memset(void *dest, s32 value, u32 size);
+extern s32 dds3EffectGetState(void *effect);
+extern void dds3EffectSetPosition(void *effect, const void *position);
+extern void dds3EffectDraw(void *effect);
+extern void getPosTranslate(tagPipeObject *object, f32 *position);
+
+void pipeEffDraw2Doffset(PIPE_EFF_t *pEffect, u8 maxSize)
+{
+    PIPE_EFF_t *effect;
+    f32 position[4];
+    tagPipeObject object;
+    u8 index;
+
+    memset(position, 0, 0x10);
+    effect = pEffect;
+    position[3] = 1.0f;
+    index = maxSize - 2;
+    if (index != 0xFF) {
+        do {
+            if (effect->d3p != NULL) {
+                if (dds3EffectGetState(effect->d3p) == 0) {
+                    dds3EffectDelete(effect->d3p);
+                    effect->d3p = NULL;
+                } else {
+                    f32 x = effect->pos2[0];
+                    f32 y = effect->pos2[1];
+                    object.pos[0] = x;
+                    object.pos[1] = y;
+                    object.offset = effect->offset;
+                    getPosTranslate(&object, position);
+                    dds3EffectSetPosition(effect->d3p, position);
+                    dds3EffectDraw(effect->d3p);
+                    if (maxSize == 5 && effect->count != 0) {
+                        effect->count--;
+                        if (effect->count == 0) {
+                            dds3EffectDelete(effect->d3p);
+                            effect->d3p = NULL;
+                        }
+                    }
+                }
+            }
+            index--;
+            effect++;
+        } while (index != 0xFF);
+    }
+}
 
 INCLUDE_SDATA(const s32, "pipe/pipeEffect", pipeBulrLimitValue);
 
