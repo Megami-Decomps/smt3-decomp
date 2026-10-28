@@ -2722,8 +2722,6 @@ void cmbUpdateStockCursor(void)
 }
 
 extern char D_0053CC60[];
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CC60);
-
 void cmbChangeSequence(void)
 {
     s32 button = cmpGetPressedButton(0x237) & 0xFFFF;
@@ -3126,6 +3124,8 @@ s32 cmbHandleDebugExit(void)
 }
 
 extern void fclSetPanelAnimState(void *anim, u8 state);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CC60);
 
 s32 cmbUpdatePanelAnim(void)
 {

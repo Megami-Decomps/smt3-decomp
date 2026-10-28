@@ -35,6 +35,7 @@ page and line to open. Conventions are in
 | 3 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 3 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
+| 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
 | 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |

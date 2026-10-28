@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1118 members, 506 adopted constants.
+# 0 types, 1117 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -234,7 +234,6 @@ member datPartyWork_t.unknown1928
 member datRaceEntry_t.unk_01
 member datRaceEntry_t.unk_04
 member datRaceEntry_t.unk_19
-member datRaceEntry_t.unk_1A
 member datRaceEntry_t.unk_3C
 member datSkillBadEntry_t.unk_00
 member datSkillBadWindow_t.unk_00
@@ -559,7 +558,6 @@ member fldTakaraSlot_t.unk10
 member fldTakaraSlot_t.unk28
 member fldTaskInfo_t.unk0
 member fldTaskInfo_t.unk08
-member fldTest_FLDRUN_DANTE_t.unk20
 member fldTransferChunk_t.unk00
 member fldWave_tag.unk08
 member frFontChild_t.unk00
@@ -1095,6 +1093,7 @@ member sndChannel_t.unk1
 member sndChannel_t.unk2
 member sndChannel_t.unk4
 member sndChannel_t.unkC
+member stfStaffRoll_t.unk_0A
 member stfUiWork_t.unk_0004
 member stfUiWork_t.unk_0008
 member stfUiWork_t.unk_000C

@@ -1070,12 +1070,12 @@ s32 nbGetAisyoTable(s32 formindex)
     return ret;
 }
 
+extern u32 datAisyoTable[248][16];
+extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
+
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544BF8);
 
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544C10);
-
-extern u32 datAisyoTable[248][16];
-extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
 
 u32 nbGetAisyo(s32 nskill, s32 formindex, s32 attr)
 {

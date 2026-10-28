@@ -283,7 +283,133 @@ void nbCameraState_NegoTarget_Calc2(void)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraNego", nbCameraState_NegoHojo_Init);
+extern nbFormation_t *effBTLSkillGetInvokeFormation(void);
+extern void effBTLModelAllShow(void);
+extern f32 effBTLModelGetHeight(nbFormation_t *pFormation);
+extern void effBTLGetGroupPos(nbFormation_t *pFormation, sdfVector4_t *pPos);
+extern void effBTLModelSetPosition(nbFormation_t *pFormation, sdfVector4_t *pPos);
+extern void effBTLModelLook(nbFormation_t *pFormation, sdfVector4_t *pTargetPos);
+
+typedef struct nbCamera_AllTable_t {
+    f32 distance;
+    f32 up;
+    f32 radius;
+} nbCamera_AllTable_t;
+
+extern nbCamera_AllTable_t *nbCameraGetModelAllTable(nbFormation_t *pFormation);
+
+void nbCameraState_NegoHojo_Init(void)
+{
+    nbFormation_t *pTarget[2];
+    f32 len[2];
+    sdfVector4_t pos;
+    sdfVector4_t mid;
+    sdfVector4_t center[2];
+    sdfVector4_t invokeCenter;
+    nbMainProcessData_t *pData;
+    nbCamera_t *pCamera;
+    nbFormation_t *pInvoke;
+    nbCamera_AllTable_t *pTable;
+    nbFormation_t *p;
+    f32 maxlen;
+    f32 want;
+    f32 add;
+    f32 delta;
+    f32 atanv;
+    f32 width;
+    u32 i;
+
+    pData = nbGetMainProcessData();
+    if (pData == NULL) {
+        return;
+    }
+    pCamera = &pNbCamera;
+    pInvoke = effBTLSkillGetInvokeFormation();
+    pTarget[0] = effBTLSkillGetTargetFormation(0);
+    pTarget[1] = effBTLSkillGetTargetFormation(1);
+    effBTLModelAllShow();
+    pTable = nbCameraGetModelAllTable(pInvoke);
+
+    effBTLModelGetSphereCenter(pTarget[0]);
+    SDF_VU0_STOREVECTOR_NOMEM(&center[0]);
+    effBTLModelGetSphereCenter(pTarget[1]);
+    SDF_VU0_STOREVECTOR_NOMEM(&center[1]);
+    SDF_VU0_LOADVECTOR_B(&center[0]);
+    VU0_LERP_VF10_VF11(0.5f);
+    SDF_VU0_STOREVECTOR(&mid);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(&center[0]);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(len[0]);
+    if (pTarget[0]->h * 0.5f < pTarget[0]->r) {
+        len[0] = len[0] + pTarget[0]->r * pTarget[0]->scl;
+    } else {
+        len[0] = len[0] + pTarget[0]->h * pTarget[0]->scl * 0.5f;
+    }
+    SDF_VU0_COPYVECTOR_C_TO_A();
+    SDF_VU0_LOADVECTOR_B(&center[1]);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(len[1]);
+    if (pTarget[1]->h * 0.5f < pTarget[1]->r) {
+        len[1] = len[1] + pTarget[1]->r * pTarget[1]->scl;
+    } else {
+        len[1] = len[1] + pTarget[1]->h * pTarget[1]->scl * 0.5f;
+    }
+    maxlen = len[1] < len[0] ? len[0] : len[1];
+
+    effBTLModelGetSphereCenter(pInvoke);
+    SDF_VU0_STOREVECTOR(&invokeCenter);
+    invokeCenter.y = -effBTLModelGetHeight(pInvoke);
+    invokeCenter.y = invokeCenter.y + pTable->up * pInvoke->scl;
+
+    SDF_VU0_LOADVECTOR(&mid);
+    SDF_VU0_STOREVECTOR(pCamera);
+    SDF_VU0_LOADVECTOR_B(&invokeCenter);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_GETLENGTH(pCamera->distance);
+
+    atanv = sdfAtan(0x1.657182p-2f);
+    width = pInvoke->r * pInvoke->scl;
+    if (pTable->distance == 0.0f) {
+        if (150.0f < width) {
+            add = width / atanv;
+        } else if (90.0f < width) {
+            add = width * 1.5f / atanv;
+        } else {
+            add = (width + width) / atanv;
+        }
+    } else {
+        add = pTable->distance * pInvoke->scl;
+    }
+    pCamera->distance = pCamera->distance + add;
+
+    want = maxlen / sdfAtan(0x1.fb91dp-2f);
+    if (pCamera->distance < want) {
+        delta = want - pCamera->distance;
+        p = pData->form;
+        for (i = 0; i < 4; i++) {
+            if ((p->stat & 0x103) == 0x103) {
+                effBTLGetGroupPos(p, &pos);
+                pos.z -= delta;
+                effBTLModelSetPosition(p, &pos);
+            }
+            p++;
+        }
+        pCamera->distance = want;
+        invokeCenter.z -= delta;
+    }
+
+    SDF_VU0_LOADVECTOR(&mid);
+    SDF_VU0_LOADVECTOR_B(&invokeCenter);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&pCamera->direction);
+    pCamera->fovy = 0x1.657182p-1f;
+    effBTLModelLook(pInvoke, &mid);
+    nbCamera_NegoHojo_Distance = pCamera->distance;
+    nbCamera_NegoHojo_Rate = 0.5f;
+}
 
 void nbCameraState_NegoHojo_Calc(void)
 {

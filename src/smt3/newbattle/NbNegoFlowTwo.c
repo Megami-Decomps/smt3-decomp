@@ -757,10 +757,10 @@ s32 Flow6_21(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00545018);
-
 extern char D_00545018[];
 extern void nbMakaDispOff(void);
+
+INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00545018);
 
 s32 Flow6_70(nbNegoProcessData_t *n)
 {
