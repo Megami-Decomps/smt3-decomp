@@ -445,14 +445,14 @@ void nbSetDamage(nbFormation_t *form, f32 range, s32 week)
     form->type = 1;
     form->damageFrames = 20;
     form->time = 0;
-    *(s32 *)&form->addmovet = 0;
+    form->badframe = 0;
     work = nbGetUnitWorkFromFormindex(form->formindex);
     if ((form->stat & 0x40) != 0) {
         nbSetUnitMotion(form, 1, 0, 1.0f);
         if (week == 0) {
             s32 badframe = nbGetUnitVisual(work)->badframe;
 
-            *(s32 *)&form->addmovet = badframe;
+            form->badframe = badframe;
             form->damageFrames = badframe + 10;
         }
     }
@@ -486,7 +486,7 @@ void nbSetBadstatMotion(nbFormation_t *form, s32 type, f32 range)
         nbSetUnitMotion(form, 1, 0, 1.0f);
         badframe = nbGetUnitVisual(work)->badframe;
         form->damageFrames = badframe + 10;
-        *(s32 *)&form->addmovet = badframe;
+        form->badframe = badframe;
     }
 }
 

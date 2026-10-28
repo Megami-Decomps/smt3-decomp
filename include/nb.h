@@ -69,7 +69,10 @@ typedef struct nbFormation_t
         f32 range;
         s32 shakePhase;
     };
-    f32 addmovet;
+    union {
+        f32 addmovet;
+        s32 badframe;
+    };
     f32 movet;
     sdfVector4_t tarpos;
     sdfVector4_t startpos;
