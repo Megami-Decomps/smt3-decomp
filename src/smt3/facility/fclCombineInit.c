@@ -1558,12 +1558,25 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockEntry);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockBox);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockFrame);
-
 extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 extern fclSpriteTbl_t cmbSpriteTable[];
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
                              fclSpriteTbl_t *table, s32 OtNo);
+
+void cmbDrawStockFrame(s32 unusedX, s32 unusedY, s32 z, s32 ot)
+{
+    s32 i;
+    s32 x;
+
+    cmpDrawBoxF(0x1020, 0x388, z, 0xF1, 9, 0x33, ot);
+    x = 0x1060;
+    for (i = 0; i < 12; i++) {
+        s32 offset = (i < 9) ? 0 : -0x30;
+        fclDrawSpriteRes(x + offset, 0x370, z << 4, 0, 2, (u16)i,
+                         CMB_GBWK->texHandle, cmbSpriteTable, ot);
+        x += 0x140;
+    }
+}
 
 void cmbDrawStockText(s32 unused0, s32 unused1, s32 z, s32 ot)
 {
