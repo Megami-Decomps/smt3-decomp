@@ -289,7 +289,7 @@ evtStartWork_t *rstInit(cmpSeqInfo_t *parent)
     cmpInitCursorRange(work->cursorLayout, 5, 5, 0);
     cmpInitCursorRange(work->cursorInfo, 8, 8, 0);
     cmpModelInit();
-    rstChkResult2Process(work);
+    rstChkResult2Process((u8 *)work);
     rstClearHeartsMasterPhase();
     work->scriptAllocation = sdfDevLoadFileEx("/result2/scr/message.bf", (u32 *)&work->scriptData, 0);
     work->messageAllocation = sdfDevLoadFileEx("/result2/mes_data.bmd", (u32 *)&work->messageData, 0);
