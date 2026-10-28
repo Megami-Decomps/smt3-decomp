@@ -24,29 +24,33 @@ ROOT = Path(__file__).resolve().parents[1]
 # Below this a body says nothing: dozens of stubs share a two-instruction return.
 MIN_WORDS = 16
 
-INSN = re.compile(r"^\s*/\* [0-9A-Fa-f]+ [0-9A-Fa-f]+ ([0-9A-Fa-f]{8}) \*/\s+(.*?)\s*$")
+INSN = re.compile(r"^\s*/\* [0-9A-Fa-f]+ ([0-9A-Fa-f]+) ([0-9A-Fa-f]{8}) \*/\s+(.*?)\s*$")
 GLABEL = re.compile(r"^\s*glabel\s+(\S+)")
 INCLUDE_ASM = re.compile(r'INCLUDE_ASM\(\s*[^,]+,\s*"([^"]+)"\s*,\s*(\w+)\s*\)')
 RELOC = re.compile(r"%(hi|lo|gp_rel)\(([^)]+)\)")
-# A C definition at column zero: return type, name, open paren.
-C_DEF = re.compile(r"^\w[\w \*]*?(\w+)\(", re.M)
 
 
-def parse_asm(path):
-    """Every glabel body in one splat .s file as name -> (masked words, symbols)."""
-    out, name, words, syms = {}, None, [], []
+def parse_asm(path, *, addresses=False):
+    """Every glabel body as name -> (masked words, symbols).
+
+    With addresses=True, include the function start address as the first tuple
+    item. The default return shape is retained for existing callers.
+    """
+    out, name, address, words, syms = {}, None, None, [], []
     for line in path.read_text(errors="replace").splitlines():
         label = GLABEL.match(line)
         if label:
             if name and words:
-                out[name] = (words, syms)
-            name, words, syms = label.group(1), [], []
+                out[name] = (address, words, syms) if addresses else (words, syms)
+            name, address, words, syms = label.group(1), None, [], []
             continue
         insn = INSN.match(line)
         if not insn or name is None:
             continue
-        word = int.from_bytes(bytes.fromhex(insn.group(1)), "little")
-        text = insn.group(2)
+        if address is None:
+            address = int(insn.group(1), 16)
+        word = int.from_bytes(bytes.fromhex(insn.group(2)), "little")
+        text = insn.group(3)
         op = word >> 26
         reloc = RELOC.search(text)
         if op in (2, 3):
@@ -58,7 +62,7 @@ def parse_asm(path):
         else:
             words.append(word)
     if name and words:
-        out[name] = (words, syms)
+        out[name] = (address, words, syms) if addresses else (words, syms)
     return out
 
 
@@ -86,23 +90,50 @@ def smt3_fallbacks():
     return rows
 
 
+def dds_function_names(dds, ver):
+    """Current function names keyed by exact start address.
+
+    Curated symbol rows precede generated rows, so setdefault preserves the
+    project's preferred name when aliases share an address.
+    """
+    rows = {}
+    path = dds / "config" / ver / "symbol_addrs.txt"
+    for line in path.read_text(errors="replace").splitlines():
+        match = re.match(
+            r"^\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)\s*;.*\btype:func\b",
+            line,
+        )
+        if match:
+            rows.setdefault(int(match.group(2), 16), match.group(1))
+    return rows
+
+
 def dds_donors(dds):
-    """One row per dds-decomp function that is written out in C."""
+    """One row per matching function with a real, current C definition."""
+    from dds_body_src import code_view, definitions
+
     rows = defaultdict(list)
     for ver in ("dds1", "dds2"):
         skip, home = set(), {}
-        for src in dds.glob(f"src/{ver}/**/*.c"):
+        for src in sorted((dds / "src" / ver).rglob("*.c")):
             text = src.read_text(errors="replace")
+            code = code_view(text)
             for _, fn in INCLUDE_ASM.findall(text):
                 skip.add(fn)
-            for m in C_DEF.finditer(text):
-                home.setdefault(m.group(1), str(src.relative_to(dds)))
+            for fn in definitions(text, code):
+                home.setdefault(fn, str(src.relative_to(dds)))
+
+        names = dds_function_names(dds, ver)
         for asm in (dds / f"asm/{ver}/matchings").rglob("*.s"):
-            for fn, (words, syms) in parse_asm(asm).items():
-                if fn in skip or len(words) < MIN_WORDS:
+            for asm_fn, (address, words, syms) in parse_asm(asm, addresses=True).items():
+                if len(words) < MIN_WORDS or address is None:
+                    continue
+                fn = names.get(address)
+                if fn is None or fn in skip or fn not in home:
                     continue
                 rows[digest(words)].append(
-                    {"fn": fn, "ver": ver, "src": home.get(fn), "words": len(words),
+                    {"fn": fn, "asm_fn": asm_fn, "ver": ver,
+                     "src": home[fn], "words": len(words),
                      "syms": syms})
     return rows
 
