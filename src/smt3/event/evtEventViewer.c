@@ -103,7 +103,7 @@ struct evtViewerInfo_t {
     s32 sp;                      /* 0x227C */
     s32 nowmenu;                     /* 0x2280 */
     s32 menusw;                   /* 0x2284 */
-    u32 word2288;
+    s32 fldfilter;
     /* Cancelled and cleared by the menu-step handler. */
     dds3ProcessID_t *menuProcess;
     s32 drawblur2;                      /* 0x2290 */
@@ -1272,7 +1272,7 @@ s32 EnterSelect(s32 unused, s32 menuMode)
                 break;
             case 12:
                 node->param.sh[0] = viewerinfo->select_y;
-                viewerinfo->word2288 = 0;
+                viewerinfo->fldfilter = 0;
                 break;
             case 19:
                 node->param.sh[0] = viewerinfo->select_y;
