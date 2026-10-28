@@ -85,7 +85,67 @@ INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", nbDrawTargetCursor);
 
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", CheckFormCursor);
 
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", nbSetSelectOkMark);
+extern s32 CheckFormCursor(s32 targetForm, s32 ctype, s32 crule, s32 carea, s32 formindex);
+
+s32 nbSetSelectOkMark(s32 partyindex, s32 ctype, s32 crule, s32 carea)
+{
+    nbTarSelProcessData_t *process = GetTarSelProcessData();
+    s32 i;
+    s32 j;
+    s32 a;
+    s32 b;
+    f32 xa;
+    f32 xb;
+
+    process->friendcnt = 0;
+    process->enemycnt = 0;
+    for (i = 0; i < 16; i++) {
+        process->data->form[i].stat &= ~4u;
+        process->data->form[i].stat &= ~8u;
+        if (CheckFormCursor(process->data->party[partyindex].formindex,
+                            ctype, crule, carea, i) == 0) {
+            continue;
+        }
+        process->data->form[i].stat |= 4;
+
+        if (i < 4) {
+            if ((process->data->stat & 8) != 0) {
+                process->enemyno[process->enemycnt] = i;
+                process->enemycnt++;
+            } else {
+                process->friendno[process->friendcnt] = i;
+                process->friendcnt++;
+            }
+        } else if (i < 14) {
+            if ((process->data->stat & 8) != 0) {
+                process->friendno[process->friendcnt] = i;
+                process->friendcnt++;
+            } else {
+                process->enemyno[process->enemycnt] = i;
+                process->enemycnt++;
+            }
+        }
+    }
+
+    i = 0;
+    while (i < process->enemycnt - 1) {
+        j = i + 1;
+        while (j < process->enemycnt) {
+            b = process->enemyno[j];
+            a = process->enemyno[i];
+            xa = process->data->form[a].orgpos.x;
+            xb = process->data->form[b].orgpos.x;
+            if (xb < xa) {
+                process->enemyno[i] = process->enemyno[j];
+                process->enemyno[j] = a;
+            }
+            j++;
+        }
+        i++;
+    }
+
+    return process->friendcnt + process->enemycnt != 0;
+}
 
 extern s32 dds3GetGlobalConfigFlag(s32 index);
 
