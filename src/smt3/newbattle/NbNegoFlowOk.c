@@ -285,7 +285,7 @@ typedef struct nbNegoProcessData_t
 
 extern s32 printf(const char *format, ...);
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 extern datDevilFormat_t datDevilTable[];
 
@@ -380,7 +380,49 @@ s32 nbGetNegoYaruStone(datUnitWork_t *w);
 
 void nbSetMesMakka(s32 msgid, s32 i);
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOk", Flow9_1);
+extern s32 datGetRace(datUnitWork_t *work);
+extern s32 evtBitCheck(s32 no);
+extern void nbCameraSetTarget(nbFormation_t *form);
+
+s32 Flow9_1(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x90002);
+    nbAddNegoIdKouho(n, 0x9000B);
+    nbAddNegoIdKouho(n, 0x90013);
+    nbAddNegoIdKouho(n, 0x6004A);
+    n->workid[6] = 0x60015;
+
+    if (datGetRace(n->ework) != 0x17 &&
+        datGetRace(n->ework) != 0x16 &&
+        datGetRace(n->ework) != 0x15) {
+        n->cnt6_37++;
+    }
+
+    if (n->negoreqtype == 0 && n->cnt6_36 >= 2 && n->cnt6_37 == 1 &&
+        evtBitCheck(8) != 0 && n->ework->id != 0x5C && n->ework->id != 0x61 &&
+        dds3GetRandIntA(0, 10) < 8) {
+        n->nextnegoid = n->nextkouho[3];
+        return 0;
+    }
+
+    nbCameraSetTarget(n->eform);
+    switch (n->negoreqtype) {
+    case 0:
+        n->nextnegoid = n->nextkouho[0];
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+        n->nextnegoid = n->nextkouho[1];
+        break;
+    case 6:
+        n->nextnegoid = n->nextkouho[2];
+        break;
+    }
+    return 0;
+}
 
 s32 Flow9_2(nbNegoProcessData_t *n)
 {
