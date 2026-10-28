@@ -4,7 +4,7 @@
 /* Name-entry work is 0x51C8 bytes; its sequence flag is the first byte. */
 typedef struct {
     u8 sequenceFlags;
-    u8 unknown01[0x51C7];
+    u8 reserved01[0x51C7];
 } nmeCalcWork_t;
 
 extern nmeCalcWork_t *D_00552024;

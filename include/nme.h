@@ -8,7 +8,7 @@
 typedef struct {
     u8 flag;
     s8 current, next, last, change, messageFlag;
-    u8 unk06[2];
+    u8 reserved06[2];
     dds3ProcessID_t *messageProcess;
     s32 timer;
     void *parent;

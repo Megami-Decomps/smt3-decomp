@@ -30,11 +30,11 @@ INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultInitTimer);
 typedef struct nbResultScoreEntry_t {
     u32 occupied;
     u32 bestScore;
-    u32 unknown08[3];
+    u32 reserved08[3];
     u32 *work;
-    u32 unknown18[5];
+    u32 reserved18[5];
     u32 scoreOffset;
-    u32 unknown30;
+    u32 reserved30;
 } nbResultScoreEntry_t;
 
 extern nbResultScoreEntry_t nbResultScoreTable[];
