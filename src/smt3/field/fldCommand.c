@@ -721,7 +721,42 @@ s32 fldCommand_SET_NPC_CAMERA(void) {
 
 INCLUDE_RODATA(const s32, "field/fldCommand", D_00532980);
 
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_SET_ALLPANEL);
+extern void evtDisableMoonDraw(void);
+extern void evtEnableMoonDraw(void);
+extern void evtDisableMoonDraw2(void);
+extern void evtEnableMoonDraw2(void);
+
+s32 fldCommand_SET_ALLPANEL(void)
+{
+    s32 mode = scrGetIntPara(0);
+
+    fldGlobalBase.word90 = mode;
+    fldGlobalBase.word94 = 0;
+    switch (mode) {
+        case 0:
+            evtDisableMoonDraw();
+            break;
+        case 1:
+            evtEnableMoonDraw();
+            break;
+        case 2:
+            evtDisableMoonDraw2();
+            fldGlobalBase.word94 = 15;
+            break;
+        case 3:
+            evtEnableMoonDraw2();
+            fldGlobalBase.word94 = 0;
+            break;
+        /* Reserved modes retain the native eight-entry dispatch table. */
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        default:
+            break;
+    }
+    return 1;
+}
 
 void fldPanelSet(void) {
 }
