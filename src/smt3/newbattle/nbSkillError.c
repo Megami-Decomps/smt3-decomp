@@ -670,14 +670,14 @@ void nbLoadMotionData(nbStatWork_t *stat, void *src, u32 size, s32 motion, s32 u
     }
 }
 
-void nbCopyPackData(nbMainProcessData_t *data, void *src, u32 size)
+void nbCopyPackData(nbStatWork_t *stat, void *src, u32 size, s32 unitid)
 {
     void *p;
 
-    if (data != NULL) {
+    if (stat != NULL) {
         p = sdfMemAllocDirect(size);
         memcpy(sdfMemLock(p), src, size);
-        data->packdata = p;
+        stat->motbuf = p;
     }
 }
 
