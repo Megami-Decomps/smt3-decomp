@@ -53,7 +53,7 @@ struct nbParty_t {
 
 extern f32 effBTLModelGroupGetSphere(u32 group);
 
-extern void effBTLModelGroupGetDirection(u32 group, f32 *pDirection);
+extern void effBTLModelGroupGetDirection(u32 group, sdfVector4_t *pDirection);
 
 extern f32 sdfAtan(f32 aX);
 extern u32 effBTLModelGetInvokeGroupNumber(void);
@@ -184,7 +184,7 @@ f32 nbCameraGroupGetMaxLength(sdfVector4_t *pPos, u32 group)
     return max;
 }
 
-f32 nbCameraGroupGetSphere(nbFormation_t *group)
+f32 nbCameraGroupGetSphere(u32 group)
 {
     sdfVector4_t center;
 
