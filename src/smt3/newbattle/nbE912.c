@@ -401,6 +401,38 @@ extern nbKoukaPacket_t *D_00527660[];
 
 extern nbKoukaPacket_t *D_00527664[];
 
+extern s32 (*D_00527670[])(nbEventProcessData_t *e);
+
+extern void dds3DeleteSceneBasicData(void *basic);
+
+extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *b);
+
+extern void nbCameraHelperModelSet(dds3Basic_t *hModel);
+
+extern void nbCameraSetState(s32 state);
+
+extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
+
+extern dds3Basic_t *dds3GetActiveScene(void);
+
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
+
+extern void nbAllFormDispOn(void);
+
+extern void nbGroupFormDispOff(s32 group);
+
+extern void nbCameraBoss_BSALBI_E912_Set(void);
+
+extern void nbCameraBoss_BSALBI_E912_Run(void);
+
+extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
+
+extern dds3Basic_t *D_00551630;
+
+extern dds3Basic_t *D_00551634;
+
+extern dds3Basic_t *D_00551638;
+
 nbFormation_t *nbGetEventForm();
 
 void MoveSub(nbEventProcessData_t *ed)
@@ -511,7 +543,63 @@ s32 nbE912_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE912", nb_295D98);
+s32 nb_295D98(dds3ProcessID_t *id)
+{
+    nbEventProcessData_t *e;
+    evtUnitHandle_t *unit;
+    s32 serial;
+
+    e = dds3GetProcessData(id);
+    if (D_00527670[e->seq](e) != 0) {
+        D_00551630 = NULL;
+        if (D_00551634 != NULL) {
+            dds3DeleteSceneBasicData(D_00551634);
+            D_00551634 = NULL;
+        }
+        if (D_00551638 != NULL) {
+            dds3DeleteSceneBasicData(D_00551638);
+            D_00551638 = NULL;
+        }
+        return -1;
+    }
+    if (e->time > 0 && D_00551630 != NULL) {
+        unit = dds3GetUnitHandleObjectBasic(D_00551630);
+        if (unit->basic != NULL) {
+            nbCameraHelperModelSet(unit->basic);
+        }
+    }
+    switch (e->time) {
+    case 0:
+        nbCameraSetState(0x17);
+        nbAllFormDispOn();
+        nbGroupFormDispOff(0);
+        D_00551630 = NULL;
+        D_00551634 = NULL;
+        D_00551638 = NULL;
+        nbCameraBoss_BSALBI_E912_Set();
+        break;
+    case 0x3C:
+        nbCameraSetState(0x17);
+        serial = evtInitMotionSeProcess(e->eventrid, 4);
+        D_00551634 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551634), 0, 0, 0, 2);
+        D_00551630 = D_00551634;
+        break;
+    case 0xD2:
+        serial = evtInitMotionSeProcess(e->eventrid, 5);
+        D_00551638 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551638), 0, 0, 0, 2);
+        D_00551630 = D_00551638;
+        break;
+    default:
+        if (e->time < 0x3C) {
+            nbCameraBoss_BSALBI_E912_Run();
+        }
+        break;
+    }
+    nbUpdateEventProcessData(id);
+    return 0;
+}
 
 s32 nbE913_Test(nbEventProcessData_t *e)
 {
