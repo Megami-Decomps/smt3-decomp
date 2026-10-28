@@ -297,6 +297,6 @@ src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	typed order/stoc
 src/smt3/sdf/sdfCd.c	redthing1	done	2026-10-28	2 fn / 636 B	indexed lookup and tray wait; translation unit has no function fallbacks
 src/smt3/interface/frName.c	redthing1	done	2026-10-28	0 matches	name image and request trials remain assembly
 src/smt3/facility/fclRagInit.c	redthing1	open	2026-10-28	3 fn / 748 B	startup lookup and allocator matched; row conversion follow-up active
-src/smt3/facility/fclRecoverCalc.c	redthing1	done	2026-10-28	1 fn / 132 B	rcvGetRecoverPrice sparse switch; price and healing trials remain assembly
+src/smt3/facility/fclRecoverCalc.c	redthing1	open	2026-10-28	2 fn / 340 B	price dispatch and unsigned HP MP formula matched; full-heal follow-up active
 src/smt3/kernel/dds3GlobalWork.c	redthing1	open	2026-10-28	dds3PrimLine3D	VU0 basis transform and packet reconstruction
 src/smt3/event/evtCommand.c	redthing1	open	2026-10-28	evtCommand_MODEL_RGB	color-command sibling and packing-contract review

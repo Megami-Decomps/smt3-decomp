@@ -156,7 +156,18 @@ extern s32 D_00345D88[];
 extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
                                   s32 mode, s32 b, s32 id);
 
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvCalcPriceRecover);
+s32 rcvCalcPriceRecover(datUnitWork_t *work)
+{
+    u32 reviveHp = 0;
+    s32 hpCost;
+    u32 mpCost;
+    if (work->badstatus & 0x800) {
+        reviveHp = ((u32)datGetMaxHp(work) + 9) / 10;
+    }
+    hpCost = datGetMaxHp(work) - (work->hp + reviveHp);
+    mpCost = datGetMaxMp(work) - work->mp;
+    return (f32)hpCost + (f32)mpCost * 2.5f;
+}
 
 s32 rcvGetStatusPrice(datUnitWork_t *work)
 {
