@@ -6,7 +6,7 @@
 typedef struct
 {
     u8 reserved0000[0x1D7C];
-    u8 nameBitmap[0x4800];
+    u8 nameBitmap[4][16][0x120];
     u8 nameCounts[4][2];
     u8 nameGlyphCodes[4][16][2];
     u8 cNames[4][20];
@@ -19,6 +19,7 @@ extern const char *D_003263B0[4];
 extern void frAllocNameData(void);
 
 extern void frTransNameImage(s8 target, s8 type);
+extern void frSetNameData(s8 target, s8 type, s8 glyphCount, u8 *imageData);
 extern frFontHandle_t *frCreateNameHandle(s8 target, s8 glyph, frFontHandle_t *chain);
 
 void frInitNameData(void)
@@ -53,7 +54,27 @@ void frInitNameData(void)
 
 INCLUDE_ASM(const s32, "interface/frName", frSetNameData);
 
-INCLUDE_ASM(const s32, "interface/frName", frTransNameImage);
+void frTransNameImage(s8 target, s8 type)
+{
+    if (D_0056BD50[target] == 0) {
+        s8 firstCount = (s8)frNameGlobalWork->nameCounts[target][0];
+        u8 *images = &frNameGlobalWork->nameBitmap[(s32)target][0][0];
+
+        frSetNameData(target, 0, firstCount, images);
+        {
+            frNameGlobalWork_t *work = frNameGlobalWork;
+            u8 *secondImages = &work->nameBitmap[(s32)target][(s32)firstCount][0];
+            s8 secondCount = (s8)work->nameCounts[target][1];
+
+            frSetNameData(target, 1, secondCount, secondImages);
+        }
+    }
+    if (type == 0) {
+        D_0056BD50[target] += frNameGlobalWork->nameCounts[target][0];
+    } else {
+        D_0056BD50[target] += frNameGlobalWork->nameCounts[target][1];
+    }
+}
 
 extern GsFont_t *pFont[4][16];
 extern void fmRetFontMem(FontMem_t *memory);
