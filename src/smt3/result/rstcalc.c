@@ -96,8 +96,7 @@ typedef struct
     /* 0x1299 */ u8 unk_1299;
     /* 0x129A */ u16 commentId;
     /* 0x129C */ u8 commentMessage;
-    /* 0x129D */ u8 unk_129D;
-    /* 0x129E */ u8 unk_129E;
+    /* 0x129D */ u8 unk_129D[2];
     /* 0x129F */ u8 bonusParam[6];
     /* 0x12A5 */ u8 reserved12A5[0x1040];
     /* 0x22E5 */ s8 unk_22E5;
@@ -448,7 +447,7 @@ s32 rstCalcSeqDevilLevelUp(void)
 {
     if (rstSetCurrentDevil() != 0) {
         cmpStatSetTimer(0, 0);
-        EventStart->unk_129E = 0;
+        EventStart->unk_129D[1] = 0;
         rstAutoAsignDevilParam();
         rstAdvanceLevelUpStep();
         cmpModelSetup(EventStart->unit->id, 0);
