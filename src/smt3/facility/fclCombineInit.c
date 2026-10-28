@@ -2242,7 +2242,48 @@ void cmbDrawStockIcon(s32 x, s32 y, s32 z, s8 icon, u32 ot)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockEntry);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockBox);
+extern void fclDrawSpriteAlpha(s32 x, s32 y, s32 z, u8 mode, s32 *colors,
+                               s32 page, s32 sprite, s32 *textures,
+                               fclSpriteTbl_t *table, s32 ot);
+
+void cmbDrawStockBox(s32 unusedX, s32 unusedY, s32 z, s32 unused3, s8 selected, s32 ot)
+{
+    s32 i;
+    s32 rowY;
+    s32 selectedY;
+
+    cmpDrawBoxF(0x180, 0x388, z, 0x4F, 9, 0x33, ot);
+    cmpDrawBoxF(0x6A0, 0x388, z, 0x6F, 9, 0x33, ot);
+    cmpDrawBoxF(0xDC0, 0x388, z, 0x1E, 9, 0x33, ot);
+    cmpDrawBoxF(0x180, 0x3D0, z, 0xA, 0x11B, 0x33, ot);
+
+    rowY = 0x420;
+    selectedY = 0;
+    for (i = 0; i < 12; i++) {
+        s32 sprite = i;
+        s32 xOffset = (i < 9) ? 0 : -0x30;
+
+        if (i == selected) {
+            /* The sprite stays live across alpha rendering. Qualified
+             * cc1probe --alloc --no-dumps maps pseudo 97 to $16;
+             * see docs/cc1probe.md. */
+            sprite = i + 0xC;
+            fclDrawSpriteAlpha(0, selectedY, z << 4, 1, NULL, 2, 0x18,
+                               CMB_GBWK->texHandle, cmbSpriteTable, ot);
+        }
+        fclDrawSpriteRes(0x180 + xOffset, rowY, z << 4, NULL, 2, (u16)sprite,
+                         CMB_GBWK->texHandle, cmbSpriteTable, ot);
+        rowY += 0xB8;
+        selectedY += 0xB8;
+    }
+
+    fclDrawSpriteRes(0, 0, z << 4, NULL, 0, 1, CMB_GBWK->texHandle,
+                     cmbSpriteTable, ot);
+    fclDrawSpriteRes(0, 0, z << 4, NULL, 0, 2, CMB_GBWK->texHandle,
+                     cmbSpriteTable, ot);
+    fclDrawSpriteRes(0, 0, z << 4, NULL, 0, 3, CMB_GBWK->texHandle,
+                     cmbSpriteTable, ot);
+}
 
 extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 extern fclSpriteTbl_t cmbSpriteTable[];
