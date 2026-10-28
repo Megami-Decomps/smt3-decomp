@@ -216,13 +216,139 @@ void pbSetDebugOwner(pbProcHandle_t *panel) {
     }
 }
 
+extern u8 dds3PadButtonState[];
+extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
+extern void rsetOtOfs(u32 offset);
+extern void rsetAlpha(s32 mode);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail,
+                     s32 date, s32 datm, s32 zte, s32 ztst);
+extern void DrwSprite2D(s32 x, s32 y, s32 width, s32 height,
+                        s32 u, s32 v, s32 uw, s32 vh, u32 color,
+                        sdfTexHandle_t *texture);
+extern u8 D_0054F5D0[2];
+extern s32 D_0054F5D4;
+extern u8 D_00551EC1;
+extern s32 (*D_003272F0[][8])(pbProcHandle_t *panel);
+extern void (*D_00327330[][8])(pbProcHandle_t *panel);
+
 INCLUDE_RODATA(const s32, "pb/pbMenu", D_00535E40);
 
 INCLUDE_RODATA(const s32, "pb/pbMenu", D_00535E68);
 
 INCLUDE_RODATA(const s32, "pb/pbMenu", D_00535E90);
 
-INCLUDE_ASM(const s32, "pb/pbMenu", pb_proc_menu_Process);
+s32 pb_proc_menu_Process(dds3ProcessID_t *id)
+{
+    pbProcHandle_t *panel = id->workdata;
+    pbPanelValue_t *work = panel->data.value;
+
+    switch (panel->state) {
+    case 1:
+        if (panel != NULL) {
+            panel->flags = 0;
+        }
+        break;
+    case 5:
+        return -1;
+    }
+
+    if ((s8)dds3PadButtonState[0x23] < 0 || (s8)dds3PadButtonState[0x20] < 0) {
+        p2sdPlaySE(0x340006, 0x7F, 0x3F);
+        return -1;
+    }
+
+    switch (pbMapPathIdx) {
+    case 0:
+        if (dds3PadButtonState[0x26] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            if (pbMenuState == 0) {
+                pbMenuState = D_0054F5D0[work->value] - 1;
+            } else {
+                pbMenuState = pbMenuState - 1;
+            }
+        } else if (dds3PadButtonState[0x27] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            if (pbMenuState < D_0054F5D0[work->value] - 1) {
+                pbMenuState = pbMenuState + 1;
+            } else {
+                pbMenuState = 0;
+            }
+        }
+        break;
+    case 1:
+        if (dds3PadButtonState[0x24] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            pbMenuIndex = (pbMenuIndex + 0x1D) % 0x1E;
+        } else if (dds3PadButtonState[0x25] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            pbMenuIndex = (pbMenuIndex + 0x1F) % 0x1E;
+        } else if (dds3PadButtonState[0x26] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            pbMenuIndex = (pbMenuIndex + 0x28) % 0x1E;
+        } else if (dds3PadButtonState[0x27] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            pbMenuIndex = (pbMenuIndex + 0x14) % 0x1E;
+        }
+        break;
+    case 3:
+        if (dds3PadButtonState[0x24] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            pbMapNo = (pbMapNo + 0x31) % 0x32;
+        } else if (dds3PadButtonState[0x25] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            pbMapNo = (pbMapNo + 0x33) % 0x32;
+        } else if (dds3PadButtonState[0x26] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            pbMapNo = (pbMapNo + 0x3C) % 0x32;
+        } else if (dds3PadButtonState[0x27] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            pbMapNo = (pbMapNo + 0x28) % 0x32;
+        }
+        break;
+    case 4:
+        if ((dds3PadButtonState[0x24] & 2) || (dds3PadButtonState[0x25] & 2)) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            if (D_0054F5D4 != 0) {
+                D_0054F5D4 = 0;
+            } else {
+                D_0054F5D4 = 1;
+            }
+        }
+        break;
+    case 5:
+        if (dds3PadButtonState[0x24] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            D_00551EC1 = (D_00551EC1 + 0xC) % 0xD;
+        } else if (dds3PadButtonState[0x25] & 2) {
+            p2sdPlaySE(0x340007, 0x7F, 0x3F);
+            D_00551EC1 = (D_00551EC1 + 0xE) % 0xD;
+        }
+        break;
+    }
+
+    if ((s8)dds3PadButtonState[0x21] < 0) {
+        if (D_003272F0[work->value][pbMenuState](panel) == 1) {
+            p2sdPlaySE(0x340005, 0x7F, 0x3F);
+            D_00327330[work->value][pbMenuState](panel);
+        } else {
+            p2sdPlaySE(0x340008, 0x7F, 0x3F);
+        }
+    } else if ((s8)dds3PadButtonState[0x23] < 0) {
+        p2sdPlaySE(0x340006, 0x7F, 0x3F);
+        if (pbMapPathIdx != 0) {
+            pbMapPathIdx = 0;
+        }
+    }
+
+    rsetOtOfs(0x47);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    DrwSprite2D(0, 0, 0x100, 0x100, 0, 0, 0x100, 0x100, 0x80808080,
+                (sdfTexHandle_t *)D_0054F5C4->tex348);
+    DrwSprite2D(0x27, pbMenuState * 24 + 0x43, 0x1A, 0x1A, 1, 0x1CC, 0x1A, 0x1A,
+                0x80808080, (sdfTexHandle_t *)D_0054F5C4->tex348);
+    return 0;
+}
 
 void pb_proc_menu_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;

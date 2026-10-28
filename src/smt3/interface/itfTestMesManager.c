@@ -700,6 +700,10 @@ INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5C0);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5C4);
 
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5D0);
+
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5D2);
+
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5D4);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMoveCharList);
