@@ -555,7 +555,91 @@ void frCreateDrawEnvPacket(frFontGsPacket_t *pDrawEnvPkt) {
     pDrawEnvPkt->writes[5].reg = 0x47;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", frCreateDrawFontPacket_20550848);
+typedef struct {
+    u64 uv;
+    u64 rgbaq;
+    u64 xyz;
+} frFontSpriteCorner_t;
+
+typedef struct {
+    frFontDmaTag_t dma;
+    u64 setupTag;
+    u64 setupRegisters;
+    frFontGsWrite_t tex0;
+    frFontGsWrite_t tex1;
+    frFontGsWrite_t clamp;
+    u64 spriteTag;
+    u64 spriteRegisters;
+    frFontSpriteCorner_t corners[2];
+} frFontSpritePacket_t;
+
+/* Two direct views of the allocated DMA/GIF packet: header words and GS data. */
+typedef union {
+    frFontSpritePacket_t sprite;
+    u32 words[36];
+} frFontSpritePacketView_t;
+
+extern u32 frFontEntryTable[];
+extern sdfGrOt_t sdfGrOtTable[];
+extern void *sdfGrAllocPacketBuff(u32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+
+void frCreateDrawFontPacket_20550848(s32 x, s32 y, s32 width, s32 height, u8 style,
+    u32 color, u32 depth, s32 filtered, const frFontUvRect_t *uv,
+    const frFontAtlas_t *atlas, s32 surface) {
+    frFontSpritePacketView_t *packet;
+    sdfDrawTag_t *list;
+    sdfGrOt_t *drawSurface;
+    u32 reversedColor;
+    s32 right, bottom;
+    u64 rgbaq;
+    u64 z;
+    u64 texBase, texWidth, texBuffer, texHeight;
+
+    reversedColor = frSwapColor(color);
+    packet = (frFontSpritePacketView_t *)sdfGrAllocPacketBuff(sizeof(frFontSpritePacketView_t));
+    packet->words[0] = 0x70000008;
+    packet->words[3] = 0x50000008;
+    packet->sprite.tex1.value = ((u64)filtered << 5) | ((u64)filtered << 6);
+    packet->sprite.setupTag = 0x10AF400000000003ULL;
+    packet->sprite.setupRegisters = 0xE;
+    packet->sprite.tex1.reg = 0x14;
+    packet->words[1] = 0;
+    packet->words[2] = 0;
+    x += 0x7000;
+    width <<= 4;
+    y += 0x7900;
+    height <<= 4;
+    right = x + width;
+    bottom = y + height;
+    texBase = atlas->bufferBase | 0x8000000000000000ULL;
+    texWidth = ((u64)atlas->widthExponent << 26) | 0x400000000ULL;
+    texBuffer = ((u64)atlas->bufferWidth << 14) | 0x1400000;
+    texHeight = ((u64)atlas->heightExponent << 30) | ((u64)frFontEntryTable[style] << 37);
+    texBase |= texWidth;
+    texBuffer |= texHeight;
+    packet->sprite.tex0.reg = 6;
+    packet->sprite.clamp.reg = 8;
+    packet->sprite.spriteTag = 0x3400000000008002ULL;
+    packet->sprite.spriteRegisters = 0x413;
+    packet->sprite.tex0.value = texBase | texBuffer;
+    packet->sprite.clamp.value = 0;
+    rgbaq = reversedColor | 0x3F80000000000000ULL;
+    z = (u64)depth << 32;
+    packet->sprite.corners[0].uv = (uv->v1 << 16) | uv->u1;
+    packet->sprite.corners[0].rgbaq = rgbaq;
+    packet->sprite.corners[0].xyz = (u32)((right & 0xFFFF) | (bottom << 16)) | z;
+    packet->sprite.corners[1].uv = (uv->v0 << 16) | uv->u0;
+    packet->sprite.corners[1].rgbaq = rgbaq;
+    packet->sprite.corners[1].xyz = (u32)((x & 0xFFFF) | (y << 16)) | z;
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (u32)packet);
+    drawSurface = &sdfGrOtTable[surface];
+    drawSurface->regFunc(drawSurface, list);
+}
+
 
 /* Submit glyph-relative coordinates and the cache node's owned UV rectangle. */
 void frCreateUserFontPacket(s32 X, s32 Y, s32 Z, frTextHandle_t *pText,

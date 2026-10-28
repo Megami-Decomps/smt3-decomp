@@ -356,3 +356,4 @@ src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	3 fn / 588 B	character symbol 
 src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	3 fn / 668 B	allocation textures and name cursor initialization; remaining setup and startup stay assembly
 src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	0 matches	input-mode and editing residuals retain assembly
 src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	3 fn / 588 B	character symbol and tab drawing; typed textures and data descriptor
+src/smt3/interface/frFont.c	redthing1	done	2026-10-28	1 fn / 604 B	atlas glyph DMA GIF packet builder with actual packet views; whole-unit 74 match, 0 differ
