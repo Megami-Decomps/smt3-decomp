@@ -382,16 +382,16 @@ u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight)
     return (a0 << 24) | (r0 << 16) | (g0 << 8) | b0;
 }
 
-extern s32 itfMesMngInitialize(void);
+extern s32 itfMesMngInitialize(void *data);
 
 extern void itfMesMngChangeWindowType(s32 id, s32 type, s32 alpha);
 
-s32 fclInitMessage(void)
+s8 fclInitMessage(void *pData)
 {
     s32 ret;
 
     if (gMsgID < 0) {
-        gMsgID = itfMesMngInitialize();
+        gMsgID = itfMesMngInitialize(pData);
         itfMesMngChangeWindowType(gMsgID, 2, 0);
         ret = 1;
     } else {
