@@ -2776,7 +2776,57 @@ void eff_1757D8(void)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", dds3_175878);
+extern u8 D_0054F1BE;
+extern u8 D_0054F1BF;
+extern u8 D_0054F1C0;
+extern s8 dds3PadButtonState[];
+extern void effBTLCutDebugPrint(void);
+extern void effDebugAllocDrawTag(void);
+extern void effDebugDrawMenu(void *menu);
+extern void effDebugLinkDrawTag(void);
+extern void nbCameraSetTarget(nbFormation_t *target);
+
+void dds3_175878(void)
+{
+    nbMainProcessData_t *mainData;
+
+    if (dds3DebugSign == 0) {
+        return;
+    }
+    func_00174860();
+    effBTLCutDebugPrint();
+    if (D_0054F1BF != 0) {
+        func_00174AB8(0x10604020, 0x10204060);
+    }
+    if (D_0054F1BE != 0) {
+        func_00174BB0(0x80303030);
+    }
+    if (D_0054F1C0 != 0) {
+        func_00174C50(0x10206040);
+    }
+    if (D_0054F1DF != 0) {
+        effDebugAllocDrawTag();
+        effDebugDrawMenu(nbHelperViewer);
+        effDebugLinkDrawTag();
+    }
+
+    mainData = nbGetMainProcessData();
+    if ((mainData->stat & 0x400000) == 0) {
+        return;
+    }
+    if (dds3PadButtonState[0x2B] >= 0) {
+        return;
+    }
+    if ((mainData->form[4].stat & 3) != 3) {
+        return;
+    }
+    nbCameraSetTarget(&mainData->form[4]);
+    /* Retail keeps jal plus the epilogue. Qualified ee-gcc traces (ordinary
+     * and probed output identical) retain this own-pointer reset after call
+     * insn 216 in cfg, then delete reset 220 in life. It therefore blocks
+     * sibling-call formation before disappearing; see CONTRIBUTING.md. */
+    mainData = NULL;
+}
 
 void InitModelCollisionEditorProcess(void)
 {
