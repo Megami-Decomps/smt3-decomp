@@ -804,8 +804,8 @@ void DestPhaseReadStatus(fclEncyc_instance_tag *pinst)
 typedef struct fclEncycReadStatusWork_t {
     fclEncyc_readmainwork_tag phase;
     u8 reserved0030[0x10];
-    s32 unk_040;
-    s32 unk_044;
+    s32 reserved040;
+    s32 reserved044;
     u8 reserved0048[0x10];
     s32 boardY;
     s16 boardAlpha;
@@ -921,8 +921,8 @@ void CalcPhaseReadExplain(fclEncyc_instance_tag *pinst)
         ReleaseFontExplain(pinst, 0);
         InitCameraForViewMode(pinst);
         SetBoundControl(pinst);
-        work->unk_040 = 0;
-        work->unk_044 = 0;
+        work->reserved040 = 0;
+        work->reserved044 = 0;
         fclRbnSwitchActive(work->ribbon, 2);
         pinst->stat |= 8;
         dds3KernelDebugSign = 0;
