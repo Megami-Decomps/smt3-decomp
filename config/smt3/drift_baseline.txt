@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1117 members, 506 adopted constants.
+# 0 types, 1106 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -222,6 +222,7 @@ member datDevilInfo_t.unk_05
 member datDevilInfo_t.unk_06
 member datDevilNegoFormat_t.unk00
 member datDevilNegoFormat_t.unk10
+member datDevilNegoFormat_t.unk14
 member datDevilNegoFormat_t.unk_04
 member datDevilNegoFormat_t.unk_0A
 member datDevilNegoFormat_t.unk_2E
@@ -259,6 +260,7 @@ member dds3GlobalWork_t.unk38
 member dds3GlobalWork_t.unk657C
 member dds3GlobalWork_t.unkA42
 member dds3LinkedLightWork_t.unk00
+member dds3LiveBattleUnitsView_t.unk00
 member dds3MatterPathPosition_t.unk00
 member dds3ModelBasicWorkData_t.unk10
 member dds3ModelResrc_t.unk_AC
@@ -399,20 +401,6 @@ member effSub_t.unk0
 member effSub_t.unk21
 member effSub_t.unk41
 member effTrackPolyParams_t.unk1C
-member evtPolygonMovieWork_t.unk14
-member evtPolygonMovieWork_t.unk1C
-member evtPolygonMovieWork_t.unk48
-member evtPolygonMovieWork_t.unk58
-member evtPolygonMovieWork_t.unk64
-member evtPolygonMovieWork_t.unk74
-member evtPolygonMovieWork_t.unk80
-member evtPolygonMovieWork_t.unk88
-member evtPolygonMovieWork_t.unk90
-member evtPolygonMovieWork_t.unk98
-member evtPolygonMovieWork_t.unkA0
-member evtPolygonMovieWork_t.unkA8
-member evtPolygonMovieWork_t.unkB0
-member evtPolygonMovieWork_t.unkB8
 member evtStartWork_t.unk_00
 member evtStartWork_t.unk_170
 member evtStartWork_t.unk_18
