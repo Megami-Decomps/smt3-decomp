@@ -241,10 +241,30 @@ void fclTerminalInitMenu(s32 id, void *commands, void *work)
 INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalInitMenu);
 #endif
 
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalDumpJump);
+typedef struct
+{
+    s16 field;
+    s16 jumpEvent;
+} trmFieldEntry_t;
+
+extern trmFieldEntry_t fldAllCnt[];
+extern char D_0054FC28[]; /* "%x\n" */
+
+s32 fclTerminalDumpJump(trmTerminalWork_t *work)
+{
+    s32 i;
+
+    printf("jump:%x %x\n", fldAllCnt[work->terminalNo].jumpEvent, work->terminalNo);
+    for (i = 0; i < work->terminalCommandCount; i++) {
+        printf(D_0054FC28, work->terminalList[i]);
+        if (work->terminalList[i] == fldAllCnt[work->terminalNo].jumpEvent) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 extern void *memset(void *dst, s32 value, u32 size);
-extern s32 fclTerminalDumpJump(void *work);
 extern void cmpSetCursorFlag(void *cursor, u8 *flags);
 extern void fclTerminalInitMenu(s32 id, void *commands, void *work);
 
