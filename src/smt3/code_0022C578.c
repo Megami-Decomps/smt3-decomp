@@ -2883,17 +2883,14 @@ void fclCalcArrowCursorOffset(s8 index, s32 *x, s32 *y)
     }
 }
 
-void fclGetArrowCursorTarget(s32 x, s32 y, s32 z, u32 color, s32 extra);
-
-INCLUDE_ASM(const s32, "code_0022C578", fclGetArrowCursorTarget);
-
 typedef struct
 {
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 unk_01[0x1B];
     /* 0x1C */ s32 unk_1C;
     /* 0x20 */ s32 entryStep;
-    /* 0x24 */ u8 reserved24[8];
+    /* 0x24 */ s32 targetPhase;
+    /* 0x28 */ u8 reserved28[4];
     /* 0x2C */ s32 fadeAlpha;
     /* 0x30 */ s8 unk_30;
     /* 0x31 */ s8 iconIndex;
@@ -2902,6 +2899,55 @@ typedef struct
 } campDhWork_t;
 
 extern campDhWork_t *campDhDrawWork;
+
+void fclGetArrowCursorTarget(s32 x, s32 y, s32 z, u32 color, s32 extra)
+{
+    s32 alpha = campDhDrawWork->targetPhase;
+    s32 phase;
+    s32 colors[4];
+    fclSpriteTbl_t *table;
+    s32 *texList;
+
+    if (alpha < 512) {
+        if (alpha >= 257) {
+            alpha = 512 - alpha;
+        }
+        phase = 0;
+    } else {
+        alpha -= 512;
+        if (alpha >= 257) {
+            alpha = 512 - alpha;
+        }
+        phase = 1;
+    }
+
+    if (phase == 0) {
+        colors[0] = fclBlendColor(0x80808080, 0x80808040, 256 - alpha);
+        texList = (s32 *)((u8 *)campDhDrawWork + 0x1160);
+        table = fclSpriteTable;
+        colors[1] = colors[0];
+        colors[2] = colors[0];
+        colors[3] = colors[0];
+        fclDrawSpriteRes(x, y, 0, colors, 8, 0x2A,
+                         texList, table, 0x47);
+        colors[0] = fclBlendColor(0x80808080, 0x80808026, alpha);
+        texList = (s32 *)((u8 *)campDhDrawWork + 0x1160);
+        colors[1] = colors[0];
+        colors[2] = colors[0];
+        colors[3] = colors[0];
+        fclDrawSpriteRes(x, y, 0, colors, 0xB, 0xD,
+                         texList, table, 0x47);
+    } else {
+        colors[0] = fclBlendColor(0xA0A0A080, 0x80808080, alpha);
+        texList = (s32 *)((u8 *)campDhDrawWork + 0x1160);
+        table = fclSpriteTable;
+        colors[1] = colors[0];
+        colors[2] = colors[0];
+        colors[3] = colors[0];
+        fclDrawSpriteRes(x, y, 0, colors, 8, 0x2A,
+                         texList, table, 0x47);
+    }
+}
 
 extern s32 datDevilIsRegistered(u8 devilId);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *color, s32 page, s32 spriteId,
