@@ -5566,7 +5566,7 @@ void cmpResetCursorPos(s16 value, cmpCursorInfo_t *cursor)
     cursor->unk_22 = value;
 }
 
-void cmpSetCursorRow(s8 row, cmpCursorInfo_t *cursor)
+void cmpSetCursorRow(s32 row, cmpCursorInfo_t *cursor)
 {
     cursor->unk_24 = row;
 }

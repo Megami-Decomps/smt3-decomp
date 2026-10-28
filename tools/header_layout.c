@@ -819,7 +819,7 @@ OFF(nm02, nmeWork_t, targetNo, 0x18);
 OFF(nm03, nmeWork_t, cursor, 0x30D4);
 OFF(nm04, nmeWork_t, inputPos, 0x5150);
 OFF(nm05, nmeWork_t, textures, 0x51B4);
-OFF(nm06, nmeWork_t, baseRate, 0x51C4);
+OFF(nm06, nmeWork_t, animation, 0x51C4);
 OFF(nm07, nmeWork_t, inputCursor, 0x1058);
 OFF(nm08, nmeWork_t, nameCursor, 0x2094);
 SZ(nm09, nmeWork_t, 0x51C8);

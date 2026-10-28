@@ -1,9 +1,9 @@
 #include "common.h"
+#include "nme.h"
 
-typedef struct {
-    u8 unknown[0x51C4];
-    s32 animation;
-} nmeWork_t;
+extern s32 nmeGetInputMode(nmeWork_t *work);
+extern void cmpSetCursorRow(s32 row, cmpCursorInfo_t *cursor);
+
 
 extern nmeWork_t *nmeUpdateWork;
 extern s32 nmeGetCursorPos(nmeWork_t *work);
@@ -18,7 +18,21 @@ INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDrawInputPanel);
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeDraw);
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeGetCursorPos);
+s32 nmeGetCursorPos(nmeWork_t *work) {
+    s32 mode = nmeGetInputMode(work);
+
+    switch (mode) {
+    case 0:
+        return work->inputPos;
+    case 1: {
+        s32 position = (u8)work->inputPos;
+        position -= 8;
+        return (s8)position;
+    }
+    default:
+        return work->inputPos;
+    }
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", func_0029A108);
 
@@ -38,7 +52,12 @@ void nmeBackspace(void)
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursorBy);
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeSyncCursor);
+void nmeSyncCursor(void) {
+    s8 row = (s8)((u8)nmeUpdateWork->cursor.unk_22 +
+                  (u8)nmeUpdateWork->cursor.unk_24);
+
+    cmpSetCursorRow((s32)row + 2, &nmeUpdateWork->inputCursor);
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursor);
 

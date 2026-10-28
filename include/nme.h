@@ -57,7 +57,7 @@ typedef struct {
     s8 inputPos;
     u8 unk5151[0x63];
     sdfTexHandle_t *textures[4];
-    s32 baseRate;
+    s32 animation;
 } nmeWork_t;
 
 
