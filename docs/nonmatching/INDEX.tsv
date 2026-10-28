@@ -67,7 +67,6 @@ dds3EffectDistortionBlurDraw	effect/effBlur_Filter	0x208	60 of 128 words differ	
 effEveBEDCutDraw	effect/effEvent	0x1DC	117 of 119 words match	docs/nonmatching/effect/effEvent.md	5
 effEVECombParSmokeDraw	effect/effEvent	0xB34	493 of 711 words differ	docs/nonmatching/effect/effEvent.md	66
 effDebugDrawRectLine	effect/effMagatuhi	0x154	72 of 85 words match	docs/nonmatching/effect/effMagatuhi.md	5
-effMagaCylinderDraw, effMagaSpiralDraw and effMagaSmokeDraw	effect/effMagatuhi	0x2B4, 0x2C4 and 0x2DC	140 of 182 words match	docs/nonmatching/effect/effMagatuhi.md	38
 effPCPBezierBillDraw	effect/effPCPBezier	0x1764	1482 of 1497 words match	docs/nonmatching/effect/effPCPBezier.md	5
 effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words match	docs/nonmatching/effect/effPCPBoss.md	5
 effPCP_BED_Create	effect/effPCPBoss	248 bytes	33 of 63 words match	docs/nonmatching/effect/effPCPBoss.md	22
