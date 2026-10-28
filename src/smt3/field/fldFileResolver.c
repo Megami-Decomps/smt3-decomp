@@ -342,7 +342,33 @@ extern char D_0054EC30[]; /* "%d" */
 
 extern u32 gFldFileResetMode;
 
-extern void fldFileResolverFL1(void *info);
+typedef struct fldFileAreaDataFL1_t {
+    s32 unk_00;
+    s32 field;
+    s32 floor;
+} fldFileAreaDataFL1_t;
+
+typedef struct fldFileNameTableFL1_t {
+    s32 unk_00;
+    s32 idx;
+    char *name[4];
+} fldFileNameTableFL1_t;
+
+typedef struct fldFileInfoHeaderFL1_t {
+    fldFileAreaDataFL1_t *pAreaData;
+    void *pResourceTypeTable;
+    fldFileNameTableFL1_t *pNameTable;
+} fldFileInfoHeaderFL1_t;
+
+extern u32 fldResolverFL1Data[];
+
+extern char D_0054EBC0[];
+
+extern void fldSetFileResolverIdx(u32 state);
+
+extern void fldMakeResouceBasicFL1(void *table, fldFileAreaDataFL1_t *area);
+
+extern void fldFileResolverFL1(fldFileInfoHeaderFL1_t *info);
 
 u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, void *textureBuffer);
 
@@ -622,7 +648,62 @@ s32 fldMakeObjectBasic3(void) {
     }
 }
 
+#ifdef NON_MATCHING
+/* NON_MATCHING: 116 of 144 words match at the exact 576-byte size; the
+   remaining difference is the branch form on the NULL test and a register
+   permutation around it. */
+void fldFileResolverFL1(fldFileInfoHeaderFL1_t *info)
+{
+    char dir[32];
+    char full[64];
+    char buf[0x18];
+    char *s;
+    s32 extra;
+    s32 i;
+    s32 j;
+
+    fldSetFileResolverIdx(info->pNameTable->idx);
+    fldResolverFL1Data[0] = (u32)info->pNameTable->name[0];
+    fldResolverFL1Data[1] = (u32)info->pNameTable->name[1];
+    fldResolverFL1Data[2] = (u32)info->pNameTable->name[2];
+    fldResolverFL1Data[3] = (u32)info->pNameTable->name[3];
+    if (fldGlobalBase.area == 0x18 && evtBitCheck(0x4F) != 0) {
+        for (i = 0; i < 4; i++) {
+            memset(buf, 0, sizeof(buf));
+            extra = 0;
+            s = (char *)fldResolverFL1Data[i];
+            if (s != NULL) {
+                if (s[0] != 0) {
+                    for (j = 0; j < 16 && s[j] != 0; j++) {
+                        if (s[j] == '.') {
+                            buf[j + extra] = 'b';
+                            extra = 1;
+                        }
+                        buf[j + extra] = s[j];
+                    }
+                }
+                strcpy(s, buf);
+            }
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        D_0055DA98[i] = NULL;
+        D_0055DAA8[i] = NULL;
+    }
+    if (fldGlobalBase.area < 0x1F4) {
+        for (i = 0; i < 4; i++) {
+            if (fldResolverFL1Data[i] != NULL) {
+                fldMakeFilePath(dir, fldGlobalBase.area, fldGlobalBase.floor + 1);
+                sprintf(full, D_0054EBC0, dir, (char *)fldResolverFL1Data[i]);
+                D_0055DA98[i] = (sdfMemHandle_t *)sdfDevLoadFileEx(full, &D_0055DAA8[i], 0);
+            }
+        }
+    }
+    fldMakeResouceBasicFL1(info->pResourceTypeTable, info->pAreaData);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldFileResolverFL1);
+#endif
 
 void fldFileResolverFL2(fldFileInfoHeaderFL2_t *info) {
     fldMakeBlockBasicFL2(info->pAreaTable, info->nArea);
