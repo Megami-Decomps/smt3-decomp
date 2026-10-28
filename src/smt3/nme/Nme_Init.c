@@ -136,7 +136,28 @@ void nmeInitNameCursor(s8 mode, nmeWork_t *work)
     cmpInitCursorLayout(&work->nameCursor, 0, 0, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitCursor);
+extern void cmpResetCursorPos(s16 value, cmpCursorInfo_t *cursor);
+
+void nmeInitCursor(s8 mode, nmeWork_t *work)
+{
+    cmpCursorInfo_t *cursor = &work->cursor;
+    s8 row;
+
+    cmpInitCursorRange(cursor, 4, 4, 0);
+    cmpInitCursorLayout(cursor, 0, 0, 0, 0, 0);
+    row = work->inputCursor.unk_24;
+    if (row < 6) {
+        if (row >= 3) {
+            return cmpResetCursorPos(row - 2, cursor);
+        }
+    }
+    cmpResetCursorPos(0, cursor);
+    /* Qualified cc1probe --jump: this reset follows the nonsibling call in
+     * .01.sibling and .11.cfg, then disappears in .13.life (verify: OK).
+     * It retains the native jal/epilogue under the CONTRIBUTING exception. */
+    row = 0;
+}
+
 
 extern char D_00548780[];
 extern char D_00548798[];

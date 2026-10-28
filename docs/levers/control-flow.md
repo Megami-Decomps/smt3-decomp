@@ -318,3 +318,18 @@ The same-unit `cmpUpdateHeartsAttachStatus` resets its handled button after
 `cmpPlayCursorSE` and preserves its native `jal` plus epilogue at 396 bytes.
 Both resets update their own completed local state, under the contributing
 rules' qualified post-call-statement exception.
+
+### Reset a consumed cursor-row local after the default call
+
+`nmeInitCursor` (`nme/Nme_Init`) resets its local `row` after the default
+`cmpResetCursorPos(0, cursor)` call. The reset is dead local state, not an
+observable work-record write. This uses the narrow post-call statement
+exception in CONTRIBUTING: retail has a `jal` and epilogue on that path,
+while rows 3 through 5 use the early tail return.
+
+A qualified `tools/cc1probe.sh src/smt3/nme/Nme_Init.c --func nmeInitCursor
+--jump` run reports `verify: OK`, including dumped/plain assembly parity.
+Reset UID 149 follows ordinary call UID 145 in `.01.sibling` and remains
+in `.11.cfg`; it disappears in `.13.life`. The in-range call UID 110 is
+already a sibling call and remains one. Removing the reset makes the
+otherwise exact initializer eight bytes short. The complete unit stays exact.
