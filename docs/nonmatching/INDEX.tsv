@@ -165,6 +165,7 @@ nbCameraShot_All_Set2	newbattle/nbCameraSkill	0x248	16 of 125 words match	docs/n
 nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	117 of 137 words match	docs/nonmatching/newbattle/nbCameraSkill.md	118
 nbCallNewBattle	newbattle/nbInit	0xA0	29 of 40 words differ	docs/nonmatching/newbattle/nbInit.md	5
 nbMainProcess1	newbattle/nbMainProcess	0x420	113 of 263 words match	docs/nonmatching/newbattle/nbMainProcess.md	5
+nbDrawMakaNum	newbattle/nbMakaProcess	0x2B4	136 of 173 words match	docs/nonmatching/newbattle/nbMakaProcess.md	5
 Flow2_13	newbattle/nbMakePacket	0xC8	44 of 50 words match	docs/nonmatching/newbattle/nbMakePacket.md	5
 Flow2_2	newbattle/nbMakePacket	0xCC	22 of 48 words match	docs/nonmatching/newbattle/nbMakePacket.md	21
 nbGetVirtualAisyo	newbattle/nbMakePacket	0xAC	39 of 43 words match	docs/nonmatching/newbattle/nbMakePacket.md	36

@@ -336,6 +336,26 @@ extern void nbMakaStep(nbMakaProcessData_t *w);
 
 extern void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 n);
 
+extern nbMainProcessData_t *nbGetMainProcessData(void);
+
+extern char *nbDigitStringTable[10];
+
+extern void nbPnl_setOt(s32 ot);
+
+extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte,
+                           s32 ztst);
+
+extern void nbPnl_rsetAlpha(s32 mode);
+
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 rgba,
+                        void *th);
+
+extern void *frwGetNumFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
+
+extern void func_001C7E38(void *frq, s32 mode, s32 arg);
+
+extern void frDestroyFontRequestAfter(void *pFRQ);
+
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern void nbMakaDispOn(s32 type);
@@ -436,7 +456,53 @@ u32 nbPow10(u32 v, s32 n)
     return (v % p) / (p / 10);
 }
 
+#ifdef NON_MATCHING
+/* NON_MATCHING: 37 of 173 words differ; the loop body is exact and the only
+   real difference is where the scheduler puts the i = 6 load. */
+void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 alpha)
+{
+    char *nums[10];
+    nbMainProcessData_t *data;
+    void *frq;
+    s32 dx;
+    s32 dy;
+    s32 base;
+    s32 started;
+    s32 i;
+    s32 v;
+
+    memcpy(nums, nbDigitStringTable, sizeof(nums));
+    dx = x + 0x5D;
+    dy = y + 6;
+    data = nbGetMainProcessData();
+    nbPnl_setOt(0x48);
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    col = (col & 0xFFFFFF) | (alpha << 24);
+    nbPnlSprite(x, y, 0x36, 0x21, 2, 0x5D, 0x36, 0x21, col, data->pnltex[3]);
+    nbPnlSprite(x + 0xE1, y, -0x36, 0x21, 2, 0x5D, 0x36, 0x21, col, data->pnltex[3]);
+    nbPnlSprite(x + 0x36, y, 0x75, 0x21, 0x37, 0x5D, 1, 0x21, col, data->pnltex[3]);
+    nbPnlSprite(x + 0x2C, dy, 0x2F, 0x14, 0x86, 1, 0x2F, 0x14, col, data->pnltex[0]);
+    nbPnlSprite(x + 0xBA, dy, 0xD, 0x14, 0xB6, 1, 0xD, 0x14, col, data->pnltex[0]);
+    col = (col >> 24) | 0x89FEFF00;
+    started = 0;
+    base = 10;
+    for (i = 6; i >= 0; i--) {
+        v = nbPow10(DDS3_GBWK->maka, i);
+        if (v != 0 || i == 0) {
+            started = 1;
+        }
+        if (started != 0) {
+            frq = frwGetNumFontFRQ(dx << 4, dy << 3, 0xFF0051, col, nums[v % base], 0);
+            func_001C7E38(frq, 1, 0x48);
+            frDestroyFontRequestAfter(frq);
+        }
+        dx += 0xD;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakaProcess", nbDrawMakaNum);
+#endif
 
 void nbMakaStep(nbMakaProcessData_t *w)
 {
