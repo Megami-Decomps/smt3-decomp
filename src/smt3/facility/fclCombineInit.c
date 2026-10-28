@@ -421,7 +421,7 @@ extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 
 extern void fclScriptForcedEnd(u8 *PID);
 
-extern s32 fclBlendColor(s32 color, s32 mask, s32 alpha);
+extern u32 fclBlendColor(u32 color, u32 mask, u32 alpha);
 
 typedef struct
 {

@@ -105,7 +105,7 @@ extern s32 fclChkMessage(void);
 
 extern void fclScriptForcedEnd(u8 *PID);
 
-extern s32 fclBlendColor(s32 color, s32 mask, s32 alpha);
+extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
 
 extern s8 gMsgFlag;
 
@@ -326,9 +326,41 @@ char *func_00213DC0(datUnitWork_t *unit)
     return text2[unit->id];
 }
 
-INCLUDE_ASM(const s32, "facility/fclMisc", func_00213DF0);
+u32 func_00213DF0(u32 color, u32 scaleFactor)
+{
+    u32 red = color >> 24;
+    u32 green = (color >> 16) & 0xFF;
+    u32 blue = (color & 0xFF00) >> 8;
+    u32 alpha = color & 0xFF;
 
-INCLUDE_ASM(const s32, "facility/fclMisc", fclBlendColor);
+    red = (red * scaleFactor) >> 8;
+    green = (green * scaleFactor) >> 8;
+    blue = (blue * scaleFactor) >> 8;
+    return (red << 24) | (green << 16) | (blue << 8) | alpha;
+}
+
+u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight)
+{
+    u32 a0 = firstColor >> 24;
+    u32 r0 = (firstColor & 0xFF0000) >> 16;
+    u32 g0 = (firstColor & 0xFF00) >> 8;
+    u32 b0 = firstColor & 0xFF;
+    u32 a1 = secondColor >> 24;
+    u32 r1 = (secondColor & 0xFF0000) >> 16;
+    u32 g1 = (secondColor & 0xFF00) >> 8;
+    u32 b1 = secondColor & 0xFF;
+    u32 inv;
+
+    if (weight > 0x100) {
+        weight = 0x200 - weight;
+    }
+    inv = 0x100 - weight;
+    a0 = (a0 * weight + a1 * inv) >> 8;
+    r0 = (r0 * weight + r1 * inv) >> 8;
+    g0 = (g0 * weight + g1 * inv) >> 8;
+    b0 = (b0 * weight + b1 * inv) >> 8;
+    return (a0 << 24) | (r0 << 16) | (g0 << 8) | b0;
+}
 
 extern s32 itfMesMngInitialize(void);
 

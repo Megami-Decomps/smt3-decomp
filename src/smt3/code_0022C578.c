@@ -707,7 +707,7 @@ extern cmpVec4_t cmpStatusModelBasePos;
 
 extern s32 cmpDrawTriG(s32 a, s32 b, s32 c, s32 *colors);
 
-extern s32 fclBlendColor(s32 color, s32 mask, s32 alpha);
+extern u32 fclBlendColor(u32 color, u32 mask, u32 alpha);
 
 extern void cmpUpdatePanelEffSlots(void);
 
