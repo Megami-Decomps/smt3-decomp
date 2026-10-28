@@ -261,7 +261,34 @@ void objCopy(s32 offset, f32 x, f32 y, u8 id, u8 action, s16 count, s16 num) {
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", objCopy2);
+void objCopy2(s32 offset, f32 x, f32 y, u8 id, u8 action, s16 count, s16 num, s32 range) {
+    tagPipeObject object;
+    memset(&object, 0, 0x20);
+    objMake(&object, offset, id, 0, action, 0);
+
+    if (num != 0) {
+        f32 rangeAsFloat = (f32)range;
+        s32 positionSpan = range * 2;
+
+        do {
+            u32 randomValue;
+
+            randomValue = dds3GetRandA(NULL);
+            object.pos[0] = x + (f32)(randomValue % positionSpan) - rangeAsFloat;
+            randomValue = dds3GetRandA(NULL);
+            object.pos[1] = y + (f32)(randomValue % positionSpan) - rangeAsFloat;
+            randomValue = dds3GetRandA(NULL);
+            object.offset = offset + randomValue % (range / 20);
+            randomValue = dds3GetRandA(NULL);
+            object.vpos[0] = (f32)(randomValue % 10) - 5.0f;
+            randomValue = dds3GetRandA(NULL);
+            object.vpos[1] = (f32)(randomValue % 10) - 5.0f;
+            object.count = count;
+            objAdd(&object);
+            num--;
+        } while (num != 0);
+    }
+}
 
 void objAddDMaka(s32 offset, f32 x, f32 y)
 {
