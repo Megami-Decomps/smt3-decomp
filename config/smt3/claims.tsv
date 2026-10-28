@@ -586,7 +586,7 @@ src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 528 B	skill destruc
 src/smt3/code_0029B780.c	redthing1	done	2026-10-28	1 fn / 248 B	configuration label colors, embedded message lookup, spacing reset and deferred font destruction; owner 21 match, 0 differ
 src/smt3/newbattle/nbSkillError.c	redthing1	done	2026-10-28	1 fn / 328 B	model-pack descriptor dispatch with separate motion numbering and callback-sensitive count reloads; owner 14 match, 0 differ
 src/smt3/pipe/pipeCamera.c	redthing1	done	2026-10-28	1 fn / 368 B	viewport matrix with pre-normalization eye snapshot and normalized vector providers; owner 5 match, 0 differ
-src/smt3/newbattle/NbNegoFlowFullMoon.c	redthing1	done	2026-10-28	1 fn / 204 B	Flow2_2 full-moon message dispatch with word ID and native halfword comparisons
+src/smt3/newbattle/NbNegoFlowFullMoon.c	redthing1	done	2026-10-28	2 fn / 648 B	Flow2_1 enemy eligibility selection and Flow2_2 immediate message dispatch; owner 16 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 428 B	camp allocation and four cursor-page initialization with native data-backed tables and flag storage; owner 349 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 352 B	camp phase dispatch with signed entry snapshot, native negative skip return and exact jump table; owner 350 match, 0 differ
 src/smt3/effect/effPCPBoss.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	KAGU invoke poly-list reconstruction at native 736-byte size with three remaining address-form words

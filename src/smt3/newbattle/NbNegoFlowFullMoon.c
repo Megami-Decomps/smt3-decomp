@@ -339,7 +339,40 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 void nbSetMesMakka(s32 msgid, s32 i);
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowFullMoon", Flow2_1);
+s32 Flow2_1(nbNegoProcessData_t *n)
+{
+    u16 initialId;
+    u32 devilId;
+
+    nbAddNegoIdKouho(n, 0x20003);
+    nbAddNegoIdKouho(n, 0x20002);
+    nbAddNegoIdKouho(n, 0x10020);
+    initialId = n->ework->id;
+    if (initialId == 0x96 || initialId == 0x1D || initialId == 3 ||
+        initialId == 8 || initialId == 0xD || initialId == 0xA || initialId == 5 ||
+        initialId == 4 || initialId == 0x10 || initialId == 0x18 || initialId == 0x1E ||
+        initialId == 0x99) {
+        n->nextnegoid = n->nextkouho[2];
+        return 0;
+    }
+    if (datGetRace(n->ework) == 0x13 || datGetRace(n->ework) == 0x12) {
+        n->nextnegoid = n->nextkouho[1];
+        return 0;
+    }
+    devilId = n->ework->id;
+    if ((u16)devilId == 0x9A || (u16)(devilId - 0x24) < 4 ||
+        (u16)devilId == 0x6E || (u16)devilId == 0x90 ||
+        datGetRace(n->ework) == 7 || datGetRace(n->ework) == 8) {
+        n->nextnegoid = n->nextkouho[1];
+        return 0;
+    }
+    if ((s32)dds3GetRandIntA(NULL, 100) < 50) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
 s32 Flow2_2(nbNegoProcessData_t *n)
 {
