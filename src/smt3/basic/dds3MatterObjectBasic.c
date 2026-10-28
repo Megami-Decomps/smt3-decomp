@@ -1,6 +1,7 @@
 #include "common.h"
 #include "basic.h"
 #include "model.h"
+#include "ps2asm.h"
 
 typedef struct {
     /* 0x00 */ dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
@@ -128,7 +129,125 @@ void dds3MatterObjectBasicDestructor(dds3Basic_t *aPtr) {
     sdfChipFreeDirect(work);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3MatterObjectBasic", dds3MatterObjectBasicMainProcedure);
+extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *basic);
+extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
+extern void dds3GetRotPoseSet(dds3Basic_t *basic);
+extern void dds3GetTMPoseSet(dds3Basic_t *basic);
+extern void dds3GetPosPoseSet(dds3Basic_t *basic);
+extern s32 fldDoor_Step(s32 matterSerialID, f32 *x, f32 *y, f32 *z);
+extern void dds3SetRadiusPoseSet(dds3PoseSet_t *pose);
+extern void sdfModelEvalTm(sdfModelRootNode_t *model);
+
+s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
+    dds3MatterObjectBasicWorkData_t *work = basic->workdata;
+    u32 mode = work->alpmode;
+    s32 alpha;
+
+    switch (mode) {
+    case 0:
+        basic->color = 0x80808080;
+        break;
+    case 1:
+        basic->color = 0x80808080;
+        break;
+    case 2:
+        basic->color = 0x00808080;
+        break;
+    case 3: {
+        alpha = ((u8 *)&basic->color)[3];
+        if (alpha < 0x80) {
+            alpha += 8;
+        }
+        if (alpha >= 0x81) {
+            alpha = 0x80;
+        }
+        basic->color = ((u32)alpha << 24) | 0x00808080;
+        break;
+    }
+    case 4: {
+        alpha = ((u8 *)&basic->color)[3];
+        if (alpha >= 0x41) {
+            alpha -= 8;
+        }
+        if (alpha < 0x40) {
+            alpha = 0x40;
+        }
+        basic->color = ((u32)alpha << 24) | 0x00808080;
+        break;
+    }
+    case 5: {
+        alpha = ((u8 *)&basic->color)[3];
+        if (alpha < 0x80) {
+            alpha += 4;
+        }
+        if (alpha >= 0x81) {
+            alpha = 0x80;
+        }
+        basic->color = ((u32)alpha << 24) | 0x00808080;
+        break;
+    }
+    case 6: {
+        alpha = ((u8 *)&basic->color)[3];
+        alpha = alpha != 0 ? alpha - 4 : 0;
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        basic->color = ((u32)alpha << 24) | 0x00808080;
+        break;
+    }
+    case 7: {
+        alpha = ((u8 *)&basic->color)[3];
+        if (alpha < 0x80) {
+            alpha += 2;
+        }
+        if (alpha >= 0x81) {
+            alpha = 0x80;
+        }
+        basic->color = ((u32)alpha << 24) | 0x00808080;
+        break;
+    }
+    case 8: {
+        alpha = ((u8 *)&basic->color)[3];
+        alpha = alpha != 0 ? alpha - 2 : 0;
+        if (alpha <= 0) {
+            alpha = 0;
+        }
+        basic->color = ((u32)alpha << 24) | 0x00808080;
+        break;
+    }
+    }
+
+    {
+        sdfModelRootNode_t *model = dds3ObjectBaseGetModelHandle(basic);
+        if (model != NULL) {
+            dds3PoseSet_t *pose;
+            f32 doorX, doorY, doorZ;
+
+            dds3OffPoseSetFlag(basic->poseset, 1);
+            dds3GetRotPoseSet(basic);
+            SDF_VU0_STOREVECTOR(&model->rotate);
+            dds3GetTMPoseSet(basic);
+            dds3GetPosPoseSet(basic);
+
+            if (fldDoor_Step(basic->serialID, &doorX, &doorY, &doorZ) != 0) {
+                pose = basic->poseset;
+                pose->pos.x = work->base_pos[0] + work->move_pos[0] + doorX;
+                pose->pos.y = work->base_pos[1] + work->move_pos[1] + doorY;
+                pose->pos.z = work->base_pos[2] + work->move_pos[2] + doorZ;
+            } else {
+                pose = basic->poseset;
+                pose->pos.x = work->base_pos[0] + work->move_pos[0];
+                pose->pos.y = work->base_pos[1] + work->move_pos[1];
+                pose->pos.z = work->base_pos[2] + work->move_pos[2];
+            }
+            SDF_VU0_SET_ROW3();
+            SDF_VU0_STOREMATRIX(&model->tm);
+            dds3SetRadiusPoseSet(pose);
+            sdfModelEvalTm(model);
+        }
+    }
+    return 1;
+}
 
 extern sdfModelOt_t D_002F69B8[];
 extern sdfModelOt_t dds3MatterDrawParam;
