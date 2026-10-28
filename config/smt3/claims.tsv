@@ -496,3 +496,4 @@ src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 264 B	battle 
 src/smt3/code_001C55F8.c	redthing1	done	2026-10-28	1 fn / 224 B	camera helper file load and effect-part creation; owner 11 match, 0 differ
 src/smt3/code_001C55F8.c	redthing1	done	2026-10-28	1 fn / 252 B	PB file selection and viewer callback replacement; owner 12 match, 0 differ
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 656 B	battle status update from thirteen native byte controls with exact flag polarity and read/write order; owner 286 match, 0 differ
+src/smt3/facility/fclPanel.c	redthing1	done	2026-10-28	1 fn / 416 B	panel corner drawing with cached right-edge coordinate and native flip flags; owner 15 match, 0 differ
