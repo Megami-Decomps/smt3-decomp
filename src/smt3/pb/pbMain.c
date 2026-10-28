@@ -184,7 +184,57 @@ void pb_draw_bg_Shutdown(dds3ProcessID_t *id) {
 
 INCLUDE_RODATA(const s32, "pb/pbMain", D_00535DE0);
 
-INCLUDE_ASM(const s32, "pb/pbMain", pbStartMapEditor);
+typedef struct { dds3ProcessID_t *id; } pbMapEditorState_t;
+extern s32 pbMoveChar;
+extern s32 pbEditorState;
+extern s32 pbEditWork;
+/* Only the process-link prefix is used here. The unsized view preserves its
+ * non-small-data address form; see docs/levers/addressing-and-types.md. */
+extern pbMapEditorState_t pbMapEditorState[];
+extern char D_00535DE0[];
+extern void pbLoadTextures(s32 mode, s32 stage);
+extern s32 pbEditInitProc(dds3ProcessID_t *id);
+extern pbProcHandle_t *pbStartBackGround(pbProcHandle_t *parent);
+extern void pbEditMainExitProc(void);
+extern void pbDebugShutdown(void);
+extern dds3ProcessFunc_t *pbDebugProc(dds3ProcessID_t *proc_id);
+extern s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update,
+                               dds3ProcessFunc_t destroy, void *userValue);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 priority, s32 v2, s32 v3,
+                                         dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
+
+dds3ProcessID_t *pbStartMapEditor(s32 mode, s32 stage) {
+    s32 state;
+    dds3ProcessID_t *rootProcess;
+    pbMapEditorState_t *mapState;
+
+    pbEditWork = 0;
+    if (mode == 0) {
+        pbEditorState = 0;
+    } else if (mode == 1) {
+        pbEditorState = mode;
+    } else {
+        state = pbEditorState;
+        if (mode == 2) {
+            state = mode;
+        }
+        pbEditorState = state;
+    }
+
+    pbMoveChar = 0;
+    rootProcess = dds3StartProcess("puzzleBoy-root", 0x3EE, 1, 0, pbEditInitProc,
+                                   (dds3ProcessFunc_t)pbEditMainExitProc, NULL);
+    mapState = pbMapEditorState;
+    mapState->id = rootProcess;
+    pbLoadTextures(mode, stage);
+    pbStartBackGround((pbProcHandle_t *)mapState);
+    if (mode == 1) {
+        fclEncycAllocEntry(D_00535DE0, (dds3ProcessFunc_t)pbDebugProc,
+                           (dds3ProcessFunc_t)pbDebugShutdown, NULL);
+    }
+    return mapState->id;
+}
 
 s32 pbGetMoveChar(void) {
     return pbMoveChar;
