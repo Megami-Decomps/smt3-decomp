@@ -1074,7 +1074,140 @@ INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544BF8);
 
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544C10);
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetAisyo);
+extern u32 datAisyoTable[248][16];
+extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
+
+u32 nbGetAisyo(s32 nskill, s32 formindex, s32 attr)
+{
+    datUnitWork_t *work;
+    nbParty_t *party;
+    u32 aisyo;
+    s32 count;
+    s32 ratio;
+
+    work = nbGetUnitWorkFromFormindex(formindex);
+    if (formindex >= 16) {
+        return datGetAisyo(work, attr);
+    }
+    party = nbGetPartyFromFormindex(formindex);
+    if (attr == -1) {
+        return 0;
+    }
+    if (attr >= -1) {
+        if (attr < 16) {
+            if (attr >= 12) {
+                return 100;
+            }
+        }
+    }
+
+    aisyo = party->aisyo[attr];
+    count = nbGetHojoCounter(formindex, 19);
+    if (count > 0) {
+        aisyo = datAisyoTable[count][attr];
+    }
+    switch (work->badstatus & 0xFFF) {
+    case 0x400:
+        aisyo = datAisyoTable[246][attr];
+        break;
+    case 0x200:
+        aisyo = datAisyoTable[247][attr];
+        break;
+    }
+
+    switch (attr) {
+    case 1:
+        if (nbGetHojoCounter(formindex, 10) > 0) {
+            aisyo |= 0x10000;
+        }
+        break;
+    case 2:
+        if (nbGetHojoCounter(formindex, 9) > 0) {
+            aisyo |= 0x10000;
+        }
+        break;
+    case 6:
+        if (nbGetHojoCounter(formindex, 12) > 0) {
+            aisyo |= 0x10000;
+        }
+        break;
+    case 7:
+        if (nbGetHojoCounter(formindex, 11) > 0) {
+            aisyo |= 0x10000;
+        }
+        break;
+    }
+
+    if (nskill >= 0 && attr != 5 && attr != 11) {
+        switch (datSkillTable.normal[nskill].koukatype) {
+        case 0:
+            if (nbGetHojoCounter(formindex, 14) > 0) {
+                aisyo |= 0x20000;
+            }
+            break;
+        case 1:
+            if (nbGetHojoCounter(formindex, 13) > 0) {
+                aisyo |= 0x20000;
+            }
+            break;
+        }
+    }
+
+    ratio = aisyo & 0xFFFF;
+    switch (attr) {
+    case 0:
+        if (nbHatudoCheckSkill(work, 0x143) != 0) aisyo |= 0x10000;
+        if (nbHatudoCheckSkill(work, 0x14D) != 0) aisyo |= 0x40000;
+        if (nbHatudoCheckSkill(work, 0x152) != 0) aisyo |= 0x20000;
+        if (nbHatudoCheckSkill(work, 0x139) != 0) ratio = ratio * datSkillTable.special[0x19].n / 100;
+        break;
+    case 1:
+        if (nbHatudoCheckSkill(work, 0x144) != 0) aisyo |= 0x10000;
+        if (nbHatudoCheckSkill(work, 0x14E) != 0) aisyo |= 0x40000;
+        if (nbHatudoCheckSkill(work, 0x153) != 0) aisyo |= 0x20000;
+        if (nbHatudoCheckSkill(work, 0x13A) != 0) ratio = ratio * datSkillTable.special[0x1A].n / 100;
+        break;
+    case 2:
+        if (nbHatudoCheckSkill(work, 0x145) != 0) aisyo |= 0x10000;
+        if (nbHatudoCheckSkill(work, 0x14F) != 0) aisyo |= 0x40000;
+        if (nbHatudoCheckSkill(work, 0x154) != 0) aisyo |= 0x20000;
+        if (nbHatudoCheckSkill(work, 0x13B) != 0) ratio = ratio * datSkillTable.special[0x1B].n / 100;
+        break;
+    case 3:
+        if (nbHatudoCheckSkill(work, 0x146) != 0) aisyo |= 0x10000;
+        if (nbHatudoCheckSkill(work, 0x150) != 0) aisyo |= 0x40000;
+        if (nbHatudoCheckSkill(work, 0x155) != 0) aisyo |= 0x20000;
+        if (nbHatudoCheckSkill(work, 0x13C) != 0) ratio = ratio * datSkillTable.special[0x1C].n / 100;
+        break;
+    case 4:
+        if (nbHatudoCheckSkill(work, 0x147) != 0) aisyo |= 0x10000;
+        if (nbHatudoCheckSkill(work, 0x151) != 0) aisyo |= 0x40000;
+        if (nbHatudoCheckSkill(work, 0x156) != 0) aisyo |= 0x20000;
+        if (nbHatudoCheckSkill(work, 0x13D) != 0) ratio = ratio * datSkillTable.special[0x1D].n / 100;
+        break;
+    case 6:
+        if (nbHatudoCheckSkill(work, 0x148) != 0) aisyo |= 0x10000;
+        if (nbHatudoCheckSkill(work, 0x13E) != 0) ratio = ratio * datSkillTable.special[0x1E].n / 100;
+        break;
+    case 7:
+        if (nbHatudoCheckSkill(work, 0x149) != 0) aisyo |= 0x10000;
+        if (nbHatudoCheckSkill(work, 0x13F) != 0) ratio = ratio * datSkillTable.special[0x1F].n / 100;
+        break;
+    case 8:
+        if (nbHatudoCheckSkill(work, 0x14A) != 0) aisyo |= 0x10000;
+        if (nbHatudoCheckSkill(work, 0x140) != 0) ratio = ratio * datSkillTable.special[0x20].n / 100;
+        break;
+    case 9:
+        if (nbHatudoCheckSkill(work, 0x14B) != 0) aisyo |= 0x10000;
+        if (nbHatudoCheckSkill(work, 0x141) != 0) ratio = ratio * datSkillTable.special[0x21].n / 100;
+        break;
+    case 10:
+        if (nbHatudoCheckSkill(work, 0x14C) != 0) aisyo |= 0x10000;
+        if (nbHatudoCheckSkill(work, 0x142) != 0) ratio = ratio * datSkillTable.special[0x22].n / 100;
+        break;
+    }
+    return (aisyo & 0xFFFF0000) | ratio;
+}
 
 s32 nbGetNormalSkillAttr(s32 nskill)
 {
