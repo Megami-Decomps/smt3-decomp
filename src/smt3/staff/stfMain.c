@@ -70,7 +70,95 @@ extern void stfFreeTextures(void);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
+typedef struct
+{
+    /* 0x0000 */ const char *text0;
+    /* 0x0004 */ const char *text1;
+    /* 0x0008 */ s8 style0;
+    /* 0x0009 */ s8 style1;
+    /* 0x000A */ u8 unk_0A[2];
+    /* 0x000C */ s32 y;
+} stfStaffRoll_t;
+
+extern stfStaffRoll_t D_00343018[0xB5];
+extern char D_0054FD90[];
+extern s32 sprintf(char *buf, const char *fmt, ...);
+extern u32 stfDrawText(s32 style, u32 color, const char *text);
+extern s32 stfDrawStaffText(f32 x, f32 y, s32 style, u32 color, const char *text);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
+extern void GetoStaffUI(void);
+extern void dds3AdminiCallSequence(s32 kind, void *arg, s32 a, s32 b);
+
+/* NON_MATCHING: 145 of 181 words match at the exact size. The range guard
+ * folds to one sltiu where retail keeps slti plus bltz. */
+#ifdef NON_MATCHING
+s32 stfMain2(dds3ProcessID_t *id)
+{
+    char buf[128];
+    s32 arg;
+    s32 i;
+    s32 y;
+    s32 w;
+    s32 state;
+
+    for (i = 0; i < 0xB5; i++) {
+        y = D_00343018[i].y - oStaff_UI->scrollY / 2 + 0x1C0;
+        if (i == 0xB4) {
+            if (y < 0xE0) {
+                y = 0xE0;
+            }
+        }
+        if (y >= -0x1E && y <= 0x1C0) {
+            if (D_00343018[i].text0 != NULL) {
+                if (D_00343018[i].text1 == NULL) {
+                    sprintf(buf, D_0054FD90, D_00343018[i].text0);
+                    w = stfDrawText(1, 0x80808080, buf);
+                    stfDrawStaffText(0x100 - w / 2, y, D_00343018[i].style0, 0x80808080, buf);
+                    continue;
+                }
+                sprintf(buf, D_0054FD90, D_00343018[i].text0);
+                w = stfDrawText(1, 0x80808080, buf);
+                stfDrawStaffText(0xF1 - w, y, D_00343018[i].style0, 0x80808080, buf);
+            }
+            if (D_00343018[i].text1 != NULL) {
+                sprintf(buf, D_0054FD90, D_00343018[i].text1);
+                stfDrawStaffText(271.0f, y, D_00343018[i].style1, 0x80808080, buf);
+            }
+        }
+    }
+
+    state = oStaff_UI->reserved00E4;
+    if (state != 0) {
+        if (state >= 0 && state < 3) {
+            /* in range; the scroll update below runs */
+        } else {
+            return 0;
+        }
+    } else {
+        dds3FadeIn(0, 0, 0, 0x1E);
+        oStaff_UI->reserved00E4 = 2;
+        oStaff_UI->unk_0118 = 0;
+        oStaff_UI->scrollY = 0;
+        oStaff_UI->reserved00F4 = 0;
+        oStaff_UI->unk_0110 = 0;
+        return 0;
+    }
+
+    oStaff_UI->scrollY = oStaff_UI->scrollY + 1;
+    GetoStaffUI();
+    if (oStaff_UI->scrollY == (D_00343018[0xB4].y + 0xE0) / 0x1E * 0x3C + 0x12C) {
+        dds3FadeOut(0, 0, 0, 0x28);
+    }
+    if ((D_00343018[0xB4].y + 0xE0) / 0x1E + 6 < oStaff_UI->scrollY / 0x3C) {
+        arg = 0x2B4;
+        dds3AdminiCallSequence(7, &arg, 4, 0);
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "staff/stfMain", stfMain2);
+#endif
 
 extern void stfGetUIField(s32, s32, s32);
 extern void ObjDispOff(void);
