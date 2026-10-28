@@ -30,6 +30,17 @@ extern s32 dds3DebugColorEditEx(u32 *aValue, s32 aColumn, s8 *aPadMap);
 
 u64 *dds3PrimFrameRect(s32 aX, s32 aY, s32 aZ, s32 aW, s32 aH, u32 aBgCol, u32 aFrameCol);
 
+extern void rsetOtOfs(s32 otofs);
+
+extern void rsetAlpha(s32 mode);
+
+extern f32 sdfSin(f32 aRadius);
+
+extern f32 sdfCos(f32 aRadius);
+
+extern void fldDrawPoly3(s32 c0, s32 c1, s32 c2, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1,
+                         f32 x2, f32 y2, f32 z2);
+
 void dds3DebugFloatEditEx(f32 *controlledValue, u8 *padState, f32 minimum, f32 maximum, f32 step, f32 bigStep) {
     f32 adjustedValue = *controlledValue;
 
@@ -356,7 +367,64 @@ s32 dds3NullDrawProc(dds3ProcessID_t *id)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3DebugStuff", dds3DrawUnitObjectShadow);
+void dds3DrawUnitObjectShadow(s32 fade, f32 x, f32 y, f32 z, f32 radius)
+{
+    s32 shallow;
+    s32 color;
+    s32 angle;
+    s32 prev;
+    s32 i;
+    f32 a;
+    f32 b;
+    f32 sinA;
+    f32 cosA;
+    f32 sinB;
+    f32 cosB;
+
+    shallow = fldGlobalBase.area >= 201 && fldGlobalBase.area <= 499;
+    if (shallow) {
+        y = 0.0f;
+    }
+    if (fade != 0) {
+        if (shallow) {
+            rsetOtOfs(0x20);
+        } else {
+            rsetOtOfs(0x2E);
+        }
+        rsetAlpha(5);
+        color = (fade * 2 / 3 * 0x70 / 0x80) & 0xFF;
+        if (color > 0x70) {
+            color = 0x70;
+        }
+        color = 0x80 - color;
+        if (color >= 0x80) {
+            color = 0x7F;
+        }
+        if (color < 0x10) {
+            color = 0x10;
+        }
+        color = (color << 24) | 0x10101;
+        if (fldGlobalBase.area >= 17 && fldGlobalBase.area <= 18) {
+            color = 0x50010101;
+            radius = 60.0f;
+        }
+        for (i = 0; i < 360; i += 10) {
+            angle = (i + 360) % 360;
+            prev = (i + 350) % 360;
+            a = (f32)angle * 3.14f / 180.0f;
+            sinA = sdfSin(a) * radius;
+            cosA = sdfCos(a) * radius;
+            b = (f32)prev * 3.14f / 180.0f;
+            sinB = sdfSin(b) * radius;
+            cosB = sdfCos(b) * radius;
+            fldDrawPoly3(color, 0x80101010, 0x80101010,
+                         x + 0.0f, y - 2.0f, z + 0.0f,
+                         x + sinA, y - 2.0f, z + cosA,
+                         x + sinB, y - 2.0f, z + cosB);
+        }
+        rsetAlpha(0);
+    }
+}
 INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", D_0054EA38);
 
 INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", D_0054EA40);
