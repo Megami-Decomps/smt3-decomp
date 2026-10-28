@@ -421,9 +421,79 @@ void ragCreateAllList(s32 onlyHearts, s32 type, ragListWork_t *work)
     }
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D140);
+typedef struct fclPanel
+{
+    s32 X;
+    s32 Y;
+    s32 Z;
+    s16 W;
+    s16 H;
+    s32 Col;
+    u8 Spd;
+    u8 reserved15[3];
+    s32 Timer;
+    s32 Timer2;
+    s32 Flag;
+    u8 reserved24[0x10];
+    s32 TexHandle;
+    void (*draw)(struct fclPanel *panel, s32 id);
+    void (*update)(struct fclPanel *panel);
+} fclPanel_t;
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", fclRagLoadTextures);
+typedef struct
+{
+    s32 tex;
+    u16 unk_04;
+    u16 unk_06;
+    u16 unk_08;
+    u16 unk_0A;
+    u16 unk_0C;
+    u16 unk_0E;
+    s32 X;
+    s32 Y;
+    s32 Z;
+    u8 color[4];
+    u8 Flag;
+} fclSprite_t;
+
+typedef struct
+{
+    u8 reserved0000[0x14];
+    void *allocation;
+    u8 reserved0018[0x462C];
+    void *messageFile;
+    u32 script;
+    s32 scriptArg;
+    s32 backgroundTexture;
+    s32 texture[2];
+    fclSprite_t messageSprite;
+    fclPanel_t panel[3];
+} ragLoadTextureWork_t;
+
+extern char *D_0032FC28[];
+extern char D_0053D150[];
+extern char D_0053D170[];
+extern s32 fclLoadTexture(char *filename);
+extern void fclSetPanelTex(fclPanel_t *panel, s32 u0, s32 v0, s32 u1, s32 v1,
+                           s32 texture);
+extern void fclSetSprite(fclSprite_t *sprite, s32 width, s32 height, s32 z,
+                         s32 u0, s32 v0, s32 u1, s32 v1, s32 color, s32 texture);
+
+void fclRagLoadTextures(u8 *data)
+{
+    ragLoadTextureWork_t *work = (ragLoadTextureWork_t *)data;
+    s8 i;
+
+    for (i = 0; (u8)i < 2; i++) {
+        work->texture[i] = fclLoadTexture(D_0032FC28[i]);
+    }
+    fclSetPanelTex(&work->panel[2], 0, 0, 0x100, 0x80, work->texture[1]);
+    work->backgroundTexture = fclLoadTexture(D_0053D150);
+    fclSetSprite(&work->messageSprite, 0x200, 0x1C0, 0, 5, 5, 0x1FB, 0xFB,
+                 0x80808080, work->backgroundTexture);
+    printf(D_0053D170);
+}
+
 
 extern char D_0053D188[];
 
@@ -449,6 +519,12 @@ void fclRagTexLoad(u8 *pData)
         tex++;
     }
 }
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D140);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D150);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D170);
 
 INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D188);
 
