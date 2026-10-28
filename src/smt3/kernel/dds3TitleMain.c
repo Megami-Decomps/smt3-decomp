@@ -71,6 +71,16 @@ extern void frDestroyFontRequestAfter(void *pFRQ);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
+extern void eglSetOt(u32 ot);
+
+extern void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
+
+extern void eglLinkAlpha(s32 mode);
+
+extern void eglLinkSprite(s32 x, s32 y, s32 w, s32 h,
+                          s32 u, s32 v, s32 uw, s32 vh,
+                          u32 rgba0, u32 rgba1, u32 rgba2, u32 rgba3, sdfTexHandle_t *th);
+
 INCLUDE_ASM(const s32, "kernel/dds3TitleMain", dds3Titlemain);
 
 s32 titleStart(s32 mode)
@@ -134,7 +144,15 @@ void mselUpdateCursor(void)
 
 INCLUDE_ASM(const s32, "kernel/dds3TitleMain", mselDrawTitleAnim);
 
-INCLUDE_ASM(const s32, "kernel/dds3TitleMain", mselDrawBackground);
+void mselDrawBackground(void)
+{
+    eglSetOt(0x47);
+    eglLinkTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    eglLinkAlpha(0);
+    eglLinkSprite(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
+                  0x80101010, 0x80101010, 0x80101010, 0x80101010,
+                  gGlobal->unk_48);
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3TitleMain", mselDrawTitleAnim2);
 
