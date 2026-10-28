@@ -894,7 +894,34 @@ s8 cmbFindRaceEntry(u16 devilId, u8 race)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindPairEntry);
+s32 cmbFindPairEntry(u16 first, u16 second)
+{
+    u32 i;
+    cmbPairEntry_t *entry = D_0032DB90;
+
+    for (i = 0; i < 6; i++, entry++) {
+        s32 side = 0;
+        if (entry->devilA == first) {
+            side = 1;
+        }
+        if (entry->devilB == first) {
+            side = 2;
+        }
+        switch (side) {
+        case 1:
+            if (entry->devilB == second) {
+                return entry->result;
+            }
+            break;
+        case 2:
+            if (entry->devilA == second) {
+                return entry->result;
+            }
+            break;
+        }
+    }
+    return 0;
+}
 
 s8 cmbCountSkills(cmbUnit_t *unit)
 {

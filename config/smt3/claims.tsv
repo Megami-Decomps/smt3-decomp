@@ -334,6 +334,7 @@ src/smt3/facility/fclShare.c	redthing1	done	2026-10-28	1 fallback / 92 B	fclDraw
 src/smt3/newbattle/nbResultProcess.c	redthing1	done	2026-10-28	4 new fn / 732 B	caption allocation, level-up timer, shutdown and unit cleanup; recover EXP row types for published completion check; owner 11 match, 0 differ
 src/smt3/facility/fclDraw.c	redthing1	done	2026-10-28	4 fn / 652 B	sprite wrapper, centered number/caption and list text; owner 25 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 112 B	typed fusion result matrices and reset; owner 100 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 140 B	unordered devil pair result lookup; owner 105 match, 0 differ
 src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	1 fn / 168 B	panel animation state callback; switch fallthrough and qualified reorg trace; whole-unit 8 match, 0 differ
 src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	2 fn / 404 B	list initialization and work allocator; recovered prefix bytes and script data output; whole-unit 22 match, 0 differ
 src/smt3/pipe/pipeEffect.c	redthing1	done	2026-10-28	1 fn / 160 B	free effect slot allocation with typed initialization and qualified scheduler evidence; whole-unit 8 match, 0 differ
