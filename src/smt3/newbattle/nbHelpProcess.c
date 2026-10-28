@@ -147,7 +147,7 @@ typedef struct nbMainProcessData_t
     dds3ProcessID_t *encproc;
     dds3ProcessID_t *eventproc;
     u8 unk_11C[0x4];
-    void *pnltex[4];
+    sdfTexHandle_t *pnltex[4];
     s32 unk_130;
     s32 unk_134;
     nbPacHandle_t *modelpack;
@@ -209,7 +209,7 @@ typedef struct nbHelpProcessData_t
     s32 mesid;
     s32 nextmeshandle;
     s32 nextmesid;
-    s32 msgid;
+    s32 panelAlpha;
 } nbHelpProcessData_t;
 
 /* 0x1A4 bytes; only the fields this unit touches are named. */
@@ -584,7 +584,41 @@ void nbHelpOff(void)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbHelpProcess", nbDrawHelpPanel);
+extern void nbPnl_setOt(s32 ot);
+extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail,
+                         s32 date, s32 datm, s32 zte, s32 ztst);
+extern void nbPnl_rsetAlpha(s32 mode);
+
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v,
+                        s32 uw, s32 vh, s32 rgba, sdfTexHandle_t *texture);
+
+void nbDrawHelpPanel(nbHelpProcessData_t *w)
+{
+    nbMainProcessData_t *data;
+    s32 halfWidth;
+    s32 sideWidth;
+    s32 centerX = 0x100;
+    u32 color;
+
+    data = nbGetMainProcessData();
+    nbPnl_setOt(0x47);
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    halfWidth = w->textwidth / 2;
+    color = ((u32)w->panelAlpha << 24) | 0x808080;
+    halfWidth += 0x60;
+    if (halfWidth < 0x88) {
+        halfWidth = 0x88;
+    }
+    sideWidth = halfWidth - 0x88;
+    if (halfWidth < 0x89) {
+        sideWidth = 0;
+    }
+    nbPnlSprite(centerX - halfWidth, 0x4D, 0x88, 0x21, 1, 0x5F, 0x88, 0x21, color, data->pnltex[0]);
+    nbPnlSprite(halfWidth + centerX, 0x6E, -0x88, -0x21, 1, 0x5F, 0x88, 0x21, color, data->pnltex[0]);
+    nbPnlSprite(centerX - sideWidth, 0x4D, sideWidth * 2, 0x21, 0x87, 0x5F, 1, 0x21, color,
+                data->pnltex[0]);
+}
 
 extern void cmpSetSkillListRows(s32 rows);
 extern void itfMesMngSetMesPosition(s32 id, s32 x, s32 y);
@@ -610,28 +644,28 @@ s32 nbHelpProcess1(dds3ProcessID_t *id)
             break;
         case 2:
             w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
-            frSetFontColor(w->textmax, w->msgid | 0x80808000);
+            frSetFontColor(w->textmax, w->panelAlpha | 0x80808000);
             frDrawFontEx(w->textmax, 1);
             frDestroyFontRequestAfter(w->textmax);
             w->textmax = NULL;
             x += w->nextwidth;
             w->textmax = frGetCNameFRQ(0, 1, 0, 0);
             frSetDrawPosition(w->textmax, x << 4, 0x2A0);
-            frSetFontColor(w->textmax, w->msgid | 0x80808000);
+            frSetFontColor(w->textmax, w->panelAlpha | 0x80808000);
             frDrawFontEx(w->textmax, 1);
             frDestroyFontRequestAfter(w->textmax);
             w->textmax = NULL;
             break;
         case 0:
             w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
-            frSetFontColor(w->textmax, w->msgid | 0x80808000);
+            frSetFontColor(w->textmax, w->panelAlpha | 0x80808000);
             frDrawFontEx(w->textmax, 1);
             frDestroyFontRequestAfter(w->textmax);
             w->textmax = NULL;
             if (w->text2 != NULL) {
                 x += w->nextwidth;
                 w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text2, 0);
-                frSetFontColor(w->textmax, w->msgid | 0x80808000);
+                frSetFontColor(w->textmax, w->panelAlpha | 0x80808000);
                 frDrawFontEx(w->textmax, 1);
                 frDestroyFontRequestAfter(w->textmax);
                 w->textmax = NULL;
@@ -675,7 +709,7 @@ nbHelpProcessData_t *nbAllocHelpWork(void)
     w = sdfChipAllocDirect(sizeof(nbHelpProcessData_t));
     memset(w, 0, sizeof(nbHelpProcessData_t));
     w->reqmsgid = -1;
-    w->msgid = 0x80;
+    w->panelAlpha = 0x80;
     return w;
 }
 
