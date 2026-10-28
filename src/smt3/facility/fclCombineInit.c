@@ -445,6 +445,8 @@ typedef struct
     /* 0x1A718 */ u8 *table;
     /* 0x1A71C */ void *panel;
     /* 0x1A720 */ fclRibbon_t *ribbon;
+    /* 0x1A724 */ u8 resultPanelAnim[0x24];
+    /* 0x1A748 */ u8 sacrificePanelAnim[0x24];
 } cmbGbWork_t;
 
 extern cmbGbWork_t *CMB_GBWK;
@@ -2357,9 +2359,60 @@ void cmbSetAction(void)
     cmbAddBirthDevilToStock(&cmbGlobalWork->party[4].unit, 0xC);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateDecideDevil);
+s32 cmbUpdateDecideDevil(void)
+{
+    s32 flag;
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateSacConfirm);
+    if (dds3GetProcessStat(CMB_GBWK->scriptArg) == 2) {
+        return 0;
+    }
+    flag = fclGetFlag(2);
+    switch (flag) {
+    case 0:
+        fclScriptForcedEnd(CMB_GBWK->scriptArg);
+        CMB_GBWK->scriptArg = NULL;
+        fclCombineInitWork();
+        CMB_GBWK->unk_00001 = 13;
+        CMB_GBWK->unk_00004 = 1;
+        cmbSetAction();
+        CMB_GBWK->unk_1650A = 3;
+        break;
+    case 1:
+        fclScriptForcedEnd(CMB_GBWK->scriptArg);
+        if (CMB_GBWK->stockSlot[2].index == -1) {
+            CMB_GBWK->unk_00001 = 6;
+        } else {
+            CMB_GBWK->unk_00001 = 8;
+        }
+        CMB_GBWK->unk_00004 = 2;
+        break;
+    }
+    return 1;
+}
+
+s32 cmbUpdateSacConfirm(void)
+{
+    s32 flag;
+
+    if (dds3GetProcessStat(CMB_GBWK->scriptArg) == 2) {
+        return 0;
+    }
+    flag = fclGetFlag(2);
+    switch (flag) {
+    case 0:
+        fclScriptForcedEnd(CMB_GBWK->scriptArg);
+        CMB_GBWK->unk_00001 = 8;
+        CMB_GBWK->unk_00004 = 1;
+        break;
+    case 1:
+        fclScriptForcedEnd(CMB_GBWK->scriptArg);
+        fclScriptStart(CMB_GBWK->script, 8, &CMB_GBWK->scriptArg);
+        CMB_GBWK->unk_00001 = 11;
+        CMB_GBWK->unk_00004 = flag;
+        break;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateStockCursor2);
 
@@ -2460,7 +2513,46 @@ s32 cmbHandleDebugExit(void)
     return result;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdatePanelAnim);
+extern void fclSetPanelAnimState(void *anim, u8 state);
+
+s32 cmbUpdatePanelAnim(void)
+{
+    s8 phase;
+
+    phase = CMB_GBWK->unk_00001;
+    switch (phase) {
+    case 6:
+    case 7:
+    case 8:
+    case 10:
+    case 11:
+    case 15:
+        fclSetPanelAnimState(CMB_GBWK->resultPanelAnim, 2);
+        break;
+    default:
+        fclSetPanelAnimState(CMB_GBWK->resultPanelAnim, 1);
+        break;
+    }
+
+    switch ((s8)CMB_GBWK->unk_00001) {
+    case 10:
+    case 11:
+    case 15:
+        if (CMB_GBWK->stockSlot[2].index < 0) {
+            break;
+        }
+    case 8:
+        fclSetPanelAnimState(CMB_GBWK->sacrificePanelAnim, 2);
+        break;
+    default:
+        fclSetPanelAnimState(CMB_GBWK->sacrificePanelAnim, 1);
+        break;
+    }
+
+    fclRunPanelAnim(CMB_GBWK->resultPanelAnim);
+    return fclRunPanelAnim(CMB_GBWK->sacrificePanelAnim);
+}
+
 
 extern datUnitWork_t *cmbGetBirthDevilPanel(void);
 
