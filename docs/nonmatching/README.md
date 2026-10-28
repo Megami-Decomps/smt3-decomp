@@ -40,7 +40,6 @@ page and line to open. Conventions are in
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
-| 2 | event/evtPolygonMovie | [event/evtPolygonMovie.md](event/evtPolygonMovie.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |

@@ -160,7 +160,8 @@ extern void evtTransEventBgm(s32 eventNo, s32 bgm);
 extern void p2sdBgmVolDown(void);
 extern void p2sdBgmVolUp(void);
 extern void p2sdStopAllBgm(void);
-extern s32 pacFileCheckEnd(void);
+typedef struct fileRequest fileRequest_t;
+extern s32 pacFileCheckEnd(const fileRequest_t *pacFileHandle);
 extern sdfMemHandle_t *fileGetMemHandle(void *fileHandle);
 extern void *fileLoad(const char *filename);
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, void *data, s32 mode);
@@ -1134,14 +1135,12 @@ s32 evtPolygonMovieProcess2(dds3ProcessID_t *id)
     return ret;
 }
 
-/* NON_MATCHING: 32 of 68 words differ (first at +0x24). */
-#ifdef NON_MATCHING
 void CheckLoad_evtPolygonMovie(evtPolygonMovieWork_t *work)
 {
     if ((work->movieFlags & 8) == 0) {
         if (work->movieFlags & 2) {
             if (work->file04 != NULL) {
-                if (pacFileCheckEnd() != 0) {
+                if (pacFileCheckEnd(work->file04) != 0) {
                     work->mem08 = fileGetMemHandle(work->file04);
                     work->pm1data = (void *)sdfMemLock(work->mem08);
                     fileHandleFree(work->file04);
@@ -1151,7 +1150,7 @@ void CheckLoad_evtPolygonMovie(evtPolygonMovieWork_t *work)
             }
         } else if (work->movieFlags & 4) {
             if (work->file4C != NULL) {
-                if (pacFileCheckEnd() != 0) {
+                if (pacFileCheckEnd(work->file4C) != 0) {
                     work->mem50 = fileGetMemHandle(work->file4C);
                     work->pm2data = (void *)sdfMemLock(work->mem50);
                     fileHandleFree(work->file4C);
@@ -1167,9 +1166,6 @@ void CheckLoad_evtPolygonMovie(evtPolygonMovieWork_t *work)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", CheckLoad_evtPolygonMovie);
-#endif
 
 s32 evtCheckPolygonMovieRun(dds3ProcessID_t *id)
 {
@@ -1797,8 +1793,6 @@ void SetPMFileName(s32 eventno, s32 cutno, char *pm1file, char *pm2file)
     sprintf(pm2file, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2", eventno / 10 * 10, eventno, eventno, cutno, eventno, cutno);
 }
 
-/* NON_MATCHING: 2 of 60 words differ (first at +0x5C). */
-#ifdef NON_MATCHING
 evtPolygonMovieWork_t *evtGetPolygonMovieWorkData2(s32 eventno, s32 cutno, s32 type)
 {
     char pm1file[64];
@@ -1831,9 +1825,6 @@ evtPolygonMovieWork_t *evtGetPolygonMovieWorkData2(s32 eventno, s32 cutno, s32 t
     work->cutNo = cutno;
     return work;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtGetPolygonMovieWorkData2);
-#endif
 
 dds3ProcessID_t *evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno)
 {
