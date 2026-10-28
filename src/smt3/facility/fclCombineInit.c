@@ -501,7 +501,23 @@ extern void frDestroyFontRequestAfter(void *pFRQ);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", fclCombineDisableCmdZensyo);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbEnableMenuEntry5);
+extern u8 cmbMenuEntryTable[8];
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
+
+void cmbEnableMenuEntry5(void)
+{
+    s32 enabled = (evtBitCheck(0x28) ^ 1) != 0;
+    s32 allow = evtBitCheck(0x8A0) ^ 1;
+
+    enabled = (allow != 0) ? enabled : 0;
+    if (enabled != 0) {
+        cmpSetCursorFlag(&CMB_GBWK->menuCursor, (s32)cmbMenuEntryTable);
+        if ((cmbMenuEntryTable[5] & 2) == 0) {
+            cmbMenuEntryTable[5] |= 2;
+            CMB_GBWK->menuCursor.unk_21++;
+        }
+    }
+}
 
 s32 fclCombineChkEventStat(void)
 {
