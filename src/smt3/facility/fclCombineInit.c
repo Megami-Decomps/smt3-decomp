@@ -86,7 +86,7 @@ typedef struct
     u8 flag;
     u8 unk_01[3];
     u8 race;
-    u8 unk_05;
+    u8 baseLevel;
     u8 unk_06[54];
 } datDevilInfo_t;
 
@@ -1513,7 +1513,29 @@ s32 cmbLookupCombine(u16 devilA, u16 devilB, s8 flag)
     return D_0032D270[0][race[1] - 1][race[0] - 1];
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcResultLevel);
+s32 cmbCalcResultLevel(cmbUnit_t *unitA, cmbUnit_t *unitB, cmbUnit_t *unitC, s8 flag)
+{
+    s32 a, b;
+    s32 c = 0;
+    if (flag == 0) {
+        datDevilInfo_t *table = datDevilTable;
+        a = table[unitA->unit.id].baseLevel;
+        b = table[unitB->unit.id].baseLevel;
+        if (unitC != NULL) {
+            c = table[unitC->unit.id].baseLevel;
+        }
+    } else {
+        a = unitA->unit.level;
+        b = unitB->unit.level;
+        if (unitC != NULL) {
+            c = unitC->unit.level;
+        }
+    }
+    if (c == 0) {
+        return ((a + b + 1) >> 1) + 1;
+    }
+    return (a + b + c + 2) / 3;
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetRaceCombineResult);
 
@@ -1875,7 +1897,7 @@ void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst)
     entry = &datDevilTable[devilId];
     sourceParam = &entry->unk_06[0xA];
     destParam = dst->param;
-    dst->level = entry->unk_05;
+    dst->level = entry->baseLevel;
     for (i = 0; i < 6; i++) {
         *destParam++ = *sourceParam++;
     }
