@@ -233,7 +233,33 @@ void objInitMyAdd(void)
     objAdd(&obj);
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", objCopy);
+extern u32 dds3GetRandA(void *state);
+
+void objCopy(s32 offset, f32 x, f32 y, u8 id, u8 action, s16 count, s16 num) {
+    tagPipeObject object;
+    s16 remaining = num;
+
+    memset(&object, 0, 0x20);
+    objMake(&object, offset, id, 0, action, 0);
+
+    while (remaining != 0) {
+        u32 randomValue;
+
+        randomValue = dds3GetRandA(NULL);
+        object.pos[0] = x + (f32)(randomValue % 400) - 200.0f;
+        randomValue = dds3GetRandA(NULL);
+        object.pos[1] = y + (f32)(randomValue % 400) - 200.0f;
+        randomValue = dds3GetRandA(NULL);
+        object.offset = offset + randomValue % 20;
+        randomValue = dds3GetRandA(NULL);
+        object.vpos[0] = (f32)(randomValue % 10) - 5.0f;
+        randomValue = dds3GetRandA(NULL);
+        object.vpos[1] = (f32)(randomValue % 10) - 5.0f;
+        object.count = count;
+        objAdd(&object);
+        remaining--;
+    }
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeObject", objCopy2);
 
