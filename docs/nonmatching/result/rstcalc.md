@@ -2,24 +2,6 @@
 
 Conventions and the reason these are kept: [../../nonmatching.md](../../nonmatching.md).
 
-## rstDrawStatusRow (rstcalc, 0x5C)
-
-21 of 23 words match, at the exact 92-byte size. A pure call wrapper around
-`cmpDrawStatusComEx`.
-
-The two differing words are the `sra` halves of the two `s8` arguments that
-travel on the stack, emitted in the opposite order: retail sign-extends the
-second parameter and then the third, this emits the third and then the
-second. Both `sll` halves, both stack stores, the eight register arguments
-and the frame are identical, so nothing but the schedule is left.
-
-Ruled out: `s8` parameters against `s32` parameters with `(s8)` casts at the
-call; `(s32)` casts on the two stack arguments; `s32` locals copied from the
-parameters and passed instead; an `s8` local for the first parameter; a local
-for the colour constant; a `rstDrawWork_t *` local for the global; and
-renaming the parameters, which changes nothing because the `sll` order
-already matches.
-
 ## cmpFindKugatatiMsgEntry (rstcalc, 0x60)
 
 12 of 24 words differ, at the exact 96-byte size. Scans a devil's 24 level-up

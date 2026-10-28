@@ -54,19 +54,3 @@ three ways of initialising the offset (a statement above the loop, and either
 order inside the `for` init), crossed with both orders of the two terms of the
 damage sum. All twelve produce byte-identical output, so ee-gcc canonicalises
 the sum and the constant-hoisting order is not reachable from the expression.
-
-## datInitPlayer (newdata/datCalc, 0x12C)
-
-7 of 75 words differ, exact size. The `memset`, the 0xEC struct assignment
-from `D_003493C0` with its runtime 8-byte-alignment dispatch, the item clear
-loop and the tail call to `evtBitOn` are all right. What is left is a
-one-register rotation over the two scalar stores: retail puts the constant 1
-in `$4` and the loop index in `$5`, skipping `$2`, while the draft uses `$2`
-and `$4`. Retail also emits `sb 0x1914` before `sw 0x1924` and the draft emits
-them the other way round, and no source order changes that.
-
-Ruled out: both orders of the two stores, written through the `u8 *` local as
-a subscript and as a cast; both declaration orders of the pointer and index
-locals; and four `memset` declarations (the `s32` return meant to reserve
-`$2`, `void *`, unprototyped, and none at all, leaving gcc's builtin). All
-sixteen combinations produce byte-identical output.

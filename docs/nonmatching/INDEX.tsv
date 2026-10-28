@@ -192,19 +192,17 @@ StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/nonmatching/
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/nonmatching/newdata/datCalc.md	5
 datDeadNakama	newdata/datCalc	0xC4	28 of 48 words differ	docs/nonmatching/newdata/datCalc.md	23
 datPartyDamagePipe	newdata/datCalc	0x114	54 of 68 words differ	docs/nonmatching/newdata/datCalc.md	42
-datInitPlayer	newdata/datCalc	0x12C	7 of 75 words differ	docs/nonmatching/newdata/datCalc.md	58
 gameKey1	pb/pbGame	0x2A8	150 of 168 words differ	docs/nonmatching/pb/pbGame.md	5
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame.md	34
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md	59
 roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/nonmatching/pb/pbGame.md	79
-rstDrawStatusRow	rstcalc	0x5C	21 of 23 words match	docs/nonmatching/result/rstcalc.md	5
-cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/nonmatching/result/rstcalc.md	23
-cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/nonmatching/result/rstcalc.md	45
-datFindKugatatiEntry	rstcalc	0x74	28 of 28 words differ	docs/nonmatching/result/rstcalc.md	67
-cmbGetHeartsParamByIndex	rstcalc	0x58	8 of 22 words differ	docs/nonmatching/result/rstcalc.md	92
-cmbCountEvoReady	rstcalc	0x84	9 of 34 words match	docs/nonmatching/result/rstcalc.md	115
-cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/nonmatching/result/rstcalc.md	141
-rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/nonmatching/result/rstcalc.md	170
+cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/nonmatching/result/rstcalc.md	5
+cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/nonmatching/result/rstcalc.md	27
+datFindKugatatiEntry	rstcalc	0x74	28 of 28 words differ	docs/nonmatching/result/rstcalc.md	49
+cmbGetHeartsParamByIndex	rstcalc	0x58	8 of 22 words differ	docs/nonmatching/result/rstcalc.md	74
+cmbCountEvoReady	rstcalc	0x84	9 of 34 words match	docs/nonmatching/result/rstcalc.md	97
+cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/nonmatching/result/rstcalc.md	123
+rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/nonmatching/result/rstcalc.md	152
 rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/nonmatching/result/rstdraw.md	5
 sdfFileCmdAnalyzeFileName	sdf/sdfFileIO	0x120	65 of 72 words matching	docs/nonmatching/sdf/sdfFileIO.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/nonmatching/sdf/sdfGraph.md	5
