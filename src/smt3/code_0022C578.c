@@ -2810,15 +2810,21 @@ void campDhGetEntryRatio(campDhEntry_t *entry)
     }
 }
 
-/* NON_MATCHING: 4 of 38 words differ, exact size; all four are a register pair. */
-#ifdef NON_MATCHING
+typedef struct
+{
+    u8 unk_0000[0x1278];
+    campDhEntry_t entries[25];
+} campDhEntryWork_t;
+
+extern campDhEntryWork_t *campDhEntryWork asm("campDhUpdateWork");
+
 void campDhScanEntries(void)
 {
     s32 ofs;
     s32 i;
 
-    for (ofs = 0, i = 0x18; i >= 0; i--, ofs += 0x34) {
-        campDhEntry_t *entry = (campDhEntry_t *)((u8 *)campDhUpdateWork + ofs + 0x1278);
+    for (ofs = 0, i = 0x18; i >= 0; i--, ofs += sizeof(campDhEntry_t)) {
+        campDhEntry_t *entry = (campDhEntry_t *)((u8 *)campDhEntryWork->entries + ofs);
 
         if (entry->unk_01 < 0) {
             continue;
@@ -2833,9 +2839,7 @@ void campDhScanEntries(void)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDhScanEntries);
-#endif
+
 
 typedef struct
 {
