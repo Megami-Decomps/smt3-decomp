@@ -193,7 +193,45 @@ extern s32 nbCamera_Cut1Enemy_Frame;
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCamera_SkillInfo_Set);
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_GroundCollision);
+/* vu0 routine: project the camera ray to the floor and rebuild its direction. */
+void nbCameraShot_GroundCollision(nbCamera_t *pNbCamera)
+{
+    sdfVector4_t point;
+    sdfVector4_t horizontal;
+    volatile sdfVector4_t scale;
+    f32 height;
+    f32 distance;
+    f32 scale2;
+
+    distance = pNbCamera->distance;
+    scale.z = -distance;
+    scale.x = -distance;
+    scale.y = -distance;
+    SDF_VU0_LOADVECTOR(&pNbCamera->direction);
+    SDF_VU0_LOADVECTOR_B(&scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(pNbCamera);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&point);
+    if (point.y > -20.0f) {
+        SDF_VU0_LOADVECTOR(pNbCamera);
+        SDF_VU0_SETVECTOR_Y(0.0f);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(&point);
+        SDF_VU0_SETVECTOR_Y(0.0f);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(&horizontal);
+        height = pNbCamera->target.y - -20.0f;
+        scale2 = fsqrtf(height * height + distance * distance);
+        point.x = -horizontal.x * scale2;
+        point.y = height;
+        point.z = -horizontal.z * scale2;
+        SDF_VU0_LOADVECTOR(&point);
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+    }
+}
 
 extern f32 effBTLModelGroupGetSphere(u32 group);
 extern void effBTLModelGroupGetDirection(u32 group, sdfVector4_t *pDirection);
