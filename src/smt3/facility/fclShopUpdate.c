@@ -651,7 +651,7 @@ extern void shpUpdateSeqSell(void);
 extern void shpUpdateSeqBuyNums(void);
 extern void shpUpdateSeqSellNums(void);
 extern s32 shpUpdateSeqConfirm(s8 mode);
-extern s32 shpUpdateSeqPay(void);
+extern void shpUpdateSeqPay(void);
 
 INCLUDE_RODATA(const s32, "facility/fclShopUpdate", D_0053D080);
 

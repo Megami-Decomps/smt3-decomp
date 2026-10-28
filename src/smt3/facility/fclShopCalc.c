@@ -178,7 +178,7 @@ s8 shpChkChoiceMax(s32 index, s8 kind, s8 preserveTotal)
 }
 
 extern s32 fclChkDbgProcess(void);
-extern void shopStartEvent(s32 mode);
+extern s32 shopStartEvent(s8 mode);
 extern s32 dds3GetProcessStat(void *id);
 extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
 extern void fclClearFlag(s8 index);
