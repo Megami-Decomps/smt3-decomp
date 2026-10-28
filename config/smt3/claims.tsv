@@ -281,3 +281,7 @@ src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	2 fn / 148 B	character-code in
 src/smt3/event/evtMoon.c	redthing1	done	2026-10-28	1 fn / 300 B	evtMoonProcess1; PAC texture-list transfer into six owned handles
 src/smt3/effect/polyManager.c	redthing1	done	2026-10-28	3 functions / 1804 B	dds3TrackPolyVCRefresh_ParType2, Set_AcuteW, Set2_Acute matched from current DDS C bodies
 src/smt3/effect/polyManager.c	redthing1	done	2026-10-28	1 fn / 344 B	dds3SpPoly_Ring_Old_New matched from immutable DDS C donor using typed no-global-clobber copy contract; whole-unit 84 match, 0 differ
+src/smt3/newbattle/nbAtoProcess.c	redthing1	done	2026-10-28	1 fn / 92 B	three boot resource loads; process initializer already matched on main
+src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	2 fn / 320 B	terminal process startup/destruction with recovered work layout
+src/smt3/kernel/dds3CreateData.c	redthing1	done	2026-10-28	2 fn / 416 B	UI field setup and font cleanup; natural texture-loader draft retained
+src/smt3/interface/frWrap.c	redthing1	done	2026-10-28	1 fn / 32 B	fixed-mode font request wrapper
