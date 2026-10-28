@@ -1001,8 +1001,6 @@ s32 cmbIsSpecialPair(s32 devilA, s32 devilB, s32 race)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindCombineResult);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindUnlockedResult);
-
 typedef struct {
     u16 devilA;
     u16 devilB;
@@ -1013,6 +1011,54 @@ typedef struct {
 extern cmbTripleEntry_t D_0032DBE0[];
 extern cmbPairEntry_t D_0032DC18[];
 extern cmbPairEntry_t D_0032DC90[];
+
+extern u16 cmbCalcCombineResult(cmbUnit_t *unitA, cmbUnit_t *unitB, s8 flag,
+                                s8 levelFlag);
+
+u16 cmbFindUnlockedResult(cmbUnit_t *unitA, cmbUnit_t *unitB, cmbUnit_t *unitC,
+                          s8 flag, s8 levelFlag)
+{
+    cmbTripleEntry_t *table = D_0032DBE0;
+    s32 pass = 0;
+    u16 ids[3];
+    u16 result;
+    u32 i;
+    cmbPairEntry_t *pair;
+
+    ids[0] = unitA->unit.id;
+    ids[1] = unitB->unit.id;
+    ids[2] = unitC->unit.id;
+    for (; pass < 2; pass++) {
+        u32 j = 0;
+        cmbTripleEntry_t *entry = table;
+        for (; j < 7; j++, entry++) {
+            if (entry->devilA == ids[0] && entry->devilB == ids[1] &&
+                entry->devilC == ids[2]) {
+                result = entry->result;
+                if (cmbDevilIsUnlocked(result) == 0) {
+                    return result;
+                }
+            }
+        }
+        {
+            u16 swap = ids[0];
+            ids[0] = ids[1];
+            ids[1] = swap;
+        }
+    }
+    ids[0] = cmbCalcCombineResult(unitA, unitB, flag, levelFlag);
+    ids[1] = unitC->unit.id;
+    pair = D_0032DC18;
+    for (i = 0; i < 19; i++, pair++) {
+        if (pair->devilA == ids[0] && pair->devilB == ids[1]) {
+            result = pair->result;
+            if (cmbDevilIsUnlocked(result) == 0) {
+                return result;
+            }
+        }
+    }
+    return 0;
+}
 
 s32 cmbFindBirthEntry(u16 devilId)
 {

@@ -362,6 +362,7 @@ src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 220 B	stock-
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 140 B	new-moon active-party pair presence scan and exclusive-result mask; owner 132 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 172 B	occupied stock compaction with custom copy and vacated-record clear; owner 133 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 268 B	moon-interval and race lookup with item and unlock eligibility; owner 134 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 400 B	three-devil rules in both orientations and eligible pair fallback; owner 135 match, 0 differ
 src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	1 fn / 168 B	panel animation state callback; switch fallthrough and qualified reorg trace; whole-unit 8 match, 0 differ
 src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	2 fn / 404 B	list initialization and work allocator; recovered prefix bytes and script data output; whole-unit 22 match, 0 differ
 src/smt3/pipe/pipeEffect.c	redthing1	done	2026-10-28	1 fn / 160 B	free effect slot allocation with typed initialization and qualified scheduler evidence; whole-unit 8 match, 0 differ
