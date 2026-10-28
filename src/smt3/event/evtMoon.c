@@ -111,7 +111,65 @@ void evtDisableMoonDraw2(void)
 
 INCLUDE_ASM(const s32, "event/evtMoon", evtMoonProcess2);
 
-INCLUDE_ASM(const s32, "event/evtMoon", evtMoonAddMove);
+extern s32 dds3GetRandIntA(s32 minimum, s32 range);
+extern s32 evtBitCheck(s32 eventNo);
+extern void evtBitOn(s32 eventNo);
+extern void fldEsutoMaClearMsg(void);
+extern void fldRiberaMaClearMsg(void);
+extern void fldRifutoMaClearMsg(void);
+extern void fldLightMaClearMsg(void);
+extern s32 printf(const char *format, ...);
+extern s32 evtMoonMove;
+
+void evtMoonAddMove(f32 delta)
+{
+    if ((DDS3_GBWK->moonFlags & 1) == 0) {
+        return;
+    }
+    DDS3_GBWK->moonTimer += delta;
+    if (!(4500.0f < DDS3_GBWK->moonTimer)) {
+        return;
+    }
+    {
+        u8 age = DDS3_GBWK->moonPhase + 1;
+        DDS3_GBWK->moonTimer = 0.0f;
+        evtSetAgeOfMoon(age & 0xF);
+        evtMoonMove = 30;
+        if (evtGetAgeOfMoon() == 0) {
+            fldEsutoMaClearMsg();
+            fldRiberaMaClearMsg();
+            fldRifutoMaClearMsg();
+            fldLightMaClearMsg();
+        }
+    }
+    DDS3_GBWK->unkA42[0]++;
+    if (dds3GetRandIntA(0, 2) + 12 < DDS3_GBWK->unkA42[0]) {
+        DDS3_GBWK->unkA42[0] = 0;
+    }
+    if (evtBitCheck(0x502) != 0) {
+        if (DDS3_GBWK->moonAnahoriCount < 0xF0) {
+            DDS3_GBWK->moonAnahoriCount++;
+            printf("moon anahori:%d\n", DDS3_GBWK->moonAnahoriCount);
+        }
+        if (evtBitCheck(0x504) != 0) {
+            if (DDS3_GBWK->moonAnahoriCount == 0x30) {
+                evtBitOn(0x505);
+            }
+            if (DDS3_GBWK->moonAnahoriCount == 0x70) {
+                evtBitOn(0x506);
+            }
+        } else {
+            if (DDS3_GBWK->moonAnahoriCount == 0x30) {
+                evtBitOn(0x505);
+            }
+            if (DDS3_GBWK->moonAnahoriCount == 0xA0) {
+                evtBitOn(0x506);
+            }
+        }
+    } else if (evtBitCheck(0x503) == 0) {
+        DDS3_GBWK->moonAnahoriCount = 0;
+    }
+}
 
 INCLUDE_RODATA(const s32, "event/evtMoon", D_0053B1F8);
 
