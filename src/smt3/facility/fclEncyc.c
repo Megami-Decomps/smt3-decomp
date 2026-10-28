@@ -140,16 +140,39 @@ extern s32 printf(const char *fmt, ...);
 
 typedef struct
 {
-    /* 0x00 */ u8 unk_00[0xC];
-    /* 0x0C */ s32 unk_0C;
-    /* 0x10 */ s32 unk_10;
-    /* 0x14 */ s32 unk_14;
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s16 unk_1C;
+    /* 0x00 */ s16 recordIndex;
+    /* 0x02 */ u16 flags;
+    /* 0x04 */ s32 mak;
+    /* 0x08 */ s32 msgid;
+    /* 0x0C */ s32 ribbonX;
+    /* 0x10 */ s32 ribbonY;
+    /* 0x14 */ s32 ribbonWidth;
+    /* 0x18 */ s32 ribbonHeight;
+    /* 0x1C */ s16 ribbonAlpha;
     /* 0x1E */ u8 unk_1E[2];
-    /* 0x20 */ s32 unk_20;
+    /* 0x20 */ s32 ribbonVelocity;
     /* 0x24 */ s32 ribbon_accel;
 } fclEncyc_readmainwork_tag;
+
+/* The confirmation phase keeps the animated coordinates inline in native
+ * work; the HD view models the corresponding record position as a vector. */
+typedef struct
+{
+    /* 0x00 */ u8 flag;
+    /* 0x01 */ u8 period;
+    /* 0x02 */ s16 unitIndex;
+    /* 0x04 */ s32 statusAlpha;
+    /* 0x08 */ s32 xNow;
+    /* 0x0C */ s32 incNow;
+    /* 0x10 */ s32 xRecord;
+    /* 0x14 */ s32 incRecord;
+    /* 0x18 */ s32 registX;
+    /* 0x1C */ s32 registY;
+    /* 0x20 */ s32 registInc;
+    /* 0x24 */ s16 registAlpha;
+    /* 0x26 */ u8 dispregist;
+    /* 0x27 */ u8 unk_27;
+} fclEncyc_registconfirmwork_tag;
 
 extern s32 dds3KillProcess(s32 id, s32 shutdowntimer);
 
@@ -632,12 +655,12 @@ void AdjustStackCursor(s32 numlist, s16 *pindex, s16 *pshift)
 
 void ResetReadMainRibbon(fclEncyc_readmainwork_tag *pwork)
 {
-    pwork->unk_0C = 0;
-    pwork->unk_10 = 0x58;
-    pwork->unk_14 = 0x480;
-    pwork->unk_18 = 0xA8;
-    pwork->unk_1C = 0x80;
-    pwork->unk_20 = 0;
+    pwork->ribbonX = 0;
+    pwork->ribbonY = 0x58;
+    pwork->ribbonWidth = 0x480;
+    pwork->ribbonHeight = 0xA8;
+    pwork->ribbonAlpha = 0x80;
+    pwork->ribbonVelocity = 0;
     pwork->ribbon_accel = 0x100;
 }
 
@@ -753,26 +776,26 @@ void ReleaseFontExplain(fclEncyc_instance_tag *pinst, s32 release_mesmng)
 
 void FadeOutRibbon(fclEncyc_readmainwork_tag *pwork)
 {
-    pwork->unk_1C -= 0x10;
-    if (pwork->unk_1C < 0) {
-        pwork->unk_1C = 0;
+    pwork->ribbonAlpha -= 0x10;
+    if (pwork->ribbonAlpha < 0) {
+        pwork->ribbonAlpha = 0;
     }
-    pwork->unk_20 += 0x20;
-    pwork->unk_0C -= pwork->unk_20;
-    pwork->unk_14 -= pwork->ribbon_accel;
+    pwork->ribbonVelocity += 0x20;
+    pwork->ribbonX -= pwork->ribbonVelocity;
+    pwork->ribbonWidth -= pwork->ribbon_accel;
     pwork->ribbon_accel -= 0x20;
 }
 
 void FadeInRibbon(fclEncyc_readmainwork_tag *pwork)
 {
-    pwork->unk_1C += 0x10;
-    if (pwork->unk_1C >= 0x81) {
-        pwork->unk_1C = 0x80;
+    pwork->ribbonAlpha += 0x10;
+    if (pwork->ribbonAlpha >= 0x81) {
+        pwork->ribbonAlpha = 0x80;
     }
     pwork->ribbon_accel += 0x20;
-    pwork->unk_0C += pwork->unk_20;
-    pwork->unk_20 -= 0x20;
-    pwork->unk_14 += pwork->ribbon_accel;
+    pwork->ribbonX += pwork->ribbonVelocity;
+    pwork->ribbonVelocity -= 0x20;
+    pwork->ribbonWidth += pwork->ribbon_accel;
 }
 
 s32 GetDevilParam(fclencyceelem_t *pelem, s32 type)
@@ -908,11 +931,60 @@ void ChangeDevilObjectReadMain(s32 recindex, fclEncyc_instance_tag *pinst)
     SetRecordToUnitCore((void *)(base + 0x90), record);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcMoveRegistKeyHelp);
+void CalcMoveRegistKeyHelp(fclEncyc_registconfirmwork_tag *pwork)
+{
+    s32 alpha = pwork->registAlpha;
+
+    if (pwork->dispregist != 0) {
+        alpha += 0x10;
+        if (alpha > 0x80) {
+            alpha = 0x80;
+        } else {
+            pwork->registY -= pwork->registInc;
+            pwork->registInc -= 4;
+        }
+    } else {
+        alpha -= 0x10;
+        if (alpha < 0) {
+            pwork->registX = 0x1370;
+            pwork->registY = 0xD20;
+            pwork->registInc = 0x20;
+            alpha = 0;
+        } else {
+            pwork->registInc += 4;
+            pwork->registY += pwork->registInc;
+        }
+    }
+    pwork->registAlpha = alpha;
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcMoveReadMainHelp);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcMoveViewModeRibbon);
+void CalcMoveViewModeRibbon(fclEncyc_readmainwork_tag *pwork)
+{
+    s32 alpha = pwork->ribbonAlpha;
+
+    if ((pwork->flags & 0x20) == 0) {
+        alpha += 0x10;
+        if (alpha >= 0x81) {
+            pwork->ribbonY = 0x58;
+            pwork->ribbonVelocity = 0;
+            alpha = 0x80;
+        } else {
+            pwork->ribbonY += pwork->ribbonVelocity;
+            pwork->ribbonVelocity -= 4;
+        }
+    } else {
+        alpha -= 0x10;
+        if (alpha < 0) {
+            alpha = 0;
+        } else {
+            pwork->ribbonVelocity += 4;
+            pwork->ribbonY -= pwork->ribbonVelocity;
+        }
+    }
+    pwork->ribbonAlpha = alpha;
+}
 
 extern s32 fclDrawPanel(fclPanel_t *pPanel, s32 OtNo);
 
