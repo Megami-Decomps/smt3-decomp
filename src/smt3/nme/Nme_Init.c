@@ -101,7 +101,25 @@ s32 nmeGetRowCount(s8 mode)
     }
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameBuffer);
+void nmeInitNameBuffer(s8 mode, nmeWork_t *work) {
+    work->inputMode = mode;
+    work->inputPos = 0;
+    work->primaryCursorActive = 0;
+    work->alternateCursorActive = 0;
+    work->unk1B = 0;
+    nmeInitNameCursor(2, work);
+    switch (mode) {
+    case 0:
+    case 1:
+        cmpInitCursorRange(&work->modeCursor, 4, 4, 0);
+        return cmpInitCursorLayout(&work->modeCursor, 0, 0, 0, 0, 0);
+    case 2:
+        cmpInitCursorRange(&work->modeCursor, 3, 3, 0);
+        cmpInitCursorLayout(&work->modeCursor, 0, 0, 0, 0, 0);
+        break;
+    }
+}
+
 
 extern const char *D_005276C4 __attribute__((section(".data")));
 extern u32 strlen(const char *string);
