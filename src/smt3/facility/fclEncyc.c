@@ -2783,9 +2783,49 @@ s32 DebugProcViewkey(fclEncyc_instance_tag *pinst, fclRibbon_t *work,
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D898);
+extern const char D_0053D8B0[];
+extern const char D_0053D8C0[];
+extern const char D_0053D8D0[];
+extern const char D_0053D8E0[];
+extern const char D_0053D8F0[];
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcDispBound);
+extern u64 sdfFloatToULong(f32 value);
+EQUATE_FPTODP();
+
+s32 DebugProcDispBound(fclEncyc_instance_tag *pinst, fclRibbon_t *debugWork,
+                       sdfDrawTag_t *tag)
+{
+    if (((u32)(s32)dds3PadButtonState[0x33] >> 31) | (((u8)dds3PadButtonState[0x31] >> 1) & 1)) {
+        debugWork->unk_04 = 0;
+    }
+
+    dds3ConsPanelTagLink(tag, 0x10, 0x10, 0x16, 7);
+    if ((s16)pinst->unk_58 != 7) {
+        return 0;
+    }
+
+    {
+        fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
+        u16 devilId = *(u16 *)((u8 *)encycSaveWork + work->phase.recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+        f32 radius = work->phase.cameraRadius;
+
+        radius -= pinst->camera[1].w;
+        radius -= datModelParamTable[devilId].formsize;
+        radius -= 80.0f;
+
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7A00, 0x00FFFFF0, 0,
+                                               D_0053D8B0, devilId));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7A60, 0x00FFFFF0, 0,
+                                               D_0053D8C0, radius));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7AC0, 0x00FFFFF0, 0,
+                                               D_0053D8D0, work->phase.cameraAngle));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7B20, 0x00FFFFF0, 0,
+                                               D_0053D8E0, work->reserved040));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7B80, 0x00FFFFF0, 0,
+                                               D_0053D8F0, work->reserved044));
+    }
+    return 0;
+}
 
 extern void *memmove(void *dest, const void *source, unsigned int size);
 
@@ -2833,6 +2873,18 @@ void DebugUpdateListwin(fclEncyc_instance_tag *pinst)
                       ? pinst->entries.read.sorted[1] : pinst->entries.read.sorted[0]);
     drawEncycRatio(&work->requests[2], 1);
 }
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D898);
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D8B0);
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D8C0);
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D8D0);
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D8E0);
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D8F0);
+
 INCLUDE_SDATA(const s32, "facility/fclEncyc", g_pinst);
 
 INCLUDE_SDATA(const s32, "facility/fclEncyc", g_pdebug);

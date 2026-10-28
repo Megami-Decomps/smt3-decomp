@@ -402,3 +402,4 @@ src/smt3/facility/fclTerminalUpdate.c	redthing1	done	2026-10-28	4 fn / 1600 B	co
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 264 B	view bounds from native model and camera parameters; owner 93 match, 0 differ
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 672 B	summon pricing, availability and script preparation; owner 94 match, 0 differ
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 260 B	debug view-key selection; owner 95 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 516 B	debug model-bound display with native float promotion; owner 96 match, 0 differ
