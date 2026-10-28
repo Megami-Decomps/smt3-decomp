@@ -701,7 +701,23 @@ void cmbInitStockCursor(void)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSeqBuildResultTable);
+extern void cmbCreateCombineResultTable(s32 mode);
+
+void cmbSeqBuildResultTable(void)
+{
+    if (CMB_GBWK->unk_00004 != 0) {
+        cmbCreateLocalStock();
+    }
+
+    if (CMB_GBWK->unk_00004 == 1) {
+        cmbCreateCombineResultTable(1);
+        cmpInitCursorRange(&CMB_GBWK->stockCursorGroup[2].cursor,
+                           CMB_GBWK->stockCursorCount, CMB_GBWK->stockCursorCount, 0);
+        cmpInitCursorLayout(&CMB_GBWK->stockCursorGroup[2].cursor, 0x2B, 0x80, 0x1C5,
+                            0x15, 0x17);
+        cmpClearCursorSlots(&CMB_GBWK->stockCursorGroup[2].cursor);
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSetupBirthPanel);
 
