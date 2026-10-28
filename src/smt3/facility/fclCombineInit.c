@@ -185,7 +185,7 @@ extern char D_0053CF10[];
 
 extern void sortSkillList(cmbUnit_t *unit);
 
-extern void p2sdStopBGM(s32 id);
+extern s32 p2sdStopBGM(s32 id);
 
 extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
@@ -336,7 +336,7 @@ typedef struct
 
 extern cmbSlotParam_t D_0032DE28[];
 
-extern s32 p2sdPlayBGM(s32 MidiNo);
+extern void p2sdPlayBGM(s32 MidiNo);
 
 typedef struct
 {
@@ -642,7 +642,45 @@ s32 fclCombineCheckMoonPhase(void)
     return found == 3 ? 0 : found;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", fclCombineBGM);
+extern void p2sdPlayBGMFade(s32 id);
+
+void fclCombineBGM(s8 mode)
+{
+    s32 generalStat = cmbChkGeneralStat();
+    s8 previous = (s8)CMB_GBWK->unk_0410C[1];
+    s32 bgm;
+
+    switch (previous) {
+    case 1:
+        bgm = 0x360000;
+        break;
+    case 2:
+        bgm = 0x370000;
+        break;
+    default:
+        if (generalStat == 1) {
+            bgm = 0x330000;
+        } else {
+            bgm = generalStat == 0 ? 0x350000 : 0x320000;
+        }
+        break;
+    }
+
+    switch (mode) {
+    case 0:
+        p2sdPlayBGM(bgm);
+        break;
+    case 1:
+        p2sdStopBGM(bgm);
+        break;
+    case 2:
+        p2sdPlayBGMFade(bgm);
+        /* Qualified cc1probe: selector reset uid146 survives sibling-call
+         * selection and is deleted in life analysis, preserving retail jal. */
+        mode = 0;
+        break;
+    }
+}
 
 void fclCombineInitRagTex(u8 *work)
 {
