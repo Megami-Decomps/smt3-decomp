@@ -252,7 +252,66 @@ INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvFullHeal);
 
 INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvCreateLocalStock);
 
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvCalc);
+typedef struct rcvCalcWork_t {
+    u8 flags;
+    s8 sequence;
+    s8 partyCount;
+    s8 reserveCount;
+    s8 sequenceChanged;
+    s8 stock[16];
+    u8 unk0015[0xB];
+    cmpCursorInfo_t cursor;
+    u8 unk0058[0x1004];
+    s32 recoverPrices[16];
+    u8 unk109C[0x3430];
+    s32 script;
+    s32 scriptProcess;
+    u8 unk44D4[0x24];
+    s32 unk44F8;
+} rcvCalcWork_t;
+
+typedef struct cmpInfoWindow_t cmpInfoWindow_t;
+extern rcvCalcWork_t *rcvCalcState;
+extern void *dds3GetProcessData(s32 id);
+extern s32 dds3GetProcessStat(s32 id);
+extern void cmpClearCursorSlots(cmpCursorInfo_t *cursor);
+extern s32 fclScriptStart(s32 script, s32 entry, void *process);
+extern void fclClearFlag(s8 index);
+extern void cmpUpdateTerminate(cmpInfoWindow_t *window);
+
+s32 rcvCalc(s32 id)
+{
+    rcvCalcWork_t *work;
+    rcvCalcState = dds3GetProcessData(id);
+    if (fclGetFlag(1) == 0) {
+        return 0;
+    }
+    work = rcvCalcState;
+    switch (work->sequence) {
+    case 0:
+        work->unk44F8 = 0;
+        cmpClearCursorSlots(&work->cursor);
+        if (rcvCalcState->sequenceChanged == 1) {
+            if (dds3GetProcessStat(rcvCalcState->scriptProcess) != 2) {
+                rcvCalcState->scriptProcess = fclScriptStart(rcvCalcState->script, 0, NULL);
+            }
+        }
+        break;
+    case 5:
+        if (work->sequenceChanged == 1) {
+            work->recoverPrices[0] = rcvGetHealCost();
+            fclClearFlag(2);
+        }
+        break;
+    }
+    rcvCalcState->sequenceChanged = 0;
+    if (rcvCalcState->flags & 0x10) {
+        cmpUpdateTerminate((cmpInfoWindow_t *)rcvCalcState);
+        return -1;
+    }
+    return 0;
+}
+
 
 typedef struct
 {
