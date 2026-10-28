@@ -34,6 +34,7 @@ page and line to open. Conventions are in
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
+| 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
 | 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
@@ -46,7 +47,6 @@ page and line to open. Conventions are in
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
 | 2 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
-| 1 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
 | 1 | sdf/sdfIpu | [sdf/sdfIpu.md](sdf/sdfIpu.md) |

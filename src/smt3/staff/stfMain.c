@@ -206,7 +206,134 @@ void GetoStaffUI(void) {
                 oStaff_UI->textureHandle);
 }
 
+extern void stfResetUI(void);
+extern void DrwSprite2DC(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                         u32 rgba0, u32 rgba1, u32 rgba2, u32 rgba3, sdfTexHandle_t *th);
+extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0,
+                      u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2,
+                      u32 r3, u32 g3, u32 b3, u32 a3);
+
+/* NON_MATCHING: 303 of 321 words match at retail's size. The clamp ties its
+ * cmov to the constant's register, so movn where retail has movz. */
+#ifdef NON_MATCHING
+void ObjDispOff(void)
+{
+    s32 step;
+    s32 cover;
+    s32 width;
+    s32 x;
+    s32 fade;
+    s32 alpha;
+
+    if (oStaff_UI->unk_000C == 0) {
+        return;
+    }
+    step = 2;
+    if (oStaff_UI->unk_0110 != 0xF) {
+        step = 1;
+    }
+    if (oStaff_UI->unk_0100 >= 0x450) {
+        stfResetUI();
+        return;
+    }
+
+    rsetOtOfs(0x47);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    rsetAlpha(0);
+    cover = oStaff_UI->unk_0100 * 3;
+    if (cover > 0x200) {
+        cover = 0x200;
+    }
+    if (cover >= 0x200) {
+        oStaff_UI->unk_0104 = oStaff_UI->unk_0104 + 2;
+        if (oStaff_UI->unk_0104 > 0x80) {
+            oStaff_UI->unk_0104 = 0x80;
+        }
+        alpha = oStaff_UI->unk_0104;
+        rsetAlpha(0);
+        DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
+                    (alpha << 24) | 0xA0A0A0, (sdfTexHandle_t *)oStaff_UI->unk_000C);
+        DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
+                    0x80A0A0A0, (sdfTexHandle_t *)oStaff_UI->unk_0008);
+    }
+    rsetAlpha(1);
+    if (oStaff_UI->unk_010C < 0) {
+        width = 0x100;
+        fade = 0;
+        x = 0x200 - oStaff_UI->unk_0100 * 3;
+        if (x >= -0xFF) {
+            if (x < 0) {
+                fade = -x;
+                x = 0;
+                width = 0x100 - fade;
+                fade = fade / 2;
+            }
+            DrwSprite2DC(x, 0, width, 0x1C0, x, 0, width, 0x1C0,
+                         (fade << 24) | 0xFFFFFF, 0x80FFFFFF, 0x80FFFFFF,
+                         (fade << 24) | 0xFFFFFF,
+                         (sdfTexHandle_t *)oStaff_UI->unk_0004);
+            if (x + width < 0x200) {
+                DrwSprite2D(x + width, 0, 0x200 - (x + width), 0x1C0,
+                            x + width, 0, 0x200 - (x + width), 0x1C0,
+                            0x80FFFFFF, (sdfTexHandle_t *)oStaff_UI->unk_0004);
+            }
+        } else {
+            DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80FFFFFF,
+                        (sdfTexHandle_t *)oStaff_UI->unk_0004);
+        }
+    } else {
+        fade = 0;
+        width = 0x300;
+        if (oStaff_UI->unk_0100 * 3 <= 0x300) {
+            width = oStaff_UI->unk_0100 * 3;
+        }
+        if (width < 0x100) {
+            fade = width / 2;
+            DrwSprite2DC(0, 0, width, 0x1C0, 0, 0, width, 0x1C0,
+                         (fade << 24) | 0xFFFFFF, 0xFFFFFF, 0xFFFFFF,
+                         (fade << 24) | 0xFFFFFF,
+                         (sdfTexHandle_t *)oStaff_UI->unk_0004);
+        } else if (width < 0x300) {
+            x = width - 0x100;
+            if (width >= 0x201) {
+                fade = (width - 0x200) / 2;
+                width = 0x200 - x;
+            } else {
+                width = 0x100;
+            }
+            DrwSprite2DC(x, 0, width, 0x1C0, x, 0, width, 0x1C0,
+                         0x80FFFFFF, (fade << 24) | 0xFFFFFF,
+                         (fade << 24) | 0xFFFFFF, 0x80FFFFFF,
+                         (sdfTexHandle_t *)oStaff_UI->unk_0004);
+            DrwSprite2D(0, 0, x, 0x1C0, 0, 0, x, 0x1C0, 0x80FFFFFF,
+                        (sdfTexHandle_t *)oStaff_UI->unk_0004);
+        } else {
+            DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80FFFFFF,
+                        (sdfTexHandle_t *)oStaff_UI->unk_0004);
+        }
+    }
+    rsetAlpha(0);
+    if (oStaff_UI->unk_0100 >= 0x3BB) {
+        if (oStaff_UI->unk_0114 < 0x80) {
+            oStaff_UI->unk_0114 = oStaff_UI->unk_0114 + 2 / step;
+        } else {
+            oStaff_UI->unk_0114 = 0x80;
+        }
+        alpha = oStaff_UI->unk_0114;
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        if (alpha > 0x80) {
+            alpha = 0x80;
+        }
+        aDrawBoxG(0, 0, 0x200, 0xE0, 0, 0, 0, alpha, 0, 0, 0, alpha,
+                  0, 0, 0, alpha, 0, 0, 0, alpha);
+    }
+    oStaff_UI->unk_0100 = oStaff_UI->unk_0100 + 1;
+}
+#else
 INCLUDE_ASM(const s32, "staff/stfMain", ObjDispOff);
+#endif
 
 extern s32 p2sdGetPcmState(void);
 

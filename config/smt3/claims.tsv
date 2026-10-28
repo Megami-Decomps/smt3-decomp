@@ -527,3 +527,4 @@ src/smt3/field/fldSky.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	sk
 src/smt3/newbattle/nbMakePacket.c	redthing1	done	2026-10-28	1 fn / 416 B	press-count adjustment with native case transitions, bounded counts and qualified one-pass loop
 src/smt3/newbattle/nbMakePacket.c	redthing1	done	2026-10-28	1 fn / 756 B	activation effect cut overrides, sound mapping and cut end-frame publication; owner 72 match, 0 differ
 coverage sweep, fourth batch	z19	open	2026-10-28	55 fn / 68680 B	33 units finishable; no sub-agents
+coverage sweep, claim-free queue	z20	done	2026-10-29	3 fn / 3616 B	3 units closed: nbCameraNego, dds3PadManager, pbMenu; two stfMain drafts parked

@@ -32,3 +32,25 @@ drags along: `subu $3, $6, $3` for `0x100 - w / 2` comes out as
 of those three moved under any source spelling of the expressions themselves
 (a named local for the coordinate, `w = w / 2` first, and reordering the `w`
 and `y` declarations all give byte-identical output), so they follow the guard.
+
+## ObjDispOff (staff/stfMain, 0x504)
+
+303 of 321 words match, at retail's size.
+
+The two things that got it there, from 87 matching words, are both layout. The
+`x < -0xFF` fallback must be the `else` of `if (x >= -0xFF)`, so retail's
+forward `bnez` puts it out of line. And `width = 0x100` has to precede
+`fade = 0`, because retail's `bnez` delay slot holds `daddu $5, $0, $0`, which
+serves as both `fade` and the `y` argument of the fallback's `DrwSprite2D`;
+with `fade = 0` first the draft emits that zero twice and is 14 words worse.
+
+What is left is one register-allocation tie, repeated. For
+`cover = unk_0100 * 3; if (cover > 0x200) cover = 0x200;` retail ties the cmov
+and the `addu` of the `* 3` to the value's register and emits
+`movz $2, $5, $3`; the draft ties both to the constant's and emits
+`movn $4, $2, $3`. That swaps `$2`/`$4`/`$5` through the clamp, the `* 3`, and
+the later `slti $2, $18, 0x100`, and leaves the two `addiu`s of `step`'s 1 and
+2 in the other order in the entry block's delay slot. Ruled out: `>= 0x201`
+for the clamp, both ternary spellings, loading `unk_0100` into the same local
+first, every permutation of the local declarations, and splitting the two uses
+of `alpha` (which costs 16 words).

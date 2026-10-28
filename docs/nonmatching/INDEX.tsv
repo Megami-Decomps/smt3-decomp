@@ -241,3 +241,4 @@ sceMcSetFileInfo				docs/nonmatching/sdk/libmc.md	60
 _send_to_iop			28 of 69 words differ	docs/nonmatching/sdk/libpad.md	15
 scePadPortOpen				docs/nonmatching/sdk/libpad.md	30
 stfMain2	staff/stfMain	0x2D4	145 of 181 words match	docs/nonmatching/staff/stfMain.md	5
+ObjDispOff	staff/stfMain	0x504	303 of 321 words match	docs/nonmatching/staff/stfMain.md	36
