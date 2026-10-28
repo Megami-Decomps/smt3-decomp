@@ -97,6 +97,14 @@ typedef struct
  * partial views; the alias holds them apart until one covers the object. */
 extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
 
+typedef struct
+{
+    u8 unk_00000[0x1928];
+    u8 item[0xA0];
+} fclGlobalWorkItemInventory_t;
+
+extern fclGlobalWorkItemInventory_t *fclGlobalWorkItems asm("DDS3_GBWK");
+
 extern s32 datAddItem(s32 id, s32 num);
 
 extern s32 dds3KillProcess(s32 id, s32 shutdowntimer);
@@ -262,7 +270,19 @@ void func_00213BB8(fclItemList_t *list)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclMisc", fclCreateItemListEx);
+extern s32 cmpItemHasFlag(u16 item, s8 which);
+
+void fclCreateItemListEx(fclItemList_t *list, s8 which)
+{
+    s32 item;
+
+    list->count = 0;
+    for (item = 1; item < 0xA0; item++) {
+        if (fclGlobalWorkItems->item[item] != 0 && cmpItemHasFlag(item, which) != 0) {
+            list->item[list->count++] = item;
+        }
+    }
+}
 
 s32 cmpItemOrder(u8 *a, u8 *b)
 {
