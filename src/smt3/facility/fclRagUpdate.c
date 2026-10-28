@@ -62,6 +62,12 @@ typedef struct
 
 typedef struct
 {
+    u8 unk_00000[0x15C];
+    cmpCursorInfo_t listCursor;
+} ragListWindow_t;
+
+typedef struct
+{
     /* 0x0000 */ u8 unk_0000;
     /* 0x0001 */ s8 unk_0001;
     /* 0x0002 */ s8 unk_0002;
@@ -72,11 +78,23 @@ typedef struct
     /* 0x0008 */ s32 unk_0008;
     /* 0x000C */ u8 unk_000C[0x0D];
     /* 0x0019 */ s8 ragType;
-    /* 0x001A */ u8 reserved001A[0x3A];
+    /* 0x001A */ s8 heartItems[0x20];
+    /* 0x003A */ s8 heartItemCount;
+    /* 0x003B */ s8 itemList2[8];
+    /* 0x0043 */ s8 itemList2Count;
+    /* 0x0044 */ s8 itemList3[8];
+    /* 0x004C */ s8 itemList3Count;
+    /* 0x004D */ u8 unk_004D[7];
     /* 0x0054 */ u16 unk_0054;
     /* 0x0056 */ u8 unk_0056[0xEA];
     /* 0x0140 */ cmpCursorInfo_t listCursor;
-    /* 0x0178 */ u8 unk_0178[0x44D0];
+    /* 0x0178 */ u8 unk_0178[0x1004];
+    /* 0x117C */ ragListWindow_t heartListWindow;
+    /* 0x1310 */ u8 unk_1310[0x1004];
+    /* 0x2314 */ ragListWindow_t itemList2Window;
+    /* 0x24A8 */ u8 unk_24A8[0x1004];
+    /* 0x34AC */ ragListWindow_t itemList3Window;
+    /* 0x3640 */ u8 unk_3640[0x1008];
     /* 0x4648 */ s32 script;
     /* 0x464C */ s32 scriptArg;
     /* 0x4650 */ s32 unk_4650;
@@ -255,8 +273,33 @@ s8 ragChkDevilLevelErr(datUnitWork_t *stock)
 
 INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragSetSeqPhase);
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragGetHeartsFlag);
+s32 ragGetHeartsFlag(s8 index)
+{
+    s32 flag;
 
+    flag = 0;
+    switch (index) {
+    case 1: {
+        s32 entry = ragUpdateWork->heartListWindow.listCursor.unk_22 +
+                    (u8)ragUpdateWork->heartListWindow.listCursor.unk_24;
+        flag = ragUpdateWork->heartItems[entry];
+        break;
+    }
+    case 2: {
+        s32 entry = ragUpdateWork->itemList2Window.listCursor.unk_22 +
+                    (u8)ragUpdateWork->itemList2Window.listCursor.unk_24;
+        flag = ragUpdateWork->itemList2[entry];
+        break;
+    }
+    case 3: {
+        s32 entry = ragUpdateWork->itemList3Window.listCursor.unk_22 +
+                    (u8)ragUpdateWork->itemList3Window.listCursor.unk_24;
+        flag = ragUpdateWork->itemList3[entry];
+        break;
+    }
+    }
+    return flag;
+}
 extern s32 ragGetHeartsFlag(s8 index);
 
 /* NON_MATCHING: 22 of 29 words match, 116 bytes against retail's 128; retail
