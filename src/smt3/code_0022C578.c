@@ -2887,7 +2887,47 @@ INCLUDE_ASM(const s32, "code_0022C578", fclGetArrowCursorTarget);
 
 INCLUDE_ASM(const s32, "code_0022C578", fclDrawArrowCursorIcon);
 
-INCLUDE_ASM(const s32, "code_0022C578", fclDrawArrowCursorBox);
+typedef struct
+{
+    /* 0x00 */ u8 flags;
+    /* 0x01 */ u8 unk_01[0x1B];
+    /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ s32 entryStep;
+    /* 0x24 */ u8 reserved24[8];
+    /* 0x2C */ s32 fadeAlpha;
+    /* 0x30 */ s8 unk_30;
+    /* 0x31 */ s8 iconIndex;
+    /* 0x32 */ u8 reserved32[0x1146];
+    /* 0x1178 */ s32 cursorAlpha[64];
+} campDhWork_t;
+
+extern campDhWork_t *campDhDrawWork;
+
+extern void fclDrawSpriteSizeAlphaFilter(s32 x, s32 y, s32 d, s32 w, s32 h, u8 mode,
+    s32 *color, s32 id, f32 angle, u16 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 ot);
+
+void fclDrawArrowCursorBox(s32 x, s32 y, s32 z, s32 w, s32 h, u32 color,
+                          s32 id, s32 mode, s32 alpha, f32 angle)
+{
+    s32 colors[4];
+    u32 blended;
+
+    id += 43;
+    mode = mode != 0;
+    if (alpha > 256) {
+        alpha = 512 - alpha;
+    }
+    blended = fclBlendColor(color, color & 0xFF, alpha);
+    colors[0] = blended;
+    colors[1] = blended;
+    colors[2] = blended;
+    colors[3] = blended;
+    if (angle < 0.0f) {
+        angle += 360.0f;
+    }
+    fclDrawSpriteSizeAlphaFilter(x, y, 0, w, h, mode, colors, 8, angle,
+        (u16)id, (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", fclGetArrowCursorEntry);
 
@@ -2919,22 +2959,6 @@ INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHelpTextAlt);
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHelpText);
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHeartsGauge);
-
-typedef struct
-{
-    /* 0x00 */ u8 flags;
-    /* 0x01 */ u8 unk_01[0x1B];
-    /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ s32 entryStep;
-    /* 0x24 */ u8 reserved24[8];
-    /* 0x2C */ s32 fadeAlpha;
-    /* 0x30 */ s8 unk_30;
-    /* 0x31 */ s8 iconIndex;
-    /* 0x32 */ u8 reserved32[0x1146];
-    /* 0x1178 */ s32 cursorAlpha[64];
-} campDhWork_t;
-
-extern campDhWork_t *campDhDrawWork;
 
 extern void campDhDrawHeartsGauge(void *gauge, s8 arg);
 
