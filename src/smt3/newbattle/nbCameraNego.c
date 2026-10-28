@@ -40,6 +40,7 @@ struct nbParty_t {
 };
 
 extern void effBTLModelGetSphereCenter(nbFormation_t *pFormation);
+extern void effBTLModelGetMarkPosition2(nbFormation_t *pFormation, s32 mark);
 
 extern void effBTLModelAllHide(void);
 
@@ -53,7 +54,7 @@ extern u128 D_00324740;
 
 extern nbCamera_t pNbCamera;
 
-extern u32 nbCamera_NegoBougai_Wait;
+extern s32 nbCamera_NegoBougai_Wait;
 
 extern f32 nbCamera_NegoHojo_Rate;
 
@@ -63,7 +64,7 @@ extern void effBTLModelTargetGroupHide(void);
 
 extern void effBTLModelInvokeGroupHide(void);
 
-extern u128 nbCameraNegoBougaiVec;
+extern sdfVector4_t nbCameraNegoBougaiVec;
 
 extern f32 nbCamera_NegoBougai_Rate;
 
@@ -73,7 +74,7 @@ extern void ToMatrix(void);
 
 extern f32 sdfAtan(f32 value);
 
-extern u32 nbCamera_NegoBougai_Frame;
+extern s32 nbCamera_NegoBougai_Frame;
 
 void nbCameraState_NegoBougai_Init(void)
 {
@@ -102,7 +103,53 @@ void nbCameraState_NegoBougai_SetWaitFrame(u32 frame)
     nbCamera_NegoBougai_Wait = frame;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraNego", nbCameraState_NegoBougai_Calc);
+void nbCameraState_NegoBougai_Calc(void)
+{
+    nbFormation_t *pFormation = effBTLSkillGetTargetFormation(0);
+    nbCamera_t *pCamera = &pNbCamera;
+    sdfVector4_t scale;
+    sdfVector4_t focus;
+    f32 length;
+    f32 base;
+    f32 want;
+
+    if ((pFormation->stat & 3) == 3) {
+        if (nbCamera_NegoBougai_Frame >= nbCamera_NegoBougai_Wait) {
+            nbCamera_NegoBougai_Rate *= 0x1.ab851ep-1f;
+            scale.x = -pCamera->distance;
+            scale.y = -pCamera->distance;
+            scale.z = -pCamera->distance;
+            SDF_VU0_LOADVECTOR(&pCamera->direction);
+            SDF_VU0_LOADVECTOR_B(&scale);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_LOADVECTOR_B(pCamera);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(&focus);
+            effBTLModelGetMarkPosition2(pFormation, 1);
+            SDF_VU0_LOADVECTOR_B(&nbCameraNegoBougaiVec);
+            VU0_LERP_VF10_VF11(nbCamera_NegoBougai_Rate);
+            SDF_VU0_STOREVECTOR(pCamera);
+            SDF_VU0_LOADVECTOR_B(&focus);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_GETLENGTH(length);
+            pCamera->distance = length;
+            if (0x1.0624dcp-10f < nbCamera_NegoBougai_Rate) {
+                SDF_VU0_COPYVECTOR_C_TO_A();
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_STOREVECTOR(&pCamera->direction);
+            }
+            pCamera->fovy = 0x1.657182p-1f;
+            base = pFormation->oneshotr * pFormation->scl * 1.25f / sdfAtan(0x1.657182p-2f);
+            want = base + (nbCamera_NegoBougai_Distance - base) * nbCamera_NegoBougai_Rate;
+            pCamera->distance = want;
+            if (want < base) {
+                pCamera->distance = base;
+            }
+        }
+        nbCamera_NegoBougai_Frame++;
+    }
+}
 
 void nbCameraState_NegoTaizi_Init(void)
 {
