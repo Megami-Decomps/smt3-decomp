@@ -417,11 +417,15 @@ typedef struct
     /* 0x0410E */ u8 evoCandidateCount;
     /* 0x0410F */ u8 reserved0410F;
     /* 0x04110 */ cmbStockSlot_t stockSlot[3];
-    /* 0x0411C */ u8 birthPanel[0x2C9];
+    /* 0x0411C */ u8 birthPanel[0x2C8];
+    /* 0x043E4 */ s8 resultRowsBuilt;
     /* 0x043E5 */ s8 resultIndex[2][12][12];
     /* 0x04505 */ u8 reserved04505;
     /* 0x04506 */ u16 resultId[2][12][12];
-    /* 0x04746 */ u8 reserved04746[0x11DC2];
+    /* 0x04746 */ u8 reserved04746[2];
+    /* Native table construction copies a complete unit into each cell. */
+    /* 0x04748 */ datUnitWork_t resultUnit[2][12][12];
+    /* 0x150C8 */ u8 reserved150C8[0x1440];
     /* 0x16508 */ u8 displayFlags[2];
     /* 0x1650A */ s8 unk_1650A;
     /* 0x1650B */ u8 unk_1650B;
@@ -917,7 +921,7 @@ void cmbCalcDevSel1st(void)
         cmbCreateLocalStock();
     }
     if (CMB_GBWK->unk_00004 != 0) {
-        *(s8 *)((u8 *)CMB_GBWK + 0x43E4) = 0;
+        CMB_GBWK->resultRowsBuilt = 0;
     }
     cmbCreateCombineResultTable(0);
     if (CMB_GBWK->unk_00004 != 1) {
@@ -2575,7 +2579,7 @@ void cmbDrawStockPanel1(void)
     cmbDrawStockList(0x180, 0x3F0, 0xFFFF, 0, count, 0, 0x47);
     cmbDrawStockEntry(0x300, 0x408, 0xFFFFF, count, 0x89FEFF80,
                       (u8 *)CMB_GBWK + 0x1058, 0, 0x47);
-    if (*(s8 *)((u8 *)CMB_GBWK + 0x43E4) >= *(s8 *)((u8 *)CMB_GBWK + 0x165ED)) {
+    if (CMB_GBWK->resultRowsBuilt >= *(s8 *)((u8 *)CMB_GBWK + 0x165ED)) {
         cmbDrawStockScrollBar(0, 0xFFFFF, 0x50807080, &CMB_GBWK->stockCursorGroup[0].cursor,
                               0x47);
     }
@@ -2704,7 +2708,7 @@ void cmbUpdateStockCursor(void)
     switch (button) {
     case 1: {
         s8 selected;
-        if ((s8)CMB_GBWK->birthPanel[0x2C8] < (s8)CMB_GBWK->stockCursorCount) {
+        if (CMB_GBWK->resultRowsBuilt < (s8)CMB_GBWK->stockCursorCount) {
             button = 0;
             break;
         }
