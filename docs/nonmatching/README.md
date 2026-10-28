@@ -39,6 +39,7 @@ page and line to open. Conventions are in
 | 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
+| 2 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
 | 2 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 2 | interface/frName | [interface/frName.md](interface/frName.md) |
@@ -56,7 +57,6 @@ page and line to open. Conventions are in
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |
 | 1 | sdf/sdfFileIO | [sdf/sdfFileIO.md](sdf/sdfFileIO.md) |
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
-| 1 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 1 | pipe/pipePosTable | [pipe/pipePosTable.md](pipe/pipePosTable.md) |
 | 1 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
 | 1 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |

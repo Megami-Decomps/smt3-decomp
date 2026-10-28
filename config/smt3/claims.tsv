@@ -611,3 +611,4 @@ src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	0 matches / 1 guarded dra
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 364 B	status process input and signed selection wrapping; explicit no-input dispatch and callback-sensitive model loading
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 444 B	HP and MP gauge drawing with callback-sensitive field reads and native signed integer ratios; owner 355 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 432 B	unit race/name/level rendering with native callback reloads and truthful font-destruction return contract; owner 174 match, 0 differ
+src/smt3/pipe/pipeSection.c	redthing1	done	2026-10-28	1 guarded draft / 844 B	EmTask native action table and callback routing; 189 of 211 words match, assembly active

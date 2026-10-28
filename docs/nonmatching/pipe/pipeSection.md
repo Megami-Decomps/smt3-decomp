@@ -25,3 +25,27 @@ matched ObjectDraw pattern in this unit. Qualified candidate/control traces
 show reset187 after sibling selection and absent in life13; removing it gives
 a tail call and twelve extra bytes. Hooked/unhooked and dump/plain outputs
 agree. No extra loop block or dummy copies are retained.
+
+## EmTask (pipe/pipeSection, 0x34C)
+
+189 of 211 instruction words match at the native 844-byte size. Production
+remains assembly-backed. The complete 101-entry action table and its target
+layout are reproduced by the C switch, including the explicit no-action case.
+
+The body preserves the two lifetime windows, flag-dependent counter clearing,
+two independent player-follow paths and all action callbacks. The second
+player-follow path reads the current ID after the first callback. Deactivation
+from an action still reaches model positioning; lifetime expiration returns
+earlier. The zeroed temporary is the real 32-byte object passed to construction
+and insertion. Constructor and insertion declarations match their providers.
+
+Separate entry/dispatch action snapshots reproduce the initial byte registers.
+Capturing the object offset before the global counter reproduces the lifetime
+comparison operands. A signed halfword snapshot of each decremented follow
+count reproduces the native extent. All 22 remaining differences occur in the
+two player-follow blocks: the global offset and player-pointer registers,
+counter narrowing, and load/store scheduling differ. Native stores the counter
+before loading the player's Y coordinate and carries the player pointer in a
+separate register. These are observed differences, not an isolated compiler
+diagnosis. A raw word count snapshot loses two instructions per block; checking
+the pre-decrement before copying Y gives 188 matching words instead of 189.

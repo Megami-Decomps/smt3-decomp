@@ -565,7 +565,174 @@ INCLUDE_ASM(const s32, "pipe/pipeSection", MyAction);
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", MyHitAction);
 
+/* NON_MATCHING: 22 of 211 words differ; see docs/nonmatching/pipe/pipeSection.md. */
+#ifdef NON_MATCHING
+extern u8 objMake(tagPipeObject *object, s32 offset, u8 id, u8 way, u8 action, u8 value);
+extern s32 objAdd(tagPipeObject *object);
+extern void ActionRot(tagPipeObject *object);
+extern void ActionHm(tagPipeObject *object);
+extern void ActionSlide(tagPipeObject *object);
+extern void ActionCrush(tagPipeObject *object);
+extern void ActionBound(tagPipeObject *object);
+extern void ActionDeath(tagPipeObject *object);
+extern void ActionAbsorp(tagPipeObject *object);
+extern void ActionZMotion(tagPipeObject *object);
+extern void objSetAction(tagPipeObject *object, u8 action, s16 count);
+extern void objMdlSclSet(tagPipeObject *object, f32 scale);
+
+void EmTask(tagPipeObject *object)
+{
+    tagPipeObject temporary;
+    u8 action;
+    u8 nextAction;
+
+    memset(&temporary, 0, sizeof(temporary));
+    action = object->action;
+    if (action == 6 || action == 15 || action == 16) {
+        s32 objectOffset = object->offset;
+        s32 count = offsetCount;
+
+        if (count + 100 < objectOffset && (object->flags & 0x4000) != 0) {
+            ZmakaCount = 0;
+            object->flags &= (u16)~0x4000;
+        }
+        if (count + 500 < objectOffset) {
+            object->enabled = 0;
+            return;
+        }
+    } else if (object->offset < offsetCount - 60) {
+        ZmakaCount = (object->flags & 0x4000) != 0 ? 0 : ZmakaCount;
+        object->enabled = 0;
+        return;
+    }
+
+    if (object->id == 0xB) {
+        tagPipeObject *player = objMyData();
+        s32 currentOffset = offsetCount;
+        s16 count = object->count - 1;
+
+        object->offset = currentOffset;
+        object->pos[0] = player->pos[0];
+        object->count = count;
+        object->pos[1] = player->pos[1];
+        if (count == 0) {
+            object->enabled = 0;
+        }
+    }
+    if (object->id == 0xC) {
+        tagPipeObject *player = objMyData();
+        s32 currentOffset = offsetCount;
+        s16 count = object->count - 1;
+
+        object->offset = currentOffset;
+        object->pos[0] = player->pos[0];
+        object->count = count;
+        object->pos[1] = player->pos[1];
+        if (count == 0) {
+            object->enabled = 0;
+        }
+    }
+
+    nextAction = object->action;
+    switch (nextAction) {
+        case 0:
+            break;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            ActionRot(object);
+            break;
+        case 5:
+            object->offset -= 7;
+            break;
+        case 6:
+            object->offset += 9;
+            break;
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+            ActionHm(object);
+            break;
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+            ActionSlide(object);
+            break;
+        case 15:
+        case 16:
+            object->offset += 9;
+            ActionRot(object);
+            break;
+        case 17:
+            ActionCrush(object);
+            ActionBound(object);
+            if (object->count == 0) {
+                objSetAction(object, 0x14, 5);
+            }
+            break;
+        case 18:
+            ActionCrush(object);
+            ActionBound(object);
+            objMake(&temporary, object->offset, 5, 0, 0, 0);
+            temporary.pos[0] = object->pos[0];
+            temporary.pos[1] = object->pos[1];
+            objAdd(&temporary);
+            if (object->count == 0) {
+                object->enabled = 0;
+            }
+            break;
+        case 26:
+            object->enabled = 0;
+            break;
+        case 19:
+            ActionBound(object);
+            if (object->count == 0) {
+                objSetAction(object, 0, 0);
+            }
+            break;
+        case 20:
+            ActionDeath(object);
+            if (object->count == 0) {
+                object->enabled = 0;
+            }
+            break;
+        case 21:
+            ActionZMotion(object);
+            if ((object->flags & 2) != 0) {
+                object->enabled = 0;
+            }
+            break;
+        case 25:
+            ActionCrush(object);
+            if (object->count == 0) {
+                object->enabled = 0;
+            }
+            break;
+        case 60:
+        case 61:
+        case 62:
+        case 63:
+            object->offset += nextAction - 59;
+            break;
+        case 100:
+            if (object->count == 0) {
+                object->enabled = 0;
+            } else {
+                ActionAbsorp(object);
+                objMdlSclSet(object, (f32)object->count / 100.0f);
+            }
+            break;
+        default:
+            break;
+    }
+    objMdlPosSet(object);
+}
+#else
 INCLUDE_ASM(const s32, "pipe/pipeSection", EmTask);
+#endif
 
 extern void vecRotate2D(f32 *vector, f32 angle);
 
