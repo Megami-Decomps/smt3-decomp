@@ -379,3 +379,4 @@ src/smt3/facility/fclRagInit.c	redthing1	done	2026-10-28	0 matches	preview-recor
 src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	1 fn / 616 B	model-position provider with native camera and rotation paths; owner 66 match, 0 differ
 src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	1 fn / 512 B	world-position provider with camera and direction paths; owner 67 match, 0 differ
 src/smt3/facility/fclRagInit.c	redthing1	done	2026-10-28	0 matches	preview-loop and texture-load attempts remain assembly; owner 19 match, 0 differ
+src/smt3/effect/effBattleMisc.c	redthing1	active	2026-10-28	callback boundary recovery	seven entries in the original invoke-show span

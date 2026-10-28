@@ -155,7 +155,7 @@ extern void effBTLModelGetMarkPosition2(nbFormation_t *pFormation, s32 mark);
 extern s32 effBTLModelGetMarkPositionEvalTm(nbFormation_t *pFormation, s32 mark);
 extern s32 effBTLModelCheckBossID(nbFormation_t *pFormation);
 extern void mdlGetPosition(mdlObj_t *aHandle);
-extern void func_0016E120(void);
+extern void effBTLModelInvokeGroupHide(void);
 extern f32 sdfAtan(f32 aX);
 extern f32 EulerAngleAxisY(void);
 extern void SetRotateMatrixXYZ(sdfVector4_t *aAngles);
@@ -174,7 +174,7 @@ typedef struct nbCamera_AllTable_t {
 
 extern nbCamera_AllTable_t *nbCameraGetModelAllTable(nbFormation_t *pFormation);
 extern void effBTLModelAllShow(void);
-extern void func_0016E1F8(void);
+extern void effBTLModelTargetGroupHide(void);
 extern nbFormation_t *effBTLSkillGetTargetFormation(s32 number);
 extern f32 effBTLModelGetHeight(nbFormation_t *pFormation);
 extern void effBTLModelLook(nbFormation_t *pFormation, sdfVector4_t *pTargetPos);
@@ -440,7 +440,7 @@ void nbCameraShot_One_Init(nbCamera_t *pCamera, nbFormation_t *pForm)
     f32 scale;
 
     effBTLModelAllHide();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     invokeParty = effBTLSkillGetInvokeParty();
     targetParty = effBTLSkillGetTargetParty();
     pCamera->fovy = 0.69813163f;
@@ -529,7 +529,7 @@ void nbCameraShot_PullOne_Init(nbCamera_t *pNbCamera)
     f32 width;
 
     effBTLModelAllHide();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pForm = effBTLSkillGetInvokeFormation();
     pNbCamera->fovy = 0.69813163f;
     fovy = sdfAtan(0.78539807f);
@@ -582,7 +582,7 @@ void nbCameraShot_InvokeTarget_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *
     f32 clamp;
 
     effBTLModelTargetPartyShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pTarget = effBTLSkillGetTargetFormation(0);
     pInvoke = effBTLSkillGetInvokeFormation();
     width = nbCameraGetModelAllTable(pInvoke)->radius;
@@ -659,7 +659,7 @@ void nbCameraShot_InvokeTargetReverse_Set2(nbCamera_t *pNbCamera, nbCameraSkillI
     f32 clamp;
 
     effBTLModelAllShow();
-    func_0016E1F8();
+    effBTLModelTargetGroupHide();
     pTarget = effBTLSkillGetTargetFormation(0);
     pInvoke = effBTLSkillGetInvokeFormation();
     width = nbCameraGetModelAllTable(pTarget)->radius;
@@ -731,7 +731,7 @@ void nbCameraShot_InvokeTargetNear_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_
     f32 length;
 
     effBTLModelAllShow();
-    func_0016E120();
+    effBTLModelInvokeGroupHide();
     pInvoke = effBTLSkillGetInvokeFormation();
     pTarget = effBTLSkillGetTargetFormation(0);
     effBTLModelGetSphereCenter(pInvoke);
@@ -789,7 +789,7 @@ void nbCameraShot_InvokeTargetNearReverse_Set(nbCamera_t *pNbCamera, nbCameraSki
     f32 length;
 
     effBTLModelAllShow();
-    func_0016E1F8();
+    effBTLModelTargetGroupHide();
     pTarget = effBTLSkillGetTargetFormation(0);
     pInvoke = effBTLSkillGetInvokeFormation();
     effBTLModelGetSphereCenter(pTarget);
@@ -843,7 +843,7 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_InvokeTargetParty
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_InvokeTargetPartyTop2_Set);
 
-extern void func_0016E2A0(void);
+extern void effBTLModelInvokePartyShow(void);
 
 void nbCameraShot_InvokeParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 {
@@ -858,7 +858,7 @@ void nbCameraShot_InvokeParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *p
     f32 length;
 
     effBTLModelAllHide();
-    func_0016E2A0();
+    effBTLModelInvokePartyShow();
     group = effBTLSkillGetInvokeParty();
     pNbCamera->fovy = 0.69813163f;
     radius = effBTLModelGroupGetSphere(group);
@@ -1036,7 +1036,7 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", bCameraShot_AttackInvokeTarget
 
 extern f32 sdfSin(f32 aRadius);
 extern f32 fabsf(f32 x);
-extern void func_0016E050(void);
+extern void effBTLModelTargetShow(void);
 
 void nbCameraShot_AttackTuibi_Set(nbCamera_t *pNbCamera)
 {
@@ -1054,11 +1054,11 @@ void nbCameraShot_AttackTuibi_Set(nbCamera_t *pNbCamera)
     invokeParty = effBTLSkillGetInvokeParty();
     if (invokeParty != effBTLSkillGetTargetParty()) {
         effBTLModelAllShow();
-        func_0016E120();
+        effBTLModelInvokeGroupHide();
     } else {
         effBTLModelAllHide();
         effBTLModelInvokeShow();
-        func_0016E050();
+        effBTLModelTargetShow();
     }
     pTarget = effBTLSkillGetTargetFormation(0);
     pInvoke = effBTLSkillGetInvokeFormation();
@@ -1120,7 +1120,7 @@ void nbCameraShot_AttackTuibiReverse_Set(nbCamera_t *pNbCamera)
     f32 height;
 
     effBTLModelAllShow();
-    func_0016E1F8();
+    effBTLModelTargetGroupHide();
     effBTLSkillGetInvokeParty();
     pTarget = effBTLSkillGetTargetFormation(0);
     pInvoke = effBTLSkillGetInvokeFormation();

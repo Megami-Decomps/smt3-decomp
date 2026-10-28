@@ -1,0 +1,8 @@
+# addr	name	evidence|inferred	note
+0x0016DFF8	effBTLModelInvokeShow	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokeShow
+0x0016E050	effBTLModelTargetShow	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelTargetShow
+0x0016E0A8	effBTLModelInvokeHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokeHide
+0x0016E0C8	effBTLModelTargetHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelTargetHide
+0x0016E120	effBTLModelInvokeGroupHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokeGroupHide
+0x0016E1F8	effBTLModelTargetGroupHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelTargetGroupHide
+0x0016E2A0	effBTLModelInvokePartyShow	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokePartyShow

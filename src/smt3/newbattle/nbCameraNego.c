@@ -59,9 +59,9 @@ extern f32 nbCamera_NegoHojo_Rate;
 
 extern f32 nbCamera_NegoHojo_Distance;
 
-extern void func_0016E1F8(void);
+extern void effBTLModelTargetGroupHide(void);
 
-extern void func_0016E120(void);
+extern void effBTLModelInvokeGroupHide(void);
 
 extern u128 nbCameraNegoBougaiVec;
 
@@ -106,8 +106,8 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraNego", nbCameraState_NegoBougai_Calc);
 
 void nbCameraState_NegoTaizi_Init(void)
 {
-    func_0016E1F8();
-    func_0016E120();
+    effBTLModelTargetGroupHide();
+    effBTLModelInvokeGroupHide();
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraNego", nbCameraState_NegoTaizi_Calc);
@@ -118,7 +118,7 @@ void nbCameraState_NegoTarget_Init(void)
     nbCamera_t *pCamera;
 
     effBTLModelAllHide();
-    func_0016E1F8();
+    effBTLModelTargetGroupHide();
     pCamera = &pNbCamera;
     pForm = effBTLSkillGetTargetFormation(0);
     if ((pForm->stat & 3) == 3) {

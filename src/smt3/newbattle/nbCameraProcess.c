@@ -89,7 +89,7 @@ extern void effBTLModelAllPopPosition(void);
 
 extern void effBTLModelAllPopRotate(void);
 
-extern void func_0016E1F8(void);
+extern void effBTLModelTargetGroupHide(void);
 
 extern void nbCameraShot_All_Set(nbCamera_t *pNbCamera);
 
@@ -257,7 +257,7 @@ void nbCameraScriptSet1Shot(nbFormation_t *pTargetForm)
     effBTLModelAllPopPosition();
     effBTLModelAllPopRotate();
     effBTLModelAllHide();
-    func_0016E1F8();
+    effBTLModelTargetGroupHide();
     nbCameraSetState(0x1A);
 }
 

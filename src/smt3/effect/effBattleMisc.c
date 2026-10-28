@@ -740,6 +740,18 @@ void effBTLModelAllHide(void) {
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelInvokeShow);
 
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelTargetShow);
+
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelInvokeHide);
+
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelTargetHide);
+
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelInvokeGroupHide);
+
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelTargetGroupHide);
+
+INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelInvokePartyShow);
+
 void effBTLModelTargetPartyShow(void) {
     nbFormation_t *form;
     u32 party;
