@@ -850,3 +850,4 @@ src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 364 B	top-chunk page tr
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	0 exact / guard improvement	default skill initialization reduced from 172 to native160 bytes; parity-qualified multiply coalescing explains remaining three words
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 288 B	CFA expression decoding with grounded frame state, signed operand widening and native regx fallthrough; complete owner 33 match, 0 differ
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	2 matches / 1248 bytes	Unpacked addition/subtraction and double multiplication; inferred __muldi3 provider remains assembly-backed
+src/smt3/field/fldSnow.c	redthing1	done	2026-10-28	0 exact / 436 B guarded	snow initializer reaches native block layout with shared allocation and scoped defaults; 107 of 109 words match, mode/speed stores remain exchanged

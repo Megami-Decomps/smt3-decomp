@@ -95,10 +95,9 @@ void fldSetSnowActive(void) {
 }
 
 
-/* NON_MATCHING: 28 of 110 words, two words over; blocks are ordered differently. */
+/* NON_MATCHING: 107 of 109 instruction words match at the native 436-byte size. */
 #ifdef NON_MATCHING
 void fldSnowInit(void) {
-    s32 floor;
 
     if (gFldSeedBuff != NULL) {
         return;
@@ -110,24 +109,24 @@ void fldSnowInit(void) {
         return;
     }
     if (fldGlobalBase.area == 0x1F) {
+        s32 floor;
         floor = fldGlobalBase.floor;
         if (floor == 0xE) {
             return;
         }
-        gFldSnowZ = -640.0f;
+        gFldSnowMode = 0;
+        gFldSnowZ = gFldSnowX = -640.0f;
         gFldSnowY = -6900.0f;
         gFldSnowSpd = 4.0f;
         gFldSnowLife = 0x5DC;
         gFldSnowW = 5.0f;
-        gFldSnowMode = 0;
-        gFldSnowX = -640.0f;
         if (floor == 0) {
             gFldSnowYD = 10.0f;
-        } else {
-            gFldSnowYD = 10000.0f;
+            goto initSeeds;
         }
     } else if (fldGlobalBase.area == 0x18) {
-        f32 width = 25.0f;
+        s32 floor;
+        f32 width;
         f32 y;
         s32 life;
 
@@ -138,15 +137,16 @@ void fldSnowInit(void) {
         if (floor == 0x18) {
             return;
         }
-        gFldSnowYD = 10000.0f;
-        gFldSnowMode = 1;
         gFldSnowSpd = -3.0f;
+        gFldSnowMode = 1;
+        gFldSnowYD = 10000.0f;
+        life = 0xF0;
+        width = 25.0f;
         if (floor == 5) {
             y = 800.0f;
             life = 0x1C2;
         } else {
             y = 100.0f;
-            life = 0xF0;
         }
         gFldSnowY = y;
         if (floor == 9) {
@@ -160,11 +160,13 @@ void fldSnowInit(void) {
         } else {
             gFldSnowW = width;
         }
-        gFldSnowZ = -(gFldSnowW * 256.0f * 0.5f);
-        gFldSnowX = gFldSnowZ;
+        gFldSnowZ = gFldSnowX = -(gFldSnowW * 256.0f * 0.5f);
+        goto initSeeds;
     } else {
         return;
     }
+    gFldSnowYD = 10000.0f;
+initSeeds:
     fldSnowSeedBuf = sdfMemAllocDirect(0x36B0);
     gFldSeedBuff = sdfMemLock(fldSnowSeedBuf);
     fldSnowSeedInit();
