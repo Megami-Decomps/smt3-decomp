@@ -1016,7 +1016,7 @@ typedef struct fclEncycReadTopWork_t {
 extern const char *D_00330A14[];
 extern void drawSummonCount(void **font, s32 x, s32 y, s32 releasePrevious);
 extern void drawEncycRatio(frFontHandle_t **font, s32 releasePrevious);
-extern void CreateFontListRead(void *work, s32 sort, s16 *indices);
+extern void CreateFontListRead(fclEncycReadTopWork_t *work, s32 sort, s16 *indices);
 
 void InitPhaseReadTop(fclEncyc_instance_tag *pinst)
 {
@@ -1916,7 +1916,7 @@ void ResetReadMainRibbon(fclEncyc_readmainwork_tag *pwork)
 }
 
 extern void ApplyChangeListIndex(lstListWindow_t *work, s16 *indices, s32 recordIndex);
-extern void CreateFontListRead(void *work, s32 sort, s16 *indices);
+extern void CreateFontListRead(fclEncycReadTopWork_t *work, s32 sort, s16 *indices);
 extern void cmpClearCursorSlots(void *cursor);
 
 s32 AcceptKeyChangeSort(fclEncyc_instance_tag *pinst)
@@ -2298,7 +2298,84 @@ void drawRegistList(fclEncyc_instance_tag *pinst)
     }
 }
 
+extern u8 *datExplainTable[];
+extern char D_0054FCC0[];
+extern char D_0054FCC8[];
+extern char D_0054FCD0[];
+extern s32 GetDevilParam(fclencyceelem_t *record, s32 type);
+
+#ifdef NON_MATCHING
+void CreateFontListRead(fclEncycReadTopWork_t *work, s32 sort, s16 *indices)
+{
+    s32 count;
+    s32 index;
+    s32 row = 0;
+    s32 y = 0x4A0;
+    s32 previous = -1;
+    char text[64];
+
+    ReleaseFontList(work->fontList, 8);
+    memset(work->groupStart, 0, 8);
+    count = fclEncycGetNum();
+    index = work->list.cursorPos.Index;
+    while (index < count && row < 8) {
+        fclencyceelem_t *record = &encycSaveWork->records[indices[index]];
+        u16 id = record->id;
+        u8 race = datDevilTable[id].race;
+        s32 level;
+        s32 param0;
+        s32 param2;
+        s32 param3;
+        s32 param4;
+        s32 param5;
+        s32 price;
+        s32 ratio;
+        frFontHandle_t *font;
+
+        if (sort != 0) {
+            level = record->level;
+            if (previous / 10 != level / 10) {
+                previous = level;
+                work->groupStart[row] = 1;
+            }
+        } else if (previous != race) {
+            work->groupStart[row] = 1;
+            previous = race;
+        }
+        font = frwGetSmallFontFRQ2(0x620, y, 0xFFFFF0, 0xA09DC380,
+                                    (char *)datExplainTable[race], NULL);
+        font = frwGetSmallFontFRQ2(0xB10, y + 0x10, 0xFFFFF0, 0xA09DC380,
+                                    (char *)text2[id], font);
+        level = record->level;
+        sprintf(text, D_0054FCC0, level < 100 ? level : 99);
+        font = frwGetSmallNumFontFRQ(0x11E0, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
+        id = record->id;
+        level = record->level;
+        param0 = GetDevilParam(record, 0);
+        param2 = GetDevilParam(record, 2);
+        param3 = GetDevilParam(record, 3);
+        param4 = GetDevilParam(record, 4);
+        param5 = GetDevilParam(record, 5);
+        price = GetPriceForSummon(id, record->exp, level, param0, param2, param3, param4, param5);
+        ratio = fclEncycGetRatio();
+        if (ratio >= 100) {
+            price >>= 1;
+        }
+        if (record->id == 0xC0) {
+            sprintf(text, D_0054FCC8);
+        } else {
+            sprintf(text, D_0054FCD0, price);
+        }
+        font = frwGetSmallNumFontFRQ(0x1680, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
+        work->fontList[row] = font;
+        row++;
+        index++;
+        y += 0xE0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", CreateFontListRead);
+#endif
 
 void ReleaseFontList(frFontHandle_t **ppfont, s32 num)
 {
