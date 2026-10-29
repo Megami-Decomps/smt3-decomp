@@ -88,3 +88,23 @@ tail, with selector0 for sine. All larger words use the two-component range
 reducer, including exponent255 encodings; no generic infinity/NaN gate is added.
 The low two bits of the signed quadrant result select the original kernel/sign
 permutation, and reduced sine calls pass selector1.
+
+## __ieee754_atan2f
+
+All480 instruction bytes at0x002CFB88 match. Inputs y/x use `$f12`/`$f13`, with
+the scalar result in `$f0`. Only exact raw x=+1 takes the direct `atanf(y)` tail
+handoff. Both magnitude words have explicit zero/subnormal gates: small y uses
+the four quadrant cases, and small x returns signed half-pi before division.
+Do not assume division by zero reproduces that explicit path.
+
+Other paths test signed exponent difference against61 and-60, then call
+`fabsf(y/x)` and `atanf`. The final quadrant logic preserves native sign-bit
+flipping and pi/low-part correction order. The immediate words are40490FDA,
+3FC90FDA and34222168; validate them with the configured toolchain rather than
+host float rounding. No generic infinity/NaN branch is added.
+
+Use the common word-conversion macros for both inputs and the result sign
+flip. Group each input's `GET_FLOAT_WORD` with its immediate magnitude mask,
+x first, then y. Performing both GETs before both masks leaves fourteen
+instruction differences at the same480-byte size; the native grouping closes
+all120 words. The earlier plain scoped unions left21 words different.

@@ -65,30 +65,19 @@ INCLUDE_ASM(const s32, "sdk/libm", __ieee754_acosf);
 extern f32 fabsf(f32 x);
 extern f32 atanf(f32 x);
 
-/* NON_MATCHING: 21 of 120 words differ; native 480-byte size. */
-#ifdef NON_MATCHING
 f32 __ieee754_atan2f(f32 y, f32 x)
 {
     s32 hx;
     s32 hy;
     s32 ix;
     s32 iy;
-    union { f32 f; u32 u; } angleWord;
     s32 quadrant;
     s32 exponentDifference;
     f32 angle;
 
-    {
-        union { f32 f; s32 i; } input;
-        input.f = x;
-        hx = input.i;
-    }
-    {
-        union { f32 f; s32 i; } input;
-        input.f = y;
-        hy = input.i;
-    }
+    GET_FLOAT_WORD(hx, x);
     ix = hx & 0x7FFFFFFF;
+    GET_FLOAT_WORD(hy, y);
     iy = hy & 0x7FFFFFFF;
 
     if (hx == 0x3F800000) {
@@ -126,19 +115,18 @@ f32 __ieee754_atan2f(f32 y, f32 x)
     switch (quadrant) {
     case 0:
         return angle;
-    case 1:
-        angleWord.f = angle;
-        angleWord.u ^= 0x80000000U;
-        return angleWord.f;
+    case 1: {
+        s32 signWord;
+        GET_FLOAT_WORD(signWord, angle);
+        SET_FLOAT_WORD(angle, (u32)signWord ^ 0x80000000U);
+        return angle;
+    }
     case 2:
         return 3.1415926f - (angle - 1.5099578831723193e-7f);
     default:
         return (angle - 1.5099578831723193e-7f) - 3.1415926f;
     }
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libm", __ieee754_atan2f);
-#endif
 
 INCLUDE_ASM(const s32, "sdk/libm", __ieee754_rem_pio2f);
 
