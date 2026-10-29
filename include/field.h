@@ -69,6 +69,15 @@ typedef struct fldAmSBlock_t
     fldAmXYZ_t *pointB;
 } fldAmSBlock_t;
 
+typedef struct fldAmAreaData_t
+{
+    char *name;
+    fldAmSBlock_t *items;
+    u32 nSB;
+    void *pMdl;
+    fldAmXYZ_t *pPos;
+} fldAmAreaData_t;
+
 union fldTriggerShape_t;
 
 typedef struct fldResPut_t

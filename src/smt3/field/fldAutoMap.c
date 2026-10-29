@@ -8,15 +8,6 @@
 
 typedef struct
 {
-    char *name;
-    fldAmSBlock_t *items;
-    u32 nSB;
-    void *pMdl;
-    fldAmXYZ_t *pPos;
-} fldAmAreaData_t;
-
-typedef struct
-{
     u8 opaque00[4];
     fldAmAreaData_t *areaTable; /* 0x04: first relocated area row */
     s32 areaCount;              /* 0x08: number of area rows */

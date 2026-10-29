@@ -8,15 +8,6 @@
 
 typedef struct
 {
-    char *name;
-    fldAmSBlock_t *items;
-    u32 nSB;
-    void *pMdl;
-    fldAmXYZ_t *pPos;
-} fldAmAreaData_t;
-
-typedef struct
-{
     void *resourceState;
     u32 roomNumber;
 } fldMatterWork_t;
