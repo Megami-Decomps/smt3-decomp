@@ -1025,7 +1025,7 @@ f32 effBTLPartCalcScale(nbFormation_t *form) {
     return scale;
 }
 
-f32 effBTLPartGetScalePtr(nbFormation_t *form, effBTLAimParams_t *request) {
+f32 effBTLPartGetScalePtr(nbFormation_t *form) {
     switch (effBTLModelGetID(form)) {
     case 0x112:
         return 2.7f;
