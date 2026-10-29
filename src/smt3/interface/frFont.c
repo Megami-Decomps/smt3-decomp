@@ -1454,7 +1454,102 @@ s32 frDrawFontEx(frFontHandle_t *pFRQ, s8 Mode) {
     return func_001C7E38(pFRQ, Mode, gFontDrawOT);
 }
 
+#ifdef NON_MATCHING
+extern s32 frDrawFontWork;
+extern s32 D_00326210[], D_00326278[], D_003262E0[], D_00326348[];
+
+s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot)
+{
+    frFontHandle_t *parent;
+    frTextHandle_t *glyph;
+    volatile frTextHandle_t *glyphRead;
+    GsFont_t *font;
+    FontMem_t *fontMem;
+    s32 x, y, xOffset, yOffset, glyphX, glyphY, drawCount, total = 0;
+    u32 color, depth;
+    u8 width, height, style;
+    s32 filtered = 1;
+    s32 allOpaque = 1;
+    s8 spacing;
+    u16 code;
+    u8 fade;
+
+    if (request == NULL) {
+        return 0;
+    }
+    parent = request->chainHead;
+    while (parent != NULL) {
+        glyph = parent->firstChild;
+        x = parent->x;
+        y = parent->y;
+        spacing = parent->glyphCodeOrContext.byteRoles.spacing;
+        frDrawFontWork = 0;
+        while (glyph != NULL) {
+            glyphRead = glyph;
+            xOffset = 0;
+            if (mode == 0) {
+                xOffset = frDrawEffect(parent, glyph, 0x1C,
+                                       parent->glyphCodeOrContext.byteRoles.encodedContextByte);
+            }
+            yOffset = 0;
+            if (glyph->renderValueOrSetupOrShade.setupBytes.fontIndex < 2) {
+                code = glyphRead->glyphCodeOrContext.glyphCode;
+                if ((u16)(code - 'A') < 26) {
+                    xOffset += D_00326278[code - 'A'];
+                    yOffset = D_00326210[code - 'A'];
+                } else if ((u16)(code - 'a') < 26) {
+                    code = glyphRead->glyphCodeOrContext.glyphCode;
+                    xOffset += D_003262E0[code - 'a'];
+                    yOffset = D_00326348[code - 'a'];
+                }
+            }
+            font = glyph->sourceItem;
+            glyphX = glyph->x;
+            if (font == NULL) {
+                font = glyph->cachedItem;
+                code = glyph->glyphCodeOrContext.glyphCode;
+                glyphY = glyph->y;
+                fontMem = font->font_mem;
+                height = glyph->cellDimensions.cellHeight;
+                width = glyph->cellDimensions.cellWidth;
+                depth = parent->renderValueOrSetupOrShade.renderValue;
+                color = glyph->parentDimensionsOrRenderWord.renderWord;
+                style = glyph->renderValueOrSetupOrShade.setupBytes.firstOption;
+                if (code < 0x80) {
+                    filtered = 1;
+                }
+            } else {
+                glyphY = glyph->y;
+                fontMem = font->font_mem;
+                height = glyph->cellDimensions.cellHeight;
+                width = glyph->cellDimensions.cellWidth;
+                depth = parent->renderValueOrSetupOrShade.renderValue;
+                style = glyph->renderValueOrSetupOrShade.setupBytes.firstOption;
+                color = glyph->parentDimensionsOrRenderWord.renderWord;
+            }
+            frCreateDrawFontPacket_20550848(x + glyphX + xOffset, y + glyphY + yOffset,
+                                            width, height >> 1, style, color, depth, filtered,
+                                            &fontMem->uv, &gFT.atlas, ot);
+            drawCount = frDrawFontWork;
+            fade = glyph->parentDimensionsOrRenderWord.fadeByte.value;
+            frDrawFontWork = drawCount + 1;
+            if (fade != 0) {
+                glyph->drawCount++;
+            }
+            x += (glyph->advance + spacing) * 16;
+            glyph = glyph->next;
+            if (fade < 0x80) {
+                allOpaque = 0;
+            }
+        }
+        total += parent->childCount;
+        parent = parent->next;
+    }
+    return allOpaque ? total : 0;
+}
+#else
 INCLUDE_ASM(const s32, "interface/frFont", func_001C7E38);
+#endif
 
 /* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
  * slot 0; return 0. This is buffer selection, not a current-font selection. */
