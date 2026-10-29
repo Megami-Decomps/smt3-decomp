@@ -163,10 +163,19 @@ CSE trace, UID297 assigns the tangent to the working float, UID304 reads that
 float's word, UID325 masks it and UID329 writes the truncated float back.
 These are consumed arithmetic values, with no artificial copies, fixed
 registers or compiler-option changes.
+## Math forwarding wrappers
+
+The ordinary C bodies at0x002CF730 (`__ieee754_acosf`) and0x002CF748
+(`func_002CF748`) each match all20 instruction bytes. They forward one float
+to the acos core and two floats to the atan2 implementation, respectively.
+Each preserves the actual float argument/result banks and native16-byte
+frame/tail-jump sequence. The intervening alignment NOPs receive no credit.
+See the [native entry boundaries](sdk-matching.md#inverse-cosine-entry-boundaries).
+
 ## Inverse-cosine arithmetic body
 
 `func_002CF760` matches all1060 instruction bytes. The two preceding
-forwarding entries are separate functions and remain assembly; see
+forwarding entries also have exact C bodies; see
 [their boundaries](sdk-matching.md#inverse-cosine-entry-boundaries).
 
 The signed input word and its masked magnitude preserve exact-unit,
