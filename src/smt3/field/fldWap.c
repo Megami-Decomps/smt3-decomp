@@ -184,6 +184,7 @@ extern u8 *fldDoor_Find3(void);
 extern u8 fldDoorExitFlag;
 
 extern s32 strcmp(const char *left, const char *right);
+extern char *strcpy(char *destination, const char *source);
 
 extern s32 gFldInfIdx;
 
