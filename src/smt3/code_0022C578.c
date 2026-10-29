@@ -6931,7 +6931,48 @@ void cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
     cmpDrawBoxSolid(a, b, c, d, e, f, 0, g);
 }
 
+#ifdef NON_MATCHING
+void cmpDrawBoxG(s32 x, s32 y, s32 z, s32 width, s32 height,
+                 s32 *colors, s32 mode, s32 ot)
+{
+    sdfGrPacketHeader_t *packet;
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *surface = &sdfGrOtTable[ot];
+    u64 *prim;
+    volatile u64 *livePrim;
+    volatile s32 *liveColors = colors;
+    u32 left = x + 0x7000;
+    u32 top = y + 0x7900;
+    u32 right = left + width * 16;
+    u32 bottom = top + height * 8;
+    u32 color;
+
+    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(8, 1));
+    sdf2DMakePrimPacketHeader(packet, (mode << 9) | 0x14C, 8, 0x51515151, 1);
+    prim = sdf2DGetPrimPtr(packet);
+    livePrim = prim;
+    cmpExpandColor(prim, liveColors[0]);
+    livePrim[2] = left | ((u64)top << 32);
+    livePrim[3] = (u32)z;
+    cmpExpandColor(prim + 4, liveColors[1]);
+    color = liveColors[2];
+    livePrim[7] = (u32)z;
+    livePrim[6] = right | ((u64)top << 32);
+    cmpExpandColor(prim + 8, color);
+    color = liveColors[3];
+    livePrim[11] = (u32)z;
+    livePrim[10] = left | ((u64)bottom << 32);
+    cmpExpandColor(prim + 12, color);
+    livePrim[15] = (u32)z;
+    livePrim[14] = right | ((u64)bottom << 32);
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdfDrawTagLink(tag, (u32)packet);
+    surface->regFunc(surface, tag);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawBoxG);
+#endif
 
 void cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g)
 {
