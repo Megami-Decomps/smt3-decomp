@@ -1326,7 +1326,31 @@ s32 datAddHeartsEntry(u8 id, datUnitWork_t *work)
     return result;
 }
 
+#ifdef NON_MATCHING
+s32 func_00222610(u8 id, u8 limit, datUnitWork_t *unit)
+{
+    datRaceEntry_t *race = &D_00339E00[id];
+    u8 count = 0;
+    s32 i;
+
+    for (i = 0; i < 8; i++) {
+        u8 condition = race->heartConditions[i].condition;
+        u16 skill = race->heartConditions[i].skill;
+
+        if (condition != 0 && skill != 0) {
+            if (count++ >= limit) {
+                return 0;
+            }
+            if (unit->level >= race->heartConditions[i].condition) {
+                unit->skill[unit->skillcnt++] = skill;
+            }
+        }
+    }
+    return (s8)count;
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", func_00222610);
+#endif
 
 /* Interior row label: the 66-byte stride is not a multiple of the
  * four-byte skill-entry stride. */
