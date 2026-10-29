@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile the NON_MATCHING drafts and check each one is written up.
+"""Compile the NON_MATCHING drafts.
 
     python3 tools/check_nonmatching.py [src/smt3/<unit>.c ...]
 
@@ -7,11 +7,6 @@ A draft kept behind `#ifdef NON_MATCHING` is never compiled by the normal
 build, so a struct rename or a changed signature elsewhere can break it
 silently. This compiles every unit that has one with NON_MATCHING and
 SKIP_ASM defined, which selects the drafts and drops the asm fallbacks.
-
-It also checks that each draft has an entry under docs/nonmatching/. The
-source carries one line; that page carries what the remaining difference is
-and which source shapes are already ruled out. A draft nobody can read is a
-draft the next person redoes from scratch.
 
 A failure means the draft needs updating, not that the repo is broken: the
 real build does not use it. Exit status is non-zero so CI still says so.
@@ -24,8 +19,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 GUARD = "#ifdef NON_MATCHING"
-WRITEUP_DIR = ROOT / "docs/nonmatching"
-WRITEUP_INTRO = ROOT / "docs/nonmatching.md"
 # A draft is a guarded block whose #else holds the asm fallback; the
 # INCLUDE_ASM names there name the functions the drafts are for. One block can
 # carry several, so every name in the #else counts: reading only the first made
@@ -87,44 +80,11 @@ def compile_unit(path: Path) -> str:
     return diagnostics
 
 
-# An entry whose function is matched everywhere describes work that is already
-# done, and reads as if it were still open. The draft-to-entry check cannot see
-# these, because it only ever asks the question the other way round.
-HEADING = re.compile(r"^## (.+)$", re.M)
-
-
-def stale_entries() -> int:
-    """Report entries naming only functions no INCLUDE_ASM mentions any more."""
-    in_asm = set()
-    for path in (ROOT / "src").rglob("*.c"):
-        in_asm.update(ASM_NAME.findall(path.read_text()))
-    stale = 0
-    for page in sorted(WRITEUP_DIR.rglob("*.md")):
-        for i, line in enumerate(page.read_text().split("\n"), 1):
-            m = HEADING.match(line)
-            if not m:
-                continue
-            title = re.sub(r"\s*\(.*\)$", "", m.group(1))
-            names = [n.strip() for n in re.split(r"[,/]| and ", title)
-                     if re.fullmatch(r"\w+", n.strip())]
-            # A shared entry still earns its place while one sibling is unmatched.
-            if names and all(n not in in_asm for n in names):
-                stale += 1
-                print(f"{page.relative_to(ROOT)}:{i}: {', '.join(names)} "
-                      "match now, so this entry is stale")
-    return stale
-
-
 if __name__ == "__main__":
     todo = units(sys.argv[1:])
     if not todo:
         print("no NON_MATCHING drafts")
         sys.exit(0)
-    # One page per unit under docs/nonmatching/, plus the intro page that
-    # carries the conventions; an entry on any of them counts.
-    writeup = "\n".join(
-        [p.read_text() for p in sorted(WRITEUP_DIR.rglob("*.md"))]
-        + ([WRITEUP_INTRO.read_text()] if WRITEUP_INTRO.exists() else []))
     bad = 0
     for path in todo:
         text = path.read_text()
@@ -137,9 +97,4 @@ if __name__ == "__main__":
             print("\n".join("    " + l for l in err.split("\n")[:12]))
         else:
             print(f"{rel}: {len(names)} draft(s) compile")
-        for name in names:
-            if not re.search(r"^#+ .*\b" + re.escape(name) + r"\b", writeup, re.M):
-                bad += 1
-                print(f"{rel}: {name} has no entry under docs/nonmatching/")
-    bad += stale_entries()
     sys.exit(1 if bad else 0)

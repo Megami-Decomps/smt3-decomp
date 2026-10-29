@@ -17,7 +17,6 @@
  *
  * A function whose C is close but not exact is kept beside its fallback:
  *
- *     NON_MATCHING comment: 12 of 694 words; three spill slots rotated.
  *     #ifdef NON_MATCHING
  *     void f(void) { ... }
  *     #else
@@ -26,8 +25,9 @@
  *
  * The normal build never defines NON_MATCHING, so it takes the asm and stays
  * byte-identical, and the function still counts as unmatched. The draft is
- * there for the next person instead of being thrown away, and
- * tools/check_nonmatching.py compiles it so it cannot rot unnoticed.
+ * there for the next person, and for a native build of this source, which
+ * compiles it; tools/check_nonmatching.py compiles every draft so it cannot
+ * rot unnoticed.
  *
  * A bug the original has, which the image therefore depends on, keeps the
  * behaviour and carries the correction behind FIX_BUGS:
@@ -42,11 +42,6 @@
  * a port for instance, defines it and gets code that does what was meant. A
  * bug that can be corrected without moving the image is simply corrected; the
  * guard is only for the ones the image depends on.
- *
- * The one line says how close it is and what differs.
- * docs/nonmatching/<unit>.md carries the rest: the remaining difference and
- * the source shapes already ruled out. tools/check_nonmatching.py compiles
- * every draft and refuses one with no entry there.
  */
 #if !defined(M2CTX) && !defined(PERMUTER) && !defined(SKIP_ASM)
 

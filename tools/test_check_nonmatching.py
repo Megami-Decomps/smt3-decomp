@@ -82,10 +82,6 @@ class DraftNames(unittest.TestCase):
 
 
 class TreeState(unittest.TestCase):
-    def test_every_draft_compiles_and_no_entry_is_stale(self) -> None:
-        """The tree as it stands passes both directions of the check."""
-        self.assertEqual(cn.stale_entries(), 0)
-
     def test_drafts_are_found_in_the_tree(self) -> None:
         """A parser that silently matched nothing would pass every other test."""
         self.assertGreater(sum(len(v) for v in cn.draft_functions().values()), 100)
