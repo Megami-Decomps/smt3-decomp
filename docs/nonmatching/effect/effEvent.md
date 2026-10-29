@@ -30,6 +30,18 @@ reading the byte at the top of the loop body, before the `zeroKindCount` test
 and both switch shapings of the dispatch, `default` first with a `goto` back
 (78 words) and `case 5` falling into `default` (41 words).
 
+A current `--sched --reorg --no-dumps --cflag -DNON_MATCHING` trace filtered
+to this function passes hooked/unhooked/plain output parity (`verify: OK`).
+Sched1 gives the slot load UID86 priority 2 and byte load UID81 priority 0,
+then schedules both before null branch UID87. Sched2 retains that block
+with priorities 3 and 1; reload has placed constant 5 in UID297 in the next
+block. Reorg accepts the already preceding byte load for UID87's delay slot
+with flags 0x11. The constant is therefore not an independent ready
+instruction competing with the byte load at that point: it is beyond the
+branch. A bounded one-pass per-entry block with a null-slot `break` leaves
+the same 117/119-word result and was discarded. The earlier source-placement
+and type controls remain ruled out; the native ordering is still unresolved.
+
 What the draft establishes, since the rest is exact:
 
 - `D_005343D0` is a quaternion `Mult` combines with the record's own
