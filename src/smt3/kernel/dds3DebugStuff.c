@@ -362,7 +362,7 @@ void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y, s32 selected,
     }
 }
 
-s32 dds3NullDrawProc(dds3ProcessID_t *id)
+u32 dds3NullDrawProc(void)
 {
     return 0;
 }
