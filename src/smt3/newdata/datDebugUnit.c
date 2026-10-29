@@ -85,9 +85,69 @@ s32 datDebugUnitProcess(dds3ProcessID_t *id)
     return 0;
 }
 
+extern const char *const D_005431F0[];
+extern const char D_00543200[];
+extern const char D_00550F70[];
+extern s32 D_00550F54;
+extern s8 dds3PadButtonState[];
+extern s32 dds3SelectMenu(s32 pad, s32 listsx, s32 listsy, s32 winsx, s32 winsy,
+                           s32 *basex, s32 *basey, s32 *x, s32 *y);
+extern void datAddKotowariPoint(s32 type, s32 point);
+
+s32 datDebugDrawSelectMenu(void)
+{
+    const char *labels[3];
+    sdfDrawTag_t *listTag;
+    sdfDrawTag_t *panelTag;
+    s32 result;
+    s32 i;
+    s32 x;
+    s32 y;
+
+    memcpy(labels, D_005431F0, sizeof(labels));
+    listTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(listTag);
+    sdfDrawTagLink(listTag, (u32)sdfDevPrintf(0x82C0, 0x7AE0, 0xFEFFFF, 0xE, D_00543200));
+
+    for (i = 1, x = 27, y = 0x7B40; i < 4; i++, y += 0x60) {
+        const char *name = labels[i - 1];
+        s32 attr = 0;
+        if (D_00550F54 == i - 1) {
+            attr = 4;
+        }
+        sdfDrawTagLink(listTag,
+                       (u32)sdfDevPrintf(0x7000 + x * 0xC0, y, 0xFEFFFF, attr, D_00550F70,
+                                         name, DDS3_GBWK->kotowari[i]));
+    }
+
+    panelTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(panelTag);
+    dds3ConsPanelTagLink(panelTag, 0x12C, 0x36, 0xF, 5);
+    D_002F6938.regFunc(&D_002F6938, panelTag);
+    D_002F6938.regFunc(&D_002F6938, listTag);
+
+    result = dds3SelectMenu(1, 1, 3, 1, 3, NULL, NULL, NULL, &D_00550F54);
+    if (result == -1) {
+        return -1;
+    }
+    if (dds3PadButtonState[0x34] & 2) {
+        datAddKotowariPoint(D_00550F54 + 1, -1);
+    }
+    if (dds3PadButtonState[0x35] & 2) {
+        datAddKotowariPoint(D_00550F54 + 1, 1);
+    }
+    if (dds3PadButtonState[0x38] & 2) {
+        datAddKotowariPoint(D_00550F54 + 1, -10);
+    }
+    if (dds3PadButtonState[0x3A] & 2) {
+        datAddKotowariPoint(D_00550F54 + 1, 10);
+    }
+    return 0;
+}
+
 INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_005431F0);
 
-INCLUDE_ASM(const s32, "newdata/datDebugUnit", datDebugDrawSelectMenu);
+INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_00543200);
 
 INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_00543230);
 
