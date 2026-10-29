@@ -31,21 +31,21 @@ cmpItemIsUsable	code_0022C578	0x8C	15 of 28 words match	docs/matching/code_0022C
 cmpSetStockRemoveEff	code_0022C578	0x8C	26 of 35 words match	docs/matching/code_0022C578.md	321
 cmpCursorSlotIsSelectable	code_0022C578	0x98	22 of 38 words match	docs/matching/code_0022C578.md	342
 cmpStartSkillMsg	code_0022C578	0xA0	19 of 40 words match	docs/matching/code_0022C578.md	366
-cmp_23C918	code_0022C578	0xA8	40 of 42 words match	docs/matching/code_0022C578.md	386
-cmpGetKugatatiMsg	code_0022C578	0xA0	22 of 40 words differ	docs/matching/code_0022C578.md	401
-campCheckStockRoom	code_0022C578	0x9C	14 of 39 words differ	docs/matching/code_0022C578.md	419
-cmpAddQuePanelEff	code_0022C578	0xB8	6 of 46 words differ	docs/matching/code_0022C578.md	435
-campDrawInfoText	code_0022C578	0xBC	17 of 47 words differ	docs/matching/code_0022C578.md	452
-cmpDrawItemListRow	code_0022C578	0xB8	2 of 46 words differ	docs/matching/code_0022C578.md	472
-campDhDrawHelpText	code_0022C578	0x158	82 of 86 words match	docs/matching/code_0022C578.md	489
-camp_draw_Process	code_0022C578	0x1A0	102 of 104 words match	docs/matching/code_0022C578.md	510
-campDrawStatusRow2	code_0022C578	0x134	69 of 77 words match	docs/matching/code_0022C578.md	526
-campDebugRegistAll	code_0022C578	0x43C	265 of 271 words match	docs/matching/code_0022C578.md	541
-cmpDrawPanelEffQuad	code_0022C578	0x20C	128 of 131 words match	docs/matching/code_0022C578.md	562
-campDhUpdateCursor	code_0022C578	0x248	143 of 146 words match	docs/matching/code_0022C578.md	597
-campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	624
-campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	648
-cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	693
+cmp_23C918	code_0022C578	0xA8		docs/matching/code_0022C578.md	386
+cmpGetKugatatiMsg	code_0022C578	0xA0	22 of 40 words differ	docs/matching/code_0022C578.md	406
+campCheckStockRoom	code_0022C578	0x9C	14 of 39 words differ	docs/matching/code_0022C578.md	424
+cmpAddQuePanelEff	code_0022C578	0xB8	6 of 46 words differ	docs/matching/code_0022C578.md	440
+campDrawInfoText	code_0022C578	0xBC	17 of 47 words differ	docs/matching/code_0022C578.md	457
+cmpDrawItemListRow	code_0022C578	0xB8	2 of 46 words differ	docs/matching/code_0022C578.md	477
+campDhDrawHelpText	code_0022C578	0x158	82 of 86 words match	docs/matching/code_0022C578.md	494
+camp_draw_Process	code_0022C578	0x1A0	102 of 104 words match	docs/matching/code_0022C578.md	515
+campDrawStatusRow2	code_0022C578	0x134	69 of 77 words match	docs/matching/code_0022C578.md	531
+campDebugRegistAll	code_0022C578	0x43C	265 of 271 words match	docs/matching/code_0022C578.md	546
+cmpDrawPanelEffQuad	code_0022C578	0x20C	128 of 131 words match	docs/matching/code_0022C578.md	567
+campDhUpdateCursor	code_0022C578	0x248	143 of 146 words match	docs/matching/code_0022C578.md	602
+campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	629
+campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	653
+cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	698
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
