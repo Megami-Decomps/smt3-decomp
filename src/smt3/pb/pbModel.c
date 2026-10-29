@@ -483,7 +483,68 @@ void pbSetPrimMatrix(sdfVector4_t *rot, f32 *pos, void *prim) {
     sdf3DPrimLinkTm(prim, 0);
 }
 
+#ifdef NON_MATCHING
+extern s8 D_0054F5B8[4][2];
+extern s32 D_00535C88[];
+
+u8 pbFindBlockSlot(s16 x, s16 y, s32 mode)
+{
+    s8 offsets[4][2];
+    s32 bits[4];
+    pbMapWork_t *map = D_0054F5C4;
+    u16 cell;
+    u32 kind, neighborKind, i;
+    s32 nx, ny, outside;
+    s16 result = 0;
+    u16 neighbor, blocked;
+
+    __builtin_memcpy(offsets, D_0054F5B8, sizeof(offsets));
+    cell = map->map[y][x];
+    __builtin_memcpy(bits, D_00535C88, sizeof(bits));
+    kind = cell >> 13;
+    if (mode == 0) {
+        if (cell & 0x800) {
+            return 0;
+        }
+        result = kind == 0;
+    } else if (mode == 1) {
+        result = 1;
+        if (kind == 0) {
+            return 0;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        ny = y + offsets[i][1];
+        nx = x + offsets[i][0];
+        outside = (u32)ny >= 20 || (u32)nx >= 20;
+        neighbor = map->map[ny][nx];
+        blocked = neighbor & 0x800;
+        neighborKind = neighbor >> 13;
+        if (mode == 0) {
+            if (!outside) {
+                if (blocked) {
+                    result |= 1 << bits[i];
+                }
+                if (kind == 0 && neighborKind == 1) {
+                    result |= 1 << bits[i];
+                }
+                if (kind >= 2) {
+                    result |= 1 << bits[i];
+                }
+            }
+        } else if (mode == 1) {
+            if (neighborKind < 2) {
+                result |= 1 << bits[i];
+            }
+        } else if (!outside && neighborKind != 1) {
+            result |= 1 << bits[i];
+        }
+    }
+    return result;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbModel", pbFindBlockSlot);
+#endif
 
 INCLUDE_ASM(const s32, "pb/pbModel", func_001D35F0);
 
