@@ -71,7 +71,7 @@ void ragDrawSeqStatus(void)
 }
 
 
-extern void ragDrawHeartsList(s32 mode);
+extern void ragDrawHeartsList(s8 mode);
 
 void ragDrawSeqConfirm(void)
 {
