@@ -796,9 +796,28 @@ INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress_0);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", InitAlarm);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDeci2Open);
-
 extern s32 Deci2Call(s32 command, void *packet);
+extern u8 D_0059ECA8[];
+
+typedef void (*deci2Handler_t)(s32 event, s32 parameter, void *argument);
+
+typedef struct deci2Registration_t {
+    u32 protocol;
+    void *argument;
+    deci2Handler_t handler;
+    void *storage;
+} deci2Registration_t;
+
+s32 sceDeci2Open(u16 protocol, void *argument, deci2Handler_t handler)
+{
+    deci2Registration_t packet;
+
+    packet.protocol = protocol;
+    packet.argument = argument;
+    packet.handler = handler;
+    packet.storage = (void *)((u32)D_0059ECA8 | 0x20000000);
+    return Deci2Call(1, &packet);
+}
 
 s32 sceDeci2Close(s32 handle)
 {
@@ -876,7 +895,13 @@ s32 sceDeci2ExUnLock(s32 handle)
     return Deci2Call(-9, packet);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", kputs);
+s32 kputs(const char *text)
+{
+    const char *packet[1];
+
+    packet[0] = text;
+    return Deci2Call(16, packet);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", SetTLBHandler);
 
