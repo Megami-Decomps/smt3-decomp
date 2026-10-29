@@ -1458,6 +1458,14 @@ typedef struct fsChstatRequest_t {
     fsStat_t stat;
     u8 name[0x400];
 } fsChstatRequest_t;
+typedef struct fsReadlinkRequest_t {
+    s32 sema;
+    s32 *result;
+    s32 resultSize;
+    u32 count;
+    char *buffer;
+    char name[0x400];
+} fsReadlinkRequest_t;
 typedef union fsRequest_t {
     fsCloseRequest_t close;
     fsPathRequest_t path;
@@ -1466,6 +1474,7 @@ typedef union fsRequest_t {
     fsSyncRequest_t sync;
     fsRenameRequest_t rename;
     fsChstatRequest_t chstat;
+    fsReadlinkRequest_t readlink;
 } fsRequest_t;
 extern fsRequest_t D_0059D4C0;
 
@@ -1973,7 +1982,55 @@ s32 sceSymlink(const char *oldPath, const char *newPath)
     return result;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceReadlink);
+s32 sceReadlink(const char *path, char *buffer, u32 count)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsReadlinkRequest_t *request = &D_0059D4C0.readlink;
+    s32 length;
+    s32 sema;
+    s32 accepted;
+
+    _sceFsWaitS(17);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    for (length = 0; length < 0x400 &&
+         (request->name[length] = path[length]) != 0; length++) {
+    }
+    if (length == 0x400) {
+        request->name[0x3FF] = 0;
+    }
+    if (count >= 0x400) {
+        count = 0x3FF;
+    }
+    request->buffer = buffer;
+    request->count = count;
+    sceSifWriteBackDCache(buffer, count);
+    param.initCount = 0;
+    param.maxCount = 1;
+    param.option = 0;
+    sema = CreateSema(&param);
+    request->result = &result;
+    request->sema = sema;
+    request->resultSize = 4;
+    /* The fixed transfer also includes the shared buffer's untouched tail. */
+    if (sceSifCallRpc(&D_0059E780, 25, 0, &D_0059D4C0,
+                      0x80C, D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
 
 extern s32 D_0052C354;
 /* The BSS map bounds this opaque RPC client to 0x40 bytes. */
