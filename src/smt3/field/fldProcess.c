@@ -10,6 +10,13 @@
 extern char D_0054EA38[], D_0054EA40[], D_0054EA48[], D_0054EA50[], D_0054EA58[];
 
 extern dds3Basic_t *dds3GetControlScene(void);
+extern void dds3SetActiveScene(dds3Basic_t *scene);
+extern s32 evtBitCheck(s32 no);
+extern void evtBitOff(s32 no);
+extern void evtBitOn(s32 no);
+extern s32 ProcRandomEncountCheck(void);
+extern void fldLoadNextFile_SetId_BtlRet(u32 field, u32 area);
+extern char *strcpy(char *destination, const char *source);
 
 extern void *mhfldWaveFile;
 
@@ -115,7 +122,7 @@ extern void evtDisableMoonDraw(void);
 
 extern void fldFreeAddressProcess(void);
 
-extern void dds3EffectDistortionBlurDelete(void *hDistortionBlur);
+extern void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *hDistortionBlur);
 
 extern void campKillProcesses(void);
 
@@ -123,7 +130,7 @@ extern void scrAllReleaseScript(void);
 
 extern dds3Basic_t *fldAnaBasic;
 
-extern void *hDistortionBlur;
+extern effBlurScatterWork_t *hDistortionBlur;
 
 extern char D_00531950[];
 
@@ -803,7 +810,109 @@ s32 ProcSequence(dds3ProcessID_t *id)
 }
 
 
+#ifdef NON_MATCHING
+extern s32 fldDrawFlag[];
+extern s32 fldDbg_ExBlurOn;
+extern s32 nbGetEncountOn(void);
+extern void fldDbgPrint2D(s32 x, s32 y, const char *text);
+extern void fldNpcDraw(void);
+extern void fldWaveTask(void);
+extern void fldAutoMapDraw(void);
+extern void fldSnowTask(void);
+extern void fldElvDrawFloorNum(void);
+extern void dds3EffectBlur(const dds3Effect_Blur_t *source);
+extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
+
+#define DRAW_FIELD_BLUR(color, mode, angle, zoom) do { \
+    blur.abgr = (color); \
+    blur.blend = (mode); \
+    blur.rotate = (angle); \
+    blur.scale = (zoom); \
+    blur.center[0] = 0; \
+    blur.center[1] = 0; \
+    blur.xy[0][0] = 0; \
+    blur.xy[0][1] = 0; \
+    blur.xy[1][0] = 0x200; \
+    blur.xy[1][1] = 0x1C0; \
+    dds3EffectBlur(&blur); \
+} while (0)
+
+s32 ProcDraw(dds3ProcessID_t *id)
+{
+    dds3Effect_Blur_t blur;
+    s32 status;
+    s32 area;
+    s32 areaAfterDistortion;
+
+    if (dds3AdminiGetNextSequence() != -1) return 0;
+    status = fldLoadNextGetStatus();
+    if (status == 1) {
+        if (fldDrawFlag[0] == status) fldDbgPrint2D(0x40, 0xC0, "NowLoading...");
+        if (fldSequenceState == 0) return 0;
+    }
+    if (nbGetEncountOn() != 0 || fmProcessChk() != 0 ||
+        fldAutoMapSeqTestFlag(2) != 0 || fldProcCampChk() == 1) return 0;
+    if (fldAutoMapChkMode() == 0 && fldProcCampChk() == 0) fldNpcDraw();
+    fldWaveTask();
+    fldAutoMapDraw();
+    fldSnowTask();
+    fldElvDrawFloorNum();
+    if (fldAutoMapSeqFlags.stage < 2 || fldDbg_ExBlurOn == 0 || nbGetEncountOn() != 0) return 0;
+
+    if (fldGlobalBase.area == 0x12 || fldGlobalBase.area == 0x1C || fldGlobalBase.area == 0x1E)
+        DRAW_FIELD_BLUR(0x3C8080AA, 0x44, 0.02f, 0.9859999418f);
+    if (((u32)fldGlobalBase.area - 2) < 3 || fldGlobalBase.area == 6 ||
+        fldGlobalBase.area == 7 || fldGlobalBase.area == 8 ||
+        (fldGlobalBase.area == 12 && fldGlobalBase.floor == 0))
+        DRAW_FIELD_BLUR(0x2D7882B4, 0x44, 0.0f, 1.0f);
+    if (fldGlobalBase.area == 5)
+        DRAW_FIELD_BLUR(0x2D8282B4, 0x44, 0.0f, 1.0f);
+    if (fldGlobalBase.area == 15) {
+        if (((u32)fldGlobalBase.floor - 19) < 2)
+            DRAW_FIELD_BLUR(0x2D7882B4, 0x44, 0.0f, 1.0f);
+        if (((u32)fldGlobalBase.floor - 2) < 3)
+            DRAW_FIELD_BLUR(0x1E8080C6, 0x44, 0.0f, 0.9859999418f);
+    }
+    if (fldGlobalBase.area == 16)
+        DRAW_FIELD_BLUR(0x1EC8B4C8, 0x44, 0.0f, 1.0f);
+    if (fldGlobalBase.area == 17 && fldGlobalBase.floor == 0)
+        DRAW_FIELD_BLUR(0x1E8080C6, 0x44, 0.0f, 0.9859999418f);
+    if (fldGlobalBase.area == 23 && ((u32)fldGlobalBase.floor < 2 || fldGlobalBase.floor == 6))
+        DRAW_FIELD_BLUR(0x2380A0DC, 0x44, 0.0f, 0.9859999418f);
+    if (fldGlobalBase.area == 24 && fldGlobalBase.floor == 17)
+        DRAW_FIELD_BLUR(0x288296B4, 0x44, 0.0f, 1.0f);
+    if (fldGlobalBase.area == 25 && (((u32)fldGlobalBase.floor - 16) < 5 || fldGlobalBase.floor == 24))
+        dds3EffectDistortionBlurDraw(hDistortionBlur);
+    if (fldGlobalBase.area == 27 && (u32)fldGlobalBase.floor < 5)
+        DRAW_FIELD_BLUR(0x1E8296B4, 0x44, 0.0f, 1.0f);
+    if ((fldGlobalBase.area == 32 && fldGlobalBase.floor == 19) ||
+        (fldGlobalBase.area == 36 && fldGlobalBase.floor == 20) ||
+        (fldGlobalBase.area == 37 && fldGlobalBase.floor == 25))
+        DRAW_FIELD_BLUR(0x38948080, 0x48, 0.0f, 1.0f);
+    if (fldGlobalBase.area == 34 && ((u32)fldGlobalBase.floor - 1) < 2)
+        DRAW_FIELD_BLUR(0x1E82DCFA, 0x44, 0.0f, 1.0f);
+    if (fldGlobalBase.area == 36 && fldGlobalBase.floor == 16)
+        DRAW_FIELD_BLUR(0x237882AA, 0x44, 0.0f, 1.0f);
+    area = fldGlobalBase.area;
+    if (area == 37) {
+        if (((u32)fldGlobalBase.floor - 6) < 17) dds3EffectDistortionBlurDraw(hDistortionBlur);
+        areaAfterDistortion = fldGlobalBase.area;
+        if (areaAfterDistortion == area) {
+            if (fldGlobalBase.floor == 23) DRAW_FIELD_BLUR(0x237882AA, 0x48, 0.0f, 1.0f);
+            if (fldGlobalBase.area == areaAfterDistortion && fldGlobalBase.floor == 26)
+                DRAW_FIELD_BLUR(0x19828CA0, 0x48, 0.0f, 1.0f);
+        }
+    }
+    if (fldGlobalBase.area == 42 && (fldGlobalBase.floor == 13 || fldGlobalBase.floor == 25))
+        dds3EffectDistortionBlurDraw(hDistortionBlur);
+    if (fldGlobalBase.area == 44 && (fldGlobalBase.floor == 2 || fldGlobalBase.floor == 4 || fldGlobalBase.floor == 24))
+        dds3EffectDistortionBlurDraw(hDistortionBlur);
+    return 0;
+}
+#undef DRAW_FIELD_BLUR
+#else
 INCLUDE_ASM(const s32, "field/fldProcess", ProcDraw);
+#endif
 
 void fldAutoMapSeqSetFlag(u32 flag)
 {
