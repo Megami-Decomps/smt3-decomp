@@ -41,6 +41,7 @@ page and line to open. Conventions are in
 | 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
+| 2 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 2 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | interface/frName | [interface/frName.md](interface/frName.md) |
@@ -70,7 +71,6 @@ page and line to open. Conventions are in
 | 1 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 1 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
-| 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 1 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
 | 1 | newbattle/nbEncount | [newbattle/nbEncount.md](newbattle/nbEncount.md) |

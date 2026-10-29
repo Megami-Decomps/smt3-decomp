@@ -1,5 +1,6 @@
 #include "common.h"
 #include "nb.h"
+#include "ps2asm.h"
 #include "basic.h"
 #include "libsdf.h"
 #include "effBattle.h"
@@ -428,7 +429,7 @@ extern char *D_00550F78;
 extern char *D_00550F7C;
 extern char D_00550F88[];
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
-extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...);
+extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
 extern sdfGrOt_t D_002F6978;
 
@@ -498,7 +499,207 @@ void nbDebugCamera(nbMainProcessData_t *data)
     }
 }
 
+/* NON_MATCHING: 99 of 666 words match; 2664/2672 bytes. */
+#ifdef NON_MATCHING
+extern s32 sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern long sdfFloatToULong(f32 value);
+extern const char *nbDebugPhaseNameTable[];
+extern const char *D_003FA748[];
+extern char D_00543260[];
+extern char D_00543270[];
+extern char D_00543280[];
+extern char D_00543290[];
+extern char D_005432A0[];
+extern char D_005432B0[];
+extern char D_005432C0[];
+extern char D_005432D0[];
+extern char D_005432E0[];
+extern char D_005432F0[];
+extern char D_00543300[];
+extern char D_00543310[];
+extern char D_00543320[];
+extern char D_00543330[];
+extern char D_00543340[];
+extern char D_00543350[];
+extern char D_00543360[];
+extern char D_00543370[];
+extern char D_00543380[];
+extern char D_00543398[];
+extern char D_005433A8[];
+extern char D_005433B8[];
+extern char D_00551060[];
+extern char D_00551068[];
+extern char D_00551070[];
+extern char D_00551078[];
+extern char D_00551080[];
+extern char D_00551088[];
+extern char D_00551090[];
+extern sdfGrOt_t D_002F67F8;
+EQUATE_FPTODP();
+
+void nbDebugMainProcess(nbMainProcessData_t *data)
+{
+    sdfDrawTag_t *tag;
+    s32 i;
+    s32 y;
+    s32 seq;
+    u8 *item;
+    nbActionStack_t *action;
+
+    if (data->debug != 1) {
+        return;
+    }
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7880, 0x7980, 0xFFFF80, 0, D_00543260,
+                                          data->stat));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x7980, 0xFFFF80, 0, D_00543270,
+                                          data->phase));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x79E0, 0xFFFF80, 0, D_00551060,
+                                          data->turn));
+    if (data->stat & 8) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7880, 0x79E0, 0xFFFF80, 6, D_00551068,
+                                              data->turn));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7880, 0x79E0, 0xFFFF80, 5, D_00551070,
+                                              data->turn));
+    }
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x7A40, 0xFFFF80, 0, D_00543280,
+                                          data->press3));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x7AA0, 0xFFFF80, 0, D_00543290,
+                                          data->press4_p, data->press4_ten));
+
+    y = 0x7B00;
+    if (data->maeProcess != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_005432A0));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->AtoProcessID != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_005432B0));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->ResultProcessID != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_005432C0));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->StageProcessID != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_005432D0));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->UnitProcessID != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_005432E0));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->CommSelProcessID != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_005432F0));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->tarSelProcess != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_00543300));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->EffectProcessID != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_00543310));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->KoukaProcessID != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_00543320));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->NegoProcessID != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_00543330));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->camera != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_00543340));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->DebugProcessID != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_00543350));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->AiScriptProcessID != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_00543360));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+    y += 0x60;
+    if (data->panelProcess != NULL) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, D_00543370));
+    } else {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+    }
+
+    y = 0x7B00;
+    for (i = 0; i < 4; i++) {
+        if (data->ActionProcessID[i] != NULL) {
+            seq = nbGetActionSeq(data->ActionProcessID[i]);
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, y, 0xFFFF80, 4, D_00543380,
+                                                  i, nbDebugPhaseNameTable[seq]));
+        } else {
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, y, 0xFFFF80, 0, D_00551078));
+        }
+        y += 0x60;
+    }
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, 0x7D40, 0xFFFF80, 0, D_00551080,
+                                          data->exp));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, 0x7DA0, 0xFFFF80, 0, D_00551088,
+                                          data->maka));
+    y = 0x7E00;
+    item = &data->item[0];
+    for (i = 0; i < 4; i++) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, y, 0xFFFF80, 0, D_00543398,
+                                              *item));
+        item++;
+        y += 0x60;
+    }
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, y + 0x60, 0xFFFF80, 0, D_00551090,
+                                          data->nakamayobi));
+
+    y = 0x7D40;
+    i = 0;
+    while (i < 8) {
+        if (i < data->actionstackp) {
+            action = data->actionstack;
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8480, y, 0xFFFF80, 0, D_005433A8,
+                                                  i, D_003FA748[action[i].type],
+                                                  action[i].from, action[i].to, action[i].data));
+        } else {
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8480, y, 0xFFFF80, 0, D_005433B8, i));
+        }
+        i++;
+        y += 0x60;
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbDebugMainProcess);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbMainProcess", DebugDisp2);
 
