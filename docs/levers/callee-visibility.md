@@ -53,6 +53,12 @@ drawing arm; restore rotation before colour in the plural branch; and assign
 the packet kind directly in each selection arm so the compiler can share the
 store. A local packet-kind value instead produced conditional moves.
 
+Historical controls reproduce the old trade in `c1223151` and `e275e63c`;
+it no longer reproduces after the next relevant owner/context change,
+`e27ec762`. See [billboard matching](../billboard-matching.md#animation-drawing)
+for the preserved controls and current qualification. This comparison does
+not isolate a compiler-internal mechanism.
+
 Confirmed again in `event/evtPolygonMovie`, and this time on a callee that does
 *not* match: `evtHokanFilter` is 71 of 72 words with a single `bnel` for
 retail's `bne`, and compiling the parked `evtHokanColor` draft unguarded makes

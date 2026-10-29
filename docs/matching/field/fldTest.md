@@ -1,8 +1,27 @@
-# Field test and chase drafts
+# Field test and chase matching
 
 ## fldRunDantePatr (field/fldTest, 0x2D0)
 
-178 of 180 words match at the native 720-byte size. Assembly remains active.
+Matched in `b62c6009`: all 180 of 180 words match in the 720-byte production
+body, and the assembly fallback is removed. The existing patrol body and
+callback reloads are unchanged except for the short diagnostic's native symbol
+reference.
+
+`D_0054EAD0[]` retains the existing seven-byte `"Re1KO\n"` string and its
+one-byte pad through `INCLUDE_SDATA`, preserving the complete 140-byte,
+four-aligned owner. Emitting that literal instead raises alignment to eight
+and fails retail despite a clean unit report. A truthful `[7]` extern keeps
+data exact but emits a nonmatching 724-byte body; no enlarged bound is used.
+The ten-byte `"ReCalcOK\n"` literal remains C at `0x00531308` in its 16-byte slot.
+
+The complete owner checks 38 match, 0 differ; the entire retail image matches
+SHA-1 `5facfbf7916836613449c922e26a4ec412207b32`. Stock plain/`-da` output parity
+also passes. `fldRunEffSet` and the remaining guarded drafts are preserved.
+
+### Historical residual and controls
+
+The earlier `376abcae` draft matched 178 of 180 words at the native 720-byte
+size, with assembly active in that context.
 The two differences at +0x1C0 and +0x1C4 exchange the speed load and the
 stack distance load used to compute the route timer.
 
@@ -11,8 +30,9 @@ The routine converts Dante and player positions to map coordinates, finds a
 cell pointer is stored at Dante +0x28, separately from the route data pointer
 at +0x2C. A route with two or more points probes the next point against enemy
 collision; a blocked probe returns to the first point. Successful shortcuts
-advance the waypoint and set the shortcut flag. Patrol movement turns with
-limits 15 and 1, updates position, and enables the patrol BGM state.
+advance the waypoint and set the shortcut flag. Patrol movement uses
+turn-toward parameters 15 and 1 (divisor 15, minimum step 1), updates position,
+and enables the patrol BGM state.
 
 A qualified `cc1probe.sh --sched --no-dumps` trace of the isolated C body in
 this unit has equal plain, hooked and unhooked outputs. In sched1, distance
