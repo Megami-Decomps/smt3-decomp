@@ -49,7 +49,63 @@ void DispList(s32 listX, s32 listY, sdfDrawTag_t *tag)
     }
 }
 
-INCLUDE_ASM(const s32, "newdata/datDebugUnit", DispUnit1);
+extern const char D_00550F20[];
+extern const char D_00550F28[];
+extern const char D_00550F30[];
+extern const char D_00550F38[];
+extern const char D_00550F40[];
+extern const char D_00550F48[];
+extern const char D_00550F50[];
+extern const char *nbUnitBadStatusNames[13];
+
+void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag)
+{
+    datUnitWork_t *work = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + unit;
+    s32 column = x;
+    s32 baseY = 0x7900 + y * 0x60;
+    s32 badstatus;
+    s32 badStatusIndex;
+
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                           0xFEFFFF, 0, D_00550F20, unit));
+    column += 5;
+    if ((work->flag & 1) == 0) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                               0xFEFFFF, 0xE, D_00550F28));
+        return;
+    }
+
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                           0xFEFFFF, 0, D_00550F30, work->id));
+    column += 4;
+    if (work->flag & 2) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                               0xFEFFFF, 5, D_00550F38));
+    }
+    column += 2;
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                           0xFEFFFF, 0, D_00550F40, work->level));
+    column += 4;
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                           0xFEFFFF, 0, D_00550F48,
+                                           work->hp, work->maxhp));
+    column += 8;
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                           0xFEFFFF, 0, D_00550F48,
+                                           work->mp, work->maxmp));
+    column += 8;
+
+    badstatus = work->badstatus;
+    for (badStatusIndex = 0; badStatusIndex < 12; badStatusIndex++) {
+        if ((badstatus >> badStatusIndex) & 1) {
+            break;
+        }
+    }
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0,
+                                           0x7900 + y * 0x60,
+                                           0xFEFFFF, 0, D_00550F50,
+                                           nbUnitBadStatusNames[badStatusIndex]));
+}
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
@@ -57,7 +113,7 @@ extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...);
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
 extern void DispList(s32 x, s32 y, sdfDrawTag_t *tag);
-extern void DispUnit1(s32 unit, s32 mode, s32 entry, sdfDrawTag_t *tag);
+extern void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag);
 extern sdfGrOt_t D_002F6938;
 const char D_005431C8[] = "     ID     LV  HP       MP     STAT";
 
