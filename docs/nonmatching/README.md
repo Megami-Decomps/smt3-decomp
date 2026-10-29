@@ -84,6 +84,7 @@ page and line to open. Conventions are in
 | 1 | field/fldTitle | [field/fldTitle.md](field/fldTitle.md) |
 | 1 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
+| 1 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
 | 1 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 1 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |

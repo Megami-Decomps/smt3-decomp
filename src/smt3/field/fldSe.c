@@ -60,7 +60,7 @@ extern s32 fldBgmLoadStep;
 
 extern s32 fldBgmSmgAddr;
 
-extern s32 fldGb[];
+extern s32 fldGb __attribute__((section(".data")));
 
 void p2sdPlaySE(s32 trackId, s32 volume, s32 pan);
 
@@ -91,6 +91,9 @@ extern s32 fldGetBgmTrack(s32 code);
 extern void p2sdSetBgmTrack(s32 track);
 
 extern s32 evtBitCheck(s32 no);
+
+extern u32 gFldBgmBit;
+extern s16 gFldAreaBgm __attribute__((section(".data")));
 
 extern void fldBgmPlay(void);
 
@@ -214,8 +217,8 @@ void fldBgmFadeOut(void) {
 }
 
 s32 fldBgmTransChk(s32 id1, s32 id2) {
-    s8 first = gFldBgmTop[fldGb[0]].trans[id1];
-    s8 second = gFldBgmTop[fldGb[0]].trans[id2];
+    s8 first = gFldBgmTop[fldGb].trans[id1];
+    s8 second = gFldBgmTop[fldGb].trans[id2];
 
     if (first != 0 && second != 0) {
         return 1;
@@ -386,7 +389,32 @@ s32 fldWaitBgmReload(void) {
     return 0;
 }
 
+/* NON_MATCHING: 1 of 31 words differs; see docs/nonmatching/field/fldSe.md. */
+#ifdef NON_MATCHING
+void fldBgmBitChk(void)
+{
+    if (fldGb != 0x22) {
+        return;
+    }
+    if (gFldBgmBit == 0) {
+        if (evtBitCheck(gFldAreaBgm) != 0) {
+            fldBgmFadeOut();
+            fldBgmPlay();
+        } else {
+            return;
+        }
+    } else {
+        if (evtBitCheck(gFldAreaBgm) != 0) {
+            return;
+        }
+        fldBgmFadeOut();
+        fldBgmPlay();
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldSe", fldBgmBitChk);
+#endif
+
 
 void fldMotionSePlay(s32 seid, s32 subid) {
     s32 cmd = 0x9010000;
