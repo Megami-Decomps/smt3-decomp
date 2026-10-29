@@ -155,7 +155,6 @@ extern void eglLinkAlpha(s32 alpha);
 extern void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy);
 extern void makaDrawGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha);
 
-#ifdef NON_MATCHING
 void makaDrawSingle(tagMakaObject_t *object)
 {
     makaEaseTable_t easeTable = D_00548FD8;
@@ -196,8 +195,14 @@ void makaDrawSingle(tagMakaObject_t *object)
                     (u32)(alpha * 128.0f), 1.3f, 1.3f);
     }
 
+    /* SMT3 matching constraint: reuse the finished easing scratch for the
+     * live ghost-fade zero endpoint. The empty operand keeps its FPU value
+     * distinct until alpha consumes it; no fixed register or call lifetime.
+     * This is a reconstruction aid, not original-source evidence. */
+    easing = 0.0f;
+    __asm__ ("" : "+f" (easing));
     if (phase < 7) {
-        alpha = 0.0f;
+        alpha = easing;
     } else if (phase < 8) {
         alpha = 1.0f;
     } else {
@@ -227,11 +232,6 @@ void makaDrawSingle(tagMakaObject_t *object)
                   1.0f - easing + easing * 1.8f,
                   alpha * 76.0f);
 }
-
-
-#else
-INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawSingle);
-#endif
 
 extern void eglLinkAlpha(s32 alpha);
 extern void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy);
