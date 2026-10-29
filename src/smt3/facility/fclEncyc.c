@@ -3250,7 +3250,43 @@ void DrawReadListwinElem(fclEncyc_instance_tag *pinst)
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
 
+extern itfColor_t D_0053D828;
+extern itfColor_t D_003309E0;
+extern itfColor_t D_003309F0;
+
+#ifdef NON_MATCHING
+void DrawReadStatusMoney(fclEncyc_instance_tag *pinst)
+{
+    itfColor_t color = D_0053D828;
+    fclEncycReadStatusWork_t *work = pinst->pwork;
+    s32 alpha = 0x80 - work->phase.ribbonAlpha;
+    s32 x = work->phase.ribbonWidth;
+    s32 y = work->phase.ribbonHeight;
+    sdfIVector2_t pos[2];
+    sdfDrawTag_t *tag;
+
+    color.components[3] = alpha;
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    pos[0].x = x + 0x12F0;
+    pos[0].y = y;
+    pos[1].x = x + 0x16B0;
+    pos[1].y = y + 0xA0;
+    itfMiscDrawSpritePrim(pos, &D_003309E0, &color, 0xFFFFF0,
+                          pinst->texHandle[2], 0, tag);
+    pos[0].x = x + 0x1D00;
+    pos[0].y = y - 8;
+    pos[1].x = x + 0x1DD0;
+    pos[1].y = y + 0xA8;
+    itfMiscDrawSpritePrim2(pos, &D_003309F0, &color, 0xFFFFF0, 0, tag);
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+    frSetDrawPosition(work->countFont, x + 0x1700, y + 8);
+    frSetFontColor(work->countFont, 0x80808000 | alpha);
+    func_001C7E38(work->countFont, 1, 0x47);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadStatusMoney);
+#endif
 
 extern u8 D_003323A8[];
 extern u8 D_003323B0[];
