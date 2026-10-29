@@ -112,7 +112,175 @@ s32 fldTitleMiniChk(void) {
     return dds3SearchProcessName(D_00532820) != 0;
 }
 
-INCLUDE_ASM(const s32, "field/fldTitle", fldTitleMini_Process);
+extern s32 fldProcCampChk(void);
+extern void rsetOtOfs(s32);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void rsetAlpha(s32);
+extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, s32,
+                        sdfTexHandle_t *);
+extern void aDrawBoxG(s32, s32, s32, s32,
+                      u32, u32, u32, u32, u32, u32, u32, u32,
+                      u32, u32, u32, u32, u32, u32, u32, u32);
+extern s32 fldSnowActive;
+extern s32 fldTitleMiniState;
+
+s32 fldTitleMini_Process(dds3ProcessID_t *id)
+{
+    s32 phase;
+    s32 maxAlpha;
+    s32 alpha;
+    s32 x;
+
+    if (fldProcCampChk() != 1) {
+        maxAlpha = 128;
+        rsetOtOfs(0x47);
+        rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
+        rsetAlpha(0);
+
+        phase = fldSnowActive;
+        switch (phase) {
+        case 0:
+            break;
+        case 1: {
+            if (fldTitleMiniState >= 3) {
+                s32 stripColor;
+                alpha = (fldTitleMiniState * 128 - 384) / 7;
+                x = fldTitleMiniState * 80 - 752;
+                if (x > 0) x = 0;
+                if (alpha > 128) alpha = maxAlpha;
+                stripColor = 0x00808080 | (alpha << 24);
+
+                DrwSprite2D(x, 340, 9, 8, 2, 1, 9, 8, stripColor, fldTitleMiniWork);
+                DrwSprite2D(x + 9, 340, 503, 8, 10, 1, 1, 8, stripColor,
+                            fldTitleMiniWork);
+
+                x = 752 - fldTitleMiniState * 80;
+                if (x < 0) x = 0;
+                DrwSprite2D(x, 378, 9, 8, 2, 8, 9, -8, stripColor, fldTitleMiniWork);
+                DrwSprite2D(x + 9, 378, 503, 8, 10, 8, 1, -8, stripColor,
+                            fldTitleMiniWork);
+            }
+
+            if (fldTitleMiniState >= 5) {
+                s32 shade;
+                alpha = (fldTitleMiniState * 128 - 512) / 10;
+                if (alpha > 128) alpha = maxAlpha;
+                shade = 89;
+                shade *= alpha;
+                shade /= 128;
+                aDrawBoxG(0, 174, 256, 15,
+                          0, 0, 0, 0, 0, 0, 0, shade,
+                          0, 0, 0, shade, 0, 0, 0, 0);
+                aDrawBoxG(256, 174, 256, 15,
+                          0, 0, 0, shade, 0, 0, 0, 0,
+                          0, 0, 0, 0, 0, 0, 0, shade);
+            }
+
+            if (fldTitleMiniState >= 9) {
+                alpha = fldTitleMiniState * 16 - 128;
+                if (alpha > 128) alpha = maxAlpha;
+                DrwSprite2D(128, 313, 256, 128, 0, 0, 256, 128, 0x00808080 | (alpha << 24),
+                            fldTitleMiniTex);
+            }
+
+            if (++fldTitleMiniState >= 21) {
+                fldTitleMiniState = 0;
+                fldSnowActive++;
+            }
+            break;
+        }
+
+        case 2: {
+            s32 flatColor;
+            flatColor = 0x80808080;
+            DrwSprite2D(0, 340, 9, 8, 2, 1, 9, 8, flatColor, fldTitleMiniWork);
+            DrwSprite2D(9, 340, 503, 8, 10, 1, 1, 8, flatColor, fldTitleMiniWork);
+            DrwSprite2D(0, 378, 9, 8, 2, 8, 9, -8, flatColor, fldTitleMiniWork);
+            DrwSprite2D(9, 378, 503, 8, 10, 8, 1, -8, flatColor, fldTitleMiniWork);
+            aDrawBoxG(0, 174, 256, 15,
+                      0, 0, 0, 0, 0, 0, 0, 89,
+                      0, 0, 0, 89, 0, 0, 0, 0);
+            aDrawBoxG(256, 174, 256, 15,
+                      0, 0, 0, 89, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 89);
+            DrwSprite2D(128, 313, 256, 128, 0, 0, 256, 128, flatColor,
+                        fldTitleMiniTex);
+
+            if (++fldTitleMiniState >= 31) {
+                fldTitleMiniState = 0;
+                fldSnowActive++;
+            }
+            break;
+        }
+
+        case 3: {
+            s32 displacement;
+
+            alpha = (7 - fldTitleMiniState) * 128 / 7;
+            if (alpha < 0) alpha = 0;
+            if (alpha > 128) alpha = maxAlpha;
+
+            if (fldTitleMiniState >= 3) {
+                x = fldTitleMiniState * 128 - 256;
+            } else {
+                x = 0;
+            }
+            if (x < 512) {
+                s32 stripColor;
+                stripColor = 0x00808080 | (alpha << 24);
+                DrwSprite2D(x, 340, 9, 8, 2, 1, 9, 8, stripColor, fldTitleMiniWork);
+                DrwSprite2D(x + 9, 340, 503, 8, 10, 1, 1, 8, stripColor,
+                            fldTitleMiniWork);
+            }
+
+            if (fldTitleState >= 3) {
+                displacement = fldTitleMiniState * 128 - 256;
+                x = -displacement;
+            } else {
+                x = 0;
+            }
+            if (x >= -511) {
+                s32 stripColor;
+                stripColor = 0x00808080 | (alpha << 24);
+                DrwSprite2D(x, 378, 9, 8, 2, 8, 9, -8, stripColor, fldTitleMiniWork);
+                DrwSprite2D(x + 9, 378, 503, 8, 10, 8, 1, -8, stripColor,
+                            fldTitleMiniWork);
+            }
+
+            alpha = (15 - fldTitleMiniState) * 128 / 15;
+            if (alpha < 0) alpha = 0;
+            if (alpha > 128) alpha = 128;
+            if (alpha > 0) {
+                s32 shade;
+                shade = 89;
+                shade *= alpha;
+                shade /= 128;
+                aDrawBoxG(0, 174, 256, 15,
+                          0, 0, 0, 0, 0, 0, 0, shade,
+                          0, 0, 0, shade, 0, 0, 0, 0);
+                aDrawBoxG(256, 174, 256, 15,
+                          0, 0, 0, shade, 0, 0, 0, 0,
+                          0, 0, 0, 0, 0, 0, 0, shade);
+            }
+
+            alpha = (25 - fldTitleMiniState) * 128 / 25;
+            if (alpha < 0) alpha = 0;
+            if (alpha > 128) alpha = 128;
+            DrwSprite2D(128, 313, 256, 128, 0, 0, 256, 128, 0x00808080 | (alpha << 24),
+                        fldTitleMiniTex);
+
+            if (++fldTitleMiniState >= 31) {
+                fldTitleMiniState = 0;
+                fldSnowActive++;
+            }
+            break;
+        }
+        default:
+            return -1;
+        }
+    }
+    return 0;
+}
 
 void fldTitleMini_Shutdown(void) {
     if (fldTitleMiniTex != 0) {
@@ -125,12 +293,9 @@ void fldTitleMini_Shutdown(void) {
     }
 }
 
-extern s32 fldTitleMiniState;
-extern s32 fldSnowActive;
 extern s32 fldArea[];
 extern s32 D_0054EFB0;
 extern s32 evtBitCheck(s32 no);
-extern s32 fldTitleMini_Process(dds3ProcessID_t *id);
 
 INCLUDE_RODATA(const s32, "field/fldTitle", D_00532820);
 
