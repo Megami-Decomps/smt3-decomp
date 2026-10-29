@@ -1199,16 +1199,6 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifQueryBlockTopAddress);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifQueryBlockSize);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _lf_bind);
-
-INCLUDE_ASM(const s32, "sdk/libkernl", _lf_version);
-
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadFileReset);
-
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifLoadModuleBuffer);
-
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifStopModule);
-
 /* The load-file RPC sends this complete 0x200-byte shared request region. */
 typedef struct lfRequest_t {
     s32 value;
@@ -1222,6 +1212,58 @@ extern rpcClient D_0059EC00;
 extern s32 _lf_bind(void);
 extern s32 _lf_version(void);
 extern char *strncpy(char *destination, const char *source, u32 count);
+
+extern s32 D_0052C358;
+extern u8 D_0059EC28[0x18];
+extern u8 D_0052C2A0[4];
+extern void *D_0052C35C;
+extern void *memcpy(void *destination, const void *source, u32 size);
+extern s32 memcmp(const void *a, const void *b, u32 size);
+
+s32 _lf_bind(void)
+{
+    s32 delay;
+
+    if (D_0052C358 < 0) {
+        for (;;) {
+            if (sceSifBindRpc(&D_0059EC00, 0x80000006, 0) < 0) {
+                return -1;
+            }
+            if (D_0059EC00.server != NULL) {
+                D_0052C358 = 0;
+                if (sceSifCallRpc(&D_0059EC00, 0xFF, 0, NULL, 0,
+                                  &D_0059EA00, 4, NULL, NULL) < 0) {
+                    return -65537;
+                }
+                memcpy(D_0059EC28, &D_0059EA00, 4);
+                return 0;
+            }
+            for (delay = 0x100000; delay != -1; delay--) {
+            }
+        }
+    }
+    return 0;
+}
+
+s32 _lf_version(void)
+{
+    const void *builtin = D_0052C2A0;
+    const void *detected = D_0059EC28;
+    s32 mismatch = 0;
+
+    if (memcmp(detected, builtin, 4) != 0) {
+        if (memcmp(detected, D_0052C35C, 4) != 0) {
+            mismatch = memcmp(builtin, D_0052C35C, 4) != 0;
+        }
+    }
+    return mismatch;
+}
+
+INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadFileReset);
+
+INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifLoadModuleBuffer);
+
+INCLUDE_ASM(const s32, "sdk/libkernl", sceSifStopModule);
 
 s32 sceSifUnloadModule(s32 moduleId)
 {
@@ -1278,9 +1320,21 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadStartModuleBuffer);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifLoadModule);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadModule);
+extern s32 _sceSifLoadModule(const char *path, s32 argumentSize, const void *arguments,
+                              s32 *moduleResult, s32 command);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadStartModule);
+s32 sceSifLoadModule(const char *path, s32 argumentSize, const void *arguments)
+{
+    s32 moduleResult;
+
+    return _sceSifLoadModule(path, argumentSize, arguments, &moduleResult, 0);
+}
+
+s32 sceSifLoadStartModule(const char *path, s32 argumentSize, const void *arguments,
+                          s32 *moduleResult)
+{
+    return _sceSifLoadModule(path, argumentSize, arguments, moduleResult, 0);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifLoadElfPart);
 

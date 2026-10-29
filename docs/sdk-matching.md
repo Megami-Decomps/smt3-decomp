@@ -472,3 +472,26 @@ load with the configured 2.9 compiler. A nonnegative-result-first form leaves
 one branch-word difference in each four-byte transaction and adds eight bytes
 to name search. The complete kernel owner checks 41 match / 0 differ at this
 qualification.
+
+## Matched load-file initialization and loader wrappers
+
+`_lf_bind` (256 bytes), `_lf_version` (140 bytes), `sceSifLoadModule` (32 bytes)
+and `sceSifLoadStartModule` (28 bytes) match 456 instruction bytes. Binding is
+skipped once the initialization flag is nonnegative. Otherwise it retries the
+synchronous bind with the native empty countdown until a server is available.
+It clears the flag before querying command `0xFF`; a failed query returns
+`-65537` without resetting that flag. A four-byte `memcpy` preserves the native
+unaligned copy into the version-byte buffer.
+
+Version validation compares the detected, built-in and configured four-byte
+values. It returns one only when all three are pairwise different. The basic
+loader wrapper supplies a real local result slot; the start wrapper forwards
+its caller's result pointer. Both preserve the core's return value and command
+zero, including the configured compiler's call/return sequence.
+
+Keeping bind work inside the negative-initialization guard matches the native
+entry branch. An early nonnegative return instead emits 260 bytes. Constructing
+the built-in address before the detected address reproduces the four native
+address-setup words in the version helper; the reversed declaration order is
+the same 140-byte size but differs in those words. The complete kernel owner
+checks 45 match / 0 differ at this qualification.

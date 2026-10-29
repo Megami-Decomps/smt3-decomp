@@ -737,3 +737,4 @@ src/smt3/sdk/libpad.c	redthing1	done	2026-10-28	1 SDK fn / 320 B	dual-client bin
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 448 B	load-file module unload and name/address lookup with complete request extent, bounded name copy and distinct error returns; owner 41 match, 0 differ
 src/smt3/field/fldAutoMap.c	redthing1	done	2026-10-29	2 fn / 1660 B	PiM agent: DDS native-adapted1000grid/height camera update and genuine unchanged caller closure; complete owner34/0
 src/smt3/field/fld_Npc.c	redthing1	done	2026-10-29	1 fn / 652 B	PiM agent: native/DDS genuine RGB component reuse, canonical local model helper declarations, no unnecessary angle changes; complete owner17/0
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 456 B	load-file bind/version initialization and loader result wrappers with native retry, flag/query ordering and byte-version copy; owner 45 match, 0 differ
