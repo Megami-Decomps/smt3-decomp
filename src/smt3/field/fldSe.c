@@ -28,8 +28,6 @@ extern fldSe3D_tag fldSe3DTable[8];
 
 extern s32 gFldSe3DNum;
 
-extern s32 D_002FC020[];
-
 extern s32 fldBgmTrackTable[];
 
 void p2sdPlayBGM(s32 MidiNo);
@@ -196,7 +194,7 @@ s32 fldGetBgmTrack(s32 code) {
 INCLUDE_ASM(const s32, "field/fldSe", fldBgmPlay);
 
 void fldPlayFieldBgm(void) {
-    if (D_002FC020[0] == 0x80) {
+    if (fldGlobalBase.sequenceCode == 0x80) {
         p2sdPlayBGM(fldBgmTrackTable[0] + 1);
     }
 }
@@ -244,7 +242,7 @@ void fldBgmStopAll(void) {
 
 void fldBgmStop(void) {
     p2sdStopSe(fldSeLastBgm);
-    D_002FC020[0] = 0;
+    fldGlobalBase.sequenceCode = 0;
 }
 
 void fldSePlay(s32 seid) {

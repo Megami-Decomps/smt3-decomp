@@ -32,7 +32,7 @@ extern void p2sdStopBGM(s32 index);
 
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
-extern void p2sdStopSe(s32 sound);
+extern void p2sdStopSe(u32 sound);
 
 s32 evtGetSoundIndex(s32 eventId, s32 variation);
 
