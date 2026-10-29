@@ -202,8 +202,16 @@ split in this region:
 - **A rodata block whose unit contains a 16-byte-aligned jump table must start
   16-byte aligned.** spimdisasm emits `.align 4` before such a table, and that
   directive aligns the offset within the section, so a section starting 8 bytes
-  off puts the table 8 bytes wrong. libkernl's block starts at its first jump
-  table for this reason, and the strings before it sit in libc's object.
+  off puts the table 8 bytes wrong. libkernl's block originally started at its
+  first jump table (`0x0054BB10`) for this reason. It now starts at the also
+  16-byte-aligned `0x0054BAE0`, including printfloat's contiguous 48-byte
+  string/double block before that table. This is a minimal packaging-boundary
+  extension, not recovery of the whole library's original data boundary:
+  earlier kernel strings remain in libc's object. `sdk_objects.tsv` identifies
+  printfloat by bytes and `_printf` by name as `kprintf.o`; native references
+  tie those six literals exclusively to printfloat. Moving their existing ASM
+  ownership first preserves both complete owners and the retail image before
+  C promotion.
 - **An object aligned more strictly than its code needs has to say so.**
   libkernl's first object, `klib.o`, aligns `.text` to 64, and the retail link
   pads 16 bytes after libc's last function to reach it. `TEXT_ALIGN(6)` in the
@@ -1080,3 +1088,29 @@ the wrapper alone has that extent or a byte-identified producer. All strings
 and the dispatch table remain with the assembly-backed core. Neither boundary
 recovery nor the guarded wrapper adds exact matching credit.
 
+
+## Kernel floating-point formatter
+
+`printfloat` matches all 360 native bytes under the configured ee-gcc
+2.9-991111-01. `_printf` handles zero itself and promotes its nonzero single
+argument through `fptodp` before calling this binary64 helper. The helper
+subtracts a negative input from zero, emits '-' through the current character
+callback, and normalizes with factors of ten while tracking a signed exponent.
+
+The unusual conversion chain is intentional: multiply by one million, convert
+to `u64` through `__fixunsdfdi`, then pass those integer bits directly to
+`ftoi`. Native `ftoi` extracts a binary64-style exponent and mantissa from its
+raw 64-bit argument and returns a sign-extended 32-bit result. There is no
+integer-to-double conversion between the two calls. In particular, the
+normalized finite values reach `ftoi` as small integer bit patterns, producing
+zero; this reconstruction does not repair that native behavior. It also adds
+no zero, infinity or NaN handling beyond the original caller/helper behavior.
+
+The meaningful `digits` local finishes that conversion chain before evaluating
+the format argument. Compared with nesting `ftoi` directly in `kprintf`, this
+preserves native format-address scheduling and the ordinary loop branches;
+no artificial dependency is introduced. All three strings and three double
+constants reproduce their native 48-byte block. The earlier ASM-only ownership
+change and the C promotion each pass the complete libc/libkernl owners and the
+retail checksum; plain and `-da` output agree under the selected 2.9 compiler.
+This adds 360 SDK bytes, not game-code bytes.

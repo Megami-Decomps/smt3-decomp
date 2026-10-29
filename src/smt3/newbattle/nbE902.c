@@ -310,7 +310,6 @@ extern u32 dds3GetRandA(u8 *name);
 
 extern u8 dds3EffectBase[];
 
-extern void nbCameraEnemyPartySet(u8 *pNbCamera, f32 angleH, f32 angleW);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -360,7 +359,6 @@ nbKoukaPacket_t *nbAddOngBunshin2Packet(s32 startframe, s32 uniqueid, nbFormatio
 
 void nbMoveFormation(void *data, s32 sindex, s32 dindex);
 
-nbFormation_t *nbGetEventForm();
 
 void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
@@ -370,7 +368,7 @@ s32 Pos1(nbEventProcessData_t *ed)
     nbFormation_t *p;
     s32 i;
 
-    nbMoveFormation(ed->data, nbGetEventForm(ed)->formindex, 5);
+    nbMoveFormation(ed->data, nbGetEventForm()->formindex, 5);
     nbSetActionCommand(ed->data, 0x10D);
     p = ed->data->form + 4;
     for (i = 0; i < 10; i++) {
@@ -397,7 +395,7 @@ s32 SetForm(nbEventProcessData_t *e)
 
 s32 nbE902_Wait1(nbEventProcessData_t *e)
 {
-    nbGetEventForm(e);
+    nbGetEventForm();
     if (*(u16 *)(datModelParamTable + 0x3386E) < e->seqtime) {
         nbFreeEffectSlot(e);
     }
@@ -541,7 +539,7 @@ s32 nbE903_Wait1(nbEventProcessData_t *e)
 {
     nbFormation_t *form;
 
-    form = nbGetEventForm(e);
+    form = nbGetEventForm();
     /* The animation block the unit basic points at; its end frame sits at +0x2E. */
     if (*(u16 *)((u8 *)((dds3Basic_t *)form->hunit->owner)->poseset + 0x2E) < e->seqtime) {
         nbFreeEffectSlot(e);

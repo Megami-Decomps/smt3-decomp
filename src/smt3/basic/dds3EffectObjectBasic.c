@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "basic.h"
 #include "dds3obj.h"
 #include "ps2asm.h"
@@ -105,7 +106,6 @@ struct billHandle_t *dds3BillboardCopy(struct billHandle_t *hBillboard);
 struct billHandle_t *dds3BillboardCreate(s32 kind, u32 id);
 void effMagaP4Randomize(void *hEffect);
 void *memset(void *a, s32 b, u32 c);
-void *sdfDevLoadFileEx(void *resource, u32 *id, s32 mode);
 
 
 struct dds3BillResource_tag;

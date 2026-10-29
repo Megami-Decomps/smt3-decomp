@@ -327,7 +327,7 @@ void sdfDrawTagInit(sdfDrawTag_t *a);
 void sdfDrawTagLink(sdfDrawTag_t *aTag, void *aPacket);
 void *sdf2DMakeStdPacket(void *aPacket, s32 aLeng);
 s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
-void sdf2DMakePrimPacketHeader(void *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s32 aGifRegs, s32 aNumOfPrim);
+sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s64 aGifRegs, s32 aNumOfPrim);
 void *sdf2DGetPrimPtr(void *aPacketPtr);
 void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 void sdfPrimLinkGt4(sdfDrawTag_t *aTag, s32 aPrim,
@@ -347,7 +347,6 @@ void *sdfDevPrintfEx(dds3PrintControl_t *aCB, const char *aStr, ...);
 void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, u32 aAttr, const char *aStr, ...);
 void sdfGrSetDrawEnv(sdfGrDrawEnv_t *aEnv, sdfGrFrameSet_t *aFrameSet, s32 aEvenOdd);
 void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *aPacket, sdf3DScreenParam_t *aParam, sdfMatrix4_t *aCamera);
-void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdf3DLight_t **aLights, sdfVector4_t *aAmbient);
 sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 aW, s32 aH, s32 aPixelFormat);
 sdfTexHandle_t *sdfTexNew(s32 aWidth, s32 aHeight, s32 aPixelFormat, s32 aNumOfMipmap,
     sdfGsMemSlice_t *aPixelGsHandle, s32 aCLUTFormat, s32 aNumOfCLUT, sdfGsMemSlice_t *aCLUTGsHandle);
@@ -1094,8 +1093,8 @@ void dds3MultiBlurOff(s32 frame)
     }
 }
 
-void dds3SetDistBlurPara(s32 number, s32 width, s32 intval, s32 speed,
-                         f32 rotate, f32 distor, f32 blend)
+void dds3SetDistBlurPara(s32 number, s32 width, s32 intval, f32 rotate,
+                         f32 distor, f32 blend, s32 speed)
 {
     if (number >= 101)
 {
@@ -1168,7 +1167,7 @@ void dds3DistBlurOff(s32 frame)
     }
 }
 
-void dds3SetRipBlurPara(s32 number, s32 speed, f32 intval, f32 rotate, f32 distor, f32 distor_s, f32 blend)
+void dds3SetRipBlurPara(s32 number, f32 intval, f32 rotate, f32 distor, f32 distor_s, f32 blend, s32 speed)
 {
     if (number >= 0x29) {
         ripblurovercnt++;

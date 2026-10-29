@@ -96,7 +96,7 @@ extern void fldMainLoadStart(void);
 extern void fldAllShutDown(void);
 extern s32 fldProcShutDown2(void);
 extern void fldProcNextJump(void);
-extern void evtInitSky(void);
+extern dds3ProcessID_t *evtInitSky(void);
 extern void fclTerminalProcessStart(s32 TerminalType, s32 TerminalNo);
 extern scrProcessWork_s *scrPrintProcedureStart(scrHeader_t *header, scrTypeTable_t *typetable,
                                                 scrProcTable_t *proctable,

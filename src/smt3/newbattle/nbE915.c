@@ -6,6 +6,13 @@
 #include "ps2asm.h"
 #include "newdata.h"
 
+#ifdef NON_MATCHING
+extern void nbCameraBoss_BSBERU_E915_Init(void);
+extern void nbCameraBoss_BSBERU_E915_0_Set(void);
+extern void nbCameraBoss_BSBERU_E915_1_Set(void);
+extern void nbCameraBoss_BSBERU_E915_2_Set(void);
+#endif
+
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];
@@ -433,7 +440,6 @@ void nbFormDispOff2(nbFormation_t *form);
 
 void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
 
-nbFormation_t *nbGetEventForm();
 
 void nbUpdateEventProcessData(dds3ProcessID_t *id);
 

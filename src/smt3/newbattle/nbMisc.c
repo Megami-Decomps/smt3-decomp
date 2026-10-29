@@ -23,7 +23,6 @@ extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, s32 aId);
 
 extern void nbDrawTargetCursor(nbMainProcessData_t *data, s32 x, s32 y);
 
-extern nbFormation_t *nbGetEventForm();
 
 extern s32 evtGetAgeOfMoon16(void);
 
@@ -186,7 +185,6 @@ extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
 
 extern nbEncountForm_t nbEncountFormTable[];
 
-void nbSetOrder(s32 index);
 
 s32 nbCheckDeadScript(nbFormation_t *form);
 
@@ -375,7 +373,7 @@ void nbSetOrderSide(s32 side)
     data->activeunit = data->order[data->orderindex];
 }
 
-void nbSetOrder(s32 index)
+void nbSetOrder(void)
 {
     if ((nbGetMainProcessData()->stat & 8) == 0) {
         nbSetOrderSide(0);
@@ -391,14 +389,14 @@ void nbSetNextOrder(void)
     s32 next;
 
     if (data->orderindex < 0) {
-        nbSetOrder(data->orderindex);
+        nbSetOrder();
         return;
     }
     do {
         next = data->orderindex + 1;
         data->orderindex = next;
         if (data->orderindex >= 12) {
-            nbSetOrder(next);
+            nbSetOrder();
             break;
         }
     } while (data->order[data->orderindex] < 0);

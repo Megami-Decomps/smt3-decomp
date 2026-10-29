@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fileManager.h"
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -7,6 +8,9 @@
 #include "newdata.h"
 #include "motion.h"
 #include "model.h"
+
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void effPadVibeFadeOUT(u32 mode, u8 power, s32 frame);
 
 typedef struct evtUnitHandle_t
 {
@@ -335,7 +339,6 @@ nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *
 
 void nbBgmFadeOut(void);
 
-nbFormation_t *nbGetEventForm();
 
 extern s32 (*nbE906Table[])(nbEventProcessData_t *e);
 
@@ -612,7 +615,7 @@ s32 Model2Wait_1(nbEventProcessData_t *ed)
     nbFormation_t *form;
     void *res;
 
-    form = nbGetEventForm(ed);
+    form = nbGetEventForm();
     evtSetUnitMotion(form->hunit, 0x11, 0xA, 0, 0);
     dds3DrawFlag |= 0x2000000;
     res = evtGetResorceData(0x38B, 2);

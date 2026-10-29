@@ -111,8 +111,6 @@ void lightdestructor(dds3Basic_t *basic)
     dds3FreePoseSet(basic);
 }
 
-extern void sdf3DMakeLightParallelPacket(struct sdf3DLightParallelPacket_t *aPacket,
-                                         sdf3DLight_t **aLights, sdfVector4_t *aAmbient);
 
 /* vu0 routine: blend the stored light and ambient colours toward the target */
 s32 lightmainprocedure(dds3Basic_t *basic)

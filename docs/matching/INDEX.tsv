@@ -113,7 +113,7 @@ fldBgmBitChk	field/fldSe	0x7C	30 of 31 words match	docs/matching/field/fldSe.md	
 fldBgmPlay	field/fldSe	0x2D0	161 of 180 words match	docs/matching/field/fldSe.md	27
 fldSkyDrawFilter	field/fldSky	0xAD8	682 of 694 words match	docs/matching/field/fldSky.md	3
 fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3
-fldRunDantePatr	field/fldTest	0x2D0	178 of 180 words match	docs/matching/field/fldTest.md	3
+fldRunDantePatr	field/fldTest	0x2D0	180 of 180 words match	docs/matching/field/fldTest.md	3
 fldTitle_Process	field/fldTitle	0xBD4		docs/matching/field/fldTitle.md	3
 fldItemBoxAdd (0x680)			294 of 416 words differ	docs/matching/field/fld_Npc.md	3
 fldNpcCalc	field/fld_Npc	0x7B0	487 of 492 words match	docs/matching/field/fld_Npc.md	35
@@ -213,7 +213,7 @@ pbDrawMapPolyTransformed			10 of 262 words matching	docs/matching/pb/pbModel.md	
 pbAddRecord_char	pb/pbRecord	0x144	73 of 81 words match	docs/matching/pb/pbRecord.md	3
 makaDrawMulti	pipe/pipeMakaAnim	0x494		docs/matching/pipe/pipeMakaAnim.md	3
 objOption				docs/matching/pipe/pipeObject.md	3
-pipeFileLoad	pipe/pipePosTable	424 bytes	103 of 106 words match	docs/matching/pipe/pipePosTable.md	3
+pipeFileLoad	pipe/pipePosTable	424 bytes	106 of 106 words match	docs/matching/pipe/pipePosTable.md	3
 ActionZMotion	pipe/pipeSection	0x140	74 of 80 words match	docs/matching/pipe/pipeSection.md	3
 EmTask	pipe/pipeSection	0x34C		docs/matching/pipe/pipeSection.md	27
 MyAction	pipe/pipeSection	0x21C		docs/matching/pipe/pipeSection.md	66

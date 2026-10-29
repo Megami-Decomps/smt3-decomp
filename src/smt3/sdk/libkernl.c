@@ -1,5 +1,6 @@
 #include "common.h"
 #include "newlib_stat.h"
+#include "sdk_libgcc.h"
 #include "ps2asm.h"
 #include "sif_rpc.h"
 #include "ps2asm.h"
@@ -777,7 +778,38 @@ void serialPutchar(s32 character)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", ftoi);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", printfloat);
+/* ftoi consumes the integer bits directly, not a numeric double conversion. */
+extern s32 ftoi(u64 bits);
+extern void (*D_0052C2B4)(s32 character) __attribute__((section(".data")));
+
+void printfloat(f64 value)
+{
+    s32 exponent = 0;
+    s32 digits;
+
+    if (value < 0.0) {
+        value = 0.0 - value;
+        D_0052C2B4('-');
+    }
+    if (value < 0.1) {
+        while (value < 0.1) {
+            value *= 10.0;
+            exponent--;
+        }
+    } else if (value >= 1.0) {
+        while (value >= 1.0) {
+            value /= 10.0;
+            exponent++;
+        }
+    }
+    digits = ftoi((u64)(value * 1000000.0));
+    kprintf("0.%d", digits);
+    if (exponent >= 0) {
+        kprintf("e+%d", exponent);
+    } else {
+        kprintf("e%d", exponent);
+    }
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _printf);
 

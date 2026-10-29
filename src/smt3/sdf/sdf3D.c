@@ -1,7 +1,9 @@
 #include "common.h"
+#include "libsdf.h"
 #include "fpu.h"
 #include "ps2asm.h"
 #include "sdf_lighting.h"
+#include "libsdf.h"
 #include "sdf_resource.h"
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
@@ -196,19 +198,7 @@ typedef struct sdf3DScreenParam_t {
 
 void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
 
-/* Per-texture reference count and non-owning clone source (0x8). */
-/* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
-typedef struct sdfTexPacket_t {
-    s32 gifTagWord; /* Low GIFtag word; NLOOP occupies bits 0-14. */
-    u32 gifTagControl; /* High GIFtag control word; one packed register. */
-    u64 gifTagRegisters; /* Packed register list: A+D. */
-    u64 samplingState; /* GS TEX1 data, including minification/magnification filters. */
-    u64 samplingRegister; /* GS TEX1_1/TEX1_2 register selector. */
-    u64 textureState; /* GS TEX0 data. */
-    u64 textureRegister; /* GS TEX0_1/TEX0_2 register selector. */
-    u64 clampState; /* GS CLAMP data. */
-    u64 clampRegister; /* GS CLAMP_1/CLAMP_2 register selector. */
-} sdfTexPacket_t;
+
 
 
 
@@ -360,18 +350,19 @@ void sdf3DMakeScreenParam(sdf3DScreenParam_t *camera)
     camera->trans[3] = 0;
 }
 
-void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdfLightSources_t aLights, f32 *aAmbient);
 
 extern f32 D_00529630[];
 extern void DiagMatrix(void);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *memset(void *dst, s32 value, u32 size);
 
 /* vu0 routine: parallel-light packet and lighting basis construction */
-void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdfLightSources_t aLights, f32 *aAmbient) {
+void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdf3DLight_t **aLights, sdfVector4_t *aAmbient) {
     f32 direction[4] __attribute__((aligned(16)));
     /* VU0 lqc2 reads this scratch through its address, like the DDS rotation
      * loaders and Euler-to-quaternion routines; volatile preserves its stores. */
     volatile f32 axis[4] __attribute__((aligned(16)));
-    f32 (*first)[4];
+    sdf3DLight_t *first;
     s32 i;
 
     aPacket->dmatag.qwc = 13;
@@ -381,7 +372,7 @@ void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdfLightS
     SDF_VU0_STOREVECTOR_B(&aPacket->color[3]);
     first = NULL;
     for (i = 0; i < 3; i++) {
-        f32 (*light)[4] = aLights[i];
+        sdf3DLight_t *light = aLights[i];
 
         if (light == NULL) {
             aPacket->normalComponents[0][i] = 0.0f;
@@ -395,14 +386,14 @@ void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdfLightS
             if (first == NULL) {
                 first = light;
             }
-            SDF_VU0_LOADVECTOR(light[1]);
+            SDF_VU0_LOADVECTOR(&light->v);
             SDF_VU0_NORMALIZE();
             SDF_VU0_SCALEVECTOR_BITS(-1.0f);
             SDF_VU0_STOREVECTOR(direction);
             aPacket->normalComponents[0][i] = direction[0];
             aPacket->normalComponents[1][i] = direction[1];
             aPacket->normalComponents[2][i] = direction[2];
-            SDF_VU0_LOADVECTOR(light[0]);
+            SDF_VU0_LOADVECTOR(&light->color);
             SDF_VU0_ADDVECTOR_B_A();
             SDF_VU0_STOREVECTOR(&aPacket->color[i]);
         }
@@ -413,7 +404,7 @@ void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdfLightS
         SDF_MMI_STORE_UNIT_MATRIX(&aPacket->TM);
         return;
     }
-    SDF_VU0_LOADVECTOR(first[1]);
+    SDF_VU0_LOADVECTOR(&first->v);
     SDF_VU0_NORMALIZE();
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_SET_ROW2();
@@ -438,7 +429,7 @@ void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdfLightS
     SDF_VU0_SET_ROW1();
     SDF_VU0_RESET_ROW3();
     DiagMatrix();
-    SDF_VU0_LOADVECTOR(first[1]);
+    SDF_VU0_LOADVECTOR(&first->v);
     SDF_VU0_NORMALIZE();
     SDF_VU0_LOADVECTOR_B_MTXCOL(sdfCameraTm + 8);
     SDF_VU0_ADDVECTOR();
@@ -492,6 +483,9 @@ void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket) {
     aPacket->unknown1C = 0;
     sdfDrawTagLinkRef(aTag, (u32)aPacket);
 }
+
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *memset(void *dst, s32 value, u32 size);
 
 void sdf3DInitSpecularTex2(void) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x2440);

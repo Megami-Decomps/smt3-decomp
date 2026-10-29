@@ -523,7 +523,6 @@ void fclRagUpdateInit(s8 type, fclRagWork_t *owner)
 
 extern void *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(void *handle);
-extern void *sdfDevLoadFileEx(const char *name, u32 *data, u32 *size);
 extern void cmpInitSeqInfo(void *work, s32 seq);
 extern void fclRagUpdateInit(s8 type, fclRagWork_t *work);
 extern void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 w,

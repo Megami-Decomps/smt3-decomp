@@ -58,7 +58,6 @@ PS2_SYMBOL_AT(sdf3DFogParam_t, dds3FogParamMain, dds3LightParam, 0x20);
 PS2_SYMBOL_AT(sdf3DFogParam_t, dds3FogParam2, dds3LightParam2, 0x20);
 extern void dds3RunQuake(void);
 extern void dds3SceneLightUpdateFirst(void);
-extern void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *, sdf3DLight_t **, sdfVector4_t *);
 extern void sdf3DMakeScreenParam(sdf3DScreenParam_t *);
 extern void LookAtMatrix(const void *, const void *, const void *);
 extern void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *, sdf3DScreenParam_t *, void *);

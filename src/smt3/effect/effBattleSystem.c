@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdk_libgcc.h"
 #include "newbattle.h"
 #include "effDebug.h"
@@ -87,7 +88,6 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern s32 sdfFileRead(void *handle, void *dst, s32 size);
 extern void sdfFileClose(void *handle);
-extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
 extern s32 printf(const char *format, ...);
 extern char D_00533300[];
 
@@ -275,6 +275,7 @@ void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 void effBTLModelGetMarkPosition2(nbFormation_t *pFormation, s32 mark);
 
 void effBTLModelGetMarkPosition3(mdlObj_t *hModel, s32 mark);
+
 
 
 void *effBTLBindCreateTrack(void *pParam);
@@ -1580,20 +1581,18 @@ void effBTLSys_Hansya_SetColor(void) {
 
 #ifdef NON_MATCHING
 typedef struct {
-    sdfLightSources_t lights;
+    sdf3DLight_t *lights[3];
 } effHansyaLights_t;
 
 extern f32 D_005334C0[];
 extern sdfModelOt_t D_002F69B8[];
 extern void effBTLModelGetSphereCenter(nbFormation_t *formation);
 extern void nbMakeUnitDrawMatrix(nbFormation_t *formation);
-extern void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *packet,
-                                        sdfLightSources_t lights, f32 *ambient);
 extern void mdlLink(mdlObj_t *model, void *ot);
 
 void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work)
 {
-    f32 light[2][4] __attribute__((aligned(16)));
+    sdf3DLight_t light __attribute__((aligned(16)));
     sdfVector4_t ambient;
     sdfVector4_t position;
     sdfMatrix4_t rotation;
@@ -1604,7 +1603,7 @@ void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work)
     mdlObj_t *model;
     u32 frame = work->frame;
 
-    initial.lights[0] = light;
+    initial.lights[0] = &light;
     initial.lights[1] = NULL;
     initial.lights[2] = NULL;
     lights = initial;
@@ -1654,21 +1653,21 @@ void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work)
         SDF_VU0_STOREVECTOR(&position);
         dds3EffectPartSetPosition(work->hPart2, &position);
         if (datSkillTable.normal[effBTLSkillGetID()].koukatype == 0) {
-            light[0][0] = 0.6078431010246277f;
-            light[0][1] = 0.23529410362243652f;
-            light[0][2] = 0.3529411554336548f;
+            light.color.x = 0.6078431010246277f;
+            light.color.y = 0.23529410362243652f;
+            light.color.z = 0.3529411554336548f;
         } else {
-            light[0][0] = 0.2549019455909729f;
-            light[0][1] = 0.3333333134651184f;
-            light[0][2] = 0.45098036527633667f;
+            light.color.x = 0.2549019455909729f;
+            light.color.y = 0.3333333134651184f;
+            light.color.z = 0.45098036527633667f;
         }
-        light[0][3] = 0.0f;
-        SDF_VU0_COPYVECTOR(&ambient, light[0]);
-        light[1][0] = -0.7299999594688416f;
-        light[1][1] = 1.5499999523162842f;
-        light[1][2] = 0.23999999463558197f;
-        light[1][3] = 0.0f;
-        sdf3DMakeLightParallelPacket(&work->lightPacket, (f32 (**)[4])lights.lights, (f32 *)&ambient);
+        light.color.w = 0.0f;
+        SDF_VU0_COPYVECTOR(&ambient, &light.color);
+        light.v.x = -0.7299999594688416f;
+        light.v.y = 1.5499999523162842f;
+        light.v.z = 0.23999999463558197f;
+        light.v.w = 0.0f;
+        sdf3DMakeLightParallelPacket(&work->lightPacket, (sdf3DLight_t **)lights.lights, &ambient);
         model = dds3EffectPartGetHandle(work->hPart);
         model->inner->light = &work->lightPacket;
         mdlLink(model, D_002F69B8);

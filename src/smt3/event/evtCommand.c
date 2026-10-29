@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "event.h"
 #include "kernel.h"
 #include "scr.h"
@@ -202,8 +203,6 @@ typedef u8 sdfTextureClampMode_t;
 
 void sdfMemFreeDirect(struct sdfMemHandle_t *aHandle);
 
-struct sdfMemHandle_t *sdfDevLoadFileEx(
-    const char *name, u32 *outAddress, u32 *outSize);
 
 
 struct sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *aTex);
@@ -2729,21 +2728,24 @@ u32 evtCommand_TEX_SWAP(void)
     return 1;
 }
 
-u32 evtCommand_TEX_OT(void) {
-    u64 id;
-    u64 fade;
+extern void evtPictureSetOt(dds3ProcessID_t *id, s32 ot);
+extern void evtPictureSetPri(dds3ProcessID_t *id, s32 pri);
 
-    id = scrGetIntPara(0);
+u32 evtCommand_TEX_OT(void) {
+    dds3ProcessID_t *id;
+    s32 fade;
+
+    id = (dds3ProcessID_t *)scrGetIntPara(0);
     fade = scrGetIntPara(1);
     evtPictureSetOt(id, fade);
     return 1;
 }
 
 u32 evtCommand_TEX_PRI(void) {
-    u64 task;
-    u64 value;
+    dds3ProcessID_t *task;
+    s32 value;
 
-    task = scrGetIntPara(0);
+    task = (dds3ProcessID_t *)scrGetIntPara(0);
     value = scrGetIntPara(1);
     evtPictureSetPri(task, value);
     return 1;

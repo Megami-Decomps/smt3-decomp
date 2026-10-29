@@ -71,7 +71,6 @@ extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
 extern s32 sprintf(char *text, const char *format, ...);
 
-extern sdfMemHandle_t *sdfDevLoadFileEx(char *path, void *destination, void *size);
 
 
 
@@ -1276,7 +1275,7 @@ void fldRunTamaInit(void)
     res->x = 0.0f;
     res->y = 0.0f;
     res->z = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_00531080, &res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(D_00531080, (u32 *)&res->ptr, &res->size);
     res = &fldDsmoke2File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1288,7 +1287,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_00531098, &res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(D_00531098, (u32 *)&res->ptr, &res->size);
     res = &fldDspark02File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1300,7 +1299,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_005310B0, &res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(D_005310B0, (u32 *)&res->ptr, &res->size);
     res = &fldGun02aFile;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1312,7 +1311,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_005310C8, &res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(D_005310C8, (u32 *)&res->ptr, &res->size);
     res = &fldGun01a0File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1324,7 +1323,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_005310E0, &res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(D_005310E0, (u32 *)&res->ptr, &res->size);
     res = &fldMuzzleB010File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1336,7 +1335,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_005310F8, &res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(D_005310F8, (u32 *)&res->ptr, &res->size);
     res = &fldDsmoke1File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1348,7 +1347,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_00531118, &res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(D_00531118, (u32 *)&res->ptr, &res->size);
     res = &fldDflash1File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1360,7 +1359,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_00531130, &res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(D_00531130, (u32 *)&res->ptr, &res->size);
 }
 
 /* NON_MATCHING: 27 of 47 words differ (first at +0x2C). */
@@ -1644,7 +1643,7 @@ void fldMakeFroFileName(void) {
 
     fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
     sprintf(path, "%sF%03d_%03d.FRO", directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
-    fldRunMapData = sdfDevLoadFileEx(path, &resource, 0);
+    fldRunMapData = sdfDevLoadFileEx(path, (u32 *)&resource, 0);
     base = (u32)resource;
     first = base + resource->firstOffset;
     second = base + resource->secondOffset;

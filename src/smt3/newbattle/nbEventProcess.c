@@ -354,8 +354,7 @@ void func_0028FA68(nbEventProcessData_t *e, s32 step)
     }
 }
 
-nbFormation_t *nbGetEventForm(e)
-nbEventProcessData_t *e;
+nbFormation_t *nbGetEventForm(void)
 {
     nbFormation_t *form;
     s32 i;

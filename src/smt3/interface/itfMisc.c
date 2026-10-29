@@ -53,7 +53,6 @@ extern itfColorVector_t D_003263E8[];
 
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-extern sdfMemHandle_t *sdfDevLoadFileEx(const char *, u32 *, s32);
 
 extern sdfTexHandle_t *sdfTexSet(void *aTex);
 

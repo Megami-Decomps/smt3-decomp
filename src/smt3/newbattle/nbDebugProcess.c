@@ -1024,7 +1024,6 @@ void SetNextSeq(nbDebugProcessData_t *d)
 }
 
 extern s32 nbGetTarSelStat(void);
-extern void nbSetOrder(s32 index);
 extern void nbSetNextOrder(void);
 
 #ifdef NON_MATCHING
@@ -1067,7 +1066,7 @@ void *nbDebugProcess1(dds3ProcessID_t *id)
             ((d->data->stat & 8) == 0 && d->side != 0)) {
             return (void *)-1;
         }
-        nbSetOrder((s32)id);
+        nbSetOrder();
         while (d->data->party[d->data->activeunit].formindex != d->formindex) {
             nbSetNextOrder();
         }

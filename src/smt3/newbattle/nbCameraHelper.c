@@ -47,7 +47,6 @@ extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern s32 sprintf(char *destination, const char *format, ...);
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
-extern sdfMemHandle_t *sdfDevLoadFileEx(char *name, void *topPtr, s32 *sizePtr);
 extern sdfTexHandle_t *sdfTexSet(void *aTex);
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 extern void *sdfGrAllocPacketBuff(u32 aSize);

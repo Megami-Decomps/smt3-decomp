@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "basic.h"
 #include "model.h"
 #include "newdata.h"
@@ -16,7 +17,6 @@ enum sl_slot_flag
 extern char D_005327B0[];
 extern s32 sprintf(char *destination, const char *format, ...);
 extern s32 fldTitleState, D_0054EF8C, D_0054EF90, D_0054EF94;
-extern void *sdfDevLoadFileEx(const char *name, u32 *data, u32 *size);
 extern sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *texture);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 a, s32 b,

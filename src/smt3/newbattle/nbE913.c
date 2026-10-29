@@ -310,7 +310,6 @@ nbKoukaPacket_t *nbAddFadeOutKoukaPacket(s32 startframe, s32 uniqueid, s32 lengt
 
 nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *bed, s32 cutno, nbFormation_t *form);
 
-nbFormation_t *nbGetEventForm();
 
 void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
@@ -335,7 +334,7 @@ s32 nbE914_Test(nbEventProcessData_t *e)
 {
     nbFormation_t *form;
 
-    form = nbGetEventForm(e);
+    form = nbGetEventForm();
     nbBgmStop();
     nbPanelAllHide();
     nbSingleFormExceptedDispOff(form);

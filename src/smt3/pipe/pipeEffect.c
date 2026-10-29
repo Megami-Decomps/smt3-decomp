@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "sdf_resource.h"
 #include "pipe.h"
 #include "ps2asm.h"
 #include "basic.h"
@@ -104,7 +105,6 @@ void pipeBulrLimit(void)
     }
 }
 
-extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
 
 void pipeEffCreateLoadFile(PIPE_EFF_t *effect, const char *path, u8 maxSize)
 {

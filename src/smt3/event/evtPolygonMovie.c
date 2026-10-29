@@ -72,7 +72,6 @@ typedef struct fileRequest fileRequest_t;
 extern s32 pacFileCheckEnd(const fileRequest_t *pacFileHandle);
 extern sdfMemHandle_t *fileGetMemHandle(void *fileHandle);
 extern void *fileLoad(const char *filename);
-extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, void *data, s32 mode);
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
@@ -1834,12 +1833,12 @@ evtPolygonMovieWork_t *evtGetPolygonMovieWorkData2(s32 eventno, s32 cutno, s32 t
     sdfMemHandle_t *handle2;
 
     SetPMFileName(eventno, cutno, pm1file, pm2file);
-    handle1 = sdfDevLoadFileEx(pm1file, &pm1data, 0);
+    handle1 = sdfDevLoadFileEx(pm1file, (u32 *)&pm1data, 0);
     if (pm1data == NULL) {
         return NULL;
     }
     if (type == 0) {
-        handle2 = sdfDevLoadFileEx(pm2file, &pm2data, 0);
+        handle2 = sdfDevLoadFileEx(pm2file, (u32 *)&pm2data, 0);
     } else {
         handle2 = evtAllocMovieWork((pmdHeader_t **)&pm2data);
     }

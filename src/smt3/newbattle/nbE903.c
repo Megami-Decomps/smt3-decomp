@@ -8,6 +8,10 @@
 #include "event.h"
 #include "model.h"
 
+#ifdef NON_MATCHING
+extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
+#endif
+
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
 typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
@@ -323,11 +327,10 @@ nbKoukaPacket_t *nbAddFadeOutKoukaPacket(s32 startframe, s32 uniqueid, s32 lengt
 
 nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *bed, s32 cutno, nbFormation_t *form);
 
-nbFormation_t *nbGetEventForm();
 
 s32 Parts1(nbEventProcessData_t *ed)
 {
-    nbAddMotionKoukaPacket(0, 0, nbGetEventForm(ed), 0x10);
+    nbAddMotionKoukaPacket(0, 0, nbGetEventForm(), 0x10);
     nbFreeEffectSlot(ed);
     return 0;
 }

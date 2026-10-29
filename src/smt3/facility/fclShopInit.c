@@ -96,7 +96,6 @@ extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
 extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 /* Called above its definition, where ee-gcc assumed int. */
-void *sdfDevLoadFileEx(char *name, void **data, s32 *size);
 
 void fclShopEventEnd(void)
 {
@@ -181,7 +180,7 @@ void fclShopGetTexPath(void *work, s32 mode)
     } else {
         path = "/facility/scr/shop/message.bf";
     }
-    *(s32 *)((u8 *)work + 0x2388) = (s32)sdfDevLoadFileEx(path, (u8 *)work + 0x238C, 0);
+    *(s32 *)((u8 *)work + 0x2388) = (s32)sdfDevLoadFileEx(path, (u32 *)((u8 *)work + 0x238C), 0);
 }
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);

@@ -6,6 +6,12 @@
 #include "ps2asm.h"
 #include "newdata.h"
 
+#ifdef NON_MATCHING
+extern void nbAddUnitStock(struct nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
+extern s32 nbAppendEnemyDevilWork(struct nbMainProcessData_t *data, s32 id, s32 formindex);
+extern void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect);
+#endif
+
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];
@@ -304,7 +310,6 @@ nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *
 
 void nbPanelAllShow(void);
 
-nbFormation_t *nbGetEventForm();
 
 void nbUpdateEventProcessData(dds3ProcessID_t *id);
 

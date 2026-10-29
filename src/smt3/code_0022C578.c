@@ -7150,7 +7150,6 @@ extern void sdfDrawTagInit(sdfDrawTag_t *);
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, sdf3DInitPacket_t *);
 extern void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *, sdf3DScreenParam_t *, sdfMatrix4_t *);
 extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
-extern void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *, sdf3DLight_t **, sdfVector4_t *);
 
 void cmpDrawSetup3DView(void)
 {

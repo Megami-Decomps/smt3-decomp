@@ -77,7 +77,6 @@ extern void nbInitDebugProcess(nbMainProcessData_t *data);
 
 extern s32 D_0054F0F4;
 
-extern sdfMemHandle_t *sdfDevLoadFileEx(s32 path, void *destination, void *size);
 
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
@@ -221,7 +220,6 @@ extern char D_00543458[];
 
 extern void nbSetHojoCounter(s32 formindex, s32 type, s32 point);
 
-extern void nbSetOrder(void);
 
 /* The 60-byte devil record; only the flag word this unit reads is named. */
 
@@ -1455,7 +1453,7 @@ void SetJyocyuData(nbMainProcessData_t *data)
 {
     sdfMemHandle_t *handle;
 
-    handle = sdfDevLoadFileEx(D_0054F0F4, 0, 0);
+    handle = sdfDevLoadFileEx((const char *)D_0054F0F4, 0, 0);
     data->HatudoEff = effBTLCreate(sdfMemLock(handle));
     sdfMemFreeDirect(handle);
 }

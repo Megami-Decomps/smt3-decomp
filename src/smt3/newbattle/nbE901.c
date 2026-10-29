@@ -8,6 +8,15 @@
 #include "newdata.h"
 #include "model.h"
 
+#ifdef NON_MATCHING
+extern void effBTLSkillStart(u32 id, u32 stat);
+extern void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color);
+extern s32 nbMakeModelPackName(s32 no);
+extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serialID, s32 type);
+extern dds3Basic_t *dds3GetActiveScene(void);
+#endif
+
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];
@@ -350,7 +359,6 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 dds3Basic_t *nbCreateBasicEffect(void *p, void *pos, void *rot);
 
-nbFormation_t *nbGetEventForm();
 
 void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
@@ -426,7 +434,7 @@ s32 SetUp1(nbEventProcessData_t *ed)
 {
     sdfVector4_t pos;
     sdfVector4_t rot;
-    void *h;
+    s32 h;
     dds3Basic_t *basic;
 
     memset(&pos, 0, sizeof(pos));

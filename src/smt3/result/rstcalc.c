@@ -21,7 +21,7 @@ extern s8 cmbAddLevelUpParamEx(datUnitWork_t *work, s8 mode);
 
 extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 
-extern s32 dds3PadVibrationSet(s32 port, s32 power, s32 frames);
+extern void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
 
 
 
@@ -925,9 +925,9 @@ s32 rstFindDevilSlot(void)
     return ret;
 }
 
-s32 rstShakePad(void)
+void rstShakePad(void)
 {
-    return dds3PadVibrationSet(1, 0xFF, 0x1E);
+    dds3PadVibrationSet(1, 0xFF, 0x1E);
 }
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);

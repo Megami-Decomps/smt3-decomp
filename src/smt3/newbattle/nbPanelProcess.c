@@ -485,7 +485,6 @@ extern char D_00545270[];
 
 extern char D_00545290[];
 
-extern u32 sdfDevLoadFileEx(char *path, void *dest, void *size);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -555,10 +554,10 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 void nbPnlLoad(void)
 {
-    hnbPnlFile1 = sdfDevLoadFileEx(D_00545230, &pnbPnlFile1, 0);
-    hnbPnlFile2 = sdfDevLoadFileEx(D_00545250, &pnbPnlFile2, 0);
-    hnbPnlFile3 = sdfDevLoadFileEx(D_00545270, &pnbPnlFile3, 0);
-    hnbPnlFile4 = sdfDevLoadFileEx(D_00545290, &pnbPnlFile4, 0);
+    hnbPnlFile1 = (u32)sdfDevLoadFileEx(D_00545230, (u32 *)&pnbPnlFile1, 0);
+    hnbPnlFile2 = (u32)sdfDevLoadFileEx(D_00545250, (u32 *)&pnbPnlFile2, 0);
+    hnbPnlFile3 = (u32)sdfDevLoadFileEx(D_00545270, (u32 *)&pnbPnlFile3, 0);
+    hnbPnlFile4 = (u32)sdfDevLoadFileEx(D_00545290, (u32 *)&pnbPnlFile4, 0);
 }
 
 void nbPnlTexSet(nbMainProcessData_t *p)

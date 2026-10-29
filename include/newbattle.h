@@ -67,6 +67,10 @@ typedef struct nbFormation_t
     sdfVector4_t startpos;
 } nbFormation_t;
 
+nbFormation_t *nbGetEventForm(void);
+void nbSetOrder(void);
+void nbCameraEnemyPartySet(void *camera, f32 pitch, f32 yaw);
+
 /* Decoded entry in a battle pack. */
 typedef struct nbPacEntry_t {
     u8 unk_00[0x8];

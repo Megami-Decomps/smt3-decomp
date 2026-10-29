@@ -31,7 +31,7 @@ typedef enum EVT_VIEWER_MENU {
 
 
 
-extern evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frame, evtViewerInfo_t *viewer);
+extern evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frame);
 extern void sdfChipFreeDirect(void *aPtr);
 extern void dds3DeleteSceneBasicData(void *basic);
 extern void evtInitViewerInfo(void);
@@ -58,8 +58,8 @@ extern s32 PopMenu(void);
 extern s32 strcmp(const char *a, const char *b);
 extern char *strcpy(char *dst, const char *src);
 extern void evtRunFrame(s32 nowframe);
-extern s32 evtInitFrameVar(void);
-extern void dds3LinkProcess(void *parent, s32 target);
+extern dds3ProcessID_t *evtInitFrameVar(void);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 extern void evtFreeStage(void);
 extern s32 sdfDelayedResrcCheck(void);
 extern void evtFreeViewerInfo(void);
@@ -76,7 +76,7 @@ extern void *sdfMemLock(void *aHandle);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
                                          s32 shutdownTimer, dds3ProcessFunc_t process,
                                          dds3ProcessFunc_t shutdown, void *data);
-extern s32 evtInitSky(void);
+extern dds3ProcessID_t *evtInitSky(void);
 extern u32 dds3BackColor;
 extern void PushMenu(s32 no, s32 x, s32 y);
 extern void DelEffectTable_evtEventViewer(s32 index);
@@ -230,7 +230,7 @@ extern effBlurScaleWork_t *Eve_RippleBlurGetParams(void);
 extern dds3Effect_Filter_t *Eve_FilterGetParams(void);
 extern dds3Effect_PartialMultiFilter_t *Eve_PartialMultiFilterGetParams(void);
 
-evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber, evtViewerInfo_t *unused)
+evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
 {
     evtFrameInfo_t *frame = sdfChipAllocDirect(0x20);
     pmdSceneLightTable_t *sceneLight;
@@ -358,7 +358,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", evtAddFrameInfo);
 
 evtFrameInfo_t *AddFrameInfo2(evtViewerObject_s *group, s32 frame, evtViewerInfo_t *viewer)
 {
-    return evtAddFrameInfo(group, frame, viewer);
+    return evtAddFrameInfo(group, frame);
 }
 
 evtFrameInfo_t *evtGetSelectFrameInfo(void)

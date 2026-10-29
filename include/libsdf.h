@@ -28,6 +28,7 @@ typedef struct sdfMatPacket_t sdfMatPacket_t;
 typedef struct sdfPreDrawHook_t sdfPreDrawHook_t;
 typedef struct sdfModelPacketHeader_tag sdfModelPacketHeader_tag;
 typedef struct sdfItemArray_t sdfItemArray_t;
+void sdfTexListSetClutColor(sdfItemArray_t *list, s32 color, f32 ratio);
 typedef struct sdfGrOt_t sdfGrOt_t;
 typedef struct sdfPacDecodeCb_t sdfPacDecodeCb_t;
 
@@ -279,13 +280,16 @@ struct sdfGrOt_t
 };
 
 /* Four quadwords: colour, direction, position and the falloff parameters. */
-typedef struct
+typedef struct sdf3DLight_t
 {
     sdfVector4_t color;
     sdfVector4_t v;
     sdfVector4_t p;
     f32 param[4];
 } sdf3DLight_t;
+
+void sdf3DMakeLightParallelPacket(struct sdf3DLightParallelPacket_t *packet,
+                                  sdf3DLight_t **lights, sdfVector4_t *ambient);
 
 /* The .pac stream decoder. sdfPacInit memsets 56 bytes, and sdfPacDecode runs
  * phase as a three-state machine: 0 starts the next packet, 1 skips bytes, 2
@@ -438,6 +442,9 @@ typedef struct sdfThCB_t
     struct sdfThCB_t *next;
     s32 thId;
 } sdfThCB_t;
+
+void sdfStartThreadAndWait(sdfThCB_t *thread, void (*entry)(void), void *stack,
+                           s64 stackSize, s32 priority, s32 argument);
 
 
 

@@ -59,7 +59,6 @@ extern char D_00531690[], D_00531950[];
 
 extern void fclClearTerminalState(void);
 
-extern sdfMemHandle_t *sdfDevLoadFileEx(char *path, void *destination, void *size);
 
 extern s32 fldWmapIsEnabled(void);
 
@@ -638,7 +637,7 @@ INCLUDE_ASM(const s32, "field/fldMain", fldReadyScene);
 void fldPlayerALoad(void)
 {
     if (fldPlayerAnimData == NULL) {
-        fldPlayerAnimData = sdfDevLoadFileEx(D_005316B0, &gfldPlayerPtr, &gfldPlayerSizeBk);
+        fldPlayerAnimData = sdfDevLoadFileEx(D_005316B0, (u32 *)&gfldPlayerPtr, &gfldPlayerSizeBk);
     }
 }
 
@@ -661,13 +660,13 @@ void fldJDataLoad(void)
 
     if (fldGlobalBase.area == 11 || fldGlobalBase.area == 14) {
         if (evtBitCheck(0x8B0) != 0) {
-            mhfldPlayerFile = sdfDevLoadFileEx(D_005316D0, &gfldPlayerPtr, &gfldPlayerSize);
+            mhfldPlayerFile = sdfDevLoadFileEx(D_005316D0, (u32 *)&gfldPlayerPtr, &gfldPlayerSize);
         } else {
-            mhfldPlayerFile = sdfDevLoadFileEx(D_005316F0, &gfldPlayerPtr, &gfldPlayerSize);
+            mhfldPlayerFile = sdfDevLoadFileEx(D_005316F0, (u32 *)&gfldPlayerPtr, &gfldPlayerSize);
         }
         mdlPackDecode(2, 0, 0x101, gfldPlayerPtr, gfldPlayerSize);
     } else if (fldGlobalBase.area < 10) {
-        mhfldPlayerFile = sdfDevLoadFileEx(D_00531710, &gfldPlayerPtr, &gfldPlayerSize);
+        mhfldPlayerFile = sdfDevLoadFileEx(D_00531710, (u32 *)&gfldPlayerPtr, &gfldPlayerSize);
         mdlPackDecode(2, 4, 0x101, gfldPlayerPtr, gfldPlayerSize);
     } else {
         fldPlayerALoad();
@@ -682,14 +681,14 @@ void fldJDataLoad(void)
         mhfldPlayerFile = NULL;
     }
     if (fldGlobalBase.area == 21 || fldGlobalBase.area == 26 || fldGlobalBase.area >= 36) {
-        mhfldAnaFile = sdfDevLoadFileEx(D_00531728, &gfldAnaPtr, &gfldAnaSize);
+        mhfldAnaFile = sdfDevLoadFileEx(D_00531728, (u32 *)&gfldAnaPtr, &gfldAnaSize);
         mdlPackDecode(2, 5, 0x101, gfldAnaPtr, gfldAnaSize);
     }
     if (fldGlobalBase.area == 22) {
-        mhfldWaveFile = sdfDevLoadFileEx(D_00531740, &gfldWavePtr, &gfldWaveSize);
+        mhfldWaveFile = sdfDevLoadFileEx(D_00531740, (u32 *)&gfldWavePtr, &gfldWaveSize);
         mdlPackDecode(2, 0x1B, 0x101, gfldWavePtr, gfldWaveSize);
     } else if (fldGlobalBase.area == 45) {
-        mhfldWaveFile = sdfDevLoadFileEx(D_00531758, &gfldWavePtr, &gfldWaveSize);
+        mhfldWaveFile = sdfDevLoadFileEx(D_00531758, (u32 *)&gfldWavePtr, &gfldWaveSize);
         mdlPackDecode(2, 0x1B, 0x101, gfldWavePtr, gfldWaveSize);
     }
 }

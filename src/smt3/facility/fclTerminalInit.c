@@ -477,7 +477,6 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void cmpInitSeqInfo(void *work, s32 seq);
-extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
 extern void fclTerminalLoadTextures(void *work);
 extern void fclClearTerminalState(void);
 

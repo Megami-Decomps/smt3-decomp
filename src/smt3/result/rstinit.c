@@ -175,7 +175,6 @@ extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode)
 extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
 extern void cmpModelInit(void);
 extern void rstClearHeartsMasterPhase(void);
-extern void *sdfDevLoadFileEx(char *name, void **data, s32 *size);
 extern void fclInitMessage(void *message);
 extern void fclSetSelMessagePos(s32 pos);
 extern void cmpStartProcessPanelEff(s32 mode);
@@ -206,8 +205,8 @@ rstData_t *rstInit(s32 parent)
     cmpModelInit();
     rstChkResult2Process((u8 *)work);
     rstClearHeartsMasterPhase();
-    work->scriptAllocation = sdfDevLoadFileEx(D_0053DA40, &work->script, 0);
-    work->messageAllocation = sdfDevLoadFileEx(D_0053DA58, &work->message, 0);
+    work->scriptAllocation = sdfDevLoadFileEx(D_0053DA40, (u32 *)&work->script, 0);
+    work->messageAllocation = sdfDevLoadFileEx(D_0053DA58, (u32 *)&work->message, 0);
     fclInitMessage(work->message);
     fclSetSelMessagePos(0);
     cmpStartProcessPanelEff(0);
