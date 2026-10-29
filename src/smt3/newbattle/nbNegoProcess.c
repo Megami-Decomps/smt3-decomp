@@ -1182,7 +1182,84 @@ s32 nbNegoSetProcessData(dds3ProcessID_t *id)
     return -1;
 }
 
+#ifdef NON_MATCHING
+extern s32 nbGetUniqueIdKoukaPacketCnt(s32 uniqueid);
+extern s32 (*D_004EF468[])(nbNegoProcessData_t *n);
+
+void *nbNegoProcess1(dds3ProcessID_t *id)
+{
+    nbNegoProcessData_t *n = dds3GetProcessData(id);
+    s32 result;
+    s32 i;
+
+    if (nbGetUniqueIdKoukaPacketCnt((s32)n->actdata) > 0) {
+        return NULL;
+    }
+    if (n->waitframe > 0) {
+        n->waitframe--;
+        return NULL;
+    }
+    if (n->data->stat & 0x400000) {
+        nbNegoDebugPrint(n);
+    }
+    for (;;) {
+        if (n->stat & 1) {
+            nbNegoDebugPrint2(n);
+            if (NegoDebug(n) != 0) {
+                n->stat &= ~1;
+            }
+        } else if (n->endid != 1 && n->nextnegoid == 0) {
+            n->nextnegoid = 0;
+            n->nextkouhocnt = 0;
+            result = D_004EF468[n->nownegoid >> 16](n);
+            n->nownegophase++;
+            if (result != 0) {
+                n->endid = 1;
+                n->endtype = result;
+            }
+            if (n->nextnegoid == 0 && n->nextkouhocnt > 0) {
+                n->nextnegoid = n->nextkouho[0];
+            }
+            if (n->nextnegoid != 0 && (n->data->stat & 0x400000)) {
+                n->stat |= 1;
+                n->selectcur = 0;
+                for (i = 0; i < n->nextkouhocnt; i++) {
+                    if (n->nextkouho[i] == n->nextnegoid) {
+                        n->selectcur = i;
+                        break;
+                    }
+                }
+            }
+        }
+        if (nbGetUniqueIdKoukaPacketCnt((s32)n->actdata) > 0 || n->waitframe > 0) {
+            return NULL;
+        }
+        if (n->nowmsgid >= 0) {
+            return nbNegoProcessMessage;
+        }
+        if ((n->stat & 1) == 0) {
+            if (n->endid == 1) {
+                return nbNegoSetProcessData;
+            }
+            if (n->nextnegoid != 0) {
+                n->historyindex = (n->historyindex + 1) % 14;
+                n->history[n->historyindex] = n->nownegoid;
+                n->historymes[n->historyindex] = n->nowmes;
+                n->nownegophase = 0;
+                n->nextkouhocnt = 0;
+                n->nownegoid = n->nextnegoid;
+                n->nextnegoid = 0;
+                n->nowmes = 0;
+            }
+        }
+        if (n->data->stat & 0x400000) {
+            return NULL;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbNegoProcess1);
+#endif
 
 void nbNegoShutdown(dds3ProcessID_t *id)
 {
