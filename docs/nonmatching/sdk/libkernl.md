@@ -213,3 +213,32 @@ A condition-first bounded copy restores native loop peeling and most setup
 scheduling compared with the initial combined assignment/increment condition.
 Reading the mode after the copy worsens allocation. No synthetic scratch move
 or dependency was added for the final slot-return difference.
+
+## _sceFs_Rcv_Intr
+
+948 emitted bytes against 960 native bytes. Of the 237 overlapping native
+words, 212 match and 25 differ; twelve bytes remain uncovered. The first
+difference is at `+0x344`, in the final pending-semaphore search. All earlier
+copy paths and the command jump table match. Normal builds retain assembly.
+
+The callback ignores both arguments and snapshots four uncached completion
+fields separately. Nonnegative semaphore values copy the result first.
+Command 2 repairs signed-positive head/tail read fragments with byte loops
+that preserve length reloads. Command 11 copies the 324-byte directory entry;
+command 12 copies the 64-byte status record. Commands 23, 25 and 26 snapshot
+an output pointer/count and cap the unsigned count at 1024 before copying.
+Other commands use only the common completion path. Negative semaphore IDs
+are normalized and remove the first matching entry from the 32-slot pending
+table without signaling; nonnegative IDs call `iSignalSema`, including zero.
+
+The shared output record gives the native scratch offsets and 48-byte frame
+without padding. Separately decoded output size and source pointers preserve
+the native bounded-copy setup. The remaining search keeps the normalized key
+in a different lifetime and shares the return epilogue more aggressively.
+Returning from inside the match instead of breaking emits 936 bytes and
+changes the scan into a pointer loop; dropping the separate search key emits
+944 bytes. An early return after the whole negative-ID branch is inert.
+The preferred 948-byte source is retained until a genuine SDK 2.9 allocation
+or loop-control premise explains this tail. No qualified allocator hook is
+available for this compiler; no register pins, volatile scratch or padding
+were introduced.

@@ -838,3 +838,5 @@ src/smt3/event/evtEventViewerMenu.c	redthing1	done	2026-10-28	1 fn / 4784 B	evtM
 src/smt3/newbattle/nbActionProcess.c	redthing1	done	2026-10-28	1 fn / 3540 B	SetAction_READY matched with truthful opaque-ID providers and native target-mask widths; ff1946d6
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 616 B	DrawReadListwinElem matched after native texture-pointer field recovery; owner 107 match, 0 differ with sibling; c845b5aa
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 620 B	drawRegistSprites matched by the same truthful texture-pointer field; unchanged drawing body and qualified alias evidence; c845b5aa
+
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	0 exact SDK B	guarded filesystem completion reconstruction with exact copy paths/table; final semaphore search remains 948/960 bytes, no matching credit
