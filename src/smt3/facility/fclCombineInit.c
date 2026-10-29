@@ -964,7 +964,73 @@ void cmbSeqBuildResultTable(void)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSetupBirthPanel);
 
+extern void cmbSetupBirthPanel(s32 index);
+extern void *memcpy(void *dst, const void *src, u32 size);
+extern s32 cmbGetBirthDevil(datUnitWork_t *first, datUnitWork_t *second,
+                            datUnitWork_t *third, datUnitWork_t *result,
+                            s8 available, s8 mode, s8 flag, cmpSkillList_t *skills);
+
+#ifdef NON_MATCHING
+s32 cmbCalcBirthDevil(void)
+{
+    datUnitWork_t *first;
+    datUnitWork_t *second;
+    datUnitWork_t *third;
+    s32 row;
+    s32 column;
+    s32 available;
+    s32 result;
+    u16 id;
+    s8 flag;
+
+    if (CMB_GBWK->unk_00004 != 1) {
+        return 0;
+    }
+    first = &cmbGlobalWork->party[CMB_GBWK->stockSlot[0].index].unit;
+    second = &cmbGlobalWork->party[CMB_GBWK->stockSlot[1].index].unit;
+    if (CMB_GBWK->stockSlot[2].index >= 0) {
+        third = &cmbGlobalWork->party[CMB_GBWK->stockSlot[2].index].unit;
+    } else {
+        third = NULL;
+    }
+    if (CMB_GBWK->stockSlot[2].index >= 0) {
+        cmbSetupBirthPanel(4);
+        row = (s8)CMB_GBWK->stockSlot[2].unk_01;
+        memcpy(&CMB_GBWK->birthUnit[0], &CMB_GBWK->resultUnit[1][row][0], sizeof(datUnitWork_t));
+        CMB_GBWK->birthKind = CMB_GBWK->resultIndex[1][row][0];
+        cmpSetSkillCursor(&CMB_GBWK->resultSkills[1][row][0]);
+    } else {
+        cmbSetupBirthPanel(3);
+        column = (s8)CMB_GBWK->stockSlot[0].unk_01;
+        row = (s8)CMB_GBWK->stockSlot[1].unk_01;
+        memcpy(&CMB_GBWK->birthUnit[0], &CMB_GBWK->resultUnit[0][row][column], sizeof(datUnitWork_t));
+        CMB_GBWK->birthKind = CMB_GBWK->resultIndex[0][row][column];
+        cmpSetSkillCursor(&CMB_GBWK->resultSkills[0][row][column]);
+    }
+    flag = CMB_GBWK->unk_0410C[0] == 0;
+    id = CMB_GBWK->birthUnit[0].id;
+    available = cmbBirthDevilIsAvailable();
+    result = cmbGetBirthDevil(first, second, third, &CMB_GBWK->birthUnit[2],
+                              available, 0, flag, NULL);
+    if (result == 10) {
+        CMB_GBWK->birthVariant = 1;
+    } else if (result == 11) {
+        CMB_GBWK->birthVariant = 2;
+    } else {
+        CMB_GBWK->birthVariant = 0;
+    }
+    if (id == 0) {
+        CMB_GBWK->unk_00001 = 6;
+        return 1;
+    }
+    cmpModelSetup(id, 0);
+    CMB_GBWK->unk_1650A = 3;
+    cmpStatSetTimer(0, 0);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcBirthDevil);
+#endif
 
 extern s32 cmbAddCustomDevilToStock(datUnitWork_t *custom, cmbUnit_t *list, u8 count);
 extern s32 cmbGetSpecialItemId(void);
