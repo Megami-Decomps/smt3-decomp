@@ -249,9 +249,7 @@ void Initmymdl(void)
 }
 
 
-typedef struct tagPipePosTable {
-    sdfMemHandle_t *aHandle; s32 tSize; tagPipePosData *points; u32 opaque0C;
-} tagPipePosTable;
+
 extern tagPipePosTable D_00528F58;
 extern void vecTranslate(f32 *, f32 *, f32 *);
 extern f32 vecNormalize(f32 *);

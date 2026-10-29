@@ -24,6 +24,13 @@ typedef struct tagPipePosData {
     u32 opaque1C;
 } tagPipePosData;
 
+typedef struct tagPipePosTable {
+    sdfMemHandle_t *aHandle;
+    s32 tSize;
+    tagPipePosData *points;
+    u32 opaque0C;
+} tagPipePosTable;
+
 typedef struct tagPipeLinkData {
     u16 id;
     s16 partsID;

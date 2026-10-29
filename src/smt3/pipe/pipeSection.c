@@ -15,7 +15,6 @@ extern void sdfMemFreeDirect(void *aHandle);
 
 
 
-typedef struct tagPipePosTable tagPipePosTable;
 
 extern u16 myStatus;
 
@@ -50,11 +49,7 @@ extern void pipeInitSection(void);
 
 extern void pipeFreeLink(tagPipeLinkInfo *pInfo);
 
-typedef struct tagPipePosTable {
-    sdfMemHandle_t *aHandle;
-    s32 tSize;
-    u8 unk08[8];
-} tagPipePosTable_t;
+
 
 typedef struct tagPipeTable {
     s32 tabMax;
@@ -65,7 +60,7 @@ typedef struct tagPipeTable {
 
 extern tagPipeLinkInfo linkHeader00;
 
-extern tagPipePosTable_t D_00528F58;
+extern tagPipePosTable D_00528F58;
 
 extern tagPipeTable_t D_00528F68;
 
@@ -261,7 +256,7 @@ typedef struct tagPipeMidiList {
     s32 entries[2];
 } tagPipeMidiList;
 extern u32 pipeLoadState;
-extern s32 pipeFileLoad(char *filename, tagPipePosTable_t *pos, tagPipeTable_t *objects, tagPipeLinkInfo *links);
+extern s32 pipeFileLoad(char *filename, tagPipePosTable *pos, tagPipeTable_t *objects, tagPipeLinkInfo *links);
 extern s32 sprintf(char *buffer, const char *format, ...);
 extern s32 p2sdLoadCheckMidi(s32 midi);
 extern void p2sdLoadSMGFile(s32 midi);

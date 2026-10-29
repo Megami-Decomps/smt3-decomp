@@ -81,12 +81,7 @@ void getViewPortMatrix(sdfMatrix4_t *matrix)
 
 
 
-typedef struct tagPipePosTable {
-    sdfMemHandle_t *aHandle;
-    s32 tSize;
-    tagPipePosData *points;
-    u32 opaque0C;
-} tagPipePosTable;
+
 
 extern s32 offsetCount;
 extern tagPipePosTable D_00528F58;
