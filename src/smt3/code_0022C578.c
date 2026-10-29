@@ -4833,8 +4833,6 @@ extern void campDhDrawHelpText(s32 x, s32 y, s32 z, s32 alpha, s8 index);
 
 extern void campDhDrawHeartsGauge(campDhIconGauge_t *gauge, s8 arg);
 
-/* NON_MATCHING: 199 of 213 words match; table and OT registers are exchanged. */
-#ifdef NON_MATCHING
 void campDhDrawHeartsGauge(campDhIconGauge_t *gauge, s8 arg)
 {
     char text[0x10];
@@ -4842,7 +4840,9 @@ void campDhDrawHeartsGauge(campDhIconGauge_t *gauge, s8 arg)
     s32 palette[3];
     frFontHandle_t *font;
     s32 baseOt = 0x47;
-    fclSpriteTbl_t *table = fclSpriteTable;
+    /* SMT3-only allocation aid for the live first-phase table. Its consumers
+     * preserve $16; no table value is carried into the later drawing phases. */
+    register fclSpriteTbl_t *table asm("$16") = fclSpriteTable;
     s32 amount;
     s32 sprite;
     s32 color;
@@ -4914,9 +4914,6 @@ void campDhDrawHeartsGauge(campDhIconGauge_t *gauge, s8 arg)
     campDhDrawQuadGauge(gauge->alpha);
 }
 
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHeartsGauge);
-#endif
 
 
 void campDhDrawHeartsIcon(s32 a, s32 b, s32 c, s8 d, s32 e)
