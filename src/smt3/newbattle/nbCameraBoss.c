@@ -5045,7 +5045,82 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraHero_Cut2_Run);
 
 INCLUDE_RODATA(const s32, "newbattle/nbCameraBoss", D_005357E0);
 
+#ifdef NON_MATCHING
+extern void ToMatrix(void);
+extern void effBTLModelLook2(nbFormation_t *pFormation, sdfVector4_t *pTargetPos, f32 angle);
+extern u128 D_005357E0;
+
+s32 nbCameraDANTE_Init(void)
+{
+    nbFormation_t *invoke = effBTLSkillGetInvokeFormation();
+    nbFormation_t *target;
+    sdfVector4_t invokePos;
+    sdfVector4_t targetPos;
+    u32 state;
+    s32 id;
+    f32 distance;
+    f32 offset;
+
+    id = effBTLModelGetID(invoke);
+    if (id != 0xC0 && (id < 0x153 || id > 0x155)) {
+        return 0;
+    }
+    state = effBTLSkillGetState();
+    if ((effBTLModelGetBadStatus(invoke) & 0x40) != 0 || (state & 0xC) != 0) {
+        return 0;
+    }
+    switch (effBTLSkillGetID()) {
+    case 0x107:
+        target = effBTLSkillGetTargetFormation(0);
+        effBTLModelTargetPartyShow();
+        effBTLModelInvokeGroupHide();
+        id = effBTLModelGetID(target);
+        if (id == 0x156 || id == 0x124 || id == 0x103) {
+            effBTLGetGroupPos(invoke, &invokePos);
+            effBTLModelLook(target, &invokePos);
+            return 1;
+        }
+        target = effBTLSkillGetTargetFormation(0);
+        effBTLGetGroupPos(invoke, &invokePos);
+        effBTLGetGroupPos(target, &targetPos);
+        if (nbCameraBoss_CheckRotate(target) != 0) {
+            effBTLModelLook2(target, &invokePos, 0.08726646f);
+        }
+        SDF_VU0_LOADVECTOR(&target->rot);
+        ToMatrix();
+        SDF_VU0_LOADVECTOR(&D_005357E0);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        distance = target->r * target->scl + invoke->cr * invoke->scl;
+        SDF_VU0_SCALEVECTOR(distance);
+        SDF_VU0_LOADVECTOR_B(&targetPos);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_SETVECTOR_Y(invokePos.y);
+        SDF_VU0_STOREVECTOR(&invokePos);
+        effBTLModelSetPosition(invoke, &invokePos);
+        effBTLModelLook(invoke, &targetPos);
+        return 1;
+    case 0x10B:
+        effBTLModelTargetPartyShow();
+        effBTLModelInvokeGroupHide();
+        effBTLGetGroupPos(invoke, &invokePos);
+        if (invoke->stat & 0x100) {
+            offset = -300.0f;
+        } else {
+            offset = 300.0f;
+        }
+        invokePos.z += offset;
+        effBTLModelSetPosition(invoke, &invokePos);
+        return 1;
+    case 0x10D:
+        effBTLModelTargetPartyShow();
+        effBTLModelInvokeGroupHide();
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraDANTE_Init);
+#endif
 
 s32 nbCameraDANTE_Run(nbCamera_t *pCamera)
 {
