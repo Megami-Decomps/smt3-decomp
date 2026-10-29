@@ -65,6 +65,8 @@ def compile_unit(path: Path) -> str:
          "-D__mips_single_float",
          "-I" + str(ROOT / "include"), "-I" + str(ROOT / "src"),
          "-DVERSION_SMT3", "-DSKIP_ASM", "-DNON_MATCHING",
+         # Old GCC needs this spelling; -Werror=... is silently ignored.
+         "-Werror-implicit-function-declaration",
          "-quiet", "-O2", str(path), "-o", "/dev/null"],
         capture_output=True, text=True, cwd=ROOT)
     # cc1 brackets its diagnostics with context lines that carry no line

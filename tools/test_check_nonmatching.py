@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import unittest
+import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -85,6 +86,28 @@ class TreeState(unittest.TestCase):
     def test_drafts_are_found_in_the_tree(self) -> None:
         """A parser that silently matched nothing would pass every other test."""
         self.assertGreater(sum(len(v) for v in cn.draft_functions().values()), 100)
+
+
+@unittest.skipUnless((cn.ROOT / "tools/compilers/ee-gcc2.96").is_dir(), "ee-gcc not installed")
+class ImplicitDeclarationTests(unittest.TestCase):
+    def test_retained_c_requires_a_declaration_before_use(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "unit.c"
+            source.write_text('#ifdef NON_MATCHING\n'
+                              'int retained(void) { return undeclared(1); }\n'
+                              '#else\nint matching(void) { return 0; }\n#endif\n')
+            self.assertIn("implicit declaration", cn.compile_unit(source))
+            normal = subprocess.run([str(cn.ROOT / "tools/cc.sh"), "-DSKIP_ASM",
+                                     str(source), "-o", str(Path(directory) / "unit.o")],
+                                    cwd=cn.ROOT, capture_output=True, text=True)
+            self.assertEqual(normal.returncode, 0, normal.stderr)
+
+    def test_early_prototype_allows_the_retained_call(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "unit.c"
+            source.write_text('extern int declared(int);\n'
+                              'int retained(void) { return declared(1); }\n')
+            self.assertEqual(cn.compile_unit(source), "")
 
 
 if __name__ == "__main__":
