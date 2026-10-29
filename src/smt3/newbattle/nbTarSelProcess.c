@@ -311,7 +311,48 @@ s32 CheckEnemy(nbTarSelProcessData_t *t, s32 formindex)
     return 0;
 }
 
+#ifdef NON_MATCHING
+void UpdateSelect(nbTarSelProcessData_t *process)
+{
+    nbFormation_t *form;
+    u32 stat;
+    s32 selected;
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        form = &process->data->form[i];
+        stat = form->stat;
+        form->stat = stat & ~8u;
+        if (stat & 4) {
+            selected = 0;
+            switch (process->ctype) {
+            case 0:
+                if ((process->nowcarea == 1 && process->friendno[process->nowno] == i) ||
+                    (process->nowcarea == 2 && process->enemyno[process->nowno] == i)) {
+                    process->nowform = i;
+                    selected = 1;
+                }
+                break;
+            case 1:
+                if (process->nowcarea == 1) {
+                    selected = CheckFriend(process, i);
+                } else if (process->nowcarea == 2) {
+                    selected = CheckEnemy(process, i);
+                }
+                break;
+            case 2:
+                selected = 1;
+                break;
+            }
+            if (selected) {
+                process->data->form[i].stat |= 8;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", UpdateSelect);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", OnOffTargetCursor);
 
