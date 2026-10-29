@@ -56,7 +56,11 @@ typedef struct fldAmXYZ_t
     f32 z;
 } fldAmXYZ_t;
 
-struct fldAmIcon_t;
+typedef struct fldAmIcon_t
+{
+    u32 type;
+    fldAmXYZ_t *position;
+} fldAmIcon_t;
 
 typedef struct fldAmSBlock_t
 {
