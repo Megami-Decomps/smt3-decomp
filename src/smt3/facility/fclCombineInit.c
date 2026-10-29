@@ -1176,24 +1176,23 @@ void cmbAddBirthDevilToStock(datUnitWork_t *units, u8 count)
 }
 
 
-#ifdef NON_MATCHING
 void cmbStartResultScript(void)
 {
     s32 entry = 0;
 
     if (CMB_GBWK->unk_00004 != 0) {
-        if (CMB_GBWK->unk_1650B == 1) {
-            entry = 5;
-        } else if (CMB_GBWK->unk_1650B == 2) {
+        switch (CMB_GBWK->unk_1650B) {
+        case 2:
             entry = 6;
+            break;
+        case 1:
+            entry = 5;
+            break;
         }
         CMB_GBWK->unk_00005 = 1;
         CMB_GBWK->unk_00008 = fclScriptStart(CMB_GBWK->script, entry, &CMB_GBWK->scriptArg);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbStartResultScript);
-#endif
 
 extern void cmbRunActionSe(s32 enabled, s32 mode);
 extern s32 cmbChkPolygonMovie(void);
