@@ -233,7 +233,435 @@ f32 GetSplineLength(dds3PathBasicControl_t *path) {
     return length;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", UnitAnime);
+extern f32 sdfFaceDivSoften, sdfFaceDivBias;
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 id);
+extern void mdlGetPosition(mdlObj_t *model);
+extern s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *scene, s32 type, dds3Basic_t *target);
+extern void dds3RotationArc(void);
+extern void Lerp(f32 ratio);
+extern void sdfModelSetFaceDivParm(sdfModelRootNode_t *model, f32 soften, f32 bias);
+extern void sdfModelResetFaceDivParm(sdfModelRootNode_t *model);
+
+/* Advance the model, light-colour and directional transitions for one event unit. */
+void UnitAnime(evtUnit_t *unit) {
+    f32 identity[4] __attribute__((aligned(16)));
+    f32 targetDirection[4] __attribute__((aligned(16)));
+    f32 previousDirection[4] __attribute__((aligned(16)));
+    f32 position[4] __attribute__((aligned(16)));
+    f32 blendedDirection[4] __attribute__((aligned(16)));
+    f32 oldDirection[4] __attribute__((aligned(16)));
+    u32 rgbTarget[4], rgbSource[4], rgbResult[4];
+    u32 alphaTarget[4], alphaSource[4], alphaResult[4];
+    u32 firstSource[4], firstTarget[4], firstResult[4];
+    u32 secondSource[4], secondTarget[4], secondResult[4];
+    u32 defaultFirst[4], defaultSecond[4];
+    u32 currentFirst[4], previousFirst[4], finalFirst[4];
+    u32 currentSecond[4], previousSecond[4], finalSecond[4];
+    f32 auxFirst, auxSecond;
+    f32 factor;
+    f32 transition;
+    f32 currentWeight;
+    f32 previousWeight;
+    evtTargetInfo_t *target;
+    evtTargetInfo_t *previous;
+    s32 ownVector;
+    s32 overrideAux = 0;
+    u32 flags;
+    u32 originalFlags;
+    u32 oldColor;
+
+    memset(identity, 0, sizeof(identity));
+    identity[3] = 1.0f;
+    previousWeight = 0.0f;
+    auxFirst = sdfFaceDivSoften;
+    auxSecond = sdfFaceDivBias;
+    /* The model RGB and alpha tracks preserve the other packed channel. */
+    flags = unit->flags;
+    if (flags & EVT_UNIT_FLAG_RGB_TRANSITION) {
+        u32 packed;
+        factor = unit->rgbDuration ? (f32)unit->rgbElapsed / unit->rgbDuration : 1.0f;
+        rgbTarget[0] = unit->color64;
+        EE_MMI_RGBA_UNPACK_READONLY(rgbTarget, 0.0078125f);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        rgbSource[0] = unit->color60;
+        EE_MMI_RGBA_UNPACK_READONLY(rgbSource, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
+        SDF_VU0_SCALEVECTOR_B_BITS(factor);
+        SDF_VU0_ADDVECTOR();
+        oldColor = mdlGetColor((mdlObj_t *)unit->owner);
+        MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        rgbResult[0] = packed;
+        mdlSetColor((mdlObj_t *)unit->owner, (oldColor & 0xFF000000) | (rgbResult[0] & 0xFFFFFF));
+        if (unit->rgbElapsed >= unit->rgbDuration) {
+            flags = unit->flags &= ~EVT_UNIT_FLAG_RGB_TRANSITION;
+        } else {
+            flags = unit->flags;
+            unit->rgbElapsed++;
+        }
+    }
+    if (flags & EVT_UNIT_FLAG_ALPHA_TRANSITION) {
+        u32 packed;
+        factor = unit->alphaDuration ? (f32)unit->alphaElapsed / unit->alphaDuration : 1.0f;
+        alphaTarget[0] = unit->color64;
+        EE_MMI_RGBA_UNPACK_READONLY(alphaTarget, 0.0078125f);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        alphaSource[0] = unit->color60;
+        EE_MMI_RGBA_UNPACK_READONLY(alphaSource, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
+        SDF_VU0_SCALEVECTOR_B_BITS(factor);
+        SDF_VU0_ADDVECTOR();
+        oldColor = mdlGetColor((mdlObj_t *)unit->owner);
+        MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        alphaResult[0] = packed;
+        mdlSetColor((mdlObj_t *)unit->owner, (oldColor & 0xFFFFFF) | (alphaResult[0] & 0xFF000000));
+        if (unit->alphaElapsed >= unit->alphaDuration) {
+            flags = unit->flags &= ~EVT_UNIT_FLAG_ALPHA_TRANSITION;
+        } else {
+            flags = unit->flags;
+            unit->alphaElapsed++;
+        }
+    }
+    /* Stale world-node references must not reach the target-vector reads. */
+    if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
+        if (unit->currentTransitionValue == 0) {
+            unit->flags = flags & ~EVT_UNIT_FLAG_TARGET_TRANSITION;
+        } else if (dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
+                                                   (dds3Basic_t *)unit->currentTransitionValue) == 0) {
+            unit->currentTransitionValue = 0;
+            unit->previousTransitionValue = 0;
+            unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
+        }
+    }
+    if (unit->previousTransitionValue &&
+        dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
+                                         (dds3Basic_t *)unit->previousTransitionValue) == 0) {
+        unit->previousTransitionValue = 0;
+    }
+    transition = 0.0f;
+    target = 0;
+    previous = 0;
+    ownVector = 0;
+    currentWeight = 0.0f;
+    if (unit->currentTransitionValue) {
+        flags = unit->flags;
+        if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
+            f32 distance;
+            target = ((dds3Basic_t *)unit->currentTransitionValue)->workdata;
+            if (unit->previousTransitionValue) {
+                previous = ((dds3Basic_t *)unit->previousTransitionValue)->workdata;
+            }
+            if (!sdfModelGetMarkPos(unit->owner->inner, 0)) {
+                mdlGetPosition(unit->owner);
+            }
+            SDF_VU0_STOREVECTOR_NOMEM(position);
+            SDF_VU0_LOADVECTOR_B(&((dds3Basic_t *)unit->currentTransitionValue)->poseset->pos);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(targetDirection);
+            SDF_VU0_GETLENGTH(distance);
+            if (distance <= target->nearDistance) {
+                currentWeight = 1.0f;
+            } else if (distance >= target->farDistance) {
+                currentWeight = 0.0f;
+            } else {
+                currentWeight = 1.0f - (distance - target->nearDistance) /
+                    (target->farDistance - target->nearDistance);
+            }
+            if (previous) {
+                f32 previousDistance;
+                SDF_VU0_LOADVECTOR(position);
+                SDF_VU0_LOADVECTOR_B(&((dds3Basic_t *)unit->previousTransitionValue)->poseset->pos);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR_NOMEM(previousDirection);
+                SDF_VU0_GETLENGTH(previousDistance);
+                if (previousDistance <= previous->nearDistance) {
+                    previousWeight = 1.0f;
+                } else if (previousDistance >= previous->farDistance) {
+                    previousWeight = 0.0f;
+                } else {
+                    previousWeight = 1.0f - (previousDistance - previous->nearDistance) /
+                        (previous->farDistance - previous->nearDistance);
+                }
+            }
+            SDF_VU0_LOADVECTOR(targetDirection);
+            if (target->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
+                SDF_VU0_STOREVECTOR_NOMEM(target->direction);
+                flags = unit->flags;
+                ownVector = 1;
+            } else {
+                if (unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_PHASES) {
+                    if ((u16)unit->transitionFrameCount) {
+                        transition = (f32)(u16)unit->transitionElapsed / (u16)unit->transitionFrameCount;
+                    } else {
+                        transition = 1.0f;
+                    }
+                    if (unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_OUT) {
+                        transition = 1.0f - transition;
+                    }
+                    if ((u16)unit->transitionFrameCount) {
+                        if ((u16)unit->transitionFrameCount <= (u16)++unit->transitionElapsed) {
+                            if (unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_OUT) {
+                                unit->currentTransitionValue = 0;
+                                unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
+                            }
+                            unit->previousTransitionValue = 0;
+                            unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
+                        }
+                    }
+                } else {
+                    transition = 1.0f;
+                }
+                flags = unit->flags;
+            }
+        }
+    } else {
+        flags = unit->flags;
+    }
+    /* Direction consumes the snapshot after the target transition updates. */
+    if (flags & 0x6000) {
+        if (unit->directionFramesRemaining) {
+            factor = 1.0f / unit->directionFramesRemaining;
+        } else {
+            factor = 1.0f;
+        }
+        SDF_VU0_LOADVECTOR(unit->vec20);
+        if (flags & 0x2000) {
+            SDF_VU0_LOADVECTOR_B(unit->vec30);
+        } else if (ownVector) {
+            SDF_VU0_LOADVECTOR_B(target->direction);
+        } else {
+            SDF_VU0_LOADVECTOR_B(dds3LightParam.sources[0] + 4);
+        }
+        dds3RotationArc();
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(identity);
+        Lerp(factor);
+        ToMatrix();
+        SDF_VU0_LOADVECTOR(unit->vec20);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(unit->vec40);
+        SDF_VU0_STOREVECTOR_NOMEM(unit->vec20);
+        if (unit->directionFramesRemaining == 0) {
+            flags = unit->flags;
+            if (flags & 0x4000) {
+                unit->flags &= ~0x400;
+                flags = unit->flags;
+            }
+            unit->flags = flags & ~0x6000;
+        } else {
+            unit->directionFramesRemaining--;
+        }
+    } else if (!(flags & 0x400)) {
+        if (ownVector) {
+            SDF_VU0_LOADVECTOR(target->direction);
+        } else {
+            SDF_VU0_LOADVECTOR(dds3LightParam.sources[0] + 4);
+        }
+        SDF_VU0_STOREVECTOR_NOMEM(unit->vec40);
+    }
+    if (target && !ownVector) {
+        factor = transition;
+        SDF_VU0_LOADVECTOR(unit->vec40);
+        SDF_VU0_LOADVECTOR_B(targetDirection);
+        dds3RotationArc();
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(identity);
+        Lerp(factor);
+        ToMatrix();
+        SDF_VU0_LOADVECTOR(unit->vec40);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(blendedDirection);
+        if (previous) {
+            factor = 1.0f;
+            SDF_VU0_LOADVECTOR(unit->vec40);
+            SDF_VU0_LOADVECTOR_B(previousDirection);
+            dds3RotationArc();
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(identity);
+            Lerp(factor);
+            ToMatrix();
+            SDF_VU0_LOADVECTOR(unit->vec40);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR_NOMEM(oldDirection);
+            SDF_VU0_LOADVECTOR_B(blendedDirection);
+            dds3RotationArc();
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(identity);
+            Lerp(transition);
+            ToMatrix();
+            SDF_VU0_LOADVECTOR(oldDirection);
+            SDF_VU0_APPLYMATRIX();
+        }
+        SDF_VU0_STOREVECTOR_NOMEM(unit->vec10);
+    } else {
+        SDF_VU0_COPYVECTOR(unit->vec10, unit->vec40);
+    }
+    /* Advance the two local colour tracks before applying target influence. */
+    originalFlags = unit->flags;
+    flags = originalFlags;
+    if (originalFlags & 0x1800) {
+        u32 firstPacked;
+        u32 secondPacked;
+
+        if (unit->colorFramesRemaining) {
+            factor = 1.0f / unit->colorFramesRemaining;
+        } else {
+            factor = 1.0f;
+        }
+        firstSource[0] = unit->firstCurrent;
+        EE_MMI_RGBA_UNPACK_READONLY(firstSource, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        if (unit->flags & 0x800) {
+            firstTarget[0] = unit->color08;
+            EE_MMI_RGBA_UNPACK_READONLY(firstTarget, 0.0078125f);
+        } else if (ownVector) {
+            SDF_VU0_LOADVECTOR(target);
+        } else {
+            SDF_VU0_LOADVECTOR(dds3LightParam.sources[0]);
+        }
+        SDF_VU0_SCALEVECTOR_BITS(factor);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
+        firstResult[0] = firstPacked;
+        unit->firstCurrent = firstResult[0];
+        unit->color0C = unit->firstCurrent;
+        secondSource[0] = unit->color54;
+        EE_MMI_RGBA_UNPACK_READONLY(secondSource, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        if (unit->flags & 0x800) {
+            secondTarget[0] = unit->color58;
+            EE_MMI_RGBA_UNPACK_READONLY(secondTarget, 0.0078125f);
+        } else if (ownVector) {
+            SDF_VU0_LOADVECTOR(target->secondColor);
+        } else {
+            SDF_VU0_LOADVECTOR(dds3LightParam.ambient);
+        }
+        SDF_VU0_SCALEVECTOR_BITS(factor);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_VECTOR_W_SET_ONE();
+        MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
+        secondResult[0] = secondPacked;
+        unit->color54 = secondResult[0];
+        unit->color5C = unit->color54;
+        if (unit->colorFramesRemaining == 0) {
+            if (originalFlags & 0x1000) {
+                flags = unit->flags = originalFlags & ~EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS;
+            }
+            unit->flags = flags & ~0x1800;
+        } else {
+            unit->colorFramesRemaining--;
+        }
+    } else {
+        u32 firstPacked;
+        u32 secondPacked;
+        if (!(originalFlags & EVT_UNIT_FLAG_USE_UNIT_FIRST_COLOR)) {
+            if (ownVector) {
+                SDF_VU0_LOADVECTOR(target);
+            } else {
+                SDF_VU0_LOADVECTOR(dds3LightParam.sources[0]);
+            }
+            MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
+            defaultFirst[0] = firstPacked;
+            unit->color0C = defaultFirst[0];
+        }
+        if (!(originalFlags & EVT_UNIT_FLAG_USE_UNIT_SECOND_COLOR)) {
+            if (ownVector) {
+                SDF_VU0_LOADVECTOR(target->secondColor);
+            } else {
+                SDF_VU0_LOADVECTOR(dds3LightParam.ambient);
+            }
+            MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
+            defaultSecond[0] = secondPacked;
+            unit->color5C = defaultSecond[0];
+        }
+    }
+    if (target && !ownVector) {
+        u32 packed;
+        f32 weightedTransition;
+        factor = currentWeight * transition;
+        weightedTransition = factor;
+        currentFirst[0] = unit->color0C;
+        EE_MMI_RGBA_UNPACK_READONLY(currentFirst, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
+        SDF_VU0_LOADVECTOR_B(target);
+        SDF_VU0_SCALEVECTOR_B_BITS(factor);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(blendedDirection);
+        if (previous) {
+            factor = previousWeight;
+            previousFirst[0] = unit->color0C;
+            EE_MMI_RGBA_UNPACK_READONLY(previousFirst, 0.0078125f);
+            SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
+            SDF_VU0_LOADVECTOR_B(previous);
+            SDF_VU0_SCALEVECTOR_B_BITS(factor);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_SCALEVECTOR_BITS(1.0f - transition);
+            SDF_VU0_LOADVECTOR_B(blendedDirection);
+            SDF_VU0_SCALEVECTOR_B_BITS(transition);
+            SDF_VU0_ADDVECTOR();
+        }
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        finalFirst[0] = packed;
+        unit->color = finalFirst[0];
+        factor = weightedTransition;
+        currentSecond[0] = unit->color5C;
+        EE_MMI_RGBA_UNPACK_READONLY(currentSecond, 0.0078125f);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
+        SDF_VU0_LOADVECTOR_B(target->secondColor);
+        SDF_VU0_SCALEVECTOR_B_BITS(factor);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(blendedDirection);
+        if (previous) {
+            factor = previousWeight;
+            previousSecond[0] = unit->color5C;
+            EE_MMI_RGBA_UNPACK_READONLY(previousSecond, 0.0078125f);
+            SDF_VU0_SCALEVECTOR_BITS(1.0f - factor);
+            SDF_VU0_LOADVECTOR_B(previous->secondColor);
+            SDF_VU0_SCALEVECTOR_B_BITS(factor);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_SCALEVECTOR_BITS(1.0f - transition);
+            SDF_VU0_LOADVECTOR_B(blendedDirection);
+            SDF_VU0_SCALEVECTOR_B_BITS(transition);
+            SDF_VU0_ADDVECTOR();
+        }
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        finalSecond[0] = packed;
+        unit->color50 = finalSecond[0];
+    } else {
+        unit->color = unit->color0C;
+        unit->color50 = unit->color5C;
+    }
+    if (target && !ownVector) {
+        auxFirst = target->auxFirst;
+        auxSecond = target->auxSecond;
+        if (auxFirst >= 1.0f) {
+            factor = currentWeight * transition;
+            auxFirst = sdfFaceDivSoften * (1.0f - factor) + auxFirst * factor;
+            auxSecond = sdfFaceDivBias * (1.0f - factor) + auxSecond * factor;
+        }
+        if (previous) {
+            f32 oldFirst = previous->auxFirst;
+            f32 oldSecond = previous->auxSecond;
+            if (oldFirst >= 1.0f) {
+                factor = previousWeight;
+                oldFirst = sdfFaceDivSoften * (1.0f - factor) + oldFirst * factor;
+                oldSecond = sdfFaceDivBias * (1.0f - factor) + oldSecond * factor;
+                auxFirst = auxFirst * transition + oldFirst * (1.0f - transition);
+                auxSecond = auxSecond * transition + oldSecond * (1.0f - transition);
+            }
+        }
+        overrideAux = 1;
+    }
+    if (overrideAux) {
+        sdfModelSetFaceDivParm(unit->owner->inner, auxFirst, auxSecond);
+    } else {
+        sdfModelResetFaceDivParm(unit->owner->inner);
+    }
+}
 
 /* vu0 routine: load vf10 with the unit's colour (flag 0x100), its target's vector, or the default */
 void GetBaseLightRGB(evtUnit_t *h) {
