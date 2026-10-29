@@ -871,16 +871,6 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifWriteBackDCache);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", func_002DE504);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitRpc);
-
-extern s32 D_0052C2BC;
-
-void sceSifExitRpc(void)
-{
-    sceSifExitCmd();
-    D_0052C2BC = 0;
-}
-
 typedef struct rpcPacket {
     u32 w[16];
 } rpcPacket;
@@ -900,6 +890,72 @@ typedef struct rpcQueue {
 } rpcQueue;
 
 extern rpcQueue D_0059D440;
+
+extern rpcPacket D_0059BC40[32];
+extern rpcPacket D_0059C440[32];
+extern rpcPacket D_0059CC40[32];
+extern s32 D_0052C2BC;
+extern void sceSifInitCmd(void);
+extern u32 sceSifGetReg(u32 registerId);
+extern s32 sceSifSetReg(u32 registerId, u32 value);
+extern void sceSifAddCmdHandler(s32 command, void (*handler)(void *, void *), void *argument);
+extern void _request_end_0(void *packet, void *queue);
+extern void _request_bind(void *packet, void *queue);
+extern void _request_call(void *packet, void *queue);
+extern void _request_rdata(rpcPacket *packet, rpcQueue *queue);
+
+#ifdef NON_MATCHING
+/* Native-sized reconstruction; see docs/nonmatching/sdk/libkernl.md. */
+void sceSifInitRpc(s32 mode)
+{
+    rpcPacket *packets;
+    rpcPacket *packet;
+    rpcQueue *queue;
+
+    DIntr();
+    if (D_0052C2BC != 0) {
+        EIntr();
+        return;
+    }
+    D_0052C2BC = 1;
+    EIntr();
+    sceSifInitCmd();
+    DIntr();
+    packets = D_0059BC40;
+    queue = &D_0059D440;
+    queue->indexedCount = queue->forwardCount = queue->count = 32;
+    queue->seq = 1;
+    queue->base = (rpcPacket *)((u32)packets | 0x20000000);
+    queue->unk_C = 0;
+    queue->unk_10 = 0;
+    queue->forwardBase = (rpcPacket *)((u32)D_0059C440 | 0x20000000);
+    queue->indexedBase = (rpcPacket *)((u32)D_0059CC40 | 0x20000000);
+    queue->forwardIndex = 0;
+    sceSifAddCmdHandler(0x80000008, _request_end_0, queue);
+    sceSifAddCmdHandler(0x80000009, _request_bind, queue);
+    sceSifAddCmdHandler(0x8000000a, _request_call, queue);
+    sceSifAddCmdHandler(0x8000000c, (void (*)(void *, void *))_request_rdata, queue);
+    EIntr();
+    if (sceSifGetReg(0x80000002) != 0)
+        return;
+    packet = packets + 1;
+    packet->w[3] = 1;
+    sceSifSendCmd(0x80000002, packet, 16, 0, 0, 0);
+    while (sceSifGetSreg(0) == 0) {
+    }
+    sceSifSetReg(0x80000002, 1);
+}
+#else
+INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitRpc);
+#endif
+
+extern s32 D_0052C2BC;
+
+void sceSifExitRpc(void)
+{
+    sceSifExitCmd();
+    D_0052C2BC = 0;
+}
 
 extern s32 DIntr(void);
 extern s32 EIntr(void);
