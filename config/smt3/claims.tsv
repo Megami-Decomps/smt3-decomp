@@ -712,3 +712,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	5 SDK fn / 224 B	DECI2 extende
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 SDK fn / 160 B	read completion copies both payload spans through uncached descriptor, then forwards status-word pointer; complete owner exact
 src/smt3/kernel/dds3KernelDraw.c	redthing1	done	2026-10-29	1 fn / 1532 B	PiM agent: DDS scene-light update with six real shared READONLY unpack calls and canonical fog color owner; no alias/type/header/macro change; complete owner87/0
 src/smt3/sdk/libmc.c	redthing1	done	2026-10-28	1 SDK fn / 144 B	read callback copies two uncached payload spans with native signed bounds and destination increments; complete owner exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 232 B	command-send wrappers and signed forwarding-packet selectors; status query guarded at 44 of 60 bytes; owner 10 match, 0 differ

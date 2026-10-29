@@ -406,9 +406,20 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRemoveCmdHandler);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifSendCmd);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSendCmd);
+extern s32 _sceSifSendCmd(s32 command, s32 interruptMode, void *packet, s32 packetBytes,
+                           void *source, void *destination, s32 dataBytes);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", isceSifSendCmd);
+s32 sceSifSendCmd(s32 command, void *packet, s32 packetBytes,
+                  void *source, void *destination, s32 dataBytes)
+{
+    return _sceSifSendCmd(command, 0, packet, packetBytes, source, destination, dataBytes);
+}
+
+s32 isceSifSendCmd(s32 command, void *packet, s32 packetBytes,
+                   void *source, void *destination, s32 dataBytes)
+{
+    return _sceSifSendCmd(command, 1, packet, packetBytes, source, destination, dataBytes);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifCmdIntrHdlr);
 
@@ -428,6 +439,13 @@ typedef struct rpcQueue {
     u32 seq;
     rpcPacket *base;
     s32 count;
+    u32 unk_C; /* Cleared by sceSifInitRpc. */
+    u32 unk_10; /* Cleared by sceSifInitRpc. */
+    rpcPacket *forwardBase;
+    s32 forwardCount;
+    rpcPacket *indexedBase;
+    s32 indexedCount;
+    s32 forwardIndex;
 } rpcQueue;
 
 extern s32 DIntr(void);
@@ -473,9 +491,22 @@ void _sceRpcFreePacket_0(rpcPacket *packet)
     packet->w[4] = flags & ~1;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceRpcGetFPacket);
+rpcPacket *_sceRpcGetFPacket(rpcQueue *queue)
+{
+    s32 index = queue->forwardIndex % queue->forwardCount;
+    rpcPacket *packet = &queue->forwardBase[index];
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceRpcGetFPacket2);
+    queue->forwardIndex = index + 1;
+    return packet;
+}
+
+rpcPacket *_sceRpcGetFPacket2(rpcQueue *queue, s32 index)
+{
+    if (index < 0 || index >= queue->indexedCount) {
+        return _sceRpcGetFPacket(queue);
+    }
+    return &queue->indexedBase[index];
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _request_end_0);
 
@@ -493,7 +524,30 @@ INCLUDE_ASM(const s32, "sdk/libkernl", _request_call);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifCallRpc);
 
+typedef struct rpcClientPrefix {
+    void *packet;
+    u32 sequence;
+} rpcClientPrefix;
+
+/* NON_MATCHING: 44 of 60 native bytes, 5 of 11 compared words match;
+ * the final active-bit test becomes a direct boolean return. */
+#ifdef NON_MATCHING
+s32 sceSifCheckStatRpc(rpcClientPrefix *client)
+{
+    rpcPacket *packet = client->packet;
+
+    if (packet != NULL) {
+        if (client->sequence == packet->w[6]) {
+            if ((packet->w[4] & 1) != 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifCheckStatRpc);
+#endif
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSetRpcQueue);
 
