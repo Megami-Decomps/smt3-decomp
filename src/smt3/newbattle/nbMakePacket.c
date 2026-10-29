@@ -5,14 +5,7 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
-
-typedef struct evtUnitHandle_t
-{
-    u8 unk_00[0x8C];
-    struct mdlObj_t *owner;
-    u8 unk_90[0x14];
-    u32 flags;
-} evtUnitHandle_t;
+#include "event.h"
 
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
@@ -40,7 +33,7 @@ typedef struct
     u32 anime;
     dds3Basic_t *basic;
     s32 serial;
-    evtUnitHandle_t *hunit;
+    evtUnit_t *hunit;
     s16 partyindex;
     s16 formindex;
     u32 autotime;
