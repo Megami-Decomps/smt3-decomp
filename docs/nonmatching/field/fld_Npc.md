@@ -133,3 +133,39 @@ Ruled out: `position.w` assigned first, last, and between the coordinates;
 `extern void *volatile fldBlurEffectId[]`; `extern void *fldBlurEffectId[2]`
 (which goes back to `$gp` and 31 words); and a `void **p = fldBlurEffectId`
 local feeding the three calls.
+
+## fldNpcDraw (0x8E0) is not started
+
+No draft yet; the assembly is still the only version. What a reading of retail
+settles, so the next attempt does not have to re-derive it:
+
+The frame is 0x110 with no parameters. The locals are a `sdfVector4_t` mark
+position at 0x0, a second one at 0x10 whose `w` is 1.0f, a normalised direction
+at 0x20, and a sprite3D record from 0x30 to 0x78 (three `f32` at 0x30, eight
+`s16` at 0x40 to 0x4E, eight `f32` at 0x50 to 0x6C, two packed colours at 0x70
+and 0x74). The body is `memset(&mark, 0, 0x10)` then
+`if (fldGlobalBase.field04 < 200 && fldAutoMapSeqTestFlag(1) == 0)`, and
+everything else sits inside that.
+
+The chest loop walks `fldTakaraSlotTable` (0x30 stride) and switches on `mode`
+with cases 0, 1, 2 and 3, case 1 an empty `break`: that four-case list is what
+puts the `== 1` test at the root of the tree and leaves `mode > 1` as an
+`slti 2` with an inverted branch. `activationState` then splits three ways,
+`>= 3` leaving the case, `> 0` taking the item-box arm and `== 0` the effect
+arm. The item-box arm reads `*(s32 *)&fldTakaraTable[slot.unk28 * 16 + 8]` and
+picks `D_0054EEDC` for 2 and 3, `fldItemBoxCount` otherwise.
+
+The billboard block computes `eye - mark` into a vector whose three components
+are stored negated, takes `sqrt` of the dot product for the distance, then
+normalises through the VU0 macro pair and scales the result by 50.0f. The fade
+is `alpha = 0` below 500.0f, `0x80` above `D_0054C570`, and
+`(s32)((dist - 500.0f) * 128.0f / D_0054C574)` clamped to 0..0x80 between,
+packed as `alpha << 24 | 0x808080` and passed with `rsetOtOfs(0x2C)` before
+`drawSprite3D(hEffPart, &sprite)`.
+
+The NPC loop walks `fldModelSlotTable` (0x70 stride) and keeps five separate
+base pointers into the row, one each at +0x0, +0x4, +0xC, +0x20 and +0x50,
+which is what gives the loop its five `addiu` increments; `type == 0x3E7` skips
+the row. Its float constants are 10.0f and 1.5f in callee-saved registers and
+60.0f, 90.0f, 50.0f, 150.0f, 3.0f, 250.0f, 95.0f, 29.0f, 75.0f, 60.0f and
+110.0f at their use sites.
