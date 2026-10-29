@@ -23,6 +23,9 @@ typedef struct {
 extern nmeSpriteTable_t GBWK_2 __attribute__((section(".data")));
 extern nmeWork_t *namelist_buttonAnim_end;
 extern void frSetFontColor(frFontHandle_t *font, u32 color);
+extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
+                              s32 *colors, s32 ot);
+extern void nmeDrawCursorAt(s32 x, s32 y, s32 z, s8 mode, s32 ot);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page, s32 spriteId,
                              s32 *texList, nmeSpriteTable_t *table, s32 ot);
 
