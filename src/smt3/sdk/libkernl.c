@@ -1449,7 +1449,14 @@ s32 _lf_version(void)
     return mismatch;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadFileReset);
+extern void *memset(void *destination, s32 value, u32 size);
+
+s32 sceSifLoadFileReset(void)
+{
+    D_0052C358 = -1;
+    memset(D_0059EC28, 0, 4);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifLoadModuleBuffer);
 

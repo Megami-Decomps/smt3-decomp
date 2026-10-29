@@ -753,3 +753,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 336 B	heap memory-s
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 332 B	IOP address reads and live/sync status polling with exact width/error semantics; address writer guarded at 51 of 55 words matching; owner 53 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 240 B	heap file load with bounded path, exact transmitted length and native signed result; complete owner exact
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	5 SDK fn / 112 B	software-register access, command-context getter and system/user buffer replacement; native previous-pointer returns; complete owner qualified with concurrent IOP-alive implementation preserved
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 56 B	load-file reset preserves explicit zero result and four-byte clear; reboot reconstruction retained without promotion
