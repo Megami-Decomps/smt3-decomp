@@ -160,7 +160,7 @@ extern void *D_0054EED0;
 
 extern u16 D_00567EA0[];
 
-extern u16 D_00567EF8[];
+extern s16 D_00567EF8[];
 
 extern u16 D_00567F50[];
 
@@ -885,7 +885,455 @@ s32 fldAutoMapGetFloorMax(void) {
     return max + 1;
 }
 
+#ifdef NON_MATCHING
+struct frFontHandle_t;
+struct frFontRequest_t;
+extern struct frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
+                                                  const char *text, struct frFontRequest_t *previous);
+extern u32 frGetStrWidth2(struct frFontHandle_t *font);
+extern s32 frDestroyFontRequestAfter(struct frFontHandle_t *font);
+extern void frSetPriority(struct frFontHandle_t *font, u32 priority);
+extern s32 frDrawFont(struct frFontHandle_t *font);
+extern s32 frDrawFontEx(struct frFontHandle_t *font, s8 mode);
+extern struct frFontHandle_t *D_00551CA0;
+extern const char D_005321C0[];
+extern s32 fldWmapMode, gFldNowDZone;
+extern s32 fldAutoMapDrawState, fldAutoMapDrawY;
+extern f32 fldAutoMapDrawX, fldCamPitch;
+extern s32 D_0054EE78, D_0054EE7C, D_0054EE90;
+extern f32 D_0054EE80, D_0054EE94, D_0054EE98, D_0054EE9C;
+extern f32 D_0054C4A4, D_0054C4A8, D_0054C4AC, D_0054C4B0;
+extern f32 D_0054C4B4, D_0054C4B8, D_0054C4BC, D_0054C4C0;
+extern s32 evtBitCheck(s32 flag);
+extern s32 fldAutoMapGetFloorPrev(s32 floor);
+extern s32 fldAutoMapGetFloorNext(s32 floor);
+extern void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ);
+extern void fldPoint3To2H(f32 *x, f32 *y, f32 px, f32 py, f32 pz);
+extern void fldAutoMapDrawIconOfsR(s32 index, s32 mode, f32 x, f32 y);
+extern void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 rotation);
+extern void rsetFrameMaskRgbOn(void);
+extern void rsetFrameMaskRgbOff(void);
+extern f32 sdfSin(f32 angle);
+extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h,
+                      u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1,
+                      u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3);
+extern void aDrawBoxGF(f32 x, f32 y, f32 w, f32 h,
+                       u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1,
+                       u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3);
+
+static inline s32 fldAutoMapNodeVisible(fldAmSBlock_t *item, s32 area, u32 block,
+                                        s32 floor, s32 checkOpen, s32 specialRoom)
+{
+    s32 visible = 0;
+
+    if (floor == item->floor) {
+        if (!checkOpen || fldAutoMapBBox != 0 || fldAutoMapChkOpen(fldAutoMapField, area, block) != 0) {
+            visible = 1;
+        }
+    }
+    if (specialRoom && fldGlobalBase.area == 20 && area == 7) {
+        if (evtBitCheck(0x4EB) != 0) {
+            if (block == 0) {
+                visible = 0;
+            }
+        } else if (block == 2 || block == 4) {
+            visible = 0;
+        }
+    }
+    return visible;
+}
+
+static inline s32 fldAutoMapIconNumber(u32 type, s32 adjacent)
+{
+    switch (type) {
+    case 1: return 10;
+    case 2: return adjacent ? -1 : 11;
+    case 3: return adjacent ? -1 : 12;
+    case 4: return 5;
+    case 5: return adjacent ? -1 : 2;
+    case 6: return 4;
+    case 7: return 6;
+    case 8: return 7;
+    case 9: return 3;
+    case 10: return adjacent ? -1 : 14;
+    case 11: return adjacent ? -1 : 13;
+    case 12: return adjacent ? -1 : 15;
+    default: return -1;
+    }
+}
+
+void fldAutoMapDrawOneArea(void)
+{
+    sdfVector4_t rect __attribute__((aligned(16)));
+    s32 floor, maxFloor, room, state;
+    u32 block, icon;
+    f32 x, y, offsetX, offsetZ, minX, maxZ, maxX, minZ;
+    s32 blink;
+    volatile s32 firstColor;
+    struct frFontRequest_t *request;
+    struct frFontHandle_t *font;
+    s32 textX;
+    const char *text;
+
+    if (fldWmapMode != 0) {
+        s32 showAll = fldAutoMapBBox;
+        if ((dds3PadButtonState[0x29] != 0 && dds3PadButtonState[0x2B] < 0) ||
+            (dds3PadButtonState[0x2B] != 0 && dds3PadButtonState[0x29] < 0)) {
+            showAll++;
+        }
+        fldAutoMapBBox = showAll & 1;
+    }
+    if (fldAutoMapBBox != 0) {
+        fldDbgPrint2D(0x640, -0x280, D_005321C0);
+    }
+    maxFloor = fldAutoMapGetFloorMax();
+    frSetFontDrawOT(0x51);
+    SDF_VU0_LOADMATRIX(aProjMatrix);
+    InversMatrix();
+    floor = fldAutoMapDrawArea;
+    D_0054EE78 = floor;
+    if (dds3PadButtonState[0x28] < 0 && floor < maxFloor) {
+        s32 next = floor + 1;
+        if (fldAutoMapBBox == 0) {
+            next = fldAutoMapGetFloorNext(floor);
+        }
+        floor = D_0054EE78;
+        if (floor != next) {
+            p2sdPlaySE(2, 0x7F, 0x3F);
+            D_0054EE7C = D_0054EE78;
+            floor = next;
+            D_0054EE80 = D_0054C4A4;
+            fldAutoMapDrawState = -24;
+            D_0054EE78 = floor;
+            fldAutoMapDrawX = 0.0f;
+            fldAutoMapDrawY = 0;
+            D_0054EE90 = 0;
+        }
+    }
+    if (dds3PadButtonState[0x2A] < 0 && floor >= 2) {
+        s32 previous = floor - 1;
+        if (fldAutoMapBBox == 0) {
+            previous = fldAutoMapGetFloorPrev(floor);
+        }
+        floor = D_0054EE78;
+        if (floor != previous) {
+            p2sdPlaySE(2, 0x7F, 0x3F);
+            D_0054EE7C = D_0054EE78;
+            floor = previous;
+            D_0054EE80 = D_0054C4A8;
+            fldAutoMapDrawState = 24;
+            D_0054EE78 = floor;
+            fldAutoMapDrawX = 0.0f;
+            fldAutoMapDrawY = 0;
+            D_0054EE90 = 0;
+        }
+    }
+    state = fldAutoMapDrawState;
+    if (state < 0) {
+        state += 4;
+        fldAutoMapDrawState = state;
+        D_0054EE90 += 4;
+    }
+    if (state > 0) {
+        fldAutoMapDrawState = state - 4;
+        D_0054EE90 -= 4;
+    }
+    if (!(D_0054EE80 < 1000.0f) || !(D_0054EE80 > -1000.0f)) {
+        if (D_0054EE80 > 0.0f) {
+            fldAutoMapDrawX -= 500.0f;
+        } else if (D_0054EE80 < 0.0f) {
+            fldAutoMapDrawX += 500.0f;
+        }
+    }
+    fldAutoMapDrawY = 0x80;
+    fldAutoMapDrawArea = floor;
+    D_0054EE80 = 0.0f;
+    sdf3DSetCamera(&dds3ScreenParam, aProjMatrix);
+    rsetOtOfs(0x4A);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    aDrawBoxF(0, 0, 0x200, 0xE0, 0, 0, 0, 0);
+    rsetOtOfs(0x4B);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    rsetOtOfs(0x4A);
+    rsetTest(1, 1, 0x80, 1, 0, 0, 1, 1);
+    if (dds3PadButtonState[0x29] != 0) {
+        s32 adjacentFloor;
+        rsetAlpha(0);
+        rsetFrameMaskRgbOn();
+        rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+        adjacentFloor = D_0054EE78 - 1;
+        if (fldAutoMapDrawY >= 0x80) {
+            for (room = 0; room < fldAutoMapData; room++) {
+                fldAmAreaData_t *area = &fldAutoMapHeader[room];
+                offsetX = offsetZ = 0.0f;
+                for (block = 0; block < area->nSB; block++) {
+                    fldAmSBlock_t *item = &area->items[block];
+                    if ((item->floor == adjacentFloor - 1 || item->floor == adjacentFloor + 1) &&
+                        (fldAutoMapBBox != 0 || fldAutoMapChkOpen(fldAutoMapField, room, block) != 0) &&
+                        item->icons != NULL) {
+                        for (icon = 0; icon < item->iconCount; icon++) {
+                            fldAmIcon_t *entry = &item->icons[icon];
+                            s32 number = fldAutoMapIconNumber(entry->type, 1);
+                            if (number >= 0) {
+                                fldPoint3To2H(&x, &y, entry->position->x + offsetX + 0.0f,
+                                              D_0054EE80, entry->position->z + offsetZ + 0.0f);
+                                fldAutoMapDrawIconOfsR(number, 0, x, y);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (room = 0; room < fldAutoMapData; room++) {
+            fldAmAreaData_t *area = &fldAutoMapHeader[room];
+            for (block = 0; block < area->nSB; block++) {
+                fldAmSBlock_t *item = &area->items[block];
+                s32 visible = 0;
+                if (item->floor == adjacentFloor - 1 || item->floor == adjacentFloor + 1) {
+                    visible = fldAutoMapBBox != 0 || fldAutoMapChkOpen(fldAutoMapField, room, block) != 0;
+                }
+                fldAutoMapNodeSet(D_00312150[room], item->nodeIndex, visible);
+            }
+            D_00312150[room]->color = 0x80808080;
+            fldAutoMapDrawMdl1(D_00312150[room], 0.0f, D_0054EE80, 0.0f);
+        }
+        rsetFrameMaskRgbOff();
+        rsetAlpha(0);
+        rsetTest(1, 0, 0x80, 1, 1, 1, 1, 1);
+        aDrawBoxF(0, 0, 0x200, 0xE0, 0x40, 0x40, 0x60, 0x30);
+        rsetTest(1, 1, 0x80, 1, 0, 0, 1, 1);
+    }
+    floor = D_0054EE78 - 1;
+    for (room = 0; room < fldAutoMapData; room++) {
+        fldAmAreaData_t *area = &fldAutoMapHeader[room];
+        for (block = 0; block < area->nSB; block++) {
+            s32 visible = fldAutoMapNodeVisible(&area->items[block], room, block, floor, 1, 1);
+            fldAutoMapNodeSet(D_00312150[room], area->items[block].nodeIndex, visible);
+        }
+    }
+    for (room = 0; room < fldAutoMapData; room++) {
+        D_00312150[room]->color = 0x80808080;
+        fldAutoMapDrawMdl1(D_00312150[room], 0.0f, D_0054EE80, 0.0f);
+    }
+    rsetOtOfs(0x4A);
+    rsetAlpha(0);
+    rsetFrameMaskRgbOn();
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    aDrawBoxF(0, 0, 0x200, 0xE0, 0, 0, 0, 0);
+    floor = D_0054EE78 - 1;
+    for (room = 0; room < fldAutoMapData; room++) {
+        fldAmAreaData_t *area = &fldAutoMapHeader[room];
+        sdfModelRootNode_t *model;
+        for (block = 0; block < area->nSB; block++) {
+            s32 visible = fldAutoMapNodeVisible(&area->items[block], room, block, floor, 1, 1);
+            fldAutoMapNodeSet(D_00312150[room], area->items[block].nodeIndex, visible);
+        }
+        model = D_00312150[room];
+        model->color = 0x80808080;
+        fldAutoMapDrawMdl1(model, -50.0f, D_0054EE80, 50.0f);
+        fldAutoMapDrawMdl1(D_00312150[room], 50.0f, D_0054EE80, 50.0f);
+        fldAutoMapDrawMdl1(D_00312150[room], -50.0f, D_0054EE80, -50.0f);
+        fldAutoMapDrawMdl1(D_00312150[room], 50.0f, D_0054EE80, -50.0f);
+        for (block = 0; block < area->nSB; block++) {
+            s32 visible = fldAutoMapNodeVisible(&area->items[block], room, block, floor, 0, 1);
+            fldAutoMapNodeSet(D_00312150[room], area->items[block].nodeIndex, visible);
+        }
+        model = D_00312150[room];
+        model->color = 0x10808080;
+        fldAutoMapDrawMdl1(model, 0.0f, D_0054EE80, 0.0f);
+        D_00312150[room]->color = 0x80808080;
+    }
+    rsetOtOfs(0x4E);
+    rsetFrameMaskRgbOff();
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 1, 1, 1, 1, 1);
+    aDrawBoxF(0, 0, 0x200, 0xE0, 0x80, 0x80, 0xA2, 0x80);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    sdf3DSetCamera(&dds3ScreenParam, D_002FA240);
+    D_0054EE98 += D_0054C4AC;
+    D_0054EE9C += D_0054C4B0;
+    SDF_VU0_COPYVECTOR(&rect, &fldAutoMapRect);
+    if (fldAutoMapDrawY >= 0x80) {
+        s32 currentFloor = D_0054EE78;
+        floor = currentFloor - 1;
+        for (room = 0; room < fldAutoMapData; room++) {
+            fldAmAreaData_t *area = &fldAutoMapHeader[room];
+            offsetX = offsetZ = 0.0f;
+            for (block = 0; block < area->nSB; block++) {
+                fldAmSBlock_t *item = &area->items[block];
+                s32 visible = 0;
+                if (item->floor == floor) {
+                    visible = fldAutoMapBBox != 0 || fldAutoMapChkOpen(fldAutoMapField, room, block) != 0;
+                }
+                if (visible && item->icons != NULL) {
+                    for (icon = 0; icon < item->iconCount; icon++) {
+                        fldAmIcon_t *entry = &item->icons[icon];
+                        s32 number = fldAutoMapIconNumber(entry->type, 0);
+                        f32 bob = 0.0f;
+                        if (entry->type == 11) {
+                            bob = sdfSin(D_0054EE9C + (f32)(room + (s32)icon) * D_0054C4B4) * 30.0f;
+                        }
+                        if (number >= 0) {
+                            f32 px = entry->position->x + offsetX + 0.0f;
+                            f32 pz = entry->position->z + offsetZ + bob;
+                            f32 dx = sdfFabs(rect.x - px);
+                            f32 dz = sdfFabs(rect.z - pz);
+                            if (dx < D_0054C4B8 && dz < D_0054C4B8) {
+                                fldPoint3To2H(&x, &y, px, D_0054EE80, pz);
+                                fldAutoMapDrawIconOfsR(number, 0, x, y);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (currentFloor == fldGlobalBase.amFloor) {
+            f32 px, pz, dx, dz;
+            s32 darkZone;
+            fldAllIconDel(fldAutoMapAreaNo, &offsetX, &offsetZ);
+            rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+            rsetAlpha(1);
+            px = fldGlobalBase.x + offsetX;
+            pz = fldGlobalBase.z + offsetZ;
+            dx = sdfFabs(rect.x - px);
+            dz = sdfFabs(rect.z - pz);
+            fldPoint3To2H(&x, &y, px, D_0054EE80, pz);
+            darkZone = gFldNowDZone;
+            if (dx < D_0054C4BC && dz < D_0054C4BC) {
+                rsetAlpha(1);
+                fldAutoMapDrawIconOfsRF(1, x, y, -fldCamPitch);
+                rsetAlpha(0);
+                fldAutoMapDrawIconOfsRF(0, x, y, fldGlobalBase.camAngle);
+            }
+            if (darkZone != 0 && fldGlobalBase.lightMaIdx == 0) {
+                s32 spriteX, spriteY;
+                rsetOtOfs(0x51);
+                rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+                rsetAlpha(1);
+                aDrawBoxF(0x18, 0x29, 0x1D0, 0xE0, 0, 0, 0, 0);
+                aDrawBoxF((s32)(x - 2048.0f) + 0xDC, (s32)(y - 2048.0f) + 0x67, 0x48, 0x25, 0, 0, 0, 0x80);
+                rsetTest(1, 0, 0x80, 1, 1, 0, 1, 1);
+                rsetAlpha(0);
+                aDrawBoxF(0x18, 0x29, 0x1D0, 0xE0, 8, 0x11, 0x1A, 0x80);
+                rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+                spriteX = (s32)(x - 2048.0f) + 0xDC;
+                spriteY = (s32)(y - 2048.0f) * 2;
+                DrwSprite2D(spriteX, spriteY + 0xCD, 0x48, 0x26, 0x30, 0x51, 0x48, 0x26, 0x80808080, D_00551CC0[0]);
+                DrwSprite2D(spriteX, spriteY + 0xF3, 0x48, 0x26, 0x30, 0x76, 0x48, -0x26, 0x80808080, D_00551CC0[0]);
+                aDrawBoxF(0, 0x29, 0x18, 0xAA, 0, 0, 0, 0x80);
+                aDrawBoxF(0x1E8, 0x29, 0x18, 0xAA, 0, 0, 0, 0x80);
+                aDrawBoxG(0x18, 0x29, 0x7B, 0xAA, 0, 0, 0, 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x80);
+                aDrawBoxG(0x16D, 0x29, 0x7B, 0xAA, 0, 0, 0, 0, 0, 0, 0, 0x80, 0, 0, 0, 0x80, 0, 0, 0, 0);
+            }
+        }
+    }
+    rsetOtOfs(0x51);
+    rsetAlpha(0);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    DrwSprite2D(0, 0, 0x100, 0x80, 0, 0, 0x100, 0x80, 0x80808080, fldAutoMapWindowTex[1]);
+    DrwSprite2D(0x200, 0, -0x100, 0x80, 0, 0, 0xFF, 0x80, 0x80808080, fldAutoMapWindowTex[1]);
+    DrwSprite2D(0, 0x80, 0x26, 0xF8, 0, 0x7E, 0x26, 1, 0x80808080, fldAutoMapWindowTex[1]);
+    DrwSprite2D(0x200, 0x80, -0x26, 0xF8, 0, 0x7E, 0x25, 1, 0x80808080, fldAutoMapWindowTex[1]);
+    DrwSprite2D(0, 0x1F8, 0x100, -0x80, 0, 0, 0x100, 0x7F, 0x80808080, fldAutoMapWindowTex[1]);
+    DrwSprite2D(0x200, 0x1F8, -0x100, -0x80, 0, 0, 0xFF, 0x7F, 0x80808080, fldAutoMapWindowTex[1]);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    rsetFrameMaskRgbOn();
+    aDrawBoxG(0, 0, 0x200, 0xE0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    aDrawBoxGF(24.0f, 79.0f, 464.0f, 346.0f, 0, 0, 0, 0x80, 0, 0, 0, 0x80, 0, 0, 0, 0x80, 0, 0, 0, 0x80);
+    if (gFldNowDZone != 0 && fldGlobalBase.lightMaIdx == 0) {
+        aDrawBoxF(0, 0x29, 0x18, 0xAA, 0, 0, 0, 0x80);
+        aDrawBoxF(0x1E8, 0x29, 0x18, 0xAA, 0, 0, 0, 0x80);
+    }
+    rsetTest(1, 0, 0x80, 1, 1, 0, 1, 1);
+    rsetFrameMaskRgbOff();
+    rsetAlpha(1);
+    aDrawBoxG(-0x58, 0, 0x258, 0x7D, 0x16, 0x13, 0x49, 0, 0x16, 0x13, 0x49, 0x66, 0x16, 0x13, 0x49, 0, 0x16, 0x13, 0x49, 0);
+    aDrawBoxG(0, 0x4F, 0x118, 0x91, 0x1E, 0x24, 0x38, 0, 0x1E, 0x24, 0x38, 0, 0x1E, 0x24, 0x38, 0, 0x1E, 0x24, 0x38, 0x4C);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    rsetAlpha(0);
+    rsetAlpha(0);
+    DrwSprite2D(0xE, 0x34, 0xDA, 0x17, 1, 1, 0xDA, 0x17, 0x80808080, D_00551CC0[1]);
+    floor = D_0054EE78;
+    if (floor != fldAutoMapGetFloorNext(D_0054EE78)) {
+        DrwSprite2D(0x17, 0x36, 0x3D, 0x13, 1, 0x1A, 0x3D, 0x13, 0x80808080, D_00551CC0[1]);
+    }
+    if (D_0054EE78 != fldAutoMapGetFloorPrev(floor)) {
+        DrwSprite2D(0x84, 0x36, 0x3D, 0x13, 0x40, 0x1A, 0x3D, 0x13, 0x80808080, D_00551CC0[1]);
+    }
+    blink = (s32)(((u32)(s32)(sdfSin(D_0054EE94) * 32.0f) << 24) + 0x60909090u);
+    D_0054EE94 += D_0054C4C0;
+    fldAutoMapGetBBox(&minX, &maxZ, &maxX, &minZ);
+    minX = (f32)((s32)((minX - 1000.0f) / 1000.0f) * 1000);
+    minZ = (f32)((s32)((minZ + 1000.0f) / 1000.0f) * 1000);
+    maxX = (f32)((s32)((maxX + 1000.0f) / 1000.0f) * 1000);
+    maxZ = (f32)((s32)((maxZ - 1000.0f) / 1000.0f) * 1000);
+    DrwSprite2D(0xF5, 0x44, 0x16, 0x19, 0x40, 1, 0x16, 0x19, 0x80808080, D_00551CC0[0]);
+    DrwSprite2D(0xF5, 0x19B, 0x16, 0x19, 0x58, 1, 0x16, 0x19, 0x80808080, D_00551CC0[0]);
+    DrwSprite2D(0xB, 0xEE, 0x1F, 0x1F, 1, 1, 0x1F, 0x1F, 0x80808080, D_00551CC0[0]);
+    DrwSprite2D(0x1D6, 0xEE, 0x1F, 0x1F, 0x21, 1, 0x1F, 0x1F, 0x80808080, D_00551CC0[0]);
+    if ((f32)D_00551CB0 < maxZ) {
+        DrwSprite2D(0xFB, 0x45, 0xB, 0xC, 0x74, 0x38, 0xB, 0xC, blink, D_00551CC0[0]);
+    }
+    if (minZ < (f32)D_00551CB0) {
+        DrwSprite2D(0xFB, 0x1B4, 0xB, -0xC, 0x74, 0x38, 0xB, 0xC, blink, D_00551CC0[0]);
+    }
+    if (minX < (f32)D_00551CAC) {
+        DrwSprite2D(0x1A, 0xF7, -0xC, 0xD, 0x5E, 0x1B, 0xC, 0xD, blink, D_00551CC0[0]);
+    }
+    if ((f32)D_00551CAC < maxX) {
+        DrwSprite2D(0x1E6, 0xF7, 0xC, 0xD, 0x5E, 0x1B, 0xC, 0xD, blink, D_00551CC0[0]);
+    }
+    DrwSprite2D(0xE3, 9, 0xFC, 0x51, 2, 0x2F, 0xFC, 0x51, 0x80808080, D_00551CC0[1]);
+    DrwSprite2D(0x1DF, 9, 0x22, 0x51, 0xFD, 0x2F, 1, 0x51, 0x80808080, D_00551CC0[1]);
+    text = D_0030A670[fldGlobalBase.area % 100];
+    request = frwGetSmallFontFRQ(0, 0, 0, firstColor, text, NULL);
+    font = (struct frFontHandle_t *)request;
+    textX = (s32)((0x1ECu - frGetStrWidth2(font)) << 4);
+    frDestroyFontRequestAfter(font);
+    request = frwGetSmallFontFRQ(textX, 0x98, 0, 0xA09DC380, text, NULL);
+    D_00551CA0 = (struct frFontHandle_t *)request;
+    frSetPriority(D_00551CA0, 0xFFFFFF);
+    frDrawFont(D_00551CA0);
+    frDestroyFontRequestAfter(D_00551CA0);
+    rsetOtOfs(0x51);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 2, 0, 0, 1, 2);
+    rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
+    if (fldAutoMapDrawState != 0 && (u32)(D_0054EE7C - 1) < 40 && D_00567EF8[D_0054EE7C] >= 2) {
+        s32 alpha = 0x80 - (D_0054EE90 < 0 ? -D_0054EE90 : D_0054EE90) * 8;
+        s32 color = (alpha < 0 ? 0 : alpha) | 0x78759B00;
+        text = D_0030FBD4[fldAutoMapFindFloor(fldGlobalBase.area % 100, D_0054EE7C)];
+        request = frwGetSmallFontFRQ(0, 0, 0, color, text, NULL);
+        font = (struct frFontHandle_t *)request;
+        textX = (s32)((0x1ECu - frGetStrWidth2(font)) << 4);
+        frDestroyFontRequestAfter(font);
+        request = frwGetSmallFontFRQ(textX, (D_0054EE90 + 0x3C) * 8, 0, color, text, NULL);
+        D_00551CA0 = (struct frFontHandle_t *)request;
+        frSetPriority(D_00551CA0, 0xFFFFFF);
+        frDrawFontEx(D_00551CA0, 1);
+        frDestroyFontRequestAfter(D_00551CA0);
+    }
+    if ((u32)(D_0054EE78 - 1) < 40 && D_00567EF8[D_0054EE78] >= 2) {
+        s32 alpha = 0x80 - (fldAutoMapDrawState < 0 ? -fldAutoMapDrawState : fldAutoMapDrawState) * 8;
+        s32 color = (alpha < 0 ? 0 : alpha) | 0x78759B00;
+        text = D_0030FBD4[fldAutoMapFindFloor(fldGlobalBase.area % 100, D_0054EE78)];
+        request = frwGetSmallFontFRQ(0, 0, 0, color, text, NULL);
+        font = (struct frFontHandle_t *)request;
+        textX = (s32)((0x1ECu - frGetStrWidth2(font)) << 4);
+        frDestroyFontRequestAfter(font);
+        request = frwGetSmallFontFRQ(textX, fldAutoMapDrawState * 8 + 0x1DC, 0, color, text, NULL);
+        D_00551CA0 = (struct frFontHandle_t *)request;
+        frSetPriority(D_00551CA0, 0xFFFFFF);
+        frDrawFontEx(D_00551CA0, 1);
+        frDestroyFontRequestAfter(D_00551CA0);
+    }
+    SDF_VU0_LOADMATRIX(D_002FA240);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawOneArea);
+#endif
 
 void fldAutoMapDrawWindow(void) {
     SDF_VU0_LOADMATRIX(aProjMatrix);
