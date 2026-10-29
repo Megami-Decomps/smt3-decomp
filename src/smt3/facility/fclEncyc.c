@@ -1198,6 +1198,14 @@ void DestPhaseReadTop(fclEncyc_instance_tag *pinst)
     ReleaseWork(pinst);
 }
 
+typedef struct fclEncycHelpPanel_t {
+    s32 x;
+    s32 y;
+    s32 speed;
+    s16 alpha;
+    u8 reserved0E[2];
+} fclEncycHelpPanel_t;
+
 INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadStatus);
 
 typedef struct fclEncycReadStatusWork_t {
@@ -1209,9 +1217,14 @@ typedef struct fclEncycReadStatusWork_t {
     s32 boardY;
     s16 boardAlpha;
     s16 explainAlpha;
-    u8 reserved0060[0x0E];
-    s16 viewIdleTimer;
-    u8 reserved0070[0x10];
+    union {
+        fclEncycHelpPanel_t help[2];
+        struct {
+            u8 reserved0060[0x0E];
+            s16 viewIdleTimer;
+            u8 reserved0070[0x10];
+        };
+    };
     fclRibbon_t *ribbon;
     void *countFont;
     void *explainFont;
@@ -2984,14 +2997,6 @@ void CalcMoveRegistKeyHelp(fclEncyc_registconfirmwork_tag *pwork)
     }
     pwork->registAlpha = alpha;
 }
-
-typedef struct fclEncycHelpPanel_t {
-    s32 x;
-    s32 y;
-    s32 speed;
-    s16 alpha;
-    u8 reserved0E[2];
-} fclEncycHelpPanel_t;
 
 typedef struct fclEncycReadHelpWork_t {
     u8 reserved00[2];
