@@ -14,10 +14,6 @@ INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __fixunsdfdi);
 
 INCLUDE_ASM(const s32, "sdk/libgcc_longlong", dpdiv);
 
-INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __floatdidf);
-
-INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __errno_8);
-
 INCLUDE_RODATA(const s32, "sdk/libgcc_longlong", D_0054BD78);
 
 INCLUDE_RODATA(const s32, "sdk/libgcc_longlong", D_0054BE78);

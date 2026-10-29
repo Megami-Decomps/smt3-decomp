@@ -378,6 +378,8 @@ segments:
       - [0x1D4810, c, sdk/libc]
       - [0x1DCA80, c, sdk/libkernl]
       - [0x1E62FC, c, sdk/libgcc_longlong]
+      - [0x1E7D88, c, sdk/libgcc_floatdidf]  # _floatdidf.o: byte-identified 168-byte object
+      - [0x1E7E30, c, sdk/libgcc_longlong_tail]  # remaining errno accessor and native padding
       - [0x1E7E50, textbin, vutext]
       # .ctors + .dtors (both ffffffff 00000000) + .reginfo, then zeros to .data.
       - [0x1F6600, databin, ctors_dtors_reginfo]

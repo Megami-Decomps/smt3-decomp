@@ -4,7 +4,8 @@
 libraries, newlib, and libgcc. It runs from `0x002C81A8` (`sceGsResetGraph`) to
 the start of `.vutext` at `0x002E6E50` and holds 671 functions.
 
-It is now 12 units under `src/smt3/sdk/`, one per archive, so
+It is grouped under `src/smt3/sdk/` into library containers and recovered
+compiler objects, so
 [reading progress](progress.md) measures it as its own `sdk` category instead
 of inside the game-code denominator. This page is the account of what it is,
 function by function, and of the two toolchains it takes to rebuild.
@@ -791,3 +792,35 @@ The patch code stays external data and all syscall stubs stay in assembly.
 The shared pair declaration and cache-flush prototype precede all of their
 C consumers. Both complete helper bodies match with the configured compiler;
 no flags, copy shims or artificial lifetimes are added.
+
+## Signed 64-bit integer conversion
+
+`__floatdidf` at `0x002E6D88` matches all 168 instruction bytes with a real
+`s64` input and `f64` result. This EE double ABI carries the value in GPRs;
+the reconstruction uses ordinary double arithmetic and the existing `litodp`,
+`dpmul` and `dpadd` compiler providers.
+
+The signed high word is converted first and multiplied by 65536 twice. The
+low word is then isolated in the 64-bit working integer, narrowed to signed
+32 bits, and converted. A negative low word receives a double correction of
+4294967296 before the final addition. Preserve both high-word multiplies and
+the final addition order rather than reassociating the expression.
+
+The explicit `0xFFFFFFFFULL` mask is a half-width extraction of the genuine
+64-bit argument. A qualified CSE/allocation trace (`--expand --cse --alloc
+--no-dumps`, with plain and hooked output parity) records the DI-mode AND at
+instruction 48 and its subsequent SI-mode narrowing at instruction 50. A
+cast-only low-word extraction emits 156 bytes and hoists the narrowing ahead
+of the high-word calls; retaining the working integer's low-word mask gives
+the native order and exact bytes. No float value is carried through an
+integer substitute type.
+
+`config/smt3/sdk_objects.tsv` identifies the entire 168-byte helper as
+`_floatdidf.o` by bytes. Its recovered C unit starts at `0x002E6D88` and ends
+at `0x002E6E30`; the remaining errno accessor and native padding keep a
+separate assembly-backed tail. The earlier combined archive unit starts at
+`0x002E52FC`, which is only four-byte aligned. Keeping the new C function in
+that aggregate raises its alignment and adds padding, shifting the linked
+image despite a standalone instruction match. The object-backed split
+preserves both the earlier archive code and the helper's real placement
+without compiler-flag or instruction changes.
