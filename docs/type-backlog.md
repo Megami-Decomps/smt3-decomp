@@ -4,9 +4,9 @@ From `tools/drift_report.py --write`. Every type still carrying an
 invented name, with whatever evidence exists for the real one. The
 methods and their refusals are described in [type recovery](type-recovery.md).
 
-169 types: 27 with a single agreed candidate,
+164 types: 27 with a single agreed candidate,
 13 with candidates that disagree, and
-129 with no candidate from any method.
+124 with no candidate from any method.
 
 ## One agreed candidate
 
@@ -72,8 +72,6 @@ disagreement here is the useful signal, not noise.
 Nothing in the IDB or the HD corpus has this shape in a place this
 type could occupy. Some of these the originals never named either.
 
-- `AtExitEntry`, 6 members, src/smt3/code_002C81A8.c:98 (uniform member sizes)
-- `AtExitList`, 2 members, src/smt3/code_002C81A8.c:107 (uniform member sizes)
 - `BattleEffect`, 17 members, src/smt3/effect/effPCPMisc.c:1097 (cannot be sized here)
 - `BattleGroupNode`, 16 members, src/smt3/effect/effPCPMisc.c:1784
 - `BattleGroupSlot`, 5 members, src/smt3/effect/effPCPMisc.c:1679
@@ -90,7 +88,6 @@ type could occupy. Some of these the originals never named either.
 - `BillPluralRecord`, 5 members, src/smt3/effect/billManager.c:192
 - `BillScreenParam`, 5 members, src/smt3/effect/billManager.c:75
 - `BillTextureQuad`, 1 members, src/smt3/effect/billManager.c:120 (uniform member sizes)
-- `Dds3AdminModeDispatch`, 0 members, src/smt3/code_002C81A8.c:31
 - `DevRequest`, 6 members, src/smt3/effect/effPCPMisc.c:1689
 - `EffBattleEntry`, 7 members, src/smt3/effect/effPCPMisc.c:1069
 - `EffBattleEntryList`, 15 members, src/smt3/effect/effPCPMisc.c:1079
@@ -193,8 +190,6 @@ type could occupy. Some of these the originals never named either.
 - `SdfStreamReadRequest`, 3 members, src/smt3/sdf/sdfTmx.c:106 (uniform member sizes)
 - `SdfStreamState`, 6 members, src/smt3/sdf/sdfTmx.c:112 (uniform member sizes)
 - `SdfTextureDrawPacket`, 7 members, src/smt3/sdf/sdf2D.c:80
-- `SdfUnpacked`, 4 members, src/smt3/code_002C81A8.c:271 (uniform member sizes)
-- `SdfUnpackedD`, 4 members, src/smt3/code_002C81A8.c:293 (uniform member sizes)
 - `SdfVuColorTransform`, 6 members, src/smt3/sdf/sdfVu1.c:76
 - `SoundBank`, 3 members, src/smt3/effect/effPCPMisc.c:1117
 - `SoundMixer`, 5 members, src/smt3/effect/effPCPMisc.c:1123
