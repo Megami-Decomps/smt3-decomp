@@ -262,12 +262,7 @@ typedef struct {
     lstWork_t window3;
 } ragListWork_t;
 
-typedef struct {
-    u16 item;
-    u8 reserved02[12];
-} ragHeartEntry_t;
-
-extern ragHeartEntry_t ragHeartEntries[] asm("ragHeartsTable");
+extern ragHeartsEntry_t ragHeartEntries[] asm("ragHeartsTable");
 extern u8 D_0032FC58[][32];
 extern s32 datGetItemSlotIndex(u16 item);
 extern s32 cmbChkGetHearts(s32 id);
