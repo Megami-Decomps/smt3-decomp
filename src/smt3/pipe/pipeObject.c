@@ -1103,7 +1103,60 @@ void partsInit(void)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", partsAdd);
+typedef struct tagPipeLinkInput { u16 id; s16 partsID; } tagPipeLinkInput;
+typedef struct tagPipePartsInfo tagPipePartsInfo;
+extern s32 getPartsType(s32);
+extern tagPipePartsInfo *getPartsInfo(s16);
+extern s32 mymdlAddObject(tagpipeBasic *, u16);
+extern void PipemdlRot(tagpipeBasic *, tagPipePartsInfo *);
+const char D_00548D40[32] = "-----PipeLine %d ADD OBJECT\n";
+const char D_00548D60[32] = "-----PipeCur %d ADD OBJECT\n";
+const char D_00548D80[32] = "-----PipeCur2 %d ADD OBJECT\n";
+
+void partsAdd(tagPipeLinkInput *input, s32 offset)
+{
+    tagpipeParts *slot;
+    tagPipePartsInfo *info;
+    s32 remaining;
+    s8 type = (s8)getPartsType((u16)input->partsID);
+    slot = PartsWork;
+    for (remaining = 19; remaining != -1; remaining--, slot++) {
+        if (slot->id == 0xFF) {
+            info = getPartsInfo(input->partsID);
+            slot->id = (u8)type;
+            slot->offset = offset;
+            switch (slot->id) {
+            case 1:
+            case 3:
+                slot->mdl = mymdlAddObject(PipeLine, 10);
+                if (slot->mdl == 0xFF) return;
+                DEBUG_PRINT(D_00548D40, slot->mdl);
+                mymdlPosSet(&PipeLine[slot->mdl], D_00528F58.points[slot->offset].position[0],
+                    D_00528F58.points[slot->offset].position[1], D_00528F58.points[slot->offset].position[2]);
+                PipemdlRot(&PipeLine[slot->mdl], info);
+                break;
+            case 2:
+                slot->mdl = mymdlAddObject(PipeCur, 10);
+                if (slot->mdl == 0xFF) return;
+                DEBUG_PRINT(D_00548D60, slot->mdl);
+                mymdlPosSet(&PipeCur[slot->mdl], D_00528F58.points[slot->offset].position[0],
+                    D_00528F58.points[slot->offset].position[1], D_00528F58.points[slot->offset].position[2]);
+                PipemdlRot(&PipeCur[slot->mdl], info);
+                break;
+            case 4:
+                slot->mdl = mymdlAddObject(PipeCur2, 10);
+                if (slot->mdl == 0xFF) return;
+                DEBUG_PRINT(D_00548D80, slot->mdl);
+                mymdlPosSet(&PipeCur2[slot->mdl], D_00528F58.points[slot->offset].position[0],
+                    D_00528F58.points[slot->offset].position[1], D_00528F58.points[slot->offset].position[2]);
+                PipemdlRot(&PipeCur2[slot->mdl], info);
+                break;
+            }
+            break;
+        }
+    }
+}
+
 
 void partsDel(tagpipeParts *pPtr)
 {
