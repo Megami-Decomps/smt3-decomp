@@ -291,7 +291,6 @@ extern s32 nbGetInfoMsg(s32 infotype);
 
 extern void nbSetMesItem(s32 msgid, s32 it);
 
-typedef struct { u8 rate; u8 item; } nbMasterTextKouho_t;
 
 typedef struct {
     s32 mesno;
@@ -300,9 +299,9 @@ typedef struct {
     u8 honboutype;
     u8 unk_0A[0xA];
     u16 negorate;
-    nbMasterTextKouho_t itema[4];
-    nbMasterTextKouho_t itemb[4];
-    nbMasterTextKouho_t stone[4];
+    datNegoPresent_t itema[4];
+    datNegoPresent_t itemb[4];
+    datNegoPresent_t stone[4];
     u8 unk_2E[0x2];
 } datDevilNegoFormat_t;
 

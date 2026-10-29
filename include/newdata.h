@@ -276,6 +276,8 @@ typedef struct {
     u32 reserved_A0;
 } datDevilAIData_t;
 
+typedef struct { u8 ritu, item; } datNegoPresent_t;
+
 typedef struct datSkill_t
 {
     s8 skillattr;

@@ -500,7 +500,6 @@ s32 Flow6_8(nbNegoProcessData_t *n)
     return 0;
 }
 
-typedef struct { u8 ritu; u8 item; } datNegoPresent_t;
 typedef struct {
     u32 kucyo;
     u32 tokucyo;
