@@ -104,7 +104,7 @@ extern pbProcHandle_t *blockDB;
 
 extern s32 pbPopRecord(pbProcHandle_t *p, pbProcHandle_t **c, pbProcHandle_t *blkDB);
 
-extern void *sdfChipAllocDirect(u32 aSize);
+extern void *sdfChipAllocDirect(s32 aSize);
 
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
@@ -176,7 +176,49 @@ s8 pbCheckPopRecord(pbProcHandle_t *p) {
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbPopRecord);
 
+#ifdef NON_MATCHING
+s32 pbAddRecord_blk(pbProcHandle_t *panel, pbGroupData_t *group)
+{
+    pbRecord_t *rec = panel->data.record;
+    pbRecordSlot_t *slots;
+    pbRecordCell_t *cells;
+    pbBlockEntry_t *entry;
+    pbMapWork_t *map;
+    s32 position;
+    u32 i;
+
+    rec->slot[rec->pos].flag[2] = group->count;
+    if (rec->slot[rec->pos].blocks != NULL) {
+        sdfChipFreeDelayedDirect(rec->slot[rec->pos].blocks);
+    }
+    cells = sdfChipAllocDirect(group->count * sizeof(*cells));
+    position = rec->pos;
+    slots = rec->slot;
+    slots[position].blocks = cells;
+    if (group->count != 0) {
+        map = D_0054F5C4;
+        entry = group->blockEntries;
+        i = 0;
+        do {
+            cells[i].x = group->cellX + entry->x;
+            cells[i].y = group->cellY + entry->y;
+            cells[i].status = map->map[cells[i].y][cells[i].x] & 0xE7FF;
+            entry++;
+        } while (++i < group->count);
+    }
+    if (slots[position].floors != NULL) {
+        sdfChipFreeDelayedDirect(slots[position].floors);
+        position = rec->pos;
+        slots = rec->slot;
+        slots[position].flag[3] = 0;
+        slots[position].floors = NULL;
+        position = rec->pos;
+    }
+    return position;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_blk);
+#endif
 
 s32 pbAddRecord_flor(pbProcHandle_t *panel, pbGroupData_t *group)
 {
