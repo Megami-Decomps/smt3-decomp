@@ -1692,7 +1692,61 @@ void fldRunDanteShutdown(void)
     }
 }
 
+#ifdef NON_MATCHING
+extern void fldDrawPoly3(s32 c0, s32 c1, s32 c2,
+                         f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1,
+                         f32 x2, f32 y2, f32 z2);
+extern void fldDrawPoly4(s32 c0, f32 x0, f32 y0, f32 z0,
+                         s32 c1, f32 x1, f32 y1, f32 z1,
+                         s32 c2, f32 x2, f32 y2, f32 z2,
+                         s32 c3, f32 x3, f32 y3, f32 z3);
+
+void fldRunDanteDrawShadow(s32 alpha, f32 x, f32 y, f32 z, f32 radius)
+{
+    s32 i;
+    u32 edgeColor;
+    u32 centerColor;
+    f32 innerRadius;
+
+    if (alpha == 0) {
+        return;
+    }
+    rsetOtOfs(0x2E);
+    rsetAlpha(1);
+    edgeColor = ((u32)alpha << 24) | 0x181818;
+    centerColor = ((u32)alpha << 24) | 0x202020;
+    innerRadius = radius / 3.0f;
+
+    for (i = 0; i < 360; i += 10) {
+        f32 angle = (f32)((i + 360) % 360) * 3.1399999f / 180.0f;
+        f32 outerX = sdfSin(angle) * radius;
+        f32 outerZ = sdfCos(angle) * radius;
+        f32 prevAngle = (f32)((i + 350) % 360) * 3.1399999f / 180.0f;
+        f32 prevOuterX = sdfSin(prevAngle) * radius;
+        f32 prevOuterZ = sdfCos(prevAngle) * radius;
+        f32 innerX = sdfSin(angle) * innerRadius;
+        f32 innerZ = sdfCos(angle) * innerRadius;
+        f32 prevInnerX = sdfSin(prevAngle) * innerRadius;
+        f32 prevInnerZ = sdfCos(prevAngle) * innerRadius;
+        f32 height = y - 2.0f;
+
+        innerX = x + innerX;
+        innerZ = z + innerZ;
+        prevInnerX = x + prevInnerX;
+        prevInnerZ = z + prevInnerZ;
+        fldDrawPoly3(centerColor, edgeColor, edgeColor,
+                     x + 0.0f, height, z + 0.0f,
+                     innerX, height, innerZ, prevInnerX, height, prevInnerZ);
+        fldDrawPoly4(edgeColor, innerX, height, innerZ,
+                     0, x + outerX, height, z + outerZ,
+                     0, x + prevOuterX, height, z + prevOuterZ,
+                     edgeColor, prevInnerX, height, prevInnerZ);
+    }
+    rsetAlpha(0);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteDrawShadow);
+#endif
 
 void fldRunDanteFacePlayer(void)
 {
