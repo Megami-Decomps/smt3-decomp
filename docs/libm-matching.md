@@ -163,6 +163,29 @@ CSE trace, UID297 assigns the tangent to the working float, UID304 reads that
 float's word, UID325 masks it and UID329 writes the truncated float back.
 These are consumed arithmetic values, with no artificial copies, fixed
 registers or compiler-option changes.
+## __ieee754_rem_pio2f
+
+All944 instruction bytes match. The scalar input uses `$f12`; the pointer in
+`$4` receives two float remainders. Small values return the input/zero pair;
+the next range uses a signed single-quarter-turn split. Medium values use the
+native magnitude/table check and up to three cancellation corrections, including
+the exponent-loss gates at8 and25. Sign restoration negates both remainders
+and the returned integer.
+
+The large path normalizes the word, extracts three bounded float chunks into
+`tx[3]`, trims trailing zero chunks and calls the real six-argument reduction
+kernel. Its arguments are chunk pointer, output pointer, exponent, chunk count,
+precision2 and the two-over-pi table pointer. The leading chunk is nonzero, so
+the native trim loop cannot exhaust the array. No IEEE infinity/NaN shortcut
+is added to this bitwise PS2 path.
+
+Keep both readonly imports intact. The fragment at0x0054AF60 contains197
+integer digit words, with the198th digit0x6B at0x0054B274. The actual comparison
+patterns start at0x0054B278; the native biased base uses `D_0054B274[n]`, guarded
+by `n < 32`, to address pattern n-1. Splat's symbol fragments are not proof of
+independent source-array boundaries. Do not shrink a fragment or change this
+to an unadjusted n-1 access.
+
 ## Math forwarding wrappers
 
 The ordinary C bodies at0x002CF730 (`__ieee754_acosf`) and0x002CF748
