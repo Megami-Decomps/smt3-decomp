@@ -129,3 +129,45 @@ record, calls `__sinit` only when that record is uninitialized, and forwards
 the fresh stream record after the call. A cached-record/explicit reload
 control emits 112 bytes and was discarded. No storage qualifiers, dummy
 references or false argument types constrain allocation.
+
+## _d2b
+
+The binary64-to-bigint reconstruction emits all388 native instruction bytes:
+93 of97 words match and four differ, at+0x84,+0x88,+0x8C,+0x98. These are the
+low-word extraction, zero test and stack store using GPR16 instead of native
+GPR5. Normal builds retain assembly; no exact matching credit is claimed.
+
+The existing binary64 word union and `_Bigint` layout preserve the actual
+`(_reent *, f64, s32 *, s32 *)` interface. Allocation precedes representation
+extraction. The high mantissa snapshot precedes sign clearing and exponent
+extraction; normal values restore the implicit bit. A detached unsigned low
+word is normalized through `_lo0bits`, then joined with the high mantissa.
+The low-zero path normalizes the high mantissa and adds32 to the shift count.
+Both paths set the real limb count and cache it for subnormal bit counting.
+The upper payload store occurs even when zero. Exponent and significant-bit
+outputs follow the normal/subnormal native branches without new special cases.
+
+Qualified actual-owner allocation/scheduler traces use pinned cc1
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`,
+with hooked/unhooked and plain-output parity. In the unguarded control, UID86
+truncates input pseudo88 into low-word pseudo113. Global allocation gives
+pseudo113 three references, live length4, conflicts with GPR4 and a GPR16
+preference inherited from the input; it receives GPR16. The later trailing-bit
+pseudo93 has eight references, live length30, no preference and receives GPR5.
+
+Reusing `trailingBits` first for the signed raw low word is semantically sound
+but does not supply native allocation. The qualified control puts UID86 and
+the later helper return in pseudo93 (11 references, live length34), inherits
+GPR16 and assigns it there. The result grows to392 bytes with70 differing
+native words and four excess bytes. Binding the mutable `lowWord` in the
+conditional instead leaves388 bytes and five differing words: GPR2 receives
+the raw word and its store moves into the branch delay slot. Sharing the bit
+count with that bound value is inert. These controls are not retained.
+
+Reproduce the baseline with `tools/cc1probe.sh src/smt3/sdk/libc.c --func _d2b
+--alloc --sched --no-dumps --maxlines 3000 --out <output>` after removing only
+its guard; the guarded owner needs `--cflag -DNON_MATCHING`. Earlier in-place
+union normalization and isolated original source-object context also failed.
+A new grounded allocation or source-lifetime premise is needed; scalar reuse
+alone does not defeat the inherited preference. No register constraints,
+extra arithmetic or artificial lifetime extensions were added.

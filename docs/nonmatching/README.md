@@ -16,6 +16,7 @@ page and line to open. Conventions are in
 | 8 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 8 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
+| 5 |  | [sdk/libc.md](sdk/libc.md) |
 | 5 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
@@ -23,7 +24,6 @@ page and line to open. Conventions are in
 | 5 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
-| 4 |  | [sdk/libc.md](sdk/libc.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |

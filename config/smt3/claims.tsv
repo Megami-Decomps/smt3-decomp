@@ -878,3 +878,4 @@ src/smt3/sdk/libm.c	redthing1	done	2026-10-28	1 SDK fn / 1060 B	inverse-cosine a
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 16 B	raw close and lseek interfaces preserve caller-grounded signed inputs and 64-bit seek result; owner 140 match, 0 differ
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	0 exact / boundary + 116 B guarded	vfprintf wrapper separated from independently called 5744-byte formatter core; guarded wrapper retains 21 differing words and core assembly/data ownership
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 40 B	raw open compatibility stub sets errno 5 and returns -1 without reading inputs; complete owner 139 match, 0 differ
+src/smt3/sdk/libc.c	redthing1	done	2026-10-28	0 exact / 388 B guarded	binary64-to-bigint conversion retained at 93 of 97 words matching; qualified shared-scratch control explains inherited low-word preference and is rejected
