@@ -2,6 +2,7 @@
 """Tests for tools/docs_index.py, the levers and drafts index."""
 import pathlib
 import sys
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -54,6 +55,26 @@ class DraftRowTests(unittest.TestCase):
             text = (ROOT / page).read_text().split("\n")[int(line) - 1]
             self.assertTrue(text.startswith("## "), page)
             self.assertIn(fn, text)
+
+    def test_wrapped_distance_stays_in_one_tsv_cell(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            drafts = root / "docs/nonmatching"
+            drafts.mkdir(parents=True)
+            page = drafts / "example.md"
+            for separator in ("\n", "\n\t"):
+                with self.subTest(separator=separator):
+                    page.write_text(
+                        "## example (sdk/math, 0x28C)\n\n"
+                        f"51 of 155 words{separator}match; 32 bytes uncovered.\n")
+                    with patch.object(docs_index, "ROOT", root), \
+                            patch.object(docs_index, "DRAFTS", drafts):
+                        rows = docs_index.draft_rows()
+                    self.assertEqual(len(rows), 1)
+                    self.assertEqual(rows[0][3], "51 of 155 words match")
+                    serialized = "\t".join(rows[0])
+                    self.assertEqual(len(serialized.splitlines()), 1)
+                    self.assertEqual(len(serialized.split("\t")), 6)
 
 
 class IndexFreshnessTests(unittest.TestCase):

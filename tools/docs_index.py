@@ -108,7 +108,7 @@ def draft_rows() -> list[tuple[str, ...]]:
                 m.group(1),
                 m.group(2) or "",
                 m.group(3) or "",
-                d.group(1) if d else "",
+                re.sub(r"\s+", " ", d.group(1)) if d else "",
                 page.relative_to(ROOT).as_posix(),
                 str(i + 1),
             ))
