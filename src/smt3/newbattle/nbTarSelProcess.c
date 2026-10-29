@@ -354,7 +354,24 @@ void UpdateSelect(nbTarSelProcessData_t *process)
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", UpdateSelect);
 #endif
 
+#ifdef NON_MATCHING
+void OnOffTargetCursor(nbTarSelProcessData_t *process)
+{
+    volatile nbTarSelProcessData_t *selection = process;
+    volatile nbMainProcessData_t *data = selection->data;
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        if (selection->stat == 1 && (data->form[i].stat & 8) != 0) {
+            data->form[i].anime |= 8;
+        } else {
+            data->form[i].anime &= ~8;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", OnOffTargetCursor);
+#endif
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 index);
 extern void nbDispDevilName(s32 id);
