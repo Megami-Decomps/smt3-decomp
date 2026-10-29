@@ -417,7 +417,10 @@ typedef struct
     /* 0x0410E */ u8 evoCandidateCount;
     /* 0x0410F */ u8 reserved0410F;
     /* 0x04110 */ cmbStockSlot_t stockSlot[3];
-    /* 0x0411C */ u8 birthPanel[0x2C8];
+    /* 0x0411C */ union {
+        u8 birthPanel[0x2C8];
+        datUnitWork_t birthUnit[3];
+    };
     /* 0x043E4 */ s8 resultRowsBuilt;
     /* 0x043E5 */ s8 resultIndex[2][12][12];
     /* 0x04505 */ u8 reserved04505;
@@ -2786,7 +2789,33 @@ void cmbDrawStatus(void)
     fclRbnDraw(CMB_GBWK->ribbon, 0, 0x98, 0, 0x80, 2, -0x80, 0x47);
 }
 
+extern fclSpriteTbl_t fclSpriteTable[];
+extern void func_002146F8(s32 x, s32 y, s32 width, s32 height, s32 *color,
+                          fclSprite_t *sprite, u8 flip, s32 ot);
+
+#ifdef NON_MATCHING
+void cmbDrawBirthDevilMaskBG(void)
+{
+    s32 colors[4];
+    fclSprite_t *sprite;
+
+    if (evtBitCheck(0x8A0) != 0) {
+        return;
+    }
+    sprite = &CMB_GBWK->backgroundSprite;
+    if (cmbGlobalWork->party[0].unit.level >= CMB_GBWK->birthUnit[0].level) {
+        return;
+    }
+    colors[0] = colors[1] = colors[2] = colors[3] = 0x80808060;
+    func_002146F8(0, 0, sprite->unk_04, sprite->unk_06, colors, sprite, 0, 0x46);
+    fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x12, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x15, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x16, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x14, D_00345D88, fclSpriteTable, 0x47);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevilMaskBG);
+#endif
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevil);
 
