@@ -965,7 +965,48 @@ s32 CheckArrCounter(nbActionProcessData_t *a)
     return 1;
 }
 
+#ifdef NON_MATCHING
+extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
+extern char D_005438C0[];
+
+s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to)
+{
+    s32 skills[] = { 0x133, 0x132, 0x131, -1 };
+    s32 counters[] = { 0xA6, 0xA5, 0xA4 };
+    datUnitWork_t *work;
+    s32 badstatus;
+    s32 counter = 0;
+    s32 i;
+    s32 rate;
+
+    if (CheckTimeListDead(a, to) != 0) {
+        return 0;
+    }
+    work = nbGetUnitWorkFromFormindex(from);
+    badstatus = work->badstatus & 0xFFF;
+    if (badstatus == 1 || badstatus == 2 || badstatus == 4 || badstatus == 0x10 ||
+        badstatus == 0x80 || badstatus == 0x100 || badstatus == 0x400) {
+        return 0;
+    }
+    for (i = 0; skills[i] >= 0; i++) {
+        if (datCheckSyojiSkill(work, skills[i]) != 0) {
+            rate = 100 / datSkillTable.special[skills[i] - 0x120].n;
+            if ((s32)dds3GetRandIntA(NULL, 100) < rate) {
+                counter = counters[i];
+                break;
+            }
+        }
+    }
+    if (counter != 0) {
+        nbPushAction(4, a->data->form[from].partyindex, a->data->form[to].partyindex, counter);
+        printf(D_005438C0);
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckCounter);
+#endif
 
 s32 CheckMukanNego(nbActionProcessData_t *a)
 {
