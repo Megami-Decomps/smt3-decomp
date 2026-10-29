@@ -345,26 +345,24 @@ extern void fclUpdatePanel(fclPanel_t *panel);
 extern void fclDrawPriceText(fclPanelPos_t *pos, u16 price, s32 ot);
 extern ragOfferTable_t ragOffers asm("ragHeartsTable");
 
-#ifdef NON_MATCHING
 void ragDrawHeartsList(s8 mode)
 {
     ragDrawWork_t *work = ragDrawWork;
     s32 top = work->list.heartWindow.listCursor.unk_22;
     s8 *rows = &work->list.heartItems[top];
-    s8 index = rows[(u8)work->list.heartWindow.listCursor.unk_24];
+    s8 index = work->list.heartItems[top + (u8)work->list.heartWindow.listCursor.unk_24];
     u16 price = ragOffers.hearts[index].item;
     fclPanelPos_t pos;
 
     fclDrawPanel(&work->panel[2], 0x47);
     fclUpdatePanel(&ragDrawWork->panel[2]);
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, (char *)ragOffers.heartsCaption,
+    trmDrawListText(&pos, *(char **)(ragHeartsTable + 0x8B8),
                     ragDrawWork->texHandle, D_003306B8, 0x47);
     ragDrawHeartsRows(&ragDrawWork->list.heartWindow,
                       0, rows, mode, 0x47);
     fclDrawPanel(&ragDrawWork->panel[1], 0x47);
-    work = ragDrawWork;
-    fclInitPanelPos(work->panel[1].X, work->panel[1].Y, work->panel[1].Z,
+    fclInitPanelPos(ragDrawWork->panel[1].X, ragDrawWork->panel[1].Y, ragDrawWork->panel[1].Z,
                     0, 0, 0, (fclPanel_t *)&pos);
     ragDrawListFrame(&pos, 0, (u8)index, 0x47);
     fclDrawPhaseHeader((u8 *)&ragDrawWork->panel[1],
@@ -377,9 +375,6 @@ void ragDrawHeartsList(s8 mode)
     fclDrawPhaseHeader((u8 *)&ragDrawWork->list.heartWindow,
                        0x80808080, 0, 0x47);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawHeartsList);
-#endif
 
 
 extern void ragDrawListRows(lstWork_t *list, u8 kind, u8 *rows, s8 mode, s32 ot);
