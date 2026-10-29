@@ -654,7 +654,7 @@ extern s8 campExitState;
 
 extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
 
-extern void campDrawText(s32 id, s32 flag);
+extern void campDrawText(s32 id, s32 *colors);
 
 extern void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ);
 
@@ -2545,7 +2545,37 @@ void cmpDisableInfoWindow(void)
     cmpSetInfoWindowHidden();
 }
 
+extern const char *cmpMenuStrings[] asm("cmpMenuTextTable");
+extern void cmpSetSkillListRows(s32 rows);
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors, s32 page,
+                             s32 spriteId, s32 *texList,
+                             fclSpriteTbl_t *table, s32 ot);
+extern u32 frGetStrWidth2(frFontHandle_t *font);
+extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
+
+#ifdef NON_MATCHING
+void campDrawText(s32 id, s32 *colors)
+{
+    s8 index = id;
+    u8 alpha = colors != NULL ? *(u8 *)colors : 0x80;
+    frFontHandle_t *font;
+    s32 x;
+
+    cmpSetSkillListRows(0x12);
+    font = frwGetSmallFontFRQ2(0, 0, 0xFFFFF, 0xA09DC300 | alpha,
+                               cmpMenuStrings[index], NULL);
+    fclDrawSpriteRes(0, 0, 0, colors, 0, 0x21, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, 0, colors, 0, 0x22, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, 0, colors, 0, 0x23, D_00345D88, fclSpriteTable, 0x47);
+    x = (0xB9 - (s32)frGetStrWidth2(font)) / 2 + 0x10;
+    frSetDrawPosition(font, x * 16, 0xC8);
+    func_001C7E38(font, 1, 0x47);
+    frDestroyFontRequestAfter(font);
+    cmpSetSkillListRows(-1);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDrawText);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", func_002306A0);
 
