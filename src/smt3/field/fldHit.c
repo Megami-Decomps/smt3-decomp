@@ -1066,9 +1066,266 @@ f32 HitPositionInside3(s32 mode2D, s32 numE, f32 pos, f32 *r, collision_s *colli
     return clearance;
 }
 
-INCLUDE_ASM(const s32, "field/fldHit", fldHitChkCamera);
+/* Native stop-table rows have stride 8 and a name pointer at +4. */
+typedef struct fldCollisionStopEntry_t {
+    u32 reserved;
+    const char *name;
+} fldCollisionStopEntry_t;
 
-INCLUDE_ASM(const s32, "field/fldHit", fldHitChkEnemy);
+extern dds3Basic_t *dds3GetControlScene(void);
+extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *scene, s32 type);
+extern u16 dds3GetBasicArrayCount(const dds3BasicArrayHandle_t *handle);
+extern u32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *handle);
+extern dds3Basic_t *dds3GetBasicArray(const dds3BasicArrayHandle_t *handle);
+extern u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *handle);
+extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *handle);
+extern u32 dds3MatterObjectBasicGetAlpMode(const dds3Basic_t *object);
+extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *object, u32 mode);
+extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
+
+/* Adapted from Megami-Decomps/dds-decomp, fldFileResolver.c at f79f86dc.
+ * SMT3 inlines the kind-6 alpha reset instead of calling the DDS world helper. */
+s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
+    f32 origin[4];
+    f32 target[4];
+    f32 delta[4];
+    f32 probeStart[4];
+    f32 probeEnd[4];
+    f32 anchor[4];
+    dds3PoseSet_t *transform;
+    dds3Basic_t *secondary;
+    f32 startDistance;
+    f32 endDistance;
+    f32 total;
+    f32 ratio;
+    f32 clearance;
+    s32 found;
+    fldCollisionStopEntry_t *entry;
+    s32 relative;
+    s32 index;
+
+    found = -1;
+    secondary = dds3GetControlScene();
+    if (!((u32)(fldGlobalBase.area - 200) < 300)) {
+        dds3BasicArrayHandle_t *objects;
+        dds3Basic_t *object;
+
+        objects = dds3SceneBasicGetList(secondary, 6);
+        if (dds3GetBasicArrayCount(objects) != 0) {
+            dds3SetFirstBasicArray(objects);
+            do {
+                object = dds3GetBasicArray(objects);
+                if (dds3MatterObjectBasicGetAlpMode(object) == 4) {
+                    dds3MatterObjectBasicSetAlpMode(object, 3);
+                }
+            } while (dds3SetNextBasicArray(objects) != 0);
+            dds3FreeBasicArrayHandle(objects);
+        }
+    }
+    origin[0] = start[0];
+    origin[1] = start[1];
+    origin[2] = start[2];
+    target[0] = end[0];
+    target[1] = end[1];
+    target[2] = end[2];
+    for (index = 0; index < D_0054EDA0; index++) {
+        if (((collision_s *)fldMatterTable)[index].mode2D == 1) {
+            if (!(((collision_s *)fldMatterTable)[index].pFace->attributes & 0x100)) {
+                continue;
+            }
+        }
+        if (((collision_s *)fldMatterTable)[index].pFace->attributes & 0xA01) {
+            continue;
+        }
+        if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                        ((collision_s *)fldMatterTable)[index].hojiID)) {
+            continue;
+        }
+        if (((collision_s *)fldMatterTable)[index].matter != 0) {
+            relative = 1;
+            transform = ((collision_s *)fldMatterTable)[index].matter->poseset;
+            origin[0] -= transform->pos.x;
+            origin[1] -= transform->pos.y;
+            origin[2] -= transform->pos.z;
+            target[0] -= transform->pos.x;
+            target[1] -= transform->pos.y;
+            target[2] -= transform->pos.z;
+        } else {
+            relative = 0;
+        }
+        probeStart[0] = origin[0];
+        probeStart[1] = origin[1];
+        probeStart[2] = origin[2];
+        probeEnd[0] = target[0];
+        probeEnd[1] = target[1];
+        probeEnd[2] = target[2];
+        startDistance = fldVecDot((sdfVector4_t *)probeStart, (sdfVector4_t *)((collision_s *)fldMatterTable)[index].normal) -
+                        ((collision_s *)fldMatterTable)[index].num;
+        endDistance = fldVecDot((sdfVector4_t *)probeEnd, (sdfVector4_t *)((collision_s *)fldMatterTable)[index].normal) -
+                      ((collision_s *)fldMatterTable)[index].num;
+        if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
+            startDistance = ffabsf(startDistance);
+            endDistance = ffabsf(endDistance);
+            total = startDistance + endDistance;
+            ratio = startDistance / total;
+            anchor[0] = probeStart[0];
+            anchor[1] = probeStart[1];
+            anchor[2] = probeStart[2];
+            delta[0] = probeEnd[0] - probeStart[0];
+            delta[1] = probeEnd[1] - probeStart[1];
+            delta[2] = probeEnd[2] - probeStart[2];
+            probeStart[0] += delta[0] * ratio;
+            probeStart[1] += delta[1] * ratio;
+            probeStart[2] += delta[2] * ratio;
+            clearance = HitPositionInside3(((collision_s *)fldMatterTable)[index].mode2D, ((collision_s *)fldMatterTable)[index].numedges, 2.0f, probeStart, &((collision_s *)fldMatterTable)[index]);
+            if (0.0f <= clearance) {
+                if (((collision_s *)fldMatterTable)[index].pFace->attributes & 0x400) {
+                    entry = &((fldCollisionStopEntry_t *)((collision_s *)fldMatterTable)[index].pTome)
+                                [((collision_s *)fldMatterTable)[index].pFace->stop];
+                    dds3MatterObjectBasicSetAlpMode(dds3SceneBasicSearchNameAndType(secondary, 6, entry->name), 4);
+                } else {
+                    found = index;
+                    ratio = (startDistance + clearance) / total;
+                    delta[0] = probeEnd[0] - anchor[0];
+                    delta[1] = probeEnd[1] - anchor[1];
+                    delta[2] = probeEnd[2] - anchor[2];
+                    anchor[0] += delta[0] * ratio;
+                    anchor[1] += delta[1] * ratio;
+                    anchor[2] += delta[2] * ratio;
+                    probeStart[0] = anchor[0];
+                    probeStart[1] = anchor[1];
+                    probeStart[2] = anchor[2];
+                    origin[0] = anchor[0];
+                    origin[1] = anchor[1];
+                    origin[2] = anchor[2];
+                }
+            }
+        }
+        if (relative) {
+            transform = ((collision_s *)fldMatterTable)[index].matter->poseset;
+            origin[0] += transform->pos.x;
+            origin[1] += transform->pos.y;
+            origin[2] += transform->pos.z;
+            target[0] += transform->pos.x;
+            target[1] += transform->pos.y;
+            target[2] += transform->pos.z;
+        }
+    }
+    hitPoint[0] = origin[0];
+    hitPoint[1] = origin[1];
+    hitPoint[2] = origin[2];
+    return found;
+}
+
+/* Adapted from Megami-Decomps/dds-decomp, fldFileResolver.c at f79f86dc.
+ * SMT3 uses the 0xE01 surface mask and 70-unit clearance, without DDS tags. */
+s32 fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
+    f32 origin[4];
+    f32 target[4];
+    f32 delta[4];
+    f32 probeStart[4];
+    f32 probeEnd[4];
+    f32 anchor[4];
+    dds3PoseSet_t *transform;
+    f32 startDistance;
+    f32 endDistance;
+    f32 total;
+    f32 ratio;
+    f32 clearance;
+    s32 found;
+    s32 relative;
+    s32 index;
+
+    found = -1;
+    dds3GetControlScene();
+    origin[0] = start[0];
+    origin[1] = start[1];
+    origin[2] = start[2];
+    target[0] = end[0];
+    target[1] = end[1];
+    target[2] = end[2];
+    for (index = 0; index < D_0054EDA0; index++) {
+        if (((collision_s *)fldMatterTable)[index].mode2D == 1) {
+            if (!(((collision_s *)fldMatterTable)[index].pFace->attributes & 0x100)) {
+                continue;
+            }
+        }
+        if (((collision_s *)fldMatterTable)[index].pFace->attributes & 0xE01) {
+            continue;
+        }
+        if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                        ((collision_s *)fldMatterTable)[index].hojiID)) {
+            continue;
+        }
+        if (((collision_s *)fldMatterTable)[index].matter != 0) {
+            relative = 1;
+            transform = ((collision_s *)fldMatterTable)[index].matter->poseset;
+            origin[0] -= transform->pos.x;
+            origin[1] -= transform->pos.y;
+            origin[2] -= transform->pos.z;
+            target[0] -= transform->pos.x;
+            target[1] -= transform->pos.y;
+            target[2] -= transform->pos.z;
+        } else {
+            relative = 0;
+        }
+        probeStart[0] = origin[0];
+        probeStart[1] = origin[1];
+        probeStart[2] = origin[2];
+        probeEnd[0] = target[0];
+        probeEnd[1] = target[1];
+        probeEnd[2] = target[2];
+        startDistance = fldVecDot((sdfVector4_t *)probeStart, (sdfVector4_t *)((collision_s *)fldMatterTable)[index].normal) -
+                        ((collision_s *)fldMatterTable)[index].num;
+        endDistance = fldVecDot((sdfVector4_t *)probeEnd, (sdfVector4_t *)((collision_s *)fldMatterTable)[index].normal) -
+                      ((collision_s *)fldMatterTable)[index].num;
+        if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
+            startDistance = ffabsf(startDistance);
+            endDistance = ffabsf(endDistance);
+            total = startDistance + endDistance;
+            ratio = startDistance / total;
+            anchor[0] = probeStart[0];
+            anchor[1] = probeStart[1];
+            anchor[2] = probeStart[2];
+            delta[0] = probeEnd[0] - probeStart[0];
+            delta[1] = probeEnd[1] - probeStart[1];
+            delta[2] = probeEnd[2] - probeStart[2];
+            probeStart[0] += delta[0] * ratio;
+            probeStart[1] += delta[1] * ratio;
+            probeStart[2] += delta[2] * ratio;
+            clearance = HitPositionInside3(((collision_s *)fldMatterTable)[index].mode2D, ((collision_s *)fldMatterTable)[index].numedges, 70.0f, probeStart, &((collision_s *)fldMatterTable)[index]);
+            if (0.0f <= clearance) {
+                found = index;
+                ratio = (startDistance + clearance) / total;
+                delta[0] = probeEnd[0] - anchor[0];
+                delta[1] = probeEnd[1] - anchor[1];
+                delta[2] = probeEnd[2] - anchor[2];
+                anchor[0] += delta[0] * ratio;
+                anchor[1] += delta[1] * ratio;
+                anchor[2] += delta[2] * ratio;
+                probeStart[0] = anchor[0];
+                probeStart[1] = anchor[1];
+                probeStart[2] = anchor[2];
+                origin[0] = anchor[0];
+                origin[1] = anchor[1];
+                origin[2] = anchor[2];
+            }
+        }
+        if (relative) {
+            transform = ((collision_s *)fldMatterTable)[index].matter->poseset;
+            origin[0] += transform->pos.x;
+            origin[1] += transform->pos.y;
+            origin[2] += transform->pos.z;
+            target[0] += transform->pos.x;
+            target[1] += transform->pos.y;
+            target[2] += transform->pos.z;
+        }
+    }
+    hitPoint[0] = origin[0];
+    hitPoint[1] = origin[1];
+    hitPoint[2] = origin[2];
+    return found;
+}
 
 void fldAddItemBoxObject(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     f32 origin[4] = {0.0f, 0.0f, 0.0f, 1.0f};

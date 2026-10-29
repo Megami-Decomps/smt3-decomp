@@ -4834,7 +4834,75 @@ void effPCPBreathDelete(effPCPBreath_tag *hData) {
     sdfChipFreeDirect(hData);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathDraw);
+extern void *effBTLSkillGetInvokeFormation(void);
+extern u32 effBTLSkillGetTargetParty(void);
+extern void effBTLModelGroupGetCenter(u32 group);
+extern f32 sdfAtan2(f32 x, f32 y);
+extern void dds3EffectSetRotateMatrix(effHandle_t *pData, const void *pMatrix);
+
+/* Center the orbit on the first battle frame, then position and fade its node. */
+void effPCPBreathDraw(effPCPBreath_tag *work) {
+    effPCPBreathParam_t *params = &work->param;
+    effHandle_t *node = work->hD3P;
+    s32 fadeFrames = params->fade_out;
+    u32 end = fadeFrames + params->life;
+    u32 frame = work->frame;
+    s32 remaining = end - frame;
+    f32 mtx[16] __attribute__((aligned(16)));
+    f32 muzzle[4] __attribute__((aligned(16)));
+    f32 aim[4] __attribute__((aligned(16)));
+    f32 center[4] __attribute__((aligned(16)));
+    f32 look[4];
+    f32 t;
+    void *formation;
+
+    if (end < frame) {
+        return;
+    }
+    if (effBTLSkillCheckRun() && work->frame == 0) {
+        formation = effBTLSkillGetInvokeFormation();
+        effBTLModelGroupGetCenter(effBTLSkillGetTargetParty());
+        SDF_VU0_STOREVECTOR(center);
+        effBTLModelGetSphereCenter(formation);
+        SDF_VU0_STOREVECTOR(muzzle);
+        look[0] = center[0] - muzzle[0];
+        look[2] = center[2] - muzzle[2];
+        work->rotate = sdfAtan2(look[0], look[2]) - params->angle * 0.017453292f * 0.5f;
+    }
+    if (node != 0) {
+        SDF_VU0_LOADMATRIX(work->matrix);
+        SetRotateMatrixY_B(work->rotate);
+        MultMatrixNoArg();
+        aim[0] = aim[1] = 0.0f;
+        aim[2] = 1.0f;
+        SDF_VU0_LOADVECTOR(aim);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        muzzle[0] = params->move;
+        muzzle[1] = params->move;
+        muzzle[2] = params->move;
+        SDF_VU0_LOADVECTOR_B(muzzle);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_LOADVECTOR_B(params->pos);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR_NOMEM(muzzle);
+        dds3EffectSetPosition(node, muzzle);
+        if (work->frame > params->start) {
+            work->rotate += work->speed;
+        }
+        SetRotateMatrixY(work->rotate);
+        SDF_VU0_STOREMATRIX(mtx);
+        dds3EffectSetRotateMatrix(node, mtx);
+        if (fadeFrames >= remaining && fadeFrames != 0) {
+            t = (f32)remaining / (f32)fadeFrames;
+        } else {
+            t = 1.0f;
+        }
+        dds3EffectSetRGBA(node, effColorBlend(work->abgr & 0xFFFFFF, work->abgr, t));
+        dds3EffectDraw(node);
+    }
+    work->frame++;
+}
+
 
 void effPCPBreathSetPosition(effPCPBreath_tag *hData, const void *pPos) {
     SDF_VU0_COPYVECTOR(hData->param.pos, pPos);

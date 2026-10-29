@@ -113,8 +113,6 @@ void dds3EffectBlurDraw(const dds3Effect_Blur_t *source, sdfTexHandle_t *texture
 void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHandle_t *texture);
 
 /* Build the alpha-multiply tri-strip: a flat grey quad over the blur rect. */
-/* NON_MATCHING: 26 of 45 words differ (first at +0x18). */
-#ifdef NON_MATCHING
 void dds3EffectBlur_AlphaMultiParmSet(const dds3Effect_Blur_t *pBlur, effBlurPrimTriStrip_t *pSpriteParm) {
     s32 x0;
     s32 y0;
@@ -124,7 +122,7 @@ void dds3EffectBlur_AlphaMultiParmSet(const dds3Effect_Blur_t *pBlur, effBlurPri
     pSpriteParm->r = 128;
     pSpriteParm->g = 128;
     pSpriteParm->b = 128;
-    pSpriteParm->a = ((const u8 *)pBlur)[3];
+    pSpriteParm->a = pBlur->abgr >> 24;
     x0 = (pBlur->xy[0][0] << 4) + 0x7000;
     pSpriteParm->vtx[0].x = x0;
     y0 = (pBlur->xy[0][1] << 3) + 0x7900;
@@ -154,9 +152,6 @@ void dds3EffectBlur_AlphaMultiParmSet(const dds3Effect_Blur_t *pBlur, effBlurPri
     pSpriteParm->vtx[3].z = 0;
     pSpriteParm->vtx[3].adc = 0;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectBlur_AlphaMultiParmSet);
-#endif
 
 /* Borrow the display frame as a texture, set the two blend states and the
    sampling window, then draw the source quad through it. */

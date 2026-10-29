@@ -48,7 +48,6 @@ page and line to open. Conventions are in
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 2 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
-| 2 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
@@ -95,4 +94,5 @@ page and line to open. Conventions are in
 | 1 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 1 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
+| 1 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 1 | code_001C55F8 | [code_001C55F8.md](code_001C55F8.md) |

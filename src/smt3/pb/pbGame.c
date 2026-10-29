@@ -334,9 +334,10 @@ extern u8 pbRotRKeyAct(void);
 extern pbProcHandle_t *moveViewCamera;
 
 extern f32 aViewEye[4], aViewTarget[4];
-extern sdfVector4_t pbGameCameraParam;
-/* Two target-offset rows; pbCameraVec2 names the second row. */
-extern f32 pbCameraVec[][4];
+/* Three rows initialized by pbLoadTextures; pbInitCameraParam is row one. */
+extern f32 pbGameCameraParam[3][4];
+/* Three target-offset rows; pbCameraVec2 names the second row. */
+extern f32 pbCameraVec[3][4];
 
 extern sdfVector4_t pbInitCameraParam, pbCameraVec2;
 
@@ -1291,7 +1292,7 @@ void pbRoundCamera(s32 dir) {
 }
 
 void pbSetGameCamera0(void) {
-    SDF_VU0_COPYVECTOR(&aViewEye, &pbGameCameraParam);
+    SDF_VU0_COPYVECTOR(&aViewEye, &pbGameCameraParam[0]);
     SDF_VU0_COPYVECTOR(&aViewTarget, &pbCameraVec[0]);
 }
 

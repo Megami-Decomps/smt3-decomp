@@ -667,3 +667,9 @@ src/smt3/effect/effBlur_Filter.c	redthing1	done	2026-10-29	2 fn / 1008 B	PiM age
 src/smt3/field/fld_Npc.c	redthing1	done	2026-10-29	1 fn / 2344 B	PiM agent: encounter HUD with native state gates and recovered signed getter; owner 16 match, 0 differ
 src/smt3/newbattle/nbEncount.c	redthing1	done	2026-10-29	0 matches / provider contract correction	PiM agent: s32 count getter corroborated HD/IDB, native u16 storage unchanged; owner 9 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	hearts gauge rendering at native 852-byte size; 199 of 213 words match, table/OT register pair unresolved; default owner 365 match, 0 differ
+src/smt3/field/fldHit.c	redthing1	done	2026-10-29	2 fn / 2304 B	PiM agent: camera and enemy collision from native-qualified DDS shapes; SMT3 inline alpha reset, collision mask and 70-unit margin preserved
+src/smt3/effect/effBlur_Filter.c	redthing1	done	2026-10-29	1 fn / 180 B	PiM agent: canonical packed-alpha member load retains truthful alias contract; owner peers remain exact
+src/smt3/effect/effPCPMisc.c	redthing1	done	2026-10-29	1 fn / 592 B	PiM agent: DDS orbit/fade donor with native SMT3 first-frame formation queries and audited VU handoffs
+src/smt3/pb/pbDraw.c	redthing1	done	2026-10-29	1 fn / 808 B	PiM agent: native resource initializer using canonical map work and three-row camera arrays
+src/smt3/pb/pbGame.c	redthing1	done	2026-10-29	0 matches / canonical camera contract	PiM agent: declare actual three-row camera storage and preserve existing row-zero consumer bytes
+src/smt3/interface/itfTestMesManager.c	redthing1	done	2026-10-29	0 matches / declaration cleanup	PiM agent: remove two unused contradictory scalar camera declarations; complete owner unchanged
