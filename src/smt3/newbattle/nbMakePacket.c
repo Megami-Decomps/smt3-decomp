@@ -8,7 +8,7 @@
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];
-    dds3Basic_t *basic;
+    struct mdlObj_t *owner;
     u8 unk_90[0x14];
     u32 flags;
 } evtUnitHandle_t;
@@ -1420,7 +1420,83 @@ s32 nbMakeUnitFadeOutPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u
     return 1;
 }
 
+#ifdef NON_MATCHING
+extern s32 mdlGetNumOfCut(struct mdlObj_t *model, s32 group);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+extern s32 nbCheckDeadEvent(nbFormation_t *form);
+extern s32 nbGetDeadEventFadeTime(s32 eventno);
+extern s32 nbGetDeadEventFadeOutFrame(s32 eventno);
+extern s32 nbGetDeadEventFadeStopFrame(s32 eventno);
+extern s32 nbGetDeadEventFadeInFrame(s32 eventno);
+
+s32 nbMakeDeadVisualPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                           s32 deadtype, s32 deadpcm)
+{
+    s32 sound = 0;
+    s32 event;
+    s32 fadeTime;
+    s32 fadeOut;
+    s32 fadeStop;
+    s32 fadeIn;
+
+    nbGetMainProcessData();
+    if (nbCheckEventDead(form) != 0) {
+        deadtype = 2;
+    }
+    switch (deadtype) {
+    case 0:
+        nbAddBadDmgMotKoukaPacket(startframe, uniqueid, form, 17.0f, 0);
+        sound = 0x10000;
+        nbMakeUnitFadeOutPacket(startframe + 7, uniqueid, form, 0, 10, 10, 10);
+        break;
+    case 1:
+        nbMakeUnitFadeOutPacket(startframe, uniqueid, form, 0, 2, 2, 2);
+        sound = 0x10004;
+        nbAddHitEffKoukaPacket(startframe + 1, uniqueid, form, 6);
+        break;
+    case 2:
+        if (mdlGetNumOfCut(form->hunit->owner, 0) < 24) {
+            nbMakeBadKaifukuPacket(startframe, uniqueid, form);
+            nbAddBadDmgMotKoukaPacket(startframe, uniqueid, form, 30.0f, -1);
+        } else {
+            nbMakeBadKaifukuPacket(startframe, uniqueid, form);
+            nbAddMotionKoukaPacket(startframe, uniqueid, form, 1);
+        }
+        event = nbCheckDeadEvent(form);
+        sound = 0x10000;
+        if (event != 0) {
+            fadeTime = nbGetDeadEventFadeTime(event);
+            fadeOut = nbGetDeadEventFadeOutFrame(event);
+            fadeStop = nbGetDeadEventFadeStopFrame(event);
+            fadeIn = nbGetDeadEventFadeInFrame(event);
+            nbAddFadeOutKoukaPacket(startframe + fadeTime, uniqueid, fadeOut, 1);
+            if (fadeIn > 0) {
+                nbAddFadeInKoukaPacket(startframe + fadeStop + fadeOut + 2 + fadeTime,
+                                       uniqueid, fadeIn, 1);
+            }
+            nbAddDeadEventKoukaPacket(startframe + fadeTime + fadeOut + fadeStop - 3,
+                                      uniqueid, form, event);
+        }
+        break;
+    }
+    if (deadpcm != 0) {
+        nbAddDeadPcmPacket(startframe + 7, uniqueid, form);
+        if (sound != 0) {
+            nbAddSePacket(startframe + 7, uniqueid, sound);
+        }
+    }
+    if (form->stat & 0x100) {
+        if (nbGetUnitWorkFromFormindex(form->formindex)->flag & 4) {
+            nbAddPadShockPacket(startframe, uniqueid, 1, 250, 30);
+        } else {
+            nbAddPadShockPacket(startframe, uniqueid, 1, 150, 20);
+        }
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDeadVisualPacket);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDamagePacket);
 
