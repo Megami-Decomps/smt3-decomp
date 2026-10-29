@@ -1540,6 +1540,14 @@ typedef struct fsMountRequest_t {
     s32 mode;
     s32 argSize;
 } fsMountRequest_t;
+typedef struct fsDreadRequest_t {
+    s32 sema;
+    s32 *result;
+    s32 resultSize;
+    u32 descriptor;
+    void *entry;
+    u8 opaque14[0xC];
+} fsDreadRequest_t;
 typedef union fsRequest_t {
     fsCloseRequest_t close;
     fsPathRequest_t path;
@@ -1551,6 +1559,7 @@ typedef union fsRequest_t {
     fsReadlinkRequest_t readlink;
     fsFormatRequest_t format;
     fsMountRequest_t mount;
+    fsDreadRequest_t dread;
 } fsRequest_t;
 extern fsRequest_t D_0059D4C0;
 
@@ -1861,7 +1870,51 @@ s32 sceDopen(const char *path)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceDclose);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDread);
+s32 sceDread(s32 descriptor, void *directoryEntry)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsDreadRequest_t *request = &D_0059D4C0.dread;
+    fsRequestEntry_t *entry;
+    s32 sema;
+    s32 accepted;
+
+    entry = get_iob(descriptor);
+    _sceFsWaitS(11);
+    if (D_0052C340 == 0) {
+        _sceFsSigSema();
+        return -1;
+    }
+    if (entry == NULL || entry->active == 0) {
+        _sceFsSigSema();
+        return -9;
+    }
+    request->entry = directoryEntry;
+    request->descriptor = entry->word0;
+    param.maxCount = 1;
+    param.initCount = 0;
+    param.option = 0;
+    sema = CreateSema(&param);
+    D_0059D4C0.dread.sema = sema;
+    request->result = &result;
+    request->resultSize = 4;
+    if (sceSifCallRpc(&D_0059E780, 11, 0, request, 0x20,
+                      D_0059E100, 4, NULL, NULL) < 0) {
+        /* The failure path waits before releasing the filesystem lock. */
+        WaitSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
 
 s32 sceGetstat(const char *path, void *stat)
 {
