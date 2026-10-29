@@ -902,3 +902,4 @@ src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-29	1 fn / 116 B	result
 src/smt3/field/fldSe.c	redthing1	done	2026-10-29	0 exact / 720 B guarded	playback early start-gate return recovers native sibling call and size, 161 of 180 words match; paired reorg evidence isolates BitChk callee-visibility dependency, fallbacks retained
 src/smt3/newbattle/nbCameraBoss.c + field/fldCamera.c	z21	open	2026-10-29	21 fn / 26360 B	claimed in dds-collab#19; matcher profile
 nbPanelDrawPP1 chain + nbPanelFlashDraw + fldNpcDraw	z27	open	2026-10-29	3 fn	per-block offset fix; chain unblocks 1624 B
+src/smt3/field/fldEveHit.c	z29	open	2026-10-29	1 fn / 6248 B	largest-first pass: fldEveHit_AddEveHit, existing broad guard as the starting point
