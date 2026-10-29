@@ -1171,7 +1171,148 @@ void ActionZMotion(tagPipeObject *object)
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionZMotion);
 #endif
 
+extern s8 dds3PadButtonState[];
+
+#ifdef NON_MATCHING
+void ActionKey(tagPipeObject *object)
+{
+    f32 vector[4];
+    f32 horizontalStep = 0.0f;
+    f32 verticalStep = 0.0f;
+    f32 acceleration = 0.0f;
+    f32 maximum = 0.0f;
+    f32 friction = 0.0f;
+    f32 rate;
+    f32 velocity;
+    f32 length;
+    u8 mode;
+
+    memset(vector, 0, sizeof(vector));
+    if (dds3PadButtonState[0x23] < 0 && !(object->flags & 0x200)) {
+        objMyStatusChange(object, 1);
+        if (object->action == 1 && object->count >= 3) {
+            attackCount++;
+        }
+    }
+    mode = *(volatile u8 *)&myStatus >> 4;
+    if (object->flags & 0x400) {
+        mode = 0;
+    }
+    if (mode == 0) {
+        horizontalStep = 2.0f;
+        verticalStep = 2.0f;
+        acceleration = 4.0f;
+        maximum = 20.0f;
+        friction = 1.0f;
+    } else if (mode == 1) {
+        horizontalStep = 2.5f;
+        verticalStep = 2.5f;
+        acceleration = 6.0f;
+        maximum = 36.0f;
+        friction = 2.0f;
+    } else if (mode == 2) {
+        horizontalStep = 3.0f;
+        verticalStep = 3.0f;
+        acceleration = 36.0f;
+        maximum = 56.0f;
+        friction = 14.0f;
+    }
+
+    if (dds3PadButtonState[0x26] != 0) {
+        rate = D_00551748 - verticalStep;
+        if (rate < 0.0f ? rate < -10.0f : rate > 10.0f) {
+            rate = -10.0f;
+        }
+        D_00551748 = rate;
+        object->vpos[1] -= acceleration;
+        if (object->vpos[1] < -maximum) {
+            object->vpos[1] = -maximum;
+        }
+    } else if (dds3PadButtonState[0x27] != 0) {
+        rate = D_00551748 + verticalStep;
+        if (rate < 0.0f ? rate < -10.0f : rate > 10.0f) {
+            rate = 10.0f;
+        }
+        D_00551748 = rate;
+        object->vpos[1] += acceleration;
+        if (object->vpos[1] > maximum) {
+            object->vpos[1] = maximum;
+        }
+    }
+    if (dds3PadButtonState[0x24] != 0) {
+        rate = D_00551744 - horizontalStep;
+        if (rate < 0.0f ? rate < -10.0f : rate > 10.0f) {
+            rate = -10.0f;
+        }
+        D_00551744 = rate;
+        object->vpos[0] -= acceleration;
+        if (object->vpos[0] < -maximum) {
+            object->vpos[0] = -maximum;
+        }
+    } else if (dds3PadButtonState[0x25] != 0) {
+        rate = D_00551744 + horizontalStep;
+        if (rate < 0.0f ? rate < -10.0f : rate > 10.0f) {
+            rate = 10.0f;
+        }
+        D_00551744 = rate;
+        object->vpos[0] += acceleration;
+        if (object->vpos[0] > maximum) {
+            object->vpos[0] = maximum;
+        }
+    }
+
+    rate = D_00551748;
+    if (rate != 0.0f) {
+        rate = rate > 0.0f ? rate - 0.5f : rate + 0.5f;
+        D_00551748 = rate;
+    }
+    if (rate < 0.0f ? rate > -0.5f : rate < 0.5f) {
+        D_00551748 = 0.0f;
+    }
+    velocity = object->vpos[1];
+    if (velocity != 0.0f) {
+        velocity = velocity > 0.0f ? velocity - friction : velocity + friction;
+        object->vpos[1] = velocity;
+    }
+    if (velocity < 0.0f ? -velocity < friction : velocity < friction) {
+        object->vpos[1] = 0.0f;
+    }
+
+    rate = D_00551744;
+    if (rate != 0.0f) {
+        rate = rate > 0.0f ? rate - 0.5f : rate + 0.5f;
+        D_00551744 = rate;
+    }
+    if (rate < 0.0f ? rate > -0.5f : rate < 0.5f) {
+        D_00551744 = 0.0f;
+    }
+    velocity = object->vpos[0];
+    if (velocity != 0.0f) {
+        velocity = velocity > 0.0f ? velocity - friction : velocity + friction;
+        object->vpos[0] = velocity;
+    }
+    if (velocity < 0.0f ? -velocity < friction : velocity < friction) {
+        object->vpos[0] = 0.0f;
+    }
+
+    vector[0] = object->vpos[0];
+    vector[1] = object->vpos[1];
+    vector[2] = 0.0f;
+    length = vecNormalize(vector);
+    if (object->flags & 0x800) {
+        if (length > 8.0f) {
+            length = 8.0f;
+        }
+    } else if (length > maximum) {
+        length = maximum;
+    }
+    vecScale(vector, length);
+    object->pos[0] += vector[0];
+    object->pos[1] += vector[1];
+}
+#else
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionKey);
+#endif
 
 #ifdef NON_MATCHING
 extern volatile s32 pbHitCheckCur;
