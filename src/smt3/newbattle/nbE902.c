@@ -310,7 +310,6 @@ extern u32 dds3GetRandA(u8 *name);
 
 extern u8 dds3EffectBase[];
 
-extern void nbCameraEnemyPartySet(u8 *pNbCamera, f32 angleH, f32 angleW);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 

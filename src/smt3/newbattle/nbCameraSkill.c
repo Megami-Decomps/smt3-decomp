@@ -2529,7 +2529,7 @@ void nbCameraState_EnemySide_Init(void)
     nbCameraShot_TargetParty_Set2(&pNbCamera, &work);
 }
 
-void nbCameraEnemyPartySet(f32 pitch, f32 yaw)
+void nbCameraEnemyPartySet(void *camera, f32 pitch, f32 yaw)
 {
     nbCameraSkillInfo_t work;
     nbFormation_t *pForm = nbGetMainProcessData()->form;
