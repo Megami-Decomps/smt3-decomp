@@ -18,3 +18,18 @@ negation. Drawing stages use separate color lifetimes. No padding, fixed
 registers or artificial dependency is used to alter scheduling.
 
 A local phase snapshot and direct global switch produce the same residual.
+
+A qualified `cc1probe.sh --sched --alloc --no-dumps` trace reproduces the
+residual with hooked/unhooked and plain-output equality. In both scheduling
+passes, phase load UID 1748 has priority 3 and cost 2; constant-one UID 1750
+has priority 2 and cost 1. The load therefore issues first because of its
+critical-path priority, rather than an original-order tie. The constant also
+feeds the case-zero transition store. Replacing that transition's assignment
+with a phase increment is behavior-equivalent on this path and leaves the
+same two-word residual; the full owner preserves its seven existing matches
+and data. This control is not retained.
+
+Reproduce on the guarded body with `tools/cc1probe.sh <owner.c> --as-unit
+src/smt3/field/fldTitle.c --func fldTitle_Process --cflag -DNON_MATCHING
+--sched --alloc --no-dumps --out <output>`. No source-backed dependency that
+places the constant before the phase load has been established.
