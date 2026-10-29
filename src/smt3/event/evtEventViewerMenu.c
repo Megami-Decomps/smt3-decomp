@@ -1851,12 +1851,7 @@ typedef struct pmdEffectTable_t {
     s32 reserve;
 } pmdEffectTable_t;
 
-typedef struct pmdEntry_t {
-    u32 type;
-    u32 elementSize;
-    u32 value;
-    u32 offset;
-} pmdEntry_t;
+
 
 typedef struct pmdHeader_t {
     u8 pad[0x10];

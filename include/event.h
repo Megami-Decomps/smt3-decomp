@@ -126,6 +126,13 @@ typedef struct pmdCutInfo_t {
     s32 reserve;
 } pmdCutInfo_t;
 
+typedef struct pmdEntry_t {
+    u32 type;
+    u32 elementSize;
+    u32 value;
+    u32 offset;
+} pmdEntry_t;
+
 /* Interpolated event vector and packed colour. */
 typedef struct evtBlendVecColor_t {
     f32 vec[4];
