@@ -464,7 +464,73 @@ s32 Flow2_5(nbNegoProcessData_t *n)
     return 0;
 }
 
+#ifdef NON_MATCHING
+typedef struct { u16 type; u8 lower; u8 higher; } nbNormalQuestion_t;
+typedef struct {
+    s8 type3[3][2];
+    s8 type1[3][2];
+    s8 type2[3][2];
+    u8 remaining[54];
+} nbKotowariQuestion_t;
+extern nbNormalQuestion_t D_003E2538[][7];
+extern nbKotowariQuestion_t D_003E28A0[];
+extern s32 datGetParam(datUnitWork_t *work, s32 type);
+extern void datAddKotowariPoint(s32 type, s32 point);
+
+s32 Flow2_6(nbNegoProcessData_t *n)
+{
+    nbNormalQuestion_t *question;
+    s32 rate = 50;
+    s32 bonus = 0;
+    s32 player;
+    s32 less;
+    s32 success;
+    s32 type;
+    u16 questionType;
+    u8 lower;
+    u8 higher;
+
+    nbAddNegoIdKouho(n, 0x20007);
+    nbAddNegoIdKouho(n, 0x2000D);
+    if (n->qtype == 0) {
+        question = &D_003E2538[n->ekucyo][n->qindex];
+        questionType = question->type;
+        higher = question->higher;
+        lower = question->lower;
+        if (questionType == 0) {
+            player = datGetParam(n->pwork, 1);
+            less = player < datGetParam(n->ework, 1);
+        } else if (questionType == 1) {
+            less = n->pwork->level < n->ework->level;
+        } else {
+            less = -1;
+        }
+        if (less >= 0) {
+            rate = less ? higher : lower;
+            if (n->nowselect != 0) {
+                rate = 100 - rate;
+            }
+        }
+    } else if (n->qtype > 0 && n->qtype < 4) {
+        player = datGetParam(n->pwork, 1);
+        rate = player < datGetParam(n->ework, 1) ? 30 : 70;
+    }
+    success = (s32)dds3GetRandIntA(NULL, 100) < rate;
+    type = n->qtype;
+    switch (type) {
+    case 1: bonus = D_003E28A0[n->qindex].type1[n->nowselect][0]; break;
+    case 2: bonus = D_003E28A0[n->qindex].type2[n->nowselect][0]; break;
+    case 3: bonus = D_003E28A0[n->qindex].type3[n->nowselect][0]; break;
+    }
+    if (type > 0 && type < 4) {
+        datAddKotowariPoint(bonus, 1);
+    }
+    n->nextnegoid = n->nextkouho[success ? 0 : 1];
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowFullMoon", Flow2_6);
+#endif
 
 s32 Flow2_7(nbNegoProcessData_t *n)
 {
