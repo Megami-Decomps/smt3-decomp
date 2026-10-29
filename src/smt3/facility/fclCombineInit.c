@@ -151,6 +151,18 @@ typedef struct
 
 typedef struct
 {
+    u8 animState;
+    u8 reserved01[3];
+    s32 target;
+    u8 reserved08[12];
+    s32 phase;
+    s32 phaseStep;
+    s32 value;
+    void (*calcSizes)();
+} fclPanelAnim_t;
+
+typedef struct
+{
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 unk_01[0x13];
     /* 0x14 */ void *allocation;
@@ -464,8 +476,8 @@ typedef struct
     /* 0x1A718 */ u8 *table;
     /* 0x1A71C */ fclPanel_t *panel;
     /* 0x1A720 */ fclRibbon_t *ribbon;
-    /* 0x1A724 */ u8 resultPanelAnim[0x24];
-    /* 0x1A748 */ u8 sacrificePanelAnim[0x24];
+    /* 0x1A724 */ fclPanelAnim_t resultPanelAnim;
+    /* 0x1A748 */ fclPanelAnim_t sacrificePanelAnim;
 } cmbGbWork_t;
 
 extern cmbGbWork_t *CMB_GBWK;
@@ -2765,7 +2777,44 @@ void cmbDrawResultFooter(s32 color)
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultFooter);
 #endif
 
+extern void cmbDrawResultHeader(s32 x, s32 y, s32 z, s32 width, s32 height,
+                                u32 color, u32 borderColor, s32 ot);
+extern void cmbDrawResultFooter(s32 color);
+extern s32 fclGetPanelAnimPhase(fclPanelAnim_t *anim);
+
+#ifdef NON_MATCHING
+void cmbDrawResultPanel(s32 mode)
+{
+    s32 alpha = 0x100;
+
+    cmbDrawResultHeader(0x1360, 0x1C0, 0xFFFFF, 0xCA, 0x16,
+                        0xB8B8F820, 0x30303040, 0x47);
+    cmbDrawDevilNameLevel(0x13A0, 0x1D0, 0xFFFFF, &cmbGlobalWork->party[0].unit, 0x47);
+    fclDrawPanelSprite(0x33001, 0x47);
+    fclDrawPanelSprite2(0x48, 0x47);
+    if (mode == 2) {
+        cmbDrawResultFooter(0x698AEC40);
+    } else {
+        cmbDrawResultFooter(0x5FA5E240);
+    }
+    if (mode != 2) {
+        alpha = (0x200 - fclGetPanelAnimPhase(&CMB_GBWK->resultPanelAnim)) / 2;
+    }
+    cmbDrawResultIcon(0, 0xFFFFF, 0x100, 0x16, alpha, 0x47);
+    cmbDrawDevilStats(0, 0, 0xFFFFF,
+                      &cmbGlobalWork->party[CMB_GBWK->stockSlot[0].index].unit,
+                      0, alpha, 0x47);
+    alpha = (0x200 - fclGetPanelAnimPhase(&CMB_GBWK->sacrificePanelAnim)) / 2;
+    cmbDrawResultIcon(1, 0xFFFFF, 0x100, 0x16, alpha, 0x47);
+    cmbDrawDevilStats(0, 0xE8, 0xFFFFF,
+                      &cmbGlobalWork->party[CMB_GBWK->stockSlot[1].index].unit,
+                      1, alpha, 0x47);
+    fclDrawPanelSprite(0x3101B, 0x47);
+    fclDrawPanelSprite2(0x44, 0x47);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultPanel);
+#endif
 
 void cmbDrawStockPanel1(void)
 {
@@ -3395,10 +3444,10 @@ s32 cmbUpdatePanelAnim(void)
     case 10:
     case 11:
     case 15:
-        fclSetPanelAnimState(CMB_GBWK->resultPanelAnim, 2);
+        fclSetPanelAnimState(&CMB_GBWK->resultPanelAnim, 2);
         break;
     default:
-        fclSetPanelAnimState(CMB_GBWK->resultPanelAnim, 1);
+        fclSetPanelAnimState(&CMB_GBWK->resultPanelAnim, 1);
         break;
     }
 
@@ -3410,15 +3459,15 @@ s32 cmbUpdatePanelAnim(void)
             break;
         }
     case 8:
-        fclSetPanelAnimState(CMB_GBWK->sacrificePanelAnim, 2);
+        fclSetPanelAnimState(&CMB_GBWK->sacrificePanelAnim, 2);
         break;
     default:
-        fclSetPanelAnimState(CMB_GBWK->sacrificePanelAnim, 1);
+        fclSetPanelAnimState(&CMB_GBWK->sacrificePanelAnim, 1);
         break;
     }
 
-    fclRunPanelAnim(CMB_GBWK->resultPanelAnim);
-    return fclRunPanelAnim(CMB_GBWK->sacrificePanelAnim);
+    fclRunPanelAnim(&CMB_GBWK->resultPanelAnim);
+    return fclRunPanelAnim(&CMB_GBWK->sacrificePanelAnim);
 }
 
 
