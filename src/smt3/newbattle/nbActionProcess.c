@@ -646,7 +646,437 @@ void SetOngShadowPacket2(nbActionProcessData_t *a, s32 dformindex, s32 frame)
     }
 }
 
+#ifdef NON_MATCHING
+extern f32 nbGetAisyoRitu(s32 skill, s32 source, s32 target);
+extern u32 nbGetKoukaBadDamage(s32 skill, s32 source, s32 target, f32 rate, s32 virtual);
+extern u32 nbGetKoukaBadKaifuku(s32 skill, s32 source, s32 target, f32 rate, s32 virtual);
+extern s32 nbGetHitType(nbActionProcessData_t *action, s32 skill, s32 source, s32 target);
+extern f32 nbGetCriticalPow(s32 source, f32 rate);
+extern u32 nbGetAisyo(s32 skill, s32 formindex, s32 attr);
+extern s32 nbGetNormalSkillAttr(s32 skill);
+extern s32 datGetBadStatusAttr(s32 bad);
+extern s32 nbCheckFormationFriend(s32 source, s32 target);
+extern void nbCheckPacketState(nbActionProcessData_t *action, s32 frame);
+extern s32 nbGetDeadType(s32 skill, s32 source, s32 target);
+extern s32 nbGetKoukaHp(s32 damage, s32 skill, s32 source, s32 target, f32 rate, s32 count);
+extern s32 nbGetKoukaMp(s32 damage, s32 skill, s32 source, s32 target, f32 rate, s32 count);
+extern u32 nbCheckHitEffect(s32 skill, s32 source, s32 target);
+extern f32 nbGetHpDrainRitu(s32 skill, s32 source, s32 target);
+extern f32 nbGetMpDrainRitu(s32 skill, s32 source, s32 target);
+extern s32 nbCheckStoneDead(s32 skill, s32 target);
+extern u32 nbGetBadStat(s32 formindex);
+extern f32 nbGetGensyoRitu(s32 skill, s32 source, s32 target);
+extern s32 nbCheckBadKaifuku(datUnitWork_t *work, s32 type);
+extern void nbSetBadStat(s32 formindex, s32 sw, s32 bad);
+extern s32 nbMakeBadKaifukuPacket(s32 frame, s32 uniqueid, nbFormation_t *form);
+extern s32 nbMakeKaifukuPacket(s32 frame, s32 uniqueid, nbFormation_t *form,
+                                s32 type, s32 hp, s32 mp, u32 bad);
+extern struct nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 frame, s32 uniqueid,
+                                                     nbFormation_t *form, s32 type);
+extern struct nbKoukaPacket_t *nbAddHojoKoukaPacket(s32 frame, s32 uniqueid,
+                                                    nbFormation_t *form, u32 type, s32 point);
+extern datDevilFormat_t datDevilTable[];
+s32 GetTimeListHp(nbActionProcessData_t *a, s32 formindex);
+s32 GetUnlockTime(nbActionProcessData_t *a, s32 formindex);
+s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to);
+
+void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sformindex,
+                  s32 dformindex, s32 count, s32 frame, f32 rate)
+{
+    extern u32 nbSetAllGetDevilFormatFlag(s32 formindex) asm("nbGetDevilFormatFlag");
+    datNormalSkill_t *skill = &datSkillTable.normal[nskill];
+    datUnitWork_t *work;
+    s32 target = dformindex, originalTarget = dformindex;
+    s32 autoskill, hit, type, reflect = 0, canDrain = 1, hidden;
+    s32 hpDamage, hpHeal, mpDamage, mpHeal, totalHpDamage = 0, totalMpDamage = 0;
+    s32 totalHpHeal = 0, totalMpHeal = 0, hpDrain = 0, mpDrain = 0;
+    s32 dead = 0, deadType = 0, damage, hitEffect, blocked, counter = 0;
+    s32 i, amount, before, interval, savedFrame;
+    u32 badDamage, badHeal, appliedBad = 0;
+    f32 speed, drain;
+
+    rate = nbGetAisyoRitu(nskill, sformindex, target) * rate;
+    badDamage = nbGetKoukaBadDamage(nskill, sformindex, target, rate, 0);
+    badHeal = nbGetKoukaBadKaifuku(nskill, sformindex, target, rate, 0);
+    autoskill = a->autoskill;
+    hit = nbGetHitType(a, nskill, sformindex, target);
+    if (koukatype == 1) {
+        a->autoskill = autoskill;
+    }
+    if (hit == 1) {
+        rate = nbGetCriticalPow(sformindex, rate);
+    }
+    speed = (a->stat & 0x100) ? 3.0f : 1.0f;
+    type = 0;
+    switch (koukatype) {
+    case 1:
+        if (nskill == 0x107) {
+            frame += 8;
+            nbGetMainProcessData()->d31_rebehansya = 1;
+        }
+        if (nskill == 0x108) {
+            frame += 90;
+        }
+        if (nskill == 0x113) {
+            nbGetMainProcessData()->d31_andahansya = 1;
+        }
+        if (target < 16) {
+            nbAddHitEffKoukaPacket(frame, (s32)a, &a->data->form[target], 1);
+        }
+        SetHitStopFrame(a, frame);
+        SetTimeList(a, target, frame, 15, 30);
+        frame += 13;
+        target = sformindex;
+        count = 1;
+        canDrain = 0;
+        if (nbGetAisyo(-1, sformindex, nbGetNormalSkillAttr(nskill)) & 0x70000) {
+            badDamage = 0;
+            type = 0x10000;
+        }
+        switch (badDamage) {
+        case 1:
+        case 2:
+        case 4:
+        case 8:
+        case 0x10:
+        case 0x20:
+        case 0x40:
+        case 0x80:
+        case 0x100:
+        case 0x200:
+        case 0x400:
+        case 0x800:
+        case 0x1000:
+        case 0x2000:
+        case 0x4000:
+            if (nbGetAisyo(nskill, sformindex, datGetBadStatusAttr(badDamage)) & 0x170000) {
+                badDamage = 0;
+            }
+            break;
+        }
+        if ((a->data->stat & 0x400) && !nbCheckFormationPlayerSide(sformindex)) {
+            badDamage = 0;
+            type = 0x10000;
+        }
+        if (nskill == 0xD4) {
+            badDamage = 0;
+            type = 0x10000;
+        }
+        hit = 0;
+        break;
+    case 2:
+        if (nskill == 0x106) {
+            frame += 8;
+        }
+        if (nskill == 0x107) {
+            frame += 60;
+        }
+        if (nskill == 0x108) {
+            frame += 90;
+        }
+        if (target < 16) {
+            nbAddHitEffKoukaPacket(frame, (s32)a, &a->data->form[target], 2);
+        }
+        SetHitStopFrame(a, frame);
+        SetTimeList(a, target, frame, 15, 30);
+        frame += 13;
+        count = 1;
+        canDrain = 0;
+        reflect = 1;
+        badDamage = 0;
+        break;
+    case 3:
+        SetHitStopFrame(a, frame);
+        count = 1;
+        canDrain = 0;
+        badDamage = 0;
+        type = 0x10000;
+        break;
+    }
+    hidden = target >= 16;
+    if (!hidden && (a->data->party[a->data->form[target].partyindex].flag & 0x20)) {
+        count = 0;
+    }
+    if (frame < GetUnlockTime(a, target)) {
+        frame = GetUnlockTime(a, target);
+    }
+    if (koukatype == 1 && !(type & 0x70000)) {
+        nbCheckPacketState(a, frame);
+    }
+    for (i = 0; i < count; i++) {
+        dead = 0;
+        if (badDamage == 0x800) {
+            dead = 1;
+            deadType = nbGetDeadType(nskill, sformindex, target);
+        }
+        hpDamage = nbGetKoukaHp(1, nskill, sformindex, target, rate, count);
+        hpHeal = nbGetKoukaHp(0, nskill, sformindex, target, rate, count);
+        switch (badDamage) {
+        case 0x4000:
+            badDamage = 0;
+            amount = nbGetUnitWorkFromFormindex(target)->hp;
+            before = amount - (u32)amount / 10;
+            if (before >= amount) {
+                before = amount - 1;
+            }
+            hpDamage = before < 0 ? 0 : before;
+            break;
+        case 0x2000:
+            badDamage = 0;
+            amount = nbGetUnitWorkFromFormindex(target)->hp;
+            before = amount - ((u32)amount >> 2);
+            if (before >= amount) {
+                before = amount - 1;
+            }
+            hpDamage = before < 0 ? 0 : before;
+            break;
+        case 0x1000:
+            badDamage = 0;
+            hpDamage = nbGetUnitWorkFromFormindex(target)->hp >> 1;
+            break;
+        }
+        printf("HP damage = %d, kaifuku = %d\n", hpDamage, hpHeal);
+        mpDamage = nbGetKoukaMp(1, nskill, sformindex, target, rate, count);
+        mpHeal = nbGetKoukaMp(0, nskill, sformindex, target, rate, count);
+        printf("MP damage = %d, kaifuku = %d\n", mpDamage, mpHeal);
+        if (reflect) {
+            if (hpDamage >= 0) {
+                hpHeal = hpHeal >= 0 ? hpHeal + hpDamage : hpDamage;
+            }
+            hpDamage = -1;
+            if (mpDamage >= 0) {
+                mpHeal = mpHeal >= 0 ? mpHeal + mpDamage : mpDamage;
+            }
+            mpDamage = -1;
+            if (dead) {
+                dead = 0;
+            }
+        }
+        blocked = 0;
+        if (type == 0x10000) {
+            if (!hidden) {
+                nbAddMojiEffKoukaPacket(frame, 45, (s32)a, &a->data->form[target], 4);
+                blocked = 1;
+            }
+            hpDamage = mpDamage = -1;
+            if (dead) {
+                dead = 0;
+            }
+        }
+        damage = 0;
+        hitEffect = nbCheckHitEffect(nskill, sformindex, target);
+        if (i == count - 1 && badDamage != 0) {
+            appliedBad = badDamage;
+            damage = 1;
+        } else if (hpDamage >= 0 || mpDamage >= 0) {
+            appliedBad = 0;
+            damage = 1;
+        }
+        if (dead) {
+            appliedBad = 0;
+            damage = 1;
+        }
+        if (damage) {
+            if (koukatype == 0 && skill->koukatype == 0) {
+                counter = 1;
+            }
+            if (dead) {
+                if (nbCheckKuisibari2Skill(target)) {
+                    dead = 0;
+                    if (appliedBad == 0x800) {
+                        appliedBad = 0;
+                    }
+                    hpDamage = GetTimeListHp(a, target) - 1;
+                    nbAddSkillNamePacket(frame, (s32)a, 0x168);
+                } else if (nbCheckKuisibariSkill(target)) {
+                    dead = 0;
+                    if (appliedBad == 0x800) {
+                        appliedBad = 0;
+                    }
+                    hpDamage = GetTimeListHp(a, target) - 1;
+                    nbAddSkillNamePacket(frame, (s32)a, 0x159);
+                }
+            } else if (hpDamage > 0 && hpDamage >= GetTimeListHp(a, target)) {
+                if (nbCheckKuisibariSkill(target)) {
+                    hpDamage = GetTimeListHp(a, target) - 1;
+                    nbAddSkillNamePacket(frame, (s32)a, 0x159);
+                } else if (nbCheckKuisibari2Skill(target)) {
+                    hpDamage = GetTimeListHp(a, target) - 1;
+                    nbAddSkillNamePacket(frame, (s32)a, 0x168);
+                }
+            }
+            if (hpDamage > 0) {
+                if (canDrain) {
+                    amount = hpDamage;
+                    if (GetTimeListHp(a, target) < hpDamage) {
+                        amount = GetTimeListHp(a, target);
+                    }
+                    totalHpDamage += amount;
+                }
+                drain = nbGetHpDrainRitu(nskill, sformindex, target);
+                if (drain > 0.0f) {
+                    hpDrain += (s32)((f32)hpDamage * drain);
+                }
+                AddTimeListHp(a, target, -hpDamage);
+                if (CheckTimeListDead(a, target)) {
+                    dead = 1;
+                    deadType = nbGetDeadType(nskill, sformindex, target);
+                    if (nbGetBadStat(target) == 0x400) {
+                        deadType = 1;
+                    }
+                } else if (nbCheckStoneDead(nskill, target)) {
+                    dead = 1;
+                    deadType = 1;
+                }
+            }
+            if (mpDamage > 0) {
+                if (canDrain) {
+                    totalMpDamage += mpDamage;
+                }
+                drain = nbGetMpDrainRitu(nskill, sformindex, target);
+                if (drain > 0.0f) {
+                    mpDrain += (s32)((f32)mpDamage * drain);
+                }
+            }
+            if (a->data->stat & 0x20000) {
+                dead = 0;
+            }
+            if (nbSetAllGetDevilFormatFlag(target) & 0x100) {
+                dead = 0;
+            }
+            nbMakeDamagePacket(frame, (s32)a, &a->data->form[target], hit, hpDamage, mpDamage,
+                               appliedBad, hitEffect, dead, deadType, 1, koukatype == 1 ? 2 : 0);
+            if (koukatype == 1) {
+                nbAddSePacket(frame, (s32)a, 0x10002);
+            } else if ((koukatype >= 3 || koukatype <= 0) &&
+                       (nskill == 0 || (nskill >= 0xA4 && nskill < 0xA7))) {
+                nbAddSePacket(frame, (s32)a, hit == 1 ? 0x10003 : 0x10002);
+            }
+            if (dead) {
+                before = frame;
+                frame += 30;
+                SetTimeList(a, target, before, 30, 30);
+                AddTimeListHp(a, target, -GetTimeListHp(a, target));
+            } else {
+                work = a->work;
+                interval = 10;
+                if (!(work->flag & 4)) {
+                    if (work->nowcommand == 0 ||
+                        (work->nowcommand == 1 && work->nowindex >= 0xA4 &&
+                         work->nowindex < 0xA8)) {
+                        interval = datDevilTable[work->id].attackinterval;
+                    }
+                }
+                interval = (s32)((f32)interval / speed);
+                if (interval < 5) {
+                    interval = 5;
+                }
+                SetTimeList(a, target, frame, interval, interval);
+                frame += interval;
+            }
+            if (!dead && appliedBad == 0 && !hidden &&
+                nbCheckBadKaifuku(nbGetUnitWorkFromFormindex(target), 2)) {
+                nbMakeBadKaifukuPacket(frame, (s32)a, &a->data->form[target]);
+            }
+        }
+        if (hpHeal > 0) {
+            totalHpHeal += hpHeal;
+        }
+        if (mpHeal > 0) {
+            totalMpHeal += mpHeal;
+        }
+        rate *= nbGetGensyoRitu(nskill, sformindex, target);
+        if (dead) {
+            break;
+        }
+        if (!damage && hpHeal <= 0 && mpHeal <= 0 && skill->hojotype == 0 && !blocked && badHeal == 0) {
+            hit = 0;
+            printf("MISS!!!\n");
+            nbAddMojiEffKoukaPacket(frame, 45, (s32)a, &a->data->form[target], 3);
+            SetHitStopFrame(a, frame);
+            break;
+        }
+    }
+    a->allhpdamage += totalHpDamage;
+    a->allmpdamage += totalMpDamage;
+    savedFrame = frame;
+    if (!dead) {
+        if (totalHpHeal > 0 || totalMpHeal > 0 || badHeal != 0) {
+            if (totalHpHeal <= 0) {
+                totalHpHeal = -1;
+            }
+            nbMakeKaifukuPacket(frame, (s32)a, &a->data->form[target], 0, totalHpHeal,
+                                totalMpHeal > 0 ? totalMpHeal : -1, badHeal);
+            if (badHeal) {
+                nbSetBadStat(target, 0, badHeal);
+            }
+            before = frame;
+            if (totalHpHeal > 0) {
+                AddTimeListHp(a, target, totalHpHeal);
+            }
+            frame += 15;
+            SetTimeList(a, target, before, 15, 20);
+        }
+        if (!dead && !hidden && skill->hojotype) {
+            nbAddHojoKoukaPacket(frame, (s32)a, &a->data->form[target],
+                                  skill->hojotype, skill->hojopoint);
+            SetTimeList(a, target, frame, 10, 15);
+        }
+    }
+    if ((hpDrain > 0 || mpDrain > 0) && canDrain) {
+        before = savedFrame + 5;
+        if (hpDrain <= 0) {
+            hpDrain = -1;
+        }
+        nbMakeKaifukuPacket(before + 10, (s32)a, &a->data->form[sformindex], 2, hpDrain,
+                            mpDrain > 0 ? mpDrain : -1, 0);
+        if (hpDrain > 0) {
+            AddTimeListHp(a, sformindex, hpDrain);
+        }
+        SetTimeList(a, sformindex, before, 15, 20);
+    }
+    if (!dead && counter && a->type == 0) {
+        CheckCounter(a, target, sformindex);
+    }
+    nbSetKuisibariStop(target);
+    if (dead) {
+        SetDeadPacket(a, target);
+    }
+    work = nbGetUnitWorkFromFormindex(target);
+    if (nskill >= 0x31 && nskill < 0x33) {
+        nbSetJyokyoMes(a, 0x4E, 1, work->id);
+    } else if (nskill == 0xE0) {
+        nbSetJyokyoMes(a, 0x58, 1, work->id);
+    }
+    switch (koukatype) {
+    case 0:
+        if (hit == 0) {
+            SetPress(a, -1.0f);
+            SetNewPress(a, 0);
+        } else if (hit == 1) {
+            SetPress(a, -0.5f);
+            SetNewPress(a, 3);
+        } else if (hit == 2) {
+            SetPress(a, -0.5f);
+            SetNewPress(a, 2);
+        }
+        break;
+    case 1:
+    case 2:
+    case 3:
+        if (!nbCheckFormationFriend(sformindex, originalTarget)) {
+            SetPress(a, koukatype == 3 ? -2.0f : -4.0f);
+            SetNewPress(a, koukatype == 1 ? 6 : koukatype == 2 ? 7 : 5);
+        } else {
+            SetPress(a, -1.0f);
+            SetNewPress(a, 0);
+        }
+        break;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAllPacket);
+#endif
 
 void SetTarget_nbActionProcess(nbActionProcessData_t *a)
 {
