@@ -1341,7 +1341,27 @@ u16 rstCheckHeartsSlot(u8 id, datUnitWork_t *unit)
 
 INCLUDE_ASM(const s32, "result/rstcalc", cmbInitStockUnit);
 
+extern void cmbClearUnitSkills(datUnitWork_t *unit);
+extern u8 datLevelUpTable[];
+
+#ifdef NON_MATCHING
+void cmb_222828(u16 devilId, u8 level, datUnitWork_t *unit)
+{
+    datLevelUp_t *table = (datLevelUp_t *)datLevelUpTable;
+    datLevelUpEntry_t *entry;
+    s32 i;
+
+    cmbClearUnitSkills(unit);
+    entry = table[devilId].entry;
+    for (i = 0; i < 24; i++) {
+        if (entry[i].kind == 1 && entry[i].level <= level) {
+            unit->skill[unit->skillcnt++] = entry[i].value;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", cmb_222828);
+#endif
 
 s8 cmbCheckEvoUnlocked(u16 devilId, datUnitWork_t *list, u8 count)
 {
