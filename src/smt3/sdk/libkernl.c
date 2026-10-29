@@ -1433,12 +1433,20 @@ typedef struct fsSyncRequest_t {
     s32 mode;
     char name[0x400];
 } fsSyncRequest_t;
+typedef struct fsRenameRequest_t {
+    s32 sema;
+    s32 *result;
+    s32 resultSize;
+    char oldName[0x400];
+    char newName[0x400];
+} fsRenameRequest_t;
 typedef union fsRequest_t {
     fsCloseRequest_t close;
     fsPathRequest_t path;
     fsMkdirRequest_t mkdir;
     fsGetstatRequest_t getstat;
     fsSyncRequest_t sync;
+    fsRenameRequest_t rename;
 } fsRequest_t;
 extern fsRequest_t D_0059D4C0;
 
@@ -1735,7 +1743,58 @@ s32 sceGetstat(const char *path, void *stat)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceChstat);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceRename);
+s32 sceRename(const char *oldPath, const char *newPath)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsRenameRequest_t *request = &D_0059D4C0.rename;
+    s32 oldLength;
+    s32 newLength;
+    s32 sema;
+    s32 accepted;
+    fsRequest_t *packet;
+
+    _sceFsWaitS(17);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    for (oldLength = 0; oldLength < 0x400 &&
+         (request->oldName[oldLength] = oldPath[oldLength]) != 0; oldLength++) {
+    }
+    if (oldLength == 0x400) {
+        request->oldName[0x3FF] = 0;
+    }
+    for (newLength = 0; newLength < 0x400 &&
+         (request->newName[newLength] = newPath[newLength]) != 0; newLength++) {
+    }
+    if (newLength == 0x400) {
+        request->newName[0x3FF] = 0;
+    }
+    param.initCount = 0;
+    param.maxCount = 1;
+    param.option = 0;
+    packet = &D_0059D4C0;
+    sema = CreateSema(&param);
+    request->sema = sema;
+    request->result = &result;
+    request->resultSize = 4;
+    sceSifWriteBackDCache(packet, 0x80C);
+    if (sceSifCallRpc(&D_0059E780, 17, 0, packet,
+                      0x80C, D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
 
 s32 sceChdir(const char *path)
 {
