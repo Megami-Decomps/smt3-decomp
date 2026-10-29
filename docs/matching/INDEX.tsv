@@ -228,7 +228,7 @@ cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/matching/result/rstcal
 rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/matching/result/rstcalc.md	148
 cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	168
 rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/matching/result/rstdraw.md	3
-sdfCorePacketGen	sdf/sdfCoreDraw	0x944	543 of 575 words differ	docs/matching/sdf/sdfCoreDraw.md	3
+sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3
 sdfIpuDecode	sdf/sdfIpu	0x1D0	22 of 115 words match	docs/matching/sdf/sdfIpu.md	3
 sdfModelSetOneSkinDrawPacket	sdf/sdfModel	0x180	Three of ninety words match	docs/matching/sdf/sdfModel.md	3

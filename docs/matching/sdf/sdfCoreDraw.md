@@ -2,10 +2,44 @@
 
 ## sdfCorePacketGen (sdf/sdfCoreDraw, 0x944)
 
-543 of 575 words differ in the emitted prefix: 32 words match, 2,300 bytes
-are emitted against 2,372 native bytes, and 72 bytes are uncovered. Production
-remains assembly-backed. This is a broad register-allocation and code-layout residual,
-not a 72-byte-only frontier. The six existing C functions remain exact.
+70 of 583 words match, first difference at +0x18: 2,332 bytes are emitted
+against 2,372 native bytes, 40 uncovered. Production remains assembly-backed.
+The frame (0x140), the save set ($16-$23, $30, $31, $f20, $f21), the control-block
+and spill slots, the block layout and the per-region instruction counts for the
+generated-geometry, kind-7, VU0-dispatch and plain-geometry regions are retail's.
+The six existing C functions remain exact.
+
+`corePktCb_t` ends at `backfaceSign`, 0xB0 bytes. `savedAttrBits` and the second
+material-packet pointer are locals of this function, not members: retail's first
+spill slot is 0xB0, which only a 16-byte-rounded 0xB0 control block allows.
+The kind dispatch is an `if`/`else if` chain on the packet type, not a `switch`:
+retail inverts both tests and falls through into each arm. The VU0 dispatch call
+is written in both arms, so only the `jal` cross-jumps. The plain-geometry block
+is physically last, after the point-buffer transform tail, which both other
+paths branch over. The blend count and its entry index are one reused `u32`,
+which is why retail stores the raw `extData[0]` word and then the masked low
+half to the same slot. The skinned path's vertex pointer is the same variable
+the plain path uses, and its per-node normal test is written inside the loop,
+so the `andi` is hoisted into the preheader and duplicated on the empty-loop arm.
+
+What blocks the match is one callee-saved assignment. The nine mutually
+conflicting long-lived values are colored in `allocno_compare` priority order,
+`floor_log2(n_refs) * n_refs * 10000 / live_length`, and take $16 upward. Seven
+land on retail's register. The remaining two are swapped: `node` needs $18 and
+the packet pointer $20, so `node` has to be colored first.
+
+    tools/cc1probe.sh src/smt3/sdf/sdfCoreDraw.c --func sdfCorePacketGen \
+        --alloc --no-dumps --cflag -DNON_MATCHING    # verify: OK
+
+measures `node` at refs=6, live_length=75, priority 1600 and the packet pointer
+at refs=5, live_length=56, priority 1785. `node` therefore needs a seventh
+reference (priority 1866) or live_length 67, or the packet pointer needs
+live_length 63. Its six references are the five `node->` reads retail performs
+plus the parameter copy, and its live range is the CFG span from that copy to
+the last `node->root` read in the three geometry arms. Reordering the
+declarations in each arm leaves both allocnos bit-identical (same probe on a
+scratchpad candidate through `--as-unit`), so neither number moves without
+changing which fields the function reads.
 
 The driver now uses the shared model, material and generated-packet headers.
 The third parameter is the attribute mask passed to `corePktInitCb`; retain it

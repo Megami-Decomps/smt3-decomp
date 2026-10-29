@@ -978,10 +978,13 @@ PRIM bit and its own UNPACK; `allocator` +0x24, called in place of
 `sdfGrAllocPacketBuff` when set, and `zBias` +0x28 as `lwc1`. Nothing is read
 past +0x28, so the struct is 44.
 
-`corePktCb_t` is the exception in this document: **its offsets are proven and
-its size is not**. `sdfCorePacketGen` is the only function that declares one, on
-its own stack, so there is no allocation and no stride. Every offset from
-`tmSave` +0 to `matPacket2` +0xB4 is a load or a store: `corePktInitCb` writes
+`corePktCb_t` is the exception in this document: **its offsets are proven from
+the callees and its size from one frame**. `sdfCorePacketGen` is the only
+function that declares one, on its own stack, so there is no allocation and no
+stride. The size is 0xB0, because that frame's first spill slot is at 0xB0 and
+gcc rounds the declared-local area up to 16 bytes; the two words retail keeps at
+0xB0 and 0xB4 are locals of that function, not members. Every offset from
+`tmSave` +0 to `backfaceSign` +0xAC is a load or a store: `corePktInitCb` writes
 +0x40, +0x42, +0x44, +0x48, +0x4C, +0x80 and +0x90; `corePktSetupPointBuff`
 writes +0x64 through +0x74 and puts `&cb->extPointTop` into +0x7C;
 `corePktOpenAndEmit` writes the opened packet buffer at +0x80, the closing tag's
@@ -1029,8 +1032,9 @@ Three, all resolved in favour of the retail code.
   stack frame, which also holds that function's own spill slots: it saves `$ra`
   at frame+0x128 and two FPRs at +0x130 and +0x138, which cannot be inside a
   struct it passes by pointer. No `corePkt*` callee touches anything above
-  +0xB4. So 320 is not a size claim about the struct and is not asserted here;
-  every sdfhook offset from +0 to +0xB4 agrees with this header.
+  +0xB4. So 320 is not a size claim about the struct; 0xB0 is, from the frame's
+  first spill slot, and every sdfhook offset from +0 to +0xAC agrees with this
+  header.
 - `corePktCb_t.head`: sdfhook has `u8 head[64]`. The first 64 bytes are a
   matrix, written as four `sqc2` and read back as `lq` by three different
   routines, so it is declared `sdfMatrix4_t tmSave`, which is also HD's name for
@@ -1362,8 +1366,8 @@ use until someone decompiles that effect. Also left behind:
   `sdfCorePrimHeader_t`, which `draw3d.h` has. The batch header sdfhook calls
   `sdfCoreBatchHeader_t` is that same four-halfword header read at a different
   address, not a second type.
-- `corePktCb_t`'s size. See `draw3d.h` above: the offsets are proven and the
-  size needs a second declaration site, which does not exist in this binary.
+- `corePktCb_t`'s size. See `draw3d.h` above: 0xB0, from where
+  `sdfCorePacketGen`'s own spill slots start.
 - The rest of sdfhook's draw-environment family: `sdfGrStdDrawEnv_t` (544),
   `sdfGrStdDrawEnvExt_t`, `sdfGrAlphaMaskPacket_t`, `sdfGrFramePacket_t`,
   `sdfGrDrawFrame_t` and `frDrawEnvPkt_t`. All are compositions of the four

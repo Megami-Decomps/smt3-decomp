@@ -638,8 +638,7 @@ OFF(va5, corePktCb_t, uvPtr, 160);
 OFF(va6, corePktCb_t, uv2Ptr, 164);
 OFF(va7, corePktCb_t, vertColPtr, 168);
 OFF(va8, corePktCb_t, backfaceSign, 172);
-OFF(va9, corePktCb_t, savedAttrBits, 176);
-OFF(vb0, corePktCb_t, matPacket2, 180);
+SZ(va9, corePktCb_t, 0xB0);
 
 /* Canonical layouts reconciled across the DDS port units. */
 SZ(p01, dds3ObjectBaseControlWorkData_t, 0xAC);
