@@ -135,8 +135,8 @@ instructions cc1 cannot select are not only `addi`:
 
 | function | what it really is |
 |---|---|
-| `sdfTexSetPacket` | ordinary C plus the bit-length idiom. Draft at the exact size and dataflow; [../matching/sdf/sdfTex.md](../matching/sdf/sdfTex.md) |
-| `release_movieobj2` | ordinary C plus the idiom twice. Draft, 148 of 150 instructions; [../matching/sdf/sdfMovie.md](../matching/sdf/sdfMovie.md) |
+| `sdfTexSetPacket` | ordinary C plus the bit-length idiom. Draft at the exact size and dataflow, 15 of 90 words; the residual is the opening schedule, measured with a sched trace in [../matching/sdf/sdfTex.md](../matching/sdf/sdfTex.md) |
+| `release_movieobj2` | **matched.** Ordinary C plus the idiom twice; see [../movie-frame-matching.md](../movie-frame-matching.md). The row is kept because this page is what the `addi` grep points at. |
 | `corePktVu0Run` | assembly throughout: `ctc2`, `vlqi`, `vilwr`, `cfc2`, `pextlb`, and a poll loop on the VIF1 and DMA status registers at 0x10008000 and 0x10003800. The frame exists because it needs `$16`-`$18`, not because it was compiled. |
 | `corePktEmitRefMapPass` | assembly throughout: a dozen VU0 macro-mode ops on vf24-vf26 and vf10, two `pextlb`/`pextlh`/`vitof0` colour unpacks, and a tail `j corePktEmitTexTrisCtx2`. The frame is for the `jal corePktLerpUVColorChain`. |
 | `sdf_2BFC58` | a computed `jr` into an unrolled `sq` block, as above. |
