@@ -1551,7 +1551,115 @@ void SetAction_COMM(nbActionProcessData_t *a)
     nbInitCommSelProcess(a->data, a->party, a);
 }
 
+#ifdef NON_MATCHING
+extern s8 dds3PadButtonState[];
+extern void nbSetAutoCommSel(void);
+extern s32 nbGetCommSelStat(void);
+extern void nbSetCommSelStat(s32 stat);
+extern void nbCloseCommSel(void);
+extern void nbClearActionFlags(nbMainProcessData_t *data);
+extern s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command);
+extern s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid);
+extern s32 nbCheckBattleSkillError1(s32 skill);
+
+s32 CheckAction_COMM(nbActionProcessData_t *a)
+{
+    s32 result = 0;
+    s32 close = 0;
+    s32 sound = 0;
+    datUnitWork_t *work;
+    s32 command;
+    u16 currentCommand;
+    s32 skill;
+    s32 err;
+
+    if (dds3DebugSign && dds3PadButtonState[0x29] && dds3PadButtonState[0x2B]) {
+        DokodemoPoa(a);
+        a->packettime = 60;
+        SetNextActionSeq(a, 0x14);
+        return 1;
+    }
+    if (dds3DebugSign && dds3PadButtonState[0x29] && dds3PadButtonState[0x23]) {
+        KyouseiPress(a);
+        a->packettime = 60;
+        SetNextActionSeq(a, 0x14);
+        return 1;
+    }
+    if ((a->data->stat & 0x40) && !(a->stat & 0x80)) {
+        a->stat |= 0x80;
+        nbSetAutoCommSel();
+    }
+    if (nbGetCommSelStat() == 3) {
+        sound = 8;
+        work = nbGetUnitWorkPointer(a->data, a->party);
+        command = work->nowcommand;
+        currentCommand = *(volatile u16 *)&work->nowcommand;
+        switch (command) {
+        case 0:
+            SetNextActionSeq(a, 5);
+            result = 1;
+            break;
+        case 1:
+        case 5:
+            skill = work->nowindex;
+            if (command == 1) {
+                switch (skill) {
+                case 0xDE: case 0xDF: case 0xE2: case 0xE3: case 0xE4:
+                case 0xE5: case 0xE6: case 0xFC:
+                    nbClearActionFlags(a->data);
+                    nbSetActionCommand(a->data, 0);
+                    currentCommand = work->nowcommand;
+                    skill = work->nowindex;
+                    break;
+                }
+            }
+            if ((s16)currentCommand != 1) {
+                skill = nbGetItemSkillNo(a, work->nowindex);
+                printf("item no = %d\n", work->nowindex);
+                printf("skill no = %d\n", skill);
+            }
+            err = nbCheckBattleSkillError1(skill);
+            if (err != 0 && !(a->stat & 0x80)) {
+                sound = -1;
+                nbDispSkillErrorMessage(err);
+                nbSetCommSelStat(2);
+            } else {
+                if ((a->party->flag & 6) || !(datSkillTable.normal[skill].targetarea & 1) ||
+                    (datSkillTable.normal[skill].targetarea & 0xC)) {
+                    SetNextActionSeq(a, 5);
+                } else {
+                    SetNextActionSeq(a, 6);
+                }
+                result = 1;
+            }
+            break;
+        case 4:
+            a->negotype = 0;
+            result = 1;
+            SetNextActionSeq(a, 5);
+            break;
+        case 6:
+            result = 1;
+            nbClearActionFlags(a->data);
+            nbSetActionCommand(a->data, 0);
+            SetNextActionSeq(a, 5);
+            break;
+        default:
+            SetNextActionSeq(a, 7);
+            close = 1;
+            result = 1;
+            break;
+        }
+        if (sound >= 0 && !(a->stat & 0x80)) {
+            nbPlaySe(sound);
+        }
+    }
+    if (close) nbCloseCommSel();
+    return result;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_COMM);
+#endif
 
 void SetAction_AI(nbActionProcessData_t *a)
 {
