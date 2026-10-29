@@ -32,38 +32,3 @@ worse. `limit` in `case 9` has to be assigned in both arms of an explicit
 takes a third saved register. `data->unk118` and `data->unkC8` are `u8[4]`
 in `nb.h`, so they have to be read through `*(s32 *)`, not compared
 directly.
-
-## nbDebugMainProcess (newbattle/nbMainProcess, 0xA70)
-
-99 of 666 words match, with 2664 bytes emitted against 2672 native bytes.
-The comparison covers all 666 emitted words; eight native bytes remain
-uncovered. This guarded reconstruction receives no exact matching credit.
-
-The renderer accepts only the unsigned-halfword debug value one. It prints
-signed phase and press-count values, the unsigned turn byte, fourteen separate
-process-presence rows, four action sequences, rewards, four item bytes in
-ascending address order, and eight action-stack rows. Stack count and base are
-read again after each print/link callback. Each stack row has four signed
-32-bit fields at a sixteen-byte stride. The phase-name and action-name tables
-are distinct assembly-owned pointer tables.
-
-The print provider takes unsigned coordinates/color, signed attributes and
-variadic arguments. The press float uses ordinary variadic promotion through
-the existing `fptodp` alias; the conversion provider retains its actual `long`
-return contract. All twenty-two padded format/label objects remain
-assembly-owned. The existing forty-two normal C functions and all data check
-exact with the candidate substituted.
-
-The native row-coordinate cursor is retained across the early floating print;
-C instead folds the first presence-row coordinates into immediate arguments.
-The first differing branch displacement is at +0x34; the first instruction
-placement difference is at +0x160 around the promotion call and format-address
-completion. The later repeated print blocks and final loops still differ.
-The native and candidate both use a 0x60-byte frame. No precise compiler-pass
-closure is established.
-
-Moving the row initialization before the press print is inert, as is using the
-same coordinate cursor for the press and new-press rows. Advancing the row
-coordinate in both conditional print arms worsens the comparison to 91 of
-666 words matching at the same size. No register constraints, fabricated
-storage, barriers or artificial dependencies are used.
