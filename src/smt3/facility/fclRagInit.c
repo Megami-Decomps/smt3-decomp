@@ -48,13 +48,8 @@ extern char D_0053D140[];
 
 typedef struct
 {
-    /* 0x00 */ datUnitWork_t unit;
-} dds3PartyUnit_t;
-
-typedef struct
-{
     /* 0x00000 */ u8 unk_00000[0xA54];
-    /* 0x00A54 */ dds3PartyUnit_t party[16];
+    /* 0x00A54 */ cmbUnit_t party[16];
     /* 0x01914 */ s8 stock[0x10];
     /* 0x01924 */ s32 stockCount;
     /* 0x01928 */ u8 unk_01928[0x3D];

@@ -163,15 +163,10 @@ extern fclEncycDebugWork_t *g_pdebug;
 
 typedef struct
 {
-    /* 0x00 */ datUnitWork_t unit;
-} dds3PartyUnit_t;
-
-typedef struct
-{
     /* 0x00000 */ u8 reserved00000[0xA48];
     /* 0x00A48 */ s32 maka;
     /* 0x00A4C */ u8 reserved00A4C[8];
-    /* 0x00A54 */ dds3PartyUnit_t party[16];
+    /* 0x00A54 */ cmbUnit_t party[16];
     /* 0x01914 */ s8 stock[0x10];
     /* 0x01924 */ s32 stockCount;
     /* 0x01928 */ u8 reserved01928[0x3D];
