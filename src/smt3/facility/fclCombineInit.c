@@ -2562,7 +2562,24 @@ void cmbDrawResultIcon(s8 mode, s32 z, s32 unused2, s32 unused3, s32 alpha, s32 
     }
 }
 
+extern s32 fclDrawPanelSprite(s32 id, s32 ot);
+
+#ifdef NON_MATCHING
+void cmbDrawResultHeader(s32 x, s32 y, s32 z, s32 width, s32 height,
+                         u32 color, u32 borderColor, s32 ot)
+{
+    fclDrawPanelSprite(0x33001, 0x47);
+    fclDrawSpriteRes(0, 0, 0xFFFFF0, NULL, 0, 7, CMB_GBWK->texHandle,
+                     cmbSpriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, 0xFFFFF0, NULL, 0, 8, CMB_GBWK->texHandle,
+                     cmbSpriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, z << 4, NULL, 0, 0xD, CMB_GBWK->texHandle,
+                     cmbSpriteTable, ot);
+    fclDrawPanelSprite(0x5101B, 0x47);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultHeader);
+#endif
 
 s32 cmbDrawPhaseDefault(s32 active)
 {
