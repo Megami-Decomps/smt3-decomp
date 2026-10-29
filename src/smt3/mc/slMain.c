@@ -408,20 +408,7 @@ typedef struct slFileRec_t {
     s8 unk25[15];
 } slFileRec_t;
 
-typedef struct GameFileInfo_t {
-    u8 verstr[3];
-    u8 ver;
-    u8 TmnlMode;
-    u8 TmnlId;
-    u8 Lv;
-    u8 mode;
-    s32 PlayTime;
-    u16 endcnt;
-    u16 newfile;
-    slFileWork_t work;
-    u8 autoMapOpen;
-    u8 autoMapOpenEX[15];
-} GameFileInfo_t;
+
 
 #define SL_REC ((u8 (*)[52])D_00569740)
 #define SL_FILE_HEAD ((GameFileInfo_t *)DDS3_GBWK)

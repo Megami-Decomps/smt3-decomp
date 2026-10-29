@@ -287,4 +287,18 @@ typedef struct slFileWork_t {
     s32 w[5];
 } slFileWork_t;
 
+typedef struct GameFileInfo_t {
+    u8 verstr[3];
+    u8 ver;
+    u8 TmnlMode;
+    u8 TmnlId;
+    u8 Lv;
+    u8 mode;
+    s32 PlayTime;
+    union { struct { u16 endcnt; u16 newfile; }; s32 endCounterWord; };
+    slFileWork_t work;
+    u8 autoMapOpen;
+    u8 autoMapOpenEX[15];
+} GameFileInfo_t;
+
 #endif /* FIELD_H */
