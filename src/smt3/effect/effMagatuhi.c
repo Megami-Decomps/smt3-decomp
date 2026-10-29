@@ -2495,42 +2495,6 @@ s32 dds3_1AACF8(void) {
     return D_0054F220;
 }
 
-/* Debug filesystem mode opens the formatted pfs0 directory; otherwise reset built-in iteration.
-   Return the native directory-open result, or zero for built-in mode. */
-s32 dds3EffectDirOpen(void *name) {
-    u8 path[EFF_DIRECTORY_PATH_BYTES];
-
-    if (sdfHddValid != 0) {
-        sprintf(path, D_0054F260, name);
-        return sceDopen(path);
-    } else {
-        D_00551DE4 = 0;
-        return 0;
-    }
-}
-
-/* Run the native directory callback only in debug filesystem mode; its result is ignored. */
-void dds3EffectDirClose(s32 directory) {
-    if (sdfHddValid != 0) {
-        sceDclose(directory);
-    }
-}
-
-/* Debug mode delegates to the native iterator. Built-in mode copies the next name,
-   clears flag mask 0x1000, and returns name length; zero also marks table exhaustion. */
-s32 dds3EffectDirRead(s32 directory, effDirEnt_t *entry) {
-    if (sdfHddValid != 0) {
-        return sceDread(directory, entry);
-    }
-    if ((u32)D_00551DE4 >= EFF_BUILTIN_NAME_COUNT) {
-        return 0;
-    }
-    strcpy(entry->name, dds3EffectFileNameTable[D_00551DE4]);
-    entry->flags &= ~EFF_DIRECTORY_FLAG_CLEAR;
-    D_00551DE4++;
-    return strlen(entry->name);
-}
-
 INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534090);
 
 INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005340A0);
@@ -2658,6 +2622,4 @@ INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F248);
 INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F250);
 
 INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F258);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F260);
 

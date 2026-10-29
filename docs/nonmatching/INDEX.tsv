@@ -63,11 +63,8 @@ effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/nonmatchin
 effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	4 of 146 words differ	docs/nonmatching/effect/effBattleMisc.md	72
 dds3EffectBlur_AlphaMultiParmSet	effect/effBlur_Filter	0xB4	Twenty-six of forty-five words differ	docs/nonmatching/effect/effBlur_Filter.md	5
 dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/nonmatching/effect/effBlur_Filter.md	39
-dds3EffectRippleBlurDraw	effect/effBlur_Filter	0x1E8		docs/nonmatching/effect/effBlur_Filter.md	74
-dds3EffectDistortionBlurDraw	effect/effBlur_Filter	0x208	60 of 128 words differ	docs/nonmatching/effect/effBlur_Filter.md	108
 effEveBEDCutDraw	effect/effEvent	0x1DC	117 of 119 words match	docs/nonmatching/effect/effEvent.md	5
 effDebugDrawRectLine	effect/effMagatuhi	0x154	72 of 85 words match	docs/nonmatching/effect/effMagatuhi.md	5
-effPCPBezierBillDraw	effect/effPCPBezier	0x1764	1482 of 1497 words match	docs/nonmatching/effect/effPCPBezier.md	5
 effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words match	docs/nonmatching/effect/effPCPBoss.md	5
 effPCP_BED_Create	effect/effPCPBoss	248 bytes	33 of 63 words match	docs/nonmatching/effect/effPCPBoss.md	22
 effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	71 of 75 words match	docs/nonmatching/effect/effPCPBoss.md	55
@@ -131,10 +128,8 @@ frAnalyzeTag	interface/frFont	0x518		docs/nonmatching/interface/frFont.md	48
 frAnalyzeMessage	interface/frFont	0x200		docs/nonmatching/interface/frFont.md	100
 frRestoreNameImage	interface/frName	0xD8	42 of 54 words match	docs/nonmatching/interface/frName.md	5
 frGetCNameFRQ	interface/frName	0x158	82 of 86 words match	docs/nonmatching/interface/frName.md	28
-DrawMesFlow	interface/itfMesManager	0x18C	Thirty-seven of ninety-nine words match	docs/nonmatching/interface/itfMesManager.md	5
-DrawSelectCursor	interface/itfMesManager	0x2FC		docs/nonmatching/interface/itfMesManager.md	44
-DrawMsgMng_Process	interface/itfMesManager	0x70	Twenty-four of twenty-eight words match	docs/nonmatching/interface/itfMesManager.md	79
-itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/nonmatching/interface/itfMesManager.md	97
+DrawSelectCursor	interface/itfMesManager	0x2FC		docs/nonmatching/interface/itfMesManager.md	5
+itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/nonmatching/interface/itfMesManager.md	40
 lstDrawListWindow	interface/lstListWindow	0x84	26 of 33 words match	docs/nonmatching/interface/lstListWindow.md	5
 fclEncycFindFreeSlot	kernel/dds3AdminiProcess	0x1C4	111 of 113 words match	docs/nonmatching/kernel/dds3AdminiProcess.md	5
 fclEncycFreeEntries	kernel/dds3AdminiProcess	0x1E8	120 of 122 words match	docs/nonmatching/kernel/dds3AdminiProcess.md	41
@@ -156,8 +151,6 @@ nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	d
 nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	156
 nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	177
 nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440	204 of 272 words match	docs/nonmatching/newbattle/nbCameraBoss.md	207
-dds3EffectFileListCreate	newbattle/nbCameraHelper	1080 bytes	269 of 270 words match	docs/nonmatching/newbattle/nbCameraHelper.md	5
-dds3EffectFileListWindowDrawSprite	newbattle/nbCameraHelper	280 bytes	Two of 70 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	21
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/nonmatching/newbattle/nbCameraPress.md	5
 nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	56 of 58 words match	docs/nonmatching/newbattle/nbCameraSkill.md	5
 nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	29 of 30 words match	docs/nonmatching/newbattle/nbCameraSkill.md	28
@@ -227,14 +220,12 @@ cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/nonmatching/result/rst
 rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/nonmatching/result/rstcalc.md	150
 rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/nonmatching/result/rstdraw.md	5
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	543 of 575 words differ	docs/nonmatching/sdf/sdfCoreDraw.md	3
-sdfFileCmdAnalyzeFileName	sdf/sdfFileIO	0x120	65 of 72 words matching	docs/nonmatching/sdf/sdfFileIO.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/nonmatching/sdf/sdfGraph.md	5
 sdfIpuDecode	sdf/sdfIpu	0x1D0	22 of 115 words match	docs/nonmatching/sdf/sdfIpu.md	5
 sdfModelSetOneSkinDrawPacket	sdf/sdfModel	0x180	Three of ninety words match	docs/nonmatching/sdf/sdfModel.md	5
 sdfModelLinkDrawPacket	sdf/sdfModel	0x208	Eighteen of 122 words match	docs/nonmatching/sdf/sdfModel.md	42
 sdfModelLinkShapedDrawPacket	sdf/sdfModel	0x258	Fifty of 150 words match	docs/nonmatching/sdf/sdfModel.md	77
 sdfModelTempPacketLinkOt	sdf/sdfModel	0x468	twenty-seven of 282 words differ	docs/nonmatching/sdf/sdfModel.md	135
-sdfModelLinkOt	sdf/sdfModel	0x480	Sixty-nine of 288 words differ	docs/nonmatching/sdf/sdfModel.md	179
 movieWaitSema	sdf/sdfMovie	212 bytes	Thirty-nine of fifty-three words differ	docs/nonmatching/sdf/sdfMovie.md	5
 release_movieobj2	sdf/sdfMovie	596 bytes	1 of 150 words match	docs/nonmatching/sdf/sdfMovie.md	53
 sdfSndVoiceMapInit	sdf/sdfSound	180 bytes	39 of 45 words match	docs/nonmatching/sdf/sdfSound.md	5

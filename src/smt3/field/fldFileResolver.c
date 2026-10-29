@@ -481,11 +481,12 @@ dds3Basic_t *fldGetModelRange_From_MatterName(const char *matterName) {
     return NULL;
 }
 
-typedef struct fldSpawnBatchFL1_t {
+/* FL1 and FL2 use the same 0x0C-byte resource-type table entries. */
+typedef struct fldSpawnBatch_t {
     u32 kind;
     u32 count;
     fldFileResource_t *entries;
-} fldSpawnBatchFL1_t;
+} fldSpawnBatch_t;
 
 typedef struct fldBillConfigView_t {
     u32 flags;
@@ -510,7 +511,11 @@ typedef struct fldSpawnCollisionView_t {
 enum {
     FLD_SPAWN_BATCH_KIND_SCRIPT_RESOURCE = 2,
     FLD_SPAWN_BATCH_KIND_COLLISION = 3,
+    FLD_SPAWN_BATCH_KIND_CAMERA = 4,
+    FLD_SPAWN_BATCH_KIND_EVENT = 6,
+    FLD_SPAWN_BATCH_KIND_UNSUPPORTED = 7,
     FLD_SPAWN_BATCH_KIND_PATH = 9,
+    FLD_SPAWN_BATCH_KIND_POINT = 10,
     FLD_SPAWN_BATCH_KIND_BILLBOARD_EFFECT = 11,
     FLD_SPAWN_BATCH_KIND_LIGHT = 12
 };
@@ -542,7 +547,7 @@ extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, f32 *, const char *);
 extern void dds3SetPathBasicSpline(dds3Basic_t *, u32);
 
 void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
-    fldSpawnBatchFL1_t *batch;
+    fldSpawnBatch_t *batch;
     f32 position[4];
     f32 rotation[4];
     char path[64];
@@ -557,7 +562,7 @@ void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
     dds3Basic_t *spawnedObject;
     u32 pathIndex;
 
-    batch = (fldSpawnBatchFL1_t *)typeTable;
+    batch = (fldSpawnBatch_t *)typeTable;
     memset(loaded, 0, cacheCount);
     memset(cached, 0, cacheCount * sizeof(*cached));
     D_00551C8C = NULL;
@@ -724,7 +729,189 @@ void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldMakeResouceBasicFL2);
+/* Resolved FL2 event and placement payloads, selected by the batch kind. */
+typedef struct fldSpawnEventDataFL2_t {
+    u32 kind;
+    void *data;
+} fldSpawnEventDataFL2_t;
+
+typedef struct fldSpawnPointDataFL2_t {
+    u32 kind;
+    s32 eventIndex;
+    u8 opaque08[4]; /* Not interpreted by this resource constructor. */
+    void *parameters;
+} fldSpawnPointDataFL2_t;
+
+typedef struct fldSpawnSoundDataFL2_t {
+    f32 radius;
+    s32 soundId;
+} fldSpawnSoundDataFL2_t;
+
+typedef struct fldResourcePoint_t fldResourcePoint_t;
+typedef struct fldEventDataHeader_t fldEventDataHeader_t;
+typedef struct fldResHead_t fldResHead_t;
+extern dds3Basic_t *dds3AddEventBasic(s32 serialID, void *data, const char *name);
+extern u32 fldEveHit_AddEveData(fldEventDataHeader_t *resource, dds3Basic_t *basic);
+extern s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic);
+extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *data, const char *name);
+extern void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room, const char *name, s32 eventIndex);
+extern void fldItemBoxAdd(s32 itemId, f32 x, f32 y, f32 z, const f32 *rotation);
+extern void fldAddSe3D(s32 soundId, f32 radius, f32 x, f32 y, f32 z);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(u32 serialID, const sdfVector4_t *position, const sdfVector4_t *rotation);
+
+void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
+    fldSpawnBatch_t *batch;
+    f32 position[4];
+    f32 rotation[4];
+    u32 batchIndex;
+    u32 resourceCount;
+    u32 resourceIndex;
+    fldFileResource_t *resource;
+    dds3Basic_t *spawnedObject;
+    u32 pathIndex;
+
+    batch = (fldSpawnBatch_t *)typeTable;
+    g_pHitData = NULL;
+    g_nHitData = 0;
+    for (batchIndex = 0; batchIndex < batchCount; batchIndex++, batch++) {
+        resource = batch->entries;
+        resourceCount = batch->count;
+        switch (batch->kind) {
+        case 0:
+        case 1:
+        case 2:
+        case 5:
+        case 8:
+        case 11:
+            break;
+        case FLD_SPAWN_BATCH_KIND_COLLISION:
+            g_pHitData = resource;
+            g_nHitData = resourceCount;
+            for (resourceIndex = 0, pathIndex = 1; resourceIndex < resourceCount; resourceIndex++, resource++, pathIndex++) {
+                resource->id |= 0x10000;
+                if (resource->transform != NULL) {
+                    position[0] = resource->transform[0];
+                    position[1] = resource->transform[1];
+                    position[2] = resource->transform[2];
+                    position[3] = 0.0f;
+                    rotation[0] = resource->transform[4];
+                    rotation[1] = resource->transform[5];
+                    rotation[2] = resource->transform[6];
+                    rotation[3] = resource->transform[7];
+                } else {
+                    position[0] = 0.0f;
+                    position[1] = 0.0f;
+                    position[2] = 0.0f;
+                    position[3] = 0.0f;
+                    rotation[0] = 0.0f;
+                    rotation[1] = 0.0f;
+                    rotation[2] = 0.0f;
+                    rotation[3] = 0.0f;
+                }
+                if (((fldSpawnCollisionView_t *)resource->data)->kind == 0) {
+                    s32 room = fldCommand_GetHojiID(resource->name);
+                    fldMakePlane(((fldSpawnCollisionView_t *)resource->data)->header, position,
+                                  resource->id, room, -1);
+                    spawnedObject = dds3AddModelRangeBasicNew(resource->id, resource->data, position, resource->name);
+                    dds3SetPathBasicSpline(spawnedObject, pathIndex);
+                }
+            }
+            break;
+        case FLD_SPAWN_BATCH_KIND_EVENT:
+            for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
+                spawnedObject = dds3AddEventBasic(resource->id, ((fldSpawnEventDataFL2_t *)resource->data)->data, resource->name);
+                fldEveHit_AddEveData((fldEventDataHeader_t *)resource, spawnedObject);
+            }
+            break;
+        case FLD_SPAWN_BATCH_KIND_PATH:
+            for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
+                dds3AddPathBasic(resource->id, resource->data, resource->name);
+            }
+            break;
+        case FLD_SPAWN_BATCH_KIND_POINT:
+            for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
+                fldSpawnPointDataFL2_t *data;
+                if (resource->transform != NULL) {
+                    position[0] = resource->transform[0];
+                    position[1] = resource->transform[1];
+                    position[2] = resource->transform[2];
+                    position[3] = 0.0f;
+                    rotation[0] = resource->transform[4];
+                    rotation[1] = resource->transform[5];
+                    rotation[2] = resource->transform[6];
+                    rotation[3] = resource->transform[7];
+                } else {
+                    position[0] = 0.0f;
+                    position[1] = 0.0f;
+                    position[2] = 0.0f;
+                    position[3] = 0.0f;
+                    rotation[0] = 0.0f;
+                    rotation[1] = 0.0f;
+                    rotation[2] = 0.0f;
+                    rotation[3] = 0.0f;
+                }
+                data = resource->data;
+                switch (data->kind) {
+                case 0:
+                    dds3AddPointBasic(resource->id, (fldResourcePoint_t *)resource->transform, resource->name);
+                    break;
+                case 1:
+                    spawnedObject = dds3AddPointBasic(resource->id, (fldResourcePoint_t *)resource->transform, resource->name);
+                    fldEveHit_AddEveHit((fldResHead_t *)resource, spawnedObject);
+                    break;
+                case 2: {
+                    s32 npcId = *(s32 *)data->parameters;
+                    s32 room = fldCommand_GetHojiID(resource->name);
+                    fldNpcLoad(npcId, position[0], position[1], position[2], rotation, room,
+                               resource->name, ((fldSpawnPointDataFL2_t *)resource->data)->eventIndex);
+                    break;
+                }
+                case 3:
+                    fldItemBoxAdd(*(s32 *)data->parameters, position[0], position[1], position[2], rotation);
+                    break;
+                case 7: {
+                    fldSpawnSoundDataFL2_t *sound = data->parameters;
+                    fldAddSe3D(sound->soundId, sound->radius, position[0], position[1], position[2]);
+                    break;
+                }
+                }
+            }
+            break;
+        case FLD_SPAWN_BATCH_KIND_CAMERA:
+            for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
+                if (resource->transform != NULL) {
+                    position[0] = resource->transform[0];
+                    position[1] = resource->transform[1];
+                    position[2] = resource->transform[2];
+                    position[3] = 0.0f;
+                    rotation[0] = resource->transform[4];
+                    rotation[1] = resource->transform[5];
+                    rotation[2] = resource->transform[6];
+                    rotation[3] = resource->transform[7];
+                } else {
+                    position[0] = 0.0f;
+                    position[1] = 0.0f;
+                    position[2] = 0.0f;
+                    position[3] = 0.0f;
+                    rotation[0] = 0.0f;
+                    rotation[1] = 0.0f;
+                    rotation[2] = 0.0f;
+                    rotation[3] = 0.0f;
+                }
+                spawnedObject = dds3AddCameraObjectBasicTypeFree(resource->id, (const sdfVector4_t *)position,
+                                                                (const sdfVector4_t *)rotation);
+                ((dds3CameraObjectBasicWorkData_t *)spawnedObject->workdata)->fovy = *(f32 *)resource->data;
+                dds3SetUnitObjectId(spawnedObject, (u32)resource->name);
+            }
+            break;
+        case FLD_SPAWN_BATCH_KIND_UNSUPPORTED:
+            /* Retail stops here for this unsupported resource class. */
+            for (;;) {}
+            break;
+        }
+    }
+}
+
 
 void fldMakeBlockBasicFL2(fldConstruntAreaFL2_t *pBlockTable, u32 nBlock) {
     u32 i;

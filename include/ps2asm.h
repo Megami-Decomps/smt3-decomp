@@ -602,6 +602,35 @@ typedef struct {
 #define SDF_VU0_SUBVECTOR_EXTENDED() __asm__ volatile ( \
     ".set noreorder\n\tvsub.xyzw vf10, vf10, vf11\n\t.set reorder" : :)
 
+/* Extended register-only forms used by the audited Bezier ribbon pipeline.
+ * As in the matched DDS engine, empty operands retain ASM_OPERANDS boundaries
+ * without adding instructions, artificial C dependencies or memory clobbers.
+ * The existing basic forms and their consumers are unchanged. */
+#define SDF_VU0_APPLYMATRIX_XYZ_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\tvmadday.xyzw ACC, vf29, vf10y\n\t" \
+    "vmaddz.xyzw vf10, vf30, vf10z\n\t.set reorder" : :)
+#define SDF_VU0_NORMALIZE_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
+    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
+    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder" : :)
+#define SDF_VU0_COPYVECTOR_A_TO_C_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf12, vf10\n\t.set reorder" : :)
+#define SDF_VU0_COPYVECTOR_C_TO_A_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf10, vf12\n\t.set reorder" : :)
+#define SDF_VU0_OUTERPRODUCT_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvopmula.xyz ACC, vf10, vf11\n\t" \
+    "vopmsub.xyz vf10, vf11, vf10\n\t.set reorder" : :)
+#define SDF_VU0_MULVECTOR_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyzw vf10, vf10, vf11\n\t.set reorder" : :)
+#define SDF_VU0_ADDVECTOR_A_C_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyzw vf10, vf10, vf12\n\t.set reorder" : :)
+#define SDF_VU0_SUBVECTOR_B_A_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw vf11, vf11, vf10\n\t.set reorder" : :)
+#define SDF_VU0_COPYVECTOR_A_TO_TEMP_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf2, vf10\n\t.set reorder" : :)
+#define SDF_VU0_COPYVECTOR_TEMP_TO_C_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf12, vf2\n\t.set reorder" : :)
+
 /* ---- operations that were written out at a call site ---- */
 
 #define SDF_VU0_SET_ROW3() __asm__ volatile ( \

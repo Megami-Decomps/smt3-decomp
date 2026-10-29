@@ -63,7 +63,8 @@ extern s32 dds3EffectDirOpen(void *name);
 extern void dds3EffectDirClose(s32 directory);
 extern void *sdf2DAllocSprite(s32 aNumOfSpr);
 extern void *sdf2DGetPrimPtr(void *aPacketPtr);
-extern void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
+/* The provider returns the linked packet address, even when ignored here. */
+extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 
 /* One textureless sprite as sdf2D lays it out: the colour, then two corners
  * of 0x20 bytes each. */
@@ -107,10 +108,54 @@ typedef enum EffResourceKind {
 
 extern s32 dds3EffectDirRead(s32 directory, dds3EffectDirEnt_t *entry);
 
+#define EFF_BUILTIN_NAME_COUNT 0x2F
+#define EFF_DIRECTORY_FLAG_CLEAR 0x1000
+#define EFF_DIRECTORY_PATH_BYTES 0x70
+extern char *dds3EffectFileNameTable[];
+extern char D_0054F260[];
+extern u32 D_00551DE4;
+extern s32 sceDopen(void *path);
+extern s32 sceDclose(s32 directory);
+extern s32 sceDread(s32 directory, dds3EffectDirEnt_t *entry);
+
+/* Debug filesystem mode opens the formatted pfs0 directory; otherwise reset built-in iteration.
+   Return the native directory-open result, or zero for built-in mode. */
+s32 dds3EffectDirOpen(void *name) {
+    u8 path[EFF_DIRECTORY_PATH_BYTES];
+
+    if (sdfHddValid != 0) {
+        sprintf(path, D_0054F260, name);
+        return sceDopen(path);
+    } else {
+        D_00551DE4 = 0;
+        return 0;
+    }
+}
+
+/* Run the native directory callback only in debug filesystem mode; its result is ignored. */
+void dds3EffectDirClose(s32 directory) {
+    if (sdfHddValid != 0) {
+        sceDclose(directory);
+    }
+}
+
+/* Debug mode delegates to the native iterator. Built-in mode copies the next name,
+   clears flag mask 0x1000, and returns name length; zero also marks table exhaustion. */
+s32 dds3EffectDirRead(s32 directory, dds3EffectDirEnt_t *entry) {
+    if (sdfHddValid != 0) {
+        return sceDread(directory, entry);
+    }
+    if ((u32)D_00551DE4 >= EFF_BUILTIN_NAME_COUNT) {
+        return 0;
+    }
+    strcpy(entry->name, dds3EffectFileNameTable[D_00551DE4]);
+    entry->flags &= ~EFF_DIRECTORY_FLAG_CLEAR;
+    D_00551DE4++;
+    return strlen(entry->name);
+}
+
 /* One node per file whose extension matches a requested type bit. The 0x10
  * types use a two-character extension, so the dot sits one byte later. */
-/* NON_MATCHING: 1 of 270 words differs (first at +0x3F8). */
-#ifdef NON_MATCHING
 nbCameraHelper_effFileListHandle_t *dds3EffectFileListCreate(char *path, s32 typeMask) {
     dds3EffectDirEnt_t entry;
     s32 directory;
@@ -169,9 +214,6 @@ nbCameraHelper_effFileListHandle_t *dds3EffectFileListCreate(char *path, s32 typ
     dds3EffectDirClose(directory);
     return root;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraHelper", dds3EffectFileListCreate);
-#endif
 
 void dds3EffectFileListDelete(nbCameraHelper_effFileListHandle_t *a) {
     dds3EffectFileNode_t *node = a->head;
@@ -419,8 +461,6 @@ void dds3EffectListSetTexture(nbCameraHelper_effFLWinHandle_t *work, char *textu
     sdfMemFreeDirect(loadedResource);
 }
 
-/* NON_MATCHING: 2 of 70 words differ (first at +0x7C). */
-#ifdef NON_MATCHING
 void dds3EffectFileListWindowDrawSprite(nbCameraHelper_effFLWinHandle_t *work)
 {
     sdfDrawTag_t *list;
@@ -437,8 +477,8 @@ void dds3EffectFileListWindowDrawSprite(nbCameraHelper_effFLWinHandle_t *work)
     sprite = sdf2DAllocSprite(1);
     vertex = (dds3EffectSpriteVertex_t *)sdf2DGetPrimPtr(sprite);
     vertex->a = 0x80;
-    vertex->g = 0x80;
     vertex->b = 0x80;
+    vertex->g = 0x80;
     vertex->r = 0x80;
     vertex->corner[0].u = 0;
     vertex->corner[0].v = 0;
@@ -463,9 +503,6 @@ void dds3EffectFileListWindowDrawSprite(nbCameraHelper_effFLWinHandle_t *work)
         ot->regFunc(ot, list);
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraHelper", dds3EffectFileListWindowDrawSprite);
-#endif
 
 void InitParticleEditorProcess(void) {
     dds3AdminiCallSequence(0, 0, 0, 0);
@@ -474,6 +511,8 @@ void InitParticleEditorProcess(void) {
 void InitSpriteViewerProcess(void) {
     dds3AdminiCallSequence(0, 0, 0, 0);
 }
+
+INCLUDE_SDATA(const s32, "newbattle/nbCameraHelper", D_0054F260);
 
 INCLUDE_SDATA(const s32, "newbattle/nbCameraHelper", D_0054F268);
 

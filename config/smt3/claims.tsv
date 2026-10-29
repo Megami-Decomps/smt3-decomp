@@ -657,3 +657,12 @@ src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 632 B	battle escape
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	0 matches / reflection packet recovery	SDK parallel-light packet embedded at work offset zero, native 240-byte allocation and model-light consumer; owner 290 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 488 B	heart panel sprite rendering with native corner colors and callback reloads; owner 368 match, 0 differ
 src/smt3/newbattle/nbEncProcess.c	redthing1	done	2026-10-28	1 fn / 724 B	bad-curse weighted action table initialization with native status mapping; owner 20 match, 0 differ
+src/smt3/newbattle/nbCameraHelper.c	redthing1	done	2026-10-29	2 fn / 1360 B	PiM agent: restored directory-provider ownership and truthful sprite API; three moved matches earn no new credit
+src/smt3/sdf/sdfModel.c	redthing1	done	2026-10-29	1 fn / 1152 B	PiM agent: model OT submission from qualified DDS index, signed-color and packet contracts; generic-pointer LinkDraw remains guarded
+src/smt3/sdf/sdfFileIO.c	redthing1	done	2026-10-29	1 fn / 288 B	PiM agent: read-only selected path and common filename-construction call; complete owner verified
+src/smt3/effect/effPCPBezier.c	redthing1	done	2026-10-29	1 fn / 5988 B	PiM agent: qualified DDS ribbon pipeline and literal VU primitive contracts; entire owner 13 match, 0 differ
+src/smt3/interface/itfMesManager.c	redthing1	done	2026-10-29	2 fn / 508 B	PiM agent: truthful glyph snapshots and post-callback next-link load; owner 118 match, 0 differ
+src/smt3/field/fldFileResolver.c	redthing1	done	2026-10-29	1 fn / 1152 B	PiM agent: FL2 resource dispatch reconstructed from native and matched FL1 sibling; owner 36 match, 0 differ
+src/smt3/effect/effBlur_Filter.c	redthing1	done	2026-10-29	2 fn / 1008 B	PiM agent: qualified DDS slot loops, canonical runtime helpers and in-place alpha attenuation; owner 29 match, 0 differ
+src/smt3/field/fld_Npc.c	redthing1	done	2026-10-29	1 fn / 2344 B	PiM agent: encounter HUD with native state gates and recovered signed getter; owner 16 match, 0 differ
+src/smt3/newbattle/nbEncount.c	redthing1	done	2026-10-29	0 matches / provider contract correction	PiM agent: s32 count getter corroborated HD/IDB, native u16 storage unchanged; owner 9 match, 0 differ

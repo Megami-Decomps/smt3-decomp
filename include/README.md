@@ -1162,6 +1162,10 @@ A **basic** asm (no colons) and an **extended** asm with an empty operand list
 and `SDF_VU0_SUBVECTOR_EXTENDED` exist only because `mdlSetBlur` needs the
 extended spelling; substituting the plain form moves the float constants it
 materialises and breaks the match. A macro named `_EXTENDED` means exactly this.
+The Bezier ribbon pipeline uses additional fixed-register `_EXTENDED` forms
+ported from the matched DDS donor. Its aligned vector objects and restricted
+SDK store/readback contract are documented in
+[Bezier matching](../docs/bezier-matching.md); the ordinary basic forms are unchanged.
 
 ### Name it for the function, not the instruction
 

@@ -1903,3 +1903,19 @@ or a read-write address constraint.
   formation pointer; read `main->form` rather than declaring the provider as
   returning a pointer-to-pointer. The local formation view preserves the
   native 0xF0 array stride. The complete owner checks 153 match / 0 differ.
+
+### Keep a packet-linker's returned address even when the caller discards it
+
+`sdf2DLinkTexPacket` returns the packet address as `s32`: its provider in
+`sdf/sdf2D` obtains the address from `sdf2DMakeTexPacket`, links it, and returns
+that same value. A caller that ignores the address still needs this real
+return contract, not a `void` declaration.
+
+In `dds3EffectFileListWindowDrawSprite`, correcting that declaration and using
+the established DDS donor's `a, b, g, r` colour-store order reproduces all
+70 words (280 bytes). The previous `void` declaration plus its retained
+`a, g, b, r` draft left the blue and second-corner U stores exchanged;
+correcting only the declaration instead leaves the green and blue stores
+exchanged. The actual provider contract and ordinary donor store order close
+the pair without a store-order sweep or an invented dependency. The complete
+19-function browser owner and retail checksum remain exact.

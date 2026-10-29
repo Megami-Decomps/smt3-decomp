@@ -66,9 +66,6 @@ extern f64 dpmul(f64 left, f64 right) __attribute__((const));
 
 extern u32 sdfDoubleToUInt(f64 value) __attribute__((const));
 
-extern f64 D_00533E30;
-
-extern f64 D_00533E38;
 
 extern sdfGrPacketHeader_t *effPkt2DAllocTriStrip(s32 num, s32 prim);
 
@@ -440,58 +437,53 @@ void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *hDistortionBlur) {
     sdfMemFreeDirect(hDistortionBlur->allocation);
 }
 
-/* Each live slot waits out its delay, then fades as its angle leaves zero. */
-/* NON_MATCHING: eight of 130 words differ inside the full unit (60 of 128 standalone); the loop guard's delay slot. */
-#ifdef NON_MATCHING
-void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work) {
-    sdfDrawTag_t *list;
+/* Each live slot waits out its delay, then fades as its angle leaves zero.
+ * Adapted from the matched DDS/redthing1 effBlurStepScatterSlotsAndDraw.
+ * Keep SMT3's two-argument renderer and canonical soft-double helpers:
+ * dpdiv compares doubles; the pi and reciprocal literals are promoted floats. */
+void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work)
+{
+    struct sdfDrawTag_t *list;
     effBlurScatterSlot_t *slot;
-    s32 remaining;
-    s32 delay;
+    s32 count;
     u32 alpha;
     f64 level;
     f64 angle;
 
-    if (dds3NullDrawProc() != 0) {
-        return;
-    }
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit(list);
-    dds3EffectBlurDrawFrameMask(list, work->params.blend, work->texture);
-    if (work->params.number > 0) {
+    if (dds3NullDrawProc() == 0) {
+        list = (void *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
+        dds3EffectBlurDrawFrameMask(list, work->params.blend, work->texture);
         slot = work->slots;
-        remaining = work->params.number;
-        do {
-            delay = slot->delay;
-            if (delay == 0) {
-                if (3.1415925f < slot->angle) {
-                    dds3EffectDistBlurPartInit(work, slot);
+        if (work->params.number > 0) {
+            count = work->params.number;
+            do {
+                if (slot->delay == 0) {
+                    if (slot->angle > 3.14159265f) {
+                        dds3EffectDistBlurPartInit(work, slot);
+                    }
+                    slot->quad.scale = work->params.distortion * sdfSin(slot->angle) + 1.0f;
+                    level = sdfFloatToULong((f32)(work->params.abgr >> 24));
+                    angle = sdfFloatToULong(slot->angle);
+                    if (dpdiv(angle, 0.0) < 0) {
+                        angle = dpsub(0.0, angle);
+                    }
+                    level = dpmul(level, dpsub(3.14159265f, angle));
+                    level = dpmul(level, 1.0f / 3.14159265f);
+                    alpha = sdfDoubleToUInt(level);
+                    slot->quad.abgr = (slot->quad.abgr & 0xFFFFFF) | (alpha << 24);
+                    dds3EffectBlurDrawAlphaMulti(list, &slot->quad);
+                    slot->angle += work->params.speed;
+                } else {
+                    slot->delay--;
                 }
-                slot->quad.scale =
-                    work->params.distortion * sdfSin(slot->angle) + 1.0f;
-                level = sdfFloatToULong((f32)(work->params.abgr >> 24));
-                angle = sdfFloatToULong(slot->angle);
-                if (dpdiv(angle, 0.0) < 0) {
-                    angle = dpsub(0.0, angle);
-                }
-                level = dpmul(level, dpsub(D_00533E30, angle));
-                level = dpmul(level, D_00533E38);
-                alpha = sdfDoubleToUInt(level);
-                slot->quad.abgr = (slot->quad.abgr & 0xFFFFFF) | (alpha << 24);
-                dds3EffectBlurDrawAlphaMulti(list, &slot->quad);
-                slot->angle = slot->angle + work->params.speed;
-            } else {
-                slot->delay = delay - 1;
-            }
-            remaining--;
-            slot++;
-        } while (remaining != 0);
+                count--;
+                slot++;
+            } while (count != 0);
+        }
+        dds3EffectBlurDrawFrameMaskReset(list);
     }
-    dds3EffectBlurDrawFrameMaskReset(list);
 }
-#else
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectDistortionBlurDraw);
-#endif
 
 /* Update scale parameters but preserve the allocated destination slot count. */
 void dds3EffectDistortionBlurSetParam(effBlurScaleWork_t *hDistortionBlur, dds3Effect_RippleBlurParam_t *pParam) {
@@ -577,51 +569,47 @@ void dds3EffectRippleBlurDelete(effBlurScaleWork_t *hRippleBlur) {
     sdfMemFreeDirect(hRippleBlur->allocation);
 }
 
-/* A slot stays dark until its phase reaches zero, then fades out over one
-   cycle and restarts. */
-/* NON_MATCHING: 18 of 122 words differ (first at +0x54). */
-#ifdef NON_MATCHING
-void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work) {
-    sdfDrawTag_t *list;
+/* Phase-driven sibling of the distortion update; adapted from DDS/redthing1
+ * effBlurStepScaleSlotsAndDraw. SMT3 preserves the slot's RGB and uses the
+ * two-argument renderer. Extract then attenuate the same alpha quantity. */
+void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work)
+{
+    struct sdfDrawTag_t *list;
     effBlurScaleSlot_t *slot;
-    s32 remaining;
-    u32 level;
+    s32 count;
+    u32 alpha;
 
-    if (dds3NullDrawProc() != 0) {
-        return;
-    }
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit(list);
-    dds3EffectBlurDrawFrameMask(list, work->params.blend, work->texture);
-    remaining = work->params.number;
-    if (remaining > 0) {
+    if (dds3NullDrawProc() == 0) {
+        list = (void *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
+        dds3EffectBlurDrawFrameMask(list, work->params.blend, work->texture);
         slot = work->slots;
-        do {
-            if (0.0f <= slot->phase) {
-                f32 sine = sdfSin(slot->angle);
-
-                slot->quad.scale = work->params.power * sine *
-                    (1.0f - slot->phase) + 1.0f;
-                level = (u32)((f32)(work->params.abgr >> 24) * (1.0f - slot->phase));
-                slot->quad.abgr = (slot->quad.abgr & 0xFFFFFF) | (level << 24);
-                dds3EffectRipBlurPartAreaSet(work, slot);
-                dds3EffectBlurDrawAlphaMulti(list, &slot->quad);
-                slot->angle = slot->angle + work->params.frequency;
-                slot->phase = slot->phase + work->params.speed;
-                if (1.0f < slot->phase) {
-                    dds3EffectRipBlurPartInit(work, slot);
+        if (work->params.number > 0) {
+            count = work->params.number;
+            do {
+                if (slot->phase >= 0.0f) {
+                    slot->quad.scale = work->params.power * sdfSin(slot->angle) *
+                                              (1.0f - slot->phase) + 1.0f;
+                    alpha = work->params.abgr >> 24;
+                    alpha = (u32)((f32)alpha * (1.0f - slot->phase));
+                    slot->quad.abgr = (slot->quad.abgr & 0xFFFFFF) | (alpha << 24);
+                    dds3EffectRipBlurPartAreaSet(work, slot);
+                    dds3EffectBlurDrawAlphaMulti(list, &slot->quad);
+                    slot->angle += work->params.frequency;
+                    slot->phase += work->params.speed;
+                    if (slot->phase > 1.0f) {
+                        dds3EffectRipBlurPartInit(work, slot);
+                    }
+                } else {
+                    slot->phase += work->params.speed;
                 }
-            } else {
-                slot->phase = slot->phase + work->params.speed;
-            }
-            slot++;
-        } while (--remaining != 0);
+                count--;
+                slot++;
+            } while (count != 0);
+        }
+        dds3EffectBlurDrawFrameMaskReset(list);
     }
-    dds3EffectBlurDrawFrameMaskReset(list);
 }
-#else
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectRippleBlurDraw);
-#endif
 
 /* Queue blend state and a uniformly colored GS quad from two source corners. */
 void dds3EffectFilter(dds3Effect_Filter_t *source) {
@@ -775,8 +763,3 @@ void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialM
     hPartialMultiFilter->param.Filter.bounds.bottom = y + half;
     dds3EffectFilterDrawTexQuad(&hPartialMultiFilter->param.Filter, hPartialMultiFilter->hAlphaTex);
 }
-
-INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00533E30);
-
-INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00533E38);
-

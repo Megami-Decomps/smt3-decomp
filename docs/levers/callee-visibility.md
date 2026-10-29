@@ -79,3 +79,29 @@ annul bit, and the camera-argument move and following call/branch shift out of
 the native delay slots. The isolated promotion preserves all 29 C functions
 in the owner. Check recently matched callees before rewriting a parked caller;
 this case needs no new declaration, attribute or control-flow adjustment.
+
+
+### Snapshot each message glyph before its visibility guard
+
+`DrawMesFlow` reads the speaker, message and selection font-chain pointers
+before their respective flag guards. Native loads at +0x3C, +0x5C and +0xB0
+execute in the unconditional delay slots of the guards; loading only inside
+the guarded arms left two branch-annul differences and their displacement
+cascade. The established DDS `itfUpdateSoundSelectorPanel` uses the same
+live glyph snapshots. Its direct selection-field argument, after initializing
+an unselected row to zero, and its status-before-fade update also reproduce
+the SMT3 native sequence. All 99 words (396 bytes) match without false
+attributes, artificial dependencies or a statement-order sweep.
+
+Once the provider is visible, `DrawMsgMng_Process` matches all 28 words
+(112 bytes) with the ordinary post-callback `node = node->next` traversal.
+Retail loads the next link at +0x40, after `DrawMesFlow` returns. The old
+pre-call snapshot draft and its claim that this snapshot was required were
+not the native callback contract; do not preserve a stale next link merely
+to approach the bytes while the provider is opaque. The canonical DDS loop
+also reads the next link after rendering.
+
+Adapted from redthing1's [published DDS message-manager source](https://github.com/Megami-Decomps/dds-decomp/blob/f79f86dc00f7fbd266fd5144e71faa86bef12aa4/src/dds1/game/code_0019DB88.c).
+SMT3's native field offsets, selector initialization, flag values and tail
+calls were reviewed independently. The complete message owner checks
+118 match / 0 differ, and the full retail image remains byte-identical.
