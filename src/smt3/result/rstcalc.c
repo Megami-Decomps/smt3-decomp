@@ -1,4 +1,5 @@
 #include "common.h"
+#include "datCalc.h"
 #include "facility.h"
 #include "camp.h"
 #include "result2.h"
@@ -59,11 +60,6 @@ typedef struct
 extern void rstSetMaxHpMp(s8 Mode, datUnitWork_t *pStock);
 
 
-typedef struct
-{
-    u8 head[6];
-    fclSkillParam_t entry[24];
-} datLevelUp_t;
 
 
 
@@ -306,7 +302,7 @@ void rstInitWorkStock(s8 IkenieChk)
 }
 
 extern s32 datGetDevilSlotState(u8 devilId);
-extern u8 datLevelUpTable[];
+
 
 #ifdef NON_MATCHING
 void rstCreateBeforeSkillList(s8 heartsId, datUnitWork_t *stock, s8 levelOffset,
@@ -335,7 +331,7 @@ void rstCreateBeforeSkillList(s8 heartsId, datUnitWork_t *stock, s8 levelOffset,
             }
         }
     } else {
-        datLevelUp_t *table = (datLevelUp_t *)datLevelUpTable;
+        datLevelUpRecord_t *table = datLevelUpTable;
         fclSkillParam_t *entry = table[stock->id].entry;
 
         for (i = 0; i < 24; i++) {
@@ -711,7 +707,7 @@ s32 rstCalcSkillPowerUp(void)
 
 extern s32 rstCalcEvoLevelDiff(datUnitWork_t *, datUnitWork_t *, datUnitWork_t *, s32);
 extern s32 cmbChkEvoNeedFlag(u16 devilId);
-extern u8 datLevelUpTable[];
+
 
 s32 rstChkEvoEvent(datUnitWork_t *stock, datUnitWork_t *evo, s32 index)
 {
@@ -720,10 +716,7 @@ s32 rstChkEvoEvent(datUnitWork_t *stock, datUnitWork_t *evo, s32 index)
     s32 level;
 
     if (index >= 0) {
-        /* Byte-table view, with the six-byte header and entry offset first;
-         * see docs/levers/addressing-and-types.md. */
-        level = datLevelUpTable[index * sizeof(fclSkillParam_t) +
-                               stock->id * sizeof(datLevelUp_t) + 6];
+        level = datLevelUpTable[stock->id].entry[index].level;
     } else {
         level = -1;
     }
@@ -1477,16 +1470,16 @@ u16 rstCheckHeartsSlot(u8 id, datUnitWork_t *unit)
 }
 
 extern void cmbClearUnitSkills(datUnitWork_t *unit);
-extern u8 datLevelUpTable[];
+
 
 #ifdef NON_MATCHING
 void cmbInitStockUnit(u16 id, datUnitWork_t *unit)
 {
-    datLevelUp_t *row;
+    datLevelUpRecord_t *row;
     s32 i;
 
     cmbClearUnitSkills(unit);
-    row = &((datLevelUp_t *)datLevelUpTable)[id];
+    row = &datLevelUpTable[id];
     for (i = 0; i < 24; i++) {
         if (row->entry[i].kind == 1 && row->entry[i].level == 0) {
             unit->skill[unit->skillcnt++] = row->entry[i].value;
@@ -1498,12 +1491,12 @@ INCLUDE_ASM(const s32, "result/rstcalc", cmbInitStockUnit);
 #endif
 
 extern void cmbClearUnitSkills(datUnitWork_t *unit);
-extern u8 datLevelUpTable[];
+
 
 #ifdef NON_MATCHING
 void cmb_222828(u16 devilId, u8 level, datUnitWork_t *unit)
 {
-    datLevelUp_t *table = (datLevelUp_t *)datLevelUpTable;
+    datLevelUpRecord_t *table = datLevelUpTable;
     fclSkillParam_t *entry;
     s32 i;
 
@@ -1597,21 +1590,15 @@ s32 func_002229E8(u16 value)
     return 0;
 }
 
-typedef struct
-{
-    /* 0x00 */ u8 unk_00[2];
-    /* 0x02 */ s8 value;
-    /* 0x03 */ u8 kind;
-} cmpKugatatiEntry_t;
 
-extern u8 datLevelUpTable[];
+
 
 /* NON_MATCHING: the native lookup retains a table offset and a separate
  * address for the first matching entry. */
 #ifdef NON_MATCHING
 fclSkillParam_t *datFindKugatatiEntry(datUnitWork_t *unit, s8 *outcount)
 {
-    datLevelUp_t *table = (datLevelUp_t *)datLevelUpTable;
+    datLevelUpRecord_t *table = datLevelUpTable;
     fclSkillParam_t *entry = table[unit->id].entry;
     u8 level = unit->level;
     fclSkillParam_t *found = NULL;
@@ -1789,12 +1776,12 @@ s8 rst_223080(datUnitWork_t *unit)
 #ifdef NON_MATCHING
 s32 rstFindEvoEntryType7(datUnitWork_t *unit)
 {
-    cmpKugatatiEntry_t *entry = (cmpKugatatiEntry_t *)&datLevelUpTable[unit->id * 0x66];
+    fclSkillParam_t *entry = datLevelUpTable[unit->id].entry;
     u8 level = unit->level;
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (entry[1].kind == 7 && (u8)entry[1].value <= level) {
+        if (entry[0].kind == 7 && entry[0].level <= level) {
             return (s8)i;
         }
         entry++;
@@ -1809,12 +1796,12 @@ INCLUDE_ASM(const s32, "result/rstcalc", rstFindEvoEntryType7);
 #ifdef NON_MATCHING
 s32 rstFindEvoEntryType5(datUnitWork_t *unit)
 {
-    cmpKugatatiEntry_t *entry = (cmpKugatatiEntry_t *)&datLevelUpTable[unit->id * 0x66];
+    fclSkillParam_t *entry = datLevelUpTable[unit->id].entry;
     u8 level = unit->level;
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (entry[1].kind == 5 && (u8)entry[1].value < level) {
+        if (entry[0].kind == 5 && entry[0].level < level) {
             return (s8)i;
         }
         entry++;
@@ -1829,16 +1816,16 @@ INCLUDE_ASM(const s32, "result/rstcalc", rstFindEvoEntryType5);
 #ifdef NON_MATCHING
 s32 cmbChkDevilEvo(datUnitWork_t *unit)
 {
-    u8 *p = &datLevelUpTable[unit->id * 0x66 + 8];
+    fclSkillParam_t *entry = datLevelUpTable[unit->id].entry;
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (p[-1] == 5) {
-            datDevilTableEntry_t *info = &datDevilTable[*(u16 *)p];
+        if (entry->kind == 5) {
+            datDevilTableEntry_t *info = &datDevilTable[entry->value];
 
             return (s8)info->level;
         }
-        p += 4;
+        entry++;
     }
     return -1;
 }
@@ -1849,7 +1836,7 @@ INCLUDE_ASM(const s32, "result/rstcalc", cmbChkDevilEvo);
 #ifdef NON_MATCHING
 s32 cmpFindKugatatiMsgEntry(datUnitWork_t *unit)
 {
-    datLevelUp_t *table = (datLevelUp_t *)datLevelUpTable;
+    datLevelUpRecord_t *table = datLevelUpTable;
     fclSkillParam_t *entry = table[unit->id].entry;
     s32 i;
 
@@ -2087,7 +2074,7 @@ s8 func_00223890(datUnitWork_t *unit, s32 rawLevel)
     s32 count = 0;
     s32 level;
     s32 i;
-    datLevelUp_t *table;
+    datLevelUpRecord_t *table;
 
     /* The override is interpreted as a signed low byte before selection. */
     if ((s8)rawLevel > 0) {
@@ -2095,7 +2082,7 @@ s8 func_00223890(datUnitWork_t *unit, s32 rawLevel)
     } else {
         level = (s8)unit->level;
     }
-    table = (datLevelUp_t *)datLevelUpTable;
+    table = datLevelUpTable;
     for (i = 0; i < 24; i++) {
         if (level < table[id].entry[i].level) {
             return count;

@@ -1,6 +1,5 @@
 #include "common.h"
 #include "datCalc.h"
-#include "result2.h"
 #include "ps2asm.h"
 
 extern s32 evtBitCheck(s32 no);
@@ -37,13 +36,6 @@ extern datItem_t datItemTable[];
 
 extern s32 datGetItemSlotIndex(s32 id);
 extern void evtBitOff(s32 no);
-typedef struct
-{
-    /* 0x00 */ u8 unk00[6];
-    /* 0x06 */ fclSkillParam_t skill[24];
-} datLevelUpRecord_t;
-
-extern datLevelUpRecord_t datLevelUpTable[];
 extern datUnitWork_t D_003493C0;
 
 extern s32 memset(void *a, s32 b, s32 c);
@@ -1175,8 +1167,8 @@ void datSetDevilWork(s32 id, datUnitWork_t *work)
     }
     skillcnt = 0;
     for (i = 0; i < 24; i++) {
-        if (datLevelUpTable[id].skill[i].level == 0 && datLevelUpTable[id].skill[i].kind == 1) {
-            work->skill[skillcnt++] = datLevelUpTable[id].skill[i].value;
+        if (datLevelUpTable[id].entry[i].level == 0 && datLevelUpTable[id].entry[i].kind == 1) {
+            work->skill[skillcnt++] = datLevelUpTable[id].entry[i].value;
         }
     }
     maxHp = datGetMaxHp(work);
@@ -1649,9 +1641,9 @@ void datCopyDevilWork(s32 id, datUnitWork_t *w)
     cnt = 0;
     skill = w->skill;
     for (i = 0; i < 24; i++) {
-        if (datLevelUpTable[id].skill[i].level == 0 &&
-            datLevelUpTable[id].skill[i].kind == 1) {
-            *skill++ = datLevelUpTable[id].skill[i].value;
+        if (datLevelUpTable[id].entry[i].level == 0 &&
+            datLevelUpTable[id].entry[i].kind == 1) {
+            *skill++ = datLevelUpTable[id].entry[i].value;
             cnt++;
         }
     }

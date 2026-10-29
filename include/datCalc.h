@@ -2,6 +2,14 @@
 #define DATCALC_H
 
 #include "newdata.h"
+#include "result2.h"
+
+typedef struct {
+    u8 head[6];
+    fclSkillParam_t entry[24];
+} datLevelUpRecord_t;
+
+extern datLevelUpRecord_t datLevelUpTable[];
 
 /* paratype indexes datUnitWork_t::param[6]; the retail code uses 0, 2, 3 and 5
  * and no source names them, so they stay plain integers. */
