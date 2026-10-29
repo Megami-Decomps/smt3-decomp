@@ -28,6 +28,7 @@ page and line to open. Conventions are in
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
+| 3 |  | [sdk/libc.md](sdk/libc.md) |
 | 3 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frName | [interface/frName.md](interface/frName.md) |
@@ -40,7 +41,6 @@ page and line to open. Conventions are in
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
-| 2 |  | [sdk/libc.md](sdk/libc.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |

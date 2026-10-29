@@ -1213,7 +1213,89 @@ s32 __swsetup(FILE *fp)
     return 0;
 }
 
+s32 __mcmp(_Bigint *a, _Bigint *b);
+
+/* NON_MATCHING: native 556-byte extent; 65 differing words in limb-loop allocation. */
+#ifdef NON_MATCHING
+s32 gcc2_compiled__1(_Bigint *dividend, _Bigint *divisor)
+{
+    s32 n = divisor->wds;
+    u32 *divisorCursor;
+    u32 *divisorEnd;
+    u32 *divisorStart;
+    u32 *dividendCursor;
+    u32 *dividendEnd;
+    u32 *dividendStart;
+    u32 quotient;
+    u32 product;
+    u32 carry;
+    u32 borrow;
+    s32 low;
+    s32 highDifference;
+    u32 high;
+
+    if (dividend->wds < n) {
+        return 0;
+    }
+    n--;
+    divisorStart = divisorCursor = divisor->x;
+    divisorEnd = divisorCursor + n;
+    dividendStart = dividendCursor = dividend->x;
+    dividendEnd = dividendCursor + n;
+    quotient = *dividendEnd / (*divisorEnd + 1);
+    if (quotient != 0) {
+        borrow = 0;
+        carry = 0;
+        do {
+            product = (*divisorCursor & 0xFFFF) * quotient + carry;
+            high = (*divisorCursor++ >> 16) * quotient + (product >> 16);
+            carry = high >> 16;
+            low = (*dividendCursor & 0xFFFF) - (product & 0xFFFF) + borrow;
+            borrow = low >> 16;
+            ((u16 *)dividendCursor)[0] = low;
+            highDifference = (*dividendCursor >> 16) - (high & 0xFFFF) + borrow;
+            ((u16 *)dividendCursor)[1] = highDifference;
+            dividendCursor++;
+            borrow = highDifference >> 16;
+        } while (divisorCursor <= divisorEnd);
+        if (*dividendEnd == 0) {
+            while (dividendStart < --dividendEnd && *dividendEnd == 0) {
+                n--;
+            }
+            dividend->wds = n;
+        }
+    }
+    if (__mcmp(dividend, divisor) >= 0) {
+        quotient++;
+        borrow = 0;
+        carry = 0;
+        divisorCursor = divisorStart;
+        dividendCursor = dividendStart;
+        do {
+            product = (*divisorCursor & 0xFFFF) + carry;
+            high = (*divisorCursor++ >> 16) + (product >> 16);
+            carry = high >> 16;
+            low = (*dividendCursor & 0xFFFF) - (product & 0xFFFF) + borrow;
+            borrow = low >> 16;
+            ((u16 *)dividendCursor)[0] = low;
+            highDifference = (*dividendCursor >> 16) - (high & 0xFFFF) + borrow;
+            ((u16 *)dividendCursor)[1] = highDifference;
+            dividendCursor++;
+            borrow = highDifference >> 16;
+        } while (divisorCursor <= divisorEnd);
+        dividendEnd = dividendStart + n;
+        if (*dividendEnd == 0) {
+            while (dividendStart < --dividendEnd && *dividendEnd == 0) {
+                n--;
+            }
+            dividend->wds = n;
+        }
+    }
+    return quotient;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libc", gcc2_compiled__1);
+#endif
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B880);
 

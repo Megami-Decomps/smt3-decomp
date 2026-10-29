@@ -76,3 +76,42 @@ fencepost record emits 584. Explicit signed/unsigned long page constants
 and physical field order do not retain the missing conversions. The actual
 `_sbrk_r` prototype is supplied before this earlier helper; it is compiler-inert.
 No extra pointer copy or dummy width operation was added.
+
+## gcc2_compiled__1
+
+The dtoa quotient/remainder helper at 0x002D8148 has a native-sized draft:
+556 instruction bytes, 74 of 139 words match and 65 differ. Normal builds
+retain assembly; no exact matching credit is claimed. Both `_dtoa_r` callers
+add the integer return to ASCII zero and store an output digit.
+
+Existing `_Bigint` records supply the signed limb counts and unsigned 32-bit
+limbs. A shorter dividend returns zero. Otherwise the top limbs estimate an
+unsigned quotient using divisor-top plus one; native division retains its
+zero-divisor trap. The first loop subtracts that multiple with 16-bit products,
+carry and signed borrow shifts. After trimming, the matched `__mcmp` decides
+whether one additional subtraction and quotient increment are needed. There
+is no decrement/carry-back correction or digit clamp. The callers provide the
+normalized digit-producing ratio; arbitrary bigint division is not the API.
+
+The typed limb array is updated with two halfword stores, as in the matched
+bigint subtraction helper. The first top-limb test compiles to the native
+cached pre-loop word; a nonzero estimate already implies that word is nonzero.
+The post-correction trim uses a fresh word load. Independent native and caller
+review confirmed both loops, correction direction and count updates.
+
+The parity-qualified pinned cc1
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`
+trace uses `tools/cc1probe.sh src/smt3/sdk/libc.c --func gcc2_compiled__1
+--cflag -DNON_MATCHING --alloc --sched --no-dumps --maxlines 3000 --out <output>`.
+Global allocation gives the high difference pseudo 98 (12 references, live
+length 10) GPR6, low difference pseudo 97 (12/12) GPR3, and product-high
+pseudo 99 (12/22) GPR4. Native uses GPR5 for the high difference and GPR8 for
+the product high; the cursor, borrow and cached-word registers consequently
+also differ. Control-flow shape and function extent already agree.
+
+Signed quotient/borrow spelling, direct limb reads versus a captured word,
+and deferring the carry assignment do not resolve this allocation. Separate
+phase locals leave 72 differing words; a repeated inline subtraction helper
+leaves 90. Sharing the carry and low difference leaves 60, still nonmatching;
+that control is not retained. A new ordinary lifetime or source-context premise
+is needed before another attempt. No register constraints or artificial work.
