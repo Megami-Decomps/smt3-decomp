@@ -481,7 +481,50 @@ INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispCommCursor);
 
 #endif
 
+#ifdef NON_MATCHING
+void DispSummonCursor(s32 ox, s32 oy, s32 a)
+{
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    f32 rate;
+    s32 alpha;
+    s32 halfAlpha;
+    s32 x0, x1, x2, y0, y1, y2;
+    u32 left, middle, halfLeft, halfMiddle;
+
+    if (a == 0x80) {
+        alpha = 0x46;
+        halfAlpha = 0x23;
+    } else {
+        rate = (f32)a * 0.0078125f;
+        halfAlpha = (s32)(rate * 35.0f);
+        alpha = (s32)(rate * 70.0f);
+    }
+    tag = dds3FontReqAllocDrawTag();
+    left = ((u32)alpha << 24) | 0x8CBE1B;
+    middle = ((u32)alpha << 24) | 0x9B4400;
+    x0 = (u32)ox * 16 + 0x7000;
+    x1 = (u32)ox * 16 + 0x7630;
+    x2 = (u32)ox * 16 + 0x7C60;
+    y0 = (u32)oy * 8 + 0x7900;
+    y1 = (u32)oy * 8 + 0x7998;
+    y2 = (u32)oy * 8 + 0x7A48;
+    sdfPrimLinkG4(tag, 0x14C, x0, y0, left, x1, y0, middle,
+                  x0, y1, left, x1, y1, middle, -1, NULL);
+    sdfPrimLinkG4(tag, 0x14C, x1, y0, middle, x2, y0, 0xBF0013,
+                  x1, y1, middle, x2, y1, 0xBF0013, -1, NULL);
+    halfLeft = ((u32)halfAlpha << 24) | 0x8CBE1B;
+    halfMiddle = ((u32)halfAlpha << 24) | 0x9B4400;
+    sdfPrimLinkG4(tag, 0x14C, x0, y1, halfLeft, x1, y1, halfMiddle,
+                  x0, y2, halfLeft, x1, y2, halfMiddle, -1, NULL);
+    sdfPrimLinkG4(tag, 0x14C, x1, y1, halfMiddle, x2, y1, 0xBF0013,
+                  x1, y2, halfMiddle, x2, y2, 0xBF0013, -1, NULL);
+    ot = &sdfGrOtTable[71];
+    ot->regFunc(ot, tag);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispSummonCursor);
+#endif
 
 void DispComm1PanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 oz, u32 col)
 {
