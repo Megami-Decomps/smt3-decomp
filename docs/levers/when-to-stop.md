@@ -75,8 +75,7 @@ These have been ruled out repeatedly and are not worth a second attempt:
   `xori`.
 - `xori reg, reg, 0` in front of a `movn`. `frGetXShiftLev` in
   `interface/frFont` has one, on `(fontIndex < 2)` feeding
-  `movn $18, $6, $3`, so that function is capped by this row and not worth a
-  long attack. No `!= 0` shape (plain `if`,
+  `movn $18, $6, $3`, so that draft retains this residual. No `!= 0` shape (plain `if`,
   ternary, `> 0`, `>= 1`, explicit `^ 0`, a `continue`, a local of either
   width) adds it; every one of them emits the `movn` alone.
   `sdfModelLinkDrawPacket` in `sdf/sdfModel` is a second instance, on
@@ -85,8 +84,11 @@ These have been ruled out repeatedly and are not worth a second attempt:
   an `if`/`else`, `== 0` with the arms swapped, `!!`, `-0`, `> 0` unsigned, a
   one-case `switch`, a 0/1 condition local, three shapes of a zero local that
   constant-folds, and `u8`/`u16`/`s8`/`s16`/`s64`/`u64`/pointer condition
-  types. The only thing that produces an `xori` at all is comparing against a
-  **non-zero** constant, so the zero case is not reachable. The missing
+  types. In those isolated trials, only comparison against a **non-zero**
+  constant produced an `xori`; that is not a general impossibility result.
+  Qualified matched-SMT3 observations show XOR-zero created by late `ce`
+  conversion after CSE; see [the pass-timing evidence](../matching/code_00116AD0.md#fldanahoriselectinit-code_00116ad0-0x7c).
+  The failed spellings remain useful negative results for these drafts. The missing
   reference also costs the allocation: retail gives `aMode` a saved register
   ahead of the next parameter, and without the `xori` the whole body's
   registers rotate.
