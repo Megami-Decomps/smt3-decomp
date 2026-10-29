@@ -273,12 +273,6 @@ typedef struct
 
 typedef struct
 {
-    /* 0x0000 */ cmpCursorInfo_t cursor;
-    /* 0x0038 */ u8 unk_0038[0x1004];
-} cmbStockCursorGroup_t;
-
-typedef struct
-{
     /* 0x00 */ s32 handle;
     /* 0x04 */ void *lock;
     /* 0x08 */ s32 size;
@@ -302,7 +296,7 @@ typedef struct
     /* 0x00018 */ u8 unk_00018[4];
     /* 0x0001C */ cmpCursorInfo_t combineCursor;
     /* 0x00054 */ u8 unk_00054[0x1004];
-    /* 0x01058 */ cmbStockCursorGroup_t stockCursorGroup[3];
+    /* 0x01058 */ cmpCursorFullWork_t stockCursorGroup[3];
     /* 0x0410C */ u8 unk_0410C[2];
     /* 0x0410E */ u8 evoCandidateCount;
     /* 0x0410F */ u8 reserved0410F;

@@ -55,6 +55,10 @@ typedef struct
     } rows[256];
     /* 0x1028 */ u8 unk_1028[0x14];
 } cmpStockInfo_t;
+typedef struct {
+    cmpCursorInfo_t cursor;
+    u8 reserved[0x1004];
+} cmpCursorFullWork_t;
 
 typedef struct cmpPadStopWork_t {
     cmpCursorInfo_t cursor;
