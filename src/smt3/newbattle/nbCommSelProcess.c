@@ -1160,7 +1160,177 @@ s32 GetNextCommType(nbCommSelProcessData_t *s, s32 dir)
     return type;
 }
 
+extern s8 dds3PadButtonState[];
+extern void evtBitOff(s32 bit);
+extern void evtBitOn(s32 bit);
+extern void nbPlaySe(s32 no);
+
+#ifdef NON_MATCHING
+void SelectCommandList(nbCommSelProcessData_t *s)
+{
+    s32 se = -1;
+    s32 type;
+    s32 total;
+    s32 visible;
+    s32 cursor;
+    s32 scroll;
+
+    if ((s->data->stat & 0x200000) != 0) {
+        return;
+    }
+
+    if (s->nowtype == 3 &&
+        (dds3PadButtonState[0x26] < 0 || dds3PadButtonState[0x27] < 0 ||
+         ((u8)dds3PadButtonState[0x26] & 2) != 0 ||
+         ((u8)dds3PadButtonState[0x27] & 2) != 0) && s->cnt == 2) {
+        s32 delta = s->nowcursor[s->nowtype] - s->nowlisty[s->nowtype];
+        if (((dds3PadButtonState[0x26] < 0 ||
+              ((u8)dds3PadButtonState[0x26] & 2) != 0) && delta == 0) ||
+            ((dds3PadButtonState[0x27] < 0 ||
+              ((u8)dds3PadButtonState[0x27] & 2) != 0) && delta == 1)) {
+            s->cnt = 3;
+            s->animeflag |= 4;
+        }
+    }
+    if ((s->animeflag & 4) != 0) {
+        return;
+    }
+
+    visible = GetCommListCnt(s, s->nowtype);
+    type = s->nowtype;
+    total = s->commcnt[type];
+    cursor = s->nowcursor[type];
+    scroll = s->nowlisty[type];
+
+    if (total >= 2) {
+        u8 up = dds3PadButtonState[0x26];
+        u8 down;
+
+        if (((u8)up & 2) != 0) {
+            if ((s8)up < 0 && cursor == 0) {
+                cursor = total - 1;
+                scroll = total - visible;
+                if (scroll < 0) {
+                    scroll = 0;
+                }
+                se = 4;
+            } else if (cursor != 0) {
+                s32 oldCursor = cursor;
+
+                cursor--;
+                if (visible >= 4 && oldCursor <= scroll + 1) {
+                    scroll--;
+                    if (scroll < 0) {
+                        scroll = 0;
+                    }
+                } else {
+                    scroll -= cursor < scroll;
+                }
+                se = 4;
+            }
+        }
+        down = dds3PadButtonState[0x27];
+        if ((down & 2) != 0) {
+            if ((s8)down < 0 && cursor == total - 1) {
+                cursor = 0;
+                scroll = 0;
+                se = 4;
+            } else if (cursor != total - 1) {
+                s32 oldCursor = cursor;
+
+                cursor++;
+                if (visible >= 4 && oldCursor >= scroll + visible - 2) {
+                    scroll++;
+                    if (scroll > total - visible) {
+                        scroll = total - visible;
+                    }
+                } else if (cursor >= scroll + visible) {
+                    scroll++;
+                }
+                se = 4;
+            }
+        }
+        s->nowcursor[type] = cursor;
+        type = s->nowtype;
+        s->nowlisty[type] = scroll;
+        type = s->nowtype;
+        s->commcnt[type] = total;
+    }
+
+    (void)nbGetUnitWorkPointer(s->data, s->my);
+
+    if (((u8)dds3PadButtonState[0x24] & 2) != 0) {
+        s32 nextType = GetNextCommType(s, 0);
+        s32 oldType = s->nowtype;
+        if (nextType != oldType) {
+            s8 button = dds3PadButtonState[0x24];
+            if (button < 0 || nextType < oldType) {
+                s->nowtype = nextType;
+                se = 4;
+            }
+        }
+    }
+    if (((u8)dds3PadButtonState[0x25] & 2) != 0) {
+        s32 nextType = GetNextCommType(s, 1);
+        s32 oldType = s->nowtype;
+        if (nextType != oldType) {
+            s8 button = dds3PadButtonState[0x25];
+            if (button < 0 || oldType < nextType) {
+                s->nowtype = nextType;
+                se = 4;
+            }
+        }
+    }
+
+    if (((u8)dds3PadButtonState[0x21] & 2) != 0) {
+        if (CheckSelectError(s) == 0) {
+            s->stat = 3;
+            MemoryCommand(s);
+        } else if (dds3PadButtonState[0x21] < 0) {
+            se = 0xD;
+        }
+    } else if (dds3PadButtonState[0x23] < 0) {
+        if (s->nowtype != 0 || s->nowcursor[0] != 0 || s->nowlisty[0] != 0) {
+            s->nowtype = 0;
+            s->nowcursor[0] = 0;
+            s->nowlisty[s->nowtype] = 0;
+            se = 0xA;
+        }
+    } else if (dds3PadButtonState[0x20] < 0) {
+        volatile nbCommSelProcessData_t *state = s;
+        s32 count = state->commcnt[0];
+        state->nowtype = 0;
+        if (count > 0) {
+            s32 i = 0;
+            count = state->commcnt[0];
+            do {
+                if (s->commlist[0][i] == 0x8002) {
+                    s->nowcursor[0] = i;
+                    break;
+                }
+                i++;
+            } while (i < count);
+        }
+        s->stat = 3;
+        MemoryCommand(s);
+        se = 8;
+    }
+
+    if (dds3PadButtonState[0x2D] < 0) {
+        if (evtBitCheck(0xC0E) != 0) {
+            evtBitOff(0xC0E);
+        } else {
+            evtBitOn(0xC0E);
+        }
+        se = 8;
+    }
+    if (se >= 0) {
+        nbPlaySe(se);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", SelectCommandList);
+#endif
 
 void SelectCommandListAuto(nbCommSelProcessData_t *s)
 {
