@@ -105,7 +105,89 @@ s32 makaGetBarCell(s32 maka, s32 digit)
 
 INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawNormal);
 
+typedef struct { f32 value[7]; } makaEaseTable_t;
+extern const makaEaseTable_t D_00548FD8;
+extern void eglLinkAlpha(s32 alpha);
+extern void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy);
+extern void makaDrawGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha);
+
+#ifdef NON_MATCHING
+void makaDrawSingle(tagMakaObject_t *object)
+{
+    makaEaseTable_t easeTable = D_00548FD8;
+    s8 phase = (s8)(16 - (s32)object->count);
+    s32 value = object->maka;
+    f32 easing;
+    f32 alpha = 0.0f;
+
+    eglLinkAlpha(1);
+
+    if (phase < 8) {
+        easing = easeTable.value[phase - 1];
+    } else if (phase < 12) {
+        easing = (11 - phase) * 0.25f;
+    } else {
+        easing = 0.0f;
+    }
+
+    if (phase < 2) {
+        alpha = 1.0f;
+    } else if (phase < 13) {
+        alpha = (12 - phase) / 11.0f;
+    } else {
+        alpha = 0.0f;
+    }
+
+    if (phase < 8) {
+        value &= 0xFFFF;
+        makaDrawBar(object->pos[0],
+                    (s32)(object->pos[1] * (1.0f - easing)
+                         + (object->pos[1] - 40) * easing), value,
+                    (u32)(alpha * 128.0f), 1.3f, 1.3f);
+    } else {
+        value &= 0xFFFF;
+        makaDrawBar(object->pos[0],
+                    (s32)((object->pos[1] - 40) * easing
+                         + (object->pos[1] + 3) * (1.0f - easing)), value,
+                    (u32)(alpha * 128.0f), 1.3f, 1.3f);
+    }
+
+    if (phase < 7) {
+        alpha = 0.0f;
+    } else if (phase < 8) {
+        alpha = 1.0f;
+    } else {
+        alpha = (16 - phase) / 9.0f;
+    }
+    makaDrawBar(object->pos[0], object->pos[1] - 40, (u16)value,
+                (u8)(u32)(alpha * 25.0f), 1.5f, 1.7f);
+
+    if (phase < 5) {
+        easing = 0.0f;
+    } else if (phase < 12) {
+        easing = (phase - 4) / 7.0f;
+    } else {
+        easing = 1.0f;
+    }
+    if (phase < 4) {
+        alpha = 0.0f;
+    } else if (phase < 8) {
+        alpha = (phase - 3) * 0.25f;
+    } else if (phase < 12) {
+        alpha = (11 - phase) * 0.25f;
+    } else {
+        alpha = 0.0f;
+    }
+    makaDrawGauge(0x100, 0x94,
+                  1.0f - easing + easing * 1.3f,
+                  1.0f - easing + easing * 1.8f,
+                  alpha * 76.0f);
+}
+
+
+#else
 INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawSingle);
+#endif
 
 extern void eglLinkAlpha(s32 alpha);
 extern void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy);
