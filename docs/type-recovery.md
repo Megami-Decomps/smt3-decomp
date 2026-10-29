@@ -41,6 +41,21 @@ The `const s32` in an `INCLUDE_ASM` invocation describes the imported assembly
 symbol and is not evidence of a function's C signature. Check the native return
 paths and actual callers before adopting an inherited declaration.
 
+## Partial battle views retain recovered names
+
+The60-byte devil-format row already names bytes0x3A/0x3B `attackinterval` and
+`reserve1`; a local view must not replace them with an unknown tail. Likewise,
+the38-byte encounter row names `flag` at0x20 and `mae` at0x24. Split its opaque
+gaps around those fields rather than hiding them inside a larger byte array.
+The remaining0x1C..0x1F and0x22 bytes stay unnamed.
+
+The action unit reuses its existing persistent-unit view for the unit at0xA54
+instead of declaring a second alias over the known save-work prefix. The AI
+records are a different case: native indexing establishes stride0xA4 after four
+five-entry tables of eight bytes each. Their final word at0xA0 has no recovered
+member name; both local AI views retain that precise unknown in the naming
+inventory. No role is invented merely to satisfy the checker.
+
 ## Sources
 
 Same order of authority as [IDB corrections](idb-corrections.md).

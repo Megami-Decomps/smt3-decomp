@@ -10,7 +10,7 @@
 # fails, so a named constant cannot quietly go back to being a literal.
 # LOAD3 and SOUND_PTNTEST are HD-only modes absent from the retail 43-entry
 # administrator table; fe9aff3d removes them from the adopted header.
-# 0 types, 1109 members, 504 adopted constants.
+# 0 types, 1111 members, 504 adopted constants.
 
 
 member _FRQ.unk00
@@ -208,6 +208,7 @@ member cmpStockSeqInfo_t.unk_18
 member cmpStockSeqInfo_t.unk_19
 member cmpStockWork_t.unk_00AC
 member datCommentEntry_t.unk_03
+member datDevilAIData_t.unk_A0
 member datDevilAI_t.unk_00
 member datDevilAI_t.unk_A4
 member datDevilInfo_t.unk_01
@@ -625,6 +626,7 @@ member nbActionProcessData_t.unk_6C
 member nbAkumaSelect_t.unk00
 member nbAkumaSelect_t.unk0A
 member nbAkumaSelect_t.unk0C
+member nbBadCurseAiData_t.unk_A0
 member nbBlurParam_t.unk04
 member nbBlurParam_t.unk08
 member nbBlurParam_t.unk0C

@@ -130,7 +130,8 @@ typedef struct nbDevilInfo_t {
     u8 unk0E[0x2A];
     s8 attackattr;
     u8 attackcnt;
-    u8 unk3A[2];
+    u8 attackinterval;
+    u8 reserve1;
 } nbDevilInfo_t;
 
 extern nbDevilInfo_t datDevilTable[];
@@ -155,9 +156,11 @@ typedef struct nbEncountForm_t {
     u8 formationtype;
     u8 unk05;
     u16 id[11];
-    u8 unk1C[7];
+    u8 unk_1C[4];
+    u16 flag;
+    u8 unk_22;
     u8 nakamayobi;
-    u8 unk24[2];
+    u16 mae;
 } nbEncountForm_t;
 
 void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag);

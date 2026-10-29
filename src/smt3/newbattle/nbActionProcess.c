@@ -1109,12 +1109,6 @@ INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438B0);
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438C0);
 
 #ifdef NON_MATCHING
-typedef struct {
-    u8 unk00[0xA54];
-    datUnitWork_t unit[16];
-} nbInotiGlobalWork_t;
-extern nbInotiGlobalWork_t *nbInotiGlobalWork asm("DDS3_GBWK");
-
 s32 CheckInotiNego(nbActionProcessData_t *a)
 {
     nbFormation_t *form;
@@ -1163,7 +1157,7 @@ s32 CheckInotiNego(nbActionProcessData_t *a)
         if ((a->data->stat & 0x2000000) != 0) {
             rate = 100;
         } else {
-            if (nbInotiGlobalWork->unit[0].level < work->level) {
+            if (((dds3LiveBattleUnitsView_t *)DDS3_GBWK)->units[0].level < work->level) {
                 continue;
             }
             rate = 6;
