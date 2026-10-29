@@ -70,26 +70,7 @@ extern s32 dds3AdminiGetPrevHistoryFlag(void);
 
 extern void fldDoor_EveBtlExit(s32 field, s32 eveno);
 
-typedef struct {
-    u8 safeUnitPoint[0x30];
-    u32 flag;
-    s32 mode;
-    u32 sequenceWord38;
-    u32 pointResrcID;
-    char pointResName[16];
-    s32 loadField;
-    s32 loadArea;
-    s32 loadScript;
-    s32 callmode;
-    u16 bgm;
-    s16 bgmMode;
-    s32 camMode;
-    u8 unk68[8];
-    char camName[16];
-    char FoceScript[16];
-    u32 loadMode;
-    u8 unk94[12];
-} fldSceneParam_t;
+
 
 typedef struct {
     u32 flags;

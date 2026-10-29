@@ -226,26 +226,7 @@ extern s32 fldDoorWarpTarget;
 extern doormovetbl_s fldDoorTable[256];
 
 /* The 0xA0 scene request block dds3AdminiCallSequence(6, ...) takes. */
-typedef struct {
-    u8 safeUnitPoint[0x30];
-    u32 flag;
-    s32 mode;
-    u32 sequenceWord38;
-    u32 pointResrcID;
-    char pointResName[16];
-    s32 loadField;
-    s32 loadArea;
-    s32 loadScript;
-    s32 callmode;
-    u16 bgm;
-    u16 bgmMode;
-    s32 camMode;
-    u8 unk68[8];
-    char camName[16];
-    char FoceScript[16];
-    u32 loadMode;
-    u8 unk94[12];
-} fldSceneParam_t;
+
 
 extern void fldSetSceneParam4(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
                               s32 bgm, s32 camMode, const char *camName);
