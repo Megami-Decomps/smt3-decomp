@@ -624,7 +624,33 @@ s32 rstChkSkillPowerUp1(void)
     return ret;
 }
 
+#ifdef NON_MATCHING
+s32 rstChkSkillPowerUp2(void)
+{
+    u32 roll;
+
+    if (EventStart->unit->id == 0) {
+        roll = dds3GetRandA(NULL) % 254;
+        if (roll < 112) {
+            return 0;
+        }
+        if (roll < 254) {
+            return 1;
+        }
+        return 2;
+    }
+    roll = dds3GetRandA(NULL) % 254;
+    if (roll < 128) {
+        return 0;
+    }
+    if (roll < 254) {
+        return 1;
+    }
+    return 2;
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", rstChkSkillPowerUp2);
+#endif
 
 extern s32 rstFindPowerUpSkill(u16 skillId);
 
