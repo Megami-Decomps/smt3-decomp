@@ -78,3 +78,12 @@ Correcting the caller declaration keeps the switch root constant 0x4A in
 `$3`, matching retail; the void declaration puts it in `$2` and differs in
 that constant load and its branch operand. The caller discards the result.
 The other camp caller, `cmpExecRecover`, remains exact with the real contract.
+
+`code_0022C578::camp_update_stock_Process` supplies a forward-declaration case.
+Its first `cmpUpdateCursorSlots` call had an implicit integer result despite
+the later definition and other consumers establishing a void contract. The
+following global reload used `$3` instead of retail's `$2`, leaving two of
+35 words different. A truthful void declaration before the caller matches
+all 140 bytes; the updater remains assembly-backed under its existing guard.
+The complete owner also matches with the process callback and data accessor
+typed with `dds3ProcessID_t *`.

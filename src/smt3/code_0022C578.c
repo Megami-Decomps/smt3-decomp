@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -491,7 +492,7 @@ extern char *D_00349388[];
 
 extern s8 dds3PadButtonState[];
 
-extern void *dds3GetProcessData(s32 id);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
 extern s8 shpProcessStat;
 
@@ -3211,7 +3212,7 @@ void camp_update_stock_Shutdown(void)
 
 extern s32 camp_calc_stock_Process(s32 id);
 extern s32 camp_draw_stock_Process(s32 id);
-extern s32 camp_update_stock_Process(s32 id);
+extern s32 camp_update_stock_Process(dds3ProcessID_t *id);
 
 void *cmpStartProcessStock(cmpLocalStock_t *stock, s32 value)
 {
@@ -3352,11 +3353,10 @@ s32 camp_draw_stock_Process(s32 id)
     return 0;
 }
 
-/* NON_MATCHING: 2 of 35 words differ, exact size; both are one register name. */
-#ifdef NON_MATCHING
 extern cmpStockSeqInfo_t *cmpStockUpdateState;
+extern void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor);
 
-s32 camp_update_stock_Process(s32 id)
+s32 camp_update_stock_Process(dds3ProcessID_t *id)
 {
     cmpGetPressedButton(0x30);
     cmpStockUpdateState = dds3GetProcessData(id);
@@ -3370,9 +3370,6 @@ s32 camp_update_stock_Process(s32 id)
     cmpUpdateCursorSlots((cmpCursorInfo_t *)((u8 *)cmpStockUpdateState->stock + 0x10E8));
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", camp_update_stock_Process);
-#endif
 
 void cmpSetDHEntry(s8 id) {
 }
