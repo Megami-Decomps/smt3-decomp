@@ -1181,7 +1181,57 @@ s32 datGetDevilRace(s8 index)
     return D_00339E00[index].race & 7;
 }
 
+extern void *memset(void *dst, s32 value, u32 size);
+extern s8 datCountPlayerLND(void);
+
+#ifdef NON_MATCHING
+s32 datGetPlayerLNDList(u8 *outCount)
+{
+    s8 counts[3];
+    s32 result = 0;
+    s32 count;
+    s32 i;
+
+    memset(counts, 0, sizeof(counts));
+    for (i = 0; i < DDS3_GBWK->heartscnt; i++) {
+        s8 id = DDS3_GBWK->hearts[i];
+
+        if (datDevilIsRegistered((u8)id) != 0) {
+            switch (datGetDevilRace(id)) {
+            case 1:
+                counts[0]++;
+                break;
+            case 0:
+                counts[1]++;
+                break;
+            case 4:
+                counts[2]++;
+                break;
+            }
+        }
+    }
+    if (counts[0] != counts[2] &&
+        (counts[0] >= counts[1] || counts[2] >= counts[1])) {
+        result = counts[0] < counts[2] ? 4 : 1;
+    }
+    count = datCountPlayerLND();
+    if (count < 6) {
+        count /= 2;
+    } else if (count == 25) {
+        count = 5;
+    } else if (count < 12) {
+        count = 3;
+    } else {
+        count = 4;
+    }
+    if (outCount != NULL) {
+        *outCount = count;
+    }
+    return result;
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", datGetPlayerLNDList);
+#endif
 
 s8 datGetDevilSlotIndex(u8 devilId)
 {
