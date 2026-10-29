@@ -613,8 +613,7 @@ zero:
 }
 
 #ifdef NON_MATCHING
-typedef struct { u16 rate; u16 skill; u32 target; } nbBadCurseAiEntry_t;
-typedef struct { nbBadCurseAiEntry_t table[4][5]; u32 reserved_A0; } nbBadCurseAiData_t;
+typedef struct { datDevilAITbl_t table[4][5]; u32 reserved_A0; } nbBadCurseAiData_t;
 extern nbBadCurseAiData_t D_00398A08[];
 extern s32 nbSkillIsInRange(s32 skill, s32 type);
 

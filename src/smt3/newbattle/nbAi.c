@@ -239,9 +239,6 @@ extern s32 nbRunAiSub(nbActionProcessData_t *a, s32 tbl);
 
 extern char D_00545728[];
 
-/* One devil AI action: its weight, the skill it picks and the target rule. */
-typedef struct { u16 ritu; u16 skill; u32 target; } datDevilAITbl_t;
-
 extern u8 D_00398A08[];
 
 extern s32 datGetPlayerLevel(void);
