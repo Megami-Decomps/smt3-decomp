@@ -508,6 +508,8 @@ extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDr
 
 extern s32 D_00326728[8];
 
+extern itfColor_t D_00326748[2];
+
 
 extern u8 D_00326768[];
 
@@ -515,7 +517,7 @@ extern u8 D_00326770[];
 
 extern void itfMiscDrawSpritePlanePrim(void *pos, void *color, s32 z, s32 context, sdfDrawTag_t *pdrawtag);
 
-extern void itfMiscDrawRectanglePrim(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 tail, sdfDrawTag_t *command);
+extern void itfMiscDrawRectanglePrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, sdfDrawTag_t *command);
 
 extern void itfMiscDrawSpritePrim2(void *pos, void *uv, void *color, s32 z, s32 context, sdfDrawTag_t *pdrawtag);
 
@@ -2575,7 +2577,7 @@ void DrawSelectCursor(instanceMes_tag *pinst) {
     D_00326728[3] = y - 8;
     D_00326728[5] = y + 0xA8;
     D_00326728[7] = y + 0xA8;
-    itfMiscDrawRectanglePrim(D_00326728, "W", D_00326768, D_00326770, pinst->z, list);
+    itfMiscDrawRectanglePrim((sdfIVector2_t *)D_00326728, D_00326748, D_00326768, D_00326770, pinst->z, list);
     uv[0] = 0x150;
     uv[1] = 0x2F0;
     uv[2] = 0x1B0;
