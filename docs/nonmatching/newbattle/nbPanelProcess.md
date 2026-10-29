@@ -70,6 +70,10 @@ The animation alpha must be a named local assigned before `nbPnl_rsetAlpha`:
 as the colour argument. Folding the shift into the argument computes it after
 the call in a call-clobbered register and cost 106 differing words.
 
+Not yet tried here: the per-block byte offset and akuma pointer that closed the
+same share in nbPanelDrawPP, `ofs = j * sizeof(fldAnahoriAkuma_t) + 0xA50;`
+with its own block-scope pointer in each block.
+
 The eight remaining words are two subexpressions that cse1 shares here and
 retail recomputes: `(y + 2) << 3`, shared between the two
 frwGetSmallNumFontFRQ calls, and `236 * j + 0xA50`, shared between the HP bar
