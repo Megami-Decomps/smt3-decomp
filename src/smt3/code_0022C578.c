@@ -9783,7 +9783,59 @@ s32 cmpMoveCursor2(cmpCursorInfo_t *cursor, s8 dir)
     } while (0);
 }
 
+#ifdef NON_MATCHING
+void cmpChangeCursorListNums(s32 countValue, u8 *cursorData)
+{
+    cmpCursorInfo_t *cursor = (cmpCursorInfo_t *)cursorData;
+    volatile cmpCursorInfo_t *live = cursor;
+    u8 count = countValue;
+    u8 oldCount = live->unk_20;
+    u8 visible;
+    u8 range;
+    s32 offset;
+
+    if (count == oldCount) {
+        return;
+    }
+    if (oldCount == 0) {
+        cmpInitCursorRange(cursor, count, count, 0);
+        return;
+    }
+    visible = live->unk_26;
+    if (count < visible) {
+        cursor->unk_26 = count;
+        visible = count;
+        range = count;
+    } else {
+        range = live->unk_26;
+        if (count != 0 && count < oldCount) {
+            s32 remaining = count - cursor->unk_22;
+            u16 position = live->unk_22;
+            if (remaining < range) {
+                u8 total = live->unk_20;
+                cursor->unk_22 = position - (total - count);
+            }
+        }
+    }
+    if ((u8)cursor->unk_24 >= visible) {
+        cursor->unk_24 = visible - 1;
+    }
+    offset = range - (s8)cursor->unk_21 - 1;
+    if (offset >= (u8)cursor->unk_25) {
+        cursor->unk_25 = offset;
+    }
+    if (cursor->CursorPos != 0) {
+        offset = (range - 1) * cursor->StepY;
+        if (offset < cursor->CursorPos - cursor->unk_1C) {
+            cursor->CursorPos = offset + cursor->unk_1C;
+        }
+    }
+    cursor->unk_20 = count;
+    cmpClearCursorSlots(cursor);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpChangeCursorListNums);
+#endif
 
 void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor)
 {
