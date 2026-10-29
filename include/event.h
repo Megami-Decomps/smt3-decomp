@@ -251,7 +251,10 @@ typedef struct evtUnit_t {
         u32 color64;
     };
     void *endpointWork;
-    u32 value;
+    union {
+        u32 value;
+        struct sdf3DLightParallelPacket_t *lightPacket;
+    };
     f32 targetVector[4];           /* 0x70 */
     dds3Basic_t *effObj;           /* 0x80 */
     s32 currentTransitionValue;

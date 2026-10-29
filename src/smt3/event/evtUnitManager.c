@@ -3,6 +3,10 @@
 #include "kernel.h"
 #include "ps2asm.h"
 
+#ifdef NON_MATCHING
+extern void *memset(void *dst, s32 value, u32 size);
+#endif
+
 
 f32 dds3PathBasicControlGetRatio(const dds3PathBasicControl_t *pControl);
 
@@ -759,7 +763,7 @@ void MakeLightPacket(evtUnit_t *h) {
     if (flags & 0x20000) {
         return;
     }
-    h->value = 0;
+    h->lightPacket = NULL;
     if ((flags & 0x40000) == 0) {
         if ((flags & 0x700) == 0) {
             return;
@@ -782,7 +786,7 @@ void MakeLightPacket(evtUnit_t *h) {
         channel++;
     }
     sdf3DMakeLightParallelPacket(h->endpointWork, lights, &ambient);
-    h->value = (u32)h->endpointWork;
+    h->lightPacket = h->endpointWork;
 }
 
 void evtLinkLightObjectBasic(evtUnit_t *h, dds3Basic_t *light, s32 frame) {
@@ -817,9 +821,9 @@ void evtUnlinkLightObjectBasic(evtUnit_t *h, s32 frame) {
     }
 }
 
-void func_001E35B0(evtUnit_t *unit, u32 value)
+void func_001E35B0(evtUnit_t *unit, struct sdf3DLightParallelPacket_t *value)
 {
-    unit->value = value;
+    unit->lightPacket = value;
     unit->flags = unit->flags | EVT_UNIT_FLAG_VALUE_CHANGED;
 }
 
@@ -948,8 +952,8 @@ evtUnit_t *evtCreateUnitHandle(dds3Basic_t *owner, mdlObj_t *model) {
     sdfVector4_t axis;
 
     axis = D_0053A850;
-    work = sdfChipAllocDirect(0x148);
-    memset(work, 0, 0x148);
+    work = sdfChipAllocDirect(sizeof(*work));
+    memset(work, 0, sizeof(*work));
     work->motionState = EVT_UNIT_MOTION_STATE_IDLE;
     work->waitBlendEnd = 10;
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
@@ -968,7 +972,7 @@ evtUnit_t *evtCreateUnitHandle(dds3Basic_t *owner, mdlObj_t *model) {
     work->color50 = 0x80303030;
     work->endpointWork = sdfChipAllocDirect(0xE0);
     memset(work->endpointWork, 0, 0xE0);
-    work->value = 0;
+    work->lightPacket = NULL;
     return work;
 }
 
