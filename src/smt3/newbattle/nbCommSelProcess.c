@@ -1456,12 +1456,7 @@ typedef struct {
 } nbCommItem_t;
 extern nbCommItem_t datItemTable[];
 
-/* Negotiation rows are 0x68 bytes; NbNegoFlowOne reads the same first word. */
-typedef struct {
-    u32 type;
-    u8 remainder[0x64];
-} nbCommNegoSkill_t;
-extern nbCommNegoSkill_t D_003E1338[];
+extern nbNegoSkillEntry_t D_003E1338[];
 
 /* Partial save-work view: datAddDevil corroborates the unit, stock-list
  * and count offsets; this routine reads the following inventory bytes. */
@@ -1557,7 +1552,7 @@ void SetCommList(nbCommSelProcessData_t *s, struct nbParty_t *my)
         case 1:
             break;
         case 2:
-            if (D_003E1338[entry - 0x180].type < 7) {
+            if ((u32)D_003E1338[entry - 0x180].requestmode < 7) {
                 s->commlist[1][s->commcnt[1]] = entry;
                 s->commdisable[1][s->commcnt[1]] = 0;
                 if (badstatus == 0x200) {
