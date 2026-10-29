@@ -1210,7 +1210,109 @@ INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F00);
 
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F10);
 
-INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", InitNegoProcessData);
+/* Negotiation skills have a 0x68-byte record; the first word selects request mode. */
+typedef struct { s32 requestmode; u8 remainder[0x64]; } nbNegoSkillEntry_t;
+extern nbNegoSkillEntry_t D_003E1338[];
+typedef struct { void *flow; void *aisyo; void *question; void *info; } nbNegoMsgEntry_t;
+extern nbNegoMsgEntry_t negoMsgTable[];
+extern u8 itfMesEmbedded_4EB810[], itfMesEmbedded_4EE8B0[];
+extern u8 itfMesEmbedded_4EF0C8[], itfMesEmbedded_4E3DD8[];
+extern void *sdfChipAllocDirect(s32 size);
+extern void *memset(void *dest, s32 value, u32 size);
+extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 index);
+extern nbParty_t *nbGetPartyFromFormindex(s32 index);
+typedef struct itfMesResource_t itfMesResource_t;
+extern s32 itfMesMngInitialize(itfMesResource_t *message);
+extern s32 nbMemoryLoadNegoSe(nbFormation_t *form);
+
+nbNegoProcessData_t *InitNegoProcessData(nbActionProcessData_t *actdata, s32 pformindex,
+                                      s32 eformindex, s32 negotype, s32 skillid)
+{
+    nbNegoProcessData_t *n;
+    nbNegoMsgEntry_t *message;
+    s32 skillindex;
+    s32 requesttype = 0;
+    s32 i;
+
+    n = sdfChipAllocDirect(sizeof(*n));
+    memset(n, 0, sizeof(*n));
+    n->actdata = actdata;
+    n->data = actdata->data;
+    switch (negotype) {
+    case 0:
+    case 6: n->nownegoid = 0x10007; break;
+    case 1: n->nownegoid = 0xC0001; skillid = 0x180; break;
+    case 2: n->nownegoid = 0xD0001; skillid = 0x180; break;
+    case 3: n->nownegoid = 0xE0001; break;
+    case 4: n->nownegoid = 0xF0001; skillid = 0x180; break;
+    case 5: n->nownegoid = 0x100001; skillid = 0x180; break;
+    }
+    n->negotype = negotype;
+    n->nowmsgid = -1;
+    n->msgwndid = -1;
+    n->prevreqtype = -1;
+    n->flag1_6 = 0;
+    n->flag1_39 = 0;
+    skillindex = skillid - 0x180;
+    switch (D_003E1338[skillindex].requestmode) {
+    case 0: requesttype = 0; break;
+    case 1: requesttype = 2; break;
+    case 2: requesttype = 3; break;
+    case 3: requesttype = 4; break;
+    case 4: requesttype = 1; break;
+    case 5: requesttype = 5; break;
+    case 6: requesttype = 6; break;
+    case 7: break;
+    }
+    n->negoreqtype = requesttype;
+    n->negoskillid = skillid;
+    n->pwork = nbGetUnitWorkFromFormindex(pformindex);
+    n->pparty = nbGetPartyFromFormindex(pformindex);
+    n->pform = &n->data->form[pformindex];
+    n->pformindex = pformindex;
+    n->ppartyindex = n->pform->partyindex;
+    n->ework = nbGetUnitWorkFromFormindex(eformindex);
+    n->eparty = nbGetPartyFromFormindex(eformindex);
+    n->eform = &n->data->form[eformindex];
+    n->eformindex = eformindex;
+    n->epartyindex = n->eform->partyindex;
+    n->pkucyo = master_text[n->pwork->id].mesno;
+    n->ekucyo = master_text[n->ework->id].mesno;
+    for (i = 0; i < 31; i++) {
+        n->flowmsg[i] = -1;
+        if (negoMsgTable[i].flow) {
+            n->flowmsg[i] = itfMesMngInitialize(negoMsgTable[i].flow);
+            nbSetNegoMesVar(n->flowmsg[i], n->pwork, n->ework);
+        }
+    }
+    message = &negoMsgTable[n->ekucyo];
+    n->questionmsg = itfMesMngInitialize(message->question);
+    nbSetNegoMesVar(n->questionmsg, n->pwork, n->ework);
+    for (i = 0; i < 31; i++) {
+        n->infomsg[i] = -1;
+        if (negoMsgTable[i].info) {
+            n->infomsg[i] = itfMesMngInitialize(negoMsgTable[i].info);
+            nbSetNegoMesVar(n->infomsg[i], n->pwork, n->ework);
+        }
+    }
+    for (i = 0; i < 31; i++) {
+        n->aisyomsg[i] = -1;
+        if (negoMsgTable[i].aisyo) {
+            n->aisyomsg[i] = itfMesMngInitialize(negoMsgTable[i].aisyo);
+            nbSetNegoMesVar(n->aisyomsg[i], n->pwork, n->ework);
+        }
+    }
+    n->bossmsg = itfMesMngInitialize((itfMesResource_t *)itfMesEmbedded_4EB810);
+    nbSetNegoMesVar(n->bossmsg, n->pwork, n->ework);
+    n->helpmsg = itfMesMngInitialize((itfMesResource_t *)itfMesEmbedded_4EE8B0);
+    nbSetNegoMesVar(n->helpmsg, n->pwork, n->ework);
+    n->helpmsg2 = itfMesMngInitialize((itfMesResource_t *)itfMesEmbedded_4EF0C8);
+    nbSetNegoMesVar(n->helpmsg2, n->pwork, n->ework);
+    n->innenmsg = itfMesMngInitialize((itfMesResource_t *)itfMesEmbedded_4E3DD8);
+    nbSetNegoMesVar(n->innenmsg, n->pwork, n->ework);
+    nbMemoryLoadNegoSe(n->eform);
+    return n;
+}
 
 void nbInitNegoProcess(nbActionProcessData_t *actdata, s32 pformindex, s32 eformindex, s32 negotype,
                       s32 skillid)
