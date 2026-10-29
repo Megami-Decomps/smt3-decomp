@@ -168,7 +168,7 @@ extern char D_005440D8[];
 
 extern void nbPlaySe(s32 no);
 
-extern struct nbKoukaPacket_t *nbAddSePacket(s32 startframe, void *uniqueid, s32 se);
+extern struct nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se);
 
 extern void nbPanelStockEnd(void);
 
@@ -182,11 +182,11 @@ extern void SetTarget_nbActionProcess(nbActionProcessData_t *a);
 
 extern s32 AddTimeListHp(nbActionProcessData_t *a, s32 formindex, s32 add);
 
-extern s32 nbMakeDamagePacket(s32 startframe, nbActionProcessData_t *uniqueid, nbFormation_t *form,
+extern s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                               s32 type, s32 hp, s32 mp, s32 badstat, s32 hiteff, s32 dead,
                               s32 deadtype, s32 moji, s32 animeoff);
 
-extern struct nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, nbActionProcessData_t *uniqueid,
+extern struct nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, s32 uniqueid,
                                                     s32 id);
 
 extern s32 nbCheckKuisibariSkill(s32 formindex);
@@ -229,7 +229,7 @@ extern s32 nbMakeNewPressPacket(s32 startframe, nbActionProcessData_t *uniqueid,
                                 nbFormation_t *form);
 
 extern struct nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame,
-                                                       nbActionProcessData_t *uniqueid,
+                                                       s32 uniqueid,
                                                        nbFormation_t *form, s32 type);
 
 extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, nbActionProcessData_t *uniqueid,
@@ -589,7 +589,7 @@ void SetSakePacket(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s32 dfo
 void SetMissPacket(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s32 dformindex,
                    s32 cnt, s32 frame)
 {
-    nbAddMojiEffKoukaPacket(frame, 0x2D, a, &a->data->form[dformindex], 3);
+    nbAddMojiEffKoukaPacket(frame, 0x2D, (s32)a, &a->data->form[dformindex], 3);
     SetTimeList(a, dformindex, frame, 10, 20);
     SetPress(a, -2.0f);
     SetNewPress(a, 4);
@@ -600,7 +600,7 @@ void SetOngShadowPacket(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s3
 {
     s32 i;
 
-    nbAddMojiEffKoukaPacket(frame, 0x2D, a, &a->data->form[dformindex], 4);
+    nbAddMojiEffKoukaPacket(frame, 0x2D, (s32)a, &a->data->form[dformindex], 4);
     nbAddOngOutPacket(frame, a, &a->data->form[dformindex]);
     nbAddUnitAKoukaPacket(frame + 1, a, &a->data->form[dformindex], 0, 0);
     nbMakeDeadPacket(frame + effPCPBossONGYGetLength(), a, &a->data->form[dformindex], 1);
@@ -1136,7 +1136,7 @@ void SetDamagePacket(nbActionProcessData_t *a, s32 hp)
         if (hp > 0) {
             if (hp >= GetTimeListHp(a, a->form->formindex)) {
                 hp = GetTimeListHp(a, a->form->formindex) - 1;
-                nbAddSkillNamePacket(start, a, 0x159);
+                nbAddSkillNamePacket(start, (s32)a, 0x159);
                 nbSetKuisibariStop(a->form->formindex);
             }
         }
@@ -1144,14 +1144,14 @@ void SetDamagePacket(nbActionProcessData_t *a, s32 hp)
         if (hp > 0) {
             if (hp >= GetTimeListHp(a, a->form->formindex)) {
                 hp = GetTimeListHp(a, a->form->formindex) - 1;
-                nbAddSkillNamePacket(start, a, 0x168);
+                nbAddSkillNamePacket(start, (s32)a, 0x168);
                 nbSetKuisibariStop(a->form->formindex);
             }
         }
     }
     AddTimeListHp(a, a->form->formindex, -hp);
     dead = CheckTimeListDead(a, a->form->formindex) != 0;
-    nbMakeDamagePacket(start, a, a->form, 3, hp, -1, 0, 0, dead, 0, 1, 0);
+    nbMakeDamagePacket(start, (s32)a, a->form, 3, hp, -1, 0, 0, dead, 0, 1, 0);
     if (dead != 0) {
         SetTimeList(a, a->form->formindex, start, 0x1E, 0x1E);
         SetDeadPacket(a, a->form->formindex);
@@ -1935,7 +1935,7 @@ s32 CheckAction_ESCAPE(nbActionProcessData_t *a)
         }
         a->packettime = 0x1E;
         dds3FadeOut(0xFF, 0xFF, 0xFF, 0x14);
-        nbAddSePacket(0, a, 0x10000);
+        nbAddSePacket(0, (s32)a, 0x10000);
         SetTimeList(a, a->form->formindex, 0, 0x11, 0x11);
         break;
     default:
