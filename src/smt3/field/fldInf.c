@@ -125,7 +125,7 @@ void sdfFileRead(devState_t *aHandle, void *aPtr, s32 aLeng);
 
 void sdfFileClose(devState_t *aHandle);
 
-extern s32 sprintf(char *, const char *, ...);
+#include "sdk_libc.h"
 
 extern const char D_00531E98[];
 

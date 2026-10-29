@@ -629,7 +629,8 @@ extern f32 sdfAtan(f32 value);
 extern f32 sdfSin(f32 value);
 extern f32 sdfCos(f32 value);
 extern s32 effBTLModelGetID(nbFormation_t *form);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern sdfVector4_t D_00526400;
 extern sdfVector4_t D_00526410;
 

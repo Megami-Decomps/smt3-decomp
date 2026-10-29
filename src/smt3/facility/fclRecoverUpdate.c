@@ -477,7 +477,7 @@ void rcvUpdatePanelAnim(void)
 extern s32 rcvRootHasItems(rcvRootWork_t *work);
 extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
 extern s32 cmpChkPadPressUpDown(void);
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 void rcvUpdateSeqRoot(void)
 {

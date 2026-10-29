@@ -74,7 +74,7 @@ extern s32 dds3AdminiGetActiveSequence(void);
 
 extern void dds3AdminiExitSequence(void);
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 #define ITF_BYTE_MASK 0xFF
 

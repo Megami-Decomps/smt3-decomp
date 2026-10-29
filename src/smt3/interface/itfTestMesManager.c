@@ -64,7 +64,7 @@ extern void sdfDevSetPrintCB(pbPrintState_t *, s32, s32, s32, s32);
 
 extern void *sdfDevPrintfEx(void *, const char *, ...);
 
-extern s32 printf(const char *, ...);
+#include "sdk_libc.h"
 
 extern f32 sdfSin(f32 aRadius);
 

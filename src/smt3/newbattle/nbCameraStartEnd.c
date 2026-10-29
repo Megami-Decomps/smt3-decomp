@@ -43,7 +43,7 @@ extern u32 D_0054F37C;
 
 extern char D_00534630[];
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern u8 D_0054F370;
 

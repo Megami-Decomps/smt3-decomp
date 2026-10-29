@@ -529,7 +529,7 @@ extern f32 aViewTarget[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
 extern f32 aViewEye[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
-extern s32 sprintf(char *destination, const char *format, ...);
+#include "sdk_libc.h"
 
 extern char * strcpy(char *, const char *);
 

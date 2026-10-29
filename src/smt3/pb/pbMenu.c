@@ -118,7 +118,7 @@ extern char D_005361B0[];
 
 extern void dds3FadeOut(s32, s32, s32, s32);
 
-extern s32 sprintf(char *buf, const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern void sdfFileCmdReadFile(char *aFileName, void *aBuffer, s32 aLength, void *aCallback, s32 aUserData);
 

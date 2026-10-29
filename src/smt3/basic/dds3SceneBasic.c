@@ -31,7 +31,7 @@ extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern s32 scrSearchProcedureName(void *scrdata, char *procname);
-int printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 s32 sceneconstructor(dds3Basic_t *basic)
 {
@@ -504,10 +504,4 @@ dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name)
     }
     return NULL;
 }
-
-
-
-
-
-
 

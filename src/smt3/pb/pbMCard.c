@@ -66,7 +66,8 @@ extern void sdfChipFreeDelayedDirect(void *aPtr);
 extern s32 sceMcGetInfo(s32 a, s32 b, s32 *c, s32 *d, s32 *e);
 extern s32 sceSifLoadModule(const char *path, s32 argSize, const char *args);
 extern s32 sceMcInit(void);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern const char D_0054F600[];
 
 extern pbProcHandle_t *record;

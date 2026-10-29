@@ -258,7 +258,7 @@ extern effBTLCutHandle_t *effBTLCutCreate(effBTL_t *hBTLEffect, u16 CutNum, nbFo
 
 extern s32 effBTLGetCutEndFrame(effBTL_t *hBTLEffect, u16 CutNum);
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se);
 

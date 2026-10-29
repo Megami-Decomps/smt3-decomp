@@ -856,7 +856,8 @@ u8 *GetSpeakerName(instanceMes_tag *pinst);
 
 #ifdef NON_MATCHING
 extern frFontHandle_t *MessageRequestEx(s32 X, s32 Y, s32 Style, s32 ColNo, s32 Tp, s32 Spd, u8 *pMsg, frFontHandle_t *pFRQ);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern void frSetDrawPosition(frFontHandle_t *pFRQ, u32 X, u32 Y);
 extern void frSetDrawSpeed(frFontHandle_t *pFRQ, s32 Speed);
 #endif
@@ -952,9 +953,6 @@ void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker) {
     }
     InitializeSpeaker(primaryTextBlock, 0);
 }
-
-extern s32 printf(const char *format, ...);
-
 
 /* Called above its definition, where ee-gcc assumed int. */
 frFontHandle_t *GetFontHandleUnit(u32 *list, s32 count, u32 mask, s32 x, s32 y, s32 depth);
@@ -1206,11 +1204,6 @@ void itfMesMngGetVarLocalize(s32 id)
 #else
 INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesMngGetVarLocalize);
 #endif
-
-
-
-
-extern s32 sprintf(char *buffer, const char *format, ...);
 
 extern char D_0054F4C0[];
 

@@ -197,7 +197,7 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
@@ -234,8 +234,6 @@ extern void pacFileHandleFree_(void *pacHandle);
 extern s32 pacLoadUseTail(char *filename);
 
 extern void sdfMemFreeDirect(void *aHandle);
-
-extern s32 sprintf(char *buf, const char *format, ...);
 
 extern s32 nbMakeModelPackName(s32 no);
 

@@ -82,7 +82,7 @@ extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern char D_00543448[];
 

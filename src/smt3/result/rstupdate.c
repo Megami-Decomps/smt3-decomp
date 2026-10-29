@@ -242,7 +242,8 @@ void rstUpdateSeqPlayerLevelUpOnly(void)
 }
 
 extern char *cmpGetParamName(s8 index);
-extern s32 sprintf(char *buffer, const char *format, ...);
+#include "sdk_libc.h"
+
 extern char D_0054FD00[]; /* "%d", padded eight-byte small-data span. */
 
 void rstUpdateSeqDevilParam(void)
@@ -783,7 +784,6 @@ s32 rstUpdateSeqDestroySkill(void)
 
 extern u16 rstChkHeartsSkill(datUnitWork_t *unit);
 extern s32 datGetDevilSlotState(u8 devilId);
-extern s32 printf(const char *format, ...);
 
 static const char D_0053DBD8[] = "New hearts skill ID : %02x\n";
 

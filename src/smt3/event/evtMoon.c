@@ -755,7 +755,8 @@ extern void fldEsutoMaClearMsg(void);
 extern void fldRiberaMaClearMsg(void);
 extern void fldRifutoMaClearMsg(void);
 extern void fldLightMaClearMsg(void);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern s32 evtMoonMove;
 
 void evtMoonAddMove(f32 delta)

@@ -53,7 +53,8 @@ extern void titleExit(void);
 extern void titleStart(u32 mode);
 extern s32 trmCheckProcessStat(void);
 
-extern int printf(const char *fmt, ...);
+#include "sdk_libc.h"
+
 extern const char D_0052E230[];
 extern void fldProcTrigSequence(void *srcParam, u32 mode);
 extern void nmeStartProcesses(s32 arg0, s32 arg1, s32 arg2);

@@ -11,7 +11,8 @@ typedef struct dds3AreaBasicWorkData_t
 extern char D_0052F7C0[]; /* "エリアリストが見つかりません...\n" */
 extern char D_0052F7E8[]; /* "not exist a area  エリアが見つかりません...\n" */
 
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
+
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);

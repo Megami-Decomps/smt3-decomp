@@ -202,7 +202,7 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
@@ -491,7 +491,7 @@ nbStatWork_t *nbSetFormEntry(s32 id)
 }
 
 extern char D_00575450[];
-extern s32 sprintf(char *str, const char *format, ...);
+
 extern fileRequest_t *fileLoad(const char *path);
 
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545BC0);

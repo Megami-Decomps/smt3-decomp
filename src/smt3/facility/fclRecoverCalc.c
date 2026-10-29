@@ -32,7 +32,7 @@ extern char D_0053D408[];
 
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *font);
 
-extern s32 sprintf(char *out, const char *fmt, ...);
+#include "sdk_libc.h"
 
 void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 

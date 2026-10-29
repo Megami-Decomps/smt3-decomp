@@ -114,7 +114,7 @@ extern void pb_proc_dummy_Shutdown(dds3ProcessID_t *id);
 
 extern void dds3FadeOut(s32, s32, s32, s32);
 
-extern s32 sprintf(char *buf, const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern void sdfFileCmdReadFile(char *aFileName, void *aBuffer, s32 aLength, void *aCallback, s32 aUserData);
 
@@ -150,7 +150,7 @@ extern s32 pbEditWork;
  * view preserves its non-small-data address form. */
 extern pbMapEditorState_t pbMapEditorState[];
 extern pbProcHandle_t *(*D_00327260[])(pbProcHandle_t *parent);
-extern s32 printf(const char *format, ...);
+
 extern void dds3AdminiCallSequence(s32 sequence, void *data, u32 size, s32 restore);
 extern s32 p2sdStopBGM(s32 midi);
 extern char D_0054F5C0[]; /* Shared "%s\n" process-name format. */

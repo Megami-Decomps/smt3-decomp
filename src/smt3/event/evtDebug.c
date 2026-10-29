@@ -32,7 +32,7 @@ extern void dds3ConsPanelTagLink(sdfDrawTag_t *, s32, s32, s32, s32);
 
 extern void *sdfDevPrintf(u32 aX, u32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
 
-extern s32 sprintf(char *, const char *, ...);
+#include "sdk_libc.h"
 
 extern s32 sdfFileCheckExist(char *aFilename);
 

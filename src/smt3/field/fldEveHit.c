@@ -1188,7 +1188,8 @@ extern void rsetAlpha(s32 mode);
 extern void ooyTestLine3D(u32 color1, u32 color2, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
 extern s32 dds3ComparePosPoseSet(dds3PoseSet_t *left, dds3PoseSet_t *right);
 extern void fldDbgPrint2D(s32 x, s32 y, const char *str);
-extern s32 sprintf(char *buffer, const char *format, ...);
+#include "sdk_libc.h"
+
 extern const char *fldCheckNpcTalk(const char *name);
 extern const char *fldCheckNpcTalk2(const char *name);
 extern const char *fldInf_FindTypeEveNpc(const char *name);

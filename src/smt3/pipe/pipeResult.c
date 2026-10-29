@@ -46,7 +46,7 @@ extern void fclDestroyMessage(void);
 
 extern void sdfMemFreeDelayedDirect(void *aHandle);
 
-extern s32 sprintf(char *buf, const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern void fclSetMessageVar_20743088(s8 Index, char *pStr);
 

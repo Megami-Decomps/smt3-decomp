@@ -31,7 +31,7 @@ extern char D_0054E8E0[];  /* "\n" */
 extern char D_0052DF50[];  /* "%d,0x%02X]" */
 extern char D_0052DF60[];  /* "restore sequence!!\n" */
 
-int printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern dds3AdminiList_t dds3AdminiList[];
 extern void *dds3GetProcessData(dds3ProcessID_t *id);

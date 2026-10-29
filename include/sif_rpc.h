@@ -44,10 +44,8 @@ typedef char sifRpcServerData_size_must_be_0x44[
     sizeof(sifRpcServerData_t) == 0x44 ? 1 : -1];
 
 extern void sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId);
-extern void sceSifRegisterRpc(sifRpcServerData_t *server, s32 serviceId,
-                              sifRpcFunc_t handler, void *buffer,
-                              sifRpcFunc_t callback, void *callbackBuffer,
-                              sifRpcDataQueue_t *queue);
+#include "sdk_libkernl.h"
+
 extern void sceSifRpcLoop(sifRpcDataQueue_t *queue);
 
 #endif

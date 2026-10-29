@@ -426,7 +426,8 @@ void nbCameraCheckStateChange(void)
 }
 
 #ifdef NON_MATCHING
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern void nbRestartMotion(void);
 extern void nbSetEnemyFormation(nbMainProcessData_t *data);
 extern u32 effBTLDebug_CameraAllEditCheck(void);

@@ -17,7 +17,8 @@ extern dds3EffectPart_t *dds3EffectPartCopy(dds3EffectPart_t *hEffPartSrc);
 extern dds3EffectPart_t *dds3EffectPartCreate(u16 type, void *pData);
 extern void dds3EffectPartSetScale(dds3EffectPart_t *hEffPart, f32 scale);
 extern void sdfChipFreeDirect(void *aPtr);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern f32 D_0031B8B0[4];
 extern f32 D_0031B8A0[4];
 /* Non-GP BSS words: incomplete extern arrays preserve the native lui/lw

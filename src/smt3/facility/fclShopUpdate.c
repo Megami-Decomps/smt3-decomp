@@ -484,7 +484,8 @@ void shpServiceTicketItem(void)
     shopUpdateWork->unk_0001 = 0xB;
 }
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern void fclClearFlag(s8 index);
 extern s32 fclSetWorkValue(s8 index, s32 value);
 extern s32 fclScriptStart(s32 script, s32 entry, void *process);

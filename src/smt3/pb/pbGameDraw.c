@@ -98,7 +98,7 @@ struct pbProcHandle_t
 };
 
 extern void sdfChipFreeDelayedDirect(void *aPtr);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern pbMapWork_t *D_0054F5C4;
 
@@ -320,5 +320,4 @@ void pbFreeRecord(pbRecordSlot_t *slot) {
         slot->floors = NULL;
     }
 }
-
 

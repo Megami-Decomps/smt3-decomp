@@ -26,7 +26,7 @@ extern rstData_t *EventStart;
 
 extern rstData_t *GBWK_1;
 
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern char D_0053DA28[];
 

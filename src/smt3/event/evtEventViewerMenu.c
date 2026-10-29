@@ -26,11 +26,11 @@ extern u16 evt_file_minor;
 
 extern u16 D_0054F824;
 
-extern s32 sprintf(char *buf, const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern void *sdfDevPrintf(u32 aX, u32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
 
-extern s32 sceWrite(s32 a, const void *b, s32 c);
+#include "sdk_libkernl.h"
 
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 
@@ -126,9 +126,6 @@ extern u8 sdfHddValid;
 
 extern char *sdfFileGetHostRoot(void);
 
-extern s32 printf(const char *fmt, ...);
-
-extern s32 sceOpen();
 
 extern s32 sceClose(s32 a);
 
@@ -1235,7 +1232,7 @@ s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y)
 }
 s32 evtWriteRecord(s32 fd, const void *buffer, s32 size)
 {
-    return sceWrite(fd, buffer, size);
+    return sceWrite(fd, (const void *)buffer, size);
 }
 
 s32 evtCountObjType10(void)

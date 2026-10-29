@@ -73,7 +73,7 @@ extern void sdfFileCmdThreadSetLoPrio(void);
 extern void dds3RunProcessList(void);
 extern s32 dds3ProcessMain(void);
 extern void LoadExecPS2(const char *path, s32 argc, char **argv);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 void dds3FirstInit(void)
 {

@@ -203,7 +203,7 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern u32 dds3GetRandIntA(void *state, u32 limit);
 

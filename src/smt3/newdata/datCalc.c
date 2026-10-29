@@ -38,7 +38,8 @@ extern void evtBitOff(s32 no);
 extern datUnitWork_t D_003493C0;
 
 extern s32 memset(void *a, s32 b, s32 c);
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
+
 extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 extern s32 fclEncycRegist(datUnitWork_t *work, s32 overwrite);
 extern s32 datBossRashGetRec(s32 eid, s32 type);

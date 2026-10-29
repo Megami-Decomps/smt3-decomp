@@ -398,7 +398,7 @@ extern u8 *GBWK_1;
 
 extern u8 *GBWK_3;
 
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern void sdfTexFree(s32 aHandle);
 
@@ -1958,7 +1958,7 @@ extern char *pStr[];
 #ifdef NON_MATCHING
 extern s32 cmpItemHasFlag(u16 item, s8 which);
 extern s32 fclStartSelMessage(s32 message);
-extern s32 sprintf(char *str, const char *fmt, ...);
+
 extern void fclSetMessageInvalid(s8 mode);
 #endif
 
@@ -6781,7 +6781,6 @@ extern s32 fclChkMessage(void);
 extern s32 D_00345D88[5];
 extern fclSpriteTbl_t fclSpriteTable[];
 extern const char D_0054FEB0[];
-extern s32 sprintf(char *buffer, const char *format, ...);
 
 void cmpCalcItemEntry(fclPanelPos_t *pos, cmpCursorInfo_t *cursor,
                       s32 callbackContext, s8 callbackFlag, s32 alpha,

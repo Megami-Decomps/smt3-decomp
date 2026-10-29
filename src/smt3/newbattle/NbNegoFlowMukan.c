@@ -219,7 +219,7 @@ extern s32 datCheckStockFull(void);
 
 extern s32 datGetPlayerLevel(void);
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern char D_00545218[];
 

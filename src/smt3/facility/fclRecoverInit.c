@@ -31,7 +31,7 @@ extern s8 gProcessStat_2;
 
 extern char D_0053D390[];
 
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern void sdfTexFree(s32 aHandle);
 

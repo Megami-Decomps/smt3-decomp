@@ -27,7 +27,8 @@ extern s32 titleFreeWork(s32 arg);
 extern mselGlobalWork_t *gGlobal;
 
 extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
-extern s32 sprintf(char *buffer, const char *format, ...);
+#include "sdk_libc.h"
+
 extern char D_0054FD50[];
 extern char D_0054FD58[];
 extern char *datExplainTable[];
@@ -52,7 +53,7 @@ extern void eglLinkSprite(s32 x, s32 y, s32 w, s32 h,
 extern dds3TitleWork_t *titleWork;
 extern s32 D_0054FD2C, D_0054FD38, dds3KernelDebugSign;
 extern char D_0053DDA8[];
-extern s32 printf(const char *format, ...);
+
 extern void rsetOtOfs(s32 offset);
 extern void rsetAlpha(s32 mode);
 extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);

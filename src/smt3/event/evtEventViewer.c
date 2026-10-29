@@ -99,8 +99,8 @@ extern void evtViewerShutdown(s32 kind);
 extern u16 evt_file_minor;
 extern u16 D_0054F824;
 extern void evtViewerStopFrame(void);
-extern s32 sprintf(char *buf, const char *fmt, ...);
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
+
 extern void mdlUnRegist(s32 aMajor, s32 aMinor);
 extern s32 D_0032C6E0[];
 extern s32 capwait;

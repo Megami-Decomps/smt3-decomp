@@ -211,7 +211,7 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 /* 164-byte entries indexed by devil id; only the field this unit reads is named. */
 typedef struct {

@@ -213,7 +213,7 @@ void dds3RunProcessList(void)
 
 extern u8 dds3PadVibrationLevel;
 extern u8 D_00551B91;
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 void dds3GetVibrationLevel(void)
 {

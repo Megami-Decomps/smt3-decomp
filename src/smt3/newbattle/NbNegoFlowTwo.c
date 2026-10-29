@@ -490,7 +490,7 @@ s32 Flow6_8(nbNegoProcessData_t *n)
 
 extern s32 nbGetNegoRequestType(s32 reqtype);
 extern char D_00544FF0[];
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00544FF0);
 

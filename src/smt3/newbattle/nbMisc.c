@@ -743,7 +743,7 @@ extern datSkill_t attr[];
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
 extern char D_00544170[];
 
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 void nbSetNormalSkill0(datUnitWork_t *work)
 {

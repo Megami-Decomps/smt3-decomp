@@ -38,7 +38,7 @@ void ChangeProcessFlagChild(s32 change, dds3ProcessID_t *parent, u32 flag);
 
 void *sdfChipAllocDirect(u32 aSize);
 void sdfChipFreeDirect(void *aPtr);
-int printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern char D_0054E878[];
 extern char D_0054E880[];

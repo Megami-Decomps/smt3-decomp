@@ -189,7 +189,8 @@ extern s32 effBTLSkillGetState(void);
 extern u16 effBTLModelGetBadStatus(nbFormation_t *pFormation);
 extern f32 effBTLModelGroupGetSphere(u32 group);
 extern u32 dds3GetRandIntA(void *state, u32 limit);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern f32 D_003246D0[];
 extern f32 D_003246F0[];
 extern f32 D_00324710[];
@@ -1956,7 +1957,7 @@ void nbCameraShot_AttackTuibiReverse_Set(nbCamera_t *pNbCamera)
 
 extern s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera);
 extern void nbCameraState_InvokeTarget_SearchSet(void);
-extern s32 printf(const char *format, ...);
+
 extern f32 D_003246D0[];
 extern f32 D_003246F0[];
 extern f32 D_00324710[];

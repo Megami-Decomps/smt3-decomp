@@ -30,7 +30,7 @@ extern char D_0053D038[];
 
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 
-extern s32 sprintf(char *out, const char *fmt, ...);
+#include "sdk_libc.h"
 
 typedef struct {
     /* 0x0000 */ u8 flags;
