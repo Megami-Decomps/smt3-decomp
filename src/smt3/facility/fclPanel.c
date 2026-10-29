@@ -76,7 +76,7 @@ extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
 extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 *colors, s32 ot);
 
-extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 extern void fclDrawPanelType0Grad(fclPanel_t *panel, u32 ot);
 
 /* NON_MATCHING: 57 of 229 words differ at the native 916-byte size. */
