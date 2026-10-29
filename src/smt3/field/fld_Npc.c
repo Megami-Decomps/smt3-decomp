@@ -7,6 +7,7 @@
 #include "event.h"
 #include "field.h"
 #include "fldNpc_tag.h"
+#include "fldTakaraWork_tag.h"
 #include "ps2asm.h"
 #include "billboard.h"
 #include "effect.h"
@@ -16,22 +17,6 @@ struct effResourceHeader_t;
 
 extern struct effNode_t *dds3EffectLoad(struct effResourceHeader_t *data);
 extern struct effNode_t *dds3EffectCopy(struct effNode_t *effect);
-
-typedef struct
-{
-    dds3Basic_t *object;
-    s32 id;
-    s32 activationState;
-    s32 activationRequested;
-    f32 x;                     /* 0x10 */
-    f32 y;
-    f32 z;
-    f32 angle;                 /* 0x1C */
-    s32 mode;                  /* 0x20 */
-    void *effect;              /* 0x24 */
-    s32 tableIndex;            /* 0x28 */
-    u8 pad2C[4];
-} fldTakaraSlot_t;
 
 typedef struct
 {

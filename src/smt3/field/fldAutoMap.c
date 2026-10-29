@@ -5,6 +5,7 @@
 #include "scr.h"
 #include "field.h"
 #include "fldNpc_tag.h"
+#include "fldTakaraWork_tag.h"
 #include "ps2asm.h"
 
 typedef struct
@@ -13,17 +14,6 @@ typedef struct
     fldAmAreaData_t *areaTable; /* 0x04: first relocated area row */
     s32 areaCount;              /* 0x08: number of area rows */
 } fldAmInfoHeader_t;
-
-typedef struct
-{
-    s32 unk00;
-    s32 id;
-    s32 activationState;
-    s32 activationRequested;
-    u8 unk10[0x14];
-    void *effect;              /* 0x24 */
-    u8 unk28[8];
-} fldTakaraSlot_t;
 
 enum sl_slot_flag
 {
@@ -1948,7 +1938,7 @@ void fldClearTakaraSlots(void) {
         void *effect = fldTakaraSlotTable[i].effect;
 
         fldTakaraSlotTable[i].id = -1;
-        fldTakaraSlotTable[i].unk00 = 0;
+        fldTakaraSlotTable[i].object = 0;
         fldTakaraSlotTable[i].activationState = 0;
         fldTakaraSlotTable[i].activationRequested = 0;
         if (effect != NULL) {
