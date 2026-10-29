@@ -4296,9 +4296,10 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetModelMarkPos);
 /* NON_MATCHING: 20 of 26 words match, exact size; the two `fclDrawPanelSprite`
  * calls put the `ori` of the sprite id in the delay slot where retail puts the
  * flags copy. */
-#ifdef NON_MATCHING
 extern void cmpAllocRefGifTag(s32 ot);
 extern void cmpDisableRGB(s32 ot);
+
+#ifdef NON_MATCHING
 
 void cmbDrawFullScreenPanel(s32 flags)
 {
@@ -4312,7 +4313,28 @@ void cmbDrawFullScreenPanel(s32 flags)
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawFullScreenPanel);
 #endif
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawModelPanel);
+extern void cmbRotateModelPanel(const f32 *center, s32 mode, u32 color,
+                                sdfVector4_t *vertices, u32 *colors, f32 radius, f32 height);
+extern sdfVector4_t D_0056D190[2][384];
+extern u32 D_00573190[2][384];
+
+void cmbDrawModelPanel(f32 (*positions)[4], f32 *sizes, u32 color,
+                       f32 scale, s32 *found, s32 ot)
+{
+    s32 i;
+
+    for (i = 0; i < 2; i++) {
+        if (found[i] != 0) {
+            cmbRotateModelPanel(positions[i], 0, 0x80808080, D_0056D190[i],
+                                D_00573190[i], sizes[i], sizes[i] * scale);
+            cmpDisableRGB(ot);
+            fclDrawPanelSprite(0x30000, ot);
+            cmbDrawModelPoly(color, color, D_0056D190[i], ot);
+            fclDrawPanelSprite(0x30000, ot);
+            cmpAllocRefGifTag(ot);
+        }
+    }
+}
 
 extern void cmbDrawModelAt(u8 index, f32 *position, f32 firstOffset, f32 secondOffset);
 
