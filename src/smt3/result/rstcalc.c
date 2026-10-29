@@ -1816,7 +1816,47 @@ s32 cmpFindKugatatiMsgEntry(datUnitWork_t *unit)
 INCLUDE_ASM(const s32, "result/rstcalc", cmpFindKugatatiMsgEntry);
 #endif
 
+extern s8 cmbCountEvoReady(datUnitWork_t *unit, u8 count);
+
+#ifdef NON_MATCHING
+void cmbCalcEvoEvent(datUnitWork_t *unit, datLevelUpEntry_t *entry,
+                     s8 hasNext, datUnitWork_t *result)
+{
+    u16 devilId;
+
+    if (hasNext != 0 && entry[1].kind == 5) {
+        s8 half = cmbCountEvoCandidates(unit, 16) / 2;
+
+        if (half < cmbCountEvoReady(unit, 16)) {
+            devilId = entry[0].value;
+        } else {
+            devilId = entry[1].value;
+        }
+    } else {
+        devilId = entry[0].value;
+    }
+    if (result != NULL) {
+        cmbCopyDefaultDevilToStock(devilId, result);
+        if (result->level < unit->level) {
+            s32 difference = unit->level - result->level;
+            s32 i;
+
+            result->level = unit->level;
+            result->exp = datCopyDevilWorkEntry(result, result->level);
+            for (i = 0; i < difference; i++) {
+                s32 param = cmbAddLevelUpParamEx(result, 0);
+
+                if (param >= 0 && datGetParam(result, param) < 40) {
+                    result->param[param]++;
+                }
+            }
+            result->flag |= 0x200;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", cmbCalcEvoEvent);
+#endif
 
 s32 rstCalcEvoLevelDiff(datUnitWork_t *a, datUnitWork_t *b, datUnitWork_t *c, s32 level)
 {
