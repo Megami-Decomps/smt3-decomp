@@ -459,7 +459,6 @@ void fldPlayerCalc_Hit(void) {
 #ifdef NON_MATCHING
 extern f32 fldCamPitch;
 extern f32 fldPlayerWarpState;
-extern f32 D_0054C3C8, D_0054C3CC, D_0054C3D0;
 extern sdfVector4_t D_00531C50;
 extern sdfMatrix4_t D_002FA240;
 extern f32 EulerAngleAxisY(void);
@@ -547,8 +546,8 @@ void fldPlayerCalc_WarpRun(void)
     if (angle < 0.0f) {
         angle = -angle;
     }
-    pi = D_0054C3C8;
-    distance = (180.0f - angle) * D_0054C3CC;
+    pi = 3.1399999f;
+    distance = (180.0f - angle) * 0.077777774f;
     position.x = fldGlobalBase.x - sdfSin((-fldPlayerWarpState * pi) / 180.0f) * distance;
     position.y = fldGlobalBase.y;
     position.z = fldGlobalBase.z - sdfCos((-fldPlayerWarpState * pi) / 180.0f) * distance;
@@ -617,7 +616,7 @@ void fldPlayerCalc_WarpRun(void)
         fldGlobalBase.camAngle += step;
     }
     SDF_VU0_LOADVECTOR(&axis);
-    FromRotation(fldGlobalBase.camAngle * D_0054C3D0 / 180.0f);
+    FromRotation(fldGlobalBase.camAngle * 3.1399999f / 180.0f);
     SDF_VU0_STOREVECTOR(&rotation);
     dds3SetRotPoseSet(control->handle, &rotation);
     if (control->handle2 != NULL) {
