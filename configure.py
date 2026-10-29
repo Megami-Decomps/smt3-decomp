@@ -208,10 +208,40 @@ def generated_footprint(version: str) -> list[Path]:
     ]
 
 
-def run_splat(version: str, yaml: Path, force: bool) -> None:
-    """Split when the config inputs changed since the last successful split."""
+def source_matching_ownership(version: str) -> list[tuple[str, list[tuple[str, str]]]]:
+    """Fingerprint which functions still own their split assembly and literals.
+
+    Body-only matching experiments must not trigger a full split. Generated
+    INCLUDE_RODATA/SDATA lines are outputs, not ownership inputs: including them
+    here would feed a split's source edits back into its own cache key.
+    """
+    return [
+        (str(path.relative_to(ROOT)), [
+            (folder, name)
+            for kind, folder, name in include_directives(
+                path.read_text(errors="replace"), context=str(path.relative_to(ROOT))
+            )
+            if kind == "ASM"
+        ])
+        for path in sorted((ROOT / "src" / version).rglob("*.c"))
+    ]
+
+
+def splat_digest(version: str, yaml: Path) -> str:
     inputs = [yaml, ROOT / "config" / version / "symbol_addrs.txt", ROOT / "config" / version / "reloc_addrs.txt"]
-    digest = hashlib.sha1(b"".join(p.read_bytes() for p in inputs if p.exists())).hexdigest()
+    digest = hashlib.sha1(b"source-matching-ownership-v1\0")
+    for path in inputs:
+        digest.update(str(path.relative_to(ROOT)).encode())
+        digest.update(b"\0")
+        digest.update(path.read_bytes() if path.exists() else b"<missing>")
+        digest.update(b"\0")
+    digest.update(json.dumps(source_matching_ownership(version)).encode())
+    return digest.hexdigest()
+
+
+def run_splat(version: str, yaml: Path, force: bool) -> None:
+    """Split when configuration or ASM/C ownership changed since the last split."""
+    digest = splat_digest(version, yaml)
     stamp = ROOT / "build" / version / ".splat_stamp"
     if not force and stamp.exists() and stamp.read_text() == digest and (ROOT / "asm" / version).exists():
         return
@@ -229,12 +259,14 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
     provide_data_symbols(version)
     restore_unchanged_timestamps(snapshot)
     stamp.parent.mkdir(parents=True, exist_ok=True)
-    stamp.write_text(digest)
+    # Splat can create C files on the first split. Record their final ownership,
+    # not the pre-split absence, so the following configure remains a cache hit.
+    stamp.write_text(splat_digest(version, yaml))
 
 
 def write_configure_build(n, configure_inputs: list[str], argv: list[str]) -> None:
     """Write the Ninja regeneration edge without persisting one-shot options."""
-    generator_args = [arg for arg in argv if arg not in ("--force-split", "--no-split")]
+    generator_args = [arg for arg in argv if arg not in ("--force-split", "--no-split", "--clean")]
     n.build(
         "build.ninja",
         "configure",
@@ -597,7 +629,16 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
     configure_inputs = ["configure.py", "tools/symbol_aliases.py", "config/versions.json"] + [
         f"config/{v}/{VERSIONS[v]['serial']}.yaml" for v in versions
-    ] + [f"config/{v}/symbol_addrs.txt" for v in versions]
+    ] + [
+        f"config/{v}/{name}" for v in versions
+        for name in ("symbol_addrs.txt", "reloc_addrs.txt")
+    ]
+    # Source changes can alter both the eeasm dependency list and splat's
+    # ASM/C ownership. The ownership digest keeps body-only edits split-free.
+    configure_inputs += [
+        str(path.relative_to(ROOT)) for v in versions
+        for path in sorted((ROOT / "src" / v).rglob("*.c"))
+    ]
     for version in versions:
         alias_metadata = ROOT / "config" / version / "symbol_aliases.json"
         if alias_metadata.exists():
