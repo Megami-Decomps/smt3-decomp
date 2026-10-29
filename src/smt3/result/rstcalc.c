@@ -82,8 +82,11 @@ typedef struct
             } heartConditions[8];
             u8 unk_3A[2];
         };
+        struct {
+            u8 reserved1A[0x20];
+            u8 probabilities[8];
+        };
     };
-    /* 0x3C */ u8 unk_3C[6];
 } datRaceEntry_t;
 
 extern void rstSetMaxHpMp(s8 Mode, datUnitWork_t *pStock);
@@ -833,7 +836,39 @@ void rstInitSkillAct(s8 Pos)
 void func_002215B8(datUnitWork_t *unit) {
 }
 
+extern s32 datDevilIsRegistered(u8 devilId);
+extern s8 datGetDevilSlotIndex(u8 devilId);
+extern s32 datGetDevilSlotState(u8 devilId);
+
+#ifdef NON_MATCHING
+s32 rstFindRegisteredDevil(void)
+{
+    s8 id = cmbGlobalWork->equipHearts;
+    s32 slotCount;
+    s32 roll;
+    s32 i;
+
+    if (id == 0 || datDevilIsRegistered((u8)id) != 0) {
+        return -1;
+    }
+    slotCount = datGetDevilSlotIndex((u8)id);
+    if ((s16)datGetDevilSlotState((u8)id) >= slotCount) {
+        return -1;
+    }
+    if (dds3GetRandA(NULL) % 3 >= 2) {
+        return -1;
+    }
+    roll = dds3GetRandA(NULL) % 255;
+    for (i = 0; i < 8; i++) {
+        if (roll < D_00339E00[id].probabilities[i]) {
+            return (s8)i;
+        }
+    }
+    return -1;
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", rstFindRegisteredDevil);
+#endif
 
 /* Called above its definition, where ee-gcc assumed int. */
 s32 datGetDevilSlotState(u8 devilId);
