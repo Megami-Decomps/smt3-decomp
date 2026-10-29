@@ -510,12 +510,65 @@ s32 fcl_215190(fclPanelAnim_t *anim)
     return anim->unk_1C;
 }
 
+typedef struct
+{
+    s32 x;
+    s32 y;
+    s32 z;
+    u16 width;
+    u16 height;
+} fclPhasePanel_t;
+
+extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+extern void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot);
+
+#ifdef NON_MATCHING
+void fclDrawPhaseValue(void *work, s32 color, s32 ot)
+{
+    fclPhasePanel_t *panel = work;
+    u32 xs[3];
+    u32 ys[3];
+    u32 colors[3];
+    s32 depth;
+    s32 right;
+    s32 y;
+    s32 height;
+
+    fclDrawPanelSprite2(0x48, ot);
+    height = panel->height;
+    depth = height * 80 / 100;
+    right = panel->x + panel->width * 16;
+    y = panel->y;
+    colors[0] = color;
+    colors[1] = color & 0xFF;
+    colors[2] = color & 0xFF;
+    xs[0] = right;
+    xs[1] = right;
+    xs[2] = right - depth * 16;
+    ys[0] = y;
+    ys[1] = y + depth * 8;
+    ys[2] = y;
+    cmpDrawTriG(xs, ys, panel->z, colors, ot);
+
+    height = panel->height;
+    y = panel->y;
+    xs[0] = panel->x;
+    xs[1] = panel->x + (height * 80 / 100) * 16;
+    xs[2] = panel->x;
+    ys[0] = y + height * 8;
+    ys[1] = y + height * 8;
+    ys[2] = y + (height / 5) * 8;
+    cmpDrawTriG(xs, ys, panel->z, colors, ot);
+    fclDrawPanelSprite2(0x44, ot);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclShare", fclDrawPhaseValue);
+#endif
 
 INCLUDE_ASM(const s32, "facility/fclShare", fclDrawPanelBorder);
 
 extern s32 fclDrawPanelSprite(s32 id, s32 ot);
-extern void fclDrawPhaseValue(u8 *work, s32 color, s32 ot);
+extern void fclDrawPhaseValue(void *work, s32 color, s32 ot);
 
 #ifdef NON_MATCHING
 void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 ot)
