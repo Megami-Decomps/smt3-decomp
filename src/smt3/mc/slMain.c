@@ -2172,7 +2172,106 @@ s32 slLoadProc_closeFile(void) {
     return (s32)slErrorWait;
 }
 
+#ifdef NON_MATCHING
+s32 slFileSelCalc(void)
+{
+    s32 selectionCount;
+    s32 selected;
+    s32 action;
+    s32 ready;
+    u32 flags;
+
+    if (gSlFileErroeFlg == 0) {
+        selectionCount = gSlSelCnt;
+        selected = slFileSelError;
+        if (selectionCount >= 21) {
+            if (slGetPadRep(((u8)dds3PadButtonState[0x26] >> 1) & 1)) {
+                p2sdPlaySE(0, 0x7F, 0x3F);
+                slFileSelError--;
+            }
+            if (slGetPadRep(((u8)dds3PadButtonState[0x27] >> 1) & 1)) {
+                p2sdPlaySE(0, 0x7F, 0x3F);
+                selected = slFileSelError + 1;
+            } else {
+                selected = slFileSelError;
+            }
+            selectionCount = gSlSelCnt;
+        }
+        slFileSelError = (selected + 50) % 5;
+        if (selectionCount >= 21) {
+            if (slGetPadTrig(dds3PadButtonState[0x21] < 0)) {
+                gSlFileErroeFlg = 1;
+            }
+            if (slGetPadTrig(dds3PadButtonState[0x23] < 0)) {
+                gSlFileErroeFlg = 2;
+            }
+        }
+    }
+    if (sdfMcFuncGetInfo1() == 0) {
+        return 0;
+    }
+    ready = sdfMcGetFileInfoReady(mccb);
+    action = gSlFileErroeFlg;
+    if (ready == 0) {
+        return slNoCard();
+    }
+    if (action == 0) {
+        sdfMcRegetInfo(mccb);
+        return 0;
+    }
+    if (action == 1) {
+        slSetInfo(0);
+        if (gslMode == 0) {
+            sdfMcSetSlotIndex(mccb, slFileSelError);
+            flags = sdfMcGetSlotFlags(mccb, slFileSelError);
+            if ((flags & 0xB) == 0xB) {
+                p2sdPlaySE(8, 0x7F, 0x3F);
+                if (gSlEndingMode != 0) {
+                    slQueryYesNoMsg = action;
+                    gSlSaveMode = action;
+                    return slQueryYesNo(slEndingUpd2, slFileSel, 1);
+                }
+                slQueryYesNoMsg = action;
+                gSlSaveMode = action;
+                return slQueryYesNo(slSaveData, slFileSel, 1);
+            }
+            if ((flags & 0xA) == 2) {
+                p2sdPlaySE(8, 0x7F, 0x3F);
+                gSlSaveMode = 2;
+                return slSaveData();
+            }
+            p2sdPlaySE(8, 0x7F, 0x3F);
+            gSlSaveMode = 0;
+            if (slSizeChk() != 0) {
+                return slSaveData();
+            }
+            slSetInfo(0);
+            gslErrorCode = 5;
+            gslErrorKeyFlag = 0;
+            sdfMcRegetInfo(mccb);
+            return (s32)slErrorWaitToFileMc;
+        }
+        sdfMcSetSlotIndex(mccb, slFileSelError);
+        if (sdfMcGetSlotFlags(mccb, slFileSelError) & 1) {
+            p2sdPlaySE(8, 0x7F, 0x3F);
+            slQueryYesNoMsg = 3;
+            return slQueryYesNo(slLoadData, slFileSel, 1);
+        }
+        p2sdPlaySE(10, 0x7F, 0x3F);
+        return slFileSel();
+    }
+    if (action == 2) {
+        p2sdPlaySE(10, 0x7F, 0x3F);
+        if (gSlEndingMode != 0) {
+            return slEndingExit();
+        }
+        return slCancel();
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "mc/slMain", slFileSelCalc);
+#endif
 
 INCLUDE_RODATA(const s32, "mc/slMain", D_005328C0);
 
