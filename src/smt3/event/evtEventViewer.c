@@ -963,7 +963,242 @@ void OutFrame1(evtViewerObject_s *track, evtFrameInfo_t *node, s32 nowFrame, s32
     }
 }
 
+#ifdef NON_MATCHING
+extern evtViewerObject_s *evt_camera;
+extern s8 dds3ScreenBlurFlag;
+extern s16 dds3ScreenBlurAlpha, dds3ScreenBlurScale;
+extern dds3LightState_t dds3LightParam;
+extern f32 sdfFaceDivSoften, sdfFaceDivBias;
+extern pmdSceneLightTable_t D_0056CE90;
+extern evtBlendVecColor_t D_0056CEC0;
+extern dds3Effect_Blur_t D_0056CEE0;
+extern dds3Effect_PartialMultiBlurParam_t D_0056CF10;
+extern dds3Effect_Filter_t D_0056CF40;
+extern dds3Effect_PartialMultiFilterParam_t D_0056CF60;
+extern dds3Effect_DistortionBlurParam_t D_0056CF90;
+extern dds3Effect_RippleBlurParam_t D_0056CFC0;
+extern void evtSetBokasi(s32 enabled);
+extern void fldSkySetFilter(s32 index, s32 mode, s32 hokan);
+extern void evtSetSkyAlpha(s32 frame, s32 alpha);
+extern u16 evtCheckSkyAlphaAnime(void);
+extern s32 fldSkyGetAlpha(void);
+extern void dds3FadeClear(void);
+extern void dds3FadeSet(s32 r, s32 g, s32 b, s32 a);
+extern void evtHokanSceneLight(s32 hokan, f32 ratio, f32 *key1, f32 *key2, f32 *dst);
+extern f32 evtHokanFloat(s32 hokan, f32 ratio, f32 first, f32 second);
+extern void evtHokanSceneFog(s32 hokan, f32 ratio, evtBlendVecColor_t *first, evtBlendVecColor_t *second, evtBlendVecColor_t *dst);
+extern void evtHokanBlur2(s32 hokan, f32 ratio, dds3Effect_Blur_t *first, dds3Effect_Blur_t *second, dds3Effect_Blur_t *dst);
+extern void evtHokanMultBlur(s32 hokan, f32 ratio, dds3Effect_PartialMultiBlurParam_t *first, dds3Effect_PartialMultiBlurParam_t *second, dds3Effect_PartialMultiBlurParam_t *dst);
+extern void evtHokanDistBlur(s32 hokan, f32 ratio, dds3Effect_DistortionBlurParam_t *first, dds3Effect_DistortionBlurParam_t *second, dds3Effect_DistortionBlurParam_t *dst);
+extern void evtHokanRipBlur(s32 hokan, f32 ratio, dds3Effect_RippleBlurParam_t *first, dds3Effect_RippleBlurParam_t *second, dds3Effect_RippleBlurParam_t *dst);
+extern void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *first, dds3Effect_Filter_t *second, dds3Effect_Filter_t *dst);
+extern void evtHokanMultFilter(s32 hokan, f32 ratio, dds3Effect_PartialMultiFilterParam_t *first, dds3Effect_PartialMultiFilterParam_t *second, dds3Effect_PartialMultiFilterParam_t *dst);
+extern void evtSetUnityCalcArea(void *params);
+extern void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *params);
+extern void Eve_DistortionBlurSetParam(dds3Effect_DistortionBlurParam_t *params);
+extern void Eve_RippleBlurSetParam(dds3Effect_RippleBlurParam_t *params);
+extern void Eve_FilterSetParam(dds3Effect_Filter_t *params);
+extern void Eve_PartialMultiFilterSetParam(dds3Effect_PartialMultiFilterParam_t *params);
+extern void dds3SetLightColor(s32 frame, s32 light, f32 *color);
+extern void dds3SetLightDir(s32 frame, s32 light, f32 *direction);
+extern void dds3SetAmbientColor(s32 frame, f32 *color);
+extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 near, f32 far);
+
+void RunFrame2(evtViewerObject_s *track, evtFrameInfo_t *next, evtFrameInfo_t *previous,
+               s32 nowFrame, s32 *nearestFrame)
+{
+    evtViewerInfo_t *viewer = viewerinfo;
+    s32 start = previous != NULL ? previous->frame : viewer->firstframe;
+    s32 end = next != NULL ? next->frame : viewer->lastframe;
+    f32 ratio = end != start ? (f32)(s32)((u32)nowFrame - (u32)start) / (f32)(s32)((u32)end - (u32)start) : 0.0f;
+    s32 hokan = 1, color = 0, alpha = 0, elapsed, duration, remaining, type;
+    f32 fade = 1.0f, firstSoften, firstBias, nextSoften, nextBias;
+    void *first, *second;
+    s16 blurAlpha, blurScale;
+    evtFrameInfo_t *after;
+
+    type = track->type;
+    switch (type) {
+    case 2:
+        if (previous != NULL) {
+            elapsed = (s32)((u32)nowFrame - previous->frame);
+            if (elapsed < *nearestFrame) {
+                *nearestFrame = elapsed;
+                evt_camera = track;
+            }
+        }
+        break;
+    case 22:
+        evtSetBokasi(previous != NULL && (s16)previous->param.sh[0] != 0);
+        break;
+    case 12:
+        if (previous != NULL) {
+            if (viewer->fldfilter != previous->param.sw[1]) {
+                fldSkySetFilter(previous->param.sw[1], (s16)previous->param.sh[0], previous->index);
+                evtSetSkyAlpha(previous->index, (s16)previous->param.sh[1]);
+                viewerinfo->fldfilter = previous->param.sw[1];
+            } else if (evtCheckSkyAlphaAnime() == 0 && fldSkyGetAlpha() != (s16)previous->param.sh[1]) {
+                evtSetSkyAlpha(previous->index, (s16)previous->param.sh[1]);
+            }
+        } else if (viewer->fldfilter != 0) {
+            fldSkySetFilter(0, 1, 0);
+            viewerinfo->fldfilter = 0;
+        }
+        break;
+    case 6:
+        if (previous == NULL) {
+            dds3FadeClear();
+            break;
+        }
+        if (previous->index != 0 && nowFrame < previous->frame + previous->index) {
+            fade = (f32)(nowFrame - previous->frame) / (f32)previous->index;
+        }
+        switch ((s16)previous->param.sh[0]) {
+        case 0:
+            color = 0xFF;
+            if (fade != 1.0f) {
+                alpha = (s32)(128.0f * (1.0f - fade));
+            }
+            break;
+        case 1:
+            color = 0xFF;
+            alpha = 0x80;
+            if (fade != 1.0f) {
+                alpha = (s32)(fade * 128.0f);
+            }
+            break;
+        case 2:
+            if (fade != 1.0f) {
+                alpha = (s32)(128.0f * (1.0f - fade));
+            }
+            break;
+        case 3:
+            alpha = 0x80;
+            if (fade != 1.0f) {
+                alpha = (s32)(fade * 128.0f);
+            }
+            break;
+        }
+        dds3FadeSet(color, color, color, alpha);
+        break;
+    case 10:
+        if (previous != NULL) {
+            hokan = previous->nameIndex;
+            first = previous->work;
+            firstSoften = previous->param.sf[0];
+            firstBias = previous->param.sf[1];
+        } else {
+            first = NULL;
+            firstSoften = 7.0f;
+            firstBias = 0.0f;
+        }
+        if (next != NULL) {
+            second = next->work;
+            nextSoften = next->param.sf[0];
+            nextBias = next->param.sf[1];
+        } else {
+            second = NULL;
+            nextSoften = 7.0f;
+            nextBias = 0.0f;
+        }
+        if (first != NULL || second != NULL) {
+            evtHokanSceneLight(hokan, ratio, first, second, D_0056CE90.color);
+            dds3SetLightColor(0, 0, D_0056CE90.color);
+            dds3SetLightDir(0, 0, D_0056CE90.direction);
+            dds3SetAmbientColor(0, D_0056CE90.ambient);
+            sdfFaceDivSoften = evtHokanFloat(hokan, ratio, firstSoften, nextSoften);
+            sdfFaceDivBias = evtHokanFloat(hokan, ratio, firstBias, nextBias);
+        }
+        break;
+    case 11:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 23:
+        first = NULL;
+        second = NULL;
+        if (previous != NULL) {
+            hokan = (s16)previous->param.sh[0];
+            first = previous->work;
+        }
+        if (next != NULL) {
+            second = next->work;
+        }
+        if (first == NULL && second == NULL) {
+            break;
+        }
+        switch (type) {
+        case 11:
+            evtHokanSceneFog(hokan, ratio, first, second, &D_0056CEC0);
+            dds3SetFogPara(0, D_0056CEC0.vec[1], D_0056CEC0.vec[0], D_0056CEC0.vec[2], D_0056CEC0.vec[3]);
+            dds3LightParam.fog.color = D_0056CEC0.color;
+            break;
+        case 13:
+            evtHokanBlur2(hokan, ratio, first, second, &D_0056CEE0);
+            evtSetUnityCalcArea(&D_0056CEE0);
+            viewerinfo->drawblur2 = 1;
+            break;
+        case 14:
+            evtHokanMultBlur(hokan, ratio, first, second, &D_0056CF10);
+            Eve_PartialMultiBlurSetParam(&D_0056CF10);
+            viewerinfo->drawmblur = 1;
+            break;
+        case 15:
+            evtHokanDistBlur(hokan, ratio, first, second, &D_0056CF90);
+            Eve_DistortionBlurSetParam(&D_0056CF90);
+            viewerinfo->drawdblur = 1;
+            break;
+        case 23:
+            evtHokanRipBlur(hokan, ratio, first, second, &D_0056CFC0);
+            Eve_RippleBlurSetParam(&D_0056CFC0);
+            viewerinfo->drawrblur = 1;
+            break;
+        case 16:
+            evtHokanFilter(hokan, ratio, first, second, &D_0056CF40);
+            Eve_FilterSetParam(&D_0056CF40);
+            viewerinfo->filter = 1;
+            break;
+        case 17:
+            evtHokanMultFilter(hokan, ratio, first, second, &D_0056CF60);
+            Eve_PartialMultiFilterSetParam(&D_0056CF60);
+            viewerinfo->drawmfilter = 1;
+            break;
+        }
+        break;
+    case 8:
+        blurAlpha = 0;
+        blurScale = 0;
+        if (previous != NULL) {
+            if ((s16)previous->param.sh[2] != 0 && (after = previous->next) != NULL) {
+                elapsed = (s32)((u32)nowFrame - previous->frame);
+                duration = after->frame - previous->frame;
+                remaining = (s32)((u32)duration - (u32)elapsed);
+                blurAlpha = (s32)((u32)(s16)previous->param.sh[0] * (u32)remaining +
+                                  (u32)(s16)after->param.sh[0] * (u32)elapsed) / duration;
+                blurScale = (s32)((u32)(s16)previous->param.sh[1] * (u32)remaining +
+                                  (u32)(s16)after->param.sh[1] * (u32)elapsed) / duration;
+            } else {
+                blurAlpha = previous->param.sh[0];
+                blurScale = previous->param.sh[1];
+            }
+        }
+        if (blurAlpha != 0 || blurScale != 0) {
+            viewer->flags |= 4;
+            dds3ScreenBlurFlag = 1;
+            dds3ScreenBlurAlpha = blurAlpha;
+            dds3ScreenBlurScale = blurScale;
+        } else {
+            viewer->flags &= ~4;
+            dds3ScreenBlurFlag = 0;
+        }
+        break;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrame2);
+#endif
 
 extern evtUnit_t *evtGetUnitHandle2(dds3Basic_t *basic);
 extern void evtLinkLightObjectBasic(evtUnit_t *unit, dds3Basic_t *light,
