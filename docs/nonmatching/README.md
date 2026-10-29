@@ -50,7 +50,6 @@ page and line to open. Conventions are in
 | 2 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
-| 2 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 1 |  | [sdk/libmrpc.md](sdk/libmrpc.md) |
@@ -103,4 +102,5 @@ page and line to open. Conventions are in
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 1 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 1 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
+| 1 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 1 | code_001C55F8 | [code_001C55F8.md](code_001C55F8.md) |

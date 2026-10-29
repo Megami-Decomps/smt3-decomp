@@ -16,11 +16,12 @@ difference is an annul bit:
 3. If it is already a C definition, test the reverse: in a scratch copy, rename
    that definition so only the file's `extern` remains, and recheck the caller.
 
-In `newbattle/nbMakePacket` one callee, `nbFreeEffectSlot`, was costing four
-functions at 1, 1, 1 and 4 differing words. Reducing it to the `extern` the
-file already carried made all four exact. It is byte-exact on its own, so it is
-parked behind a `NON_MATCHING` fallback: a matching function can cost more than
-it earns, and nineteen more of its callers are still in assembly.
+An earlier context test found that hiding `nbFreeEffectSlot` closed four
+callers at 1, 1, 1 and 4 differing words. That is a historical result, not a
+current parking requirement: the helper is now ordinary C in
+`newbattle/nbEventProcess`, matches all32 bytes, and its complete normal owner
+passes21 match/0 differ. Recheck the current owner before carrying a visibility
+exclusion forward.
 
 Ruled out as causes, measured: every spelling of the caller's own guard, the
 callee's declaration style including K&R and no prototype at all, and cc1 heap
@@ -31,15 +32,26 @@ A side effect worth noticing: the four callers that discriminate all sit above
 that callee's address, which is evidence for a retail translation-unit boundary
 between them. A callee-visibility result is also a boundary hint.
 
-Two neighbours that both look responsible are not interchangeable, and the
-fallback is not a weaker form of renaming. In `effect/billManager`,
-`dds3Billboard_P2ADraw` is one annul word out, and parking
-`dds3Billboard_P2AAnimDraw` behind the fallback closes it exactly as renaming
-the definition does. Parking `dds3Billboard_P2ASetNumber` instead leaves it at
-one word, although an earlier reading reported either neighbour would do and
-that the fallback did not reach the effect at all. Both halves of that were
-measured wrong. Identify the neighbour by testing one at a time, and use the
-fallback, which is reversible and keeps the draft.
+### Resolved animated-billboard context
+
+Earlier `effect/billManager` compiles made `dds3Billboard_P2ADraw` one annul
+word different when `dds3Billboard_P2AAnimDraw` was visible. Hiding that helper
+closed the caller; hiding `dds3Billboard_P2ASetNumber` did not. Qualified reorg
+traces measured the later mask's delay-slot eligibility changing while branch
+probability stayed the same. Those observations described the tested context,
+not a permanent restriction on the helper.
+
+[79519a4d](https://github.com/Megami-Decomps/smt3-decomp/commit/79519a4db080c32f6688248dd61792e49279f13a)
+promotes the animation body. In the current normal owner both it (464 bytes)
+and `P2ADraw` (696 bytes) match; the complete owner passes63 match/0 differ.
+The former nonmatching entry is retired. This check establishes the current
+result, without attributing the closure to an unmeasured compiler mechanism.
+
+Four source properties remain useful from the matched caller: form the plural
+output pointer with index before base; place the negative-frame arm after the
+drawing arm; restore rotation before colour in the plural branch; and assign
+the packet kind directly in each selection arm so the compiler can share the
+store. A local packet-kind value instead produced conditional moves.
 
 Confirmed again in `event/evtPolygonMovie`, and this time on a callee that does
 *not* match: `evtHokanFilter` is 71 of 72 words with a single `bnel` for

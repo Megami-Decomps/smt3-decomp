@@ -52,7 +52,6 @@ dds3DrawConfigPanel	code_0029B780	0x258		docs/nonmatching/code_0029B780.md	56
 dds3DrawConfigBar	code_0029B780	0x1C4		docs/nonmatching/code_0029B780.md	70
 dds3DrawConfigCursor	code_0029B780	0x2CC	48 of 179 words matching	docs/nonmatching/code_0029B780.md	87
 dds3BillboardManagerInit	effect/billManager	0xB8	44 of 46 words match	docs/nonmatching/effect/billManager.md	5
-dds3Billboard_P2AAnimDraw	effect/billManager	0x1D0	1 of 174 words differing	docs/nonmatching/effect/billManager.md	51
 effBTLCutDraw	effect/effBattle	0x420	Eighty-eight of 263 words differ	docs/nonmatching/effect/effBattle.md	5
 effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270	6 of 156 words differ	docs/nonmatching/effect/effBattleMisc.md	5
 effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/nonmatching/effect/effBattleMisc.md	41
