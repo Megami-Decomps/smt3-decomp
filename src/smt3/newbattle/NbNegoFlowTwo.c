@@ -376,7 +376,83 @@ u32 nbGetPrevNegoId(nbNegoProcessData_t *n);
 
 void nbSetMesMakka(s32 msgid, s32 i);
 
+typedef struct nbNegoSkillCondition_t {
+    s32 ptype;
+    s32 etype;
+    s32 message;
+} nbNegoSkillCondition_t;
+
+typedef struct nbNegoSkillEntry_t {
+    s32 requestmode;
+    s32 unknown;
+    nbNegoSkillCondition_t condition[8];
+} nbNegoSkillEntry_t;
+
+extern nbNegoSkillEntry_t D_003E1338[];
+extern s32 nbFlowCheckUnit2(datUnitWork_t *pwork, datUnitWork_t *ework,
+                            s32 ptype, s32 etype, s32 data);
+
+extern s32 datCheckStockFull(void);
+extern s32 nbFlowCheckUnit(nbNegoProcessData_t *n, s32 ptype, s32 etype, s32 data);
+
+#ifdef NON_MATCHING
+s32 Flow6_1(nbNegoProcessData_t *n)
+{
+    nbNegoSkillCondition_t *condition;
+    s32 skill;
+    s32 ptype;
+    s32 etype;
+    s32 i;
+
+    nbAddNegoIdKouho(n, 0x60003);
+    nbAddNegoIdKouho(n, 0x60050);
+    nbAddNegoIdKouho(n, 0x60006);
+    nbAddNegoIdKouho(n, 0x90006);
+    nbAddNegoIdKouho(n, 0x60002);
+    if (datCheckStockFull() != 0 && n->negoreqtype == 0) {
+        n->nextnegoid = n->nextkouho[3];
+        return 0;
+    }
+    skill = n->negoskillid - 0x180;
+    n->aisyo = 0;
+    condition = D_003E1338[skill].condition;
+    for (i = 0; i < 4; i++, condition++) {
+        ptype = condition->ptype;
+        etype = condition->etype;
+        if ((ptype != 0 || etype != 0) && nbFlowCheckUnit(n, ptype, etype, 1)) {
+            n->aisyo = 1;
+            n->aisyomes = condition->message;
+            break;
+        }
+    }
+    if (n->aisyo == 0) {
+        condition = &D_003E1338[skill].condition[4];
+        for (i = 0; i < 4; i++, condition++) {
+            ptype = condition->ptype;
+            etype = condition->etype;
+            if ((ptype != 0 || etype != 0) && nbFlowCheckUnit(n, ptype, etype, 0)) {
+                n->aisyo = 2;
+                n->aisyomes = condition->message;
+                break;
+            }
+        }
+    }
+    switch (n->aisyo) {
+    case 0:
+        n->nextnegoid = 0x60002;
+        break;
+    case 1:
+        n->nextnegoid = 0x60003;
+        break;
+    case 2:
+        n->nextnegoid = 0x60006;
+        break;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_1);
+#endif
 
 s32 Flow6_2(nbNegoProcessData_t *n)
 {
@@ -1570,22 +1646,6 @@ s32 Flow6_55(nbNegoProcessData_t *n)
     nbDispNegoMessage(n, n->flowmsg[n->temp_param[0]], n->temp_param[1], 0);
     return 0;
 }
-
-typedef struct nbNegoSkillCondition_t {
-    s32 ptype;
-    s32 etype;
-    s32 message;
-} nbNegoSkillCondition_t;
-
-typedef struct nbNegoSkillEntry_t {
-    s32 requestmode;
-    s32 unknown;
-    nbNegoSkillCondition_t condition[8];
-} nbNegoSkillEntry_t;
-
-extern nbNegoSkillEntry_t D_003E1338[];
-extern s32 nbFlowCheckUnit2(datUnitWork_t *pwork, datUnitWork_t *ework,
-                            s32 ptype, s32 etype, s32 data);
 
 #ifdef NON_MATCHING
 s32 Flow6_56(nbNegoProcessData_t *n)
