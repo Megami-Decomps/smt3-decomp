@@ -328,3 +328,29 @@ libgcc's `__main.o`; `sdfFloatToULong`, `sdfDoubleToULong`, `sdfUnpackFloat`,
 `sdfPackFloat`, `sdfUnpackDouble` and `sdfPackQuad` sit between libgcc's
 `fp-bit` objects and are soft-float helpers, not `sdf` engine code. Correct these in the IDB, then re-export and rebuild. Record each in
 [IDB corrections](idb-corrections.md) when it is done.
+
+## Matched disc semaphore and power-off callbacks
+
+### Semaphore delay and alarm callback
+
+`sceCdDelayThread` matches all 104 bytes using the same six-word semaphore
+record as the matched `sdfCreateSema` wrapper. It initializes maxCount to 1,
+initCount to 0 and option to 0, retaining the native untouched fields. It
+creates the semaphore, sets the 16-bit alarm delay with the semaphore ID as
+callback argument, waits, then deletes it. The 36-byte callback forwards its
+third argument to `iSignalSema`, then uses the existing `EE_SYNC_EI` hardware
+primitive. The compiler supplies the argument move and complete epilogue.
+At that qualification, the complete disc owner checked 21 match / 0 differ.
+
+### Power-off callback registration and dispatch
+
+The three power-off callback functions match 296 bytes. Registration returns
+the prior callback pointer, publishes its user argument before the new function
+pointer, and restores interrupts only when `DIntr` reported them enabled.
+Installation sets the dispatch guard before registering command `0x80000012`,
+then restores interrupt state before clearing that guard and marking the handler
+installed. Dispatch requires a nonnull callback and a clear guard.
+
+The HDD consumer uses that same function-pointer/user-pointer interface, with
+its semaphore ID carried as the user argument. Updating its placeholder
+declaration and handler parameter preserves all three existing HDD functions.
