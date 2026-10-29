@@ -77,15 +77,165 @@ void getViewPortMatrix(sdfMatrix4_t *matrix)
 
 INCLUDE_ASM(const s32, "pipe/pipeCamera", PipeCamera);
 
-INCLUDE_ASM(const s32, "pipe/pipeCamera", PipeCameraAction);
+
+/* Shared pipe records: node stride is 0x20; PosTable.points is at +8. */
+typedef struct tagPipeObject {
+    s32 offset;
+    f32 w;
+    f32 pos[2];
+    f32 vpos[2];
+    s8 id;
+    u8 action;
+    u8 enabled;
+    u8 mdl;
+    s16 count;
+    u16 flags;
+} tagPipeObject;
+
+typedef struct tagPipePathNode {
+    f32 position[3];
+    u32 opaque0C;
+    f32 direction[3];
+    u32 opaque1C;
+} tagPipePathNode;
+
+typedef struct tagPipePosTable {
+    sdfMemHandle_t *aHandle;
+    s32 tSize;
+    tagPipePathNode *points;
+    u32 opaque0C;
+} tagPipePosTable;
+
+extern s32 offsetCount;
+extern tagPipePosTable D_00528F58;
+
+extern tagPipeObject *objMyData(void);
+extern void getPosTranslate(tagPipeObject *object, f32 *position);
+extern void vecSet(f32 *vector, f32 x, f32 y, f32 z);
+extern void vecScale(f32 *vector, f32 scale);
+extern void pipeCameraLerp(f32 *vector, f32 angle);
+
+void PipeCameraAction(void)
+{
+    f32 difference[4];
+    f32 forward[4];
+    f32 up[4];
+    f32 sum[4];
+    f32 position[4];
+    f32 vertical[4];
+    tagPipeObject *object;
+    s32 pathIndex;
+    f32 ease;
+    f32 scale;
+    s32 index;
+
+    pathIndex = offsetCount;
+    object = objMyData();
+    ease = 0.0f;
+    if (object == NULL) {
+        return;
+    }
+
+    getPosTranslate(object, position);
+
+    /* The six XYZ vectors occupy native 0x10-byte stack slots. */
+    difference[0] = position[0] - D_00528F58.points[pathIndex].position[0];
+    difference[1] = position[1] - D_00528F58.points[pathIndex].position[1];
+    difference[2] = position[2] - D_00528F58.points[pathIndex].position[2];
+    vecSet(forward,
+           D_00528F58.points[pathIndex + 10].position[0] -
+               D_00528F58.points[pathIndex].position[0],
+           D_00528F58.points[pathIndex + 10].position[1] -
+               D_00528F58.points[pathIndex].position[1],
+           D_00528F58.points[pathIndex + 10].position[2] -
+               D_00528F58.points[pathIndex].position[2]);
+    vecSet(up,
+           D_00528F58.points[pathIndex].direction[0],
+           D_00528F58.points[pathIndex].direction[1],
+           D_00528F58.points[pathIndex].direction[2]);
+
+    pipeCamShakeVec[0] = position[0];
+    pipeCamShakeVec[1] = position[1];
+    pipeCamShakeVec[2] = position[2];
+    vecNormalize(forward);
+    vecScale(forward, -600.0f);
+
+    if (pathIndex < 480) {
+        vecNormalize(up);
+        vecScale(up, 400.0f);
+        pipeCamShake[0] = D_00528F58.points[480].position[0] +
+                          forward[0] + up[0];
+        pipeCamShake[1] = D_00528F58.points[480].position[1] +
+                          forward[1] + up[1];
+        pipeCamShake[2] = D_00528F58.points[480].position[2] +
+                          forward[2] + up[2];
+    } else if (pathIndex < 680) {
+        scale = (f32)(pathIndex - 480);
+        ease = scale / 200.0f;
+        ease = 1.0f - (1.0f - ease) * (1.0f - ease);
+        vecNormalize(up);
+        vecScale(up, 400.0f - ease * 500.0f);
+        sum[0] = forward[0] + up[0];
+        sum[1] = forward[1] + up[1];
+        sum[2] = forward[2] + up[2];
+        index = (s32)(ease * scale + 480.0f);
+        pipeCamShake[0] = D_00528F58.points[index].position[0] + sum[0];
+        pipeCamShake[1] = D_00528F58.points[index].position[1] + sum[1];
+        pipeCamShake[2] = D_00528F58.points[index].position[2] + sum[2];
+    } else if (pathIndex < 800) {
+        f32 radius;
+        f32 target;
+        f32 y;
+        f32 limit;
+
+        ease = (f32)(pathIndex - 680) / 120.0f;
+        radius = fsqrtf(250000.0f - object->pos[0] * object->pos[0]);
+        target = -100.0f - ease * -50.0f;
+        y = object->pos[1] + target;
+        limit = radius + 50.0f;
+        if (y < 0.0f) {
+            if (limit < -y) {
+                goto constrainOffset;
+            }
+        } else if (limit < y) {
+            goto constrainOffset;
+        }
+        goto offsetReady;
+constrainOffset:
+        /* Reuse the vertical distance for the boundary correction. Qualified
+         * 2.96 allocation gives its 10-reference/live-13 pseudo f0 before the
+         * limit's 3/9 pseudo f1; splitting the correction changes four words. */
+        y = radius + 50.0f;
+        if (object->pos[1] < 0.0f) {
+            y = y + object->pos[1];
+        } else {
+            y = y - object->pos[1];
+        }
+        target = -y;
+offsetReady:
+        vecNormalize(up);
+        vecScale(up, target);
+        pipeCamShake[0] = position[0] + forward[0] + up[0];
+        pipeCamShake[1] = position[1] + forward[1] + up[1];
+        pipeCamShake[2] = position[2] + forward[2] + up[2];
+    }
+
+    if (pathIndex < 680) {
+        vertical[0] = 0.0f;
+        vertical[1] = 1.0f;
+        vertical[2] = 0.0f;
+        pipeCameraLerp(vertical, ease * -1.5707963f);
+        pipeCameraPos[0] = vertical[0];
+        pipeCameraPos[1] = vertical[1];
+        pipeCameraPos[2] = vertical[2];
+    }
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeCamera", PipeCameraAction2);
 
 INCLUDE_ASM(const s32, "pipe/pipeCamera", PipeCameraAction3);
 
 typedef struct tagPipeQuakeWeights { s8 values[6]; } tagPipeQuakeWeights;
-typedef struct tagPipePathNode { f32 position[3]; u32 opaque0C; f32 direction[3]; u32 opaque1C; } tagPipePathNode;
-typedef struct tagPipePosTable { sdfMemHandle_t *aHandle; s32 tSize; tagPipePathNode *points; u32 opaque0C; } tagPipePosTable;
 extern s8 CameraAction;
 extern s32 offsetCount;
 extern tagPipePosTable D_00528F58;

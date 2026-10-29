@@ -777,3 +777,4 @@ src/smt3/sdk/libgraph.c	redthing1	done	2026-10-28	1 SDK reference / 1676 B	Store
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 416 B	stat query with forwarded output buffer, unsigned path bytes and native completion lifecycle; complete owner exact
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 408 B	filesystem sync with exact fixed request extent, untouched shared word, bounded path and completion cleanup; owner 93 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 496 B	filesystem rename with two bounded paths, fixed writeback/send extent and callback completion; complete owner exact
+src/smt3/pipe/pipeCamera.c	redthing1	done	2026-10-28	1 fn / 1048 B	regional path camera interpolation with callback reloads, native signed boundary correction and shared vertical-distance allocation; complete owner exact
