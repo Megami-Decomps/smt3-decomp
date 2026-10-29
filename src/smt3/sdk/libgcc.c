@@ -859,7 +859,55 @@ INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B460);
 
 INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B480);
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D2B60);
+typedef struct {
+    char *augmentation;
+    void *ehPointer;
+    u32 codeAlignment;
+    s32 dataAlignment;
+    u32 returnRegister;
+} cieInfo_t;
+
+/* The encoded EH pointer follows a variable-length string. */
+typedef struct __attribute__((packed)) {
+    void *value;
+} cieEncodedPointer_t;
+
+extern const char D_0054B480[];
+extern const char D_0054B488[];
+extern s32 strcmp(const char *left, const char *right);
+extern u32 strlen(const char *text);
+
+u8 *libc_2D2B60(u32 *frame, cieInfo_t *info)
+{
+    u8 *p;
+    u32 length;
+
+    info->augmentation = (char *)frame - frame[1] + 13;
+    if (strcmp(info->augmentation, D_0054B480) != 0 &&
+        strcmp(info->augmentation, D_0054B488) != 0 &&
+        info->augmentation[0] != 'z')
+        return NULL;
+    length = strlen(info->augmentation);
+    p = (u8 *)info->augmentation + length + 1;
+    if (strcmp(info->augmentation, D_0054B488) == 0) {
+        info->ehPointer = ((const cieEncodedPointer_t *)p)->value;
+        p += sizeof(void *);
+    } else {
+        info->ehPointer = NULL;
+    }
+    p = libc_2D1E08(p, &info->codeAlignment);
+    p = libc_2D1E50(p, &info->dataAlignment);
+    info->returnRegister = *p++;
+    if (info->augmentation[0] == 'z') {
+        u32 payloadSize;
+        p = libc_2D1E08(p, &payloadSize);
+        p += payloadSize;
+    }
+    return p;
+}
+
+INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B488);
+
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D2C70);
 

@@ -841,3 +841,4 @@ src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 620 B	drawRegistSp
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	0 exact SDK B	guarded filesystem completion reconstruction with exact copy paths/table; final semaphore search remains 948/960 bytes, no matching credit
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 424 B	frame descriptor lookup preserves lazy initialization, failure retry/raw fallback and post-unlock sorted search; complete owner 31 match, 0 differ
 src/smt3/pipe/pipeObject.c	redthing1	done	2026-10-28	1 fn / 808 B	part rotation restores native direction-pair axes, dispatch order and vector handoff; owner 40 match, 0 differ including data
+src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 272 B	CIE metadata parser with true 20-byte info record, unaligned EH decoding and existing augmentation data; complete owner 32 match, 0 differ

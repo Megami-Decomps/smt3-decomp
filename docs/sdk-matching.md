@@ -874,3 +874,20 @@ capture these fields before unlocking. The midpoint and frame-end arithmetic
 use native 32-bit wrapping operations; containment is begin-inclusive and
 end-exclusive. Every path releases the semaphore exactly once. The caller
 passes a 32-bit PC and consumes the returned descriptor pointer or null.
+
+
+## CIE metadata and unaligned EH augmentation
+
+`sdk/libgcc::libc_2D2B60` matches all 272 instruction bytes. Its caller passes
+a 20-byte metadata record at stack offset zero; the separate 0x480-byte frame
+state starts at offset 0x20 and is initialized afterward. The five metadata
+words are augmentation pointer, EH pointer, unsigned code alignment, signed
+data alignment and return-register number.
+
+The parser accepts empty augmentation, `eh`, or any leading `z`. Rejection
+writes only the augmentation pointer. The optional EH pointer follows a
+variable-length string, so its packed encoded view permits the native
+unaligned four-byte load. Code/data alignment use the existing ULEB/SLEB
+providers. The return-register byte is zero-extended; `z` consumes a payload
+size and skips those bytes. Both existing string blocks retain their original
+assembly data ownership, including the unused trailing bytes.
