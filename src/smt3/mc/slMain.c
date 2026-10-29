@@ -362,7 +362,7 @@ extern s32 slFormatCancel(void);
 
 extern u8 frEnableMode(s32 Flag);
 
-extern void frDisableMode(s32 Flag);
+extern u8 frDisableMode(u8 Flag);
 
 extern void *frSetFontString(const char *text, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
