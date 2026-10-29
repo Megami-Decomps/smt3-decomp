@@ -781,7 +781,49 @@ s32 nbGetNegoTuikaRequestType(s32 tuikareqtype)
     return 0;
 }
 
+typedef struct { s32 requestmode; u8 remainder[0x64]; } nbNegoSkillEntry_t;
+#ifdef NON_MATCHING
+typedef struct { s8 skillattr; s8 type; s16 index; u16 keisyoform; s8 capacity; u8 flag; } nbSkillAttr_t;
+extern nbSkillAttr_t attr[];
+extern nbNegoSkillEntry_t D_003E1338[];
+extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t *party);
+extern s32 datCheckTalk(datUnitWork_t *work);
+
+void nbSetAllHojoSkillWork(nbNegoProcessData_t *n)
+{
+    nbParty_t *party;
+    datUnitWork_t *work;
+    s32 i;
+    s32 j;
+    s32 count;
+    u16 skill;
+    u16 *slot;
+
+    for (i = 0; i < 14; i++) {
+        party = &n->data->party[i];
+        slot = party->hojoskill;
+        for (j = 0; j < 8; j++) {
+            *slot++ = 0;
+        }
+        party = &n->data->party[i];
+        party->flag &= ~0x80;
+        if (i < 4 && (party->flag & 1) != 0 && i != n->ppartyindex) {
+            work = nbGetUnitWorkPointer(n->data, party);
+            if (datCheckTalk(work) != 0) {
+                count = 0;
+                for (j = 0; j < work->skillcnt; j++) {
+                    skill = work->skill[j];
+                    if (attr[skill].type == 2 && D_003E1338[skill - 0x180].requestmode == 7) {
+                        n->data->party[i].hojoskill[count++] = skill;
+                    }
+                }
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbSetAllHojoSkillWork);
+#endif
 
 s32 nbGetHojoSkillWorkCnt(nbNegoProcessData_t *n)
 {
@@ -1193,7 +1235,6 @@ void nbNegoShutdown(dds3ProcessID_t *id)
 }
 
 /* Negotiation skills have a 0x68-byte record; the first word selects request mode. */
-typedef struct { s32 requestmode; u8 remainder[0x64]; } nbNegoSkillEntry_t;
 extern nbNegoSkillEntry_t D_003E1338[];
 typedef struct { void *flow; void *aisyo; void *question; void *info; } nbNegoMsgEntry_t;
 extern nbNegoMsgEntry_t negoMsgTable[];
