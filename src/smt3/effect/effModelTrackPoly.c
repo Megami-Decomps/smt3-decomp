@@ -834,7 +834,8 @@ void effSwordTrackPolygonDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
 }
 
 #ifdef NON_MATCHING
-extern f32 D_0054C9F4;
+/* 307 of 584 words match, 277 differ, first at +0x270: the reload register for
+ * the spilled history pointer in the run-loop head, two words short overall. */
 extern f32 D_002FA240[16];
 extern f32 aViewEye[4];
 extern sdf3DScreenParam_t dds3ScreenParam;
@@ -848,75 +849,78 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
 {
     dds3HermitianTrackPoly_tag *history = track->hPoly;
     sdfDrawTag_t *list;
-    sdfPrimTransPacket_t *trans;
-    sdfGrPacketHeader_t *state, *quadPacket;
-    sdfGrTagStdReg_t *reg;
+    u64 *packet;
+    u64 *testPacket;
+    u64 *texPacket;
+    void *tex;
+    sdfGrPacketHeader_t *quadPacket;
     effBlurPrimTriStrip_t *quad;
-    sdfVector4_t world[2] __attribute__((aligned(16)));
-    s32 screen[4][4] __attribute__((aligned(16)));
-    f32 distances[2];
+    s32 starts[4];
+    s32 runCounts[2];
+    sdfVector4_t world[2] QWORD_ALIGNED;
+    s32 screen[4][4] QWORD_ALIGNED;
+    /* Each scratch pair owns a quadword slot in retail's frame. */
+    f32 d[4];
+    f32 distances[4];
+    f32 offset[4];
     f32 angle = 0.0f;
-    f32 angleStep, wave, length, dx, dy, inverseLength, offsetX, offsetY;
-    s32 starts[2], runCounts[2];
-    s32 start, count, run, i, j;
+    f32 angleStep, wave, length, len;
+    s32 pointCount, count, run, i, j, k;
     u128 *vertices;
-    const u8 *color = (const u8 *)&track->param_dante.abgr;
-    sdfGrOt_t *ot;
-    void *texturePacket;
+    s32 (*rows)[4];
 
-    angleStep = D_0054C9F4 / (f32)((u32)track->param_dante.historyLength * (u32)history->split);
+    angleStep = 1.5707963f / (f32)((u32)track->param_dante.historyLength * (u32)history->split);
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    trans = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
-    trans->elem.test.data = 0x35801;
-    trans->elem.test.reg = 0x47;
-    trans->elem.alpha.data = 0x44;
-    trans->elem.alpha.reg = 0x42;
-    trans->header.dmaWords.tag = 3;
-    trans->header.dmaWords.vif = 0x5000000310000000ULL;
-    trans->header.giftag.parm = 0x1000000000008002ULL;
-    trans->header.giftag.regs = 0xE;
-    sdfDrawTagLink(list, (u32)trans);
-    texturePacket = (void *)sdfGrAllocPacketBuff(0x20);
-    sdfGrLinkDrawFrameTex(list, dds3DrawEnv[dds3GetFrameID()].frameTex, texturePacket);
-    state = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(0x30);
-    reg = (sdfGrTagStdReg_t *)(state + 1);
-    reg->data = 0x0000037C00000008ULL;
-    reg->reg = 8;
-    state->dmaWords.tag = 2;
-    state->dmaWords.vif = 0x5000000210000000ULL;
-    state->giftag.parm = 0x1000000000008001ULL;
-    state->giftag.regs = 0xE;
-    sdfDrawTagLink(list, (u32)state);
-    state = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(0x30);
-    reg = (sdfGrTagStdReg_t *)(state + 1);
-    reg->data = 0x60;
-    state->dmaWords.tag = 2;
-    state->dmaWords.vif = 0x5000000210000000ULL;
-    state->giftag.parm = 0x1000000000008001ULL;
-    state->giftag.regs = 0xE;
-    reg->reg = 0x14;
-    sdfDrawTagLink(list, (u32)state);
+    packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+    packet[0] = 3;
+    packet[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
+    packet[2] = ((u64)0x10000000 << 32) | 0x8002;
+    packet[3] = 0xE;
+    packet[4] = 0x35801;
+    packet[5] = 0x47;
+    packet[6] = 0x44;
+    packet[7] = 0x42;
+    sdfDrawTagLink(list, (u32)packet);
+    tex = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfGrLinkDrawFrameTex(list, dds3DrawEnv[dds3GetFrameID()].frameTex, tex);
+    testPacket = (u64 *)sdfGrAllocPacketBuff(0x30);
+    testPacket[0] = 2;
+    testPacket[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
+    testPacket[2] = ((u64)0x10000000 << 32) | 0x8001;
+    testPacket[3] = 0xE;
+    testPacket[4] = ((u64)0x37C << 32) | 8;
+    testPacket[5] = 8;
+    sdfDrawTagLink(list, (u32)testPacket);
+    texPacket = (u64 *)sdfGrAllocPacketBuff(0x30);
+    texPacket[0] = 2;
+    texPacket[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
+    texPacket[2] = ((u64)0x10000000 << 32) | 0x8001;
+    texPacket[3] = 0xE;
+    texPacket[4] = 0x60;
+    texPacket[5] = 0x14;
+    sdfDrawTagLink(list, (u32)texPacket);
 
-    count = history->count;
-    start = (s32)((u32)history->current - (u32)count);
-    starts[1] = 0; /* Retail leaves this unset when the second run is skipped. */
-    if (start < 2) {
-        start = (s32)((u32)start - 2);
-        runCounts[0] = (s32)(0U - (u32)start);
-        runCounts[1] = (s32)((u32)count - (u32)runCounts[0] + 2);
-        starts[0] = (s32)((u32)start + (u32)history->point);
+    pointCount = history->count;
+    starts[0] = history->current - pointCount;
+    if (starts[0] < 2) {
+        starts[0] -= 2;
+        runCounts[0] = -starts[0];
+        starts[0] += history->point;
+        runCounts[1] = pointCount - runCounts[0] + 2;
+        starts[1] = 0;
     } else {
-        starts[0] = start;
-        runCounts[0] = count;
+        runCounts[0] = pointCount;
         runCounts[1] = 0;
     }
     SDF_VU0_LOADMATRIX(D_002FA240);
     MultMatrixRev(dds3ScreenParam.TM.m);
     for (run = 0; run < 2; run++) {
-        count = (s32)((u32)runCounts[run] - 2);
-        if (count < 4) continue;
         vertices = history->pVertex + starts[run];
+        count = runCounts[run] - 2;
+        if (count < 4) {
+            continue;
+        }
         wave = sdfSin(angle);
         SDF_VU0_LOADVECTOR(vertices + 1);
         SDF_VU0_LOADVECTOR_B(vertices);
@@ -924,12 +928,12 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
         SDF_VU0_SUBVECTOR();
         SDF_VU0_GETLENGTH(length);
         SDF_VU0_NORMALIZE();
-        length *= wave;
-        SDF_VU0_SCALEVECTOR(length);
+        SDF_VU0_SCALEVECTOR(length * wave);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR(&world[1]);
-        for (i = 0; i < 2; i++) {
-            SDF_VU0_LOADVECTOR(&world[i]);
+        for (k = 0; k < 2; k++) {
+            rows = screen;
+            SDF_VU0_LOADVECTOR(&world[k]);
             SDF_VU0_APPLYMATRIX_XYZ1();
             SDF_VU0_PERSVECTOR();
             SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.scale);
@@ -937,17 +941,17 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
             SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_FTOI4();
-            SDF_VU0_STOREVECTOR(screen[i]);
-            screen[i][0] = (s32)((u32)screen[i][0] - 0x7000);
-            screen[i][1] = (s32)((u32)screen[i][1] - 0x7900);
+            SDF_VU0_STOREVECTOR(rows[k]);
+            screen[k][0] -= 0x7000;
+            screen[k][1] -= 0x7900;
         }
         for (i = 0; i < count; i += 2) {
             quadPacket = effPkt2DAllocTriStrip(1, 0);
             quad = effPkt2DGetPrimPtr(quadPacket);
-            quad->r = color[0];
-            quad->g = color[1];
-            quad->b = color[2];
-            quad->a = color[3];
+            quad->r = ((const u8 *)&track->param_dante.abgr)[0];
+            quad->g = ((const u8 *)&track->param_dante.abgr)[1];
+            quad->b = ((const u8 *)&track->param_dante.abgr)[2];
+            quad->a = ((const u8 *)&track->param_dante.abgr)[3];
             wave = sdfSin(angle);
             SDF_VU0_LOADVECTOR(vertices + 3);
             vertices += 2;
@@ -956,17 +960,16 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
             SDF_VU0_SUBVECTOR();
             SDF_VU0_GETLENGTH(length);
             SDF_VU0_NORMALIZE();
-            length *= wave;
-            SDF_VU0_SCALEVECTOR(length);
+            SDF_VU0_SCALEVECTOR(length * wave);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(&world[1]);
             angle += angleStep;
-            for (j = 0; j < 2; j++) {
-                SDF_VU0_LOADVECTOR(&world[j]);
+            for (j = 2; j < 4; j++) {
+                SDF_VU0_LOADVECTOR(&world[j - 2]);
                 SDF_VU0_LOADVECTOR_B(aViewEye);
                 SDF_VU0_SUBVECTOR();
-                SDF_VU0_GETLENGTH(distances[j]);
-                SDF_VU0_LOADVECTOR(&world[j]);
+                SDF_VU0_GETLENGTH(distances[j - 2]);
+                SDF_VU0_LOADVECTOR(&world[j - 2]);
                 SDF_VU0_APPLYMATRIX_XYZ1();
                 SDF_VU0_PERSVECTOR();
                 SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.scale);
@@ -974,19 +977,23 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
                 SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
                 SDF_VU0_ADDVECTOR();
                 SDF_VU0_FTOI4();
-                SDF_VU0_STOREVECTOR(screen[j + 2]);
-                screen[j + 2][0] = (s32)((u32)screen[j + 2][0] - 0x7000);
-                screen[j + 2][1] = (s32)((u32)screen[j + 2][1] - 0x7900);
+                SDF_VU0_STOREVECTOR(screen[j]);
+                screen[j][0] -= 0x7000;
+                screen[j][1] -= 0x7900;
             }
-            if (dpcmp(fptodp(distances[0]), 16.0) > 0 && dpcmp(fptodp(distances[1]), 16.0) > 0 &&
+            if (distances[0] > 16.0 && distances[1] > 16.0 &&
                 (((u32)screen[0][0] <= 0x2000 && (u32)screen[0][1] <= 0xE00) ||
                  ((u32)screen[1][0] <= 0x2000 && (u32)screen[1][1] <= 0xE00) ||
                  ((u32)screen[2][0] <= 0x2000 && (u32)screen[2][1] <= 0xE00) ||
                  ((u32)screen[3][0] <= 0x2000 && (u32)screen[3][1] <= 0xE00))) {
-                for (j = 0; j < 4; j++) {
-                    quad->vtx[j].x = (s32)((u32)screen[j][0] + 0x7000);
-                    quad->vtx[j].y = (s32)((u32)screen[j][1] + 0x7900);
-                }
+                quad->vtx[0].x = screen[0][0] + 0x7000;
+                quad->vtx[0].y = screen[0][1] + 0x7900;
+                quad->vtx[1].x = screen[1][0] + 0x7000;
+                quad->vtx[1].y = screen[1][1] + 0x7900;
+                quad->vtx[2].x = screen[2][0] + 0x7000;
+                quad->vtx[2].y = screen[2][1] + 0x7900;
+                quad->vtx[3].x = screen[3][0] + 0x7000;
+                quad->vtx[3].y = screen[3][1] + 0x7900;
                 quad->vtx[1].s = (f32)screen[1][0] * 0.0001220703125f;
                 quad->vtx[0].s = (f32)screen[0][0] * 0.0001220703125f;
                 quad->vtx[0].t = (f32)screen[0][1] * 0.000244140625f;
@@ -995,33 +1002,37 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
                 quad->vtx[2].t = (f32)screen[2][1] * 0.000244140625f;
                 quad->vtx[3].s = (f32)screen[3][0] * 0.0001220703125f;
                 quad->vtx[3].t = (f32)screen[3][1] * 0.000244140625f;
-                dx = (f32)(s32)((u32)screen[2][0] - (u32)screen[0][0]);
-                dy = (f32)(s32)((u32)screen[2][1] - (u32)screen[0][1]);
-                if (dx != 0.0f || dy != 0.0f) {
-                    inverseLength = sdfSqrt(dx * dx + dy * dy);
-                    dy /= inverseLength;
-                    dx /= inverseLength;
+                d[0] = (f32)(screen[2][0] - screen[0][0]);
+                d[1] = (f32)(screen[2][1] - screen[0][1]);
+                if (d[0] != 0.0f || d[1] != 0.0f) {
+                    len = sdfSqrt(d[0] * d[0] + d[1] * d[1]);
+                    d[0] /= len;
+                    d[1] /= len;
                 }
                 quad->vtx[0].z = 0xFF0000;
                 quad->vtx[1].z = 0xFF0000;
+                quad->vtx[2].z = 0xFF0000;
+                quad->vtx[3].z = 0xFF0000;
                 quad->vtx[0].adc = 0;
-                offsetX = dx * 144.0f * 0.0001220703125f;
-                offsetY = dy * 144.0f * 0.000244140625f;
-                quad->vtx[0].s += offsetX;
-                quad->vtx[0].t += offsetY;
-                quad->vtx[2].s += offsetX;
-                quad->vtx[2].t += offsetY;
-                offsetX = dx * 272.0f * 0.0001220703125f;
-                offsetY = dy * 272.0f * 0.000244140625f;
-                quad->vtx[1].s += offsetX;
-                quad->vtx[1].t += offsetY;
-                quad->vtx[3].s += offsetX;
-                quad->vtx[3].t += offsetY;
+                offset[0] = d[0] * 144.0f;
+                offset[1] = d[1] * 144.0f;
+                offset[0] *= 0.0001220703125f;
+                offset[1] *= 0.000244140625f;
+                quad->vtx[0].s += offset[0];
+                quad->vtx[0].t += offset[1];
+                quad->vtx[2].s += offset[0];
+                quad->vtx[2].t += offset[1];
+                offset[0] = d[0] * 272.0f;
+                offset[1] = d[1] * 272.0f;
+                offset[0] *= 0.0001220703125f;
+                offset[1] *= 0.000244140625f;
+                quad->vtx[1].s += offset[0];
+                quad->vtx[1].t += offset[1];
+                quad->vtx[3].s += offset[0];
+                quad->vtx[3].t += offset[1];
                 quad->vtx[1].adc = 0;
                 quad->vtx[3].adc = 0;
-                quad->vtx[2].z = 0xFF0000;
                 quad->vtx[2].adc = 0;
-                quad->vtx[3].z = 0xFF0000;
                 sdfDrawTagLink(list, (u32)quadPacket);
             }
             screen[0][0] = screen[2][0];
@@ -1030,8 +1041,11 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
             screen[1][1] = screen[3][1];
         }
     }
-    ot = &sdfGrOtTable[track->otIndex];
-    ot->regFunc(ot, list);
+    {
+        sdfGrOt_t *ot = &sdfGrOtTable[track->otIndex];
+
+        ot->regFunc(ot, list);
+    }
 }
 #else
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", effSwordTrackPolygon2DDraw);
