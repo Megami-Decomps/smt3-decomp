@@ -283,4 +283,8 @@ typedef struct {
     u8 unk94[12];
 } fldSceneParam_t;
 
+typedef struct slFileWork_t {
+    s32 w[5];
+} slFileWork_t;
+
 #endif /* FIELD_H */

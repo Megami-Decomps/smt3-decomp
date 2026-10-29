@@ -391,9 +391,7 @@ typedef struct slFileName_t {
     s8 ch[20];
 } slFileName_t;
 
-typedef struct slFileWork_t {
-    s32 w[5];
-} slFileWork_t;
+
 
 typedef struct slFileRec_t {
     s8 verstr[3];
