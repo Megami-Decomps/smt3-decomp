@@ -1,5 +1,6 @@
 #include "common.h"
 #include "facility.h"
+#include "kernel.h"
 #include "basic.h"
 #include "motion.h"
 #include "fpu.h"
@@ -440,7 +441,7 @@ typedef struct
     /* 0x16514 */ u8 *scriptArg;
     /* 0x16518 */ void *resourceHandle_16518;
     /* 0x1651C */ void *explainData;
-    /* 0x16520 */ u8 unk_16520[4];
+    /* 0x16520 */ dds3ProcessID_t *eventProcess;
     /* 0x16524 */ cmbActionData_t actionData[5];
     /* 0x16588 */ u8 reserved16588[8];
     /* 0x16590 */ f32 modelMark[3][4];
@@ -939,7 +940,55 @@ void cmbCreateLocalStock(void)
     }
 }
 
+extern s32 fclScriptStart(s32 script, s32 entry, void *process);
+
+#ifdef NON_MATCHING
+s32 cmbCalcRoot(void)
+{
+    s32 entry;
+    s32 status;
+
+    CMB_GBWK->unk_00001 = 0;
+    if (CMB_GBWK->unk_00004 == 0) {
+        return 0;
+    }
+    if (dds3GetProcessStat(CMB_GBWK->eventProcess) == 2) {
+        return 1;
+    }
+    cmpResetDrawEnv();
+    cmpModelFreeResource();
+    if (CMB_GBWK->unk_00003 == 0) {
+        if (fclCombineChkEventStat() == 0) {
+            fclCombineEventStart(1);
+        }
+        status = cmbChkGeneralStat();
+        if (status == 0) {
+            entry = 1;
+        } else if (status == 1) {
+            entry = 2;
+        } else {
+            entry = 0;
+        }
+    } else {
+        if (fclCombineChkEventStat() == 0) {
+            dds3FadeOut(0, 0, 0, 0);
+            fclCombineEventStart(2);
+            return 1;
+        }
+        entry = 9;
+    }
+    fclScriptStart(CMB_GBWK->script, entry, &CMB_GBWK->scriptArg);
+    cmbCreateLocalStock();
+    CMB_GBWK->unk_1650B = 0;
+    CMB_GBWK->panel->Timer = 0;
+    cmpResetCursorInfo(&CMB_GBWK->menuCursor);
+    fclCombineDisableCmdZensyo();
+    cmpResetCursorInfo(&CMB_GBWK->resultCursor);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcRoot);
+#endif
 
 void cmbCalcDevSel1st(void)
 {
@@ -1033,7 +1082,6 @@ void cmbAddBirthDevilToStock(datUnitWork_t *units, u8 count)
     }
 }
 
-extern s32 fclScriptStart(s32 script, s32 entry, void *process);
 
 #ifdef NON_MATCHING
 void cmbStartResultScript(void)
