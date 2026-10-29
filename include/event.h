@@ -140,6 +140,14 @@ typedef struct pmdEffectTable_t {
     s32 reserve;
 } pmdEffectTable_t;
 
+typedef struct pmdHeader_t {
+    u8 pad[0x10];
+    s32 count;
+    s32 kind;
+    u8 pad2[8];
+    pmdEntry_t entries[1];
+} pmdHeader_t;
+
 /* Interpolated event vector and packed colour. */
 typedef struct evtBlendVecColor_t {
     f32 vec[4];

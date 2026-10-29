@@ -19,13 +19,7 @@ typedef struct pmdFrameTable_t pmdFrameTable_t;
 
 
 
-typedef struct pmdHeader_t {
-    u8 pad[0x10];
-    s32 count;
-    s32 kind;
-    u8 pad2[8];
-    pmdEntry_t entries[1];
-} pmdHeader_t;
+
 
 typedef struct evtPolygonMovieWork_t {
     u32 movieFlags;
