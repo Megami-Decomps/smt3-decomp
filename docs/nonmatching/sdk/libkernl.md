@@ -41,3 +41,21 @@ callback/buffer, service ID, registration link, request link and owning queue.
 Only native-written fields are initialized. The function appends through the
 registration link at 0x38, while pending requests use the separate link at
 0x3C. The owning queue is at 0x40. Interrupt restoration is a void tail call.
+
+## sceSifInitIopHeap
+
+31 of 34 words match at the native 136-byte size. The last three differing
+words construct the initialization-flag address, store zero and return zero:
+native uses the return register for the address before clearing it; the C
+uses a separate address register and clears the return register before the
+store. The bind/retry loop and its four countdown NOPs match ordinary C.
+
+Naming the global client at each use reproduces the native separately saved
+high address and per-iteration client address. Keeping one local client pointer
+instead emits 128 bytes. Moving the successful flag store and return into the
+loop emits 144 bytes and changes its control flow; neither is preferred.
+
+The routine binds service `0x80000003` synchronously, returns `-1` for a negative
+bind result, and retries after the native countdown while the bound server is
+null. Only successful binding clears the heap initialization flag. No new
+volatile accesses, instruction padding or forced register use are justified.

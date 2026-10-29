@@ -1106,24 +1106,47 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSymlink);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceReadlink);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitIopHeap);
-
 extern s32 D_0052C354;
 /* The BSS map bounds this opaque RPC client to 0x40 bytes. */
 extern u8 D_0059E840[0x40];
 extern s32 D_0059E880;
-extern s32 D_0059E8C0;
+/* Shared heap request storage is 0x40 bytes in the BSS map. */
+extern u32 D_0059E8C0[16];
 extern s32 sceSifCallRpc(void *client, s32 function, s32 mode, void *send,
                          s32 sendBytes, void *receive, s32 receiveBytes,
                          void *endFunction, void *endParameter);
+
+/* NON_MATCHING: 31 of 34 words match at the native 136-byte size;
+ * the final initialization store and return use different scheduling. */
+#ifdef NON_MATCHING
+s32 sceSifInitIopHeap(void)
+{
+    s32 delay;
+
+    for (;;) {
+        if (sceSifBindRpc((rpcClient *)D_0059E840, 0x80000003, 0) < 0) {
+            return -1;
+        }
+        if (((rpcClient *)D_0059E840)->server != NULL) {
+            break;
+        }
+        for (delay = 0x100000; delay != -1; delay--) {
+        }
+    }
+    D_0052C354 = 0;
+    return 0;
+}
+#else
+INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitIopHeap);
+#endif
 
 s32 sceSifAllocIopHeap(s32 size)
 {
     if (D_0052C354 < 0) {
         return 0;
     }
-    D_0059E8C0 = size;
-    if (sceSifCallRpc(D_0059E840, 1, 0, &D_0059E8C0, 4,
+    D_0059E8C0[0] = size;
+    if (sceSifCallRpc(D_0059E840, 1, 0, D_0059E8C0, 4,
                       &D_0059E880, 4, NULL, NULL) >= 0) {
         return D_0059E880;
     }
@@ -1131,11 +1154,38 @@ s32 sceSifAllocIopHeap(s32 size)
 }
 
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifAllocSysMemory);
+void *sceSifAllocSysMemory(s32 mode, s32 size, void *address)
+{
+    if (D_0052C354 < 0) {
+        return NULL;
+    }
+    D_0059E8C0[0] = size;
+    D_0059E8C0[1] = mode;
+    D_0059E8C0[2] = (u32)address;
+    if (sceSifCallRpc(D_0059E840, 4, 0, D_0059E8C0, 12,
+                      &D_0059E880, 4, NULL, NULL) >= 0) {
+        return (void *)D_0059E880;
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifFreeSysMemory);
+s32 sceSifFreeSysMemory(void *address)
+{
+    if (D_0052C354 < 0) {
+        return 0;
+    }
+    D_0059E8C0[0] = (u32)address;
+    if (sceSifCallRpc(D_0059E840, 2, 0, D_0059E8C0, 4,
+                      &D_0059E880, 4, NULL, NULL) >= 0) {
+        return D_0059E880;
+    }
+    return -1;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifFreeIopHeap);
+s32 sceSifFreeIopHeap(void *address)
+{
+    return sceSifFreeSysMemory(address);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadIopHeap);
 

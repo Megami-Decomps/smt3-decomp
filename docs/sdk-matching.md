@@ -426,3 +426,19 @@ negative result returns that result minus 100. The server and manager version
 checks read the shared reply after preceding callbacks. All three diagnostics
 are ordinary string literals, with their complete read-only-data placement
 verified against retail.
+
+## Matched heap allocation and release wrappers
+
+`sceSifAllocSysMemory` (128 bytes), `sceSifFreeSysMemory` (120 bytes) and
+`sceSifFreeIopHeap` (28 bytes) match 276 instruction bytes. Allocation sends
+three words in size/mode/address order using command four and returns the
+reply address, or null on a negative RPC status. Free sends one address word
+using command two and returns the reply status, or `-1` on RPC failure. Both
+return zero while the heap initialization flag is negative. The small free
+wrapper forwards the result through the native call/return sequence.
+
+The BSS map bounds the shared request buffer to 64 bytes. Its word-array view
+supports the three-word allocation request and the existing one-word requests
+without inventing neighboring storage. The complete kernel owner checks 38
+match / 0 differ; heap initialization remains a guarded draft with its native
+assembly fallback.

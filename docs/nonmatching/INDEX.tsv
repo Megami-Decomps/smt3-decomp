@@ -262,6 +262,7 @@ sceIpuRestartDMA			74 of 84 words match	docs/nonmatching/sdk/libipu.md	47
 sceSifCheckStatRpc				docs/nonmatching/sdk/libkernl.md	3
 sceSifSetRpcQueue				docs/nonmatching/sdk/libkernl.md	17
 sceSifRegisterRpc				docs/nonmatching/sdk/libkernl.md	32
+sceSifInitIopHeap			31 of 34 words match	docs/nonmatching/sdk/libkernl.md	45
 sceMcWrite				docs/nonmatching/sdk/libmc.md	30
 sceMcSync				docs/nonmatching/sdk/libmc.md	49
 sceMcSetFileInfo				docs/nonmatching/sdk/libmc.md	60
