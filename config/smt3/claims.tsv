@@ -939,3 +939,5 @@ src/smt3/pb/pbMain.c	redthing1	done	2026-10-29	1 fn / 148 B	func_001D4C08 matche
 src/smt3/field/fldHit.c	z29	open	2026-10-29	1 fn / 3088 B	largest-first pass: fldHitChkUnit, using the VWM sibling transfer list
 src/smt3/field/fldHit.c	z29	done	2026-10-29	0 fn, withdrawn	fldHitChkUnit claim released unstarted, redirected to the sdf units; the VWM transfer list above still applies
 src/smt3/sdf/sdfCoreDraw.c	z29	open	2026-10-29	1 fn / 2372 B	sdf sweep, largest first: sdfCorePacketGen
+src/smt3/sdf/sdfCoreDraw.c	z29	done	2026-10-29	0 matches / 1 guarded draft	sdfCorePacketGen 2332/2372 B, 70 of 583 words match (was 32); corePktCb_t corrected to 0xB0; 7 of 9 long-lived values now on retail registers
+src/smt3/sdf/sdfDraw.c	z29	open	2026-10-29	1 fn / 1152 B	sdf sweep: sdfGrDrawFrame
