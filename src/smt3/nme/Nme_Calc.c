@@ -62,7 +62,56 @@ void nmeDrawSymbolRow(s32 x, s32 y)
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameText);
 
+#ifdef NON_MATCHING
+extern const s8 D_00551698[3];
+extern s32 nmeGetCursorPos(nmeWork_t *work);
+extern void cmpSetSkillListRows(s32 rows);
+extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type,
+                                        frFontHandle_t *chain);
+extern void frSetDrawPosition(frFontHandle_t *request, u32 x, u32 y);
+extern void frSetPriority(frFontHandle_t *request, u32 priority);
+extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
+
+void nmeDrawNameString(s32 x, s32 y, u32 color, s32 mode)
+{
+    volatile s32 first = D_00551698[0];
+    volatile s32 second = D_00551698[1];
+    volatile s32 terminator = D_00551698[2];
+    u8 text[3];
+    s32 cursor, i;
+
+    text[0] = first;
+    text[1] = second;
+    text[2] = terminator;
+    cursor = nmeGetCursorPos(namelist_buttonAnim_end);
+    nmeDrawSymbolRow((x - 0x18) * 16, (y - 8) * 8);
+    cmpSetSkillListRows(0x16);
+    for (i = 0; i < 8; i++) {
+        s32 sprite = 0x41;
+        if (mode == 0 && cursor == i) {
+            sprite = 0x42;
+        }
+        fclDrawSpriteRes((x + 0x10) * 16 + i * 0x120, (y + 0x12) * 8,
+                         0, NULL, 0, sprite, (s32 *)namelist_buttonAnim_end->textures,
+                         &GBWK_2, 0x47);
+    }
+    for (i = 0; i < namelist_buttonAnim_end->inputRowEnabled[2]; i++) {
+        frFontHandle_t *font;
+        text[0] = namelist_buttonAnim_end->inputChars[2][i][0];
+        text[1] = namelist_buttonAnim_end->inputChars[2][i][1];
+        font = frLinkFontString(text, 1, 0, 0, NULL);
+        frSetDrawPosition(font, (x + 0x10) * 16 + i * 0x120, y * 8);
+        frSetFontColor(font, color);
+        frSetPriority(font, 0);
+        func_001C7E38(font, 0, 0x47);
+        frDestroyFontRequestAfter(font);
+    }
+    cmpSetSkillListRows(-1);
+}
+#else
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameString);
+#endif
 
 void nmeDrawEditIcons(void)
 {
