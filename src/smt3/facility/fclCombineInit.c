@@ -1750,7 +1750,7 @@ s32 cmbGetRaceCombineResult(s32 race, u8 level)
         return 0;
     }
     for (i = 0; i < eligibleCount; i++) {
-        if (datDevilTable[eligible[i]].baseLevel < level) {
+        if (datDevilTable[eligible[i]].level < level) {
             return i == 0 ? eligible[0] : eligible[i - 1];
         }
     }

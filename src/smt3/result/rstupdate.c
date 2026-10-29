@@ -10,6 +10,7 @@
 
 
 
+extern s8 fclEndMessage(void);
 extern datDevilTableEntry_t datDevilTable[];
 
 typedef struct
@@ -391,7 +392,6 @@ void rstUpdateSeqGift(void)
 }
 
 extern s32 rstWaitConfirmButton(void);
-extern s8 fclEndMessage(void);
 extern char *text1[];
 extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
 
