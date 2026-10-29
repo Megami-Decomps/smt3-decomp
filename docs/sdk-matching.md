@@ -36,6 +36,28 @@ Of the 126,120 bytes, 50,080 (39.7%) are identified by bytes, 65,508 (51.9%) by
 name alone, and 10,532 (8.4%) not yet at all. 116 distinct archive members are
 named, so the region is around 116 translation units rather than one.
 
+## Stream-buffer status ABI
+
+`include/newlib_stat.h` records the historical newlib status structure for the
+EE ABI. The upstream [newlib 1.9.0 stat declaration](https://github.com/mirror/newlib-cygwin/blob/newlib-1_9_0/newlib/libc/include/sys/stat.h),
+[system typedefs](https://github.com/mirror/newlib-cygwin/blob/newlib-1_9_0/newlib/libc/include/sys/types.h)
+and [time typedef](https://github.com/mirror/newlib-cygwin/blob/newlib-1_9_0/newlib/libc/include/machine/types.h)
+corroborate its fields and order. This tag supplies a historical layout reference;
+it does not establish the exact newlib release bundled with the game.
+
+The fixed-width prefix occupies 16 bytes. EE's 64-bit long supplies the remaining
+eleven long fields, giving 104 bytes (0x68), with mode at +4 and block size at +0x48.
+The header checks that size at compile time. Native `fstat` stores exactly those
+two fields, while `__smakebuf` passes the record at stack+0 in its 0x90-byte frame,
+with saved registers beginning at +0x70. The layout follows independently typed
+fields rather than an invented frame-filling array.
+
+`__smakebuf` matches all 340 instruction bytes. It preserves the negative-file
+and failed-status defaults, regular-file/seek-provider test, 1024-byte allocation,
+embedded-byte fallback, cleanup publication and terminal-only line-buffer flag.
+It reads only the mode returned by the status call; unused status fields are not
+silently initialized. The typed `_fstat_r` bridge preserves its existing bytes.
+
 ## Two different provenances, measured separately
 
 The three SDK trees on hand are 2.0.4, the ee-gcc 2.96 toolchain package, and

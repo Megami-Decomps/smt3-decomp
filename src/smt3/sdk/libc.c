@@ -1,4 +1,5 @@
 #include "common.h"
+#include "newlib_stat.h"
 #include "ps2asm.h"
 
 enum {
@@ -290,7 +291,7 @@ extern s32 read(s32 fd, void *buf, s32 count);
 
 extern long lseek(s32 fd, s32 offset, s32 whence);
 
-extern s32 fstat(s32 fd, void *buf);
+extern s32 fstat(s32 fd, struct stat *buf);
 
 extern s32 kill(s32 pid, s32 sig);
 
@@ -1029,7 +1030,48 @@ void *localeconv(void) {
     return func_002DA308(_impure_ptr);
 }
 
-INCLUDE_ASM(const s32, "sdk/libc", __smakebuf);
+extern s32 _fstat_r(_reent *r, s32 fd, struct stat *buf);
+extern s32 isatty(s32 fd);
+
+void __smakebuf(FILE *fp)
+{
+    struct stat st;
+    u8 *buf;
+    s32 size;
+    s32 couldBeTty;
+
+    if (fp->_flags & 2) {
+        fp->_bf._base = fp->_p = fp->_nbuf;
+        fp->_bf._size = 1;
+        return;
+    }
+    if (fp->_file < 0 || _fstat_r(fp->_data, fp->_file, &st) < 0) {
+        couldBeTty = 0;
+        size = 1024;
+        fp->_flags |= 0x800;
+    } else {
+        couldBeTty = (st.st_mode & 0xF000) == 0x2000;
+        size = 1024;
+        if ((st.st_mode & 0xF000) == 0x8000 && fp->_seek == __sseek) {
+            fp->_flags |= 0x400;
+            fp->_blksize = size;
+        } else {
+            fp->_flags |= 0x800;
+        }
+    }
+    buf = _malloc_r(fp->_data, size);
+    if (buf == NULL) {
+        fp->_flags |= 2;
+        fp->_bf._base = fp->_p = fp->_nbuf;
+        fp->_bf._size = 1;
+    } else {
+        fp->_data->__cleanup = _cleanup_r;
+        fp->_flags |= 0x80;
+        fp->_bf._base = fp->_p = buf;
+        fp->_bf._size = size;
+        if (couldBeTty && isatty(fp->_file)) fp->_flags |= 1;
+    }
+}
 
 s32 _mbtowc_r(_reent *r, s32 *pwc, const char *s, u32 n, s32 *state) {
     s32 dummy;
@@ -1566,7 +1608,7 @@ s32 _close_r(_reent *r, s32 fd) {
     return result;
 }
 
-s32 _fstat_r(_reent *r, s32 fd, void *buf) {
+s32 _fstat_r(_reent *r, s32 fd, struct stat *buf) {
     s32 result;
 
     D_00552178 = 0;
