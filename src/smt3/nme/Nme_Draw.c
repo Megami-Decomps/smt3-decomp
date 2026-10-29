@@ -314,7 +314,60 @@ void nmeSyncCursor(void) {
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursor);
 
+typedef struct {
+    cmpCursorInfo_t cursor;
+    s8 unk_38;
+} cmpPadStopWork_t;
+
+extern s32 cmpGetPressedButton(s32 mask);
+extern void nmeMoveCursorBy(s8 delta);
+extern s32 nmeGetRowCount(s8 mode);
+extern void cmpResetCursorPos(s16 value, cmpCursorInfo_t *cursor);
+extern s32 cmpChkPadPressUpDown(void);
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
+extern void cmpPlayCursorSE(u32 button);
+
+#ifdef NON_MATCHING
+void nmeMoveCursor2(void)
+{
+    u16 button = cmpGetPressedButton(0xF3);
+    s8 mode = (s8)((u8)nmeUpdateWork->modeCursor.unk_22 +
+                   (u8)nmeUpdateWork->modeCursor.unk_24);
+
+    switch (button) {
+    case 1:
+        return;
+    case 2:
+        nmeBackspace();
+        break;
+    case 0x10:
+        nmeMoveCursorBy(-1);
+        break;
+    case 0x20:
+        nmeMoveCursorBy(1);
+        break;
+    case 0x40:
+        nmeUpdateWork->alternateCursorActive = 0;
+        nmeUpdateWork->primaryCursorActive = 1;
+        cmpResetCursorPos(nmeGetRowCount(mode) - 1, &nmeUpdateWork->nameCursor);
+        break;
+    case 0x80:
+        nmeUpdateWork->alternateCursorActive = 0;
+        cmpResetCursorPos(0, &nmeUpdateWork->nameCursor);
+        break;
+    }
+    nmeSyncCursor();
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&nmeUpdateWork->cursor, 0);
+    }
+    button = (u16)cmpDisablePadBitStop((cmpPadStopWork_t *)&nmeUpdateWork->cursor,
+                                       button, 0x30);
+    cmpPlayCursorSE(button);
+}
+#else
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursor2);
+#endif
 
 extern s8 cmpGetCursorRow(cmpCursorInfo_t *cursor);
 extern s32 nmeGetRowCount(s8 mode);
@@ -349,10 +402,6 @@ s32 nmeResetCursor(cmpCursorInfo_t *cursor, s8 delta)
     return 0;
 }
 
-typedef struct {
-    cmpCursorInfo_t cursor;
-    s8 unk_38;
-} cmpPadStopWork_t;
 
 extern s32 cmpGetPressedButton(s32 mask);
 extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s32 mode);
