@@ -2,6 +2,7 @@
 #define PIPE_H
 
 #include "common.h"
+#include "libsdf.h"
 
 typedef struct tagPipeLinkData {
     u16 id;
@@ -10,6 +11,14 @@ typedef struct tagPipeLinkData {
     struct tagPipeLinkData *prev;
     u8 unk0C[4];
 } tagPipeLinkData;
+
+
+typedef struct tagPipeLinkInfo {
+    sdfMemHandle_t *aHandle;
+    tagPipeLinkData *head;
+    s32 maxNum;
+    s32 nextId;
+} tagPipeLinkInfo;
 
 typedef struct tagPipePartsType {
     f32 radius;

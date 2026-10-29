@@ -25,13 +25,6 @@ f32 vecNormalize(f32 *vector);
 
 f32 func_002A7DF8(f32 base, f32 exponent);
 
-typedef struct tagPipeLinkInfo {
-    sdfMemHandle_t *aHandle;
-    tagPipeLinkData *head;
-    s32 maxNum;
-    s32 nextId;
-} tagPipeLinkInfo;
-
 extern void vecRotate2D(f32 *vector, f32 angle);
 
 extern void pipeFreeLink(tagPipeLinkInfo *pInfo);

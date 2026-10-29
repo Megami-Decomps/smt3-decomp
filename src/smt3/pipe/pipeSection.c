@@ -28,13 +28,6 @@ typedef struct tagPipeObject {
 
 typedef struct tagPipePosTable tagPipePosTable;
 
-typedef struct tagPipeLinkInfo {
-    sdfMemHandle_t *aHandle;
-    tagPipeLinkData *head;
-    s32 maxNum;
-    s32 nextId;
-} tagPipeLinkInfo;
-
 extern u16 myStatus;
 
 extern s32 datGetPlayerParam(s32 id);
