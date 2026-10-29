@@ -45,7 +45,7 @@ typedef struct evtViewerObject_s {
     s32 type;
     s32 nameindex;
     s32 fileindex;
-    s32 unitHandle;                /* 0x0C */
+    dds3Basic_t *unitHandle;       /* 0x0C */
     union {
         u8 unk10[8];
         /* Effect tracks carry their loaded resource at 0x10. */
@@ -176,7 +176,7 @@ extern void evtStopFrame(s32 sw, s32 nowframe);
 extern void *dds3SetActiveCameraSceneBasic(void *pSceneBasic, void *pCameraBasic);
 extern f32 dds3CameraObjectBasicGetFovy(void *pBasic);
 extern void dds3SetScreenFovy(f32 fovy);
-extern void evtRunUnitMode(s32 unit, s32 mode);
+extern void evtRunUnitMode(dds3Basic_t *unit, s32 mode);
 extern void *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(void *aHandle);
 extern void *dds3StartProcess(const char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
@@ -959,7 +959,7 @@ void RunFrame3(s32 nowframe) {
                 }
                 bestFrameNumber = frameInfo->frame;
                 bestFrame = frameInfo;
-                lightBasic = (dds3Basic_t *)track->unitHandle;
+                lightBasic = track->unitHandle;
             }
         }
 
@@ -985,7 +985,31 @@ void RunFrame3(s32 nowframe) {
     }
 }
 
+#ifdef NON_MATCHING
+void RunFrameUnit(evtViewerObject_s *track, s32 nowFrame)
+{
+    evtFrameInfo_t *frame;
+    s32 mode = 0;
+    s32 otherMode = 2;
+
+    for (frame = track->p; frame != NULL && nowFrame >= frame->frame;
+         frame = frame->next) {
+        s32 value = frame->param.sb[0];
+
+        if (value >= 0) {
+            if (value < 2) {
+                mode = value;
+            } else if (value < 5) {
+                otherMode = value;
+            }
+        }
+    }
+    evtRunUnitMode(track->unitHandle, mode);
+    evtRunUnitMode(track->unitHandle, otherMode);
+}
+#else
 INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrameUnit);
+#endif
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtRunFrame);
 
