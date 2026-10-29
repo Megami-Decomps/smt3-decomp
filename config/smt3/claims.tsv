@@ -806,3 +806,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 568 B	device-contro
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 568 B	64-bit signed long conversion, unsigned cutoff and accumulation, overflow scanning and original-input end pointer; complete owner 70 match, 0 differ
 src/smt3/pipe/pipeObject.c	redthing1	done	2026-10-28	1 fn / 536 B	object creation preserves two random draws, entry offset, byte categories, metadata failure and fresh post-callback state; complete owner exact
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 476 B	descriptor ioctl transaction with unsigned limits, native null-input size update, post-copy descriptor reload and fixed request extent; owner 119 match, 0 differ
+src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 992 B	vector output across unbuffered, fully buffered/string and line-buffered modes; qualified byte-count lifetime; complete owner 71 match, 0 differ

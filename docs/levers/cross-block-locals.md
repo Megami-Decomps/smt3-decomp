@@ -341,3 +341,31 @@ that phase keeps 276 bytes but differs in 20 of 69 words, first at +0x4C.
 The byte-exact source retains both properties. Reproduce with
 `tools/cc1probe.sh src/smt3/sdk/libc.c --func fflush --cse --alloc --reorg --no-dumps`.
 The complete libc owner, including the other stdio helpers, remains exact.
+
+
+## Vector output byte count across setup
+
+`sdk/libc::__sfvwrite` matches all 992 instruction bytes when `length` first
+holds `uio->uio_resid` for the early zero test, then resets to zero before
+consuming vector lengths. Both phases use a real byte count. The zero-input
+path does not call stream setup or access the vector array; setup may change
+the stream, and the vector pointer is captured afterward.
+
+A control that changes only these initial two statements to
+`if (uio->uio_resid == 0)` keeps 992 bytes but matches 200 of 248 words.
+The qualified actual-owner `--cse --alloc --no-dumps` traces show entry load
+uid14 and later vector loads sharing pseudo 86 in the accepted source. Its
+63 references, live length 170 and 12 crossed calls give it `$18`; buffer
+cursor 87 receives `$19`, and vector cursor 88 receives `$20`. In the control,
+entry uses temporary 94; length 86 has 61 references and live length 334,
+receiving `$20` after the two cursors receive `$18` and `$19`. The resulting
+48 differing words are register choices. Neither form adds accesses or
+changes the buffering algorithm.
+
+Both probes pass plain/hooked/unhooked output parity with the pinned compiler.
+Reproduce the accepted probe with
+`tools/cc1probe.sh src/smt3/sdk/libc.c --func __sfvwrite --cse --alloc --no-dumps --out /tmp/sfvwrite-count`.
+The unbuffered path caps each callback at 1024 bytes. Fully buffered and
+string streams preserve native copy limits and direct-write sizes; line
+buffering tracks the next newline across partial writes. Write and flush
+failures update fresh stream flags with `0x40`; setup failure returns directly.
