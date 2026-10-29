@@ -2905,25 +2905,7 @@ void effBTLEncountEnd(void)
     effBTLSkillEnd();
 }
 
-typedef struct
-{
-    u32 size;
-    u32 offset;
-    u32 type;
-    u32 reserve;
-} dds3EffectPCPData_Part_t;
 
-typedef struct
-{
-    u32 kateg;
-    u32 param;
-    u32 part;
-    u32 reserve;
-    dds3EffectPCPData_Part_t pcpData[1];
-} dds3EffectPCPData_t;
-
-extern void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number);
-extern u32 dds3EffectPCPDataGetSize(dds3EffectPCPData_t *hPCPData, u32 number);
 
 extern const char D_00533990[], D_005339A0[];
 void effBTLSystemInit(void)

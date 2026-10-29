@@ -114,7 +114,6 @@ extern dds3Effect_RippleBlurParam_t D_003209B0;
 extern sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 number);
 
 typedef struct dds3Billboard_t dds3Billboard_t;
-typedef struct dds3EffectPCPData_t dds3EffectPCPData_t;
 
 
 /* Shared billboard-emitter parameters copied into each live set. Creation and
@@ -296,8 +295,6 @@ extern effEVECombParSmokeParam_t EVE_ParSmokeParam;
 dds3EffectPart_t *dds3EffectPartCreate(u16 type, void *pData);
 dds3EffectPart_t *dds3EffectPartCopy(dds3EffectPart_t *hEffPartSrc);
 /* Return a borrowed block at the selected record's signed relative offset. */
-void *dds3EffectPCPDataGetData(const dds3EffectPCPData_t *table, s32 recordIndex);
-u32 dds3EffectPCPDataGetType(const dds3EffectPCPData_t *hPCPData, s32 number);
 void dds3Bezier4PDelete(struct effArrHdr_t *pEffBezier4P);
 void dds3EffectPartDelete(dds3EffectPart_t *hEffPart);
 effCubicBezierSlot_t *dds3Bezier4PGetPart(struct effArrHdr_t *pEffBezier4P, s32 index);

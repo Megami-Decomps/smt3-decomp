@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effPCPData.h"
 #include "fpu.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
@@ -85,8 +86,6 @@ struct effPCPAgiraoFireParam_t;
 struct effPCPAgiraoFire_tag;
 struct effPCPHama01_tag;
 struct effDebugPolyParams_t;
-struct dds3EffectPCPData_t;
-struct dds3EffectPCPData_Part_t;
 struct effRandState_t;
 struct effResourceRectBounds_t;
 struct effResourceRectDrawParams_t;
@@ -250,8 +249,6 @@ typedef struct mdlEffectResrcItem_t mdlEffectResrcItem_t;
 typedef struct mdlMarkPos_t mdlMarkPos_t;
 typedef struct dds3ModelEffectCtrlr_t dds3ModelEffectCtrlr_t;
 typedef struct effDebugPolyParams_t effDebugPolyParams_t;
-typedef struct dds3EffectPCPData_Part_t dds3EffectPCPData_Part_t;
-typedef struct dds3EffectPCPData_t dds3EffectPCPData_t;
 
 #define EFF_DEG2RAD 0.017453292f
 
@@ -2269,27 +2266,8 @@ extern u8 D_0031FDF0[];
 
 extern u8 D_0031FE50[];
 
-/* The table starts with four header words, followed by 0x10-byte parts. Each
- * offset is relative to the start of the whole table. */
-struct dds3EffectPCPData_Part_t {
-    u32 size;
-    u32 offset;
-    u32 type;
-    u32 reserve;
-};
-
-struct dds3EffectPCPData_t {
-    u32 kateg;
-    u32 param;
-    u32 part;
-    u32 reserve;
-    dds3EffectPCPData_Part_t pcpData[1];
-};
-
 effPartHandle_t *dds3EffectPCPDataPartCreate(dds3EffectPCPData_t *hPCPData, u32 number);
 
-/* Return a borrowed block at the selected part's relative offset. */
-void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number);
 
 /* Optional source and matrix operations retain their generic pointer domains. */
 void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, void *pPos);

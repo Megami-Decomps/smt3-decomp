@@ -577,7 +577,6 @@ extern s32 printf(const char *format, ...);
 extern void sdfMatFreeDelayed(void *aMat);
 extern void effPCP_ThunderPolyListDelete(void *hData);
 extern void *effPCP_ThunderPolyListCreate(const effPCPBossThunderParam_t *param);
-extern void *dds3EffectPCPDataGetData(void *hData, u32 number, ...);
 extern effPCPBossThunderbolt_t *effPCPBossThunderboltCreate(effPCPBossThunderbolt_t *pParam);
 
 extern f32 effPCPBossKAGUDrawParam[4];
@@ -2444,7 +2443,7 @@ effPCPBossThunderbolt_t *effPCPBossThunderboltCreate(effPCPBossThunderbolt_t *pP
 
 effPCPBossThunderbolt_t *effPCPBossThunderboltCreatePCF(void *hData, s32 bPos, s32 tbldata)
 {
-    return effPCPBossThunderboltCreate(dds3EffectPCPDataGetData(hData, 0, tbldata));
+    return effPCPBossThunderboltCreate(dds3EffectPCPDataGetData(hData, 0));
 }
 
 effPCPBossThunderbolt_t *effPCPBossThunderboltCopy(void *hData, s32 bPos, s32 tbldata)
@@ -2547,7 +2546,7 @@ effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreate(effPCPBossKAGUInvoke_t *pPara
 
 effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreatePCF(void *hData, s32 bPos, s32 tbldata)
 {
-    return effPCPBossKAGUInvokeCreate(dds3EffectPCPDataGetData(hData, 0, tbldata));
+    return effPCPBossKAGUInvokeCreate(dds3EffectPCPDataGetData(hData, 0));
 }
 
 effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCopy(void *hData, s32 bPos, s32 tbldata)
@@ -3421,7 +3420,7 @@ effPCPBossKAGU2MUHENK_t *effPCPBossKAGU2MUHENKCreate(void *pParam)
 
 effPCPBossKAGU2MUHENK_t *effPCPBossKAGU2MUHENKCreatePCF(void *hData, s32 bPos, s32 tbldata)
 {
-    return effPCPBossKAGU2MUHENKCreate(dds3EffectPCPDataGetData(hData, 0, tbldata));
+    return effPCPBossKAGU2MUHENKCreate(dds3EffectPCPDataGetData(hData, 0));
 }
 
 effPCPBossKAGU2MUHENK_t *effPCPBossKAGU2MUHENKCopy(void *hData, s32 bPos, s32 tbldata)
@@ -3562,7 +3561,7 @@ effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCreate(void *pParam)
 
 effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCreatePCF(void *hData, s32 bPos, s32 tbldata)
 {
-    return effPCPBossMETATOBeamCreate(dds3EffectPCPDataGetData(hData, 0, tbldata));
+    return effPCPBossMETATOBeamCreate(dds3EffectPCPDataGetData(hData, 0));
 }
 
 effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCopy(void *hData, s32 bPos, s32 tbldata)
@@ -3936,7 +3935,7 @@ s32 effPCPDANTE_Thunder_ProcessDraw(dds3ProcessID_t *process)
 
 effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_CreatePCF(void *hData, s32 bPos, s32 tbldata)
 {
-    return effPCPDANTE_Thunder_Create(dds3EffectPCPDataGetData(hData, 0, tbldata));
+    return effPCPDANTE_Thunder_Create(dds3EffectPCPDataGetData(hData, 0));
 }
 
 void effPCPDANTE_Thunder_Delete(effPCPDANTE_Thunder_tag *hData)

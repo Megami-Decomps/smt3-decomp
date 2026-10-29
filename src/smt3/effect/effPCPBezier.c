@@ -93,7 +93,6 @@ extern void sdfMatSetConstant(sdfMat_t *aMat, f32 aRatio);
 extern void sdfMatFreeDelayed(sdfMat_t *aMat);
 extern void *memcpy(void *a, const void *b, u32 c);
 extern void *memset(void *a, s32 b, u32 c);
-extern void *dds3EffectPCPDataGetData(void *table, s32 index);
 extern effBezierBED_t *effEveBEDCreate(effBezierBED_t *pData);
 extern void effEveBEDDelete(effBezierBED_t *hEveBED);
 extern effBezierCut_t *effEveBEDCutCreate(effBezierBED_t *hEveBED, s32 CutNum, effBezierPlacement_t *pParams);
