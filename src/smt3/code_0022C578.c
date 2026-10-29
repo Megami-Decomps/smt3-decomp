@@ -275,14 +275,6 @@ typedef struct
  * pair of 0x103C-byte records at 0xC0, both selected by the same index. */
 typedef struct
 {
-    /* 0x0000 */ u8 unk_0000[0xE];
-    /* 0x000E */ s16 unk_0E;
-    /* 0x0010 */ u8 unk_10;
-    /* 0x0011 */ u8 unk_0011[0x102B];
-} cmpStockInfo_t;
-
-typedef struct
-{
     /* 0x0000 */ cmpLocalStock_t stock[2];
     /* 0x00AC */ u8 unk_00AC[0x14];
     /* 0x00C0 */ cmpStockInfo_t info[2];
