@@ -7744,7 +7744,64 @@ char *cmpGetParamName(s8 index)
     return D_00349388[index];
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpGetPressedButton);
+s32 cmpGetPressedButton(s32 mask)
+{
+    if ((mask & 0x1) && dds3PadButtonState[0x21] < 0) {
+        return 0x1;
+    }
+    if ((mask & 0x2) && dds3PadButtonState[0x23] < 0) {
+        return 0x2;
+    }
+    if ((mask & 0x10) && (dds3PadButtonState[0x26] & 2)) {
+        return 0x10;
+    }
+    if ((mask & 0x20) && (dds3PadButtonState[0x27] & 2)) {
+        return 0x20;
+    }
+    if ((mask & 0x40) && (dds3PadButtonState[0x24] & 2)) {
+        return 0x40;
+    }
+    if ((mask & 0x80) && (dds3PadButtonState[0x25] & 2)) {
+        return 0x80;
+    }
+    if ((mask & 0x4) && dds3PadButtonState[0x22] < 0) {
+        return 0x4;
+    }
+    if ((mask & 0x8) && dds3PadButtonState[0x20] < 0) {
+        return 0x8;
+    }
+    if ((mask & 0x200) && (dds3PadButtonState[0x2A] & 2)) {
+        return 0x200;
+    }
+    if ((mask & 0x100) && (dds3PadButtonState[0x28] & 2)) {
+        return 0x100;
+    }
+    if ((mask & 0x800) && (dds3PadButtonState[0x2B] & 2)) {
+        return 0x800;
+    }
+    if ((mask & 0x400) && (dds3PadButtonState[0x29] & 2)) {
+        return 0x400;
+    }
+    if ((mask & 0x1000) && dds3PadButtonState[0x2C] < 0) {
+        return 0x1000;
+    }
+    if ((mask & 0x2000) && dds3PadButtonState[0x2D] < 0) {
+        return 0x2000;
+    }
+    if ((mask & 0x20000) && dds3PadButtonState[0x2A] < 0) {
+        return 0x20000;
+    }
+    if ((mask & 0x10000) && dds3PadButtonState[0x28] < 0) {
+        return 0x10000;
+    }
+    if ((mask & 0x80000) && dds3PadButtonState[0x2B] < 0) {
+        return 0x80000;
+    }
+    if ((mask & 0x40000) && dds3PadButtonState[0x29] < 0) {
+        return 0x40000;
+    }
+    return 0;
+}
 
 void func_002413B8(u32 button, s8 mode);
 
