@@ -1502,12 +1502,7 @@ void fldRunDantePatr(void)
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDantePatr);
 #endif
 
-typedef struct {
-    s32 words[19];
-    s32 counter;
-} fldDanteGunCounter_t;
-
-extern fldDanteGunCounter_t fldRunDanteGunFlag;
+extern fldDanteGunState_t fldRunDanteGunFlag;
 extern dds3Basic_t *D_0054EAF0;
 extern s32 fldPlayerStepDist;
 extern u32 dds3GetRandA(void *name);

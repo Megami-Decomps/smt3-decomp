@@ -293,12 +293,7 @@ void fldKaifukuTest(void) {
 }
 
 #ifdef NON_MATCHING
-typedef struct {
-    s32 words[20];
-    s32 word50;
-} fldStatusWork_t;
-
-extern fldStatusWork_t fldRunDanteGunFlag;
+extern fldDanteGunState_t fldRunDanteGunFlag;
 extern s32 datCheckDying(datUnitWork_t *work);
 
 void fldStatusSet(void)
