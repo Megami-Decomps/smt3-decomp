@@ -650,3 +650,7 @@ src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	camer
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 696 B	absorption renderer with native selector-first local records, shared VU matrix contract and callback-sensitive four/eight-frame gates; owner 290 match, 0 differ
 src/smt3/field/fldTitle.c	redthing1	done	2026-10-28	1 fn / 2088 B	miniature field title process; native drawing phases, callback-sensitive frame reads and gradient opacity; owner 7 match, 0 differ
 src/smt3/newbattle/nbCameraStartEnd.c	redthing1	done	2026-10-28	1 fn / 644 B	start animation state machine with qualified final-use initialization scheduling; owner 11 match, 0 differ
+src/smt3/pb/pbModel.c	KiB	done	2026-10-28	1 fn / 284 B	map block draw guard, three real zeroed vectors, signed grid coordinates and provider result; owner 26 match, 0 differ
+src/smt3/code_0022C578.c	KiB	done	2026-10-28	1 fn / 308 B	segmented gauge drawing with cumulative thresholds and callback-sensitive panel reloads; owner 367 match, 0 differ
+src/smt3/newbattle/nbActionProcess.c	KiB	done	2026-10-28	1 fn / 528 B	bad-status action dispatch with native recovery, curse and packet-completion paths; owner 78 match, 0 differ
+src/smt3/newbattle/nbCalc.c	KiB	done	2026-10-28	1 fn / 632 B	battle escape eligibility, rate calculation and native random/moon outcomes; owner 55 match, 0 differ
