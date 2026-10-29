@@ -56,3 +56,17 @@ index takes `$2` and the address/result takes `$3`, opposite retail. Qualified
 The value-returning call reserves `$2`, so the exact form places the following
 index in `$3`. This example uses the provider's native byte result; return
 types must follow the actual contract.
+
+## One callback local for sequential table submissions
+
+`pb/pbGame`'s `pb_proc_block_DB_Process` submits two tags through adjacent
+ordering-table nodes. Direct `ot->regFunc(ot, tag)` expressions emit the native
+740 bytes but differ in the second target load and indirect call: `$3` instead
+of `$2`. Qualified `cc1probe --alloc --no-dumps` traces show two local quantities
+with overlapping allocation ranges, `[8,18]` and `[16,26]`.
+
+Reloading each callback into the same ordinary function-pointer local before
+calling it matches all 740 bytes. Its four real references form one global
+pseudo, with eight live units and no crossed calls, allocated to `$2`. The
+callback is still fetched afresh for each node. This is value reuse across
+sequential calls, with no dummy references or fixed-register constraint.

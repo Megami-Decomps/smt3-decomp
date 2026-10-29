@@ -44,6 +44,8 @@ typedef struct
     u8 unk35C[4];
     struct pbProcHandle_t *menuProc;
     struct pbProcHandle_t *helpProc;
+    u8 reserved368[4];
+    s32 drawCount;
 } pbMapWork_t;
 
 typedef struct { u8 unk00[4]; u16 group; } pbGroupEntry_t;
@@ -61,7 +63,14 @@ typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCam
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
-typedef struct { u16 kind; s16 x, y; u8 unk06[0x8A]; } pbBlockEntry_t;
+typedef struct
+{
+    u16 kind;
+    s16 x, y;
+    u16 outline_num;
+    u8 reserved08[8];
+    f32 outlineVertices[8][4];
+} pbBlockEntry_t;
 
 typedef struct
 {
@@ -72,10 +81,14 @@ typedef struct
     s16 cellX, cellY;
     u8 unk16[0x9A];
     pbBlockEntry_t *blk;
-    u8 unkB4[4];
-    f32 rot;
-    u8 unkBC[8];
+    union {
+        sdfVector4_t rotation;
+        struct { f32 rotationX, rot, rotationZ; u8 reservedC0[4]; };
+    };
     f32 x, y, z;
+    u8 reservedD0[4];
+    u32 colors[8];
+    u8 reservedF4[0xC];
 } pbGroupData_t;
 
 typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
@@ -1582,7 +1595,100 @@ u8 pbGetBlockAt(s16 x, s16 y, s16 grp) {
 INCLUDE_ASM(const s32, "pb/pbGame", pbGetBlockAt);
 #endif
 
-INCLUDE_ASM(const s32, "pb/pbGame", pb_proc_block_DB_Process);
+typedef struct { sdfVector4_t v[4]; } pbMatrix_t;
+extern void pbAddGroupEntry(pbBlockDB_t *db);
+extern s32 sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdf3DPrimLinkMat(sdfDrawTag_t *tag, sdfMat_t *material, s32 (*allocator)(s32));
+extern void pbSetPrimMatrix(sdfVector4_t *rotation, f32 *position, void *tag);
+extern u8 pbFindBlockSlot(s16 x, s16 y, s32 mode);
+extern s32 pbDrawMapPolyTransformed(sdfVector4_t *position, u8 slot, u32 kind,
+                                   sdfDrawTag_t *tag);
+extern void SetRotateMatrixXYZ(const sdfVector3_t *rotation);
+extern void StoreMatrix(void *matrix);
+extern void LoadMatrix(const void *matrix);
+extern sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors,
+                                               s32 count, u32 flags);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern sdfGrOt_t sdfGrOtTable[85];
+extern f64 sdfFloatToULong(f32 value);
+extern f32 sdfDoubleToULong(f64 value);
+EQUATE_FPTODP();
+EQUATE_DPTOFP();
+
+s32 pb_proc_block_DB_Process(dds3ProcessID_t *id)
+{
+    sdfVector4_t position;
+    pbMatrix_t matrix;
+    pbProcHandle_t *panel = id->workdata;
+    pbBlockDB_t *db = panel->data.blockDB;
+    sdfDrawTag_t *mapTag;
+    sdfDrawTag_t *outlineTag;
+    sdfGrOt_t *ot;
+    void (*registerTag)(sdfGrOt_t *, sdfDrawTag_t *);
+    pbGroupData_t *group;
+    u32 i;
+    u32 j;
+    u8 slot;
+    s32 drawn;
+
+    memset(&position, 0, sizeof(position));
+    switch (panel->state) {
+    case 1:
+        pbFreeGroupHandles(db);
+        pbAddGroupEntry(db);
+        if (panel != NULL) {
+            panel->flags = 0;
+        }
+        break;
+    case 5:
+        return -1;
+    }
+
+    mapTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(mapTag);
+    outlineTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(outlineTag);
+    sdf3DPrimLinkMat(mapTag, db->mat, NULL);
+    for (i = 0; i < db->count; i++) {
+        group = (pbGroupData_t *)db->entry[i];
+        pbSetPrimMatrix(&group->rotation, &group->x, mapTag);
+        memset(&position, 0, sizeof(position));
+        for (j = 0; j < group->num; j++) {
+            slot = 31;
+            if (group->value == 0) {
+                slot = pbFindBlockSlot(group->cellX + group->blk[j].x,
+                                       group->cellY + group->blk[j].y, 1);
+            }
+            position.x = group->blk[j].x * 40;
+            position.z = group->blk[j].y * 40;
+            drawn = pbDrawMapPolyTransformed(&position, slot, group->blk[j].kind,
+                                             mapTag);
+            D_0054F5C4->drawCount += drawn;
+            SetRotateMatrixXYZ((const sdfVector3_t *)&group->rotation);
+            StoreMatrix(&matrix);
+            matrix.v[3].x = group->x;
+            matrix.v[3].y = group->y * 2.0 - 2.0;
+            matrix.v[3].z = group->z;
+            LoadMatrix(&matrix);
+            if (group->blk[j].outline_num != 0) {
+                sdfDrawTagLink(outlineTag, (u32)sdfDrawRotatedModel(group->blk[j].outlineVertices,
+                    group->colors, group->blk[j].outline_num, 0x80));
+            }
+        }
+    }
+    /* Reuse the callback local: qualified allocation traces keep its four
+     * references in one global pseudo at $2. Direct field calls create two
+     * overlapping local quantities and place the second target in $3. */
+    ot = &sdfGrOtTable[39];
+    registerTag = ot->regFunc;
+    registerTag(ot, mapTag);
+    ot = &sdfGrOtTable[40];
+    registerTag = ot->regFunc;
+    registerTag(ot, outlineTag);
+    return 0;
+}
+
 
 void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
