@@ -36,6 +36,8 @@ extern s32 fldGb __attribute__((section(".data")));
 s32 evtBitCheck(s32 no);
 
 void fldPlayerOff(void);
+void fldPlayerSvsOff(void);
+void fldPlayerSdwOff(void);
 
 extern f32 fldWmFastMove;
 
@@ -1048,7 +1050,416 @@ s32 fldPlayerCalc_Wm2(void)
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Wm2);
 #endif
 
+#ifdef NON_MATCHING
+extern const volatile sdfVector4_t D_00531D48;
+extern u8 dds3PadStickState[2][2][2];
+extern s8 dds3PadButtonState[];
+extern s32 fldPlayerMoveState, fldPlayerSyukanState, fldSyukanState;
+extern s32 D_0054ECD8;
+extern f32 D_0054ECDC, D_0054C414, D_0054C418, D_0054C41C, D_0054C420;
+extern f32 fldCamPitch;
+extern sdfMatrix4_t D_002FA240;
+extern sdfVector4_t fldPlayerPosRotWork[];
+extern s32 fldCamMiwatasiChk(void);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeIn2(s32 frames);
+extern void dds3PadVibrationSet(s32 port, s32 power, s32 frames);
+extern void fldEncountSetFlag(s32 mask);
+extern void fldStatusSet(void);
+extern void fldDmgStart(f32 x, f32 y, f32 z);
+extern void mdlSingleMotion(mdlObj_t *model, s32 group, s32 motion);
+extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flags);
+extern void dds3GetRotPoseSet(dds3Basic_t *basic);
+extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+extern void InversMatrix(void);
+extern f32 EulerAngleAxisY(void);
+extern void FromRotation(f32 angle);
+extern void fldPlayerMotionSe(s32 previous, s32 next);
+extern f32 sdfSin(f32 angle);
+extern f32 sdfCos(f32 angle);
+extern void fldHitChkUnitDamage(f32 *position);
+extern void fldPlayerOn(void);
+
+s32 fldPlayerCalc_Nml_syukan(void)
+{
+    fldUnitControl_t *control = fldGetUnitControl();
+    mdlObj_t *model = dds3ObjectBaseGetModelHandle(control->handle);
+    sdfVector4_t axis __attribute__((aligned(16))) = D_00531D48;
+    sdfVector4_t position __attribute__((aligned(16)));
+    sdfVector4_t rotation __attribute__((aligned(16)));
+    sdfVector4_t previous __attribute__((aligned(16)));
+    f32 collisionPosition[4] __attribute__((aligned(16)));
+    s32 left = 0, right = 0, back = 0, forward = 0;
+    s32 turnLeft = 0, turnRight = 0, modifier = 0;
+    s32 lookLeft = 0, lookRight = 0, quickLeft = 0, quickRight = 0, turnAround = 0;
+    s32 moving = 0, motion, oldMotion;
+    f32 angle, speed, delta, amount, target;
+
+    if (gfldPlayerHasiCnt > 0) {
+        oldMotion = model->current.h.motionIndex;
+        if (oldMotion != 13) {
+            model->first->speed = 1.0f;
+            mdlSingleMotion(model, 0, 13);
+            dds3FadeIn2(8);
+        }
+        {
+            f32 frame = model->first->frame;
+            if (fldGlobalBase.float12C < 13.0f && frame >= 13.0f) {
+                dds3PadVibrationSet(0, 1, 10);
+                dds3PadVibrationSet(1, 230, 10);
+            }
+        }
+        if (model->first->stat == 5) {
+            gfldPlayerHasiCnt = 0;
+            fldEncountSetFlag(0x40);
+        } else {
+            fldPlayerMotionSe(oldMotion, 13);
+            return 0;
+        }
+    }
+    if (fldGlobalBase.word78 == 0) {
+        if (fldPlayerStepDist > 0) {
+            if (fldGlobalBase.wordB0 == 0 && (fldPlayerStatus[0] & 1)) {
+                fldSePlay(0x22);
+                dds3FadeIn(0x80, 0x20, 0x20, 6);
+                dds3PadVibrationSet(0, 1, 6);
+                dds3PadVibrationSet(1, 150, 6);
+                fldStatusSet();
+                fldPlayerStepDist = 0;
+                fldEncountSetFlag(0x40);
+                return 0;
+            }
+            if (model->current.h.motionIndex != 10) {
+                model->first->speed = 1.0f;
+                mdlSingleMotion(model, 0, 10);
+                fldDmgStart(fldGlobalBase.x, fldGlobalBase.y, fldGlobalBase.z);
+                fldSePlay(0x22);
+                dds3PadVibrationSet(0, 1, 30);
+                dds3PadVibrationSet(1, 150, 30);
+                fldStatusSet();
+            }
+            if (model->first->stat != 5) {
+                return 0;
+            }
+            fldPlayerStepDist = 0;
+            fldEncountSetFlag(0x40);
+        }
+    } else if (fldPlayerStepDist > 0) {
+        s32 step = fldPlayerStepDist;
+        if (model->current.h.motionIndex != 10) {
+            model->first->speed = 1.0f;
+            mdlSingleMotion(model, 0, 10);
+            fldSePlay(0x22);
+            dds3PadVibrationSet(0, 1, 30);
+            dds3PadVibrationSet(1, 100, 30);
+            fldStatusSet();
+            step = fldPlayerStepDist;
+        }
+        step--;
+        if (step != 0) {
+            fldPlayerStepDist = step;
+            return 0;
+        }
+        fldGlobalBase.word78 = 0;
+        fldPlayerStepDist = 0;
+        fldEncountSetFlag(0x40);
+    }
+    if (fldCamMiwatasiChk() != 0) {
+        D_0054ECD8 = 0x80;
+        dds3ObjectBaseSetControlBasicSvs(control->handle, 0x80);
+        dds3ObjectBaseOnFlag(control->handle, 0x800);
+        fldPlayerOff();
+        return 0;
+    }
+    if (l_UseCollision != 0) {
+        dds3OnPoseSetFlag(control->handle->poseset, 8);
+    }
+    if (fldSyukanState == 0) {
+        left = dds3PadButtonState[0x24] != 0;
+        turnRight = dds3PadButtonState[0x2A] != 0;
+        forward = dds3PadButtonState[0x26] != 0;
+        right = dds3PadButtonState[0x25] != 0;
+        back = dds3PadButtonState[0x27] != 0;
+        modifier = dds3PadButtonState[0x23] != 0;
+        turnLeft = dds3PadButtonState[0x28] != 0;
+        if (fldGlobalBase.encountState > 0) {
+            modifier = 0;
+            fldGlobalBase.encountState--;
+        }
+        if (!forward && !back && !modifier && !turnLeft && !turnRight) {
+            lookRight = dds3PadButtonState[0x25] != 0;
+            lookLeft = dds3PadButtonState[0x24] != 0;
+        }
+        if (!modifier) {
+            if (back && !left && !right) {
+                turnAround = 1;
+            }
+        } else if (turnLeft) {
+            quickLeft = 1;
+        } else if (turnRight) {
+            quickRight = 1;
+        } else if (!forward && !back) {
+            turnRight = right != 0;
+            turnLeft = left != 0;
+        }
+    }
+    if (((dds3PadStickState[0][0][0] + 0xC0) & 0xFF) >= 0x81 ||
+        dds3PadStickState[0][0][1] < 0x40 || dds3PadStickState[0][0][1] >= 0xC1) {
+        left = right = forward = back = turnLeft = turnRight = modifier = 0;
+        lookLeft = lookRight = quickLeft = quickRight = turnAround = 0;
+    }
+    if (fldGlobalBase.encountState > 0) {
+        left = right = forward = back = turnLeft = turnRight = modifier = 0;
+        lookLeft = lookRight = quickLeft = quickRight = 0;
+    }
+    dds3GetPosPoseSet(control->handle);
+    SDF_VU0_STOREVECTOR(&position);
+    fldGlobalBase.prevX = fldGlobalBase.x;
+    fldGlobalBase.prevY = fldGlobalBase.y;
+    fldGlobalBase.prevZ = fldGlobalBase.z;
+    fldGlobalBase.x = position.x;
+    fldGlobalBase.y = position.y;
+    fldGlobalBase.z = position.z;
+    if ((left || right || forward || back || turnLeft || turnRight) && l_UseCollision != 0) {
+        fldGlobalBase.y = position.y + (fldGlobalBase.float130 > 0.0f ? 5.0f : 10.0f);
+    }
+    {
+        f32 pitch = fldCamPitch;
+        f32 facing = fldGlobalBase.camAngle;
+        if (pitch >= 360.0f) {
+            do {
+                pitch -= 360.0f;
+            } while (pitch >= 360.0f);
+            fldCamPitch = pitch;
+        }
+        if (pitch < 0.0f) {
+            do {
+                pitch += 360.0f;
+            } while (pitch < 0.0f);
+            fldCamPitch = pitch;
+        }
+        if (facing >= 360.0f) {
+            do {
+                facing -= 360.0f;
+            } while (facing >= 360.0f);
+            fldGlobalBase.camAngle = facing;
+        }
+        if (facing < 0.0f) {
+            do {
+                facing += 360.0f;
+            } while (facing < 0.0f);
+            fldGlobalBase.camAngle = facing;
+        }
+    }
+    dds3GetRotPoseSet(control->handle);
+    SDF_VU0_STOREVECTOR(&rotation);
+    EulerAngleAxisY();
+    SDF_VU0_LOADMATRIX(&D_002FA240);
+    InversMatrix();
+    motion = 8;
+    control->moveFlag = 0;
+    oldMotion = model->current.h.motionIndex;
+    dds3GetPosPoseSet(control->handle);
+    angle = fldGlobalBase.camAngle2;
+    if (forward && ((modifier && left) || (!modifier && turnLeft))) {
+        moving = 1;
+        angle = 45.0f - fldCamPitch;
+    } else if (forward && ((modifier && right) || (!modifier && turnRight))) {
+        moving = 1;
+        angle = -45.0f - fldCamPitch;
+    } else if (modifier && back && left) {
+        moving = 1;
+        angle = 135.0f - fldCamPitch;
+    } else if (modifier && back && right) {
+        moving = 1;
+        angle = -135.0f - fldCamPitch;
+    } else if (turnLeft) {
+        moving = 1;
+        angle = 90.0f - fldCamPitch;
+    } else if (turnRight) {
+        moving = 1;
+        angle = -90.0f - fldCamPitch;
+    } else if (forward) {
+        moving = 1;
+        angle = -fldCamPitch;
+    } else if (back && !turnAround) {
+        moving = 1;
+        angle = 180.0f - fldCamPitch;
+    } else {
+        fldPlayerSyukanState = 0;
+        fldPlayerMoveState = -1;
+    }
+    if (moving) {
+        speed = 29.0f;
+        motion = 1;
+        if (fldGlobalBase.float130 > 0.0f) {
+            speed = (sdfFabs(fldGlobalBase.float130) / 40.0f) + 2.0f + 29.0f;
+        }
+        if (fldRunDanteGunFlag.word50 & 2) {
+            speed *= D_0054C414;
+        }
+        delta = (-angle * D_0054C418) / 180.0f;
+        position.x = fldGlobalBase.x - sdfSin(delta) * speed;
+        position.y = fldGlobalBase.y;
+        position.z = fldGlobalBase.z - sdfCos(delta) * speed;
+    } else {
+        position.x = fldGlobalBase.x;
+        position.y = fldGlobalBase.y;
+        position.z = fldGlobalBase.z;
+    }
+    dds3SetPosPoseSet(control->handle, &position);
+    if (l_UseCollision != 0) {
+        dds3Basic_t *basic;
+        dds3PoseSet_t *pose;
+        if (forward || back || left || right || turnLeft || turnRight) {
+            collisionPosition[0] = position.x;
+            collisionPosition[1] = position.y;
+            collisionPosition[2] = position.z;
+            fldGlobalBase.x = position.x;
+            fldGlobalBase.y = position.y;
+            fldGlobalBase.z = position.z;
+            fldHitChkUnit(collisionPosition);
+            if (fldGlobalBase.hitValid != 0) {
+                position.x = fldGlobalBase.hitX;
+                position.y = fldGlobalBase.hitY + 44.0f;
+                position.z = fldGlobalBase.hitZ;
+                fldGlobalBase.x = position.x;
+                fldGlobalBase.y = position.y;
+                fldGlobalBase.z = position.z;
+                dds3SetPosPoseSet(control->handle, &position);
+                fldGlobalBase.hitValid = 0;
+            }
+        }
+        dds3GetPosPoseSet(control->handle);
+        SDF_VU0_STOREVECTOR(&position);
+        basic = control->handle;
+        pose = basic->poseset;
+        SDF_VU0_COPYVECTOR(&previous, &pose->pos2);
+        if (sdfFabs(previous.x - position.x) < 1.0f) {
+            pose->pos2.x = position.x;
+        } else {
+            pose->pos2.x = previous.x + (position.x - previous.x) / 3.0f;
+        }
+        if (sdfFabs(previous.y - position.y) < 1.0f) {
+            basic->poseset->pos2.y = position.y;
+        } else {
+            basic->poseset->pos2.y = previous.y + (position.y - previous.y) / 3.0f;
+        }
+        if (sdfFabs(previous.z - position.z) < 1.0f) {
+            basic->poseset->pos2.z = position.z;
+        } else {
+            basic->poseset->pos2.z = previous.z + (position.z - previous.z) / 3.0f;
+        }
+        basic->poseset->pos2.w = 1.0f;
+    }
+    fldHitChkUnitDamage(&position.x);
+    while (angle >= 360.0f) {
+        angle -= 360.0f;
+    }
+    while (angle < 0.0f) {
+        angle += 360.0f;
+    }
+    fldGlobalBase.camAngle2 = fldPlayerCalc360_8(angle);
+    delta = R360_LR(fldGlobalBase.camAngle, angle);
+    amount = delta / 6.0f;
+    if (amount < 0.0f) {
+        amount = -amount;
+    }
+    if (amount < 2.0f) {
+        amount = 2.0f;
+    }
+    if ((delta >= 0.0f && delta <= amount) || (delta <= 0.0f && -amount <= delta)) {
+        fldGlobalBase.camAngle = angle;
+    } else if (delta < 0.0f) {
+        fldGlobalBase.camAngle -= amount;
+    } else {
+        fldGlobalBase.camAngle += amount;
+    }
+    SDF_VU0_LOADVECTOR(&axis);
+    FromRotation(fldGlobalBase.camAngle * D_0054C41C / 180.0f);
+    SDF_VU0_STOREVECTOR(&rotation);
+    dds3SetRotPoseSet(control->handle, &rotation);
+    target = D_0054ECDC;
+    if (sdfFabs(target - fldCamPitch) < 1.0f) {
+        fldCamPitch = target;
+        if (lookLeft || quickLeft) {
+            target = fldPlayerCalc360_4(target - 50.0f);
+            fldSyukanState = 2;
+            D_0054ECDC = target;
+        } else if (lookRight || quickRight) {
+            target = fldPlayerCalc360_4(target + 50.0f);
+            fldSyukanState = 2;
+            D_0054ECDC = target;
+        } else if (turnAround) {
+            target = fldPlayerCalc360_4(target + 140.0f);
+            fldSyukanState = 2;
+            D_0054ECDC = target;
+            delta = R360_LR(fldCamPitch, target);
+            if ((s32)delta == -180) {
+                delta = 180.0f;
+            }
+            if ((delta >= 0.0f && delta <= 10.0f) || (delta <= 0.0f && -10.0f <= delta)) {
+                fldCamPitch = target;
+            } else if (delta < 0.0f) {
+                fldCamPitch -= 10.0f;
+            } else {
+                fldCamPitch += 10.0f;
+            }
+            target = D_0054ECDC;
+        }
+    }
+    if (sdfFabs(target - fldCamPitch) < 1.0f) {
+        if (fldSyukanState > 0) {
+            fldSyukanState--;
+        }
+    } else {
+        delta = R360_LR(fldCamPitch, target);
+        if ((delta >= 0.0f && delta <= 10.0f) || (delta <= 0.0f && -10.0f <= delta)) {
+            fldCamPitch = target;
+        } else if (delta < 0.0f) {
+            fldCamPitch -= 10.0f;
+        } else {
+            fldCamPitch += 10.0f;
+        }
+        target = D_0054ECDC;
+    }
+    target = fldPlayerCalc360_8(target);
+    D_0054ECDC = target;
+    fldGlobalBase.camAngle2 = -target;
+    fldGlobalBase.camAngle = -fldCamPitch;
+    SDF_VU0_LOADVECTOR(&axis);
+    FromRotation(fldGlobalBase.camAngle * D_0054C420 / 180.0f);
+    SDF_VU0_STOREVECTOR(&rotation);
+    dds3SetRotPoseSet(control->handle, &rotation);
+    fldPlayerOn();
+    if (fldRunDanteGunFlag.word50 & 2) {
+        if (motion == 8) {
+            motion = 18;
+        } else if (motion == 4 || motion == 1) {
+            motion = 17;
+        }
+    }
+    fldPlayerMotion(oldMotion, motion, 4.0f);
+    fldGlobalBase.x = position.x;
+    fldGlobalBase.z = position.z;
+    fldGlobalBase.y = position.y;
+    fldPlayerMotionSe(oldMotion, motion);
+    {
+        dds3PoseSet_t *pose = control->handle->poseset;
+        fldPlayerPosRotWork[0].x = pose->pos2.x;
+        fldPlayerPosRotWork[0].y = pose->pos2.y;
+        fldPlayerPosRotWork[0].z = pose->pos2.z;
+        fldPlayerPosRotWork[0].w = pose->pos2.w;
+        fldPlayerPosRotWork[1].x = pose->rot.x;
+        fldPlayerPosRotWork[1].y = pose->rot.y;
+        fldPlayerPosRotWork[1].z = pose->rot.z;
+        fldPlayerPosRotWork[1].w = pose->rot.w;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Nml_syukan);
+#endif
 
 extern s32 printf(const char *format, ...);
 
@@ -1076,7 +1487,7 @@ extern s32 fldPlayerCalc_Wm2(void);
 
 extern void fldPlayerCalc_Nml(void);
 
-extern void fldPlayerCalc_Nml_syukan(void);
+extern s32 fldPlayerCalc_Nml_syukan(void);
 
 /* NON_MATCHING: 17 of 169 words differ (first at +0x64). */
 #ifdef NON_MATCHING
