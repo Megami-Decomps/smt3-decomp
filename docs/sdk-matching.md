@@ -1034,3 +1034,21 @@ the latter is called by `_getpid_r` and keeps its existing symbol name. `kill`
 calls `Exit(signal)` only for process ID 1 and returns zero. `stat` and `unlink`
 leave their supplied objects untouched, set the current errno to 5 through
 `__errno_8`, and return -1. These are the native compatibility behaviors.
+
+## Inverse-cosine entry boundaries
+
+The region formerly covered by the single `__ieee754_acosf` symbol contains
+three functions. The entry at0x002CF730 has a complete20-byte forwarding
+body, followed by four alignment bytes. The separate20-byte entry
+`func_002CF748` forwards two float arguments to `__ieee754_atan2f`, also
+followed by four alignment bytes. Both save and restore the return address
+before their terminal jumps. The arithmetic inverse-cosine body begins at
+`func_002CF760`, owns its own frame and returns independently after1060 bytes.
+Its next four bytes are alignment before0x002CFB88.
+
+Keep the established entry names: caller behavior establishes their interfaces,
+not their original source spellings. The archive map's old1112-byte name-only
+`ef_acos.o` attribution covers this aggregate region and does not prove that
+both forwarding entries belong to that object. Function boundaries now follow
+the independent native entries, without changing the translation-unit boundary
+or compiler profile. The forwarding functions remain assembly.

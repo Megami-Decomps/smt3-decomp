@@ -76,6 +76,10 @@ f32 tanf(f32 x)
 
 INCLUDE_ASM(const s32, "sdk/libm", __ieee754_acosf);
 
+INCLUDE_ASM(const s32, "sdk/libm", func_002CF748);
+
+INCLUDE_ASM(const s32, "sdk/libm", func_002CF760);
+
 extern f32 fabsf(f32 x);
 extern f32 atanf(f32 x);
 

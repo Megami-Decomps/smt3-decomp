@@ -1,5 +1,10 @@
 // Symbols seeded from the SLUS_209.11 IDB by tools/ida_symbols.py.
 // Hand-curated symbols go above the generated block and win over it.
+// Independent forwarding entries and the arithmetic inverse-cosine body.
+// Each entry owns its own prologue and terminal jump/return; gaps are alignment.
+__ieee754_acosf = 0x002CF730; // type:func size:0x14
+func_002CF748 = 0x002CF748; // type:func size:0x14
+func_002CF760 = 0x002CF760; // type:func size:0x424
 // Native SDK data, identified through paired DDS1 readers and initial layout.
 ipuDefaultQuantizerMatrices = 0x0052BAA0; // type:u8 size:0x50
 ipuDefaultVqClut = 0x0052BAF0; // type:u16 size:0x20
@@ -9119,7 +9124,6 @@ sceMcGetEntSpace = 0x002CF3E0; // type:func size:0x118
 cosf = 0x002CF4F8; // type:func size:0xD4
 sinf = 0x002CF5D0; // type:func size:0xE8
 tanf = 0x002CF6B8; // type:func size:0x78
-__ieee754_acosf = 0x002CF730; // type:func size:0x454
 __ieee754_atan2f = 0x002CFB88; // type:func size:0x1E0
 __ieee754_rem_pio2f = 0x002CFD68; // type:func size:0x3B0
 __ieee754_sqrtf = 0x002D0118; // type:func size:0xCC
