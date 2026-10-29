@@ -101,8 +101,7 @@ extern sdf3DFogParam_t D_0032C6B0;
 
 extern u128 D_0032C6D0;
 
-extern void sprintf(char *, const char *, ...);
-
+#include "sdk_libc.h"
 
 extern void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *pBasic, u32 field, u32 area,
                                                        u32 pF1, u32 pF2,
@@ -123,8 +122,6 @@ enum evtProcessState {
 };
 
 extern const char D_0053A828[0x28];
-
-s32 printf(const char *format, ...);
 
 void dds3PathBasicPauseOn(dds3PathBasicControl_t *value);
 

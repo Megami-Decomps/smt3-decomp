@@ -141,7 +141,7 @@ void fclRbnSetPara(fclRibbon_t *handle, s32 index,
     }
 }
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 #ifdef NON_MATCHING
 void dumpCursorInfo(fclRibbon_t *handle)

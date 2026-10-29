@@ -15,7 +15,8 @@ enum sl_slot_flag
 };
 
 extern char D_005327B0[];
-extern s32 sprintf(char *destination, const char *format, ...);
+#include "sdk_libc.h"
+
 extern s32 fldTitleState, D_0054EF8C, D_0054EF90, D_0054EF94;
 extern sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *texture);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);

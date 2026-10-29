@@ -223,7 +223,7 @@ extern s32 frDrawFontEx(frFontHandle_t *font, s8 mode);
 extern s32 frDrawFont(frFontHandle_t *font);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *font);
 extern void cmpSetSkillListRows(s32 rows);
-extern s32 sprintf(char *buffer, const char *format, ...);
+#include "sdk_libc.h"
 
 #ifdef NON_MATCHING
 void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
@@ -836,7 +836,7 @@ extern char D_005435F8[];
 /* Qualified reorg traces: the preceding C reward routine removes $2 from
  * the fall-through live set, preserving the final plain loading-state branch. */
 #ifdef NON_MATCHING
-extern s32 printf(const char *fmt, ...);
+
 #endif
 
 s32 nbResultProcess2(dds3ProcessID_t *id)

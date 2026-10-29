@@ -44,7 +44,7 @@ extern char D_0053CF70[];
 
 extern shopProcWork_t *shopProcWork;
 
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern void sdfTexFree(s32 aHandle);
 

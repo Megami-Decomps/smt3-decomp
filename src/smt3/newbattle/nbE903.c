@@ -238,7 +238,7 @@ typedef struct nbKoukaProcessData_t
     nbKoukaPacket_t *last;
 } nbKoukaProcessData_t;
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern void nbPanelAllHide(void);
 

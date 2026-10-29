@@ -238,7 +238,7 @@ typedef struct nbKoukaPacket_t
     sdfVector4_t v;
 } nbKoukaPacket_t;
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern void nbPanelAllHide(void);
 
@@ -273,8 +273,6 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 extern s32 nbMaeCheckDone(void);
 
 extern void nbMaeWaitStep(void);
-
-extern s32 sprintf(char *buf, const char *format, ...);
 
 extern s32 nbMakeModelPackName(s32 no);
 

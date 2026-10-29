@@ -369,7 +369,7 @@ s32 pbAddRecord_char(pbProcHandle_t *panel, s32 currentChar,
 INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_char);
 #endif
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 void pbDumpRecordData(pbProcHandle_t *panel)
 {

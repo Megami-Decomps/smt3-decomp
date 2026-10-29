@@ -172,7 +172,7 @@ void sdfFileRead(devState_t *aHandle, void *aPtr, s32 aLeng);
 
 void sdfFileClose(devState_t *aHandle);
 
-extern s32 sprintf(char *, const char *, ...);
+#include "sdk_libc.h"
 
 extern void *memcpy(void *, const void *, unsigned int);
 
@@ -598,7 +598,6 @@ extern void fldSetSceneParam3(fldSceneParam_t *param, s32 field, s32 area, const
 extern void fldSetSceneParam5(fldSceneParam_t *param, s32 field, s32 area, const char *name,
                              s32 bgm, const char *script);
 extern char D_00531F18[], D_00531F28[];
-extern s32 printf(const char *format, ...);
 
 void fldDoor_Warp(const char *name)
 {

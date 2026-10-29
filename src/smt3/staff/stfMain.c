@@ -59,7 +59,8 @@ typedef struct
 
 extern stfStaffRoll_t D_00343018[0xB5];
 extern char D_0054FD90[];
-extern s32 sprintf(char *buf, const char *fmt, ...);
+#include "sdk_libc.h"
+
 extern u32 stfDrawText(s32 style, u32 color, const char *text);
 extern s32 stfDrawStaffText(f32 x, f32 y, s32 style, u32 color, const char *text);
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);

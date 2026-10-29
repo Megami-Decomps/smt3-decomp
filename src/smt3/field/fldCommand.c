@@ -158,7 +158,7 @@ dds3Basic_t *dds3GetControlScene(void);
 
 dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const u8 *name);
 
-s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern char D_0054F0A8[];
 

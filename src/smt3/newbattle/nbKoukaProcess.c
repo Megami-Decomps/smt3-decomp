@@ -172,8 +172,8 @@ extern void p2sdStopSe(u32 sound);
 extern void datDebugPrintf(const char *fmt, ...);
 extern s32 p2sdGetPcmState(void);
 extern s32 p2sdLoadPcmFile(char *name, s32 channel);
-extern s32 sprintf(char *buf, char *fmt, ...);
-extern s32 printf(char *fmt, ...);
+#include "sdk_libc.h"
+
 extern char D_00551138[];
 extern void dds3FadeIn2(s32 frame);
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);

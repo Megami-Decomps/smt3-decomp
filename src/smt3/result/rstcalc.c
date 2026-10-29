@@ -130,7 +130,8 @@ s16 rstGetEquipHeartsAisyo(void)
 
 extern u32 datGetMaxHp(datUnitWork_t *work);
 extern u32 datGetMaxMp(datUnitWork_t *work);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern char D_0053DAB0[];
 
 void rstSetDestroySkillMaxHpMp(void)

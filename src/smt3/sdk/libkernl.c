@@ -532,7 +532,7 @@ extern threadMgrQueue_t D_0059B178;
 extern void topThread(void *queue);
 extern s32 CreateThread(kernelThreadParam_t *param);
 extern s32 DeleteSema(s32 sema);
-extern s32 _StartThread(s32 threadId, void *argument);
+
 extern s32 GetThreadId(void);
 extern s32 ChangeThreadPriority(s32 threadId, s32 priority);
 
@@ -945,7 +945,7 @@ typedef struct sifDmaTransfer_t {
 typedef char sifDmaTransfer_size_must_be_16[
     sizeof(sifDmaTransfer_t) == 16 ? 1 : -1];
 
-extern s32 sceSifSetDma(sifDmaTransfer_t *transfers, s32 count);
+#include "sdk_libkernl.h"
 extern s32 isceSifSetDma(sifDmaTransfer_t *transfers, s32 count);
 extern void sceSifWriteBackDCache(void *address, s32 size);
 
@@ -1362,7 +1362,7 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSetRpcQueue);
 
 /* NON_MATCHING: 200 of 208 native bytes; the same append-loop cursor copies coalesce. */
 #ifdef NON_MATCHING
-void sceSifRegisterRpc(sifRpcServerData_t *server, s32 serviceId,
+void sceSifRegisterRpc(sifRpcServerData_t *server, u32 serviceId,
                         sifRpcFunc_t handler, void *buffer,
                         sifRpcFunc_t callback, void *callbackBuffer,
                         sifRpcDataQueue_t *queue)

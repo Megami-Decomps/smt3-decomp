@@ -1327,7 +1327,7 @@ extern void UnitAnime(evtUnit_t *unit);
 extern void mdlSmoothLoopMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
 extern void mdlSmoothSingleMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
 extern s32 mdlChkMotionEndEx(mdlObj_t *model, s32 group);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_0053A850);
 

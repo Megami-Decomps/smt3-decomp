@@ -689,7 +689,8 @@ extern f32 fldCamPitch, fldCamLength, D_0054ECDC;
 extern f32 D_0054C3D4, D_0054C3D8, D_0054C3DC, D_0054C3E0;
 extern f32 D_0054C3E4, D_0054C3E8, D_0054C3EC, D_0054C3F0;
 extern sdfMatrix4_t D_002FA240;
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern s32 fldEncountTestFlag(u32 flag);
 extern s32 fldCamMiwatasiChk(void);
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
@@ -2121,8 +2122,6 @@ s32 fldPlayerCalc_Nml_syukan(void)
 #else
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Nml_syukan);
 #endif
-
-extern s32 printf(const char *format, ...);
 
 extern char D_00531D58[];
 

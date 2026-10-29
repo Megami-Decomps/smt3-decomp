@@ -84,8 +84,7 @@ extern s32 strcmp(const char *left, const char *right);
 
 void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
-
-extern s32 sprintf(char *dst, const char *format, ...);
+#include "sdk_libc.h"
 
 s32 fldMakeObjectBasic3(void);
 

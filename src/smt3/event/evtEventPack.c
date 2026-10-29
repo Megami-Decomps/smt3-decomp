@@ -66,7 +66,7 @@ extern void Eve_DistortionBlurSetTex(sdfTexHandle_t *);
 
 extern s32 evtMotionSeWork;
 
-s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern void mdlPackDecode(s32, s32, s32, void *, s32);
 
@@ -173,8 +173,6 @@ s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 dds3ProcessID_t *dds3SearchProcessPriority(u32 priority);
 
 dds3ProcessID_t *evtLoadModelSe(s32 modelKey, s32 eventTaskId, s32 resourceId);
-
-extern void sprintf(char *, const char *, ...);
 
 struct FileRequest *fileLoad(const char *filename);
 

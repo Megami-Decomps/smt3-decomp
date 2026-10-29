@@ -240,7 +240,7 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
@@ -1042,7 +1042,7 @@ void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *p)
 }
 
 extern f32 sdfSin(f32 angle);
-extern s32 sprintf(char *dst, const char *format, ...);
+
 extern void cmpSetSkillListRows(s32 rows);
 extern char D_00551188[];
 extern frFontHandle_t *gnbPnlWork;

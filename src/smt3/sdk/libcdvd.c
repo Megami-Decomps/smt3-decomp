@@ -1,3 +1,4 @@
+#include "sdk_libcdvd.h"
 #include "common.h"
 #include "ps2asm.h"
 
@@ -51,7 +52,8 @@ extern s32 _gp;
 extern s32 GetThreadId(void);
 extern s32 ReferThreadStatus(s32 threadId, void *status);
 extern s32 CreateThread(sdfKernelThreadParam_t *param);
-extern s32 _StartThread(s32 threadId, void *argument);
+#include "sdk_libkernl.h"
+
 extern s32 ChangeThreadPriority(s32 threadId, s32 priority);
 void _Cdvd_cbLoop(void);
 
@@ -225,9 +227,9 @@ s32 PowerOffCB(void)
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdLayerSearchFile);
 
-s32 sceCdSearchFile(u32 file, char *name)
+s32 sceCdSearchFile(sceCdlFILE *file, const char *name)
 {
-    return sceCdLayerSearchFile(file, name, 0);
+    return sceCdLayerSearchFile((u32)file, (char *)name, 0);
 }
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_ncmd_prechk);
@@ -432,7 +434,7 @@ s32 sceCdStStop(void)
 /* NON_MATCHING: native size; the active-flag address/load uses the opposite
  * pair of temporary registers (three words). */
 #ifdef NON_MATCHING
-s32 sceCdStRead(s32 sectors, void *buffer, s32 mode, s32 *status)
+s32 sceCdStRead(u32 sectors, u32 *buffer, u32 mode, u32 *status)
 {
     s32 error;
     s32 completed;

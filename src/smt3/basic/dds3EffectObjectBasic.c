@@ -1,3 +1,4 @@
+#include "sdk_libc.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "basic.h"

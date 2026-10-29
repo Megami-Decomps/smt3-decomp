@@ -68,7 +68,7 @@ extern const char D_0053A948[];
 
 void *evtGetResorceData(u32 eventno, s32 rid);
 
-s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern void dds3EffectObjectBasicStatOn(void *basic, s32 s);
 

@@ -26,7 +26,7 @@ typedef struct dds3EffectFunc3_t {
 extern dds3EffectFunc3_t dds3BillboardFuncTable[];
 extern struct billHandle_t *hGeneralBillboard[];
 
-s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 typedef struct billGeneralEntry_t {
     s16 kind;

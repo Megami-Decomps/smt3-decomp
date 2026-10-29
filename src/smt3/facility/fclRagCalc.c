@@ -134,7 +134,8 @@ extern fclSpriteTbl_t D_003306B8[];
 
 extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 
-extern s32 sprintf(char *buf, const char *fmt, ...);
+#include "sdk_libc.h"
+
 extern ragItemReq_t *ragGetConfirmEntry(s8 kind, u8 index);
 extern void cmpSetSkillListRows(s32 rows);
 extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,

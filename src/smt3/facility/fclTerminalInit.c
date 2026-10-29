@@ -63,7 +63,7 @@ typedef struct
 
 extern trmTerminalWork_t *GBWK_3;
 
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern void sdfTexFree(s32 aHandle);
 
@@ -76,8 +76,6 @@ extern char D_0053D650[];
 extern char D_0053D660[];
 
 extern void fclScriptForcedEnd(u8 *PID);
-
-extern s32 sprintf(char *out, const char *fmt, ...);
 
 s8 trmGetCallMode(void)
 {

@@ -74,7 +74,7 @@ extern struct evtUnit_t *evtCreateUnitHandle(dds3Basic_t *owner, mdlObj_t *model
 extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *aRoot, const char *aName);
 extern char *sdfModelGetNodeName(sdfModelRootNode_t *aRoot, s32 aIndex);
 extern s32 strcmp(const char *a, const char *b);
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 typedef struct
 {

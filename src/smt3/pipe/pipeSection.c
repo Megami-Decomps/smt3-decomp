@@ -252,7 +252,8 @@ typedef struct tagPipeMidiList {
 } tagPipeMidiList;
 extern u32 pipeLoadState;
 extern s32 pipeFileLoad(char *filename, tagPipePosTable *pos, tagPipeTable *objects, tagPipeLinkInfo *links);
-extern s32 sprintf(char *buffer, const char *format, ...);
+#include "sdk_libc.h"
+
 extern s32 p2sdLoadCheckMidi(s32 midi);
 extern void p2sdLoadSMGFile(s32 midi);
 const char D_00548948[24] = "/pipe/PIPE_%02d.DAT";

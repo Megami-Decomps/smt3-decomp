@@ -232,7 +232,7 @@ typedef struct nbKoukaPacket_t
     sdfVector4_t v;
 } nbKoukaPacket_t;
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 

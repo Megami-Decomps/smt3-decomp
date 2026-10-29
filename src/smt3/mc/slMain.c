@@ -316,7 +316,7 @@ extern void *slKanjiDraw_handle;
 
 extern s32 slDDS3To31Flg;
 
-extern s32 sprintf(char *dst, const char *format, ...);
+#include "sdk_libc.h"
 
 extern char D_00532860[];
 
@@ -603,7 +603,6 @@ typedef struct {
 
 extern char D_00532878[];
 extern char D_005328A0[];
-extern s32 printf(const char *, ...);
 
 void slVersionConvert_Step3(void)
 {

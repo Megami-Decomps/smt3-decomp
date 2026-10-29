@@ -233,7 +233,7 @@ typedef struct
     u16 mae;
 } nbEncountForm_t;
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 

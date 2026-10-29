@@ -69,10 +69,7 @@ typedef struct {
 
 extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
-extern s32 sprintf(char *text, const char *format, ...);
-
-
-
+#include "sdk_libc.h"
 
 extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 
@@ -1784,7 +1781,7 @@ f32 fldTurnToward(f32 cur, f32 target, f32 speed, f32 minStep) {
 }
 
 #ifdef NON_MATCHING
-extern s32 printf(const char *format, ...);
+
 extern u32 dds3GetRandA(void *name);
 extern s32 fldHitChkEnemy(const f32 *position, const f32 *target, f32 *hitPosition);
 extern char D_0054EAC0[];
@@ -2035,7 +2032,6 @@ void fldRunDanteDoin(void)
 
 extern s32 fldHitChkEnemy(const f32 *position, const f32 *target, f32 *hitPosition);
 extern void fldRunAiCng(s32 mode);
-extern s32 printf(const char *format, ...);
 
 void fldRunDanteMove(void)
 {

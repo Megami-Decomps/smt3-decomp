@@ -64,7 +64,7 @@ extern GsFont_t *frTranslateUserData(s32 width, s32 height, void *data, s8 dataF
 
 /* NON_MATCHING: 74 of 122 native words differ; emits 496 of 488 bytes. */
 #ifdef NON_MATCHING
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 void frSetNameData(s8 target, s8 type, s8 glyphCount, u8 *imageData)
 {

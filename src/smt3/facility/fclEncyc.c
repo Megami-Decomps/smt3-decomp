@@ -74,12 +74,7 @@ typedef struct
 
 extern fclEncycDebugWork_t *g_pdebug;
 
-
-
-
-
-
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 typedef struct
 {
@@ -2228,7 +2223,7 @@ void ExecSummon(s32 recindex)
 extern u8 *datExplainTable[];
 extern u8 *text2[];
 extern char D_0054FCC0[];
-extern s32 sprintf(char *out, const char *format, ...);
+
 extern u16 datGetLevelForDraw(datUnitWork_t *work);
 extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
     u32 color, const char *text, frFontHandle_t *previous);
@@ -2539,8 +2534,6 @@ s32 PrepSummon(fclEncyc_readmainwork_tag *phase)
     return success;
 }
 
-
-extern s32 sprintf(char *out, const char *format, ...);
 extern void *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                               const char *text, void *previous);
 extern char D_0054FCD8[];

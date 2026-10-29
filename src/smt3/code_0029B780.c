@@ -84,7 +84,7 @@ extern u8 dds3GetConfigFadeAlpha(void);
 
 extern s32 dds3GetConfigAnimPhase(void);
 
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern void *sdfMemAllocDirect(s32 aSize);
 

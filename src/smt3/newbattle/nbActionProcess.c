@@ -11,8 +11,7 @@ extern char D_00543FB8[]; /* "nego result = %d\n" */
 
 extern char D_00544020[];
 
-extern s32 printf(const char *format, ...);
-
+#include "sdk_libc.h"
 
 extern void nbPanelDraw(s32 flag);
 
@@ -2619,7 +2618,7 @@ extern s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid);
 extern void datAddItem(s32 id, s32 num);
 extern char *effMakeBedFileName(u32 id);
 extern struct fileRequest *fileLoad(const char *filename);
-extern s32 sprintf(char *str, const char *format, ...);
+
 extern char D_00575360[];
 extern void nbDelAllMojiNumEffectKoukaPacket(nbFormation_t *form);
 extern struct nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 startframe,

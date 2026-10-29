@@ -197,7 +197,7 @@ extern struct nbKoukaPacket_t *nbAddBadEffKoukaPacket(s32 startframe, s32 unique
 extern struct nbKoukaPacket_t *nbAddBadMotKoukaPacket(s32 startframe, s32 uniqueid,
                                                    nbFormation_t *form, s32 badstat);
 extern s32 dds3GetRandIntA(s32 minimum, s32 range);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 

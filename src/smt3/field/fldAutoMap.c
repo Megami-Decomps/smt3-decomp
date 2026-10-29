@@ -118,7 +118,7 @@ extern dds3Basic_t *fldNpcFreeCount;
 
 extern s32 fldNpcCamTarget;
 
-extern s32 sprintf(char *dst, const char *format, ...);
+#include "sdk_libc.h"
 
 extern void fldAddressResolver(u8 *pFileTop, void *pData);
 

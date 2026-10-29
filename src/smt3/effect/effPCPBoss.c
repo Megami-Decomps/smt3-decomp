@@ -572,7 +572,7 @@ extern void mdlFree(void *aHandle);
 extern void mdlSmoothLoopMotion(void *aHandle, s32 aGroup, s32 aNumber, f32 aBeforeLeng,
                                 f32 aSmoothLeng);
 extern s32 dds3GetKernelCount(void);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern void sdfMatFreeDelayed(void *aMat);
 extern void effPCP_ThunderPolyListDelete(void *hData);

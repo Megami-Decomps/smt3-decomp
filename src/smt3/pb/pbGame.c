@@ -1794,7 +1794,8 @@ dds3ProcessID_t *pbGetMessageScriptProc(void) {
 
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 timer);
 extern void evtBitOn(s32 no);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern pbProcHandle_t *pbGetMoveChar(void);
 
 INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F40);

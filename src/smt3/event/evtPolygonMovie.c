@@ -43,7 +43,8 @@ extern void fileSyncAll(void);
 extern void fileHandleFree(void *fileHandle);
 extern void sdfMemFreeDirect(void *aHandle);
 extern void FrameRun(evtPolygonMovieWork_t *wdata);
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
+
 extern f32 D_0056CFF0[12];
 extern s32 strcmp(const char *a, const char *b);
 extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *effdata, f32 *pos, f32 *rot);
@@ -112,7 +113,7 @@ extern void dds3ObjectBaseOffFlag(dds3Basic_t *pObjectBasic, s32 flag);
 extern void *evtGetUnitHandle2(dds3Basic_t *unit);
 extern void evtLinkLightObjectBasic(void *h, dds3Basic_t *light, s32 frame);
 extern void evtUnlinkLightObjectBasic(void *h, s32 frame);
-extern s32 sprintf(char *buffer, const char *format, ...);
+
 void evtHokanSceneLight(s32 hokan, f32 ratio, f32 *key1, f32 *key2, f32 *d);
 f32 evtHokanFloat(s32 hokan, f32 ratio, f32 f1, f32 f2);
 extern s16 dds3ScreenBlurAlpha;

@@ -8,7 +8,8 @@
 #include "motion.h"
 #include "fpu.h"
 
-extern s32 printf(const char *, ...);
+#include "sdk_libc.h"
+
 extern char D_00534BB8[]; /* Padded ground-collision diagnostic. */
 
 typedef struct nbCameraAnim_t {
@@ -60,7 +61,7 @@ extern void effBTLModelLook(nbFormation_t *formation, sdfVector4_t *position);
 extern void effBTLModelLook2(nbFormation_t *formation, sdfVector4_t *position, f32 angle);
 extern void nbGetUnitModelPos(nbFormation_t *formation, f32 *position);
 extern f32 sdfAtan2(f32 y, f32 x);
-extern s32 sprintf(char *destination, const char *format, ...);
+
 extern void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *format);
 extern void SetRotateMatrixY(f32 angle);
 

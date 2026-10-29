@@ -14,9 +14,7 @@ extern u16 skyanime;
 
 extern s32 fldbokasi;
 
-extern s32 printf(const char *fmt, ...);
-
-extern s32 sprintf(char *buf, const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern s32 p2sdLoadSMGFile(s32 MidiNo);
 

@@ -26,7 +26,7 @@ extern s32 frDrawFontEx(void *pFRQ, s8 Mode);
 
 extern s32 frDestroyFontRequestAfter(void *pFRQ);
 
-extern s32 sprintf(char *buf, const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern s32 datGetSkillCost(datUnitWork_t *w, s32 nskill);
 

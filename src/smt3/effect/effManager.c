@@ -59,7 +59,7 @@ typedef struct effLegacyInstance_t
 
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
-int printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern void dds3PolygonLinkOt(void);
 extern void dds3TrackPolyLinkOt(void);

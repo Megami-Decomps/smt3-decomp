@@ -88,7 +88,8 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern s32 sdfFileRead(void *handle, void *dst, s32 size);
 extern void sdfFileClose(void *handle);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern char D_00533300[];
 
 void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
@@ -3159,7 +3160,7 @@ s32 eff_174898(void)
 }
 
 #ifdef NON_MATCHING
-extern s32 sprintf(char *str, const char *fmt, ...);
+
 #endif
 
 char *effMakeBedFileName(u32 id)

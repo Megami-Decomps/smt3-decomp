@@ -221,7 +221,7 @@ extern void p2sdPlayBGM(s32 MidiNo);
 
 extern s32 fclRunPanelAnim(void *work);
 
-extern s32 printf(const char *fmt, ...);
+#include "sdk_libc.h"
 
 extern u8 D_0032D1F0[];
 
@@ -2707,7 +2707,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthDevil);
 extern char D_0054FB10[];
 extern char *datExplainTable[];
 extern char *text2[];
-extern s32 sprintf(char *out, const char *format, ...);
+
 extern void *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
                                 const char *text, void *previous);
 extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
@@ -3016,7 +3016,7 @@ extern char D_0054FB18[];
 extern char D_0054FB10[];
 extern char *datExplainTable[];
 extern char *text2[];
-extern s32 sprintf(char *out, const char *format, ...);
+
 extern void *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color, const char *text, void *previous);
 extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color, const char *text, void *previous);
 extern s32 func_001C7E38(void *request, s8 mode, u32 ot);
@@ -3046,7 +3046,6 @@ void cmbDrawDevilStats(s32 x, s32 y, s32 z, datUnitWork_t *unit, s32 unused, u32
 
 
 extern char D_0054FB10[];
-extern s32 sprintf(char *out, const char *fmt, ...);
 
 extern void *frGetCNameFRQ(s8 targetNo, s8 style, void *previous, s32 firstOption);
 extern void frSetDrawPosition(void *request, u32 x, u32 y);
@@ -4568,8 +4567,6 @@ s32 cmbActionExists(void *work)
 }
 
 extern void mdlGetFilebase(s32 aMajor, u16 aMinor, char *aName, s32 aNameLeng);
-
-extern s32 sprintf(char *out, const char *fmt, ...);
 
 extern char D_0053CD68[];
 

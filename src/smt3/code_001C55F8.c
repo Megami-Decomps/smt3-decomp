@@ -72,7 +72,7 @@ extern char D_00535850[];
 
 extern char D_00535878[];
 
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
 
 extern s32 nbCameraBossCutFlag;
 
@@ -365,7 +365,7 @@ s32 nbCameraHelperViewer_Init(s32 pData)
 extern u8 D_0054F3E8;
 extern u8 D_0054F3E9;
 extern const char D_005358E0[];
-extern s32 sprintf(char *buf, const char *fmt, ...);
+
 extern void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *text);
 extern void effDebugLineDraw2(sdfVector4_t *from, sdfVector4_t *to, u32 mode);
 extern void effDebugPointDraw2(sdfVector4_t *point, u32 color);

@@ -342,7 +342,8 @@ extern s32 nbGetEncountJoken(s32 id);
 
 extern s32 D_0054FF1C;
 extern s32 dds3GetRandIntA(s32 minimum, s32 range);
-extern s32 printf(const char *format, ...);
+#include "sdk_libc.h"
+
 extern char D_00545BA0[];
 
 s32 nbGetEncountMax(s32 id)
