@@ -207,7 +207,7 @@ void nmeInitNameCursor(s8 mode, nmeWork_t *work)
     cmpInitCursorLayout(&work->nameCursor, 0, 0, 0, 0, 0);
 }
 
-extern void cmpResetCursorPos(s16 value, cmpCursorInfo_t *cursor);
+extern void cmpResetCursorPos(s32 value, cmpCursorInfo_t *cursor);
 
 void nmeInitCursor(s8 mode, nmeWork_t *work)
 {

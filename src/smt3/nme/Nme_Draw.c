@@ -305,7 +305,8 @@ void nmeBackspace(void)
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursorBy);
 
-void nmeSyncCursor(void) {
+/* Native dispatchers pass the mode word; this helper derives the row globally. */
+void nmeSyncCursor(s32 mode) {
     s8 row = (s8)((u8)nmeUpdateWork->cursor.unk_22 +
                   (u8)nmeUpdateWork->cursor.unk_24);
 
@@ -315,13 +316,12 @@ void nmeSyncCursor(void) {
 extern s32 cmpGetPressedButton(s32 mask);
 extern void nmeMoveCursorBy(s8 delta);
 extern s32 nmeGetRowCount(s8 mode);
-extern void cmpResetCursorPos(s16 value, cmpCursorInfo_t *cursor);
+extern void cmpResetCursorPos(s32 value, cmpCursorInfo_t *cursor);
 extern s32 cmpChkPadPressUpDown(void);
 extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
 extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 extern void cmpPlayCursorSE(u32 button);
 
-#ifdef NON_MATCHING
 s32 nmeMoveCursor(void)
 {
     s32 result = 0;
@@ -368,7 +368,7 @@ s32 nmeMoveCursor(void)
         }
         break;
     }
-    nmeSyncCursor();
+    nmeSyncCursor(mode);
     if (cmpChkPadPressUpDown() == 0) {
         cmpMoveCursor(&nmeUpdateWork->cursor, 0);
     }
@@ -377,11 +377,7 @@ s32 nmeMoveCursor(void)
     cmpPlayCursorSE(button);
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursor);
-#endif
 
-#ifdef NON_MATCHING
 void nmeMoveCursor2(void)
 {
     u16 button = cmpGetPressedButton(0xF3);
@@ -410,7 +406,7 @@ void nmeMoveCursor2(void)
         cmpResetCursorPos(0, &nmeUpdateWork->nameCursor);
         break;
     }
-    nmeSyncCursor();
+    nmeSyncCursor(mode);
     if (cmpChkPadPressUpDown() == 0) {
         cmpMoveCursor(&nmeUpdateWork->cursor, 0);
     }
@@ -418,9 +414,6 @@ void nmeMoveCursor2(void)
                                        button, 0x30);
     cmpPlayCursorSE(button);
 }
-#else
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursor2);
-#endif
 
 extern s8 cmpGetCursorRow(cmpCursorInfo_t *cursor);
 extern s32 nmeGetRowCount(s8 mode);

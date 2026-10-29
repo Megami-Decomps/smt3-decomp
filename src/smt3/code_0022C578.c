@@ -9486,7 +9486,7 @@ s32 cmp_241A88(cmpCursorInfo_t *cursor, s32 index)
     return 1;
 }
 
-void cmpResetCursorPos(s16 value, cmpCursorInfo_t *cursor)
+void cmpResetCursorPos(s32 value, cmpCursorInfo_t *cursor)
 {
     cursor->StopFlag = 0;
     cursor->unk_24 = 0;
