@@ -179,8 +179,7 @@ extern s32 fldHitChkMatter;
 
 extern s32 fldHitChkSlope;
 
-extern s32 fldHitChkCamera(const sdfVector4_t *eyepos, const sdfVector4_t *disppos,
-                           sdfVector4_t *hitpos);
+extern s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]);
 
 extern void fldCamSetLeng(void);
 
@@ -190,9 +189,9 @@ void resetCamNormal(void) {
     sdfVector4_t eye;
     sdfVector4_t eyeBase;
     sdfVector4_t tgt;
-    sdfVector4_t ta;
-    sdfVector4_t tb;
-    sdfVector4_t hitpos;
+    f32 ta[4] __attribute__((aligned(16)));
+    f32 tb[4] __attribute__((aligned(16)));
+    f32 hitpos[4] __attribute__((aligned(16)));
     sdfVector4_t pos;
     fldFollowCameraControl_t *control;
     fldUnitControl_t *unit;
@@ -246,15 +245,15 @@ void resetCamNormal(void) {
     fldCamDist = ofs;
     SDF_VU0_COPYVECTOR(&ta, &eyeBase);
     SDF_VU0_COPYVECTOR(&tb, &tgt);
-    fldHitChkCamera(&tb, &ta, &hitpos);
-    dx = hitpos.x - eyeBase.x;
-    dy = hitpos.y - eyeBase.y;
-    dz = hitpos.z - eyeBase.z;
+    fldHitChkCamera(tb, ta, hitpos);
+    dx = hitpos[0] - eyeBase.x;
+    dy = hitpos[1] - eyeBase.y;
+    dz = hitpos[2] - eyeBase.z;
     len = fsqrtf(dx * dx + dy * dy + dz * dz);
     fldCamHeight = len * (D_0054ECA0 / fldCamParamTable2);
-    tgt.x = eyeBase.x - (eyeBase.x - hitpos.x) / len * fldCamHeight;
-    tgt.y = eyeBase.y - (eyeBase.y - hitpos.y) / len * fldCamHeight - ofs;
-    tgt.z = eyeBase.z - (eyeBase.z - hitpos.z) / len * fldCamHeight;
+    tgt.x = eyeBase.x - (eyeBase.x - hitpos[0]) / len * fldCamHeight;
+    tgt.y = eyeBase.y - (eyeBase.y - hitpos[1]) / len * fldCamHeight - ofs;
+    tgt.z = eyeBase.z - (eyeBase.z - hitpos[2]) / len * fldCamHeight;
     dds3SetPosPoseSet(control->camera, &tgt);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
     SDF_VU0_COPYVECTOR(fldCamTarget, &tgt);
@@ -272,9 +271,9 @@ void resetCamNormal2(void) {
     sdfVector4_t eye;
     sdfVector4_t eyeBase;
     sdfVector4_t tgt;
-    sdfVector4_t ta;
-    sdfVector4_t tb;
-    sdfVector4_t hitpos;
+    f32 ta[4] __attribute__((aligned(16)));
+    f32 tb[4] __attribute__((aligned(16)));
+    f32 hitpos[4] __attribute__((aligned(16)));
     sdfVector4_t pos;
     fldFollowCameraControl_t *control;
     fldUnitControl_t *unit;
@@ -322,15 +321,15 @@ void resetCamNormal2(void) {
     tgt.y = tgt.y + (ofs + (fldCamDirLock - ofs) * 0.0625f);
     SDF_VU0_COPYVECTOR(&ta, &eyeBase);
     SDF_VU0_COPYVECTOR(&tb, &tgt);
-    fldHitChkCamera(&tb, &ta, &hitpos);
-    dx = hitpos.x - eyeBase.x;
-    dy = hitpos.y - eyeBase.y;
-    dz = hitpos.z - eyeBase.z;
+    fldHitChkCamera(tb, ta, hitpos);
+    dx = hitpos[0] - eyeBase.x;
+    dy = hitpos[1] - eyeBase.y;
+    dz = hitpos[2] - eyeBase.z;
     len = fsqrtf(dx * dx + dy * dy + dz * dz);
     fldCamHeight = len * (D_0054ECA0 / fldCamParamTable2);
-    tgt.x = eyeBase.x - (eyeBase.x - hitpos.x) / len * fldCamHeight;
-    tgt.y = eyeBase.y - (eyeBase.y - hitpos.y) / len * fldCamHeight;
-    tgt.z = eyeBase.z - (eyeBase.z - hitpos.z) / len * fldCamHeight;
+    tgt.x = eyeBase.x - (eyeBase.x - hitpos[0]) / len * fldCamHeight;
+    tgt.y = eyeBase.y - (eyeBase.y - hitpos[1]) / len * fldCamHeight;
+    tgt.z = eyeBase.z - (eyeBase.z - hitpos[2]) / len * fldCamHeight;
     dds3SetPosPoseSet(control->camera, &tgt);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
     SDF_VU0_COPYVECTOR(fldCamTarget, &tgt);
@@ -389,9 +388,206 @@ void fldCamUpdateFollow(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldCamera", calcCamNormal);
+extern f32 R360_LR(f32 a, f32 b);
+extern s32 fldEncountTestFlag(u32 flag);
+extern s8 dds3PadButtonState[];
+extern s32 D_0054ECB0;
+extern s32 l_UseCollision;
+extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, const sdfVector4_t *target);
+extern void dds3GetTMPoseSet(dds3Basic_t *pBasic);
 
-INCLUDE_ASM(const s32, "field/fldCamera", calcCamDirLock);
+/* DDS player-follow camera reconstruction adapted to SMT3 native geometry,
+ * smoothing and collision behavior; see docs/normal-camera-matching.md. */
+void calcCamNormal(void) {
+    sdfVector4_t nearPoint;
+    sdfVector4_t referencePoint;
+    sdfVector4_t farPoint;
+    f32 referenceCopy[4] __attribute__((aligned(16)));
+    f32 farCopy[4] __attribute__((aligned(16)));
+    sdfVector4_t scaledPoint;
+    f32 collisionPoint[4] __attribute__((aligned(16)));
+    fldFollowCameraControl_t *control;
+    fldUnitControl_t *unit;
+    dds3Basic_t *node;
+    f32 angle;
+    f32 heightOffset;
+    f32 collisionLength;
+    f32 ratio;
+    f32 fx, fy, fz;
+    f32 dx, dy, dz;
+    f32 unitX, unitY, unitZ;
+    f32 divisorX, divisorY, divisorZ;
+
+    control = fldGetFollowCameraControl();
+    unit = fldGetUnitControl();
+    dds3GetPosPoseSet(unit->handle);
+    nearPoint.w = 1.0f;
+    nearPoint.x = fldGlobalBase.x - sdfSin(fldCamPitch * 3.14f / 180.0f) * 80.0f;
+    nearPoint.y = fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight;
+    nearPoint.z = fldGlobalBase.z - sdfCos(fldCamPitch * 3.14f / 180.0f) * 80.0f;
+    R360_LR(fldCamPitch, D_0054ECDC);
+    if (fldEncountTestFlag(0x40)) {
+        if (dds3PadButtonState[0x23]) {
+            D_0054ECB0 = 1;
+        } else {
+            D_0054ECB0 = 0;
+        }
+    }
+    if (D_0054ECB0) {
+        divisorX = 3.0f;
+        divisorY = 4.0f;
+    } else {
+        divisorX = 4.0f;
+        divisorY = 8.0f;
+    }
+    nearPoint.x = D_002FC9C0[0] + (nearPoint.x - D_002FC9C0[0]) / divisorX;
+    nearPoint.y = D_002FC9C0[1] + (nearPoint.y - D_002FC9C0[1]) / divisorY;
+    nearPoint.z = D_002FC9C0[2] + (nearPoint.z - D_002FC9C0[2]) / divisorX;
+    dds3CameraObjectBasicGetCameraTM(control->camera, &nearPoint);
+    referencePoint.x = fldGlobalBase.x;
+    referencePoint.y = fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight;
+    referencePoint.z = fldGlobalBase.z;
+    dds3GetTMPoseSet(unit->handle);
+    angle = fldCamPitch * 3.14f / 180.0f;
+    farPoint.w = 1.0f;
+    fx = fldGlobalBase.x + sdfSin(angle) * fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
+    farPoint.x = fx;
+    fy = fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].targetHeight;
+    farPoint.y = fy;
+    fz = fldGlobalBase.z + sdfCos(angle) * fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
+    farPoint.z = fz;
+    if (l_UseCollision) {
+        heightOffset = fldCamDist + (fldCamDirLock - fldCamDist) * 0.0625f;
+        fldCamDist = fldCamDirLock;
+        fy = farPoint.y + heightOffset;
+        farPoint.y = fy;
+    } else {
+        fldCamDist = fldCamDirLock = 0.0f;
+    }
+    dds3SetPosPoseSet(control->camera, &farPoint);
+    SDF_VU0_COPYVECTOR(&referenceCopy, &referencePoint);
+    SDF_VU0_COPYVECTOR(&farCopy, &farPoint);
+    if (fldCamHeight > D_0054ECA0) {
+        fldCamHeight -= 1000.0f;
+        if (fldCamHeight < D_0054ECA0) {
+            fldCamHeight = D_0054ECA0;
+        }
+    } else if (fldCamHeight < D_0054ECA0) {
+        fldCamHeight += 1000.0f;
+        if (D_0054ECA0 < fldCamHeight) {
+            fldCamHeight = D_0054ECA0;
+        }
+    }
+    /* Retail retains this scaled XYZ scratch at sp+0x50, separate from the
+     * collision output at +0x60. Reload the published far point here; these
+     * same values also feed the no-collision smoothing path below. */
+    fx = farPoint.x;
+    scaledPoint.x = nearPoint.x - fx * fldCamParamTable2;
+    fy = farPoint.y;
+    scaledPoint.y = nearPoint.y - fy * fldCamParamTable2;
+    fz = farPoint.z;
+    scaledPoint.z = nearPoint.z - fz * fldCamParamTable2;
+    if (l_UseCollision) {
+        fldHitChkCamera(farCopy, referenceCopy,
+                        collisionPoint);
+        ratio = D_0054ECA0 / fldCamParamTable2;
+        dx = collisionPoint[0] - referencePoint.x;
+        dy = collisionPoint[1] - referencePoint.y;
+        dz = collisionPoint[2] - referencePoint.z;
+        collisionLength = fsqrtf(dx * dx + dy * dy + dz * dz);
+        unitX = (referencePoint.x - collisionPoint[0]) / collisionLength;
+        unitY = (referencePoint.y - collisionPoint[1]) / collisionLength;
+        unitZ = (referencePoint.z - collisionPoint[2]) / collisionLength;
+        if (collisionLength * ratio < fldCamHeight) {
+            fldCamHeight = collisionLength * ratio;
+        }
+        fx = referencePoint.x - unitX * fldCamHeight;
+        fy = referencePoint.y - unitY * fldCamHeight;
+        fz = referencePoint.z - unitZ * fldCamHeight;
+        farPoint.x = fx;
+        farPoint.y = fy;
+        farPoint.z = fz;
+    }
+    if (D_0054ECB0) {
+        divisorX = 3.0f;
+        divisorY = 4.0f;
+        divisorZ = 3.0f;
+    } else {
+        divisorX = 8.0f;
+        divisorY = 8.0f;
+        divisorZ = 8.0f;
+    }
+    fx = fldCamTarget[0] + (fx - fldCamTarget[0]) / divisorX;
+    farPoint.x = fx;
+    fy = fldCamTarget[1] + (fy - fldCamTarget[1]) / divisorY;
+    farPoint.y = fy;
+    fz = fldCamTarget[2] + (fz - fldCamTarget[2]) / divisorZ;
+    farPoint.z = fz;
+    dds3SetPosPoseSet(control->camera, &farPoint);
+    SDF_VU0_COPYVECTOR(D_002FC9C0, &nearPoint);
+    SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
+    node = control->camera;
+    ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
+    fldCamSetLeng();
+}
+
+
+extern f32 D_0054EC88;
+
+/* Native direction-locked sibling of calcCamNormal; see
+ * docs/dir-lock-camera-matching.md for its retained reference-vector stores. */
+void calcCamDirLock(void) {
+    sdfVector4_t nearPoint;
+    sdfVector4_t referencePoint;
+    sdfVector4_t farPoint;
+    fldFollowCameraControl_t *control;
+    fldUnitControl_t *unit;
+    dds3Basic_t *node;
+    f32 angle;
+    f32 heightOffset;
+
+    control = fldGetFollowCameraControl();
+    unit = fldGetUnitControl();
+    dds3GetPosPoseSet(unit->handle);
+    nearPoint.w = 1.0f;
+    nearPoint.x = fldGlobalBase.x;
+    nearPoint.y = fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight;
+    nearPoint.z = fldGlobalBase.z;
+    nearPoint.x = D_002FC9C0[0] + (nearPoint.x - D_002FC9C0[0]) * 0.5f;
+    nearPoint.y = D_002FC9C0[1] + (nearPoint.y - D_002FC9C0[1]) * 0.5f;
+    nearPoint.z = D_002FC9C0[2] + (nearPoint.z - D_002FC9C0[2]) * 0.5f;
+    dds3CameraObjectBasicGetCameraTM(control->camera, &nearPoint);
+    /* Retail keeps the reference XYZ setup at +0x10 although this mode has
+     * no collision query. calcCamNormal uses this same setup as a live base. */
+    referencePoint.x = fldGlobalBase.x;
+    referencePoint.y = fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight;
+    referencePoint.z = fldGlobalBase.z;
+    dds3GetTMPoseSet(unit->handle);
+    fldCamPitch = D_0054EC88;
+    angle = fldCamPitch * 3.14f / 180.0f;
+    farPoint.w = 1.0f;
+    farPoint.x = fldGlobalBase.x + sdfSin(angle) * fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
+    farPoint.y = fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].targetHeight;
+    farPoint.z = fldGlobalBase.z + sdfCos(angle) * fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
+    if (l_UseCollision) {
+        heightOffset = fldCamDist + (fldCamDirLock - fldCamDist) * 0.0625f;
+        fldCamDist = fldCamDirLock;
+        farPoint.y += heightOffset;
+    } else {
+        fldCamDist = fldCamDirLock = 0.0f;
+    }
+    dds3SetPosPoseSet(control->camera, &farPoint);
+    farPoint.x = fldCamTarget[0] + (farPoint.x - fldCamTarget[0]) * 0.5f;
+    farPoint.y = fldCamTarget[1] + (farPoint.y - fldCamTarget[1]) * 0.5f;
+    farPoint.z = fldCamTarget[2] + (farPoint.z - fldCamTarget[2]) * 0.5f;
+    dds3SetPosPoseSet(control->camera, &farPoint);
+    SDF_VU0_COPYVECTOR(D_002FC9C0, &nearPoint);
+    SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
+    node = control->camera;
+    ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
+    fldCamSetLeng();
+}
+
 
 extern s32 fldNpcCamTarget;
 
