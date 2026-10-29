@@ -197,9 +197,9 @@ s32 checkModelVersion(void)
 
 INCLUDE_ASM(const s32, "sdk/libgraph", _GetGsDxDyOffset);
 
-/* NON_MATCHING: 892 bytes against retail's 888, 40 of 222 words differing,
- * all of them inside the NTSC and PAL display arithmetic. Everything before it
- * matches: the parameter-block call, the mode range test, the model-version
+/* NON_MATCHING: 892 bytes against retail's 888. The first 64 words match and
+ * the divergence starts inside the NTSC display arithmetic, where one extra
+ * instruction shifts the rest of the function. What matches: the parameter-block call, the mode range test, the model-version
  * path, the _GetGsDxDyOffset call with its four frame addresses, the shared
  * zeroing block with the reloaded mode halfword duplicated into both
  * predecessors, pmode, the three cross-jumped smode2 stores and dispfb.
