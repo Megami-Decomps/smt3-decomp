@@ -29,9 +29,17 @@ typedef struct
     u32 flag;
     u16 devilId;
     u16 hp;
-    u8 unk0C[6];
-    u16 badstatus;
-    u32 exp;
+    union {
+        struct {
+            u8 unk0C[6];
+            u16 badstatus;
+            u32 exp;
+        };
+        struct {
+            u8 statePrefix[4];
+            u64 packedState;
+        } __attribute__((packed));
+    };
     u8 pad18[2];
     s8 level;
     u8 unk1B[0x21];
