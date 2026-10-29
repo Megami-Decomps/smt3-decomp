@@ -749,3 +749,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 548 B	module-loadin
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 132 B	two-vector stdout line write, padded newline owner and native status result; complete owner exact
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 140 B	reentrant locale selection preserves shared C/empty strings and original accepted pointer; corrected locale pointer-return contracts; complete owner 61 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 248 B	block-address and size queries with one-word IOP requests, all-ones failure and native reply-load branch; complete owner exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 336 B	heap memory-size and free-space queries using native result words and failure-first RPC control; complete owner exact

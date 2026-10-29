@@ -1261,11 +1261,41 @@ s32 sceSifFreeIopHeap(void *address)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadIopHeap);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifQueryMemSize);
+u32 sceSifQueryMemSize(void)
+{
+    if (D_0052C354 < 0) {
+        return 0;
+    }
+    if (sceSifCallRpc(D_0059E840, 5, 0, NULL, 0,
+                      &D_0059E880, 4, NULL, NULL) < 0) {
+        return 0xFFFFFFFF;
+    }
+    return D_0059E880;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifQueryMaxFreeMemSize);
+u32 sceSifQueryMaxFreeMemSize(void)
+{
+    if (D_0052C354 < 0) {
+        return 0;
+    }
+    if (sceSifCallRpc(D_0059E840, 6, 0, NULL, 0,
+                      &D_0059E880, 4, NULL, NULL) < 0) {
+        return 0xFFFFFFFF;
+    }
+    return D_0059E880;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifQueryTotalFreeMemSize);
+u32 sceSifQueryTotalFreeMemSize(void)
+{
+    if (D_0052C354 < 0) {
+        return 0;
+    }
+    if (sceSifCallRpc(D_0059E840, 7, 0, NULL, 0,
+                      &D_0059E880, 4, NULL, NULL) < 0) {
+        return 0xFFFFFFFF;
+    }
+    return D_0059E880;
+}
 
 /* The IOP block key and query results travel as 32-bit words. */
 u32 sceSifQueryBlockTopAddress(u32 block)

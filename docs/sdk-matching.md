@@ -526,3 +526,23 @@ the first reply word before writing the second through the caller's result
 pointer, preserving the native behavior even when that pointer aliases the
 shared reply. A write-then-read form has the same 548-byte size but differs in
 three result-path words. The complete kernel owner checks 49 match / 0 differ.
+
+## Heap query result words
+
+The five heap queries reproduce their complete configured 2.9 bodies with
+32-bit result words. Block-top and block-size queries send one block key
+word, using selectors 8 and 9; memory-size, maximum-free and total-free
+queries send no request, using selectors 5, 6 and 7. Each receives one word.
+An unavailable heap returns zero before touching the request or RPC. A
+negative RPC result returns the all-ones word `0xFFFFFFFF`; success returns
+the received word. This describes the reconstructed word contract rather
+than asserting the spelling of the original SDK declaration.
+
+Writing the failure case first (`if (call(...) < 0) return 0xFFFFFFFF;`
+then the reply return) reproduces native `bgezl` with the reply load in its
+delay slot. The equivalent success-first block-query form instead emits
+ordinary `bgez`, differing by one word at the same 124-byte size. The native
+query failure uses `lui`/`ori` for the all-ones result; the signed free-memory
+wrapper uses `addiu -1`. The three request-free query bodies each match
+112 bytes; the two block queries each match 124. Complete-owner checks
+qualify the shared signed reply buffer and unchanged neighboring functions.
