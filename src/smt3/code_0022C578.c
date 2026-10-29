@@ -9822,7 +9822,63 @@ s8 cmpGetStockInfoIndex(cmpLocalStock_t *stock, s8 index, s8 flag)
 INCLUDE_ASM(const s32, "code_0022C578", cmpGetStockInfoIndex);
 #endif
 
+#ifdef NON_MATCHING
+void cmpBuildStockNameList(cmpLocalStock_t *stock)
+{
+    s8 outputIndex = 0;
+    s32 i;
+
+    stock->PartyCnt = 0;
+    stock->StockCnt = 0;
+
+    if ((stock->count & 1) != 0) {
+        for (i = 0; i < cmbGlobalWork->stockCount; i++) {
+            s8 stockId = cmbGlobalWork->stock[i];
+            datUnitWork_t *unit = &cmbGlobalWork->party[stockId].unit;
+
+            if ((unit->flag & 2) != 0 &&
+                cmpCursorSlotIsSelectable(unit, stock->count, 0) != 0) {
+                s8 selectedIndex = outputIndex;
+                stock->StockIdx[selectedIndex] = stockId;
+                outputIndex++;
+                stock->ListIdx[selectedIndex] = i;
+                stock->PartyCnt++;
+            }
+        }
+    }
+
+    if ((stock->count & 2) != 0) {
+        for (i = 4; i < 16; i++) {
+            datUnitWork_t *unit = &cmbGlobalWork->party[i].unit;
+
+            if ((unit->flag & 4) != 0) {
+                continue;
+            }
+            if ((unit->flag & 1) == 0) {
+                continue;
+            }
+            if (cmpCursorSlotIsSelectable(unit, stock->count, 1) == 0) {
+                continue;
+            }
+            {
+                s32 j;
+                s8 selectedIndex = outputIndex;
+
+                stock->StockIdx[selectedIndex] = i;
+                for (j = 0; j < cmbGlobalWork->stockCount; j++) {
+                    if ((u8)cmbGlobalWork->stock[j] == i) {
+                        stock->ListIdx[selectedIndex] = j;
+                    }
+                }
+                stock->StockCnt++;
+                outputIndex++;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpBuildStockNameList);
+#endif
 
 s8 cmpGetStockCount(void)
 {
