@@ -24,33 +24,7 @@ extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 extern s32 dds3PadVibrationSet(s32 port, s32 power, s32 frames);
 
 
-typedef struct
-{
-    /* 0x00 */ u8 race;
-    /* 0x01 */ u8 unk_01;
-    /* 0x02 */ s16 param;
-    /* 0x04 */ u8 unk_04[0x15];
-    /* 0x19 */ s8 unk_19;
-    /* The same eight records expose condition bytes before each skill. */
-    union {
-        struct {
-            u8 unk_1A[2];
-            datHeartsSkill_t heartsSkill[8];
-        };
-        struct {
-            struct {
-                u8 condition;
-                u8 reserved;
-                u16 skill;
-            } heartConditions[8];
-            u8 unk_3A[2];
-        };
-        struct {
-            u8 reserved1A[0x20];
-            u8 probabilities[8];
-        };
-    };
-} datRaceEntry_t;
+
 
 extern void rstSetMaxHpMp(s8 Mode, datUnitWork_t *pStock);
 

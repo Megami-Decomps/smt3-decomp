@@ -25,6 +25,36 @@ typedef struct
     /* 0x02 */ u16 unk_02;
 } datHeartsSkill_t;
 
+typedef struct
+{
+    /* 0x00 */ u8 race;
+    /* 0x01 */ u8 unk_01;
+    /* 0x02 */ s16 param;
+    /* 0x04 */ u8 reserved04[0xE];
+    /* 0x12 */ u8 growthRate[6];
+    /* 0x18 */ u8 reserved18;
+    /* 0x19 */ s8 unk_19;
+    /* The same eight records expose condition bytes before each skill. */
+    union {
+        struct {
+            u8 unk_1A[2];
+            datHeartsSkill_t heartsSkill[8];
+        };
+        struct {
+            struct {
+                u8 condition;
+                u8 reserved;
+                u16 skill;
+            } heartConditions[8];
+            u8 unk_3A[2];
+        };
+        struct {
+            u8 reserved1A[0x20];
+            u8 probabilities[8];
+        };
+    };
+} datRaceEntry_t;
+
 typedef struct rstData_t {
     union { u8 flags; u8 unk_0000; };
     union { s8 phase; s8 unk_0001; };
