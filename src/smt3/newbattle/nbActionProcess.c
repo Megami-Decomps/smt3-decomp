@@ -1328,7 +1328,65 @@ void DokodemoPoa(nbActionProcessData_t *a)
     }
 }
 
+#ifdef NON_MATCHING
+void SetNowActionStat(nbActionProcessData_t *a, s32 command, s32 skill)
+{
+    datNormalSkill_t *data;
+    u16 type;
+    s32 i;
+
+    if (a->partyindex >= 4) {
+        return;
+    }
+    data = &datSkillTable.normal[skill];
+    if (command == 0) {
+        a->stat |= 0x10000;
+    } else if (command == 1 && data->koukatype == 0) {
+        for (i = 0; i < 2; i++) {
+            type = i == 0 ? data->hptype : data->mptype;
+            switch (type) {
+            case 1: case 3: case 4: case 6: case 8:
+            case 10: case 12: case 13: case 14:
+                a->stat |= 0x10000;
+                break;
+            }
+        }
+    }
+    if (command == 1 && data->koukatype == 1) {
+        for (i = 0; i < 2; i++) {
+            type = i == 0 ? data->hptype : data->mptype;
+            switch (type) {
+            case 1: case 3: case 4: case 6: case 8:
+            case 10: case 12: case 13: case 14:
+                a->stat |= 0x20000;
+                break;
+            }
+        }
+        if (data->badtype == 1 || data->badtype == 3) {
+            a->stat |= 0x20000;
+        }
+    }
+    for (i = 0; i < 2; i++) {
+        type = i == 0 ? data->hptype : data->mptype;
+        switch (type) {
+        case 2: case 5: case 7: case 9: case 11: case 15:
+            a->stat |= 0x40000;
+            break;
+        }
+    }
+    if (command == 1 && data->koukatype == 1) {
+        a->stat |= 0x80000;
+    }
+    if (command == 5) {
+        a->stat |= 0x100000;
+    }
+    if (command == 6 || (command == 1 && (data->program == 2 || data->program == 3))) {
+        a->stat |= 0x200000;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetNowActionStat);
+#endif
 
 /* NON_MATCHING: 4 of 120 words differ (first at +0x110). */
 
