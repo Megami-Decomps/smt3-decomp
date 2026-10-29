@@ -34,38 +34,6 @@ reads the row base once and reaches the rotation members at displacements
 load arm also differs in shape: retail branches around dds3EffectCopy with the
 fldTakaraSlotCount store in the taken delay slot.
 
-## fldNpcLightSet (field/fld_Npc, 0x28C)
-
-125 of 163 words match, at the exact 652-byte size. Everything the source can say
-is said: the light row is `D_003129D0 + (fldArea[0] + 1) * 8` with the
-direction mode in byte 7 and the face-division nibbles in byte 6, the
-`if (m == 0) ... else if (m == 3) ... else` chain with the last arm repeating
-the first (gcc cross-jumps the two into one block, which is what gives
-retail's `beqz` and its `bne $3, 3` both targeting `.L0014AF28`), each arm
-carrying its own `3.14f` and `0.6f` so the four pool entries at `0x54C4F8`
-through `0x54C514` come out one per arm, `dir = dir * 180.0f / 3.14f;` split
-from `dir = dir - 70.0f;` so the division writes `dir`'s own register, and
-`rad = dir * 3.14f / 180.0f;` placed after `sdfModelSetFaceDivParm` so `dir`
-and the light power stay live across the three calls in `$f21` and `$f22`.
-
-The remaining 38 words are one hard-register permutation of the four
-callee-saved integers. Retail allocates `object` `$16`, the model handle
-`$17`, the light row `$18`, the unit `$19`; the draft gets row `$16`, object
-`$17`, unit `$18`, handle `$19`. Every instruction is otherwise the same, the
-float registers included, and the two colour words land in `$17` and `$16` in
-both. gcc 2.96 sorts allocnos by `floor_log2(n_refs) * freq / live_length`,
-so this needs a live range changed, not a statement reworded.
-
-Ruled out: a `mode` local for `row[7]` (60 words); a `div` local for
-`row[6]` (39); the row as a pointer to an eight-`u8` struct, as a `u32`-cast
-read, and as a plain `u8 *` (all 38); computing the row before
-`dds3ObjectBaseGetModelHandle`, after `EulerAngleAxisY` and before the
-`SDF_VU0_LOADVECTOR` (53, 47, 48); the ambient word computed before the light
-word (42); the blue component or'd before the green one (38);
-`dds3ObjectBaseGetModelHandle(unit->effObj)` with `object` read afterwards
-(39); a `switch` over the four modes, which runs past the next function; and
-seven declaration-order permutations of the nine locals, all 38.
-
 ## fldDrawEATexQuad (field/fld_Npc, 0x340)
 
 143 of 208 words match, at the exact 832-byte size. The structure is settled: ten

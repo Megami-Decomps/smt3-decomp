@@ -85,7 +85,7 @@ extern fldNpcSlot_t fldModelSlotTable[];
 
 extern s32 fldGbChkNpc(s32 fld, u32 area, s32 hojiID);
 
-extern void dds3ObjectBaseOnFlag(dds3Basic_t *object, u32 flags);
+extern void dds3ObjectBaseOnFlag(dds3Basic_t *object, s32 flags);
 
 extern u8 D_003129D0[0x100];
 
@@ -191,7 +191,7 @@ extern void *D_0054EF2C;
 
 extern const sdfVector4_t D_00532720;
 
-extern mdlObj_t *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
+extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 
 extern void FromRotation(f32 aAngle);
 
@@ -242,8 +242,7 @@ extern void *D_0054EED0;
 extern u32 fldDmgBlurHandle;
 
 
-/* NON_MATCHING: 38 of 163 words differ (first at +0x4). */
-#ifdef NON_MATCHING
+/* RGB component staging follows DDS1 fldInitializeHuntSparkUnit. */
 void fldNpcLightSet(evtUnit_t *hEveUnit) {
     dds3Basic_t *object;
     mdlObj_t *model;
@@ -253,6 +252,7 @@ void fldNpcLightSet(evtUnit_t *hEveUnit) {
     f32 rad;
     u32 light;
     u32 ambient;
+    s32 red, green, blue;
     sdfVector4_t vec;
 
     object = hEveUnit->effObj;
@@ -292,17 +292,20 @@ void fldNpcLightSet(evtUnit_t *hEveUnit) {
     SDF_VU0_LOADVECTOR(&vec);
     SDF_VU0_NORMALIZE();
     evtSetUnitLightDir(hEveUnit, 0);
-    light = row[0] | (row[1] << 8) | (row[2] << 16) | 0x80000000;
-    ambient = row[3] | (row[4] << 8) | (row[5] << 16) | 0x80000000;
+    red = row[0];
+    green = row[1];
+    blue = row[2];
+    light = red | (blue << 16) | (green << 8) | 0x80000000;
+    red = row[3];
+    green = row[4];
+    blue = row[5];
+    ambient = red | (blue << 16) | (green << 8) | 0x80000000;
     evtSetUnitLightAndAmbient(hEveUnit, 0, light, ambient);
     SDF_VU0_LOADVECTOR(&vec);
     SDF_VU0_NORMALIZE();
     evtSetUnitLightDir(hEveUnit, 0);
     evtSetUnitLightAndAmbient(hEveUnit, 0, light, ambient);
 }
-#else
-INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLightSet);
-#endif
 
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLoad);
 
