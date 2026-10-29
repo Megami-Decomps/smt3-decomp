@@ -82,11 +82,7 @@ void fclUpdatePanelType0(fclPanel_t *pPanel)
     }
 }
 
-typedef struct
-{
-    void *res;
-    void *entries;
-} fclSpriteTbl_t;
+
 extern s32 D_00345D88[];
 extern fclSpriteTbl_t fclSpriteTable[];
 extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);

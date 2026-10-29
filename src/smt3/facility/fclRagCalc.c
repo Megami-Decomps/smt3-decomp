@@ -17,11 +17,7 @@
 
 
 
-typedef struct
-{
-    /* 0x00 */ fclSpriteRes_t *res;
-    /* 0x04 */ fclSpriteEntry_t *entries;
-} fclSpriteTbl_t;
+
 
 extern char D_0053D1F0[];
 

@@ -251,10 +251,7 @@ s32 dds3DrawConfigLabel(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
     return frDestroyFontRequestAfter(font);
 }
 
-typedef struct {
-    fclSpriteRes_t *res;
-    fclSpriteEntry_t *entries;
-} fclSpriteTbl_t;
+
 
 extern fclSpriteTbl_t dds3ConfigLayoutTable[];
 extern s32 D_00345D88[];

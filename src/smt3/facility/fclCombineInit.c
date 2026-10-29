@@ -201,11 +201,7 @@ typedef struct
 
 
 
-typedef struct
-{
-    /* 0x00 */ fclSpriteRes_t *res;
-    /* 0x04 */ fclSpriteEntry_t *entries;
-} fclSpriteTbl_t;
+
 
 extern s32 sdfDelayedResrcCheck(void);
 

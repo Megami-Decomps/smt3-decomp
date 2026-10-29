@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "nme.h"
 
 extern s32 nmeGetInputMode(nmeWork_t *work);
@@ -27,19 +28,16 @@ void nmeDrawInputUBar(s8 mode)
     }
 }
 
-typedef struct {
-    void *res;
-    void *entries;
-} nmeSpriteTable_t;
 
-extern nmeSpriteTable_t GBWK_2 __attribute__((section(".data")));
+
+extern fclSpriteTbl_t GBWK_2 __attribute__((section(".data")));
 extern nmeWork_t *namelist_buttonAnim_end;
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page, s32 spriteId,
-                             s32 *texList, nmeSpriteTable_t *table, s32 ot);
+                             s32 *texList, fclSpriteTbl_t *table, s32 ot);
 
 void nmeDrawFuncIcon(void)
 {
-    nmeSpriteTable_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = &GBWK_2;
     s32 ot = 0x47;
 
     fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 0,
@@ -88,7 +86,7 @@ extern void nmeDrawPanelSprites(void);
 
 void nmeDrawInputPanel(void)
 {
-    nmeSpriteTable_t *table;
+    fclSpriteTbl_t *table;
     s32 ot = 0x47;
 
     nmeDrawPanelSprites();
@@ -116,7 +114,7 @@ void nmeDrawInputPanel(void)
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern void cmpUpdateTerminate(void *work);
 extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
-extern void nmeDrawBlendText(s32 sprite, s32 page, sdfTexHandle_t **textures, nmeSpriteTable_t *table, u32 color, s32 animation, s32 ot);
+extern void nmeDrawBlendText(s32 sprite, s32 page, sdfTexHandle_t **textures, fclSpriteTbl_t *table, u32 color, s32 animation, s32 ot);
 extern void nmeDrawNamePanel(void);
 extern void nmeDrawInputPanel(void);
 extern void nmeDrawCursor(void);
@@ -127,7 +125,7 @@ extern void nmeDrawButtonGuide(void);
 s32 nmeDraw(dds3ProcessID_t *id)
 {
     nmeWork_t *work = dds3GetProcessData(id);
-    nmeSpriteTable_t *table;
+    fclSpriteTbl_t *table;
     namelist_buttonAnim_end = work;
     if (work->sequence.flag & 0x20) {
         cmpUpdateTerminate(work);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "kernel.h"
 #include "nme.h"
 #include "font.h"
@@ -8,20 +9,17 @@ extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern s32 dds3FadeCheck(void);
 extern void cmpUpdateTerminate(void *work);
 
-typedef struct {
-    void *res;
-    void *entries;
-} nmeSpriteTable_t;
+
 
 /* This descriptor is in .data, outside the GP-relative range. */
-extern nmeSpriteTable_t GBWK_2 __attribute__((section(".data")));
+extern fclSpriteTbl_t GBWK_2 __attribute__((section(".data")));
 extern nmeWork_t *namelist_buttonAnim_end;
 extern void frSetFontColor(frFontHandle_t *font, u32 color);
 extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 *colors, s32 ot);
 extern void nmeDrawCursorAt(s32 x, s32 y, s32 z, s8 mode, s32 ot);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page, s32 spriteId,
-                             s32 *texList, nmeSpriteTable_t *table, s32 ot);
+                             s32 *texList, fclSpriteTbl_t *table, s32 ot);
 
 s32 nmeCalc(dds3ProcessID_t *id)
 {
@@ -38,7 +36,7 @@ s32 nmeCalc(dds3ProcessID_t *id)
 
 void nmeDrawCharRow(s32 x, s32 y)
 {
-    nmeSpriteTable_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = &GBWK_2;
     s32 ot = 0x47;
 
     fclDrawSpriteRes(x, y, 0, 0, 3, 0x12,
@@ -51,7 +49,7 @@ void nmeDrawCharRow(s32 x, s32 y)
 
 void nmeDrawSymbolRow(s32 x, s32 y)
 {
-    nmeSpriteTable_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = &GBWK_2;
     s32 ot = 0x47;
 
     fclDrawSpriteRes(x, y, 0, 0, 3, 0x12,
@@ -69,7 +67,7 @@ INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameString);
 void nmeDrawEditIcons(void)
 {
     s32 colors[4];
-    nmeSpriteTable_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = &GBWK_2;
 
     colors[0] = 0x80808079;
     colors[1] = 0x80808079;
@@ -202,7 +200,7 @@ void nmeDrawPanelSprites(void)
 
 void nmeDrawNamePanel(void)
 {
-    nmeSpriteTable_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = &GBWK_2;
     s32 ot = 0x47;
 
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0,
@@ -254,7 +252,7 @@ void nmeDrawCursor(void)
 
 void nmeDrawTabSprite(s32 x, s32 y, s32 unused)
 {
-    nmeSpriteTable_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = &GBWK_2;
     s32 ot = 0x47;
 
     fclDrawSpriteRes(x, y, 0, 0, 3, 0xF,

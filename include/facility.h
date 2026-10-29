@@ -30,6 +30,12 @@ typedef struct fclSpriteRes_t
 
 typedef struct
 {
+    /* 0x00 */ fclSpriteRes_t *res;
+    /* 0x04 */ fclSpriteEntry_t *entries;
+} fclSpriteTbl_t;
+
+typedef struct
+{
     sdfIVector4_t pos_act;
     sdfIVector4_t pos_deact;
     sdfIVector4_t uv_act;

@@ -158,10 +158,7 @@ extern s32 cmpUpdateListSelection(trmPanelPos_t *panel, u8 *list, s32 row,
 extern u32 frGetStrWidth2(void *request);
 extern void frSetDrawPosition(void *request, s32 x, s32 y);
 extern void func_001C7E38(void *frq, s32 mode, s32 arg);
-typedef struct {
-    void *res;
-    void *entries;
-} fclSpriteTbl_t;
+
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,
                              s32 spriteId, s32 *texList, fclSpriteTbl_t *table, s32 ot);
 extern void fclDrawSpriteSize(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color,

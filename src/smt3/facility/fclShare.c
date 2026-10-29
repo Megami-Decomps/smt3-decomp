@@ -564,11 +564,7 @@ void fclDrawPhaseValue(void *work, s32 color, s32 ot)
 INCLUDE_ASM(const s32, "facility/fclShare", fclDrawPhaseValue);
 #endif
 
-typedef struct
-{
-    void *res;
-    void *entries;
-} fclSpriteTbl_t;
+
 extern s32 D_00345D88[];
 extern fclSpriteTbl_t fclSpriteTable[];
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,

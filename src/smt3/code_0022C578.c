@@ -234,11 +234,7 @@ extern s32 cmpDrawBoxG(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *colors, s32 g, s3
 
 
 
-typedef struct
-{
-    /* 0x00 */ fclSpriteRes_t *res;
-    /* 0x04 */ fclSpriteEntry_t *entries;
-} fclSpriteTbl_t;
+
 
 extern s32 sdfDelayedResrcCheck(void);
 

@@ -48,11 +48,7 @@ typedef struct
 
 
 
-typedef struct
-{
-    /* 0x00 */ fclSpriteRes_t *res;
-    /* 0x04 */ fclSpriteEntry_t *entries;
-} fclSpriteTbl_t;
+
 
 extern void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
                               u8 FlipFlag, u8 AlphaFlag, u8 FilterFlag, s32 OtNo);

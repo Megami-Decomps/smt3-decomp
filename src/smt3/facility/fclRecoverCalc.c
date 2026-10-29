@@ -22,11 +22,7 @@ s32 fclGetFlag(s8 index);
 
 
 
-typedef struct
-{
-    /* 0x00 */ fclSpriteRes_t *res;
-    /* 0x04 */ fclSpriteEntry_t *entries;
-} fclSpriteTbl_t;
+
 
 extern void rcvReviveUnit(datUnitWork_t *work);
 
