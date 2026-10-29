@@ -80,8 +80,10 @@ typedef struct
     /* 0x005C */ s32 selectedIndex;
     /* 0x0060 */ u8 reserved0060[4];
     /* 0x0064 */ s16 lw_cur[4];
-    /* 0x006C */ u8 unk_6C;
-    /* 0x006D */ s8 unk_6D;
+    /* 0x006C */ union {
+        struct { u8 unk_6C; s8 unk_6D; };
+        u16 cursorShift;
+    };
     /* 0x006E */ u16 modelId;
     /* 0x0070 */ s32 unk_70;
     /* 0x0074 */ union {
