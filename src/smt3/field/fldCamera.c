@@ -15,14 +15,6 @@
 #include "event.h"
 #include "effect.h"
 
-typedef struct fldFollowCameraControl_t fldFollowCameraControl_t;
-
-/* fldGetFollowCameraControl owns the follow-camera basic at +0x78. */
-struct fldFollowCameraControl_t {
-    u8 unk00[0x78];
-    dds3Basic_t *camera;
-};
-
 extern void *memset(void *, int, unsigned int);
 
 f32 sdfSin(f32 aRadius);
@@ -298,10 +290,10 @@ void resetCamNormal(void) {
     tgt.x = eyeBase.x - (eyeBase.x - hitpos[0]) / len * fldCamHeight;
     tgt.y = eyeBase.y - (eyeBase.y - hitpos[1]) / len * fldCamHeight - ofs;
     tgt.z = eyeBase.z - (eyeBase.z - hitpos[2]) / len * fldCamHeight;
-    dds3SetPosPoseSet(control->camera, &tgt);
+    dds3SetPosPoseSet(control->handle, &tgt);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
     SDF_VU0_COPYVECTOR(fldCamTarget, &tgt);
-    node = control->camera;
+    node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
     fldCamSetLeng();
 }
@@ -374,10 +366,10 @@ void resetCamNormal2(void) {
     tgt.x = eyeBase.x - (eyeBase.x - hitpos[0]) / len * fldCamHeight;
     tgt.y = eyeBase.y - (eyeBase.y - hitpos[1]) / len * fldCamHeight;
     tgt.z = eyeBase.z - (eyeBase.z - hitpos[2]) / len * fldCamHeight;
-    dds3SetPosPoseSet(control->camera, &tgt);
+    dds3SetPosPoseSet(control->handle, &tgt);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
     SDF_VU0_COPYVECTOR(fldCamTarget, &tgt);
-    node = control->camera;
+    node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
     fldCamSetLeng();
 }
@@ -423,8 +415,8 @@ void fldCamUpdateFollow(void) {
     farPoint.f[2] = fldCamPhokanTgtX[2] * ratio + fldCamPhokanTgtX[2] * remaining;
     SDF_VU0_COPYVECTOR(D_002FC9C0, &nearPoint);
     SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
-    dds3SetPosPoseSet(control->camera, (const sdfVector4_t *)&farPoint.q);
-    node = control->camera;
+    dds3SetPosPoseSet(control->handle, (const sdfVector4_t *)&farPoint.q);
+    node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
     fldCamPhokanState++;
     if (fldCamPHokanMode < fldCamPhokanState) {
@@ -487,7 +479,7 @@ void calcCamNormal(void) {
     nearPoint.x = D_002FC9C0[0] + (nearPoint.x - D_002FC9C0[0]) / divisorX;
     nearPoint.y = D_002FC9C0[1] + (nearPoint.y - D_002FC9C0[1]) / divisorY;
     nearPoint.z = D_002FC9C0[2] + (nearPoint.z - D_002FC9C0[2]) / divisorX;
-    dds3CameraObjectBasicGetCameraTM(control->camera, &nearPoint);
+    dds3CameraObjectBasicGetCameraTM(control->handle, &nearPoint);
     referencePoint.x = fldGlobalBase.x;
     referencePoint.y = fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight;
     referencePoint.z = fldGlobalBase.z;
@@ -508,7 +500,7 @@ void calcCamNormal(void) {
     } else {
         fldCamDist = fldCamDirLock = 0.0f;
     }
-    dds3SetPosPoseSet(control->camera, &farPoint);
+    dds3SetPosPoseSet(control->handle, &farPoint);
     SDF_VU0_COPYVECTOR(&referenceCopy, &referencePoint);
     SDF_VU0_COPYVECTOR(&farCopy, &farPoint);
     if (fldCamHeight > D_0054ECA0) {
@@ -567,10 +559,10 @@ void calcCamNormal(void) {
     farPoint.y = fy;
     fz = fldCamTarget[2] + (fz - fldCamTarget[2]) / divisorZ;
     farPoint.z = fz;
-    dds3SetPosPoseSet(control->camera, &farPoint);
+    dds3SetPosPoseSet(control->handle, &farPoint);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &nearPoint);
     SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
-    node = control->camera;
+    node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
     fldCamSetLeng();
 }
@@ -600,7 +592,7 @@ void calcCamDirLock(void) {
     nearPoint.x = D_002FC9C0[0] + (nearPoint.x - D_002FC9C0[0]) * 0.5f;
     nearPoint.y = D_002FC9C0[1] + (nearPoint.y - D_002FC9C0[1]) * 0.5f;
     nearPoint.z = D_002FC9C0[2] + (nearPoint.z - D_002FC9C0[2]) * 0.5f;
-    dds3CameraObjectBasicGetCameraTM(control->camera, &nearPoint);
+    dds3CameraObjectBasicGetCameraTM(control->handle, &nearPoint);
     /* Retail keeps the reference XYZ setup at +0x10 although this mode has
      * no collision query. calcCamNormal uses this same setup as a live base. */
     referencePoint.x = fldGlobalBase.x;
@@ -620,14 +612,14 @@ void calcCamDirLock(void) {
     } else {
         fldCamDist = fldCamDirLock = 0.0f;
     }
-    dds3SetPosPoseSet(control->camera, &farPoint);
+    dds3SetPosPoseSet(control->handle, &farPoint);
     farPoint.x = fldCamTarget[0] + (farPoint.x - fldCamTarget[0]) * 0.5f;
     farPoint.y = fldCamTarget[1] + (farPoint.y - fldCamTarget[1]) * 0.5f;
     farPoint.z = fldCamTarget[2] + (farPoint.z - fldCamTarget[2]) * 0.5f;
-    dds3SetPosPoseSet(control->camera, &farPoint);
+    dds3SetPosPoseSet(control->handle, &farPoint);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &nearPoint);
     SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
-    node = control->camera;
+    node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
     fldCamSetLeng();
 }
@@ -681,7 +673,7 @@ void calcCamNormalNPC(void) {
         eye.f[2] = D_0054EF74;
         eye.f[1] = D_0054EF70 + fldCamNpcTarget;
     }
-    dds3CameraObjectBasicGetCameraTM(control->camera, (const sdfVector4_t *)&eye);
+    dds3CameraObjectBasicGetCameraTM(control->handle, (const sdfVector4_t *)&eye);
     dds3GetTMPoseSet(unit->handle);
     target.f[3] = 1.0f;
     if (fldNpcCamTarget == 2) {
@@ -701,8 +693,8 @@ void calcCamNormalNPC(void) {
         target.f[1] = D_0054EF70 + D_0054EF80;
         target.f[2] = eye.f[2] + sdfCos(angle) * (fldCamNpcTarget2 + dist);
     }
-    dds3SetPosPoseSet(control->camera, (const sdfVector4_t *)&target.q);
-    node = control->camera;
+    dds3SetPosPoseSet(control->handle, (const sdfVector4_t *)&target.q);
+    node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
 }
 
@@ -732,20 +724,20 @@ void resetCamTgtPlayer(void) {
     eye.y = D_002FC9C0[1] +
                (fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight - D_002FC9C0[1]);
     eye.z = D_002FC9C0[2] + (fldGlobalBase.z - D_002FC9C0[2]);
-    dds3CameraObjectBasicGetCameraTM(control->camera, &eye);
+    dds3CameraObjectBasicGetCameraTM(control->handle, &eye);
     dds3GetTMPoseSet(unit->handle);
     target.w = 1.0f;
     target.x = fldGlobalBase.campos.x;
     target.y = fldGlobalBase.campos.y;
     target.z = fldGlobalBase.campos.z;
-    dds3SetPosPoseSet(control->camera, &target);
+    dds3SetPosPoseSet(control->handle, &target);
     target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]);
     target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]);
     target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]);
-    dds3SetPosPoseSet(control->camera, &target);
+    dds3SetPosPoseSet(control->handle, &target);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
     SDF_VU0_COPYVECTOR(fldCamTarget, &target);
-    node = control->camera;
+    node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
     dx = eye.x - target.x;
     dy = eye.y - target.y;
@@ -778,7 +770,7 @@ void fldEventUpdateEx_Unity_2(void)
     eye.x = D_002FC9C0[0] + (fldGlobalBase.x - D_002FC9C0[0]) * 0.5f;
     eye.y = D_002FC9C0[1] + (fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight - D_002FC9C0[1]) * 0.125f;
     eye.z = D_002FC9C0[2] + (fldGlobalBase.z - D_002FC9C0[2]) * 0.5f;
-    dds3CameraObjectBasicGetCameraTM(control->camera, &eye);
+    dds3CameraObjectBasicGetCameraTM(control->handle, &eye);
     dds3GetTMPoseSet(unit->handle);
     target.x = fldGlobalBase.campos.x;
     target.y = fldGlobalBase.campos.y;
@@ -893,14 +885,14 @@ void fldEventUpdateEx_Unity_2(void)
         target.x = x * inverse + bx * blend;
         target.y = y * inverse + by * blend;
     }
-    dds3SetPosPoseSet(control->camera, &target);
+    dds3SetPosPoseSet(control->handle, &target);
     target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * 0.125f;
     target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * 0.125f;
     target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * 0.125f;
-    dds3SetPosPoseSet(control->camera, &target);
+    dds3SetPosPoseSet(control->handle, &target);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
     SDF_VU0_COPYVECTOR(fldCamTarget, &target);
-    camera = control->camera;
+    camera = control->handle;
     ((s32 (*)(dds3Basic_t *))camera->basicfunction->mainprocuder)(camera);
     dx = eye.x - target.x;
     dy = eye.y - target.y;
@@ -1068,7 +1060,7 @@ void fldCamSetChaseCore(f32 divisor)
         eye.y = D_002FC9C0[1] + (eye.y - D_002FC9C0[1]) / divisor;
         eye.z = D_002FC9C0[2] + (eye.z - D_002FC9C0[2]) / divisor;
     }
-    dds3CameraObjectBasicGetCameraTM(control->camera, &eye);
+    dds3CameraObjectBasicGetCameraTM(control->handle, &eye);
     sinAngle = sdfSin(3.1399996280670166f);
     cameraIndex = fldGlobalBase.cameraParamIndex;
     target.y = y + fldCamParamTable[cameraIndex].targetHeight;
@@ -1087,8 +1079,8 @@ void fldCamSetChaseCore(f32 divisor)
         target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) / divisor;
         target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) / divisor;
     }
-    dds3SetPosPoseSet(control->camera, &target);
-    camera = control->camera;
+    dds3SetPosPoseSet(control->handle, &target);
+    camera = control->handle;
     ((s32 (*)(dds3Basic_t *))camera->basicfunction->mainprocuder)(camera);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
     SDF_VU0_COPYVECTOR(fldCamTarget, &target);
@@ -1135,15 +1127,15 @@ void fldCamUpdateChase(void) {
     eye.x = D_002FC9C0[0] + (eye.x - D_002FC9C0[0]) * 0.0625f;
     eye.y = D_002FC9C0[1] + (eye.y - D_002FC9C0[1]) * 0.0625f;
     eye.z = D_002FC9C0[2] + (eye.z - D_002FC9C0[2]) * 0.0625f;
-    dds3CameraObjectBasicGetCameraTM(control->camera, &eye);
+    dds3CameraObjectBasicGetCameraTM(control->handle, &eye);
     target.x = fldGlobalBase.x;
     target.y = fldGlobalBase.y - 200.0f;
     target.z = fldGlobalBase.z;
     target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * 0.0625f;
     target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * 0.0625f;
     target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * 0.0625f;
-    dds3SetPosPoseSet(control->camera, &target);
-    node = control->camera;
+    dds3SetPosPoseSet(control->handle, &target);
+    node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
     SDF_VU0_COPYVECTOR(fldCamTarget, &target);
@@ -1202,7 +1194,7 @@ void calcCamSyukan(void) {
     nearPoint.x = D_002FC9C0[0] + (nearPoint.x - D_002FC9C0[0]) / divisorX;
     nearPoint.y = D_002FC9C0[1] + (nearPoint.y - D_002FC9C0[1]) / divisorY;
     nearPoint.z = D_002FC9C0[2] + (nearPoint.z - D_002FC9C0[2]) / divisorZ;
-    dds3CameraObjectBasicGetCameraTM(control->camera, &nearPoint);
+    dds3CameraObjectBasicGetCameraTM(control->handle, &nearPoint);
     referencePoint.x = fldGlobalBase.x;
     referencePoint.y = fldGlobalBase.y - 140.0f;
     referencePoint.z = fldGlobalBase.z;
@@ -1224,7 +1216,7 @@ void calcCamSyukan(void) {
     } else {
         fldCamDist = fldCamDirLock = 0.0f;
     }
-    dds3SetPosPoseSet(control->camera, &farPoint);
+    dds3SetPosPoseSet(control->handle, &farPoint);
     SDF_VU0_COPYVECTOR(&referenceCopy, &referencePoint);
     SDF_VU0_COPYVECTOR(&farCopy, &farPoint);
     if (fldCamHeight > D_0054ECA0) {
@@ -1274,10 +1266,10 @@ void calcCamSyukan(void) {
     farPoint.y = fy;
     fz = fldCamTarget[2] + (fz - fldCamTarget[2]) / divisorZ;
     farPoint.z = fz;
-    dds3SetPosPoseSet(control->camera, &farPoint);
+    dds3SetPosPoseSet(control->handle, &farPoint);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &nearPoint);
     SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
-    node = control->camera;
+    node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
     fldCamLength = 0.0f;
 }
@@ -1369,7 +1361,7 @@ void *fldCamMain(void) {
 
     control = fldGetFollowCameraControl();
     unit = fldGetUnitControl();
-    if (control->camera == NULL || unit->handle == NULL) {
+    if (control->handle == NULL || unit->handle == NULL) {
         return NULL;
     }
     fldPlayerAlpOn();
@@ -1415,19 +1407,19 @@ void *fldCamMain(void) {
     if (fldNpcCamTarget) {
         fldGlobalBase.wordF8 = 1;
         if (fldNpcCamTarget == 2) {
-            dds3CameraObjectBasicSetFovy(control->camera, 50.0f * 3.14f / 180.0f);
+            dds3CameraObjectBasicSetFovy(control->handle, 50.0f * 3.14f / 180.0f);
         } else {
-            dds3CameraObjectBasicSetFovy(control->camera, 40.0f * 3.14f / 180.0f);
+            dds3CameraObjectBasicSetFovy(control->handle, 40.0f * 3.14f / 180.0f);
         }
     } else if (fldGlobalBase.mode == 0 && evtBitCheck(0xAF0)) {
         if (scrSearchScriptName(D_00531BF0)) {
-            dds3CameraObjectBasicSetFovy(control->camera,
+            dds3CameraObjectBasicSetFovy(control->handle,
                 fldCamParamTable[fldGlobalBase.cameraParamIndex].fovy * 3.14f / 180.0f);
         } else {
-            dds3CameraObjectBasicSetFovy(control->camera, 60.0f * 3.14f / 180.0f);
+            dds3CameraObjectBasicSetFovy(control->handle, 60.0f * 3.14f / 180.0f);
         }
     } else {
-        dds3CameraObjectBasicSetFovy(control->camera,
+        dds3CameraObjectBasicSetFovy(control->handle,
             fldCamParamTable[fldGlobalBase.cameraParamIndex].fovy * 3.14f / 180.0f);
     }
     if (fldGlobalBase.mode) {

@@ -10,6 +10,22 @@ typedef struct {
     s8 rotFlag;
 } fldUnitControl_t;
 
+typedef struct {
+    sdfVector4_t wideCameraOffset;
+    sdfVector4_t wideTargetOffset;
+    sdfVector4_t narrowCameraOffset;
+    sdfVector4_t narrowTargetOffset;
+    sdfVector4_t q0;
+    sdfVector4_t q1;
+    f32 rotFrame;
+    f32 rotFrameMax;
+    f32 t0;
+    f32 t1;
+    f32 lenFrame;
+    f32 lenFrameMax;
+    struct dds3Basic_t *handle;
+} fldFollowCameraControl_t;
+
 /* Field collision record shared by the hit and camera code. */
 typedef struct collision_s collision_s;
 struct collision_s {

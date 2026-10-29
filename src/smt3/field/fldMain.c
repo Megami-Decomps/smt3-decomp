@@ -255,22 +255,7 @@ extern void sdfModelOtInit(void *aModelOt, sdfGrOt_t *aOt0, sdfGrOt_t *aOt1,
                            sdfGrOt_t *aOt2, sdfGrOt_t *aOt3);
 
 
-typedef struct
-{
-    sdfVector4_t wideCameraOffset;
-    sdfVector4_t wideTargetOffset;
-    sdfVector4_t narrowCameraOffset;
-    sdfVector4_t narrowTargetOffset;
-    sdfVector4_t q0;
-    sdfVector4_t q1;
-    f32 rotFrame;
-    f32 rotFrameMax;
-    f32 t0;
-    f32 t1;
-    f32 lenFrame;
-    f32 lenFrameMax;
-    dds3Basic_t *handle;
-} fldFollowCameraControl_t;
+
 
 extern sdfGrOt_t sdfGrOtTable[];
 
