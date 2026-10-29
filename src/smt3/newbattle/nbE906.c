@@ -20,52 +20,7 @@ typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
 typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
 
-typedef struct
-{
-    sdfVector4_t orgpos;
-    sdfVector4_t orgrot;
-    sdfVector4_t pos;
-    sdfVector4_t rot;
-    sdfVector4_t center;
-    f32 r;
-    f32 h;
-    f32 cr;
-    f32 scl;
-    f32 oneshotr;
-    f32 allshotr;
-    f32 movey;
-    f32 movez;
-    s32 type;
-    u32 time;
-    u32 stat;
-    u32 flag;
-    u32 anime;
-    dds3Basic_t *basic;
-    s32 serial;
-    evtUnitHandle_t *hunit;
-    s16 partyindex;
-    s16 formindex;
-    u32 autotime;
-    effBTLSysHandle_t *badeff;
-    u32 modelcol;
-    f32 motspeed;
-    s16 motendtype;
-    s16 motenddata;
-    s16 nexthokan;
-    s16 nexthokanb;
-    s16 waitmot;
-    s16 motcate;
-    s32 reserve4;
-    NB_FILEHANDLE_T *packh;
-    char *akey;
-    s32 read_minor;
-    u32 tartime;
-    f32 range;
-    f32 addmovet;
-    f32 movet;
-    sdfVector4_t tarpos;
-    sdfVector4_t startpos;
-} nbFormation_t;
+
 
 
 
