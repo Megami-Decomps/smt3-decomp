@@ -22,7 +22,7 @@ typedef struct ragOffer_t {
     s8 custom;
     u8 reserved03;
     ragCustomUnit_t unit;
-    u8 reserved20[12];
+    ragItemReq_t requirements[3];
 } ragOffer_t;
 
 typedef char ragCustomUnitSizeCheck[(sizeof(ragCustomUnit_t) == 0x1C) ? 1 : -1];
