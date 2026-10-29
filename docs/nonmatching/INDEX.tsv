@@ -48,6 +48,7 @@ cmpDrawPanelEffQuad	code_0022C578	0x20C	128 of 131 words match	docs/nonmatching/
 campDhUpdateCursor	code_0022C578	0x248	143 of 146 words match	docs/nonmatching/code_0022C578.md	619
 campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/nonmatching/code_0022C578.md	646
 campDhDrawHeartsGauge (0x354)				docs/nonmatching/code_0022C578.md	670
+cmpUpdateListSelection (0x15C)				docs/nonmatching/code_0022C578.md	715
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/nonmatching/code_0029B780.md	5
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/nonmatching/code_0029B780.md	32
 dds3DrawConfigPanel	code_0029B780	0x258		docs/nonmatching/code_0029B780.md	56

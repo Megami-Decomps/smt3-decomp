@@ -808,8 +808,8 @@ extern fclSpriteTbl_t fclSpriteTable[];
 
 extern char D_0054FB60[];
 
-extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
-                                  s32 mode, s32 b, s32 id);
+extern void cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 unused,
+                                   s8 mode, s32 alpha, s32 ot);
 
 extern s32 cmpModelSetup(u16 a, s32 b);
 
@@ -6399,7 +6399,44 @@ void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s32 kind)
 }
 
 
+/* Exact size; 76 of 87 words match. Remaining differences schedule independent
+ * argument setup and entry instructions in a different order. */
+#ifdef NON_MATCHING
+extern void cmpDrawListFrame(s32 x, s32 y, s32 unusedZ, s32 rowHeight, s8 rows,
+                             s32 alpha, s32 ot);
+extern void cmpDrawListItemText(s32 x, s32 y, s32 color, u8 width,
+                                cmpCursorInfo_t *cursor, s32 mode, s32 alpha, s32 ot);
+
+void cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 unused,
+                           s8 mode, s32 alpha, s32 ot)
+{
+    cmpCursorInfo_t *cursor = (cmpCursorInfo_t *)list;
+    s32 x = pos->unk_00;
+    s32 y = pos->unk_04;
+    s8 difference = (s8)cursor->unk_20;
+    difference -= cursor->unk_21;
+
+    fclDrawPanelSprite(0x5101B, 0x47);
+    cmpDrawListFrame(x - 0x280, y, 0x10, *(s32 *)cursor,
+                     difference, alpha, 0x47);
+    if (mode == 3) {
+        return;
+    }
+    cmpDrawListItemText(x + 0x120, y + 0x288, 0xFFFFFF,
+                        list[0], cursor, mode, alpha, 0x47);
+    if (mode == 0) {
+        s32 blink = cmpCursorBlinkColor(alpha);
+        cmpDrawScrollBar(x, y + 0x280, 0x10, 0xA4, 0x16,
+                         blink, alpha, cursor->unk_25, cursor,
+                         (s32)cmpDrawListRowBox, 0x47);
+    } else {
+        cursor->unk_34 = 0;
+    }
+    cmpUpdateCursorSlots(cursor);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateListSelection);
+#endif
 
 /* NON_MATCHING: 2 of 42 words differ, exact size: the argument-register copy and
  * the `slt` are swapped. */
