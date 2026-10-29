@@ -990,7 +990,7 @@ void cmbAddBirthDevilToStock(datUnitWork_t *units, u8 count)
     }
     cmbCopyCustomDevilToStock((datUnitWork_t *)CMB_GBWK->birthPanel + 1,
                             (datUnitWork_t *)CMB_GBWK->birthPanel);
-    if ((s8)CMB_GBWK->birthPanel[0x2C5] == 0) {
+    if (CMB_GBWK->birthVariant == 0) {
         ((datUnitWork_t *)CMB_GBWK->birthPanel + 1)->id = 0;
     } else {
         cmbCopyCustomDevilToStock((datUnitWork_t *)CMB_GBWK->birthPanel,
@@ -999,7 +999,7 @@ void cmbAddBirthDevilToStock(datUnitWork_t *units, u8 count)
     cmbAddCustomDevilToStock((datUnitWork_t *)CMB_GBWK->birthPanel, (cmbUnit_t *)units, count);
     fclEncycRegist((datUnitWork_t *)CMB_GBWK->birthPanel, 0);
     if (datDevilTable[((datUnitWork_t *)CMB_GBWK->birthPanel)->id].race == 0x26 &&
-        (s8)CMB_GBWK->birthPanel[0x2C4] != 2) {
+        CMB_GBWK->birthKind != 2) {
         datAddItem(cmbGetSpecialItemId(), -1);
     }
 }
@@ -1037,10 +1037,10 @@ s32 cmbCalcIntroduce(void)
     if (cmbChkPolygonMovie() != 0) {
         return 0;
     }
-    if (CMB_GBWK->actionFrame != 0 && (s8)CMB_GBWK->birthPanel[0x2C5] != 0) {
+    if (CMB_GBWK->actionFrame != 0 && CMB_GBWK->birthVariant != 0) {
         cmbUpdateIntroduceModel(&CMB_GBWK->actionData[3]);
         cmbRunActionSe(0, 1);
-        CMB_GBWK->birthPanel[0x2C5] = 0;
+        CMB_GBWK->birthVariant = 0;
     }
     if (CMB_GBWK->actionFrame < 150) {
         return 0;
@@ -3037,7 +3037,7 @@ extern void cmpDrawStatusComEx(datUnitWork_t *unit, u8 alpha, s8 kind, s8 mode,
 void cmbDrawBirthDevil(s32 hideRibbon)
 {
     datUnitWork_t *selected = cmbGetBirthDevilPanel();
-    s32 type = (s8)CMB_GBWK->birthPanel[0x2C4];
+    s32 type = CMB_GBWK->birthKind;
 
     if (type == 12 && CMB_GBWK->stockSlot[2].index >= 0) {
         type = 8;
@@ -4744,7 +4744,7 @@ void cmbUpdateCameraPos(void)
     s32 index;
 
     memset(mark, 0, sizeof(mark));
-    index = (s8)CMB_GBWK->birthPanel[0x2C5] == 0 ? 3 : 4;
+    index = CMB_GBWK->birthVariant == 0 ? 3 : 4;
     if ((__SIZE_TYPE__)CMB_GBWK + (__SIZE_TYPE__)&((cmbGbWork_t *)0)->cameraPosition == 0) {
         return;
     }
@@ -4944,10 +4944,10 @@ void cmbSetActionWorkValues(void)
     } else {
         fclSetWorkValue(2, 0);
     }
-    fclSetWorkValue(3, (s8)CMB_GBWK->birthPanel[0x2C5]);
+    fclSetWorkValue(3, CMB_GBWK->birthVariant);
     if (datDevilTable[((datUnitWork_t *)CMB_GBWK->birthPanel)->id].race != 0x26) {
         fclSetWorkValue(7, 0);
-    } else if ((s8)CMB_GBWK->birthPanel[0x2C4] != 2) {
+    } else if (CMB_GBWK->birthKind != 2) {
         fclSetWorkValue(7, cmbGetSpecialItemId());
     } else {
         fclSetWorkValue(7, -1);
@@ -5202,7 +5202,7 @@ void cmbUpdateAction(void)
         if (cmbActionStep == 2) {
             p2sdPlaySE(0x380004, 0x7F, 0x3F);
         }
-        if ((s8)CMB_GBWK->birthPanel[0x2C5] != 0) {
+        if (CMB_GBWK->birthVariant != 0) {
             cmbUpdateIntroduceModel(&CMB_GBWK->actionData[4]);
             cmbActionExists(&CMB_GBWK->actionData[3]);
             cmbRunActionSe(1, 1);
