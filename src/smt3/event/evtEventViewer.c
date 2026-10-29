@@ -2,6 +2,8 @@
 #include "basic.h"
 #include "event.h"
 #include "effect.h"
+#include "kernel_draw.h"
+#include "ps2asm.h"
 #include "kernel.h"
 #include "model.h"
 #include "motion.h"
@@ -1732,7 +1734,92 @@ s32 EnterEventPos(void)
     return 0;
 }
 
+#ifdef NON_MATCHING
+/* The viewer copies these records through pointers with no alignment guarantee. */
+typedef struct __attribute__((packed)) { dds3Effect_Blur_t value; } evtBlurCopy_t;
+typedef struct __attribute__((packed)) { dds3Effect_PartialMultiBlurParam_t value; } evtMultiBlurCopy_t;
+typedef struct __attribute__((packed)) { dds3Effect_DistortionBlurParam_t value; } evtDistBlurCopy_t;
+typedef struct __attribute__((packed)) { dds3Effect_RippleBlurParam_t value; } evtRippleBlurCopy_t;
+typedef struct __attribute__((packed)) { dds3Effect_Filter_t value; } evtFilterCopy_t;
+typedef struct __attribute__((packed)) { dds3Effect_PartialMultiFilterParam_t value; } evtMultiFilterCopy_t;
+
+extern dds3LightState_t dds3LightParam;
+extern f32 sdfFaceDivSoften, sdfFaceDivBias;
+extern dds3Effect_PartialMultiBlurParam_t *mblurGetParam(void);
+extern dds3Effect_DistortionBlurParam_t *dblurGetParam(void);
+extern dds3Effect_RippleBlurParam_t *rblurGetParam(void);
+extern dds3Effect_Filter_t *dblurGetParam2(void);
+extern dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void);
+
+s32 EnterData(void)
+{
+    evtFrameInfo_t *frame = evtGetSelectFrameInfo();
+    evtViewerInfo_t *viewer = viewerinfo;
+    evtViewerInfo_t *volatile *currentViewer = &viewerinfo;
+    void *destination;
+    pmdSceneFogTable_t *fog;
+
+    switch (viewer->framelist_target->type) {
+    case 10:
+        if (viewer->framelist_type == 13) {
+            sdf3DLight_t *light = dds3LightParam.parallel[0];
+            pmdSceneLightTable_t *sceneLight = frame->work;
+            SDF_VU0_COPYVECTOR(sceneLight->color, &light->color);
+            SDF_VU0_COPYVECTOR(sceneLight->direction, &light->v);
+            SDF_VU0_COPYVECTOR(sceneLight->ambient, &dds3LightParam.ambient);
+        } else if (viewer->framelist_type == 14) {
+            frame->param.sf[0] = sdfFaceDivSoften;
+            frame->param.sf[1] = sdfFaceDivBias;
+            viewer = *currentViewer;
+        }
+        break;
+    case 11:
+        fog = frame->work;
+        viewer = *currentViewer;
+        fog->fog.vec[0] = dds3LightParam.fog.fogMin;
+        fog->fog.color = dds3LightParam.fog.color;
+        fog->fog.vec[1] = dds3LightParam.fog.fogMax;
+        fog->fog.vec[2] = dds3LightParam.fog.fogNear;
+        fog->fog.vec[3] = dds3LightParam.fog.fogFar;
+        break;
+    case 13:
+        destination = frame->work;
+        *(volatile evtBlurCopy_t *)destination = *(volatile evtBlurCopy_t *)&evtGetUnityCalcArea()->source;
+        viewer = *currentViewer;
+        break;
+    case 14:
+        destination = frame->work;
+        *(volatile evtMultiBlurCopy_t *)destination = *(volatile evtMultiBlurCopy_t *)mblurGetParam();
+        viewer = *currentViewer;
+        break;
+    case 15:
+        destination = frame->work;
+        *(volatile evtDistBlurCopy_t *)destination = *(volatile evtDistBlurCopy_t *)dblurGetParam();
+        viewer = *currentViewer;
+        break;
+    case 23:
+        destination = frame->work;
+        *(volatile evtRippleBlurCopy_t *)destination = *(volatile evtRippleBlurCopy_t *)rblurGetParam();
+        viewer = *currentViewer;
+        break;
+    case 16:
+        destination = frame->work;
+        *(volatile evtFilterCopy_t *)destination = *(volatile evtFilterCopy_t *)dblurGetParam2();
+        viewer = *currentViewer;
+        break;
+    case 17:
+        destination = frame->work;
+        *(volatile evtMultiFilterCopy_t *)destination = *(volatile evtMultiFilterCopy_t *)mfilterGetParam();
+        viewer = *currentViewer;
+        break;
+    }
+    evtRunFrame(viewer->nowframe);
+    PopMenu();
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "event/evtEventViewer", EnterData);
+#endif
 
 extern s16 winoff_x;
 extern s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y);
