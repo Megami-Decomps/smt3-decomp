@@ -751,16 +751,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetTargetSkill);
 #endif
 
 #ifdef NON_MATCHING
-typedef struct {
-    s8 skillattr;
-    s8 type;
-    s16 index;
-    u16 keisyoform;
-    s8 capacity;
-    u8 flag;
-} nbSkillAttr_t;
-
-extern nbSkillAttr_t attr[];
+extern datSkill_t attr[];
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
 extern char D_00544170[];
 
@@ -770,7 +761,7 @@ void nbSetNormalSkill0(datUnitWork_t *work)
 {
     datNormalSkill_t *skill;
     datNormalSkillVisual_t *visual;
-    nbSkillAttr_t *skillattr;
+    datSkill_t *skillattr;
     s32 attackattr;
     u32 attackcnt;
     s32 index;

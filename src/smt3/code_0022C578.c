@@ -9660,17 +9660,9 @@ u8 cmp_242998(s32 id)
     return data[0];
 }
 
-typedef struct
-{
-    /* 0x00 */ s8 skillattr;
-    /* 0x01 */ s8 type;
-    /* 0x02 */ s16 index;
-    /* 0x04 */ u16 keisyoform;
-    /* 0x06 */ s8 capacity;
-    /* 0x07 */ u8 flag;
-} cmbSkillAttr_t;
 
-extern cmbSkillAttr_t attr[];
+
+extern datSkill_t attr[];
 
 s32 func_002429C0(void)
 {

@@ -269,6 +269,16 @@ typedef struct datUnitVisual_t
     u8 unk182[0x18E];
 } datUnitVisual_t;
 
+typedef struct datSkill_t
+{
+    s8 skillattr;
+    s8 type;
+    s16 index;
+    u16 keisyoform;
+    s8 capacity;
+    u8 flag;
+} datSkill_t;
+
 typedef struct
 {
     u8 flag;

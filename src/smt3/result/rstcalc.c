@@ -1704,16 +1704,6 @@ s32 cmbFindEvoEntry(u16 devilId)
     return 1;
 }
 
-typedef struct
-{
-    s8 skillattr;
-    s8 type;
-    s16 index;
-    u16 keisyoform;
-    s8 capacity;
-    u8 flag;
-} datSkill_t;
-
 extern datSkill_t attr[];
 
 #ifdef NON_MATCHING

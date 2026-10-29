@@ -57,15 +57,7 @@ extern s32 printf(const char *fmt, ...);
 extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 extern s32 fclEncycRegist(datUnitWork_t *work, s32 overwrite);
 extern s32 datBossRashGetRec(s32 eid, s32 type);
-typedef struct
-{
-    /* 0x00 */ s8 skillattr;
-    /* 0x01 */ s8 type;
-    /* 0x02 */ s16 index;
-    /* 0x04 */ u16 keisyoform;
-    /* 0x06 */ s8 capacity;
-    /* 0x07 */ u8 flag;
-} datSkill_t;
+
 
 extern datSkill_t attr[];
 

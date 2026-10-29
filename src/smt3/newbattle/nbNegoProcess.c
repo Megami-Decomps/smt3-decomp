@@ -729,8 +729,7 @@ s32 nbGetNegoTuikaRequestType(s32 tuikareqtype)
 }
 
 #ifdef NON_MATCHING
-typedef struct { s8 skillattr; s8 type; s16 index; u16 keisyoform; s8 capacity; u8 flag; } nbSkillAttr_t;
-extern nbSkillAttr_t attr[];
+extern datSkill_t attr[];
 extern nbNegoSkillEntry_t D_003E1338[];
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t *party);
 extern s32 datCheckTalk(datUnitWork_t *work);

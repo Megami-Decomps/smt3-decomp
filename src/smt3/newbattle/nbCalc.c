@@ -243,16 +243,6 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-typedef struct
-{
-    s8 skillattr;
-    s8 type;
-    s16 index;
-    u16 keisyoform;
-    s8 capacity;
-    u8 flag;
-} datSkill_t;
-
 /* Only the fields this unit touches are named; the entry is 38 bytes. */
 typedef struct
 {

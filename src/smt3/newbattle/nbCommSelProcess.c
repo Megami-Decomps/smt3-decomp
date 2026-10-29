@@ -1444,16 +1444,7 @@ void nbCommSelShutdown(dds3ProcessID_t *id)
     sdfMemFreeDirect(s->handle);
 }
 
-/* Native eight-byte skill attributes, also consumed by datCalc and nbCalc. */
-typedef struct {
-    s8 skillattr;
-    s8 type;
-    s16 index;
-    u16 keisyoform;
-    s8 capacity;
-    u8 flag;
-} nbCommSkillAttr_t;
-extern nbCommSkillAttr_t attr[];
+extern datSkill_t attr[];
 
 /* The native inventory scan uses eight-byte item rows; no table extent
  * is inferred from its 160 inventory slots. */
