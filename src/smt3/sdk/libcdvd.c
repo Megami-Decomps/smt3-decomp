@@ -508,4 +508,51 @@ s32 sceCdStStat(void)
     return sceCdStream(0, 0, 0, 6, D_00598ED8);
 }
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdStream);
+typedef struct cdvdStreamRequest_t {
+    u32 lsn;
+    u32 sectors;
+    void *buffer;
+    s32 command;
+    u8 mode[3];
+    u8 opaque13;
+} cdvdStreamRequest_t;
+extern cdvdStreamRequest_t D_0052A100 __attribute__((section(".data")));
+extern s32 _sceCd_ncmd_prechk(s32 command);
+
+s32 sceCdStream(u32 lsn, u32 sectors, void *buf, s32 cmd, void *arg)
+{
+    cdvdStreamRequest_t *request = &D_0052A100;
+    u8 *mode = arg;
+    s32 result;
+
+    if (_sceCd_ncmd_prechk(15) == 0) {
+        return 0;
+    }
+    if (D_0052A010 > 0) {
+        scePrintf("call cdreadstm call\n");
+    }
+    D_0052A100.lsn = lsn;
+    request->sectors = sectors;
+    request->buffer = buf;
+    request->command = cmd;
+    if (mode != NULL) {
+        request->mode[0] = mode[0];
+        request->mode[1] = mode[1];
+        request->mode[2] = mode[2];
+    }
+    if (D_0052A010 > 0) {
+        scePrintf("call cdreadstm cmd\n");
+    }
+    sceSifWriteBackDCache(request, 0x14);
+    if (sceSifCallRpc(D_0052B1D0, 9, 0, request, 0x14,
+                      &D_0052A080, 4, NULL, NULL) < 0) {
+        SignalSema(cdvdNcmdSema);
+        return 0;
+    }
+    if (D_0052A010 > 0) {
+        scePrintf("cdread end\n");
+    }
+    result = *UNCACHED(&D_0052A080);
+    SignalSema(cdvdNcmdSema);
+    return result;
+}
