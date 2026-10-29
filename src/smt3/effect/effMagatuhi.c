@@ -643,11 +643,11 @@ u32 dds3MagatuhiGetType(dds3MagatuhiPar_tag *hMagaPar);
 /* Native node type-three condition slot: accept with the constant result one. */
 u32 dds3MagatuhiParIsActive(void);
 /* Node set-vector slot: invoke optional subtype callback A; preserve the one-formal surface. */
-void dds3MagatuhiParSetPosition(dds3MagatuhiPar_tag *work);
+void dds3MagatuhiParSetPosition(dds3MagatuhiPar_tag *work, void *pPos);
 /* Node set-matrix slot: invoke optional subtype callback B; preserve the one-formal surface. */
-void dds3MagatuhiParSetRotateMatrix(dds3MagatuhiPar_tag *work);
+void dds3MagatuhiParSetRotateMatrix(dds3MagatuhiPar_tag *work, void *pMatrix);
 /* Node parameter-word slot: invoke optional subtype callback C; preserve the one-formal surface. */
-void dds3MagatuhiParSetRGBA(dds3MagatuhiPar_tag *work);
+void dds3MagatuhiParSetRGBA(dds3MagatuhiPar_tag *work, u32 abgr);
 /* Store the low byte of slotValue at the type-specific subslot.
    Types two through four share the same location; other types are left unchanged. */
 void dds3MagatuhiParSetByType(dds3MagatuhiPar_tag *work, s32 slotValue);
@@ -2168,30 +2168,30 @@ u32 dds3MagatuhiParIsActive(void) {
     return 1;
 }
 
-/* Node set-vector slot: invoke optional subtype callback A; preserve the one-formal surface. */
-void dds3MagatuhiParSetPosition(dds3MagatuhiPar_tag *work) {
-    void (*handler)(void *) = D_0032004C[work->type].handler;
+/* Node set-vector slot: invoke optional subtype callback A with the position. */
+void dds3MagatuhiParSetPosition(dds3MagatuhiPar_tag *work, void *pPos) {
+    void (*handler)(void *, void *) = (void (*)(void *, void *))D_0032004C[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->pHandle);
+        handler(work->pHandle, pPos);
     }
 }
 
-/* Node set-matrix slot: invoke optional subtype callback B; preserve the one-formal surface. */
-void dds3MagatuhiParSetRotateMatrix(dds3MagatuhiPar_tag *work) {
-    void (*handler)(void *) = D_00320054[work->type].handler;
+/* Node set-matrix slot: invoke optional subtype callback B with the matrix. */
+void dds3MagatuhiParSetRotateMatrix(dds3MagatuhiPar_tag *work, void *pMatrix) {
+    void (*handler)(void *, void *) = (void (*)(void *, void *))D_00320054[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->pHandle);
+        handler(work->pHandle, pMatrix);
     }
 }
 
-/* Node parameter-word slot: invoke optional subtype callback C; preserve the one-formal surface. */
-void dds3MagatuhiParSetRGBA(dds3MagatuhiPar_tag *work) {
-    void (*handler)(void *) = D_00320050[work->type].handler;
+/* Node parameter-word slot: invoke optional subtype callback C with the colour. */
+void dds3MagatuhiParSetRGBA(dds3MagatuhiPar_tag *work, u32 abgr) {
+    void (*handler)(void *, u32) = (void (*)(void *, u32))D_00320050[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->pHandle);
+        handler(work->pHandle, abgr);
     }
 }
 
