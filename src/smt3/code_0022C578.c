@@ -5562,7 +5562,54 @@ void cmpDrawStatusBars(s32 x, s32 y, u8 *alpha)
     fclDrawSpriteRes(x << 4, y << 3, 0, colors, 1, 11, D_00345D88, fclSpriteTable, 0x47);
 }
 
+#ifdef NON_MATCHING
+void cmpDrawSkillRowText(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
+                         s32 mode, s8 *count)
+{
+    s32 row;
+    s32 col;
+    s32 i;
+
+    if ((unit->flag & 4) != 0 && cmbGlobalWork->equipHearts == 0) {
+        fclDrawSpriteRes(x * 16, y * 8 + 4, 0, colors, 1, 0xC,
+                         D_00345D88, fclSpriteTable, 0x47);
+        fclDrawSpriteRes(x * 16, y * 8 + 4, 0, colors, 1, 0xD,
+                         D_00345D88, fclSpriteTable, 0x47);
+        fclDrawSpriteRes(x * 16, y * 8 + 4, 0, colors, 1, 0xE,
+                         D_00345D88, fclSpriteTable, 0x47);
+        fclDrawSpriteRes(x * 16, y * 8 + 4, 0, colors, 1, 0xF,
+                         D_00345D88, fclSpriteTable, 0x47);
+    } else {
+        s32 alpha = colors != NULL ? *(u8 *)colors : 0x80;
+        cmpDrawBoxF(x * 16, (y + 0x136) * 8, 0, 0x200, 0x61,
+                    alpha * 13 / 64, 0x47);
+    }
+    for (row = 0; row < 4; row++) {
+        s32 sprite = row < 3 ? 1 : 2;
+        for (col = 0; col < 2; col++) {
+            fclDrawSpriteRes(x * 16 + col * 0x740, (y + row * 0x16) * 8,
+                             0, colors, 5, sprite, D_00345D88, fclSpriteTable, 0x47);
+        }
+    }
+    for (i = 0; i < *count; i++) {
+        s32 column = i / 4;
+        s32 line = i % 4;
+        s32 xOffset = column * 116;
+        s32 yOffset = line * 22;
+
+        fclDrawSpriteRes((x + xOffset) * 16, (y + yOffset) * 8, 0, colors,
+                         5, 3, D_00345D88, fclSpriteTable, 0x47);
+        if (mode == 4) {
+            fclDrawPanelSprite2(0x48, 0x47);
+            cmpDrawBoxF((xOffset + 0x101) * 16, (yOffset + 0x13C) * 8,
+                        0, 0x71, 0x12, 0x171580, 0x47);
+            fclDrawPanelSprite2(0x44, 0x47);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillRowText);
+#endif
 
 extern s8 D_00551FB9;
 extern volatile s32 cmpStatusAnimLive[] asm("cmpStatusAnimCount");
