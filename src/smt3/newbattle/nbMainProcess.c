@@ -645,7 +645,103 @@ void nbDebugMainProcess(nbMainProcessData_t *data)
 }
 
 
+extern char D_005433C8[], D_005433D8[], D_005433F0[], D_00543408[], D_00543420[];
+extern char D_00551098[], D_005510A0[], D_005510A8[], D_005510B0[];
+
+#ifdef NON_MATCHING
+void DebugDisp2(nbMainProcessData_t *data)
+{
+    sdfDrawTag_t *tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    nbParty_t *party;
+    volatile nbFormation_t *form;
+    s32 i;
+    s32 glyph;
+    u32 stat;
+    s32 attr;
+    nbEventProcessData_t *event;
+    dds3ProcessID_t *eventProcess;
+
+    sdfDrawTagInit(tag);
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x80A0, 0xFFFF80, 0,
+                                            D_005433C8, data->playerpcnt,
+                                            data->enemypcnt, data->activeunit));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x8100, 0xFFFF80, 0xE,
+                                            D_005433D8));
+
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x8160, 0xFFFF80, 0xE,
+                                            D_00551098));
+    for (i = 0; i < 14; i++) {
+        s32 formindex;
+        u16 flags;
+
+        party = data->party;
+        flags = party[i].flag;
+        glyph = '.';
+        if (flags & 1) {
+            if (flags & 8) {
+                glyph = '!';
+            } else {
+                formindex = party[i].formindex;
+                glyph = formindex < 10 ? formindex + 0x30 : formindex + 0x37;
+            }
+        }
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7280 + i * 0xC0, 0x8160,
+                                                0xFFFF80, 0, D_005510A0, glyph));
+    }
+
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x81C0, 0xFFFF80, 0xE,
+                                            D_005510A8));
+    for (i = 0; i < 16; i++) {
+        form = data->form + i;
+        stat = form->stat;
+        glyph = '.';
+        if (stat & 1) {
+            if (stat & 0x40) {
+                s32 partyindex = form->partyindex;
+                glyph = partyindex < 10 ? partyindex + 0x30 : partyindex + 0x37;
+            } else {
+                glyph = '-';
+            }
+        }
+        attr = 0;
+        if (stat & 1) {
+            attr = (form->stat & 2) ? 4 : 0;
+        }
+        if ((form->stat & 0x700) == 0) {
+            attr = 2;
+        }
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7280 + i * 0xC0, 0x81C0,
+                                                0xFFFF80, attr, D_005510A0, glyph));
+    }
+
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x8220, 0xFFFF80, 0xE,
+                                            D_005510B0));
+    for (i = 0; i < 12; i++) {
+        s32 order = data->order[i];
+        s32 selected = data->orderindex;
+
+        glyph = order < 0 ? '.' : (order < 10 ? order + 0x30 : order + 0x37);
+        attr = i == selected ? 4 : 0;
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7280 + i * 0xC0, 0x8220,
+                                                0xFFFF80, attr, D_005510A0, glyph));
+    }
+
+    eventProcess = data->EventProcessID;
+    if (eventProcess != NULL) {
+        event = dds3GetProcessData(eventProcess);
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x82E0, 0xFFFF80, 0,
+                                                D_005433F0, event->time));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x8340, 0xFFFF80, 0,
+                                                D_00543408, event->seq));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x83A0, 0xFFFF80, 0,
+                                                D_00543420, event->seqtime));
+    }
+
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMainProcess", DebugDisp2);
+#endif
 
 s32 CheckActionProcessEnd(nbMainProcessData_t *data)
 {
