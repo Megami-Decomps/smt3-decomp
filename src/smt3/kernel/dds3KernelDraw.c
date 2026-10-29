@@ -327,7 +327,7 @@ void sdfDrawTagInit(sdfDrawTag_t *a);
 void sdfDrawTagLink(sdfDrawTag_t *aTag, void *aPacket);
 void *sdf2DMakeStdPacket(void *aPacket, s32 aLeng);
 s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
-void sdf2DMakePrimPacketHeader(void *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s32 aGifRegs, s32 aNumOfPrim);
+sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s64 aGifRegs, s32 aNumOfPrim);
 void *sdf2DGetPrimPtr(void *aPacketPtr);
 void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 void sdfPrimLinkGt4(sdfDrawTag_t *aTag, s32 aPrim,
