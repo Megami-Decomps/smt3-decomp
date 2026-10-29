@@ -570,7 +570,7 @@ extern s32 effBTLModelGetID(effPCPBossUnit_t *pFormation);
 extern u128 *effPCP_ThunderPolyListGetParam(void *pTPolyList);
 extern void effPCP_ThunderPolyListDraw(void *hData);
 extern void effPCP_ThunderPolyListSetColor(void *hData, u32 abgr);
-extern void nbPanelFlashInit(void *pFlash, s32 scale_x, s32 scale_y, s32 abgr, f32 abgr_c, f32 addX, s32 addY);
+extern void nbPanelFlashInit(void *pFlash, u32 color0, u32 color1, s32 x, f32 scaleX, f32 scaleY, s32 y);
 extern void nbPanelFlashDraw(void *pFlash, u32 abgrBase);
 extern void effBTLModelGetSphereCenter(void *pFormation);
 extern void *effBTLSkillGetTargetFormation(s32 number);
