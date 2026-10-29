@@ -426,3 +426,38 @@ a specific alias-analysis or strength-reduction decision.
 
 Reproduce with
 `tools/cc1probe.sh src/smt3/sdk/libgcc.c --func libc_2D1EA8 --alloc --loops --no-dumps --out /tmp/fde-vector-merge`.
+
+## Retain qsort comparison and span scratch
+
+`sdk/libc::qsort` matches all 2,540 bytes, with the complete libc owner at
+75 matches and no differences. It uses median-of-three selection for counts
+8 through 40, nine samples above 40, equal-key bands, an insertion fallback,
+left recursion and right tail iteration. The swap helper is a genuine repeated
+operation: aligned records use 64-bit words, other records use bytes. Its signed
+32-bit byte parameter is converted back to unsigned before initializing the
+64-bit loop count, preserving the caller's count bit pattern.
+
+The signed `scratch` holds comparator results during partitioning and byte
+spans afterward. These live values have disjoint lifetimes; each span is defined
+before use, the no-swap path returns, and the local's address never escapes.
+Independent semantic review confirmed the conversions, comparator evaluation
+order, signed first minimum, unsigned second minimum (from `size`), and unsigned
+recursive counts. No extra operation or lifetime extension connects the phases.
+
+Qualified allocation/scheduling traces use pinned cc1
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`,
+with plain/probed and hooked/unhooked output parity. The deciding property is
+shared pseudo ownership in global allocation: pseudo 98 receives comparator
+results at UIDs 658 and 793, then byte spans at UIDs 1213 and 1303. It has 76
+references, live length 38, a $5 preference, conflicts with $2/$3, and receives
+$5. Splitting comparison and span locals leaves 33 of 635 words different at
+the same native extent. In that qualified control, comparator pseudo 98 has
+24 references, live length 6, a $2 copy preference and receives $2; span pseudo
+99 independently receives $5. The shared source restores the native copies
+and consumers without register constraints.
+
+Reproduce with `tools/cc1probe.sh src/smt3/sdk/libc.c --func qsort --alloc
+--sched --no-dumps --maxlines 6000 --out <output>`. For the control, split
+`scratch` into `order` in the partition loops and `span` after the insertion
+fallback. Keep the repeated inline swap helper: expanding it as a macro instead
+leaves 111 words different, including the exchanged width/end-pointer registers.

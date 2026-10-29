@@ -499,7 +499,147 @@ s32 puts(const char *s) {
     return _puts_r(_impure_ptr, s);
 }
 
-INCLUDE_ASM(const s32, "sdk/libc", qsort);
+typedef s32 (*qsortCompare_t)(const void *, const void *);
+
+static inline char *qsortMedian3(char *a, char *b, char *c, qsortCompare_t compare)
+{
+    return compare(a, b) < 0 ?
+        (compare(b, c) < 0 ? b : (compare(a, c) < 0 ? c : a)) :
+        (compare(b, c) > 0 ? b : (compare(a, c) < 0 ? a : c));
+}
+
+static inline void qsortSwapRange(char *first, char *second, s32 bytes, s32 swapType)
+{
+    if (swapType < 2) {
+        s64 remaining = (u32)bytes / sizeof(s64);
+        s64 *left = (s64 *)first;
+        s64 *right = (s64 *)second;
+        do {
+            s64 temporary = *left;
+            *left++ = *right;
+            *right++ = temporary;
+        } while (--remaining > 0);
+    } else {
+        s64 remaining = (u32)bytes;
+        char *left = first;
+        char *right = second;
+        do {
+            char temporary = *left;
+            *left++ = *right;
+            *right++ = temporary;
+        } while (--remaining > 0);
+    }
+}
+
+#define QSORT_SWAP_ELEMENT(first, second) { \
+    if (swapType == 0) { \
+        s64 temporary = *(s64 *)(first); \
+        *(s64 *)(first) = *(s64 *)(second); \
+        *(s64 *)(second) = temporary; \
+    } else { \
+        qsortSwapRange(first, second, size, swapType); \
+    } \
+}
+
+void qsort(void *array, u32 count, u32 size, qsortCompare_t compare)
+{
+    char *base = array;
+    char *pa;
+    char *pb;
+    char *pc;
+    char *pd;
+    char *pl;
+    char *pm;
+    char *pn;
+    s32 swapType;
+    s32 swapped;
+    /* Comparator result, then byte spans; see levers/cross-block-locals.md. */
+    s32 scratch;
+    s32 sampleStep;
+
+sortLoop:
+    swapType = ((u32)base % sizeof(s64) || size % sizeof(s64)) ? 2 :
+               (size == sizeof(s64) ? 0 : 1);
+    swapped = 0;
+    if (count < 7) {
+        for (pm = base + size; pm < base + count * size; pm += size) {
+            for (pl = pm; pl > base && compare(pl - size, pl) > 0; pl -= size) {
+                QSORT_SWAP_ELEMENT(pl, pl - size);
+            }
+        }
+        return;
+    }
+    pm = base + (count / 2) * size;
+    if (count > 7) {
+        pl = base;
+        pn = base + (count - 1) * size;
+        if (count > 40) {
+            sampleStep = (count / 8) * size;
+            pl = qsortMedian3(pl, pl + sampleStep, pl + 2 * sampleStep, compare);
+            pm = qsortMedian3(pm - sampleStep, pm, pm + sampleStep, compare);
+            pn = qsortMedian3(pn - 2 * sampleStep, pn - sampleStep, pn, compare);
+        }
+        pm = qsortMedian3(pl, pm, pn, compare);
+    }
+    QSORT_SWAP_ELEMENT(base, pm);
+    pa = pb = base + size;
+    pc = pd = base + (count - 1) * size;
+    for (;;) {
+        while (pb <= pc && (scratch = compare(pb, base)) <= 0) {
+            if (scratch == 0) {
+                swapped = 1;
+                QSORT_SWAP_ELEMENT(pa, pb);
+                pa += size;
+            }
+            pb += size;
+        }
+        while (pb <= pc && (scratch = compare(pc, base)) >= 0) {
+            if (scratch == 0) {
+                swapped = 1;
+                QSORT_SWAP_ELEMENT(pc, pd);
+                pd -= size;
+            }
+            pc -= size;
+        }
+        if (pb > pc) {
+            break;
+        }
+        QSORT_SWAP_ELEMENT(pb, pc);
+        swapped = 1;
+        pb += size;
+        pc -= size;
+    }
+    if (swapped == 0) {
+        for (pm = base + size; pm < base + count * size; pm += size) {
+            for (pl = pm; pl > base && compare(pl - size, pl) > 0; pl -= size) {
+                QSORT_SWAP_ELEMENT(pl, pl - size);
+            }
+        }
+        return;
+    }
+    pn = base + count * size;
+    scratch = pa - base < pb - pa ? pa - base : pb - pa;
+    if (scratch > 0) {
+        qsortSwapRange(base, pb - scratch, scratch, swapType);
+    }
+    scratch = pd - pc < pn - pd - size ? pd - pc : pn - pd - size;
+    if (scratch > 0) {
+        qsortSwapRange(pb, pn - scratch, scratch, swapType);
+    }
+    scratch = pb - pa;
+    if ((u32)scratch > size) {
+        qsort(base, (u32)scratch / size, size, compare);
+    }
+    scratch = pd - pc;
+    if ((u32)scratch > size) {
+        base = pn - scratch;
+        count = (u32)scratch / size;
+        goto sortLoop;
+    }
+}
+
+#undef QSORT_SWAP_ELEMENT
+
 
 void *_sbrk_r(_reent *r, s32 incr) {
     void *result;
