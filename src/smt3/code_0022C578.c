@@ -3947,7 +3947,35 @@ void fclDrawArrowCursor(s32 x, s32 y, s32 z, s32 extra)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawPanel);
+void campDhDrawPanel(s32 x, s32 y, s32 unused, s32 alpha)
+{
+    s32 phase;
+    s32 colors[4];
+
+    phase = campDhDrawWork->unk_1C % 128;
+    if (phase < 16) {
+        colors[0] = 0x80808000 | (128 - phase * 4);
+    } else {
+        colors[0] = 0x80808000 | ((phase - 16) * 64 / 112 + 64);
+    }
+    colors[1] = colors[0];
+    colors[2] = colors[0];
+    colors[3] = colors[0];
+    fclDrawSpriteRes(x, y, 0, colors, 8, 0x25,
+        (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    fclDrawSpriteRes(x, y, 0, colors, 8, 0x26,
+        (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    fclDrawSpriteRes(x, y, 0, colors, 8, 0x27,
+        (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    fclDrawSpriteRes(x, y, 0, colors, 8, 0x28,
+        (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    campDhDrawBackground(x, y, 0, alpha);
+    fclDrawArrowCursor(x, y, 0, alpha);
+    if ((u8)(campDhDrawWork->flags & 1)) {
+        fclDrawArrowCursorLabel(x, y, 0, campDhDrawWork->iconIndex,
+            0, campDhDrawWork->entryStep);
+    }
+}
 
 extern const u32 D_0053FDC0[];
 extern const u32 D_0053FDD8[];
