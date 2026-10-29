@@ -771,15 +771,56 @@ s32 sceDeci2Poll(s32 handle)
     return Deci2Call(4, packet);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDeci2ExRecv);
+typedef struct deci2Transfer_t {
+    s32 handle;
+    void *buffer;
+    u32 length;
+} deci2Transfer_t;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDeci2ExSend);
+s32 sceDeci2ExRecv(s32 handle, void *buffer, u16 length)
+{
+    deci2Transfer_t packet;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDeci2ExReqSend);
+    packet.handle = handle;
+    packet.buffer = buffer;
+    packet.length = length;
+    return Deci2Call(-5, &packet);
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDeci2ExLock);
+s32 sceDeci2ExSend(s32 handle, void *buffer, u16 length)
+{
+    deci2Transfer_t packet;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDeci2ExUnLock);
+    packet.handle = handle;
+    packet.buffer = buffer;
+    packet.length = length;
+    return Deci2Call(-6, &packet);
+}
+
+s32 sceDeci2ExReqSend(s32 handle, s8 destination)
+{
+    s32 packet[2];
+
+    packet[0] = handle;
+    packet[1] = destination;
+    return Deci2Call(-7, packet);
+}
+
+s32 sceDeci2ExLock(s32 handle)
+{
+    s32 packet[1];
+
+    packet[0] = handle;
+    return Deci2Call(-8, packet);
+}
+
+s32 sceDeci2ExUnLock(s32 handle)
+{
+    s32 packet[1];
+
+    packet[0] = handle;
+    return Deci2Call(-9, packet);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", kputs);
 

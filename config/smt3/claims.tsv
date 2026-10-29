@@ -704,3 +704,4 @@ src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 SDK fn / 212 B	callback-threa
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 120 B	DECI2 close, send request and poll wrappers with native packet widths and signed destination/status contracts; complete owner 6 match, 0 differ
 src/smt3/newbattle/nbTest.c	redthing1	done	2026-10-28	1 fn / 2752 B	fourteen native AI-record copies with repeated source rows and signed post-callback mode dispatch; complete owner 14 match, 0 differ
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	2 fn / 652 B SDK	power-of-five cache scaling and signed bigint difference; qualified shared pointer/limb lifetimes; complete owner 58 match, 0 differ; multiply remains assembly
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	5 SDK fn / 224 B	DECI2 extended transfer, send request and lock wrappers; native three-word transfer packets, u16 lengths and signed destination; complete owner 11 match, 0 differ
