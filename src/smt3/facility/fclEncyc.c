@@ -904,9 +904,6 @@ typedef struct fclEncycModelLink_t {
 } fclEncycModelLink_t;
 
 extern fclEncycModelLink_t D_002F69B8[];
-extern void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
-    s8 kind, s8 detail, s8 *delta, s8 mode, u32 color, s8 show,
-    s8 option, s8 extra, s32 full);
 extern s32 cmpDrawStatusModel(void *links);
 extern void fclRbnDraw(fclRibbon_t *ribbon, s32 x, s32 y, u32 z,
     s32 alpha, s32 mode, s32 width, s32 ot);
@@ -1388,7 +1385,6 @@ void CalcPhaseReadStatus(fclEncyc_instance_tag *pinst)
 extern void DrawExplainBack(s32 alpha);
 extern void DrawReadMainHelp(fclEncyc_instance_tag *pinst);
 extern void DrawReadStatusMoney(fclEncyc_instance_tag *work);
-extern void cmpDrawStatusComEx(datUnitWork_t *unit, u8 alpha, s8 kind, s8 mode, s8 *value, s8 option, s32 color, s8 show, s8 extra, s8 full);
 #endif
 
 void DrawPhaseReadStatus(fclEncyc_instance_tag *pinst)
@@ -1562,8 +1558,6 @@ void CalcPhaseReadExplain(fclEncyc_instance_tag *pinst)
 }
 
 extern mdlObj_t *cmpGetEncycWork(void);
-extern void cmpDrawStatusComEx(datUnitWork_t *unit, u8 alpha, s8 kind, s8 mode,
-    s8 *value, s8 option, s32 color, s8 show, s8 extra, s8 full);
 extern void DrawExplainBack(s32 alpha);
 extern void DrawReadMainHelp(fclEncyc_instance_tag *pinst);
 extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);

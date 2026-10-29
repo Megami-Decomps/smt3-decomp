@@ -58,6 +58,21 @@ typedef struct
     /* 0x34 */ s32 unk_34;
 } cmpCursorInfo_t;
 
+typedef void (*cmpListRowDraw_t)(s32 x, s32 y, s32 z, u16 width, u16 height2,
+                                 u16 height, s32 color0, s32 color1, s32 color2,
+                                 s8 phase, s32 scale, s32 ot);
+
+void cmpDrawScrollBar(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
+                      s32 alpha, s8 row, cmpCursorInfo_t *cursor,
+                      cmpListRowDraw_t draw, s32 ot);
+
+struct datUnitWork_t;
+void cmpDrawStatusComEx(struct datUnitWork_t *unit, u8 alpha, s8 kind, s8 detail,
+                        s8 *delta, s8 mode, s32 color, s8 show, s8 option, s8 extra);
+void cmpDrawStatusComEx2(struct datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
+                         s8 kind, s8 detail, s8 *delta, s8 mode, u32 color,
+                         s8 show, s8 option, s8 extra, s8 full);
+
 typedef struct
 {
     s8 state;

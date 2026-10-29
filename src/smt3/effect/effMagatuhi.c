@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfDevCons.h"
 #include "libsdf.h"
 #include "ps2asm.h"
 #include "fpu.h"
@@ -461,7 +462,6 @@ extern void *dds3PrimFrameRect(s32 aX, s32 aY, u32 aZ, s32 aW, s32 aH, u32 aBgCo
 
 extern void *dds3PrimLine(s32 aX0, s32 aY0, u32 aZ0, u32 aColor0, s32 aX1, s32 aY1, u32 aZ1, u32 aColor1, s32 aMode);
 
-extern void *sdfDevPrintf(s32 x, s32 y, u32 z, u32 attributes, const char *text);
 
 extern s32 effDebugPosX;
 

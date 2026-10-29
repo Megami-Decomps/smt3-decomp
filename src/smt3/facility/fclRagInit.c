@@ -16,7 +16,6 @@ void fclFreeStage(void);
 
 extern u32 dds3GetRandA(void *state);
 
-extern s32 evtStartEvent(s32 no);
 
 extern s32 fclSetWorkValue(s8 index, s32 value);
 

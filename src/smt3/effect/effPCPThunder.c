@@ -1,4 +1,6 @@
 #include "common.h"
+#include "effPCPData.h"
+#include "effThunder.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
 #include "sdf_types.h"
@@ -454,7 +456,6 @@ extern sdfMemHandle_t *sdfMemAllocDirect(u32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void *memset(void *a, s32 b, u32 c);
-extern void *dds3EffectPCPDataGetData(void *table, s32 index);
 extern parSystem_t *dds3TrackPolyCreate(s32 number, s32 face, s32 rec, u32 type);
 extern void dds3TrackPolySetMode(parSystem_t *hTrackPoly, u16 mode);
 extern void dds3TrackPolyVCSet(parSystem_t *hTrackPoly, s32 type, u32 abgr_in, u32 abgr_out);
@@ -787,9 +788,9 @@ void effPCPThunderSpherePolyLowSetColor(effPCPThunderSpherePoly_t *hData, u32 ab
     hData->abgr = abgr;
 }
 
-void effPCPThunderSpherePolyLowSetScale(f32 hData, effPCPThunderSpherePoly_t *scale) {
-    scale->head.width = scale->width_base * hData;
-    scale->head.height = scale->height_base * hData;
+void effPCPThunderSpherePolyLowSetScale(effPCPThunderSpherePoly_t *work, f32 scale) {
+    work->head.width = work->width_base * scale;
+    work->head.height = work->height_base * scale;
 }
 
 u32 effPCPThunderSpherePolyLowGetParam(u32 pThunderPoly) {

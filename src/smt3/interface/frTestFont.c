@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr.h"
 #include "libsdf.h"
 #include "kernel.h"
 #include "font.h"
@@ -11,7 +12,6 @@ extern void *fclLoadTexture(char *pFileName);
 extern void frwLoadStaffFont(void);
 extern void frDestroyFontRequest(frFontHandle_t *pFRQ);
 extern void frCreateUserFontPacket(s32 X, s32 Y, s32 Z, frTextHandle_t *pText, s32 Ot);
-extern void scrStartScriptByName(s32 priority, char *name, s32 messageHandle);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 v2, s32 v3,
                                          dds3ProcessFunc_t processfunc,
                                          dds3ProcessFunc_t shutdownfunc, void *p);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel.h"
 #include "ps2asm.h"
 #include "fpu.h"
 #include "model.h"
@@ -497,7 +498,7 @@ extern void *effPCPHelperBEDCreate(void *pParam, void *pPBData, void *pBEDData);
 extern void effEveBEDCutSetParams(void *hEveBEDCut, const effPCPBossPlace_t *pParams);
 extern void effEveBEDCutDraw(void *hEveBEDCut);
 extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
-extern void *dds3GetProcessData(void);
+extern void *dds3GetProcessData(dds3ProcessID_t *process);
 extern u32 effBTLSkillCheckRun(void);
 extern u32 effBTLSkillGetTargetBit(void);
 extern u32 dds3GetRandIntA(void *aLimit, u32 name);
@@ -529,7 +530,7 @@ extern void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, const void 
 extern void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, const void *pPos);
 extern void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 abgr);
 extern void dds3EffectPartDraw(effPartHandle_t *hEffPart);
-s32 effPCPDANTE_Thunder_ProcessDraw(void);
+s32 effPCPDANTE_Thunder_ProcessDraw(dds3ProcessID_t *process);
 void effPCPDANTE_Thunder_SetPosition(effPCPDANTE_Thunder_tag *hData, const void *pPos);
 void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_tag *hData, const void *pRot);
 extern void *effPCPHelperBEDCopy(void *helper);
@@ -576,7 +577,6 @@ extern s32 printf(const char *format, ...);
 extern void sdfMatFreeDelayed(void *aMat);
 extern void effPCP_ThunderPolyListDelete(void *hData);
 extern void *effPCP_ThunderPolyListCreate(const effPCPBossThunderParam_t *param);
-extern void *dds3EffectPCPDataGetData(void *hData, u32 number, ...);
 extern effPCPBossThunderbolt_t *effPCPBossThunderboltCreate(effPCPBossThunderbolt_t *pParam);
 
 extern f32 effPCPBossKAGUDrawParam[4];
@@ -2443,7 +2443,7 @@ effPCPBossThunderbolt_t *effPCPBossThunderboltCreate(effPCPBossThunderbolt_t *pP
 
 effPCPBossThunderbolt_t *effPCPBossThunderboltCreatePCF(void *hData, s32 bPos, s32 tbldata)
 {
-    return effPCPBossThunderboltCreate(dds3EffectPCPDataGetData(hData, 0, tbldata));
+    return effPCPBossThunderboltCreate(dds3EffectPCPDataGetData(hData, 0));
 }
 
 effPCPBossThunderbolt_t *effPCPBossThunderboltCopy(void *hData, s32 bPos, s32 tbldata)
@@ -2546,7 +2546,7 @@ effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreate(effPCPBossKAGUInvoke_t *pPara
 
 effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreatePCF(void *hData, s32 bPos, s32 tbldata)
 {
-    return effPCPBossKAGUInvokeCreate(dds3EffectPCPDataGetData(hData, 0, tbldata));
+    return effPCPBossKAGUInvokeCreate(dds3EffectPCPDataGetData(hData, 0));
 }
 
 effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCopy(void *hData, s32 bPos, s32 tbldata)
@@ -3420,7 +3420,7 @@ effPCPBossKAGU2MUHENK_t *effPCPBossKAGU2MUHENKCreate(void *pParam)
 
 effPCPBossKAGU2MUHENK_t *effPCPBossKAGU2MUHENKCreatePCF(void *hData, s32 bPos, s32 tbldata)
 {
-    return effPCPBossKAGU2MUHENKCreate(dds3EffectPCPDataGetData(hData, 0, tbldata));
+    return effPCPBossKAGU2MUHENKCreate(dds3EffectPCPDataGetData(hData, 0));
 }
 
 effPCPBossKAGU2MUHENK_t *effPCPBossKAGU2MUHENKCopy(void *hData, s32 bPos, s32 tbldata)
@@ -3561,7 +3561,7 @@ effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCreate(void *pParam)
 
 effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCreatePCF(void *hData, s32 bPos, s32 tbldata)
 {
-    return effPCPBossMETATOBeamCreate(dds3EffectPCPDataGetData(hData, 0, tbldata));
+    return effPCPBossMETATOBeamCreate(dds3EffectPCPDataGetData(hData, 0));
 }
 
 effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCopy(void *hData, s32 bPos, s32 tbldata)
@@ -3910,9 +3910,9 @@ effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Pa
 extern void effPCPDANTE_Thunder_Draw(effPCPDANTE_Thunder_tag *hData);
 #endif
 
-s32 effPCPDANTE_Thunder_ProcessDraw(void)
+s32 effPCPDANTE_Thunder_ProcessDraw(dds3ProcessID_t *process)
 {
-    effPCPDANTE_Thunder_tag *work = dds3GetProcessData();
+    effPCPDANTE_Thunder_tag *work = dds3GetProcessData(process);
     u128 matrix[4];
     u128 position;
     void *model;
@@ -3935,7 +3935,7 @@ s32 effPCPDANTE_Thunder_ProcessDraw(void)
 
 effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_CreatePCF(void *hData, s32 bPos, s32 tbldata)
 {
-    return effPCPDANTE_Thunder_Create(dds3EffectPCPDataGetData(hData, 0, tbldata));
+    return effPCPDANTE_Thunder_Create(dds3EffectPCPDataGetData(hData, 0));
 }
 
 void effPCPDANTE_Thunder_Delete(effPCPDANTE_Thunder_tag *hData)

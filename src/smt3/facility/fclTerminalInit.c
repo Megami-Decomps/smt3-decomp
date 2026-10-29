@@ -230,7 +230,6 @@ void trmEndBGM(void)
 }
 
 #ifdef NON_MATCHING
-extern void evtStartEvent(s32 no);
 #endif
 
 s8 trmStartEvent(void)

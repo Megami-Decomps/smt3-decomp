@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr.h"
 #include "basic.h"
 #include "newdata.h"
 #include "kernel.h"
@@ -35,7 +36,6 @@ extern s32 sprintf(char *, const char *, ...);
 
 extern s32 sdfFileCheckExist(char *aFilename);
 
-extern void scrStartScriptByName(s32 handle, const char *path, s32 param);
 
 extern void scrAllReleaseScript(void);
 

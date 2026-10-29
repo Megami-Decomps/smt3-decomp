@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr.h"
 #include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -189,7 +190,6 @@ void fclScriptForcedEnd(u8 *PID)
     }
 }
 
-extern s32 scrStartScript2(s32 priority, s32 scrdata, s32 startproc);
 
 s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID)
 {
@@ -199,7 +199,7 @@ s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID)
     {
         fclScriptForcedEnd(*(u8 **)pPID);
     }
-    handle = scrStartScript2(0x7D0, pScriptData, StartNo);
+    handle = (s32)scrStartScript2(0x7D0, (void *)pScriptData, StartNo);
     fclClearFlag(0);
     if (pPID != NULL)
     {

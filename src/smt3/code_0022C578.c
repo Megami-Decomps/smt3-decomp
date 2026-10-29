@@ -243,9 +243,6 @@ typedef struct
     /* 0x00C0 */ cmpStockInfo_t info[2];
 } cmpStockWork_t;
 
-typedef void (*cmpListRowDraw_t)(s32 x, s32 y, s32 z, u16 width, u16 height2,
-                                 u16 height, s32 color0, s32 color1, s32 color2,
-                                 s8 phase, s32 scale, s32 ot);
 
 typedef struct
 {
@@ -349,7 +346,8 @@ extern s32 cmpModelHandle;
 
 extern fclRibbon_t *g_pdebug;
 
-extern void cmpDrawBoxLine();
+extern void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+                           const u32 *colors, s32 surfaceIndex);
 
 extern s32 cmpGetCursorSlotValue(s8 index, cmpCursorSlot_t *slot);
 
@@ -643,9 +641,6 @@ extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 arg);
 
 extern void fmProcTrigSequence(s32 mode);
 
-extern void cmpDrawScrollBar(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
-                             s32 alpha, s8 row, cmpCursorInfo_t *cursor,
-                             cmpListRowDraw_t draw, s32 ot);
 
 void fclDrawSpriteSize(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color, s32 id, s32 idx, s32 *texList, fclSpriteTbl_t *table, s32 OtNo);
 
@@ -4953,7 +4948,6 @@ void campDhDrawIcon(void)
 extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
 
 #ifdef NON_MATCHING
-extern void cmpDrawStatusComEx(datUnitWork_t *a, u8 alpha, s8 b, s8 c, s8 *d, s8 e, s32 color, s8 f, s8 g, s8 h);
 #endif
 
 void campDhDrawHearts(void)
@@ -6586,17 +6580,12 @@ void cmpDrawSkill(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkill);
 #endif
 
-extern void cmpDrawStatusComEx(datUnitWork_t *a, u8 alpha, s8 b, s8 c, s8 *d, s8 e, s32 color, s8 f,
-                               s8 g, s8 h);
 
 void cmpDrawStatusCom(datUnitWork_t *a, s8 b, s8 c, s8 d)
 {
     cmpDrawStatusComEx(a, 0x80, -1, 0, 0, 0, 0xA09DC380, b, c, d);
 }
 
-extern void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
-                                s8 kind, s8 detail, s8 *delta, s8 mode, u32 color,
-                                s8 show, s8 option, s8 extra, s8 full);
 
 void cmpDrawStatusComEx(datUnitWork_t *a, u8 alpha, s8 b, s8 c, s8 *d, s8 e, s32 color, s8 f, s8 g, s8 h)
 {
@@ -7440,7 +7429,7 @@ void cmp_23A360(s32 x, s32 y, s32 z, s32 w, s32 h, s32 g, s32 col)
 
 void cmpDrawPanelEffCell(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h)
 {
-    s32 pair[2];
+    u32 pair[2];
 
     pair[1] = g;
     pair[0] = g;
@@ -8577,7 +8566,7 @@ void camp_23C9C0(fclPanelPos_t *pos, s32 width, s32 gap,
 
 void camp_23CAF8(s32 x, s32 y, s32 a, s32 b, s32 color, s32 g)
 {
-    s32 pair[2];
+    u32 pair[2];
     s32 right = x + 0x200;
 
     pair[0] = color;

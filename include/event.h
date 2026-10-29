@@ -5,6 +5,8 @@
 #include "model.h"
 #include "motion.h"
 
+void evtStartEvent(s32 no);
+
 typedef struct evtFrameInfo_t {
     u16 frame;
     u16 index;
