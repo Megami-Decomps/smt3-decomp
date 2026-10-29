@@ -228,12 +228,13 @@ f32 scalbnf(f32 x, s32 n)
 
 INCLUDE_ASM(const s32, "sdk/libm", copysignf);
 
+
+#undef GET_FLOAT_WORD
+#undef SET_FLOAT_WORD
+
 INCLUDE_RODATA(const s32, "sdk/libm", D_0054B408);
 
 INCLUDE_RODATA(const s32, "sdk/libm", D_0054B414);
 
 INCLUDE_RODATA(const s32, "sdk/libm", D_0054B418);
 
-
-#undef GET_FLOAT_WORD
-#undef SET_FLOAT_WORD

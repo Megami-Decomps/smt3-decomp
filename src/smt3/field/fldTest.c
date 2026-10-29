@@ -521,8 +521,6 @@ s32 fldElvCheckEnd(void)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00530F30);
-
 #ifdef NON_MATCHING
 extern volatile s8 dds3PadButtonState[];
 
@@ -596,6 +594,8 @@ void fldElvDrawFloorNum(void)
     fldElvGetFloorDigits(380, 26, display);
 }
 #else
+INCLUDE_RODATA(const s32, "field/fldTest", D_00530F30);
+
 INCLUDE_ASM(const s32, "field/fldTest", fldElvDrawFloorNum);
 #endif
 
@@ -2670,8 +2670,6 @@ s32 fldRunEncountChk(void)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_005313E0);
-
 #ifdef NON_MATCHING
 extern fldDanteDoor_t D_002FBF00, D_002FBF10, D_002FBF20;
 extern fldDanteDoor_t D_002FBF40, D_002FBF50, D_002FBF60;
@@ -2819,6 +2817,8 @@ void fldRunDanteStanceSet(s32 stance)
     }
 }
 #else
+INCLUDE_RODATA(const s32, "field/fldTest", D_005313E0);
+
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteStanceSet);
 #endif
 INCLUDE_SDATA(const s32, "field/fldTest", gFldElvFloorNow);

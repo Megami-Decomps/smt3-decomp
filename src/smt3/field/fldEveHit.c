@@ -724,8 +724,6 @@ s32 fldEveHit_ChkOn(const char *evehitname) {
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "field/fldEveHit", D_00531E08);
-
 #ifdef NON_MATCHING
 extern fldDanteGunState_t fldRunDanteGunFlag;
 extern s32 fldEncountTestFlag(u32 flag);
@@ -940,6 +938,8 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
     }
 }
 #else
+INCLUDE_RODATA(const s32, "field/fldEveHit", D_00531E08);
+
 INCLUDE_ASM(const s32, "field/fldEveHit", fldEveHit_ChkEveHit);
 #endif
 

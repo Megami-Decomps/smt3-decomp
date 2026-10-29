@@ -8,9 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# LOAD3 and SOUND_PTNTEST are HD-only modes absent from the retail 43-entry
-# administrator table; fe9aff3d removes them from the adopted header.
-# 0 types, 1111 members, 504 adopted constants.
+# 0 types, 1094 members, 504 adopted constants.
 
 
 member _FRQ.unk00
@@ -74,7 +72,7 @@ member campWork_t.unk_0001
 member campWork_t.unk_0002
 member campWork_t.unk_0004
 member campWork_t.unk_0005
-member campWork_t.unk_0018
+member campWork_t.unk_0019
 member campWork_t.unk_410C
 member campWork_t.unk_4131
 member campWork_t.unk_6230
@@ -208,14 +206,13 @@ member cmpStockSeqInfo_t.unk_18
 member cmpStockSeqInfo_t.unk_19
 member cmpStockWork_t.unk_00AC
 member datCommentEntry_t.unk_03
-member datDevilAIData_t.unk_A0
 member datDevilAI_t.unk_00
 member datDevilAI_t.unk_A4
 member datDevilInfo_t.unk_01
 member datDevilInfo_t.unk_05
 member datDevilInfo_t.unk_06
+member datDevilInfo_t.unk_2A
 member datDevilNegoFormat_t.unk00
-member datDevilNegoFormat_t.unk10
 member datDevilNegoFormat_t.unk14
 member datDevilNegoFormat_t.unk_04
 member datDevilNegoFormat_t.unk_0A
@@ -232,7 +229,6 @@ member datPartyWork_t.unknown1928
 member datRaceEntry_t.unk_01
 member datRaceEntry_t.unk_04
 member datRaceEntry_t.unk_19
-member datRaceEntry_t.unk_3C
 member datSkillBadEntry_t.unk_00
 member datSkillBadWindow_t.unk_00
 member datSkillBadWindow_t.unk_05
@@ -250,7 +246,6 @@ member dds3GlobalWorkView_t.unk_00000
 member dds3GlobalWorkView_t.unk_01928
 member dds3GlobalWork_t.unk10
 member dds3GlobalWork_t.unk1910
-member dds3GlobalWork_t.unk1914
 member dds3GlobalWork_t.unk38
 member dds3GlobalWork_t.unk657C
 member dds3GlobalWork_t.unkA42
@@ -273,8 +268,13 @@ member dds3Spline_t.unk28
 member dds3StdDrawEnv_t.unk180
 member dds3TitleWork_t.unk_18
 member dds3TitleWork_t.unk_20
+member dds3TitleWork_t.unk_24
+member dds3TitleWork_t.unk_28
+member dds3TitleWork_t.unk_2C
 member dds3TitleWork_t.unk_30
 member dds3TitleWork_t.unk_34
+member dds3TitleWork_t.unk_38
+member dds3TitleWork_t.unk_3C
 member effBTLAimParams_t.unk03
 member effBTLCut_t.unk120
 member effBTLCut_t.unk16
@@ -310,21 +310,13 @@ member effCrackModel_t.unk00
 member effCrackMotion_t.unk00
 member effCrackMotion_t.unk24
 member effCreateHandler_t.unk4
-member effDblurWork_t.unk00
 member effDebugMenuItem_t.unk16
 member effDebugMenuItem_t.unk20
-member effDebugViewer_t.unk00
-member effDebugViewer_t.unk20
-member effDebugViewer_t.unk30
 member effDirEnt_t.unknown10
 member effDirEnt_t.unknown18
 member effDirEnt_t.unknown1C
 member effDrawBank_t.unk0000
 member effDrawSurface_t.unk00
-member effEventSetupRecord_t.unknown00
-member effEventSetupRecord_t.unknown28
-member effEventSetupRecord_t.unknown30
-member effEventSetupRecord_t.unknown3C
 member effHandle_t.unkC
 member effHandler_t.unk4
 member effLegacyInstance_t.unk00
@@ -340,7 +332,6 @@ member effPCPBossDengeki_t.unk00
 member effPCPBossHUnit_t.unk00
 member effPCPBossKAGU2Attack_t.unk00
 member effPCPBossKAGUAttack_t.unk00
-member effPCPBossKAGUAttack_t.unk58
 member effPCPBossKAGUAttack_t.unk68
 member effPCPBossKAGUThunderbolt_t.unk010
 member effPCPBossMETATOBeam_t.unk10
@@ -357,12 +348,7 @@ member effPCPBossWork_t.unk1C
 member effPCPBossWork_t.unk24
 member effPCPCrackPartFlash_t.unk11
 member effPCPCrackPart_t.unk10
-member effPCPCrack_t.unk10
-member effPCPCrack_t.unk1C
 member effPCPCrack_t.unk3A
-member effPCPCrack_t.unk3D
-member effPCPCrack_t.unk48
-member effPCPCrack_t.unk6C
 member effPCPCrack_t.unk89
 member effPCPCrack_t.unk9A
 member effPCPDANTE_Damage_tag.unk030
@@ -433,12 +419,6 @@ member fclEncyc_instance_tag.unk_84
 member fclEncyc_registconfirmwork_tag.unk_27
 member fclGlobalWorkItemInventory_t.unk_00000
 member fclItemList_t.unk_01
-member fclPanelAnim_t.unk_01
-member fclPanelAnim_t.unk_04
-member fclPanelAnim_t.unk_08
-member fclPanelAnim_t.unk_14
-member fclPanelAnim_t.unk_18
-member fclPanelAnim_t.unk_1C
 member fclPanelPos_t.unk_00
 member fclPanelPos_t.unk_04
 member fclPanelPos_t.unk_08
@@ -453,7 +433,6 @@ member fclPanel_t.unk_24
 member fclPanel_t.unk_28
 member fclPanel_t.unk_2C
 member fclPanel_t.unk_30
-member fclRagTex_t.unk00
 member fclRagTex_t.unk_00
 member fclRagTex_t.unk_01
 member fclRagTex_t.unk_04
@@ -483,6 +462,7 @@ member fldAddressProcessData_t.unk0C
 member fldAnahoriAkuma_t.unk00
 member fldAnahoriAkuma_t.unk0C
 member fldAnahoriAkuma_t.unk1B
+member fldAnahoriAkuma_t.unk6E
 member fldAreaWork_t.unk58
 member fldAreaWork_t.unkC4
 member fldAreaWork_t.unkFC
@@ -497,6 +477,8 @@ member fldBlurParam_t.unk1C
 member fldBlurParam_t.unk20
 member fldBlurParam_t.unk24
 member fldBlurParam_t.unk28
+member fldDanteGunState_t.unk48
+member fldDanteGunState_t.unk58
 member fldDanteGunWork_t.unk48
 member fldDanteGunWork_t.unk58
 member fldDanteGunWork_t.unk_00
@@ -521,16 +503,14 @@ member fldNpcSlot_t.unk08
 member fldNpcSlot_t.unk0C
 member fldNpcSlot_t.unk10
 member fldNpcSlot_t.unk24
+member fldNpcSlot_t.unk28
 member fldNpcSlot_t.unk34
 member fldNpcSlot_t.unk38
 member fldNpcSlot_t.unk3C
 member fldNpcSlot_t.unk40
-member fldNpcSlot_t.unk28
 member fldNpcSlot_t.unk44
 member fldNpcSlot_t.unk4C
 member fldNpcSlot_t.unk50
-member fldNpcSlot_t.unk54
-member fldNpcSlot_t.unk58
 member fldNpcSlot_t.unk60
 member fldRoomState_t.unk10C
 member fldRoomState_t.unk110
@@ -541,6 +521,9 @@ member fldRoomState_t.unk120
 member fldRoomState_t.unk124
 member fldSceneParam_t.unk68
 member fldSceneParam_t.unk94
+member fldTakaraData_t.unk04
+member fldTakaraData_t.unk06
+member fldTakaraData_t.unk0C
 member fldTakaraEntry_t.unk08
 member fldTakaraEntry_t.unk0C
 member fldTakaraSlot_t.unk00
@@ -577,6 +560,7 @@ member lstWindowWork_t.unk_170
 member lstWork_t.unk_0000
 member lstWork_t.unk_0009
 member lstWork_t.unk_0024
+member lstWork_t.unk_0060
 member lstWork_t.unk_0159
 member lstWork_t.unk_54
 member lstWork_t.unk_58
@@ -619,14 +603,13 @@ member mselGlobalWork_t.unk_94
 member mselGlobalWork_t.unk_A8
 member nbActionProcessData_t.unk190
 member nbActionProcessData_t.unk78
-member nbActionProcessData_t.unk80
 member nbActionProcessData_t.unk_08
 member nbActionProcessData_t.unk_40
+member nbActionProcessData_t.unk_5C
 member nbActionProcessData_t.unk_6C
 member nbAkumaSelect_t.unk00
 member nbAkumaSelect_t.unk0A
 member nbAkumaSelect_t.unk0C
-member nbBadCurseAiData_t.unk_A0
 member nbBlurParam_t.unk04
 member nbBlurParam_t.unk08
 member nbBlurParam_t.unk0C
@@ -638,7 +621,6 @@ member nbBlurParam_t.unk28
 member nbBlurParam_t.unk2C
 member nbCameraHelper_effFLWinHandle_t.unk10
 member nbCameraSkillPtr_t.unk00
-member nbCameraStateEntry_t.unk00
 member nbCameraStateEntry_t.unk0D
 member nbCameraUnitWork_t.unk00
 member nbDeadEvent_t.unk04
@@ -690,7 +672,6 @@ member nbMakaProcessData_t.unk_14
 member nbNegoSkillEntry_t.unk_00
 member nbPacEntry_t.unk_00
 member nbPacHandle_t.unk_00
-member nbPanelFlashData_t.unk_20
 member nbStatWork_t.unk_02
 member nbStockGlobalWork_t.unk_00000
 member nbTarSelProcessData_t.unk0F
@@ -708,7 +689,6 @@ member parSphereAtomPacket_t.unk38
 member parSphereRingPacket_t.unk34
 member parSystem_t.unk28
 member pbBlockEntry_t.unk06
-member pbBlockEntry_t.unk08
 member pbColorByte_t.unk01
 member pbErrorWork_t.unk04
 member pbFovWork_t.unk00
@@ -772,6 +752,7 @@ member rcvCalcWork_t.unk44F8
 member rcvDrawWork_t.unk_0000
 member rcvDrawWork_t.unk_0002
 member rcvDrawWork_t.unk_1060
+member rcvDrawWork_t.unk_109C
 member rcvDrawWork_t.unk_12C4
 member rcvRootWork_t.unk_00
 member rcvRootWork_t.unk_25

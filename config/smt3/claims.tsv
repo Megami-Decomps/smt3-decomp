@@ -844,7 +844,6 @@ src/smt3/pipe/pipeObject.c	redthing1	done	2026-10-28	1 fn / 808 B	part rotation 
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 272 B	CIE metadata parser with true 20-byte info record, unaligned EH decoding and existing augmentation data; complete owner 32 match, 0 differ
 src/smt3/sdk/libmc.c	redthing1	done	2026-10-28	0 exact / typed guard	write request fields preserve const bulk pointer and unsigned inline count; native instruction extent corrected to 380 bytes, existing seven-word residual unchanged
 src/smt3/pipe/pipeSection.c	redthing1	done	2026-10-28	0 exact / 540 B guarded	MyAction corrects action-zero fallthrough and callback count reloads; 129 of 135 words match, six post-effect load-scheduling differences remain
-
 src/smt3/sdk/libgcc_dpdiv.c	redthing1	done	2026-10-28	1 SDK fn / 320 B	binary64 division with real unpacked-record helper, native class dispatch and qualified current/next remainder loop; complete owner exact
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 364 B	top-chunk page trimming with 64-bit rounding, fresh break/top queries, failed-shrink repair and allocator unlock on every exit; owner 74 match, 0 differ
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	0 exact / guard improvement	default skill initialization reduced from 172 to native160 bytes; parity-qualified multiply coalescing explains remaining three words
@@ -853,5 +852,5 @@ src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	2 matches / 1248 bytes	Unpacked 
 src/smt3/field/fldSnow.c	redthing1	done	2026-10-28	0 exact / 436 B guarded	snow initializer reaches native block layout with shared allocation and scoped defaults; 107 of 109 words match, mode/speed stores remain exchanged
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 440 B	frame-state builder preserves separate records, CIE/FDE bounds, location gate and public-only structure copy; complete owner 34 match, 0 differ
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	0 exact / 756 B guarded	free-list coalescing, last-remainder handling and bin insertion reconstructed with typed links and arena; native-sized draft retains 103 differing words
-
 src/smt3/sdk/libgcc_longlong.c	redthing1	done	2026-10-28	0 exact / 1404 B guarded	unsigned64 division with normalized base-65536 estimates, carry-aware correction and native zero-divisor trap; widening-product extraction remains nonmatching
+src/smt3/field/fld_Npc.c	z28	done	2026-10-29	0 exact / 2268 B parked	fldNpcDraw structure settled at the native frame; 145 of 561 words match, one loop-invariant float too many

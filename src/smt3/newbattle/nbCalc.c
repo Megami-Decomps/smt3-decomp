@@ -1036,8 +1036,6 @@ f32 nbGetGensyoRitu(s32 nskill, s32 sformindex, s32 dformindex)
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaBadDamage);
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544BA8);
-
 extern const char D_00544BE8[];
 
 #ifdef NON_MATCHING
@@ -1075,6 +1073,8 @@ u32 nbGetKoukaBadKaifuku(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544BA8);
+
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaBadKaifuku);
 #endif
 

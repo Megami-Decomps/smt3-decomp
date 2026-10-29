@@ -2785,8 +2785,6 @@ s32 CheckAction_INVISIBLE(nbActionProcessData_t *a)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
-
 #ifdef NON_MATCHING
 extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                   u32 col, s32 delay, s32 aframe, s32 colframe);
@@ -2860,6 +2858,8 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
     printf("allframe %d\n", a->packettime);
 }
 #else
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
+
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAction_CHECK1);
 #endif
 

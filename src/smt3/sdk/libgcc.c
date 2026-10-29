@@ -1056,10 +1056,6 @@ u32 *libc_2D29B8(u32 pc)
     return NULL;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B460);
-
-INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B480);
-
 typedef struct {
     char *augmentation;
     void *ehPointer;
@@ -1106,8 +1102,6 @@ u8 *libc_2D2B60(u32 *frame, cieInfo_t *info)
     }
     return p;
 }
-
-INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B488);
 
 
 typedef struct {
@@ -1166,6 +1160,11 @@ u8 *libc_2D2C70(u8 *p, frameState_t *state)
     return p;
 }
 
+INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B460);
+
+INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B480);
+
+INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B488);
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D2D90);
 
