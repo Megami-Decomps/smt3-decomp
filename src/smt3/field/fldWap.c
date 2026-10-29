@@ -588,7 +588,158 @@ s32 fldWap_SetBgm(doormovetbl_s *pWap) {
     return result;
 }
 
+#ifdef NON_MATCHING
+extern s16 D_002FC1A2[][2];
+extern void fldSetNextField(s32 field, s32 parameter);
+extern void fldAutoMapOpenBlock2(s32 field, s32 floor, s32 block);
+extern void evtBitOn(s32 no);
+extern void fldPlayerCalc_FastStart(void);
+extern void fldSetSceneParam3(fldSceneParam_t *param, s32 field, s32 area, const char *name);
+extern void fldSetSceneParam5(fldSceneParam_t *param, s32 field, s32 area, const char *name,
+                             s32 bgm, const char *script);
+extern char D_00531F18[], D_00531F28[];
+extern s32 printf(const char *format, ...);
+
+void fldDoor_Warp(const char *name)
+{
+    fldSceneParam_t record;
+    s32 block[2];
+    s32 facility;
+    u32 nextSequence;
+    doormovetbl_s *entry;
+    s32 i;
+    s16 nextArea;
+    s16 nextFloor;
+    s32 bgmMode;
+    s32 slot;
+    s32 currentArea;
+    s32 elevatorFloor;
+
+    if (name == NULL && fldDoor_ChkWarp() == 0) return;
+    i = 0;
+    do {
+        if (fldDoor_ChkWarp() != 0) i = gFldWap_after_nextidx;
+        entry = &fldDoorTable[i];
+        if ((entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) ||
+            entry->kind == 0 || entry->floor != fldGlobalBase.floor + 1) {
+            i++;
+            continue;
+        }
+        if (fldDoor_ChkWarp() == 0 && strcmp(name, entry->name) != 0) {
+            i++;
+            continue;
+        }
+        if (entry->kind == 3 && entry->motion != 0)
+            fldAutoMapOpenBlock2(fldGlobalBase.area, fldGlobalBase.floor + 1, entry->motion);
+        if (entry->kind == 10 && entry->secondaryMotion != 0)
+            fldAutoMapOpenBlock2(fldGlobalBase.area, fldGlobalBase.floor + 1, entry->secondaryMotion);
+
+        if (entry->variantMode == 2) {
+            fldSetNextField(0, 0);
+            fldBgmFadeOut();
+            fldAutoMapOpenBlock2(fldGlobalBase.area, fldGlobalBase.floor + 1, entry->sequenceValue);
+            D_0054EDF4 = fldGlobalBase.area;
+            fldDoorSiseState = fldGlobalBase.floor + 1;
+            D_0054EE00 = entry->sequenceKind;
+            D_0054EDFC = entry->variant;
+            switch ((u32)entry->variant) {
+            case 0:
+                facility = entry->sequenceKind;
+                dds3AdminiCallSequence(0x1C, &facility, 4, 0);
+                break;
+            case 1:
+                facility = entry->sequenceKind;
+                dds3AdminiCallSequence(0x1D, &facility, 4, 0);
+                break;
+            case 2:
+                facility = entry->sequenceKind;
+                dds3AdminiCallSequence(0x1B, &facility, 4, 0);
+                break;
+            case 3:
+                block[0] = 0;
+                block[1] = entry->sequenceKind;
+                if (D_002FC1A2[block[1]][0] != 0) evtBitOn(D_002FC1A2[block[1]][0]);
+                DDS3_GBWK->previewX = block[0];
+                DDS3_GBWK->previewY = block[1];
+                dds3AdminiCallSequence(0x1F, block, 8, 0);
+                break;
+            case 4:
+                block[0] = 1;
+                block[1] = entry->sequenceKind;
+                DDS3_GBWK->previewX = block[0];
+                DDS3_GBWK->previewY = block[1];
+                dds3AdminiCallSequence(0x1F, block, 8, 0);
+                break;
+            case 5:
+                dds3AdminiCallSequence(0x1E, NULL, 0, 0);
+                break;
+            }
+            return;
+        }
+        if (entry->variantMode == 0) {
+            nextArea = entry->variant != 0 ? entry->variant : fldGlobalBase.area;
+            nextFloor = entry->sequenceKind != 0 ? entry->sequenceKind : fldGlobalBase.floor + 1;
+            if (fldGlobalBase.area != nextArea) fldBgmFadeOut();
+            bgmMode = fldWap_SetBgm(entry);
+            if (entry->flags54 != 0) {
+                fldDoorExitFlag = entry->flags54;
+                strcpy((char *)fldDoorExitMode, entry->taskName);
+                gFldWap_after_nextidx = i + 1;
+            }
+            gFldNowDZone = entry->flags31;
+            printf("WARP : %d\n", entry->variantMode);
+            if (nextArea < 10) fldPlayerCalc_FastStart();
+            if (entry->kind == 3 || entry->kind == 4) {
+                gfldPlayerHasiCnt = 15;
+                dds3FadeOut(0, 0, 0, 0);
+                if (entry->linkKind == 1 || entry->linkKind == 2)
+                    fldSetSceneParam4(&record, nextArea, nextFloor, entry->sequenceName,
+                                     entry->sequenceCode, entry->linkKind, entry->linkName);
+                else
+                    fldSetSceneParam3(&record, nextArea, nextFloor, entry->sequenceName);
+            } else {
+                fldSetSceneParam4(&record, nextArea, nextFloor, entry->sequenceName,
+                                 entry->sequenceCode, entry->linkKind, entry->linkName);
+            }
+            record.bgmMode = bgmMode;
+            dds3AdminiCallSequence(6, &record, sizeof(record), 0);
+            return;
+        }
+        if (entry->variantMode == 1) {
+            slot = entry->variant - 1;
+            currentArea = fldGlobalBase.area;
+            elevatorFloor = fldDoorParamTable.headers[slot].area;
+            gFld_ElvTakasa = slot;
+            fldDoorWarpTarget = entry->sequenceKind;
+            gFldNowDZone = 0;
+            fldAutoMapOpenBlock2(currentArea, fldGlobalBase.floor + 1,
+                                 fldDoorParamTable.headers[slot].body.data[6 + entry->sequenceKind]);
+            fldSetSceneParam5(&record, currentArea, elevatorFloor, D_00531F18, 0, D_00531F28);
+            dds3AdminiCallSequence(6, &record, sizeof(record), 0);
+            return;
+        }
+        if (entry->variantMode == 3) {
+            nextSequence = entry->variant;
+            fldSetNextField(fldGlobalBase.area, nextSequence);
+            fldBgmFadeOut();
+            if (entry->sequenceKind == 0 && entry->sequenceValue != 0)
+                fldSetNextField(entry->sequenceValue, nextSequence);
+            if (nextSequence >= 1000U) {
+                nextSequence -= 1000;
+                block[0] = nextSequence;
+                block[1] = fldGlobalBase.area;
+                dds3AdminiCallSequence(0x12, block, 8, 0);
+            } else {
+                dds3AdminiCallSequence(7, &nextSequence, 4, 0);
+            }
+            return;
+        }
+        i++;
+    } while (i < 256);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldWap", fldDoor_Warp);
+#endif
 
 extern s16 D_002FC1A2[][2];
 extern void fldSetNextField(s32 field, s32 parameter);
