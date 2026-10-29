@@ -4,12 +4,12 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## frPreCalcStrWidth (interface/frFont, 0xF8)
 
-Fifty-four of sixty-two words match, at the exact 248-byte size. The
+Fifty-six of sixty-two words match, at the exact 248-byte size. The
 reconstruction is structurally right: the stack `frTextHandle_t`, the
 two-byte lead-byte combine, the `code - 0x8080` index formula and every
 register but three are retail's.
 
-The eight remaining words are three separate things:
+The six remaining words are two separate things:
 
 - Two words: the two byte stores that seed the stack glyph come out
   `sharedFlags` (`+0x17`) then `fontIndex` (`+0x15`), where retail has
@@ -21,11 +21,12 @@ The eight remaining words are three separate things:
   which costs the two `sltiu`s and the two `bnez`es that read it. Mine
   coalesces the flag with the `addu text, i` address temp; retail keeps them
   apart.
-- Two words: the `length == 0` guard is a `beql` with the first epilogue `ld`
-  duplicated into its delay slot, where retail has a plain `beqz` with
-  `daddu $2, $20, $0` there. The loop body's only call is `frGetXShiftLev`,
-  which is still `INCLUDE_ASM`, so this is the callee-visibility shape and
-  should be retested the moment that function is C rather than permuted here.
+The previous early return for `length == 0` added a third residual: a branch
+annulment and duplicated epilogue load. Guarding the conversion do/while with
+`if (length != 0)` and keeping one common return closes those two words,
+without converting the still-assembly `frGetXShiftLev` callee. Empty strings
+still perform the glyph setup and provider queries, then return zero.
+
 
 Ruled out: the two arms of the index formula written with the store hoisted
 into each arm (36 of 62 differ, 8 bytes over), the store moved below both

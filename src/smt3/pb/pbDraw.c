@@ -67,7 +67,7 @@ extern sdfMat_t *sdfMatNew(void);
 
 extern pbProcHandle_t *blockDB;
 
-extern void *sdfChipAllocDirect(u32 aSize);
+extern void *sdfChipAllocDirect(s32 aSize);
 
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
@@ -129,12 +129,14 @@ void pbSetExitPos(pbProcHandle_t *p, s32 x, s32 y) {
 }
 
 
-/* NON_MATCHING: 3 of 49 words; the work store and the process load swap delay slots. */
-#ifdef NON_MATCHING
+extern char D_00535CE8[]; /* "pb-draw-mapbase", followed by two aligned empty strings. */
+
 pbProcHandle_t *pbInitMapBaseDraw(pbProcHandle_t *parent, s32 sw) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     void *work;
-    panel->id = dds3StartProcess("pb-draw-mapbase", 0x2AFD, 1, 1, pb_draw_mapbase_Process,
+    pbExit_t *mapWork;
+    dds3ProcessID_t *processId;
+    panel->id = dds3StartProcess(D_00535CE8, 0x2AFD, 1, 1, pb_draw_mapbase_Process,
                                       (dds3ProcessFunc_t)pb_draw_mapbase_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -143,20 +145,20 @@ pbProcHandle_t *pbInitMapBaseDraw(pbProcHandle_t *parent, s32 sw) {
     work = sdfChipAllocDirect(0xC);
     panel->data.mat = work;
     memset(work, 0, 0xC);
-    panel->data.mat->value = sw;
-    dds3SetProcessData(panel->id, panel);
+    mapWork = panel->data.mat;
+    processId = panel->id;
+    mapWork->value = sw;
+    dds3SetProcessData(processId, panel);
     pbInitMapBaseMat(panel);
     return panel;
 }
-#else
-
-INCLUDE_ASM(const s32, "pb/pbDraw", pbInitMapBaseDraw);
-#endif
 
 
 void func_001D4140(pbProcHandle_t *panel, s32 value) {
     panel->data.value->value = value;
 }
+
+INCLUDE_RODATA(const s32, "pb/pbDraw", D_00535CE8);
 
 
 /* Allocation and consumers in pbModel/pbGame establish this 0x370-byte owner. */

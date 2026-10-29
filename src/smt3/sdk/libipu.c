@@ -28,7 +28,14 @@ extern void gcc2_compiled__7(u32 chcr);
 #define IPU_HAZARD_WAIT() __asm__ volatile ("nop\nnop\nnop\nnop")
 #define IPU_HAZARD_WAIT3() __asm__ volatile ("nop\nnop\nnop")
 
-INCLUDE_ASM(const s32, "sdk/libipu", gcc2_compiled__7);
+void gcc2_compiled__7(u32 chcr)
+{
+    DIntr();
+    D_ENABLEW = D_ENABLER | 0x10000;
+    D3_CHCR = chcr;
+    D_ENABLEW = D_ENABLER & ~0x10000;
+    EIntr();
+}
 
 void setD4_CHCR(u32 chcr)
 {
@@ -69,6 +76,13 @@ u32 sceIpuSync(s32 mode)
 INCLUDE_ASM(const s32, "sdk/libipu", sceIpuSync);
 #endif
 
-INCLUDE_ASM(const s32, "sdk/libipu", gcc2_compiled__8);
+void gcc2_compiled__8(u32 chcr)
+{
+    DIntr();
+    D_ENABLEW = D_ENABLER | 0x10000;
+    D4_CHCR = chcr;
+    D_ENABLEW = D_ENABLER & ~0x10000;
+    EIntr();
+}
 
 INCLUDE_ASM(const s32, "sdk/libipu", sceIpuInit);
