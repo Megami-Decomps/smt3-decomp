@@ -3,14 +3,7 @@
 #include "model.h"
 #include "ps2asm.h"
 
-typedef struct {
-    /* 0x00 */ dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
-    /* 0x04 */ u32 hojiID;
-    /* 0x08 */ u32 alpmode;
-    /* 0x0C */ s32 OtLinkIdx;
-    /* 0x10 */ f32 base_pos[4];
-    /* 0x20 */ f32 move_pos[4];
-} dds3MatterObjectBasicWorkData_t;
+
 
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 

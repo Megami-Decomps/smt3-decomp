@@ -1186,9 +1186,6 @@ void SelectActiveCamera(void)
     SetActiveCamera();
 }
 
-typedef struct {
-    dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
-} evtMatterWork_t;
 
 extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
 extern void sdfMotionPause(sdfMotionCtrlr_t *motion);
@@ -1203,7 +1200,7 @@ void evtStopFrame(s32 sw, u32 nowFrame)
     dds3Basic_t *effect;
     dds3Basic_t *mover;
     dds3UnitObjectBasicWorkData_t *unitWork;
-    evtMatterWork_t *matterWork;
+    dds3MatterObjectBasicWorkData_t *matterWork;
     dds3ObjectBaseControlWorkData_t *control;
     mdlObj_t *model;
     sdfMotionCtrlr_t *motion;
