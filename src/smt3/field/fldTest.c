@@ -2347,7 +2347,14 @@ void fldRunDantePatr(void)
         fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);
         fldGetDistAngleTo(&distance, &angle, targetX, targetZ);
         {
+#ifdef NON_MATCHING
             f32 frames = distance / fldRun_Dante.speed;
+#else
+            register f32 speed __asm__("$f1") = fldRun_Dante.speed;
+            f32 frames;
+            __asm__ volatile ("" : "+f" (speed));
+            frames = distance / speed;
+#endif
             fldRun_Dante.angleToPlayer = angle;
             fldRun_Dante.nextframe = (s32)frames;
         }
