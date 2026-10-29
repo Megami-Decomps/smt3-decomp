@@ -198,6 +198,7 @@ StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/nonmatching/
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	138 of 152 words match	docs/nonmatching/newbattle/nbUnitProcess.md	5
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/nonmatching/newdata/datCalc.md	5
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/nonmatching/nme/Nme_Init.md	5
+nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/nonmatching/nme/Nme_Init.md	24
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame.md	5
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md	30
 roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/nonmatching/pb/pbGame.md	50

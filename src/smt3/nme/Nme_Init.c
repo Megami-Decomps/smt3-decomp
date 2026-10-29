@@ -94,18 +94,24 @@ void nmeInitNameRow(s8 mode, s32 rowValue, void *data)
 {
     nmeWork_t *work = data;
     s8 row = rowValue;
-    s8 tableOffset = mode * 3;
-    s32 maxLength = nmeGetMaxNameLen(row);
+    s32 maxLength;
     const char *name;
     u8 (*characters)[2];
-    s8 count = 0;
-    s32 i;
+    s8 count;
+    s32 i = 0;
 
-    for (i = 0; i < maxLength; i++) {
-        work->inputChars[row][i][0] = 0x80;
-        work->inputChars[row][i][1] = 0x80;
+    mode *= 3;
+    maxLength = nmeGetMaxNameLen(row);
+
+    if (maxLength > 0) {
+        do {
+            work->inputChars[row][i][0] = 0x80;
+            work->inputChars[row][i][1] = 0x80;
+            i++;
+        } while (i < maxLength);
     }
-    name = D_005276C8[tableOffset + row];
+    count = 0;
+    name = D_005276C8[mode + row];
     characters = work->inputChars[row];
     while (*name != 0) {
         if (*name & 0x80) {

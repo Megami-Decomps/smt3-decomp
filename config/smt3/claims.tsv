@@ -883,3 +883,4 @@ src/smt3/sdk/libc.c	redthing1	done	2026-10-28	0 exact / 388 B guarded	binary64-t
 src/smt3/sdk/libm.c	redthing1	done	2026-10-28	1 SDK fn / 336 B	cosine kernel with shared word views, exact binary32 coefficients and native Horner accumulator; complete owner 12 match, 0 differ
 src/smt3/sdk/libm.c	redthing1	done	2026-10-28	0 exact / typed table bounds	198-digit two-over-pi and adjacent 32-entry comparison array; preserve final digit and natural n-minus-one index in existing exact reducer
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 8 B	raw ioctl compatibility stub returns -1, with unrecovered parameter types left unspecified; complete owner 142 match, 0 differ
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	0 exact / 324 B guarded	name-row initializer: native upward clear loop and scalar phases; 52 of 81 words match, complete owner 20 match, 0 differ, assembly fallback retained
