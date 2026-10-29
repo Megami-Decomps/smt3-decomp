@@ -71,7 +71,7 @@ typedef struct
 
 extern datSkill_t attr[];
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 extern s32 datCountRegisteredHearts(void);
 extern void datAddHeartsEntry(s32 id, datUnitWork_t *work);
 extern void evtBitOn(s32 no);
@@ -899,9 +899,183 @@ void datDeadNakama(s32 did)
 }
 #endif
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datPartyDamage);
+/* Partial view of the persistent party and stock records. */
+typedef struct {
+    u8 unknown00[0xA50];
+    /* 0xA50 */ s32 maxstock;
+    /* 0xA54 */ datUnitWork_t unitwork[16];
+    /* 0x1914 */ s8 stocklist[16];
+    /* 0x1924 */ s32 stockcnt;
+    /* 0x1928 */ u8 unknown1928[0xA0];
+} datPartyWork_t;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datPartyDamageFld);
+/* The same persistent-work pointer, through its recovered party/stock view. */
+extern datPartyWork_t *datPartyWork asm("DDS3_GBWK");
+
+void datPartyDamage(s32 mode)
+{
+    s32 i;
+    s32 hp;
+    s32 damage;
+
+    if (mode == 1 || mode == 4 || mode == 5 || mode == 6) {
+        for (i = 0; i < 16; i++) {
+            if ((datPartyWork->unitwork[i].flag & 2) != 0) {
+                if (datPartyWork->unitwork[i].hp != 0) {
+                    hp = datPartyWork->unitwork[i].hp;
+                    damage = hp / 10;
+                    if (evtBitCheck(0xAF2) == 0) {
+                        damage *= 3;
+                    }
+                    if (damage == 0) {
+                        damage = 1;
+                    }
+                    hp -= damage;
+                    if (hp <= 0) {
+                        hp = 1;
+                    }
+                    datPartyWork->unitwork[i].hp = hp;
+                }
+            }
+        }
+    }
+    if (mode == 2) {
+        for (i = 0; i < 16; i++) {
+            if ((datPartyWork->unitwork[i].flag & 2) != 0) {
+                if (datPartyWork->unitwork[i].hp != 0) {
+                    hp = datPartyWork->unitwork[i].hp;
+                    damage = (u32)hp / 2;
+                    if (evtBitCheck(0xAF2) == 0) {
+                        damage *= 3;
+                    }
+                    if (damage == 0) {
+                        damage = 1;
+                    }
+                    hp -= damage;
+                    if (hp <= 0) {
+                        hp = 1;
+                    }
+                    datPartyWork->unitwork[i].hp = hp;
+                }
+            }
+        }
+    }
+    if (mode == 3) {
+        for (i = 0; i < 16; i++) {
+            if (datPartyWork->unitwork[i].id != 0xC0 &&
+                (datPartyWork->unitwork[i].flag & 2) != 0 &&
+                datPartyWork->unitwork[i].hp != 0) {
+                datPartyWork->unitwork[i].hp = 1;
+            }
+        }
+    }
+    if (mode >= 4 && mode <= 6) {
+        for (i = 0; i < 16; i++) {
+            if ((datPartyWork->unitwork[i].flag & 2) != 0 &&
+                datPartyWork->unitwork[i].hp != 0) {
+                if (mode == 4) {
+                    datSetBadStat(&datPartyWork->unitwork[i], 0x40);
+                }
+                if (mode == 5) {
+                    datSetBadStat(&datPartyWork->unitwork[i], 0x100);
+                }
+                if (mode == 6) {
+                    datSetBadStat(&datPartyWork->unitwork[i], 0x20);
+                }
+            }
+        }
+    }
+}
+
+void datPartyDamageFld(s32 mode)
+{
+    s32 i;
+    s32 hp;
+    s32 damage;
+
+    if (mode == 1) {
+        for (i = 0; i < 16; i++) {
+            if ((datPartyWork->unitwork[i].flag & 2) != 0 &&
+                (datPartyWork->unitwork[i].badstatus & 0x40) != 0) {
+                if (datPartyWork->unitwork[i].hp != 0) {
+                    hp = datPartyWork->unitwork[i].hp;
+                    damage = hp * 3 / 100;
+                    if (evtBitCheck(0xAF2) == 0) {
+                        damage *= 3;
+                    }
+                    if (damage == 0) {
+                        damage = 1;
+                    }
+                    hp -= damage;
+                    if (hp <= 0) {
+                        hp = 1;
+                    }
+                    datPartyWork->unitwork[i].hp = hp;
+                }
+            }
+        }
+    }
+    if (mode == 2) {
+        for (i = 0; i < 16; i++) {
+            if ((datPartyWork->unitwork[i].flag & 2) != 0) {
+                if (datPartyWork->unitwork[i].hp != 0) {
+                    hp = datPartyWork->unitwork[i].hp;
+                    damage = hp * 3 / 100;
+                    if (evtBitCheck(0xAF2) == 0) {
+                        damage *= 3;
+                    }
+                    if (damage == 0) {
+                        damage = 1;
+                    }
+                    hp -= damage;
+                    if (hp <= 0) {
+                        hp = 1;
+                    }
+                    datPartyWork->unitwork[i].hp = hp;
+                }
+            }
+        }
+    }
+    if (mode == 3) {
+        for (i = 0; i < 16; i++) {
+            if ((datPartyWork->unitwork[i].flag & 2) != 0) {
+                if (datPartyWork->unitwork[i].hp != 0) {
+                    s32 multiplier;
+
+                    hp = datPartyWork->unitwork[i].hp;
+                    multiplier = dds3GetRandIntA(NULL, 2) + 1;
+                    damage = (u32)(hp * multiplier) / 100;
+                    if (damage == 0) {
+                        damage = 1;
+                    }
+                    hp -= damage;
+                    if (hp <= 0) {
+                        hp = 1;
+                    }
+                    datPartyWork->unitwork[i].hp = hp;
+                }
+            }
+        }
+    }
+    if (mode == 4) {
+        for (i = 0; i < 16; i++) {
+            if ((datPartyWork->unitwork[i].flag & 2) != 0) {
+                if (datPartyWork->unitwork[i].hp != 0) {
+                    hp = datPartyWork->unitwork[i].hp;
+                    damage = (u32)hp / 2;
+                    if (damage == 0) {
+                        damage = 1;
+                    }
+                    hp -= damage;
+                    if (hp <= 0) {
+                        hp = 1;
+                    }
+                    datPartyWork->unitwork[i].hp = hp;
+                }
+            }
+        }
+    }
+}
 
 /* NON_MATCHING: 54 of 68 words differ (first at +0x4). */
 #ifdef NON_MATCHING
@@ -1048,19 +1222,6 @@ void datSetDevilWork(s32 id, datUnitWork_t *work)
     work->mp = maxMp;
     work->skillcnt = skillcnt;
 }
-
-/* Partial view of the persistent party and stock records. */
-typedef struct {
-    u8 unknown00[0xA50];
-    /* 0xA50 */ s32 maxstock;
-    /* 0xA54 */ datUnitWork_t unitwork[16];
-    /* 0x1914 */ s8 stocklist[16];
-    /* 0x1924 */ s32 stockcnt;
-    /* 0x1928 */ u8 unknown1928[0xA0];
-} datPartyWork_t;
-
-/* The same persistent-work pointer, through its recovered party/stock view. */
-extern datPartyWork_t *datPartyWork asm("DDS3_GBWK");
 
 s32 datAddDevil(s32 id, s32 sw)
 {
@@ -1351,7 +1512,7 @@ s32 datGetKotowariLank(s32 lank)
             if (left > right) {
                 continue;
             }
-            if (left == right && dds3GetRandIntA(0, 100) < 50) {
+            if (left == right && (s32)dds3GetRandIntA(0, 100) < 50) {
                 continue;
             }
             temp = rank[i];
