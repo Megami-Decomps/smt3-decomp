@@ -36,3 +36,20 @@ Returning directly from each magnitude comparison preserves native control
 flow; collecting the order first emitted a different, shorter body. The existing
 `dpcmp` wrapper retains all 76 matching bytes with its corrected signed return.
 Complete libgcc owner: 26 match / 0 differ.
+
+
+## Native packing
+
+`__pack_df` (216 bytes) and `sdfPackFloat` (180) match all 396 instruction
+bytes. Their binary views assign fraction, exponent and sign before reading
+the complete floating value. Double packing preserves NaN payloads, sign,
+zero/infinity classes, the native underflow flush and overflow bound. It
+snapshots the input sign before classification, and assigns the infinity
+exponent before clearing its fraction.
+
+Float packing preserves the native upper-bound predicate: exponent greater
+than 128, or exponent 128 with fraction at least `0x80000000`, selects the
+overflow encoding. Other in-range nonzero fractions shift right by seven.
+The routine adds no NaN-class handling absent from the native float build.
+The binary32 view is shared with float unpacking; the binary64 view is shared
+with double unpacking. Complete libgcc owner: 28 match / 0 differ.

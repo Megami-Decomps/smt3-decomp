@@ -107,11 +107,11 @@ extern u16 D_0054F824;
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
 
-extern s32 sdfDevPrintf(s32 aX, s32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
+extern void *sdfDevPrintf(u32 aX, u32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
 
 extern s32 sceWrite(s32 a, const void *b, s32 c);
 
-extern void sdfDrawTagLink(void *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 
 extern void *D_002F6978[];
 
@@ -173,7 +173,7 @@ extern char *frameheadstr[];
 extern s8 framelist_xcnt[];
 
 s32 evtFrameListHead(void *tag, s32 ox, s32 oy);
-s32 evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no);
+void evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no);
 
 extern s32 func_001AD6E8(void);
 
@@ -229,11 +229,11 @@ void evtBasicListItem(void *tag, s32 ox, s32 oy, s32 no);
 
 void evtEventPosItem(void *tag, s32 ox, s32 oy, s32 no);
 s32 evtFileName2Head(void *tag, s32 ox, s32 oy);
-void evtFileName2Item(void *tag, s32 ox, s32 oy, u32 no);
+void evtFileName2Item(void *tag, s32 ox, s32 oy, s32 no);
 s32 evtFileNameHead(void *tag, s32 ox, s32 oy);
 void evtFileNameItem(void *tag, s32 ox, s32 oy, s32 no);
 
-extern void dds3ConsPanelTagLink(void *tag, s32 x, s32 y, s32 sx, s32 sy);
+extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
 
 void evtObjectListSub(void *tag, evtViewerGroup_t *obj, s32 ox, s32 oy);
 void evtObjectListItem(void *tag, s32 ox, s32 oy, s32 no);
@@ -242,8 +242,7 @@ s32 evtSelectHead(void *tag, s32 ox, s32 oy);
 void evtSelectItem(void *tag, s32 ox, s32 oy, s32 no);
 void evtMainMenuItem(void *tag, s32 ox, s32 oy, s32 no);
 
-/* NON_MATCHING: 49 of 112 words differ (first at +0x34). */
-#ifdef NON_MATCHING
+/* DDS1 evtDrawMenuFrame: marker offsets are grid units before GS conversion. */
 void evtMenuDisp(void *tag, s32 x, s32 y, s32 sx, s32 sy,
                  s32 baseitem, s32 maxitem, void *head, void *item)
 {
@@ -253,11 +252,14 @@ void evtMenuDisp(void *tag, s32 x, s32 y, s32 sx, s32 sy,
     s32 index;
 
     dds3ConsPanelTagLink(tag, x, y, sx, sy);
-    px = x * 16 + 0x7000;
-    py = y * 8 + 0x7900;
+    /* GS fixed-point encoding; unsigned shifts also handle negative offsets. */
+    px = ((u32)x << 4) + 0x7000;
+    py = ((u32)y << 3) + 0x7900;
     if (head != NULL) {
-        used = ((evtMenuHead_t)head)(tag, px, py);
-        py += used * 0x60;
+        s32 headerRows = ((evtMenuHead_t)head)(tag, px, py);
+
+        py += headerRows * 0x60;
+        used = headerRows;
     }
     for (index = baseitem; used < sy; used++) {
         if (item != NULL) {
@@ -267,21 +269,18 @@ void evtMenuDisp(void *tag, s32 x, s32 y, s32 sx, s32 sy,
         }
     }
     if (evtMenuDisp_cnt & 0x10) {
-        px = (x + sx * 5) * 16 + 0x7060;
-        py = y * 8 + 0x78B0;
+        py = ((u32)(y - 10) << 3) + 0x7900;
+        px = ((u32)(x + sx * 5 + 6) << 4) + 0x7000;
         if (baseitem > 0) {
             sdfDrawTagLink(tag, (u32)sdfDevPrintf(px, py, 0xFEFFFF, 6, D_0054F9A0));
         }
-        py = (y + sy * 12) * 8 + 0x78F0;
+        py = ((u32)(y + sy * 12 - 2) << 3) + 0x7900;
         if (index < maxitem) {
             sdfDrawTagLink(tag, (u32)sdfDevPrintf(px, py, 0xFEFFFF, 6, D_0054F9A8));
         }
     }
     evtMenuDisp_cnt++;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewerMenu", evtMenuDisp);
-#endif
 
 s32 evtFloatChangeHead(void *tag, s32 ox, s32 oy)
 {
@@ -289,7 +288,7 @@ s32 evtFloatChangeHead(void *tag, s32 ox, s32 oy)
     return 2;
 }
 
-void evtFloatChangeItem(void *tag, s32 ox, s32 oy, u32 no)
+void evtFloatChangeItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     switch (no) {
     case 0:
@@ -355,7 +354,7 @@ s32 evtIntChangeHead(void *tag, s32 ox, s32 oy)
     return 2;
 }
 
-void evtIntChangeItem(void *tag, s32 ox, s32 oy, u32 no)
+void evtIntChangeItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     switch (no) {
     case 0:
@@ -419,7 +418,7 @@ s32 evtFrameChangeHead(void *tag, s32 ox, s32 oy)
     return 2;
 }
 
-void evtFrameChangeItem(void *tag, s32 ox, s32 oy, u32 no)
+void evtFrameChangeItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     switch (no) {
     case 0:
@@ -664,7 +663,7 @@ s32 evtFileName2Head(void *tag, s32 ox, s32 oy)
     return 2;
 }
 
-void evtFileName2Item(void *tag, s32 ox, s32 oy, u32 no)
+void evtFileName2Item(void *tag, s32 ox, s32 oy, s32 no)
 {
     s32 color = 0;
 
@@ -1049,7 +1048,7 @@ void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtViewerKey_t *f)
 }
 
 
-s32 evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no)
+void evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     evtViewerKey_t *key;
     s32 color;
@@ -1077,6 +1076,11 @@ s32 evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no)
         } else {
             sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
         }
+        /* Post-call own-state reset (docs/CONTRIBUTING.md): close the real
+         * traversal cursor after either render tail. Stock RTL keeps UID228
+         * through sibling/CFG and deletes it in life; native retains JALs
+         * at 0x1F71F8/0x1F7230. No native reset store is claimed. */
+        key = NULL;
     }
 }
 s32 evtFrameListMenu(s32 x, s32 y)

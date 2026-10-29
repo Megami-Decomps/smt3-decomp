@@ -66,32 +66,3 @@ return), `count` through a local assigned beside `payloadOffset` (an extra local
 moves every spill slot, 235 words), moving the six zero stores to the front or
 the back of the block, and computing `byteLength` in one expression or deferring
 its last term.
-
-## evtMenuDisp (event/evtEventViewerMenu, 0x1C0)
-
-63 of 112 words match, exact size. The signature is recovered in full: nine arguments
-(list, column, row, colCount, rowCount, scroll, total, head, item), the ninth
-reaching the callee at `0x60($29)`; the panel call takes arguments one to five
-unchanged, the grid origin is `column * 16 + 0x7000` and `row * 8 + 0x7900`, the
-head's return value advances `py` by `used * 0x60`, the item loop is a `for` whose
-index the body does not use, and the scroll arrows sit at
-`(column + colCount * 5) * 16 + 0x7060` with y `row * 8 + 0x78B0` and
-`(row + rowCount * 12) * 8 + 0x78F0`. `evtMenuDisp_cnt++` is the last statement.
-
-The whole difference is which loop-crossing value gets the ninth saved register.
-Retail keeps `row` there and recomputes `row * 8` for the scrollbar; the C keeps
-`row * 8` (gcse finds the expression available, since the only two uses are the
-`py` initialiser and the arrow y) and spills `row` to a fourth stack slot, which
-rotates every allocation from the prologue on. Both sides use the same nine saved
-registers and the same frame size.
-
-Writing both arrow coordinates back into `px` and `py` rather than into fresh
-locals is worth keeping (60 differing words becomes 49). Ruled out: separate
-`barX`/`topY`/`botY` locals in any declaration order; `index = scroll` as a
-statement before the loop; a `while` instead of the `for`; `used = 0` after the
-panel call; `px`/`py` as declaration initialisers; `(rowCount * 12 + row)` for
-the bottom arrow; spelling the arrow y as `row * 8 + 0x78F0 - 0x40`; a shared
-`rowY = row * 8` local; typed function-pointer parameters instead of `void *`
-plus a cast; and `(evtMenuDisp_cnt & 0x10) != 0`. Every spelling of the two
-`row * 8` expressions that folds to the same instructions also unifies under
-gcse, so blocking the share needs a source form that keeps them distinct.

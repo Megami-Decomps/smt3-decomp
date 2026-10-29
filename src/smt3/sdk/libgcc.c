@@ -358,7 +358,21 @@ extern s32 func_002D6678(_reent *r, FILE *fp, const char *fmt, va_list ap);
 typedef union f32_bits {
     f32 f;
     u32 u;
+    struct {
+        u32 fraction : 23;
+        u32 exponent : 8;
+        u32 sign : 1;
+    } fields;
 } f32_bits;
+
+typedef union sdfDoubleBits_t {
+    double value;
+    struct {
+        u64 fraction : 52;
+        u32 exponent : 11;
+        u32 sign : 1;
+    } fields;
+} sdfDoubleBits_t;
 
 /* The same record from the double-precision build of fp-bit.c. */
 typedef struct fp_number_type_df {
@@ -758,16 +772,36 @@ f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant) {
     return sdfPackFloat(&u);
 }
 
-INCLUDE_ASM(const s32, "sdk/libgcc", __pack_df);
+f64 __pack_df(const fp_number_type_df *u) {
+    sdfDoubleBits_t result;
+    u64 fraction = u->fraction;
+    u32 exponent = 0;
+    u32 sign = u->sign;
 
-typedef union sdfDoubleBits_t {
-    double value;
-    struct {
-        u64 fraction : 52;
-        u32 exponent : 11;
-        u32 sign : 1;
-    } fields;
-} sdfDoubleBits_t;
+    if (dfIsNaN(u)) {
+        fraction |= (u64)1 << 51;
+        exponent = 0x7FF;
+    } else if (dfIsInfinity(u)) {
+        exponent = 0x7FF;
+        fraction = 0;
+    } else if (dfIsZero(u)) {
+        fraction = 0;
+    } else if (fraction != 0) {
+        if (u->normal_exp < -1022) {
+            fraction = 0;
+        } else if (u->normal_exp > 1023) {
+            exponent = 0x7FF;
+            fraction = 0;
+        } else {
+            exponent = u->normal_exp + 1023;
+            fraction >>= 8;
+        }
+    }
+    result.fields.fraction = fraction;
+    result.fields.exponent = exponent;
+    result.fields.sign = sign;
+    return result.value;
+}
 
 void sdfUnpackDouble(const double *x, fp_number_type_df *u) {
     sdfDoubleBits_t input;
@@ -841,4 +875,36 @@ s32 __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df *b) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "sdk/libgcc", sdfPackFloat);
+static inline s32 sfIsZero(const fp_number_type *number) {
+    return number->class == 2;
+}
+
+f32 sdfPackFloat(const fp_number_type *number) {
+    f32_bits result;
+    s32 zero = sfIsZero(number);
+    u32 fraction;
+    s32 exponent;
+    u32 sign;
+
+    exponent = 0;
+    fraction = number->fraction;
+    sign = number->sign;
+    if (zero) {
+        fraction = 0;
+    } else if (fraction != 0) {
+        if (number->normal_exp < -126) {
+            fraction = 0;
+        } else if (number->normal_exp > 128 ||
+                   (number->normal_exp == 128 && fraction >= 0x80000000U)) {
+            exponent = 255;
+            fraction = 0;
+        } else {
+            exponent = number->normal_exp + 127;
+            fraction >>= 7;
+        }
+    }
+    result.fields.fraction = fraction;
+    result.fields.exponent = exponent;
+    result.fields.sign = sign;
+    return result.f;
+}
