@@ -275,7 +275,65 @@ void ragInitList3(s32 count, lstWork_t *work)
     cmpInitCursorRange(&work->listCursor, count, 7, 0);
 }
 
+typedef struct {
+    u8 reserved00[0x1A];
+    s8 heartItems[32];
+    s8 heartCount;
+    s8 list2[8];
+    s8 list2Count;
+    s8 list3[8];
+    s8 list3Count;
+    s8 hasUnregistered;
+    u8 reserved4E[0xF2];
+    cmpCursorInfo_t cursor;
+    u8 reserved178[0x1004];
+    lstWork_t heartWindow;
+    u8 reserved1310[0x1004];
+    lstWork_t window2;
+    u8 reserved24A8[0x1004];
+    lstWork_t window3;
+} ragListWork_t;
+
+typedef struct {
+    u16 item;
+    u8 reserved02[12];
+} ragHeartEntry_t;
+
+extern ragHeartEntry_t ragHeartEntries[] asm("ragHeartsTable");
+extern u8 D_0032FC58[][32];
+extern s32 datGetItemSlotIndex(u16 item);
+extern s32 cmbChkGetHearts(s32 id);
+extern s32 cmpItemOrder(u8 *a, u8 *b);
+
+#ifdef NON_MATCHING
+s32 ragBuildHeartsList(u8 type, ragListWork_t *work)
+{
+    s8 count = 0;
+    s32 i;
+
+    work->hasUnregistered = 0;
+    for (i = 0; i < 32; i++) {
+        u8 index = D_0032FC58[type][i];
+        u16 item = ragHeartEntries[index].item;
+        s32 slot = datGetItemSlotIndex(item);
+
+        if (slot != 0) {
+            if (cmbChkGetHearts((s8)slot) != 0) {
+                continue;
+            }
+            work->hasUnregistered = 1;
+        }
+        if (item != 0) {
+            work->heartItems[count++] = index;
+        }
+    }
+    qsort(work->heartItems, count, 1, (s32 (*)(const void *, const void *))cmpItemOrder);
+    fclSetWorkValue(4, work->hasUnregistered);
+    return count;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclRagInit", ragBuildHeartsList);
+#endif
 
 extern void shuffleIndices(s8 *order, s32 count, s32 rounds);
 
@@ -361,23 +419,6 @@ INCLUDE_ASM(const s32, "facility/fclRagInit", ragBuildList3);
 #endif
 
 typedef struct {
-    u8 reserved00[0x1A];
-    s8 heartItems[32];
-    s8 heartCount;
-    s8 list2[8];
-    s8 list2Count;
-    s8 list3[8];
-    s8 list3Count;
-    u8 reserved4D[0xF3];
-    cmpCursorInfo_t cursor;
-    u8 reserved178[0x1004];
-    lstWork_t heartWindow;
-    u8 reserved1310[0x1004];
-    lstWork_t window2;
-    u8 reserved24A8[0x1004];
-    lstWork_t window3;
-} ragListWork_t;
-typedef struct {
     u8 reserved00[2];
     s16 eventBit;
     u8 hearts[2];
@@ -386,7 +427,7 @@ typedef struct {
 } ragListConfig_t;
 extern ragListConfig_t gCommandFlag_0[];
 extern u8 ragListFlags[5];
-extern s32 ragBuildHeartsList(u8 type, u8 *work);
+extern s32 ragBuildHeartsList(u8 type, ragListWork_t *work);
 extern s8 ragBuildList2(u8 type, u8 *work);
 extern s8 ragBuildList3(u8 type, u8 *work);
 extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
@@ -399,7 +440,7 @@ void ragCreateAllList(s32 onlyHearts, s32 type, ragListWork_t *work)
     } else {
         active = 0;
     }
-    work->heartCount = ragBuildHeartsList(gCommandFlag_0[type].hearts[active], (u8 *)work);
+    work->heartCount = ragBuildHeartsList(gCommandFlag_0[type].hearts[active], work);
     if (gCommandFlag_0[type].hearts[active] == 0) {
         ragListFlags[0] |= 2;
         work->cursor.unk_21++;
