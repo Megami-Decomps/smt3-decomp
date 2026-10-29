@@ -28,8 +28,8 @@ typedef struct
     f32 y;
     f32 z;
     s16 flg;
-    u8 spdx;
-    u8 spdy;
+    s8 spdx;
+    s8 spdy;
     s16 life;
     s16 alp;
 } fldSeedWork_t;
@@ -360,4 +360,146 @@ void fldSnowSeedReset(void)
     }
 }
 
+#ifdef NON_MATCHING
+extern void rsetOtOfs(s32 offset);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
+extern void rsetAlpha(s32 mode);
+extern sdfTexHandle_t *fldSnowBlurHandle;
+extern volatile sdfVector4_t D_002FC9C0;
+extern volatile sdfVector4_t fldCamTarget;
+
+void fldSnowTask(void)
+{
+    Sprite3D_t sprite;
+    volatile sdfVector4_t direction;
+    fldSeedWork_t *seed;
+    s32 i;
+    s32 mode;
+    f32 speed;
+    f32 cameraX;
+    f32 cameraZ;
+    f32 eyeX;
+    f32 eyeZ;
+
+    if (gFldSeedBuff == NULL) {
+        return;
+    }
+    if (gFldSnowMode == 0) {
+        for (i = 0; i < 2; i++) {
+            if ((dds3GetRandA(NULL) & 3) == 0) {
+                u32 random = dds3GetRandA(NULL) & 0xFF;
+                f32 x = gFldSnowX + (f32)random * gFldSnowW;
+                f32 z;
+                random = dds3GetRandA(NULL) & 0xFF;
+                z = gFldSnowZ + (f32)random * gFldSnowW;
+                fldInitSnowSeed(x, gFldSnowY, z);
+            }
+        }
+    } else {
+        for (i = 0; i < 12; i++) {
+            if ((dds3GetRandA(NULL) & 3) == 0) {
+                u32 random = dds3GetRandA(NULL) & 0xFF;
+                f32 x = fldGlobalBase.x + gFldSnowX + (f32)random * gFldSnowW;
+                f32 z;
+                random = dds3GetRandA(NULL) & 0xFF;
+                z = fldGlobalBase.z + gFldSnowZ + (f32)random * gFldSnowW;
+                fldInitSnowSeed(x, gFldSnowY, z);
+            }
+        }
+    }
+    rsetOtOfs(0x2C);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 2);
+    rsetAlpha(1);
+    cameraZ = fldCamTarget.z;
+    cameraX = fldCamTarget.x;
+    eyeZ = D_002FC9C0.z;
+    eyeX = D_002FC9C0.x;
+    direction.x = eyeX - cameraX;
+    direction.y = 0.0f;
+    direction.z = eyeZ - cameraZ;
+    direction.w = 1.0f;
+    sprite.uv[0].u = 0;
+    sprite.uv[0].v = 0;
+    sprite.uv[1].u = 0x100;
+    sprite.uv[1].v = 0;
+    sprite.uv[2].u = 0x100;
+    sprite.uv[2].v = 0x100;
+    sprite.uv[3].u = 0;
+    sprite.uv[3].v = 0x100;
+    sprite.vt[0].x = -12.0f;
+    sprite.vt[0].y = -12.0f;
+    sprite.vt[1].x = 12.0f;
+    sprite.vt[1].y = -12.0f;
+    sprite.vt[2].x = 12.0f;
+    sprite.vt[2].y = 12.0f;
+    sprite.vt[3].x = -12.0f;
+    sprite.vt[3].y = 12.0f;
+    sprite.rot = 0.0f;
+    mode = gFldSnowMode;
+    if (mode == 0) {
+        speed = gFldSnowSpd;
+        seed = gFldSeedBuff;
+        for (i = 0; i < 700; i++, seed++) {
+            if (seed->flg & 1) {
+                seed->life--;
+                seed->y += speed + (f32)seed->spdx * 0.125f;
+                if (seed->life < 0x40) {
+                    seed->alp -= 2;
+                }
+                if (seed->life <= 0) {
+                    seed->flg = 0;
+                }
+            }
+        }
+        fldSnowSpriteTex(fldSnowBlurHandle);
+        for (i = 0; i < 700; i++) {
+            volatile fldSeedWork_t *item = &gFldSeedBuff[i];
+            if ((item->flg & 1) && item->y < gFldSnowYD) {
+                s32 color;
+                s32 alpha;
+                sprite.pos.x = item->x;
+                color = 0x80 - item->spdy;
+                alpha = item->alp;
+                sprite.pos.y = item->y;
+                sprite.col = ((u32)alpha << 24) | (u32)color | ((u32)color << 8) | ((u32)color << 16);
+                sprite.pos.z = item->z;
+                fldSnowSprite3D(&sprite);
+            }
+        }
+        mode = gFldSnowMode;
+    }
+    if (mode == 1) {
+        speed = gFldSnowSpd;
+        seed = gFldSeedBuff;
+        for (i = 0; i < 700; i++, seed++) {
+            if (seed->flg & 1) {
+                seed->life--;
+                seed->y += speed - (f32)seed->spdx * 0.125f;
+                if (seed->life < 0x40) {
+                    seed->alp -= 2;
+                }
+                if (seed->life <= 0) {
+                    seed->flg = 0;
+                }
+            }
+        }
+        fldSnowSpriteTex(fldSnowBlurHandle);
+        for (i = 0; i < 700; i++) {
+            volatile fldSeedWork_t *item = &gFldSeedBuff[i];
+            if ((item->flg & 1) && item->y < gFldSnowYD) {
+                s32 color;
+                s32 alpha;
+                sprite.pos.x = item->x;
+                color = 0x80 - item->spdy;
+                alpha = item->alp;
+                sprite.pos.y = item->y;
+                sprite.col = ((u32)alpha << 24) | (u32)color | ((u32)color << 8) | ((u32)color << 16);
+                sprite.pos.z = item->z;
+                fldSnowSprite3D(&sprite);
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldSnow", fldSnowTask);
+#endif
