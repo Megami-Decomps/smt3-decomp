@@ -24,6 +24,19 @@
 #define OFF(line, type, field, at) \
     ASSERT_AT(line, ((char *)&((type *)0)->field - (char *)(type *)0) == (at))
 
+/* kernel.h: native administration allocation and dispatcher strides. */
+SZ(kadm01, dds3AdminiData_t, 0x24);
+OFF(kadm02, dds3AdminiData_t, NowSequence, 0x08);
+OFF(kadm03, dds3AdminiData_t, SequenceHistory, 0x0C);
+OFF(kadm04, dds3AdminiData_t, FlagHistory, 0x14);
+OFF(kadm05, dds3AdminiData_t, CallData, 0x1C);
+OFF(kadm06, dds3AdminiData_t, CallDataSize, 0x20);
+OFF(kadm07, dds3AdminiData_t, CallCount, 0x21);
+SZ(kadm08, dds3AdminiList_t, 0x0C);
+OFF(kadm09, dds3AdminiList_t, start, 0);
+OFF(kadm10, dds3AdminiList_t, end, 4);
+OFF(kadm11, dds3AdminiList_t, check, 8);
+
 /* event.h and the shared prefixes used by the event commands. */
 SZ(e01, evtUnit_t, 0x148);
 OFF(e02, evtUnit_t, pathHandle, 0x9C);

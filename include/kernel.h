@@ -32,6 +32,29 @@ struct dds3ProcessID_t
     dds3ProcessID_t *sibling;
 };
 
+/* Native administration state and dispatch row; HD owner: kernel.h. */
+typedef struct dds3AdminiData_t
+{
+    u32 Stat;
+    u32 RunTimer;
+    s8 NowSequence;
+    s8 NextSequence;
+    u8 HistoryPointer;
+    u8 unk0B;
+    s8 SequenceHistory[8];
+    u8 FlagHistory[8];
+    void *CallData;
+    u8 CallDataSize;
+    u8 CallCount;
+} dds3AdminiData_t;
+
+typedef struct dds3AdminiList_t
+{
+    s32 (*start)(s32 restored, void *reqdata);
+    s32 (*end)(void);
+    s32 (*check)(void);
+} dds3AdminiList_t;
+
 /* Process list slots. Lower runs earlier; dds3KernelMain walks the list in
  * priority order. Cross-checked against 113 dds3StartProcess call sites. */
 enum dds3kernelpriority

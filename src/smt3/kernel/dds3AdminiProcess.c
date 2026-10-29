@@ -1,28 +1,6 @@
 #include "common.h"
 #include "kernel.h"
 
-typedef struct dds3AdminiData_t
-{
-    u32 Stat;
-    u32 RunTimer;
-    s8 NowSequence;
-    s8 NextSequence;
-    u8 HistoryPointer;
-    u8 unk0B;
-    s8 SequenceHistory[8];
-    u8 FlagHistory[8];
-    void *CallData;
-    u8 CallDataSize;
-    u8 CallCount;
-} dds3AdminiData_t;
-
-typedef struct dds3AdminiList_t
-{
-    s32 (*start)(s32 restored, void *reqdata);
-    s32 (*end)(void);
-    s32 (*check)(void);
-} dds3AdminiList_t;
-
 /* Named scheduler slots: retail strides entries by 0x44 bytes. */
 typedef struct
 {

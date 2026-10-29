@@ -91,6 +91,8 @@ unit-local. Message-manager work also remains local: native allocation is
 | struct | size | evidence |
 |---|---|---|
 | `dds3ProcessID_t` | 80 | `dds3StartProcess` calls `sdfChipAllocDirect(0x50)` |
+| `dds3AdminiData_t` | 36 | `dds3InitAdmini` allocates 0x24; native state fields retain byte widths |
+| `dds3AdminiList_t` | 12 | native administrator table: three pointers per row |
 
 All sixteen fields confirmed. `dds3StartProcess` stores `name[0]`/`name[23]`,
 `namehash` +24, `flag` +28, `priority` +32, `starttime` +36, `runtime` +40,
@@ -1480,3 +1482,11 @@ after `dblurDebugMenu` contains `dds3EffectDistortionBlurCreate`, corroborating
 the native 0x40-byte extent beyond the advisory 0x3C IDB size. The input
 handler returns the current menu, which can change on entering or leaving a
 child; callers use a pointer return contract.
+
+The administration state and dispatch-row declarations now live in their HD
+owner `kernel.h`, retaining the original PS2 layouts. The state has Stat/RunTimer
+at 0/4, current/next sequence at 8/9, history index at 0xA, two eight-byte
+histories at 0xC/0x14, payload pointer at 0x1C, and size/count bytes at 0x20/0x21.
+The dispatch-row member names are `start`, `end` and `check`; their existing
+native s32 callback signatures remain. Local named-slot records stay in their
+source because their original header owner is unknown.
