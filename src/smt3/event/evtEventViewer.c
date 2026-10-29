@@ -1,6 +1,7 @@
 #include "common.h"
 #include "basic.h"
 #include "event.h"
+#include "effect.h"
 #include "kernel.h"
 #include "model.h"
 #include "motion.h"
@@ -191,7 +192,7 @@ extern void PushMenu(s32 no, s32 x, s32 y);
 extern void DelEffectTable_evtEventViewer(s32 index);
 extern void DelBED(evtFrameInfo_t *frame);
 extern s8 dds3PadButtonState[];
-extern void *evtGetUnityCalcArea(void);
+extern effScreenDrawParams_t *evtGetUnityCalcArea(void);
 extern void dds3EffectBlur(void *area);
 extern void Eve_PartialMultiBlurON(void);
 extern void Eve_PartialMultiBlurOFF(void);

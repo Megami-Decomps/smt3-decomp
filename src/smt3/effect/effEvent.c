@@ -59,11 +59,6 @@ extern void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut);
 #define EFF_CURVE_SOURCE_ROW_COUNT 4
 
 
-/* The stored screen record keeps eight bytes beyond the copied blur quad. */
-typedef struct effScreenDrawParams_t {
-    dds3Effect_Blur_t source;
-    u8 pad28[8];
-} effScreenDrawParams_t;
 
 
 extern s8 Eve_BlurShow;
