@@ -263,14 +263,14 @@ premise is required before allocation or control-flow tuning.
 
 ## _dtoa_r
 
-The seven-argument conversion emits4848 instruction bytes against4708 native:
-109 of1177 native words match and1068 differ, with140 excess bytes. Its0xC0
+The seven-argument conversion emits 4848 instruction bytes against 4708 native:
+109 of 1177 native words match and1068 differ, with140 excess bytes. Its 0xC0
 frame, allocation, block layout and source data ownership remain open. Normal
 builds retain assembly; no exact credit is claimed.
 
 The result cache uses the allocation header itself as character storage; entry
-restores `k` and `maxwds` before recycling it. Full52-bit fraction tests preserve
-special values. Subnormal normalization uses bounded32-bit shifts. Native mode
+restores `k` and `maxwds` before recycling it. Full 52-bit fraction tests preserve
+special values. Subnormal normalization uses bounded 32-bit shifts. Native mode
 limits, quick-path rollback, small-integer rounding, exact bigint margins and
 cleanup are preserved. Independent native reviews covered both conversion halves.
 
@@ -282,18 +282,18 @@ No compiler flags changed. An unguarded trial still duplicates the original
 mode-table import and places its zero string in small data; resolve those
 ownership issues at promotion while preserving the default assembly context.
 
-A host diagnostic completed124117 conversions over2420 boundary/random input
+A host diagnostic completed 124117 conversions over 2420 boundary/random input
 patterns against independent decimal rounding and binary64 round trips. It
-checks modes2/3 against quick-disabled6/7 and permits the native shorter-output
-variation in4/5. Cache reuse and allocation balance passed. This checks tested
+checks modes 2/3 against quick-disabled modes 6/7 and permits the native shorter-output
+variation in modes 4/5. Cache reuse and allocation balance passed. This checks tested
 numerical behavior; EE instruction/data matching remains open.
 
-The unchecked mode5/9 corner remains: input0.1 with digits-3 derives power-5
-argument-4 at0x002D8FB0. Only mode3 clears boundary-aware setup. The observed
-`cvt` caller uses2/3; the host diagnostic detects this negative exponent and
+The unchecked mode 5/9 corner remains: input 0.1 with digits -3 derives power-5
+argument -4 at 0x002D8FB0. Only mode 3 clears boundary-aware setup. The observed
+`cvt` caller uses modes 2/3; the host diagnostic detects this negative exponent and
 excludes it from terminating numeric tests. No defensive clamp was introduced.
 
-Moving shared quick rounding beside the integer path saves16 bytes. In the
+Moving shared quick rounding beside the integer path saves 16 bytes. In the
 initial unguarded owner, sharing the decoded exponent, buffer capacity and
 quick error count is compiler-inert; separate roles remain preferred. Both
 allocation probes pass output parity with pinned cc1
