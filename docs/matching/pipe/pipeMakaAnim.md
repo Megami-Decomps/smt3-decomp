@@ -24,5 +24,23 @@ positions are read again for each bar; subsequent gauge origins are fixed.
 
 A conditional expression in the ghost fade's active window emits 1,188 bytes. Independent phase-seven and phase-eight tests
 retain the native size but change three words. The ordinary three-arm fade is
-the preferred source. The neighboring single renderer has the same zero-move
-pattern, but no compiler trace has yet established a justified source closure.
+the preferred source for this still-unmatched function. The neighboring single
+renderer is now matched with the localized constraint documented below; that
+result does not establish a match for `makaDrawMulti`.
+
+
+## makaDrawSingle (pipe/pipeMakaAnim, 0x3D0)
+
+244 of 244 words match in `f6648fa8`: 976 bytes, complete owner 8 match / 0 differ with data
+checks; the actual published commit rebuilt the exact retail image and a second
+`ninja` reported no work, with a clean tracked tree and validated link inputs.
+
+The ordinary reconstruction had five differing words: it assigned ghost
+alpha zero directly to `$f20` and hoisted the phase comparison. Reusing the
+finished easing scratch for the real zero endpoint, with a local nonvolatile
+empty `"+f"` operand constraint, retains the native `mtc1` to `$f4` and `mov.s`
+to `$f20` in the branch delay slot. The value is initialized after the first-bar
+calls, consumed by alpha when phase is below seven, and overwritten before the
+later gauge stage. There is no hard register binding or constrained call-crossing
+lifetime. This is an SMT3 reconstruction aid, not original-source evidence;
+the qualified stock diagnostic run preserved production code/data output.
