@@ -443,25 +443,6 @@ void ragCreateAllList(s32 onlyHearts, s32 type, ragListWork_t *work)
     }
 }
 
-typedef struct fclPanel
-{
-    s32 X;
-    s32 Y;
-    s32 Z;
-    s16 W;
-    s16 H;
-    s32 Col;
-    u8 Spd;
-    u8 reserved15[3];
-    s32 Timer;
-    s32 Timer2;
-    s32 Flag;
-    u8 reserved24[0x10];
-    s32 TexHandle;
-    void (*draw)(struct fclPanel *panel, s32 id);
-    void (*update)(struct fclPanel *panel);
-} fclPanel_t;
-
 typedef struct
 {
     s32 tex;
