@@ -202,3 +202,48 @@ at UID 541, then supplies the group bound (UID 324). Global allocation combines
 16 references, live length 114 and four crossed calls (priority 5614), assigning
 it `$19`. Independent review confirms that each phase defines the value before
 use, the type is truthful, and no address escapes or artificial uses are added.
+
+## effPCPBossONGYDraw (1432 bytes)
+
+306 of 358 instruction words match at the exact native size. The reconstruction
+is guarded; normal builds retain assembly and receive no exact matching credit.
+
+The effect work contains a formation pointer, material pointer, floating angle
+and signed frame counter. Its two constructors retain their exact bytes with
+these contracts. Position and rotation come from the formation. The model under
+its helper unit supplies the motion number and controller frame; reload the
+render-model global at the native callback boundaries. The first model-position
+call uses the model pointer checked before the VU transfers. Cache the formation
+scale once before writing its three equal vector components.
+
+Preserve both position snapshots and the zero scale-vector fourth lane. The
+model texture is rendered before testing the twelve-frame ribbon limit. Only
+the packet path advances the effect counter. Material and render-texture reads
+follow their preceding callbacks. The existing primitive descriptor retains its
+constructor-owned fields at offsets 4 and 0xC.
+
+The frame ratio drives an unsigned alpha conversion and an unsigned phase count.
+The angle advances once in the work record; a separate local angle walks the
+ribbon. Cache the native width, UV step and vertical step across VU operations
+and packet callbacks. Caching the UV and vertical steps raises the initial comparison from 42 to
+246 matching words at the same total size; the later snapshot and literal fixes
+raise it to 306.
+Use literal-pool values rather than new global data. The decimal spellings
+`0.043633227f` and `0.0033333333f` reproduce words `0x3D32B8C1` and
+`0x3B5A740D` with the original compiler; their exact binary values written as
+long decimal fractions truncate one word low in that compiler's parser.
+
+The 300 iterations each generate four transformed vertices, four UV pairs and
+four colors. Full packets contain 32 vertices and 16 primitives. Reset all three
+array cursors and the count after linking a full packet. The final sixteen
+vertices form eight primitives. File the tag through ordering-table entry 43,
+then reload and increment the live frame counter.
+
+The remaining words concern scale-store and argument scheduling, primitive
+setup register choices, and floating-register allocation in the loop. Descriptor
+store reordering and a named next-Y value worsen the result. Separating the
+angle-step numerator does not improve it. No artificial dependency or register
+constraint is used.
+
+Reproduce with `tools/check_unit.py src/smt3/effect/effPCPBoss.c
+--cflags=-DNON_MATCHING --func effPCPBossONGYDraw -v`.

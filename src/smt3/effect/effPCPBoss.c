@@ -2,6 +2,7 @@
 #include "ps2asm.h"
 #include "fpu.h"
 #include "model.h"
+#include "motion.h"
 #include "draw3d.h"
 #include "effect.h"
 
@@ -176,14 +177,14 @@ typedef struct effPCPBossBael_t
 
 typedef struct effPCPBossONGYParam_t
 {
-    s32 pFormation;
+    struct effPCPBossUnit_t *pFormation;
 } effPCPBossONGYParam_t;
 
 typedef struct effPCPBossONGY_t
 {
-    s32 param;
-    void *pMat;
-    s32 radian;
+    struct effPCPBossUnit_t *param;
+    sdfMat_t *pMat;
+    f32 radian;
     s32 frame;
 } effPCPBossONGY_t;
 
@@ -754,7 +755,7 @@ s32 effPCPBossONGYModelTexRenderCheck(void)
 effPCPBossONGY_t *effPCPBossONGYCreate(effPCPBossONGYParam_t *param, void *unused)
 {
     effPCPBossONGY_t *work = sdfChipAllocDirect(0x10);
-    s32 value = param->pFormation;
+    effPCPBossUnit_t *value = param->pFormation;
     void *matrix;
 
     work->frame = 0;
@@ -777,7 +778,202 @@ void effPCPBossONGYDelete(effPCPBossONGY_t *pPCPBossONGY)
     sdfChipFreeDirect(pPCPBossONGY);
 }
 
+/* NON_MATCHING: 306 of 358 words match at the exact 1432-byte size. */
+#ifdef NON_MATCHING
+extern u32 dds3CheckRenderTexture(void);
+extern void *dds3GetRenderTexture(void);
+extern void sdfMatSetTex(sdfMat_t *mat, sdfTexHandle_t *tex);
+extern void sdf3DPrimLinkMat(sdfDrawTag_t *tag, sdfMat_t *mat, s32 (*allocator)(s32));
+extern s32 mdlGetMotionNum(mdlObj_t *model, s32 group);
+extern void sdfMotionSeek(sdfMotionCtrlr_t *controller, f32 frame);
+extern f32 sdfSin(f32 angle);
+extern void Mult(void);
+extern void mdlSetScale(mdlObj_t *model);
+extern void effPCPBossONGYModelTexRender(const void *target, effPCPBossUnit_t *form, f32 height);
+extern effPCPBossVector_t D_00533DA0;
+extern sdfGrOt_t sdfGrOtTable[];
+
+void effPCPBossONGYDraw(effPCPBossONGY_t *work)
+{
+    effPCPBossVector_t origin;
+    effPCPBossVector_t scale;
+    effPCPBossVector_t target;
+    effPCPBossVector_t points[32];
+    f32 uv[64];
+    u32 colors[32];
+    effPCPBossUnit_t *form;
+    sdfDrawTag_t *tag;
+    effPCPBossVector_t *point;
+    f32 *st;
+    u32 *color;
+    u32 count;
+    u32 i;
+    u32 phase;
+    f32 rate;
+    f32 angle;
+    f32 angleStep;
+    f32 sway;
+    f32 y;
+    f32 v;
+    f32 nextV;
+    f32 x;
+    f32 width;
+    f32 uvStep;
+    f32 yStep;
+    f32 height;
+    f32 renderHeight;
+    f32 offset;
+    f32 scaleValue;
+    mdlObj_t *model;
+    sdfGrOt_t *ot;
+
+    if (!dds3CheckRenderTexture()) {
+        return;
+    }
+    if (!dds3GetRenderTexture()) {
+        return;
+    }
+    model = effPCPBossTexHandle;
+    if (!model) {
+        return;
+    }
+    form = work->param;
+    height = 340.0f;
+    renderHeight = height;
+    offset = 0.0f;
+    width = 271.999969482421875f;
+    SDF_VU0_LOADVECTOR(&form->position);
+    SDF_VU0_STOREVECTOR_MEMOPS(origin);
+    SDF_VU0_STOREVECTOR(&target);
+    mdlSetPosition(model);
+    SDF_VU0_LOADVECTOR(&form->rotation);
+    SDF_VU0_LOADVECTOR_B(&D_00533DA0);
+    Mult();
+    mdlSetRotate(effPCPBossTexHandle);
+    scaleValue = form->scale;
+    scale.f[3] = 0.0f;
+    scale.f[2] = scaleValue;
+    scale.f[0] = scaleValue;
+    scale.f[1] = scaleValue;
+    SDF_VU0_LOADVECTOR(&scale);
+    offset = height + offset;
+    mdlSetScale(effPCPBossTexHandle);
+    mdlSmoothLoopMotion(effPCPBossTexHandle, 0,
+                       mdlGetMotionNum((mdlObj_t *)form->hunit->owner, 0), 0.0f, 4.0f);
+    sdfMotionSeek(((mdlObj_t *)effPCPBossTexHandle)->first,
+                  ((mdlObj_t *)form->hunit->owner)->first->frame);
+    target.f[1] -= offset;
+    effPCPBossONGYModelTexRender(&target, form, renderHeight);
+    if (work->frame >= 12) {
+        return;
+    }
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    origin.f[1] -= height;
+    SDF_VU0_LOADIDENTITY();
+    SDF_VU0_LOADVECTOR_MEMOPS(origin);
+    VU0_ADD_VF31_VF10_XYZ();
+    sdf3DPrimLinkTm(tag, 0);
+    sdfMatSetTex(work->pMat, dds3GetRenderTexture());
+    sdf3DPrimLinkMat(tag, work->pMat, 0);
+    LookAtMatrix(D_002F5C20, D_002F5C30, effPCPBossTexRect);
+    ReverseMatrix();
+    rate = (f32)work->frame / 12.0f;
+    effPCPBossWork.color = ((u32)((1.0f - rate) * 128.0f) << 24) | 0x808080;
+    effPCPBossWork.vertexCount = 32;
+    effPCPBossWork.positions = points;
+    effPCPBossWork.uvs = uv;
+    effPCPBossWork.primCount = 16;
+    effPCPBossWork.colors = colors;
+    count = 0;
+    phase = (u32)(rate * 15.0f);
+    angle = work->radian;
+    work->radian = angle + 0.043633227f;
+    angleStep = ((f32)phase * 3.141592502593994140625f) / 300.0f;
+    sway = rate * 67.99999237060546875f;
+    uvStep = 0.0033333333f;
+    y = -height;
+    v = 0.0f;
+    yStep = 2.2666666507720947265625f;
+    point = points;
+    st = uv;
+    color = colors;
+    for (i = 0; i < 300; i++) {
+        nextV = v + uvStep;
+        st[1] = v;
+        st[0] = 0.0f;
+        st += 2;
+        st[0] = 1.0f;
+        st[1] = v;
+        st += 2;
+        st[1] = nextV;
+        st[0] = 0.0f;
+        st += 2;
+        st[0] = 1.0f;
+        st[1] = nextV;
+        st += 2;
+        x = sdfSin(angle) * sway;
+        point->f[1] = y;
+        point->f[2] = 0.0f;
+        point->f[3] = 0.0f;
+        point->f[0] = x - width;
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(point);
+        point++;
+        point->f[1] = y;
+        point->f[2] = 0.0f;
+        point->f[3] = 0.0f;
+        point->f[0] = width + x;
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(point);
+        point++;
+        point->f[2] = 0.0f;
+        point->f[3] = 0.0f;
+        point->f[0] = x - width;
+        point->f[1] = y + yStep;
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(point);
+        point++;
+        point->f[2] = 0.0f;
+        point->f[3] = 0.0f;
+        point->f[0] = width + x;
+        point->f[1] = y + yStep;
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(point);
+        point++;
+        count += 4;
+        color[0] = 0x80808080;
+        color[1] = 0x80808080;
+        color[2] = 0x80808080;
+        color[3] = 0x80808080;
+        color += 4;
+        y += yStep;
+        angle += angleStep;
+        if (count >= 32) {
+            sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+            color = colors;
+            point = points;
+            st = uv;
+            count = 0;
+        }
+        v = nextV;
+    }
+    if (count >= 4) {
+        effPCPBossWork.primCount = count >> 1;
+        effPCPBossWork.vertexCount = count;
+        sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+    }
+    ot = &sdfGrOtTable[43];
+    ot->regFunc(ot, tag);
+    work->frame++;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYDraw);
+#endif
 
 s32 effPCPBossONGYGetLength(void)
 {
@@ -787,7 +983,7 @@ s32 effPCPBossONGYGetLength(void)
 effPCPBossONGY_t *effPCPBossONGY2Create(effPCPBossONGYParam_t *param, void *unused)
 {
     effPCPBossONGY_t *work = sdfChipAllocDirect(0x10);
-    s32 value = param->pFormation;
+    effPCPBossUnit_t *value = param->pFormation;
     void *matrix;
 
     work->frame = 0;
