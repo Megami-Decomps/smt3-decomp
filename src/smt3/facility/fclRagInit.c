@@ -394,21 +394,6 @@ void ragCreateAllList(s32 onlyHearts, s32 type, ragListWork_t *work)
     }
 }
 
-typedef struct
-{
-    s32 tex;
-    u16 unk_04;
-    u16 unk_06;
-    u16 unk_08;
-    u16 unk_0A;
-    u16 unk_0C;
-    u16 unk_0E;
-    s32 X;
-    s32 Y;
-    s32 Z;
-    u8 color[4];
-    u8 Flag;
-} fclSprite_t;
 
 typedef struct
 {
@@ -493,21 +478,6 @@ typedef struct ragPanel
     void (*update)(struct ragPanel *panel);
 } ragPanel_t;
 
-typedef struct ragSprite
-{
-    s32 tex;
-    u16 width;
-    u16 height;
-    u16 u0;
-    u16 v0;
-    u16 u1;
-    u16 v1;
-    s32 X;
-    s32 Y;
-    s32 Z;
-    u8 color[4];
-    u8 flags;
-} ragSprite_t;
 
 typedef struct fclRagWork
 {
@@ -526,7 +496,7 @@ typedef struct fclRagWork
     /* 0x464C */ u8 *forcedEndScript;
     /* 0x4650 */ s32 backgroundTexture;
     /* 0x4654 */ s32 texture[2];
-    /* 0x465C */ ragSprite_t messageSprite;
+    /* 0x465C */ fclSprite_t messageSprite;
     /* 0x4680 */ ragPanel_t panel[3];
     /* 0x4740 */ fclRagTex_t textureCalc[2];
 } fclRagWork_t;

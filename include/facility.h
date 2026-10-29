@@ -14,6 +14,21 @@ typedef struct
     /* 0x0A */ u16 v1;
 } fclSpriteRect_t;
 
+typedef struct fclSprite_t {
+    s32 tex;
+    union { u16 unk_04; u16 width; };
+    union { u16 unk_06; u16 height; };
+    union { u16 unk_08; u16 u0; };
+    union { u16 unk_0A; u16 v0; };
+    union { u16 unk_0C; u16 u1; };
+    union { u16 unk_0E; u16 v1; };
+    s32 X;
+    s32 Y;
+    s32 Z;
+    u8 color[4];
+    union { u8 Flag; u8 flags; };
+} fclSprite_t;
+
 typedef struct fclSpriteEntry_t
 {
     /* 0x00 */ s16 x;

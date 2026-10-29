@@ -214,21 +214,6 @@ void fclUpdatePanelType2(fclPanel_t *pPanel)
     }
 }
 
-typedef struct
-{
-    s32 tex;
-    u16 width;
-    u16 height;
-    u16 u0;
-    u16 v0;
-    u16 u1;
-    u16 v1;
-    s32 X;
-    s32 Y;
-    s32 Z;
-    u8 color[4];
-    u8 flags;
-} fclSprite_t;
 
 extern void fclSetSprite(fclSprite_t *sprite, s32 width, s32 height, s32 z,
                          s32 u0, s32 v0, s32 u1, s32 v1, s32 color,

@@ -28,21 +28,6 @@ extern void sortSkillList(cmbUnit_t *unit);
 
 
 
-typedef struct
-{
-    /* 0x00 */ s32 tex;
-    /* 0x04 */ u16 unk_04;
-    /* 0x06 */ u16 unk_06;
-    /* 0x08 */ u16 unk_08;
-    /* 0x0A */ u16 unk_0A;
-    /* 0x0C */ u16 unk_0C;
-    /* 0x0E */ u16 unk_0E;
-    /* 0x10 */ s32 X;
-    /* 0x14 */ s32 Y;
-    /* 0x18 */ s32 Z;
-    /* 0x1C */ u8 color[4];
-    /* 0x20 */ u8 Flag;
-} fclSprite_t;
 
 
 
