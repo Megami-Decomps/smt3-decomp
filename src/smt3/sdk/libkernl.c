@@ -744,11 +744,32 @@ INCLUDE_ASM(const s32, "sdk/libkernl", InitAlarm);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceDeci2Open);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDeci2Close);
+extern s32 Deci2Call(s32 command, void *packet);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDeci2ReqSend);
+s32 sceDeci2Close(s32 handle)
+{
+    s32 packet[1];
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDeci2Poll);
+    packet[0] = handle;
+    return Deci2Call(2, packet);
+}
+
+s32 sceDeci2ReqSend(s32 handle, s8 destination)
+{
+    s32 packet[2];
+
+    packet[0] = handle;
+    packet[1] = destination;
+    return Deci2Call(3, packet);
+}
+
+s32 sceDeci2Poll(s32 handle)
+{
+    s32 packet[1];
+
+    packet[0] = handle;
+    return Deci2Call(4, packet);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceDeci2ExRecv);
 

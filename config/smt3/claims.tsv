@@ -701,3 +701,4 @@ src/smt3/effect/billManager.c	redthing1	done	2026-10-29	1 fn / 1180 B	PiM agent:
 src/smt3/newdata/datCalc.c	redthing1	done	2026-10-29	2 fn / 1280 B	PiM agent: native field/event party damage modes, canonical unsigned RNG ABI, real persistent party view and callback reloads; complete owner77/0
 src/smt3/effect/effPCPMisc.c	redthing1	done	2026-10-29	1 fn / 2508 B	PiM agent: DDS PCP donor with native SMT3 SP1/SP2 geometry and qualified VU workspaces/callback lifetimes; reclaimed after prior scope release
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 SDK fn / 212 B	callback-thread initialization using the established kernel descriptor; create/start and existing-thread priority paths exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 120 B	DECI2 close, send request and poll wrappers with native packet widths and signed destination/status contracts; complete owner 6 match, 0 differ
