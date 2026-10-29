@@ -315,15 +315,6 @@ INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLoad);
 
 extern u8 D_003129D8[];
 
-typedef struct {
-    s32 type;
-    s16 unk04;
-    s16 unk06;
-    s32 effectType;
-    s32 unk0C;
-} fldTakaraData_t;
-
-extern fldTakaraData_t fldTakaraTable[];
 
 extern s32 fldTakaraSlotCount;
 
@@ -1452,7 +1443,7 @@ void fldNpcDraw(void)
             if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(slot->object)->owner->inner, 1)) {
                 SDF_VU0_STOREVECTOR(&position);
             }
-            kind = fldTakaraTable[slot->tableIndex].effectType;
+            kind = fldTakaraTable[slot->tableIndex].trap;
             if (kind >= 2 && kind < 4) {
                 if (dds3EffectGetState(D_0054EEDC) != 0) {
                     dds3EffectSetPosition(D_0054EEDC, &position);

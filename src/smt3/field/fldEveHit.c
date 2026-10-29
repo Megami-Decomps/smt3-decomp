@@ -742,14 +742,6 @@ extern u8 *fldDoor_Find2(const char *name);
 extern u8 *fldFindEventEntry(const char *name);
 extern s32 gFldInf_HitIdx, gFldInf_WpExit;
 
-typedef struct {
-    s32 type;
-    s16 item;
-    s16 amount;
-    s32 effectType;
-    s32 value;
-} fldEveTreasure_t;
-extern fldEveTreasure_t fldTakaraTable[];
 
 extern void fldPurgeEveRngProcesses(void);
 
@@ -815,9 +807,9 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
                 if (fldRunDanteGunFlag.word20 == 1) {
                     fldDbgPrint2D(0x40, 0x140, gEvnRng[i]->name);
                     if (fldRunDanteGunFlag.word20 == 1 && room->roomId != -1) {
-                        fldEveTreasure_t *treasure = &fldTakaraTable[room->roomId];
+                        fldTakaraTbl_t *treasure = &fldTakaraTable[room->roomId];
                         sprintf(message, "Takara:%d [%d,%d,%d,%d,%d]", room->roomId,
-                                treasure->type, treasure->item, treasure->amount, treasure->effectType, treasure->value);
+                                treasure->type, treasure->id, treasure->num, treasure->trap, treasure->param);
                         fldDbgPrint2D(0x40, 0x1A0, message);
                     }
                 }

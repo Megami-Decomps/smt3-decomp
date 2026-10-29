@@ -453,14 +453,6 @@ extern s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put);
 
 extern s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put);
 
-typedef struct
-{
-    s32 type;
-    s16 id;
-    s16 num;
-    s32 unk08;
-    s32 unk0C;
-} fldTakaraEntry_t;
 
 extern sdfMemHandle_t *fldNpcModelCount;
 
@@ -474,7 +466,6 @@ extern sdfTexHandle_t *hEffPart;
 
 extern void *fldItemBoxCount;
 
-extern fldTakaraEntry_t fldTakaraTable[];
 
 extern void fldLoadNextFile(s32 field, s32 area);
 
@@ -1422,10 +1413,10 @@ s32 fldCommand_FLD_GET_TAKARA_TBL(void) {
         scrSetIntReturnValue(fldTakaraTable[index].num);
         break;
     case 3:
-        scrSetIntReturnValue(fldTakaraTable[index].unk08);
+        scrSetIntReturnValue(fldTakaraTable[index].trap);
         break;
     case 4:
-        scrSetIntReturnValue(fldTakaraTable[index].unk0C);
+        scrSetIntReturnValue(fldTakaraTable[index].param);
         break;
     }
     return 1;

@@ -65,7 +65,7 @@ extern char D_005315D0[];
 
 extern u8 D_0030A670[], D_00311450[], D_00311850[], D_00314100[], D_002FC1A0[];
 
-extern u8 fldTakaraTable[], fldAllCnt[];
+extern u8 fldAllCnt[];
 
 extern void fldFindTakaraSlot(s32 id);
 

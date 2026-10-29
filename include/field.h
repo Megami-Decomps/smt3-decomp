@@ -149,6 +149,16 @@ typedef struct fldAreaWork_t
 extern fldAreaWork_t fldGlobalBase;
 
 typedef struct {
+    s32 type;
+    s16 id;
+    s16 num;
+    s32 trap;
+    s32 param;
+} fldTakaraTbl_t;
+
+extern fldTakaraTbl_t fldTakaraTable[];
+
+typedef struct {
     u8 x;
     u8 z;
     u16 angle;
