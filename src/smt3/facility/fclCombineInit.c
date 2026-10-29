@@ -3059,7 +3059,67 @@ void cmbDrawBirthDevilMaskBG(void)
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevilMaskBG);
 #endif
 
+extern void cmbSetBirthPanel(datUnitWork_t *unit);
+extern s32 datGetParam(datUnitWork_t *unit, s32 type);
+extern void cmpDrawStatusComEx(datUnitWork_t *unit, u8 alpha, s8 kind, s8 mode,
+                               s8 *delta, s8 option, s32 color, s8 show, s8 extra, s8 full);
+
+#ifdef NON_MATCHING
+void cmbDrawBirthDevil(s32 hideRibbon)
+{
+    datUnitWork_t *selected = cmbGetBirthDevilPanel();
+    s32 type = (s8)CMB_GBWK->birthPanel[0x2C4];
+
+    if (type == 12 && CMB_GBWK->stockSlot[2].index >= 0) {
+        type = 8;
+    }
+    if (CMB_GBWK->unk_1650A == 3) {
+        datUnitWork_t display;
+        datUnitWork_t base;
+        s8 delta[6];
+        s32 hasBase = 0;
+        s32 i;
+
+        cmbCopyCustomDevilToStock(&display, selected);
+        if (type == 2) {
+            datUnitWork_t *source = &cmbGlobalWork->party[CMB_GBWK->stockSlot[0].index].unit;
+
+            if (datDevilTable[source->id].race == 8) {
+                source = &cmbGlobalWork->party[CMB_GBWK->stockSlot[1].index].unit;
+            }
+            cmbCopyCustomDevilToStock(&base, source);
+            hasBase = 1;
+        } else if (type == 8 || type == 9) {
+            cmbCopyDefaultDevilToStock(selected->id, &base);
+            hasBase = 1;
+        } else {
+            for (i = 5; i >= 0; i--) {
+                delta[i] = 0;
+            }
+        }
+        if (hasBase != 0) {
+            for (i = 0; i < 6; i++) {
+                s32 difference = datGetParam(&display, i);
+
+                difference -= datGetParam(&base, i);
+                delta[i] = difference;
+                display.param[i] -= difference;
+            }
+            cmbSetBirthPanel(&base);
+        }
+        cmpDrawStatusComEx(&display, 0x80, -1, 2, delta, 0, 0xA09DC380, 3, 2, 2);
+        cmbSetBirthPanel(NULL);
+        cmbDrawBirthDevilMaskBG();
+    } else {
+        cmpDrawStatusCom(selected, 1, 0, 0);
+    }
+    if (hideRibbon == 0) {
+        fclRbnDraw(CMB_GBWK->ribbon, 0, 0x98, 0, 0x80, 0, -0x80, 0x47);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevil);
+#endif
 
 #ifdef NON_MATCHING
 s32 func_00201FB0(s32 active)
