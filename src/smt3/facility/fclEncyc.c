@@ -2740,7 +2740,69 @@ void ControlModel(fclEncyc_instance_tag *pinst, s32 modelHandle, s32 key)
 }
 
 
+extern s32 GetAnalogPad(void);
+
+#ifdef NON_MATCHING
+s32 GetViewModeKey(fclEncyc_instance_tag *pinst)
+{
+    s32 analog = GetAnalogPad();
+    s8 mode = pinst->unk_6D;
+    s32 keys = 0;
+    s8 up;
+    s8 down;
+    s8 left;
+    s8 right;
+    s8 zoomIn;
+    s8 zoomOut;
+
+    switch (mode) {
+    case 0:
+    case 1:
+        keys = dds3PadButtonState[0x22] < 0;
+        up = dds3PadButtonState[4];
+        down = dds3PadButtonState[5];
+        left = dds3PadButtonState[6];
+        if (mode == 0) {
+            zoomIn = dds3PadButtonState[9];
+            right = dds3PadButtonState[7];
+            zoomOut = dds3PadButtonState[11];
+        } else {
+            right = dds3PadButtonState[7];
+            zoomIn = analog & 0x40;
+            zoomOut = analog & 0x80;
+        }
+        if (analog & 1) keys |= 2;
+        if (analog & 2) keys |= 4;
+        if (analog & 4) keys |= 8;
+        if (analog & 8) keys |= 0x10;
+        if (up != 0) keys |= 0x20;
+        if (down != 0) keys |= 0x40;
+        if (left != 0) keys |= 0x80;
+        if (right != 0) keys |= 0x100;
+        if (zoomIn != 0) keys |= 0x200;
+        if (zoomOut != 0) keys |= 0x400;
+        break;
+    case 2:
+        keys = dds3PadButtonState[0x22] < 0;
+        zoomOut = dds3PadButtonState[7];
+        zoomIn = dds3PadButtonState[6];
+        if (analog & 1) keys |= 0x20;
+        if (analog & 2) keys |= 0x40;
+        if (analog & 4) keys |= 0x80;
+        if (analog & 8) keys |= 0x100;
+        if (analog & 0x10) keys |= 2;
+        if (analog & 0x20) keys |= 4;
+        if (analog & 0x40) keys |= 8;
+        if (analog & 0x80) keys |= 0x10;
+        if (zoomIn != 0) keys |= 0x200;
+        if (zoomOut != 0) keys |= 0x400;
+        break;
+    }
+    return keys;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", GetViewModeKey);
+#endif
 
 extern u8 dds3PadStickState[2][2][2];
 
