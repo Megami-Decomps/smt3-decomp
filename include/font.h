@@ -13,6 +13,7 @@ typedef struct GsFont_t GsFont_t;
 typedef struct frTextHandle_t frTextHandle_t;
 
 typedef struct frFontHandle_t frFontHandle_t;
+typedef struct frFontRequest_t frFontRequest_t;
 
 /* Atlas-list nodes use a flattened index; index zero is the sentinel. */
 struct frFontUvRect_t {

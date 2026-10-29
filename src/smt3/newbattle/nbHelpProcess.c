@@ -5,6 +5,7 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
+#include "font.h"
 
 typedef struct evtUnitHandle_t
 {
@@ -103,15 +104,7 @@ typedef struct nbMainProcessData_t
 
 
 
-typedef struct _FRQ _FRQ;
 
-/* Only the fields this unit reads are named; x and y are in 1/16 pixels. */
-struct _FRQ
-{
-    u8 unk_00[0x4];
-    s32 x;
-    s32 y;
-};
 
 /* The nb_help process work; only the fields this unit touches are named. */
 typedef struct nbHelpProcessData_t
@@ -121,7 +114,7 @@ typedef struct nbHelpProcessData_t
     char *text2;
     s32 text3;
     s32 time;
-    _FRQ *textmax;
+    frFontHandle_t *textmax;
     s32 textwidth;
     s32 nextwidth;
     u32 textcol;
@@ -252,13 +245,13 @@ extern void nbHelpOff(void);
 
 extern s32 itfMesMngGetWidth(s32 id, s32 message, s32 page);
 
-extern _FRQ *frwGetSmallFontFRQ(s32 X, s32 Y, u32 Pri, u32 Color, char *pStr, s32 pFRQ);
+extern frFontRequest_t *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, const char *pStr, frFontRequest_t *pFRQ);
 
-extern _FRQ *frGetCNameFRQ(s8 no, s8 style, _FRQ *chain, s8 tp);
+extern frFontHandle_t *frGetCNameFRQ(s8 no, s8 style, frFontHandle_t *chain, s32 tp);
 
-extern s32 frGetStrWidth2(_FRQ *pFRQ);
+extern u32 frGetStrWidth2(frFontHandle_t *pFRQ);
 
-extern _FRQ *frDestroyFontRequestAfter(_FRQ *pFRQ);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *pFRQ);
 
 extern s32 datGetPlayerLNDLevel(void *work);
 
@@ -337,7 +330,7 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color)
 {
     nbHelpProcessData_t *w;
-    _FRQ *frq;
+    frFontHandle_t *frq;
 
     w = dds3GetProcessData(dds3SearchProcessName(D_005514F0));
     nbHelpOff();
@@ -353,7 +346,7 @@ void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color)
         w->textwidth = itfMesMngGetWidth(w->reqmsgid, w->mesid, 0) >> 4;
         break;
     case 2:
-        frq = frwGetSmallFontFRQ(0, 0, 0xFF0051, color, w->text1, 0);
+        frq = (frFontHandle_t *)frwGetSmallFontFRQ(0, 0, 0xFF0051, color, w->text1, 0);
         w->textwidth = frGetStrWidth2(frq);
         frDestroyFontRequestAfter(frq);
         frq = frGetCNameFRQ(0, 1, 0, 0);
@@ -363,11 +356,11 @@ void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color)
         break;
     case 0:
     default:
-        frq = frwGetSmallFontFRQ(0, 0, 0xFF0051, w->textcol, w->text1, 0);
+        frq = (frFontHandle_t *)frwGetSmallFontFRQ(0, 0, 0xFF0051, w->textcol, w->text1, 0);
         w->textwidth = frGetStrWidth2(frq);
         frDestroyFontRequestAfter(frq);
         if (w->text2 != NULL) {
-            frq = frwGetSmallFontFRQ(0, 0, 0xFF0051, w->textcol, w->text2, 0);
+            frq = (frFontHandle_t *)frwGetSmallFontFRQ(0, 0, 0xFF0051, w->textcol, w->text2, 0);
             w->nextwidth = w->textwidth + 10;
             w->textwidth = w->textwidth + frGetStrWidth2(frq) + 10;
             frDestroyFontRequestAfter(frq);
@@ -531,9 +524,9 @@ void nbDrawHelpPanel(nbHelpProcessData_t *w)
 extern void cmpSetSkillListRows(s32 rows);
 extern void itfMesMngSetMesPosition(s32 id, s32 x, s32 y);
 extern void itfMesMngRequestMessage(s32 id, s32 message, s32 page);
-extern void frSetFontColor(_FRQ *font, u32 color);
-extern s32 frDrawFontEx(_FRQ *font, s8 mode);
-extern void frSetDrawPosition(_FRQ *font, u32 x, u32 y);
+extern void frSetFontColor(frFontHandle_t *font, u32 color);
+extern s32 frDrawFontEx(frFontHandle_t *font, s8 mode);
+extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
 extern void nbDrawHelpPanel(nbHelpProcessData_t *w);
 
 s32 nbHelpProcess1(dds3ProcessID_t *id)
@@ -551,7 +544,7 @@ s32 nbHelpProcess1(dds3ProcessID_t *id)
             itfMesMngRequestMessage(w->reqmsgid, w->mesid, 0);
             break;
         case 2:
-            w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
+            w->textmax = (frFontHandle_t *)frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
             frSetFontColor(w->textmax, w->panelAlpha | 0x80808000);
             frDrawFontEx(w->textmax, 1);
             frDestroyFontRequestAfter(w->textmax);
@@ -565,14 +558,14 @@ s32 nbHelpProcess1(dds3ProcessID_t *id)
             w->textmax = NULL;
             break;
         case 0:
-            w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
+            w->textmax = (frFontHandle_t *)frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
             frSetFontColor(w->textmax, w->panelAlpha | 0x80808000);
             frDrawFontEx(w->textmax, 1);
             frDestroyFontRequestAfter(w->textmax);
             w->textmax = NULL;
             if (w->text2 != NULL) {
                 x += w->nextwidth;
-                w->textmax = frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text2, 0);
+                w->textmax = (frFontHandle_t *)frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text2, 0);
                 frSetFontColor(w->textmax, w->panelAlpha | 0x80808000);
                 frDrawFontEx(w->textmax, 1);
                 frDestroyFontRequestAfter(w->textmax);
