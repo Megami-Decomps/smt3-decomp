@@ -1425,7 +1425,7 @@ void fldNpcCalc(void)
             } else {
                 fldNpcBlurHandle = 0;
             }
-        } else if (fldGlobalBase.word4C != -1 && *(f32 *)&fldGlobalBase.wordC8 > 3.0f) {
+        } else if (fldGlobalBase.word4C != -1 && fldGlobalBase.playerMoveDistance > 3.0f) {
             control = fldGetUnitControl();
             fldSibukiStart(control->handle->poseset->pos2.x, *(f32 *)fldGlobalBase.unkC4 - 5.0f,
                            control->handle->poseset->pos2.z);
