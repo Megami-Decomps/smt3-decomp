@@ -1723,7 +1723,42 @@ s32 cmbCalcResultLevel(cmbUnit_t *unitA, cmbUnit_t *unitB, cmbUnit_t *unitC, s8 
     return (a + b + c + 2) / 3;
 }
 
+#ifdef NON_MATCHING
+s32 cmbGetRaceCombineResult(s32 race, u8 level)
+{
+    u8 raceId = (u8)race;
+    s32 count = cmbRaceTable;
+    cmbRaceSortEntry_t entries[count];
+    u16 eligible[count];
+    u16 eligibleCount = 0;
+    s32 i;
+
+    if (raceId == 0) {
+        return 0;
+    }
+    cmbSetRaceResult(entries, (u16)cmbRaceTable);
+    for (i = 0; i < count; i++) {
+        if (entries[i].info->race == raceId &&
+            cmbEntryIsValid(entries[i].index) == 0 &&
+            cmbFindBirthEntry(entries[i].index) == 0 &&
+            cmbDevilIsUnlocked(entries[i].index) == 0 &&
+            cmbDevilIsSpecial(entries[i].index) == 0) {
+            eligible[eligibleCount++] = entries[i].index;
+        }
+    }
+    if (eligibleCount == 0) {
+        return 0;
+    }
+    for (i = 0; i < eligibleCount; i++) {
+        if (datDevilTable[eligible[i]].baseLevel < level) {
+            return i == 0 ? eligible[0] : eligible[i - 1];
+        }
+    }
+    return eligible[eligibleCount - 1];
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetRaceCombineResult);
+#endif
 
 void cmbGetDevilIdAndRace(cmbUnit_t *unit, u16 *devilId, u8 *race)
 {
