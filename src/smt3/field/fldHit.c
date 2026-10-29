@@ -44,7 +44,7 @@ extern u32 fldItemBoxObjBuf;
 
 extern collision_s *fldMatterTable;
 
-extern s32 D_0054EDA0;
+extern s32 fldValueRecordCount;
 
 extern s32 fldPlaneCount;
 
@@ -105,7 +105,7 @@ void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ
 dds3Basic_t *fldFindMatterIndex(s32 id) {
     s32 index = 0;
 
-    if (D_0054EDA0 > 0) {
+    if (fldValueRecordCount > 0) {
         collision_s *record = (collision_s *)fldMatterTable;
         do {
             if (record->resID == id) {
@@ -113,7 +113,7 @@ dds3Basic_t *fldFindMatterIndex(s32 id) {
             }
             index++;
             record++;
-        } while (index < D_0054EDA0);
+        } while (index < fldValueRecordCount);
     }
     return 0;
 }
@@ -121,7 +121,7 @@ dds3Basic_t *fldFindMatterIndex(s32 id) {
 void fldFindMatterIndexFrom(s32 id, dds3Basic_t *worldNode) {
     s32 index;
 
-    for (index = 0; index < D_0054EDA0; index++) {
+    for (index = 0; index < fldValueRecordCount; index++) {
         if (((collision_s *)fldMatterTable)[index].resID == id) {
             ((collision_s *)fldMatterTable)[index].matter = worldNode;
         }
@@ -133,7 +133,7 @@ extern s32 D_0054ED90;
 extern s32 fldHitChkMatter;
 
 void fldClearMatterFlags(void) {
-    s32 count = D_0054EDA0;
+    s32 count = fldValueRecordCount;
 
     if (count > 0) {
         dds3Basic_t **node = &((collision_s *)fldMatterTable)->matter;
@@ -143,7 +143,7 @@ void fldClearMatterFlags(void) {
             node = (dds3Basic_t **)((u8 *)node + sizeof(collision_s));
         } while (count != 0);
     }
-    D_0054EDA0 = 0;
+    fldValueRecordCount = 0;
     fldHitChkMatter = -1;
     D_0054ED90 = -1;
     fldPlaneCount = 0;
@@ -205,7 +205,7 @@ void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
             remaining = faceCount;
             for (; remaining != 0; remaining--, face++, trianglesRemaining--) {
                 u32 vertexIndex;
-                record = &((collision_s *)fldMatterTable)[D_0054EDA0];
+                record = &((collision_s *)fldMatterTable)[fldValueRecordCount];
                 record->numedges = trianglesRemaining > 0 ? 3 : 4;
                 vertexIndex = face->vertexIndices[0];
                 vertices[0][0] = sourceVertices[vertexIndex][0] + translation[0];
@@ -751,7 +751,7 @@ void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
                 record->hojiID = sceneFlag;
                 record->npcID = ownerIndex;
                 record->hitflag = 0;
-                D_0054EDA0++;
+                fldValueRecordCount++;
             }
         }
     }
@@ -852,7 +852,7 @@ void fldHitChkUnitElvOnly(f32 *phys_pos) {
     }
     travel[0] = sdfFabs(current[0] - previous[0]);
     travel[2] = sdfFabs(current[2] - previous[2]);
-    for (index = 0; index < D_0054EDA0; index++) {
+    for (index = 0; index < fldValueRecordCount; index++) {
         if (!(((collision_s *)fldMatterTable)[index].pFace->attributes & 0x80)) {
             continue;
         }
@@ -1005,7 +1005,7 @@ void fldHitChkUnitDamage(f32 *phys_pos)
     }
     axis = sdfFabs(current.z - previous.z) < sdfFabs(current.x - previous.x) ? 0 : 2;
     fldHitChkUnitElvOnly(phys_pos);
-    count = D_0054EDA0;
+    count = fldValueRecordCount;
     for (pass = 0; pass < 2; pass++) {
         for (index = 0; index < count; index++) {
             collision_s *face = &fldMatterTable[index];
@@ -1019,7 +1019,7 @@ void fldHitChkUnitDamage(f32 *phys_pos)
                 continue;
             }
             if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1, face->hojiID) != 0) {
-                count = D_0054EDA0;
+                count = fldValueRecordCount;
                 continue;
             }
             face = &fldMatterTable[index];
@@ -1041,7 +1041,7 @@ void fldHitChkUnitDamage(f32 *phys_pos)
                     fldGlobalBase.wordB0 = 1;
                 }
             }
-            count = D_0054EDA0;
+            count = fldValueRecordCount;
         }
     }
 }
@@ -1116,7 +1116,7 @@ void fldHitChkUnit(f32 *position)
         position[1] = previous.y;
         return;
     }
-    for (index = 0; index < D_0054EDA0; index++) {
+    for (index = 0; index < fldValueRecordCount; index++) {
         fldMatterTable[index].hitflag = 0;
     }
     axis = sdfFabs(current.z - previous.z) < sdfFabs(current.x - previous.x) ? 0 : 2;
@@ -1124,7 +1124,7 @@ void fldHitChkUnit(f32 *position)
     fldGlobalBase.wordC0 = 0;
     fldHitChkUnitElvOnly(position);
     for (pass = 0; pass < 2; pass++) {
-        for (index = 0; index < D_0054EDA0; index++) {
+        for (index = 0; index < fldValueRecordCount; index++) {
             collision_s *face = &fldMatterTable[index];
             fldCollisionFace_t *data;
             u32 attributes;
@@ -1414,7 +1414,7 @@ void fldHitChkUnitVWM(f32 *position)
         position[1] = previous[1];
         return;
     }
-    for (index = 0; index < D_0054EDA0; index++) {
+    for (index = 0; index < fldValueRecordCount; index++) {
         fldMatterTable[index].hitflag = 0;
     }
     travel[0] = sdfFabs(current[0] - previous[0]);
@@ -1428,7 +1428,7 @@ void fldHitChkUnitVWM(f32 *position)
     }
     fldHitChkUnitElvOnly(position);
     for (pass = 0; pass < 2; pass++) {
-        for (index = 0; index < D_0054EDA0; index++) {
+        for (index = 0; index < fldValueRecordCount; index++) {
             if (pass == 0) {
                 if (fldMatterTable[index].mode2D == axis) {
                     continue;
@@ -1749,7 +1749,7 @@ void fldHitWM_Mask(void)
     pos.x = 0.0f;
     pos.y = 0.0f;
     pos.z = 0.0f;
-    count = D_0054EDA0;
+    count = fldValueRecordCount;
     if (count > 0) {
         table = fldMatterTable;
         for (i = 0; i < count; i++) {
@@ -1772,7 +1772,7 @@ void fldHitWM_Mask(void)
                                  0x80000000, face->point[2][0] + pos.x, face->point[2][1] + pos.y, face->point[2][2] + pos.z,
                                  0x80000000, face->point[3][0] + pos.x, face->point[3][1] + pos.y, face->point[3][2] + pos.z);
                 }
-                count = D_0054EDA0;
+                count = fldValueRecordCount;
             }
             table = fldMatterTable;
         }
@@ -1894,7 +1894,7 @@ s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     target[0] = end[0];
     target[1] = end[1];
     target[2] = end[2];
-    for (index = 0; index < D_0054EDA0; index++) {
+    for (index = 0; index < fldValueRecordCount; index++) {
         if (((collision_s *)fldMatterTable)[index].mode2D == 1) {
             if (!(((collision_s *)fldMatterTable)[index].pFace->attributes & 0x100)) {
                 continue;
@@ -2010,7 +2010,7 @@ s32 fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     target[0] = end[0];
     target[1] = end[1];
     target[2] = end[2];
-    for (index = 0; index < D_0054EDA0; index++) {
+    for (index = 0; index < fldValueRecordCount; index++) {
         if (((collision_s *)fldMatterTable)[index].mode2D == 1) {
             if (!(((collision_s *)fldMatterTable)[index].pFace->attributes & 0x100)) {
                 continue;
@@ -2213,7 +2213,7 @@ INCLUDE_SDATA(const s32, "field/fldHit", fldItemBoxObjCount);
 
 INCLUDE_SDATA(const s32, "field/fldHit", fldMatterTable);
 
-INCLUDE_SDATA(const s32, "field/fldHit", D_0054EDA0);
+INCLUDE_SDATA(const s32, "field/fldHit", fldValueRecordCount);
 
 INCLUDE_SDATA(const s32, "field/fldHit", fldPlaneCount);
 

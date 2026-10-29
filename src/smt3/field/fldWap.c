@@ -135,7 +135,7 @@ extern u32 D_0054EDA8;
 
 extern u32 D_0054EDAC;
 
-extern s32 D_0054EDA0;
+extern s32 fldValueRecordCount;
 
 extern s32 fldPlaneCount;
 
