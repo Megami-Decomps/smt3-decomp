@@ -6727,7 +6727,37 @@ void camp_23CDB8(s32 x, s32 y, s32 z, s32 h, s32 n, s32 f, s32 g, s32 col)
 }
 
 
+extern frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain,
+                                     s32 firstOption);
+extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
+extern void frSetPriority(frFontHandle_t *font, u32 priority);
+extern void frSetFontColor(frFontHandle_t *font, u32 color);
+
+#ifdef NON_MATCHING
+void campDrawStatusRow1(s32 x, s32 y, u32 color, datUnitWork_t *unit)
+{
+    u32 flags = unit->flag;
+    frFontHandle_t *font;
+
+    if (!(flags & 1)) {
+        return;
+    }
+    x += 0x180;
+    y += 0x18;
+    if (flags & 4) {
+        font = frGetCNameFRQ(0, 1, NULL, 0);
+        frSetDrawPosition(font, x, y);
+        frSetPriority(font, 0xFFFFF0);
+        frSetFontColor(font, color);
+    } else {
+        font = frwGetSmallFontFRQ2(x, y, 0xFFFFF, color, text2[unit->id], NULL);
+    }
+    func_001C7E38(font, 1, 0x47);
+    frDestroyFontRequestAfter(font);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStatusRow1);
+#endif
 
 void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags)
 {
