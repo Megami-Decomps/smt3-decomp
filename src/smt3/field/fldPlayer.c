@@ -76,17 +76,9 @@ extern void dds3SetSclPoseSet(dds3Basic_t *pBasic, f32 *scl);
 
 extern f32 fldWmapPlayerState;
 
-/* The world-map player scale triple, copied as one word-aligned 16-byte block. */
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-} fldScaleVec_t;
+extern sdfVector4_t D_00531D08;
 
-extern fldScaleVec_t D_00531D08;
-
-extern fldScaleVec_t D_00531D18;
+extern sdfVector4_t D_00531D18;
 
 extern s32 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, s32 flag);
 
@@ -700,7 +692,7 @@ void fldPlayerCalc_FastStart(void)
 void fldPlayerCalc_Wm3(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
     mdlObj_t *model = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
-    fldScaleVec_t scale = D_00531D08;
+    sdfVector4_t scale = D_00531D08;
     f32 next;
 
     if (fldWmWarpMode != 1) {
@@ -723,7 +715,7 @@ void fldPlayerCalc_Wm3(void) {
 void fldPlayerCalc_Wm4(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
     mdlObj_t *model = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
-    fldScaleVec_t scale = D_00531D18;
+    sdfVector4_t scale = D_00531D18;
     f32 next;
 
     if (fldWmWarpMode == 2) {
@@ -754,7 +746,7 @@ extern s32 D_0054ED00, D_0054ED04;
 extern collision_s *fldMatterTable;
 extern sdfVector4_t fldWmapPlayerPos, D_002FCA30, D_002FCA40;
 extern const volatile sdfVector4_t D_00531D38;
-extern const volatile fldScaleVec_t D_00531D28;
+extern const volatile sdfVector4_t D_00531D28;
 extern sdfMatrix4_t D_002FA240;
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3PadVibrationSet(s32 port, s32 power, s32 frames);
@@ -774,7 +766,7 @@ s32 fldPlayerCalc_Wm2(void)
     fldUnitControl_t *control = fldGetUnitControl();
     mdlObj_t *model = dds3ObjectBaseGetModelHandle(control->handle);
     s32 step = fldPlayerStepDist;
-    fldScaleVec_t scale __attribute__((aligned(16))) = D_00531D28;
+    sdfVector4_t scale __attribute__((aligned(16))) = D_00531D28;
     sdfVector4_t position __attribute__((aligned(16)));
     sdfVector4_t initial __attribute__((aligned(16)));
     sdfVector4_t previous __attribute__((aligned(16)));
