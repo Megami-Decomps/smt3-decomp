@@ -164,6 +164,10 @@ void fclDrawBG(fclSprite_t *pSprite, s32 OtNo)
     }
 }
 
+#ifdef NON_MATCHING
+extern void fclSetSpriteEx(fclSprite_t *pSprite, fclSpriteRect_t *pSpriteBase, s32 X, s32 Y, s32 Z, s32 Col, s32 Flag, s32 TexHandle);
+#endif
+
 void fclSetupSprite(s32 Z, fclSprite_t *pSprite, u8 page, u16 spriteId, s32 *texList, fclSpriteTbl_t *table)
 {
     fclSpriteEntry_t *e;

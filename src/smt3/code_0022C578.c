@@ -3416,8 +3416,6 @@ extern s32 cmpUpdateSeqInfo(cmbGbWork_t *work, s8 value);
 
 #ifdef NON_MATCHING
 extern void campUpdateStockSelect(s8 mode);
-extern void cmpUpdateDestroyItemConfirm(void);
-extern void cmpUpdateSkillSelect(void);
 #endif
 
 s32 camp_update_Process(void)

@@ -4136,8 +4136,6 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_ShowTime_Draw);
 
 /* NON_MATCHING: 4 of 75 words differ (first at +0x34). */
 #ifdef NON_MATCHING
-extern void effPCPDANTE_ShowTime_Bingo_Draw(effPCPDANTE_ShowTime_tag *work);
-extern void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work);
 
 void effPCPDANTE_ShowTime_Draw(effPCPDANTE_ShowTime_tag *hData)
 {
