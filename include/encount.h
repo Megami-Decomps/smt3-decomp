@@ -7,6 +7,10 @@
  * packs the encounter roll draws from (nbEncountTable, nbEncountCalc), and
  * the formations their rows name (nbEncountFormTable). */
 
+/* The fields fldEncounterFloorTable holds, from field 0: fldReadyScene reads
+ * it for a field below this alone. */
+#define FLD_ENCOUNTER_FIELDS 46
+
 /* A field's encounter packs by area: the normal ones, or the alternate ones
  * once its event flag is set (fldReadyScene, fldGlobalBase.defaultEncounterId). */
 typedef struct fldEncounterFloorTable_t {
