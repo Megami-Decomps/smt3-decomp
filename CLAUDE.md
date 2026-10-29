@@ -15,7 +15,8 @@ measured on DDS and not on this ELF, it says so; keep that distinction when edit
 ## Matching policy
 
 Follow `docs/CONTRIBUTING.md`, which adopts dds-decomp's current matching rules
-as the single canonical policy, including its evidence-backed permissions.
+as the canonical default, with the SMT3-only localized compiler-constraint and
+conservative same-symbol ABI-view allowances documented there.
 Ordinary C need not reproduce the original source spelling. Compiler traces,
 live scalar reuse, one-pass blocks and the narrow frame/dead-code exceptions
 are permitted under that policy's conditions; exact complete-unit and retail

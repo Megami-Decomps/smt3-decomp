@@ -7,9 +7,9 @@ it, decompile it, verify it, and name it.
 
 The [dds-decomp matching rules](https://github.com/Megami-Decomps/dds-decomp/blob/main/docs/CONTRIBUTING.md#matching-rules)
 are the canonical default for this project, including their permissions and
-evidence requirements, except for the SMT3-only compiler-constraint allowance
-below. That local allowance does not change DDS policy; all other canonical
-conditions still apply.
+evidence requirements, except for the SMT3-only compiler-constraint and
+conservative same-symbol ABI-view allowances below. These local allowances do
+not change DDS policy; all other canonical conditions still apply.
 
 Prefer clear, plausible ordinary C. Accepted source must preserve behavior and
 compile to the exact retail bytes. Matching establishes the reconstructed
@@ -32,7 +32,7 @@ spelling or variable names. In particular, the canonical policy permits:
 - Bounded search as a diagnostic aid. Reduce a hit to readable, ordinary C,
   explain the compiler property, and qualify it independently before landing.
 
-Apart from the localized constraints below, these permissions retain the
+Apart from the narrow local allowances below, these permissions retain the
 prohibitions on fakematches, register pinning, artificial dependencies, false
 types, dummy uses and unsupported compiler flags.
 A close reconstruction remains `INCLUDE_ASM` with its best draft preserved.
@@ -65,6 +65,37 @@ behavior changes merely to improve a score. The empty template emits no
 instructions; it does not replace C with handwritten scalar assembly. Complete
 affected-owner code and data checks, the retail checksum build, regression
 tests and any applicable compiler-trace output-parity checks remain unchanged.
+
+### Conservative same-symbol ABI views (SMT3 only)
+
+A narrowly scoped external declaration may withhold same-unit definition
+knowledge from the compiler through a distinct C identifier with an assembler
+label naming the existing function. Prefer the ordinary direct declaration
+whenever it matches. This is a conservative compiler-visibility reconstruction
+aid, not permission to redirect a call or invent an ABI. All conditions apply:
+
+- Match the provider's canonical function type exactly, including its return
+  and parameter types, calling convention and declared attributes. Keep the
+  original linker target and the truthful C provider unchanged. Do not add
+  unsupported `pure`, `const`, `nothrow` or other optimizer promises.
+- Preserve behavior, call targets and ordering, memory effects and ABI. No
+  wrapper, runtime indirection, replacement symbol, helper demotion, or
+  source-owner or translation-unit reassignment is permitted by this allowance.
+  Compiler flags and the configured unit boundaries remain unchanged.
+- Establish the definition-visibility dependency with paired ordinary and
+  opaque-declaration builds in the same complete owner and compiler context.
+  Review the emitted calls and relocations to confirm the original targets,
+  the unchanged provider and all affected code and owned data. Do not infer
+  an internal compiler mechanism from a byte comparison alone; any claimed
+  compiler-trace mechanism still needs its applicable output-parity checks.
+- Explain the deliberate opacity and the paired evidence in a source comment.
+  It establishes neither historical source spelling nor an original TU
+  boundary. Independent semantic review and complete affected-owner/data
+  checks, the full retail checksum build and regression tests remain required;
+  checker silence or a single matching caller is not approval.
+
+This allowance does not authorize broader symbol redirection, false types,
+fabricated side effects, instruction-emitting assembly or relaxed verification.
 
 For SMT3, use the existing COP2/VU0 and MMI macros in `include/ps2asm.h` and
 check the complete affected units with `tools/check_unit.py`, then the full
