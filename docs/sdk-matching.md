@@ -856,3 +856,21 @@ assembly container. The following byte-identified 320-byte `_div_df.o`
 remains assembly-backed in its own container. The recovered boundaries do
 not change instructions, data ownership, compiler flags or matching credit
 for those adjacent routines.
+
+
+## Frame lookup after allocation failure
+
+`sdk/libgcc::libc_2D29B8` matches all 424 instruction bytes. It holds the
+registered-object semaphore while lazily initializing PC ranges and finding
+the containing object. A missing sorted array, or an array still equal to
+the original table, triggers another initialization attempt. Allocation
+failure then falls back to the original single frame sequence or pointer
+table, keeping the semaphore held through those searches. The table search
+stops before advancing its cursor when a frame is found.
+
+A genuinely sorted array takes the other path: release the semaphore first,
+then load the current count and array for unsigned binary search. Do not
+capture these fields before unlocking. The midpoint and frame-end arithmetic
+use native 32-bit wrapping operations; containment is begin-inclusive and
+end-exclusive. Every path releases the semaphore exactly once. The caller
+passes a 32-bit PC and consumes the returned descriptor pointer or null.

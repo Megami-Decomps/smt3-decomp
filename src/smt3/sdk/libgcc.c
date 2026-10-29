@@ -807,7 +807,53 @@ void libc_2D2850(object *entry)
 }
 
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D29B8);
+u32 *libc_2D29B8(u32 pc)
+{
+    object *entry;
+    u32 low;
+    u32 high;
+    u32 *found;
+
+    WaitSema(D_0052C37C);
+    for (entry = D_0059AD60; entry != NULL; entry = entry->next) {
+        if (entry->pc_begin == NULL)
+            libc_2D2850(entry);
+        if (pc >= (u32)entry->pc_begin && pc < (u32)entry->pc_end)
+            break;
+    }
+    if (entry == NULL) {
+        SignalSema(D_0052C37C);
+        return NULL;
+    }
+    if (entry->fde_array == NULL || entry->fde_array == entry->fde_begin)
+        libc_2D2850(entry);
+    if (entry->fde_array != NULL && entry->fde_array != entry->fde_begin) {
+        SignalSema(D_0052C37C);
+        for (low = 0, high = entry->count; low < high;) {
+            u32 index = (low + high) / 2;
+            u32 *frame = ((u32 **)entry->fde_array)[index];
+            if (pc < frame[2])
+                high = index;
+            else if (pc >= frame[2] + frame[3])
+                low = index + 1;
+            else
+                return frame;
+        }
+    } else {
+        if (entry->fde_array != NULL) {
+            u32 **table = entry->fde_array;
+            do {
+                found = libc_2D27F8(*table, pc);
+            } while (found == NULL && *++table != NULL);
+        } else {
+            found = libc_2D27F8(entry->fde_begin, pc);
+        }
+        SignalSema(D_0052C37C);
+        return found;
+    }
+    return NULL;
+}
+
 
 INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B460);
 
