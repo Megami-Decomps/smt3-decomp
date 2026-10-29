@@ -1513,7 +1513,7 @@ void nbCameraShot_AttackTuibiReverse_Set(nbCamera_t *pNbCamera)
 
 extern s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera);
 extern void nbCameraState_InvokeTarget_SearchSet(void);
-extern s32 sdfFloatToULong(f32 value);
+extern s32 fptodp(f32 value);
 extern s32 printf(const char *format, ...);
 extern f32 D_003246D0[];
 extern f32 D_003246F0[];
@@ -1564,7 +1564,7 @@ void nbCameraState_SkillAttack_Init(void)
                 bCameraShot_AttackInvokeTargetPartyNear_Set(pCamera, &work);
                 nbCameraSkillAttackStep = 0xB;
             } else {
-                printf("nbCameraState_SkillAttack : %f < NBCAMERA_ATTACK_MOVE_WIDTH_MAX\n", sdfFloatToULong(width));
+                printf("nbCameraState_SkillAttack : %f < NBCAMERA_ATTACK_MOVE_WIDTH_MAX\n", fptodp(width));
                 nbCameraShot_InvokeTargetReverse_Set2(pCamera, &work);
                 nbCameraSkillAttackStep = 0xB;
             }

@@ -117,7 +117,7 @@ addr	name	size	lib	member	evidence	sdk	upstream
 002CD160	sceSifMBindRpcParam	408	libmrpc.a	msifrpc.o	name	204,303	-
 002CD2F8	sceSifMUnBindRpc	288	libmrpc.a	msifrpc.o	name	204,303	-
 002CD418	sceSifMCallRpc	616	libmrpc.a	msifrpc.o	name	204,303	-
-002CD680	gcc2_compiled__7	104	-	-	none	-	-
+002CD680	ipuWriteFromIpuChcr	104	-	-	none	-	-
 002CD6E8	setD4_CHCR	104	libipu.a	?	name	204,303	-
 002CD750	sceIpuStopDMA	232	libipu.a	libipu.o	name	204,303	-
 002CD838	sceIpuRestartDMA	336	libipu.a	libipu.o	bytes	204,303	-
@@ -171,7 +171,7 @@ addr	name	size	lib	member	evidence	sdk	upstream
 002D13C8	runAtExitList	144	-	-	none	-	-
 002D1458	initAtExit	192	libgcc[2.96-ee-001003-1]	__main.o	bytes	296	src/gcc/libgcc2.c
 002D1518	initFloatOnce	56	libgcc[2.96-ee-001003-1]	__main.o	bytes	296	src/gcc/libgcc2.c
-002D1550	sdfFloatToULong	64	-	-	none	-	-
+002D1550	fptodp	64	-	-	none	-	-
 002D1590	libc_2D1590	608	-	-	none	-	-
 002D17F0	dpadd	88	libgcc[2.96-ee-001003-1]	_addsub_df.o	bytes	296	-
 002D1848	dpsub	104	libgcc[2.96-ee-001003-1]	_addsub_df.o	name	296	-
@@ -179,9 +179,9 @@ addr	name	size	lib	member	evidence	sdk	upstream
 002D1B38	dpcmp	80	-	-	none	-	-
 002D1B88	litodp	184	libgcc[2.96-ee-001003-1]	_si_to_df.o	bytes	296	-
 002D1C40	dptoli	160	libgcc[2.96-ee-001003-1]	_df_to_si.o	name	296	-
-002D1CE0	dptoul	48	libgcc[2.96-ee-001003-1]	_df_to_usi.o	name	296	-
-002D1D10	sdfDoubleToULong	88	-	-	none	-	-
-002D1D68	sdfDoubleToUInt	160	libgcc[2.96-ee-001003-1]	_df_to_usi.o	bytes	296	-
+002D1CE0	__make_dp	48	-	-	none	-	-
+002D1D10	dptofp	88	-	-	none	-	-
+002D1D68	dptoul	160	libgcc[2.96-ee-001003-1]	_df_to_usi.o	bytes	296	-
 002D1E08	libc_2D1E08	72	-	-	none	-	-
 002D1E50	libc_2D1E50	88	libgcc[2.96-ee-001003-1]	frame-dwarf2.o	bytes	296	src/gcc/frame-dwarf2.c
 002D1EA8	libc_2D1EA8	248	libgcc[2.96-ee-001003-1]	frame-dwarf2.o	bytes	296	src/gcc/frame-dwarf2.c
@@ -309,7 +309,7 @@ addr	name	size	lib	member	evidence	sdk	upstream
 002DBA10	_read_r	112	libc.a	readr.o	name	296	src/newlib/libc/reent/readr.c
 002DBA80	RFU000_FullReset	16	libkernl.a	klib.o	name	204,303	-
 002DBA90	ResetEE	16	libkernl.a	klib.o	name	204,303	-
-002DBAA0	libc_2DBAA0	16	-	-	none	-	-
+002DBAA0	SetGsCrt	16	-	-	none	-	-
 002DBAB0	RFU003	16	libkernl.a	klib.o	name	204,303	-
 002DBAC0	libc_2DBAC0	16	-	-	none	-	-
 002DBAD0	RFU005	16	libkernl.a	klib.o	name	204,303	-
@@ -342,8 +342,8 @@ addr	name	size	lib	member	evidence	sdk	upstream
 002DBC80	iSetAlarm	16	libkernl.a	klib.o	name	204,303	-
 002DBC90	iReleaseAlarm	16	libkernl.a	klib.o	name	204,303	-
 002DBCA0	CreateThread	16	libkernl.a	klib.o	name	204,303	-
-002DBCB0	libc_2DBCB0	16	-	-	none	-	-
-002DBCC0	StartThread	16	libkernl.a	?	name	204,303	-
+002DBCB0	DeleteThread	16	-	-	none	-	-
+002DBCC0	_StartThread	16	libkernl.a	?	name	204,303	-
 002DBCD0	ExitThread	16	libkernl.a	klib.o	name	204,303	-
 002DBCE0	ExitDeleteThread	16	libkernl.a	klib.o	name	204,303	-
 002DBCF0	TerminateThread	16	libkernl.a	klib.o	name	204,303	-
@@ -439,7 +439,7 @@ addr	name	size	lib	member	evidence	sdk	upstream
 002DC290	isceSifSetDChain	16	libkernl.a	klib.o	name	204,303	-
 002DC2A0	sceSifSetReg	16	libkernl.a	klib.o	name	204,303	-
 002DC2B0	sceSifGetReg	16	libkernl.a	klib.o	name	204,303	-
-002DC2C0	libc_2DC2C0	16	-	-	none	-	-
+002DC2C0	_ExecOSD	16	-	-	none	-	-
 002DC2D0	Deci2Call	16	libkernl.a	klib.o	name	204,303	-
 002DC2E0	PSMode	16	libkernl.a	klib.o	name	204,303	-
 002DC2F0	MachineType	16	libkernl.a	klib.o	name	204,303	-

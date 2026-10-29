@@ -30,3 +30,12 @@
 0x0052C260	__malloc_current_mallinfo	inferred	newlib: _malloc_trim_r addresses these mallinfo totals; 0x28-byte state follows the high-water marks, same layout and initial bytes as DDS1.
 0x0052C2A8	sbrkBreak	inferred	sbrk 0x002DC5A0 pairs with DDS1 0x0030B120; the same loads/stores address this current break with interrupts disabled.
 0x0054B550	_ctype_	inferred	newlib: unique 257-byte EOF-plus-character-class table, byte-identical to DDS1 0x003B7990; _strtol_r and mdlManager FileUpper index its character flags from +1.
+0x002CD680	ipuWriteFromIpuChcr	evidence	Native SDK routine paired with DDS; was gcc2_compiled__7. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002D1550	fptodp	evidence	Native SDK routine paired with DDS; was sdfFloatToULong. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002D1CE0	__make_dp	evidence	Native SDK routine paired with DDS; was dptoul. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002D1D10	dptofp	evidence	Native SDK routine paired with DDS; was sdfDoubleToULong. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002D1D68	dptoul	evidence	Native SDK routine paired with DDS; was sdfDoubleToUInt. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002DBAA0	SetGsCrt	evidence	Native SDK routine paired with DDS; was libc_2DBAA0. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002DBCB0	DeleteThread	evidence	Native SDK routine paired with DDS; was libc_2DBCB0. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002DBCC0	_StartThread	evidence	Native SDK routine paired with DDS; was StartThread. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002DC2C0	_ExecOSD	evidence	Native SDK routine paired with DDS; was libc_2DC2C0. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.

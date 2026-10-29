@@ -1060,3 +1060,41 @@ binary64 union view. Exponent fields above 52 yield a normal power of two;
 fields 1 through 52 yield the corresponding subnormal spacing, while field 0
 also returns the minimum subnormal spacing. Its result words are initialized
 in their native branches without extra storage or instructions.
+
+## Native SDK names: conversions, packing and kernel syscalls
+
+The curated symbol map corrects these names. Its export writer suppresses IDB
+rows at curated addresses, so regeneration cannot restore an old name at the
+wrong function. The IDB snapshot still needs these corrections when available.
+
+| Address | Previous name | Native name |
+| --- | --- | --- |
+| 0x002CD680 | gcc2_compiled__7 | ipuWriteFromIpuChcr |
+| 0x002D1550 | sdfFloatToULong | fptodp |
+| 0x002D1CE0 | dptoul | __make_dp |
+| 0x002D1D10 | sdfDoubleToULong | dptofp |
+| 0x002D1D68 | sdfDoubleToUInt | dptoul |
+| 0x002DBAA0 | libc_2DBAA0 | SetGsCrt |
+| 0x002DBCB0 | libc_2DBCB0 | DeleteThread |
+| 0x002DBCC0 | StartThread | _StartThread |
+| 0x002DC2C0 | libc_2DC2C0 | _ExecOSD |
+
+The instruction bodies pair with the named DDS1 routines after masking only
+resolved code/data relocations. Scalar constants, member offsets, branch
+positions and registers remain equal. The syscall wrappers retain their exact
+native syscall numbers; `_StartThread` is the low-level wrapper, not the
+higher-level SDK entry.
+
+The old `dptoul` at 0x002D1CE0 writes class, sign, exponent and fraction at
+0/4/8/0x10 of a stack record and calls `__pack_df`. This establishes the
+packing operation; its `__make_dp` name is inferred from the corresponding
+four-argument GCC helper. The GOFAST aliases also establish `fptodp`, `dptofp`
+and `dptoul`. See [GCC 2.95.3 fp-bit.c](https://github.com/gcc-mirror/gcc/blob/releases/gcc-2.95.3/gcc/config/fp-bit.c).
+The former name-only `_df_to_usi.o` attribution for the packing helper is
+withdrawn. The actual conversion at 0x002D1D68 retains its byte-supported
+archive attribution. Earlier statements that both helpers should retain the
+old name are superseded by this native distinction.
+
+Existing C argument and return types are preserved, including declarations
+expressing soft-float values as integer bits. This change removes the obsolete
+float-conversion equates without introducing ABI changes.

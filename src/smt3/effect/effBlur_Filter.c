@@ -56,7 +56,7 @@ extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 
 extern f32 sdfSin(f32 aRadius);
 
-extern f64 sdfFloatToULong(f32 value) __attribute__((const));
+extern f64 fptodp(f32 value) __attribute__((const));
 
 extern long dpcmp(f64 left, f64 right) __attribute__((const));
 
@@ -64,7 +64,7 @@ extern f64 dpsub(f64 left, f64 right) __attribute__((const));
 
 extern f64 dpmul(f64 left, f64 right) __attribute__((const));
 
-extern u32 sdfDoubleToUInt(f64 value) __attribute__((const));
+extern u32 dptoul(f64 value) __attribute__((const));
 
 
 extern sdfGrPacketHeader_t *effPkt2DAllocTriStrip(s32 num, s32 prim);
@@ -458,14 +458,14 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work)
                         dds3EffectDistBlurPartInit(work, slot);
                     }
                     slot->quad.scale = work->params.distortion * sdfSin(slot->angle) + 1.0f;
-                    level = sdfFloatToULong((f32)(work->params.abgr >> 24));
-                    angle = sdfFloatToULong(slot->angle);
+                    level = fptodp((f32)(work->params.abgr >> 24));
+                    angle = fptodp(slot->angle);
                     if (dpcmp(angle, 0.0) < 0) {
                         angle = dpsub(0.0, angle);
                     }
                     level = dpmul(level, dpsub(3.14159265f, angle));
                     level = dpmul(level, 1.0f / 3.14159265f);
-                    alpha = sdfDoubleToUInt(level);
+                    alpha = dptoul(level);
                     slot->quad.abgr = (slot->quad.abgr & 0xFFFFFF) | (alpha << 24);
                     dds3EffectBlurDrawAlphaMulti(list, &slot->quad);
                     slot->angle += work->params.speed;

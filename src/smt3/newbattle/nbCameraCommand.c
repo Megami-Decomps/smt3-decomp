@@ -6,10 +6,9 @@
 #include "motion.h"
 #include "fpu.h"
 
-extern u64 sdfFloatToULong(f32);
+extern u64 fptodp(f32);
 extern s32 printf(const char *, ...);
 extern char D_00534BB8[]; /* Padded ground-collision diagnostic. */
-EQUATE_FPTODP();
 
 typedef struct nbCameraAnim_t {
     s32 rotate_f;

@@ -86,14 +86,12 @@ A checksum pass is a statement about the build, not about progress; see
 ### Compiler helper names in ports
 
 A unit can match instruction-by-instruction yet fail to link if the compiler
-emits a runtime helper under a name absent from SMT3's symbol map. For example,
-the float-to-double promotion in `dds3PrimDebugTextBoxRGB` emits `fptodp`, while
-the corresponding retail routine has the recovered name `sdfFloatToULong`.
-That call is reconstructed explicitly with the proven signature
-`f64 sdfFloatToULong(f32 value)`. Keep the existing SMT3 symbol and its actual
-argument/return types rather than adding a compatibility alias for the DDS or
-compiler name. The full `ninja` link and checksum remain required after a clean
-unit check.
+emits a runtime helper under a name absent from the symbol map. The native
+float conversions are now named `fptodp`, `dptofp` and `dptoul`, matching
+EE libgcc's GOFAST names. No assembler equates are needed for these names.
+Preserve each existing C declaration's native argument/return ABI when
+renaming a helper; changing its types is a separate correction. The full
+`ninja` link and checksum remain required after a clean unit check.
 
 ## Generated files
 

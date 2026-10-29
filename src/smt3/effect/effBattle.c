@@ -132,7 +132,7 @@ extern u32 D_0031CA90[];
 extern s32 effBTLFieldColorIsOn(void);
 extern void effBTLFieldColorGetBaseColor(void);
 extern void effBTLFieldColorStart(void);
-extern s32 sdfFloatToULong(f32 value);
+extern s32 fptodp(f32 value);
 
 typedef struct effBTLColor_t {
     f32 a;
@@ -783,12 +783,12 @@ void effBTLFieldColorON(u32 id) {
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR_MEMOPS(work);
         format = "FieldColor:%f,%f,%f(%f,%f,%f)\n";
-        ar = sdfFloatToULong(work.r);
-        ag = sdfFloatToULong(work.g);
-        ab = sdfFloatToULong(work.b);
-        br = sdfFloatToULong(D_00317750[id].color.r);
-        bg = sdfFloatToULong(D_00317750[id].color.g);
-        bb = sdfFloatToULong(D_00317750[id].color.b);
+        ar = fptodp(work.r);
+        ag = fptodp(work.g);
+        ab = fptodp(work.b);
+        br = fptodp(D_00317750[id].color.r);
+        bg = fptodp(D_00317750[id].color.g);
+        bb = fptodp(D_00317750[id].color.b);
         printf(format, ar, ag, ab, br, bg, bb);
         D_00569970[1] = work.r;
         D_00569970[2] = work.g;

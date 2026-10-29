@@ -5,7 +5,6 @@
 #include "ps2asm.h"
 #include "fpu.h"
 
-EQUATE_FPTODP();
 
 
 /* nbKoukaPacket_t.type, as the kouka dispatchers switch on it. Names and

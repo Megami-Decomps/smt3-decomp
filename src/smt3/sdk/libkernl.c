@@ -11,7 +11,7 @@ INCLUDE_ASM(const s32, "sdk/libkernl", RFU000_FullReset);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", ResetEE);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", libc_2DBAA0);
+INCLUDE_ASM(const s32, "sdk/libkernl", SetGsCrt);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", RFU003);
 
@@ -77,9 +77,9 @@ INCLUDE_ASM(const s32, "sdk/libkernl", iReleaseAlarm);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", CreateThread);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", libc_2DBCB0);
+INCLUDE_ASM(const s32, "sdk/libkernl", DeleteThread);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", StartThread);
+INCLUDE_ASM(const s32, "sdk/libkernl", _StartThread);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", ExitThread);
 
@@ -271,7 +271,7 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSetReg);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifGetReg);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", libc_2DC2C0);
+INCLUDE_ASM(const s32, "sdk/libkernl", _ExecOSD);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", Deci2Call);
 

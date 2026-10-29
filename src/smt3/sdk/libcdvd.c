@@ -51,7 +51,7 @@ extern s32 _gp;
 extern s32 GetThreadId(void);
 extern s32 ReferThreadStatus(s32 threadId, void *status);
 extern s32 CreateThread(sdfKernelThreadParam_t *param);
-extern s32 StartThread(s32 threadId, void *argument);
+extern s32 _StartThread(s32 threadId, void *argument);
 extern s32 ChangeThreadPriority(s32 threadId, s32 priority);
 void _Cdvd_cbLoop(void);
 
@@ -150,7 +150,7 @@ s32 sceCdInitEeCB(s32 priority, void *stack, s32 stackSize)
         D_00598C88.stack = stack;
         D_00598C88.priority = priority;
         cdvdCallbackThreadId = CreateThread(&D_00598C88);
-        StartThread(cdvdCallbackThreadId, NULL);
+        _StartThread(cdvdCallbackThreadId, NULL);
     } else {
         ChangeThreadPriority(cdvdCallbackThreadId, priority);
         created = 0;

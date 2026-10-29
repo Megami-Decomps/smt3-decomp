@@ -503,7 +503,7 @@ void nbDebugCamera(nbMainProcessData_t *data)
 #ifdef NON_MATCHING
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern long sdfFloatToULong(f32 value);
+extern long fptodp(f32 value);
 extern const char *nbDebugPhaseNameTable[];
 extern const char *D_003FA748[];
 extern char D_00543260[];
@@ -536,7 +536,6 @@ extern char D_00551080[];
 extern char D_00551088[];
 extern char D_00551090[];
 extern sdfGrOt_t D_002F67F8;
-EQUATE_FPTODP();
 
 void nbDebugMainProcess(nbMainProcessData_t *data)
 {

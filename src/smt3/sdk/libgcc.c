@@ -23,7 +23,7 @@ struct sdfGrOt_t;
 
 #define SDF_POOL_FREE_KIND 0xFFFF
 
-extern void StartThread();
+extern void _StartThread();
 
 extern void SleepThread(void);
 
@@ -349,7 +349,7 @@ extern void sdfUnpackFloat(const void *x, fp_number_type *u);
 
 extern f32 sdfPackFloat(const fp_number_type *u);
 
-extern long dptoul(s32 kind, s32 sign, s32 exp, long mant);
+extern long __make_dp(s32 kind, s32 sign, s32 exp, long mant);
 
 #define va_start(ap, last) __builtin_stdarg_start((ap), last)
 
@@ -400,11 +400,11 @@ void __main(void) {
     }
 }
 
-long sdfFloatToULong(f32 x) {
+long fptodp(f32 x) {
     fp_number_type u;
 
     sdfUnpackFloat(&x, &u);
-    return dptoul(u.class, u.sign, u.normal_exp, (long)u.fraction << 30);
+    return __make_dp(u.class, u.sign, u.normal_exp, (long)u.fraction << 30);
 }
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D1590);
@@ -445,7 +445,7 @@ INCLUDE_ASM(const s32, "sdk/libgcc", litodp);
 
 INCLUDE_ASM(const s32, "sdk/libgcc", dptoli);
 
-long dptoul(s32 kind, s32 sign, s32 exp, long mant) {
+long __make_dp(s32 kind, s32 sign, s32 exp, long mant) {
     fp_number_type_df u;
 
     u.class = kind;
@@ -459,7 +459,7 @@ long dptoul(s32 kind, s32 sign, s32 exp, long mant) {
 f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant);
 #endif
 
-u32 sdfDoubleToULong(double x) {
+u32 dptofp(double x) {
     fp_number_type_df u;
     u32 m;
 
@@ -476,7 +476,7 @@ u32 sdfDoubleToULong(double x) {
     return sdfPackQuad(u.class, u.sign, u.normal_exp, m);
 }
 
-INCLUDE_ASM(const s32, "sdk/libgcc", sdfDoubleToUInt);
+INCLUDE_ASM(const s32, "sdk/libgcc", dptoul);
 
 u8 *libc_2D1E08(u8 *p, u32 *out) {
     u32 b;

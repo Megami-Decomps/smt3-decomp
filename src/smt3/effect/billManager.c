@@ -80,13 +80,11 @@ extern void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
 extern void sdfBillBoardMakeTMPacket(void *aPacket, const f32 *aTM);
 extern f32 sdfCos(f32 aRadius);
 extern f32 sdfSin(f32 aRadius);
-extern f64 sdfFloatToULong(f32 value) __attribute__((const));
+extern f64 fptodp(f32 value) __attribute__((const));
 extern long dpcmp(f64 left, f64 right) __attribute__((const));
 extern f64 dpsub(f64 left, f64 right) __attribute__((const));
-extern f32 sdfDoubleToULong(f64 value) __attribute__((const));
+extern f32 dptofp(f64 value) __attribute__((const));
 extern f64 fabs(f64 value);
-EQUATE_FPTODP();
-EQUATE_DPTOFP();
 PS2_SYMBOL_AT(sdfGrOt_t, dds3MultiBillboardOt, sdfGrOtTable, 0x580);
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);

@@ -3470,8 +3470,7 @@ extern effDebugMenuItem_t D_0031CF88[5];
 extern char D_0056A920[0x20];
 extern char D_0056A940[0x20];
 extern f32 effBTLModelGroupGetSphereOld(u32 group);
-extern f64 sdfFloatToULong(f32 value);
-EQUATE_FPTODP();
+extern f64 fptodp(f32 value);
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A60);
 

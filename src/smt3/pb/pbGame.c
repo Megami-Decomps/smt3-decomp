@@ -1698,10 +1698,8 @@ extern sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u
                                                s32 count, u32 flags);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
 extern sdfGrOt_t sdfGrOtTable[85];
-extern f64 sdfFloatToULong(f32 value);
-extern f32 sdfDoubleToULong(f64 value);
-EQUATE_FPTODP();
-EQUATE_DPTOFP();
+extern f64 fptodp(f32 value);
+extern f32 dptofp(f64 value);
 
 s32 pb_proc_block_DB_Process(dds3ProcessID_t *id)
 {

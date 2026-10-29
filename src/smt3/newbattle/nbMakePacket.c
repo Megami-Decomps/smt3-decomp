@@ -377,7 +377,7 @@ extern f32 sdfAtan2(f32 aY, f32 aX);
 
 extern f32 nbMakeUnitMoveGetCyDist(nbFormation_t *i_form, nbFormation_t *t_form);
 
-extern s32 sdfFloatToULong(f32 value);
+extern s32 fptodp(f32 value);
 
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {

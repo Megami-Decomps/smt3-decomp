@@ -97,7 +97,7 @@ extern s32 atoi(const char *s);
 extern s32 DisableIntc(s32 cause);
 extern s32 RemoveIntcHandler(s32 cause, s32 handlerId);
 /* Syscall 2 has the SetGsCrt void interface. */
-extern void libc_2DBAA0(s16 interlace, s16 mode, s16 fieldMode);
+extern void SetGsCrt(s16 interlace, s16 mode, s16 fieldMode);
 GParam *sceGsGetGParam(void);
 
 void sceGsResetGraph(s16 mode, s16 interlace, s16 outputMode, s16 fieldMode)
@@ -119,7 +119,7 @@ void sceGsResetGraph(s16 mode, s16 interlace, s16 outputMode, s16 fieldMode)
             param->intcHandlerEnabled = 0;
             param->intcHandlerId = 0;
         }
-        libc_2DBAA0(interlace & 1, outputMode & 0xFF, fieldMode & 1);
+        SetGsCrt(interlace & 1, outputMode & 0xFF, fieldMode & 1);
         break;
     case 1:
         *(volatile u64 *)0x12001000 = 0x100;
@@ -130,7 +130,7 @@ void sceGsResetGraph(s16 mode, s16 interlace, s16 outputMode, s16 fieldMode)
         param->interlace = interlace;
         param->mode = outputMode;
         param->version = (*(volatile u64 *)0x12001000 >> 16) & 0xFF;
-        libc_2DBAA0(interlace & 1, outputMode & 0xFF, fieldMode & 1);
+        SetGsCrt(interlace & 1, outputMode & 0xFF, fieldMode & 1);
         break;
     }
 }

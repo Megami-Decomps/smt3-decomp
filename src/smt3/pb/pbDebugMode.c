@@ -252,7 +252,7 @@ extern void pbSetCameraRadius(f32 radius);
 extern void pbSetCameraDegree(f32 degree);
 extern void pbSetCameraDegreeInit(f32 degree);
 /* Historical name for the runtime float-to-soft-double promotion helper. */
-extern f64 sdfFloatToULong(f32 value);
+extern f64 fptodp(f32 value);
 extern char D_0054F620[];
 
 s32 DebugProcRadius(pbDebugWork_t *work, sdfDrawTag_t *tag)
@@ -282,7 +282,7 @@ s32 DebugProcRadius(pbDebugWork_t *work, sdfDrawTag_t *tag)
     format = D_0054F620;
     sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x7A00, 0xFFFFF0, 0,
                                      "CAMERA RADIUS (LENGTH)"));
-    radiusValue = sdfFloatToULong(camera[1]);
+    radiusValue = fptodp(camera[1]);
     sdfDrawTagLink(tag, sdfDevPrintf(0x7980, 0x7A60, 0xFFFFF0, 0,
                                      format, radiusValue));
     return 0;
@@ -317,7 +317,7 @@ s32 DebugProcDegree(pbDebugWork_t *work, sdfDrawTag_t *tag)
     format = D_0054F620;
     sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x7A00, 0xFFFFF0, 0,
                                      "CAMERA DEGREE (RADIAN)"));
-    degreeValue = sdfFloatToULong(camera[2]);
+    degreeValue = fptodp(camera[2]);
     sdfDrawTagLink(tag, sdfDevPrintf(0x7980, 0x7A60, 0xFFFFF0, 0,
                                      format, degreeValue));
     return 0;

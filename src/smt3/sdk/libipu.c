@@ -21,7 +21,7 @@ extern s32 EIntr(void);
 
 /* The sibling that drives channel 3; the IDB still carries the object's
  * gcc2_compiled label as its name. */
-extern void gcc2_compiled__7(u32 chcr);
+extern void ipuWriteFromIpuChcr(u32 chcr);
 
 /* Retained sync draft's explicit wait; see docs/nonmatching/sdk/libipu.md. */
 #define IPU_HAZARD_WAIT() __asm__ volatile ("nop\nnop\nnop\nnop")
@@ -30,7 +30,7 @@ extern void gcc2_compiled__7(u32 chcr);
  * nops before a signed test. See docs/nonmatching/sdk/libipu.md. */
 #define IPU_POLL_BARRIER() __asm__ volatile ("nop")
 
-void gcc2_compiled__7(u32 chcr)
+void ipuWriteFromIpuChcr(u32 chcr)
 {
     DIntr();
     D_ENABLEW = D_ENABLER | 0x10000;
@@ -73,7 +73,7 @@ void sceIpuStopDMA(sdfIpuDmaRegs_t *state)
         ctrl = IPU_CTRL & 0xF0;
         IPU_POLL_BARRIER();
     } while (ctrl != 0);
-    gcc2_compiled__7(0);
+    ipuWriteFromIpuChcr(0);
     state->outputAddress = D3_MADR;
     state->outputQwords = D3_QWC;
     state->outputControl = D3_CHCR;
@@ -96,7 +96,7 @@ void sceIpuRestartDMA(sdfIpuDmaRegs_t *state)
     if (state->outputAddress != 0 && state->outputQwords != 0) {
         D3_MADR = state->outputAddress;
         D3_QWC = state->outputQwords;
-        gcc2_compiled__7(state->outputControl | 0x100);
+        ipuWriteFromIpuChcr(state->outputControl | 0x100);
     }
     do {
         ctrl = IPU_CTRL;

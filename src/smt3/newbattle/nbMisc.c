@@ -36,7 +36,7 @@ extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32
 
 /* These inherited symbol names identify the soft-double conversion and
  * comparison helpers in this executable, not integer conversion/division. */
-extern f64 sdfFloatToULong(f32 value);
+extern f64 fptodp(f32 value);
 
 extern long dpcmp(f64 left, f64 right);
 
@@ -423,7 +423,7 @@ s32 nbClipEffectNum(s32 screenPosition[4])
     SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(viewDistance);
-    if (dpcmp(sdfFloatToULong(viewDistance), 16.0) <= 0)
+    if (dpcmp(fptodp(viewDistance), 16.0) <= 0)
         return 0;
 
     SDF_VU0_NORMALIZE();

@@ -21,10 +21,8 @@ typedef struct datTakaraSagasi_t {
 extern datTakaraSagasi_t datSagasiSkillTable;
 extern void datDebugPrintf(const char *format, ...);
 extern s32 GetButuriAttack(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza);
-extern f64 sdfFloatToULong(f32 value);
-extern f32 sdfDoubleToULong(f64 value);
-EQUATE_DPTOFP();
-EQUATE_FPTODP();
+extern f64 fptodp(f32 value);
+extern f32 dptofp(f64 value);
 extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
 extern s32 func_0022E168(u16 devilId);
 typedef struct

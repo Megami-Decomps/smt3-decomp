@@ -35,8 +35,7 @@ emitted 1,176 bytes; ordinary C closes the remaining register/lifetime issue.
 
 The prerequisite, separately qualified zero-credit correction names the real
 comparison provider `dpcmp`; see [IDB corrections](idb-corrections.md#double-comparison-runtime-name).
-No `dpcmp` compatibility alias is added. The existing `EQUATE_FPTODP` and
-`EQUATE_DPTOFP` macros retain the repository's established conversion bindings.
+No `dpcmp` compatibility alias is added. The conversions now use the native `fptodp` and `dptofp` symbol names directly.
 
 The aligned 16-float matrix is genuinely stored by VU0 and passed to
 `sdfBillBoardMakeTMPacket`. The four-float direction carrier is genuinely

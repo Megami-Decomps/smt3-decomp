@@ -6,7 +6,6 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 
-EQUATE_FPTODP();
 
 typedef struct { u8 unk00[8]; f32 degrees; u8 unk0C[4]; } pbFovWork_t;
 

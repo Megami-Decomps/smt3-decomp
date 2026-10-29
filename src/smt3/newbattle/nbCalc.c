@@ -393,8 +393,7 @@ extern char D_00544D10[];
 extern char D_00544D30[];
 extern s32 datGetNormalAtkPow(datUnitWork_t *work);
 
-extern long sdfFloatToULong(f32 value);
-EQUATE_FPTODP();
+extern long fptodp(f32 value);
 
 extern s32 nbGetLvAvg(nbMainProcessData_t *data, s32 side);
 
@@ -1602,7 +1601,7 @@ s32 nbGetMagicKaifuku(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
     base = datGetParam(swork, 2) * 4 + swork->level + dds3GetRandIntA(0, 8);
     v = (f32)base / 10.0f * (f32)waza;
     fmt = D_00544D30;
-    printf(fmt, waza, sdfFloatToULong(ritu), ret = v * ritu);
+    printf(fmt, waza, fptodp(ritu), ret = v * ritu);
     return ret;
 }
 

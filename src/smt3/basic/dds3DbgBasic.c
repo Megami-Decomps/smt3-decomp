@@ -28,9 +28,8 @@ extern s32 evtSceneDispProcess(void *id);
 
 extern s32 DispBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *tag);
 
-extern f64 sdfFloatToULong(f32 value);
+extern f64 fptodp(f32 value);
 
-EQUATE_FPTODP();
 
 extern char D_0054E9A8[];
 

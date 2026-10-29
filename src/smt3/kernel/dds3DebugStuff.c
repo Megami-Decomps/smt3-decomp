@@ -16,7 +16,7 @@ extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 
 extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, ...);
 
-extern f64 sdfFloatToULong(f32 value);
+extern f64 fptodp(f32 value);
 
 extern void dds3MenuStepValue(char *text, f32 value);
 
@@ -356,7 +356,7 @@ void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y, s32 selected,
                             x, y + 0x180, 0xFF0080, style, label));
             sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
                             x + 0x240, y + 0x180, 0xFF0080, 0,
-                            D_0054EA58, sdfFloatToULong(channel * (1.0f / 255.0f))));
+                            D_0054EA58, fptodp(channel * (1.0f / 255.0f))));
         }
         y += 0x60;
     }

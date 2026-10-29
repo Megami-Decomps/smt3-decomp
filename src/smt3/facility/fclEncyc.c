@@ -3413,8 +3413,7 @@ extern const char D_0053D8D0[];
 extern const char D_0053D8E0[];
 extern const char D_0053D8F0[];
 
-extern u64 sdfFloatToULong(f32 value);
-EQUATE_FPTODP();
+extern u64 fptodp(f32 value);
 
 s32 DebugProcDispBound(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *debugWork,
                        sdfDrawTag_t *tag)

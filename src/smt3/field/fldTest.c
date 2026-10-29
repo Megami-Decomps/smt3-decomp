@@ -1263,8 +1263,7 @@ void fldRunDanteMove(void)
 }
 
 
-extern f64 sdfFloatToULong(f32 value);
-EQUATE_FPTODP();
+extern f64 fptodp(f32 value);
 
 void fldRunDantePwak(void)
 {

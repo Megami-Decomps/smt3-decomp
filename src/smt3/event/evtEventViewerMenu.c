@@ -3,7 +3,6 @@
 #include "kernel.h"
 #include "ps2asm.h"
 
-EQUATE_FPTODP();
 extern char D_0054F9D8[];
 extern char D_0054F9E0[];
 extern char D_0054F9E8[];
