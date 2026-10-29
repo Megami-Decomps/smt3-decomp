@@ -131,3 +131,28 @@ The nested upper/lower kind checks retain the native separate comparisons.
 The two creation-kind arms each initialize eight colors. The complete
 256-byte group owns its block memory handle at +0xA0; its block records are
 144 bytes. Construction and freeing use this same group type.
+
+## Advance the live confirmation row
+
+`mc/slMain::slQueryYesNoDraw` matches all 2,012 bytes. After drawing the two
+highlight halves, advance the live Y by one for the two text labels. Both
+values are row coordinates. A separate `fontY = y + 1` control emits 2,004
+bytes, with 48 of 501 emitted words different and eight native bytes absent.
+
+Paired pinned-cc1 `--alloc --no-dumps` traces pass hooked/unhooked and plain
+output parity. The exact Y is pseudo 88 in $21, with 11 references, live
+length 242 and eight crossed calls. In the split control, the base Y is
+pseudo 89 in $21, with nine references, live length 238 and eight crossed
+calls. The control computes the label arguments from the base plus 1 and
+13; the exact form retains the Y update in each drawing branch.
+
+Initialize the alternate highlight row only in the branch that uses it, and
+initialize all three blink colors inside their selected phase. Keep message
+tests independent, with fresh global reads after drawing callbacks. The
+message-6 row choice uses an ordinary equality `if`/`else`; its arm order
+reproduces the two constant loads before the conditional move.
+
+Reproduce with `tools/cc1probe.sh <owner.c> --as-unit src/smt3/mc/slMain.c
+--func slQueryYesNoDraw --alloc --no-dumps --out <output>`. The control adds
+`s32 fontY`, assigns it from `y + 1` instead of incrementing `y`, and uses
+that local in the final two label calls.

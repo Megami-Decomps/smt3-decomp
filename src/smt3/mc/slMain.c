@@ -2390,7 +2390,175 @@ s32 slQueryYesNo(void *yesFunc, void *noFunc, s32 yesNoDefault) {
 
 INCLUDE_RODATA(const s32, "mc/slMain", D_00532948);
 
-INCLUDE_ASM(const s32, "mc/slMain", slQueryYesNoDraw);
+extern char D_00528360[];
+extern char D_00528390[];
+extern char D_00528560[];
+extern char D_00528578[];
+extern char D_005286A0[];
+extern char D_005286C0[];
+extern char D_005286E8[];
+extern char D_00528760[];
+extern char D_00528770[];
+extern char D_00528780[];
+extern char D_00528790[];
+extern char D_005287A0[];
+extern char D_005287B0[];
+extern char D_005288E0[];
+extern char D_005288F0[];
+extern char D_00528918[];
+extern char D_00528940[];
+extern char D_00528960[];
+extern char D_00528978[];
+extern char D_005289A0[];
+extern char D_005289B0[];
+extern char D_005289E8[];
+extern char D_00528A10[];
+extern char D_00528A28[];
+extern char D_00528A60[];
+extern char D_00528A88[];
+extern char D_00528AA0[];
+extern char D_00528AC0[];
+extern char D_00528AF0[];
+extern char D_00528B08[];
+extern char D_00528B20[];
+extern char D_00528B58[];
+extern char D_00528B80[];
+extern char D_005516C8[];
+extern char D_005516D0[];
+extern char D_005516E0[];
+
+void slQueryYesNoDraw(void)
+{
+    s32 selectedY;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 y;
+
+    if ((slQueryYesNoCursor != -1) && (slQueryYesNoMsg != 0)) {
+        rsetOtOfs(0x47);
+        rsetAlpha(0);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        if (slQueryYesNoMsg == 1) {
+            if (slDrawWindow() != 0) {
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005286A0);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, D_005286C0);
+                slKanjiDrawH(0x28, 0x64, 0x64618780, D_005286E8);
+            }
+        }
+        if (slQueryYesNoMsg == 2) {
+            if (slDrawWindow() != 0) {
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528360);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528390);
+                slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528560);
+            }
+        }
+        if (slQueryYesNoMsg == 3) {
+            if (slDrawWindow() != 0) {
+                switch (slFileSelError) {
+                case 0:
+                    slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528760);
+                    break;
+                case 1:
+                    slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528770);
+                    break;
+                case 2:
+                    slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528780);
+                    break;
+                case 3:
+                    slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528790);
+                    break;
+                case 4:
+                    slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005287A0);
+                    break;
+                }
+                slKanjiDrawH(0x28, 0x58, 0x64618780, D_005287B0);
+            }
+        }
+        if (slQueryYesNoMsg == 4) {
+            if (slDrawWindow() != 0) {
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005288E0);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, D_005288F0);
+                slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528918);
+                slKanjiDrawH(0x28, 0x70, 0x64618780, D_005516E0);
+            }
+        }
+        if (slQueryYesNoMsg == 5) {
+            if (slDrawWindow() != 0) {
+                slKanjiDrawH(0x28, 0x3C, 0x64618780, D_005289B0);
+                slKanjiDrawH(0x28, 0x48, 0x64618780, D_005289E8);
+                slKanjiDrawH(0x28, 0x54, 0x64618780, D_00528A10);
+                slKanjiDrawH(0x28, 0x60, 0x64618780, D_00528A28);
+                slKanjiDrawH(0x28, 0x6C, 0x64618780, D_00528A60);
+                slKanjiDrawH(0x28, 0x78, 0x64618780, D_00528A88);
+            }
+        }
+        if (slQueryYesNoMsg == 6) {
+            if (slDrawWindow() != 0) {
+                slKanjiDrawH(0x28, 0x3C, 0x64618780, D_00528AA0);
+                slKanjiDrawH(0x28, 0x48, 0x64618780, D_00528AC0);
+                slKanjiDrawH(0x28, 0x54, 0x64618780, D_00528AF0);
+                slKanjiDrawH(0x28, 0x60, 0x64618780, D_00528B08);
+                slKanjiDrawH(0x28, 0x6C, 0x64618780, D_00528B20);
+                slKanjiDrawH(0x28, 0x78, 0x64618780, D_00528B58);
+                slKanjiDrawH(0x28, 0x84, 0x64618780, D_00528B80);
+            }
+        }
+        if (slQueryYesNoMsg == 7) {
+            if (slDrawWindow() != 0) {
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528578);
+            }
+        }
+        if (slQueryYesNoMsg == 8) {
+            if (slDrawWindow() != 0) {
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528940);
+            }
+        }
+        if ((slQueryYesNoMsg == 9) && (slDrawWindow() != 0)) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528960);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528978);
+            slKanjiDrawH(0x28, 0x64, 0x64618780, D_005289A0);
+        }
+        if (slChkWindowOpenDone() != 0) {
+            if (gslAnimCnt & 8) {
+                red = 0xA6;
+                green = 0x1B;
+                blue = 0x15;
+            } else {
+                red = 0x92;
+                green = 7;
+                blue = 1;
+            }
+            y = 0x8D;
+            if (slQueryYesNoMsg != 5) {
+                if (slQueryYesNoMsg == 6) {
+                    y = 0x91;
+                } else {
+                    y = 0x88;
+                }
+            }
+            rsetOtOfs(0x4A);
+            rsetAlpha(1);
+            rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+            if (slQueryYesNoCursor == 0) {
+                aDrawBoxG(0x10, y, 0x30, 0xB, red, green, blue, 0, red, green, blue, 0x40, red, green, blue, 0x40, red, green, blue, 0);
+                aDrawBoxG(0x40, y, 0x30, 0xB, red, green, blue, 0x40, red, green, blue, 0, red, green, blue, 0, red, green, blue, 0x40);
+            } else {
+                selectedY = y + 0xC;
+                aDrawBoxG(0x10, selectedY, 0x30, 0xB, red, green, blue, 0, red, green, blue, 0x40, red, green, blue, 0x40, red, green, blue, 0);
+                aDrawBoxG(0x40, selectedY, 0x30, 0xB, red, green, blue, 0x40, red, green, blue, 0, red, green, blue, 0, red, green, blue, 0x40);
+            }
+            /* Qualified allocation traces retain the label row in the live Y.
+             * See docs/levers/cross-block-locals.md. */
+            y++;
+            slKanjiDrawH(0x28, y, 0xA09DC380, D_005516C8);
+            slKanjiDrawH(0x28, y + 0xC, 0xA09DC380, D_005516D0);
+        }
+        rsetOtOfs(0x47);
+        rsetAlpha(0);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    }
+}
 
 u32 slGetExitMode(void) {
     return gSlExitMode;
