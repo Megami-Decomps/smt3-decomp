@@ -7,6 +7,8 @@
 #include "event.h"
 #include "field.h"
 #include "ps2asm.h"
+#include "billboard.h"
+#include "effect.h"
 
 typedef struct
 {
@@ -20,7 +22,7 @@ typedef struct
     f32 angle;                 /* 0x1C */
     s32 mode;                  /* 0x20 */
     void *effect;              /* 0x24 */
-    s32 unk28;                 /* 0x28 */
+    s32 tableIndex;            /* 0x28 */
     u8 pad2C[4];
 } fldTakaraSlot_t;
 
@@ -44,7 +46,7 @@ typedef struct
     s32 itemBoxIdx;            /* 0x4C */
     s32 kind;                  /* 0x50 */
     s32 camera;                /* 0x54 */
-    u8 unk58[4];
+    s32 modelMajor;            /* 0x58 */
     s32 modelIndex;            /* 0x5C */
     u8 unk60[0x10];
 } fldNpcSlot_t;
@@ -313,7 +315,14 @@ INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLoad);
 
 extern u8 D_003129D8[];
 
-extern u8 fldTakaraTable[];
+typedef struct {
+    s32 type;
+    s32 unk04;
+    s32 effectType;
+    s32 unk0C;
+} fldTakaraData_t;
+
+extern fldTakaraData_t fldTakaraTable[];
 
 extern s32 fldTakaraSlotCount;
 
@@ -409,7 +418,7 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
     pos.y = y;
     pos.z = z;
     minor = 3;
-    switch (*(s32 *)&fldTakaraTable[id * 16]) {
+    switch (fldTakaraTable[id].type) {
     case 0:
     case 3:
         if (fldTakaraSlotCount == 0) {
@@ -475,8 +484,8 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
     fldTakaraSlotTable[fldTakaraCount].z = z;
     dds3GetRotPoseSet(object);
     fldTakaraSlotTable[fldTakaraCount].angle = EulerAngleAxisY() * 180.0f / 3.14f;
-    fldTakaraSlotTable[fldTakaraCount].mode = *(s32 *)&fldTakaraTable[id * 16];
-    fldTakaraSlotTable[fldTakaraCount].unk28 = id;
+    fldTakaraSlotTable[fldTakaraCount].mode = fldTakaraTable[id].type;
+    fldTakaraSlotTable[fldTakaraCount].tableIndex = id;
     fldTakaraCount = fldTakaraCount + 1;
     fldAddItemBoxObject(-1, x, y, z, 20.0f, 100.0f);
     row = &D_003129D8[fldArea[0] * 8];
@@ -1285,7 +1294,7 @@ void fldNpcCalc(void)
                     fldNpcCamTarget = 2;
                     SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
                     D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
-                    switch (*(s32 *)&fldTakaraTable[fldModelSlotTable[i].itemBoxIdx * 16]) {
+                    switch (fldTakaraTable[fldModelSlotTable[i].itemBoxIdx].type) {
                     case 0:
                     case 2:
                         fldCamNpcTarget = -110.0f;
@@ -1408,7 +1417,195 @@ void fldNpcCalc(void)
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcCalc);
 #endif
 
+#ifdef NON_MATCHING
+extern sdfVector4_t aViewEye;
+extern f32 D_0054C570, D_0054C574;
+extern effBlurScatterWork_t *fldBlurEffectHandle;
+extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
+extern void dds3GetPosPoseSet(dds3Basic_t *basic);
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *object, s32 flags);
+extern void dds3EffectDraw(void *effect);
+extern void dds3EffectPartSetPosition(void *effect, sdfVector4_t *position);
+extern void dds3EffectPartDraw(void *effect);
+extern void dds3DrawUnitObjectShadow(s32 alpha, f32 x, f32 y, f32 z, f32 radius);
+extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *effect);
+extern void drawSprite3D(sdfTexHandle_t *texture, Sprite3D_t *sprite);
+
+void fldNpcDraw(void)
+{
+    sdfVector4_t position __attribute__((aligned(16)));
+    sdfVector4_t direction __attribute__((aligned(16)));
+    sdfVector4_t normalized __attribute__((aligned(16)));
+    sdfVector4_t eye __attribute__((aligned(16)));
+    Sprite3D_t sprite;
+    s32 i;
+
+    memset(&position, 0, sizeof(position));
+    position.w = 1.0f;
+    if (fldGlobalBase.area >= 200 || fldAutoMapSeqTestFlag(1) != 0) {
+        return;
+    }
+    for (i = 0; i < fldTakaraCount; i++) {
+        fldTakaraSlot_t *slot = &fldTakaraSlotTable[i];
+        s32 kind;
+        f32 dx, dy, dz, distance;
+        s32 alpha;
+
+        if (slot->mode != 0 && slot->mode != 2 && slot->mode != 3) {
+            continue;
+        }
+        if (slot->activationState > 0 && slot->activationState < 3) {
+            if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(slot->object)->owner->inner, 1)) {
+                SDF_VU0_STOREVECTOR(&position);
+            }
+            kind = fldTakaraTable[slot->tableIndex].effectType;
+            if (kind >= 2 && kind < 4) {
+                if (dds3EffectGetState(D_0054EEDC) != 0) {
+                    dds3EffectSetPosition(D_0054EEDC, &position);
+                    dds3EffectDraw(D_0054EEDC);
+                }
+            } else if (fldItemBoxCount != NULL) {
+                dds3EffectPartSetPosition(fldItemBoxCount, &position);
+                dds3EffectPartDraw(fldItemBoxCount);
+            }
+        } else if (slot->activationState == 0) {
+            if ((slot->mode == 0 || slot->mode == 3) && slot->effect != NULL) {
+                if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(slot->object)->owner->inner, 2)) {
+                    SDF_VU0_STOREVECTOR(&position);
+                }
+                dds3EffectSetPosition(slot->effect, &position);
+                dds3EffectDraw(slot->effect);
+            }
+            if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(slot->object)->owner->inner, 1)) {
+                SDF_VU0_STOREVECTOR(&position);
+            }
+            dx = aViewEye.x - position.x;
+            dy = aViewEye.y - position.y;
+            dz = aViewEye.z - position.z;
+            distance = sdfSqrt(dx * dx + dy * dy + dz * dz);
+            direction.x = -dx;
+            direction.y = -dy;
+            direction.z = -dz;
+            direction.w = 1.0f;
+            SDF_VU0_LOADVECTOR(&direction);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_STOREVECTOR(&normalized);
+            position.x -= normalized.x * 50.0f;
+            position.y -= normalized.y * 50.0f;
+            position.z -= normalized.z * 50.0f;
+            sprite.pos.x = position.x;
+            sprite.pos.y = position.y;
+            sprite.pos.z = position.z;
+            sprite.uv[0].u = 0;
+            sprite.uv[0].v = 0;
+            sprite.uv[1].u = 512;
+            sprite.uv[1].v = 0;
+            sprite.uv[2].u = 512;
+            sprite.uv[2].v = 512;
+            sprite.uv[3].u = 0;
+            sprite.uv[3].v = 512;
+            sprite.vt[0].x = -64.0f; sprite.vt[0].y = -64.0f;
+            sprite.vt[1].x = 64.0f;  sprite.vt[1].y = -64.0f;
+            sprite.vt[2].x = 64.0f;  sprite.vt[2].y = 64.0f;
+            sprite.vt[3].x = -64.0f; sprite.vt[3].y = 64.0f;
+            *(volatile s32 *)&sprite.col = 0x80808080;
+            sprite.rot = 0.0f;
+            alpha = 0;
+            if (!(distance < 500.0f)) {
+                alpha = 128;
+                if (!(D_0054C570 < distance)) {
+                    alpha = (s32)((distance - 500.0f) * 128.0f / D_0054C574);
+                    if (alpha > 128) alpha = 128;
+                    if (alpha < 0) alpha = 0;
+                }
+            }
+            sprite.col = ((u32)alpha << 24) | 0x808080;
+            rsetOtOfs(44);
+            drawSprite3D(hEffPart, &sprite);
+        }
+    }
+    for (i = 0; i < fldNpcModelTable; i++) {
+        fldNpcSlot_t *slot = &fldModelSlotTable[i];
+        f32 x, y, z;
+
+        if (slot->room != 0 && fldGbChkNpc(fldGlobalBase.area, fldGlobalBase.floor + 1, slot->room) != 0) {
+            if (slot->object != NULL) {
+                dds3ObjectBaseOnFlag(slot->object, 1);
+            }
+            continue;
+        }
+        x = slot->x;
+        y = slot->y;
+        z = slot->z;
+        if (slot->type == 999) {
+            continue;
+        }
+        if (slot->kind == 0) {
+            if (fldGlobalBase.area != 1) {
+                if (fldGlobalBase.area < 11) {
+                    dds3DrawUnitObjectShadow(0x60, x, (y - 10.0f) - 90.0f, z, 60.0f);
+                } else {
+                    dds3DrawUnitObjectShadow(0x60, x, y - 10.0f, z, 60.0f);
+                }
+                if (slot->cntAnmi == 0 || fldGlobalBase.area < 10) {
+                    position.x = x;
+                    if (fldGlobalBase.area == 1) {
+                        position.y = (y - 50.0f) + sdfSin(slot->cntf * 1.5f) * 3.0f;
+                    } else {
+                        position.y = (y - 150.0f) + sdfSin(slot->cntf * 1.5f) * 10.0f;
+                    }
+                    position.z = z;
+                    dds3EffectSetPosition(slot->effect, &position);
+                    dds3EffectDraw(slot->effect);
+                }
+            }
+        } else if (slot->kind == 1) {
+            f32 vertical, horizontal, radius;
+            eye = aViewEye;
+            if (slot->object != NULL) {
+                dds3ObjectBaseOffFlag(slot->object, 1);
+                dds3GetPosPoseSet(slot->object);
+                SDF_VU0_STOREVECTOR(&position);
+                vertical = eye.y - position.y;
+                if (vertical < 0.0f) vertical = -vertical;
+                if (vertical < 250.0f) {
+                    f32 dx = eye.x - position.x;
+                    f32 dz = eye.z - position.z;
+                    horizontal = sdfSqrt(dx * dx + dz * dz);
+                    if (slot->csize >= 79.0f) radius = 95.0f;
+                    else if (slot->csize >= 29.0f) radius = 75.0f;
+                    else radius = 60.0f;
+                    if (horizontal < radius) {
+                        dds3ObjectBaseOnFlag(slot->object, 1);
+                    }
+                    if (slot->modelMajor == 6 && slot->modelIndex == 73 && horizontal < 110.0f) {
+                        dds3ObjectBaseOnFlag(slot->object, 1);
+                    }
+                }
+            }
+        }
+    }
+    if (fldGlobalBase.area >= 11 && fldNpcCamTarget == 1 && D_0054EEB0 != -1 &&
+        fldModelSlotTable[D_0054EEB0].kind == 0) {
+        fldNpcDrawCount += 3;
+        if (fldNpcDrawCount > 128) fldNpcDrawCount = 128;
+        mdlSetColor(dds3ObjectBaseGetModelHandle(fldNpcFreeCount), ((u32)fldNpcDrawCount << 24) | 0x808080);
+        dds3EffectDistortionBlurDraw(fldBlurEffectHandle);
+    }
+    if (fldDmgBlurHandle != 0) {
+        if (dds3EffectGetState(D_0054EED0) == 0) fldDmgBlurHandle = 0;
+        else dds3EffectDraw(D_0054EED0);
+    }
+    if (fldNpcBlurHandle != 0 && dds3EffectGetState(fldBlurEffectId[0]) != 0) {
+        dds3EffectDraw(fldBlurEffectId[0]);
+    }
+    fldEADraw();
+    fldVLDraw();
+}
+#else
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcDraw);
+#endif
 
 void fldNpcHojiRefresh(void) {
     s32 i;
