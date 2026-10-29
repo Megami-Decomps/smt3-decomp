@@ -203,18 +203,7 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-/* Only the fields this unit touches are named; the entry is 38 bytes. */
-typedef struct
-{
-    s8 backAttack;
-    s8 esc;
-    u8 unk_02[0x4];
-    u16 id[11];
-    u8 unk_1C[0x6];
-    u8 unk_22;
-    u8 unk_23;
-    u16 mae;
-} nbEncountForm_t;
+#include "encount.h"
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
@@ -235,33 +224,6 @@ extern s32 nbGetUnitID(datUnitWork_t *work);
 extern s32 datGetPlayerLevel(void);
 
 
-
-typedef struct datEncountRitu_t {
-    u16 encountid;
-    u16 ritu;
-    u8 sensei;
-    u8 renzokuritu;
-    u16 renzokuindex;
-} datEncountRitu_t;
-
-typedef struct datEncountTbl_t {
-    s32 normalritu;
-    datEncountRitu_t ritu[12];
-} datEncountTbl_t;
-
-/* Native encounter packs embed their four table selectors and four rows. */
-typedef struct nbEncountEntry_t {
-    u16 stageid;
-    u16 areaid;
-    u16 btlsound;
-    u16 moonchk;
-    u16 table2;
-    u16 eventbit1;
-    u16 eventbit2;
-    u8 table1[4];
-    u8 reserved12[2];
-    datEncountTbl_t enctable[4];
-} nbEncountEntry_t;
 
 extern nbEncountEntry_t nbEncountTable[];
 

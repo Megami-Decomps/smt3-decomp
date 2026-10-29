@@ -206,18 +206,7 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-/* Only the fields this unit touches are named; the entry is 38 bytes. */
-typedef struct
-{
-    s8 backAttack;
-    s8 esc;
-    u8 unk_02[0x4];
-    u16 id[11];
-    u8 unk_1C[0x6];
-    u8 unk_22;
-    u8 unk_23;
-    u16 mae;
-} nbEncountForm_t;
+#include "encount.h"
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 

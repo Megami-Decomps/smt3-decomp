@@ -7,24 +7,9 @@ extern void nbInitPlayer(void);
 extern void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno,
                               s32 stagemajor, s32 stageminor);
 
-/* 420-byte entries; only the two fields this unit reads are named. */
-typedef struct
-{
-    u16 stagemajor;
-    u16 stageminor;
-    u8 unk_04[0x1A0];
-} nbEncountEntry_t;
+#include "encount.h"
 
 extern nbEncountEntry_t nbEncountTable[];
-
-/* 38-byte entries; only the two fields this unit reads are named. */
-typedef struct
-{
-    u8 unk_00[0x1C];
-    u16 stagemajor;
-    u16 stageminor;
-    u8 reserve[0x6];
-} nbEncountForm_t;
 
 extern nbEncountForm_t nbEncountFormTable[];
 

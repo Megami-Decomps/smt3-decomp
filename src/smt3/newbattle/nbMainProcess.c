@@ -29,14 +29,7 @@ extern void nbDelUnEventKoukaPacket(void);
 /* The player party's unit records in the global work. */
 #define NB_PLAYERUNIT ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))
 
-/* The 38-byte encounter row; only the flag word this unit reads is named. */
-typedef struct {
-    u8 unk_00[0x4];
-    u8 formtype;
-    u8 unk_05[0x1B];
-    u16 flag;
-    u8 unk_22[0x4];
-} nbEncountForm_t;
+#include "encount.h"
 
 
 
@@ -1628,7 +1621,7 @@ void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno, s32 
     data->packno = packno;
     data->packindex = packindex;
     data->encno = encno;
-    data->formationtype = nbEncountFormTable[encno].formtype;
+    data->formationtype = nbEncountFormTable[encno].formationtype;
     printf("encpackno = %d\n", data->encpackno);
     printf("packno = %d\n", data->packno);
     printf("packindex = %d\n", data->packindex);
