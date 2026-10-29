@@ -13,18 +13,7 @@ extern void *memset(void *a, s32 b, u32 c);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
-typedef struct tagPipeObject {
-    s32 offset;
-    f32 w;
-    f32 pos[2];
-    f32 vpos[2];
-    u8 id;
-    u8 action;
-    s8 enabled;
-    u8 mdl;
-    s16 count;
-    u16 flags;
-} tagPipeObject;
+
 
 typedef struct tagPipePosTable tagPipePosTable;
 

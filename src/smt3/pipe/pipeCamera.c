@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "pipe.h"
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
@@ -76,18 +77,7 @@ void getViewPortMatrix(sdfMatrix4_t *matrix)
 }
 
 /* Shared pipe records: node stride is 0x20; PosTable.points is at +8. */
-typedef struct tagPipeObject {
-    s32 offset;
-    f32 w;
-    f32 pos[2];
-    f32 vpos[2];
-    s8 id;
-    u8 action;
-    u8 enabled;
-    u8 mdl;
-    s16 count;
-    u16 flags;
-} tagPipeObject;
+
 
 typedef struct tagPipePathNode {
     f32 position[3];
