@@ -251,7 +251,22 @@ s32 sceCdNcmdDiskReady(void)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdSync);
+s32 sceCdSync(s32 mode)
+{
+    if (mode == 0) {
+        if (D_0052A010 > 0) {
+            scePrintf("N cmd wait\n");
+        }
+        while (D_0052A030 != 0 || sceSifCheckStatRpc(D_0052B1D0) != 0) {
+            sceCdDelayThread(60);
+        }
+        return 0;
+    }
+    if (D_0052A030 != 0 || sceSifCheckStatRpc(D_0052B1D0) != 0) {
+        return 1;
+    }
+    return 0;
+}
 
 s32 sceCdSyncS(s32 mode)
 {
