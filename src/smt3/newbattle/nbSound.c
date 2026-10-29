@@ -357,7 +357,28 @@ s32 nbGetMotionTable(s32 unitid, s32 index)
     return *(s8 *)(p + index * 28 + 0x31);
 }
 
+#ifdef NON_MATCHING
+extern u16 D_003E7028[];
+extern s32 evtBitCheck(s32 no);
+
+s32 nbLoadMotionByIndex(s32 unitid, s32 index)
+{
+    s32 id;
+    s32 motion;
+
+    id = D_003E7028[unitid];
+    motion = nbGetMotionTable(id, index);
+    if (motion < 0) {
+        return 0;
+    }
+    if (evtBitCheck(0xC0F)) {
+        return (s32)((u32)(id * 16 + motion + 0x1000) << 16);
+    }
+    return (s32)((u32)(motion + id * 16 + 0x1000) << 16);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbSound", nbLoadMotionByIndex);
+#endif
 
 s32 nbGetUnitFromAction(nbFormation_t *form, s32 index)
 {
