@@ -111,9 +111,9 @@ s32 FrameVarProcess(dds3ProcessID_t *id)
 INCLUDE_ASM(const s32, "event/evtEventViewerFrameVar", FrameVarProcess);
 #endif
 
-void evtInitFrameVar(void)
+dds3ProcessID_t *evtInitFrameVar(void)
 {
-    dds3StartProcess(D_0053BC98, 0x2AF9, 1, 1, FrameVarProcess, NULL, NULL);
+    return dds3StartProcess(D_0053BC98, 0x2AF9, 1, 1, FrameVarProcess, NULL, NULL);
 }
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerFrameVar", D_0053BC98);

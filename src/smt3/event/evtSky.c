@@ -113,13 +113,13 @@ void evtExitSky(void)
     }
 }
 
-void evtInitSky(void)
+dds3ProcessID_t *evtInitSky(void)
 {
     fldSetFilterAnime(0);
     fldSkySetAlpha(0x80);
     fldSkySetAlphaOfs(0);
     fldSkySetFilter(0, 1, 0);
-    dds3StartProcess(D_0054F908, 0x2B0E, 1, 1, evtSkyProcess1, (dds3ProcessFunc_t)evtSkyShutdown, NULL);
+    return dds3StartProcess(D_0054F908, 0x2B0E, 1, 1, evtSkyProcess1, (dds3ProcessFunc_t)evtSkyShutdown, NULL);
 }
 INCLUDE_SDATA(const s32, "event/evtSky", skyanime);
 
