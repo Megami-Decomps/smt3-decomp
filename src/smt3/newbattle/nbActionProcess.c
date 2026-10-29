@@ -1361,7 +1361,64 @@ void SetAction_BAD(nbActionProcessData_t *a)
     nbPanelPressGaugeShow();
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_BAD);
+extern s32 nbMakeBadKaifukuPacket(s32 frame, s32 id, nbFormation_t *form);
+extern s32 nbMakeKaifukuPacket(s32 frame, s32 id,
+    nbFormation_t *form, s32 type, s32 hp, s32 mp, s32 flag);
+extern s32 nbApplyBadCurse(nbActionProcessData_t *a);
+extern s32 nbCheckBadCurse(s32 formindex);
+
+s32 CheckAction_BAD(nbActionProcessData_t *a)
+{
+    ClearTimeList(a);
+    SetHpForTimeList(a);
+    a->jyokyomes = 0;
+    switch (nbGetBadStat(a->form->formindex)) {
+    case 1:
+    case 2:
+        nbMakePressPacket(0, a, -1.0f);
+        nbMakeNewPressPacket(0, a, 0, a->form);
+        nbMakeBadKaifukuPacket(5, (s32)a, a->form);
+        if ((a->data->stat & 8) != 0) {
+            nbCameraSetState(0x19);
+        }
+        SetTimeList(a, a->form->formindex, 0, 30, 30);
+        SetNextActionSeq(a, 0x12);
+        break;
+    case 8:
+    case 0x80:
+        nbApplyBadCurse(a);
+        SetNextActionSeq(a, 0xB);
+        break;
+    case 4:
+        nbMakePressPacket(0, a, -1.0f);
+        nbMakeNewPressPacket(0, a, 0, a->form);
+        nbMakeKaifukuPacket(10, (s32)a, a->form, 0, a->work->maxhp >> 3,
+                            a->work->maxmp >> 3, 0);
+        if ((a->data->stat & 8) != 0) {
+            nbCameraSetState(0x19);
+        }
+        SetTimeList(a, a->form->formindex, 0, 30, 30);
+        SetNextActionSeq(a, 0x12);
+        break;
+    case 0x10:
+    case 0x400:
+        nbMakePressPacket(0, a, -1.0f);
+        nbMakeNewPressPacket(0, a, 0, a->form);
+        if ((a->data->stat & 8) != 0) {
+            nbCameraSetState(0x19);
+        }
+        SetTimeList(a, a->form->formindex, 0, 30, 30);
+        SetNextActionSeq(a, 0x12);
+        break;
+    default:
+        if (nbCheckBadCurse(a->form->formindex) != 0) {
+            nbApplyBadCurse(a);
+            SetNextActionSeq(a, 0xB);
+        }
+        break;
+    }
+    return 1;
+}
 
 void SetAction_BADWAIT(nbActionProcessData_t *a)
 {
