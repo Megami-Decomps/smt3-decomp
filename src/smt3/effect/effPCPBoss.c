@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel.h"
 #include "ps2asm.h"
 #include "fpu.h"
 #include "model.h"
@@ -497,7 +498,7 @@ extern void *effPCPHelperBEDCreate(void *pParam, void *pPBData, void *pBEDData);
 extern void effEveBEDCutSetParams(void *hEveBEDCut, const effPCPBossPlace_t *pParams);
 extern void effEveBEDCutDraw(void *hEveBEDCut);
 extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
-extern void *dds3GetProcessData(void);
+extern void *dds3GetProcessData(dds3ProcessID_t *process);
 extern u32 effBTLSkillCheckRun(void);
 extern u32 effBTLSkillGetTargetBit(void);
 extern u32 dds3GetRandIntA(void *aLimit, u32 name);
@@ -529,7 +530,7 @@ extern void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, const void 
 extern void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, const void *pPos);
 extern void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 abgr);
 extern void dds3EffectPartDraw(effPartHandle_t *hEffPart);
-s32 effPCPDANTE_Thunder_ProcessDraw(void);
+s32 effPCPDANTE_Thunder_ProcessDraw(dds3ProcessID_t *process);
 void effPCPDANTE_Thunder_SetPosition(effPCPDANTE_Thunder_tag *hData, const void *pPos);
 void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_tag *hData, const void *pRot);
 extern void *effPCPHelperBEDCopy(void *helper);
@@ -3910,9 +3911,9 @@ effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Pa
 extern void effPCPDANTE_Thunder_Draw(effPCPDANTE_Thunder_tag *hData);
 #endif
 
-s32 effPCPDANTE_Thunder_ProcessDraw(void)
+s32 effPCPDANTE_Thunder_ProcessDraw(dds3ProcessID_t *process)
 {
-    effPCPDANTE_Thunder_tag *work = dds3GetProcessData();
+    effPCPDANTE_Thunder_tag *work = dds3GetProcessData(process);
     u128 matrix[4];
     u128 position;
     void *model;
