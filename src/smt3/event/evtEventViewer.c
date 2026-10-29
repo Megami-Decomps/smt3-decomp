@@ -94,9 +94,9 @@ extern void dds3SetScreenFovy(f32 fovy);
 extern void evtRunUnitMode(dds3Basic_t *unit, s32 mode);
 extern void *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(void *aHandle);
-extern void *dds3StartProcess(const char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
-                              s32 v3, void *drawExit, void *deleteExit,
-                              void *p);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
+                                         s32 shutdownTimer, dds3ProcessFunc_t process,
+                                         dds3ProcessFunc_t shutdown, void *data);
 extern s32 evtInitSky(void);
 extern u32 dds3BackColor;
 extern void PushMenu(s32 no, s32 x, s32 y);
@@ -2265,8 +2265,8 @@ void evtInitEventViewer(void)
     memset(viewer, 0, 0x2328);
     viewer->block = block;
     viewerinfo = viewer;
-    process = dds3StartProcess("EventViewer", 0x3E8, 1, 1, evtEventViewerProcess1,
-                               evtEventViewerShutdown, viewer);
+    process = dds3StartProcess("EventViewer", 0x3E8, 1, 1, (dds3ProcessFunc_t)evtEventViewerProcess1,
+                               (dds3ProcessFunc_t)evtEventViewerShutdown, viewer);
     dds3LinkProcess(process, evtInitSky());
 }
 
