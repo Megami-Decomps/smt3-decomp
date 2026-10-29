@@ -171,6 +171,7 @@ _ExecOSD = 0x002DC2C0; // type:func size:0x10
 dds3GlobalWorkDestroy = 0x00116BB8; // type:func size:0x50
 dds3GlobalWorkMainProc = 0x00116C08; // type:func size:0x24
 __muldi3 = 0x002D3398; // type:func size:0x74
+__divdi3 = 0x002E5320; // type:func size:0x694
 __udivdi3 = 0x002E6048; // type:func size:0x57C
 // Shared engine name from the paired triangle-color wrapper.
 uiDrawUniformRgbRange = 0x00239FA0; // type:func size:0x2C
@@ -9634,7 +9635,6 @@ _kTLBException = 0x002E4FC0; // type:func size:0x100
 _xlaunch = 0x002E50C0; // type:func size:0x134
 _kDebugException = 0x002E5200; // type:func size:0xFC
 libc_2E52FC = 0x002E52FC; // type:func size:0x20
-libc_2E5320 = 0x002E5320; // type:func size:0x694
 __moddi3 = 0x002E59B8; // type:func size:0x690
 __umoddi3 = 0x002E65C8; // type:func size:0x568
 __fixunsdfdi = 0x002E6B30; // type:func size:0x118

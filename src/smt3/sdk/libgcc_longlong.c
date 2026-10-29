@@ -2,7 +2,7 @@
 
 INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E52FC);
 
-INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E5320);
+INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __divdi3);
 
 #ifdef NON_MATCHING
 /* EE little-endian raw word view; arithmetic below converts each half to u32. */
