@@ -107,7 +107,107 @@ INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawNormal);
 
 INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawSingle);
 
+extern void eglLinkAlpha(s32 alpha);
+extern void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy);
+extern void makaDrawMultiGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha);
+extern void makaDrawGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha);
+
+/* NON_MATCHING: 291 of 293 instruction words match at the native 1172-byte size. */
+#ifdef NON_MATCHING
+void makaDrawMulti(tagMakaObject_t *object)
+{
+    f32 easeTable[7] = {0.4f, 0.8f, 0.83f, 0.86f, 0.89f, 0.95f, 1.0f};
+    s8 phase = (s8)(16 - (s32)object->count);
+    s32 value = object->maka;
+    f32 easing;
+    f32 alpha = 0.0f;
+
+    eglLinkAlpha(0);
+
+    if (phase < 8) {
+        easing = easeTable[phase - 1];
+    } else if (phase < 12) {
+        easing = (11 - phase) * 0.25f;
+    } else {
+        easing = 0.0f;
+    }
+
+    if (phase < 2) {
+        alpha = 1.0f;
+    } else if (phase < 13) {
+        alpha = (12 - phase) / 11.0f;
+    } else {
+        alpha = 0.0f;
+    }
+
+    if (phase < 8) {
+        makaDrawBar(object->pos[0],
+                    (s32)(object->pos[1] * (1.0f - easing)
+                         + (object->pos[1] - 40) * easing), (u16)value,
+                    (u32)(alpha * 128.0f), 1.7f, 1.7f);
+    } else {
+        makaDrawBar(object->pos[0],
+                    (s32)((object->pos[1] - 40) * easing
+                         + (object->pos[1] + 3) * (1.0f - easing)), (u16)value,
+                    (u32)(alpha * 128.0f), 1.7f, 1.7f);
+    }
+
+    eglLinkAlpha(1);
+    if (phase < 7) {
+        alpha = 0.0f;
+    } else if (phase < 8) {
+        alpha = 1.0f;
+    } else {
+        alpha = (16 - phase) / 9.0f;
+    }
+    makaDrawBar(object->pos[0], object->pos[1] - 40, (u16)value,
+                (u8)(u32)(alpha * 25.0f), 1.8f, 1.8f);
+
+    if (phase < 7) {
+        easing = 0.0f;
+    } else if (phase < 12) {
+        easing = (11 - phase) * 0.25f;
+    } else {
+        easing = 0.0f;
+    }
+    if (phase < 4) {
+        alpha = 0.0f;
+    } else if (phase < 7) {
+        alpha = (phase - 3) / 3.0f;
+    } else if (phase < 14) {
+        alpha = (13 - phase) / 7.0f;
+    } else {
+        alpha = 0.0f;
+    }
+    makaDrawMultiGauge(256, 156,
+                       1.0f - easing + (easing + easing),
+                       1.0f - easing + easing * 1.3f, alpha * 64.0f);
+
+    if (phase < 5) {
+        easing = 0.0f;
+    } else if (phase < 12) {
+        easing = (phase - 4) / 7.0f;
+    } else {
+        easing = 1.0f;
+    }
+    if (phase < 4) {
+        alpha = 0.0f;
+    } else if (phase < 8) {
+        alpha = (phase - 3) * 0.25f;
+    } else if (phase < 12) {
+        alpha = (11 - phase) * 0.25f;
+    } else {
+        alpha = 0.0f;
+    }
+    makaDrawGauge(0x100, 0x94,
+                  1.0f - easing + easing * 2.1f,
+                  1.0f - easing + easing * 3.0f,
+                  alpha * 89.0f);
+}
+
+#else
 INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawMulti);
+#endif
 
 void makaDraw(tagMakaObject_t *makaPtr)
 {
