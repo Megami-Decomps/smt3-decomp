@@ -246,10 +246,7 @@ typedef struct effPCPBossBUNSIN2Param_t
     nbFormation_t *pForm2R;
 } effPCPBossBUNSIN2Param_t;
 
-typedef struct effPCPBossONGYParam_t
-{
-    nbFormation_t *pFormation;
-} effPCPBossONGYParam_t;
+
 
 typedef struct effPCPBossONGY2Param_t
 {

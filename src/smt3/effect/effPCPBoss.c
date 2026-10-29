@@ -177,10 +177,7 @@ typedef struct effPCPBossBael_t
     effPartHandle_t *hPCF;
 } effPCPBossBael_t;
 
-typedef struct effPCPBossONGYParam_t
-{
-    struct nbFormation_t *pFormation;
-} effPCPBossONGYParam_t;
+
 
 typedef struct effPCPBossONGY_t
 {
