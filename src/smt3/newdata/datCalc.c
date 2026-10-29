@@ -1367,7 +1367,51 @@ void datEquipHearts(s32 HeartsID)
     }
 }
 
+#ifdef NON_MATCHING
+void datSetAutoKaifukuSkill(datUnitWork_t *work, s32 skill)
+{
+    s32 hp = 0;
+    s32 mp = 0;
+    s16 n;
+    s16 m;
+
+    if (datCheckSyojiSkill(work, skill) == 0) {
+        return;
+    }
+    n = datSkillTable.special[skill - 288].n;
+    m = datSkillTable.special[skill - 288].m;
+    switch (skill) {
+    case 0x15A:
+    case 0x15D:
+        if (n > 0) {
+            hp = work->maxhp / n;
+        }
+        break;
+    case 0x15B:
+    case 0x15E:
+        if (n > 0) {
+            mp = work->maxmp / n;
+        }
+        break;
+    case 0x15C:
+        if (n > 0) {
+            hp = work->maxhp / n;
+        }
+        if (m > 0) {
+            mp = work->maxmp / m;
+        }
+        break;
+    }
+    if (hp > 0) {
+        datAddHp(work, hp);
+    }
+    if (mp > 0) {
+        datAddMp(work, mp);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newdata/datCalc", datSetAutoKaifukuSkill);
+#endif
 
 void datFieldSkillKaifuku(void)
 {
