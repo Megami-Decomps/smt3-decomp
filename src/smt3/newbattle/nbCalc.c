@@ -1082,7 +1082,110 @@ f32 nbGetGensyoRitu(s32 nskill, s32 sformindex, s32 dformindex)
     return datSkillTable.normal[nskill].minus / 100.0f;
 }
 
+#ifdef NON_MATCHING
+extern s32 datGetBadStatusAttr(s32 bad);
+extern const char D_00544BA8[];
+
+u32 nbGetKoukaBadDamage(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s32 nvirtual)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    volatile datNormalSkill_t *skill = &datSkillTable.normal[nskill];
+    datUnitWork_t *source, *target;
+    s32 status, aisyo, random, chanceInt, success;
+    s32 candidates[14], count, i;
+    u32 targetFlags;
+    u8 badtype, badlevel;
+    f32 affinity, baseChance, chance;
+
+    badtype = skill->badtype;
+    if (badtype != 1 && badtype != 3) {
+        return 0;
+    }
+    source = nbGetUnitWorkFromFormindex(sformindex);
+    target = nbGetUnitWorkFromFormindex(dformindex);
+    status = skill->basstatus & 0x7FFF;
+    if (nskill == 0x110) {
+        random = dds3GetRandIntA(NULL, 100);
+        if (random < 40) {
+            status = 0x1000;
+        } else if (random < 60) {
+            status = 0x2000;
+        } else if (random < 70) {
+            status = 0x4000;
+        } else if (random < 80) {
+            status = 0x20;
+        } else if (random < 90) {
+            status = 0x40;
+        } else {
+            status = 0x100;
+        }
+    } else if (skill->badtype == 3) {
+        count = 0;
+        for (i = 0; i < 14; i++) {
+            if ((status >> i) & 1) {
+                candidates[count++] = i;
+            }
+        }
+        /* Retail leaves this unset; no table entry has zero candidates. */
+        status = 0;
+        if (count == 0) {
+            return status;
+        }
+        random = dds3GetRandIntA(NULL, count);
+        status = 1 << candidates[random];
+    }
+    aisyo = nbGetAisyo(nskill, dformindex, datGetBadStatusAttr(status));
+    if (aisyo & 0x170000) {
+        return 0;
+    }
+    affinity = ritu;
+    if (status != 0x800) {
+        affinity = (f32)(aisyo & 0xFFFF) / 100.0f;
+    }
+    if (nskill == 0x10A && (data->stat & 1) && (target->flag & 0x20)) {
+        printf("DANTE SUTING BOSS NG...\n");
+        return 0;
+    }
+    if ((u32)(nskill - 0x103) < 2 && (nbGetAisyo(-1, dformindex, 7) & 0x70000)) {
+        printf("SIBAE JYUSATU TAISEI ARI NG...\n");
+        return 0;
+    }
+    if (nskill == 0x4F && !(target->badstatus & 0x40)) {
+        printf("PESTO POISON NASI NG...\n");
+        return 0;
+    }
+    badlevel = skill->badlevel;
+    success = 1;
+    if (badlevel != 0xFF && nvirtual == 0) {
+        baseChance = (f32)badlevel;
+        (void)((volatile datUnitWork_t *)source)->flag;
+        chance = (baseChance / 100.0f) * affinity * 100.0f;
+        i = evtBitCheck(0xAF2);
+        targetFlags = target->flag;
+        if (i != 0) {
+            if (!(targetFlags & 0x20)) {
+                if (status == 0x800) {
+                    chance *= targetFlags & 4 ? 0.5f : 0.7f;
+                } else {
+                    chance *= 0.7f;
+                }
+            }
+        } else if (!(targetFlags & 0x20) && status == 0x800) {
+            chance *= targetFlags & 4 ? 1.3f : 1.5f;
+        }
+        random = dds3GetRandIntA(NULL, 100);
+        chanceInt = (s32)chance;
+        success = random < chanceInt;
+        printf(D_00544BA8, (s32)baseChance, (s32)(affinity * 100.0f), chanceInt, random);
+    }
+    if (success && (s32)nbGetBadStat(dformindex) < status) {
+        return status;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaBadDamage);
+#endif
 
 extern const char D_00544BE8[];
 
