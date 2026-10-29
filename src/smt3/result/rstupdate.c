@@ -45,7 +45,9 @@ typedef struct
     /* 0x007F */ u8 reserved7F;
     /* 0x0080 */ datUnitWork_t evoWork;
     /* 0x016C */ datUnitWork_t *pCurrentStock;
-    /* 0x0170 */ u8 unk_170[0x1128];
+    /* 0x0170 */ datUnitWork_t workStock;
+    /* 0x025C */ cmpPadStopWork_t paramCursor;
+    /* 0x0298 */ u8 reserved0298[0x1000];
     /* 0x1298 */ s8 giftKind;
     /* 0x1299 */ u8 reserved1299;
     /* 0x129A */ u16 giftId;
