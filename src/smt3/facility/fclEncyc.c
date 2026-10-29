@@ -3841,8 +3841,10 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadMainHelp);
 
 void InitializeDebug_fclEncyc(void)
 {
-    void *buf = sdfMemAllocDirect(0xC);
-    fclEncycDebugWork_t *work = (fclEncycDebugWork_t *)sdfMemLock(buf);
+    fclEncycDebugWork_t *work;
+    void *buf = sdfMemAllocDirect(sizeof(*work));
+
+    work = (fclEncycDebugWork_t *)sdfMemLock(buf);
 
     work->allocation = buf;
     work->state = 0;
