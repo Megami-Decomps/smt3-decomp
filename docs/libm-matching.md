@@ -59,6 +59,27 @@ The [historical scaler](https://github.com/mirror/newlib-cygwin/blob/newlib-1_9_
 corroborates those separate returns, while the PS2 denormal/exponent limits are
 established by native control flow.
 
+## __kernel_cosf
+
+All336 instruction bytes match. The shared unsigned word-view macros preserve
+both the magnitude extraction and the reconstructed `qx` float. Tiny inputs
+return one only after the native integer-conversion gate. The correction split
+uses the inclusive0x3E999999 cutoff; `qx` is0.28125 above0x3F480000 and otherwise
+comes from subtracting0x01000000 from the magnitude word.
+
+The nested Horner expression retains all six native binary32 coefficient words.
+Hexadecimal float literals avoid the pinned compiler's one-bit truncation of
+five earlier decimal spellings. The polynomial already contains one factor of
+`z`; the later `z * r` is a second multiplication, followed by the native tail
+correction. The compound expression keeps the native Horner accumulator where
+successive assignments leave fourteen register-operand differences.
+
+The actual-owner `cc1probe.sh --func __kernel_cosf --alloc --sched --no-dumps`
+run passes hooked/unhooked assembly parity. Local allocation combines the
+Horner intermediates at UIDs65 through88 into one quantity (reg113), selects
+`$f0` for it and keeps the final scaled result distinct. No data objects,
+compiler settings, extra state or register constraints are added.
+
 ## __kernel_sinf
 
 All260 instruction bytes at0x002D0BA0 match, with no data section or target

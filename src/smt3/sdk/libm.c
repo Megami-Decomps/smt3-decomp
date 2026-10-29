@@ -378,7 +378,38 @@ f32 __ieee754_sqrtf(f32 x)
 INCLUDE_ASM(const s32, "sdk/libm", __ieee754_sqrtf);
 #endif
 
-INCLUDE_ASM(const s32, "sdk/libm", __kernel_cosf);
+f32 __kernel_cosf(f32 x, f32 tail)
+{
+    s32 magnitude;
+    f32 z;
+    f32 r;
+    f32 qx;
+    f32 hz;
+    f32 a;
+
+    GET_FLOAT_WORD(magnitude, x);
+    magnitude &= 0x7FFFFFFF;
+    if (magnitude <= 0x31FFFFFF) {
+        if ((s32)x == 0) {
+            return 1.0f;
+        }
+    }
+    z = x * x;
+    r = z * (0x1.555554p-5f + z * (-0x1.6c16c0p-10f +
+        z * (0x1.a01a00p-16f + z * (-0x1.27e4f6p-22f +
+        z * (0x1.1ee9eap-29f + z * -0x1.8fae9cp-37f)))));
+    if (magnitude <= 0x3E999999) {
+        return 1.0f - (0.5f * z - (z * r - x * tail));
+    }
+    if (magnitude > 0x3F480000) {
+        qx = 0.28125f;
+    } else {
+        SET_FLOAT_WORD(qx, magnitude - 0x01000000);
+    }
+    hz = 0.5f * z - qx;
+    a = 1.0f - qx;
+    return a - (hz - (z * r - x * tail));
+}
 
 INCLUDE_ASM(const s32, "sdk/libm", __kernel_rem_pio2f);
 
