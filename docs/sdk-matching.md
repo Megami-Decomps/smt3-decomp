@@ -249,14 +249,16 @@ archive object is byte identical to retail: upstream newlib 1.8.2 and 1.9.0
 compiled at `-O2 -G0 -fno-common -fno-builtin` give 1,340 bytes with `med3` and
 `swapfunc` as separate functions, where retail is one 2,544-byte function with
 both inlined. At `-O3` both versions give one function of 2,676 bytes, the
-right shape and 132 bytes over. So Sony built this newlib with `-O3`-level
-inlining, and the version between 1.8.2 and 1.9.0 makes no difference to this
-file.
+right shape and 132 bytes over. This establishes a different inlining result;
+it does not prove a blanket `-O3` setting for the runtime. The two upstream
+versions make no difference to that diagnostic.
 
-libm is further off: fdlibm 1.9.0's `sf_floor.c` gives 232 bytes against
-retail's 216 and differs from the first instruction at both `-O2` and `-O3`,
-building the mantissa mask with `lui`/`ori`/`and` where upstream shifts and
-masks. That is a different source, not a different flag.
+The early unadapted fdlibm `sf_floor.c` diagnostic emitted232 bytes against
+216 native bytes at both optimization levels. The current PS2 reconstruction
+matches all216 bytes: native word gates, conversion boundaries and the
+assembler's immediate-constant expansion all matter. See
+[EE math matching](libm-matching.md) for the qualified source and library-call
+profile. Source differences and build settings must be established separately.
 
 So these units are ordinary matching work after all, with upstream source as a
 strong hint rather than an answer. The archives still help: a member's bytes
