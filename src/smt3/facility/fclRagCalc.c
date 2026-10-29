@@ -150,7 +150,6 @@ s32 ragCalc(dds3ProcessID_t *id)
 }
 
 
-
 typedef struct
 {
     /* 0x0000 */ u8 unk_00[3];
@@ -163,10 +162,11 @@ extern ragDrawWork_t *ragDrawWork;
 
 extern fclSpriteTbl_t D_003306B8[];
 
+
 extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
-extern u16 *ragGetConfirmEntry(s8 kind, u8 index);
+extern ragItemReq_t *ragGetConfirmEntry(s8 kind, u8 index);
 extern void cmpSetSkillListRows(s32 rows);
 extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
                                                 const char *text, frFontHandle_t *previous);
@@ -179,26 +179,20 @@ extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *color,
                                 fclSpriteTbl_t *table, s32 ot);
 extern s32 fclDrawListSprite(s32 x, s32 y, s32 color, s32 width, s32 height,
                              s32 arg6, s32 blend, s32 ot);
-/* Inventory window shared with the fusion confirmation consumers. */
-typedef struct
-{
-    u8 reserved0000[0x1928];
-    u8 itemQuantity[0xA0];
-} ragInventoryView_t;
 extern char *pStr[];
 extern char D_0054FBA0[];
 extern char D_0054FBA8[] __attribute__((section(".sdata")));
 
 void ragDrawFrameEdge(fclPanelPos_t *pos, u8 kind, u8 item, s32 ot)
 {
-    u16 *entries = ragGetConfirmEntry((s8)kind, item);
+    ragItemReq_t *entries = ragGetConfirmEntry((s8)kind, item);
     s32 x = pos->unk_00;
     s32 rowY = pos->unk_04;
     s32 i;
 
     cmpSetSkillListRows(0x13);
     for (i = 0; i < 3; i++) {
-        u16 id = entries[i * 2];
+        u16 id = entries[i].item;
 
         if (id != 0) {
             char text[0x20];
@@ -214,13 +208,13 @@ void ragDrawFrameEdge(fclPanelPos_t *pos, u8 kind, u8 item, s32 ot)
                              pos->unk_08 << 4, NULL, 0, 1,
                              ragDrawWork->texHandle, D_003306B8, ot);
 
-            sprintf(text, D_0054FBA8, ((s8 *)entries)[i * 4 + 2]);
+            sprintf(text, D_0054FBA8, entries[i].count);
             font = frwGetNumFontFRQ(x + 0x740, numberY,
                                     pos->unk_08, 0x75A8EB80, text, NULL);
             func_001C7E38(font, 1, ot);
             frDestroyFontRequestAfter(font);
 
-            sprintf(text, D_0054FBA8, ((ragInventoryView_t *)DDS3_GBWK)->itemQuantity[id]);
+            sprintf(text, D_0054FBA8, DDS3_GBWK->stockRemainder[id]);
             font = frwGetNumFontFRQ(x + 0xB10, numberY,
                                     pos->unk_08, 0x6C81BB80, text, NULL);
             func_001C7E38(font, 1, ot);
