@@ -51,6 +51,18 @@ extern f32 sdfAtan(f32 aX);
 extern u32 effBTLModelGetInvokeGroupNumber(void);
 extern f32 nbCameraGetSummonNear(void);
 extern f32 nbCameraGetSummonFar(void);
+extern f32 D_0054F384;
+extern f32 D_0054F388;
+extern s8 dds3PadBitTable[];
+extern u32 effBTLDebug_CameraAllEditCheck(void);
+extern void effDebugPointDraw2(sdfVector4_t *point, u32 color);
+extern void effBTLModelLook(nbFormation_t *formation, sdfVector4_t *position);
+extern void effBTLModelLook2(nbFormation_t *formation, sdfVector4_t *position, f32 angle);
+extern void nbGetUnitModelPos(nbFormation_t *formation, f32 *position);
+extern f32 sdfAtan2(f32 y, f32 x);
+extern s32 sprintf(char *destination, const char *format, ...);
+extern void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *format);
+extern void SetRotateMatrixY(f32 angle);
 
 extern void SetRotateMatrixX(f32 aAngle);
 
@@ -105,7 +117,7 @@ extern void effBTLModelCheckBoundsHide(nbFormation_t *formation, sdfVector4_t *t
 extern sdfVector4_t aViewDown;
 
 extern f32 effBTLModelGetHeight(nbFormation_t *formation);
-extern void effBTLGetGroupPos(nbFormation_t *formation, sdfVector4_t *position);
+extern void effBTLGetGroupPos(nbFormation_t *formation, f32 *position);
 extern void effBTLModelSetPosition(nbFormation_t *formation, sdfVector4_t *position);
 extern void nbCameraShot_GroundCollision(nbCamera_t *camera);
 extern sdfVector4_t D_00325960;
@@ -220,7 +232,265 @@ void nbCameraShot_CommandFixPos_Set2(nbCamera_t *pNbCamera)
     }
 }
 
+#ifdef NON_MATCHING
+void nbCameraShot_CommandFixPos_Calc2(nbCamera_t *camera, nbFormation_t *target)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    nbCamera_AllTable_t *table;
+    nbFormation_t *forms;
+    nbFormation_t *lowest = NULL;
+    nbFormation_t *heightSource = NULL;
+    nbFormation_t *form;
+    datUnitWork_t *unitWork;
+    sdfVector4_t cameraTarget;
+    sdfVector4_t targetCenter;
+    sdfVector4_t position;
+    sdfVector4_t lowCenter;
+    char debugText[0x70];
+    f32 minimumHeight = 0.0f;
+    f32 maximumHeight = 0.0f;
+    f32 groupRadius = 0.0f;
+    f32 up = 0.0f;
+    f32 addDistance = 0.0f;
+    f32 bodyRadius;
+    f32 cameraAngle;
+    f32 distance;
+    f32 minDistance;
+    f32 delta;
+    f32 height;
+    f32 angle;
+    s32 adjustOtherEnemies = 0;
+    s32 scanFormation = 0;
+    s32 i;
+    s32 modelId;
+
+    if (data == NULL) {
+        return;
+    }
+    table = (nbCamera_AllTable_t *)nbCameraGetModelAllTable(target);
+    forms = data->form;
+
+    switch (data->formationtype) {
+    case 12:
+        if ((forms[4].stat & 1) != 0) {
+            scanFormation = 1;
+        }
+        break;
+    case 8:
+        heightSource = &forms[4];
+        nbGetUnitModelPos(&forms[4], &position.x);
+        cameraTarget.x = position.x - 300.0f;
+        cameraTarget.y = -150.0f;
+        cameraTarget.z = position.z + 800.0f;
+        up = -150.0f;
+        groupRadius = 700.0f;
+        minimumHeight = 300.0f;
+        maximumHeight = 300.0f;
+        addDistance = 150.0f;
+        break;
+    case 9:
+    case 11:
+        if ((forms[4].stat & 1) != 0) {
+            modelId = effBTLModelGetID(&forms[4]);
+            forms = data->form;
+            switch (modelId) {
+            case 0x102:
+                heightSource = &forms[4];
+                height = 700.0f;
+                addDistance = 150.0f;
+                groupRadius = 500.0f;
+                minimumHeight = 700.0f;
+                maximumHeight = 700.0f;
+                effBTLModelGetSphereCenter(&forms[4]);
+                SDF_VU0_STOREVECTOR(&position);
+                cameraTarget.x = 0.0f;
+                cameraTarget.y = height * 0.5f;
+                cameraTarget.z = position.z;
+                break;
+            case 0x123:
+            case 0x156:
+                heightSource = &forms[4];
+                height = 900.0f;
+                addDistance = 150.0f;
+                groupRadius = 500.0f;
+                minimumHeight = 900.0f;
+                maximumHeight = 900.0f;
+                effBTLModelGetSphereCenter(&forms[4]);
+                SDF_VU0_STOREVECTOR(&position);
+                cameraTarget.x = 0.0f;
+                cameraTarget.y = height * 0.5f;
+                cameraTarget.z = position.z;
+                break;
+            }
+        }
+        break;
+    case 4:
+    case 10:
+    case 13:
+        scanFormation = 1;
+        break;
+    default:
+        scanFormation = 1;
+        adjustOtherEnemies = 1;
+        break;
+    }
+
+    if (scanFormation != 0) {
+        minimumHeight = 1000000.0f;
+        maximumHeight = 0.0f;
+        forms = data->form;
+        for (i = 0; i < 32; i++) {
+            form = &forms[i];
+            if ((form->stat & 0x203) == 0x203) {
+                height = effBTLModelGetHeight(form);
+                if (height < minimumHeight) {
+                    minimumHeight = height;
+                    lowest = form;
+                }
+                if (height > maximumHeight) {
+                    maximumHeight = height;
+                }
+            }
+        }
+        if (lowest == NULL) {
+            return;
+        }
+        heightSource = lowest;
+        groupRadius = nbCameraGroupGetSphere(0x200) + 50.0f;
+        SDF_VU0_STOREVECTOR(&cameraTarget);
+    }
+
+    if (minimumHeight > 150.0f) {
+        cameraTarget.y = -(minimumHeight * 0.5f);
+        effBTLModelGetSphereCenter(heightSource);
+        SDF_VU0_STOREVECTOR(&lowCenter);
+        up = (cameraTarget.y + lowCenter.y) * 0.5f;
+    } else {
+        up = 0.0f;
+    }
+
+    cameraTarget.y = up;
+    effBTLModelGetSphereCenter(target);
+    SDF_VU0_STOREVECTOR(&targetCenter);
+    height = -effBTLModelGetHeight(target);
+    targetCenter.y = height;
+    targetCenter.y += table->up * target->scl;
+
+    forms = data->form;
+    for (i = 0; i < 32; i++) {
+        form = &forms[i];
+        if ((form->stat & 0x103) == 0x103) {
+            effBTLGetGroupPos(form, &position.x);
+            position.z += 100.0f;
+            effBTLModelSetPosition(form, &position);
+        }
+    }
+    targetCenter.z += 100.0f;
+    SDF_VU0_LOADVECTOR(&cameraTarget);
+    SDF_VU0_STOREVECTOR(&camera->target);
+    SDF_VU0_LOADVECTOR_B(&targetCenter);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_GETLENGTH(camera->distance);
+
+    cameraAngle = sdfAtan(0.3490658104f);
+    bodyRadius = target->r * target->scl;
+    if (effBTLDebug_CameraAllEditCheck() != 0) {
+        if ((dds3PadBitTable[4] & 2) != 0) {
+            D_0054F384 -= dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
+        } else if ((dds3PadBitTable[5] & 2) != 0) {
+            D_0054F384 += dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
+        }
+        if ((dds3PadBitTable[6] & 2) != 0) {
+            D_0054F388 -= dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
+        } else if ((dds3PadBitTable[7] & 2) != 0) {
+            D_0054F388 += dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
+        }
+        effDebugPointDraw2(&targetCenter, 0x80008080);
+        bodyRadius = D_0054F384 * target->scl;
+        targetCenter.y += (D_0054F388 - table->up) * target->scl;
+        unitWork = nbGetUnitWorkFromFormindex(target->formindex);
+        sprintf(debugText, "CAMERA EDIT:\n");
+        effDebugStringDraw(0x18, 0xC8, 0, debugText);
+        sprintf(debugText, " DIST:[%-3.3f]\n", D_0054F384);
+        effDebugStringDraw(0x18, 0xD4, 0, debugText);
+        sprintf(debugText, " UP  :[%-3.3f]\n", D_0054F388);
+        effDebugStringDraw(0x18, 0xE0, 0, debugText);
+        sprintf(debugText, " ID  ;[%Xd]\n", unitWork->id);
+        effDebugStringDraw(0x18, 0xEC, 0, debugText);
+        effDebugPointDraw2(&cameraTarget, 0x80000080);
+        effDebugPointDraw2(&targetCenter, 0x80800000);
+    } else if (table->distance != 0.0f) {
+        bodyRadius = table->distance * target->scl;
+    } else if (bodyRadius > 150.0f) {
+        bodyRadius /= cameraAngle;
+    } else if (!(bodyRadius > 90.0f)) {
+        bodyRadius = (2.0f * bodyRadius) / cameraAngle;
+    } else {
+        bodyRadius = (bodyRadius * 1.5f) / cameraAngle;
+    }
+    camera->distance += bodyRadius * 0.9f + addDistance;
+
+    cameraAngle = sdfAtan(0.495673418f);
+    if (minimumHeight < 150.0f && maximumHeight > 150.0f && groupRadius < 550.0f) {
+        groupRadius = 550.0f;
+    }
+    minDistance = groupRadius / cameraAngle;
+    distance = camera->distance;
+    if (distance < minDistance) {
+        delta = minDistance - distance;
+        forms = data->form;
+        for (i = 0; i < 32; i++) {
+            form = &forms[i];
+            if ((form->stat & 0x103) == 0x103) {
+                effBTLGetGroupPos(form, &position.x);
+                position.z -= delta;
+                effBTLModelSetPosition(form, &position);
+            }
+        }
+        camera->distance = minDistance;
+        distance = minDistance;
+        targetCenter.z -= delta;
+    }
+
+    SDF_VU0_LOADVECTOR(&cameraTarget);
+    SDF_VU0_LOADVECTOR_B(&targetCenter);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&camera->direction);
+    angle = sdfAtan2(target->r * target->scl, distance);
+    SetRotateMatrixY(targetCenter.x > 0.0f ? angle * 0.5f : -angle * 0.5f);
+    SDF_VU0_LOADVECTOR(&camera->direction);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&camera->direction);
+    camera->fovy = 0.6981316209f;
+
+    forms = data->form;
+    for (i = 0; i < 32; i++) {
+        form = &forms[i];
+        if (form != target && (form->stat & 0x103) == 0x103) {
+            height = form->r * form->scl;
+            effBTLGetGroupPos(form, &position.x);
+            position.z -= height * 0.25f;
+            effBTLModelSetPosition(form, &position);
+        }
+    }
+    effBTLModelLook(target, &cameraTarget);
+    if (adjustOtherEnemies != 0) {
+        forms = data->form;
+        effBTLGetGroupPos(target, &position.x);
+        for (i = 0; i < 32; i++) {
+            form = &forms[i];
+            if ((form->stat & 0x203) == 0x203 && form != target) {
+                effBTLModelLook2(form, &position, 0.3490658104f);
+            }
+        }
+    }
+}
+
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_CommandFixPos_Calc2);
+#endif
 
 void nbCameraShot_CommandFixPos_Set(nbCamera_t *pNbCamera)
 {
@@ -295,7 +565,7 @@ void nbCameraShot_AllParty_Set(nbCamera_t *pNbCamera)
         formation = data->form;
         for (i = 0; i < 4; i++, formation++) {
             if ((formation->stat & 3) == 3) {
-                effBTLGetGroupPos(formation, &position);
+                effBTLGetGroupPos(formation, &position.x);
                 position.z -= 250.0f;
                 effBTLModelSetPosition(formation, &position);
             }
