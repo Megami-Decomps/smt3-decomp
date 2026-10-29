@@ -19,9 +19,17 @@ extern void *mhfldAnaFile;
 
 extern s32 gFldRndEncBtl;
 
-extern s32 fldLoadNextGetStatus2(void);
+extern u8 fldLoadNextGetStatus2(void);
 
-extern s32 fldLoadNextGetStatus(void);
+extern u32 fldLoadNextGetStatus(void);
+
+extern void dds3SetActiveScene(dds3Basic_t *scene);
+extern s32 evtBitCheck(s32 no);
+extern void evtBitOff(s32 no);
+extern void evtBitOn(s32 no);
+extern s32 ProcRandomEncountCheck(void);
+extern void fldLoadNextFile_SetId_BtlRet(u32 field, u32 area);
+extern char *strcpy(char *destination, const char *source);
 
 extern s32 fldLoadNextTask(void);
 
