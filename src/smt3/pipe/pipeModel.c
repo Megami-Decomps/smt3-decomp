@@ -3,6 +3,7 @@
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
+#include "pipe.h"
 
 extern void (*D_00551828)(void);
 
@@ -13,16 +14,6 @@ extern u32 dds3GetRandA(void *name);
 extern void sdfMotionSeek(sdfMotionCtrlr_t *aCtrlr, f32 aFrame);
 
 extern void *memset(void *a, s32 b, u32 c);
-
-typedef struct tagpipeBasic {
-    void *base;
-    mdlObj_t *mdl;
-    u8 unk08[4];
-    s32 enabled;
-    f32 pos[4];
-    f32 rot[4];
-    f32 scl[4];
-} tagpipeBasic;
 
 
 extern s32 mymdlAddObject(tagpipeBasic *pWork, u16 mdlSize);

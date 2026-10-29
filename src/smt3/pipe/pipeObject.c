@@ -15,16 +15,6 @@ extern sdfTexHandle_t *sdfTexSet(struct pipeTextureFile_t *aTex);
 
 extern void *memset(void *a, s32 b, u32 c);
 
-typedef struct tagpipeBasic {
-    void *base;
-    mdlObj_t *mdl;
-    u8 unk08[4];
-    s32 enabled;
-    f32 pos[4];
-    f32 rot[4];
-    f32 scl[4];
-} tagpipeBasic;
-
 
 
 typedef struct tagPipeEnemyInfo {
