@@ -12,8 +12,8 @@ both native and emitted sizes when they differ.
 | Entries | Unit | Page |
 |---|---|---|
 | 33 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
-| 18 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
+| 17 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 11 |  | [sdk/libkernl.md](sdk/libkernl.md) |
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
@@ -87,6 +87,7 @@ both native and emitted sizes when they differ.
 | 1 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
 | 1 | newbattle/nbE911 | [newbattle/nbE911.md](newbattle/nbE911.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
+| 1 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 1 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 1 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 1 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |

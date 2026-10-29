@@ -138,6 +138,7 @@ dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3Ke
 slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/matching/mc/slMain.md	3
 SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/matching/newbattle/nbAi.md	3
 SetSingleTarget2	newbattle/nbAi	0x26C	143 of 155 words match	docs/matching/newbattle/nbAi.md	29
+nbGetVirtualAisyo	newbattle/nbCalc	0xAC	43 of 43 words match	docs/matching/newbattle/nbCalc.md	3
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words differ	docs/matching/newbattle/nbCameraBoss.md	3
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	docs/matching/newbattle/nbCameraBoss.md	50
 nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	79
@@ -163,24 +164,23 @@ nbCallNewBattle	newbattle/nbInit	0xA0	29 of 40 words differ	docs/matching/newbat
 RunNumEffectKouka	newbattle/nbKoukaProcess	0x144	81 of 81 words match	docs/matching/newbattle/nbKoukaProcess.md	3
 nbMainProcess1	newbattle/nbMainProcess	0x420	113 of 263 words match	docs/matching/newbattle/nbMainProcess.md	3
 nbDrawMakaNum	newbattle/nbMakaProcess	0x2B4	136 of 173 words match	docs/matching/newbattle/nbMakaProcess.md	3
-nbGetVirtualAisyo	newbattle/nbMakePacket	0xAC	39 of 43 words match	docs/matching/newbattle/nbMakePacket.md	3
-Flow1_11	newbattle/nbMakePacket	0xC8	19 of 48 words match	docs/matching/newbattle/nbMakePacket.md	23
-nbClearActionFlags	newbattle/nbMakePacket	0xE0	18 of 56 words match	docs/matching/newbattle/nbMakePacket.md	37
-Flow10_21	newbattle/nbMakePacket	0x98	11 of 37 words differ	docs/matching/newbattle/nbMakePacket.md	58
-Flow10_10	newbattle/nbMakePacket	0x90	15 of 35 words differ	docs/matching/newbattle/nbMakePacket.md	77
-nbCheckBattleSkillError1	newbattle/nbSkillError	0x48	1 of 18 words differ	docs/matching/newbattle/nbMakePacket.md	93
-nbSetBadCurseTimer	newbattle/nbEncProcess	0x2C	2 of 11 words differ	docs/matching/newbattle/nbMakePacket.md	118
-Flow5_6, Flow5_18	newbattle/nbMakePacket	0xD8 each	23 of 52 words match	docs/matching/newbattle/nbMakePacket.md	147
-Flow6_37	newbattle/nbMakePacket	0x10C	58 of 67 words match	docs/matching/newbattle/nbMakePacket.md	184
-Flow6_43	newbattle/nbMakePacket	0x10C	45 of 68 words match	docs/matching/newbattle/nbMakePacket.md	211
-Flow7_20	newbattle/nbMakePacket	0x130	49 of 76 words match	docs/matching/newbattle/nbMakePacket.md	233
-Flow10_1	newbattle/nbMakePacket	0x100	15 of 63 words differ	docs/matching/newbattle/nbMakePacket.md	259
-Flow9_16	newbattle/nbMakePacket	0x168	45 of 89 words differ	docs/matching/newbattle/nbMakePacket.md	280
-Flow6_65	newbattle/nbMakePacket	0x190	79 of 100 words differ	docs/matching/newbattle/nbMakePacket.md	293
-nbCollectBadCurseUnits	newbattle/nbEncProcess	0xA4	23 of 41 words match	docs/matching/newbattle/nbMakePacket.md	314
-ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/matching/newbattle/nbMakePacket.md	332
-nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/matching/newbattle/nbMakePacket.md	353
-nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/matching/newbattle/nbMakePacket.md	381
+Flow1_11	newbattle/nbMakePacket	0xC8	19 of 48 words match	docs/matching/newbattle/nbMakePacket.md	3
+nbClearActionFlags	newbattle/nbMakePacket	0xE0	18 of 56 words match	docs/matching/newbattle/nbMakePacket.md	17
+Flow10_21	newbattle/nbMakePacket	0x98	11 of 37 words differ	docs/matching/newbattle/nbMakePacket.md	38
+Flow10_10	newbattle/nbMakePacket	0x90	15 of 35 words differ	docs/matching/newbattle/nbMakePacket.md	57
+nbCheckBattleSkillError1	newbattle/nbSkillError	0x48	1 of 18 words differ	docs/matching/newbattle/nbMakePacket.md	73
+nbSetBadCurseTimer	newbattle/nbEncProcess	0x2C	2 of 11 words differ	docs/matching/newbattle/nbMakePacket.md	98
+Flow5_6, Flow5_18	newbattle/nbMakePacket	0xD8 each	23 of 52 words match	docs/matching/newbattle/nbMakePacket.md	127
+Flow6_37	newbattle/nbMakePacket	0x10C	58 of 67 words match	docs/matching/newbattle/nbMakePacket.md	164
+Flow6_43	newbattle/nbMakePacket	0x10C	45 of 68 words match	docs/matching/newbattle/nbMakePacket.md	191
+Flow7_20	newbattle/nbMakePacket	0x130	49 of 76 words match	docs/matching/newbattle/nbMakePacket.md	213
+Flow10_1	newbattle/nbMakePacket	0x100	15 of 63 words differ	docs/matching/newbattle/nbMakePacket.md	239
+Flow9_16	newbattle/nbMakePacket	0x168	45 of 89 words differ	docs/matching/newbattle/nbMakePacket.md	260
+Flow6_65	newbattle/nbMakePacket	0x190	79 of 100 words differ	docs/matching/newbattle/nbMakePacket.md	273
+nbCollectBadCurseUnits	newbattle/nbEncProcess	0xA4	23 of 41 words match	docs/matching/newbattle/nbMakePacket.md	294
+ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/matching/newbattle/nbMakePacket.md	312
+nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/matching/newbattle/nbMakePacket.md	333
+nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/matching/newbattle/nbMakePacket.md	361
 nbPanelDrawPP (0xA84)			671 of 673 words match	docs/matching/newbattle/nbPanelProcess.md	3
 nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanelProcess.md	65
 nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	127

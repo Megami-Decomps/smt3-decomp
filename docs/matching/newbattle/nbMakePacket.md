@@ -1,25 +1,5 @@
 # Matching notes: newbattle/nbMakePacket
 
-## nbGetVirtualAisyo (newbattle/nbMakePacket, 0xAC)
-
-39 of 43 words match, at the exact 172-byte size.
-
-The `switch` over `-1` and `0xC..0xE` gives retail's dispatch tree exactly:
-`beq -1`, `slti -1`, `slti 0xF`, `slti 0xC`. The two remaining words are
-branch delay slots: retail leaves a `nop` after the first two tests, and
-ee-gcc fills both with the following `slti`, which shifts the two branch
-offsets. The instruction order is otherwise identical.
-
-`nbBadCurseApplyMove` in the same unit matches with the same switch shape
-over `0` and `1..2`, and there retail's nops come out, so the shape itself is
-not the problem.
-
-Ruled out: direct `return` per arm instead of `break` to a shared tail; a
-separate `== -1` test in front of a `switch` over `0xC..0xE` only; the
-`skillattr == -1 || (u32)(skillattr - 0xC) < 3` range chain, which folds to
-one `sltiu`; and an explicit `goto` dispatch, which compiles to the same
-words as the switch.
-
 ## Flow1_11 (newbattle/nbMakePacket, 0xC8)
 
 19 of 48 words match, at the exact 192-byte size.
