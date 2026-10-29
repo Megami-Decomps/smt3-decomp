@@ -3234,7 +3234,49 @@ void eff_174D98(void)
     dds3EffectFileListDelete(D_00551DA0);
 }
 
+struct nbParty_t {
+    u16 flag;
+    s16 formindex;
+    s16 statindex;
+    u16 partyindex;
+    s16 count[20];
+    u32 aisyo[16];
+    u16 hojoskill[8];
+};
+
+extern u32 D_00551DA8;
+extern u32 D_00551DAC;
+extern u32 D_00551DB0;
+extern effBTLAimParams_t D_00551DB8;
+extern u32 mdlGetColor(mdlObj_t *model);
+
+#ifdef NON_MATCHING
+s32 func_00174DC0(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    struct nbParty_t *party = &data->party[D_0054F130];
+    nbFormation_t *formation;
+    evtUnit_t *unit;
+    u32 color;
+
+    if (party->flag & 1) {
+        formation = &data->form[party->formindex];
+        if (formation->stat & 2) {
+            color = mdlGetColor(formation->hunit->owner);
+            unit = formation->hunit;
+            D_00551DB0 = (unit->color50 & 0x00FFFFFF) | 0x80000000;
+            D_00551DAC = (unit->color & 0x00FFFFFF) | 0x80000000;
+            D_00551DB8.directionMode = 0;
+            D_00551DB8.scaleKind = 0;
+            D_00551DB8.aimMode = 0;
+            D_00551DA8 = color;
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174DC0);
+#endif
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_174E88);
 
