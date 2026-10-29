@@ -690,7 +690,159 @@ INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C58);
 
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C78);
 
+#ifdef NON_MATCHING
+extern s32 nbInitMaeTableDefault(void);
+extern s32 nbInitMaeTable(u32 code);
+
+void nbSetMaeFlag(s32 code)
+{
+    s32 maeIndex;
+    /* The zeros cover stack regions reached only if the result count wraps. */
+    s32 table[] = {
+        0, 0, 0, 0, 0, 0,
+        0x160000, 0x170000, 0x180000, 0x190000, 0x1A0000, 0x1B0000, 0x1C0000, 0,
+        0x200000, 0x210000, 0x220000, 0x230000, 0x240000, 0x250000, 0x260000, 0x270000,
+        0x50000, 0x60000, 0x70000, 0x80000, 0x90000, 0xA0000, 0xB0000, 0xC0000,
+    };
+
+    if (nbMaeFlag != 0) {
+        return;
+    }
+
+    if (code == 0) {
+        maeIndex = nbInitMaeTableDefault() - 1;
+    } else {
+        maeIndex = nbInitMaeTable(code) - 1;
+    }
+
+    nbMaeLoadDone = 0;
+    if ((u32)maeIndex < 15) {
+        switch (maeIndex) {
+        case 0: {
+            s32 rem = nbResultCount % 7;
+            bgmno = 0x150001;
+            nbBgmSaved = 0x150002;
+            nbBgmFadeState = 0x150002;
+            nbMaeMidiNo = 0x150000;
+            nbMaeSubMidiNo = table[6 + rem];
+            break;
+        }
+        case 1: {
+            s32 rem = nbResultCount % 8;
+            bgmno = 0x1F0001;
+            nbBgmSaved = 0x1F0002;
+            nbBgmFadeState = 0x1F0002;
+            nbMaeMidiNo = 0x1F0000;
+            nbMaeSubMidiNo = table[14 + rem];
+            break;
+        }
+        case 2: {
+            s32 rem = nbResultCount % 8;
+            bgmno = 0x40001;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x40001;
+            nbMaeMidiNo = 0x40000;
+            nbMaeSubMidiNo = table[22 + rem];
+            break;
+        }
+        case 3:
+            bgmno = 0x110000;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x110000;
+            nbMaeMidiNo = 0x110000;
+            nbMaeSubMidiNo = 0x120000;
+            break;
+        case 4:
+            bgmno = 0x1D0001;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x1D0001;
+            nbMaeMidiNo = 0x1D0000;
+            nbMaeSubMidiNo = 0x1E0000;
+            break;
+        case 5:
+            bgmno = 0x280001;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x280001;
+            nbMaeMidiNo = 0x280000;
+            nbMaeSubMidiNo = 0x290000;
+            break;
+        case 6:
+            bgmno = 0x0D0001;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x0D0001;
+            nbMaeMidiNo = 0x0D0000;
+            nbMaeSubMidiNo = 0x0E0000;
+            break;
+        case 7:
+            bgmno = 0x0F0001;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x0F0001;
+            nbMaeMidiNo = 0x0F0000;
+            nbMaeSubMidiNo = 0x100000;
+            break;
+        case 8:
+            bgmno = 0x130001;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x130001;
+            nbMaeMidiNo = 0x130000;
+            nbMaeSubMidiNo = 0x140000;
+            break;
+        case 9:
+            bgmno = 0x840000;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x840000;
+            nbMaeMidiNo = 0x840000;
+            nbMaeSubMidiNo = 0x850000;
+            break;
+        case 10:
+            bgmno = 0x860000;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x860000;
+            nbMaeMidiNo = 0x860000;
+            nbMaeSubMidiNo = 0x870000;
+            break;
+        case 11:
+            bgmno = 0x880000;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x880000;
+            nbMaeMidiNo = 0x880000;
+            nbMaeSubMidiNo = 0x890000;
+            break;
+        case 12:
+            bgmno = 0x8A0000;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x8A0000;
+            nbMaeMidiNo = 0x8A0000;
+            nbMaeSubMidiNo = 0x8B0000;
+            break;
+        case 13:
+            bgmno = 0x820000;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x820000;
+            nbMaeMidiNo = 0x820000;
+            nbMaeSubMidiNo = 0x830000;
+            break;
+        case 14:
+            bgmno = 0x800001;
+            nbBgmSaved = 0;
+            nbBgmFadeState = 0x800001;
+            nbMaeMidiNo = 0x800000;
+            nbMaeSubMidiNo = 0x810000;
+            break;
+        }
+    }
+
+    if (p2sdLoadCheckMidi(nbMaeMidiNo) != 0) {
+        nbMaeFlag = 3;
+    } else {
+        p2sdLoadSMGFile(nbMaeMidiNo);
+        nbMaeFlag = 1;
+    }
+}
+
+#else
 INCLUDE_ASM(const s32, "newbattle/nbSound", nbSetMaeFlag);
+#endif
 
 void nbIncResultCounter(void)
 {
