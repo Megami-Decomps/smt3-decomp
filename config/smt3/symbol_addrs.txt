@@ -108,6 +108,10 @@ lightdirmax = 0x00551BD8; // type:s16 size:0x6
 pointResName = 0x0054EB30; // type:u8 size:0x8
 hDistortionBlur = 0x0054EB5C; // type:u32 size:0x4
 hPartialMultiBlur = 0x0054EC68; // type:u32 size:0x4
+// Each field's encounter packs by area, the normal and the alternate set
+// (fldEncounterFloorTable_t, encount.h): fldReadyScene indexes it by the field
+// it loads and takes the area's pack as the floor's (defaultEncounterId).
+fldEncounterFloorTable = 0x003D51E0; // size:0x17B8
 // fldMatterTable's record count: fldHit.c sets it to 0 as the table is
 // freed, adds one for each record it builds and bounds every walk of the
 // table with it. DDS names it fldValueRecordCount.

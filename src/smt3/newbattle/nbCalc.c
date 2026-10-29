@@ -217,21 +217,7 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-/* Only the fields this unit touches are named; the entry is 38 bytes. */
-typedef struct
-{
-    s8 backAttack;
-    s8 esc;
-    u8 item;
-    u8 itemcnt;
-    u8 unk_04[0x2];
-    u16 id[11];
-    u8 unk_1C[0x4];
-    /* 0x20 */ u16 senseiFlags;
-    u8 unk_22;
-    u8 unk_23;
-    u16 mae;
-} nbEncountForm_t;
+#include "encount.h"
 
 #include "sdk_libc.h"
 
@@ -2433,32 +2419,6 @@ s32 nbGetParamAvg2(nbMainProcessData_t *data, s32 side, s32 paratype)
     return sum / cnt;
 }
 
-typedef struct {
-    u16 encountid;
-    u16 ritu;
-    u8 sensei;
-    u8 renzokuritu;
-    u16 renzokuindex;
-} datEncountRitu_t;
-
-typedef struct {
-    s32 normalritu;
-    datEncountRitu_t ritu[12];
-} datEncountTbl_t;
-
-typedef struct {
-    u16 stageid;
-    u16 areaid;
-    u16 btlsound;
-    u16 moonchk;
-    u16 table2;
-    u16 eventbit1;
-    u16 eventbit2;
-    u8 table1[4];
-    u8 reserved12[2];
-    datEncountTbl_t enctable[4];
-} nbEncountEntry_t;
-
 typedef struct { f32 factor[6]; } nbCheckSenseiFactors_t;
 
 extern nbEncountEntry_t nbEncountTable[];
@@ -2470,7 +2430,7 @@ s32 nbCheckSensei(nbMainProcessData_t *data)
     nbCheckSenseiFactors_t factors = D_00544D58;
     nbEncountForm_t *form = &nbEncountFormTable[data->encno];
     datUnitWork_t *player;
-    u16 senseiFlags = form->senseiFlags;
+    u16 senseiFlags = form->flag;
     s32 enemyLevel = 0;
     s32 enemyParam4 = 0;
     s32 enemyParam5 = 0;
@@ -2578,7 +2538,7 @@ s32 nbCheckEscape(nbMainProcessData_t *data)
     s32 moonRoll;
     f32 ratio;
 
-    if (nbEncountFormTable[data->encno].senseiFlags & 0x20) return 1;
+    if (nbEncountFormTable[data->encno].flag & 0x20) return 1;
     allDisabled = 1;
     for (i = 4; i < 14; i++) {
         unit = nbGetUnitWorkFromFormindex(i);
@@ -2644,7 +2604,7 @@ s32 nbCheckRenzokuEncount(nbMainProcessData_t *data)
     s32 nextIndex;
     u32 mode;
 
-    if ((nbEncountFormTable[data->encno].senseiFlags & 0x10) != 0) {
+    if ((nbEncountFormTable[data->encno].flag & 0x10) != 0) {
         data->packindex = 1;
         data->encno = 0x149;
     } else {

@@ -132,18 +132,7 @@ typedef struct nbDeadEvent_t {
     u8 unk04[0xA0];
 } nbDeadEvent_t;
 
-/* 38-byte encounter formation rows. */
-typedef struct nbEncountForm_t {
-    u8 unk00[4];
-    u8 formationtype;
-    u8 unk05;
-    u16 id[11];
-    u8 unk_1C[4];
-    u16 flag;
-    u8 unk_22;
-    u8 nakamayobi;
-    u16 mae;
-} nbEncountForm_t;
+#include "encount.h"
 
 void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag);
 

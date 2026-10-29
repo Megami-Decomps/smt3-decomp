@@ -178,8 +178,9 @@ typedef struct fldAreaWork_t
     s32 wordB0;                 /* 0x0B0 */
     f32 floatB4;                /* 0x0B4 */
     s32 lightMaIdx;             /* 0x0B8 */
-    s32 wordBC;                 /* 0x0BC */
-    s32 wordC0;                 /* 0x0C0 */
+    s32 defaultEncounterId;     /* 0x0BC: the floor's encounter pack, fldReadyScene's */
+    s32 encounterOverrideId;    /* 0x0C0: the zone's, which fldHitChkUnit sets from the matter
+                                 * the player stands in and the encounter roll prefers */
     f32 floatC4;               /* 0x0C4 */
     union { s32 wordC8; f32 playerMoveDistance; }; /* 0x0C8 */
     s32 wordCC;                 /* 0x0CC */

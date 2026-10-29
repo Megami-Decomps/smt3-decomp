@@ -461,17 +461,13 @@ s32 fldGetRestoreMode(void)
 }
 
 #ifdef NON_MATCHING
-typedef struct {
-    s32 eventFlag;
-    s16 normal[32];
-    s16 alternate[32];
-} fldEncounterFloorTable_t;
+#include "encount.h"
 
 typedef struct __attribute__((packed, aligned(1))) {
     u64 part[2];
 } fldPackedVector_t;
 
-extern fldEncounterFloorTable_t D_003D51E0[];
+extern fldEncounterFloorTable_t fldEncounterFloorTable[];
 extern const fldPackedVector_t D_005316A0;
 extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
 extern fldResourcePoint_t *dds3PointBasicGetResource(dds3Basic_t *basic);
@@ -540,13 +536,13 @@ void fldReadyScene(void)
             point = &adjustedPoint;
         }
         if (fldSceneParam.loadField < 46) {
-            encounters = &D_003D51E0[fldSceneParam.loadField];
+            encounters = &fldEncounterFloorTable[fldSceneParam.loadField];
             eventSet = 0;
             if (encounters->eventFlag != 0) eventSet = evtBitCheck(encounters->eventFlag) != 0;
             if (eventSet == 0)
-                fldGlobalBase.wordBC = D_003D51E0[fldSceneParam.loadField].normal[fldSceneParam.loadArea];
+                fldGlobalBase.defaultEncounterId = fldEncounterFloorTable[fldSceneParam.loadField].normal[fldSceneParam.loadArea];
             else
-                fldGlobalBase.wordBC = D_003D51E0[fldSceneParam.loadField].alternate[fldSceneParam.loadArea];
+                fldGlobalBase.defaultEncounterId = fldEncounterFloorTable[fldSceneParam.loadField].alternate[fldSceneParam.loadArea];
         }
         if (((u32)fldGlobalBase.area - 11) < 35 && fldGlobalBase.area != 39 &&
             fldGetRestoreMode() != 4 && reused == 0) {

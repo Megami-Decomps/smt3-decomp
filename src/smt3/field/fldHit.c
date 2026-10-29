@@ -1121,7 +1121,7 @@ void fldHitChkUnit(f32 *position)
     }
     axis = sdfFabs(current.z - previous.z) < sdfFabs(current.x - previous.x) ? 0 : 2;
     fldGlobalBase.word4C = -1;
-    fldGlobalBase.wordC0 = 0;
+    fldGlobalBase.encounterOverrideId = 0;
     fldHitChkUnitElvOnly(position);
     for (pass = 0; pass < 2; pass++) {
         for (index = 0; index < fldValueRecordCount; index++) {
@@ -1180,7 +1180,7 @@ void fldHitChkUnit(f32 *position)
                 if (distance < radius) {
                     HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
                     if (!(clearance < 0.0f)) {
-                        fldGlobalBase.wordC0 = fldMatterTable[index].pFace->encounter;
+                        fldGlobalBase.encounterOverrideId = fldMatterTable[index].pFace->encounter;
                     }
                 }
             } else if (attributes & 0x200) {
@@ -1420,7 +1420,7 @@ void fldHitChkUnitVWM(f32 *position)
     travel[0] = sdfFabs(current[0] - previous[0]);
     travel[2] = sdfFabs(current[2] - previous[2]);
     fldGlobalBase.word4C = -1;
-    fldGlobalBase.wordC0 = 0;
+    fldGlobalBase.encounterOverrideId = 0;
     if (travel[2] < travel[0]) {
         axis = 0;
     } else {
@@ -1508,7 +1508,7 @@ void fldHitChkUnitVWM(f32 *position)
                         inside = 1;
                     }
                     if (inside == 1) {
-                        fldGlobalBase.wordC0 = fldMatterTable[index].pFace->encounter;
+                        fldGlobalBase.encounterOverrideId = fldMatterTable[index].pFace->encounter;
                     }
                 }
             } else if (attributes & 0x200) {
