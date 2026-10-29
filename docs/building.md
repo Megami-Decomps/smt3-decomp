@@ -56,21 +56,24 @@ function you just wrote.
 2. Re-run `python configure.py` after any change to a `config/smt3/` file or
    after renaming a symbol. Splat output and the ninja graph are generated, and
    a stale split silently links old assembly.
-   When replacing assembly functions that own literals with C, use
-   `python configure.py --force-split` to migrate their data ownership too.
-   Run `ninja` to refresh the generated `build/eeasm/` includes before
-   checking the unit if the resplit introduced a new standalone data file.
+   Source edits also make Ninja refresh its graph. Changes to a unit's
+   `INCLUDE_ASM` ownership automatically resplit and migrate the function's
+   literals; ordinary C-body edits reuse the cached split. Run `ninja` before
+   checking a promoted unit so newly standalone `build/eeasm/` data imports
+   are generated too.
 3. If the unit is clean and configure is fresh, suspect data placement. A new C
    definition can emit `.rodata`, `.lit4` or `.sdata` that the retail layout
    accounts for somewhere else, which shifts everything after it. The
    `INCLUDE_RODATA` and `INCLUDE_SDATA` lines in the unit exist to hold that
    data; do not delete or reorder them by hand.
    An `extern` reference does not preserve data that an old `INCLUDE_ASM`
-   brought in with its function. After porting a function with embedded strings
-   or constants that must remain external, run
-   `python configure.py --force-split`: the split postprocessors regenerate
-   the corresponding data imports around the C functions. Plain `configure.py`
-   can reuse its cached split when only C source changed.
+   brought in with its function. Removing its `INCLUDE_ASM` now invalidates
+   the split cache, and the postprocessors regenerate the data imports around
+   the C function. Use `python configure.py --force-split` when changing data
+   ownership without changing `INCLUDE_ASM` (for example, replacing an extern
+   constant reference with a C literal or adding a named data definition).
+   Generated `INCLUDE_RODATA`/`INCLUDE_SDATA` edits do not invalidate the split
+   cache themselves, avoiding regeneration loops.
 4. `.sbss` and `.bss` are aligned to 128 bytes, as in Sony's `app.cmd`. A
    wrongly sized `.bss` object moves every later object and fails the
    checksum rather than any single function check.
