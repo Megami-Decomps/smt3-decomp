@@ -881,3 +881,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 40 B	raw open compa
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	0 exact / 388 B guarded	binary64-to-bigint conversion retained at 93 of 97 words matching; qualified shared-scratch control explains inherited low-word preference and is rejected
 
 src/smt3/sdk/libm.c	redthing1	done	2026-10-28	1 SDK fn / 336 B	cosine kernel with shared word views, exact binary32 coefficients and native Horner accumulator; complete owner 12 match, 0 differ
+src/smt3/sdk/libm.c	redthing1	done	2026-10-28	0 exact / typed table bounds	198-digit two-over-pi and adjacent 32-entry comparison array; preserve final digit and natural n-minus-one index in existing exact reducer

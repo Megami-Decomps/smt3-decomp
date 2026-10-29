@@ -5,6 +5,9 @@
 __ieee754_acosf = 0x002CF730; // type:func size:0x14
 func_002CF748 = 0x002CF748; // type:func size:0x14
 func_002CF760 = 0x002CF760; // type:func size:0x424
+// Range-reduction tables: 198 base-256 digits, then 32 binary32 high words.
+D_0054AF60 = 0x0054AF60; // type:s32 size:0x318
+D_0054B278 = 0x0054B278; // type:s32 size:0x80
 // Native SDK data, identified through paired DDS1 readers and initial layout.
 ipuDefaultQuantizerMatrices = 0x0052BAA0; // type:u8 size:0x50
 ipuDefaultVqClut = 0x0052BAF0; // type:u16 size:0x20

@@ -224,8 +224,8 @@ f32 __ieee754_atan2f(f32 y, f32 x)
     }
 }
 
-extern const s32 D_0054AF60[];
-extern const s32 D_0054B274[];
+extern const s32 D_0054AF60[198];
+extern const s32 D_0054B278[32];
 extern s32 __kernel_rem_pio2f(f32 *x, f32 *y, s32 e0, s32 nx, s32 precision,
                               const s32 *twoOverPi);
 
@@ -276,7 +276,7 @@ s32 __ieee754_rem_pio2f(f32 x, f32 *y)
         fn = (f32)n;
         r = t - fn * 0x1.921f000000000p+0f;
         w = fn * 0x1.6a88840000000p-17f;
-        if (n < 32 && (ix & 0xFFFFFF00) != (u32)D_0054B274[n]) {
+        if (n < 32 && (ix & 0xFFFFFF00) != (u32)D_0054B278[n - 1]) {
             y[0] = r - w;
         } else {
             j = ix >> 23;
@@ -497,7 +497,7 @@ f32 __kernel_tanf(f32 x, f32 y, s32 selector)
 
 INCLUDE_RODATA(const s32, "sdk/libm", D_0054AF60);
 
-INCLUDE_RODATA(const s32, "sdk/libm", D_0054B274);
+INCLUDE_RODATA(const s32, "sdk/libm", D_0054B278);
 
 INCLUDE_RODATA(const s32, "sdk/libm", D_0054B348);
 

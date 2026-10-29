@@ -200,12 +200,18 @@ precision2 and the two-over-pi table pointer. The leading chunk is nonzero, so
 the native trim loop cannot exhaust the array. No IEEE infinity/NaN shortcut
 is added to this bitwise PS2 path.
 
-Keep both readonly imports intact. The fragment at0x0054AF60 contains197
-integer digit words, with the198th digit0x6B at0x0054B274. The actual comparison
-patterns start at0x0054B278; the native biased base uses `D_0054B274[n]`, guarded
-by `n < 32`, to address pattern n-1. Splat's symbol fragments are not proof of
-independent source-array boundaries. Do not shrink a fragment or change this
-to an unadjusted n-1 access.
+The readonly tables have separate native bounds:198 integer digits at
+0x0054AF60 through0x0054B274, followed by32 comparison words at0x0054B278
+through0x0054B2F4. The final digit0x6B belongs to the first array. Curated
+sizes0x318 and0x80 preserve both objects, including that digit and all
+following scalar data. The former split at0x0054B274 was a symbol fragment,
+not a source-array boundary.
+
+The native biased address at0x0054B274 plus `n*4`, guarded by `n < 32`, is
+`D_0054B278[n-1]` for the actual comparison array. Typed declarations now
+use the198/32 extents and this natural index. The two arrays remain
+assembly-owned; this boundary correction changes no instructions, values
+or matching credit.
 
 ## Math forwarding wrappers
 
