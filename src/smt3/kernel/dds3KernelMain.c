@@ -72,7 +72,7 @@ extern void sdfFileCmdThreadSetHiPrio(void);
 extern void sdfFileCmdThreadSetLoPrio(void);
 extern void dds3RunProcessList(void);
 extern s32 dds3ProcessMain(void);
-extern s32 LoadExecPS2(const char *path, s32 argc, char **argv);
+extern void LoadExecPS2(const char *path, s32 argc, char **argv);
 extern s32 printf(const char *format, ...);
 
 void dds3FirstInit(void)
@@ -191,7 +191,7 @@ void dds3SoftResetOff(void)
     dds3SoftResetDisableFlag = 1;
 }
 
-s32 dds3KernelMain(void)
+void dds3KernelMain(void)
 {
     u32 base;
     s32 time;
@@ -243,7 +243,7 @@ top:
     goto frame;
 done:
     printf(D_0052DCF0);
-    return LoadExecPS2(D_0052DD00, 0, 0);
+    LoadExecPS2(D_0052DD00, 0, 0);
 }
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", D_0052DCA0);
