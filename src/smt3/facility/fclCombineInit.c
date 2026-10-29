@@ -3475,7 +3475,54 @@ void cmbSeqAfterBirth(void)
     CMB_GBWK->unk_00004 = 2;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateMenuCursor);
+void cmbUpdateMenuCursor(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+    s32 selected;
+    s32 process;
+    cmbGbWork_t *work;
+
+    fclSetWorkValue(2, 0);
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+        selected = CMB_GBWK->menuCursor.unk_22 + (u8)CMB_GBWK->menuCursor.unk_24;
+        if (selected != 7) {
+            fclSetWorkValue(8, selected);
+            fclScriptForcedEnd(CMB_GBWK->scriptArg);
+            CMB_GBWK->unk_00005 = 1;
+            process = fclScriptStart(CMB_GBWK->script, 0xD, &CMB_GBWK->scriptArg);
+            work = CMB_GBWK;
+            work->unk_00001 = 0x10;
+            work->unk_00008 = process;
+            CMB_GBWK->unk_00003 = 0x10;
+            CMB_GBWK->unk_00004 = -1;
+            CMB_GBWK->unk_00002 = 3;
+            break;
+        }
+        /* fall through */
+    case 2:
+        fclScriptForcedEnd(CMB_GBWK->scriptArg);
+        fclSetWorkValue(2, 2);
+        CMB_GBWK->unk_00001 = 0;
+        CMB_GBWK->unk_00003 = 3;
+        CMB_GBWK->unk_00004 = 1;
+        break;
+    case 0x10:
+        cmpMoveCursor(&CMB_GBWK->menuCursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&CMB_GBWK->menuCursor, 1);
+        break;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&CMB_GBWK->menuCursor, 0);
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&CMB_GBWK->menuCursor, button, 0x30));
+}
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
