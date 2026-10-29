@@ -3357,7 +3357,90 @@ s32 cmbChkIkenieEnable(void)
     return evtBitCheck(0x25) != 0;
 }
 
+#ifdef NON_MATCHING
+void cmbUpdateBirthDevil(void)
+{
+    u16 button = cmpGetPressedButton(0x303);
+
+    switch (button) {
+    case 1: {
+        u16 birthId;
+        s32 first;
+        s32 second;
+        u16 firstId;
+
+        if (CMB_GBWK->unk_1650A != 3) {
+            CMB_GBWK->unk_1650A = 3;
+            cmpSetModelReloadFlag();
+        }
+        first = ((volatile cmbGbWork_t *)CMB_GBWK)->stockSlot[0].index;
+        second = ((volatile cmbGbWork_t *)CMB_GBWK)->stockSlot[1].index;
+        birthId = CMB_GBWK->birthUnit[0].id;
+        firstId = ((volatile cmbGlobalWork_t *)cmbGlobalWork)->party[first].unit.id;
+        if (firstId != birthId && cmbGlobalWork->party[second].unit.id != birthId &&
+            cmbCheckEvoUnlocked(birthId, &cmbGlobalWork->party[0].unit, 16) >= 0) {
+            CMB_GBWK->unk_00001 = 15;
+            CMB_GBWK->unk_00004 = button;
+            CMB_GBWK->unk_1650B = 2;
+        } else {
+            if (evtBitCheck(0x8A0) == 0 &&
+                cmbGlobalWork->party[0].unit.level < CMB_GBWK->birthUnit[0].level) {
+                CMB_GBWK->unk_00001 = 15;
+                CMB_GBWK->unk_00004 = 1;
+                CMB_GBWK->unk_1650B = 1;
+            } else if (cmbChkIkenieEnable() != 0) {
+                fclScriptStart(CMB_GBWK->script, 7, &CMB_GBWK->scriptArg);
+                CMB_GBWK->unk_00001 = 7;
+                CMB_GBWK->unk_00004 = 1;
+            } else {
+                fclScriptStart(CMB_GBWK->script, 8, &CMB_GBWK->scriptArg);
+                CMB_GBWK->unk_00001 = 11;
+                CMB_GBWK->unk_00004 = 1;
+            }
+            cmpModelSetup(CMB_GBWK->birthUnit[0].id, 0);
+        }
+        break;
+    }
+    case 2:
+        if (cmpLoadStatusModel() != 0) {
+            button = 0x8000;
+        } else {
+            CMB_GBWK->unk_00001 = CMB_GBWK->stockSlot[2].index == -1 ? 6 : 8;
+            CMB_GBWK->unk_00004 = 2;
+        }
+        break;
+    case 0x100:
+        CMB_GBWK->unk_1650A--;
+        if (CMB_GBWK->stockSlot[2].index < 0 && CMB_GBWK->unk_1650A == 2) {
+            CMB_GBWK->unk_1650A = 1;
+        }
+        if (CMB_GBWK->unk_1650A < 0) {
+            CMB_GBWK->unk_1650A = 3;
+        }
+        cmpSetModelReloadFlag();
+        break;
+    case 0x200:
+        CMB_GBWK->unk_1650A++;
+        if (CMB_GBWK->stockSlot[2].index < 0 && CMB_GBWK->unk_1650A == 2) {
+            CMB_GBWK->unk_1650A = 3;
+        }
+        if (CMB_GBWK->unk_1650A >= 4) {
+            CMB_GBWK->unk_1650A = 0;
+        }
+        cmpSetModelReloadFlag();
+        break;
+    }
+    if (CMB_GBWK->unk_00004 != 0) {
+        fclRbnRelease(CMB_GBWK->ribbon);
+        CMB_GBWK->ribbon = NULL;
+    } else {
+        cmbSwitchRibbon();
+    }
+    cmpPlayCursorSE(button);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateBirthDevil);
+#endif
 
 extern void cmbAddBirthDevilToStock(datUnitWork_t *unit, u8 count);
 
