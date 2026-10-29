@@ -495,7 +495,7 @@ typedef struct effPCPDANTE_ShowTime_tag
     u8 flash[3][0x38];
     void *hTex[2];
     s32 frame;
-    s32 frameParts[3];
+    s32 frameParts[3]; /* Bingo, AreYouReady, ShowTime at +0xC8/+0xCC/+0xD0. */
     u8 texLoaded;
 } effPCPDANTE_ShowTime_tag;
 
@@ -570,7 +570,7 @@ extern s32 effBTLModelGetID(effPCPBossUnit_t *pFormation);
 extern u128 *effPCP_ThunderPolyListGetParam(void *pTPolyList);
 extern void effPCP_ThunderPolyListDraw(void *hData);
 extern void effPCP_ThunderPolyListSetColor(void *hData, u32 abgr);
-extern void nbPanelFlashInit(void *pFlash, s32 scale_x, s32 scale_y, s32 abgr, f32 abgr_c, f32 addX, s32 addY);
+extern void nbPanelFlashInit(void *pFlash, u32 color0, u32 color1, s32 x, f32 scaleX, f32 scaleY, s32 y);
 extern void nbPanelFlashDraw(void *pFlash, u32 abgrBase);
 extern void effBTLModelGetSphereCenter(void *pFormation);
 extern void *effBTLSkillGetTargetFormation(s32 number);
@@ -3746,82 +3746,81 @@ void effPCPDANTE_Sprite_Draw(s32 x, s32 y, f32 scale, u32 color, effPCPDANTE_UV_
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Bingo_Draw);
 
-/* NON_MATCHING: native 1276-byte size; 21 second-loop words differ. */
-#ifdef NON_MATCHING
 extern effPCPDANTE_UV_tag effPCPDANTE_AreYouReady_UV;
 extern void nbPnl_rsetAlpha(s32 mode);
 
-void effPCPDANTE_ShowTime_AreYouReady_Draw(effPCPDANTE_ShowTime_tag *work)
+void effPCPDANTE_ShowTime_AreYouReady_Draw(effPCPDANTE_ShowTime_tag *hData)
 {
-    s32 frame = work->frameParts[1];
+    s32 frame = hData->frameParts[1];
     u32 i;
-    s32 phase;
-    s32 holdPhase;
-    u32 baseAlpha;
-    u32 color;
+    s32 age;
     s32 y;
-    f32 t;
+    u32 alpha;
+    u32 color;
+    f32 rate;
     f32 fade;
 
-    phase = frame - 6;
-    for (i = 0; i < 6; i++, phase++) {
-        baseAlpha = (u32)(((f32)i / 6.0f) * 80.0f) + 48;
-        if ((u32)phase < 17) {
-            t = (f32)phase * 0.125f;
-            if (t > 1.0f) {
-                fade = 2.0f - t;
+    for (i = 0; i < 6; i++) {
+        age = frame + i - 6;
+        alpha = 48 + (u32)((f32)i / 6.0f * 80.0f);
+        if (age >= 0 && age <= 16) {
+            rate = (f32)age / 8.0f;
+            /* Retail keeps the triangular fade at 0x1A03E0..3F4 even though
+             * the draw guard below discards its descending half. Bingo uses
+             * that half live (0x19FFE0..FF4), the same copied-family shape. */
+            if (rate > 1.0f) {
+                fade = 2.0f - rate;
             } else {
-                fade = t;
+                fade = rate;
             }
-            if (phase < 9) {
+            if (age <= 8) {
                 fade *= fade;
                 nbPnl_rsetAlpha(0);
-                y = 184 - (s32)((t * 92.0f) * t);
-                color = ((u32)((f32)baseAlpha * fade) << 24) | 0x808080;
+                y = 184 - (s32)(rate * 92.0f * rate);
+                color = ((u32)((f32)alpha * fade) << 24) | 0x808080;
                 effPCPDANTE_Sprite_Draw(32, y, 1.0f, color,
-                                       &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
-                if (phase == 8) {
+                                       &effPCPDANTE_AreYouReady_UV, hData->hTex[0]);
+                if (age == 8) {
                     nbPnl_rsetAlpha(1);
                     effPCPDANTE_Sprite_Draw(32, y, 1.0f, 0x20808080,
-                                           &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
+                                           &effPCPDANTE_AreYouReady_UV, hData->hTex[0]);
                 }
             }
         }
     }
-    holdPhase = frame - 10;
-    if ((u32)holdPhase < 17) {
+    /* The hold uses absolute frames; the glow below uses relative age. Stock
+     * RTL keeps both predicates through gcse (247/486); sharing the relative
+     * age instead caches one predicate across the exit loop. */
+    if (frame >= 10 && frame <= 26) {
         nbPnl_rsetAlpha(0);
         effPCPDANTE_Sprite_Draw(32, 92, 1.0f, 0x80808080,
-                               &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
+                               &effPCPDANTE_AreYouReady_UV, hData->hTex[0]);
     }
     for (i = 0; i < 4; i++) {
-        s32 elapsed = frame + i - 4;
-
-        baseAlpha = (u32)(((f32)i * 0.25f) * 112.0f) + 16;
-        if ((u32)(elapsed - 26) < 13) {
-            elapsed -= 26;
+        s32 trailAge = frame + i - 4;
+        alpha = 16 + (u32)((f32)i / 4.0f * 112.0f);
+        if (trailAge >= 26 && trailAge <= 38) {
             nbPnl_rsetAlpha(0);
-            t = 1.0f - (f32)elapsed / 12.0f;
-            color = ((u32)((f32)baseAlpha * t) << 24) | 0x808080;
-            y = 92 - (s32)((f32)(elapsed * elapsed) * 3.0f);
+            trailAge -= 26;
+            rate = 1.0f - (f32)trailAge / 12.0f;
+            color = ((u32)((f32)alpha * rate) << 24) | 0x808080;
+            y = 92 - (s32)((f32)(trailAge * trailAge) * 3.0f);
             effPCPDANTE_Sprite_Draw(32, y, 1.0f, color,
-                                   &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
+                                   &effPCPDANTE_AreYouReady_UV, hData->hTex[0]);
         }
     }
-    if (frame >= 10 && frame <= 26) {
+    age = frame - 10;
+    if (age >= 0 && age <= 16) {
         nbPnl_rsetAlpha(1);
-        t = (f32)holdPhase * 0.0625f;
-        color = ((u32)((1.0f - t) * 80.0f) << 24) | 0x808080;
-        effPCPDANTE_Sprite_Draw(32, 92, 1.0f + (t * 0.75f) * t, color,
-                               &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
-        effPCPDANTE_Sprite_Draw(32, 92, 1.0f + (t * 0.325f) * t, color,
-                               &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
+        rate = (f32)age / 16.0f;
+        color = ((u32)((1.0f - rate) * 80.0f) << 24) | 0x808080;
+        effPCPDANTE_Sprite_Draw(32, 92, rate * 0.75f * rate + 1.0f, color,
+                               &effPCPDANTE_AreYouReady_UV, hData->hTex[0]);
+        effPCPDANTE_Sprite_Draw(32, 92, rate * 0.325f * rate + 1.0f, color,
+                               &effPCPDANTE_AreYouReady_UV, hData->hTex[0]);
     }
-    work->frameParts[1]++;
+    hData->frameParts[1]++;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_AreYouReady_Draw);
-#endif
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_ShowTime_Draw);
 

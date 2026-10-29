@@ -72,7 +72,6 @@ effPCPDANTE_Damage_Create	effect/effPCPBoss	360 bytes	71 of 90 words match	docs/
 effPCPBossBUNSINDrawPoly2	effect/effPCPBoss	468 bytes	108 of 117 words match	docs/nonmatching/effect/effPCPBoss.md	141
 effPCPBossKAGUInvokeDraw	effect/effPCPBoss	0x2E0	181 of 184 words match	docs/nonmatching/effect/effPCPBoss.md	171
 effPCPBossONGYDraw (1432 bytes)				docs/nonmatching/effect/effPCPBoss.md	206
-effPCPDANTE_ShowTime_AreYouReady_Draw (1276 bytes)				docs/nonmatching/effect/effPCPBoss.md	252
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790	462 of 484 words match	docs/nonmatching/effect/parManager.md	5
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/nonmatching/effect/parManager.md	35
 evtEventViewerProcess3	event/evtEventViewer	0x16C	88 of 91 words match	docs/nonmatching/event/evtEventViewer.md	5
@@ -163,10 +162,8 @@ Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/nonmatching/newbat
 nbApplyBadCurse	newbattle/nbEncProcess	0x174	80 of 93 words match	docs/nonmatching/newbattle/nbEncProcess.md	5
 nbGetEncountJoken	newbattle/nbEncount	0x174	24 of 66 words match	docs/nonmatching/newbattle/nbEncount.md	5
 nbCallNewBattle	newbattle/nbInit	0xA0	29 of 40 words differ	docs/nonmatching/newbattle/nbInit.md	5
-NumEffectClip	newbattle/nbKoukaProcess	0x40C		docs/nonmatching/newbattle/nbKoukaProcess.md	3
-RunNumEffectKouka	newbattle/nbKoukaProcess	0x144	57 of 80 words match	docs/nonmatching/newbattle/nbKoukaProcess.md	40
+RunNumEffectKouka	newbattle/nbKoukaProcess	0x144	57 of 80 words match	docs/nonmatching/newbattle/nbKoukaProcess.md	3
 nbMainProcess1	newbattle/nbMainProcess	0x420	113 of 263 words match	docs/nonmatching/newbattle/nbMainProcess.md	5
-nbDebugMainProcess	newbattle/nbMainProcess	0xA70	99 of 666 words match	docs/nonmatching/newbattle/nbMainProcess.md	36
 nbDrawMakaNum	newbattle/nbMakaProcess	0x2B4	136 of 173 words match	docs/nonmatching/newbattle/nbMakaProcess.md	5
 nbGetVirtualAisyo	newbattle/nbMakePacket	0xAC	39 of 43 words match	docs/nonmatching/newbattle/nbMakePacket.md	5
 Flow1_11	newbattle/nbMakePacket	0xC8	19 of 48 words match	docs/nonmatching/newbattle/nbMakePacket.md	25

@@ -11,9 +11,9 @@ page and line to open. Conventions are in
 | 18 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
-| 9 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 8 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
+| 8 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 7 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 6 |  | [sdk/libkernl.md](sdk/libkernl.md) |
 | 6 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
@@ -41,8 +41,6 @@ page and line to open. Conventions are in
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
-| 2 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
-| 2 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
@@ -74,6 +72,8 @@ page and line to open. Conventions are in
 | 1 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 1 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
+| 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
+| 1 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
 | 1 | newbattle/nbEncount | [newbattle/nbEncount.md](newbattle/nbEncount.md) |
 | 1 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |

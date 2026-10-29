@@ -198,9 +198,11 @@ between them they spelled out the same four operations, which is why
 `VU0_QUAT_DOT_VF10_VF11`, `VU0_NEGATE_VF11_TO_VF12`,
 `VU0_SET_WEIGHTS_VF2X_VF3X` and `VU0_WEIGHTED_SUM_VF10_VF12` are named.
 
-Three things stay as raw asm because they are not instructions at all: the
-`fptodp = sdfFloatToULong` style assembler symbol aliases, the `__asm__("")`
-scheduling barriers, and `__asm__("nop\nnop\nnop\nnop\n")` delay padding.
+The historical `fptodp = sdfFloatToULong` assembler symbol alias used raw
+asm; the corrected native helper names now make that alias unnecessary.
+The `__asm__("")` scheduling barriers and
+`__asm__("nop\nnop\nnop\nnop\n")` delay padding remain raw asm rather than
+instruction macros.
 
 ## The quaternion functions
 
@@ -217,3 +219,24 @@ where the dot product uses `vadday.x`. It therefore computes
 `(x*x)*(y*y) + z*z + w*w`, which is neither a length nor a dot, and HD's
 `sdfQuat$$Length` is an empty stub. It keeps its address for a name until
 something better than elimination is available.
+
+## Number-effect clipping and implicit vector state
+
+`NumEffectClip` receives and returns its world position in `vf10`; its packet
+argument is not a substitute for that input. Both number-draw callers supply
+the vector, then use the selected output to calculate a formation-relative
+offset. The exact C reconstruction uses typed VU outputs and retains the
+volatile sphere-center handoff needed by the existing bare-address load.
+
+The initial projection has a native edge case: `nbClipEffectNum` can return
+without filling its screen array, but the caller still reads those stack words.
+The reconstruction preserves those real consumers rather than adding an
+initialization that would change the executable. This is not an all-input
+ISO-C definedness guarantee. Failed later mark projections explicitly receive
+the native screen sentinels and zero distance.
+
+The two integer squared distances are converted to float only after their
+integer multiplications. Ordinary C emits the native `mult`/`mult1` pair in
+cc1's own assembly, outside inline-assembly regions, followed by the existing
+`fsqrtf` primitive. Pipeline-1 instructions alone do not justify adding an
+assembly macro. This replaces the earlier guarded draft in `0f799620`.

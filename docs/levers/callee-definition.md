@@ -96,3 +96,14 @@ as defined by `sdfSound`. The key mode result and action input are `u8`, as
 defined by `pbKeyConv`. Initialize the movement mask to zero and set its four
 bits conditionally; the first bit is `y < 19`. That ordinary mask-building
 form closes the final three operand/conditional-move differences.
+
+## Main battle diagnostic rendering
+
+`nbDebugMainProcess` replaces the guarded reconstruction in `9c75db2e` with
+2,672 exact bytes. The real unsigned-coordinate print API, a live vertical
+position advanced between rows, and direct typed action-stack field reads
+preserve the retail callback boundaries and schedule. Floating variadic
+arguments use ordinary default promotion and the native `fptodp` helper.
+Its declaration retains the provider's `long` return type: it returns the
+64-bit double representation, not a numeric integer conversion. Shared small
+strings stay external while the other format literals belong to this owner.
