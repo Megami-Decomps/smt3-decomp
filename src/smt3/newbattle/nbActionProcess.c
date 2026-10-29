@@ -846,7 +846,6 @@ s32 GetAllUnlockTime(nbActionProcessData_t *a)
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005437F8);
 
-extern char D_005437F8[];
 #ifdef NON_MATCHING
 void GetKoukaList(nbActionProcessData_t *a, s8 koukalist[32][2], u32 select, s32 nskill)
 {
@@ -869,7 +868,7 @@ void GetKoukaList(nbActionProcessData_t *a, s8 koukalist[32][2], u32 select, s32
     if (hits < datSkillTable.normal[nskill].targetcntmax) {
         hits += dds3GetRandIntA(NULL, datSkillTable.normal[nskill].targetcntmax - hits + 1);
     }
-    printf(D_005437F8, hits, select);
+    printf("\310\277\261\307\262\363\277\364=%d, select = 0x%08X\n", hits, select);
     for (i = 0; i < 16; i++) {
         if (select & (1U << i)) {
             form = &a->data->form[i];
