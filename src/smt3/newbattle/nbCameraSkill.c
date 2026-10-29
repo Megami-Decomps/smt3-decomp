@@ -8,6 +8,7 @@
 #include "motion.h"
 #include "event.h"
 #include "newdata.h"
+#include "effect.h"
 
 typedef struct nbCameraAnim_t {
     s32 rotate_f;
@@ -110,10 +111,6 @@ extern u32 nbCamera_Analyze_Frame;
 extern u32 nbCamera_Analyze_Wait;
 
 extern nbFormation_t *effBTLSkillGetInvokeFormation(void);
-
-typedef struct nbCameraSkillPtr_t {
-    u32 unk00[7];
-} nbCameraSkillPtr_t;
 
 extern u32 dds3DrawFlag;
 extern f32 nbCameraModelMotionCr;
