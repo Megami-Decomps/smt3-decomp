@@ -718,7 +718,17 @@ sifCommandContext_t *sceSifGetDataTable(void)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitCmd);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifExitCmd);
+extern s32 DisableDmac(s32 channel);
+extern s32 RemoveDmacHandler(s32 channel, s32 handlerId);
+extern s32 D_0059BA94;
+extern s32 D_0052C2B8;
+
+void sceSifExitCmd(void)
+{
+    DisableDmac(5);
+    RemoveDmacHandler(5, D_0059BA94);
+    D_0052C2B8 = 0;
+}
 
 sifCommandHandler_t *sceSifSetCmdBuffer(sifCommandHandler_t *buffer, s32 count)
 {
