@@ -1924,7 +1924,55 @@ u16 cmbCalcCombineResult(cmbUnit_t *unitA, cmbUnit_t *unitB, s8 flag, s8 levelFl
     return result;
 }
 
+#ifdef NON_MATCHING
+s32 cmbGetCombineResultEx(cmbUnit_t *first, cmbUnit_t *second, s8 inverted, s8 levelFlag,
+                          u16 *ids, u8 *races, u8 *kind)
+{
+    s32 result = cmbCheckUnlockedPair(ids[0], ids[1]);
+    s32 type = 7;
+    u8 race0;
+    u8 race1;
+    s32 other;
+    s32 spirit;
+    s32 direction;
+
+    if (result == 0) {
+        race0 = races[0];
+        race1 = races[1];
+        if ((race0 == 7 || race1 == 7) && race0 != 0x26 && race1 != 0x26) {
+            if (race0 == race1) {
+                result = cmbFindPairEntry(ids[0], ids[1]);
+                type = 3;
+            } else {
+                other = race0 != 7;
+                spirit = !other;
+                direction = cmbFindRaceEntry(ids[other], races[spirit]);
+                if (inverted != 0) {
+                    if (direction == 1) direction = 2;
+                    else if (direction == 2) direction = 1;
+                }
+                result = cmbFindBirthResult(ids[spirit], (u8)direction);
+                type = direction == 2 ? 6 : 5;
+            }
+        } else if ((race0 == 8 || race1 == 8) && race0 != race1) {
+            result = race0 == 8 ? ids[1] : ids[0];
+            type = 2;
+        } else if (race0 == race1) {
+            result = cmbLookupCombine(ids[0], ids[1], inverted);
+            type = 4;
+        } else {
+            result = cmbCalcCombineResult(first, second, inverted, levelFlag);
+            type = 1;
+        }
+    }
+    if (kind != NULL) {
+        *kind = type;
+    }
+    return result;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetCombineResultEx);
+#endif
 
 extern s32 cmbGetLevelUpCount(datUnitWork_t *work, u32 exp);
 
@@ -1969,17 +2017,13 @@ s32 cmbDevilCanBirth(u16 devilId)
     return flag > 0;
 }
 
-#ifdef NON_MATCHING
-extern s32 cmbGetCombineResultEx(cmbUnit_t *unitA, cmbUnit_t *unitB, s8 flag, s8 levelFlag, u16 *ids, s8 *races, u8 *kind);
-#endif
-
-s32 cmbMakeBirthDevil(s32 id1, s32 id2, s32 id3, s8 race1, s8 race2, u16 *ids, s8 *races)
+s32 cmbMakeBirthDevil(cmbUnit_t *first, cmbUnit_t *second, s32 id3, s8 race1, s8 race2, u16 *ids, u8 *races)
 {
     datUnitWork_t unit;
     u8 kind;
     u16 id;
 
-    id = cmbGetCombineResultEx(id1, id2, race1, race2, ids, races, &kind);
+    id = cmbGetCombineResultEx(first, second, race1, race2, ids, races, &kind);
     if (kind == 2) {
         return 0;
     }
