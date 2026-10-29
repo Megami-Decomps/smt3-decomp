@@ -241,21 +241,7 @@ void mselToggleFlag(u8 *toggle, s32 *value, s8 dir)
     *value = (v & ~0xFF) | level;
 }
 
-typedef struct datDevilFormat_t {
-    u32 flag;
-    u8 race, level;
-    u16 hp, maxhp, mp, maxmp;
-    s16 aisyoid;
-    s8 param[6];
-    u16 skill[8];
-    s16 keisyotype;
-    u16 keisyoform, dropmakka, dropexp;
-    u8 dropitem[2], droppoint[2];
-    u16 specialbit;
-    u8 specialitem, specialpoint, hougyokupoint, masekipoint;
-    s8 attackattr;
-    u8 attackcnt, attackinterval, reserve1;
-} datDevilFormat_t;
+
 extern datDevilFormat_t datDevilTable[];
 
 void mselMakeSaveText(s32 *devilIds, u32 color, u32 nameColor)

@@ -78,34 +78,7 @@ extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
 extern void cmpSetMaxHPMP(datUnitWork_t *work);
 extern s32 datGetPlayerLNDLevel(datUnitWork_t *work);
 
-typedef struct
-{
-    /* 0x00 */ u32 flag;
-    /* 0x04 */ u8 race;
-    /* 0x05 */ u8 level;
-    /* 0x06 */ u16 hp;
-    /* 0x08 */ u16 maxhp;
-    /* 0x0A */ u16 mp;
-    /* 0x0C */ u16 maxmp;
-    /* 0x0E */ s16 aisyoid;
-    /* 0x10 */ s8 param[6];
-    /* 0x16 */ u16 skill[8];
-    /* 0x26 */ s16 keisyotype;
-    /* 0x28 */ u16 keisyoform;
-    /* 0x2A */ u16 dropmakka;
-    /* 0x2C */ u16 dropexp;
-    /* 0x2E */ u8 dropitem[2];
-    /* 0x30 */ u8 droppoint[2];
-    /* 0x32 */ u16 specialbit;
-    /* 0x34 */ u8 specialitem;
-    /* 0x35 */ u8 specialpoint;
-    /* 0x36 */ u8 hougyokupoint;
-    /* 0x37 */ u8 masekipoint;
-    /* 0x38 */ s8 attackattr;
-    /* 0x39 */ u8 attackcnt;
-    /* 0x3A */ u8 attackinterval;
-    /* 0x3B */ u8 reserve1;
-} datDevilFormat_t;
+
 
 extern datDevilFormat_t datDevilTable[];
 

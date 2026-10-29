@@ -103,34 +103,7 @@ typedef struct nbMainProcessData_t
     void *modelpackbuf;
 } nbMainProcessData_t;
 
-typedef struct
-{
-    u32 flag;
-    u8 race;
-    u8 level;
-    u16 hp;
-    u16 maxhp;
-    u16 mp;
-    u16 maxmp;
-    s16 aisyoid;
-    s8 param[6];
-    u16 skill[8];
-    s16 keisyotype;
-    u16 keisyoform;
-    u16 dropmakka;
-    u16 dropexp;
-    u8 dropitem[2];
-    u8 droppoint[2];
-    u16 specialbit;
-    u8 specialitem;
-    u8 specialpoint;
-    u8 hougyokupoint;
-    u8 masekipoint;
-    s8 attackattr;
-    u8 attackcnt;
-    u8 attackinterval;
-    u8 reserve1;
-} datDevilFormat_t;
+
 
 /* 0x1A4 bytes; only the fields this unit touches are named. */
 typedef struct nbActionProcessData_t
