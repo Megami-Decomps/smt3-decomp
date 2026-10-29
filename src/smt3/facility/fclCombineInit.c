@@ -4643,24 +4643,12 @@ void cmbDrawTargetModel(f32 (*positions)[4], f32 *sizes, s32 *enabled,
     }
 }
 
-typedef struct
-{
-    u8 reserved00[0x80];
-    u32 modelValue;
-} cmbSceneModel_t;
-
-typedef struct
-{
-    u8 reserved00[0x18];
-    cmbSceneModel_t *model;
-} cmbSceneModelOwner_t;
-
 extern dds3Basic_t *dds3GetActiveScene(void);
 extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type,
                                                     const char *name);
 extern evtUnit_t *evtGetUnitHandle2(dds3Basic_t *unit);
 
-s32 cmbGetSceneModel(cmbSceneModelOwner_t *work, const char *name)
+s32 cmbGetSceneModel(mdlObj_t *work, const char *name)
 {
     dds3Basic_t *scene = dds3GetActiveScene();
     dds3Basic_t *basic;
@@ -4677,10 +4665,10 @@ s32 cmbGetSceneModel(cmbSceneModelOwner_t *work, const char *name)
     if (unit == NULL) {
         return 0;
     }
-    if (unit->value == 0) {
+    if (unit->lightPacket == NULL) {
         return 0;
     }
-    work->model->modelValue = unit->value;
+    work->inner->light = unit->lightPacket;
     return 1;
 }
 
@@ -4731,7 +4719,7 @@ void cmbLoadTargetModel(s32 drawTarget, s32 drawModels, f32 scale)
                 }
                 color = fclBlendColor(0x80000000, 0x80808080, (s32)cmbActionTargetModel[i]);
                 mdlSetColorWithEffect(CMB_GBWK->actionData[i].model, color);
-                cmbGetSceneModel((cmbSceneModelOwner_t *)CMB_GBWK->actionData[i].model, D_0053CE48);
+                cmbGetSceneModel(CMB_GBWK->actionData[i].model, D_0053CE48);
                 cmbInitModelOt((u16)CMB_GBWK->actionData[i].id, modelOt);
                 cmbDrawActionModel(CMB_GBWK->actionData[i].model,
                     (u16)CMB_GBWK->actionData[i].id, CMB_GBWK->modelMark[i], 0x80808080, modelOt);
@@ -4753,7 +4741,7 @@ extern evtUnit_t *evtGetUnitHandle2(dds3Basic_t *unit);
 /* Called above its definition, where ee-gcc assumed int. */
 dds3Basic_t *dds3GetActiveScene(void);
 
-s32 cmbFindUnitScene(void *work)
+s32 cmbFindUnitScene(mdlObj_t *work)
 {
     dds3Basic_t *scene = dds3GetActiveScene();
     dds3Basic_t *basic;
@@ -4770,10 +4758,10 @@ s32 cmbFindUnitScene(void *work)
     if (unit == NULL) {
         return 0;
     }
-    if (unit->value == 0) {
+    if (unit->lightPacket == NULL) {
         return 0;
     }
-    *(u32 *)(*(u8 **)((u8 *)work + 0x18) + 0x80) = unit->value;
+    work->inner->light = unit->lightPacket;
     return 1;
 }
 
