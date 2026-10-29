@@ -1452,7 +1452,227 @@ s32 nbPanelStockSelectCtrl(void)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelStockSelect);
+extern void nbPanelCursorDraw(s32 x, s32 y);
+
+extern void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag);
+
+extern nbPanelProcess_nbPanelXYZ_t nbStockSelectTable[];
+
+extern nbPanelProcess_nbPanelXYZ_t D_004EFE90[];
+
+extern nbPanelProcess_nbPanelXYZ_t D_004EFF6C[];
+
+extern nbPanelProcess_nbPanelTMXuv_t D_004EFB00[];
+
+u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
+{
+    s32 ret;
+    s32 cx;
+    s32 cy;
+    s32 i;
+    u32 *pid;
+    s32 n;
+    u32 blink;
+    f32 rate;
+
+    if (pad != 0 && nbPanelStockPad != 0) {
+        ret = nbPanelStockSelectCtrl();
+    } else {
+        ret = -1;
+    }
+    cx = nbPanelStockShiftX + 0xE6;
+    if (nbPanelStockFrame > 0) {
+        s32 frame;
+        u32 col;
+
+        frame = nbPanelStockFrame - 1;
+        if (frame < 5) {
+            rate = (f32)frame / 5.0f;
+        } else {
+            rate = 1.0f;
+        }
+        col = ((u32)(rate * 128.0f) << 24) | 0x808080;
+        nbPanelBaseColorSet(col);
+        nbPanelStockShiftX = nbPanelStockShiftX >> 1;
+        if (nbPanelStockFadeFlag != 0) {
+            if ((nbPanelStockABGR & 0xFF000000) != 0) {
+                nbPanelStockABGR = nbPanelStockABGR + 0xE0000000;
+            }
+            effMagaCylinderCalcColor(col, nbPanelStockABGR);
+            nbPanelBaseColorSet(nbPanelStockABGR);
+        }
+    }
+    {
+        nbPanelProcess_nbPanelXYZ_t *xyz0;
+        nbPanelProcess_nbPanelXYZ_t *xyz1;
+        nbPanelProcess_nbPanelTMXuv_t *uv0;
+        nbPanelProcess_nbPanelTMXuv_t *uv1;
+
+        xyz0 = &D_004EFE90[0];
+        uv0 = &D_004EFB00[0];
+        cy = 0x153;
+        xyz1 = &D_004EFE90[1];
+        uv1 = &D_004EFB00[1];
+        for (i = 3; i >= 0; i--) {
+            void *hTex0 = p->pnltex[0];
+            void *hTex1;
+
+            nbPnlSprite(xyz0->x + cx, xyz0->y + cy, xyz0->w, xyz0->h, uv0->u0, uv0->v0, uv0->u1,
+                        uv0->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex0);
+            hTex1 = p->pnltex[0];
+            nbPnlSprite(xyz1->x + cx, xyz1->y + cy, xyz1->w, xyz1->h, uv1->u0, uv1->v0, uv1->u1,
+                        uv1->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex1);
+            cy += 0x17;
+        }
+    }
+    cy = 0x153;
+    {
+        nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[0];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[6];
+        void *hTex = p->pnltex[1];
+
+        nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
+                    uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
+                    hTex);
+    }
+    {
+        nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[1];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[7];
+        void *hTex = p->pnltex[1];
+
+        nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
+                    uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
+                    hTex);
+    }
+    {
+        nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[6];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[4];
+        void *hTex = p->pnltex[1];
+
+        nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
+                    uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
+                    hTex);
+    }
+    {
+        nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[7];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[4];
+        void *hTex = p->pnltex[1];
+
+        nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
+                    uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
+                    hTex);
+    }
+    {
+        nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[2];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[5];
+        void *hTex = p->pnltex[0];
+
+        nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
+                    uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
+                    hTex);
+    }
+    {
+        nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[3];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[5];
+        void *hTex = p->pnltex[0];
+
+        nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
+                    uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
+                    hTex);
+    }
+    blink = p->battletime % 25 < 14;
+    if (blink == 0 || StockIDListTop == 0) {
+        {
+            nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[4];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[8];
+            void *hTex = p->pnltex[0];
+
+            nbPnlSprite(xyz->x + cx, xyz->y + 0x153, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
+                        uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
+                        hTex);
+        }
+    } else {
+        {
+            nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[4];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[9];
+            void *hTex = p->pnltex[0];
+
+            nbPnlSprite(xyz->x + cx, xyz->y + 0x153, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
+                        uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
+                        hTex);
+        }
+    }
+    if (blink == 0 || StockIDListTop >= StockIDListCount - 4) {
+        {
+            nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[5];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[8];
+            void *hTex = p->pnltex[0];
+
+            nbPnlSprite(xyz->x + cx, xyz->y + 0x153, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
+                        uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
+                        hTex);
+        }
+    } else {
+        {
+            nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[5];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[9];
+            void *hTex = p->pnltex[0];
+
+            nbPnlSprite(xyz->x + cx, xyz->y + 0x153, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
+                        uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
+                        hTex);
+        }
+    }
+    nbPanelCursorDraw(0xE6, StockIDListCursor * 23 + 0x153);
+    n = StockIDListTop;
+    if (StockIDListCount > 0) {
+        nbPanelProcess_nbPanelXYZ_t *xyz = &D_004EFF6C[0];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[10];
+
+        u32 ppSelect = 0x200000;
+
+        pid = &StockIDList[n];
+        i = 0;
+        while (1) {
+            if (i == StockIDListCursor) {
+                nbPanelDrawPP(cx, cy, 0, *pid, ppSelect | 0x38);
+            } else {
+                nbPanelDrawPP(cx, cy, 0, *pid, 0x38);
+            }
+            if (DDS3_GBWK->akuma[*pid].badstatus & 0x800) {
+                {
+                    void *hTex = p->pnltex[0];
+
+                    nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
+                                uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
+                                hTex);
+                }
+            }
+            pid++;
+            n++;
+            if (n >= StockIDListCount) {
+                break;
+            }
+            i++;
+            if (i >= 4) {
+                break;
+            }
+            cy += 0x17;
+        }
+    }
+    {
+        if (nbPanelStockFrame < 5) {
+            rate = 1.0f - (f32)nbPanelStockFrame / 5.0f;
+        } else {
+            rate = 0.0f;
+        }
+        nbPanelBaseColorSet(((u32)(rate * 128.0f) << 24) | 0x808080);
+    }
+    nbPanelPartyDraw();
+    nbPanelBaseColorSet(0x80808080);
+    nbPanelStockFrame = nbPanelStockFrame + 1;
+    return ret;
+}
 
 void nbPanelAnalyzeInit(void)
 {

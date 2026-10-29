@@ -740,3 +740,5 @@ src/smt3/field/fld_Npc.c	redthing1	done	2026-10-29	1 fn / 652 B	PiM agent: nativ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 456 B	load-file bind/version initialization and loader result wrappers with native retry, flag/query ordering and byte-version copy; owner 45 match, 0 differ
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	0 exact / 392 B guarded	stream read native-size draft with 95 of 98 words matching; active-check temporary-register pair unresolved
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 404 B	TTY receive/send callback with shared progress fields, native diagnostic/error behavior and allocator-qualified byte-count lifetime; complete owner 36 match, 0 differ
+src/smt3/field/fld_Npc.c	z25	done	2026-10-29	0 fn / 0 B	fldNpcCalc drafted to 5 of 492 words; fldNpcDraw and fldNpcLoad untouched
+src/smt3/newbattle/nbPanelProcess.c	z25	done	2026-10-29	1 fn / 2032 B	nbPanelStockSelect; nbPanelDrawPP untouched

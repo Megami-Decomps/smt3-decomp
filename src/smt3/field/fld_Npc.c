@@ -26,23 +26,25 @@ typedef struct
 
 typedef struct
 {
-    s32 unk00;
+    s32 type;                  /* 0x00 */
     f32 x;                     /* 0x04 */
     f32 y;
     f32 z;
     sdfVector4_t rot;          /* 0x10 */
     dds3Basic_t *object;       /* 0x20 */
-    u8 unk24[0xC];
+    f32 csize;                 /* 0x24 */
+    u8 unk28[8];
     void *effect;              /* 0x30 */
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    s32 unk40;
+    f32 cntf;                  /* 0x34 */
+    s32 cnti;                  /* 0x38 */
+    f32 cntAnmf;               /* 0x3C */
+    s32 cntAnmi;               /* 0x40 */
     s32 unk44;
     s32 room;                  /* 0x48 */
-    s32 unk4C;
+    s32 itemBoxIdx;            /* 0x4C */
     s32 kind;                  /* 0x50 */
-    u8 unk54[8];
+    s32 camera;                /* 0x54 */
+    u8 unk58[4];
     s32 modelIndex;            /* 0x5C */
     u8 unk60[0x10];
 } fldNpcSlot_t;
@@ -386,7 +388,7 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
     memset(&rotation, 0, sizeof(rotation));
     n = fldNpcModelTable;
     fldNpcModelTable = n + 1;
-    fldModelSlotTable[n].unk00 = 0x3E7;
+    fldModelSlotTable[n].type = 0x3E7;
     fldModelSlotTable[n].x = x;
     fldModelSlotTable[n].y = y;
     fldModelSlotTable[n].z = z;
@@ -396,13 +398,13 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
     fldModelSlotTable[n].rot.w = rot->w;
     scl = D_005326F0;
     fldModelSlotTable[n].effect = NULL;
-    fldModelSlotTable[n].unk34 = 0;
-    fldModelSlotTable[n].unk38 = 0;
-    fldModelSlotTable[n].unk3C = 0;
-    fldModelSlotTable[n].unk40 = 0;
+    fldModelSlotTable[n].cntf = 0.0f;
+    fldModelSlotTable[n].cnti = 0;
+    fldModelSlotTable[n].cntAnmf = 0.0f;
+    fldModelSlotTable[n].cntAnmi = 0;
     fldModelSlotTable[n].unk44 = 0;
     fldModelSlotTable[n].room = 0;
-    fldModelSlotTable[n].unk4C = id;
+    fldModelSlotTable[n].itemBoxIdx = id;
     pos.x = x;
     pos.y = y;
     pos.z = z;
@@ -1153,7 +1155,258 @@ void fldFreeNpcModel(void) {
     }
 }
 
+typedef struct
+{
+    dds3Basic_t *handle;
+    dds3Basic_t *handle2;
+    s8 moveFlag;
+    s8 rotFlag;
+} fldUnitControl_t;
+
+extern fldUnitControl_t *fldGetUnitControl(void);
+
+extern s32 dds3EffectGetState(void *hEffect);
+
+extern void dds3GetPosPoseSet(dds3Basic_t *basic);
+
+extern void fldWaveStart(f32 x, f32 y, f32 z);
+
+extern void fldSibukiStart(f32 x, f32 y, f32 z);
+
+extern s32 fldAutoMapSeqTestFlag(u32 flag);
+
+extern s32 fldProcCampChk(void);
+
+extern s32 fldProcAmChk(void);
+
+extern s32 fldCheckEveRngT(s32 index);
+
+extern s32 fldCheckEveRngN(s32 index);
+
+extern s32 fldCamNpcCamChk(void *name);
+
+extern void fldSePlay(s32 no);
+
+extern dds3Basic_t *D_0054EAE8;
+
+extern sdfVector4_t fldNpcWorkVec;
+
+extern f32 D_0054EF64;
+
+extern s32 D_0054EF68;
+
+extern f32 D_0054EF6C;
+
+extern f32 D_0054EF70;
+
+extern f32 D_0054EF74;
+
+extern f32 D_0054EF78;
+
+extern f32 D_0054EF80;
+
+extern f32 fldCamNpcTarget;
+
+extern f32 fldCamNpcTarget2;
+
+extern s32 D_0054EEB0;
+
+/* NON_MATCHING: 5 of 492 words differ (first at +0xB8), at the exact 1968-byte size. */
+#ifdef NON_MATCHING
+void fldNpcCalc(void)
+{
+    sdfVector4_t vec;
+    fldUnitControl_t *control;
+    s32 i;
+    f32 x;
+    f32 y;
+    f32 z;
+
+    fldNpcCamTarget = 0;
+    if (fldGlobalBase.area < 200 && fldAutoMapSeqTestFlag(1) == 0 && fldProcCampChk() == 0 &&
+        fldProcAmChk() == 0) {
+        if (fldNpcBlurHandle != 0) {
+            memset(&vec, 0, sizeof(vec));
+            vec.w = 1.0f;
+            if (dds3EffectGetState(fldBlurEffectId[0]) != 0 && fldGlobalBase.word4C != -1) {
+                f32 length;
+
+                control = fldGetUnitControl();
+                y = *(f32 *)fldGlobalBase.unkC4;
+                vec.x = control->handle->poseset->pos2.x;
+                vec.y = y;
+                vec.z = control->handle->poseset->pos2.z;
+                dds3EffectSetPosition(fldBlurEffectId[0], &vec);
+                vec.x = control->handle->poseset->pos.x;
+                vec.y = y;
+                vec.z = control->handle->poseset->pos.z;
+                dds3GetPosPoseSet(D_0054EAE8);
+                SDF_VU0_LOADVECTOR_B(&fldNpcWorkVec);
+                SDF_VU0_STOREVECTOR(&fldNpcWorkVec);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_GETLENGTH(length);
+                D_0054EF64 = D_0054EF64 + length;
+                if (D_0054EF64 > 100.0f) {
+                    D_0054EF64 = 0.0f;
+                    fldWaveStart(vec.x, vec.y, vec.z);
+                }
+                D_0054EF68++;
+            } else {
+                fldNpcBlurHandle = 0;
+            }
+        } else if (fldGlobalBase.word4C != -1 && *(f32 *)&fldGlobalBase.wordC8 > 3.0f) {
+            control = fldGetUnitControl();
+            fldSibukiStart(control->handle->poseset->pos2.x, *(f32 *)fldGlobalBase.unkC4 - 5.0f,
+                           control->handle->poseset->pos2.z);
+        }
+
+        for (i = 0; i < fldNpcModelTable; i++) {
+            if (fldModelSlotTable[i].room != 0 &&
+                fldGbChkNpc(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                            fldModelSlotTable[i].room) != 0) {
+                continue;
+            }
+            x = fldModelSlotTable[i].x;
+            y = fldModelSlotTable[i].y;
+            z = fldModelSlotTable[i].z;
+            if (fldModelSlotTable[i].type == 999 && fldEncountTestFlag(0x40) == 0) {
+                if (fldCheckEveRngT(fldModelSlotTable[i].itemBoxIdx) != 0) {
+                    fldModelSlotTable[i].cntAnmf += 1.05f;
+                    if (fldModelSlotTable[i].cntAnmf > 1.0f) {
+                        fldModelSlotTable[i].cntAnmf = 1.0f;
+                    }
+                    fldModelSlotTable[i].cntAnmi += 2;
+                    if (fldModelSlotTable[i].cntAnmi >= 49) {
+                        fldModelSlotTable[i].cntAnmi = 48;
+                    }
+                    D_0054EF6C = x;
+                    D_0054EF70 = y;
+                    D_0054EF74 = z;
+                    fldNpcCamTarget = 2;
+                    SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                    D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                    switch (*(s32 *)&fldTakaraTable[fldModelSlotTable[i].itemBoxIdx * 16]) {
+                    case 0:
+                    case 2:
+                        fldCamNpcTarget = -110.0f;
+                        break;
+                    case 1:
+                        fldCamNpcTarget = -90.0f;
+                        break;
+                    case 3:
+                        fldCamNpcTarget = -110.0f;
+                        break;
+                    }
+                }
+                continue;
+            }
+            switch (fldModelSlotTable[i].kind) {
+            case 0: {
+                s32 talk = 0;
+
+                if (fldAutoMapSeqTestFlag(1) == 0 && fldEncountTestFlag(0x40) == 0 &&
+                    (fldCheckEveRngN(i) != 0 || fldCamNpcCamChk(&fldModelSlotTable[i].unk60) != 0)) {
+                    if (fldModelSlotTable[i].cntAnmi == 0) {
+                        fldSePlay(0x2D);
+                        D_0054EEB0 = i;
+                        if (fldGlobalBase.area >= 11) {
+                            fldNpcModelStart(i, x, y - 10.0f, z, &fldModelSlotTable[i].rot);
+                        }
+                        fldModelSlotTable[i].cntAnmi = 128;
+                    }
+                    talk = 1;
+                    fldNpcCamTarget = talk;
+                }
+                if (talk == 0) {
+                    fldModelSlotTable[i].cntf += 0.1f;
+                    fldModelSlotTable[i].cntAnmi = 0;
+                    fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
+                    fldDeleteNpcModel(i);
+                } else {
+                    D_0054EF6C = x;
+                    D_0054EF70 = y;
+                    D_0054EF74 = z;
+                    SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                    D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                    fldCamNpcTarget = -140.0f;
+                    D_0054EF80 = -140.0f;
+                    fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                    fldModelSlotTable[i].cntf += 0.05f;
+                    fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
+                }
+                break;
+            }
+            case 1:
+                if (fldAutoMapSeqTestFlag(1) == 0 && fldEncountTestFlag(0x40) == 0 &&
+                    fldCheckEveRngN(i) != 0) {
+                    if (fldModelSlotTable[i].camera == 0) {
+                        fldNpcCamTarget = 0;
+                    } else if (fldModelSlotTable[i].camera == 1) {
+                        fldNpcCamTarget = 1;
+                        D_0054EEB0 = -1;
+                        D_0054EF6C = x;
+                        D_0054EF70 = y;
+                        D_0054EF74 = z;
+                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                        D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                        fldCamNpcTarget = -110.0f;
+                        D_0054EF80 = -110.0f;
+                        fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                    } else if (fldModelSlotTable[i].camera == 2) {
+                        fldNpcCamTarget = 1;
+                        D_0054EEB0 = -1;
+                        D_0054EF6C = x;
+                        D_0054EF70 = y;
+                        D_0054EF74 = z;
+                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                        D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                        fldCamNpcTarget = -50.0f;
+                        D_0054EF80 = -50.0f;
+                        fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                    } else if (fldModelSlotTable[i].camera == 3) {
+                        fldNpcCamTarget = 1;
+                        D_0054EEB0 = -1;
+                        D_0054EF6C = x;
+                        D_0054EF70 = y;
+                        D_0054EF74 = z;
+                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                        D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                        fldCamNpcTarget = -180.0f;
+                        D_0054EF80 = -180.0f;
+                        fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                    } else if (fldModelSlotTable[i].camera == 4) {
+                        fldNpcCamTarget = 1;
+                        D_0054EEB0 = -1;
+                        D_0054EF6C = x;
+                        D_0054EF70 = y;
+                        D_0054EF74 = z;
+                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                        D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                        fldCamNpcTarget = -10.0f;
+                        D_0054EF80 = -170.0f;
+                        fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                    } else if (fldModelSlotTable[i].camera == 5) {
+                        fldNpcCamTarget = 1;
+                        D_0054EEB0 = -1;
+                        D_0054EF6C = x;
+                        D_0054EF70 = y;
+                        D_0054EF74 = z;
+                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                        D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                        fldCamNpcTarget = -210.0f;
+                        D_0054EF80 = -180.0f;
+                        fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                    }
+                }
+                break;
+            }
+        }
+    }
+}
+
+#else
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcCalc);
+#endif
 
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcDraw);
 

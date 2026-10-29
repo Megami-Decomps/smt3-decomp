@@ -525,10 +525,12 @@ member fldNpcSlot_t.unk34
 member fldNpcSlot_t.unk38
 member fldNpcSlot_t.unk3C
 member fldNpcSlot_t.unk40
+member fldNpcSlot_t.unk28
 member fldNpcSlot_t.unk44
 member fldNpcSlot_t.unk4C
 member fldNpcSlot_t.unk50
 member fldNpcSlot_t.unk54
+member fldNpcSlot_t.unk58
 member fldNpcSlot_t.unk60
 member fldRoomState_t.unk10C
 member fldRoomState_t.unk110

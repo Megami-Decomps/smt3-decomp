@@ -266,7 +266,6 @@ s32 sceGsSetDefStoreImage(sceGsStoreImage *p, s16 sbp, s16 sbw, s16 spsm, s16 ss
     return 7;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A6E0);
 extern const char D_0054A6E0[]; /* DMA channel timeout diagnostic, with native padding. */
 
 s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
@@ -301,6 +300,8 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
     D2_CHCR = 0x101;
     return 0;
 }
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A6E0);
 
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsExecStoreImage);
 
