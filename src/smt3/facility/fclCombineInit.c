@@ -761,7 +761,67 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C890);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C8B8);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", fclCombineCalc);
+extern dds3Basic_t *dds3GetActiveScene(void);
+extern void dds3VisibleSceneBasic(void *scene, s32 visible);
+extern void evtEnableMoonDraw(void);
+extern s32 fclEncycWork(void);
+extern s32 cmbCalcSequence(void);
+
+s32 fclCombineCalc(void)
+{
+    dds3Basic_t *scene;
+
+    if (fclGetFlag(1) == 0) {
+        return 0;
+    }
+    if (fclCombineChkEventStat() != 0) {
+        switch (CMB_GBWK->unk_00001) {
+        case 2:
+        case 3:
+        case 15:
+        case 16:
+            break;
+        case 0:
+        case 1:
+        case 4:
+        case 5:
+        case 6:
+        case 8:
+            scene = dds3GetActiveScene();
+            if (scene != NULL) {
+                dds3VisibleSceneBasic(scene, 1);
+            }
+            break;
+        default:
+            scene = dds3GetActiveScene();
+            if (scene != NULL) {
+                dds3VisibleSceneBasic(scene, 0);
+            }
+            break;
+        }
+    } else {
+        scene = dds3GetActiveScene();
+        if (scene != NULL) {
+            dds3VisibleSceneBasic(scene, 1);
+        }
+    }
+    switch (CMB_GBWK->unk_00001) {
+    case 0:
+    case 2:
+    case 3:
+    case 4:
+    case 16:
+        evtEnableMoonDraw();
+        break;
+    default:
+        evtDisableMoonDraw();
+        break;
+    }
+    if (fclEncycWork() != 0) {
+        evtDisableMoonDraw();
+    }
+    return cmbCalcSequence();
+}
 
 s32 fclCombineDraw(void)
 {
