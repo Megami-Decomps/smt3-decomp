@@ -1614,9 +1614,6 @@ void effPCPBossBUNSIN2Delete(effPCPBossBUNSIN2_t *pPCPBossBUNSIN2)
     sdfChipFreeDirect(pPCPBossBUNSIN2);
 }
 
-#ifdef NON_MATCHING
-extern void effPCPBossBUNSINDraw(void *pPCPBossBUNSIN);
-#endif
 
 void effPCPBossBUNSIN2Draw(effPCPBossBUNSIN2_t *pPCPBossBUNSIN2)
 {

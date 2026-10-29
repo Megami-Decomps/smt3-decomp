@@ -494,16 +494,12 @@ extern void cmpUpdateCursorScroll(cmpCursorInfo_t *cursor, s8 mode);
 
 extern void cmpSetInfoWindowHidden(void);
 
-typedef struct
-{
-    /* 0x00 */ datUnitWork_t unit;
-} dds3PartyUnit_t;
 
 typedef struct
 {
     /* 0x00000 */ u8 unk_00000[0xA50];
     /* 0x00A50 */ s32 maxstock;
-    /* 0x00A54 */ dds3PartyUnit_t party[16];
+    /* 0x00A54 */ cmbUnit_t party[16];
     /* 0x01914 */ s8 stock[0x10];
     /* 0x01924 */ s32 stockCount;
     /* 0x01928 */ u8 itemQuantity[0xA0];
@@ -890,7 +886,6 @@ void func_0022C658(void) {
 
 /* NON_MATCHING: 6 of 271 words differ at the exact 1084-byte size. */
 #ifdef NON_MATCHING
-typedef dds3PartyUnit_t cmbUnit_t;
 extern void cmbClearStockEntry(cmbUnit_t *unit);
 extern s32 cmbAddDevilToStock(u16 devilId, cmbUnit_t *list, u8 count);
 extern void fclEncycDebugRegist(void);

@@ -42,7 +42,6 @@ s32 dds3FirstProcess(dds3ProcessID_t *id)
 
 /* Reference implementation: native packet/camera flow; assembly remains production. */
 #ifdef NON_MATCHING
-typedef struct { sdf3DLight_t *parallel[4]; sdfVector4_t ambient; sdf3DFogParam_t fog; } dds3LightState_t;
 extern u32 dds3RenderTex, dds3RenderDrawEnv, dds3BackColor;
 extern dds3LightState_t dds3LightParam, dds3LightParam2;
 extern sdf3DLight_t *D_002F5D10[];
