@@ -442,55 +442,41 @@ u32 fldEveHit_AddEveData(fldEventDataHeader_t *pEve, dds3Basic_t *pBasic) {
     return index;
 }
 
+/* NON_MATCHING: 1408 of 1559 words differ (first at +0x30). */
 #ifdef NON_MATCHING
-extern const volatile sdfVector4_t D_00531E08;
+extern const sdfVector4_t D_00531E08;
 extern f32 D_0054C474;
 extern void LoadIdentity(void);
 extern void ToMatrix(void);
 extern void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY,
-                               f32 *normalZ, f32 *planeConstant);
-
-static inline void fldEveHitMakeBoxFace(fldRoomState_t *room, sdfVector4_t *triangle,
-                                        sdfVector4_t *normal, f32 *unused,
-                                        s32 face, s32 first, s32 second, s32 third)
-{
-    triangle[0].x = room->corner[first][0];
-    triangle[0].y = room->corner[first][1];
-    triangle[0].z = room->corner[first][2];
-    triangle[0].w = 1.0f;
-    triangle[1].x = room->corner[second][0];
-    triangle[1].y = room->corner[second][1];
-    triangle[1].z = room->corner[second][2];
-    triangle[1].w = 1.0f;
-    triangle[2].x = room->corner[third][0];
-    triangle[2].y = room->corner[third][1];
-    triangle[2].z = room->corner[third][2];
-    triangle[2].w = 1.0f;
-    fldMakeEveHitPlanes(&triangle[0].x, &normal->x, &normal->y, &normal->z, unused);
-    room->plane[face][0] = normal->x;
-    room->plane[face][1] = normal->y;
-    room->plane[face][2] = normal->z;
-    room->plane[face][3] = 0.0f;
-    room->limit[face] = fldVecDot((sdfVector4_t *)room->plane[face], &triangle[0]);
-}
+                                f32 *normalZ, f32 *planeConstant);
 
 s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
 {
-    sdfVector4_t local __attribute__((aligned(16)));
-    sdfVector4_t rotation __attribute__((aligned(16)));
-    sdfVector4_t direction __attribute__((aligned(16)));
-    sdfVector4_t transformed[8] __attribute__((aligned(16)));
-    sdfVector4_t triangle[4] __attribute__((aligned(16)));
+    sdfVector4_t transformed[8];
+    sdfVector4_t local;
+    sdfVector4_t rotation;
+    sdfVector4_t direction;
+    f32 nrm[4];
+    sdfVector4_t triangle[4];
+    sdfVector4_t edge[4];
     sdfVector4_t center;
-    sdfVector4_t normal;
-    fldRoomState_t *room;
+    sdfVector4_t *point;
     fldTriggerShape_t *shape;
-    fldResPut_t *info;
-    s32 index, i, j;
-    u32 shapeKind;
-    f32 width = 0.0f, height = 0.0f, depth = 0.0f;
-    f32 positionX, positionY, positionZ;
-    f32 unused;
+    fldResourcePoint_t *transform;
+    s32 index;
+    s32 count;
+    s32 i;
+    s32 n;
+    f32 width = 0.0f;
+    f32 height = 0.0f;
+    f32 depth = 0.0f;
+    f32 positionX;
+    f32 positionY;
+    f32 positionZ;
+    f32 absX;
+    f32 absY;
+    f32 absZ;
 
     memset(&local, 0, 16);
     local.w = 1.0f;
@@ -499,203 +485,448 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
     index = fldEveRngCount;
     direction = D_00531E08;
     gEvnRng[index] = resource;
-    info = resource->data;
-    shape = info->data.shape;
-    room = &fldEveHitTable[index];
-    shapeKind = shape->kind;
-    if (shapeKind == 1 || shapeKind == 2) {
-        fldResourcePoint_t *transform = resource->transform;
+    shape = ((fldResPut_t *)resource->data)->data.shape;
+    switch (shape->kind) {
+    case 1:
+        transform = resource->transform;
         width = shape->plane.width;
         height = shape->plane.height;
-        if (shapeKind == 2) {
-            depth = shape->box.size[2];
-        }
         positionX = transform->pos.x;
         positionY = transform->pos.y;
         positionZ = transform->pos.z;
-        if (shapeKind == 1) {
-            SDF_VU0_COPYVECTOR(&rotation, &transform->rot);
-        } else {
-            rotation.x = transform->rot.x;
-            rotation.y = transform->rot.y;
-            rotation.z = transform->rot.z;
-            rotation.w = transform->rot.w;
-        }
+        SDF_VU0_COPYVECTOR(&rotation, &transform->rot);
         LoadIdentity();
         SDF_VU0_LOADVECTOR(&rotation);
         ToMatrix();
-        if (shapeKind == 1) {
-            local.x = height * 0.5f;
-            local.y = -(width * 0.5f);
-            local.z = 0.0f;
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[0]);
-            local.x = -(height * 0.5f);
-            local.y = -(width * 0.5f);
-            local.z = 0.0f;
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[1]);
-            local.x = -(height * 0.5f);
-            local.y = width * 0.5f;
-            local.z = 0.0f;
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[2]);
-            local.x = height * 0.5f;
-            local.y = width * 0.5f;
-            local.z = 0.0f;
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[3]);
-            j = 4;
-        } else {
-            local.x = -(height * 0.5f);
-            local.y = -(width * 0.5f);
-            local.z = -(depth * 0.5f);
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[0]);
-            local.x = height * 0.5f;
-            local.y = -(width * 0.5f);
-            local.z = -(depth * 0.5f);
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[1]);
-            local.x = -(height * 0.5f);
-            local.y = -(width * 0.5f);
-            local.z = depth * 0.5f;
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[2]);
-            local.x = height * 0.5f;
-            local.y = -(width * 0.5f);
-            local.z = depth * 0.5f;
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[3]);
-            local.x = -(height * 0.5f);
-            local.y = width * 0.5f;
-            local.z = -(depth * 0.5f);
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[4]);
-            local.x = height * 0.5f;
-            local.y = width * 0.5f;
-            local.z = -(depth * 0.5f);
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[5]);
-            local.x = -(height * 0.5f);
-            local.y = width * 0.5f;
-            local.z = depth * 0.5f;
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[6]);
-            local.x = height * 0.5f;
-            local.y = width * 0.5f;
-            local.z = depth * 0.5f;
-            SDF_VU0_LOADVECTOR(&local);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&transformed[7]);
-            j = 8;
-        }
-        for (i = 0; i < j; i++) {
-            room->corner[i][0] = transformed[i].x + positionX;
-            room->corner[i][1] = transformed[i].y + positionY;
-            room->corner[i][2] = transformed[i].z + positionZ;
-            room->corner[i][3] = 1.0f;
+        local.x = height * 0.5f;
+        local.y = -(width * 0.5f);
+        local.z = 0.0f;
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[0]);
+        local.x = -(height * 0.5f);
+        local.y = -(width * 0.5f);
+        local.z = 0.0f;
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[1]);
+        local.x = -(height * 0.5f);
+        local.y = width * 0.5f;
+        local.z = 0.0f;
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[2]);
+        local.x = height * 0.5f;
+        local.y = width * 0.5f;
+        local.z = 0.0f;
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[3]);
+        for (i = 0; i < 4; i++) {
+            point = &transformed[i];
+            fldEveHitTable[index].corner[i][0] = point->x + positionX;
+            fldEveHitTable[index].corner[i][1] = point->y + positionY;
+            fldEveHitTable[index].corner[i][2] = point->z + positionZ;
+            fldEveHitTable[index].corner[i][3] = 1.0f;
         }
         SDF_VU0_LOADVECTOR(&direction);
         SDF_VU0_APPLYMATRIX();
-        SDF_VU0_STOREVECTOR(room->center);
-        if (shapeKind == 2) {
-            fldEveHitMakeBoxFace(room, triangle, &normal, &unused, 0, 0, 1, 2);
-            fldEveHitMakeBoxFace(room, triangle, &normal, &unused, 1, 1, 0, 5);
-            fldEveHitMakeBoxFace(room, triangle, &normal, &unused, 2, 0, 2, 4);
-            fldEveHitMakeBoxFace(room, triangle, &normal, &unused, 3, 3, 1, 7);
-            fldEveHitMakeBoxFace(room, triangle, &normal, &unused, 4, 2, 3, 6);
-            fldEveHitMakeBoxFace(room, triangle, &normal, &unused, 5, 6, 7, 4);
+        SDF_VU0_STOREVECTOR(fldEveHitTable[index].center);
+        for (i = 0; i < 4; i++) {
+            SDF_VU0_COPYVECTOR(&triangle[i], fldEveHitTable[index].corner[i]);
+        }
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[index].plane[0][i] = nrm[i];
+        }
+        fldEveHitTable[index].plane[0][3] = 0.0f;
+        fldEveHitTable[index].limit[0] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[0], &triangle[0]);
+        absX = sdfFabs(fldEveHitTable[index].plane[0][0]);
+        absY = sdfFabs(fldEveHitTable[index].plane[0][1]);
+        absZ = sdfFabs(fldEveHitTable[index].plane[0][2]);
+        if (absY < absX && absZ < absX) {
+            fldEveHitTable[index].axisMode = 0;
+            center.x = 0.0f;
+            center.y = (triangle[0].y + triangle[1].y + triangle[2].y + triangle[3].y) * 0.25f;
+            center.z = (triangle[0].z + triangle[1].z + triangle[2].z + triangle[3].z) * 0.25f;
+            i = 1;
+            edge[0].x = 0.0f;
+            edge[0].y = triangle[0].y;
+            edge[0].z = triangle[0].z;
+            edge[1].x = 0.0f;
+            edge[1].y = triangle[1].y;
+            edge[1].z = triangle[1].z;
+            edge[2].x = 10.0f;
+            edge[2].y = triangle[1].y;
+            edge[2].z = triangle[1].z;
+            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+            fldEveHitTable[index].plane[i][0] = nrm[0];
+            fldEveHitTable[index].plane[i][1] = nrm[1];
+            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
+            if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
+                fldEveHitTable[index].plane[i][0] = -nrm[0];
+                fldEveHitTable[index].plane[i][1] = -nrm[1];
+                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
+            }
+            i = 2;
+            edge[0].x = 0.0f;
+            edge[0].y = triangle[1].y;
+            edge[0].z = triangle[1].z;
+            edge[1].x = 0.0f;
+            edge[1].y = triangle[2].y;
+            edge[1].z = triangle[2].z;
+            edge[2].x = 10.0f;
+            edge[2].y = triangle[2].y;
+            edge[2].z = triangle[2].z;
+            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+            fldEveHitTable[index].plane[i][0] = nrm[0];
+            fldEveHitTable[index].plane[i][1] = nrm[1];
+            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[1]);
+            if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
+                fldEveHitTable[index].plane[i][0] = -nrm[0];
+                fldEveHitTable[index].plane[i][1] = -nrm[1];
+                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[1]);
+            }
+            i = 3;
+            edge[0].x = 0.0f;
+            edge[0].y = triangle[2].y;
+            edge[0].z = triangle[2].z;
+            edge[1].x = 0.0f;
+            edge[1].y = triangle[3].y;
+            edge[1].z = triangle[3].z;
+            edge[2].x = 10.0f;
+            edge[2].y = triangle[3].y;
+            edge[2].z = triangle[3].z;
+            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+            fldEveHitTable[index].plane[i][0] = nrm[0];
+            fldEveHitTable[index].plane[i][1] = nrm[1];
+            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[2]);
+            if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
+                fldEveHitTable[index].plane[i][0] = -nrm[0];
+                fldEveHitTable[index].plane[i][1] = -nrm[1];
+                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[2]);
+            }
+            i = 4;
+            edge[0].x = 0.0f;
+            edge[0].y = triangle[3].y;
+            edge[0].z = triangle[3].z;
+            edge[1].x = 0.0f;
+            edge[1].y = triangle[0].y;
+            edge[1].z = triangle[0].z;
+            edge[2].x = 10.0f;
+            edge[2].y = triangle[0].y;
+            edge[2].z = triangle[0].z;
+            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+            fldEveHitTable[index].plane[i][0] = nrm[0];
+            fldEveHitTable[index].plane[i][1] = nrm[1];
+            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
+            if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
+                fldEveHitTable[index].plane[i][0] = -nrm[0];
+                fldEveHitTable[index].plane[i][1] = -nrm[1];
+                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
+            }
+        } else if (absX < absY && absZ < absY) {
+            fldEveHitTable[index].axisMode = 1;
         } else {
-            f32 absX, absY, absZ;
-            for (i = 0; i < 4; i++) {
-                SDF_VU0_COPYVECTOR(&triangle[i], room->corner[i]);
+            fldEveHitTable[index].axisMode = 2;
+            center.x = (triangle[0].x + triangle[1].x + triangle[2].x + triangle[3].x) * 0.25f;
+            center.y = (triangle[0].y + triangle[1].y + triangle[2].y + triangle[3].y) * 0.25f;
+            center.z = 0.0f;
+            i = 1;
+            edge[0].x = triangle[0].x;
+            edge[0].y = triangle[0].y;
+            edge[0].z = 0.0f;
+            edge[1].x = triangle[1].x;
+            edge[1].y = triangle[1].y;
+            edge[1].z = 0.0f;
+            edge[2].x = triangle[1].x;
+            edge[2].y = triangle[1].y;
+            edge[2].z = 10.0f;
+            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+            fldEveHitTable[index].plane[i][0] = nrm[0];
+            fldEveHitTable[index].plane[i][1] = nrm[1];
+            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
+            if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
+                fldEveHitTable[index].plane[i][0] = -nrm[0];
+                fldEveHitTable[index].plane[i][1] = -nrm[1];
+                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
             }
-            fldMakeEveHitPlanes(&triangle[0].x, &normal.x, &normal.y, &normal.z, &unused);
-            room->plane[0][0] = normal.x;
-            room->plane[0][1] = normal.y;
-            room->plane[0][2] = normal.z;
-            room->plane[0][3] = 0.0f;
-            room->limit[0] = fldVecDot((sdfVector4_t *)room->plane[0], &triangle[0]);
-            absX = sdfFabs(room->plane[0][0]);
-            absY = sdfFabs(room->plane[0][1]);
-            absZ = sdfFabs(room->plane[0][2]);
-            if (absY < absX && absZ < absX) {
-                room->axisMode = 0;
-                center.x = 0.0f;
-                center.y = (triangle[0].y + triangle[1].y + triangle[2].y + triangle[3].y) * 0.25f;
-                center.z = (triangle[0].z + triangle[1].z + triangle[2].z + triangle[3].z) * 0.25f;
-            } else if (absX < absY && absZ < absY) {
-                room->axisMode = 1;
-            } else {
-                room->axisMode = 2;
-                center.x = (triangle[0].x + triangle[1].x + triangle[2].x + triangle[3].x) * 0.25f;
-                center.y = (triangle[0].y + triangle[1].y + triangle[2].y + triangle[3].y) * 0.25f;
-                center.z = 0.0f;
+            i = 2;
+            edge[0].x = triangle[1].x;
+            edge[0].y = triangle[1].y;
+            edge[0].z = 0.0f;
+            edge[1].x = triangle[2].x;
+            edge[1].y = triangle[2].y;
+            edge[1].z = 0.0f;
+            edge[2].x = triangle[2].x;
+            edge[2].y = triangle[2].y;
+            edge[2].z = 10.0f;
+            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+            fldEveHitTable[index].plane[i][0] = nrm[0];
+            fldEveHitTable[index].plane[i][1] = nrm[1];
+            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[1]);
+            if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
+                fldEveHitTable[index].plane[i][0] = -nrm[0];
+                fldEveHitTable[index].plane[i][1] = -nrm[1];
+                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[1]);
             }
-            if (room->axisMode != 1) {
-                sdfVector4_t edge[3];
-                for (i = 0; i < 4; i++) {
-                    s32 next = (i + 1) & 3;
-                    if (room->axisMode == 0) {
-                        edge[0].x = 0.0f;
-                        edge[0].y = triangle[i].y;
-                        edge[0].z = triangle[i].z;
-                        edge[1].x = 0.0f;
-                        edge[1].y = triangle[next].y;
-                        edge[1].z = triangle[next].z;
-                        edge[2].x = 10.0f;
-                        edge[2].y = triangle[next].y;
-                        edge[2].z = triangle[next].z;
-                    } else {
-                        edge[0].x = triangle[i].x;
-                        edge[0].y = triangle[i].y;
-                        edge[0].z = 0.0f;
-                        edge[1].x = triangle[next].x;
-                        edge[1].y = triangle[next].y;
-                        edge[1].z = 0.0f;
-                        edge[2].x = triangle[next].x;
-                        edge[2].y = triangle[next].y;
-                        edge[2].z = 10.0f;
-                    }
-                    fldMakeEveHitPlanes(&edge[0].x, &normal.x, &normal.y, &normal.z, &unused);
-                    room->plane[i + 1][0] = normal.x;
-                    room->plane[i + 1][1] = normal.y;
-                    room->plane[i + 1][2] = normal.z;
-                    j = i == 1 ? 1 : i == 2 ? 2 : 0;
-                    room->limit[i + 1] = fldVecDot((sdfVector4_t *)room->plane[i + 1], &edge[j]);
-                    if (fldVecDot(&center, (sdfVector4_t *)room->plane[i + 1]) - room->limit[i + 1] < 0.0f) {
-                        room->plane[i + 1][0] = -normal.x;
-                        room->plane[i + 1][1] = -normal.y;
-                        room->plane[i + 1][2] = -normal.z;
-                        room->limit[i + 1] = fldVecDot((sdfVector4_t *)room->plane[i + 1], &edge[j]);
-                    }
-                }
+            i = 3;
+            edge[0].x = triangle[2].x;
+            edge[0].y = triangle[2].y;
+            edge[0].z = 0.0f;
+            edge[1].x = triangle[3].x;
+            edge[1].y = triangle[3].y;
+            edge[1].z = 0.0f;
+            edge[2].x = triangle[3].x;
+            edge[2].y = triangle[3].y;
+            edge[2].z = 10.0f;
+            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+            fldEveHitTable[index].plane[i][0] = nrm[0];
+            fldEveHitTable[index].plane[i][1] = nrm[1];
+            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[2]);
+            if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
+                fldEveHitTable[index].plane[i][0] = -nrm[0];
+                fldEveHitTable[index].plane[i][1] = -nrm[1];
+                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[2]);
+            }
+            i = 4;
+            edge[0].x = triangle[3].x;
+            edge[0].y = triangle[3].y;
+            edge[0].z = 0.0f;
+            edge[1].x = triangle[0].x;
+            edge[1].y = triangle[0].y;
+            edge[1].z = 0.0f;
+            edge[2].x = triangle[0].x;
+            edge[2].y = triangle[0].y;
+            edge[2].z = 10.0f;
+            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+            fldEveHitTable[index].plane[i][0] = nrm[0];
+            fldEveHitTable[index].plane[i][1] = nrm[1];
+            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
+            if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
+                fldEveHitTable[index].plane[i][0] = -nrm[0];
+                fldEveHitTable[index].plane[i][1] = -nrm[1];
+                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
             }
         }
+        break;
+    case 2:
+        transform = resource->transform;
+        width = shape->box.size[0];
+        height = shape->box.size[1];
+        depth = shape->box.size[2];
+        positionX = transform->pos.x;
+        positionY = transform->pos.y;
+        positionZ = transform->pos.z;
+        rotation.x = transform->rot.x;
+        rotation.y = transform->rot.y;
+        rotation.z = transform->rot.z;
+        rotation.w = transform->rot.w;
+        LoadIdentity();
+        SDF_VU0_LOADVECTOR(&rotation);
+        ToMatrix();
+        local.x = -(height * 0.5f);
+        local.y = -(width * 0.5f);
+        local.z = -(depth * 0.5f);
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[0]);
+        local.x = height * 0.5f;
+        local.y = -(width * 0.5f);
+        local.z = -(depth * 0.5f);
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[1]);
+        local.x = -(height * 0.5f);
+        local.y = -(width * 0.5f);
+        local.z = depth * 0.5f;
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[2]);
+        local.x = height * 0.5f;
+        local.y = -(width * 0.5f);
+        local.z = depth * 0.5f;
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[3]);
+        local.x = -(height * 0.5f);
+        local.y = width * 0.5f;
+        local.z = -(depth * 0.5f);
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[4]);
+        local.x = height * 0.5f;
+        local.y = width * 0.5f;
+        local.z = -(depth * 0.5f);
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[5]);
+        local.x = -(height * 0.5f);
+        local.y = width * 0.5f;
+        local.z = depth * 0.5f;
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[6]);
+        local.x = height * 0.5f;
+        local.y = width * 0.5f;
+        local.z = depth * 0.5f;
+        SDF_VU0_LOADVECTOR(&local);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&transformed[7]);
+        for (i = 0; i < 8; i++) {
+            point = &transformed[i];
+            fldEveHitTable[index].corner[i][0] = point->x + positionX;
+            fldEveHitTable[index].corner[i][1] = point->y + positionY;
+            fldEveHitTable[index].corner[i][2] = point->z + positionZ;
+            fldEveHitTable[index].corner[i][3] = 1.0f;
+        }
+        SDF_VU0_LOADVECTOR(&direction);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(fldEveHitTable[index].center);
+        n = 0;
+        triangle[0].x = fldEveHitTable[index].corner[0][0];
+        triangle[0].y = fldEveHitTable[index].corner[0][1];
+        triangle[0].z = fldEveHitTable[index].corner[0][2];
+        triangle[0].w = 1.0f;
+        triangle[1].x = fldEveHitTable[index].corner[1][0];
+        triangle[1].y = fldEveHitTable[index].corner[1][1];
+        triangle[1].z = fldEveHitTable[index].corner[1][2];
+        triangle[1].w = 1.0f;
+        triangle[2].x = fldEveHitTable[index].corner[2][0];
+        triangle[2].y = fldEveHitTable[index].corner[2][1];
+        triangle[2].z = fldEveHitTable[index].corner[2][2];
+        triangle[2].w = 1.0f;
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[index].plane[n][i] = nrm[i];
+        }
+        fldEveHitTable[index].plane[n][3] = 0.0f;
+        fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
+        n = 1;
+        triangle[0].x = fldEveHitTable[index].corner[1][0];
+        triangle[0].y = fldEveHitTable[index].corner[1][1];
+        triangle[0].z = fldEveHitTable[index].corner[1][2];
+        triangle[0].w = 1.0f;
+        triangle[1].x = fldEveHitTable[index].corner[0][0];
+        triangle[1].y = fldEveHitTable[index].corner[0][1];
+        triangle[1].z = fldEveHitTable[index].corner[0][2];
+        triangle[1].w = 1.0f;
+        triangle[2].x = fldEveHitTable[index].corner[5][0];
+        triangle[2].y = fldEveHitTable[index].corner[5][1];
+        triangle[2].z = fldEveHitTable[index].corner[5][2];
+        triangle[2].w = 1.0f;
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[index].plane[n][i] = nrm[i];
+        }
+        fldEveHitTable[index].plane[n][3] = 0.0f;
+        fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
+        n = 2;
+        triangle[0].x = fldEveHitTable[index].corner[0][0];
+        triangle[0].y = fldEveHitTable[index].corner[0][1];
+        triangle[0].z = fldEveHitTable[index].corner[0][2];
+        triangle[0].w = 1.0f;
+        triangle[1].x = fldEveHitTable[index].corner[2][0];
+        triangle[1].y = fldEveHitTable[index].corner[2][1];
+        triangle[1].z = fldEveHitTable[index].corner[2][2];
+        triangle[1].w = 1.0f;
+        triangle[2].x = fldEveHitTable[index].corner[4][0];
+        triangle[2].y = fldEveHitTable[index].corner[4][1];
+        triangle[2].z = fldEveHitTable[index].corner[4][2];
+        triangle[2].w = 1.0f;
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[index].plane[n][i] = nrm[i];
+        }
+        fldEveHitTable[index].plane[n][3] = 0.0f;
+        fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
+        n = 3;
+        triangle[0].x = fldEveHitTable[index].corner[3][0];
+        triangle[0].y = fldEveHitTable[index].corner[3][1];
+        triangle[0].z = fldEveHitTable[index].corner[3][2];
+        triangle[0].w = 1.0f;
+        triangle[1].x = fldEveHitTable[index].corner[1][0];
+        triangle[1].y = fldEveHitTable[index].corner[1][1];
+        triangle[1].z = fldEveHitTable[index].corner[1][2];
+        triangle[1].w = 1.0f;
+        triangle[2].x = fldEveHitTable[index].corner[7][0];
+        triangle[2].y = fldEveHitTable[index].corner[7][1];
+        triangle[2].z = fldEveHitTable[index].corner[7][2];
+        triangle[2].w = 1.0f;
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[index].plane[n][i] = nrm[i];
+        }
+        fldEveHitTable[index].plane[n][3] = 0.0f;
+        fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
+        n = 4;
+        triangle[0].x = fldEveHitTable[index].corner[2][0];
+        triangle[0].y = fldEveHitTable[index].corner[2][1];
+        triangle[0].z = fldEveHitTable[index].corner[2][2];
+        triangle[0].w = 1.0f;
+        triangle[1].x = fldEveHitTable[index].corner[3][0];
+        triangle[1].y = fldEveHitTable[index].corner[3][1];
+        triangle[1].z = fldEveHitTable[index].corner[3][2];
+        triangle[1].w = 1.0f;
+        triangle[2].x = fldEveHitTable[index].corner[6][0];
+        triangle[2].y = fldEveHitTable[index].corner[6][1];
+        triangle[2].z = fldEveHitTable[index].corner[6][2];
+        triangle[2].w = 1.0f;
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[index].plane[n][i] = nrm[i];
+        }
+        fldEveHitTable[index].plane[n][3] = 0.0f;
+        fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
+        n = 5;
+        triangle[0].x = fldEveHitTable[index].corner[6][0];
+        triangle[0].y = fldEveHitTable[index].corner[6][1];
+        triangle[0].z = fldEveHitTable[index].corner[6][2];
+        triangle[0].w = 1.0f;
+        triangle[1].x = fldEveHitTable[index].corner[7][0];
+        triangle[1].y = fldEveHitTable[index].corner[7][1];
+        triangle[1].z = fldEveHitTable[index].corner[7][2];
+        triangle[1].w = 1.0f;
+        triangle[2].x = fldEveHitTable[index].corner[4][0];
+        triangle[2].y = fldEveHitTable[index].corner[4][1];
+        triangle[2].z = fldEveHitTable[index].corner[4][2];
+        triangle[2].w = 1.0f;
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[index].plane[n][i] = nrm[i];
+        }
+        fldEveHitTable[index].plane[n][3] = 0.0f;
+        fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
+        break;
     }
-    room->unk10C = height;
-    room->unk110 = width;
-    room->unk114 = depth;
-    room->worldObjectKey = basic->serialID;
-    room->entryIndex = -1;
-    room->unk11C = (f32)index * D_0054C474;
-    fldEveRngCount++;
-    room->roomId = -1;
-    room->unk124 = -1;
-    room->mode = 0;
-    return index;
+    fldEveHitTable[index].unk10C = height;
+    fldEveHitTable[index].unk110 = width;
+    fldEveHitTable[index].unk114 = depth;
+    fldEveHitTable[index].worldObjectKey = basic->serialID;
+    fldEveHitTable[index].entryIndex = -1;
+    fldEveHitTable[index].unk11C = (f32)index * D_0054C474;
+    count = fldEveRngCount;
+    fldEveRngCount = count + 1;
+    fldEveHitTable[index].roomId = -1;
+    fldEveHitTable[index].unk124 = -1;
+    fldEveHitTable[index].mode = 0;
+    return count;
 }
 #else
 INCLUDE_ASM(const s32, "field/fldEveHit", fldEveHit_AddEveHit);
