@@ -714,6 +714,17 @@ typedef struct {
     "vmadday.xyzw ACC, vf29, vf10y\n\tvmaddaz.xyzw ACC, vf30, vf10z\n\t" \
     "vmaddw.xyzw vf31, vf31, vf10w\n\t.set reorder")
 
+/* Translate with an implicit homogeneous coordinate of one. */
+#define SDF_VU0_TRANSLATE_XYZ1() __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\t" \
+    "vmadday.xyzw ACC, vf29, vf10y\n\tvmaddaz.xyzw ACC, vf30, vf10z\n\t" \
+    "vmaddw.xyzw vf31, vf31, vf0w\n\t.set reorder")
+
+#define SDF_VU0_SCALE_XYZW() __asm__ volatile ( \
+    ".set noreorder\n\tvmulx.xyzw vf28, vf28, vf10x\n\t" \
+    "vmuly.xyzw vf29, vf29, vf10y\n\tvmulz.xyzw vf30, vf30, vf10z\n\t" \
+    "vmulw.xyzw vf31, vf31, vf10w\n\t.set reorder")
+
 /* from basic/dds3PathBasic.c */
 #define SDF_VU0_SCALEVECTOR_V0_BARRIER(value) __asm__ volatile ( \
     ".set noreorder\n\t" \
