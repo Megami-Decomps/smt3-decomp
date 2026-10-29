@@ -303,7 +303,266 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
 
 INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A6E0);
 
+/* Reference implementation; see docs/nonmatching/sdk/libgraph.md. */
+#ifdef NON_MATCHING
+extern const char D_0054A720[];
+extern const char D_0054A758[];
+extern const char D_0054A788[];
+extern const char D_0054A7C8[];
+extern const u128 D_00529F50;
+
+s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
+{
+    s32 width;
+    s32 height;
+    s32 pixelFormat;
+    s32 bytes;
+    s32 qwc;
+    s32 dmaQwc;
+    s32 qwcTail;
+    s32 byteTail;
+    s32 extraQwc;
+    s32 roundedHeight;
+    s32 timeout;
+    s32 i;
+    u32 value;
+    u32 dmaAddress;
+    u128 *destination;
+    u64 csr;
+    u64 restoreImr;
+    u128 fifoWord;
+    u8 *fifoBytes;
+
+    extraQwc = 0;
+    byteTail = 0;
+    dmaQwc = 0;
+    qwcTail = 0;
+    timeout = 0;
+    width = (s32)(pkt->trxreg & 0xFFF);
+    height = (s32)((pkt->trxreg >> 32) & 0xFFF);
+    pixelFormat = (s32)((pkt->bitbltbuf >> 24) & 0x3F);
+    roundedHeight = 0;
+
+    switch (pixelFormat) {
+    case 0:
+    case 48:
+        bytes = width * height * 4;
+        qwc = bytes >> 4;
+        dmaQwc = qwc & ~7;
+        qwcTail = qwc & 7;
+        byteTail = bytes & 0xF;
+        if (byteTail != 0) {
+            roundedHeight = (height + 3) & 0x1FFC;
+            extraQwc = ((width * roundedHeight) >> 2) - dmaQwc - qwcTail - 1;
+        } else {
+            roundedHeight = height;
+        }
+        break;
+    case 1:
+    case 49:
+        bytes = width * height * 3;
+        qwc = bytes >> 4;
+        dmaQwc = qwc & ~7;
+        qwcTail = qwc & 7;
+        byteTail = bytes & 0xF;
+        if (byteTail != 0) {
+            roundedHeight = (height + 15) & 0x1FF0;
+            extraQwc = ((width * roundedHeight * 3) >> 4) - dmaQwc - qwcTail - 1;
+        } else {
+            roundedHeight = height;
+        }
+        break;
+    case 2:
+    case 10:
+    case 50:
+    case 58:
+        bytes = width * height * 2;
+        qwc = bytes >> 4;
+        dmaQwc = qwc & ~7;
+        qwcTail = qwc & 7;
+        byteTail = bytes & 0xF;
+        if (byteTail != 0) {
+            roundedHeight = (height + 7) & ~7;
+            extraQwc = ((width * roundedHeight) >> 3) - dmaQwc - qwcTail - 1;
+        } else {
+            roundedHeight = height;
+        }
+        break;
+    case 19:
+    case 27:
+        bytes = width * height;
+        qwc = bytes >> 4;
+        dmaQwc = qwc & ~7;
+        qwcTail = qwc & 7;
+        byteTail = bytes & 0xF;
+        if (byteTail != 0) {
+            roundedHeight = (height + 7) & ~7;
+            extraQwc = ((width * roundedHeight) >> 4) - dmaQwc - qwcTail - 1;
+        } else {
+            roundedHeight = height;
+        }
+        break;
+    case 20:
+    case 36:
+    case 44:
+        bytes = (width * height) >> 1;
+        qwc = bytes >> 4;
+        dmaQwc = qwc & ~7;
+        qwcTail = qwc & 7;
+        byteTail = bytes & 0xF;
+        if (byteTail != 0) {
+            roundedHeight = (height + 7) & ~7;
+            extraQwc = ((width * roundedHeight) >> 5) - dmaQwc - qwcTail - 1;
+        } else {
+            roundedHeight = height;
+        }
+        break;
+    }
+    if (byteTail != 0) {
+        *(volatile u64 *)(((u32)&pkt->trxreg) | 0x20000000) =
+            (u64)(u32)width | ((u64)(u32)roundedHeight << 32);
+    }
+
+    value = *(volatile u32 *)0x10009000;
+    if ((value & 0x100) != 0) {
+        do {
+            if ((u32)timeout++ > 0x1000000U) {
+                scePrintf(D_0054A720);
+                return -1;
+            }
+            value = *(volatile u32 *)0x10009000;
+        } while ((value & 0x100) != 0);
+    }
+
+    restoreImr = GsPutIMR(GsGetIMR() | 0x200);
+    *(volatile u64 *)0x12001000 = 2;
+    *(volatile u32 *)0x10009020 = 7;
+    dmaAddress = (u32)pkt;
+    if ((dmaAddress & 0x70000000) == 0x70000000) {
+        dmaAddress = (dmaAddress & 0x0FFFFFFF) | 0x80000000;
+    } else {
+        dmaAddress &= 0x0FFFFFFF;
+    }
+    *(volatile u32 *)0x10009010 = dmaAddress;
+    *(volatile u32 *)0x10009000 = 0x101;
+
+    value = *(volatile u32 *)0x10009000;
+    if ((value & 0x100) != 0) {
+        do {
+            if ((u32)timeout++ > 0x1000000U) {
+                scePrintf(D_0054A720);
+                return -1;
+            }
+            value = *(volatile u32 *)0x10009000;
+        } while ((value & 0x100) != 0);
+    }
+
+    csr = *(volatile u64 *)0x12001000;
+    if ((csr & 2) == 0) {
+        do {
+            if ((u32)timeout++ > 0x1000000U) {
+                scePrintf(D_0054A758);
+                *(volatile u128 *)0x10005000 = D_00529F50;
+                return -1;
+            }
+            csr = *(volatile u64 *)0x12001000;
+        } while ((csr & 2) == 0);
+    }
+
+    *(volatile u32 *)0x10003C00 = 0x00800000;
+    *(volatile u64 *)0x12001040 = 1;
+
+    if (dmaQwc != 0) {
+        *(volatile u32 *)0x10009020 = dmaQwc;
+        dmaAddress = (u32)addr;
+        if ((dmaAddress & 0x70000000) == 0x70000000) {
+            dmaAddress = (dmaAddress & 0x0FFFFFFF) | 0x80000000;
+        } else {
+            dmaAddress &= 0x0FFFFFFF;
+        }
+        *(volatile u32 *)0x10009010 = dmaAddress;
+        *(volatile u32 *)0x10009000 = 0x100;
+        value = *(volatile u32 *)0x10009000;
+        if ((value & 0x100) != 0) {
+            do {
+                if ((u32)timeout++ > 0x1000000U) {
+                    scePrintf(D_0054A788);
+                    goto transfer_error;
+                }
+                value = *(volatile u32 *)0x10009000;
+            } while ((value & 0x100) != 0);
+        }
+    }
+
+    destination = (u128 *)((u8 *)addr + (dmaQwc << 4));
+    if (qwcTail != 0) {
+        for (i = 0; i < qwcTail; i++) {
+            value = *(volatile u32 *)0x10003C00;
+            if ((value & 0x1F000000) == 0) {
+                do {
+                    if ((u32)timeout++ > 0x1000000U) {
+                        scePrintf(D_0054A7C8);
+                        goto transfer_error;
+                    }
+                    value = *(volatile u32 *)0x10003C00;
+                } while ((value & 0x1F000000) == 0);
+            }
+            fifoWord = *(volatile u128 *)0x10005000;
+            *destination++ = fifoWord;
+        }
+    }
+
+    if (byteTail != 0) {
+        value = *(volatile u32 *)0x10003C00;
+        if ((value & 0x1F000000) == 0) {
+            do {
+                if ((u32)timeout++ > 0x1000000U) {
+                    scePrintf(D_0054A7C8);
+                    goto transfer_error;
+                }
+                value = *(volatile u32 *)0x10003C00;
+            } while ((value & 0x1F000000) == 0);
+        }
+        fifoWord = *(volatile u128 *)0x10005000;
+        fifoBytes = (u8 *)&fifoWord;
+        for (i = 0; i < byteTail; i++) {
+            ((u8 *)addr)[((dmaQwc + qwcTail) << 4) + i] = fifoBytes[i];
+        }
+
+        if (extraQwc > 0) {
+            for (i = 0; i < extraQwc; i++) {
+                value = *(volatile u32 *)0x10003C00;
+                if ((value & 0x1F000000) == 0) {
+                    do {
+                        if ((u32)timeout++ > 0x1000000U) {
+                            scePrintf(D_0054A7C8);
+                            goto transfer_error;
+                        }
+                        value = *(volatile u32 *)0x10003C00;
+                    } while ((value & 0x1F000000) == 0);
+                }
+                fifoWord = *(volatile u128 *)0x10005000;
+            }
+        }
+    }
+
+    *(volatile u32 *)0x10003C00 = 0;
+    *(volatile u64 *)0x12001040 = 0;
+    GsPutIMR(restoreImr);
+    *(volatile u64 *)0x12001000 = 2;
+    *(volatile u128 *)0x10005000 = D_00529F50;
+    return 0;
+
+transfer_error:
+    *(volatile u64 *)0x12001000 = 0x100;
+    *(volatile u64 *)0x12001040 = 0;
+    *(volatile u32 *)0x10003000 = 1;
+    *(volatile u32 *)0x10003C10 = 1;
+    return -1;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsExecStoreImage);
+#endif
 
 u64 sceGsPutIMR(u64 imr)
 {
