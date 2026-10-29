@@ -3,6 +3,29 @@
 
 #include "common.h"
 
+/* Field collision record shared by the hit and camera code. */
+typedef struct collision_s collision_s;
+struct collision_s {
+    s16 mode2D;
+    s16 numedges;
+    f32 normal[4];
+    f32 num;
+    f32 e_normal[4][4];
+    f32 e_num[4];
+    f32 min[4];
+    f32 max[4][4];
+    f32 point[3];
+    u32 elv;
+    u16 blockID;
+    u16 hitflag;
+    s32 resID;
+    struct dds3Basic_t *matter;
+    struct fldCollisionFace_t *pFace;
+    void *pTome;
+    s32 hojiID;
+    s32 npcID;
+};
+
 /* Counted filename tables use a variable-length trailing array. The native
  * filename entry is 0x0C bytes and the file-resource row is 0x24 bytes. */
 typedef struct fldFileNameEntry_t

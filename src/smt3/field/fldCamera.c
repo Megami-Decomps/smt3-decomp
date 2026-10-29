@@ -160,34 +160,13 @@ extern f32 fldCamDirLock;
 extern s32 fldHitChkMatter;
 extern s32 fldHitChkSlope;
 
-typedef struct {
-    s16 mode2D;
-    s16 numedges;
-    f32 normal[4];
-    f32 num;
-    f32 e_normal[4][4];
-    f32 e_num[4];
-    f32 min[4];
-    f32 max[4][4];
-    f32 point[3];
-    u32 elv;
-    u16 blockID;
-    u16 hitflag;
-    s32 resID;
-    dds3Basic_t *matter;
-    void *face;
-    void *stopData;
-    s32 hojiID;
-    s32 npcID;
-} fldCamCollision_t;
-
-extern fldCamCollision_t *fldMatterTable;
+extern collision_s *fldMatterTable;
 
 #ifdef NON_MATCHING
 void fldCamCalcSaka(void)
 {
     s32 index = fldHitChkSlope;
-    fldCamCollision_t *collision;
+    collision_s *collision;
     sdfVector3_t offset;
     f32 xs[3], ys[3], zs[3];
     f32 x, z;
