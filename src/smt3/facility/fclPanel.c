@@ -72,7 +72,75 @@ void fclDrawPanelType0Grad(fclPanel_t *panel, u32 ot)
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType0Grad);
 #endif
 
+extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
+extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
+                              s32 *colors, s32 ot);
+
+#ifdef NON_MATCHING
+void fclDrawPanelType0(fclPanel_t *panel, s32 ot)
+{
+    s32 colors[4];
+    s32 timer = panel->Timer;
+    s32 height = (u16)panel->H;
+    s32 limit = height * 80 / 100;
+    s32 remaining = limit * (0x100 - timer) / 0x100;
+    f32 root = fsqrtf((f32)remaining);
+    s32 rising = limit - fcvtws(root * root);
+    s32 dark = ((u32)(timer * 102) >> 8) | 0x11171800;
+    s32 top;
+    s32 bottom;
+    u32 color;
+
+    fclDrawPanelSprite2(0x44, ot);
+    cmpDrawBoxF(0, panel->Y + 0x20, panel->Z, 0x200, height - 8, dark, ot);
+    top = panel->Y;
+    colors[0] = 0x020D1200;
+    colors[1] = 0x020D1200;
+    colors[2] = 0x020D1240;
+    colors[3] = 0x020D1240;
+    fclDrawPanelSprite2(0x44, ot);
+    cmpDrawBoxGDefault(0, top - 0xB0, panel->Z, 0x200, 0x16, colors, ot);
+    fclDrawPanelSprite2(0x44, ot);
+    cmpDrawBoxF(0, top, panel->Z, 0x200, 4, 0x80, ot);
+    fclDrawPanelSprite2(0x48, ot);
+    cmpDrawBoxF(0, top + 0x20, panel->Z, 0x200, 4, 0x1F252B80, ot);
+    color = fclBlendColor(0x3C, 0x0602253C, 0x100 - panel->Timer);
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color & 0xFF;
+    colors[3] = color & 0xFF;
+    fclDrawPanelSprite2(0x48, ot);
+    cmpDrawBoxGDefault(0, top + 0x40, panel->Z, 0x200, 0x22, colors, ot);
+    color = fclBlendColor(0x3C, 0x0602253C, panel->Timer);
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color & 0xFF;
+    colors[3] = color & 0xFF;
+    fclDrawPanelSprite2(0x48, ot);
+    cmpDrawBoxGDefault(0, top + 0x40, panel->Z, 0x200, rising + 0x22, colors, ot);
+    bottom = panel->Y + (((u16)panel->H - 8) << 3);
+    colors[0] = 0x3C;
+    colors[1] = 0x3C;
+    colors[2] = 0x0602253C;
+    colors[3] = 0x0602253C;
+    fclDrawPanelSprite2(0x48, ot);
+    cmpDrawBoxGDefault(0, bottom - 0x110, panel->Z, 0x200, 0x22, colors, ot);
+    fclDrawPanelSprite2(0x48, ot);
+    cmpDrawBoxF(0, bottom, panel->Z, 0x200, 4, 0x1F252B80, ot);
+    fclDrawPanelSprite2(0x44, ot);
+    cmpDrawBoxF(0, bottom + 0x20, panel->Z, 0x200, 4, 0x80, ot);
+    colors[0] = 0x020D1240;
+    colors[1] = 0x020D1240;
+    colors[2] = 0x020D1200;
+    colors[3] = 0x020D1200;
+    fclDrawPanelSprite2(0x44, ot);
+    cmpDrawBoxGDefault(0, bottom + 0x40, panel->Z, 0x200, 0x16, colors, ot);
+    fclDrawPanelSprite2(0x44, ot);
+    fclDrawPanelType0Grad(panel, ot);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType0);
+#endif
 
 void fclUpdatePanelType0(fclPanel_t *pPanel)
 {
