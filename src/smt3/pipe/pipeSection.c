@@ -368,7 +368,48 @@ s32 pipeSoundSection(void)
     return ObjectSound();
 }
 
+#ifdef NON_MATCHING
+extern tagPipePartsInfo *getPartsInfo(s16 partsID);
+extern s32 D_00551740;
+
+void pipeOffset(void)
+{
+    tagPipeLinkData *node = linkHeader00.head;
+    tagPipePartsType *part = getPartsInfo(node->partsID)->data;
+    s32 start = 0;
+    s32 position = offsetCount;
+    u16 id = node->id;
+    s8 step;
+    s8 count;
+    u8 countBits;
+    s32 next;
+
+    while ((u32)position >= (u32)(start + part->frame) && position >= start && id != 0xFFFF) {
+        node = node->next;
+        start = (s32)((u32)start + part->frame);
+        part = getPartsInfo(node->partsID)->data;
+        id = node->id;
+        position = offsetCount;
+    }
+    step = *(s8 *)&offsetStep;
+    count = *(s8 *)&offsetStepCount;
+    D_00551740 = id;
+    next = (s32)((u32)position + (u32)(s32)step + 7);
+    countBits = *(volatile u8 *)&offsetStepCount;
+    if (count > 0) {
+        offsetStepCount = countBits - 1;
+        offsetStep = (u8)-3;
+    } else if (count < 0) {
+        offsetStepCount = countBits + 1;
+        offsetStep = 3;
+    } else {
+        offsetStep = 0;
+    }
+    offsetCount = next >= 0 ? next : 10;
+}
+#else
 INCLUDE_ASM(const s32, "pipe/pipeSection", pipeOffset);
+#endif
 
 void pipeStart(void)
 {
