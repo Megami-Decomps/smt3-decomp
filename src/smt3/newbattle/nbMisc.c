@@ -682,10 +682,6 @@ INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawKoukaSprite);
 
 #endif
 
-INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544130);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544140);
-
 #ifdef NON_MATCHING
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
 extern s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid);
@@ -747,6 +743,10 @@ void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
     if (carea != NULL) *carea = area;
 }
 #else
+INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544130);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544140);
+
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetTargetSkill);
 #endif
 
@@ -763,6 +763,8 @@ typedef struct {
 extern nbSkillAttr_t attr[];
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
 extern char D_00544170[];
+
+extern s32 printf(const char *fmt, ...);
 
 void nbSetNormalSkill0(datUnitWork_t *work)
 {

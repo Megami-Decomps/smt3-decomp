@@ -1374,6 +1374,10 @@ void nbAddPanelStockEndPacket(s32 startframe, s32 uniqueid)
     p->type = 57;
 }
 
+#ifdef NON_MATCHING
+extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 col, s32 delay, s32 aframe, s32 colframe);
+#endif
+
 s32 nbMakeSummonPacket(s32 startframe, s32 uniqueid, s32 side, s32 stockno, s32 formindex)
 {
     nbFormation_t *form;
@@ -1383,6 +1387,10 @@ s32 nbMakeSummonPacket(s32 startframe, s32 uniqueid, s32 side, s32 stockno, s32 
     nbMakeUnitFadeInPacket(startframe + 1, uniqueid, form, 0, 15, 15, 20);
     return 1;
 }
+
+#ifdef NON_MATCHING
+extern s32 nbMakeUnitFadeOutPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 col, s32 delay, s32 colframe, s32 aframe);
+#endif
 
 s32 nbMakeReturnPacket(s32 startframe, s32 uniqueid, nbParty_t *party)
 {

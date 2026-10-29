@@ -366,6 +366,10 @@ s32 Flow2_1(nbNegoProcessData_t *n)
     return 0;
 }
 
+#ifdef NON_MATCHING
+extern s32 nbSetNegoNoMotion(nbNegoProcessData_t *n, nbFormation_t *form);
+#endif
+
 s32 Flow2_2(nbNegoProcessData_t *n)
 {
     s32 message;

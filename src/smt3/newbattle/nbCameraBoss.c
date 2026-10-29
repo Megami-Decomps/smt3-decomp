@@ -3483,8 +3483,6 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut2_Init);
 /* NON_MATCHING: 92 of 138 words, 2 short; the 0x11F arm's first `return 1`
  * becomes a local block instead of a delay-slot constant. */
 #ifdef NON_MATCHING
-extern void nbCameraBoss_Ongy_BUNSIN_Run(u8 *pNbCamera);
-
 s32 nbCameraBoss_Cut2_Run(nbCamera_t *pNbCamera)
 {
     nbFormation_t *pForm;
@@ -5038,8 +5036,6 @@ s32 nbCameraHero_Cut2_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraHero_Cut2_Run);
 
-INCLUDE_RODATA(const s32, "newbattle/nbCameraBoss", D_005357E0);
-
 #ifdef NON_MATCHING
 extern void ToMatrix(void);
 extern void effBTLModelLook2(nbFormation_t *pFormation, sdfVector4_t *pTargetPos, f32 angle);
@@ -5114,6 +5110,8 @@ s32 nbCameraDANTE_Init(void)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "newbattle/nbCameraBoss", D_005357E0);
+
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraDANTE_Init);
 #endif
 

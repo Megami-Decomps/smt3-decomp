@@ -2144,6 +2144,11 @@ void fldRunDanteCollision(void)
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteCollision);
 #endif
 
+#ifdef NON_MATCHING
+extern void fldRunDanteGun1(void);
+extern void fldRunDanteGun2(void);
+#endif
+
 INCLUDE_RODATA(const s32, "field/fldTest", D_00531318);
 
 INCLUDE_RODATA(const s32, "field/fldTest", D_00531328);
@@ -2151,11 +2156,6 @@ INCLUDE_RODATA(const s32, "field/fldTest", D_00531328);
 INCLUDE_RODATA(const s32, "field/fldTest", D_00531338);
 
 INCLUDE_RODATA(const s32, "field/fldTest", D_00531350);
-
-#ifdef NON_MATCHING
-extern void fldRunDanteGun1(void);
-extern void fldRunDanteGun2(void);
-#endif
 
 void fldRunDanteAi(void)
 {

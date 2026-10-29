@@ -1069,6 +1069,10 @@ s32 nbCheckSelectMesJoukenAri(s32 index, s32 limit)
     return ret;
 }
 
+#ifdef NON_MATCHING
+extern s32 nbPlayMotionSe(nbFormation_t *form);
+#endif
+
 s32 nbSetNegoNoMotion(nbNegoProcessData_t *n, nbFormation_t *form)
 {
     nbClsNegoMessage(n);

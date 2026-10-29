@@ -1098,14 +1098,6 @@ INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckSenseiNego);
 
 #endif
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543880);
-
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438A0);
-
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438B0);
-
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438C0);
-
 #ifdef NON_MATCHING
 s32 CheckInotiNego(nbActionProcessData_t *a)
 {
@@ -1169,6 +1161,14 @@ s32 CheckInotiNego(nbActionProcessData_t *a)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543880);
+
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438A0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438B0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438C0);
+
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckInotiNego);
 #endif
 

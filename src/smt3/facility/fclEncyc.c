@@ -339,6 +339,10 @@ void fclEncycStartProcess(s32 mode)
     g_pinst = pinst;
 }
 
+#ifdef NON_MATCHING
+extern void ReleaseWork(fclEncyc_instance_tag *pinst);
+#endif
+
 INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D718);
 
 INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D738);
@@ -352,10 +356,6 @@ INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D768);
 INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D778);
 
 INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D798);
-
-#ifdef NON_MATCHING
-extern void ReleaseWork(fclEncyc_instance_tag *pinst);
-#endif
 
 s32 fclEncycKillProcess(void)
 {

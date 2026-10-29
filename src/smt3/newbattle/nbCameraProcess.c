@@ -387,6 +387,11 @@ s32 nbCameraCheckNiidaCamera(void)
     return dds3GetActiveCameraSceneBasic(dds3GetActiveScene()) == pData->niidacamera;
 }
 
+#ifdef NON_MATCHING
+extern s32 nbGetActionSeq(dds3ProcessID_t *id);
+extern void effBTLModelAllShow(void);
+#endif
+
 void nbCameraCheckStateChange(void)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();

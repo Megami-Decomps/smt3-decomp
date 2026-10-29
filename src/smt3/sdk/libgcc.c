@@ -1056,7 +1056,6 @@ u32 *libc_2D29B8(u32 pc)
     return NULL;
 }
 
-
 INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B460);
 
 INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B480);
