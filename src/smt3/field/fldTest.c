@@ -7,6 +7,7 @@
 #include "field.h"
 #include "event.h"
 #include "model.h"
+#include "motion.h"
 
 extern s32 fldDoor_ElvTakasaToFloor(s32 takasa);
 
@@ -2218,7 +2219,141 @@ void fldRunDanteFacePlayer(void)
     fldRun_Dante.turn = 180.0f - angle;
 }
 
+#ifdef NON_MATCHING
+extern void *memset(void *dst, int value, unsigned int size);
+extern void FromRotation(f32 angle);
+extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
+extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
+extern void mdlLoopMotion(mdlObj_t *handle, s32 group, s32 number);
+extern void mdlSmoothLoopMotion(mdlObj_t *handle, s32 group, s32 number, f32 before, f32 after);
+extern void dds3DrawUnitObjectShadow(s32 fade, f32 x, f32 y, f32 z, f32 radius);
+extern void fldRunDanteDrawShadow(s32 alpha, f32 x, f32 y, f32 z, f32 radius);
+extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b, u32 a);
+
+void fldRunDanteSetModel(void)
+{
+    mdlObj_t *model = dds3ObjectBaseGetModelHandle(D_0054EAF0);
+    sdfVector4_t pos __attribute__((aligned(16)));
+    sdfVector4_t previous __attribute__((aligned(16)));
+    sdfVector4_t rotation __attribute__((aligned(16)));
+    f32 distance;
+    f32 angle;
+
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+    memset(&previous, 0, sizeof(previous));
+    previous.w = 1.0f;
+    {
+        sdfVector4_t axis __attribute__((aligned(16))) = { 0.0f, 1.0f, 0.0f, 1.0f };
+
+        memset(&rotation, 0, sizeof(rotation));
+        rotation.w = 1.0f;
+        pos.x = fldRun_Dante.x;
+        pos.y = 0.0f;
+        pos.z = fldRun_Dante.z;
+        dds3SetPosPoseSet(D_0054EAF0, &pos);
+        SDF_VU0_LOADVECTOR(&axis);
+        FromRotation(fldRun_Dante.turn * 3.1399999f / 180.0f);
+        SDF_VU0_STOREVECTOR(&rotation);
+    }
+    dds3SetRotPoseSet(D_0054EAF0, &rotation);
+    if (fldRun_Dante.flag & 0x40) {
+        dds3PoseSet_t *pose;
+
+        dds3OnPoseSetFlag(D_0054EAF0->poseset, 8);
+        pose = D_0054EAF0->poseset;
+        SDF_VU0_COPYVECTOR(&previous, &pose->pos2);
+        if (sdfFabs(previous.x - pos.x) < 1.0f) {
+            pose->pos2.x = pos.x;
+        } else {
+            pose->pos2.x = previous.x + (pos.x - previous.x) / 3.0f;
+        }
+        if (sdfFabs(previous.y - pos.y) < 1.0f) {
+            D_0054EAF0->poseset->pos2.y = pos.y;
+        } else {
+            D_0054EAF0->poseset->pos2.y = previous.y + (pos.y - previous.y) / 3.0f;
+        }
+        if (sdfFabs(previous.z - pos.z) < 1.0f) {
+            D_0054EAF0->poseset->pos2.z = pos.z;
+        } else {
+            D_0054EAF0->poseset->pos2.z = previous.z + (pos.z - previous.z) / 3.0f;
+        }
+        D_0054EAF0->poseset->pos2.w = 1.0f;
+    } else {
+        dds3OffPoseSetFlag(D_0054EAF0->poseset, 8);
+    }
+    if (fldRun_Dante.flag & 0x20) {
+        mdlLoopMotion(model, 0, fldRun_Dante.update_flag);
+    } else if (fldRun_Dante.flag & 2) {
+        s32 motion = fldRun_Dante.update_flag;
+        s32 change = 1;
+
+        if (motion == 0 || (motion >= 2 && motion < 4)) {
+            change = motion != model->current.h.motionIndex;
+        }
+        if (change) {
+            model->first->speed = 1.0f;
+            if (motion == 1) {
+                mdlSmoothLoopMotion(model, 0, 1, 1.0f, 4.0f);
+            } else if (motion == 4) {
+                mdlSmoothLoopMotion(model, 0, 4, 3.0f, 4.0f);
+            } else if (motion == 3) {
+                mdlSmoothLoopMotion(model, 0, 3, 8.0f, 8.0f);
+            } else {
+                mdlSmoothLoopMotion(model, 0, motion, 6.0f, 6.0f);
+            }
+        }
+    }
+    {
+        u32 flag = fldRun_Dante.flag;
+        f32 frame = model->first->frame;
+        f32 oldframe = fldRun_Dante.nowframe;
+
+        fldRun_Dante.nowframe = frame;
+        fldRun_Dante.oldframe = oldframe;
+        if (flag & 2) {
+            fldRun_Dante.oldframe = frame;
+        }
+    }
+    if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(D_0054EAF0)->owner->inner, 0) != 0) {
+        SDF_VU0_STOREVECTOR(&pos);
+        dds3DrawUnitObjectShadow(0x80, pos.x, fldRun_Dante.y, pos.z, 70.0f);
+    }
+    if (fldRun_Dante.gunlight_anime > 0) {
+        s32 count = fldRun_Dante.gunlight_anime;
+        s32 alpha = (s32)((u32)count * 14U);
+        s32 intensity = 16;
+
+        if (count < 4) {
+            alpha >>= 1;
+        }
+        fldRunDanteDrawShadow(alpha, fldRun_Dante.x, fldRun_Dante.y, fldRun_Dante.z, 700.0f);
+        fldRun_Dante.gunlight_anime--;
+        fldRunDanteGetDistAngle(&distance, &angle);
+        if (distance < 1800.0f) {
+            intensity = (s32)((1800.0f - distance) * 0.017777777f) + 16;
+        }
+        alpha = (s32)((u32)intensity * (u32)fldRun_Dante.gunlight_anime) / 8;
+        rsetOtOfs(0x47);
+        rsetAlpha(1);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        aDrawBoxF(0, 0, 0x200, 0xF4, 0x30, 0x30, 0x30, alpha);
+        rsetAlpha(0);
+    }
+    if (fldRun_Dante.flag & 0x10) {
+        f32 pi = 3.1399999f;
+
+        pos.x = fldRun_Dante.x;
+        pos.y = -10.0f;
+        pos.z = fldRun_Dante.z;
+        pos.x += sdfSin(fldRun_Dante.angleToPlayer * pi / 180.0f) * 100.0f;
+        pos.z += sdfCos(fldRun_Dante.angleToPlayer * pi / 180.0f) * 100.0f;
+        fldRunTamaSet(pos.x, pos.y, pos.z, fldRun_Dante.turn);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteSetModel);
+#endif
 
 s32 fldRunDanteDistToTarget(f32 x, f32 y, f32 z)
 {
