@@ -1278,13 +1278,21 @@ effPCPBossBUNSIN_t *effPCPBossBUNSINCreate(effPCPBossBUNSINParam_t *pParam)
 
     work->param = *pParam;
     work->unk2C = 0;
+#ifdef NON_MATCHING
+    node = work->param.pStartForm;
+#else
     node = (nbFormation_t *)work->param.pStartBits;
+#endif
     work->frame = 0;
     work->pos_s[0] = node->pos.x;
     work->pos_s[1] = node->pos.y;
     work->pos_s[2] = node->pos.z;
     work->pos_s[3] = 0.0f;
+#ifdef NON_MATCHING
+    node = work->param.pEndForm;
+#else
     node = (nbFormation_t *)work->param.pEndBits;
+#endif
     work->pos_e[0] = node->pos.x;
     work->pos_e[1] = node->pos.y;
     work->pos_e[2] = node->pos.z;
@@ -1469,7 +1477,122 @@ void effPCPBossBUNSINDrawPoly2(void *tag, void *asset, const u128 *center, u32 c
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDrawPoly2);
 #endif
 
+#ifdef NON_MATCHING
+extern effPCPBossVector_t D_00533DC0;
+extern void nbFormDispOff2(nbFormation_t *form);
+
+void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
+{
+    effPCPBossVector_t position, target, scale, direction, start, segment;
+    volatile u32 colorScratch, convertedColor;
+    nbFormation_t *form;
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    u32 bits, i, color;
+    s32 frame;
+    f32 rate, startRate, width, t, scaleValue, y;
+
+    if (!dds3CheckRenderTexture()) {
+        return;
+    }
+    if (!dds3GetRenderTexture()) {
+        return;
+    }
+    if (!effPCPBossTexHandle) {
+        return;
+    }
+    form = work->param.pStartForm;
+    if (work->frame > 0) {
+        nbFormDispOff2(form);
+    }
+    if (effPCPBossONGYModelTexRenderCheck()) {
+        SDF_VU0_LOADVECTOR(work->pos_s);
+        SDF_VU0_STOREVECTOR(&target);
+        mdlSetPosition(effPCPBossTexHandle);
+        SDF_VU0_LOADVECTOR(&form->rot);
+        SDF_VU0_LOADVECTOR_B(&D_00533DC0);
+        Mult();
+        mdlSetRotate(effPCPBossTexHandle);
+        scaleValue = form->scl;
+        scale.f[3] = scaleValue;
+        scale.f[0] = scaleValue;
+        scale.f[1] = scaleValue;
+        scale.f[2] = scaleValue;
+        SDF_VU0_LOADVECTOR(&scale);
+        mdlSetScale(effPCPBossTexHandle);
+        mdlSmoothLoopMotion(effPCPBossTexHandle, 0,
+                            mdlGetMotionNum(form->hunit->owner, 0), 0.0f, 4.0f);
+        sdfMotionSeek(((mdlObj_t *)effPCPBossTexHandle)->first, form->hunit->owner->first->frame);
+        target.f[1] -= 340.0f;
+        effPCPBossONGYModelTexRender(&target, form, 340.0f);
+    }
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdfMatSetTex(work->matrix, dds3GetRenderTexture());
+    sdf3DPrimLinkMat(tag, work->matrix, 0);
+    frame = work->frame;
+    SDF_VU0_COPYVECTOR(&position, work->pos_s);
+    position.f[1] -= 340.0f;
+    effPCPBossBUNSINDrawPoly2(tag, work, &position.q, 0x80808080, 543.99993896484375f, 680.0f);
+    rate = frame < 10 ? (f32)frame / 10.0f : 1.0f;
+    SDF_VU0_LOADVECTOR(work->pos_s);
+    SDF_VU0_LOADVECTOR_B(work->pos_e);
+    PS2_FLOAT_BITS(bits, rate);
+    SDF_VU0_INTERPOLATE(bits);
+    SDF_VU0_STOREVECTOR(&position);
+    position.f[1] -= 340.0f;
+    if (frame >= 24) {
+        effPCPBossBUNSINDrawPoly2(tag, work, &position.q, 0x80808080, 543.99993896484375f, 680.0f);
+    } else {
+        startRate = 0.0f;
+        if (frame >= 11) {
+            if (frame < 20) {
+                startRate = (f32)(frame - 10) / 10.0f;
+            } else {
+                startRate = 1.0f;
+            }
+        }
+        SDF_VU0_LOADVECTOR(D_002F5C30);
+        SDF_VU0_SETVECTOR_Y(0.0f);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(D_002F5C20);
+        SDF_VU0_SETVECTOR_Y(0.0f);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(&direction);
+        width = (frame < 10 ? 1.0f : 1.0f - (f32)(frame - 10) / 14.0f) * 33.999996185302734f;
+        SDF_VU0_LOADVECTOR(work->pos_s);
+        y = work->pos_s[1] - 340.0f;
+        SDF_VU0_SETVECTOR_Y(y);
+        SDF_VU0_LOADVECTOR_B(&position);
+        PS2_FLOAT_BITS(bits, startRate);
+        SDF_VU0_INTERPOLATE(bits);
+        SDF_VU0_STOREVECTOR(&start);
+        t = 0.0f;
+        for (i = 0; i < 15; i++) {
+            SDF_VU0_LOADVECTOR(&start);
+            SDF_VU0_LOADVECTOR_B(&position);
+            PS2_FLOAT_BITS(bits, t);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_LOADVECTOR_B(&direction);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(&segment);
+            colorScratch = 0x80808080;
+            MMI_RGBA_UNPACK(&colorScratch, 0x3C000000);
+            SDF_VU0_SCALEVECTOR(t);
+            MMI_RGBA_PACK_128(convertedColor);
+            color = effColorBlend(0x303030, 0x40808080, t);
+            effPCPBossBUNSINDrawPoly(tag, work, &segment, color, width, 20.0f, 543.99993896484375f, 680.0f);
+            t += 0.06666666269302368f;
+        }
+    }
+    ot = &sdfGrOtTable[43];
+    ot->regFunc(ot, tag);
+    work->frame++;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDraw);
+#endif
 
 s32 effPCPBossBUNSINGetLength(void)
 {
