@@ -134,7 +134,7 @@ typedef struct
     s32 word08;
     s16 half0C;
     s16 transition; /* 0xE: fldMainLoadStart */
-    u8 unk10[0x24];
+    union { u8 unk10[0x24]; struct { u8 reserved10[0x20]; u32 headerWord30; }; };
     sdfMemHandle_t *memHandle;
     s32 unk38;
     s32 playtime;
@@ -196,9 +196,15 @@ typedef struct
     u8 reserved11AA0[0x20];
     union { u16 heartsSkills[32][12]; u16 hearts_sk[32][12]; }; /* 0x11AC0 */
     u8 hearts_up_param[32][6];   /* 0x11DC0 */
-    s32 encycNum;                /* 0x11E80 */
-    u8 reserved11E84[0xC];
-    fclencyceelem_t encycRecords[168]; /* 0x11E90 */
+    union {
+        mselSaveData_t encyclopedia; /* 0x11E80 */
+        struct {
+            s32 encycNum;
+            u8 reserved11E84[0xC];
+            fclencyceelem_t encycRecords[168];
+        };
+    };
+    u8 reserved19D10[0x800];
 } dds3GlobalWork_t;
 
 extern dds3GlobalWork_t *DDS3_GBWK;
