@@ -17,6 +17,7 @@
 0x002197B0	ApplyChangeListIndex	inferred	Reconstructed fclEncyc name; native extent ends at the independent ApplyEdgeListCursor entry after the restored-frame tail call.
 0x002198D8	ApplyEdgeListCursor	inferred	Independent frameless edge-correction entry reached after ApplyChangeListIndex restores its frame; name agrees with the reconstructed fclEncyc source.
 0x002D1B38	dpcmp	inferred	Native double-comparison wrapper: unpacks both arguments and calls __fpcmp_parts_df (0x002D3638); matching compiler uses dpcmp. Curated correction; IDB update pending.
+0x002E6C48	dpdiv	inferred	compiler binary64 division libcall; native provider unpacks both operands, divides mantissas and repacks; _ratio calls this address
 0x0052BAA0	ipuDefaultQuantizerMatrices	inferred	libipu: sceIpuInit 0x002CDA58 pairs with DDS1 0x002F5618; loads five 16-byte quantizer chunks. All 0x50 initial bytes agree.
 0x0052BAF0	ipuDefaultVqClut	inferred	libipu: sceIpuInit loads two 16-byte VQ CLUT chunks after the quantizer matrices. All 0x20 initial bytes agree with DDS1.
 0x0052BE28	_impure_ptr	inferred	newlib: active reentrancy pointer passed by malloc/free and stdio wrappers; initialized to 0x0052BB38. DDS1 names the same four-byte pointer at 0x0039BFD0.

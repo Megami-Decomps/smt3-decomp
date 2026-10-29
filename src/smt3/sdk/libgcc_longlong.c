@@ -12,7 +12,7 @@ INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __umoddi3);
 
 INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __fixunsdfdi);
 
-INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E6C48);
+INCLUDE_ASM(const s32, "sdk/libgcc_longlong", dpdiv);
 
 INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __floatdidf);
 
