@@ -384,7 +384,7 @@ typedef struct nbNegoSkillCondition_t {
 
 typedef struct nbNegoSkillEntry_t {
     s32 requestmode;
-    s32 unknown;
+    u8 rate[4];
     nbNegoSkillCondition_t condition[8];
 } nbNegoSkillEntry_t;
 
@@ -1013,7 +1013,122 @@ s32 Flow6_23(nbNegoProcessData_t *n)
     return 0;
 }
 
+#ifdef NON_MATCHING
+s32 Flow6_24(nbNegoProcessData_t *n)
+{
+    s32 rate[4];
+    s32 race, aisyo, playerParam, enemyParam;
+    s32 playerLevel, enemyLevel;
+    s32 choice, sum, roll, i, count;
+    u16 enemyId;
+
+    nbAddNegoIdKouho(n, 0x90001);
+    nbAddNegoIdKouho(n, 0x60019);
+    nbAddNegoIdKouho(n, 0x60025);
+    nbAddNegoIdKouho(n, 0x6002B);
+    nbAddNegoIdKouho(n, 0xA000D);
+    nbAddNegoIdKouho(n, 0x6004A);
+    n->cnt6_36 = (u32)n->cnt6_36 + 1;
+    for (i = 0; i < 4; i++) {
+        rate[i] = D_003E1338[n->negoskillid - 0x180].rate[i];
+    }
+    race = datGetRace(n->ework);
+    aisyo = n->aisyo;
+    if (aisyo == 1) {
+        if (race == 0x13) {
+            rate[2] -= 5;
+            rate[3] -= 5;
+            rate[0] += 10;
+        } else {
+            rate[2] -= 10;
+            rate[3] -= 10;
+            rate[0] += 20;
+        }
+    } else if (aisyo == 2) {
+        rate[2] += 10;
+        rate[3] += 10;
+        rate[0] -= 20;
+    }
+    if (datGetRace(n->ework) != 0x13) {
+        playerParam = datGetParam(n->pwork, 1);
+        enemyParam = datGetParam(n->ework, 1);
+        if (enemyParam + 5 < playerParam) {
+            rate[2] -= 5;
+            rate[3] -= 5;
+            rate[0] += 10;
+        } else if (playerParam < enemyParam - 5) {
+            rate[2] += 5;
+            rate[3] += 5;
+            rate[0] -= 10;
+        }
+    }
+    if (n->negotype == 3) {
+        rate[0] = 70;
+        rate[1] = 20;
+        rate[2] = 5;
+        rate[3] = 5;
+    }
+    if (n->cnt6_37 == 1) {
+        n->nextnegoid = n->nextkouho[0];
+        return 0;
+    }
+    if (n->requesttype == 2) {
+        rate[2] += rate[3];
+        rate[3] = 0;
+    }
+    if (n->cnt6_36 < 2) {
+        if (evtBitCheck(8) != 0 || (n->cnt6_36 < 2 && n->negoreqtype == 0)) {
+            n->nextnegoid = n->nextkouho[2];
+            return 0;
+        }
+    }
+    count = n->cnt6_36;
+    playerLevel = n->pwork->level;
+    enemyLevel = n->ework->level;
+    if (count < 3) {
+        if (evtBitCheck(8) != 0 && enemyLevel >= playerLevel - 10) {
+            rate[2] += rate[0];
+            rate[0] = 0;
+        }
+        count = n->cnt6_36;
+    }
+    if (count >= 4 || (n->negoreqtype != 0 && count >= 2)) {
+        n->nextnegoid = n->nextkouho[0];
+        return 0;
+    }
+    enemyId = n->ework->id;
+    if ((enemyId == 0x5C || enemyId == 0x3D || enemyId == 0x61 || enemyId == 0x5B) &&
+        evtBitCheck(8) == 0 && n->negoreqtype == 0 && n->cnt6_36 >= 2) {
+        rate[0] += rate[3] + rate[2];
+        rate[3] = 0;
+        rate[2] = 0;
+    }
+    enemyLevel = ((volatile datUnitWork_t *)n->ework)->level;
+    playerLevel = ((volatile datUnitWork_t *)n->pwork)->level;
+    if (playerLevel - 17 >= enemyLevel && dds3GetRandIntA(0, 100) < 4) {
+        rate[2] += rate[3];
+        rate[3] = 0;
+    }
+    roll = dds3GetRandIntA(0, 100);
+    choice = 0;
+    sum = 0;
+    while (choice < 4 && sum + rate[choice] < roll) {
+        sum += rate[choice];
+        choice++;
+    }
+    if (choice == 4) {
+        choice = 2;
+    }
+    n->nextnegoid = n->nextkouho[choice];
+    if (choice == 3 && n->cnt6_36 >= 2 && n->negoreqtype == 0 && dds3GetRandIntA(0, 10) < 6) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x63, 0);
+        n->nextnegoid = n->nextkouho[4];
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_24);
+#endif
 
 s32 Flow6_25(nbNegoProcessData_t *n)
 {
