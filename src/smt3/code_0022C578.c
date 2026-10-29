@@ -2298,16 +2298,18 @@ s32 cmpCalcSequence(void)
     return 0;
 }
 
-void nmeMakeGradColors(s32 *color0, s32 *color1, s32 red, s32 green, s32 blue)
+/* The gradient fan passes three fixed-point X and Y coordinates here.
+ * Each vertex receives a separate distortion scale; X uses twice the Y scale. */
+void nmeMakeGradColors(s32 *xs, s32 *ys, s32 delta0, s32 delta1, s32 delta2)
 {
     s32 scale[2][3] = {
-        { (s32)((f32)red * 2.0f), (s32)((f32)green * 2.0f), (s32)((f32)blue * 2.0f) },
-        { (s32)(f32)red, (s32)(f32)green, (s32)(f32)blue }
+        { (s32)((f32)delta0 * 2.0f), (s32)((f32)delta1 * 2.0f), (s32)((f32)delta2 * 2.0f) },
+        { (s32)(f32)delta0, (s32)(f32)delta1, (s32)(f32)delta2 }
     };
     s32 i;
     for (i = 0; i < 3; i++) {
-        color0[i] += color0[i] * scale[0][i] / 0xA00;
-        color1[i] += color1[i] * scale[1][i] / 0xA00;
+        xs[i] += xs[i] * scale[0][i] / 0xA00;
+        ys[i] += ys[i] * scale[1][i] / 0xA00;
     }
 }
 
