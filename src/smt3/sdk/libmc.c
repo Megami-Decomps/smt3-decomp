@@ -69,8 +69,8 @@ extern const char D_0054AEE8[];
 extern void sceSifWriteBackDCache(void *addr, s32 size);
 extern void FlushCache(s32 mode);
 extern void mceIntrReadFixAlign(void);
-extern void mceGetInfoApdx(void);
-extern void mceStorePwd(void);
+extern void mceGetInfoApdx(void *reply);
+extern void mceStorePwd(char *dest);
 
 INCLUDE_ASM(const s32, "sdk/libmc", sceMcInit);
 
@@ -343,7 +343,20 @@ s32 sceMcSync(s32 a, s32 *b, s32 *c)
 INCLUDE_ASM(const s32, "sdk/libmc", sceMcSync);
 #endif
 
-INCLUDE_ASM(const s32, "sdk/libmc", mceGetInfoApdx);
+void mceGetInfoApdx(void *response)
+{
+    s32 *reply = (s32 *)((u32)response | 0x20000000);
+
+    if (D_00599768) {
+        *(s32 *)D_00599768 = reply[0];
+    }
+    if (D_0059976C) {
+        *(s32 *)D_0059976C = reply[1];
+    }
+    if (D_00599770) {
+        *(s32 *)D_00599770 = reply[0x90 / sizeof(s32)];
+    }
+}
 
 s32 sceMcGetInfo(s32 a, s32 b, s32 *c, s32 *d, s32 *e)
 {
@@ -431,7 +444,25 @@ s32 sceMcGetDir(s32 a, s32 b, char *c, s32 d, s32 e, void *f)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "sdk/libmc", mceStorePwd);
+extern u32 strlen(const char *str);
+extern void *memcpy(void *dest, const void *src, u32 size);
+
+void mceStorePwd(char *dest)
+{
+    if (dest != NULL) {
+        const char *source = (const char *)((u32)D_00599D00 | 0x20000000);
+        u32 count;
+
+        /* Native evaluates the length again on the short-string path. */
+        if (strlen(source) < 0x400) {
+            count = strlen(source);
+        } else {
+            count = 0x3FF;
+        }
+        memcpy(dest, (const char *)((u32)D_00599D00 | 0x20000000), count);
+        dest[count] = 0;
+    }
+}
 
 s32 sceMcChdir(s32 a, s32 b, char *c, char *d)
 {
