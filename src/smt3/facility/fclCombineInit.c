@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "basic.h"
 #include "motion.h"
 #include "fpu.h"
@@ -149,17 +150,7 @@ typedef struct
     /* 0x20 */ s32 num;
 } fclRibbon_t;
 
-typedef struct
-{
-    u8 animState;
-    u8 reserved01[3];
-    s32 target;
-    u8 reserved08[12];
-    s32 phase;
-    s32 phaseStep;
-    s32 value;
-    void (*calcSizes)();
-} fclPanelAnim_t;
+
 
 typedef struct
 {

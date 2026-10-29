@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -7,17 +8,7 @@
 
 extern void sdfMemFreeDirect(void *aHandle);
 
-typedef struct
-{
-    /* 0x00 */ u8 animState;
-    /* 0x01 */ u8 unk_01[3];
-    /* 0x04 */ s32 target;
-    /* 0x08 */ u8 unk_08[0xC];
-    /* 0x14 */ s32 phase;
-    /* 0x18 */ s32 phaseStep;
-    /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ void (*calcSizes)();
-} fclPanelAnim_t;
+
 
 typedef struct
 {
@@ -461,53 +452,53 @@ void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, v
 s32 fclRunPanelAnim(void *work)
 {
     fclPanelAnim_t *anim = work;
-    u8 state = anim->animState;
+    u8 state = anim->state.animState;
 
     switch (state) {
     case 0:
         break;
     case 1:
-        anim->phase += anim->phaseStep;
-        if (anim->phase > 0x200) {
-            anim->phase = 0x200;
+        anim->state.phase += anim->state.phaseStep;
+        if (anim->state.phase > 0x200) {
+            anim->state.phase = 0x200;
         }
         break;
     case 2:
-        anim->phase -= anim->phaseStep;
-        if (anim->phase < 0) {
-            anim->phase = 0;
+        anim->state.phase -= anim->state.phaseStep;
+        if (anim->state.phase < 0) {
+            anim->state.phase = 0;
         }
         break;
     default:
         break;
     }
     anim->calcSizes(anim);
-    return anim->phase;
+    return anim->state.phase;
 }
 
 void fclSetPanelAnimState(fclPanelAnim_t *anim, u8 state)
 {
-    anim->animState = state;
+    anim->state.animState = state;
 }
 
 s32 fclGetPanelAnimTarget(fclPanelAnim_t *anim)
 {
-    return anim->target;
+    return anim->state.target;
 }
 
 s32 fclGetPanelAnimPhase(fclPanelAnim_t *anim)
 {
-    return anim->phase;
+    return anim->state.phase;
 }
 
 void func_00215188(fclPanelAnim_t *anim, s32 value)
 {
-    anim->unk_1C = value;
+    anim->state.value = value;
 }
 
 s32 fcl_215190(fclPanelAnim_t *anim)
 {
-    return anim->unk_1C;
+    return anim->state.value;
 }
 
 typedef struct

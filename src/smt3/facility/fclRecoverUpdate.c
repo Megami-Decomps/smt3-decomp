@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -10,17 +11,7 @@ extern s32 fclSetWorkValue(s8 index, s32 value);
 
 s32 fclGetFlag(s8 index);
 
-typedef struct
-{
-    u8 animState;
-    u8 unk_01[3];
-    s32 target;
-    u8 unk_08[0xC];
-    s32 phase;
-    s32 phaseStep;
-    s32 unk_1C;
-    void (*calcSizes)();
-} fclPanelAnim_t;
+
 
 extern void fclSetPanelAnimState(fclPanelAnim_t *anim, u8 state);
 extern s32 fclRunPanelAnim(fclPanelAnim_t *anim);

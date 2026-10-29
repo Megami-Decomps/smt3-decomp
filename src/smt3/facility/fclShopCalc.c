@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -13,16 +14,7 @@ extern s32 shopDrawPanelMode0(s8 mode);
 
 extern s32 shopUpdateItemList(s32 mode);
 
-typedef struct
-{
-    /* 0x00 */ u8 animState;
-    /* 0x01 */ u8 unk_01[3];
-    /* 0x04 */ s32 unk_04;
-    /* 0x08 */ u8 unk_08[0xC];
-    /* 0x14 */ s32 unk_14;
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s32 unk_1C;
-} fclPanelAnim_t;
+
 
 typedef struct fclPanel
 {

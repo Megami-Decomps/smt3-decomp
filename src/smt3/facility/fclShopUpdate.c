@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -24,16 +25,7 @@ typedef struct
     /* 0x20 */ s32 num;
 } fclRibbon_t;
 
-typedef struct
-{
-    /* 0x00 */ u8 animState;
-    /* 0x01 */ u8 unk_01[3];
-    /* 0x04 */ s32 unk_04;
-    /* 0x08 */ u8 unk_08[0xC];
-    /* 0x14 */ s32 unk_14;
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s32 unk_1C;
-} fclPanelAnim_t;
+
 
 typedef struct
 {
@@ -182,7 +174,7 @@ typedef struct
     /* 0x2390 */ dds3ProcessID_t *scriptArg;
     /* 0x2394 */ s32 texHandle[2];
     /* 0x239C */ u8 unk_239C[0x80];
-    /* 0x241C */ fclPanelAnim_t anim;
+    /* 0x241C */ fclPanelAnimState_t anim;
 } shpUpdateWork_t;
 
 extern shpUpdateWork_t *shopUpdateWork;
