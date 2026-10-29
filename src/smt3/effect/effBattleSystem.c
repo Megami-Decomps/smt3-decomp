@@ -346,7 +346,7 @@ s32 effBTLSkillGetID(void);
 /* Effect handle of the Hansya family, two parts behind its own work area. */
 typedef struct
 {
-    u8 reserve00[0xE0];
+    sdf3DLightParallelPacket_t lightPacket;
     nbFormation_t *pFormation;
     u32 frame;
     effPartHandle_t *hPart;

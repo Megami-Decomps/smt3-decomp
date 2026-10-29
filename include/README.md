@@ -897,6 +897,14 @@ merely to reproduce those instructions.
 | `sdfCorePacket_t` | 24 | `sdfCoreDrawScanOneSkinNodes` reads the bone count at +0x18 |
 | `corePktCb_t` | **unproven** | offsets only; see below |
 
+The reflection work `effBattleSystem_effBTLSystem_Hansya_tag` embeds this
+224-byte light packet at offset zero. Its constructor allocates 240 bytes,
+with the formation pointer, frame and two part handles at `0xE0`, `0xE4`,
+`0xE8` and `0xEC`. The assembly-backed draw path passes the prefix to
+`sdf3DMakeLightParallelPacket`, then installs its address in the first part
+model's `inner->light` before `mdlLink`. The SDK packet type therefore
+covers the complete prefix without changing the matched constructor layout.
+
 `sdf3DScreenParam_t` is confirmed field by field by `sdf3DMakeScreenParam`
 alone. It reads `flags` +0 (testing bit 1 for the half-height Y scale and bit 2
 for deriving `projDist` from `fovy`), `aspect` +4, `projDist` +8, `fovy` +0xC,

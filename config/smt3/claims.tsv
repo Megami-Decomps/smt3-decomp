@@ -654,3 +654,4 @@ src/smt3/pb/pbModel.c	KiB	done	2026-10-28	1 fn / 284 B	map block draw guard, thr
 src/smt3/code_0022C578.c	KiB	done	2026-10-28	1 fn / 308 B	segmented gauge drawing with cumulative thresholds and callback-sensitive panel reloads; owner 367 match, 0 differ
 src/smt3/newbattle/nbActionProcess.c	KiB	done	2026-10-28	1 fn / 528 B	bad-status action dispatch with native recovery, curse and packet-completion paths; owner 78 match, 0 differ
 src/smt3/newbattle/nbCalc.c	KiB	done	2026-10-28	1 fn / 632 B	battle escape eligibility, rate calculation and native random/moon outcomes; owner 55 match, 0 differ
+src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	0 matches / reflection packet recovery	SDK parallel-light packet embedded at work offset zero, native 240-byte allocation and model-light consumer; owner 290 match, 0 differ
