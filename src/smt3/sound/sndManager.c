@@ -139,7 +139,120 @@ void dds3TitleUpdateCursor(void)
 
 INCLUDE_ASM(const s32, "sound/sndManager", dds3TitleDrawMenu);
 
+#ifdef NON_MATCHING
+extern void rsetAlpha(s32 mode);
+extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                        s32 color, sdfTexHandle_t *texture);
+extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0,
+                      u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2,
+                      u32 r3, u32 g3, u32 b3, u32 a3);
+
+void dds3TitleDrawFade(void)
+{
+    dds3TitleWork_t *work;
+    s32 count;
+    s32 age;
+    s32 progress;
+    s32 alpha;
+    s32 remainder;
+    u32 color;
+
+    rsetAlpha(1);
+    work = titleWork;
+    count = work->unk_30;
+    work->unk_30 = (s32)((u32)count + 1);
+    if ((s32)((u32)count + 1) >= 0x3C) {
+        progress = count - 0x3B;
+        if (progress >= 0x11) {
+            progress = 0x10;
+        }
+        aDrawBoxG(-0x12C, 0x15, 0x32C, 0xCA,
+                  0x23, 0x25, 0x56, 0,
+                  0x23, 0x25, 0x56, 0,
+                  0x23, 0x25, 0x56, progress * 3,
+                  0x23, 0x25, 0x56, 0);
+    }
+
+    rsetAlpha(0);
+    count = titleWork->unk_30;
+    if (count >= 0x32) {
+        age = count - 0x32;
+        if (age > 0x96) {
+            age = 0x96;
+        }
+        alpha = (age * 0x80) / 0x96;
+        color = ((u32)alpha << 24) | 0x00808080;
+        DrwSprite2D(0xA7, 0x186, 0xB2, 0x18, 2, 0x7C, 0xB2, 0x18,
+                    color, titleWork->texHandle[2]);
+    }
+
+    DrwSprite2D(0x1A, 0x1A4, 0x1C7, 0x14, 0, 0x96, 0x1C7, 0x14,
+                0x80808080, titleWork->texHandle[2]);
+    rsetAlpha(1);
+    count = titleWork->unk_30;
+    if (count >= 0x32) {
+        age = count - 0x32;
+        if (age < 0x78) {
+            if (age < 0x3F) {
+                alpha = (age * 0x80) / 0x3F;
+            } else {
+                remainder = age - 0x3F;
+                alpha = 0x80 - ((remainder * 0x66) / 0x39);
+            }
+            if (alpha < 0) alpha = 0;
+            if (alpha > 0x80) alpha = 0x80;
+            color = ((u32)alpha << 24) | 0x00808080;
+            DrwSprite2D(0x4D, 0x111, 0x166, 0x63, 2, 0x15, 0x166, 0x63,
+                        color, titleWork->texHandle[2]);
+        } else {
+            remainder = (age - 0x78) % 0x42;
+            if (remainder < 0x13) {
+                alpha = 0x19 + ((remainder * 0x33) / 0x13);
+            } else {
+                alpha = 0x80 - (((remainder * 0x66) - 0x792) / 0x2F);
+            }
+            if (alpha < 0) alpha = 0;
+            if (alpha > 0x80) alpha = 0x80;
+            color = ((u32)alpha << 24) | 0x00808080;
+            DrwSprite2D(0x4D, 0x111, 0x166, 0x63, 2, 0x15, 0x166, 0x63,
+                        color, titleWork->texHandle[2]);
+        }
+
+        count = titleWork->unk_30;
+        if (count >= 0x32) {
+            age = count - 0x32;
+            if (age < 0x78) {
+                if (age < 0x3F) {
+                    alpha = (age * 0x66) / 0x3F;
+                } else {
+                    remainder = age - 0x3F;
+                    alpha = 0x66 - ((remainder * 0x2C) / 0x39);
+                }
+                if (alpha < 0) alpha = 0;
+                if (alpha > 0x80) alpha = 0x80;
+                color = ((u32)alpha << 24) | 0x00808080;
+                DrwSprite2D(0xA2, 0x13A, 0xBA, 0x11, 1, 1, 0xBA, 0x11,
+                            color, titleWork->texHandle[2]);
+            } else {
+                remainder = (age - 0x78) % 0x42;
+                if (remainder < 0x0D) {
+                    alpha = 0x39 - ((remainder * 6) / 0x0D);
+                } else if (remainder < 0x11) {
+                    alpha = 0x33 + (((remainder * 0x33) - 0x297) / 4);
+                } else {
+                    alpha = 0x66 - (((remainder * 0x2C) - 0x2EC) / 0x31);
+                }
+                color = ((u32)alpha << 24) | 0x00808080;
+                DrwSprite2D(0xA2, 0x13A, 0xBA, 0x11, 1, 1, 0xBA, 0x11,
+                            color, titleWork->texHandle[2]);
+            }
+        }
+    }
+    rsetAlpha(0);
+}
+#else
 INCLUDE_ASM(const s32, "sound/sndManager", dds3TitleDrawFade);
+#endif
 
 void dds3TitleClearFade(void)
 {
