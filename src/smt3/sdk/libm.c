@@ -78,7 +78,76 @@ INCLUDE_ASM(const s32, "sdk/libm", __ieee754_acosf);
 
 INCLUDE_ASM(const s32, "sdk/libm", func_002CF748);
 
-INCLUDE_ASM(const s32, "sdk/libm", func_002CF760);
+extern f32 __ieee754_sqrtf(f32 x);
+
+f32 func_002CF760(f32 x)
+{
+    f32 z, p, q, r, w, s, c, df;
+    s32 hx, ix;
+
+    GET_FLOAT_WORD(hx, x);
+    ix = hx & 0x7FFFFFFF;
+
+    if (ix == 0x3F800000) {
+        if (hx > 0) return 0.0f;
+        return 3.141592502597e+00f;
+    } else if (ix > 0x3F800000) {
+        return (x - x) / (x - x);
+    }
+    if (ix <= 0x3EFFFFFF) {
+        if (ix <= 0x23000000) return 1.570796251299e+00f;
+        z = x * x;
+        p = z * (1.666666567327e-01f
+            + z * (-3.255657851699e-01f
+            + z * (2.012125253679e-01f
+            + z * (-4.005553573374e-02f
+            + z * (7.915350142874e-04f
+            + z * 3.479330916892e-05f)))));
+        q = 1.0f + z * (-2.403394699099e+00f
+            + z * (2.020945549013e+00f
+            + z * (-6.882839202888e-01f
+            + z * 7.703814655550e-02f)));
+        r = p / q;
+        return 1.570796251299e+00f - (x - (7.549789415869e-08f - x * r));
+    } else if (hx < 0) {
+        z = (1.0f + x) * 0.5f;
+        p = z * (1.666666567327e-01f
+            + z * (-3.255657851699e-01f
+            + z * (2.012125253679e-01f
+            + z * (-4.005553573374e-02f
+            + z * (7.915350142874e-04f
+            + z * 3.479330916892e-05f)))));
+        q = 1.0f + z * (-2.403394699099e+00f
+            + z * (2.020945549013e+00f
+            + z * (-6.882839202888e-01f
+            + z * 7.703814655550e-02f)));
+        s = __ieee754_sqrtf(z);
+        r = p / q;
+        w = r * s - 7.549789415869e-08f;
+        return 3.141592502597e+00f - 2.0f * (s + w);
+    } else {
+        s32 word;
+        z = (1.0f - x) * 0.5f;
+        s = __ieee754_sqrtf(z);
+        df = s;
+        GET_FLOAT_WORD(word, df);
+        SET_FLOAT_WORD(df, word & 0xFFFFF000);
+        c = (z - df * df) / (s + df);
+        p = z * (1.666666567327e-01f
+            + z * (-3.255657851699e-01f
+            + z * (2.012125253679e-01f
+            + z * (-4.005553573374e-02f
+            + z * (7.915350142874e-04f
+            + z * 3.479330916892e-05f)))));
+        q = 1.0f + z * (-2.403394699099e+00f
+            + z * (2.020945549013e+00f
+            + z * (-6.882839202888e-01f
+            + z * 7.703814655550e-02f)));
+        r = p / q;
+        w = r * s + c;
+        return 2.0f * (df + w);
+    }
+}
 
 extern f32 fabsf(f32 x);
 extern f32 atanf(f32 x);

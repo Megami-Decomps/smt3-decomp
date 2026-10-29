@@ -163,3 +163,28 @@ CSE trace, UID297 assigns the tangent to the working float, UID304 reads that
 float's word, UID325 masks it and UID329 writes the truncated float back.
 These are consumed arithmetic values, with no artificial copies, fixed
 registers or compiler-option changes.
+## Inverse-cosine arithmetic body
+
+`func_002CF760` matches all1060 instruction bytes. The two preceding
+forwarding entries are separate functions and remain assembly; see
+[their boundaries](sdk-matching.md#inverse-cosine-entry-boundaries).
+
+The signed input word and its masked magnitude preserve exact-unit,
+out-of-domain, tiny-input and half-range branches. Native pi and half-pi
+returns use their actual binary32 words. The small-input expression keeps
+the low correction in `halfPi - (x - (low - x*r))`. Each rational expression
+has six numerator and four denominator coefficients with native bit patterns.
+
+Negative inputs at or below minus one-half compute the polynomial before the square
+root call and return `pi - 2*(s + (r*s - low))`. Positive inputs at or above
+one-half truncate twelve low bits from a copy of the square root, preserve
+the original result for the compensation denominator and final product, and
+return twice the compensated sum. Both calls use the actual float square-root
+provider. No host IEEE special cases are substituted.
+
+Use the shared `GET_FLOAT_WORD` and `SET_FLOAT_WORD` macros for representation
+transfers. A pointer-pun initial extraction emits1068 bytes with broad entry
+and scheduling differences; the existing scoped unsigned union boundary
+restores every word under the qualified2.96 library profile. An isolated
+older-compiler diagnostic also remains nonmatching; no compiler flags or
+unit boundaries were changed to obtain the result.
