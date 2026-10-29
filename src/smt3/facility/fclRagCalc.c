@@ -230,13 +230,13 @@ void ragDrawHeartsFooter(fclPanelPos_t *panel, s32 id)
                      ragDrawWork->texHandle, D_003306B8, id);
 }
 
-void ragDrawListFooter(fclPanel_t *panel, s32 id)
+void ragDrawListFooter(fclPanelPos_t *panel, s32 id)
 {
-    cmpDrawBoxF(0x490, 0x200, panel->Z, 0x6a, 9, 0x19191e59, id);
-    fclDrawSpriteRes(0, 0, panel->Z << 4, 0, 0, 7,
+    cmpDrawBoxF(0x490, 0x200, panel->unk_08, 0x6a, 9, 0x19191e59, id);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 7,
                      ragDrawWork->texHandle, D_003306B8, id);
-    cmpDrawBoxF(0xbb0, 0x200, panel->Z, 0x20, 9, 0x19191e59, id);
-    fclDrawSpriteRes(0, 0, panel->Z << 4, 0, 0, 8,
+    cmpDrawBoxF(0xbb0, 0x200, panel->unk_08, 0x20, 9, 0x19191e59, id);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 8,
                      ragDrawWork->texHandle, D_003306B8, id);
 }
 
@@ -298,11 +298,59 @@ void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
 INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawHeartsRows);
 #endif
 
+extern datDevilTableEntry_t datDevilTable[];
+extern char *text2[];
+extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                            const char *text, frFontHandle_t *previous);
+
+#ifdef NON_MATCHING
+void ragDrawListRows(lstWork_t *list, u8 kind, u8 *rows, s8 mode, s32 ot)
+{
+    cmpCursorInfo_t *cursor = &list->listCursor;
+    s32 x = list->pos.unk_00;
+    s32 y = list->pos.unk_04;
+    s32 z = list->pos.unk_08;
+    s32 i;
+
+    lstDrawListWindow(list, mode, ot);
+    for (i = 0; i < cursor->unk_26; i++) {
+        s8 index = (s8)rows[i];
+        ragOfferTable_t *table = (ragOfferTable_t *)ragHeartsTable;
+        ragOffer_t *offers = kind == 1 ? table->offers2 : table->offers3;
+        s8 level = (s8)offers[index].unit.level;
+        u16 devil = offers[index].devilId;
+        ragItemReq_t *requirements = ragGetConfirmEntry((s8)kind, rows[i]);
+        s32 disabled = ragFindItemSlot(requirements) == 0;
+        s32 boxMode = disabled | (mode != 0 ? 2 : 0);
+        u32 color = cmpDrawListItemBox(cursor, i, i, boxMode, 0x100);
+        frFontHandle_t *font;
+        char text[16];
+
+        font = frwGetSmallFontFRQ2(x + 0x250, y + 0xC0, z, color, text2[devil], NULL);
+        func_001C7E38(font, 1, ot);
+        frDestroyFontRequestAfter(font);
+        if (!disabled && datDevilTable[devil].level < level) {
+            color = 0xFFBD8380;
+        }
+        sprintf(text, D_0054FBA8, level);
+        font = frwGetSmallNumFontFRQ(x + 0x9B0, y + 0xD8, z, color, text, NULL);
+        func_001C7E38(font, 1, ot);
+        frDestroyFontRequestAfter(font);
+        fclDrawListSprite(x + 0x210, y + 0x160, z, 0x93, 2, 0x22242F80, 0, ot);
+        y += cursor->StepY << 3;
+    }
+    ragDrawListFooter(&list->pos, ot);
+    if (mode == 0) {
+        lstDrawListWindowCursor((lstWindowWork_t *)list, ot);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawListRows);
+#endif
 
 INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawHeartsList);
 
-extern void ragDrawListRows(lstWork_t *list, s32 kind, u8 *rows, s32 mode, s32 ot);
+extern void ragDrawListRows(lstWork_t *list, u8 kind, u8 *rows, s8 mode, s32 ot);
 
 extern char *D_003305E8[];
 
