@@ -10,8 +10,8 @@ page and line to open. Conventions are in
 | 32 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 18 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
-| 12 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 11 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
+| 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 7 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 7 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 6 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
@@ -20,6 +20,7 @@ page and line to open. Conventions are in
 | 5 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 5 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
+| 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 4 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
