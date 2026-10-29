@@ -15,24 +15,11 @@
 #include "event.h"
 #include "effect.h"
 
-typedef struct fldCollisionFace_t fldCollisionFace_t;
-
 typedef struct fldCollisionDescriptor_t fldCollisionDescriptor_t;
 
 typedef struct fldWallMeshRecord_t fldWallMeshRecord_t;
 
-struct fldCollisionFace_t {
-    u32 attributes;
-    u8 moveFloor;
-    u8 sound;
-    u16 stop;
-    u16 place;
-    u8 automap[2];
-    u32 vertexIndices[4];
-    s16 encounterType;
-    s16 encounter;
-    s16 special[2];
-};
+
 
 
 

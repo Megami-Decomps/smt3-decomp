@@ -301,6 +301,21 @@ typedef struct GameFileInfo_t {
     u8 autoMapOpenEX[15];
 } GameFileInfo_t;
 
+/* Native 0x24-byte resource collision face; attributes occupy the first word. */
+typedef struct fldCollisionFace_t fldCollisionFace_t;
+struct fldCollisionFace_t {
+    u32 attributes;
+    u8 moveFloor;
+    u8 sound;
+    u16 stop;
+    u16 place;
+    u8 automap[2];
+    u32 vertexIndices[4];
+    s16 encounterType;
+    s16 encounter;
+    s16 special[2];
+};
+
 /* Field encounter control and the native placement table. */
 #include "fldNpc_tag.h"
 extern u32 fldEncountFlags;
