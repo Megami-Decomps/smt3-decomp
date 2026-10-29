@@ -1795,7 +1795,567 @@ INCLUDE_RODATA(const s32, "sdk/libc", D_0054B880);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B890);
 
+/* Little-endian IEEE binary64 word view used by the numeric helpers. */
+typedef union libcDoubleBits_t {
+    f64 value;
+    u32 word[2];
+    u64 bits;
+} libcDoubleBits_t;
+
+void _Bfree(_reent *r, _Bigint *v);
+s32 _hi0bits(u32 x);
+_Bigint *_d2b(_reent *r, f64 d, s32 *e, s32 *bitsOut);
+_Bigint *_i2b(_reent *r, s32 i);
+_Bigint *_multadd(_reent *r, _Bigint *b, s32 m, s32 a);
+_Bigint *_multiply(_reent *r, _Bigint *a, _Bigint *b);
+_Bigint *_pow5mult(_reent *r, _Bigint *b, s32 n);
+_Bigint *_lshift(_reent *r, _Bigint *b, s32 shift);
+_Bigint *__mdiff(_reent *r, _Bigint *a, _Bigint *b);
+s32 gcc2_compiled__1(_Bigint *dividend, _Bigint *divisor);
+extern char D_0054B880[], D_0054B890[];
+extern const f64 D_0054B8A0 __attribute__((section(".rodata")));
+extern const f64 D_0054B8A8 __attribute__((section(".rodata")));
+extern const f64 D_0054B8B0 __attribute__((section(".rodata")));
+extern const f64 D_0054B9F8[];
+extern const f64 D_0054BA18 __attribute__((section(".rodata")));
+
+#ifdef NON_MATCHING
+char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
+              s32 *decimalPoint, s32 *sign, char **end)
+{
+    libcDoubleBits_t value, normalized, epsilon;
+    _Bigint *b, *S, *mhi, *mlo, *difference, *product;
+    char *start, *out;
+    const f64 *power;
+    f64 estimate, scale, savedValue, remainder, threshold;
+    u32 capacity, significand;
+    s32 binaryExponent, bitCount, binaryScale, k, kCheck, denormal;
+    s32 b2, b5, s2, s5, m2, m5, leftRight, tryQuick;
+    s32 limit, limit1, needed, savedLimit, savedK, errors;
+    s32 i, j, digit, lowComparison, highComparison, specialBoundary;
+
+    /* The result buffer overwrites this header; restore it before recycling. */
+    if (r->_result != NULL) {
+        r->_result->k = r->_result_k;
+        r->_result->maxwds = 1U << r->_result_k;
+        _Bfree(r, r->_result);
+        r->_result = NULL;
+    }
+    value.value = input;
+    if ((s32)value.word[1] < 0) {
+        *sign = 1;
+        value.word[1] &= 0x7FFFFFFFU;
+    } else {
+        *sign = 0;
+    }
+    if ((value.word[1] & 0x7FF00000U) == 0x7FF00000U) {
+        *decimalPoint = 9999;
+        start = (value.bits & 0x000FFFFFFFFFFFFFULL) == 0 ?
+                D_0054B880 : D_0054B890;
+        if (end != NULL) {
+            *end = start[3] == '\0' ? start + 3 : start + 8;
+        }
+        return start;
+    }
+    if (value.value == 0.0) {
+        *decimalPoint = 1;
+        start = "0";
+        if (end != NULL) {
+            *end = start + 1;
+        }
+        return start;
+    }
+
+    b = _d2b(r, value.value, &binaryExponent, &bitCount);
+    binaryScale = (value.word[1] >> 20) & 0x7FF;
+    if (binaryScale != 0) {
+        normalized.value = value.value;
+        normalized.word[1] &= 0xFFFFFU;
+        normalized.word[1] |= 0x3FF00000U;
+        binaryScale -= 0x3FF;
+        denormal = 0;
+    } else {
+        i = bitCount + binaryExponent;
+        j = i + 0x432;
+        if (j > 32) {
+            significand = (value.word[1] << (64 - j)) |
+                          (value.word[0] >> (j - 32));
+        } else {
+            significand = value.word[0] << (32 - j);
+        }
+        normalized.value = (f64)significand;
+        normalized.word[1] -= 0x01F00000U;
+        binaryScale = j - 0x433;
+        denormal = 1;
+    }
+    estimate = ((normalized.value - 1.5) * D_0054B8A0 + D_0054B8A8) +
+               (f64)binaryScale * D_0054B8B0;
+    k = (s32)estimate;
+    if (estimate < 0.0 && estimate != (f64)k) {
+        k--;
+    }
+    kCheck = 1;
+    if ((u32)k < 23U) {
+        if (value.value < D_0054B930[k]) {
+            k--;
+        }
+        kCheck = 0;
+    }
+    i = (bitCount - binaryScale) - 1;
+    if (i < 0) {
+        s2 = 0;
+        b2 = -i;
+    } else {
+        s2 = i;
+        b2 = 0;
+    }
+    if (k >= 0) {
+        b5 = 0;
+        s5 = k;
+        s2 += k;
+    } else {
+        b5 = -k;
+        s5 = 0;
+        b2 -= k;
+    }
+    tryQuick = 1;
+    if ((u32)mode >= 10U) {
+        mode = 0;
+    }
+    if (mode >= 6) {
+        mode -= 4;
+        tryQuick = 0;
+    }
+    leftRight = 1;
+    limit = limit1 = -1;
+    switch (mode) {
+    case 0:
+    case 1:
+        needed = 18;
+        digits = 0;
+        break;
+    case 2:
+        leftRight = 0;
+        /* fallthrough */
+    case 4:
+        if (digits <= 0) {
+            digits = 1;
+        }
+        needed = limit = limit1 = digits;
+        break;
+    case 3:
+        leftRight = 0;
+        /* fallthrough */
+    case 5:
+        limit1 = digits + k;
+        limit = limit1 + 1;
+        needed = limit > 0 ? limit : 1;
+        break;
+    }
+    r->_result_k = 0;
+    capacity = 4;
+    if ((u32)needed >= 24U) {
+        i = 0;
+        do {
+            capacity *= 2;
+            i++;
+        } while ((u32)needed >= capacity + 20U);
+        r->_result_k = i;
+    }
+    r->_result = _Balloc(r, r->_result_k);
+    start = out = (char *)r->_result;
+
+    if ((u32)limit < 15U && tryQuick != 0) {
+        savedValue = value.value;
+        savedK = k;
+        savedLimit = limit;
+        errors = 2;
+        if (k > 0) {
+            i = k >> 4;
+            scale = D_0054B930[k & 15];
+            if ((i & 16) != 0) {
+                i &= 15;
+                errors = 3;
+                value.value /= D_0054BA18;
+            }
+            if (i != 0) {
+                power = D_0054B9F8;
+                do {
+                    if ((i & 1) != 0) {
+                        errors++;
+                        scale *= *power;
+                    }
+                    i >>= 1;
+                    power++;
+                } while (i != 0);
+            }
+            value.value /= scale;
+        } else {
+            j = -k;
+            if (j != 0) {
+                i = j >> 4;
+                value.value = D_0054B930[j & 15] * value.value;
+                if (i != 0) {
+                    power = D_0054B9F8;
+                    do {
+                        if ((i & 1) != 0) {
+                            errors++;
+                            value.value = *power * value.value;
+                        }
+                        i >>= 1;
+                        power++;
+                    } while (i != 0);
+                }
+            }
+        }
+        if (kCheck != 0 && value.value < 1.0 && limit > 0) {
+            if (limit1 <= 0) {
+                goto quickFailed;
+            }
+            k--;
+            limit = limit1;
+            errors++;
+            value.value = 10.0 * value.value;
+        }
+        epsilon.value = (f64)errors * value.value + 7.0;
+        epsilon.word[1] -= 0x03400000U;
+        if (limit == 0) {
+            mhi = NULL;
+            S = NULL;
+            remainder = value.value - 5.0;
+            if (remainder > epsilon.value) {
+                goto oneDigit;
+            }
+            if (remainder < 0.0 - epsilon.value) {
+                goto noDigits;
+            }
+            goto quickFailed;
+        }
+        if (leftRight != 0) {
+            i = 0;
+            threshold = 0.5 / D_0054B930[limit - 1] - epsilon.value;
+            for (;;) {
+                digit = (s32)value.value;
+                remainder = value.value - (f64)digit;
+                *out++ = digit + '0';
+                if (remainder < threshold) {
+                    goto finish;
+                }
+                if (1.0 - remainder < threshold) {
+                    goto roundQuick;
+                }
+                i++;
+                if (i >= limit) {
+                    goto quickFailed;
+                }
+                threshold = 10.0 * threshold;
+                value.value = 10.0 * remainder;
+            }
+        } else {
+            i = 1;
+            threshold = D_0054B930[limit - 1] * epsilon.value;
+            for (;;) {
+                digit = (s32)value.value;
+                remainder = value.value - (f64)digit;
+                *out++ = digit + '0';
+                if (i == limit) {
+                    if (remainder > 0.5 + threshold) {
+                        goto roundQuick;
+                    }
+                    if (remainder < 0.5 - threshold) {
+                        do {
+                            out--;
+                        } while (*out == '0');
+                        out++;
+                        goto finish;
+                    }
+                    goto quickFailed;
+                }
+                i++;
+                value.value = 10.0 * remainder;
+            }
+        }
+quickFailed:
+        value.value = savedValue;
+        k = savedK;
+        limit = savedLimit;
+        out = start;
+    }
+
+    if (binaryExponent >= 0 && k < 15) {
+        scale = D_0054B930[k];
+        i = 1;
+        if (digits < 0 && limit <= 0) {
+            mhi = NULL;
+            S = NULL;
+            if (limit < 0 || value.value <= scale * 5.0) {
+                goto noDigits;
+            }
+            goto oneDigit;
+        }
+        for (;;) {
+            digit = (s32)(value.value / scale);
+            remainder = value.value - (f64)digit * scale;
+            *out++ = digit + '0';
+            if (i == limit) {
+                remainder = remainder + remainder;
+                if (remainder > scale ||
+                    (remainder == scale && (digit & 1) != 0)) {
+                    goto roundQuick;
+                }
+                goto finish;
+            }
+            value.value = 10.0 * remainder;
+            i++;
+            if (value.value == 0.0) {
+                goto finish;
+            }
+        }
+
+roundQuick:
+    out--;
+    while (*out == '9') {
+        if (out == start) {
+            k++;
+            *start = '0';
+            break;
+        }
+        out--;
+    }
+    *out = (u8)*out + 1;
+    out++;
+    goto finish;
+    }
+
+    m2 = b2;
+    m5 = b5;
+    mlo = NULL;
+    mhi = NULL;
+    if (leftRight != 0) {
+        if (mode >= 2) {
+            i = limit - 1;
+            m5 = b5 - i;
+            if (b5 < i) {
+                m5 = 0;
+                j = i - b5;
+                b5 += j;
+                s5 += j;
+            }
+            j = limit;
+            if (j < 0) {
+                m2 = b2 - j;
+                j = 0;
+            }
+        } else {
+            j = denormal != 0 ? binaryExponent + 0x433 : 0x36 - bitCount;
+        }
+        s2 += j;
+        mhi = _i2b(r, 1);
+        b2 += j;
+    }
+    if (m2 > 0 && s2 > 0) {
+        i = m2 < s2 ? m2 : s2;
+        m2 -= i;
+        s2 -= i;
+        b2 -= i;
+    }
+    if (b5 > 0) {
+        if (leftRight != 0) {
+            if (m5 > 0) {
+                mhi = _pow5mult(r, mhi, m5);
+                product = _multiply(r, mhi, b);
+                _Bfree(r, b);
+                b = product;
+            }
+            i = b5 - m5;
+            if (i != 0) {
+                b = _pow5mult(r, b, i);
+            }
+        } else {
+            b = _pow5mult(r, b, b5);
+        }
+    }
+    S = _i2b(r, 1);
+    if (s5 > 0) {
+        S = _pow5mult(r, S, s5);
+    }
+    specialBoundary = 0;
+    if (mode < 2 && (value.bits & 0x000FFFFFFFFFFFFFULL) == 0 &&
+        (value.word[1] & 0x7FF00000U) != 0) {
+        specialBoundary = 1;
+        b2++;
+        s2++;
+    }
+    i = s5 != 0 ? s2 - _hi0bits(S->x[S->wds - 1]) : s2 + 1;
+    j = i & 31;
+    if (j != 0) {
+        j = 32 - j;
+    }
+    if (j > 4) {
+        j -= 4;
+        m2 += j;
+        s2 += j;
+        b2 += j;
+    } else if (j < 4) {
+        j += 28;
+        m2 += j;
+        s2 += j;
+        b2 += j;
+    }
+    if (b2 > 0) {
+        b = _lshift(r, b, b2);
+    }
+    if (s2 > 0) {
+        S = _lshift(r, S, s2);
+    }
+    if (kCheck != 0 && __mcmp(b, S) < 0) {
+        k--;
+        b = _multadd(r, b, 10, 0);
+        if (leftRight != 0) {
+            mhi = _multadd(r, mhi, 10, 0);
+        }
+        limit = limit1;
+    }
+    if (limit <= 0 && mode >= 3) {
+        if (limit < 0) {
+            goto noDigits;
+        }
+        S = _multadd(r, S, 5, 0);
+        if (__mcmp(b, S) > 0) {
+            goto oneDigit;
+        }
+        goto noDigits;
+    }
+
+    if (leftRight != 0) {
+        if (m2 > 0) {
+            mhi = _lshift(r, mhi, m2);
+        }
+        mlo = mhi;
+        if (specialBoundary != 0) {
+            mhi = _Balloc(r, mlo->k);
+            memcpy(&mhi->sign, &mlo->sign, mlo->wds * sizeof(u32) + 8);
+            mhi = _lshift(r, mhi, 1);
+        }
+        i = 1;
+        j = value.word[0] & 1;
+        for (;;) {
+            digit = gcc2_compiled__1(b, S) + '0';
+            lowComparison = __mcmp(b, mlo);
+            difference = __mdiff(r, S, mhi);
+            highComparison = difference->sign != 0 ? 1 : __mcmp(b, difference);
+            _Bfree(r, difference);
+            if (highComparison == 0 && mode == 0 && j == 0) {
+                if (digit == '9') {
+                    *out++ = '9';
+                    goto roundBigint;
+                }
+                *out++ = digit + (highComparison < lowComparison);
+                goto bigintDone;
+            }
+            if (lowComparison < 0 ||
+                (lowComparison == 0 && mode == 0 && j == 0)) {
+                if (highComparison > 0) {
+                    b = _lshift(r, b, 1);
+                    lowComparison = __mcmp(b, S);
+                    if (lowComparison > 0 ||
+                        (lowComparison == 0 && (digit & 1) != 0)) {
+                        digit++;
+                        if (digit == ':') {
+                            *out++ = '9';
+                            goto roundBigint;
+                        }
+                    }
+                }
+                *out++ = digit;
+                goto bigintDone;
+            }
+            if (highComparison > 0) {
+                if (digit == '9') {
+                    *out++ = '9';
+                    goto roundBigint;
+                }
+                *out++ = digit + 1;
+                goto bigintDone;
+            }
+            *out++ = digit;
+            if (i == limit) {
+                break;
+            }
+            b = _multadd(r, b, 10, 0);
+            if (mlo == mhi) {
+                mlo = mhi = _multadd(r, mhi, 10, 0);
+            } else {
+                mlo = _multadd(r, mlo, 10, 0);
+                mhi = _multadd(r, mhi, 10, 0);
+            }
+            i++;
+        }
+    } else {
+        for (i = 1;; i++) {
+            digit = gcc2_compiled__1(b, S) + '0';
+            *out++ = digit;
+            if (i >= limit) {
+                break;
+            }
+            b = _multadd(r, b, 10, 0);
+        }
+    }
+    b = _lshift(r, b, 1);
+    j = __mcmp(b, S);
+    if (j > 0 || (j == 0 && (digit & 1) != 0)) {
+roundBigint:
+        out--;
+        for (;;) {
+            if (*out != '9') {
+                *out = (u8)*out + 1;
+                out++;
+                break;
+            }
+            if (out == start) {
+                k++;
+                *start = '1';
+                out = start + 1;
+                break;
+            }
+            out--;
+        }
+    } else {
+        do {
+            out--;
+        } while (*out == '0');
+        out++;
+    }
+bigintDone:
+    _Bfree(r, S);
+    if (mhi != NULL) {
+        if (mlo != NULL && mlo != mhi) {
+            _Bfree(r, mlo);
+        }
+        _Bfree(r, mhi);
+    }
+finish:
+    _Bfree(r, b);
+    *out = '\0';
+    *decimalPoint = k + 1;
+    if (end != NULL) {
+        *end = out;
+    }
+    return start;
+
+noDigits:
+    k = ~digits;
+    goto bigintDone;
+oneDigit:
+    k++;
+    out = start + 1;
+    *start = '1';
+    goto bigintDone;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libc", _dtoa_r);
+#endif
+
 
 s32 fflush(void *stream)
 {
@@ -2684,11 +3244,6 @@ _Bigint *__mdiff(_reent *r, _Bigint *a, _Bigint *b) {
     return result;
 }
 
-/* Little-endian IEEE binary64 word view used by the numeric helpers. */
-typedef union libcDoubleBits_t {
-    f64 value;
-    u32 word[2];
-} libcDoubleBits_t;
 
 f64 _ulp(f64 x)
 {
