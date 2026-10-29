@@ -28,7 +28,7 @@ s8 fclInitMessage(void *data);
 
 s32 fclLoadTexture(char *pFileName);
 
-extern s32 evtBitOn(s32 no);
+extern void evtBitOn(s32 no);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
@@ -304,7 +304,7 @@ extern void mselDrawTitleAnim(void);
 extern void mselDrawTitleAnim2(s32 animate);
 extern void mselDrawBackground(void);
 extern void mselUpdateCursor(void);
-extern s32 mselStartDataSet(void);
+extern void mselStartDataSet(void);
 extern void mselStartGame(void);
 
 s32 mselMain(dds3ProcessID_t *id)
@@ -634,13 +634,13 @@ extern void dds3ConfigSaveBackup(void);
 
 extern void dds3ConfigRestoreBackup(void);
 
-extern s32 evtBitOn(s32 no);
+extern void evtBitOn(s32 no);
 
 #ifdef NON_MATCHING
 extern void dds3CreateGameData(s32 no);
 #endif
 
-s32 mselStartDataSet(void)
+void mselStartDataSet(void)
 {
     if (gGlobal->unk_A8 == 0) {
         dds3CreateGameData(0);
@@ -655,7 +655,7 @@ s32 mselStartDataSet(void)
     } else {
         dds3ConfigRestoreBackup();
     }
-    return evtBitOn(0xC0F);
+    evtBitOn(0xC0F);
 }
 
 extern fldDanteGunState_t fldRunDanteGunFlag;
