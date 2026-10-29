@@ -4765,7 +4765,39 @@ s32 cmbFindUnitScene(mdlObj_t *work)
     return 1;
 }
 
+extern const char *D_0032F59C[];
+extern sdfModelOt_t D_002F69B8[];
+
+#ifdef NON_MATCHING
+void cmbUpdateCameraPos(void)
+{
+    f32 mark[4] __attribute__((aligned(16)));
+    s32 index;
+
+    memset(mark, 0, sizeof(mark));
+    index = (s8)CMB_GBWK->birthPanel[0x2C5] == 0 ? 3 : 4;
+    if ((__SIZE_TYPE__)CMB_GBWK + (__SIZE_TYPE__)&((cmbGbWork_t *)0)->cameraPosition == 0) {
+        return;
+    }
+    if (cmbFindCameraPoint(D_0032F59C[0], CMB_GBWK->cameraPosition) == 0) {
+        return;
+    }
+    if (CMB_GBWK->actionData[index].model != NULL) {
+        sdfModelGetMarkPos(CMB_GBWK->actionData[index].model->inner, 0);
+        SDF_VU0_STOREVECTOR(mark);
+    }
+    fclSetWorkValue(11, fcvtws(mark[0]));
+    fclSetWorkValue(12, fcvtws(mark[1]));
+    fclSetWorkValue(13, fcvtws(mark[2]));
+    mdlSetColorWithEffect(CMB_GBWK->actionData[index].model, 0x80808080);
+    cmbFindUnitScene(CMB_GBWK->actionData[index].model);
+    cmbDrawActionModel(CMB_GBWK->actionData[index].model,
+                       (u16)CMB_GBWK->actionData[index].id,
+                       CMB_GBWK->cameraPosition, 0x80808080, D_002F69B8);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateCameraPos);
+#endif
 
 extern s8 cmbActionStep;
 extern s8 cmbActionMode;
