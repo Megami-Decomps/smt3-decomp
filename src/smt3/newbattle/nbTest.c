@@ -335,6 +335,9 @@ typedef struct nbEventProcessData_t {
 } nbEventProcessData_t;
 
 extern void evtBitOn(s32 no);
+extern void evtBitOff(s32 no);
+extern s32 evtBitCheck(s32 no);
+extern void evtSetAgeOfMoon(u8 age);
 
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer, s32 shutdownTimer,
                                          dds3ProcessFunc_t process, dds3ProcessFunc_t shutdown,
