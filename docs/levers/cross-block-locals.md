@@ -156,3 +156,35 @@ Reproduce with `tools/cc1probe.sh <owner.c> --as-unit src/smt3/mc/slMain.c
 --func slQueryYesNoDraw --alloc --no-dumps --out <output>`. The control adds
 `s32 fontY`, assigns it from `y + 1` instead of incrementing `y`, and uses
 that local in the final two label calls.
+
+## Retain bigint limb and bit counts
+
+`sdk/libc::_lshift` matches all 344 bytes with two live counts used across
+disjoint phases. `count` first grows the limb capacity, then counts the
+zero-filled low limbs. `bitCount` first holds the allocation exponent, then
+the complementary carry shift. Every assignment contributes to the actual
+allocation or output; neither value is carried between phases.
+
+Pinned cc1 `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`
+allocation traces qualify the source and each control with hooked/unhooked
+and plain-output parity. The deciding pass is global allocation. The exact
+source's destination pseudo 89 has 20 references and live length 36, allocated
+to $7; bit-count pseudo 94 has nine references and live length 21, allocated
+to $5. Input, end and carry use $4, $6 and $3. With both counts split by
+phase, destination pseudo 89 instead receives $5 and right-shift pseudo 97
+receives $7, leaving 13 of 86 words different at the same native size.
+
+Two independent controls establish that both count lifetimes matter. Keeping
+only the bit-count reuse and splitting limb capacity from the zero-loop index
+leaves 14 differing words. Keeping only the limb-count reuse and splitting
+the allocation exponent from the carry shift leaves ten. Each control keeps
+the 344-byte extent and first differs at +0x7C, where the destination pointer
+is assigned after allocation. Their qualified allocation logs show changed
+pseudo lifetimes and hard-register assignments; the source with both counts
+shared restores the native pair without register constraints or extra work.
+
+Reproduce each trace with `tools/cc1probe.sh <owner.c> --as-unit
+src/smt3/sdk/libc.c --func _lshift --alloc --no-dumps --out <output>`. For
+the first control, split `count` into `maxwds` and `zeroCount`; for the second,
+split `bitCount` into `k` and `rightShift`. Compute the complementary shift
+only in the nonzero-shift branch. The complete libc owner remains exact.

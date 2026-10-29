@@ -872,9 +872,72 @@ void _Bfree(_reent *r, _Bigint *v) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdk/libc", _multadd);
+_Bigint *_multadd(_reent *r, _Bigint *b, s32 m, s32 a)
+{
+    s32 wds = b->wds;
+    u32 *x = b->x;
+    s32 i = 0;
+    u32 lo;
+    u32 hi;
+    _Bigint *b1;
 
-INCLUDE_ASM(const s32, "sdk/libc", _s2b);
+    do {
+        lo = (*x & 0xffff) * m + a;
+        hi = (*x >> 16) * m + (lo >> 16);
+        a = hi >> 16;
+        *x++ = (hi << 16) + (lo & 0xffff);
+    } while (++i < wds);
+    if (a != 0) {
+        if (wds >= b->maxwds) {
+            b1 = _Balloc(r, b->k + 1);
+            memcpy(&b1->sign, &b->sign, b->wds * sizeof(u32) + 2 * sizeof(s32));
+            _Bfree(r, b);
+            b = b1;
+        }
+        b->x[wds++] = a;
+        b->wds = wds;
+    }
+    return b;
+}
+
+/* Ordinary source reconstruction of the newlib decimal-string to Bigint helper. */
+_Bigint *_s2b(_reent *r, const char *s, s32 nd0, s32 nd, u32 y9)
+{
+    _Bigint *b;
+    s32 n;
+    s32 k;
+    s32 i;
+    s32 capacity;
+
+    n = (nd + 8) / 9;
+    k = 0;
+    capacity = 1;
+    while (capacity < n) {
+        capacity <<= 1;
+        k++;
+    }
+
+    b = _Balloc(r, k);
+    b->x[0] = y9;
+    b->wds = 1;
+
+    i = 9;
+    if (nd0 > 9) {
+        s += 9;
+        do {
+            b = _multadd(r, b, 10, *s++ - '0');
+        } while (++i < nd0);
+        s++;
+    } else {
+        s += 10;
+    }
+
+    while (i < nd) {
+        b = _multadd(r, b, 10, *s++ - '0');
+        ++i;
+    }
+    return b;
+}
 
 s32 _hi0bits(u32 x) {
     s32 k = 0;
@@ -959,7 +1022,59 @@ INCLUDE_ASM(const s32, "sdk/libc", _multiply);
 
 INCLUDE_ASM(const s32, "sdk/libc", _pow5mult);
 
-INCLUDE_ASM(const s32, "sdk/libc", _lshift);
+/* Qualified allocator controls for the two count lifetimes are recorded in
+ * docs/levers/cross-block-locals.md, "Retain bigint limb and bit counts". */
+_Bigint *_lshift(_reent *r, _Bigint *b, s32 shift) {
+    _Bigint *b1;
+    u32 *src;
+    u32 *dst;
+    u32 *end;
+    u32 carry;
+    s32 n;
+    s32 wds;
+    s32 bitCount;
+    s32 count;
+
+    n = shift >> 5;
+    count = b->maxwds;
+    wds = n + b->wds + 1;
+    bitCount = b->k;
+    if (count < wds) {
+        do {
+            count *= 2;
+            bitCount++;
+        } while (count < wds);
+    }
+    b1 = _Balloc(r, bitCount);
+    dst = b1->x;
+    count = 0;
+    while (count < n) {
+        *dst++ = 0;
+        count++;
+    }
+    src = b->x;
+    shift &= 0x1F;
+    end = src + b->wds;
+    if (shift != 0) {
+        bitCount = 0x20 - shift;
+        carry = 0;
+        do {
+            *dst++ = (*src << shift) | carry;
+            carry = *src++ >> bitCount;
+        } while (src < end);
+        *dst = carry;
+        if (carry != 0) {
+            wds++;
+        }
+    } else {
+        do {
+            *dst++ = *src++;
+        } while (src < end);
+    }
+    b1->wds = wds - 1;
+    _Bfree(r, b);
+    return b1;
+}
 
 s32 __mcmp(_Bigint *a, _Bigint *b) {
     u32 *xa, *xa0, *xb, *xb0;

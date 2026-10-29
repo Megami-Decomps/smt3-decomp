@@ -689,3 +689,4 @@ src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 SDK fn / 248 B	clock-read RPC
 src/smt3/sdk/libmrpc.c	redthing1	done	2026-10-28	1 SDK fn / 168 B	packet allocation with interrupt ordering, signed capacity and unsigned queue sequence; owner 3 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 196 B	sibling RPC packet allocation and release; owner 2 match, 0 differ
 src/smt3/effect/effPCPBoss.c	redthing1	done	2026-10-28	0 matches / guarded Ongy renderer	native model snapshots, motion synchronization and 300-segment VU ribbon batching; 306/358 words at exact size
+src/smt3/sdk/libc.c	redthing1	done	2026-10-28	3 fn / 912 B SDK	bigint multiply-add, decimal input and left shift; allocator-qualified limb/bit count lifetimes; complete owner 56 match, 0 differ
