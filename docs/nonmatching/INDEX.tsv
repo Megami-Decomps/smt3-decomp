@@ -182,10 +182,10 @@ ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/nonmatching/newbat
 nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/nonmatching/newbattle/nbMakePacket.md	355
 nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	383
 nbPanelDrawPP (0xA84)			671 of 673 words match	docs/nonmatching/newbattle/nbPanelProcess.md	5
-nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/nonmatching/newbattle/nbPanelProcess.md	53
-nbPanelPartyDraw (0x54C)				docs/nonmatching/newbattle/nbPanelProcess.md	115
-nbPanelDrawProcess (0x108)				docs/nonmatching/newbattle/nbPanelProcess.md	141
-nbPanelAuto (0x3A0)				docs/nonmatching/newbattle/nbPanelProcess.md	153
+nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/nonmatching/newbattle/nbPanelProcess.md	67
+nbPanelPartyDraw (0x54C)				docs/nonmatching/newbattle/nbPanelProcess.md	129
+nbPanelDrawProcess (0x108)				docs/nonmatching/newbattle/nbPanelProcess.md	155
+nbPanelAuto (0x3A0)				docs/nonmatching/newbattle/nbPanelProcess.md	167
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	5
 CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/nonmatching/newbattle/nbStageProcess.md	20
 CheckAction_STKSEL	newbattle/nbStageProcess	0xE8	9 of 58 words differ	docs/nonmatching/newbattle/nbStageProcess.md	39

@@ -9,9 +9,23 @@ count and schedule. The two differing words are the reads of `hp` and `maxhp`
 for the gauge ratio: retail loads each spill slot straight into the float
 register (`lwc1`/`cvt.s.w`), the draft inherits the `lhu` result still live in
 a general register and moves it across (`mtc1`/`cvt.s.w`). Both slots are
-compiler spill slots, not frame variables, since they sit at 0x8C and 0x90
-above the parameter spills, so no declaration can place them; the choice is
-reload's and is not reachable from C.
+compiler spill slots, not frame variables. An actual-owner allocation trace
+records `alter_reg` assigning the HP and max-HP pseudos to offsets 0x8C and
+0x90. Reload has therefore already produced the expected homes.
+
+A separate post-reload CSE trace identifies the two substitutions precisely.
+At instruction UID784, `reload_cse_simplify_operands` changes the float
+conversion's input from the word at stack+0x8C to `$4`. At UID786 it changes
+the word at stack+0x90 to `$3`. Those transformations produce the two `mtc1`
+instructions. Both traces preserve plain/hooked/unhooked assembly parity
+without RTL dumps. This establishes the rewriting pass, not the original
+source context that prevented those substitutions in retail. The trace does
+not observe the equivalence cache's reset decisions.
+
+Writing the HP and max-HP guards as nested positive tests leaves the same
+671/673-word result. No source change qualified; the existing draft remains
+preferred. A future explanation must account for the post-reload equivalences,
+rather than forcing the two already-correct spill homes.
 
 What the body needed, all of it worth more than fifty words each:
 
