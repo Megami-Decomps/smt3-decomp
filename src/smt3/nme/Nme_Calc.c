@@ -34,7 +34,7 @@ s32 nmeCalc(dds3ProcessID_t *id)
     return 0;
 }
 
-void nmeDrawCharRow(s32 x, s32 y)
+void nmeDrawCharRow(s32 x, s32 y, s32 unused)
 {
     fclSpriteTbl_t *table = &GBWK_2;
     s32 ot = 0x47;
@@ -47,7 +47,7 @@ void nmeDrawCharRow(s32 x, s32 y)
                      (s32 *)namelist_buttonAnim_end->textures, table, ot);
 }
 
-void nmeDrawSymbolRow(s32 x, s32 y)
+void nmeDrawSymbolRow(s32 x, s32 y, s32 unused)
 {
     fclSpriteTbl_t *table = &GBWK_2;
     s32 ot = 0x47;
@@ -87,7 +87,7 @@ void nmeDrawNameText(s32 x, s32 y, s32 secondX, s32 secondY, u32 color, s32 mode
     text[1] = second;
     text[2] = terminator;
     cursor = nmeGetCursorPos(namelist_buttonAnim_end);
-    nmeDrawCharRow((x - 0x25) * 16, (y - 4) * 8);
+    nmeDrawCharRow((x - 0x25) * 16, (y - 4) * 8, 0);
     for (i = 0; i < 8; i++) {
         s32 sprite = 8;
         if (mode == 0 && nmeGetInputMode(namelist_buttonAnim_end) == 0 && cursor == i) {
@@ -154,7 +154,7 @@ void nmeDrawNameString(s32 x, s32 y, u32 color, s32 mode)
     text[1] = second;
     text[2] = terminator;
     cursor = nmeGetCursorPos(namelist_buttonAnim_end);
-    nmeDrawSymbolRow((x - 0x18) * 16, (y - 8) * 8);
+    nmeDrawSymbolRow((x - 0x18) * 16, (y - 8) * 8, 0);
     cmpSetSkillListRows(0x16);
     for (i = 0; i < 8; i++) {
         s32 sprite = 0x41;
