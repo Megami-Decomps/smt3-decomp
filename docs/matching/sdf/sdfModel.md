@@ -96,7 +96,7 @@ has to recheck the whole unit, not just this line.
 
 ## sdfModelLinkShapedDrawPacket (sdf/sdfModel, 0x258)
 
-Fifty of 150 words match at the exact 600-byte size, and the mnemonic
+Sixty of 150 words match at the exact 600-byte size, and the mnemonic
 sequence is identical apart from two alignment `nop`s and one saved-register
 save/restore pair: `diff` over the opcodes alone leaves the prologue's
 `li`/`sd` ordering, two `lui`/`addiu` pairs that swap places inside the
@@ -114,8 +114,39 @@ register. It does that by splitting the buffer's live range: the
 register `aNode` has just vacated. The draft instead copies the result
 straight into a saved register before `aNode` dies, so the two conflict.
 
+### The scheduling trace, and the RTL shape retail needs
+
+    tools/cc1probe.sh <candidate> --as-unit src/smt3/sdf/sdfModel.c --version smt3 \
+        --func sdfModelLinkShapedDrawPacket --sched --no-dumps --out <dir>   # verify: OK
+
+sched1 decides it, before the allocator ever sees the two values:
+
+    uid150 = (set (reg 97) (reg $2))                  prio 4 regw 0 luid 38
+    uid172 = (set (reg $4) (mem (plus (reg 84) 16)))  prio 4 regw 0 luid 39  DEAD reg84
+    uid176 = (set (reg $6) (reg 97))                  prio 3
+
+The buffer copy and `aNode`'s last use tie at priority 4 (the copy's chain is
+copy, argument move, call; the load's is load with cost 2, call), their
+`reg_weight` ties at 0, so `INSN_LUID` decides, and `expand_call` emits the
+result copy before the next call's arguments. The copy therefore lands ahead of
+`aNode`'s death, the two conflict, and the frame grows to eight saved registers.
+
+Retail's order needs the allocation result to reach `$6` **without** passing
+through the long-lived pseudo:
+
+    (set (reg $6) (reg $2))      ; the argument, priority 3 or 4
+    (set r_long (reg $6))        ; priority 1, so it is scheduled last
+
+With that shape the long-lived pseudo is born after `aNode`'s last use, takes
+`aNode`'s register, and its copy falls into the `jal`'s delay slot, which is
+exactly `daddu $18, $6, $0` in retail. Two C variables express it, but no
+spelling survives: a plain copy between two pointer variables is propagated
+back to one pseudo whichever way round it is written and wherever it is placed,
+including after the call and after the header stores.
+
 Ruled out, all measured here: a second local copied from the buffer
-(assigned right after the allocation, and again immediately before the
+(assigned right after the allocation, after the `sdfModelSetMatRefPacket`
+call, after the header stores, and again immediately before the
 call), the two locals with their roles reversed, a `u8 *` second local, the
 allocation written inline as the call's third argument (with and without a
 second local), a `(sdfDmaTag_t *)` cast on the argument, the buffer declared
