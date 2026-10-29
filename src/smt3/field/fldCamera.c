@@ -779,7 +779,129 @@ dds3Basic_t *fldCamNowEveCamera(void) {
     return currentEntry;
 }
 
-INCLUDE_ASM(const s32, "field/fldCamera", calcCamSyukan);
+/* First-person sibling of the normal follow camera. See
+ * docs/first-person-camera-matching.md for native geometry and storage. */
+void calcCamSyukan(void) {
+    sdfVector4_t nearPoint;
+    sdfVector4_t referencePoint;
+    sdfVector4_t farPoint;
+    f32 referenceCopy[4] __attribute__((aligned(16)));
+    f32 farCopy[4] __attribute__((aligned(16)));
+    sdfVector4_t scaledPoint;
+    f32 collisionPoint[4] __attribute__((aligned(16)));
+    fldFollowCameraControl_t *control;
+    fldUnitControl_t *unit;
+    dds3Basic_t *node;
+    f32 angle;
+    f32 heightOffset;
+    f32 supportHeight;
+    f32 collisionLength;
+    f32 ratio;
+    f32 fx, fy, fz;
+    f32 dx, dy, dz;
+    f32 unitX, unitY, unitZ;
+    f32 divisorX, divisorY, divisorZ;
+
+    control = fldGetFollowCameraControl();
+    unit = fldGetUnitControl();
+    if (fldGlobalBase.wordF8) {
+        divisorX = 1.0f;
+        divisorY = 1.0f;
+        divisorZ = 1.0f;
+    } else {
+        divisorX = 2.0f;
+        divisorY = 4.0f;
+        divisorZ = 2.0f;
+    }
+    fldGlobalBase.wordF8 = 0;
+    dds3GetPosPoseSet(unit->handle);
+    nearPoint.w = 1.0f;
+    nearPoint.x = fldGlobalBase.x - sdfSin(fldCamPitch * 3.14f / 180.0f) * 30.0f;
+    nearPoint.y = fldGlobalBase.y - 140.0f;
+    nearPoint.z = fldGlobalBase.z - sdfCos(fldCamPitch * 3.14f / 180.0f) * 30.0f;
+    nearPoint.x = D_002FC9C0[0] + (nearPoint.x - D_002FC9C0[0]) / divisorX;
+    nearPoint.y = D_002FC9C0[1] + (nearPoint.y - D_002FC9C0[1]) / divisorY;
+    nearPoint.z = D_002FC9C0[2] + (nearPoint.z - D_002FC9C0[2]) / divisorZ;
+    dds3CameraObjectBasicGetCameraTM(control->camera, &nearPoint);
+    referencePoint.x = fldGlobalBase.x;
+    referencePoint.y = fldGlobalBase.y - 140.0f;
+    referencePoint.z = fldGlobalBase.z;
+    dds3GetTMPoseSet(unit->handle);
+    angle = fldCamPitch * 3.14f / 180.0f;
+    farPoint.w = 1.0f;
+    fx = fldGlobalBase.x + sdfSin(angle) * 100.0f;
+    farPoint.x = fx;
+    fy = fldGlobalBase.y - 140.0f;
+    farPoint.y = fy;
+    fz = fldGlobalBase.z + sdfCos(angle) * 100.0f;
+    farPoint.z = fz;
+    if (l_UseCollision) {
+        supportHeight = fldCamDirLock / 5.0f;
+        heightOffset = fldCamDist + (supportHeight - fldCamDist) * 0.0625f;
+        fldCamDist = supportHeight;
+        fy = farPoint.y + heightOffset;
+        farPoint.y = fy;
+    } else {
+        fldCamDist = fldCamDirLock = 0.0f;
+    }
+    dds3SetPosPoseSet(control->camera, &farPoint);
+    SDF_VU0_COPYVECTOR(&referenceCopy, &referencePoint);
+    SDF_VU0_COPYVECTOR(&farCopy, &farPoint);
+    if (fldCamHeight > D_0054ECA0) {
+        fldCamHeight -= 1000.0f;
+        if (fldCamHeight < D_0054ECA0) {
+            fldCamHeight = D_0054ECA0;
+        }
+    } else if (fldCamHeight < D_0054ECA0) {
+        fldCamHeight += 1000.0f;
+        if (D_0054ECA0 < fldCamHeight) {
+            fldCamHeight = D_0054ECA0;
+        }
+    }
+    /* Retail retains this scaled XYZ scratch at sp+0x50, separate from the
+     * collision output at +0x60. Reload the published far point here; these
+     * same values also feed the no-collision smoothing path below. */
+    fx = farPoint.x;
+    scaledPoint.x = nearPoint.x - fx * fldCamParamTable2;
+    fy = farPoint.y;
+    scaledPoint.y = nearPoint.y - fy * fldCamParamTable2;
+    fz = farPoint.z;
+    scaledPoint.z = nearPoint.z - fz * fldCamParamTable2;
+    if (l_UseCollision) {
+        fldHitChkCamera(farCopy, referenceCopy,
+                        collisionPoint);
+        ratio = D_0054ECA0 / fldCamParamTable2;
+        dx = collisionPoint[0] - referencePoint.x;
+        dy = collisionPoint[1] - referencePoint.y;
+        dz = collisionPoint[2] - referencePoint.z;
+        collisionLength = fsqrtf(dx * dx + dy * dy + dz * dz);
+        unitX = (referencePoint.x - collisionPoint[0]) / collisionLength;
+        unitY = (referencePoint.y - collisionPoint[1]) / collisionLength;
+        unitZ = (referencePoint.z - collisionPoint[2]) / collisionLength;
+        if (collisionLength * ratio < fldCamHeight) {
+            fldCamHeight = collisionLength * ratio;
+        }
+        fx = referencePoint.x - unitX * fldCamHeight;
+        fy = referencePoint.y - unitY * fldCamHeight;
+        fz = referencePoint.z - unitZ * fldCamHeight;
+        farPoint.x = fx;
+        farPoint.y = fy;
+        farPoint.z = fz;
+    }
+    fx = fldCamTarget[0] + (fx - fldCamTarget[0]) / divisorX;
+    farPoint.x = fx;
+    fy = fldCamTarget[1] + (fy - fldCamTarget[1]) / divisorY;
+    farPoint.y = fy;
+    fz = fldCamTarget[2] + (fz - fldCamTarget[2]) / divisorZ;
+    farPoint.z = fz;
+    dds3SetPosPoseSet(control->camera, &farPoint);
+    SDF_VU0_COPYVECTOR(D_002FC9C0, &nearPoint);
+    SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
+    node = control->camera;
+    ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
+    fldCamLength = 0.0f;
+}
+
 
 void fldSetElvCameraScene(u32 mode) {
     fldElvCameraScene = mode;
