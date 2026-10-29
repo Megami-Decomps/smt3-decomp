@@ -18,12 +18,6 @@ s32 pipeFileSave(s8 filename, tagPipePosTable *posPtr, s8 index)
 
 
 
-typedef struct {
-    s32 unk_00;
-    s32 unk_04;
-    s32 unk_08;
-    s32 unk_0C;
-} pipeLinkTable_t;
 
 extern char D_005517E8[];
 extern char D_00548E78[]; /* "size %d\n" */
@@ -43,12 +37,12 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern void LoadLinkData(pipeLinkTable_t *table, pipeLinkSource_t *source, s32 mode);
+extern s32 LoadLinkData(tagPipeLinkInfo *table, pipeLinkSource_t *source, s32 mode);
 
 #ifdef NON_MATCHING
 /* NON_MATCHING: 103 of 106 words match at the exact 424-byte size. */
 s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
-                 pipeLinkTable_t *link)
+                 tagPipeLinkInfo *link)
 {
     s32 *header;
     u8 *src;
@@ -59,7 +53,7 @@ s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
     s32 offset;
     s32 count;
     pipeLinkSource_t source;
-    pipeLinkTable_t table;
+    tagPipeLinkInfo table;
 
     if (D_005517E0 == NULL) {
         D_005517E0 = fileLoad(filename);
@@ -96,10 +90,10 @@ s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
     DEBUG_PRINT(D_00548E98, nodes);
     source.data = src;
     LoadLinkData(&table, &source, 0);
-    link->unk_00 = table.unk_00;
-    link->unk_08 = table.unk_08;
-    link->unk_0C = table.unk_0C;
-    link->unk_04 = table.unk_04;
+    link->aHandle = table.aHandle;
+    link->maxNum = table.maxNum;
+    link->nextId = table.nextId;
+    link->head = table.head;
     sdfMemFreeDirect(fileGetMemHandle(D_005517E0));
     fileHandleFree(D_005517E0);
     D_005517E0 = NULL;
