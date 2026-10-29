@@ -1,5 +1,27 @@
 # Math runtime matching residuals
 
+## __ieee754_atan2f
+
+The reconstruction emits480 native-sized bytes:99 of120 instruction words
+match,21 differ, and no bytes are uncovered or excess. Differences concern
+initial register/scheduling choices, magnitude/sign calculations, two branch
+delay slots and the return restore sequence. Production retains assembly;
+there is no exact-match credit. All three existing math C functions stay exact.
+
+The ABI is scalar y/x in `$f12`/`$f13` and a scalar result in `$f0`. Only the
+exact +1 encoding of x takes the direct `atanf(y)` path. Both magnitude words
+have explicit zero/subnormal gates: small y uses the four quadrant cases;
+small x returns signed half-pi before any division. The original draft omitted
+that x gate; do not replace it with an assumption about division by zero.
+
+The general path tests signed exponent difference against61 and-60, then
+computes `y/x`, calls `fabsf` and calls `atanf`. The library's documented
+`-fno-builtin` option preserves those actual providers. Final quadrants return
+the angle, flip its sign bit, or use the native pi/low-part correction order.
+The immediate words are40490FDA,3FC90FDA and34222168. Validate literals with the
+configured compiler/assembler, whose truncation differs from host rounding.
+No generic infinity/NaN branch is added to the PS2 paths.
+
 ## __ieee754_sqrtf
 
 The guarded reconstruction emits the native 204 bytes; 17 of 51 instruction

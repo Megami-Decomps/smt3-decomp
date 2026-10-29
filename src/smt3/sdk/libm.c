@@ -82,7 +82,83 @@ INCLUDE_ASM(const s32, "sdk/libm", tanf);
 
 INCLUDE_ASM(const s32, "sdk/libm", __ieee754_acosf);
 
+extern f32 fabsf(f32 x);
+extern f32 atanf(f32 x);
+
+/* NON_MATCHING: 21 of 120 words differ; native 480-byte size. */
+#ifdef NON_MATCHING
+f32 __ieee754_atan2f(f32 y, f32 x)
+{
+    s32 hx;
+    s32 hy;
+    s32 ix;
+    s32 iy;
+    union { f32 f; u32 u; } angleWord;
+    s32 quadrant;
+    s32 exponentDifference;
+    f32 angle;
+
+    {
+        union { f32 f; s32 i; } input;
+        input.f = x;
+        hx = input.i;
+    }
+    {
+        union { f32 f; s32 i; } input;
+        input.f = y;
+        hy = input.i;
+    }
+    ix = hx & 0x7FFFFFFF;
+    iy = hy & 0x7FFFFFFF;
+
+    if (hx == 0x3F800000) {
+        return atanf(y);
+    }
+
+    quadrant = (s32)(((u32)hy >> 31) | ((hx >> 30) & 2));
+    if (iy <= 0x007FFFFF) {
+        switch (quadrant) {
+        case 0:
+        case 1:
+            return y;
+        case 2:
+            return 3.1415926f;
+        case 3:
+            return -3.1415926f;
+        }
+    }
+
+    if (ix <= 0x007FFFFF) {
+        return hy < 0
+                   ? -1.5707963f
+                   : 1.5707963f;
+    }
+
+    exponentDifference = (iy - ix) >> 23;
+    if (exponentDifference >= 61) {
+        angle = 1.5707963f;
+    } else if (hx < 0 && exponentDifference < -60) {
+        angle = 0.0f;
+    } else {
+        angle = atanf(fabsf(y / x));
+    }
+
+    switch (quadrant) {
+    case 0:
+        return angle;
+    case 1:
+        angleWord.f = angle;
+        angleWord.u ^= 0x80000000U;
+        return angleWord.f;
+    case 2:
+        return 3.1415926f - (angle - 1.5099578831723193e-7f);
+    default:
+        return (angle - 1.5099578831723193e-7f) - 3.1415926f;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libm", __ieee754_atan2f);
+#endif
 
 INCLUDE_ASM(const s32, "sdk/libm", __ieee754_rem_pio2f);
 
