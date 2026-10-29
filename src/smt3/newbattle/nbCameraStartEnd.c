@@ -86,9 +86,139 @@ extern void effBTLModelAllShow(void);
 extern u8 D_0056B270[];
 extern void *memcpy(void *dst, const void *src, u32 size);
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraStartEnd", nbCameraState_Start_Set);
-
 extern dds3Bezier4PPart_t nbCameraStartTable[2];
+extern f32 effBTLModelGetRadius(nbFormation_t *pFormation);
+extern void SetRotateMatrixY(f32 angle);
+extern const volatile f32 D_0054CA8C, D_0054CA90, D_0054CA94, D_0054CA98;
+extern const volatile f32 D_0054CA9C, D_0054CAA0, D_0054CAA4, D_0054CAA8;
+
+#ifdef NON_MATCHING
+void nbCameraState_Start_Set(nbCamera_t *pNbCamera)
+{
+    nbFormation_t *form = nbGetMainProcessData()->form;
+    nbFormation_t *first = NULL;
+    u32 count = 0;
+    u32 i;
+    f32 width = 0.0f;
+    f32 maxHeight = 0.0f;
+    f32 angle;
+    f32 fovy;
+    f32 widthLimit;
+    f32 minAngle;
+    f32 projection;
+    f32 viewRange;
+    f32 distance;
+    f32 radius;
+    f32 t;
+    f32 step;
+    volatile sdfVector4_t target;
+    volatile sdfVector4_t destination;
+    volatile sdfVector4_t center;
+    volatile sdfVector4_t offset;
+    volatile sdfVector4_t start;
+    volatile sdfVector4_t point;
+
+    for (i = 0; i < 32; i++, form++) {
+        if ((form->stat & 0x201) == 0x201) {
+            f32 height;
+
+            width += 2.0f * (form->r * form->scl);
+            height = effBTLModelGetHeight(form);
+            if (maxHeight < height) {
+                maxHeight = height;
+            }
+            if (count == 0) {
+                first = form;
+            }
+            count++;
+        }
+    }
+    if (count == 0) {
+        return;
+    }
+    width += nbGetEnemyInterval() * (f32)(count - 1);
+    widthLimit = D_0054CA8C;
+    angle = D_0054CA90;
+    if (!(widthLimit <= width)) {
+        angle = (width / widthLimit) * D_0054CA94;
+    }
+    minAngle = D_0054CA98;
+    if (angle < minAngle) {
+        angle = minAngle;
+    }
+    fovy = D_0054CA9C;
+    if (count >= 2) {
+        fovy = D_0054CAA0;
+    }
+    projection = sdfAtan(fovy * 0.5f);
+    if (width < maxHeight) {
+        viewRange = maxHeight * 0.5f;
+    } else {
+        viewRange = width * 0.5f;
+    }
+    if (viewRange < 400.0f) {
+        viewRange = 400.0f;
+    }
+    distance = viewRange / projection;
+    target.x = 0.0f;
+    target.y = -(maxHeight * 0.5f);
+    target.z = nbCameraGetBossDistance() * 0.5f;
+    destination.x = target.x;
+    destination.y = target.y;
+    destination.z = target.z - distance;
+    effBTLModelGetSphereCenter(first);
+    SDF_VU0_STOREVECTOR(&center);
+    radius = effBTLModelGetRadius(first);
+    if (radius < 200.0f) {
+        radius = 200.0f;
+    }
+    radius /= projection;
+    offset.x = 0.0f;
+    offset.y = 0.0f;
+    offset.z = -(radius + (distance - radius) * 0.25f);
+    SetRotateMatrixY(angle);
+    SDF_VU0_LOADVECTOR(&offset);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_LOADVECTOR_B(&center);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&start);
+    if (start.y < -160.0f) {
+        start.y = -160.0f;
+    }
+    destination.y = -160.0f;
+    center.x = -width * 0.25f;
+    t = 0.0f;
+    step = D_0054CAA4;
+    for (i = 0; i < 4; i++) {
+        SDF_VU0_LOADVECTOR(&center);
+        SDF_VU0_LOADVECTOR_B(&target);
+        SDF_VU0_INTERPOLATE(t);
+        SDF_VU0_STOREVECTOR(&point);
+        t += step;
+        nbCameraStartTable[0].controlPoints[i][0] = point.x;
+        nbCameraStartTable[0].controlPoints[i][1] = point.y;
+        nbCameraStartTable[0].controlPoints[i][2] = point.z;
+    }
+    t = 0.0f;
+    step = D_0054CAA8;
+    for (i = 0; i < 4; i++) {
+        SDF_VU0_LOADVECTOR(&start);
+        SDF_VU0_LOADVECTOR_B(&destination);
+        SDF_VU0_INTERPOLATE(t);
+        SDF_VU0_STOREVECTOR(&point);
+        t += step;
+        nbCameraStartTable[1].controlPoints[i][0] = point.x;
+        nbCameraStartTable[1].controlPoints[i][1] = point.y;
+        nbCameraStartTable[1].controlPoints[i][2] = point.z;
+    }
+    nbCameraStartState = 0;
+    D_00551E08 = 0;
+    nbCameraState_Start_Animation(pNbCamera);
+}
+#else
+INCLUDE_ASM(const s32, "newbattle/nbCameraStartEnd", nbCameraState_Start_Set);
+#endif
+
 extern void effBTLModelAllShow(void);
 
 void nbCameraState_Start_Animation(nbCamera_t *pNbCamera)
