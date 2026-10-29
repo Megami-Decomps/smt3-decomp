@@ -2,6 +2,38 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
+## fldItemBoxAdd (0x680)
+
+294 of 416 words differ at the native 1664-byte size, which the draft
+reproduces exactly. Assembly remains active; this reconstruction carries no
+exact-match credit.
+
+The parameters are `(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)`:
+the caller passes the rotation by pointer in $5, not by value as HD does.
+
+Three member groups are pinned by the stores. fldNpcSlot_t holds the spawn
+position as three f32 at 0x04 and a full sdfVector4_t rotation at 0x10, copied
+component by component, then seven zeroed words from 0x30 to 0x48 and the item
+id at 0x4C. fldTakaraSlot_t holds the same position as f32 at 0x10, 0x14 and
+0x18, and the item id again at 0x28. fldTakaraTable has a 16-byte stride and
+its first word is the chest kind, which both selects the pack and lands in
+fldTakaraSlot_t::mode; it is read twice because the calls in between clobber
+memory.
+
+The pack minor is 3 before the switch and 0x1C, 0x1D, 0x1E in the kind 0/3,
+1 and 2 arms; the constant 3 also serves as the case-3 comparison value, which
+is why it appears once.
+
+Most of the remaining differences are one register-numbering shift: retail
+holds the rotation pointer, the item id, id * 16, &rotation and &scl in $19,
+$21, $23, $22 and $30, the draft in $18, $20, $22, $21 and $23, so retail has
+one more high-priority address temporary in $16/$17 over the field-store run
+than the draft produces. The field-store addressing differs with it: retail
+reads the row base once and reaches the rotation members at displacements
+0x10 to 0x1C, while the draft forms a second base at row + 0x10. The effect
+load arm also differs in shape: retail branches around dds3EffectCopy with the
+fldTakaraSlotCount store in the taken delay slot.
+
 ## fldNpcLightSet (field/fld_Npc, 0x28C)
 
 125 of 163 words match, at the exact 652-byte size. Everything the source can say

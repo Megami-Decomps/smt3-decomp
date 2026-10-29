@@ -680,6 +680,7 @@ src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 660 B	physical atta
 src/smt3/newbattle/nbCameraBoss.c	redthing1	done	2026-10-28	1 fn / 1660 B	Pisces camera path with signed frame gates, native remapped blend factors, two four-lane VU scratch vectors and qualified shared-coordinate lifetime; owner 106 match, 0 differ
 src/smt3/field/fldHit.c	redthing1	done	2026-10-29	1 fn / 388 B	PiM agent: native-qualified DDS elevator collision with genuine indexed-field and vector snapshot contracts
 src/smt3/event/evtUnitManager.c	redthing1	done	2026-10-29	1 fn / 1560 B	PiM agent: DDS motion state machine with native SMT3 vertical-motion difference and genuine two-ID restart arms
+<<<<<<< HEAD
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / guarded selection renderer	list selection snapshots, signed row extent, drawing callbacks and cursor-slot update; exact-size draft with 11 scheduling words unresolved
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 fn / 180 B	power-off RPC 33 with uncached result/status words and native semaphore ordering; complete owner exact
 src/smt3/effect/effMagatuhi.c	redthing1	done	2026-10-28	0 matches / shared menu recovery	native editor menu and item records unify effect setup and battle viewer contracts; three complete owners remain exact
@@ -699,3 +700,7 @@ src/smt3/sdk/libgcc.c	redthing1	done	2026-10-29	0 matches / canonical runtime na
 src/smt3/sdk/libmrpc.c	redthing1	done	2026-10-28	2 SDK fn / 444 B	bind wrapper and parameterized transaction with native semaphore lifecycle; unbind guarded at 284 bytes, 60 of 71 words match; owner 5 match, 0 differ
 src/smt3/newbattle/nbPanelProcess.c	z24	wip	2026-10-29	3 fn / 7900 B	nbPanelDrawPP1, nbPanelStockSelect, nbPanelDrawPP
 src/smt3/field/fld_Npc.c	z24	wip	2026-10-29	5 fn / 10512 B	fldItemBoxAdd, fldNpcCalc, fldNpcDraw, fldNpcLoad, fldEADraw
+=======
+src/smt3/newbattle/nbPanelProcess.c	z24	done	2026-10-29	0 fn / 0 B	nbPanelDrawPP1 parked eight words short; nbPanelStockSelect and nbPanelDrawPP untouched; owner 57 match, 0 differ
+src/smt3/field/fld_Npc.c	z24	done	2026-10-29	0 fn / 0 B	fldItemBoxAdd parked at the native size; fldNpcCalc, fldNpcDraw, fldNpcLoad and fldEADraw untouched; owner 16 match, 0 differ
+>>>>>>> 6a4e2457 (Park a fldItemBoxAdd draft at the native size)
