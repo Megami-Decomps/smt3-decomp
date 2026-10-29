@@ -569,7 +569,32 @@ s32 Flow1_10(nbNegoProcessData_t *n)
     return 0;
 }
 
+#ifdef NON_MATCHING
+s32 Flow1_11(nbNegoProcessData_t *n)
+{
+    s32 major;
+
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = 30;
+        return 0;
+    case 1:
+        major = n->data->stagemajor;
+        if (major >= 0xF0 && major < 0xF7) {
+            nbDispNegoMessage(n, n->bossmsg, 0x80, 0);
+        } else if (n->ework->id >= 0x100) {
+            nbDispNegoMessage(n, n->bossmsg, n->ework->id - 0x100, 0);
+        } else {
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x12A, 0);
+        }
+        return 1;
+    default:
+        return 0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_11);
+#endif
 
 s32 Flow1_33(nbNegoProcessData_t *n)
 {
