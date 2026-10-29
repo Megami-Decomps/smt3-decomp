@@ -219,19 +219,7 @@ extern u32 dds3DebugSign;
 
 extern u8 dds3PadButtonState[];
 
-/* The nb event script work; only the fields this unit touches are named. */
-typedef struct nbEventProcessData_t {
-    nbMainProcessData_t *data;
-    s32 eventrid;
-    s32 time;
-    s32 seq;
-    s32 seqtime;
-    void *userdata;
-    void (*unk_18)(dds3ProcessID_t *id);
-    void *file;
-    nbPacHandle_t *pfile;
-    void *mem;
-} nbEventProcessData_t;
+
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 

@@ -79,6 +79,23 @@ typedef struct NB_FILEHANDLE_T {
     nbPacEntry_t *entry;
 } nbPacHandle_t;
 
+struct nbMainProcessData_t;
+struct dds3ProcessID_t;
+
+/* Battle event script process work. */
+typedef struct nbEventProcessData_t {
+    struct nbMainProcessData_t *data;
+    s32 eventrid;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
+    void *userdata;
+    void (*unk_18)(struct dds3ProcessID_t *id);
+    void *file;
+    nbPacHandle_t *pfile;
+    void *mem;
+} nbEventProcessData_t;
+
 /* The native 0x80-byte battle party record. */
 typedef struct nbParty_t {
     u16 flag;

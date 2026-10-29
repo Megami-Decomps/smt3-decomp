@@ -293,19 +293,7 @@ extern void nbSetMesItem(s32 msgid, s32 it);
 
 extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
-/* The nb event script work; only the fields this unit touches are named. */
-typedef struct nbEventProcessData_t {
-    nbMainProcessData_t *data;
-    s32 eventrid;
-    s32 time;
-    s32 seq;
-    s32 seqtime;
-    void *userdata;
-    void (*unk_18)(dds3ProcessID_t *id);
-    void *file;
-    nbPacHandle_t *pfile;
-    void *mem;
-} nbEventProcessData_t;
+
 
 extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                                s32 motion);

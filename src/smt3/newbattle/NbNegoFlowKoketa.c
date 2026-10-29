@@ -236,19 +236,7 @@ extern s32 evtGetAgeOfMoon(void);
 
 extern u32 f;
 
-/* The nb event script work; only the fields this unit touches are named. */
-typedef struct nbEventProcessData_t {
-    nbMainProcessData_t *data;
-    s32 eventrid;
-    s32 time;
-    s32 seq;
-    s32 seqtime;
-    void *userdata;
-    void (*unk_18)(dds3ProcessID_t *id);
-    void *file;
-    nbPacHandle_t *pfile;
-    void *mem;
-} nbEventProcessData_t;
+
 
 extern s32 datGetRace(datUnitWork_t *work);
 
