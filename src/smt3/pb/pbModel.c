@@ -546,7 +546,99 @@ u8 pbFindBlockSlot(s16 x, s16 y, s32 mode)
 INCLUDE_ASM(const s32, "pb/pbModel", pbFindBlockSlot);
 #endif
 
+#ifdef NON_MATCHING
+s32 func_001D35F0(s16 x, s16 y, s32 mode)
+{
+    pbMapWork_t *map = D_0054F5C4;
+    u16 cell = map->map[y][x];
+    u32 kind;
+    s32 result;
+
+    kind = cell >> 13;
+    if (mode == 0) {
+        result = kind == 0;
+        if (cell & 0x800) {
+            return 0;
+        }
+    } else {
+        result = 1;
+        if (kind == 0) {
+            return 0;
+        }
+    }
+    if (x + 1 >= 20) {
+        result |= 8;
+    } else {
+        cell = map->map[y][x + 1];
+        kind = cell >> 13;
+        if (mode == 0) {
+            if (cell & 0x800) {
+                result |= 8;
+            }
+        } else if (mode == 1) {
+            if (kind < 2) {
+                result |= 8;
+            }
+        } else if (kind == 0) {
+            result |= 8;
+        }
+    }
+    if (x - 1 < 0) {
+        result |= 0x10;
+    } else {
+        cell = map->map[y][x - 1];
+        kind = cell >> 13;
+        if (mode == 0) {
+            if (cell & 0x800) {
+                result |= 0x10;
+            }
+        } else if (mode == 1) {
+            if (kind < 2) {
+                result |= 0x10;
+            }
+        } else if (kind == 0) {
+            result |= 0x10;
+        }
+    }
+    if (y + 1 >= 20) {
+        result |= 2;
+    } else {
+        cell = map->map[y + 1][x];
+        kind = cell >> 13;
+        if (mode == 0) {
+            if (cell & 0x800) {
+                result |= 2;
+            }
+        } else if (mode == 1) {
+            if (kind < 2) {
+                result |= 2;
+            }
+        } else if (kind == 0) {
+            result |= 2;
+        }
+    }
+    if (y - 1 < 0) {
+        result |= 4;
+    } else {
+        cell = map->map[y - 1][x];
+        kind = cell >> 13;
+        if (mode == 0) {
+            if (cell & 0x800) {
+                result |= 4;
+            }
+        } else if (mode == 1) {
+            if (kind < 2) {
+                result |= 4;
+            }
+        } else if (kind == 0) {
+            result |= 4;
+        }
+    }
+    return result;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbModel", func_001D35F0);
+#endif
 
 extern sdfVector2_t D_00326D78[];
 extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request);
