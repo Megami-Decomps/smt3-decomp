@@ -1026,3 +1026,11 @@ directly; it returns the previous address or the pointer sentinel `-1`. Selector
 remaining selectors use the common-exception service. The hardware entries remain
 assembly. Their user callbacks have different argument sets, so the registration
 functions preserve opaque code addresses instead of imposing one callback type.
+
+## Process and filesystem compatibility shims
+
+The kernel runtime's `isatty` and the raw provider `libc_2DC670` both return 1;
+the latter is called by `_getpid_r` and keeps its existing symbol name. `kill`
+calls `Exit(signal)` only for process ID 1 and returns zero. `stat` and `unlink`
+leave their supplied objects untouched, set the current errno to 5 through
+`__errno_8`, and return -1. These are the native compatibility behaviors.

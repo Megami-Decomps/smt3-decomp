@@ -379,7 +379,10 @@ INCLUDE_ASM(const s32, "sdk/libkernl", lseek);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sbrk);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", isatty);
+s32 isatty(s32 descriptor)
+{
+    return 1;
+}
 
 s32 fstat(s32 fd, struct stat *st)
 {
@@ -388,13 +391,34 @@ s32 fstat(s32 fd, struct stat *st)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", libc_2DC670);
+s32 libc_2DC670(void)
+{
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", kill);
+extern void Exit(s32 status);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", stat);
+s32 kill(s32 pid, s32 signal)
+{
+    if (pid == 1) {
+        Exit(signal);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", unlink);
+extern s32 *__errno_8(void);
+
+s32 stat(const char *path, struct stat *result)
+{
+    *__errno_8() = 5;
+    return -1;
+}
+
+s32 unlink(const char *path)
+{
+    *__errno_8() = 5;
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceSDC);
 
