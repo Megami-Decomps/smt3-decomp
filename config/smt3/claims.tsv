@@ -637,3 +637,5 @@ src/smt3/effect/effPCPBoss.c	PiM	done	2026-10-29	1 fn / 2544 B	crack trail and f
 src/smt3/newbattle/nbActionProcess.c	redthing1	done	2026-10-28	1 fn / 1172 B	negotiation result setup with fresh battle-work views and a separate final party cursor; qualified allocation parity, owner 77 match, 0 differ
 src/smt3/newbattle/nbCameraSkill.c	redthing1	done	2026-10-28	1 fn / 988 B	second skill-camera initialization with native early overrides, target-count dispatch and three exact jump tables; owner 30 match, 0 differ
 src/smt3/mc/slMain.c	redthing1	done	2026-10-28	0 matches / provider contract correction	file-info readiness declaration aligned with the signed 32-bit definition; existing caller bytes unchanged, owner 97 match, 0 differ
+src/smt3/newbattle/nbCameraBoss.c	z21	done	2026-10-29	14 fn / 17320 B	4 matched, 3 parked; camera-state family, see docs/nonmatching/newbattle/nbCameraBoss.md
+src/smt3/field/fldCamera.c	z21	done	2026-10-29	7 fn / 9040 B	not started; no usable shape template, resetCamNormal and resetCamNormal2 are 0.84 twins of each other

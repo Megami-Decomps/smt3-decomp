@@ -92,3 +92,41 @@ on this alone: `dds3CameraObjectBasicSetFovy(camera, 0.8726646f)` and
 truncation row above is what picks the decimal: `0.87266457f` rounds to
 `0x3F5F66F1` and retail holds `0x3F5F66F2`, so the literal has to be at or
 above the target value, and `0.8726646f` is exact.
+
+## Correcting a one-ULP miss mechanically
+
+`check_unit.py` prints both words, so the direction of the miss is known. Take
+the retail word, print its exact value, and write the first eight or nine
+significant digits; if that still lands one ULP short, bump the last digit by
+one in the direction of the miss. Over 24 literals in `nbCameraBoss` this
+closed every case in at most two tries:
+
+| retail word | exact value | `%.8g`, which missed | what matched |
+| --- | --- | --- | --- |
+| `0xc46a8f5b` | -938.23992919921875 | `-938.23993f` | `-938.23993f` |
+| `0xc3fcef5b` | -505.86996459960938 | `-505.86996f` | `-505.86997f` |
+| `0x41119998` | 9.0999984741210938 | `9.0999985f` | `9.0999985f` |
+| `0x3ecccccc` | 0.39999997615814209 | `0.39999998f` | `0.39999998f` |
+
+The shortest round-tripping decimal is the wrong thing to reach for: `-938.24f`
+and `0.4f` are both exact in C and both one ULP away from retail, because
+ee-as, not cc1, does the decimal-to-binary conversion for the `li.s` cc1
+emits, and it rounds differently at the shorter spellings.
+
+## A constant the original build put in the unit's own .sdata
+
+A float constant too awkward for `.lit4`, negative zero among them, was emitted
+into the translation unit's own `.sdata` and addressed with `lui %hi` plus
+`%lo`, not `gp`-relative. The build cannot reproduce that: the linker script
+discards each source object's `.sdata` in favour of the split asm, so writing
+the literal fails the link with
+
+    `.sdata' referenced in section `.text' ... defined in discarded section
+
+Reference the address instead, and declare it **`extern const f32
+D_XXXXXXXX[];`**. The array form keeps it out of small data so the addressing
+is `%hi`/`%lo`; `const` puts the load in the constant pool's alias set, which
+is what decides the scheduling around it. Plain `extern f32 D_XXXXXXXX[]`
+assembles and links but reorders the surrounding loads:
+`nbCameraBoss_Beru_HAENO1_Set` is 18 words off with it and exact with `const`.
+A scalar `extern f32` is worse again, since gcc then uses `gp`.

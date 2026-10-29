@@ -100,3 +100,76 @@ whatever makes that first `return 1` a bare jump to the shared exit.
 
 The jump table differs as a consequence; the case set itself is confirmed by
 the default entries, which all resolve to the one default block.
+
+## nbCameraBoss_BSMIZ_Command_Set (newbattle/nbCameraBoss, 0x218)
+
+68 of 131 words differ; 524 bytes emitted against retail's 536.
+
+The body came off the matched sibling `nbCameraBoss_BSSAMA_Command_Set`, which
+has the same shape plus an `effBTLModelGetID` test. Everything up to the
+`length` choice matches except two callee-saved names: retail holds
+`pNbCamera` in `$18` and the model id in `$17`, the draft the other way round.
+That swap is a live-length tie-break and follows the one real difference.
+
+Retail reloads `pos.y` from the frame for the `> -1.5f` clamp after storing all
+three components, then uses `bc1tl` with the clamp store in the delay slot. The
+draft keeps `pos.y` in a register, so the whole scale-and-add block schedules
+`pos.y` first and the clamp folds into it, and retail's `b` to the join plus its
+`nop` are three words the draft never emits. The HD reconstruction of this
+function also reads `pos.y` back through a separate accessor, so the reload is
+in the original, but nothing in C reproduces it here: the matched
+`BSSAMA_Command_Set` has the identical clamp over a literal distance and keeps
+the value in a register, as the draft does.
+
+Ruled out: `if/else`, `?:`, reversed `!=` tests, nested `if`, and a `switch` with
+cases 50 and 74 for the 560/550 choice (all identical output); declaration order
+of the locals; `u32` for the id; `pos`, `dir` and `center` as `f32[4]` instead of
+`sdfVector4_t`; `volatile pos`; `pBase`/`pForm` assignment order;
+`STOREVECTOR` against `STOREVECTOR_NOMEM` on each of the three stored vectors;
+`length * dir.x` and `dir.x * length + center.x` operand orders; scaling `dir`
+in place first (exact size, 41 of 134 words differ, but it emits three extra
+`dir` stores retail does not have); `do { } while (0)` around the three
+component assignments.
+
+## nbCameraBoss_Kagu_E909_Run (newbattle/nbCameraBoss, 0x2D4)
+
+44 of 180 words differ; 720 bytes emitted against retail's 724.
+
+Everything up to the shared tail matches, including the two-case `switch` on
+`pNbCamera.frame` that puts both arms out of line, and the four interpolation
+endpoints in `D_00325A00`, `D_00325A10`, `nbCameraKaguVec` and
+`nbCameraKaguVec2`.
+
+The one missing word is a register copy. Retail loads the frame counter with
+`lw $2, %gp_rel(D_00551E80)`, then `daddu $4, $2, $0` before `mtc1 $4, $f0` and
+`cvt.s.w`, and both the conversion and the trailing `addiu $2, $4, 1` read `$4`,
+so `$2` dies at the copy. The draft loads straight into `$4` and converts that,
+one word shorter, and every word after shifts.
+
+Ruled out: reading the global once against twice; `frame / (f32)len` without
+the cast, `(f32)frame` assigned to a float local first, and a second `s32`
+local copied from `frame` before the cast (all coalesce the same way);
+`frame = frame + 1; D_00551E80 = frame;` instead of one expression;
+`D_00551E80++`; `u32` for the counter (which reverses the clamp and runs two
+words long).
+
+## nbCameraBoss_Kagu_MJINKO_Set (newbattle/nbCameraBoss, 0x31C)
+
+39 of 199 words differ at retail's exact 796 bytes.
+
+The dispatch, the three arms, the four stacked interpolation endpoints and every
+float literal match. `u32` on `nbCameraBoss_Kagu_MJINKO_Type` is what drops the
+range test out of the three-case `switch`, the way it does in
+`nbCameraBoss_Beru_HAENO1_Set`.
+
+What is left is one instruction's placement. The arms for type 0 and type 1 end
+with the same eight-statement tail, which gcc cross-jumps into one block.
+Retail's merged block begins with the `lui`/`mtc1` pair that materialises the
+`1.0f` for `distance`, so ee-as finds nothing to put in the delay slot of the
+`b` that reaches it and leaves a `nop`. The draft's merged block begins with the
+six `lwc1` loads of `target` and `direction`, ee-as hoists the first load into
+that delay slot, and every word of the tail then sits one position earlier.
+
+Ruled out: `distance = 1.0f` before, between and after the three component adds
+and the `fovy` store (all six orders of those three statements); computing the
+three sums into float locals and storing them after the `fovy` store.

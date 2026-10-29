@@ -106,6 +106,8 @@ fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/nonmatchin
 fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	187 of 207 words match	docs/nonmatching/field/fldAutoMap.md	119
 fldAutoMapProc	field/fldAutoMap	0x48	15 of 18 words match	docs/nonmatching/field/fldAutoMap.md	166
 fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/nonmatching/field/fldAutoMap.md	184
+resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/nonmatching/field/fldCamera.md	5
+resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/nonmatching/field/fldCamera.md	35
 fldSkyDrawFilter	field/fldDraw	0xAD8	682 of 694 words match	docs/nonmatching/field/fldDraw.md	5
 fldStatusSet	field/fldDraw	0xF8	36 of 62 words match	docs/nonmatching/field/fldDraw.md	32
 fldCamUpdateChase	field/fldDraw	0x250	120 of 148 words match	docs/nonmatching/field/fldDraw.md	52
@@ -148,6 +150,9 @@ SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/nonmatching/newbattle
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	5
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	48
 nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	77
+nbCameraBoss_BSMIZ_Command_Set	newbattle/nbCameraBoss	0x218	68 of 131 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	104
+nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	134
+nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	156
 dds3EffectFileListCreate	newbattle/nbCameraHelper	1080 bytes	269 of 270 words match	docs/nonmatching/newbattle/nbCameraHelper.md	5
 dds3EffectFileListWindowDrawSprite	newbattle/nbCameraHelper	280 bytes	Two of 70 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	21
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/nonmatching/newbattle/nbCameraPress.md	5
