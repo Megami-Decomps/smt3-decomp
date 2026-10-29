@@ -89,7 +89,7 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00 */ u8 StepY[4];
+    /* 0x00 */ s32 StepY;
     /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
     /* 0x08 */ s32 CursorSize;
@@ -123,7 +123,9 @@ typedef struct
     /* 0x0000 */ u8 unk_0000[9];
     /* 0x0009 */ u8 unk_0009[0x17];
     /* 0x0020 */ s32 flags;
-    /* 0x0024 */ u8 unk_0024[0x138];
+    /* 0x0024 */ u8 unk_0024[0x1C];
+    /* 0x0040 */ fclPanelPos_t pos;
+    /* 0x0060 */ u8 unk_0060[0xFC];
     /* 0x015C */ cmpCursorInfo_t listCursor;
 } lstWork_t;
 
@@ -343,15 +345,18 @@ s32 rcvCalc(s32 id)
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_0000[0x1130];
+    /* 0x0000 */ u8 unk_0000[0x105C];
+    /* 0x105C */ s32 recoverPrices[16];
+    /* 0x109C */ u8 unk_109C[0x94];
     /* 0x1130 */ lstWork_t list;
     /* 0x12C4 */ u8 unk_12C4[0x3210];
     /* 0x44D4 */ s32 texHandle[3];
+    /* 0x44E0 */ fclPanel_t panel;
 } rcvDrawWork_t;
 
 extern rcvDrawWork_t *rcvDrawWork;
 
-extern void rcvDrawPanelAt(lstWork_t *list, s32 flag, s32 arg);
+extern void rcvDrawPanelAt(lstWork_t *list, s8 flag, s32 arg);
 
 extern char *D_003306F0[];
 
@@ -417,7 +422,50 @@ void rcvDrawRowBox(fclPanelPos_t *panel, s32 ot)
 
 INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawRowText);
 
+extern s32 fclDrawPanel(fclPanel_t *panel, s32 ot);
+extern void fclUpdatePanel(fclPanel_t *panel);
+extern void lstDrawListWindow(lstWork_t *list, s8 noCursor, s32 ot);
+extern void lstDrawListWindowCursor(lstWork_t *list, s32 ot);
+extern s32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 row, s32 slot,
+                              s32 mode, s32 alpha);
+extern void rcvDrawRowText(s32 x, s32 y, s32 z, s32 color, s8 index, s32 ot);
+extern void fclDrawPhaseHeader(lstWork_t *list, s32 color, s32 mode, s32 ot);
+
+#ifdef NON_MATCHING
+void rcvDrawPanelAt(lstWork_t *list, s8 flag, s32 ot)
+{
+    cmpCursorInfo_t *cursor = &list->listCursor;
+    s32 x = list->pos.unk_00;
+    s32 y = list->pos.unk_04;
+    s32 z = list->pos.unk_08;
+    fclPanelPos_t panel;
+    s32 i;
+
+    fclDrawPanel(&rcvDrawWork->panel, 0x47);
+    fclUpdatePanel(&rcvDrawWork->panel);
+    lstDrawListWindow(list, flag, ot);
+    for (i = 0; i < cursor->unk_26; i++) {
+        s32 mode = DDS3_GBWK->maka < rcvDrawWork->recoverPrices[i];
+        s32 color;
+
+        if (flag != 0) {
+            mode |= 2;
+        }
+        color = cmpDrawListItemBox(cursor, i, i, mode, 0x100);
+        rcvDrawRowText(x, y, z, color, (u8)cursor->unk_22 + i, ot);
+        y += cursor->StepY << 3;
+    }
+    fclDrawPhaseHeader(list, 0x80808080, 0, 0x47);
+    rcvDrawRowBox(&list->pos, ot);
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, (fclPanel_t *)&panel);
+    shopDrawItemCount(&panel, 0x80808080, 0x47);
+    if (flag == 0) {
+        lstDrawListWindowCursor(list, ot);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawPanelAt);
+#endif
 
 void rcvDrawSeq1(void)
 {
