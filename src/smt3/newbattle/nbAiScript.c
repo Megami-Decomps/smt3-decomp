@@ -255,7 +255,6 @@ extern void nbGroupFormDispOff(s32 side);
 
 extern s32 btl_ai_rot_cnt;
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, u8 *scrdata, s32 startproc);
 
 extern void scrSetUserData(dds3ProcessID_t *id, void *p);
 

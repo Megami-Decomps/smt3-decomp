@@ -1,9 +1,12 @@
 #include "common.h"
+#include "scr.h"
 #include "event.h"
 #include "kernel.h"
 #include "draw3d.h"
 #include "libsdf.h"
 #include "ps2asm.h"
+
+extern u64 sdfDelayedResrcCheck(void);
 void dds3GetRadiusPoseSet(dds3Basic_t *node, f32 value);
 
 u32 dds3AllocObjectId(void);
@@ -105,7 +108,6 @@ extern void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *pBasic, u32 field, u
                                                        u32 pF1, u32 pF2,
                                                        const sdfTextureOffsetListHeader_t *pTB, u32 pBF);
 
-extern s32 scrStartScriptByName(s32 priority, const char *path, s32 option);
 
 extern char D_0056CE50[];
 

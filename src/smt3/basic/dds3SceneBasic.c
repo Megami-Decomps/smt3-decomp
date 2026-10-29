@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr.h"
 #include "basic.h"
 #include "kernel.h"
 
@@ -30,7 +31,6 @@ extern void sdfChipFreeDirect(void *aPtr);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *address, s32 flags);
 extern s32 scrSearchProcedureName(void *scrdata, char *procname);
-extern void scrStartScript2(s32 priority, void *scrdata, s32 startproc);
 int printf(const char *fmt, ...);
 
 s32 sceneconstructor(dds3Basic_t *basic)

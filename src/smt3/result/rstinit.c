@@ -43,7 +43,6 @@ extern void fclClearFlag(s8 index);
 extern s32 fclSetWorkValue(s8 index, s32 value);
 extern void rstGetEvoModelParam(u16 id, f32 *out);
 extern datUnitVisual_t datModelParamTable[];
-extern void evtStartEvent(s32 no);
 extern s32 cmpGetEncycWork(void);
 extern void mdlSmoothSingleMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
 extern void mdlSmoothLoopMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);

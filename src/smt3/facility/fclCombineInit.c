@@ -106,7 +106,6 @@ extern s32 cmbGetRaceCombineResult(s32 race, u8 level);
 
 extern s32 evtBitCheck(s32 no);
 
-extern s32 evtStartEvent(s32 no);
 
 extern s32 evtGetAgeOfMoon(void);
 
@@ -5766,11 +5765,11 @@ void shop_206A38(s32 x, s32 y, cmbListWork_t *list, s32 ot)
 INCLUDE_ASM(const s32, "facility/fclCombineInit", shop_206A38);
 #endif
 
-s32 shopStartEvent(s8 value)
+void shopStartEvent(s8 value)
 {
     fclSetWorkValue(1, value);
     fclClearFlag(1);
-    return evtStartEvent(0x322);
+    evtStartEvent(0x322);
 }
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEB0);

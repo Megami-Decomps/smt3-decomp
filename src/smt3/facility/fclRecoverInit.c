@@ -84,7 +84,7 @@ extern void fclRecoverLoadTextures(void *work);
 extern void fclInitPanel(void *panel, s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 color, s8 type,
                          s8 speed);
 
-extern void fclStartRecoverEvent(s32 mode);
+extern void fclStartRecoverEvent(s8 mode);
 
 extern void *fclLoadTexture(char *pFileName);
 

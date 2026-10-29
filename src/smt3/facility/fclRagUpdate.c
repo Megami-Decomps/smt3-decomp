@@ -10,7 +10,6 @@
 #include "event.h"
 #include "kernel.h"
 
-extern s32 evtStartEvent(s32 no);
 
 extern s32 fclSetWorkValue(s8 index, s32 value);
 
@@ -720,11 +719,11 @@ s32 ragUpdate(dds3ProcessID_t *id)
     return 0;
 }
 
-s32 fclStartRecoverEvent(s8 value)
+void fclStartRecoverEvent(s8 value)
 {
     fclSetWorkValue(1, value);
     fclClearFlag(1);
-    return evtStartEvent(0x321);
+    evtStartEvent(0x321);
 }
 
 INCLUDE_RODATA(const s32, "facility/fclRagUpdate", D_0053D2E8);

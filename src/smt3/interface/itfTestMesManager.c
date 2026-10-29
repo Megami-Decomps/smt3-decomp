@@ -130,7 +130,6 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, u8 *scrdata, s32 startproc);
 
 extern void itfMesMngSetKutiCallback(s32 id, void *func);
 

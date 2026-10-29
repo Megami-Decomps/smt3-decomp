@@ -72,7 +72,6 @@ extern evtUnit_t *evtGetUnitHandle(s32 serial);
 extern void evtSetUnitMotion(evtUnit_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
 extern void mdlSmoothLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber, f32 aBeforeLeng,
                                 f32 aSmoothLeng);
-extern void evtStartEvent(s32 no);
 extern s32 evtNextEventNo;
 extern s32 fldGb __attribute__((section(".data")));
 extern void *sdfChipAllocDirect(u32 aSize);
