@@ -1261,9 +1261,32 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifQueryMaxFreeMemSize);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifQueryTotalFreeMemSize);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifQueryBlockTopAddress);
+/* The IOP block key and query results travel as 32-bit words. */
+u32 sceSifQueryBlockTopAddress(u32 block)
+{
+    if (D_0052C354 < 0) {
+        return 0;
+    }
+    D_0059E8C0[0] = block;
+    if (sceSifCallRpc(D_0059E840, 8, 0, D_0059E8C0, 4,
+                      &D_0059E880, 4, NULL, NULL) < 0) {
+        return 0xFFFFFFFF;
+    }
+    return D_0059E880;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifQueryBlockSize);
+u32 sceSifQueryBlockSize(u32 block)
+{
+    if (D_0052C354 < 0) {
+        return 0;
+    }
+    D_0059E8C0[0] = block;
+    if (sceSifCallRpc(D_0059E840, 9, 0, D_0059E8C0, 4,
+                      &D_0059E880, 4, NULL, NULL) < 0) {
+        return 0xFFFFFFFF;
+    }
+    return D_0059E880;
+}
 
 /* The load-file RPC sends this complete 0x200-byte shared request region. */
 typedef struct lfRequest_t {
