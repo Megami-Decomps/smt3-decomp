@@ -608,7 +608,34 @@ u8 *libc_2D1E50(u8 *p, s32 *out) {
     return p;
 }
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D1EA8);
+static inline s32 fde_compare(u32 *left, u32 *right)
+{
+    return (s32)(left[2] - right[2]);
+}
+
+void libc_2D1EA8(fde_vector *left, const fde_vector *right)
+{
+    u32 leftIndex;
+    u32 rightIndex;
+    u32 *entry;
+
+    /* Preserve owner-based indexing; see levers/cross-block-locals.md. */
+    rightIndex = right->count;
+    if (rightIndex > 0) {
+        leftIndex = left->count;
+        do {
+            rightIndex--;
+            entry = right->array[rightIndex];
+            while (leftIndex > 0 && fde_compare(left->array[leftIndex - 1], entry) > 0) {
+                left->array[leftIndex + rightIndex] = left->array[leftIndex - 1];
+                leftIndex--;
+            }
+            left->array[leftIndex + rightIndex] = entry;
+        } while (rightIndex > 0);
+        left->count += right->count;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D1FA0);
 

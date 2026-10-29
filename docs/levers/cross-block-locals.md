@@ -396,3 +396,33 @@ The object count and vector counts are unsigned 32-bit quantities. Only a
 nonnull sort result replaces the object's array; min/max bounds are still
 published when initial sorting storage is unavailable. An initialized object
 whose linear allocation fails returns before changing its bounds.
+
+
+## Keep frame-vector indexing through its owner
+
+`sdk/libgcc::libc_2D1EA8` matches all 248 instruction bytes with indexed
+accesses through the two `fde_vector` records, as in historical
+[GCC frame.c](https://github.com/gcc-mirror/gcc/blob/releases/gcc-2.95/gcc/frame.c).
+The right index is decremented before selecting its entry. Larger signed
+32-bit address differences shift left entries upward; equal keys stay in
+place. The final left count adds the unchanged right count.
+
+Adding the historical inline comparator alone to the earlier cached-array
+reconstruction leaves its 204-byte residual unchanged. The owner-based form
+recovers the native index/address streams. A control that only captures
+`left->array` once inside the nonempty-right branch and uses that local in
+place of the member accesses again emits 204 bytes, with zero of 51 compared
+words matching and 44 bytes uncovered. Keep the actual member accesses;
+there is no extra read qualifier or artificial consumer.
+
+Qualified actual-owner `--alloc --loops --no-dumps` probes pass
+plain/hooked/unhooked output parity for both forms. The accepted form retains
+the original left count in pseudo 132 (four references, live length 46,
+no crossed calls), assigned `$16`; owner pseudo 84 then receives `$17`.
+Those two saved registers require the native 16-byte frame. The cached-array
+control has a zero-byte frame and no saved registers. These observations
+establish the source control and resulting allocation; they do not identify
+a specific alias-analysis or strength-reduction decision.
+
+Reproduce with
+`tools/cc1probe.sh src/smt3/sdk/libgcc.c --func libc_2D1EA8 --alloc --loops --no-dumps --out /tmp/fde-vector-merge`.
