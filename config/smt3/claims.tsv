@@ -717,3 +717,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 104 B	DECI2 registr
 src/smt3/sdk/libgraph.c	redthing1	done	2026-10-28	1 SDK fn / 400 B	GS reset modes0/1/5 with complete parameter record, native CSR access, handler cleanup and CRT syscall; complete owners exact
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 328 B	buffered DECI2 character output and formatted wrappers; native flush/reload ordering, seven-slot EE variadic register area and callback restoration; complete owner 20 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 444 B	server and queue removal, request dequeue and dispatch loop with shared SIF records; append routines guarded; owner 19 match, 0 differ
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 156 B	TTY circular queue initialization and read/write completion; native bounded payload, shared occupancy and cursor wrap; complete owner 23 match, 0 differ

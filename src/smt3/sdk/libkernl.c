@@ -353,11 +353,45 @@ INCLUDE_ASM(const s32, "sdk/libkernl", iRotateThreadReadyQueue);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", iSuspendThread);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__10);
+typedef struct ttyQueue_t {
+    u32 capacity;
+    /* The TTY callback produces bytes while sceTtyRead polls occupancy. */
+    volatile s32 count;
+    u8 *read;
+    u8 *write;
+    u8 data[256];
+} ttyQueue_t;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", QueuePeekWriteDone);
+extern ttyQueue_t D_0059B580;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", QueuePeekReadDone);
+ttyQueue_t *gcc2_compiled__10(u32 capacity)
+{
+    ttyQueue_t *queue = &D_0059B580;
+
+    queue->capacity = capacity;
+    queue->count = 0;
+    queue->write = queue->data;
+    queue->read = queue->data;
+    return queue;
+}
+
+void QueuePeekWriteDone(ttyQueue_t *queue)
+{
+    queue->count++;
+    queue->write++;
+    if (queue->write == queue->data + queue->capacity) {
+        queue->write = queue->data;
+    }
+}
+
+void QueuePeekReadDone(ttyQueue_t *queue)
+{
+    queue->count--;
+    queue->read++;
+    if (queue->read == queue->data + queue->capacity) {
+        queue->read = queue->data;
+    }
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyHandler);
 
