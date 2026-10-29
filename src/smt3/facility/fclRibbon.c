@@ -330,7 +330,73 @@ void DrawHexagonElem(sdfIVector3_t *std_pos, itfColor_t *color, u32 z, sdfDrawTa
     itfMiscDrawSpritePrim2(pos, &D_00332438, color, z, 0, pdrawtag);
 }
 
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *tag, s32 type, s32 context);
+extern itfColor_t D_0053DA08;
+
+#ifdef NON_MATCHING
+void DrawElem(fclRibbon_t *handle, s32 x, s32 y, u32 z,
+              s32 alpha, sdfDrawTag_t *tag)
+{
+    itfColor_t color = D_0053DA08;
+    itfVertex_t pos[2];
+    fclribbon_elem_t *entry = handle->pelem;
+    s32 count = handle->num;
+    s32 i;
+    s32 spread;
+
+    color.components[3] = (s32)((u32)alpha << 7) >> 7;
+    for (i = 0; i < count; i++, entry++) {
+        pos[0].x = x + entry->pos_deact.pm[0];
+        pos[0].y = y + entry->pos_deact.pm[1];
+        pos[1].x = x + entry->pos_deact.pm[2];
+        pos[1].y = y + entry->pos_deact.pm[3];
+        itfMiscDrawSpritePrim(pos, &entry->uv_deact, &color, z, entry->tex[0], 0, tag);
+        if (handle->act == i) {
+            pos[0].x = x + entry->pos_act.pm[0];
+            pos[0].y = y + entry->pos_act.pm[1];
+            pos[1].x = x + entry->pos_act.pm[2];
+            pos[1].y = y + entry->pos_act.pm[3];
+            itfMiscDrawSpritePrim(pos, &entry->uv_act, &color, z, entry->tex[1], 0, tag);
+        }
+    }
+    if (handle->stat & 2) {
+        color.components[3] = (s32)((u32)handle->ctr_deact * (u32)alpha) >> 7;
+        entry = &handle->pelem[handle->deact];
+        pos[0].x = x + entry->pos_act.pm[0];
+        pos[0].y = y + entry->pos_act.pm[1];
+        pos[1].x = x + entry->pos_act.pm[2];
+        pos[1].y = y + entry->pos_act.pm[3];
+        itfMiscDrawSpritePrim(pos, &entry->uv_act, &color, z, entry->tex[1], 0, tag);
+    }
+    itfMiscDrawAlphaPrim(tag, 1, 0);
+    if (handle->stat & 1) {
+        s32 timer = handle->ctr_act;
+
+        color.components[3] = (s32)((u32)timer * (u32)alpha) >> 7;
+        entry = &handle->pelem[handle->act];
+        pos[0].x = x + entry->pos_act.pm[0] - timer * 2;
+        pos[0].y = y + entry->pos_act.pm[1] - (timer >> 1);
+        pos[1].x = x + entry->pos_act.pm[2] + timer * 2;
+        pos[1].y = y + entry->pos_act.pm[3] + (timer >> 1);
+        itfMiscDrawSpritePrim(pos, &entry->uv_act, &color, z, entry->tex[1], 0, tag);
+    }
+    if (handle->ctr < 0x40) {
+        s32 timer = handle->ctr;
+
+        spread = 0x40 - timer;
+        color.components[3] = (s32)((u32)timer * (u32)alpha) >> 7;
+        entry = &handle->pelem[handle->act];
+        pos[0].x = x + entry->pos_act.pm[0] - spread * 2;
+        pos[0].y = y + entry->pos_act.pm[1] - (spread >> 1);
+        pos[1].x = x + entry->pos_act.pm[2] + spread * 2;
+        pos[1].y = y + entry->pos_act.pm[3] + (spread >> 1);
+        itfMiscDrawSpritePrim(pos, &entry->uv_act, &color, z, entry->tex[1], 0, tag);
+    }
+    itfMiscDrawAlphaPrim(tag, 0, 0);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclRibbon", DrawElem);
+#endif
 
 INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053DA08);
 
