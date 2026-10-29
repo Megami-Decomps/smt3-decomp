@@ -875,3 +875,4 @@ src/smt3/sdk/libm.c	redthing1	done	2026-10-28	2 SDK fn / 100 B	fabsf and copysig
 
 src/smt3/sdk/libm.c	redthing1	done	2026-10-28	1 SDK fn / 644 B	tangent kernel with native tiny-input returns, angle fold, thirteen-coefficient polynomial and compensated reciprocal; initialized truncation working value restores native word transfers
 src/smt3/sdk/libm.c	redthing1	done	2026-10-28	1 SDK fn / 1060 B	inverse-cosine arithmetic body with native rational coefficients, signed domains and compensated square-root paths; forwarding entries remain assembly
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 16 B	raw close and lseek interfaces preserve caller-grounded signed inputs and 64-bit seek result; owner 140 match, 0 differ

@@ -371,11 +371,17 @@ s32 read(s32 descriptor, void *buffer, s32 length)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", open);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", close);
+s32 close(s32 descriptor)
+{
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", ioctl);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", lseek);
+long lseek(s32 descriptor, s32 offset, s32 whence)
+{
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sbrk);
 

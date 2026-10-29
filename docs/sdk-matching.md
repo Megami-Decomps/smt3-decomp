@@ -1035,6 +1035,12 @@ calls `Exit(signal)` only for process ID 1 and returns zero. `stat` and `unlink`
 leave their supplied objects untouched, set the current errno to 5 through
 `__errno_8`, and return -1. These are the native compatibility behaviors.
 
+The raw `close` and `lseek` compatibility providers also return -1 unconditionally
+and do not update errno. The existing `_lseek_r` interface supplies signed 32-bit
+descriptor, offset and origin values and consumes a 64-bit `long` result; the
+native signed immediate return sign-extends to that same full-width -1. These
+providers are distinct from the `sceClose` and `sceLseek` RPC interfaces.
+
 ## Inverse-cosine entry boundaries
 
 The region formerly covered by the single `__ieee754_acosf` symbol contains
