@@ -8,20 +8,13 @@
 
 typedef struct
 {
-    f32 x;
-    f32 y;
-    f32 z;
-} fldMapPoint_t;
-
-typedef struct
-{
     char *name;
     u32 nodeIndex;
     void *icons;
     u32 iconCount;
     s32 floor;
-    fldMapPoint_t *pointA;
-    fldMapPoint_t *pointB;
+    fldAmXYZ_t *pointA;
+    fldAmXYZ_t *pointB;
 } fldMapItem_t;
 
 typedef struct
@@ -30,7 +23,7 @@ typedef struct
     fldMapItem_t *items;
     u32 nSB;
     void *pMdl;
-    fldMapPoint_t *pPos;
+    fldAmXYZ_t *pPos;
 } fldAmAreaData_t;
 
 typedef struct
@@ -296,7 +289,7 @@ extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, u8 **loadedAt, u32 *si
 
 extern void *D_00312150[];
 
-extern fldMapPoint_t fldAutoMapModelPos[32];
+extern fldAmXYZ_t fldAutoMapModelPos[32];
 
 extern sdfTexHandle_t *D_00551CC0[2];
 
@@ -987,7 +980,7 @@ void fldAutoMapSeqStart(void) {
     p2sdPlaySE(0xE, 0x7F, 0x3F);
     rec = fldAutoMapHeader;
     for (i = 0; i < fldAutoMapData; i++, rec++) {
-        fldMapPoint_t *pos;
+        fldAmXYZ_t *pos;
 
         D_00312150[i] = sdfModelMakeEarly(0, rec->pMdl);
         pos = rec->pPos;
@@ -1484,7 +1477,7 @@ void fldAllIconDel(s32 index, f32 *x, f32 *z) {
     fldAmAreaData_t *entry = fldAutoMapHeader;
     for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
         if (i == index) {
-            fldMapPoint_t *position = entry->pPos;
+            fldAmXYZ_t *position = entry->pPos;
             *x = position->x;
             *z = position->z;
             return;
@@ -1499,9 +1492,9 @@ void fldAutoMapGetBBox(f32 *getX0, f32 *getZ0, f32 *getX1, f32 *getZ1) {
     u32 i;
     fldAmAreaData_t *rec;
     fldMapItem_t *item;
-    fldMapPoint_t *a;
+    fldAmXYZ_t *a;
     s32 visible;
-    fldMapPoint_t *b;
+    fldAmXYZ_t *b;
 
     room = 0;
     *getX0 = 0.0f;

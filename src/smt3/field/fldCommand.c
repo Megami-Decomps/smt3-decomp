@@ -8,20 +8,13 @@
 
 typedef struct
 {
-    f32 x;
-    f32 y;
-    f32 z;
-} fldMapPoint_t;
-
-typedef struct
-{
     char *name;
     u32 nodeIndex;
     void *icons;
     u32 iconCount;
     s32 floor;
-    fldMapPoint_t *pointA;
-    fldMapPoint_t *pointB;
+    fldAmXYZ_t *pointA;
+    fldAmXYZ_t *pointB;
 } fldMapItem_t;
 
 typedef struct
@@ -30,7 +23,7 @@ typedef struct
     fldMapItem_t *items;
     u32 nSB;
     void *pMdl;
-    fldMapPoint_t *pPos;
+    fldAmXYZ_t *pPos;
 } fldAmAreaData_t;
 
 typedef struct

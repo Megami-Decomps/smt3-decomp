@@ -49,6 +49,13 @@ struct collision_s {
     s32 npcID;
 };
 
+typedef struct fldAmXYZ_t
+{
+    f32 x;
+    f32 y;
+    f32 z;
+} fldAmXYZ_t;
+
 union fldTriggerShape_t;
 
 typedef struct fldResPut_t
