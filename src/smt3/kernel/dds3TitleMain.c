@@ -2,6 +2,7 @@
 #include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
+#include "titleGlobal.h"
 #include "mselGlobal.h"
 #include "newdata.h"
 #include "ps2asm.h"
