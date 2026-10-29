@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effThunder.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
 #include "sdf_types.h"
@@ -787,9 +788,9 @@ void effPCPThunderSpherePolyLowSetColor(effPCPThunderSpherePoly_t *hData, u32 ab
     hData->abgr = abgr;
 }
 
-void effPCPThunderSpherePolyLowSetScale(f32 hData, effPCPThunderSpherePoly_t *scale) {
-    scale->head.width = scale->width_base * hData;
-    scale->head.height = scale->height_base * hData;
+void effPCPThunderSpherePolyLowSetScale(effPCPThunderSpherePoly_t *work, f32 scale) {
+    work->head.width = work->width_base * scale;
+    work->head.height = work->height_base * scale;
 }
 
 u32 effPCPThunderSpherePolyLowGetParam(u32 pThunderPoly) {

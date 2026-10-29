@@ -7,6 +7,7 @@
 #include "event.h"
 #include "nb.h"
 #include "effBattle.h"
+#include "effThunder.h"
 #include "ps2asm.h"
 #include "draw3d.h"
 
@@ -284,7 +285,6 @@ void effPCPThunderSpherePolyLowDraw(void *hData);
 
 void effPCPThunderSpherePolyLowSetPosition(void *hData, sdfVector4_t *pPos);
 
-void effPCPThunderSpherePolyLowSetScale(void *hData, f32 scale);
 
 void effPCPThunderSpherePolyLowSetColor(void *hData, u32 abgr);
 
