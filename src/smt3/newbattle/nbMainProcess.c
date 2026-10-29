@@ -1,4 +1,5 @@
 #include "common.h"
+#include "newbattle.h"
 #include "nb.h"
 #include "ps2asm.h"
 #include "basic.h"
@@ -37,16 +38,7 @@ typedef struct {
     u8 unk_22[0x4];
 } nbEncountForm_t;
 
-typedef struct nbParty_t
-{
-    u16 flag;
-    s16 formindex;
-    s16 statindex;
-    u16 partyindex;
-    s16 count[20];
-    u32 aisyo[16];
-    u16 hojoskill[8];
-} nbParty_t;
+
 
 typedef struct nbActionStack_t {
     s32 type;

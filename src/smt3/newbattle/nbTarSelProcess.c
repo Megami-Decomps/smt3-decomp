@@ -1,16 +1,9 @@
 #include "common.h"
+#include "newbattle.h"
 #include "kernel.h"
 #include "nb.h"
 
-struct nbParty_t {
-    u16 flag;
-    s16 formindex;
-    s16 statindex;
-    u16 partyindex;
-    s16 count[20];
-    u32 aisyo[16];
-    u16 hojoskill[8];
-};
+
 
 /* Target selection is started with an nbActionProcessData_t from the normal
  * action path; the debug path passes NULL. Only its leading state word is

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
 #include "nb.h"
@@ -6,15 +7,7 @@
 #include "motion.h"
 
 /* 128-byte party records; this unit only reads the formation index. */
-struct nbParty_t {
-    u16 flag;
-    s16 formindex;
-    s16 statindex;
-    u16 partyindex;
-    s16 count[20];
-    u32 aisyo[16];
-    u16 hojoskill[8];
-};
+
 
 extern s8 nbCameraPressRunFlag;
 

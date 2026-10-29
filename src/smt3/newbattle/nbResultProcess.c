@@ -1,4 +1,5 @@
 #include "common.h"
+#include "newbattle.h"
 #include "nb.h"
 #include "effBattle.h"
 
@@ -290,15 +291,7 @@ void ShutdownProcess(void)
     }
 }
 
-typedef struct nbParty_t {
-    u16 flag;
-    s16 formindex;
-    s16 statindex;
-    u16 partyindex;
-    s16 count[20];
-    u32 aisyo[16];
-    u16 hojoskill[8];
-} nbParty_t;
+
 
 extern void pacFileHandleFree_(struct NB_FILEHANDLE_T *handle);
 extern void evtFreeStage(void);

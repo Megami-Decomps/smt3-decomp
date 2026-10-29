@@ -1,4 +1,5 @@
 #include "common.h"
+#include "newbattle.h"
 #include "effDebug.h"
 #include "motion.h"
 #include "model.h"
@@ -3234,15 +3235,7 @@ void eff_174D98(void)
     dds3EffectFileListDelete(D_00551DA0);
 }
 
-struct nbParty_t {
-    u16 flag;
-    s16 formindex;
-    s16 statindex;
-    u16 partyindex;
-    s16 count[20];
-    u32 aisyo[16];
-    u16 hojoskill[8];
-};
+
 
 extern u32 D_00551DA8;
 extern u32 D_00551DAC;

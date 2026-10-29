@@ -1,4 +1,5 @@
 #include "common.h"
+#include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
 #include "nb.h"
@@ -45,15 +46,7 @@ extern void dds3EffectPartDraw(effPartHandle_t *hEffPart);
 extern effPartHandle_t *nbCameraHelperFileLoadPB(const char *pFilename);
 
 /* 128-byte party records; this unit only reads the formation index. */
-struct nbParty_t {
-    u16 flag;
-    s16 formindex;
-    s16 statindex;
-    u16 partyindex;
-    s16 count[20];
-    u32 aisyo[16];
-    u16 hojoskill[8];
-};
+
 
 extern f32 D_0054F3A0[];
 

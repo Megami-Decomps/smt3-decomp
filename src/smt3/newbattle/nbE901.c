@@ -1,4 +1,5 @@
 #include "common.h"
+#include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
 #include "scr.h"
@@ -65,16 +66,7 @@ typedef struct
     sdfVector4_t startpos;
 } nbFormation_t;
 
-typedef struct nbParty_t
-{
-    u16 flag;
-    s16 formindex;
-    s16 statindex;
-    u16 partyindex;
-    s16 count[20];
-    u32 aisyo[16];
-    u16 hojoskill[8];
-} nbParty_t;
+
 
 /* A loaded pac file; only the chain down to the decoded buffer is named. */
 typedef struct { u8 unk_00[0x8]; void *buf; } nbPacEntry_t;
