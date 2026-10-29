@@ -264,6 +264,7 @@ The scmd template, for the next pass				docs/matching/sdk/libcdvd.md	24
 Completion callback contracts and remaining drafts				docs/matching/sdk/libcdvd.md	51
 sceCdStRead			95 of 98 words matching	docs/matching/sdk/libcdvd.md	70
 sceDmaPutEnv			21 of 118 words differ	docs/matching/sdk/libdma.md	3
+__umoddi3	sdk/libgcc_longlong	0x568	130 of 346 words match	docs/matching/sdk/libgcc_longlong.md	3
 sceGsExecStoreImage	sdk/libgraph	0x68C	392 of 416 words differ	docs/matching/sdk/libgraph.md	3
 The IPU hazard wait				docs/matching/sdk/libipu.md	3
 sceIpuSync				docs/matching/sdk/libipu.md	38

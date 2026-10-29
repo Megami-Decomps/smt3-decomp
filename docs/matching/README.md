@@ -60,6 +60,7 @@ both native and emitted sizes when they differ.
 | 1 |  | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 1 |  | [sdk/libm.md](sdk/libm.md) |
 | 1 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
+| 1 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
 | 1 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
