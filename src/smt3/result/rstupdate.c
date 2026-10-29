@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camp.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -8,45 +9,10 @@
 
 typedef struct
 {
-    /* 0x00 */ u8 StepY[4];
-    /* 0x04 */ s8 StopFlag;
-    /* 0x05 */ u8 unk_05[3];
-    /* 0x08 */ s32 CursorSize;
-    /* 0x0C */ s32 CursorPos;
-    /* 0x10 */ u16 unk_10;
-    /* 0x12 */ u16 unk_12;
-    /* 0x14 */ u16 unk_14;
-    /* 0x16 */ u16 unk_16;
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ u8 unk_20;
-    /* 0x21 */ u8 unk_21;
-    /* 0x22 */ s16 unk_22;
-    /* 0x24 */ u8 unk_24; /* cursor page offset, with byte-wrapped updates */
-    /* 0x25 */ s8 unk_25;
-    /* 0x26 */ u8 unk_26;
-    /* 0x27 */ u8 unk_27;
-    /* 0x28 */ s32 unk_28;
-    /* 0x2C */ s32 unk_2C;
-    /* 0x30 */ s32 unk_30;
-    /* 0x34 */ s32 unk_34;
-} cmpCursorInfo_t;
-
-typedef struct
-{
-    u8 flag;
-    u8 unk_01[3];
-    u8 race;
-    u8 unk_05;
-    u8 unk_06[54];
-} datDevilInfo_t;
-
-typedef struct
-{
     /* 0x00 */ datUnitWork_t unit;
 } cmbUnit_t;
 
-extern datDevilInfo_t datDevilTable[];
+extern datDevilTableEntry_t datDevilTable[];
 
 typedef struct
 {
@@ -819,9 +785,9 @@ s32 rstUpdateSeqDestroySkill(void)
             if (cursorIndex < 4)
                 startPos->cursorInfo.unk_24 = 8;
             else
-                startPos->cursorInfo.unk_24 -= 4;
+                startPos->cursorInfo.unk_24 = (u8)startPos->cursorInfo.unk_24 + 0xFC;
         } else {
-            startPos->cursorInfo.unk_24 -= 4;
+            startPos->cursorInfo.unk_24 = (u8)startPos->cursorInfo.unk_24 + 0xFC;
         }
         break;
     case 0x80:

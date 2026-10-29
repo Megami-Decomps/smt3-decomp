@@ -312,11 +312,6 @@ void nmeSyncCursor(void) {
     cmpSetCursorRow((s32)row + 2, &nmeUpdateWork->inputCursor);
 }
 
-typedef struct {
-    cmpCursorInfo_t cursor;
-    s8 unk_38;
-} cmpPadStopWork_t;
-
 extern s32 cmpGetPressedButton(s32 mask);
 extern void nmeMoveCursorBy(s8 delta);
 extern s32 nmeGetRowCount(s8 mode);

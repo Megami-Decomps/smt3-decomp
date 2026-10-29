@@ -40,6 +40,49 @@ typedef struct
     u8 unk6E[0x7E];
 } fldAnahoriAkuma_t;
 
+/* The IDB's field order at PS2 widths: narrowing its 0x120-byte record, where
+ * skillcnt is s32 and skill is s32[24], gives this 0xEC record with no gap.
+ * Three HD bodies pin the names against retail: rstChkAddSkill tests
+ * skillcnt at +0x38, SetAction_AI stores nowcommand and nowindex at +0x6A and
+ * +0x6C, and datGetBaseParam sums param, skillparam and mitamaparam.
+ * See docs/idb-corrections.md. */
+typedef struct datUnitWork_t
+{
+    /* 0x00 */ u32 flag;
+    /* 0x04 */ u16 id;
+    /* 0x06 */ u16 hp;
+    /* 0x08 */ u16 maxhp;
+    /* 0x0A */ u16 mp;
+    /* 0x0C */ u16 maxmp;
+    /* 0x0E */ u16 badstatus;
+    /* 0x10 */ u32 exp;
+    /* 0x14 */ u16 level;
+    /* 0x16 */ s8 param[6];
+    /* 0x1C */ s8 skillparam[6];
+    /* 0x22 */ u16 uniqueid;
+    /* 0x24 */ u16 reserve1;
+    /* 0x26 */ u16 reserve2;
+    /* 0x28 */ u16 namecode[8];
+    /* 0x38 */ u16 skillcnt;
+    /* 0x3A */ u16 skill[24];
+    /* 0x6A */ s16 nowcommand;
+    /* 0x6C */ u16 nowindex;
+    /* 0x6E */ s16 nowtarea;
+    /* 0x70 */ s16 nowtform;
+    /* 0x72 */ s16 prevcommand;
+    /* 0x74 */ u16 previndex;
+    /* 0x76 */ s16 prevtarea;
+    /* 0x78 */ s16 prevtform;
+    /* 0x7A */ s8 mitamaparam[6];
+    /* 0x80 */ s8 levelupparam[6];
+    /* 0x86 */ u16 keisyoskill[24];
+    /* 0xB6 */ u8 keiattr[24];
+    /* 0xCE */ u16 hensinmae;
+    /* 0xD0 */ u16 getdevilhearts[4];
+    /* 0xD8 */ u32 hensinmaeexp;
+    /* 0xDC */ u16 fullnamecode[8];
+} datUnitWork_t;
+
 /* Shared persistent work, recovered through its consumers. These fields form
  * a partial view, not a claim about the complete save-work allocation. */
 typedef struct
@@ -61,9 +104,11 @@ typedef struct
     f32 moonTimer;      /* 0xA44 */
     s32 maka;
     u32 maFlags;                  /* 0xA4C */
-    fldAnahoriAkuma_t akuma[16];   /* 0xA50 */
-    /* 0x1910..0x1CF4, split on the IDB's names for the span. */
-    u8 unk1910[4];
+    union {
+        struct { fldAnahoriAkuma_t akuma[16]; u8 unk1910[4]; };
+        struct { u32 unitPrefix; datUnitWork_t unitwork[16]; };
+    };
+    /* 0x1914..0x1CF4, split on the IDB's names for the span. */
     union {
         u8 unk1914[0x10];
         u8 stockOrder[16];
@@ -122,7 +167,7 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00 */ u32 flag;
+    /* 0x00 */ union { u32 flag; struct { u8 flagByte; u8 flagReserved[3]; }; };
     /* 0x04 */ u8 race;
     /* 0x05 */ u8 level;
     /* 0x06 */ u16 hp;
@@ -149,48 +194,45 @@ typedef struct
     /* 0x3B */ u8 reserve1;
 } datDevilTableEntry_t;
 
-/* The IDB's field order at PS2 widths: narrowing its 0x120-byte record, where
- * skillcnt is s32 and skill is s32[24], gives this 0xEC record with no gap.
- * Three HD bodies pin the names against retail: rstChkAddSkill tests
- * skillcnt at +0x38, SetAction_AI stores nowcommand and nowindex at +0x6A and
- * +0x6C, and datGetBaseParam sums param, skillparam and mitamaparam.
- * See docs/idb-corrections.md. */
-typedef struct datUnitWork_t
-{
-    /* 0x00 */ u32 flag;
-    /* 0x04 */ u16 id;
-    /* 0x06 */ u16 hp;
-    /* 0x08 */ u16 maxhp;
-    /* 0x0A */ u16 mp;
-    /* 0x0C */ u16 maxmp;
-    /* 0x0E */ u16 badstatus;
-    /* 0x10 */ u32 exp;
-    /* 0x14 */ u16 level;
-    /* 0x16 */ s8 param[6];
-    /* 0x1C */ s8 skillparam[6];
-    /* 0x22 */ u16 uniqueid;
-    /* 0x24 */ u16 reserve1;
-    /* 0x26 */ u16 reserve2;
-    /* 0x28 */ u16 namecode[8];
-    /* 0x38 */ u16 skillcnt;
-    /* 0x3A */ u16 skill[24];
-    /* 0x6A */ s16 nowcommand;
-    /* 0x6C */ u16 nowindex;
-    /* 0x6E */ s16 nowtarea;
-    /* 0x70 */ s16 nowtform;
-    /* 0x72 */ s16 prevcommand;
-    /* 0x74 */ u16 previndex;
-    /* 0x76 */ s16 prevtarea;
-    /* 0x78 */ s16 prevtform;
-    /* 0x7A */ s8 mitamaparam[6];
-    /* 0x80 */ s8 levelupparam[6];
-    /* 0x86 */ u16 keisyoskill[24];
-    /* 0xB6 */ u8 keiattr[24];
-    /* 0xCE */ u16 hensinmae;
-    /* 0xD0 */ u16 getdevilhearts[4];
-    /* 0xD8 */ u32 hensinmaeexp;
-    /* 0xDC */ u16 fullnamecode[8];
-} datUnitWork_t;
+
+
+/* The 0x1C-byte motion records at datUnitVisual_t +0x2C; the shared view splits
+ * the same bytes as part[], six bytes later. */
+typedef struct nbUnitMotion_t {
+    s16 movetype;
+    u16 actframe;
+    union {
+        s32 se_no;
+        struct { u8 seBytes[2]; u8 type; s8 data; };
+    };
+    f32 motionsp;
+    f32 atarisize;
+    f32 movey;
+    f32 movez;
+    s16 bframe;
+    s16 hframe;
+} nbUnitMotion_t;
+
+
+/* Complete motion-bank view of a native 0x310-byte model-visual row. */
+typedef struct {
+    sdfVector4_t center;
+    f32 formsize;
+    f32 formheight;
+    f32 formscale;
+    f32 oneshotr;
+    f32 allshotr;
+    u16 modelsize;
+    u16 shadowsize;
+    u16 badframe;
+    u16 autowait;
+    nbUnitMotion_t motions[26];
+    u32 reserved[3];
+} nbUnitVisualMotions_t;
+
+typedef char nbUnitVisualMotions_size_must_be_0x310[
+    sizeof(nbUnitVisualMotions_t) == 0x310 ? 1 : -1];
+
 
 /* Model-visual records have a 0x310-byte native stride. The upstream packet
  * helpers use the scalar prefix; the action helpers index 0x1C-byte
@@ -286,6 +328,20 @@ typedef struct
 } datSkillTable_t;
 
 extern datSkillTable_t datSkillTable;
+
+typedef struct nbNegoSkillCondition_t {
+    s32 ptype;
+    s32 etype;
+    s32 message;
+} nbNegoSkillCondition_t;
+
+typedef struct nbNegoSkillEntry_t {
+    s32 requestmode;
+    u8 rate[4];
+    nbNegoSkillCondition_t condition[8];
+} nbNegoSkillEntry_t;
+
+
 
 
 /* Target codes for the AI's group and single target helpers. SMT3HD recovers this

@@ -134,20 +134,6 @@ extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern s32 mdlGetMinorNum(mdlObj_t *aHandle);
 
-/* The 0x1C-byte motion records at datUnitVisual_t +0x2C; the shared view splits
- * the same bytes as part[], six bytes later. */
-typedef struct nbUnitMotion_t {
-    s16 movetype;
-    u16 actframe;
-    s32 se_no;
-    f32 motionsp;
-    f32 atarisize;
-    f32 movey;
-    f32 movez;
-    s16 bframe;
-    s16 hframe;
-} nbUnitMotion_t;
-
 extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 ritu);
 
 extern f32 dds3GetRandFloatA(s32 name);
@@ -268,25 +254,6 @@ s32 nbSetNegoWaitMotion(nbFormation_t *form)
         }
     }
 }
-
-/* Complete motion-bank view of a native 0x310-byte model-visual row. */
-typedef struct {
-    sdfVector4_t center;
-    f32 formsize;
-    f32 formheight;
-    f32 formscale;
-    f32 oneshotr;
-    f32 allshotr;
-    u16 modelsize;
-    u16 shadowsize;
-    u16 badframe;
-    u16 autowait;
-    nbUnitMotion_t motions[26];
-    u32 reserved[3];
-} nbUnitVisualMotions_t;
-
-typedef char nbUnitVisualMotions_size_must_be_0x310[
-    sizeof(nbUnitVisualMotions_t) == 0x310 ? 1 : -1];
 
 extern s32 nbGetMotionNo(nbFormation_t *form, s32 motion);
 extern void evtSetUnitMotion(evtUnit_t *unit, s32 motion, s32 before, s32 smooth, s32 mode);

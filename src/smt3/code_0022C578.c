@@ -1,4 +1,6 @@
 #include "common.h"
+#include "result2.h"
+#include "camp.h"
 #include "kernel.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -345,47 +347,9 @@ typedef struct
     /* 0x00C0 */ cmpStockInfo_t info[2];
 } cmpStockWork_t;
 
-typedef struct
-{
-    /* 0x00 */ u8 StepY[4];
-    /* 0x04 */ s8 StopFlag;
-    /* 0x05 */ u8 unk_05[3];
-    /* 0x08 */ s32 CursorSize;
-    /* 0x0C */ s32 CursorPos;
-    /* 0x10 */ u16 unk_10;
-    /* 0x12 */ u16 unk_12;
-    /* 0x14 */ u16 unk_14;
-    /* 0x16 */ u16 unk_16;
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ u8 unk_20;
-    /* 0x21 */ u8 unk_21;
-    /* 0x22 */ s16 unk_22;
-    /* 0x24 */ s8 unk_24;
-    /* 0x25 */ s8 unk_25;
-    /* 0x26 */ u8 unk_26;
-    /* 0x27 */ u8 unk_27;
-    /* 0x28 */ union {
-        s32 flag;
-        char **text;
-    } listData;
-    /* 0x2C */ union {
-        s32 value;
-        u8 *bytes;
-    } flagsData;
-    /* 0x30 */ s32 unk_30;
-    /* 0x34 */ s32 unk_34;
-} cmpCursorInfo_t;
-
 typedef void (*cmpListRowDraw_t)(s32 x, s32 y, s32 z, u16 width, u16 height2,
                                  u16 height, s32 color0, s32 color1, s32 color2,
                                  s8 phase, s32 scale, s32 ot);
-
-typedef struct
-{
-    /* 0x00 */ cmpCursorInfo_t cursor;
-    /* 0x38 */ s8 unk_38;
-} cmpPadStopWork_t;
 
 typedef struct
 {
@@ -5618,13 +5582,6 @@ void cmpAdvanceStatusAnim(void)
 
 typedef struct
 {
-    s8 SkillCnt;
-    u8 TargetLevel[0x19];
-    u16 skill[25];
-} rstSkillInfo_t;
-
-typedef struct
-{
     /* 0x00 */ u8 unk_00[0x10];
 } cmpModelLink_t;
 
@@ -6967,7 +6924,7 @@ s32 cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
     } else if (phase == -1) {
         effect = 1;
     }
-    memcpy(&step, cursor->StepY, sizeof(step));
+    memcpy(&step, &cursor->StepY, sizeof(step));
     y += step * row * 8;
     fclDrawPanelSprite2(layout == 0 ? 0x48 : 0x44, ot);
     if (effect == 0) {

@@ -2,6 +2,7 @@
 #include "newbattle.h"
 #include "nb.h"
 #include "effBattle.h"
+#include "font.h"
 
 /* Four native 0x34-byte rows; member names follow typeNbResultWork. */
 typedef struct nbResultScore_t {
@@ -256,7 +257,273 @@ s32 nbResultFindBestScore(nbMainProcessData_t *data)
     return nbResultBestScore;
 }
 
+typedef struct frFontRequest_t frFontRequest_t;
+extern s32 nbTobiwarpLabelIdx;
+extern f32 D_00551100;
+extern frFontRequest_t *D_00551FC0;
+extern const char D_005510F0[], D_005510F8[];
+extern char *pStr[];
+extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h,
+                      u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1,
+                      u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3);
+extern f32 sdfSin(f32 angle);
+extern s32 nbGetKakutokuExp(nbMainProcessData_t *data);
+extern s32 nbGetKakutokuMaka(nbMainProcessData_t *data);
+extern void nbResultDrawPC1(s32 index, s32 x, s32 y, s32 offset,
+                            datUnitWork_t *unit, s32 unitIndex, nbMainProcessData_t *data);
+extern void cmpSetSkillListRows(s32 rows);
+extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
+                                          const char *text, frFontRequest_t *previous);
+extern frFontRequest_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                             const char *text, frFontRequest_t *previous);
+extern s32 frDrawFont(frFontHandle_t *request);
+extern s32 frDrawFontEx(frFontHandle_t *request, s8 mode);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
+extern s32 sprintf(char *buffer, const char *format, ...);
+extern void rsetOtOfs(s32 offset);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void rsetAlpha(s32 mode);
+
+#ifdef NON_MATCHING
+void nbFindTobiwarpLabel(nbMainProcessData_t *data)
+{
+    char numberText[16];
+    u32 itemId[3];
+    u32 itemCount[3];
+    s32 i;
+    s32 itemTotal;
+    s32 haveItem = 0;
+    u32 rewardColor = 0xA09DC300;
+    s32 step;
+    s32 alpha;
+    s32 packed;
+    s32 scoreY;
+    s32 resultState;
+    s32 spread;
+    frFontRequest_t *font;
+
+    D_00551100 = D_00551100 + 0.099999995f;
+    nbResultTimer++;
+    nbPnl_setOt(0x47);
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+
+    if (((s32)nbResultTimer) > 0) {
+        step = ((s32)nbResultTimer) < 10 ? ((s32)nbResultTimer) : 10;
+        alpha = (step * 0x80) / 10;
+        packed = 0x80000000 | alpha | (alpha << 8) | (alpha << 16);
+        nbPnlSprite(0, 0, 0x200, 0x1C0, 0, 0, 0x100, 0x100,
+                    packed, nbResultTexHandle);
+        alpha = (step * 112) / 10;
+        packed = 0x10000000 | alpha | (alpha << 8) | (alpha << 16);
+        nbPnlSprite(-2, -2, 0x204, 0x1C4, 0, 0, 0x100, 0x100,
+                    packed, nbResultTexHandle);
+        alpha = (step * 144) / 10;
+        packed = 0x10000000 | alpha | (alpha << 8) | (alpha << 16);
+        nbPnlSprite(-4, -4, 0x208, 0x1C8, 0, 0, 0x100, 0x100,
+                    packed, nbResultTexHandle);
+        alpha = step * 16;
+        packed = 0x10000000 | alpha | (alpha << 8) | (alpha << 16);
+        nbPnlSprite(-6, -6, 0x20C, 0x1CC, 0, 0, 0x100, 0x100,
+                    packed, nbResultTexHandle);
+    }
+
+    if (((s32)nbResultTimer) >= 9) {
+        step = ((s32)nbResultTimer) < 23 ? 23 - ((s32)nbResultTimer) : 0;
+        nbPnlSprite(0, 0x36, 0xFC, 0x1C, 2, 0x53, 0xFC, 0x1C,
+                    0x80808080, nbResultTex2);
+        nbPnlSprite(0xFC, 0x36, 0x104, 0x1C, 0xFD, 0x53, 1, 0x1C,
+                    0x80808080, nbResultTex2);
+        nbPnlSprite(0, 0x56, 0x13, 0x66, 0xE7, 1, 0x13, 0x66,
+                    0x80808080, nbResultTex1);
+        nbPnlSprite(0x13, 0x56, 0x1ED, 0x66, 0xF9, 1, 1, 0x66,
+                    0x80808080, nbResultTex1);
+        nbPnlSprite(0, 0xC0, 0xFC, 5, 2, 0x6F, 0xFC, 5,
+                    0x80808080, nbResultTex2);
+        nbPnlSprite(0xFC, 0xC0, 0x104, 5, 0xFD, 0x6F, 1, 5,
+                    0x80808080, nbResultTex2);
+        alpha = (s32)(sdfSin(D_00551100 * 1.3f) * 24.0f) + 0x70;
+        packed = 0x80000000 | alpha | (alpha << 8) | (alpha << 16);
+        nbPnl_rsetAlpha(1);
+        nbPnlSprite(0, 0x30, 0x9C, 0x2C, 1, 0x25, 0x9C, 0x2C,
+                    packed, nbResultTex2);
+        alpha = step * 128 / 15;
+        nbPnl_rsetAlpha(0);
+        nbPnlSprite(21, 58, 99, 21, 1, 1, 99, 21,
+                    0x80808080, nbResultTex1);
+        if (alpha > 0) {
+            nbPnl_rsetAlpha(1);
+            packed = (u32)alpha << 24;
+            spread = step / 4;
+            nbPnlSprite(21 - spread, 58 - spread, 99 + spread * 2, 21 + spread * 2,
+                        1, 1, 99, 21, packed | 0xC0C0C0, nbResultTex1);
+            spread = step / 2;
+            nbPnlSprite(21 - spread, 58 - spread, 99 + spread * 2, 21 + spread * 2,
+                        1, 1, 99, 21, packed | 0x909090, nbResultTex1);
+            spread = step * 3 / 4;
+            nbPnlSprite(21 - spread, 58 - spread, 99 + spread * 2, 21 + spread * 2,
+                        1, 1, 99, 21, packed | 0x606060, nbResultTex1);
+            nbPnlSprite(21 - step, 58 - step, 99 + step * 2, 21 + step * 2,
+                        1, 1, 99, 21, packed | 0x303030, nbResultTex1);
+        }
+    }
+    nbPnl_rsetAlpha(0);
+    itemId[0] = itemId[1] = itemId[2] = 0;
+    itemCount[0] = itemCount[1] = itemCount[2] = 0;
+    itemTotal = 0;
+    for (i = 0; i < 3; i++) {
+        u8 item = data->item[i];
+        if (item != 0 && (u8)(item + 0xC0) >= 0x19) {
+            haveItem = 1;
+            itemId[itemTotal] = ((volatile nbMainProcessData_t *)data)->item[i];
+            itemCount[itemTotal] = data->itemcnt[i];
+            itemTotal++;
+        }
+    }
+
+    if (((s32)nbResultTimer) >= 9) {
+        step = ((s32)nbResultTimer) < 23 ? 23 - ((s32)nbResultTimer) : 0;
+        alpha = 128 - step * 128 / 15;
+        packed = ((u32)alpha << 24) | 0x808080;
+        nbPnlSprite(0x5C, 0x64, 0x37, 0x16, 1, 0x17, 0x37, 0x16, packed, nbResultTex1);
+        nbPnlSprite(0x93, 0x64, 0x36, 0x16, 0x39, 0x17, 0x36, 0x16, packed, nbResultTex1);
+        nbPnlSprite(0x5C, 0x84, 0x37, 0x16, 1, 0x17, 0x37, 0x16, packed, nbResultTex1);
+        nbPnlSprite(0x93, 0x84, 0x36, 0x16, 0x39, 0x17, 0x36, 0x16, packed, nbResultTex1);
+        nbPnlSprite(0x30, 0x68, 0x27, 0x10, 0x97, 1, 0x27, 0x10, packed, nbResultTex1);
+        nbPnlSprite(0x49, 0x88, 0x0E, 0x10, 0x9D, 0x12, 0x0E, 0x10, packed, nbResultTex1);
+        if (haveItem != 0) {
+            nbPnlSprite(0xDC, 0x68, 0x31, 0x10, 0x65, 1, 0x31, 0x12,
+                        packed, nbResultTex1);
+            for (i = 0; i < 3; i++) {
+                nbPnlSprite(0x111, 0x64 + i * 0x1A, 0x37, 0x16,
+                            1, 0x17, 0x37, 0x16, packed,
+                            nbResultTex1);
+                nbPnlSprite(0x148, 0x64 + i * 0x1A, 0x53, 0x16,
+                            0x37, 0x17, 1, 0x16, packed,
+                            nbResultTex1);
+                nbPnlSprite(0x19B, 0x64 + i * 0x1A, 0x36, 0x16,
+                            0x39, 0x17, 0x36, 0x16, packed,
+                            nbResultTex1);
+            }
+
+        cmpSetSkillListRows(0x13);
+        for (i = 0; i < itemTotal; i++) {
+            u32 id = itemId[i];
+            if (id == 0) { continue; }
+            font = frwGetSmallFontFRQ(0x1210, 0x338 + i * 0xD0,
+                                      0, (s32)0xA09DC380, pStr[id], NULL);
+            D_00551FC0 = font;
+            frDrawFont((frFontHandle_t *)font);
+            frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
+            nbPnlSprite(0x197, 0x6B + i * 0x1A, 0x0B, 0x0B,
+                        0xAC, 0x12, 0x0B, 0x0B, 0x80808080,
+                        nbResultTex1);
+            sprintf(numberText, D_005510F0, itemCount[i]);
+            font = frwGetSmallNumFontFRQ(0x1AC0, 0x348 + i * 0xD0,
+                                         0, 0xA09DC380, numberText, NULL);
+            D_00551FC0 = font;
+            frDrawFont((frFontHandle_t *)font);
+            frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
+        }
+        cmpSetSkillListRows(-1);
+        }
+    }
+
+    if (((s32)nbResultTimer) >= 24) {
+        s32 phase = ((s32)nbResultTimer) < 31 ? ((s32)nbResultTimer) - 23 : 8;
+        s32 y = (s32)(sdfSin(D_00551100 + D_00551100) * 16.0f);
+        packed = (((u32)phase << 28) | (0x70 + y) | ((0x70 + y) << 8) | ((0x70 + y) << 16));
+        nbPnlSprite(0x27, 0x5E, 0x37, 0x23, 0x21, 1, 0x37, 0x23,
+                    packed, nbResultTex2);
+        y = (s32)(sdfSin((D_00551100 + D_00551100) + 0.099999995f) * 16.0f);
+        packed = (((u32)phase << 28) | (0x70 + y) | ((0x70 + y) << 8) | ((0x70 + y) << 16));
+        nbPnlSprite(0x3F, 0x80, 0x1F, 0x1F, 1, 1, 0x1F, 0x1F,
+                    packed, nbResultTex2);
+        if (haveItem != 0) {
+            y = (s32)(sdfSin((D_00551100 + D_00551100) + 0.19999999f) * 16.0f);
+            packed = (((u32)phase << 28) | (0x70 + y) | ((0x70 + y) << 8) | ((0x70 + y) << 16));
+            nbPnlSprite(0xD1, 0x5E, 0x45, 0x23, 0x59, 1, 0x45, 0x23,
+                        packed, nbResultTex2);
+        }
+    }
+
+    if (((s32)nbResultTimer) >= 29) {
+        scoreY = ((s32)nbResultTimer) < 43 ? ((s32)nbResultTimer) - 28 : 15;
+        rewardColor |= (scoreY * 128) / 15;
+        sprintf(numberText, D_005510F8, nbGetKakutokuExp(data));
+        font = frwGetSmallNumFontFRQ(0x7A0, 0x348, 0,
+                                     rewardColor,
+                                     numberText, 0);
+        D_00551FC0 = font;
+        frDrawFontEx((frFontHandle_t *)font, 1);
+        frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
+        sprintf(numberText, D_005510F8, nbGetKakutokuMaka(data));
+        font = frwGetSmallNumFontFRQ(0x7A0, 0x448, 0,
+                                     rewardColor,
+                                     numberText, 0);
+        D_00551FC0 = font;
+        frDrawFontEx((frFontHandle_t *)font, 1);
+        frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
+    }
+
+    nbResultCounter = 0;
+    if (((s32)nbResultTimer) >= 21) {
+        nbResultTobiwarpLabel = ((s32)nbResultTimer) - 50;
+        scoreY = 0xD0;
+        for (i = 0; i < 4; i++) {
+            nbResultScore_t *entry = &nbResultScoreTable[i];
+            s32 use = entry->useflg;
+            u32 frame = *(volatile u32 *)&nbResultTimer;
+            if (use != 0) {
+                nbResultDrawPC1(i, 0x3F, scoreY, (s32)(frame - 20 - (u32)i * 6),
+                                entry->unit, entry->unitidx, data);
+            }
+            scoreY += 0x28;
+        }
+    }
+
+    if ((nbResultCounter & 1) != 0) {
+        p2sdPlaySE(5, 0x7F, 0x3F);
+        nbTobiwarpLabelIdx++;
+    }
+    if ((nbResultCounter & 2) != 0) {
+        p2sdPlaySE(0x11, 0x7F, 0x3F);
+    }
+    nbResultInitLabels();
+
+    resultState = nbResultState;
+    if (((s32)nbResultTimer) > 0) {
+        step = ((s32)nbResultTimer) < 10 ? ((s32)nbResultTimer) : 10;
+        scoreY = (step * 0x80) / 10;
+        rsetOtOfs(0x47);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        rsetAlpha(1);
+        alpha = ((scoreY * 0x50) / 100);
+        aDrawBoxG(0, 0, 0x200, 0x96,
+                  0, 0x2F, 0x4C, alpha,
+                  0, 0x2F, 0x4C, 0,
+                  0, 0x2F, 0x4C, 0,
+                  0, 0x2F, 0x4C, 0);
+        rsetAlpha(0);
+        resultState = nbResultState;
+    }
+
+    if (resultState > 0) {
+        nbPnl_setOt(0x48);
+        nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        nbPnl_rsetAlpha(0);
+        resultState = nbResultState;
+        step = resultState < 16 ? resultState * 8 : 0x80;
+        alpha = resultState < 16 ? 0x80 - resultState * 8 : 0;
+        packed = ((u32)step << 24) | (alpha << 16) | (alpha << 8) | alpha;
+        nbPnlSprite(0, 0, 0x200, 0x1C0, 0, 0, 0x100, 0x100,
+                    packed, nbResultTexHandle);
+        nbPnl_setOt(0x47);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbFindTobiwarpLabel);
+#endif
 
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 timer);
 

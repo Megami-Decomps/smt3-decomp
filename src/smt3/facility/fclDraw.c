@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camp.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -8,19 +9,10 @@
 
 typedef struct
 {
-    u8 flag;
-    u8 unk_01[3];
-    u8 race;
-    u8 unk_05;
-    u8 unk_06[54];
-} datDevilInfo_t;
-
-typedef struct
-{
     /* 0x00 */ datUnitWork_t unit;
 } cmbUnit_t;
 
-extern datDevilInfo_t datDevilTable[];
+extern datDevilTableEntry_t datDevilTable[];
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
 extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color, s32 ot);
@@ -108,31 +100,6 @@ extern s32 func_00213148(const void *a, const void *b);
 extern s32 func_00213190(const void *a, const void *b);
 
 extern void fclDrawSpriteEx(s32 X, s32 Y, s32 W, s32 H, fclSprite_t *pSprite, s32 OtNo);
-
-typedef struct
-{
-    /* 0x00 */ u8 StepY[4];
-    /* 0x04 */ s8 StopFlag;
-    /* 0x05 */ u8 unk_05[3];
-    /* 0x08 */ s32 CursorSize;
-    /* 0x0C */ s32 CursorPos;
-    /* 0x10 */ u16 unk_10;
-    /* 0x12 */ u16 unk_12;
-    /* 0x14 */ u16 unk_14;
-    /* 0x16 */ u16 unk_16;
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ u8 unk_20;
-    /* 0x21 */ u8 unk_21;
-    /* 0x22 */ s16 unk_22;
-    /* 0x24 */ s8 unk_24;
-    /* 0x25 */ s8 unk_25;
-    /* 0x26 */ u8 unk_26;
-    /* 0x27 */ u8 unk_27[5];
-    /* 0x2C */ s32 unk_2C;
-    /* 0x30 */ s32 unk_30;
-    /* 0x34 */ s32 unk_34;
-} cmpCursorInfo_t;
 
 typedef struct
 {
@@ -521,8 +488,8 @@ s32 cmpSkillOrder(const void *a, const void *b)
 
 s32 cmbSetEvoResult(const void *a, const void *b)
 {
-    datDevilInfo_t *eb = *(datDevilInfo_t **)((u8 *)b + 4);
-    datDevilInfo_t *ea = *(datDevilInfo_t **)((u8 *)a + 4);
+    datDevilTableEntry_t *eb = *(datDevilTableEntry_t **)((u8 *)b + 4);
+    datDevilTableEntry_t *ea = *(datDevilTableEntry_t **)((u8 *)a + 4);
 
     if (ea->race > eb->race) {
         return 1;
@@ -530,10 +497,10 @@ s32 cmbSetEvoResult(const void *a, const void *b)
     if (ea->race < eb->race) {
         return -1;
     }
-    if (ea->unk_05 > eb->unk_05) {
+    if (ea->level > eb->level) {
         return -1;
     }
-    return ea->unk_05 < eb->unk_05;
+    return ea->level < eb->level;
 }
 
 void buildSkillSortArray(cmbUnit_t *unit, skillSortEntry_t *out)
@@ -581,7 +548,7 @@ typedef struct
 {
     /* 0x00 */ u16 index;
     /* 0x02 */ u16 unk_02;
-    /* 0x04 */ datDevilInfo_t *info;
+    /* 0x04 */ datDevilTableEntry_t *info;
 } cmbRaceSortEntry_t;
 
 void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count)
@@ -589,7 +556,7 @@ void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count)
     s32 i = 0;
 
     if (count != 0) {
-        datDevilInfo_t *info = datDevilTable;
+        datDevilTableEntry_t *info = datDevilTable;
         cmbRaceSortEntry_t *p = list;
 
         do {
