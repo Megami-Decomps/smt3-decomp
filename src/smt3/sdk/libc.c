@@ -1123,15 +1123,15 @@ extern const char D_0054B680[16];
 /* Native output uses eight vectors and a 348-byte digit workspace. */
 s32 func_002D6678(_reent *r, FILE *fp, const char *format, va_list ap)
 {
+    char exponentBuffer[16];
     __suio uio;
     __siov iov[8];
     __siov *current;
     s32 cumulative;
     char numberBuffer[0x15C];
-    char signByte;
     char prefix[2];
     char floatSign;
-    char exponentBuffer[16];
+    char signByte;
     char *number;
     char *text;
     char *decimalPoint;

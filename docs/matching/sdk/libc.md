@@ -177,8 +177,8 @@ extra arithmetic or artificial lifetime extensions were added.
 
 The 5744-byte formatted-output core is independently bounded by its entry,
 frame and direct reentrant callers; see [SDK matching](../../sdk-matching.md).
-Its guarded reconstruction emits 5308 bytes: 38 of 1327 emitted words match,
-1289 differ, and 436 native bytes are uncovered. The frame is 0x2A0 rather
+Its guarded reconstruction emits 5308 bytes: 40 of 1327 emitted words match,
+1287 differ, and 436 native bytes are uncovered. The frame is 0x2A0 rather
 than 0x290. Assembly remains active and this adds no exact matching credit.
 
 The reconstruction uses the native eight-entry output-vector batches and
@@ -218,21 +218,45 @@ bypasses this dispatch and remains an empty numeral. Common precision padding
 is derived directly from the precision field and converted-text length.
 
 The previous 5488-byte body matched 7 emitted words and had a 0x2C0 frame.
-The current body matches 31 more words and reduces the frame gap from 48 to
-16 bytes, while leaving 180 more native bytes uncovered. A selector switch
+The numeric-dispatch revision matched 31 more words and reduced the frame gap
+from 48 to 16 bytes, while leaving 180 more native bytes uncovered. A selector switch
 with the old conditional convergence emitted 5456 bytes; direct convergence
 with that switch emitted 5316 bytes. These controls are not retained.
 
-A qualified actual-owner jump trace used pinned cc1
+At numeric-dispatch revision `a20eb528`, a qualified actual-owner jump trace
+used pinned cc1
 `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`:
 `tools/cc1probe.sh src/smt3/sdk/libc.c --func func_002D6678 --jump --no-dumps
 --cflag -DNON_MATCHING --maxlines 1200 --out <output>`.
 Hooked/unhooked and plain-output parity passed. The target assembly is also
 identical with and without `SKIP_ASM`. Late `jump_optimize_1` merges parser
 character-load tails: UID4270/4274/4278 enter the shared tail at UID4193.
-This confirms the current sharing, not the origin of the remaining gap.
+This confirms that revision's tail sharing, not the origin of the remaining gap.
 
-Control-flow layout, register allocation and stack lifetimes remain broad
-frontiers. The source does not attempt to
+Declaration order now follows the observed live buffer layout. Sizes and
+uses are unchanged. Offsets below are relative to the post-prologue stack
+pointer; the overall frame remains 16 bytes larger than native.
+
+| Object | Previous C | Native and current C |
+|---|---:|---:|
+| Exponent buffer | 0x1C0 | 0x000 |
+| Output descriptor | 0x000 | 0x010 |
+| Eight vectors | 0x010 | 0x020 |
+| Digit workspace | 0x050 | 0x060 |
+| Two-byte prefix | 0x1B0 | 0x1C0 |
+| Sign byte | 0x1AC | 0x1D1 |
+
+The float sign, wide-character output, multibyte state, decimal position and
+digit-length outputs retain their already-correct offsets 0x1D0, 0x1D4,
+0x1D8, 0x1DC and 0x1E0. This adds two matching words with unchanged body and
+frame sizes. Before/after actual-owner allocation probes pass hooked/unhooked
+and plain-output parity; the target also emits identical assembly with and
+without `SKIP_ASM`. Reproduce with `tools/cc1probe.sh src/smt3/sdk/libc.c
+--func func_002D6678 --alloc --no-dumps --cflag -DNON_MATCHING --maxlines 2500
+--out <output>`. The remaining frame gap is not an aggregate-size mismatch;
+no local has been resized or added to force it.
+
+Control-flow layout, register allocation and scalar spill lifetimes remain
+broad frontiers. The source does not attempt to
 fill missing bytes or force the native frame. A new compiler-property
 premise is required before allocation or control-flow tuning.
