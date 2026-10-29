@@ -173,7 +173,7 @@ extern char *frameheadstr[];
 extern s8 framelist_xcnt[];
 
 s32 evtFrameListHead(void *tag, s32 ox, s32 oy);
-s32 evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no);
+void evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no);
 
 extern s32 func_001AD6E8(void);
 
@@ -229,7 +229,7 @@ void evtBasicListItem(void *tag, s32 ox, s32 oy, s32 no);
 
 void evtEventPosItem(void *tag, s32 ox, s32 oy, s32 no);
 s32 evtFileName2Head(void *tag, s32 ox, s32 oy);
-void evtFileName2Item(void *tag, s32 ox, s32 oy, u32 no);
+void evtFileName2Item(void *tag, s32 ox, s32 oy, s32 no);
 s32 evtFileNameHead(void *tag, s32 ox, s32 oy);
 void evtFileNameItem(void *tag, s32 ox, s32 oy, s32 no);
 
@@ -289,7 +289,7 @@ s32 evtFloatChangeHead(void *tag, s32 ox, s32 oy)
     return 2;
 }
 
-void evtFloatChangeItem(void *tag, s32 ox, s32 oy, u32 no)
+void evtFloatChangeItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     switch (no) {
     case 0:
@@ -355,7 +355,7 @@ s32 evtIntChangeHead(void *tag, s32 ox, s32 oy)
     return 2;
 }
 
-void evtIntChangeItem(void *tag, s32 ox, s32 oy, u32 no)
+void evtIntChangeItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     switch (no) {
     case 0:
@@ -419,7 +419,7 @@ s32 evtFrameChangeHead(void *tag, s32 ox, s32 oy)
     return 2;
 }
 
-void evtFrameChangeItem(void *tag, s32 ox, s32 oy, u32 no)
+void evtFrameChangeItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     switch (no) {
     case 0:
@@ -664,7 +664,7 @@ s32 evtFileName2Head(void *tag, s32 ox, s32 oy)
     return 2;
 }
 
-void evtFileName2Item(void *tag, s32 ox, s32 oy, u32 no)
+void evtFileName2Item(void *tag, s32 ox, s32 oy, s32 no)
 {
     s32 color = 0;
 
@@ -1049,7 +1049,7 @@ void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtViewerKey_t *f)
 }
 
 
-s32 evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no)
+void evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     evtViewerKey_t *key;
     s32 color;
@@ -1077,6 +1077,11 @@ s32 evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no)
         } else {
             sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
         }
+        /* Post-call own-state reset (docs/CONTRIBUTING.md): close the real
+         * traversal cursor after either render tail. Stock RTL keeps UID228
+         * through sibling/CFG and deletes it in life; native retains JALs
+         * at 0x1F71F8/0x1F7230. No native reset store is claimed. */
+        key = NULL;
     }
 }
 s32 evtFrameListMenu(s32 x, s32 y)
