@@ -698,7 +698,7 @@ SZ(p44, parCell_t, 0x14);
 SZ(p45, parSystem_t, 0x2C);
 SZ(p46, sifCommand_t, 0x10);
 SZ(p47, fldFileNameEntry_t, 0xC);
-SZ(p48, fldFileResource_t, 0x24);
+SZ(p48, fldResHead_t, 0x24);
 OFF(p49, fldAreaWork_t, consumedFlags, 0x14);
 OFF(p50, fldAreaWork_t, mode, 0x18);
 OFF(p51, fldAreaWork_t, requestedSceneName, 0x20);
