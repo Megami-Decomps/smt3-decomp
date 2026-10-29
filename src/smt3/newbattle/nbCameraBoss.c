@@ -536,7 +536,23 @@ s32 nbCameraBoss_Sp_DOUTYO_TP_Set(nbCamera_t *pNbCamera)
     return 1;
 }
 
+#ifdef NON_MATCHING
+s32 nbCameraBoss_Sp_DOUTYO_TPFix_Set(nbCamera_t *pNbCamera)
+{
+    nbCameraSetState(0x17);
+    pNbCamera->direction.x = 0.0f;
+    pNbCamera->target.x = pNbCamera->direction.x;
+    pNbCamera->target.y = -88.75f;
+    pNbCamera->target.z = -888.9399414f;
+    pNbCamera->distance = 1.0f;
+    pNbCamera->direction.y = pNbCamera->direction.x;
+    pNbCamera->direction.z = 1.0f;
+    pNbCamera->fovy = 0.6981316209f;
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Sp_DOUTYO_TPFix_Set);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Sp_DOUTYO_Set);
 
