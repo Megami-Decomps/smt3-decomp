@@ -3028,7 +3028,84 @@ void cmpUpdateParty(void)
         (cmpPadStopWork_t *)&campWork->page[1], button, 0x30));
 }
 
+#ifdef NON_MATCHING
+void campUpdateStockSelect(s8 mode)
+{
+    u16 button = cmpGetPressedButton(0x33);
+    s32 invalid = 0;
+    cmpCursorInfo_t *cursor;
+
+    if (fclChkMessage() != 0) {
+        return;
+    }
+    switch (button) {
+    case 1: {
+        s8 index = cmpGetStockInfoIndex(campWork->stock, mode, 0);
+
+        if (campWork->previousPhase == 3) {
+            s32 selection = campWork->page[1].cursor.unk_22 +
+                            (u8)campWork->page[1].cursor.unk_24;
+            if (selection == 0) {
+                datUnitWork_t *unit = &DDS3_GBWK->unitwork[index];
+                u32 flags = unit->flag;
+
+                invalid = (flags & 2) != 0;
+                if ((unit->badstatus & 0x800) != 0 || (flags & 0x10) != 0) {
+                    invalid = 1;
+                }
+                if (camp_H_cmpLocalStock_t__ctor() == 3) {
+                    invalid = 1;
+                }
+                if (invalid == 0) {
+                    button = 0;
+                    p2sdPlaySE(0x11, 0x7F, 0x3F);
+                }
+            } else if (selection == 1) {
+                button = 0;
+                p2sdPlaySE(0x12, 0x7F, 0x3F);
+            }
+        }
+        if (campWork->previousPhase == 2) {
+            datUnitWork_t *unit = &DDS3_GBWK->unitwork[
+                cmpGetStockInfoIndex(campWork->stock, 0, 0)];
+
+            if ((unit->badstatus & 0x20) != 0 || unit->skillcnt == 0) {
+                invalid = 1;
+            }
+        }
+        if (campWork->previousPhase == 1 ||
+            (campWork->previousPhase == 2 && mode != 0)) {
+            button &= 0xFFFE;
+        }
+        if (invalid != 0) {
+            button = 0x8000;
+        } else {
+            campWork->unk_0001 = campWork->previousPhase;
+            campWork->unk_0004 = 1;
+        }
+        break;
+    }
+    case 2:
+        campWork->unk_0001 = campWork->previousPhase;
+        campWork->unk_0004 = 2;
+        cmpResetCursorInfo((cmpCursorInfo_t *)&campWork->unk_6230[mode * 0x103C]);
+        cmpDisableInfoWindow();
+        break;
+    case 0x10:
+        cmpMoveStockCursor(mode, -1, (u8 *)campWork->stock);
+        break;
+    case 0x20:
+        cmpMoveStockCursor(mode, 1, (u8 *)campWork->stock);
+        break;
+    }
+    cursor = (cmpCursorInfo_t *)&campWork->unk_6230[mode * 0x103C];
+    cmpMoveCursor2(cursor, 0);
+    cursor = (cmpCursorInfo_t *)&campWork->unk_6230[mode * 0x103C];
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop((cmpPadStopWork_t *)cursor, button, 0x30));
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campUpdateStockSelect);
+#endif
 
 void campUpdateStockCursor(void)
 {
