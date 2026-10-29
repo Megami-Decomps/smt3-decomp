@@ -1139,9 +1139,47 @@ void sceSifRpcLoop(sifRpcDataQueue_t *queue)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__13);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", new_iob);
+typedef struct {
+    u32 word0;
+    s32 active;
+    u8 opaque[8];
+} fsRequestEntry_t;
+extern fsRequestEntry_t D_0059E580[32];
+extern s32 D_0052C348;
+extern void gcc2_compiled__13(void);
+extern s32 SignalSema(s32 sema);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", get_iob);
+fsRequestEntry_t *new_iob(void)
+{
+    fsRequestEntry_t *entry;
+
+    gcc2_compiled__13();
+    WaitSema(D_0052C348);
+    for (entry = D_0059E580; entry < &D_0059E580[32]; entry++) {
+        if (entry->active == 0) {
+            entry->active = 0x10000000;
+            SignalSema(D_0052C348);
+            return entry;
+        }
+    }
+    SignalSema(D_0052C348);
+    return NULL;
+}
+
+fsRequestEntry_t *get_iob(u32 index)
+{
+    fsRequestEntry_t *entry;
+
+    gcc2_compiled__13();
+    WaitSema(D_0052C348);
+    if (index >= 32) {
+        SignalSema(D_0052C348);
+        return NULL;
+    }
+    entry = &D_0059E580[index];
+    SignalSema(D_0052C348);
+    return entry;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceFs_Rcv_Intr);
 
