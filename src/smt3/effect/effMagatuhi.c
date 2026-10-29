@@ -2471,7 +2471,168 @@ s32 func_001AA5A0(void) {
     return 0;
 }
 
+/* NON_MATCHING: emits 1564/native 1576 bytes; input-address lifetime and frame differ. */
+#ifdef NON_MATCHING
+extern u8 D_005518E0[8];
+extern void SetRotateMatrixAxis(f32 angle, const sdfVector3_t *axis);
+
+/* vu0 routine: pad-driven camera translation and axis rotation. */
+void func_001AA6D0(void)
+{
+    f32 axis[4];
+    /* XYZ is handed to VU0 by address; native leaves W uninitialized. */
+    volatile f32 scale[4];
+    /* Right stick pair; the left pair precedes it in the same pad buffer. */
+    const u8 *stick = &D_005518E0[2];
+    s32 y = stick[1];
+    s32 x = stick[0];
+    f32 angle;
+    f32 step;
+
+    if ((u8)(y + 0xC0) > 0x80) {
+        step = (128 - y) * (1.0f / 128.0f) * 22.5f;
+        scale[1] = step;
+        scale[0] = step;
+        scale[2] = step;
+        SDF_VU0_LOADVECTOR(aViewTarget);
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_LOADVECTOR_B(scale);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(aViewEye);
+        SDF_VU0_COPYVECTOR_C_TO_A();
+        SDF_VU0_LOADVECTOR_B(aViewTarget);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(aViewTarget);
+    }
+    if ((u8)(x + 0xC0) > 0x80) {
+        angle = (128 - x) * (1.0f / 128.0f) * 0.06f;
+        SDF_VU0_LOADVECTOR(aViewTarget);
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(aViewDown);
+        SDF_VU0_OUTERPRODUCT();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_COPYVECTOR_C_TO_B();
+        SDF_VU0_OUTERPRODUCT();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(axis);
+        SetRotateMatrixAxis(angle, (const sdfVector3_t *)axis);
+        SDF_VU0_LOADVECTOR(aViewTarget);
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(aViewTarget);
+    }
+    y = stick[-1];
+    x = stick[-2];
+    if ((u8)(y + 0xC0) > 0x80) {
+        angle = (128 - y) * (1.0f / 128.0f) * 0.06f;
+        SDF_VU0_LOADVECTOR(aViewTarget);
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(aViewDown);
+        SDF_VU0_OUTERPRODUCT();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(axis);
+        SetRotateMatrixAxis(angle, (const sdfVector3_t *)axis);
+        SDF_VU0_LOADVECTOR(aViewTarget);
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(aViewTarget);
+    }
+    if (dds3PadBitTable[10] != 0) {
+        scale[0] = -22.5f;
+        scale[2] = -22.5f;
+        scale[1] = -22.5f;
+        SDF_VU0_LOADVECTOR(aViewTarget);
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(aViewDown);
+        SDF_VU0_OUTERPRODUCT();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_COPYVECTOR_C_TO_B();
+        SDF_VU0_OUTERPRODUCT();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_LOADVECTOR_B(scale);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(aViewEye);
+        SDF_VU0_COPYVECTOR_C_TO_A();
+        SDF_VU0_LOADVECTOR_B(aViewTarget);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(aViewTarget);
+    } else if (dds3PadBitTable[8] != 0) {
+        scale[0] = 22.5f;
+        scale[2] = 22.5f;
+        scale[1] = 22.5f;
+        SDF_VU0_LOADVECTOR(aViewTarget);
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(aViewDown);
+        SDF_VU0_OUTERPRODUCT();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_COPYVECTOR_C_TO_B();
+        SDF_VU0_OUTERPRODUCT();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_LOADVECTOR_B(scale);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(aViewEye);
+        SDF_VU0_COPYVECTOR_C_TO_A();
+        SDF_VU0_LOADVECTOR_B(aViewTarget);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(aViewTarget);
+    }
+    if ((u8)(x + 0xC0) > 0x80) {
+        angle = (128 - x) * (1.0f / 128.0f) * 0.06f;
+        SDF_VU0_LOADVECTOR(aViewTarget);
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(aViewDown);
+        SDF_VU0_OUTERPRODUCT();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_COPYVECTOR_C_TO_B();
+        SDF_VU0_OUTERPRODUCT();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(axis);
+        SetRotateMatrixAxis(angle, (const sdfVector3_t *)axis);
+        SDF_VU0_LOADVECTOR(aViewTarget);
+        SDF_VU0_LOADVECTOR_B(aViewEye);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(aViewTarget);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001AA6D0);
+#endif
 
 s32 dds3_1AACF8(void) {
     return D_0054F220;
