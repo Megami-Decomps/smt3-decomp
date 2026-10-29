@@ -779,6 +779,13 @@ extern void fldPlayerCalc_Nml_syukan(void);
 
 /* NON_MATCHING: 17 of 169 words differ (first at +0x64). */
 #ifdef NON_MATCHING
+static inline s32 fldPlayerCalcNormal(void)
+{
+    fldPlayerCalc_Nml();
+    fldPlayerMirChk();
+    return 0;
+}
+
 s32 fldPlayerCalc(void)
 {
     fldUnitControl_t *ctl;
@@ -848,13 +855,10 @@ s32 fldPlayerCalc(void)
     fldWmWarpMode = 0;
     if (mode == 1) {
         fldPlayerSvsOff();
-        goto nml;
+        return fldPlayerCalcNormal();
     }
     if (mode == 3) {
-    nml:
-        fldPlayerCalc_Nml();
-        fldPlayerMirChk();
-        return 0;
+        return fldPlayerCalcNormal();
     }
     if (evtBitCheck(0xAF0) != 0) {
         fldPlayerCalc_Nml_syukan();
