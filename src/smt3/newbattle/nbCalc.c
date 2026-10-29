@@ -1027,7 +1027,63 @@ void nbSetBadStat(s32 formindex, s32 sw, s32 badstat)
     }
 }
 
+extern const char D_00544C10[];
+
+#ifdef NON_MATCHING
+s32 nbCheckBadKaifuku(datUnitWork_t *work, s32 type)
+{
+    u32 status;
+    f32 ratio;
+    f32 base;
+    s32 chance;
+
+    if (work == NULL || !(work->flag & 1)) {
+        return 0;
+    }
+    status = work->badstatus & 0xFFF;
+    switch (type) {
+    case 0:
+        switch (status) {
+        case 1:
+        case 2:
+            return 1;
+        case 4:
+        case 8:
+        case 0x10:
+        case 0x80:
+            ratio = (f32)datGetParam(work, 5) / (f32)((work->level + 20) / 5);
+            if (status == 4) {
+                base = 20.0f;
+            } else if (status == 0x80) {
+                base = 40.0f;
+            } else {
+                base = 30.0f;
+            }
+            chance = (s32)(base * ratio);
+            printf(D_00544C10, chance);
+            return (s32)dds3GetRandIntA(NULL, 100) < chance;
+        default:
+            return 0;
+        }
+    case 1:
+        return status == 0x10;
+    case 2:
+        return status == 4;
+    case 3:
+        switch (status) {
+        case 1: case 2: case 4: case 8: case 0x10:
+        case 0x80: case 0x200: case 0x400:
+            return 1;
+        default:
+            return 0;
+        }
+    default:
+        return 0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbCheckBadKaifuku);
+#endif
 
 u32 nbGetBadStat(s32 formindex)
 {
