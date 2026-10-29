@@ -77,7 +77,7 @@ extern s8 dds3PadBitTable[32];
 extern u8 D_005518E0[8];
 extern void dds3UpdateVibrationSlots(void);
 extern void effPadVibeFadeUpdate(void);
-extern f32 __ieee754_acosf(f32 x);
+extern f32 acosf(f32 x);
 
 void dds3RunProcessList(void)
 {
@@ -131,7 +131,7 @@ void dds3RunProcessList(void)
             if (1.0f < dot) {
                 dot = 1.0f;
             }
-            angle = __ieee754_acosf(dot);
+            angle = acosf(dot);
             if (dir.x < 0.0f) {
                 angle = 0x1.921fb4p+2f - angle;
             }

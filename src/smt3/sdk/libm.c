@@ -74,22 +74,22 @@ f32 tanf(f32 x)
     return __kernel_tanf(y[0], y[1], 1 - ((quadrant & 1) << 1));
 }
 
-extern f32 func_002CF760(f32 x);
+extern f32 __ieee754_acosf(f32 x);
 extern f32 __ieee754_atan2f(f32 y, f32 x);
 
-f32 __ieee754_acosf(f32 x)
+f32 acosf(f32 x)
 {
-    return func_002CF760(x);
+    return __ieee754_acosf(x);
 }
 
-f32 func_002CF748(f32 y, f32 x)
+f32 atan2f(f32 y, f32 x)
 {
     return __ieee754_atan2f(y, x);
 }
 
 extern f32 __ieee754_sqrtf(f32 x);
 
-f32 func_002CF760(f32 x)
+f32 __ieee754_acosf(f32 x)
 {
     f32 z, p, q, r, w, s, c, df;
     s32 hx, ix;
