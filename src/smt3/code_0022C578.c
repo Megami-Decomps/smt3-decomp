@@ -5873,7 +5873,70 @@ u16 cmpGetSkillCost(u16 skill, u16 *work)
     return cost;
 }
 
+extern u8 D_0053FEB8[];
+extern char D_0054FEB8[];
+
+#ifdef NON_MATCHING
+void cmpDrawSkillListRow(s32 x, s32 y, s32 textColor, u16 unusedSkill,
+                         s8 rowFlag, s8 selected, u16 *work, u16 skill, s32 alpha)
+{
+    char buffer[0x20];
+    s32 colors[4];
+    s32 adjustedAlpha;
+    s32 scaled;
+    s32 sprite;
+    s32 icon;
+    frFontHandle_t *font;
+
+    buffer[0] = D_0053FEB8[0];
+    memset(buffer + 1, 0, 0x1F);
+    adjustedAlpha = alpha;
+    if (alpha >= 0x101) {
+        adjustedAlpha = 0x200 - alpha;
+    }
+    scaled = (s32)(adjustedAlpha * 96);
+    if (scaled < 0) {
+        scaled += 0xFF;
+    }
+    colors[0] = (scaled >> 8) | 0x80808000;
+    colors[1] = colors[0];
+    colors[2] = colors[0];
+    colors[3] = colors[0];
+
+    if (skill >= 0x120) {
+        if (selected != 0 || rowFlag == 0) {
+            sprite = 0x14;
+        } else {
+            sprite = 0x15;
+        }
+        fclDrawSpriteRes(x + 0x120, y + 0x38, 0x10, colors, 7, sprite,
+                         D_00345D88, fclSpriteTable, 0x47);
+    } else {
+        sprintf(buffer, D_0054FEB8, cmpGetSkillCost(skill, work));
+        font = (frFontHandle_t *)frwGetSmallNumFontFRQ(x, y + 0x10, 0x10, (u32)textColor, buffer, NULL);
+        func_001C7E38(font, 1, 0x47);
+        frDestroyFontRequestAfter(font);
+
+        sprite = 2;
+        if (selected == 0) {
+            sprite = rowFlag != 0;
+        }
+        icon = cmpGetSkillIcon(skill);
+        if (icon == 1) {
+            sprite += 0xE;
+        } else if (icon == 2) {
+            sprite += 0x11;
+        } else {
+            return;
+        }
+        fclDrawSpriteRes(x + 0x230, y + 0x20, 0x10, colors, 7, sprite,
+                         D_00345D88, fclSpriteTable, 0x47);
+    }
+}
+
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillListRow);
+#endif
 
 void cmpDrawSkillListScrollBar(s32 a, cmpCursorInfo_t *cursor)
 {
