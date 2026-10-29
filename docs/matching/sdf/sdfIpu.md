@@ -56,3 +56,10 @@ Also ruled out: writing `bufferIndex = cb->bufferIndex` in both arms of an
 if/else to reproduce retail's duplicated `lbu $9, 0x18($17)` and the `b` that
 precedes it. The compile collapses the two reads back into one block (456
 bytes, unchanged), so retail's duplicate is not a source duplicate.
+
+Taking the zero through a local declared before the `if`
+(`s32 syncArg = 0; ... sceIpuSync(syncArg, 0);`) does not supply it either:
+cprop folds the local back into the argument move at the call, and the output
+is byte-identical to the plain spelling. A zero in `$4` that survives into the
+entry block therefore needs a value that is not a propagable constant, which
+this call does not have.
