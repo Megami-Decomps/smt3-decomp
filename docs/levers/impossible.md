@@ -83,6 +83,17 @@ unwritable too until the split is corrected:
 Both are `docs/tu-recovery.md` work, not matching work: drop the epilogue symbol
 from the split and the function above it compiles as one piece.
 
+A retail `cvt.w.s` is not reachable from a C cast. The configured
+`ee-gcc2.96` emits `trunc.w.s` for every float-to-int cast: `(s32)f`,
+`(unsigned)f` and `(s32)(g * 2.0f)` all give `trunc.w.s`, four out of four on a
+three-line probe through `tools/cc.sh`. Where retail holds the raw word
+`0x46000064`, the only route to the opcode is `fpu.h`'s `fcvtws`, and its two
+volatile asm blocks are scheduling barriers: on `nbFindTobiwarpLabel` they
+restore the four conversion words and cost 82 others, and a non-volatile local
+copy of the same helper costs 63. So the four words come back only by losing
+more than they are worth, and a function whose only residual is `cvt.w.s`
+cannot land.
+
 ## Written in assembly, and reachable only through an asm macro
 
 ee-gcc 2.96 materialises a small constant with `addiu`, never `addi`, so an

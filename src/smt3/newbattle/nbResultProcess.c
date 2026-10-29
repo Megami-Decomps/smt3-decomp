@@ -453,7 +453,10 @@ extern void rsetAlpha(s32 mode);
    ee-gcc 2.96 never selects (it always emits trunc.w.s), and reaching the
    opcode through the fpu.h asm helper costs 82 more words of scheduling. The
    rest is callee-saved assignment in the item-text loop and the two tail
-   blocks. */
+   blocks. The inherited volatile cast in the item-collect loop reproduces
+   retail's second lbu of the same byte and is worth about 30 words, but
+   volatile is not a legitimate match device, so that loop needs a real
+   explanation before this function could land. */
 void nbFindTobiwarpLabel(nbMainProcessData_t *data)
 {
     char numberText[16];

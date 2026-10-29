@@ -432,13 +432,13 @@ docs/levers/impossible.md	32		nbMakaDispOn needs GetMakaProcessData to take an a
 docs/levers/impossible.md	45	mult mult1	func_00213DF0 uses mult1, the EE's second multiply pipe, in a way no C expression reaches.
 docs/levers/impossible.md	50	$2 $3 $31 add addi addiu addu beqz j jal jr ld sd subu	fclDrawSpriteEx's split assembly holds two symbols, so writing C for one would drop the other's bytes.
 docs/levers/impossible.md	73	$29 $31 addiu jal jr ld	sdf/sdfPrint's sdf_2BD3E8 is three instructions, ld $31, 0x70($29), jr $31, addiu $29, $29, 0x80, with no prologue.
-docs/levers/impossible.md	79	$0 $16 $17 $18 $29 $31 addi addiu andi ld plzcw subu	sdf/sdfTmx's sdf_2C7BC4 is the same thing for SdfFileRpcServerThreadProc:
-docs/levers/impossible.md	125		| function | what it really is | |---|---|
-docs/levers/impossible.md	127		| sdfTexSetPacket | ordinary C plus the bit-length idiom.
-docs/levers/impossible.md	128		| release_movieobj2 | ordinary C plus the idiom twice.
-docs/levers/impossible.md	129	$16 $18 cfc2 ctc2 pextlb	| corePktVu0Run | assembly throughout:
-docs/levers/impossible.md	130	j jal pextlb pextlh vitof0	| corePktEmitRefMapPass | assembly throughout:
-docs/levers/impossible.md	131	jr	| sdf_2BFC58 | a computed jr into an unrolled sq block, as above.
+docs/levers/impossible.md	79	$0 $16 $17 $18 $29 $31 addi addiu andi cvt.w.s ld plzcw sh subu trunc.w.s	sdf/sdfTmx's sdf_2C7BC4 is the same thing for SdfFileRpcServerThreadProc:
+docs/levers/impossible.md	136		| function | what it really is | |---|---|
+docs/levers/impossible.md	138		| sdfTexSetPacket | ordinary C plus the bit-length idiom.
+docs/levers/impossible.md	139		| release_movieobj2 | ordinary C plus the idiom twice.
+docs/levers/impossible.md	140	$16 $18 cfc2 ctc2 pextlb	| corePktVu0Run | assembly throughout:
+docs/levers/impossible.md	141	j jal pextlb pextlh vitof0	| corePktEmitRefMapPass | assembly throughout:
+docs/levers/impossible.md	142	jr	| sdf_2BFC58 | a computed jr into an unrolled sq block, as above.
 docs/levers/local-vectors.md	53	$f0	### Preserve both sphere results in the top-view camera setter nbCameraShot_InvokeTargetPartyTop2_Set matches all 720 bytes with separate radius and height…
 docs/levers/loop-rotation.md	38	beql	### Sentinel exit and per-mode effect lifetime (fldRunEffSet) field/fldTest::fldRunEffSet (300 instruction bytes) walks a null-terminated array of effect…
 docs/levers/scalar-spills.md	28		Index the three parallel arrays by the compact target slot.
