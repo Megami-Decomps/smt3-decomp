@@ -2741,7 +2741,38 @@ void ControlModel(fclEncyc_instance_tag *pinst, s32 modelHandle, s32 key)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", GetViewModeKey);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", GetAnalogPad);
+extern u8 dds3PadStickState[2][2][2];
+
+s32 GetAnalogPad(void)
+{
+    s32 flags = 0;
+    s32 x = dds3PadStickState[0][1][0];
+    s32 y = dds3PadStickState[0][1][1];
+
+    if (x < 0x40) {
+        flags |= 1;
+    } else if (x > 0xC0) {
+        flags |= 2;
+    }
+    if (y < 0x40) {
+        flags |= 4;
+    } else if (y > 0xC0) {
+        flags |= 8;
+    }
+    x = dds3PadStickState[0][0][0];
+    y = dds3PadStickState[0][0][1];
+    if (x < 0x40) {
+        flags |= 0x10;
+    } else if (x > 0xC0) {
+        flags |= 0x20;
+    }
+    if (y < 0x40) {
+        flags |= 0x40;
+    } else if (y > 0xC0) {
+        flags |= 0x80;
+    }
+    return flags;
+}
 
 extern void rstGetEvoModelParam(u16 id, f32 *out);
 extern void initViewCamera(cmpVec4_t *camera);
