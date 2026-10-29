@@ -38,7 +38,91 @@ extern void p2sdPlaySE(s32 no, s32 volume, s32 pan);
 
 extern void fldSkyBattle(void);
 
+extern TMX_HEADER_t *D_00551FD0, *D_00551FD4, *D_00551FD8;
+extern sdfTexHandle_t *nbResultTex1, *nbResultTex2, *nbResultTexHandle;
+extern sdfTexHandle_t *sdfTexSet(TMX_HEADER_t *texture);
+extern s32 nbResultTobiwarpLabel;
+extern s32 nbResultState;
+extern s32 D_005510E8;
+extern s32 GetAddExp(s32 index, s32 cap);
+
+#ifdef NON_MATCHING
+void nbResultLoadTextures(void)
+{
+    volatile nbResultScore_t *score;
+    datUnitWork_t *unit;
+    volatile dds3GlobalWork_t *global;
+    u32 index;
+    u32 flags;
+    s32 i;
+    s32 count;
+    s32 addExp;
+
+    nbResultTex1 = sdfTexSet(D_00551FD0);
+    nbResultTex2 = sdfTexSet(D_00551FD4);
+    nbResultTexHandle = sdfTexSet(D_00551FD8);
+    nbResultTimer = 0;
+    nbResultTobiwarpLabel = 0;
+    nbResultState = 0;
+    for (i = 0; i < 4; i++) {
+        score = &nbResultScoreTable[i];
+        score->useflg = 0;
+        score->exp_cnt = 0;
+        score->l_lv = 0;
+        score->lvupflg = 0;
+        score->unitidx = 0;
+        score->unit = NULL;
+        score->lvupanmflg = 0;
+        score->lvupanmcnt = 0;
+        score->lvuplvanmcnt = 0;
+        score->ofsx = 0;
+        score->stopcnt = 0;
+    }
+    count = 0;
+    i = 0;
+    global = DDS3_GBWK;
+    while (i < (s32)global->stockCount) {
+        index = global->stockOrder[i++];
+        unit = (datUnitWork_t *)&global->akuma[index].flag;
+        flags = unit->flag;
+        if ((flags & 1) && (flags & 2)) {
+            score = &nbResultScoreTable[count];
+            score->useflg = 1;
+            score->unit = unit;
+            score->exp_cnt = unit->exp;
+            score->l_lv = unit->level;
+            score->ofsx = 0xC0;
+            score->lvupflg = 0;
+            score->unitidx = index;
+            score->lvupanmflg = 0;
+            score->lvupanmcnt = 0;
+            score->lvuplvanmcnt = 0;
+            addExp = GetAddExp(index, D_005510E8);
+            score->addexp = addExp;
+            score->resultadd = addExp / 45;
+            if (addExp % 45 > 0) {
+                score->resultadd = addExp / 45 + 1;
+            }
+            if (score->resultadd <= 0) {
+                score->resultadd = 1;
+            }
+            count++;
+            if (count >= 4) {
+                break;
+            }
+            global = DDS3_GBWK;
+        }
+    }
+    for (i = 0; i < 64; i++) {
+        D_00574F50[i].flag = 0;
+        D_00574F50[i].x = 0;
+        D_00574F50[i].y = 0;
+        D_00574F50[i].life = 0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultLoadTextures);
+#endif
 
 extern sdfTexHandle_t *nbResultTex1, *nbResultTex2, *nbResultTexHandle;
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
