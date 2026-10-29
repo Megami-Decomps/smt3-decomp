@@ -3909,7 +3909,7 @@ void camp_update_dh_Shutdown(void)
 
 extern campInfoWork_t *cmpinitDH(cmpSeqInfo_t *parent);
 
-extern void camp_calc_dh_Process();
+extern s32 camp_calc_dh_Process(dds3ProcessID_t *id);
 
 extern s32 camp_draw_dh_Process();
 
@@ -3946,7 +3946,56 @@ void campHideInfoWindow(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetStatusStartEff);
 
+extern campInfoWork_t *volatile campDhCalcStateLive asm("campDhCalcState");
+extern campWork_t *volatile campWorkLive asm("campWork");
+extern void cmpSetStatusStartEff(void);
+extern void cmpModelInit(void);
+
+#ifdef NON_MATCHING
+s32 camp_calc_dh_Process(dds3ProcessID_t *id)
+{
+    campInfoWork_t *work = dds3GetProcessData(id);
+    u8 flags = ((volatile campInfoWork_t *)work)->unk_00;
+
+    campDhCalcStateLive = work;
+    if (flags & 2) {
+        s8 state = work->unk_01;
+
+        if (state == 1) {
+            if (work->unk_04 == state) {
+                campDhFreeTexture(work);
+                while (sdfDelayedResrcCheck() != 0) {
+                }
+                cmpSetStatusStartEff();
+                cmpStatSetTimer(0, 0);
+                cmpModelInit();
+                cmpModelSetup(0, 0);
+            }
+        } else if (state == 0) {
+            s32 ready = campDhCheckReady();
+            campWork_t *camp = campWorkLive;
+
+            if (ready != 0) {
+                cmpSetCrossGeneralVal(camp->crossPanel, -1);
+            } else {
+                campDhCheckTextures();
+                camp = campWorkLive;
+                cmpSetCrossGeneralVal(camp->crossPanel, 0);
+            }
+        }
+    }
+    work = campDhCalcStateLive;
+    work->unk_04 = 0;
+    work = campDhCalcStateLive;
+    if (work->unk_00 & 0x10) {
+        cmpUpdateTerminate((cmpInfoWindow_t *)work);
+        return -1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", camp_calc_dh_Process);
+#endif
 
 #ifdef NON_MATCHING
 extern s32 cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g);
