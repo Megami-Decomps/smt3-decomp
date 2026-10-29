@@ -149,11 +149,15 @@ typedef struct nbDeadEvent_t {
     u8 unk04[0xA0];
 } nbDeadEvent_t;
 
-/* 38-byte rows; this unit reads only the formation type at +4. */
+/* 38-byte encounter formation rows. */
 typedef struct nbEncountForm_t {
     u8 unk00[4];
     u8 formationtype;
-    u8 unk05[0x21];
+    u8 unk05;
+    u16 id[11];
+    u8 unk1C[7];
+    u8 nakamayobi;
+    u8 unk24[2];
 } nbEncountForm_t;
 
 void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag);
@@ -835,7 +839,41 @@ void nbCountActiveUnits(void)
     }
 }
 
+#ifdef NON_MATCHING
+extern void nbSetEnemyFormation(nbMainProcessData_t *data);
+
+void nbSetupBattleUnits(nbMainProcessData_t *data, s32 encno)
+{
+    nbEncountForm_t *entry = &nbEncountFormTable[encno];
+    datUnitWork_t *work;
+    s32 count = 0;
+    s32 i;
+    s32 nakamayobi;
+
+    for (i = 0; i < 10; i++) {
+        data->form[i + 4].stat = 0x200;
+        data->party[i + 4].flag = 0;
+    }
+    for (i = 0; i < 10; i++) {
+        if (entry->id[i] != 0) {
+            datSetDevilWork(entry->id[i], &data->enemyunit[count]);
+            work = &data->enemyunit[count];
+            work->flag |= 2;
+            work->maxhp = datDevilTable[entry->id[i]].maxhp;
+            work->hp = datDevilTable[entry->id[i]].hp;
+            work->maxmp = datDevilTable[entry->id[i]].maxmp;
+            work->mp = datDevilTable[entry->id[i]].mp;
+            nbAddUnitStock(data, 1, count, i + 4);
+            count++;
+        }
+    }
+    nbSetEnemyFormation(data);
+    nakamayobi = entry->nakamayobi;
+    data->nakamayobi = nakamayobi != 0 ? nakamayobi : -1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetupBattleUnits);
+#endif
 
 void nbSetPlayerStartData(nbMainProcessData_t *data)
 {
