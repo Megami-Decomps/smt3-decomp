@@ -535,7 +535,7 @@ void fldReadyScene(void)
             adjustedPoint.rot.w = fldSceneParam.safeUnit.rot.w;
             point = &adjustedPoint;
         }
-        if (fldSceneParam.loadField < 46) {
+        if (fldSceneParam.loadField < FLD_ENCOUNTER_FIELDS) {
             encounters = &fldEncounterFloorTable[fldSceneParam.loadField];
             eventSet = 0;
             if (encounters->eventFlag != 0) eventSet = evtBitCheck(encounters->eventFlag) != 0;
