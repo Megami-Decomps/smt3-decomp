@@ -169,6 +169,12 @@ typedef struct {
 } fldMapCell_t;
 
 typedef struct {
+    u32 firstOffset;
+    u32 cellCount;
+    u32 secondOffset;
+} fldRunMapHeader_t;
+
+typedef struct {
     u8 x;
     u8 z;
     u16 angle;

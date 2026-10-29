@@ -43,12 +43,6 @@ extern void dds3GetPosPoseSet(dds3Basic_t *pBasic);
 
 extern void fldRunDanteShutdown(void);
 
-typedef struct {
-    u32 firstOffset;
-    u32 cellCount;
-    u32 secondOffset;
-} fldRunMapHeader_t;
-
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 flag);
 
 extern s16 fldRun_MAP_OX;

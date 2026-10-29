@@ -11,12 +11,6 @@ extern char D_0054EA38[], D_0054EA40[], D_0054EA48[], D_0054EA50[], D_0054EA58[]
 
 extern dds3Basic_t *dds3GetControlScene(void);
 
-typedef struct {
-    u32 firstOffset;
-    u32 cellCount;
-    u32 secondOffset;
-} fldRunMapHeader_t;
-
 extern void *mhfldWaveFile;
 
 extern void *mhfldPlayerFile;
