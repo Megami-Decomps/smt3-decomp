@@ -994,3 +994,19 @@ state, with the native unchecked allocation. Structure assignments generate
 the copy loops. Expression blocks reset CFA fields, then call the matched
 expression decoder through the encoded end. Window-save rules cover registers
 16 through 31 with four-byte offsets. No instruction or data padding is added.
+
+## SIF command DMA submission
+
+`_sceSifSendCmd` matches all 308 instruction bytes. The 16-byte command
+header uses a 32-bit storage word for its 8-bit packet size and 24-bit payload
+size. The two DMA descriptors now have named bus-address, signed-size and
+attribute fields; both existing descriptor consumers remain exact.
+
+The unsigned packet-size check accepts 16 through 112 bytes. A positive payload
+adds its descriptor, optionally flushes its source for mode bit 4, and preserves
+the full signed payload length in that descriptor despite the header's 24-bit
+length. The remote packet address is read after that callback. The packet
+descriptor carries attribute `0x44`; the command and size are published before
+the mandatory packet flush. Mode bit 1 selects interrupt-context submission.
+The option word is untouched. Initializing the payload descriptor before the
+header gives the native store schedule using ordinary field assignments.

@@ -848,10 +848,71 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifAddCmdHandler);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRemoveCmdHandler);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifSendCmd);
+/* DMA bus addresses and transfer controls occupy four 32-bit words. */
+typedef struct sifDmaTransfer_t {
+    u32 source;
+    u32 destination;
+    s32 size;
+    u32 attributes;
+} sifDmaTransfer_t;
 
-extern s32 _sceSifSendCmd(s32 command, s32 interruptMode, void *packet, s32 packetBytes,
-                           void *source, void *destination, s32 dataBytes);
+typedef char sifDmaTransfer_size_must_be_16[
+    sizeof(sifDmaTransfer_t) == 16 ? 1 : -1];
+
+extern s32 sceSifSetDma(sifDmaTransfer_t *transfers, s32 count);
+extern s32 isceSifSetDma(sifDmaTransfer_t *transfers, s32 count);
+extern void sceSifWriteBackDCache(void *address, s32 size);
+
+typedef struct sifCommandHeader_t {
+    u32 packetSize : 8;
+    u32 dataSize : 24;
+    u32 destination;
+    u32 command;
+    u32 option;
+} sifCommandHeader_t;
+
+typedef char sifCommandHeader_size_must_be_16[
+    sizeof(sifCommandHeader_t) == 16 ? 1 : -1];
+
+s32 _sceSifSendCmd(s32 command, s32 interruptMode, void *packet, s32 packetBytes,
+                    void *source, void *destination, s32 dataBytes)
+{
+    sifDmaTransfer_t transfers[2];
+    sifCommandHeader_t *header = packet;
+    s32 count;
+
+    if ((u32)packetBytes - 16U > 96U) {
+        return 0;
+    }
+    count = 0;
+    if (dataBytes > 0) {
+        transfers[count].source = (u32)source;
+        transfers[count].destination = (u32)destination;
+        transfers[count].size = dataBytes;
+        transfers[count].attributes = 0;
+        header->dataSize = dataBytes;
+        header->destination = (u32)destination;
+        count++;
+        if (interruptMode & 4) {
+            sceSifWriteBackDCache(source, dataBytes);
+        }
+    } else {
+        header->dataSize = 0;
+        header->destination = 0;
+    }
+    transfers[count].source = (u32)packet;
+    transfers[count].destination = (u32)D_0059BA98.remoteAddress;
+    transfers[count].size = packetBytes;
+    header->command = command;
+    header->packetSize = packetBytes;
+    transfers[count].attributes = 0x44;
+    sceSifWriteBackDCache(packet, packetBytes);
+    count++;
+    if (interruptMode & 1) {
+        return isceSifSetDma(transfers, count);
+    }
+    return sceSifSetDma(transfers, count);
+}
 
 s32 sceSifSendCmd(s32 command, void *packet, s32 packetBytes,
                   void *source, void *destination, s32 dataBytes)
@@ -1304,12 +1365,6 @@ sifRpcServerData_t *sceSifGetNextRequest(sifRpcDataQueue_t *queue)
     return request;
 }
 
-/* DMA descriptor words: source, destination, byte count, attributes. */
-typedef u32 sifDmaTransfer_t[4];
-
-extern s32 sceSifSetDma(sifDmaTransfer_t *transfers, s32 count);
-extern void sceSifWriteBackDCache(void *address, s32 size);
-
 void sceSifExecRequest(sifRpcServerData_t *server)
 {
     sifDmaTransfer_t transfers[2];
@@ -1348,16 +1403,16 @@ void sceSifExecRequest(sifRpcServerData_t *server)
     count = 0;
     packet->w[4] = 0;
     if (replySize > 0) {
-        transfers[0][0] = (u32)reply;
-        transfers[0][1] = (u32)server->receiveBuffer;
-        transfers[0][2] = replySize;
-        transfers[0][3] = 0;
+        transfers[0].source = (u32)reply;
+        transfers[0].destination = (u32)server->receiveBuffer;
+        transfers[0].size = replySize;
+        transfers[0].attributes = 0;
         count++;
     }
-    transfers[count][0] = (u32)packet;
-    transfers[count][1] = (u32)server->packetAddress;
-    transfers[count][2] = 0x40;
-    transfers[count][3] = 0;
+    transfers[count].source = (u32)packet;
+    transfers[count].destination = (u32)server->packetAddress;
+    transfers[count].size = 0x40;
+    transfers[count].attributes = 0;
     count++;
     do {
         status = sceSifSetDma(transfers, count);
@@ -3412,10 +3467,10 @@ s32 sceSifResetIop(const char *arguments, s32 mode)
     D_0059EC40.command = 0x80000003;
     D_0059EC40.dataSize = 0;
     D_0059EC40.packetSize = 104;
-    transfer[0] = (u32)&D_0059EC40;
-    transfer[1] = destination;
-    transfer[2] = 104;
-    transfer[3] = 0x44;
+    transfer.source = (u32)&D_0059EC40;
+    transfer.destination = destination;
+    transfer.size = 104;
+    transfer.attributes = 0x44;
     sceSifWriteBackDCache(&D_0059EC40, 104);
     sceSifSetReg(4, 0x40000);
     if (sceSifSetDma(&transfer, 1) != 0) {
