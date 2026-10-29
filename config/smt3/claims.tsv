@@ -853,3 +853,5 @@ src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	2 matches / 1248 bytes	Unpacked 
 src/smt3/field/fldSnow.c	redthing1	done	2026-10-28	0 exact / 436 B guarded	snow initializer reaches native block layout with shared allocation and scoped defaults; 107 of 109 words match, mode/speed stores remain exchanged
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 440 B	frame-state builder preserves separate records, CIE/FDE bounds, location gate and public-only structure copy; complete owner 34 match, 0 differ
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	0 exact / 756 B guarded	free-list coalescing, last-remainder handling and bin insertion reconstructed with typed links and arena; native-sized draft retains 103 differing words
+
+src/smt3/sdk/libgcc_longlong.c	redthing1	done	2026-10-28	0 exact / 1404 B guarded	unsigned64 division with normalized base-65536 estimates, carry-aware correction and native zero-divisor trap; widening-product extraction remains nonmatching
