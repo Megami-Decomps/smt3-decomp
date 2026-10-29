@@ -532,7 +532,149 @@ INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_005449E0);
 
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_005449F8);
 
+extern char D_005449E0[], D_005449F8[], D_00551140[];
+extern const volatile f32 D_0054E528, D_0054E52C;
+extern u32 nbGetDevilFormatFlag(s32 formindex);
+extern s32 datGetSakePow(datUnitWork_t *work);
+extern s32 datGetMagicHitPow(datUnitWork_t *work);
+
+#ifdef NON_MATCHING
+s32 nbGetKoukaType(s32 nskill, s32 sformindex, s32 dformindex)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    volatile datNormalSkill_t *skill = &datSkillTable.normal[nskill];
+    datUnitWork_t *source;
+    datUnitWork_t *target;
+    u32 formatFlag;
+    u32 battleStat;
+    u32 aisyo;
+    u32 bad;
+    s32 attr;
+    s32 hit;
+    u32 program;
+    f32 levelRate;
+    f32 sourceRate;
+    f32 targetRate;
+    f32 chance;
+    char *format;
+
+    switch (skill->program) {
+    case 1: return 7;
+    case 2:
+    case 3: return 6;
+    case 4: return 8;
+    case 5: return 9;
+    case 7: return 10;
+    case 12: return 12;
+    case 13: return 13;
+    case 14: return 14;
+    }
+
+    source = nbGetUnitWorkFromFormindex(sformindex);
+    target = nbGetUnitWorkFromFormindex(dformindex);
+    formatFlag = nbGetDevilFormatFlag(dformindex);
+    battleStat = data->stat;
+    if (battleStat & 0x40000000) {
+        return 1;
+    }
+    if (battleStat & 0x08000000) {
+        return 0;
+    }
+    if (nskill == 0x9E && (battleStat & 1) && data->encno != 0x408 &&
+        (target->flag & 0x20)) {
+        return 5;
+    }
+    if (nskill == 0x9F && (battleStat & 1) && (target->flag & 0x20)) {
+        return 5;
+    }
+    attr = nbGetNormalSkillAttr(nskill);
+    if (attr != -1 && (attr < 12 || attr >= 15)) {
+        aisyo = nbGetAisyo(nskill, dformindex, attr);
+        if ((target->badstatus & 0xFFF) == 2 && skill->koukatype == 0) {
+            aisyo &= ~0x70000;
+        }
+        if (aisyo & 0x20000) {
+            return 1;
+        }
+        if (datCheckSyojiSkill(source, 0x165) != 0 && skill->koukatype == 0) {
+            if (aisyo & 0x50000) {
+                data->d31_kantuu = 1;
+            }
+        } else {
+            if (aisyo & 0x40000) return 2;
+            if (aisyo & 0x10000) return 3;
+        }
+    }
+
+    if ((data->stat & 0x400) && (target->flag & 0x20)) {
+        if (skill->targettype != 0) {
+            if (attr != 14 && data->enemypcnt != 1) return 5;
+        } else if (data->form[dformindex].stat & 0x1000) {
+            return 11;
+        }
+    }
+    program = skill->program;
+    bad = target->badstatus & 0xFFF;
+    if (program == 6 && bad != 4) return 5;
+    if (program == 15 && bad != 0x40) return 5;
+    if (bad == 1 || bad == 2 || bad == 4 || bad == 0x10 ||
+        bad == 0x100 || bad == 0x400) {
+        return 0;
+    }
+    if (nbCheckKoukaJyoken(nskill, sformindex, dformindex) == 0) {
+        printf(D_00551140);
+        return 5;
+    }
+    if (skill->hitlevel == 0xFF) return 0;
+    levelRate = (f32)skill->hitlevel * D_0054E528;
+    if (evtBitCheck(0xAF2) != 0 && skill->hptype == 3 && skill->hpn == 1 &&
+        !(target->flag & 0x20)) {
+        levelRate *= D_0054E52C;
+    }
+    sourceRate = nbGetHojoRitu(sformindex, 8);
+    targetRate = nbGetHojoRitu(dformindex, 6);
+    switch (skill->koukatype) {
+    case 0: {
+        s32 sourceParam;
+        s32 targetParam;
+        s32 failpoint;
+        (void)((volatile datUnitWork_t *)source)->flag;
+        sourceParam = datGetParam(source, 4);
+        sourceParam = (sourceParam / (source->level / 5 + 3)) * 100;
+        targetParam = datGetParam(target, 4);
+        targetParam = (targetParam / (target->level / 5 + 3)) * 100;
+        failpoint = skill->failpoint;
+        chance = ((f32)(100 - failpoint) +
+                  ((f32)sourceParam - (f32)targetParam) * 0.0625f) *
+                 sourceRate * targetRate * levelRate;
+        format = D_005449E0;
+        break;
+    }
+    case 1: {
+        f32 base = (source->flag & 0x20) ? 95.0f : 100.0f;
+        s32 evasion = datGetSakePow(target);
+        s32 accuracy = datGetMagicHitPow(source);
+        chance = ((f32)(100 - (evasion * 100) / accuracy) * 0.5f + base) *
+                 sourceRate * targetRate * levelRate;
+        format = D_005449F8;
+        break;
+    }
+    default:
+        return 0;
+    }
+    if (chance < 50.0f) chance = 50.0f;
+    if (chance > 100.0f) chance = 100.0f;
+    if (nbGetBadStat(sformindex) == 0x100) chance *= 0.25f;
+    hit = (s32)chance;
+    printf(format, hit);
+    if ((s32)dds3GetRandIntA(NULL, 100) >= hit) {
+        return (formatFlag & 0x800) ? 5 : 4;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaType);
+#endif
 
 void nbAddHpMp(s32 formindex, s32 type, s32 n)
 {
