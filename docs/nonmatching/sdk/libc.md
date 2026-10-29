@@ -177,8 +177,8 @@ extra arithmetic or artificial lifetime extensions were added.
 
 The 5744-byte formatted-output core is independently bounded by its entry,
 frame and direct reentrant callers; see [SDK matching](../../sdk-matching.md).
-Its guarded reconstruction emits 5488 bytes: 7 of 1372 emitted words match,
-1365 differ, and 256 native bytes are uncovered. The frame is 0x2C0 rather
+Its guarded reconstruction emits 5308 bytes: 38 of 1327 emitted words match,
+1289 differ, and 436 native bytes are uncovered. The frame is 0x2A0 rather
 than 0x290. Assembly remains active and this adds no exact matching credit.
 
 The reconstruction uses the native eight-entry output-vector batches and
@@ -209,7 +209,30 @@ words but did not reproduce that structure; it is not retained. The decoder
 limit has its observed ordinary-data storage annotation, avoiding an inferred
 small-data reference.
 
-Control-flow layout, base-dispatch diagnostic retention, register allocation
-and stack lifetimes remain broad frontiers. The source does not attempt to
+Numeric cases now converge directly on a shared integer-formatting label.
+The internal selectors are octal 0, decimal 1 and hexadecimal 2, rather than
+radix values. A decimal/octal/hexadecimal comparison chain retains the native
+invalid-base diagnostic once; an ordinary switch emitted two diagnostic
+address paths and an extra range comparison. Zero value with precision zero
+bypasses this dispatch and remains an empty numeral. Common precision padding
+is derived directly from the precision field and converted-text length.
+
+The previous 5488-byte body matched 7 emitted words and had a 0x2C0 frame.
+The current body matches 31 more words and reduces the frame gap from 48 to
+16 bytes, while leaving 180 more native bytes uncovered. A selector switch
+with the old conditional convergence emitted 5456 bytes; direct convergence
+with that switch emitted 5316 bytes. These controls are not retained.
+
+A qualified actual-owner jump trace used pinned cc1
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`:
+`tools/cc1probe.sh src/smt3/sdk/libc.c --func func_002D6678 --jump --no-dumps
+--cflag -DNON_MATCHING --maxlines 1200 --out <output>`.
+Hooked/unhooked and plain-output parity passed. The target assembly is also
+identical with and without `SKIP_ASM`. Late `jump_optimize_1` merges parser
+character-load tails: UID4270/4274/4278 enter the shared tail at UID4193.
+This confirms the current sharing, not the origin of the remaining gap.
+
+Control-flow layout, register allocation and stack lifetimes remain broad
+frontiers. The source does not attempt to
 fill missing bytes or force the native frame. A new compiler-property
 premise is required before allocation or control-flow tuning.

@@ -1114,6 +1114,7 @@ extern const char D_0054B698[];
 extern const char D_0054B6A0[];
 extern const char D_0054B6B8[];
 extern const char D_0054B6C0[];
+extern const char D_0054B6D8[];
 extern const char D_0054B6F8[];
 extern const char D_0054B700[];
 extern const char D_0054B670[16];
@@ -1229,7 +1230,6 @@ s32 func_002D6678(_reent *r, FILE *fp, const char *format, va_list ap)
         integerPrecision = 0;
         textBytes = 0;
         text = numberBuffer;
-        base = 0;
 read_conversion:
         conversion = (s8)*cursor++;
 dispatch_conversion:
@@ -1306,8 +1306,8 @@ dispatch_conversion:
                 signByte = '-';
                 unsignedLong = 0 - unsignedLong;
             }
-            base = 10;
-            break;
+            base = 1;
+            goto format_integer;
         case 'O':
             flags |= 0x10;
             /* fall through */
@@ -1321,8 +1321,8 @@ dispatch_conversion:
                 unsignedWord = __builtin_va_arg(ap, u32);
                 unsignedLong = unsignedWord;
             }
-            base = 8;
-            break;
+            base = 0;
+            goto format_integer;
         case 'U':
             flags |= 0x10;
             /* fall through */
@@ -1336,8 +1336,8 @@ dispatch_conversion:
                 unsignedWord = __builtin_va_arg(ap, u32);
                 unsignedLong = unsignedWord;
             }
-            base = 10;
-            break;
+            base = 1;
+            goto format_integer;
         case 'X':
         case 'x':
             signByte = 0;
@@ -1349,16 +1349,16 @@ dispatch_conversion:
                 unsignedWord = __builtin_va_arg(ap, u32);
                 unsignedLong = unsignedWord;
             }
-            base = 16;
-            break;
+            base = 2;
+            goto format_integer;
         case 'p':
             signByte = 0;
             flags |= 2;
             signedWord = (s32)__builtin_va_arg(ap, void *);
             unsignedLong = (u64)(s64)signedWord;
-            base = 16;
+            base = 2;
             conversion = 'x';
-            break;
+            goto format_integer;
         case 's':
             signByte = 0;
             text = __builtin_va_arg(ap, char *);
@@ -1436,7 +1436,7 @@ dispatch_conversion:
                 if (floatSign != 0) signByte = '-';
                 textBytes = renderedLength;
             }
-            break;
+            goto emit_field;
         default:
             signByte = 0;
             if (conversion == '%') numberBuffer[0] = '%';
@@ -1446,48 +1446,46 @@ dispatch_conversion:
             textBytes = 1;
             goto emit_field;
         }
-        if (base != 0) {
+format_integer:
+        {
             const char *alphabet = conversion == 'X' ? D_0054B6C0 : D_0054B6A0;
             char *end = numberBuffer + sizeof(numberBuffer);
             number = end;
             nonzero = unsignedLong != 0;
-            if (precision == 0 && unsignedLong == 0) {
-                textBytes = 0;
-            } else if (base == 8) {
-                do {
-                    *--number = (char)('0' + (unsignedLong & 7));
-                    unsignedLong >>= 3;
-                } while (unsignedLong != 0);
-                textBytes = end - number;
-            } else if (base == 16) {
-                do {
-                    *--number = alphabet[unsignedLong & 15];
-                    unsignedLong >>= 4;
-                } while (unsignedLong != 0);
-                textBytes = end - number;
-            } else {
-                while (unsignedLong >= 10) {
-                    *--number = (char)('0' + unsignedLong % 10);
-                    unsignedLong /= 10;
-                }
-                *--number = (char)('0' + unsignedLong);
-                textBytes = end - number;
-            }
             integerPrecision = precision;
             if (precision >= 0) flags &= ~0x80;
-            if ((conversion == 'o' || conversion == 'O') && (flags & 1) &&
-                textBytes > 0 && *number != '0') {
-                *--number = '0';
-                textBytes++;
-            }
-            precisionZeros = precision > textBytes ? precision - textBytes : 0;
             if ((conversion == 'x' || conversion == 'X') && (flags & 1) && nonzero)
                 flags |= 2;
+            if (precision != 0 || unsignedLong != 0) {
+                if (base == 1) {
+                    while (unsignedLong >= 10) {
+                        *--number = (char)('0' + unsignedLong % 10);
+                        unsignedLong /= 10;
+                    }
+                    *--number = (char)('0' + unsignedLong);
+                } else if (base == 0) {
+                    do {
+                        *--number = (char)('0' + (unsignedLong & 7));
+                        unsignedLong >>= 3;
+                    } while (unsignedLong != 0);
+                    if ((flags & 1) && *number != '0') *--number = '0';
+                } else if (base == 2) {
+                    do {
+                        *--number = alphabet[unsignedLong & 15];
+                        unsignedLong >>= 4;
+                    } while (unsignedLong != 0);
+                } else {
+                    text = (char *)D_0054B6D8;
+                    textBytes = strlen(text);
+                    goto emit_field;
+                }
+            }
+            textBytes = end - number;
             text = number;
         }
 
 emit_field:
-        if (base == 0) precisionZeros = 0;
+        precisionZeros = integerPrecision > textBytes ? integerPrecision - textBytes : 0;
         fieldBytes = textBytes;
         if (integerPrecision > fieldBytes) fieldBytes = integerPrecision;
         if (signByte != 0) fieldBytes++;
@@ -1507,7 +1505,7 @@ emit_field:
         if ((flags & 0x80) && !(flags & 4) && width > fieldBytes) {
             PAD(D_0054B680, width - fieldBytes);
         }
-        if (base != 0 && precisionZeros > 0) PAD(D_0054B680, precisionZeros);
+        if (precisionZeros > 0) PAD(D_0054B680, precisionZeros);
         if ((flags & 0x100) == 0) {
             PRINT(text, textBytes);
         } else if (conversion == 'e' || conversion == 'E') {
