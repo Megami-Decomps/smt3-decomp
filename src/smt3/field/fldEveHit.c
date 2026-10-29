@@ -726,7 +726,220 @@ s32 fldEveHit_ChkOn(const char *evehitname) {
 
 INCLUDE_RODATA(const s32, "field/fldEveHit", D_00531E08);
 
+#ifdef NON_MATCHING
+extern fldDanteGunState_t fldRunDanteGunFlag;
+extern s32 fldEncountTestFlag(u32 flag);
+extern s32 fldGbChkNpc(s32 area, u32 floor, s32 id);
+extern void rsetOtOfs(u32 offset);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void rsetAlpha(s32 mode);
+extern void ooyTestLine3D(u32 color1, u32 color2, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
+extern s32 dds3ComparePosPoseSet(dds3PoseSet_t *left, dds3PoseSet_t *right);
+extern void fldDbgPrint2D(s32 x, s32 y, const char *str);
+extern s32 sprintf(char *buffer, const char *format, ...);
+extern const char *fldCheckNpcTalk(const char *name);
+extern const char *fldCheckNpcTalk2(const char *name);
+extern const char *fldInf_FindTypeEveNpc(const char *name);
+extern u8 *fldDoor_Find2(const char *name);
+extern u8 *fldFindEventEntry(const char *name);
+extern s32 gFldInf_HitIdx, gFldInf_WpExit;
+
+typedef struct {
+    s32 type;
+    s16 item;
+    s16 amount;
+    s32 effectType;
+    s32 value;
+} fldEveTreasure_t;
+extern fldEveTreasure_t fldTakaraTable[];
+
+void fldEveHit_ChkEveHit(dds3Basic_t *player)
+{
+    sdfVector4_t scratch __attribute__((aligned(16)));
+    sdfVector4_t current __attribute__((aligned(16)));
+    sdfVector4_t previous __attribute__((aligned(16)));
+    sdfVector4_t corners[8] __attribute__((aligned(16)));
+    dds3PoseSet_t playerPose __attribute__((aligned(16)));
+    dds3PoseSet_t eventPose __attribute__((aligned(16)));
+    char message[64];
+    dds3Basic_t *scene;
+    s32 talkIndex = -1, doorIndex = -1;
+    s32 i, j;
+
+    memset(&scratch, 0, sizeof(scratch));
+    scratch.w = 1.0f;
+    memset(&current, 0, sizeof(current));
+    current.w = 1.0f;
+    memset(&previous, 0, sizeof(previous));
+    previous.w = 1.0f;
+    if (fldEveHitState != 0 || fldEncountTestFlag(0x40) == 0) {
+        return;
+    }
+    fldPurgeEveRngProcesses();
+    if (fldRunDanteGunFlag.word18 == 1) {
+        rsetOtOfs(0x51);
+        rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+        rsetAlpha(0);
+    }
+    scene = dds3GetControlScene();
+    for (i = 0; i < fldEveRngCount; i++) {
+        fldRoomState_t *room = &fldEveHitTable[i];
+        fldFileResource_t *event;
+        fldTaskInfo_t *info;
+        const f32 *position;
+        char *script;
+        u32 kind;
+        s32 crossing;
+        f32 nowDistance, oldDistance;
+
+        if (room->unk124 > 0 && fldGbChkNpc(fldGlobalBase.area, fldGlobalBase.floor + 1, room->unk124) != 0) {
+            continue;
+        }
+        if (fldEveHit_ChkOn(gEvnRng[i]->name) == 0) {
+            continue;
+        }
+        event = gEvnRng[i];
+        info = event->data;
+        kind = info->shape->kind;
+        if (kind == 0) {
+            position = event->transform;
+            playerPose.r = 30.0f;
+            playerPose.pos.x = player->poseset->pos.x;
+            playerPose.pos.y = player->poseset->pos.y;
+            playerPose.pos.z = player->poseset->pos.z;
+            eventPose.r = info->shape->sphere.radius;
+            eventPose.pos.x = position[0];
+            eventPose.pos.y = position[1];
+            eventPose.pos.z = position[2];
+            if (dds3ComparePosPoseSet(&playerPose, &eventPose) == 1) {
+                if (fldRunDanteGunFlag.word20 == 1) {
+                    fldDbgPrint2D(0x40, 0x140, gEvnRng[i]->name);
+                    if (fldRunDanteGunFlag.word20 == 1 && room->roomId != -1) {
+                        fldEveTreasure_t *treasure = &fldTakaraTable[room->roomId];
+                        sprintf(message, "Takara:%d [%d,%d,%d,%d,%d]", room->roomId,
+                                treasure->type, treasure->item, treasure->amount, treasure->effectType, treasure->value);
+                        fldDbgPrint2D(0x40, 0x1A0, message);
+                    }
+                }
+                if (fldCheckNpcTalk2(gEvnRng[i]->name) != NULL) {
+                    talkIndex = i;
+                } else if (((fldTaskInfo_t *)gEvnRng[i]->data)->slot >= 0) {
+                    info = gEvnRng[i]->data;
+                    script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->slot]->objectId, 0xD));
+                    fldEveHit_ScriptStart(script, i);
+                }
+            } else if (fldCheckNpcTalk(gEvnRng[i]->name) == NULL &&
+                       ((fldTaskInfo_t *)gEvnRng[i]->data)->slot >= 0) {
+                fldEveHit_ScriptEnd2(i);
+            }
+        } else if (kind == 1) {
+            f32 x, y, z;
+            position = event->transform;
+            x = position[0];
+            y = position[1];
+            z = position[2];
+            for (j = 0; j < 4; j++) {
+                SDF_VU0_COPYVECTOR(&corners[j], room->corner[j]);
+            }
+            SDF_VU0_COPYVECTOR(&scratch, room->center);
+            if (fldRunDanteGunFlag.word18 == 1) {
+                ooyTestLine3D(0x8010FF10, 0x8010FF10, x, y, z,
+                              x + scratch.x * 40.0f, y + scratch.y * 40.0f, z + scratch.z * 40.0f);
+            }
+            for (j = 1; j < 5; j++) {
+                SDF_VU0_COPYVECTOR(&scratch, room->plane[j]);
+            }
+            current.x = fldGlobalBase.x;
+            current.y = fldGlobalBase.y - 45.0f;
+            current.z = fldGlobalBase.z;
+            previous.x = fldGlobalBase.prevX;
+            previous.y = fldGlobalBase.prevY - 45.0f;
+            previous.z = fldGlobalBase.prevZ;
+            nowDistance = fldVecDot(&current, (sdfVector4_t *)room->plane[0]) - room->limit[0];
+            oldDistance = fldVecDot(&previous, (sdfVector4_t *)room->plane[0]) - room->limit[0];
+            crossing = 0;
+            if (nowDistance < 0.0f && oldDistance >= 0.0f) crossing = -1;
+            else if (nowDistance >= 0.0f && oldDistance < 0.0f) crossing = 1;
+            if (crossing != 0) {
+                if (fldEveHitTestRect((f32 *)&current, i) != -1) {
+                    room->shapeKind = crossing;
+                    if (fldRunDanteGunFlag.word20 == 1) {
+                        fldDbgPrint2D(0x40, 0x140, gEvnRng[i]->name);
+                    }
+                    if (fldCheckNpcTalk(gEvnRng[i]->name) != NULL) {
+                        talkIndex = i;
+                    } else if (((fldTaskInfo_t *)gEvnRng[i]->data)->slot >= 0) {
+                        info = gEvnRng[i]->data;
+                        script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->slot]->objectId, 0xD));
+                        if (scrSearchScriptName(script) == NULL) {
+                            gEvnRngPid[i] = dds3SceneBasicStartScript(dds3GetActiveScene(), script);
+                            gFldEveRngIdx = i;
+                            gFldEveRngIdx_N = room->mode == 1 ? i : -1;
+                            gFldEveRngIdx_T = room->mode == 2 ? i : -1;
+                        }
+                    }
+                } else {
+                    room->shapeKind = 0;
+                }
+            }
+        } else if (kind == 2) {
+            for (j = 0; j < 8; j++) {
+                SDF_VU0_COPYVECTOR(&corners[j], room->corner[j]);
+            }
+            SDF_VU0_COPYVECTOR(&scratch, room->center);
+            for (j = 0; j < 6; j++) {
+                SDF_VU0_COPYVECTOR(&scratch, room->plane[j]);
+            }
+            scratch.x = player->poseset->pos.x;
+            scratch.y = player->poseset->pos.y - 45.0f;
+            scratch.z = player->poseset->pos.z;
+            scratch.w = 1.0f;
+            event = gEvnRng[i];
+            if (fldEveHitTestPlanes(&scratch, i) != 0) {
+                if (fldCheckNpcTalk(event->name) != NULL) {
+                    talkIndex = i;
+                } else if (fldFindEventEntry(gEvnRng[i]->name) != NULL) {
+                    doorIndex = i;
+                } else if (((fldTaskInfo_t *)gEvnRng[i]->data)->slot >= 0) {
+                    info = gEvnRng[i]->data;
+                    script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->slot]->objectId, 0xD));
+                    fldEveHit_ScriptStart(script, i);
+                }
+            } else if (fldCheckNpcTalk(event->name) == NULL && fldFindEventEntry(gEvnRng[i]->name) == NULL) {
+                info = gEvnRng[i]->data;
+                if (info->slot >= 0) {
+                    script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->slot]->objectId, 0xD));
+                    fldEveHit_ScriptEnd(script, i);
+                }
+                gEvnRngPid[i] = 0;
+            }
+        }
+    }
+    if (talkIndex != -1) {
+        if (fldEveHit_ScriptStart((char *)fldInf_FindTypeEveNpc(gEvnRng[talkIndex]->name), talkIndex) != -1) {
+            fldEveRngHitIdx = talkIndex;
+            gFldInf_HitIdx = talkIndex;
+            gFldInf_WpExit = 0;
+        }
+        doorIndex = -1;
+    } else if (fldEveRngHitIdx != talkIndex) {
+        s32 oldIndex = fldEveRngHitIdx;
+        fldEveHit_ScriptEnd((char *)fldInf_FindTypeEveNpc(gEvnRng[oldIndex]->name), oldIndex);
+        fldEveRngHitIdx = talkIndex;
+    }
+    if (doorIndex != -1) {
+        if (fldEveHit_ScriptStart((char *)fldDoor_Find2(gEvnRng[doorIndex]->name), doorIndex) != -1) {
+            fldEveRngPrevIdx = doorIndex;
+        }
+    } else if (fldEveRngPrevIdx != doorIndex) {
+        s32 oldIndex = fldEveRngPrevIdx;
+        fldEveHit_ScriptEnd((char *)fldFindEventEntry(gEvnRng[oldIndex]->name), oldIndex);
+        fldEveRngPrevIdx = doorIndex;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldEveHit", fldEveHit_ChkEveHit);
+#endif
 
 void fld_13F6B8(void) {
     s32 count = fldEveRngCount;
