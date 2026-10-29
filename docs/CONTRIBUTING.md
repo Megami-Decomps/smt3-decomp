@@ -347,6 +347,13 @@ particle and billboard dispatchers). Both forms compile to the same MIPS, so a
 match never shows the difference, but a native build of the C reads whatever
 the register holds.
 
+The same holds for any function a caller reads the result of: on every path it
+returns what retail leaves in `v0`. Where retail's final call is no tail call,
+a one-pass block keeps ee-gcc from making it one (`do { return f(...); } while
+(0);`, as `cmpMoveCursor` and `dds3SceneBasicStartScript` have it), and so does a
+store after the call (`return x = f(...);`, `cmpPrepareStatusModel`). A function
+whose callers never read its result may fall off its end as retail's does.
+
 ### Variables
 
 `camelCase` for variable names.

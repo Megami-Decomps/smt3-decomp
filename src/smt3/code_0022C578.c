@@ -10012,7 +10012,9 @@ void cmpModelFreeResource(void)
 
 s32 cmpPrepareStatusModel(s32 group, s32 id, s32 blocking)
 {
-    D_0054FEE0 = mdlPrepare(group, id, blocking);
+    /* mdlPrepare's result, which retail returns in v0 (cmpLoadStatusModel
+     * reads it); the store after the call keeps it no sibling call. */
+    return D_0054FEE0 = mdlPrepare(group, id, blocking);
 }
 
 typedef struct
@@ -11257,8 +11259,13 @@ s32 cmpMoveCursor(cmpCursorInfo_t *cur, s8 dir)
     {
         cmpAdvanceCursorPhase(cur);
     }
-    cmpFindNextCursorItem(cur, dir, 1);
-    cur = NULL;
+    /* Whether the cursor moved, which retail returns in v0 (lstMoveCursor's
+     * loop reads it). The nesting keeps ee-gcc from turning this into a
+     * sibling call, as in cmpMoveCursor2. */
+    do
+    {
+        return cmpFindNextCursorItem(cur, dir, 1);
+    } while (0);
 }
 
 s32 cmpGetCursorMoveMode(cmpCursorInfo_t *cursor)
