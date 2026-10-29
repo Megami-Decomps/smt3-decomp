@@ -1,0 +1,2 @@
+# Extra per-unit assembler flags, after toolchain defaults. Compiler flags stay separate.
+sdk/libm  -G0  # floorf: identical 2.96 output gives all 216 native bytes; -G8 introduces .lit4

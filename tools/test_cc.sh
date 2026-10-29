@@ -81,6 +81,25 @@ CC_LOG="$tmp/cc.log" AS_LOG="$tmp/as.log" SMT3_ALLOW_ASLR=1 \
     "$repo/tools/cc.sh" "$tmp/override.c" -o "$tmp/out.o"
 grep -Fx -- '-D__GNUC_MINOR__=96' "$tmp/cc.log" >/dev/null
 
+# Assembler-only overrides follow the canonical unit, including source overlays.
+printf '  sdk/libipu  -G0 -funit-as-flag # assembler evidence\n' > "$repo/config/smt3/asflags.txt"
+for source in "$repo/src/smt3/sdk/libipu.c" "$tmp/override.c"; do
+    CC_LOG="$tmp/cc.log" AS_LOG="$tmp/as.log" SMT3_ALLOW_ASLR=1 \
+        SMT3_AS_UNIT=src/smt3/sdk/libipu.c \
+        "$repo/tools/cc.sh" "$source" -o "$tmp/out.o"
+    grep -Fx -- '-funit-as-flag' "$tmp/as.log" >/dev/null
+    if grep -Fx -- '-funit-as-flag' "$tmp/cc.log" >/dev/null; then
+        echo "assembler flags reached cc1" >&2; exit 1
+    fi
+done
+CC_LOG="$tmp/cc.log" AS_LOG="$tmp/as.log" SMT3_ALLOW_ASLR=1 \
+    SMT3_AS_UNIT=src/smt3/field/fixture.c \
+    "$repo/tools/cc.sh" "$tmp/override.c" -o "$tmp/out.o"
+grep -Fx -- '-G8' "$tmp/as.log" >/dev/null
+if grep -Fx -- '-funit-as-flag' "$tmp/as.log" >/dev/null; then
+    echo "assembler override leaked to another unit" >&2; exit 1
+fi
+
 # Pinned decision hooks must reject SDK units before launching a compiler.
 cp "$root/tools/cc1probe.sh" "$repo/tools/cc1probe.sh"
 if "$repo/tools/cc1probe.sh" "$repo/src/smt3/sdk/libipu.c" --alloc --out "$tmp/probe" 2>"$tmp/probe-error"; then

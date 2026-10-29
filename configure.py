@@ -152,6 +152,19 @@ def unit_cflags(version: str) -> dict[str, str]:
     return out
 
 
+def unit_asflags(version: str) -> dict[str, str]:
+    """Extra per-unit assembler flags, appended after toolchain defaults."""
+    path = ROOT / "config" / version / "asflags.txt"
+    out = {}
+    if path.exists():
+        for line in path.read_text().splitlines():
+            line = line.split("#", 1)[0].strip()
+            if line:
+                unit, flags = line.split(None, 1)
+                out[unit] = flags
+    return out
+
+
 def _regular_files(paths: list[Path]) -> list[Path]:
     """List existing regular files under paths without following symlinks."""
     files = []
@@ -583,8 +596,10 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 chain = TOOLCHAINS[unit_toolchain(version).get(unit, DEFAULT_TOOLCHAIN)]
                 tools = {"cc1": str(chain["cc1"]), "ccdefines": chain["defines"],
                          "ccflags": chain["flags"], "ccas": str(chain["as"]),
-                         "ccasflags": chain["as_flags"]}
-                configs = [f"config/{version}/cflags.txt", f"config/{version}/compilers.txt"]
+                         "ccasflags": (chain["as_flags"] + " " +
+                                       unit_asflags(version).get(unit, "")).strip()}
+                configs = [f"config/{version}/cflags.txt", f"config/{version}/compilers.txt",
+                           f"config/{version}/asflags.txt"]
                 n.build(str(obj), "cc", str(src),
                         implicit=eeasm + ["include/macro.inc", *configs,
                                           "tools/production_report.py"],
@@ -631,7 +646,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         f"config/{v}/{VERSIONS[v]['serial']}.yaml" for v in versions
     ] + [
         f"config/{v}/{name}" for v in versions
-        for name in ("symbol_addrs.txt", "reloc_addrs.txt")
+        for name in ("symbol_addrs.txt", "reloc_addrs.txt", "cflags.txt", "compilers.txt", "asflags.txt")
     ]
     # Source changes can alter both the eeasm dependency list and splat's
     # ASM/C ownership. The ownership digest keeps body-only edits split-free.

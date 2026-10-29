@@ -137,6 +137,20 @@ class ConfigureTests(unittest.TestCase):
                     {"main/code_00100000": "-fno-optimize-sibling-calls"},
                 )
 
+    def test_unit_asflags_keep_assembler_options_separate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            config = root / f"config/{VERSION}"
+            config.mkdir(parents=True)
+            with patch.object(configure, "ROOT", root):
+                self.assertEqual(configure.unit_asflags(VERSION), {})
+                (config / "asflags.txt").write_text(
+                    "# assembler evidence\n"
+                    "  sdk/libm  -G0  # immediate float constants\n\n"
+                )
+                self.assertEqual(configure.unit_asflags(VERSION), {"sdk/libm": "-G0"})
+                self.assertEqual(configure.unit_cflags(VERSION), {})
+
     def test_source_for_prefers_c_then_asm_then_assets(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -434,6 +448,7 @@ class SplatOwnershipTests(unittest.TestCase):
         (self.build / f"{SERIAL}.ld").write_text(
             f"    build/{VERSION}/src/{VERSION}/game/test.o(.text)\n"
         )
+        (self.config / "asflags.txt").write_text("game/test -G0 # native literals\n")
         writer = Mock()
 
         def make_writer(stream, **kwargs):
@@ -453,6 +468,16 @@ class SplatOwnershipTests(unittest.TestCase):
         inputs = regeneration.kwargs["implicit"]
         self.assertIn(f"src/{VERSION}/game/test.c", inputs)
         self.assertIn(f"config/{VERSION}/reloc_addrs.txt", inputs)
+        for name in ("asflags.txt", "cflags.txt", "compilers.txt"):
+            self.assertIn(f"config/{VERSION}/{name}", inputs)
+        compile_edges = [call for call in writer.build.call_args_list
+                         if len(call.args) > 1 and call.args[1] == "cc"]
+        self.assertEqual(len(compile_edges), 2)  # production and SKIP_ASM base
+        defaults = configure.TOOLCHAINS[configure.DEFAULT_TOOLCHAIN]["as_flags"]
+        for edge in compile_edges:
+            self.assertIn(f"config/{VERSION}/asflags.txt", edge.kwargs["implicit"])
+            self.assertEqual(edge.kwargs["variables"]["ccasflags"], defaults + " -G0")
+            self.assertNotIn("-G0", edge.kwargs["variables"]["cflags"])
 
 
 class ObjdiffProgressTests(unittest.TestCase):

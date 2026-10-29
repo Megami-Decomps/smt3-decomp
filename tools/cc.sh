@@ -84,6 +84,8 @@ if [ -n "$canon" ]; then
     # Per-unit flags of the original build (config/<v>/cflags.txt), as configure.py uses.
     unit_flags=$(sed -n "s|^$rel[[:space:]]\{1,\}\([^#]*\).*|\1|p" "config/$version/cflags.txt" 2>/dev/null)
     flags="$flags $unit_flags"
+    unit_asflags=$(sed -n "s|^[[:space:]]*$rel[[:space:]]\{1,\}\([^#]*\).*|\1|p" "config/$version/asflags.txt" 2>/dev/null || :)
+    asflags="$asflags $unit_asflags"
 fi
 run "$cc1" \
     -D__GNUC__=2 "-D__GNUC_MINOR__=$minor" -D__GNUC_PATCHLEVEL__=0 \

@@ -37,6 +37,22 @@ Of the 126,120 bytes, 50,080 (39.7%) are identified by bytes, 65,508 (51.9%) by
 name alone, and 10,532 (8.4%) not yet at all. 116 distinct archive members are
 named, so the region is around 116 translation units rather than one.
 
+## Assembler options for float constants
+
+`config/smt3/asflags.txt` appends per-unit assembler options after the selected
+compiler's defaults. Both the production and `SKIP_ASM` objects use them, as
+does `tools/cc.sh` with a canonical source path or `SMT3_AS_UNIT`. Changes to
+this file, `cflags.txt` or `compilers.txt` regenerate the Ninja graph.
+
+The `sdk/libm -G0` entry keeps ee-gcc 2.96 and its optimization settings.
+Its `li.s` pseudo-instructions must expand into immediate integer words and
+`mtc1`, as in native `floorf` and `scalbnf`. Assembling identical compiler output
+with `-G8` instead introduces unowned `.lit4` entries. The reviewed `floorf`
+source then emits200 rather than216 bytes; `-G0` reproduces all216 native bytes
+in an unmasked comparison. This is an assembler setting, independent of the
+older compiler selected for other Sony-library units. Passing `-G0` only to
+cc1 does not change the assembler's literal-pool expansion.
+
 ## Stream-buffer status ABI
 
 `include/newlib_stat.h` records the historical newlib status structure for the
