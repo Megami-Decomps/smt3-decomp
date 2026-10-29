@@ -708,7 +708,93 @@ void effPCPBossONGYTexRenderEnd(void)
     }
 }
 
+#ifdef NON_MATCHING
+extern f32 D_002F5B8C;
+extern f32 aViewDown[4];
+extern sdfModelOt_t D_002F6A58[];
+extern sdf3DLightParallelPacket_t D_0056ADF0;
+extern f32 sdfAtan(f32 value);
+extern u32 mdlGetColor(mdlObj_t *model);
+extern void mdlSetColor(mdlObj_t *model, u32 color);
+extern void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *packet,
+                                        sdfLightSources_t lights, f32 *ambient);
+
+void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32 height)
+{
+    f32 light[2][4] __attribute__((aligned(16)));
+    sdfVector4_t ambient;
+    sdfVector4_t distance;
+    volatile struct { sdfLightSources_t list; } initial, lights;
+    nbFormation_t *forms, *found;
+    evtUnit_t *unit;
+    mdlObj_t *model;
+    u32 color;
+    s32 count;
+    u32 i;
+    f32 scale;
+
+    initial.list[0] = light;
+    initial.list[1] = NULL;
+    initial.list[2] = NULL;
+    lights = initial;
+    count = dds3GetKernelCount();
+    if (effPCPBossONGY_RFrame == count) {
+        return;
+    }
+    effPCPBossONGY_RFrame = count;
+    SDF_VU0_COPYVECTOR(D_002F5C20, target);
+    scale = height / sdfAtan(D_002F5B8C * 0.5f);
+    distance.x = scale;
+    distance.y = scale;
+    distance.z = scale;
+    distance.w = 0.0f;
+    SDF_VU0_LOADVECTOR(aViewEye);
+    SDF_VU0_LOADVECTOR_B(D_002F5C20);
+    SDF_VU0_COPYVECTOR_B_TO_C();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(&distance);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(D_002F5C30);
+    SDF_VU0_COPYVECTOR(effPCPBossTexRect, aViewDown);
+    forms = nbGetMainProcessData()->form;
+    found = NULL;
+    for (i = 4; i < 14; i++) {
+        if ((forms[i].stat & 3) == 3 && forms[i].hunit != NULL) {
+            found = &forms[i];
+            break;
+        }
+    }
+    if (found != NULL) {
+        unit = found->hunit;
+        color = unit->color;
+        MMI_RGBA_UNPACK(&color, 0x3C000000);
+        SDF_VU0_STOREVECTOR(light[0]);
+        color = found->hunit->color50;
+        MMI_RGBA_UNPACK(&color, 0x3C000000);
+        SDF_VU0_STOREVECTOR(&ambient);
+        SDF_VU0_COPYVECTOR(light[1], found->hunit->vec10);
+        sdf3DMakeLightParallelPacket(&D_0056ADF0, (f32 (**)[4])lights.list, (f32 *)&ambient);
+        model = effPCPBossTexHandle;
+        model->inner->light = &D_0056ADF0;
+        mdlSetColor(effPCPBossTexHandle, (mdlGetColor(found->hunit->owner) & 0xFFFFFF) | 0x80000000);
+    } else {
+        color = 0x80808080;
+        MMI_RGBA_UNPACK(&color, 0x3C000000);
+        SDF_VU0_STOREVECTOR(light[0]);
+        SDF_VU0_STOREVECTOR(&ambient);
+        sdf3DMakeLightParallelPacket(&D_0056ADF0, (f32 (**)[4])lights.list, (f32 *)&ambient);
+        model = effPCPBossTexHandle;
+        model->inner->light = &D_0056ADF0;
+        mdlSetColor(model, 0x80808080);
+    }
+    mdlLink(effPCPBossTexHandle, D_002F6A58);
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYModelTexRender);
+#endif
 
 s32 effPCPBossONGYModelTexRenderCheck(void)
 {
