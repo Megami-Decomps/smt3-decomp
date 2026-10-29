@@ -487,7 +487,7 @@ extern void rotXY(s16 *x, s16 *y, s32 direction);
 s32 roundCheck(s32 direction, u32 groupID, pbGroupData_t **pGroup)
 {
     pbGroupData_t *group;
-    pbBlockEntry_t *entry;
+    volatile pbBlockEntry_t *entry;
     pbMapWork_t *map;
     s16 x, y, rotatedX, rotatedY, centerX, centerY;
     s32 rotation;
