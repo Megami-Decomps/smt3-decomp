@@ -430,7 +430,121 @@ s32 nbGetMotionNo(nbFormation_t *form, s32 motion)
     return D_0034F1C0[motion];
 }
 
+extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
+extern s16 rstGetEquipHeartsAisyo(void);
+extern u32 datAisyoTable[248][16];
+
+#ifdef NON_MATCHING
+void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex)
+{
+    volatile nbMainProcessData_t *state = data;
+    datUnitWork_t *work = NULL;
+    datUnitVisual_t *visual = NULL;
+    volatile nbParty_t *party;
+    volatile nbFormation_t *form;
+    volatile datUnitVisual_t *vvisual;
+    s32 partyindex = -1;
+    s32 partyflag = 0;
+    s32 hearts = 0;
+    s32 i;
+    f32 size;
+    f32 allshot;
+
+    if (side == 0 || side == 1) {
+        s32 first = side == 0 ? 0 : 4;
+        s32 end = side == 0 ? 4 : 14;
+        volatile nbParty_t *slots = state->party;
+
+        for (i = first; i < end; i++) {
+            if (!(slots[i].flag & 1)) {
+                partyindex = i;
+                break;
+            }
+        }
+        if (side == 0) {
+            datUnitWork_t *updated;
+            u16 count;
+            u32 flags;
+
+            work = &DDS3_GBWK->unitwork[stockno];
+            nbGetUnitID(work);
+            visual = nbGetUnitVisual(work);
+            updated = &DDS3_GBWK->unitwork[stockno];
+            count = state->playerpcnt;
+            flags = ((volatile datUnitWork_t *)updated)->flag;
+            state->playerpcnt = count + 1;
+            ((volatile datUnitWork_t *)updated)->flag = flags | 2;
+            partyflag = 1;
+        } else {
+            datUnitWork_t *updated;
+            u16 count;
+            u32 flags;
+
+            work = &state->enemyunit[stockno];
+            nbGetUnitID(work);
+            visual = nbGetUnitVisual(work);
+            updated = &state->enemyunit[stockno];
+            count = state->enemypcnt;
+            flags = ((volatile datUnitWork_t *)updated)->flag;
+            state->enemypcnt = count + 1;
+            ((volatile datUnitWork_t *)updated)->flag = flags | 0x22;
+            partyflag = 3;
+        }
+    }
+
+    party = &state->party[partyindex];
+    party->flag = partyflag;
+    party->statindex = stockno;
+    party->formindex = formindex;
+    for (i = 19; i >= 0; i--) {
+        party->count[i] = 0;
+    }
+
+    if (((volatile datUnitWork_t *)work)->flag & 4) {
+        hearts = rstGetEquipHeartsAisyo();
+    }
+    if (hearts != 0) {
+        party = &state->party[partyindex];
+        for (i = 0; i < 16; i++) {
+            party->aisyo[i] = datAisyoTable[hearts][i];
+        }
+    } else {
+        for (i = 0; i < 16; i++) {
+            u32 aisyo = datGetAisyo(work, i);
+            state->party[partyindex].aisyo[i] = aisyo;
+        }
+    }
+
+    form = &state->form[formindex];
+    form->stat = 0x41;
+    if (formindex < 4) {
+        form->stat = 0x141;
+    } else if (formindex < 14) {
+        form->stat = 0x241;
+    } else {
+        form->stat = 0x441;
+    }
+    vvisual = visual;
+    if (vvisual->autowait == 1) {
+        form->stat |= 0x80;
+    }
+    size = vvisual->formsize;
+    form->partyindex = partyindex;
+    form->formindex = formindex;
+    form->r = size;
+    form->cr = 0;
+    SDF_VU0_COPYVECTOR(&form->center, &visual->center);
+    form->scl = vvisual->formscale;
+    form->h = vvisual->formheight;
+    form->oneshotr = vvisual->oneshotr;
+    allshot = vvisual->allshotr;
+    form->badeff = NULL;
+    form->allshotr = allshot;
+    nbGetMotionNo((nbFormation_t *)form, 0);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbAddUnitStock);
+#endif
 
 void nbSummonUnit(s32 side, s32 stockno, s32 formindex)
 {
