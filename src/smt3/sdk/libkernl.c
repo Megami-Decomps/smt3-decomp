@@ -591,7 +591,28 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceReadlink);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitIopHeap);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifAllocIopHeap);
+extern s32 D_0052C354;
+/* The BSS map bounds this opaque RPC client to 0x40 bytes. */
+extern u8 D_0059E840[0x40];
+extern s32 D_0059E880;
+extern s32 D_0059E8C0;
+extern s32 sceSifCallRpc(void *client, s32 function, s32 mode, void *send,
+                         s32 sendBytes, void *receive, s32 receiveBytes,
+                         void *endFunction, void *endParameter);
+
+s32 sceSifAllocIopHeap(s32 size)
+{
+    if (D_0052C354 < 0) {
+        return 0;
+    }
+    D_0059E8C0 = size;
+    if (sceSifCallRpc(D_0059E840, 1, 0, &D_0059E8C0, 4,
+                      &D_0059E880, 4, NULL, NULL) >= 0) {
+        return D_0059E880;
+    }
+    return 0;
+}
+
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifAllocSysMemory);
 
