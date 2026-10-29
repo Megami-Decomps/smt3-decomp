@@ -1262,13 +1262,61 @@ _Bigint *__mdiff(_reent *r, _Bigint *a, _Bigint *b) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "sdk/libc", _ulp);
+/* Little-endian IEEE binary64 word view used by the numeric helpers. */
+typedef union libcDoubleBits_t {
+    f64 value;
+    u32 word[2];
+} libcDoubleBits_t;
+
+f64 _ulp(f64 x)
+{
+    libcDoubleBits_t input;
+    libcDoubleBits_t result;
+    s32 exponent;
+
+    input.value = x;
+    exponent = (input.word[1] & 0x7FF00000) - 0x03400000;
+    if (exponent > 0) {
+        result.word[1] = exponent;
+        result.word[0] = 0;
+    } else {
+        exponent = -exponent >> 20;
+        if (exponent < 20) {
+            result.word[1] = 0x80000 >> exponent;
+            result.word[0] = 0;
+        } else {
+            result.word[1] = 0;
+            exponent -= 20;
+            result.word[0] = exponent >= 31 ? 1 : 1 << (31 - exponent);
+        }
+    }
+    return result.value;
+}
 
 INCLUDE_ASM(const s32, "sdk/libc", _b2d);
 
 INCLUDE_ASM(const s32, "sdk/libc", _d2b);
 
-INCLUDE_ASM(const s32, "sdk/libc", _ratio);
+f64 _b2d(_Bigint *b, s32 *exponent);
+
+f64 _ratio(_Bigint *a, _Bigint *b)
+{
+    libcDoubleBits_t numerator;
+    libcDoubleBits_t denominator;
+    s32 aExponent;
+    s32 bExponent;
+    s32 difference;
+
+    numerator.value = _b2d(a, &aExponent);
+    denominator.value = _b2d(b, &bExponent);
+    difference = aExponent - bExponent + 32 * (a->wds - b->wds);
+    if (difference > 0) {
+        numerator.word[1] += difference * 0x100000U;
+    } else {
+        denominator.word[1] -= difference * 0x100000U;
+    }
+    return numerator.value / denominator.value;
+}
 
 double _mprec_log10(s32 dig) {
     double v = 1.0;

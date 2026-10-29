@@ -675,6 +675,6 @@ addr	name	size	lib	member	evidence	sdk	upstream
 002E6048	libc_2E6048	1408	-	-	none	-	-
 002E65C8	libc_2E65C8	1384	libgcc[2.96-ee-001003-1]	_umoddi3.o	bytes	296	src/gcc/libgcc2.c
 002E6B30	libc_2E6B30	280	libgcc[2.96-ee-001003-1]	_fixunsdfdi.o	bytes	296	src/gcc/libgcc2.c
-002E6C48	libc_2E6C48	320	libgcc[2.96-ee-001003-1]	_div_df.o	bytes	296	-
+002E6C48	dpdiv	320	libgcc[2.96-ee-001003-1]	_div_df.o	bytes	296	-
 002E6D88	libc_2E6D88	168	libgcc[2.96-ee-001003-1]	_floatdidf.o	bytes	296	src/gcc/libgcc2.c
 002E6E30	__errno_8	32	-	-	none	-	-

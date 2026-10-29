@@ -742,3 +742,5 @@ src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	0 exact / 392 B guarded	stream 
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 404 B	TTY receive/send callback with shared progress fields, native diagnostic/error behavior and allocator-qualified byte-count lifetime; complete owner 36 match, 0 differ
 src/smt3/field/fld_Npc.c	z25	done	2026-10-29	0 fn / 0 B	fldNpcCalc drafted to 5 of 492 words; fldNpcDraw and fldNpcLoad untouched
 src/smt3/newbattle/nbPanelProcess.c	z25	done	2026-10-29	1 fn / 2032 B	nbPanelStockSelect; nbPanelDrawPP untouched
+src/smt3/sdk/libc.c	redthing1	done	2026-10-28	2 fn / 412 B SDK	binary64 ULP spacing and scaled bigint ratio; genuine double ABI and compiler division libcall; complete owner 60 match, 0 differ
+src/smt3/sdk/libgcc_longlong.c	redthing1	done	2026-10-28	0 matches / runtime naming	curated dpdiv at 0x002E6C48 from native unpack/divide/repack provider and ordinary double-division call; comparator remains dpcmp

@@ -945,12 +945,14 @@ function, because libgcc's object file name *is* its symbol: `fp-bit.c` and
 | 0x002E6B30 | `libc_2E6B30` | `__fixunsdfdi` | `_fixunsdfdi.o` | `(double) -> u64` |
 | 0x002E6D88 | `libc_2E6D88` | `__floatdidf` | `_floatdidf.o` | `(s64) -> double` |
 
-Not applied, and why. `_div_df.o`, `_df_to_usi.o`, `_addsub_df.o` and `__main.o`
-each account for two functions in the region, so the object no longer fixes the
-symbol: `dpdiv` at 0x002D1B38 and `libc_2E6C48` are both `_div_df.o`, and a
-second copy of the same object's code gives no way to choose between its name
-and a GNU alias. `_addsub_df.o`'s pair is fine because that object really does
-export two symbols, `dpadd` and `dpsub`, and both are already named.
+The original audit left additional names unresolved for `_div_df.o`,
+`_df_to_usi.o`, `_addsub_df.o` and `__main.o` because each was attributed
+more than one function. In particular, the former `dpdiv` at `0x002D1B38`
+and `libc_2E6C48` were both attributed to `_div_df.o`. The comparator's
+name-only attribution was later withdrawn; the actual division provider is
+resolved in [Double-division runtime name](#double-division-runtime-name).
+`_addsub_df.o` genuinely exports two symbols, `dpadd` and `dpsub`, which
+already retain their names.
 
 The original audit kept Sony's `dp*` spellings where they were. The `dpdiv`
 conclusion below was name-only and is superseded by the native comparison proof
@@ -1036,3 +1038,25 @@ All five active owners, a forced assembly re-split, and the full retail checksum
 qualify the correction independently of the billboard reconstruction. It earns
 zero new function or byte credit. No compiler, assembler, options, unit
 boundaries or runtime instructions are changed.
+
+## Double-division runtime name
+
+The 320-byte provider at `0x002E6C48`, formerly `libc_2E6C48`, is now named
+`dpdiv` through the inferred curated-name workflow. Its native body unpacks
+two binary64 operands with `sdfUnpackDouble`, handles floating-point classes,
+divides the mantissas and returns `__pack_df`'s binary64 result. The existing
+SDK index identifies these bytes with `_div_df.o`; this differs from the
+withdrawn name-only attribution of the comparator.
+
+Ordinary `double` division in `sdk/libc::_ratio` emits the runtime call
+`dpdiv`. Native `_ratio` calls `0x002E6C48` after constructing the same two
+scaled binary64 operands. Resolving that compiler name to this verified
+provider gives an exact 204-byte routine and a byte-identical retail image.
+No compatibility alias, integer argument substitution or direct-call
+workaround is required. The comparator at `0x002D1B38` remains `dpcmp`.
+
+`_ulp` also matches its complete 208-byte native body using the same genuine
+binary64 union view. Exponent fields above 52 yield a normal power of two;
+fields 1 through 52 yield the corresponding subnormal spacing, while field 0
+also returns the minimum subnormal spacing. Its result words are initialized
+in their native branches without extra storage or instructions.
