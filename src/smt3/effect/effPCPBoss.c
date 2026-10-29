@@ -699,6 +699,7 @@ extern void mdlSetColor(mdlObj_t *model, u32 color);
 
 void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32 height)
 {
+    static sdfVector4_t lastDirection __attribute__((aligned(16))) = { 0.0f, 0.0f, 1.0f, 0.0f };
     sdf3DLight_t light __attribute__((aligned(16)));
     sdfVector4_t ambient;
     sdfVector4_t distance;
@@ -754,6 +755,7 @@ void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32
         MMI_RGBA_UNPACK(&color, 0x3C000000);
         SDF_VU0_STOREVECTOR(&ambient);
         SDF_VU0_COPYVECTOR(&light.v, found->hunit->vec10);
+        SDF_VU0_COPYVECTOR(&lastDirection, &light.v);
         sdf3DMakeLightParallelPacket(&D_0056ADF0, (sdf3DLight_t **)lights.list, &ambient);
         model = effPCPBossTexHandle;
         model->inner->light = &D_0056ADF0;
@@ -763,6 +765,8 @@ void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32
         MMI_RGBA_UNPACK(&color, 0x3C000000);
         SDF_VU0_STOREVECTOR(&light.color);
         SDF_VU0_STOREVECTOR(&ambient);
+        /* Retail reads stale saved registers here. */
+        SDF_VU0_COPYVECTOR(&light.v, &lastDirection);
         sdf3DMakeLightParallelPacket(&D_0056ADF0, (sdf3DLight_t **)lights.list, &ambient);
         model = effPCPBossTexHandle;
         model->inner->light = &D_0056ADF0;
