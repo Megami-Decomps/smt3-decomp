@@ -5985,7 +5985,80 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusRow);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawParamGauge);
 
+extern s32 cmbGetParam(datUnitWork_t *unit, s32 index);
+extern void cmpDrawParamGauge(s32 x, s32 y, s32 *colors, s32 rowHeight,
+                              s8 index, s8 bonus, s8 mode, datUnitWork_t *unit);
+extern void fclDrawSpriteAlpha(s32 x, s32 y, s32 z, u8 mode, s32 *colors,
+                                s32 page, s32 spriteId, s32 *texList,
+                                fclSpriteTbl_t *table, s32 ot);
+
+#ifdef NON_MATCHING
+void cmpDrawParamPanel(s32 x, s32 y, s32 *colors, s8 *bonuses, datUnitWork_t *unit,
+                       s8 selected, s8 selectMode, s8 mode)
+{
+    s32 spriteX = x * 16;
+    s32 spriteY = y * 8;
+    s32 numberX = (u16)((x + 0x2E) * 16);
+    s32 numberY = (u16)((y + 0xA5) * 8);
+    s8 gaugeMode = mode;
+    s32 i;
+    char text[16];
+
+    fclDrawSpriteRes(spriteX, spriteY + 4, 0, colors, 1, 4, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(spriteX, spriteY + 4, 0, colors, 1, 5, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(spriteX, spriteY + 4, 0, colors, 1, 6, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(spriteX, spriteY + 4, 0, colors, 1, 7, D_00345D88, fclSpriteTable, 0x47);
+    for (i = 0; i < 5; i++) {
+        s8 parameter = cmpGetParamGaugeColor((s8)i);
+        s32 textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0xA09DC380);
+        s8 bonus = 0;
+        s32 value;
+        frFontRequest_t *font;
+
+        if (selected >= 0 && selectMode == 2 && i == selected) {
+            textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x80C08080);
+        }
+        if (bonuses != NULL) {
+            bonus = bonuses[parameter];
+        }
+        value = cmbGetParam(unit, parameter);
+        if (gaugeMode != 4) {
+            value += bonus;
+        }
+        if (value >= 0x29) {
+            value = 0x28;
+        }
+        fclDrawSpriteFilter(spriteX, spriteY + i * 0xA0, 0, 0, colors, 4, 0,
+                            D_00345D88, fclSpriteTable, 0x47);
+        sprintf(text, D_0054FE98, value);
+        font = frwGetSmallNumFontFRQ(numberX, numberY, 0xFFFF, textColor, text, NULL);
+        func_001C7E38((frFontHandle_t *)font, 1, 0x47);
+        numberY += 0xA0;
+        frDestroyFontRequestAfter((frFontHandle_t *)font);
+        if (selected >= 0) {
+            gaugeMode = 2;
+        }
+        cmpDrawParamGauge(x, y, colors, 0x14, (s8)i, bonus, gaugeMode, unit);
+        fclDrawSpriteAlpha(spriteX, spriteY + i * 0xA0, 0, 2, colors, 4, 1,
+                           D_00345D88, fclSpriteTable, 0x47);
+    }
+    if (selected >= 0 && selectMode == 2) {
+        fclDrawSpriteRes(spriteX, (y + selected * 0x14) * 8, 0, colors, 6, 2,
+                         D_00345D88, fclSpriteTable, 0x47);
+    }
+    for (i = 0; i < 5; i++) {
+        if (selected == i && selectMode == 2) {
+            fclDrawSpriteRes(spriteX, spriteY, 0, colors, 6, i + 5,
+                             D_00345D88, fclSpriteTable, 0x47);
+        } else {
+            fclDrawSpriteRes(spriteX, spriteY, 0, colors, 2, i + 0xC,
+                             D_00345D88, fclSpriteTable, 0x47);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawParamPanel);
+#endif
 
 extern datDevilTableEntry_t datDevilTable[];
 extern char *datExplainTable[];
@@ -6200,7 +6273,7 @@ typedef struct
 extern cmpModelLink_t D_002F69B8[];
 
 extern void cmpDrawStatusRow(s32, s32, s32 *, s32, datUnitWork_t *);
-extern void cmpDrawParamPanel(s32, s32, s32 *, s8 *, datUnitWork_t *, s32, s32, s32);
+extern void cmpDrawParamPanel(s32, s32, s32 *, s8 *, datUnitWork_t *, s8, s8, s8);
 extern void cmpDrawStatusValue(s32, s32, s32 *, s32, datUnitWork_t *);
 extern u16 itfMesMngGetStatManager(void);
 extern void rstCreateBeforeSkillList(s8, datUnitWork_t *, s8, rstSkillInfo_t *);
