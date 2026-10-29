@@ -4,6 +4,7 @@
 #include "kernel.h"
 #include "basic.h"
 #include "motion.h"
+#include "model.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -4368,7 +4369,47 @@ void cmbDrawActionModel(struct mdlObj_t *model, u16 id, f32 *position, u32 color
     }
 }
 
+extern const char *D_0032F590[3];
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 id);
+
+#ifdef NON_MATCHING
+void cmbGetModelMarkPos(f32 (*positions)[4], f32 *sizes, s32 *found)
+{
+    s32 i;
+    volatile f32 mark[4] __attribute__((aligned(16)));
+
+    for (i = 0; i < 3; i++) {
+        found[i] = 0;
+        if (CMB_GBWK->actionData[i].model != NULL &&
+            cmbFindCameraPoint(D_0032F590[i], CMB_GBWK->modelMark[i]) != 0) {
+            found[i] = 1;
+            sizes[i] = datModelParamTable[CMB_GBWK->stockSlot[i].id].formsize;
+            if (cmbGetSmokeType((u16)CMB_GBWK->actionData[i].id) != 0) {
+                volatile f32 *out = positions[i];
+                f32 x, y, z;
+
+                SDF_VU0_COPYVECTOR(positions[i], CMB_GBWK->modelMark[i]);
+                x = out[0];
+                y = out[1];
+                z = out[2];
+                out[0] = x + datModelParamTable[CMB_GBWK->stockSlot[i].id].center.x;
+                out[1] = y + datModelParamTable[CMB_GBWK->stockSlot[i].id].center.y;
+                out[2] = z + datModelParamTable[CMB_GBWK->stockSlot[i].id].center.z;
+            } else {
+                volatile f32 *out = positions[i];
+
+                sdfModelGetMarkPos(CMB_GBWK->actionData[i].model->inner, 0);
+                SDF_VU0_STOREVECTOR(mark);
+                out[0] = mark[0];
+                out[1] = mark[1];
+                out[2] = mark[2];
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetModelMarkPos);
+#endif
 
 /* NON_MATCHING: 20 of 26 words match, exact size; the two `fclDrawPanelSprite`
  * calls put the `ori` of the sprite id in the delay slot where retail puts the
