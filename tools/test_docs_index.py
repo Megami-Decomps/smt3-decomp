@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for tools/docs_index.py, the levers and drafts index."""
+"""Tests for tools/docs_index.py, the levers and matching-findings indexes."""
 import pathlib
 import sys
 import tempfile
@@ -39,19 +39,19 @@ class SummaryTests(unittest.TestCase):
         self.assertTrue(got.endswith("…"))
 
 
-class DraftRowTests(unittest.TestCase):
+class MatchingRowTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.dir = ROOT / "docs/nonmatching"
+        self.dir = ROOT / "docs/matching"
 
-    def test_every_draft_page_entry_is_indexed(self) -> None:
+    def test_every_matching_note_entry_is_indexed(self) -> None:
         pages = sorted(self.dir.rglob("*.md"))
         headings = sum(
             sum(1 for l in p.read_text().split("\n") if l.startswith("## "))
             for p in pages)
-        self.assertEqual(len(docs_index.draft_rows()), headings)
+        self.assertEqual(len(docs_index.matching_rows()), headings)
 
     def test_unit_and_line_point_at_the_entry(self) -> None:
-        for fn, unit, _size, _d, page, line in docs_index.draft_rows()[:40]:
+        for fn, unit, _size, _d, page, line in docs_index.matching_rows()[:40]:
             text = (ROOT / page).read_text().split("\n")[int(line) - 1]
             self.assertTrue(text.startswith("## "), page)
             self.assertIn(fn, text)
@@ -59,7 +59,7 @@ class DraftRowTests(unittest.TestCase):
     def test_wrapped_distance_stays_in_one_tsv_cell(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
-            drafts = root / "docs/nonmatching"
+            drafts = root / "docs/matching"
             drafts.mkdir(parents=True)
             page = drafts / "example.md"
             for separator in ("\n", "\n\t"):
@@ -68,8 +68,8 @@ class DraftRowTests(unittest.TestCase):
                         "## example (sdk/math, 0x28C)\n\n"
                         f"51 of 155 words{separator}match; 32 bytes uncovered.\n")
                     with patch.object(docs_index, "ROOT", root), \
-                            patch.object(docs_index, "DRAFTS", drafts):
-                        rows = docs_index.draft_rows()
+                            patch.object(docs_index, "MATCHING", drafts):
+                        rows = docs_index.matching_rows()
                     self.assertEqual(len(rows), 1)
                     self.assertEqual(rows[0][3], "51 of 155 words match")
                     serialized = "\t".join(rows[0])

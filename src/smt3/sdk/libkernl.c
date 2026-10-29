@@ -1020,7 +1020,7 @@ extern void _request_call(void *packet, void *queue);
 extern void _request_rdata(rpcPacket *packet, rpcQueue *queue);
 
 #ifdef NON_MATCHING
-/* Native-sized reconstruction; see docs/nonmatching/sdk/libkernl.md. */
+/* Native-sized reconstruction; see docs/matching/sdk/libkernl.md. */
 void sceSifInitRpc(s32 mode)
 {
     rpcPacket *packets;
@@ -3564,7 +3564,7 @@ INCLUDE_ASM(const s32, "sdk/libkernl", DIntr);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", EIntr);
 
-/* Four initialization stores differ; see docs/nonmatching/sdk/libkernl.md. */
+/* Four initialization stores differ; see docs/matching/sdk/libkernl.md. */
 #ifdef NON_MATCHING
 extern s32 D_0052C378;
 extern s32 D_0052C37C;

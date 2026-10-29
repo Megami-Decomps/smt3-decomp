@@ -1050,7 +1050,7 @@ extern frFontHandle_t *gnbPnlWork;
 
 /* NON_MATCHING: 798 of 806 instruction words emitted against the native
  * 3224-byte size; the body is structurally complete and the tail aligns at a
- * constant eight-word offset. See docs/nonmatching/newbattle/nbPanelProcess.md. */
+ * constant eight-word offset. See docs/matching/newbattle/nbPanelProcess.md. */
 
 #ifdef NON_MATCHING
 
@@ -3475,7 +3475,7 @@ void nbPanelAutoInit(void)
 
 /* NON_MATCHING: 226 of 232 words match at the native 928-byte size.
  * Six background-sprite argument loads remain reordered; see
- * docs/nonmatching/newbattle/nbPanelProcess.md. */
+ * docs/matching/newbattle/nbPanelProcess.md. */
 #ifdef NON_MATCHING
 extern f32 sdfSin(f32 angle);
 extern nbPanelProcess_nbPanelXYZ_t D_004F05D8[];

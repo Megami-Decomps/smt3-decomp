@@ -13,17 +13,13 @@ thrown away, wrapped as
     INCLUDE_ASM(const s32, "unit/path", name);
     #endif
 
-so the normal build takes the asm and the next person starts from the draft
-instead of from scratch. One line above it says how close it is and what
-differs, "12 of 694 words, three spill slots rotated". The rest goes in
-docs/nonmatching/<unit>.md: the remaining difference and the shapes already
-ruled out, which tools/check_nonmatching.py requires. --discard deletes the
-draft instead, for one not worth keeping.
+so the normal build takes the asm. The guard is the marking, with no required
+source annotation or documentation entry. --discard deletes a draft instead.
 
 Structs, prototypes and matching functions are left alone. Run
 configure.py --force-split afterwards, since the set of INCLUDE_ASM lines has
 changed, and tools/check_nonmatching.py to confirm the draft still compiles
-and is written up.
+without implicit function declarations.
 """
 import re
 import subprocess
@@ -37,8 +33,6 @@ ROOT = Path(__file__).resolve().parent.parent
 # optional "<word> of" prefix is matched and discarded.
 BAD = re.compile(
     r"^(?:DIFF|OVER|CONTEXT|PAD|SHARED)(?: (?:jump table|rodata|sdata) of)? (\w+)\b", re.M)
-# The measured difference, so the kept draft can say how close it is.
-DETAIL = re.compile(r"^(?:DIFF|OVER|CONTEXT|PAD|SHARED)[^\n]*?\b(\w+)\b[^\n]*?: (.+)$", re.M)
 
 # A function definition's opening line: a name followed by a parameter list,
 # not a call, a control statement or an INCLUDE_ macro. Both brace styles
@@ -91,10 +85,9 @@ def spans(text):
         i = k + 1
 
 
-def wrap(body: list[str], unit: str, name: str, detail: str = "") -> list[str]:
-    """The draft kept behind its asm fallback, labelled with what still differs."""
-    note = f"/* NON_MATCHING: {detail or 'difference not recorded'}. */"
-    return ([note, "#ifdef NON_MATCHING"] + body + ["#else",
+def wrap(body: list[str], unit: str, name: str) -> list[str]:
+    """Keep the C and its native-order fallback in the plain source form."""
+    return (["#ifdef NON_MATCHING"] + body + ["#else",
             f'INCLUDE_ASM(const s32, "{unit}", {name});', "#endif"])
 
 
@@ -103,7 +96,6 @@ def revert(path: Path, dry_run=False, discard=False) -> list[str]:
     out = subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path)],
                          capture_output=True, text=True).stdout
     bad = set(BAD.findall(out))
-    detail = {n: d.strip() for n, d in DETAIL.findall(out)}
     if not bad:
         return []
     lines = path.read_text().split("\n")
@@ -117,8 +109,7 @@ def revert(path: Path, dry_run=False, discard=False) -> list[str]:
         if discard:
             lines[start:end + 1] = [f'INCLUDE_ASM(const s32, "{unit}", {name});']
         else:
-            lines[start:end + 1] = wrap(lines[start:end + 1], unit, name,
-                                        detail.get(name, ""))
+            lines[start:end + 1] = wrap(lines[start:end + 1], unit, name)
     if not dry_run:
         path.write_text("\n".join(lines))
     return sorted(n for _, _, n in drop)

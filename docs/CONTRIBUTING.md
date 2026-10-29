@@ -110,18 +110,13 @@ than another permutation:
   `INCLUDE_ASM` functions; [the port notes](dds-port.md) cover how far the
   pairing can be trusted.
 
-### The levers and drafts indexes are generated, and must be committed
+### Finding existing matching analysis
 
-`docs/levers/INDEX.tsv`, `docs/nonmatching/INDEX.tsv` and the `README.md` beside
-each are built by `python3 tools/docs_index.py` from the pages themselves. Run it
-after adding a lever or a draft entry and **commit what it writes**:
-`tools/test_docs_index.py` asserts the committed tables are current, so a branch
-that edits a page without regenerating fails the suite.
-
-Two agents adding entries in the same round will conflict on those four files,
-since both regenerate them. That is expected and costs nothing to resolve: take
-either side, or neither, and run `tools/docs_index.py` again. Never hand-merge
-them.
+Optional per-unit findings live under [matching/](matching/README.md), alongside
+[matching levers](matching-levers.md). They record compiler measurements and
+source shapes already tried; a new draft does not need a page or index entry.
+When editing those findings or the lever pages, run `python3 tools/docs_index.py`
+to refresh their searchable indexes.
 
 [Matching levers](matching-levers.md) is the list to work through when a
 function is close but not exact, including the shapes that have been ruled out
@@ -132,11 +127,30 @@ to `done` when you stop, finished or not. The file is advisory and nothing in
 the build reads it; it exists so two people do not reconstruct the same unit
 twice. Check it before you pick a unit.
 
-A function that comes close but does not match belongs behind
-`#ifdef NON_MATCHING`, which `tools/revert_differing.py` does for you, with
-one line in the source and the detail in
-[Non-matching drafts](nonmatching.md). See
-[when to stop](levers/when-to-stop.md).
+### Non-matching C
+
+Keep the C in its own unit with its assembly fallback in native order:
+
+```c
+#ifdef NON_MATCHING
+void unfinished(void) {
+    /* Reconstructed behaviour. */
+}
+#else
+INCLUDE_ASM(const s32, "unit/path", unfinished);
+#endif
+```
+
+The normal matching build selects the assembly. Builds defining NON_MATCHING
+compile the C. The guard is the marking: no closeness comment, write-up,
+per-function metadata or separate status is required. Non-matching C earns no
+matching credit. Preserve retail's behaviour, including its bugs, and declare
+every callee before first use through a header or its real prototype.
+
+`python3 tools/check_nonmatching.py` compiles every guarded unit
+with NON_MATCHING and SKIP_ASM. Implicit function declarations
+are errors in this compile only. It checks compilation and nothing else.
+`tools/revert_differing.py` also emits this plain form.
 
 ## 3. Verify
 

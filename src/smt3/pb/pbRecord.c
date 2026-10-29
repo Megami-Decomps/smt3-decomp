@@ -337,7 +337,7 @@ s32 pbAddRecord_flor(pbProcHandle_t *panel, pbGroupData_t *group)
 }
 
 #ifdef NON_MATCHING
-/* 73 of 81 words match; coordinate/slot address setup differs. See docs/nonmatching/pb/pbRecord.md. */
+/* 73 of 81 words match; coordinate/slot address setup differs. See docs/matching/pb/pbRecord.md. */
 extern void pbGetMyCharcterPos2(pbProcHandle_t *panel, s16 *x, s16 *y);
 extern u32 pbMyCharacterDispStat(pbProcHandle_t *panel);
 

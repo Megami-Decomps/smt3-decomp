@@ -32,7 +32,7 @@ target by 0.0625. This is the same real construction-then-smoothing shape as
 DirLock; no component-order sweep is involved. Input still uses the native
 unsigned stick bytes `[0][0][0]` and `[0][0][1]`, subtracts 0x80, uses 0.7 and
 negative 2.5 scaling, and constructs the 256-unit eye position. The legacy
-28-word draft entry is retired from `docs/nonmatching/field/fldDraw.md`, where
+28-word draft entry is retired from `docs/matching/field/fldDraw.md`, where
 it remained after the owner split; unrelated entries are preserved.
 
 ## Main's native behavior

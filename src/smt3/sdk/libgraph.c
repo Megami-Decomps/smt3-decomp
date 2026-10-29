@@ -301,7 +301,7 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
     return 0;
 }
 
-/* Reference implementation; see docs/nonmatching/sdk/libgraph.md. */
+/* Reference implementation; see docs/matching/sdk/libgraph.md. */
 #ifdef NON_MATCHING
 extern const char D_0054A720[];
 extern const char D_0054A758[];

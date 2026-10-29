@@ -410,7 +410,7 @@ void nmeDestroyName(dds3ProcessID_t *processId) {
 }
 
 #ifdef NON_MATCHING
-/* 69 of 71 words match; white RGB store order differs. See docs/nonmatching/nme/Nme_Init.md. */
+/* 69 of 71 words match; white RGB store order differs. See docs/matching/nme/Nme_Init.md. */
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority,
                                       s32 startTimer, s32 shutdownTimer,
                                       dds3ProcessFunc_t process,

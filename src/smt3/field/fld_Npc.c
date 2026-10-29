@@ -538,7 +538,7 @@ extern void dds3GetRotPoseSet(dds3Basic_t *pBasic);
 extern sdfTexHandle_t *sdfTexSet(void *aTex);
 
 /* NON_MATCHING: 294 of 416 words differ at the native 1664-byte size, which
- * the draft reproduces exactly; see docs/nonmatching/field/fld_Npc.md. */
+ * the draft reproduces exactly; see docs/matching/field/fld_Npc.md. */
 
 #ifdef NON_MATCHING
 

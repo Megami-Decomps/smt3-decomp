@@ -3001,7 +3001,7 @@ void campDrawFade(void)
 
 
 #ifdef NON_MATCHING
-/* Two argument-setup words differ; see docs/nonmatching/code_0022C578.md. */
+/* Two argument-setup words differ; see docs/matching/code_0022C578.md. */
 struct campCrossPanel_t;
 extern void campRunPanelCallback(struct campCrossPanel_t *panel);
 extern void campDrawSkillPanel(void);
@@ -4775,7 +4775,7 @@ void campDhDrawHelpTextAlt(s32 x, s32 y, s32 z, s32 alpha)
     cmpDrawBoxGDefault(x + 0x1710, y + 0xAF8, 0, 52, 5, colors, 0x47);
 }
 
-/* NON_MATCHING: 4 of 86 words differ; see docs/nonmatching/code_0022C578.md. */
+/* NON_MATCHING: 4 of 86 words differ; see docs/matching/code_0022C578.md. */
 #ifdef NON_MATCHING
 extern u8 frEnableMode(s32 flag);
 extern u8 frDisableMode(u8 flag);
@@ -9167,7 +9167,7 @@ void cmpDrawPanelEffQuad(cmpPanelEffState_t *state, s32 ot)
     }
 
     /* One geometry scalar retains the native conversion/square allocation.
-     * Qualified control and remaining stores: docs/nonmatching/code_0022C578.md. */
+     * Qualified control and remaining stores: docs/matching/code_0022C578.md. */
     radius = (s32)(fsqrtf(3200.0f) * (f32)(0x100 - frame) * 0.00390625f);
     radius = 0xC80 - radius * radius;
     fclDrawPanelSprite2(0x48, ot);

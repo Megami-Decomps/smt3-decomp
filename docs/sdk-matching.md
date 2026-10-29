@@ -340,7 +340,7 @@ unit in this region:
    recurring "one instruction long, `nop` in the delay slot" difference.
 2. **A `volatile` access cannot fill a hazard pad either**, which is why
    libipu's `IPU_CTRL` polls carry four explicit slots between the load and the
-   branch; see [its page](nonmatching/sdk/libipu.md).
+   branch; see [its page](matching/sdk/libipu.md).
 3. **An sceSif client data symbol is the structure, not a pointer to it.**
    Retail passes `&D_0052BA48` with `addiu`; declaring it `void *` loads a word
    and costs a register.
@@ -363,7 +363,7 @@ Next, in the order the bytes are worth having:
    wrappers are mostly transcription. `_sceCd_scmd_prechk` and
    `sceCdDiskReady` carry the bind-retry loops and are the real work.
 4. **The nine parked drafts.** Each is one register-allocation decision away;
-   [the per-unit pages](nonmatching/) say which.
+   [the per-unit pages](matching/) say which.
 5. **Per-object units.** The 12 library units can become ~116 member units
    using the member column of `config/smt3/sdk_objects.tsv`.
 ## What the region says about the recovered names
@@ -789,7 +789,7 @@ The configured EE 2.9 compiler supplies that tail handoff directly.
 thread ID on success. Both the startup and SDF callers discard that result;
 their declarations retain its integer interface. This declaration correction
 earns no matching credit. The neighboring semaphore setup remains guarded
-with a [four-store residual](nonmatching/sdk/libkernl.md#supplement_crt0-sdklibkernl-0x48).
+with a [four-store residual](matching/sdk/libkernl.md#supplement_crt0-sdklibkernl-0x48).
 
 ## Executable patch installation
 

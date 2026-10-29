@@ -301,7 +301,7 @@ void fldSkyCalcFilter(void) {
     }
 }
 
-/* NON_MATCHING: 12 of 694 words differ; see docs/nonmatching/field/fldSky.md. */
+/* NON_MATCHING: 12 of 694 words differ; see docs/matching/field/fldSky.md. */
 #ifdef NON_MATCHING
 extern u32 fldAutoMapChkMode(void);
 extern void rsetOtOfs(s32);

@@ -835,7 +835,7 @@ void MyHitAction(tagPipeObject *object)
 INCLUDE_ASM(const s32, "pipe/pipeSection", MyHitAction);
 #endif
 
-/* NON_MATCHING: 22 of 211 words differ; see docs/nonmatching/pipe/pipeSection.md. */
+/* NON_MATCHING: 22 of 211 words differ; see docs/matching/pipe/pipeSection.md. */
 #ifdef NON_MATCHING
 extern u8 objMake(tagPipeObject *object, s32 offset, u8 id, u8 way, u8 action, u8 value);
 extern s32 objAdd(tagPipeObject *object);
@@ -1242,7 +1242,7 @@ void ActionDeath(tagPipeObject *object)
     objMdlAlphaSet(object, (u8)object->count);
 }
 
-/* NON_MATCHING: 6 of 80 words differ; see docs/nonmatching/pipe/pipeSection.md. */
+/* NON_MATCHING: 6 of 80 words differ; see docs/matching/pipe/pipeSection.md. */
 #ifdef NON_MATCHING
 extern void objMdlSclSet(tagPipeObject *object, f32 scale);
 

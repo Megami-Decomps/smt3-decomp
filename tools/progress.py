@@ -10,8 +10,9 @@ microcode is reported on its own, since it is not EE code. This source inventory
 use check_unit.py and the retail checksum build for that.
 
 Functions still assembled are counted again on their own: a NON_MATCHING
-draft is a near reconstruction the build never uses, so it earns no coverage
-credit and is reported as a separate counter.
+body is compiled by builds defining NON_MATCHING. The normal matching build
+uses the assembly fallback, so retained C earns no matching coverage credit
+and is reported as a separate counter.
 """
 import re
 import sys

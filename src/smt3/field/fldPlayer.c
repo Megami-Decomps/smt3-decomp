@@ -401,7 +401,7 @@ void fldPlayerMotionSe(s32 hisMotion, s32 upMotion)
         }
         /* Retail keeps jal + epilogue here. Qualified compiler trace: this
          * reset survives sibling selection and is deleted by life analysis.
-         * See docs/nonmatching/field/fldPlayer.md. */
+         * See docs/matching/field/fldPlayer.md. */
         volume = 0;
     }
 }

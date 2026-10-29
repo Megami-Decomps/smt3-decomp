@@ -1,0 +1,289 @@
+function	unit	size	distance	page	line
+fldRunTamaFree	code_00116AD0	0xBC	27 of 47 words differ	docs/matching/code_00116AD0.md	3
+fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/matching/code_00116AD0.md	46
+fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/matching/code_00116AD0.md	63
+fldGbFlagClear	code_00116AD0	0x124	23 of 73 words differ	docs/matching/code_00116AD0.md	90
+fldAnahoriSelectInit	code_00116AD0	0x7C	10 of 30 words differ	docs/matching/code_00116AD0.md	115
+slCopyNonZero	code_00144798	0x40	14 of 16 words match	docs/matching/code_00144798.md	3
+fldCommand_DIR_HIT_CNTR	code_00144798	0xC0	32 of 42 words differ	docs/matching/code_00144798.md	24
+fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/matching/code_00144798.md	53
+nbCameraBoss_BSKAGU_EP_IT_Set	code_001B0858	0x144	19 of 79 words before the first difference	docs/matching/code_001B0858.md	3
+nbCameraBoss_Sukady_DAIJIS_Set	code_001B0858	0x134	4 of 77 words differ	docs/matching/code_001B0858.md	23
+nbCameraHelperViewer_Draw	code_001C55F8	336 bytes	48 of 83 words match	docs/matching/code_001C55F8.md	3
+moveBlock	code_001D1470	0x8C	30 of 31 words differ	docs/matching/code_001D1470.md	3
+pbStartErrorDraw	code_001D1470	0xBC	2 of 47 words differ	docs/matching/code_001D1470.md	26
+func_001D4EB0, func_001D4C08	code_001D1470	0x58 and 0x94	36 of 37 words match	docs/matching/code_001D1470.md	57
+cmp_241A10	code_0022C578	0x74	19 of 28 words match	docs/matching/code_0022C578.md	3
+cmpClearCursorSlots	code_0022C578	0x54	18 of 21 words differ	docs/matching/code_0022C578.md	28
+cmpSetCursorSlot	code_0022C578	0x3C	8 of 15 words differ	docs/matching/code_0022C578.md	49
+cmp_23A918	code_0022C578	0x40	4 of 16 words differ	docs/matching/code_0022C578.md	72
+cmpItemHasFlag	code_0022C578	0x54	13 of 17 words differ	docs/matching/code_0022C578.md	87
+cmpClearStatusFlags	code_0022C578	0x30	1 of 10 words match	docs/matching/code_0022C578.md	114
+cmpGetStockInfoIndex	code_0022C578	0x80	29 of 32 words match	docs/matching/code_0022C578.md	141
+cmpDisablePadBitStop	code_0022C578	0x80	17 of 32 words match	docs/matching/code_0022C578.md	162
+cmpReCalcStockCursorPos	code_0022C578	0x84	27 of 33 words match	docs/matching/code_0022C578.md	183
+cmpSetIniStockRecoverEff	code_0022C578	0x84	20 of 32 words match	docs/matching/code_0022C578.md	200
+cmpUpdateCursorSlots	code_0022C578	0x84	1 of 31 words matches	docs/matching/code_0022C578.md	221
+cmpChkDoNotUseSkill	code_0022C578	0x98	37 of 38 words match	docs/matching/code_0022C578.md	238
+cmpInitCursorLayout	code_0022C578	0x94	30 of 37 words match	docs/matching/code_0022C578.md	259
+campDhCheckTextures	code_0022C578	0x8C	7 of 35 words match	docs/matching/code_0022C578.md	274
+cmpItemIsUsable	code_0022C578	0x8C	15 of 28 words match	docs/matching/code_0022C578.md	298
+cmpSetStockRemoveEff	code_0022C578	0x8C	26 of 35 words match	docs/matching/code_0022C578.md	321
+cmpCursorSlotIsSelectable	code_0022C578	0x98	22 of 38 words match	docs/matching/code_0022C578.md	342
+cmpStartSkillMsg	code_0022C578	0xA0	19 of 40 words match	docs/matching/code_0022C578.md	366
+cmp_23C918	code_0022C578	0xA8	40 of 42 words match	docs/matching/code_0022C578.md	386
+cmpGetKugatatiMsg	code_0022C578	0xA0	22 of 40 words differ	docs/matching/code_0022C578.md	401
+campCheckStockRoom	code_0022C578	0x9C	14 of 39 words differ	docs/matching/code_0022C578.md	419
+cmpAddQuePanelEff	code_0022C578	0xB8	6 of 46 words differ	docs/matching/code_0022C578.md	435
+campDrawInfoText	code_0022C578	0xBC	17 of 47 words differ	docs/matching/code_0022C578.md	452
+cmpDrawItemListRow	code_0022C578	0xB8	2 of 46 words differ	docs/matching/code_0022C578.md	472
+campDhDrawHelpText	code_0022C578	0x158	82 of 86 words match	docs/matching/code_0022C578.md	489
+camp_draw_Process	code_0022C578	0x1A0	102 of 104 words match	docs/matching/code_0022C578.md	510
+campDrawStatusRow2	code_0022C578	0x134	69 of 77 words match	docs/matching/code_0022C578.md	526
+campDebugRegistAll	code_0022C578	0x43C	265 of 271 words match	docs/matching/code_0022C578.md	541
+cmpDrawPanelEffQuad	code_0022C578	0x20C	128 of 131 words match	docs/matching/code_0022C578.md	562
+campDhUpdateCursor	code_0022C578	0x248	143 of 146 words match	docs/matching/code_0022C578.md	597
+campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	624
+campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	648
+cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	693
+pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
+dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
+dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
+dds3DrawConfigBar	code_0029B780	0x1C4		docs/matching/code_0029B780.md	68
+dds3DrawConfigCursor	code_0029B780	0x2CC	48 of 179 words matching	docs/matching/code_0029B780.md	85
+dds3BillboardManagerInit	effect/billManager	0xB8	44 of 46 words match	docs/matching/effect/billManager.md	3
+effBTLCutDraw	effect/effBattle	0x420	Eighty-eight of 263 words differ	docs/matching/effect/effBattle.md	3
+effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270	6 of 156 words differ	docs/matching/effect/effBattleMisc.md	3
+effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/matching/effect/effBattleMisc.md	39
+effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	4 of 146 words differ	docs/matching/effect/effBattleMisc.md	70
+dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/matching/effect/effBlur_Filter.md	3
+effEveBEDCutDraw	effect/effEvent	0x1DC	117 of 119 words match	docs/matching/effect/effEvent.md	3
+effDebugDrawRectLine	effect/effMagatuhi	0x154	72 of 85 words match	docs/matching/effect/effMagatuhi.md	3
+func_001AA6D0	effect/effMagatuhi	0x628		docs/matching/effect/effMagatuhi.md	37
+effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words match	docs/matching/effect/effPCPBoss.md	3
+effPCP_BED_Create	effect/effPCPBoss	248 bytes	33 of 63 words match	docs/matching/effect/effPCPBoss.md	20
+effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	71 of 75 words match	docs/matching/effect/effPCPBoss.md	53
+effPCPBossMETATOBeamDraw	effect/effPCPBoss	0x25C	7 of 151 words differ	docs/matching/effect/effPCPBoss.md	71
+effPCPDANTE_Damage_Create	effect/effPCPBoss	360 bytes	71 of 90 words match	docs/matching/effect/effPCPBoss.md	100
+effPCPBossBUNSINDrawPoly2	effect/effPCPBoss	468 bytes	108 of 117 words match	docs/matching/effect/effPCPBoss.md	139
+effPCPBossKAGUInvokeDraw	effect/effPCPBoss	0x2E0	181 of 184 words match	docs/matching/effect/effPCPBoss.md	169
+effPCPBossONGYDraw (1432 bytes)				docs/matching/effect/effPCPBoss.md	204
+dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790	462 of 484 words match	docs/matching/effect/parManager.md	3
+dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/matching/effect/parManager.md	33
+evtEventViewerProcess3	event/evtEventViewer	0x16C	88 of 91 words match	docs/matching/event/evtEventViewer.md	3
+FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
+func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
+evtFrameListHead	event/evtEventViewerMenu	0x138	39 of 78 words differ	docs/matching/event/evtEventViewerMenu.md	22
+evtSaveViewerHeader	event/evtEventViewerMenu	0x400	254 of 256 words match	docs/matching/event/evtEventViewerMenu.md	41
+evtMoonProcess2	event/evtMoon	0x119C	13 of 996 words match	docs/matching/event/evtMoon.md	3
+func_00206308, func_002065C8	fclCombineInit	0x2C0 each	35 of 176 words differ	docs/matching/facility/fclCombineInit.md	3
+cmbDrawFullScreenPanel	fclCombineInit	0x68	20 of 26 words match	docs/matching/facility/fclCombineInit.md	41
+cmbDrawResultFooter	fclCombineInit	0x74	25 of 29 words match	docs/matching/facility/fclCombineInit.md	60
+ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
+DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/matching/facility/fclEncyc.md	22
+DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	46
+fclDrawPanel	fclPanel	0x54	8 of 21 words differ	docs/matching/facility/fclPanel.md	3
+fclDrawPanelType0Grad	facility/fclPanel	0x100	6 of 64 words differ	docs/matching/facility/fclPanel.md	25
+ragDrawList2, ragDrawList3	fclRagCalc	0x150 each	10 of 84 words differ	docs/matching/facility/fclRagCalc.md	3
+ragBuildList2, ragBuildList3	fclRagInit	0x174 each	22 of 93 words differ	docs/matching/facility/fclRagInit.md	3
+ragGetListItem2	fclRagInit	0xCC	29 of 51 words match	docs/matching/facility/fclRagInit.md	47
+ragGetListItem3	fclRagInit	0xCC	29 of 51 words match	docs/matching/facility/fclRagInit.md	74
+ragCheckHeartsChoice	fclRagUpdate	0x80	22 of 29 words match	docs/matching/facility/fclRagUpdate.md	3
+fclDrawSpriteAngleCore	fclShare	0x4A8	212 of 298 words match	docs/matching/facility/fclShare.md	3
+fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/matching/facility/fclShare.md	48
+shop_Process	facility/fclShopCalc	256 bytes	37 of 64 words match	docs/matching/facility/fclShopCalc.md	3
+fclTerminalLoadTextures	fclTerminalInit	0x70	16 of 27 words match	docs/matching/facility/fclTerminalInit.md	3
+fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	40 of 42 words match	docs/matching/field/fldAutoMap.md	3
+fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244	10 of 146 words match	docs/matching/field/fldAutoMap.md	30
+fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/matching/field/fldAutoMap.md	77
+fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	187 of 207 words match	docs/matching/field/fldAutoMap.md	117
+fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/matching/field/fldAutoMap.md	164
+resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
+resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
+fldSkyDrawFilter	field/fldDraw	0xAD8	682 of 694 words match	docs/matching/field/fldDraw.md	3
+fldStatusSet	field/fldDraw	0xF8	36 of 62 words match	docs/matching/field/fldDraw.md	30
+fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words differ	docs/matching/field/fldDraw.md	50
+fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/matching/field/fldDraw.md	82
+fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/matching/field/fldDraw.md	124
+fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/matching/field/fldDraw.md	173
+fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/matching/field/fldDraw.md	197
+fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/matching/field/fldDraw.md	235
+fldPlayerMotionSe	field/fldPlayer	0x5B0		docs/matching/field/fldPlayer.md	2
+fldBgmBitChk	field/fldSe	0x7C	30 of 31 words match	docs/matching/field/fldSe.md	3
+fldSkyDrawFilter	field/fldSky	0xAD8	682 of 694 words match	docs/matching/field/fldSky.md	3
+fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3
+fldRunDantePatr	field/fldTest	0x2D0	178 of 180 words match	docs/matching/field/fldTest.md	3
+fldTitle_Process	field/fldTitle	0xBD4		docs/matching/field/fldTitle.md	3
+fldItemBoxAdd (0x680)			294 of 416 words differ	docs/matching/field/fld_Npc.md	3
+fldNpcCalc	field/fld_Npc	0x7B0	487 of 492 words match	docs/matching/field/fld_Npc.md	35
+fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/matching/field/fld_Npc.md	80
+fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/matching/field/fld_Npc.md	114
+fldNpcDraw	field/fld_Npc	0x8DC	145 of 561 words match	docs/matching/field/fld_Npc.md	135
+frPreCalcStrWidth	interface/frFont	0xF8	Fifty-six of sixty-two words match	docs/matching/interface/frFont.md	3
+frAnalyzeTag	interface/frFont	0x518		docs/matching/interface/frFont.md	47
+frAnalyzeMessage	interface/frFont	0x200		docs/matching/interface/frFont.md	99
+frRestoreNameImage	interface/frName	0xD8	42 of 54 words match	docs/matching/interface/frName.md	3
+frGetCNameFRQ	interface/frName	0x158	82 of 86 words match	docs/matching/interface/frName.md	26
+frSetNameData				docs/matching/interface/frName.md	53
+DrawSelectCursor	interface/itfMesManager	0x2FC		docs/matching/interface/itfMesManager.md	3
+itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/matching/interface/itfMesManager.md	38
+lstDrawListWindow	interface/lstListWindow	0x84	26 of 33 words match	docs/matching/interface/lstListWindow.md	3
+fclEncycFindFreeSlot	kernel/dds3AdminiProcess	0x1C4	111 of 113 words match	docs/matching/kernel/dds3AdminiProcess.md	3
+fclEncycFreeEntries	kernel/dds3AdminiProcess	0x1E8	120 of 122 words match	docs/matching/kernel/dds3AdminiProcess.md	39
+fcl_103420, fclEncycAllocEntry and fcl_103560	kernel/dds3AdminiProcess	0x94, 0xA8, 0xAC	32 of 43 words match	docs/matching/kernel/dds3AdminiProcess.md	62
+dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/matching/kernel/dds3ConfigMain.md	3
+dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matching/kernel/dds3KernelDraw.md	3
+dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
+slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/matching/mc/slMain.md	3
+MovieViewerProc	movie/MovieViewer	0x24C	6 of 144 words match	docs/matching/movie/MovieViewer.md	3
+SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/matching/newbattle/nbAi.md	3
+SetSingleTarget2	newbattle/nbAi	0x26C	143 of 155 words match	docs/matching/newbattle/nbAi.md	29
+nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words differ	docs/matching/newbattle/nbCameraBoss.md	3
+nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	docs/matching/newbattle/nbCameraBoss.md	50
+nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	79
+nbCameraBoss_BSMIZ_Command_Set	newbattle/nbCameraBoss	0x218	68 of 131 words differ	docs/matching/newbattle/nbCameraBoss.md	106
+nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	docs/matching/newbattle/nbCameraBoss.md	136
+nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/matching/newbattle/nbCameraBoss.md	158
+nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/matching/newbattle/nbCameraBoss.md	179
+nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440	204 of 272 words match	docs/matching/newbattle/nbCameraBoss.md	209
+nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/matching/newbattle/nbCameraPress.md	3
+nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	56 of 58 words match	docs/matching/newbattle/nbCameraSkill.md	3
+nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	29 of 30 words match	docs/matching/newbattle/nbCameraSkill.md	26
+nbCameraShot_All_Set2	newbattle/nbCameraSkill	0x248	16 of 125 words match	docs/matching/newbattle/nbCameraSkill.md	49
+nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	117 of 137 words match	docs/matching/newbattle/nbCameraSkill.md	86
+bCameraShot_AttackInvokeTargetPartyNear_Set	newbattle/nbCameraSkill	0x308	188 of 194 words matching	docs/matching/newbattle/nbCameraSkill.md	113
+DispComm1PanelComm	newbattle/nbCommSelProcess	0xE0	53 of 56 words match	docs/matching/newbattle/nbCommSelProcess.md	3
+DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/matching/newbattle/nbCommSelProcess.md	27
+AnimeCommandList	newbattle/nbCommSelProcess	0x18C	97 of 99 words match	docs/matching/newbattle/nbCommSelProcess.md	52
+DispCommandPanel (0x33C)				docs/matching/newbattle/nbCommSelProcess.md	75
+Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/matching/newbattle/nbE911.md	3
+nbApplyBadCurse	newbattle/nbEncProcess	0x174	80 of 93 words match	docs/matching/newbattle/nbEncProcess.md	3
+nbGetEncountJoken	newbattle/nbEncount	0x174	24 of 66 words match	docs/matching/newbattle/nbEncount.md	3
+nbCallNewBattle	newbattle/nbInit	0xA0	29 of 40 words differ	docs/matching/newbattle/nbInit.md	3
+RunNumEffectKouka	newbattle/nbKoukaProcess	0x144	57 of 80 words match	docs/matching/newbattle/nbKoukaProcess.md	3
+nbMainProcess1	newbattle/nbMainProcess	0x420	113 of 263 words match	docs/matching/newbattle/nbMainProcess.md	3
+nbDrawMakaNum	newbattle/nbMakaProcess	0x2B4	136 of 173 words match	docs/matching/newbattle/nbMakaProcess.md	3
+nbGetVirtualAisyo	newbattle/nbMakePacket	0xAC	39 of 43 words match	docs/matching/newbattle/nbMakePacket.md	3
+Flow1_11	newbattle/nbMakePacket	0xC8	19 of 48 words match	docs/matching/newbattle/nbMakePacket.md	23
+nbClearActionFlags	newbattle/nbMakePacket	0xE0	18 of 56 words match	docs/matching/newbattle/nbMakePacket.md	37
+Flow10_21	newbattle/nbMakePacket	0x98	11 of 37 words differ	docs/matching/newbattle/nbMakePacket.md	58
+Flow10_10	newbattle/nbMakePacket	0x90	15 of 35 words differ	docs/matching/newbattle/nbMakePacket.md	77
+nbCheckBattleSkillError1	newbattle/nbSkillError	0x48	1 of 18 words differ	docs/matching/newbattle/nbMakePacket.md	93
+nbSetBadCurseTimer	newbattle/nbEncProcess	0x2C	2 of 11 words differ	docs/matching/newbattle/nbMakePacket.md	118
+Flow5_6, Flow5_18	newbattle/nbMakePacket	0xD8 each	23 of 52 words match	docs/matching/newbattle/nbMakePacket.md	147
+Flow6_37	newbattle/nbMakePacket	0x10C	58 of 67 words match	docs/matching/newbattle/nbMakePacket.md	184
+Flow6_43	newbattle/nbMakePacket	0x10C	45 of 68 words match	docs/matching/newbattle/nbMakePacket.md	211
+Flow7_20	newbattle/nbMakePacket	0x130	49 of 76 words match	docs/matching/newbattle/nbMakePacket.md	233
+Flow10_1	newbattle/nbMakePacket	0x100	15 of 63 words differ	docs/matching/newbattle/nbMakePacket.md	259
+Flow9_16	newbattle/nbMakePacket	0x168	45 of 89 words differ	docs/matching/newbattle/nbMakePacket.md	280
+Flow6_65	newbattle/nbMakePacket	0x190	79 of 100 words differ	docs/matching/newbattle/nbMakePacket.md	293
+nbCollectBadCurseUnits	newbattle/nbEncProcess	0xA4	23 of 41 words match	docs/matching/newbattle/nbMakePacket.md	314
+ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/matching/newbattle/nbMakePacket.md	332
+nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/matching/newbattle/nbMakePacket.md	353
+nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/matching/newbattle/nbMakePacket.md	381
+nbPanelDrawPP (0xA84)			671 of 673 words match	docs/matching/newbattle/nbPanelProcess.md	3
+nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanelProcess.md	65
+nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	127
+nbPanelDrawProcess (0x108)				docs/matching/newbattle/nbPanelProcess.md	153
+nbPanelAuto (0x3A0)				docs/matching/newbattle/nbPanelProcess.md	165
+nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/matching/newbattle/nbStageProcess.md	3
+CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/matching/newbattle/nbStageProcess.md	18
+CheckAction_STKSEL	newbattle/nbStageProcess	0xE8	9 of 58 words differ	docs/matching/newbattle/nbStageProcess.md	37
+CheckAction_ESCAPE	newbattle/nbStageProcess	0xE4	9 of 57 words differ	docs/matching/newbattle/nbStageProcess.md	54
+nbDrawKoukaSprite	newbattle/nbStageProcess	0x108	24 of 66 words differ	docs/matching/newbattle/nbStageProcess.md	70
+RunSake	newbattle/nbStageProcess	0x104	45 of 65 words match	docs/matching/newbattle/nbStageProcess.md	97
+CheckAction_TARSEL	newbattle/nbStageProcess	0x1CC	111 of 115 words match	docs/matching/newbattle/nbStageProcess.md	126
+SetDamagePacket	newbattle/nbStageProcess	0x1E0	116 of 120 words match	docs/matching/newbattle/nbStageProcess.md	150
+StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/matching/newbattle/nbStageProcess.md	179
+UpdateFormAnime	newbattle/nbUnitProcess	0x260	138 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
+datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/matching/newdata/datCalc.md	3
+nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_Calc.md	3
+nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
+nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_Init.md	3
+nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Init.md	22
+deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/matching/pb/pbGame.md	3
+pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/matching/pb/pbGame.md	28
+roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/matching/pb/pbGame.md	48
+pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/matching/pb/pbGame.md	73
+pbRebuildOutline				docs/matching/pb/pbGameDraw.md	3
+pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/matching/pb/pbMCard.md	3
+pbEditInitProc	pb/pbMain	0x148	79 of 82 words match	docs/matching/pb/pbMain.md	3
+pb_draw_mapbase_Process	pb/pbModel	0x214	126 of 133 words match	docs/matching/pb/pbModel.md	3
+pbAddRecord_char	pb/pbRecord	0x144	73 of 81 words match	docs/matching/pb/pbRecord.md	3
+makaDrawMulti	pipe/pipeMakaAnim	0x494		docs/matching/pipe/pipeMakaAnim.md	3
+objOption				docs/matching/pipe/pipeObject.md	3
+pipeFileLoad	pipe/pipePosTable	424 bytes	103 of 106 words match	docs/matching/pipe/pipePosTable.md	3
+ActionZMotion	pipe/pipeSection	0x140	74 of 80 words match	docs/matching/pipe/pipeSection.md	3
+EmTask	pipe/pipeSection	0x34C		docs/matching/pipe/pipeSection.md	27
+MyAction	pipe/pipeSection	0x21C		docs/matching/pipe/pipeSection.md	66
+cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/matching/result/rstcalc.md	3
+cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/matching/result/rstcalc.md	25
+datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/matching/result/rstcalc.md	47
+cmbGetHeartsParamByIndex	rstcalc	0x58	8 of 22 words differ	docs/matching/result/rstcalc.md	70
+cmbCountEvoReady	rstcalc	0x84	9 of 34 words match	docs/matching/result/rstcalc.md	93
+cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/matching/result/rstcalc.md	119
+rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/matching/result/rstcalc.md	148
+cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	168
+rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/matching/result/rstdraw.md	3
+sdfCorePacketGen	sdf/sdfCoreDraw	0x944	543 of 575 words differ	docs/matching/sdf/sdfCoreDraw.md	3
+sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3
+sdfIpuDecode	sdf/sdfIpu	0x1D0	22 of 115 words match	docs/matching/sdf/sdfIpu.md	3
+sdfModelSetOneSkinDrawPacket	sdf/sdfModel	0x180	Three of ninety words match	docs/matching/sdf/sdfModel.md	3
+sdfModelLinkDrawPacket	sdf/sdfModel	0x208	Eighteen of 122 words match	docs/matching/sdf/sdfModel.md	40
+sdfModelLinkShapedDrawPacket	sdf/sdfModel	0x258	Fifty of 150 words match	docs/matching/sdf/sdfModel.md	75
+sdfModelTempPacketLinkOt	sdf/sdfModel	0x468	twenty-seven of 282 words differ	docs/matching/sdf/sdfModel.md	133
+movieWaitSema	sdf/sdfMovie	212 bytes	Thirty-nine of fifty-three words differ	docs/matching/sdf/sdfMovie.md	3
+release_movieobj2	sdf/sdfMovie	596 bytes	1 of 150 words match	docs/matching/sdf/sdfMovie.md	51
+sdfSndVoiceMapInit	sdf/sdfSound	180 bytes	39 of 45 words match	docs/matching/sdf/sdfSound.md	3
+sdfTexSetPacket	sdfTex	0x168	15 of 90 words match	docs/matching/sdf/sdfTex.md	3
+corePktLoadVerts	sdfVu1	0x2C		docs/matching/sdf/sdfVu1.md	3
+The corePkt VU1 packet builders written in assembly				docs/matching/sdf/sdfVu1.md	26
+corePktLoadVertsNorms	sdfVu1	0x44		docs/matching/sdf/sdfVu1.md	46
+corePktMorphVerts	sdfVu1	0x44		docs/matching/sdf/sdfVu1.md	52
+corePktMorphVertsNorms	sdfVu1	0x6C		docs/matching/sdf/sdfVu1.md	59
+corePktNormalizeNorms	sdfVu1	0x34		docs/matching/sdf/sdfVu1.md	64
+corePktSkinVertFirst	sdfVu1	0x58		docs/matching/sdf/sdfVu1.md	71
+corePktSkinVertAccum	sdfVu1	0x60		docs/matching/sdf/sdfVu1.md	81
+corePktSkinPointsFirst	sdfVu1	0x84		docs/matching/sdf/sdfVu1.md	86
+corePktSkinPointsAccum	sdfVu1	0xC4		docs/matching/sdf/sdfVu1.md	99
+corePktXfmUV	sdfVu1	0x60		docs/matching/sdf/sdfVu1.md	107
+corePktXfmLightClip	sdfVu1	0xD0		docs/matching/sdf/sdfVu1.md	114
+corePktXfmLightClipPB	sdfVu1	0xA8		docs/matching/sdf/sdfVu1.md	131
+corePktXfmLightClipUV	sdfVu1	0xFC		docs/matching/sdf/sdfVu1.md	137
+corePktXfmLightClipUVPB	sdfVu1	0xD4		docs/matching/sdf/sdfVu1.md	144
+corePktRelightBackFaces	sdfVu1	0x8C		docs/matching/sdf/sdfVu1.md	149
+corePktApplyFaceDivColor	sdfVu1	0x98		docs/matching/sdf/sdfVu1.md	156
+_free_r			86 of 189 words match	docs/matching/sdk/libc.md	2
+gcc2_compiled_				docs/matching/sdk/libc.md	43
+gcc2_compiled__1			74 of 139 words match	docs/matching/sdk/libc.md	80
+vfprintf			8 of 29 words match	docs/matching/sdk/libc.md	119
+_d2b				docs/matching/sdk/libc.md	133
+func_002D6678				docs/matching/sdk/libc.md	176
+What cracked the scmd family				docs/matching/sdk/libcdvd.md	3
+The scmd template, for the next pass				docs/matching/sdk/libcdvd.md	24
+Completion callback contracts and remaining drafts				docs/matching/sdk/libcdvd.md	51
+sceCdStRead			95 of 98 words matching	docs/matching/sdk/libcdvd.md	70
+sceDmaPutEnv			21 of 118 words differ	docs/matching/sdk/libdma.md	3
+sceGsExecStoreImage	sdk/libgraph	0x68C	392 of 416 words differ	docs/matching/sdk/libgraph.md	3
+The IPU hazard wait				docs/matching/sdk/libipu.md	3
+sceIpuSync				docs/matching/sdk/libipu.md	38
+sceIpuRestartDMA			74 of 84 words match	docs/matching/sdk/libipu.md	47
+sceSifCheckStatRpc				docs/matching/sdk/libkernl.md	3
+sceSifSetRpcQueue				docs/matching/sdk/libkernl.md	22
+sceSifRegisterRpc				docs/matching/sdk/libkernl.md	37
+sceSifInitIopHeap			31 of 34 words match	docs/matching/sdk/libkernl.md	50
+sceSifSetIopAddr			51 of 55 words match	docs/matching/sdk/libkernl.md	68
+sceClose				docs/matching/sdk/libkernl.md	90
+sceIoctl			165 of 211 words matching	docs/matching/sdk/libkernl.md	117
+supplement_crt0	sdk/libkernl	0x48	4 of 18 words differ	docs/matching/sdk/libkernl.md	143
+sceSifInitRpc			95 of 103 words matching	docs/matching/sdk/libkernl.md	158
+sceOpen				docs/matching/sdk/libkernl.md	189
+_sceFs_Rcv_Intr				docs/matching/sdk/libkernl.md	217
+__ieee754_sqrtf				docs/matching/sdk/libm.md	3
+sceMcWrite			88 of 95 words match	docs/matching/sdk/libmc.md	30
+sceMcSync				docs/matching/sdk/libmc.md	61
+sceMcSetFileInfo				docs/matching/sdk/libmc.md	72
+sceSifMUnBindRpc			60 of 71 words match	docs/matching/sdk/libmrpc.md	3
+scePadPortOpen				docs/matching/sdk/libpad.md	3
+stfMain2	staff/stfMain	0x2D4	145 of 181 words match	docs/matching/staff/stfMain.md	3
+ObjDispOff	staff/stfMain	0x504	303 of 321 words match	docs/matching/staff/stfMain.md	34

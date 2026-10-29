@@ -763,9 +763,8 @@ Point-light and model-color callers compare and subtract these durations.
 Event-only blur, smoke-particle and Bezier-emitter owners remain local to
 `effect/effEvent.c`. Their parameter prefixes are copied independently of
 the retained texture/allocation handles; the packed BED record copy preserves
-unaligned `0x30`-byte source and destination records. The unmatched batched
-smoke renderer candidate is retained in `nonmatching/effEVECombParSmokeDraw.c`:
-its residual starts at ordering-table address commoning, not particle math.
+unaligned `0x30`-byte source and destination records. The batched smoke renderer is reconstructed in
+`src/smt3/effect/effEvent.c`.
 The native renderer also proves `sdfGrOt_t.regFunc` takes the ordering-table
 slot and a draw-tag pointer; `libsdf.h` now declares that callback signature.
 

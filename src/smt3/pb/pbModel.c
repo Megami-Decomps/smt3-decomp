@@ -374,7 +374,7 @@ void pb_draw_exit_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(panel);
 }
 
-/* NON_MATCHING: 7 of 133 words differ; see docs/nonmatching/pb/pbModel.md. */
+/* NON_MATCHING: 7 of 133 words differ; see docs/matching/pb/pbModel.md. */
 #ifdef NON_MATCHING
 s32 pb_draw_mapbase_Process(dds3ProcessID_t *id)
 {

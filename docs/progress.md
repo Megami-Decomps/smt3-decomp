@@ -18,10 +18,11 @@ retail bytes for it. Three things that look like progress do not count:
   directive. That is source coverage. It does not compile or compare anything,
   so it is an upper bound on what is actually matched.
 - **A non-matching draft.** A reconstruction kept behind `#ifdef NON_MATCHING`
-  is never compiled by the build, which takes the assembly fallback instead.
+  is compiled when NON_MATCHING is selected. The normal matching build takes
+  the assembly fallback instead.
   Drafts are counted on their own, against what is still assembled rather than
   against the game, and are never added to matched functions or bytes. See
-  [Non-matching drafts](nonmatching.md).
+  [Non-matching drafts](CONTRIBUTING.md#non-matching-c).
 
 Unfinished functions stay in the denominator. Function counts and code bytes
 are reported separately: a short and a large function each count once in the

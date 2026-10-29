@@ -112,7 +112,7 @@
   target, since a bitfield read conflicts with neither the integer nor the
   float stores and cc1 then hoists all four loads into four registers ahead of
   every store. `dds3EffectFilterDrawTexQuad` sits on this at 22 of 110 words;
-  see [Non-matching drafts](nonmatching.md).
+  see [Non-matching drafts](../CONTRIBUTING.md#non-matching-c).
 - A colour read-modify-write whose new value comes out of a float-to-unsigned
   conversion needs the converted value in its own `u32` local. Written as one
   expression, `p->color = (p->color & 0xFFFFFF) | ((u32)(...) << 24)`, cc1
@@ -613,7 +613,7 @@
   subtract is the one that coalesces with its parameter's register. A comma
   expression proves the rule is RTL evaluation order and not statement order.
   `fldAutoMapCloseBlock2` sits two words from exact on it; see
-  [Non-matching drafts](nonmatching.md).
+  [Non-matching drafts](../CONTRIBUTING.md#non-matching-c).
 - A constant that retail adds to the *scaled index* rather than to the base
   (`addiu rd, index, 0xC0` and then one `addu`) comes from an integer offset
   local: `s32 ofs = index * stride + 0xC0;` and a cast pointer off the work
@@ -697,7 +697,7 @@
   through an explicit `xor` too, so every spelling folds to one `sw`. A `u64`
   local keeps the cmov but pays `lwu` and two `dsll32`/`dsra32` pairs for it.
   `movieWaitSema` in `sdf/sdfMovie` sits on this; see
-  [Non-matching drafts](nonmatching.md).
+  [Non-matching drafts](../CONTRIBUTING.md#non-matching-c).
 - A single-bit mask test ee-gcc folds. Retail's `andi 1` followed by a
   redundant `andi 0xFF` and an explicit branch is not reachable: see
   `cmpItemHasFlag` in the drafts.

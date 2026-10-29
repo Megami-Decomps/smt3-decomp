@@ -682,7 +682,7 @@ s32 fldWaitBgmReload(void) {
     return 0;
 }
 
-/* NON_MATCHING: 1 of 31 words differs; see docs/nonmatching/field/fldSe.md. */
+/* NON_MATCHING: 1 of 31 words differs; see docs/matching/field/fldSe.md. */
 #ifdef NON_MATCHING
 void fldBgmBitChk(void)
 {

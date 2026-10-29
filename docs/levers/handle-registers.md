@@ -15,7 +15,7 @@ fresh local per arm (cse propagates both), `while` for the `if`, `s32` and
 unprototyped callee declarations, an `s32` parameter in place of `void *`, a
 cast at the call site, and every loop spelling of the enclosing walk. Two
 functions in `code_00116AD0` sit on it; see
-[Non-matching drafts](nonmatching.md).
+[Non-matching drafts](../CONTRIBUTING.md#non-matching-c).
 
 So when a caller sits within a couple of branch-annul words of exact and
 calls something still in assembly, decompile the callee first rather than

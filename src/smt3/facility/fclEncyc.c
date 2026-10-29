@@ -1920,7 +1920,7 @@ s32 AcceptKeyChangeSort(fclEncyc_instance_tag *pinst)
 }
 
 #ifdef NON_MATCHING
-/* Native size; eighteen words differ. See docs/nonmatching/facility/fclEncyc.md. */
+/* Native size; eighteen words differ. See docs/matching/facility/fclEncyc.md. */
 void ApplyEdgeListCursor(lstListWindow_t *list);
 void ApplyChangeListIndex(lstListWindow_t *list, s16 *indices, s32 recordIndex)
 {
@@ -3871,7 +3871,7 @@ extern char D_0054FCE0[];
 
 #ifdef NON_MATCHING
 /* 103 of 106 words match; three argument-setup instructions reorder.
- * See docs/nonmatching/facility/fclEncyc.md. */
+ * See docs/matching/facility/fclEncyc.md. */
 s32 DebugProcMenu_fclEncyc(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
                           sdfDrawTag_t *tag)
 {

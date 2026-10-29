@@ -23,11 +23,11 @@ extern s32 EIntr(void);
  * gcc2_compiled label as its name. */
 extern void ipuWriteFromIpuChcr(u32 chcr);
 
-/* Retained sync draft's explicit wait; see docs/nonmatching/sdk/libipu.md. */
+/* Retained sync draft's explicit wait; see docs/matching/sdk/libipu.md. */
 #define IPU_HAZARD_WAIT() __asm__ volatile ("nop\nnop\nnop\nnop")
 /* With the configured 2.9 compiler, this barrier plus its generated padding
  * leaves four slots after an IPU_CTRL read: three nops after a mask, or four
- * nops before a signed test. See docs/nonmatching/sdk/libipu.md. */
+ * nops before a signed test. See docs/matching/sdk/libipu.md. */
 #define IPU_POLL_BARRIER() __asm__ volatile ("nop")
 
 void ipuWriteFromIpuChcr(u32 chcr)

@@ -459,13 +459,13 @@ docs/levers/stores.md	94	beqz blezl slti	An && of two tests on the same field co
 docs/levers/stores.md	104	sll	Field stores placed **after** the pointer arithmetic that reads the same count keep the count in its own register.
 docs/levers/stores.md	112	jal	A vertex writer's three component stores are written in **field order**, x, y, z, even where retail emits the z store between the other two.
 docs/levers/sweeping.md	11	$0 $4 $7 $8 addiu daddu lui	**A loop-invariant constant hoisted out of a for lands before the for-init, so splitting the init out as i = 0;
-docs/levers/when-to-stop.md	48		Pure instruction scheduling, where the same instructions appear in a different order with no semantic difference to steer.
-docs/levers/when-to-stop.md	50		Register allocation that needs one register fewer than the C uses, shifting every later allocation.
-docs/levers/when-to-stop.md	52	$0 $16 $17 $5 daddu	A plain register-to-register copy retail keeps and the C coalesces away, normally of a parameter or of a value read once and used twice.
-docs/levers/when-to-stop.md	64		A set of reload spill slots that appear in a rotated order.
-docs/levers/when-to-stop.md	69	bnel	An epilogue duplicated into a branch-likely delay slot is **no longer in this list**:
-docs/levers/when-to-stop.md	75	$ra	A frameless conditional sibling call.
-docs/levers/when-to-stop.md	77	andi sll srl	Zero-extending a byte with a sll 24, srl 24 pair.
-docs/levers/when-to-stop.md	79	sltiu xori	sltiu rd, rd, 1 negating a comparison, where ee-gcc emits xori rd, rd, 1.
-docs/levers/when-to-stop.md	87	$18 $3 $6 movn xori	xori reg, reg, 0 in front of a movn.
-docs/levers/when-to-stop.md	104	jal	A jal plus a shared epilogue in a switch default arm, where return against break, a non-void or struct return type on the callee, and a dead assignment of the…
+docs/levers/when-to-stop.md	37		Pure instruction scheduling, where the same instructions appear in a different order with no semantic difference to steer.
+docs/levers/when-to-stop.md	39		Register allocation that needs one register fewer than the C uses, shifting every later allocation.
+docs/levers/when-to-stop.md	41	$0 $16 $17 $5 daddu	A plain register-to-register copy retail keeps and the C coalesces away, normally of a parameter or of a value read once and used twice.
+docs/levers/when-to-stop.md	53		A set of reload spill slots that appear in a rotated order.
+docs/levers/when-to-stop.md	58	bnel	An epilogue duplicated into a branch-likely delay slot is **no longer in this list**:
+docs/levers/when-to-stop.md	64	$ra	A frameless conditional sibling call.
+docs/levers/when-to-stop.md	66	andi sll srl	Zero-extending a byte with a sll 24, srl 24 pair.
+docs/levers/when-to-stop.md	68	sltiu xori	sltiu rd, rd, 1 negating a comparison, where ee-gcc emits xori rd, rd, 1.
+docs/levers/when-to-stop.md	76	$18 $3 $6 movn xori	xori reg, reg, 0 in front of a movn.
+docs/levers/when-to-stop.md	93	jal	A jal plus a shared epilogue in a switch default arm, where return against break, a non-void or struct return type on the callee, and a dead assignment of the…

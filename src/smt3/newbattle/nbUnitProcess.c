@@ -921,7 +921,7 @@ s32 nbCheckLoadGroup(s32 side)
     return 0;
 }
 
-/* NON_MATCHING: 14 of 152 words differ; see docs/nonmatching/newbattle/nbUnitProcess.md. */
+/* NON_MATCHING: 14 of 152 words differ; see docs/matching/newbattle/nbUnitProcess.md. */
 #ifdef NON_MATCHING
 extern void nbSetHpScale(nbFormation_t *form);
 

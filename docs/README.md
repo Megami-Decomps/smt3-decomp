@@ -42,8 +42,8 @@ quickstart.
   function came from, and the compiler that built them.
 - [Matching levers](matching-levers.md): what to change in the source when a
   function is close but not exact, and what has been ruled out.
-- [Non-matching drafts](nonmatching.md): the reconstructions kept behind
-  `#ifdef NON_MATCHING`, how close each is, and what has been ruled out.
+- [Non-matching C](CONTRIBUTING.md#non-matching-c): the plain source form and compilation check.
+- [Per-unit matching findings](matching/README.md): native behaviour, compiler residuals and source shapes already tried.
 - [Matching by analogy](matching-harness.md): how far a matched function's C
   serves as a template for an unmatched one, with the measured reach of
   `tools/find_similar.py`.

@@ -929,7 +929,7 @@ void nbInitBadCurseState(nbActionProcessData_t *a)
 
 extern void nbInitBadCurseState(nbActionProcessData_t *a);
 
-/* NON_MATCHING: 13 of 93 words differ; see docs/nonmatching/newbattle/nbEncProcess.md. */
+/* NON_MATCHING: 13 of 93 words differ; see docs/matching/newbattle/nbEncProcess.md. */
 #ifdef NON_MATCHING
 s32 nbApplyBadCurse(nbActionProcessData_t *a)
 {

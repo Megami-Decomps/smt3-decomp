@@ -18,21 +18,10 @@ byte-identical, and the function still counts as unmatched everywhere. Run
 has changed, and `python3 tools/check_nonmatching.py` to confirm the draft
 still compiles.
 
-Label the draft with one line saying how close it is and what differs, which
-`revert_differing.py` writes from check_unit's measurement:
-
-    /* NON_MATCHING: 682 of 694 words, exact size; three reload spill slots rotated. */
-
-Then write the draft up in [Non-matching drafts](nonmatching.md): what the
-remaining difference actually is, and which source shapes you ruled out. The
-one-line label tells the next person whether to look; that page tells them
-where to start and what not to retry. `python3 tools/check_nonmatching.py`
-compiles every draft and refuses one with no entry, so this is not optional.
-`--discard` deletes a draft not worth keeping.
-
-A draft is never evidence of anything. It is not compiled by the build, so
-`tools/check_nonmatching.py` is what stops it rotting when a struct or a
-signature changes under it.
+The guard is the marking. No source annotation or matching note is required.
+Every callee must be declared before use; the retained-C compile treats implicit
+function declarations as errors. Existing optional findings are under
+[matching/](../matching/README.md). `--discard` deletes a draft not worth keeping.
 
 A draft and its `#else` fallback must stay in the same file when a container
 is split, and the fallback may carry an `INCLUDE_RODATA` line before its

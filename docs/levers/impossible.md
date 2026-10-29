@@ -123,8 +123,8 @@ instructions cc1 cannot select are not only `addi`:
 
 | function | what it really is |
 |---|---|
-| `sdfTexSetPacket` | ordinary C plus the bit-length idiom. Draft at the exact size and dataflow; [../nonmatching/sdf/sdfTex.md](../nonmatching/sdf/sdfTex.md) |
-| `release_movieobj2` | ordinary C plus the idiom twice. Draft, 148 of 150 instructions; [../nonmatching/sdf/sdfMovie.md](../nonmatching/sdf/sdfMovie.md) |
+| `sdfTexSetPacket` | ordinary C plus the bit-length idiom. Draft at the exact size and dataflow; [../matching/sdf/sdfTex.md](../matching/sdf/sdfTex.md) |
+| `release_movieobj2` | ordinary C plus the idiom twice. Draft, 148 of 150 instructions; [../matching/sdf/sdfMovie.md](../matching/sdf/sdfMovie.md) |
 | `corePktVu0Run` | assembly throughout: `ctc2`, `vlqi`, `vilwr`, `cfc2`, `pextlb`, and a poll loop on the VIF1 and DMA status registers at 0x10008000 and 0x10003800. The frame exists because it needs `$16`-`$18`, not because it was compiled. |
 | `corePktEmitRefMapPass` | assembly throughout: a dozen VU0 macro-mode ops on vf24-vf26 and vf10, two `pextlb`/`pextlh`/`vitof0` colour unpacks, and a tail `j corePktEmitTexTrisCtx2`. The frame is for the `jal corePktLerpUVColorChain`. |
 | `sdf_2BFC58` | a computed `jr` into an unrolled `sq` block, as above. |
@@ -133,7 +133,7 @@ instructions cc1 cannot select are not only `addi`:
 fifteen beside it. Every one now carries a C reference implementation behind
 `#ifdef NON_MATCHING` recording the record layout, the stream strides and the
 alignment reasons, with no word count because there is nothing to be close to:
-[../nonmatching/sdf/sdfVu1.md](../nonmatching/sdf/sdfVu1.md). One of them,
+[../matching/sdf/sdfVu1.md](../matching/sdf/sdfVu1.md). One of them,
 `corePktSkinVertFirst`, turns out to carry a register slip in retail: it
 branches on the destination pointer instead of the count and stores through
 the weight pointer instead of the destination.

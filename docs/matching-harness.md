@@ -192,8 +192,7 @@ wrongly. `corpus()` therefore asserts that every function's token count equals
 the instruction count the split assembly reports, and raises if it does not.
 `tools/test_find_similar.py` pins that invariant.
 
-The same class of error is the one `docs/nonmatching.md` warns about from the
-other direction: count instructions, never the `/* ... */` comment lines, since
+Count instructions, never the `/* ... */` comment lines, since
 a `.s` file's `.rodata` jump table shares that comment format.
 
 ## Where the work actually goes
