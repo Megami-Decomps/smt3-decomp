@@ -1488,7 +1488,57 @@ void SetPrevCursor(nbCommSelProcessData_t *s, s32 type, s32 ind)
     }
 }
 
+extern s32 dds3GetGlobalConfigFlag(s32 index);
+
+#ifdef NON_MATCHING
+void SetCommCursor2(nbCommSelProcessData_t *s)
+{
+    datUnitWork_t *work = nbGetUnitWorkPointer(s->data, s->my);
+    u16 previousIndex = work->previndex;
+    s16 previousCommand = work->prevcommand;
+    u16 entry;
+    s32 type;
+    s32 i;
+    s32 matches;
+
+    if (dds3GetGlobalConfigFlag(2) == 0 && (s->act->stat & 0x80)) {
+        previousCommand = 0;
+        previousIndex = 0;
+    }
+    if (dds3GetGlobalConfigFlag(1) == 0 && !(s->act->stat & 0x80)) {
+        previousCommand = 0;
+        previousIndex = 0;
+    }
+    for (type = 0; type < 6; type++) {
+        for (i = 0; i < s->commcnt[type]; i++) {
+            entry = s->commlist[type][i];
+            matches = 0;
+            switch (entry) {
+            case 0x8000: matches = previousCommand == 0; break;
+            case 0x8001: matches = previousCommand == 2; break;
+            case 0x8002: matches = previousCommand == 3; break;
+            case 0x8003: matches = previousCommand == 7; break;
+            case 0x8004: break;
+            default:
+                if (type == 0) {
+                    matches = previousCommand == 1 && previousIndex == entry;
+                } else if (type == 1) {
+                    matches = previousCommand == 4 && previousIndex == entry;
+                } else if (type == 2) {
+                    matches = previousCommand == 5 && previousIndex == entry;
+                }
+                break;
+            }
+            if (matches) {
+                SetPrevCursor(s, type, i);
+                return;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", SetCommCursor2);
+#endif
 
 void nbSetAutoCommSel(void)
 {
