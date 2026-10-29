@@ -1020,7 +1020,48 @@ _Bigint *_i2b(_reent *r, s32 i) {
 
 INCLUDE_ASM(const s32, "sdk/libc", _multiply);
 
-INCLUDE_ASM(const s32, "sdk/libc", _pow5mult);
+/* Native indexed constants span the separately labeled word at 0x0054B928. */
+extern const s32 D_0054B91C[4];
+_Bigint *_multiply(_reent *r, _Bigint *a, _Bigint *b);
+
+_Bigint *_pow5mult(_reent *r, _Bigint *b, s32 n)
+{
+    _Bigint *power;
+    _Bigint *nextPower;
+    _Bigint *product;
+    s32 remainder;
+
+    remainder = n & 3;
+    if (remainder != 0) {
+        b = _multadd(r, b, D_0054B91C[remainder], 0);
+    }
+    n >>= 2;
+    if (n == 0) {
+        return b;
+    }
+    power = r->_p5s;
+    if (power == NULL) {
+        power = r->_p5s = _i2b(r, 625);
+        power->next = NULL;
+    }
+    for (;;) {
+        if (n & 1) {
+            product = _multiply(r, b, power);
+            _Bfree(r, b);
+            b = product;
+        }
+        n >>= 1;
+        if (n == 0) {
+            break;
+        }
+        if ((nextPower = power->next) == NULL) {
+            nextPower = power->next = _multiply(r, power, power);
+            nextPower->next = NULL;
+        }
+        power = nextPower;
+    }
+    return b;
+}
 
 /* Qualified allocator controls for the two count lifetimes are recorded in
  * docs/levers/cross-block-locals.md, "Retain bigint limb and bit counts". */
@@ -1100,7 +1141,78 @@ s32 __mcmp(_Bigint *a, _Bigint *b) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "sdk/libc", __mdiff);
+/* The shared pointer and limb intermediates have qualified allocator controls;
+ * see docs/levers/cross-block-locals.md, "Retain bigint subtraction values". */
+_Bigint *__mdiff(_reent *r, _Bigint *a, _Bigint *b) {
+    s32 sign = __mcmp(a, b);
+    _Bigint *result;
+    u32 *srcA;
+    u32 *srcB;
+    u32 *dst;
+    u32 *endA;
+    u32 *endB;
+    s32 countA;
+    s32 countB;
+    s32 borrow;
+    s32 low;
+    u32 limb;
+
+    if (sign == 0) {
+        result = _Balloc(r, 0);
+        result->wds = 1;
+        result->x[0] = 0;
+        return result;
+    }
+    if (sign < 0) {
+        result = a;
+        a = b;
+        b = result;
+        sign = 1;
+    } else {
+        sign = 0;
+    }
+
+    result = _Balloc(r, a->k);
+    result->sign = sign;
+    srcA = a->x;
+    srcB = b->x;
+    dst = result->x;
+    countA = a->wds;
+    countB = b->wds;
+    endA = srcA + countA;
+    endB = srcB + countB;
+    borrow = 0;
+    do {
+        u32 wordB;
+        limb = *srcA++;
+        wordB = *srcB++;
+        low = (limb & 0xFFFF) - (wordB & 0xFFFF) + borrow;
+        borrow = low >> 16;
+        limb = (limb >> 16) - (wordB >> 16);
+        limb += borrow;
+        ((u16 *)dst)[0] = low;
+        ((u16 *)dst)[1] = limb;
+        dst++;
+        borrow = (s32)limb >> 16;
+    } while (srcB < endB);
+    while (srcA < endA) {
+        u32 word = *srcA++;
+        low = (word & 0xFFFF) + borrow;
+        borrow = low >> 16;
+        limb = (word >> 16) + borrow;
+        ((u16 *)dst)[0] = low;
+        ((u16 *)dst)[1] = limb;
+        dst++;
+        borrow = (s32)limb >> 16;
+    }
+    dst--;
+    while (*dst == 0) {
+        dst--;
+        countA--;
+    }
+    result->wds = countA;
+    return result;
+}
 
 INCLUDE_ASM(const s32, "sdk/libc", _ulp);
 
