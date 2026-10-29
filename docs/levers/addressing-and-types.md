@@ -987,9 +987,9 @@
   and moves every other local; `delta[0]` is the correct spelling and gives
   retail's bare `lqc2 vf10, 0($29)`. `dds3BillboardGetDirectionRotate` went from
   23 of 94 words to exact on that alone.
-- The double-precision helpers are explicit calls in this engine's source, not
-  compiler soft float. `sdfFloatToULong(x)` widens an `f32`, `dpdiv(a, b)` is
-  the **comparison** (its result's sign is what `bgez` tests, despite the name),
+- The double-precision helpers are explicit calls in this reconstruction;
+  natural floating-point expressions can also emit runtime calls. `sdfFloatToULong(x)` widens an `f32`, `dpcmp(a, b)` is
+  the **comparison** (its result's sign is what `bgez` tests),
   `dpsub(a, b)` subtracts, and `sdfDoubleToULong` returns the narrowed value in
   `$f0`, so declare it `f32`. A `1.0` double is retail's `ori rd, $0, 0xFFC0`
   plus `dsll32 rd, rd, 14`. `dds3BillboardTagLink` and `script/scrTraceCode`

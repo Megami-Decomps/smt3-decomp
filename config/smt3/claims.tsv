@@ -695,3 +695,4 @@ src/smt3/event/evtUnitManager.c	redthing1	done	2026-10-29	1 fn / 3920 B	PiM agen
 src/smt3/sdk/libmc.c	redthing1	done	2026-10-28	2 fn / 104 B	alarm delay and wakeup callback with 16-bit ticks, thread-ID handoff and existing interrupt-return primitive
 src/smt3/sdk/libmc.c	redthing1	done	2026-10-28	2 fn / 216 B	uncached get-info outputs and bounded working-directory completion copy with native nullable destinations and callback reads
 src/smt3/sdk/libmc.c	redthing1	done	2026-10-28	1 fn / 48 B	shared 0x40-byte reply record and client accessor preserving potentially aliased generic output slots
+src/smt3/sdk/libgcc.c	redthing1	done	2026-10-29	0 matches / canonical runtime name	PiM agent: inferred dpcmp correction at 0x002D1B38, native comparator call chain and compiler DI result ABI; all active declarations audited; IDB update pending

@@ -79,9 +79,9 @@ every later allocation shifts. Scoping `void *packet` into the tag-creation
 block (rather than at function scope) is what aligned the first sixteen words,
 so the prologue's saved-register list is now retail's apart from `$23`.
 
-Confirmed by the draft rather than guessed: the double-precision tail is
-explicit calls, not compiler soft-float. `sdfFloatToULong(dot)` widens the
-inner product, `dpdiv(x, 0.0)` is the *comparison* (its sign is tested with
+The draft expresses the double-precision tail as explicit calls; natural
+floating-point expressions can also emit runtime calls. `sdfFloatToULong(dot)` widens the
+inner product, `dpcmp(x, 0.0)` is the *comparison* (its sign is tested with
 `bgez`), `dpsub(0.0, x)` negates and `dpsub(1.0, x)` subtracts, and
 `sdfDoubleToULong` returns the `f32` in `$f0`. The `1.0` double is retail's
 `ori $4, $0, 0xFFC0` / `dsll32 $4, $4, 14`, which is `0x3FF0000000000000`. The

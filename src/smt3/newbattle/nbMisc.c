@@ -38,7 +38,7 @@ extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32
  * comparison helpers in this executable, not integer conversion/division. */
 extern f64 sdfFloatToULong(f32 value);
 
-extern s32 dpdiv(f64 left, f64 right);
+extern long dpcmp(f64 left, f64 right);
 
 /* The selection block at +0x70 of an akuma record, which nbSetPlayerStartData
  * clears before the devil enters the stock. */
@@ -423,7 +423,7 @@ s32 nbClipEffectNum(s32 screenPosition[4])
     SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(viewDistance);
-    if (dpdiv(sdfFloatToULong(viewDistance), 16.0) <= 0)
+    if (dpcmp(sdfFloatToULong(viewDistance), 16.0) <= 0)
         return 0;
 
     SDF_VU0_NORMALIZE();

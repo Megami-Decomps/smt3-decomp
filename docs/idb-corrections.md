@@ -952,11 +952,14 @@ second copy of the same object's code gives no way to choose between its name
 and a GNU alias. `_addsub_df.o`'s pair is fine because that object really does
 export two symbols, `dpadd` and `dpsub`, and both are already named.
 
-Sony's `dp*` spellings stay where they are. `dptoul` is attributed by the `name`
+The original audit kept Sony's `dp*` spellings where they were. The `dpdiv`
+conclusion below was name-only and is superseded by the native comparison proof
+in [Double-comparison runtime name](#double-comparison-runtime-name). `dptoul` is attributed by the `name`
 rule, which means the recovered name is itself a symbol of `_df_to_usi.o`: the
 EE libgcc exports Sony's aliases for the double arithmetic and conversions, so
-`dpadd`, `dpsub`, `dpmul`, `dpdiv`, `dptoli` and `dptoul` are correct as they
-stand. The six above are fp-bit and libgcc2 helpers that Sony did not alias.
+`dpadd`, `dpsub`, `dpmul`, `dptoli` and `dptoul` keep their existing names.
+The former `dpdiv` name-only inference is corrected below. The six above are
+fp-bit and libgcc2 helpers that Sony did not alias.
 
 The same evidence fixed four record names in the C, which needed no IDB change:
 `frame-dwarf2.o` makes `AtExitEntry` that file's `struct object` and `AtExitList`
@@ -991,3 +994,45 @@ Still unnamed in `frame-dwarf2.o`: 0x002D1E50, 0x002D1EA8, 0x002D1FA0,
 (`decode_uleb128`, `fde_split`, `frame_heapsort`, `fde_merge`, `search_object`,
 `execute_cfa_program` and friends); 0x002D2768 reads like `add_fdes` but its
 first argument is the FDE rather than the object, so the match is not settled.
+
+
+## Double-comparison runtime name
+
+The 76-byte function at `0x002D1B38` is now named `dpcmp`, not `dpdiv`. Its
+matched `sdk/libgcc.c` body unpacks its two binary64 arguments and passes the
+resulting records to `__fpcmp_parts_df` at `0x002D3638`. The 288-byte latter body
+compares classes, signs, exponents and fractions; it returns -1, 0 or 1 for
+ordered values and 1 for unordered input. It contains no division. Arguments
+arrive in `$4`/`$5`, and the signed comparison result leaves in `$2`. The
+provider's `long` return spelling and implementation are unchanged. The four
+active consumer declarations now also return `long`, correcting their inherited
+32-bit declarations. Plain/`-da` compiler output parity confirms the actual
+comparison libcall returns `DI` in `$2`, with `DF` inputs in `$4`/`$5`; this is
+the EE compiler's signed 64-bit comparison ABI, not an inference from the small
+result range alone. No signature was tuned to select instructions.
+
+All active C consumers test the result's sign or zero: `effect/billManager`,
+`effect/effBlur_Filter`, `newbattle/nbMisc` and `script/scrTraceCode`. The
+inactive legacy SDK source is renamed consistently too. The pinned compiler
+emits the runtime name `dpcmp` for ordinary double comparisons, and the current
+DDS donor links that name to its corresponding comparator. This corrects a
+recovered name; it adds neither a new helper nor a compatibility alias.
+
+The former `_div_df.o` attribution in `sdk_objects.tsv` was based only on the
+recovered name. As [SDK matching](sdk-matching.md) states, that rule does not
+prove that these bytes came from that object. The unsupported attribution is
+withdrawn rather than relabeled as a byte match; no SDK archive was available
+for a new object attribution in this pass. The 80-byte table interval includes
+four alignment bytes beyond the 76-byte function.
+
+`tools/names.py apply smt3` records the correction as **inferred** in
+`name_sources.txt` and inserts a hand-curated symbol row. This follows
+[Names](names.md#recording-provenance), and `ida_symbols.py` preserves such rows
+outside its generated block. **The IDB was not updated: no IDA session/tool was
+available.** Its correction remains pending; the curated override prevents a
+future export from restoring the wrong build symbol.
+
+All five active owners, a forced assembly re-split, and the full retail checksum
+qualify the correction independently of the billboard reconstruction. It earns
+zero new function or byte credit. No compiler, assembler, options, unit
+boundaries or runtime instructions are changed.

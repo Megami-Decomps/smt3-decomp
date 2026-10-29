@@ -58,7 +58,7 @@ extern f32 sdfSin(f32 aRadius);
 
 extern f64 sdfFloatToULong(f32 value) __attribute__((const));
 
-extern s32 dpdiv(f64 left, f64 right) __attribute__((const));
+extern long dpcmp(f64 left, f64 right) __attribute__((const));
 
 extern f64 dpsub(f64 left, f64 right) __attribute__((const));
 
@@ -435,7 +435,7 @@ void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *hDistortionBlur) {
 /* Each live slot waits out its delay, then fades as its angle leaves zero.
  * Adapted from the matched DDS/redthing1 effBlurStepScatterSlotsAndDraw.
  * Keep SMT3's two-argument renderer and canonical soft-double helpers:
- * dpdiv compares doubles; the pi and reciprocal literals are promoted floats. */
+ * dpcmp compares doubles; the pi and reciprocal literals are promoted floats. */
 void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work)
 {
     struct sdfDrawTag_t *list;
@@ -460,7 +460,7 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work)
                     slot->quad.scale = work->params.distortion * sdfSin(slot->angle) + 1.0f;
                     level = sdfFloatToULong((f32)(work->params.abgr >> 24));
                     angle = sdfFloatToULong(slot->angle);
-                    if (dpdiv(angle, 0.0) < 0) {
+                    if (dpcmp(angle, 0.0) < 0) {
                         angle = dpsub(0.0, angle);
                     }
                     level = dpmul(level, dpsub(3.14159265f, angle));

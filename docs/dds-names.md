@@ -37,8 +37,11 @@ shared masked hash is otherwise rejected, so the stubs are named by their bytes.
   references by name, and the build is byte-identical, so its `dpcmp`, `dptofp`
   and `dptoul` are at the right addresses. The IDB names their SMT3 twins
   `dpdiv`, `sdfDoubleToULong` and `sdfDoubleToUInt`, which cannot be right for a
-  routine the compiler calls as `dpcmp`. Not yet corrected in the IDB; see
-  [idb-corrections.md](idb-corrections.md) for the bar a correction has to meet.
+  routine the compiler calls as `dpcmp`. The comparator is now corrected to
+  `dpcmp` by an inferred hand-curated override, with its complete native call
+  chain checked. The IDB is not updated; the conversion names remain unchanged.
+  See [idb-corrections.md](idb-corrections.md#double-comparison-runtime-name) for
+  the proof and the pending IDB correction.
 - `sdfAddHandler` carries its own name in the string
   `sdfAddHandler : unknown type %d`; the IDB calls it `DmacAddHandler`, which is
   the HD name. dds-decomp keeps the evidence name, and the port never replaces an

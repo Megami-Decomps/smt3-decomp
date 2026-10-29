@@ -16,3 +16,4 @@
 0x001B9240	nbCameraShot_CommandFixPos_Calc2	inferred	Independent retail prologue at the tail-call target after Set2; camera/formation arguments and calculation flow agree with smt-ret/smt3-reconstructed-sources src/nbCameraCommand.c
 0x002197B0	ApplyChangeListIndex	inferred	Reconstructed fclEncyc name; native extent ends at the independent ApplyEdgeListCursor entry after the restored-frame tail call.
 0x002198D8	ApplyEdgeListCursor	inferred	Independent frameless edge-correction entry reached after ApplyChangeListIndex restores its frame; name agrees with the reconstructed fclEncyc source.
+0x002D1B38	dpcmp	inferred	Native double-comparison wrapper: unpacks both arguments and calls __fpcmp_parts_df (0x002D3638); matching compiler uses dpcmp. Curated correction; IDB update pending.

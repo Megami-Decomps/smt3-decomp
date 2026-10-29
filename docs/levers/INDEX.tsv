@@ -176,7 +176,7 @@ docs/levers/addressing-and-types.md	961	$f14 $f15	Two float products that share 
 docs/levers/addressing-and-types.md	970	cvt.s.w mul.s mult	An integer parameter that retail converts to f32 early and then multiplies by another converted integer needs its own f32 local.
 docs/levers/addressing-and-types.md	977		A header word a function needs both before its calls and again after them belongs at its second use site as the field expression, not in a local.
 docs/levers/addressing-and-types.md	983	$29 lqc2	SDF_VU0_LOADVECTOR_MEMOPS and SDF_VU0_STOREVECTOR_MEMOPS take an **lvalue**, and an array's name is not one.
-docs/levers/addressing-and-types.md	990	$0 $f0 bgez dsll32 ori	The double-precision helpers are explicit calls in this engine's source, not compiler soft float.
+docs/levers/addressing-and-types.md	990	$0 $f0 bgez dsll32 ori	The double-precision helpers are explicit calls in this reconstruction;
 docs/levers/addressing-and-types.md	999		A run of field copies between two objects of the same struct type gets its loads and stores regrouped by the scheduler, and the alias set is the lever, not…
 docs/levers/addressing-and-types.md	1015		The alias-set lever reaches a run of **zero stores**, not only a run of field copies, and the type to share is u32 rather than a pointer type.
 docs/levers/addressing-and-types.md	1028	$4 $6 addu	A table read whose index retail keeps in $4 wants the read placed **after** the first store of the object it initialises, not before it.

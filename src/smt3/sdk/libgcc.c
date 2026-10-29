@@ -432,7 +432,7 @@ long dpsub(double a, double b) {
 
 INCLUDE_ASM(const s32, "sdk/libgcc", dpmul);
 
-long dpdiv(double a, double b) {
+long dpcmp(double a, double b) {
     fp_number_type_df ua;
     fp_number_type_df ub;
 

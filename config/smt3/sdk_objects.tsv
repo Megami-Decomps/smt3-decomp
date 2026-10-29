@@ -176,7 +176,7 @@ addr	name	size	lib	member	evidence	sdk	upstream
 002D17F0	dpadd	88	libgcc[2.96-ee-001003-1]	_addsub_df.o	bytes	296	-
 002D1848	dpsub	104	libgcc[2.96-ee-001003-1]	_addsub_df.o	name	296	-
 002D18B0	dpmul	648	libgcc[2.96-ee-001003-1]	_mul_df.o	name	296	-
-002D1B38	dpdiv	80	libgcc[2.96-ee-001003-1]	_div_df.o	name	296	-
+002D1B38	dpcmp	80	-	-	none	-	-
 002D1B88	litodp	184	libgcc[2.96-ee-001003-1]	_si_to_df.o	bytes	296	-
 002D1C40	dptoli	160	libgcc[2.96-ee-001003-1]	_df_to_si.o	name	296	-
 002D1CE0	dptoul	48	libgcc[2.96-ee-001003-1]	_df_to_usi.o	name	296	-

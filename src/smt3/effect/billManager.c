@@ -81,7 +81,7 @@ extern void sdfBillBoardMakeTMPacket(void *aPacket, const f32 *aTM);
 extern f32 sdfCos(f32 aRadius);
 extern f32 sdfSin(f32 aRadius);
 extern f64 sdfFloatToULong(f32 value) __attribute__((const));
-extern s32 dpdiv(f64 left, f64 right) __attribute__((const));
+extern long dpcmp(f64 left, f64 right) __attribute__((const));
 extern f64 dpsub(f64 left, f64 right) __attribute__((const));
 extern f32 sdfDoubleToULong(f64 value) __attribute__((const));
 PS2_SYMBOL_AT(sdfGrOt_t, dds3MultiBillboardOt, sdfGrOtTable, 0x580);
@@ -417,7 +417,7 @@ void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
             SDF_VU0_LOADVECTOR_B(D_00317030);
             SDF_VU0_INNERPRODUCT(dot);
             angle = sdfFloatToULong(dot);
-            if (dpdiv(angle, 0.0) < 0) {
+            if (dpcmp(angle, 0.0) < 0) {
                 angle = dpsub(0.0, angle);
             }
             dds3BillboardTagParam[1] = sdfDoubleToULong(dpsub(1.0, angle));
