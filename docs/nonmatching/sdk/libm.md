@@ -38,10 +38,14 @@ packed word through the working-mantissa local is inert; extracting the
 exponent before the sign test gives 10 matching words. The preferred source
 keeps distinct representation objects and the direct algorithm.
 
-## cosf and sinf
+## cosf (sdk/libm, 0xD4)
 
-Both wrappers emit native size: cosine212 bytes with38 of53 words matching
-and15 differing; sine232 bytes with43 of58 words matching and15 differing.
+15 of 53 words differ; 38 match. All 212 native bytes are emitted.
+
+## sinf (sdk/libm, 0xE8)
+
+15 of 58 words differ; 43 match. All 232 native bytes are emitted.
+
 The same initial scheduling and mask/comparison temporary choices differ in
 both, first at+8. Cosine dispatch from+48 onward and sine dispatch from+48
 onward match exactly. Normal builds retain assembly; no exact credit.
@@ -59,3 +63,24 @@ A direct pointer cast instead emits MFC1, shortens each body by8 bytes and
 changes the prologue broadly; it was discarded. Splitting the magnitude mask
 assignment or scoping the union is compiler-inert. No forced storage, artificial
 reference or unsupported compiler setting was added to constrain scheduling.
+
+The entry residual also includes RA preservation: native saves RA before the
+float-word store, while the current source fills the threshold branch delay
+slot with that save. The remaining dispatch bytes already match.
+
+The existing [object audit](../../sdk-matching.md) records a relocation-masked
+instruction match for sine in the 2.96 package's `libm.a/sf_sin.o`. Cosine is
+a name-only association to `sf_cos.o`, and its 216-byte audit span includes
+four bytes after the 212-byte function. These records do not establish the
+producer's compiler invocation. A separate 2.9 control changes the float-word
+transfer to `mfc1` and reduces the frame from 0x30 to 0x20; it does not close
+this residual or justify a compiler change.
+
+The named zero argument used by the [newlib sine](https://raw.githubusercontent.com/mirror/newlib-cygwin/master/newlib/libm/math/sf_sin.c)
+and [cosine](https://raw.githubusercontent.com/mirror/newlib-cygwin/master/newlib/libm/math/sf_cos.c)
+wrappers is compiler-inert here, as is a lexical union followed by an explicit
+signed-word normalization. Their [fdlibm header](https://raw.githubusercontent.com/mirror/newlib-cygwin/master/newlib/libm/common/fdlibm.h)
+supports a largest-exponent-is-normal classification that removes the
+nonfinite shortcut, a source configuration consistent with native's paths.
+No compiler setting was changed. Further work needs evidence for the entry
+scheduling or the producer invocation.
