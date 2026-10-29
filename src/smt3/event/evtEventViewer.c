@@ -31,7 +31,7 @@ typedef enum EVT_VIEWER_MENU {
 
 
 
-extern evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frame, evtViewerInfo_t *viewer);
+extern evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frame);
 extern void sdfChipFreeDirect(void *aPtr);
 extern void dds3DeleteSceneBasicData(void *basic);
 extern void evtInitViewerInfo(void);
@@ -230,7 +230,7 @@ extern effBlurScaleWork_t *Eve_RippleBlurGetParams(void);
 extern dds3Effect_Filter_t *Eve_FilterGetParams(void);
 extern dds3Effect_PartialMultiFilter_t *Eve_PartialMultiFilterGetParams(void);
 
-evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber, evtViewerInfo_t *unused)
+evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
 {
     evtFrameInfo_t *frame = sdfChipAllocDirect(0x20);
     pmdSceneLightTable_t *sceneLight;
@@ -358,7 +358,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", evtAddFrameInfo);
 
 evtFrameInfo_t *AddFrameInfo2(evtViewerObject_s *group, s32 frame, evtViewerInfo_t *viewer)
 {
-    return evtAddFrameInfo(group, frame, viewer);
+    return evtAddFrameInfo(group, frame);
 }
 
 evtFrameInfo_t *evtGetSelectFrameInfo(void)
