@@ -1094,8 +1094,8 @@ void dds3MultiBlurOff(s32 frame)
     }
 }
 
-void dds3SetDistBlurPara(s32 number, s32 width, s32 intval, s32 speed,
-                         f32 rotate, f32 distor, f32 blend)
+void dds3SetDistBlurPara(s32 number, s32 width, s32 intval, f32 rotate,
+                         f32 distor, f32 blend, s32 speed)
 {
     if (number >= 101)
 {
@@ -1168,7 +1168,7 @@ void dds3DistBlurOff(s32 frame)
     }
 }
 
-void dds3SetRipBlurPara(s32 number, s32 speed, f32 intval, f32 rotate, f32 distor, f32 distor_s, f32 blend)
+void dds3SetRipBlurPara(s32 number, f32 intval, f32 rotate, f32 distor, f32 distor_s, f32 blend, s32 speed)
 {
     if (number >= 0x29) {
         ripblurovercnt++;
