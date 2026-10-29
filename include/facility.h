@@ -184,6 +184,7 @@ typedef struct mselSaveData_t {
     u8 reserved[12];
     fclencyceelem_t records[184];
 } mselSaveData_t;
+typedef char mselSaveDataSizeCheck[(sizeof(mselSaveData_t) == 0x7E90) ? 1 : -1];
 
 typedef struct
 {
