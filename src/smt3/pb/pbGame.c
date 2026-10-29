@@ -1383,8 +1383,6 @@ void pbSetGameCamera4(s16 x, s16 y)
     SDF_VU0_COPYVECTOR(&aViewTarget, &target);
 }
 
-/* NON_MATCHING: 35 of 37 words match at native 148-byte size; case 2 tail-calls instead of calling and returning. */
-#ifdef NON_MATCHING
 void pbInitGameCamera(void) {
     u32 type = D_0054F5C4->charIndex;
     switch (type) {
@@ -1399,12 +1397,12 @@ void pbInitGameCamera(void) {
         break;
     case 2:
         pbSetGameCamera2();
+        /* Reset the local selector; qualified late deletion:
+         * docs/levers/callee-visibility.md#camera-selector-reset-after-the-final-call. */
+        type = 0;
         break;
     }
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbGame", pbInitGameCamera);
-#endif
 
 
 s8 pbCheckPreviousRecord(void) {

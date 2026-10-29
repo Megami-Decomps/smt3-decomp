@@ -105,3 +105,23 @@ Adapted from redthing1's [published DDS message-manager source](https://github.c
 SMT3's native field offsets, selector initialization, flag values and tail
 calls were reviewed independently. The complete message owner checks
 118 match / 0 differ, and the full retail image remains byte-identical.
+
+### Camera selector reset after the final call
+
+`pbInitGameCamera` matches all 148 bytes with the unsigned local selector and
+one `type = 0` reset after case 2's `pbSetGameCamera2()` call. This resets only
+the function's own selector; it does not update shared camera state. Native
+case 2 uses `jal` and a common epilogue, while case 1 genuinely tail-calls its
+provider. All providers retain their established `void` return types.
+
+This uses the canonical matching rules' narrow post-call-statement exception.
+The qualified default-owner trace, with pinned cc1 SHA-256
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`,
+reports `verify: OK`: dumps match plain compilation and hooked output matches
+unhooked output. In `rtl.01.sibling`, call uid60 is followed by uid64 setting
+the local selector pseudo 84 to zero. In `rtl.13.life`, the call remains but
+uid64 has disappeared, and control reaches the common label 81. Thus sibling
+selection sees the reset before later dead-store deletion. The complete normal
+owner checks 61 match / 0 differ.
+
+Reproduce with `tools/cc1probe.sh src/smt3/pb/pbGame.c --func pbInitGameCamera --reorg --out /tmp/camera-selector`; require `verify: OK` before interpreting the dumps.

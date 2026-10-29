@@ -13,8 +13,8 @@ open the page and line it names.
 | 10 | [stores.md](stores.md) | Stores |
 | 9 | [float-literals.md](float-literals.md) | Float literals |
 | 5 | [scheduling.md](scheduling.md) | Store scheduling |
+| 4 | [callee-visibility.md](callee-visibility.md) | Callee visibility: the cause of most one-word branch-likely misses |
 | 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
-| 3 | [callee-visibility.md](callee-visibility.md) | Callee visibility: the cause of most one-word branch-likely misses |
 | 2 | [scalar-spills.md](scalar-spills.md) | Scalar declaration order and reload spill slots |
 | 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
 | 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
