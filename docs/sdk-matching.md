@@ -907,3 +907,34 @@ unaligned four-byte load. Code/data alignment use the existing ULEB/SLEB
 providers. The return-register byte is zero-extended; `z` consumes a payload
 size and skips those bytes. Both existing string blocks retain their original
 assembly data ownership, including the unused trailing bytes.
+
+## Binary64 division
+
+`dpdiv` at `0x002E6C48` matches all 320 instruction bytes. It uses the same
+unpacked binary64 record and real `sdfUnpackDouble` / `__pack_df` interfaces
+as the matched addition, subtraction and comparison wrappers.
+
+The parts-level division helper and classification primitives are established
+in [GCC's historical fp-bit.c](https://github.com/gcc-mirror/gcc/blob/releases/gcc-2.95/gcc/config/fp-bit.c#L944).
+They describe real arithmetic operations, rather than wrappers introduced only
+to constrain registers. Retail independently establishes the selected class
+paths and quotient loop; retain its behavior rather than importing upstream
+rounding or subnormal changes.
+
+NaNs propagate numerator-first before sign XOR. Equal zero classes and equal
+infinity classes select the existing shared NaN record at `D_0054B460`.
+Finite divided by infinity clears the numerator fraction and exponent;
+nonzero divided by zero makes it infinity. Exponent-zero inputs follow the
+unpacker's zero classification, including subnormals.
+
+The finite path subtracts exponents, doubles a smaller numerator fraction and
+decrements its exponent, then performs 61 unsigned restoring-division steps
+from bit 60 through bit zero. The loop computes a real `nextRemainder` after
+the optional subtraction, then advances the quotient bit and current
+remainder. Qualified allocation, PRE, jump and delay-slot traces with output
+parity confirm the native shape: current remainder in GPR4, next remainder in
+GPR2, quotient in GPR7, quotient bit in GPR3, and the result-record pointer in
+GPR8. A direct in-place update or a speculative next-value initialization
+leaves an extra loop-entry transfer and emits 328 bytes; the single
+next-state calculation gives the native 320-byte body without extra uses,
+flags, constraints or instruction padding.
