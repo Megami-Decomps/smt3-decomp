@@ -379,17 +379,32 @@ typedef struct fp_number_type_df {
     s32 class;
     s32 sign;
     s32 normal_exp;
-    long fraction;
+    u64 fraction;
 } fp_number_type_df;
 
 extern f64 __pack_df(const fp_number_type_df *u);
 
 extern void sdfUnpackDouble(const double *x, fp_number_type_df *u);
 
-extern fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_number_type_df *b, fp_number_type_df *r);
+extern const fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_number_type_df *b, fp_number_type_df *r);
 
 extern s32 __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df *b);
 
+
+extern const fp_number_type_df D_0054B460;
+
+/* fp-bit tags: NaN classes 0/1, zero 2, normal 3, infinity 4. */
+static inline s32 dfIsNaN(const fp_number_type_df *number) {
+    return (u32)number->class < 2;
+}
+
+static inline s32 dfIsZero(const fp_number_type_df *number) {
+    return number->class == 2;
+}
+
+static inline s32 dfIsInfinity(const fp_number_type_df *number) {
+    return number->class == 4;
+}
 
 void __do_global_dtors(void) {
     void (**p)(void);
@@ -421,7 +436,101 @@ f64 fptodp(f32 x) {
     return __make_dp(u.class, u.sign, u.normal_exp, (long)u.fraction << 30);
 }
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D1590);
+const fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_number_type_df *b,
+                                     fp_number_type_df *result) {
+    s32 exponentA;
+    s32 exponentB;
+    s32 exponentDifference;
+    u64 fractionA;
+    u64 fractionB;
+
+    if (dfIsNaN(a)) {
+        return a;
+    }
+    if (dfIsNaN(b)) {
+        return b;
+    }
+    if (dfIsInfinity(a)) {
+        if (dfIsInfinity(b) && a->sign != b->sign) {
+            return &D_0054B460;
+        }
+        return a;
+    }
+    if (dfIsInfinity(b)) {
+        return b;
+    }
+    if (dfIsZero(b)) {
+        if (dfIsZero(a)) {
+            *result = *a;
+            result->sign = a->sign & b->sign;
+            return result;
+        }
+        return a;
+    }
+    if (dfIsZero(a)) {
+        return b;
+    }
+
+    fractionA = (u64)a->fraction;
+    fractionB = (u64)b->fraction;
+    exponentA = a->normal_exp;
+    exponentB = b->normal_exp;
+    exponentDifference = exponentA - exponentB;
+    if (exponentDifference < 0) {
+        exponentDifference = -exponentDifference;
+    }
+    if (exponentDifference < 64) {
+        while (exponentA > exponentB) {
+            exponentB++;
+            fractionB = (fractionB & 1) | (fractionB >> 1);
+        }
+        while (exponentB > exponentA) {
+            exponentA++;
+            fractionA = (fractionA & 1) | (fractionA >> 1);
+        }
+    } else {
+        if (exponentA > exponentB) {
+            exponentB = exponentA;
+            fractionB = 0;
+        } else {
+            exponentA = exponentB;
+            fractionA = 0;
+        }
+    }
+
+    if (a->sign != b->sign) {
+        s64 difference;
+        if (a->sign != 0) {
+            difference = fractionB - fractionA;
+        } else {
+            difference = fractionA - fractionB;
+        }
+        if (difference >= 0) {
+            result->sign = 0;
+            result->normal_exp = exponentA;
+            result->fraction = difference;
+        } else {
+            result->sign = 1;
+            result->normal_exp = exponentA;
+            result->fraction = -difference;
+        }
+        while (result->fraction < ((u64)1 << 60) && result->fraction != 0) {
+            result->fraction <<= 1;
+            result->normal_exp--;
+        }
+    } else {
+        result->sign = a->sign;
+        result->normal_exp = exponentA;
+        result->fraction = fractionA + fractionB;
+    }
+
+    result->class = 3;
+    if (result->fraction > ((u64)-1 >> 3)) {
+        result->fraction = (result->fraction & 1) | (result->fraction >> 1);
+        result->normal_exp++;
+    }
+    return result;
+}
 
 f64 dpadd(double a, double b) {
     fp_number_type_df ua;
@@ -444,7 +553,113 @@ f64 dpsub(double a, double b) {
     return __pack_df(libc_2D1590(&ua, &ub, &r));
 }
 
-INCLUDE_ASM(const s32, "sdk/libgcc", dpmul);
+static inline const fp_number_type_df *dfMultiplyParts(fp_number_type_df *left,
+                                                       fp_number_type_df *right,
+                                                       fp_number_type_df *result) {
+    u64 leftLow;
+    u64 leftHigh;
+    u64 rightLow;
+    u64 rightHigh;
+    u64 lowProduct;
+    u64 crossLeft;
+    u64 crossRight;
+    u64 cross;
+    u64 low;
+    u64 high;
+    u64 highProduct;
+
+
+    if (dfIsNaN(left)) {
+        left->sign = left->sign != right->sign;
+        return left;
+    }
+    if (dfIsNaN(right)) {
+        right->sign = left->sign != right->sign;
+        return right;
+    }
+    if (dfIsInfinity(left)) {
+        if (dfIsZero(right)) {
+            return &D_0054B460;
+        }
+        left->sign = left->sign != right->sign;
+        return left;
+    }
+    if (dfIsInfinity(right)) {
+        if (dfIsZero(left)) {
+            return &D_0054B460;
+        }
+        right->sign = left->sign != right->sign;
+        return right;
+    }
+    if (dfIsZero(left)) {
+        left->sign = left->sign != right->sign;
+        return left;
+    }
+    if (dfIsZero(right)) {
+        right->sign = left->sign != right->sign;
+        return right;
+    }
+
+    leftLow = (u64)left->fraction & 0xFFFFFFFFULL;
+    leftHigh = (u64)left->fraction >> 32;
+    rightLow = (u64)right->fraction & 0xFFFFFFFFULL;
+    rightHigh = (u64)right->fraction >> 32;
+    lowProduct = rightLow * leftLow;
+    crossLeft = rightHigh * leftLow;
+    crossRight = rightLow * leftHigh;
+    highProduct = rightHigh * leftHigh;
+    {
+        u64 upperAccum = 0;
+        u64 lowerAccum;
+        u64 shiftedCross;
+        cross = crossLeft + crossRight;
+        if (cross < crossLeft) {
+            upperAccum += (u64)1 << 32;
+        }
+        shiftedCross = (cross << 32) & 0xFFFFFFFF00000000ULL;
+        lowerAccum = lowProduct + shiftedCross;
+        if (lowerAccum < lowProduct) {
+            upperAccum++;
+        }
+        upperAccum += ((cross >> 32) & 0xFFFFFFFFULL) + highProduct;
+        high = upperAccum;
+        low = lowerAccum;
+    }
+
+    result->normal_exp = left->normal_exp + right->normal_exp;
+    result->sign = left->sign != right->sign;
+    result->normal_exp += 4;
+    while (high > (~(u64)0 >> 3)) {
+        result->normal_exp++;
+        if (high & 1) {
+            low >>= 1;
+            low |= (u64)1 << 63;
+        }
+        high >>= 1;
+    }
+    while (high <= (~(u64)0 >> 4)) {
+        result->normal_exp--;
+        high <<= 1;
+        if (low & ((u64)1 << 63)) {
+            high |= 1;
+        }
+        low <<= 1;
+    }
+
+    result->class = 3;
+    result->fraction = high;
+    return result;
+}
+
+f64 dpmul(f64 a, f64 b) {
+    fp_number_type_df left;
+    fp_number_type_df right;
+    fp_number_type_df result;
+
+    sdfUnpackDouble(&a, &left);
+    sdfUnpackDouble(&b, &right);
+    return __pack_df(dfMultiplyParts(&left, &right, &result));
+}
 
 s32 dpcmp(double a, double b) {
     fp_number_type_df ua;
@@ -453,19 +668,6 @@ s32 dpcmp(double a, double b) {
     sdfUnpackDouble(&a, &ua);
     sdfUnpackDouble(&b, &ub);
     return __fpcmp_parts_df(&ua, &ub);
-}
-
-/* fp-bit tags: NaN classes 0/1, zero 2, normal 3, infinity 4. */
-static inline s32 dfIsNaN(const fp_number_type_df *number) {
-    return (u32)number->class < 2;
-}
-
-static inline s32 dfIsZero(const fp_number_type_df *number) {
-    return number->class == 2;
-}
-
-static inline s32 dfIsInfinity(const fp_number_type_df *number) {
-    return number->class == 4;
 }
 
 f64 litodp(s32 n) {

@@ -201,7 +201,7 @@ addr	name	size	lib	member	evidence	sdk	upstream
 002D2C70	libc_2D2C70	288	libgcc[2.96-ee-001003-1]	frame-dwarf2.o	bytes	296	src/gcc/frame-dwarf2.c
 002D2D90	libc_2D2D90	1104	-	-	none	-	-
 002D31E0	libc_2D31E0	440	libgcc[2.96-ee-001003-1]	frame-dwarf2.o	bytes	296	src/gcc/frame-dwarf2.c
-002D3398	libc_2D3398	120	-	-	none	-	-
+002D3398	__muldi3	120	-	-	none	-	-
 002D3410	sdfUnpackFloat	96	-	-	none	-	-
 002D3470	sdfPackQuad	48	-	-	none	-	-
 002D34A0	libc_2D34A0	216	libgcc[2.96-ee-001003-1]	_pack_df.o	bytes	296	-

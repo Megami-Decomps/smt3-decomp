@@ -1098,3 +1098,14 @@ old name are superseded by this native distinction.
 Existing C argument and return types are preserved, including declarations
 expressing soft-float values as integer bits. This change removes the obsolete
 float-conversion equates without introducing ABI changes.
+
+
+## Low 64-bit integer multiplication
+
+`0x002D3398`, formerly `libc_2D3398`, is curated as inferred `__muldi3`.
+Its native partial products compute the low 64-bit integer product, and all
+four compiler-generated integer calls in the now-matched `dpmul` select that
+address. The provider stays assembly backed; the name adds no matching credit.
+See [double arithmetic](libgcc-arithmetic-matching.md) for the caller and
+qualification evidence. The IDB correction remains pending; the curated row
+prevents an export from restoring the old generated name.
