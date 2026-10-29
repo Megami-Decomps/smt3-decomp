@@ -435,3 +435,15 @@ Those eight operand differences are the entire target difference; no operation
 is added or removed. Reuse produces all 500 native bytes, with the complete
 owner checking as 104 match, 0 differ. This establishes a shared-pseudo
 allocation dependency, not the original source spelling.
+
+## Shared camera dispatch exits
+
+`nbCameraState_SkillCut2_Init` matches 988 bytes and three jump tables with
+ordinary switch breaks and a converged function exit, as in the matched
+`nbCameraState_SkillCut1_Init` sibling. Returning immediately after every
+setter instead clones tail-call epilogues and grows the function. In the
+single-target switch, cases 2 and 13 share the target-camera body after
+the case-14 invoke-and-analyze body, matching their common native target.
+Read the selector after the target-count callback in each different-party
+branch. The same-party fallback queries group size only below two targets;
+two or more targets select the party camera directly.

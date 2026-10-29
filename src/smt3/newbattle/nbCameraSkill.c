@@ -1491,7 +1491,166 @@ void nbCameraState_SkillCut1_Calc(void)
     nbCameraShot_GroundCollision(&pNbCamera);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraState_SkillCut2_Init);
+INCLUDE_RODATA(const s32, "newbattle/nbCameraSkill", D_00534A20);
+
+extern char D_00534A20[];
+extern s32 nbCameraHero_Cut2_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
+extern s32 nbCameraDANTE_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
+extern s32 nbCameraBoss_Cut2_Ptr_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
+extern void nbCameraShot_AllParty_Set(nbCamera_t *pNbCamera);
+extern void nbCameraShot_InvokeTarget_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
+extern void nbCameraShot_InvokeTargetPartyTop_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
+extern void nbCameraShot_InvokeTargetPartyTop2_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
+extern void nbCameraShot_InvokeTargetNear_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
+extern void nbCameraShot_InvokeTargetNearReverse_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
+extern u32 effBTLModelGetGroupNumber(u32 group);
+
+void nbCameraState_SkillCut2_Init(void)
+{
+    u32 skillID = effBTLSkillGetID();
+
+    nbCamera_SkillInfo_Set(&nbCameraSkillNBSInfo, &D_00320EB0[skillID]);
+    if (effBTLSkillGetTargetNumber() == 0) {
+        if (nbCameraSkillNBSInfo.shot_23 == 19) {
+            nbCameraShot_Invoke_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+        } else {
+            printf(D_00534A20);
+            nbCameraClearState(&pNbCamera);
+            nbCameraShot_All_Set(&pNbCamera);
+        }
+        return;
+    }
+
+    {
+        nbFormation_t *invoke = effBTLSkillGetInvokeFormation();
+
+        nbCameraClearState(&pNbCamera);
+        if (effBTLModelCheckBossID(invoke) != 0) {
+            if (nbCameraBoss_Cut2_Init(&pNbCamera) != 0) {
+                return;
+            }
+        }
+        if (nbCameraHero_Cut2_Init(&pNbCamera, &nbCameraSkillNBSInfo) != 0) {
+            return;
+        }
+        if (nbCameraDANTE_Init(&pNbCamera, &nbCameraSkillNBSInfo) != 0) {
+            return;
+        }
+        if (nbCameraBoss_Cut2_Ptr_Init(&pNbCamera, &nbCameraSkillNBSInfo) != 0) {
+            return;
+        }
+
+        nbCameraModelMotionCr = invoke->cr * invoke->scl;
+    }
+
+    {
+        u32 invokeParty = effBTLSkillGetInvokeParty();
+        u32 targetParty = effBTLSkillGetTargetParty();
+
+        if (invokeParty == targetParty) {
+            switch (nbCameraSkillNBSInfo.shot_23) {
+            case 13:
+                nbCameraShot_Target_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 17:
+                nbCameraShot_All_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 18:
+                nbCameraShot_AllParty_Set(&pNbCamera);
+                break;
+            case 19:
+                nbCameraShot_Invoke_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 20:
+                nbCameraShot_TargetParty_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            default:
+                if (effBTLSkillGetTargetNumber() < 2) {
+                    u32 groupCount = effBTLModelGetGroupNumber(targetParty);
+                    if (targetParty == 0x200 && groupCount >= 2) {
+                        nbCameraShot_TargetParty_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                    } else {
+                        nbCameraShot_Target_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                    }
+                } else {
+                    nbCameraShot_TargetParty_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                }
+                break;
+            }
+        } else if (effBTLSkillGetTargetNumber() >= 2) {
+            switch (nbCameraSkillNBSInfo.shot_23) {
+            case 1:
+                nbCameraShot_InvokeTargetParty_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 2:
+                nbCameraShot_TargetParty_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 5:
+                nbCameraShot_InvokeTargetPartyTop_Set(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 6:
+                nbCameraShot_InvokeTargetPartyTop2_Set(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 18:
+                nbCameraShot_AllParty_Set(&pNbCamera);
+                break;
+            case 19:
+                nbCameraShot_Invoke_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            default:
+                break;
+            }
+        } else {
+            switch (nbCameraSkillNBSInfo.shot_23) {
+            case 1:
+                nbCameraShot_InvokeTarget_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 5:
+                nbCameraShot_InvokeTargetPartyTop_Set(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 6:
+                nbCameraShot_InvokeTargetPartyTop2_Set(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 7:
+                nbCameraShot_InvokeTargetReverse_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 14: {
+                nbCamera_t *camera = &pNbCamera;
+                nbCameraShot_InvokeTarget_Set2(camera, &nbCameraSkillNBSInfo);
+                nbCameraState_Analyze_Set(camera);
+                break;
+            }
+            case 2:
+            case 13:
+                nbCameraShot_Target_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            case 15:
+                if (nbCameraModelMotionCr < 450.0f) {
+                    nbCameraShot_InvokeTargetNear_Set(&pNbCamera, &nbCameraSkillNBSInfo);
+                } else {
+                    nbCameraShot_AttackTuibi_Set(&pNbCamera);
+                }
+                break;
+            case 16:
+                effBTLModelGroupPopPosition(targetParty);
+                if (nbCameraModelMotionCr < 450.0f) {
+                    nbCameraShot_InvokeTargetNearReverse_Set(&pNbCamera, &nbCameraSkillNBSInfo);
+                } else {
+                    nbCameraShot_InvokeTargetReverse_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                }
+                break;
+            case 18:
+                nbCameraShot_AllParty_Set(&pNbCamera);
+                break;
+            case 19:
+                nbCameraShot_Invoke_Set2(&pNbCamera, &nbCameraSkillNBSInfo);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
 
 void nbCameraState_SkillCut2_Calc(void)
 {
