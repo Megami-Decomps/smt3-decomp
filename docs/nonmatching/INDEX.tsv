@@ -85,9 +85,8 @@ func_00206308, func_002065C8	fclCombineInit	0x2C0 each	35 of 176 words differ	do
 cmbDrawFullScreenPanel	fclCombineInit	0x68	20 of 26 words match	docs/nonmatching/facility/fclCombineInit.md	43
 cmbDrawResultFooter	fclCombineInit	0x74	25 of 29 words match	docs/nonmatching/facility/fclCombineInit.md	62
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/nonmatching/facility/fclEncyc.md	5
-drawRegistSprites	facility/fclEncyc	0x26C	153 of 155 words match	docs/nonmatching/facility/fclEncyc.md	24
-DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/nonmatching/facility/fclEncyc.md	47
-DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/nonmatching/facility/fclEncyc.md	71
+DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/nonmatching/facility/fclEncyc.md	24
+DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/nonmatching/facility/fclEncyc.md	48
 fclDrawPanel	fclPanel	0x54	8 of 21 words differ	docs/nonmatching/facility/fclPanel.md	5
 fclDrawPanelType0Grad	facility/fclPanel	0x100	6 of 64 words differ	docs/nonmatching/facility/fclPanel.md	27
 ragDrawList2, ragDrawList3	fclRagCalc	0x150 each	10 of 84 words differ	docs/nonmatching/facility/fclRagCalc.md	5

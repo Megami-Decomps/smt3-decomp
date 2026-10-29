@@ -2999,9 +2999,6 @@ extern void itfMiscDrawSpritePlanePrim(fclEncycVertex_t *, fclEncycColor_t *, u3
 extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 extern void itfMiscDrawSpritePrim2(fclEncycVertex_t *, fclEncycColor_t *, fclEncycColor_t *, u32, s32, sdfDrawTag_t *);
 
-#ifdef NON_MATCHING
-/* 153 of 155 words match; color-address/texture-load scheduling differs.
- * See docs/nonmatching/facility/fclEncyc.md. */
 void drawRegistSprites(fclEncyc_instance_tag *pinst)
 {
     fclEncycVertex_t pos[2];
@@ -3049,9 +3046,6 @@ void drawRegistSprites(fclEncyc_instance_tag *pinst)
                          pinst->texHandle[1], 0, tag);
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", drawRegistSprites);
-#endif
 
 /* NON_MATCHING: 83 of 99 words match at native 396-byte size. */
 #ifdef NON_MATCHING
