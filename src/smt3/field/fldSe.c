@@ -337,13 +337,14 @@ void fldBgmPlay(void)
             track = base + fldGlobalBase.sequenceCode;
         }
     }
-    if (gFldStart != 1) {
-        if (fldSeLastBgm != track) {
-            p2sdStopBGM(fldSeLastBgm);
-        }
-        fldSeLastBgm = track;
-        p2sdPlayBGM(track);
+    if (gFldStart == 1) {
+        return;
     }
+    if (fldSeLastBgm != track) {
+        p2sdStopBGM(fldSeLastBgm);
+    }
+    fldSeLastBgm = track;
+    p2sdPlayBGM(track);
 }
 #else
 INCLUDE_ASM(const s32, "field/fldSe", fldBgmPlay);
