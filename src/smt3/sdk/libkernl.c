@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sif_rpc.h"
+#include "ps2asm.h"
 
 /* libkernl's first object, klib.o, has .text aligned to 64, so the retail link
  * pads 16 bytes after libc's last function to reach it. */
@@ -1158,7 +1159,7 @@ void _sceFsSemInit(void)
     }
 }
 
-s32 _sceFsWaitS(void)
+s32 _sceFsWaitS(s32 command)
 {
     _sceFsSemInit();
     WaitSema(D_0052C344);
@@ -1173,9 +1174,43 @@ void _sceFsSigSema(void)
     SignalSema(D_0052C344);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", scePowerOffHandler);
+typedef void (*fsPowerOffCallback_t)(void *argument);
+typedef struct fsPowerOffState_t {
+    fsPowerOffCallback_t callback;
+    void *argument;
+} fsPowerOffState_t;
+extern fsPowerOffState_t D_0059E800;
+extern s32 D_0052C340;
+extern s32 sceFsInit(void);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceFs_Poff_Intr);
+fsPowerOffCallback_t scePowerOffHandler(fsPowerOffCallback_t callback, void *argument)
+{
+    fsPowerOffState_t *state = &D_0059E800;
+    fsPowerOffCallback_t previous;
+    s32 interrupts;
+
+    _sceFsWaitS(0x1B);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    interrupts = DIntr();
+    previous = D_0059E800.callback;
+    state->argument = argument;
+    D_0059E800.callback = callback;
+    if (interrupts != 0) {
+        EIntr();
+    }
+    _sceFsSigSema();
+    return previous;
+}
+
+void _sceFs_Poff_Intr(void *packet, fsPowerOffState_t *state)
+{
+    if (state->callback != NULL) {
+        state->callback(state->argument);
+    }
+    EE_SYNC_EI();
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceFsInit);
 
