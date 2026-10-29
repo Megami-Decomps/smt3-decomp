@@ -356,6 +356,27 @@ unit in this region:
    evidence about source order, and inverting a test is a one-line experiment.
 5. **One local pointer holds an address passed to two calls**, where naming the
    global twice recomputes it; the store through it still goes to the global.
+6. **A register access in a delay slot is not reachable from either access
+   form, and this is a negative result.** Retail puts a hardware register
+   access in a delay slot in three places in libgraph: `sceGsResetPath` writes
+   `GIF_CTRL` in the `jr` slot, `sceGsSyncPath` reads each of its ten
+   diagnostic registers in that call's `scePrintf` slot, and
+   `sceGsExecStoreImage` writes `GS_BUSDIR` in the slot of the `GsPutIMR` call
+   of its success tail. Each uses the three-instruction form, `lui` plus `ori`
+   into a register and a zero displacement, which is what this compiler emits
+   only for a volatile access, and it never moves a volatile access into a
+   delay slot; writing the same access through a plain pointer makes it
+   eligible but collapses the address into a two-instruction assembler-macro
+   form, which is ineligible in turn, so the slot takes a `nop` either way.
+   Taking the address from a pointer local that is initialized in its
+   declaration gives both the register form and the filled slot, but the
+   materialization can then only be scheduled before the function's first
+   volatile asm, which is a barrier, so it lands early. The assembler does not
+   supply what the compiler declines: ee-as appends a `nop` rather than
+   swapping the preceding instruction into the slot, checked by assembling a
+   load followed by a `jal` under `.set reorder` with the 2.9 chain's own `as`.
+   Measured with `tools/sdk_probe.py` on the libgraph unit; what the original
+   source wrote for these accesses is still open.
 
 Next, in the order the bytes are worth having:
 
