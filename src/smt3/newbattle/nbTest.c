@@ -262,7 +262,7 @@ extern s32 D_00551500;
 
 extern u32 f;
 
-extern u8 D_005269D0[];
+extern datUnitWork_t D_005269D0;
 
 extern u8 D_00526AC0[];
 
@@ -278,7 +278,7 @@ extern u8 D_005267D0[];
 
 extern u8 D_005267E0[];
 
-extern u8 test2_pdummy[];
+extern datUnitWork_t test2_pdummy;
 
 extern u16 test2_dvllist[];
 
@@ -296,7 +296,7 @@ extern s32 rstCalcExpFromLevel(s32 Index, s32 Level);
 
 extern void effBTLSetFieldColor(u32 color);
 
-extern u8 test_skilllist[];
+extern datUnitWork_t test_skilllist;
 
 extern u16 test_pskill[];
 
@@ -341,7 +341,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTime
                                          void *work);
 
 extern void nbSetBattleDummy(s32 count, void *devilList, void *skillList, void *passiveSkills,
-                             void *skillEntries);
+                             datUnitWork_t *skillEntries);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -435,11 +435,78 @@ void SetBossDummy(void)
 }
 
 
+typedef union {
+    s32 value;
+    struct { u16 low; u16 high; };
+} nbTestSkillId_t;
+
+extern void datSetDevilWork(s32 id, datUnitWork_t *work);
+extern void *memset(void *dest, s32 value, u32 size);
+
+#ifdef NON_MATCHING
+void nbSetBattleDummy(s32 count, void *devilList, void *skillList, void *passiveSkills,
+                      datUnitWork_t *dummy)
+{
+    volatile s32 *devil = devilList;
+    volatile nbTestSkillId_t *skills = skillList;
+    volatile nbTestSkillId_t *passive = passiveSkills;
+    dds3GlobalWork_t *volatile *global = &DDS3_GBWK;
+    volatile dds3GlobalWork_t *save;
+    s32 i, j, next, nextDevil;
+    u16 skill, start;
+
+    memset(DDS3_GBWK->unitwork, 0, sizeof(DDS3_GBWK->unitwork));
+    DDS3_GBWK->unitwork[0] = *dummy;
+    i = 0;
+    nextDevil = devil[0];
+    while (nextDevil >= 0) {
+        datSetDevilWork(devil[i], &DDS3_GBWK->unitwork[i + 4]);
+        save = *global;
+        next = skills[i * 30].value;
+        start = save->unitwork[i + 4].skillcnt;
+        j = 0;
+        while (next >= 0) {
+            skill = skills[i * 30 + j].low;
+            next = skills[i * 30 + j + 1].value;
+            save->unitwork[i + 4].skill[start + j] = skill;
+            j++;
+            save = *global;
+        }
+        nextDevil = devil[i + 1];
+        save->unitwork[i + 4].skillcnt = start + j;
+        i++;
+    }
+    save = *global;
+    save->stockCount = i + 1;
+    save->stockOrder[0] = 0;
+    for (j = 0; j < i; j++) {
+        (*global)->stockOrder[j + 1] = j + 4;
+    }
+    j = 0;
+    next = passive[0].value;
+    if (next >= 0) {
+        save = *global;
+        do {
+            skill = passive[j].low;
+            next = passive[j + 1].value;
+            save->unitwork[0].skill[j] = skill;
+            j++;
+        } while (next >= 0);
+    }
+    save = *global;
+    save->maka = 0;
+    save->unitwork[0].skillcnt = j;
+    for (i = 0; i < 160; i++) {
+        (*global)->stockRemainder[i] = 0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbTest", nbSetBattleDummy);
+#endif
 
 void nbInitPlayer(void)
 {
-    nbSetBattleDummy(D_00551500, D_00526530, D_00526540, test_pskill, test_skilllist);
+    nbSetBattleDummy(D_00551500, D_00526530, D_00526540, test_pskill, &test_skilllist);
     evtBitOn(0xC04);
 }
 
@@ -469,7 +536,7 @@ void *TestProcess5(void)
     evtBitOff(0xC0D);
     evtBitOff(0xC10);
     evtBitOff(0xC12);
-    nbSetBattleDummy(D_00551500, D_005267D0, D_005267E0, test2_dvllist, test2_pdummy);
+    nbSetBattleDummy(D_00551500, D_005267D0, D_005267E0, test2_dvllist, &test2_pdummy);
 
     ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))[7].hp = 0;
     DDS3_GBWK->maka = 0x15F90;
@@ -511,7 +578,7 @@ void *TestProcess4(void)
     evtBitOff(0xC0D);
     evtBitOff(0xC10);
     evtBitOff(0xC12);
-    nbSetBattleDummy(D_00551500, D_005267D0, D_005267E0, test2_dvllist, test2_pdummy);
+    nbSetBattleDummy(D_00551500, D_005267D0, D_005267E0, test2_dvllist, &test2_pdummy);
     ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->exp = rstCalcExpFromLevel(0, 0x32);
     DDS3_GBWK->maka = 0x15F90;
     DDS3_GBWK->akuma[7].badstatus = 0x800;
@@ -543,7 +610,7 @@ void *TestProcess8(void)
     evtBitOff(0xC12);
     evtBitOn(0xC0F);
     evtBitOn(0xC11);
-    nbSetBattleDummy(D_00551500, D_00526AC0, D_00526AD0, D_00526B48, D_005269D0);
+    nbSetBattleDummy(D_00551500, D_00526AC0, D_00526AD0, D_00526B48, &D_005269D0);
     ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->exp = rstCalcExpFromLevel(0, 0x32);
     ai = (u8 *)D_003989E0;
     f = 0xC;
@@ -572,7 +639,7 @@ void *TestProcess3(void)
     evtBitOff(0xC0D);
     evtBitOff(0xC10);
     evtBitOff(0xC12);
-    nbSetBattleDummy(D_00551500, D_00526530, D_00526540, test_pskill, test_skilllist);
+    nbSetBattleDummy(D_00551500, D_00526530, D_00526540, test_pskill, &test_skilllist);
     if (test_phearts > 0) {
         printf(D_00545B78);
         datAddHearts(test_phearts);
@@ -630,7 +697,7 @@ void nbInitBattleTest(void)
     dds3GlobalWork_t *work;
 
     if (evtBitCheck(0xC08) == 0) {
-        nbSetBattleDummy(4, D_00526530, D_00526540, test_pskill, test_skilllist);
+        nbSetBattleDummy(4, D_00526530, D_00526540, test_pskill, &test_skilllist);
         evtBitOn(0xC08);
     }
 
