@@ -1559,7 +1559,58 @@ s32 cmbFindBirthEntry(u16 devilId)
     return 0;
 }
 
+extern s32 cmbRaceTable;
+extern void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count);
+extern s32 cmbEntryIsValid(u16 devilId);
+extern s32 cmbDevilIsSpecial(u16 devilId);
+
+#ifdef NON_MATCHING
+u16 cmbFindBirthResult(u16 devilId, u8 direction)
+{
+    s32 count = cmbRaceTable;
+    u8 race = datDevilTable[devilId].race;
+    cmbRaceSortEntry_t list[count];
+    s32 index = -1;
+    s32 step = 0;
+    s32 rejected;
+    s32 i;
+
+    cmbSetRaceResult(list, (u16)cmbRaceTable);
+    for (i = 0; i < count; i++) {
+        if (list[i].index == devilId) {
+            index = i;
+            break;
+        }
+    }
+    if (index < 0) {
+        return 0;
+    }
+    count = cmbRaceTable;
+    if (direction == 0) {
+        return 0;
+    }
+    if (direction == 1) {
+        step = -1;
+    } else if (direction == 2) {
+        step = 1;
+    }
+    for (;;) {
+        index += step;
+        if (index <= 0 || index >= count || list[index].info->race != race) {
+            return 0;
+        }
+        rejected = cmbEntryIsValid(list[index].index) != 0;
+        rejected |= cmbFindBirthEntry(list[index].index) != 0;
+        rejected |= cmbDevilIsUnlocked(list[index].index) != 0;
+        rejected |= cmbDevilIsSpecial(list[index].index) != 0;
+        if (rejected == 0) {
+            return list[index].index;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindBirthResult);
+#endif
 
 s8 cmbFindRaceEntry(u16 devilId, u8 race)
 {
