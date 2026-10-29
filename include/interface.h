@@ -7,6 +7,8 @@
 #include "libsdf.h"
 #include "font.h"
 
+typedef struct lstWindowWork_t lstWindowWork_t;
+
 typedef struct
 {
     u8 unk_0000[9];

@@ -138,7 +138,7 @@ void lstDrawListWindow(lstWork_t *work, s8 noCursor, s32 ot)
 INCLUDE_ASM(const s32, "interface/lstListWindow", lstDrawListWindow);
 #endif
 
-typedef struct
+typedef struct lstWindowWork_t
 {
     /* 0x0000 */ s32 x;
     /* 0x0004 */ s32 y;
