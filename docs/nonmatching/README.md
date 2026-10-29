@@ -55,6 +55,7 @@ page and line to open. Conventions are in
 | 1 |  | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 1 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
+| 1 |  | [sdk/libc.md](sdk/libc.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
 | 1 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
 | 1 | sdf/sdfIpu | [sdf/sdfIpu.md](sdf/sdfIpu.md) |

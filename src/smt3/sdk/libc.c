@@ -1101,16 +1101,24 @@ void __sinit(_reent *r) {
     r->__sglue.iobs = &r->__sf[0];
 }
 
-INCLUDE_ASM(const s32, "sdk/libc", _free_r);
-
 typedef struct mallocChunkPrefix_t {
     u32 previousSize;
     u32 size;
+    struct mallocChunkPrefix_t *forward;
+    struct mallocChunkPrefix_t *backward;
 } mallocChunkPrefix_t;
 
+typedef struct mallocBinLinks_t {
+    mallocChunkPrefix_t *forward;
+    mallocChunkPrefix_t *backward;
+} mallocBinLinks_t;
+
 typedef struct mallocArenaPrefix_t {
-    u8 opaque00[8];
+    u32 opaque00;
+    u32 bitmap;
     mallocChunkPrefix_t *top;
+    u32 opaque0C;
+    mallocBinLinks_t bins[127];
 } mallocArenaPrefix_t;
 
 typedef struct mallocInfo_t {
@@ -1121,6 +1129,129 @@ typedef struct mallocInfo_t {
 extern mallocArenaPrefix_t __malloc_av_;
 extern mallocInfo_t __malloc_current_mallinfo;
 extern void *__malloc_sbrk_base __attribute__((section(".data")));
+
+extern u64 __malloc_trim_threshold __attribute__((section(".data")));
+extern u64 __malloc_top_pad __attribute__((section(".data")));
+s32 _malloc_trim_r(_reent *r, u32 pad);
+
+/* NON_MATCHING: native 756-byte size; chunk-size/successor allocation
+ * and coalescing-path scheduling differ in 103 instruction words. */
+#ifdef NON_MATCHING
+void _free_r(_reent *r, void *memory)
+{
+    mallocChunkPrefix_t *chunk;
+    mallocChunkPrefix_t *next;
+    mallocChunkPrefix_t *forward;
+    mallocChunkPrefix_t *backward;
+    mallocChunkPrefix_t *bin;
+    u32 size;
+    u32 nextSize;
+    u32 previousSize;
+    u32 original;
+    u32 scaled;
+    s32 index;
+    s32 isRemainder;
+
+    if (memory == NULL) return;
+    __malloc_lock(r);
+    chunk = (mallocChunkPrefix_t *)((u8 *)memory - 8);
+    original = chunk->size;
+    size = original & ~1U;
+    next = (mallocChunkPrefix_t *)((u8 *)chunk + size);
+    nextSize = next->size & ~3U;
+    if (next == __malloc_av_.top) {
+        size += nextSize;
+        if ((original & 1) == 0) {
+            previousSize = chunk->previousSize;
+            chunk = (mallocChunkPrefix_t *)((u8 *)chunk - previousSize);
+            size += previousSize;
+            backward = chunk->backward;
+            forward = chunk->forward;
+            forward->backward = backward;
+            backward->forward = forward;
+        }
+        __malloc_av_.top = chunk;
+        chunk->size = size | 1;
+        if ((u64)size >= __malloc_trim_threshold) {
+            _malloc_trim_r(r, (u32)__malloc_top_pad);
+        }
+        __malloc_unlock(r);
+        return;
+    }
+    next->size = nextSize;
+    isRemainder = 0;
+    if ((original & 1) == 0) {
+        previousSize = chunk->previousSize;
+        chunk = (mallocChunkPrefix_t *)((u8 *)chunk - previousSize);
+        size += previousSize;
+        forward = chunk->forward;
+        if (forward == (mallocChunkPrefix_t *)&__malloc_av_.top) {
+            isRemainder = 1;
+        } else {
+            backward = chunk->backward;
+            forward->backward = backward;
+            backward->forward = forward;
+        }
+    }
+    if ((((mallocChunkPrefix_t *)((u8 *)next + nextSize))->size & 1) == 0) {
+        size += nextSize;
+        if (!isRemainder && next->forward ==
+            (mallocChunkPrefix_t *)((u32)&__malloc_av_.bins[0] - 8)) {
+            forward = next->forward;
+            forward->backward = chunk;
+            isRemainder = 1;
+            forward->forward = chunk;
+            chunk->forward = forward;
+            chunk->backward = forward;
+        } else {
+            forward = next->forward;
+            backward = next->backward;
+            forward->backward = backward;
+            backward->forward = forward;
+        }
+    }
+    chunk->size = size | 1;
+    ((mallocChunkPrefix_t *)((u8 *)chunk + size))->previousSize = size;
+    if (!isRemainder) {
+        if (size < 0x200) {
+            u32 smallIndex = size >> 3;
+            backward = (mallocChunkPrefix_t *)((u8 *)&__malloc_av_ + smallIndex * 8);
+            forward = backward->forward;
+            chunk->backward = backward;
+            chunk->forward = forward;
+            __malloc_av_.bitmap |= (u32)(1L << (smallIndex >> 2));
+        } else {
+            scaled = size >> 9;
+            if (scaled == 0) index = size >> 3;
+            else if (scaled < 5) index = (size >> 6) + 0x38;
+            else if (scaled < 0x15) index = scaled + 0x5B;
+            else if (scaled < 0x55) index = (size >> 12) + 0x6E;
+            else if (scaled < 0x155) index = (size >> 15) + 0x77;
+            else if (scaled < 0x555) index = (size >> 18) + 0x7C;
+            else index = 0x7E;
+            bin = (mallocChunkPrefix_t *)((u32)&__malloc_av_.top + index * 8 - 8);
+            forward = bin->forward;
+            if (forward == bin) {
+                __malloc_av_.bitmap |= (u32)(1L << (index / 4));
+                backward = bin;
+            } else {
+                while (forward != bin && size < (forward->size & ~3U)) {
+                    forward = forward->forward;
+                }
+                backward = forward->backward;
+            }
+            chunk->backward = backward;
+            chunk->forward = forward;
+        }
+        backward->forward = chunk;
+        forward->backward = chunk;
+    }
+    __malloc_unlock(r);
+}
+#else
+INCLUDE_ASM(const s32, "sdk/libc", _free_r);
+#endif
+
 
 s32 _malloc_trim_r(_reent *r, u32 pad)
 {
