@@ -8558,7 +8558,129 @@ s32 campCheckStockRoom(s8 index, s8 listIndex, s8 *pRoom, u8 *pFlag, cmpStockWor
 INCLUDE_ASM(const s32, "code_0022C578", campCheckStockRoom);
 #endif
 
+#ifdef NON_MATCHING
+void campDrawStockSlots(s8 *indices, s32 active, s8 *flags,
+                        cmpLocalStock_t *stock)
+{
+    s8 activeMode = (s8)active;
+    s8 rows[2];
+    s8 cols[2];
+    s32 colors[4];
+    s32 color;
+    s8 i = 0;
+
+    color = cmpCursorBlinkColor(0x100);
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+
+    do {
+        s8 index = indices[i + 1];
+
+        if (index >= 0) {
+            s8 unitIndex = DDS3_GBWK->stock[index];
+            datUnitWork_t *unit = &DDS3_GBWK->unitwork[unitIndex];
+
+            if (unit->badstatus & 0x800) {
+                indices[i + 1] = -1;
+            }
+            if ((unit->flag & 1) == 0) {
+                indices[i + 1] = -1;
+            }
+        }
+
+        index = indices[i + 1];
+        if (index < 0) {
+            rows[i] = 0;
+            cols[i] = -1;
+        } else if (activeMode == 1) {
+            s32 room = cmpStockHasRoom((cmpStockWork_t *)stock, flags[i + 1]);
+
+            rows[i] = room;
+            cols[i] = cmpFindFreeStockSlot(indices[i + 1], (s8)room);
+        } else {
+            rows[i] = 0;
+            cols[i] = -1;
+        }
+        i = (s8)(i + 1);
+    } while (i < 2);
+
+    campDrawStockRow1(0, 0, 0, rows, cols,
+                      (activeMode == 0 || activeMode == 4), (cmpStockWork_t *)stock, 0x47);
+    campDrawStockRow2(0, 0, 0, rows, cols, activeMode == 0, stock);
+
+    fclDrawSpriteRes(0, 0, 0, colors, 0, 1,
+                     D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, 0, colors, 0, 2,
+                     D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, 0, colors, 0, 3,
+                     D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, 0, colors, 0, 4,
+                     D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0xD40, 0xF0, 0, colors, 0, 0xE,
+                     D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0xD40, 0xF0, 0, colors, 0, 0xF,
+                     D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0xD40, 0x408, 0, colors, 0, 0x10,
+                     D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(0xD40, 0x408, 0, colors, 0, 0x11,
+                     D_00345D88, fclSpriteTable, 0x47);
+
+    if (activeMode == 1) {
+        s8 room;
+        u8 flag;
+        s32 result = campCheckStockRoom(flags[0], indices[0], &room, &flag,
+                                         (cmpStockWork_t *)stock, 0);
+
+        campCheckStockFree(0, 0, indices[0], room, 0, 0x100 - result, (s8)flag);
+    } else {
+        s8 slot = 0;
+
+        do {
+            s8 room;
+            u8 flag;
+            s32 result = campCheckStockRoom(flags[0], slot, &room, &flag,
+                                             (cmpStockWork_t *)stock, 1);
+
+            campCheckStockFree(0, 0, slot, 1, 1, 0x100 - result, (s8)flag);
+            slot = (s8)(slot + 1);
+        } while (slot < 4);
+    }
+
+    if (activeMode == 0) {
+        s8 partyCount = campWork->drawStock.PartyCnt;
+        s8 stockCount = campWork->drawStock.StockCnt;
+        s8 index = partyCount;
+
+        if ((s32)index < (s32)partyCount + stockCount) {
+            do {
+                s8 currentPartyCount = (u8)campWork->drawStock.PartyCnt;
+                s8 stockIndex = campWork->drawStock.StockIdx[index];
+                datUnitWork_t *unit = &DDS3_GBWK->unitwork[stockIndex];
+                s8 localIndex = (s8)(index - currentPartyCount);
+                u32 unitFlags = unit->flag;
+
+                if ((unitFlags & 0x10) == 0 && (unitFlags & 2) == 0) {
+                    s8 room;
+                    u8 flag;
+                    s32 result = campCheckStockRoom(flags[0], localIndex,
+                                                     &room, &flag,
+                                                     (cmpStockWork_t *)stock, 1);
+
+                    campCheckStockFree(0, 0, localIndex, 0, 1,
+                                       0x100 - result, (s8)flag);
+                }
+                index = (s8)(index + 1);
+                partyCount = campWork->drawStock.PartyCnt;
+                stockCount = campWork->drawStock.StockCnt;
+            } while ((s32)index < (s32)partyCount + stockCount);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockSlots);
+#endif
 
 #ifndef NON_MATCHING
 INCLUDE_ASM(const s32, "code_0022C578", cmpRandomizePanelEff);
