@@ -1483,7 +1483,83 @@ s32 EnterEventPos(void)
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", EnterData);
 
+extern s16 winoff_x;
+extern s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y);
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
+extern s32 (*D_0032C750[])(s32 action, s32 previousMenu);
+
+#ifdef NON_MATCHING
+s32 evtEventViewerProcess4(void)
+{
+    s32 index;
+    s32 previousMenu = 0;
+    s32 done = 0;
+    s32 action;
+    s32 result;
+    evtViewerMenuEntry_t *entry;
+    evtViewerInfo_t *viewer;
+
+    DrawEffect();
+    for (index = 1; index <= viewerinfo->sp; index++) {
+        entry = &viewerinfo->menuStack[index];
+        action = evtViewerDispatch(entry->mode, entry->unk02 + winoff_x, entry->unk04);
+        entry = &viewerinfo->menuStack[index];
+        if (viewerinfo->nowmenu == entry->mode && viewerinfo->nowmenu == 4) {
+            evtViewerDispatch(5, winoff_x + 0x90, 0x48);
+        }
+        if (action == 0) {
+            previousMenu = viewerinfo->menuStack[index].mode;
+            continue;
+        }
+        if (action == -1) {
+            PopMenu();
+        } else {
+            result = D_0032C750[viewerinfo->menuStack[index].mode](action, previousMenu);
+            if (result == 1) {
+                return (s32)evtEventViewerProcess5_0;
+            }
+            if (result == -1) {
+                done = 1;
+            }
+        }
+        break;
+    }
+
+    if (winoff_x < 11 && dds3PadButtonState[0x29] != 0) {
+        winoff_x += 10;
+    } else if (winoff_x >= -99 && dds3PadButtonState[0x2B] != 0) {
+        winoff_x -= 10;
+    }
+    viewer = viewerinfo;
+    if (dds3PadButtonState[0x22] < 0) {
+        if (viewer->menuProcess != NULL) {
+            dds3KillProcess(viewer->menuProcess, 1);
+            viewerinfo->menuProcess = NULL;
+            viewer = viewerinfo;
+        }
+        if (viewer->menusw == 0) {
+            viewer->nowmenu = 0;
+            viewer->menusw = 1;
+            viewer->sp = 0;
+            PushMenu(4, 0x24, 0x18);
+            viewer = viewerinfo;
+        } else if (viewer->menusw == 1) {
+            viewer->menusw = 0;
+            done = 1;
+            viewer = viewerinfo;
+        }
+    }
+    if (viewer->nowmenu == 0 || done) {
+        viewer->menusw = 0;
+        viewer->nowmenu = 0;
+        viewer->sp = 0;
+        return (s32)evtEventViewerProcess3;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerProcess4);
+#endif
 
 /* NON_MATCHING: 3 of 91 words differ (first at +0x110). */
 #ifdef NON_MATCHING
