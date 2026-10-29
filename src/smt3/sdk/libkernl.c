@@ -368,7 +368,31 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyInit);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", kputchar);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", deci2Putchar);
+extern s32 D_0052C2B0 __attribute__((section(".data")));
+extern char D_0059B940[128];
+extern s32 kputs(const char *text);
+
+void deci2Putchar(s32 character)
+{
+    s32 index;
+
+    index = D_0052C2B0;
+    if (index >= 126) {
+        D_0052C2B0 = 0;
+        D_0059B940[127] = 0;
+        kputs(D_0059B940);
+        index = D_0052C2B0;
+    }
+    if (character == 10) {
+        D_0052C2B0 = 0;
+        D_0059B940[index] = character;
+        D_0059B940[index + 1] = 0;
+        kputs(D_0059B940);
+    } else {
+        D_0052C2B0 = index + 1;
+        D_0059B940[index] = character;
+    }
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", serialPutchar);
 
@@ -378,9 +402,33 @@ INCLUDE_ASM(const s32, "sdk/libkernl", printfloat);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _printf);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", kprintf);
+/* In ee-gcc 2.9, next_arg names the first incoming stack argument. These
+ * one-fixed-argument wrappers save the seven remaining argument GPRs in
+ * contiguous eight-byte slots immediately before it. The formatter walks
+ * that register-save area and then continues into the stack arguments. */
+typedef char *kernelVaList_t;
+extern void _printf(const char *format, kernelVaList_t arguments);
+extern void (*D_0052C2B4)(s32 character) __attribute__((section(".data")));
 
-INCLUDE_ASM(const s32, "sdk/libkernl", scePrintf);
+void kprintf(const char *format, ...)
+{
+    kernelVaList_t arguments;
+
+    arguments = (kernelVaList_t)__builtin_next_arg(format) - 7 * sizeof(long);
+    _printf(format, arguments);
+}
+
+void scePrintf(const char *format, ...)
+{
+    kernelVaList_t arguments;
+    void (*previous)(s32);
+
+    previous = D_0052C2B4;
+    D_0052C2B4 = deci2Putchar;
+    arguments = (kernelVaList_t)__builtin_next_arg(format) - 7 * sizeof(long);
+    _printf(format, arguments);
+    D_0052C2B4 = previous;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__12);
 
