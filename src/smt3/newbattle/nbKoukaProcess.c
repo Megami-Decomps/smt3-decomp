@@ -168,7 +168,7 @@ extern s32 evtSetUnitColorRGB(evtUnit_t *h, s32 frame, u32 rgb);
 extern void evtSetWaitHokanFrame(evtUnit_t *h, s32 before, s32 smooth);
 extern s32 p2sdLoadCheckMidi(s32 MidiNo);
 extern void p2sdPlaySE(s32 id, s32 vol, s32 pan);
-extern void p2sdStopSe(s32 sound);
+extern void p2sdStopSe(u32 sound);
 extern void datDebugPrintf(const char *fmt, ...);
 extern s32 p2sdGetPcmState(void);
 extern s32 p2sdLoadPcmFile(char *name, s32 channel);

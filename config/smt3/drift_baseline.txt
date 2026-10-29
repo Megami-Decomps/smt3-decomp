@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1094 members, 504 adopted constants.
+# 0 types, 1111 members, 504 adopted constants.
 
 
 member _FRQ.unk00
@@ -159,6 +159,7 @@ member cmpDHWindow_t.unk_0C
 member cmpDHWindow_t.unk_10
 member cmpDhWork_t.unk_0000
 member cmpDrawBank_t.unk_0000
+member cmpHeartsIconTableEntry_t.unk_02
 member cmpHeartsIcon_t.unk_02
 member cmpInfoWindow_t.unk_01
 member cmpInfoWindow_t.unk_18
@@ -201,6 +202,7 @@ member cmpStockInfo_t.unk_0000
 member cmpStockInfo_t.unk_0011
 member cmpStockInfo_t.unk_0E
 member cmpStockInfo_t.unk_10
+member cmpStockInfo_t.unk_1028
 member cmpStockSeqInfo_t.unk_00
 member cmpStockSeqInfo_t.unk_18
 member cmpStockSeqInfo_t.unk_19
@@ -747,12 +749,16 @@ member ragUpdateWork_t.unk_465C
 member rcvCalcWork_t.unk0015
 member rcvCalcWork_t.unk0058
 member rcvCalcWork_t.unk109C
+member rcvCalcWork_t.unk10BD
+member rcvCalcWork_t.unk10D3
+member rcvCalcWork_t.unk12C4
 member rcvCalcWork_t.unk44D4
 member rcvCalcWork_t.unk44F8
 member rcvDrawWork_t.unk_0000
 member rcvDrawWork_t.unk_0002
 member rcvDrawWork_t.unk_1060
 member rcvDrawWork_t.unk_109C
+member rcvDrawWork_t.unk_10D3
 member rcvDrawWork_t.unk_12C4
 member rcvRootWork_t.unk_00
 member rcvRootWork_t.unk_25
@@ -775,6 +781,15 @@ member rcvWork_t.unk_44D0
 member rpcClient.unk_C
 member rpcQueue.unk_10
 member rpcQueue.unk_C
+member rstData_t.unk_0003
+member rstData_t.unk_1299
+member rstData_t.unk_22E4
+member rstData_t.unk_22E5
+member rstData_t.unk_22E6
+member rstData_t.unk_22E7
+member rstData_t.unk_22E8
+member rstData_t.unk_22EC
+member rstData_t.unk_2310
 member rstDrawWork_t.unk_0000
 member rstDrawWork_t.unk_0002
 member rstDrawWork_t.unk_001C
@@ -1098,6 +1113,8 @@ member trmUpdateWork_t.unk_0004
 member trmUpdateWork_t.unk_0005
 member trmUpdateWork_t.unk_003D
 member trmUpdateWork_t.unk_003E
+member trmUpdateWork_t.unk_0054
+member trmUpdateWork_t.unk_1078
 member trmUpdateWork_t.unk_11D6
 member trmUpdateWork_t.unk_11D8
 member trmUpdateWork_t.unk_11D9

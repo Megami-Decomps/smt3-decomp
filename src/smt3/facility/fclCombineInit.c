@@ -5157,7 +5157,7 @@ void cmbSetActionWorkValues(void)
     fclSetWorkValue(6, ((datUnitWork_t *)CMB_GBWK->birthPanel)->id);
 }
 
-extern s32 p2sdStopSe(s32 sound);
+extern void p2sdStopSe(u32 sound);
 
 void cmbRunActionSe(s32 enabled, s32 mode)
 {

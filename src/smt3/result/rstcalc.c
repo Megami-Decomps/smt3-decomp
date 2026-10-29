@@ -428,7 +428,7 @@ s32 rstCalcSeqPlayerLevelUp(void)
 extern s32 rstSetCurrentDevil(void);
 extern void rstAutoAsignDevilParam(void);
 extern void rstSetLevelUpFlag(void);
-extern s32 p2sdStopSe(s32 id);
+extern void p2sdStopSe(u32 id);
 extern void p2sdPlayBGM(s32 id);
 extern void dds3FadeOut(s32, s32, s32, s32);
 extern void fclSetMessageVar_20743088(s8 index, s32 str);
