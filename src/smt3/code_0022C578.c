@@ -5558,7 +5558,7 @@ void cmpDrawSkillRowText(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
     s32 col;
     s32 i;
 
-    if ((unit->flag & 4) != 0 && cmbGlobalWork->equipHearts == 0) {
+    if ((unit->flag & 4) != 0 && DDS3_GBWK->equipHearts == 0) {
         fclDrawSpriteRes(x * 16, y * 8 + 4, 0, colors, 1, 0xC,
                          D_00345D88, fclSpriteTable, 0x47);
         fclDrawSpriteRes(x * 16, y * 8 + 4, 0, colors, 1, 0xD,
