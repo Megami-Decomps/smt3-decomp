@@ -6,6 +6,7 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
+#include "font.h"
 
 typedef struct fclPanel
 {
@@ -189,7 +190,7 @@ s32 ragCalc(dds3ProcessID_t *id)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawFrameEdge);
+
 
 typedef struct
 {
@@ -204,7 +205,78 @@ extern ragDrawWork_t *ragDrawWork;
 extern fclSpriteTbl_t D_003306B8[];
 
 extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
-extern void ragDrawFrameEdge(fclPanelPos_t *pos, u8 kind, u8 item, s32 ot);
+
+extern s32 sprintf(char *buf, const char *fmt, ...);
+extern u16 *ragGetConfirmEntry(s8 kind, u8 index);
+extern void cmpSetSkillListRows(s32 rows);
+extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
+                                                const char *text, frFontHandle_t *previous);
+extern frFontHandle_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                           const char *text, frFontHandle_t *previous);
+extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
+extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *color,
+                                s32 page, s32 spriteId, s32 *texList,
+                                fclSpriteTbl_t *table, s32 ot);
+extern s32 fclDrawListSprite(s32 x, s32 y, s32 color, s32 width, s32 height,
+                             s32 arg6, s32 blend, s32 ot);
+/* Inventory window shared with the fusion confirmation consumers. */
+typedef struct
+{
+    u8 reserved0000[0x1928];
+    u8 itemQuantity[0xA0];
+} ragInventoryView_t;
+extern char *pStr[];
+extern char D_0054FBA0[];
+extern char D_0054FBA8[] __attribute__((section(".sdata")));
+
+void ragDrawFrameEdge(fclPanelPos_t *pos, u8 kind, u8 item, s32 ot)
+{
+    u16 *entries = ragGetConfirmEntry((s8)kind, item);
+    s32 x = pos->unk_00;
+    s32 rowY = pos->unk_04;
+    s32 i;
+
+    cmpSetSkillListRows(0x13);
+    for (i = 0; i < 3; i++) {
+        u16 id = entries[i * 2];
+
+        if (id != 0) {
+            char text[0x20];
+            frFontHandle_t *font;
+            s32 numberY = rowY + 0x18;
+
+            sprintf(text, D_0054FBA0, pStr[id]);
+            font = frwGetSmallFontFRQ2(x, rowY + 0x38, pos->unk_08,
+                                       0x75A8EB80, text, NULL);
+            func_001C7E38(font, 1, ot);
+            frDestroyFontRequestAfter(font);
+            fclDrawSpriteRes(x + 0x650, rowY + 0x60,
+                             pos->unk_08 << 4, NULL, 0, 1,
+                             ragDrawWork->texHandle, D_003306B8, ot);
+
+            sprintf(text, D_0054FBA8, ((s8 *)entries)[i * 4 + 2]);
+            font = frwGetNumFontFRQ(x + 0x740, numberY,
+                                    pos->unk_08, 0x75A8EB80, text, NULL);
+            func_001C7E38(font, 1, ot);
+            frDestroyFontRequestAfter(font);
+
+            sprintf(text, D_0054FBA8, ((ragInventoryView_t *)DDS3_GBWK)->itemQuantity[id]);
+            font = frwGetNumFontFRQ(x + 0xB10, numberY,
+                                    pos->unk_08, 0x6C81BB80, text, NULL);
+            func_001C7E38(font, 1, ot);
+            frDestroyFontRequestAfter(font);
+
+            fclDrawSpriteFilter(x + 0xCC0, rowY + 0x48,
+                                pos->unk_08 << 4, 1, NULL, 0, 2,
+                                ragDrawWork->texHandle, D_003306B8, ot);
+            fclDrawListSprite(x + 0xC0, rowY + 0xE0, pos->unk_08,
+                              0xD8, 2, 0x152480, 0, ot);
+            rowY += 0xC8;
+        }
+    }
+    cmpSetSkillListRows(-1);
+}
 
 void ragDrawListFrame(fclPanelPos_t *pos, s8 kind, u8 item, s32 ot)
 {
