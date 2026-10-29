@@ -952,7 +952,33 @@ u32 nbPanelMPColor(datUnitWork_t *pUnitWork)
     return pct < 0x32 ? 0xB4A06480 : 0xA09DC380;
 }
 
+#ifdef NON_MATCHING
+void nbPanelCursorDraw(s32 x, s32 y)
+{
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    s32 x0, x1, x2, y0, y1;
+    u32 c0, c1, c2;
+
+    x0 = ((u32)x + 0x15) * 16 + 0x7000;
+    x1 = ((u32)x + 0x15) * 16 + 0x7828;
+    x2 = ((u32)x + 0x15) * 16 + 0x8050;
+    y0 = (u32)y * 8 + 0x7900;
+    y1 = (u32)y * 8 + 0x79A0;
+    tag = dds3FontReqAllocDrawTag();
+    c2 = effMagaCylinderCalcColor(0x468CBE1B, nbPanelBaseABGR);
+    c1 = effMagaCylinderCalcColor(0x469B4400, nbPanelBaseABGR);
+    c0 = effMagaCylinderCalcColor(0x00BF0013, nbPanelBaseABGR);
+    sdfPrimLinkG4(tag, 0x14C, x0, y0, c0, x1, y0, c1,
+                  x0, y1, c0, x1, y1, c1, -1, NULL);
+    sdfPrimLinkG4(tag, 0x14C, x1, y0, c1, x2, y0, c2,
+                  x1, y1, c1, x2, y1, c2, -1, NULL);
+    ot = &sdfGrOtTable[71];
+    ot->regFunc(ot, tag);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelCursorDraw);
+#endif
 
 void nbPanelPolygonDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, u32 abgr0, u32 abgr1,
                         u32 abgr2, u32 abgr3)
