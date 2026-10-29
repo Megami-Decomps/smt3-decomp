@@ -221,7 +221,43 @@ void fclDrawPanelEdges(fclPanel_t *panel, s32 ot)
     }
 }
 
+typedef struct
+{
+    void *res;
+    void *entries;
+} fclSpriteTbl_t;
+extern s32 D_00345D88[];
+extern fclSpriteTbl_t fclSpriteTable[];
+extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *color,
+                                s32 id, s32 spriteId, s32 *textures,
+                                fclSpriteTbl_t *table, s32 ot);
+extern void fclDrawSpriteSizeFilter(s32 x, s32 y, s32 z, s32 width, s32 height,
+                                    u8 filter, s32 *color, s32 id, u16 spriteId,
+                                    s32 *textures, fclSpriteTbl_t *table, s32 ot);
+extern void fclDrawPanelBorder(fclPanel_t *panel, s32 z, s32 type, s32 ot);
+
+#ifdef NON_MATCHING
+void fclDrawPanelType3(fclPanel_t *panel, s32 ot)
+{
+    s32 z = panel->Z << 4;
+
+    if (panel->TexHandle != 0) {
+        fclDrawPanelType3BackGrad(panel, ot);
+        fclDrawPanelCorners(panel, ot);
+        fclDrawPanelEdges(panel, ot);
+    }
+    fclDrawSpriteFilter(panel->X + 0x170, panel->Y + 0x30, z, 0, NULL,
+                        10, 13, D_00345D88, fclSpriteTable, ot);
+    fclDrawSpriteSizeFilter(panel->X + 0x170, panel->Y + 0xF8, z, 0x13,
+                            (u16)panel->H - 0x3E, 0, NULL, 10, 15,
+                            D_00345D88, fclSpriteTable, ot);
+    fclDrawSpriteFilter(panel->X + 0x170, panel->Y + (((u16)panel->H - 0x1F) << 3),
+                        z, 0, NULL, 10, 14, D_00345D88, fclSpriteTable, ot);
+    fclDrawPanelBorder(panel, z, 0x17, ot);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType3);
+#endif
 
 void fclUpdatePanelType3(fclPanel_t *pPanel)
 {
