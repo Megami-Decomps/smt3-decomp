@@ -121,6 +121,11 @@ typedef struct datUnitWork_t
     /* 0xDC */ u16 fullnamecode[8];
 } datUnitWork_t;
 
+typedef struct
+{
+    datUnitWork_t unit;
+} cmbUnit_t;
+
 /* Shared persistent work, recovered through its consumers. These fields form
  * a partial view, not a claim about the complete save-work allocation. */
 typedef struct
@@ -145,11 +150,13 @@ typedef struct
     union {
         struct { fldAnahoriAkuma_t akuma[16]; u8 unk1910[4]; };
         struct { u32 unitPrefix; datUnitWork_t unitwork[16]; };
+        struct { s32 maxstock; cmbUnit_t party[16]; };
     };
     /* 0x1914..0x1CF4, split on the IDB's names for the span. */
     union {
         u8 unk1914[0x10];
         u8 stockOrder[16];
+        s8 stock[16];
     };
     union {
         struct {
@@ -157,10 +164,9 @@ typedef struct
             u8 stockcnt[80];
             u8 item[19];
         };
-        struct {
-            u32 stockCount;
-            u8 stockRemainder[160];
-        };
+        struct { s32 stockCount; u8 stockRemainder[160]; };
+        struct { u8 stockCountBytes[4]; u8 itemQuantity[160]; };
+        struct { u8 stockCountPadding[4]; u8 unk_01928[0x3D]; u8 unk_1965; };
     };
     s16 boss_press[40][2];            /* 0x19C8 */
     u8 syakkincnt[640];
@@ -170,17 +176,15 @@ typedef struct
     u16 bouga_cnt;                 /* 0x1CF2 */
     f32 encountkyori;              /* 0x1CF4 */
     u16 encountCount;              /* 0x1CF8 */
-    u8 heartsequip;
+    union { u8 heartsequip; u8 equipHearts; };
     union {
         struct {
             u8 hearts[0x80];       /* 0x1CFB */
             u8 heartscnt;          /* 0x1D7B */
             u8 nameData[0x4800];   /* 0x1D7C */
         };
-        struct {
-            u8 heartsPrefix[0x40];
-            u8 devilSlot[0x100];   /* 0x1D3B */
-        };
+        struct { u8 heartsPrefix[0x40]; u8 devilSlot[0x100]; }; /* 0x1D3B */
+        struct { u8 unk_01CFB[0x40]; u8 heartsskcnt[64]; };
     };
     u8 unk657C[0xDC];
     fldGbTypeBlock_t gb[48];       /* 0x6658 */
@@ -190,8 +194,10 @@ typedef struct
     s32 moonAnahoriCount;
     u8 takaraOpenEx[0x20];         /* 0x11A80 */
     u8 reserved11AA0[0x20];
-    u16 heartsSkills[32][12];    /* 0x11AC0 */
-    u8 reserved11DC0[0xD0];
+    union { u16 heartsSkills[32][12]; u16 hearts_sk[32][12]; }; /* 0x11AC0 */
+    u8 hearts_up_param[32][6];   /* 0x11DC0 */
+    s32 encycNum;                /* 0x11E80 */
+    u8 reserved11E84[0xC];
     fclencyceelem_t encycRecords[168]; /* 0x11E90 */
 } dds3GlobalWork_t;
 
@@ -274,10 +280,6 @@ typedef char nbUnitVisualMotions_size_must_be_0x310[
     sizeof(nbUnitVisualMotions_t) == 0x310 ? 1 : -1];
 
 
-typedef struct
-{
-    datUnitWork_t unit;
-} cmbUnit_t;
 
 /* Model-visual records have a 0x310-byte native stride. The upstream packet
  * helpers use the scalar prefix; the action helpers index 0x1C-byte

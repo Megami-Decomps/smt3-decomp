@@ -24,29 +24,9 @@ extern s8 dds3PadButtonState[];
 
 extern rstData_t *startPos;
 
-typedef struct
-{
-    /* 0x00000 */ u8 unk_00000[0xA54];
-    /* 0x00A54 */ cmbUnit_t party[16];
-    /* 0x01914 */ s8 stock[0x10];
-    /* 0x01924 */ s32 stockCount;
-    /* 0x01928 */ u8 unk_01928[0x3D];
-    /* 0x01965 */ u8 unk_1965;
-    /* 0x01966 */ u8 unk_01966[0x394];
-    /* 0x01CFA */ u8 heartsequip;
-    /* 0x01CFB */ u8 unk_01CFB[0x40];
-    /* 0x01D3B */ u8 heartsskcnt[64];
-    /* 0x01D7B */ u8 unk_01D7B[0xC0];
-    /* 0x01E3B */ u8 unk_01E3B[0xFC85];
-    /* 0x11AC0 */ u16 hearts_sk[32][12];
-    /* 0x11DC0 */ u8 hearts_up_param[32][6];
-    /* 0x11E80 */ s32 encycNum;
-} cmbGlobalWork_t;
 
-/* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
- * unit reads it through a different member set at the same offsets. Both are
- * partial views; the alias holds them apart until one covers the object. */
-extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
+
+
 
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
@@ -809,16 +789,16 @@ static const char D_0053DBD8[] = "New hearts skill ID : %02x\n";
 
 s8 rstGetHeartsSkill(s8 type)
 {
-    datUnitWork_t *player = &cmbGlobalWork->party[0].unit;
+    datUnitWork_t *player = &DDS3_GBWK->party[0].unit;
     u16 skill = rstChkHeartsSkill(player);
 
     if (skill != 0) {
         if (type == 0) {
             player->skill[player->skillcnt++] = skill;
         }
-        cmbGlobalWork->hearts_sk[cmbGlobalWork->heartsequip]
-                                  [datGetDevilSlotState(cmbGlobalWork->heartsequip)] = skill;
-        cmbGlobalWork->heartsskcnt[cmbGlobalWork->heartsequip]++;
+        DDS3_GBWK->hearts_sk[DDS3_GBWK->heartsequip]
+                                  [datGetDevilSlotState(DDS3_GBWK->heartsequip)] = skill;
+        DDS3_GBWK->heartsskcnt[DDS3_GBWK->heartsequip]++;
         if (type == 0) {
             startPos->HeartsSkFlag++;
         }
@@ -989,7 +969,7 @@ s32 rstStandbyHeartsSkillPowerUp(void)
         rstOverWriteSkill(
             &startPos->pCurrentStock->skill[startPos->powerSlot],
             startPos->powerSkill);
-        cmbGlobalWork->hearts_sk[cmbGlobalWork->heartsequip]
+        DDS3_GBWK->hearts_sk[DDS3_GBWK->heartsequip]
                                [startPos->powerSlot] = startPos->powerSkill;
         rstInitSkillAct(startPos->powerSlot);
         return 0;
@@ -997,7 +977,7 @@ s32 rstStandbyHeartsSkillPowerUp(void)
         rstOverWriteSkill(
             &startPos->pCurrentStock->skill[startPos->powerSlot],
             startPos->powerSkill);
-        cmbGlobalWork->hearts_sk[cmbGlobalWork->heartsequip]
+        DDS3_GBWK->hearts_sk[DDS3_GBWK->heartsequip]
                                [startPos->powerSlot] = startPos->powerSkill;
         rstInitSkillAct(startPos->powerSlot);
         break;
@@ -1013,9 +993,9 @@ void rstSetHeartsRecover(void)
     s32 i;
 
     startPos->RecoverFlag = 1;
-    for (i = 0; i < cmbGlobalWork->stockCount; i++) {
-        s8 stockIndex = cmbGlobalWork->stock[i];
-        datUnitWork_t *unit = &cmbGlobalWork->party[(s32)stockIndex].unit;
+    for (i = 0; i < DDS3_GBWK->stockCount; i++) {
+        s8 stockIndex = DDS3_GBWK->stock[i];
+        datUnitWork_t *unit = &DDS3_GBWK->party[(s32)stockIndex].unit;
 
         if ((unit->flag & 2) != 0) {
             unit->hp = unit->maxhp;
@@ -1027,7 +1007,7 @@ void rstSetHeartsRecover(void)
 
 void rstSetHeartsRecoverPlayer(void)
 {
-    cmbUnit_t *pu = &cmbGlobalWork->party[0];
+    cmbUnit_t *pu = &DDS3_GBWK->party[0];
 
     pu->unit.hp = pu->unit.maxhp;
     pu->unit.mp = pu->unit.maxmp;
@@ -1049,7 +1029,7 @@ s32 rstStandbyHeartsEvent(s8 event)
             if (rstStandbyHeartsAddPoint() == 0) {
                 event = 7;
             } else {
-                fclSetMessageVar_20743088(12, (s32)pstr[cmbGlobalWork->heartsequip]);
+                fclSetMessageVar_20743088(12, (s32)pstr[DDS3_GBWK->heartsequip]);
                 fclSetMessageVar_20743088(8, (s32)cmpGetParamName((s8)startPos->bonusParamIndex));
                 fclSetMessageVar_20743088(9, (s32)D_0054FD08);
                 fclStartMessage(0x1E);
@@ -1104,17 +1084,17 @@ s32 rstSetHeartsEvent(s8 event)
     switch (startPos->heartsEvent) {
     case 0:
         rstChkResult2Process((u8 *)startPos);
-        cmbGlobalWork->party[0].unit.levelupparam[startPos->bonusParamIndex]++;
-        cmbGlobalWork->party[0].unit.param[startPos->bonusParamIndex]++;
+        DDS3_GBWK->party[0].unit.levelupparam[startPos->bonusParamIndex]++;
+        DDS3_GBWK->party[0].unit.param[startPos->bonusParamIndex]++;
         break;
     case 2:
-        datOverwriteBadStat(&cmbGlobalWork->party[0].unit, 0x40);
+        datOverwriteBadStat(&DDS3_GBWK->party[0].unit, 0x40);
         break;
     case 3:
-        datOverwriteBadStat(&cmbGlobalWork->party[0].unit, 0x100);
+        datOverwriteBadStat(&DDS3_GBWK->party[0].unit, 0x100);
         break;
     case 4:
-        datOverwriteBadStat(&cmbGlobalWork->party[0].unit, 0x8000);
+        datOverwriteBadStat(&DDS3_GBWK->party[0].unit, 0x8000);
         break;
     case 5:
         rstSetHeartsRecover();
@@ -1191,10 +1171,10 @@ void rstUpdateSeqHeartsMaster(void)
         return;
     switch (startPos->Flag) {
     case 0:
-        fclSetMessageVar_20743088(12, (s32)pstr[cmbGlobalWork->heartsequip]);
+        fclSetMessageVar_20743088(12, (s32)pstr[DDS3_GBWK->heartsequip]);
         fclStartMessage(39);
         before = datGetPlayerLNDLevel(startPos->pCurrentStock);
-        rstSetDevilRegistered((s8)cmbGlobalWork->heartsequip);
+        rstSetDevilRegistered((s8)DDS3_GBWK->heartsequip);
         after = datGetPlayerLNDLevel(startPos->pCurrentStock);
         if (before != after) {
             printf(D_0053DC40, after);
@@ -1257,7 +1237,7 @@ s32 rstUpdate(dds3ProcessID_t *id)
             switch (startPos->unk_0001) {
             case 0:
                 if ((s8)startPos->AsignParamMax != 0)
-                    rstUpdateSeqAsignPlayerParam(&cmbGlobalWork->party[0].unit);
+                    rstUpdateSeqAsignPlayerParam(&DDS3_GBWK->party[0].unit);
                 else
                     rstUpdateSeqPlayerLevelUpOnly();
                 break;

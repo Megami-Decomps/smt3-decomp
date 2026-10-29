@@ -43,16 +43,7 @@ typedef struct
     /* 0x017C */ cmpCursorPos_t cursorPos;
 } lstListWindow_t;
 
-/* The save-work fields this unit reaches that the shared dds3GlobalWork_t view
- * leaves as padding or does not cover at all. */
-typedef struct
-{
-    /* 0x00000 */ u8 unk_00000[0x1914];
-    /* 0x01914 */ u8 id[0x10];
-    /* 0x01924 */ s32 idCount;
-    /* 0x01928 */ u8 unk_01928[0x10558];
-    /* 0x11E80 */ s32 recordCount;
-} dds3GlobalWorkView_t;
+
 
 extern fclEncyc_instance_tag *g_pinst;
 
@@ -82,30 +73,10 @@ typedef struct
 
 extern fclEncycDebugWork_t *g_pdebug;
 
-typedef struct
-{
-    /* 0x00000 */ u8 reserved00000[0xA48];
-    /* 0x00A48 */ s32 maka;
-    /* 0x00A4C */ u8 reserved00A4C[8];
-    /* 0x00A54 */ cmbUnit_t party[16];
-    /* 0x01914 */ s8 stock[0x10];
-    /* 0x01924 */ s32 stockCount;
-    /* 0x01928 */ u8 reserved01928[0x3D];
-    /* 0x01965 */ u8 reserved1965;
-    /* 0x01966 */ u8 reserved01966[0x394];
-    /* 0x01CFA */ u8 equipHearts;
-    /* 0x01CFB */ u8 reserved01CFB[0x40];
-    /* 0x01D3B */ u8 devilSlot[0x100];
-    /* 0x01E3B */ u8 reserved01E3B[0x10045];
-    /* 0x11E80 */ s32 encycNum;
-    /* 0x11E84 */ u8 reserved11E84[0xC];
-    /* 0x11E90 */ fclencyceelem_t records[0xA8];
-} encycSaveWork_t;
 
-/* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
- * unit reads it through a different member set at the same offsets. Both are
- * partial views, distinct from transient CMB_GBWK; the alias holds them apart until one covers the object. */
-extern encycSaveWork_t *encycSaveWork asm("DDS3_GBWK");
+
+
+
 
 extern s32 printf(const char *fmt, ...);
 
@@ -199,7 +170,7 @@ s32 fclEncycWork(void)
 
 void fclEncycInitRecord(s32 mode)
 {
-    s32 *count = &((dds3GlobalWorkView_t *)DDS3_GBWK)->recordCount;
+    s32 *count = &DDS3_GBWK->encycNum;
 
     if (mode == 0) {
         *count = 0;
@@ -329,8 +300,8 @@ extern s32 evtBitOff(s32 no);
 
 s32 fclEncycRegist2(fclencyceelem_t *pelemsrc, s32 overwrite)
 {
-    s32 *num = &encycSaveWork->encycNum;
-    fclencyceelem_t *table = (fclencyceelem_t *)((u8 *)encycSaveWork + 0x11E90);
+    s32 *num = &DDS3_GBWK->encycNum;
+    fclencyceelem_t *table = (fclencyceelem_t *)((u8 *)DDS3_GBWK + 0x11E90);
     s32 index = fclEncycSearch(*(u16 *)((u8 *)pelemsrc + 0x0));
     s32 known = 1;
     s32 count;
@@ -362,8 +333,8 @@ s32 fclEncycRegist2(fclencyceelem_t *pelemsrc, s32 overwrite)
 
 s32 fclEncycRegist(datUnitWork_t *entry, s32 store)
 {
-    s32 *num = &encycSaveWork->encycNum;
-    fclencyceelem_t *table = (fclencyceelem_t *)((u8 *)encycSaveWork + 0x11E90);
+    s32 *num = &DDS3_GBWK->encycNum;
+    fclencyceelem_t *table = (fclencyceelem_t *)((u8 *)DDS3_GBWK + 0x11E90);
     s32 index = fclEncycSearch(*(u16 *)((u8 *)entry + 0x4));
     s32 known = 1;
     s32 count;
@@ -395,8 +366,8 @@ s32 fclEncycRegist(datUnitWork_t *entry, s32 store)
 
 s32 fclEncycSearch(s32 id)
 {
-    fclencyceelem_t *entry = (fclencyceelem_t *)((u8 *)encycSaveWork + 0x11E90);
-    s32 count = encycSaveWork->encycNum;
+    fclencyceelem_t *entry = (fclencyceelem_t *)((u8 *)DDS3_GBWK + 0x11E90);
+    s32 count = DDS3_GBWK->encycNum;
     s32 i;
 
     for (i = 0; i < count; i++) {
@@ -410,7 +381,7 @@ s32 fclEncycSearch(s32 id)
 
 s32 fclEncycGetNum(void)
 {
-    return encycSaveWork->encycNum;
+    return DDS3_GBWK->encycNum;
 }
 
 s32 fclEncycGetRatio(void)
@@ -434,11 +405,11 @@ s32 fclEncycCheckRegistable(void)
 void fclEncycDebugRegist(void)
 {
     s32 i;
-    s32 count = encycSaveWork->stockCount;
+    s32 count = DDS3_GBWK->stockCount;
 
     for (i = 0; i < count; i++) {
-        s32 slot = (u8)encycSaveWork->stock[i];
-        datUnitWork_t *source = &encycSaveWork->party[slot].unit;
+        s32 slot = (u8)DDS3_GBWK->stock[i];
+        datUnitWork_t *source = &DDS3_GBWK->party[slot].unit;
         datUnitWork_t unit;
 
         if ((source->flag & 4) == 0) {
@@ -917,7 +888,7 @@ void CalcPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
     } else if (fclChkMessageDraw(work->messageProcess) == 0) {
         if (fclGetFlag(0) != 0) {
             index = work->phase.unitIndex;
-            fclEncycRegist(&encycSaveWork->party[index].unit, 1);
+            fclEncycRegist(&DDS3_GBWK->party[index].unit, 1);
             AdjustStackCursor(pinst->unk_70 - 1, &pinst->lw_cur[0], &pinst->lw_cur[1]);
             pinst->unk_5A = (pinst->unk_70 < 2) ? 8 : 0;
         } else {
@@ -1701,7 +1672,7 @@ void DrawPhaseReadView(fclEncyc_instance_tag *pinst)
 
         if (model != NULL) {
             if ((pinst->stat & 0x400) == 0) {
-                u16 modelId = *(u16 *)((u8 *)encycSaveWork +
+                u16 modelId = *(u16 *)((u8 *)DDS3_GBWK +
                                        work->phase.recordIndex * 0xB0 + 0x11E90);
                 InitModelPosRot(model, modelId);
                 pinst->stat |= 0x400;
@@ -1787,7 +1758,7 @@ extern s32 CompareUnitToRecord(datUnitWork_t *unit, fclencyceelem_t *record);
 
 s32 GetValidUnitIndex(u8 *pindex)
 {
-    datUnitWork_t *unit = &encycSaveWork->party[4].unit;
+    datUnitWork_t *unit = &DDS3_GBWK->party[4].unit;
     s32 index = 4;
     s32 count = 0;
     s32 writeIndices = pindex != NULL;
@@ -1798,7 +1769,7 @@ s32 GetValidUnitIndex(u8 *pindex)
         flags &= 1;
         if (flags && !unavailable && !(unit->badstatus & 0x800)) {
             s32 recordIndex = fclEncycSearch(unit->id);
-            fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)encycSaveWork + recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+            fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)DDS3_GBWK + recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
             if (CompareUnitToRecord(unit, record) != 0) {
                 count++;
                 if (writeIndices) {
@@ -1825,7 +1796,7 @@ s32 RegistAll(fclEncyc_instance_tag *pinst)
         index = pinst->entries.regist.validUnit;
         remaining = count;
         do {
-            if (fclEncycRegist(&encycSaveWork->party[*index++].unit, 1) == 1) {
+            if (fclEncycRegist(&DDS3_GBWK->party[*index++].unit, 1) == 1) {
                 registered++;
             }
             remaining--;
@@ -2102,8 +2073,8 @@ extern datDevilTableEntry_t datDevilTable[];
 
 s32 cmpRaceOrder(const void *a, const void *b)
 {
-    fclencyceelem_t *left = (fclencyceelem_t *)((u8 *)encycSaveWork + *(const s16 *)a * (s32)sizeof(fclencyceelem_t) + 0x11E90);
-    fclencyceelem_t *right = (fclencyceelem_t *)((u8 *)encycSaveWork + *(const s16 *)b * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    fclencyceelem_t *left = (fclencyceelem_t *)((u8 *)DDS3_GBWK + *(const s16 *)a * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    fclencyceelem_t *right = (fclencyceelem_t *)((u8 *)DDS3_GBWK + *(const s16 *)b * (s32)sizeof(fclencyceelem_t) + 0x11E90);
     s32 result;
     s32 l = datDevilTable[left->id].race;
     s32 r = datDevilTable[right->id].race;
@@ -2121,8 +2092,8 @@ s32 cmpRaceOrder(const void *a, const void *b)
 
 s32 cmpLevelOrder(const void *a, const void *b)
 {
-    fclencyceelem_t *left = (fclencyceelem_t *)((u8 *)encycSaveWork + *(const s16 *)a * (s32)sizeof(fclencyceelem_t) + 0x11E90);
-    fclencyceelem_t *right = (fclencyceelem_t *)((u8 *)encycSaveWork + *(const s16 *)b * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    fclencyceelem_t *left = (fclencyceelem_t *)((u8 *)DDS3_GBWK + *(const s16 *)a * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    fclencyceelem_t *right = (fclencyceelem_t *)((u8 *)DDS3_GBWK + *(const s16 *)b * (s32)sizeof(fclencyceelem_t) + 0x11E90);
     s32 result;
     s32 l = right->level;
     s32 r = left->level;
@@ -2256,7 +2227,7 @@ void ExecSummon(s32 recindex)
     fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)DDS3_GBWK + recindex * 0xB0 + 0x11E90);
     s32 slot = datAddDevil(record->id, 0);
 
-    SetRecordToUnitCore(&encycSaveWork->party[slot].unit, record);
+    SetRecordToUnitCore(&DDS3_GBWK->party[slot].unit, record);
 }
 
 extern u8 *datExplainTable[];
@@ -2281,7 +2252,7 @@ void drawRegistList(fclEncyc_instance_tag *pinst)
     ReleaseFontList(fonts, 7);
     count = pinst->unk_70;
     for (index = cursor->Index; row < 7 && index < count; index++, row++, y += 0xE0) {
-        datUnitWork_t *unit = &encycSaveWork->party[pinst->entries.regist.validUnit[index]].unit;
+        datUnitWork_t *unit = &DDS3_GBWK->party[pinst->entries.regist.validUnit[index]].unit;
         u16 id = unit->id;
         frFontHandle_t *font;
         font = frwGetSmallFontFRQ2(0x620, y, 0xFFFFF0, 0xA09DC380,
@@ -2319,7 +2290,7 @@ void CreateFontListRead(fclEncycReadTopWork_t *work, s32 sort, s16 *indices)
     count = fclEncycGetNum();
     index = work->list.cursorPos.Index;
     while (index < count && row < 8) {
-        fclencyceelem_t *record = &encycSaveWork->records[indices[index]];
+        fclencyceelem_t *record = &DDS3_GBWK->encycRecords[indices[index]];
         u16 id = record->id;
         u8 race = datDevilTable[id].race;
         s32 level;
@@ -2413,7 +2384,7 @@ extern u8 *text2[];
 void CreateFontExplain(fclEncyc_instance_tag *pinst)
 {
     fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
-    u16 id = ((fclencyceelem_t *)((u8 *)encycSaveWork +
+    u16 id = ((fclencyceelem_t *)((u8 *)DDS3_GBWK +
               work->phase.recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90))->id;
     frFontHandle_t *font;
 
@@ -2507,7 +2478,7 @@ typedef struct
 s32 PrepSummon(fclEncyc_readmainwork_tag *phase)
 {
     fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)phase;
-    fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)encycSaveWork +
+    fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)DDS3_GBWK +
                               phase->recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
     s32 devilId = record->id;
     s32 level = record->level;
@@ -2550,13 +2521,13 @@ s32 PrepSummon(fclEncyc_readmainwork_tag *phase)
         scriptEntry = 0x12;
         phase->flags |= 4;
     } else if (evtBitCheck(0x8A0) == 0 &&
-               encycSaveWork->party[0].unit.level < record->level) {
+               DDS3_GBWK->party[0].unit.level < record->level) {
         fclSetWorkValue(8, 3);
         scriptEntry = 0x12;
         phase->flags |= 4;
     } else {
         scriptEntry = 0x11;
-        if (encycSaveWork->maka < price) {
+        if (DDS3_GBWK->maka < price) {
             fclSetWorkValue(8, 0);
             scriptEntry = 0x12;
         } else {
@@ -2810,10 +2781,10 @@ void ControlModel(fclEncyc_instance_tag *pinst, s32 modelHandle, s32 key)
     }
     if ((key & 1) != 0) {
         u16 id;
-        encycSaveWork_t *save;
+        dds3GlobalWork_t *save;
 
         InitCameraForViewMode(pinst);
-        save = encycSaveWork;
+        save = DDS3_GBWK;
         id = *(u16 *)((u8 *)save + work->phase.recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
         InitModelPosRot(model, id);
         work->viewOffsetX = 0;
@@ -2987,7 +2958,7 @@ void InitCameraForViewMode(fclEncyc_instance_tag *pinst)
 {
     fclEncyc_readmainwork_tag *work = (fclEncyc_readmainwork_tag *)pinst->pwork;
     sdfVector4_t model;
-    u16 modelId = *(u16 *)((u8 *)encycSaveWork + work->recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    u16 modelId = *(u16 *)((u8 *)DDS3_GBWK + work->recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
 
     rstGetEvoModelParam(modelId, &model.x);
     initViewCamera(pinst->camera);
@@ -3013,7 +2984,7 @@ extern datUnitVisual_t datModelParamTable[];
 void SetBoundControl(fclEncyc_instance_tag *pinst)
 {
     fclEncycBoundWork_t *work = (fclEncycBoundWork_t *)pinst->pwork;
-    u16 id = *(u16 *)((u8 *)encycSaveWork + work->phase.recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+    u16 id = *(u16 *)((u8 *)DDS3_GBWK + work->phase.recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
     work->rotationMin = -D_00331218[id].rotation;
     work->rotationMax = D_00331218[id].rotation;
     work->radiusMin = pinst->camera[1].w + datModelParamTable[id].formsize + 80.0f + D_00331218[id].radius;
@@ -3123,19 +3094,19 @@ extern void RequestModelLoad(fclEncyc_instance_tag *pinst, s32 id);
 
 void ChangeDevilObjectRegistConfirm(s32 unitIndex, fclEncyc_instance_tag *pinst)
 {
-    datUnitWork_t *unit = &encycSaveWork->party[unitIndex].unit;
+    datUnitWork_t *unit = &DDS3_GBWK->party[unitIndex].unit;
     fclEncycConfirmDrawWork_t *work = (fclEncycConfirmDrawWork_t *)pinst->pwork;
 
     work->phase.unitIndex = unitIndex;
     RequestModelLoad(pinst, unit->id);
     work->units[1] = *unit;
-    SetRecordToUnit(&work->units[0], encycSaveWork->party[unitIndex].unit.id);
+    SetRecordToUnit(&work->units[0], DDS3_GBWK->party[unitIndex].unit.id);
 }
 
 void ChangeDevilObjectReadMain(s32 recindex, fclEncyc_instance_tag *pinst)
 {
     fclEncycReadStatusWork_t *work = pinst->pwork;
-    fclencyceelem_t *record = &encycSaveWork->records[recindex];
+    fclencyceelem_t *record = &DDS3_GBWK->encycRecords[recindex];
 
     work->phase.recordIndex = recindex;
     RequestModelLoad(pinst, record->id);
@@ -3790,7 +3761,7 @@ s32 DebugProcDispBound(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *debugW
 
     {
         fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
-        u16 devilId = *(u16 *)((u8 *)encycSaveWork + work->phase.recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
+        u16 devilId = *(u16 *)((u8 *)DDS3_GBWK + work->phase.recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
         f32 radius = work->phase.cameraRadius;
 
         radius -= pinst->camera[1].w;
@@ -3821,13 +3792,13 @@ void DebugRemoveRecord(s32 id)
     s32 remaining;
 
     if (index < 0) return;
-    dest = (fclencyceelem_t *)((u8 *)encycSaveWork + index * (s32)sizeof(*dest) + 0x11E90);
+    dest = (fclencyceelem_t *)((u8 *)DDS3_GBWK + index * (s32)sizeof(*dest) + 0x11E90);
     source = dest + 1;
-    remaining = encycSaveWork->encycNum - index - 1;
+    remaining = DDS3_GBWK->encycNum - index - 1;
     if (remaining > 0) {
         memmove(dest, source, remaining * (s32)sizeof(*dest));
     }
-    encycSaveWork->encycNum--;
+    DDS3_GBWK->encycNum--;
     if (fclEncycGetRatio() >= 100) {
         evtBitOn(0x913);
     } else {
@@ -3839,7 +3810,7 @@ extern void cmpChangeCursorListNums(s32 count, void *cursor);
 
 void DebugUpdateListwin(fclEncyc_instance_tag *pinst)
 {
-    s32 count = encycSaveWork->encycNum;
+    s32 count = DDS3_GBWK->encycNum;
     fclEncycReadTopWork_t *work = (fclEncycReadTopWork_t *)pinst->pwork;
 
     s32 *stepY;

@@ -75,27 +75,9 @@ extern s8 D_00339E06[];
 
 extern s8 D_00339E0C[];
 
-typedef struct
-{
-    /* 0x00000 */ u8 unk_00000[0xA54];
-    /* 0x00A54 */ cmbUnit_t party[16];
-    /* 0x01914 */ s8 stock[0x10];
-    /* 0x01924 */ s32 stockCount;
-    /* 0x01928 */ u8 unk_01928[0x3D];
-    /* 0x01965 */ u8 unk_1965;
-    /* 0x01966 */ u8 unk_01966[0x394];
-    /* 0x01CFA */ u8 equipHearts;
-    /* 0x01CFB */ u8 unk_01CFB[0x40];
-    /* 0x01D3B */ u8 devilSlot[0x100];
-    /* 0x01E3B */ u8 unk_01E3B[0xFF85];
-    /* 0x11DC0 */ u8 hearts_up_param[32][6];
-    /* 0x11E80 */ s32 encycNum;
-} cmbGlobalWork_t;
 
-/* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
- * unit reads it through a different member set at the same offsets. Both are
- * partial views; the alias holds them apart until one covers the object. */
-extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
+
+
 
 extern s16 datGetDevilParam(u8 devilId);
 
@@ -178,7 +160,7 @@ s32 rstChkAddSkill(u16 SkillID)
 
 s16 rstGetEquipHeartsAisyo(void)
 {
-    return datGetDevilParam(cmbGlobalWork->equipHearts);
+    return datGetDevilParam(DDS3_GBWK->equipHearts);
 }
 
 extern u32 datGetMaxHp(datUnitWork_t *work);
@@ -530,7 +512,7 @@ s32 rstChkSkillPowerUp1(void)
 {
     s32 ret;
 
-    if (cmbGlobalWork->party[0].unit.level < 7)
+    if (DDS3_GBWK->party[0].unit.level < 7)
     {
         return 0;
     }
@@ -694,7 +676,7 @@ s32 rstCalcSeqEvoAt(void)
 
     if (rstFindEvoEntryType7(EventStart->unit) >= 0)
     {
-        level = cmbGlobalWork->party[0].unit.level + 6;
+        level = DDS3_GBWK->party[0].unit.level + 6;
         if (level < cmbChkDevilEvo(EventStart->unit))
         {
             return -1;
@@ -799,7 +781,7 @@ extern s32 datGetDevilSlotState(u8 devilId);
 #ifdef NON_MATCHING
 s32 rstFindRegisteredDevil(void)
 {
-    s8 id = cmbGlobalWork->equipHearts;
+    s8 id = DDS3_GBWK->equipHearts;
     s32 slotCount;
     s32 roll;
     s32 i;
@@ -897,7 +879,7 @@ s32 rstCalc(dds3ProcessID_t *id)
             EventStart->phase = (u8)EventStart->phase + 1;
         case 1:
             if (process) {
-                EventStart->heartsSkill = rstChkHeartsSkill(&cmbGlobalWork->party[0].unit);
+                EventStart->heartsSkill = rstChkHeartsSkill(&DDS3_GBWK->party[0].unit);
                 if (EventStart->heartsSkill != 0) {
                     EventStart->heartsResult = rstChkAddSkill(EventStart->heartsSkill);
                     rstInitSkillAct(8);
@@ -921,7 +903,7 @@ s32 rstCalc(dds3ProcessID_t *id)
                     }
                     EventStart->unk_129D[1] = 0;
                     rstShakePad();
-                    fclSetMessageVar_20743088(12, (s32)pstr[cmbGlobalWork->equipHearts]);
+                    fclSetMessageVar_20743088(12, (s32)pstr[DDS3_GBWK->equipHearts]);
                     fclStartMessage(28);
                     fclStartSelMessage(43);
                 }
@@ -1057,8 +1039,8 @@ s32 cmbGetParamBase(datUnitWork_t *unit, s32 index)
 
     if (unit->id == 0) {
         value = unit->param[index];
-        if (cmbGlobalWork->equipHearts != 0) {
-            value -= cmbGetHeartsParam(cmbGlobalWork->equipHearts, index);
+        if (DDS3_GBWK->equipHearts != 0) {
+            value -= cmbGetHeartsParam(DDS3_GBWK->equipHearts, index);
         }
     } else {
         value = datGetParam(unit, index);
@@ -1090,8 +1072,8 @@ s32 cmbChkGetHearts(s32 rawId)
     s8 id = rawId;
     s32 i;
 
-    for (i = 0; i < ((u8 *)cmbGlobalWork)[0x1D7B]; i++) {
-        if (cmbGlobalWork->unk_01CFB[i] == id) {
+    for (i = 0; i < ((u8 *)DDS3_GBWK)[0x1D7B]; i++) {
+        if (DDS3_GBWK->unk_01CFB[i] == id) {
             return 1;
         }
     }
@@ -1211,12 +1193,12 @@ s8 datGetDevilSlotIndex(u8 devilId)
 
 void func_00222120(u8 devilId)
 {
-    cmbGlobalWork->devilSlot[devilId] &= 0xF0;
+    DDS3_GBWK->devilSlot[devilId] &= 0xF0;
 }
 
 s32 datDevilIsRegistered(u8 devilId)
 {
-    u8 flag = cmbGlobalWork->devilSlot[devilId] & 0x80;
+    u8 flag = DDS3_GBWK->devilSlot[devilId] & 0x80;
 
     return flag != 0;
 }
@@ -1242,12 +1224,12 @@ s8 datCountPlayerLND(void)
 
 s32 datGetDevilSlotState(u8 devilId)
 {
-    return cmbGlobalWork->devilSlot[devilId] & 0xF;
+    return DDS3_GBWK->devilSlot[devilId] & 0xF;
 }
 
 void rstSetDevilRegistered(s8 devilId)
 {
-    cmbGlobalWork->devilSlot[devilId] |= 0x80;
+    DDS3_GBWK->devilSlot[devilId] |= 0x80;
 }
 
 u16 rstGetHeartsSkillAt(u8 race, s8 index)
@@ -1297,7 +1279,7 @@ s32 cmbGetHeartsParamEx(s8 devilId, s8 index, s32 registered)
 {
     s32 value = cmbGetHeartsParamByIndex(devilId, index, (s8)registered != 0);
 
-    return (s8)(value + cmbGlobalWork->hearts_up_param[devilId][index]);
+    return (s8)(value + DDS3_GBWK->hearts_up_param[devilId][index]);
 }
 #else
 INCLUDE_ASM(const s32, "result/rstcalc", cmbGetHeartsParamEx);
@@ -2018,8 +2000,8 @@ s32 rstRollComment(void)
         for (i = 0, entry = D_00339D10; i < 38; i++, entry++) {
             if (draw < entry->unk_02) {
                 u16 id = entry->devilId;
-                if (cmbGlobalWork->party[0].unit.level >= entry->unk_04 &&
-                    cmbGlobalWork->unk_01928[id] <= entry->unk_05) {
+                if (DDS3_GBWK->party[0].unit.level >= entry->unk_04 &&
+                    DDS3_GBWK->unk_01928[id] <= entry->unk_05) {
                     return id;
                 }
             }

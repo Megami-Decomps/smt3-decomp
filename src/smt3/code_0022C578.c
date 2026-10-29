@@ -405,26 +405,9 @@ extern void cmpUpdateCursorScroll(cmpCursorInfo_t *cursor, s8 mode);
 extern void cmpSetInfoWindowHidden(void);
 
 
-typedef struct
-{
-    /* 0x00000 */ u8 unk_00000[0xA50];
-    /* 0x00A50 */ s32 maxstock;
-    /* 0x00A54 */ cmbUnit_t party[16];
-    /* 0x01914 */ s8 stock[0x10];
-    /* 0x01924 */ s32 stockCount;
-    /* 0x01928 */ u8 itemQuantity[0xA0];
-    /* 0x019C8 */ u8 unk_019C8[0x332];
-    /* 0x01CFA */ u8 equipHearts;
-    /* 0x01CFB */ u8 unk_01CFB[0x40];
-    /* 0x01D3B */ u8 devilSlot[0x100];
-    /* 0x01E3B */ u8 unk_01E3B[0x10045];
-    /* 0x11E80 */ s32 encycNum;
-} cmbGlobalWork_t;
 
-/* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
- * unit reads it through a different member set at the same offsets. Both are
- * partial views; the alias holds them apart until one covers the object. */
-extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
+
+
 
 extern u8 *GBWK_0;
 
@@ -806,57 +789,57 @@ void campDebugRegistAll(void)
         return;
     }
 
-    cmbGlobalWork->maxstock = 12;
+    DDS3_GBWK->maxstock = 12;
     for (i = 1; i < 16; i++) {
-        cmbClearStockEntry(&cmbGlobalWork->party[i]);
-        cmbGlobalWork->stock[i] = 0;
+        cmbClearStockEntry(&DDS3_GBWK->party[i]);
+        DDS3_GBWK->stock[i] = 0;
     }
     registered = 1;
-    cmbGlobalWork->stockCount = 1;
+    DDS3_GBWK->stockCount = 1;
 
-    if (cmbGlobalWork->party[0].unit.skillcnt == 0) {
-        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 1;
-        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 2;
-        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 3;
-        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 4;
-        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 5;
-        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 6;
-        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 7;
-        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 8;
+    if (DDS3_GBWK->party[0].unit.skillcnt == 0) {
+        DDS3_GBWK->party[0].unit.skill[DDS3_GBWK->party[0].unit.skillcnt++] = 1;
+        DDS3_GBWK->party[0].unit.skill[DDS3_GBWK->party[0].unit.skillcnt++] = 2;
+        DDS3_GBWK->party[0].unit.skill[DDS3_GBWK->party[0].unit.skillcnt++] = 3;
+        DDS3_GBWK->party[0].unit.skill[DDS3_GBWK->party[0].unit.skillcnt++] = 4;
+        DDS3_GBWK->party[0].unit.skill[DDS3_GBWK->party[0].unit.skillcnt++] = 5;
+        DDS3_GBWK->party[0].unit.skill[DDS3_GBWK->party[0].unit.skillcnt++] = 6;
+        DDS3_GBWK->party[0].unit.skill[DDS3_GBWK->party[0].unit.skillcnt++] = 7;
+        DDS3_GBWK->party[0].unit.skill[DDS3_GBWK->party[0].unit.skillcnt++] = 8;
     }
 
     if (dds3PadButtonState[0x2A] != 0) {
-        slot = cmbAddDevilToStock(0x4B, &cmbGlobalWork->party[4], 12);
-        cmbGlobalWork->party[4 + slot].unit.flag = registered;
-        slot = cmbAddDevilToStock(0x1F, &cmbGlobalWork->party[4], 12);
-        cmbGlobalWork->party[4 + slot].unit.flag = registered;
-        slot = cmbAddDevilToStock(0x01, &cmbGlobalWork->party[4], 12);
-        cmbGlobalWork->party[4 + slot].unit.flag = registered;
-        slot = cmbAddDevilToStock(0x8A, &cmbGlobalWork->party[4], 12);
-        cmbGlobalWork->party[4 + slot].unit.flag = registered;
-        slot = cmbAddDevilToStock(0x8B, &cmbGlobalWork->party[4], 12);
-        nextList = &cmbGlobalWork->party[4];
-        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x4B, &DDS3_GBWK->party[4], 12);
+        DDS3_GBWK->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x1F, &DDS3_GBWK->party[4], 12);
+        DDS3_GBWK->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x01, &DDS3_GBWK->party[4], 12);
+        DDS3_GBWK->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x8A, &DDS3_GBWK->party[4], 12);
+        DDS3_GBWK->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x8B, &DDS3_GBWK->party[4], 12);
+        nextList = &DDS3_GBWK->party[4];
+        DDS3_GBWK->party[4 + slot].unit.flag = registered;
         lastDevil = 0x6D;
     } else {
-        slot = cmbAddDevilToStock(0x35, &cmbGlobalWork->party[4], 12);
-        cmbGlobalWork->party[4 + slot].unit.flag = registered;
-        slot = cmbAddDevilToStock(0x4E, &cmbGlobalWork->party[4], 12);
-        cmbGlobalWork->party[4 + slot].unit.flag = registered;
-        slot = cmbAddDevilToStock(0x35, &cmbGlobalWork->party[4], 12);
-        cmbGlobalWork->party[4 + slot].unit.flag = registered;
-        slot = cmbAddDevilToStock(0x01, &cmbGlobalWork->party[4], 12);
-        cmbGlobalWork->party[4 + slot].unit.flag = registered;
-        slot = cmbAddDevilToStock(0x50, &cmbGlobalWork->party[4], 12);
-        cmbGlobalWork->party[4 + slot].unit.flag = registered;
-        slot = cmbAddDevilToStock(0x0B, &cmbGlobalWork->party[4], 12);
-        nextList = &cmbGlobalWork->party[4];
-        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x35, &DDS3_GBWK->party[4], 12);
+        DDS3_GBWK->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x4E, &DDS3_GBWK->party[4], 12);
+        DDS3_GBWK->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x35, &DDS3_GBWK->party[4], 12);
+        DDS3_GBWK->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x01, &DDS3_GBWK->party[4], 12);
+        DDS3_GBWK->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x50, &DDS3_GBWK->party[4], 12);
+        DDS3_GBWK->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x0B, &DDS3_GBWK->party[4], 12);
+        nextList = &DDS3_GBWK->party[4];
+        DDS3_GBWK->party[4 + slot].unit.flag = registered;
         lastDevil = 0x9A;
     }
 
     slot = cmbAddDevilToStock(lastDevil, nextList, 12);
-    cmbGlobalWork->party[4 + slot].unit.flag = registered;
+    DDS3_GBWK->party[4 + slot].unit.flag = registered;
     fclEncycDebugRegist();
 
     if (dds3PadButtonState[0x29] != 0) {
@@ -1145,7 +1128,7 @@ datUnitWork_t *cmpGetSelectDstStock(void)
 {
     s32 index = cmpGetSelectedStockIndex();
 
-    return &cmbGlobalWork->party[index].unit;
+    return &DDS3_GBWK->party[index].unit;
 }
 
 u16 cmpGetSelectItemID(void)
@@ -1256,14 +1239,14 @@ void cmpCreateLocalItem(u8 mode)
     switch (mode) {
     case 0:
         for (i = 1; i < 0x60; i++) {
-            if (cmbGlobalWork->itemQuantity[i] != 0) {
+            if (DDS3_GBWK->itemQuantity[i] != 0) {
                 campWork->itemId[campWork->unk_8302++] = i;
             }
         }
         break;
     case 1:
         for (i = 0x60; i < 0x70; i++) {
-            if (cmbGlobalWork->itemQuantity[i] != 0) {
+            if (DDS3_GBWK->itemQuantity[i] != 0) {
                 campWork->itemId[campWork->unk_8302++] = i;
             }
         }
@@ -1507,7 +1490,7 @@ s32 cmpUseItem(void)
 u16 cmpGetSelectSkillID(void)
 {
     datUnitWork_t *unit =
-        &cmbGlobalWork->party[cmpGetStockInfoIndex(campWork->stock, 0, 0)].unit;
+        &DDS3_GBWK->party[cmpGetStockInfoIndex(campWork->stock, 0, 0)].unit;
 
     return unit->skill[campWork->itemCursor + campWork->itemScroll];
 }
@@ -1647,8 +1630,8 @@ void cmpApplyStockRemove(void)
     if (index < 0) {
         return;
     }
-    cmpClearStockFlag(&cmbGlobalWork->party[index].unit);
-    datClearCommMemory(&cmbGlobalWork->party[index].unit);
+    cmpClearStockFlag(&DDS3_GBWK->party[index].unit);
+    datClearCommMemory(&DDS3_GBWK->party[index].unit);
     datAllClearCommMemory();
 }
 
@@ -1661,7 +1644,7 @@ void cmpRemoveStockDevilEntry(void)
     if (index < 0) {
         return;
     }
-    func_0022E168(cmbGlobalWork->party[index].unit.id);
+    func_0022E168(DDS3_GBWK->party[index].unit.id);
 }
 
 #ifdef NON_MATCHING
@@ -1676,17 +1659,17 @@ s32 func_0022E168(u16 devilId)
     s32 found = 0;
     s32 removeIndex = 0;
 
-    for (i = 0; i < cmbGlobalWork->stockCount; ++i) {
+    for (i = 0; i < DDS3_GBWK->stockCount; ++i) {
         removeIndex = i;
-        stockIndex = (u8)cmbGlobalWork->stock[i];
-        if (cmbGlobalWork->party[stockIndex].unit.id == devilId) {
+        stockIndex = (u8)DDS3_GBWK->stock[i];
+        if (DDS3_GBWK->party[stockIndex].unit.id == devilId) {
             found = 1;
             break;
         }
     }
     result = 0;
     if (found != 0) {
-        memset(&cmbGlobalWork->party[stockIndex].unit, 0, sizeof(datUnitWork_t));
+        memset(&DDS3_GBWK->party[stockIndex].unit, 0, sizeof(datUnitWork_t));
         cmpRemoveStockSlot((s8)removeIndex);
         cmpRebuildStockList();
         result = 1;
@@ -1860,14 +1843,14 @@ void cmpCalcSkill(void)
             break;
         case 8:
             if (campWork->unk_0004 == 1) {
-                unit = &cmbGlobalWork->party[index].unit;
+                unit = &DDS3_GBWK->party[index].unit;
                 cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, NULL, NULL, 0, 0);
                 campWork->unk_0001 = 10;
                 cmpInitSelectCursor((s8)unit->skillcnt);
                 cmpInitSkillCursor(unit);
                 cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0x120, 0x288,
                                     cmpDrawSkillList, campWork->unk_410C,
-                                    &cmbGlobalWork->party[index].unit, 0);
+                                    &DDS3_GBWK->party[index].unit, 0);
             } else {
                 cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
                 campWork->unk_0001 = 0;
@@ -1885,7 +1868,7 @@ void cmpCalcSkill(void)
                     campWork->unk_0001 = 10;
                     cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0x120, 0x288,
                                         cmpDrawSkillList, campWork->unk_410C,
-                                        &cmbGlobalWork->party[index].unit, 0);
+                                        &DDS3_GBWK->party[index].unit, 0);
                     cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
                 }
             }
@@ -2084,11 +2067,11 @@ s32 cmpCalcParty(void)
                     break;
                 }
 
-                if ((cmbGlobalWork->party[selectedIndex].unit.flag & 1) == 0) {
+                if ((DDS3_GBWK->party[selectedIndex].unit.flag & 1) == 0) {
                     campWork->unk_0001 = 8;
                     goto finish;
                 }
-                if ((cmbGlobalWork->party[selectedIndex].unit.flag & 0x800) != 0) {
+                if ((DDS3_GBWK->party[selectedIndex].unit.flag & 0x800) != 0) {
                     datUnitWork_t *unit = cmpGetSelectSrcStock();
 
                     fclSetMessageVar_20743088(0, (s32)text2[unit->id]);
@@ -2586,7 +2569,7 @@ void campDrawStockRow(s8 mode)
     } else {
         switch (campWork->previousPhase) {
         case 2:
-            campSkillTargetIsSelf(cmbGlobalWork->party[stockIndex].unit.skill[
+            campSkillTargetIsSelf(DDS3_GBWK->party[stockIndex].unit.skill[
                 campWork->itemCursor + campWork->itemScroll], 3);
             campDrawText(6, 0);
             break;
@@ -2994,7 +2977,7 @@ void cmpUpdateSkillSelect(void)
 {
     u16 button = cmpGetPressedButton(0x33);
     u8 index = cmpGetStockInfoIndex(campWork->stock, 0, 0);
-    u16 skill = cmbGlobalWork->party[index].unit.skill[campWork->itemCursor + campWork->itemScroll];
+    u16 skill = DDS3_GBWK->party[index].unit.skill[campWork->itemCursor + campWork->itemScroll];
 
     if (fclChkMessage() != 0) {
         return;
@@ -3575,8 +3558,8 @@ s32 cmpHeartsIconIsVisible(s8 id)
 {
     s32 i;
 
-    for (i = 0; i < ((u8 *)cmbGlobalWork)[0x1D7B]; i++) {
-        if (cmbGlobalWork->unk_01CFB[i] == id) {
+    for (i = 0; i < ((u8 *)DDS3_GBWK)[0x1D7B]; i++) {
+        if (DDS3_GBWK->unk_01CFB[i] == id) {
             return 1;
         }
     }
@@ -3723,14 +3706,14 @@ extern char *pstr[];
 
 s32 cmpSetHeartsSequenceRemove(void)
 {
-    if (cmbGlobalWork->equipHearts == 0)
+    if (DDS3_GBWK->equipHearts == 0)
     {
         return 0;
     }
-    if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) == 0)
+    if ((DDS3_GBWK->party[0].unit.badstatus & 0x8000) == 0)
     {
         campInfoWork->unk_18 = 0;
-        fclSetMessageVar_20743088(0xC, (s32)pstr[cmbGlobalWork->equipHearts]);
+        fclSetMessageVar_20743088(0xC, (s32)pstr[DDS3_GBWK->equipHearts]);
         fclSetMessageInvalid(0);
         fclStartMessage(4);
         campInfoWork->unk_01 = 3;
@@ -4583,24 +4566,24 @@ s32 campDhFindEntry(void)
     {
         return 1;
     }
-    if (cmbGlobalWork->equipHearts != 0)
+    if (DDS3_GBWK->equipHearts != 0)
     {
-        if (id == cmbGlobalWork->equipHearts)
+        if (id == DDS3_GBWK->equipHearts)
         {
             return 2;
         }
-        for (i = 0; i < ((u8 *)cmbGlobalWork)[0x1D7B]; i++)
+        for (i = 0; i < ((u8 *)DDS3_GBWK)[0x1D7B]; i++)
         {
-            if (id == cmbGlobalWork->unk_01CFB[i])
+            if (id == DDS3_GBWK->unk_01CFB[i])
             {
-                if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) != 0)
+                if ((DDS3_GBWK->party[0].unit.badstatus & 0x8000) != 0)
                 {
                     return 4;
                 }
             }
         }
     }
-    else if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) == 0)
+    else if ((DDS3_GBWK->party[0].unit.badstatus & 0x8000) == 0)
     {
         return 3;
     }
@@ -4622,7 +4605,7 @@ extern void datEquipHearts(s32 HeartsID);
 void cmpReturnParamDH(void)
 {
     datEquipHearts(((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts);
-    cmbGlobalWork->party[0].unit = ((campDhSavedUnit_t *)campDhUpdateWork)->unit;
+    DDS3_GBWK->party[0].unit = ((campDhSavedUnit_t *)campDhUpdateWork)->unit;
 }
 
 
@@ -4662,8 +4645,8 @@ void campDhUpdateCursor(void)
         case 3:
         case 4:
             ((u8 *)campDhUpdateWork)[0x18] = 0;
-            ((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts = cmbGlobalWork->equipHearts;
-            ((campDhSavedUnit_t *)campDhUpdateWork)->unit = cmbGlobalWork->party[0].unit;
+            ((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts = DDS3_GBWK->equipHearts;
+            ((campDhSavedUnit_t *)campDhUpdateWork)->unit = DDS3_GBWK->party[0].unit;
             campDhEquipHearts();
             ((u8 *)campDhUpdateWork)[1] = 1;
             ((u8 *)campDhUpdateWork)[4] = 1;
@@ -6461,7 +6444,7 @@ s32 func_0023AD30(void)
     if (panel == NULL) {
         return -1;
     }
-    return cmbGlobalWork->party[panel->slot[panel->slotCursor]].unit.id;
+    return DDS3_GBWK->party[panel->slot[panel->slotCursor]].unit.id;
 }
 
 extern void cmpInitSeqInfo(cmpSeqInfo_t *pSeq, cmpSeqInfo_t *pParent);
@@ -6694,7 +6677,7 @@ s32 camp_update_status_Process(s32 id)
     }
 
     slot = cmpStatusPhase->slot[cmpStatusPhase->slotCursor];
-    cmpUpdateStatusModelLoad(cmbGlobalWork->party[slot].unit.id);
+    cmpUpdateStatusModelLoad(DDS3_GBWK->party[slot].unit.id);
     return 0;
 }
 
@@ -7599,7 +7582,7 @@ extern void campDrawStockStatus(s32 x, s32 y, s32 z, s32 color,
 s32 campDrawStockLabel(s32 x, s32 y, s32 z, s8 slot, s8 row,
                        cmpCursorSlot_t *cursor, s8 cursorMode, s32 alpha)
 {
-    datUnitWork_t *unit = &cmbGlobalWork->party[cmbGlobalWork->stock[slot]].unit;
+    datUnitWork_t *unit = &DDS3_GBWK->party[DDS3_GBWK->stock[slot]].unit;
     s32 rowY = y + row * 0xC0;
     s32 color = 0xA09DC380;
 
@@ -7618,7 +7601,7 @@ s32 campDrawStockLabel(s32 x, s32 y, s32 z, s8 slot, s8 row,
 s32 campDrawStockLabel2(s32 x, s32 y, s32 z, s8 slot, s8 localSlot,
                         cmpCursorSlot_t *cursor, s32 mode, s32 alpha)
 {
-    datUnitWork_t *unit = &cmbGlobalWork->party[slot].unit;
+    datUnitWork_t *unit = &DDS3_GBWK->party[slot].unit;
     s32 rowY = y + localSlot * 0xC0;
     s32 colors[4];
     s32 color = 0xA09DC380;
@@ -7744,7 +7727,7 @@ void campDrawStockRow2(s32 x, s32 y, s32 z, s8 *rows, s8 *cols, s8 force, void *
     s32 visibleRow;
     u8 *cursorBase = (u8 *)work + 0x10E8;
 
-    if (cmbGlobalWork->maxstock > 0) {
+    if (DDS3_GBWK->maxstock > 0) {
         rowY = 0;
         do {
             s8 index = (s8)i++;
@@ -7761,7 +7744,7 @@ void campDrawStockRow2(s32 x, s32 y, s32 z, s8 *rows, s8 *cols, s8 force, void *
             fclDrawSpriteRes(scale, rowY, 0, colors, 0, 8,
                              D_00345D88, fclSpriteTable, 0x47);
             rowY += 0xC0;
-        } while (i < cmbGlobalWork->maxstock);
+        } while (i < DDS3_GBWK->maxstock);
     }
 
     visibleRow = 0;
@@ -7777,7 +7760,7 @@ void campDrawStockRow2(s32 x, s32 y, s32 z, s8 *rows, s8 *cols, s8 force, void *
         cmpCursorSlot_t *cursor;
 
         i++;
-        flag = cmbGlobalWork->party[slot].unit.flag;
+        flag = DDS3_GBWK->party[slot].unit.flag;
         mode = 0;
         if ((flag & 0x10) == 0) {
             mode = iconResult;
@@ -8860,12 +8843,12 @@ s32 cmpDrawStatusModel(void *scene)
     return err;
 }
 
-extern cmbGlobalWork_t *volatile cmpRebuildGlobalWork asm("DDS3_GBWK");
+extern dds3GlobalWork_t *volatile cmpRebuildGlobalWork asm("DDS3_GBWK");
 
 #ifdef NON_MATCHING
 void cmpRebuildStockList(void)
 {
-    cmbGlobalWork_t *work = cmpRebuildGlobalWork;
+    dds3GlobalWork_t *work = cmpRebuildGlobalWork;
     s8 removed = 0;
     s32 slot = 4;
     s32 i;
@@ -8881,7 +8864,7 @@ void cmpRebuildStockList(void)
             }
             memset(&work->party[15], 0, sizeof(work->party[15]));
             work = cmpRebuildGlobalWork;
-            for (i = 0; i < ((volatile cmbGlobalWork_t *)work)->stockCount; i++) {
+            for (i = 0; i < ((volatile dds3GlobalWork_t *)work)->stockCount; i++) {
                 if ((u8)work->stock[i] >= slot) {
                     work->stock[i]--;
                     work = cmpRebuildGlobalWork;
@@ -8890,7 +8873,7 @@ void cmpRebuildStockList(void)
             removed++;
         }
         slot++;
-    } while (slot < 16 && removed != ((volatile cmbGlobalWork_t *)work)->stockCount);
+    } while (slot < 16 && removed != ((volatile dds3GlobalWork_t *)work)->stockCount);
 }
 #else
 INCLUDE_ASM(const s32, "code_0022C578", cmpRebuildStockList);
@@ -8900,17 +8883,17 @@ void cmpRemoveStockSlot(s8 index)
 {
     s32 i;
 
-    cmbGlobalWork->stock[index] = 0;
-    for (i = index + 1; i < cmbGlobalWork->stockCount; i++)
+    DDS3_GBWK->stock[index] = 0;
+    for (i = index + 1; i < DDS3_GBWK->stockCount; i++)
     {
-        cmbGlobalWork->stock[i - 1] = cmbGlobalWork->stock[i];
+        DDS3_GBWK->stock[i - 1] = DDS3_GBWK->stock[i];
     }
-    cmbGlobalWork->stockCount--;
+    DDS3_GBWK->stockCount--;
 }
 
 void cmpCompactStockList(s8 devilId)
 {
-    cmbGlobalWork->stock[cmbGlobalWork->stockCount++] = devilId;
+    DDS3_GBWK->stock[DDS3_GBWK->stockCount++] = devilId;
 }
 
 void cmpClearStockFlag(datUnitWork_t *work)
@@ -9157,14 +9140,14 @@ s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, s32 unused)
     return 0;
 }
 
-extern cmbGlobalWork_t *volatile cmpRecoverGlobalWork asm("DDS3_GBWK");
+extern dds3GlobalWork_t *volatile cmpRecoverGlobalWork asm("DDS3_GBWK");
 
 #ifdef NON_MATCHING
 void cmpRecover(u16 skill, datUnitWork_t *user, datUnitWork_t *target)
 {
     s32 recovered = 0;
     s32 area = cmpGetSkillTargetArea(skill);
-    cmbGlobalWork_t *work = cmpRecoverGlobalWork;
+    dds3GlobalWork_t *work = cmpRecoverGlobalWork;
     s32 i;
 
     if (area == 1) {
@@ -9942,9 +9925,9 @@ void cmpBuildStockNameList(cmpLocalStock_t *stock)
     stock->StockCnt = 0;
 
     if ((stock->count & 1) != 0) {
-        for (i = 0; i < cmbGlobalWork->stockCount; i++) {
-            s8 stockId = cmbGlobalWork->stock[i];
-            datUnitWork_t *unit = &cmbGlobalWork->party[stockId].unit;
+        for (i = 0; i < DDS3_GBWK->stockCount; i++) {
+            s8 stockId = DDS3_GBWK->stock[i];
+            datUnitWork_t *unit = &DDS3_GBWK->party[stockId].unit;
 
             if ((unit->flag & 2) != 0 &&
                 cmpCursorSlotIsSelectable(unit, stock->count, 0) != 0) {
@@ -9959,7 +9942,7 @@ void cmpBuildStockNameList(cmpLocalStock_t *stock)
 
     if ((stock->count & 2) != 0) {
         for (i = 4; i < 16; i++) {
-            datUnitWork_t *unit = &cmbGlobalWork->party[i].unit;
+            datUnitWork_t *unit = &DDS3_GBWK->party[i].unit;
 
             if ((unit->flag & 4) != 0) {
                 continue;
@@ -9975,8 +9958,8 @@ void cmpBuildStockNameList(cmpLocalStock_t *stock)
                 s8 selectedIndex = outputIndex;
 
                 stock->StockIdx[selectedIndex] = i;
-                for (j = 0; j < cmbGlobalWork->stockCount; j++) {
-                    if ((u8)cmbGlobalWork->stock[j] == i) {
+                for (j = 0; j < DDS3_GBWK->stockCount; j++) {
+                    if ((u8)DDS3_GBWK->stock[j] == i) {
                         stock->ListIdx[selectedIndex] = j;
                     }
                 }
@@ -9992,7 +9975,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpBuildStockNameList);
 
 s8 cmpGetStockCount(void)
 {
-    return cmbGlobalWork->stockCount;
+    return DDS3_GBWK->stockCount;
 }
 
 void cmpSortStockList(void)
@@ -10002,20 +9985,20 @@ void cmpSortStockList(void)
     s8 j;
     s8 cur;
 
-    for (i = 0; i < cmbGlobalWork->stockCount; i++)
+    for (i = 0; i < DDS3_GBWK->stockCount; i++)
     {
         j = 0;
-        cur = cmbGlobalWork->stock[i];
-        for (k = 0; k < cmbGlobalWork->stockCount; k++)
+        cur = DDS3_GBWK->stock[i];
+        for (k = 0; k < DDS3_GBWK->stockCount; k++)
         {
-            if ((i != k) && (cur == (u8)cmbGlobalWork->stock[k]))
+            if ((i != k) && (cur == (u8)DDS3_GBWK->stock[k]))
             {
-                cmbGlobalWork->stock[k] = 0;
-                cmbGlobalWork->stockCount--;
+                DDS3_GBWK->stock[k] = 0;
+                DDS3_GBWK->stockCount--;
             }
             else
             {
-                cmbGlobalWork->stock[j++] = cmbGlobalWork->stock[k];
+                DDS3_GBWK->stock[j++] = DDS3_GBWK->stock[k];
             }
         }
     }
@@ -10023,19 +10006,19 @@ void cmpSortStockList(void)
 
 s8 func_002426F0(void)
 {
-    if (cmbGlobalWork->stockCount < 0x10) {
-        return cmbGlobalWork->stockCount;
+    if (DDS3_GBWK->stockCount < 0x10) {
+        return DDS3_GBWK->stockCount;
     }
     return -1;
 }
 
 s8 func_00242710(u8 id)
 {
-    s32 count = cmbGlobalWork->stockCount;
+    s32 count = DDS3_GBWK->stockCount;
     s8 n = 0;
 
     if (count > 0) {
-        u8 *p = (u8 *)cmbGlobalWork->stock;
+        u8 *p = (u8 *)DDS3_GBWK->stock;
         s32 i = count;
 
         do {

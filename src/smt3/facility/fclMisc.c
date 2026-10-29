@@ -50,26 +50,9 @@ extern s32 scrGetIntPara(s32 n);
 
 extern void scrSetIntReturnValue(s32 i);
 
-typedef struct
-{
-    /* 0x00000 */ u8 unk_00000[0xA54];
-    /* 0x00A54 */ cmbUnit_t party[16];
-    /* 0x01914 */ s8 stock[0x10];
-    /* 0x01924 */ s32 stockCount;
-    /* 0x01928 */ u8 unk_01928[0x3D];
-    /* 0x01965 */ u8 unk_1965;
-    /* 0x01966 */ u8 unk_01966[0x394];
-    /* 0x01CFA */ u8 equipHearts;
-    /* 0x01CFB */ u8 unk_01CFB[0x40];
-    /* 0x01D3B */ u8 devilSlot[0x100];
-    /* 0x01E3B */ u8 unk_01E3B[0x10045];
-    /* 0x11E80 */ s32 encycNum;
-} cmbGlobalWork_t;
 
-/* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
- * unit reads it through a different member set at the same offsets. Both are
- * partial views; the alias holds them apart until one covers the object. */
-extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
+
+
 
 typedef struct
 {
@@ -238,7 +221,7 @@ void func_00213BB8(fclItemList_t *list)
 
     list->count = 0;
     for (item = 1; item < 0xA0; item++) {
-        if (((u8 *)item + (u32)cmbGlobalWork)[0x1928] != 0) {
+        if (((u8 *)item + (u32)DDS3_GBWK)[0x1928] != 0) {
             list->item[list->count++] = item;
         }
     }

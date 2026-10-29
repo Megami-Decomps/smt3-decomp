@@ -47,26 +47,9 @@ extern s8 gProcessStat_1;
 
 extern char D_0053D140[];
 
-typedef struct
-{
-    /* 0x00000 */ u8 unk_00000[0xA54];
-    /* 0x00A54 */ cmbUnit_t party[16];
-    /* 0x01914 */ s8 stock[0x10];
-    /* 0x01924 */ s32 stockCount;
-    /* 0x01928 */ u8 unk_01928[0x3D];
-    /* 0x01965 */ u8 unk_1965;
-    /* 0x01966 */ u8 unk_01966[0x394];
-    /* 0x01CFA */ u8 equipHearts;
-    /* 0x01CFB */ u8 unk_01CFB[0x40];
-    /* 0x01D3B */ u8 devilSlot[0x100];
-    /* 0x01E3B */ u8 unk_01E3B[0x10045];
-    /* 0x11E80 */ s32 encycNum;
-} cmbGlobalWork_t;
 
-/* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
- * unit reads it through a different member set at the same offsets. Both are
- * partial views; the alias holds them apart until one covers the object. */
-extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
+
+
 
 extern u8 *GBWK_0;
 
@@ -737,7 +720,7 @@ ragItemReq_t *ragGetConfirmEntry(s8 kind, u8 index)
 
 s32 ragFindItemSlot(ragItemReq_t *req)
 {
-    u8 *base = (u8 *)cmbGlobalWork + 8;
+    u8 *base = (u8 *)DDS3_GBWK + 8;
     s32 i;
 
     for (i = 0; i < 3; i++) {

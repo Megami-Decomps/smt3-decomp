@@ -236,26 +236,9 @@ extern cmbSlotParam_t D_0032DE28[];
 
 extern void p2sdPlayBGM(s32 MidiNo);
 
-typedef struct
-{
-    /* 0x00000 */ u8 unk_00000[0xA54];
-    /* 0x00A54 */ cmbUnit_t party[16];
-    /* 0x01914 */ s8 stock[0x10];
-    /* 0x01924 */ s32 stockCount;
-    /* 0x01928 */ u8 unk_01928[0x3D];
-    /* 0x01965 */ u8 unk_1965;
-    /* 0x01966 */ u8 unk_01966[0x394];
-    /* 0x01CFA */ u8 equipHearts;
-    /* 0x01CFB */ u8 unk_01CFB[0x40];
-    /* 0x01D3B */ u8 devilSlot[0x100];
-    /* 0x01E3B */ u8 unk_01E3B[0x10045];
-    /* 0x11E80 */ s32 encycNum;
-} cmbGlobalWork_t;
 
-/* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
- * unit reads it through a different member set at the same offsets. Both are
- * partial views; the alias holds them apart until one covers the object. */
-extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
+
+
 
 extern s32 fclRunPanelAnim(void *work);
 
@@ -517,7 +500,7 @@ void fclCombineSetTable(void)
 
 s32 cmbChkGeneralStat(void)
 {
-    if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) != 0) {
+    if ((DDS3_GBWK->party[0].unit.badstatus & 0x8000) != 0) {
         return 1;
     }
     if (evtGetAgeOfMoon() == 8) {
@@ -536,7 +519,7 @@ s32 fclCombineCheckMoonPhase(void)
         return 0;
     }
     i = 0;
-    party = cmbGlobalWork->party;
+    party = DDS3_GBWK->party;
     for (; i < 16; i++, party++) {
         if (party->unit.flag & 1) {
             switch (party->unit.id) {
@@ -844,7 +827,7 @@ s32 cmbGetBirthPhase(void)
         cursor = &CMB_GBWK->stockCursorGroup[2].cursor;
     }
     stockIndex = (s8)CMB_GBWK->unk_165EE[cursor->unk_22 + (u8)cursor->unk_24];
-    return cmpModelSetup(cmbGlobalWork->party[stockIndex].unit.id, 0);
+    return cmpModelSetup(DDS3_GBWK->party[stockIndex].unit.id, 0);
 }
 #else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthPhase);
@@ -852,7 +835,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthPhase);
 
 s32 cmbBirthDevilIsAvailable(void)
 {
-    u16 flag = cmbGlobalWork->party[0].unit.badstatus & 0x8000;
+    u16 flag = DDS3_GBWK->party[0].unit.badstatus & 0x8000;
 
     return flag != 0;
 }
@@ -878,12 +861,12 @@ void cmbCreateLocalStock(void)
 
     CMB_GBWK->stockCursorCount = 0;
     CMB_GBWK->evoCandidateCount =
-        cmbCountEvoCandidates(&cmbGlobalWork->party[4].unit, 12);
+        cmbCountEvoCandidates(&DDS3_GBWK->party[4].unit, 12);
 
     for (i = 4; i < 16; i++) {
-        if ((cmbGlobalWork->party[i].unit.flag & 1) != 0 &&
-            (cmbGlobalWork->party[i].unit.badstatus & 0x800) == 0 &&
-            (cmbGlobalWork->party[i].unit.flag & 0x10) == 0) {
+        if ((DDS3_GBWK->party[i].unit.flag & 1) != 0 &&
+            (DDS3_GBWK->party[i].unit.badstatus & 0x800) == 0 &&
+            (DDS3_GBWK->party[i].unit.flag & 0x10) == 0) {
             CMB_GBWK->unk_165EE[(s8)CMB_GBWK->stockCursorCount++] = i;
         }
     }
@@ -1007,12 +990,12 @@ extern s32 cmbStoreBirthDevil(u16 devilId, cmbUnit_t *list, u8 count);
 
 void cmbAddBirthDevilToStock(datUnitWork_t *units, u8 count)
 {
-    datUnitWork_t *first = &cmbGlobalWork->party[CMB_GBWK->stockSlot[0].index].unit;
-    datUnitWork_t *second = &cmbGlobalWork->party[CMB_GBWK->stockSlot[1].index].unit;
+    datUnitWork_t *first = &DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index].unit;
+    datUnitWork_t *second = &DDS3_GBWK->party[CMB_GBWK->stockSlot[1].index].unit;
     datUnitWork_t *third = NULL;
 
     if (CMB_GBWK->stockSlot[2].index >= 0) {
-        third = &cmbGlobalWork->party[CMB_GBWK->stockSlot[2].index].unit;
+        third = &DDS3_GBWK->party[CMB_GBWK->stockSlot[2].index].unit;
     }
     cmbStoreBirthDevil(first->id, (cmbUnit_t *)units, count);
     cmbStoreBirthDevil(second->id, (cmbUnit_t *)units, count);
@@ -1825,7 +1808,7 @@ s32 cmbFindSpecialEntry(u16 devilId)
 s32 cmbBuildDevilEntry(u16 devilId)
 {
     datUnitWork_t unit;
-    datUnitWork_t *leader = &cmbGlobalWork->party[0].unit;
+    datUnitWork_t *leader = &DDS3_GBWK->party[0].unit;
     datDevilTableEntry_t *table = datDevilTable;
     s32 found = 0;
     s8 attempt = 1;
@@ -1850,7 +1833,7 @@ s32 cmbBuildDevilEntry(u16 devilId)
                 continue;
             }
         }
-        if (cmbCheckEvoUnlocked(candidate, &cmbGlobalWork->party[0].unit, 16) >= 0) {
+        if (cmbCheckEvoUnlocked(candidate, &DDS3_GBWK->party[0].unit, 16) >= 0) {
             continue;
         }
         if (cmbDevilIsSpecial(candidate) != 0 || candidate == devilId) {
@@ -2246,7 +2229,7 @@ void cmbApplyEvoUnlock(s8 id)
 
 void cmbFindStockEnd(s8 devilId)
 {
-    cmbGlobalWork->stock[cmbGlobalWork->stockCount++] = devilId;
+    DDS3_GBWK->stock[DDS3_GBWK->stockCount++] = devilId;
 }
 
 extern s8 cmbCheckEvoUnlocked(u16 devilId, datUnitWork_t *list, u8 count);
@@ -2936,7 +2919,7 @@ void cmbDrawResultPanel(s32 mode)
 
     cmbDrawResultHeader(0x1360, 0x1C0, 0xFFFFF, 0xCA, 0x16,
                         0xB8B8F820, 0x30303040, 0x47);
-    cmbDrawDevilNameLevel(0x13A0, 0x1D0, 0xFFFFF, &cmbGlobalWork->party[0].unit, 0x47);
+    cmbDrawDevilNameLevel(0x13A0, 0x1D0, 0xFFFFF, &DDS3_GBWK->party[0].unit, 0x47);
     fclDrawPanelSprite(0x33001, 0x47);
     fclDrawPanelSprite2(0x48, 0x47);
     if (mode == 2) {
@@ -2949,12 +2932,12 @@ void cmbDrawResultPanel(s32 mode)
     }
     cmbDrawResultIcon(0, 0xFFFFF, 0x100, 0x16, alpha, 0x47);
     cmbDrawDevilStats(0, 0, 0xFFFFF,
-                      &cmbGlobalWork->party[CMB_GBWK->stockSlot[0].index].unit,
+                      &DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index].unit,
                       0, alpha, 0x47);
     alpha = (0x200 - fclGetPanelAnimPhase(&CMB_GBWK->sacrificePanelAnim)) / 2;
     cmbDrawResultIcon(1, 0xFFFFF, 0x100, 0x16, alpha, 0x47);
     cmbDrawDevilStats(0, 0xE8, 0xFFFFF,
-                      &cmbGlobalWork->party[CMB_GBWK->stockSlot[1].index].unit,
+                      &DDS3_GBWK->party[CMB_GBWK->stockSlot[1].index].unit,
                       1, alpha, 0x47);
     fclDrawPanelSprite(0x3101B, 0x47);
     fclDrawPanelSprite2(0x44, 0x47);
@@ -3027,7 +3010,7 @@ void cmbDrawStatus(void)
                               (u8)work->stockCursorGroup[2].cursor.unk_24];
         break;
     }
-    cmpDrawStatusCom(&cmbGlobalWork->party[slot].unit, 1, 0, 0);
+    cmpDrawStatusCom(&DDS3_GBWK->party[slot].unit, 1, 0, 0);
     fclRbnDraw(CMB_GBWK->ribbon, 0, 0x98, 0, 0x80, 2, -0x80, 0x47);
 }
 
@@ -3045,7 +3028,7 @@ void cmbDrawBirthDevilMaskBG(void)
         return;
     }
     sprite = &CMB_GBWK->backgroundSprite;
-    if (cmbGlobalWork->party[0].unit.level >= CMB_GBWK->birthUnit[0].level) {
+    if (DDS3_GBWK->party[0].unit.level >= CMB_GBWK->birthUnit[0].level) {
         return;
     }
     colors[0] = colors[1] = colors[2] = colors[3] = 0x80808060;
@@ -3082,10 +3065,10 @@ void cmbDrawBirthDevil(s32 hideRibbon)
 
         cmbCopyCustomDevilToStock(&display, selected);
         if (type == 2) {
-            datUnitWork_t *source = &cmbGlobalWork->party[CMB_GBWK->stockSlot[0].index].unit;
+            datUnitWork_t *source = &DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index].unit;
 
             if (datDevilTable[source->id].race == 8) {
-                source = &cmbGlobalWork->party[CMB_GBWK->stockSlot[1].index].unit;
+                source = &DDS3_GBWK->party[CMB_GBWK->stockSlot[1].index].unit;
             }
             cmbCopyCustomDevilToStock(&base, source);
             hasBase = 1;
@@ -3356,7 +3339,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateRoot);
 
 s32 cmbStockIsLocked(s32 index)
 {
-    s32 flag = cmbGlobalWork->party[index].unit.flag & 0x800;
+    s32 flag = DDS3_GBWK->party[index].unit.flag & 0x800;
 
     return flag != 0;
 }
@@ -3549,15 +3532,15 @@ void cmbUpdateBirthDevil(void)
         first = ((volatile cmbGbWork_t *)CMB_GBWK)->stockSlot[0].index;
         second = ((volatile cmbGbWork_t *)CMB_GBWK)->stockSlot[1].index;
         birthId = CMB_GBWK->birthUnit[0].id;
-        firstId = ((volatile cmbGlobalWork_t *)cmbGlobalWork)->party[first].unit.id;
-        if (firstId != birthId && cmbGlobalWork->party[second].unit.id != birthId &&
-            cmbCheckEvoUnlocked(birthId, &cmbGlobalWork->party[0].unit, 16) >= 0) {
+        firstId = ((volatile dds3GlobalWork_t *)DDS3_GBWK)->party[first].unit.id;
+        if (firstId != birthId && DDS3_GBWK->party[second].unit.id != birthId &&
+            cmbCheckEvoUnlocked(birthId, &DDS3_GBWK->party[0].unit, 16) >= 0) {
             CMB_GBWK->unk_00001 = 15;
             CMB_GBWK->unk_00004 = button;
             CMB_GBWK->unk_1650B = 2;
         } else {
             if (evtBitCheck(0x8A0) == 0 &&
-                cmbGlobalWork->party[0].unit.level < CMB_GBWK->birthUnit[0].level) {
+                DDS3_GBWK->party[0].unit.level < CMB_GBWK->birthUnit[0].level) {
                 CMB_GBWK->unk_00001 = 15;
                 CMB_GBWK->unk_00004 = 1;
                 CMB_GBWK->unk_1650B = 1;
@@ -3620,12 +3603,12 @@ extern void cmbAddBirthDevilToStock(datUnitWork_t *unit, u8 count);
 void cmbSetAction(void)
 {
     CMB_GBWK->stockSlot[0].id =
-        cmbGlobalWork->party[CMB_GBWK->stockSlot[0].index].unit.id;
+        DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index].unit.id;
     CMB_GBWK->stockSlot[1].id =
-        cmbGlobalWork->party[CMB_GBWK->stockSlot[1].index].unit.id;
+        DDS3_GBWK->party[CMB_GBWK->stockSlot[1].index].unit.id;
     CMB_GBWK->stockSlot[2].id =
-        cmbGlobalWork->party[CMB_GBWK->stockSlot[2].index].unit.id;
-    cmbAddBirthDevilToStock(&cmbGlobalWork->party[4].unit, 0xC);
+        DDS3_GBWK->party[CMB_GBWK->stockSlot[2].index].unit.id;
+    cmbAddBirthDevilToStock(&DDS3_GBWK->party[4].unit, 0xC);
 }
 
 s32 cmbUpdateDecideDevil(void)
@@ -4839,7 +4822,7 @@ datUnitWork_t *cmbGetBirthDevilPanel(void)
     datUnitWork_t *panel = (datUnitWork_t *)CMB_GBWK->birthPanel;
 
     if (sel != 3) {
-        panel = &cmbGlobalWork->party[*(s8 *)((u8 *)CMB_GBWK + sel * 4 + 0x4110)];
+        panel = &DDS3_GBWK->party[*(s8 *)((u8 *)CMB_GBWK + sel * 4 + 0x4110)];
     }
     return panel;
 }
@@ -5376,7 +5359,7 @@ void shop_206948(void)
 
     CMB_GBWK->eligibleCount = 0;
     for (i = 0; i < 16; i++) {
-        datUnitWork_t *unit = &cmbGlobalWork->party[i].unit;
+        datUnitWork_t *unit = &DDS3_GBWK->party[i].unit;
 
         if (func_00206910(unit) != 0) {
             cmbGbWork_t *work = CMB_GBWK;

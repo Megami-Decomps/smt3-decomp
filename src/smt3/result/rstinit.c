@@ -20,26 +20,9 @@ extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 
 extern rstData_t *EventStart;
 
-typedef struct
-{
-    /* 0x00000 */ u8 unk_00000[0xA54];
-    /* 0x00A54 */ cmbUnit_t party[16];
-    /* 0x01914 */ s8 stock[0x10];
-    /* 0x01924 */ s32 stockCount;
-    /* 0x01928 */ u8 unk_01928[0x3D];
-    /* 0x01965 */ u8 unk_1965;
-    /* 0x01966 */ u8 unk_01966[0x394];
-    /* 0x01CFA */ u8 equipHearts;
-    /* 0x01CFB */ u8 unk_01CFB[0x40];
-    /* 0x01D3B */ u8 devilSlot[0x100];
-    /* 0x01E3B */ u8 unk_01E3B[0x10045];
-    /* 0x11E80 */ s32 encycNum;
-} cmbGlobalWork_t;
 
-/* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
- * unit reads it through a different member set at the same offsets. Both are
- * partial views; the alias holds them apart until one covers the object. */
-extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
+
+
 
 extern rstData_t *GBWK_1;
 
@@ -97,8 +80,8 @@ void rstKillEvoAct(void)
 
 void rstSetTestParam(void)
 {
-    cmbGlobalWork->party[0].unit.exp += 100;
-    cmbGlobalWork->party[4].unit.exp += cmbGlobalWork->party[4].unit.level * 100;
+    DDS3_GBWK->party[0].unit.exp += 100;
+    DDS3_GBWK->party[4].unit.exp += DDS3_GBWK->party[4].unit.level * 100;
 }
 
 s32 rstChkLevelUpTarget(datUnitWork_t *pStock)
@@ -121,7 +104,7 @@ s32 rstChkResultEntry(void)
 
     for (i = 0; i < 0x10; i++)
     {
-        if (rstChkLevelUpTarget(&cmbGlobalWork->party[i].unit) != 0)
+        if (rstChkLevelUpTarget(&DDS3_GBWK->party[i].unit) != 0)
         {
             return 1;
         }
@@ -133,14 +116,14 @@ extern s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp);
 
 u8 rstCalcLevelFromExp(u8 Index, u32 Exp)
 {
-    datUnitWork_t *unit = &cmbGlobalWork->party[Index].unit;
+    datUnitWork_t *unit = &DDS3_GBWK->party[Index].unit;
 
     return (u8)unit->level + cmbGetLevelUpCount(unit, Exp - unit->exp);
 }
 
 s32 rstCalcExpFromLevel(u8 Index, s32 Level)
 {
-    return datCopyDevilWorkEntry(&cmbGlobalWork->party[Index].unit, Level);
+    return datCopyDevilWorkEntry(&DDS3_GBWK->party[Index].unit, Level);
 }
 
 void rstChkResult2Process(u8 *work)
@@ -155,7 +138,7 @@ void rstCreateTargetList(rstData_t *work)
     s32 useFirstUnit = 1;
     s32 i;
 
-    if (rstChkLevelUpTarget(&cmbGlobalWork->party[0].unit) != 0) {
+    if (rstChkLevelUpTarget(&DDS3_GBWK->party[0].unit) != 0) {
         rstPrepareStatusModel(6, 0, 1);
         useFirstUnit = 0;
     }
@@ -163,9 +146,9 @@ void rstCreateTargetList(rstData_t *work)
     work->levelUpCount = 0;
     work->levelUpStep = 0;
     i = 1;
-    while (i < cmbGlobalWork->stockCount) {
-        u8 stockIndex = (u8)cmbGlobalWork->stock[i];
-        datUnitWork_t *unit = &cmbGlobalWork->party[stockIndex].unit;
+    while (i < DDS3_GBWK->stockCount) {
+        u8 stockIndex = (u8)DDS3_GBWK->stock[i];
+        datUnitWork_t *unit = &DDS3_GBWK->party[stockIndex].unit;
         i++;
 
         if (rstChkLevelUpTarget(unit) != 0) {
