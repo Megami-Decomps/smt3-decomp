@@ -600,7 +600,7 @@ void deci2Putchar(s32 character)
         kputs(D_0059B940);
         index = D_0052C2B0;
     }
-    if (character == 10) {
+    if (character == '\n') {
         D_0052C2B0 = 0;
         D_0059B940[index] = character;
         D_0059B940[index + 1] = 0;
@@ -657,10 +657,6 @@ void scePrintf(const char *format, ...)
     D_0052C2B4 = previous;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__12);
-
-INCLUDE_ASM(const s32, "sdk/libkernl", _change_addr);
-
 typedef struct {
     void (*handler)(void *packet, void *argument);
     void *argument;
@@ -668,15 +664,42 @@ typedef struct {
 
 /* Consumed command-context prefix; later state remains opaque. */
 typedef struct {
-    u8 prefix[0xC];
+    u8 prefix[8];
+    void *remoteAddress;
     sifCommandHandler_t *systemHandlers;
     s32 systemCount;
     sifCommandHandler_t *handlers;
     s32 handlerCount;
+    u32 *softwareRegisters;
 } sifCommandContext_t;
 
 extern sifCommandContext_t D_0059BA98;
 extern u32 D_0059BBC0[];
+
+typedef struct {
+    u8 header[16];
+    u32 index;
+    u32 value;
+} sifRegisterPacket_t;
+
+typedef struct {
+    u8 header[16];
+    void *address;
+} sifAddressPacket_t;
+
+void gcc2_compiled__12(void *packet, void *argument)
+{
+    const sifRegisterPacket_t *command = packet;
+    sifCommandContext_t *context = argument;
+    context->softwareRegisters[command->index] = command->value;
+}
+
+void _change_addr(void *packet, void *argument)
+{
+    const sifAddressPacket_t *command = packet;
+    sifCommandContext_t *context = argument;
+    context->remoteAddress = command->address;
+}
 
 u32 sceSifGetSreg(s32 index)
 {

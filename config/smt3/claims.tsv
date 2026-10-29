@@ -788,3 +788,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 216 B	Kernel patch 
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 408 B	Alarm/TLB patch initialization; eight-pair tables, real copy extents, cache flush order, callback index reloads and TLB pointer publication
 src/smt3/pipe/pipeCamera.c	redthing1	done	2026-10-28	1 fn / 1040 B	third regional pipe camera with matched sibling vector layout, qualified unused sum declaration and signed clamp; complete owner exact
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 52 B	default void serial output callback expands newline to CR/LF and discards byte-writer status; native tail calls preserved
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 40 B	system-command callbacks update remote command address and indexed software register; recovered packet/context fields; complete owner 101 match, 0 differ
