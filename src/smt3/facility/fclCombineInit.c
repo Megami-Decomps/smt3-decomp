@@ -402,7 +402,7 @@ typedef struct
     /* 0x00000 */ u8 unk_00000;
     /* 0x00001 */ s8 unk_00001;
     /* 0x00002 */ u8 unk_00002;
-    /* 0x00003 */ u8 unk_00003;
+    /* 0x00003 */ s8 unk_00003;
     /* 0x00004 */ s8 unk_00004;
     /* 0x00005 */ s8 unk_00005;
     /* 0x00006 */ u8 unk_00006[2];
@@ -428,7 +428,7 @@ typedef struct
     /* 0x150C8 */ u8 reserved150C8[0x1440];
     /* 0x16508 */ u8 displayFlags[2];
     /* 0x1650A */ s8 unk_1650A;
-    /* 0x1650B */ u8 unk_1650B;
+    /* 0x1650B */ s8 unk_1650B;
     /* 0x1650C */ void *resourceHandle_1650C;
     /* 0x16510 */ s32 script;
     /* 0x16514 */ u8 *scriptArg;
@@ -872,7 +872,27 @@ s32 cmbCheckProcessStat(void)
     return 0;
 }
 
+extern s32 cmpModelSetup(u16 id, s32 blocking);
+
+#ifdef NON_MATCHING
+s32 cmbGetBirthPhase(void)
+{
+    cmpCursorInfo_t *cursor;
+    s32 stockIndex;
+
+    if (CMB_GBWK->unk_00003 == 5) {
+        cursor = &CMB_GBWK->stockCursorGroup[0].cursor;
+    } else if (CMB_GBWK->unk_00003 == 6) {
+        cursor = &CMB_GBWK->stockCursorGroup[1].cursor;
+    } else {
+        cursor = &CMB_GBWK->stockCursorGroup[2].cursor;
+    }
+    stockIndex = (s8)CMB_GBWK->unk_165EE[cursor->unk_22 + (u8)cursor->unk_24];
+    return cmpModelSetup(cmbGlobalWork->party[stockIndex].unit.id, 0);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthPhase);
+#endif
 
 s32 cmbBirthDevilIsAvailable(void)
 {
@@ -1007,7 +1027,26 @@ void cmbAddBirthDevilToStock(datUnitWork_t *units, u8 count)
     }
 }
 
+extern s32 fclScriptStart(s32 script, s32 entry, void *process);
+
+#ifdef NON_MATCHING
+void cmbStartResultScript(void)
+{
+    s32 entry = 0;
+
+    if (CMB_GBWK->unk_00004 != 0) {
+        if (CMB_GBWK->unk_1650B == 1) {
+            entry = 5;
+        } else if (CMB_GBWK->unk_1650B == 2) {
+            entry = 6;
+        }
+        CMB_GBWK->unk_00005 = 1;
+        CMB_GBWK->unk_00008 = fclScriptStart(CMB_GBWK->script, entry, &CMB_GBWK->scriptArg);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbStartResultScript);
+#endif
 
 typedef struct
 {
@@ -1054,7 +1093,26 @@ s32 cmbSeqStartScript(void)
     return 0;
 }
 
+extern void cmbSetupBirthPanel(s32 index);
+extern s32 cmbGetBirthPhase(void);
+
+#ifdef NON_MATCHING
+s32 cmbRunBirthDevilStep(void)
+{
+    if (CMB_GBWK->unk_00004 == 1) {
+        if (CMB_GBWK->unk_00003 == 5) {
+            cmbSetupBirthPanel(0);
+        } else if (CMB_GBWK->unk_00003 == 6) {
+            cmbSetupBirthPanel(1);
+        } else if (CMB_GBWK->unk_00003 == 8) {
+            cmbSetupBirthPanel(2);
+        }
+    }
+    return cmbGetBirthPhase();
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbRunBirthDevilStep);
+#endif
 
 extern datUnitWork_t *cmbGetBirthDevilPanel(void);
 extern u16 cmpGetStatusModelId(void);
