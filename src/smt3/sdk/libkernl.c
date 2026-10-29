@@ -3444,9 +3444,52 @@ s32 kCopy_1(u8 *dst, const u8 *src, u32 count)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", PatchIsNeeded);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", SetArg);
+typedef struct execArgumentBlock_t {
+    char *arguments[16];
+    char strings[1];
+} execArgumentBlock_t;
+extern void *D_0052D668;
+extern kernelEntryPair_t D_0052CB40[1];
+extern void PatchIsNeeded(u32 index, void *entry);
+extern s32 gcc2_compiled__16(void *destination, const void *source, u32 size);
+extern u32 strlen(const char *text);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", TerminateLibrary);
+char *SetArg(const char *path, s32 count, const char *const *arguments)
+{
+    char **table = ((execArgumentBlock_t *)D_0052D668)->arguments;
+    char *cursor = (char *)&table[16];
+    char *start = cursor;
+    u32 length;
+
+    PatchIsNeeded(D_0052CB40[0].index, D_0052CB40[0].entry);
+    if (count >= 16) {
+        count = 15;
+    }
+    gcc2_compiled__16(table, &cursor, 4);
+    table++;
+    length = strlen(path) + 1;
+    gcc2_compiled__16(cursor, path, length);
+    cursor += length;
+    if (count > 0) {
+        const char *const *argument = arguments;
+
+        do {
+            gcc2_compiled__16(table++, &cursor, 4);
+            count--;
+            length = strlen(*argument) + 1;
+            gcc2_compiled__16(cursor, *argument++, length);
+            cursor += length;
+        } while (count != 0);
+    }
+    return start;
+}
+
+extern void InitTLB(void);
+
+void TerminateLibrary(void)
+{
+    InitTLB();
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", ExecPS2);
 

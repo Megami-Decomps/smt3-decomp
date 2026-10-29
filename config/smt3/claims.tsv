@@ -817,3 +817,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 reconstruction / 0 exact B	R
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 448 B	formatted double conversion wrapper with sign-bit handling, dtoa mode/precision, fixed decimal correction and alternate-form zero fill; owner 73 match, 0 differ
 
 src/smt3/sdk/libgcc_floatdidf.c	redthing1	done	2026-10-28	1 SDK fn / 168 B	signed 64-bit integer to double conversion with high-word scaling, native low-word mask and unsigned-low correction; complete owner exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 288 B	execution argument packing with typed pointer header, scoped argument-loop cursor, signed count cap and TLB termination wrapper; owner 126 match, 0 differ
