@@ -349,7 +349,8 @@ extern s32 cmpModelHandle;
 
 extern fclRibbon_t *g_pdebug;
 
-extern void cmpDrawBoxLine();
+extern void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+                           const u32 *colors, s32 surfaceIndex);
 
 extern s32 cmpGetCursorSlotValue(s8 index, cmpCursorSlot_t *slot);
 
@@ -7440,7 +7441,7 @@ void cmp_23A360(s32 x, s32 y, s32 z, s32 w, s32 h, s32 g, s32 col)
 
 void cmpDrawPanelEffCell(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h)
 {
-    s32 pair[2];
+    u32 pair[2];
 
     pair[1] = g;
     pair[0] = g;
@@ -8577,7 +8578,7 @@ void camp_23C9C0(fclPanelPos_t *pos, s32 width, s32 gap,
 
 void camp_23CAF8(s32 x, s32 y, s32 a, s32 b, s32 color, s32 g)
 {
-    s32 pair[2];
+    u32 pair[2];
     s32 right = x + 0x200;
 
     pair[0] = color;
