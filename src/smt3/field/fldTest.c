@@ -273,7 +273,7 @@ extern void dds3EffectSetPosition(void *pData, sdfVector4_t *pPos);
 
 extern void dds3EffectSetRotateMatrix(void *pData, sdfMatrix4_t *pMatrix);
 
-extern void *dds3EffectPartCreate(s32 type, void *pData);
+extern void *dds3EffectPartCreate(u16 type, void *pData);
 
 extern void dds3EffectPartDelete(void *hEffPart);
 
@@ -802,17 +802,19 @@ void fldRunTamaFree(void)
 INCLUDE_ASM(const s32, "field/fldTest", fldRunTamaFree);
 #endif
 
-/* NON_MATCHING: 67 of 73 words differ (first at +0x10). */
-#ifdef NON_MATCHING
 void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 r)
 {
+    fldTest_FLDRUN_EFFTBL_t *entry = D_002FBEF0[id];
     fldTest_FLDRUN_DANTE_t *dante = &fldRun_Dante;
-    fldTest_FLDRUN_EFFTBL_t *entry;
     fldTest_FLDRUN_EFF_t *res;
     void *handle;
 
-    for (entry = D_002FBEF0[id]; (res = entry->pEff) != NULL; entry++) {
-        if (entry->off_cam_range_min < dante->d_c_dir && dante->d_c_dir < entry->off_cam_range_max) {
+    for (;;) {
+        res = entry->pEff;
+        if (res == NULL) {
+            return;
+        }
+        if (dante->d_c_dir > entry->off_cam_range_min && dante->d_c_dir < entry->off_cam_range_max) {
             if (entry->effmode == 0) {
                 handle = res->d3p;
                 if (handle != NULL) {
@@ -821,10 +823,6 @@ void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 r)
                 }
                 res->d3p = dds3EffectLoad(res->ptr);
                 res->cnt = entry->time;
-                res->x = x;
-                res->y = y;
-                res->z = z;
-                res->r = r;
             } else {
                 handle = res->pcf;
                 if (handle != NULL) {
@@ -833,17 +831,15 @@ void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 r)
                 }
                 res->pcf = dds3EffectPartCreate(6, res->ptr);
                 res->cnt = entry->time;
-                res->x = x;
-                res->y = y;
-                res->z = z;
-                res->r = r;
             }
+            res->x = x;
+            res->y = y;
+            res->z = z;
+            res->r = r;
         }
+        entry++;
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldTest", fldRunEffSet);
-#endif
 
 /* NON_MATCHING: 115 of 136 words differ (first at +0x10). */
 #ifdef NON_MATCHING
