@@ -6021,7 +6021,179 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawItemListRow);
 #endif
 
 
+#ifdef NON_MATCHING
+extern s32 cmpCursorBlinkColor(s32 timer);
+extern s32 cmpCursorFadeChannel(s32 color, s32 timer, s32 rate);
+extern void cmpDrawListFrame(s32 x, s32 y, s32 z, s32 rowHeight,
+                             s8 rowCount, s32 alpha, s32 ot);
+extern void cmpSetCursorSlot(s8 index, s8 state, u8 param,
+                             cmpCursorSlot_t *slot);
+extern s32 cmpItemIsUsable(u16 item);
+extern s32 cmpItemHasFlag(u16 item, s8 which);
+extern s32 cmpAllocEffectSlot(s32 color, s8 selected, s8 special,
+                              cmpCursorSlot_t *slot);
+extern void cmpSetSkillListRows(s32 rows);
+extern void cmpDrawItemListHeader(s32 x, s32 y, s32 color, u16 item);
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors, s32 page,
+                             s32 spriteId, s32 *texList,
+                             fclSpriteTbl_t *table, s32 ot);
+extern frFontRequest_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 width,
+                                               u32 color, const char *text,
+                                               frFontRequest_t *previous);
+extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
+extern void cmpDrawItemListRow(s32 x, s32 y, s32 z, s32 row, s32 ot);
+extern void fclInitPanelPos(s32 x, s32 y, s32 z, s16 w, s16 h,
+                            s32 work, fclPanelPos_t *panel);
+extern void cmpDrawHelp(fclPanelPos_t *panel, u16 index, s8 bank,
+                        s8 skipBackground, s32 alpha, u32 ot);
+extern void cmpDrawItemListScrollBar(s32 alpha, cmpCursorInfo_t *cursor);
+extern void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor);
+extern s32 fclChkMessage(void);
+extern s32 D_00345D88[5];
+extern fclSpriteTbl_t fclSpriteTable[];
+extern const char D_0054FEB0[];
+extern s32 sprintf(char *buffer, const char *format, ...);
+
+void cmpCalcItemEntry(fclPanelPos_t *pos, cmpCursorInfo_t *cursor,
+                      s32 callbackContext, s8 callbackFlag, s32 alpha,
+                      s32 ot)
+{
+    s32 x;
+    s32 rowY = 0;
+    s32 blinkLow;
+    s32 selectedRow;
+    s32 start;
+    cmpCursorSlot_t (*slots)[2];
+    s32 foldedAlpha;
+    s32 blinkColor;
+    s32 fontColor;
+    s32 itemY;
+    s32 row;
+    u8 itemRows;
+    s32 colorParts[4];
+    char numberText[16];
+    fclPanelPos_t helpPanel;
+
+    (void)callbackContext;
+    (void)ot;
+
+    x = pos->unk_00;
+    itemY = pos->unk_04;
+    itemRows = (u8)cursor->unk_26;
+    selectedRow = (u8)cursor->unk_25;
+    start = (u8)cursor->unk_22;
+    slots = (cmpCursorSlot_t (*)[2])((u8 *)cursor + 0x3C);
+    blinkColor = cmpCursorBlinkColor(alpha);
+    blinkLow = (u8)blinkColor;
+    cmpDrawListFrame(0, 0, 0x10, 0x17, 8, alpha, 0x47);
+
+    foldedAlpha = alpha;
+    if (alpha >= 0x100) foldedAlpha = 0x200 - alpha;
+
+    row = start;
+    if (campWork->unk_8302 != 0) {
+        while (row < start + itemRows) {
+            u16 item = campWork->itemId[row];
+            s32 rowColor;
+            s32 selected = 0;
+            s32 special = 0;
+
+            if (item != 0) {
+                rowColor = 0xA09DC380;
+                if (callbackFlag >= 0 && row - start == selectedRow) {
+                    cmpSetCursorSlot(0, 1, 0x10,
+                                     &slots[selectedRow + start][0]);
+                    selected = 1;
+                    rowColor = 0x89FEFF80;
+                }
+
+                if ((s8)campWork->itemMode == 0) {
+                    if (campWork->page[0].cursor.unk_22 +
+                            (u8)campWork->page[0].cursor.unk_24 != 1) {
+                        if (cmpItemIsUsable(item) != 0) {
+                            rowColor = 0x4D4B4B4D;
+                            special = 1;
+                            if (selected != 0) rowColor = 0x8EBEF52B;
+                        }
+                    } else if (cmpItemHasFlag(item, 1) == 0) {
+                        rowColor = 0x4D4B4B4D;
+                        if (selected != 0) rowColor = 0x8EBEF52B;
+                        special = 1;
+                    }
+                }
+
+                {
+                    s32 allocated = cmpAllocEffectSlot(
+                        rowColor, (s8)selected, (s8)special,
+                        &slots[row][0]);
+                    s32 color = (allocated & 0xFFFFFF00) |
+                                ((((u32)rowColor & 0xFF) * (u32)blinkLow) >> 7);
+                    frFontRequest_t *font;
+                    s32 quantity;
+
+                    fontColor = cmpCursorFadeChannel(color, alpha, 0);
+                    cmpSetSkillListRows(0x12);
+
+                    item = campWork->itemId[row];
+                    cmpDrawItemListHeader(x - 0x5A, itemY,
+                                          fontColor, item);
+
+                    colorParts[0] = blinkColor;
+                    colorParts[1] = blinkColor;
+                    colorParts[2] = blinkColor;
+                    colorParts[3] = blinkColor;
+                    fclDrawSpriteRes(0x40, rowY, 0x10, colorParts, 7, 2,
+                                     D_00345D88, fclSpriteTable, 0x47);
+
+                    item = campWork->itemId[row];
+                    quantity = DDS3_GBWK->itemQuantity[item];
+                    if ((s8)campWork->itemMode != 2) {
+                        sprintf(numberText, D_0054FEB0, quantity);
+                    } else if (quantity < 2) {
+                        sprintf(numberText, D_0054FEB0, 1);
+                    } else {
+                        sprintf(numberText, D_0054FEB0, quantity);
+                    }
+
+                    font = frwGetSmallNumFontFRQ(x + 0x810,
+                                                 itemY + 0x10, 0x10,
+                                                 (u32)fontColor, numberText, NULL);
+                    func_001C7E38((frFontHandle_t *)font, 1, 0x47);
+                    frDestroyFontRequestAfter((frFontHandle_t *)font);
+                }
+
+                rowY += 0xB8;
+                itemY += 0xB8;
+            }
+            row++;
+        }
+        fclInitPanelPos(0x120, 0x988, 0x10, 0, 0, 0, &helpPanel);
+        cmpDrawHelp(&helpPanel, campWork->itemId[cursor->unk_22 + (u8)cursor->unk_24],
+                    1, 0, foldedAlpha, 0x47);
+        cmpSetSkillListRows(-1);
+    } else {
+        s32 halfColor = 0x80808000 | (foldedAlpha / 2);
+        cmpDrawItemListRow(0xF0, 0x278, 0x10, foldedAlpha, 0x47);
+        colorParts[0] = halfColor;
+        colorParts[1] = halfColor;
+        colorParts[2] = halfColor;
+        colorParts[3] = halfColor;
+        fclDrawSpriteRes(0, 0, 0x10, colorParts, 0, 0x1F,
+                         D_00345D88, fclSpriteTable, 0x47);
+    }
+
+    if (callbackFlag == 0 && alpha < 0x101) {
+        if (fclChkMessage() != 0) {
+            cursor->unk_34 = 0;
+        } else {
+            cmpDrawItemListScrollBar(alpha, cursor);
+        }
+    }
+    cmpUpdateCursorSlots(cursor);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcItemEntry);
+#endif
 
 void campDrawInfoPanel(void)
 {
