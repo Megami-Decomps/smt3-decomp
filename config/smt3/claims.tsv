@@ -914,3 +914,7 @@ src/smt3/newbattle/nbPanelProcess.c	z29	open	2026-10-29	1 fn / 5400 B	largest-fi
 src/smt3/facility/fclRagCalc.c	redthing1	done	2026-10-29	2 fn / 672 B	PiM agents: ragDrawList2/3 use canonical Rag list/window/panel members and truthful void providers; existing drafts and shared-record/API prerequisites credited; whole owner exact
 src/smt3/newbattle/nbPanelProcess.c	z29	done	2026-10-29	0 matches / 1 guarded draft	nbPanelPressGauge drafted at 5360/5400 B, 1046 of 1350 mnemonics in order; D_004F0034/48 resolved as nbPressGaugeTable[1..2]; residual is one extra spilled color local
 src/smt3/newbattle/nbActionProcess.c	z29	open	2026-10-29	1 fn / 5160 B	largest-first pass: SetAction_SKILL
+src/smt3/effect/billManager.c	redthing1	done	2026-10-29	1 fn / 464 B	dds3Billboard_P2AAnimDraw promoted unchanged after full owner63/0, data and retail qualification; historical caller annul trade superseded; 79519a4d
+src/smt3/pipe/pipePosTable.c	redthing1	done	2026-10-29	1 fn / 424 B	pipeFileLoad matched with truthful providers and native56B rodata/16B sdata preserved; actual published retail exact; 5d31d1d9
+src/smt3/code_0022C578.c	redthing1	done	2026-10-29	1 fn / 472 B	cmpRandomizePanelEff matched via native byte reflection field and ordinary loop reversal; owner370/0 and actual published retail exact; f7d17230
+src/smt3/field/fldTest.c	redthing1	done	2026-10-29	1 fn / 720 B	fldRunDantePatr matched with native diagnostic identity and exact140B sdata; owner38/0 and actual published retail exact; b62c6009
