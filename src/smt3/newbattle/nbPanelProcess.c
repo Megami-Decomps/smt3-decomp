@@ -118,9 +118,6 @@ typedef struct nbMainProcessData_t
 
 
 
-/* The box nbCenterText centres a string inside; only the width is named. */
-typedef struct { u8 unk_00[0xC]; s32 width; } nbTextBox_t;
-
 /* 0x38 bytes of flash state: three unsigned phases, RGB colours and pixel offsets. */
 typedef struct
 {
@@ -856,9 +853,9 @@ void nbPanelSmallNameStringDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ,
     frDestroyFontRequestAfter(frq);
 }
 
-void nbCenterText(frFontHandle_t *frq, nbTextBox_t *box)
+void nbCenterText(frFontHandle_t *frq, nbPanelProcess_nbPanelXYZ_t *box)
 {
-    frSetDrawPosition(frq, frq->x + (((box->width - (s32)frGetStrWidth2(frq)) >> 1) << 4), frq->y);
+    frSetDrawPosition(frq, frq->x + (((box->w - (s32)frGetStrWidth2(frq)) >> 1) << 4), frq->y);
 }
 
 u32 nbPanelHPColor(datUnitWork_t *pUnitWork)
