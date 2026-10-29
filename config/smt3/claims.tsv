@@ -910,3 +910,4 @@ src/smt3/sdf/sdfMovie.c	redthing1	done	2026-10-29	1 fn / 596 B	PiM agent: native
 src/smt3/mc/slMain.c	redthing1	done	2026-10-29	1 fn / 708 B	PiM agent: native save revision conversion with genuine record extents and live copy/clear extent reuse; compiler unchanged, complete owner exact
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-29	1 fn / 1576 B	PiM agent: native encyclopedia caption renderer, bounded real packet buffers and callback reloads; HD algorithm reference credited, all peers preserved
 src/smt3/field/fldEveHit.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldEveHit_AddEveHit redrafted from the retail block structure: 6236/6248 B, 1144 of 1560 instructions identical (was 3584 B / 3 words); residual is reload density, not shape
+src/smt3/newbattle/nbPanelProcess.c	z29	open	2026-10-29	1 fn / 5400 B	largest-first pass: nbPanelPressGauge, no prior draft
