@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ps2asm.h"
 
 extern s32 D_0052BA70 __attribute__((section(".data")));
 extern s32 D_00598C40 __attribute__((section(".data")));
@@ -12,6 +13,23 @@ extern s32 D_0052A02C __attribute__((section(".data")));
 extern u8 D_0052B1D0[0x40] __attribute__((section(".data")));
 extern s32 D_0052B640 __attribute__((section(".data")));
 extern s32 D_0052B200[4] __attribute__((section(".data")));
+
+typedef struct sdfSemaParam_t {
+    s32 count;
+    s32 maxCount;
+    s32 initCount;
+    s32 waitThreads;
+    u32 attr;
+    u32 option;
+} sdfSemaParam_t;
+
+extern s32 CreateSema(sdfSemaParam_t *param);
+extern s32 iSignalSema(s32 sema);
+extern s32 WaitSema(s32 sema);
+extern s32 DeleteSema(s32 sema);
+extern s32 SetAlarm(u16 ticks, void (*callback)(s32, s32, s32), void *argument);
+extern void gcc2_compiled__6(s32 cause, s32 address, s32 argument);
+extern s32 cdvdNcmdSema __attribute__((section(".data")));
 
 /* The reply word is read back through the uncached mirror, since the IOP
  * wrote it behind the data cache. */
@@ -31,9 +49,25 @@ extern s32 sceCdSync(s32 mode);
 extern s32 sceCdStream(u32 lsn, u32 sectors, void *buf, s32 cmd, void *arg);
 extern s32 sceCdLayerSearchFile(u32 file, const char *name, s32 layer);
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", gcc2_compiled__6);
+void gcc2_compiled__6(s32 cause, s32 address, s32 argument)
+{
+    iSignalSema(argument);
+    EE_SYNC_EI();
+}
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdDelayThread);
+void sceCdDelayThread(u16 ticks)
+{
+    sdfSemaParam_t param;
+    s32 sema;
+
+    param.maxCount = 1;
+    param.initCount = 0;
+    param.option = 0;
+    sema = CreateSema(&param);
+    SetAlarm(ticks, gcc2_compiled__6, (void *)sema);
+    WaitSema(sema);
+    DeleteSema(sema);
+}
 
 s32 sceCdCallback(s32 func)
 {
@@ -81,7 +115,6 @@ INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_ncmd_prechk);
 
 extern s32 _sceCd_ncmd_prechk(s32 cmd);
 extern s32 D_0052A080 __attribute__((section(".data")));
-extern s32 cdvdNcmdSema __attribute__((section(".data")));
 
 s32 sceCdNcmdDiskReady(void)
 {

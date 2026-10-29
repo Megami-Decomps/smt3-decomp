@@ -32,12 +32,12 @@ writing it out gets within one instruction without any searching:
         SignalSema(D_0052A02C);
         return 0;
     }
-    ret = UNCACHED(D_0052B200);
+    ret = UNCACHED(D_0052B200)[0];
     SignalSema(D_0052A02C);
     return ret;
 
 Two details are load-bearing. The reply word is read through the uncached
-mirror, `*(volatile s32 *)((u32)&D_0052B200 | 0x20000000)`, because the IOP
+mirror, `*(s32 *)((u32)D_0052B200 | 0x20000000)`, because the IOP
 wrote it behind the data cache; and `SignalSema` is written out in both the
 error and the success arm, never hoisted, exactly as in libmc.
 
@@ -47,3 +47,14 @@ each), which an `s32 D_0052B200[4]` reproduces, but the draft then comes out
 172 bytes against retail's 184 and the two loads schedule differently.
 `sceCdSync` is 156 against 160: unlike `sceCdSyncS` its branch polarity is the
 other way round, and inverting it makes things worse rather than better.
+
+## Semaphore delay and alarm callback
+
+`sceCdDelayThread` matches all 104 bytes using the same six-word semaphore
+record as the matched `sdfCreateSema` wrapper. It initializes maxCount to 1,
+initCount to 0 and option to 0, retaining the native untouched fields. It
+creates the semaphore, sets the 16-bit alarm delay with the semaphore ID as
+callback argument, waits, then deletes it. The 36-byte callback forwards its
+third argument to `iSignalSema`, then uses the existing `EE_SYNC_EI` hardware
+primitive. The compiler supplies the argument move and complete epilogue.
+The complete disc owner checks 17 match / 0 differ.
