@@ -227,9 +227,9 @@ extern s32 nbAddReturnKoukaPacket(s32 startframe, nbActionProcessData_t *uniquei
 
 extern s32 nbCheckEscape(nbMainProcessData_t *data);
 
-extern s32 nbMakePressPacket(s32 startframe, nbActionProcessData_t *uniqueid, f32 press);
+extern s32 nbMakePressPacket(s32 startframe, s32 uniqueid, f32 press);
 
-extern s32 nbMakeNewPressPacket(s32 startframe, nbActionProcessData_t *uniqueid, s32 ptype,
+extern s32 nbMakeNewPressPacket(s32 startframe, s32 uniqueid, s32 ptype,
                                 nbFormation_t *form);
 
 extern struct nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame,
@@ -1379,8 +1379,8 @@ s32 CheckAction_BAD(nbActionProcessData_t *a)
     switch (nbGetBadStat(a->form->formindex)) {
     case 1:
     case 2:
-        nbMakePressPacket(0, a, -1.0f);
-        nbMakeNewPressPacket(0, a, 0, a->form);
+        nbMakePressPacket(0, (s32)a, -1.0f);
+        nbMakeNewPressPacket(0, (s32)a, 0, a->form);
         nbMakeBadKaifukuPacket(5, (s32)a, a->form);
         if ((a->data->stat & 8) != 0) {
             nbCameraSetState(0x19);
@@ -1394,8 +1394,8 @@ s32 CheckAction_BAD(nbActionProcessData_t *a)
         SetNextActionSeq(a, 0xB);
         break;
     case 4:
-        nbMakePressPacket(0, a, -1.0f);
-        nbMakeNewPressPacket(0, a, 0, a->form);
+        nbMakePressPacket(0, (s32)a, -1.0f);
+        nbMakeNewPressPacket(0, (s32)a, 0, a->form);
         nbMakeKaifukuPacket(10, (s32)a, a->form, 0, a->work->maxhp >> 3,
                             a->work->maxmp >> 3, 0);
         if ((a->data->stat & 8) != 0) {
@@ -1406,8 +1406,8 @@ s32 CheckAction_BAD(nbActionProcessData_t *a)
         break;
     case 0x10:
     case 0x400:
-        nbMakePressPacket(0, a, -1.0f);
-        nbMakeNewPressPacket(0, a, 0, a->form);
+        nbMakePressPacket(0, (s32)a, -1.0f);
+        nbMakeNewPressPacket(0, (s32)a, 0, a->form);
         if ((a->data->stat & 8) != 0) {
             nbCameraSetState(0x19);
         }
@@ -2275,8 +2275,8 @@ void SetAction_NEGORESULT(nbActionProcessData_t *a)
         break;
     }
     if (pressPacket != 0) {
-        nbMakePressPacket(0, a, a->press);
-        nbMakeNewPressPacket(0, a, pressType, a->form);
+        nbMakePressPacket(0, (s32)a, a->press);
+        nbMakeNewPressPacket(0, (s32)a, pressType, a->form);
     }
 
     if (setMotion != 0) {
@@ -2314,17 +2314,17 @@ void SetAction_WAIT(nbActionProcessData_t *a)
     switch (a->work->nowcommand) {
     case 10:
         SetDamagePacket(a, a->work->maxhp * 15 / 100);
-        nbMakePressPacket(0, a, -1.0f);
-        nbMakeNewPressPacket(0, a, 0, a->form);
+        nbMakePressPacket(0, (s32)a, -1.0f);
+        nbMakeNewPressPacket(0, (s32)a, 0, a->form);
         return;
     case 8:
-        nbMakePressPacket(0, a, -1.0f);
-        nbMakeNewPressPacket(0, a, 0, a->form);
+        nbMakePressPacket(0, (s32)a, -1.0f);
+        nbMakeNewPressPacket(0, (s32)a, 0, a->form);
         SetTimeList(a, a->form->formindex, 0, 5, 5);
         return;
     case 3:
-        nbMakePressPacket(0, a, -0.5f);
-        nbMakeNewPressPacket(0, a, 1, a->form);
+        nbMakePressPacket(0, (s32)a, -0.5f);
+        nbMakeNewPressPacket(0, (s32)a, 1, a->form);
         SetTimeList(a, a->form->formindex, 0, 5, 5);
         break;
     case 9:
@@ -2343,8 +2343,8 @@ void SetAction_ESCAPE(nbActionProcessData_t *a)
     if (a->data->esccnt < 255) {
         a->data->esccnt++;
     }
-    nbMakePressPacket(0, a, -10.0f);
-    nbMakeNewPressPacket(0, a, 8, a->form);
+    nbMakePressPacket(0, (s32)a, -10.0f);
+    nbMakeNewPressPacket(0, (s32)a, 8, a->form);
     if (nbCheckEscape(a->data) != 0) {
         a->data->endtype = 3;
         return;
@@ -2397,8 +2397,8 @@ void SetAction_RETURN(nbActionProcessData_t *a)
     }
     nbMakeReturnPacket(0, a, a->party);
     SetTimeList(a, a->form->formindex, 0, 40, 40);
-    nbMakePressPacket(10, a, -0.5f);
-    nbMakeNewPressPacket(10, a, 9, a->form);
+    nbMakePressPacket(10, (s32)a, -0.5f);
+    nbMakeNewPressPacket(10, (s32)a, 9, a->form);
 }
 
 s32 CheckAction_RETURN(nbActionProcessData_t *a)

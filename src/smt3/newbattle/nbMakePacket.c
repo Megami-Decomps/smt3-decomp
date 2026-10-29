@@ -1467,7 +1467,8 @@ s32 nbMakePressPacket(s32 startframe, s32 uniqueid, f32 press)
     return 1;
 }
 
-s32 nbMakeNewPressPacket(s32 startframe, s32 uniqueid, s32 type)
+/* Action callers supply a formation in argument four; native does not read it. */
+s32 nbMakeNewPressPacket(s32 startframe, s32 uniqueid, s32 type, nbFormation_t *form)
 {
     nbMainProcessData_t *data;
     s32 press, turns;
@@ -1482,7 +1483,7 @@ s32 nbMakeNewPressPacket(s32 startframe, s32 uniqueid, s32 type)
     deltaTurns = 0;
     totalPress = 0;
     totalTurns = 0;
-    /* Qualified cc1 loop notes 54/337 retain the retail back edge at 0x2644D8. */
+    /* The qualified one-pass loop retains the retail back edge at 0x2644D8. */
     for (i = 0; i < 1; i++) {
         s32 noHalfTurn = press == 0;
         s32 hasHalfTurn = press < turns;

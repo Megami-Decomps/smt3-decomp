@@ -13,6 +13,21 @@ and a `_t` suffix (`sdfMat_t`, `dds3ModelHandle_t`). A type in this repo spelled
 Capitalization is a signal, not proof: some invented types are spelled
 correctly, and a type can carry the right name over a guessed layout.
 
+## Press-packet caller contracts
+
+`nbMakePressPacket` and `nbMakeNewPressPacket` receive a 32-bit integer
+`uniqueid`. Action callers explicitly convert their action address to that ID,
+matching the packet providers instead of declaring an incompatible pointer
+parameter in the caller's unit.
+
+`nbMakeNewPressPacket` also has an unused fourth formation parameter. Native
+action calls at 0x00256958 and 0x0025699C load the action's `form` field (+0x28)
+into `$7` in the call delay slot; calls at 0x00253EC4 and 0x00253F24 do the same.
+All nine C callers supply that field. The provider at 0x00264368 uses only its
+first three inputs: its later `$7` values are newly initialized locals. Keep
+the caller-supplied formal rather than adding a use or removing the argument.
+This reconciles the source interface without changing the native behavior.
+
 ## Sources
 
 Same order of authority as [IDB corrections](idb-corrections.md).
