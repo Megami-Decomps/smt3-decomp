@@ -3269,21 +3269,27 @@ extern void cmbDrawResultHeader(s32 x, s32 y, s32 z, s32 width, s32 height,
 extern void cmbDrawResultFooter(s32 color);
 extern s32 fclGetPanelAnimPhase(fclPanelAnim_t *anim);
 
-#ifdef NON_MATCHING
 void cmbDrawResultPanel(s32 mode)
 {
-    s32 alpha = 0x100;
+    s32 alpha;
 
     cmbDrawResultHeader(0x1360, 0x1C0, 0xFFFFF, 0xCA, 0x16,
                         0xB8B8F820, 0x30303040, 0x47);
     cmbDrawDevilNameLevel(0x13A0, 0x1D0, 0xFFFFF, &DDS3_GBWK->party[0].unit, 0x47);
     fclDrawPanelSprite(0x33001, 0x47);
     fclDrawPanelSprite2(0x48, 0x47);
-    if (mode == 2) {
-        cmbDrawResultFooter(0x698AEC40);
-    } else {
+    switch (mode) {
+    case 1:
         cmbDrawResultFooter(0x5FA5E240);
+        break;
+    case 2:
+        cmbDrawResultFooter(0x698AEC40);
+        break;
+    default:
+        cmbDrawResultFooter(0x5FA5E240);
+        break;
     }
+    alpha = 0x100;
     if (mode != 2) {
         alpha = (0x200 - fclGetPanelAnimPhase(&CMB_GBWK->resultPanelAnim)) / 2;
     }
@@ -3299,9 +3305,6 @@ void cmbDrawResultPanel(s32 mode)
     fclDrawPanelSprite(0x3101B, 0x47);
     fclDrawPanelSprite2(0x44, 0x47);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultPanel);
-#endif
 
 #ifdef NON_MATCHING
 extern void cmbDrawStockEntry(s32 x, s32 y, u32 z, s8 selected, u32 color, cmpCursorInfo_t *cursor, u8 mode, s32 ot);
