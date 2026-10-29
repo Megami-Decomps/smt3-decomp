@@ -510,3 +510,19 @@ The wrappers supply command one; the whole-file wrapper supplies the ordinary
 string literal `"all"`. No larger caller-output record is inferred from the
 16-byte receive length. The complete kernel owner checks 48 match / 0 differ
 at this qualification.
+
+## Matched module-loading core
+
+`_sceSifLoadModule` matches all 548 instruction bytes. It copies and terminates
+the path, then copies at most 252 argument bytes. A null argument pointer
+writes only the first argument byte and sets the transmitted count to zero;
+other unused argument bytes retain their native shared-buffer state. The
+size test is signed, and the short-copy path forwards the original size.
+
+The ordinary constant-size `memcpy` expands into the native aligned/unaligned
+252-byte copy paths with the configured compiler. The RPC sends 512 bytes and
+receives eight. Failure leaves the caller's result untouched. Success captures
+the first reply word before writing the second through the caller's result
+pointer, preserving the native behavior even when that pointer aliases the
+shared reply. A write-then-read form has the same 548-byte size but differs in
+three result-path words. The complete kernel owner checks 49 match / 0 differ.

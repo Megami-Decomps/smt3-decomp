@@ -1384,7 +1384,39 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadModuleBuffer);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadStartModuleBuffer);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifLoadModule);
+s32 _sceSifLoadModule(const char *path, s32 argumentSize, const void *arguments,
+                      s32 *moduleResult, s32 command)
+{
+    s32 result;
+
+    if (_lf_bind() < 0) {
+        return -65536;
+    }
+    if (_lf_version() != 0) {
+        return -65540;
+    }
+    strncpy(D_0059EA00.name, path, 0xFC);
+    D_0059EA00.name[0xFB] = 0;
+    if (arguments != NULL) {
+        if (argumentSize > 0xFC) {
+            memcpy(D_0059EA00.arguments, arguments, 0xFC);
+            D_0059EA00.value = 0xFC;
+        } else {
+            memcpy(D_0059EA00.arguments, arguments, argumentSize);
+            D_0059EA00.value = argumentSize;
+        }
+    } else {
+        D_0059EA00.arguments[0] = 0;
+        D_0059EA00.value = 0;
+    }
+    if (sceSifCallRpc(&D_0059EC00, command, 0, &D_0059EA00, 0x200,
+                      &D_0059EA00, 8, NULL, NULL) < 0) {
+        return -65537;
+    }
+    result = D_0059EA00.value;
+    *moduleResult = D_0059EA00.moduleResult;
+    return result;
+}
 
 extern s32 _sceSifLoadModule(const char *path, s32 argumentSize, const void *arguments,
                               s32 *moduleResult, s32 command);
