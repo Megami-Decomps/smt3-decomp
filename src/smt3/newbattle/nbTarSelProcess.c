@@ -410,7 +410,85 @@ void MemoryCommand_nbTarSelProcess(nbTarSelProcessData_t *process)
     work->nowtform = process->nowform;
 }
 
+extern u8 dds3PadButtonState[64];
+extern void nbPlaySe(s32 no);
+
+#ifdef NON_MATCHING
+void CursorSelect(nbTarSelProcessData_t *process)
+{
+    volatile nbTarSelProcessData_t *selection = process;
+    volatile u8 *pad = dds3PadButtonState;
+    s32 count = 0;
+    s32 both;
+    s32 moved = 0;
+    s32 area;
+    s8 friendCount;
+
+    if ((process->data->stat & 0x200000) || process->stat != 1) {
+        return;
+    }
+    if (pad[0x21] & 2) {
+        MemoryCommand_nbTarSelProcess(process);
+        process->stat = 0;
+        return;
+    }
+    if ((s8)pad[0x23] < 0) {
+        process->stat = 2;
+        nbPlaySe(10);
+    }
+    if (process->ctype == 2) {
+        return;
+    }
+    area = selection->nowcarea;
+    if (area == 1) {
+        count = selection->friendcnt;
+    } else if (area == 2) {
+        count = selection->enemycnt;
+    }
+    friendCount = selection->friendcnt;
+    both = friendCount > 0 && selection->enemycnt > 0;
+    if (count >= 2) {
+        if (((s8)pad[0x25] < 0 || ((s8)pad[0x27] < 0 && !both)) &&
+            selection->nowno == count - 1) {
+            selection->nowno = 0;
+            moved = 1;
+        } else if ((pad[0x25] & 2) || ((pad[0x27] & 2) && !both)) {
+            if (selection->nowno < count - 1) {
+                selection->nowno++;
+                moved = 1;
+            }
+        }
+        if (((s8)pad[0x24] < 0 || ((s8)pad[0x26] < 0 && !both)) &&
+            selection->nowno == 0) {
+            selection->nowno = count - 1;
+            moved = 1;
+        } else if ((pad[0x24] & 2) || ((pad[0x26] & 2) && !both)) {
+            if (selection->nowno > 0) {
+                selection->nowno--;
+                moved = 1;
+            }
+        }
+    }
+    if ((s8)pad[0x26] < 0 || (s8)pad[0x27] < 0) {
+        if (area == 1 && selection->enemycnt > 0) {
+            selection->nowno = 0;
+            selection->nowcarea = 2;
+            moved = 1;
+        } else if (area == 2 && friendCount > 0) {
+            selection->nowcarea = 1;
+            selection->nowno = 0;
+            moved = 1;
+        }
+    }
+    if (moved) {
+        UpdateSelect(process);
+        nbPlaySe(3);
+        process->statusTime = 0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", CursorSelect);
+#endif
 
 void CursorSelectAuto(nbTarSelProcessData_t *process)
 {
