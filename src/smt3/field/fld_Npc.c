@@ -1060,9 +1060,9 @@ void fldEADraw(void) {
         DrwSprite2D(offset + 0x1A4, offset + 0x183, 0x3D, 0x21, 0x7B, 0x7D, 0x3D, -0x21, (alpha << 24) | 0x808080, fldUiTexture);
         fldEADrawState += 0.1f;
     }
-    encounterId = fldGlobalBase.wordC0;
+    encounterId = fldGlobalBase.encounterOverrideId;
     if (encounterId == 0) {
-        encounterId = fldGlobalBase.wordBC;
+        encounterId = fldGlobalBase.defaultEncounterId;
     }
     if (fldChkVortex()) {
         s32 count = nbGetEncountCnt();

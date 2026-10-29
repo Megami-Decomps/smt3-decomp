@@ -458,8 +458,8 @@ s32 ProcRandomEncountCheck(void)
     }
     if (distance < 9998.0f && fldRunDanteGunFlag.enabled == 0) return 0;
     if (fldEncountTestFlag(0x10) == 0) return 0;
-    encounter = fldGlobalBase.wordC0;
-    if (encounter == 0) encounter = fldGlobalBase.wordBC;
+    encounter = fldGlobalBase.encounterOverrideId;
+    if (encounter == 0) encounter = fldGlobalBase.defaultEncounterId;
     fldEncountTimer = encounter;
     D_0054EB94 = nbEncountCalc(encounter, distance);
     if (D_0054EB94 == 0) return 0;

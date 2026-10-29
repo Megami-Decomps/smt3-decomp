@@ -544,9 +544,9 @@ void fldReadyScene(void)
             eventSet = 0;
             if (encounters->eventFlag != 0) eventSet = evtBitCheck(encounters->eventFlag) != 0;
             if (eventSet == 0)
-                fldGlobalBase.wordBC = D_003D51E0[fldSceneParam.loadField].normal[fldSceneParam.loadArea];
+                fldGlobalBase.defaultEncounterId = D_003D51E0[fldSceneParam.loadField].normal[fldSceneParam.loadArea];
             else
-                fldGlobalBase.wordBC = D_003D51E0[fldSceneParam.loadField].alternate[fldSceneParam.loadArea];
+                fldGlobalBase.defaultEncounterId = D_003D51E0[fldSceneParam.loadField].alternate[fldSceneParam.loadArea];
         }
         if (((u32)fldGlobalBase.area - 11) < 35 && fldGlobalBase.area != 39 &&
             fldGetRestoreMode() != 4 && reused == 0) {

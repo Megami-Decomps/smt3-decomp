@@ -143,8 +143,8 @@ void fldGbInit_System(s32 mode)
     fldGlobalBase.word78 = 0;
     fldGlobalBase.word80 = 0;
     fldGlobalBase.lightMaIdx = 0;
-    fldGlobalBase.wordBC = 0;
-    fldGlobalBase.wordC0 = 0;
+    fldGlobalBase.defaultEncounterId = 0;
+    fldGlobalBase.encounterOverrideId = 0;
     fldGlobalBase.wordC8 = 0;
     fldGlobalBase.wordCC = 0;
     fldGlobalBase.wordF8 = 0;
