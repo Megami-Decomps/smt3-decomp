@@ -160,6 +160,7 @@ DispComm1PanelComm	newbattle/nbCommSelProcess	0xE0	53 of 56 words match	docs/non
 DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/nonmatching/newbattle/nbCommSelProcess.md	29
 AnimeCommandList	newbattle/nbCommSelProcess	0x18C	97 of 99 words match	docs/nonmatching/newbattle/nbCommSelProcess.md	54
 DispCommandPanel (0x33C)				docs/nonmatching/newbattle/nbCommSelProcess.md	77
+SetCommList	newbattle/nbCommSelProcess	0x668		docs/nonmatching/newbattle/nbCommSelProcess.md	121
 Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/nonmatching/newbattle/nbE911.md	5
 nbApplyBadCurse	newbattle/nbEncProcess	0x174	80 of 93 words match	docs/nonmatching/newbattle/nbEncProcess.md	5
 nbGetEncountJoken	newbattle/nbEncount	0x174	24 of 66 words match	docs/nonmatching/newbattle/nbEncount.md	5

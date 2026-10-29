@@ -117,3 +117,34 @@ has its documented three-word lower-bound residual, so it cannot yet replace
 its fallback. Reproduce the caller measurement with
 `tools/check_unit.py src/smt3/newbattle/nbCommSelProcess.c
 --cflags=-DNON_MATCHING --func DispCommandPanel -v`.
+
+## SetCommList (newbattle/nbCommSelProcess, 0x668)
+
+382 of 410 instruction words match at the native 1,640-byte size, in both
+the isolated and complete guarded compilation. Production remains
+assembly-backed. The 28 differing words are confined to +0x40C through
++0x47C: the escape command's disable test, its count update, the following
+command append and item-loop setup. The skill and final stock loops match.
+
+The signed skill kinds are unused (-1), normal (0), passive (1) and secondary
+(2). Naming the unused case preserves the native dispatch tree. The secondary
+path has a separate word access at `attr + 0xDA0 + entryId * 104`; its byte
+view shares the original assembler symbol and does not assert an unsupported
+record layout. Normal skills use `flag`, `use` and `koukatype` at offsets
+zero, one and two. Disable bytes are written at each native decision, before
+later callbacks can change command counts. Stock entries use the existing
+unit view at +0xA54, unsigned index bytes at +0x1914, the word count at +0x1924
+and item quantities at +0x1928.
+
+The shared `entryId` is consumed as the real key in both skill and stock
+enumeration. A separate stock-key control matches 359/410 words. Qualified
+`--alloc --no-dumps` controls identify a skill quantity (reg90, 32 references,
+live96, one crossed call) assigned `$16` and a stock quantity (reg460, ten
+references, live20, no crossed calls) assigned `$5`. Reusing the real key
+combines those references into reg90 (42 references, live116, one crossed
+call), retaining `$16` and closing all 23 stock-register words. Plain,
+hooked and unhooked assembly agree in both controls; no extra operation,
+fixed register or artificial dependency is used.
+
+Trace the guarded source with
+`tools/cc1probe.sh src/smt3/newbattle/nbCommSelProcess.c --func SetCommList --alloc --no-dumps --cflag -DNON_MATCHING --out /tmp/command-keys`.
