@@ -401,7 +401,34 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
+extern s32 evtGetAgeOfMoon(void);
+extern s32 evtBitCheck(s32 no);
+
+#ifdef NON_MATCHING
+s32 nbGetEncountJoken(s32 id)
+{
+    nbEncountEntry_t *entry = &nbEncountTable[id];
+    s32 first = 0;
+    s32 second = 0;
+
+    if (entry->moonchk != 0 &&
+        ((entry->moonchk >> evtGetAgeOfMoon()) & 1) != 0) {
+        return entry->table2;
+    }
+    if (entry->eventbit1 != 0) {
+        first = evtBitCheck(entry->eventbit1);
+    }
+    if (entry->eventbit2 != 0) {
+        second = evtBitCheck(entry->eventbit2);
+    }
+    if (first == 0) {
+        return entry->table1[second != 0 ? 2 : 0];
+    }
+    return entry->table1[second != 0 ? 3 : 1];
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbEncount", nbGetEncountJoken);
+#endif
 
 extern s32 nbGetEncountJoken(s32 id);
 
