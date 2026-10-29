@@ -943,3 +943,4 @@ src/smt3/sdf/sdfCoreDraw.c	z29	done	2026-10-29	0 matches / 1 guarded draft	sdfCo
 src/smt3/sdf/sdfDraw.c	z29	open	2026-10-29	1 fn / 1152 B	sdf sweep: sdfGrDrawFrame
 src/smt3/sdf/sdfDraw.c	z29	done	2026-10-29	1 fn / 1152 B	sdfGrDrawFrame exact; sdfStoreTransfer_t.callback arity corrected to one argument; sdfGrStdDrawEnvPredraw parked at 86 of 110 words on a sched2 tie
 src/smt3/sdf/sdfModel.c + sdfIpu.c + sdfMovie.c + sdfSound.c + sdfGraph.c	z29	open	2026-10-29	7 fn / 3056 B	sdf sweep: the remaining reachable drafts
+src/smt3/sdf/sdfModel.c + sdfMovie.c + sdfGraph.c + sdfSound.c	z29	done	2026-10-29	0 matches / 6 drafts improved	sdf sweep: TempPacketLinkOt 54 to 163 of 282 at native size, SetOneSkinDrawPacket 3 to 82 of 96, movieWaitSema 14 to 21 of 52; each residual has a measured probe reason; sdfIpuDecode not reached
