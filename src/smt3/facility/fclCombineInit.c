@@ -3255,9 +3255,6 @@ void cmbDrawStockScrollBar(s8 mode, s32 z, s32 unused, cmpCursorInfo_t *cursor, 
     }
 }
 
-/* NON_MATCHING: 25 of 29 words match, exact size; the `color & ~0xFF` value
- * takes $3 where retail uses $2. */
-#ifdef NON_MATCHING
 extern void cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g);
 extern void fclDrawPanelSprite2(s32 id, s32 arg);
 
@@ -3273,9 +3270,7 @@ void cmbDrawResultFooter(s32 color)
     cmpDrawBoxGDefault(0, 0x148, 0xFFFFF, 0xC8, 0x3A, corner, 0x47);
     fclDrawPanelSprite2(0x44, 0x47);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultFooter);
-#endif
+
 
 extern void cmbDrawResultHeader(s32 x, s32 y, s32 z, s32 width, s32 height,
                                 u32 color, u32 borderColor, s32 ot);

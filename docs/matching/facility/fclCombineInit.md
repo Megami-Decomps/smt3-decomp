@@ -57,23 +57,24 @@ the function, which the unit otherwise leaves implicit; an `s32 id = 0x34000;`
 local for the sprite id, which the `cmp_23A918` entry also rules out; and
 passing `flags` to `cmpDisableRGB`, which the unit's other caller does not.
 
-## cmbDrawResultFooter (fclCombineInit, 0x74)
+### Matched result footer
 
-25 of 29 words match, at the exact 116-byte size. Draws the combine result
-footer: two panel sprites around a `cmpDrawBoxGDefault` whose four corner
-colours come from a stack array.
+`cmbDrawResultFooter` is ordinary exact C (116 bytes). Its four corner colors
+remain `[color, color & ~0xFF, color, color & ~0xFF]`, between panel sprites
+`0x48` and `0x44`. No source arithmetic or store-order change was needed.
+The complete default owner checks182 match,0 differ with only this former
+guard promoted; other guarded bodies need not be visible.
 
-The instruction stream, the store order into the array (`corner[2]`,
-`corner[0]`, `corner[3]`, `corner[1]`, the last in the call's delay slot) and
-every other register match. The four differing words are one register name:
-retail builds `color & ~0xFF` in `$2` (`addiu $2, $0, -0x100` then
-`and $2, $16, $2`) and stores it from there, while this builds it in `$3`. The
-`$2`/`$3` row in the levers page blames a non-void callee whose result is
-ignored, but it does not apply here: making `fclDrawPanelSprite2` `void`, which
-keeps its own body's `j cmpDrawSprite2` and leaves it byte-exact, changes
-nothing in this function.
+The old four-word register residual is resolved by the current truthful
+`void fclDrawPanelSprite2(s32, s32)` contract, adopted in777f9340. In the
+current owner, restoring only that declaration to `s32` reproduces25/29
+matching words; restoring only `cmpDrawBoxGDefault` to `s32` retains29/29.
+The historical report that the void sprite declaration was inert does not
+reproduce in this context and must not be used to park the current body.
 
-Ruled out: the mask written `color & 0xFFFFFF00`; an `s32 dark` local for it,
-which hoists the `and` above the first call and runs one word long;
-`corner[2] = corner[0]; corner[3] = corner[1];` in place of re-reading `color`;
-and the `void` callee above.
+Qualified actual-owner allocation traces pass plain/hooked/unhooked output
+parity for both declarations. The combined mask/result quantity85 has the
+same five references and lifetime10..36 in both; local allocation selects
+`$2` with the actual void sprite contract and `$3` in the non-void control.
+Its priority remains3846. This isolates the declaration-dependent register
+choice without inventing a scalar use, constraint or compiler flag.
