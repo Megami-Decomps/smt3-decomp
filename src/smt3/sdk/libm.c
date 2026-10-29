@@ -682,7 +682,73 @@ INCLUDE_RODATA(const s32, "sdk/libm", D_0054B3C0);
 
 INCLUDE_RODATA(const s32, "sdk/libm", D_0054B3F8);
 
-INCLUDE_ASM(const s32, "sdk/libm", atanf);
+INCLUDE_RODATA(const s32, "sdk/libm", D_0054B404);
+extern const f32 D_0054B3F8[4];
+extern const f32 D_0054B404;
+extern const f32 D_0054B408[4];
+extern const f32 D_0054B414;
+extern const f32 D_0054B418[11];
+f32 atanf(f32 x)
+{
+    s32 inputWord;
+    s32 magnitude;
+    s32 reduction;
+    f32 z;
+    f32 w;
+    f32 even;
+    f32 odd;
+    f32 result;
+
+    GET_FLOAT_WORD(inputWord, x);
+    magnitude = inputWord & 0x7FFFFFFF;
+    if (magnitude > 0x507FFFFF) {
+        if (inputWord > 0) {
+            return D_0054B404 + D_0054B414;
+        }
+        return -D_0054B404 - D_0054B414;
+    }
+
+    if (magnitude <= 0x3EDFFFFF) {
+        if (magnitude < 0x31000000 && 1.0f < x + 1.0e30f) {
+            return x;
+        }
+        reduction = -1;
+    } else {
+        x = fabsf(x);
+        if (magnitude <= 0x3F97FFFF) {
+            if (magnitude <= 0x3F2FFFFF) {
+                reduction = 0;
+                x = (2.0f * x - 1.0f) / (x + 2.0f);
+            } else {
+                reduction = 1;
+                x = (x - 1.0f) / (x + 1.0f);
+            }
+        } else if (magnitude <= 0x401BFFFF) {
+            reduction = 2;
+            x = (x - 1.5f) / (1.5f * x + 1.0f);
+        } else {
+            reduction = 3;
+            x = -1.0f / x;
+        }
+    }
+
+    z = x * x;
+    w = z * z;
+    even = z * (D_0054B418[0] + w * (D_0054B418[2] + w * (D_0054B418[4] +
+                  w * (D_0054B418[6] + w * (D_0054B418[8] +
+                  w * D_0054B418[10])))));
+    odd = w * (D_0054B418[1] + w * (D_0054B418[3] + w * (D_0054B418[5] +
+                 w * (D_0054B418[7] + w * D_0054B418[9]))));
+
+    if (reduction < 0) {
+        return x - x * (even + odd);
+    }
+    result = D_0054B3F8[reduction] - ((x * (even + odd) - D_0054B408[reduction]) - x);
+    if (inputWord < 0) {
+        result = -result;
+    }
+    return result;
+}
 
 f32 fabsf(f32 x)
 {

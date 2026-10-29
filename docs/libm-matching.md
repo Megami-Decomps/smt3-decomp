@@ -20,7 +20,7 @@ uses those flags. This corroborates the option, not an exact bundled release.
 The compiler's `-G 0` is separate from the assembler option: scalar readonly
 values at0x0054B404 and0x0054B414 use native absolute address loads rather than
 small-data GP-relative loads. These options preserve the existing exact floor
-and scaler functions. They do not by themselves qualify the arctangent drafts.
+and scaler functions. The additional arctangent source-shape requirements are described below.
 
 ## floorf
 
@@ -270,3 +270,29 @@ and scheduling differences; the existing scoped unsigned union boundary
 restores every word under the qualified2.96 library profile. An isolated
 older-compiler diagnostic also remains nonmatching; no compiler flags or
 unit boundaries were changed to obtain the result.
+
+## atanf
+
+All 652 instruction bytes match, including the scalar float interface and real
+`fabsf` call. The reduction cases follow the native low-range-first fallthrough:
+the two smaller intervals precede the 1.5-centered and reciprocal reductions.
+Reversing only that source partition to put the large ranges first leaves
+620 bytes and 51 matching words; the low-first form gives 652 bytes and 160 of 163
+matching words. The thresholds and arithmetic operations are unchanged.
+
+Keep the final corrected angle separate from the even-polynomial contribution.
+Reusing `even` for that angle leaves three differing words: the odd-polynomial
+result and its two later additions use `$f2` instead of `$f1`. Qualified pinned
+2.96 allocator/scheduler observations pass hooked/unhooked output parity with
+`--func atanf --alloc --sched --no-dumps --cflag -DSKIP_ASM` in the actual unit
+context. In the control, odd pseudo 91 has preferences `$f0/$f2` and is allocated
+`$f2`. With a separate result, it has only `$f0` as a preference; `$f0` conflicts
+with the even contribution, so it receives `$f1`. No register ties or extra
+operations are introduced.
+
+The readonly views contain four reduction centers, four correction terms and
+eleven polynomial coefficients. The fourth center/correction values also have
+the named scalar aliases `D_0054B404` and `D_0054B414`. Preserve the full existing
+`D_0054B418` import, including adjacent literals beyond the coefficient view.
+Large magnitudes take the native signed limit expression; tiny inputs use the
+actual `1.0f < x + 1.0e30f` gate. No generic NaN/infinity cases are added.
