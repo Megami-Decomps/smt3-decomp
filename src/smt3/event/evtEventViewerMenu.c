@@ -1844,12 +1844,7 @@ typedef struct pmdFrameTable_t pmdFrameTable_t;
 
 
 
-typedef struct pmdEffectTable_t {
-    s32 NameIndex;
-    s32 DataOffset;
-    s32 Type;
-    s32 reserve;
-} pmdEffectTable_t;
+
 
 
 

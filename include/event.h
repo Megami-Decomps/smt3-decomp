@@ -133,6 +133,13 @@ typedef struct pmdEntry_t {
     u32 offset;
 } pmdEntry_t;
 
+typedef struct pmdEffectTable_t {
+    s32 NameIndex;
+    s32 DataOffset;
+    s32 Type;
+    s32 reserve;
+} pmdEffectTable_t;
+
 /* Interpolated event vector and packed colour. */
 typedef struct evtBlendVecColor_t {
     f32 vec[4];
