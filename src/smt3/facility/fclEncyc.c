@@ -846,7 +846,7 @@ void CalcPhaseRegistTop(fclEncyc_instance_tag *pinst)
 void DrawPhaseRegistTop(fclEncyc_instance_tag *pinst)
 {
     extern void cmbDrawTopSprite(s32 x, s32 y, u32 z, s32 ot);
-    extern s32 func_001C7E38(void *request, s32 mode, s32 ot);
+    extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
     extern void DrawListWindowBack(void *obj, fclPanel_t *panel);
     extern void drawRegistSprites(fclEncyc_instance_tag *pinst);
     extern void DrawRegistListwinElem(fclEncyc_instance_tag *pinst);
@@ -1205,7 +1205,7 @@ extern void DrawListWindowBack(void *obj, fclPanel_t *panel);
 void DrawPhaseReadTop(fclEncyc_instance_tag *pinst)
 {
     extern void cmbDrawTopSprite(s32 x, s32 y, u32 z, s32 ot);
-    extern s32 func_001C7E38(void *request, s32 mode, s32 ot);
+    extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
     extern void fclRbnDraw(fclRibbon_t *ribbon, s32 x, s32 y, u32 z,
                            s32 alpha, s32 mode, s32 width, s32 ot);
     extern void DrawReadListwinCaption(fclEncyc_instance_tag *pinst);
@@ -1526,7 +1526,7 @@ extern void cmpDrawStatusComEx(s32 unit, u8 alpha, s8 kind, s8 mode,
     s32 value, s8 option, s32 color, s8 show, s8 extra, s8 full);
 extern void DrawExplainBack(s32 alpha);
 extern void DrawReadMainHelp(fclEncyc_instance_tag *pinst);
-extern s32 func_001C7E38(void *font, s32 mode, s32 ot);
+extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
 
 void DrawPhaseReadExplain(fclEncyc_instance_tag *pinst)
 {
@@ -3053,7 +3053,51 @@ void drawRegistSprites(fclEncyc_instance_tag *pinst)
 INCLUDE_ASM(const s32, "facility/fclEncyc", drawRegistSprites);
 #endif
 
+/* NON_MATCHING: 83 of 99 words match at native 396-byte size. */
+#ifdef NON_MATCHING
+extern fclEncycColor_t D_00330930;
+extern fclEncycColor_t D_00330940;
+extern fclEncycColor_t D_00330950;
+extern fclEncycColor_t g_uv_summon_back[];
+void DrawRegistListwinElem(fclEncyc_instance_tag *pinst)
+{
+    fclEncycRegistAllWork_t *work = (fclEncycRegistAllWork_t *)pinst->pwork;
+    sdfDrawTag_t *tag = sdfGrAllocPacketBuff(0x20);
+    fclEncycVertex_t pos[2];
+    frFontHandle_t *request;
+    s32 y = 0x300;
+    s32 i;
+
+    sdfDrawTagInit(tag);
+    for (i = 0; i < 7; i++, y += 0xE0) {
+        pos[0].x = 0x5C0;
+        pos[0].y = y + 0x98;
+        pos[1].x = 0x1C40;
+        pos[1].y = y + 0xB0;
+        itfMiscDrawSpritePrim(pos, &D_00330930, g_uv_summon_back, 0x000FFFFF,
+                              (sdfTexHandle_t *)pinst->texHandle[0], 0, tag);
+
+        request = work->fonts[i];
+        if (request != NULL) {
+            pos[0].x = 0x1440;
+            pos[0].y = y + 0x48;
+            pos[1].x = 0x1560;
+            pos[1].y = y + 0x90;
+            itfMiscDrawSpritePrim2(pos, &D_00330940, g_uv_summon_back,
+                                   0x00FFFFF0, 0, tag);
+
+            pos[0].x = 0x1880;
+            pos[1].x = 0x19A0;
+            itfMiscDrawSpritePrim2(pos, &D_00330950, g_uv_summon_back,
+                                   0x00FFFFF0, 0, tag);
+            func_001C7E38(request, 0, 0x47);
+        }
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawRegistListwinElem);
+#endif
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadListwinCaption);
 

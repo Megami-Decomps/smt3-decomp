@@ -23,6 +23,7 @@ page and line to open. Conventions are in
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 4 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
+| 4 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
@@ -31,7 +32,6 @@ page and line to open. Conventions are in
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fld_Npc | [field/fld_Npc.md](field/fld_Npc.md) |
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
-| 3 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 3 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 3 | effect/billManager | [effect/billManager.md](effect/billManager.md) |

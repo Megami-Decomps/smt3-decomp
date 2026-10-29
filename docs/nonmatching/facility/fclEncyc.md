@@ -67,3 +67,27 @@ tie break. These are independent constant arguments to the same print call.
 Capturing the returned packet or the label pointer in a local does not change
 the result. The retained source uses the direct print/link expression. Provider
 coordinate and color parameters follow the unsigned 32-bit C definition.
+
+## DrawRegistListwinElem (facility/fclEncyc, 0x18C)
+
+The draft emits the native 396 bytes with 83 of 99 instruction words matching.
+It draws seven registration rows. The existing work record's `fonts[7]` starts
+at +0x11E0; the request at +0x11DC precedes that array and is not an eighth row.
+Each iteration reads the current texture handle for the background, then reads
+the font request after that draw callback. A non-null request receives two
+foreground sprites and a font draw. The tag is finally submitted through the
+ordering-table callback. The work view is captured before tag allocation.
+
+The font provider's native sign extension establishes its `s8` mode parameter;
+its existing font-unit declaration and native return paths establish
+`func_001C7E38(frFontHandle_t *, s8, u32) -> s32`. The owner declarations now
+agree with that contract, preserving all 105 normal C matches.
+
+Sixteen words remain different at +0x20, +0x24, +0x28, +0x2C, +0x30, +0x34,
++0x38, +0x3C, +0x48, +0x60, +0x68, +0x70, +0x74, +0x8C, +0xCC and +0x10C.
+The unresolved question is the native saved-register allocation and address /
+sprite-argument scheduling; the operations and frame size agree. A separate
+font-array cursor regressed to 71 of 99 words matching and was discarded.
+A default scratch promotion qualified the complete owner at 105 match / 1
+differ with this target as the sole difference. The retail build retains its
+assembly fallback.
