@@ -118,7 +118,7 @@ typedef struct nbMainProcessData_t
     dds3ProcessID_t *helpProcess;
     dds3ProcessID_t *autoCommProcess;
     dds3ProcessID_t *EncProcessID;      /* 0x114 */
-    u8 EventProcessID[4];
+    dds3ProcessID_t *EventProcessID;
     struct effBTL_t *HatudoEff;         /* 0x11C */
     void *pnltex[4];                       /* 0x120 */
     s32 mesmngid;                          /* 0x130 */
