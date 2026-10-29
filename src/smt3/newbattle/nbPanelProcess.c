@@ -146,9 +146,10 @@ typedef struct nbMainProcessData_t
     nbPacHandle_t *formpack;
     u8 unk_B8[0x4];
     dds3ProcessID_t *MainProcessID;
-    u8 unk_C0[0x1C];
-    void *packdata;
-    u8 unk_E0[0x14];
+    u8 unk_C0[0x14];
+    dds3ProcessID_t *ActionProcessID[4];
+    s32 NowActionProcess;
+    u8 unk_E8[0xC];
     dds3ProcessID_t *koukaproc;
     dds3ProcessID_t *negoproc;
     u8 unk_FC[0x4];
@@ -487,6 +488,18 @@ extern s32 nbPanelLayoutTable2[4][6];
 
 extern s32 nbPanelDrawProcess(void);
 
+extern s32 nbGetActionSeq(dds3ProcessID_t *id);
+
+extern void nbPanelPressTurn(nbMainProcessData_t *data);
+
+extern void nbPanelAnalyzeRun(void);
+
+extern void nbPanelPressGauge(nbMainProcessData_t *data);
+
+extern void nbPanelPartySelect(nbMainProcessData_t *data);
+
+extern void nbPanelPartyDraw(void);
+
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, void *drawExit,
                                          void *deleteExit, void *p);
@@ -558,6 +571,12 @@ extern void sdfDrawTagInit(sdfDrawTag_t *a);
 extern u64 *sdf2DMakeStdPacket(void *aPacket, s32 aLeng);
 
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, void *aPacket);
+
+extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
+
+extern void sdfPrimLinkG4(sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, u32 aColor0, s32 aX1,
+                          s32 aY1, u32 aColor1, s32 aX2, s32 aY2, u32 aColor2, s32 aX3, s32 aY3,
+                          u32 aColor3, s32 aZ, void *aAllocator);
 
 extern sdfGrOt_t sdfGrOtTable[];
 
@@ -918,9 +937,56 @@ u32 nbPanelMPColor(datUnitWork_t *pUnitWork)
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelCursorDraw);
 
-INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPolygonDraw);
+void nbPanelPolygonDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, u32 abgr0, u32 abgr1,
+                        u32 abgr2, u32 abgr3)
+{
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    s32 x0, y0, x1, y1, w, h;
+    u32 c0, c1, c2, c3;
 
-INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPolygonScaleDraw);
+    tag = dds3FontReqAllocDrawTag();
+    x0 = ((pXYZ->x + x) << 4) + 0x7000;
+    y0 = ((pXYZ->y + y) << 3) + 0x7900;
+    w = pXYZ->w << 4;
+    h = pXYZ->h << 3;
+    c0 = effMagaCylinderCalcColor(abgr0, nbPanelBaseABGR);
+    c1 = effMagaCylinderCalcColor(abgr1, nbPanelBaseABGR);
+    c2 = effMagaCylinderCalcColor(abgr2, nbPanelBaseABGR);
+    c3 = effMagaCylinderCalcColor(abgr3, nbPanelBaseABGR);
+    x1 = x0 + w;
+    y1 = y0 + h;
+    sdfPrimLinkG4(tag, 0x14C, x0, y0, c0, x1, y0, c1, x0, y1, c2, x1, y1, c3, -1, NULL);
+    ot = &sdfGrOtTable[71];
+    ot->regFunc(ot, tag);
+}
+
+void nbPanelPolygonScaleDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, f32 scale_w,
+                             f32 scale_h, u32 abgr0, u32 abgr1, u32 abgr2, u32 abgr3)
+{
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    s32 x0, y0, x1, y1;
+    s32 w, h;
+    u32 c0, c1, c2, c3;
+
+    tag = dds3FontReqAllocDrawTag();
+    w = pXYZ->w << 4;
+    h = pXYZ->h << 3;
+    w = w * scale_w;
+    h = h * scale_h;
+    x0 = ((pXYZ->x + x) << 4) + 0x7000;
+    y0 = ((pXYZ->y + y) << 3) + 0x7900;
+    c0 = effMagaCylinderCalcColor(abgr0, nbPanelBaseABGR);
+    c1 = effMagaCylinderCalcColor(abgr1, nbPanelBaseABGR);
+    c2 = effMagaCylinderCalcColor(abgr2, nbPanelBaseABGR);
+    c3 = effMagaCylinderCalcColor(abgr3, nbPanelBaseABGR);
+    x1 = x0 + w;
+    y1 = y0 + h;
+    sdfPrimLinkG4(tag, 0x14C, x0, y0, c0, x1, y0, c1, x0, y1, c2, x1, y1, c3, -1, NULL);
+    ot = &sdfGrOtTable[71];
+    ot->regFunc(ot, tag);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPolygonFlashDraw);
 
@@ -1347,7 +1413,52 @@ void nbPanelPartyHide(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPartyDraw);
 
+/* NON_MATCHING: 65 of 66 words match; the one differing word is the branch form
+ * after nbPanelStockCheckRun, which turns into bne once nbPanelPartyDraw is a
+ * visible C definition in this unit. */
+
+#ifdef NON_MATCHING
+
+s32 nbPanelDrawProcess(void)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    s32 i;
+
+    data = nbGetMainProcessData();
+    if (data == NULL) {
+        return 0;
+    }
+    nbPanelPressTurn(data);
+    nbPanelAnalyzeRun();
+    if (nbPnlDrawFlag == 0) {
+        return 0;
+    }
+    nbPanelPressGauge(data);
+    nbPanelAuto(data);
+    data = nbGetMainProcessData();
+    if (data->ActionProcessID[data->NowActionProcess] != NULL && data->orderindex != -1 &&
+        nbGetActionSeq(data->ActionProcessID[data->NowActionProcess]) == 5) {
+        form = data->form;
+        for (i = 0; i < 4; i++) {
+            if ((form->stat & 0x109) == 0x109) {
+                nbPanelPartySelect(data);
+                return 0;
+            }
+            form++;
+        }
+    }
+    if (nbPanelStockCheckRun() == 0) {
+        nbPanelPartyDraw();
+    }
+    return 0;
+}
+
+#else
+
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawProcess);
+
+#endif
 
 void nbPanelShutdown(dds3ProcessID_t *id)
 {

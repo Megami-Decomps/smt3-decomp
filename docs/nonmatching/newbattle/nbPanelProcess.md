@@ -2,6 +2,18 @@
 
 Conventions: [nonmatching drafts](../../nonmatching.md).
 
+## nbPanelDrawProcess (0x108)
+
+65 of 66 instruction words match at the native 264-byte size. Assembly remains
+active; this reconstruction carries no exact-match credit.
+
+The one differing word is at +0xE4: the draft emits `bnel` where retail has
+`bne` on the test after nbPanelStockCheckRun. Compiling the same body with
+nbPanelPartyDraw present as a C definition in this unit gives a full match, so
+the branch form follows the visibility of the callee in the not-taken arm and
+not the source spelling. Reordering the test into an early return, and both
+spellings of the comparison, were ruled out.
+
 ## nbPanelAuto (0x3A0)
 
 226 of 232 instruction words match at the native 928-byte size. Assembly
