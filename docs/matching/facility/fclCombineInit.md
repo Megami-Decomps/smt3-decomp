@@ -98,3 +98,37 @@ changes together reproduce the owner; either change alone remains non-matching.
 Keep the signed `(0x200 - phase) / 2` calculation, the later recomputation
 from `sacrificePanelAnim`, and the existing global-pointer reloads across
 calls. No dummy work, opacity, constraints or ABI change is required.
+
+## cmbStartResultScript (fclCombineInit, 0x84)
+
+33 of 33 words match at 132 bytes in ordinary C. The complete owner has
+184 matching functions and no differences, including its owned data.
+Source commit: `6f214449f849679f552b9d80cf03e49b14f7c88e`.
+Exact-source [CI run 40972478153](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40972478153)
+passed build and deployment.
+
+Use the actual two-case switch, with case 2 written before case 1. Case 2
+selects script entry 6, case 1 selects entry 5, and all other signed-byte
+values retain the initialized entry 0. This source order gives retail's
+`beql` with the entry-6 assignment in its slot and the correct shared
+publication block. The inherited `if`/`else if` form emits 120 bytes;
+the switch with case 1 written first emits 140 bytes. No empty cases,
+compiler constraints, ABI changes or dummy operations are needed.
+
+Qualified dumps show the case-order effect. With case 2 first, `jump2`
+leaves its inequality branch targeted at the shared join and the entry-6
+assignment on the fallthrough path. Delay-slot reorganization reverses and
+annuls that branch into the native equality test with entry 6 in its slot;
+the entry-5 block then falls into common state publication. The opposite
+case order leaves both assignments out of line, adding a jump/alignment
+and duplicating the state-byte store. For both switch orders, whole-owner
+plain/dump assembly agrees apart from the scratch `.file` pathname, and
+text, data and relocations agree. This describes observed compiler output,
+not the original source spelling.
+
+The signed enable byte still gates all state changes and the script call.
+When enabled, the state byte at offset 5 is set to 1 before script setup.
+The current global work pointer is reloaded for the script and argument
+address, and again after `fclScriptStart` before its actual return value is
+stored at offset 8. The declaration and return-value consumer remain
+unchanged.

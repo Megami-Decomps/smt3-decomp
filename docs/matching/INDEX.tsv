@@ -46,6 +46,7 @@ campDhUpdateCursor	code_0022C578	0x248	143 of 146 words match	docs/matching/code
 campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	627
 campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	651
 cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	703
+cmpUpdateDestroyItemConfirm	code_0022C578	0xE0	56 of 56 words match	docs/matching/code_0022C578.md	733
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
@@ -71,6 +72,7 @@ effPCPBossONGYDraw (1432 bytes)				docs/matching/effect/effPCPBoss.md	204
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790	462 of 484 words match	docs/matching/effect/parManager.md	3
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/matching/effect/parManager.md	33
 evtEventViewerProcess3	event/evtEventViewer	0x16C	88 of 91 words match	docs/matching/event/evtEventViewer.md	3
+RunFrameUnit	event/evtEventViewer	0x94	37 of 37 words match	docs/matching/event/evtEventViewer.md	31
 FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
 func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
 evtFrameListHead	event/evtEventViewerMenu	0x138	39 of 78 words differ	docs/matching/event/evtEventViewerMenu.md	22
@@ -79,6 +81,7 @@ evtMoonProcess2	event/evtMoon	0x119C	13 of 996 words match	docs/matching/event/e
 func_00206308, func_002065C8	fclCombineInit	0x2C0 each	35 of 176 words differ	docs/matching/facility/fclCombineInit.md	3
 cmbDrawFullScreenPanel	fclCombineInit	0x68	20 of 26 words match	docs/matching/facility/fclCombineInit.md	41
 cmbDrawResultPanel	fclCombineInit	0x228	138 of 138 words match	docs/matching/facility/fclCombineInit.md	82
+cmbStartResultScript	fclCombineInit	0x84	33 of 33 words match	docs/matching/facility/fclCombineInit.md	102
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/matching/facility/fclEncyc.md	22
 DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	46
@@ -94,6 +97,7 @@ ragCheckHeartsChoice	fclRagUpdate	0x80	22 of 29 words match	docs/matching/facili
 fclDrawSpriteAngleCore	fclShare	0x4A8	212 of 298 words match	docs/matching/facility/fclShare.md	3
 fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/matching/facility/fclShare.md	48
 shop_Process	facility/fclShopCalc	256 bytes	37 of 64 words match	docs/matching/facility/fclShopCalc.md	3
+shpUpdateSeqConfirm	facility/fclShopUpdate	0xFC	63 of 63 words match	docs/matching/facility/fclShopUpdate.md	3
 fclTerminalLoadTextures	fclTerminalInit	0x70	16 of 27 words match	docs/matching/facility/fclTerminalInit.md	3
 fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	40 of 42 words match	docs/matching/field/fldAutoMap.md	3
 fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244	10 of 146 words match	docs/matching/field/fldAutoMap.md	30

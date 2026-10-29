@@ -11,7 +11,7 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 33 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
+| 34 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 11 |  | [sdk/libkernl.md](sdk/libkernl.md) |
@@ -31,6 +31,7 @@ both native and emitted sizes when they differ.
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
+| 4 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 3 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
@@ -40,7 +41,6 @@ both native and emitted sizes when they differ.
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 3 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
-| 3 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
@@ -58,6 +58,7 @@ both native and emitted sizes when they differ.
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 2 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
+| 2 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
@@ -101,11 +102,11 @@ both native and emitted sizes when they differ.
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
 | 1 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
+| 1 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
 | 1 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 1 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 1 | event/evtMoon | [event/evtMoon.md](event/evtMoon.md) |
 | 1 | event/evtEventViewerFrameVar | [event/evtEventViewerFrameVar.md](event/evtEventViewerFrameVar.md) |
-| 1 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 1 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 1 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
