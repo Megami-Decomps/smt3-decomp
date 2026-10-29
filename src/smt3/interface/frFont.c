@@ -1303,7 +1303,81 @@ s32 frEraseEffect(frFontHandle_t *pFRQ) {
     return didChange;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", frDrawEffect);
+/* Shared DDS fade/jitter algorithm with Nocturne's two-parent fallback and
+ * default 24-pixel advance. No DDS timed-control or lips-stop state exists here. */
+s32 frDrawEffect(frFontHandle_t *parent, frTextHandle_t *glyph,
+                 u8 threshold, u8 step) {
+    frFontHandle_t *previousParent;
+    frTextHandle_t *previousGlyph;
+    u32 *fadeWord;
+    u8 previousOption;
+    u8 previousFade = 0x80;
+    s32 glyphJitter = 0;
+    s32 canAdvanceFade = 0;
+
+    previousGlyph = glyph->previous;
+    previousOption = 0;
+    if (previousGlyph == NULL) {
+        previousParent = parent->previous;
+        if (previousParent != NULL) {
+            previousGlyph = previousParent->lastChild;
+            if (previousGlyph != NULL) {
+                previousFade = previousGlyph->parentDimensionsOrRenderWord.fadeByte.value;
+                previousOption = previousGlyph->renderValueOrSetupOrShade.setupBytes.secondOption;
+            } else {
+                if (previousParent->previous != NULL) {
+                    previousGlyph = previousParent->previous->lastChild;
+                    if (previousGlyph != NULL) {
+                        previousFade = previousGlyph->parentDimensionsOrRenderWord.fadeByte.value;
+                        previousOption = previousGlyph->renderValueOrSetupOrShade.setupBytes.secondOption;
+                    }
+                }
+            }
+        }
+    } else {
+        previousFade = previousGlyph->parentDimensionsOrRenderWord.fadeByte.value;
+    }
+
+    fadeWord = &glyph->parentDimensionsOrRenderWord.renderWord;
+    if (previousOption == 0 || previousOption == glyph->renderValueOrSetupOrShade.setupBytes.secondOption) {
+        if (previousFade >= threshold) {
+            canAdvanceFade = 1;
+        }
+    } else {
+        canAdvanceFade = previousFade == 0x80;
+    }
+    if (canAdvanceFade != 0) {
+        u32 currentFadeWord;
+        s32 advance = glyph->advance + parent->glyphCodeOrContext.byteRoles.spacing;
+
+        if (advance == 0) {
+            advance = 24;
+        }
+        if ((s8)step >= 0) {
+            step = (step * 22) / advance;
+        }
+        currentFadeWord = *fadeWord;
+        if ((u32)(0x80 - (currentFadeWord & 0xFF)) >= step) {
+            *fadeWord = currentFadeWord + step;
+        } else {
+            *fadeWord = (currentFadeWord & ~0xFF) | 0x80;
+        }
+    }
+    {
+        s8 currentFade = fadeWord[0];
+        u16 glyphValue = glyph->drawCount;
+
+        if (currentFade >= 0) {
+            if (glyph->renderValueOrSetupOrShade.setupBytes.secondOption == 1) {
+                /* Encode the signed pixel offset as 32-bit GS fixed-point bits;
+                 * the unsigned shift is defined for the negative half-cycle. */
+                glyphJitter = -((u32)(((glyphValue * 2) % 5) - 2) << 4);
+            }
+        }
+    }
+    return glyphJitter;
+}
+
 
 /* Draw through the shared render flags with mode zero. */
 s32 frDrawFont(frFontHandle_t *pFRQ) {
@@ -1314,7 +1388,97 @@ s32 frDrawFontEx(frFontHandle_t *pFRQ, s8 Mode) {
     return func_001C7E38(pFRQ, Mode, gFontDrawOT);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_001C7E38);
+/* Nocturne's ASCII bearing adjustments are separate 26-entry X/Y tables. */
+extern s32 D_00326210[26];
+extern s32 D_00326278[26];
+extern s32 D_003262E0[26];
+extern s32 D_00326348[26];
+extern u32 frDrawFontWork;
+
+/* DDS1 frFontDrawGlyphChain supplies the shared child/parent traversal;
+ * Nocturne adds its ASCII bearings and per-parent draw count, not DDS waits. */
+s32 func_001C7E38(frFontHandle_t *glyph, s8 mode, u32 renderFlags) {
+    frTextHandle_t *child;
+    s32 ready = 1;
+    s32 enabled = 1;
+    s32 result = 0;
+    s32 totalGlyphCount = 0;
+
+    if (glyph != NULL) {
+        glyph = glyph->chainHead;
+        if (glyph != NULL) {
+            do {
+                s32 x = glyph->x;
+                s32 y = glyph->y;
+                s8 spacing = glyph->glyphCodeOrContext.byteRoles.spacing;
+
+                child = glyph->firstChild;
+                frDrawFontWork = 0;
+                if (child != NULL) {
+                    do {
+                        s32 xOffset = mode != 0 ? 0 :
+                            frDrawEffect(glyph, child, 0x1C,
+                                (u8)glyph->glyphCodeOrContext.byteRoles.encodedContextByte);
+                        s32 yOffset = 0;
+                        u32 glyphState;
+
+                        if (child->renderValueOrSetupOrShade.setupBytes.fontIndex < 2) {
+                            if ((u16)(child->glyphCodeOrContext.glyphCode - 'A') < 26) {
+                                xOffset += D_00326278[child->glyphCodeOrContext.glyphCode - 'A'];
+                                yOffset = D_00326210[child->glyphCodeOrContext.glyphCode - 'A'];
+                            } else if ((u16)(child->glyphCodeOrContext.glyphCode - 'a') < 26) {
+                                xOffset += D_003262E0[child->glyphCodeOrContext.glyphCode - 'a'];
+                                yOffset = D_00326348[child->glyphCodeOrContext.glyphCode - 'a'];
+                            }
+                        }
+                        if (child->sourceItem == NULL) {
+                            /* Native 0x1C7FA4 retains this ASCII reassertion;
+                             * the DDS twin has the same initialized-one state. */
+                            if ((u16)child->glyphCodeOrContext.glyphCode < 0x80) {
+                                enabled = 1;
+                            }
+                            frCreateDrawFontPacket_20550848(x + child->x + xOffset, y + child->y + yOffset,
+                                child->cellDimensions.cellWidth,
+                                child->cellDimensions.cellHeight >> 1,
+                                child->renderValueOrSetupOrShade.setupBytes.firstOption,
+                                child->parentDimensionsOrRenderWord.renderWord,
+                                glyph->renderValueOrSetupOrShade.renderValue, enabled,
+                                &child->cachedItem->font_mem->uv, &gFT.atlas, renderFlags);
+                        } else {
+                            frCreateDrawFontPacket_20550848(x + child->x + xOffset, y + child->y + yOffset,
+                                child->cellDimensions.cellWidth,
+                                child->cellDimensions.cellHeight >> 1,
+                                child->renderValueOrSetupOrShade.setupBytes.firstOption,
+                                child->parentDimensionsOrRenderWord.renderWord,
+                                glyph->renderValueOrSetupOrShade.renderValue, enabled,
+                                &child->sourceItem->font_mem->uv, &gFT.atlas, renderFlags);
+                        }
+                        frDrawFontWork++;
+                        glyphState = child->parentDimensionsOrRenderWord.fadeByte.value;
+                        if (glyphState != 0) {
+                            child->drawCount++;
+                        }
+                        if (glyphState < 0x80) {
+                            ready = 0;
+                        }
+                        /* GS coordinate accumulation follows the native 32-bit word
+                         * addition/shift, including negative spacing. */
+                        x += ((u32)child->advance + spacing) << 4;
+                        child = child->next;
+                    } while (child != NULL);
+                }
+                totalGlyphCount += glyph->childCount;
+                glyph = glyph->next;
+            } while (glyph != NULL);
+        }
+        result = totalGlyphCount;
+        if (ready == 0) {
+            result = 0;
+        }
+    }
+    return result;
+}
+
 
 /* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
  * slot 0; return 0. This is buffer selection, not a current-font selection. */
