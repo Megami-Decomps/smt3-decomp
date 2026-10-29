@@ -192,6 +192,24 @@ typedef struct datUnitWork_t
     /* 0xDC */ u16 fullnamecode[8];
 } datUnitWork_t;
 
+/* The 0x1C-byte motion records at datUnitVisual_t +0x2C; the shared view splits
+ * the same bytes as part[], six bytes later. */
+typedef struct nbUnitMotion_t {
+    s16 movetype;
+    u16 actframe;
+    union {
+        s32 se_no;
+        struct { u8 seBytes[2]; u8 type; s8 data; };
+    };
+    f32 motionsp;
+    f32 atarisize;
+    f32 movey;
+    f32 movez;
+    s16 bframe;
+    s16 hframe;
+} nbUnitMotion_t;
+
+
 /* Model-visual records have a 0x310-byte native stride. The upstream packet
  * helpers use the scalar prefix; the action helpers index 0x1C-byte
  * visual-part records starting at +0x32, up to index 11. */

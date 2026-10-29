@@ -134,20 +134,6 @@ extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern s32 mdlGetMinorNum(mdlObj_t *aHandle);
 
-/* The 0x1C-byte motion records at datUnitVisual_t +0x2C; the shared view splits
- * the same bytes as part[], six bytes later. */
-typedef struct nbUnitMotion_t {
-    s16 movetype;
-    u16 actframe;
-    s32 se_no;
-    f32 motionsp;
-    f32 atarisize;
-    f32 movey;
-    f32 movez;
-    s16 bframe;
-    s16 hframe;
-} nbUnitMotion_t;
-
 extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 ritu);
 
 extern f32 dds3GetRandFloatA(s32 name);
