@@ -25,11 +25,6 @@ typedef struct
     u8 percent;
 } cmbEvoTableEntry_t;
 
-typedef struct
-{
-    u16 skill[8];
-    s8 count;
-} cmpSkillList_t;
 
 extern char D_0053C938[];
 

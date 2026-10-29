@@ -16,11 +16,6 @@ typedef struct frFontRequest_t frFontRequest_t;
 
 extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *packet, s32 prim, s32 count, s64 registers, s32 loops);
 
-typedef struct
-{
-    u16 skill[8];
-    s8 count;
-} cmpSkillList_t;
 
 extern char D_0054FB00[];
 

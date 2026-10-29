@@ -14,6 +14,11 @@ typedef struct
     /* 0x0A */ u16 v1;
 } fclSpriteRect_t;
 
+typedef struct cmpSkillList_t {
+    u16 skill[8];
+    s8 count;
+} cmpSkillList_t;
+
 typedef struct fclSprite_t {
     s32 tex;
     union { u16 unk_04; u16 width; };
