@@ -2482,7 +2482,82 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_0053F6D8);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053F6E8);
 
+#ifdef NON_MATCHING
+extern const s32 D_0053F718[26][10];
+extern const u32 D_0053FB28[];
+extern const f32 D_0053FB50[];
+extern void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot);
+
+void nmeDrawGradQuad(s32 amount, s32 alpha, s32 ot)
+{
+    s32 faces[26][10];
+    u32 baseColors[9];
+    u32 colors[3];
+    f32 weights[5];
+    s32 coords[2][3];
+    u32 i;
+    s32 layer;
+    s32 offset;
+    s32 strength;
+    f32 scale;
+
+    memcpy(faces, D_0053F718, sizeof(faces));
+    memcpy(baseColors, D_0053FB28, sizeof(baseColors));
+    memcpy(weights, D_0053FB50, sizeof(weights));
+    for (i = 0; i < 26; i++) {
+        strength = amount;
+        offset = 0;
+        for (layer = 0; layer < 2; layer++) {
+            if (layer != 0) {
+                strength = strength * 180 / 256;
+            }
+            scale = strength;
+            coords[0][0] = (faces[i][0] - offset) << 4;
+            coords[0][1] = (faces[i][2] - offset) << 4;
+            coords[0][2] = (faces[i][8] - offset) << 4;
+            coords[1][0] = faces[i][1] << 3;
+            coords[1][1] = faces[i][3] << 3;
+            coords[1][2] = faces[i][9] << 3;
+            colors[0] = fclBlendColor(baseColors[0], 0x14002210, alpha);
+            colors[1] = fclBlendColor(baseColors[1], 0x14002210, alpha);
+            colors[2] = fclBlendColor(baseColors[2], 0x14002210, alpha);
+            nmeMakeGradColors(coords[0], coords[1], (s32)(scale * weights[0]),
+                              (s32)(scale * weights[1]), (s32)(scale * weights[4]));
+            cmpDrawTriG((u32 *)coords[0], (u32 *)coords[1], 0, colors, ot);
+
+            coords[0][0] = (faces[i][2] - offset) << 4;
+            coords[0][1] = (faces[i][4] - offset) << 4;
+            coords[0][2] = (faces[i][8] - offset) << 4;
+            coords[1][0] = faces[i][3] << 3;
+            coords[1][1] = faces[i][5] << 3;
+            coords[1][2] = faces[i][9] << 3;
+            colors[0] = fclBlendColor(baseColors[3], 0x14002210, alpha);
+            colors[1] = baseColors[4];
+            colors[2] = fclBlendColor(baseColors[5], 0x14002210, alpha);
+            nmeMakeGradColors(coords[0], coords[1], (s32)(scale * weights[1]),
+                              (s32)(scale * weights[2]), (s32)(scale * weights[4]));
+            cmpDrawTriG((u32 *)coords[0], (u32 *)coords[1], 0, colors, ot);
+
+            coords[0][0] = (faces[i][4] - offset) << 4;
+            coords[0][1] = (faces[i][6] - offset) << 4;
+            coords[0][2] = (faces[i][8] - offset) << 4;
+            coords[1][0] = faces[i][5] << 3;
+            coords[1][1] = faces[i][7] << 3;
+            coords[1][2] = faces[i][9] << 3;
+            offset += 10;
+            colors[0] = baseColors[6];
+            colors[1] = baseColors[7];
+            colors[2] = fclBlendColor(baseColors[8], 0x14002210, alpha);
+            nmeMakeGradColors(coords[0], coords[1], (s32)(scale * weights[2]),
+                              (s32)(scale * weights[3]), (s32)(scale * weights[4]));
+            cmpDrawTriG((u32 *)coords[0], (u32 *)coords[1], 0, colors, ot);
+        }
+    }
+}
+
+#else
 INCLUDE_ASM(const s32, "code_0022C578", nmeDrawGradQuad);
+#endif
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB28);
 
