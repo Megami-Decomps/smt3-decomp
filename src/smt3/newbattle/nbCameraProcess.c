@@ -4,10 +4,13 @@
 #include "nb.h"
 #include "model.h"
 #include "motion.h"
+#include "basic.h"
 
 /* 16-byte rows indexed by camera state; +0xC selects the per-state reset. */
 typedef struct nbCameraStateEntry_t {
-    u8 unk00[0xC];
+    char *name;
+    void (*init)(void);
+    void (*calc)(void);
     s8 reset;
     u8 unk0D[3];
 } nbCameraStateEntry_t;
@@ -93,13 +96,11 @@ extern void effBTLModelTargetGroupHide(void);
 
 extern void nbCameraShot_All_Set(nbCamera_t *pNbCamera);
 
-typedef struct dds3Scene_t dds3Scene_t;
-
 extern nbFormation_t *effBTLSkillGetInvokeFormation(void);
 
-extern dds3Scene_t *dds3GetActiveScene(void);
+extern dds3Basic_t *dds3GetActiveScene(void);
 
-extern s32 dds3GetActiveCameraSceneBasic(dds3Scene_t *pBasic);
+extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pBasic);
 
 void nbCameraSetState(u16 state);
 
@@ -425,7 +426,109 @@ void nbCameraCheckStateChange(void)
     }
 }
 
+#ifdef NON_MATCHING
+extern s32 printf(const char *format, ...);
+extern void nbRestartMotion(void);
+extern void nbSetEnemyFormation(nbMainProcessData_t *data);
+extern u32 effBTLDebug_CameraAllEditCheck(void);
+extern void nbCameraCommandSetFixPosition(void);
+extern void nbCameraShot_CommandFixPos_Set(nbCamera_t *camera);
+extern void effBTLModelShowRun(void);
+extern void nbCameraPressProcessRun(void);
+extern void dds3SetPosPoseSet(dds3Basic_t *basic, const sdfVector4_t *pos);
+extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *basic, f32 fovy);
+
+s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    dds3Basic_t *camera;
+    dds3CameraObjectBasicWorkData_t *work;
+    sdfVector4_t scale;
+    sdfVector4_t eye;
+    f32 distance;
+
+    nbCameraCheckStateChange();
+    if (pNbCamera.state != pNbCamera.state_change) {
+        if ((pNbCamera.state_change == 2 || pNbCamera.state_change == 4) && (data->stat & 0x40)) {
+            pNbCamera.state_change = 0;
+        }
+        if (pNbCamera.state_change != 0 && pNbCamera.state_change != 6 &&
+            pNbCamera.state_change != 8 && pNbCamera.state_change != 9 &&
+            pNbCamera.state_change != 10) {
+            printf("nbCamera:nbRestartMotion\n");
+            nbRestartMotion();
+        }
+        pNbCamera.state_old2 = pNbCamera.state_old;
+        pNbCamera.state_old = pNbCamera.state;
+        pNbCamera.state = pNbCamera.state_change;
+        pNbCamera.phase = 0;
+        pNbCamera.frame = 0;
+        pNbCamera.type = 0;
+        pNbCamera.angle = 0.0f;
+        if ((data->stat & 0x2000) && pNbCamera.state != 0 && pNbCamera.state != 10 &&
+            pNbCamera.state != 17) {
+            nbSetEnemyFormation(data);
+            data->stat &= ~0x2000;
+        }
+        nbCameraClearState(&pNbCamera);
+        if (nbCameraStateTable[pNbCamera.state].init != NULL) {
+            nbCameraStateTable[pNbCamera.state].init();
+        }
+    }
+    if (nbCameraStateTable[pNbCamera.state].calc != NULL) {
+        nbCameraStateTable[pNbCamera.state].calc();
+    }
+    if (effBTLDebug_CameraAllEditCheck() != 0) {
+        nbCameraCommandSetFixPosition();
+        nbCameraShot_CommandFixPos_Set(&pNbCamera);
+    }
+    effBTLModelShowRun();
+    nbCameraPressProcessRun();
+    if (nbCameraCheckNiidaCamera() == 0) {
+        return 0;
+    }
+    camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
+    work = camera->workdata;
+    if (pNbCamera.anim.rotate_f > 0) {
+        pNbCamera.anim.rotate_f--;
+    } else {
+        pNbCamera.anim.rotate_s *= 0.5f;
+    }
+    if (pNbCamera.anim.rotate_s != 0.0f) {
+        SetRotateMatrixY(pNbCamera.anim.rotate_s);
+        SDF_VU0_LOADVECTOR(&pNbCamera.direction);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&pNbCamera.direction);
+    }
+    if (pNbCamera.anim.distance_f > 0) {
+        pNbCamera.anim.distance_f--;
+    } else {
+        pNbCamera.anim.distance_s *= 0.5f;
+    }
+    if (pNbCamera.anim.distance_s != 0.0f) {
+        pNbCamera.distance += pNbCamera.anim.distance_s;
+    }
+    distance = -pNbCamera.distance;
+    scale.x = distance;
+    scale.y = distance;
+    scale.z = distance;
+    SDF_VU0_LOADVECTOR(&pNbCamera.direction);
+    SDF_VU0_LOADVECTOR_B(&scale);
+    SDF_VU0_STOREVECTOR(&work->eyeVector);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(&pNbCamera.target);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_B(&work->targetPos);
+    SDF_VU0_STOREVECTOR(&eye);
+    dds3SetPosPoseSet(camera, &eye);
+    dds3CameraObjectBasicSetFovy(camera, pNbCamera.fovy);
+    work->flag |= 1;
+    pNbCamera.frame++;
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraProcess", nbCameraProcess_nbCameraProcess);
+#endif
 
 s32 nbCameraDraw(dds3ProcessID_t *id)
 {

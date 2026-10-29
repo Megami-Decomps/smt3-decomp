@@ -156,7 +156,7 @@ typedef struct nbMainProcessData_t
     u32 exp;
     struct dds3Basic_t *light[2];          /* 0x0A8 */
     struct dds3Basic_t *gamecamera;         /* 0x0B0 */
-    s32 niidacamera;
+    struct dds3Basic_t *niidacamera;
     u8 eventcamera[4];
     dds3ProcessID_t *MainProcessID;
     dds3ProcessID_t *maeProcess;            /* 0x0C0 */

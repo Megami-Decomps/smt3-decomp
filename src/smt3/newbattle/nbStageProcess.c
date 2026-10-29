@@ -107,11 +107,11 @@ extern char D_00543678[];
 
 extern void *memcpy(void *a, const void *b, u32 c);
 
-extern s32 dds3GetActiveScene(void);
+extern dds3Basic_t *dds3GetActiveScene(void);
 
-extern dds3Basic_t *dds3GetActiveCameraSceneBasic(s32 pBasic);
+extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pBasic);
 
-extern void dds3SetActiveCameraSceneBasic(s32 pSceneBasic, s32 pCameraBasic);
+extern dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 
 extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 
@@ -172,7 +172,7 @@ void nbAddStageCamera(nbMainProcessData_t *data)
     dds3ObjectBaseCreateMover(camera);
     dds3ObjectBaseSetPadControl(camera, 0);
     dds3CameraObjectBasicSetFovy(camera, 0.8726646f);
-    data->niidacamera = (s32)camera;
+    data->niidacamera = camera;
 }
 
 void nbAddStageCamera2(nbMainProcessData_t *data)
