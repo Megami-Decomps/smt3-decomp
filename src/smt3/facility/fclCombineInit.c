@@ -1885,7 +1885,35 @@ s8 ragUseItemOnUnit(u16 id, datUnitWork_t *unit, u8 count)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbInheritSkills);
+extern s8 cmbChkSkillOwner(u16 skill, datUnitWork_t *unit);
+extern s32 cmbCopyEvoDevil(datUnitWork_t *unit, u16 skill);
+extern s8 rstFindSkillSlot(u16 skill, cmbUnit_t *unit);
+
+void cmbInheritSkills(cmbUnit_t *target, datUnitWork_t *source)
+{
+    s32 count = cmbCountSkills(target);
+    s32 added = 0;
+    s32 i;
+
+    for (i = 0; i < 8; i++) {
+        if (source->skill[i] != 0 &&
+            cmbChkSkillOwner(source->skill[i], &target->unit) < 0 &&
+            cmbCopyEvoDevil(&target->unit, source->skill[i]) != 0) {
+            s32 slot = rstFindSkillSlot(source->skill[i], target);
+
+            if (slot >= 0) {
+                if ((target->unit.keiattr[slot] & 1) == 0) {
+                    target->unit.keiattr[slot] = 1;
+                }
+            } else if (count + added < 24) {
+                target->unit.keisyoskill[count + added] = source->skill[i];
+                added++;
+            } else {
+                break;
+            }
+        }
+    }
+}
 
 void rstClearSkillSlot(cmbUnit_t *unit, u8 slot)
 {
