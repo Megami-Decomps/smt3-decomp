@@ -3,6 +3,7 @@
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
+#include "pipe.h"
 
 extern void (*D_00551828)(void);
 
@@ -37,11 +38,6 @@ typedef struct {
     void *data;
     void *tail;
 } pipeTypeArray_t;
-
-typedef struct {
-    s32 count;
-    void *data;
-} pipeLinkSource_t;
 
 typedef struct {
     s32 unk_00;

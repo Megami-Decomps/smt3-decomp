@@ -3,6 +3,7 @@
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
+#include "pipe.h"
 
 extern void (*D_00551828)(void);
 
@@ -51,11 +52,6 @@ extern f32 __ieee754_acosf(f32 x);
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
-
-typedef struct {
-    s32 count;
-    u8 *data;
-} pipeLinkSource_t;
 
 extern s32 pipeLinkGetNum(u8 *data, s32 size);
 extern s32 pipeCreateLink(tagPipeLinkInfo *info, s32 count);
