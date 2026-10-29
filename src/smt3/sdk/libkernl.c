@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ps2asm.h"
 #include "sif_rpc.h"
 #include "ps2asm.h"
 
@@ -284,7 +285,28 @@ INCLUDE_ASM(const s32, "sdk/libkernl", _InitTLB);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceResetttyinit);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", VSync);
+extern s32 DIntr(void);
+extern s32 EIntr(void);
+
+void VSync(void)
+{
+    s32 enabled;
+
+    enabled = DIntr();
+    *(volatile u32 *)0x1000F000 = 4;
+    EE_SYNC();
+    if (enabled != 0) {
+        EIntr();
+    }
+    while ((*(volatile u32 *)0x1000F000 & 4) == 0) {
+    }
+    enabled = DIntr();
+    *(volatile u32 *)0x1000F000 = 4;
+    EE_SYNC();
+    if (enabled != 0) {
+        EIntr();
+    }
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", VSync2);
 

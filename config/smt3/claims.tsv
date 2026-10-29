@@ -763,3 +763,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 244 B	filesystem re
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 1096 B	module-buffer load/stop cores and wrappers with exact argument extents, untouched null payload and aliased reply capture; owner 77 match, 0 differ
 src/smt3/field/fldCamera.c	redthing1	done	2026-10-29	2 fn / 2048 B	PiM agent: native-qualified Normal and direction-locked camera phases, real collision arrays and post-publication reloads; complete owner19/0, reset algorithms/pools preserved
 src/smt3/interface/itfMesManager.c	redthing1	done	2026-10-29	1 fn / 596 B	PiM agent: native DDS selection transition with genuine flags snapshot and defined unsigned coordinate extent including zero rows; complete owner119/0
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 144 B	VSync native interrupt restoration, volatile status acknowledgement and polling; complete owner exact
