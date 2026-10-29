@@ -215,11 +215,6 @@ typedef struct {
     s16 v[10];
 } fldTamaSeVol_t;
 
-typedef struct {
-    u8 unk00[0x1C];
-    sdfMotionCtrlr_t *motion;
-} fldModel_t;
-
 extern fldTamaSeFrame_t D_00531158;
 
 extern fldTamaSeFrame_t D_00531180;
@@ -937,7 +932,7 @@ void fldRunTamaSe(void)
     fldTamaSeFrame_t frame2;
     fldTamaSeFrame_t frame3;
     fldTamaSeVol_t vol;
-    fldModel_t *model;
+    mdlObj_t *model;
     f32 now;
     s32 i;
 
@@ -948,7 +943,7 @@ void fldRunTamaSe(void)
     frame3 = D_005311A8;
     vol = D_005311D0;
     model = dds3ObjectBaseGetModelHandle(D_0054EAB0);
-    now = model->motion->frame;
+    now = model->first->frame;
     for (i = 0; i < 10; i++) {
         if (frame1.f[i] - 0.5f < now && now < frame1.f[i] + 0.5f) {
             dds3GetPosPoseSet(D_0054EAB0);
@@ -959,7 +954,7 @@ void fldRunTamaSe(void)
         }
     }
     model = dds3ObjectBaseGetModelHandle(fldRunTama2Basic);
-    now = model->motion->frame;
+    now = model->first->frame;
     for (i = 0; i < 10; i++) {
         if (frame2.f[i] - 0.5f < now && now < frame2.f[i] + 0.5f) {
             dds3GetPosPoseSet(fldRunTama2Basic);
@@ -970,7 +965,7 @@ void fldRunTamaSe(void)
         }
     }
     model = dds3ObjectBaseGetModelHandle(fldRunTama3Basic);
-    now = model->motion->frame;
+    now = model->first->frame;
     for (i = 0; i < 10; i++) {
         if (frame3.f[i] - 0.5f < now && now < frame3.f[i] + 0.5f) {
             dds3GetPosPoseSet(fldRunTama3Basic);
