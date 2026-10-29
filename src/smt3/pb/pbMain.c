@@ -238,7 +238,66 @@ void pb_proc_dummy_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(panel);
 }
 
+extern void rsetOtOfs(s32 offset);
+extern void rsetAlpha(s32 mode);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm,
+                     s32 zte, s32 ztst);
+extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                        s32 color, sdfTexHandle_t *texture);
+extern dds3ProcessID_t *pbGetMessageScriptProc(void);
+extern s32 fclGetFlag(s8 index);
+
+#ifdef NON_MATCHING
+s32 pb_draw_bg_Process(dds3ProcessID_t *id) {
+    pbProcHandle_t *panel = id->workdata;
+    s32 state = panel->state;
+    s32 number;
+    s32 tens;
+    s32 ones;
+    pbMapWork_t *map;
+
+    if (state == 1) {
+        if (panel != NULL) {
+            panel->flags = 0;
+        }
+    } else if (state == 5) {
+        return -1;
+    }
+
+    rsetOtOfs(0x27);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
+                0x80808080, D_0054F5C4->tex344);
+
+    rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
+    rsetOtOfs(0x47);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    if (pbGetMessageScriptProc() == NULL && fclGetFlag(0) == 0) {
+        DrwSprite2D(0, 0x15E, 0x200, 0x62, 0, 0x15E, 0x200, 0x62,
+                    0x80808080, D_0054F5C4->tex348);
+    }
+
+    DrwSprite2D(0x100, 0, 0x100, 0xC8, 0x100, 0, 0x100, 0xC8,
+                0x80808080, D_0054F5C4->tex348);
+
+    map = D_0054F5C4;
+    number = map->stage + 1;
+    ones = number % 10;
+    DrwSprite2D(0x1C4, 0x1B, 0xD, 0x14, ones * 0x14 + 0x28, 0x1CC, 0xD, 0x14,
+                0x80808080, map->tex348);
+    map = D_0054F5C4;
+    tens = (map->stage + 1) / 10;
+    if (tens > 0) {
+        DrwSprite2D(0x1B7, 0x1B, 0xD, 0x14, tens * 0x14 + 0x28, 0x1CC, 0xD, 0x14,
+                    0x80808080, map->tex348);
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbMain", pb_draw_bg_Process);
+#endif
 
 void pb_draw_bg_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(id->workdata);
