@@ -82,15 +82,9 @@ extern effBlurDrawBank_t dds3DrawEnv[];
 /* Nine A+D registers per tri-strip: RGBAQ once, then ST and XYZ2 per vertex. */
 
 
-typedef struct effBlurPrimTriStrip_t {
-    s32 r;
-    s32 g;
-    s32 b;
-    s32 a;
-    effBlurPrimVertex_t vtx[4];
-} effBlurPrimTriStrip_t;
 
-void dds3EffectBlurDrawQuad(const dds3Effect_Blur_t *pBlur, void *pPrim);
+
+void dds3EffectBlurDrawQuad(const dds3Effect_Blur_t *pBlur, effBlurPrimTriStrip_t *pPrim);
 
 void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *texture);
 

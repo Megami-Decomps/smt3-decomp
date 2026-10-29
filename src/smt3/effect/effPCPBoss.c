@@ -4441,15 +4441,12 @@ void effPadVibeFadeIN(u32 mode, u8 power, s32 frame)
 
 
 
-typedef struct {
-    s32 r, g, b, a;
-    effBlurPrimVertex_t vertex[4];
-} effBlurQuadPacket_t;
+
 
 extern f32 sdfCos(f32 angle);
 
 #ifdef NON_MATCHING
-void dds3EffectBlurDrawQuad(const dds3Effect_Blur_t *source, effBlurQuadPacket_t *quad)
+void dds3EffectBlurDrawQuad(const dds3Effect_Blur_t *source, effBlurPrimTriStrip_t *quad)
 {
     const u8 *color = (const u8 *)&source->abgr;
     s32 x0, y0, x1, y1;
@@ -4463,58 +4460,58 @@ void dds3EffectBlurDrawQuad(const dds3Effect_Blur_t *source, effBlurQuadPacket_t
     quad->b = color[2];
     quad->a = color[3];
     x0 = ((u32)source->xy[0][0] << 4) + 0x7000;
-    quad->vertex[0].x = x0;
+    quad->vtx[0].x = x0;
     y0 = ((u32)source->xy[0][1] << 3) + 0x7900;
-    quad->vertex[1].x = x0;
-    quad->vertex[0].y = y0;
+    quad->vtx[1].x = x0;
+    quad->vtx[0].y = y0;
     y1 = ((u32)source->xy[1][1] << 3) + 0x7900;
-    quad->vertex[1].y = y1;
+    quad->vtx[1].y = y1;
     x1 = ((u32)source->xy[1][0] << 4) + 0x7000;
-    quad->vertex[2].y = y0;
-    quad->vertex[3].y = y1;
-    quad->vertex[3].x = x1;
-    quad->vertex[2].x = x1;
+    quad->vtx[2].y = y0;
+    quad->vtx[3].y = y1;
+    quad->vtx[3].x = x1;
+    quad->vtx[2].x = x1;
     s0 = (f32)source->xy[0][0] * 0.001953125f;
     t0 = (f32)source->xy[0][1] * 0.001953125f;
     t1 = (f32)source->xy[1][1] * 0.001953125f;
     s1 = (f32)source->xy[1][0] * 0.001953125f;
-    quad->vertex[0].z = 0;
-    quad->vertex[1].s = s0;
-    quad->vertex[2].t = t0;
-    quad->vertex[1].z = 0;
-    quad->vertex[2].z = 0;
-    quad->vertex[3].z = 0;
-    quad->vertex[0].s = s0;
-    quad->vertex[0].t = t0;
+    quad->vtx[0].z = 0;
+    quad->vtx[1].s = s0;
+    quad->vtx[2].t = t0;
+    quad->vtx[1].z = 0;
+    quad->vtx[2].z = 0;
+    quad->vtx[3].z = 0;
+    quad->vtx[0].s = s0;
+    quad->vtx[0].t = t0;
     centerX = ((f32)source->center[0] + 256.0f) * 0.001953125f;
     centerY = ((f32)source->center[1] + 224.0f) * yScale;
-    quad->vertex[3].t = t1;
-    quad->vertex[3].s = s1;
-    quad->vertex[1].t = t1;
-    quad->vertex[2].s = s1;
-    quad->vertex[0].adc = 0;
-    quad->vertex[1].adc = 0;
-    quad->vertex[2].adc = 0;
-    quad->vertex[3].adc = 0;
+    quad->vtx[3].t = t1;
+    quad->vtx[3].s = s1;
+    quad->vtx[1].t = t1;
+    quad->vtx[2].s = s1;
+    quad->vtx[0].adc = 0;
+    quad->vtx[1].adc = 0;
+    quad->vtx[2].adc = 0;
+    quad->vtx[3].adc = 0;
     scale = source->scale;
     cosine = sdfCos(source->rotate);
     sine = sdfSin(source->rotate);
-    u0 = (quad->vertex[0].s - centerX) * scale;
-    v0 = (quad->vertex[0].t - centerY) * scale;
-    u1 = (quad->vertex[1].s - centerX) * scale;
-    v1 = (quad->vertex[1].t - centerY) * scale;
-    u2 = (quad->vertex[2].s - centerX) * scale;
-    v2 = (quad->vertex[2].t - centerY) * scale;
-    u3 = (quad->vertex[3].s - centerX) * scale;
-    v3 = (quad->vertex[3].t - centerY) * scale;
-    quad->vertex[0].s = (u0 * cosine - v0 * sine) + centerX;
-    quad->vertex[0].t = (u0 * sine + v0 * cosine) + centerY;
-    quad->vertex[1].s = (u1 * cosine - v1 * sine) + centerX;
-    quad->vertex[1].t = (u1 * sine + v1 * cosine) + centerY;
-    quad->vertex[2].s = (u2 * cosine - v2 * sine) + centerX;
-    quad->vertex[2].t = (u2 * sine + v2 * cosine) + centerY;
-    quad->vertex[3].t = (u3 * sine + v3 * cosine) + centerY;
-    quad->vertex[3].s = (u3 * cosine - v3 * sine) + centerX;
+    u0 = (quad->vtx[0].s - centerX) * scale;
+    v0 = (quad->vtx[0].t - centerY) * scale;
+    u1 = (quad->vtx[1].s - centerX) * scale;
+    v1 = (quad->vtx[1].t - centerY) * scale;
+    u2 = (quad->vtx[2].s - centerX) * scale;
+    v2 = (quad->vtx[2].t - centerY) * scale;
+    u3 = (quad->vtx[3].s - centerX) * scale;
+    v3 = (quad->vtx[3].t - centerY) * scale;
+    quad->vtx[0].s = (u0 * cosine - v0 * sine) + centerX;
+    quad->vtx[0].t = (u0 * sine + v0 * cosine) + centerY;
+    quad->vtx[1].s = (u1 * cosine - v1 * sine) + centerX;
+    quad->vtx[1].t = (u1 * sine + v1 * cosine) + centerY;
+    quad->vtx[2].s = (u2 * cosine - v2 * sine) + centerX;
+    quad->vtx[2].t = (u2 * sine + v2 * cosine) + centerY;
+    quad->vtx[3].t = (u3 * sine + v3 * cosine) + centerY;
+    quad->vtx[3].s = (u3 * cosine - v3 * sine) + centerX;
 }
 #else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", dds3EffectBlurDrawQuad);
