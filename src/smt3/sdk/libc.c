@@ -216,7 +216,7 @@ extern s32 _raise_r(_reent *r, s32 sig);
 
 extern void *_signal_r(_reent *r, s32 sig, void *handler);
 
-extern s32 _setlocale_r(_reent *r, s32 category, const char *locale);
+extern char *_setlocale_r(_reent *r, s32 category, const char *locale);
 
 extern void *func_002DA308(_reent *r);
 
@@ -868,13 +868,28 @@ INCLUDE_RODATA(const s32, "sdk/libc", D_0054B908);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B910);
 
-INCLUDE_ASM(const s32, "sdk/libc", _setlocale_r);
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B918);
+
+extern char D_0054B908[];
+extern char D_0054B918[];
+extern s32 strcmp(const char *left, const char *right);
+
+char *_setlocale_r(_reent *r, s32 category, const char *locale)
+{
+    if (locale != NULL) {
+        if (strcmp(locale, D_0054B918) != 0 && strcmp(locale, D_0054B908) != 0)
+            return NULL;
+        r->_current_category = category;
+        r->_current_locale = locale;
+    }
+    return D_0054B918;
+}
 
 void *func_002DA308(_reent *r) {
     return D_0054B8D8;
 }
 
-s32 setlocale(s32 category, const char *locale) {
+char *setlocale(s32 category, const char *locale) {
     return _setlocale_r(_impure_ptr, category, locale);
 }
 
