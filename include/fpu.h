@@ -36,4 +36,14 @@ static inline float ffabsf(float x)
     return result;
 }
 
+/* Convert using the EE FPU's current rounding mode. */
+static inline int fcvtws(float value)
+{
+    float bits;
+    int result;
+    __asm__ volatile ("cvt.w.s %0, %1" : "=f" (bits) : "f" (value));
+    __asm__ volatile ("mfc1 %0, %1" : "=r" (result) : "f" (bits));
+    return result;
+}
+
 #endif /* FPU_H */
