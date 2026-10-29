@@ -23,8 +23,6 @@ typedef struct fldTriggerBox_t fldTriggerBox_t;
 
 typedef union fldTriggerShape_t fldTriggerShape_t;
 
-typedef struct fldTaskInfo_t fldTaskInfo_t;
-
 typedef struct fldRoomState_t fldRoomState_t;
 
 typedef struct fldInfHit_t fldInfHit_t;
@@ -73,13 +71,6 @@ union fldTriggerShape_t {
     fldTriggerSphere_t sphere;
     fldTriggerPlane_t plane;
     fldTriggerBox_t box;
-};
-
-struct fldTaskInfo_t {
-    s32 unk0;
-    s32 slot;
-    u32 unk08;
-    fldTriggerShape_t *shape;
 };
 
 struct fldRoomState_t {
@@ -389,7 +380,7 @@ void fldEveHit_End(void) {
     s32 slotIndex;
     dds3Basic_t *scene;
     char *scriptName;
-    fldTaskInfo_t *taskInfo;
+    fldResPut_t *taskInfo;
 
     fldEveHitState = 1;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
@@ -401,10 +392,10 @@ void fldEveHit_End(void) {
     scene = dds3GetControlScene();
     if (scene != NULL) {
         for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
-            taskInfo = (fldTaskInfo_t *)gEvnRng[slotIndex]->data;
-            if (taskInfo->slot >= 0) {
+            taskInfo = (fldResPut_t *)gEvnRng[slotIndex]->data;
+            if (taskInfo->eventIndex >= 0) {
                 scriptName = dds3EventBasicGetResource((dds3Basic_t *)dds3SearchSceneBasic(
-                    scene, fldEveHitDataTable[taskInfo->slot]->objectId, 0xD));
+                    scene, fldEveHitDataTable[taskInfo->eventIndex]->objectId, 0xD));
                 if (scrSearchScriptName(scriptName) != NULL) {
                     dds3SceneBasicEndScript(dds3GetActiveScene(), scriptName);
                 }
@@ -420,13 +411,6 @@ typedef struct {
     u32 Type;
     f32 r;
 } fldResPutEveBall_t;
-
-typedef struct {
-    u32 type;
-    s32 eveIndex;
-    s32 visible;
-    fldResPutEveBall_t *ball;
-} fldResPut_t;
 
 typedef struct {
     fldResPutEveBall_t ball;  /* 0x00 */
@@ -467,7 +451,7 @@ s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
     f32 dir[4];
     f32 pos[4];
     s32 i;
-    fldTaskInfo_t *info;
+    fldResPut_t *info;
     f32 *target;
     f32 length;
     f32 dot;
@@ -478,8 +462,8 @@ s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
         if (fldEveHitTable[i].worldObjectKey != put->serialID) {
             continue;
         }
-        info = (fldTaskInfo_t *)gEvnRng[i]->data;
-        switch (info->shape->kind) {
+        info = (fldResPut_t *)gEvnRng[i]->data;
+        switch (info->data.shape->kind) {
         case 0:
             target = (f32 *)put->workdata;
             pos[0] = target[0];
@@ -511,7 +495,7 @@ s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
             }
             return 1;
         case 1:
-            return fldEveHitTable[i].shapeKind == info->shape->kind;
+            return fldEveHitTable[i].shapeKind == info->data.shape->kind;
         case 2:
             SDF_VU0_LOADVECTOR(&unit->poseset->rot);
             ToMatrix();
@@ -536,7 +520,7 @@ s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
     f32 dir[4];
     f32 pos[4];
     s32 i;
-    fldTaskInfo_t *info;
+    fldResPut_t *info;
     f32 *probe;
     f32 length;
     f32 dot;
@@ -547,8 +531,8 @@ s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
         if (fldEveHitTable[i].worldObjectKey != put->serialID) {
             continue;
         }
-        info = (fldTaskInfo_t *)gEvnRng[i]->data;
-        switch (info->shape->kind) {
+        info = (fldResPut_t *)gEvnRng[i]->data;
+        switch (info->data.shape->kind) {
         case 0:
             probe = pos;
             *(u128 *)pos = *(u128 *)put->workdata;
@@ -575,7 +559,7 @@ s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
             }
             return 1;
         case 1:
-            return fldEveHitTable[i].shapeKind == info->shape->kind;
+            return fldEveHitTable[i].shapeKind == info->data.shape->kind;
         case 2:
             SDF_VU0_LOADVECTOR(&unit->poseset->rot);
             ToMatrix();
@@ -759,7 +743,7 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
     for (i = 0; i < fldEveRngCount; i++) {
         fldRoomState_t *room = &fldEveHitTable[i];
         fldResHead_t *event;
-        fldTaskInfo_t *info;
+        fldResPut_t *info;
         const f32 *position;
         char *script;
         u32 kind;
@@ -774,14 +758,14 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
         }
         event = gEvnRng[i];
         info = event->data;
-        kind = info->shape->kind;
+        kind = info->data.shape->kind;
         if (kind == 0) {
             position = &event->transform->pos.x;
             playerPose.r = 30.0f;
             playerPose.pos.x = player->poseset->pos.x;
             playerPose.pos.y = player->poseset->pos.y;
             playerPose.pos.z = player->poseset->pos.z;
-            eventPose.r = info->shape->sphere.radius;
+            eventPose.r = info->data.shape->sphere.radius;
             eventPose.pos.x = position[0];
             eventPose.pos.y = position[1];
             eventPose.pos.z = position[2];
@@ -797,13 +781,13 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
                 }
                 if (fldCheckNpcTalk2(gEvnRng[i]->name) != NULL) {
                     talkIndex = i;
-                } else if (((fldTaskInfo_t *)gEvnRng[i]->data)->slot >= 0) {
+                } else if (((fldResPut_t *)gEvnRng[i]->data)->eventIndex >= 0) {
                     info = gEvnRng[i]->data;
-                    script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->slot]->objectId, 0xD));
+                    script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->eventIndex]->objectId, 0xD));
                     fldEveHit_ScriptStart(script, i);
                 }
             } else if (fldCheckNpcTalk(gEvnRng[i]->name) == NULL &&
-                       ((fldTaskInfo_t *)gEvnRng[i]->data)->slot >= 0) {
+                       ((fldResPut_t *)gEvnRng[i]->data)->eventIndex >= 0) {
                 fldEveHit_ScriptEnd2(i);
             }
         } else if (kind == 1) {
@@ -842,9 +826,9 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
                     }
                     if (fldCheckNpcTalk(gEvnRng[i]->name) != NULL) {
                         talkIndex = i;
-                    } else if (((fldTaskInfo_t *)gEvnRng[i]->data)->slot >= 0) {
+                    } else if (((fldResPut_t *)gEvnRng[i]->data)->eventIndex >= 0) {
                         info = gEvnRng[i]->data;
-                        script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->slot]->objectId, 0xD));
+                        script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->eventIndex]->objectId, 0xD));
                         if (scrSearchScriptName(script) == NULL) {
                             gEvnRngPid[i] = dds3SceneBasicStartScript(dds3GetActiveScene(), script);
                             gFldEveRngIdx = i;
@@ -874,15 +858,15 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
                     talkIndex = i;
                 } else if (fldFindEventEntry(gEvnRng[i]->name) != NULL) {
                     doorIndex = i;
-                } else if (((fldTaskInfo_t *)gEvnRng[i]->data)->slot >= 0) {
+                } else if (((fldResPut_t *)gEvnRng[i]->data)->eventIndex >= 0) {
                     info = gEvnRng[i]->data;
-                    script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->slot]->objectId, 0xD));
+                    script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->eventIndex]->objectId, 0xD));
                     fldEveHit_ScriptStart(script, i);
                 }
             } else if (fldCheckNpcTalk(event->name) == NULL && fldFindEventEntry(gEvnRng[i]->name) == NULL) {
                 info = gEvnRng[i]->data;
-                if (info->slot >= 0) {
-                    script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->slot]->objectId, 0xD));
+                if (info->eventIndex >= 0) {
+                    script = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, fldEveHitDataTable[info->eventIndex]->objectId, 0xD));
                     fldEveHit_ScriptEnd(script, i);
                 }
                 gEvnRngPid[i] = 0;
@@ -992,14 +976,14 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
     id = dds3AllocObjectId();
     event = dds3AddEventBasic(id, "itembox_label", D_002FCD70);
     D_002FCFA0[i].event.id = id;
-    D_002FCFA0[i].put.eveIndex =
+    D_002FCFA0[i].put.eventIndex =
         fldEveHit_AddEveData((fldEventDataHeader_t *)&D_002FCFA0[i].event, event);
     D_002FCFA0[i].put.visible = 1;
     D_002FCFA0[i].hit.data = &D_002FCFA0[i].put;
     D_002FCFA0[i].ball.Type = 0;
     D_002FCFA0[i].ball.r = r;
     D_002FCFA0[i].put.type = 1;
-    D_002FCFA0[i].put.ball = &D_002FCFA0[i].ball;
+    D_002FCFA0[i].put.data.parameters = &D_002FCFA0[i].ball;
     sisei = &D_002FCFA0[i].sisei;
     sisei->pos.x = x;
     sisei->pos.y = y;
@@ -1040,11 +1024,11 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     fldEveRngBox_t *box;
     dds3Basic_t *point;
     fldResourcePoint_t *sisei;
-    D_002FCFA0[i].put.ball = &D_002FCFA0[i].ball;
+    D_002FCFA0[i].put.data.parameters = &D_002FCFA0[i].ball;
     D_002FCFA0[i].ball.Type = 0;
     D_002FCFA0[i].hit.data = &D_002FCFA0[i].put;
     D_002FCFA0[i].ball.r = r;
-    D_002FCFA0[i].put.eveIndex = eveidx;
+    D_002FCFA0[i].put.eventIndex = eveidx;
     D_002FCFA0[i].put.type = 1;
     D_002FCFA0[i].put.visible = 1;
     sisei = &D_002FCFA0[i].sisei;

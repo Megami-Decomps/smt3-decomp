@@ -49,6 +49,19 @@ struct collision_s {
     s32 npcID;
 };
 
+union fldTriggerShape_t;
+
+typedef struct fldResPut_t
+{
+    u32 type;
+    s32 eventIndex;
+    u32 visible;
+    union {
+        void *parameters;
+        union fldTriggerShape_t *shape;
+    } data;
+} fldResPut_t;
+
 typedef struct fldResourcePoint_t
 {
     sdfVector4_t pos;

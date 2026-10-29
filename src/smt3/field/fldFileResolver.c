@@ -735,13 +735,6 @@ typedef struct fldSpawnEventDataFL2_t {
     void *data;
 } fldSpawnEventDataFL2_t;
 
-typedef struct fldSpawnPointDataFL2_t {
-    u32 kind;
-    s32 eventIndex;
-    u8 opaque08[4]; /* Not interpreted by this resource constructor. */
-    void *parameters;
-} fldSpawnPointDataFL2_t;
-
 typedef struct fldSpawnSoundDataFL2_t {
     f32 radius;
     s32 soundId;
@@ -828,7 +821,7 @@ void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
             break;
         case FLD_SPAWN_BATCH_KIND_POINT:
             for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
-                fldSpawnPointDataFL2_t *data;
+                fldResPut_t *data;
                 if (resource->transform != NULL) {
                     position[0] = resource->transform->pos.x;
                     position[1] = resource->transform->pos.y;
@@ -849,7 +842,7 @@ void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
                     rotation[3] = 0.0f;
                 }
                 data = resource->data;
-                switch (data->kind) {
+                switch (data->type) {
                 case 0:
                     dds3AddPointBasic(resource->id, resource->transform, resource->name);
                     break;
@@ -858,17 +851,17 @@ void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
                     fldEveHit_AddEveHit(resource, spawnedObject);
                     break;
                 case 2: {
-                    s32 npcId = *(s32 *)data->parameters;
+                    s32 npcId = *(s32 *)data->data.parameters;
                     s32 room = fldCommand_GetHojiID(resource->name);
                     fldNpcLoad(npcId, position[0], position[1], position[2], rotation, room,
-                               resource->name, ((fldSpawnPointDataFL2_t *)resource->data)->eventIndex);
+                               resource->name, ((fldResPut_t *)resource->data)->eventIndex);
                     break;
                 }
                 case 3:
-                    fldItemBoxAdd(*(s32 *)data->parameters, position[0], position[1], position[2], rotation);
+                    fldItemBoxAdd(*(s32 *)data->data.parameters, position[0], position[1], position[2], rotation);
                     break;
                 case 7: {
-                    fldSpawnSoundDataFL2_t *sound = data->parameters;
+                    fldSpawnSoundDataFL2_t *sound = data->data.parameters;
                     fldAddSe3D(sound->soundId, sound->radius, position[0], position[1], position[2]);
                     break;
                 }
