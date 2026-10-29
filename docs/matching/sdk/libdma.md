@@ -52,6 +52,10 @@ Also ruled out, each worse than 12 words:
 - writing `D_RBOR` before `D_SQWC` in source, which confirms the volatile
   writes keep source order and so fixes the write sequence.
 
+The assembler pin that closed `sceGsResetPath` and `sceGsSyncPath` does not
+move this one: 472 bytes and the same 15 words either way, because its only
+delay slot is one gcc fills itself.
+
 An independent description of the function confirms the draft's shape: five
 locals each initialized from one volatile register read, of which only the
 `D_CTRL` one is read again, so the other four reads are dead values that only

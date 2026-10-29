@@ -2,48 +2,49 @@
 
 ## sceGsResetPath (0x68)
 
-108 bytes against retail's 104. The two VIF1 register writes, the store sync,
-the four-instruction VU1 reset through COP2 control register 28 and both
-quadword pushes of the initialization packet at `D_00529F30` match word for
-word, as does the position where retail materializes the GIF_CTRL address.
+Matches, all 104 bytes, and is C in the unit.
 
-The one open word is the ending. Retail writes GIF_CTRL in the `jr` delay
-slot, and ee-gcc 2.9 never moves a volatile access into a delay slot, so that
-store cannot be volatile; but a plain store to the constant address becomes a
-two-instruction form that is itself ineligible for the slot, and ee-as fills
-delay slots with `nop` rather than swapping, so the assembler will not rescue
-it either. Taking the address from a pointer local that is initialized in its
-declaration gives both the register-held address and the filled slot, at
-exactly 104 bytes, but the materialization then sits 12 words early, before
-the asm block, because a volatile asm is a scheduling barrier the insn cannot
-cross. The draft keeps the direct volatile writes.
+What closed it was two things. The source form is the one the SDK header uses:
+pointer-valued volatile register macros with put accessors over them, no local
+pointer anywhere, so each access materializes its own address with `lui` plus
+`ori` and a zero displacement. And the eight-word VIF packet is read as two
+quadwords through a cast of its first and fifth words, not indexed as a
+quadword array; indexing it as `u128[2]` costs nine words of register
+allocation even though the instruction count is the same. The data stays in
+asm at `D_00529F30`, declared here as `extern const u32 [8]`.
+
+The last word, the GIF_CTRL write in the return's delay slot, was never a
+source question: it is the SDK assembler's delay-slot filling, which the 2.9
+package's assembler does not do. See the sweep in
+[sdk-matching](../../sdk-matching.md).
 
 ## sceGsSyncPath (0x314)
 
-828 bytes against retail's 792, the 36 bytes being nine unfilled delay slots.
-The body is otherwise reproduced: the mode test with the return-address save
-in its delay slot, the counter in the unused timeout parameter's register, the
-five spin loops in order with their rotated do-while shape and their top
-tests, the post-increment counter test against 0x1000000, the two COP2
-control-register-29 reads of the VU1 loop, the shared eleven-call diagnostic
-block that cross-jumping merges out of the five written-out copies, the
-literal zero return, and the five conditional moves that accumulate the
-non-blocking mask.
+The C matches: 788 bytes plus retail's four bytes of alignment fill, every
+word equal, under the SDK toolchain's 2.10 assembler. It is still `INCLUDE_ASM`
+for one packaging reason, and the body is kept beside it ready to promote.
 
-What is left is the ten register reads of the diagnostic block. Retail reads
-each one in its `scePrintf` delay slot, from an address held in a register as
-a `lui`/`ori` pair with zero displacement. That address shape is what this
-compiler emits only for a volatile access, and it will not put a volatile
-access in a delay slot; a plain read is eligible but collapses the address
-into a single two-instruction macro load, which is ineligible in turn. A
-pointer local does not help: the constant folds back into the load unless a
-volatile asm sits between the assignment and the use, and there is none here.
-Ten reads, nine `nop`s, because the last call's slot takes its string
-address.
+The ten register-dump format strings have no per-symbol rodata piece. While the
+function was assembly they rode in its own `.s`; once it is C, splat leaves
+them in the unit's whole-rodata file, which nothing includes, and the link ends
+176 bytes short in rodata. Writing them as C literals instead loses retail's
+eight-byte string alignment and shortens the image by 16 bytes. Giving those
+ten strings a piece, the way `D_0054A428` and the other four messages have one,
+is all that is left.
+
+The body itself needed: the counter in the unused timeout parameter's register,
+five spin loops with their rotated do-while shape and top tests, a
+post-increment counter test against 0x1000000, two COP2 control-register-29
+reads around the VU1 loop, the eleven-call diagnostic block written out at each
+of the five timeout sites so cross-jumping merges the tails, a literal zero
+return on the blocking path with the result local confined to the non-blocking
+section, and five single-statement ifs that `-O2` turns into four conditional
+moves.
 
 ## sceGsSetDefDispEnv (0x374)
 
-892 bytes against retail's 888, with the first 64 words exact. Matched: the
+892 bytes against retail's 888, with the first 64 words exact. The assembler
+pin does not touch this one: it has no unfilled delay slot. Matched: the
 `sceGsGetGParam` call kept external, the `mode == 2 || mode == 3` range test,
 the `checkModelVersion` path, the `_GetGsDxDyOffset` call with the four frame
 addresses formed by OR-ing into the stack pointer, the zeroing block with its
@@ -75,9 +76,10 @@ retail's operand order rather than guessed.
 
 ## sceGsExecStoreImage (sdk/libgraph, 0x68C)
 
-**Still assembly in production.** 1672 bytes against retail's 1680, with the
-first difference at +0x3C, where retail has its fifth prologue zero and this
-shape sinks that one initialization past the register saves. Everything the
+**Still assembly in production.** 1668 bytes against retail's 1680 under the
+pinned assembler (1672 before it), with the first difference at +0x3C, where
+retail has its fifth prologue zero and this shape sinks that one
+initialization past the register saves. Everything the
 structure decides now agrees instruction for instruction: the seven saved
 registers and the two parameter copies, one load of each 64-bit record word
 with the width, height and pixel-store mode extracted from the loaded

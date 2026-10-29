@@ -27,6 +27,7 @@ both native and emitted sizes when they differ.
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 5 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
+| 4 |  | [sdk/libgraph.md](sdk/libgraph.md) |
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
@@ -63,7 +64,6 @@ both native and emitted sizes when they differ.
 | 1 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 1 |  | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 1 |  | [sdk/libm.md](sdk/libm.md) |
-| 1 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
 | 1 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |

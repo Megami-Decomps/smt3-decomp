@@ -140,40 +140,32 @@ GParam *sceGsGetGParam(void)
     return &D_00529F20;
 }
 
-/* The VIF1 register-initialization packet pushed through the FIFO. */
-extern const u128 D_00529F30[2];
+/* EE register macros: pointer-valued volatile casts of the address constant. */
+#define VIF1_FBRST ((volatile u32 *)0x10003C10)
+#define VIF1_ERR   ((volatile u32 *)0x10003C20)
+#define VIF1_FIFO  ((volatile u128 *)0x10005000)
+#define GIF_CTRL   ((volatile u32 *)0x10003000)
 
-/* Resets VU1 through COP2 control register 28; the operand is an input even
- * though the block writes it, so the zero has to be materialized first. */
-#define EE_VU1_RESET(t) __asm__ volatile ( \
-    ".set noreorder\n\tcfc2.ni %0, $vi28\n\tori %0, %0, 0x200\n\t" \
-    "ctc2.ni %0, $vi28\n\tsync.p\n\t.set reorder" : : "r" (t))
+#define putVIF1_FBRST(x) (*VIF1_FBRST = (x))
+#define putVIF1_ERR(x)   (*VIF1_ERR = (x))
+#define putVIF1_FIFO(x)  (*VIF1_FIFO = (x))
+#define putGIF_CTRL(x)   (*GIF_CTRL = (x))
 
-/* NON_MATCHING: 108 bytes against retail's 104. Everything through the VU1
- * reset matches. Retail ends with the GIF_CTRL write in the jr delay slot,
- * which this compiler will not do for a volatile access, and writing it
- * through a plain pointer instead turns the address into a two-instruction
- * assembler macro that is equally ineligible. Taking the address from a
- * declaration-initialized pointer local does fill the slot at the right 104
- * bytes, but then the address is materialized 12 words early, before the
- * asm block, where retail materializes it between the first quadword load
- * and its store. */
-#ifdef NON_MATCHING
+extern const u32 D_00529F30[8];
+
 void sceGsResetPath(void)
 {
     u32 vu1 = 0;
 
-    *(volatile u32 *)0x10003C10 = 1;
-    *(volatile u32 *)0x10003C20 = 2;
-    EE_SYNC();
-    EE_VU1_RESET(vu1);
-    *(volatile u128 *)0x10005000 = D_00529F30[0];
-    *(volatile u128 *)0x10005000 = D_00529F30[1];
-    *(volatile u32 *)0x10003000 = 1;
+    putVIF1_FBRST(1);
+    putVIF1_ERR(2);
+    __asm__ volatile ("sync.l");
+    __asm__ volatile (".set noreorder\n\tcfc2.ni %0, $vi28\n\tori %0, %0, 0x200\n\t"
+                      "ctc2.ni %0, $vi28\n\tsync.p\n\t.set reorder" : : "r" (vu1));
+    putVIF1_FIFO(*(u128 *)&D_00529F30[0]);
+    putVIF1_FIFO(*(u128 *)&D_00529F30[4]);
+    putGIF_CTRL(1);
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libgraph", sceGsResetPath);
-#endif
 
 s32 checkModelVersion(void)
 {
@@ -318,18 +310,12 @@ void sceGsPutDispEnv(sceGsDispEnv *disp)
 #define EE_GET_VPU_STAT(out) __asm__ volatile ( \
     ".set noreorder\n\tcfc2.ni %0, $vi29\n\t.set reorder" : "=r" (out))
 
-/* NON_MATCHING: 828 bytes against retail's 792, nine words of it the unfilled
- * delay slots of the ten diagnostic calls. Retail reads each register in its
- * scePrintf delay slot off an address held in a register (lui plus ori, zero
- * displacement), which is the shape this compiler emits only for a volatile
- * access, and it never moves a volatile access into a delay slot. A plain read
- * is eligible but then the address collapses into a single two-instruction
- * macro load, which is ineligible for the slot in turn, and ee-as does not
- * swap instructions into delay slots at all. Everything else matches: the five
- * spin loops and their rotated shape, the shared eleven-call tail that
- * cross-jumping merges out of the five written-out copies, the counter test,
- * and the five conditional moves of the non-blocking section. The two
- * remaining words are branch displacements that the extra nops shift. */
+/* MATCHES under the SDK toolchain's 2.10 assembler: 788 bytes plus retail's
+ * four bytes of alignment fill, every word equal. It is held as assembly only
+ * for packaging: the ten register-dump format strings have no per-symbol
+ * rodata piece, splat leaves them in the unit's whole-rodata file, and writing
+ * them as C literals loses retail's eight-byte string alignment and shifts the
+ * image by 16 bytes. Give them a piece and this body can be promoted as is. */
 #ifdef NON_MATCHING
 /* The five timeout messages and the ten register-dump formats. */
 extern const char D_0054A428[];
