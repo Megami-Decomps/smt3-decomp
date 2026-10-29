@@ -74,7 +74,11 @@ typedef struct nbActionProcessData_t {
     s32 motion;
     s32 motse;
     void *hEffBTL;
-    u8 unk78[0x10];
+    /* Asynchronous requests returned by fileLoad; the sound id is bank << 16. */
+    struct fileRequest *bedfile;
+    struct fileRequest *midifile;
+    u32 unk80;
+    u32 midino;
     nbTimeList_t timelist[32];
     u32 packettime;
     s32 hitstopframe;
@@ -1614,7 +1618,439 @@ INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_STKSEL);
 
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAction_READY);
+/* Native item rows, as consumed by the command and inventory providers. */
+typedef struct {
+    u8 use;
+    u8 flag;
+    u16 skill;
+    u32 price;
+} nbActionItem_t;
+extern nbActionItem_t datItemTable[];
+
+/* Motion records begin at +0x2C in the 0x310-byte model-visual row. */
+typedef struct {
+    s16 movetype;
+    u16 actframe;
+    s32 se_no;
+    f32 motionsp;
+    f32 atarisize;
+    f32 movey;
+    f32 movez;
+    s16 bframe;
+    s16 hframe;
+} nbActionMotion_t;
+
+extern void nbRestoreBgm(void);
+extern datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
+extern s32 dds3GetGlobalConfigFlag(s32 flag);
+extern s32 nbCheckBadPanicAction(datUnitWork_t *work);
+extern s32 nbCheckSkillUse(s32 formindex, s32 nskill);
+extern s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid);
+extern void datAddItem(s32 id, s32 num);
+extern char *effMakeBedFileName(u32 id);
+extern struct fileRequest *fileLoad(const char *filename);
+extern s32 sprintf(char *str, const char *format, ...);
+extern char D_00575360[];
+extern void nbDelAllMojiNumEffectKoukaPacket(nbFormation_t *form);
+extern struct nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 startframe,
+    s32 uniqueid, nbFormation_t *form, s32 sw, u32 flag);
+extern s32 nbCalcUnitVisual(nbFormation_t *form, s32 part);
+extern s32 nbCalcUnitVisual2(nbFormation_t *form, s32 part);
+extern s32 nbGetMotionNo(nbFormation_t *form, s32 motion);
+extern struct nbKoukaPacket_t *nbAddSkillMotionKoukaPacket(s32 startframe,
+    s32 uniqueid, nbFormation_t *form, s32 motion, s32 endtype, f32 rate);
+extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 rate);
+extern s32 nbGetMotionActframe(nbFormation_t *form, s32 motion, f32 rate);
+extern s32 nbMemoryLoadMotionSe(nbFormation_t *form, s32 motion);
+extern s32 datGetSkillCost(datUnitWork_t *work, s32 nskill);
+extern struct nbKoukaPacket_t *nbAddHpMpKoukaPacket(s32 startframe,
+    s32 uniqueid, nbFormation_t *form, s32 n, s32 type);
+extern struct nbKoukaPacket_t *nbAddHatudoEffectKoukaPacket(s32 startframe, s32 framelength,
+    s32 uniqueid, nbFormation_t *form, s32 type, s32 mottype, s32 skillid);
+extern struct nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe,
+    s32 uniqueid, nbFormation_t *form, s32 type);
+extern void nbSetNormalSkill0(datUnitWork_t *work);
+extern void effBTLSkillEnd(void);
+extern void effBTLSkillSetFormationInfo(s32 invokeId, u32 targetBit);
+extern void effBTLSkillStart(u32 id, u32 stat);
+extern s32 nbMakeUnitMovePacket(s32 startframe, s32 uniqueid,
+    nbFormation_t *form, u32 targetMask, s32 type, f32 speed);
+extern void cmpSetSkillListRows(s32 rows);
+extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 nskill);
+extern void nbDispSkillName(s32 skill);
+extern void nbDispActionText(u32 command);
+extern void nbDispTextById(s32 id);
+void SetActionSeq(nbActionProcessData_t *a, s32 seq);
+
+void SetAction_READY(nbActionProcessData_t *a)
+{
+    s32 motionType = -1;
+    s32 skill = 0;
+    s32 moveType = 0;
+    datUnitVisual_t *visual;
+    f32 motionRate;
+    f32 moveRate;
+    s32 motion;
+    /* Live HP-cost delay, then independently reset formation indices.
+     * Qualified allocation evidence: docs/levers/handle-registers.md. */
+    s32 i;
+    nbFormation_t *form;
+    datNormalSkill_t *skillData;
+    s32 cost;
+    s32 hp;
+    s32 midi;
+    u32 stat;
+
+    nbRestoreBgm();
+    a->press = 0.0f;
+    a->form->motenddata = a->form->motendtype = 0;
+    a->runerr = 0;
+    a->jyokyomes = 0;
+    a->skilltime = 0;
+    a->autoskill = 0;
+    a->allhpdamage = 0;
+    a->allmpdamage = 0;
+    ClearTimeList(a);
+    SetHpForTimeList(a);
+    visual = nbGetUnitVisual(a->work);
+    if (dds3GetGlobalConfigFlag(2) == 0) {
+        if ((a->stat & 0x80) != 0 && a->work->nowcommand == 0) {
+            a->stat |= 0x100;
+        }
+    }
+    if ((a->stat & 0x100) != 0) {
+        motionRate = 3.0f;
+        moveRate = 1.5f;
+        if (a->work->id == 0xC0) {
+            motionRate = 1.0f;
+        }
+    } else {
+        motionRate = 1.0f;
+        moveRate = 1.0f;
+    }
+    if ((a->stat & 4) == 0) {
+        a->stat |= 4;
+        if (nbGetBadStat(a->form->formindex) == 8 && a->type != 3 &&
+            nbCheckBadPanicAction(a->work) != 0) {
+            SetActionSeq(a, 4);
+            return;
+        }
+        if (nbCheckBadCurse(a->form->formindex) != 0 && dds3GetRandIntA(NULL, 4) == 0) {
+            SetActionSeq(a, 4);
+            return;
+        }
+    }
+    switch (a->work->nowcommand) {
+    case -1:
+        SetActionSeq(a, 0x12);
+        return;
+    case 6:
+        skill = 0xFF;
+        break;
+    case 5:
+        skill = nbGetItemSkillNo(a, a->work->nowindex);
+        break;
+    case 1:
+        skill = a->work->nowindex;
+        switch (nbCheckSkillUse(a->form->formindex, skill)) {
+        case 1:
+            a->runerr = 1;
+            nbSetJyokyoMes(a, 0x3C, -1, 0);
+            break;
+        case 2:
+            a->runerr = 1;
+            nbSetJyokyoMes(a, 0xE, -1, 0);
+            break;
+        case 3:
+            a->runerr = 1;
+            nbSetJyokyoMes(a, 0xC, -1, 0);
+            break;
+        }
+        break;
+    case 0: break;
+    case 2: break;
+    case 3: break;
+    case 4: break;
+    case 7: break;
+    case 8: break;
+    case 9: break;
+    case 10: break;
+    }
+    switch (a->work->nowcommand) {
+    case 0: case 1: case 4: case 5: case 6:
+        if (a->select == 0) {
+            a->runerr = 3;
+            nbSetJyokyoMes(a, 0x3E, -1, 0);
+        }
+        break;
+    }
+    if (a->work->nowcommand == 5) {
+        if ((datItemTable[a->work->nowindex].flag & 4) != 0) {
+            datAddItem(a->work->nowindex, -1);
+        }
+    }
+    a->stat &= ~1;
+    switch (a->work->nowcommand) {
+    case 0: break;
+    case 1: case 5: case 6:
+        a->bedfile = NULL;
+        if (datSkillTable.visual[skill].bedno != 0) {
+            printf("name [%d]:%s\n", skill, effMakeBedFileName(skill));
+            a->bedfile = fileLoad(effMakeBedFileName(skill));
+        }
+        a->midifile = NULL;
+        midi = skill + 0x200;
+        sprintf(D_00575360, "/sound/MIDI%04X.SMG", midi);
+        printf("MIDI :%s\n", D_00575360);
+        a->midifile = fileLoad(D_00575360);
+        a->midino = midi << 16;
+        break;
+    case 2: break;
+    case 3: break;
+    case 4: break;
+    case 7: break;
+    case 8: break;
+    case 9: break;
+    case 10: break;
+    }
+    switch (a->work->nowcommand) {
+    case 0: motionType = 3; break;
+    case 5: motionType = 0x19; break;
+    case 1: motionType = datSkillTable.visual[a->work->nowindex].motion; break;
+    case 6: motionType = 0x18; break;
+    case 2: motionType = -1; break;
+    case 3: motionType = -1; break;
+    case 4: motionType = -1; break;
+    case 7: motionType = -1; break;
+    case 8: motionType = -1; break;
+    case 9: motionType = -1; break;
+    case 10: motionType = -1; break;
+    }
+    motion = -1;
+    if (motionType >= 0) {
+        nbDelAllMojiNumEffectKoukaPacket(a->form);
+        nbAddFormFlagOnOffPacket(0, (s32)a, a->form, 0, 0x2000);
+        if ((a->form->stat & 0x4000) != 0) {
+            a->form->stat &= ~0x4000;
+        }
+        a->form->motendtype = nbCalcUnitVisual(a->form, motionType);
+        a->form->motenddata = nbCalcUnitVisual2(a->form, motionType);
+        motion = nbGetMotionNo(a->form, motionType);
+        nbAddSkillMotionKoukaPacket(0, (s32)a, a->form, motionType, a->form->motendtype, motionRate);
+        if (a->form->motendtype == 2 && a->form->motenddata >= 0) {
+            f32 speed = nbGetMotionSpeed(a->form, motionType, motionRate);
+            nbMakeUnitFadeOutPacket(a->form->motenddata / speed, a, a->form, 0, 2, 4, 4);
+        }
+    }
+    a->form->motcate = motionType;
+    a->motion = motion;
+    if ((a->stat & 0x100) == 0) {
+        a->motse = nbMemoryLoadMotionSe(a->form, motion);
+    }
+    switch (a->work->nowcommand) {
+    case 0: case 1: case 5: case 6:
+        a->timer = nbGetMotionActframe(a->form, motionType, motionRate);
+        moveType = ((nbActionMotion_t *)((u8 *)visual + 0x2C))[motionType].movetype;
+        if (a->work->nowcommand == 1 && skill == 0x73) {
+            moveType = 2;
+        }
+        break;
+    case 4:
+        switch (a->negotype) {
+        case 0: a->timer = 0; break;
+        case 2:
+            a->timer = 0x23;
+            nbCameraSetState(0x15);
+            nbAddMojiEffKoukaPacket(0, 0x1E, (s32)a, a->form, 0);
+            break;
+        case 1: case 3: case 4:
+            a->timer = 0x23;
+            nbCameraSetState(3);
+            nbAddMojiEffKoukaPacket(0, 0x1E, (s32)a, a->form, 0);
+            break;
+        case 5: a->timer = 0; break;
+        case 6: a->timer = 0; break;
+        }
+        break;
+    default:
+        a->timer = 0;
+        moveType = 0;
+        break;
+    }
+    printf("acttime = %d\n", a->timer);
+    if (a->runerr == 0 && a->work->nowcommand == 1) {
+        skillData = &datSkillTable.normal[skill];
+        switch (skillData->costtype) {
+        case 0: break;
+        case 1:
+            cost = datGetSkillCost(a->work, skill);
+            if ((skillData->flag & 8) != 0) {
+                i = 60;
+                if (skill >= 0x73) {
+                    i = skill < 0x75 ? 83 : 60;
+                }
+                hp = -0x7FFF;
+                nbAddHpMpKoukaPacket(a->timer + i, (s32)a, a->form, hp, 0);
+            } else {
+                hp = -cost;
+                nbAddHpMpKoukaPacket(1, (s32)a, a->form, hp, 0);
+            }
+            AddTimeListHp(a, a->form->formindex, hp);
+            break;
+        case 2:
+            nbAddHpMpKoukaPacket(1, (s32)a, a->form, -datGetSkillCost(a->work, skill), 1);
+            break;
+        }
+    }
+    switch (a->work->nowcommand) {
+    case 0: break;
+    case 1: case 5: case 6:
+        nbAddHatudoEffectKoukaPacket(0, a->timer, (s32)a, a->form,
+            datSkillTable.visual[skill].hatudo, a->form->motcate, skill);
+        break;
+    case 2: break;
+    case 3: break;
+    case 4: break;
+    case 7:
+        nbAddHitEffKoukaPacket(0, (s32)a, a->form, 5);
+        break;
+    }
+    switch (a->work->nowcommand) {
+    case 0:
+        nbSetNormalSkill0(a->work);
+        nbDelAllKoukaPacketType(0xE);
+        effBTLSkillEnd();
+        effBTLSkillSetFormationInfo(a->party->formindex, (u16)a->select);
+        effBTLSkillStart(0, 0);
+        break;
+    case 1: case 5: case 6:
+        nbSetNormalSkill0(a->work);
+        nbDelAllKoukaPacketType(0xE);
+        effBTLSkillEnd();
+        effBTLSkillSetFormationInfo(a->party->formindex, (u16)a->select);
+        effBTLSkillStart(skill, 0);
+        break;
+    case 2: break;
+    case 3: nbCameraSetState(3); break;
+    case 4: break;
+    case 7: break;
+    case 8: break;
+    case 9: break;
+    case 10: break;
+    }
+    printf("select %d -> %08X\n", a->party->formindex, a->select);
+    if (a->work->nowcommand != 4) {
+        if (moveType == 2 && (a->work->nowcommand == 1 || a->work->nowcommand == 5)) {
+            switch (datSkillTable.normal[skill].targettype) {
+            case 0: moveType = 4; break;
+            case 1: case 2: moveType = 5; break;
+            }
+        }
+        nbMakeUnitMovePacket(1, (s32)a, a->form, (u16)a->select, moveType, moveRate);
+    }
+    for (i = 0; i < 16; i++) {
+        if ((a->select & (1 << i)) != 0) {
+            form = &a->data->form[i];
+            switch (a->work->nowcommand) {
+            case 4:
+                nbMakeUnitMovePacket(0, (s32)a, form, 1 << a->form->formindex, 1, 1.0f);
+                break;
+            case 6:
+                if ((form->stat & 0x41) == 0x41) {
+                    nbMakeReturnPacket(0, a, &a->data->party[form->partyindex]);
+                    nbAddHitEffKoukaPacket(0, (s32)a, form, 5);
+                }
+                break;
+            }
+        }
+    }
+    if (a->runerr == 0) {
+        if ((a->party->flag & 2) != 0) {
+            for (i = 0; i < 4; i++) {
+                stat = a->data->form[i].stat;
+                if ((stat & 1) != 0) {
+                    if ((stat & 0x40) != 0) {
+                        if ((stat & 8) != 0) {
+                            nbSetHojoAddCounter(i, 0x10, 1, 0);
+                        }
+                    }
+                }
+            }
+        } else {
+            for (i = 4; i < 14; i++) {
+                stat = a->data->form[i].stat;
+                if ((stat & 1) != 0) {
+                    if ((stat & 0x40) != 0) {
+                        if ((stat & 8) != 0) {
+                            nbSetHojoAddCounter(i, 0x10, 1, 0);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    nbPanelAllShow();
+    nbPanelPressGaugeShow();
+    if (a->work->nowcommand == 3 && (a->data->stat & 8) != 0) {
+        nbCameraSetState(0x19);
+    }
+    cmpSetSkillListRows(20);
+    switch (a->work->nowcommand) {
+    case 0:
+        if (nbHatudoCheckSkill(a->work, 0x130) != 0) {
+            nbDispSkillName(0x130);
+        } else {
+            nbDispActionText(a->work->nowcommand);
+        }
+        break;
+    case 2: case 3: case 6:
+        nbDispActionText(a->work->nowcommand);
+        break;
+    case 7:
+        if (nbCheckFormationPlayerSide(a->form->formindex) != 0) {
+            if ((a->stat & 0x20) != 0) {
+                nbSetJyokyoMes(a, 0x32, 1, a->work->id);
+            } else {
+                nbDispActionText(a->work->nowcommand);
+            }
+        } else if ((a->stat & 0x20) != 0) {
+            nbSetJyokyoMes(a, 0x34, 1, a->work->id);
+        } else {
+            nbSetJyokyoMes(a, 0xA, 1, a->work->id);
+        }
+        break;
+    case 5:
+        nbDispTextById(a->work->nowindex);
+        break;
+    case 4:
+        if (a->negotype == 0) {
+            nbDispSkillName(a->work->nowindex);
+        }
+        break;
+    case 1:
+        if (a->work->id == 0x159 && a->work->nowindex == 0xE2) {
+            nbDispSkillName(0x1F3);
+        } else if (a->work->id == 0x15A && a->work->nowindex == 0xE2) {
+            nbDispSkillName(0x1F0);
+        } else if (a->work->id == 0x15B && a->work->nowindex == 0xE2) {
+            nbDispSkillName(0x1F1);
+        } else if (a->work->id == 0x15C && a->work->nowindex == 0xE2) {
+            nbDispSkillName(0x1F2);
+        } else {
+            /* This display value is distinct from the special-skill tests. */
+            s32 skillName = a->work->nowindex;
+
+            if (skillName != 0xF7) {
+                nbDispSkillName(skillName);
+            }
+        }
+        break;
+    case 8: break;
+    case 9: break;
+    case 10: break;
+    }
+    cmpSetSkillListRows(-1);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_READY);
 
