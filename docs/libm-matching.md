@@ -19,3 +19,24 @@ the native arithmetic shift. Keep the actual bit tests: negative zero and
 negative subnormals pass through; negative normal values below one become-1.
 Inputs with unbiased exponent at least23 pass through, including raw exponent255
 encodings. No generic IEEE NaN/infinity handling is added.
+
+## scalbnf
+
+All200 instruction bytes at0x002D12C0 match. Its float input/result use the
+float register bank independently of the signed32-bit exponent in `$4`.
+The explicit unsigned sum followed by a signed cast reproduces native32-bit
+wrapping, including the extreme exponent path checked against50000.
+
+Zero and subnormal encodings return unchanged. Adjusted exponents1..255 replace
+only the exponent bits. Larger results use the signed `1.0e30f` product; results
+at or below zero select that product when the original exponent exceeds50000,
+otherwise the signed `1.0e-30f` product. Preserve the native `copysignf` call and
+multiplication rather than substituting host IEEE overflow/underflow results.
+
+Extract the original exponent before the zero/subnormal gate and add the
+requested exponent afterward. Separate direct return expressions on the two
+underflow branches keep their constants in those branches; a shared scale local
+lets the compiler hoist the large constant and emits192 rather than200 bytes.
+The [historical scaler](https://github.com/mirror/newlib-cygwin/blob/newlib-1_9_0/newlib/libm/common/sf_scalbn.c)
+corroborates those separate returns, while the PS2 denormal/exponent limits are
+established by native control flow.

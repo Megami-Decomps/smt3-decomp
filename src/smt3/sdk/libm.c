@@ -197,7 +197,34 @@ f32 floorf(f32 x)
     return x;
 }
 
-INCLUDE_ASM(const s32, "sdk/libm", scalbnf);
+extern f32 copysignf(f32 magnitude, f32 sign);
+f32 scalbnf(f32 x, s32 n)
+{
+    s32 word;
+    f32 scale;
+    s32 exponent;
+
+    GET_FLOAT_WORD(word, x);
+    exponent = (s32)(((u32)(word & 0x7FFFFFFF)) >> 23);
+    if (((u32)(word & 0x7FFFFFFF)) <= 0x007FFFFFU) {
+        return x;
+    }
+    exponent = (s32)((u32)exponent + (u32)n);
+
+    if (exponent >= 0x100) {
+        scale = 1.0e30f;
+        return copysignf(scale, x) * scale;
+    }
+    if (exponent > 0) {
+        SET_FLOAT_WORD(x, ((u32)word & 0x807FFFFFU) | ((u32)exponent << 23));
+        return x;
+    }
+
+    if (n > 50000) {
+        return copysignf(1.0e30f, x) * 1.0e30f;
+    }
+    return copysignf(1.0e-30f, x) * 1.0e-30f;
+}
 
 INCLUDE_ASM(const s32, "sdk/libm", copysignf);
 
