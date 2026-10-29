@@ -1733,11 +1733,6 @@ s32 nbSetAiTarget(nbActionProcessData_t *a, s32 code, s32 n)
 
 
 #ifdef NON_MATCHING
-typedef struct {
-    datDevilAITbl_t table[4][5];
-    u32 reserved_A0;
-} datDevilAIData_t;
-
 extern s32 nbGetSelectBit(nbMainProcessData_t *data);
 
 s32 nbRunAiSub(nbActionProcessData_t *a, s32 tbl)

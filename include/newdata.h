@@ -271,6 +271,11 @@ typedef struct datUnitVisual_t
 
 typedef struct { u16 ritu, skill; u32 target; } datDevilAITbl_t;
 
+typedef struct {
+    datDevilAITbl_t table[4][5];
+    u32 reserved_A0;
+} datDevilAIData_t;
+
 typedef struct datSkill_t
 {
     s8 skillattr;

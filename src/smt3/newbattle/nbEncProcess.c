@@ -613,15 +613,14 @@ zero:
 }
 
 #ifdef NON_MATCHING
-typedef struct { datDevilAITbl_t table[4][5]; u32 reserved_A0; } nbBadCurseAiData_t;
-extern nbBadCurseAiData_t D_00398A08[];
+extern datDevilAIData_t D_00398A08[];
 extern s32 nbSkillIsInRange(s32 skill, s32 type);
 
 s32 nbFindBadCurseTarget(nbActionProcessData_t *a, s32 step)
 {
     s16 skills[64];
     datUnitWork_t *work;
-    nbBadCurseAiData_t *ai;
+    datDevilAIData_t *ai;
     s32 count = 0;
     s32 i;
     s32 j;
