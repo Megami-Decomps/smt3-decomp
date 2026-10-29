@@ -171,7 +171,7 @@ extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
-extern s8 cmbAddLevelUpParamEx(void *work, s8 mode);
+extern s8 cmbAddLevelUpParamEx(datUnitWork_t *work, s8 mode);
 
 extern void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst);
 extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);

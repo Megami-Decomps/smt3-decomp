@@ -17,7 +17,7 @@ extern u32 dds3GetRandA(void *state);
 
 extern s32 evtBitCheck(s32 no);
 
-extern s8 cmbAddLevelUpParamEx(void *work, s8 mode);
+extern s8 cmbAddLevelUpParamEx(datUnitWork_t *work, s8 mode);
 
 extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 
@@ -1785,7 +1785,65 @@ s32 func_00222DC0(u16 devilId)
     return 0;
 }
 
+#ifdef NON_MATCHING
+s8 cmbAddLevelUpParamEx(datUnitWork_t *unit, s8 mode)
+{
+    s16 quotient[6];
+    s16 weights[6];
+    s16 minimum = 0x1000;
+    s16 total = 0;
+    u8 count = 0;
+    u8 accumulated = 0;
+    u16 id = unit->id;
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        dds3GlobalWork_t *global = *(dds3GlobalWork_t *volatile *)&DDS3_GBWK;
+        u8 rate = id != 0 ? datLevelUpTable[id].head[i] :
+                              D_00339E00[global->heartsequip].growthRate[i];
+        s32 current;
+        if (i == 1) {
+            rate = 0;
+        }
+        current = cmbGetParam(unit, i) & 0xFF;
+        if (rate != 0 && current != 40) {
+            s8 value = unit->levelupparam[i];
+            quotient[i] = value / rate;
+            weights[i] = rate - value % rate;
+            if (quotient[i] < minimum) {
+                minimum = quotient[i];
+            }
+        } else {
+            quotient[i] = -1;
+            weights[i] = 0; /* Retail leaves this unset; normal growth values never select it. */
+        }
+    }
+    for (i = 0; i < 6; i++) {
+        if (quotient[i] == minimum) {
+            count++;
+            total = (s16)(total + (u16)weights[i]);
+        }
+    }
+    if (count != 0) {
+        u8 roll = dds3GetRandA(NULL) % (u32)total;
+        for (i = 0; i < 6; i++) {
+            if (quotient[i] == minimum) {
+                accumulated = (u8)(accumulated + *(u8 *)&weights[i]);
+                if (accumulated >= roll) {
+                    if (mode == 0) {
+                        ((u8 *)unit->levelupparam)[i]++;
+                    }
+                    break;
+                }
+            }
+        }
+        return (s8)i;
+    }
+    return -1;
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", cmbAddLevelUpParamEx);
+#endif
 
 s8 rst_223080(datUnitWork_t *unit)
 {
