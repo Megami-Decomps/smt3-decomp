@@ -18,13 +18,7 @@ extern s32 shopUpdateItemList(s32 mode);
 
 
 
-typedef struct
-{
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ u8 Flag;
-    /* 0x06 */ u16 res;
-} fclSpriteEntry_t;
+
 
 typedef struct
 {

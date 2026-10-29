@@ -252,7 +252,6 @@ s32 dds3DrawConfigLabel(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
 }
 
 typedef struct fclSpriteRes_t fclSpriteRes_t;
-typedef struct fclSpriteEntry_t fclSpriteEntry_t;
 typedef struct {
     fclSpriteRes_t *res;
     fclSpriteEntry_t *entries;

@@ -230,13 +230,7 @@ extern s32 cmpDrawBoxG(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *colors, s32 g, s3
 
 
 
-typedef struct
-{
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ u8 Flag;
-    /* 0x06 */ u16 res;
-} fclSpriteEntry_t;
+
 
 typedef struct
 {

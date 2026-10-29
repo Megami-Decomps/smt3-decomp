@@ -14,6 +14,14 @@ typedef struct
     /* 0x0A */ u16 v1;
 } fclSpriteRect_t;
 
+typedef struct fclSpriteEntry_t
+{
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ u8 Flag;
+    /* 0x06 */ u16 res;
+} fclSpriteEntry_t;
+
 typedef struct
 {
     sdfIVector4_t pos_act;
