@@ -228,15 +228,7 @@ extern s32 cmpDrawBoxSolid(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, 
 
 extern s32 cmpDrawBoxG(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *colors, s32 g, s32 h);
 
-typedef struct
-{
-    /* 0x00 */ u16 x;
-    /* 0x02 */ u16 y;
-    /* 0x04 */ u16 u0;
-    /* 0x06 */ u16 v0;
-    /* 0x08 */ u16 u1;
-    /* 0x0A */ u16 v1;
-} fclSpriteRect_t;
+
 
 typedef struct
 {

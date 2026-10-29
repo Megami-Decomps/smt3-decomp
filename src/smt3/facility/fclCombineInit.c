@@ -179,15 +179,7 @@ extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 
 extern s32 cmpDrawSpriteFlag(u8 id, s32 flag, s32 arg);
 
-typedef struct
-{
-    /* 0x00 */ u16 x;
-    /* 0x02 */ u16 y;
-    /* 0x04 */ u16 u0;
-    /* 0x06 */ u16 v0;
-    /* 0x08 */ u16 u1;
-    /* 0x0A */ u16 v1;
-} fclSpriteRect_t;
+
 
 typedef struct
 {
