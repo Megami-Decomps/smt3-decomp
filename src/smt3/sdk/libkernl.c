@@ -1259,7 +1259,34 @@ s32 sceSifFreeIopHeap(void *address)
     return sceSifFreeSysMemory(address);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadIopHeap);
+typedef struct heapLoadRequest_t {
+    u32 address;
+    char name[0xFC];
+} heapLoadRequest_t;
+extern heapLoadRequest_t D_0059E900;
+
+s32 sceSifLoadIopHeap(const char *path, u32 address)
+{
+    s32 length;
+
+    if (D_0052C354 < 0) {
+        return 0;
+    }
+    for (length = 0; length < 0xFC &&
+         (D_0059E900.name[length] = path[length]) != 0; length++) {
+    }
+    if (length == 0xFC) {
+        D_0059E900.name[length - 1] = 0;
+        length--;
+    }
+    D_0059E900.address = address;
+    D_0059E900.name[0xFB] = 0;
+    if (sceSifCallRpc(D_0059E840, 3, 0, &D_0059E900, length + 5,
+                      &D_0059E880, 4, NULL, NULL) >= 0) {
+        return D_0059E880;
+    }
+    return -1;
+}
 
 u32 sceSifQueryMemSize(void)
 {
