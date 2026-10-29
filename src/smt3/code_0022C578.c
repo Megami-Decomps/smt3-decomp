@@ -1781,7 +1781,8 @@ void cmpSetItemTSL(u16 itemId)
 extern void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func,
                                  void *data, s32 value, s32 alpha);
 extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
-extern void cmpDrawSkillList();
+extern void cmpDrawSkillList(s32 *position, cmpCursorInfo_t *cursor,
+                             datUnitWork_t *unit, s8 mode, s32 alpha);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053F4F0);
 
@@ -5925,7 +5926,76 @@ void cmpDrawSkillListScrollBar(s32 a, cmpCursorInfo_t *cursor)
     }
 }
 
+extern s32 cmpCursorBlinkColor(s32 timer);
+extern s32 cmpCursorFadeChannel(s32 color, s32 timer, s32 rate);
+extern void cmpDrawListFrame(s32 x, s32 y, s32 unusedZ, s32 rowHeight,
+                             s8 rowCount, s32 alpha, s32 ot);
+extern void cmpSetCursorSlot(s8 index, s8 state, u8 param, cmpCursorSlot_t *slot);
+extern s32 cmpAllocEffectSlot(s32 color, s8 selected, s8 disabled,
+                              cmpCursorSlot_t *slot);
+
+#ifdef NON_MATCHING
+void cmpDrawSkillList(s32 *position, cmpCursorInfo_t *cursor, datUnitWork_t *unit,
+                      s8 mode, s32 alpha)
+{
+    volatile cmpCursorInfo_t *liveCursor = cursor;
+    volatile datUnitWork_t *liveUnit = unit;
+    s32 start = *(volatile u8 *)&cursor->unk_22;
+    s32 rows = liveCursor->unk_26;
+    volatile s32 *livePosition = position;
+    s32 y = livePosition[1];
+    s32 x = livePosition[0];
+    s32 selectedRow = (u8)liveCursor->unk_25;
+    s32 blink = cmpCursorBlinkColor(alpha) & 0xFF;
+    s32 i;
+    fclPanelPos_t helpPosition;
+
+    cmpDrawListFrame(0, 0, 0x10, 0x17, 8, alpha, 0x47);
+    for (i = start; i < start + rows && i < 24; i++) {
+        s32 selected = 0;
+        s32 disabled = 0;
+        s32 color = 0xA09DC380;
+        cmpCursorSlot_t *slot = (cmpCursorSlot_t *)((u8 *)cursor + 0x3C + i * 0x10);
+
+        if (liveUnit->skill[i] == 0) {
+            continue;
+        }
+        if (mode >= 0 && i - start == selectedRow) {
+            color = 0x89FEFF80;
+            selected = 1;
+            cmpSetCursorSlot(0, 1, 0x10, slot);
+        }
+        if (cmpChkDoNotUseSkill(liveUnit->skill[i]) != 0) {
+            color = selected ? 0x8EBEF52B : 0x4D4B4B4D;
+            disabled = 1;
+        }
+        color = (cmpAllocEffectSlot(color, selected, disabled, slot) & ~0xFF) |
+                (((color & 0xFF) * blink) >> 7);
+        color = cmpCursorFadeChannel(color, alpha, 0);
+        cmpDrawSkillListHeader(x, y, color, liveUnit->skill[i]);
+        cmpDrawSkillListRow(x + 0x740, y, color, blink, selected, disabled,
+                            (u16 *)unit, liveUnit->skill[i], alpha);
+        y += 0xB8;
+    }
+    fclInitPanelPos(0x120, 0x988, 0x10, 0, 0, 0, &helpPosition);
+    {
+        u8 row = liveCursor->unk_24;
+        s16 offset = cursor->unk_22;
+        cmpDrawHelp(&helpPosition, liveUnit->skill[offset + row], 0, 0,
+                    alpha >= 0x100 ? 0x200 - alpha : alpha, 0x47);
+    }
+    if (mode == 0 && alpha <= 0x100) {
+        if (fclChkMessage() != 0) {
+            cursor->unk_34 = 0;
+        } else {
+            cmpDrawSkillListScrollBar(alpha, cursor);
+        }
+    }
+    cmpUpdateCursorSlots(cursor);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillList);
+#endif
 
 void cmpExpandColor(u64 *dst, u32 color)
 {
