@@ -5983,7 +5983,135 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusGauge);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusRow);
 
+extern s32 cmbGetHeartsParamEx(s8 devilId, s8 index, s32 registered);
+extern s32 cmbGetParam(datUnitWork_t *unit, s32 index);
+extern volatile s32 cmpGaugeAnimLive[] asm("cmpStatusAnimCount");
+
+#ifdef NON_MATCHING
+void cmpDrawParamGauge(s32 x, s32 y, s32 *colors, s32 rowHeight,
+                       s8 index, s8 bonus, s8 mode, datUnitWork_t *unit)
+{
+    s32 hearts = 0;
+    s8 value;
+    s8 i;
+    s32 marked = 0;
+    s32 rowY;
+    u32 blinkColors[4];
+
+    if ((unit->flag & 4) != 0) {
+        s8 parameter = cmpGetParamGaugeColor(index);
+        s8 equipped = (s8)DDS3_GBWK->heartsequip;
+        if (mode == 5) {
+            hearts = cmbGetHeartsParamEx(equipped, parameter, 0);
+        } else {
+            hearts = cmbGetHeartsParam(equipped, parameter);
+        }
+    }
+    value = bonus + cmbGetParam(unit, cmpGetParamGaugeColor(index));
+    if (mode == 4) {
+        value -= hearts;
+    } else if (mode == 5) {
+        hearts = (s8)(hearts + bonus);
+    }
+    if (hearts < 0) {
+        value -= hearts;
+    }
+    if (value > 0) {
+        s32 low = value - hearts;
+        s32 high = value + hearts;
+        s32 drawX = x * 16;
+
+        rowY = y + index * rowHeight;
+        for (i = 0; i < value && i < 40; i++) {
+            s32 sprite = 2;
+            if (hearts > 0) {
+                if (i >= low) {
+                    sprite = marked ? 3 : 4;
+                    marked = 1;
+                }
+            } else if (i >= high) {
+                sprite = marked ? 5 : 6;
+                marked = 1;
+            }
+            fclDrawSpriteRes(drawX, rowY * 8, 0, colors, 4, sprite,
+                             D_00345D88, fclSpriteTable, 0x47);
+            drawX += 0x50;
+        }
+    }
+    if (bonus == 0) {
+        return;
+    }
+    rowY = y + index * rowHeight;
+    switch (mode) {
+    case 0:
+        if (cmpGaugeAnimLive[0] % 48 != 0) {
+            mode = 2;
+        } else {
+            cmpParamGaugeState[0] = 0;
+        }
+        if (cmpParamGaugeState[0] == 0) {
+            mode = 0;
+        }
+        /* fall through */
+    case 1:
+    case 2: {
+        s32 left;
+        s32 right;
+        s32 leftX;
+        s32 rightX;
+
+        cmpGetGaugeBlinkAlpha(cmpGaugeAnimLive[0], mode, blinkColors);
+        i = value - bonus;
+        left = i - hearts;
+        right = i + hearts;
+        leftX = left * 5;
+        rightX = right * 5;
+        while (i < value) {
+            if ((hearts < 0 ? right : left) >= 40) {
+                return;
+            }
+            fclDrawSpriteRes((x + (hearts < 0 ? rightX : leftX)) * 16,
+                             rowY * 8, 0, (s32 *)blinkColors, 6, 3,
+                             D_00345D88, fclSpriteTable, 0x47);
+            leftX += 5;
+            rightX += 5;
+            left++;
+            right++;
+            i++;
+        }
+        break;
+    }
+    case 3: {
+        s32 position = hearts >= 0 ? value - hearts : value + hearts;
+        s32 *timer = &D_00574A48[index];
+        s32 frame = *timer;
+
+        if (frame != 0) {
+            frame++;
+            *timer = frame;
+            if (frame >= 24) {
+                *timer = 0;
+                return;
+            }
+            cmpGetGaugeBlinkAlpha(frame, 0, blinkColors);
+            fclDrawSpriteRes((x + position * 5 - 5) * 16, rowY * 8, 0,
+                             (s32 *)blinkColors, 6, 3, D_00345D88, fclSpriteTable, 0x47);
+        }
+        break;
+    }
+    case 4:
+    case 5:
+        cmpGetGaugeBlinkAlpha(cmpGaugeAnimLive[0], mode, blinkColors);
+        for (i = value - bonus; i < value && i < 40; i++) {
+            fclDrawSpriteRes((x + i * 5) * 16, rowY * 8, 0, (s32 *)blinkColors,
+                             6, 0xB, D_00345D88, fclSpriteTable, 0x47);
+        }
+        break;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawParamGauge);
+#endif
 
 extern s32 cmbGetParam(datUnitWork_t *unit, s32 index);
 extern void cmpDrawParamGauge(s32 x, s32 y, s32 *colors, s32 rowHeight,
