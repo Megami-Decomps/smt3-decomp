@@ -2295,7 +2295,49 @@ no:
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthDevil);
 
+extern char D_0054FB10[];
+extern char *datExplainTable[];
+extern char *text2[];
+extern s32 sprintf(char *out, const char *format, ...);
+extern void *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
+                                const char *text, void *previous);
+extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                   const char *text, void *previous);
+extern s32 func_001C7E38(void *request, s8 mode, u32 ot);
+extern u16 datGetLevelForDraw(datUnitWork_t *work);
+
+#ifdef NON_MATCHING
+void cmbDrawUnitLevel(s32 x, s32 y, s32 z, u32 color, u32 levelColor,
+                      datUnitWork_t *unit, s32 ot)
+{
+    char text[32];
+    void *request;
+
+    if ((unit->flag & 1) == 0) {
+        return;
+    }
+    if ((unit->flag & 0x800) != 0) {
+        color = 0x4D4B4B4D;
+        levelColor = color;
+    }
+    request = frwGetSmallFontFRQ2(x - 0x20, y, z, color,
+                                  datExplainTable[datDevilTable[unit->id].race], NULL);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+    request = frwGetSmallFontFRQ2(x + 0x460, y + 8, z, color, text2[unit->id], NULL);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+    if (unit->level == datDevilTable[unit->id].baseLevel) {
+        levelColor = color;
+    }
+    sprintf(text, D_0054FB10, datGetLevelForDraw(unit));
+    request = frwGetSmallNumFontFRQ(x + 0xB40, y + 0x18, z, levelColor, text, NULL);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawUnitLevel);
+#endif
 
 extern fclSpriteTbl_t cmbSpriteTable[];
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
