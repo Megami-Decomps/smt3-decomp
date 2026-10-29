@@ -3324,9 +3324,51 @@ s32 kCopy_0(u32 *dst, const u32 *src, u32 count)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", PatchIsNeeded_0);
+extern void SetOsdConfigParam(const u32 *param);
+extern void GetOsdConfigParam(u32 *param);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", InitExecPS2);
+s32 PatchIsNeeded_0(void)
+{
+    u32 original;
+    u32 changed;
+
+    GetOsdConfigParam(&original);
+    changed = (original & 0xFFFF1FFF) | 0x2000;
+    SetOsdConfigParam(&changed);
+    GetOsdConfigParam(&changed);
+    SetOsdConfigParam(&original);
+    return ((changed >> 13) & 7) == 0;
+}
+
+extern void FlushCache(s32 mode);
+
+extern kernelEntryPair_t D_0052CB28[3];
+extern const u8 D_0052C380[0x7A8];
+extern s32 PatchIsNeeded_0(void);
+extern void gcc2_compiled__15(u32 index, void *entry);
+extern s32 Copy_0(void *destination, const void *source, u32 size);
+extern void *GetEntryAddress(u32 index);
+
+void InitExecPS2(void)
+{
+    u32 index;
+    u32 i;
+    void *entry;
+
+    if (PatchIsNeeded_0() == 0) {
+        return;
+    }
+    gcc2_compiled__15(D_0052CB28[0].index, D_0052CB28[0].entry);
+    Copy_0((void *)0x80074000, D_0052C380, 0x7A8);
+    FlushCache(0);
+    FlushCache(2);
+    gcc2_compiled__15(D_0052CB28[1].index, D_0052CB28[1].entry);
+    for (i = 2; i < 3; i++) {
+        index = D_0052CB28[i].index;
+        entry = GetEntryAddress(index);
+        gcc2_compiled__15(D_0052CB28[i].index, entry);
+    }
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__16);
 
@@ -3385,7 +3427,6 @@ extern const u8 D_0052D2F0[0x330];
 extern void gcc2_compiled__17(u32 index, void *entry);
 extern s32 Copy_1(void *destination, const void *source, u32 size);
 extern s32 Copy_2(void *destination, const void *source, u32 size);
-extern void FlushCache(s32 mode);
 extern void *GetEntryAddress_0(u32 index);
 extern void *GetEntryAddress_1(u32 index);
 extern void setup_0(u32 index, void *entry);

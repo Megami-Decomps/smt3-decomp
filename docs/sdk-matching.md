@@ -771,3 +771,23 @@ thread ID on success. Both the startup and SDF callers discard that result;
 their declarations retain its integer interface. This declaration correction
 earns no matching credit. The neighboring semaphore setup remains guarded
 with a [four-store residual](nonmatching/sdk/libkernl.md#supplement_crt0-sdklibkernl-0x48).
+
+## Executable patch installation
+
+`PatchIsNeeded_0` (104 bytes) saves one configuration word, clears bits
+13 through 15 and sets that field to one in a second word. It writes and
+rereads the second word, restores the original, then tests whether the
+reread field is zero. Two actual `u32` locals reproduce the native frame
+and unsigned shifts without an invented configuration record or padding.
+
+`InitExecPS2` (172 bytes) uses that predicate to gate installation. It reuses
+`kernelEntryPair_t` for the existing three-entry table at `D_0052CB28`,
+installs the word-copy entry, copies exactly `0x7A8` bytes to `0x80074000`,
+flushes cache modes 0 then 2, installs the lookup entry, and resolves the
+remaining table entry. Its raw selector `0xFFFFC402` is passed unchanged.
+The table index is reloaded after the lookup callback before setup.
+
+The patch code stays external data and all syscall stubs stay in assembly.
+The shared pair declaration and cache-flush prototype precede all of their
+C consumers. Both complete helper bodies match with the configured compiler;
+no flags, copy shims or artificial lifetimes are added.
