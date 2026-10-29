@@ -65,64 +65,9 @@ typedef struct
     fclSkillParam_t entry[24];
 } datLevelUp_t;
 
-typedef struct
-{
-    /* 0x0000 */ u8 flags;
-    /* 0x0001 */ s8 phase;
-    /* 0x0002 */ u8 reserved02[2];
-    /* 0x0004 */ s8 stepFlag;
-    /* 0x0005 */ u8 drawFlag;
-    /* 0x0006 */ u8 reserved06[0x12];
-    /* 0x0018 */ s8 unk_18;
-    /* 0x0019 */ s8 unk_19;
-    /* 0x001A */ s8 StartLevel;
-    /* 0x001B */ s8 LevelUpCnt;
-    /* 0x001C */ fclSkillParam_t *eventEntries;
-    /* 0x0020 */ s8 EventNums;
-    /* 0x0021 */ s8 eventIndex;
-    /* 0x0022 */ u16 eventValue;
-    /* 0x0024 */ u16 heartsSkill;
-    /* 0x0026 */ s8 RecoverFlag;
-    /* 0x0027 */ s8 HeartsSkFlag;
-    /* 0x0028 */ s8 heartsResult;
-    /* 0x0029 */ s8 heartsEvent;
-    /* 0x002A */ u16 bonusParamIndex;
-    /* 0x002C */ s8 defaultSkillResult;
-    /* 0x002D */ u8 reserved2D[3];
-    /* 0x0030 */ datUnitWork_t *levelUpUnit[16];
-    /* 0x0070 */ s8 levelUpCount;
-    /* 0x0071 */ s8 levelUpStep;
-    /* 0x0072 */ u8 stockIndex;
-    /* 0x0073 */ s8 powerState;
-    /* 0x0074 */ s8 powerSlot;
-    /* 0x0075 */ u8 reserved75;
-    /* 0x0076 */ u16 powerSkill;
-    /* 0x0078 */ s32 counter;
-    /* 0x007C */ s8 evoPhase;
-    /* 0x007D */ u8 reserved7D;
-    /* 0x007E */ s8 evoResult;
-    /* 0x007F */ u8 reserved7F;
-    /* 0x0080 */ datUnitWork_t evoWork;
-    /* 0x016C */ datUnitWork_t *unit;
-    /* 0x0170 */ datUnitWork_t workStock;
-    /* 0x025C */ u8 unk_25C[0x103C];
-    /* 0x1298 */ u8 commentFromUnit;
-    /* 0x1299 */ u8 unk_1299;
-    /* 0x129A */ u16 commentId;
-    /* 0x129C */ u8 commentMessage;
-    /* 0x129D */ u8 unk_129D[2];
-    /* 0x129F */ u8 bonusParam[6];
-    /* 0x12A5 */ u8 reserved12A5[0x1040];
-    /* 0x22E5 */ s8 unk_22E5;
-    /* 0x22E6 */ s8 unk_22E6;
-    /* 0x22E7 */ u8 unk_22E7;
-    /* 0x22E8 */ f32 unk_22E8;
-    /* 0x22EC */ f32 unk_22EC;
-    /* 0x22F0 */ u8 unk_22F0[0x18];
-    /* 0x2308 */ s32 unk_2308;
-} evtStartWork_t;
 
-extern evtStartWork_t *EventStart;
+
+extern rstData_t *EventStart;
 
 extern datRaceEntry_t D_00339E00[];
 
@@ -162,27 +107,9 @@ extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
 
 
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000[0x7C];
-    /* 0x007C */ s8 unk_7C;
-    /* 0x007D */ s8 unk_7D;
-    /* 0x007E */ u8 unk_007E[0xEE];
-    /* 0x016C */ datUnitWork_t *unk_16C;
-    /* 0x0170 */ u8 unk_170[0x112E];
-    /* 0x129E */ s8 unk_129E;
-    /* 0x129F */ u8 unk_129F[6];
-    /* 0x12A5 */ u8 unk_12A5[3];
-    /* 0x12A8 */ cmpCursorInfo_t skillSlot;
-    /* 0x12E0 */ u8 unk_12E0[0x1004];
-    /* 0x22E4 */ u8 unk_22E4;
-    /* 0x22E5 */ u8 unk_22E5[0x23];
-    /* 0x2308 */ s32 unk_2308;
-    /* 0x230C */ u8 unk_230C[8];
-    /* 0x2314 */ s32 fadeColor;
-} rstDrawWork_t;
 
-extern rstDrawWork_t *rstDrawWork;
+
+extern rstData_t *rstDrawWork;
 
 typedef struct
 {
@@ -331,15 +258,15 @@ s32 rstSetLevelUpCount(datUnitWork_t *unit)
     datUnitWork_t copy;
     s32 offset = 0;
     EventStart->StartLevel = unit->level;
-    EventStart->LevelUpCnt = cmbGetLevelUpCount(unit, 0);
-    EventStart->unk_18 = EventStart->unk_19 = EventStart->LevelUpCnt;
+    EventStart->signedLevelUpCnt = cmbGetLevelUpCount(unit, 0);
+    EventStart->unk_18 = EventStart->unk_19 = EventStart->signedLevelUpCnt;
     if (unit->flag & 0x200) {
         cmbCopyDefaultDevilToStock(unit->id, &copy);
         offset = unit->level - copy.level;
     }
-    rstAddExp(EventStart->LevelUpCnt, unit);
-    if ((unit->badstatus & 0x800) == 0 && EventStart->LevelUpCnt != 0) {
-        EventStart->LevelUpCnt += offset;
+    rstAddExp(EventStart->signedLevelUpCnt, unit);
+    if ((unit->badstatus & 0x800) == 0 && EventStart->signedLevelUpCnt != 0) {
+        EventStart->signedLevelUpCnt += offset;
         EventStart->StartLevel -= offset;
         rstSetMaxHpMp(0, unit);
         return 1;
@@ -510,7 +437,7 @@ s32 rstCalcSeqPlayerLevelUp(void)
     rstAdvanceLevelUpStep();
     cmpModelSetup(0, 0);
     if (rstChkParamLimitAll(EventStart->unit) != 0) {
-        evtStartWork_t *start = EventStart;
+        rstData_t *start = EventStart;
 
         start->unk_19 = 0;
         start->unk_18 = 0;
@@ -594,7 +521,7 @@ s32 rstGetDefaultSkill(void)
         if (canAdd != 0) {
             return (s8)canAdd;
         }
-        EventStart->LevelUpCnt--;
+        EventStart->signedLevelUpCnt--;
     }
     return 0;
 }
@@ -802,7 +729,7 @@ u16 rstChkHeartsSkill(datUnitWork_t *unit)
     if (cmbChkSkillOwner(skill, unit) >= 0) {
         return 0;
     }
-    return EventStart->HeartsSkFlag < EventStart->LevelUpCnt ? skill : 0;
+    return EventStart->HeartsSkFlag < EventStart->signedLevelUpCnt ? skill : 0;
 }
 
 extern s32 datGetDevilSlotState(u8 devilId);
@@ -1061,7 +988,7 @@ s32 rstCalc(dds3ProcessID_t *id)
             EventStart->phase = (u8)EventStart->phase + 1;
         case 14:
             {
-                evtStartWork_t *work = EventStart;
+                rstData_t *work = EventStart;
                 if (work->powerState == 0 && work->commentId == 0)
                     func_002215B8(work->unit);
                 work->phase = (u8)work->phase + 1;
@@ -2160,15 +2087,15 @@ extern void cmpDrawStatusComEx(s32 a, u8 alpha, s8 b, s8 c, s32 d,
 
 void rstDrawGetCursorRow(void)
 {
-    rstDrawWork_t *work;
+    rstData_t *work;
     s32 row;
 
     work = rstDrawWork;
-    row = (s8)(work->unk_170[0x10E] + work->unk_170[0x110]);
-    if ((s8)work->unk_0000[0x18] != 0) {
-        rstDrawNumber(0, 0, (s8)work->unk_0000[0x19]);
+    row = (s8)(*(u8 *)&work->paramCursor.cursor.unk_22 + (u8)work->paramCursor.cursor.unk_24);
+    if ((s8)work->AsignParamMax != 0) {
+        rstDrawNumber(0, 0, (s8)work->AsignParam);
     }
-    if (fclChkMessage() != 0 || (s8)rstDrawWork->unk_0000[0x18] == 0) {
+    if (fclChkMessage() != 0 || (s8)rstDrawWork->AsignParamMax == 0) {
         cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, 0x80, row, 0,
                            (s32)rstDrawWork->unk_129F, 0, 0xA09DC380, 2, 0, 0);
     } else {
@@ -2275,7 +2202,7 @@ s32 rstGetEncycPanel(void)
 
 s32 rstResetEncycPanel(void)
 {
-    s8 phase = rstDrawWork->unk_129E;
+    s8 phase = rstDrawWork->Flag;
 
     if (phase < 2) {
         if (phase >= 0) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "result2.h"
 #include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -7,32 +8,9 @@
 #include "event.h"
 #include "kernel.h"
 
-typedef struct
-{
-    /* 0x0000 */ u8 flags;
-    /* 0x0001 */ s8 phase;
-    /* 0x0002 */ u8 unk_0002[0x19];
-    /* 0x001B */ u8 unk_1B;
-    /* 0x001C */ u8 unk_001C[0xD];
-    /* 0x0029 */ s8 unk_29;
-    /* 0x002A */ u8 unk_002A[0x4A];
-    /* 0x0074 */ s8 unk_74;
-    /* 0x0075 */ u8 unk_0075[0x7];
-    /* 0x007C */ s8 unk_7C;
-    /* 0x007D */ s8 unk_7D;
-    /* 0x007E */ u8 unk_007E[0xEE];
-    /* 0x016C */ void *unk_16C;
-    /* 0x0170 */ u8 unk_170[0x112E];
-    /* 0x129E */ s8 unk_129E;
-    /* 0x129F */ u8 unk_129F[6];
-    /* 0x12A5 */ u8 unk_12A5[0x103F];
-    /* 0x22E4 */ u8 unk_22E4;
-    /* 0x22E5 */ u8 unk_22E5[0x2B];
-    /* 0x2310 */ s32 unk_2310;
-    /* 0x2314 */ s32 fadeColor;
-} rstDrawWork_t;
 
-extern rstDrawWork_t *rstDrawWork;
+
+extern rstData_t *rstDrawWork;
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 

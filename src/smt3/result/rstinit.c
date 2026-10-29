@@ -1,4 +1,5 @@
 #include "common.h"
+#include "result2.h"
 #include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -15,33 +16,9 @@ extern void *dds3SearchProcessName(const char *namestr);
 
 extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 
-typedef struct
-{
-    /* 0x0000 */ u8 flags;
-    /* 0x0001 */ u8 reserved01[0x17];
-    /* 0x0018 */ s8 unk_18;
-    /* 0x0019 */ s8 unk_19;
-    /* 0x001A */ u8 unk_1A[0x16];
-    /* 0x0030 */ datUnitWork_t *levelUpUnit[16];
-    /* 0x0070 */ s8 levelUpCount;
-    /* 0x0071 */ s8 levelUpStep;
-    /* 0x0072 */ u8 unk_72[0x0B];
-    /* 0x007D */ u8 reserved7D;
-    /* 0x007E */ u8 reserved7E[6];
-    /* 0x0084 */ u16 evoID;
-    /* 0x0086 */ u8 reserved86[0xE6];
-    /* 0x016C */ datUnitWork_t *unit;
-    /* 0x0170 */ u8 unk_170[0x2175];
-    /* 0x22E5 */ s8 unk_22E5;
-    /* 0x22E6 */ s8 unk_22E6;
-    /* 0x22E7 */ u8 unk_22E7;
-    /* 0x22E8 */ f32 unk_22E8;
-    /* 0x22EC */ f32 unk_22EC;
-    /* 0x22F0 */ u8 unk_22F0[0x18];
-    /* 0x2308 */ s32 unk_2308;
-} evtStartWork_t;
 
-extern evtStartWork_t *EventStart;
+
+extern rstData_t *EventStart;
 
 typedef struct
 {
@@ -64,7 +41,7 @@ typedef struct
  * partial views; the alias holds them apart until one covers the object. */
 extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
 
-extern evtStartWork_t *GBWK_1;
+extern rstData_t *GBWK_1;
 
 extern s32 printf(const char *fmt, ...);
 
@@ -97,9 +74,9 @@ void rstInitEvoAct(void)
     fclSetWorkValue(2, 1);
     fclSetWorkValue(3, 1);
     fclSetWorkValue(4, GBWK_1->unit->id);
-    fclSetWorkValue(5, GBWK_1->evoID);
-    rstGetEvoModelParam(GBWK_1->evoID, modelParam);
-    modelParam[1] *= datModelParamTable[GBWK_1->evoID].formscale;
+    fclSetWorkValue(5, GBWK_1->evoWork.id);
+    rstGetEvoModelParam(GBWK_1->evoWork.id, modelParam);
+    modelParam[1] *= datModelParamTable[GBWK_1->evoWork.id].formscale;
     fclSetWorkValue(6, (s32)modelParam[1]);
     evtStartEvent(0x329);
     GBWK_1->reserved7D = 0;
@@ -173,7 +150,7 @@ void rstChkResult2Process(u8 *work)
 
 extern void rstPrepareStatusModel(s32 group, s32 id, s32 blocking);
 
-void rstCreateTargetList(evtStartWork_t *work)
+void rstCreateTargetList(rstData_t *work)
 {
     s32 useFirstUnit = 1;
     s32 i;
@@ -203,33 +180,7 @@ void rstCreateTargetList(evtStartWork_t *work)
 }
 
 /* Allocations, cursors and the texture are installed by rstInit. */
-typedef struct {
-    /* 0x0000 */ u8 reserved0000;
-    /* 0x0001 */ s8 unk_0001;
-    /* 0x0002 */ u8 reserved0002;
-    /* 0x0003 */ s8 unk_0003;
-    /* 0x0004 */ s8 unk_0004;
-    /* 0x0005 */ u8 reserved0005[0x0F];
-    /* 0x0014 */ sdfMemHandle_t *allocation;
-    /* 0x0018 */ u8 reserved0018[3];
-    /* 0x001B */ s8 unk_001B;
-    /* 0x001C */ u8 reserved001C[0x56];
-    /* 0x0072 */ s8 unk_0072;
-    /* 0x0073 */ u8 reserved0073[0x1E9];
-    /* 0x025C */ u8 listCursor[0x104C];
-    /* 0x12A8 */ u8 stockCursor[0x103C];
-    /* 0x22E4 */ s8 unk_22E4;
-    /* 0x22E5 */ s8 unk_22E5;
-    /* 0x22E6 */ u8 reserved22E6[0x12];
-    /* 0x22F8 */ sdfMemHandle_t *scriptAllocation;
-    /* 0x22FC */ void *script;
-    /* 0x2300 */ sdfMemHandle_t *messageAllocation;
-    /* 0x2304 */ void *message;
-    /* 0x2308 */ s32 messageSize;
-    /* 0x230C */ sdfTexHandle_t *texture;
-    /* 0x2310 */ s32 unk_2310;
-    /* 0x2314 */ u8 reserved2314[4];
-} rstResourceWork_t;
+
 
 extern char D_0053DA40[]; /* "/result2/scr/message.bf" */
 extern char D_0053DA58[]; /* "/result2/mes_data.bmd" */
@@ -252,10 +203,10 @@ extern void rstSetResultWork(sdfTexHandle_t *texture);
 extern void dds3FadeIn(s32 a, s32 b, s32 c, s32 frames);
 extern s32 p2sdPlayBGM(s32 id);
 
-evtStartWork_t *rstInit(s32 parent)
+rstData_t *rstInit(s32 parent)
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(0x2318);
-    rstResourceWork_t *work = sdfMemLock(allocation);
+    rstData_t *work = sdfMemLock(allocation);
 
     memset(work, 0, 0x2318);
     work->allocation = allocation;
@@ -267,9 +218,9 @@ evtStartWork_t *rstInit(s32 parent)
     work->unk_0072 = 1;
     work->unk_0003 = 0;
     work->unk_001B = 0;
-    cmpInitCursorLayout(work->listCursor, 0, 0, 0, 0, 0);
-    cmpInitCursorRange(work->listCursor, 5, 5, 0);
-    cmpInitCursorRange(work->stockCursor, 8, 8, 0);
+    cmpInitCursorLayout(&work->paramCursor, 0, 0, 0, 0, 0);
+    cmpInitCursorRange(&work->paramCursor, 5, 5, 0);
+    cmpInitCursorRange(&work->cursorInfo, 8, 8, 0);
     cmpModelInit();
     rstChkResult2Process((u8 *)work);
     rstClearHeartsMasterPhase();
@@ -281,11 +232,11 @@ evtStartWork_t *rstInit(s32 parent)
     rstSetStatusModelReady(1);
     work->texture = fclLoadTexture(D_0053DA70);
     rstSetResultWork(work->texture);
-    rstCreateTargetList((evtStartWork_t *)work);
+    rstCreateTargetList(work);
     work->unk_2310 = 0x2B3;
     dds3FadeIn(0, 0, 0, 0xF);
     p2sdPlayBGM(0x2B0000);
-    return (evtStartWork_t *)work;
+    return work;
 }
 
 
@@ -304,22 +255,22 @@ void rstDestroyResult2(dds3ProcessID_t *id)
 {
     if (GBWK_1 != NULL) {
         rstClearResultWork();
-        sdfTexFree(((rstResourceWork_t *)GBWK_1)->texture);
+        sdfTexFree(GBWK_1->texture);
         fclDestroyMessage();
-        sdfMemFreeDirect(((rstResourceWork_t *)GBWK_1)->messageAllocation);
+        sdfMemFreeDirect(GBWK_1->messageAllocation);
         cmpModelFreeResource();
         cmpResetDrawEnv();
-        sdfMemFreeDirect(((rstResourceWork_t *)GBWK_1)->scriptAllocation);
+        sdfMemFreeDirect(GBWK_1->scriptAllocation);
         rstSetPanelEffFlag();
         rstSetStatusModelReady(0);
-        sdfMemFreeDirect(((rstResourceWork_t *)GBWK_1)->allocation);
+        sdfMemFreeDirect(GBWK_1->allocation);
         GBWK_1 = NULL;
         gProcessStat_4 = 2;
         p2sdStopBGM(0x2B0000);
     }
 }
 
-extern evtStartWork_t *rstInit(s32 mode);
+extern rstData_t *rstInit(s32 mode);
 extern s32 rstCalc(dds3ProcessID_t *id);
 extern s32 rstDraw(dds3ProcessID_t *id);
 extern s32 rstUpdate(dds3ProcessID_t *id);
@@ -378,7 +329,7 @@ void rstAddExp(s32 amount, datUnitWork_t *work)
 
 void rstAdvanceLevelUpStep(void)
 {
-    evtStartWork_t *work = EventStart;
+    rstData_t *work = EventStart;
     s8 step;
 
     if (work->levelUpCount == 0) {

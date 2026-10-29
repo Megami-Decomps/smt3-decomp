@@ -1,4 +1,5 @@
 #include "common.h"
+#include "result2.h"
 #include "facility.h"
 #include "camp.h"
 #include "fpu.h"
@@ -13,62 +14,7 @@
 extern s8 fclEndMessage(void);
 extern datDevilTableEntry_t datDevilTable[];
 
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000;
-    /* 0x0001 */ s8 unk_0001;
-    /* 0x0002 */ u8 unk_0002[2];
-    /* 0x0004 */ s8 unk_0004;
-    /* 0x0005 */ u8 unk_0005[0x13];
-    /* 0x0018 */ u8 AsignParamMax;
-    /* 0x0019 */ u8 AsignParam;
-    /* 0x001A */ u8 unk_1A;
-    /* 0x001B */ u8 LevelUpCnt;
-    /* 0x001C */ u8 unk_1C[6];
-    /* 0x0022 */ u16 EventParam;
-    /* 0x0024 */ u16 GetHeartsSkill;
-    /* 0x0026 */ s8 RecoverFlag;
-    /* 0x0027 */ s8 HeartsSkFlag;
-    /* 0x0028 */ s8 HeartsSkillResult;
-    /* 0x0029 */ s8 heartsEvent;
-    /* 0x002A */ u16 bonusParamIndex;
-    /* 0x002C */ s8 DefaultSkillResult;
-    /* 0x002D */ u8 reserved2D[0x46];
-    /* 0x0073 */ s8 powerState;
-    /* 0x0074 */ s8 powerSlot;
-    /* 0x0075 */ u8 reserved75;
-    /* 0x0076 */ u16 powerSkill;
-    /* 0x0078 */ s32 unk_78;
-    /* 0x007C */ s8 evoPhase;
-    /* 0x007D */ u8 unk_7D;
-    /* 0x007E */ s8 evoResult;
-    /* 0x007F */ u8 reserved7F;
-    /* 0x0080 */ datUnitWork_t evoWork;
-    /* 0x016C */ datUnitWork_t *pCurrentStock;
-    /* 0x0170 */ datUnitWork_t workStock;
-    /* 0x025C */ cmpPadStopWork_t paramCursor;
-    /* 0x0298 */ u8 reserved0298[0x1000];
-    /* 0x1298 */ s8 giftKind;
-    /* 0x1299 */ u8 reserved1299;
-    /* 0x129A */ u16 giftId;
-    /* 0x129C */ u8 giftMessage;
-    /* 0x129D */ s8 giftStep;
-    /* 0x129E */ s8 Flag;
-    /* 0x129F */ u8 unk_129F[6];
-    /* 0x12A5 */ u8 unk_12A5[3];
-    /* 0x12A8 */ cmpCursorInfo_t cursorInfo;
-    /* 0x12E0 */ u8 unk_12E0[0x1004];
-    /* 0x22E4 */ u8 unk_22E4;
-    /* 0x22E5 */ u8 unk_22E5[0x0B];
-    /* 0x22F0 */ u16 selectedSkill;
-    /* 0x22F2 */ u8 reserved22F2[2];
-    /* 0x22F4 */ s32 panelEffectIndex;
-    /* 0x22F8 */ u8 reserved22F8[0x10];
-    /* 0x2308 */ s32 unk_2308;
-    /* 0x230C */ s32 unk_230C;
-    /* 0x2310 */ u32 unk_2310;
-    /* 0x2314 */ u32 evoBgFade;
-} rstWork_t;
+
 
 extern void rstSetMaxHpMp(s8 Mode, datUnitWork_t *pStock);
 
@@ -76,7 +22,7 @@ extern void func_00224230(datUnitWork_t *unit);
 
 extern s8 dds3PadButtonState[];
 
-extern rstWork_t *startPos;
+extern rstData_t *startPos;
 
 typedef struct
 {
@@ -240,7 +186,7 @@ void rstUpdateSeqAsignPlayerParam(datUnitWork_t *unit)
     s8 cursor = (s8)(*(u8 *)&startPos->paramCursor.cursor.unk_22 +
                      (u8)startPos->paramCursor.cursor.unk_24);
     s32 parameter = cmpGetParamGaugeColor(cursor);
-    rstWork_t *work;
+    rstData_t *work;
 
     values[1] = 0; /* Retail leaves this unset; the cursor table never selects it. */
     for (i = 0; i < 6; i++) {
@@ -414,7 +360,7 @@ void rstUpdateSeqGift(void)
             }
             startPos->Flag = 1;
             {
-                rstWork_t *work = startPos;
+                rstData_t *work = startPos;
                 work->giftId = 0;
                 work->giftStep = 0;
             }
@@ -426,7 +372,7 @@ void rstUpdateSeqGift(void)
             fclEndMessage();
             startPos->Flag = 2;
             {
-                rstWork_t *work = startPos;
+                rstData_t *work = startPos;
                 work->giftStep = 1;
                 work->giftId = 0;
             }
@@ -559,7 +505,7 @@ void rstStartIntroduce(u16 DevilID)
 void rstUpdateEvoBgFade(void)
 {
     u32 max = 0x32;
-    rstWork_t *work = startPos;
+    rstData_t *work = startPos;
 
     if (work->unk_0001 == 0x14) {
         u32 v = work->evoBgFade;
