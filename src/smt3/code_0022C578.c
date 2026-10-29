@@ -365,7 +365,10 @@ typedef struct
     /* 0x25 */ s8 unk_25;
     /* 0x26 */ u8 unk_26;
     /* 0x27 */ u8 unk_27;
-    /* 0x28 */ s32 unk_28;
+    /* 0x28 */ union {
+        s32 flag;
+        char **text;
+    } listData;
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
@@ -6432,7 +6435,36 @@ s32 cmpCursorFadeChannel(s32 color, s32 timer, s32 rate)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListItemBox);
 
+extern u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
+                              s32 mode, s32 alpha);
+
+#ifdef NON_MATCHING
+void cmpDrawListItemText(s32 x, s32 y, s32 priority, u8 rowHeight,
+                         cmpCursorInfo_t *cursor, s32 mode, s32 alpha, s32 ot)
+{
+    frFontHandle_t *font = NULL;
+    s32 boxMode = mode == 2 ? 2 : 0;
+    s32 row = 0;
+    s32 i;
+
+    cmpSetSkillListRows(0x12);
+    for (i = 0; i < cursor->unk_20; i++) {
+        u32 color = cmpDrawListItemBox(cursor, i, row, boxMode, alpha);
+
+        if (color != 0) {
+            font = frwGetSmallFontFRQ2(x, y, priority, color,
+                                       cursor->listData.text[i], font);
+            row++;
+            y += rowHeight * 8;
+        }
+    }
+    func_001C7E38(font, 1, ot);
+    frDestroyFontRequestAfter(font);
+    cmpSetSkillListRows(-1);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListItemText);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListFrame);
 
@@ -8376,7 +8408,7 @@ void cmpInitCursorRange(void *cursor, u8 index, u8 rows, s32 flag)
     work->cursor.unk_22 = 0;
     work->cursor.unk_24 = 0;
     work->cursor.unk_25 = 0;
-    work->cursor.unk_28 = flag;
+    work->cursor.listData.flag = flag;
     work->cursor.unk_2C = 0;
     work->cursor.unk_30 = 0;
     work->cursor.unk_34 = 0;
