@@ -1184,7 +1184,102 @@ void partsDel(tagpipeParts *pPtr)
 
 
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", PipemdlRot);
+struct tagPipePartsInfo { u16 partsID; u8 inWay; u8 goWay; void *extent; };
+extern void FromEuler(f32 x, f32 y, f32 z);
+
+void PipemdlRot(tagpipeBasic *work, tagPipePartsInfo *part)
+{
+    sdfVector4_t rotation;
+    f32 x = 0.0f;
+    f32 y = 0.0f;
+    f32 z = 0.0f;
+
+    /* Native VU scratch load precedes the direction dispatch. */
+    SDF_VU0_LOADVECTOR_MEMOPS(rotation);
+    switch (part->inWay) {
+    case 1:
+        if (part->goWay == 6) {
+        } else if (part->goWay == 3) {
+            y = -90.0f;
+        } else if (part->goWay == 4) {
+            y = 90.0f;
+        } else if (part->goWay == 2) {
+            y = 180.0f;
+        }
+        break;
+    case 6:
+        if (part->goWay == 1) {
+            z = 180.0f;
+        } else if (part->goWay == 3) {
+            x = 180.0f; y = 90.0f;
+        } else if (part->goWay == 4) {
+            x = 180.0f; y = -90.0f;
+        } else if (part->goWay == 2) {
+            x = 180.0f;
+        } else if (part->goWay == 5) {
+            z = 180.0f;
+        }
+        break;
+    case 3:
+        if (part->goWay == 6) {
+            x = 90.0f; y = -90.0f;
+        } else if (part->goWay == 1) {
+            x = -90.0f; y = 90.0f;
+        } else if (part->goWay == 4) {
+            z = 90.0f;
+        } else if (part->goWay == 2) {
+            x = 180.0f; z = -90.0f;
+        } else if (part->goWay == 5) {
+            z = 90.0f;
+        }
+        break;
+    case 4:
+        if (part->goWay == 6) {
+            y = 90.0f; z = -90.0f;
+        } else if (part->goWay == 1) {
+            y = -90.0f; x = -90.0f;
+        } else if (part->goWay == 3) {
+            z = -90.0f;
+        } else if (part->goWay == 2) {
+            y = 180.0f; z = -90.0f;
+        } else if (part->goWay == 5) {
+            z = -90.0f;
+        }
+        break;
+    case 2:
+        if (part->goWay == 6) {
+            x = 90.0f; y = 180.0f;
+        } else if (part->goWay == 1) {
+            x = -90.0f;
+        } else if (part->goWay == 3) {
+            x = -90.0f; z = 90.0f;
+        } else if (part->goWay == 4) {
+            z = -90.0f; x = -90.0f;
+        } else if (part->goWay == 5) {
+            x = -90.0f;
+        }
+        break;
+    case 5:
+        if (part->goWay == 6) {
+            x = 90.0f;
+        } else if (part->goWay == 1) {
+            x = 90.0f; z = 180.0f;
+        } else if (part->goWay == 3) {
+            x = 90.0f; z = -90.0f;
+        } else if (part->goWay == 4) {
+            z = 90.0f; x = 90.0f;
+        } else if (part->goWay == 2) {
+            x = 90.0f;
+        }
+        break;
+    }
+    FromEuler(x * 0x1.1df46ap-6f, y * 0x1.1df46ap-6f, z * 0x1.1df46ap-6f);
+    /* SDK address-only handoff: the setter consumes the vector immediately.
+     * No C vector elements are cached; base is outside the vector range. */
+    SDF_VU0_STOREVECTOR_NOMEM(work->rot);
+    dds3SetRotPoseSet(work->base, (sdfVector4_t *)work->rot);
+}
+
 
 s32 PipeTexLoad(void)
 {
