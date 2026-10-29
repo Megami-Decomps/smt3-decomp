@@ -292,7 +292,7 @@ extern void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 
 
 typedef struct
 {
-    /* 0x00 */ u8 StepY[4];
+    /* 0x00 */ s32 StepY;
     /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
     /* 0x08 */ s32 CursorSize;
@@ -4432,7 +4432,26 @@ void func_00206A28(void) {
 void func_00206A30(void) {
 }
 
+#ifdef NON_MATCHING
+void shop_206A38(s32 x, s32 y, cmbListWork_t *list, s32 ot)
+{
+    s32 first = list->listCursor.unk_22 + (u8)list->listCursor.unk_24;
+    s32 end = first + list->listCursor.unk_26;
+    s32 step = list->listCursor.StepY * 8;
+    s32 i;
+
+    for (i = first; i < end; i++) {
+        u16 id = CMB_GBWK->eligibleStock[i].id;
+        void *request = frwGetSmallFontFRQ2(x, y, 0xFFFFF, 0xA09DC380, text2[id], NULL);
+
+        y += step;
+        func_001C7E38(request, 1, ot);
+        frDestroyFontRequestAfter(request);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", shop_206A38);
+#endif
 
 s32 shopStartEvent(s8 value)
 {
