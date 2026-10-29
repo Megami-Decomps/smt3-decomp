@@ -84,12 +84,26 @@ def place(version):
         if full.exists():
             for f in re.finditer(r"^glabel (\w+)\n(.*?)^endlabel \1", full.read_text(), re.M | re.S):
                 retail_refs[f.group(1)] = set(re.findall(r"%lo\((\w+)\)", f.group(2)))
+        bodies = {m.group(1): function_text(text, m.start()) for m in DEF.finditer(text)}
+
+        def named_refs(name, visited):
+            if name in visited:
+                return set()
+            visited.add(name)
+            code = bodies[name]
+            refs = unit_rodata.intersection(re.findall(r"\b[A-Za-z_]\w*\b", code))
+            # A private inline helper has no separate native function entry.
+            # Follow those calls without changing another retail function's ownership.
+            for callee in set(re.findall(r"\b(\w+)\s*\(", code)):
+                if callee in bodies and callee not in retail_refs:
+                    refs.update(named_refs(callee, visited))
+            return refs
+
         compiled = set()
-        for m in DEF.finditer(text):
-            code = function_text(text, m.start())
-            for sym in retail_refs.get(m.group(1), ()):
-                # Named (renamed D_) rodata counts too: compiled &= unit_rodata below.
-                if (sym.startswith(("D_", "jtbl_")) or sym in unit_rodata) and not re.search(rf"\b{sym}\b", code):
+        for name in bodies:
+            refs = named_refs(name, set())
+            for sym in retail_refs.get(name, ()):
+                if (sym.startswith(("D_", "jtbl_")) or sym in unit_rodata) and sym not in refs:
                     compiled.add(sym)
         # Only this unit's own rodata can be compiled here: other names a C
         # function writes differently (D_X[9] for retail's D_Y) are other data.

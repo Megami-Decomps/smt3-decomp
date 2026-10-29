@@ -117,8 +117,34 @@ class IncludeRodataTests(unittest.TestCase):
         self.assertIn('INCLUDE_RODATA(const s32, "game/testUnit", D_00300000);', first)
         self.assert_stable(first)
 
+    def test_inline_helper_preserves_named_rodata(self) -> None:
+        self.prepare(
+            "extern const u32 D_00300000[];\n"
+            "static inline const u32 *sharedRecord(void) {\n"
+            "    return D_00300000;\n}\n"
+            "const u32 *useRecord(void) {\n    return sharedRecord();\n}\n",
+            [("D_00300000", 0x00300000)],
+            "glabel useRecord\n    addiu $2, $2, %lo(D_00300000)\nendlabel useRecord\n",
+        )
+        first = self.place()
+        self.assertIn('INCLUDE_RODATA(const s32, "game/testUnit", D_00300000);', first)
+        self.assert_stable(first)
+
+    def test_unrelated_named_reference_keeps_literal_owner(self) -> None:
+        self.prepare(
+            'void useLiteral(void) {\n    print("message");\n}\n'
+            'void unrelated(void) {\n    load(D_00300000);\n}\n',
+            [("D_00300000", 0x00300000)],
+            "glabel useLiteral\n    addiu $2, $2, %lo(D_00300000)\nendlabel useLiteral\n"
+            "glabel unrelated\n    addiu $2, $2, %lo(D_00300000)\nendlabel unrelated\n",
+        )
+        first = self.place()
+        self.assertNotIn("INCLUDE_RODATA", first)
+        self.assert_stable(first)
+
     def test_function_literal_ownership_is_unchanged(self) -> None:
         self.prepare(
+            'extern const char D_00300000[];\n'
             'void useLiteral(void) {\n    print("message");\n}\n',
             [("D_00300000", 0x00300000)],
             "glabel useLiteral\n    addiu $2, $2, %lo(D_00300000)\nendlabel useLiteral\n",
