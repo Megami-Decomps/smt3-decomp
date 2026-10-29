@@ -182,7 +182,7 @@ typedef struct fclencyceelem_t {
 typedef struct mselSaveData_t {
     s32 count;
     u8 reserved[12];
-    fclencyceelem_t records[1];
+    fclencyceelem_t records[184];
 } mselSaveData_t;
 
 typedef struct
