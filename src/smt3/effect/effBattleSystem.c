@@ -275,7 +275,6 @@ void effBTLModelGetMarkPosition2(nbFormation_t *pFormation, s32 mark);
 
 void effBTLModelGetMarkPosition3(mdlObj_t *hModel, s32 mark);
 
-void mdlSetClutColor(mdlObj_t *aHandle, u32 aColor, f32 aRatio);
 
 void *effBTLBindCreateTrack(void *pParam);
 
