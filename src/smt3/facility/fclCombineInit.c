@@ -3142,7 +3142,76 @@ void cmbExit(void)
     CMB_GBWK->unk_00001 = 4;
 }
 
+extern s32 cmpGetPressedButton(s32 mask);
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
+extern s32 cmpChkPadPressUpDown(void);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
+extern void cmpPlayCursorSE(u32 button);
+
+#ifdef NON_MATCHING
+void cmbUpdateRoot(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+    s8 selected;
+    u8 offset;
+    u8 index;
+
+    fclSetWorkValue(2, 0);
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+        offset = (u8)CMB_GBWK->combineCursor.unk_24;
+        index = *(u8 *)&CMB_GBWK->combineCursor.unk_22;
+        selected = (s8)(index + offset + 1);
+        CMB_GBWK->unk_00001 = selected;
+        switch (selected) {
+        case 1:
+            if ((s8)CMB_GBWK->stockCursorCount >= 2) {
+                CMB_GBWK->unk_00004 = 1;
+            } else {
+                CMB_GBWK->unk_00005 = 1;
+                CMB_GBWK->unk_00008 = fclScriptStart(CMB_GBWK->script, 4,
+                                                     &CMB_GBWK->scriptArg);
+                CMB_GBWK->unk_00001 = 0x10;
+                CMB_GBWK->unk_00003 = 0x10;
+                CMB_GBWK->unk_00004 = -1;
+                CMB_GBWK->unk_00002 = 0;
+            }
+            break;
+        case 3:
+            fclSetWorkValue(2, 1);
+            CMB_GBWK->unk_00001 = selected;
+            CMB_GBWK->unk_00004 = 1;
+            break;
+        case 4:
+            cmbExit();
+            break;
+        default:
+            CMB_GBWK->unk_00004 = 1;
+            break;
+        }
+        break;
+    case 2:
+        cmbExit();
+        break;
+    case 0x10:
+        cmpMoveCursor(&CMB_GBWK->combineCursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&CMB_GBWK->combineCursor, 1);
+        break;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&CMB_GBWK->combineCursor, 0);
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&CMB_GBWK->combineCursor, button, 0x30));
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateRoot);
+#endif
 
 s32 cmbStockIsLocked(s32 index)
 {
@@ -3151,11 +3220,6 @@ s32 cmbStockIsLocked(s32 index)
     return flag != 0;
 }
 
-extern s32 cmpGetPressedButton(s32 mask);
-extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
-extern s32 cmpChkPadPressUpDown(void);
-extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
-extern void cmpPlayCursorSE(u32 button);
 
 void cmbUpdateStockCursor(void)
 {
