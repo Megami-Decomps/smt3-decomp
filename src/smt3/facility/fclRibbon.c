@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -28,16 +29,6 @@ typedef struct
     /* 0x0368 */ void *allocation;
     /* 0x036C */ s32 pwork;
 } fclEncyc_instance_tag;
-
-/* Native entries embed four 16-byte rectangles and two texture handles. */
-typedef struct
-{
-    sdfIVector4_t pos_act;
-    sdfIVector4_t pos_deact;
-    sdfIVector4_t uv_act;
-    sdfIVector4_t uv_deact;
-    sdfTexHandle_t *tex[2];
-} fclribbon_elem_t;
 
 typedef struct
 {

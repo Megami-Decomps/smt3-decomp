@@ -2,6 +2,16 @@
 #define FACILITY_H
 
 #include "common.h"
+#include "libsdf.h"
+
+typedef struct
+{
+    sdfIVector4_t pos_act;
+    sdfIVector4_t pos_deact;
+    sdfIVector4_t uv_act;
+    sdfIVector4_t uv_deact;
+    sdfTexHandle_t *tex[2];
+} fclribbon_elem_t;
 
 typedef struct
 {
