@@ -823,3 +823,4 @@ src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 360 B	frame-vector in
 src/smt3/pipe/pipeObject.c	redthing1	done	2026-10-28	1 fn / 1328 B	model startup restores all twelve pool initializers, actual scale/count contract, native pool layout and regular completion call; both owners exact
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 228 B	execution/exit wrappers preserve raw result forwarding, original counts, post-termination vector reloads and native terminal syscall tails; owner 129 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	0 exact / 644 B guarded	variadic open transaction and descriptor reservation reconstructed; 640 emitted bytes, saved-register allocation and slot-return scheduling unresolved
+src/smt3/sdk/libgcc_fixunsdfdi.c	redthing1	done	2026-10-28	1 SDK fn / 280 B	double to unsigned 64-bit conversion with native quotient/remainder splitting and qualified floating working-value lifetime; complete owner exact

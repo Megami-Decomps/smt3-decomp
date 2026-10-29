@@ -824,3 +824,35 @@ that aggregate raises its alignment and adds padding, shifting the linked
 image despite a standalone instruction match. The object-backed split
 preserves both the earlier archive code and the helper's real placement
 without compiler-flag or instruction changes.
+
+## Double to unsigned 64-bit integer conversion
+
+`__fixunsdfdi` matches all 280 instruction bytes. Its real interface is
+`f64` to `u64`, using the EE double ABI in GPRs. Ordered negative inputs
+return zero. The high chunk is an unsigned 32-bit conversion of the input
+scaled by `2^-32`, widened and shifted left by 32. The routine subtracts the
+double representation of that chunk from the input, then adds or subtracts
+the unsigned 32-bit remainder magnitude. The existing conversion providers
+govern NaN and out-of-range inputs; no new guard or saturation is introduced.
+
+The cast of the high chunk back to `f64` is genuinely unsigned. The compiler
+lowers it to the native signed-negative test, sticky-bit halving before
+`__floatdidf`, and doubling of that result. The negative-remainder arm uses
+`0.0 - value`, preserving the software-double subtraction operation.
+
+Updating the floating working value to its remainder gives the native
+allocation. Qualified before/after allocation traces (`--expand --alloc
+--no-dumps`, both with output parity) show that separate input and remainder
+locals occupy GPR16 and leave the integer accumulator in GPR17, differing in
+17 of 70 words. With `value -= (f64)result`, the accumulator remains the same
+DI pseudo (10 references, live length 41, eight calls) but takes GPR16. The
+DF working value has seven references, live length 31 and seven calls, and
+takes GPR17. Both uses are real floating arithmetic values; neither is an
+integer carrier or an artificial dependency.
+
+The byte-identified `_fixunsdfdi.o` owns `0x002E6B30` through `0x002E6C48`.
+It has a separate C unit to preserve the original alignment of the preceding
+assembly container. The following byte-identified 320-byte `_div_df.o`
+remains assembly-backed in its own container. The recovered boundaries do
+not change instructions, data ownership, compiler flags or matching credit
+for those adjacent routines.
