@@ -1043,7 +1043,86 @@ void cmpSetIniStockRecoverEff(u8 *work)
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetIniStockRecoverEff);
 #endif
 
+#ifdef NON_MATCHING
+extern s32 cmpStockEffIsActive(u8 *work);
+extern u16 cmpChkSkillBad(u16 skill);
+extern s32 cmpAddQuePanelEff(s32 x, s32 y, s32 z, u16 width, u16 height, u8 step,
+                             u8 delay, s32 color0, s32 color1, u8 kind);
+extern s32 cmpSetPanelEffParam(s32 index, s32 value);
+
+void cmpSetStockRecoverEff(s32 effect, s32 skill, cmpLocalStock_t *stock)
+{
+    s32 count = cmpStockEffIsActive((u8 *)stock);
+    s32 index = cmpGetStockInfoIndex(stock, 1, 1);
+    s32 room = cmpStockHasRoom((cmpStockWork_t *)stock, 1);
+    s8 slot = 0;
+    s32 position;
+    s32 i;
+
+    effect = (s8)effect;
+    skill = (u16)skill;
+    if (count == 1) {
+        slot = cmpFindFreeStockSlot(index, room);
+    } else if (count == 4) {
+        room = 1;
+    }
+    position = slot * 0x18;
+    for (i = 0; i < count; i++) {
+        s32 y = position + (room != 0 ? 0x24 : 0x8F);
+        s32 panel;
+
+        if (cmpChkSkillBad(skill) & 0x800) {
+            cmpStockWork_t *work = (cmpStockWork_t *)stock;
+            u8 *base = (u8 *)work;
+            s32 offset = (u8 *)&work->info[room != 0 ? 0 : 1].rows[0].slot - base;
+            cmpCursorSlot_t *cursor = (cmpCursorSlot_t *)(base + offset +
+                slot * sizeof(work->info[0].rows[0]));
+
+            cmpSetCursorSlot(0, 3, 0x10, cursor);
+            panel = cmpAddQuePanelEff(0xE20, y * 8, 0xFFFFFF, 0x118, 0x15,
+                                      0x20, i, 0x75A8FF80, 0x75A8FF00, 2);
+        } else if (cmpChkSkillBad(skill) & 0xFFF) {
+            panel = cmpAddQuePanelEff(0xE20, y * 8, 0xFFFFFF, 0x118, 0x15,
+                                      0x20, i, 0xCD67FF80, 0xCD67FF00, 1);
+        } else {
+            s32 xOffset, width, color0, color1;
+            u8 step;
+
+            switch (effect) {
+            case 3:
+                xOffset = 0; width = 0x1E; step = 0x20;
+                color0 = 0xAD610580; color1 = 0xAD610500;
+                break;
+            case 4:
+                xOffset = 0; width = 0; step = 8;
+                color0 = 0x00436580; color1 = 0x00436580;
+                break;
+            case 5:
+                xOffset = 0; width = 0; step = 0x20;
+                color0 = 0xFF692F80; color1 = 0xFF7D2F00;
+                break;
+            default:
+                xOffset = 0x1E; width = 0x3C; step = 0x20;
+                color0 = 0x7CFF6780; color1 = 0x7CFF6700;
+                break;
+            }
+            panel = cmpAddQuePanelEff((0xE2 - xOffset) * 16, y * 8, 0xFFFFFF,
+                                      0x118 + width, 0x15, step, i,
+                                      color0, color1, effect);
+        }
+        cmpSetPanelEffParam(panel, slot);
+        if (count != 1) {
+            position += 0x18;
+            slot++;
+            if (slot >= 4) {
+                room = 0;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetStockRecoverEff);
+#endif
 
 extern void datAddItem(s32 id, s32 num);
 
