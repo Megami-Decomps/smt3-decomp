@@ -711,7 +711,129 @@ void MyAction(tagPipeObject *object)
 INCLUDE_ASM(const s32, "pipe/pipeSection", MyAction);
 #endif
 
+extern tagPipeObject *HITCHECK_CUR(tagPipeObject *object, f32 extension);
+extern void objSetAction(tagPipeObject *object, u8 action, s16 count);
+extern void pipeMyMakaAdd(s32 amount);
+extern void pipeMyMakaSubRate(f32 rate);
+extern void makaAdd(f32 x, f32 y, s32 amount);
+extern void objAddDMaka(s32 offset, f32 x, f32 y);
+extern void objAddDRBOX(s32 offset, f32 x, f32 y);
+extern u32 dds3GetRandA(void *state);
+
+#ifdef NON_MATCHING
+static void pipeDropMaka(tagPipeObject *object, f32 rate)
+{
+    pipeMyMakaSubRate(rate);
+    myMaka = myMaka < 0 ? 0 : myMaka;
+    objAddDMaka(object->offset, object->pos[0], object->pos[1]);
+    object->flags |= 0x10;
+}
+
+static void pipeDropRBox(tagPipeObject *object)
+{
+    rBoxNum--;
+    objAddDRBOX(object->offset, object->pos[0], object->pos[1]);
+}
+
+void MyHitAction(tagPipeObject *object)
+{
+    tagPipeObject *hit;
+
+    while ((hit = HITCHECK_CUR(object, 35.0f)) != NULL) {
+        if ((hit->id == 5 || hit->id == 6 || hit->id == 10) && hit->action != 100) {
+            objSetAction(hit, 100, 100);
+            hit->vpos[0] = hit->pos[0];
+            hit->vpos[1] = hit->pos[1];
+            hit->w *= 1.5f;
+        }
+    }
+    while ((hit = HITCHECK_CUR(object, 0.0f)) != NULL) {
+        s32 damage = 0;
+        s32 resources;
+        s32 savedMaka;
+        u8 savedBox;
+
+        if (hit->id == 5 && !(hit->flags & 1)) {
+            pipeMyMakaAdd(5);
+            makaAdd(hit->vpos[0], hit->vpos[1], 5);
+            hit->flags |= 1;
+            object->flags |= 1;
+        }
+        if (hit->id == 6 && !(hit->flags & 1)) {
+            pipeMyMakaAdd(100);
+            makaAdd(hit->vpos[0], hit->vpos[1], 100);
+            hit->flags |= 1;
+            object->flags |= 1;
+        }
+        if (hit->id == 9 && !(hit->flags & 2) && hit->action == 21 && hit->count == 0) {
+            if (ZmakaCount >= 7) {
+                pipeMyMakaAdd(9999);
+                makaAdd(hit->vpos[0], hit->vpos[1], (s32)0x8000270Fu);
+            } else {
+                pipeMyMakaAdd((s32)(100u << ((u32)ZmakaCount & 31)));
+                makaAdd(hit->vpos[0], hit->vpos[1],
+                        (s32)((100u << ((u32)ZmakaCount & 31)) | 0x80000000u));
+                ZmakaCount = (s32)((u32)ZmakaCount + 1);
+            }
+            hit->flags |= 2;
+            object->flags |= 2;
+        }
+        if (hit->id == 10 && !(hit->flags & 4)) {
+            object->flags |= 4;
+            hit->flags |= 4;
+            rBoxNum++;
+        }
+        if (hit->id == 1 && !(hit->flags & 0x2000)) {
+            u16 flags = object->flags;
+            u16 status = *(volatile u16 *)&myStatus;
+            if ((flags & 0x100) && (status & 0xF) > 0) {
+                objSetAction(hit, 20, 0);
+            } else {
+                damage |= 1;
+            }
+        }
+        savedMaka = myMaka;
+        if (hit->id == 2 && !(hit->flags & 0x2000)) {
+            u16 flags = object->flags;
+            u16 status = *(volatile u16 *)&myStatus;
+            if ((flags & 0x100) && (s32)(status & 0xF) >= 0) {
+                objSetAction(hit, 20, 0);
+                savedMaka = myMaka;
+            } else {
+                damage |= 2;
+            }
+        }
+
+        resources = (savedMaka != 0 ? 4 : 0) | (*(volatile s8 *)&rBoxNum != 0 ? 8 : 0);
+        savedBox = *(volatile u8 *)&rBoxNum;
+        if ((damage & 1) && CameraAction == 0) {
+            objMyStatusChange(object, 2);
+            playerDAMAGE = (s32)((u32)playerDAMAGE + 0x10000u);
+            if (resources == 4 ||
+                (resources == 12 && (dds3GetRandA(NULL) & 0xFF) < 0xA6)) {
+                pipeDropMaka(object, 0.25f);
+            } else if (resources == 8 || (resources == 12 && rBoxNum > 0)) {
+                pipeDropRBox(object);
+            }
+            savedMaka = myMaka;
+            savedBox = (u8)rBoxNum;
+        }
+        resources = (savedMaka != 0 ? 4 : 0) | (savedBox != 0 ? 8 : 0);
+        if ((damage & 2) && CameraAction == 0) {
+            objMyStatusChange(object, 2);
+            playerDAMAGE = (s32)((u32)playerDAMAGE + 1);
+            if (resources == 4 ||
+                (resources == 12 && (dds3GetRandA(NULL) & 0xFF) < 0xCD)) {
+                pipeDropMaka(object, 0x1.999998p-4f);
+            } else if (resources == 8 || (resources == 12 && rBoxNum > 0)) {
+                pipeDropRBox(object);
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "pipe/pipeSection", MyHitAction);
+#endif
 
 /* NON_MATCHING: 22 of 211 words differ; see docs/nonmatching/pipe/pipeSection.md. */
 #ifdef NON_MATCHING
