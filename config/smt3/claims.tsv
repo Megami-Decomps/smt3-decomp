@@ -760,3 +760,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 196 B	power-off reg
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 316 B	IOP reset packet with native 64-bit header update, real wire/DMA extents and success-side register order; owner 59 match, 0 differ
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 match / 188 bytes	__deregister_frame_info: semaphore-protected frame object unlink, optional array free and absent-entry abort
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 244 B	filesystem request-table reservation and unsigned indexed lookup with semaphore-balanced exits; complete owner exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 1096 B	module-buffer load/stop cores and wrappers with exact argument extents, untouched null payload and aliased reply capture; owner 77 match, 0 differ

@@ -585,3 +585,23 @@ size reproduces the native field scheduling. Keeping the success-side register
 updates inside a nonzero-DMA-result block reproduces the final branch. The
 complete kernel owner checks 59 match / 0 differ at this qualification; reboot
 remains assembly-backed.
+
+## Matched module-buffer loading and stopping
+
+`_sceSifLoadModuleBuffer` and `sceSifStopModule` each match 520 bytes. The
+load-buffer and load-start-buffer wrappers each match 28 bytes, for 1,096
+instruction bytes across the family. The cores write the buffer address or
+module ID into request word zero and the argument byte count into word one.
+They use commands six and seven respectively, send 512 bytes and receive eight.
+
+Nonnull arguments use the same signed size test and ordinary constant-size
+252-byte `memcpy` expansion as the matched path loader. A null argument pointer
+sets only the size word to zero; it does not clear any argument byte. The name
+area is also untouched. Errors leave caller output untouched. Success captures
+the first reply word before writing the second through the caller's pointer,
+retaining native behavior when that pointer aliases the reply buffer.
+
+The basic buffer wrapper supplies a real local result slot and ignores its
+contents; the start wrapper forwards the caller's result pointer. Both return
+the core's result. All four match on the first complete-owner compilation,
+which checks 77 match / 0 differ at this qualification.

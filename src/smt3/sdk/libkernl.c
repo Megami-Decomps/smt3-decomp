@@ -1512,7 +1512,7 @@ u32 sceSifQueryBlockSize(u32 block)
 /* The load-file RPC sends this complete 0x200-byte shared request region. */
 typedef struct lfRequest_t {
     s32 value;
-    s32 moduleResult;
+    s32 moduleResult; /* Argument size on buffer-load/stop requests; result on replies. */
     char name[0xFC];
     u8 arguments[0xFC];
 } lfRequest_t;
@@ -1578,9 +1578,67 @@ s32 sceSifLoadFileReset(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifLoadModuleBuffer);
+s32 _sceSifLoadModuleBuffer(void *buffer, s32 argumentSize, const void *arguments, s32 *moduleResult)
+{
+    s32 result;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifStopModule);
+    if (_lf_bind() < 0) {
+        return -65536;
+    }
+    if (_lf_version() != 0) {
+        return -65540;
+    }
+    D_0059EA00.value = (s32)buffer;
+    if (arguments != NULL) {
+        if (argumentSize > 0xFC) {
+            memcpy(D_0059EA00.arguments, arguments, 0xFC);
+            D_0059EA00.moduleResult = 0xFC;
+        } else {
+            memcpy(D_0059EA00.arguments, arguments, argumentSize);
+            D_0059EA00.moduleResult = argumentSize;
+        }
+    } else {
+        D_0059EA00.moduleResult = 0;
+    }
+    if (sceSifCallRpc(&D_0059EC00, 6, 0, &D_0059EA00, 0x200,
+                      &D_0059EA00, 8, NULL, NULL) < 0) {
+        return -65537;
+    }
+    result = D_0059EA00.value;
+    *moduleResult = D_0059EA00.moduleResult;
+    return result;
+}
+
+s32 sceSifStopModule(s32 moduleId, s32 argumentSize, const void *arguments, s32 *moduleResult)
+{
+    s32 result;
+
+    if (_lf_bind() < 0) {
+        return -65536;
+    }
+    if (_lf_version() != 0) {
+        return -65540;
+    }
+    D_0059EA00.value = moduleId;
+    if (arguments != NULL) {
+        if (argumentSize > 0xFC) {
+            memcpy(D_0059EA00.arguments, arguments, 0xFC);
+            D_0059EA00.moduleResult = 0xFC;
+        } else {
+            memcpy(D_0059EA00.arguments, arguments, argumentSize);
+            D_0059EA00.moduleResult = argumentSize;
+        }
+    } else {
+        D_0059EA00.moduleResult = 0;
+    }
+    if (sceSifCallRpc(&D_0059EC00, 7, 0, &D_0059EA00, 0x200,
+                      &D_0059EA00, 8, NULL, NULL) < 0) {
+        return -65537;
+    }
+    result = D_0059EA00.value;
+    *moduleResult = D_0059EA00.moduleResult;
+    return result;
+}
 
 s32 sceSifUnloadModule(s32 moduleId)
 {
@@ -1631,9 +1689,18 @@ s32 sceSifSearchModuleByAddress(void *address)
     return D_0059EA00.value;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadModuleBuffer);
+s32 sceSifLoadModuleBuffer(void *buffer, s32 argumentSize, const void *arguments)
+{
+    s32 moduleResult;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadStartModuleBuffer);
+    return _sceSifLoadModuleBuffer(buffer, argumentSize, arguments, &moduleResult);
+}
+
+s32 sceSifLoadStartModuleBuffer(void *buffer, s32 argumentSize, const void *arguments,
+                                s32 *moduleResult)
+{
+    return _sceSifLoadModuleBuffer(buffer, argumentSize, arguments, moduleResult);
+}
 
 s32 _sceSifLoadModule(const char *path, s32 argumentSize, const void *arguments,
                       s32 *moduleResult, s32 command)
