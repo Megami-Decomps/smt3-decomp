@@ -111,7 +111,8 @@ typedef struct nbDevilData_t {
 typedef struct datDevilNegoFormat_t {
     u8 unk00[0xF];
     u8 talkflag;
-    u8 unk10[2];
+    u8 unk10;
+    u8 binjotype;
     u16 mukantype;
     u8 unk14[0x1C];
 } datDevilNegoFormat_t;
@@ -1068,7 +1069,59 @@ INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438C0);
 
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckInotiNego);
 
+#ifdef NON_MATCHING
+s32 CheckBinjoNego(nbActionProcessData_t *a)
+{
+    nbFormation_t *form;
+    datUnitWork_t *work;
+    struct nbParty_t *party;
+    s32 i;
+    s32 id;
+    s32 rate;
+
+    if ((u32)((u16)a->data->StageMajor - 0xF0) < 7 || (a->data->stat & 1) != 0 ||
+        (a->party->flag & 6) != 0 || a->partyindex >= 4 || (a->stat & 8) == 0) {
+        return 0;
+    }
+    if (evtGetAgeOfMoon() == 8 || datCheckTalk(a->work) == 0) {
+        return 0;
+    }
+    for (i = 4; i < 14; i++) {
+        form = &a->data->form[i];
+        if ((form->stat & 0x49) != 0x41) {
+            continue;
+        }
+        party = &a->data->party[form->partyindex];
+        if ((party->flag & 1) == 0 || (party->flag & 0x60) != 0) {
+            continue;
+        }
+        work = nbGetUnitWorkFromFormindex(i);
+        if (CheckTimeListDead(a, i) != 0) {
+            continue;
+        }
+        id = work->id;
+        if (master_text[id].binjotype == 0) {
+            continue;
+        }
+        if ((a->work->flag & 4) == 0 && a->work->id == id) {
+            continue;
+        }
+        if (datSearchDevilStock(id) >= 0 || datCheckTalk(work) == 0) {
+            continue;
+        }
+        rate = (a->data->stat & 0x2000000) != 0 ? 100 : 2;
+        if ((s32)dds3GetRandIntA(NULL, 100) < rate) {
+            a->data->party[form->partyindex].flag |= 0x40;
+            nbPushAction(2, form->partyindex, a->partyindex, 0);
+            printf("binjo party = %d\n", form->partyindex);
+            return 1;
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckBinjoNego);
+#endif
 
 void CheckDeadScript(nbActionProcessData_t *a)
 {
