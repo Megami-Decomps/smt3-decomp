@@ -959,3 +959,4 @@ src/smt3/newbattle/nbResultProcess.c	z29	done	2026-10-29	0 matches / 1 guarded d
 src/smt3/sound/sndManager.c	z29	open	2026-10-29	1 fn / 2572 B	largest-first pass: dds3TitleDrawMenu
 src/smt3/sound/sndManager.c	z29	done	2026-10-29	1 fn / 2572 B	dds3TitleDrawMenu exact; a dead division keeps its zero-divide trap, two inherited volatiles and a dummy use were wrong, D_0054E444 is a .lit4 float; owner 13 match 0 differ
 src/smt3/effect/effModelTrackPoly.c	z29	open	2026-10-29	1 fn / 2344 B	largest-first pass: effSwordTrackPolygon2DDraw
+src/smt3/effect/effModelTrackPoly.c	z29	done	2026-10-29	0 matches / 1 guarded draft	effSwordTrackPolygon2DDraw 307 of 584 words, first diff +0x270; frame 0x130 and prologue exact from three quadword f32 scratch arrays and per-loop counters; D_0054C9F4 is a .lit4 1.5707963f; blocked on recorded loop-invariant and reload families
