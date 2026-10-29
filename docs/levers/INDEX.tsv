@@ -1,6 +1,6 @@
 page	line	mnemonics	tell
 docs/levers/README.md	7		| Levers | Page | Section | |---|---|---|
-docs/levers/README.md	9		| 250 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
+docs/levers/README.md	9		| 251 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
 docs/levers/README.md	10		| 124 | [control-flow.md](control-flow.md) | Control flow |
 docs/levers/README.md	11		| 14 | [impossible.md](impossible.md) | Functions that cannot be written in C |
 docs/levers/README.md	12		| 10 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
@@ -25,256 +25,257 @@ docs/levers/README.md	30		| 0 | [callee-definition.md](callee-definition.md) | A
 docs/levers/README.md	31		| 0 | [block-locals.md](block-locals.md) | A block-local whose live range reaches the end of the block costs a register |
 docs/levers/README.md	32		| 0 | [asm-macros.md](asm-macros.md) | Reaching an instruction cc1 never selects, and what it costs |
 docs/levers/README.md	33		| 0 | [arithmetic.md](arithmetic.md) | Arithmetic |
-docs/levers/addressing-and-types.md	4	sll	A struct pointer local is what keeps two index scalings apart.
-docs/levers/addressing-and-types.md	11	slti sltu	A u8 field compared against a small constant folds to sltu, since cc1 knows the promoted value is non-negative.
-docs/levers/addressing-and-types.md	15	lw	A byte offset added to a **reloaded** global on every iteration is a second variable in the for init, not an expression.
-docs/levers/addressing-and-types.md	25	andi	andi 1 followed by a redundant andi 0xFF on a value that only feeds a branch is a u8 local for the masked bit, u8 usable = flags & 1;
-docs/levers/addressing-and-types.md	32	addu bgez	A clear loop written up-counting, whose index the body uses only as a subscript, is what gcc reverses and strength-reduces into a decrementing address plus a…
-docs/levers/addressing-and-types.md	38	jal	The motion-speed setter is inlined in newbattle/nbKoukaProcess:
-docs/levers/addressing-and-types.md	44	$2 $22 $3 $4 addu lw sll	Three identical call sites through **one** function-scope pointer local give that local nine refs and one pseudo, so the index temp feeding it takes $2 and…
-docs/levers/addressing-and-types.md	55	$f0 $f1 add andi bltz or srl	In a comparison between an f32 field and an integer cast to f32, gcc expands the cast first whatever the operand order, because it is the more complex operand.
-docs/levers/addressing-and-types.md	63	$gp ld lui	Externs of 8 bytes or less are addressed through $gp.
-docs/levers/addressing-and-types.md	76	div divu lb lbu	div against divu, and lb against lbu, come from a cast at the use site, not from narrowing the field's declared type.
-docs/levers/addressing-and-types.md	78		A symbol that looks standalone may be one element of a table already declared.
-docs/levers/addressing-and-types.md	83	addu sll subu	A row stride that is not a power of two comes from subscripting a two-dimensional array.
-docs/levers/addressing-and-types.md	86	$2 movn movz	Reuse the loop index variable for a value clamped after the loops.
-docs/levers/addressing-and-types.md	89		A store to a struct field aliases a global table of the same type, so reading tbl[i].f after the store forces a reload.
-docs/levers/addressing-and-types.md	92	lbu sw	**A u8 read is alias set 0 and serialises every store around it**, which is a scheduling fact before it is an addressing one.
-docs/levers/addressing-and-types.md	108	lw or	A colour read-modify-write whose new value comes out of a float-to-unsigned conversion needs the converted value in its own u32 local.
-docs/levers/addressing-and-types.md	117	mov.s	A float expression needed both before and after a call, where retail copies it with mov.s, is the **expression written twice**, not a named f32 local.
-docs/levers/addressing-and-types.md	123	$0 $2 $7 daddu	A run of packet builders that each allocate a buffer, fill it and link it takes **one function-scope pointer for some of them and a block-scope pointer for…
-docs/levers/addressing-and-types.md	133	blez	The argument setup for a tail call that follows a counted loop gets hoisted above the loop's guard and lands in its blez delay slot, where retail fills that…
-docs/levers/addressing-and-types.md	144		Where retail **reloads** a void * handle after a store made through a pointer derived from it, cast the store's lvalue to void **.
-docs/levers/addressing-and-types.md	156		for (i = 0, ofs = 0;
-docs/levers/addressing-and-types.md	158	addiu lw	A row offset of n - 1 folds into the load displacement on a two dimensional array but not on a flat index:
-docs/levers/addressing-and-types.md	162	ld or sd	Two if/else arms that read-modify-write the same kind of address get cross-jumped into one ld/or/sd tail, where retail has the tail twice.
-docs/levers/addressing-and-types.md	174		A store through a cast pointer may alias a gp-addressed pointer global, so gcc reloads the global inside the inner loop.
-docs/levers/addressing-and-types.md	178	addiu j	An inner loop that walks up (addiu ptr, 8) while its counter walks down comes from *p++ on a row pointer.
-docs/levers/addressing-and-types.md	183		Where retail folds a constant offset into a symbol's %hi/%lo pair and then uses small displacements, the source holds a pointer to the sub-object:
-docs/levers/addressing-and-types.md	187	$0 mtc1 sw swc1	Storing 0.0f to several float fields gives sw $0 per store.
-docs/levers/addressing-and-types.md	191	lh lhu sll sra	An s16 table field used once at * 16 and once at * 8 comes out as a second lhu plus sll 16, sra 13 for the narrower scale.
-docs/levers/addressing-and-types.md	195		s16 *t = table[index];
-docs/levers/addressing-and-types.md	199	$5	Do not cache a value a call consumes in each arm.
-docs/levers/addressing-and-types.md	203		An uninitialised local passed as an argument is a real retail shape:
-docs/levers/addressing-and-types.md	206	lw	A Create that reads its parameter block at offset 0 needs the parameter to have its own type, not the work type.
-docs/levers/addressing-and-types.md	210		A local caching a gp-addressed global pointer (evtViewer_t *viewer = viewerinfo;) held across the whole body costs one pseudo and shifts every later allocation.
-docs/levers/addressing-and-types.md	217	$2 addu	A loop bound used once belongs in the for condition, not in a named local.
-docs/levers/addressing-and-types.md	221	movn	Where retail has movn rd, rs, rs, the cmov whose value and condition are the same register, write an explicit if (x != 0) y = x;
-docs/levers/addressing-and-types.md	226		A string the retail pool keeps next to padding or an empty string is safer as INCLUDE_RODATA plus extern char D_XXXXXXXX[];
-docs/levers/addressing-and-types.md	230	$29 addiu	Two addiu of the same frame address where the C uses &local twice means the store before it is SDF_VU0_STOREVECTOR_NOMEM, not SDF_VU0_STOREVECTOR.
-docs/levers/addressing-and-types.md	238	$f1 $f20 add mov.s	An accumulate into a saved fp register (add.s $f20, $f20, $f1) needs x += ...;
-docs/levers/addressing-and-types.md	242	ldl ldr lw lwl lwr	The alignment of a struct assignment comes from the assigned type, not from the object it sits in, so one set of bytes can need two struct types.
-docs/levers/addressing-and-types.md	250	$2 $3 $gp	A $gp reload landing in $3 where retail uses $2, immediately after a call whose result is ignored, means that callee is void in retail's compile:
-docs/levers/addressing-and-types.md	259		A constant offset that retail leaves in the load displacement while hoisting only the bare symbol comes from a pointer local:
-docs/levers/addressing-and-types.md	263		Where retail shifts a run of parameters in argument order but stores the shifted values in some other order, the shifts are their own statements:
-docs/levers/addressing-and-types.md	268	$29 addiu	Where retail recomputes the same addiu rd, $29, N or addiu rd, base, N for every VU0 access to one local, and the C holds it in a saved register instead, use…
-docs/levers/addressing-and-types.md	279	$f0	Two successive divides into the same destination come from reusing one float local, not from two named locals.
-docs/levers/addressing-and-types.md	284		Writing the derived value at its uses, (gSlWindowCnt - 2) * 0xE9, lets gcc distribute the multiply (gSlWindowCnt * 0xE9 - 466), two words more than retail's…
-docs/levers/addressing-and-types.md	287	$4	The register the reused local gets follows its neighbours.
-docs/levers/addressing-and-types.md	295	$f0 $f1 $f20 div lwc1 mul.s	Where retail folds a float constant's register into the result of the expression that consumes it (lwc1 $f20, 3.14f, then mul.s $f20, $f0, $f20, then div.s…
-docs/levers/addressing-and-types.md	302		A second loop-invariant float constant used across the same calls needs its own named local, assigned right after the first one, or it takes the lower saved…
-docs/levers/addressing-and-types.md	308	seq	A jump table needs enough case **nodes**, but the threshold is not 10:
-docs/levers/addressing-and-types.md	324	$0 $f12 lwc1 mov.s sw swc1	A float argument read from a global that the same body also stores:
-docs/levers/addressing-and-types.md	342	$2 $4 addiu lui	Two callback sites through sdfGrOtTable want a sdfGrOt_t *ot declared in each site's own braced block.
-docs/levers/addressing-and-types.md	350	swc1	A u32 global store placed among a run of float stores decides the register the constant takes and whether its own store lands before or after the first swc1.
-docs/levers/addressing-and-types.md	355		The "constant assigned in both arms" row reaches a **compare operand**, not only an assigned value.
-docs/levers/addressing-and-types.md	362		Two **byte-identical** if/else arms are a reachable retail shape here.
-docs/levers/addressing-and-types.md	367	abs.s li lqc2 lui lwc1 mtc1	extern f32 fabsf(f32);
-docs/levers/addressing-and-types.md	394	$2 $3 jal	The same thing happens by accident when a void callee defined later in the unit has no prototype above the caller:
-docs/levers/addressing-and-types.md	399	addu	Where retail computes a table row as addu rd, index, base *into the register the index already occupies*, the index has to reach the add as a pointer:
-docs/levers/addressing-and-types.md	405	sqc2	Stack vectors a function stores with sqc2 and later copies with lq/sq have to be local *aggregates*, not scalar u128s, when retail's frame layout follows the…
-docs/levers/addressing-and-types.md	415	$29 addiu	A SDF_VU0_STOREVECTOR to a local that a later SDF_VU0_COPYVECTOR reads as its source has to be SDF_VU0_STOREVECTOR_NOMEM.
-docs/levers/addressing-and-types.md	422	$0 sw swc1	The effEveBEDCutSetParams placement block in the draw routines is written zeros first:
-docs/levers/addressing-and-types.md	429	lui mfc1 mtc1 ori	An interpolation factor that retail builds with a bare lui/ori pair is a u32 local holding the binary32 bits, assigned just before the call that precedes the…
-docs/levers/addressing-and-types.md	435		A local that gets spilled competes for slot order with the others.
-docs/levers/addressing-and-types.md	439	$4	A call that sets only $4 where the callee really takes three parameters is an unprototyped declaration in the caller's unit, not a wrong signature on the…
-docs/levers/addressing-and-types.md	446		Hatudo and nbE915_Test call nbGetEventForm with no argument, which only an unprototyped declaration produces, and that function is defined with a prototype in…
-docs/levers/addressing-and-types.md	450	$19 addiu	Where retail updates a base coordinate in place, addiu $19, $19, -2, and you fold the constant into every use instead, write the adjustment as its own…
-docs/levers/addressing-and-types.md	457		Locals that each switch arm assigns and uses for itself belong inside the arm's own block, not at function scope.
-docs/levers/addressing-and-types.md	463	ldl ldr sdl sdr	A block-scope aggregate initializer is not the only way to reach a rodata table the unit already carries.
-docs/levers/addressing-and-types.md	471	addiu	Where retail forms a symbol's address and then adds a constant in a separate addiu, put the bare symbol in a pointer local inside the block that uses it and…
-docs/levers/addressing-and-types.md	477		A quotient and a remainder of the same division belong in one reused local, not two.
-docs/levers/addressing-and-types.md	482	$0 sw	A sw $0 that sits in the wrong place *among* a run of other sw $0 stores is the same tell read the other way:
-docs/levers/addressing-and-types.md	489	andi	An andi 0xffff after the andi of a bit test comes from reading a u16 struct field directly in the condition.
-docs/levers/addressing-and-types.md	495	addiu and	Two bits cleared in one mask come out as one addiu/and;
-docs/levers/addressing-and-types.md	499		Two reads of the same pointer field in one function, where retail puts them in different registers, need two distinct locals.
-docs/levers/addressing-and-types.md	502		A placeholder field declared u8 unk_NN[4] in a shared header decays to its own address, so if (data->unk118 == 0) compiles to a compare against a constant and…
-docs/levers/addressing-and-types.md	506	$2 $3	Where retail loads two function pointers out of the same kind of struct and calls each, into the *same* register, put the pointer in one local and reuse it:
-docs/levers/addressing-and-types.md	513		A callee defined in the same unit can take a parameter it never reads, and still match:
-docs/levers/addressing-and-types.md	518	beq beql bgez bgezl bne bnel	Which of beq/beql, bne/bnel and bgez/bgezl ee-gcc picks is the delay-slot filler deciding whether the slot's instruction is safe on the untaken path, and it…
-docs/levers/addressing-and-types.md	526	$f21 $f3	One float local reused for two unrelated values is how retail gets both into one register, and it is the commonest residual in the nbCameraShot_*_Set2 family.
-docs/levers/addressing-and-types.md	536	$2 $29 addiu	SDF_VU0_STOREVECTOR against _NOMEM cuts both ways within one function, so sweep the pair mechanically rather than reasoning about it.
-docs/levers/addressing-and-types.md	542	$7 lui lw mtc1	Where a global's value lives in one register across a whole loop and is reloaded only after a call, nothing else in the loop may clobber memory.
-docs/levers/addressing-and-types.md	558	lui mtc1	A float constant that retail materialises with lui/mtc1 *after* the multiply whose operand register it reuses comes from one reused float local holding both…
-docs/levers/addressing-and-types.md	568		A run of locals whose initializers are constants materialised in the prologue takes its registers from the *declaration* order, and that order is a real lever.
-docs/levers/addressing-and-types.md	579		Where a function fills several stack vectors and then transforms each through VU0, two orders are separate levers and both are worth sweeping:
-docs/levers/addressing-and-types.md	587	addu lui sll	An inner loop whose counter walks down while its pointer walks up, with the outer base recomputed from the index rather than strength-reduced, comes from a…
-docs/levers/addressing-and-types.md	599	beql div	Two subtractions of 1 from two different parameters, where retail evaluates one before a div and the other after the divide-by-zero trap, *and* keeps the…
-docs/levers/addressing-and-types.md	609	addiu addu	A constant that retail adds to the *scaled index* rather than to the base (addiu rd, index, 0xC0 and then one addu) comes from an integer offset local:
-docs/levers/addressing-and-types.md	618	$1 $2 lb	A constant byte offset into a global table folds into the symbol's %hi/%lo pair only when the source names a flat array at that address.
-docs/levers/addressing-and-types.md	625	$at addu lui lw	A lui/addu/load triple using $at is ee-as expanding lw rd, sym(rx), not cc1 splitting the address.
-docs/levers/addressing-and-types.md	631		An index whose stride is 4 on what the struct declares as a byte array means the record is four bytes wide.
-docs/levers/addressing-and-types.md	636	addiu andi	A u8 parameter used as a loop counter has to be copied into an s32 local.
-docs/levers/addressing-and-types.md	640	$0 $2 $3 daddu lbu	Where retail copies a loop bound into a second register (daddu $3, $2, $0) before the loop, the source has a separate counter local initialised from the bound…
-docs/levers/addressing-and-types.md	645		A gp-addressed work pointer that retail holds in two registers comes from a local assigned from the global plus the global written at the other uses, and…
-docs/levers/addressing-and-types.md	649	$f0 $f1	An f32 field that retail keeps in $f0 across a read-modify-write is written in place, work->ofs -= 16.0f;, not through a named f32 local.
-docs/levers/addressing-and-types.md	655	$f0 mult mult1	fsqrtf from include/fpu.h is what produces a bare sqrt.s $f0, $f0, and ee-gcc does not fold it even on a constant:
-docs/levers/addressing-and-types.md	660	addiu lw slti	A global pointer read inside a loop beats caching it.
-docs/levers/addressing-and-types.md	665	bnel	An epilogue duplicated into a branch-likely delay slot, where ee-gcc emits the plain branch.
-docs/levers/addressing-and-types.md	672	beqz bnez jal	Two arms of an if holding the *same* call is a real retail shape, not only a cross-jumping artifact.
-docs/levers/addressing-and-types.md	679		Two arms of an if that compute the same thing.
-docs/levers/addressing-and-types.md	685	$0 daddu dsll32 dsra32 lwu movn sw xor	A conditional move whose two arms are the same value.
-docs/levers/addressing-and-types.md	693	andi	A single-bit mask test ee-gcc folds.
-docs/levers/addressing-and-types.md	696	lui ori	Where in a tail call's argument setup the second half of a lui/ori constant lands.
-docs/levers/addressing-and-types.md	701	$16 jal slt sltiu xori	A negated comparison assigned to a variable needs the comparison in its own local first.
-docs/levers/addressing-and-types.md	712		case_values_threshold is 10 in this build:
-docs/levers/addressing-and-types.md	716	li lwc1 nop	An address that looks like a global may be a .lit4 pool entry holding a float constant, and must be written as a literal.
-docs/levers/addressing-and-types.md	722	$16 addiu	Holding a struct address in a local (nbCamera_t *p = &pNbCamera;) reproduces retail keeping it in a saved register.
-docs/levers/addressing-and-types.md	727	j jal	The cheapest sibling-call blocker measured is s32 dummy;
-docs/levers/addressing-and-types.md	739	jal	Blocking the sibling call where retail uses jal and a full epilogue has two other forms, and which one works varies by unit.
-docs/levers/addressing-and-types.md	746	$2 jal	An ignored return value still reserves $2 across the call.
-docs/levers/addressing-and-types.md	749	$2	The void-callee remedy for an unused result reserving $2 is not always available.
-docs/levers/addressing-and-types.md	754	$2 $gp	An implicit declaration is itself a void against non-void trap.
-docs/levers/addressing-and-types.md	760		A local whose only initializer is a constant gets that constant materialised in the *prologue*, which costs a prologue instruction and rotates every saved…
-docs/levers/addressing-and-types.md	769	addiu addu	An index read and then advanced reaches addu base, i plus addiu i, 1 into one register only as a post-increment in a single expression, text[(*offset)++].
-docs/levers/addressing-and-types.md	775	slt slti srl	One variable whose comparisons are signed (slti, slt) but whose byte extraction is srl needs the cast at that one use, (u32)code >> 8.
-docs/levers/addressing-and-types.md	778		A guard arm that is a single instruction belongs in the else, not the then:
-docs/levers/addressing-and-types.md	785	addu	Subscript the whole expression instead of caching an element address.
-docs/levers/addressing-and-types.md	790	addu	addu operand order follows the cast order:
-docs/levers/addressing-and-types.md	795		A gp-addressed global can be cached in a local for part of a function.
-docs/levers/addressing-and-types.md	798	andi jal	andi 0xff after a jal comes from declaring the callee s32 and casting at the use site, (u8)f(), not from giving it a u8 return type.
-docs/levers/addressing-and-types.md	800	$0 sw	When retail biases a base once and stores at 0(reg), the induction variable is a pointer to the field, not to the struct.
-docs/levers/addressing-and-types.md	803		An induction pointer can be based one byte past its record:
-docs/levers/addressing-and-types.md	806		Split a packed argument into named locals in retail's computation order, type = joken >> 16;
-docs/levers/addressing-and-types.md	810	jal	A local assigned before the first call lands in a callee-saved register.
-docs/levers/addressing-and-types.md	813	jal	A struct field read whose live range crosses a jal is a **named local assigned in front of that call**, not the field expression at its use site.
-docs/levers/addressing-and-types.md	819		A weighted-table scan compares before it accumulates:
-docs/levers/addressing-and-types.md	822	or	Pack a colour word through explicit s32 locals assigned in r, g, b order.
-docs/levers/addressing-and-types.md	826	andi daddu	A u16 or u8 parameter adds an andi on entry that retail does not have.
-docs/levers/addressing-and-types.md	830		A run of adjacent constant stores comes out right-rotated by one, so the source order is retail's list left-rotated:
-docs/levers/addressing-and-types.md	834	addu	Where retail adds the index to the base (addu rd, index, base) and leaves the rest of the offset in the load displacement, write ((u8 *)index +…
-docs/levers/addressing-and-types.md	838		Subscript the array with the loop index rather than walking a pointer when retail computes the pointer after the loop guard.
-docs/levers/addressing-and-types.md	842		The EABI stack argument slot is eight bytes wide here, not four:
-docs/levers/addressing-and-types.md	844		Pick the VU0 load by how retail forms the address:
-docs/levers/addressing-and-types.md	847		SDF_VU0_STOREVECTOR_NOMEM is not only for globals and frame addresses shared across a call.
-docs/levers/addressing-and-types.md	852		Copy a vector quadword with SDF_VU0_COPYVECTOR(dst, src), not a struct or u128 assignment.
-docs/levers/addressing-and-types.md	857		A loop-invariant float constant that retail materialises into a saved fp register ahead of the loop index's init comes from a named local assigned before the…
-docs/levers/addressing-and-types.md	861	slti sltiu	sltiu on a function result comes from a u32 at the use site, either an unsigned return type or a cast.
-docs/levers/addressing-and-types.md	864	sqc2	Where retail forms a global's address twice, once into a temp for an sqc2 and again as the following call's argument, use SDF_VU0_STOREVECTOR_NOMEM(g) rather…
-docs/levers/addressing-and-types.md	871	addiu lw	Where retail materialises %hi/%lo of symbol + offset fresh while the C holds the bare symbol's address in a register, declare the sub-object with PS2_SYMBOL_AT.
-docs/levers/addressing-and-types.md	881	$2 $3	A u16 struct field used both as a loop bound test and as the loop counter's initial value needs **two** locals, and the bound one has to be u16.
-docs/levers/addressing-and-types.md	889	movz	A movz selecting between two member addresses takes its two temporaries in the order the statement appears relative to its neighbours, not from how the…
-docs/levers/addressing-and-types.md	898	$4 jal	A varargs format string that retail keeps in a callee-saved register across the calls that compute the arguments is a named local assigned before them, and…
-docs/levers/addressing-and-types.md	907	addu	The (T *)((u8 *)(i * sizeof(T)) + (u32)base) cast for retail's addu rd, index, base **can make things much worse**, so measure it rather than applying it on…
-docs/levers/addressing-and-types.md	916	sw	A dead sw to the frame after a colour-pack macro is a dead store to a stack aggregate's element, not a compiler artefact.
-docs/levers/addressing-and-types.md	921	ld ldl ldr sd	A copy of a struct's whole leading image, where retail emits a runtime 8-byte-alignment dispatch over an ld/sd loop and an ldl/ldr loop plus an unconditional…
-docs/levers/addressing-and-types.md	928	lui	Two pointer locals that walk in step through one loop, each initialised from a different global inside the same guard, couple their register assignment to…
-docs/levers/addressing-and-types.md	936	$17 $18 daddu lw sw	Two pointers of the same type that a function needs again after its calls, where retail spills them to two adjacent 4-byte stack slots instead of using…
-docs/levers/addressing-and-types.md	944	$18 addiu	Where retail folds a constant element offset into a symbol's %lo and then loads a member at a small displacement, &table[n] is not enough:
-docs/levers/addressing-and-types.md	953	$f14 $f15	Two float products that share one converted operand take their registers from the source order, and the **second** one written is the one that reuses the…
-docs/levers/addressing-and-types.md	962	cvt.s.w mul.s mult	An integer parameter that retail converts to f32 early and then multiplies by another converted integer needs its own f32 local.
-docs/levers/addressing-and-types.md	969		A header word a function needs both before its calls and again after them belongs at its second use site as the field expression, not in a local.
-docs/levers/addressing-and-types.md	975	$29 lqc2	SDF_VU0_LOADVECTOR_MEMOPS and SDF_VU0_STOREVECTOR_MEMOPS take an **lvalue**, and an array's name is not one.
-docs/levers/addressing-and-types.md	982	$0 $f0 bgez dsll32 ori	The double-precision helpers are explicit calls in this engine's source, not compiler soft float.
-docs/levers/addressing-and-types.md	991		A run of field copies between two objects of the same struct type gets its loads and stores regrouped by the scheduler, and the alias set is the lever, not…
-docs/levers/addressing-and-types.md	1007		The alias-set lever reaches a run of **zero stores**, not only a run of field copies, and the type to share is u32 rather than a pointer type.
-docs/levers/addressing-and-types.md	1020	$4 $6 addu	A table read whose index retail keeps in $4 wants the read placed **after** the first store of the object it initialises, not before it.
-docs/levers/addressing-and-types.md	1026	$0 $2 daddu	A function whose early exits all return 0 does **not** want the s32 ret = 0;
-docs/levers/addressing-and-types.md	1032	addiu	An index into an array that is a **struct member** associates as (base + index * scale) + offsetof, which is what leaves retail's constant in the store…
-docs/levers/addressing-and-types.md	1043	jal	A jal fptodp anywhere in the output means a float argument reaches a callee with no prototype in scope:
-docs/levers/addressing-and-types.md	1050	$20 $21 addiu	A static out buffer used three times at different offsets does **not** want the pointer local the fldElvGetFloorDigits row above asks for.
-docs/levers/addressing-and-types.md	1059		Where a run of sibling callbacks reads a key frame and its successor, which arm of now >= f->frame is written first decides the whole body's branch direction.
-docs/levers/addressing-and-types.md	1067		Two values computed by the same expression shape and merged at one exit take their registers from the order of the two assignments, and the computing arm and…
-docs/levers/addressing-and-types.md	1074		The void-to-s32 return-type sibcall blocker has to be swept per function, not applied to a family.
-docs/levers/addressing-and-types.md	1083		A run of stores inside a loop whose addresses are hoisted base pointers has **two** orders to get right, and they run opposite ways.
-docs/levers/addressing-and-types.md	1091	lb lbu	A single-statement guard arm belongs in the else even when the statement is a *store*, not just an index computation.
-docs/levers/addressing-and-types.md	1099	$2 $4 jal nop	A two-load chain work->owner->field whose base is also a later call's argument can leave the base in $4 across the whole function, so that a path which…
-docs/levers/addressing-and-types.md	1111		A function whose body is more than half inline assembly is only refused by the production report when it carries no exemption comment.
-docs/levers/addressing-and-types.md	1118	lh lhu sll sra	A (s16) cast on a u16 struct field compiles to a bare lh, not to lhu plus sll/sra:
-docs/levers/addressing-and-types.md	1123	beq blez bne lh lhu	Where every retail read of a u16 field is lh, retype the field s16 in the header rather than casting at each use.
-docs/levers/addressing-and-types.md	1130		A base[index].field expression used several times keeps index * sizeof in a register and re-adds base at each use.
-docs/levers/addressing-and-types.md	1136	$16 $19	One extra *statement* on a value raises its register-allocation priority, which is a cheaper lever than any declaration order.
-docs/levers/addressing-and-types.md	1145	$4 $6 slti	A named local for a *divisor* decides which register the constant takes, and its declaration position among the other locals decides the prologue order.
-docs/levers/addressing-and-types.md	1152		One u32 local for the switched value, **reused** across two successive switches in the same function, is what gives both their registers.
-docs/levers/addressing-and-types.md	1160	sb	A switch arm that writes one byte of a stack array in each of two paths wants a pointer local assigned *before* the if, with the stores written *p = c;.
-docs/levers/addressing-and-types.md	1168	$29 addiu sqc2	A frame address that a VU0 store and a following call argument both use is one pseudo for both, and inside a loop that pseudo is loop invariant:
-docs/levers/addressing-and-types.md	1181	$f2 neg.s	A clamp whose result is stored straight into a vector field belongs in the field, not in an f32 local:
-docs/levers/addressing-and-types.md	1189		A constant assigned once above an if (a == K1 || a == K2) whose body overwrites it comes out hoisted and shared.
-docs/levers/addressing-and-types.md	1196	$0 lwc1 mtc1 sw swc1	Where retail materialises one zero with mtc1 $0 and stores it with swc1 twice, the source assigns an f32 local as a *statement* positioned after the first…
-docs/levers/addressing-and-types.md	1204	$0 $29 daddu sh sll	A run of stores that each repeat the whole subscript needs the row to be one flat array, not an array of two-field structs.
-docs/levers/addressing-and-types.md	1218	$0 $f25 mtc1	Four corner offsets that each rotate a signed half extent come from **two** float locals reassigned between the pairs, not from the expressions written out:
-docs/levers/addressing-and-types.md	1228	$29 addiu	The read-write address operand generalises past the matrix store.
-docs/levers/addressing-and-types.md	1239		Two pointer pairs retail holds in adjacent four-byte slots are **not** necessarily a local array.
-docs/levers/addressing-and-types.md	1246		Two locals that both spill take their stack slots in **declaration** order, and their load order in the prologue follows the statement order separately.
-docs/levers/addressing-and-types.md	1254		The whole spill-slot sequence is readable, not just a pair, and it gives the declaration list back.
-docs/levers/addressing-and-types.md	1267		A local assigned **inside** a loop and then hoisted out loses its place in that sequence:
-docs/levers/addressing-and-types.md	1274	$0 andi sltu srl	(flags & bit) != 0 stored as a flag folds to srl/andi.
-docs/levers/addressing-and-types.md	1279	movn slt slti srl	x < 0 stored as a 0/1 flag is **always** srl rd, x, 31 from C.
-docs/levers/addressing-and-types.md	1287	lhu lw srl	A word load whose only use is >> 16 is narrowed to lhu at +2.
-docs/levers/addressing-and-types.md	1295	$0 bne bnez j nop slti sw	The three nops between the sw $0 and the bne of retail's four-slot draw-tag clear loops are ee-as's short-loop padding, not source.
-docs/levers/addressing-and-types.md	1305		A packet builder whose stores all go to one array element wants the element indexed at every store, packet_array[frame].field = v;, not a T *p =…
-docs/levers/addressing-and-types.md	1313	sll	Where retail multiplies a loop index by a struct size with an odd factor and a shift (sll idx, 5 with the induction variable stepping 0xB for a 0x160 row),…
-docs/levers/addressing-and-types.md	1319	addiu slti	A loop that reads three arrays, where retail walks two by pointer and subscripts the third by the counter, comes from subscripting *all three* by the counter.
-docs/levers/addressing-and-types.md	1327	$28 ldl ldr	An eight-byte extern struct copied by value is addressed gp-relative, with the ldl/ldr pair reading off $28.
-docs/levers/addressing-and-types.md	1332	addiu lui	Two references to one symbol with different addends that retail materialises as two independent lui/addiu pairs are two symbols in the source.
-docs/levers/addressing-and-types.md	1338	ldl ldr	Row 78's ldl/ldr plus 8-byte-alignment dispatch is reproduced exactly by extern const T g;
-docs/levers/addressing-and-types.md	1350	$f20 $f5 $f7 $f8 mov.s	**Every repeated scale factor in a run of coordinate expressions is a reused f32 local, not a literal at the use site**, and this is the largest single lever…
-docs/levers/addressing-and-types.md	1363	lui mtc1 mul.s	The operand order of a commutative mul.s follows the **source** order, so reach * axis[k] and axis[k] * reach are one word apart at every use.
-docs/levers/addressing-and-types.md	1371	$29 addiu	Where several VU0 accesses to one frame vector sit in a loop *or* in a straight run punctuated by calls, the plain SDF_VU0_STOREVECTOR is what costs the frame.
-docs/levers/addressing-and-types.md	1380		A second read of a field that a store to an addressable local sits between is a reload, and the cheap fix is to read the local back instead of the field.
-docs/levers/addressing-and-types.md	1390	lw	A colour word built by a float-to-unsigned conversion and stored through a pointer field wants **no intermediate local at all** when retail loads that pointer…
-docs/levers/addressing-and-types.md	1401	$f20 $f21 $f22	A float local reused for two values with **disjoint** live ranges is how retail gets the long-lived one into the lowest callee-saved register, and splitting…
-docs/levers/addressing-and-types.md	1410		A .lit4 constant whose decimal is obvious needs no reverse engineering:
-docs/levers/addressing-and-types.md	1416	addiu lbu	A byte counter decremented in place gives addiu rd, rs, 0xFF when the global is u8 and addiu rd, rs, -1 when it is s8, since the unsigned form stays in QImode.
-docs/levers/addressing-and-types.md	1423	andi dsll32 dsra32 sltiu xori	!x on a value that reached s32 through a 64-bit truncation emits sltiu rd, rs, 1, because the dsll32/dsra32 pair hides the andi 1's range from the expander.
-docs/levers/addressing-and-types.md	1429	$1 $2 $at addiu addu lui	A row pointer that shares the scaled index's own register is visible in the assembly as the %hi/%lo pair landing in $1:
-docs/levers/addressing-and-types.md	1438	addiu	PS2_SYMBOL_AT for dds3LightParam + 0x10 confirmed a third time, and the two halves of one unit disagree.
-docs/levers/addressing-and-types.md	1446	$0 $2 daddu	One reused handle local for two successive allocate-and-lock pairs is what gives retail's single callee-saved register and its daddu rd, $2, $0 per pair.
-docs/levers/addressing-and-types.md	1451	$5 jal sll sra	**A callee with no prototype in scope drops every argument conversion**, so on a unit that leaves most callees implicit, a caller sitting above its callee's…
-docs/levers/addressing-and-types.md	1463	sll sra	**A narrow parameter forwarded to a narrow parameter inside a loop wants to be declared s32**, with the prototype doing the conversion.
-docs/levers/addressing-and-types.md	1476	addiu addu lw sll sw	Where a loop both loads from a table and stores into a slot, retail usually **walks the store pointer and indexes the load**, and the source has to say so:
-docs/levers/addressing-and-types.md	1483	addu and sll sra	**A signed byte loop counter is a biv ee-gcc's strength reduction recognises;
-docs/levers/addressing-and-types.md	1492	addiu bnez	**Two address bases in one loop come from two pointer locals computed before the guard, and which one lands in the guard's delay slot is decided by which is…
-docs/levers/addressing-and-types.md	1504		An argument that is a cast of another argument belongs **at the call**, not in a local:
-docs/levers/addressing-and-types.md	1508	$1	The mirror of the pointer-local rows:
-docs/levers/addressing-and-types.md	1515	$2 $31 beqz beqzl ld	A guard on a call's result whose failure returns zero wants flag = f();
-docs/levers/addressing-and-types.md	1522	$21 $22	Four same-typed parameters copied into a local array in order, all with the same live range, do not take consecutive callee-saved registers:
-docs/levers/addressing-and-types.md	1533	ld sd	A 0x40-byte inline block move (eight ld then eight sd) whose temporaries retail draws partly from the callee-saved file wants the copy statement *above* the…
-docs/levers/addressing-and-types.md	1543	addu lh lui	A symbol-plus-index load in three instructions (lui %hi(sym), addu, lh %lo(sym)(rd)) where your C emits four, with the symbol's address materialised into its…
-docs/levers/addressing-and-types.md	1555	lb	lb on a field a header declares u8 means the field is signed.
-docs/levers/addressing-and-types.md	1561	addiu addu	Where retail computes a scaled index plus a constant **before** adding the base (addiu rd, rd, C then addu rd, base, rd), and every pointer spelling gives the…
-docs/levers/addressing-and-types.md	1573	addiu ld sd	A quadword structure copy with retail's addiu address temp plus lq/sq is **SDF_VU0_COPYVECTOR(dst, src)**, whose two "r" operands are where the temp comes from.
-docs/levers/addressing-and-types.md	1581	$17 $3 addiu ldl ldr lw lwl lwr sdl sdr swl swr	**A 12-byte struct whose members are all short is the unaligned copy.** *dst = *src between two struct { short a, b, c, d, e, f;
-docs/levers/addressing-and-types.md	1592	$16 $18 $2 addiu lbu	**A loop-invariant address base plus a load displacement reads off the real field offset.** Where retail hoists addiu $18, base, C1 and loads at C2($18), the…
-docs/levers/addressing-and-types.md	1601	andi lhu lw	**A narrow parameter masked at function entry is narrow in the signature.** The companion to the s32-forwarding row above, read in the other direction:
-docs/levers/addressing-and-types.md	1612	$2 $3 $4 jalr lw	**An indirect call whose loaded pointer retail puts in $2, in a function that cannot be void, is the function's return value.** Where the void lever above is…
-docs/levers/addressing-and-types.md	1621		**Where a table's %hi/%lo pair lands among a run of calls is the statement position of the pointer local that holds it.** Retail computes &sdfGrOtTable[ot] at…
-docs/levers/addressing-and-types.md	1631	andi lhu sb	A qsort comparator that re-reads one operand and caches the other is reading both through pointers with no local at all.
-docs/levers/addressing-and-types.md	1638	$17 $3 addu	Operand order in an addu that sums a reloaded base with a scaled index follows whether the row is a named pointer or written out at every use.
-docs/levers/addressing-and-types.md	1649	$0 $17 $4 addiu daddu lui	A format string reaching printf as a local gets its own callee-saved register and a copy, where the array name written at the call is materialised straight…
-docs/levers/addressing-and-types.md	1659	ldl ldr lw lwl lwr sw	**A 4-byte tail on an inline block copy is lw/sw only when both pointer expressions are known 4-byte aligned, so a void * parameter is what forces lwl/lwr…
-docs/levers/addressing-and-types.md	1670	$2 $29 addiu	**SDF_VU0_STOREVECTOR_NOMEM is also how retail recomputes a frame address that the plain form makes gcc share.** Where retail has addiu $2, $29, N for the…
-docs/levers/addressing-and-types.md	1682	$0 $17 $4 $7 addiu daddu	**An argument that has to leave $4-$7 before a call is copied where the source assigns it, so a late addiu rd, $4, $0 is a named local.** In…
-docs/levers/addressing-and-types.md	1690	$0 $2 daddu	**Two results of the same allocator call in one function need two locals.** Reusing one u32 id for two dds3AllocObjectId() calls makes gcc keep the second…
-docs/levers/addressing-and-types.md	1701	addiu addu	**A record-array field fill is per-field subscripts for the small blocks and one pointer local for the big one.** Where retail forms the scaled index once and…
-docs/levers/addressing-and-types.md	1714	$2 $3 jalr	**A function whose result the caller ignores wants void, because $2 is then free for an index chain.** fldEveHit_AddEveHitNpc ends by scaling…
-docs/levers/addressing-and-types.md	1722	$18 $29 $3 addiu jal lqc2 lui move	**Where retail emits the same address twice, once long-lived and once rematerialised, the second one is not a second C pointer.** Three functions in…
-docs/levers/addressing-and-types.md	1739	addiu	**A quadword copy out of a f32 * into a stack vector is *(u128 *), not *(Quad *).** Quad is four u32 at alignment 4, so gcc copies it with lq 7/sq style…
-docs/levers/addressing-and-types.md	1745	addu j	**addu base, off against addu off, base in a byte index is the offset's own local.** Every spelling of the index expression gives the offset first:
-docs/levers/addressing-and-types.md	1753	cvt.s.w lh lhu mtc1 sll sra	**A global pointer read inside a loop beats caching it, second case.** FroFtoI writes ((fldRunMapGrid_t *)pFroMapHead)->sizeX at all three uses (the inner…
-docs/levers/addressing-and-types.md	1765	andi sra srl	**An s32 cast has to sit inside the unsigned shift, not around the sum.** Where retail has srl for a shift and a signed % on the enclosing sum, write…
-docs/levers/addressing-and-types.md	1772	$29 addiu sqc2	**Where one frame vector is both a VU0 store target and a later call argument, the store is SDF_VU0_STOREVECTOR_NOMEM.** The plain memory-clobbering store…
-docs/levers/addressing-and-types.md	1783	lui	A .data word retail addresses with lui/%lo rather than gp-relative is an unsized extern array, not a scalar.
-docs/levers/addressing-and-types.md	1788	addiu and mult	mult rd, rs, rt against a constant materialised with addiu, where a literal gives a shift-and-add chain, comes from a local holding the factor:
-docs/levers/addressing-and-types.md	1794	and	An and against a mask that combine folds away, because the value's bits are known ((x & 0xFF) | C masked with ~0xFF is just C), reads the value back out of…
-docs/levers/addressing-and-types.md	1800	addu	**The operand order of the addu that forms base + index follows whether the source spells the address as pointer or as integer arithmetic.** (u8 *)list + i *…
-docs/levers/addressing-and-types.md	1807		**Which subexpression cse keeps decides how many address instructions there are.** Two accesses into the same strided element share whatever the first one…
-docs/levers/addressing-and-types.md	1814	addu daddu sw	**A clamped accumulator that retail copies with a daddu at the merge is read back through the struct, not held in a local.** if (p->alpha < 0x100) { p->alpha…
-docs/levers/addressing-and-types.md	1823	addiu li mult	A struct's trailing filler has to be sized from the real member sizes, not from the address range:
-docs/levers/addressing-and-types.md	1832		An independent symbol view and an array-derived pointer can both be needed for one global span.
-docs/levers/addressing-and-types.md	1868		Use the existing nested save-work view for a selected unit's skill.
-docs/levers/addressing-and-types.md	1876		Keep packet vector accesses as direct field expressions in nbDrawKoukaNum.
-docs/levers/addressing-and-types.md	1885	$2 $21	### VU matrix output with no global memory barrier effBTLSys_Attack_Draw uses a 64-byte scratch matrix written by VU0 and passed by address to effect-part…
+docs/levers/addressing-and-types.md	4		A global that holds rows of records must be declared as a struct array, not as s32[N][K], whenever a loop walks the rows.
+docs/levers/addressing-and-types.md	12	sll	A struct pointer local is what keeps two index scalings apart.
+docs/levers/addressing-and-types.md	19	slti sltu	A u8 field compared against a small constant folds to sltu, since cc1 knows the promoted value is non-negative.
+docs/levers/addressing-and-types.md	23	lw	A byte offset added to a **reloaded** global on every iteration is a second variable in the for init, not an expression.
+docs/levers/addressing-and-types.md	33	andi	andi 1 followed by a redundant andi 0xFF on a value that only feeds a branch is a u8 local for the masked bit, u8 usable = flags & 1;
+docs/levers/addressing-and-types.md	40	addu bgez	A clear loop written up-counting, whose index the body uses only as a subscript, is what gcc reverses and strength-reduces into a decrementing address plus a…
+docs/levers/addressing-and-types.md	46	jal	The motion-speed setter is inlined in newbattle/nbKoukaProcess:
+docs/levers/addressing-and-types.md	52	$2 $22 $3 $4 addu lw sll	Three identical call sites through **one** function-scope pointer local give that local nine refs and one pseudo, so the index temp feeding it takes $2 and…
+docs/levers/addressing-and-types.md	63	$f0 $f1 add andi bltz or srl	In a comparison between an f32 field and an integer cast to f32, gcc expands the cast first whatever the operand order, because it is the more complex operand.
+docs/levers/addressing-and-types.md	71	$gp ld lui	Externs of 8 bytes or less are addressed through $gp.
+docs/levers/addressing-and-types.md	84	div divu lb lbu	div against divu, and lb against lbu, come from a cast at the use site, not from narrowing the field's declared type.
+docs/levers/addressing-and-types.md	86		A symbol that looks standalone may be one element of a table already declared.
+docs/levers/addressing-and-types.md	91	addu sll subu	A row stride that is not a power of two comes from subscripting a two-dimensional array.
+docs/levers/addressing-and-types.md	94	$2 movn movz	Reuse the loop index variable for a value clamped after the loops.
+docs/levers/addressing-and-types.md	97		A store to a struct field aliases a global table of the same type, so reading tbl[i].f after the store forces a reload.
+docs/levers/addressing-and-types.md	100	lbu sw	**A u8 read is alias set 0 and serialises every store around it**, which is a scheduling fact before it is an addressing one.
+docs/levers/addressing-and-types.md	116	lw or	A colour read-modify-write whose new value comes out of a float-to-unsigned conversion needs the converted value in its own u32 local.
+docs/levers/addressing-and-types.md	125	mov.s	A float expression needed both before and after a call, where retail copies it with mov.s, is the **expression written twice**, not a named f32 local.
+docs/levers/addressing-and-types.md	131	$0 $2 $7 daddu	A run of packet builders that each allocate a buffer, fill it and link it takes **one function-scope pointer for some of them and a block-scope pointer for…
+docs/levers/addressing-and-types.md	141	blez	The argument setup for a tail call that follows a counted loop gets hoisted above the loop's guard and lands in its blez delay slot, where retail fills that…
+docs/levers/addressing-and-types.md	152		Where retail **reloads** a void * handle after a store made through a pointer derived from it, cast the store's lvalue to void **.
+docs/levers/addressing-and-types.md	164		for (i = 0, ofs = 0;
+docs/levers/addressing-and-types.md	166	addiu lw	A row offset of n - 1 folds into the load displacement on a two dimensional array but not on a flat index:
+docs/levers/addressing-and-types.md	170	ld or sd	Two if/else arms that read-modify-write the same kind of address get cross-jumped into one ld/or/sd tail, where retail has the tail twice.
+docs/levers/addressing-and-types.md	182		A store through a cast pointer may alias a gp-addressed pointer global, so gcc reloads the global inside the inner loop.
+docs/levers/addressing-and-types.md	186	addiu j	An inner loop that walks up (addiu ptr, 8) while its counter walks down comes from *p++ on a row pointer.
+docs/levers/addressing-and-types.md	191		Where retail folds a constant offset into a symbol's %hi/%lo pair and then uses small displacements, the source holds a pointer to the sub-object:
+docs/levers/addressing-and-types.md	195	$0 mtc1 sw swc1	Storing 0.0f to several float fields gives sw $0 per store.
+docs/levers/addressing-and-types.md	199	lh lhu sll sra	An s16 table field used once at * 16 and once at * 8 comes out as a second lhu plus sll 16, sra 13 for the narrower scale.
+docs/levers/addressing-and-types.md	203		s16 *t = table[index];
+docs/levers/addressing-and-types.md	207	$5	Do not cache a value a call consumes in each arm.
+docs/levers/addressing-and-types.md	211		An uninitialised local passed as an argument is a real retail shape:
+docs/levers/addressing-and-types.md	214	lw	A Create that reads its parameter block at offset 0 needs the parameter to have its own type, not the work type.
+docs/levers/addressing-and-types.md	218		A local caching a gp-addressed global pointer (evtViewer_t *viewer = viewerinfo;) held across the whole body costs one pseudo and shifts every later allocation.
+docs/levers/addressing-and-types.md	225	$2 addu	A loop bound used once belongs in the for condition, not in a named local.
+docs/levers/addressing-and-types.md	229	movn	Where retail has movn rd, rs, rs, the cmov whose value and condition are the same register, write an explicit if (x != 0) y = x;
+docs/levers/addressing-and-types.md	234		A string the retail pool keeps next to padding or an empty string is safer as INCLUDE_RODATA plus extern char D_XXXXXXXX[];
+docs/levers/addressing-and-types.md	238	$29 addiu	Two addiu of the same frame address where the C uses &local twice means the store before it is SDF_VU0_STOREVECTOR_NOMEM, not SDF_VU0_STOREVECTOR.
+docs/levers/addressing-and-types.md	246	$f1 $f20 add mov.s	An accumulate into a saved fp register (add.s $f20, $f20, $f1) needs x += ...;
+docs/levers/addressing-and-types.md	250	ldl ldr lw lwl lwr	The alignment of a struct assignment comes from the assigned type, not from the object it sits in, so one set of bytes can need two struct types.
+docs/levers/addressing-and-types.md	258	$2 $3 $gp	A $gp reload landing in $3 where retail uses $2, immediately after a call whose result is ignored, means that callee is void in retail's compile:
+docs/levers/addressing-and-types.md	267		A constant offset that retail leaves in the load displacement while hoisting only the bare symbol comes from a pointer local:
+docs/levers/addressing-and-types.md	271		Where retail shifts a run of parameters in argument order but stores the shifted values in some other order, the shifts are their own statements:
+docs/levers/addressing-and-types.md	276	$29 addiu	Where retail recomputes the same addiu rd, $29, N or addiu rd, base, N for every VU0 access to one local, and the C holds it in a saved register instead, use…
+docs/levers/addressing-and-types.md	287	$f0	Two successive divides into the same destination come from reusing one float local, not from two named locals.
+docs/levers/addressing-and-types.md	292		Writing the derived value at its uses, (gSlWindowCnt - 2) * 0xE9, lets gcc distribute the multiply (gSlWindowCnt * 0xE9 - 466), two words more than retail's…
+docs/levers/addressing-and-types.md	295	$4	The register the reused local gets follows its neighbours.
+docs/levers/addressing-and-types.md	303	$f0 $f1 $f20 div lwc1 mul.s	Where retail folds a float constant's register into the result of the expression that consumes it (lwc1 $f20, 3.14f, then mul.s $f20, $f0, $f20, then div.s…
+docs/levers/addressing-and-types.md	310		A second loop-invariant float constant used across the same calls needs its own named local, assigned right after the first one, or it takes the lower saved…
+docs/levers/addressing-and-types.md	316	seq	A jump table needs enough case **nodes**, but the threshold is not 10:
+docs/levers/addressing-and-types.md	332	$0 $f12 lwc1 mov.s sw swc1	A float argument read from a global that the same body also stores:
+docs/levers/addressing-and-types.md	350	$2 $4 addiu lui	Two callback sites through sdfGrOtTable want a sdfGrOt_t *ot declared in each site's own braced block.
+docs/levers/addressing-and-types.md	358	swc1	A u32 global store placed among a run of float stores decides the register the constant takes and whether its own store lands before or after the first swc1.
+docs/levers/addressing-and-types.md	363		The "constant assigned in both arms" row reaches a **compare operand**, not only an assigned value.
+docs/levers/addressing-and-types.md	370		Two **byte-identical** if/else arms are a reachable retail shape here.
+docs/levers/addressing-and-types.md	375	abs.s li lqc2 lui lwc1 mtc1	extern f32 fabsf(f32);
+docs/levers/addressing-and-types.md	402	$2 $3 jal	The same thing happens by accident when a void callee defined later in the unit has no prototype above the caller:
+docs/levers/addressing-and-types.md	407	addu	Where retail computes a table row as addu rd, index, base *into the register the index already occupies*, the index has to reach the add as a pointer:
+docs/levers/addressing-and-types.md	413	sqc2	Stack vectors a function stores with sqc2 and later copies with lq/sq have to be local *aggregates*, not scalar u128s, when retail's frame layout follows the…
+docs/levers/addressing-and-types.md	423	$29 addiu	A SDF_VU0_STOREVECTOR to a local that a later SDF_VU0_COPYVECTOR reads as its source has to be SDF_VU0_STOREVECTOR_NOMEM.
+docs/levers/addressing-and-types.md	430	$0 sw swc1	The effEveBEDCutSetParams placement block in the draw routines is written zeros first:
+docs/levers/addressing-and-types.md	437	lui mfc1 mtc1 ori	An interpolation factor that retail builds with a bare lui/ori pair is a u32 local holding the binary32 bits, assigned just before the call that precedes the…
+docs/levers/addressing-and-types.md	443		A local that gets spilled competes for slot order with the others.
+docs/levers/addressing-and-types.md	447	$4	A call that sets only $4 where the callee really takes three parameters is an unprototyped declaration in the caller's unit, not a wrong signature on the…
+docs/levers/addressing-and-types.md	454		Hatudo and nbE915_Test call nbGetEventForm with no argument, which only an unprototyped declaration produces, and that function is defined with a prototype in…
+docs/levers/addressing-and-types.md	458	$19 addiu	Where retail updates a base coordinate in place, addiu $19, $19, -2, and you fold the constant into every use instead, write the adjustment as its own…
+docs/levers/addressing-and-types.md	465		Locals that each switch arm assigns and uses for itself belong inside the arm's own block, not at function scope.
+docs/levers/addressing-and-types.md	471	ldl ldr sdl sdr	A block-scope aggregate initializer is not the only way to reach a rodata table the unit already carries.
+docs/levers/addressing-and-types.md	479	addiu	Where retail forms a symbol's address and then adds a constant in a separate addiu, put the bare symbol in a pointer local inside the block that uses it and…
+docs/levers/addressing-and-types.md	485		A quotient and a remainder of the same division belong in one reused local, not two.
+docs/levers/addressing-and-types.md	490	$0 sw	A sw $0 that sits in the wrong place *among* a run of other sw $0 stores is the same tell read the other way:
+docs/levers/addressing-and-types.md	497	andi	An andi 0xffff after the andi of a bit test comes from reading a u16 struct field directly in the condition.
+docs/levers/addressing-and-types.md	503	addiu and	Two bits cleared in one mask come out as one addiu/and;
+docs/levers/addressing-and-types.md	507		Two reads of the same pointer field in one function, where retail puts them in different registers, need two distinct locals.
+docs/levers/addressing-and-types.md	510		A placeholder field declared u8 unk_NN[4] in a shared header decays to its own address, so if (data->unk118 == 0) compiles to a compare against a constant and…
+docs/levers/addressing-and-types.md	514	$2 $3	Where retail loads two function pointers out of the same kind of struct and calls each, into the *same* register, put the pointer in one local and reuse it:
+docs/levers/addressing-and-types.md	521		A callee defined in the same unit can take a parameter it never reads, and still match:
+docs/levers/addressing-and-types.md	526	beq beql bgez bgezl bne bnel	Which of beq/beql, bne/bnel and bgez/bgezl ee-gcc picks is the delay-slot filler deciding whether the slot's instruction is safe on the untaken path, and it…
+docs/levers/addressing-and-types.md	534	$f21 $f3	One float local reused for two unrelated values is how retail gets both into one register, and it is the commonest residual in the nbCameraShot_*_Set2 family.
+docs/levers/addressing-and-types.md	544	$2 $29 addiu	SDF_VU0_STOREVECTOR against _NOMEM cuts both ways within one function, so sweep the pair mechanically rather than reasoning about it.
+docs/levers/addressing-and-types.md	550	$7 lui lw mtc1	Where a global's value lives in one register across a whole loop and is reloaded only after a call, nothing else in the loop may clobber memory.
+docs/levers/addressing-and-types.md	566	lui mtc1	A float constant that retail materialises with lui/mtc1 *after* the multiply whose operand register it reuses comes from one reused float local holding both…
+docs/levers/addressing-and-types.md	576		A run of locals whose initializers are constants materialised in the prologue takes its registers from the *declaration* order, and that order is a real lever.
+docs/levers/addressing-and-types.md	587		Where a function fills several stack vectors and then transforms each through VU0, two orders are separate levers and both are worth sweeping:
+docs/levers/addressing-and-types.md	595	addu lui sll	An inner loop whose counter walks down while its pointer walks up, with the outer base recomputed from the index rather than strength-reduced, comes from a…
+docs/levers/addressing-and-types.md	607	beql div	Two subtractions of 1 from two different parameters, where retail evaluates one before a div and the other after the divide-by-zero trap, *and* keeps the…
+docs/levers/addressing-and-types.md	617	addiu addu	A constant that retail adds to the *scaled index* rather than to the base (addiu rd, index, 0xC0 and then one addu) comes from an integer offset local:
+docs/levers/addressing-and-types.md	626	$1 $2 lb	A constant byte offset into a global table folds into the symbol's %hi/%lo pair only when the source names a flat array at that address.
+docs/levers/addressing-and-types.md	633	$at addu lui lw	A lui/addu/load triple using $at is ee-as expanding lw rd, sym(rx), not cc1 splitting the address.
+docs/levers/addressing-and-types.md	639		An index whose stride is 4 on what the struct declares as a byte array means the record is four bytes wide.
+docs/levers/addressing-and-types.md	644	addiu andi	A u8 parameter used as a loop counter has to be copied into an s32 local.
+docs/levers/addressing-and-types.md	648	$0 $2 $3 daddu lbu	Where retail copies a loop bound into a second register (daddu $3, $2, $0) before the loop, the source has a separate counter local initialised from the bound…
+docs/levers/addressing-and-types.md	653		A gp-addressed work pointer that retail holds in two registers comes from a local assigned from the global plus the global written at the other uses, and…
+docs/levers/addressing-and-types.md	657	$f0 $f1	An f32 field that retail keeps in $f0 across a read-modify-write is written in place, work->ofs -= 16.0f;, not through a named f32 local.
+docs/levers/addressing-and-types.md	663	$f0 mult mult1	fsqrtf from include/fpu.h is what produces a bare sqrt.s $f0, $f0, and ee-gcc does not fold it even on a constant:
+docs/levers/addressing-and-types.md	668	addiu lw slti	A global pointer read inside a loop beats caching it.
+docs/levers/addressing-and-types.md	673	bnel	An epilogue duplicated into a branch-likely delay slot, where ee-gcc emits the plain branch.
+docs/levers/addressing-and-types.md	680	beqz bnez jal	Two arms of an if holding the *same* call is a real retail shape, not only a cross-jumping artifact.
+docs/levers/addressing-and-types.md	687		Two arms of an if that compute the same thing.
+docs/levers/addressing-and-types.md	693	$0 daddu dsll32 dsra32 lwu movn sw xor	A conditional move whose two arms are the same value.
+docs/levers/addressing-and-types.md	701	andi	A single-bit mask test ee-gcc folds.
+docs/levers/addressing-and-types.md	704	lui ori	Where in a tail call's argument setup the second half of a lui/ori constant lands.
+docs/levers/addressing-and-types.md	709	$16 jal slt sltiu xori	A negated comparison assigned to a variable needs the comparison in its own local first.
+docs/levers/addressing-and-types.md	720		case_values_threshold is 10 in this build:
+docs/levers/addressing-and-types.md	724	li lwc1 nop	An address that looks like a global may be a .lit4 pool entry holding a float constant, and must be written as a literal.
+docs/levers/addressing-and-types.md	730	$16 addiu	Holding a struct address in a local (nbCamera_t *p = &pNbCamera;) reproduces retail keeping it in a saved register.
+docs/levers/addressing-and-types.md	735	j jal	The cheapest sibling-call blocker measured is s32 dummy;
+docs/levers/addressing-and-types.md	747	jal	Blocking the sibling call where retail uses jal and a full epilogue has two other forms, and which one works varies by unit.
+docs/levers/addressing-and-types.md	754	$2 jal	An ignored return value still reserves $2 across the call.
+docs/levers/addressing-and-types.md	757	$2	The void-callee remedy for an unused result reserving $2 is not always available.
+docs/levers/addressing-and-types.md	762	$2 $gp	An implicit declaration is itself a void against non-void trap.
+docs/levers/addressing-and-types.md	768		A local whose only initializer is a constant gets that constant materialised in the *prologue*, which costs a prologue instruction and rotates every saved…
+docs/levers/addressing-and-types.md	777	addiu addu	An index read and then advanced reaches addu base, i plus addiu i, 1 into one register only as a post-increment in a single expression, text[(*offset)++].
+docs/levers/addressing-and-types.md	783	slt slti srl	One variable whose comparisons are signed (slti, slt) but whose byte extraction is srl needs the cast at that one use, (u32)code >> 8.
+docs/levers/addressing-and-types.md	786		A guard arm that is a single instruction belongs in the else, not the then:
+docs/levers/addressing-and-types.md	793	addu	Subscript the whole expression instead of caching an element address.
+docs/levers/addressing-and-types.md	798	addu	addu operand order follows the cast order:
+docs/levers/addressing-and-types.md	803		A gp-addressed global can be cached in a local for part of a function.
+docs/levers/addressing-and-types.md	806	andi jal	andi 0xff after a jal comes from declaring the callee s32 and casting at the use site, (u8)f(), not from giving it a u8 return type.
+docs/levers/addressing-and-types.md	808	$0 sw	When retail biases a base once and stores at 0(reg), the induction variable is a pointer to the field, not to the struct.
+docs/levers/addressing-and-types.md	811		An induction pointer can be based one byte past its record:
+docs/levers/addressing-and-types.md	814		Split a packed argument into named locals in retail's computation order, type = joken >> 16;
+docs/levers/addressing-and-types.md	818	jal	A local assigned before the first call lands in a callee-saved register.
+docs/levers/addressing-and-types.md	821	jal	A struct field read whose live range crosses a jal is a **named local assigned in front of that call**, not the field expression at its use site.
+docs/levers/addressing-and-types.md	827		A weighted-table scan compares before it accumulates:
+docs/levers/addressing-and-types.md	830	or	Pack a colour word through explicit s32 locals assigned in r, g, b order.
+docs/levers/addressing-and-types.md	834	andi daddu	A u16 or u8 parameter adds an andi on entry that retail does not have.
+docs/levers/addressing-and-types.md	838		A run of adjacent constant stores comes out right-rotated by one, so the source order is retail's list left-rotated:
+docs/levers/addressing-and-types.md	842	addu	Where retail adds the index to the base (addu rd, index, base) and leaves the rest of the offset in the load displacement, write ((u8 *)index +…
+docs/levers/addressing-and-types.md	846		Subscript the array with the loop index rather than walking a pointer when retail computes the pointer after the loop guard.
+docs/levers/addressing-and-types.md	850		The EABI stack argument slot is eight bytes wide here, not four:
+docs/levers/addressing-and-types.md	852		Pick the VU0 load by how retail forms the address:
+docs/levers/addressing-and-types.md	855		SDF_VU0_STOREVECTOR_NOMEM is not only for globals and frame addresses shared across a call.
+docs/levers/addressing-and-types.md	860		Copy a vector quadword with SDF_VU0_COPYVECTOR(dst, src), not a struct or u128 assignment.
+docs/levers/addressing-and-types.md	865		A loop-invariant float constant that retail materialises into a saved fp register ahead of the loop index's init comes from a named local assigned before the…
+docs/levers/addressing-and-types.md	869	slti sltiu	sltiu on a function result comes from a u32 at the use site, either an unsigned return type or a cast.
+docs/levers/addressing-and-types.md	872	sqc2	Where retail forms a global's address twice, once into a temp for an sqc2 and again as the following call's argument, use SDF_VU0_STOREVECTOR_NOMEM(g) rather…
+docs/levers/addressing-and-types.md	879	addiu lw	Where retail materialises %hi/%lo of symbol + offset fresh while the C holds the bare symbol's address in a register, declare the sub-object with PS2_SYMBOL_AT.
+docs/levers/addressing-and-types.md	889	$2 $3	A u16 struct field used both as a loop bound test and as the loop counter's initial value needs **two** locals, and the bound one has to be u16.
+docs/levers/addressing-and-types.md	897	movz	A movz selecting between two member addresses takes its two temporaries in the order the statement appears relative to its neighbours, not from how the…
+docs/levers/addressing-and-types.md	906	$4 jal	A varargs format string that retail keeps in a callee-saved register across the calls that compute the arguments is a named local assigned before them, and…
+docs/levers/addressing-and-types.md	915	addu	The (T *)((u8 *)(i * sizeof(T)) + (u32)base) cast for retail's addu rd, index, base **can make things much worse**, so measure it rather than applying it on…
+docs/levers/addressing-and-types.md	924	sw	A dead sw to the frame after a colour-pack macro is a dead store to a stack aggregate's element, not a compiler artefact.
+docs/levers/addressing-and-types.md	929	ld ldl ldr sd	A copy of a struct's whole leading image, where retail emits a runtime 8-byte-alignment dispatch over an ld/sd loop and an ldl/ldr loop plus an unconditional…
+docs/levers/addressing-and-types.md	936	lui	Two pointer locals that walk in step through one loop, each initialised from a different global inside the same guard, couple their register assignment to…
+docs/levers/addressing-and-types.md	944	$17 $18 daddu lw sw	Two pointers of the same type that a function needs again after its calls, where retail spills them to two adjacent 4-byte stack slots instead of using…
+docs/levers/addressing-and-types.md	952	$18 addiu	Where retail folds a constant element offset into a symbol's %lo and then loads a member at a small displacement, &table[n] is not enough:
+docs/levers/addressing-and-types.md	961	$f14 $f15	Two float products that share one converted operand take their registers from the source order, and the **second** one written is the one that reuses the…
+docs/levers/addressing-and-types.md	970	cvt.s.w mul.s mult	An integer parameter that retail converts to f32 early and then multiplies by another converted integer needs its own f32 local.
+docs/levers/addressing-and-types.md	977		A header word a function needs both before its calls and again after them belongs at its second use site as the field expression, not in a local.
+docs/levers/addressing-and-types.md	983	$29 lqc2	SDF_VU0_LOADVECTOR_MEMOPS and SDF_VU0_STOREVECTOR_MEMOPS take an **lvalue**, and an array's name is not one.
+docs/levers/addressing-and-types.md	990	$0 $f0 bgez dsll32 ori	The double-precision helpers are explicit calls in this engine's source, not compiler soft float.
+docs/levers/addressing-and-types.md	999		A run of field copies between two objects of the same struct type gets its loads and stores regrouped by the scheduler, and the alias set is the lever, not…
+docs/levers/addressing-and-types.md	1015		The alias-set lever reaches a run of **zero stores**, not only a run of field copies, and the type to share is u32 rather than a pointer type.
+docs/levers/addressing-and-types.md	1028	$4 $6 addu	A table read whose index retail keeps in $4 wants the read placed **after** the first store of the object it initialises, not before it.
+docs/levers/addressing-and-types.md	1034	$0 $2 daddu	A function whose early exits all return 0 does **not** want the s32 ret = 0;
+docs/levers/addressing-and-types.md	1040	addiu	An index into an array that is a **struct member** associates as (base + index * scale) + offsetof, which is what leaves retail's constant in the store…
+docs/levers/addressing-and-types.md	1051	jal	A jal fptodp anywhere in the output means a float argument reaches a callee with no prototype in scope:
+docs/levers/addressing-and-types.md	1058	$20 $21 addiu	A static out buffer used three times at different offsets does **not** want the pointer local the fldElvGetFloorDigits row above asks for.
+docs/levers/addressing-and-types.md	1067		Where a run of sibling callbacks reads a key frame and its successor, which arm of now >= f->frame is written first decides the whole body's branch direction.
+docs/levers/addressing-and-types.md	1075		Two values computed by the same expression shape and merged at one exit take their registers from the order of the two assignments, and the computing arm and…
+docs/levers/addressing-and-types.md	1082		The void-to-s32 return-type sibcall blocker has to be swept per function, not applied to a family.
+docs/levers/addressing-and-types.md	1091		A run of stores inside a loop whose addresses are hoisted base pointers has **two** orders to get right, and they run opposite ways.
+docs/levers/addressing-and-types.md	1099	lb lbu	A single-statement guard arm belongs in the else even when the statement is a *store*, not just an index computation.
+docs/levers/addressing-and-types.md	1107	$2 $4 jal nop	A two-load chain work->owner->field whose base is also a later call's argument can leave the base in $4 across the whole function, so that a path which…
+docs/levers/addressing-and-types.md	1119		A function whose body is more than half inline assembly is only refused by the production report when it carries no exemption comment.
+docs/levers/addressing-and-types.md	1126	lh lhu sll sra	A (s16) cast on a u16 struct field compiles to a bare lh, not to lhu plus sll/sra:
+docs/levers/addressing-and-types.md	1131	beq blez bne lh lhu	Where every retail read of a u16 field is lh, retype the field s16 in the header rather than casting at each use.
+docs/levers/addressing-and-types.md	1138		A base[index].field expression used several times keeps index * sizeof in a register and re-adds base at each use.
+docs/levers/addressing-and-types.md	1144	$16 $19	One extra *statement* on a value raises its register-allocation priority, which is a cheaper lever than any declaration order.
+docs/levers/addressing-and-types.md	1153	$4 $6 slti	A named local for a *divisor* decides which register the constant takes, and its declaration position among the other locals decides the prologue order.
+docs/levers/addressing-and-types.md	1160		One u32 local for the switched value, **reused** across two successive switches in the same function, is what gives both their registers.
+docs/levers/addressing-and-types.md	1168	sb	A switch arm that writes one byte of a stack array in each of two paths wants a pointer local assigned *before* the if, with the stores written *p = c;.
+docs/levers/addressing-and-types.md	1176	$29 addiu sqc2	A frame address that a VU0 store and a following call argument both use is one pseudo for both, and inside a loop that pseudo is loop invariant:
+docs/levers/addressing-and-types.md	1189	$f2 neg.s	A clamp whose result is stored straight into a vector field belongs in the field, not in an f32 local:
+docs/levers/addressing-and-types.md	1197		A constant assigned once above an if (a == K1 || a == K2) whose body overwrites it comes out hoisted and shared.
+docs/levers/addressing-and-types.md	1204	$0 lwc1 mtc1 sw swc1	Where retail materialises one zero with mtc1 $0 and stores it with swc1 twice, the source assigns an f32 local as a *statement* positioned after the first…
+docs/levers/addressing-and-types.md	1212	$0 $29 daddu sh sll	A run of stores that each repeat the whole subscript needs the row to be one flat array, not an array of two-field structs.
+docs/levers/addressing-and-types.md	1226	$0 $f25 mtc1	Four corner offsets that each rotate a signed half extent come from **two** float locals reassigned between the pairs, not from the expressions written out:
+docs/levers/addressing-and-types.md	1236	$29 addiu	The read-write address operand generalises past the matrix store.
+docs/levers/addressing-and-types.md	1247		Two pointer pairs retail holds in adjacent four-byte slots are **not** necessarily a local array.
+docs/levers/addressing-and-types.md	1254		Two locals that both spill take their stack slots in **declaration** order, and their load order in the prologue follows the statement order separately.
+docs/levers/addressing-and-types.md	1262		The whole spill-slot sequence is readable, not just a pair, and it gives the declaration list back.
+docs/levers/addressing-and-types.md	1275		A local assigned **inside** a loop and then hoisted out loses its place in that sequence:
+docs/levers/addressing-and-types.md	1282	$0 andi sltu srl	(flags & bit) != 0 stored as a flag folds to srl/andi.
+docs/levers/addressing-and-types.md	1287	movn slt slti srl	x < 0 stored as a 0/1 flag is **always** srl rd, x, 31 from C.
+docs/levers/addressing-and-types.md	1295	lhu lw srl	A word load whose only use is >> 16 is narrowed to lhu at +2.
+docs/levers/addressing-and-types.md	1303	$0 bne bnez j nop slti sw	The three nops between the sw $0 and the bne of retail's four-slot draw-tag clear loops are ee-as's short-loop padding, not source.
+docs/levers/addressing-and-types.md	1313		A packet builder whose stores all go to one array element wants the element indexed at every store, packet_array[frame].field = v;, not a T *p =…
+docs/levers/addressing-and-types.md	1321	sll	Where retail multiplies a loop index by a struct size with an odd factor and a shift (sll idx, 5 with the induction variable stepping 0xB for a 0x160 row),…
+docs/levers/addressing-and-types.md	1327	addiu slti	A loop that reads three arrays, where retail walks two by pointer and subscripts the third by the counter, comes from subscripting *all three* by the counter.
+docs/levers/addressing-and-types.md	1335	$28 ldl ldr	An eight-byte extern struct copied by value is addressed gp-relative, with the ldl/ldr pair reading off $28.
+docs/levers/addressing-and-types.md	1340	addiu lui	Two references to one symbol with different addends that retail materialises as two independent lui/addiu pairs are two symbols in the source.
+docs/levers/addressing-and-types.md	1346	ldl ldr	Row 78's ldl/ldr plus 8-byte-alignment dispatch is reproduced exactly by extern const T g;
+docs/levers/addressing-and-types.md	1358	$f20 $f5 $f7 $f8 mov.s	**Every repeated scale factor in a run of coordinate expressions is a reused f32 local, not a literal at the use site**, and this is the largest single lever…
+docs/levers/addressing-and-types.md	1371	lui mtc1 mul.s	The operand order of a commutative mul.s follows the **source** order, so reach * axis[k] and axis[k] * reach are one word apart at every use.
+docs/levers/addressing-and-types.md	1379	$29 addiu	Where several VU0 accesses to one frame vector sit in a loop *or* in a straight run punctuated by calls, the plain SDF_VU0_STOREVECTOR is what costs the frame.
+docs/levers/addressing-and-types.md	1388		A second read of a field that a store to an addressable local sits between is a reload, and the cheap fix is to read the local back instead of the field.
+docs/levers/addressing-and-types.md	1398	lw	A colour word built by a float-to-unsigned conversion and stored through a pointer field wants **no intermediate local at all** when retail loads that pointer…
+docs/levers/addressing-and-types.md	1409	$f20 $f21 $f22	A float local reused for two values with **disjoint** live ranges is how retail gets the long-lived one into the lowest callee-saved register, and splitting…
+docs/levers/addressing-and-types.md	1418		A .lit4 constant whose decimal is obvious needs no reverse engineering:
+docs/levers/addressing-and-types.md	1424	addiu lbu	A byte counter decremented in place gives addiu rd, rs, 0xFF when the global is u8 and addiu rd, rs, -1 when it is s8, since the unsigned form stays in QImode.
+docs/levers/addressing-and-types.md	1431	andi dsll32 dsra32 sltiu xori	!x on a value that reached s32 through a 64-bit truncation emits sltiu rd, rs, 1, because the dsll32/dsra32 pair hides the andi 1's range from the expander.
+docs/levers/addressing-and-types.md	1437	$1 $2 $at addiu addu lui	A row pointer that shares the scaled index's own register is visible in the assembly as the %hi/%lo pair landing in $1:
+docs/levers/addressing-and-types.md	1446	addiu	PS2_SYMBOL_AT for dds3LightParam + 0x10 confirmed a third time, and the two halves of one unit disagree.
+docs/levers/addressing-and-types.md	1454	$0 $2 daddu	One reused handle local for two successive allocate-and-lock pairs is what gives retail's single callee-saved register and its daddu rd, $2, $0 per pair.
+docs/levers/addressing-and-types.md	1459	$5 jal sll sra	**A callee with no prototype in scope drops every argument conversion**, so on a unit that leaves most callees implicit, a caller sitting above its callee's…
+docs/levers/addressing-and-types.md	1471	sll sra	**A narrow parameter forwarded to a narrow parameter inside a loop wants to be declared s32**, with the prototype doing the conversion.
+docs/levers/addressing-and-types.md	1484	addiu addu lw sll sw	Where a loop both loads from a table and stores into a slot, retail usually **walks the store pointer and indexes the load**, and the source has to say so:
+docs/levers/addressing-and-types.md	1491	addu and sll sra	**A signed byte loop counter is a biv ee-gcc's strength reduction recognises;
+docs/levers/addressing-and-types.md	1500	addiu bnez	**Two address bases in one loop come from two pointer locals computed before the guard, and which one lands in the guard's delay slot is decided by which is…
+docs/levers/addressing-and-types.md	1512		An argument that is a cast of another argument belongs **at the call**, not in a local:
+docs/levers/addressing-and-types.md	1516	$1	The mirror of the pointer-local rows:
+docs/levers/addressing-and-types.md	1523	$2 $31 beqz beqzl ld	A guard on a call's result whose failure returns zero wants flag = f();
+docs/levers/addressing-and-types.md	1530	$21 $22	Four same-typed parameters copied into a local array in order, all with the same live range, do not take consecutive callee-saved registers:
+docs/levers/addressing-and-types.md	1541	ld sd	A 0x40-byte inline block move (eight ld then eight sd) whose temporaries retail draws partly from the callee-saved file wants the copy statement *above* the…
+docs/levers/addressing-and-types.md	1551	addu lh lui	A symbol-plus-index load in three instructions (lui %hi(sym), addu, lh %lo(sym)(rd)) where your C emits four, with the symbol's address materialised into its…
+docs/levers/addressing-and-types.md	1563	lb	lb on a field a header declares u8 means the field is signed.
+docs/levers/addressing-and-types.md	1569	addiu addu	Where retail computes a scaled index plus a constant **before** adding the base (addiu rd, rd, C then addu rd, base, rd), and every pointer spelling gives the…
+docs/levers/addressing-and-types.md	1581	addiu ld sd	A quadword structure copy with retail's addiu address temp plus lq/sq is **SDF_VU0_COPYVECTOR(dst, src)**, whose two "r" operands are where the temp comes from.
+docs/levers/addressing-and-types.md	1589	$17 $3 addiu ldl ldr lw lwl lwr sdl sdr swl swr	**A 12-byte struct whose members are all short is the unaligned copy.** *dst = *src between two struct { short a, b, c, d, e, f;
+docs/levers/addressing-and-types.md	1600	$16 $18 $2 addiu lbu	**A loop-invariant address base plus a load displacement reads off the real field offset.** Where retail hoists addiu $18, base, C1 and loads at C2($18), the…
+docs/levers/addressing-and-types.md	1609	andi lhu lw	**A narrow parameter masked at function entry is narrow in the signature.** The companion to the s32-forwarding row above, read in the other direction:
+docs/levers/addressing-and-types.md	1620	$2 $3 $4 jalr lw	**An indirect call whose loaded pointer retail puts in $2, in a function that cannot be void, is the function's return value.** Where the void lever above is…
+docs/levers/addressing-and-types.md	1629		**Where a table's %hi/%lo pair lands among a run of calls is the statement position of the pointer local that holds it.** Retail computes &sdfGrOtTable[ot] at…
+docs/levers/addressing-and-types.md	1639	andi lhu sb	A qsort comparator that re-reads one operand and caches the other is reading both through pointers with no local at all.
+docs/levers/addressing-and-types.md	1646	$17 $3 addu	Operand order in an addu that sums a reloaded base with a scaled index follows whether the row is a named pointer or written out at every use.
+docs/levers/addressing-and-types.md	1657	$0 $17 $4 addiu daddu lui	A format string reaching printf as a local gets its own callee-saved register and a copy, where the array name written at the call is materialised straight…
+docs/levers/addressing-and-types.md	1667	ldl ldr lw lwl lwr sw	**A 4-byte tail on an inline block copy is lw/sw only when both pointer expressions are known 4-byte aligned, so a void * parameter is what forces lwl/lwr…
+docs/levers/addressing-and-types.md	1678	$2 $29 addiu	**SDF_VU0_STOREVECTOR_NOMEM is also how retail recomputes a frame address that the plain form makes gcc share.** Where retail has addiu $2, $29, N for the…
+docs/levers/addressing-and-types.md	1690	$0 $17 $4 $7 addiu daddu	**An argument that has to leave $4-$7 before a call is copied where the source assigns it, so a late addiu rd, $4, $0 is a named local.** In…
+docs/levers/addressing-and-types.md	1698	$0 $2 daddu	**Two results of the same allocator call in one function need two locals.** Reusing one u32 id for two dds3AllocObjectId() calls makes gcc keep the second…
+docs/levers/addressing-and-types.md	1709	addiu addu	**A record-array field fill is per-field subscripts for the small blocks and one pointer local for the big one.** Where retail forms the scaled index once and…
+docs/levers/addressing-and-types.md	1722	$2 $3 jalr	**A function whose result the caller ignores wants void, because $2 is then free for an index chain.** fldEveHit_AddEveHitNpc ends by scaling…
+docs/levers/addressing-and-types.md	1730	$18 $29 $3 addiu jal lqc2 lui move	**Where retail emits the same address twice, once long-lived and once rematerialised, the second one is not a second C pointer.** Three functions in…
+docs/levers/addressing-and-types.md	1747	addiu	**A quadword copy out of a f32 * into a stack vector is *(u128 *), not *(Quad *).** Quad is four u32 at alignment 4, so gcc copies it with lq 7/sq style…
+docs/levers/addressing-and-types.md	1753	addu j	**addu base, off against addu off, base in a byte index is the offset's own local.** Every spelling of the index expression gives the offset first:
+docs/levers/addressing-and-types.md	1761	cvt.s.w lh lhu mtc1 sll sra	**A global pointer read inside a loop beats caching it, second case.** FroFtoI writes ((fldRunMapGrid_t *)pFroMapHead)->sizeX at all three uses (the inner…
+docs/levers/addressing-and-types.md	1773	andi sra srl	**An s32 cast has to sit inside the unsigned shift, not around the sum.** Where retail has srl for a shift and a signed % on the enclosing sum, write…
+docs/levers/addressing-and-types.md	1780	$29 addiu sqc2	**Where one frame vector is both a VU0 store target and a later call argument, the store is SDF_VU0_STOREVECTOR_NOMEM.** The plain memory-clobbering store…
+docs/levers/addressing-and-types.md	1791	lui	A .data word retail addresses with lui/%lo rather than gp-relative is an unsized extern array, not a scalar.
+docs/levers/addressing-and-types.md	1796	addiu and mult	mult rd, rs, rt against a constant materialised with addiu, where a literal gives a shift-and-add chain, comes from a local holding the factor:
+docs/levers/addressing-and-types.md	1802	and	An and against a mask that combine folds away, because the value's bits are known ((x & 0xFF) | C masked with ~0xFF is just C), reads the value back out of…
+docs/levers/addressing-and-types.md	1808	addu	**The operand order of the addu that forms base + index follows whether the source spells the address as pointer or as integer arithmetic.** (u8 *)list + i *…
+docs/levers/addressing-and-types.md	1815		**Which subexpression cse keeps decides how many address instructions there are.** Two accesses into the same strided element share whatever the first one…
+docs/levers/addressing-and-types.md	1822	addu daddu sw	**A clamped accumulator that retail copies with a daddu at the merge is read back through the struct, not held in a local.** if (p->alpha < 0x100) { p->alpha…
+docs/levers/addressing-and-types.md	1831	addiu li mult	A struct's trailing filler has to be sized from the real member sizes, not from the address range:
+docs/levers/addressing-and-types.md	1840		An independent symbol view and an array-derived pointer can both be needed for one global span.
+docs/levers/addressing-and-types.md	1876		Use the existing nested save-work view for a selected unit's skill.
+docs/levers/addressing-and-types.md	1884		Keep packet vector accesses as direct field expressions in nbDrawKoukaNum.
+docs/levers/addressing-and-types.md	1893	$2 $21	### VU matrix output with no global memory barrier effBTLSys_Attack_Draw uses a 64-byte scratch matrix written by VU0 and passed by address to effect-part…
 docs/levers/callee-visibility.md	51	$16 $29 bne sh	### One-pass model-load phase in fldAutoMap fldAutoMapModelLoad is 100 bytes and exact when its 372-byte provider, fldAmModelLoadFile, is a visible C…
 docs/levers/callee-visibility.md	72		### Skill-attack camera scheduling The unchanged nbCameraState_SkillAttack_Calc draft becomes exact at 364 bytes with the matched nbCameraShot_GroundCollision…
 docs/levers/control-flow.md	6		| two early return <same constant> reached by separate ifs, with the constant's block laid out **after** the body | nest the two tests and give them one…
