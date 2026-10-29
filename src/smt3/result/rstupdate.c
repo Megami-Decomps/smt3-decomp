@@ -221,7 +221,85 @@ void rstAddAsignParam(void)
     func_00224230(startPos->pCurrentStock);
 }
 
+#ifdef NON_MATCHING
+extern s32 cmpGetPressedButton(s32 mask);
+extern s8 cmpGetParamGaugeColor(s8 index);
+extern s32 cmbGetParamBase(datUnitWork_t *unit, s32 index);
+extern s32 fclStartSelMessage(s32 message);
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
+extern s32 cmpChkPadPressUpDown(void);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
+extern void cmpPlayCursorSE(u32 button);
+
+void rstUpdateSeqAsignPlayerParam(datUnitWork_t *unit)
+{
+    s32 values[6];
+    s32 i;
+    s32 allMax = 1;
+    u16 button = (u16)cmpGetPressedButton(0xF3);
+    s8 cursor = (s8)(*(u8 *)&startPos->paramCursor.cursor.unk_22 +
+                     (u8)startPos->paramCursor.cursor.unk_24);
+    s32 parameter = cmpGetParamGaugeColor(cursor);
+    rstWork_t *work;
+
+    values[1] = 0; /* Retail leaves this unset; the cursor table never selects it. */
+    for (i = 0; i < 6; i++) {
+        if (i != 1) {
+            values[i] = cmbGetParamBase(unit, i) + (s8)startPos->unk_129F[i];
+            if (values[i] < 40) {
+                allMax = 0;
+            }
+        }
+    }
+    if ((s8)startPos->AsignParam == 0 || allMax != 0) {
+        startPos->AsignParam = 0;
+        fclStartMessage(2);
+        fclStartSelMessage(0x2B);
+        startPos->unk_0001 = 0x18;
+        startPos->unk_0004 = 1;
+        return;
+    }
+    if (fclChkMessage() != 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+    case 0x80:
+        if (values[parameter] >= 40) {
+            button = 0x8000;
+        } else if ((s8)startPos->AsignParam > 0) {
+            startPos->unk_129F[parameter]++;
+            startPos->AsignParam--;
+        }
+        break;
+    case 0x40:
+        if ((s8)startPos->unk_129F[parameter] > 0) {
+            startPos->unk_129F[parameter]--;
+            startPos->AsignParam++;
+        }
+        break;
+    case 2:
+        rstResetAsignParam();
+        break;
+    case 0x10:
+        cmpMoveCursor(&startPos->paramCursor.cursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&startPos->paramCursor.cursor, 1);
+        break;
+    }
+    rstSetMaxHpMp(0, unit);
+    i = cmpChkPadPressUpDown();
+    work = startPos;
+    if (i == 0) {
+        cmpMoveCursor(&work->paramCursor.cursor, 0);
+        work = startPos;
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop(&work->paramCursor, button, 0x30));
+}
+#else
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqAsignPlayerParam);
+#endif
 
 void rstUpdateSeqPlayerLevelUpOnly(void)
 {
