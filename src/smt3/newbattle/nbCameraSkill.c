@@ -1246,7 +1246,76 @@ void nbCameraState_Analyze_Set(nbCamera_t *pNbCamera)
     nbCamera_Analyze_Wait = 5;
 }
 
+#ifdef NON_MATCHING
+extern s32 effBTLModelGetID(nbFormation_t *pFormation);
+extern void effBTLModelInvokePartyHide(void);
+
+void nbCameraState_Analyze_Calc(nbCamera_t *pNbCamera)
+{
+    nbFormation_t *target = effBTLSkillGetTargetFormation(0);
+    sdfVector4_t scale;
+    sdfVector4_t focus;
+    s32 id = effBTLModelGetID(target);
+    f32 rate;
+    f32 distance;
+    f32 length;
+    f32 base;
+    f32 want;
+
+    switch (id) {
+    case 0x102: case 0x103: case 0x108:
+    case 0x123: case 0x124: case 0x125:
+        effBTLModelInvokePartyHide();
+        return;
+    }
+    rate = nbCamera_Analyze_Rate + nbCamera_Analyze_Rate_Add;
+    if (rate > 0.215f) {
+        nbCamera_Analyze_Rate_Add *= 1.1f;
+    } else {
+        nbCamera_Analyze_Rate_Add *= 0.725f;
+    }
+    nbCamera_Analyze_Rate = rate < 0.0f ? 0.0f : rate;
+    distance = -pNbCamera->distance;
+    scale.x = distance;
+    scale.y = distance;
+    scale.z = distance;
+    SDF_VU0_LOADVECTOR(&pNbCamera->direction);
+    SDF_VU0_LOADVECTOR_B(&scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(&pNbCamera->target);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&focus);
+    effBTLModelGetMarkPosition2(target, 1);
+    SDF_VU0_LOADVECTOR_B(&nbCameraAnalyzeVec);
+    VU0_LERP_VF10_VF11(nbCamera_Analyze_Rate);
+    SDF_VU0_STOREVECTOR(&pNbCamera->target);
+    SDF_VU0_LOADVECTOR_B(&focus);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_GETLENGTH(length);
+    pNbCamera->distance = length;
+    if (0.001f < nbCamera_Analyze_Rate) {
+        SDF_VU0_COPYVECTOR_C_TO_A();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+    }
+    pNbCamera->fovy = 0.69813163f;
+    length = sdfAtan(0.34906582f);
+    if (id == 0x82 || id == 0x11F) {
+        base = target->oneshotr * target->scl * 1.25f / length;
+    } else {
+        base = target->oneshotr * target->scl / length;
+    }
+    want = base + (nbCamera_Analyze_Distance - base) * nbCamera_Analyze_Rate;
+    pNbCamera->distance = want;
+    if (want < base) {
+        pNbCamera->distance = base;
+    }
+    nbCamera_Analyze_Frame++;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraState_Analyze_Calc);
+#endif
 
 void nbCameraShot_All_Set(nbCamera_t *pNbCamera)
 {
