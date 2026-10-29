@@ -1381,7 +1381,156 @@ void fldGetDoorEntry(const void *source) {
     memcpy(&fldDoorParamTable, source, sizeof(fldDoorParamTable));
 }
 
+#ifdef NON_MATCHING
+extern fldResHead_t *gEvnRng[];
+extern dds3Basic_t *dds3GetControlScene(void);
+extern f32 EulerAngleAxisY(void);
+
+#define SET_DOOR_MOTION(x, y, z, mode, direction) do { \
+    if ((mode) >= 1 && (mode) <= 8) { \
+        f32 step = (mode) <= 4 ? 7.5f : 3.75f; \
+        if ((mode) == 3 || (mode) == 7) { \
+            (x) = 0.0f; (y) = -step; (z) = 0.0f; \
+        } else if ((mode) == 4 || (mode) == 8) { \
+            (x) = 0.0f; (y) = step; (z) = 0.0f; \
+        } else { \
+            if ((mode) == 2 || (mode) == 6) step = -step; \
+            switch (direction) { \
+            case 0: (x) = -step; (y) = 0.0f; (z) = 0.0f; break; \
+            case 1: (x) = 0.0f; (y) = 0.0f; (z) = step; break; \
+            case 2: (x) = step; (y) = 0.0f; (z) = 0.0f; break; \
+            case 3: (x) = 0.0f; (y) = 0.0f; (z) = -step; break; \
+            } \
+        } \
+    } else { \
+        (x) = 0.0f; (y) = 0.0f; (z) = 0.0f; \
+    } \
+} while (0)
+
+#define LOAD_DOOR_ANGLE(resource, angle) do { \
+    fldResourcePoint_t *point = (resource)->transform; \
+    quaternion.x = point->rot.x; \
+    quaternion.y = point->rot.y; \
+    quaternion.z = point->rot.z; \
+    quaternion.w = point->rot.w; \
+    SDF_VU0_LOADVECTOR(&quaternion); \
+    (angle) = EulerAngleAxisY() * 180.0f / 3.139999866f; \
+    while ((angle) < 0.0f) (angle) += 360.0f; \
+    while ((angle) > 360.0f) (angle) -= 360.0f; \
+} while (0)
+
+#define SET_DOOR_DIRECTION(angle, direction) do { \
+    if ((angle) >= 45.0f && (angle) <= 135.0f) (direction) = 1; \
+    else if ((angle) >= 135.0f && (angle) <= 225.0f) (direction) = 0; \
+    else if ((angle) >= 225.0f && (angle) <= 315.0f) (direction) = 3; \
+    else (direction) = 2; \
+} while (0)
+
+void fldSetupDoorScenes(void)
+{
+    QWORD_ALIGNED volatile sdfVector4_t quaternion;
+    dds3Basic_t *scene;
+    dds3Basic_t *matter;
+    fldResHead_t *resource;
+    doormovetbl_s *door;
+    doormovework_s *work;
+    s32 direction1 = 0;
+    s32 direction2 = 0;
+    s32 index;
+    s32 i;
+    s16 firstMode;
+    f32 angle;
+
+    memset((void *)&quaternion, 0, sizeof(quaternion));
+    quaternion.w = 1.0f;
+    scene = dds3GetControlScene();
+    for (index = 0; index < 256; index++) {
+        door = &fldDoorTable[index];
+        work = &fldDoorEventTable[index];
+        if (door->kind == 2) {
+            if (door->floor != fldArea[0] + 1) continue;
+            for (i = 0; i < fldEveRngCount; i++) {
+                if (gEvnRng[i]->name != NULL && strcmp(gEvnRng[i]->name, door->name) == 0) {
+                    resource = gEvnRng[i];
+                    work->evehit_resid = resource->id;
+                    LOAD_DOOR_ANGLE(resource, angle);
+                    work->x1 = angle;
+                }
+            }
+            work->z2 = 0.0f;
+            work->stat = 0;
+            work->cnt1 = 0;
+            work->cnt2 = 0;
+            work->y1 = 0.0f;
+            work->z1 = 0.0f;
+            work->x2 = 0.0f;
+            work->y2 = 0.0f;
+        } else if (door->kind == 1 && door->floor == fldArea[0] + 1) {
+            work->matter_resid1 = -1;
+            if (door->motion != 0) {
+                matter = dds3SceneBasicSearchNameAndType(scene, 6, (const u8 *)door->motionName);
+                if (matter != NULL) {
+                    work->matter_resid1 = matter->serialID;
+                    for (i = 0; i < fldEveRngCount; i++) {
+                        if (gEvnRng[i]->name != NULL && strcmp(gEvnRng[i]->name, door->name) == 0) {
+                            resource = gEvnRng[i];
+                            work->evehit_resid = resource->id;
+                            LOAD_DOOR_ANGLE(resource, angle);
+                            SET_DOOR_DIRECTION(angle, direction1);
+                        }
+                    }
+                }
+            }
+            work->matter_resid2 = -1;
+            if (door->secondaryMotion != 0) {
+                matter = dds3SceneBasicSearchNameAndType(scene, 6, (const u8 *)door->otherName);
+                if (matter != NULL) {
+                    work->matter_resid2 = matter->serialID;
+                    for (i = 0; i < fldEveRngCount; i++) {
+                        if (gEvnRng[i]->name != NULL && strcmp(gEvnRng[i]->name, door->name) == 0) {
+                            resource = gEvnRng[i];
+                            work->evehit_resid = resource->id;
+                            LOAD_DOOR_ANGLE(resource, angle);
+                            SET_DOOR_DIRECTION(angle, direction2);
+                        }
+                    }
+                }
+            }
+            firstMode = door->motion;
+            work->stat = 1;
+            work->mode2 = door->secondaryMotion;
+            work->mode1 = firstMode;
+            work->cnt1 = 0;
+            work->cnt2 = 0;
+            work->x1 = 0.0f;
+            work->y1 = 0.0f;
+            work->z1 = 0.0f;
+            work->x2 = 0.0f;
+            work->y2 = 0.0f;
+            work->z2 = 0.0f;
+            if (work->matter_resid1 != -1) {
+                SET_DOOR_MOTION(work->mx1, work->my1, work->mz1, firstMode, direction1);
+            } else {
+                work->mx1 = 0.0f;
+                work->my1 = 0.0f;
+                work->mz1 = 0.0f;
+            }
+            if (work->matter_resid2 != -1) {
+                SET_DOOR_MOTION(work->mx2, work->my2, work->mz2, work->mode2, direction2);
+            } else {
+                work->mx2 = 0.0f;
+                work->my2 = 0.0f;
+                work->mz2 = 0.0f;
+            }
+        }
+    }
+}
+#undef SET_DOOR_MOTION
+#undef LOAD_DOOR_ANGLE
+#undef SET_DOOR_DIRECTION
+#else
 INCLUDE_ASM(const s32, "field/fldWap", fldSetupDoorScenes);
+#endif
 
 void fldFindDoorEvent(s32 id) {
     doormovework_s *e;
