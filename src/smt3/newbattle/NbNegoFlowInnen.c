@@ -276,13 +276,24 @@ typedef struct nbEventProcessData_t {
 
 typedef struct { u16 item; u16 cnt; } nbInnenPhase_t;
 
+typedef struct { s16 phase; s16 side; s16 motion; } nbInnenMotion_t;
+
 /* 60-byte entries; only the fields this unit reads are named. */
 typedef struct {
     s16 id;
     u16 pid;
     u16 eid;
     u16 unk_06;
-    nbInnenPhase_t phase[13];
+    union {
+        nbInnenPhase_t phase[13];
+        struct {
+            u8 unk_08[24];
+            u16 mainmes;
+            u16 mescnt;
+            u8 unk_24[6];
+            nbInnenMotion_t motion[3];
+        } message;
+    } data;
 } nbInnenRec_t;
 
 extern nbInnenRec_t D_003E3158[];
@@ -370,7 +381,35 @@ s32 Flow5_2(nbNegoProcessData_t *n)
     return 0;
 }
 
+#ifdef NON_MATCHING
+typedef struct nbKoukaPacket_t nbKoukaPacket_t;
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid,
+                                               nbFormation_t *form, s32 motion);
+
+s32 Flow5_3(nbNegoProcessData_t *n)
+{
+    nbInnenMotion_t *motion;
+    nbFormation_t *form;
+    s32 i;
+
+    if (n->nownegophase >= D_003E3158[n->innen_id].data.message.mescnt) {
+        nbAddNegoIdKouho(n, 0x50004);
+    } else {
+        nbDispNegoMessage(n, n->innenmsg,
+                          D_003E3158[n->innen_id].data.message.mainmes + n->nownegophase, 0);
+        for (i = 0; i < 3; i++) {
+            motion = &D_003E3158[n->innen_id].data.message.motion[i];
+            if (motion->phase == n->nownegophase + 1) {
+                form = motion->side == 1 ? n->pform : n->eform;
+                nbAddMotionKoukaPacket(0, 0, form, motion->motion == 1 ? 14 : 15);
+            }
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowInnen", Flow5_3);
+#endif
 
 s32 Flow5_4(nbNegoProcessData_t *n)
 {
@@ -397,12 +436,12 @@ s32 Flow5_6(nbNegoProcessData_t *n)
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (D_003E3158[n->innen_id].phase[i].item == 0) {
+        if (D_003E3158[n->innen_id].data.phase[i].item == 0) {
             break;
         }
-        n->getitem = D_003E3158[n->innen_id].phase[i].item;
-        datAddItem(D_003E3158[n->innen_id].phase[i].item,
-                   ((nbInnenPhase_t *)&D_003E3158[n->innen_id].phase[i])->cnt);
+        n->getitem = D_003E3158[n->innen_id].data.phase[i].item;
+        datAddItem(D_003E3158[n->innen_id].data.phase[i].item,
+                   ((nbInnenPhase_t *)&D_003E3158[n->innen_id].data.phase[i])->cnt);
     }
     nbAddNegoIdKouho(n, 0x50009);
     return 0;
@@ -423,10 +462,10 @@ s32 Flow5_8(nbNegoProcessData_t *n)
 
 s32 Flow5_9(nbNegoProcessData_t *n)
 {
-    if (D_003E3158[n->innen_id].phase[n->nownegophase].item == 0) {
+    if (D_003E3158[n->innen_id].data.phase[n->nownegophase].item == 0) {
         return 2;
     }
-    n->getitem = D_003E3158[n->innen_id].phase[n->nownegophase].item;
+    n->getitem = D_003E3158[n->innen_id].data.phase[n->nownegophase].item;
     nbSetMesItem(n->helpmsg, n->getitem);
     nbDispNegoMessage(n, n->helpmsg, 8, 0);
     return 0;
@@ -482,12 +521,12 @@ s32 Flow5_18(nbNegoProcessData_t *n)
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (D_003E3158[n->innen_id].phase[i].item == 0) {
+        if (D_003E3158[n->innen_id].data.phase[i].item == 0) {
             break;
         }
-        n->getitem = D_003E3158[n->innen_id].phase[i].item;
-        datAddItem(D_003E3158[n->innen_id].phase[i].item,
-                   ((nbInnenPhase_t *)&D_003E3158[n->innen_id].phase[i])->cnt);
+        n->getitem = D_003E3158[n->innen_id].data.phase[i].item;
+        datAddItem(D_003E3158[n->innen_id].data.phase[i].item,
+                   ((nbInnenPhase_t *)&D_003E3158[n->innen_id].data.phase[i])->cnt);
     }
     nbAddNegoIdKouho(n, 0x50015);
     return 0;
@@ -508,10 +547,10 @@ s32 Flow5_20(nbNegoProcessData_t *n)
 
 s32 Flow5_21(nbNegoProcessData_t *n)
 {
-    if (D_003E3158[n->innen_id].phase[n->nownegophase].item == 0) {
+    if (D_003E3158[n->innen_id].data.phase[n->nownegophase].item == 0) {
         return 6;
     }
-    n->getitem = D_003E3158[n->innen_id].phase[n->nownegophase].item;
+    n->getitem = D_003E3158[n->innen_id].data.phase[n->nownegophase].item;
     nbSetMesItem(n->helpmsg, n->getitem);
     nbDispNegoMessage(n, n->helpmsg, 5, 0);
     return 0;
