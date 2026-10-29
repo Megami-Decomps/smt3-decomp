@@ -86,6 +86,17 @@ done
 modes=${modes#,}
 case $in in /*) ;; *) in=$PWD/$in ;; esac
 
+canon=${as_unit:-}
+case $in in "$REPO"/src/*/*.c) [ -z "$canon" ] && canon=${in#"$REPO"/} ;; esac
+[ -n "$canon" ] || canon=src/$version/$(basename "$in")
+unit=${canon#src/$version/}
+unit=${unit%.c}
+compiler=$(awk -v unit="$unit" '$1 == unit { compiler = $2 } END { print compiler }' "$REPO/config/$version/compilers.txt")
+if [ -n "$compiler" ] && [ "$compiler" != ee-gcc2.96 ]; then
+    echo "cc1probe hooks require ee-gcc2.96; $unit selects $compiler" >&2
+    exit 3
+fi
+
 cc1="$REPO/tools/compilers/ee-gcc2.96/lib/gcc-lib/ee/2.96-ee-001003-1/cc1"
 want=d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1
 [ -f "$cc1" ] || { echo "no compiler at $cc1 (run tools/download_tools.py)" >&2; exit 3; }
@@ -131,10 +142,6 @@ for d in tools include src config build; do
         echo "mirror entry $mir/$d is not a link; remove it or set CC1PROBE_MIRROR_BASE" >&2; exit 3
     fi
 done
-
-canon=${as_unit:-}
-case $in in "$REPO"/src/*/*.c) [ -z "$canon" ] && canon=${in#"$REPO"/} ;; esac
-[ -n "$canon" ] || canon=src/$version/$(basename "$in")
 
 # One compile of $in through tools/cc.sh (inside the mirror). $1 = where to keep the assembly;
 # $3 = plain compiles without the -da dumps, as the build does.

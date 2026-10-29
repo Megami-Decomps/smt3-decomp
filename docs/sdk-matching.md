@@ -85,8 +85,15 @@ from the decomp.me archive, and its `cc1` output is identical to the 2.9 `cc1`
 shipped in SDK 2.0.4, so nothing from the SDK has to be run.
 
 `config/smt3/compilers.txt` assigns it per unit, the way `cflags.txt` assigns
-flags, and every Sony library unit is on it. Three of its traits decide how the
-C has to be written:
+flags, and every Sony library unit is on it.
+
+Standalone checks must use the same unit selection. `tools/cc.sh` reads
+`compilers.txt` for both source paths and `SMT3_AS_UNIT` overrides, including
+GNU-version defines and assembler flags. For example, the IPU control writers
+match under 2.9 but each differ by eleven words under 2.96. Run
+`tools/test_cc.sh` to check wrapper selection and override handling.
+
+Three of its traits decide how the C has to be written:
 
 - Sibling calls only where the result is discarded. 2.9 emits `j func` for a
   tail call whose value the caller throws away, and `jal` plus `jr $31` as soon
@@ -319,6 +326,5 @@ Several names in this region are the IDB's placeholders or are wrong, and the
 archives prove it. `initAtExit`, `runAtExitList` and `registerAtExit` sit in
 libgcc's `__main.o`; `sdfFloatToULong`, `sdfDoubleToULong`, `sdfUnpackFloat`,
 `sdfPackFloat`, `sdfUnpackDouble` and `sdfPackQuad` sit between libgcc's
-`fp-bit` objects and are soft-float helpers, not `sdf` engine code. Correcting
-them follows the rule in `CLAUDE.md`: fix the IDB, re-export, rebuild. Record
-each in [IDB corrections](idb-corrections.md) when it is done.
+`fp-bit` objects and are soft-float helpers, not `sdf` engine code. Correct these in the IDB, then re-export and rebuild. Record each in
+[IDB corrections](idb-corrections.md) when it is done.
