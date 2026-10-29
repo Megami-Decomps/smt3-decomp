@@ -309,3 +309,35 @@ the allocation trace does not show a real constraint excluding `$f1`. Do not
 invent a live value or fixed register to create one. For a reproducible probe,
 use an otherwise unchanged full-owner copy with only this draft promoted, then
 run `tools/cc1probe.sh /tmp/near.c --as-unit src/smt3/newbattle/nbCameraSkill.c --func bCameraShot_AttackInvokeTargetPartyNear_Set --alloc --sched --no-dumps --out /tmp/near-alloc` and require `verify: OK`.
+
+
+## Stream flags followed by callback status
+
+`sdk/libc::fflush` matches all 276 bytes using one signed `status` scratch.
+It first holds the stream's signed flags for the write-enabled test and buffer
+space selection. Each write callback then replaces it with the signed byte
+count used by the error test, remaining count and cursor advance. The initial
+flags value never crosses that callback; failure reloads the current flags
+before setting the error bit. Independent native review confirms both phases
+and the unchanged callback-visible state.
+
+Qualified `--cse --alloc --reorg --no-dumps` probes preserve plain, hooked and
+unhooked output parity with the pinned ee-gcc 2.96. UID92 reads the halfword;
+UIDs94/96 sign-extend it into pseudo88. UID159 defines that same pseudo from
+callback result `$2`. Its eleven references and eleven-instruction live length
+cross no calls: each callback result is a new definition. Global allocation
+has a `$2` conflict and a `$3` preference, assigning pseudo88 to `$3`.
+
+A control with separate `flags` and callback `status` locals emits 272 bytes,
+50 of 68 emitted words matching. Callback pseudo88 then has eight references,
+live length four, a `$2` copy preference and no `$2` conflict, so it remains
+in `$2`; flags pseudo89 receives `$3`. The native callback-result move and
+related scheduling disappear. This is live scratch reuse with real consumers,
+not an extra dependency or forced copy.
+
+The attachment/initialization checks also retain the single-pass phase already
+qualified for `__swsetup` in [control flow](control-flow.md). Flattening only
+that phase keeps 276 bytes but differs in 20 of 69 words, first at +0x4C.
+The byte-exact source retains both properties. Reproduce with
+`tools/cc1probe.sh src/smt3/sdk/libc.c --func fflush --cse --alloc --reorg --no-dumps`.
+The complete libc owner, including the other stdio helpers, remains exact.
