@@ -937,3 +937,5 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-29	1 fn / 152 B	cmpChkDoNotUseSk
 src/smt3/code_0022C578.c	redthing1	done	2026-10-29	1 fn / 852 B	campDhDrawHeartsGauge matched with genuine first-phase table bound to native call-preserved $16; owner373/0, plain/-da parity, all80 owner drafts and retail exact; board6497756448
 src/smt3/pb/pbMain.c	redthing1	done	2026-10-29	1 fn / 148 B	func_001D4C08 matched through reviewed same-symbol exact-ABI opaque view; existing 8 B pbGetMoveChar unchanged C, all four calls retain real helper target; published owner 23/0, data/retail/provenance and no-op verified; 241a43a8
 src/smt3/field/fldHit.c	z29	open	2026-10-29	1 fn / 3088 B	largest-first pass: fldHitChkUnit, using the VWM sibling transfer list
+src/smt3/field/fldHit.c	z29	done	2026-10-29	0 fn, withdrawn	fldHitChkUnit claim released unstarted, redirected to the sdf units; the VWM transfer list above still applies
+src/smt3/sdf/sdfCoreDraw.c	z29	open	2026-10-29	1 fn / 2372 B	sdf sweep, largest first: sdfCorePacketGen
