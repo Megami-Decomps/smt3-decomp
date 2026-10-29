@@ -745,7 +745,316 @@ void fldPlayerCalc_Wm4(void) {
     }
 }
 
+#ifdef NON_MATCHING
+extern f32 fldCamPitch;
+extern s8 dds3PadButtonState[];
+extern s32 fldWmapMode;
+extern s32 fldHitChkMatter;
+extern s32 D_0054ED00, D_0054ED04;
+extern collision_s *fldMatterTable;
+extern sdfVector4_t fldWmapPlayerPos, D_002FCA30, D_002FCA40;
+extern const volatile sdfVector4_t D_00531D38;
+extern const volatile fldScaleVec_t D_00531D28;
+extern sdfMatrix4_t D_002FA240;
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3PadVibrationSet(s32 port, s32 power, s32 frames);
+extern void fldStatusSet(void);
+extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flags);
+extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rot);
+extern void FromEuler(f32 x, f32 y, f32 z);
+extern void InversMatrix(void);
+extern f32 sdfSin(f32 angle);
+extern f32 sdfCos(f32 angle);
+extern f32 sdfAtan2(f32 y, f32 x);
+extern void fldHitChkUnitVWM(f32 *position);
+extern void fldHitChkUnitDamage(f32 *position);
+
+s32 fldPlayerCalc_Wm2(void)
+{
+    fldUnitControl_t *control = fldGetUnitControl();
+    mdlObj_t *model = dds3ObjectBaseGetModelHandle(control->handle);
+    s32 step = fldPlayerStepDist;
+    fldScaleVec_t scale __attribute__((aligned(16))) = D_00531D28;
+    sdfVector4_t position __attribute__((aligned(16)));
+    sdfVector4_t initial __attribute__((aligned(16)));
+    sdfVector4_t previous __attribute__((aligned(16)));
+    sdfVector4_t direction __attribute__((aligned(16)));
+    sdfVector4_t normal __attribute__((aligned(16)));
+    sdfVector4_t rotation __attribute__((aligned(16)));
+    f32 collisionPosition[4] __attribute__((aligned(16)));
+    s32 up, down, left, right;
+    s32 moving = 0;
+    f32 angle = 0.0f;
+
+    if (step > 0) {
+        if (step == 60) {
+            fldSePlay(0x22);
+            dds3FadeIn(0x80, 0x20, 0x20, 6);
+            dds3PadVibrationSet(0, 1, 8);
+            dds3PadVibrationSet(1, 100, 8);
+            fldStatusSet();
+            step = fldPlayerStepDist;
+        }
+        step -= 10;
+        if (step > 0) {
+            fldPlayerStepDist = step;
+            return 0;
+        }
+        fldPlayerStepDist = 0;
+    }
+    if (l_UseCollision != 0) {
+        dds3OnPoseSetFlag(control->handle->poseset, 8);
+    }
+    up = dds3PadButtonState[0x27] != 0;
+    left = dds3PadButtonState[0x24] != 0;
+    right = dds3PadButtonState[0x25] != 0;
+    down = dds3PadButtonState[0x26] != 0;
+    if (fldGlobalBase.encountState > 0) {
+        up = down = left = right = 0;
+    }
+    dds3GetPosPoseSet(control->handle);
+    SDF_VU0_STOREVECTOR(&position);
+    SDF_VU0_STOREVECTOR(&initial);
+    fldGlobalBase.prevX = fldGlobalBase.x;
+    fldGlobalBase.prevY = fldGlobalBase.y;
+    fldGlobalBase.prevZ = fldGlobalBase.z;
+    fldGlobalBase.x = position.x;
+    fldGlobalBase.y = position.y;
+    fldGlobalBase.z = position.z;
+    if ((up || down || left || right) && l_UseCollision != 0) {
+        fldGlobalBase.y = position.y + 3.0f;
+    }
+    SDF_VU0_LOADMATRIX(&D_002FA240);
+    InversMatrix();
+    control->moveFlag = 0;
+    dds3GetPosPoseSet(control->handle);
+    fldWmWarpMode = fldWmWarpMode == 1 ? 0 : fldWmWarpMode;
+    if (fldWmWarpMode == 2) {
+        fldPlayerCalc_Wm4();
+    }
+    if (fldWmWarpMode == 3) {
+        fldPlayerCalc_Wm4();
+    }
+    if (fldWmWarpMode != 0) {
+        up = down = left = right = 0;
+    } else {
+        fldCamPitch = 0.0f;
+        if (up && right) {
+            angle = 45.0f;
+            moving = 1;
+        } else if (up && left) {
+            angle = -45.0f;
+            moving = 1;
+        } else if (down && right) {
+            angle = 135.0f;
+            moving = 1;
+        } else if (down && left) {
+            angle = -135.0f;
+            moving = 1;
+        } else if (up) {
+            angle = -0.0f;
+            moving = 1;
+        } else if (down) {
+            angle = 180.0f;
+            moving = 1;
+        } else if (right) {
+            angle = 90.0f;
+            moving = 1;
+        } else if (left) {
+            angle = -90.0f;
+            moving = 1;
+        }
+        if (moving) {
+            angle = -angle * 3.1399999f / 180.0f;
+            position.x = fldGlobalBase.x - sdfSin(angle) * 16.0f;
+            position.y = fldGlobalBase.y;
+            position.z = fldGlobalBase.z - sdfCos(angle) * 16.0f;
+        } else {
+            position.x = fldGlobalBase.x;
+            position.y = fldGlobalBase.y;
+            position.z = fldGlobalBase.z;
+        }
+        dds3SetPosPoseSet(control->handle, &position);
+        if (l_UseCollision == 0 && fldWmapMode != 0 &&
+            (dds3PadButtonState[0x29] != 0 || dds3PadButtonState[0x2B] != 0)) {
+            position.x = fldGlobalBase.x;
+            position.y = fldGlobalBase.y;
+            position.z = fldGlobalBase.z;
+            dds3SetPosPoseSet(control->handle, &position);
+        }
+    }
+    if (l_UseCollision != 0) {
+        dds3Basic_t *basic;
+        dds3PoseSet_t *pose;
+        if (up || down || left || right) {
+            collisionPosition[0] = position.x;
+            collisionPosition[1] = position.y;
+            collisionPosition[2] = position.z;
+            fldGlobalBase.x = position.x;
+            fldGlobalBase.y = position.y;
+            fldGlobalBase.z = position.z;
+            fldHitChkUnitVWM(collisionPosition);
+            if (fldGlobalBase.hitValid != 0) {
+                fldGlobalBase.x = fldGlobalBase.hitX;
+                if (fldGlobalBase.area == 1) {
+                    fldGlobalBase.y = (fldGlobalBase.hitY + 44.0f) - 11.0f;
+                } else {
+                    fldGlobalBase.y = fldGlobalBase.hitY + 44.0f;
+                }
+                position.x = fldGlobalBase.x;
+                position.y = fldGlobalBase.y;
+                position.z = fldGlobalBase.hitZ;
+                fldGlobalBase.z = position.z;
+                dds3SetPosPoseSet(control->handle, &position);
+                fldGlobalBase.hitValid = 0;
+            }
+        }
+        dds3GetPosPoseSet(control->handle);
+        SDF_VU0_STOREVECTOR(&position);
+        basic = control->handle;
+        pose = basic->poseset;
+        SDF_VU0_COPYVECTOR(&previous, &pose->pos2);
+        if (sdfFabs(previous.x - position.x) < 1.0f) {
+            pose->pos2.x = position.x;
+        } else {
+            pose->pos2.x = previous.x + (position.x - previous.x) / 3.0f;
+        }
+        if (sdfFabs(previous.y - position.y) < 1.0f) {
+            basic->poseset->pos2.y = position.y;
+        } else {
+            basic->poseset->pos2.y = previous.y + (position.y - previous.y) / 3.0f;
+        }
+        if (sdfFabs(previous.z - position.z) < 1.0f) {
+            basic->poseset->pos2.z = position.z;
+        } else {
+            basic->poseset->pos2.z = previous.z + (position.z - previous.z) / 3.0f;
+        }
+        basic->poseset->pos2.w = 1.0f;
+        if (l_UseCollision != 0) {
+            if (up || down || left || right) {
+                direction.x = position.x - initial.x;
+                direction.y = position.y - initial.y;
+                direction.z = position.z - initial.z;
+                direction.w = 1.0f;
+                SDF_VU0_LOADVECTOR(&direction);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_STOREVECTOR(&normal);
+                position.x = initial.x + normal.x * 16.0f;
+                position.y = (initial.y + normal.y * 16.0f) + 3.0f;
+                position.z = initial.z + normal.z * 16.0f;
+                dds3SetPosPoseSet(basic, &position);
+                collisionPosition[0] = position.x;
+                collisionPosition[1] = position.y;
+                collisionPosition[2] = position.z;
+                fldGlobalBase.x = position.x;
+                fldGlobalBase.y = position.y;
+                fldGlobalBase.z = position.z;
+                fldHitChkUnitVWM(collisionPosition);
+                if (fldGlobalBase.hitValid != 0) {
+                    fldGlobalBase.x = fldGlobalBase.hitX;
+                    if (fldGlobalBase.area == 1) {
+                        fldGlobalBase.y = (fldGlobalBase.hitY + 44.0f) - 11.0f;
+                    } else {
+                        fldGlobalBase.y = fldGlobalBase.hitY + 44.0f;
+                    }
+                    position.x = fldGlobalBase.x;
+                    position.y = fldGlobalBase.y;
+                    position.z = fldGlobalBase.hitZ;
+                    fldGlobalBase.z = position.z;
+                    dds3SetPosPoseSet(control->handle, &position);
+                    fldGlobalBase.hitValid = 0;
+                }
+            }
+            dds3GetPosPoseSet(control->handle);
+            SDF_VU0_STOREVECTOR(&position);
+            basic = control->handle;
+            pose = basic->poseset;
+            SDF_VU0_COPYVECTOR(&previous, &pose->pos2);
+            if (sdfFabs(previous.x - position.x) < 1.0f) {
+                pose->pos2.x = position.x;
+            } else {
+                pose->pos2.x = previous.x + (position.x - previous.x) / 3.0f;
+            }
+            if (sdfFabs(previous.y - position.y) < 1.0f) {
+                basic->poseset->pos2.y = position.y;
+            } else {
+                basic->poseset->pos2.y = previous.y + (position.y - previous.y) / 3.0f;
+            }
+            if (sdfFabs(previous.z - position.z) < 1.0f) {
+                basic->poseset->pos2.z = position.z;
+            } else {
+                basic->poseset->pos2.z = previous.z + (position.z - previous.z) / 3.0f;
+            }
+            basic->poseset->pos2.w = 1.0f;
+        }
+    }
+    fldHitChkUnitDamage(&position.x);
+    fldGlobalBase.z = position.z;
+    fldGlobalBase.x = position.x;
+    fldGlobalBase.y = position.y;
+    if (fldHitChkMatter >= 0 && D_0054ED00 != fldHitChkMatter) {
+        D_002FCA30.z = fldWmapPlayerPos.z;
+        D_002FCA30.x = fldWmapPlayerPos.x;
+        D_002FCA30.y = fldWmapPlayerPos.y;
+        D_002FCA40.x = fldMatterTable[fldHitChkMatter].normal[0];
+        D_002FCA40.y = fldMatterTable[fldHitChkMatter].normal[1];
+        D_0054ED00 = fldHitChkMatter;
+        D_002FCA40.z = fldMatterTable[fldHitChkMatter].normal[2];
+        D_0054ED04 = 0;
+    }
+    if (D_0054ED04 < 8) {
+        f32 fraction = (f32)D_0054ED04;
+        D_0054ED04++;
+        fldWmapPlayerPos.z = D_002FCA30.z + (D_002FCA40.z - D_002FCA30.z) * fraction * 0.125f;
+        fldWmapPlayerPos.x = D_002FCA30.x + (D_002FCA40.x - D_002FCA30.x) * fraction * 0.125f;
+        fldWmapPlayerPos.y = D_002FCA30.y + (D_002FCA40.y - D_002FCA30.y) * fraction * 0.125f;
+    } else {
+        fldWmapPlayerPos.z = D_002FCA40.z;
+        fldWmapPlayerPos.x = D_002FCA40.x;
+        fldWmapPlayerPos.y = D_002FCA40.y;
+    }
+    if (fldGlobalBase.area == 1) {
+        FromEuler(-1.04666651f, 0.0f, 0.0f);
+        SDF_VU0_STOREVECTOR(&rotation);
+        dds3SetRotPoseSet(control->handle, &rotation);
+    } else if (fldHitChkMatter >= 0) {
+        f32 a, b, xrot, zrot;
+        normal = D_00531D38;
+        normal.x = fldWmapPlayerPos.x;
+        normal.y = fldWmapPlayerPos.y;
+        normal.z = fldWmapPlayerPos.z;
+        a = sdfAtan2(normal.x, normal.y);
+        zrot = 3.1399997f - (a < 0.0f ? -a : a);
+        if (a < 0.0f) {
+            zrot = -zrot;
+        }
+        b = sdfAtan2(normal.z, normal.y);
+        xrot = 3.1399997f - (b < 0.0f ? -b : b);
+        if (b >= 0.0f) {
+            xrot = -xrot;
+        }
+        FromEuler(xrot, 0.0f, zrot);
+        SDF_VU0_STOREVECTOR(&rotation);
+        dds3SetRotPoseSet(control->handle, &rotation);
+    }
+    if (fldWmWarpMode == 0) {
+        fldWmapPlayerState = 1.0f;
+        dds3SetSclPoseSet(control->handle, &scale.x);
+        model->first->speed = 1.0f;
+    }
+    {
+        dds3Basic_t *basic = control->handle;
+        if (evtBitCheck(0x75B) != 0) {
+            dds3ObjectBaseOnFlag(basic, 1);
+        } else {
+            dds3ObjectBaseOffFlag(basic, 1);
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Wm2);
+#endif
 
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Nml_syukan);
 
