@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 typedef struct
 {
@@ -31,13 +32,18 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00 */ void *allocation;
+    /* 0x00 */ sdfMemHandle_t *allocation;
     /* 0x04 */ s32 texHandle[5];
-    /* 0x18 */ u8 unk_18[4];
+    /* 0x18 */ s32 mode;
     /* 0x1C */ s32 cursor;
-    /* 0x20 */ u8 unk_20[0x10];
+    /* 0x20 */ s32 unk_20;
+    /* 0x24 */ s32 unk_24;
+    /* 0x28 */ s32 unk_28;
+    /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
+    /* 0x38 */ s32 unk_38;
+    /* 0x3C */ s32 unk_3C;
 } dds3TitleWork_t;
 
 extern dds3TitleWork_t *titleWork;
@@ -46,7 +52,7 @@ extern void p2sdStopAllSe(void);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
-extern s32 titleAllocWork(s32 arg);
+extern dds3ProcessID_t *titleAllocWork(s32 arg);
 
 extern void movieStop(void);
 
@@ -239,7 +245,62 @@ void titleFreeTextures(void)
     }
 }
 
+extern void evtBitOn(s32 no);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern s32 p2sdStopBGM(s32 id);
+extern void dds3FadeIn2(s32 frames);
+extern s32 dds3PlayMovieByIndex(s32 index);
+extern u32 dds3BackColor;
+extern s32 dds3Titlemain(dds3ProcessID_t *id);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
+                                         s32 shutdownTimer, dds3ProcessFunc_t process,
+                                         dds3ProcessFunc_t shutdown, void *work);
+
+#ifdef NON_MATCHING
+dds3ProcessID_t *titleAllocWork(s32 mode)
+{
+    sdfMemHandle_t *allocation;
+    dds3TitleWork_t *work;
+
+    evtBitOn(0xC0F);
+    allocation = sdfMemAllocDirect(sizeof(*work));
+    work = sdfMemLock(allocation);
+    titleWork = work;
+    work->unk_34 = -1;
+    work->allocation = allocation;
+    work->unk_2C = 0;
+    work->mode = 0;
+    work->cursor = 0;
+    work->unk_20 = 0;
+    work->unk_30 = 0;
+    work->unk_38 = 0;
+    work->unk_3C = 0;
+    titleLoadTextures();
+    if (mode == 2) {
+        titleWork->cursor = 0;
+    }
+    if (mode == 1) {
+        titleWork->cursor = 2;
+    }
+    if (mode == 3) {
+        titleWork->cursor = 1;
+    }
+    if (mode != 0) {
+        p2sdStopBGM(0x3A0000);
+        dds3FadeIn2(15);
+        dds3PlayMovieByIndex(13);
+        titleWork->mode = 22;
+        titleWork->unk_28 = 0x80;
+        titleWork->unk_20 = 0;
+        titleWork->unk_30 = 0;
+    }
+    dds3BackColor = 0x80000000;
+    return dds3StartProcess(D_0053DD98, 0x2B19, 0, 0, dds3Titlemain, NULL, NULL);
+}
+#else
 INCLUDE_ASM(const s32, "sound/sndManager", titleAllocWork);
+#endif
 
 s32 titleFreeWork(s32 arg)
 {
