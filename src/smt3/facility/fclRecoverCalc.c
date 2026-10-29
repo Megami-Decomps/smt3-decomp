@@ -1,4 +1,5 @@
 #include "common.h"
+#include "interface.h"
 #include "camp.h"
 #include "facility.h"
 #include "fpu.h"
@@ -50,17 +51,6 @@ extern void rcvReviveUnit(datUnitWork_t *work);
 extern char D_0053D3F8[];
 
 extern char D_0053D408[];
-
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000[9];
-    /* 0x0009 */ u8 unk_0009[0x17];
-    /* 0x0020 */ s32 flags;
-    /* 0x0024 */ u8 unk_0024[0x1C];
-    /* 0x0040 */ fclPanelPos_t pos;
-    /* 0x0060 */ u8 unk_0060[0xFC];
-    /* 0x015C */ cmpCursorInfo_t listCursor;
-} lstWork_t;
 
 extern void frDestroyFontRequestAfter(void *pFRQ);
 

@@ -1,24 +1,11 @@
 #include "common.h"
+#include "interface.h"
 #include "camp.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
-
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000[9];
-    /* 0x0009 */ u8 unk_0009[0x17];
-    /* 0x0020 */ s32 flags;
-    /* 0x0024 */ u8 unk_0024[0x1C];
-    /* 0x0040 */ u8 panelPos[0x14];
-    /* 0x0054 */ s32 unk_54;
-    /* 0x0058 */ u8 unk_58;
-    /* 0x0059 */ u8 slotFlags[0x100];
-    /* 0x0159 */ u8 unk_0159[3];
-    /* 0x015C */ cmpCursorInfo_t listCursor;
-} lstWork_t;
 
 extern void lstMoveCursor(lstWork_t *pListWindow, s8 Dir);
 

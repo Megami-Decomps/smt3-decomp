@@ -1,4 +1,5 @@
 #include "common.h"
+#include "interface.h"
 #include "camp.h"
 #include "facility.h"
 #include "fpu.h"
@@ -82,15 +83,6 @@ extern char D_0053D1F0[];
 extern char D_0053D200[];
 
 extern void fclScriptForcedEnd(u8 *PID);
-
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000[9];
-    /* 0x0009 */ u8 unk_0009[0x17];
-    /* 0x0020 */ s32 flags;
-    /* 0x0024 */ u8 unk_0024[0x138];
-    /* 0x015C */ cmpCursorInfo_t listCursor;
-} lstWork_t;
 
 typedef struct
 {
