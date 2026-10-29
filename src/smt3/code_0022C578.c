@@ -8162,7 +8162,39 @@ s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, s32 unused)
     return 0;
 }
 
+extern cmbGlobalWork_t *volatile cmpRecoverGlobalWork asm("DDS3_GBWK");
+
+#ifdef NON_MATCHING
+void cmpRecover(u16 skill, datUnitWork_t *user, datUnitWork_t *target)
+{
+    s32 recovered = 0;
+    s32 area = cmpGetSkillTargetArea(skill);
+    cmbGlobalWork_t *work = cmpRecoverGlobalWork;
+    s32 i;
+
+    if (area == 1) {
+        cmpExecRecover(skill, user, target);
+    } else {
+        for (i = 0; i < work->stockCount; i++) {
+            target = &work->party[work->stock[i]].unit;
+            if (target->flag & 2) {
+                cmpExecRecover(skill, user, target);
+                work = cmpRecoverGlobalWork;
+                recovered = 1;
+            }
+        }
+    }
+    if (cmpChkSkillBad(skill) & 0x800) {
+        p2sdPlaySE(0x17, 0x7F, 0x3F);
+    } else if (recovered) {
+        p2sdPlaySE(0x16, 0x7F, 0x3F);
+    } else {
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpRecover);
+#endif
 
 char *cmpGetParamName(s8 index)
 {
