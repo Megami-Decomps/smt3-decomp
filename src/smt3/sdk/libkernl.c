@@ -1737,9 +1737,60 @@ s32 sceSifSetIopAddr(void *address, const void *input, u32 kind)
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSetIopAddr);
 #endif
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifResetIop);
+typedef struct sifResetPacket_t {
+    u64 packetSize : 8;
+    u64 dataSize : 24;
+    void *destination;
+    u32 command;
+    u32 option;
+    s32 argumentSize;
+    s32 mode;
+    char arguments[80];
+} sifResetPacket_t;
 
+typedef char sifResetPacket_size_must_be_0x68[
+    sizeof(sifResetPacket_t) == 0x68 ? 1 : -1];
+
+extern sifResetPacket_t D_0059EC40;
+extern void sceSifStopDma(void);
 extern u32 sceSifGetReg(u32 registerId);
+extern s32 sceSifSetReg(u32 registerId, u32 value);
+extern void sceSifInitRpc(s32 mode);
+extern void sceSifExitRpc(void);
+
+s32 sceSifResetIop(const char *arguments, s32 mode)
+{
+    sifDmaTransfer_t transfer;
+    u32 destination;
+    s32 length;
+
+    sceSifStopDma();
+    destination = sceSifGetReg(0x80000000);
+    D_0059EC40.mode = mode;
+    for (length = 0; arguments[length] != 0; length++) {
+        D_0059EC40.arguments[length] = arguments[length];
+    }
+    D_0059EC40.destination = NULL;
+    D_0059EC40.argumentSize = length;
+    D_0059EC40.command = 0x80000003;
+    D_0059EC40.dataSize = 0;
+    D_0059EC40.packetSize = 104;
+    transfer[0] = (u32)&D_0059EC40;
+    transfer[1] = destination;
+    transfer[2] = 104;
+    transfer[3] = 0x44;
+    sceSifWriteBackDCache(&D_0059EC40, 104);
+    sceSifSetReg(4, 0x40000);
+    if (sceSifSetDma(&transfer, 1) != 0) {
+        sceSifSetReg(4, 0x10000);
+        sceSifSetReg(4, 0x20000);
+        sceSifSetReg(0x80000002, 0);
+        sceSifSetReg(0x80000000, 0);
+        return 1;
+    }
+    return 0;
+}
+
 extern void sceResetttyinit(void);
 
 s32 sceSifIsAliveIop(void)

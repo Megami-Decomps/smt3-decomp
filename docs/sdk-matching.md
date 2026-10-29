@@ -563,3 +563,25 @@ mask/unsigned-compare sequence; a direct comparison instead emits a shorter
 shift/low-bit sequence. Explicit width branches reproduce the native address
 reader, while a switch emits 232 bytes instead of 236. The complete kernel
 owner checks 53 match / 0 differ; the address writer remains guarded.
+
+## Matched IOP reset transaction
+
+`sceSifResetIop` matches all 316 instruction bytes. Its 104-byte packet has a
+16-byte command header, argument length/mode words and an 80-byte argument
+area. The native 64-bit header-field update is represented by 8-bit packet
+size and 24-bit data size fields with a 64-bit allocation type; the destination
+remains at offset four. A compile-time size check verifies the wire extent.
+A 32-bit allocation type instead emits a shorter word update and does not match.
+
+The routine stops DMA, captures the destination register, and copies nonzero
+argument bytes without appending a terminator or adding a length bound. It
+leaves the option word and unused argument bytes untouched. After packet
+writeback it sets register four to `0x40000` and submits one descriptor with
+size 104 and attributes `0x44`. Only successful submission performs the four
+native register updates and returns one; failure returns zero.
+
+Initializing the payload length and command before clearing the header data
+size reproduces the native field scheduling. Keeping the success-side register
+updates inside a nonzero-DMA-result block reproduces the final branch. The
+complete kernel owner checks 59 match / 0 differ at this qualification; reboot
+remains assembly-backed.

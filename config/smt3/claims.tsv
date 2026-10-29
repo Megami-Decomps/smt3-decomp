@@ -757,3 +757,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 56 B	load-file rese
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	5 SDK fn / 324 B	filesystem semaphore setup/wait/notification, version comparisons and first-word reset; partial descriptor initialization and fresh version pointer reloads; complete owner 69 match, 0 differ
 src/smt3/sdk/libpad.c	redthing1	done	2026-10-28	1 SDK fn / 276 B	_send_to_iop destination snapshot and post-flush descriptor construction; complete owner exact
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 196 B	power-off registration and interrupt callback; concurrent filesystem semaphore implementations preserved without duplicate credit; complete owner exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 316 B	IOP reset packet with native 64-bit header update, real wire/DMA extents and success-side register order; owner 59 match, 0 differ
