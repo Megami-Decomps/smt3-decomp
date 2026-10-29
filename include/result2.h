@@ -19,6 +19,12 @@ typedef struct
 } rstSkillInfo_t;
 
 
+typedef struct
+{
+    /* 0x00 */ u16 skill;
+    /* 0x02 */ u16 unk_02;
+} datHeartsSkill_t;
+
 typedef struct rstData_t {
     union { u8 flags; u8 unk_0000; };
     union { s8 phase; s8 unk_0001; };

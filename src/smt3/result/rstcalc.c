@@ -23,11 +23,6 @@ extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 
 extern s32 dds3PadVibrationSet(s32 port, s32 power, s32 frames);
 
-typedef struct
-{
-    /* 0x00 */ u16 skill;
-    /* 0x02 */ u16 unk_02;
-} datHeartsSkill_t;
 
 typedef struct
 {
