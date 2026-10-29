@@ -1657,9 +1657,14 @@ s32 fldPlayerCalc_Wm2(void)
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Wm2);
 #endif
 
-/* NON_MATCHING: 776 of 1082 words differ (first at +0x4). The structure is
- * reproduced; gcc spills `moving` instead of `turnLeft`, which renames every
- * callee-saved register and flag slot downstream. */
+/* NON_MATCHING: 776 of 1082 words differ (first at +0x4). Thirteen input flags
+ * compete for four callee-saved registers. cc1probe --alloc measures allocno
+ * priorities modifier 647, moving 453, forward 437, back 415, turnRight 380,
+ * turnLeft 375, so turnLeft spills where retail keeps it, renaming every
+ * register and flag slot downstream. moving is 12 refs over 794 insns, one per
+ * source assignment; cutting it to a single assignment hands the freed register
+ * to turnRight (387) and not turnLeft (381), so retail's set needs turnLeft to
+ * outrank turnRight too and is not reachable from this source. */
 #ifdef NON_MATCHING
 extern const volatile sdfVector4_t D_00531D48;
 extern u8 dds3PadStickState[2][2][2];
