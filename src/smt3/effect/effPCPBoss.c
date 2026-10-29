@@ -6,6 +6,7 @@
 #include "draw3d.h"
 #include "effect.h"
 #include "event.h"
+#include "nb.h"
 
 typedef struct
 {
@@ -553,11 +554,6 @@ extern void effDebugLineDraw(const void *pPos0, const void *pPos1);
 extern s32 sdfModelGetMarkPosMatrix(void *aRoot, s32 aId);
 extern void effPCPCrackInit(effPCPCrack_t *pPCPCrack);
 extern void dds3PadVibrationSet(s32 port, u8 power, s32 frames);
-/* First field of the battle main-process record. */
-typedef struct effPCPBossMainData_t {
-    effPCPBossUnit_t *form;
-} effPCPBossMainData_t;
-extern effPCPBossMainData_t *nbGetMainProcessData(void);
 extern s32 effBTLModelGetID(effPCPBossUnit_t *pFormation);
 extern u128 *effPCP_ThunderPolyListGetParam(void *pTPolyList);
 extern void effPCP_ThunderPolyListDraw(void *hData);
