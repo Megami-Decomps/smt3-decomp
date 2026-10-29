@@ -50,6 +50,7 @@ both native and emitted sizes when they differ.
 | 2 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 2 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 2 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
+| 2 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 2 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
@@ -77,7 +78,6 @@ both native and emitted sizes when they differ.
 | 1 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
 | 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 |  | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
-| 1 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 1 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
