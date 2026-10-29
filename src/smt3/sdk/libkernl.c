@@ -1441,7 +1441,132 @@ fsRequestEntry_t *get_iob(u32 index)
     return entry;
 }
 
+typedef struct fsStat_t {
+    u32 mode;
+    u32 attributes;
+    u32 size;
+    u8 creationTime[8];
+    u8 accessTime[8];
+    u8 modificationTime[8];
+    u32 highSize;
+    u32 privateData[6];
+} fsStat_t;
+
+typedef struct fsCompletion_t {
+    s32 sema;
+    s32 command;
+    void *result;
+    u32 resultSize;
+} fsCompletion_t;
+typedef struct fsReadFragments_t {
+    s32 headSize;
+    s32 tailSize;
+    u8 *headDestination;
+    u8 *tailDestination;
+    u8 head[0x40];
+    u8 tail[0x40];
+} fsReadFragments_t;
+typedef struct fsDirectoryEntry_t {
+    fsStat_t stat;
+    char name[0x100];
+    u32 privateData;
+} fsDirectoryEntry_t;
+typedef struct fsOutputCompletion_t {
+    void *destination;
+    u32 size;
+} fsOutputCompletion_t;
+extern u8 D_0059E140[];
+extern u8 D_0059E154[];
+extern s32 D_0052C2C0[32];
+extern void *memcpy(void *destination, const void *source, u32 size);
+extern s32 iSignalSema(s32 sema);
+
+/* NON_MATCHING: 948/960 bytes; the final pending-semaphore search differs
+ * in key lifetime and early-return scheduling. Copy paths and jump table match. */
+#ifdef NON_MATCHING
+void _sceFs_Rcv_Intr(void *packet, void *argument)
+{
+    fsCompletion_t completion;
+    fsOutputCompletion_t output;
+    s32 index;
+
+    memcpy(&completion.sema, (void *)((u32)D_0059E140 | 0x20000000), 4);
+    memcpy(&completion.command, (void *)((u32)(D_0059E140 + 4) | 0x20000000), 4);
+    memcpy(&completion.result, (void *)((u32)(D_0059E140 + 8) | 0x20000000), 4);
+    memcpy(&completion.resultSize, (void *)((u32)(D_0059E140 + 12) | 0x20000000), 4);
+    if (completion.sema >= 0) {
+        memcpy(completion.result, (void *)((u32)(D_0059E140 + 16) | 0x20000000),
+               completion.resultSize);
+    }
+    switch (completion.command) {
+    case 2: {
+        fsReadFragments_t *fragments = (void *)((u32)D_0059E154 | 0x20000000);
+        u8 *destination;
+        s32 i;
+
+        if (fragments->headSize > 0) {
+            destination = fragments->headDestination;
+            for (i = 0; i < fragments->headSize; i++) {
+                destination[i] = fragments->head[i];
+            }
+        }
+        if (fragments->tailSize > 0) {
+            destination = fragments->tailDestination;
+            for (i = 0; i < fragments->tailSize; i++) {
+                destination[i] = fragments->tail[i];
+            }
+        }
+        break;
+    }
+    case 11: {
+        memcpy(&output.destination, (void *)((u32)D_0059E154 | 0x20000000), 4);
+        memcpy(output.destination, (void *)((u32)(D_0059E154 + 4) | 0x20000000),
+               sizeof(fsDirectoryEntry_t));
+        break;
+    }
+    case 12: {
+        memcpy(&output.destination, (void *)((u32)D_0059E154 | 0x20000000), 4);
+        memcpy(output.destination, (void *)((u32)(D_0059E154 + 4) | 0x20000000),
+               sizeof(fsStat_t));
+        break;
+    }
+    case 23:
+    case 25:
+    case 26: {
+        const void *destinationSource = (void *)((u32)D_0059E154 | 0x20000000);
+        const void *sizeSource = (void *)((u32)(D_0059E154 + 4) | 0x20000000);
+        u32 size;
+
+        memcpy(&output.destination, destinationSource, 4);
+        memcpy(&output.size, sizeSource, 4);
+        size = output.size;
+        if (size > 0x400) {
+            output.size = 0x400;
+            size = 0x400;
+        }
+        memcpy(output.destination, (void *)((u32)(D_0059E154 + 8) | 0x20000000),
+               size);
+        break;
+    }
+    }
+    if (completion.sema < 0) {
+        s32 sema;
+
+        completion.sema = -completion.sema;
+        sema = completion.sema;
+        for (index = 0; index < 32; index++) {
+            if (D_0052C2C0[index] == sema) {
+                D_0052C2C0[index] = -1;
+                break;
+            }
+        }
+        return;
+    }
+    iSignalSema(completion.sema);
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceFs_Rcv_Intr);
+#endif
 
 extern s32 D_0052C344 __attribute__((section(".data")));
 
@@ -1638,16 +1763,6 @@ typedef struct fsRenameRequest_t {
     char oldName[0x400];
     char newName[0x400];
 } fsRenameRequest_t;
-typedef struct fsStat_t {
-    u32 mode;
-    u32 attributes;
-    u32 size;
-    u8 creationTime[8];
-    u8 accessTime[8];
-    u8 modificationTime[8];
-    u32 highSize;
-    u32 privateData[6];
-} fsStat_t;
 typedef struct fsChstatRequest_t {
     s32 sema;
     s32 *result;

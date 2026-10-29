@@ -270,6 +270,7 @@ sceIoctl			165 of 211 words matching	docs/nonmatching/sdk/libkernl.md	117
 supplement_crt0	sdk/libkernl	0x48	4 of 18 words differ	docs/nonmatching/sdk/libkernl.md	143
 sceSifInitRpc			95 of 103 words matching	docs/nonmatching/sdk/libkernl.md	158
 sceOpen				docs/nonmatching/sdk/libkernl.md	189
+_sceFs_Rcv_Intr				docs/nonmatching/sdk/libkernl.md	217
 __ieee754_sqrtf				docs/nonmatching/sdk/libm.md	3
 cosf and sinf				docs/nonmatching/sdk/libm.md	41
 sceMcWrite				docs/nonmatching/sdk/libmc.md	30
