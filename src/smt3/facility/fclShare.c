@@ -141,7 +141,7 @@ void func_002146F8(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
     fclDrawSpriteCore(X << 4, Y << 3, W, H, pCol, pSprite, FlipFlag, 0, 1, OtNo);
 }
 
-/* NON_MATCHING: 111 of 180 words differ (first at +0x20). */
+/* NON_MATCHING: 104 of 180 words differ (first at +0x20). */
 #ifdef NON_MATCHING
 extern void fclDrawPanelSprite2(s32 id, s32 arg);
 extern s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
@@ -203,10 +203,10 @@ void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSpri
         prim[0] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
     }
     prim[2] = uv[0] | ((u64)uv[1] << 32);
-    prim[4] = x1 | ((u64)y1 << 32);
+    prim[4] = x0 | ((u64)y0 << 32);
     prim[5] = pSprite->Z;
     prim[6] = uv[2] | ((u64)uv[3] << 32);
-    prim[8] = x0 | ((u64)y0 << 32);
+    prim[8] = x1 | ((u64)y1 << 32);
     prim[9] = pSprite->Z;
     switch (AlphaFlag) {
     case 1:
