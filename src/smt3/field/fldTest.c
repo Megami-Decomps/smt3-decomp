@@ -1965,7 +1965,173 @@ void fldRunDanteGun2(void)
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteGun2);
 #endif
 
+#ifdef NON_MATCHING
+extern sdfVector4_t aViewEye;
+extern sdfVector4_t aViewTarget;
+
+void fldRunDanteCollision(void)
+{
+    f32 position[4];
+    f32 target[4];
+    f32 hitPosition[4];
+    f32 dx;
+    f32 dz;
+    f32 viewAngle = 0.0f;
+    f32 difference;
+    s32 hit;
+    s32 status;
+
+    fldRun_Dante.flag = 0;
+    fldRunDanteGetDistAngle(&fldRun_Dante.d_p_len, &fldRun_Dante.d_p_dir);
+    dz = aViewTarget.z - aViewEye.z;
+    dx = aViewTarget.x - aViewEye.x;
+    if (!(sdfSqrt(dx * dx + dz * dz) < 1.0f)) {
+        viewAngle = sdfAtan2(dx, dz) * 180.0f / 3.1399999f;
+    }
+    difference = R360_LR(180.0f - viewAngle, fldRun_Dante.turn);
+    if (difference < 0.0f) {
+        difference = -difference;
+    }
+    fldRun_Dante.d_c_dir = difference;
+    status = fldRun_Dante.status;
+    if (status == 0) {
+        return;
+    }
+    if (status == 1 && fldRun_Dante.nextframe > 0) {
+        return;
+    }
+    if (status == 2) {
+        if (fldRun_Dante.nextframe <= 0) {
+            fldRunAiCng(9);
+        }
+        return;
+    }
+    if (status == 9) {
+        if (fldRun_Dante.nextframe <= 0) {
+            fldRunAiCng(6);
+        }
+        return;
+    }
+    position[0] = fldRun_Dante.x;
+    position[1] = 0.0f;
+    position[2] = fldRun_Dante.z;
+    position[3] = 1.0f;
+    target[0] = fldGlobalBase.x;
+    target[1] = 0.0f;
+    target[2] = fldGlobalBase.z;
+    target[3] = 1.0f;
+    hit = fldHitChkEnemy(position, target, hitPosition);
+    if (hit != -1) {
+        fldRun_Dante.flag |= 1;
+    }
+    if (fldRun_Dante.stance == 4) {
+        if (fldRun_Dante.nextframe <= 0) {
+            if ((fldRun_Dante.flag & 1) || (dds3GetRandA(NULL) >> 3) % 100 >= 30) {
+                if (fldRun_Dante.status != 1) {
+                    fldRunAiCng(1);
+                }
+            } else if (fldRun_Dante.status != 8) {
+                fldRunAiCng(8);
+            }
+        }
+        return;
+    }
+    if (fldRun_Dante.stance == 9) {
+        if (fldRun_Dante.nextframe <= 0 && fldRun_Dante.status == 1) {
+            if (!(fldRun_Dante.flag & 1) && fldRun_Dante.d_p_len < 900.0f) {
+                fldRunAiCng(3);
+            }
+            return;
+        }
+        if (fldGlobalBase.floor == 7 && (u32)(fldRunDanteStartX[0] - 5) < 3 &&
+            (s16)fldRunDanteStartX[1] < 4 && fldRun_Dante.iz >= 6) {
+            fldRun_Dante.ix = 6;
+            fldRun_Dante.iz = 8;
+            fldRun_Dante.angleToPlayer = 180.0f;
+            fldRun_Dante.turn = 0.0f;
+            fldMapIndexToPos(6, 8, &fldRun_Dante.x, &fldRun_Dante.z);
+            fldRunAiCng(1);
+            fldRunDanteSetModel();
+            if (fldRun_Dante.bgm_mode != 0) {
+                fldRun_Dante.bgm_mode = 0;
+                fldRun_Dante.flag |= 4;
+            }
+            return;
+        }
+    }
+    if (hit == -1) {
+        s32 choice;
+
+        if (fldRun_Dante.status == 6 && fldRun_Dante.nextframe > 0 && fldRun_Dante.cnt_ex >= 6) {
+            fldRun_Dante.nextframe = 0;
+        }
+        if (fldRun_Dante.status == 5) {
+            fldRun_Dante.nextframe = 0;
+        }
+        if (fldRun_Dante.status == 4 && (fldRun_Dante.cnt_ex >= 3 || fldRun_Dante.nextframe < 3)) {
+            fldRun_Dante.nextframe = 0;
+        }
+        if (fldRun_Dante.nextframe > 0) {
+            return;
+        }
+        choice = (dds3GetRandA(NULL) >> 3) % 100;
+        if (fldRun_Dante.stance == 7) {
+            choice += 50;
+        }
+        if (fldRun_Dante.stance == 9) {
+            choice += 50;
+        }
+        if (choice < 80) {
+            if (fldRun_Dante.status != 3) {
+                fldRunAiCng(3);
+            }
+        } else {
+            if (fldRun_Dante.d_p_len < 900.0f) {
+                choice = (dds3GetRandA(NULL) >> 3) % 100;
+                if (fldRun_Dante.stance == 7 || fldRun_Dante.stance == 9) {
+                    choice = 100;
+                }
+                if (choice < 80) {
+                    if (fldRun_Dante.status != 8) {
+                        fldRunAiCng(8);
+                    }
+                    return;
+                }
+            }
+            if (fldRun_Dante.status != 7) {
+                fldRunAiCng(7);
+            }
+        }
+        return;
+    }
+    status = fldRun_Dante.status;
+    if ((status == 7 && fldRun_Dante.cnt_ex < 15) ||
+        (status == 8 && fldRun_Dante.cnt_ex < 30)) {
+        return;
+    }
+    if (status == 4) {
+        if (fldRun_Dante.nextframe <= 0) {
+            fldRunAiCng(6);
+        } else if ((s16)fldRun_Dante.targetIx != (s16)fldRunDanteStartX[0] ||
+                   (s16)fldRun_Dante.targetIz != (s16)fldRunDanteStartX[1]) {
+            fldRunAiCng(4);
+        }
+    } else if ((s16)fldRun_Dante.targetIx != (s16)fldRunDanteStartX[0] ||
+               (s16)fldRun_Dante.targetIz != (s16)fldRunDanteStartX[1]) {
+        if (status == 5 && fldRun_Dante.tikamiti == 0) {
+            fldRunAiCng(5);
+        } else if (status == 6 && fldRun_Dante.tikamiti == 0) {
+            fldRunAiCng(6);
+        } else {
+            fldRunAiCng(4);
+        }
+    } else if (status != 5 && status != 6) {
+        fldRunAiCng(4);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteCollision);
+#endif
 
 INCLUDE_RODATA(const s32, "field/fldTest", D_00531318);
 
