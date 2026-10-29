@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -383,31 +384,7 @@ void fclEncycSetExplainData(void *pbmd)
     g_pinst->explainData = pbmd;
 }
 
-/* One encyclopaedia record. Member names from the IDB, which the two local
- * views this replaces already agreed with where they overlapped: one was a
- * 0xB0 blob reading only id, the other a 0x52 prefix reading the param rows. */
-typedef struct
-{
-    /* 0x00 */ u16 id;
-    /* 0x02 */ u16 reserved0;
-    /* 0x04 */ u16 maxhp;
-    /* 0x06 */ u16 maxmp;
-    /* 0x08 */ u32 exp;
-    /* 0x0C */ u16 level;
-    /* 0x0E */ s8 param[6];
-    /* 0x14 */ s8 skillparam[6];
-    /* 0x1A */ u16 skillcnt;
-    /* 0x1C */ u16 skill[24];
-    /* 0x4C */ s8 mitamaparam[6];
-    /* 0x52 */ s8 levelupparam[6];
-    /* 0x58 */ u16 keisyoskill[24];
-    /* 0x88 */ u8 keiattr[24];
-    /* 0xA0 */ u16 hensinmae;
-    /* 0xA2 */ u16 reserved1;
-    /* 0xA4 */ u32 flag;
-    /* 0xA8 */ u32 reserved2;
-    /* 0xAC */ u32 hensinmaeexp;
-} fclencyceelem_t;
+
 
 extern s32 fclEncycSearch(s32 id);
 

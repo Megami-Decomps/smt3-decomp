@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -81,18 +82,6 @@ extern s32 evtBitOn(s32 no);
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 #ifdef NON_MATCHING
-typedef struct {
-    u16 id, reserved0, maxhp, maxmp;
-    u32 exp;
-    u16 level;
-    s8 param[6], skillparam[6];
-    u16 skillcnt, skill[24];
-    s8 mitamaparam[6], levelupparam[6];
-    u16 keisyoskill[24];
-    u8 keiattr[24];
-    u16 hensinmae, reserved1;
-    u32 flag, reserved2, hensinmaeexp;
-} fclencyceelem_t;
 
 typedef struct {
     s32 count;

@@ -22,4 +22,26 @@ typedef struct
 
 typedef char fclPanelAnimStateSizeCheck[(sizeof(fclPanelAnimState_t) == 0x20) ? 1 : -1];
 
+typedef struct fclencyceelem_t {
+    u16 id;
+    u16 reserved0;
+    u16 maxhp;
+    u16 maxmp;
+    u32 exp;
+    u16 level;
+    s8 param[6];
+    s8 skillparam[6];
+    u16 skillcnt;
+    u16 skill[24];
+    s8 mitamaparam[6];
+    s8 levelupparam[6];
+    u16 keisyoskill[24];
+    u8 keiattr[24];
+    u16 hensinmae;
+    u16 reserved1;
+    u32 flag;
+    u32 reserved2;
+    u32 hensinmaeexp;
+} fclencyceelem_t;
+
 #endif
