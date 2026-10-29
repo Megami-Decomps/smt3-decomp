@@ -43,7 +43,9 @@ extern s32 datGetPlayerParam(s32 id);
 extern s8 camMode, CameraAction;
 extern u8 offsetStep, offsetStepCount;
 
-extern s32 D_00551738, D_0055173C, D_00551744, D_00551748;
+extern s32 D_00551738, D_0055173C;
+/* ActionKey updates these two axis rates with single-precision arithmetic. */
+extern f32 D_00551744, D_00551748;
 
 extern void *pipeObjList, *pipeObjTail;
 
