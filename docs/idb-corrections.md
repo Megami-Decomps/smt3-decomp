@@ -1109,3 +1109,37 @@ address. The provider stays assembly backed; the name adds no matching credit.
 See [double arithmetic](libgcc-arithmetic-matching.md) for the caller and
 qualification evidence. The IDB correction remains pending; the curated row
 prevents an export from restoring the old generated name.
+
+
+## The mini-title step, not a snow flag
+
+`0x0054EFAC`, formerly `fldSnowActive`, is the mini-title animation step, and
+`0x00150BB8`, formerly `fldSetSnowActive`, is the function that starts it. Both
+are renamed in the IDB to `fldTitleMiniStep` and `fldSetTitleMiniStep`.
+
+The whole evidence is the reference set. Only three functions read the word:
+`fldTitleMini_Process` switches on it with cases 0 to 3 and increments it at the
+end of each phase, `fldTitleMiniStart` zeroes it, and `0x00150BB8` is nothing but
+`if (!step) step = 1;`. No snow routine touches it, and `fldSnowInit` at
+`0x00150BD0` keeps its own state. HD's `fldTitleMiniDrawProc` switches on
+`gfldTitleMiniStep` over the same four cases and keeps the per-phase frame
+counter separately, which retail has at `0x0054EFA8`.
+
+`config/smt3/symbol_addrs.txt` is not regenerated here. The live IDB currently
+merges several function boundaries that the checked-in file keeps separate
+(`func_00116C30` into `dds3GlobalWorkInit`, four symbols into
+`dds3Particle_SpiralRandomize`, two into `slShutDownProcess`), so an export today
+would delete symbols other work depends on. The names are correct in the IDB and
+will carry on the next export taken when those boundaries are settled.
+
+## Two literal pools read as globals
+
+`D_0054C468` and `D_0054C46C` are not data symbols. Each holds `cccccc3d`, the
+binary32 `0.1f`, and they are the per-function `.lit4` pool entries of
+`fldHitChkUnit` and `fldHitChkUnitVWM`; `D_0054C40C` and `D_0054C410` are the
+same arrangement for `3.1399996f` in `fldPlayerCalc_Wm2`. Adjacent identical
+floats, one per referencing function, are the signature: a shared global would be
+referenced from both.
+
+Writing the literal in the source removes the extern and gains a word in each
+case. These auto-named addresses should not be declared as globals.
