@@ -48,7 +48,17 @@ extern u8 D_00599D00[0x400] __attribute__((section(".data")));
 extern s32 D_00599768 __attribute__((section(".data")));
 extern s32 D_0059976C __attribute__((section(".data")));
 extern s32 D_00599770 __attribute__((section(".data")));
-extern s32 D_0059AD00 __attribute__((section(".data")));
+/* The shared reply begins with result/version words. The client accessor
+ * also publishes the command semaphore at the end of its 0x40-byte buffer. */
+typedef struct mcReply {
+    s32 result;
+    s32 serverVersion;
+    s32 managerVersion;
+    u8 reserved0C[0x30];
+    s32 sema;
+} mcReply;
+
+extern mcReply D_0059AD00 __attribute__((section(".data")));
 extern s32 D_0052BB20 __attribute__((section(".data")));
 extern s32 D_0052BB24 __attribute__((section(".data")));
 
@@ -83,7 +93,16 @@ s32 sceMcEnd(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "sdk/libmc", _lmcGetClientPtr);
+/* Both outputs are generic pointer slots and may alias. */
+mcRpcCd *_lmcGetClientPtr(void **reply, void **command)
+{
+    mcReply *buffer = &D_0059AD00;
+
+    *reply = buffer;
+    *command = &D_0052BB20;
+    buffer->sema = D_0052BB24;
+    return &D_00599740;
+}
 
 s32 sceMcChangeThreadPriority(s32 prio)
 {
@@ -124,7 +143,7 @@ s32 sceMcGetSlotMax(s32 port)
         return ret;
     }
     SignalSema(D_0052BB24);
-    return D_0059AD00;
+    return D_0059AD00.result;
 }
 
 s32 sceMcOpen(s32 a, s32 b, char *c, s32 d)
@@ -333,7 +352,7 @@ s32 sceMcSync(s32 a, s32 *b, s32 *c)
     if (ok) {
         D_0052BB20 = 0;
         if (c != NULL) {
-            *c = D_0059AD00;
+            *c = D_0059AD00.result;
         }
         SignalSema(D_0052BB24);
     }
@@ -407,7 +426,7 @@ s32 sceMcUdCheckNewCard(void)
         scePrintf(D_0054AEE8);
         return -1;
     }
-    return D_0059AD00;
+    return D_0059AD00.result;
 }
 
 s32 sceMcGetDir(s32 a, s32 b, char *c, s32 d, s32 e, void *f)
