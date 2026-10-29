@@ -34,7 +34,6 @@ page and line to open. Conventions are in
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
-| 3 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
@@ -50,6 +49,7 @@ page and line to open. Conventions are in
 | 2 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
+| 2 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |

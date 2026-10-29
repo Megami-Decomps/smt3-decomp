@@ -665,7 +665,11 @@ above comes from a store: `sdfBillBoardMakeTMPacket`, `sdfBillBoardMake1`,
 `sdfBillBoardBatch_t`: `dds3BillboardLinkOt` hands
 `sdfBillBoardMakeN(batch, batch+240, batch+300, batch+540, batch->count)`, which
 is `centre[15]` at 0, `color[15]` at 0xF0, `uv[15][4]` at 0x12C,
-`offset[15][4]` at 0x21C and `count` at 0x3FC, ending the 1024 bytes exactly.
+`offset[15][8]` (eight floats, four X/Y pairs per quad) at 0x21C and `count`
+at 0x3FC, ending the 1024 bytes exactly. The packet builders consume this as a
+32-byte stream per quad; the existing effect-side batch view uses the same flat
+rows. `Sprite3D_t::vt[4]` remains four `VTX_t` pairs. See
+[billboard matching](../docs/billboard-matching.md) for the native address proof.
 
 The HD metadata keeps `dds3BillResource_tag` in `effect.h` and `Sprite3D_t` in
 `field.h`; they are together here because one allocation holds both halves of

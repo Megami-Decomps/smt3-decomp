@@ -697,3 +697,4 @@ src/smt3/sdk/libmc.c	redthing1	done	2026-10-28	2 fn / 216 B	uncached get-info ou
 src/smt3/sdk/libmc.c	redthing1	done	2026-10-28	1 fn / 48 B	shared 0x40-byte reply record and client accessor preserving potentially aliased generic output slots
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-29	0 matches / canonical runtime name	PiM agent: inferred dpcmp correction at 0x002D1B38, native comparator call chain and compiler DI result ABI; all active declarations audited; IDB update pending
 src/smt3/sdk/libmrpc.c	redthing1	done	2026-10-28	2 SDK fn / 444 B	bind wrapper and parameterized transaction with native semaphore lifecycle; unbind guarded at 284 bytes, 60 of 71 words match; owner 5 match, 0 differ
+src/smt3/effect/billManager.c	redthing1	done	2026-10-29	1 fn / 1180 B	PiM agent: DDS donor TagLink with native flat 15x8 offset stream and canonical comparator; complete owner62/0, existing VU contracts
