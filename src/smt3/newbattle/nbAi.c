@@ -1287,7 +1287,96 @@ INCLUDE_ASM(const s32, "newbattle/nbAi", SetKoudou);
 #endif
 
 extern s32 Sel_AI(nbActionProcessData_t *a, s32 n, s32 group);
+#ifdef NON_MATCHING
+extern s32 nbGetVirtualAisyo(s32 skill, s32 source, s32 target);
+extern s32 nbGetVirtualKoukaPoint(s32 skill, s32 source, s32 target);
+
+s32 Sel_AI(nbActionProcessData_t *a, s32 n, s32 group)
+{
+    s32 points[32];
+    s32 level = D_003989E0[a->work->id].ailevel;
+    s32 skill;
+    s32 count = 0;
+    s32 i;
+    s32 point;
+    s32 affinity;
+    s32 best;
+    s32 bestIndex;
+
+    if (a->work->nowcommand == 0) {
+        skill = 0;
+    } else if (a->work->nowcommand == 1) {
+        skill = a->work->nowindex;
+    } else {
+        printf("no skill\n");
+        return 0;
+    }
+    switch (level) {
+    case 0:
+        for (i = 0; i < 16; i++) {
+            if (a->data->form[i].stat & 4) {
+                a->data->form[i].stat |= 8;
+            }
+        }
+        break;
+    case 1:
+        for (i = 0; i < 16; i++) {
+            if (a->data->form[i].stat & 4) {
+                points[count++] = nbGetVirtualKoukaPoint(skill, a->form->formindex, i);
+            }
+        }
+        break;
+    case 2:
+        for (i = 0; i < 16; i++) {
+            if (a->data->form[i].stat & 4) {
+                affinity = nbGetVirtualAisyo(skill, a->form->formindex, i);
+                if (affinity != 0x10000 && affinity != 0x20000 && affinity != 0x40000) {
+                    point = nbGetVirtualKoukaPoint(skill, a->form->formindex, i);
+                    if (point != 0) {
+                        points[count++] = point;
+                    }
+                }
+            }
+        }
+        break;
+    }
+    if (level == 0 || level >= 3) {
+        return 0;
+    }
+    if (count == 0) {
+        printf("taisyo nashi!!!\n");
+        return -1;
+    }
+    if (group) {
+        for (i = 0; i < 16; i++) {
+            if (a->data->form[i].stat & 4) {
+                a->data->form[i].stat |= 8;
+            }
+        }
+        return 0;
+    }
+    best = 0;
+    bestIndex = 0;
+    for (i = 0; i < count; i++) {
+        if (best < points[i]) {
+            best = points[i];
+            bestIndex = i;
+        }
+    }
+    count = 0;
+    for (i = 0; i < 16; i++) {
+        if (a->data->form[i].stat & 4) {
+            if (count++ == bestIndex) {
+                a->data->form[i].stat |= 8;
+                break;
+            }
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbAi", Sel_AI);
+#endif
 
 void Sel_LIFEMIN(nbActionProcessData_t *a, s32 n)
 {
