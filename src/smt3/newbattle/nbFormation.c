@@ -58,7 +58,7 @@ typedef struct nbMainProcessData_t
     u8 unk_2C[0x8];
     s32 encno;
     s32 formationtype;
-    s32 unk_3C;
+    struct nbActionStack_t *actionstack;
     s32 actionstackp;
     u32 endtype;
     u8 unk_48[0x18];
