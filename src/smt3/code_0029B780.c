@@ -15,23 +15,32 @@ extern s32 dds3GetGlobalConfigFlag(s32 index);
 
 extern void dds3PadVibrationSet(s32 port, s32 strength, s32 frames);
 
+typedef struct fclPanelAnim_t {
+    u8 animState;
+    u8 unk01[3];
+    s32 target;
+    u8 unk08[0xC];
+    s32 phase;
+    s32 phaseStep;
+    s32 unk1C;
+    void (*calcSizes)();
+} fclPanelAnim_t;
+
+typedef fclPanelAnim_t fclRagTex_t;
+
 typedef struct dds3ConfigWork_t {
     u8 prefix[0x14];
     void *memHandle;
     s8 mode;
     u8 reserved19[3];
-    u8 cursorAndItems[0x1084];
+    u8 cursorAndItems[0x103C];
+    fclPanelAnim_t panels[2];
     s32 animationPhase;
     void *textureHandle;
 } dds3ConfigWork_t;
 
 typedef char dds3ConfigWork_size_must_be_0x10A8[
     sizeof(dds3ConfigWork_t) == 0x10A8 ? 1 : -1];
-
-typedef struct fclRagTex_t {
-    u8 unk00[0x20];
-    void (*calcSizes)();
-} fclRagTex_t;
 
 extern void dds3FreeConfigTexture(void *texture);
 
@@ -357,7 +366,29 @@ s32 dds3DrawConfigItem(s32 x, s32 y, s32 z, s32 ot)
     }
 }
 
+extern s32 fclGetPanelAnimTarget(fclPanelAnim_t *anim);
+
+#ifdef NON_MATCHING
+s32 dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
+{
+    s32 colors[4];
+    s32 target = fclGetPanelAnimTarget(&((dds3ConfigWork_t *)GBWK)->panels[0]);
+
+    fclDrawPanelSprite2(0x44, ot);
+    colors[0] = 0x15043A40;
+    colors[1] = 0;
+    colors[2] = 0x15043A40;
+    colors[3] = 0;
+    cmpDrawBoxGDefault(x - target, y + 0x2B0, z, 0x9E, 0x121, colors, ot);
+    colors[0] = 0;
+    colors[1] = 0x80;
+    colors[2] = 0;
+    colors[3] = 0x80;
+    return cmpDrawBoxGDefault(x + target + 0x1120, y + 0x2B0, z, 0xEE, 0x121, colors, ot);
+}
+#else
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigSlider);
+#endif
 
 extern const s32 D_00548888[3][4];
 extern void *memcpy(void *destination, const void *source, u32 size);
