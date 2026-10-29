@@ -165,7 +165,7 @@ typedef struct
     /* 0x0C */ s32 dbest;
 } datBossPress_t;
 
-typedef struct
+typedef struct datDevilTableEntry_t
 {
     /* 0x00 */ union { u32 flag; struct { u8 flagByte; u8 flagReserved[3]; }; };
     /* 0x04 */ u8 race;
@@ -233,6 +233,11 @@ typedef struct {
 typedef char nbUnitVisualMotions_size_must_be_0x310[
     sizeof(nbUnitVisualMotions_t) == 0x310 ? 1 : -1];
 
+
+typedef struct
+{
+    datUnitWork_t unit;
+} cmbUnit_t;
 
 /* Model-visual records have a 0x310-byte native stride. The upstream packet
  * helpers use the scalar prefix; the action helpers index 0x1C-byte

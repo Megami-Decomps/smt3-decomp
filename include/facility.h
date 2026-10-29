@@ -2,7 +2,6 @@
 #define FACILITY_H
 
 #include "common.h"
-#include "newdata.h"
 
 typedef struct
 {
@@ -61,16 +60,14 @@ typedef struct
 
 typedef char ragItemReqSizeCheck[(sizeof(ragItemReq_t) == 4) ? 1 : -1];
 
-typedef struct
-{
-    datUnitWork_t unit;
-} cmbUnit_t;
+
+struct datDevilTableEntry_t;
 
 typedef struct
 {
     /* 0x00 */ u16 index;
     /* 0x02 */ u16 unk_02;
-    /* 0x04 */ datDevilTableEntry_t *info;
+    /* 0x04 */ struct datDevilTableEntry_t *info;
 } cmbRaceSortEntry_t;
 
 #endif
