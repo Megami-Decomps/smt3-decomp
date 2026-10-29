@@ -786,3 +786,4 @@ src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	3 matches / 500 bytes	Integer/do
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 456 B	readlink with unsigned output count cap, buffer writeback and fixed shared transfer extent; complete owner exact
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 216 B	Kernel patch byte/word copy helpers; unsigned counts, forward copies, word-tail truncation and explicit zero results
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 408 B	Alarm/TLB patch initialization; eight-pair tables, real copy extents, cache flush order, callback index reloads and TLB pointer publication
+src/smt3/pipe/pipeCamera.c	redthing1	done	2026-10-28	1 fn / 1040 B	third regional pipe camera with matched sibling vector layout, qualified unused sum declaration and signed clamp; complete owner exact
