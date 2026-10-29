@@ -207,7 +207,9 @@ typedef struct nbActionProcessData_t
     s32 type;
     s32 target;
     s32 select;
-    u8 unk_40[0x28];
+    u8 unk_40[0x18];
+    s32 autoskill;
+    u8 unk_5C[0xC];
     s32 massuruid;
     u8 unk_6C[0x124];
     u32 aiselect;
@@ -379,6 +381,7 @@ extern datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 extern datDevilFormat_t datDevilTable[];
 
 extern u32 nbGetAisyo(s32 nskill, s32 formindex, s32 attr);
+extern s32 nbGetNormalSkillAttr(s32 nskill);
 
 extern s32 nbGetHojoCounter(s32 formindex, s32 type);
 
@@ -463,7 +466,80 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
+#ifdef NON_MATCHING
+s32 nbGetHitType(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s32 dformindex)
+{
+    datUnitWork_t *source, *target;
+    datNormalSkill_t *skill;
+    s32 skillattr, aisyo, status, sourceParam, targetParam, point;
+    s32 autoSkill = 0;
+    f32 factor = 1.0f;
+    f32 sourceRate, targetRate, baseRate, hitRate;
+
+    source = nbGetUnitWorkFromFormindex(sformindex);
+    target = nbGetUnitWorkFromFormindex(dformindex);
+    skillattr = nbGetNormalSkillAttr(nskill);
+    if (skillattr == -1 || (skillattr >= 12 && skillattr < 16)) {
+        return 0;
+    }
+    aisyo = nbGetAisyo(nskill, dformindex, skillattr);
+    if (nskill == 0) {
+        if (nbHatudoCheckSkill(source, 0x12C)) {
+            a->autoskill = 0x12C;
+            return 1;
+        }
+        if (nbHatudoCheckSkill(source, 0x12D)) {
+            a->autoskill = 0x12D;
+            return 1;
+        }
+    }
+    if (aisyo < 0) {
+        return 2;
+    }
+    if (nbGetPartyFromFormindex(sformindex)->flag & 0x100) {
+        return 1;
+    }
+    status = target->badstatus & 0xFFF;
+    if (status == 1 || status == 2) {
+        factor = 100.0f;
+    } else if (status == 4 || status == 16) {
+        factor = 8.0f;
+    }
+    if ((a->data->form[dformindex].flag & 0x2000) && evtBitCheck(0xAF2) == 0) {
+        factor = 100.0f;
+    }
+    if (nskill == 0 && nbHatudoCheckSkill(source, 0x12B)) {
+        autoSkill = 1;
+        factor *= (f32)datSkillTable.special[11].n / 100.0f;
+    }
+    skill = &datSkillTable.normal[nskill];
+    if (skill->koukatype != 0) {
+        return 0;
+    }
+    (void)((volatile datUnitWork_t *)source)->flag;
+    sourceParam = datGetParam(source, 4);
+    sourceRate = (f32)((sourceParam / (source->level / 5 + 3)) * 100);
+    targetParam = datGetParam(target, 4);
+    targetRate = (f32)((targetParam / (target->level / 5 + 3)) * 100);
+    baseRate = (f32)(100 - skill->failpoint);
+    hitRate = baseRate + (sourceRate - targetRate) * 0.0625f;
+    if (hitRate < 50.0f) {
+        hitRate = 50.0f;
+    }
+    point = (s32)((hitRate / baseRate) * (f32)skill->criticalpoint * factor);
+    printf("critical p:%d, z = %d, a = %d\n",
+           ((volatile datNormalSkill_t *)skill)->criticalpoint, (s32)hitRate, point);
+    if ((s32)dds3GetRandIntA(NULL, 100) < point) {
+        if (autoSkill) {
+            a->autoskill = 0x12B;
+        }
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetHitType);
+#endif
 
 s32 nbGet3Zokusei(s32 formindex)
 {
