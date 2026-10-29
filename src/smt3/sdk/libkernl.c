@@ -597,19 +597,57 @@ INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__12);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _change_addr);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifGetSreg);
+typedef struct {
+    void (*handler)(void *packet, void *argument);
+    void *argument;
+} sifCommandHandler_t;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSetSreg);
+/* Consumed command-context prefix; later state remains opaque. */
+typedef struct {
+    u8 prefix[0xC];
+    sifCommandHandler_t *systemHandlers;
+    s32 systemCount;
+    sifCommandHandler_t *handlers;
+    s32 handlerCount;
+} sifCommandContext_t;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifGetDataTable);
+extern sifCommandContext_t D_0059BA98;
+extern u32 D_0059BBC0[];
+
+u32 sceSifGetSreg(s32 index)
+{
+    return D_0059BBC0[index];
+}
+
+u32 sceSifSetSreg(s32 index, u32 value)
+{
+    return D_0059BBC0[index] = value;
+}
+
+sifCommandContext_t *sceSifGetDataTable(void)
+{
+    return &D_0059BA98;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitCmd);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifExitCmd);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSetCmdBuffer);
+sifCommandHandler_t *sceSifSetCmdBuffer(sifCommandHandler_t *buffer, s32 count)
+{
+    sifCommandHandler_t *previous = D_0059BA98.handlers;
+    D_0059BA98.handlers = buffer;
+    D_0059BA98.handlerCount = count;
+    return previous;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSetSysCmdBuffer);
+sifCommandHandler_t *sceSifSetSysCmdBuffer(sifCommandHandler_t *buffer, s32 count)
+{
+    sifCommandHandler_t *previous = D_0059BA98.systemHandlers;
+    D_0059BA98.systemHandlers = buffer;
+    D_0059BA98.systemCount = count;
+    return previous;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifAddCmdHandler);
 
