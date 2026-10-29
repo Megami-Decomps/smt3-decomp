@@ -827,3 +827,14 @@ src/smt3/sdk/libgcc_fixunsdfdi.c	redthing1	done	2026-10-28	1 SDK fn / 280 B	doub
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 248 B	frame-vector reverse insertion merge with native indexed owner accesses, unsigned counts and signed address comparison; complete owner 30 match, 0 differ
 src/smt3/pipe/pipeObject.c	redthing1	done	2026-10-28	1 fn / 572 B	parts allocation preserves twenty-slot scan, reserved slot dispatch, byte model result and fresh slot loads across callbacks; complete owner 39 match, 0 differ
 src/smt3/sdk/libm.c	redthing1	done	2026-10-28	0 exact / 444 B guarded	cosine and sine wrappers preserve binary32 threshold and reduced quadrant dispatch; fifteen initial words differ in each native-sized draft
+src/smt3/newbattle/nbNegoProcess.c	redthing1	done	2026-10-28	1 fn / 1024 B	InitNegoProcessData matched with native table layout; verified owner and retail checksum; 2ad3764c
+src/smt3/field/fldWap.c	redthing1	done	2026-10-28	1 fn / 1236 B	fldDoor_WarpEx matched with native callback/state ordering; verified owner and retail checksum; 4dfb04b0
+src/smt3/newbattle/nbCommSelProcess.c	redthing1	done	2026-10-28	1 fn / 1640 B	SetCommList matched with qualified shared skill/stock local and native inventory bounds; 82147e2e
+src/smt3/newbattle/nbKoukaProcess.c	redthing1	done	2026-10-28	1 fn / 1036 B	NumEffectClip matched; native VU input and projection behavior preserved; bbcc8fe3
+src/smt3/newbattle/nbMainProcess.c	redthing1	done	2026-10-28	1 fn / 2672 B	nbDebugMainProcess matched with typed native fields and default float promotion; bbcc8fe3
+src/smt3/effect/effPCPBoss.c	redthing1	done	2026-10-28	1 fn / 1276 B	AreYouReady matched; native frame snapshots and unsigned conversion preserved; bbcc8fe3
+src/smt3/newbattle/nbPanelProcess.c	redthing1	done	2026-10-28	1 fn / 2880 B	nbPanelFlashDraw matched with native phase fields and qualified disjoint local lifetimes; bbcc8fe3
+src/smt3/event/evtEventViewerMenu.c	redthing1	done	2026-10-28	1 fn / 4784 B	evtMakeMotionName matched with producer-backed PM layouts and ordinary memcpy transfers; ff1946d6
+src/smt3/newbattle/nbActionProcess.c	redthing1	done	2026-10-28	1 fn / 3540 B	SetAction_READY matched with truthful opaque-ID providers and native target-mask widths; ff1946d6
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 616 B	DrawReadListwinElem matched after native texture-pointer field recovery; owner 107 match, 0 differ with sibling; c845b5aa
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 620 B	drawRegistSprites matched by the same truthful texture-pointer field; unchanged drawing body and qualified alias evidence; c845b5aa
