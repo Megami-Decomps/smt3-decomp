@@ -41,9 +41,9 @@ mirror, `*(s32 *)((u32)D_0052B200 | 0x20000000)`, because the IOP
 wrote it behind the data cache; and `SignalSema` is written out in both the
 error and the success arm, never hoisted, exactly as in libmc.
 
-`sceCdPowerOff` and `sceCdReadClock` read a second word at `D_0052B200 + 4`.
-Retail derives it from one base (`addiu v0, s0, 4`, then the uncached `or` on
-each), which an `s32 D_0052B200[4]` reproduces, but the draft then comes out
-172 bytes against retail's 184 and the two loads schedule differently.
+`sceCdPowerOff` and `sceCdReadClock` now match 180 and 248 bytes. Both
+read the status at the uncached reply base and copy payload from byte offset 4:
+one word for power-off, eight clock bytes for clock-read. The shared
+`s32 D_0052B200[4]` declaration preserves the native single-base addressing.
 `sceCdSync` is 156 against 160: unlike `sceCdSyncS` its branch polarity is the
 other way round, and inverting it makes things worse rather than better.
