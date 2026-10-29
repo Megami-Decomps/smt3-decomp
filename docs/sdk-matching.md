@@ -58,6 +58,11 @@ embedded-byte fallback, cleanup publication and terminal-only line-buffer flag.
 It reads only the mode returned by the status call; unused status fields are not
 silently initialized. The typed `_fstat_r` bridge preserves its existing bytes.
 
+`fstat` matches all 20 bytes in its configured Sony-library compiler. It ignores
+the descriptor, returns zero, sets character-device mode and clears the 64-bit
+block-size field. It leaves every other byte untouched. Both the 2.9 provider
+and 2.96 caller compile against the same checked status layout.
+
 ## Two different provenances, measured separately
 
 The three SDK trees on hand are 2.0.4, the ee-gcc 2.96 toolchain package, and

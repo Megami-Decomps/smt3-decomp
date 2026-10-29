@@ -1,4 +1,5 @@
 #include "common.h"
+#include "newlib_stat.h"
 #include "ps2asm.h"
 #include "sif_rpc.h"
 #include "ps2asm.h"
@@ -380,7 +381,12 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sbrk);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", isatty);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", fstat);
+s32 fstat(s32 fd, struct stat *st)
+{
+    st->st_mode = 0x2000;
+    st->st_blksize = 0;
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", libc_2DC670);
 
