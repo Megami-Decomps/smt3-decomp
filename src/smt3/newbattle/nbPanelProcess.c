@@ -1029,7 +1029,7 @@ extern _FRQ *gnbPnlWork;
 
 void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessData_t *p)
 {
-    char buf[112];
+    char buf[16];
     s32 pcnum[4][2] = {{1, 1}, {0xD, 1}, {0x19, 1}, {0x24, 1}};
     s32 bad[12][2] = {{0x55, 0x38}, {1, 0x22},    {0x16, 0x22}, {0x2B, 0x22},
                       {0x40, 0x22}, {0x55, 0x22}, {0x6A, 0x22}, {0x7F, 0x22},
@@ -2363,13 +2363,13 @@ u32 nbPanelFlashRGBAMulti(u32 abgr0, u32 abgr1)
     return out;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545488);
-
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545498);
-
 extern nbPanelProcess_nbPanelXYZ_t nbPanelPTPartList[];
 extern void nbPanelPolygonFlashDraw(s32 x, s32 y, s32 centerX, s32 centerY,
                                     s32 width, s32 height, u32 color, u32 edgeColor);
+
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545488);
+
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545498);
 
 void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
 {

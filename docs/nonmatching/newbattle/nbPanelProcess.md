@@ -52,43 +52,58 @@ fields again at the division.
 
 ## nbPanelDrawPP1 (0xC98)
 
-705 of 798 words differ at their retail positions, but the draft emits 798 of
-the native 806 words and the tail aligns with retail at a constant eight-word
-offset, so only eight words are missing and they are all in the middle.
-Assembly remains active; this reconstruction carries no exact-match credit.
+690 of 797 words differ at their retail positions. The draft emits 797 of the
+native 806 words in the unit; the frame now matches retail at 0x110 and the
+prologue and epilogue agree except for a register name. Assembly remains
+active; this reconstruction carries no exact-match credit.
+
+`char buf[16]` is the sprintf buffer: retail passes `$29 + 0x10` to sprintf and
+the local area above it is pcnum at 0x20, bad at 0x40 and the five spill slots
+at 0xA0..0xC0, which fixes the frame at 0x110. The earlier `char buf[112]`
+carried over from nbPanelDrawPP inflated it to 0x170 and moved every stack
+displacement in the body.
 
 The record at 0xA50 is reached two ways and both appear in retail. The plain
-field reads are `DDS3_GBWK->akuma[j].<field>`, which folds 0xA50 into the
-index and leaves the member offset in the load displacement; only the two
-colour helpers take `(datUnitWork_t *)&DDS3_GBWK->akuma[j].flag`, whose +4
-shows as the 0xA54 constant. Reading hp through the cast instead costs the
-0xA50/0xA shape at every site. That pins three more members of
-fldAnahoriAkuma_t: maxhp at 0xC, mp at 0xE and maxmp at 0x10.
+field reads are `DDS3_GBWK->akuma[j].<field>`, which folds 0xA50 into the index
+and leaves the member offset in the load displacement; only the two colour
+helpers take `(datUnitWork_t *)&DDS3_GBWK->akuma[j].flag`, whose +4 shows as
+the 0xA54 constant. Reading hp through the cast instead costs the 0xA50/0xA
+shape at every site. That pins three more members of fldAnahoriAkuma_t: maxhp
+at 0xC, mp at 0xE and maxmp at 0x10.
 
 The animation alpha must be a named local assigned before `nbPnl_rsetAlpha`:
 `anm = nbPnlWork[i].HpAnmCnt << 28;` ahead of the call, then `anm | 0xFFFFFF`
 as the colour argument. Folding the shift into the argument computes it after
 the call in a call-clobbered register and cost 106 differing words.
 
-Not yet tried here: the per-block byte offset and akuma pointer that closed the
-same share in nbPanelDrawPP, `ofs = j * sizeof(fldAnahoriAkuma_t) + 0xA50;`
-with its own block-scope pointer in each block.
+### What is left is one register-allocation choice, not a spelling
 
-The eight remaining words are two subexpressions that cse1 shares here and
-retail recomputes: `(y + 2) << 3`, shared between the two
-frwGetSmallNumFontFRQ calls, and `236 * j + 0xA50`, shared between the HP bar
-block and both the HP and MP animation blocks. Retail spills `y + 2` and
-reshifts it at each call, and rebuilds the index from the spilled `j` and
-`j * 16` in each block. Keeping one fewer long-lived value also changes which
-two parameters are spilled: retail spills `i` and keeps `jun` in a
-callee-saved register, the draft does the reverse, which is what exchanges
-$23 with $30 and $16 with $17 over most of the body.
+Retail keeps only the leaf values live and recomputes every composite in each
+region. The spill slots are `i` at 0xA0, `j` at 0xA4, `i * 2` at 0xA8, `y + 2`
+at 0xAC and `j * 16` at 0xB0. Each of the four regions that touch the akuma
+record reloads `j` and `j * 16` and rebuilds `236 * j` with the same
+subu/sll/subu/sll pair, and each reloads `i` and `i * 2` and rebuilds the
+nbPnlWork row address; `(y + 2) << 3` is reshifted at both
+frwGetSmallNumFontFRQ calls. The draft instead computes `236 * j`, the row
+offset and `(y + 2) << 3` once and keeps them in callee-saved registers, which
+is why it is nine words short and why `i` stays in $23 where retail spills it
+and keeps `p` in $20.
 
-Ruled out: spelling `(y + 2) << 3` inline versus through a local, `y2 * 8`,
-every declaration order of the locals, `(u32)jun < 4` against
-`jun >= 0 && jun < 4`, `OfsX > 15` against `OfsX >= 16`, initialising `w` at
-its declaration, and inlining the effMagaCylinderCalcColor results into the
-nbPnlSprite arguments. A gcse probe shows the two shares are not PRE
+That leaf-only sharing is what gcse alone produces: its expression hash matches
+only single-insn expressions over the same registers, so `j * 16` is shared and
+the dependent `t - j` at each site is not. The draft's extra sharing comes from
+cse1, which with -O2 follows conditional branches (flag_cse_skip_blocks) and so
+reaches every region from the first one on a single extended path.
+
+Ruled out: the per-block byte offset and akuma pointer that closed the same
+share in nbPanelDrawPP, `ofs = j * sizeof(fldAnahoriAkuma_t) + 0xA50;` with its
+own block-scope pointer in each of the three regions. It shares *more*, not
+less: cse1 merges the three offsets outright and the body falls to 784 words,
+twenty-two short. Also ruled out: spelling `(y + 2) << 3` inline versus through
+a local, `y2 * 8`, every declaration order of the locals, `(u32)jun < 4`
+against `jun >= 0 && jun < 4`, `OfsX > 15` against `OfsX >= 16`, initialising
+`w` at its declaration, and inlining the effMagaCylinderCalcColor results into
+the nbPnlSprite arguments. A gcse probe shows the two shares are not PRE
 decisions: PRE's eight deletions are the frame addresses of the two local
 tables, the nbPanelLayoutTable2 %hi, `i * 2`, `j << 4` and three DDS3_GBWK
 loads, and by then `236 * j + 0xA50` already has a single occurrence.

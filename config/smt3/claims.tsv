@@ -815,7 +815,6 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 276 B	Configuration
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 220 B	decimal exponent formatter with native reverse-digit workspace, sign/minimum-width handling and returned byte count; owner 72 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 reconstruction / 0 exact B	RPC initialization reviewed at native 412-byte size, 95 of 103 words matching; eight-word queue store/setup residual documented, assembly retained
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 448 B	formatted double conversion wrapper with sign-bit handling, dtoa mode/precision, fixed decimal correction and alternate-form zero fill; owner 73 match, 0 differ
-
 src/smt3/sdk/libgcc_floatdidf.c	redthing1	done	2026-10-28	1 SDK fn / 168 B	signed 64-bit integer to double conversion with high-word scaling, native low-word mask and unsigned-low correction; complete owner exact
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 288 B	execution argument packing with typed pointer header, scoped argument-loop cursor, signed count cap and TLB termination wrapper; owner 126 match, 0 differ
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 SDK fn / 360 B	stream command preserves optional three-byte mode update, fixed request extent and uncached reply before semaphore release; owner 26 match, 0 differ
@@ -827,3 +826,4 @@ src/smt3/sdk/libgcc_fixunsdfdi.c	redthing1	done	2026-10-28	1 SDK fn / 280 B	doub
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 248 B	frame-vector reverse insertion merge with native indexed owner accesses, unsigned counts and signed address comparison; complete owner 30 match, 0 differ
 src/smt3/pipe/pipeObject.c	redthing1	done	2026-10-28	1 fn / 572 B	parts allocation preserves twenty-slot scan, reserved slot dispatch, byte model result and fresh slot loads across callbacks; complete owner 39 match, 0 differ
 src/smt3/sdk/libm.c	redthing1	done	2026-10-28	0 exact / 444 B guarded	cosine and sine wrappers preserve binary32 threshold and reduced quadrant dispatch; fifteen initial words differ in each native-sized draft
+src/smt3/newbattle/nbPanelProcess.c	z27	done	2026-10-29	1 fn / 2880 B	nbPanelFlashDraw exact; nbPanelDrawPP1 draft frame fixed to 0x110 and the remaining share recorded
