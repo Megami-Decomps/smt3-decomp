@@ -360,7 +360,61 @@ done:
     return;
 }
 
+#ifdef NON_MATCHING
+extern const s8 D_005516B0[3];
+extern const s8 D_005280C0[][2];
+extern const u8 *D_005276B8[];
+
+void nmeDrawCursorAt(s32 x, s32 y, s32 z, s8 mode, s32 ot)
+{
+    volatile s32 first = D_00551698[0];
+    volatile s32 second = D_00551698[1];
+    volatile s32 terminator = D_00551698[2];
+    volatile s32 skipFirst = D_005516B0[0];
+    volatile s32 skipSecond = D_005516B0[1];
+    volatile s32 skipThird = D_005516B0[2];
+    u8 text[3];
+    s8 skip[3];
+    s32 rows, step, row, column;
+
+    text[0] = first;
+    text[1] = second;
+    text[2] = terminator;
+    skip[0] = skipFirst;
+    skip[1] = skipSecond;
+    skip[2] = skipThird;
+    rows = (s8)namelist_buttonAnim_end->inputCursor.unk_26;
+    step = mode == 2 ? 0x17 : 0x16;
+    cmpSetSkillListRows(0x18);
+    for (row = 0; row < rows; row++) {
+        s32 drawX = 0;
+        s32 drawY = row * 0x1E;
+        for (column = 0; column < 16 - skip[mode]; column++) {
+            s32 index = row * 16 + column + skip[mode];
+            s8 offsetX = D_005280C0[index][0];
+            s8 offsetY = D_005280C0[index][1];
+            const u8 *character;
+            frFontHandle_t *font;
+
+            fclDrawSpriteRes(drawX * 16, drawY * 8, 0, NULL, 0, 0x2B,
+                             (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+            character = D_005276B8[mode] + index * 2;
+            text[0] = character[0];
+            text[1] = character[1];
+            font = frLinkFontString(text, 4, 0, 0, NULL);
+            frSetDrawPosition(font, (x + drawX + offsetX) * 16, (y + drawY + offsetY) * 8);
+            frSetPriority(font, z * 16);
+            nmeDrawCharCell(drawX, drawY, row, column, font);
+            drawX += step;
+            func_001C7E38(font, 0, 0x47);
+            frDestroyFontRequestAfter(font);
+        }
+    }
+    cmpSetSkillListRows(-1);
+}
+#else
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawCursorAt);
+#endif
 
 void nmeDrawCursor(void)
 {
