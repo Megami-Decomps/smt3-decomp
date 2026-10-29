@@ -5,6 +5,27 @@
 #include "model.h"
 #include "motion.h"
 
+typedef struct evtFrameInfo_t {
+    u16 frame;
+    u16 index;
+    s32 nameIndex;
+    union {
+        union { s8 sb[0xC]; u16 sh[6]; s32 sw[3]; f32 sf[3]; } param;
+        union {
+            struct { u8 unk08[2]; u16 typeIndex; } f;
+            s32 words[2];
+            s16 shorts[4];
+            s8 bytes[8];
+            u8 unsignedBytes[8];
+            u16 unsignedShorts[4];
+            f32 values[2];
+        } body;
+    };
+    union { void *work; void *payload; };
+    struct evtFrameInfo_t *next;
+    struct evtFrameInfo_t *prev;
+} evtFrameInfo_t;
+
 /* Interpolated event vector and packed colour. */
 typedef struct evtBlendVecColor_t {
     f32 vec[4];

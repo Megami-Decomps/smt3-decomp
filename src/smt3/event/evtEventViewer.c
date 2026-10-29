@@ -29,21 +29,7 @@ typedef enum EVT_VIEWER_MENU {
 
 /* evtAddFrameInfo allocates/clears a 0x20-byte key. Its parameter bytes
  * depend on the owning track kind; only the list and payload are needed here. */
-typedef struct evtFrameInfo_t {
-    u16 frame;
-    u16 index;                     /* 0x02 */
-    s32 nameIndex;
-    /* Parameter bytes: the owning track kind decides which view is written. */
-    union {
-        s8 sb[0xC];
-        u16 sh[6];
-        s32 sw[3];
-        f32 sf[3];
-    } param;                       /* 0x08 */
-    void *work;                 /* 0x14 */
-    struct evtFrameInfo_t *next;   /* 0x18 */
-    struct evtFrameInfo_t *prev;   /* 0x1C */
-} evtFrameInfo_t;
+
 
 /* Track prefix consumed by the intrusive-list helpers. */
 typedef struct evtViewerObject_s {

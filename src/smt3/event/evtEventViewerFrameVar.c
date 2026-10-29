@@ -1,18 +1,11 @@
 #include "common.h"
 #include "kernel.h"
 #include "basic.h"
+#include "event.h"
 
 /* evtAddFrameInfo allocates a 0x20-byte key; only the list and the frame
  * number are needed here. */
-typedef struct evtFrameInfo_t {
-    u16 frame;
-    u16 index;
-    s32 nameIndex;
-    u8 param[0xC];
-    void *work;
-    struct evtFrameInfo_t *next;
-    struct evtFrameInfo_t *prev;
-} evtFrameInfo_t;
+
 
 /* Shared track prefix recovered by evtEventViewer. */
 typedef struct evtViewerObject_s {

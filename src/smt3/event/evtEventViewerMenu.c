@@ -11,27 +11,7 @@ extern char D_0054F9E8[];
 extern char D_0054F9F0[];
 extern char D_0054F9B0[]; /* "     %d" */
 /* Viewer timeline key; the viewer links these on a group's child list. */
-typedef struct evtViewerKey_t {
-    u16 frame;
-    u16 index;                      /* 0x02 */
-    s32 nameIndex;
-    union {
-        struct {
-            u8 unk08[2];
-            u16 typeIndex;          /* 0x0A */
-        } f;
-        s32 words[2];
-        s16 shorts[4];
-        s8 bytes[8];
-        u8 unsignedBytes[8];
-        u16 unsignedShorts[4];
-        f32 values[2];
-    } body;                         /* 0x08 */
-    u8 unk10[4];
-    void *payload;                  /* 0x14 */
-    struct evtViewerKey_t *next;    /* 0x18 */
-    struct evtViewerKey_t *prev;    /* 0x1C */
-} evtViewerKey_t;
+
 /* Group prefix: the viewer walks the group chain and each group's keys. */
 typedef struct evtViewerGroup_t {
     s32 type;
@@ -43,8 +23,8 @@ typedef struct evtViewerGroup_t {
         struct { void *data; s32 reserve; } effect;
     };
     s32 childCount;                 /* 0x18 */
-    evtViewerKey_t *children;       /* 0x1C */
-    evtViewerKey_t *lastChild;      /* 0x20 */
+    evtFrameInfo_t *children;       /* 0x1C */
+    evtFrameInfo_t *lastChild;      /* 0x20 */
     struct evtViewerGroup_t *next;  /* 0x24 */
 } evtViewerGroup_t;
 typedef struct {
@@ -102,7 +82,7 @@ typedef struct {
 } evtViewerInfo_t;
 extern evtViewerInfo_t *viewerinfo;
 extern s32 (*D_0032CB48[])(s32, s32);
-void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtViewerKey_t *f);
+void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtFrameInfo_t *f);
 extern s32 mfilterRun(void);
 extern s32 evtViewerCheckDirty(void);
 
@@ -169,7 +149,7 @@ extern dds3Basic_t *dds3GetActiveScene(void);
 
 extern dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name);
 
-extern evtViewerKey_t *evtGetSelectFrameInfo(void);
+extern evtFrameInfo_t *evtGetSelectFrameInfo(void);
 
 /* A signed column count followed by eight signed column kinds, ten bytes per track. */
 typedef struct evtFrameColumns_t {
@@ -914,7 +894,7 @@ INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C290);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C2A0);
 
-void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtViewerKey_t *f)
+void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtFrameInfo_t *f)
 {
     char name[32];
     s32 type = viewerinfo->framelist_target->type;
@@ -1058,7 +1038,7 @@ void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtViewerKey_t *f)
 
 void evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no)
 {
-    evtViewerKey_t *key;
+    evtFrameInfo_t *key;
     s32 color;
     s32 i;
 
@@ -1126,7 +1106,7 @@ s32 evtFrameListMenu(s32 x, s32 y)
     }
     if (dds3PadButtonState[0x2C] != 0) {
         if (viewerinfo->frameCursor + viewerinfo->frameFirst < group->childCount) {
-            evtViewerKey_t *key = evtGetSelectFrameInfo();
+            evtFrameInfo_t *key = evtGetSelectFrameInfo();
 
             if (viewerinfo->nowframe != key->frame) {
                 viewerinfo->nowframe = key->frame;
@@ -1334,7 +1314,7 @@ s32 evtCountObjType10(void)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0xA) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 key->index = childIndex++;
             }
@@ -1349,7 +1329,7 @@ s32 evtCountObjType11(void)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0xB) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 key->index = childIndex++;
             }
@@ -1364,7 +1344,7 @@ s32 evtCountObjType13(void)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0xD) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 key->body.f.typeIndex = childIndex++;
             }
@@ -1379,7 +1359,7 @@ s32 evtCountObjType14(void)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0xE) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 key->body.f.typeIndex = childIndex++;
             }
@@ -1394,7 +1374,7 @@ s32 evtCountObjType15(void)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0xF) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 key->body.f.typeIndex = childIndex++;
             }
@@ -1409,7 +1389,7 @@ s32 evtCountObjType23(void)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0x17) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 key->body.f.typeIndex = childIndex++;
             }
@@ -1424,7 +1404,7 @@ s32 evtCountObjType16(void)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0x10) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 key->body.f.typeIndex = childIndex++;
             }
@@ -1439,7 +1419,7 @@ s32 evtCountObjType17(void)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0x11) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 key->body.f.typeIndex = childIndex++;
             }
@@ -1680,7 +1660,7 @@ void evtSaveFrameList(s32 fd)
     evtViewerGroup_t *group;
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
-        evtViewerKey_t *key;
+        evtFrameInfo_t *key;
 
         for (key = group->children; key != NULL; key = key->next) {
             evtSaveRecord_t record;
@@ -1741,7 +1721,7 @@ void evtSaveObjType10(s32 fd)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0xA) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 evtWriteRecord(fd, key->payload, 0x30);
             }
@@ -1754,7 +1734,7 @@ void evtSaveObjType11(s32 fd)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0xB) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 evtWriteRecord(fd, key->payload, 0x20);
             }
@@ -1767,7 +1747,7 @@ void evtSaveObjType13(s32 fd)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0xD) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 evtWriteRecord(fd, key->payload, 0x28);
             }
@@ -1780,7 +1760,7 @@ void evtSaveObjType14(s32 fd)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0xE) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 evtWriteRecord(fd, key->payload, 0x2C);
             }
@@ -1793,7 +1773,7 @@ void evtSaveObjType15(s32 fd)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0xF) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 evtWriteRecord(fd, key->payload, 0x2C);
             }
@@ -1806,7 +1786,7 @@ void evtSaveObjType23(s32 fd)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0x17) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 evtWriteRecord(fd, key->payload, 0x2C);
             }
@@ -1819,7 +1799,7 @@ void evtSaveObjType16(s32 fd)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0x10) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 evtWriteRecord(fd, key->payload, 0x18);
             }
@@ -1832,7 +1812,7 @@ void evtSaveObjType17(s32 fd)
 
     for (group = viewerinfo->groups; group != NULL; group = group->next) {
         if (group->type == 0x11) {
-            evtViewerKey_t *key;
+            evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
                 evtWriteRecord(fd, key->payload, 0x24);
             }
@@ -2043,7 +2023,7 @@ extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *obj);
 extern evtViewerGroup_t *evtAddViewerObject(s32 type);
 extern s32 evtAddNameTable(const char *name);
 /* Native provider only consumes the track and frame, not a third viewer argument. */
-extern evtViewerKey_t *evtAddFrameInfo(evtViewerGroup_t *group, s32 frame);
+extern evtFrameInfo_t *evtAddFrameInfo(evtViewerGroup_t *group, s32 frame);
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *camera, f32 fovy);
 extern s32 strcmp(const char *a, const char *b);
 extern void *memcpy(void *dest, const void *src, u32 size);
@@ -2060,7 +2040,7 @@ s32 evtMakeMotionName(evtPolygonMovieWork_t *work)
     dds3Basic_t *linkedBasic;
     dds3Basic_t *basic;
     evtViewerGroup_t *group;
-    evtViewerKey_t *key;
+    evtFrameInfo_t *key;
     pmdFrameTable_t *frame;
 
     if (work->stageTable != NULL) {
