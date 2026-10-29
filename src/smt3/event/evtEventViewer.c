@@ -790,7 +790,7 @@ extern s32 evtPlaySe(s32 eventNo, s32 soundNo);
 extern void dds3SetQuake(s32 frame, s32 range);
 extern void dds3StopQuake(void);
 
-void RunFrame1(evtViewerObject_s *track, evtFrameInfo_t *frameInfo, s32 nowFrame)
+void RunFrame1(evtViewerObject_s *track, evtFrameInfo_t *frameInfo, s32 nowFrame, s32 length)
 {
     switch (track->type) {
     /* Other viewer track kinds do no work in this frame pass. */
@@ -885,7 +885,7 @@ void RunFrame1(evtViewerObject_s *track, evtFrameInfo_t *frameInfo, s32 nowFrame
     }
 }
 
-void OutFrame1(evtViewerObject_s *track, evtFrameInfo_t *node)
+void OutFrame1(evtViewerObject_s *track, evtFrameInfo_t *node, s32 nowFrame, s32 length)
 {
     s32 slot;
 
@@ -1082,9 +1082,9 @@ void evtRunFrame(s32 nowFrame)
             }
             if ((length == 0 && nowFrame == frame->frame) ||
                 (length > 0 && nowFrame >= frame->frame && nowFrame < frame->frame + length)) {
-                RunFrame1(track, frame, nowFrame);
+                RunFrame1(track, frame, nowFrame, length);
             } else {
-                OutFrame1(track, frame);
+                OutFrame1(track, frame, nowFrame, length);
             }
         }
     }
