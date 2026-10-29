@@ -320,7 +320,8 @@ typedef struct
 {
     /* 0x00 */ u16 count;
     /* 0x02 */ s8 PartyCnt;
-    /* 0x03 */ u8 unk_03[2];
+    /* 0x03 */ s8 StockCnt;
+    /* 0x04 */ s8 InvalidCnt;
     /* 0x05 */ s8 StockIdx[0x10];
     /* 0x15 */ s8 ListIdx[0x10];
     /* 0x25 */ u8 unk_25[0x31];
@@ -1769,9 +1770,9 @@ void cmpInitStockCursorPos(void)
 {
     s32 rows;
 
-    rows = campWork->stock[0].PartyCnt + campWork->stock[0].unk_03[0];
+    rows = campWork->stock[0].PartyCnt + (u8)campWork->stock[0].StockCnt;
     cmpInitCursorRange(campWork->unk_6230, (u8)rows, (u8)rows, 0);
-    rows = campWork->stock[1].PartyCnt + campWork->stock[1].unk_03[0];
+    rows = campWork->stock[1].PartyCnt + (u8)campWork->stock[1].StockCnt;
     cmpInitCursorRange((u8 *)campWork + 0x726C, (u8)rows, (u8)rows, 0);
 }
 
@@ -1781,12 +1782,12 @@ void cmpReCalcStockCursorPos(s8 index)
 {
     if (index == 0 || index == 2) {
         cmpChangeCursorListNums(
-            (campWork->stock[0].PartyCnt + campWork->stock[0].unk_03[0]) & 0xFF,
+            (campWork->stock[0].PartyCnt + (u8)campWork->stock[0].StockCnt) & 0xFF,
             &campWork->unk_6230[0]);
     }
     if (index == 1 || index == 2) {
         cmpChangeCursorListNums(
-            (campWork->stock[1].PartyCnt + campWork->stock[1].unk_03[0]) & 0xFF,
+            (campWork->stock[1].PartyCnt + (u8)campWork->stock[1].StockCnt) & 0xFF,
             &campWork->unk_6230[0x103C]);
     }
 }
@@ -1828,9 +1829,9 @@ s8 cmpStartStockMsg(s8 flag)
     cmpBuildStockNameList(&stock);
     if (flag != 0)
     {
-        return (u8)stock.PartyCnt + stock.unk_03[0];
+        return (u8)stock.PartyCnt + (u8)stock.StockCnt;
     }
-    return (s8)stock.unk_03[0];
+    return stock.StockCnt;
 }
 
 void cmpCalcRoot(void)
@@ -1952,14 +1953,14 @@ void cmpCalcSkill(void)
     }
     /* Preserve the current list selection across the rebuild. */
     cursor = ((cmpStockWork_t *)&campWork->stock[0])->info[0].unk_0E;
-    oldCount = campWork->stock[0].PartyCnt + (s8)campWork->stock[0].unk_03[0];
+    oldCount = campWork->stock[0].PartyCnt + (s8)campWork->stock[0].StockCnt;
     selected = campWork->stock[0].ListIdx[
         cursor + ((cmpStockWork_t *)&campWork->stock[0])->info[0].unk_10];
     campWork->stock[0].count = 0xF;
     cmpBuildStockNameList(&campWork->stock[0]);
     cmpReCalcStockCursorPos(0);
     newCount = campWork->stock[0].PartyCnt;
-    newCount += (s8)campWork->stock[0].unk_03[0];
+    newCount += (s8)campWork->stock[0].StockCnt;
     if (newCount != oldCount) {
         for (i = 0; i < newCount; i++) {
             if (campWork->stock[0].ListIdx[i] == selected) {
@@ -6433,7 +6434,68 @@ s32 campDrawStockIcon(s8 a, s8 b, s8 *rows, s8 *cols, s8 force)
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow1);
 
+/* NON_MATCHING: 27 of 152 words differ at the exact 608-byte size. */
+#ifdef NON_MATCHING
+extern s32 campDrawStockLabel2(s32 x, s32 y, s32 z, s8 slot, s8 localSlot,
+                               cmpCursorSlot_t *cursor, s32 mode, s32 alpha);
+
+void campDrawStockRow2(s32 x, s32 y, s32 z, s8 *rows, s8 *cols, s8 force, void *work)
+{
+    s32 i = 0;
+    s32 rowY;
+    s32 visibleRow;
+    u8 *cursorBase = (u8 *)work + 0x10E8;
+
+    if (cmbGlobalWork->maxstock > 0) {
+        rowY = 0;
+        do {
+            s8 index = (s8)i++;
+            s32 scale = campCalcStockScale(index, 1);
+            s32 color = campDrawStockCell(0x80808080, index, 1);
+            s32 colors[4];
+
+            colors[0] = color;
+            colors[1] = color;
+            colors[2] = color;
+            colors[3] = color;
+            fclDrawSpriteRes(scale, rowY, 0, colors, 0, 7,
+                             D_00345D88, fclSpriteTable, 0x47);
+            fclDrawSpriteRes(scale, rowY, 0, colors, 0, 8,
+                             D_00345D88, fclSpriteTable, 0x47);
+            rowY += 0xC0;
+        } while (i < cmbGlobalWork->maxstock);
+    }
+
+    visibleRow = 0;
+    i = campWork->drawStock.PartyCnt;
+    while (i < (s32)campWork->drawStock.PartyCnt + campWork->drawStock.StockCnt) {
+        u8 partyCount = (u8)campWork->drawStock.PartyCnt;
+        s32 iconResult = campDrawStockIcon(0, (s8)visibleRow, rows, cols, force);
+        s8 localSlot = (s8)(i - partyCount);
+        s8 slot = campWork->drawStock.StockIdx[i];
+        u32 flag;
+        s32 mode;
+        s32 alpha;
+        cmpCursorSlot_t *cursor;
+
+        i++;
+        flag = cmbGlobalWork->party[slot].unit.flag;
+        mode = 0;
+        if ((flag & 0x10) == 0) {
+            mode = iconResult;
+        }
+        if ((flag & 0x2) != 0) {
+            mode = 0;
+        }
+        alpha = campGetStockAlpha(localSlot, 1);
+        cursor = (cmpCursorSlot_t *)(cursorBase + 0x3C + 0x10 * visibleRow);
+        visibleRow = (s8)(visibleRow + campDrawStockLabel2(x, y, z, slot, localSlot,
+                                                           cursor, mode, alpha));
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow2);
+#endif
 
 s32 cmpFindFreeStockSlot(s8 index, s8 room)
 {

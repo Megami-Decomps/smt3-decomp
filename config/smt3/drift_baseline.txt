@@ -167,7 +167,6 @@ member cmpInfoWindow_t.unk_18
 member cmpInfoWindow_t.unk_1C
 member cmpKugatatiEntry_t.unk_00
 member cmpListPage_t.unk_0038
-member cmpLocalStock_t.unk_03
 member cmpLocalStock_t.unk_25
 member cmpModelLink_t.unk_00
 member cmpModelParam_t.unk_01
