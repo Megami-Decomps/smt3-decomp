@@ -1160,7 +1160,86 @@ void RunFormFlagOnOffKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", RunFlyKouka);
+extern s32 nbCheckModelLoad(nbMainProcessData_t *data, s32 major, s32 minor);
+extern s32 nbLoadMidiFile(s32 no);
+extern void nbAddFormEntry(void *buffer, s32 group, s32 id);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void datSetBadStat(datUnitWork_t *work, u32 badstat);
+extern u32 datGetMaxHp(datUnitWork_t *work);
+extern u32 datGetMaxMp(datUnitWork_t *work);
+extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
+extern s32 evtSetRegistUnit(s32 major, s32 minor);
+extern dds3Basic_t *dds3GetActiveScene(void);
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *basic, u32 serial, s32 type);
+extern void dds3LinkLightObjectToUnitObject(dds3Basic_t *light, dds3Basic_t *unit, s32 frame);
+extern void dds3SetPosPoseSet(dds3Basic_t *basic, const sdfVector4_t *pos);
+extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rot);
+extern void mdlSetPosition(mdlObj_t *model);
+extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 mask);
+extern sdfVector4_t D_003FB2E0;
+
+void RunFlyKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
+{
+    datUnitWork_t *unit = nbGetUnitWorkFromFormindex(p->form->formindex);
+    s32 serial;
+    dds3Basic_t *basic;
+    switch (p->data1.i) {
+    case 0:
+        if (nbCheckModelLoad(k->data, 1, 255)) {
+            nbLoadMidiFile(255);
+        } else {
+            nbAddFormEntry(sdfMemLock(k->data->eventMemory), 1, 255);
+        }
+        datSetBadStat(unit, 0x200);
+        p->data1.i++;
+        break;
+    case 1:
+        dds3DeleteSceneBasicData(p->form->basic);
+        p->form->basic = NULL;
+        p->form->serial = 0;
+        p->form->hunit = NULL;
+        if ((p->form->anime & 0x100) && p->form->badeff) {
+            effBTLSystemDelete2(p->form->badeff);
+            p->form->badeff = NULL;
+        }
+        p->form->stat &= ~2;
+        serial = evtSetRegistUnit(1, 255);
+        p->form->stat |= 2;
+        basic = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        p->form->serial = serial;
+        p->form->basic = basic;
+        p->form->hunit = ((dds3UnitObjectBasicWorkData_t *)basic->workdata)->hUnit;
+        p->form->hunit->flags |= 0x200000;
+        if (k->data->light[0]) {
+            dds3LinkLightObjectToUnitObject(k->data->light[0], basic, 1);
+        }
+        nbSetWaitMotion(p->form, 0, 1.0f);
+        nbSetUnitMotion(p->form, 0, 1, 1.0f);
+        dds3SetPosPoseSet(basic, &p->form->pos);
+        SDF_VU0_LOADVECTOR(&p->form->pos);
+        mdlSetPosition(p->form->hunit->owner);
+        if (p->form->partyindex < 4) {
+            dds3SetRotPoseSet(basic, &D_003FB2E0);
+        }
+        dds3ObjectBaseOnFlag(basic, 0x400);
+        basic->poseset->r = 50.0f;
+        p->form->stat |= 0x8000;
+        if (!(unit->flag & 0x20)) {
+            unit->maxhp = datGetMaxHp(unit);
+            if (unit->hp > unit->maxhp) {
+                unit->hp = unit->maxhp;
+            }
+            unit->maxmp = datGetMaxMp(unit);
+            if (unit->mp > unit->maxmp) {
+                unit->mp = unit->maxmp;
+            }
+        }
+        p->framelength = 0;
+        return;
+    }
+    p->framelength = 1;
+}
+
 
 void RunDeadEventKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
