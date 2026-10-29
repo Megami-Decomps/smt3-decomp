@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sif_rpc.h"
 
 /* libkernl's first object, klib.o, has .text aligned to 64, so the retail link
  * pads 16 bytes after libc's last function to reach it. */
@@ -494,6 +495,7 @@ typedef struct rpcQueue {
     rpcPacket *indexedBase;
     s32 indexedCount;
     s32 forwardIndex;
+    sifRpcDataQueue_t *queues;
 } rpcQueue;
 
 extern s32 DIntr(void);
@@ -597,19 +599,143 @@ s32 sceSifCheckStatRpc(rpcClientPrefix *client)
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifCheckStatRpc);
 #endif
 
+extern rpcQueue D_0059D440;
+
+/* NON_MATCHING: 140 of 148 native bytes; linked-list cursor copies coalesce. */
+#ifdef NON_MATCHING
+void sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId)
+{
+    sifRpcDataQueue_t *current;
+
+    DIntr();
+    queue->threadId = threadId;
+    queue->active = 0;
+    queue->link = NULL;
+    queue->start = NULL;
+    queue->end = NULL;
+    queue->next = NULL;
+    current = D_0059D440.queues;
+    if (current == NULL) {
+        D_0059D440.queues = queue;
+    } else {
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = queue;
+    }
+    EIntr();
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSetRpcQueue);
+#endif
 
+/* NON_MATCHING: 200 of 208 native bytes; the same append-loop cursor copies coalesce. */
+#ifdef NON_MATCHING
+void sceSifRegisterRpc(sifRpcServerData_t *server, s32 serviceId,
+                        sifRpcFunc_t handler, void *buffer,
+                        sifRpcFunc_t callback, void *callbackBuffer,
+                        sifRpcDataQueue_t *queue)
+{
+    sifRpcServerData_t *current;
+
+    DIntr();
+    server->next = NULL;
+    server->link = NULL;
+    server->serviceId = serviceId;
+    server->handler = handler;
+    server->buffer = buffer;
+    server->callback = callback;
+    server->callbackBuffer = callbackBuffer;
+    server->queue = queue;
+    current = queue->link;
+    if (current == NULL) {
+        queue->link = server;
+    } else {
+        while (current->link != NULL) {
+            current = current->link;
+        }
+        current->link = server;
+    }
+    EIntr();
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRegisterRpc);
+#endif
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRemoveRpc);
+sifRpcServerData_t *sceSifRemoveRpc(sifRpcServerData_t *server, sifRpcDataQueue_t *queue)
+{
+    sifRpcServerData_t *current;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRemoveRpcQueue);
+    DIntr();
+    current = queue->link;
+    if (current == server) {
+        queue->link = current->link;
+    } else {
+        while (current != NULL) {
+            if (current->link == server) {
+                current->link = server->link;
+                break;
+            }
+            current = current->link;
+        }
+    }
+    EIntr();
+    return current;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifGetNextRequest);
+sifRpcDataQueue_t *sceSifRemoveRpcQueue(sifRpcDataQueue_t *queue)
+{
+    sifRpcDataQueue_t *current;
+
+    DIntr();
+    current = D_0059D440.queues;
+    if (current == queue) {
+        D_0059D440.queues = current->next;
+    } else {
+        while (current != NULL) {
+            if (current->next == queue) {
+                current->next = queue->next;
+                break;
+            }
+            current = current->next;
+        }
+    }
+    EIntr();
+    return current;
+}
+
+sifRpcServerData_t *sceSifGetNextRequest(sifRpcDataQueue_t *queue)
+{
+    sifRpcServerData_t *request;
+
+    DIntr();
+    request = queue->start;
+    if (request == NULL) {
+        queue->active = 0;
+    } else {
+        queue->active = 1;
+        queue->start = request->next;
+    }
+    EIntr();
+    return request;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifExecRequest);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRpcLoop);
+extern void sceSifExecRequest(sifRpcServerData_t *request);
+extern s32 SleepThread(void);
+
+void sceSifRpcLoop(sifRpcDataQueue_t *queue)
+{
+    sifRpcServerData_t *request;
+
+    for (;;) {
+        while ((request = sceSifGetNextRequest(queue)) != NULL) {
+            sceSifExecRequest(request);
+        }
+        SleepThread();
+    }
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__13);
 

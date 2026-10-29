@@ -27,6 +27,7 @@ page and line to open. Conventions are in
 | 4 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
+| 3 |  | [sdk/libkernl.md](sdk/libkernl.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 3 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
@@ -51,7 +52,6 @@ page and line to open. Conventions are in
 | 2 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libmrpc.md](sdk/libmrpc.md) |
-| 1 |  | [sdk/libkernl.md](sdk/libkernl.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
 | 1 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
