@@ -58,3 +58,18 @@ lets the compiler hoist the large constant and emits192 rather than200 bytes.
 The [historical scaler](https://github.com/mirror/newlib-cygwin/blob/newlib-1_9_0/newlib/libm/common/sf_scalbn.c)
 corroborates those separate returns, while the PS2 denormal/exponent limits are
 established by native control flow.
+
+## __kernel_sinf
+
+All260 instruction bytes at0x002D0BA0 match, with no data section or target
+relocation. The inputs are two floats in `$f12`/`$f13` and an independent integer
+tail selector in `$4`. The tiny-input word gate and integer conversion are
+preserved before the squared argument, cubic factor, Horner polynomial and
+optional tail correction. All six coefficients keep their native binary32 words.
+
+The source uses the same scoped `GET_FLOAT_WORD` conversion as the matched
+floor function, followed by a separate signed magnitude mask. Keeping one signed
+union alive throughout the function emits the native260 bytes but differs in38
+words. The original unsigned word-view macro boundary closes all65 words under
+the qualified library profile. No artificial storage, register constraint or
+added operation is used.
