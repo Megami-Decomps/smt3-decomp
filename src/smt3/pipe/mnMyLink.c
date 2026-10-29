@@ -33,7 +33,7 @@ extern s32 pipeInitLink(tagPipeLinkInfo *pInfo);
 
 extern f32 vecDot(f32 *a, f32 *b);
 
-extern f32 __ieee754_acosf(f32 x);
+extern f32 acosf(f32 x);
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
@@ -339,7 +339,7 @@ float vecDot(float *left, float *right) {
 
 f32 vecAngleBetween(f32 *a, f32 *b)
 {
-    return __ieee754_acosf(vecDot(a, b));
+    return acosf(vecDot(a, b));
 }
 
 void vecTranslate(float *output, float *left, float *right) {

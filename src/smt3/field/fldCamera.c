@@ -176,15 +176,15 @@ void fldCamCalcSaka(void)
         offset.z = 0.0f;
     }
     pi = 3.14f;
-    xs[0] = collision->max[0][0] + offset.x;
-    ys[0] = collision->max[0][1] + offset.y;
-    zs[0] = collision->max[0][2] + offset.z;
-    xs[1] = collision->max[1][0] + offset.x;
-    ys[1] = collision->max[1][1] + offset.y;
-    zs[1] = collision->max[1][2] + offset.z;
-    xs[2] = collision->max[2][0] + offset.x;
-    ys[2] = collision->max[2][1] + offset.y;
-    zs[2] = collision->max[2][2] + offset.z;
+    xs[0] = collision->point[0][0] + offset.x;
+    ys[0] = collision->point[0][1] + offset.y;
+    zs[0] = collision->point[0][2] + offset.z;
+    xs[1] = collision->point[1][0] + offset.x;
+    ys[1] = collision->point[1][1] + offset.y;
+    zs[1] = collision->point[1][2] + offset.z;
+    xs[2] = collision->point[2][0] + offset.x;
+    ys[2] = collision->point[2][1] + offset.y;
+    zs[2] = collision->point[2][2] + offset.z;
     x = fldGlobalBase.x - sdfSin(fldCamPitch * pi / 180.0f) *
         fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
     z = fldGlobalBase.z - sdfCos(fldCamPitch * pi / 180.0f) *

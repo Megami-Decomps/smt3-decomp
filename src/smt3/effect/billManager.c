@@ -69,7 +69,7 @@ extern f32 D_00317030[4];
 extern sdf3DScreenParam_t dds3ScreenParam;
 extern f32 D_002FA240[16];
 extern void MultMatrixRev(f32 *aMatrix);
-extern f32 func_002CF748(f32 y, f32 x);
+extern f32 atan2f(f32 y, f32 x);
 
 extern sdfTexPacket_t *sdfTexGetPacket(sdfTexHandle_t *aHandle);
 extern s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle);
@@ -1405,7 +1405,7 @@ f32 dds3BillboardGetDirectionRotate(void *pPos, f32 *pVec) {
     SDF_VU0_LOADVECTOR_MEMOPS(delta[0]);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_MEMOPS(delta[0]);
-    return func_002CF748(delta[1], delta[0]);
+    return atan2f(delta[1], delta[0]);
 }
 
 /* vu0 routine: 1 - |axis . normalized view direction|. */

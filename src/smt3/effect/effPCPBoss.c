@@ -594,9 +594,9 @@ extern void effPCP_ThunderPolyDelete(void *hData);
 extern void sdfTexFreeDelayed(void *aHandle);
 extern void mdlSetRotate(mdlObj_t *aHandle);
 extern void FromEuler(f32 x, f32 y, f32 z);
-extern f32 func_002CF748(f32 y, f32 x);
+extern f32 atan2f(f32 y, f32 x);
 extern f32 tanf(f32 x);
-extern f32 __ieee754_acosf(f32 x);
+extern f32 acosf(f32 x);
 extern void mdlSetPosition(mdlObj_t *aHandle);
 extern void mdlLink(mdlObj_t *aHandle, void *aModelOt);
 extern void sdfDrawTagInit(sdfDrawTag_t *aTag);
@@ -3726,8 +3726,8 @@ void effPCPScreenCrackModelDraw(effPCPScreenCrackModel_t *hData)
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(view);
     pi = 3.141592503f;
-    angle = pi - __ieee754_acosf(view[1]);
-    FromEuler(angle, func_002CF748(view[0], view[2]) + pi, 0.0f);
+    angle = pi - acosf(view[1]);
+    FromEuler(angle, atan2f(view[0], view[2]) + pi, 0.0f);
     mdlSetRotate(model);
 
     halfFovy = tanf(dds3ScreenParam.fovy * 0.5f);

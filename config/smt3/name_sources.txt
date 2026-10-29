@@ -47,3 +47,6 @@
 0x002D6600	vfprintf	evidence	Native 116-byte wrapper installs FILE reentrancy and initializes stdio, restores its frame and tail-calls the independent formatter at 0x002D6678; four alignment bytes follow.
 0x002D6678	func_002D6678	evidence	Independent 0x290-byte frame at direct printf/sprintf reentrant call target after the restored-frame vfprintf tail jump; core ends at 0x002D7CE8. Existing generic identity retained.
 0x00239FA0	uiDrawUniformRgbRange	inferred	Existing DDS descriptive name; audited relocation-only native counterpart repeats one color for three triangle vertices; was cmp_239FA0.
+0x2cf730	acosf	evidence	Native libm routine pairs with DDS at 0x2fa1c0 over 20 bytes with only address relocations masked; former name __ieee754_acosf. Wrapper identity follows its verified kernel target.
+0x2cf748	atan2f	evidence	Native libm routine pairs with DDS at 0x2fa1f0 over 20 bytes with only address relocations masked; former name func_002CF748. Wrapper identity follows its verified kernel target.
+0x2cf760	__ieee754_acosf	evidence	Native libm routine pairs with DDS at 0x2fa208 over 1060 bytes with only address relocations masked; former name func_002CF760. Wrapper identity follows its verified kernel target.

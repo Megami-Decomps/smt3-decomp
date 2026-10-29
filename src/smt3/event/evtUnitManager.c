@@ -1084,7 +1084,7 @@ void evtSetUnitMotion(evtUnit_t *h, s32 motion, s32 before, s32 smooth, s32 mode
     }
 }
 
-extern f32 __ieee754_acosf(f32 x);
+extern f32 acosf(f32 x);
 
 extern void FromRotation(f32 aAngle);
 
@@ -1116,7 +1116,7 @@ s32 evtUnitRotationTarget(evtUnit_t *h, f32 *pos, f32 radio) {
     if (0.9998f <= angle) {
         return 1;
     }
-    angle = __ieee754_acosf(angle);
+    angle = acosf(angle);
     if (0.0f < cross) {
         angle = -angle;
     }
