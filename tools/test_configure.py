@@ -34,7 +34,7 @@ class ConfigureTests(unittest.TestCase):
     def test_one_shot_force_split_is_not_persisted_and_cached_split_is_reused(self) -> None:
         writer = Mock()
         configure.write_configure_build(
-            writer, [f"config/{VERSION}/{SERIAL}.yaml"], [VERSION, "--force-split", "--no-split"]
+            writer, [f"config/{VERSION}/{SERIAL}.yaml"], [VERSION, "--force-split", "--no-split", "--clean"]
         )
         self.assertEqual(
             writer.build.call_args,
@@ -83,6 +83,15 @@ class ConfigureTests(unittest.TestCase):
         writer = Mock()
         configure.write_configure_build(writer, [], [VERSION, "--no-split"])
         self.assertEqual(writer.build.call_args.kwargs["variables"]["args"], VERSION)
+
+    def test_clean_is_not_repeated_on_source_triggered_regeneration(self) -> None:
+        writer = Mock()
+        configure.write_configure_build(
+            writer, [f"src/{VERSION}/game/test.c"], [VERSION, "--clean", "other"]
+        )
+        self.assertEqual(
+            writer.build.call_args.kwargs["variables"]["args"], f"{VERSION} other"
+        )
 
     def test_bss_alignment_is_inserted_once_per_symbol(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -315,6 +324,135 @@ const char *text = "INCLUDE_SDATA(hidden)";
                 with self.assertRaises(SystemExit):
                     configure.write_ninja([VERSION], args)
             self.assertEqual((root / "build.ninja").read_text(), "the previous graph\n")
+
+
+class SplatOwnershipTests(unittest.TestCase):
+    def setUp(self) -> None:
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        root_patch = patch.object(configure, "ROOT", self.root)
+        root_patch.start()
+        self.addCleanup(root_patch.stop)
+        self.config = self.root / f"config/{VERSION}"
+        self.build = self.root / f"build/{VERSION}"
+        self.source = self.root / f"src/{VERSION}/game/test.c"
+        for path in (self.config, self.build, self.source.parent):
+            path.mkdir(parents=True)
+        self.yaml = self.config / f"{SERIAL}.yaml"
+        self.yaml.write_text("test config\n")
+        (self.config / "symbol_addrs.txt").write_text("test symbols\n")
+        (self.config / "reloc_addrs.txt").write_text("test relocs\n")
+        (self.build / f"{SERIAL}.ld").write_text("")
+        self.fallback = 'INCLUDE_ASM(const s32, "game/test", useLiteral);\n'
+        self.source.write_text(self.fallback)
+
+    def test_ownership_ignores_bodies_comments_and_generated_data_directives(self) -> None:
+        before = configure.splat_digest(VERSION, self.yaml)
+        self.source.write_text(
+            "// INCLUDE_ASM(const s32, \"fake\", fake);\n"
+            + self.fallback
+            + "int another(void) { return 2; }\n"
+            + 'INCLUDE_RODATA(const s32, "game/test", D_0054A960);\n'
+            + 'INCLUDE_SDATA(const s32, "game/test", D_00550000);\n'
+            + 'const char *comment = "INCLUDE_ASM(fake)";\n'
+        )
+        self.assertEqual(configure.splat_digest(VERSION, self.yaml), before)
+        self.source.write_text(self.source.read_text().replace("return 2", "return 3"))
+        self.assertEqual(configure.splat_digest(VERSION, self.yaml), before)
+        self.source.write_text(self.source.read_text().replace(self.fallback, ""))
+        self.assertNotEqual(configure.splat_digest(VERSION, self.yaml), before)
+
+    def test_ownership_tracks_source_path_and_include_target(self) -> None:
+        before = configure.splat_digest(VERSION, self.yaml)
+        self.source.write_text(self.fallback.replace("game/test", "game/other"))
+        self.assertNotEqual(configure.splat_digest(VERSION, self.yaml), before)
+        self.source.write_text(self.fallback)
+        self.source.rename(self.source.with_name("other.c"))
+        self.assertNotEqual(configure.splat_digest(VERSION, self.yaml), before)
+
+    def test_promotion_splits_once_and_generated_rodata_does_not_loop(self) -> None:
+        asm = self.root / f"asm/{VERSION}/nonmatchings/game/test"
+        standalone = asm / "D_0054A960.s"
+        splits = []
+
+        def generate(command, **kwargs):
+            if "splat" not in command:
+                return
+            splits.append(command)
+            asm.mkdir(parents=True)
+            if "INCLUDE_ASM" in self.source.read_text():
+                (asm / "useLiteral.s").write_text("function with embedded rodata\n")
+            else:
+                standalone.write_text("standalone rodata\n")
+                # Model include_rodata's source output, which must not become
+                # another split input.
+                self.source.write_text(
+                    self.source.read_text()
+                    + 'INCLUDE_RODATA(const s32, "game/test", D_0054A960);\n'
+                )
+
+        with patch.object(configure.subprocess, "run", side_effect=generate):
+            configure.run_splat(VERSION, self.yaml, force=False)
+            self.assertEqual(len(splits), 1)
+            self.assertFalse(standalone.exists())
+            configure.run_splat(VERSION, self.yaml, force=False)
+            self.assertEqual(len(splits), 1)
+            self.source.write_text("void useLiteral(void) { use(D_0054A960); }\n")
+            configure.run_splat(VERSION, self.yaml, force=False)
+            self.assertEqual(len(splits), 2)
+            self.assertTrue(standalone.exists())
+            self.assertFalse((asm / "useLiteral.s").exists())
+            configure.run_splat(VERSION, self.yaml, force=False)
+            self.assertEqual(len(splits), 2)
+            self.source.write_text(self.fallback)
+            configure.run_splat(VERSION, self.yaml, force=False)
+            self.assertEqual(len(splits), 3)
+            self.assertFalse(standalone.exists())
+
+    def test_first_split_records_newly_generated_source_ownership(self) -> None:
+        self.source.unlink()
+        splits = []
+
+        def generate(command, **kwargs):
+            if "splat" in command:
+                splits.append(command)
+                (self.root / f"asm/{VERSION}").mkdir(parents=True)
+                self.source.write_text(self.fallback)
+
+        with patch.object(configure.subprocess, "run", side_effect=generate):
+            configure.run_splat(VERSION, self.yaml, force=False)
+            configure.run_splat(VERSION, self.yaml, force=False)
+        self.assertEqual(len(splits), 1)
+
+    def test_relocation_edit_invalidates_split(self) -> None:
+        before = configure.splat_digest(VERSION, self.yaml)
+        (self.config / "reloc_addrs.txt").write_text("changed relocs\n")
+        self.assertNotEqual(configure.splat_digest(VERSION, self.yaml), before)
+
+    def test_ninja_regeneration_depends_on_sources_and_relocations(self) -> None:
+        (self.build / f"{SERIAL}.ld").write_text(
+            f"    build/{VERSION}/src/{VERSION}/game/test.o(.text)\n"
+        )
+        writer = Mock()
+
+        def make_writer(stream, **kwargs):
+            writer.close.side_effect = stream.close
+            return writer
+
+        args = types.SimpleNamespace(no_split=True, force_split=False)
+        version_info = {"serial": SERIAL, "title": "Nocturne", "elf_sha1": "0" * 40}
+        with patch.dict(configure.VERSIONS, {VERSION: version_info}), \
+                patch.object(configure, "i386_prefix", return_value=""), \
+                patch("ninja_syntax.Writer", side_effect=make_writer, create=True):
+            configure.write_ninja([VERSION], args)
+        regeneration = next(
+            call for call in writer.build.call_args_list
+            if call.args[:2] == ("build.ninja", "configure")
+        )
+        inputs = regeneration.kwargs["implicit"]
+        self.assertIn(f"src/{VERSION}/game/test.c", inputs)
+        self.assertIn(f"config/{VERSION}/reloc_addrs.txt", inputs)
 
 
 class ObjdiffProgressTests(unittest.TestCase):
