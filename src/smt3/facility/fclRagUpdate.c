@@ -19,22 +19,6 @@ void fclClearFlag(s8 index);
 
 typedef struct
 {
-    /* 0x00 */ void *allocation;
-    /* 0x04 */ s16 unk_04;
-    /* 0x06 */ s16 unk_06;
-    /* 0x08 */ s16 unk_08;
-    /* 0x0A */ s16 unk_0A;
-    /* 0x0C */ s32 stat;
-    /* 0x10 */ s16 act;
-    /* 0x12 */ u16 deact;
-    /* 0x14 */ s32 ctr_act;
-    /* 0x18 */ s32 ctr_deact;
-    /* 0x1C */ s32 ctr;
-    /* 0x20 */ s32 num;
-} fclRibbon_t;
-
-typedef struct
-{
     u8 reserved00000[0x15C];
     cmpCursorInfo_t listCursor;
 } ragListWindow_t;

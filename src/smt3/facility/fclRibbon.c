@@ -32,20 +32,6 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00 */ void *allocation;
-    /* 0x04 */ sdfTexHandle_t *tex[2];
-    /* 0x0C */ s32 stat;
-    /* 0x10 */ s16 act;
-    /* 0x12 */ u16 deact;
-    /* 0x14 */ s32 ctr_act;
-    /* 0x18 */ s32 ctr_deact;
-    /* 0x1C */ s32 ctr;
-    /* 0x20 */ s32 num;
-    /* 0x24 */ fclribbon_elem_t pelem[0];
-} fclRibbon_t;
-
-typedef struct
-{
     s32 pm[3];
 } sdfIVector3_t;
 

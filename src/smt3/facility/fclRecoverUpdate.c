@@ -19,22 +19,6 @@ extern s32 fclRunPanelAnim(fclPanelAnim_t *anim);
 
 typedef struct
 {
-    /* 0x00 */ void *allocation;
-    /* 0x04 */ s16 unk_04;
-    /* 0x06 */ s16 unk_06;
-    /* 0x08 */ s16 unk_08;
-    /* 0x0A */ s16 unk_0A;
-    /* 0x0C */ s32 stat;
-    /* 0x10 */ s16 act;
-    /* 0x12 */ u16 deact;
-    /* 0x14 */ s32 ctr_act;
-    /* 0x18 */ s32 ctr_deact;
-    /* 0x1C */ s32 ctr;
-    /* 0x20 */ s32 num;
-} fclRibbon_t;
-
-typedef struct
-{
     /* 0x0000 */ s8 unk_00;
     /* 0x0001 */ s8 unk_01;
     /* 0x0002 */ s8 unk_02;
