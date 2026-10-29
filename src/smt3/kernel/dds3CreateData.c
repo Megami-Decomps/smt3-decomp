@@ -38,7 +38,7 @@ extern void dds3GlobalWorkInit(void);
 extern void sdfTexFree(sdfTexHandle_t *handle);
 extern void sdfTexFreeDelayed(sdfTexHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
-extern sdfTexHandle_t *sdfTexSet(void *texture);
+extern sdfTexHandle_t *sdfTexSet(TMX_HEADER_t *texture);
 extern void frwFreeStaffFont(void);
 extern void *frwGetStaffFontFRQ(u32 x, u32 y, s32 priority, s32 alternate,
                                s32 spacing, s32 width, u32 color,
@@ -222,18 +222,14 @@ u32 stfDrawText(s32 style, u32 color, const char *text)
     return width;
 }
 
-#ifdef NON_MATCHING
-/* NON_MATCHING: 12 of 35 words differ (first at +0x4). */
 void stfLoadUITexture(s32 index)
 {
-    s32 slot = index % 4;
-    oStaff_UI->textureHandleA = sdfTexSet(oStaff_UI->uiTextureInputsA[slot]);
-    oStaff_UI->textureHandleB = sdfTexSet(oStaff_UI->uiTextureInputsB[slot]);
-    oStaff_UI->textureHandleC = sdfTexSet(oStaff_UI->uiTextureInputsC[index]);
+    s32 fullIndex = index;
+    index %= 4;
+    oStaff_UI->textureHandleA = sdfTexSet(oStaff_UI->uiTextureInputsA[index]);
+    oStaff_UI->textureHandleB = sdfTexSet(oStaff_UI->uiTextureInputsB[index]);
+    oStaff_UI->textureHandleC = sdfTexSet(oStaff_UI->uiTextureInputsC[fullIndex]);
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3CreateData", stfLoadUITexture);
-#endif
 
 void stfFreeTextures(void)
 {

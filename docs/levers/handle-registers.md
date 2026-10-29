@@ -65,3 +65,20 @@ pseudo received `$16`, and the count received `$7` while avoiding other pseudos'
 preferred argument registers. This is a real cursor over the ten party records,
 not an extra value or dependency. No register is pinned and no callback read is
 cached across a call.
+
+### Preserve the full texture index before reducing the parameter
+
+`stfLoadUITexture` matches all 140 bytes by preserving `fullIndex = index`
+and then reducing the parameter with `index %= 4`. The first two texture arrays
+have four entries and use the remainder; the third has fifteen entries and
+uses the original full index. Native saves the original argument in `$17`,
+computes the signed remainder in `$16`, and independently scales the full index
+for the third array. A fresh remainder local instead left 12 of 35 words
+differing at the same size. The parameter and snapshot lifetimes explain the
+native allocation without spelling out division's machine lowering.
+
+Keep the signed `% 4`: native's negative-input bias preserves C's signed
+remainder semantics. Each texture call is followed by a fresh `oStaff_UI` load
+before storing its result, so the source retains separate global accesses.
+The provider's parameter remains the actual `TMX_HEADER_t *` contract. The
+complete normal owner checks 9 match / 0 differ.

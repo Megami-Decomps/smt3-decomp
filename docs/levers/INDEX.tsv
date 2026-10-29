@@ -10,9 +10,9 @@ docs/levers/README.md	15		| 5 | [scheduling.md](scheduling.md) | Store schedulin
 docs/levers/README.md	16		| 4 | [callee-visibility.md](callee-visibility.md) | Callee visibility:
 docs/levers/README.md	17		| 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
 docs/levers/README.md	18		| 2 | [scalar-spills.md](scalar-spills.md) | Scalar declaration order and reload spill slots |
-docs/levers/README.md	19		| 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
-docs/levers/README.md	20		| 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
-docs/levers/README.md	21	$2 $4 lw move	| 1 | [handle-registers.md](handle-registers.md) | lw $4 against lw $2 plus move $4, $2 |
+docs/levers/README.md	19	$2 $4 lw move	| 2 | [handle-registers.md](handle-registers.md) | lw $4 against lw $2 plus move $4, $2 |
+docs/levers/README.md	20		| 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
+docs/levers/README.md	21		| 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
 docs/levers/README.md	22		| 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
 docs/levers/README.md	23		| 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
 docs/levers/README.md	24		| 0 | [second-label.md](second-label.md) | A second label in the split assembly:
@@ -421,6 +421,7 @@ docs/levers/float-registers.md	13	$2 $3 lui mfc1 mtc1	SDF_VU0_SCALEVECTOR agains
 docs/levers/float-registers.md	24		A word the **next** block needs, read right after a volatile asm and before the stores of the previous block's result, belongs in its own local.
 docs/levers/float-registers.md	31	$f12 $f20 mov.s	A float argument's **position in the argument list** is a pure scheduling lever and nothing else.
 docs/levers/handle-registers.md	26	and sh	### SetAction_NEGORESULT:
+docs/levers/handle-registers.md	69	$16 $17	### Preserve the full texture index before reducing the parameter stfLoadUITexture matches all 140 bytes by preserving fullIndex = index and then reducing the…
 docs/levers/impossible.md	13		nbInitPlayer needs three separate symbols at test_skilllist, +0xF0 and +0x100.
 docs/levers/impossible.md	16		nbLoadMotionByIndex has two byte-identical arms that gcc cross-jumps.
 docs/levers/impossible.md	19	$4	A call with no argument to a function the unit defines with a prototype, as Hatudo and nbE915_Test do to nbGetEventForm.
