@@ -3,19 +3,13 @@
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
+#include "pipe.h"
 
 struct pipeTextureFile_t;
 
 extern void (*D_00551828)(void);
 
 extern void *memset(void *a, s32 b, u32 c);
-
-typedef struct tagPipeTexture {
-    sdfTexHandle_t *th;
-    sdfMemHandle_t *mh;
-    struct pipeTextureFile_t *mp;
-    u32 unk0C;
-} tagPipeTexture;
 
 typedef struct tagMakaObject_t {
     s32 maka;

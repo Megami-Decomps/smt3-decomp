@@ -4,6 +4,15 @@
 #include "common.h"
 #include "libsdf.h"
 
+struct pipeTextureFile_t;
+
+typedef struct tagPipeTexture {
+    sdfTexHandle_t *th;
+    sdfMemHandle_t *mh;
+    struct pipeTextureFile_t *mp;
+    u32 unk0C;
+} tagPipeTexture;
+
 typedef struct tagPipeObject {
     s32 offset;
     f32 w;
