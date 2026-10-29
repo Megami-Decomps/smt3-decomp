@@ -8,30 +8,6 @@
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_00[0x20];
-    /* 0x0020 */ f32 screenOfsX;
-    /* 0x0024 */ f32 screenOfsY;
-    /* 0x0028 */ u8 unk_28[0x10];
-    /* 0x0038 */ s32 texHandle[7];
-    /* 0x0054 */ s32 stat;
-    /* 0x0058 */ u16 unk_58;
-    /* 0x005A */ u16 unk_5A;
-    /* 0x005C */ u8 unk_5C[8];
-    /* 0x0064 */ s16 lw_cur[4];
-    /* 0x006C */ u8 unk_6C;
-    /* 0x006D */ u8 unk_6D;
-    /* 0x006E */ u16 modelId;
-    /* 0x0070 */ s32 unk_70;
-    /* 0x0074 */ u8 unk_74[0x10];
-    /* 0x0084 */ u8 unk_84[0x2DC];
-    /* 0x0360 */ void *explainData;
-    /* 0x0364 */ s32 unk_364;
-    /* 0x0368 */ void *allocation;
-    /* 0x036C */ s32 pwork;
-} fclEncyc_instance_tag;
-
-typedef struct
-{
     s32 pm[3];
 } sdfIVector3_t;
 

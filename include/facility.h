@@ -38,6 +38,40 @@ typedef struct
 
 typedef struct
 {
+    /* 0x0000 */ sdfVector4_t camera[2];
+    /* 0x0020 */ f32 screenOfsX;
+    /* 0x0024 */ f32 screenOfsY;
+    /* 0x0028 */ sdfMemHandle_t *memhandle;
+    /* 0x002C */ struct dds3ProcessID_t *procid[3];
+    /* 0x0038 */ sdfTexHandle_t *texHandle[7];
+    /* 0x0054 */ s32 stat;
+    /* 0x0058 */ u16 unk_58;
+    /* 0x005A */ u16 unk_5A;
+    /* 0x005C */ s32 selectedIndex;
+    /* 0x0060 */ u8 reserved0060[4];
+    /* 0x0064 */ s16 lw_cur[4];
+    /* 0x006C */ u8 unk_6C;
+    /* 0x006D */ s8 unk_6D;
+    /* 0x006E */ u16 modelId;
+    /* 0x0070 */ s32 unk_70;
+    /* 0x0074 */ union {
+        struct {
+            u8 validUnit[0x10];
+            u8 reserved0084[0x2DC];
+        } regist;
+        struct {
+            u8 reserved0074[0x0C];
+            s16 sorted[2][0xB8];
+        } read;
+    } entries;
+    /* 0x0360 */ void *explainData;
+    /* 0x0364 */ s32 unk_364;
+    /* 0x0368 */ void *allocation;
+    /* 0x036C */ s32 pwork;
+} fclEncyc_instance_tag;
+
+typedef struct
+{
     /* 0x00 */ u8 animState;
     /* 0x01 */ u8 reserved01[3];
     /* 0x04 */ s32 target;
