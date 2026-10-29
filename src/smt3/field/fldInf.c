@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "fldWap.h"
 #include "libsdf.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -31,7 +32,6 @@ typedef struct fldInfSet_t fldInfSet_t;
 
 typedef struct fldInfTable_t fldInfTable_t;
 
-typedef struct doormovetbl_s doormovetbl_s;
 
 struct fldInfHit_t {
     s8 area;
@@ -97,31 +97,7 @@ struct fldInfTable_t {
 
 typedef struct devState_t devState_t;
 
-struct doormovetbl_s {
-    s8 kind;
-    u8 pad01;
-    s16 requiredFlag;
-    s16 floor;
-    char name[0xC];
-    s16 motion;
-    s16 secondaryMotion;
-    s16 sound;
-    char motionName[0xC];
-    char otherName[0xC];
-    s8 variantMode;
-    s8 flags31;
-    s16 variant;
-    s16 sequenceKind;
-    s16 sequenceValue;
-    char sequenceName[0xC];
-    s8 linkKind;
-    s8 rowIndex;
-    char linkName[0xC];
-    s8 sequenceCode;
-    s8 selectedRoom;
-    s8 flags54;
-    char taskName[0xF];
-};
+
 
 dds3Basic_t *dds3GetActiveScene(void);
 

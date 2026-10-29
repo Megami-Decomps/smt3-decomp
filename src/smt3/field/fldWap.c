@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "fldWap.h"
 #include "libsdf.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -15,7 +16,6 @@
 #include "event.h"
 #include "effect.h"
 
-typedef struct doormovetbl_s doormovetbl_s;
 
 typedef union fldWaypointHeaderValues_t fldWaypointHeaderValues_t;
 
@@ -25,31 +25,7 @@ typedef struct fldWaypointBlock_t fldWaypointBlock_t;
 
 typedef struct devState_t devState_t;
 
-struct doormovetbl_s {
-    s8 kind;
-    u8 pad01;
-    s16 requiredFlag;
-    s16 floor;
-    char name[0xC];
-    s16 motion;
-    s16 secondaryMotion;
-    s16 sound;
-    char motionName[0xC];
-    char otherName[0xC];
-    s8 variantMode;
-    s8 flags31;
-    s16 variant;
-    s16 sequenceKind;
-    s16 sequenceValue;
-    char sequenceName[0xC];
-    s8 linkKind;
-    s8 rowIndex;
-    char linkName[0xC];
-    s8 sequenceCode;
-    s8 selectedRoom;
-    s8 flags54;
-    char taskName[0xF];
-};
+
 
 enum { FLD_WAYPOINT_HEADER_COUNT = 5, FLD_WAYPOINT_BLOCK_BYTES = 0x64A0 };
 
