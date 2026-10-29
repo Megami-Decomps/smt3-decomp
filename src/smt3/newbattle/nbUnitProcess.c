@@ -842,6 +842,8 @@ s32 nbCheckLoadGroup(s32 side)
 
 /* NON_MATCHING: 14 of 152 words differ; see docs/nonmatching/newbattle/nbUnitProcess.md. */
 #ifdef NON_MATCHING
+extern void nbSetHpScale(nbFormation_t *form);
+
 void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork_t *work)
 {
     u32 anime;

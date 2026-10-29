@@ -1291,6 +1291,10 @@ s32 PipeTexLoad(void)
     return 1;
 }
 
+#ifdef NON_MATCHING
+extern s32 texRelease(tagPipeTexture *texPtr);
+#endif
+
 s32 PipeTexRelease(void)
 {
     s32 i;

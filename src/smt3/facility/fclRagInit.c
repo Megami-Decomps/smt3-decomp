@@ -255,6 +255,10 @@ u8 ragGetListItem3(u8 index, s8 kind)
 INCLUDE_ASM(const s32, "facility/fclRagInit", ragGetListItem3);
 #endif
 
+#ifdef NON_MATCHING
+extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, lstWork_t *work);
+#endif
+
 void ragInitHeartsList(s32 count, lstWork_t *work)
 {
     lstInitListWindow(0x250, 0x280, 0xFFFFF, 0xBF, 0xDD, 0x19191E59, 0, work);
@@ -432,6 +436,10 @@ extern s32 ragBuildHeartsList(u8 type, ragListWork_t *work);
 extern s8 ragBuildList2(u8 type, u8 *work);
 extern s8 ragBuildList3(u8 type, u8 *work);
 extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
+
+#ifdef NON_MATCHING
+extern s32 evtBitCheck(s32 no);
+#endif
 
 void ragCreateAllList(s32 onlyHearts, s32 type, ragListWork_t *work)
 {
@@ -627,6 +635,10 @@ extern char D_0054FB90[];
 extern char D_0053D1A0[];
 extern char D_0053D1B0[];
 extern char D_0053D1C0[];
+
+#ifdef NON_MATCHING
+extern void *memset(void *a, s32 b, u32 c);
+#endif
 
 void fclRagUpdateInit(s8 type, fclRagWork_t *owner)
 {

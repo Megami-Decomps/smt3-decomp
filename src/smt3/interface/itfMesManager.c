@@ -854,6 +854,13 @@ void itfMesMngRelease(s32 id) {
 /* Called above its definition, where ee-gcc assumed int. */
 u8 *GetSpeakerName(instanceMes_tag *pinst);
 
+#ifdef NON_MATCHING
+extern frFontHandle_t *MessageRequestEx(s32 X, s32 Y, s32 Style, s32 ColNo, s32 Tp, s32 Spd, u8 *pMsg, frFontHandle_t *pFRQ);
+extern s32 printf(const char *format, ...);
+extern void frSetDrawPosition(frFontHandle_t *pFRQ, u32 X, u32 Y);
+extern void frSetDrawSpeed(frFontHandle_t *pFRQ, s32 Speed);
+#endif
+
 s32 itfMesMngRequestMessage(s32 window, s32 entryIndex, s32 itemIndex) {
     instanceMes_tag *panel = pinst[window].mes;
     message_tag *mes = &panel->message;
@@ -951,6 +958,10 @@ extern s32 printf(const char *format, ...);
 
 /* Called above its definition, where ee-gcc assumed int. */
 frFontHandle_t *GetFontHandleUnit(u32 *list, s32 count, u32 mask, s32 x, s32 y, s32 depth);
+
+#ifdef NON_MATCHING
+extern s32 GetNumSelectItem(s32 allitem, u32 mask);
+#endif
 
 void itfMesMngRequestSelect(s32 id, s32 select) {
     instanceMes_tag *panel = pinst[id].mes;
@@ -1629,6 +1640,13 @@ u8 *GetMessagePagePtr(itfMesBinMesHeader_t *table, s32 index)
 
 /* Called above its definition, where ee-gcc assumed int. */
 frFontHandle_t *GetLastLinkFontHandle(frFontHandle_t *pfont);
+
+#ifdef NON_MATCHING
+extern s32 CountLineMessage(frFontHandle_t *pfont_top, frFontHandle_t *pfont);
+extern u32 frGetMessageResult(u32 Flag);
+extern void GetLastMessagePara(frFontHandle_t *pfont, message_tag *pmessage);
+extern void RaiseMessageSpeedMax(frFontHandle_t *pfont);
+#endif
 
 void ReadytoMessage(instanceMes_tag *panel) {
     message_tag *mes = &panel->message;
@@ -2447,6 +2465,11 @@ void CalcCurCtr(instanceMes_tag *pinst) {
     }
 }
 
+#ifdef NON_MATCHING
+extern s32 frDrawFont(frFontHandle_t *pFRQ);
+extern s32 frDrawFontEx(frFontHandle_t *pFRQ, s8 Mode);
+#endif
+
 void DrawMesFlow(instanceMes_tag *pinst) {
     u32 flags = pinst->stat;
     select_tag *sel;
@@ -2495,6 +2518,10 @@ void DrawMesFlow(instanceMes_tag *pinst) {
         DrawSelectCursor(pinst);
     }
 }
+
+#ifdef NON_MATCHING
+extern void itfPnlDraw(itfpanel_t *handle, sdfGrOt_t *pot);
+#endif
 
 void DrawWindow(instanceMes_tag *pinst) {
     window_tag *place = &pinst->window;

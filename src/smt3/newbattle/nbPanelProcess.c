@@ -749,6 +749,12 @@ void nbPnl_rsetAlpha(s32 mode)
     ot->regFunc(ot, list);
 }
 
+#ifdef NON_MATCHING
+extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
+extern sdfGrPacketHeader_t *sdf2DAllocSprite(s32 aNumOfSpr);
+extern void *sdf2DGetPrimPtr(sdfGrPacketHeader_t *aPacketPtr);
+#endif
+
 void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 rgba,
                  sdfTexHandle_t *th)
 {

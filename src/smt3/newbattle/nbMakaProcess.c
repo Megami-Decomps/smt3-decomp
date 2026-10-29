@@ -451,6 +451,8 @@ u32 nbPow10(u32 v, s32 n)
 #ifdef NON_MATCHING
 /* NON_MATCHING: 37 of 173 words differ; the loop body is exact and the only
    real difference is where the scheduler puts the i = 6 load. */
+extern void *memcpy(void *a, const void *b, u32 c);
+
 void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 alpha)
 {
     char *nums[10];

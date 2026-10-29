@@ -551,6 +551,11 @@ s32 Flow10_9(nbNegoProcessData_t *n)
     return 4;
 }
 
+#ifdef NON_MATCHING
+extern u32 datGetAisyoFlag(datUnitWork_t *work, s32 attr);
+extern void nbCameraSetTaizi(nbFormation_t *pInvokeForm, nbFormation_t *pTargetForm);
+#endif
+
 s32 Flow10_33(nbNegoProcessData_t *n)
 {
     u32 flag;

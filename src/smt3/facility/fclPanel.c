@@ -29,6 +29,11 @@ typedef struct fclPanel
 
 extern void sdfChipFreeDirect(void *aPtr);
 
+#ifdef NON_MATCHING
+extern s32 cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g);
+extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+#endif
+
 void fclDrawPanelTypeDef(fclPanel_t *pPanel, s32 OtNo)
 {
     s32 color = pPanel->Col;
@@ -307,6 +312,10 @@ extern void fclDrawPanelType0(fclPanel_t *panel, s32 ot);
 extern void fclDrawPanelType1(fclPanel_t *panel, s32 ot);
 extern void fclDrawPanelType3(fclPanel_t *panel, s32 ot);
 
+#ifdef NON_MATCHING
+extern void *memset(void *a, s32 b, u32 c);
+#endif
+
 void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 w,
                   s32 h, s32 color, s8 type, s8 speed)
 {
@@ -365,6 +374,8 @@ s32 fclDestroyPanel(void *pPanel)
 
 /* NON_MATCHING: 8 of 21 words differ (first at +0x10). */
 #ifdef NON_MATCHING
+extern s32 fclDrawPanelSprite(s32 id, s32 arg);
+
 s32 fclDrawPanel(fclPanel_t *pPanel, s32 OtNo)
 {
     fclDrawPanelSprite(0x53001, OtNo);

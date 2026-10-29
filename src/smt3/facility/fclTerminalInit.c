@@ -96,6 +96,10 @@ void fclSetTerminalMode(s8 mode)
 
 extern void cmpSetCursorFlag(void *cursor, u8 *flags);
 
+#ifdef NON_MATCHING
+extern s32 evtBitCheck(s32 no);
+#endif
+
 s32 trmGetEventNo(s32 update, trmTerminalWork_t *work)
 {
     s32 event = -1;
@@ -224,6 +228,10 @@ void trmEndBGM(void)
 {
     p2sdStopBGM(0x20001);
 }
+
+#ifdef NON_MATCHING
+extern void evtStartEvent(s32 no);
+#endif
 
 s8 trmStartEvent(void)
 {
@@ -423,6 +431,8 @@ extern char *D_00330808[];
 /* NON_MATCHING: 16 of 27 words match, 108 bytes against retail's 112; the `u8`
  * counter normalizes with `andi 0xff` where retail has sll 24 / sra 24. */
 #ifdef NON_MATCHING
+extern s32 fclLoadTexture(char *pFileName);
+
 void fclTerminalLoadTextures(void *work)
 {
     u8 i;

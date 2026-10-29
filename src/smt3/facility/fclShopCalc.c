@@ -178,6 +178,8 @@ extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
 #ifdef NON_MATCHING
 /* NON_MATCHING: 37 of 64 words match at the exact 256-byte size. */
+extern void cmpUpdateTerminate(void *work);
+
 s32 shop_Process(dds3ProcessID_t *id)
 {
     shopProcWork = dds3GetProcessData(id);
@@ -211,7 +213,7 @@ s32 shop_Process(dds3ProcessID_t *id)
     if ((shopProcWork->flags & 0x10) == 0) {
         return 0;
     }
-    cmpUpdateTerminate();
+    cmpUpdateTerminate(shopProcWork);
     return -1;
 }
 #else
@@ -313,6 +315,11 @@ void shopDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
 }
 
 extern char D_0054FB68[];
+
+#ifdef NON_MATCHING
+extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 z, u32 color, const char *text, frFontHandle_t *chain);
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page, s32 spriteId, s32 *textures, fclSpriteTbl_t *table, s32 ot);
+#endif
 
 void shopDrawPrice(fclPanelPos_t *pos, s32 count, s8 drawMode, s32 ot)
 {
@@ -504,6 +511,10 @@ s32 shopUpdateItemList(s32 active)
     fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, (fclPanel_t *)&pos);
     cmpUpdateListSelection(&pos, shopDrawWork + 0x2c, 0, mode, 0x100, 0x47);
 }
+
+#ifdef NON_MATCHING
+extern void fclUpdatePanel(fclPanel_t *pPanel);
+#endif
 
 s32 shopDrawPanelMode0(s8 mode)
 {

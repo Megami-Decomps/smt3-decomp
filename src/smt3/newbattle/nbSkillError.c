@@ -462,6 +462,11 @@ extern s32 cmpButtonGuideShowDone(datUnitWork_t **list, s32 count);
 extern s32 cmpButtonGuideHideDone(datUnitWork_t **list, s32 count);
 extern s32 cmpFindButtonGuideByFlag(datUnitWork_t **list, s32 count, s32 mask);
 
+#ifdef NON_MATCHING
+extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
+extern nbParty_t *nbGetPartyFromFormindex(s32 formindex);
+#endif
+
 s32 nbCheckBattleSkillError2(s32 nskill, u32 select)
 {
     datUnitWork_t *unitList[32];

@@ -931,6 +931,10 @@ s32 Flow6_70(nbNegoProcessData_t *n)
     return 0;
 }
 
+#ifdef NON_MATCHING
+extern s32 datCheckMaka(s32 maka);
+#endif
+
 s32 Flow6_22(nbNegoProcessData_t *n)
 {
     switch (n->requesttype) {

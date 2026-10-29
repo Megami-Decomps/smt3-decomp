@@ -155,6 +155,10 @@ extern void cmpResetDrawEnv(void);
 extern void ragUpdateScene(void);
 extern void cmpUpdateTerminate(void *work);
 
+#ifdef NON_MATCHING
+extern void fclClearFlag(s8 index);
+#endif
+
 s32 ragCalc(dds3ProcessID_t *id)
 {
     ragCalcWork = dds3GetProcessData(id);
@@ -270,6 +274,9 @@ extern char *D_003305E8[];
 /* NON_MATCHING: 10 of 84 words differ, the work pointer in the other
  * caller-saved register in each of the two blocks that load it. */
 #ifdef NON_MATCHING
+extern s32 fclDrawPanel(fclPanel_t *pPanel, s32 OtNo);
+extern void fclUpdatePanel(fclPanel_t *pPanel);
+
 void ragDrawList2(s8 mode)
 {
     fclPanelPos_t pos;

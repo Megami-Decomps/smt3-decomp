@@ -371,6 +371,10 @@ void fldFirstInit(void)
     fldAllTblLoad();
 }
 
+#ifdef NON_MATCHING
+extern void *memset(void *a, s32 b, u32 c);
+#endif
+
 void fldInitAllValue(void)
 {
     u8 *p = (u8 *)&fldSceneParam;
@@ -380,6 +384,10 @@ void fldInitAllValue(void)
     memset(fldGetUnitControl(), 0, 0xC);
     memset(fldGetFollowCameraControl(), 0, 0x7C);
 }
+
+#ifdef NON_MATCHING
+extern char * strcpy(char *, const char *);
+#endif
 
 void fldSetSceneParam2(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName) {
     if (dds3SearchProcessName(D_00531690) != NULL) {
@@ -535,6 +543,10 @@ void fldPlayerAFree(void)
         fldPlayerAnimData = NULL;
     }
 }
+
+#ifdef NON_MATCHING
+extern void *memcpy(void *a, const void *b, u32 c);
+#endif
 
 void fldJDataLoad(void)
 {

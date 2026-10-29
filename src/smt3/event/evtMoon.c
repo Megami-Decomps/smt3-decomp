@@ -880,6 +880,10 @@ void evtInitMoonProcess(void)
     }
 }
 
+#ifdef NON_MATCHING
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
+#endif
+
 void evt_1EB030(void)
 {
     if (moonprocess_id != NULL) {

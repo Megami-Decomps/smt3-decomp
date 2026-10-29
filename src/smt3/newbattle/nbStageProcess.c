@@ -230,6 +230,8 @@ void nbFreeStage(void)
 
 #ifdef NON_MATCHING
 
+extern void nbLoadStageSky(void);
+
 void StageLoad(void)
 {
     sdfVector4_t pos;

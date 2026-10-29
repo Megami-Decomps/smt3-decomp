@@ -521,6 +521,11 @@ void SetAnalyzePacket(nbActionProcessData_t *a, s32 dformindex, s32 sframe)
     a->stat |= 0x10;
 }
 
+#ifdef NON_MATCHING
+extern s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formindex);
+extern s32 nbGetRandamStock(void);
+#endif
+
 s32 SetPlayerSummonPacket(nbActionProcessData_t *a, s32 nskill, s32 sformindex,
                           s32 dformindex, s32 sframe)
 {
@@ -1746,6 +1751,11 @@ void SetAction_TARSEL(nbActionProcessData_t *a)
 /* NON_MATCHING: 4 of 115 words differ (first at +0x120). */
 
 #ifdef NON_MATCHING
+
+extern s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid);
+extern void nbCloseCommSel(void);
+extern void nbSetAutoCommSel(void);
+extern void nbSetCommSelStat(s32 stat);
 
 s32 CheckAction_TARSEL(nbActionProcessData_t *a)
 {

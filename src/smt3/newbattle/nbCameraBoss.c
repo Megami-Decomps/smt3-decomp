@@ -3483,6 +3483,8 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut2_Init);
 /* NON_MATCHING: 92 of 138 words, 2 short; the 0x11F arm's first `return 1`
  * becomes a local block instead of a delay-slot constant. */
 #ifdef NON_MATCHING
+extern void nbCameraBoss_Ongy_BUNSIN_Run(u8 *pNbCamera);
+
 s32 nbCameraBoss_Cut2_Run(nbCamera_t *pNbCamera)
 {
     nbFormation_t *pForm;

@@ -1620,6 +1620,10 @@ s32 SetSingleTarget2(nbActionProcessData_t *a, s32 code, s32 n)
 INCLUDE_ASM(const s32, "newbattle/nbAi", SetSingleTarget2);
 #endif
 
+#ifdef NON_MATCHING
+extern s32 Sel_AI(nbActionProcessData_t *action, s32 count, s32 group);
+#endif
+
 s32 SetGroupTarget2(nbActionProcessData_t *a, s32 code, s32 n)
 {
     nbFormation_t *form;

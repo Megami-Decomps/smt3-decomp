@@ -97,6 +97,8 @@ void fldSetSnowActive(void) {
 
 /* NON_MATCHING: 107 of 109 instruction words match at the native 436-byte size. */
 #ifdef NON_MATCHING
+extern void fldSnowSeedInit(void);
+
 void fldSnowInit(void) {
 
     if (gFldSeedBuff != NULL) {

@@ -862,6 +862,10 @@ void rstLoadHeartsSkill(void) {
 void rstStoreHeartsSkill(void) {
 }
 
+#ifdef NON_MATCHING
+extern void rstSetSkillActFlag(u8 flag);
+#endif
+
 void rstInitSkillAct(s8 Pos)
 {
     cmpStatSetTimer(0, 1);
@@ -1193,6 +1197,10 @@ s32 datFindCommentEntry(u16 devilId)
 }
 
 /* Callers supply a unit; the classification currently uses global state. */
+#ifdef NON_MATCHING
+extern s32 datGetPlayerLNDList(u8 *list);
+#endif
+
 s32 datGetPlayerLNDLevel(datUnitWork_t *unit)
 {
     u8 list;
@@ -2270,6 +2278,10 @@ s32 rstFindUnitScene(s32 work)
     *(u32 *)(*(u8 **)((u8 *)work + 0x18) + 0x80) = unit->value;
     return 1;
 }
+
+#ifdef NON_MATCHING
+extern s32 cmpGetEncycWork(void);
+#endif
 
 s32 rstGetEncycPanel(void)
 {

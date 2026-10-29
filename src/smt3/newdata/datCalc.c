@@ -401,6 +401,10 @@ void datResetBadStat(datUnitWork_t *work, s32 badstat)
     work->badstatus &= ~badstat;
 }
 
+#ifdef NON_MATCHING
+extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
+#endif
+
 u32 datGetMaxHp(datUnitWork_t *work)
 {
     u32 max;
@@ -661,6 +665,10 @@ s32 datCheckMaka(s32 maka)
     }
     return 1;
 }
+
+#ifdef NON_MATCHING
+extern s32 datAddHearts(s32 id);
+#endif
 
 void datAddItem(s32 id, s32 num)
 {

@@ -318,6 +318,10 @@ f32 effBTLModelGroupGetLineMaxLength(sdfVector4_t *pVec, sdfVector4_t *pPos, u32
     return max;
 }
 
+#ifdef NON_MATCHING
+extern void effBTLGetGroupPos(nbFormation_t *form, f32 *out);
+#endif
+
 f32 effBTLModelGroupGetWidthX(u32 group) {
     sdfVector4_t pos;
     nbFormation_t *form;
@@ -657,6 +661,8 @@ f32 effBTLModelGetGroupMaxHeight(u32 group) {
 
 /* NON_MATCHING: 4 of 146 words differ (first at +0x70). */
 #ifdef NON_MATCHING
+extern void effBTLPartPtrGetModelCenter(nbFormation_t *pFormation);
+
 void effBTLPartPtrModelGroupGetCenterAndHeight(u32 group, sdfVector4_t *pCenter, f32 *pHeightAve,
                                                f32 *pHeightMax, f32 *pFrontMax) {
     sdfVector4_t pos;

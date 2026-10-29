@@ -67,6 +67,10 @@ extern s32 fclUpdatePanel(lstWork_t *pPanel);
 extern void cmpDrawScrollBar(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h,
                              cmpCursorInfo_t *cursor, s32 j, s32 k);
 
+#ifdef NON_MATCHING
+extern void *memset(void *a, s32 b, u32 c);
+#endif
+
 void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, lstWork_t *work)
 {
     if (Style == 0) {

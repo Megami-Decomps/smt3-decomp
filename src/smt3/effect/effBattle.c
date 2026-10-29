@@ -181,6 +181,10 @@ typedef f32 effBTLVector4_t[4];
 
 PS2_SYMBOL_AT(effBTLVector4_t, effBTLSceneAmbient, dds3LightParam, 0x10);
 
+#ifdef NON_MATCHING
+extern void effBTLPartCreate(effBTL_t *pSkill, effBTL_t *pData);
+#endif
+
 effBTL_t *effBTLCreate(void *pData) {
     sdfMemHandle_t *handle;
     effBTL_t *work;
@@ -195,6 +199,10 @@ effBTL_t *effBTLCreate(void *pData) {
     printf("effBTL:handle create\n");
     return work;
 }
+
+#ifdef NON_MATCHING
+extern void effBTLPartDelete(effBTL_t *pSkill);
+#endif
 
 void effBTLDelete(effBTL_t *hBTLEffect) {
     effBTLCut_t *cut;

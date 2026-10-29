@@ -365,6 +365,11 @@ s32 nbCheckBadCurse(s32 formindex);
 
 s32 nbCheckFormationPlayerSide(s32 formindex);
 
+#ifdef NON_MATCHING
+extern s32 nbCameraStart(void);
+extern void effBTLEncountEnd(void);
+#endif
+
 void *nbEncProcess3(dds3ProcessID_t *id)
 {
     nbMainProcessData_t *data;

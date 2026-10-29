@@ -939,6 +939,10 @@ extern void frSetFontColor(frFontHandle_t *font, u32 color);
 extern s16 D_00551134;
 extern frTextBank_t itfMesEmbedded_3F7FC8;
 
+#ifdef NON_MATCHING
+extern s32 evtBitCheck(s32 no);
+#endif
+
 void DispHelp1(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, s32 alpha)
 {
     s32 x;
@@ -1183,6 +1187,10 @@ void nbCloseCommSel(void)
     s->stat = 4;
     s->animeflag = (s->animeflag | 2) & ~1;
 }
+
+#ifdef NON_MATCHING
+extern void SelectCommandList(nbCommSelProcessData_t *work);
+#endif
 
 void *nbCommSelProcess1(dds3ProcessID_t *id)
 {
@@ -1540,6 +1548,11 @@ void nbSetAutoCommSel(void)
     SetCommCursor2(s);
     s->animeflag |= 0x10;
 }
+
+#ifdef NON_MATCHING
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
+#endif
 
 nbCommSelProcessData_t *InitCommSelProcessData(nbMainProcessData_t *data, struct nbParty_t *my,
                                                nbActionProcessData_t *act)

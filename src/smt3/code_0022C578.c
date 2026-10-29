@@ -1070,6 +1070,10 @@ extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
 extern void cmpDebugDumpCount(void);
 extern void camp_H_cmpGlobalWork_t__ctor(void);
 
+#ifdef NON_MATCHING
+extern void *memset(void *a, s32 b, u32 c);
+#endif
+
 void cmpinit(void)
 {
     void *allocation = sdfMemAllocDirect(0x8540);
@@ -1098,6 +1102,11 @@ void cmpinit(void)
 }
 
 extern void rstSetPanelEffFlag(void);
+
+#ifdef NON_MATCHING
+extern void campHideStatusWindow(void);
+extern void cmpSetStatusWindowHidden(void);
+#endif
 
 void camp_update_Shutdown(void)
 {
@@ -1128,6 +1137,10 @@ extern s32 camp_draw_Process(void);
 extern s32 camp_update_Process(void);
 
 extern void *cmpStartProcessPanelEff(s32 parent);
+
+#ifdef NON_MATCHING
+extern void *cmpStartProcessStock(cmpLocalStock_t *stock, s32 value);
+#endif
 
 void cmpProcessStart(void)
 {
@@ -1181,6 +1194,9 @@ u8 cmpGetLoadState(void)
 
 /* NON_MATCHING: 9 of 35 words differ, exact size. */
 #ifdef NON_MATCHING
+extern s32 cmpFindFreeStockSlot(s8 index, s8 room);
+extern s32 cmpStockHasRoom(cmpStockWork_t *work, s8 index);
+
 s32 cmpSetStockRemoveEff(u8 *work)
 {
     s32 index = cmpGetStockInfoIndex((cmpLocalStock_t *)work, 0, 1);
@@ -1204,6 +1220,8 @@ extern s32 cmpFindFreeStockSlot(s8 index, s8 room);
 #ifdef NON_MATCHING
 /* Called above its definition, where ee-gcc assumed int. */
 s32 cmpStockHasRoom(cmpStockWork_t *work, s8 index);
+
+extern void cmpSetCursorSlot(s8 index, s8 state, u8 param, cmpCursorSlot_t *slot);
 
 void cmpSetIniStockRecoverEff(u8 *work)
 {
@@ -1282,6 +1300,10 @@ typedef struct {
 extern char *text2[];
 extern void fclSetMessageVar_20743088(s8 index, s32 value);
 
+#ifdef NON_MATCHING
+extern void *memcpy(void *a, const void *b, u32 c);
+#endif
+
 void cmpSetItSkMessageVar(datUnitWork_t *unit)
 {
     char name[((cmpSavedNameView_t *)DDS3_GBWK)->nameLength * 2 + 1];
@@ -1357,6 +1379,10 @@ s32 cmpFindItemMsgIndex(s32 which, u16 id)
     return -1;
 }
 
+#ifdef NON_MATCHING
+extern s32 evtBitCheck(s32 no);
+#endif
+
 void cmpCreateLocalItem(u8 mode)
 {
     s32 i;
@@ -1397,6 +1423,10 @@ extern s32 fldEsutoMaChk(void);
 extern s32 fldRiberaMaChk(void);
 extern s32 fldRifutoMaChk(void);
 extern s32 fldLightMaChk(void);
+
+#ifdef NON_MATCHING
+extern s32 fclStartMessage(s32 message);
+#endif
 
 s32 cmpStartSkillTokusyuMsg(u16 skill)
 {
@@ -1722,6 +1752,14 @@ s32 cmpItemIsUsable(u16 item)
 INCLUDE_ASM(const s32, "code_0022C578", cmpItemIsUsable);
 #endif
 
+#ifdef NON_MATCHING
+extern void cmpCompactStockList(s8 devilId);
+extern void cmpRemoveStockSlot(s8 index);
+extern void cmpSetStockFlag(datUnitWork_t *work);
+extern void datAllClearCommMemory(void);
+extern void datClearCommMemory(datUnitWork_t *work);
+#endif
+
 void cmpApplyStockRecover(void)
 {
     s32 index = cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
@@ -1762,6 +1800,10 @@ void cmpRemoveStockDevilEntry(void)
     }
     func_0022E168(cmbGlobalWork->party[index].unit.id);
 }
+
+#ifdef NON_MATCHING
+extern void cmpRebuildStockList(void);
+#endif
 
 s32 func_0022E168(u16 devilId)
 {
@@ -1829,6 +1871,8 @@ void cmpInitStockCursorPos(void)
 
 /* NON_MATCHING: 6 of 33 words differ (first at +0x28). */
 #ifdef NON_MATCHING
+extern void cmpChangeCursorListNums(s32 count, u8 *cursor);
+
 void cmpReCalcStockCursorPos(s8 index)
 {
     if (index == 0 || index == 2) {
@@ -1884,6 +1928,11 @@ s8 cmpStartStockMsg(s8 flag)
     }
     return stock.StockCnt;
 }
+
+#ifdef NON_MATCHING
+extern void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func, void *data, s32 value, s32 alpha);
+extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
+#endif
 
 void cmpCalcRoot(void)
 {
@@ -2028,6 +2077,13 @@ extern char D_0054FE40[];
 
 extern char *pStr[];
 
+#ifdef NON_MATCHING
+extern s32 cmpItemHasFlag(u16 item, s8 which);
+extern s32 fclStartSelMessage(s32 message);
+extern s32 sprintf(char *str, const char *fmt, ...);
+extern void fclSetMessageInvalid(s8 mode);
+#endif
+
 s32 cmpCalcDestroyItem(void)
 {
     char buf[16];
@@ -2080,6 +2136,10 @@ s32 cmpSetPartyDSL(void)
     }
     return 1;
 }
+
+#ifdef NON_MATCHING
+extern void cmpMoveStockCursor(s8 index, s8 dir, u8 *base);
+#endif
 
 s32 cmpCalcStockControl(void)
 {
@@ -2214,6 +2274,10 @@ finish:
 
 extern void dds3ConfigProcessStart(s32 Mode);
 
+#ifdef NON_MATCHING
+extern void cmpSetStockVisible(s8 visible);
+#endif
+
 void cmpCalcConfig(void)
 {
     if (campWork->unk_0004 == 0) {
@@ -2257,6 +2321,10 @@ void cmpUpdateList(void)
 
 /* The cursor initializer only mutates slots; its return register is unused. */
 extern void cmpSetIniStockRecoverEff(u8 *work);
+
+#ifdef NON_MATCHING
+extern s32 cmpCalcItem(void);
+#endif
 
 s32 cmpCalcSequence(void)
 {
@@ -2439,6 +2507,10 @@ void nmeDrawBlendQuad(s32 alpha, s32 ot)
     cmpDrawTriG(coords[0], coords[1], 0, colors, ot);
 }
 
+#ifdef NON_MATCHING
+extern s32 cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g);
+#endif
+
 s32 nmeDrawBox(s32 color, s32 unused, s32 flag)
 {
     return cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, color, flag);
@@ -2532,6 +2604,10 @@ INCLUDE_ASM(const s32, "code_0022C578", nmeDrawBlendText);
 
 extern frFontRequest_t *frwGetHelpFRQ(s32 x, s32 y, s32 priority, s8 bank, u16 index, s8 mode);
 extern void frSetFontColor(frFontHandle_t *request, u32 color);
+
+#ifdef NON_MATCHING
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors, s32 page, s32 spriteId, s32 *texList, fclSpriteTbl_t *table, s32 ot);
+#endif
 
 void cmpDrawHelp(fclPanelPos_t *pos, u16 index, s8 bank, s8 skipBackground, s32 alpha, u32 ot)
 {
@@ -2854,6 +2930,10 @@ INCLUDE_ASM(const s32, "code_0022C578", camp_draw_Process);
 extern u32 dds3DebugSign;
 
 extern void func_00242A70(s32 key);
+
+#ifdef NON_MATCHING
+extern s32 campStatusIsActive(void);
+#endif
 
 s32 campDebugCheckPad(s8 key)
 {
@@ -3200,6 +3280,10 @@ void campWaitSelMessage(void)
 INCLUDE_ASM(const s32, "code_0022C578", campWaitSelMessage);
 #endif
 
+#ifdef NON_MATCHING
+extern s32 campInfoWorkExists(void);
+#endif
+
 void campCloseInfoWindow(void)
 {
     if (campInfoWorkExists() == 0) {
@@ -3261,6 +3345,11 @@ void campShowStock(void)
         campWork->unk_0004 = 1;
     }
 }
+
+#ifdef NON_MATCHING
+extern s32 fmProcessChk(void);
+extern u32 slGetExitMode(void);
+#endif
 
 void cmpUpdateLoad(void)
 {
@@ -3324,6 +3413,13 @@ s32 campUpdateEffects(void)
 
 extern void fclUpdateMessage(void);
 extern s32 cmpUpdateSeqInfo(cmbGbWork_t *work, s8 value);
+
+#ifdef NON_MATCHING
+extern s32 campWaitSelMessage(void);
+extern void campUpdateStockSelect(s8 mode);
+extern void cmpUpdateDestroyItemConfirm(void);
+extern void cmpUpdateSkillSelect(void);
+#endif
 
 s32 camp_update_Process(void)
 {
@@ -3682,6 +3778,8 @@ s32 campDhIconIsReady(void)
 #ifdef NON_MATCHING
 extern char D_0053FCE8[];
 
+extern sdfTexHandle_t *sdfTexSet(TMX_HEADER_t *aTex);
+
 void campDhCheckTextures(void)
 {
     s32 ofs;
@@ -3887,6 +3985,10 @@ void campHideInfoWindow(void)
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetStatusStartEff);
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_calc_dh_Process);
+
+#ifdef NON_MATCHING
+extern s32 cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g);
+#endif
 
 void campDhDrawBox(s32 alpha)
 {
@@ -4205,6 +4307,10 @@ void fclDrawArrowCursor(s32 x, s32 y, s32 z, s32 extra)
     }
 }
 
+#ifdef NON_MATCHING
+extern void campDhDrawBackground(s32 x, s32 y, s32 unused, s32 alpha);
+#endif
+
 void campDhDrawPanel(s32 x, s32 y, s32 unused, s32 alpha)
 {
     s32 phase;
@@ -4449,6 +4555,10 @@ void campDhDrawIcon(void)
 }
 
 extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
+
+#ifdef NON_MATCHING
+extern void cmpDrawStatusComEx(s32 a, u8 alpha, s8 b, s8 c, s32 d, s8 e, s32 color, s8 f, s8 g, s8 h);
+#endif
 
 void campDhDrawHearts(void)
 {
@@ -4759,6 +4869,10 @@ typedef struct
 } campDhTimerWork_t;
 
 extern campDhTimerWork_t *campDhTimerWork asm("campDhUpdateWork");
+
+#ifdef NON_MATCHING
+extern void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
+#endif
 
 void cmpStepHeartsAttachCursor(s32 step)
 {
@@ -5764,6 +5878,12 @@ void cmpDrawSetup3DView(void)
 }
 
 
+#ifdef NON_MATCHING
+extern s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
+extern s32 sdfGrAllocPacketBuff(s32 aSize);
+extern void *sdf2DGetPrimPtr(sdfGrPacketHeader_t *aPacketPtr);
+#endif
+
 s32 cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
 {
     sdfGrOt_t *otp;
@@ -5954,6 +6074,10 @@ s32 cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g)
     return cmpDrawBoxG(a, b, c, d, e, f, 0, g);
 }
 
+#ifdef NON_MATCHING
+extern void cmpDrawPanelEffCell(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h);
+#endif
+
 void cmp_23A360(s32 x, s32 y, s32 z, s32 w, s32 h, s32 g, s32 col)
 {
     s32 right = x + w * 16;
@@ -6001,6 +6125,12 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     surface = &sdfGrOtTable[surfaceIndex];
     surface->regFunc(surface, list);
 }
+
+#ifdef NON_MATCHING
+extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);
+extern void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat, s32 (*aAllocator)(s32));
+extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag, s32 (*aAllocator)(s32));
+#endif
 
 void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
                    const u32 *colors, s32 unused, sdfMat_t *asset, s32 surfaceIndex)
@@ -6627,6 +6757,10 @@ typedef struct campCrossPanel_t
     /* 0x24 */ s8 flag;
     /* 0x25 */ u8 unk_25[7];
 } campCrossPanel_t;
+
+#ifdef NON_MATCHING
+extern void cmpClearCursorSlots(cmpCursorInfo_t *cur);
+#endif
 
 void campRunPanelCallback(campCrossPanel_t *panel)
 {
@@ -7982,6 +8116,10 @@ u16 cmpGetStatusModelId(void)
 
 extern s32 mdlGetNumOfCut(s32 work, s32 index);
 
+#ifdef NON_MATCHING
+extern void cmpGetStatusModelMotion(mdlObj_t *model);
+#endif
+
 void cmp_23F8F0(u16 id, s32 delta)
 {
     if (delta < 0) {
@@ -8525,6 +8663,11 @@ s32 cmpGetSkillEntry(u16 id, datUnitWork_t *unit)
     return 1;
 }
 
+#ifdef NON_MATCHING
+extern s32 datAddHp(datUnitWork_t *work, s32 hp);
+extern s32 datAddMp(datUnitWork_t *work, s32 amount);
+#endif
+
 s32 cmpAddCost(u16 skill, datUnitWork_t *unit)
 {
     datNormalSkill_t *entry = &datSkillTable.normal[skill];
@@ -8879,6 +9022,10 @@ s32 func_002415D8(void)
     return 0;
 }
 
+#ifdef NON_MATCHING
+extern s8 cmpGetCursorSlotState(s8 index, cmpCursorSlot_t *slot);
+#endif
+
 s32 cmpAllocEffectSlot(s32 color, s8 a, s8 b, cmpCursorSlot_t *slot)
 {
     s32 alpha = cmpGetCursorSlotValue(0, slot);
@@ -9215,6 +9362,10 @@ void cmpAdvanceCursorPhase(cmpCursorInfo_t *cursor)
         cursor->unk_34 -= 0x200;
     }
 }
+
+#ifdef NON_MATCHING
+extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s32 mode);
+#endif
 
 s32 cmpMoveCursor(cmpCursorInfo_t *cur, s8 dir)
 {

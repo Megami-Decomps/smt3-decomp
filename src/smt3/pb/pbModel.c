@@ -153,6 +153,10 @@ void pbSetModelPos(mdlObj_t *aHandle, const f32 *pos) {
     mdlSetPosition(aHandle);
 }
 
+#ifdef NON_MATCHING
+extern void mdlGetRotate(mdlObj_t *aHandle);
+#endif
+
 void pb_1D2B18(mdlObj_t *model, sdfVector4_t *rot) {
     mdlGetRotate(model);
     SDF_VU0_STOREVECTOR(rot);

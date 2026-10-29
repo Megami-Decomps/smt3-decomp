@@ -1400,6 +1400,10 @@ extern void sdfMatSetTex(sdfMat_t *, sdfTexHandle_t *);
 extern void sdfMatSetMultiTex(sdfMat_t *, sdfTexHandle_t *);
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
+#ifdef NON_MATCHING
+extern void *memset(void *a, s32 b, u32 c);
+#endif
+
 void dds3P2APolygonDraw(dds3P2APolygon_tag *instance) {
     sdf3DPrimPolyParm_t params;
     dds3P2APolygonResource_t resources;

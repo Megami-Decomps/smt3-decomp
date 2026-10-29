@@ -737,6 +737,10 @@ extern u8 D_0032D1A8[];
 extern u8 D_0032D1B8[];
 extern u8 D_0032D1C8[];
 
+#ifdef NON_MATCHING
+extern void *memset(void *a, s32 b, u32 c);
+#endif
+
 void fclUpdateInit(void)
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(0x1A770);
@@ -825,6 +829,10 @@ s32 fclCombineDraw(void)
 }
 
 extern s32 cmbUpdateSequence(void);
+
+#ifdef NON_MATCHING
+extern s32 cmpLoadStatusModel(void);
+#endif
 
 s32 fclCombineUpdate(void)
 {
@@ -1052,6 +1060,10 @@ extern s32 cmbAddCustomDevilToStock(datUnitWork_t *custom, cmbUnit_t *list, u8 c
 extern s32 cmbGetSpecialItemId(void);
 extern s32 fclEncycRegist(datUnitWork_t *unit, s32 mode);
 
+#ifdef NON_MATCHING
+extern s32 cmbStoreBirthDevil(u16 devilId, cmbUnit_t *list, u8 count);
+#endif
+
 void cmbAddBirthDevilToStock(datUnitWork_t *units, u8 count)
 {
     datUnitWork_t *first = &cmbGlobalWork->party[CMB_GBWK->stockSlot[0].index].unit;
@@ -1114,6 +1126,10 @@ extern void cmbRunActionSe(s32 enabled, s32 mode);
 extern s32 cmbChkPolygonMovie(void);
 extern void *cmbUpdateIntroduceModel(cmbActionData_t *work);
 
+#ifdef NON_MATCHING
+extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
+#endif
+
 s32 cmbCalcIntroduce(void)
 {
     if (cmbChkPolygonMovie() != 0) {
@@ -1135,6 +1151,10 @@ s32 cmbCalcIntroduce(void)
     }
     return 1;
 }
+
+#ifdef NON_MATCHING
+extern s32 fclEncycWork(void);
+#endif
 
 s32 cmbSeqStartScript(void)
 {
@@ -1219,6 +1239,11 @@ extern void cmbSeqBuildResultTable(void);
 extern s32 cmbCalcIntroduce(void);
 extern void cmbStartResultScript(void);
 extern void fclRbnCalc(fclRibbon_t *ribbon);
+
+#ifdef NON_MATCHING
+extern void cmbEnableMenuEntry2(void);
+extern void cmbEnableMenuEntry6(void);
+#endif
 
 s32 cmbCalcSequence(void)
 {
@@ -1894,6 +1919,10 @@ s32 cmbDevilCanBirth(u16 devilId)
     return flag > 0;
 }
 
+#ifdef NON_MATCHING
+extern s32 cmbGetCombineResultEx(cmbUnit_t *unitA, cmbUnit_t *unitB, s8 flag, s8 levelFlag, u16 *ids, s8 *races, u8 *kind);
+#endif
+
 s32 cmbMakeBirthDevil(s32 id1, s32 id2, s32 id3, s8 race1, s8 race2, u16 *ids, s8 *races)
 {
     datUnitWork_t unit;
@@ -2081,6 +2110,10 @@ void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst)
     dst->maxmp = dst->mp;
     cmbInitStockUnit(devilId, dst);
 }
+
+#ifdef NON_MATCHING
+extern void *memcpy(void *a, const void *b, u32 c);
+#endif
 
 void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src)
 {
@@ -2432,6 +2465,10 @@ extern void fclDrawSpriteAlpha(s32 x, s32 y, s32 z, u8 mode, s32 *colors,
                                s32 page, s32 sprite, s32 *textures,
                                fclSpriteTbl_t *table, s32 ot);
 
+#ifdef NON_MATCHING
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+#endif
+
 void cmbDrawStockBox(s32 unusedX, s32 unusedY, s32 z, s32 unused3, s8 selected, s32 ot)
 {
     s32 i;
@@ -2677,6 +2714,11 @@ void cmbDrawResultHeader(s32 x, s32 y, s32 z, s32 width, s32 height,
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultHeader);
 #endif
 
+#ifdef NON_MATCHING
+extern void cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 unused, s8 mode, s32 alpha, s32 ot);
+extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
+#endif
+
 s32 cmbDrawPhaseDefault(s32 active)
 {
     fclPanelPos_t pos;
@@ -2800,6 +2842,9 @@ void cmbDrawStockScrollBar(s8 mode, s32 z, s32 unused, cmpCursorInfo_t *cursor, 
 /* NON_MATCHING: 25 of 29 words match, exact size; the `color & ~0xFF` value
  * takes $3 where retail uses $2. */
 #ifdef NON_MATCHING
+extern s32 cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g);
+extern s32 fclDrawPanelSprite2(s32 id, s32 arg);
+
 void cmbDrawResultFooter(s32 color)
 {
     s32 corner[4];
@@ -2853,6 +2898,10 @@ void cmbDrawResultPanel(s32 mode)
 }
 #else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultPanel);
+#endif
+
+#ifdef NON_MATCHING
+extern void cmbDrawStockEntry(s32 x, s32 y, s32 color, s8 count, s32 color2, u8 *rows, s32 mode, s32 flags);
 #endif
 
 void cmbDrawStockPanel1(void)
@@ -2968,6 +3017,10 @@ s32 cmbDrawPhase3(s32 active)
     fclInitPanelPos(0, 0, 0xFFFFF, 0x64, 0, 0, (fclPanel_t *)&pos);
     cmpUpdateListSelection(&pos, &CMB_GBWK->menuCursor, 0, mode, 0x100, 0x47);
 }
+
+#ifdef NON_MATCHING
+extern s32 func_00201FB0(s32 mode);
+#endif
 
 s32 cmbDrawPhasePanel(void)
 {
@@ -3251,6 +3304,10 @@ s32 cmbUpdateSacConfirm(void)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateStockCursor2);
 
+#ifdef NON_MATCHING
+extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
+#endif
+
 void cmbSeqAfterBirth(void)
 {
     s32 info = cmpChkSeqInfo(CMB_GBWK);
@@ -3306,6 +3363,12 @@ void cmbFreeSmokeEffect(void)
     effEVECombParSmokeDelete(CMB_GBWK->smoke[1]);
     effEVECombParSmokeDelete(CMB_GBWK->smoke[2]);
 }
+
+#ifdef NON_MATCHING
+extern s32 cmbActionBGM(s32 mode);
+extern s32 cmbChkActScript(void);
+extern void evtBitOn(s32 no);
+#endif
 
 void cmbUpdateIntroduce(void)
 {
@@ -3928,6 +3991,9 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetModelMarkPos);
  * calls put the `ori` of the sprite id in the delay slot where retail puts the
  * flags copy. */
 #ifdef NON_MATCHING
+extern void cmpAllocRefGifTag(s32 ot);
+extern void cmpDisableRGB(s32 ot);
+
 void cmbDrawFullScreenPanel(s32 flags)
 {
     cmpDisableRGB(flags);

@@ -1154,6 +1154,10 @@ void effPCPBossBUNSIN2Delete(effPCPBossBUNSIN2_t *pPCPBossBUNSIN2)
     sdfChipFreeDirect(pPCPBossBUNSIN2);
 }
 
+#ifdef NON_MATCHING
+extern void effPCPBossBUNSINDraw(void *pPCPBossBUNSIN);
+#endif
+
 void effPCPBossBUNSIN2Draw(effPCPBossBUNSIN2_t *pPCPBossBUNSIN2)
 {
     s32 length = effPCPBossBUNSINGetLength();
@@ -3445,6 +3449,10 @@ effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Pa
     return work;
 }
 
+#ifdef NON_MATCHING
+extern void effPCPDANTE_Thunder_Draw(effPCPDANTE_Thunder_tag *hData);
+#endif
+
 s32 effPCPDANTE_Thunder_ProcessDraw(void)
 {
     effPCPDANTE_Thunder_tag *work = dds3GetProcessData();
@@ -4128,6 +4136,9 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_ShowTime_Draw);
 
 /* NON_MATCHING: 4 of 75 words differ (first at +0x34). */
 #ifdef NON_MATCHING
+extern void effPCPDANTE_ShowTime_Bingo_Draw(effPCPDANTE_ShowTime_tag *work);
+extern void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work);
+
 void effPCPDANTE_ShowTime_Draw(effPCPDANTE_ShowTime_tag *hData)
 {
     s32 frame = hData->frame;

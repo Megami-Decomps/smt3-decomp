@@ -181,6 +181,16 @@ void func_002146F8(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
 
 /* NON_MATCHING: 111 of 180 words differ (first at +0x20). */
 #ifdef NON_MATCHING
+extern s32 fclDrawPanelSprite2(s32 id, s32 arg);
+extern s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
+extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
+extern s32 sdfGrAllocPacketBuff(s32 aSize);
+extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s64 aGifRegs, s32 aNumOfPrim);
+extern void *sdf2DGetPrimPtr(sdfGrPacketHeader_t *aPacketPtr);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfTexSetFilter(sdfTexHandle_t *aHandle, s32 aMagMode, s32 aMinMode);
+
 void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite, u8 FlipFlag,
                        u8 AlphaFlag, u8 FilterFlag, s32 OtNo)
 {

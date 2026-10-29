@@ -1723,6 +1723,10 @@ typedef struct {
 extern datTakaraSagasi_t datSagasiSkillTable;
 extern u32 fldEncountSagasiFlag;
 
+#ifdef NON_MATCHING
+extern s32 evtBitCheck(s32 no);
+#endif
+
 s32 fldCommand_FLD_SAGASI_AKUMA(void)
 {
     if (scrGetIntPara(0) == 0) {

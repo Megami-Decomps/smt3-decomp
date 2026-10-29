@@ -637,6 +637,10 @@ void fldRunDanteClear(void)
     fldRunDanteHandle = -1;
 }
 
+#ifdef NON_MATCHING
+extern void *memset(void *a, s32 b, u32 c);
+#endif
+
 void fldRunTamaInit(void)
 {
     fldTest_FLDRUN_EFF_t *res;
@@ -1412,6 +1416,10 @@ void func_0011C7B8(void)
     }
 }
 
+#ifdef NON_MATCHING
+extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
+#endif
+
 void fldRunDanteDoin(void)
 {
     void **basic;
@@ -2144,6 +2152,11 @@ INCLUDE_RODATA(const s32, "field/fldTest", D_00531338);
 
 INCLUDE_RODATA(const s32, "field/fldTest", D_00531350);
 
+#ifdef NON_MATCHING
+extern void fldRunDanteGun1(void);
+extern void fldRunDanteGun2(void);
+#endif
+
 void fldRunDanteAi(void)
 {
     switch (fldRun_Dante.status) {
@@ -2215,6 +2228,10 @@ void fldRunDanteSwapBgm(s32 toDante)
         p2sdStopBGM(0x6B0001);
     }
 }
+
+#ifdef NON_MATCHING
+extern void evtBitOff(s32 no);
+#endif
 
 void fldRunDanteInit(void)
 {
@@ -2552,6 +2569,10 @@ s32 fldRunDanteDistToTarget(f32 x, f32 y, f32 z)
     }
     return v;
 }
+
+#ifdef NON_MATCHING
+extern u32 dds3GetRandA(void *name);
+#endif
 
 void fldRunDanteSe(void)
 {

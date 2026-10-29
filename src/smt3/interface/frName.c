@@ -22,6 +22,12 @@ extern void frTransNameImage(s8 target, s8 type);
 extern void frSetNameData(s8 target, s8 type, s8 glyphCount, u8 *imageData);
 extern frFontHandle_t *frCreateNameHandle(s8 target, s8 glyph, frFontHandle_t *chain);
 
+#ifdef NON_MATCHING
+extern u32 strlen(const char *text);
+extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memset(void *a, s32 b, u32 c);
+#endif
+
 void frInitNameData(void)
 {
     char name[3] = "\x80\x80";
@@ -58,6 +64,8 @@ extern GsFont_t *frTranslateUserData(s32 width, s32 height, void *data, s8 dataF
 
 /* NON_MATCHING: 74 of 122 native words differ; emits 496 of 488 bytes. */
 #ifdef NON_MATCHING
+extern s32 printf(const char *fmt, ...);
+
 void frSetNameData(s8 target, s8 type, s8 glyphCount, u8 *imageData)
 {
     s32 firstSlot;

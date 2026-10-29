@@ -272,6 +272,8 @@ extern void fclDrawSpriteAlpha(s32 x, s32 y, s32 z, u8 mode, s32 *colors,
 
 /* NON_MATCHING: 7 of 179 words differ, at the native 716-byte size. */
 #ifdef NON_MATCHING
+extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+
 void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 selected, s32 ot)
 {
     s32 colors[4];

@@ -75,6 +75,10 @@ extern s32 rstResetEncycPanel(void);
 
 extern s32 rstResetEncycPanel2(void);
 
+#ifdef NON_MATCHING
+extern s32 cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g);
+#endif
+
 void rstDrawEvoBgFade(void)
 {
     cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, rstDrawWork->fadeColor, 7);
@@ -83,11 +87,14 @@ void rstDrawEvoBgFade(void)
 /* NON_MATCHING: 103 of 116 words match at the exact size; retail keeps a register
  * copy of the work pointer that the C coalesces away. */
 #ifdef NON_MATCHING
+extern void cmpFindPanelEffSlot(s32 arg);
+extern void cmpUpdateTerminate(void *work);
+
 s32 rstDraw(dds3ProcessID_t *id)
 {
     rstDrawWork = dds3GetProcessData(id);
     if (rstDrawWork->flags & 0x20) {
-        cmpUpdateTerminate();
+        cmpUpdateTerminate(rstDrawWork);
         return -1;
     }
     nmeDrawFrame(0x10, rstDrawWork->unk_2310);

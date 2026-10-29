@@ -641,6 +641,9 @@ INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_WarpRun);
 
 /* NON_MATCHING: 14 of 58 words differ (first at +0x44). */
 #ifdef NON_MATCHING
+extern void fldPlayerSdwOff(void);
+extern void fldPlayerSvsOff(void);
+
 s32 fldPlayerCalcHasigo(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
     f32 pos[4];

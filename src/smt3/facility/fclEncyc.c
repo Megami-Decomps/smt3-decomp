@@ -307,6 +307,10 @@ extern s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update,
 extern char D_0053D718[], D_0053D738[], D_0053D748[], D_0053D758[];
 extern char D_0053D778[], D_0053D798[], D_0054FCB8[];
 
+#ifdef NON_MATCHING
+extern s32 fclEncycGetRatio(void);
+#endif
+
 void fclEncycStartProcess(s32 mode)
 {
     void *handle = sdfMemAllocDirect(sizeof(fclEncyc_instance_tag));
@@ -348,6 +352,10 @@ INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D768);
 INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D778);
 
 INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D798);
+
+#ifdef NON_MATCHING
+extern void ReleaseWork(fclEncyc_instance_tag *pinst);
+#endif
 
 s32 fclEncycKillProcess(void)
 {
@@ -556,6 +564,10 @@ void fclEncycDebugShutdown(void)
 {
     ReleaseDebug_fclEncyc();
 }
+
+#ifdef NON_MATCHING
+extern void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag);
+#endif
 
 void InitializeInstance(fclEncyc_instance_tag *pinst)
 {
@@ -1332,6 +1344,13 @@ void CalcPhaseReadStatus(fclEncyc_instance_tag *pinst)
     cmpPlayCursorSE(button);
 }
 
+#ifdef NON_MATCHING
+extern void DrawExplainBack(s32 alpha);
+extern void DrawReadMainHelp(fclEncyc_instance_tag *pinst);
+extern void DrawReadStatusMoney(fclEncyc_instance_tag *work);
+extern void cmpDrawStatusComEx(s32 unit, u8 alpha, s8 kind, s8 mode, s32 value, s8 option, s32 color, s8 show, s8 extra, s8 full);
+#endif
+
 void DrawPhaseReadStatus(fclEncyc_instance_tag *pinst)
 {
     s32 base = pinst->pwork;
@@ -1349,6 +1368,10 @@ void DrawPhaseReadStatus(fclEncyc_instance_tag *pinst)
     }
     DrawReadMainHelp(pinst);
 }
+
+#ifdef NON_MATCHING
+extern void ReleaseFontExplain(fclEncyc_instance_tag *pinst, s32 release_mesmng);
+#endif
 
 void DestPhaseReadStatus(fclEncyc_instance_tag *pinst)
 {

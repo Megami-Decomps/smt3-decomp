@@ -98,6 +98,8 @@ void fldAllTblLoad(void)
 
 /* NON_MATCHING: 23 of 73 words differ (first at +0xC). */
 #ifdef NON_MATCHING
+extern void fldAutoMapClear(void);
+
 void fldGbFlagClear(void)
 {
     s32 i;
