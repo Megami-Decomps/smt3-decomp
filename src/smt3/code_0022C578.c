@@ -369,7 +369,10 @@ typedef struct
         s32 flag;
         char **text;
     } listData;
-    /* 0x2C */ s32 unk_2C;
+    /* 0x2C */ union {
+        s32 value;
+        u8 *bytes;
+    } flagsData;
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
 } cmpCursorInfo_t;
@@ -6637,7 +6640,57 @@ s32 cmpCursorFadeChannel(s32 color, s32 timer, s32 rate)
     return (color & ~0xFF) | level;
 }
 
+typedef struct {
+    cmpCursorInfo_t cursor;
+    u8 reserved38[4];
+    cmpCursorSlot_t slot[256][2];
+} cmpCursorExtended_t;
+
+extern void cmpSetCursorSlot(s8 index, s8 state, u8 param, cmpCursorSlot_t *slot);
+extern s32 cmpAllocEffectSlot(s32 color, s8 selected, s8 disabled,
+                              cmpCursorSlot_t *slot);
+
+#ifdef NON_MATCHING
+u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
+                       s32 mode, s32 alpha)
+{
+    cmpCursorExtended_t *list = (cmpCursorExtended_t *)cursor;
+    s32 selected = 0;
+    s32 disabled = 0;
+    u32 color;
+    u32 blink;
+    u32 effect;
+
+    if (cursor->flagsData.bytes != NULL) {
+        u8 flags = cursor->flagsData.bytes[item];
+
+        if (flags & 1) {
+            mode = 1;
+        }
+        if (flags & 2) {
+            return 0;
+        }
+    }
+    if (row == (u8)cursor->unk_25) {
+        selected = (mode & 2) == 0;
+        cmpSetCursorSlot(0, 1, 0x10,
+                         &list->slot[cursor->unk_22 + (u8)cursor->unk_24][0]);
+    }
+    if (mode & 1) {
+        disabled = 1;
+        color = selected ? 0x8EBEF52B : 0x4D4B4B4D;
+    } else {
+        color = selected ? 0x89FEFF80 : 0xA09DC380;
+    }
+    blink = cmpCursorBlinkColor(alpha) & 0xFF;
+    effect = cmpAllocEffectSlot(color, selected, disabled,
+                                &list->slot[cursor->unk_22 + item][0]);
+    effect = (effect & ~0xFF) | (((color & 0xFF) * blink >> 7) & 0xFF);
+    return cmpCursorFadeChannel(effect, alpha, 0);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListItemBox);
+#endif
 
 extern u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
                               s32 mode, s32 alpha);
@@ -8675,7 +8728,7 @@ void cmpInitCursorRange(void *cursor, u8 index, u8 rows, s32 flag)
     work->cursor.unk_24 = 0;
     work->cursor.unk_25 = 0;
     work->cursor.listData.flag = flag;
-    work->cursor.unk_2C = 0;
+    work->cursor.flagsData.value = 0;
     work->cursor.unk_30 = 0;
     work->cursor.unk_34 = 0;
     work->unk_38 = 0;
@@ -8692,7 +8745,7 @@ void cmpUpdateCursorScroll(cmpCursorInfo_t *cursor, s8 mode)
     s32 i;
     u8 row;
 
-    flags = (u8 *)cursor->unk_2C;
+    flags = cursor->flagsData.bytes;
     if (flags == NULL)
     {
         return;
@@ -8721,7 +8774,7 @@ void cmpUpdateCursorScroll(cmpCursorInfo_t *cursor, s8 mode)
 
 void cmpSetCursorFlag(cmpCursorInfo_t *cur, s32 flag)
 {
-    cur->unk_2C = flag;
+    cur->flagsData.value = flag;
     cmpUpdateCursorScroll(cur, 1);
 }
 
@@ -8729,7 +8782,7 @@ void cmpSetCursorFlag(cmpCursorInfo_t *cur, s32 flag)
 #ifdef NON_MATCHING
 void cmp_241A10(cmpCursorInfo_t *cursor)
 {
-    u8 *flags = (u8 *)cursor->unk_2C;
+    u8 *flags = cursor->flagsData.bytes;
     s32 count;
     s32 i;
 
@@ -8754,7 +8807,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmp_241A10);
 
 s32 cmp_241A88(cmpCursorInfo_t *cursor, s32 index)
 {
-    u8 *flags = (u8 *)cursor->unk_2C;
+    u8 *flags = cursor->flagsData.bytes;
     u8 value;
 
     if (flags == NULL) {
@@ -8809,7 +8862,7 @@ s32 cmpCursorAtFirstEnabled(cmpCursorInfo_t *cursor)
 {
     s32 count = 0;
     s32 total = cursor->unk_22 + (u8)cursor->unk_24;
-    u8 *flags = (u8 *)cursor->unk_2C;
+    u8 *flags = cursor->flagsData.bytes;
     s32 i;
 
     if (flags != NULL) {
@@ -8839,7 +8892,7 @@ s32 cmpCursorAtLastEnabled(cmpCursorInfo_t *cursor)
     s32 n;
     s32 i;
 
-    flags = (u8 *)cursor->unk_2C;
+    flags = cursor->flagsData.bytes;
     idx = cursor->unk_22 + (u8)cursor->unk_24;
     n = 0;
     if (flags != NULL)
