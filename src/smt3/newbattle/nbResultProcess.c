@@ -207,7 +207,183 @@ void nbResultInitLabels(void)
 INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultInitLabels);
 #endif
 
+extern char *text2[];
+extern s32 rstCalcExpFromLevel(u8 index, s32 level);
+extern const char D_005510F0[], D_005510F8[];
+extern frFontHandle_t *D_00551FBC;
+extern frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 firstOption);
+extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
+extern void frSetFontColor(frFontHandle_t *font, u32 color);
+typedef struct frFontRequest_t frFontRequest_t;
+extern frFontRequest_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                             const char *text, frFontRequest_t *previous);
+extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
+                                          const char *text, frFontRequest_t *previous);
+extern s32 frDrawFontEx(frFontHandle_t *font, s8 mode);
+extern s32 frDrawFont(frFontHandle_t *font);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *font);
+extern void cmpSetSkillListRows(s32 rows);
+extern s32 sprintf(char *buffer, const char *format, ...);
+
+#ifdef NON_MATCHING
+void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
+                     datUnitWork_t *work, s32 unitId, nbMainProcessData_t *data)
+{
+    volatile nbResultScore_t *entry = &nbResultScoreTable[scoreIndex];
+    s32 alpha, stop, current, increment;
+    s32 drawX;
+    s32 level;
+    s32 expAtLevel;
+    s32 expNextLevel;
+    s32 exp;
+    u32 maxExp, counter;
+    s32 width;
+    u32 spriteColor;
+    u32 drawColor;
+    u32 fontColor;
+    u32 labelColor;
+    char buf[16];
+
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    stop = entry->stopcnt;
+    if (stop > 0) {
+        entry->stopcnt = stop - 1;
+    }
+    if (frame > 0) {
+        alpha = frame < 8 ? frame * 16 : 0x80;
+        drawX = (s32)((u32)entry->ofsx * 0x46) / 100;
+        entry->ofsx = drawX;
+        spriteColor = 0x808080 | ((u32)alpha << 24);
+        nbPnlSprite(x + drawX, y, 0x25, 0x22, 0xBF, 1, 0x25, 0x22, spriteColor, nbResultTex1);
+        nbPnlSprite(x + drawX + 0x25, y, 0x11F, 0x22, 0xE3, 1, 1, 0x22, spriteColor, nbResultTex1);
+        nbPnlSprite(x + drawX + 0x144, y, 0x78, 0x22, 0x6A, 0x2E, 0x78, 0x22, spriteColor, nbResultTex1);
+    }
+    if (frame >= 13) {
+        if (nbResultTobiwarpLabel > 0 && entry->stopcnt == 0) {
+            increment = entry->resultadd;
+            current = (u32)entry->exp_cnt + (u32)increment;
+            entry->exp_cnt = current;
+            increment = entry->addexp;
+            maxExp = work->exp + increment;
+            if ((u32)current < maxExp) {
+                nbResultCounter |= 1;
+            } else {
+                entry->exp_cnt = maxExp;
+            }
+        }
+        if (entry->lvupanmflg != 0) {
+            current = (u32)entry->lvupanmcnt + 1;
+            entry->lvupanmcnt = current;
+            if (current >= 16) {
+                entry->lvupanmflg = 0;
+                entry->lvupanmcnt = 0;
+            }
+        }
+        expAtLevel = rstCalcExpFromLevel((u8)unitId, entry->l_lv);
+        expNextLevel = rstCalcExpFromLevel((u8)unitId, (s32)((u32)entry->l_lv + 1));
+        exp = entry->exp_cnt;
+        level = rstCalcLevelFromExp((u8)unitId, exp);
+        if (entry->l_lv < level) {
+            counter = *(volatile u32 *)&nbResultCounter;
+            entry->lvupflg = 1;
+            entry->l_lv = level;
+            entry->stopcnt = 0xF;
+            entry->lvupanmflg = 1;
+            *(volatile u32 *)&nbResultCounter = counter | 2;
+            entry->lvupanmcnt = 0;
+            nbResultCountEntries(x + 0xFE, y + 0x13);
+        }
+        alpha = frame < 0x22 ? frame * 6 - 0x48 : 0x80;
+        if (alpha >= 0x81) {
+            alpha = 0x80;
+        }
+        spriteColor = 0x808080 | ((u32)alpha << 24);
+        nbPnlSprite(x + 0x17, y + 0x18, 8, 7, 0x98, 0x23, 8, 7, spriteColor, nbResultTex1);
+        nbPnlSprite(x + 0x1F, y + 0x18, 0xAA, 7, 0x9F, 0x23, 1, 7, spriteColor, nbResultTex1);
+        nbPnlSprite(x + 0xC9, y + 0x18, 8, 7, 0xA1, 0x23, 8, 7, spriteColor, nbResultTex1);
+        drawX = y + 8;
+        drawColor = spriteColor;
+        if (entry->lvupflg != 0) {
+            nbPnlSprite(x + 0x20, drawX, 0x34, 0x1E, 0x9F, 1, 0x34, 0x1E, 0x80808080, nbResultTex2);
+            current = (u32)entry->lvuplvanmcnt + 1;
+            entry->lvuplvanmcnt = current;
+            if (current >= 9) {
+                entry->lvuplvanmcnt = 8;
+            }
+            alpha = 0x80;
+            drawColor = 0x80808080;
+        }
+        nbPnlSprite(x + 0x27, y + 0x11, 0x12, 0xC, 0xAC, 0x1E, 0x12, 0xC, drawColor, nbResultTex1);
+        fontColor = 0xA09DC300 | alpha;
+        current = entry->l_lv;
+        sprintf(buf, D_005510F0, current < 0x64 ? current : 0x63);
+        D_00551FBC = (frFontHandle_t *)frwGetSmallNumFontFRQ(
+            (x + 0x3C) * 16, (y + 0x10) * 8, 0, fontColor, buf, NULL);
+        frDrawFontEx(D_00551FBC, 1);
+        frDestroyFontRequestAfter(D_00551FBC);
+        nbPnlSprite(x + 0xCA, y, 0x9B, 0x1F, 1, 0x51, 0x9B, 0x1F, drawColor, nbResultTex1);
+        nbPnlSprite(x + 0xD6, drawX, 0x27, 0x18, 0x70, 0x12, 0x27, 0x18, drawColor, nbResultTex1);
+        if (entry->lvupanmflg != 0) {
+            current = entry->lvupanmcnt;
+            if (current >= 6) {
+                labelColor = 0xA09DC300 | ((s32)(((u32)current << 7) - 0x280) / 10);
+                sprintf(buf, D_005510F8, (s32)((u32)expNextLevel - (u32)exp));
+                alpha = 0x80;
+                fontColor = 0xA09DC380;
+                D_00551FBC = (frFontHandle_t *)frwGetSmallNumFontFRQ((x + 0x11D) * 16, (y + 7) * 8, 0,
+                    labelColor, buf, 0);
+                frDrawFontEx(D_00551FBC, 1);
+                frDestroyFontRequestAfter(D_00551FBC);
+            }
+        } else {
+            sprintf(buf, D_005510F8, (s32)((u32)expNextLevel - (u32)exp));
+            D_00551FBC = (frFontHandle_t *)frwGetSmallNumFontFRQ(
+                (x + 0x11D) * 16, (y + 7) * 8, 0, fontColor, buf, NULL);
+            frDrawFontEx(D_00551FBC, 1);
+            frDestroyFontRequestAfter(D_00551FBC);
+        }
+        spriteColor = 0x808080 | ((u32)alpha << 24);
+        if (entry->lvupanmflg != 0) {
+            current = entry->lvupanmcnt;
+            if (current < 2) {
+                width = (s32)(0xE - (u32)current * 7);
+                nbPnlSprite(x + 0xF9, y - width / 2 + 0x18, 0x68, width, 1, 0x2E, 0x68, 0xE,
+                    spriteColor, nbResultTex1);
+            } else if (current >= 0xB) {
+                width = (s32)((u32)current * 0xE - 0x8C) / 5;
+                nbPnlSprite(x + 0xF9, y - width / 2 + 0x18, 0x68, width, 1, 0x3D, 0x68, 0xE,
+                    spriteColor, nbResultTex1);
+            }
+        } else {
+            nbPnlSprite(x + 0xF9, y + 0x11, 0x68, 0xE, 1, 0x3D, 0x68, 0xE, spriteColor, nbResultTex1);
+            width = (s32)(((u32)exp - (u32)expAtLevel) * 0x68) /
+                    (s32)((u32)expNextLevel - (u32)expAtLevel);
+            if (width < 0) width = 0;
+            if (width >= 0x69) width = 0x68;
+            if (expAtLevel < exp && width < 2) width = 2;
+            if (exp < expNextLevel && width >= 0x68) width = 0x67;
+            nbPnlSprite(x + 0xF9, y + 0x11, width, 0xE, 1, 0x2E, width, 0xE, spriteColor, nbResultTex1);
+        }
+        cmpSetSkillListRows(0x14);
+        if (work->flag & 4) {
+            D_00551FBC = frGetCNameFRQ(0, 1, 0, 0);
+            frSetDrawPosition(D_00551FBC, (x + 0x59) * 16, (y + 0xC) * 8);
+            frSetFontColor(D_00551FBC, fontColor);
+            frDrawFont(D_00551FBC);
+            frDestroyFontRequestAfter(D_00551FBC);
+        } else {
+            D_00551FBC = (frFontHandle_t *)frwGetSmallFontFRQ(
+                (x + 0x59) * 16, (y + 0xC) * 8, 0, fontColor, text2[work->id], NULL);
+            frDrawFont(D_00551FBC);
+            frDestroyFontRequestAfter(D_00551FBC);
+        }
+        cmpSetSkillListRows(-1);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultDrawPC1);
+#endif
 
 void nbResultInitTimer(nbMainProcessData_t *data)
 {
@@ -257,11 +433,9 @@ s32 nbResultFindBestScore(nbMainProcessData_t *data)
     return nbResultBestScore;
 }
 
-typedef struct frFontRequest_t frFontRequest_t;
 extern s32 nbTobiwarpLabelIdx;
 extern f32 D_00551100;
 extern frFontRequest_t *D_00551FC0;
-extern const char D_005510F0[], D_005510F8[];
 extern char *pStr[];
 extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h,
                       u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1,
@@ -269,17 +443,6 @@ extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h,
 extern f32 sdfSin(f32 angle);
 extern s32 nbGetKakutokuExp(nbMainProcessData_t *data);
 extern s32 nbGetKakutokuMaka(nbMainProcessData_t *data);
-extern void nbResultDrawPC1(s32 index, s32 x, s32 y, s32 offset,
-                            datUnitWork_t *unit, s32 unitIndex, nbMainProcessData_t *data);
-extern void cmpSetSkillListRows(s32 rows);
-extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
-                                          const char *text, frFontRequest_t *previous);
-extern frFontRequest_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
-                                             const char *text, frFontRequest_t *previous);
-extern s32 frDrawFont(frFontHandle_t *request);
-extern s32 frDrawFontEx(frFontHandle_t *request, s8 mode);
-extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
-extern s32 sprintf(char *buffer, const char *format, ...);
 extern void rsetOtOfs(s32 offset);
 extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void rsetAlpha(s32 mode);
@@ -586,7 +749,6 @@ void nbResultUpdateUnits(void)
     evtFreeStage();
 }
 
-extern s32 rstCalcExpFromLevel(u8 index, s32 level);
 
 s32 GetAddExp(s32 index, s32 cap)
 {
