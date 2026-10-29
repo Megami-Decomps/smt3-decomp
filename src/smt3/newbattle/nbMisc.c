@@ -607,7 +607,69 @@ INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544130);
 
 INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544140);
 
+#ifdef NON_MATCHING
+extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
+extern s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid);
+
+void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
+                      s32 *crule, s32 *carea, s32 mode)
+{
+    s32 type = 0;
+    s32 rule = 0;
+    s32 area = 0;
+    s32 skill;
+    u8 targetarea;
+    u8 targetrule;
+
+    switch (work->nowcommand) {
+    case 0:
+        if (mode != 0) {
+            rule = 2;
+            area = 1;
+        } else {
+            area = 2;
+        }
+        if (nbHatudoCheckSkill(work, 0x130) != 0 && mode == 0) {
+            type = 1;
+        }
+        break;
+    case 1:
+    case 5:
+        if (work->nowcommand == 1) {
+            skill = work->nowindex;
+        } else {
+            skill = nbGetItemSkillNo(a, work->nowindex);
+        }
+        switch (datSkillTable.normal[skill].targettype) {
+        case 0: type = 0; break;
+        case 1: type = 1; break;
+        case 2: type = 2; break;
+        }
+        targetarea = datSkillTable.normal[skill].targetarea;
+        if (targetarea & 1) {
+            area = mode != 0 ? 2 : 1;
+        }
+        area |= targetarea & 2;
+        targetrule = datSkillTable.normal[skill].targetrule;
+        rule = targetrule & 0xF;
+        break;
+    case 4:
+        area = 2;
+        break;
+    case 6:
+        if ((a->data->stat & 8) == 0) {
+            rule = a->data->playerpcnt >= 4 ? 2 : 12;
+            area = 1;
+        }
+        break;
+    }
+    if (ctype != NULL) *ctype = type;
+    if (crule != NULL) *crule = rule;
+    if (carea != NULL) *carea = area;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetTargetSkill);
+#endif
 
 #ifdef NON_MATCHING
 typedef struct {
