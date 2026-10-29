@@ -228,12 +228,6 @@ extern u8 D_0032D1F0[];
 
 extern void sdfTexFree(s32 aHandle);
 
-typedef struct
-{
-    /* 0x00 */ s8 index;
-    /* 0x01 */ u8 unk_01;
-    /* 0x02 */ u16 id;
-} cmbStockSlot_t;
 
 typedef struct
 {

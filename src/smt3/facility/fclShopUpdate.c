@@ -20,13 +20,6 @@ extern s32 fclRunPanelAnim(void *work);
 
 typedef struct
 {
-    /* 0x00 */ s8 index;
-    /* 0x01 */ u8 unk_01;
-    /* 0x02 */ u16 id;
-} cmbStockSlot_t;
-
-typedef struct
-{
     /* 0x00000 */ u8 unk_00000;
     /* 0x00001 */ s8 unk_00001;
     /* 0x00002 */ u8 unk_00002;
