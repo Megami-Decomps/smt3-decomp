@@ -320,8 +320,6 @@ void InitOoyTest(void);
 
 void fldRegistUnitPad(void);
 
-INCLUDE_RODATA(const s32, "field/fldProcess", D_00531860);
-
 #ifdef NON_MATCHING
 extern sdfVector4_t D_002FC490;
 extern s32 fldPlayerStatus[];
@@ -478,6 +476,8 @@ s32 ProcRandomEncountCheck(void)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "field/fldProcess", D_00531860);
+
 INCLUDE_ASM(const s32, "field/fldProcess", ProcRandomEncountCheck);
 #endif
 
@@ -951,9 +951,8 @@ s32 ProcSequence(dds3ProcessID_t *id)
 }
 
 
-#ifdef NON_MATCHING
 extern s32 fldDrawFlag[];
-extern s32 fldDbg_ExBlurOn;
+extern u32 fldDbg_ExBlurOn[];
 extern s32 nbGetEncountOn(void);
 extern void fldDbgPrint2D(s32 x, s32 y, const char *text);
 extern void fldNpcDraw(void);
@@ -964,7 +963,9 @@ extern void fldElvDrawFloorNum(void);
 extern void dds3EffectBlur(const dds3Effect_Blur_t *source);
 extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
 
-#define DRAW_FIELD_BLUR(color, mode, angle, zoom) do { \
+/* A plain block, not do/while(0): the loop notes a do/while leaves behind make gcc
+   align the join label after the area-23 test and pad the function by a word. */
+#define DRAW_FIELD_BLUR(color, mode, angle, zoom) { \
     blur.abgr = (color); \
     blur.blend = (mode); \
     blur.rotate = (angle); \
@@ -976,7 +977,7 @@ extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
     blur.xy[1][0] = 0x200; \
     blur.xy[1][1] = 0x1C0; \
     dds3EffectBlur(&blur); \
-} while (0)
+}
 
 s32 ProcDraw(dds3ProcessID_t *id)
 {
@@ -984,12 +985,13 @@ s32 ProcDraw(dds3ProcessID_t *id)
     s32 status;
     s32 area;
     s32 areaAfterDistortion;
+    fldSequenceController_t *controller = &fldAutoMapSeqFlags;
 
     if (dds3AdminiGetNextSequence() != -1) return 0;
     status = fldLoadNextGetStatus();
     if (status == 1) {
         if (fldDrawFlag[0] == status) fldDbgPrint2D(0x40, 0xC0, "NowLoading...");
-        if (fldSequenceState == 0) return 0;
+        if (controller->stage == 0) return 0;
     }
     if (nbGetEncountOn() != 0 || fmProcessChk() != 0 ||
         fldAutoMapSeqTestFlag(2) != 0 || fldProcCampChk() == 1) return 0;
@@ -998,10 +1000,10 @@ s32 ProcDraw(dds3ProcessID_t *id)
     fldAutoMapDraw();
     fldSnowTask();
     fldElvDrawFloorNum();
-    if (fldAutoMapSeqFlags.stage < 2 || fldDbg_ExBlurOn == 0 || nbGetEncountOn() != 0) return 0;
+    if (controller->stage < 2 || fldDbg_ExBlurOn[0] == 0 || nbGetEncountOn() != 0) return 0;
 
     if (fldGlobalBase.area == 0x12 || fldGlobalBase.area == 0x1C || fldGlobalBase.area == 0x1E)
-        DRAW_FIELD_BLUR(0x3C8080AA, 0x44, 0.02f, 0.9859999418f);
+        DRAW_FIELD_BLUR(0x3C8080AA, 0x44, 0.02f, 0.986f);
     if (((u32)fldGlobalBase.area - 2) < 3 || fldGlobalBase.area == 6 ||
         fldGlobalBase.area == 7 || fldGlobalBase.area == 8 ||
         (fldGlobalBase.area == 12 && fldGlobalBase.floor == 0))
@@ -1012,14 +1014,14 @@ s32 ProcDraw(dds3ProcessID_t *id)
         if (((u32)fldGlobalBase.floor - 19) < 2)
             DRAW_FIELD_BLUR(0x2D7882B4, 0x44, 0.0f, 1.0f);
         if (((u32)fldGlobalBase.floor - 2) < 3)
-            DRAW_FIELD_BLUR(0x1E8080C6, 0x44, 0.0f, 0.9859999418f);
+            DRAW_FIELD_BLUR(0x1E8080C6, 0x44, 0.0f, 0.986f);
     }
     if (fldGlobalBase.area == 16)
         DRAW_FIELD_BLUR(0x1EC8B4C8, 0x44, 0.0f, 1.0f);
     if (fldGlobalBase.area == 17 && fldGlobalBase.floor == 0)
-        DRAW_FIELD_BLUR(0x1E8080C6, 0x44, 0.0f, 0.9859999418f);
+        DRAW_FIELD_BLUR(0x1E8080C6, 0x44, 0.0f, 0.986f);
     if (fldGlobalBase.area == 23 && ((u32)fldGlobalBase.floor < 2 || fldGlobalBase.floor == 6))
-        DRAW_FIELD_BLUR(0x2380A0DC, 0x44, 0.0f, 0.9859999418f);
+        DRAW_FIELD_BLUR(0x2380A0DC, 0x44, 0.0f, 0.986f);
     if (fldGlobalBase.area == 24 && fldGlobalBase.floor == 17)
         DRAW_FIELD_BLUR(0x288296B4, 0x44, 0.0f, 1.0f);
     if (fldGlobalBase.area == 25 && (((u32)fldGlobalBase.floor - 16) < 5 || fldGlobalBase.floor == 24))
@@ -1051,9 +1053,6 @@ s32 ProcDraw(dds3ProcessID_t *id)
     return 0;
 }
 #undef DRAW_FIELD_BLUR
-#else
-INCLUDE_ASM(const s32, "field/fldProcess", ProcDraw);
-#endif
 
 void fldAutoMapSeqSetFlag(u32 flag)
 {
