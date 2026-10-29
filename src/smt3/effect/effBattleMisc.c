@@ -470,7 +470,76 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphereExp);
 #endif
 
 /* Returns world-space radius in f0 and the selected midpoint in vf10. */
+#ifdef NON_MATCHING
+extern void effDebugPointDraw2(sdfVector4_t *pPos, u32 color);
+extern void effDebugLineDraw(sdfVector4_t *pPos0, sdfVector4_t *pPos1);
+
+f32 effBTLModelGroupGetVectorSphere(u32 group, sdfVector4_t *target, sdfVector4_t *eye)
+{
+    sdfMatrix4_t matrix;
+    sdfVector4_t positions[32];
+    sdfVector4_t projected[32];
+    u8 active[32];
+    nbFormation_t *form = nbGetMainProcessData()->form;
+    s32 i, j, first = 0, second = 0;
+    f32 maxLength = 0.0f;
+    f32 length;
+
+    LookAtMatrix(target, eye, aViewDown);
+    MultMatrixRev(&dds3ScreenParam.TM);
+    SDF_VU0_STOREMATRIX(&matrix);
+    for (i = 0; i < 32; i++, form++) {
+        u32 stat = form->stat;
+        if ((stat & group) && (stat & 1) && (stat & 2)) {
+            effBTLModelGetSphereCenter(form);
+            SDF_VU0_LOADMATRIX(&matrix);
+            SDF_VU0_STOREVECTOR(&positions[i]);
+            SDF_VU0_APPLYMATRIX_XYZ1();
+            SDF_VU0_PERSVECTOR();
+            SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.scale);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(&projected[i]);
+            projected[i].z = 0.0f;
+            effDebugPointDraw2(&positions[i], 0x80000080);
+            active[i] = 1;
+        } else {
+            active[i] = 0;
+        }
+    }
+    for (i = 0; i < 32; i++) {
+        if (active[i]) {
+            for (j = 0; j < 32; j++) {
+                if (active[j] && i != j) {
+                    SDF_VU0_LOADVECTOR(&projected[i]);
+                    SDF_VU0_LOADVECTOR_B(&projected[j]);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_GETLENGTH(length);
+                    if (maxLength < length) {
+                        first = i;
+                        maxLength = length;
+                        second = j;
+                    }
+                }
+            }
+        }
+    }
+    effDebugLineDraw(&positions[first], &positions[second]);
+    SDF_VU0_LOADVECTOR(&positions[first]);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(&positions[second]);
+    VU0_LERP_VF10_VF11(0.5f);
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
+    SDF_VU0_COPYVECTOR_C_TO_A();
+    return length;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetVectorSphere);
+#endif
 
 void effBTLModelGroupGetDirection(u32 group, sdfVector4_t *pDirection) {
     if (group & 0x100) {
