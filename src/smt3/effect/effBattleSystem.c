@@ -225,7 +225,7 @@ extern u8 D_0054F1DF;
 
 extern s32 D_0054F130;
 
-extern s8 D_0054F134;
+extern u8 D_0054F134;
 
 extern u8 D_0031D000[];
 
@@ -3251,7 +3251,7 @@ extern effBTLAimParams_t D_00551DB8;
 extern u32 mdlGetColor(mdlObj_t *model);
 
 #ifdef NON_MATCHING
-s32 func_00174DC0(void)
+s32 func_00174DC0(s32 unused)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
     struct nbParty_t *party = &data->party[D_0054F130];
@@ -3278,7 +3278,73 @@ s32 func_00174DC0(void)
 INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174DC0);
 #endif
 
+extern s32 func_00174DC0(s32 unused);
+extern s8 D_005298D5 __attribute__((section(".data")));
+extern u8 D_0054F135;
+extern sdfVector4_t D_0056AC30;
+extern void evtUnitLightOn(evtUnit_t *unit);
+extern void evtUnitLightOff(evtUnit_t *unit, s32 frame);
+extern void evtSetUnitLightAndAmbient(evtUnit_t *unit, s32 frame, u32 light, u32 ambient);
+extern void evtSetUnitLightDir(evtUnit_t *unit, s32 frame);
+extern void effBTLPartGetPointLightPtr(nbFormation_t *formation, effBTLAimParams_t *params,
+                                      sdfVector4_t *direction);
+
+#ifdef NON_MATCHING
+void eff_174E88(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    nbFormation_t *formations = data->form;
+    nbFormation_t *formation;
+    struct nbParty_t *party;
+    sdfVector4_t direction;
+    sdfVector4_t center;
+    s32 index;
+
+    if (D_005298D5 < 0) {
+        index = D_0054F130;
+        for (;;) {
+            if (index == 13) {
+                D_0054F130 = 0;
+                break;
+            }
+            D_0054F130 = index + 1;
+            func_00174DC0(0);
+            index = D_0054F130;
+            if (formations[index].stat & 1) {
+                break;
+            }
+        }
+        func_00174DC0(0);
+    }
+    party = &data->party[D_0054F130];
+    if (party->flag & 1) {
+        formation = &formations[party->formindex];
+        if (formation->stat & 2) {
+            evtSetUnitColorRGB(formation->hunit, 0, D_00551DA8);
+            if (D_0054F134 == 0) {
+                evtUnitLightOff(formation->hunit, 0);
+            } else {
+                evtUnitLightOn(formation->hunit);
+                evtSetUnitLightAndAmbient(formation->hunit, 0, D_00551DAC, D_00551DB0);
+                effBTLPartGetPointLightPtr(formation, &D_00551DB8, &direction);
+                SDF_VU0_LOADVECTOR(&direction);
+                evtSetUnitLightDir(formation->hunit, 0);
+            }
+            SDF_VU0_COPYVECTOR(&D_0056AC30, &formation->pos);
+            effDebugPointDraw(&formation->pos);
+            if (D_0054F135 != 0) {
+                effBTLModelGetSphereCenter(formation);
+                SDF_VU0_STOREVECTOR(&center);
+                effDebugWireframeCylinderDraw(&center, 0x80802020,
+                                              formation->r * formation->scl,
+                                              formation->h * formation->scl);
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_174E88);
+#endif
 
 typedef struct {
     sdf3DLight_t *parallel[4];
