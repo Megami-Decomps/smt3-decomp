@@ -1,4 +1,5 @@
 #include "common.h"
+#include "result2.h"
 #include "camp.h"
 #include "kernel.h"
 #include "fpu.h"
@@ -5578,13 +5579,6 @@ void cmpAdvanceStatusAnim(void)
         cmpStatusAnimCount[1]++;
     }
 }
-
-typedef struct
-{
-    s8 SkillCnt;
-    u8 TargetLevel[0x19];
-    u16 skill[25];
-} rstSkillInfo_t;
 
 typedef struct
 {
