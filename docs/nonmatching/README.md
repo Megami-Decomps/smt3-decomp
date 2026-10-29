@@ -18,6 +18,7 @@ page and line to open. Conventions are in
 | 6 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 6 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 5 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
+| 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
@@ -25,7 +26,6 @@ page and line to open. Conventions are in
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
-| 3 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 3 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |

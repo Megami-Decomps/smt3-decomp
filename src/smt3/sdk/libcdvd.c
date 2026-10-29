@@ -31,6 +31,15 @@ extern s32 SetAlarm(u16 ticks, void (*callback)(s32, s32, s32), void *argument);
 extern void gcc2_compiled__6(s32 cause, s32 address, s32 argument);
 extern s32 cdvdNcmdSema __attribute__((section(".data")));
 
+typedef void (*cdvdPowerCallback_t)(void *argument);
+extern cdvdPowerCallback_t D_00598C44 __attribute__((section(".data")));
+extern void *D_00598C48 __attribute__((section(".data")));
+extern s32 D_0052A024 __attribute__((section(".data")));
+extern s32 D_0052A03C __attribute__((section(".data")));
+extern void sceSifAddCmdHandler(s32 id, void (*handler)(void *, void *), void *argument);
+void _sceCd_Poff_Intr(void *packet, void *argument);
+s32 PowerOffCB(void);
+
 /* The reply word is read back through the uncached mirror, since the IOP
  * wrote it behind the data cache. */
 #define UNCACHED(a) ((s32 *)((u32)(a) | 0x20000000))
@@ -98,11 +107,45 @@ INCLUDE_ASM(const s32, "sdk/libcdvd", cmd_sem_init);
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", cdvd_exit);
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdPOffCallback);
+cdvdPowerCallback_t sceCdPOffCallback(cdvdPowerCallback_t callback, void *argument)
+{
+    cdvdPowerCallback_t old;
+    s32 intr;
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_Poff_Intr);
+    if (D_0052A03C < 0) {
+        PowerOffCB();
+    }
+    intr = DIntr();
+    old = D_00598C44;
+    D_00598C48 = argument;
+    D_00598C44 = callback;
+    if (intr) {
+        EIntr();
+    }
+    return old;
+}
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", PowerOffCB);
+void _sceCd_Poff_Intr(void *packet, void *argument)
+{
+    if (D_00598C44 != NULL && D_0052A024 == 0) {
+        D_00598C44(D_00598C48);
+    }
+}
+
+s32 PowerOffCB(void)
+{
+    s32 intr;
+
+    D_0052A024 = 1;
+    intr = DIntr();
+    sceSifAddCmdHandler(0x80000012, _sceCd_Poff_Intr, NULL);
+    if (intr) {
+        EIntr();
+    }
+    D_0052A024 = 0;
+    D_0052A03C = 1;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdLayerSearchFile);
 

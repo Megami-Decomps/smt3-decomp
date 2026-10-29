@@ -250,6 +250,7 @@ corePktApplyFaceDivColor	sdfVu1	0x98		docs/nonmatching/sdf/sdfVu1.md	158
 What cracked the scmd family				docs/nonmatching/sdk/libcdvd.md	3
 The scmd template, for the next pass				docs/nonmatching/sdk/libcdvd.md	24
 Semaphore delay and alarm callback				docs/nonmatching/sdk/libcdvd.md	51
+Power-off callback registration and dispatch				docs/nonmatching/sdk/libcdvd.md	62
 sceDmaPutEnv			21 of 118 words differ	docs/nonmatching/sdk/libdma.md	3
 The IPU hazard wait				docs/nonmatching/sdk/libipu.md	3
 sceIpuSync				docs/nonmatching/sdk/libipu.md	38
