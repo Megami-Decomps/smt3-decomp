@@ -53,14 +53,6 @@ typedef struct
     /* 0x11E80 */ s32 recordCount;
 } dds3GlobalWorkView_t;
 
-typedef struct
-{
-    /* 0x0 */ f32 x;
-    /* 0x4 */ f32 y;
-    /* 0x8 */ f32 z;
-    /* 0xC */ f32 w;
-} cmpVec4_t;
-
 extern fclEncyc_instance_tag *g_pinst;
 
 extern s32 GetValidUnitIndex(u8 *pindex);
@@ -180,9 +172,9 @@ extern void cmpModelFreeResource(void);
 extern s32 fclEncycFreeEntries(const char *name);
 extern char D_0053D768[];
 
-extern cmpVec4_t cmpStatusModelPos;
+extern sdfVector4_t cmpStatusModelPos;
 
-extern cmpVec4_t cmpStatusModelBasePos;
+extern sdfVector4_t cmpStatusModelBasePos;
 
 extern void itfMesMngRelease(s32 id);
 
@@ -2783,12 +2775,12 @@ s32 GetAnalogPad(void)
 }
 
 extern void rstGetEvoModelParam(u16 id, f32 *out);
-extern void initViewCamera(cmpVec4_t *camera);
+extern void initViewCamera(sdfVector4_t *camera);
 
 void InitCameraForViewMode(fclEncyc_instance_tag *pinst)
 {
     fclEncyc_readmainwork_tag *work = (fclEncyc_readmainwork_tag *)pinst->pwork;
-    cmpVec4_t model;
+    sdfVector4_t model;
     u16 modelId = *(u16 *)((u8 *)encycSaveWork + work->recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
 
     rstGetEvoModelParam(modelId, &model.x);
@@ -2832,7 +2824,7 @@ void SetBoundControl(fclEncyc_instance_tag *pinst)
 
 
 
-void initViewCamera(cmpVec4_t *v)
+void initViewCamera(sdfVector4_t *v)
 {
     SDF_VU0_COPYVECTOR(&v[0], &cmpStatusModelBasePos);
     SDF_VU0_COPYVECTOR(&v[1], &cmpStatusModelPos);
@@ -2846,7 +2838,7 @@ extern void FromEuler(f32 x, f32 y, f32 z);
 
 void InitModelPosRot(void *model, s32 id)
 {
-    cmpVec4_t vector;
+    sdfVector4_t vector;
     s32 modelId = id;
 
     rstGetEvoModelParam((u16)modelId, &vector.x);
