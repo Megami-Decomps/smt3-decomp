@@ -883,7 +883,26 @@ void ActionHm(tagPipeObject *object) {
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", ActionSlide);
+void ActionSlide(tagPipeObject *object)
+{
+    s32 axis = 0;
+    f32 step = 16.0f;
+
+    if (object->action == 12 || object->action == 14) {
+        axis = 1;
+    }
+    if (object->action == 13 || object->action == 14) {
+        step = 32.0f;
+    }
+    if (object->count != 0) {
+        step = -step;
+    }
+    object->pos[axis] += step;
+    if (!(object->pos[0] * object->pos[0] + object->pos[1] * object->pos[1] <= 250000.0f)) {
+        object->count ^= 1;
+    }
+}
+
 
 extern tagPipeObject *HITCHECK_CUR(tagPipeObject *object, f32 extension);
 extern f32 vecNormalize(f32 *vector);
