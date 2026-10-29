@@ -804,3 +804,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 344 B	directory rea
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 252 B	syscall-table discovery using two installed handlers, unsigned converging address scan and final table-pointer publication; owner 115 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 568 B	device-control transaction with bounded path, unsigned input/output gates, argument bytes and fixed typed request extent; owner 118 match, 0 differ
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 568 B	64-bit signed long conversion, unsigned cutoff and accumulation, overflow scanning and original-input end pointer; complete owner 70 match, 0 differ
+src/smt3/pipe/pipeObject.c	redthing1	done	2026-10-28	1 fn / 536 B	object creation preserves two random draws, entry offset, byte categories, metadata failure and fresh post-callback state; complete owner exact

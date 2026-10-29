@@ -225,7 +225,71 @@ void objMyLoad(tagPipeObject *objPtr)
 
 INCLUDE_ASM(const s32, "pipe/pipeObject", objLoad);
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", objMake);
+extern u32 dds3GetRandA(void *state);
+
+u8 objMake(tagPipeObject *objPtr, s32 offset, u8 id, u8 way, u8 action, u8 value)
+{
+    u8 mode;
+    u8 diagonal;
+    u32 place;
+    f32 radius;
+    tagPipeEnemyInfo *pInfo;
+    u32 storedId;
+    u32 storedAction;
+
+    memset(objPtr, 0, 0x20);
+    if (way != 0) {
+        mode = (u32)way / 10;
+        place = (u8)(way - mode * 10);
+    } else {
+        mode = ((u32)offset + dds3GetRandA(NULL)) & 3;
+        place = ((u32)id + dds3GetRandA(NULL)) % 9 + 1;
+    }
+    radius = (f32)(mode * 100) + 150.0f;
+    diagonal = place & 1;
+    if (diagonal) {
+        radius *= 0x1.6a09e6p-1f;
+    }
+    if (place < 4) {
+        objPtr->pos[1] = radius;
+    } else if (place >= 7) {
+        objPtr->pos[1] = -radius;
+    } else {
+        objPtr->pos[1] = 0.0f;
+    }
+    if (place == 1 || place == 4 || place == 7) {
+        objPtr->pos[0] = -radius;
+    } else if (place == 3 || place == 6 || place == 9) {
+        objPtr->pos[0] = radius;
+    } else {
+        objPtr->pos[0] = 0.0f;
+    }
+    objPtr->offset = offset;
+    objPtr->enabled = 1;
+    objPtr->action = action;
+    objPtr->id = id;
+    objPtr->count = 0;
+    if ((id & 0x10) == 0) {
+        pInfo = objInfo((u8)objPtr->id);
+        if (pInfo == NULL) {
+            return 0;
+        }
+        objPtr->w = pInfo->w;
+    }
+    storedId = (u8)objPtr->id;
+    if ((storedId & 0xF0) == 0) {
+        storedAction = objPtr->action;
+        if (storedAction == 6 || storedAction == 15 || storedAction == 16) {
+            objPtr->offset -= 0x230;
+        }
+    }
+    if (storedId & 0x10) {
+        objPtr->count = value * 10;
+    }
+    return value;
+}
+
+
 
 INCLUDE_ASM(const s32, "pipe/pipeObject", objOption);
 
