@@ -420,9 +420,58 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitRpc);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifExitRpc);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceRpcGetPacket_0);
+typedef struct rpcPacket {
+    u32 w[16];
+} rpcPacket;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceRpcFreePacket_0);
+typedef struct rpcQueue {
+    u32 seq;
+    rpcPacket *base;
+    s32 count;
+} rpcQueue;
+
+extern s32 DIntr(void);
+extern s32 EIntr(void);
+
+rpcPacket *_sceRpcGetPacket_0(rpcQueue *queue)
+{
+    rpcPacket *packet;
+    s32 i;
+    s32 count;
+
+    DIntr();
+    count = queue->count;
+    packet = queue->base;
+    for (i = 0; i < count; i++, packet++) {
+        if ((packet->w[4] & 1) == 0) {
+            u32 seq;
+
+            packet->w[4] = (i << 16) | 5;
+            queue->seq++;
+            /* Capture this packet's sequence before advancing the queue again. */
+            if (queue->seq == 1) {
+                seq = queue->seq++;
+            } else {
+                seq = queue->seq;
+            }
+            packet->w[5] = (u32)packet;
+            packet->w[6] = seq;
+            EIntr();
+            return packet;
+        }
+    }
+    EIntr();
+    return NULL;
+}
+
+
+void _sceRpcFreePacket_0(rpcPacket *packet)
+{
+    u32 flags = packet->w[4];
+
+    packet->w[6] = 0;
+    packet->w[4] = flags & ~1;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceRpcGetFPacket);
 

@@ -5,9 +5,9 @@ typedef struct rpcPacket {
     u32 w[16];
 } rpcPacket;
 
-/* The queue header: count, base, capacity. */
+/* Queue prefix: sequence number, packet base, signed capacity. */
 typedef struct rpcQueue {
-    s32 seq;
+    u32 seq;
     rpcPacket *base;
     s32 count;
 } rpcQueue;
@@ -25,7 +25,37 @@ void sceSifMExitRpc(void)
     D_0052BA88 = 0;
 }
 
-INCLUDE_ASM(const s32, "sdk/libmrpc", _sceRpcGetPacket);
+rpcPacket *_sceRpcGetPacket(rpcQueue *queue)
+{
+    rpcPacket *packet;
+    s32 i;
+    s32 count;
+
+    DIntr();
+    count = queue->count;
+    packet = queue->base;
+    for (i = 0; i < count; i++, packet++) {
+        if ((packet->w[4] & 1) == 0) {
+            u32 seq;
+
+            packet->w[4] = (i << 16) | 5;
+            queue->seq++;
+            /* Capture this packet's sequence before advancing the queue again. */
+            if (queue->seq == 1) {
+                seq = queue->seq++;
+            } else {
+                seq = queue->seq;
+            }
+            packet->w[5] = (u32)packet;
+            packet->w[6] = seq;
+            EIntr();
+            return packet;
+        }
+    }
+    EIntr();
+    return NULL;
+}
+
 
 void _sceRpcFreePacket(rpcPacket *p)
 {

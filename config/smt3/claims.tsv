@@ -686,3 +686,5 @@ src/smt3/effect/effMagatuhi.c	redthing1	done	2026-10-28	0 matches / shared menu 
 src/smt3/sdk/libipu.c	redthing1	done	2026-10-28	1 SDK fn / 228 B	DMA stop snapshot with configured 2.9 hardware poll padding; restart retained at native 336-byte size, 74 of 84 words match
 src/smt3/newbattle/nbKoukaProcess.c	redthing1	done	2026-10-28	1 fn / 700 B	flying effect state handling with native callback reloads, model setup and HP/MP clamps; owner 55 match, 0 differ
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 SDK fn / 248 B	clock-read RPC1 with sixteen-byte reply, eight-byte uncached output copy and native semaphore ordering; complete owner exact
+src/smt3/sdk/libmrpc.c	redthing1	done	2026-10-28	1 SDK fn / 168 B	packet allocation with interrupt ordering, signed capacity and unsigned queue sequence; owner 3 match, 0 differ
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 196 B	sibling RPC packet allocation and release; owner 2 match, 0 differ
