@@ -1660,7 +1660,51 @@ void nbPanelStockFadeOUT(void)
     nbPanelStockFadeFlag = 1;
 }
 
+extern s32 StockIDListCount;
+extern s32 StockIDListCursor;
+extern s32 StockIDListTop;
+extern u32 StockIDList[];
+
+#ifdef NON_MATCHING
+void nbPanelStockSelectInit(void)
+{
+    volatile dds3GlobalWork_t *global;
+    volatile fldAnahoriAkuma_t *unit;
+    u32 i = 0;
+    u32 index;
+    u32 flags;
+    u32 stockCount;
+    s32 count;
+
+    nbGetMainProcessData();
+    global = DDS3_GBWK;
+    nbPanelStockShiftX = 300;
+    stockCount = global->stockCount;
+    StockIDListCursor = 0;
+    StockIDListTop = 0;
+    nbPanelStockFrame = 0;
+    StockIDListCount = 0;
+    if (stockCount != 0) {
+        count = 0;
+        do {
+            index = global->stockOrder[i++];
+            unit = &global->akuma[index];
+            flags = unit->flag;
+            if ((flags & 1) && !(flags & 4) && !(flags & 2) &&
+                (unit->hp == 0 || unit->badstatus == 0x800)) {
+                StockIDList[count++] = index;
+            }
+        } while (i < global->stockCount);
+        StockIDListCount = count;
+    }
+    nbPanelStockPad = 1;
+    nbPanelStockABGR = 0x80808080;
+    nbPanelStockFadeFlag = 0;
+    nbPanelStockRun = 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelStockSelectInit);
+#endif
 
 extern s8 dds3PadButtonState[];
 extern s32 StockIDListCount;

@@ -61,10 +61,21 @@ typedef struct
     fldAnahoriAkuma_t akuma[16];   /* 0xA50 */
     /* 0x1910..0x1CF4, split on the IDB's names for the span. */
     u8 unk1910[4];
-    u8 unk1914[0x10];
-    u8 stocklist[65];              /* 0x1924 */
-    u8 stockcnt[80];
-    u8 item[19];
+    union {
+        u8 unk1914[0x10];
+        u8 stockOrder[16];
+    };
+    union {
+        struct {
+            u8 stocklist[65];      /* 0x1924 */
+            u8 stockcnt[80];
+            u8 item[19];
+        };
+        struct {
+            u32 stockCount;
+            u8 stockRemainder[160];
+        };
+    };
     u8 boss_press[160];            /* 0x19C8 */
     u8 syakkincnt[640];
     u8 negoques[4];                /* 0x1CE8 */
