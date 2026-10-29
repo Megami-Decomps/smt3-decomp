@@ -127,7 +127,10 @@ typedef struct nbDevilInfo_t {
     u16 maxhp;
     u16 mp;
     u16 maxmp;
-    u8 unk0E[0x2E];
+    u8 unk0E[0x2A];
+    s8 attackattr;
+    u8 attackcnt;
+    u8 unk3A[2];
 } nbDevilInfo_t;
 
 extern nbDevilInfo_t datDevilTable[];
@@ -602,7 +605,61 @@ INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544140);
 
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetTargetSkill);
 
+#ifdef NON_MATCHING
+typedef struct {
+    s8 skillattr;
+    s8 type;
+    s16 index;
+    u16 keisyoform;
+    s8 capacity;
+    u8 flag;
+} nbSkillAttr_t;
+
+extern nbSkillAttr_t attr[];
+extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
+extern char D_00544170[];
+
+void nbSetNormalSkill0(datUnitWork_t *work)
+{
+    datNormalSkill_t *skill;
+    datNormalSkillVisual_t *visual;
+    nbSkillAttr_t *skillattr;
+    s32 attackattr;
+    u32 attackcnt;
+    s32 index;
+
+    if (work->nowcommand == 0) {
+        index = 0;
+        skill = &datSkillTable.normal[index];
+        skillattr = &attr[index];
+        visual = &datSkillTable.visual[index];
+        skill->targettype = nbHatudoCheckSkill(work, 0x130) != 0;
+    } else if (work->nowcommand == 1 && work->nowindex >= 0xA4 && work->nowindex < 0xA8) {
+        index = work->nowindex;
+        skill = &datSkillTable.normal[index];
+        skillattr = &attr[index];
+        visual = &datSkillTable.visual[index];
+    } else {
+        return;
+    }
+    if (work->flag & 4) {
+        attackattr = 0;
+        attackcnt = 1;
+    } else {
+        attackattr = datDevilTable[work->id].attackattr;
+        attackcnt = datDevilTable[work->id].attackcnt;
+    }
+    if (skill != NULL) {
+        skillattr->skillattr = attackattr;
+        skill->targetcntmax = attackcnt;
+        skill->targetcntmin = attackcnt;
+        visual->animetype = 0;
+    }
+    printf(D_00544170);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetNormalSkill0);
+#endif
 
 s32 nbGetNakama(datUnitWork_t *s)
 {
