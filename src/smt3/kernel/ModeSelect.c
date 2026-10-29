@@ -270,7 +270,343 @@ void mselFreeResources(s32 arg)
 
 INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DF08);
 
+#ifdef NON_MATCHING
+extern void *memcpy(void *dest, const void *src, u32 size);
+extern s8 dds3PadButtonState[];
+extern void rsetOtOfs(s32 offset);
+extern void rsetAlpha(s32 alpha);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
+extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                        u32 color, sdfTexHandle_t *texture);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern s32 dds3FadeCheck(void);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
+extern s32 evtBitOff(s32 no);
+extern s32 fclChkMessage(void);
+extern s32 fclChkSelMessage(void);
+extern s8 fclGetSelMessagePos(void);
+extern void fclSetSelMessagePos(s8 pos);
+extern s32 fclStartMessage(s32 message);
+extern s32 fclStartSelMessage(s32 message);
+extern s8 fclEndMessage(void);
+extern void fclUpdateMessage(void);
+extern s32 fclEncycRegist2(fclencyceelem_t *record, s32 mode);
+extern void fmProcTrigSequence(s32 sequence);
+extern s32 fmProcessChk(void);
+extern s32 slGetExitMode(void);
+extern s32 p2sdLoadCheckMidi(s32 id);
+extern void p2sdLoadSMGFile(s32 id);
+extern void p2sdPlayBGMFade(s32 id);
+extern s32 p2sdStopBGM(s32 id);
+extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
+extern void mselDrawTitleAnim(void);
+extern void mselDrawTitleAnim2(s32 animate);
+extern void mselDrawBackground(void);
+extern void mselUpdateCursor(void);
+extern s32 mselStartDataSet(void);
+extern void mselStartGame(void);
+
+s32 mselMain(dds3ProcessID_t *id)
+{
+    s32 selection, counter, alpha, count, time, digit, i, sequence;
+    mselSaveData_t *save;
+    dds3GlobalWork_t *snapshot;
+    sdfMemHandle_t *handle;
+    mselGlobalWork_t *work;
+
+    rsetOtOfs(0x48);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    switch (gGlobal->unk_4C) {
+    case 0:
+        dds3FadeOut(0, 0, 0, 1);
+        if (p2sdLoadCheckMidi(0x710000) != 0) {
+            gGlobal->unk_4C = 2;
+            gGlobal->unk_50 = 0;
+        } else {
+            p2sdLoadSMGFile(0x710000);
+            gGlobal->unk_50 = 0;
+            gGlobal->unk_4C = (s32)((u32)gGlobal->unk_4C + 1);
+        }
+        break;
+    case 1:
+        if (p2sdLoadCheckMidi(0x710000) != 0) {
+            gGlobal->unk_50 = 0;
+            gGlobal->unk_4C = (s32)((u32)gGlobal->unk_4C + 1);
+        }
+        break;
+    case 2:
+        p2sdPlayBGMFade(0x710001);
+        dds3FadeIn(0, 0, 0, 20);
+        gGlobal->unk_50 = 0;
+        gGlobal->unk_4C = (s32)((u32)gGlobal->unk_4C + 1);
+        mselStartDataSet();
+        break;
+    case 3:
+        mselDrawTitleAnim();
+        if (dds3FadeCheck() == 0) {
+            mselUpdateCursor();
+            if (gGlobal->unk_A8 == 0 && dds3PadButtonState[0x23] < 0) {
+                gGlobal->unk_50 = 0;
+                gGlobal->unk_4C = 22;
+                dds3FadeOut(0, 0, 0, 20);
+                p2sdStopBGM(0x710001);
+                p2sdPlaySE(10, 127, 63);
+            } else if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x2C] < 0) {
+                if (gGlobal->cursor != 0) {
+                    fldWmapEnabled = 1;
+                    evtBitOff(0xAF2);
+                } else {
+                    fldWmapEnabled = 0;
+                    evtBitOn(0xAF2);
+                }
+                p2sdPlaySE(8, 127, 63);
+                gGlobal->unk_A8 = 1;
+                gGlobal->unk_50 = 0;
+                Msel_TOverData_Clear();
+                p2sdStopBGM(0x710001);
+                gGlobal->unk_4C = 16;
+                dds3FadeOut(0, 0, 0, 20);
+            }
+        }
+        break;
+    case 15:
+        mselDrawTitleAnim();
+        /* fall through */
+    case 17:
+        if (dds3FadeCheck() == 0) {
+            dds3FadeIn(0, 0, 0, 20);
+            fclStartMessage(0);
+            gGlobal->unk_4C = 4;
+        }
+        break;
+    case 16:
+    case 19:
+        if (gGlobal->unk_4C == 16) mselDrawTitleAnim();
+        else mselDrawBackground();
+        if (dds3FadeCheck() == 0) {
+            if (gGlobal->unk_40 != 0) {
+                sdfTexFreeDelayed(gGlobal->unk_40);
+                gGlobal->unk_40 = 0;
+            }
+            selection = fclLoadTexture("/title/att_font.tmx");
+            gGlobal->unk_4C = 13;
+            gGlobal->unk_44 = selection;
+            gGlobal->unk_50 = 0;
+            dds3FadeIn(0, 0, 0, 90);
+        }
+        break;
+    case 20:
+        mselDrawTitleAnim2(0);
+        if (dds3FadeCheck() == 0) {
+            dds3FadeIn(0, 0, 0, 20);
+            fclStartMessage(0);
+            gGlobal->unk_4C = 4;
+        }
+        break;
+    case 21:
+        mselDrawTitleAnim2(1);
+        if (dds3FadeCheck() == 0) {
+            gGlobal->unk_4C = 12;
+            gGlobal->unk_50 = 0;
+            dds3FadeIn(0, 0, 0, 90);
+        }
+        break;
+    case 4:
+        mselDrawBackground();
+        if (fclChkMessage() == 0) {
+            gGlobal->unk_4C = 5;
+            gGlobal->unk_50 = 0;
+            fclEndMessage();
+            fclSetSelMessagePos(0);
+            fclStartMessage(1);
+            fclStartSelMessage(2);
+        } else fclUpdateMessage();
+        break;
+    case 5:
+        mselDrawBackground();
+        if (fclChkSelMessage() != 0) {
+            gGlobal->unk_4C = 6;
+            gGlobal->unk_50 = 0;
+        }
+        fclUpdateMessage();
+        break;
+    case 6:
+        mselDrawBackground();
+        if (fclChkSelMessage() == 0) {
+            selection = fclGetSelMessagePos();
+            fclEndMessage();
+            Msel_TOverData_Clear();
+            if (selection != 0) {
+                p2sdStopBGM(0x710001);
+                gGlobal->unk_4C = 19;
+            } else {
+                snapshot = sdfMemGetPtr(gGlobal->unk_04);
+                *snapshot = *DDS3_GBWK;
+                gGlobal->unk_4C = 18;
+                gGlobal->unk_50 = 0;
+            }
+            dds3FadeOut(0, 0, 0, 20);
+        } else fclUpdateMessage();
+        break;
+    case 18:
+        mselDrawBackground();
+        if (dds3FadeCheck() == 0) {
+            dds3FadeIn(0, 0, 0, 20);
+            gGlobal->unk_4C = 7;
+            gGlobal->unk_50 = 0;
+            fmProcTrigSequence(4);
+        }
+        break;
+    case 7:
+        if (fmProcessChk() == 0) {
+            selection = slGetExitMode();
+            if (selection == 0) {
+                gGlobal->unk_4C = 17;
+                gGlobal->unk_50 = 0;
+                dds3FadeOut(0, 0, 0, 0);
+            } else if (selection == 2) {
+                save = sdfMemGetPtr(gGlobal->unk_08);
+                *save = DDS3_GBWK->encyclopedia;
+                memcpy(&gGlobal->fileInfo, DDS3_GBWK, sizeof(GameFileInfo_t));
+                handle = DDS3_GBWK->memHandle;
+                snapshot = sdfMemGetPtr(gGlobal->unk_04);
+                *DDS3_GBWK = *snapshot;
+                DDS3_GBWK->memHandle = handle;
+                mselDevilChoice();
+                if (gGlobal->unk_60 == 0) {
+                    dds3FadeIn(0, 0, 0, 90);
+                    gGlobal->unk_4C = 12;
+                    gGlobal->unk_50 = 0;
+                } else {
+                    dds3FadeIn(0, 0, 0, 15);
+                    gGlobal->unk_4C = 8;
+                    gGlobal->unk_50 = 0;
+                    fclStartMessage(3);
+                }
+            }
+        }
+        break;
+    case 8:
+        mselDrawTitleAnim2(0);
+        if (fclChkMessage() == 0) {
+            gGlobal->unk_4C = 9;
+            gGlobal->unk_50 = 0;
+            fclSetSelMessagePos(0);
+            fclStartMessage(4);
+            fclStartSelMessage(5);
+        } else fclUpdateMessage();
+        break;
+    case 9:
+        mselDrawTitleAnim2(0);
+        if (fclChkSelMessage() != 0) {
+            gGlobal->unk_4C = 10;
+            gGlobal->unk_50 = 0;
+        }
+        fclUpdateMessage();
+        break;
+    case 10:
+        mselDrawTitleAnim2(0);
+        if (fclChkSelMessage() == 0) {
+            selection = fclGetSelMessagePos();
+            fclEndMessage();
+            if (selection == 0) {
+                gGlobal->unk_4C = 11;
+                gGlobal->unk_50 = 0;
+                fclStartMessage(6);
+            } else if (selection == 1) {
+                gGlobal->unk_4C = 8;
+                gGlobal->unk_50 = 0;
+                mselDevilChoice();
+                fclStartMessage(3);
+            } else {
+                gGlobal->unk_4C = 20;
+                gGlobal->unk_50 = 0;
+                dds3FadeOut(0, 0, 0, 20);
+            }
+        } else fclUpdateMessage();
+        break;
+    case 11:
+        mselDrawTitleAnim2(1);
+        if (fclChkMessage() != 0) fclUpdateMessage();
+        else {
+            fclEndMessage();
+            gGlobal->unk_4C = 21;
+            gGlobal->unk_50 = 0;
+            dds3FadeOut(0, 0, 0, 20);
+        }
+        break;
+    case 12:
+        evtBitOn(0x8B1);
+        count = (s32)((u32)gGlobal->fileInfo.endCounterWord + 1);
+        if (count <= 0) count = 1;
+        if (count > 0) evtBitOn(0x8B6);
+        if (count >= 2) evtBitOn(0x8B7);
+        if (count >= 3) evtBitOn(0x8B8);
+        if (count >= 4) evtBitOn(0x8B9);
+        if (count >= 5) evtBitOn(0x8BA);
+        time = gGlobal->fileInfo.PlayTime;
+        if (time > 0x066FEBF8) time = 0x066FEBF8;
+        digit = (time % 108000) / 1800 % 10;
+        if (digit == 0) evtBitOn(0x8B2);
+        if (digit == 8) evtBitOn(0x8B3);
+        if (digit == 4) evtBitOn(0x8B4);
+        if (digit == 5) evtBitOn(0x8B5);
+        save = sdfMemGetPtr(gGlobal->unk_08);
+        for (i = 0; i < 5; i++) {
+            selection = gGlobal->tover[i];
+            if (selection != -1) fclEncycRegist2(&save->records[selection], 1);
+        }
+        p2sdStopBGM(0x710001);
+        if (gGlobal->unk_40 != 0) {
+            sdfTexFreeDelayed(gGlobal->unk_40);
+            gGlobal->unk_40 = 0;
+        }
+        selection = fclLoadTexture("/title/att_font.tmx");
+        gGlobal->unk_4C = 13;
+        gGlobal->unk_44 = selection;
+        gGlobal->unk_50 = 0;
+        break;
+    case 13:
+        rsetOtOfs(0x47);
+        rsetAlpha(0);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        counter = gGlobal->unk_50;
+        alpha = 128;
+        if ((u32)counter - 240 < 91) {
+            alpha = 128 - (s32)(((u32)counter << 7) - 0x7800) / 90;
+            if (alpha < 0) alpha = 0;
+            if (alpha > 128) alpha = 128;
+        }
+        if (counter >= 330) alpha = 0;
+        DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
+                    ((u32)alpha << 24) | 0x808080, (sdfTexHandle_t *)gGlobal->unk_44);
+        work = gGlobal;
+        if (work->unk_50 == 330) dds3FadeOut(255, 255, 255, 60);
+        counter = work->unk_50;
+        if (counter >= 390) {
+            work->unk_50 = 0;
+            work->unk_4C = 14;
+            mselStartGame();
+        } else work->unk_50 = (s32)((u32)counter + 1);
+        break;
+    case 22:
+        mselDrawTitleAnim();
+        counter = gGlobal->unk_50;
+        if (counter >= 21) {
+            gGlobal->unk_50 = 0;
+            gGlobal->unk_4C = 14;
+            sequence = 3;
+            dds3AdminiCallSequence(2, &sequence, sizeof(sequence), 0);
+        } else gGlobal->unk_50 = (s32)((u32)counter + 1);
+        break;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "kernel/ModeSelect", mselMain);
+#endif
 
 s32 mselExit(u32 mode)
 {
