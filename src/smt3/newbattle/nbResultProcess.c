@@ -448,6 +448,12 @@ extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void rsetAlpha(s32 mode);
 
 #ifdef NON_MATCHING
+/* 788 of 926 words match at the native 3704-byte size; first difference at
+   +0x380. Retail's four float-to-int casts are cvt.w.s, which the configured
+   ee-gcc 2.96 never selects (it always emits trunc.w.s), and reaching the
+   opcode through the fpu.h asm helper costs 82 more words of scheduling. The
+   rest is callee-saved assignment in the item-text loop and the two tail
+   blocks. */
 void nbFindTobiwarpLabel(nbMainProcessData_t *data)
 {
     char numberText[16];
@@ -457,13 +463,19 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
     s32 itemTotal;
     s32 haveItem = 0;
     u32 rewardColor = 0xA09DC300;
+    u32 color;
     s32 step;
     s32 alpha;
     s32 packed;
+    u32 half;
     s32 scoreY;
     s32 resultState;
     s32 spread;
     frFontRequest_t *font;
+    s32 ty1;
+    s32 ty2;
+    s32 px;
+    s32 py;
 
     D_00551100 = D_00551100 + 0.099999995f;
     nbResultTimer++;
@@ -472,21 +484,25 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
     nbPnl_rsetAlpha(0);
 
     if (((s32)nbResultTimer) > 0) {
-        step = ((s32)nbResultTimer) < 10 ? ((s32)nbResultTimer) : 10;
+        if (((s32)nbResultTimer) < 10) {
+            step = (s32)nbResultTimer;
+        } else {
+            step = 10;
+        }
         alpha = (step * 0x80) / 10;
-        packed = 0x80000000 | alpha | (alpha << 8) | (alpha << 16);
+        packed = (alpha << 16) | alpha | (alpha << 8) | 0x80000000;
         nbPnlSprite(0, 0, 0x200, 0x1C0, 0, 0, 0x100, 0x100,
                     packed, nbResultTexHandle);
         alpha = (step * 112) / 10;
-        packed = 0x10000000 | alpha | (alpha << 8) | (alpha << 16);
+        packed = (alpha << 16) | alpha | (alpha << 8) | 0x10000000;
         nbPnlSprite(-2, -2, 0x204, 0x1C4, 0, 0, 0x100, 0x100,
                     packed, nbResultTexHandle);
         alpha = (step * 144) / 10;
-        packed = 0x10000000 | alpha | (alpha << 8) | (alpha << 16);
+        packed = (alpha << 16) | alpha | (alpha << 8) | 0x10000000;
         nbPnlSprite(-4, -4, 0x208, 0x1C8, 0, 0, 0x100, 0x100,
                     packed, nbResultTexHandle);
         alpha = step * 16;
-        packed = 0x10000000 | alpha | (alpha << 8) | (alpha << 16);
+        packed = (alpha << 16) | alpha | (alpha << 8) | 0x10000000;
         nbPnlSprite(-6, -6, 0x20C, 0x1CC, 0, 0, 0x100, 0x100,
                     packed, nbResultTexHandle);
     }
@@ -506,7 +522,8 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
         nbPnlSprite(0xFC, 0xC0, 0x104, 5, 0xFD, 0x6F, 1, 5,
                     0x80808080, nbResultTex2);
         alpha = (s32)(sdfSin(D_00551100 * 1.3f) * 24.0f) + 0x70;
-        packed = 0x80000000 | alpha | (alpha << 8) | (alpha << 16);
+        half = alpha | 0x80000000;
+        packed = half | ((alpha << 16) | (alpha << 8));
         nbPnl_rsetAlpha(1);
         nbPnlSprite(0, 0x30, 0x9C, 0x2C, 1, 0x25, 0x9C, 0x2C,
                     packed, nbResultTex2);
@@ -514,25 +531,30 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
         nbPnl_rsetAlpha(0);
         nbPnlSprite(21, 58, 99, 21, 1, 1, 99, 21,
                     0x80808080, nbResultTex1);
+        px = 21;
+        py = 58;
         if (alpha > 0) {
             nbPnl_rsetAlpha(1);
-            packed = (u32)alpha << 24;
             spread = step / 4;
-            nbPnlSprite(21 - spread, 58 - spread, 99 + spread * 2, 21 + spread * 2,
-                        1, 1, 99, 21, packed | 0xC0C0C0, nbResultTex1);
+            nbPnlSprite(px - spread, py - spread, 99 + spread * 2, 21 + spread * 2,
+                        1, 1, 99, 21, ((u32)alpha << 24) | 0xC0C0C0, nbResultTex1);
             spread = step / 2;
-            nbPnlSprite(21 - spread, 58 - spread, 99 + spread * 2, 21 + spread * 2,
-                        1, 1, 99, 21, packed | 0x909090, nbResultTex1);
+            nbPnlSprite(px - spread, py - spread, 99 + spread * 2, 21 + spread * 2,
+                        1, 1, 99, 21, ((u32)alpha << 24) | 0x909090, nbResultTex1);
             spread = step * 3 / 4;
-            nbPnlSprite(21 - spread, 58 - spread, 99 + spread * 2, 21 + spread * 2,
-                        1, 1, 99, 21, packed | 0x606060, nbResultTex1);
-            nbPnlSprite(21 - step, 58 - step, 99 + step * 2, 21 + step * 2,
-                        1, 1, 99, 21, packed | 0x303030, nbResultTex1);
+            nbPnlSprite(px - spread, py - spread, 99 + spread * 2, 21 + spread * 2,
+                        1, 1, 99, 21, ((u32)alpha << 24) | 0x606060, nbResultTex1);
+            nbPnlSprite(px - step, py - step, 99 + step * 2, 21 + step * 2,
+                        1, 1, 99, 21, ((u32)alpha << 24) | 0x303030, nbResultTex1);
         }
     }
     nbPnl_rsetAlpha(0);
-    itemId[0] = itemId[1] = itemId[2] = 0;
-    itemCount[0] = itemCount[1] = itemCount[2] = 0;
+    itemId[0] = 0;
+    itemId[1] = 0;
+    itemId[2] = 0;
+    itemCount[0] = 0;
+    itemCount[1] = 0;
+    itemCount[2] = 0;
     itemTotal = 0;
     for (i = 0; i < 3; i++) {
         u8 item = data->item[i];
@@ -570,23 +592,28 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
             }
 
         cmpSetSkillListRows(0x13);
+        ty1 = 0x338;
+        ty2 = 0x348;
         for (i = 0; i < itemTotal; i++) {
             u32 id = itemId[i];
-            if (id == 0) { continue; }
-            font = frwGetSmallFontFRQ(0x1210, 0x338 + i * 0xD0,
-                                      0, (s32)0xA09DC380, pStr[id], NULL);
-            D_00551FC0 = font;
-            frDrawFont((frFontHandle_t *)font);
-            frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
-            nbPnlSprite(0x197, 0x6B + i * 0x1A, 0x0B, 0x0B,
-                        0xAC, 0x12, 0x0B, 0x0B, 0x80808080,
-                        nbResultTex1);
-            sprintf(numberText, D_005510F0, itemCount[i]);
-            font = frwGetSmallNumFontFRQ(0x1AC0, 0x348 + i * 0xD0,
-                                         0, 0xA09DC380, numberText, NULL);
-            D_00551FC0 = font;
-            frDrawFont((frFontHandle_t *)font);
-            frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
+            if (id != 0) {
+                font = frwGetSmallFontFRQ(0x1210, ty1,
+                                          0, (s32)0xA09DC380, pStr[id], NULL);
+                D_00551FC0 = font;
+                frDrawFont((frFontHandle_t *)font);
+                frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
+                nbPnlSprite(0x197, 0x6B + i * 0x1A, 0x0B, 0x0B,
+                            0xAC, 0x12, 0x0B, 0x0B, 0x80808080,
+                            nbResultTex1);
+                sprintf(numberText, D_005510F0, itemCount[i]);
+                font = frwGetSmallNumFontFRQ(0x1AC0, ty2,
+                                             0, 0xA09DC380, numberText, NULL);
+                D_00551FC0 = font;
+                frDrawFont((frFontHandle_t *)font);
+                frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
+            }
+            ty2 += 0xD0;
+            ty1 += 0xD0;
         }
         cmpSetSkillListRows(-1);
         }
@@ -595,16 +622,19 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
     if (((s32)nbResultTimer) >= 24) {
         s32 phase = ((s32)nbResultTimer) < 31 ? ((s32)nbResultTimer) - 23 : 8;
         s32 y = (s32)(sdfSin(D_00551100 + D_00551100) * 16.0f);
-        packed = (((u32)phase << 28) | (0x70 + y) | ((0x70 + y) << 8) | ((0x70 + y) << 16));
+        half = (0x70 + y) | ((u32)phase << 28);
+            packed = half | (((0x70 + y) << 16) | ((0x70 + y) << 8));
         nbPnlSprite(0x27, 0x5E, 0x37, 0x23, 0x21, 1, 0x37, 0x23,
                     packed, nbResultTex2);
         y = (s32)(sdfSin((D_00551100 + D_00551100) + 0.099999995f) * 16.0f);
-        packed = (((u32)phase << 28) | (0x70 + y) | ((0x70 + y) << 8) | ((0x70 + y) << 16));
+        half = (0x70 + y) | ((u32)phase << 28);
+            packed = half | (((0x70 + y) << 16) | ((0x70 + y) << 8));
         nbPnlSprite(0x3F, 0x80, 0x1F, 0x1F, 1, 1, 0x1F, 0x1F,
                     packed, nbResultTex2);
         if (haveItem != 0) {
             y = (s32)(sdfSin((D_00551100 + D_00551100) + 0.19999999f) * 16.0f);
-            packed = (((u32)phase << 28) | (0x70 + y) | ((0x70 + y) << 8) | ((0x70 + y) << 16));
+            half = (0x70 + y) | ((u32)phase << 28);
+            packed = half | (((0x70 + y) << 16) | ((0x70 + y) << 8));
             nbPnlSprite(0xD1, 0x5E, 0x45, 0x23, 0x59, 1, 0x45, 0x23,
                         packed, nbResultTex2);
         }
@@ -612,17 +642,17 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
 
     if (((s32)nbResultTimer) >= 29) {
         scoreY = ((s32)nbResultTimer) < 43 ? ((s32)nbResultTimer) - 28 : 15;
-        rewardColor |= (scoreY * 128) / 15;
+        color = rewardColor | ((scoreY * 128) / 15);
         sprintf(numberText, D_005510F8, nbGetKakutokuExp(data));
         font = frwGetSmallNumFontFRQ(0x7A0, 0x348, 0,
-                                     rewardColor,
+                                     color,
                                      numberText, 0);
         D_00551FC0 = font;
         frDrawFontEx((frFontHandle_t *)font, 1);
         frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
         sprintf(numberText, D_005510F8, nbGetKakutokuMaka(data));
         font = frwGetSmallNumFontFRQ(0x7A0, 0x448, 0,
-                                     rewardColor,
+                                     color,
                                      numberText, 0);
         D_00551FC0 = font;
         frDrawFontEx((frFontHandle_t *)font, 1);
@@ -635,10 +665,9 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
         scoreY = 0xD0;
         for (i = 0; i < 4; i++) {
             nbResultScore_t *entry = &nbResultScoreTable[i];
-            s32 use = entry->useflg;
-            u32 frame = *(volatile u32 *)&nbResultTimer;
-            if (use != 0) {
-                nbResultDrawPC1(i, 0x3F, scoreY, (s32)(frame - 20 - (u32)i * 6),
+            if (entry->useflg != 0) {
+                nbResultDrawPC1(i, 0x3F, scoreY,
+                                ((s32)nbResultTimer) - i * 6 - 20,
                                 entry->unit, entry->unitidx, data);
             }
             scoreY += 0x28;
@@ -656,7 +685,11 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
 
     resultState = nbResultState;
     if (((s32)nbResultTimer) > 0) {
-        step = ((s32)nbResultTimer) < 10 ? ((s32)nbResultTimer) : 10;
+        if (((s32)nbResultTimer) < 10) {
+            step = (s32)nbResultTimer;
+        } else {
+            step = 10;
+        }
         scoreY = (step * 0x80) / 10;
         rsetOtOfs(0x47);
         rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
