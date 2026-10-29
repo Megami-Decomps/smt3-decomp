@@ -17,12 +17,6 @@ s32 pipeFileSave(s8 filename, tagPipePosTable *posPtr, s8 index)
 }
 
 
-typedef struct {
-    s32 count;
-    sdfMemHandle_t *handle;
-    void *data;
-    void *tail;
-} pipeTypeArray_t;
 
 typedef struct {
     s32 unk_00;
@@ -53,7 +47,7 @@ extern void LoadLinkData(pipeLinkTable_t *table, pipeLinkSource_t *source, s32 m
 
 #ifdef NON_MATCHING
 /* NON_MATCHING: 103 of 106 words match at the exact 424-byte size. */
-s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, pipeTypeArray_t *type,
+s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
                  pipeLinkTable_t *link)
 {
     s32 *header;
@@ -86,14 +80,14 @@ s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, pipeTypeArray_t *ty
 
     offset = header[3];
     count = header[2];
-    type->count = count;
+    type->tabMax = count;
     src = (u8 *)header + offset;
     DEBUG_PRINT(D_00548E88, count);
-    type->handle = sdfMemAllocDirect(type->count * 9);
-    data = sdfMemGetPtr(type->handle);
-    bytes = type->count << 3;
-    type->data = data;
-    type->tail = (u8 *)data + bytes;
+    type->aHandle = sdfMemAllocDirect(type->tabMax * 9);
+    data = sdfMemGetPtr(type->aHandle);
+    bytes = type->tabMax << 3;
+    type->tabPtr = data;
+    type->data = (u8 *)data + bytes;
     memcpy(data, src, bytes);
 
     src = (u8 *)header + header[5];

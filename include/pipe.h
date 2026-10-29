@@ -31,6 +31,13 @@ typedef struct tagPipePosTable {
     u32 opaque0C;
 } tagPipePosTable;
 
+typedef struct tagPipeTable {
+    s32 tabMax;
+    sdfMemHandle_t *aHandle;
+    void *tabPtr;
+    void *data;
+} tagPipeTable;
+
 typedef struct tagPipeLinkData {
     u16 id;
     s16 partsID;
