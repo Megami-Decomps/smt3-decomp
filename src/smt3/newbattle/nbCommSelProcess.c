@@ -475,7 +475,40 @@ void DispMpPanel(sdfTexHandle_t *th, datUnitWork_t *w, s32 ox, s32 oy, s32 oz, u
     nbPnlSprite(ox, oy, bar, 6, 1, 0x1B, bar, 5, col, th);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispComm1PanelSummon);
+void DispComm1PanelSummon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy,
+                          s32 oz, u32 color)
+{
+    datUnitWork_t *work = (datUnitWork_t *)&DDS3_GBWK->akuma[d].flag;
+    s32 u = 0;
+    s32 v = 0;
+    s32 status;
+
+    nbPnlSprite(ox + 0x7F, oy + 5, 0x14, 0xB, 0x36, 0x4E, 0x14, 0xB,
+                color, s->data->pnltex[0]);
+    DispHpPanel(s->data->pnltex[0], work, ox + 2, oy + 0x14, oz, color);
+    DispMpPanel(s->data->pnltex[0], work, ox + 0x3D, oy + 0x14, oz, color);
+    status = work->badstatus & 0xFFF;
+    if (status == 0) {
+        return;
+    }
+    switch (status) {
+    case 1:     u = 0x40; v = 0x38; break;
+    case 2:     u = 0x2B; v = 0x38; break;
+    case 4:     u = 0x16; v = 0x38; break;
+    case 8:     u = 1;    v = 0x38; break;
+    case 0x10:  u = 0x7F; v = 0x22; break;
+    case 0x20:  u = 0x6A; v = 0x22; break;
+    case 0x40:  u = 0x55; v = 0x22; break;
+    case 0x80:  u = 0x40; v = 0x22; break;
+    case 0x100: u = 0x2B; v = 0x22; break;
+    case 0x200: u = 0x16; v = 0x22; break;
+    case 0x400: u = 1;    v = 0x22; break;
+    case 0x800: u = 0x55; v = 0x38; break;
+    }
+    nbPnlSprite(ox + 0x89, oy + 0x11, 0x14, 0x15, u, v, 0x14, 0x15,
+                color, s->data->pnltex[0]);
+}
+
 
 /* NON_MATCHING: 29 of 97 words differ (first at +0x8). */
 
