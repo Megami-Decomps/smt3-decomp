@@ -61,7 +61,7 @@ extern s8 cmpStatusModelFlag;
 
 extern s8 cmpStatusModelLoadState;
 
-extern s32 cmpEncycWork;
+extern mdlObj_t *cmpEncycWork;
 
 extern u16 cmpStatusModelId;
 
@@ -8523,7 +8523,7 @@ void rstSetStatusModelReady(s32 ready)
     }
 }
 
-s32 cmpGetEncycWork(void)
+mdlObj_t *cmpGetEncycWork(void)
 {
     return cmpEncycWork;
 }
@@ -8533,7 +8533,7 @@ u16 cmpGetStatusModelId(void)
     return cmpStatusModelId;
 }
 
-extern s32 mdlGetNumOfCut(s32 work, s32 index);
+extern s32 mdlGetNumOfCut(mdlObj_t *work, s32 index);
 
 #ifdef NON_MATCHING
 extern void cmpGetStatusModelMotion(mdlObj_t *model);
@@ -8665,7 +8665,7 @@ void cmpResetDrawEnv(void)
     dds3ScreenParam[5] = 2048.0f;
 }
 
-extern void mdlFree(s32 aHandle);
+extern void mdlFree(mdlObj_t *aHandle);
 
 extern void cmpFreeBadEffect(void);
 
@@ -8752,7 +8752,7 @@ s32 cmpBadEffSetup(u16 id, u32 flag)
     default:
         return 0;
     }
-    cmpCreateBadEffect(id, (void *)cmpEncycWork, D_00349300);
+    cmpCreateBadEffect(id, cmpEncycWork, D_00349300);
     hCAMPBadEffect = effCAMPBadCreate(D_00349300, kind);
     printf(D_00540040);
     return 1;
@@ -8820,7 +8820,7 @@ s32 cmpModelSetup(u16 id, s32 blocking)
 
 extern char D_00540090[];
 
-extern s32 mdlLoad(s32 group, s32 id);
+extern mdlObj_t *mdlLoad(u32 group, u32 id);
 
 extern void cmpGetStatusModelMotion();
 
@@ -8892,7 +8892,7 @@ void cmpResetStatusModelPos(void)
     cmpStatusModelBasePos.x = 0.0f;
 }
 
-void cmpSetStatusModelPose(s32 model)
+void cmpSetStatusModelPose(mdlObj_t *model)
 {
     sdfVector4_t pos;
     f32 scale;
@@ -8902,18 +8902,18 @@ void cmpSetStatusModelPose(s32 model)
     pos.x = cmpModelParamTable[cmpStatusModelId].evo[0];
     pos.y = cmpModelParamTable[cmpStatusModelId].evo[1];
     if (cmpStatusModelReady == 0) {
-        cmpGetStatusModelScale((void *)model, 0);
+        cmpGetStatusModelScale(model, 0);
         pos.z = cmpModelParamTable[cmpStatusModelId].evo[2];
         cmpResetStatusModelPos();
     } else {
-        scale = cmpGetStatusModelScale((void *)model, 1);
+        scale = cmpGetStatusModelScale(model, 1);
         pos.z = 0.0f;
         pos.x -= cmpModelParamTable[cmpStatusModelId].evo[0] - cmpModelParamTable[cmpStatusModelId].evo[0] * scale;
         pos.y -= cmpModelParamTable[cmpStatusModelId].evo[1] - cmpModelParamTable[cmpStatusModelId].evo[1] * scale;
         cmpStatusModelBasePos.z = (-400.0f - cmpModelParamTable[cmpStatusModelId].evo[2]) * scale;
     }
     SDF_VU0_LOADVECTOR_MEMOPS(pos);
-    mdlSetPosition((void *)model);
+    mdlSetPosition(model);
 }
 
 void cmpSetModelRotate(void *model)
@@ -8955,7 +8955,7 @@ void cmpSetStatusModelParam(void)
     sdf3DSetCamera((sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
 }
 
-extern void cmpSetStatusModelPose(s32 model);
+extern void cmpSetStatusModelPose(mdlObj_t *model);
 
 extern void cmpSetModelRotate(void *model);
 

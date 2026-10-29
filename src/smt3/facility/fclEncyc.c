@@ -507,8 +507,8 @@ void ReleaseWork(fclEncyc_instance_tag *pinst)
 extern void (*D_00332228[])(fclEncyc_instance_tag *);
 extern void (*CalcPhaseTable[])(fclEncyc_instance_tag *);
 extern s32 cmpModelSetup(u16 id, s32 blocking);
-extern s32 cmpGetEncycWork(void);
-extern void ChangeModelMotion(s32 id, s32 model, s32 flags);
+extern mdlObj_t *cmpGetEncycWork(void);
+extern void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags);
 
 s32 CALC_ENCYC_Process(void)
 {
@@ -1560,7 +1560,7 @@ void CalcPhaseReadExplain(fclEncyc_instance_tag *pinst)
     cmpPlayCursorSE(button);
 }
 
-extern s32 cmpGetEncycWork(void);
+extern mdlObj_t *cmpGetEncycWork(void);
 extern void cmpDrawStatusComEx(datUnitWork_t *unit, u8 alpha, s8 kind, s8 mode,
     s8 *value, s8 option, s32 color, s8 show, s8 extra, s8 full);
 extern void DrawExplainBack(s32 alpha);
@@ -1585,7 +1585,7 @@ void DrawPhaseReadExplain(fclEncyc_instance_tag *pinst)
 }
 
 extern s32 GetViewModeKey(fclEncyc_instance_tag *pinst);
-extern void ControlModel(fclEncyc_instance_tag *pinst, s32 model, s32 key);
+extern void ControlModel(fclEncyc_instance_tag *pinst, mdlObj_t *model, s32 key);
 extern void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag);
 extern void CalcMoveViewModeRibbon(fclEncyc_readmainwork_tag *work);
 
@@ -1668,7 +1668,7 @@ void DrawPhaseReadView(fclEncyc_instance_tag *pinst)
 
     DrawBackBlackBoard(work->boardY, work->boardAlpha);
     if ((pinst->stat & 0x10) != 0) {
-        void *model = (void *)cmpGetEncycWork();
+        mdlObj_t *model = cmpGetEncycWork();
 
         if (model != NULL) {
             if ((pinst->stat & 0x400) == 0) {
@@ -2771,10 +2771,9 @@ extern f32 D_00529630[4];
 extern f32 D_00332310[4];
 extern f32 D_00332320[4];
 
-void ControlModel(fclEncyc_instance_tag *pinst, s32 modelHandle, s32 key)
+void ControlModel(fclEncyc_instance_tag *pinst, mdlObj_t *model, s32 key)
 {
     fclEncycBoundWork_t *work = (fclEncycBoundWork_t *)pinst->pwork;
-    mdlObj_t *model = (mdlObj_t *)modelHandle;
 
     if (model == NULL) {
         return;
