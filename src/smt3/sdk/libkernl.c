@@ -308,7 +308,32 @@ void VSync(void)
     }
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", VSync2);
+extern void SetVSyncFlag(volatile u32 *flag, volatile u64 *result);
+
+u64 VSync2(void)
+{
+    /* Kernel-published outputs: keep the result read after interrupt restore. */
+    volatile u32 flag = 0;
+    volatile u64 result;
+    s32 enabled;
+
+    SetVSyncFlag(&flag, &result);
+    enabled = DIntr();
+    *(volatile u32 *)0x1000F000 = 4;
+    EE_SYNC();
+    if (enabled != 0) {
+        EIntr();
+    }
+    while ((*(volatile u32 *)0x1000F000 & 4) == 0 && flag == 0) {
+    }
+    enabled = DIntr();
+    *(volatile u32 *)0x1000F000 = 4;
+    EE_SYNC();
+    if (enabled != 0) {
+        EIntr();
+    }
+    return result;
+}
 
 extern s32 D_0052C2A4 __attribute__((section(".data")));
 extern s32 sceTtyInit(void);
