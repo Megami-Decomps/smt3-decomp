@@ -676,7 +676,614 @@ INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531C50);
 
 INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531C60);
 
+#ifdef NON_MATCHING
+extern const volatile sdfVector4_t D_00531C60;
+extern const char D_00531C70[], D_00531C80[];
+extern u8 D_0054E90A[2];
+extern u8 dds3PadStickState[2][2][2];
+extern s8 dds3PadButtonState[];
+extern s32 fldPlayerMoveState, fldPlayerSyukanState, D_0054ECD8;
+extern u32 D_0054ECFC;
+extern f32 fldCamPitch, fldCamLength, D_0054ECDC;
+extern f32 D_0054C3D4, D_0054C3D8, D_0054C3DC, D_0054C3E0;
+extern f32 D_0054C3E4, D_0054C3E8, D_0054C3EC, D_0054C3F0;
+extern sdfMatrix4_t D_002FA240;
+extern sdfVector4_t fldPlayerPosRotWork[];
+extern s32 printf(const char *format, ...);
+extern s32 fldEncountTestFlag(u32 flag);
+extern s32 fldCamMiwatasiChk(void);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeIn2(s32 frames);
+extern void dds3PadVibrationSet(s32 port, s32 power, s32 frames);
+extern void fldEncountSetFlag(s32 mask);
+extern void fldStatusSet(void);
+extern void fldDmgStart(f32 x, f32 y, f32 z);
+extern void mdlSingleMotion(mdlObj_t *model, s32 group, s32 motion);
+extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flags);
+extern void dds3GetRotPoseSet(dds3Basic_t *basic);
+extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+extern void InversMatrix(void);
+extern f32 EulerAngleAxisY(void);
+extern void FromRotation(f32 angle);
+extern f32 sdfSin(f32 angle);
+extern f32 sdfCos(f32 angle);
+extern void fldHitChkUnitDamage(f32 *position);
+extern void fldPlayerOn(void);
+extern void fldPlayerSvsOn(void);
+extern void fldPlayerSdwOn(void);
+extern void fldPlayerMotionSe(s32 previous, s32 next);
+
+static inline u64 fldPlayerPackedState(void)
+{
+    volatile u64 *state = (volatile u64 *)&DDS3_GBWK->akuma[0].packedState;
+    return *state;
+}
+
+s32 fldPlayerCalc_Nml(void)
+{
+    fldUnitControl_t *control = fldGetUnitControl();
+    dds3Basic_t *second = control->handle2;
+    mdlObj_t *model = dds3ObjectBaseGetModelHandle(control->handle);
+    sdfVector4_t axis __attribute__((aligned(16))) = D_00531C60;
+    sdfVector4_t position __attribute__((aligned(16)));
+    sdfVector4_t rotation __attribute__((aligned(16)));
+    sdfVector4_t previous __attribute__((aligned(16)));
+    f32 collisionPosition[4] __attribute__((aligned(16)));
+    s32 left, right, forward, back, modifier, aiming = 0, action = 0;
+    s32 moving = 0, moveDirection = -1, motion = 8, oldMotion;
+    f32 angle, moveAngle = 0.0f, speed, delta, amount;
+
+    if (second != NULL) {
+        dds3ObjectBaseGetModelHandle(second);
+    }
+    if (gfldPlayerHasiCnt > 0) {
+        f32 frame;
+        oldMotion = model->current.h.motionIndex;
+        if (oldMotion != 13) {
+            model->first->speed = 1.0f;
+            mdlSingleMotion(model, 0, 13);
+            dds3FadeIn2(8);
+        }
+        frame = model->first->frame;
+        if (fldGlobalBase.float12C < 13.0f && frame >= 13.0f) {
+            dds3PadVibrationSet(0, 1, 10);
+            dds3PadVibrationSet(1, 230, 10);
+        }
+        if (model->first->stat == 5) {
+            gfldPlayerHasiCnt = 0;
+            fldEncountSetFlag(0x40);
+        } else {
+            fldPlayerMotionSe(oldMotion, 13);
+            return 0;
+        }
+    }
+    if (fldGlobalBase.word78 == 0) {
+        if (fldPlayerStepDist > 0) {
+            if (fldGlobalBase.wordB0 == 0 && (fldPlayerStatus[0] & 1)) {
+                fldSePlay(0x22);
+                dds3FadeIn(0x80, 0x20, 0x20, 6);
+                dds3PadVibrationSet(0, 1, 6);
+                dds3PadVibrationSet(1, 150, 6);
+                fldStatusSet();
+                fldPlayerStepDist = 0;
+                fldEncountSetFlag(0x40);
+                return 0;
+            }
+            if (model->current.h.motionIndex != 10) {
+                printf(D_00531C70);
+                model->first->speed = 1.0f;
+                mdlSingleMotion(model, 0, 10);
+                fldDmgStart(fldGlobalBase.x, fldGlobalBase.y, fldGlobalBase.z);
+                fldSePlay(0x22);
+                dds3PadVibrationSet(0, 1, 30);
+                dds3PadVibrationSet(1, 150, 30);
+                fldStatusSet();
+            }
+            if (model->first->stat != 5) {
+                return 0;
+            }
+            printf(D_00531C80);
+            fldPlayerStepDist = 0;
+            fldEncountSetFlag(0x40);
+        }
+    } else if (fldPlayerStepDist > 0) {
+        s32 step = fldPlayerStepDist;
+        if (model->current.h.motionIndex != 10) {
+            model->first->speed = 1.0f;
+            mdlSingleMotion(model, 0, 10);
+            fldSePlay(0x22);
+            dds3PadVibrationSet(0, 1, 30);
+            dds3PadVibrationSet(1, 100, 30);
+            fldStatusSet();
+            step = fldPlayerStepDist;
+        }
+        step--;
+        if (step != 0) {
+            fldPlayerStepDist = step;
+            return 0;
+        }
+        fldGlobalBase.word78 = 0;
+        fldPlayerStepDist = 0;
+        fldEncountSetFlag(0x40);
+    }
+    if (fldEncountTestFlag(0x40) == 0) {
+        return 0;
+    }
+    if (fldCamMiwatasiChk() != 0) {
+        D_0054ECD8 = 0x80;
+        dds3ObjectBaseSetControlBasicSvs(control->handle, 0x80);
+        dds3ObjectBaseOnFlag(control->handle, 0x800);
+        fldPlayerOff();
+        return 0;
+    }
+    if (l_UseCollision != 0) {
+        dds3OnPoseSetFlag(control->handle->poseset, 8);
+        if (control->handle2 != NULL) {
+            dds3OnPoseSetFlag(control->handle2->poseset, 8);
+        }
+    }
+    left = D_0054E90A[0] < 0x40;
+    right = D_0054E90A[0] >= 0xC1;
+    forward = D_0054E90A[1] < 0x40;
+    back = D_0054E90A[1] >= 0xC1;
+    if (!left && !right && !forward && !back) {
+        left = dds3PadButtonState[0x24] != 0;
+        right = dds3PadButtonState[0x25] != 0;
+        forward = dds3PadButtonState[0x26] != 0;
+        back = dds3PadButtonState[0x27] != 0;
+    }
+    if (((dds3PadStickState[0][0][0] + 0xC0) & 0xFF) >= 0x81 ||
+        dds3PadStickState[0][0][1] < 0x40 || dds3PadStickState[0][0][1] >= 0xC1) {
+        left = right = forward = back = 0;
+    }
+    modifier = dds3PadButtonState[0x23] != 0 ||
+               (dds3PadButtonState[0x28] != 0 && dds3PadButtonState[0x2A] != 0);
+    if (fldGlobalBase.encountState > 0) {
+        modifier = left = right = forward = back = 0;
+    }
+    dds3GetPosPoseSet(control->handle);
+    SDF_VU0_STOREVECTOR(&position);
+    fldGlobalBase.prevX = fldGlobalBase.x;
+    fldGlobalBase.prevY = fldGlobalBase.y;
+    fldGlobalBase.prevZ = fldGlobalBase.z;
+    fldGlobalBase.x = position.x;
+    fldGlobalBase.y = position.y;
+    fldGlobalBase.z = position.z;
+    if ((left || right || forward || back) && l_UseCollision != 0) {
+        fldGlobalBase.y = position.y + (fldGlobalBase.float130 > 0.0f ? 5.0f : 10.0f);
+    }
+    {
+        f32 pitch = fldCamPitch;
+        f32 facing = fldGlobalBase.camAngle;
+        if (pitch >= 360.0f) {
+            do {
+                pitch -= 360.0f;
+            } while (pitch >= 360.0f);
+            fldCamPitch = pitch;
+        }
+        if (pitch < 0.0f) {
+            do {
+                pitch += 360.0f;
+            } while (pitch < 0.0f);
+            fldCamPitch = pitch;
+        }
+        if (facing >= 360.0f) {
+            do {
+                facing -= 360.0f;
+            } while (facing >= 360.0f);
+            fldGlobalBase.camAngle = facing;
+        }
+        if (facing < 0.0f) {
+            do {
+                facing += 360.0f;
+            } while (facing < 0.0f);
+            fldGlobalBase.camAngle = facing;
+        }
+    }
+    dds3GetRotPoseSet(control->handle);
+    SDF_VU0_STOREVECTOR(&rotation);
+    EulerAngleAxisY();
+    SDF_VU0_LOADMATRIX(&D_002FA240);
+    InversMatrix();
+    control->moveFlag = 0;
+    oldMotion = model->current.h.motionIndex;
+    dds3GetPosPoseSet(control->handle);
+    if (modifier) {
+        s32 gunMode = fldRunDanteGunFlag.word54;
+        if (gunMode == 0) {
+            if (fldGlobalBase.mode != 1 && fldGlobalBase.mode != 3) {
+                aiming = 1;
+            }
+        } else if (gunMode >= 1 && gunMode <= 10) {
+            action = gunMode;
+            if (gunMode == 2 && dds3PadButtonState[0x23] < 0) {
+                fldDmgStart(fldGlobalBase.x, fldGlobalBase.y, fldGlobalBase.z);
+                fldSePlay(0x22);
+            }
+        }
+    }
+    angle = fldGlobalBase.camAngle2;
+    if (aiming && fldGlobalBase.mode != 1 && fldGlobalBase.mode != 3) {
+        fldCamPitch = -fldGlobalBase.camAngle;
+    }
+    if (forward && left) {
+        moving = 1;
+        moveDirection = 7;
+        moveAngle = 45.0f - fldCamPitch;
+        if (aiming) {
+            motion = 6;
+        }
+    } else if (forward && right) {
+        moving = 1;
+        moveDirection = 1;
+        moveAngle = -45.0f - fldCamPitch;
+        if (aiming) {
+            motion = 5;
+        }
+    } else if (back && left) {
+        moving = 1;
+        moveDirection = 5;
+        moveAngle = 135.0f - fldCamPitch;
+        if (aiming) {
+            motion = 7;
+        }
+    } else if (back && right) {
+        moving = 1;
+        moveDirection = 3;
+        moveAngle = -135.0f - fldCamPitch;
+        if (aiming) {
+            motion = 7;
+        }
+    } else if (forward) {
+        moving = 1;
+        moveDirection = 0;
+        moveAngle = -fldCamPitch;
+        if (aiming) {
+            motion = 1;
+        }
+    } else if (back) {
+        moving = 1;
+        moveDirection = 4;
+        moveAngle = 180.0f - fldCamPitch;
+        if (aiming) {
+            motion = 7;
+        }
+    } else if (left) {
+        moving = 1;
+        moveDirection = 6;
+        moveAngle = 90.0f - fldCamPitch;
+        if (aiming) {
+            motion = 6;
+        }
+    } else if (right) {
+        moving = 1;
+        moveDirection = 2;
+        moveAngle = -90.0f - fldCamPitch;
+        if (aiming) {
+            motion = 5;
+        }
+    }
+    if (moving && fldPlayerMoveState == moveDirection) {
+        fldPlayerSyukanState++;
+    } else if (moving && (moveDirection == 0 || (aiming && moveDirection == 6))) {
+        fldPlayerMoveState = moveDirection;
+        fldPlayerSyukanState = 0;
+    } else {
+        fldPlayerSyukanState = 0;
+        fldPlayerMoveState = moveDirection;
+    }
+    if (moving) {
+        if (!aiming) {
+            angle = moveAngle;
+            speed = fldGlobalBase.word4C != -1 ? 20.0f : 29.0f;
+            motion = 1;
+            if (fldGlobalBase.float130 > 0.0f) {
+                speed += (sdfFabs(fldGlobalBase.float130) / 40.0f) + 2.0f;
+            }
+            if ((fldRunDanteGunFlag.word50 & 2) ||
+                (fldPlayerPackedState() & 0x01400000ULL)) {
+                speed *= D_0054C3D4;
+            }
+            delta = R360_LR(fldGlobalBase.camAngle, angle);
+            if (delta < 0.0f) {
+                delta = -delta;
+            }
+            moveAngle = (-angle * D_0054C3D8) / 180.0f;
+            speed = (speed / 180.0f) * (180.0f - delta);
+        } else {
+            speed = fldPlayerMoveState == 0 ? 29.0f : 20.0f;
+            if (fldRunDanteGunFlag.word50 & 2) {
+                speed *= D_0054C3DC;
+            }
+            if (fldGlobalBase.float130 > 0.0f) {
+                speed += (sdfFabs(fldGlobalBase.float130) / 40.0f) + 2.0f;
+            }
+            moveAngle = (-moveAngle * D_0054C3E0) / 180.0f;
+        }
+        position.x = fldGlobalBase.x - sdfSin(moveAngle) * speed;
+        position.y = fldGlobalBase.y;
+        position.z = fldGlobalBase.z - sdfCos(moveAngle) * speed;
+    } else {
+        position.x = fldGlobalBase.x;
+        position.y = fldGlobalBase.y;
+        position.z = fldGlobalBase.z;
+    }
+    dds3SetPosPoseSet(control->handle, &position);
+    if (l_UseCollision != 0) {
+        dds3Basic_t *basic;
+        dds3PoseSet_t *pose;
+        if (forward || back || left || right) {
+            collisionPosition[0] = position.x;
+            collisionPosition[1] = position.y;
+            collisionPosition[2] = position.z;
+            fldGlobalBase.x = position.x;
+            fldGlobalBase.y = position.y;
+            fldGlobalBase.z = position.z;
+            fldHitChkUnit(collisionPosition);
+            if (fldGlobalBase.hitValid != 0) {
+                position.x = fldGlobalBase.hitX;
+                position.y = fldGlobalBase.hitY + 44.0f;
+                position.z = fldGlobalBase.hitZ;
+                fldGlobalBase.x = position.x;
+                fldGlobalBase.y = position.y;
+                fldGlobalBase.z = position.z;
+                dds3SetPosPoseSet(control->handle, &position);
+                fldGlobalBase.hitValid = 0;
+            }
+        }
+        dds3GetPosPoseSet(control->handle);
+        SDF_VU0_STOREVECTOR(&position);
+        basic = control->handle;
+        pose = basic->poseset;
+        SDF_VU0_COPYVECTOR(&previous, &pose->pos2);
+        if (sdfFabs(previous.x - position.x) < 1.0f) {
+            pose->pos2.x = position.x;
+        } else {
+            pose->pos2.x = previous.x + (position.x - previous.x) / 3.0f;
+        }
+        if (sdfFabs(previous.y - position.y) < 1.0f) {
+            basic->poseset->pos2.y = position.y;
+        } else {
+            basic->poseset->pos2.y = previous.y + (position.y - previous.y) / 3.0f;
+        }
+        if (sdfFabs(previous.z - position.z) < 1.0f) {
+            basic->poseset->pos2.z = position.z;
+        } else {
+            basic->poseset->pos2.z = previous.z + (position.z - previous.z) / 3.0f;
+        }
+        pose = basic->poseset;
+        pose->pos2.w = 1.0f;
+        if (control->handle2 != NULL) {
+            dds3PoseSet_t *other = control->handle2->poseset;
+            other->pos2.x = pose->pos2.x;
+            other->pos2.y = pose->pos2.y;
+            other->pos2.z = pose->pos2.z;
+            other->pos2.w = pose->pos2.w;
+        }
+    }
+    fldHitChkUnitDamage(&position.x);
+    while (angle >= 360.0f) {
+        angle -= 360.0f;
+    }
+    while (angle < 0.0f) {
+        angle += 360.0f;
+    }
+    fldGlobalBase.camAngle2 = fldPlayerCalc360_8(angle);
+    delta = R360_LR(fldGlobalBase.camAngle, angle);
+    if (fldPlayerMoveState == 2 || fldPlayerMoveState == 6 ||
+        fldPlayerMoveState == 3 || fldPlayerMoveState == 5) {
+        amount = delta / 3.0f;
+    } else if (fldPlayerMoveState == 1 || fldPlayerMoveState == 7) {
+        amount = delta / 5.0f;
+    } else {
+        amount = delta / 6.0f;
+    }
+    if (aiming) {
+        amount = delta * 0.5f;
+    }
+    if (amount < 0.0f) {
+        amount = -amount;
+    }
+    if (amount < 2.0f) {
+        amount = 2.0f;
+    }
+    if ((delta >= 0.0f && delta <= amount) || (delta <= 0.0f && -amount <= delta)) {
+        fldGlobalBase.camAngle = angle;
+    } else if (delta < 0.0f) {
+        fldGlobalBase.camAngle -= amount;
+    } else {
+        fldGlobalBase.camAngle += amount;
+    }
+    SDF_VU0_LOADVECTOR(&axis);
+    FromRotation(fldGlobalBase.camAngle * D_0054C3E4 / 180.0f);
+    SDF_VU0_STOREVECTOR(&rotation);
+    dds3SetRotPoseSet(control->handle, &rotation);
+    if (control->handle2 != NULL) {
+        dds3SetRotPoseSet(control->handle2, &rotation);
+    }
+    if (fldGlobalBase.mode != 3 && fldGlobalBase.mode != 1) {
+        if (aiming) {
+            fldCamPitch = -fldGlobalBase.camAngle2;
+            D_0054ECDC = fldCamPitch;
+        } else if (fldPlayerSyukanState >= 4 &&
+                   (fldPlayerMoveState == 1 || fldPlayerMoveState == 3 ||
+                    fldPlayerMoveState == 5 || fldPlayerMoveState == 7)) {
+            if (fldPlayerMoveState == 3) {
+                fldCamPitch += 3.0f;
+            } else if (fldPlayerMoveState == 5) {
+                fldCamPitch -= 3.0f;
+            } else {
+                f32 target = -fldGlobalBase.camAngle;
+                delta = R360_LR(fldCamPitch, target);
+                amount = delta / 12.0f;
+                if (amount < 0.0f) {
+                    amount = -amount;
+                }
+                if (amount < 1.0f) {
+                    amount = 1.0f;
+                }
+                if ((delta >= 0.0f && delta <= amount) || (delta <= 0.0f && -amount <= delta)) {
+                    fldCamPitch = target;
+                } else if (delta < 0.0f) {
+                    fldCamPitch -= amount;
+                } else {
+                    fldCamPitch += amount;
+                }
+            }
+            D_0054ECDC = fldPlayerCalc360_8(fldCamPitch);
+        } else if (fldPlayerSyukanState >= 3 && (fldPlayerMoveState == 2 || fldPlayerMoveState == 6)) {
+            f32 target = -fldGlobalBase.camAngle;
+            delta = R360_LR(fldCamPitch, target);
+            amount = delta * 0.03125f;
+            if (amount < 0.0f) {
+                amount = -amount;
+            }
+            if (amount < 1.0f) {
+                amount = 1.0f;
+            }
+            if ((delta >= 0.0f && delta <= amount) || (delta <= 0.0f && -amount <= delta)) {
+                fldCamPitch = target;
+            } else if (delta < 0.0f) {
+                fldCamPitch -= amount;
+            } else {
+                fldCamPitch += amount;
+            }
+            D_0054ECDC = fldPlayerCalc360_8(fldCamPitch);
+        }
+        if ((left || right || forward || back) && (s32)fldCamPitch != (s32)D_0054ECDC) {
+            amount = D_0054C3E8;
+            delta = R360_LR(fldCamPitch, D_0054ECDC);
+            if (fldPlayerMoveState == 0) {
+                amount = 0.5f;
+            }
+            if ((delta >= 0.0f && delta <= amount) || (delta <= 0.0f && -amount <= delta)) {
+                fldCamPitch = D_0054ECDC;
+            } else if (delta < 0.0f) {
+                fldCamPitch -= amount;
+            } else {
+                fldCamPitch += amount;
+            }
+        }
+        if (aiming) {
+            s32 turn = 0;
+            if (dds3PadButtonState[0x28] < 0 && dds3PadButtonState[0x2A] == 0) {
+                D_0054ECDC -= 88.0f;
+                turn = 1;
+            } else if (dds3PadButtonState[0x2A] < 0 && dds3PadButtonState[0x28] == 0) {
+                D_0054ECDC += 88.0f;
+                turn = 1;
+            }
+            if (turn) {
+                f32 target = fldPlayerCalc360_4(D_0054ECDC);
+                D_0054ECDC = target;
+                fldGlobalBase.camAngle2 = -target;
+            }
+        } else if (dds3PadButtonState[0x28] != 0 && dds3PadButtonState[0x2A] == 0) {
+            fldCamPitch -= 4.0f;
+            if (modifier) {
+                fldGlobalBase.camAngle = -fldCamPitch;
+                SDF_VU0_LOADVECTOR(&axis);
+                FromRotation(fldGlobalBase.camAngle * D_0054C3EC / 180.0f);
+                SDF_VU0_STOREVECTOR(&rotation);
+                dds3SetRotPoseSet(control->handle, &rotation);
+            }
+            D_0054ECDC = fldPlayerCalc360_8(fldCamPitch);
+        } else if (dds3PadButtonState[0x2A] != 0 && dds3PadButtonState[0x28] == 0) {
+            fldCamPitch += 4.0f;
+            if (modifier) {
+                fldGlobalBase.camAngle = -fldCamPitch;
+                SDF_VU0_LOADVECTOR(&axis);
+                FromRotation(fldGlobalBase.camAngle * D_0054C3F0 / 180.0f);
+                SDF_VU0_STOREVECTOR(&rotation);
+                dds3SetRotPoseSet(control->handle, &rotation);
+            }
+            D_0054ECDC = fldPlayerCalc360_8(fldCamPitch);
+        }
+        D_0054ECDC = fldPlayerCalc360_8(D_0054ECDC);
+        D_0054ECFC = fldPlayerMoveState;
+    }
+    D_0054ECD8 = 0;
+    dds3ObjectBaseSetControlBasicSvs(control->handle, 0);
+    fldPlayerOn();
+    fldPlayerSdwOn();
+    if (fldGlobalBase.mode == 1 || fldGlobalBase.mode == 3) {
+        fldPlayerSvsOff();
+    } else if (fldCamLength < 100.0f) {
+        fldPlayerSvsOn();
+    } else {
+        fldPlayerSvsOff();
+    }
+    switch (action) {
+    case 1:
+        motion = 9;
+        break;
+    case 2:
+        motion = 10;
+        break;
+    case 3:
+        motion = 16;
+        break;
+    case 4:
+        motion = 11;
+        break;
+    case 5:
+        motion = 12;
+        break;
+    case 6:
+        motion = 13;
+        break;
+    case 7:
+        motion = 14;
+        break;
+    case 8:
+        motion = 15;
+        break;
+    case 9:
+        motion = 2;
+        break;
+    case 10:
+        motion = 3;
+        break;
+    }
+    if ((fldRunDanteGunFlag.word50 & 2) ||
+        (fldPlayerPackedState() & 0x01400000ULL)) {
+        if (motion == 8) {
+            motion = 18;
+        }
+        if (motion == 6) {
+            motion = 22;
+        }
+        if (motion == 5) {
+            motion = 21;
+        }
+        if (motion == 7) {
+            motion = 23;
+        }
+        if (motion == 1 || motion == 4) {
+            motion = 17;
+        }
+    }
+    fldPlayerMotion(oldMotion, motion, 6.0f);
+    fldGlobalBase.x = position.x;
+    fldGlobalBase.z = position.z;
+    fldGlobalBase.y = position.y;
+    {
+        dds3PoseSet_t *pose = control->handle->poseset;
+        fldPlayerPosRotWork[0].x = pose->pos2.x;
+        fldPlayerPosRotWork[0].y = pose->pos2.y;
+        fldPlayerPosRotWork[0].z = pose->pos2.z;
+        fldPlayerPosRotWork[0].w = pose->pos2.w;
+        fldPlayerPosRotWork[1].x = pose->rot.x;
+        fldPlayerPosRotWork[1].y = pose->rot.y;
+        fldPlayerPosRotWork[1].z = pose->rot.z;
+        fldPlayerPosRotWork[1].w = pose->rot.w;
+    }
+    fldPlayerMotionSe(oldMotion, motion);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Nml);
+#endif
 
 void fldPlayerCalc_WarpStart(void)
 {
@@ -1467,7 +2074,7 @@ extern char D_00531D58[];
 
 extern char D_00531D70[];
 
-extern s32 fldEncountTestFlag(s32 mask);
+extern s32 fldEncountTestFlag(u32 mask);
 
 extern void fldEncountSetFlag(s32 mask);
 
@@ -1485,7 +2092,7 @@ extern void fldPlayerMotionSe(s32 hisMotion, s32 upMotion);
 
 extern s32 fldPlayerCalc_Wm2(void);
 
-extern void fldPlayerCalc_Nml(void);
+extern s32 fldPlayerCalc_Nml(void);
 
 extern s32 fldPlayerCalc_Nml_syukan(void);
 
