@@ -217,12 +217,7 @@ typedef struct {
 
 typedef struct {
     u8 unk00[0x1C];
-    f32 frame;
-} fldMotionCtrl_t;
-
-typedef struct {
-    u8 unk00[0x1C];
-    fldMotionCtrl_t *motion;
+    sdfMotionCtrlr_t *motion;
 } fldModel_t;
 
 extern fldTamaSeFrame_t D_00531158;
