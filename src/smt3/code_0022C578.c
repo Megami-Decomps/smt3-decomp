@@ -8836,7 +8836,41 @@ s32 cmpDrawStatusModel(void *scene)
     return err;
 }
 
+extern cmbGlobalWork_t *volatile cmpRebuildGlobalWork asm("DDS3_GBWK");
+
+#ifdef NON_MATCHING
+void cmpRebuildStockList(void)
+{
+    cmbGlobalWork_t *work = cmpRebuildGlobalWork;
+    s8 removed = 0;
+    s32 slot = 4;
+    s32 i;
+
+    if (removed == work->stockCount) {
+        return;
+    }
+    do {
+        if ((work->party[slot].unit.flag & 1) == 0) {
+            for (i = slot; i < 15; i++) {
+                work->party[i] = work->party[i + 1];
+                work = cmpRebuildGlobalWork;
+            }
+            memset(&work->party[15], 0, sizeof(work->party[15]));
+            work = cmpRebuildGlobalWork;
+            for (i = 0; i < ((volatile cmbGlobalWork_t *)work)->stockCount; i++) {
+                if ((u8)work->stock[i] >= slot) {
+                    work->stock[i]--;
+                    work = cmpRebuildGlobalWork;
+                }
+            }
+            removed++;
+        }
+        slot++;
+    } while (slot < 16 && removed != ((volatile cmbGlobalWork_t *)work)->stockCount);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpRebuildStockList);
+#endif
 
 void cmpRemoveStockSlot(s8 index)
 {
