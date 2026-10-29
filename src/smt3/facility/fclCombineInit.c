@@ -821,8 +821,8 @@ void cmbBuildResultRow(s32 mode)
 }
 
 #ifdef NON_MATCHING
-extern s32 cmbGetBirthDevil(datUnitWork_t *first, datUnitWork_t *second,
-                            datUnitWork_t *third, datUnitWork_t *result,
+extern s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
+                            cmbUnit_t *third, datUnitWork_t *result,
                             s8 available, s8 mode, s8 flag, cmpSkillList_t *skills);
 
 void cmbCreateCombineResultTable(s32 mode)
@@ -1005,16 +1005,16 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSetupBirthPanel);
 
 extern void cmbSetupBirthPanel(s32 index);
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern s32 cmbGetBirthDevil(datUnitWork_t *first, datUnitWork_t *second,
-                            datUnitWork_t *third, datUnitWork_t *result,
+extern s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
+                            cmbUnit_t *third, datUnitWork_t *result,
                             s8 available, s8 mode, s8 flag, cmpSkillList_t *skills);
 
 #ifdef NON_MATCHING
 s32 cmbCalcBirthDevil(void)
 {
-    datUnitWork_t *first;
-    datUnitWork_t *second;
-    datUnitWork_t *third;
+    cmbUnit_t *first;
+    cmbUnit_t *second;
+    cmbUnit_t *third;
     s32 row;
     s32 column;
     s32 available;
@@ -1025,10 +1025,10 @@ s32 cmbCalcBirthDevil(void)
     if (CMB_GBWK->unk_00004 != 1) {
         return 0;
     }
-    first = &DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index].unit;
-    second = &DDS3_GBWK->party[CMB_GBWK->stockSlot[1].index].unit;
+    first = &DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index];
+    second = &DDS3_GBWK->party[CMB_GBWK->stockSlot[1].index];
     if (CMB_GBWK->stockSlot[2].index >= 0) {
-        third = &DDS3_GBWK->party[CMB_GBWK->stockSlot[2].index].unit;
+        third = &DDS3_GBWK->party[CMB_GBWK->stockSlot[2].index];
     } else {
         third = NULL;
     }
@@ -2060,7 +2060,7 @@ s32 cmbDevilCanBirth(u16 devilId)
     return flag > 0;
 }
 
-s32 cmbMakeBirthDevil(cmbUnit_t *first, cmbUnit_t *second, s32 id3, s8 race1, s8 race2, u16 *ids, u8 *races)
+s32 cmbMakeBirthDevil(cmbUnit_t *first, cmbUnit_t *second, cmbUnit_t *third, s8 race1, s8 race2, u16 *ids, u8 *races)
 {
     datUnitWork_t unit;
     u8 kind;
@@ -2514,7 +2514,129 @@ no:
     return 0;
 }
 
+#ifdef NON_MATCHING
+s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
+                     cmbUnit_t *third, datUnitWork_t *output,
+                     s8 available, s8 mode, s8 accidentEnabled, cmpSkillList_t *skills)
+{
+    u16 ids[3];
+    u8 races[3];
+    /* Retail leaves the no-result unit unset; its caller discards it. */
+    cmbUnit_t unit = {0};
+    s32 inheritedFlag;
+    s32 result;
+    s32 accident = 0;
+    s32 moonResult;
+    u8 kind;
+
+    inheritedFlag = ((first->unit.flag & 0x1000) != 0) | ((second->unit.flag & 0x1000) != 0);
+    if (third != NULL && (third->unit.flag & 0x1000) != 0) {
+        inheritedFlag = 1;
+    }
+    if (cmbCheckDevilPair(&first->unit, &second->unit, third != NULL ? &third->unit : NULL) != 0 ||
+        first->unit.id == second->unit.id ||
+        (third != NULL && (first->unit.id == third->unit.id || second->unit.id == third->unit.id))) {
+        output->id = 0;
+        return 0;
+    }
+    if (second->unit.level < first->unit.level) {
+        cmbGetDevilIdAndRace(first, &ids[0], &races[0]);
+        cmbGetDevilIdAndRace(second, &ids[1], &races[1]);
+    } else {
+        cmbGetDevilIdAndRace(first, &ids[1], &races[1]);
+        cmbGetDevilIdAndRace(second, &ids[0], &races[0]);
+    }
+    if (third != NULL) {
+        cmbGetDevilIdAndRace(third, &ids[2], &races[2]);
+    } else {
+        ids[2] = 0;
+    }
+    if (ids[2] != 0) {
+        result = cmbFindUnlockedResult(first, second, third, available, mode);
+        if (result == 0) {
+            result = cmbFindCombineResult(ids[0], ids[1], ids[2]);
+            if (result == 0) {
+                s32 race = (u8)cmbGetCombineRace(ids[0], ids[1], ids[2]);
+                if (race != 0) {
+                    result = cmbGetRaceCombineResult(
+                        race, cmbCalcResultLevel(first, second, third, mode));
+                    kind = 9;
+                } else {
+                    result = cmbMakeBirthDevil(first, second, third, available, mode, ids, races);
+                    kind = 8;
+                }
+            } else {
+                kind = 9;
+            }
+        } else {
+            kind = 9;
+        }
+    } else {
+        result = (u16)cmbGetCombineResultEx(first, second, available, mode, ids, races, &kind);
+    }
+    if (kind == 1 || kind == 8) {
+        moonResult = cmbGetMoonBonus(result);
+        if (moonResult != 0) {
+            if (races[0] == 0x26 || races[1] == 0x26) {
+                kind = 0;
+                result = 0;
+            } else {
+                result = moonResult;
+                kind = 12;
+            }
+        }
+    }
+    if ((kind == 1 || (kind >= 3 && kind < 7) || kind == 8) &&
+        accidentEnabled != 0 && cmbIsFullMoon() != 0) {
+        accident = (s8)(cmbSkipRand() + 1);
+        printf("Combione accident!!!!!!!!!!!!!!!!!!!!!!! type = %d\n", accident - 1);
+    }
+    if (accident == 1) {
+        result = cmbBuildDevilEntry(result);
+        kind = 10;
+    }
+    if (result != 0) {
+        if (kind != 2) {
+            cmbCopyDefaultDevilToStock(result, &unit.unit);
+            cmbInheritSkills(&unit, &first->unit);
+            cmbInheritSkills(&unit, &second->unit);
+        } else if (first->unit.id == result) {
+            cmbCopyCustomDevilToStock(&unit.unit, &first->unit);
+            cmbClearSkillSlots(&unit);
+            cmbInheritSkills(&unit, &second->unit);
+            cmbGetEvoTable(second->unit.id, &unit.unit);
+        } else {
+            cmbCopyCustomDevilToStock(&unit.unit, &second->unit);
+            cmbClearSkillSlots(&unit);
+            cmbInheritSkills(&unit, &first->unit);
+            cmbGetEvoTable(first->unit.id, &unit.unit);
+        }
+        if (third != NULL) {
+            if (accident != 1) {
+                cmbCalcIkenieExp(&unit.unit, &first->unit, &second->unit, &third->unit);
+            }
+            cmbInheritSkills(&unit, &third->unit);
+        }
+        cmbCalcInheritCount(first, second, third, &unit, skills);
+    }
+    if (accident == 2) {
+        cmbCalcUnitParam(&unit);
+        kind = 11;
+    }
+    if (output != NULL) {
+        cmbCopyCustomDevilToStock(output, &unit.unit);
+        output->hp = output->maxhp;
+        output->mp = output->maxmp;
+        if (inheritedFlag != 0) {
+            output->flag |= 0x1000;
+        }
+    }
+    return result == 0 ? 0 : kind;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthDevil);
+#endif
+
 
 extern char D_0054FB10[];
 extern char *datExplainTable[];
