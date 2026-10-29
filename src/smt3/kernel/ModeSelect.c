@@ -6,6 +6,7 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
+#include "field.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -371,15 +372,7 @@ s32 mselStartDataSet(void)
     return evtBitOn(0xC0F);
 }
 
-typedef struct
-{
-    /* 0x00 */ u8 unk_00[0x44];
-    /* 0x44 */ s32 enabled;
-    /* 0x48 */ u32 unk_48;
-    /* 0x4C */ s32 counter;
-} fldDanteGunWork_t;
-
-extern fldDanteGunWork_t fldRunDanteGunFlag;
+extern fldDanteGunState_t fldRunDanteGunFlag;
 
 extern void fldSetNextField(s32 a, s32 b);
 

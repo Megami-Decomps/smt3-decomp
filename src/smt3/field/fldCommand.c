@@ -35,15 +35,6 @@ typedef struct
 
 typedef struct
 {
-    s32 gunFlag;
-    u8 unk04[0x28];
-    s32 skyTable;              /* 0x2C */
-    u8 unk30[4];
-    s32 filter;                /* 0x34 */
-} fldEnvironmentWork_t;
-
-typedef struct
-{
     void *resourceState;
     u32 roomNumber;
 } fldMatterWork_t;
@@ -202,7 +193,7 @@ extern char *strstr(const char *, const char *);
 
 extern s32 fldCamUnit[];
 
-extern fldEnvironmentWork_t fldRunDanteGunFlag;
+extern fldDanteGunState_t fldRunDanteGunFlag;
 
 extern void fldSkySetFilter(s32 idx, s32 mode, s32 hokan);
 

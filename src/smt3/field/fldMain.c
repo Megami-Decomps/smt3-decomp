@@ -64,34 +64,7 @@ typedef struct {
     u8 unk94[12];
 } fldSceneParam_t;
 
-typedef struct {
-    s32 gunFlag;                /* 0x00 */
-    s32 word04;
-    s32 word08;
-    s32 word0C;
-    s32 word10;
-    s32 word14;
-    s32 word18;
-    s32 word1C;
-    s32 word20;
-    s32 word24;
-    s32 word28;
-    s32 skyTable;               /* 0x2C */
-    s32 word30;
-    s32 filter;                 /* 0x34 */
-    s32 word38;
-    s32 word3C;
-    s32 word40;
-    s32 enabled;                /* 0x44 */
-    u32 unk48;
-    s32 counter;                /* 0x4C */
-    s32 word50;
-    s32 word54;
-    u32 unk58;
-    s32 word5C;
-} fldDanteGunWork_t;
-
-extern fldDanteGunWork_t fldRunDanteGunFlag;
+extern fldDanteGunState_t fldRunDanteGunFlag;
 
 extern u8 fldDoorExitFlag;
 
