@@ -69,7 +69,7 @@ typedef struct
     /* 0x34AC */ ragListWindow_t itemList3Window;
     /* 0x3640 */ u8 reserved3640[0x1008];
     /* 0x4648 */ s32 script;
-    /* 0x464C */ s32 scriptArg;
+    /* 0x464C */ u8 *scriptArg;
     /* 0x4650 */ s32 unk_4650;
     /* 0x4654 */ s32 texHandle[2];
     /* 0x465C */ u8 unk_465C[0xE4];
@@ -352,7 +352,7 @@ s32 ragUpdateCallSeq(s32 SeqNo)
     return 1;
 }
 
-extern ragItemReq_t *ragGetConfirmEntry(s32 kind, u8 flag);
+extern u16 *ragGetConfirmEntry(s8 kind, u8 flag);
 extern u16 ragCheckHeartsChoice(s8 index);
 extern s32 datGetItemSlotIndex(u16 id);
 extern s32 cmbChkGetHearts(s32 rawId);
@@ -363,7 +363,7 @@ extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 void ragUpdateSeqItem(void)
 {
     s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
-    ragItemReq_t *entry = ragGetConfirmEntry(0, ragGetHeartsFlag(1));
+    ragItemReq_t *entry = (ragItemReq_t *)ragGetConfirmEntry(0, ragGetHeartsFlag(1));
 
     if (fclGetFlag(0) == 0) {
         return;
@@ -429,7 +429,7 @@ extern s32 cmpModelSetup(s32 a, s32 b);
 void ragUpdateSeq2(void)
 {
     s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
-    ragItemReq_t *entry = ragGetConfirmEntry(1, ragGetHeartsFlag(2));
+    ragItemReq_t *entry = (ragItemReq_t *)ragGetConfirmEntry(1, ragGetHeartsFlag(2));
 
     if (fclGetFlag(0) == 0) {
         return;
@@ -473,7 +473,7 @@ void ragUpdateSeq2(void)
 void ragUpdateSeq3(void)
 {
     s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
-    ragItemReq_t *entry = ragGetConfirmEntry(2, ragGetHeartsFlag(3));
+    ragItemReq_t *entry = (ragItemReq_t *)ragGetConfirmEntry(2, ragGetHeartsFlag(3));
 
     if (fclGetFlag(0) == 0) {
         return;
@@ -568,7 +568,77 @@ void ragUpdateSeqStatus(void)
     cmpPlayCursorSE(button);
 }
 
+extern u32 dds3GetProcessStat(dds3ProcessID_t *id);
+extern s32 fclGetFlag(s8 index);
+extern s32 fclAddItem(u16 item, s32 count);
+extern s32 cmbAddCustomDevilToStock(datUnitWork_t *custom, cmbUnit_t *list, u8 count);
+extern s32 fclEncycRegist(datUnitWork_t *unit, s32 overwrite);
+extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
+
+#ifdef NON_MATCHING
+s32 ragUpdateSeqConfirm(void)
+{
+    ragItemReq_t *items = NULL;
+    datUnitWork_t *unit;
+    s32 slot = 0;
+    s32 state;
+    s32 i;
+
+    state = cmpChkSeqInfo((cmbGbWork_t *)ragUpdateWork);
+    if (state == 1) {
+        return 1;
+    }
+    if (state == 2) {
+        ragUpdateReturn();
+        return 1;
+    }
+    if (dds3GetProcessStat((dds3ProcessID_t *)ragUpdateWork->scriptArg) == 2) {
+        return 0;
+    }
+    state = fclGetFlag(2);
+    if (state == 1) {
+        ragUpdateReturn();
+        return 1;
+    }
+    if (state != 0) {
+        return 1;
+    }
+    switch (ragUpdateWork->unk_0003) {
+    case 1:
+        items = (ragItemReq_t *)ragGetConfirmEntry(0, ragGetHeartsFlag(1));
+        fclAddItem(ragCheckHeartsChoice(1), 1);
+        break;
+    case 2:
+        items = (ragItemReq_t *)ragGetConfirmEntry(1, ragGetHeartsFlag(2));
+        slot = cmbAddCustomDevilToStock(&ragUpdateWork->previewUnit,
+                                        (cmbUnit_t *)&DDS3_GBWK->akuma[4].flag, 12);
+        break;
+    case 3:
+        items = (ragItemReq_t *)ragGetConfirmEntry(2, ragGetHeartsFlag(3));
+        slot = cmbAddCustomDevilToStock(&ragUpdateWork->previewUnit,
+                                        (cmbUnit_t *)&DDS3_GBWK->akuma[4].flag, 12);
+        break;
+    }
+    p2sdPlaySE(0x19, 0x7F, 0x3F);
+    if (slot >= 0) {
+        unit = (datUnitWork_t *)&DDS3_GBWK->akuma[4 + slot].flag;
+        unit->hp = unit->maxhp;
+        unit->mp = unit->maxmp;
+        fclEncycRegist(unit, 0);
+        for (i = 0; i < 3; i++) {
+            if (items[i].item != 0) {
+                fclAddItem(items[i].item, -items[i].count);
+            }
+        }
+    }
+    ragUpdateWork->unk_0005 = 1;
+    ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 9,
+                                              &ragUpdateWork->scriptArg);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqConfirm);
+#endif
 
 void ragUpdateSeqMitama(void)
 {
