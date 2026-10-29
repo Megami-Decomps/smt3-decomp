@@ -185,10 +185,8 @@ question is never solved:
 
 ## sdfModelTempPacketLinkOt (sdf/sdfModel, 0x468)
 
-Two hundred twenty-seven of 282 words differ positionally, at 281 emitted
-words against 279 native; aligned on the instruction stream the distance is
-one hundred twenty-four of 279, of which fifty-nine are the same instruction
-with one register renamed. The draft's body is believed right: the node walk,
+One hundred sixty-three of 282 words match at the exact 1128-byte size, first
+difference at +0x60. The draft's body is believed right: the node walk,
 the format-1 shape list, the screen transform, the bounds reject, the four
 draw-tag slots, the 0xC0 temp packet and the ordering-table flush all appear
 in retail's order with retail's operands.
@@ -202,7 +200,38 @@ ordering-table index, the draw-parameter packet and the flush loop are one
 source template in both. Everything learned on one carried to the other, so
 fix them together.
 
+### The mat-ref packet write, and what it recovered
+
+The inner `PACKET_TYPE_NORMAL` block is the same code as
+`sdfModelSetOneSkinDrawPacket`'s header, and it wants the same two properties:
+the packet word is one `u32` narrowed in place, and it is read **after** the
+`sdfGrAllocPacketBuff` call, which is where retail's `lw $16, 0x4($18)`,
+`srl $5, $16, 16` and `andi $16, $16, 0xFFFF` sit:
+
+    buf = sdfGrAllocPacketBuff(0x30);
+    packed = *(u32 *)&pkt->packetSize;
+    matIndex = packed >> 16;
+    packed &= 0xFFFF;
+    body = sdfModelSetMatRefPacket(root, matIndex, buf, frame);
+
+That single change took the function from 54 of 282 words and eight excess
+bytes to 163 of 282 at the exact 1128-byte size, first difference at +0x60. A
+separate `u16 qwc = packed;` is what cost the rest: `packed`'s references drop
+below the allocator's threshold and the whole body's registers rotate.
+
 What is not established, and is the whole residual here:
+
+- The light and fog default block at +0x60 has the colour spill and the
+  `lw %gp_rel(sdf3DLightDefault)` the other way round, and the two default
+  addresses in swapped registers (`$4`/`$3` against the draft's `$2`/`$4`),
+  which renames the two `movz` pairs that follow. Both `movz` selects and
+  their frame slots are otherwise retail's.
+- The node loop's cursors are rotated: retail walks the shape list in `$20`
+  and keeps the header in `$19`, the draft uses `$17` and `$19`, which shifts
+  the whole temp-packet block by one word from +0x210 to +0x2F8.
+- The `while ((header = *list++) != NULL)` test comes out `bnel` with the
+  header load in the likely slot, where retail emits `bne` plus
+  `addiu $20, $20, 0x4` in a real delay slot.
 
 - Retail holds nine values in saved registers across the node loop: `aRoot`
   in `$23`, the node, the matrix pointer `node + 0xC0` in `$30`, the shape
