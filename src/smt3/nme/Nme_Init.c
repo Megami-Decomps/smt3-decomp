@@ -2,6 +2,7 @@
 #include "kernel.h"
 #include "libsdf.h"
 #include "nme.h"
+#include "newdata.h"
 
 
 extern void sdfTexFree(sdfTexHandle_t *aHandle);
@@ -290,7 +291,100 @@ nmeWork_t *nmeLoadFont(s8 target, s8 mode, s32 parent)
     return work;
 }
 
+#ifdef NON_MATCHING
+extern dds3GlobalWork_t *volatile nmeFontGlobalWork asm("DDS3_GBWK");
+
+typedef struct {
+    u32 packedRows[24][3];
+} nmeNameGlyphImage_t;
+
+typedef nmeNameGlyphImage_t nmeNameGlyphImages_t[16];
+
+extern u8 *frDecodeFontImage(u8 style, s32 fontNo);
+extern void sdfChipFreeDirect(void *ptr);
+
+void nmeBuildNameFont(s8 target, nmeWork_t *work)
+{
+    volatile nmeWork_t *live = work;
+    s8 row;
+    s8 glyphCodeIndex = 0;
+    s32 bitmapIndex = 0;
+
+    for (row = 0; row < 2; row++) {
+        s32 index;
+        dds3GlobalWork_t *global = nmeFontGlobalWork;
+        u8 count = live->inputRowEnabled[row];
+        global->unk657C[(s32)target * 2 + row] = count;
+        if (work->inputRowEnabled[row] <= 0) {
+            continue;
+        }
+        index = 0;
+        do {
+            u8 lead = work->inputChars[row][index][0];
+            u8 trail = work->inputChars[row][index][1];
+            u16 code = (u16)(((u16)lead << 8) | trail);
+            s32 fontNo;
+            u16 decoded;
+            u8 *source;
+            nmeNameGlyphImage_t *destination;
+
+            if (code > 0x8080) {
+                decoded = nmeCharToIndex(lead, trail);
+            } else if (code == 0x8080) {
+                decoded = 0x20;
+            } else {
+                decoded = code;
+            }
+            nmeFontGlobalWork->unk657C[8 + (s32)target * 0x20 + (s32)glyphCodeIndex * 2] = decoded >> 8;
+            nmeFontGlobalWork->unk657C[9 + (s32)target * 0x20 + (s32)glyphCodeIndex * 2] = decoded;
+            glyphCodeIndex = (s8)(glyphCodeIndex + 1);
+            if (decoded < 0x80) {
+                fontNo = decoded - 0x20;
+            } else {
+                s32 value = decoded - 0x8080;
+                fontNo = ((value & 0xFF00) >> 1) + (value & 0x7F);
+            }
+            source = frDecodeFontImage(4, fontNo);
+            destination = &((nmeNameGlyphImages_t *)nmeFontGlobalWork->nameData)[target][bitmapIndex];
+            *destination = *(nmeNameGlyphImage_t *)source;
+            sdfChipFreeDirect(source);
+            bitmapIndex++;
+            index++;
+        } while (work->inputRowEnabled[row] > index);
+    }
+
+    {
+        s32 index;
+        s8 count = work->inputRowEnabled[2];
+        u8 byteCount = live->inputRowEnabled[2];
+        if (count > 0) {
+            index = 0;
+            do {
+                u8 lead = work->inputChars[2][index][0];
+                u8 trail = work->inputChars[2][index][1];
+                u16 code = (u16)(((u16)lead << 8) | trail);
+                u16 decoded;
+
+                if (code > 0x8080) {
+                    decoded = nmeCharToIndex(lead, trail);
+                } else if (code == 0x8080) {
+                    decoded = 0x20;
+                } else {
+                    decoded = code;
+                }
+                nmeFontGlobalWork->unk657C[0x88 + index * 2] = decoded >> 8;
+                nmeFontGlobalWork->unk657C[0x89 + index * 2] = decoded;
+                index++;
+                count = work->inputRowEnabled[2];
+                byteCount = live->inputRowEnabled[2];
+            } while (index < count);
+            nmeFontGlobalWork->unk657C[0xD8] = byteCount;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeBuildNameFont);
+#endif
 
 extern u32 dds3KernelDebugSignOrg;
 extern u32 dds3KernelDebugSign;
