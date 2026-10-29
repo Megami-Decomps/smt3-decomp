@@ -317,7 +317,8 @@ extern u8 D_003129D8[];
 
 typedef struct {
     s32 type;
-    s32 unk04;
+    s16 unk04;
+    s16 unk06;
     s32 effectType;
     s32 unk0C;
 } fldTakaraData_t;
