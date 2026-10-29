@@ -45,7 +45,8 @@ typedef struct nbMainProcessData_t
     u8 unk_14[0x4];
     s16 playerpcnt;
     s16 enemypcnt;
-    u8 unk_1C[0x4];
+    s16 activeunit;
+    u8 unk_1E[0x2];
     nbStatWork_t *statwork;
     void *statbuf;
     s32 unk_28;
