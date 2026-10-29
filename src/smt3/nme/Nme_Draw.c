@@ -301,7 +301,54 @@ void nmeBackspace(void)
     nmeDeleteChar(1);
 }
 
+#ifdef NON_MATCHING
+extern const s8 D_005516B8[3];
+extern const u8 *volatile D_005276C4;
+
+void nmeMoveCursorBy(s8 delta)
+{
+    volatile s32 first = D_005516B8[0];
+    volatile s32 second = D_005516B8[1];
+    volatile s32 terminator = D_005516B8[2];
+    volatile u8 text[3];
+    cmpCursorInfo_t *cursor = &nmeUpdateWork->inputCursor;
+    s32 limit;
+    s16 position;
+
+    text[0] = first;
+    text[1] = second;
+    text[2] = terminator;
+    position = (u16)cursor->unk_22 + delta;
+    cursor->unk_22 = position;
+    limit = cursor->unk_20 - cursor->unk_26;
+    while (position != limit) {
+        const u8 *character;
+        u8 firstByte, secondByte;
+        if (position > limit) {
+            cursor->unk_22 = cursor->unk_20 - cursor->unk_26;
+            break;
+        }
+        position = cursor->unk_22;
+        if (position < 0) {
+            cursor->unk_22 = 0;
+            break;
+        }
+        character = D_005276C4 + position * 0x20;
+        firstByte = character[0];
+        text[0] = firstByte;
+        secondByte = character[1];
+        text[1] = secondByte;
+        if (firstByte != 0x80 || secondByte != firstByte) {
+            break;
+        }
+        position = (u16)cursor->unk_22 + delta;
+        cursor->unk_22 = position;
+        limit = cursor->unk_20 - cursor->unk_26;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursorBy);
+#endif
 
 /* Native dispatchers pass the mode word; this helper derives the row globally. */
 void nmeSyncCursor(s32 mode) {
