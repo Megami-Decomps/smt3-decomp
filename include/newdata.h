@@ -206,6 +206,7 @@ typedef struct
     };
     u8 reserved19D10[0x800];
 } dds3GlobalWork_t;
+typedef char dds3GlobalWorkSizeCheck[(sizeof(dds3GlobalWork_t) == 0x1A510) ? 1 : -1];
 
 extern dds3GlobalWork_t *DDS3_GBWK;
 
