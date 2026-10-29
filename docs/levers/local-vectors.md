@@ -65,3 +65,11 @@ above 500 selects the existing fallback; the random fallback is gated by the
 invoke formation's `0x100` bit. Keep both rotate checks in the final target walk:
 there is a state/identity test between those two real provider calls. The
 complete normal camera-skill owner checks 31 match / 0 differ.
+
+The sibling `nbCameraShot_InvokeTargetPartyTop_Set` also matches, at 716 bytes.
+Its own radius and scanned-height locals preserve their separate lifetimes.
+The earlier draft compared formation indices in the final walk; retail compares
+the formation pointers themselves. Its extra invoke-height fallback is
+`height <= 150`, and its random fallback is unconditional after the height
+scan. It uses one final rotate check per target, where Top2 uses two. The
+combined normal owner checks 32 match / 0 differ.
