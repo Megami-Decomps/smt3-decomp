@@ -22,7 +22,6 @@ page and line to open. Conventions are in
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 5 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
-| 4 |  | [sdk/libm.md](sdk/libm.md) |
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
@@ -41,6 +40,7 @@ page and line to open. Conventions are in
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
+| 2 |  | [sdk/libm.md](sdk/libm.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |

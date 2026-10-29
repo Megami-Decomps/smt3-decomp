@@ -73,3 +73,18 @@ union alive throughout the function emits the native260 bytes but differs in38
 words. The original unsigned word-view macro boundary closes all65 words under
 the qualified library profile. No artificial storage, register constraint or
 added operation is used.
+
+## cosf and sinf
+
+The cosine and sine wrappers match all212 and232 instruction bytes. Their
+existing quadrant dispatches were already exact. Replacing the first scoped
+word-view block with the shared `GET_FLOAT_WORD` macro, followed by the same
+signed magnitude mask, closes the fifteen entry scheduling/temporary words
+in each wrapper under the qualified library profile. Their union remains a
+real binary32 representation transfer; there is no invented access or storage.
+
+The magnitude cutoff is0x3F490FD8. The direct kernels receive a positive-zero
+tail, with selector0 for sine. All larger words use the two-component range
+reducer, including exponent255 encodings; no generic infinity/NaN gate is added.
+The low two bits of the signed quadrant result select the original kernel/sign
+permutation, and reduced sine calls pass selector1.

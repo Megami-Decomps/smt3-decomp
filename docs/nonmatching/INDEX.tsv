@@ -276,8 +276,6 @@ sceOpen				docs/nonmatching/sdk/libkernl.md	189
 _sceFs_Rcv_Intr				docs/nonmatching/sdk/libkernl.md	217
 __ieee754_atan2f				docs/nonmatching/sdk/libm.md	3
 __ieee754_sqrtf				docs/nonmatching/sdk/libm.md	25
-cosf	sdk/libm	0xD4	15 of 53 words differ	docs/nonmatching/sdk/libm.md	63
-sinf	sdk/libm	0xE8	15 of 58 words differ	docs/nonmatching/sdk/libm.md	67
 sceMcWrite			88 of 95 words match	docs/nonmatching/sdk/libmc.md	30
 sceMcSync				docs/nonmatching/sdk/libmc.md	61
 sceMcSetFileInfo				docs/nonmatching/sdk/libmc.md	72
