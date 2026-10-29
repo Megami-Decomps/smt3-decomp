@@ -128,6 +128,45 @@ measured, not inferred:
 from the decomp.me archive, and its `cc1` output is identical to the 2.9 `cc1`
 shipped in SDK 2.0.4, so nothing from the SDK has to be run.
 
+### Which 2.9, and which assembler
+
+A sweep over every ee-gcc the decomp.me archive publishes for the EE, on one
+clean-room probe of `sceGsResetPath` compiled through `tools/cc.sh` as the
+`sdk/libgraph` unit, says the cc1 point release does not matter and the
+assembler does:
+
+| build | bytes | words differing | `jr` slot |
+|---|---|---|---|
+| ee-gcc2.9-990721 | 108 | 2 of 26 | `nop` |
+| ee-gcc2.9-991111 | 108 | 2 of 26 | `nop` |
+| ee-gcc2.9-991111a | 108 | 2 of 26 | `nop` |
+| ee-gcc2.9-991111-01 | 108 | 2 of 26 | `nop` |
+| ee-gcc2.9-991111-01-dtls13010 | 104 | none | filled |
+| ee-gcc2.95.2-273a | 112 | 15 of 26 | `nop` |
+| ee-gcc2.95.3-114 | 112 | 15 of 26 | `nop` |
+| ee-gcc2.95.3-136 | 112 | 15 of 26 | `nop` |
+
+All four 2.9 builds emit the same assembly, down to the register allocation,
+and only the two words of the tail differ from retail. The `dtls13010` entry is
+the same compiler repackaged with its own glibc, and it wins only because that
+package also ships a different build of the same `2.9-ee-991111` assembler: run
+991111-01's cc1 output through it and the result is retail's 104 bytes, while
+its cc1 run under the other package's loader still emits the unfilled form. So
+the discriminator is the assembler, and the three 2.95 builds, which are
+Windows binaries needing a separate preprocessor pass, are out on their own
+numbers as well as on the 8-bytes-per-saved-register frame layout.
+
+Switching the SDK units to the 2.10 assembler keeps every function that already
+matched: 489 of them across the eight 2.9-pinned units, with the same two
+libkernl drafts differing before and after. It also closes `sceGsResetPath` and
+`sceGsSyncPath` exactly.
+
+Two corrections to earlier notes in this file. The zero-length
+`.mdebug.eabi64` section is a product of `-g`, not of a particular package:
+neither assembler emits it at the SDK units' flags. And ee-as never fills a
+delay slot by swapping in the preceding instruction, which is still true of the
+2.9 assembler but not of the 2.10 one.
+
 `config/smt3/compilers.txt` assigns it per unit, the way `cflags.txt` assigns
 flags, and every Sony library unit is on it.
 
@@ -356,28 +395,22 @@ unit in this region:
    evidence about source order, and inverting a test is a one-line experiment.
 5. **One local pointer holds an address passed to two calls**, where naming the
    global twice recomputes it; the store through it still goes to the global.
-6. **A register access in a delay slot is not reachable from either access
-   form, and this is a negative result.** Retail puts a hardware register
-   access in a delay slot in three places in libgraph: `sceGsResetPath` writes
-   `GIF_CTRL` in the `jr` slot, `sceGsSyncPath` reads each of its ten
-   diagnostic registers in that call's `scePrintf` slot, and
-   `sceGsExecStoreImage` writes `GS_BUSDIR` in the slot of the `GsPutIMR` call
-   of its success tail. Each uses the three-instruction form, `lui` plus `ori`
-   into a register and a zero displacement, which is what this compiler emits
-   only for a volatile access, and it never moves a volatile access into a
-   delay slot; writing the same access through a plain pointer makes it
-   eligible but collapses the address into a two-instruction assembler-macro
-   form, which is ineligible in turn, so the slot takes a `nop` either way.
-   Taking the address from a pointer local that is initialized in its
-   declaration gives both the register form and the filled slot, but the
-   materialization can then only be scheduled before the function's first
-   volatile asm, which is a barrier, so it lands early. The assembler does not
-   supply what the compiler declines: ee-as appends a `nop` rather than
-   swapping the preceding instruction into the slot, checked by assembling a
-   load followed by a `jal` under `.set reorder` with the 2.9 chain's own `as`.
-   Measured with `tools/sdk_probe.py` on the libgraph unit; what the original
-   source wrote for these accesses is still open.
-
+6. **A delay slot a register access belongs in is an assembler question, not
+   a source one.** The volatile form is the one that can occupy a slot: a
+   volatile access to a constant address puts the address in its own register
+   with `lui` plus `ori` and accesses it at displacement 0, one instruction, so
+   it is eligible, while the same access through a plain pointer becomes an
+   absolute-address load or store that ee-as expands with `$at` into two
+   instructions, which is not. Every register access at these sites is
+   therefore volatile. What decides the slot is the assembler: from one
+   unchanged cc1 output of `sceGsResetPath`, the assembler shipped in the 2.9
+   packages leaves the final store before the return with a `nop` (108 bytes),
+   and the 2.10 assembler in the ee-gcc 2.96 package puts that store in the
+   slot, which is retail (104 bytes, every word equal). Filling is suppressed
+   by `-g`, which is why the game units keep their unfilled slots and the SDK
+   units, which carry no `-g`, do not. The SDK toolchain therefore takes the
+   2.10 assembler at its own `-G0` flags. The point-release sweep below settles
+   that this is not a cc1 question.
 Next, in the order the bytes are worth having:
 
 1. **`libc`, `libm` and `libgcc` (50,296 bytes).** The upstream file each

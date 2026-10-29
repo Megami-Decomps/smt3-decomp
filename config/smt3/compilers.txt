@@ -1,5 +1,7 @@
 # Per-unit compiler: <dir>/<unit>  <id>  # evidence (default is ee-gcc2.96)
-# Why the Sony libraries need an older ee-gcc: docs/sdk-matching.md.
+# Why the Sony libraries need an older ee-gcc: docs/sdk-matching.md. The cc1
+# point release does not matter (all four 2.9 builds agree); their assembler is
+# the 2.10 one, which configure.py pins for this toolchain.
 sdk/libgraph         ee-gcc2.9-991111-01  # graph020.o == retail sceGsPutIMR
 sdk/libdma           ee-gcc2.9-991111-01  # same frame layout, no sibcalls
 sdk/libpad           ee-gcc2.9-991111-01  # 2,400 bytes byte-exact in SDK 2.0.4
