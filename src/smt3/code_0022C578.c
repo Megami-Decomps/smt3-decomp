@@ -3021,7 +3021,44 @@ void campCloseInfoWindow(void)
     }
 }
 
+extern s32 fclChkSelMessage(void);
+extern s8 fclGetSelMessagePos(void);
+extern s8 fclEndMessage(void);
+
+#ifdef NON_MATCHING
+void cmpUpdateDestroyItemConfirm(void)
+{
+    s32 closed = 0;
+
+    if (fclChkSelMessage() != 0) {
+        return;
+    }
+    switch (fclGetSelMessagePos()) {
+    case 0:
+        cmpDestroyItem(1);
+        cmpCreateLocalItem(0);
+        cmpChangeCursorListNums(campWork->unk_8302, campWork->unk_410C);
+        if (campWork->unk_8302 == 0) {
+            campWork->unk_0001 = 0;
+            closed = 1;
+            campWork->unk_0004 = 1;
+        }
+        break;
+    case 1:
+        break;
+    default:
+        return;
+    }
+    fclEndMessage();
+    if (!closed) {
+        campWork->unk_0001 = 11;
+        campWork->previousPhase = 1;
+    }
+    cmpSetCrossGeneralVal(campWork->crossPanel, 0);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateDestroyItemConfirm);
+#endif
 
 extern s32 checkConfigState(void);
 
