@@ -1033,7 +1033,9 @@ The kernel runtime's `isatty` and the raw provider `libc_2DC670` both return 1;
 the latter is called by `_getpid_r` and keeps its existing symbol name. `kill`
 calls `Exit(signal)` only for process ID 1 and returns zero. `stat` and `unlink`
 leave their supplied objects untouched, set the current errno to 5 through
-`__errno_8`, and return -1. These are the native compatibility behaviors.
+`__errno_8`, and return -1. These are the native compatibility behaviors. The raw `open` stub follows
+the same errno-5 failure path without reading its path, flags or mode; all40
+instruction bytes match.
 
 The raw `close` and `lseek` compatibility providers also return -1 unconditionally
 and do not update errno. The existing `_lseek_r` interface supplies signed 32-bit

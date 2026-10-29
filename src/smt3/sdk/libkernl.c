@@ -369,7 +369,13 @@ s32 read(s32 descriptor, void *buffer, s32 length)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", open);
+extern s32 *__errno_8(void);
+
+s32 open(const char *path, s32 flags, s32 mode)
+{
+    *__errno_8() = 5;
+    return -1;
+}
 
 s32 close(s32 descriptor)
 {
@@ -411,8 +417,6 @@ s32 kill(s32 pid, s32 signal)
     }
     return 0;
 }
-
-extern s32 *__errno_8(void);
 
 s32 stat(const char *path, struct stat *result)
 {
