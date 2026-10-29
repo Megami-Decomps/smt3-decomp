@@ -646,3 +646,4 @@ src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 1044 B	attack
 src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	1 fn / 680 B	puzzle cursor input with actual split halfword globals, truthful sound/key APIs and four-bit movement mask; owner 59 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 728 B	status panel composition with native display modes, typed skill list and callback order; owner 366 match, 0 differ
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 1600 B	extended attack rendering with twelve native part paths, separate callback-sensitive frame gates and sibling VU matrix handling; owner 289 match, 0 differ
+src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	camera initialization at native 148-byte size, 35 of 37 words match after unsigned switch snapshot; case-2 tail-call residual; normal owner 59 match, 0 differ

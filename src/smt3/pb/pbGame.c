@@ -1378,10 +1378,11 @@ void pbSetGameCamera4(s16 x, s16 y)
     SDF_VU0_COPYVECTOR(&aViewTarget, &target);
 }
 
-/* NON_MATCHING: 26 of 38 words; gcc range-tests case 0 where retail compares it. */
+/* NON_MATCHING: 35 of 37 words match at native 148-byte size; case 2 tail-calls instead of calling and returning. */
 #ifdef NON_MATCHING
 void pbInitGameCamera(void) {
-    switch (D_0054F5C4->charIndex) {
+    u32 type = D_0054F5C4->charIndex;
+    switch (type) {
     case 0:
         pbSetGameCamera0();
         cameraAngle = 0.0f;
