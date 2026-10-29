@@ -319,7 +319,108 @@ void fldPlayerMotion(s32 hisMotion, s32 upMotion, f32 motHokan) {
     mdlSmoothLoopMotion(model2, 0, upMotion, motHokan, motHokan);
 }
 
+extern f32 fldCamTarget[];
+extern f32 D_002FC9C0[];
+extern void fldSePlay(s32 id);
+extern void fldSeVol(s32 id, s32 volume);
+extern u32 dds3GetRandA(s32 stream);
+
+/* NON_MATCHING: 363 of 364 words match at the native 1456-byte size. */
+#ifdef NON_MATCHING
+void fldPlayerMotionSe(s32 hisMotion, s32 upMotion)
+{
+    fldUnitControl_t *ctl = fldGetUnitControl();
+    mdlObj_t *model = dds3ObjectBaseGetModelHandle(ctl->handle);
+    f32 now = model->first->frame;
+    f32 before = fldGlobalBase.float12C;
+    s32 surface;
+    s32 left;
+    s32 right;
+    s32 volume;
+    f32 dx, dy, dz, distance;
+
+    fldGlobalBase.float12C = now;
+    if (hisMotion == 13) {
+        if (before < 15.0f && now >= 15.0f) {
+            fldSePlay(0x27);
+        }
+    } else if (hisMotion == 11) {
+        if (before < 20.0f && now >= 20.0f) {
+            fldSePlay(0x25);
+        }
+    } else {
+        if (fldGlobalBase.word44 == 0) {
+            surface = fldGlobalBase.playerSeTable;
+        } else {
+            surface = fldGlobalBase.word44 - 1;
+        }
+        switch (surface) {
+        case 1: left = 20; right = 20; break;
+        case 2: left = 24; right = 24; break;
+        case 3: left = 28; right = 28; break;
+        default: left = 16; right = 16; break;
+        }
+        if (fldGlobalBase.mode == 1) {
+            dx = fldCamTarget[0] - D_002FC9C0[0];
+            dy = fldCamTarget[1] - D_002FC9C0[1];
+            dz = fldCamTarget[2] - D_002FC9C0[2];
+            distance = fsqrtf(dx * dx + dy * dy + dz * dz) - 500.0f;
+            if (distance > 7000.0f) distance = 7000.0f;
+            if (distance < 0.0f) distance = 0.0f;
+            volume = ((7000 - (s32)distance) * 127) / 7000;
+            if (volume > 127) volume = 127;
+            if (volume < 0) volume = 0;
+        } else {
+            volume = 127;
+            volume -= (dds3GetRandA(0) >> 2) & 0x3F;
+            if (volume > 127) volume = 127;
+            if (volume < 0) volume = 0;
+        }
+        if (hisMotion != 0 && hisMotion != 8 && hisMotion != 9 && upMotion == 8) {
+            fldSeVol(left + 3, volume);
+        } else {
+            left += (dds3GetRandA(0) >> 4) % 3;
+            right += (dds3GetRandA(0) >> 4) % 3;
+            if (upMotion == 1 || upMotion == 17 || upMotion == 2 || upMotion == 19 || upMotion == 3 || upMotion == 20) {
+                if (before < 4.0f && now >= 4.0f) fldSeVol(left, volume);
+                if (before < 13.0f && now >= 13.0f) fldSeVol(right, volume);
+            } else if (upMotion == 4) {
+                if (before < 4.0f && now >= 4.0f) fldSeVol(left, volume);
+                if (before < 20.0f && now >= 20.0f) fldSeVol(right, volume);
+            } else if (upMotion == 5) {
+                if (before < 2.0f && now >= 2.0f) fldSeVol(left, volume);
+                if (before < 16.0f && now >= 16.0f) fldSeVol(right, volume);
+            } else if (upMotion == 6) {
+                if (before < 2.0f && now >= 2.0f) fldSeVol(left, volume);
+                if (before < 16.0f && now >= 16.0f) fldSeVol(right, volume);
+            } else if (upMotion == 7) {
+                if (before < 9.0f && now >= 9.0f) fldSeVol(left, volume);
+                if (before < 21.0f && now >= 21.0f) fldSeVol(right, volume);
+            } else if (upMotion == 14) {
+                volume = 127;
+                volume -= dds3GetRandA(0) % 31;
+                if (volume > 127) volume = 127;
+                if (volume < 0) volume = 0;
+                if (before < 1.0f && now >= 1.0f) fldSeVol(0x24, volume);
+                if (before < 18.0f && now >= 18.0f) fldSeVol(0x37, volume);
+            } else if (upMotion == 15) {
+                volume = 127;
+                volume -= dds3GetRandA(0) % 31;
+                if (volume > 127) volume = 127;
+                if (volume < 0) volume = 0;
+                if (before < 1.0f && now >= 1.0f) fldSeVol(0x24, volume);
+                if (before < 18.0f && now >= 18.0f) fldSeVol(0x37, volume);
+            }
+        }
+        /* Retail keeps jal + epilogue here. Qualified compiler trace: this
+         * reset survives sibling selection and is deleted by life analysis.
+         * See docs/nonmatching/field/fldPlayer.md. */
+        volume = 0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerMotionSe);
+#endif
 
 void fldPlayerCalc_Hit(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
