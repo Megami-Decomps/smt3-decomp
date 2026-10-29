@@ -1565,14 +1565,11 @@ s32 cmpUseSkill(void)
     return cmpGetSkillEntry(skill, user) != 0;
 }
 
-/* NON_MATCHING: 1 of 38 words differs, exact size: xori against retail's sltiu. */
-#ifdef NON_MATCHING
-extern s32 cmpGetSkillEntry(u16 id, datUnitWork_t *unit);
-
 s32 cmpChkDoNotUseSkill(u16 skill)
 {
     s32 index = cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
     u8 use;
+    u32 normalSkill;
 
     if (cmpGetSkillEntry(skill, (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + index) == 0) {
         return -1;
@@ -1581,11 +1578,13 @@ s32 cmpChkDoNotUseSkill(u16 skill)
     if (use == 0) {
         return 1;
     }
-    return skill >= 0x120;
+    normalSkill = skill < 0x120;
+    /* Target-specific constraint: keep the live comparison result opaque to
+     * boolean-range folding, preserving retail's sltiu logical negation.
+     * This emits no instruction and does not assert original source spelling. */
+    asm("" : "+r"(normalSkill));
+    return normalSkill == 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpChkDoNotUseSkill);
-#endif
 
 /* Called above its definition, where ee-gcc assumed int. */
 s8 cmpStartStockMsg(s8 flag);
