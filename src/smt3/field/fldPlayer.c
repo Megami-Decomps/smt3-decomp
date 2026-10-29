@@ -1657,6 +1657,9 @@ s32 fldPlayerCalc_Wm2(void)
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Wm2);
 #endif
 
+/* NON_MATCHING: 776 of 1082 words differ (first at +0x4). The structure is
+ * reproduced; gcc spills `moving` instead of `turnLeft`, which renames every
+ * callee-saved register and flag slot downstream. */
 #ifdef NON_MATCHING
 extern const volatile sdfVector4_t D_00531D48;
 extern u8 dds3PadStickState[2][2][2];
@@ -1690,41 +1693,42 @@ s32 fldPlayerCalc_Nml_syukan(void)
 {
     fldUnitControl_t *control = fldGetUnitControl();
     mdlObj_t *model = dds3ObjectBaseGetModelHandle(control->handle);
-    sdfVector4_t axis __attribute__((aligned(16))) = D_00531D48;
     sdfVector4_t position __attribute__((aligned(16)));
-    sdfVector4_t rotation __attribute__((aligned(16)));
     sdfVector4_t previous __attribute__((aligned(16)));
+    sdfVector4_t rotation __attribute__((aligned(16)));
+    sdfVector4_t axis __attribute__((aligned(16))) = D_00531D48;
     f32 collisionPosition[4] __attribute__((aligned(16)));
-    s32 left = 0, right = 0, back = 0, forward = 0;
+    s32 moving = 0;
+    s32 left = 0, right = 0, forward = 0, back = 0;
     s32 turnLeft = 0, turnRight = 0, modifier = 0;
-    s32 lookLeft = 0, lookRight = 0, quickLeft = 0, quickRight = 0, turnAround = 0;
-    s32 moving = 0, motion, oldMotion;
-    f32 angle, speed, delta, amount, target;
+    s32 turnAround = 0;
+    s32 lookLeft = 0, lookRight = 0, quickLeft = 0, quickRight = 0;
+    s32 motion, oldMotion, step;
+    f32 angle, speed, rad, delta, amount, target;
 
     if (gfldPlayerHasiCnt > 0) {
         oldMotion = model->current.h.motionIndex;
-        if (oldMotion != 13) {
+        motion = 13;
+        if (oldMotion != motion) {
             model->first->speed = 1.0f;
-            mdlSingleMotion(model, 0, 13);
+            mdlSingleMotion(model, 0, motion);
             dds3FadeIn2(8);
         }
-        {
-            f32 frame = model->first->frame;
-            if (fldGlobalBase.float12C < 13.0f && frame >= 13.0f) {
-                dds3PadVibrationSet(0, 1, 10);
-                dds3PadVibrationSet(1, 230, 10);
-            }
+        if (fldGlobalBase.float12C < 13.0f && model->first->frame >= 13.0f) {
+            dds3PadVibrationSet(0, 1, 10);
+            dds3PadVibrationSet(1, 230, 10);
         }
         if (model->first->stat == 5) {
             gfldPlayerHasiCnt = 0;
             fldEncountSetFlag(0x40);
         } else {
-            fldPlayerMotionSe(oldMotion, 13);
+            fldPlayerMotionSe(oldMotion, motion);
             return 0;
         }
     }
+    step = fldPlayerStepDist;
     if (fldGlobalBase.word78 == 0) {
-        if (fldPlayerStepDist > 0) {
+        if (step > 0) {
             if (fldGlobalBase.wordB0 == 0 && (fldPlayerStatus[0] & 1)) {
                 fldSePlay(0x22);
                 dds3FadeIn(0x80, 0x20, 0x20, 6);
@@ -1735,9 +1739,11 @@ s32 fldPlayerCalc_Nml_syukan(void)
                 fldEncountSetFlag(0x40);
                 return 0;
             }
-            if (model->current.h.motionIndex != 10) {
+            oldMotion = model->current.h.motionIndex;
+            motion = 10;
+            if (oldMotion != motion) {
                 model->first->speed = 1.0f;
-                mdlSingleMotion(model, 0, 10);
+                mdlSingleMotion(model, 0, motion);
                 fldDmgStart(fldGlobalBase.x, fldGlobalBase.y, fldGlobalBase.z);
                 fldSePlay(0x22);
                 dds3PadVibrationSet(0, 1, 30);
@@ -1750,11 +1756,12 @@ s32 fldPlayerCalc_Nml_syukan(void)
             fldPlayerStepDist = 0;
             fldEncountSetFlag(0x40);
         }
-    } else if (fldPlayerStepDist > 0) {
-        s32 step = fldPlayerStepDist;
-        if (model->current.h.motionIndex != 10) {
+    } else if (step > 0) {
+        oldMotion = model->current.h.motionIndex;
+        motion = 10;
+        if (oldMotion != motion) {
             model->first->speed = 1.0f;
-            mdlSingleMotion(model, 0, 10);
+            mdlSingleMotion(model, 0, motion);
             fldSePlay(0x22);
             dds3PadVibrationSet(0, 1, 30);
             dds3PadVibrationSet(1, 100, 30);
@@ -1797,26 +1804,50 @@ s32 fldPlayerCalc_Nml_syukan(void)
             lookLeft = dds3PadButtonState[0x24] != 0;
         }
         if (!modifier) {
-            if (back && !left && !right) {
-                turnAround = 1;
+            if (back) {
+                if (!left) {
+                    turnAround = (right == 0);
+                }
             }
-        } else if (turnLeft) {
-            quickLeft = 1;
-        } else if (turnRight) {
-            quickRight = 1;
-        } else if (!forward && !back) {
-            turnRight = right != 0;
-            turnLeft = left != 0;
+        }
+        if (modifier) {
+            if (turnLeft) {
+                quickLeft = 1;
+            } else if (turnRight) {
+                quickRight = 1;
+            } else if (!forward && !back) {
+                turnRight = right != 0;
+                turnLeft = left != 0;
+            }
         }
     }
     if (((dds3PadStickState[0][0][0] + 0xC0) & 0xFF) >= 0x81 ||
         dds3PadStickState[0][0][1] < 0x40 || dds3PadStickState[0][0][1] >= 0xC1) {
-        left = right = forward = back = turnLeft = turnRight = modifier = 0;
-        lookLeft = lookRight = quickLeft = quickRight = turnAround = 0;
+        left = 0;
+        forward = 0;
+        right = 0;
+        back = 0;
+        turnAround = 0;
+        turnLeft = 0;
+        turnRight = 0;
+        modifier = 0;
+        lookLeft = 0;
+        lookRight = 0;
+        quickLeft = 0;
+        quickRight = 0;
     }
     if (fldGlobalBase.encountState > 0) {
-        left = right = forward = back = turnLeft = turnRight = modifier = 0;
-        lookLeft = lookRight = quickLeft = quickRight = 0;
+        left = 0;
+        forward = 0;
+        right = 0;
+        back = 0;
+        turnLeft = 0;
+        turnRight = 0;
+        modifier = 0;
+        lookLeft = 0;
+        lookRight = 0;
+        quickLeft = 0;
+        quickRight = 0;
     }
     dds3GetPosPoseSet(control->handle);
     SDF_VU0_STOREVECTOR(&position);
@@ -1827,35 +1858,23 @@ s32 fldPlayerCalc_Nml_syukan(void)
     fldGlobalBase.y = position.y;
     fldGlobalBase.z = position.z;
     if ((left || right || forward || back || turnLeft || turnRight) && l_UseCollision != 0) {
-        fldGlobalBase.y = position.y + (fldGlobalBase.float130 > 0.0f ? 5.0f : 10.0f);
+        if (fldGlobalBase.float130 > 0.0f) {
+            fldGlobalBase.y = position.y + 5.0f;
+        } else {
+            fldGlobalBase.y = position.y + 10.0f;
+        }
     }
-    {
-        f32 pitch = fldCamPitch;
-        f32 facing = fldGlobalBase.camAngle;
-        if (pitch >= 360.0f) {
-            do {
-                pitch -= 360.0f;
-            } while (pitch >= 360.0f);
-            fldCamPitch = pitch;
-        }
-        if (pitch < 0.0f) {
-            do {
-                pitch += 360.0f;
-            } while (pitch < 0.0f);
-            fldCamPitch = pitch;
-        }
-        if (facing >= 360.0f) {
-            do {
-                facing -= 360.0f;
-            } while (facing >= 360.0f);
-            fldGlobalBase.camAngle = facing;
-        }
-        if (facing < 0.0f) {
-            do {
-                facing += 360.0f;
-            } while (facing < 0.0f);
-            fldGlobalBase.camAngle = facing;
-        }
+    while (fldCamPitch >= 360.0f) {
+        fldCamPitch -= 360.0f;
+    }
+    while (fldCamPitch < 0.0f) {
+        fldCamPitch += 360.0f;
+    }
+    while (fldGlobalBase.camAngle >= 360.0f) {
+        fldGlobalBase.camAngle -= 360.0f;
+    }
+    while (fldGlobalBase.camAngle < 0.0f) {
+        fldGlobalBase.camAngle += 360.0f;
     }
     dds3GetRotPoseSet(control->handle);
     SDF_VU0_STOREVECTOR(&rotation);
@@ -1867,10 +1886,16 @@ s32 fldPlayerCalc_Nml_syukan(void)
     oldMotion = model->current.h.motionIndex;
     dds3GetPosPoseSet(control->handle);
     angle = fldGlobalBase.camAngle2;
-    if (forward && ((modifier && left) || (!modifier && turnLeft))) {
+    if (modifier && forward && left) {
         moving = 1;
         angle = 45.0f - fldCamPitch;
-    } else if (forward && ((modifier && right) || (!modifier && turnRight))) {
+    } else if (!modifier && forward && turnLeft) {
+        moving = 1;
+        angle = 45.0f - fldCamPitch;
+    } else if (modifier && forward && right) {
+        moving = 1;
+        angle = -45.0f - fldCamPitch;
+    } else if (!modifier && forward && turnRight) {
         moving = 1;
         angle = -45.0f - fldCamPitch;
     } else if (modifier && back && left) {
@@ -1899,21 +1924,22 @@ s32 fldPlayerCalc_Nml_syukan(void)
         speed = 29.0f;
         motion = 1;
         if (fldGlobalBase.float130 > 0.0f) {
-            speed = (sdfFabs(fldGlobalBase.float130) / 40.0f) + 2.0f + 29.0f;
+            speed = sdfFabs(fldGlobalBase.float130) / 40.0f + 2.0f + speed;
         }
         if (fldRunDanteGunFlag.word50 & 2) {
             speed *= D_0054C414;
         }
-        delta = (-angle * D_0054C418) / 180.0f;
-        position.x = fldGlobalBase.x - sdfSin(delta) * speed;
+        rad = -angle * D_0054C418 / 180.0f;
+        position.x = fldGlobalBase.x - sdfSin(rad) * speed;
         position.y = fldGlobalBase.y;
-        position.z = fldGlobalBase.z - sdfCos(delta) * speed;
+        position.z = fldGlobalBase.z - sdfCos(rad) * speed;
+        dds3SetPosPoseSet(control->handle, &position);
     } else {
         position.x = fldGlobalBase.x;
         position.y = fldGlobalBase.y;
         position.z = fldGlobalBase.z;
+        dds3SetPosPoseSet(control->handle, &position);
     }
-    dds3SetPosPoseSet(control->handle, &position);
     if (l_UseCollision != 0) {
         dds3Basic_t *basic;
         dds3PoseSet_t *pose;
@@ -1927,8 +1953,8 @@ s32 fldPlayerCalc_Nml_syukan(void)
             fldHitChkUnit(collisionPosition);
             if (fldGlobalBase.hitValid != 0) {
                 position.x = fldGlobalBase.hitX;
-                position.y = fldGlobalBase.hitY + 44.0f;
                 position.z = fldGlobalBase.hitZ;
+                position.y = fldGlobalBase.hitY + 44.0f;
                 fldGlobalBase.x = position.x;
                 fldGlobalBase.y = position.y;
                 fldGlobalBase.z = position.z;
@@ -1974,19 +2000,29 @@ s32 fldPlayerCalc_Nml_syukan(void)
     if (amount < 2.0f) {
         amount = 2.0f;
     }
-    if ((delta >= 0.0f && delta <= amount) || (delta <= 0.0f && -amount <= delta)) {
-        fldGlobalBase.camAngle = angle;
-    } else if (delta < 0.0f) {
-        fldGlobalBase.camAngle -= amount;
-    } else {
-        fldGlobalBase.camAngle += amount;
+    {
+        f32 result;
+        if (delta >= 0.0f && delta <= amount) {
+            result = angle;
+        } else if (delta <= 0.0f && -amount <= delta) {
+            result = angle;
+        } else if (delta < 0.0f) {
+            result = fldGlobalBase.camAngle - amount;
+        } else {
+            result = fldGlobalBase.camAngle + amount;
+        }
+        fldGlobalBase.camAngle = result;
     }
     SDF_VU0_LOADVECTOR(&axis);
     FromRotation(fldGlobalBase.camAngle * D_0054C41C / 180.0f);
     SDF_VU0_STOREVECTOR(&rotation);
     dds3SetRotPoseSet(control->handle, &rotation);
     target = D_0054ECDC;
-    if (sdfFabs(target - fldCamPitch) < 1.0f) {
+    delta = target - fldCamPitch;
+    if (delta < 0.0f) {
+        delta = -delta;
+    }
+    if (delta < 1.0f) {
         fldCamPitch = target;
         if (lookLeft || quickLeft) {
             target = fldPlayerCalc360_4(target - 50.0f);
@@ -2004,34 +2040,49 @@ s32 fldPlayerCalc_Nml_syukan(void)
             if ((s32)delta == -180) {
                 delta = 180.0f;
             }
-            if ((delta >= 0.0f && delta <= 10.0f) || (delta <= 0.0f && -10.0f <= delta)) {
-                fldCamPitch = target;
-            } else if (delta < 0.0f) {
-                fldCamPitch -= 10.0f;
-            } else {
-                fldCamPitch += 10.0f;
+            amount = 10.0f;
+            {
+                f32 result;
+                if (delta >= 0.0f && delta <= amount) {
+                    result = target;
+                } else if (delta <= 0.0f && -amount <= delta) {
+                    result = target;
+                } else if (delta < 0.0f) {
+                    result = fldCamPitch - amount;
+                } else {
+                    result = fldCamPitch + amount;
+                }
+                fldCamPitch = result;
             }
             target = D_0054ECDC;
         }
     }
-    if (sdfFabs(target - fldCamPitch) < 1.0f) {
+    delta = target - fldCamPitch;
+    if (delta < 0.0f) {
+        delta = -delta;
+    }
+    if (delta < 1.0f) {
         if (fldSyukanState > 0) {
             fldSyukanState--;
         }
     } else {
+        f32 result;
         delta = R360_LR(fldCamPitch, target);
-        if ((delta >= 0.0f && delta <= 10.0f) || (delta <= 0.0f && -10.0f <= delta)) {
-            fldCamPitch = target;
+        amount = 10.0f;
+        if (delta >= 0.0f && delta <= amount) {
+            result = target;
+        } else if (delta <= 0.0f && -amount <= delta) {
+            result = target;
         } else if (delta < 0.0f) {
-            fldCamPitch -= 10.0f;
+            result = fldCamPitch - amount;
         } else {
-            fldCamPitch += 10.0f;
+            result = fldCamPitch + amount;
         }
+        fldCamPitch = result;
         target = D_0054ECDC;
     }
-    target = fldPlayerCalc360_8(target);
-    D_0054ECDC = target;
-    fldGlobalBase.camAngle2 = -target;
+    D_0054ECDC = fldPlayerCalc360_8(target);
+    fldGlobalBase.camAngle2 = -D_0054ECDC;
     fldGlobalBase.camAngle = -fldCamPitch;
     SDF_VU0_LOADVECTOR(&axis);
     FromRotation(fldGlobalBase.camAngle * D_0054C420 / 180.0f);
@@ -2039,10 +2090,14 @@ s32 fldPlayerCalc_Nml_syukan(void)
     dds3SetRotPoseSet(control->handle, &rotation);
     fldPlayerOn();
     if (fldRunDanteGunFlag.word50 & 2) {
-        if (motion == 8) {
-            motion = 18;
-        } else if (motion == 4 || motion == 1) {
+        switch (motion) {
+        case 1:
+        case 4:
             motion = 17;
+            break;
+        case 8:
+            motion = 18;
+            break;
         }
     }
     fldPlayerMotion(oldMotion, motion, 4.0f);
