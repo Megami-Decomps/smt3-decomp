@@ -66,7 +66,7 @@ typedef struct
     /* 0x0024 */ f32 screenOfsY;
     /* 0x0028 */ sdfMemHandle_t *memhandle;
     /* 0x002C */ dds3ProcessID_t *procid[3];
-    /* 0x0038 */ s32 texHandle[7];
+    /* 0x0038 */ sdfTexHandle_t *texHandle[7];
     /* 0x0054 */ s32 stat;
     /* 0x0058 */ u16 unk_58;
     /* 0x005A */ u16 unk_5A;
@@ -374,7 +374,7 @@ void fclEncycSetTexHandle(s32 *texhandle)
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        g_pinst->texHandle[i] = texhandle[i];
+        g_pinst->texHandle[i] = (sdfTexHandle_t *)texhandle[i];
     }
 }
 
@@ -941,8 +941,8 @@ void InitPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
     ChangeDevilObjectRegistConfirm(pinst->selectedIndex, pinst);
 
     work->ribbon = fclRbnInit(2, 1,
-        (sdfTexHandle_t *)pinst->texHandle[2],
-        (sdfTexHandle_t *)pinst->texHandle[3]);
+        pinst->texHandle[2],
+        pinst->texHandle[3]);
 
     vectors[0].pm[0] = 0x790;
     vectors[0].pm[1] = 0x18;
@@ -962,8 +962,8 @@ void InitPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
     vectors[3].pm[3] = 0x530;
     fclRbnSetPara(work->ribbon, 0, &vectors[0], &vectors[1],
                   &vectors[2], &vectors[3],
-                  (sdfTexHandle_t *)pinst->texHandle[4],
-                  (sdfTexHandle_t *)pinst->texHandle[4]);
+                  pinst->texHandle[4],
+                  pinst->texHandle[4]);
 
     vectors[0].pm[0] = 0x10C0;
     vectors[0].pm[1] = 0x18;
@@ -983,8 +983,8 @@ void InitPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
     vectors[3].pm[3] = 0x530;
     fclRbnSetPara(work->ribbon, 1, &vectors[0], &vectors[1],
                   &vectors[2], &vectors[3],
-                  (sdfTexHandle_t *)pinst->texHandle[4],
-                  (sdfTexHandle_t *)pinst->texHandle[4]);
+                  pinst->texHandle[4],
+                  pinst->texHandle[4]);
     SetScreenOffset(pinst, 1);
 }
 
@@ -1106,7 +1106,7 @@ typedef struct fclEncycReadTopWork_t {
     fclRibbon_t *ribbon;
     frFontHandle_t *requests[3];
     void *fontList[8];
-    u8 reserved1208[8];
+    u8 groupStart[8]; /* 0x1208: CreateFontListRead marks race/level groups. */
 } fclEncycReadTopWork_t;
 
 extern const char *D_00330A14[];
@@ -1125,8 +1125,8 @@ void InitPhaseReadTop(fclEncyc_instance_tag *pinst)
     s32 i;
 
     work->ribbon = fclRbnInit(2, (s8)pinst->unk_6C,
-        (sdfTexHandle_t *)pinst->texHandle[2],
-        (sdfTexHandle_t *)pinst->texHandle[3]);
+        pinst->texHandle[2],
+        pinst->texHandle[3]);
 
     vectors[0].pm[0] = 0x980;
     vectors[0].pm[1] = 0x18;
@@ -1146,8 +1146,8 @@ void InitPhaseReadTop(fclEncyc_instance_tag *pinst)
     vectors[3].pm[3] = 0x150;
     fclRbnSetPara(work->ribbon, 0, &vectors[0], &vectors[1],
                   &vectors[2], &vectors[3],
-                  (sdfTexHandle_t *)pinst->texHandle[3],
-                  (sdfTexHandle_t *)pinst->texHandle[3]);
+                  pinst->texHandle[3],
+                  pinst->texHandle[3]);
 
     vectors[0].pm[0] = 0x1260;
     vectors[0].pm[1] = 0x18;
@@ -1167,8 +1167,8 @@ void InitPhaseReadTop(fclEncyc_instance_tag *pinst)
     vectors[3].pm[3] = 0x150;
     fclRbnSetPara(work->ribbon, 1, &vectors[0], &vectors[1],
                   &vectors[2], &vectors[3],
-                  (sdfTexHandle_t *)pinst->texHandle[3],
-                  (sdfTexHandle_t *)pinst->texHandle[3]);
+                  pinst->texHandle[3],
+                  pinst->texHandle[3]);
 
     for (i = 7; i >= 0; i--) work->fontList[i] = NULL;
     work->requests[0] = frwGetSmallFontFRQ2(0x290, 0x90, 0xFFFFF0,
@@ -3026,7 +3026,7 @@ void drawRegistSprites(fclEncyc_instance_tag *pinst)
     uv.components[0] = 0x10; uv.components[1] = 0x160;
     uv.components[2] = 0x2F0; uv.components[3] = 0x250;
     itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
-                         (sdfTexHandle_t *)pinst->texHandle[0], 0, tag);
+                         pinst->texHandle[0], 0, tag);
 
     pos[0].x = 0xBD0; pos[1].x = 0xED0;
     uv.components[0] = 0x300; uv.components[2] = 0x600;
@@ -3046,7 +3046,7 @@ void drawRegistSprites(fclEncyc_instance_tag *pinst)
     uv.components[0] = 0xC40; uv.components[1] = 0x150;
     uv.components[2] = 0xFF0; uv.components[3] = 0x240;
     itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
-                         (sdfTexHandle_t *)pinst->texHandle[1], 0, tag);
+                         pinst->texHandle[1], 0, tag);
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
 #else
@@ -3075,7 +3075,7 @@ void DrawRegistListwinElem(fclEncyc_instance_tag *pinst)
         pos[1].x = 0x1C40;
         pos[1].y = y + 0xB0;
         itfMiscDrawSpritePrim(pos, &D_00330930, g_uv_summon_back, 0x000FFFFF,
-                              (sdfTexHandle_t *)pinst->texHandle[0], 0, tag);
+                              pinst->texHandle[0], 0, tag);
 
         request = work->fonts[i];
         if (request != NULL) {
@@ -3101,7 +3101,64 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawRegistListwinElem);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadListwinCaption);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadListwinElem);
+extern fclEncycColor_t D_00330930;
+extern fclEncycColor_t D_00330960;
+extern fclEncycColor_t D_00330970;
+extern fclEncycColor_t D_00330980;
+extern fclEncycColor_t D_00330990;
+extern fclEncycColor_t D_003309A0;
+
+void DrawReadListwinElem(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadTopWork_t *work = (fclEncycReadTopWork_t *)pinst->pwork;
+    s32 selected = work->list.cursorPos.Shift;
+    sdfDrawTag_t *tag = sdfGrAllocPacketBuff(0x20);
+    fclEncycVertex_t pos[2];
+    frFontHandle_t *request;
+    s32 y = 0x4A0;
+    s32 i;
+
+    sdfDrawTagInit(tag);
+    for (i = 0; i < 8; i++, y += 0xE0) {
+        pos[0].x = 0x5C0;
+        pos[0].y = y + 0x98;
+        pos[1].x = 0x1BA0;
+        pos[1].y = y + 0xB0;
+        itfMiscDrawSpritePrim(pos, &D_00330930, g_uv_summon_back, 0xFFFFF,
+                            pinst->texHandle[0], 0, tag);
+        request = work->fontList[i];
+        if (request != NULL) {
+            /* A boundary before the next row draws the separator below this one. */
+            if (i < 7 && work->groupStart[i + 1] != 0) {
+                pos[0].x = 0x4D0;
+                pos[0].y = y + 0x70;
+                pos[1].x = 0x5D0;
+                pos[1].y = y + 0xD8;
+                itfMiscDrawSpritePrim2(pos, &D_003309A0, g_uv_summon_back,
+                                      0xFFFFF0, 0, tag);
+                pos[0].x = 0x1C80;
+                pos[1].x = 0x1B80;
+                itfMiscDrawSpritePrim2(pos, &D_003309A0, g_uv_summon_back,
+                                      0xFFFFF0, 0, tag);
+            }
+            pos[0].x = 0x14B0;
+            pos[0].y = y + 0x40;
+            pos[1].x = 0x1540;
+            pos[1].y = y + 0x78;
+            itfMiscDrawSpritePrim2(pos, selected == i ? &D_00330970 : &D_00330960,
+                                  g_uv_summon_back, 0xFFFFF, 0, tag);
+            pos[0].x = 0x1A70;
+            pos[0].y = y + 0x20;
+            pos[1].x = 0x1B20;
+            pos[1].y = y + 0x90;
+            itfMiscDrawSpritePrim(pos, selected == i ? &D_00330990 : &D_00330980,
+                                g_uv_summon_back, 0xFFFFF0,
+                                pinst->texHandle[1], 0, tag);
+            func_001C7E38(request, 0, 0x47);
+        }
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadStatusMoney);
 
@@ -3212,7 +3269,7 @@ void DrawRegistAllHelp(fclEncyc_instance_tag *pinst)
     pos[0].x = 0x1370; pos[0].y = 0xA0;
     pos[1].x = 0x2000; pos[1].y = 0x190;
     itfMiscDrawSpritePrim(pos, D_003309B0, g_uv_summon_back, 0xFFFFF0,
-                         (sdfTexHandle_t *)pinst->texHandle[3], 0, tag);
+                         pinst->texHandle[3], 0, tag);
     uv.components[0] = 0x60; uv.components[1] = 0x4B0;
     uv.components[2] = 0x190; uv.components[3] = 0x5F0;
     pos[0].x = 0x18D0; pos[0].y = 0xC8;
@@ -3268,7 +3325,7 @@ void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst)
     prim.color.components[2] = 0x80;
     prim.color.components[3] = work->registAlpha;
     itfMiscDrawSpritePrim(prim.pos, D_003309B0, &prim.color, 0xFFFFF0,
-                          (sdfTexHandle_t *)pinst->texHandle[3], 0, tag);
+                          pinst->texHandle[3], 0, tag);
     prim.pos[0].x = x + 0x720;
     prim.pos[0].y = y + 0x28;
     prim.pos[1].x = x + 0xAD0;
