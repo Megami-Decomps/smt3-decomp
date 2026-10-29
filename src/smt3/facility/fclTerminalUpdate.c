@@ -35,9 +35,11 @@ typedef struct
     /* 0x0001 */ s8 unk_0001;
     /* 0x0002 */ u8 unk_0002[2];
     /* 0x0004 */ s8 unk_0004;
-    /* 0x0005 */ u8 unk_0005[0x38];
-    /* 0x003D */ s8 unk_003D;
-    /* 0x003E */ u8 unk_003E[0x1198];
+    /* 0x0005 */ u8 unk_0005[0x17];
+    /* 0x001C */ cmpCursorInfo_t rootCursor;
+    /* 0x0054 */ u8 unk_0054[0x1020];
+    /* 0x1074 */ s32 rootSelection;
+    /* 0x1078 */ u8 unk_1078[0x15E];
     /* 0x11D6 */ s16 unk_11D6;
     /* 0x11D8 */ u8 unk_11D8;
     /* 0x11D9 */ u8 unk_11D9[0x1018];
@@ -50,9 +52,9 @@ typedef struct
     /* 0x2217 */ s8 movieState;
     /* 0x2218 */ void *scriptAllocationHandle;
     /* 0x221C */ u32 scriptData;
-    /* 0x2220 */ s32 ScriptPID;
+    /* 0x2220 */ u8 *ScriptPID;
     /* 0x2224 */ u8 unk_2224[0xC];
-    /* 0x2230 */ s32 saveProcess;
+    /* 0x2230 */ dds3ProcessID_t *saveProcess;
     /* 0x2234 */ dds3ProcessID_t *secondaryMovieProcess;
     /* 0x2238 */ s32 texHandle[1];
 } trmUpdateWork_t;
@@ -105,7 +107,7 @@ void trmStartSaveAct(s32 saved)
     evtLoadEventBgm(event);
     while (evtCheckEventBgmLoaded(event) == 0) {
     }
-    trmUpdateWork->saveProcess = (s32)evtStartPolygonMovie2(0x3E8, event, cut);
+    trmUpdateWork->saveProcess = evtStartPolygonMovie2(0x3E8, event, cut);
 }
 #else
 INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmStartSaveAct);
@@ -113,7 +115,7 @@ INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmStartSaveAct);
 
 s32 trmCheckSaveAct(void)
 {
-    s32 stat = dds3GetProcessStat((void *)trmUpdateWork->saveProcess);
+    s32 stat = dds3GetProcessStat(trmUpdateWork->saveProcess);
 
     if ((u32)stat < 4U) {
         if (stat != 0) {
@@ -197,7 +199,7 @@ s32 trmUpdateSeqConfirm(void)
         dds3FadeOut(0, 0, 0, 20);
         trmUpdateWork->unk_0001 = 6;
         trmUpdateWork->unk_0004 = 1;
-        fclScriptForcedEnd((u8 *)trmUpdateWork->ScriptPID);
+        fclScriptForcedEnd(trmUpdateWork->ScriptPID);
         trmUpdateWork->ScriptPID = 0;
         break;
     case 1:
@@ -217,7 +219,87 @@ s32 trmUpdateSeqConfirm(void)
     return 1;
 }
 
+extern s32 rcvRootHasItems(rcvRootWork_t *work);
+extern void fclSetTerminalMode(s8 mode);
+extern s8 trmGetCallMode(void);
+
+#ifdef NON_MATCHING
+void trmUpdateSeqRoot(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+        if (rcvRootHasItems((rcvRootWork_t *)&trmUpdateWork->rootCursor) == 0) {
+            button = 0x8000;
+            break;
+        }
+        switch ((s8)(*(u8 *)&trmUpdateWork->rootCursor.unk_22 +
+                     (u8)trmUpdateWork->rootCursor.unk_24 + 1)) {
+        case 1: {
+            s8 terminalType = trmUpdateWork->TerminalType;
+
+            trmUpdateWork->rootSelection = 0;
+            if (terminalType == 0) {
+                fclScriptStart(trmUpdateWork->scriptData, 2, &trmUpdateWork->ScriptPID);
+                trmUpdateWork->unk_0001 = 1;
+            } else {
+                fclSetWorkValue(0, trmGetJumpTerminalNo());
+                fclScriptStart(trmUpdateWork->scriptData, 3, &trmUpdateWork->ScriptPID);
+                trmUpdateWork->unk_0001 = 5;
+            }
+            trmUpdateWork->unk_0004 = 1;
+            break;
+        }
+        case 2:
+            dds3FadeOut(0, 0, 0, 10);
+            trmUpdateWork->unk_0001 = 7;
+            trmUpdateWork->unk_0004 = 1;
+            break;
+        case 3: {
+            trmUpdateWork_t *work;
+
+            fclSetTerminalMode(3);
+            fclScriptForcedEnd(trmUpdateWork->ScriptPID);
+            work = trmUpdateWork;
+            work->unk_0001 = 3;
+            work->ScriptPID = 0;
+            trmUpdateWork->unk_0004 = 1;
+            break;
+        }
+        case 4:
+            if (trmGetCallMode() == 0) {
+                dds3FadeOut(0, 0, 0, 20);
+            }
+            trmUpdateWork->unk_0001 = 4;
+            break;
+        }
+        break;
+    case 2:
+        if (trmGetCallMode() == 0) {
+            dds3FadeOut(0, 0, 0, 20);
+        }
+        trmUpdateWork->unk_0001 = 4;
+        break;
+    case 0x10:
+        cmpMoveCursor(&trmUpdateWork->rootCursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&trmUpdateWork->rootCursor, 1);
+        break;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&trmUpdateWork->rootCursor, 0);
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&trmUpdateWork->rootCursor, button, 0x30));
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateSeqRoot);
+#endif
 
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern s32 dds3PlayMovieByIndex(s32 index);
@@ -237,7 +319,7 @@ void trmUpdateActLearge(void)
         dds3ProcessID_t *movieProcess;
 
         movieProcess = evtStartPolygonMovie2(0x3E8, 0x324, 0x1E);
-        trmUpdateWork->saveProcess = (s32)movieProcess;
+        trmUpdateWork->saveProcess = movieProcess;
         evtSetPolygonMovieFlag(movieProcess, 1);
         dds3PlayMovieByIndex(3);
         dds3FadeIn(0, 0, 0, 0);
@@ -246,7 +328,7 @@ void trmUpdateActLearge(void)
     }
     case 2:
         movieStop();
-        evtResetPolygonMovieFlag((dds3ProcessID_t *)trmUpdateWork->saveProcess, 1);
+        evtResetPolygonMovieFlag(trmUpdateWork->saveProcess, 1);
         trmUpdateWork->cursor = 3;
         break;
     default: {
@@ -263,8 +345,8 @@ void trmUpdateActLearge(void)
             }
             break;
         case 3:
-            done = dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == phase;
-            if (dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == 0) {
+            done = dds3GetProcessStat(trmUpdateWork->saveProcess) == phase;
+            if (dds3GetProcessStat(trmUpdateWork->saveProcess) == 0) {
                 done = 1;
             }
             break;
@@ -297,15 +379,15 @@ void trmUpdateActSmall(void)
     switch (phase) {
     case 0:
         trmUpdateWork->secondaryMovieProcess = evtStartPolygonMovie2(0x3E8, 0x324, 0x1E);
-        trmUpdateWork->saveProcess = (s32)evtStartPolygonMovie2(0x3E8, 0x325, 0x32);
-        evtSetPolygonMovieFlag((dds3ProcessID_t *)trmUpdateWork->saveProcess, 1);
+        trmUpdateWork->saveProcess = evtStartPolygonMovie2(0x3E8, 0x325, 0x32);
+        evtSetPolygonMovieFlag(trmUpdateWork->saveProcess, 1);
         evtSetPolygonMovieFlag(trmUpdateWork->secondaryMovieProcess, 1);
         trmUpdateWork->cursor = 1;
         break;
     case 2:
-        if (dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == 1 ||
-            dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == 2) {
-            dds3KillProcess((dds3ProcessID_t *)trmUpdateWork->saveProcess, 0);
+        if (dds3GetProcessStat(trmUpdateWork->saveProcess) == 1 ||
+            dds3GetProcessStat(trmUpdateWork->saveProcess) == 2) {
+            dds3KillProcess(trmUpdateWork->saveProcess, 0);
             fclFreeStage();
             p2sdStopAllSe();
         }
@@ -315,8 +397,8 @@ void trmUpdateActSmall(void)
     default:
         switch (phase) {
         case 1:
-            done = dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == 3;
-            if (dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == 0) {
+            done = dds3GetProcessStat(trmUpdateWork->saveProcess) == 3;
+            if (dds3GetProcessStat(trmUpdateWork->saveProcess) == 0) {
                 done = 1;
             }
             if ((s8)dds3PadButtonState[1][0][1] < 0) {
@@ -331,11 +413,11 @@ void trmUpdateActSmall(void)
             if (done != 0) {
                 trmUpdateWork->movieState = 2;
             }
-            if (evtCheckPolygonMovieRun((dds3ProcessID_t *)trmUpdateWork->saveProcess) == 0) {
+            if (evtCheckPolygonMovieRun(trmUpdateWork->saveProcess) == 0) {
                 return;
             }
             if (trmUpdateWork->movieState == 0) {
-                evtResetPolygonMovieFlag((dds3ProcessID_t *)trmUpdateWork->saveProcess, 1);
+                evtResetPolygonMovieFlag(trmUpdateWork->saveProcess, 1);
                 dds3FadeIn(0, 0, 0, 0);
                 trmUpdateWork->movieState = 1;
             }
@@ -405,7 +487,7 @@ extern void fmProcTrigSequence(s32 mode);
 void trmUpdateSaveActIn(void)
 {
     if (dds3FadeCheck() == 0) {
-        fclScriptForcedEnd((u8 *)trmUpdateWork->ScriptPID);
+        fclScriptForcedEnd(trmUpdateWork->ScriptPID);
         trmUpdateWork->ScriptPID = 0;
         trmEndEvent(0);
         slSetTmnlID(trmUpdateWork->TerminalType, trmUpdateWork->TerminalNo);
@@ -422,7 +504,7 @@ extern s8 trmStartEvent(void);
 void trmUpdateSaveActOut(void)
 {
     if (trmCheckSaveAct() == 0) {
-        trmUpdateWork->unk_003D = 1;
+        trmUpdateWork->rootCursor.unk_21 = 1;
         trmStartEvent();
         trmUpdateWork->unk_0001 = 0;
         trmUpdateWork->unk_0004 = 1;
