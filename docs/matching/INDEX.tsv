@@ -230,11 +230,11 @@ cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	168
 rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3
-sdfIpuDecode	sdf/sdfIpu	0x1D0	22 of 115 words match	docs/matching/sdf/sdfIpu.md	3
-sdfModelSetOneSkinDrawPacket	sdf/sdfModel	0x180	Three of ninety words match	docs/matching/sdf/sdfModel.md	3
-sdfModelLinkDrawPacket	sdf/sdfModel	0x208	Eighteen of 122 words match	docs/matching/sdf/sdfModel.md	40
-sdfModelLinkShapedDrawPacket	sdf/sdfModel	0x258	Fifty of 150 words match	docs/matching/sdf/sdfModel.md	75
-sdfModelTempPacketLinkOt	sdf/sdfModel	0x468	twenty-seven of 282 words differ	docs/matching/sdf/sdfModel.md	133
+sdfIpuDecode	sdf/sdfIpu	0x1D0	18 of 114 words match	docs/matching/sdf/sdfIpu.md	3
+sdfModelSetOneSkinDrawPacket	sdf/sdfModel	0x180	82 of 96 words match	docs/matching/sdf/sdfModel.md	3
+sdfModelLinkDrawPacket	sdf/sdfModel	0x208	Eighteen of 122 words match	docs/matching/sdf/sdfModel.md	62
+sdfModelLinkShapedDrawPacket	sdf/sdfModel	0x258	Sixty-three of 150 words match	docs/matching/sdf/sdfModel.md	97
+sdfModelTempPacketLinkOt	sdf/sdfModel	0x468	sixty-three of 282 words match	docs/matching/sdf/sdfModel.md	192
 movieWaitSema	sdf/sdfMovie	212 bytes	Thirty-nine of fifty-three words differ	docs/matching/sdf/sdfMovie.md	3
 sdfSndVoiceMapInit	sdf/sdfSound	180 bytes	39 of 45 words match	docs/matching/sdf/sdfSound.md	3
 sdfTexSetPacket	sdfTex	0x168	15 of 90 words match	docs/matching/sdf/sdfTex.md	3
