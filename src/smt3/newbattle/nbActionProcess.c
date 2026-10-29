@@ -1643,7 +1643,166 @@ INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543FA8);
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543FB8);
 
+/* NON_MATCHING: 21 of 293 words differ (first at +0x1BC), native 1172-byte size. */
+#ifdef NON_MATCHING
+extern s32 nbGetNakama(datUnitWork_t *work);
+extern void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 rate);
+extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate);
+extern void nbCameraSetTaizi(nbFormation_t *invoke, nbFormation_t *target);
+
+void SetAction_NEGORESULT(nbActionProcessData_t *a)
+{
+    s32 pressPacket = 0;
+    s32 pressType = 0;
+    s32 setMotion = 0;
+    s32 setCamera = 1;
+    s32 i;
+    s32 workId;
+    s32 frame;
+    s32 activeCount;
+    u16 partyFlags;
+    datUnitWork_t *work;
+    nbFormation_t *form;
+    struct nbParty_t *party;
+
+    switch (a->data->negoresult) {
+    case 7:
+        setMotion = 1;
+        break;
+    case 1:
+        pressPacket = 1;
+        pressType = 12;
+        a->press = -1.0f;
+        setMotion = 1;
+        break;
+    case 2:
+        pressPacket = 1;
+        pressType = 12;
+        party = nbGetPartyFromFormindex(a->data->negoeformindex);
+        nbMakeReturnPacket(0, a, party);
+        SetTimeList(a, a->data->negoeformindex, 0, 40, 40);
+        a->press = -1.0f;
+        break;
+    case 3:
+        pressPacket = 1;
+        pressType = 11;
+        party = nbGetPartyFromFormindex(a->data->negoeformindex);
+        work = nbGetUnitWorkFromFormindex(a->data->negoeformindex);
+        nbGetNakama(work);
+        nbMakeReturnPacket(0, a, party);
+        SetTimeList(a, a->data->negoeformindex, 0, 40, 40);
+        a->press = -1.0f;
+        break;
+    case 4:
+        pressPacket = 1;
+        pressType = 13;
+        a->press = -10.0f;
+        setMotion = 1;
+        break;
+    case 5:
+        i = 4;
+        work = nbGetUnitWorkFromFormindex(a->data->negoeformindex);
+        workId = work->id;
+        for (; i < 14; i++) {
+            partyFlags = a->data->party[i].flag;
+            if ((partyFlags & 1) != 0) {
+                if ((partyFlags & 2) != 0) {
+                    if ((partyFlags & 0x20) == 0) {
+                        if (nbGetUnitWorkPointer(a->data, &a->data->party[i])->id == workId) {
+                            frame = dds3GetRandIntA(NULL, 20);
+                            nbMakeReturnPacket(frame, a, &a->data->party[i]);
+                            if ((a->data->party[i].flag & 8) == 0) {
+                                SetTimeList(a, a->data->party[i].formindex, frame, 40, 40);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        pressPacket = 1;
+        pressType = 12;
+        a->press = -1.0f;
+        break;
+    case 6:
+    case 9:
+        if (a->data->negoresult == 9) {
+            work = nbGetUnitWorkFromFormindex(a->data->negoeformindex);
+            nbGetNakama(work);
+        }
+        for (i = 4; i < 14; i++) {
+            partyFlags = a->data->party[i].flag;
+            if ((partyFlags & 1) != 0) {
+                if ((partyFlags & 2) != 0) {
+                    if ((partyFlags & 0x20) == 0) {
+                        frame = dds3GetRandIntA(NULL, 20);
+                        nbMakeReturnPacket(frame, a, &a->data->party[i]);
+                        if ((a->data->party[i].flag & 8) == 0) {
+                            SetTimeList(a, a->data->party[i].formindex, frame, 40, 40);
+                        }
+                    }
+                }
+            }
+        }
+        break;
+    case 8:
+        setMotion = 0;
+        setCamera = 0;
+        pressPacket = 0;
+        break;
+    }
+
+    switch (a->negotype) {
+    case 0:
+    case 5:
+    case 6:
+        break;
+    case 1:
+    case 2:
+        if (a->data->negoresult < 5) {
+            if (a->data->negoresult < 2) {
+                pressPacket = 0;
+            }
+        } else {
+            pressPacket = 0;
+        }
+        break;
+    case 3:
+    case 4:
+        if (a->data->negoresult != 4) {
+            pressPacket = 0;
+        }
+        break;
+    }
+    if (pressPacket != 0) {
+        nbMakePressPacket(0, a, a->press);
+        nbMakeNewPressPacket(0, a, pressType, a->form);
+    }
+
+    if (setMotion != 0) {
+        nbGetUnitWorkFromFormindex(a->data->negoeformindex);
+        form = &a->data->form[a->data->negoeformindex];
+        nbSetWaitMotion(form, 0, 1.0f);
+        nbSetUnitMotion(form, 0, 1, 1.0f);
+    }
+    if (setCamera != 0 && a->negotype == 0 && (a->form->stat & 0x10) != 0) {
+        nbCameraSetTaizi(a->form, &a->data->form[a->data->negoeformindex]);
+    }
+
+    activeCount = 0;
+    party = &a->data->party[4];
+    for (i = 9; i >= 0; i--) {
+        if ((party->flag & 1) != 0 && (party->flag & 0x20) == 0) {
+            activeCount++;
+        }
+        party++;
+    }
+    if (activeCount == 0) {
+        a->data->endtype = 9;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAction_NEGORESULT);
+#endif
 
 s32 CheckAction_NEGORESULT(nbActionProcessData_t *a)
 {
