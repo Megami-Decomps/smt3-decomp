@@ -428,7 +428,72 @@ INCLUDE_ASM(const s32, "sdk/libkernl", iDisableDmac);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", topThread);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", InitThread);
+typedef struct rpcSemaParam {
+    s32 count;
+    s32 maxCount;
+    s32 initCount;
+    s32 waitThreads;
+    u32 attr;
+    u32 option;
+} rpcSemaParam;
+
+extern s32 CreateSema(rpcSemaParam *param);
+typedef struct kernelThreadParam_t {
+    s32 status;
+    void (*entry)(void *);
+    void *stack;
+    s32 stackSize;
+    void *gp;
+    s32 priority;
+    u8 opaque[0x18];
+} kernelThreadParam_t;
+typedef struct threadMgrQueue_t {
+    u32 readIndex;
+    u32 writeIndex;
+    u8 commands[512][2];
+} threadMgrQueue_t;
+extern s32 D_0052C2AC __attribute__((section(".data")));
+extern s32 threadMgrSema;
+extern u8 D_0059AD70[0x400];
+extern u8 _gp[];
+extern threadMgrQueue_t D_0059B178;
+extern void topThread(void *queue);
+extern s32 CreateThread(kernelThreadParam_t *param);
+extern s32 DeleteSema(s32 sema);
+extern s32 _StartThread(s32 threadId, void *argument);
+extern s32 GetThreadId(void);
+extern s32 ChangeThreadPriority(s32 threadId, s32 priority);
+
+s32 InitThread(void)
+{
+    kernelThreadParam_t thread;
+    rpcSemaParam sema;
+
+    if (D_0052C2AC > 0) {
+        return -1;
+    }
+    sema.maxCount = 255;
+    sema.initCount = 0;
+    threadMgrSema = CreateSema(&sema);
+    if (threadMgrSema < 0) {
+        return -1;
+    }
+    thread.entry = topThread;
+    thread.stack = D_0059AD70;
+    thread.stackSize = 0x400;
+    thread.gp = _gp;
+    thread.priority = 0;
+    D_0052C2AC = CreateThread(&thread);
+    if (D_0052C2AC < 0) {
+        DeleteSema(threadMgrSema);
+        return -1;
+    }
+    D_0059B178.readIndex = 0;
+    D_0059B178.writeIndex = 0;
+    _StartThread(D_0052C2AC, &D_0059B178);
+    ChangeThreadPriority(GetThreadId(), 1);
+    return D_0052C2AC;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", iWakeupThread);
 
@@ -899,16 +964,6 @@ typedef struct rpcClient {
     void *server;
 } rpcClient;
 
-typedef struct rpcSemaParam {
-    s32 count;
-    s32 maxCount;
-    s32 initCount;
-    s32 waitThreads;
-    u32 attr;
-    u32 option;
-} rpcSemaParam;
-
-extern s32 CreateSema(rpcSemaParam *param);
 extern s32 WaitSema(s32 sema);
 extern s32 DeleteSema(s32 sema);
 
