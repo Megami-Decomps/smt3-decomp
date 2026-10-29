@@ -1202,7 +1202,7 @@ void fldHitChkUnit(f32 *position)
                         if (data->special[0] == 1) {
                             sky = data->special[1];
                         } else if (data->special[0] == 3) {
-                            *(f32 *)fldGlobalBase.unkC4 = face->point[0][1];
+                            fldGlobalBase.floatC4 = face->point[0][1];
                         }
                     }
                 }
@@ -1256,7 +1256,7 @@ void fldHitChkUnit(f32 *position)
                                         previous.y += pose->pos.y;
                                         previous.z += pose->pos.z;
                                     }
-                                    face->hitflag = 1;
+                                    fldMatterTable[index].hitflag = 1;
                                     fldGlobalBase.hitX = current.x;
                                     fldGlobalBase.hitY = current.y;
                                     fldGlobalBase.hitZ = current.z;
@@ -1279,7 +1279,7 @@ void fldHitChkUnit(f32 *position)
                                         previous.y += pose->pos.y;
                                         previous.z += pose->pos.z;
                                     }
-                                    face->hitflag = 1;
+                                    fldMatterTable[index].hitflag = 1;
                                     fldGlobalBase.hitValid = 1;
                                     fldGlobalBase.hitX = current.x;
                                     fldGlobalBase.hitY = current.y;
@@ -1326,28 +1326,61 @@ INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnit);
 extern f32 D_0054C46C;
 extern f32 fldCamCalcSlopeOffset(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 
+/* 487 of 808 words match, first differing word at +0x7C; 3232 of 3256 native
+ * bytes. The 24 missing bytes are three `addiu $4,$0,1` for the HImode `1`
+ * stored into hitflag (cse2 here substitutes the lowpart of the SImode `1`
+ * already in `inside`, retail rematerialises it) plus the three R5900 pad
+ * nops that follow from the shorter blocks. The rest is register choice:
+ * the prologue table pointer and the fldGlobalBase base register. */
 void fldHitChkUnitVWM(f32 *position)
 {
-    sdfVector4_t current, previous, delta, movement;
-    f32 radius, distance, clearance;
-    s32 axis, pass, index, floorHit = -1;
-    s16 sky = -1;
+    f32 current[4];
+    f32 previous[4];
+    f32 projected[4];
+    f32 delta[4];
+    f32 currentSave[4];
+    f32 previousSave[4];
+    f32 travel[4];
+    f32 unused[4];  /* retail leaves 16 bytes unused here, at sp+0x70 */
+    f32 movement[4];
+    f32 xs[4];
+    f32 ys[4];
+    f32 zs[4];
+    f32 radius;
+    f32 distance;
+    f32 clearance;
+    f32 signedDistance;
+    s32 axis;
+    s32 pass;
+    s32 index;
+    s32 floorHit;
+    s32 sky;
     s32 debug;
+    s32 moved;
+    s32 inside;
+    collision_s *face;
+    collision_s *mface;
+    fldCollisionFace_t *data;
+    u32 attributes;
+    dds3PoseSet_t *pose;
 
-    memset(&movement, 0, 16);
+    memset(movement, 0, 16);
     debug = fldRunDanteGunFlag.word18 != 0;
-    movement.w = 1.0f;
+    movement[3] = 1.0f;
+    sky = -1;
     fldHitChkSlope = -1;
+    floorHit = -1;
     fldHitChkMatter = -1;
     fldAutoMapNameD(-1);
     fldGlobalBase.word44 = 0;
     if (fldGlobalBase.hitMatterIndex != -1) {
-        collision_s *face = &fldMatterTable[fldGlobalBase.hitMatterIndex];
+        index = fldGlobalBase.hitMatterIndex;
+        face = &fldMatterTable[index];
         if (face->matter != NULL) {
-            dds3PoseSet_t *pose = face->matter->poseset;
-            movement.x = pose->pos.x - face->previousPosition[0];
-            movement.y = (pose->pos.y - face->previousPosition[1]) + 10.0f;
-            movement.z = pose->pos.z - face->previousPosition[2];
+            pose = face->matter->poseset;
+            movement[0] = pose->pos.x - face->previousPosition[0];
+            movement[1] = (pose->pos.y - face->previousPosition[1]) + 10.0f;
+            movement[2] = pose->pos.z - face->previousPosition[2];
         }
         fldGlobalBase.hitMatterIndex = -1;
     }
@@ -1356,97 +1389,138 @@ void fldHitChkUnitVWM(f32 *position)
         rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
         rsetAlpha(0);
     }
-    current.x = position[0] + movement.x;
-    current.y = position[1] + movement.y;
-    current.z = position[2] + movement.z;
-    previous.x = fldHitChkWork[0];
-    previous.y = fldHitChkWork[1];
-    previous.z = fldHitChkWork[2];
+    previous[0] = fldHitChkWork[0];
+    previous[1] = fldHitChkWork[1];
+    previous[2] = fldHitChkWork[2];
+    current[0] = position[0] + movement[0];
+    current[1] = position[1] + movement[1];
+    current[2] = position[2] + movement[2];
     if (fldGlobalBase.area == 1) {
         radius = 25.0f;
+        current[1] = current[1] - 35.0f;
     } else if (fldGlobalBase.area < 10) {
         radius = 30.0f;
+        current[1] = current[1] - 35.0f;
     } else {
         radius = 45.0f;
+        current[1] = current[1] - 35.0f;
     }
-    current.y -= 35.0f;
-    delta.x = current.x - previous.x;
-    delta.y = current.y - previous.y;
-    delta.z = current.z - previous.z;
-    if (MATH_VectorLength(&delta) < D_0054C46C) {
-        position[0] = previous.x;
-        position[2] = previous.z;
-        position[1] = previous.y;
+    delta[0] = current[0] - previous[0];
+    delta[1] = current[1] - previous[1];
+    delta[2] = current[2] - previous[2];
+    if (MATH_VectorLength((sdfVector4_t *)delta) < D_0054C46C) {
+        position[0] = previous[0];
+        position[2] = previous[2];
+        position[1] = previous[1];
         return;
     }
     for (index = 0; index < D_0054EDA0; index++) {
         fldMatterTable[index].hitflag = 0;
     }
-    axis = sdfFabs(current.z - previous.z) < sdfFabs(current.x - previous.x) ? 0 : 2;
+    travel[0] = sdfFabs(current[0] - previous[0]);
+    travel[2] = sdfFabs(current[2] - previous[2]);
     fldGlobalBase.word4C = -1;
     fldGlobalBase.wordC0 = 0;
+    if (travel[2] < travel[0]) {
+        axis = 0;
+    } else {
+        axis = 2;
+    }
     fldHitChkUnitElvOnly(position);
     for (pass = 0; pass < 2; pass++) {
         for (index = 0; index < D_0054EDA0; index++) {
-            collision_s *face = &fldMatterTable[index];
-            fldCollisionFace_t *data;
-            u32 attributes;
-            s32 moved;
-            f32 signedDistance;
-
-            if ((pass == 0 && face->mode2D == axis) ||
-                (pass != 0 && face->mode2D != axis)) {
+            if (pass == 0) {
+                if (fldMatterTable[index].mode2D == axis) {
+                    continue;
+                }
+            } else {
+                if (fldMatterTable[index].mode2D != axis) {
+                    continue;
+                }
+            }
+            if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                            fldMatterTable[index].hojiID) != 0) {
                 continue;
             }
-            if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1, face->hojiID) != 0) {
+            if (fldMatterTable[index].npcID > 0 &&
+                fldGbChkNpc(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                            fldMatterTable[index].npcID) != 0) {
                 continue;
             }
-            face = &fldMatterTable[index];
-            if (face->npcID > 0 && fldGbChkNpc(fldGlobalBase.area, fldGlobalBase.floor + 1, face->npcID) != 0) {
-                continue;
+            currentSave[0] = current[0];
+            currentSave[1] = current[1];
+            currentSave[2] = current[2];
+            previousSave[0] = previous[0];
+            previousSave[1] = previous[1];
+            previousSave[2] = previous[2];
+            if (fldMatterTable[index].matter != NULL) {
+                pose = fldMatterTable[index].matter->poseset;
+                moved = 1;
+                current[0] = currentSave[0] - pose->pos.x;
+                current[1] = currentSave[1] - pose->pos.y;
+                current[2] = currentSave[2] - pose->pos.z;
+                previous[0] = previousSave[0] - pose->pos.x;
+                previous[1] = previousSave[1] - pose->pos.y;
+                previous[2] = previousSave[2] - pose->pos.z;
+            } else {
+                moved = 0;
             }
+            signedDistance = fldVecDot((sdfVector4_t *)current,
+                                       (sdfVector4_t *)fldMatterTable[index].normal);
             face = &fldMatterTable[index];
-            moved = face->matter != NULL;
-            if (moved) {
-                dds3PoseSet_t *pose = face->matter->poseset;
-                current.x -= pose->pos.x;
-                current.y -= pose->pos.y;
-                current.z -= pose->pos.z;
-                previous.x -= pose->pos.x;
-                previous.y -= pose->pos.y;
-                previous.z -= pose->pos.z;
-            }
-            face = &fldMatterTable[index];
-            data = face->pFace;
-            attributes = data->attributes;
-            signedDistance = fldVecDot(&current, (sdfVector4_t *)face->normal) - face->num;
+            signedDistance = signedDistance - face->num;
             distance = sdfFabs(signedDistance);
+            attributes = face->pFace->attributes;
             if (attributes & 0x40) {
                 if (distance < radius) {
-                    HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
-                    if (!(clearance < 0.0f)) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges,
+                                       current, face, radius);
+                    if (clearance < 0.0f) {
+                        inside = 0;
+                    } else {
+                        inside = 1;
+                    }
+                    if (inside == 1) {
                         u8 floor = fldMatterTable[index].pFace->moveFloor;
                         fldAutoMapNameD((floor & 15) * 10 + (floor >> 4));
                     }
                 }
             } else if (attributes & 0x1000) {
                 if (distance < radius) {
-                    HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
-                    if (!(clearance < 0.0f)) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges,
+                                       current, face, radius);
+                    if (clearance < 0.0f) {
+                        inside = 0;
+                    } else {
+                        inside = 1;
+                    }
+                    if (inside == 1) {
                         fldAutoMapNameD(fldMatterTable[index].pFace->place);
                     }
                 }
             } else if (attributes & 0x2000) {
                 if (distance < radius) {
-                    HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
-                    if (!(clearance < 0.0f)) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges,
+                                       current, face, radius);
+                    if (clearance < 0.0f) {
+                        inside = 0;
+                    } else {
+                        inside = 1;
+                    }
+                    if (inside == 1) {
                         fldGlobalBase.wordC0 = fldMatterTable[index].pFace->encounter;
                     }
                 }
             } else if (attributes & 0x200) {
                 if (distance < radius) {
-                    HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
-                    if (!(clearance < 0.0f)) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges,
+                                       current, face, radius);
+                    if (clearance < 0.0f) {
+                        inside = 0;
+                    } else {
+                        inside = 1;
+                    }
+                    if (inside == 1) {
                         fldGlobalBase.word44 = fldMatterTable[index].pFace->sound;
                         if (fldGlobalBase.word44 == 3) {
                             fldGlobalBase.word4C = index;
@@ -1455,127 +1529,159 @@ void fldHitChkUnitVWM(f32 *position)
                 }
             } else if (attributes & 0x8000) {
                 if (distance < radius) {
-                    HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
-                    if (!(clearance < 0.0f)) {
-                        face = &fldMatterTable[index];
-                        data = face->pFace;
-                        if (data->special[0] == 1) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges,
+                                       current, face, radius);
+                    if (clearance < 0.0f) {
+                        inside = 0;
+                    } else {
+                        inside = 1;
+                    }
+                    if (inside == 1) {
+                        data = fldMatterTable[index].pFace;
+                        switch (data->special[0]) {
+                        case 1:
                             sky = data->special[1];
-                        } else if (data->special[0] == 3) {
-                            *(f32 *)fldGlobalBase.unkC4 = face->point[0][1];
+                            break;
+                        case 2:
+                            break;
+                        case 3:
+                            fldGlobalBase.floatC4 =
+                                fldMatterTable[index].point[0][1];
+                            break;
                         }
                     }
                 }
-            } else if (!(attributes & 0x400)) {
-                if (attributes & 0x800) {
-                    if (distance < radius) {
-                        HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
-                        if (!(clearance < 0.0f)) {
-                            fldAutoMapOpenBlock(fldMatterTable[index].pFace->automap[0]);
-                            if (fldMatterTable[index].pFace->automap[1] != 0) {
-                                fldAutoMapNameU(fldMatterTable[index].pFace->automap[1]);
-                            }
-                        }
-                    }
-                } else if (!(attributes & 0x4000)) {
-                    if (attributes & 0x100) {
-                        if (distance < radius) {
-                            HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
-                            if (!(clearance < 0.0f)) {
-                                fldHitChkSlope = index;
-                            }
-                        }
+            } else if (attributes & 0x400) {
+            } else if (attributes & 0x800) {
+                if (distance < radius) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges,
+                                       current, face, radius);
+                    if (clearance < 0.0f) {
+                        inside = 0;
                     } else {
-                        if (distance < radius) {
-                            HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
-                            if (!(clearance < 0.0f) &&
-                                (fldRunDanteGunFlag.counter == 0 || dds3PadButtonState[0x2B] == 0)) {
-                                sdfVector4_t projected;
-                                face = &fldMatterTable[index];
-                                if (face->mode2D == 1) {
-                                    f32 xs[3], ys[3], zs[3];
-                                    s32 vertex;
-                                    for (vertex = 0; vertex < 3; vertex++) {
-                                        xs[vertex] = face->point[vertex][0];
-                                        ys[vertex] = face->point[vertex][1];
-                                        zs[vertex] = face->point[vertex][2];
-                                    }
-                                    current.y = fldCamCalcSlopeOffset(current.x, current.z, xs, ys, zs) - 35.0f;
-                                    fldHitChkMatter = index;
-                                    fldGlobalBase.hitValid = 1;
-                                    fldMatterTable[index].hitflag = 1;
-                                    fldGlobalBase.hitX = current.x;
-                                    fldGlobalBase.hitY = current.y;
-                                    fldGlobalBase.hitZ = current.z;
-                                    D_0054ED90 = index;
-                                } else {
-                                    projected.x = current.x - face->normal[0] * signedDistance;
-                                    projected.y = current.y - face->normal[1] * signedDistance;
-                                    projected.z = current.z - face->normal[2] * signedDistance;
-                                    if (face->normal[1] < -0.75f) {
-                                        fldHitChkMatter = index;
-                                        if (floorHit >= 0 && clearance < distance) {
-                                            clearance = distance;
-                                        }
-                                        current.x = projected.x + face->normal[0] * clearance;
-                                        current.y = (projected.y + face->normal[1] * clearance) - 1.0f;
-                                        current.z = projected.z + face->normal[2] * clearance;
-                                        if (clearance == radius) {
-                                            floorHit = index;
-                                        }
-                                        if (face->matter != NULL) {
-                                            dds3PoseSet_t *pose = face->matter->poseset;
-                                            moved = 0;
-                                            current.x += pose->pos.x;
-                                            current.y += pose->pos.y;
-                                            current.z += pose->pos.z;
-                                            previous.x += pose->pos.x;
-                                            previous.y += pose->pos.y;
-                                            previous.z += pose->pos.z;
-                                        }
-                                        face->hitflag = 1;
-                                        fldGlobalBase.hitX = current.x;
-                                        fldGlobalBase.hitY = current.y;
-                                        fldGlobalBase.hitZ = current.z;
-                                        fldGlobalBase.hitValid = 1;
-                                        D_0054ED90 = index;
-                                    } else if (!(signedDistance < 0.0f)) {
-                                        if (clearance < distance) {
-                                            clearance = distance;
-                                        }
-                                        current.x = projected.x + face->normal[0] * clearance;
-                                        current.y = projected.y + face->normal[1] * clearance;
-                                        current.z = projected.z + face->normal[2] * clearance;
-                                        if (face->matter != NULL) {
-                                            dds3PoseSet_t *pose = face->matter->poseset;
-                                            moved = 0;
-                                            current.x += pose->pos.x;
-                                            current.y += pose->pos.y;
-                                            current.z += pose->pos.z;
-                                            previous.x += pose->pos.x;
-                                            previous.y += pose->pos.y;
-                                            previous.z += pose->pos.z;
-                                        }
-                                        face->hitflag = 1;
-                                        fldGlobalBase.hitValid = 1;
-                                        fldGlobalBase.hitX = current.x;
-                                        fldGlobalBase.hitY = current.y;
-                                        fldGlobalBase.hitZ = current.z;
-                                        D_0054ED90 = index;
-                                    }
-                                }
-                            }
-                        }
-                        if (moved) {
-                            dds3PoseSet_t *pose = fldMatterTable[index].matter->poseset;
-                            current.x += pose->pos.x;
-                            current.y += pose->pos.y;
-                            current.z += pose->pos.z;
-                            previous.x += pose->pos.x;
-                            previous.y += pose->pos.y;
-                            previous.z += pose->pos.z;
+                        inside = 1;
+                    }
+                    if (inside == 1) {
+                        fldAutoMapOpenBlock(fldMatterTable[index].pFace->automap[0]);
+                        if (fldMatterTable[index].pFace->automap[1] != 0) {
+                            fldAutoMapNameU(fldMatterTable[index].pFace->automap[1]);
                         }
                     }
+                }
+            } else if (attributes & 0x4000) {
+            } else if (attributes & 0x100) {
+                if (distance < radius) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges,
+                                       current, face, radius);
+                    if (clearance < 0.0f) {
+                        inside = 0;
+                    } else {
+                        inside = 1;
+                    }
+                    if (inside == 1) {
+                        fldHitChkSlope = index;
+                    }
+                }
+            } else {
+                if (distance < radius) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges,
+                                       current, face, radius);
+                    if (clearance < 0.0f) {
+                        inside = 0;
+                    } else {
+                        inside = 1;
+                    }
+                    if (inside == 1 &&
+                        (fldRunDanteGunFlag.counter == 0 ||
+                         dds3PadButtonState[0x2B] == 0)) {
+                        mface = &fldMatterTable[index];
+                        if (mface->mode2D == 1) {
+                            xs[0] = mface->point[0][0];
+                            ys[0] = mface->point[0][1];
+                            zs[0] = mface->point[0][2];
+                            xs[1] = mface->point[1][0];
+                            ys[1] = mface->point[1][1];
+                            zs[1] = mface->point[1][2];
+                            xs[2] = mface->point[2][0];
+                            ys[2] = mface->point[2][1];
+                            zs[2] = mface->point[2][2];
+                            current[1] = fldCamCalcSlopeOffset(current[0], current[2],
+                                                               xs, ys, zs) - 35.0f;
+                            fldHitChkMatter = index;
+                            fldGlobalBase.hitValid = 1;
+                            fldMatterTable[index].hitflag = 1;
+                            fldGlobalBase.hitX = current[0];
+                            fldGlobalBase.hitY = current[1];
+                            fldGlobalBase.hitZ = current[2];
+                            D_0054ED90 = index;
+                        } else {
+                            projected[0] = current[0] - mface->normal[0] * signedDistance;
+                            projected[1] = current[1] - mface->normal[1] * signedDistance;
+                            projected[2] = current[2] - mface->normal[2] * signedDistance;
+                            if (mface->normal[1] < -0.75f) {
+                                fldHitChkMatter = index;
+                                if (floorHit >= 0 && clearance < distance) {
+                                    clearance = distance;
+                                }
+                                mface = &fldMatterTable[index];
+                                current[0] = projected[0] + mface->normal[0] * clearance;
+                                current[1] = (projected[1] + mface->normal[1] * clearance) - 1.0f;
+                                current[2] = projected[2] + mface->normal[2] * clearance;
+                                if (clearance == radius) {
+                                    floorHit = index;
+                                }
+                                if (mface->matter != NULL) {
+                                    pose = mface->matter->poseset;
+                                    moved = 0;
+                                    current[0] = current[0] + pose->pos.x;
+                                    current[1] = current[1] + pose->pos.y;
+                                    current[2] = current[2] + pose->pos.z;
+                                    previous[0] = previous[0] + pose->pos.x;
+                                    previous[1] = previous[1] + pose->pos.y;
+                                    previous[2] = previous[2] + pose->pos.z;
+                                }
+                                fldMatterTable[index].hitflag = 1;
+                                fldGlobalBase.hitX = current[0];
+                                fldGlobalBase.hitY = current[1];
+                                fldGlobalBase.hitZ = current[2];
+                                fldGlobalBase.hitValid = 1;
+                                D_0054ED90 = index;
+                            } else if (!(signedDistance < 0.0f)) {
+                                if (clearance < distance) {
+                                    clearance = distance;
+                                }
+                                mface = &fldMatterTable[index];
+                                current[0] = projected[0] + mface->normal[0] * clearance;
+                                current[1] = projected[1] + mface->normal[1] * clearance;
+                                current[2] = projected[2] + mface->normal[2] * clearance;
+                                if (mface->matter != NULL) {
+                                    pose = mface->matter->poseset;
+                                    moved = 0;
+                                    current[0] = current[0] + pose->pos.x;
+                                    current[1] = current[1] + pose->pos.y;
+                                    current[2] = current[2] + pose->pos.z;
+                                    previous[0] = previous[0] + pose->pos.x;
+                                    previous[1] = previous[1] + pose->pos.y;
+                                    previous[2] = previous[2] + pose->pos.z;
+                                }
+                                fldMatterTable[index].hitflag = 1;
+                                fldGlobalBase.hitValid = 1;
+                                fldGlobalBase.hitX = current[0];
+                                fldGlobalBase.hitY = current[1];
+                                fldGlobalBase.hitZ = current[2];
+                                D_0054ED90 = index;
+                            }
+                        }
+                    }
+                }
+                if (moved != 0) {
+                    pose = fldMatterTable[index].matter->poseset;
+                    current[0] = current[0] + pose->pos.x;
+                    current[1] = current[1] + pose->pos.y;
+                    current[2] = current[2] + pose->pos.z;
+                    previous[0] = previous[0] + pose->pos.x;
+                    previous[1] = previous[1] + pose->pos.y;
+                    previous[2] = previous[2] + pose->pos.z;
                 }
             }
         }
@@ -1585,16 +1691,16 @@ void fldHitChkUnitVWM(f32 *position)
     } else {
         fldSkySetTblModosu(5);
     }
-    delta.x = current.x - previous.x;
-    delta.y = current.y - previous.y;
-    delta.z = current.z - previous.z;
-    MATH_VectorLength(&delta);
-    position[0] = current.x;
-    position[2] = current.z;
-    position[1] = current.y;
-    fldHitChkWork[2] = current.z;
-    fldHitChkWork[0] = current.x;
-    fldHitChkWork[1] = current.y;
+    delta[0] = current[0] - previous[0];
+    delta[1] = current[1] - previous[1];
+    delta[2] = current[2] - previous[2];
+    MATH_VectorLength((sdfVector4_t *)delta);
+    position[0] = current[0];
+    position[2] = current[2];
+    position[1] = current[1];
+    fldHitChkWork[2] = current[2];
+    fldHitChkWork[0] = current[0];
+    fldHitChkWork[1] = current[1];
 }
 #else
 INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnitVWM);
