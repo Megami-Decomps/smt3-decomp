@@ -272,9 +272,9 @@ sceOpen				docs/nonmatching/sdk/libkernl.md	189
 _sceFs_Rcv_Intr				docs/nonmatching/sdk/libkernl.md	217
 __ieee754_sqrtf				docs/nonmatching/sdk/libm.md	3
 cosf and sinf				docs/nonmatching/sdk/libm.md	41
-sceMcWrite				docs/nonmatching/sdk/libmc.md	30
-sceMcSync				docs/nonmatching/sdk/libmc.md	49
-sceMcSetFileInfo				docs/nonmatching/sdk/libmc.md	60
+sceMcWrite			88 of 95 words match	docs/nonmatching/sdk/libmc.md	30
+sceMcSync				docs/nonmatching/sdk/libmc.md	61
+sceMcSetFileInfo				docs/nonmatching/sdk/libmc.md	72
 sceSifMUnBindRpc			60 of 71 words match	docs/nonmatching/sdk/libmrpc.md	3
 scePadPortOpen				docs/nonmatching/sdk/libpad.md	3
 stfMain2	staff/stfMain	0x2D4	145 of 181 words match	docs/nonmatching/staff/stfMain.md	5

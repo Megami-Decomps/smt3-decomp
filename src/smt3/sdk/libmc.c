@@ -9,12 +9,20 @@ typedef struct mcRpcCd {
 } mcRpcCd;
 
 extern mcRpcCd D_00599740 __attribute__((section(".data")));
-/* The 0x30-byte request every short command shares. The argument words mean
- * different things per command, so they stay a block; data is the inline
- * payload sceMcWrite's leading bytes travel in. */
-typedef struct mcReq {
+/* The 0x30-byte request shared by short commands. Their argument words vary;
+ * the write view names the consumed fields and inline transfer prefix. */
+typedef union mcReq {
     s32 w[8];
-    u8 data[16];
+    struct {
+        s32 descriptor;
+        u8 opaque04[8];
+        s32 bulkSize;
+        u8 opaque10[4];
+        u32 inlineSize;
+        const void *bulkBuffer;
+        u8 opaque1C[4];
+        u8 inlineData[16];
+    } write;
 } mcReq;
 
 extern mcReq D_005997C0 __attribute__((section(".data")));
@@ -346,11 +354,10 @@ s32 sceMcRead(s32 a, void *b, s32 c)
     return ret;
 }
 
-/* NON_MATCHING: 380 bytes against retail's 384; the store order inside the
- * two size branches and the saved-register pair holding the descriptor are
- * the only differences left. */
+/* NON_MATCHING: native 380-byte instruction size; seven words differ
+ * in the branch-local request base and store scheduling. */
 #ifdef NON_MATCHING
-s32 sceMcWrite(s32 a, void *b, s32 c)
+s32 sceMcWrite(s32 a, const void *b, s32 c)
 {
     s32 ret;
     u32 i;
@@ -362,11 +369,11 @@ s32 sceMcWrite(s32 a, void *b, s32 c)
         SignalSema(D_0052BB24);
         return -100;
     }
-    D_005997C0.w[0] = a;
+    D_005997C0.write.descriptor = a;
     if (c < 17) {
-        D_005997C0.w[5] = c;
-        D_005997C0.w[6] = 0;
-        D_005997C0.w[3] = 0;
+        D_005997C0.write.inlineSize = c;
+        D_005997C0.write.bulkBuffer = 0;
+        D_005997C0.write.bulkSize = 0;
     } else {
         /* The IOP side wants the bulk transfer 16-byte aligned, so the leading
          * bytes up to the next boundary travel inside the request itself. */
@@ -374,12 +381,12 @@ s32 sceMcWrite(s32 a, void *b, s32 c)
         u32 bot = (u32)b - 16;
         s32 head = top - bot;
 
-        D_005997C0.w[6] = (s32)b + head;
-        D_005997C0.w[3] = c - head;
-        D_005997C0.w[5] = head;
+        D_005997C0.write.bulkBuffer = (const u8 *)b + head;
+        D_005997C0.write.bulkSize = c - head;
+        D_005997C0.write.inlineSize = head;
     }
-    for (i = 0; i < D_005997C0.w[5]; i++) {
-        D_005997C0.data[i] = ((u8 *)b)[i];
+    for (i = 0; i < D_005997C0.write.inlineSize; i++) {
+        D_005997C0.write.inlineData[i] = ((const u8 *)b)[i];
     }
     FlushCache(0);
     ret = sceSifCallRpc(&D_00599740, 6, 1, &D_005997C0, 48, &D_0059AD00, 4, 0, 0);

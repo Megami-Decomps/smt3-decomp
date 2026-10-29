@@ -29,7 +29,9 @@ overflows a `$gp`-relative literal reference in a game unit.
 
 ## sceMcWrite
 
-380 bytes against retail's 384. The leading-byte arithmetic is right, and it
+380 emitted and native instruction bytes: 88 of 95 words match and seven
+differ, first at +0x6C. The 384-byte address span includes four alignment bytes.
+The leading-byte arithmetic is right, and it
 has to be written as two separate subtractions:
 
     u32 top = ((u32)buf - 1) & ~15;
@@ -42,9 +44,19 @@ named member (`req.data[i]`), not `((u8 *)&req)[32 + i]`: the cast form hoists
 `base + 32` out of the loop, where retail keeps the base and uses 32 as the
 store displacement.
 
-What is left is the store order inside the two size branches (retail writes
-`w[6]`, `w[3]`, `w[5]`; the draft emits `w[5]`, `w[6]`, `w[3]` whatever order
-the source uses) and the saved register holding the descriptor.
+The write-specific view records descriptor at +0, signed bulk size at +0xC,
+unsigned inline size at +0x14, bulk-buffer pointer at +0x18 and sixteen prefix
+bytes at +0x20. The remaining words stay untouched. The original signed count
+selects the short path at count < 17, including negative counts; the copy loop
+uses the unsigned inline size. Preserve that native behavior. The source buffer
+and forwarded bulk pointer are read-only.
+
+Typed fields retain the same seven-word residual as the generic request view:
+branch-local request-base selection and independent stores differ. Native long
+writes store bulk buffer, bulk size, then inline size; the compiler schedules
+inline size first. A cached request pointer shortens the function to 372 bytes
+and hoists the inline-data address, so the preferred source keeps direct global
+accesses. No field qualifiers or artificial dependencies constrain the stores.
 
 ## sceMcSync
 
