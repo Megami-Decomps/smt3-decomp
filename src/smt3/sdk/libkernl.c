@@ -1505,6 +1505,15 @@ typedef struct fsReadlinkRequest_t {
     char *buffer;
     char name[0x400];
 } fsReadlinkRequest_t;
+typedef struct fsFormatRequest_t {
+    s32 sema;
+    s32 *result;
+    s32 resultSize;
+    char device[0x400];
+    char blockDevice[0x400];
+    u8 args[0x400];
+    s32 argSize;
+} fsFormatRequest_t;
 typedef union fsRequest_t {
     fsCloseRequest_t close;
     fsPathRequest_t path;
@@ -1514,6 +1523,7 @@ typedef union fsRequest_t {
     fsRenameRequest_t rename;
     fsChstatRequest_t chstat;
     fsReadlinkRequest_t readlink;
+    fsFormatRequest_t format;
 } fsRequest_t;
 extern fsRequest_t D_0059D4C0;
 
@@ -1684,7 +1694,71 @@ s32 sceRmdir(const char *path)
     return _sceCallCode(path, 8);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceFormat);
+s32 sceFormat(const char *device, const char *blockDevice, const void *args, s32 argSize)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsFormatRequest_t *request = &D_0059D4C0.format;
+    s32 deviceLength;
+    s32 blockLength;
+    s32 argIndex;
+    s32 sema;
+    s32 accepted;
+    fsRequest_t *packet;
+
+    _sceFsWaitS(14);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    for (deviceLength = 0; deviceLength < 0x400 &&
+         (request->device[deviceLength] = device[deviceLength]) != 0; deviceLength++) {
+    }
+    if (deviceLength == 0x400) {
+        request->device[0x3FF] = 0;
+    }
+    if (blockDevice == NULL) {
+        request->blockDevice[0] = 0;
+    } else {
+        for (blockLength = 0; blockLength < 0x400 &&
+             (request->blockDevice[blockLength] = blockDevice[blockLength]) != 0; blockLength++) {
+        }
+        if (blockLength == 0x400) {
+            request->blockDevice[0x3FF] = 0;
+        }
+    }
+    if (argSize > 0x400) {
+        _sceFsSigSema();
+        return -7;
+    }
+    for (argIndex = 0; argIndex < argSize; argIndex++) {
+        request->args[argIndex] = ((const u8 *)args)[argIndex];
+    }
+    request->argSize = argSize;
+    param.initCount = 0;
+    param.maxCount = 1;
+    param.option = 0;
+    packet = &D_0059D4C0;
+    sema = CreateSema(&param);
+    request->sema = sema;
+    request->result = &result;
+    request->resultSize = 4;
+    sceSifWriteBackDCache(packet, 0xC10);
+    if (sceSifCallRpc(&D_0059E780, 14, 0, packet,
+                      0xC10, D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
 
 s32 sceAddDrv(void *driver)
 {
