@@ -1061,7 +1061,8 @@ not their original source spellings. The archive map's old1112-byte name-only
 `ef_acos.o` attribution covers this aggregate region and does not prove that
 both forwarding entries belong to that object. Function boundaries now follow
 the independent native entries, without changing the translation-unit boundary
-or compiler profile. The forwarding functions remain assembly.
+or compiler profile. Both typed forwarding entries now match their native frames
+and terminal jumps; see [the forwarding reconstruction](https://github.com/Megami-Decomps/smt3-decomp/commit/ffba4cacf1a7168f52d8f773341537d625afb533).
 
 ## Formatted-output entry boundary
 
