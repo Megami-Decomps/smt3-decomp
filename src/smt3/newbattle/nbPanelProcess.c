@@ -1471,7 +1471,413 @@ void nbPanelPressGaugeEncountHide(void)
     nbPanelPGEncount = 1;
 }
 
+#ifdef NON_MATCHING
+extern void nbPanelPressTurnGaugeAnimStart(void);
+extern s32 nbPanelPressTurnGaugeRun(void);
+extern nbPanelProcess_nbPanelXYZ_t nbPressGaugeTable[], nbPressGaugeTable2[], D_004F0034[], D_004F0048[];
+extern nbPanelProcess_nbPanelXYZ_t D_00551178[];
+extern s32 D_004F0070[], D_004F0088[];
+extern f32 D_004F0628[][4];
+extern const volatile f32 D_0054E5AC, D_0054E5B0;
+extern s32 D_00551FE4, D_00551FE8;
+extern u32 nbPressGaugeState;
+
+void nbPanelPressGauge(nbMainProcessData_t *data)
+{
+    s32 x = 0x15D;
+    u32 index = 0;
+    u32 baseColor;
+    u32 wanted;
+    u32 count;
+    s32 *uvIndexes;
+    s32 extraColor = 0;
+    nbPanelProcess_nbPanelTMXuv_t *uv;
+    sdfTexHandle_t *texture;
+    u32 color;
+    s32 frame;
+    f32 scale;
+    f32 trailScale;
+    s32 trailCount;
+    s32 phase = 0;
+    s32 i;
+
+    nbPnl_setOt(0x47);
+    nbPnl_rsetAlpha(0);
+    nbPnl_rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    if (nbPanelPGStart != 0) {
+        if (data->pressturn == 0) return;
+        nbPanelPressTurnGaugeAnimStart();
+        nbPanelPGStart = 0;
+    }
+    if (nbPanelPGFrame == 0) {
+        s16 oldPress;
+        s16 turn;
+        oldPress = data->press4_p;
+        turn = data->pressturn;
+        D_00551FE4 = oldPress;
+        wanted = turn;
+        nbPressGaugeState = wanted;
+        D_00551FE8 = turn;
+    }
+    i = data->stat & 8;
+    if (nbPanelPGTurn != i) {
+        nbPanelPGTurn = i;
+        nbPanelPGBirthWait = 12;
+    }
+    baseColor = nbPanelPGBaseColor;
+    if (nbPanelPGShow == 0) {
+        if ((baseColor & 0xFF000000) == 0) return;
+        baseColor += 0xF0000000;
+        nbPanelPGBaseColor = baseColor;
+    } else if ((baseColor & 0xFF000000) != 0x80000000) {
+        baseColor += 0x10000000;
+        nbPanelPGBaseColor = baseColor;
+    }
+    nbPanelBaseColorSet(baseColor);
+    uvIndexes = nbPanelPGPress ? D_004F0070 : D_004F0088;
+    count = nbPanelPGNumber;
+    if (nbPanelPressTurnGaugeRun() == 0) {
+        uv = &nbPanelParamTable[uvIndexes[0]];
+        texture = data->pnltex[3];
+        color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+        nbPnlSprite(nbPressGaugeTable2[0].x + 0x15D, nbPressGaugeTable2[0].y + 1,
+                    nbPressGaugeTable2[0].w, nbPressGaugeTable2[0].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        uv = &nbPanelParamTable[uvIndexes[1]];
+        texture = data->pnltex[2];
+        color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+        nbPnlSprite(nbPressGaugeTable2[1].x + 0x15D, nbPressGaugeTable2[1].y + 1,
+                    nbPressGaugeTable2[1].w, nbPressGaugeTable2[1].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        count = nbPanelPGNumber;
+    }
+    wanted = nbPressGaugeState;
+    if (count < wanted) {
+        s32 wait = nbPanelPGBirthWait;
+        if (wait != 0) {
+            wait = (s32)((u32)wait - 1);
+            nbPanelPGBirthWait = wait;
+            if (wait == 0) nbPanelPGPress = data->stat & 8;
+        } else {
+            index = 0;
+            if (count != 0) {
+                do {
+                    uv = &nbPanelParamTable[uvIndexes[2]];
+                    texture = data->pnltex[2];
+                    color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+                    nbPnlSprite(nbPressGaugeTable[0].x + x, nbPressGaugeTable[0].y + 1,
+                                nbPressGaugeTable[0].w, nbPressGaugeTable[0].h,
+                                uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+                    uv = &nbPanelParamTable[uvIndexes[4]];
+                    texture = data->pnltex[2];
+                    color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+                    nbPnlSprite(nbPressGaugeTable[2].x + x, nbPressGaugeTable[2].y + 1,
+                                nbPressGaugeTable[2].w, nbPressGaugeTable[2].h,
+                                uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+                    x -= 0x2E;
+                    index++;
+                } while (index < (u32)nbPanelPGNumber);
+                wanted = nbPressGaugeState;
+            }
+            if ((s32)index < (s32)wanted) {
+                do {
+                    frame = (s32)((u32)nbPanelPGFrame - index * 2);
+                    if (frame >= 0) {
+                        u32 flashColor;
+                        if (frame >= 4) {
+                            phase = frame - 4;
+                            if (phase < 6) {
+                                f32 fade = 1.0f - (f32)phase / 6.0f;
+                                flashColor = ((u32)(fade * 128.0f) << 24) | 0x808080;
+                                scale = fade * D_0054E5B0 + 1.0f;
+                            } else {
+                                scale = 1.0f;
+                                flashColor = 0x80808080;
+                            }
+                            if (phase < 2) {
+                                trailScale = 2.0f;
+                            } else if (phase < 6) {
+                                trailScale = (1.0f - (f32)(phase - 2) * 0.25f) + 1.0f;
+                            } else {
+                                trailScale = 1.0f;
+                            }
+                        } else {
+                            scale = D_0054E5AC;
+                            flashColor = ((u32)((f32)frame * 0.25f * 128.0f) << 24) | 0x808080;
+                            trailScale = 2.0f;
+                        }
+                        if (scale == 1.0f) nbPnl_rsetAlpha(0);
+                        else nbPnl_rsetAlpha(1);
+                        nbPanelSpriteScaleDraw(x, 1, &nbPressGaugeTable[0],
+                                               &nbPanelParamTable[uvIndexes[2]], flashColor, scale, data->pnltex[2]);
+                        if (trailScale == 1.0f) nbPnl_rsetAlpha(0);
+                        else nbPnl_rsetAlpha(1);
+                        nbPanelSpriteScaleDraw(x, 1, &D_004F0048[0],
+                                               &nbPanelParamTable[uvIndexes[4]], 0x80808080, trailScale, data->pnltex[2]);
+                        nbPnl_rsetAlpha(1);
+                        wanted = nbPressGaugeState;
+                        trailCount = phase - 2;
+                        if (trailCount >= 5) trailCount = 8 - trailCount;
+                        if (trailCount > 0) {
+                            f32 step;
+                            if (trailCount >= 5) trailCount = 4;
+                            step = (2.0f - trailScale) / (f32)trailCount;
+                            for (i = 0; i < trailCount; i++) {
+                                nbPanelSpriteScaleDraw(x, 1, &D_004F0048[0],
+                                                       &nbPanelParamTable[uvIndexes[4]], 0x30808080,
+                                                       trailScale, data->pnltex[2]);
+                                trailScale += step;
+                            }
+                            wanted = nbPressGaugeState;
+                        }
+                        x -= 0x2E;
+                    }
+                    index++;
+                } while ((s32)index < (s32)wanted);
+            }
+            nbPnl_rsetAlpha(0);
+            wanted = nbPressGaugeState;
+            count = nbPanelPGNumber;
+            frame = (s32)((u32)nbPanelPGFrame + 1);
+            if (frame < (s32)((wanted - count) * 2 + 13)) {
+                nbPanelPGFrame = frame;
+            } else {
+                nbPanelPGFrame = 0;
+                nbPanelPGNumber = wanted;
+                count = wanted;
+            }
+        }
+    } else {
+        index = 0;
+        if (D_00551FE4 > 0) {
+            do {
+                uv = &nbPanelParamTable[uvIndexes[2]];
+                texture = data->pnltex[2];
+                color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+                nbPnlSprite(nbPressGaugeTable[0].x + x, nbPressGaugeTable[0].y + 1,
+                            nbPressGaugeTable[0].w, nbPressGaugeTable[0].h,
+                            uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+                uv = &nbPanelParamTable[uvIndexes[4]];
+                texture = data->pnltex[2];
+                color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+                nbPnlSprite(nbPressGaugeTable[2].x + x, nbPressGaugeTable[2].y + 1,
+                            nbPressGaugeTable[2].w, nbPressGaugeTable[2].h,
+                            uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+                x -= 0x2E;
+                index++;
+            } while ((s32)index < D_00551FE4);
+        }
+        count = nbPanelPGNumber;
+        if ((s32)index < D_00551FE8) {
+            do {
+                u32 cycle;
+                f32 pulse;
+                f32 glow;
+                f32 step;
+                u32 glowColor;
+
+                uv = &nbPanelParamTable[uvIndexes[2]];
+                texture = data->pnltex[2];
+                color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+                nbPnlSprite(nbPressGaugeTable[0].x + x, nbPressGaugeTable[0].y + 1,
+                            nbPressGaugeTable[0].w, nbPressGaugeTable[0].h,
+                            uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+                uv = &nbPanelParamTable[uvIndexes[4]];
+                texture = data->pnltex[2];
+                color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+                nbPnlSprite(D_004F0048[0].x + x, D_004F0048[0].y + 1,
+                            D_004F0048[0].w, D_004F0048[0].h,
+                            uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+                nbPnl_rsetAlpha(1);
+                cycle = data->battletime % 11;
+                if (cycle < 5) pulse = (f32)cycle / 5.0f;
+                else pulse = 1.0f - (f32)(cycle - 5) / 6.0f;
+                glow = ((D_004F0628[cycle][1] - 1.0f) * 1.25f) + 1.0f;
+                step = (glow - 1.0f) * 0.5f;
+                trailScale = pulse;
+                for (i = 0; i < 2; i++) {
+                    glowColor = ((u32)(trailScale * 48.0f) << 24) | 0x808080;
+                    trailScale *= 0.5f;
+                    nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[0],
+                        &nbPanelParamTable[uvIndexes[2]], glowColor, &D_00551178[0], glow, data->pnltex[2]);
+                    glow -= step;
+                }
+                if (cycle == 6) {
+                    nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[0],
+                        &nbPanelParamTable[uvIndexes[2]], 0x30808080, &D_00551178[0], 1.25f, data->pnltex[2]);
+                }
+                glow = ((D_004F0628[cycle][0] - 1.0f) * 1.25f) + 1.0f;
+                step = (glow - 1.0f) * 0.5f;
+                trailScale = pulse;
+                for (i = 0; i < 2; i++) {
+                    glowColor = ((u32)(trailScale * 48.0f) << 24) | 0x808080;
+                    trailScale *= 0.5f;
+                    extraColor = glowColor;
+                    nbPanelSpriteBlendDraw(x, 1, &D_004F0048[0],
+                        &nbPanelParamTable[uvIndexes[4]], glowColor, &D_00551178[0], glow, data->pnltex[2]);
+                    glow -= step;
+                }
+                if (cycle == 6) {
+                    extraColor = 0x30808080;
+                    nbPanelSpriteBlendDraw(x, 1, &D_004F0048[0],
+                        &nbPanelParamTable[uvIndexes[4]], extraColor, &D_00551178[0], 1.25f, data->pnltex[2]);
+                }
+                x -= 0x2E;
+                index++;
+                nbPnl_rsetAlpha(0);
+            } while ((s32)index < D_00551FE8);
+            count = nbPanelPGNumber;
+        }
+        wanted = nbPressGaugeState;
+    }
+    if (wanted < count) {
+        s32 frameValue = nbPanelPGFrame;
+        u32 fadedColor;
+        u32 blendColor;
+        s32 nextFrame;
+        f32 fade;
+
+        if (wanted == count - 1) {
+            if (frameValue < 8) {
+                fade = (1.0f - (f32)frameValue * 0.125f) * 128.0f;
+                fadedColor = ((u32)fade << 24) | 0x808080;
+            } else {
+                fadedColor = 0;
+            }
+            if (frameValue < 6) {
+                blendColor = ((u32)((f32)frameValue / 5.0f * 128.0f) << 24) | 0x808080;
+                scale = 1.0f;
+            } else {
+                fade = (f32)(s32)((u32)frameValue - 5) / 12.0f;
+                blendColor = ((u32)((1.0f - fade) * 128.0f) << 24) | 0x808080;
+                scale = 1.0f - fade;
+            }
+            nextFrame = (s32)((u32)frameValue + 1);
+            if (index < count) {
+                do {
+                    uv = &nbPanelParamTable[uvIndexes[2]];
+                    texture = data->pnltex[2];
+                    color = effMagaCylinderCalcColor(fadedColor, nbPanelBaseABGR);
+                    nbPnlSprite(nbPressGaugeTable[0].x + x, nbPressGaugeTable[0].y + 1,
+                                nbPressGaugeTable[0].w, nbPressGaugeTable[0].h,
+                                uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+                    uv = &nbPanelParamTable[uvIndexes[4]];
+                    texture = data->pnltex[2];
+                    color = effMagaCylinderCalcColor(fadedColor, nbPanelBaseABGR);
+                    nbPnlSprite(D_004F0048[0].x + x, D_004F0048[0].y + 1,
+                                D_004F0048[0].w, D_004F0048[0].h,
+                                uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+                    nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[1],
+                        &nbPanelParamTable[uvIndexes[3]], blendColor, &D_00551178[0], scale, data->pnltex[2]);
+                    nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[3],
+                        &nbPanelParamTable[uvIndexes[5]], blendColor, &D_00551178[0], scale, data->pnltex[2]);
+                    nbPnl_rsetAlpha(1);
+                    trailCount = (s32)((u32)nbPanelPGFrame - 5);
+                    if (trailCount > 0) {
+                        f32 step;
+                        if (trailCount >= 5) trailCount = 4;
+                        trailScale = scale;
+                        for (i = 0; i < trailCount; i++) {
+                            f32 oldScale;
+                            u32 alpha = (u32)((f32)(trailCount - i) * 268435456.0f / (f32)trailCount);
+                            extraColor = (alpha & 0xFF000000) | (blendColor & 0xFFFFFF);
+                            nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[1],
+                                &nbPanelParamTable[uvIndexes[3]], extraColor, &D_00551178[0], trailScale, data->pnltex[2]);
+                            oldScale = trailScale;
+                            step = (1.0f - scale) / (f32)trailCount;
+                            trailScale += step;
+                            nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[3],
+                                &nbPanelParamTable[uvIndexes[5]], extraColor, &D_00551178[0], oldScale, data->pnltex[2]);
+                        }
+                    }
+                    x -= 0x2E;
+                    index++;
+                    nbPnl_rsetAlpha(0);
+                } while (index < (u32)nbPanelPGNumber);
+                frameValue = nbPanelPGFrame;
+                nextFrame = (s32)((u32)frameValue + 1);
+            }
+            if (nextFrame < 17) {
+                nbPanelPGFrame = nextFrame;
+            } else {
+                nbPanelPGFrame = 0;
+                nbPanelPGNumber = nbPressGaugeState;
+            }
+        } else {
+            if (frameValue < 8) {
+                fade = (1.0f - (f32)frameValue * 0.125f) * 128.0f;
+                fadedColor = ((u32)fade << 24) | 0x808080;
+            } else {
+                fadedColor = 0;
+            }
+            if (frameValue < 6) {
+                blendColor = ((u32)((f32)frameValue / 5.0f * 128.0f) << 24) | 0x808080;
+                scale = 1.0f;
+            } else {
+                fade = (f32)(s32)((u32)frameValue - 5) * 0.25f;
+                blendColor = ((u32)((1.0f - fade) * 128.0f) << 24) | 0x808080;
+                extraColor = (((u32)((1.0f - fade) * 96.0f) << 24) + 0x20) | 0x808080;
+                scale = fade * 0.5f + 1.0f;
+            }
+            nextFrame = (s32)((u32)frameValue + 1);
+            if (index < count) {
+                do {
+                    uv = &nbPanelParamTable[uvIndexes[2]];
+                    texture = data->pnltex[2];
+                    color = effMagaCylinderCalcColor(fadedColor, nbPanelBaseABGR);
+                    nbPnlSprite(nbPressGaugeTable[0].x + x, nbPressGaugeTable[0].y + 1,
+                                nbPressGaugeTable[0].w, nbPressGaugeTable[0].h,
+                                uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+                    uv = &nbPanelParamTable[uvIndexes[4]];
+                    texture = data->pnltex[2];
+                    color = effMagaCylinderCalcColor(fadedColor, nbPanelBaseABGR);
+                    nbPnlSprite(nbPressGaugeTable[2].x + x, nbPressGaugeTable[2].y + 1,
+                                nbPressGaugeTable[2].w, nbPressGaugeTable[2].h,
+                                uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+                    nbPnl_rsetAlpha(1);
+                    trailCount = (s32)((u32)nbPanelPGFrame - 5);
+                    if (trailCount > 0) {
+                        f32 step;
+                        nbPnl_rsetAlpha(1);
+                        if (trailCount >= 3) trailCount = 2;
+                        trailScale = scale;
+                        for (i = 0; i < trailCount; i++) {
+                            f32 oldScale;
+                            nbPanelSpriteBlendDraw(x, 1, &D_004F0034[0],
+                                &nbPanelParamTable[uvIndexes[3]], blendColor, &D_00551178[0], trailScale, data->pnltex[2]);
+                            oldScale = trailScale;
+                            step = (1.0f - scale) / (f32)trailCount;
+                            trailScale += step;
+                            nbPanelSpriteBlendDraw(x, 1, &D_004F0034[2],
+                                &nbPanelParamTable[uvIndexes[5]], extraColor, &D_00551178[0], oldScale, data->pnltex[2]);
+                        }
+                        nbPnl_rsetAlpha(0);
+                    } else {
+                        nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[1],
+                            &nbPanelParamTable[uvIndexes[3]], blendColor, &D_00551178[0], scale, data->pnltex[2]);
+                        nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[3],
+                            &nbPanelParamTable[uvIndexes[5]], blendColor, &D_00551178[0], scale, data->pnltex[2]);
+                    }
+                    x -= 0x2E;
+                    index++;
+                } while (index < (u32)nbPanelPGNumber);
+                frameValue = nbPanelPGFrame;
+                nextFrame = (s32)((u32)frameValue + 1);
+            }
+            if (nextFrame < 10) {
+                nbPanelPGFrame = nextFrame;
+            } else {
+                nbPanelPGFrame = 0;
+                nbPanelPGNumber = nbPressGaugeState;
+            }
+        }
+    }
+    nbPanelBaseColorSet(0x80808080);
+}
+
+#else
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPressGauge);
+#endif
 
 void nbPanelPressTurnInit(void)
 {
