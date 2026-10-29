@@ -832,7 +832,42 @@ s32 Flow1_21(nbNegoProcessData_t *n)
     return 0;
 }
 
+#ifdef NON_MATCHING
+s32 Flow1_22(nbNegoProcessData_t *n)
+{
+    u8 candidates[10];
+    s32 count = 0;
+    s32 i;
+    nbMainProcessData_t *data;
+    nbParty_t *party;
+    u16 flag;
+    datUnitWork_t *work;
+
+    nbAddNegoIdKouho(n, 0x10018);
+    nbAddNegoIdKouho(n, 0x10017);
+    n->nextnegoid = n->nextkouho[0];
+    for (i = 4; i < 14; i++) {
+        data = n->data;
+        party = &data->party[i];
+        flag = party->flag;
+        if ((flag & 1) && (flag & 2) &&
+            !(flag & 0x38) && i != n->epartyindex) {
+            work = nbGetUnitWorkPointer(data, party);
+            if (datCheckTalk(work) && master_text[work->id].phase == 1) {
+                candidates[count++] = i;
+            }
+        }
+    }
+    if (count > 0) {
+        i = candidates[dds3GetRandIntA(0, count)];
+        n->nextnegoid = n->nextkouho[1];
+        n->boupartyindex = i;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_22);
+#endif
 
 s32 Flow1_23(nbNegoProcessData_t *n)
 {
