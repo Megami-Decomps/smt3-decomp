@@ -728,7 +728,58 @@ s32 rstChkEvoEvent(datUnitWork_t *stock, datUnitWork_t *evo, s32 index)
     return result;
 }
 
+#ifdef NON_MATCHING
+extern s32 rstFindEvoEntryType5(datUnitWork_t *unit);
+extern void cmbCalcEvoEvent(datUnitWork_t *unit, fclSkillParam_t *entry,
+                            s8 hasNext, datUnitWork_t *result);
+extern s32 fclStartSelMessage(s32 message);
+
+static inline s32 rstFinishEvoCandidate(s32 index)
+{
+    s32 result = rstChkEvoEvent(EventStart->unit, &EventStart->evoWork, index);
+    if (result == 1 || result == 2 || result == 3) {
+        EventStart->evoResult = result;
+        return 0;
+    }
+    EventStart->evoResult = 0;
+    fclSetMessageVar_20743088(1, (s32)text2[EventStart->unit->id]);
+    fclStartMessage(0x15);
+    fclStartSelMessage(0x2B);
+    return 1;
+}
+
+s32 rstCalcEvo(void)
+{
+    for (;;) {
+        s32 event = rstCalcEventInfo((u8 *)&EventStart->eventValue);
+        if (event < 0) {
+            s32 index = rstFindEvoEntryType5(EventStart->unit);
+            if (index >= 0) {
+                datUnitWork_t *unit = EventStart->unit;
+                cmbCalcEvoEvent(unit, &datLevelUpTable[unit->id].entry[index],
+                                index < 23, &EventStart->evoWork);
+                if (EventStart->evoWork.id != 0 &&
+                    cmbCheckEvoUnlocked(EventStart->evoWork.id, DDS3_GBWK->unitwork, 16) < 0) {
+                    return rstFinishEvoCandidate(index);
+                }
+            }
+            EventStart->evoResult = -1;
+            return 0;
+        }
+        if (event == 5) {
+            s32 index = EventStart->eventIndex - 1;
+            cmbCalcEvoEvent(EventStart->unit, &EventStart->eventEntries[index],
+                            index < EventStart->EventNums - 1, &EventStart->evoWork);
+            if (EventStart->evoWork.id != 0 &&
+                cmbCheckEvoUnlocked(EventStart->evoWork.id, DDS3_GBWK->unitwork, 16) < 0) {
+                return rstFinishEvoCandidate(-1);
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", rstCalcEvo);
+#endif
 
 extern s32 rstFindEvoEntryType7(datUnitWork_t *unit);
 
