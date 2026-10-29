@@ -603,9 +603,119 @@ u32 slVersionConvert_GetSize(void) {
     return (u32)(version_convert_ver - 3) < 2 ? 0x16DC0 : 0x1A510;
 }
 
-INCLUDE_RODATA(const s32, "mc/slMain", D_00532860);
+typedef struct
+{
+    /* 0x00 */ u16 id;
+    /* 0x02 */ u16 reserved0;
+    /* 0x04 */ u16 maxhp;
+    /* 0x06 */ u16 maxmp;
+    /* 0x08 */ u32 exp;
+    /* 0x0C */ u16 level;
+    /* 0x0E */ s8 param[6];
+    /* 0x14 */ s8 skillparam[6];
+    /* 0x1A */ u16 skillcnt;
+    /* 0x1C */ u16 skill[24];
+    /* 0x4C */ s8 mitamaparam[6];
+    /* 0x52 */ s8 levelupparam[6];
+    /* 0x58 */ u16 keisyoskill[24];
+    /* 0x88 */ u8 keiattr[24];
+    /* 0xA0 */ u16 hensinmae;
+    /* 0xA2 */ u16 reserved1;
+    /* 0xA4 */ u32 flag;
+    /* 0xA8 */ u32 reserved2;
+    /* 0xAC */ u32 hensinmaeexp;
+} fclencyceelem_t;
 
-INCLUDE_ASM(const s32, "mc/slMain", slVersionConvert_Step3);
+/* Save fields used by revision conversion; the party and encyclopedia
+ * records share the persistent allocation owned by dds3GlobalWorkInit. */
+typedef struct {
+    u8 unknown00[0x34];
+    sdfMemHandle_t *memHandle;
+    u8 unknown38[0xA54 - 0x38];
+    datUnitWork_t unitwork[16];
+    u8 unknown1914[0x11E90 - 0x1914];
+    fclencyceelem_t encyclopedia[184];
+} slConvertWork_t;
+
+extern char D_00532878[];
+extern char D_005328A0[];
+extern s32 printf(const char *, ...);
+
+void slVersionConvert_Step3(void)
+{
+    sdfMemHandle_t *handle = DDS3_GBWK->memHandle;
+    u8 *src;
+    dds3GlobalWork_t *work;
+    s32 i;
+    s32 j;
+    s32 skill;
+    u32 bytes;
+
+    if (version_convert_ver == 1) {
+        work = DDS3_GBWK;
+        src = slLoadFileHandle;
+        bytes = 0x10;
+        memcpy(work, src, bytes);
+        src += bytes;
+        bytes = 0x1BF4;
+        memcpy((u8 *)work + 0x30, src, bytes);
+        src += bytes;
+        bytes = 0xDD8C;
+        memcpy((u8 *)work + 0x1CA4, src, bytes);
+    } else if (version_convert_ver == 2) {
+        bytes = 0xFA30;
+        memcpy(DDS3_GBWK, slLoadFileHandle, bytes);
+    } else if (version_convert_ver == 3) {
+        printf(D_00532878);
+        work = DDS3_GBWK;
+        src = slLoadFileHandle;
+        bytes = 0x1A510;
+        memset(work, 0, bytes);
+        bytes = 0x16DC0;
+        memcpy(work, src, bytes);
+        for (i = 0; i < 16; i++) {
+            for (j = 0; j < 24; j++) {
+                skill = ((slConvertWork_t *)DDS3_GBWK)->unitwork[i].skill[j];
+                if (skill >= 0x100 && skill < 0x160) {
+                    ((slConvertWork_t *)DDS3_GBWK)->unitwork[i].skill[j] = skill + 0x20;
+                }
+            }
+            for (j = 0; j < 24; j++) {
+                if (((slConvertWork_t *)DDS3_GBWK)->unitwork[i].keisyoskill[j] >= 0x100 &&
+                    ((slConvertWork_t *)DDS3_GBWK)->unitwork[i].keisyoskill[j] < 0x160) {
+                    ((slConvertWork_t *)DDS3_GBWK)->unitwork[i].keisyoskill[j] += 0x20;
+                }
+            }
+        }
+        for (i = 0; i < 168; i++) {
+            for (j = 0; j < 24; j++) {
+                if (((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].skill[j] >= 0x100 &&
+                    ((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].skill[j] < 0x160) {
+                    ((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].skill[j] += 0x20;
+                }
+            }
+            for (j = 0; j < 24; j++) {
+                if (((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].keisyoskill[j] >= 0x100 &&
+                    ((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].keisyoskill[j] < 0x160) {
+                    ((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].keisyoskill[j] += 0x20;
+                }
+            }
+        }
+    } else if (version_convert_ver == 4) {
+        printf(D_005328A0);
+        work = DDS3_GBWK;
+        src = slLoadFileHandle;
+        bytes = 0x1A510;
+        memset(work, 0, bytes);
+        bytes = 0x16DC0;
+        memcpy(work, src, bytes);
+    } else {
+        bytes = 0x1A510;
+        memcpy(DDS3_GBWK, slLoadFileHandle, bytes);
+    }
+    DDS3_GBWK->memHandle = handle;
+}
+
 
 u8 slGetPadTrig(s32 map) {
     return map != 0 && slProcShutDownFlg == 1;
@@ -2173,6 +2283,12 @@ s32 slLoadProc_closeFile(void) {
 }
 
 INCLUDE_ASM(const s32, "mc/slMain", slFileSelCalc);
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_00532860);
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_00532878);
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_005328A0);
 
 INCLUDE_RODATA(const s32, "mc/slMain", D_005328C0);
 
