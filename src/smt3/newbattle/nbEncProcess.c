@@ -659,7 +659,49 @@ zero:
     return 0;
 }
 
+#ifdef NON_MATCHING
+typedef struct { u16 rate; u16 skill; u32 target; } nbBadCurseAiEntry_t;
+typedef struct { nbBadCurseAiEntry_t table[4][5]; u32 unk_A0; } nbBadCurseAiData_t;
+extern nbBadCurseAiData_t D_00398A08[];
+extern s32 nbSkillIsInRange(s32 skill, s32 type);
+
+s32 nbFindBadCurseTarget(nbActionProcessData_t *a, s32 step)
+{
+    s16 skills[64];
+    datUnitWork_t *work;
+    nbBadCurseAiData_t *ai;
+    s32 count = 0;
+    s32 i;
+    s32 j;
+    u16 skill;
+
+    if (nbCheckFormationPlayerSide(a->form->formindex) != 0) {
+        work = a->work;
+        for (i = 0; i < work->skillcnt; i++) {
+            skill = work->skill[i];
+            if (nbSkillIsInRange(skill, step) != 0) {
+                skills[count++] = skill;
+            }
+        }
+    } else {
+        ai = &D_00398A08[a->work->id];
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 5; j++) {
+                skill = ai->table[i][j].skill;
+                if (skill != 0 && (skill & 0x8000) == 0 && nbSkillIsInRange(skill, step) != 0) {
+                    skills[count++] = skill;
+                }
+            }
+        }
+    }
+    if (count != 0) {
+        return skills[dds3GetRandIntA(0, count)];
+    }
+    return -1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbFindBadCurseTarget);
+#endif
 
 s32 nbBadCurseStep3(nbActionProcessData_t *a)
 {
