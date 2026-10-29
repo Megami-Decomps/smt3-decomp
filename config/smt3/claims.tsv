@@ -629,9 +629,9 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 228 B	field skill disp
 src/smt3/field/fldTitle.c	redthing1	done	2026-10-28	1 fn / 1072 B	miniature field-title initialization with event gates, independent area remaps, native texture lifetimes and process registration; owner 6 match, 0 differ
 src/smt3/newbattle/nbActionProcess.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	negotiation result setup at native 1172-byte size; 272 of 293 words match, pointer and count register choices remain
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	365 C matches / 0 differences	camp_update_stock_Process +140 bytes; truthful void cursor updater declaration and process pointer contract; complete owner and retail verified
-src/smt3/facility/fclCombineInit.c	KiB	done	2026-10-28	1 fn / 132 B	fusion action sound selection, stop/play dispatch and qualified final-call selector reset; owner 176 match, 0 differ
-src/smt3/facility/fclEncyc.c	KiB	done	2026-10-28	1 fn / 500 B	encyclopedia record comparison with qualified live index reuse; owner 104 match, 0 differ
-src/smt3/pipe/pipeSection.c	KiB	done	2026-10-28	1 fn / 420 B	streaming object and linked-part loading with coherent header/node/descriptor types; owners 28, 7 and 28 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 132 B	fusion action sound selection, stop/play dispatch and qualified final-call selector reset; owner 176 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 500 B	encyclopedia record comparison with qualified live index reuse; owner 104 match, 0 differ
+src/smt3/pipe/pipeSection.c	redthing1	done	2026-10-28	1 fn / 420 B	streaming object and linked-part loading with coherent header/node/descriptor types; owners 28, 7 and 28 match, 0 differ
 src/smt3/kernel/dds3KernelDraw.c	PiM	done	2026-10-29	1 fn / 348 B	z-clear packet initialization from matched DDS live coordinate payloads; complete owner and retail checksum verified
 src/smt3/effect/effPCPBoss.c	PiM	done	2026-10-29	1 fn / 2544 B	crack trail and flash-cell rendering from DDS donor; full work layout, owner and retail checksum verified
 src/smt3/newbattle/nbActionProcess.c	redthing1	done	2026-10-28	1 fn / 1172 B	negotiation result setup with fresh battle-work views and a separate final party cursor; qualified allocation parity, owner 77 match, 0 differ
@@ -646,5 +646,38 @@ src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 1044 B	attack
 src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	1 fn / 680 B	puzzle cursor input with actual split halfword globals, truthful sound/key APIs and four-bit movement mask; owner 59 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 728 B	status panel composition with native display modes, typed skill list and callback order; owner 366 match, 0 differ
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 1600 B	extended attack rendering with twelve native part paths, separate callback-sensitive frame gates and sibling VU matrix handling; owner 289 match, 0 differ
+<<<<<<< HEAD
 src/smt3/newbattle/nbPanelProcess.c	z23	done	2026-10-29	6 fn / 7032 B	2 matched (both polygon draws), 2 parked; nbPanelPartyDraw is 7 words off and nbPanelDrawProcess 1, both waiting on nbPanelDrawPP1 being a visible C definition
 src/smt3/field/fld_Npc.c	z23	done	2026-10-29	5 fn / 10512 B	not started; all five are 400-600 instructions and the HD bodies for them are the Il2Cpp kind
+=======
+src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	camera initialization at native 148-byte size, 35 of 37 words match after unsigned switch snapshot; case-2 tail-call residual; normal owner 59 match, 0 differ
+src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 696 B	absorption renderer with native selector-first local records, shared VU matrix contract and callback-sensitive four/eight-frame gates; owner 290 match, 0 differ
+src/smt3/field/fldTitle.c	redthing1	done	2026-10-28	1 fn / 2088 B	miniature field title process; native drawing phases, callback-sensitive frame reads and gradient opacity; owner 7 match, 0 differ
+src/smt3/newbattle/nbCameraStartEnd.c	redthing1	done	2026-10-28	1 fn / 644 B	start animation state machine with qualified final-use initialization scheduling; owner 11 match, 0 differ
+src/smt3/pb/pbModel.c	redthing1	done	2026-10-28	1 fn / 284 B	map block draw guard, three real zeroed vectors, signed grid coordinates and provider result; owner 26 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 308 B	segmented gauge drawing with cumulative thresholds and callback-sensitive panel reloads; owner 367 match, 0 differ
+src/smt3/newbattle/nbActionProcess.c	redthing1	done	2026-10-28	1 fn / 528 B	bad-status action dispatch with native recovery, curse and packet-completion paths; owner 78 match, 0 differ
+src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 632 B	battle escape eligibility, rate calculation and native random/moon outcomes; owner 55 match, 0 differ
+src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	0 matches / reflection packet recovery	SDK parallel-light packet embedded at work offset zero, native 240-byte allocation and model-light consumer; owner 290 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 488 B	heart panel sprite rendering with native corner colors and callback reloads; owner 368 match, 0 differ
+src/smt3/newbattle/nbEncProcess.c	redthing1	done	2026-10-28	1 fn / 724 B	bad-curse weighted action table initialization with native status mapping; owner 20 match, 0 differ
+src/smt3/newbattle/nbCameraHelper.c	redthing1	done	2026-10-29	2 fn / 1360 B	PiM agent: restored directory-provider ownership and truthful sprite API; three moved matches earn no new credit
+src/smt3/sdf/sdfModel.c	redthing1	done	2026-10-29	1 fn / 1152 B	PiM agent: model OT submission from qualified DDS index, signed-color and packet contracts; generic-pointer LinkDraw remains guarded
+src/smt3/sdf/sdfFileIO.c	redthing1	done	2026-10-29	1 fn / 288 B	PiM agent: read-only selected path and common filename-construction call; complete owner verified
+src/smt3/effect/effPCPBezier.c	redthing1	done	2026-10-29	1 fn / 5988 B	PiM agent: qualified DDS ribbon pipeline and literal VU primitive contracts; entire owner 13 match, 0 differ
+src/smt3/interface/itfMesManager.c	redthing1	done	2026-10-29	2 fn / 508 B	PiM agent: truthful glyph snapshots and post-callback next-link load; owner 118 match, 0 differ
+src/smt3/field/fldFileResolver.c	redthing1	done	2026-10-29	1 fn / 1152 B	PiM agent: FL2 resource dispatch reconstructed from native and matched FL1 sibling; owner 36 match, 0 differ
+src/smt3/effect/effBlur_Filter.c	redthing1	done	2026-10-29	2 fn / 1008 B	PiM agent: qualified DDS slot loops, canonical runtime helpers and in-place alpha attenuation; owner 29 match, 0 differ
+src/smt3/field/fld_Npc.c	redthing1	done	2026-10-29	1 fn / 2344 B	PiM agent: encounter HUD with native state gates and recovered signed getter; owner 16 match, 0 differ
+src/smt3/newbattle/nbEncount.c	redthing1	done	2026-10-29	0 matches / provider contract correction	PiM agent: s32 count getter corroborated HD/IDB, native u16 storage unchanged; owner 9 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	hearts gauge rendering at native 852-byte size; 199 of 213 words match, table/OT register pair unresolved; default owner 365 match, 0 differ
+src/smt3/field/fldHit.c	redthing1	done	2026-10-29	2 fn / 2304 B	PiM agent: camera and enemy collision from native-qualified DDS shapes; SMT3 inline alpha reset, collision mask and 70-unit margin preserved
+src/smt3/effect/effBlur_Filter.c	redthing1	done	2026-10-29	1 fn / 180 B	PiM agent: canonical packed-alpha member load retains truthful alias contract; owner peers remain exact
+src/smt3/effect/effPCPMisc.c	redthing1	done	2026-10-29	1 fn / 592 B	PiM agent: DDS orbit/fade donor with native SMT3 first-frame formation queries and audited VU handoffs
+src/smt3/pb/pbDraw.c	redthing1	done	2026-10-29	1 fn / 808 B	PiM agent: native resource initializer using canonical map work and three-row camera arrays
+src/smt3/pb/pbGame.c	redthing1	done	2026-10-29	0 matches / canonical camera contract	PiM agent: declare actual three-row camera storage and preserve existing row-zero consumer bytes
+src/smt3/interface/itfTestMesManager.c	redthing1	done	2026-10-29	0 matches / declaration cleanup	PiM agent: remove two unused contradictory scalar camera declarations; complete owner unchanged
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 572 B	seven-row registry font rendering with native table lookups and chained handles; owner 105 match, 0 differ
+src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 660 B	physical attack calculation with ordered arithmetic and truthful floating diagnostic promotions; owner 56 match, 0 differ
+src/smt3/newbattle/nbCameraBoss.c	redthing1	done	2026-10-28	1 fn / 1660 B	Pisces camera path with signed frame gates, native remapped blend factors, two four-lane VU scratch vectors and qualified shared-coordinate lifetime; owner 106 match, 0 differ
+>>>>>>> origin/main

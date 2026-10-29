@@ -151,7 +151,7 @@ extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context);
 
 extern void itfMiscDrawSpritePrim(s32 *pos, s32 *uv, s32 *color, s32 z, void *texhandle, s32 context,
                                   sdfDrawTag_t *pdrawtag);
-extern sdfVector4_t aViewEye, aViewTarget, pbGameCameraParam, pbCameraVec;
+extern sdfVector4_t aViewEye, aViewTarget;
 
 
 void TestMsgReloadTexture(void);

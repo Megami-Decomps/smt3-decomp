@@ -2192,7 +2192,44 @@ void ExecSummon(s32 recindex)
     SetRecordToUnitCore(&encycSaveWork->party[slot].unit, record);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", drawRegistList);
+extern u8 *datExplainTable[];
+extern u8 *text2[];
+extern char D_0054FCC0[];
+extern s32 sprintf(char *out, const char *format, ...);
+extern u16 datGetLevelForDraw(datUnitWork_t *work);
+extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
+    u32 color, const char *text, frFontHandle_t *previous);
+
+void drawRegistList(fclEncyc_instance_tag *pinst)
+{
+    fclEncycRegistAllWork_t *work = (fclEncycRegistAllWork_t *)pinst->pwork;
+    cmpCursorPos_t *cursor = &work->listWindow.cursorPos;
+    frFontHandle_t **fonts = work->fonts;
+    s32 row = 0;
+    s32 y = 0x300;
+    s32 index;
+    s32 count;
+    char text[64];
+
+    ReleaseFontList((void **)fonts, 7);
+    count = pinst->unk_70;
+    for (index = cursor->Index; row < 7 && index < count; index++, row++, y += 0xE0) {
+        datUnitWork_t *unit = &encycSaveWork->party[pinst->entries.regist.validUnit[index]].unit;
+        u16 id = unit->id;
+        frFontHandle_t *font;
+        font = frwGetSmallFontFRQ2(0x620, y, 0xFFFFF0, 0xA09DC380,
+            (char *)datExplainTable[datDevilTable[id].race], NULL);
+        font = frwGetSmallFontFRQ2(0xB10, y + 0x10, 0xFFFFF0, 0xA09DC380,
+            (char *)text2[id], font);
+        sprintf(text, D_0054FCC0, unit->maxhp);
+        font = frwGetSmallNumFontFRQ(0x1220, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
+        sprintf(text, D_0054FCC0, unit->maxmp);
+        font = frwGetSmallNumFontFRQ(0x1670, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
+        sprintf(text, D_0054FCC0, datGetLevelForDraw(unit));
+        font = frwGetSmallNumFontFRQ(0x19F0, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
+        *fonts++ = font;
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CreateFontListRead);
 

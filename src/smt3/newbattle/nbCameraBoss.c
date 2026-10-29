@@ -171,7 +171,7 @@ extern f32 nbCameraBoss_BSARI_SIMANO_Rate;
 
 extern u8 nbCameraBoss_Pish_MUHENK_Type;
 
-extern u32 nbCameraBoss_Pish_MUHENK_Frame;
+extern s32 nbCameraBoss_Pish_MUHENK_Frame;
 
 extern void nbCameraShot_InvokeTargetReverse_Set2(nbCamera_t *pNbCamera, void *pNBSInfo);
 
@@ -1918,7 +1918,247 @@ s32 nbCameraBoss_Pish_MUHENK_Set(nbCamera_t *pNbCamera)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Pish_MUHENK_Run);
+s32 nbCameraBoss_Pish_MUHENK_Run(nbCamera_t *pNbCamera)
+{
+    /* VU0 consumes all four lanes through the address-taking helpers. */
+    volatile sdfVector4_t from;
+    volatile sdfVector4_t to;
+    u8 type;
+    s32 frame;
+    f32 rate;
+    u32 bits;
+
+    effBTLModelAllShow();
+    type = nbCameraBoss_Pish_MUHENK_Type;
+
+    switch (type) {
+    case 0:
+        frame = nbCameraBoss_Pish_MUHENK_Frame;
+        if (frame < 38) {
+            rate = (f32)frame / 160.0f;
+            if (1.0f < rate) {
+                rate = 1.0f;
+            }
+            from.x = -85.6099930f;
+            from.y = -824.539979f;
+            from.z = -2005.09998f;
+            to.x = -29.4499989f;
+            to.y = -965.949952f;
+            to.z = -2785.90992f;
+            from.w = 0.0f;
+            to.w = 0.0f;
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(&pNbCamera->target);
+
+            {
+                f32 commonX = 0.00999999978f;
+                from.y = 0.0199999996f;
+                from.z = 1.0f;
+                to.x = commonX;
+                to.y = 0.169999987f;
+                to.z = 0.989999950f;
+                from.x = commonX;
+                from.w = 0.0f;
+                to.w = 0.0f;
+                SDF_VU0_LOADVECTOR(&from);
+                SDF_VU0_LOADVECTOR_B(&to);
+                PS2_FLOAT_BITS(bits, rate);
+                SDF_VU0_INTERPOLATE(bits);
+                SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+            }
+        } else {
+            rate = (f32)(frame - 38) / 122.0f;
+            if (1.0f < rate) {
+                rate = 1.0f;
+            }
+            from.x = 845.779969f;
+            from.y = -529.929993f;
+            from.z = -1833.93995f;
+            to.x = -1291.43995f;
+            to.y = -163.949997f;
+            to.z = -2147.99000f;
+            from.w = 0.0f;
+            to.w = 0.0f;
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(&pNbCamera->target);
+
+            from.x = -0.359999985f;
+            from.y = -0.0199999996f;
+            from.z = 0.929999948f;
+            to.x = 0.429999978f;
+            to.y = -0.0699999929f;
+            to.z = 0.899999977f;
+            from.w = 0.0f;
+            to.w = 0.0f;
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+        }
+        pNbCamera->distance = 1.0f;
+        pNbCamera->fovy = 0.698131621f;
+        break;
+    case 1:
+        frame = nbCameraBoss_Pish_MUHENK_Frame;
+        if (frame < 75) {
+            rate = (f32)frame / 160.0f;
+            if (1.0f < rate) {
+                rate = 1.0f;
+            }
+            rate = rate * 0.699999989f + 0.299999983f;
+            to.x = -85.6099930f;
+            to.y = -824.539979f;
+            to.z = -2005.09998f;
+            from.x = -29.4499989f;
+            from.y = -965.949952f;
+            from.z = -2785.90992f;
+            to.w = 0.0f;
+            from.w = 0.0f;
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(&pNbCamera->target);
+
+            {
+                f32 commonX = 0.00999999978f;
+                to.y = 0.0199999996f;
+                to.z = 1.0f;
+                from.x = commonX;
+                from.y = 0.169999987f;
+                from.z = 0.989999950f;
+                to.x = commonX;
+                to.w = 0.0f;
+                from.w = 0.0f;
+                SDF_VU0_LOADVECTOR(&from);
+                SDF_VU0_LOADVECTOR_B(&to);
+                PS2_FLOAT_BITS(bits, rate);
+                SDF_VU0_INTERPOLATE(bits);
+                SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+            }
+        } else {
+            rate = (f32)(frame - 75) / 85.0f;
+            if (1.0f < rate) {
+                rate = 1.0f;
+            }
+            from.x = -1291.43995f;
+            from.y = -529.929993f;
+            from.z = -1833.93995f;
+            to.x = 845.779969f;
+            to.y = -163.949997f;
+            to.z = -2147.99000f;
+            from.w = 0.0f;
+            to.w = 0.0f;
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(&pNbCamera->target);
+
+            from.x = 0.429999978f;
+            from.y = -0.0199999996f;
+            from.z = 0.929999948f;
+            to.x = -0.359999985f;
+            to.y = -0.0699999929f;
+            to.z = 0.899999977f;
+            from.w = 0.0f;
+            to.w = 0.0f;
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+        }
+        pNbCamera->distance = 1.0f;
+        pNbCamera->fovy = 0.698131621f;
+        break;
+    case 2:
+        frame = nbCameraBoss_Pish_MUHENK_Frame;
+        if (frame < 75) {
+            rate = (f32)frame / 160.0f;
+            if (1.0f < rate) {
+                rate = 1.0f;
+            }
+            rate = rate * 0.699999989f + 0.299999983f;
+            to.x = -85.6099930f;
+            to.y = -824.539979f;
+            to.z = -2005.09998f;
+            from.x = -29.4499989f;
+            from.y = -965.949952f;
+            from.z = -2785.90992f;
+            to.w = 0.0f;
+            from.w = 0.0f;
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(&pNbCamera->target);
+
+            {
+                f32 commonX = 0.00999999978f;
+                to.y = 0.0199999996f;
+                to.z = 1.0f;
+                from.x = commonX;
+                from.y = 0.169999987f;
+                from.z = 0.989999950f;
+                to.x = commonX;
+                to.w = 0.0f;
+                from.w = 0.0f;
+                SDF_VU0_LOADVECTOR(&from);
+                SDF_VU0_LOADVECTOR_B(&to);
+                PS2_FLOAT_BITS(bits, rate);
+                SDF_VU0_INTERPOLATE(bits);
+                SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+            }
+        } else {
+            rate = (f32)(frame - 75) / 85.0f;
+            if (1.0f < rate) {
+                rate = 1.0f;
+            }
+            from.x = -826.539979f;
+            from.y = -357.219971f;
+            from.z = -1321.90992f;
+            to.x = -733.769959f;
+            to.y = -199.049988f;
+            to.z = -1834.83997f;
+            from.w = 0.0f;
+            to.w = 0.0f;
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(&pNbCamera->target);
+
+            to.x = 0.309999973f;
+            to.y = -0.0599999987f;
+            to.z = 0.949999989f;
+            from.x = 0.309999973f;
+            from.y = -0.0599999987f;
+            from.z = 0.949999989f;
+            from.w = 0.0f;
+            to.w = 0.0f;
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+        }
+        pNbCamera->distance = 1.0f;
+        pNbCamera->fovy = 0.698131621f;
+        break;
+    default:
+        break;
+    }
+    nbCameraBoss_Pish_MUHENK_Frame++;
+    return 1;
+}
 
 s32 nbCameraBoss_BSKAGU_Command_Calc(nbCamera_t *pNbCamera, nbFormation_t *pCmdForm)
 {
@@ -2881,7 +3121,7 @@ s32 nbCameraBoss_Cut1_Init(nbCamera_t *pNbCamera)
     }
 }
 
-/* NON_MATCHING: 33 of 117 words, 2 short; three arms call callees still in
+/* NON_MATCHING: 33 of 117 words differ, 2 short; two arms call callees still in
  * assembly, so ee-gcc leaves a plain branch where retail annuls. */
 #ifdef NON_MATCHING
 s32 nbCameraBoss_Cut1_Run(nbCamera_t *pNbCamera)

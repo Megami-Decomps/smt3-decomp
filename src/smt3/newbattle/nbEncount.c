@@ -437,7 +437,8 @@ s32 nbGetEncountMax(s32 id)
     return nbEncountMax;
 }
 
-u16 nbGetEncountCnt(void)
+/* The count is stored as u16, but the public getter returns s32 (HD/IDB). */
+s32 nbGetEncountCnt(void)
 {
     return DDS3_GBWK->encountCount;
 }

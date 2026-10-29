@@ -117,7 +117,7 @@ but differs in five words, including the likely branch. Those forms do not close
 the existing source. Keep the typed range reconstruction; further changes need
 evidence about the caller's scheduling or original compilation context.
 
-## nbSetBadCurseTimer (newbattle/nbMakePacket, 0x2C)
+## nbSetBadCurseTimer (newbattle/nbEncProcess, 0x2C)
 
 2 of 11 words differ, at the exact 44-byte size.
 
@@ -133,6 +133,18 @@ other or both accesses (one address and no copy, four bytes short); a
 between them; `*(s32 *)p` for the `step` store; `nbBadCurseTimer++` in place of
 the index local; and both store orders, which only swap the registers the
 timer and the table base get.
+
+A current `nbEncProcess` trace with `--cflag -DNON_MATCHING --cse --alloc
+--no-dumps --func nbSetBadCurseTimer` passes hooked/unhooked/plain output
+parity (`verify: OK`). CSE1 reverses the operands of the first row address
+UID21 to `index + base`. For the second member it first forms `base + 4`
+(UID34), then `index + (base + 4)` (UID38); CSE2 retains both address
+expressions. Local allocation gives the first address quantity register 2
+and the second register 7. There is no shared row-address pseudo whose copy
+allocation could preserve: the distinction already exists before allocation.
+Assigning the actual two-member, eight-byte record as an aggregate instead
+introduces a stack temporary and emits 68 bytes, so it does not reproduce
+the native shared address and copy. No additional source variant is retained.
 
 ## Flow5_6, Flow5_18 (newbattle/nbMakePacket, 0xD8 each)
 

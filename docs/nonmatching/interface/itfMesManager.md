@@ -2,45 +2,6 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
-## DrawMesFlow (interface/itfMesManager, 0x18C)
-
-Thirty-seven of ninety-nine words match at the exact 396-byte size, and the
-instruction list is retail's: the same three outer `flags` guards, the same
-`frDrawFont`/`frDrawFontEx` return tests, the same `panel->fade.kind` byte
-tests and the tail `j DrawSelectCursor`.
-
-The whole 62 is one difference repeated and its cascade. Retail fills the
-delay slot of the first and third outer guards from the *fall-through*
-(`lw $4, 0x1C($16)` and `lw $4, 0x48($16)`) and keeps the next guard's mask
-`lui` as a one-instruction block at a shared label; the draft emits `bnel`
-instead and annuls a copy of that `lui` into the slot. Same instruction
-count, so every later branch displacement shifts and the word diff explodes.
-The second guard already comes out as retail's `bnez`, which is why 37 words
-match.
-
-This is reorg's `mostly_true_jump`: an RTL `NE` condition is predicted taken
-and filled from the target, which is what the draft gets. Ruled out as
-levers, all four giving exactly 62: fusing the guard and its inner test with
-`&&`, spelling the guard `(flags & X) == 0` rather than `!(flags & X)`, a
-local for the speaker chain inside the first guard, and `flags &= 0x38;` as a
-statement before the third guard's two tests.
-
-Not the callee-visibility mechanism in the usual direction: the two arms that
-differ call `frDrawFont`, which lives in `interface/frFont` and was in another
-translation unit for retail too. Converting `DrawRetPageCursor` and
-`DrawSelectCursor` in this unit, and adding forward prototypes for
-`DrawWindow`, `DrawRetPageCursor` and `DrawSelectCursor`, changed nothing
-here (64 to 62, and the 62 is unmoved by the drafts being present).
-
-Confirmed on the way, and worth not rediscovering: `flags` is one `u32` local
-read once at the top, and the `(flags & 0x38)` value is written twice rather
-than kept in its own local. The selection arm needs `s16 index =
-sel->selectedIndex;` *and* the compare written against the field again, which
-is what gives retail's `lh` for the test and `lhu` plus `sll`/`sra` for the
-argument. Adding the `void DrawWindow(itfMesWork_t *panel);` prototype above
-this function is required and not optional: without it the implicit `int`
-declaration reserves `$2` and every address temp in the body moves to `$3`.
-
 ## DrawSelectCursor (interface/itfMesManager, 0x2FC)
 
 One hundred twenty-eight of one hundred ninety-one words match at the exact
@@ -75,24 +36,6 @@ five blocks' statement lists bottoms out at 63. The levers page lists pure
 instruction scheduling as not worth a second attempt and that is what this
 looks like; if it is steerable it is through something other than statement
 order.
-
-## DrawMsgMng_Process (interface/itfMesManager, 0x70)
-
-Twenty-four of twenty-eight words match at the exact 112-byte size. The
-remaining four are one difference: retail puts the loop's argument load
-`lw $4, 0xC($16)` in the `jal DrawMesFlow` delay slot and closes the loop with
-a plain `bnez`, where the draft emits `bnel` and annuls the argument load into
-the branch-likely slot. `DrawMesFlow` is the loop body's only call and is
-still behind its own fallback, so this is the callee-visibility shape: recheck
-it the moment `DrawMesFlow` matches rather than permuting this function.
-
-Confirmed on the way: the loop has to read `node->next` into its own local
-*before* the call, `itfMesLink_t *next = node->next; DrawMesFlow(node->state);
-node = next;`. Advancing after the call (`node = node->next;`) is one word
-long and 12 words out, as are a `for`, a guarded `do`/`while`, and
-`unk8 += 1`. Nesting the body inside `if (dds3NullDrawProc() == 0)` reaches
-the exact size too but moves the `$2 = 0` out of the early exit's delay slot
-and spends `$2` on the counter; the early `return 0` is what keeps it.
 
 ## itfMesMngGetVarLocalize (interface/itfMesManager, 0xAC)
 

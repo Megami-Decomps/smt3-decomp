@@ -3685,7 +3685,7 @@ void campDhDrawBox(s32 alpha)
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawBoxSprite);
 
-void campDhDrawGaugeBars(void)
+void campDhDrawGaugeBars(s32 unusedAlpha)
 {
     s32 corner[4];
 
@@ -3947,7 +3947,35 @@ void fclDrawArrowCursor(s32 x, s32 y, s32 z, s32 extra)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawPanel);
+void campDhDrawPanel(s32 x, s32 y, s32 unused, s32 alpha)
+{
+    s32 phase;
+    s32 colors[4];
+
+    phase = campDhDrawWork->unk_1C % 128;
+    if (phase < 16) {
+        colors[0] = 0x80808000 | (128 - phase * 4);
+    } else {
+        colors[0] = 0x80808000 | ((phase - 16) * 64 / 112 + 64);
+    }
+    colors[1] = colors[0];
+    colors[2] = colors[0];
+    colors[3] = colors[0];
+    fclDrawSpriteRes(x, y, 0, colors, 8, 0x25,
+        (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    fclDrawSpriteRes(x, y, 0, colors, 8, 0x26,
+        (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    fclDrawSpriteRes(x, y, 0, colors, 8, 0x27,
+        (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    fclDrawSpriteRes(x, y, 0, colors, 8, 0x28,
+        (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    campDhDrawBackground(x, y, 0, alpha);
+    fclDrawArrowCursor(x, y, 0, alpha);
+    if ((u8)(campDhDrawWork->flags & 1)) {
+        fclDrawArrowCursorLabel(x, y, 0, campDhDrawWork->iconIndex,
+            0, campDhDrawWork->entryStep);
+    }
+}
 
 extern const u32 D_0053FDC0[];
 extern const u32 D_0053FDD8[];
@@ -4028,9 +4056,114 @@ void campDhDrawHelpText(s32 x, s32 y, s32 z, s32 alpha, s8 index)
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHelpText);
 #endif
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHeartsGauge);
+extern const u32 D_0053FDE8[];
+extern char D_0054FE80[];
+extern s8 cmpGetParamGaugeColor(s8 index);
+extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
+extern frFontRequest_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
+                                               u32 color, const char *text,
+                                               frFontRequest_t *previous);
 
-extern void campDhDrawHeartsGauge(void *gauge, s8 arg);
+typedef struct
+{
+    /* 0x00 */ s32 visible;
+    /* 0x04 */ s32 alpha;
+    /* 0x08 */ s8 step;
+    /* 0x09 */ s8 id;
+    /* 0x0A */ u8 pad[2];
+    /* 0x0C */ s32 fade;
+    /* 0x10 */ s32 fadeStep;
+} campDhIconGauge_t;
+
+extern void campDhDrawHelpText(s32 x, s32 y, s32 z, s32 alpha, s8 index);
+
+extern void campDhDrawHeartsGauge(campDhIconGauge_t *gauge, s8 arg);
+
+/* NON_MATCHING: 199 of 213 words match; table and OT registers are exchanged. */
+#ifdef NON_MATCHING
+void campDhDrawHeartsGauge(campDhIconGauge_t *gauge, s8 arg)
+{
+    char text[0x10];
+    s32 colors[4];
+    s32 palette[3];
+    frFontHandle_t *font;
+    s32 baseOt = 0x47;
+    fclSpriteTbl_t *table = fclSpriteTable;
+    s32 amount;
+    s32 sprite;
+    s32 color;
+    s32 y;
+    s32 i;
+
+    memcpy(palette, D_0053FDE8, sizeof(palette));
+
+    fclDrawSpriteRes(0, 0x28, 0, NULL, 0xB, 0, (s32 *)((u8 *)campDhDrawWork + 0x1160),
+                     table, baseOt);
+    fclDrawSpriteRes(0, 0x28, 0, NULL, 0xB, 1, (s32 *)((u8 *)campDhDrawWork + 0x1160),
+                     table, baseOt);
+
+    colors[0] = fclBlendColor(0x80808080, 0x40404080, gauge->alpha);
+    colors[1] = colors[0];
+    colors[2] = colors[0];
+    colors[3] = colors[0];
+
+    y = 0x28;
+    for (i = 0; i < 5; i++) {
+        fclDrawSpriteRes(0, y, 0, NULL, 0xB, 2, (s32 *)((u8 *)campDhDrawWork + 0x1160),
+                         table, baseOt);
+        fclDrawSpriteRes(0, y, 0, NULL, 0xB, 3, (s32 *)((u8 *)campDhDrawWork + 0x1160),
+                         table, baseOt);
+        fclDrawSpriteRes(0, y, 0, colors, 0xB, (u16)(i + 4),
+                         (s32 *)((u8 *)campDhDrawWork + 0x1160), table, baseOt);
+        y += 0xD0;
+    }
+
+    y = 0x28;
+    if (gauge->visible != 0) {
+        for (i = 0; i < 5; i++) {
+            s8 parameter = cmpGetParamGaugeColor((s8)i);
+            amount = cmbGetHeartsParam(arg, parameter);
+            if (amount == 0) {
+                sprite = 0xB;
+                color = palette[2];
+            } else if (amount > 0) {
+                sprite = 9;
+                color = palette[1];
+            } else {
+                sprite = 0xA;
+                color = palette[0];
+            }
+            fclDrawSpriteRes(0, y, 0, NULL, 0xB,
+                             sprite,
+                             (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+            sprintf(text, D_0054FE80, amount);
+            font = (frFontHandle_t *)frwGetSmallNumFontFRQ(0x5E0, y + 0x910, 0, (u32)color, text, NULL);
+            func_001C7E38(font, 1, 0x47);
+            frDestroyFontRequestAfter(font);
+            y += 0xD0;
+        }
+    }
+
+    campDhDrawGaugeBars(0x100);
+    campDhDrawHelpText(0, 0x28, 0, gauge->alpha, gauge->id);
+    if (gauge->visible == 0) {
+        s32 half;
+        campDhDrawHelpTextAlt(0, 0x28, 0, gauge->alpha);
+        half = (0x100 - gauge->alpha) / 2;
+        colors[0] = half | 0x80808000;
+        colors[1] = colors[0];
+        colors[2] = colors[0];
+        colors[3] = colors[0];
+        fclDrawSpriteRes(0, 0x28, 0, colors, 0xB, 0xC,
+                         (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    }
+    campDhDrawQuadGauge(gauge->alpha);
+}
+
+#else
+INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHeartsGauge);
+#endif
+
 
 void campDhDrawHeartsIcon(s32 a, s32 b, s32 c, s8 d, s32 e)
 {
@@ -4041,7 +4174,7 @@ void campDhDrawHeartsIcon(s32 a, s32 b, s32 c, s8 d, s32 e)
             return;
         }
     }
-    campDhDrawHeartsGauge((u8 *)work + 0x1F78, d);
+    campDhDrawHeartsGauge((campDhIconGauge_t *)((u8 *)work + 0x1F78), d);
 }
 
 extern void campDhDrawBoxSprite(s32 alpha);
@@ -4649,17 +4782,6 @@ void campDhScanEntries(void)
 }
 
 
-typedef struct
-{
-    /* 0x00 */ s32 visible;
-    /* 0x04 */ s32 alpha;
-    /* 0x08 */ s8 step;
-    /* 0x09 */ s8 id;
-    /* 0x0A */ u8 pad[2];
-    /* 0x0C */ s32 fade;
-    /* 0x10 */ s32 fadeStep;
-} campDhIconGauge_t;
-
 void campDhFindVisibleIcon(void)
 {
     campDhIconGauge_t *gauge = (campDhIconGauge_t *)((u8 *)campDhUpdateWork + 0x1F78);
@@ -4865,9 +4987,9 @@ extern void cmpGetGaugeBlinkAlpha(s32 frame, s8 state, u32 *colors);
 extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *colors,
                                 s32 page, s32 spriteId, s32 *texList,
                                 fclSpriteTbl_t *table, s32 ot);
-extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
-                                              u32 color, const char *text,
-                                              frFontHandle_t *previous);
+extern frFontRequest_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
+                                               u32 color, const char *text,
+                                               frFontRequest_t *previous);
 extern char D_0054FE98[];
 
 void rstDrawNumber(s32 x, s32 y, s8 number)
@@ -6299,7 +6421,31 @@ void cmp_23C918(fclPanelPos_t *pos, s32 full, s32 total, s32 color1, s32 color2,
 INCLUDE_ASM(const s32, "code_0022C578", cmp_23C918);
 #endif
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_23C9C0);
+void camp_23C9C0(fclPanelPos_t *pos, s32 width, s32 gap,
+                  s32 first, s32 second, s32 third, s32 total,
+                  s32 color1, s32 color2, s32 color3, s32 color4, s32 flag)
+{
+    s32 firstEnd = (((u16)pos->unk_0C * first / total) << 4) + pos->unk_00;
+    s32 secondEnd = (((u16)pos->unk_0C * second / total) << 4) + firstEnd;
+    s32 thirdEnd = (((u16)pos->unk_0C * third / total) << 4) + secondEnd;
+    s32 x;
+    s32 color;
+
+    for (x = pos->unk_00; x < pos->unk_00 + ((u16)pos->unk_0C << 4);
+         x += (width + gap) << 4) {
+        if (x < firstEnd) {
+            color = color1;
+        } else if (x < secondEnd) {
+            color = color2;
+        } else if (x < thirdEnd) {
+            color = color3;
+        } else {
+            color = color4;
+        }
+        cmpDrawBoxF(x, pos->unk_04, pos->unk_08, width,
+                    (u16)pos->unk_0E, color, flag);
+    }
+}
 
 void camp_23CAF8(s32 x, s32 y, s32 a, s32 b, s32 color, s32 g)
 {

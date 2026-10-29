@@ -100,3 +100,19 @@ fixes the loop registers but changes the final label register; it remains five
 words short of exact. Explicit postincrement in the final draw call, a do-loop,
 and carrying map-validation status in the index do not close the gap. The
 preferred draft keeps the separate index, cursor and script-label values.
+
+## pbInitGameCamera (pb/pbGame, 0x94)
+
+35 of 37 words match at native 148-byte size. The signed-switch control emits
+172 bytes, with 26 of the 38 compared words differing. An unsigned local snapshot of
+the signed character index supplies retail's equality chain rather than the
+signed switch's range test. Cases 0, 1 and 2 and the no-action default have
+the same meaning for every bit pattern of the original field. Case 1 copies
+the two camera vectors and tail-calls its provider; case 0 calls its provider
+then clears cameraAngle.
+
+Only case 2 differs: C tail-calls pbSetGameCamera2 while retail uses jal/nop
+and the common epilogue. The actual matched provider returns void; changing
+that contract to force a call is unsupported. The explicit no-action default
+is unchanged, as was the earlier callee-visibility trial. No synthetic reset
+or unsupported tail-call workaround is present.

@@ -5,6 +5,7 @@
 #include "scr.h"
 #include "field.h"
 #include "ps2asm.h"
+#include "billboard.h"
 
 enum sl_slot_flag
 {
@@ -203,15 +204,14 @@ void fldSnowSpriteTex(sdfTexHandle_t *th) {
     ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
 }
 
-void fldSnowSprite3D(const sdfVector4_t *spr3d) {
+void fldSnowSprite3D(const Sprite3D_t *spr3d) {
     void *tag = sdfGrAllocPacketBuff(0x20);
     void *packet;
     sdfGrOt_t *ot;
 
     sdfDrawTagInit(tag);
     packet = sdfGrAllocPacketBuff(0x80);
-    sdfBillBoardMake1(packet, spr3d, *(u32 *)((u8 *)spr3d + 0x40), (u8 *)spr3d + 0x10,
-                      (u8 *)spr3d + 0x20);
+    sdfBillBoardMake1(packet, &spr3d->pos, spr3d->col, spr3d->uv, spr3d->vt);
     sdfDrawTagLink(tag, packet);
     ot = &sdfGrOtTable[44];
     ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);

@@ -1900,3 +1900,30 @@ The global-memory-clobber store instead retains the early address in `$21`
 and emits 1,040 bytes. A volatile matrix does not change either result.
 This case needs the existing bare-address output macro, not volatile storage
 or a read-write address constraint.
+
+- The KAGU2 attack work has signed duration/fade-in/fade-out words at
+  `+0x58/+0x5C/+0x60`, a float random-spread input at `+0x68`, and a signed
+  frame counter at `+0xB4`. The native draw path compares these timing values
+  as integers and converts only the ratio operands to float. The create path
+  resets the counter; the copied 0x6C-byte parameter head includes all timing
+  and spread fields. These recovered names preserve all existing owner bytes.
+  The battle main-process provider returns a record whose first field is the
+  formation pointer; read `main->form` rather than declaring the provider as
+  returning a pointer-to-pointer. The local formation view preserves the
+  native 0xF0 array stride. The complete owner checks 153 match / 0 differ.
+
+### Keep a packet-linker's returned address even when the caller discards it
+
+`sdf2DLinkTexPacket` returns the packet address as `s32`: its provider in
+`sdf/sdf2D` obtains the address from `sdf2DMakeTexPacket`, links it, and returns
+that same value. A caller that ignores the address still needs this real
+return contract, not a `void` declaration.
+
+In `dds3EffectFileListWindowDrawSprite`, correcting that declaration and using
+the established DDS donor's `a, b, g, r` colour-store order reproduces all
+70 words (280 bytes). The previous `void` declaration plus its retained
+`a, g, b, r` draft left the blue and second-corner U stores exchanged;
+correcting only the declaration instead leaves the green and blue stores
+exchanged. The actual provider contract and ordinary donor store order close
+the pair without a store-order sweep or an invented dependency. The complete
+19-function browser owner and retail checksum remain exact.

@@ -663,3 +663,38 @@ doing it:
   its span with what the owning object emits (`objdump -h`). A part emitting
   more than its span is the whole story: that is how `MovieViewer`'s 32 bytes
   were found, after `.lit4` and `.sdata` both came back with zero overflow.
+
+
+### Effect resource directory providers belong with the browser
+
+The `newbattle/nbCameraHelper` lower bound at `0x001AAE28` separated
+`dds3EffectFileListCreate` from its immediately preceding directory providers:
+`dds3EffectDirOpen` (`0x001AAD00`, 76 bytes), `dds3EffectDirClose`
+(`0x001AAD50`, 44 bytes), and `dds3EffectDirRead` (`0x001AAD80`, 164 bytes).
+Move the real definitions, in native order, into the browser owner and start
+its text at `0x001AAD00`. This does not rename the still-provisional owner.
+
+Three pieces of evidence agree:
+
+- The native directory-provider triplet directly precedes the browser that
+  consumes it, with only normal function alignment between them. The
+  corresponding DDS1 source (`game/code_0018CAC8.c`, from dds-decomp/redthing1)
+  retains precisely this provider/caller order in one translation unit.
+- `dds3EffectDirOpen` owns `"pfs0:%s"` at `0x0054F260`, the final eight
+  bytes of the old owner's small-data range. It immediately precedes the
+  browser's `0x0054F268` string. Moving the matching small-data boundary
+  from `0x0054F268` to `0x0054F260` preserves the native text/data order.
+- The unchanged 1,080-byte `dds3EffectFileListCreate` draft differed only at
+  `+0x3F8`: `bgtzl` instead of retail's `bgtz`, with the same flags load in
+  the delay slot. Making the authentic preceding `dds3EffectDirClose`
+  definition visible closes this one word. The visibility probe is evidence
+  for this independent ownership correction, not permission to use a stub
+  or a `nothrow` annotation.
+
+Ordinary `-da` dumps were qualified against the plain compiler output (only
+cc.sh's randomized `.file` path differs). In both visibility cases, pass
+`28.mach` retains loop branch uid179 targeting label182, probability6001,
+followed by the close call uid934. Pass `29.dbr` uses flags-load uid187 as
+the same donor; only the opaque case marks branch179 `/u` (annulled). The
+visible close call carries `REG_EH_REGION 0`. No source-level loop change,
+call hint, compiler option or provider duplication is needed.

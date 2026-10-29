@@ -2384,23 +2384,23 @@ void CalcCurCtr(instanceMes_tag *pinst) {
     }
 }
 
-/* NON_MATCHING: 37 of 99 words, exact size; two guards emit bnel where retail has bnez and everything after shifts. */
-#ifdef NON_MATCHING
 void DrawMesFlow(instanceMes_tag *pinst) {
     u32 flags = pinst->stat;
     select_tag *sel;
-    s16 index;
+    frFontHandle_t *glyph;
 
     itfMesMngManager.flags &= ~2;
     DrawWindow(pinst);
+    glyph = pinst->speaker.pfont;
     if (!(flags & 0x10000)) {
-        if (pinst->speaker.pfont != NULL) {
-            frDrawFont(pinst->speaker.pfont);
+        if (glyph != NULL) {
+            frDrawFont(glyph);
         }
     }
+    glyph = pinst->message.pfont;
     if (!(flags & 0x20000)) {
         if ((flags & 7) >= 3) {
-            if (frDrawFont(pinst->message.pfont) > 0) {
+            if (frDrawFont(glyph) > 0) {
                 if ((pinst->stat & 7) != 4) {
                     pinst->curctr.ctr_key = 0;
                     pinst->stat = (pinst->stat & ~7) | 4;
@@ -2408,20 +2408,19 @@ void DrawMesFlow(instanceMes_tag *pinst) {
             }
         }
     }
+    glyph = pinst->select.pfont;
     if (!(flags & 0x40000)) {
         if ((flags & 0x38) >= 0x18) {
-            if (frDrawFontEx(pinst->select.pfont, 1) > 0) {
+            if (frDrawFontEx(glyph, 1) > 0) {
                 if ((flags & 0x38) == 0x18) {
                     sel = &pinst->select;
-                    index = sel->select;
                     if (sel->select == -1) {
                         sel->select = 0;
                         sel->select_imm = 0;
-                        index = 0;
                     }
-                    ChangeFontColor(sel->pfont, index, sel->lines, 1);
-                    pinst->curctr.isdraw = 2;
+                    ChangeFontColor(sel->pfont, sel->select, sel->lines, 1);
                     pinst->stat = (pinst->stat & ~0x38) | 0x20;
+                    pinst->curctr.isdraw = 2;
                 }
             }
         }
@@ -2433,10 +2432,6 @@ void DrawMesFlow(instanceMes_tag *pinst) {
         DrawSelectCursor(pinst);
     }
 }
-#else
-INCLUDE_ASM(const s32, "interface/itfMesManager", DrawMesFlow);
-#endif
-
 
 void DrawWindow(instanceMes_tag *pinst) {
     window_tag *place = &pinst->window;
@@ -2580,8 +2575,6 @@ s32 CalcMsgMng_Process(void) {
     return 0;
 }
 
-/* NON_MATCHING: 24 of 28 words, exact size; bnel against retail's bne on the DrawMesFlow loop, waiting on that callee. */
-#ifdef NON_MATCHING
 s32 DrawMsgMng_Process(dds3ProcessID_t *id) {
     itfMesLink_t *node;
 
@@ -2590,16 +2583,12 @@ s32 DrawMsgMng_Process(dds3ProcessID_t *id) {
     }
     node = itfMesMngManager.pool.activeHead;
     while (node != 0) {
-        itfMesLink_t *next = node->next;
         DrawMesFlow(node->state);
-        node = next;
+        node = node->next;
     }
     itfMesMngManager.ctr++;
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "interface/itfMesManager", DrawMsgMng_Process);
-#endif
 
 void DrawMsgMng_Shutdown(void) {
     itfMesLink_t *node = itfMesMngManager.pool.activeHead;

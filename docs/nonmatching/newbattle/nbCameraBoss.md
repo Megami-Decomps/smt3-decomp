@@ -30,10 +30,14 @@ arm also frees `$3` but runs three words over.
 What is left is two branch delay slots. On the tests whose arms call
 `BSARI_MASEHA_Run` and `Lusi_Cut1_Set`, retail leaves a `nop` and uses `bnel`
 where the draft fills the slot with the following `addiu $2, $0, <const>` and
-uses `bne`. Those two callees and `Pish_MUHENK_Run` are the only arms still
-`INCLUDE_ASM`, and this is the branch-annul signature of the "a caller can need
-its callee's definition" row in [matching-levers.md](matching-levers.md): the
-remaining two words should close on their own once those three are C. Permuting
+uses `bne`. `BSARI_MASEHA_Run` and `Lusi_Cut1_Set` remain assembly-backed after the
+`Pish_MUHENK_Run` reconstruction. Enabling their guarded C definitions makes
+this caller's output byte-identical in a compiler-context diagnostic; an
+isolated caller promotion still emits 468 of the native 476 bytes with 33
+compared words differing. The default build does not use those guarded callees,
+so the context-dependent result does not qualify a caller promotion. This is
+the "a caller can need its callee's definition" row in
+[matching-levers.md](matching-levers.md). Permuting
 the caller does not reach it. Ruled out at 33 words: forward prototypes for the
 three assembly callees and removing the two that exist; `return callee(...)`
 with the sibling call blocked by an address-taken dummy local (identical

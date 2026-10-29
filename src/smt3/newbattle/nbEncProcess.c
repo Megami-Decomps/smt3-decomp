@@ -834,7 +834,76 @@ void nbSetBadCurseTimer(s32 step, s32 weight)
 INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbSetBadCurseTimer);
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbInitBadCurseState);
+extern u32 nbGetBadStat(s32 formindex);
+extern void nbSetBadCurseTimer(s32 step, s32 weight);
+extern char D_00545D40[];
+
+void nbInitBadCurseState(nbActionProcessData_t *a)
+{
+    s32 state = 0;
+    u32 bad = nbGetBadStat(a->form->formindex);
+    s32 i;
+
+    switch (bad) {
+    case 8:
+        state = 0;
+        break;
+    case 0x80:
+        state = 1;
+        break;
+    default:
+        if (nbCheckBadCurse(a->form->formindex)) state = 2;
+        break;
+    }
+    nbBadCurseTimer = 0;
+    for (i = 0; i < 10; i++) {
+        switch (state) {
+        case 0:
+            if (a->work->flag & 4) {
+                switch (i) {
+                case 4: nbSetBadCurseTimer(4, 20); break;
+                case 5:
+                    if (!(a->data->stat & 1)) nbSetBadCurseTimer(5, 30);
+                    break;
+                case 9: nbSetBadCurseTimer(9, 20); break;
+                }
+            } else if (a->work->flag & 0x20) {
+                switch (i) {
+                case 4: nbSetBadCurseTimer(4, 30); break;
+                case 6: nbSetBadCurseTimer(6, 20); break;
+                case 9: nbSetBadCurseTimer(9, 40); break;
+                }
+            } else {
+                switch (i) {
+                case 4: nbSetBadCurseTimer(4, 20); break;
+                case 5:
+                    if (!(a->data->stat & 1)) nbSetBadCurseTimer(5, 20);
+                    break;
+                case 6: nbSetBadCurseTimer(6, 10); break;
+                case 9: nbSetBadCurseTimer(9, 20); break;
+                }
+            }
+            break;
+        case 1:
+            switch (i) {
+            case 1: nbSetBadCurseTimer(1, 40); break;
+            case 2: nbSetBadCurseTimer(2, 20); break;
+            case 3: nbSetBadCurseTimer(3, 20); break;
+            case 9: nbSetBadCurseTimer(9, 20); break;
+            }
+            break;
+        case 2:
+            switch (i) {
+            case 1: nbSetBadCurseTimer(1, 50); break;
+            case 7: nbSetBadCurseTimer(7, 50); break;
+            }
+            break;
+        }
+    }
+    for (i = 0; i < nbBadCurseTimer; i++) {
+        printf(D_00545D40, nbBadCurseTable[i].step, nbBadCurseTable[i].weight);
+    }
+}
 
 extern void nbInitBadCurseState(nbActionProcessData_t *a);
 

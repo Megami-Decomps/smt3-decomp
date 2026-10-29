@@ -338,9 +338,6 @@ member effPCPBossBUNSIN_t.unk2C
 member effPCPBossDengeki_t.unk00
 member effPCPBossHUnit_t.unk00
 member effPCPBossKAGU2Attack_t.unk00
-member effPCPBossKAGU2Attack_t.unk58
-member effPCPBossKAGU2Attack_t.unk68
-member effPCPBossKAGU2Attack_t.unkB4
 member effPCPBossKAGUAttack_t.unk00
 member effPCPBossKAGUAttack_t.unk58
 member effPCPBossKAGUAttack_t.unk68

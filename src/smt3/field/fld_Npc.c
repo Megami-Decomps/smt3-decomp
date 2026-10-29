@@ -613,7 +613,158 @@ void fldDrawInputCursor(s32 x, s32 y) {
 
 INCLUDE_RODATA(const s32, "field/fld_Npc", D_00532720);
 
-INCLUDE_ASM(const s32, "field/fld_Npc", fldEADraw);
+extern s32 gFldElvFloorNow;
+extern s32 fldPlayerStatus[];
+extern f32 fldEADrawState;
+extern s32 fldEADrawWork;
+extern s32 D_0054EF54;
+extern s32 D_0054EF58;
+extern sdfTexHandle_t *fldEATexture;
+extern f32 fldCamPitch;
+extern s32 fldChkVortex(void);
+extern s32 nbGetEncountCnt(void);
+extern s32 nbGetEncountMax(s32 id);
+void fldDrawEATexQuad(s32 x, s32 y, s32 ax, s32 ay, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, f32 angle);
+
+void fldEADraw(void) {
+    s32 offset;
+    s32 alpha;
+    s32 level;
+    s32 encounterId;
+    if (fldGlobalBase.area >= 200) {
+        return;
+    }
+    if (gFldElvFloorNow != -999) {
+        return;
+    }
+    switch (fldGlobalBase.word90) {
+    case 0:
+    case 4:
+        D_0054EF4C = 0.0f;
+        break;
+    case 2:
+    case 6:
+        if (D_0054EF4C > 0.0f) {
+            D_0054EF4C -= 0.2f;
+            if (D_0054EF4C < 0.0f) {
+                D_0054EF4C = 0.0f;
+            }
+        }
+        break;
+    case 3:
+    case 7:
+        if (D_0054EF4C < 1.0f) {
+            D_0054EF4C += 0.2f;
+            if (D_0054EF4C > 1.0f) {
+                D_0054EF4C = 1.0f;
+            }
+        }
+        break;
+    case 1:
+    case 5:
+        D_0054EF4C = 1.0f;
+        break;
+    }
+    /* Same real 110-to-zero HUD interpolation as the matched fldVLDraw. */
+    offset = (s32)(0.0f * D_0054EF4C + 110.0f * (1.0f - D_0054EF4C));
+    rsetOtOfs(0x47);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    if (fldGlobalBase.area != 1) {
+        DrwSprite2D(offset + 0x199, offset + 0x156, 0x57, 0x5A, 0x5D, 1, 0x57, 0x5A, 0x80808080, fldUiTexture);
+    }
+    if (fldGlobalBase.area != 1 && (fldPlayerStatus[0] & 0x1D)) {
+        DrwSprite2D(offset + 0x1DA, offset + 0x197, 0x14, 0x15, 0x19, 0x47, 0x14, 0x15, 0x80808080, fldUiTexture);
+    }
+    if (fldGlobalBase.area == 11 || fldGlobalBase.area == 14) {
+        alpha = (s32)(sdfSin(fldEADrawState) * 32.0f) + 96;
+        DrwSprite2D(offset + 0x1A4, offset + 0x162, 0x3D, 0x21, 0x7B, 0x5D, 0x3D, 0x21, (alpha << 24) | 0x808080, fldUiTexture);
+        DrwSprite2D(offset + 0x1A4, offset + 0x183, 0x3D, 0x21, 0x7B, 0x7D, 0x3D, -0x21, (alpha << 24) | 0x808080, fldUiTexture);
+        fldEADrawState += 0.1f;
+    }
+    encounterId = fldGlobalBase.wordC0;
+    if (encounterId == 0) {
+        encounterId = fldGlobalBase.wordBC;
+    }
+    if (fldChkVortex()) {
+        s32 count = nbGetEncountCnt();
+        s32 maximum = nbGetEncountMax(encounterId);
+        if (count > maximum) {
+            count = maximum;
+        }
+        if (maximum > 0) {
+            s32 percentage = count * 100 / maximum;
+            if (percentage < 34) {
+                level = 0;
+            } else {
+                level = 1;
+            }
+            if (percentage >= 67) {
+                level = 2;
+            }
+        } else {
+            level = 4;
+        }
+        alpha = (s32)(sdfSin(fldEADrawState) * 64.0f) + 64;
+        if (D_0054EF58 == 0) {
+            if (alpha < D_0054EF54) {
+                D_0054EF58 = 1;
+            }
+        } else if (alpha > D_0054EF54) {
+            D_0054EF58 = 0;
+            fldEADrawWork ^= 1;
+        }
+        D_0054EF54 = alpha;
+        if (level == 4) {
+            alpha = (s32)(sdfSin(fldEADrawState) * 32.0f) + 96;
+            DrwSprite2D(offset + 0x1A4, offset + 0x162, 0x3D, 0x21, 0x7B, 0x5D, 0x3D, 0x21, (alpha << 24) | 0x808080, fldUiTexture);
+            DrwSprite2D(offset + 0x1A4, offset + 0x183, 0x3D, 0x21, 0x7B, 0x7D, 0x3D, -0x21, (alpha << 24) | 0x808080, fldUiTexture);
+            fldEADrawState += 0.1f;
+        }
+        if (level == 0) {
+            if (fldEADrawWork == 0) {
+                DrwSprite2D(offset + 0x1A4, offset + 0x162, 0x3D, 0x21, 1, 1, 0x3D, 0x21, (alpha << 24) | 0x808080, fldEATexture);
+                DrwSprite2D(offset + 0x1A4, offset + 0x183, 0x3D, 0x21, 1, 33, 0x3D, -0x21, (alpha << 24) | 0x808080, fldEATexture);
+            } else {
+                DrwSprite2D(offset + 0x1A4, offset + 0x162, 0x3D, 0x21, 1, 35, 0x3D, 0x21, (alpha << 24) | 0x808080, fldEATexture);
+                DrwSprite2D(offset + 0x1A4, offset + 0x183, 0x3D, 0x21, 1, 67, 0x3D, -0x21, (alpha << 24) | 0x808080, fldEATexture);
+            }
+            fldEADrawState += 0.1f;
+        }
+        if (level == 1) {
+            if (fldEADrawWork == 0) {
+                DrwSprite2D(offset + 0x1A4, offset + 0x162, 0x3D, 0x21, 63, 1, 0x3D, 0x21, (alpha << 24) | 0x808080, fldEATexture);
+                DrwSprite2D(offset + 0x1A4, offset + 0x183, 0x3D, 0x21, 63, 33, 0x3D, -0x21, (alpha << 24) | 0x808080, fldEATexture);
+            } else {
+                DrwSprite2D(offset + 0x1A4, offset + 0x162, 0x3D, 0x21, 63, 35, 0x3D, 0x21, (alpha << 24) | 0x808080, fldEATexture);
+                DrwSprite2D(offset + 0x1A4, offset + 0x183, 0x3D, 0x21, 63, 67, 0x3D, -0x21, (alpha << 24) | 0x808080, fldEATexture);
+            }
+            fldEADrawState += 0.12f;
+        }
+        if (level == 2) {
+            if (fldEADrawWork == 0) {
+                DrwSprite2D(offset + 0x1A4, offset + 0x162, 0x3D, 0x21, 1, 69, 0x3D, 0x21, (alpha << 24) | 0x808080, fldEATexture);
+                DrwSprite2D(offset + 0x1A4, offset + 0x183, 0x3D, 0x21, 1, 101, 0x3D, -0x21, (alpha << 24) | 0x808080, fldEATexture);
+            } else {
+                DrwSprite2D(offset + 0x1A4, offset + 0x162, 0x3D, 0x21, 63, 69, 0x3D, 0x21, (alpha << 24) | 0x808080, fldEATexture);
+                DrwSprite2D(offset + 0x1A4, offset + 0x183, 0x3D, 0x21, 63, 101, 0x3D, -0x21, (alpha << 24) | 0x808080, fldEATexture);
+            }
+            fldEADrawState += 0.15f;
+        }
+    }
+    if (fldGlobalBase.area >= 11) {
+        rsetAlpha(1);
+        fldDrawEATexQuad(offset + 0x1C3, offset + 0x182, 0xC, 0x14, 0x17, 0x12, 1, 0x3B, 0x17, 0x12, -fldCamPitch);
+        rsetAlpha(0);
+        fldDrawEATexQuad(offset + 0x1C2, offset + 0x182, 5, 8, 0xB, 0xB, 0x19, 0x3B, 0xB, 0xB, fldGlobalBase.camAngle);
+        DrwSprite2D(offset + 0x1B7, offset + 0x15A, 0x17, 0x10, 1, 0x22, 0x17, 0x10, 0x80808080, fldUiTexture);
+        DrwSprite2D(offset + 0x1B7, offset + 0x19B, 0x17, 0x10, 0x19, 0x22, 0x17, 0x10, 0x80808080, fldUiTexture);
+        DrwSprite2D(offset + 0x19B, offset + 0x177, 0x15, 0x17, 0x31, 0x22, 0x15, 0x17, 0x80808080, fldUiTexture);
+        DrwSprite2D(offset + 0x1D5, offset + 0x177, 0x15, 0x17, 0x47, 0x22, 0x15, 0x17, 0x80808080, fldUiTexture);
+    }
+    rsetAlpha(0);
+}
+
 
 void fldVLDraw(void) {
     s32 x;
