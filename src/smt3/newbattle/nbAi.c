@@ -288,7 +288,7 @@ extern s32 nbGetHojoCounterMin(s32 hojotype);
 
 extern void nbRunAi(nbActionProcessData_t *a);
 
-extern void nbRunAiSub(nbActionProcessData_t *a, s32 tbl);
+extern s32 nbRunAiSub(nbActionProcessData_t *a, s32 tbl);
 
 extern char D_00545728[];
 
@@ -1645,7 +1645,48 @@ s32 nbSetAiTarget(nbActionProcessData_t *a, s32 code, s32 n)
 }
 
 
+#ifdef NON_MATCHING
+typedef struct {
+    datDevilAITbl_t table[4][5];
+    u32 unk_A0;
+} datDevilAIData_t;
+
+extern s32 nbGetSelectBit(nbMainProcessData_t *data);
+
+s32 nbRunAiSub(nbActionProcessData_t *a, s32 tbl)
+{
+    datDevilAIData_t *ai = (datDevilAIData_t *)D_00398A08;
+    s32 action;
+    s32 i;
+    u32 target;
+
+    for (i = 4; i >= 0; i--) {
+        a->aichktbl[i] = 0;
+    }
+    for (;;) {
+        action = nbPickAiAction(a, tbl);
+        printf("Koukatbl = %d\n", action);
+        if (action < 0) {
+            a->select = 0;
+            a->work->nowcommand = 3;
+            a->work->nowindex = 0;
+            break;
+        }
+        SetKoudou(a, tbl, action);
+        if (ChkCost(a) == 0 && ChkClose(a) != 0) {
+            target = ai[a->work->id].table[tbl][action].target;
+            if (nbSetAiTarget(a, target >> 16, target & 0xFFFF) == 0) {
+                a->select = nbGetSelectBit(a->data);
+                break;
+            }
+        }
+        a->aichktbl[action] = 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbAi", nbRunAiSub);
+#endif
 
 void nbRunAi(nbActionProcessData_t *a)
 {
