@@ -29,11 +29,11 @@ typedef struct effDebugMenu_t {
     void *destination;
     u32 copyBytes;
     s32 mode;
-    s32 (*create)(void *);
+    void *(*create)(void *);
     void (*update)(void *);
     void (*destroy)(void *);
-    s32 *param;
-    s32 (*recreate)(void *);
+    void **param;
+    void *(*recreate)(void *);
 } effDebugMenu_t;
 
 effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu);

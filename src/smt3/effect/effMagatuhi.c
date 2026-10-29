@@ -2335,7 +2335,7 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
 
     if (menu->update != NULL && menu->mode == 1) {
         if (menu->param != NULL) {
-            menu->update((void *)*menu->param);
+            menu->update(*menu->param);
         } else {
             menu->update(NULL);
         }
