@@ -684,3 +684,4 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / guarded selection
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 fn / 180 B	power-off RPC 33 with uncached result/status words and native semaphore ordering; complete owner exact
 src/smt3/effect/effMagatuhi.c	redthing1	done	2026-10-28	0 matches / shared menu recovery	native editor menu and item records unify effect setup and battle viewer contracts; three complete owners remain exact
 src/smt3/sdk/libipu.c	redthing1	done	2026-10-28	1 SDK fn / 228 B	DMA stop snapshot with configured 2.9 hardware poll padding; restart retained at native 336-byte size, 74 of 84 words match
+src/smt3/newbattle/nbKoukaProcess.c	redthing1	done	2026-10-28	1 fn / 700 B	flying effect state handling with native callback reloads, model setup and HP/MP clamps; owner 55 match, 0 differ
