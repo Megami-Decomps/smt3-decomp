@@ -17,37 +17,9 @@
 #include "effect.h"
 
 
-typedef union fldWaypointHeaderValues_t fldWaypointHeaderValues_t;
-
-typedef struct fldWaypointHeader_t fldWaypointHeader_t;
-
-typedef struct fldWaypointBlock_t fldWaypointBlock_t;
-
 typedef struct devState_t devState_t;
 
 
-
-enum { FLD_WAYPOINT_HEADER_COUNT = 5, FLD_WAYPOINT_BLOCK_BYTES = 0x64A0 };
-
-union fldWaypointHeaderValues_t {
-    s16 data[12];
-    struct {
-        s16 floors[6];
-        s16 blocks[6];
-    } elevator;
-};
-
-struct fldWaypointHeader_t {
-    s32 area;
-    s16 sound;
-    s16 floorCount;
-    fldWaypointHeaderValues_t body;
-};
-
-struct fldWaypointBlock_t {
-    fldWaypointHeader_t headers[FLD_WAYPOINT_HEADER_COUNT];
-    doormovetbl_s actors[256];
-};
 
 extern u32 D_0054EC44;
 
