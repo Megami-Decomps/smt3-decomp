@@ -541,8 +541,7 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u1
     f32 secondBasePoint[4];
     f32 firstPointDelta[4];
     f32 secondPointDelta[4];
-    f32 firstSample[4];
-    f32 secondSample[4];
+    sdfVector4_t samples[2];
     s32 activePointCount = hPoly->count;
     s32 sampleCount = hPoly->split;
     f32 sampleWeightStep;
@@ -569,8 +568,8 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u1
         sampleWeightStep = 1.0f / (f32)sampleCount;
         dds3HermitianTrackPolySetCurrent(hPoly, 2);
         if (sampleCount > 0) {
-            firstSampleOutput = (u128 *)firstSample;
-            secondSampleOutput = (u128 *)secondSample;
+            firstSampleOutput = (u128 *)&samples[0];
+            secondSampleOutput = (u128 *)&samples[1];
             firstSampleOutputBase = firstSampleOutput;
             sampleIndex = sampleCount;
             do {
@@ -602,8 +601,8 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u1
         sampleWeightStep = 1.0f / (f32)sampleCount;
         sampleIndex = 0;
         if (sampleCount > 0) {
-            firstSampleOutput = (u128 *)firstSample;
-            secondSampleOutput = (u128 *)secondSample;
+            firstSampleOutput = (u128 *)&samples[0];
+            secondSampleOutput = (u128 *)&samples[1];
             firstSampleOutputBase = firstSampleOutput;
             do {
                 sampleWeight += sampleWeightStep;
@@ -630,18 +629,21 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u1
         SDF_VU0_STOREVECTOR(secondPointDelta);
         sampleWeight = 0.0f;
         sampleWeightStep = 1.0f / (f32)sampleCount;
+#ifdef NON_MATCHING
+        samples[0].w = samples[1].w = 1.0f;
+#endif
         if (sampleCount > 0) {
             sampleIndex = sampleCount;
-            firstSampleOutput = (u128 *)firstSample;
+            firstSampleOutput = (u128 *)&samples[0];
             do {
                 sampleWeight += sampleWeightStep;
                 sampleIndex--;
-                firstSample[0] = firstBasePoint[0] + firstPointDelta[0] * sampleWeight;
-                firstSample[1] = firstBasePoint[1] + firstPointDelta[1] * sampleWeight;
-                firstSample[2] = firstBasePoint[2] + firstPointDelta[2] * sampleWeight;
-                secondSample[0] = secondBasePoint[0] + secondPointDelta[0] * sampleWeight;
-                secondSample[1] = secondBasePoint[1] + secondPointDelta[1] * sampleWeight;
-                secondSample[2] = secondBasePoint[2] + secondPointDelta[2] * sampleWeight;
+                samples[0].x = firstBasePoint[0] + firstPointDelta[0] * sampleWeight;
+                samples[0].y = firstBasePoint[1] + firstPointDelta[1] * sampleWeight;
+                samples[0].z = firstBasePoint[2] + firstPointDelta[2] * sampleWeight;
+                samples[1].x = secondBasePoint[0] + secondPointDelta[0] * sampleWeight;
+                samples[1].y = secondBasePoint[1] + secondPointDelta[1] * sampleWeight;
+                samples[1].z = secondBasePoint[2] + secondPointDelta[2] * sampleWeight;
                 dds3HermitianTrackPolySetVertexSub(hPoly, firstSampleOutput);
             } while (sampleIndex != 0);
         }
