@@ -3415,7 +3415,6 @@ extern void fclUpdateMessage(void);
 extern s32 cmpUpdateSeqInfo(cmbGbWork_t *work, s8 value);
 
 #ifdef NON_MATCHING
-extern s32 campWaitSelMessage(void);
 extern void campUpdateStockSelect(s8 mode);
 extern void cmpUpdateDestroyItemConfirm(void);
 extern void cmpUpdateSkillSelect(void);
