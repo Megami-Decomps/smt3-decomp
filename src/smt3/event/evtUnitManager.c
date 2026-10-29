@@ -740,21 +740,15 @@ typedef struct {
     u8 pad04[12];
 } evtColorWork_t;
 
-/* The light source block sdf3DMakeLightParallelPacket reads: colour then
- * direction, each a quadword. */
-typedef struct {
-    sdfVector4_t color;
-    sdfVector4_t direction;
-    u8 pad20[0x20];
-} evtLightSource_t;
 
-void sdf3DMakeLightParallelPacket(void *aPacket, evtLightSource_t **aLights, sdfVector4_t *aAmbient);
+
+void sdf3DMakeLightParallelPacket(void *aPacket, sdf3DLight_t **aLights, sdfVector4_t *aAmbient);
 
 /* vu0 routine: unpack the unit's colours into a parallel light packet. */
 void MakeLightPacket(evtUnit_t *h) {
-    evtLightSource_t source;
+    sdf3DLight_t source;
     sdfVector4_t ambient;
-    evtLightSource_t *lights[3] = { &source, NULL, NULL };
+    sdf3DLight_t *lights[3] = { &source, NULL, NULL };
     evtColorWork_t work[2];
     u32 flags;
     f32 *channel;
@@ -774,7 +768,7 @@ void MakeLightPacket(evtUnit_t *h) {
     EE_MMI_RGBA_UNPACK(&work[0], 0.0078125f);
     SDF_VU0_STOREVECTOR_MEMOPS(source.color);
     SDF_VU0_LOADVECTOR(h->vec10);
-    SDF_VU0_STOREVECTOR(&source.direction);
+    SDF_VU0_STOREVECTOR(&source.v);
     work[1].word = h->color50;
     EE_MMI_RGBA_UNPACK(&work[1], 0.0078125f);
     SDF_VU0_STOREVECTOR(&ambient);
