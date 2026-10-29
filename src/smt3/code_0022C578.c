@@ -1050,7 +1050,7 @@ extern s32 cmpAddQuePanelEff(s32 x, s32 y, s32 z, u16 width, u16 height, u8 step
                              u8 delay, s32 color0, s32 color1, u8 kind);
 extern s32 cmpSetPanelEffParam(s32 index, s32 value);
 
-void cmpSetStockRecoverEff(s32 effect, s32 skill, cmpLocalStock_t *stock)
+void cmpSetStockRecoverEff(s8 effect, u16 skill, cmpLocalStock_t *stock)
 {
     s32 count = cmpStockEffIsActive((u8 *)stock);
     s32 index = cmpGetStockInfoIndex(stock, 1, 1);
@@ -1059,8 +1059,6 @@ void cmpSetStockRecoverEff(s32 effect, s32 skill, cmpLocalStock_t *stock)
     s32 position;
     s32 i;
 
-    effect = (s8)effect;
-    skill = (u16)skill;
     if (count == 1) {
         slot = cmpFindFreeStockSlot(index, room);
     } else if (count == 4) {
@@ -1485,7 +1483,11 @@ extern s32 datGetItemSkillNo(s32 itemid);
 extern s32 cmpStartItemMsg(u16 item, s32 errorFlags);
 extern s32 cmpUseItemTokusyu(u16 item, s32 target, s32 user);
 extern void cmpRecover(u16 skill, datUnitWork_t *stock, datUnitWork_t *target);
+#ifdef NON_MATCHING
+extern void cmpSetStockRecoverEff(s8 effect, u16 skill, cmpLocalStock_t *stock);
+#else
 extern void cmpSetStockRecoverEff(s32 effect, s32 skill, cmpLocalStock_t *stock);
+#endif
 extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
 
 s32 cmpUseItem(void)
@@ -3801,8 +3803,11 @@ s32 camp_calc_stock_Process(s32 id)
     return 0;
 }
 
-/* The renderer narrows active internally; this caller passes the s32 result. */
+#ifdef NON_MATCHING
+extern void campDrawStockSlots(s8 *indices, s8 active, s8 *flags, cmpLocalStock_t *stock);
+#else
 extern void campDrawStockSlots(s8 *indices, s32 active, s8 *flags, cmpLocalStock_t *stock);
+#endif
 
 void campDrawStockPanel(cmpLocalStock_t *stock, s32 mode)
 {
@@ -8634,10 +8639,10 @@ INCLUDE_ASM(const s32, "code_0022C578", campCheckStockRoom);
 #endif
 
 #ifdef NON_MATCHING
-void campDrawStockSlots(s8 *indices, s32 active, s8 *flags,
+void campDrawStockSlots(s8 *indices, s8 active, s8 *flags,
                         cmpLocalStock_t *stock)
 {
-    s8 activeMode = (s8)active;
+    s8 activeMode = active;
     s8 rows[2];
     s8 cols[2];
     s32 colors[4];
