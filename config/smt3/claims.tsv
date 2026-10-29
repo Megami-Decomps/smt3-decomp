@@ -846,3 +846,4 @@ src/smt3/sdk/libmc.c	redthing1	done	2026-10-28	0 exact / typed guard	write reque
 src/smt3/pipe/pipeSection.c	redthing1	done	2026-10-28	0 exact / 540 B guarded	MyAction corrects action-zero fallthrough and callback count reloads; 129 of 135 words match, six post-effect load-scheduling differences remain
 
 src/smt3/sdk/libgcc_dpdiv.c	redthing1	done	2026-10-28	1 SDK fn / 320 B	binary64 division with real unpacked-record helper, native class dispatch and qualified current/next remainder loop; complete owner exact
+src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 364 B	top-chunk page trimming with 64-bit rounding, fresh break/top queries, failed-shrink repair and allocator unlock on every exit; owner 74 match, 0 differ

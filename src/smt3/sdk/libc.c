@@ -1103,7 +1103,59 @@ void __sinit(_reent *r) {
 
 INCLUDE_ASM(const s32, "sdk/libc", _free_r);
 
-INCLUDE_ASM(const s32, "sdk/libc", _malloc_trim_r);
+typedef struct mallocChunkPrefix_t {
+    u32 previousSize;
+    u32 size;
+} mallocChunkPrefix_t;
+
+typedef struct mallocArenaPrefix_t {
+    u8 opaque00[8];
+    mallocChunkPrefix_t *top;
+} mallocArenaPrefix_t;
+
+typedef struct mallocInfo_t {
+    s32 arena;
+    u8 opaque04[0x24];
+} mallocInfo_t;
+
+extern mallocArenaPrefix_t __malloc_av_;
+extern mallocInfo_t __malloc_current_mallinfo;
+extern void *__malloc_sbrk_base __attribute__((section(".data")));
+
+s32 _malloc_trim_r(_reent *r, u32 pad)
+{
+    s64 topSize;
+    s64 extra;
+    void *newBreak;
+
+    __malloc_lock(r);
+    topSize = __malloc_av_.top->size & ~3U;
+    /* Page rounding uses 64 bits; break increments and chunk words narrow. */
+    extra = (((((u64)topSize - pad + 0xFEF) >> 12) - 1) << 12);
+    if (extra < 0x1000) {
+        __malloc_unlock(r);
+        return 0;
+    }
+    if (_sbrk_r(r, 0) != (u8 *)__malloc_av_.top + (s32)topSize) {
+        __malloc_unlock(r);
+        return 0;
+    }
+    if (_sbrk_r(r, -(s32)extra) == (void *)-1) {
+        newBreak = _sbrk_r(r, 0);
+        topSize = (s32)((u32)newBreak - (u32)__malloc_av_.top);
+        if (topSize >= 16) {
+            __malloc_current_mallinfo.arena =
+                (u32)newBreak - (u32)__malloc_sbrk_base;
+            __malloc_av_.top->size = topSize | 1;
+        }
+        __malloc_unlock(r);
+        return 0;
+    }
+    __malloc_av_.top->size = (topSize - extra) | 1;
+    __malloc_current_mallinfo.arena -= (s32)extra;
+    __malloc_unlock(r);
+    return 1;
+}
 
 extern void *memmove(void *destination, const void *source, u32 size);
 extern void *memchr(const void *source, s32 character, u32 size);
