@@ -6812,7 +6812,43 @@ void cmpDrawListRowBox(s32 x, s32 y, s32 z, u16 w, u16 h2, u16 h, s32 c0, s32 c1
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListRows);
 
+typedef void (*cmpListRowDraw_t)(s32 x, s32 y, s32 z, u16 width, u16 height2,
+                                 u16 height, s32 color0, s32 color1, s32 color2,
+                                 s8 phase, s32 scale, s32 ot);
+extern s32 cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
+                           s8 mode, s32 scale, s8 phase, s8 layout,
+                           cmpCursorInfo_t *cursor, cmpListRowDraw_t draw, s32 ot);
+
+#ifdef NON_MATCHING
+void cmpDrawListColumn(s32 x, s32 y, s32 z, s32 width, s32 height, s8 mode,
+                       s32 intensity, cmpCursorInfo_t *cursor, cmpListRowDraw_t draw)
+{
+    volatile cmpCursorInfo_t *state = cursor;
+    s32 timer = state->unk_34;
+    s32 rowHeight;
+    s32 alpha;
+    s32 remaining;
+
+    if (intensity != 0x100) {
+        state->unk_34 = 0;
+        return;
+    }
+    if (timer >= 300) {
+        return;
+    }
+    alpha = (s32)((u32)timer << 7) / 300;
+    rowHeight = timer / 16;
+    remaining = 300 - timer;
+    fclDrawPanelSprite(0x30000, 0x47);
+    cmpDrawListRows(x, y - rowHeight * 8, z * 2, width, rowHeight, alpha,
+                    mode, remaining, 0, 1, cursor, draw, 0x47);
+    cmpDrawListRows(x, y + height * 8, z * 2, width, rowHeight, alpha,
+                    mode, remaining, 0, 1, cursor, draw, 0x47);
+    fclDrawPanelSprite(0x5101B, 0x47);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListColumn);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawScrollBar);
 
