@@ -80,17 +80,7 @@ typedef struct effBlurDrawBank_t {
 extern effBlurDrawBank_t dds3DrawEnv[];
 
 /* Nine A+D registers per tri-strip: RGBAQ once, then ST and XYZ2 per vertex. */
-typedef struct effBlurPrimVertex_t {
-    f32 s;
-    f32 t;
-    f32 q;
-    s32 unk0C;
-    s32 x;
-    s32 y;
-    s32 z;
-    s16 adc;
-    s16 unk1E;
-} effBlurPrimVertex_t;
+
 
 typedef struct effBlurPrimTriStrip_t {
     s32 r;

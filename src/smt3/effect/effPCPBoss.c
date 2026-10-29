@@ -4439,17 +4439,11 @@ void effPadVibeFadeIN(u32 mode, u8 power, s32 frame)
     }
 }
 
-typedef struct {
-    f32 s, t, q;
-    s32 unk0C;
-    s32 x, y, z;
-    s16 adc;
-    s16 unk1E;
-} effBlurQuadVertex_t;
+
 
 typedef struct {
     s32 r, g, b, a;
-    effBlurQuadVertex_t vertex[4];
+    effBlurPrimVertex_t vertex[4];
 } effBlurQuadPacket_t;
 
 extern f32 sdfCos(f32 angle);
