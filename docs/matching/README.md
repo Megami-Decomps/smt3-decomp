@@ -40,6 +40,7 @@ both native and emitted sizes when they differ.
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 3 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
+| 3 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
@@ -56,7 +57,7 @@ both native and emitted sizes when they differ.
 | 2 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
-| 2 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
+| 2 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
@@ -102,7 +103,6 @@ both native and emitted sizes when they differ.
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 1 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 1 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
-| 1 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 1 | event/evtMoon | [event/evtMoon.md](event/evtMoon.md) |
 | 1 | event/evtEventViewerFrameVar | [event/evtEventViewerFrameVar.md](event/evtEventViewerFrameVar.md) |
 | 1 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
