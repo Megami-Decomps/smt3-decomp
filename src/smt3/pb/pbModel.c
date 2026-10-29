@@ -145,7 +145,7 @@ extern void sdf3DPrimLinkMat(sdfDrawTag_t *tag, sdfMat_t *mat,
 
 extern sdfGrOt_t sdfGrOtTable[85];
 
-extern s32 pbDrawMapBlock(s32 x, s32 y, s32 drawFlags, s32 special,
+extern s32 pbDrawMapBlock(s32 x, s32 y, u8 drawFlags, s32 special,
                           sdfDrawTag_t *tag);
 
 void pbSetModelPos(mdlObj_t *aHandle, const f32 *pos) {
@@ -460,7 +460,38 @@ INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C88);
 
 INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapPolyTransformed);
 
-INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapBlock);
+extern s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags,
+                                    s32 special, sdfDrawTag_t *tag);
+
+s32 pbDrawMapBlock(s32 x, s32 y, u8 drawFlags, s32 special,
+                   sdfDrawTag_t *tag)
+{
+    sdfVector4_t rotation __attribute__((aligned(16)));
+    sdfVector4_t position __attribute__((aligned(16)));
+    sdfVector4_t geometry __attribute__((aligned(16)));
+    s32 px;
+    s32 pz;
+    s32 result;
+
+    memset(&rotation, 0, 0x10);
+    memset(&position, 0, 0x10);
+    memset(&geometry, 0, 0x10);
+    result = 0;
+    if (drawFlags != 0) {
+        px = x * 40 - 380;
+        pz = y * 40 - 380;
+        position.x = px;
+        position.z = pz;
+        if (special == 0) {
+            position.y = 20.0f;
+        } else {
+            position.y = -20.0f;
+        }
+        pbSetPrimMatrix(&rotation, &position.x, tag);
+        result = pbDrawMapPolyTransformed(&geometry, drawFlags, special, tag);
+    }
+    return result;
+}
 
 INCLUDE_RODATA(const s32, "pb/pbModel", D_00535CB8);
 
