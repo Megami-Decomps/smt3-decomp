@@ -1643,8 +1643,6 @@ INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543FA8);
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543FB8);
 
-/* NON_MATCHING: 21 of 293 words differ (first at +0x1BC), native 1172-byte size. */
-#ifdef NON_MATCHING
 extern s32 nbGetNakama(datUnitWork_t *work);
 extern void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 rate);
 extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate);
@@ -1664,6 +1662,10 @@ void SetAction_NEGORESULT(nbActionProcessData_t *a)
     datUnitWork_t *work;
     nbFormation_t *form;
     struct nbParty_t *party;
+    struct nbParty_t *scanParty;
+    /* Fresh work reads share this live view; the final party scan has its own
+     * cursor. Allocation/parity evidence: docs/levers/handle-registers.md. */
+    nbMainProcessData_t *data;
 
     switch (a->data->negoresult) {
     case 7:
@@ -1704,15 +1706,17 @@ void SetAction_NEGORESULT(nbActionProcessData_t *a)
         work = nbGetUnitWorkFromFormindex(a->data->negoeformindex);
         workId = work->id;
         for (; i < 14; i++) {
-            partyFlags = a->data->party[i].flag;
+            data = a->data;
+            partyFlags = data->party[i].flag;
             if ((partyFlags & 1) != 0) {
                 if ((partyFlags & 2) != 0) {
                     if ((partyFlags & 0x20) == 0) {
-                        if (nbGetUnitWorkPointer(a->data, &a->data->party[i])->id == workId) {
+                        if (nbGetUnitWorkPointer(data, &data->party[i])->id == workId) {
                             frame = dds3GetRandIntA(NULL, 20);
                             nbMakeReturnPacket(frame, a, &a->data->party[i]);
-                            if ((a->data->party[i].flag & 8) == 0) {
-                                SetTimeList(a, a->data->party[i].formindex, frame, 40, 40);
+                            data = a->data;
+                            if ((data->party[i].flag & 8) == 0) {
+                                SetTimeList(a, data->party[i].formindex, frame, 40, 40);
                             }
                         }
                     }
@@ -1730,14 +1734,16 @@ void SetAction_NEGORESULT(nbActionProcessData_t *a)
             nbGetNakama(work);
         }
         for (i = 4; i < 14; i++) {
-            partyFlags = a->data->party[i].flag;
+            data = a->data;
+            partyFlags = data->party[i].flag;
             if ((partyFlags & 1) != 0) {
                 if ((partyFlags & 2) != 0) {
                     if ((partyFlags & 0x20) == 0) {
                         frame = dds3GetRandIntA(NULL, 20);
                         nbMakeReturnPacket(frame, a, &a->data->party[i]);
-                        if ((a->data->party[i].flag & 8) == 0) {
-                            SetTimeList(a, a->data->party[i].formindex, frame, 40, 40);
+                        data = a->data;
+                        if ((data->party[i].flag & 8) == 0) {
+                            SetTimeList(a, data->party[i].formindex, frame, 40, 40);
                         }
                     }
                 }
@@ -1758,8 +1764,9 @@ void SetAction_NEGORESULT(nbActionProcessData_t *a)
         break;
     case 1:
     case 2:
-        if (a->data->negoresult < 5) {
-            if (a->data->negoresult < 2) {
+        data = a->data;
+        if (data->negoresult < 5) {
+            if (data->negoresult < 2) {
                 pressPacket = 0;
             }
         } else {
@@ -1768,7 +1775,8 @@ void SetAction_NEGORESULT(nbActionProcessData_t *a)
         break;
     case 3:
     case 4:
-        if (a->data->negoresult != 4) {
+        data = a->data;
+        if (data->negoresult != 4) {
             pressPacket = 0;
         }
         break;
@@ -1789,20 +1797,18 @@ void SetAction_NEGORESULT(nbActionProcessData_t *a)
     }
 
     activeCount = 0;
-    party = &a->data->party[4];
+    data = a->data;
+    scanParty = &data->party[4];
     for (i = 9; i >= 0; i--) {
-        if ((party->flag & 1) != 0 && (party->flag & 0x20) == 0) {
+        if ((scanParty->flag & 1) != 0 && (scanParty->flag & 0x20) == 0) {
             activeCount++;
         }
-        party++;
+        scanParty++;
     }
     if (activeCount == 0) {
-        a->data->endtype = 9;
+        data->endtype = 9;
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAction_NEGORESULT);
-#endif
 
 s32 CheckAction_NEGORESULT(nbActionProcessData_t *a)
 {

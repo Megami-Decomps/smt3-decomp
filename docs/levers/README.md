@@ -18,6 +18,7 @@ open the page and line it names.
 | 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
 | 2 | [callee-visibility.md](callee-visibility.md) | Callee visibility: the cause of most one-word branch-likely misses |
 | 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
+| 1 | [handle-registers.md](handle-registers.md) | `lw $4` against `lw $2` plus `move $4, $2` |
 | 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
 | 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
 | 0 | [second-label.md](second-label.md) | A second label in the split assembly: which kind matters |
@@ -25,7 +26,6 @@ open the page and line it names.
 | 0 | [loop-rotation.md](loop-rotation.md) | A loop whose exit test is written first gets rotated; plain `goto`s do not |
 | 0 | [local-vectors.md](local-vectors.md) | Two local vectors: declaration order fixes the stack offsets |
 | 0 | [local-const-arrays.md](local-const-arrays.md) | Function-local constant arrays |
-| 0 | [handle-registers.md](handle-registers.md) | `lw $4` against `lw $2` plus `move $4, $2` |
 | 0 | [cross-block-locals.md](cross-block-locals.md) | Two cross-block locals whose registers come out swapped |
 | 0 | [callee-definition.md](callee-definition.md) | A caller can need its callee's definition, not just a prototype |
 | 0 | [block-locals.md](block-locals.md) | A block-local whose live range reaches the end of the block costs a register |

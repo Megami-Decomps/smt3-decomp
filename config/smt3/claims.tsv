@@ -634,3 +634,4 @@ src/smt3/facility/fclEncyc.c	KiB	done	2026-10-28	1 fn / 500 B	encyclopedia recor
 src/smt3/pipe/pipeSection.c	KiB	done	2026-10-28	1 fn / 420 B	streaming object and linked-part loading with coherent header/node/descriptor types; owners 28, 7 and 28 match, 0 differ
 src/smt3/kernel/dds3KernelDraw.c	PiM	done	2026-10-29	1 fn / 348 B	z-clear packet initialization from matched DDS live coordinate payloads; complete owner and retail checksum verified
 src/smt3/effect/effPCPBoss.c	PiM	done	2026-10-29	1 fn / 2544 B	crack trail and flash-cell rendering from DDS donor; full work layout, owner and retail checksum verified
+src/smt3/newbattle/nbActionProcess.c	redthing1	done	2026-10-28	1 fn / 1172 B	negotiation result setup with fresh battle-work views and a separate final party cursor; qualified allocation parity, owner 77 match, 0 differ

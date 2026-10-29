@@ -12,14 +12,14 @@ docs/levers/README.md	17		| 2 | [scalar-spills.md](scalar-spills.md) | Scalar de
 docs/levers/README.md	18		| 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
 docs/levers/README.md	19		| 2 | [callee-visibility.md](callee-visibility.md) | Callee visibility:
 docs/levers/README.md	20		| 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
-docs/levers/README.md	21		| 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
-docs/levers/README.md	22		| 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
-docs/levers/README.md	23		| 0 | [second-label.md](second-label.md) | A second label in the split assembly:
-docs/levers/README.md	24		| 0 | [rodata-placers.md](rodata-placers.md) | Do not run the rodata and sdata placers standalone |
-docs/levers/README.md	25		| 0 | [loop-rotation.md](loop-rotation.md) | A loop whose exit test is written first gets rotated;
-docs/levers/README.md	26		| 0 | [local-vectors.md](local-vectors.md) | Two local vectors:
-docs/levers/README.md	27		| 0 | [local-const-arrays.md](local-const-arrays.md) | Function-local constant arrays |
-docs/levers/README.md	28	$2 $4 lw move	| 0 | [handle-registers.md](handle-registers.md) | lw $4 against lw $2 plus move $4, $2 |
+docs/levers/README.md	21	$2 $4 lw move	| 1 | [handle-registers.md](handle-registers.md) | lw $4 against lw $2 plus move $4, $2 |
+docs/levers/README.md	22		| 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
+docs/levers/README.md	23		| 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
+docs/levers/README.md	24		| 0 | [second-label.md](second-label.md) | A second label in the split assembly:
+docs/levers/README.md	25		| 0 | [rodata-placers.md](rodata-placers.md) | Do not run the rodata and sdata placers standalone |
+docs/levers/README.md	26		| 0 | [loop-rotation.md](loop-rotation.md) | A loop whose exit test is written first gets rotated;
+docs/levers/README.md	27		| 0 | [local-vectors.md](local-vectors.md) | Two local vectors:
+docs/levers/README.md	28		| 0 | [local-const-arrays.md](local-const-arrays.md) | Function-local constant arrays |
 docs/levers/README.md	29		| 0 | [cross-block-locals.md](cross-block-locals.md) | Two cross-block locals whose registers come out swapped |
 docs/levers/README.md	30		| 0 | [callee-definition.md](callee-definition.md) | A caller can need its callee's definition, not just a prototype |
 docs/levers/README.md	31		| 0 | [block-locals.md](block-locals.md) | A block-local whose live range reaches the end of the block costs a register |
@@ -408,6 +408,7 @@ docs/levers/float-literals.md	77	$f12 daddu jal lui lwc1	ee-gcc does not constan
 docs/levers/float-registers.md	13	$2 $3 lui mfc1 mtc1	SDF_VU0_SCALEVECTOR against SDF_VU0_SCALEVECTOR_BITS with the float expression passed straight to the "r" operand is a scheduling lever, not only a spelling.
 docs/levers/float-registers.md	24		A word the **next** block needs, read right after a volatile asm and before the stores of the previous block's result, belongs in its own local.
 docs/levers/float-registers.md	31	$f12 $f20 mov.s	A float argument's **position in the argument list** is a pure scheduling lever and nothing else.
+docs/levers/handle-registers.md	26	and sh	### SetAction_NEGORESULT:
 docs/levers/impossible.md	13		nbInitPlayer needs three separate symbols at test_skilllist, +0xF0 and +0x100.
 docs/levers/impossible.md	16		nbLoadMotionByIndex has two byte-identical arms that gcc cross-jumps.
 docs/levers/impossible.md	19	$4	A call with no argument to a function the unit defines with a prototype, as Hatudo and nbE915_Test do to nbGetEventForm.

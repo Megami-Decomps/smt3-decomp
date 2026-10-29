@@ -76,7 +76,6 @@ page and line to open. Conventions are in
 | 1 | newbattle/nbE911 | [newbattle/nbE911.md](newbattle/nbE911.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
 | 1 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
-| 1 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 1 | movie/MovieViewer | [movie/MovieViewer.md](movie/MovieViewer.md) |
 | 1 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 1 | kernel/dds3CreateData | [kernel/dds3CreateData.md](kernel/dds3CreateData.md) |
