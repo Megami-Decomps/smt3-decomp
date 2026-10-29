@@ -207,11 +207,7 @@ typedef struct effPCPBossWork_t
     u8 unk24[8];
 } effPCPBossWork_t;
 
-typedef struct effPCPBossBUNSINParam_t
-{
-    union { s32 pStartBits; nbFormation_t *pStartForm; };
-    union { s32 pEndBits; nbFormation_t *pEndForm; };
-} effPCPBossBUNSINParam_t;
+
 
 typedef struct effPCPBossBUNSIN_t
 {

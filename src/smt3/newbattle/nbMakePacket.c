@@ -6,6 +6,7 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "event.h"
+#include "effect.h"
 
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
@@ -235,11 +236,7 @@ typedef struct nbKoukaProcessData_t
     nbKoukaPacket_t *last;
 } nbKoukaProcessData_t;
 
-typedef struct effPCPBossBUNSINParam_t
-{
-    nbFormation_t *pStartForm;
-    nbFormation_t *pEndForm;
-} effPCPBossBUNSINParam_t;
+
 
 typedef struct effPCPBossBUNSIN2Param_t
 {
