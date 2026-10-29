@@ -2711,7 +2711,47 @@ s32 kCopy_2(u32 *dst, const u32 *src, u32 count)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress_0);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", InitAlarm);
+typedef struct {
+    u32 index;
+    void *entry;
+} kernelEntryPair_t;
+
+extern kernelEntryPair_t D_0052D2B0[8];
+extern kernelEntryPair_t D_0052D670[8];
+extern void *D_0052D668;
+extern const u8 D_0052CB48[0x740];
+extern const u8 D_0052D288[0x28];
+extern const u8 D_0052D2F0[0x330];
+extern void gcc2_compiled__17(u32 index, void *entry);
+extern s32 Copy_1(void *destination, const void *source, u32 size);
+extern s32 Copy_2(void *destination, const void *source, u32 size);
+extern void FlushCache(s32 mode);
+extern void *GetEntryAddress_0(u32 index);
+extern void *GetEntryAddress_1(u32 index);
+extern void setup_0(u32 index, void *entry);
+
+void InitAlarm(void)
+{
+    u32 index;
+    u32 i;
+    void *entry;
+
+    if ((*(volatile u32 *)0x10001810 & 0x100) != 0) {
+        return;
+    }
+    gcc2_compiled__17(D_0052D2B0[0].index, D_0052D2B0[0].entry);
+    Copy_1((void *)0x80076000, D_0052CB48, 0x740);
+    Copy_1((void *)0x82000, D_0052D288, 0x28);
+    FlushCache(0);
+    FlushCache(2);
+    gcc2_compiled__17(D_0052D2B0[1].index, D_0052D2B0[1].entry);
+    for (i = 2; i < 8; i++) {
+        index = D_0052D2B0[i].index;
+        entry = GetEntryAddress_0(index);
+        gcc2_compiled__17(D_0052D2B0[i].index, entry);
+    }
+}
+
 
 extern s32 Deci2Call(s32 command, void *packet);
 extern u8 D_0059ECA8[];
@@ -2841,7 +2881,25 @@ INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress_1);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", setup_0);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", InitTLBFunctions);
+void InitTLBFunctions(void)
+{
+    u32 index;
+    u32 i;
+    void *entry;
+
+    setup_0(D_0052D670[0].index, D_0052D670[0].entry);
+    Copy_2((void *)0x80075000, D_0052D2F0, 0x330);
+    FlushCache(0);
+    FlushCache(2);
+    setup_0(D_0052D670[1].index, D_0052D670[1].entry);
+    setup_0(D_0052D670[2].index, D_0052D670[2].entry);
+    for (i = 3; i < 8; i++) {
+        index = D_0052D670[i].index;
+        entry = GetEntryAddress_1(index);
+        setup_0(D_0052D670[i].index, entry);
+    }
+    D_0052D668 = GetEntryAddress_1(3);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", PutTLBEntry);
 

@@ -708,3 +708,29 @@ index. The word helpers use ordinary indexed `u32` copies; the configured
 EE 2.9 compiler supplies their native pointer increments and loop padding.
 No copy intrinsic, assembly, extra alignment or compiler flag is needed.
 Together these are four exact SDK EE functions / 216 instruction bytes.
+
+## Alarm and TLB patch initialization
+
+`InitAlarm` (212 bytes) and `InitTLBFunctions` (196) match as ordinary C.
+The existing data at `D_0052D2B0` and `D_0052D670` each spans eight mutable
+pairs: a 32-bit syscall index and an entry address. Their kernel patch
+blocks remain external data; no embedded code or syscall stub is translated
+into a C byte array.
+
+The alarm initializer does nothing when timer register `0x10001810` has bit
+`0x100` set. Otherwise it installs the copy helper, copies the native
+`0x740`- and `0x28`-byte blocks, flushes cache modes 0 then 2, installs the
+entry lookup and patches entries 2 through 7. The TLB initializer similarly
+copies its `0x330`-byte block, flushes both caches, installs entries 1 and 2,
+then patches entries 3 through 7. Each loop reloads the syscall index from
+the mutable table after the entry-lookup call before installing its result.
+
+The TLB initializer publishes `GetEntryAddress_1(3)` to the pointer at
+`D_0052D668`; consumers use that address as their argument-storage base.
+Only that pointer is accessed; the following word does not establish a
+two-element C array. Both routines
+have void interfaces: the startup caller discards the alarm result and
+tail-calls TLB setup; neither initializer manufactures a return value.
+The installed copy implementations have explicit zero results, so their
+copy syscall declarations retain that integer return. Cache flushing and
+setup calls discard their results.
