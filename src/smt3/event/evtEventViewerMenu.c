@@ -1846,9 +1846,7 @@ typedef struct pmdCutInfo_t {
 
 
 typedef struct pmdFrameTable_t pmdFrameTable_t;
-typedef struct pmdStageTable_t {
-    s32 NameIndex, FileIndex, MajorNum, MinorNum;
-} pmdStageTable_t;
+
 
 
 typedef struct pmdEffectTable_t {

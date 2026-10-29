@@ -115,6 +115,10 @@ typedef struct pmdUnitTable_t {
     s32 NameIndex, FileIndex, MajorNum, MinorNum, DataOffset, DataSize, Reserve1, Reserve2;
 } pmdUnitTable_t;
 
+typedef struct pmdStageTable_t {
+    s32 NameIndex, FileIndex, MajorNum, MinorNum;
+} pmdStageTable_t;
+
 /* Interpolated event vector and packed colour. */
 typedef struct evtBlendVecColor_t {
     f32 vec[4];

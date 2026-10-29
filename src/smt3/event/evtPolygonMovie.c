@@ -166,9 +166,7 @@ s32 evtPolygonMovieProcess1(dds3ProcessID_t *id);
 typedef struct pmdCameraTable_t {
     s32 NameIndex, Reserve1, Reserve2, Reserve3;
 } pmdCameraTable_t;
-typedef struct pmdStageTable_t {
-    s32 NameIndex, FileIndex, MajorNum, MinorNum;
-} pmdStageTable_t;
+
 extern s32 dds3GetMapNo(dds3Basic_t *scene);
 extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, s32 pF1, s32 pF2, const void *pTB, s32 pBF);
 extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
