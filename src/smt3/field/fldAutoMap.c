@@ -1104,7 +1104,182 @@ u32 fldAutoMapChkMode(void) {
     return AutoMapSeq;
 }
 
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapCalc);
+/* These are the existing native .data flag and camera/vector records. */
+extern s32 fldAutoMapEnable __attribute__((section(".data")));
+extern u8 dds3PadStickStatusState[2][2];
+extern sdfVector4_t D_00532240;
+extern sdfVector4_t aViewEye;
+extern sdfVector4_t aViewTarget;
+extern sdfVector4_t aViewDown;
+void dds3FadeOut2(s32 frame);
+void dds3FadeIn2(s32 frame);
+void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ);
+
+void fldAutoMapCalc(void) {
+    sdfVector4_t focus;
+    sdfVector4_t eye;
+    sdfVector4_t up = D_00532240;
+    fldAmLightParam_t *light;
+    f32 minX, maxZ, maxX, minZ;
+    s32 closeRequested = 0;
+
+    if (fldAutoMapChkMode() == 0) {
+        return;
+    }
+    if (fldAutoMapEnable != 0) {
+        if ((s8)dds3PadButtonState[0x22] != 0) {
+            closeRequested = 1;
+        }
+    } else if ((s8)dds3PadButtonState[0x22] < 0) {
+        closeRequested = 1;
+    }
+
+    /* A close request does not advance the input-delay counter. */
+    if (closeRequested == 0) {
+        fldAutoMapSeqStep++;
+    }
+    if (closeRequested != 0 ||
+        ((s8)dds3PadButtonState[0x23] < 0 && fldAutoMapSeqState == 0)) {
+        fldAutoMapSeqEnd();
+        dds3FadeOut2(0);
+        dds3FadeIn2(8);
+        return;
+    }
+    if ((s8)dds3PadButtonState[0x23] < 0) {
+        p2sdPlaySE(10, 127, 63);
+        D_00551CAC = D_00551CB4;
+        D_00551CB0 = D_00551CB8;
+        fldAutoMapDrawArea = D_0054EE58;
+        fldAutoMapSeqState = 0;
+    }
+
+    if (fldAutoMapSeqStep >= 11) {
+        if ((s8)dds3PadStickStatusState[0][1] != 0) {
+            if (dds3PadStickStatusState[0][1] & 2) {
+                if ((s8)dds3PadButtonState[0x25] != 0 &&
+                    (s8)dds3PadButtonState[0x27] != 0) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CAC += 1000;
+                    D_00551CB0 -= 1000;
+                } else if ((s8)dds3PadButtonState[0x25] != 0 &&
+                           (s8)dds3PadButtonState[0x26] != 0) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CAC += 1000;
+                    D_00551CB0 += 1000;
+                } else if ((s8)dds3PadButtonState[0x24] != 0 &&
+                           (s8)dds3PadButtonState[0x27] != 0) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CAC -= 1000;
+                    D_00551CB0 -= 1000;
+                } else if ((s8)dds3PadButtonState[0x24] != 0 &&
+                           (s8)dds3PadButtonState[0x26] != 0) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CAC -= 1000;
+                    D_00551CB0 += 1000;
+                } else if ((s8)dds3PadButtonState[0x25] != 0) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CAC += 1000;
+                } else if ((s8)dds3PadButtonState[0x24] != 0) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CAC -= 1000;
+                } else if ((s8)dds3PadButtonState[0x27] != 0) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CB0 -= 1000;
+                } else if ((s8)dds3PadButtonState[0x26] != 0) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CB0 += 1000;
+                }
+            }
+        } else {
+            /* A held diagonal consumes the direction choice even when its
+             * Z-repeat bit is absent; do not fall back to a cardinal step. */
+            if ((s8)dds3PadButtonState[0x25] != 0 &&
+                (s8)dds3PadButtonState[0x27] != 0) {
+                if (dds3PadButtonState[0x27] & 2) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CAC += 1000;
+                    D_00551CB0 -= 1000;
+                }
+            } else if ((s8)dds3PadButtonState[0x25] != 0 &&
+                       (s8)dds3PadButtonState[0x26] != 0) {
+                if (dds3PadButtonState[0x26] & 2) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CAC += 1000;
+                    D_00551CB0 += 1000;
+                }
+            } else if ((s8)dds3PadButtonState[0x24] != 0 &&
+                       (s8)dds3PadButtonState[0x27] != 0) {
+                if (dds3PadButtonState[0x27] & 2) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CAC -= 1000;
+                    D_00551CB0 -= 1000;
+                }
+            } else if ((s8)dds3PadButtonState[0x24] != 0 &&
+                       (s8)dds3PadButtonState[0x26] != 0) {
+                if (dds3PadButtonState[0x26] & 2) {
+                    fldAutoMapSeqState = 1;
+                    D_00551CAC -= 1000;
+                    D_00551CB0 += 1000;
+                }
+            } else if (dds3PadButtonState[0x25] & 2) {
+                fldAutoMapSeqState = 1;
+                D_00551CAC += 1000;
+            } else if (dds3PadButtonState[0x24] & 2) {
+                fldAutoMapSeqState = 1;
+                D_00551CAC -= 1000;
+            } else if (dds3PadButtonState[0x27] & 2) {
+                fldAutoMapSeqState = 1;
+                D_00551CB0 -= 1000;
+            } else if (dds3PadButtonState[0x26] & 2) {
+                fldAutoMapSeqState = 1;
+                D_00551CB0 += 1000;
+            }
+        }
+    }
+
+    fldAutoMapGetBBox(&minX, &maxZ, &maxX, &minZ);
+    /* Quantize the two X endpoints, then the two Z endpoints. */
+    minX = (s32)((minX - 1000.0f) / 1000.0f) * 1000;
+    maxX = (s32)((maxX + 1000.0f) / 1000.0f) * 1000;
+    maxZ = (s32)((maxZ - 1000.0f) / 1000.0f) * 1000;
+    minZ = (s32)((minZ + 1000.0f) / 1000.0f) * 1000;
+
+    if ((f32)D_00551CAC < minX) {
+        D_00551CAC = (s32)minX;
+    }
+    if (maxX < (f32)D_00551CAC) {
+        D_00551CAC = (s32)maxX;
+    }
+    if ((f32)D_00551CB0 < minZ) {
+        D_00551CB0 = (s32)minZ;
+    }
+    if (maxZ < (f32)D_00551CB0) {
+        D_00551CB0 = (s32)maxZ;
+    }
+
+    focus.x = D_00551CAC;
+    focus.y = 0.0f;
+    focus.z = D_00551CB0;
+    eye.x = D_00551CAC;
+    eye.y = -24000.0f;
+    eye.z = D_00551CB0;
+    if (dds3PadButtonState[0x2B] != 0) {
+        eye.y = -60000.0f;
+    }
+    SDF_VU0_COPYVECTOR(&D_002F5E00, &eye);
+    SDF_VU0_COPYVECTOR(&fldAutoMapRect, &focus);
+    SDF_VU0_COPYVECTOR(&D_002F5E10, &up);
+    light = (fldAmLightParam_t *)&dds3LightParam2[0x20];
+    light->near = 255.0f;
+    light->scale = 1000.0f;
+    light->far = 255.0f;
+    light->bias = 20000.0f;
+    light->mode = 0x808080;
+    SDF_VU0_COPYVECTOR(&aViewEye, &eye);
+    SDF_VU0_COPYVECTOR(&aViewTarget, &focus);
+    SDF_VU0_COPYVECTOR(&aViewDown, &up);
+}
+
 
 void fldAutoMapSetField(s32 fld, s32 area, s32 block) {
     f32 x = fldGlobalBase.x;
@@ -1378,9 +1553,6 @@ void fldAutoMapGetBBox(f32 *getX0, f32 *getZ0, f32 *getX1, f32 *getZ1) {
     }
 }
 
-/* NON_MATCHING: 15 of 18 words, exact size; two `beql`/`bnel` where retail has
- * the plain branch, on the tests whose arm calls the still-assembly callee. */
-#ifdef NON_MATCHING
 void fldAutoMapProc(void) {
     if (fldGb[0] < 10) {
         return;
@@ -1392,9 +1564,6 @@ void fldAutoMapProc(void) {
         fldAutoMapCalc();
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapProc);
-#endif
 
 INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532230);
 

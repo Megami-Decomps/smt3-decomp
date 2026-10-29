@@ -104,8 +104,7 @@ fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	40 of 42 words match	docs/nonmatchin
 fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244	10 of 146 words match	docs/nonmatching/field/fldAutoMap.md	32
 fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/nonmatching/field/fldAutoMap.md	79
 fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	187 of 207 words match	docs/nonmatching/field/fldAutoMap.md	119
-fldAutoMapProc	field/fldAutoMap	0x48	15 of 18 words match	docs/nonmatching/field/fldAutoMap.md	166
-fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/nonmatching/field/fldAutoMap.md	184
+fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/nonmatching/field/fldAutoMap.md	166
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/nonmatching/field/fldCamera.md	5
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/nonmatching/field/fldCamera.md	35
 fldSkyDrawFilter	field/fldDraw	0xAD8	682 of 694 words match	docs/nonmatching/field/fldDraw.md	5

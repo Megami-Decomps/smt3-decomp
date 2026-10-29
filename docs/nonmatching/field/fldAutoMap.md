@@ -163,24 +163,6 @@ there they are initializers materialised in the prologue: declaring them
 it from 10 differing words to exact. The same lever does not exist here, since
 these four are computed from the table mid-function.
 
-## fldAutoMapProc (field/fldAutoMap, 0x48)
-
-15 of 18 words match, at the exact 72-byte size.
-
-Three words, and all three are the branch-annul shape the levers page describes
-from the other side: retail has `beqz` and `bne` with a `nop` in the delay
-slot, the draft `beqzl` and `bnel` with the epilogue's `ld $31, 0x0($29)`
-annulled into it. Both differing tests guard the arm that calls
-`fldAutoMapCalc`, which is still `INCLUDE_ASM`, so this is the `mc/slMain`
-mechanism (a caller needing its callee's definition, not just a prototype):
-decompile `fldAutoMapCalc` and try this again before touching the source.
-
-The body is settled. `fldGb[0]` is the field id, and the two bounds have to be
-separate `if` statements with early returns, which is what gets both `slti`s
-computed before the first branch; `&&` folds them and costs 13 words.
-`fldAutoMapCalc` must stay without a forward prototype, since the implicit
-`int` declaration is what reserves `$2` across the call and stops the sibcall.
-
 ## fldDrawAreaBlockFont (field/fldAutoMap, 0x388)
 
 57 of 226 words match, 908 bytes against retail's 904.
