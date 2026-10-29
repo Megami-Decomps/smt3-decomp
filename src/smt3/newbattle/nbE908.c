@@ -1,10 +1,15 @@
 #include "common.h"
+#include "fileManager.h"
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
+
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void effPadVibeFadeOUT(u32 mode, u8 power, s32 frame);
+extern void nbSetOrderSide(s32 side);
 
 typedef struct evtUnitHandle_t
 {

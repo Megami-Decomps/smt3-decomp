@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fileManager.h"
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -7,6 +8,9 @@
 #include "newdata.h"
 #include "motion.h"
 #include "model.h"
+
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void effPadVibeFadeOUT(u32 mode, u8 power, s32 frame);
 
 typedef struct evtUnitHandle_t
 {
