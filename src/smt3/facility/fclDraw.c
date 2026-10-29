@@ -486,8 +486,8 @@ s32 cmpSkillOrder(const void *a, const void *b)
 
 s32 cmbSetEvoResult(const void *a, const void *b)
 {
-    datDevilTableEntry_t *eb = *(datDevilTableEntry_t **)((u8 *)b + 4);
-    datDevilTableEntry_t *ea = *(datDevilTableEntry_t **)((u8 *)a + 4);
+    datDevilTableEntry_t *eb = ((const cmbRaceSortEntry_t *)b)->info;
+    datDevilTableEntry_t *ea = ((const cmbRaceSortEntry_t *)a)->info;
 
     if (ea->race > eb->race) {
         return 1;
@@ -560,7 +560,7 @@ void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count)
             p++;
         } while (i < count);
     }
-    qsort(list, count, 8, cmbSetEvoResult);
+    qsort(list, count, sizeof(*list), cmbSetEvoResult);
 }
 INCLUDE_SDATA(const s32, "facility/fclDraw", D_0054FC40);
 
