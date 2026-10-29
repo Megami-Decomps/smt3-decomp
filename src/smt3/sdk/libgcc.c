@@ -169,14 +169,14 @@ typedef struct object {
     void *pc_end;
     void *fde_begin;
     void *fde_array;
-    void *count;
+    u32 count;
     struct object *next;
 } object;
 
 /* libgcc's fde_vector, as add_fdes fills it. */
 typedef struct fde_vector {
     u32 **array;
-    s32 count;
+    u32 count;
 } fde_vector;
 
 typedef struct _atexit {
@@ -619,7 +619,7 @@ s32 __register_frame_info(void *fn, void *entry) {
     e->pc_end = NULL;
     e->pc_begin = NULL;
     e->fde_array = NULL;
-    e->count = NULL;
+    e->count = 0;
     WaitSema(D_0052C37C);
     e->next = D_0059AD60;
     D_0059AD60 = e;
@@ -640,7 +640,7 @@ s32 __register_frame_info_table(void *fn, void *entry) {
     e->fde_array = fn;
     e->pc_end = NULL;
     e->pc_begin = NULL;
-    e->count = NULL;
+    e->count = 0;
     WaitSema(D_0052C37C);
     e->next = D_0059AD60;
     D_0059AD60 = e;
@@ -726,7 +726,59 @@ void *libc_2D27F8(u32 *p, u32 addr) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D2850);
+typedef struct {
+    fde_vector linear;
+    fde_vector erratic;
+} fde_accumulator;
+
+extern u32 **libc_2D1FA0(fde_accumulator *vectors, u32 count);
+
+/* Preserve the allocation boundary; see levers/cross-block-locals.md. */
+static inline s32 start_fde_sort(fde_accumulator *vectors, u32 count)
+{
+    vectors->linear.array = count ? malloc(count * sizeof(u32 *)) : NULL;
+    vectors->erratic.array = vectors->linear.array ? malloc(count * sizeof(u32 *)) : NULL;
+    vectors->linear.count = 0;
+    vectors->erratic.count = 0;
+    return vectors->linear.array != NULL;
+}
+
+void libc_2D2850(object *entry)
+{
+    fde_accumulator vectors;
+    u32 minimum;
+    u32 maximum;
+    u32 count;
+    u32 **sorted;
+
+    if (entry->pc_begin != NULL) {
+        count = entry->count;
+    } else if (entry->fde_array != NULL) {
+        u32 **table = entry->fde_array;
+        for (count = 0; *table != NULL; table++)
+            count += libc_2D2728(*table);
+    } else {
+        count = libc_2D2728(entry->fde_begin);
+    }
+    entry->count = count;
+    if (!start_fde_sort(&vectors, count) && entry->pc_begin != NULL)
+        return;
+    minimum = 0xffffffff;
+    maximum = 0;
+    if (entry->fde_array != NULL) {
+        u32 **table = entry->fde_array;
+        for (; *table != NULL; table++)
+            libc_2D2768(*table, &vectors.linear, &minimum, &maximum);
+    } else {
+        libc_2D2768(entry->fde_begin, &vectors.linear, &minimum, &maximum);
+    }
+    sorted = libc_2D1FA0(&vectors, count);
+    if (sorted != NULL)
+        entry->fde_array = sorted;
+    entry->pc_begin = (void *)minimum;
+    entry->pc_end = (void *)maximum;
+}
+
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D29B8);
 

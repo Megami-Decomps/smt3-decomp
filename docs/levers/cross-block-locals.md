@@ -369,3 +369,30 @@ The unbuffered path caps each callback at 1024 bytes. Fully buffered and
 string streams preserve native copy limits and direct-write sizes; line
 buffering tracks the next newline across partial writes. Write and flush
 failures update fresh stream flags with `0x40`; setup failure returns directly.
+
+
+## Frame-vector allocation helper boundary
+
+`sdk/libgcc::libc_2D2850` matches all 360 instruction bytes with the real
+two-vector accumulator and an inline allocation helper. Historical
+[GCC frame.c](https://github.com/gcc-mirror/gcc/blob/releases/gcc-2.95/gcc/frame.c)
+provides this accumulator and helper boundary. The reconstruction follows
+the native failure-aware allocation conditions, rather than that older
+version's unconditional allocations.
+
+Flattening only the helper call into equivalent assignments retains 360
+bytes but matches 63 of 90 words, first differing at `+0x7C`. Qualified
+actual-owner `--cse --alloc --no-dumps` probes pass plain/hooked/unhooked
+output parity for both forms. In the accepted form, the inlined accumulator
+parameter is pseudo 97: CSE stores use offsets 0, 8, 4 and 12 from it; allocation
+records six references, live length 36 and two crossed calls, assigning `$16`.
+The final assembly retains the actual stack accumulator address there across
+allocation calls. The flat control addresses its fields directly from `$sp`
+and lacks this live pointer. No forced register or extra memory access is used.
+
+Reproduce with
+`tools/cc1probe.sh src/smt3/sdk/libgcc.c --func libc_2D2850 --cse --alloc --no-dumps --out /tmp/fde-vector-allocation`.
+The object count and vector counts are unsigned 32-bit quantities. Only a
+nonnull sort result replaces the object's array; min/max bounds are still
+published when initial sorting storage is unavailable. An initialized object
+whose linear allocation fails returns before changing its bounds.
