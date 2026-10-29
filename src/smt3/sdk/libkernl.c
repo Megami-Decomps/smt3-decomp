@@ -382,7 +382,11 @@ s32 close(s32 descriptor)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", ioctl);
+/* Native reads no input registers; parameter types remain unrecovered. */
+s32 ioctl()
+{
+    return -1;
+}
 
 long lseek(s32 descriptor, s32 offset, s32 whence)
 {

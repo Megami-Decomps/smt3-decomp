@@ -1035,7 +1035,9 @@ calls `Exit(signal)` only for process ID 1 and returns zero. `stat` and `unlink`
 leave their supplied objects untouched, set the current errno to 5 through
 `__errno_8`, and return -1. These are the native compatibility behaviors. The raw `open` stub follows
 the same errno-5 failure path without reading its path, flags or mode; all40
-instruction bytes match.
+instruction bytes match. The raw `ioctl` stub matches all8 bytes and
+returns -1 without reading input registers. Its old-style parameter list keeps
+input types unspecified until callers establish them.
 
 The raw `close` and `lseek` compatibility providers also return -1 unconditionally
 and do not update errno. The existing `_lseek_r` interface supplies signed 32-bit
