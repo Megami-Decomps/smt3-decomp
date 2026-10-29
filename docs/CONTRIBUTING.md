@@ -74,6 +74,15 @@ non-matching draft. It does not verify matching; see
 python tools/decompile.py FUNCNAME     # m2c draft with the unit's context
 ```
 
+`decompile.py` runs through `tools/m2c_ee.py`. The adapter preserves the EE
+compiler's eight-byte slots for known trailing scalar arguments: a twelve-word
+packet call uses eight GPRs followed by stack offsets 0, 8, 16 and 24. It also
+decodes raw `cvt.w.s` words in text sections so m2c retains their conversions
+and dependent arithmetic. Data words and the input files are preserved. The
+installed m2c dependency is unchanged; `tools/test_m2c_ee.py` checks actual caller,
+callee and conversion output. Local unit types and provider signatures still
+need to be supplied when the header-only context does not contain them.
+
 Replace the `INCLUDE_ASM` line with your C. Keep functions in retail order, and
 leave `INCLUDE_RODATA` and `INCLUDE_SDATA` lines where they are: `configure.py`
 recomputes their placement.

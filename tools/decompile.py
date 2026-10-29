@@ -36,7 +36,8 @@ def main() -> None:
     unit = asm.parent.relative_to(ROOT / "asm" / args.version / "nonmatchings")
     source = ROOT / "src" / args.version / f"{unit}.c"
 
-    cmd = [sys.executable, "-m", "m2c.main", "-t", "mipsee-gcc-c", *args.m2c_args]
+    cmd = [sys.executable, str(ROOT / "tools/m2c_ee.py"),
+           "-t", "mipsee-gcc-c", *args.m2c_args]
     with tempfile.NamedTemporaryFile("w", suffix=".c") as ctx:
         if source.exists():
             ctx.write(m2ctx.context(source))
