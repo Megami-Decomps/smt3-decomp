@@ -253,7 +253,22 @@ typedef struct effPCPBossHUnit_t
 /* One battle formation slot: the main process data holds 32 of them. */
 typedef struct effPCPBossUnit_t
 {
-    u8 unk00[0x78];
+    /* Formation prefix, as in nbFormation_t. */
+    sdfVector4_t orgpos;
+    sdfVector4_t orgrot;
+    sdfVector4_t position;
+    sdfVector4_t rotation;
+    sdfVector4_t center;
+    f32 radius;
+    f32 height;
+    f32 collisionRadius;
+    f32 scale;
+    f32 oneShotRadius;
+    f32 allShotRadius;
+    f32 moveY;
+    f32 moveZ;
+    s32 type;
+    u32 time;
     s32 flags;
     u8 unk7C[0x10];
     effPCPBossHUnit_t *hunit;
@@ -412,20 +427,22 @@ typedef struct effPCPDANTE_UV_tag
  * last word is the per-target delay step. */
 typedef struct effPCPDANTE_Damage_Param_t
 {
-    u8 unk00[0xC];
+    s32 total;
+    s32 fadeIn;
+    s32 fadeOut;
     s32 wait;
 } effPCPDANTE_Damage_Param_t;
 
 typedef struct effPCPDANTE_Damage_tag
 {
-    u8 position[0x10];
-    u8 unk010[0x20];
+    effPCPDANTE_Damage_Param_t param;
+    u8 delay[0x20];
     s32 unk030;
     u8 unk034;
     u8 unk035[3];
     effPCPBossBED_t *bed;
     void *cuts[0x20];
-    u8 unk0BC[0x80];
+    s32 counters[0x20];
     u32 color;
 } effPCPDANTE_Damage_tag;
 
@@ -2835,7 +2852,7 @@ effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
     unit = *nbGetMainProcessData();
     bits = effBTLSkillGetTargetBit();
     count = 0;
-    slot = work->unk010;
+    slot = work->delay;
     for (i = 0; i < 32; i++, unit++) {
         if (unit->flags & 1) {
             if (bits & (1 << i)) {
@@ -2849,10 +2866,10 @@ effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
     for (i = 0; i < swaps; i++) {
         u32 a = dds3GetRandIntA(NULL, count);
         u32 b = dds3GetRandIntA(NULL, count);
-        u8 held = work->unk010[a];
+        u8 held = work->delay[a];
 
-        work->unk010[a] = work->unk010[b];
-        work->unk010[b] = held;
+        work->delay[a] = work->delay[b];
+        work->delay[b] = held;
     }
     return work;
 }
@@ -2896,7 +2913,76 @@ void effPCPDANTE_Damage_Delete(effPCPDANTE_Damage_tag *hData)
     sdfChipFreeDirect(hData);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Run);
+extern void nbSetUnitMotion(effPCPBossUnit_t *form, s32 motion, s32 mode, f32 rate);
+extern f32 effBTLPartGetScalePtr(effPCPBossUnit_t *form);
+
+void effPCPDANTE_Damage_Run(effPCPDANTE_Damage_tag *work)
+{
+    effPCPBossPlace_t place;
+    /* Scan state precedes timing snapshots for the native spill order;
+       see docs/levers/scalar-spills.md. */
+    u32 i;
+    u32 targetBits;
+    u32 slot = 0;
+    s32 total = work->param.total;
+    s32 fadeIn = work->param.fadeIn;
+    s32 fadeOut = work->param.fadeOut;
+    effPCPBossUnit_t *unit = *nbGetMainProcessData();
+    targetBits = effBTLSkillGetTargetBit();
+
+    for (i = 0; i < 0x20; i++, unit++) {
+        if ((unit->flags & 1) != 0 && (targetBits & ((u32)1 << i)) != 0) {
+            f32 scale;
+
+            place.payload[0] = 0.0f;
+            place.payload[1] = 0.0f;
+            place.payload[2] = 0.0f;
+            place.payload[3] = 0.0f;
+            effBTLModelGetSphereCenter(unit);
+            SDF_VU0_STOREVECTOR(place.payload);
+            SDF_VU0_COPYVECTOR(&place.payload[4], &unit->rotation);
+            place.payload[8] = unit->radius * unit->scale;
+            place.payload[9] = unit->height * unit->scale;
+            scale = effBTLPartGetScalePtr(unit);
+            place.payload[10] = scale;
+
+            if (work->delay[slot] != 0) {
+                work->delay[slot] = work->delay[slot] - 1;
+                if (work->delay[slot] == 0) {
+                    nbSetUnitMotion(unit, 1, 0, 1.0f);
+                    place.color = 0x80808080;
+                    work->cuts[slot] = effEveBEDCutCreate(work->bed, 2, &place);
+                    work->counters[slot] = 0;
+                }
+            }
+            if (work->cuts[slot] != NULL) {
+                s32 frame = work->counters[slot];
+                f32 alpha;
+
+                if (frame < total) {
+                    if (frame < fadeIn && fadeIn != 0) {
+                        alpha = (f32)frame / (f32)fadeIn;
+                    } else {
+                        s32 remaining = total - frame;
+
+                        if (remaining <= fadeOut && fadeOut != 0) {
+                            alpha = (f32)remaining / (f32)fadeOut;
+                        } else {
+                            alpha = 1.0f;
+                        }
+                    }
+                    place.color = effColorBlend(work->color & 0xFFFFFF, work->color, alpha);
+                    effEveBEDCutDraw(work->cuts[slot]);
+                    work->counters[slot] = work->counters[slot] + 1;
+                } else {
+                    effEveBEDCutDelete(work->cuts[slot]);
+                    work->cuts[slot] = NULL;
+                }
+            }
+            slot++;
+        }
+    }
+}
 
 void effPCPDANTE_Damage_SetColor(effPCPDANTE_Damage_tag *hData, u32 abgr)
 {

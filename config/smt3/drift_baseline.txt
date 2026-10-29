@@ -350,7 +350,6 @@ member effPCPBossMETATOBeam_t.unk10
 member effPCPBossOwner_t.unk00
 member effPCPBossThunderHead_t.unk00
 member effPCPBossThunderHead_t.unk28
-member effPCPBossUnit_t.unk00
 member effPCPBossUnit_t.unk7C
 member effPCPBossUnit_t.unk90
 member effPCPBossWork_t.unk04
@@ -369,12 +368,9 @@ member effPCPCrack_t.unk48
 member effPCPCrack_t.unk6C
 member effPCPCrack_t.unk89
 member effPCPCrack_t.unk9A
-member effPCPDANTE_Damage_Param_t.unk00
-member effPCPDANTE_Damage_tag.unk010
 member effPCPDANTE_Damage_tag.unk030
 member effPCPDANTE_Damage_tag.unk034
 member effPCPDANTE_Damage_tag.unk035
-member effPCPDANTE_Damage_tag.unk0BC
 member effPCPDANTE_Thunder_tag.unkC5
 member effPCPFlashPolyPipe_tag.unk34
 member effPCPFlashPolySpherePart_tag.unk1C
