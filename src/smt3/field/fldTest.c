@@ -285,6 +285,13 @@ extern void dds3EffectPartSetRotateMatrix(void *hEffPart, sdfMatrix4_t *pMatrix)
 
 extern void SetRotateMatrixY(f32 aAngle);
 
+typedef struct {
+    char name[8];
+    s16 ix;
+    s16 iz;
+    f32 angle;
+} fldDanteDoor_t;
+
 /* Dante's chase work block. Only the fields the chase code reaches are known. */
 typedef struct
 {
@@ -317,7 +324,7 @@ typedef struct
     f32 d_p_dir;
     f32 d_c_dir;
     s32 stance;
-    char *pDoor;
+    fldDanteDoor_t *pDoor;
     u16 mapIxOld;
     u16 mapIzOld;
     s32 old_status;
@@ -1417,7 +1424,7 @@ void fldRunDanteDoin(void)
         fldRun_Dante.nextframe--;
     }
     if (fldRun_Dante.nextframe == 0x4E && fldRun_Dante.pDoor != NULL) {
-        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x11, fldRun_Dante.pDoor);
+        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x11, fldRun_Dante.pDoor->name);
         fldFindDoorEvent(basic[1]);
     }
     if (fldRun_Dante.nextframe >= 0x15) {
@@ -2653,7 +2660,146 @@ s32 fldRunEncountChk(void)
 
 INCLUDE_RODATA(const s32, "field/fldTest", D_005313E0);
 
+#ifdef NON_MATCHING
+extern fldDanteDoor_t D_002FBF00, D_002FBF10, D_002FBF20;
+extern fldDanteDoor_t D_002FBF40, D_002FBF50, D_002FBF60;
+extern char D_0054EAE0[];
+extern s32 fldGetRestoreMode(void);
+
+void fldRunDanteStanceSet(s32 stance)
+{
+    sdfVector4_t position;
+    s32 restore;
+    s32 mode;
+
+    memset(&position, 0, sizeof(position));
+    position.w = 1.0f;
+    printf("DanteStanceSet( %d )\n", stance);
+    fldRun_Dante.flag = 0x40;
+    fldRun_Dante.stance = stance;
+
+    switch (stance) {
+    case 1:
+    case 4:
+    case 5:
+    case 7:
+    case 104:
+        dds3GetPosPoseSet(D_0054EAF0);
+        SDF_VU0_STOREVECTOR(&position);
+        fldRun_Dante.x = position.x;
+        fldRun_Dante.z = position.z;
+        FroFtoI(position.x, position.z, (u16 *)&fldRun_Dante.ix, (u16 *)&fldRun_Dante.iz);
+        if (stance == 5) {
+            FroFtoI(fldGlobalBase.x, fldGlobalBase.z, &fldRunDanteStartX[0], &fldRunDanteStartX[1]);
+        }
+        mode = stance == 1 || stance == 5 ? 6 : stance == 7 ? 5 : 1;
+        fldRunAiCng(mode);
+        fldRunDanteFacePlayer();
+        fldRunDanteSetModel();
+        break;
+    case 2:
+        fldRunDanteFacePlayer();
+        printf("fldGetRestoreMode:%d  old_area:%d\n", 0, fldGlobalBase.previousFloor + 1);
+        if (fldGlobalBase.previousFloor == 4 && fldRun_Dante.old_status != 1) {
+            fldRun_Dante.ix = fldRun_Dante.mapIxOld;
+            fldRun_Dante.iz = fldRun_Dante.mapIzOld;
+            fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
+            fldRunAiCng(6);
+            fldRunDanteSetModel();
+            printf(D_0054EAE0);
+            break;
+        }
+        if (evtBitCheck(0x7B1) && evtBitCheck(0x7B2)) {
+            goto special_door;
+        }
+        if (fldGlobalBase.previousFloor == 3 || !(fldGlobalBase.z < -4000.0f)) {
+            fldRun_Dante.pDoor = &D_002FBF20;
+        } else {
+            fldRun_Dante.pDoor = &D_002FBF10;
+        }
+        goto door_position;
+    case 3:
+        restore = fldGetRestoreMode();
+        printf("fldGetRestoreMode:%d  old_area:%d\n", restore, fldGlobalBase.previousFloor + 1);
+        fldRunDanteFacePlayer();
+        if (restore == 1) {
+            fldRunAiCng(2);
+            fldRunDanteSetModel();
+            break;
+        }
+        fldRun_Dante.pDoor = fldGlobalBase.z < -4000.0f ? &D_002FBF40 : &D_002FBF50;
+        goto door_position;
+    case 6:
+        restore = fldGetRestoreMode();
+        fldRunDanteFacePlayer();
+        printf("fldGetRestoreMode:%d  old_area:%d\n", restore, fldGlobalBase.previousFloor + 1);
+        if (restore == 1) {
+            fldRunAiCng(2);
+            fldRunDanteSetModel();
+            break;
+        }
+        fldRun_Dante.pDoor = &D_002FBF60;
+    door_position:
+        if (fldRun_Dante.pDoor != NULL) {
+            fldRun_Dante.ix = fldRun_Dante.pDoor->ix;
+            fldRun_Dante.angleToPlayer = fldRun_Dante.pDoor->angle;
+            fldRun_Dante.iz = fldRun_Dante.pDoor->iz;
+        }
+        fldRun_Dante.turn = 180.0f - fldRun_Dante.angleToPlayer;
+        fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
+        fldRunAiCng(2);
+        fldRunDanteSetModel();
+        break;
+    case 9:
+        if (fldGlobalBase.previousFloor == 7 && fldRun_Dante.old_status != 1) {
+            fldRun_Dante.ix = fldRun_Dante.mapIxOld;
+            fldRun_Dante.iz = fldRun_Dante.mapIzOld;
+            fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
+            fldRunAiCng(6);
+        } else {
+            dds3GetPosPoseSet(D_0054EAF0);
+            SDF_VU0_STOREVECTOR(&position);
+            fldRun_Dante.z = position.z;
+            fldRun_Dante.x = position.x;
+            FroFtoI(position.x, position.z, (u16 *)&fldRun_Dante.ix, (u16 *)&fldRun_Dante.iz);
+            fldRun_Dante.turn = 0.0f;
+            fldRun_Dante.angleToPlayer = 180.0f;
+            fldRunAiCng(1);
+        }
+        fldRunDanteSetModel();
+        break;
+    case 10:
+    special_door:
+        fldRun_Dante.angleToPlayer = D_002FBF00.angle;
+        fldRun_Dante.ix = D_002FBF00.ix;
+        fldRun_Dante.iz = D_002FBF00.iz;
+        fldRun_Dante.turn = 180.0f - D_002FBF00.angle;
+        fldRun_Dante.pDoor = NULL;
+        fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
+        fldRun_Dante.flag |= 0x20;
+        fldRunAiCng(1);
+        fldRunDanteSetModel();
+        fldRun_Dante.stance = 9;
+        break;
+    case 11:
+    case 12:
+        fldRun_Dante.pDoor = &D_002FBF20;
+        fldRun_Dante.ix = D_002FBF20.ix;
+        fldRun_Dante.iz = D_002FBF20.iz;
+        fldRun_Dante.turn = 180.0f - D_002FBF20.angle;
+        fldRun_Dante.angleToPlayer = D_002FBF20.angle;
+        fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
+        fldRunAiCng(2);
+        if (stance == 11) {
+            evtBitOff(0xAF4);
+        }
+        fldRunDanteSetModel();
+        break;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteStanceSet);
+#endif
 INCLUDE_SDATA(const s32, "field/fldTest", gFldElvFloorNow);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldElvFloorFrom);
