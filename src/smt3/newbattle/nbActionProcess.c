@@ -1170,7 +1170,117 @@ INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetDamagePacket);
 void SetAction_NON(void) {
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_NON);
+extern s32 datGetItemSkillNo(s32 itemid);
+extern u32 nbGetBadStat(s32 formindex);
+extern u32 dds3DebugSign;
+extern s32 CheckSenseiNego(nbActionProcessData_t *a);
+
+s32 CheckAction_NON(nbActionProcessData_t *a)
+{
+    u32 badStat;
+    u16 partyFlag;
+
+    a->data->negoresult = 0;
+    a->data->negopformindex = 0;
+    a->data->negoeformindex = 0;
+    a->data->stat &= ~0x4000u;
+    a->massuruid = datGetItemSkillNo(1);
+    a->form->motendtype = 0;
+    a->party->flag &= ~0x100u;
+
+    if ((a->party->flag & 8) != 0) {
+        SetNextActionSeq(a, 0xF);
+        return 1;
+    }
+
+    switch (a->type) {
+    case 1:
+        a->work->nowcommand = 4;
+        a->work->nowindex = 0x182;
+        a->negotype = 4;
+        SetTargetParty(a, a->target);
+        a->select = nbGetSelectBit(a->data);
+        SetNextActionSeq(a, 7);
+        return 1;
+    case 2:
+        a->work->nowcommand = 4;
+        a->work->nowindex = a->data->prevcommind;
+        a->negotype = 3;
+        SetTargetParty(a, a->target);
+        a->select = nbGetSelectBit(a->data);
+        SetNextActionSeq(a, 7);
+        return 1;
+    case 3:
+        a->work->nowcommand = 4;
+        a->work->nowindex = 0x182;
+        a->negotype = 5;
+        SetTargetParty(a, a->target);
+        a->select = nbGetSelectBit(a->data);
+        SetNextActionSeq(a, 7);
+        return 1;
+    case 4:
+        a->work->nowcommand = 1;
+        a->work->nowindex = a->adata;
+        SetTargetParty(a, a->target);
+        a->select = nbGetSelectBit(a->data);
+        a->stat |= 4;
+        SetNextActionSeq(a, 7);
+        return 1;
+    case 5:
+        SetNextActionSeq(a, 0x13);
+        return 1;
+    default:
+        nbSetHojoAddCounter(a->form->formindex, 17, 1, 0);
+        nbSetHojoAddCounter(a->form->formindex, 18, 1, 0);
+        badStat = nbGetBadStat(a->form->formindex);
+        switch (badStat) {
+        case 1:
+        case 2:
+        case 4:
+        case 0x10:
+        case 0x80:
+        case 0x400:
+            SetNextActionSeq(a, 4);
+            return 1;
+        }
+
+        partyFlag = a->party->flag;
+        if ((partyFlag & 2) != 0) {
+            if (CheckMukanNego(a) != 0) {
+                a->work->nowcommand = 4;
+                a->work->nowindex = 0x182;
+                a->negotype = 1;
+                SetTargetPlayer(a);
+                a->select = nbGetSelectBit(a->data);
+                SetNextActionSeq(a, 7);
+                return 1;
+            }
+            if (CheckSenseiNego(a) != 0) {
+                a->work->nowcommand = 4;
+                a->work->nowindex = 0x182;
+                a->negotype = 2;
+                SetTargetPlayer(a);
+                a->select = nbGetSelectBit(a->data);
+                SetNextActionSeq(a, 7);
+                return 1;
+            }
+            if (dds3DebugSign == 1 && (a->data->stat & 0x10000000) != 0) {
+                SetNextActionSeq(a, 1);
+            } else if (D_003989E0[a->work->id].aiscript != 0) {
+                SetNextActionSeq(a, 3);
+            } else {
+                SetNextActionSeq(a, 2);
+            }
+            return 1;
+        }
+        if ((partyFlag & 4) != 0) {
+            SetNextActionSeq(a, 0x15);
+            return 1;
+        }
+        SetNextActionSeq(a, 1);
+        return 1;
+    }
+}
 
 void SetAction_COMM(nbActionProcessData_t *a)
 {

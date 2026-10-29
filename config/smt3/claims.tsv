@@ -623,3 +623,4 @@ src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	0 matches / debug field r
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 guarded draft / 584 B	hearts cursor input and callback-sensitive snapshot; 143 of 146 words match, default-input shared tail remains unresolved
 src/smt3/effect/effPCPBoss.c	redthing1	done	2026-10-28	1 fn / 608 B	BED matrix-to-quaternion conversion with native signs, zero fallback and explicit VU output memory operand; owner 150 match, 0 differ
 src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	1 fn / 740 B	block database rendering with recovered transform/outline records, native double translation and qualified callback-local reuse; owner 58 match, 0 differ
+src/smt3/newbattle/nbActionProcess.c	redthing1	done	2026-10-28	1 fn / 928 B	normal action dispatch with native negotiation resets, party and status gates, callback reloads and AI script selection; owner 76 match, 0 differ
