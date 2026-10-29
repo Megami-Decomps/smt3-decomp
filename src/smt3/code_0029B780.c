@@ -355,10 +355,10 @@ void dds3DrawConfigItem(s32 x, s32 y, s32 z, s32 ot)
 
 extern s32 fclGetPanelAnimTarget(fclPanelAnim_t *anim);
 
-#ifdef NON_MATCHING
 void dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
 {
     s32 colors[4];
+    s32 alpha = 0x80;
     s32 target = fclGetPanelAnimTarget(&((dds3ConfigWork_t *)GBWK)->panels[0]);
 
     fclDrawPanelSprite2(0x44, ot);
@@ -366,16 +366,14 @@ void dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
     colors[1] = 0;
     colors[2] = 0x15043A40;
     colors[3] = 0;
-    cmpDrawBoxGDefault(x - target, y + 0x2B0, z, 0x9E, 0x121, colors, ot);
+    cmpDrawBoxGDefault((s32)((u32)x - (u32)target), (s32)((u32)y + 0x2B0u), z, 0x9E, 0x121, colors, ot);
+    target = (s32)((u32)target + 0x1120u);
     colors[0] = 0;
-    colors[1] = 0x80;
+    colors[1] = alpha;
     colors[2] = 0;
-    colors[3] = 0x80;
-    cmpDrawBoxGDefault(x + target + 0x1120, y + 0x2B0, z, 0xEE, 0x121, colors, ot);
+    colors[3] = alpha;
+    cmpDrawBoxGDefault((s32)((u32)x + (u32)target), (s32)((u32)y + 0x2B0u), z, 0xEE, 0x121, colors, ot);
 }
-#else
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigSlider);
-#endif
 
 extern const s32 D_00548888[3][4];
 extern void *memcpy(void *destination, const void *source, u32 size);
