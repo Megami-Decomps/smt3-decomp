@@ -6,7 +6,6 @@
 #include "model.h"
 #include "event.h"
 #include "motion.h"
-#include "field.h"
 
 extern char D_00543FB8[]; /* "nego result = %d\n" */
 
