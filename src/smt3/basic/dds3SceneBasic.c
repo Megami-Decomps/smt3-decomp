@@ -363,6 +363,7 @@ s32 dds3SceneBasicStartScript(dds3Basic_t *scene, char *procname)
 {
     void *script = ((dds3SceneBasic_t *)scene->workdata)->pScrFileData;
     s32 procedure;
+    dds3ProcessID_t *started;
 
     if (script == NULL) {
         printf("script data invalid!!\n");
@@ -380,8 +381,14 @@ s32 dds3SceneBasicStartScript(dds3Basic_t *scene, char *procname)
     if (dds3SearchProcessName(procname) != NULL) {
         return 0;
     }
-    scrStartScript2(0x3EA, script, procedure);
-    script = NULL;
+    /* The started process, which retail returns in v0 (callers keep it:
+     * fldEveHit_ScriptStart's gEvnRngPid, which ACT_WIN_DSP finds its
+     * trigger by). Retail's call is no tail call: inside a one-pass block,
+     * ee-gcc tries none (calls.c, stmt_loop_nest_empty). */
+    do {
+        started = scrStartScript2(0x3EA, script, procedure);
+    } while (0);
+    return (s32)started;
 }
 
 void dds3SceneBasicEndScript(dds3Basic_t *scene, const char *procname)
