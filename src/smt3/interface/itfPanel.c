@@ -11,33 +11,32 @@ typedef union
         s32 blue;
         s32 alpha;
     } rgba;
-} sdfIVector4_t;
-typedef sdfIVector4_t itfDrawColor_t;
+} itfDrawColor_t;
 typedef sdfIVector2_t itfDrawVertex_t;
 typedef struct
 {
     sdfIVector2_t vertices[8];
-    sdfIVector4_t colors[2];
+    itfDrawColor_t colors[2];
 } itfPanelNormalData_t;
 typedef struct
 {
     sdfIVector2_t vertices[40];
-    sdfIVector4_t colors[8];
+    itfDrawColor_t colors[8];
 } itfPanelMesWinData_t;
 typedef struct
 {
     sdfIVector2_t vertices[32];
-    sdfIVector4_t colors[6];
+    itfDrawColor_t colors[6];
 } itfPanelSelWinData_t;
 typedef struct
 {
     sdfIVector2_t vertices[4];
-    sdfIVector4_t colors[4];
+    itfDrawColor_t colors[4];
 } itfPanelPlainData_t;
 typedef struct
 {
     sdfIVector2_t vertices[6];
-    sdfIVector4_t colors[2];
+    itfDrawColor_t colors[2];
 } itfPanelLeftFadeData_t;
 /* Kind 8 owns a distinct 0x64-byte buffer, independently selected by the
  * native allocation, layout-initializer and color-initializer tables. */
@@ -557,7 +556,7 @@ void CreateColorFacility(itfPanelFacilityData_t *base) {
 void DrawNormal(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfPanelNormalData_t *data = (itfPanelNormalData_t *)handle->pwork;
     sdfIVector2_t *drawBuffer = data->vertices;
-    sdfIVector4_t *colors = data->colors;
+    itfDrawColor_t *colors = data->colors;
     s32 quadIndex;
 
     colors[1].rgba.alpha = handle->alpha;
@@ -571,7 +570,7 @@ void DrawNormal(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 void DrawMesWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfPanelMesWinData_t *data = (itfPanelMesWinData_t *)handle->pwork;
     sdfIVector2_t *drawBuffer = data->vertices;
-    sdfIVector4_t *colors = data->colors + 1;
+    itfDrawColor_t *colors = data->colors + 1;
     s32 alpha = handle->alpha;
     s32 rowIndex;
 
@@ -592,7 +591,7 @@ void DrawMesWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 void DrawSelWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfPanelSelWinData_t *data = (itfPanelSelWinData_t *)handle->pwork;
     sdfIVector2_t *drawBuffer = data->vertices;
-    sdfIVector4_t *colors = data->colors + 1;
+    itfDrawColor_t *colors = data->colors + 1;
     s32 alpha = handle->alpha;
     s32 rowIndex;
 
@@ -612,7 +611,7 @@ void DrawPlain(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     sdfIVector2_t vertices[12];
     itfPanelPlainData_t *data = (itfPanelPlainData_t *)handle->pwork;
     sdfIVector2_t *buf = data->vertices;
-    sdfIVector4_t *colors = data->colors;
+    itfDrawColor_t *colors = data->colors;
     sdfIVector2_t *input = data->vertices;
     s32 i;
 
@@ -641,7 +640,7 @@ void DrawPlain(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 void DrawPera1(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfPanelPlainData_t *data = (itfPanelPlainData_t *)handle->pwork;
     sdfIVector2_t *drawBuffer = data->vertices;
-    sdfIVector4_t *colors = data->colors;
+    itfDrawColor_t *colors = data->colors;
 
     colors[0].rgba.alpha = handle->alpha;
     itfMiscDrawRectanglePrim(drawBuffer, colors, D_0054F4A0, D_0054F4A8, handle->z, pdrawtag);
@@ -651,7 +650,7 @@ void DrawPera1(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 void DrawLeftFade(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfPanelLeftFadeData_t *data = (itfPanelLeftFadeData_t *)handle->pwork;
     sdfIVector2_t *drawBuffer = data->vertices;
-    sdfIVector4_t *colors = data->colors;
+    itfDrawColor_t *colors = data->colors;
 
     colors[1].rgba.alpha = handle->alpha;
     itfMiscDrawAlphaPrim(pdrawtag, 2, 0);

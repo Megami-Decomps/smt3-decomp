@@ -873,10 +873,6 @@ void DestPhaseRegistTop(fclEncyc_instance_tag *pinst)
     ReleaseWork(pinst);
 }
 
-typedef struct {
-    s32 pm[4];
-} sdfIVector4_t;
-
 typedef struct fclEncycConfirmDrawWork_t {
     fclEncyc_registconfirmwork_tag phase;
     datUnitWork_t units[2];

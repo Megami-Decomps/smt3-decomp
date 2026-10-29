@@ -29,11 +29,6 @@ typedef struct
     /* 0x036C */ s32 pwork;
 } fclEncyc_instance_tag;
 
-typedef struct
-{
-    s32 pm[4];
-} sdfIVector4_t;
-
 /* Native entries embed four 16-byte rectangles and two texture handles. */
 typedef struct
 {
