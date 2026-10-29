@@ -604,7 +604,624 @@ void drawSceneBasicList(void) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "draw3d.h"
+
+typedef struct {
+    s32 vertex[3];
+} fldSdwFace_t;
+
+typedef struct {
+    sdfVector3_t vertex[3];
+} fldSdwTriangle_t;
+
+typedef struct {
+    u8 count;
+    s8 reverse;
+} fldSdwEdge_t;
+
+typedef union {
+    u64 pairs[8];
+    u32 indices[16];
+} fldSdwIndices_t;
+
+extern sdfVector3_t D_002FA950[], D_002FACC8[], D_002FADB8[], D_002FAED0[];
+extern sdfVector3_t D_002FB008[], D_002FB0B0[], D_002FB1C8[], D_002FB300[];
+extern sdfVector3_t D_002FB420[], D_002FB528[], D_002FB618[], D_002FB738[];
+extern sdfVector3_t D_002FB840[], D_002FB930[], D_002FBAC0[], D_002FBBC0[];
+extern fldSdwFace_t D_002FAA88[], D_002FAD28[], D_002FAE28[], D_002FAF48[];
+extern fldSdwFace_t D_002FB050[], D_002FB120[], D_002FB240[], D_002FB378[];
+extern fldSdwFace_t D_002FB498[], D_002FB588[], D_002FB690[], D_002FB7B0[];
+extern fldSdwFace_t D_002FB8A0[], D_002FB9D0[], D_002FBB30[], D_002FBC50[];
+extern volatile fldSdwIndices_t fldSdwTriIndices, fldSdwQuadIndices;
+extern fldSdwTriangle_t D_005574E0[50];
+extern fldSdwEdge_t fldShadowVertexTable[26][26];
+extern sdfVector4_t fldShadowTable[26][26], D_0055AB70[26][26];
+extern sdfVector4_t fldSdwDrawVec, aViewEye, aViewTarget;
+extern f32 D_002F5A80[], D_002FCA60[];
+extern f32 D_0054C1E8, D_0054C1EC, D_0054C1F0, D_0054C1F4, D_0054C1F8, D_0054C1FC;
+extern s32 fldShadowWork, D_0054EA8C, D_0054EA90;
+extern sdfMat_t *fldDrawEnv;
+extern sdfGrOt_t sdfGrOtTable[];
+extern s32 rsetFrameMaskOtOffset;
+extern void *memset(void *destination, int value, unsigned int size);
+extern dds3Basic_t *dds3GetActiveScene(void);
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serialID, s32 type);
+extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
+extern void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY,
+                               f32 *normalZ, f32 *planeConstant);
+extern s32 sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *tag, s32 (*allocator)(s32));
+extern void sdf3DPrimLinkMat(sdfDrawTag_t *tag, sdfMat_t *material, s32 (*allocator)(s32));
+extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *parameters);
+extern void rsetFrameMaskRgbOn(void);
+extern void rsetFrameMaskRgbOff(void);
+extern void fldPoint3To2_A(void);
+extern void fldPoint3To2_B(f32 *x, f32 *y, f32 px, f32 py, f32 pz);
+extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b, u32 a);
+extern void aDrawBoxF_Direct(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b, u32 a);
+
+static inline s32 fldSdwShape(s32 part, s32 area, sdfVector3_t **vertices,
+                              fldSdwFace_t **faces, s32 *faceCount, s32 *edgeCount)
+{
+    switch (part) {
+    case 0:
+        *vertices = D_002FBBC0;
+        *faces = D_002FBC50;
+        *faceCount = 20;
+        *edgeCount = 12;
+        break;
+    case 1:
+        *vertices = D_002FBAC0;
+        *faces = D_002FBB30;
+        *faceCount = 12;
+        *edgeCount = 9;
+        break;
+    case 2:
+        *vertices = D_002FB930;
+        *faces = D_002FB9D0;
+        *faceCount = 20;
+        *edgeCount = 13;
+        break;
+    case 3:
+        if (area >= 500) {
+            return 0;
+        }
+        *vertices = D_002FACC8;
+        *faces = D_002FAD28;
+        *faceCount = 12;
+        *edgeCount = 8;
+        break;
+    case 4:
+        *vertices = D_002FA950;
+        *faces = D_002FAA88;
+        *faceCount = 48;
+        *edgeCount = 26;
+        break;
+    case 5:
+        *vertices = D_002FB0B0;
+        *faces = D_002FB120;
+        *faceCount = 14;
+        *edgeCount = 9;
+        break;
+    case 6:
+        *vertices = D_002FB1C8;
+        *faces = D_002FB240;
+        *faceCount = 16;
+        *edgeCount = 10;
+        break;
+    case 7:
+    case 10:
+        *vertices = D_002FB008;
+        *faces = D_002FB050;
+        *faceCount = 8;
+        *edgeCount = 6;
+        break;
+    case 8:
+        *vertices = D_002FADB8;
+        *faces = D_002FAE28;
+        *faceCount = 14;
+        *edgeCount = 9;
+        break;
+    case 9:
+        *vertices = D_002FAED0;
+        *faces = D_002FAF48;
+        *faceCount = 16;
+        *edgeCount = 10;
+        break;
+    case 11:
+        *vertices = D_002FB618;
+        *faces = D_002FB690;
+        *faceCount = 14;
+        *edgeCount = 10;
+        break;
+    case 12:
+        *vertices = D_002FB738;
+        *faces = D_002FB7B0;
+        *faceCount = 12;
+        *edgeCount = 10;
+        break;
+    case 13:
+        if (area >= 500) {
+            return 0;
+        }
+        *vertices = D_002FB840;
+        *faces = D_002FB8A0;
+        *faceCount = 12;
+        *edgeCount = 8;
+        break;
+    case 14:
+        *vertices = D_002FB300;
+        *faces = D_002FB378;
+        *faceCount = 14;
+        *edgeCount = 10;
+        break;
+    case 15:
+        *vertices = D_002FB420;
+        *faces = D_002FB498;
+        *faceCount = 12;
+        *edgeCount = 10;
+        break;
+    case 16:
+        if (area >= 500) {
+            return 0;
+        }
+        *vertices = D_002FB528;
+        *faces = D_002FB588;
+        *faceCount = 12;
+        *edgeCount = 8;
+        break;
+    default:
+        return 0;
+    }
+    return 1;
+}
+
+static inline void fldSdwRecordEdge(s32 first, s32 second, sdfVector4_t *a, sdfVector4_t *b)
+{
+    s32 low, high, reverse;
+    fldSdwEdge_t *edge;
+    if (first >= second) {
+        low = second;
+        high = first;
+        reverse = 1;
+    } else {
+        low = first;
+        high = second;
+        reverse = 0;
+    }
+    edge = &fldShadowVertexTable[low][high];
+    edge->count++;
+    edge->reverse = reverse;
+    if (reverse == 0) {
+        SDF_VU0_COPYVECTOR(&fldShadowTable[low][high], a);
+        SDF_VU0_COPYVECTOR(&D_0055AB70[low][high], b);
+    } else {
+        SDF_VU0_COPYVECTOR(&fldShadowTable[low][high], b);
+        SDF_VU0_COPYVECTOR(&D_0055AB70[low][high], a);
+    }
+}
+
+void fldSdwDraw(dds3Basic_t *basic)
+{
+    sdfVector4_t v0 __attribute__((aligned(16)));
+    sdfVector4_t v1 __attribute__((aligned(16)));
+    sdfVector4_t v2 __attribute__((aligned(16)));
+    sdfVector4_t shadowDirection __attribute__((aligned(16)));
+    sdfVector4_t extrusion[17] __attribute__((aligned(16)));
+    sdfVector4_t mark __attribute__((aligned(16)));
+    sdfVector4_t quad[4] __attribute__((aligned(16)));
+    sdfVector4_t view __attribute__((aligned(16)));
+    sdfVector4_t triangle[3] __attribute__((aligned(16)));
+    sdfVector4_t normal __attribute__((aligned(16)));
+    sdfVector4_t quadVertices[64] __attribute__((aligned(16)));
+    sdfVector4_t triVertices[48] __attribute__((aligned(16)));
+    fldSdwIndices_t triIndices __attribute__((aligned(16)));
+    fldSdwIndices_t quadIndices __attribute__((aligned(16)));
+    dds3ObjectBaseControlWorkData_t *control;
+    mdlObj_t *model;
+    sdfModelRootNode_t *root;
+    f32 length = 300.0f;
+    s32 part, i, j;
+
+    memset(&v0, 0, 16);
+    v0.w = 1.0f;
+    memset(&v1, 0, 16);
+    v1.w = 1.0f;
+    memset(&v2, 0, 16);
+    v2.w = 1.0f;
+    memset(&mark, 0, 16);
+    mark.w = 1.0f;
+    memset(&quad[0], 0, 16);
+    quad[0].w = 1.0f;
+    memset(&quad[1], 0, 16);
+    quad[1].w = 1.0f;
+    memset(&quad[2], 0, 16);
+    quad[2].w = 1.0f;
+    memset(&quad[3], 0, 16);
+    quad[3].w = 1.0f;
+    memset(&view, 0, 16);
+    view.w = 1.0f;
+    for (i = 0; i < 8; i++) {
+        triIndices.pairs[i] = fldSdwTriIndices.pairs[i];
+    }
+    for (i = 0; i < 8; i++) {
+        quadIndices.pairs[i] = fldSdwQuadIndices.pairs[i];
+    }
+    control = dds3GetBaseControlWorkData(basic);
+    model = dds3ObjectBaseGetModelHandle(basic);
+    root = model->inner;
+    v0.w = 1.0f;
+    v1.w = 1.0f;
+    v0.x = v0.y = v0.z = 0.0f;
+    v1.x = v1.y = v1.z = 0.0f;
+    rsetOtOfs(0x25);
+    if (fldGlobalBase.area < 500) {
+        dds3UnitObjectBasicWorkData_t *work = basic->workdata;
+        if (work->EL_serialID != -1) {
+            if (D_0054EA90 == 0) {
+                if (D_0054EA8C >= 21) {
+                    D_0054EA8C -= 2;
+                } else {
+                    D_0054EA90 = 1;
+                    D_0054EA8C = 8;
+                }
+            } else {
+                dds3Basic_t *light = dds3SearchSceneBasic(dds3GetActiveScene(), work->EL_serialID, 9);
+                evtUnit_t *unit = dds3GetUnitHandleObjectBasic(basic);
+                f32 distance;
+                if (sdfModelGetMarkPos(unit->owner->inner, 0) == 0) {
+                    fldSdwDrawVec.x = fldGlobalBase.x - light->poseset->pos.x;
+                    fldSdwDrawVec.z = fldGlobalBase.z - light->poseset->pos.z;
+                } else {
+                    SDF_VU0_STOREVECTOR(&mark);
+                    fldSdwDrawVec.x = mark.x - light->poseset->pos.x;
+                    fldSdwDrawVec.z = mark.z - light->poseset->pos.z;
+                }
+                distance = sdfSqrt(fldSdwDrawVec.x * fldSdwDrawVec.x + fldSdwDrawVec.z * fldSdwDrawVec.z);
+                if (distance < D_0054C1E8) {
+                    fldSdwDrawVec.z = D_0054C1EC;
+                    fldSdwDrawVec.y = 2.0f;
+                    fldSdwDrawVec.x = D_0054C1EC;
+                } else {
+                    fldSdwDrawVec.y = 1.0f;
+                    fldSdwDrawVec.z /= distance;
+                    fldSdwDrawVec.x /= distance;
+                }
+                if (D_0054EA8C < 48) {
+                    D_0054EA8C += 2;
+                }
+            }
+            length = 200.0f;
+        } else if (D_0054EA90 == 0) {
+            f32 *light = fldGlobalBase.area >= 200 ? D_002F5A80 : D_002FCA60;
+            f32 distance, extra;
+            s32 alpha;
+            fldSdwDrawVec.z = light[6];
+            fldSdwDrawVec.x = light[4];
+            fldSdwDrawVec.y = light[5];
+            distance = sdfSqrt(fldSdwDrawVec.x * fldSdwDrawVec.x + fldSdwDrawVec.z * fldSdwDrawVec.z);
+            if (distance < D_0054C1F0) {
+                fldSdwDrawVec.x = D_0054C1F4;
+                extra = D_0054C1F8;
+                fldSdwDrawVec.z = extra;
+                fldSdwDrawVec.y = 2.0f;
+            } else {
+                fldSdwDrawVec.y = 2.0f;
+                fldSdwDrawVec.z /= distance;
+                fldSdwDrawVec.x /= distance;
+                extra = D_0054C1FC;
+            }
+            fldSdwDrawVec.x += extra;
+            alpha = D_0054EA8C;
+            if (alpha >= 21) {
+                alpha -= 2;
+                D_0054EA8C = alpha;
+            }
+            if (alpha < 20) {
+                D_0054EA8C = alpha + 2;
+            }
+            length = 200.0f;
+        } else {
+            if (D_0054EA8C < 21) {
+                D_0054EA90 = 0;
+                D_0054EA8C = 6;
+            } else {
+                D_0054EA8C -= 4;
+            }
+            length = 200.0f;
+        }
+    } else {
+        evtUnit_t *unit = dds3GetUnitHandleObjectBasic(basic);
+        if (unit != NULL && (unit->flags & 0x40000)) {
+            fldSdwDrawVec.x = unit->vec10[0];
+            fldSdwDrawVec.y = 2.0f;
+            length = 200.0f;
+            fldSdwDrawVec.z = unit->vec10[2];
+        }
+    }
+    fldSdwDrawVec.w = 1.0f;
+    SDF_VU0_LOADVECTOR(&fldSdwDrawVec);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&fldSdwDrawVec);
+    shadowDirection.x = fldSdwDrawVec.x * length;
+    shadowDirection.y = fldSdwDrawVec.y * length;
+    shadowDirection.z = fldSdwDrawVec.z * length;
+    shadowDirection.w = 1.0f;
+    SDF_VU0_LOADVECTOR(&fldSdwDrawVec);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&fldSdwDrawVec);
+    for (part = 0; part < 17; part++) {
+        switch (part) {
+        case 2:
+            length = 230.0f;
+            break;
+        case 3:
+            length = 260.0f;
+            break;
+        case 4:
+            length = 290.0f;
+            break;
+        case 6:
+        case 9:
+            length = 150.0f;
+            break;
+        case 7:
+        case 10:
+            length = 80.0f;
+            break;
+        default:
+            length = 200.0f;
+            break;
+        }
+        if (fldGlobalBase.area == 38) {
+            length += 100.0f;
+        }
+        extrusion[part].x = fldSdwDrawVec.x * length;
+        extrusion[part].y = fldSdwDrawVec.y * length;
+        extrusion[part].z = fldSdwDrawVec.z * length;
+        extrusion[part].w = 1.0f;
+    }
+    view.w = 1.0f;
+    view.x = aViewTarget.x - aViewEye.x;
+    view.y = aViewTarget.y - aViewEye.y;
+    view.z = aViewTarget.z - aViewEye.z;
+    SDF_VU0_LOADVECTOR(&view);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&view);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    rsetAlpha(1);
+    aDrawBoxF(0, 0, 0x200, 0xE0, 0, 0, 0, 0);
+    for (part = 0; part < 17; part++) {
+        sdfVector3_t *vertices;
+        fldSdwFace_t *faces;
+        sdfModelNode_t *node;
+        s32 faceCount, edgeCount, face, pass;
+        f32 minX = 4096.0f, maxX = -4096.0f, minY = 4096.0f, maxY = -4096.0f;
+        fldShadowWork = 0;
+        for (i = 0; i < 50; i++) {
+            for (j = 0; j < 3; j++) {
+                D_005574E0[i].vertex[j].x = 0.0f;
+                D_005574E0[i].vertex[j].y = 0.0f;
+                D_005574E0[i].vertex[j].z = 0.0f;
+            }
+        }
+        if (control->modelParts[part] < 0) {
+            continue;
+        }
+        node = root->nodeList->items[control->modelParts[part]];
+        if (!fldSdwShape(part, fldGlobalBase.area, &vertices, &faces, &faceCount, &edgeCount)) {
+            continue;
+        }
+        for (i = 0; i < edgeCount; i++) {
+            for (j = 0; j < edgeCount; j++) {
+                fldShadowVertexTable[i][j].count = 0;
+            }
+        }
+        for (face = 0; face < faceCount; face++) {
+            fldSdwFace_t *indices = &faces[face];
+            f32 dot;
+            SDF_VU0_LOADMATRIX(&node->tm);
+            v0.x = vertices[indices->vertex[0]].x;
+            v0.y = vertices[indices->vertex[0]].y;
+            v0.z = vertices[indices->vertex[0]].z;
+            SDF_VU0_LOADVECTOR(&v0);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR(&v0);
+            v1.x = vertices[indices->vertex[1]].x;
+            v1.y = vertices[indices->vertex[1]].y;
+            v1.z = vertices[indices->vertex[1]].z;
+            SDF_VU0_LOADVECTOR(&v1);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR(&v1);
+            v2.x = vertices[indices->vertex[2]].x;
+            v2.y = vertices[indices->vertex[2]].y;
+            v2.z = vertices[indices->vertex[2]].z;
+            SDF_VU0_LOADVECTOR(&v2);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR(&v2);
+            triangle[0] = v0;
+            triangle[1] = v1;
+            triangle[2] = v2;
+            fldMakeEveHitPlanes(&triangle[0].x, &normal.x, &normal.y, &normal.z, &normal.w);
+            SDF_VU0_LOADVECTOR(&normal);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_LOADVECTOR_B(&fldSdwDrawVec);
+            SDF_VU0_INNERPRODUCT(dot);
+            if (dot < 0.0f) {
+                fldSdwRecordEdge(indices->vertex[0], indices->vertex[1], &v0, &v1);
+                fldSdwRecordEdge(indices->vertex[1], indices->vertex[2], &v1, &v2);
+                fldSdwRecordEdge(indices->vertex[2], indices->vertex[0], &v2, &v0);
+                D_005574E0[fldShadowWork].vertex[0].x = v0.x;
+                D_005574E0[fldShadowWork].vertex[0].y = v0.y;
+                D_005574E0[fldShadowWork].vertex[0].z = v0.z;
+                D_005574E0[fldShadowWork].vertex[1].x = v1.x;
+                D_005574E0[fldShadowWork].vertex[1].y = v1.y;
+                D_005574E0[fldShadowWork].vertex[1].z = v1.z;
+                D_005574E0[fldShadowWork].vertex[2].x = v2.x;
+                D_005574E0[fldShadowWork].vertex[2].y = v2.y;
+                D_005574E0[fldShadowWork].vertex[2].z = v2.z;
+                fldShadowWork++;
+            } else if (fldGlobalBase.area < 500 || part == 2 || part == 3 || part == 4 ||
+                       part == 7 || part == 10 || part == 11 || part == 12 || part == 13 ||
+                       part == 14 || part == 15 || part == 16) {
+                D_005574E0[fldShadowWork].vertex[0].x = v0.x + extrusion[part].x;
+                D_005574E0[fldShadowWork].vertex[0].y = v0.y + extrusion[part].y;
+                D_005574E0[fldShadowWork].vertex[0].z = v0.z + extrusion[part].z;
+                D_005574E0[fldShadowWork].vertex[1].x = v1.x + extrusion[part].x;
+                D_005574E0[fldShadowWork].vertex[1].y = v1.y + extrusion[part].y;
+                D_005574E0[fldShadowWork].vertex[1].z = v1.z + extrusion[part].z;
+                D_005574E0[fldShadowWork].vertex[2].x = v2.x + extrusion[part].x;
+                D_005574E0[fldShadowWork].vertex[2].y = v2.y + extrusion[part].y;
+                D_005574E0[fldShadowWork].vertex[2].z = v2.z + extrusion[part].z;
+                fldShadowWork++;
+            }
+        }
+        for (pass = 0; pass < 2; pass++) {
+            sdfDrawTag_t *quadTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+            sdfDrawTag_t *triTag;
+            sdf3DPrimPolyParm_t quadParams, triParams;
+            sdfGrOt_t *ot;
+            sdfDrawTagInit(quadTag);
+            sdf3DPrimLinkResetTm(quadTag, NULL);
+            sdf3DPrimLinkMat(quadTag, fldDrawEnv, NULL);
+            memset(&quadParams, 0, sizeof(quadParams));
+            quadParams.vertex = quadVertices;
+            quadParams.faceIndex = quadIndices.indices;
+            quadParams.faceCount = 0;
+            quadParams.pointCount = 0;
+            quadParams.color = pass == 0 ? 0x8080F080 : 0x408080F0;
+            triTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+            sdfDrawTagInit(triTag);
+            sdf3DPrimLinkResetTm(triTag, NULL);
+            sdf3DPrimLinkMat(triTag, fldDrawEnv, NULL);
+            memset(&triParams, 0, sizeof(triParams));
+            triParams.vertex = triVertices;
+            triParams.faceIndex = triIndices.indices;
+            triParams.faceCount = 0;
+            triParams.pointCount = 0;
+            triParams.color = pass == 0 ? 0x8080F080 : 0x408080F0;
+            if (pass == 0) {
+                rsetFrameMaskRgbOn();
+            }
+            rsetTest(1, 0, 0x80, 1, 0, 0, 1, 3);
+            for (i = 0; i < fldShadowWork; i++) {
+                fldSdwTriangle_t *faceData = &D_005574E0[i];
+                v0.x = faceData->vertex[0].x;
+                v0.y = faceData->vertex[0].y;
+                v0.z = faceData->vertex[0].z;
+                v1.x = faceData->vertex[1].x;
+                v1.y = faceData->vertex[1].y;
+                v1.z = faceData->vertex[1].z;
+                v2.x = faceData->vertex[2].x;
+                v2.y = faceData->vertex[2].y;
+                v2.z = faceData->vertex[2].z;
+                v0.w = v1.w = v2.w = 1.0f;
+                if (pass == 0) {
+                    SDF_VU0_COPYVECTOR(&triVertices[triParams.pointCount], &v0);
+                    SDF_VU0_COPYVECTOR(&triVertices[triParams.pointCount + 1], &v1);
+                    SDF_VU0_COPYVECTOR(&triVertices[triParams.pointCount + 2], &v2);
+                } else {
+                    SDF_VU0_COPYVECTOR(&triVertices[triParams.pointCount], &v2);
+                    SDF_VU0_COPYVECTOR(&triVertices[triParams.pointCount + 1], &v1);
+                    SDF_VU0_COPYVECTOR(&triVertices[triParams.pointCount + 2], &v0);
+                }
+                triParams.pointCount += 3;
+                triParams.faceCount++;
+                if (triParams.faceCount >= 16) {
+                    sdfDrawTagLink(triTag, (u32)sdf3DPrimMakePoly(&triParams));
+                    triParams.faceCount = 0;
+                    triParams.pointCount = 0;
+                }
+            }
+            if (triParams.faceCount != 0) {
+                sdfDrawTagLink(triTag, (u32)sdf3DPrimMakePoly(&triParams));
+                triParams.faceCount = 0;
+                triParams.pointCount = 0;
+            }
+            ot = &sdfGrOtTable[rsetFrameMaskOtOffset];
+            ot->regFunc(ot, triTag);
+            if (pass == 0) {
+                fldPoint3To2_A();
+            }
+            for (i = 0; i < edgeCount; i++) {
+                for (j = 0; j < edgeCount; j++) {
+                    fldSdwEdge_t *edge = &fldShadowVertexTable[i][j];
+                    if (edge->count == 1) {
+                        SDF_VU0_COPYVECTOR(&v0, &fldShadowTable[i][j]);
+                        SDF_VU0_COPYVECTOR(&v1, &D_0055AB70[i][j]);
+                        SDF_VU0_COPYVECTOR(&quad[0], &v0);
+                        SDF_VU0_COPYVECTOR(&quad[1], &v1);
+                        quad[2].x = v1.x + extrusion[part].x;
+                        quad[2].y = v1.y + extrusion[part].y;
+                        quad[2].z = v1.z + extrusion[part].z;
+                        quad[3].x = v0.x + extrusion[part].x;
+                        quad[3].y = v0.y + extrusion[part].y;
+                        quad[3].z = v0.z + extrusion[part].z;
+                        if (pass == 0) {
+                            s32 k;
+                            for (k = 0; k < 4; k++) {
+                                f32 x, y;
+                                fldPoint3To2_B(&x, &y, quad[k].x, quad[k].y, quad[k].z);
+                                if (x < minX) {
+                                    minX = x;
+                                }
+                                if (maxX < x) {
+                                    maxX = x;
+                                }
+                                if (y < minY) {
+                                    minY = y;
+                                }
+                                if (maxY < y) {
+                                    maxY = y;
+                                }
+                            }
+                        }
+                        if ((edge->reverse != 0 && pass == 0) || (edge->reverse == 0 && pass != 0)) {
+                            SDF_VU0_COPYVECTOR(&quadVertices[quadParams.pointCount], &quad[0]);
+                            SDF_VU0_COPYVECTOR(&quadVertices[quadParams.pointCount + 1], &quad[1]);
+                            SDF_VU0_COPYVECTOR(&quadVertices[quadParams.pointCount + 2], &quad[2]);
+                            SDF_VU0_COPYVECTOR(&quadVertices[quadParams.pointCount + 3], &quad[3]);
+                        } else {
+                            SDF_VU0_COPYVECTOR(&quadVertices[quadParams.pointCount], &quad[0]);
+                            SDF_VU0_COPYVECTOR(&quadVertices[quadParams.pointCount + 1], &quad[3]);
+                            SDF_VU0_COPYVECTOR(&quadVertices[quadParams.pointCount + 2], &quad[2]);
+                            SDF_VU0_COPYVECTOR(&quadVertices[quadParams.pointCount + 3], &quad[1]);
+                        }
+                        quadParams.pointCount += 4;
+                        quadParams.faceCount += 2;
+                        if (quadParams.faceCount >= 15) {
+                            sdfDrawTagLink(quadTag, (u32)sdf3DPrimMakePoly(&quadParams));
+                            quadParams.faceCount = 0;
+                            quadParams.pointCount = 0;
+                        }
+                    }
+                }
+            }
+            if (quadParams.faceCount != 0) {
+                sdfDrawTagLink(quadTag, (u32)sdf3DPrimMakePoly(&quadParams));
+                quadParams.faceCount = 0;
+                quadParams.pointCount = 0;
+            }
+            ot = &sdfGrOtTable[rsetFrameMaskOtOffset];
+            ot->regFunc(ot, quadTag);
+        }
+        rsetFrameMaskRgbOff();
+        rsetTest(1, 1, 0x80, 1, 1, 1, 1, 3);
+        rsetAlpha(0);
+        aDrawBoxF_Direct((s32)(minX * 16.0f), (s32)(minY * 16.0f),
+                         (s32)(maxX * 16.0f), (s32)(maxY * 16.0f),
+                         0, 0, 0, D_0054EA8C < 0 ? 0 : D_0054EA8C);
+    }
+    rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
+    rsetAlpha(0);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldTest", fldSdwDraw);
+#endif
 
 void fldRunDanteClear(void)
 {
