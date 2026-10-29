@@ -9138,7 +9138,68 @@ s32 cmpAddQuePanelEff(s32 a1, s32 a2, s32 a3, u16 a4, u16 a5, u8 a6, u8 a7, s32 
 INCLUDE_ASM(const s32, "code_0022C578", cmpAddQuePanelEff);
 #endif
 
+#ifdef NON_MATCHING
+void cmpDrawPanelEffBox(void *entry, s32 ot)
+{
+    cmpPanelEffState_t *state = entry;
+    volatile cmpPanelEffState_t *live = state;
+    s32 frame = live->frame;
+    s32 halfWidth = live->width >> 1;
+    u32 colorA = live->color8;
+    u32 colorB = live->color4;
+    s32 centerOffset = (halfWidth - 8) * 16;
+    f32 radius;
+    s32 colors[4];
+    s32 i;
+
+    if (frame > 0x80) {
+        colorA = fclBlendColor(0x80, colorA, frame * 2 - 0x100);
+        colorB = fclBlendColor(0x80, colorB, frame * 2 - 0x100);
+    }
+    radius = fsqrtf((f32)halfWidth * 1.5f);
+    for (i = 0; i >= 0; i--) {
+        s32 extent = (s32)(radius * (f32)frame * 0.00390625f);
+        s32 width;
+        s32 x;
+        s32 y;
+        s32 z;
+        u16 height;
+
+        fclDrawPanelSprite2(0x48, ot);
+        colorA = fclBlendColor(colorA, colorB, frame);
+        width = extent * extent + 8;
+        y = live->y;
+        x = live->x;
+        z = live->z;
+        height = live->height;
+        colors[0] = 0x80;
+        colors[1] = colorA;
+        colors[2] = 0x80;
+        colors[3] = colorA;
+        cmpDrawBoxGDefault(x + (halfWidth - width - 8) * 16, y, z,
+                           width, height, colors, ot);
+        x = live->x;
+        y = live->y;
+        z = live->z;
+        height = live->height;
+        colors[0] = colorA;
+        colors[1] = 0x80;
+        colors[2] = colorA;
+        colors[3] = 0x80;
+        cmpDrawBoxGDefault(x + (halfWidth + 8) * 16, y, z, width, height, colors, ot);
+        x = live->x;
+        z = live->z;
+        height = live->height;
+        y = live->y;
+        cmpDrawBoxF(x + centerOffset, y, z, 16, height, colorA, ot);
+        cmpDrawPanelEffBar(state, ot);
+        fclDrawPanelSprite2(0x44, ot);
+        frame /= 2;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawPanelEffBox);
+#endif
 
 void cmpDrawPanelEffRing(cmpPanelEffState_t *state, s32 ot)
 {
