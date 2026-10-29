@@ -941,3 +941,5 @@ src/smt3/field/fldHit.c	z29	done	2026-10-29	0 fn, withdrawn	fldHitChkUnit claim 
 src/smt3/sdf/sdfCoreDraw.c	z29	open	2026-10-29	1 fn / 2372 B	sdf sweep, largest first: sdfCorePacketGen
 src/smt3/sdf/sdfCoreDraw.c	z29	done	2026-10-29	0 matches / 1 guarded draft	sdfCorePacketGen 2332/2372 B, 70 of 583 words match (was 32); corePktCb_t corrected to 0xB0; 7 of 9 long-lived values now on retail registers
 src/smt3/sdf/sdfDraw.c	z29	open	2026-10-29	1 fn / 1152 B	sdf sweep: sdfGrDrawFrame
+src/smt3/sdf/sdfDraw.c	z29	done	2026-10-29	1 fn / 1152 B	sdfGrDrawFrame exact; sdfStoreTransfer_t.callback arity corrected to one argument; sdfGrStdDrawEnvPredraw parked at 86 of 110 words on a sched2 tie
+src/smt3/sdf/sdfModel.c + sdfIpu.c + sdfMovie.c + sdfSound.c + sdfGraph.c	z29	open	2026-10-29	7 fn / 3056 B	sdf sweep: the remaining reachable drafts
