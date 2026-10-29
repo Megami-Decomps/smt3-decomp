@@ -1347,6 +1347,20 @@ void fldPlayerCalc_Wm4(void) {
     }
 }
 
+/* NON_MATCHING: 60 of 742 words match (first difference at +0x0: frame 0xF0
+ * against retail's 0xE0, 2968 of 3068 bytes emitted), while the block shapes
+ * agree to 606 of retail's 768 instructions. gcse PRE deletes the second
+ * (high dds3PadButtonState) computation, which cc1probe --gcse shows as expr#8
+ * avail uid205 with uid748 deleted, so one allocno carries the pad base across
+ * eight calls. Global alloc then ranks it freq 3 / live 292 = priority 102
+ * against the model handle's freq 2 / live 601 = 33, and with all nine
+ * callee-saved registers taken at or above 102 the model handle spills to the
+ * frame instead of taking $30, renaming every register after it; retail
+ * rematerialises the pad base at both sites. -fno-gcse gives retail's frame and
+ * 87 matching words but loses the shared %hi(fldGlobalBase) retail keeps in
+ * $22, so neither setting is the real compile. The two 3.1399996f loads are
+ * merged into a third callee-saved float register the same way, where retail
+ * emits the two .lit4 entries D_0054C40C and D_0054C410. */
 #ifdef NON_MATCHING
 extern f32 fldCamPitch;
 extern s8 dds3PadButtonState[];
@@ -1355,8 +1369,7 @@ extern s32 fldHitChkMatter;
 extern s32 D_0054ED00, D_0054ED04;
 extern collision_s *fldMatterTable;
 extern sdfVector4_t fldWmapPlayerPos, D_002FCA30, D_002FCA40;
-extern const volatile sdfVector4_t D_00531D38;
-extern const volatile sdfVector4_t D_00531D28;
+extern sdfVector4_t D_00531D28, D_00531D38;
 extern sdfMatrix4_t D_002FA240;
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3PadVibrationSet(s32 port, s32 power, s32 frames);
@@ -1374,19 +1387,20 @@ extern void fldHitChkUnitDamage(f32 *position);
 s32 fldPlayerCalc_Wm2(void)
 {
     fldUnitControl_t *control = fldGetUnitControl();
-    mdlObj_t *model = dds3ObjectBaseGetModelHandle(control->handle);
+    mdlObj_t *model = (mdlObj_t *)dds3ObjectBaseGetModelHandle(control->handle);
     s32 step = fldPlayerStepDist;
-    sdfVector4_t scale __attribute__((aligned(16))) = D_00531D28;
-    sdfVector4_t position __attribute__((aligned(16)));
-    sdfVector4_t initial __attribute__((aligned(16)));
-    sdfVector4_t previous __attribute__((aligned(16)));
-    sdfVector4_t direction __attribute__((aligned(16)));
-    sdfVector4_t normal __attribute__((aligned(16)));
-    sdfVector4_t rotation __attribute__((aligned(16)));
-    f32 collisionPosition[4] __attribute__((aligned(16)));
+    sdfVector4_t position;
+    sdfVector4_t previous;
+    sdfVector4_t initial;
+    sdfVector4_t direction;
+    sdfVector4_t normal;
+    sdfVector4_t rotation;
+    sdfVector4_t scale = D_00531D28;
+    sdfVector4_t work;
     s32 up, down, left, right;
     s32 moving = 0;
-    f32 angle = 0.0f;
+    f32 angle;
+    f32 pitch;
 
     if (step > 0) {
         if (step == 60) {
@@ -1398,11 +1412,12 @@ s32 fldPlayerCalc_Wm2(void)
             step = fldPlayerStepDist;
         }
         step -= 10;
-        if (step > 0) {
+        if (step <= 0) {
+            fldPlayerStepDist = 0;
+        } else {
             fldPlayerStepDist = step;
             return 0;
         }
-        fldPlayerStepDist = 0;
     }
     if (l_UseCollision != 0) {
         dds3OnPoseSetFlag(control->handle->poseset, 8);
@@ -1412,7 +1427,7 @@ s32 fldPlayerCalc_Wm2(void)
     right = dds3PadButtonState[0x25] != 0;
     down = dds3PadButtonState[0x26] != 0;
     if (fldGlobalBase.encountState > 0) {
-        up = down = left = right = 0;
+        right = left = up = down = 0;
     }
     dds3GetPosPoseSet(control->handle);
     SDF_VU0_STOREVECTOR(&position);
@@ -1423,7 +1438,7 @@ s32 fldPlayerCalc_Wm2(void)
     fldGlobalBase.x = position.x;
     fldGlobalBase.y = position.y;
     fldGlobalBase.z = position.z;
-    if ((up || down || left || right) && l_UseCollision != 0) {
+    if ((left || right || down || up) && l_UseCollision != 0) {
         fldGlobalBase.y = position.y + 3.0f;
     }
     SDF_VU0_LOADMATRIX(&D_002FA240);
@@ -1438,32 +1453,34 @@ s32 fldPlayerCalc_Wm2(void)
         fldPlayerCalc_Wm4();
     }
     if (fldWmWarpMode != 0) {
-        up = down = left = right = 0;
+        right = left = up = down = 0;
     } else {
-        fldCamPitch = 0.0f;
+        pitch = 0.0f;
+        fldCamPitch = pitch;
+        angle = fldCamPitch;
         if (up && right) {
-            angle = 45.0f;
+            angle = 45.0f - angle;
             moving = 1;
         } else if (up && left) {
-            angle = -45.0f;
+            angle = -45.0f - angle;
             moving = 1;
         } else if (down && right) {
-            angle = 135.0f;
+            angle = 135.0f - angle;
             moving = 1;
         } else if (down && left) {
-            angle = -135.0f;
+            angle = -135.0f - angle;
             moving = 1;
         } else if (up) {
-            angle = -0.0f;
+            angle = -angle;
             moving = 1;
         } else if (down) {
-            angle = 180.0f;
+            angle = 180.0f - angle;
             moving = 1;
         } else if (right) {
-            angle = 90.0f;
+            angle = 90.0f - angle;
             moving = 1;
         } else if (left) {
-            angle = -90.0f;
+            angle = -90.0f - angle;
             moving = 1;
         }
         if (moving) {
@@ -1471,12 +1488,13 @@ s32 fldPlayerCalc_Wm2(void)
             position.x = fldGlobalBase.x - sdfSin(angle) * 16.0f;
             position.y = fldGlobalBase.y;
             position.z = fldGlobalBase.z - sdfCos(angle) * 16.0f;
+            dds3SetPosPoseSet(control->handle, &position);
         } else {
             position.x = fldGlobalBase.x;
             position.y = fldGlobalBase.y;
             position.z = fldGlobalBase.z;
+            dds3SetPosPoseSet(control->handle, &position);
         }
-        dds3SetPosPoseSet(control->handle, &position);
         if (l_UseCollision == 0 && fldWmapMode != 0 &&
             (dds3PadButtonState[0x29] != 0 || dds3PadButtonState[0x2B] != 0)) {
             position.x = fldGlobalBase.x;
@@ -1488,14 +1506,15 @@ s32 fldPlayerCalc_Wm2(void)
     if (l_UseCollision != 0) {
         dds3Basic_t *basic;
         dds3PoseSet_t *pose;
-        if (up || down || left || right) {
-            collisionPosition[0] = position.x;
-            collisionPosition[1] = position.y;
-            collisionPosition[2] = position.z;
+
+        if (down || up || left || right) {
+            work.x = position.x;
+            work.y = position.y;
+            work.z = position.z;
             fldGlobalBase.x = position.x;
             fldGlobalBase.y = position.y;
             fldGlobalBase.z = position.z;
-            fldHitChkUnitVWM(collisionPosition);
+            fldHitChkUnitVWM(&work.x);
             if (fldGlobalBase.hitValid != 0) {
                 fldGlobalBase.x = fldGlobalBase.hitX;
                 if (fldGlobalBase.area == 1) {
@@ -1533,7 +1552,7 @@ s32 fldPlayerCalc_Wm2(void)
         }
         basic->poseset->pos2.w = 1.0f;
         if (l_UseCollision != 0) {
-            if (up || down || left || right) {
+            if (down || up || left || right) {
                 direction.x = position.x - initial.x;
                 direction.y = position.y - initial.y;
                 direction.z = position.z - initial.z;
@@ -1545,13 +1564,13 @@ s32 fldPlayerCalc_Wm2(void)
                 position.y = (initial.y + normal.y * 16.0f) + 3.0f;
                 position.z = initial.z + normal.z * 16.0f;
                 dds3SetPosPoseSet(basic, &position);
-                collisionPosition[0] = position.x;
-                collisionPosition[1] = position.y;
-                collisionPosition[2] = position.z;
+                work.x = position.x;
+                work.y = position.y;
+                work.z = position.z;
                 fldGlobalBase.x = position.x;
                 fldGlobalBase.y = position.y;
                 fldGlobalBase.z = position.z;
-                fldHitChkUnitVWM(collisionPosition);
+                fldHitChkUnitVWM(&work.x);
                 if (fldGlobalBase.hitValid != 0) {
                     fldGlobalBase.x = fldGlobalBase.hitX;
                     if (fldGlobalBase.area == 1) {
@@ -1616,22 +1635,25 @@ s32 fldPlayerCalc_Wm2(void)
         fldWmapPlayerPos.y = D_002FCA40.y;
     }
     if (fldGlobalBase.area == 1) {
-        FromEuler(-1.04666651f, 0.0f, 0.0f);
+        FromEuler(-1.046666503f, 0.0f, 0.0f);
         SDF_VU0_STOREVECTOR(&rotation);
         dds3SetRotPoseSet(control->handle, &rotation);
     } else if (fldHitChkMatter >= 0) {
-        f32 a, b, xrot, zrot;
-        normal = D_00531D38;
-        normal.x = fldWmapPlayerPos.x;
-        normal.y = fldWmapPlayerPos.y;
-        normal.z = fldWmapPlayerPos.z;
-        a = sdfAtan2(normal.x, normal.y);
-        zrot = 3.1399997f - (a < 0.0f ? -a : a);
+        f32 a, b, xrot, zrot, zAbs, xAbs;
+
+        work = D_00531D38;
+        work.x = fldWmapPlayerPos.x;
+        work.y = fldWmapPlayerPos.y;
+        work.z = fldWmapPlayerPos.z;
+        a = sdfAtan2(work.x, work.y);
+        zAbs = a < 0.0f ? -a : a;
+        zrot = 3.1399996f - zAbs;
         if (a < 0.0f) {
             zrot = -zrot;
         }
-        b = sdfAtan2(normal.z, normal.y);
-        xrot = 3.1399997f - (b < 0.0f ? -b : b);
+        b = sdfAtan2(work.z, work.y);
+        xAbs = b < 0.0f ? -b : b;
+        xrot = 3.1399996f - xAbs;
         if (b >= 0.0f) {
             xrot = -xrot;
         }
@@ -1644,13 +1666,10 @@ s32 fldPlayerCalc_Wm2(void)
         dds3SetSclPoseSet(control->handle, &scale.x);
         model->first->speed = 1.0f;
     }
-    {
-        dds3Basic_t *basic = control->handle;
-        if (evtBitCheck(0x75B) != 0) {
-            dds3ObjectBaseOnFlag(basic, 1);
-        } else {
-            dds3ObjectBaseOffFlag(basic, 1);
-        }
+    if (evtBitCheck(0x75B) != 0) {
+        dds3ObjectBaseOnFlag(control->handle, 1);
+    } else {
+        dds3ObjectBaseOffFlag(control->handle, 1);
     }
     return 0;
 }
