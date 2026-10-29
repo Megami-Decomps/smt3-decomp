@@ -814,3 +814,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 60 B	Native startup
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 276 B	Configuration save/probe/restore and executable patch initialization; existing three-pair table, raw selector and callback reloads
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 220 B	decimal exponent formatter with native reverse-digit workspace, sign/minimum-width handling and returned byte count; owner 72 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 reconstruction / 0 exact B	RPC initialization reviewed at native 412-byte size, 95 of 103 words matching; eight-word queue store/setup residual documented, assembly retained
+src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 448 B	formatted double conversion wrapper with sign-bit handling, dtoa mode/precision, fixed decimal correction and alternate-form zero fill; owner 73 match, 0 differ
