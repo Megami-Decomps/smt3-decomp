@@ -502,7 +502,49 @@ void DispComm1PanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s
     }
 }
 
+extern s32 evtBitCheck(s32 no);
+
+#ifdef NON_MATCHING
+void DispHelpPanel(nbCommSelProcessData_t *s, u16 d, s32 x, s32 y, s32 oz,
+                   u32 color, s32 helpa)
+{
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    s32 alpha;
+    s32 x0, x1, x2, y0, y1;
+    u32 background;
+
+    if (evtBitCheck(0xC0E) != 0) {
+        return;
+    }
+    x = (u32)x + 0x43;
+    y = (u32)y - 0x22;
+    color = (color & 0xFFFFFF) | ((u32)helpa << 24);
+    alpha = 0x46;
+    if (helpa != 0x80) {
+        alpha = (s32)((f32)helpa * 0.0078125f * 70.0f);
+    }
+    if (s->drawtype != 3) {
+        nbPnlSprite(x, y, 0x6E, 0x19, 1, 0x48, 0x6E, 0x19,
+                    color, s->data->pnltex[1]);
+    }
+    tag = dds3FontReqAllocDrawTag();
+    x0 = (u32)x * 16 + 0x76E0;
+    x1 = (u32)x * 16 + 0x8580;
+    x2 = (u32)x * 16 + 0x8A00;
+    y0 = (u32)y * 8 + 0x7900;
+    y1 = (u32)y * 8 + 0x79C8;
+    background = ((u32)alpha << 24) | 0x221810;
+    sdfPrimLinkG4(tag, 0x14C, x0, y0, background, x1, y0, background,
+                  x0, y1, background, x1, y1, background, -1, NULL);
+    sdfPrimLinkG4(tag, 0x14C, x1, y0, background, x2, y0, 0x221810,
+                  x1, y1, background, x2, y1, 0x221810, -1, NULL);
+    ot = &sdfGrOtTable[71];
+    ot->regFunc(ot, tag);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispHelpPanel);
+#endif
 
 extern void DispPanelSitaji(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 color);
 extern void DispHelpPanel(nbCommSelProcessData_t *s, u16 d, s32 x, s32 y, s32 oz, u32 color,
