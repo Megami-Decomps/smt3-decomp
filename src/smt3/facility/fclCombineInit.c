@@ -3433,7 +3433,64 @@ s32 cmbUpdateSacConfirm(void)
     return 1;
 }
 
+#ifdef NON_MATCHING
+void cmbUpdateStockCursor2(void)
+{
+    u16 button = cmpGetPressedButton(0x237);
+
+    switch (button) {
+    case 1: {
+        cmpCursorInfo_t *cursor = &CMB_GBWK->stockCursorGroup[2].cursor;
+        s8 selected = *(u8 *)&cursor->unk_22 + (u8)cursor->unk_24;
+
+        CMB_GBWK->stockSlot[2].unk_01 = selected;
+        CMB_GBWK->stockSlot[2].index = CMB_GBWK->unk_165EE[(s8)CMB_GBWK->stockSlot[2].unk_01];
+        if (cmbStockIsLocked(CMB_GBWK->stockSlot[2].index) != 0) {
+            button = 0x8000;
+            break;
+        }
+        if (CMB_GBWK->resultId[1][selected][0] == 0) {
+            return;
+        }
+        CMB_GBWK->displayFlags[0] = 0;
+        CMB_GBWK->unk_00001 = 10;
+        CMB_GBWK->unk_00004 = button;
+        break;
+    }
+    case 2:
+        CMB_GBWK->stockSlot[2].index = -1;
+        CMB_GBWK->displayFlags[0] = 0;
+        CMB_GBWK->unk_00001 = 6;
+        CMB_GBWK->unk_00004 = button;
+        break;
+    case 0x10:
+        cmpMoveCursor(&CMB_GBWK->stockCursorGroup[2].cursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&CMB_GBWK->stockCursorGroup[2].cursor, 1);
+        break;
+    case 0x200:
+        CMB_GBWK->displayFlags[0] = 0;
+        CMB_GBWK->unk_00001 = 9;
+        CMB_GBWK->unk_00004 = 1;
+        break;
+    }
+    if (button == 4) {
+        if ((s8)CMB_GBWK->displayFlags[0] == 0) {
+            CMB_GBWK->displayFlags[0] = 1;
+        } else {
+            CMB_GBWK->displayFlags[0] = 0;
+        }
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&CMB_GBWK->stockCursorGroup[2].cursor, 0);
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&CMB_GBWK->stockCursorGroup[2].cursor, button, 0x30));
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateStockCursor2);
+#endif
 
 #ifdef NON_MATCHING
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
