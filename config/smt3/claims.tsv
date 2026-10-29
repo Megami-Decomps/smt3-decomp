@@ -856,3 +856,4 @@ src/smt3/sdk/libgcc_longlong.c	redthing1	done	2026-10-28	0 exact / 1404 B guarde
 src/smt3/field/fld_Npc.c	z28	done	2026-10-29	0 exact / 2268 B parked	fldNpcDraw structure settled at the native frame; 145 of 561 words match, one loop-invariant float too many
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 1100 B	CFI interpreter with exact 48-entry dispatch table, native operand widths, CFA exclusions and saved-state copies; complete owner 37 match, 0 differ
 src/smt3/movie/MovieViewer.c	redthing1	done	2026-10-29	1 fn / 588 B	PiM agent: native/DDS movie viewer with real shared records and canonical void player API; independently qualified prerequisite and peers
+src/smt3/sdf/sdfMovie.c	redthing1	done	2026-10-29	1 fn / 596 B	PiM agent: native movie frame packet with separately qualified shared SDK bit-length primitive; complete provider and texture peers exact
