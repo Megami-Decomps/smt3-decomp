@@ -780,3 +780,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 496 B	filesystem re
 src/smt3/pipe/pipeCamera.c	redthing1	done	2026-10-28	1 fn / 1048 B	regional path camera interpolation with callback reloads, native signed boundary correction and shared vertical-distance allocation; complete owner exact
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 276 B	fflush preserves stream initialization, partial-write callbacks and fresh error flags; qualified live status scratch across flag/count phases; complete owner 68 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 572 B	stat update with ordinary 64-byte aggregate copy, mask/path request and native cache/completion extents; complete owner exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 480 B	symbolic-link transaction reusing exact two-path view, independent truncation and native wait/RPC/writeback differences; owner 96 match, 0 differ

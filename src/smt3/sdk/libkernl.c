@@ -1923,7 +1923,55 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceLseek64);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceDevctl);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSymlink);
+s32 sceSymlink(const char *oldPath, const char *newPath)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsRenameRequest_t *request = &D_0059D4C0.rename;
+    s32 oldLength;
+    s32 newLength;
+    s32 sema;
+    s32 accepted;
+
+    _sceFsWaitS(17);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    for (oldLength = 0; oldLength < 0x400 &&
+         (request->oldName[oldLength] = oldPath[oldLength]) != 0; oldLength++) {
+    }
+    if (oldLength == 0x400) {
+        request->oldName[0x3FF] = 0;
+    }
+    for (newLength = 0; newLength < 0x400 &&
+         (request->newName[newLength] = newPath[newLength]) != 0; newLength++) {
+    }
+    if (newLength == 0x400) {
+        request->newName[0x3FF] = 0;
+    }
+    param.initCount = 0;
+    param.maxCount = 1;
+    param.option = 0;
+    sema = CreateSema(&param);
+    request->result = &result;
+    request->sema = sema;
+    request->resultSize = 4;
+    if (sceSifCallRpc(&D_0059E780, 24, 0, &D_0059D4C0,
+                      0x80C, D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceReadlink);
 

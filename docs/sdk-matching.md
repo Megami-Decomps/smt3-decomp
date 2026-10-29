@@ -652,3 +652,18 @@ RPC failure and zero acceptance delete the completion semaphore and return
 `-11` in their distinct native order; acceptance waits, deletes and returns
 the callback's stack result. The complete kernel owner checks 93 match / 0
 differ at this qualification.
+
+## Matched symbolic-link transaction
+
+`sceSymlink` matches all 480 instruction bytes using the published two-path
+request view. It independently copies and terminates each path within its
+1024-byte field, retaining the bytes after the first NUL. It preserves the
+native wait-helper argument seventeen and RPC command twenty-four. Unlike
+rename, it has no separate cache-writeback call before sending the complete
+`0x80C`-byte request.
+
+The result-pointer/semaphore/result-size setup order reproduces native
+publication. Partial semaphore initialization, uncached acceptance capture
+before releasing filesystem access, failure cleanup and callback result
+lifetime remain the same audited completion contract. The complete kernel
+owner checks 96 match / 0 differ at this qualification.
