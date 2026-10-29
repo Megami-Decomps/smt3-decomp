@@ -39,3 +39,40 @@ priority 9000) to GPR5, successor pseudo 87 (8/33, priority 7272) to GPR8, and
 chunk pseudo 86 (27/153, priority 7058) to GPR9. Native keeps the chunk in GPR9
 but uses size GPR8 and successor GPR5. A new ordinary lifetime/control premise
 is needed; types and output semantics do not justify pinning that pair.
+
+## gcc2_compiled_
+
+Heap extension emits 584 of 600 native bytes, with 76 of 146 emitted words
+matching and 70 differing. Sixteen bytes remain uncovered; first difference
+is an exit displacement at +0xA8. The prologue and initial request sequence
+match. The second request simplifies to a 32-bit subtract instead of native
+64-bit subtraction followed by sign narrowing; later temporaries and the
+small-old-top exit also differ. Assembly remains active, with no exact credit.
+
+The request adds the 64-bit top pad to the zero-extended 32-bit need and 16,
+then narrows to a signed break increment. A known break base enables page
+rounding. A failed first request, or a backward break with a real old top,
+returns immediately. Contiguous growth extends the fresh top header.
+Noncontiguous growth first charges the request, then charges the gap from
+the old top end when the base was already known; it does not replace that
+accounting with an assumed break-minus-base identity.
+
+The new header aligns its user pointer to 16 bytes. The second request adds
+the front adjustment and a page complement, including a full page for zero
+remainder. Failure leaves earlier arena/base updates intact but skips new
+top, fencepost and maximum-memory updates. Success uses the entire second
+increment in both the arena charge and the new-top size.
+
+A real old top smaller than 16 poisons the NEW top size to one and returns.
+Otherwise its usable size is `(oldSize - 12) & ~15`, its previous-in-use bit
+is preserved, and two fencepost size words at offsets +4/+8 receive five.
+Only a usable old remainder of at least 16 is freed. The typed twelve-byte
+fencepost view leaves its first word untouched and avoids treating the
+second size word as a free-list pointer. Maximum counters compare the
+sign-extended 32-bit arena word as unsigned 64-bit and store that same value.
+
+The initial overlapping-header spelling emits 588 bytes; the truthful
+fencepost record emits 584. Explicit signed/unsigned long page constants
+and physical field order do not retain the missing conversions. The actual
+`_sbrk_r` prototype is supplied before this earlier helper; it is compiler-inert.
+No extra pointer copy or dummy width operation was added.

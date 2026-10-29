@@ -276,6 +276,7 @@ extern void _free_r(_reent *r, void *ptr);
 extern s32 SignalSema(s32 sema);
 
 extern void *sbrk(s32 incr);
+extern void *_sbrk_r(_reent *r, s32 incr);
 
 extern s32 close(s32 fd);
 
@@ -428,7 +429,118 @@ void free(void *ptr) {
     __malloc_unlock(_impure_ptr);
 }
 
+typedef struct mallocChunkPrefix_t {
+    u32 previousSize;
+    u32 size;
+    struct mallocChunkPrefix_t *forward;
+    struct mallocChunkPrefix_t *backward;
+} mallocChunkPrefix_t;
+
+typedef struct mallocBinLinks_t {
+    mallocChunkPrefix_t *forward;
+    mallocChunkPrefix_t *backward;
+} mallocBinLinks_t;
+
+typedef struct mallocArenaPrefix_t {
+    u32 opaque00;
+    u32 bitmap;
+    mallocChunkPrefix_t *top;
+    u32 opaque0C;
+    mallocBinLinks_t bins[127];
+} mallocArenaPrefix_t;
+
+typedef struct mallocInfo_t {
+    s32 arena;
+    u8 opaque04[0x24];
+} mallocInfo_t;
+
+extern mallocArenaPrefix_t __malloc_av_;
+extern mallocInfo_t __malloc_current_mallinfo;
+extern void *__malloc_sbrk_base __attribute__((section(".data")));
+
+extern u64 __malloc_trim_threshold __attribute__((section(".data")));
+extern u64 __malloc_top_pad __attribute__((section(".data")));
+s32 _malloc_trim_r(_reent *r, u32 pad);
+
+typedef struct mallocFenceposts_t {
+    u32 previousSize;
+    u32 firstSize;
+    u32 secondSize;
+} mallocFenceposts_t;
+
+extern u64 __malloc_max_sbrked_mem __attribute__((section(".data")));
+extern u64 __malloc_max_total_mem __attribute__((section(".data")));
+
+/* NON_MATCHING: 584/600 bytes; second-request width conversions and
+ * later register/scheduling choices remain unresolved. */
+#ifdef NON_MATCHING
+void gcc2_compiled_(_reent *r, u32 needed)
+{
+    mallocChunkPrefix_t *oldTop = __malloc_av_.top;
+    u32 oldSize = oldTop->size & ~3U;
+    u8 *oldEnd = (u8 *)oldTop + oldSize;
+    s32 increment = needed + __malloc_top_pad + 16;
+    s32 correction;
+    u32 misalignment;
+    u8 *newTop;
+    u8 *secondBreak;
+    mallocFenceposts_t *fenceposts;
+
+    if (__malloc_sbrk_base != (void *)-1) {
+        increment = ((u64)(u32)increment + 0xFFF) & ~0xFFFULL;
+    }
+    newTop = _sbrk_r(r, increment);
+    if (newTop == (void *)-1 ||
+        ((u32)newTop < (u32)oldEnd && oldTop != (void *)&__malloc_av_)) {
+        return;
+    }
+    __malloc_current_mallinfo.arena += increment;
+    if (newTop == oldEnd) {
+        __malloc_av_.top->size = (increment + oldSize) | 1;
+    } else {
+        if (__malloc_sbrk_base == (void *)-1) {
+            __malloc_sbrk_base = newTop;
+        } else {
+            __malloc_current_mallinfo.arena += (u32)newTop - (u32)oldEnd;
+        }
+        misalignment = ((u32)newTop + 8) & 15;
+        if (misalignment != 0) {
+            correction = 16 - misalignment;
+            newTop += correction;
+        } else {
+            correction = 0;
+        }
+        correction += (s32)(0x1000UL - (((u32)newTop + increment) & 0xFFF));
+        secondBreak = _sbrk_r(r, correction);
+        if (secondBreak == (void *)-1) return;
+        __malloc_current_mallinfo.arena += correction;
+        __malloc_av_.top = (mallocChunkPrefix_t *)newTop;
+        __malloc_av_.top->size = ((u32)secondBreak - (u32)newTop + correction) | 1;
+        if (oldTop != (void *)&__malloc_av_) {
+            if (oldSize < 16) {
+                __malloc_av_.top->size = 1;
+                return;
+            }
+            oldSize = (oldSize - 12) & ~15U;
+            oldTop->size = oldSize | (oldTop->size & 1);
+            fenceposts = (mallocFenceposts_t *)((u8 *)oldTop + oldSize);
+            fenceposts->firstSize = 5;
+            fenceposts->secondSize = 5;
+            if (oldSize >= 16) {
+                _free_r(r, (u8 *)oldTop + 8);
+            }
+        }
+    }
+    if (__malloc_max_sbrked_mem < (u64)__malloc_current_mallinfo.arena) {
+        __malloc_max_sbrked_mem = __malloc_current_mallinfo.arena;
+    }
+    if (__malloc_max_total_mem < (u64)__malloc_current_mallinfo.arena) {
+        __malloc_max_total_mem = __malloc_current_mallinfo.arena;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libc", gcc2_compiled_);
+#endif
 
 INCLUDE_ASM(const s32, "sdk/libc", _malloc_r);
 
@@ -1240,39 +1352,6 @@ void __sinit(_reent *r) {
     r->__sglue.niobs = 3;
     r->__sglue.iobs = &r->__sf[0];
 }
-
-typedef struct mallocChunkPrefix_t {
-    u32 previousSize;
-    u32 size;
-    struct mallocChunkPrefix_t *forward;
-    struct mallocChunkPrefix_t *backward;
-} mallocChunkPrefix_t;
-
-typedef struct mallocBinLinks_t {
-    mallocChunkPrefix_t *forward;
-    mallocChunkPrefix_t *backward;
-} mallocBinLinks_t;
-
-typedef struct mallocArenaPrefix_t {
-    u32 opaque00;
-    u32 bitmap;
-    mallocChunkPrefix_t *top;
-    u32 opaque0C;
-    mallocBinLinks_t bins[127];
-} mallocArenaPrefix_t;
-
-typedef struct mallocInfo_t {
-    s32 arena;
-    u8 opaque04[0x24];
-} mallocInfo_t;
-
-extern mallocArenaPrefix_t __malloc_av_;
-extern mallocInfo_t __malloc_current_mallinfo;
-extern void *__malloc_sbrk_base __attribute__((section(".data")));
-
-extern u64 __malloc_trim_threshold __attribute__((section(".data")));
-extern u64 __malloc_top_pad __attribute__((section(".data")));
-s32 _malloc_trim_r(_reent *r, u32 pad);
 
 /* NON_MATCHING: native 756-byte size; chunk-size/successor allocation
  * and coalescing-path scheduling differ in 103 instruction words. */
