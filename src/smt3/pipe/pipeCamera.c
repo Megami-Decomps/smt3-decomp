@@ -231,7 +231,68 @@ offsetReady:
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeCamera", PipeCameraAction2);
+void PipeCameraAction2(void)
+{
+    f32 difference[4];
+    f32 forward[4];
+    f32 up[4];
+    f32 sum[4];
+    f32 position[4];
+    tagPipeObject *object;
+    f32 blend;
+    s32 offset;
+
+    object = objMyData();
+    blend = 0.0f;
+    if (object == NULL) {
+        return;
+    }
+    getPosTranslate(object, position);
+    difference[0] = position[0] - D_00528F58.points[offsetCount].position[0];
+    difference[1] = position[1] - D_00528F58.points[offsetCount].position[1];
+    difference[2] = position[2] - D_00528F58.points[offsetCount].position[2];
+    vecSet(forward,
+           D_00528F58.points[offsetCount + 10].position[0] - D_00528F58.points[offsetCount].position[0],
+           D_00528F58.points[offsetCount + 10].position[1] - D_00528F58.points[offsetCount].position[1],
+           D_00528F58.points[offsetCount + 10].position[2] - D_00528F58.points[offsetCount].position[2]);
+    vecSet(up, D_00528F58.points[offsetCount].direction[0],
+           D_00528F58.points[offsetCount].direction[1], D_00528F58.points[offsetCount].direction[2]);
+    vecNormalize(forward);
+    vecScale(forward, -600.0f);
+
+    offset = offsetCount;
+    if (offset < 340) {
+        pipeCamShakeVec[0] = D_00528F58.points[offset].position[0];
+        pipeCamShakeVec[1] = D_00528F58.points[offset].position[1] - 100.0f;
+        pipeCamShakeVec[2] = D_00528F58.points[offset].position[2];
+        vecNormalize(up);
+        vecScale(up, 600.0f);
+        pipeCamShake[0] = D_00528F58.points[offsetCount].position[0] + up[0];
+        pipeCamShake[1] = D_00528F58.points[offsetCount].position[1] + up[1];
+        pipeCamShake[2] = D_00528F58.points[offsetCount].position[2] + up[2];
+        pipeCameraPos[0] = blend;
+        pipeCameraPos[1] = 1.0f;
+        pipeCameraPos[2] = blend;
+    } else if (offset < 800) {
+        blend = (f32)(offset - 340) / 460.0f;
+        pipeCamShakeVec[0] = D_00528F58.points[offset].position[0] + difference[0] * blend;
+        pipeCamShakeVec[1] = (D_00528F58.points[offset].position[1] - 100.0f) +
+                              (difference[1] + 100.0f) * blend;
+        pipeCamShakeVec[2] = D_00528F58.points[offset].position[2] + difference[2] * blend;
+        vecNormalize(up);
+        vecScale(up, 600.0f - blend * 650.0f);
+        sum[0] = (D_00528F58.points[offsetCount].position[0] + up[0]) + forward[0] * blend;
+        sum[1] = (D_00528F58.points[offsetCount].position[1] + up[1]) + forward[1] * blend;
+        sum[2] = (D_00528F58.points[offsetCount].position[2] + up[2]) + forward[2] * blend;
+        pipeCamShake[0] = sum[0];
+        pipeCamShake[1] = sum[1];
+        pipeCamShake[2] = sum[2];
+        pipeCameraPos[0] = D_00528F58.points[offsetCount].direction[0] * blend;
+        pipeCameraPos[1] = (D_00528F58.points[offsetCount].direction[1] + -1.0f) * blend + 1.0f;
+        pipeCameraPos[2] = D_00528F58.points[offsetCount].direction[2] * blend;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "pipe/pipeCamera", PipeCameraAction3);
 
