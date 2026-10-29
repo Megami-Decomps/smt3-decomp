@@ -817,7 +817,44 @@ u16 rstChkHeartsSkill(datUnitWork_t *unit)
     return EventStart->HeartsSkFlag < EventStart->LevelUpCnt ? skill : 0;
 }
 
+extern s32 datGetDevilSlotState(u8 devilId);
+extern u16 rstGetHeartsSkillAt(u8 race, s8 index);
+
+#ifdef NON_MATCHING
+void rstRecalcHeartsSkill(u16 skillId)
+{
+    s32 i;
+    s32 j;
+    s32 slot;
+    s8 devilId;
+    u16 skill;
+    s32 missing;
+    u8 count;
+    dds3GlobalWork_t *work;
+
+    for (i = 0; i < DDS3_GBWK->heartscnt; i++) {
+        devilId = (s8)DDS3_GBWK->hearts[i];
+        for (j = 0; j < 8; j++) {
+            skill = rstGetHeartsSkillAt((u8)devilId, (s8)j);
+            if (skill == skillId) {
+                missing = 1;
+                for (slot = 0; slot < datGetDevilSlotState((u8)devilId); slot++) {
+                    if (DDS3_GBWK->heartsSkills[devilId][slot] == skill) {
+                        missing = 0;
+                    }
+                }
+                if (missing != 0) {
+                    work = DDS3_GBWK;
+                    count = work->devilSlot[devilId]++;
+                    work->heartsSkills[devilId][count] = skill;
+                }
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", rstRecalcHeartsSkill);
+#endif
 
 void rstLoadHeartsSkill(void) {
 }

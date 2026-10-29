@@ -88,9 +88,17 @@ typedef struct
     f32 encountkyori;              /* 0x1CF4 */
     u16 encountCount;              /* 0x1CF8 */
     u8 heartsequip;
-    u8 hearts[0x80];               /* 0x1CFB */
-    u8 heartscnt;                  /* 0x1D7B */
-    u8 nameData[0x4800];           /* 0x1D7C */
+    union {
+        struct {
+            u8 hearts[0x80];       /* 0x1CFB */
+            u8 heartscnt;          /* 0x1D7B */
+            u8 nameData[0x4800];   /* 0x1D7C */
+        };
+        struct {
+            u8 heartsPrefix[0x40];
+            u8 devilSlot[0x100];   /* 0x1D3B */
+        };
+    };
     u8 unk657C[0xDC];
     fldGbTypeBlock_t gb[48];       /* 0x6658 */
     u8 takaraOpen[0x20];           /* 0x11A58 */
@@ -98,6 +106,8 @@ typedef struct
     s16 previewY;
     s32 moonAnahoriCount;
     u8 takaraOpenEx[0x20];         /* 0x11A80 */
+    u8 reserved11AA0[0x20];
+    u16 heartsSkills[32][12];    /* 0x11AC0 */
 } dds3GlobalWork_t;
 
 extern dds3GlobalWork_t *DDS3_GBWK;
