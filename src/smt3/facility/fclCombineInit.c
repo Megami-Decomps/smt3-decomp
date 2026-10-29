@@ -4394,7 +4394,57 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE38);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE48);
 
+typedef struct
+{
+    u32 frame;
+    s8 mode;
+    u8 reserved05[3];
+    void (*action)(void);
+} cmbTimeTableEntry_t;
+
+typedef struct
+{
+    cmbTimeTableEntry_t *entries;
+    s8 count;
+    u8 reserved05[3];
+} cmbTimeTable_t;
+
+extern cmbTimeTable_t D_0032F628[];
+
+#ifdef NON_MATCHING
+void cmbUpdateTimeTable(void)
+{
+    s8 mode = cmbActionMode;
+    cmbGbWork_t *work = CMB_GBWK;
+    cmbTimeTable_t *table = &D_0032F628[mode];
+    s32 index = work->actionTargetIndex;
+    cmbTimeTableEntry_t *entry;
+    void (*action)(void);
+
+    if (index < table->count - 1 &&
+        (u32)work->actionFrame >= table->entries[index + 1].frame) {
+        printf("Updating time table : %d -> %d\n", index, index + 1);
+        work = CMB_GBWK;
+        work->actionTargetIndex = (s32)((u32)work->actionTargetIndex + 1);
+    }
+    mode = cmbActionMode;
+    index = work->actionTargetIndex;
+    entry = &D_0032F628[mode].entries[index];
+    action = entry->action;
+    if (action != NULL &&
+        (entry->mode == 1 || (entry->mode == 0 && work->actionFrame == entry->frame))) {
+        action();
+        work = CMB_GBWK;
+    }
+    if (work->actionFrame % 100 == 0) {
+        printf("ActCnt = %d\n", work->actionFrame);
+        work = CMB_GBWK;
+    }
+    work->actionFrame = (s32)((u32)work->actionFrame + 1);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateTimeTable);
+#endif
 
 typedef struct effEVECombParSmokeParam_t {
     f32 position[4];
