@@ -506,7 +506,7 @@ void rcvUpdatePanelAnim(void)
 }
 
 
-extern s32 rcvRootHasItems(void *work);
+extern s32 rcvRootHasItems(rcvRootWork_t *work);
 extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
 extern s32 cmpChkPadPressUpDown(void);
 extern s32 printf(const char *fmt, ...);
@@ -524,7 +524,7 @@ void rcvUpdateSeqRoot(void)
     }
     switch (button) {
     case 1:
-        if (rcvRootHasItems(&rcvUpdateWork->listCursor) == 0) {
+        if (rcvRootHasItems((rcvRootWork_t *)&rcvUpdateWork->listCursor) == 0) {
             button = 0x8000;
         } else {
             rcvUpdateCallSeq(selection);

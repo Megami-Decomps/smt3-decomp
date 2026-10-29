@@ -40,4 +40,13 @@ typedef struct cmpPadStopWork_t {
     s8 unk_38;
 } cmpPadStopWork_t;
 
+typedef struct
+{
+    /* 0x00 */ u8 unk_00[0x22];
+    /* 0x22 */ s16 cursor;
+    /* 0x24 */ u8 scroll;
+    /* 0x25 */ u8 unk_25[7];
+    /* 0x2C */ u8 *itemFlags;
+} rcvRootWork_t;
+
 #endif
