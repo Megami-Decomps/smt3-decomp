@@ -400,8 +400,8 @@ extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 se);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern nbKoukaPacket_t *nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
-                                            s32 type, s32 hp, s32 mp, s32 badstat);
+extern s32 nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                               s32 type, s32 hp, s32 mp, s32 badstat);
 
 extern s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type, s32 hp,
                               s32 mp, s32 badstat, s32 hiteff, s32 dead, s32 deadtype, s32 moji,
@@ -1424,7 +1424,50 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDeadVisualPacket);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDamagePacket);
 
+#ifdef NON_MATCHING
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+
+s32 nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                        s32 type, s32 hp, s32 mp, s32 badstat)
+{
+    s32 hidden = form->formindex >= 16;
+
+    if (!hidden) {
+        switch (type) {
+        case 1:
+            nbAddHitEffKoukaPacket(startframe, uniqueid, form, 2);
+            break;
+        case 3:
+            nbAddUnitColKoukaPacket(startframe, uniqueid, form, 0x8086EB9B, 10);
+            nbAddUnitHomeColKoukaPacket(startframe + 10, uniqueid, form, 10);
+            break;
+        }
+    }
+    if (hp >= 0 && mp >= 0) {
+        if (!hidden) {
+            nbAddNumEffKoukaPacket(startframe + 1, 45, uniqueid, form, hp, mp, 5);
+        }
+        nbAddHpMpKoukaPacket(startframe, uniqueid, form, hp, 0);
+        nbAddHpMpKoukaPacket(startframe, uniqueid, form, mp, 1);
+    } else if (mp >= 0) {
+        if (!hidden) {
+            nbAddNumEffKoukaPacket(startframe + 1, 45, uniqueid, form, mp, 0, 3);
+        }
+        nbAddHpMpKoukaPacket(startframe, uniqueid, form, mp, 1);
+    } else if (hp >= 0) {
+        if (!hidden) {
+            nbAddNumEffKoukaPacket(startframe + 1, 45, uniqueid, form, hp, 0, 2);
+        }
+        nbAddHpMpKoukaPacket(startframe, uniqueid, form, hp, 0);
+    }
+    if (badstat != 0) {
+        nbMakeBadKaifukuPacket(startframe + 1, uniqueid, form);
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeKaifukuPacket);
+#endif
 
 s32 nbMakeDeadPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 deadchk)
 {
