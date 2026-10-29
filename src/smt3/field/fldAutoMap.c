@@ -9,18 +9,7 @@
 typedef struct
 {
     char *name;
-    u32 nodeIndex;
-    void *icons;
-    u32 iconCount;
-    s32 floor;
-    fldAmXYZ_t *pointA;
-    fldAmXYZ_t *pointB;
-} fldMapItem_t;
-
-typedef struct
-{
-    char *name;
-    fldMapItem_t *items;
+    fldAmSBlock_t *items;
     u32 nSB;
     void *pMdl;
     fldAmXYZ_t *pPos;
@@ -856,7 +845,7 @@ s32 fldAutoMap_GetFloor(s32 area, u32 block) {
     fldAmAreaData_t *rec = fldAutoMapHeader;
     s32 i;
     u32 j;
-    fldMapItem_t *item;
+    fldAmSBlock_t *item;
 
     for (i = 0; i < (s32)fldAutoMapData; i++, rec++) {
         item = rec->items;
@@ -920,7 +909,7 @@ s32 fldAutoMapGetFloorMax(void) {
     fldAmAreaData_t *rec = fldAutoMapHeader;
     s32 i;
     u32 j;
-    fldMapItem_t *item;
+    fldAmSBlock_t *item;
 
     for (i = 0; i < (s32)fldAutoMapData; i++, rec++) {
         item = rec->items;
@@ -1491,7 +1480,7 @@ void fldAutoMapGetBBox(f32 *getX0, f32 *getZ0, f32 *getX1, f32 *getZ1) {
     s32 room;
     u32 i;
     fldAmAreaData_t *rec;
-    fldMapItem_t *item;
+    fldAmSBlock_t *item;
     fldAmXYZ_t *a;
     s32 visible;
     fldAmXYZ_t *b;

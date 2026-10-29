@@ -9,18 +9,7 @@
 typedef struct
 {
     char *name;
-    u32 nodeIndex;
-    void *icons;
-    u32 iconCount;
-    s32 floor;
-    fldAmXYZ_t *pointA;
-    fldAmXYZ_t *pointB;
-} fldMapItem_t;
-
-typedef struct
-{
-    char *name;
-    fldMapItem_t *items;
+    fldAmSBlock_t *items;
     u32 nSB;
     void *pMdl;
     fldAmXYZ_t *pPos;

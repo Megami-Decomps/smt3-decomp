@@ -56,6 +56,19 @@ typedef struct fldAmXYZ_t
     f32 z;
 } fldAmXYZ_t;
 
+struct fldAmIcon_t;
+
+typedef struct fldAmSBlock_t
+{
+    char *name;
+    u32 nodeIndex;
+    struct fldAmIcon_t *icons;
+    u32 iconCount;
+    s32 floor;
+    fldAmXYZ_t *pointA;
+    fldAmXYZ_t *pointB;
+} fldAmSBlock_t;
+
 union fldTriggerShape_t;
 
 typedef struct fldResPut_t
