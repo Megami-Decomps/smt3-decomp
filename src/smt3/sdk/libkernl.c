@@ -1159,7 +1159,21 @@ void sceSifRpcLoop(sifRpcDataQueue_t *queue)
     }
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__13);
+extern s32 D_0052C348 __attribute__((section(".data")));
+extern s32 D_0052C34C __attribute__((section(".data")));
+
+void gcc2_compiled__13(void)
+{
+    rpcSemaParam param;
+    if (D_0052C348 == -1) {
+        param.initCount = 1;
+        param.maxCount = 1;
+        param.option = 0;
+        D_0052C348 = CreateSema(&param);
+        D_0052C34C = CreateSema(&param);
+    }
+}
+
 
 typedef struct {
     u32 word0;
@@ -1272,7 +1286,62 @@ void _sceFs_Poff_Intr(void *packet, fsPowerOffState_t *state)
     EE_SYNC_EI();
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceFsInit);
+typedef struct { u8 bytes[4]; } fsVersionTag_t;
+typedef struct { void *receiveBuffer; } fsRegistrationPacket_t;
+
+extern u8 D_0059E7C0[];
+extern rpcClient D_0059E780;
+extern u8 D_0059E140[];
+extern u8 D_0059E100[];
+extern fsRegistrationPacket_t D_0059D480;
+extern void sceSifInitRpc(s32 mode);
+extern void sceSifAddCmdHandler(s32 command, void (*handler)(void *, void *), void *argument);
+extern void _sceFs_Rcv_Intr(void *packet, void *argument);
+extern s32 sceSifCallRpc(void *client, s32 function, s32 mode, void *send,
+                         s32 sendBytes, void *receive, s32 receiveBytes,
+                         void *endFunction, void *endParameter);
+extern u8 D_0059E7A8[0x18];
+extern s32 D_0052C340 __attribute__((section(".data")));
+extern s32 SignalSema(s32 sema);
+
+s32 sceFsInit(void)
+{
+    fsPowerOffState_t *powerOff = &D_0059E800;
+    s32 previousInterrupts;
+    s32 delay;
+    fsRequestEntry_t *entry;
+
+    sceSifInitRpc(0);
+    powerOff->callback = NULL;
+    powerOff->argument = NULL;
+    previousInterrupts = DIntr();
+    sceSifAddCmdHandler(0x80000011, _sceFs_Rcv_Intr, D_0059E7C0);
+    sceSifAddCmdHandler(0x80000013, (void (*)(void *, void *))_sceFs_Poff_Intr, powerOff);
+    if (previousInterrupts)
+        EIntr();
+    for (;;) {
+        if (sceSifBindRpc(&D_0059E780, 0x80000001, 0) < 0)
+            return -1;
+        if (D_0059E780.server != NULL)
+            break;
+        for (delay = 0x100000; delay != -1; --delay) {
+        }
+    }
+    gcc2_compiled__13();
+    WaitSema(D_0052C348);
+    for (entry = D_0059E580; entry < &D_0059E580[32]; entry++)
+        entry->active = 0;
+    SignalSema(D_0052C348);
+    D_0059D480.receiveBuffer = D_0059E140;
+    if (sceSifCallRpc(&D_0059E780, 255, 0, &D_0059D480, 4,
+                      D_0059E100, 4, NULL, NULL) < 0)
+        return -0x10001;
+    *(fsVersionTag_t *)D_0059E7A8 =
+        *(const fsVersionTag_t *)((u32)D_0059E100 | 0x20000000);
+    D_0052C340 = 1;
+    return 0;
+}
+
 
 extern u8 D_0059E7A8[0x18];
 extern u8 D_0052C2A0[4] __attribute__((section(".data")));
