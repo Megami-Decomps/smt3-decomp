@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ps2asm.h"
 
 /* The sif client data of the mcserv module; +0x24 is non-zero once bind
  * succeeded, which every call tests before using the RPC. */
@@ -58,7 +59,7 @@ extern s32 sceSifCallRpc(void *cd, u32 fno, u32 mode, void *send, s32 ssize,
                          void *recv, s32 rsize, void *endfunc, void *endpara);
 extern s32 sceMcOpen(s32 a, s32 b, char *c, s32 d);
 extern s32 sceSifCheckStatRpc(void *cd);
-extern void mcDelayThread(s32 ticks);
+extern void mcDelayThread(u16 ticks);
 extern char *strncpy(char *dst, const char *src, u32 n);
 extern int scePrintf(const char *fmt, ...);
 
@@ -286,9 +287,23 @@ s32 sceMcWrite(s32 a, void *b, s32 c)
 INCLUDE_ASM(const s32, "sdk/libmc", sceMcWrite);
 #endif
 
-INCLUDE_ASM(const s32, "sdk/libmc", mcHearAlarm);
+extern s32 iWakeupThread(s32 thread);
+extern s32 GetThreadId(void);
+extern s32 SetAlarm(u16 ticks, void (*callback)(s32, s32, s32), void *argument);
+extern s32 SleepThread(void);
 
-INCLUDE_ASM(const s32, "sdk/libmc", mcDelayThread);
+/* SetAlarm delivers the common argument in its third callback register. */
+void mcHearAlarm(s32 cause, s32 address, s32 thread)
+{
+    iWakeupThread(thread);
+    EE_SYNC_EI();
+}
+
+void mcDelayThread(u16 ticks)
+{
+    SetAlarm(ticks, mcHearAlarm, (void *)GetThreadId());
+    SleepThread();
+}
 
 /* NON_MATCHING: 224 bytes, retail's size, with the loop's done = 0 landing in
  * the branch delay slot where retail keeps a nop. */
