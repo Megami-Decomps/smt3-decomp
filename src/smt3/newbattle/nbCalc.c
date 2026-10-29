@@ -388,9 +388,13 @@ extern s32 nbGetEscapeSwitch(nbMainProcessData_t *data);
 
 extern f32 nbGetHojoRitu(s32 formindex, s32 type);
 
+extern char D_00544D00[];
+extern char D_00544D10[];
 extern char D_00544D30[];
+extern s32 datGetNormalAtkPow(datUnitWork_t *work);
 
 extern long sdfFloatToULong(f32 value);
+EQUATE_FPTODP();
 
 extern s32 nbGetLvAvg(nbMainProcessData_t *data, s32 side);
 
@@ -1531,7 +1535,49 @@ f32 nbGetHojoRitu(s32 formindex, s32 type)
     return ritu;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetButuriAttack);
+s32 nbGetButuriAttack(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
+{
+    datUnitWork_t *swork;
+    datUnitWork_t *dwork;
+    f32 sritu;
+    f32 dritu;
+    f32 value;
+    char *sfmt;
+    char *dfmt;
+
+    swork = nbGetUnitWorkFromFormindex(sformindex);
+    dwork = nbGetUnitWorkFromFormindex(dformindex);
+    sritu = nbGetHojoRitu(sformindex, 4);
+    dritu = nbGetHojoRitu(dformindex, 7);
+    datGetNormalAtkPow(swork);
+    datGetDefPow(dwork);
+    if (swork->flag & 0x20) {
+        if (nskill == 0) {
+            value = ((f32)swork->level * 2.0f + (f32)datGetParam(swork, 0) * 2.0f)
+                * 0x1.547aep+0f * 0x1.333332p-1f - (f32)(48 / (swork->level + 10));
+        } else {
+            value = ((f32)swork->level * 2.0f + (f32)datGetParam(swork, 0) * 2.0f)
+                * (f32)waza / 0x1.733332p+4f * 0x1.333332p-1f - (f32)(50 / (swork->level + 10));
+        }
+        if (!evtBitCheck(0xAF2)) {
+            value *= 0x1.570a3cp+0f;
+        }
+    } else {
+        if (nskill == 0) {
+            value = ((f32)swork->level * 2.0f + (f32)datGetParam(swork, 0) * 2.0f)
+                * 0x1.547aep+0f * 0x1.999998p-1f;
+        } else {
+            value = ((f32)swork->level * 2.0f + (f32)datGetParam(swork, 0) * 2.0f)
+                * (f32)waza / 0x1.733332p+4f * 0x1.999998p-1f;
+        }
+    }
+    sfmt = D_00544D00;
+    printf(sfmt, sritu);
+    dfmt = D_00544D10;
+    printf(dfmt, dritu);
+    value = (value * sritu) * dritu;
+    return value;
+}
 
 s32 nbGetButuriKaifuku(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
 {
