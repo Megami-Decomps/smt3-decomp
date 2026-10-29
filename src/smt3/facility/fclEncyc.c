@@ -3038,7 +3038,46 @@ void RequestChangeMotion(motionWork_t *pinst, s32 flag)
     }
 }
 
+typedef struct {
+    s32 motion;
+    f32 speed;
+} fclEncycMotionParam_t;
+
+extern fclEncycMotionParam_t D_00330A18[];
+extern u8 cmpGetModelMotionId(u16 id);
+extern f32 cmpGetModelScale(u16 id);
+extern void mdlLoopMotion(mdlObj_t *model, s32 group, s32 motion);
+extern void mdlSmoothLoopMotion(mdlObj_t *model, s32 group, s32 motion,
+                                f32 beforeLength, f32 smoothLength);
+
+#ifdef NON_MATCHING
+void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
+{
+    s32 motion;
+    f32 speed;
+
+    if (flags & 0x80) {
+        motion = D_00330A18[id].motion;
+        speed = D_00330A18[id].speed;
+        if (flags & 0x400) {
+            if (motion != cmpGetModelMotionId((u16)id)) {
+                mdlSmoothLoopMotion(model, 0, motion, 16.0f, 16.0f);
+            }
+        } else {
+            mdlLoopMotion(model, 0, motion);
+        }
+    } else {
+        motion = cmpGetModelMotionId((u16)id);
+        speed = cmpGetModelScale((u16)id);
+        if (motion != D_00330A18[id].motion) {
+            mdlLoopMotion(model, 0, motion);
+        }
+    }
+    model->first->speed = speed;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", ChangeModelMotion);
+#endif
 
 extern void *memset(void *dst, s32 value, u32 size);
 extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode);
