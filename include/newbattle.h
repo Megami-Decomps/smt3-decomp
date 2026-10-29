@@ -73,6 +73,12 @@ typedef struct nbPacEntry_t {
     void *buf;
 } nbPacEntry_t;
 
+/* Battle pack handle and its decoded entry. */
+typedef struct NB_FILEHANDLE_T {
+    u8 unk_00[0x60];
+    nbPacEntry_t *entry;
+} nbPacHandle_t;
+
 /* The native 0x80-byte battle party record. */
 typedef struct nbParty_t {
     u16 flag;

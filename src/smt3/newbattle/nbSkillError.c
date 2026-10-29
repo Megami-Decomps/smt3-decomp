@@ -25,11 +25,7 @@ typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
 /* A loaded pac file; only the chain down to the decoded buffer is named. */
 
 
-struct NB_FILEHANDLE_T {
-    u8 reserved00[0x60];
-    nbPacEntry_t *entry;
-};
-typedef NB_FILEHANDLE_T nbPacHandle_t;
+
 
 /* 0xE0 bytes; only the field this unit reads is named. */
 typedef struct
