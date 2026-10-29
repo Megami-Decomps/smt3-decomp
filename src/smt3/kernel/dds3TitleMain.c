@@ -5,6 +5,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -32,7 +33,7 @@ typedef struct
     /* 0x036C */ s32 pwork;
 } fclEncyc_instance_tag;
 
-extern s32 titleAllocWork(s32 arg);
+extern dds3ProcessID_t *titleAllocWork(s32 arg);
 
 extern s8 dds3PadButtonState[];
 
