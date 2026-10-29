@@ -953,7 +953,90 @@ s32 frGetYShiftLev(s8 Style, s32 FontNo) {
     return 0x18;
 }
 
+#ifdef NON_MATCHING
+extern s32 D_0054F414;
+
+void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst)
+{
+    frFontData_t *entry;
+    s32 fontIndex;
+    u8 flags;
+    s32 defaultSlot = 0;
+    s32 baseWidth;
+    s32 metricCodeIndex;
+    s32 leftOffset;
+    s32 advance;
+    s8 left;
+    s8 right;
+    f32 scale = 1.0f;
+
+    fontIndex = glyph->renderValueOrSetupOrShade.setupBytes.fontIndex;
+    switch (fontIndex) {
+    case 0:
+    case 1:
+        defaultSlot = 1;
+        break;
+    }
+    entry = &gFT.entries[fontIndex];
+    glyph->cellDimensions.cellWidth = frGetDefaultFontWidth(fontIndex);
+    glyph->cellDimensions.cellHeight = frGetDefaultFontHeight(
+        glyph->renderValueOrSetupOrShade.setupBytes.fontIndex);
+
+    fontIndex = glyph->renderValueOrSetupOrShade.setupBytes.fontIndex;
+    baseWidth = gFontBaseWidth[fontIndex];
+    glyph->advance = baseWidth;
+    if (fontIndex < 2) {
+        defaultSlot = 1;
+        scale = (f32)glyph->cellDimensions.cellWidth / 20.0f;
+    }
+
+    flags = glyph->renderValueOrSetupOrShade.setupBytes.sharedFlags;
+    if (defaultSlot != 0 && glyph->glyphCodeOrContext.glyphCode < 0x80) {
+        glyph->advance = baseWidth >> 1;
+    }
+
+    if (glyph->glyphCodeOrContext.glyphCode == 0x20) {
+        fontIndex = ((volatile frTextHandle_t *)glyph)->renderValueOrSetupOrShade.setupBytes.fontIndex;
+        if (fontIndex == 1 || fontIndex == 0) {
+            glyph->advance = (glyph->advance >> 1) + D_0054F414;
+            return;
+        }
+    }
+
+    if (shiftIndex == 0x2C1) {
+        glyph->advance -= 7;
+    }
+    if ((flags & 1) == 0) {
+        return;
+    }
+    if (entry->resourceHeader->hasExtra == 0) {
+        return;
+    }
+
+    shiftIndex = (s32)((u32)shiftIndex << 1);
+    if (shiftIndex >= entry->metricByteCount) {
+        return;
+    }
+    right = entry->prop[shiftIndex + 1];
+    if (right == 0) {
+        return;
+    }
+    left = entry->prop[shiftIndex];
+    advance = (s32)((f32)(right - left) * scale);
+    leftOffset = (s32)((f32)left * 16.0f * scale);
+    metricCodeIndex = (shiftIndex >> 1) + 0x20;
+    if (metricCodeIndex == 0x21 || metricCodeIndex == 0x31) {
+        leftOffset -= 0x20;
+        advance += 4;
+    }
+    glyph->advance = advance;
+    glyph->x = -leftOffset;
+}
+
+
+#else
 INCLUDE_ASM(const s32, "interface/frFont", frGetXShiftLev);
+#endif
 
 /* Create a glyph wrapper for source and append it to an optional destination chain. */
 frFontHandle_t *frSetUserImage(GsFont_t *pFont, frFontHandle_t *pFRQ) {
