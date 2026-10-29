@@ -148,7 +148,7 @@ extern u32 Foru_E913_Frame;
 
 extern void effBTLModelAllShow(void);
 
-extern u32 nbCameraBoss_BSARI_MASEHA_Frame;
+extern s32 nbCameraBoss_BSARI_MASEHA_Frame;
 
 extern s32 nbCameraBoss_BSARI_MASEHA_Type;
 
@@ -1146,7 +1146,157 @@ s32 nbCameraBoss_BSARI_MASEHA_Set(nbCamera_t *pNbCamera)
     return 1;
 }
 
+/* NON_MATCHING: 204 of 272 words match at the exact size; the three lerp arms
+ * schedule their frame-address addiu last where retail has it first. */
+#ifdef NON_MATCHING
+s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
+{
+    nbFormation_t *pForm;
+    sdfVector4_t mark;
+    sdfVector4_t from;
+    sdfVector4_t to;
+    u32 bits;
+    u32 type;
+    f32 rate;
+
+    pForm = effBTLSkillGetInvokeFormation();
+    effBTLModelAllShow();
+    type = nbCameraBoss_BSARI_MASEHA_Type;
+    switch (type) {
+    case 0:
+        if (nbCameraBoss_BSARI_MASEHA_Frame < 30) {
+            pNbCamera->direction.x = -0.27f;
+            pNbCamera->direction.y = -0.08f;
+            pNbCamera->direction.z = 0.96f;
+            pNbCamera->target.x = 562.95f;
+            pNbCamera->target.y = -147.88999f;
+            pNbCamera->target.z = -1819.1999f;
+            pNbCamera->distance = 1.0f;
+            pNbCamera->fovy = 0.69813163f;
+        } else if (nbCameraBoss_BSARI_MASEHA_Frame < 130) {
+            rate = ((f32)nbCameraBoss_BSARI_MASEHA_Frame - 30.0f) / 100.0f;
+            from.x = -1449.11f;
+            from.y = -15.0f;
+            from.z = -2223.37f;
+            to.x = 1370.34f;
+            to.y = -15.0f;
+            to.z = -2046.0f;
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(pNbCamera);
+            effBTLModelGetMarkPosition2(pForm, 1);
+            SDF_VU0_STOREVECTOR(&mark);
+            mark.y = mark.y * 0.5f;
+            SDF_VU0_LOADVECTOR(&mark);
+            SDF_VU0_LOADVECTOR_B(pNbCamera);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+            pNbCamera->distance = 1.0f;
+            pNbCamera->fovy = 0.69813163f;
+        } else {
+            pNbCamera->direction.x = -0.52f;
+            pNbCamera->direction.y = 0.0f;
+            pNbCamera->direction.z = 0.85f;
+            pNbCamera->target.x = 1370.34f;
+            pNbCamera->target.y = -360.37f;
+            pNbCamera->target.z = -2046.0f;
+            pNbCamera->distance = 1.0f;
+            pNbCamera->fovy = 0.69813163f;
+        }
+        break;
+    case 1:
+        if (nbCameraBoss_BSARI_MASEHA_Frame < 135) {
+            rate = (f32)nbCameraBoss_BSARI_MASEHA_Frame / 135.0f;
+            from.x = -940.78992f;
+            from.y = -296.84995f;
+            from.z = -1616.1199f;
+            to.x = -1213.17f;
+            to.y = -5.17f;
+            to.z = -2024.18f;
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(pNbCamera);
+            from.x = 0.42f;
+            from.y = 0.03f;
+            from.z = 0.91f;
+            to.x = 0.39f;
+            to.y = -0.26f;
+            to.z = 0.88f;
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+            pNbCamera->distance = 1.0f;
+            pNbCamera->fovy = 0.69813163f;
+        } else {
+            pNbCamera->direction.x = 0.55000002f;
+            pNbCamera->direction.y = 0.58f;
+            pNbCamera->direction.z = 0.6f;
+            pNbCamera->target.x = -1710.3499f;
+            pNbCamera->target.y = -1780.4999f;
+            pNbCamera->target.z = -1441.6899f;
+            pNbCamera->distance = 1.0f;
+            pNbCamera->fovy = 0.69813163f;
+        }
+        break;
+    case 2:
+        if (nbCameraBoss_BSARI_MASEHA_Frame < 30) {
+            pNbCamera->direction.x = -0.27f;
+            pNbCamera->direction.y = -0.08f;
+            pNbCamera->direction.z = 0.96f;
+            pNbCamera->target.x = 562.95f;
+            pNbCamera->target.y = -147.88999f;
+            pNbCamera->target.z = -1819.1999f;
+            pNbCamera->distance = 1.0f;
+            pNbCamera->fovy = 0.69813163f;
+        } else if (nbCameraBoss_BSARI_MASEHA_Frame < 130) {
+            rate = ((f32)nbCameraBoss_BSARI_MASEHA_Frame - 30.0f) / 100.0f;
+            from.x = -628.99994f;
+            from.y = -47.56f;
+            from.z = -2074.9898f;
+            to.x = 1022.0099f;
+            to.y = -66.33f;
+            to.z = -2059.2098f;
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(pNbCamera);
+            from.x = 0.29f;
+            from.y = -0.3f;
+            from.z = 0.91f;
+            to.x = -0.43000001f;
+            to.y = -0.3f;
+            to.z = 0.85f;
+            SDF_VU0_LOADVECTOR(&from);
+            SDF_VU0_LOADVECTOR_B(&to);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+            pNbCamera->distance = 1.0f;
+            pNbCamera->fovy = 0.69813163f;
+        } else {
+            pNbCamera->direction.x = -0.35f;
+            pNbCamera->direction.y = 0.4f;
+            pNbCamera->direction.z = 0.85f;
+            pNbCamera->target.x = 934.92994f;
+            pNbCamera->target.y = -1199.6199f;
+            pNbCamera->target.z = -1920.9299f;
+            pNbCamera->distance = 1.0f;
+            pNbCamera->fovy = 0.69813163f;
+        }
+        break;
+    }
+    nbCameraBoss_BSARI_MASEHA_Frame++;
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_BSARI_MASEHA_Run);
+#endif
 
 s32 nbCameraBoss_BSARI_SIMANO_Set(nbCamera_t *pNbCamera)
 {

@@ -130,3 +130,30 @@ Confirmed on the way: the jump table's 151 entries decode to the case list
 `nbCameraBoss_Sp_JAREIH_Set` for skill `0x99` where the HD rebuild just
 returns 1; and the four pooled constants are `0.55f`, `0.85f`, `0.55f` and
 `0.9f` in code order.
+
+## nbCameraBoss_BSARI_MASEHA_Run (newbattle/nbCameraBoss, 0x440)
+
+204 of 272 words match at the exact 1088-byte size. All eight arms, both
+shared tails, the `.lit4` order and every literal are right; the 68 are a
+one-instruction rotation at the head of each of the three lerp arms, plus the
+float registers and the two frame-address temps that rotation drags with it.
+
+Retail opens each lerp arm with `addiu $3, $29, 0x10`, the address the
+following `SDF_VU0_LOADVECTOR` wants, and only then materialises the arm's
+constants; cc1 schedules that `addiu` last, next to the `lqc2`, which also
+swaps `$2` and `$3` between the two vectors. Nothing else in the arm moves.
+
+Ruled out: `PS2_FLOAT_BITS` after the `LOADVECTOR` pair instead of before it
+(worth 31 words on its own, so that part is settled), the `rate` division
+below the vector stores rather than above them (3 more words), and three
+declaration orders for `mark`, `from`, `to`, `bits`, `type` and `rate`.
+
+Confirmed on the way: the dispatch needs a `u32 type` local, because
+`switch (nbCameraBoss_BSARI_MASEHA_Type)` on the signed extern makes
+`balance_case_nodes` add an `slti` range split that retail does not have, the
+same shape the matching `nbCameraBoss_BSARI_SIMANO_Run` next door uses; the
+blend factor reaches both lerps of an arm through one `PS2_FLOAT_BITS` GPR;
+`nbCameraBoss_BSARI_MASEHA_Frame` is signed, since every frame threshold is
+`slti`; and spimdisasm's ten-digit `.lit4` decimals are each one ULP low for
+ee-as, which truncates toward zero, so the literals have to be spelled from
+the exact float value rounded away from zero.
