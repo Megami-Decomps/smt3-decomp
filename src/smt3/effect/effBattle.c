@@ -132,7 +132,7 @@ extern u32 D_0031CA90[];
 extern s32 effBTLFieldColorIsOn(void);
 extern void effBTLFieldColorGetBaseColor(void);
 extern void effBTLFieldColorStart(void);
-extern s32 fptodp(f32 value);
+extern f64 fptodp(f32 value);
 
 typedef struct effBTLColor_t {
     f32 a;
@@ -141,8 +141,11 @@ typedef struct effBTLColor_t {
     f32 b;
 } effBTLColor_t;
 
+/* Native 20-byte table row: alpha, red, green, blue, then packed color.
+ * Array components preserve the indexed address shape; see
+ * docs/levers/addressing-and-types.md. */
 typedef struct effBTLColorRow_t {
-    effBTLColor_t color;
+    f32 color[4];
     u32 word;
 } effBTLColorRow_t;
 
@@ -758,27 +761,25 @@ void effBTLFieldColorInit(void) {
     effBTLFieldColorProcess = 0;
 }
 
-/* NON_MATCHING: 13 of 241 words differ (first at +0x80). */
-#ifdef NON_MATCHING
 void effBTLFieldColorON(u32 id) {
     effBTLColor_t work;
     effBTLColor_t scale;
     u32 color;
     char *format;
-    s32 ar;
-    s32 ag;
-    s32 ab;
-    s32 br;
-    s32 bg;
-    s32 bb;
+    f64 ar;
+    f64 ag;
+    f64 ab;
+    f64 br;
+    f64 bg;
+    f64 bb;
 
     D_00551D84 = id;
-    if (D_00317750[id].color.a != 0.0f &&
+    if (D_00317750[id].color[0] != 0.0f &&
         (effBTLFieldColorIsOn() == 0 || D_00551D84 == 0x200)) {
         effBTLFieldColorGetBaseColor();
-        work.r = D_00317750[id].color.r;
-        work.g = D_00317750[id].color.g;
-        work.b = D_00317750[id].color.b;
+        work.r = D_00317750[id].color[1];
+        work.g = D_00317750[id].color[2];
+        work.b = D_00317750[id].color[3];
         SDF_VU0_LOADVECTOR_B_MEMOPS(work);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR_MEMOPS(work);
@@ -786,9 +787,9 @@ void effBTLFieldColorON(u32 id) {
         ar = fptodp(work.r);
         ag = fptodp(work.g);
         ab = fptodp(work.b);
-        br = fptodp(D_00317750[id].color.r);
-        bg = fptodp(D_00317750[id].color.g);
-        bb = fptodp(D_00317750[id].color.b);
+        br = fptodp(D_00317750[id].color[1]);
+        bg = fptodp(D_00317750[id].color[2]);
+        bb = fptodp(D_00317750[id].color[3]);
         printf(format, ar, ag, ab, br, bg, bb);
         D_00569970[1] = work.r;
         D_00569970[2] = work.g;
@@ -818,9 +819,6 @@ void effBTLFieldColorON(u32 id) {
     effBTLFieldLightAnimFrameEnd = 0;
     effBTLFieldLightAnimRotate = 0.0f;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effBattle", effBTLFieldColorON);
-#endif
 
 void effBTLFieldColorOFF(void) {
     effBTLFieldColorEnd();
