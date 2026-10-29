@@ -5430,7 +5430,61 @@ void cmpDrawStatusIcons(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit
     cmpDrawStatusIconRow(x + 0x960, y + 0x3C8, 0xFFFF, colors[0], unit, mpIconFlags, 0x47);
 }
 
+#ifdef NON_MATCHING
+void cmpDrawStatusName(s32 x, s32 y, u8 *alpha, datUnitWork_t *unit)
+{
+    volatile s32 colors[4];
+    s32 *texList;
+    fclSpriteTbl_t *spriteTable;
+    s32 mode = 0;
+    u16 status = unit->badstatus;
+    u32 flags = unit->flag;
+
+    if (status & 0x800) mode = 1;
+    if (flags & 0x10) mode = 2;
+    if (status & 0x8000) mode = 3;
+    if (mode == 0) return;
+
+    if (mode == 3) {
+        colors[0] = 0x09051C00;
+        colors[1] = 0x09051C40;
+    } else {
+        colors[0] = 0;
+        colors[1] = 0x40;
+    }
+    {
+        s32 first = colors[0];
+        s32 second = colors[1];
+
+        colors[2] = first;
+        colors[3] = second;
+    }
+    cmpDrawBoxGDefault(0x11B0, 0, 0, 0xE5, 0x1C0, (s32 *)colors, 0x47);
+    colors[2] = 0x1D053400;
+    colors[3] = 0x01010120;
+    colors[0] = 0x1D053400;
+    colors[1] = 0x01010120;
+    cmpDrawBoxGDefault(0x4A0, 0, 0, 0x1B6, 0x1C0, (s32 *)colors, 0x47);
+    texList = D_00345D88;
+    spriteTable = fclSpriteTable;
+    fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x12, texList, spriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x15, texList, spriteTable, 0x47);
+    fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x16, texList, spriteTable, 0x47);
+    switch (mode) {
+    case 1:
+        fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x13, texList, spriteTable, 0x47);
+        break;
+    case 2:
+        fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x14, texList, spriteTable, 0x47);
+        break;
+    case 3:
+        fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x17, texList, spriteTable, 0x47);
+        break;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusName);
+#endif
 
 extern char *datExplainTable[];
 extern u32 strlen(const char *text);
