@@ -1,5 +1,5 @@
 #include "common.h"
-#include "pbRecordData_t.h"
+#include "pbRecord.h"
 #include "kernel.h"
 #include "libsdf.h"
 #include "scr.h"
@@ -67,7 +67,6 @@ typedef struct { s16 x, y; } pbGoalPos_t;
 
 typedef struct { u8 unk00[8]; pbGoalPos_t pos; } pbGoal_t;
 
-typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
