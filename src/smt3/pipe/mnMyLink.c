@@ -52,7 +52,64 @@ extern f32 __ieee754_acosf(f32 x);
 extern void *sdfMemAllocDirect(s32 aSize);
 
 
+typedef struct {
+    s32 count;
+    u8 *data;
+} pipeLinkSource_t;
+
+extern s32 pipeLinkGetNum(u8 *data, s32 size);
+extern s32 pipeCreateLink(tagPipeLinkInfo *info, s32 count);
+extern tagPipeLinkData *pipeMakeNodeLink(tagPipeLinkInfo *info);
+extern s32 pipeConnectLink(tagPipeLinkData *previous, tagPipeLinkData *next);
+
+#ifdef NON_MATCHING
+s32 LoadLinkData(tagPipeLinkInfo *info, pipeLinkSource_t *source, s32 mode)
+{
+    u8 *data = source->data;
+    s32 count = pipeLinkGetNum(data, source->count);
+    tagPipeLinkData *previous;
+    tagPipeLinkData *last = NULL;
+    s8 direction;
+    s8 reverse;
+    s32 turn;
+    s32 i;
+    u8 code;
+
+    pipeCreateLink(info, count);
+    previous = pipeMakeNodeLink(info);
+    code = *data++;
+    if (code >= 11) {
+        direction = (s8)(code - 10);
+        turn = 1;
+    } else {
+        direction = code == 0 ? 6 : (s8)code;
+        turn = 0;
+    }
+    previous->partsID = (turn << 6) | direction | 8;
+    previous->id = 1;
+    reverse = 7 - direction;
+    info->head = previous;
+    for (i = 1; i < count; i++) {
+        last = pipeMakeNodeLink(info);
+        code = *data++;
+        if (code >= 11) {
+            direction = (s8)(code - 10);
+            turn = 1;
+        } else {
+            direction = code == 0 ? 6 : (s8)code;
+            turn = 0;
+        }
+        last->partsID = (turn << 6) | ((u32)(s32)reverse << 3) | direction;
+        reverse = 7 - direction;
+        pipeConnectLink(previous, last);
+        previous = last;
+    }
+    last->id = 0xFFFF;
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "pipe/mnMyLink", LoadLinkData);
+#endif
 
 s32 pipeLinkGetNum(u8 *lPtr, s32 size)
 {
