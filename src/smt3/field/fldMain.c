@@ -459,7 +459,179 @@ s32 fldGetRestoreMode(void)
     return fldSceneParam.mode != 0 ? 2 : 0;
 }
 
+#ifdef NON_MATCHING
+typedef struct {
+    s32 eventFlag;
+    s16 normal[32];
+    s16 alternate[32];
+} fldEncounterFloorTable_t;
+
+typedef struct __attribute__((packed, aligned(1))) {
+    u64 part[2];
+} fldPackedQuaternion_t;
+
+extern fldEncounterFloorTable_t D_003D51E0[];
+extern const fldPackedQuaternion_t D_005316A0;
+extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
+extern fldResourcePoint_t *dds3PointBasicGetResource(dds3Basic_t *basic);
+extern void dds3SetActiveScene(dds3Basic_t *scene);
+extern s32 evtLoadArea(s32 field, s32 area);
+extern void fldWap_Load(s32 terminalType, s32 terminalId, fldSceneParam_t *param);
+extern void fldSetUnit(fldResourcePoint_t *point);
+extern void fldRegistUnitPad(void);
+extern void fldSetUnitFollowCamera(void);
+extern void fldTitleMiniStart(s32 field);
+extern void nbBgmFadeOut(void);
+extern void resetCamNormal(void);
+extern void resetCamNormal2(void);
+extern void resetCamTgtPlayer(void);
+extern void fldCamSetChase(void);
+extern void FromRotation(f32 angle);
+extern void Mult(void);
+extern s32 gfldPlayerDamegeCnt;
+
+void fldReadyScene(void)
+{
+    QWORD_ALIGNED fldResourcePoint_t defaultPoint;
+    QWORD_ALIGNED fldResourcePoint_t adjustedPoint;
+    QWORD_ALIGNED union {
+        sdfVector4_t vector;
+        fldPackedQuaternion_t packed;
+    } rotation;
+    fldResourcePoint_t *point = NULL;
+    fldEncounterFloorTable_t *encounters;
+    dds3Basic_t *basic;
+    s32 reused;
+    s32 previous;
+    s32 area;
+    s32 showTitle;
+    s32 eventSet;
+    s32 cameraMode;
+
+    memset(&defaultPoint, 0, sizeof(defaultPoint));
+    defaultPoint.pos.w = 1.0f;
+    defaultPoint.rot.w = 1.0f;
+    memset(&adjustedPoint, 0, sizeof(adjustedPoint));
+    adjustedPoint.rot.w = 1.0f;
+    adjustedPoint.pos.w = 1.0f;
+    rotation.packed = D_005316A0;
+    if (fldSceneParam.loadMode == 1)
+        fldWap_Load(DDS3_GBWK->previewX, DDS3_GBWK->previewY, &fldSceneParam);
+    reused = fldGlobalBase.reuseAreaResources;
+    evtLoadArea(fldSceneParam.loadField, fldSceneParam.loadArea);
+    dds3SetActiveScene(NULL);
+    if (fldSceneParam.mode == 0) {
+        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x11, fldSceneParam.pointResName);
+        point = basic != NULL ? dds3PointBasicGetResource(basic) : &defaultPoint;
+        if (fldSceneParam.callmode == 3) {
+            adjustedPoint.pos.x = point->pos.x;
+            adjustedPoint.pos.y = point->pos.y;
+            adjustedPoint.pos.z = point->pos.z;
+            SDF_VU0_LOADVECTOR(&rotation.vector);
+            FromRotation(3.141592503f);
+            SDF_VU0_LOADVECTOR_B(&fldSceneParam.safeUnit.rot);
+            Mult();
+            SDF_VU0_STOREVECTOR(&fldSceneParam.safeUnit.rot);
+            adjustedPoint.rot.x = fldSceneParam.safeUnit.rot.x;
+            adjustedPoint.rot.y = fldSceneParam.safeUnit.rot.y;
+            adjustedPoint.rot.z = fldSceneParam.safeUnit.rot.z;
+            adjustedPoint.rot.w = fldSceneParam.safeUnit.rot.w;
+            point = &adjustedPoint;
+        }
+        if (fldSceneParam.loadField < 46) {
+            encounters = &D_003D51E0[fldSceneParam.loadField];
+            eventSet = 0;
+            if (encounters->eventFlag != 0) eventSet = evtBitCheck(encounters->eventFlag) != 0;
+            if (eventSet == 0)
+                fldGlobalBase.wordBC = D_003D51E0[fldSceneParam.loadField].normal[fldSceneParam.loadArea];
+            else
+                fldGlobalBase.wordBC = D_003D51E0[fldSceneParam.loadField].alternate[fldSceneParam.loadArea];
+        }
+        if (((u32)fldGlobalBase.area - 11) < 35 && fldGlobalBase.area != 39 &&
+            fldGetRestoreMode() != 4 && reused == 0) {
+            if (fldGetRestoreMode() == 5) {
+                if (fldGlobalBase.word10 != fldGlobalBase.area) fldTitleMiniStart(fldGlobalBase.area);
+            } else {
+                if (fldGetRestoreMode() == 2) {
+                    previous = fldGlobalBase.word10;
+                    showTitle = 0;
+                    switch (previous) {
+                    case 40:
+                        area = fldGlobalBase.area;
+                        showTitle = ((u32)area - 41) < 5;
+                        break;
+                    case 41:
+                        area = fldGlobalBase.area;
+                        showTitle = area == 40 || area == 42;
+                        break;
+                    case 42:
+                        area = fldGlobalBase.area;
+                        showTitle = area == 40 || area == 41 || area == 43;
+                        break;
+                    case 43:
+                        area = fldGlobalBase.area;
+                        showTitle = area == 40 || area == 42 || area == 44;
+                        break;
+                    case 44:
+                        area = fldGlobalBase.area;
+                        showTitle = area == 40 || area == 43 || area == 45;
+                        break;
+                    case 45:
+                        area = fldGlobalBase.area;
+                        showTitle = area == 40 || area == 44;
+                        break;
+                    }
+                    if (showTitle) fldTitleMiniStart(fldGlobalBase.area);
+                }
+                if (fldGetRestoreMode() != 2) {
+                    previous = fldGlobalBase.word10;
+                    area = fldGlobalBase.area;
+                    if (!((previous == 32 && (area == 36 || area == 37)) ||
+                          (previous == 36 && (area == 32 || area == 37)) ||
+                          (previous == 37 && (area == 32 || area == 36))))
+                        fldTitleMiniStart(area);
+                }
+            }
+        }
+    } else if (fldSceneParam.mode == 1) {
+        point = &fldSceneParam.safeUnit;
+        SDF_VU0_LOADVECTOR(&rotation.vector);
+        FromRotation(3.141592503f);
+        SDF_VU0_LOADVECTOR_B(&fldSceneParam.safeUnit.rot);
+        Mult();
+        SDF_VU0_STOREVECTOR(&fldSceneParam.safeUnit.rot);
+        nbBgmFadeOut();
+    }
+    fldSetUnit(point);
+    fldRegistUnitPad();
+    fldSetUnitFollowCamera();
+    if (fldSceneParam.mode == 0) {
+        cameraMode = fldSceneParam.camMode;
+        if (cameraMode == 1) {
+            basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 4, fldSceneParam.camName);
+            if (basic != NULL) {
+                fldGlobalBase.mode = cameraMode;
+                fldGlobalBase.campos.x = basic->poseset->pos.x;
+                fldGlobalBase.campos.y = basic->poseset->pos.y;
+                fldGlobalBase.campos.z = basic->poseset->pos.z;
+                resetCamTgtPlayer();
+            } else {
+                fldGlobalBase.mode = 0;
+                if (fldGlobalBase.area < 10) fldCamSetChase();
+                else resetCamNormal();
+            }
+        } else {
+            fldGlobalBase.mode = cameraMode == 2 ? 3 : 0;
+            if (fldSceneParam.callmode == 3) resetCamNormal2();
+            else if (fldGlobalBase.area < 10) fldCamSetChase();
+            else resetCamNormal();
+        }
+    }
+    gfldPlayerDamegeCnt = 0;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldMain", fldReadyScene);
+#endif
 
 void fldPlayerALoad(void)
 {
