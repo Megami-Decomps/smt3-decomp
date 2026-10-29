@@ -179,12 +179,12 @@ typedef struct effPCPBossBael_t
 
 typedef struct effPCPBossONGYParam_t
 {
-    struct effPCPBossUnit_t *pFormation;
+    struct nbFormation_t *pFormation;
 } effPCPBossONGYParam_t;
 
 typedef struct effPCPBossONGY_t
 {
-    struct effPCPBossUnit_t *param;
+    struct nbFormation_t *param;
     sdfMat_t *pMat;
     f32 radian;
     s32 frame;
@@ -259,31 +259,6 @@ typedef struct effPCPBossDengeki_t
     s32 frame;
     u32 color;
 } effPCPBossDengeki_t;
-
-/* One battle formation slot: the main process data holds 32 of them. */
-typedef struct effPCPBossUnit_t
-{
-    /* Formation prefix, as in nbFormation_t. */
-    sdfVector4_t orgpos;
-    sdfVector4_t orgrot;
-    sdfVector4_t position;
-    sdfVector4_t rotation;
-    sdfVector4_t center;
-    f32 radius;
-    f32 height;
-    f32 collisionRadius;
-    f32 scale;
-    f32 oneShotRadius;
-    f32 allShotRadius;
-    f32 moveY;
-    f32 moveZ;
-    s32 type;
-    u32 time;
-    s32 flags;
-    u8 unk7C[0x10];
-    evtUnit_t *hunit;
-    u8 unk90[0x60];
-} effPCPBossUnit_t;
 
 typedef struct effPCPBossThunderbolt_t
 {
@@ -554,7 +529,7 @@ extern void effDebugLineDraw(const void *pPos0, const void *pPos1);
 extern s32 sdfModelGetMarkPosMatrix(void *aRoot, s32 aId);
 extern void effPCPCrackInit(effPCPCrack_t *pPCPCrack);
 extern void dds3PadVibrationSet(s32 port, u8 power, s32 frames);
-extern s32 effBTLModelGetID(effPCPBossUnit_t *pFormation);
+extern s32 effBTLModelGetID(nbFormation_t *pFormation);
 extern u128 *effPCP_ThunderPolyListGetParam(void *pTPolyList);
 extern void effPCP_ThunderPolyListDraw(void *hData);
 extern void effPCP_ThunderPolyListSetColor(void *hData, u32 abgr);
@@ -743,7 +718,7 @@ s32 effPCPBossONGYModelTexRenderCheck(void)
 effPCPBossONGY_t *effPCPBossONGYCreate(effPCPBossONGYParam_t *param, void *unused)
 {
     effPCPBossONGY_t *work = sdfChipAllocDirect(0x10);
-    effPCPBossUnit_t *value = param->pFormation;
+    nbFormation_t *value = param->pFormation;
     void *matrix;
 
     work->frame = 0;
@@ -777,7 +752,7 @@ extern void sdfMotionSeek(sdfMotionCtrlr_t *controller, f32 frame);
 extern f32 sdfSin(f32 angle);
 extern void Mult(void);
 extern void mdlSetScale(mdlObj_t *model);
-extern void effPCPBossONGYModelTexRender(const void *target, effPCPBossUnit_t *form, f32 height);
+extern void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *form, f32 height);
 extern effPCPBossVector_t D_00533DA0;
 extern sdfGrOt_t sdfGrOtTable[];
 
@@ -789,7 +764,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     effPCPBossVector_t points[32];
     f32 uv[64];
     u32 colors[32];
-    effPCPBossUnit_t *form;
+    nbFormation_t *form;
     sdfDrawTag_t *tag;
     effPCPBossVector_t *point;
     f32 *st;
@@ -830,15 +805,15 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     renderHeight = height;
     offset = 0.0f;
     width = 271.999969482421875f;
-    SDF_VU0_LOADVECTOR(&form->position);
+    SDF_VU0_LOADVECTOR(&form->pos);
     SDF_VU0_STOREVECTOR_MEMOPS(origin);
     SDF_VU0_STOREVECTOR(&target);
     mdlSetPosition(model);
-    SDF_VU0_LOADVECTOR(&form->rotation);
+    SDF_VU0_LOADVECTOR(&form->rot);
     SDF_VU0_LOADVECTOR_B(&D_00533DA0);
     Mult();
     mdlSetRotate(effPCPBossTexHandle);
-    scaleValue = form->scale;
+    scaleValue = form->scl;
     scale.f[3] = 0.0f;
     scale.f[2] = scaleValue;
     scale.f[0] = scaleValue;
@@ -971,7 +946,7 @@ s32 effPCPBossONGYGetLength(void)
 effPCPBossONGY_t *effPCPBossONGY2Create(effPCPBossONGYParam_t *param, void *unused)
 {
     effPCPBossONGY_t *work = sdfChipAllocDirect(0x10);
-    effPCPBossUnit_t *value = param->pFormation;
+    nbFormation_t *value = param->pFormation;
     void *matrix;
 
     work->frame = 0;
@@ -1893,8 +1868,8 @@ void effPCPBossDengekiDraw(effPCPBossDengeki_t *hData)
     effPCPBossVector_t segB1;
     effPCPBossVector_t scale;
     u128 *param;
-    effPCPBossUnit_t *model;
-    effPCPBossUnit_t *found;
+    nbFormation_t *model;
+    nbFormation_t *found;
     s32 id;
     s32 i;
     f32 r;
@@ -1905,7 +1880,7 @@ void effPCPBossDengekiDraw(effPCPBossDengeki_t *hData)
         found = NULL;
         model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
-            if ((model->flags & 3) == 3) {
+            if ((model->stat & 3) == 3) {
                 id = effBTLModelGetID(model);
                 if (id == 0x124 || id == 0x103) {
                     found = model;
@@ -2084,12 +2059,12 @@ void effPCPBossThunderboltDelete(effPCPBossThunderbolt_t *hData)
 void effPCPBossThunderboltDraw(effPCPBossThunderbolt_t *hData)
 {
     u128 pos;
-    effPCPBossUnit_t *model;
+    nbFormation_t *model;
     u128 *param;
     u32 bits;
     s32 id;
     s32 i;
-    effPCPBossUnit_t *found;
+    nbFormation_t *found;
 
     if (effBTLSkillCheckRun() != 0) {
         model = effBTLSkillGetInvokeFormation();
@@ -2097,7 +2072,7 @@ void effPCPBossThunderboltDraw(effPCPBossThunderbolt_t *hData)
         found = NULL;
         model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
-            if ((model->flags & 3) == 3) {
+            if ((model->stat & 3) == 3) {
                 id = effBTLModelGetID(model);
                 if (id == 0x124 || id == 0x103) {
                     found = model;
@@ -2200,8 +2175,8 @@ void effPCPBossKAGUInvokeDelete(effPCPBossKAGUInvoke_t *hData)
 #ifdef NON_MATCHING
 void effPCPBossKAGUInvokeDraw(effPCPBossKAGUInvoke_t *hData)
 {
-    effPCPBossUnit_t *model;
-    effPCPBossUnit_t *found;
+    nbFormation_t *model;
+    nbFormation_t *found;
     effPCPBossVector_t marks[8];
     effPCPBossVector_t center;
     effPCPBossVector_t *centerPtr;
@@ -2230,7 +2205,7 @@ void effPCPBossKAGUInvokeDraw(effPCPBossKAGUInvoke_t *hData)
         found = NULL;
         model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
-            if ((model->flags & 3) == 3) {
+            if ((model->stat & 3) == 3) {
                 id = effBTLModelGetID(model);
                 if (id == 0x125 || id == 0x108) {
                     found = model;
@@ -2453,7 +2428,7 @@ void effPCPBossKAGUAttackGetSplitPoint(u128 *pPosBuff, const u128 *pPoint1, cons
 #ifdef NON_MATCHING
 void effPCPBossKAGUAttackDraw(effPCPBossKAGUAttack_t *work)
 {
-    effPCPBossUnit_t *model;
+    nbFormation_t *model;
     effPCPBossVector_t marks[8];
     effPCPBossVector_t center;
     effPCPBossVector_t end;
@@ -2468,7 +2443,7 @@ void effPCPBossKAGUAttackDraw(effPCPBossKAGUAttack_t *work)
     } else {
         model = nbGetMainProcessData()->form;
         for (i = 0; i < 32; i++, model++) {
-            if ((model->flags & 3) == 3) {
+            if ((model->stat & 3) == 3) {
                 id = effBTLModelGetID(model);
                 if (id == 0x125 || id == 0x108) {
                     break;
@@ -2509,7 +2484,7 @@ void effPCPBossKAGUAttackDraw(effPCPBossKAGUAttack_t *work)
         center.f[2] *= 0.125f;
         center.f[0] *= 0.125f;
         center.f[1] *= 0.125f;
-        SDF_VU0_LOADVECTOR(&model->position);
+        SDF_VU0_LOADVECTOR(&model->pos);
         SDF_VU0_LOADVECTOR_B(effPCPBossKAGUDrawParam);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR(&end);
@@ -2650,8 +2625,8 @@ void effPCPBossKAGUThunderboltDrawSub(effPCPBossKAGUThunderbolt_t *pPCPBossKAGUT
     effPCPBossVector_t tip;
     effPCPBossVector_t mark;
     effCrackModel_t *handle;
-    effPCPBossUnit_t *model;
-    effPCPBossUnit_t *found;
+    nbFormation_t *model;
+    nbFormation_t *found;
     u128 *list;
     s32 limit;
     s32 frame;
@@ -2670,7 +2645,7 @@ void effPCPBossKAGUThunderboltDrawSub(effPCPBossKAGUThunderbolt_t *pPCPBossKAGUT
         found = NULL;
         model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
-            if ((model->flags & 3) == 3) {
+            if ((model->stat & 3) == 3) {
                 id = effBTLModelGetID(model);
                 if (id == 0x125 || id == 0x108) {
                     found = model;
@@ -2923,7 +2898,7 @@ void effPCPBossKAGU2AttackGetSplitPoint(u128 *pPosBuff, const u128 *pPoint1, con
 #ifdef NON_MATCHING
 void effPCPBossKAGU2AttackDraw(effPCPBossKAGU2Attack_t *work)
 {
-    effPCPBossUnit_t *model;
+    nbFormation_t *model;
     effPCPBossVector_t marks[6], center, end;
     effPCPBossPlace_t place;
     s32 frame, limit, fadeIn, fadeOut, rest, id;
@@ -2936,7 +2911,7 @@ void effPCPBossKAGU2AttackDraw(effPCPBossKAGU2Attack_t *work)
     } else {
         model = nbGetMainProcessData()->form;
         for (i = 0; i < 32; i++, model++) {
-            if ((model->flags & 3) == 3) {
+            if ((model->stat & 3) == 3) {
                 id = effBTLModelGetID(model);
                 if (id == 0x125 || id == 0x108) {
                     break;
@@ -2977,7 +2952,7 @@ void effPCPBossKAGU2AttackDraw(effPCPBossKAGU2Attack_t *work)
         center.f[2] /= 6.0f;
         center.f[0] /= 6.0f;
         center.f[1] /= 6.0f;
-        SDF_VU0_LOADVECTOR(&model->position);
+        SDF_VU0_LOADVECTOR(&model->pos);
         SDF_VU0_LOADVECTOR_B(effPCPBossKAGU2DrawParam);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR(&end);
@@ -3063,10 +3038,10 @@ void effPCPBossKAGU2MUHENKDraw(effPCPBossKAGU2MUHENK_t *pPCPBossKAGU2MUHENK)
     effPCPBossVector_t pos;
     effPCPBossVector_t lineEnd;
     effPCPBossVector_t down;
-    effPCPBossUnit_t *model;
+    nbFormation_t *model;
     s32 id;
     u32 i;
-    effPCPBossUnit_t *found;
+    nbFormation_t *found;
 
     if (effBTLSkillCheckRun() != 0) {
         model = effBTLSkillGetInvokeFormation();
@@ -3074,7 +3049,7 @@ void effPCPBossKAGU2MUHENKDraw(effPCPBossKAGU2MUHENK_t *pPCPBossKAGU2MUHENK)
         found = NULL;
         model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
-            if ((model->flags & 3) == 3) {
+            if ((model->stat & 3) == 3) {
                 id = effBTLModelGetID(model);
                 if (id == 0x125 || id == 0x108) {
                     found = model;
@@ -3205,7 +3180,7 @@ void effPCPBossMETATOBeamDelete(effPCPBossMETATOBeam_t *hData)
 void effPCPBossMETATOBeamDraw(effPCPBossMETATOBeam_t *hData)
 {
     effPCPBossVector_t pos;
-    effPCPBossUnit_t *model;
+    nbFormation_t *model;
     u128 *param;
     s32 limit = hData->limit;
     s32 frame = hData->frame;
@@ -3219,7 +3194,7 @@ void effPCPBossMETATOBeamDraw(effPCPBossMETATOBeam_t *hData)
     u32 color;
     u32 blendInner;
     u32 blendOuter;
-    effPCPBossUnit_t *found;
+    nbFormation_t *found;
 
     if (effBTLSkillCheckRun() != 0) {
         model = effBTLSkillGetInvokeFormation();
@@ -3227,7 +3202,7 @@ void effPCPBossMETATOBeamDraw(effPCPBossMETATOBeam_t *hData)
         found = NULL;
         model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
-            if ((model->flags & 3) == 3) {
+            if ((model->stat & 3) == 3) {
                 id = effBTLModelGetID(model);
                 if (id == 0x156 || id == 0xC1) {
                     found = model;
@@ -3640,7 +3615,7 @@ effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
 {
     const effPCPDANTE_Damage_Param_t *param = pParam;
     effPCPDANTE_Damage_tag *work = sdfChipAllocZeroDirect(sizeof(effPCPDANTE_Damage_tag));
-    effPCPBossUnit_t *unit;
+    nbFormation_t *unit;
     u32 bits;
     s32 delay;
     u8 *slot;
@@ -3661,7 +3636,7 @@ effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
     count = 0;
     slot = work->delay;
     for (i = 0; i < 32; i++, unit++) {
-        if (unit->flags & 1) {
+        if (unit->stat & 1) {
             if (bits & (1 << i)) {
                 *slot++ = delay;
                 count++;
@@ -3720,8 +3695,8 @@ void effPCPDANTE_Damage_Delete(effPCPDANTE_Damage_tag *hData)
     sdfChipFreeDirect(hData);
 }
 
-extern void nbSetUnitMotion(effPCPBossUnit_t *form, s32 motion, s32 mode, f32 rate);
-extern f32 effBTLPartGetScalePtr(effPCPBossUnit_t *form);
+extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate);
+extern f32 effBTLPartGetScalePtr(nbFormation_t *form);
 
 void effPCPDANTE_Damage_Run(effPCPDANTE_Damage_tag *work)
 {
@@ -3734,11 +3709,11 @@ void effPCPDANTE_Damage_Run(effPCPDANTE_Damage_tag *work)
     s32 total = work->param.total;
     s32 fadeIn = work->param.fadeIn;
     s32 fadeOut = work->param.fadeOut;
-    effPCPBossUnit_t *unit = nbGetMainProcessData()->form;
+    nbFormation_t *unit = nbGetMainProcessData()->form;
     targetBits = effBTLSkillGetTargetBit();
 
     for (i = 0; i < 0x20; i++, unit++) {
-        if ((unit->flags & 1) != 0 && (targetBits & ((u32)1 << i)) != 0) {
+        if ((unit->stat & 1) != 0 && (targetBits & ((u32)1 << i)) != 0) {
             f32 scale;
 
             place.payload[0] = 0.0f;
@@ -3747,9 +3722,9 @@ void effPCPDANTE_Damage_Run(effPCPDANTE_Damage_tag *work)
             place.payload[3] = 0.0f;
             effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR(place.payload);
-            SDF_VU0_COPYVECTOR(&place.payload[4], &unit->rotation);
-            place.payload[8] = unit->radius * unit->scale;
-            place.payload[9] = unit->height * unit->scale;
+            SDF_VU0_COPYVECTOR(&place.payload[4], &unit->rot);
+            place.payload[8] = unit->r * unit->scl;
+            place.payload[9] = unit->h * unit->scl;
             scale = effBTLPartGetScalePtr(unit);
             place.payload[10] = scale;
 
@@ -3855,8 +3830,8 @@ void effPCP_PBCamera_Run(effPCP_PBCamera_tag *work)
 {
     sdfVector4_t position;
     u32 skill;
-    effPCPBossUnit_t *invoke;
-    effPCPBossUnit_t *target;
+    nbFormation_t *invoke;
+    nbFormation_t *target;
     u32 from;
     u32 to;
     mdlObj_t *model;
@@ -3869,7 +3844,7 @@ void effPCP_PBCamera_Run(effPCP_PBCamera_tag *work)
             skill = effBTLSkillGetID();
             invoke = effBTLSkillGetInvokeFormation();
             target = effBTLSkillGetTargetFormation(0);
-            if ((invoke->flags & 3) == 3) {
+            if ((invoke->stat & 3) == 3) {
                 mdlGetPosition(invoke->hunit->owner);
                 SDF_VU0_STOREVECTOR(&position);
                 effPCP_PBCamera_SetPosition(work, &position);
