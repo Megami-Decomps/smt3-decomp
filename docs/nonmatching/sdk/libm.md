@@ -37,3 +37,25 @@ staging the final exponent addition retains 17 matching words; assigning the
 packed word through the working-mantissa local is inert; extracting the
 exponent before the sign test gives 10 matching words. The preferred source
 keeps distinct representation objects and the direct algorithm.
+
+## cosf and sinf
+
+Both wrappers emit native size: cosine212 bytes with38 of53 words matching
+and15 differing; sine232 bytes with43 of58 words matching and15 differing.
+The same initial scheduling and mask/comparison temporary choices differ in
+both, first at+8. Cosine dispatch from+48 onward and sine dispatch from+48
+onward match exactly. Normal builds retain assembly; no exact credit.
+
+Magnitude is the binary32 word with its sign bit masked. Inputs at or below
+0x3F490FD8 call the corresponding kernel with positive-zero tail; the sine
+flag is zero. All larger magnitudes go directly to the two-component reduction
+provider, with no added infinity/NaN check. The quadrant is the signed reducer
+result masked with3. Cosine uses +cos,-sin,-cos,+sin; sine uses
++sin,+cos,-sin,-cos. Reduced sine calls pass flag1. Native provider bodies
+establish two floating arguments in f12/f13 and integer arguments in a0.
+
+A scoped binary32 union preserves the actual stack representation transfer.
+A direct pointer cast instead emits MFC1, shortens each body by8 bytes and
+changes the prologue broadly; it was discarded. Splitting the magnitude mask
+assignment or scoping the union is compiler-inert. No forced storage, artificial
+reference or unsupported compiler setting was added to constrain scheduling.

@@ -1,8 +1,68 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "sdk/libm", cosf);
+extern f32 __kernel_cosf(f32 x, f32 tail);
+extern f32 __kernel_sinf(f32 x, f32 tail, s32 reduced);
+extern s32 __ieee754_rem_pio2f(f32 x, f32 *remainder);
 
+/* NON_MATCHING: native size; fifteen initial bit-extraction and
+ * scheduling words differ; quadrant dispatch is exact. */
+#ifdef NON_MATCHING
+f32 cosf(f32 x)
+{
+    f32 y[2];
+    s32 magnitude;
+    s32 quadrant;
+
+    {
+        union { f32 value; u32 bits; } input;
+        input.value = x;
+        magnitude = input.bits;
+    }
+    magnitude &= 0x7FFFFFFF;
+    if (magnitude <= 0x3F490FD8) {
+        return __kernel_cosf(x, 0.0f);
+    }
+    quadrant = __ieee754_rem_pio2f(x, y);
+    switch (quadrant & 3) {
+    case 0: return __kernel_cosf(y[0], y[1]);
+    case 1: return -__kernel_sinf(y[0], y[1], 1);
+    case 2: return -__kernel_cosf(y[0], y[1]);
+    default: return __kernel_sinf(y[0], y[1], 1);
+    }
+}
+#else
+INCLUDE_ASM(const s32, "sdk/libm", cosf);
+#endif
+
+/* NON_MATCHING: native size; fifteen initial bit-extraction and
+ * scheduling words differ; quadrant dispatch is exact. */
+#ifdef NON_MATCHING
+f32 sinf(f32 x)
+{
+    f32 y[2];
+    s32 magnitude;
+    s32 quadrant;
+
+    {
+        union { f32 value; u32 bits; } input;
+        input.value = x;
+        magnitude = input.bits;
+    }
+    magnitude &= 0x7FFFFFFF;
+    if (magnitude <= 0x3F490FD8) {
+        return __kernel_sinf(x, 0.0f, 0);
+    }
+    quadrant = __ieee754_rem_pio2f(x, y);
+    switch (quadrant & 3) {
+    case 0: return __kernel_sinf(y[0], y[1], 1);
+    case 1: return __kernel_cosf(y[0], y[1]);
+    case 2: return -__kernel_sinf(y[0], y[1], 1);
+    default: return -__kernel_cosf(y[0], y[1]);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libm", sinf);
+#endif
 
 INCLUDE_ASM(const s32, "sdk/libm", tanf);
 

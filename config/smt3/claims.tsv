@@ -826,3 +826,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	0 exact / 644 B guarded	variad
 src/smt3/sdk/libgcc_fixunsdfdi.c	redthing1	done	2026-10-28	1 SDK fn / 280 B	double to unsigned 64-bit conversion with native quotient/remainder splitting and qualified floating working-value lifetime; complete owner exact
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 248 B	frame-vector reverse insertion merge with native indexed owner accesses, unsigned counts and signed address comparison; complete owner 30 match, 0 differ
 src/smt3/pipe/pipeObject.c	redthing1	done	2026-10-28	1 fn / 572 B	parts allocation preserves twenty-slot scan, reserved slot dispatch, byte model result and fresh slot loads across callbacks; complete owner 39 match, 0 differ
+src/smt3/sdk/libm.c	redthing1	done	2026-10-28	0 exact / 444 B guarded	cosine and sine wrappers preserve binary32 threshold and reduced quadrant dispatch; fifteen initial words differ in each native-sized draft
