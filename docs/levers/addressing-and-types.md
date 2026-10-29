@@ -1881,3 +1881,14 @@ checks 36 match / 0 differ.
   table alignment). Direct accesses match all 191 words, including the
   native address materialization after `NumEffectClip`. The complete owner
   checks 54 match / 0 differ.
+
+### VU matrix output with no global memory barrier
+
+`effBTLSys_Attack_Draw` uses a 64-byte scratch matrix written by VU0 and
+passed by address to effect-part setters. `SDF_VU0_STOREMATRIX_NOMEM` on an
+ordinary `sdfMatrix4_t` reproduces all 1,044 native bytes: the store uses a
+short-lived address in `$2`, and the later setter arguments share `$21`.
+The global-memory-clobber store instead retains the early address in `$21`
+and emits 1,040 bytes. A volatile matrix does not change either result.
+This case needs the existing bare-address output macro, not volatile storage
+or a read-write address constraint.
