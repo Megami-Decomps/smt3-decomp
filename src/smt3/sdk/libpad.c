@@ -101,48 +101,48 @@ extern int scePrintf(const char *fmt, ...);
 extern s32 sceSifDmaStat(u32 id);
 extern u32 sceSifSetDma(sceSifDmaData *data, s32 count);
 
-/* NON_MATCHING: 28 of 69 words differ; retail keeps the slot index in $s0 and
- * the command pointer in $s1, and this draft swaps the pair. */
-#ifdef NON_MATCHING
+extern const char D_0054A960[];
+
 int _send_to_iop(int port, int slot)
 {
     padCmd *c = D_005989D0[port][slot].cmd;
     sceSifDmaData dma[16];
     int id;
     u32 seq;
+    void *destination;
 
     if (D_005989D0[port][slot].dmaId != 0) {
         if (sceSifDmaStat(D_005989D0[port][slot].dmaId) >= 0) {
             if (D_00529FAC != 0) {
-                scePrintf("libpad: sceSifSetDma faild\n");
+                scePrintf(D_0054A960);
             }
             return 0;
         }
     }
     seq = c->seq + 1;
+    destination = (void *)(D_005989D0[port][slot].iopAddr + ((seq & 1) << 5));
     c->seq = seq;
+    SyncDCache(c, (u8 *)c + 0x20);
+    dma[0].dest = destination;
     dma[0].src = c;
-    dma[0].dest = (void *)(((seq & 1) << 5) + D_005989D0[port][slot].iopAddr);
     dma[0].size = 0x20;
     dma[0].attr = 0;
-    SyncDCache(c, (u8 *)c + 0x20);
     id = sceSifSetDma(dma, 1);
     if (id == 0) {
         if (D_00529FAC != 0) {
-            scePrintf("libpad: sceSifSetDma faild\n");
+            scePrintf(D_0054A960);
         }
         return 0;
     }
     D_005989D0[port][slot].dmaId = id;
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libpad", _send_to_iop);
-#endif
 
 extern s32 sceSifBindRpc(void *client, u32 service, s32 mode);
 extern int scePadGetModVersion(void);
 extern int scePadInit2(int mode);
+
+INCLUDE_RODATA(const s32, "sdk/libpad", D_0054A960);
 
 int scePadInit(int mode)
 {

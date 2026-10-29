@@ -38,7 +38,6 @@ page and line to open. Conventions are in
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
-| 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 2 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
@@ -52,6 +51,7 @@ page and line to open. Conventions are in
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
 | 2 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
+| 1 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 1 |  | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
