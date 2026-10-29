@@ -96,7 +96,7 @@ has to recheck the whole unit, not just this line.
 
 ## sdfModelLinkShapedDrawPacket (sdf/sdfModel, 0x258)
 
-Sixty of 150 words match at the exact 600-byte size, and the mnemonic
+Sixty-three of 150 words match at the exact 600-byte size, and the mnemonic
 sequence is identical apart from two alignment `nop`s and one saved-register
 save/restore pair: `diff` over the opcodes alone leaves the prologue's
 `li`/`sd` ordering, two `lui`/`addiu` pairs that swap places inside the
@@ -161,6 +161,12 @@ spelling.
 
 What the draft does get right, and is worth keeping even if the register
 question is never solved:
+
+- The packet word is one `u32` narrowed in place, as in
+  `sdfModelSetOneSkinDrawPacket`: `matIndex = packed >> 16;` then
+  `packed &= 0xFFFF;` with `packed` subscripting the morph list. That is
+  retail's `srl $20, $2, 16` followed by `andi $2, $2, 0xFFFF`, and it is
+  worth three words over a separate `u16 morphIndex`.
 
 - The weight epsilon at `0x0054E744` is a `.lit4` pool entry, not a global:
   it is `1e-6f` (`0x358637BD`) and has to be written as the literal.
