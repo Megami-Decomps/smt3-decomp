@@ -171,3 +171,45 @@ union normalization and isolated original source-object context also failed.
 A new grounded allocation or source-lifetime premise is needed; scalar reuse
 alone does not defeat the inherited preference. No register constraints,
 extra arithmetic or artificial lifetime extensions were added.
+
+
+## func_002D6678
+
+The 5744-byte formatted-output core is independently bounded by its entry,
+frame and direct reentrant callers; see [SDK matching](../../sdk-matching.md).
+Its guarded reconstruction emits 5488 bytes: 7 of 1372 emitted words match,
+1365 differ, and 256 native bytes are uncovered. The frame is 0x2C0 rather
+than 0x290. Assembly remains active and this adds no exact matching credit.
+
+The reconstruction uses the native eight-entry output-vector batches and
+348-byte digit workspace. Text scanning always calls `_mbtowc_r` with global
+reentrancy state and the decoder limit, then parses the conversion byte.
+Integer arguments consume eight-byte slots; a single `l` selects 64-bit
+loads, while `ll` and `q` set a different flag which these integer paths do
+not consult. The pointer conversion sign-extends its 32-bit pointer before
+hexadecimal conversion. Stream setup tests `_bf._base`, not `_p`.
+
+Finite floating output uses the existing `cvt` and `exponent` providers.
+Separate vectors preserve the native mixture of locale decimal points and
+literal periods. Scientific output retains its zero-length suffix vector
+when applicable: it still occupies a batch slot. Integer precision is
+represented by zero-padding vectors, including the native alternate-octal
+ordering and empty numeral at value zero with precision zero.
+
+Cumulative output is updated after a successful literal batch and once per
+completed conversion, before its final flush. An earlier full-batch failure
+therefore excludes the unfinished conversion from that count. The common
+exit selects -1 only for the stream error flag; setup failure returns -1
+directly. Empty conversion batches reset their vector cursor even when
+there are no pending bytes to flush.
+
+A single switch covers both flags and conversions, as in the native dispatch
+table. The earlier two-stage parser emitted 5596 bytes with 1359 differing
+words but did not reproduce that structure; it is not retained. The decoder
+limit has its observed ordinary-data storage annotation, avoiding an inferred
+small-data reference.
+
+Control-flow layout, base-dispatch diagnostic retention, register allocation
+and stack lifetimes remain broad frontiers. The source does not attempt to
+fill missing bytes or force the native frame. A new compiler-property
+premise is required before allocation or control-flow tuning.

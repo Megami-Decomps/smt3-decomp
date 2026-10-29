@@ -885,3 +885,4 @@ src/smt3/sdk/libm.c	redthing1	done	2026-10-28	0 exact / typed table bounds	198-d
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 8 B	raw ioctl compatibility stub returns -1, with unrecovered parameter types left unspecified; complete owner 142 match, 0 differ
 src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	0 exact / 324 B guarded	name-row initializer: native upward clear loop and scalar phases; 52 of 81 words match, complete owner 20 match, 0 differ, assembly fallback retained
 src/smt3/newbattle/nbAi.c	redthing1	done	2026-10-29	1 fn / 372 B	nbRunAiSub matches native rejection state, combined typed-entry offsets and shared selection publication; owner 46 match, 0 differ including data
+src/smt3/sdk/libc.c	redthing1	done	2026-10-29	0 exact / 5744 B guarded	formatted-output core reconstructed with native vector batches, parsing and conversion providers; 5488 emitted bytes, 1365 differing words and 256 uncovered bytes
