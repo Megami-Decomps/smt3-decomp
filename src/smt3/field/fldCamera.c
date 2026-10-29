@@ -761,7 +761,163 @@ void resetCamTgtPlayer(void) {
     fldCamPitch = GetSphericalPosMove(target.x, target.z, eye.x, eye.z) + 180.0f;
 }
 
+#ifdef NON_MATCHING
+extern dds3Basic_t *dds3GetControlScene(void);
+extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
+extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, const sdfVector4_t *pos);
+
+void fldEventUpdateEx_Unity_2(void)
+{
+    fldFollowCameraControl_t *control = fldGetFollowCameraControl();
+    fldUnitControl_t *unit = fldGetUnitControl();
+    sdfVector4_t eye, target;
+    volatile sdfVector4_t point, base;
+    dds3Basic_t *scene, *camera;
+    dds3PoseSet_t *pose;
+    f32 x, y, z, bx, by, bz, value, upper, lower, span, blend, inverse;
+    f32 dx, dy, dz;
+    const char *name;
+
+    memset((void *)&point, 0, sizeof(point));
+    point.w = 1.0f;
+    memset((void *)&base, 0, sizeof(base));
+    base.w = 1.0f;
+    eye.x = D_002FC9C0[0] + (fldGlobalBase.x - D_002FC9C0[0]) * 0.5f;
+    eye.y = D_002FC9C0[1] + (fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight - D_002FC9C0[1]) * 0.125f;
+    eye.z = D_002FC9C0[2] + (fldGlobalBase.z - D_002FC9C0[2]) * 0.5f;
+    dds3CameraObjectBasicGetCameraTM(control->camera, &eye);
+    dds3GetTMPoseSet(unit->handle);
+    target.x = fldGlobalBase.campos.x;
+    target.y = fldGlobalBase.campos.y;
+    target.z = fldGlobalBase.campos.z;
+    target.w = 1.0f;
+    if (fldGlobalBase.area == 0x24 && fldGlobalBase.floor == 0x10) {
+        scene = dds3GetControlScene();
+        if (evtBitCheck(0x670)) {
+            name = "01cam_06";
+            upper = 10000.0f;
+            lower = -390.0f;
+            span = -10390.0f;
+            pose = dds3SceneBasicSearchNameAndType(scene, 4, name)->poseset;
+            value = fldGlobalBase.z;
+        } else {
+            name = "01cam_04";
+            upper = 200.0f;
+            lower = -9500.0f;
+            span = -9700.0f;
+            pose = dds3SceneBasicSearchNameAndType(scene, 4, name)->poseset;
+            value = fldGlobalBase.x;
+        }
+        x = pose->pos.x;
+        y = pose->pos.y;
+        z = pose->pos.z;
+        bx = fldGlobalBase.campos.x;
+        by = fldGlobalBase.campos.y;
+        bz = fldGlobalBase.campos.z;
+        point.x = x;
+        point.y = y;
+        point.z = z;
+        base.x = bx;
+        base.y = by;
+        base.z = bz;
+        if (value > upper) {
+            value = upper;
+        }
+        if (value < lower) {
+            value = lower;
+        }
+        blend = (value - upper) / span;
+        inverse = 1.0f - blend;
+        target.z = z * inverse + bz * blend;
+        target.x = x * inverse + bx * blend;
+        target.y = y * inverse + by * blend;
+    }
+    if (fldGlobalBase.area == 0x25 && fldGlobalBase.floor == 0x17) {
+        scene = dds3GetControlScene();
+        if (evtBitCheck(0x66F)) {
+            name = "01cam_04";
+            upper = 9500.0f;
+            lower = -500.0f;
+            span = -10000.0f;
+            pose = dds3SceneBasicSearchNameAndType(scene, 4, name)->poseset;
+            value = fldGlobalBase.z;
+        } else {
+            name = "01cam_02";
+            upper = 400.0f;
+            lower = -10000.0f;
+            span = -10400.0f;
+            pose = dds3SceneBasicSearchNameAndType(scene, 4, name)->poseset;
+            value = fldGlobalBase.x;
+        }
+        x = pose->pos.x;
+        y = pose->pos.y;
+        z = pose->pos.z;
+        bx = fldGlobalBase.campos.x;
+        by = fldGlobalBase.campos.y;
+        bz = fldGlobalBase.campos.z;
+        point.x = x;
+        point.y = y;
+        point.z = z;
+        base.x = bx;
+        base.y = by;
+        base.z = bz;
+        if (value > upper) {
+            value = upper;
+        }
+        if (value < lower) {
+            value = lower;
+        }
+        blend = (value - upper) / span;
+        inverse = 1.0f - blend;
+        target.z = z * inverse + bz * blend;
+        target.x = x * inverse + bx * blend;
+        target.y = y * inverse + by * blend;
+    }
+    if (fldGlobalBase.area == 0x14 && fldGlobalBase.floor == 7) {
+        pose = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 4, "01cam_03")->poseset;
+        value = fldGlobalBase.y;
+        x = pose->pos.x;
+        y = pose->pos.y;
+        z = pose->pos.z;
+        bx = fldGlobalBase.campos.x;
+        by = fldGlobalBase.campos.y;
+        bz = fldGlobalBase.campos.z;
+        point.x = x;
+        point.y = y;
+        point.z = z;
+        base.x = bx;
+        base.y = by;
+        base.z = bz;
+        if (value > 2700.0f) {
+            value = 2700.0f;
+        }
+        if (value < -200.0f) {
+            value = -200.0f;
+        }
+        blend = (value - 2700.0f) / -2900.0f;
+        inverse = 1.0f - blend;
+        target.z = z * inverse + bz * blend;
+        target.x = x * inverse + bx * blend;
+        target.y = y * inverse + by * blend;
+    }
+    dds3SetPosPoseSet(control->camera, &target);
+    target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * 0.125f;
+    target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * 0.125f;
+    target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * 0.125f;
+    dds3SetPosPoseSet(control->camera, &target);
+    SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
+    SDF_VU0_COPYVECTOR(fldCamTarget, &target);
+    camera = control->camera;
+    ((s32 (*)(dds3Basic_t *))camera->basicfunction->mainprocuder)(camera);
+    dx = eye.x - target.x;
+    dy = eye.y - target.y;
+    dz = eye.z - target.z;
+    fldCamLength = fsqrtf(dx * dx + dy * dy + dz * dz);
+    fldCamPitch = GetSphericalPosMove(target.x, target.z, eye.x, eye.z) + 180.0f;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldCamera", fldEventUpdateEx_Unity_2);
+#endif
 
 #ifdef NON_MATCHING
 extern void dds3SetScreenFovy(f32 fovy);
