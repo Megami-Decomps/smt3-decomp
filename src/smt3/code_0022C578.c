@@ -8516,11 +8516,6 @@ void cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 unused,
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateListSelection);
 #endif
 
-/* NON_MATCHING: 2 of 42 words differ, exact size: the argument-register copy and
- * the `slt` are swapped. */
-// 40 of 42 words match at the exact size; one adjacent pair is scheduled
-// in the opposite order.
-#ifdef NON_MATCHING
 void cmp_23C918(fclPanelPos_t *pos, s32 full, s32 total, s32 color1, s32 color2, s32 flag)
 {
     if (total < full)
@@ -8532,9 +8527,6 @@ void cmp_23C918(fclPanelPos_t *pos, s32 full, s32 total, s32 color1, s32 color2,
     cmpDrawBoxF(pos->unk_00, pos->unk_04, pos->unk_08, (u16)pos->unk_0C * full / total,
                 (u16)pos->unk_0E, color1, flag);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmp_23C918);
-#endif
 
 void camp_23C9C0(fclPanelPos_t *pos, s32 width, s32 gap,
                   s32 first, s32 second, s32 third, s32 total,
