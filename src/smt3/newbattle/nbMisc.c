@@ -129,12 +129,7 @@ typedef struct nbDevilInfo_t {
 
 extern nbDevilInfo_t datDevilTable[];
 
-typedef struct nbPanelProcess_nbPanelTMXuv_t {
-    s32 u0;
-    s32 v0;
-    s32 u1;
-    s32 v1;
-} nbPanelProcess_nbPanelTMXuv_t;
+
 
 /* Rows of the same 164-byte stride, a separate object from D_003989E0. */
 typedef struct nbDeadEvent_t {

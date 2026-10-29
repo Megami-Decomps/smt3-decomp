@@ -402,12 +402,7 @@ typedef struct {
     nbSpriteCorner_t corner[2];
 } nbSpriteVertex_t;
 
-typedef struct {
-    s32 u0;
-    s32 v0;
-    s32 u1;
-    s32 v1;
-} nbPanelProcess_nbPanelTMXuv_t;
+
 
 extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 rgba,
                         sdfTexHandle_t *th);

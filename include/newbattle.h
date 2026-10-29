@@ -96,6 +96,14 @@ typedef struct nbEventProcessData_t {
     void *mem;
 } nbEventProcessData_t;
 
+/* Texture coordinates used by the battle panel tables. */
+typedef struct nbPanelProcess_nbPanelTMXuv_t {
+    s32 u0;
+    s32 v0;
+    s32 u1;
+    s32 v1;
+} nbPanelProcess_nbPanelTMXuv_t;
+
 /* The native 0x80-byte battle party record. */
 typedef struct nbParty_t {
     u16 flag;
