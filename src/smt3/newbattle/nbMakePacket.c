@@ -19,7 +19,7 @@ typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
 typedef struct effBTL_t effBTL_t;
 
 /* A loaded pac file; only the chain down to the decoded buffer is named. */
-typedef struct { u8 unk_00[0x8]; void *buf; } nbPacEntry_t;
+
 
 typedef struct { u8 unk_00[0x60]; nbPacEntry_t *entry; } nbPacHandle_t;
 

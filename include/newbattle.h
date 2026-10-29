@@ -67,6 +67,12 @@ typedef struct nbFormation_t
     sdfVector4_t startpos;
 } nbFormation_t;
 
+/* Decoded entry in a battle pack. */
+typedef struct nbPacEntry_t {
+    u8 unk_00[0x8];
+    void *buf;
+} nbPacEntry_t;
+
 /* The native 0x80-byte battle party record. */
 typedef struct nbParty_t {
     u16 flag;
