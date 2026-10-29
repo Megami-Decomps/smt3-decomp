@@ -605,7 +605,81 @@ u32 slVersionConvert_GetSize(void) {
 
 INCLUDE_RODATA(const s32, "mc/slMain", D_00532860);
 
+#ifdef NON_MATCHING
+extern s32 printf(const char *format, ...);
+extern void *slConvertMemcpy(void *destination, const void *source, u32 size) __asm__("memcpy");
+extern char D_00532878[], D_005328A0[];
+
+void slVersionConvert_Step3(void)
+{
+    dds3GlobalWork_t *work = DDS3_GBWK;
+    sdfMemHandle_t *handle = work->memHandle;
+    u8 *source;
+    s32 i, j;
+
+    switch (version_convert_ver) {
+    case 1:
+        source = slLoadFileHandle;
+        slConvertMemcpy(work, source, 0x10);
+        slConvertMemcpy(&work->unk10[0x20], source + 0x10, 0x1BF4);
+        slConvertMemcpy(&work->syakkincnt[0x23C], source + 0x1C04, 0xDD8C);
+        break;
+    case 2:
+        slConvertMemcpy(work, slLoadFileHandle, 0xFA30);
+        break;
+    case 3:
+        printf(D_00532878);
+        work = DDS3_GBWK;
+        source = slLoadFileHandle;
+        memset(work, 0, 0x1A510);
+        slConvertMemcpy(work, source, 0x16DC0);
+        work = DDS3_GBWK;
+        for (i = 0; i < 16; i++) {
+            for (j = 0; j < 24; j++) {
+                u16 skill = work->unitwork[i].skill[j];
+                if ((u32)(skill - 0x100) < 0x60) {
+                    work->unitwork[i].skill[j] = skill + 0x20;
+                }
+            }
+            for (j = 0; j < 24; j++) {
+                u16 skill = work->unitwork[i].keisyoskill[j];
+                if ((u16)(skill - 0x100) < 0x60) {
+                    work->unitwork[i].keisyoskill[j] = skill + 0x20;
+                }
+            }
+        }
+        for (i = 0; i < 168; i++) {
+            for (j = 0; j < 24; j++) {
+                u16 skill = work->encycRecords[i].skill[j];
+                if ((u16)(skill - 0x100) < 0x60) {
+                    work->encycRecords[i].skill[j] = skill + 0x20;
+                }
+            }
+            for (j = 0; j < 24; j++) {
+                u16 skill = work->encycRecords[i].keisyoskill[j];
+                if ((u16)(skill - 0x100) < 0x60) {
+                    work->encycRecords[i].keisyoskill[j] = skill + 0x20;
+                }
+            }
+        }
+        work->memHandle = handle;
+        return;
+    case 4:
+        printf(D_005328A0, slLoadFileHandle);
+        work = DDS3_GBWK;
+        source = slLoadFileHandle;
+        memset(work, 0, 0x1A510);
+        slConvertMemcpy(work, source, 0x16DC0);
+        break;
+    default:
+        slConvertMemcpy(work, slLoadFileHandle, 0x1A510);
+        break;
+    }
+    DDS3_GBWK->memHandle = handle;
+}
+#else
 INCLUDE_ASM(const s32, "mc/slMain", slVersionConvert_Step3);
+#endif
 
 u8 slGetPadTrig(s32 map) {
     return map != 0 && slProcShutDownFlg == 1;
