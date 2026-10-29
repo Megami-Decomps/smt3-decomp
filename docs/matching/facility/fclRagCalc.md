@@ -2,27 +2,18 @@
 
 ## ragDrawList2, ragDrawList3 (fclRagCalc, 0x150 each)
 
-10 of 84 words differ, at the exact 336-byte size, for each of the pair. They
-differ only in the scroll and cursor offsets, the row stride, the list offset,
-the caption word, the kind constant and the header colour, so one analysis
-covers both.
+Both functions match all 84 words (336 bytes) under the canonical void
+`fclDrawPanel` contract. The old raw-offset drafts retained six differing
+words in the first acquisition block after that declaration correction.
 
-Every instruction matches. The ten differing words are the `ragDrawWork`
-pointer landing in the other caller-saved register in each of the two blocks
-that load it: retail holds it in `$3` for the first block and `$2` for the
-second, this holds it in `$2` and then `$3`. Everything the pointer feeds moves
-with it, which is the whole difference; the `lh`/`lbu` of the scroll and cursor,
-the row pointer, the `lb` of the selected item in the first `fclDrawPanel`
-delay slot, and the three `lw`s of the second panel's position are otherwise
-identical.
+Use the existing `ragDrawWork_t` members for that acquisition: `list.window2`
+and `list.window3` supply the signed scroll and unsigned cursor, `list.list2`
+and `list.list3` supply the signed item arrays, and `panel[2]` is the panel.
+The established offsets are respectively 0x2492/0x2494/0x3B and
+0x362A/0x362C/0x44; the panel is at 0x4700. These typed accesses produce
+retail's initial work-pointer and index allocation without artificial uses
+or altered declarations. Later global reloads remain across calls, preserving
+their possible effects on `ragDrawWork`.
 
-Ruled out: the work pointer as a local against `(u8 *)ragDrawWork` written out
-at every use; declaring the local before and after the scroll read; a separate
-local for the cursor byte; and `s16` against `s32` for the scroll. All five give
-the same ten words, so nothing in the source reaches the choice.
-
-The header text and sprite-table arguments use the matched `trmDrawListText`
-provider's pointer types and integer return contract. The final caption object
-is a pointer table, and the other caption is read as a pointer from the packed
-exchange data. Correcting these declarations preserves both ten-word residuals;
-it does not justify splitting a new data owner to alter address reuse.
+The complete owner checks as 7 match, 0 differ. Plain and `-da` compiler
+assembly agree after normalizing only the randomized `.file` scratch path.

@@ -2,6 +2,7 @@
 #define FLDNPC_TAG_H
 
 #include "common.h"
+#include "sdf_types.h"
 
 struct dds3Basic_t;
 

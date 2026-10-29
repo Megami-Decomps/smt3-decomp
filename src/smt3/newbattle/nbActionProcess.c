@@ -3136,7 +3136,286 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_READY);
 #endif
 
+#ifdef NON_MATCHING
+struct effBTLCut_t;
+extern struct effBTLCut_t *effBTLCutCreate(struct effBTL_t *effect, u16 cut, void *form, s32 stat);
+extern s32 nbGetKoukaType(s32 skill, s32 source, s32 target);
+extern s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid);
+extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 rate);
+extern s32 nbGetMotionActframe(nbFormation_t *form, s32 motion, f32 rate);
+extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
+extern s32 nbCheckBattleSkillError3(s32 skill, u32 select);
+extern void effBTLSkillSetState(s32 state);
+extern s32 effBTLGetMotionChangeFrame(struct effBTL_t *effect, u16 cut);
+extern s32 effBTLGetCutEndFrame(struct effBTL_t *effect, u16 cut);
+extern s32 effBTLCutGetMotionChangeFrame(struct effBTLCut_t *cut);
+extern u32 effBTLCutGetCutEndFrame(struct effBTLCut_t *cut);
+extern void effBTLCutSetDrawEndFrame(struct effBTLCut_t *cut, u32 frame);
+extern void effBTLCutSetCameraState(struct effBTLCut_t *cut);
+extern f64 fptodp(f32 value);
+extern struct nbKoukaPacket_t *nbAddSkillEffectKoukaPacket(s32 start, s32 length, s32 uniqueid, struct effBTLCut_t *cut);
+extern struct nbKoukaPacket_t *nbAddSkillEffectKoukaPacket2(s32 start, s32 length, s32 uniqueid, struct effBTL_t *effect, s32 cut, nbFormation_t *form, s32 type);
+extern struct nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 start, s32 uniqueid, nbFormation_t *form, s32 sw, u32 flag);
+extern struct nbKoukaPacket_t *nbAddJyokyoHelpPacket(s32 start, s32 uniqueid, s32 no, s32 var_id, s32 var_ind);
+extern struct nbKoukaPacket_t *nbAddSkillColorOffPacket(s32 start, s32 uniqueid);
+extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 start, s32 uniqueid, nbFormation_t *form);
+extern void nbAddHatudoEffectEndPacket(s32 start, s32 uniqueid);
+extern void nbAddHitStopPacket(s32 start, s32 uniqueid);
+extern void nbDispSkillName(s32 skill);
+
+void SetAction_SKILL(nbActionProcessData_t *a)
+{
+    s8 list[32][2];
+    struct effBTLCut_t *cut;
+    s32 skill, endFrame, frame, cutFrame, cutEnd, motionFrame, effectType;
+    s32 type, i, count, target, amount, hp, mp, autoFrame, message, help;
+    s32 successful, singleCut, reflectOnly, absorbOnly, showCut, anyHit, anyNormal;
+    s32 state;
+    f32 speed, power, motionSpeed;
+
+    cut = NULL;
+    speed = (a->stat & 0x100) ? 3.0f : 1.0f;
+    a->newpresstype = 0;
+    a->data->d31_kantuu = 0;
+    cutEnd = 0;
+    count = 0;
+    state = 0;
+    successful = 1;
+    anyHit = 0;
+    showCut = 0;
+    reflectOnly = 1;
+    absorbOnly = 1;
+    anyNormal = 0;
+    if (a->hEffBTL != NULL && a->runerr == 0) {
+        cut = effBTLCutCreate(a->hEffBTL, 1, a->form, 1);
+        motionFrame = effBTLCutGetMotionChangeFrame(cut);
+        endFrame = effBTLCutGetCutEndFrame(cut);
+        printf("mot %d, cut %d\n", motionFrame, endFrame);
+        SetTimeList(a, a->form->formindex, 0, endFrame, endFrame);
+    } else {
+        endFrame = 0;
+        amount = (s32)(10.0f / speed);
+        SetTimeList(a, a->form->formindex, 0, amount, amount);
+    }
+    if (a->form->motendtype == 2 && a->form->motcate >= 0 && a->form->motenddata >= 0) {
+        motionSpeed = nbGetMotionSpeed(a->form, a->form->motcate, speed);
+        amount = (s32)((f32)a->form->motenddata / motionSpeed) -
+                 nbGetMotionActframe(a->form, a->form->motcate, speed) + (s32)(10.0f / speed);
+        OverwriteTimeList(a, a->form->formindex, 0, amount, amount);
+    }
+    skill = 0;
+    switch (a->work->nowcommand) {
+    case 6: skill = 0xFF; break;
+    case 5: skill = nbGetItemSkillNo(a, a->work->nowindex); break;
+    case 1: skill = a->work->nowindex; break;
+    }
+    power = 1.0f;
+    SetNowActionStat(a, a->work->nowcommand, skill);
+    frame = endFrame;
+    GetKoukaList(a, list, a->select, skill);
+    for (i = 0; i < 32 && list[i][0] >= 0; i++) {
+        target = list[i][0];
+        frame = endFrame >= a->timelist[target].lockframe ? endFrame : a->timelist[target].lockframe;
+        type = nbGetKoukaType(skill, a->form->formindex, target);
+        printf("\245\271\245\255\245\353\270\372\262\314\245\277\245\244\245\327 = %d\n", type);
+        singleCut = type < 3;
+        if (a->type == 4 && singleCut) {
+            if (type >= 1) type = 3;
+            singleCut = type < 3;
+        }
+        cutFrame = 0;
+        if (a->hEffBTL != NULL && i < 16 && (type == 0 || (type >= 3 && type < 15))) {
+            cutFrame = effBTLGetMotionChangeFrame(a->hEffBTL, 2);
+            cutEnd = effBTLGetCutEndFrame(a->hEffBTL, 2);
+            printf("cut3 mottime:%d  endtime:%d\n", cutFrame, cutEnd);
+            SetTimeList(a, target, frame, 0, cutEnd + 1);
+        }
+        frame += cutFrame;
+        nbAddFormFlagOnOffPacket(frame, (s32)a, &a->data->form[target], 0, 0x2000);
+        if ((u32)(type - 1) >= 2) reflectOnly = 0;
+        if (type != 2) absorbOnly = 0;
+        if (type == 0 || type == 2 || type == 3) anyHit = 1;
+        if (type == 0) anyNormal = 1;
+        switch (type) {
+        case 0: case 1: case 2: case 3:
+            SetAllPacket(a, type, skill, a->form->formindex, target, list[i][1], frame, power);
+            break;
+        case 4: SetSakePacket(a, skill, a->form->formindex, target, list[i][1], frame); break;
+        case 5: SetMissPacket(a, skill, a->form->formindex, target, list[i][1], frame); break;
+        case 6:
+            if (!SetPlayerSummonPacket(a, skill, a->form->formindex, target, frame)) successful = 0;
+            break;
+        case 7: SetAnalyzePacket(a, target, frame); break;
+        case 8: SetTorafuPacket(a, target, frame); break;
+        case 9: SetMakaPacket(a, target, frame); break;
+        case 10: SetEnemyEscapePacket(a, target, frame); break;
+        case 11: SetOngShadowPacket(a, skill, a->form->formindex, target, list[i][1], frame); break;
+        case 12: SetAuroraPacket(a, target); break;
+        case 13: SetAddPressPacket(a, skill); break;
+        case 14: SetAddFlareChargePacket(a, frame); break;
+        }
+        if (type == 0 && (a->data->stat & 0x400) && (u32)(target - 4) < 10 && nbGetNormalSkillAttr(skill) != 0xE) {
+            SetOngShadowPacket2(a, target, frame + 5);
+        }
+        if (a->hEffBTL != NULL && i < 16 && successful && (type == 0 || (type >= 3 && type < 15))) {
+            if (type != 3 || skill != 0x107) {
+                effectType = CheckTimeListDead(a, target) ? 3 : ((u32)(type - 4) < 2 ? 0x20 : 1);
+                nbAddSkillEffectKoukaPacket2(frame - cutFrame, cutEnd, (s32)a, a->hEffBTL, 2, &a->data->form[target], effectType);
+                nbAddSePacket(frame - cutFrame, (s32)a, ((skill + 0x200) << 16) | 1);
+            }
+        }
+        power *= nbGetGensyoRitu(skill, a->form->formindex, target);
+        if (datSkillTable.normal[skill].koukatype == 0) nbSetHojoCounter(a->form->formindex, 0xF, 0);
+        if (type == 3) {
+            switch (nbGetNormalSkillAttr(skill)) {
+            case 1: nbSetHojoCounter(target, 0xA, 0); break;
+            case 2: nbSetHojoCounter(target, 9, 0); break;
+            case 6: nbSetHojoCounter(target, 0xC, 0); break;
+            case 7: nbSetHojoCounter(target, 0xB, 0); break;
+            }
+        }
+        if ((u32)(skill - 0x103) < 2) nbSetHojoCounter(target, 0xB, 0);
+        if (type == 1) nbAddHatudoEffectEndPacket(frame, (s32)a);
+        switch (datSkillTable.visual[skill].animetype) {
+        case 1: case 5: case 9: case 13: endFrame += 5; break;
+        case 2: case 6: case 10: case 14: endFrame += 8; break;
+        case 3: case 7: case 11: case 15: endFrame += 10; break;
+        case 4: case 8: case 12: endFrame++; break;
+        }
+        switch (type) {
+        case 1: state |= 4; break;
+        case 2: state |= 8; break;
+        case 3: state |= 0x10; break;
+        case 4: state |= 0x20; break;
+        case 5: state |= 0x40; break;
+        }
+        if (!singleCut || type <= 0) showCut = 1;
+        count++;
+    }
+    if (reflectOnly && skill == 0x108) showCut = 1;
+    if (absorbOnly && (u32)(skill - 0x106) < 2) showCut = 1;
+    if (skill == 0 && a->autoskill == 0 && nbHatudoCheckSkill(a->work, 0x12E) &&
+        !CheckTimeListDead(a, (s8)a->form->formindex)) {
+        a->autoskill = 0x12E;
+        autoFrame = GetAllEndTime(a);
+        hp = a->allhpdamage / datSkillTable.special[0xE].n;
+        mp = a->allmpdamage / datSkillTable.special[0xE].m;
+        if (hp == 0) hp = -1;
+        if (mp == 0) mp = -1;
+        if (hp > 0 || mp > 0) {
+            nbMakeKaifukuPacket(autoFrame, (s32)a, a->form, 3, hp, mp, 0);
+            if (hp > 0) AddTimeListHp(a, a->form->formindex, hp);
+            amount = (s32)(20.0f / speed);
+            SetTimeList(a, a->form->formindex, autoFrame, amount, amount);
+        }
+    }
+    if (skill == 0x11E && a->autoskill == 0 && !CheckTimeListDead(a, (s8)a->form->formindex) && a->runerr == 0) {
+        a->autoskill = 0x12E;
+        autoFrame = GetAllEndTime(a);
+        a->autoskill = 0;
+        hp = (a->work->maxhp * datSkillTable.normal[0x11E].hojopoint) / 100;
+        if (hp == 0) hp = -1;
+        if (hp > 0) {
+            nbMakeKaifukuPacket(autoFrame, (s32)a, a->form, 0, hp, -1, 0);
+            AddTimeListHp(a, a->form->formindex, hp);
+            amount = (s32)(20.0f / speed);
+            SetTimeList(a, a->form->formindex, autoFrame, amount, amount);
+        }
+    }
+    if (skill == 0x109 && a->autoskill == 0 && !CheckTimeListDead(a, (s8)a->form->formindex) && a->runerr == 0) {
+        a->autoskill = 0x12E;
+        autoFrame = GetAllEndTime(a);
+        a->autoskill = 0;
+        mp = (a->work->maxmp * datSkillTable.normal[0x109].mpn) / 100;
+        if (mp == 0) mp = -1;
+        if (mp > 0) {
+            nbMakeKaifukuPacket(autoFrame, (s32)a, a->form, 0, -1, mp, 0);
+            amount = (s32)(20.0f / speed);
+            SetTimeList(a, a->form->formindex, autoFrame, amount, amount);
+        }
+    }
+    effBTLSkillSetState(state);
+    autoFrame = GetAllEndTime(a);
+    OverwriteTimeList(a, a->form->formindex, 0, (s32)((f32)autoFrame * 0.79999996f), -1);
+    if (CheckTimeListDead(a, (s8)a->form->formindex) && !(a->party->flag & 0x20)) {
+        nbMakeDeadVisualPacket(frame, (s32)a, a->form, 0, 1);
+        SetTimeList(a, a->form->formindex, frame, 30, 30);
+        SetDeadPacket(a, a->form->formindex);
+    }
+    if (!CheckTimeListDead(a, (s8)a->form->formindex) && a->type == 0) CheckArrCounter(a);
+    printf("\245\310\241\274\245\277\245\353\245\300\245\341\241\274\245\270 HP=%d, MP=%d\n", a->allhpdamage, a->allmpdamage);
+    printf("skill kouka end time = %d\n", autoFrame);
+    printf("skill kouka unlock time = %d\n", GetAllUnlockTime(a));
+    if (a->runerr == 0) {
+        switch (a->autoskill) {
+        case 0x12B: case 0x12C: case 0x12D: case 0x12E: nbDispSkillName(a->autoskill); break;
+        }
+        if (a->runerr == 0) {
+            message = -1;
+            switch (skill) {
+            case 0x34: message = 0x10; break; case 0x36: message = 0x12; break;
+            case 0x35: message = 0x14; break; case 0x39: message = 0x16; break;
+            case 0x11A: if (anyHit) message = 0x16; break;
+            case 0x40: message = 0x18; break; case 0x41: message = 0x1A; break;
+            case 0x42: message = 0x1C; break; case 0x43: message = 0x1E; break;
+            case 0x44: message = 0x20; break; case 0x46: message = 0x22; break;
+            case 0x45: message = 0x24; break; case 0xCB: message = 0x50; break;
+            case 0xCC: message = 0x52; break; case 0xCD: case 0x109: message = 0x54; break;
+            case 0xCE: message = 0x56; break; case 0x4D: case 0x112: message = 0x5C; break;
+            case 0x110: message = 0x60; break; case 0x114: message = 0x62; break;
+            default: if (anyNormal && a->data->d31_kantuu) message = 0x64; break;
+            }
+            if (message >= 0) nbSetJyokyoMes(a, message, -1, 0);
+            if (nbCheckBattleSkillError3(skill, a->select)) {
+                printf("Kereijyou Koukaga nai ---------------------\n");
+                nbSetJyokyoMes(a, 0x44, -1, 0);
+            }
+            help = a->jyokyomes;
+            if (help > 0 && (a->stat & 0x20)) {
+                if (help & 1) help--;
+                else help++;
+                a->jyokyomes = help;
+            }
+        } else help = a->jyokyomes;
+    } else help = a->jyokyomes;
+    if (help > 0) {
+        if (skill >= 0x31 && skill < 0x33) {
+            frame += 20;
+            SetTimeList(a, a->form->formindex, frame, 40, 40);
+            help = a->jyokyomes;
+        }
+        nbAddJyokyoHelpPacket(frame, (s32)a, help, a->jyo_varid, a->jyo_varind);
+        a->jyokyomes = 0;
+    }
+    if (cut != NULL) {
+        effBTLCutSetDrawEndFrame(cut, autoFrame);
+        nbAddSkillColorOffPacket(autoFrame, (s32)a);
+        if (showCut) {
+            nbAddSkillEffectKoukaPacket(0, autoFrame, (s32)a, cut);
+            if (absorbOnly && skill == 0x106) nbAddSePacket(0, (s32)a, 0x03060001);
+            else nbAddSePacket(0, (s32)a, (skill + 0x200) << 16);
+        } else effBTLCutSetCameraState(cut);
+    } else nbAddSkillColorOffPacket(autoFrame, (s32)a);
+    if (a->form->motendtype == 1) nbAddMotionStopClearPacket(autoFrame * 60 / 100, (s32)a, a->form);
+    if (count > 0) {
+        if (a->type == 0) {
+            nbMakePressPacket(frame, (s32)a, a->press);
+            nbMakeNewPressPacket(frame, (s32)a, a->newpresstype, a->form);
+            printf("press %f\n", fptodp(a->press));
+        }
+    } else {
+        nbMakePressPacket(frame, (s32)a, -1.0f);
+        nbMakeNewPressPacket(frame, (s32)a, 0, a->form);
+    }
+    if (a->newaddpresstype > 0) nbMakeNewPressPacket(frame + 20, (s32)a, a->newaddpresstype, a->form);
+    if (a->hitstopframe > 0 && evtBitCheck(0xC09)) {
+        amount = (a->data->stat & 8) ? a->data->enemypcnt : a->data->playerpcnt;
+        if ((s32)((a->data->press3 + a->press / (f32)amount) * 100.0f) <= 0) nbAddHitStopPacket(a->hitstopframe, (s32)a);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAction_SKILL);
+#endif
 
 s32 CheckAction_SKILL(nbActionProcessData_t *a)
 {
