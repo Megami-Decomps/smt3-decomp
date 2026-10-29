@@ -426,7 +426,7 @@ extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0
                       u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2,
                       u32 r3, u32 g3, u32 b3, u32 a3);
 
-extern void slFileSelDraw(s32 id);
+extern s32 slFileSelDraw(s32 id);
 
 extern void slDrawInfo(void);
 
@@ -2340,7 +2340,222 @@ INCLUDE_RODATA(const s32, "mc/slMain", D_005328E0);
 
 INCLUDE_RODATA(const s32, "mc/slMain", D_005328F0);
 
+extern f32 D_0054F074, D_0054C58C, slFileSelWork;
+extern char D_005287F0[], D_00528800[], D_00528810[];
+extern char D_005516D8[], D_005516E8[];
+extern char D_0054F080[], D_0054F088[], D_0054F090[], D_0054F098[], D_0054F0A0[];
+extern char D_00311450[][0x20], D_00311850[][0x20];
+extern void cmpSetSkillListRows(s32 rows);
+extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const u8 *text);
+
+#ifdef NON_MATCHING
+s32 slFileSelDraw(s32 id)
+{
+    s32 row;
+    s32 offset = 0;
+    s32 count;
+    f32 pulse;
+
+    if (gSlNowCardCheck == 1) {
+        return 0;
+    }
+    gSlSelCnt = gSlSelCnt < 30 ? gSlSelCnt + 1 : 30;
+    D_0054F074 += D_0054C58C;
+    pulse = sdfSin(D_0054F074) * 0.5f + 0.5f;
+    slFileSelWork = pulse < 0.0f ? 0.0f : pulse;
+    if (slFileSelWork > 1.0f) {
+        slFileSelWork = 1.0f;
+    }
+    rsetOtOfs(0x49);
+    rsetTest(1, 0, 0x80, 2, 0, 0, 1, 1);
+    rsetAlpha(0);
+    aDrawBoxF(0, 0, 0x200, 0x1C0, 0, 0, 0, 0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    rsetOtOfs(0x47);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    count = gSlSelCnt;
+    if (count >= 8) {
+        offset = count < 15 ? 0x200 - (count - 7) * 64 : 0;
+        DrwSprite2D(offset + 0x17E, 0x34, 0x82, 0x1D, 4, 0xD, 0x82, 0x1D, 0x80808080, slProcPtr);
+        DrwSprite2D(offset, 0x34, 0x17E, 0x1D, 0x85, 0xD, 1, 0x1D, 0x80808080, slProcPtr);
+        aDrawBoxG(offset, 0x16, 0x200, 4, 0, 0, 0, 0x59, 0, 0, 0, 0x59,
+                  0, 0, 0, 0x59, 0, 0, 0, 0x59);
+        aDrawBoxG(offset, 0x28, 0x200, 4, 0, 0, 0, 0x59, 0, 0, 0, 0x59,
+                  0, 0, 0, 0x59, 0, 0, 0, 0x59);
+        aDrawBoxG(offset, 0xCF, 0x200, 2, 0, 0, 0, 0x59, 0, 0, 0, 0x59,
+                  0, 0, 0, 0x59, 0, 0, 0, 0x59);
+        if (gSlSelCnt >= 8) {
+            offset = gSlSelCnt < 15 ? gSlSelCnt * 64 - 0x3C0 : 0;
+            for (row = 0; row < 6; row++) {
+                s32 y = 0x58 + row * 64;
+                DrwSprite2D(offset + 0x188, y, 0x78, 6, 3, 2, 0x78, 6, 0x80808080, slProcPtr);
+                DrwSprite2D(offset, y, 0x188, 6, 3, 2, 1, 6, 0x80808080, slProcPtr);
+            }
+        }
+    }
+    for (row = 0; row < 5; row++) {
+        count = gSlSelCnt;
+        if (count >= 10) {
+            offset = 0;
+        } else {
+            s32 distance = (s32)((u32)count << 9) / 10;
+            offset = (row & 1) ? 0x200 - distance : distance - 0x200;
+        }
+        {
+            s32 y = row * 64 + 0x61;
+            s32 state;
+            s32 textY = (y + 0x1A) / 2;
+            s32 selected;
+            s32 spriteV;
+            u32 color = 0xA09DC380;
+            slFileRec_t *record = &D_00569740[row];
+            GameFileInfo_t *info = (GameFileInfo_t *)(void *)record;
+            char number[16];
+            u8 name[18];
+
+            DrwSprite2D(offset + 0x17E, y - 3, 0x82, 0x1D, 0x84, 0x26, -0x82, 0x1D, 0x80808080, slProcPtr);
+            DrwSprite2D(offset, y - 3, 0x17E, 0x1D, 0x84, 0x26, 1, 0x1D, 0x80808080, slProcPtr);
+            DrwSprite2D(offset, y + 0x1A, 0x82, 0x1D, 3, 0x26, 0x82, 0x1D, 0x80808080, slProcPtr);
+            DrwSprite2D(offset + 0x82, y + 0x1A, 0x17E, 0x1D, 0x84, 0x26, 1, 0x1D, 0x80808080, slProcPtr);
+            state = slTopMenuSel[row];
+            if (state != 1) {
+                DrwSprite2D(offset + 0x17E, y - 3, 0x82, 0x1D, 0x85, 0x4D, -0x82, 0x1D, 0x80808080, slProcPtr);
+                DrwSprite2D(offset, y - 3, 0x17E, 0x1D, 0x85, 0x4D, 1, 0x1D, 0x80808080, slProcPtr);
+                DrwSprite2D(offset, y + 0x1A, 0x82, 0x1D, 4, 0x4D, 0x82, 0x1D, 0x80808080, slProcPtr);
+                DrwSprite2D(offset + 0x82, y + 0x1A, 0x17E, 0x1D, 0x85, 0x4D, 1, 0x1D, 0x80808080, slProcPtr);
+            }
+            if ((row == 0 && gSlSelCnt < 15) || (row == 1 && gSlSelCnt < 17) ||
+                (row == 2 && gSlSelCnt < 19) || (row == 3 && gSlSelCnt < 23) ||
+                (row == 4 && gSlSelCnt < 25)) {
+                continue;
+            }
+            state = slTopMenuSel[row];
+            if (state == 0) {
+                slKanjiDraw(offset + 0xCD, (y + 0xD) / 2, 0x6C81BB80,
+                            gslMode == 1 ? D_005516D8 : D_005287F0);
+            } else if (state == 2) {
+                slKanjiDraw(offset + 0xCD, (y + 0xD) / 2, 0xCB819A80, D_00528800);
+            } else if (*(volatile s16 *)&info->newfile != 0) {
+                slKanjiDraw(offset + 0x52, (y + 6) / 2, 0xA09DC380, D_00528810);
+            }
+
+            selected = slFileSelError == row;
+            if (selected) {
+                color = 0x9BF5FF80;
+                {
+                    f32 phase = slFileSelWork;
+                    f32 inverse = 1.0f - phase;
+                    s32 r0 = (s32)(phase * 56.0f + inverse * 30.0f);
+                    s32 g0 = (s32)(phase * 83.0f + inverse * 19.0f);
+                    s32 b0 = (s32)(phase * 100.0f + inverse * 54.0f);
+                    s32 r1 = (s32)(phase * 32.0f + inverse * 32.0f);
+                    s32 g1 = (s32)(phase * 23.0f + inverse * 23.0f);
+                    s32 b1 = (s32)(phase * 66.0f + inverse * 66.0f);
+                    s32 r2 = (s32)(phase * 30.0f + inverse * 56.0f);
+                    s32 g2 = (s32)(phase * 19.0f + inverse * 83.0f);
+                    s32 b2 = (s32)(phase * 54.0f + inverse * 100.0f);
+                    s32 left = (s32)(phase * 256.0f + inverse * 0.0f);
+                    s32 right = (s32)(phase * 0.0f + inverse * 256.0f);
+
+                    aDrawBoxG(0, y / 2, 0xCB, 0x1A,
+                              r0, g0, b0, 0x20, r1, g1, b1, 0x20,
+                              r1, g1, b1, 0x20, r0, g0, b0, 0x20);
+                    aDrawBoxG(0xCB, y / 2, 0x135, 0x1A,
+                              r1, g1, b1, 0x20, r2, g2, b2, 0x20,
+                              r2, g2, b2, 0x20, r1, g1, b1, 0x20);
+                    aDrawBoxG(0, (y + 2) / 2, left + 0xCB, 0xC,
+                              0x69, 0x96, 0xB1, 0x26, 0x3F, 0x37, 0x8C, 0x26,
+                              0x3F, 0x37, 0x8C, 0x26, 0x69, 0x96, 0xB1, 0x26);
+                    aDrawBoxG(left + 0xCB, (y + 2) / 2, left + 0xE8, 0xC,
+                              0x3F, 0x37, 0x8C, 0x26, 0x36, 0x26, 0x5E, 0,
+                              0x36, 0x26, 0x5E, 0, 0x3F, 0x37, 0x8C, 0x26);
+                    aDrawBoxG(0x4D - right * 2, (y + 0x1A) / 2, right + 0xE9, 0xC,
+                              0x36, 0x26, 0x5E, 0, 0x3F, 0x37, 0x8C, 0x26,
+                              0x3F, 0x37, 0x8C, 0x26, 0x36, 0x26, 0x5E, 0);
+                    aDrawBoxG(0x136 - right, (y + 0x1A) / 2, right + 0xCA, 0xC,
+                              0x3F, 0x37, 0x8C, 0x26, 0x36, 0x26, 0x5E, 0x26,
+                              0x36, 0x26, 0x5E, 0x26, 0x3F, 0x37, 0x8C, 0x26);
+                }
+            }
+            spriteV = slFileSelError == row ? 0x16 : 0;
+            DrwSprite2D(0x22, y + 3, 0x12, 0x15, row * 19 + 0x89, spriteV + 1,
+                        0x12, 0x15, 0x80808080, slProcPtr);
+            if (row == 5 || slTopMenuSel[row] != 1) {
+                continue;
+            }
+
+            if (*(volatile s16 *)&info->newfile == 0) {
+                u8 level;
+                cmpSetSkillListRows(18);
+                slKanjiDraw(0x46, textY, color,
+                            record->tmnlMode == 0 ? D_00311450[record->tmnlId] : D_00311850[record->tmnlId]);
+                cmpSetSkillListRows(-1);
+                level = *(volatile u8 *)&record->level;
+                sprintf(number, D_0054F080, level >= 100 ? 99 : level);
+                slKanjiDrawN(0x6D, (y + 5) / 2, color, number);
+            }
+            {
+                s32 time = *(volatile s32 *)&info->PlayTime;
+                if (time > 0x066FEBF8) {
+                    time = 0x066FEBF8;
+                }
+                sprintf(number, D_0054F088, time / 108000);
+                slKanjiDrawN(0x180, (y + 5) / 2, color, number);
+                sprintf(number, D_0054F090, (time % 108000) / 1800);
+                slKanjiDrawN(0x1A4, (y + 5) / 2, color, number);
+            }
+            if (slDDS3To31Flg == 0) {
+                s32 cycle;
+                if (*(volatile s16 *)&info->newfile == 0) {
+                    fldKanjiDraw(0x14D, (y + 0x1D) / 2, color,
+                                 (const u8 *)(record->mode != 0 ? D_0054F098 : D_0054F0A0));
+                }
+                cycle = *(volatile s16 *)&info->endcnt + 1;
+                if (cycle <= 0) {
+                    cycle = 1;
+                }
+                if (cycle >= 100) {
+                    cycle = 99;
+                }
+                if (cycle >= 2) {
+                    sprintf(number, D_0054F080, cycle);
+                    slKanjiDrawN(0x1D9, (y + 0x21) / 2, color, number);
+                    slKanjiDraw(0x1AE, (y + 0x1E) / 2,
+                                slFileSelError == row ? color : 0x50505080, D_005516E8);
+                }
+            }
+            {
+                s16 newFile = *(volatile s16 *)&info->newfile;
+                u16 newFileAgain = *(volatile u16 *)&info->newfile;
+                if (newFile == 0) {
+                    if (record->mapOpen > 0) {
+                        memset(name, 0, sizeof(name));
+                        slCopyNonZero(name, (u8 *)record->name.ch, record->mapOpen);
+                        slKanjiDraw(0x94, (y + 4) / 2, color, (const char *)name);
+                        newFileAgain = *(volatile u16 *)&info->newfile;
+                    }
+                    if (newFileAgain == 0) {
+                        DrwSprite2D(0x52, y + 9, 0x19, 0xD, 0x89, spriteV + 0x2D,
+                                    0x19, 0xD, 0x80808080, slProcPtr);
+                    }
+                }
+            }
+            DrwSprite2D(0x14D, y + 9, 0x2E, 0xD, 0xA3, spriteV + 0x2D,
+                        0x2E, 0xD, 0x80808080, slProcPtr);
+            DrwSprite2D(0x19C, y + 9, 6, 0xD, 0xD2, 0x2D, 6, 0xD, 0x80808080, slProcPtr);
+        }
+    }
+    rsetAlpha(0);
+    rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
+    rsetOtOfs(0x47);
+    rsetAlpha(0);
+    rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "mc/slMain", slFileSelDraw);
+#endif
 
 s32 slCalc(dds3ProcessID_t *id) {
     s32 next;
