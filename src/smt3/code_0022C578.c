@@ -5400,7 +5400,57 @@ void cmpDrawStatusBars(s32 x, s32 y, u8 *alpha)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillRowText);
 
+extern s8 D_00551FB9;
+extern volatile s32 cmpStatusAnimLive[] asm("cmpStatusAnimCount");
+
+#ifdef NON_MATCHING
+void cmpDrawSkillIcons(s32 x, s32 y, s8 index)
+{
+    s32 count;
+    s32 row;
+    s32 column;
+    u8 i;
+
+    if (D_00551FB9 == 0) {
+        return;
+    }
+    row = index / 4;
+    column = index % 4;
+    x += row * 116;
+    y += column * 22;
+    if (index >= 8) {
+        x++;
+        y--;
+    }
+    count = cmpStatusAnimLive[1];
+    if (count / 2 <= 0) {
+        return;
+    }
+    i = 0;
+    do {
+        s32 intensity;
+        s32 colors[4];
+
+        count = cmpStatusAnimLive[1];
+        intensity = (s32)(0x80U - (u32)count * 4 - (u32)i * 16);
+        if (intensity < 0) {
+            intensity = 0;
+        }
+        if (intensity != 0) {
+            s32 color = intensity | 0x80808000;
+
+            colors[0] = colors[1] = colors[2] = colors[3] = color;
+            fclDrawSpriteSize((x - i) * 16, (y - i) * 8, 0,
+                              i * 2 + 0x89, i * 2 + 0x2B, colors,
+                              6, 10, D_00345D88, fclSpriteTable, 0x47);
+            count = cmpStatusAnimLive[1];
+        }
+        i++;
+    } while (i < count / 2);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillIcons);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkill);
 
