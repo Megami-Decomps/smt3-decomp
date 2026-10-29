@@ -180,7 +180,8 @@ typedef struct
     /* 0x01CFA */ u8 equipHearts;
     /* 0x01CFB */ u8 unk_01CFB[0x40];
     /* 0x01D3B */ u8 devilSlot[0x100];
-    /* 0x01E3B */ u8 unk_01E3B[0x10045];
+    /* 0x01E3B */ u8 unk_01E3B[0xFF85];
+    /* 0x11DC0 */ u8 hearts_up_param[32][6];
     /* 0x11E80 */ s32 encycNum;
 } cmbGlobalWork_t;
 
@@ -1241,7 +1242,18 @@ s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra)
 INCLUDE_ASM(const s32, "result/rstcalc", cmbGetHeartsParamByIndex);
 #endif
 
+extern s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra);
+
+#ifdef NON_MATCHING
+s32 cmbGetHeartsParamEx(s8 devilId, s8 index, s32 registered)
+{
+    s32 value = cmbGetHeartsParamByIndex(devilId, index, (s8)registered != 0);
+
+    return (s8)(value + cmbGlobalWork->hearts_up_param[devilId][index]);
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", cmbGetHeartsParamEx);
+#endif
 
 extern s32 cmbGetHeartsParamEx(s8 devilId, s8 index, s32 registered);
 
