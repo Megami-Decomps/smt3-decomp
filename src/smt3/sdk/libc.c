@@ -471,15 +471,9 @@ s32 printf(const char *fmt, ...) {
     return vfprintf(r->_stdout, fmt, ap);
 }
 
-INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B658);
-
 extern u32 strlen(const char *s);
 /* The newline owns a padded 16-byte read-only block in retail. */
 extern const char D_0054B660[];
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B660);
-
 s32 _puts_r(_reent *r, const char *s)
 {
     __suio request;
@@ -729,6 +723,12 @@ s32 gcc2_compiled__0(FILE *fp, __suio *uio) {
 }
 
 INCLUDE_ASM(const s32, "sdk/libc", __sbprintf);
+
+INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B658);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B660);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B670);
 

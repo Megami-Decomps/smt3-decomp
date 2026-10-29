@@ -2,6 +2,54 @@
 
 Conventions: [nonmatching drafts](../../nonmatching.md).
 
+## nbPanelDrawPP (0xA84)
+
+671 of 673 words match at the native 2692-byte size, with the same instruction
+count and schedule. The two differing words are the reads of `hp` and `maxhp`
+for the gauge ratio: retail loads each spill slot straight into the float
+register (`lwc1`/`cvt.s.w`), the draft inherits the `lhu` result still live in
+a general register and moves it across (`mtc1`/`cvt.s.w`). Both slots are
+compiler spill slots, not frame variables, since they sit at 0x8C and 0x90
+above the parameter spills, so no declaration can place them; the choice is
+reload's and is not reachable from C.
+
+What the body needed, all of it worth more than fifty words each:
+
+- The akuma record pointer and its byte offset are **block-scope per gauge
+  block**, not one pair shared by both. The offset is also its own local:
+  `ofs = statindex * sizeof(fldAnahoriAkuma_t) + 0xA50;` then
+  `(fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + ofs)`. Writing
+  `&DDS3_GBWK->akuma[statindex]` folds the constant the other way round
+  (`addu` then `addiu` instead of `addiu` then `addu`), and sharing one pointer
+  across the two blocks exchanges two registers over the whole tail.
+- `maxmp` is read and stored **before** the `mp != 0 && maxmp != 0` test, not
+  short-circuited inside it. Testing the field inline left the maxmp temp in a
+  different register, which removed the anti-dependency that orders the float
+  conversions and cost 46 words through the two branch delay slots.
+- One **function-scope `u32 col`** carries the pulse value in both sdfSin
+  blocks, and the 0x200000 block then needs its own block-scope local for the
+  final colour. That shared variable is what puts the pulse in a callee-saved
+  register; a block-scope one per site lands it in the argument register.
+- The second sprite of a pair has its `nbPanelXYZ_t *`, `nbPanelTMXuv_t *` and
+  texture handle **assigned after the first sprite call**, not in the block's
+  declarations. Declaring them up front reorders the first call's argument
+  loads away from field order.
+- The two `nbPanelXYZ_t *`/`nbPanelTMXuv_t *` pointers used after an `sdfSin`
+  call are assigned **after** the statement holding that call, so they land in
+  the same basic block as the call and the scheduler fills the pre-call slots
+  with them.
+- `(flag & 0x100000) || (flag & 0x200000)` folds to one `and` against
+  0x300000. Retail tests the two bits separately, which an `else if` with the
+  same call in both arms reproduces through cross-jumping.
+- `char buf[112]`: the local area is 112 bytes and sprintf's buffer is the only
+  local in it. The size is what the frame needs, not a measured buffer length.
+
+Ruled out for the last two words: `volatile` on the two locals (moves the
+slots into the frame variable area), a two-element array or a two-member struct
+for them (16-byte alignment and a larger local area), one-step against two-step
+division, an `f32` temp for the divisor, block-scope `rate`, and reading the
+fields again at the division.
+
 ## nbPanelDrawPP1 (0xC98)
 
 705 of 798 words differ at their retail positions, but the draft emits 798 of
