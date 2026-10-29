@@ -1,4 +1,4 @@
-# Unsigned remainder runtime findings
+# Remainder runtime findings
 
 ## __umoddi3 (sdk/libgcc_longlong, 0x568)
 
@@ -29,3 +29,37 @@ the following eight alignment bytes remain in their existing assembly import.
 An isolated original-object context produces the same result, so no translation
 unit split is justified by that control. Word extraction, scalar allocation and
 branch layout remain unqualified; the existing quotient draft is unchanged.
+
+## __moddi3 (sdk/libgcc_longlong, 0x690)
+
+165 of 420 native words match. The draft emits1644 versus1680 bytes,
+with246 differing overlapping words and36 uncovered bytes. Production keeps
+assembly; this reconstruction adds no exact matching credit.
+
+The signed wrapper forms both unsigned operand magnitudes, calls the same
+inlined divide/modulo primitive, and restores the numerator's sign on the
+remainder. Each negation first preserves the negated high word, replaces the
+low word, then subtracts its nonzero borrow from the high word. Unsigned word
+arithmetic handles the minimum signed64 magnitude without signed overflow;
+its remainder for a divisor of minus one is zero. Denominator sign does not
+change the remainder sign. A zero divisor retains the native conditional
+`break 0,7` path rather than returning a fabricated result.
+
+The signed object references its own256-byte bit-length table, `D_0054BE78`.
+The shared inline helper accepts that table separately from the unsigned
+object's `D_0054C078`; their first256 bytes are equal. All assembly imports,
+including the unsigned table's trailing alignment bytes, remain intact.
+The existing unsigned quotient and remainder drafts emit byte-identical
+instruction bodies after introducing the table parameter.
+
+An initial low-word-first negation reread the high word after modifying the
+union and emitted1652 bytes with only one matching word. Staging the real
+high-word arithmetic before that write emits1644 bytes with165 matches.
+A qualified actual-owner CSE/expand observation passes hooked/unhooked and
+plain-output parity: CSE reuses the original high-word extraction in UID32's
+negation, before the low-word replacement at UIDs43/44; UID51 subtracts the
+new low word's nonzero borrow. This recovers native word-negation operations,
+while frame size, scalar allocation and the normalized core remain residuals.
+A temporary host oracle with undefined-behavior checks passes400,240 boundary
+and deterministic random cases, including minimum signed inputs and both
+divisor signs. Native sign/borrow and divmod paths were independently reviewed.

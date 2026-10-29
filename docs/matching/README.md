@@ -46,6 +46,7 @@ both native and emitted sizes when they differ.
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
+| 2 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 2 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
@@ -61,7 +62,6 @@ both native and emitted sizes when they differ.
 | 1 |  | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 1 |  | [sdk/libm.md](sdk/libm.md) |
 | 1 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
-| 1 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
 | 1 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
