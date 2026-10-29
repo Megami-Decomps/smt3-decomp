@@ -391,7 +391,29 @@ void nbSetOrder(s32 index)
     nbSetOrderSide(1);
 }
 
+#ifdef NON_MATCHING
+void nbSetNextOrder(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 next;
+
+    if (data->orderindex < 0) {
+        nbSetOrder(data->orderindex);
+        return;
+    }
+    do {
+        next = data->orderindex + 1;
+        data->orderindex = next;
+        if (data->orderindex >= 12) {
+            nbSetOrder(next);
+            break;
+        }
+    } while (data->order[data->orderindex] < 0);
+    data->activeunit = data->order[data->orderindex];
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetNextOrder);
+#endif
 
 void nbUpdateOrder(void)
 {
