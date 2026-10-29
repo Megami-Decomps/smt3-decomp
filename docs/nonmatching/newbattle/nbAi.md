@@ -27,3 +27,17 @@ before the high-bit test also changes the native branch/store layout. Explicit
 default returns and an empty default arm leave the four-word residual; a nested
 0xF000 test or explicit shared-store label makes it worse. Do not repeat those
 without evidence for a different compiler decision.
+
+## SetSingleTarget2 (newbattle/nbAi, 0x26C)
+
+143 of 155 words match at the native 620-byte instruction size. All twelve
+differences are the stack adjustment and saved-register offsets: the draft
+uses a 0x40-byte frame with saves starting at 0x10, while native uses 0x50
+with saves starting at 0x20. Every other instruction matches.
+
+The candidate buffer contains signed-byte formation indices. Native writes
+only indices 0 through 15; the extra frame space does not establish a larger
+source-level array capacity. The 16-element reconstruction remains guarded
+until actual storage evidence explains that difference. The RNG declaration
+now agrees with its provider: state pointer, unsigned limit and unsigned
+return. This correction leaves the emitted instructions unchanged.

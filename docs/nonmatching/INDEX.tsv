@@ -138,6 +138,7 @@ dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/nonmatching/kernel/dds
 slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/nonmatching/mc/slMain.md	5
 MovieViewerProc	movie/MovieViewer	0x24C	6 of 144 words match	docs/nonmatching/movie/MovieViewer.md	5
 SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/nonmatching/newbattle/nbAi.md	5
+SetSingleTarget2	newbattle/nbAi	0x26C	143 of 155 words match	docs/nonmatching/newbattle/nbAi.md	31
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	5
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	52
 nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	81

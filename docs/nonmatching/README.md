@@ -43,6 +43,7 @@ page and line to open. Conventions are in
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
+| 2 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
@@ -80,7 +81,6 @@ page and line to open. Conventions are in
 | 1 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
 | 1 | newbattle/nbE911 | [newbattle/nbE911.md](newbattle/nbE911.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
-| 1 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 1 | movie/MovieViewer | [movie/MovieViewer.md](movie/MovieViewer.md) |
 | 1 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 1 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |

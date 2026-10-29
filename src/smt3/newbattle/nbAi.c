@@ -209,7 +209,7 @@ extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t 
 
 extern s32 datGet3Zokusei(datUnitWork_t *work);
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 extern s32 nbCheckSkillCost(s32 formindex, s32 nskill);
 
@@ -1135,7 +1135,7 @@ s32 nbPickAiAction(nbActionProcessData_t *a, s32 tbl)
     if (total == 0) {
         return -1;
     }
-    r = dds3GetRandIntA(0, total);
+    r = dds3GetRandIntA(NULL, total);
     acc = 0;
     for (i = 0; i < cnt; i++) {
         if (r < acc + row[list[i]].ritu) {
@@ -1547,7 +1547,7 @@ s32 SetSingleTarget2(nbActionProcessData_t *a, s32 code, s32 n)
         }
     }
     if (count > 0) {
-        selected = list[dds3GetRandIntA(0, count)];
+        selected = list[dds3GetRandIntA(NULL, count)];
         for (i = 0; i < 16; i++) {
             if (i != selected) {
                 a->data->form[i].stat &= ~8;
