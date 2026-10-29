@@ -3,6 +3,7 @@
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
+#include "pipe.h"
 
 extern void (*D_00551828)(void);
 
@@ -520,12 +521,6 @@ typedef struct tagPipeObjectEntry {
     s32 offset;
     u8 parameters[4];
 } tagPipeObjectEntry;
-
-typedef struct tagPipePartsType {
-    f32 radius;
-    f32 length;
-    u32 frame;
-} tagPipePartsType;
 
 typedef struct tagPipePartsInfo {
     u16 partsID;
