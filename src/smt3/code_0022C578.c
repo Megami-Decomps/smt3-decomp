@@ -152,7 +152,7 @@ typedef struct
     /* 0x01 */ s8 type;
     /* 0x02 */ u8 unk_02[2];
     /* 0x04 */ s32 color;
-} cmpHeartsIcon_t;
+} cmpHeartsIconTableEntry_t;
 
 typedef struct
 {
@@ -191,7 +191,7 @@ typedef struct
     /* 0x003C */ u8 unk_3C[0x2A8];
 } cmpPanelEff_t;
 
-extern cmpHeartsIcon_t D_00345E58[];
+extern cmpHeartsIconTableEntry_t D_00345E58[];
 
 extern campStatusPanel_t *campStatusPanel;
 
