@@ -1771,7 +1771,63 @@ void nbCameraBoss_Kagu_E909_Run(void)
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Kagu_E909_Run);
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Kagu_Attack_Set);
+s32 nbCameraBoss_Kagu_Attack_Set(nbCamera_t *pNbCamera)
+{
+    nbFormation_t *target;
+    nbFormation_t *invoke;
+    sdfVector4_t pos;
+    sdfVector4_t center;
+    f32 rot;
+    f32 length;
+    f32 height;
+    f32 len;
+
+    effBTLModelAllShow();
+    effBTLSkillGetInvokeParty();
+    target = effBTLSkillGetTargetFormation(0);
+    invoke = effBTLSkillGetInvokeFormation();
+    if (invoke->pos.x < target->pos.x) {
+        rot = -0.2617993355f;
+    } else {
+        rot = 0.2617993355f;
+    }
+    pNbCamera->fovy = 0.69813163f;
+    effBTLModelGetSphereCenter(target);
+    SDF_VU0_STOREVECTOR_NOMEM(&center);
+    center.y = center.y - target->r * target->scl * 0.5f;
+    effBTLModelGetSphereCenter(invoke);
+    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    pos.y = pos.y - invoke->r * invoke->scl * 0.5f;
+    SDF_VU0_LOADVECTOR(&pos);
+    SDF_VU0_LOADVECTOR_B(&center);
+    VU0_LERP_VF10_VF11(0.5f);
+    SDF_VU0_STOREVECTOR(&pNbCamera->target);
+    SDF_VU0_LOADVECTOR(&center);
+    SDF_VU0_LOADVECTOR_B(&pos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(len);
+    length = len + target->r * target->scl + invoke->r * invoke->scl;
+    SetRotateMatrixY(rot);
+    SDF_VU0_LOADVECTOR(&pos);
+    SDF_VU0_LOADVECTOR_B(&center);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+    length = length * sdfSin(sdfFabs(rot));
+    length = length * 1.15f;
+    height = effBTLModelGetHeight(target) - target->r * target->scl * 0.5f;
+    if (height > length) {
+        length = height;
+    }
+    height = effBTLModelGetHeight(invoke) - invoke->r * target->scl * 0.5f;
+    if (height > length) {
+        length = height;
+    }
+    pNbCamera->distance = length * 1.25f / sdfAtan(0.34906582f);
+    nbCameraShot_GroundCollision(pNbCamera);
+    return 1;
+}
 
 s32 nbCameraBoss_Kagu_FLEACH_Set(nbCamera_t *pNbCamera)
 {
