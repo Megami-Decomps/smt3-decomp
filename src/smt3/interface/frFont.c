@@ -1303,7 +1303,64 @@ s32 frEraseEffect(frFontHandle_t *pFRQ) {
     return didChange;
 }
 
+#ifdef NON_MATCHING
+s32 frDrawEffect(frFontHandle_t *parent, frTextHandle_t *glyph, u8 threshold, u8 rate)
+{
+    frTextHandle_t *previous = glyph->previous;
+    s32 previousFade = 0x80;
+    u8 previousEffect = 0;
+    s32 animate;
+    s32 displacement = 0;
+
+    if (previous == NULL && parent->previous != NULL) {
+        previous = parent->previous->lastChild;
+        if (previous == NULL && parent->previous->previous != NULL) {
+            previous = parent->previous->previous->lastChild;
+        }
+        if (previous != NULL) {
+            previousEffect = previous->renderValueOrSetupOrShade.setupBytes.secondOption;
+        }
+    }
+    if (previous != NULL) {
+        previousFade = previous->parentDimensionsOrRenderWord.fadeByte.value;
+    }
+    if (previousEffect != 0 &&
+        previousEffect != glyph->renderValueOrSetupOrShade.setupBytes.secondOption) {
+        animate = previousFade == 0x80;
+    } else {
+        animate = previousFade >= threshold;
+    }
+    if (animate) {
+        s32 advance = glyph->advance + parent->glyphCodeOrContext.byteRoles.spacing;
+        u32 color;
+
+        if (advance == 0) {
+            advance = 24;
+        }
+        if (rate < 0x80) {
+            rate = rate * 22 / advance;
+        }
+        color = glyph->parentDimensionsOrRenderWord.renderWord;
+        if ((u32)(0x80 - (color & 0xFF)) < rate) {
+            color = (color & ~0xFF) | 0x80;
+        } else {
+            color += rate;
+        }
+        glyph->parentDimensionsOrRenderWord.renderWord = color;
+    }
+    {
+        u16 drawCount = glyph->drawCount;
+
+        if ((s8)glyph->parentDimensionsOrRenderWord.fadeByte.value >= 0 &&
+            glyph->renderValueOrSetupOrShade.setupBytes.secondOption == 1) {
+            displacement = -(((drawCount * 2) % 5 - 2) * 16);
+        }
+    }
+    return displacement;
+}
+#else
 INCLUDE_ASM(const s32, "interface/frFont", frDrawEffect);
+#endif
 
 /* Draw through the shared render flags with mode zero. */
 s32 frDrawFont(frFontHandle_t *pFRQ) {
