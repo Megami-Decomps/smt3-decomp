@@ -23,6 +23,7 @@ typedef struct
 extern datDevilInfo_t datDevilTable[];
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color, s32 ot);
 extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                               const char *text, frFontHandle_t *previous);
 extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, s32 color,
@@ -340,7 +341,29 @@ s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *texList,
     return frDestroyFontRequestAfter(request);
 }
 
+#ifdef NON_MATCHING
+void trm_212CB8(fclPanelPos_t *panel, s8 count, s32 xOffset, s32 yOffset,
+                s8 *spacing, u16 *widths, u16 *heights, const char **text, s32 ot)
+{
+    s32 x = panel->unk_00 + xOffset;
+    s32 y = panel->unk_04 - yOffset;
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        cmpDrawBoxF(x, y, panel->unk_08, widths[i], heights[i], 0x60, ot);
+        x += (spacing[i] + widths[i]) * 16;
+    }
+    x = panel->unk_00 + xOffset;
+    y = panel->unk_04 - yOffset - 0x20;
+    for (i = 0; i < count; i++) {
+        fclDrawStrCenterTarget(x, y, panel->unk_08, widths[i], heights[i],
+                               0xA09DC380, text[i], ot);
+        x += (spacing[i] + widths[i]) * 16;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclDraw", trm_212CB8);
+#endif
 
 /* Quantity layout shared by datAddItem and datCheckItem. */
 typedef struct
