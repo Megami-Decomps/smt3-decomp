@@ -8596,7 +8596,62 @@ void cmpPlayCursorSE(u32 button)
     func_002413B8(button, 0);
 }
 
+#ifdef NON_MATCHING
+void func_002413B8(u32 button, s8 mode)
+{
+    s32 sound;
+
+    if (button & 0x8000) {
+        p2sdPlaySE(0xD, 0x7F, 0x3F);
+        return;
+    }
+    switch (button) {
+    case 1:
+    case 0x1000:
+    case 0x2000:
+        sound = 8;
+        break;
+    case 2:
+        sound = 0xA;
+        break;
+    case 0x4000:
+        sound = 0xC;
+        break;
+    case 0x10:
+    case 0x20:
+    case 0x40:
+    case 0x80:
+    case 0x100:
+    case 0x200:
+    case 0x400:
+    case 0x800:
+    case 0x10000:
+    case 0x20000:
+    case 0x40000:
+    case 0x80000:
+        switch (mode) {
+        case 1:
+            sound = 6;
+            break;
+        case 2:
+            sound = 1;
+            break;
+        case 3:
+            sound = 0x15;
+            break;
+        default:
+            sound = 0;
+            break;
+        }
+        break;
+    default:
+        return;
+    }
+    p2sdPlaySE(sound, 0x7F, 0x3F);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", func_002413B8);
+#endif
 
 s32 cmpChkPadPressUpDown(void)
 {
