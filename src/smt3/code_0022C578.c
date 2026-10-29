@@ -7565,7 +7565,53 @@ s32 campDrawStockCell(s32 color, s8 index, s8 row)
     return (color & ~0xFF) | (alpha & 0xFF);
 }
 
+extern s8 cmpGetCursorSlotState(s8 index, cmpCursorSlot_t *slot);
+
+#ifdef NON_MATCHING
+void campDrawStockStatus(s32 x, s32 y, s32 z, s32 color,
+                         s8 cursorMode, s8 detailMode, datUnitWork_t *unit,
+                         cmpCursorSlot_t *cursor, s32 alpha)
+{
+    s32 firstColor;
+    s32 secondColor = color;
+    s32 thirdColor = 0x80808080;
+    s32 offset = 0;
+    s32 colors[4];
+
+    if (cursorMode != 0) {
+        cmpSetCursorSlot(0, 1, 0x10, cursor);
+    }
+    firstColor = cmpAllocEffectSlot(color, 1, 0, cursor);
+    switch (cmpGetCursorSlotState(0, cursor)) {
+    case 3:
+        firstColor = campGetCursorColorSel(firstColor, cursor);
+        secondColor = campGetCursorColorSel(secondColor, cursor);
+        thirdColor = campGetCursorColorSel(thirdColor, cursor);
+        break;
+    case 4:
+        offset = campGetCursorColorAlt(cursor);
+        firstColor = campGetCursorColorAlt2(firstColor, cursor);
+        secondColor = campGetCursorColorAlt2(secondColor, cursor);
+        thirdColor = campGetCursorColorAlt2(thirdColor, cursor);
+        break;
+    }
+    firstColor = fclBlendColor(firstColor, 0, alpha);
+    secondColor = fclBlendColor(secondColor, 0, alpha);
+    thirdColor = fclBlendColor(thirdColor, 0, alpha);
+    x += offset;
+    campDrawStatusRow1(x, y, firstColor, unit);
+    if (detailMode != 1) {
+        colors[0] = thirdColor;
+        colors[1] = thirdColor;
+        colors[3] = thirdColor;
+        cmpDrawStatusBadge(x, y, colors, unit->badstatus);
+        campDrawStatusRow2(x, y, secondColor, unit);
+        campDrawStatusRow3(x, y, thirdColor, unit);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockStatus);
+#endif
 
 extern void campDrawStockStatus(s32 x, s32 y, s32 z, s32 color,
                                 s8 cursorMode, s8 detailMode,
