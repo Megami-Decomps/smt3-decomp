@@ -606,49 +606,46 @@ extern void dds3RotationArc(void);
 extern void evtSetUnitRot1(evtUnit_t *unit, s128 *rotation, s32 parameter);
 extern void *memset(void *dst, s32 value, u32 size);
 
-/* NON_MATCHING: 320/324 bytes; 57 of 80 emitted words match. */
-#ifdef NON_MATCHING
 void RunNumEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
-    sdfVector4_t initialDirection;
-    sdfVector4_t targetDirection;
+    sdfVector4_t forward;
+    sdfVector4_t rotation;
+    nbMainProcessData_t *data;
     nbParty_t *party;
     nbFormation_t *form;
 
-    memset(&initialDirection, 0, sizeof(initialDirection));
-    initialDirection.z = -1.0f;
-    party = &k->data->party[p->partyno];
-    if ((party->flag & 1) == 0) {
-        return;
+    memset(&forward, 0, sizeof(forward));
+    forward.z = -1.0f;
+    data = k->data;
+    /* SMT3 reconstruction aid: keep forward.z materialized here for the
+     * later VU load / RotationArc. The verified native schedule places its
+     * store before party lookup; this empty operand is not a memory barrier. */
+    __asm__ volatile ("" : : "m"(forward.z));
+    party = (nbParty_t *)((u8 *)(p->partyno * 0x80) + (u32)data->party);
+    if ((u16)(party->flag & 1) != 0) {
+        form = &data->form[party->formindex];
+        switch (p->type) {
+        case ROT:
+            form->stat |= 0x20;
+            SDF_VU0_COPYVECTOR(&rotation, &p->v);
+            break;
+        case HOMEROT:
+            form->stat &= ~0x20;
+            SDF_VU0_LOADVECTOR(&form->orgrot);
+            ToMatrix();
+            SDF_VU0_LOADIDENTITYVECTOR();
+            SDF_VU0_SETVECTOR_Z(1.0f);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR_NOMEM(&rotation);
+            break;
+        }
+        SDF_VU0_LOADVECTOR(&forward);
+        SDF_VU0_LOADVECTOR_B(&rotation);
+        dds3RotationArc();
+        SDF_VU0_STOREVECTOR_NOMEM(&rotation);
+        evtSetUnitRot1(form->hunit, (s128 *)&rotation, p->data1.i);
     }
-    form = &k->data->form[party->formindex];
-    switch (p->type) {
-    case ROT:
-        form->stat |= 0x20;
-        SDF_VU0_COPYVECTOR(&targetDirection, &p->v);
-        break;
-    case HOMEROT:
-        form->stat &= ~0x20;
-        SDF_VU0_LOADVECTOR(&form->orgrot);
-        ToMatrix();
-        SDF_VU0_LOADIDENTITYVECTOR();
-        SDF_VU0_SETVECTOR_Z(1.0f);
-        SDF_VU0_APPLYMATRIX();
-        SDF_VU0_STOREVECTOR(&targetDirection);
-        break;
-    default:
-        /* Native still uses the untouched destination vector for other types. */
-        break;
-    }
-    SDF_VU0_LOADVECTOR_MEMOPS(initialDirection);
-    SDF_VU0_LOADVECTOR_B(&targetDirection);
-    dds3RotationArc();
-    SDF_VU0_STOREVECTOR(&targetDirection);
-    evtSetUnitRot1(form->hunit, (s128 *)&targetDirection, p->data1.i);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", RunNumEffectKouka);
-#endif
 
 void RunUnitColKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
