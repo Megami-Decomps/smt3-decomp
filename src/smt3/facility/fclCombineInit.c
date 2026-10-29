@@ -778,25 +778,29 @@ s32 cmbCheckProcessStat(void)
 
 extern s32 cmpModelSetup(u16 id, s32 blocking);
 
-#ifdef NON_MATCHING
 s32 cmbGetBirthPhase(void)
 {
-    cmpCursorInfo_t *cursor;
     s32 stockIndex;
 
-    if (CMB_GBWK->unk_00003 == 5) {
-        cursor = &CMB_GBWK->stockCursorGroup[0].cursor;
-    } else if (CMB_GBWK->unk_00003 == 6) {
-        cursor = &CMB_GBWK->stockCursorGroup[1].cursor;
-    } else {
-        cursor = &CMB_GBWK->stockCursorGroup[2].cursor;
+    switch (CMB_GBWK->unk_00003) {
+    case 5:
+        stockIndex = (s8)CMB_GBWK->unk_165EE[
+            CMB_GBWK->stockCursorGroup[0].cursor.unk_22 +
+            (u8)CMB_GBWK->stockCursorGroup[0].cursor.unk_24];
+        break;
+    case 6:
+        stockIndex = (s8)CMB_GBWK->unk_165EE[
+            CMB_GBWK->stockCursorGroup[1].cursor.unk_22 +
+            (u8)CMB_GBWK->stockCursorGroup[1].cursor.unk_24];
+        break;
+    default:
+        stockIndex = (s8)CMB_GBWK->unk_165EE[
+            CMB_GBWK->stockCursorGroup[2].cursor.unk_22 +
+            (u8)CMB_GBWK->stockCursorGroup[2].cursor.unk_24];
+        break;
     }
-    stockIndex = (s8)CMB_GBWK->unk_165EE[cursor->unk_22 + (u8)cursor->unk_24];
     return cmpModelSetup(DDS3_GBWK->party[stockIndex].unit.id, 0);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthPhase);
-#endif
 
 s32 cmbBirthDevilIsAvailable(void)
 {
