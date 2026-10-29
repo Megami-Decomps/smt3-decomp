@@ -1021,15 +1021,15 @@ extern void cmpSetSkillListRows(s32 rows);
 extern char D_00551188[];
 extern _FRQ *gnbPnlWork;
 
-/* NON_MATCHING: 798 of 806 instruction words emitted against the native
- * 3224-byte size; the body is structurally complete and the tail aligns at a
- * constant eight-word offset. See docs/nonmatching/newbattle/nbPanelProcess.md. */
+/* NON_MATCHING: 690 of 797 words differ; 797 of the native 806 words are
+ * emitted and the 0x110 frame matches. See
+ * docs/nonmatching/newbattle/nbPanelProcess.md. */
 
 #ifdef NON_MATCHING
 
 void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessData_t *p)
 {
-    char buf[112];
+    char buf[16];
     s32 pcnum[4][2] = {{1, 1}, {0xD, 1}, {0x19, 1}, {0x24, 1}};
     s32 bad[12][2] = {{0x55, 0x38}, {1, 0x22},    {0x16, 0x22}, {0x2B, 0x22},
                       {0x40, 0x22}, {0x55, 0x22}, {0x6A, 0x22}, {0x7F, 0x22},
