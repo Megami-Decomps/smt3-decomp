@@ -8829,7 +8829,17 @@ typedef struct
 
 extern cmbSkillAttr_t attr[];
 
-INCLUDE_ASM(const s32, "code_0022C578", func_002429C0);
+s32 func_002429C0(void)
+{
+    s32 total = 0;
+    s32 i;
+
+    for (i = 0; i < DDS3_GBWK->akuma[0].skillcnt; i++) {
+        total += attr[DDS3_GBWK->akuma[0].skill[i]].capacity;
+    }
+    return total;
+}
+
 
 /* NON_MATCHING: 13 of 17 words differ (first at +0xC). */
 #ifdef NON_MATCHING

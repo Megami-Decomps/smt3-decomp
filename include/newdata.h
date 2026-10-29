@@ -34,7 +34,10 @@ typedef struct
     u32 exp;
     u8 pad18[2];
     s8 level;
-    u8 unk1B[0xD1];
+    u8 unk1B[0x21];
+    u16 skillcnt;
+    u16 skill[24];
+    u8 unk6E[0x7E];
 } fldAnahoriAkuma_t;
 
 /* Shared persistent work, recovered through its consumers. These fields form
