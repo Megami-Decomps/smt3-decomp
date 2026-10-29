@@ -483,8 +483,49 @@ void *nbEncProcess2_55(dds3ProcessID_t *id)
 }
 
 
-INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbEncProcess2_5);
+typedef struct nbKoukaPacket_t nbKoukaPacket_t;
+extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid,
+                                               nbFormation_t *form, s32 type);
+extern u32 dds3GetProcessRunTime(dds3ProcessID_t *id);
 
+void *nbEncProcess2_5(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    nbParty_t *party;
+    nbFormation_t *form;
+    s32 i;
+
+    if (nbCheckLoadGroup(0) == 0 && readtime == 0) {
+        readtime = dds3GetKernelCount() - readbasetime;
+    }
+    if (data->stat & 0x800) {
+        party = &data->party[4];
+        for (i = 0; i < 10; i++, party++) {
+            if (party->flag & 9) {
+                form = &data->form[party->formindex];
+                if (form->flag & 8) {
+                    form->flag &= ~8;
+                }
+            }
+        }
+        return nbEncProcess2_55;
+    }
+    if ((dds3GetProcessRunTime(id) & 7) == 0) {
+        party = &data->party[4];
+        for (i = 4; i < 14; i++, party++) {
+            if (party->flag & 9) {
+                form = &data->form[party->formindex];
+                if (form->flag & 8) {
+                    form->flag &= ~8;
+                    nbAddHitEffKoukaPacket(1, 0, form, 4);
+                    return NULL;
+                }
+            }
+        }
+        return nbEncProcess2_55;
+    }
+    return NULL;
+}
 void *nbEncProcess2(dds3ProcessID_t *id)
 {
     nbMainProcessData_t *data;
