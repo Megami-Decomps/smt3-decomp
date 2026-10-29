@@ -264,15 +264,6 @@ void mselToggleFlag(u8 *toggle, s32 *value, s8 dir)
     *value = (v & ~0xFF) | level;
 }
 
-/* Layout recovered from facility/fclEncyc.c; native indexes these rows with
- * a 0xB0 stride from offset 0x10 of the handle's data. */
-
-
-typedef struct mselSaveData_t {
-    u8 header[0x10];
-    fclencyceelem_t records[1];
-} mselSaveData_t;
-
 typedef struct datDevilFormat_t {
     u32 flag;
     u8 race, level;

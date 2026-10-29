@@ -82,13 +82,6 @@ extern s32 evtBitOn(s32 no);
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 #ifdef NON_MATCHING
-
-typedef struct {
-    s32 count;
-    u8 reserved[12];
-    fclencyceelem_t records[1];
-} mselSaveData_t;
-
 extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
 extern void *memset(void *ptr, s32 value, u32 size);
 extern void *sdfChipAllocZeroDirect(s32 size);

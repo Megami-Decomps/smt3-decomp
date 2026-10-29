@@ -44,4 +44,11 @@ typedef struct fclencyceelem_t {
     u32 hensinmaeexp;
 } fclencyceelem_t;
 
+/* Title-mode handle data: a count followed by compendium records. */
+typedef struct mselSaveData_t {
+    s32 count;
+    u8 reserved[12];
+    fclencyceelem_t records[1];
+} mselSaveData_t;
+
 #endif
