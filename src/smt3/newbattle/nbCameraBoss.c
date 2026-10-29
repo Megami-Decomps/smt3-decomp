@@ -5067,7 +5067,350 @@ s32 nbCameraBoss_BSLUSI_Cut23_AllParty_Set(nbCamera_t *pNbCamera)
     return 0;
 }
 
+#ifdef NON_MATCHING
+extern s32 effBTLModelCheckBossID(nbFormation_t *form);
+extern void nbCameraShot_Target_Set2(nbCamera_t *camera, nbCameraSkillInfo_t *info);
+extern void nbCameraShot_AttackTuibi_Set(nbCamera_t *camera);
+
+s32 nbCameraBoss_Cut2_Ptr_Init(nbCamera_t *camera, nbCameraSkillInfo_t *info)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *invoke, *target;
+    u32 invokeParty, id, mode;
+    s32 state;
+    u16 bad;
+
+    data = nbGetMainProcessData();
+    if (data == NULL) return 0;
+    invokeParty = effBTLSkillGetInvokeParty();
+    if (invokeParty == effBTLSkillGetTargetParty()) return 0;
+    state = effBTLSkillGetState();
+    invoke = effBTLSkillGetInvokeFormation();
+    bad = effBTLModelGetBadStatus(invoke);
+    id = effBTLModelGetID(invoke);
+    switch (id) {
+    case 0x114:
+        if (info->ptr23 == 10) {
+            nbCameraShot_InvokeTargetParty_Set2(camera, info);
+            return 1;
+        }
+        break;
+    case 0x116:
+        if (info->ptr23 == 1 && effBTLSkillGetTargetNumber() >= 2) {
+            return nbCameraBoss_BSALBI_InvokeTargetParty_Set(camera);
+        }
+        break;
+    case 0x11F:
+        switch (info->ptr23) {
+        case 0:
+            if (!(state & 0xC) && !(bad & 0x40) && (dds3GetRandA(dds3EffectBase) & 1)) {
+                if (effBTLSkillGetTargetNumber() >= 2) {
+                    nbCameraShot_TargetParty_Set2(camera, info);
+                } else {
+                    nbCameraShot_Target_Set2(camera, info);
+                }
+                return 1;
+            }
+        case 1:
+            return nbCameraBoss_Samael_AKUI_Set(camera);
+        }
+        break;
+    case 0x123: case 0x156:
+        switch (info->ptr23) {
+        case 0:
+            if (!(state & 0xC) && !(bad & 0x40) && (dds3GetRandA(dds3EffectBase) & 1)) {
+                if (effBTLSkillGetTargetNumber() >= 2) {
+                    nbCameraShot_TargetParty_Set2(camera, info);
+                } else {
+                    nbCameraShot_Target_Set2(camera, info);
+                }
+                return 1;
+            }
+        case 1:
+            return nbCameraBoss_BSARI1_EP_IT_Set(camera);
+        }
+        break;
+    case 0x158:
+        switch (info->ptr23) {
+        case 0:
+            if (!(state & 0xC) && !(bad & 0x40) && (dds3GetRandA(dds3EffectBase) & 1)) {
+                if (effBTLSkillGetTargetNumber() >= 2) {
+                    nbCameraShot_TargetParty_Set2(camera, info);
+                } else {
+                    nbCameraShot_Target_Set2(camera, info);
+                }
+                return 1;
+            }
+        case 1:
+            return nbCameraBoss_BSLUSI_EP_IT_Set(camera);
+        }
+        break;
+    case 0x102:
+        switch (info->ptr23) {
+        case 0:
+            if (!(state & 0xC) && !(bad & 0x40) && (dds3GetRandA(dds3EffectBase) & 1)) {
+                if (effBTLSkillGetTargetNumber() >= 2) {
+                    nbCameraShot_TargetParty_Set2(camera, info);
+                } else {
+                    nbCameraShot_Target_Set2(camera, info);
+                }
+                return 1;
+            }
+        case 1:
+            return nbCameraBoss_BSARI2_EP_IT_Set(camera);
+        }
+        break;
+    case 0x103: case 0x124:
+        switch (info->ptr23) {
+        case 0:
+            if (!(state & 0xC) && !(bad & 0x40) && (dds3GetRandA(dds3EffectBase) & 1)) {
+                if (effBTLSkillGetTargetNumber() >= 2) {
+                    nbCameraShot_TargetParty_Set2(camera, info);
+                } else {
+                    nbCameraShot_Target_Set2(camera, info);
+                }
+                return 1;
+            }
+        case 1:
+            return nbCameraBoss_BSNET_EP_IT_Set(camera);
+        }
+        break;
+    case 0x125:
+        switch (info->ptr23) {
+        case 0:
+            if (!(state & 0xC) && !(bad & 0x40) && (dds3GetRandA(dds3EffectBase) & 1)) {
+                if (effBTLSkillGetTargetNumber() >= 2) {
+                    nbCameraShot_TargetParty_Set2(camera, info);
+                } else {
+                    nbCameraShot_Target_Set2(camera, info);
+                }
+                return 1;
+            }
+        case 1:
+            return nbCameraBoss_BSKAGU_EP_IT_Set(camera);
+        }
+        break;
+    case 0x108:
+        switch (info->ptr23) {
+        case 0:
+            if (!(state & 0xC) && !(bad & 0x40) && (dds3GetRandA(dds3EffectBase) & 1)) {
+                if (effBTLSkillGetTargetNumber() >= 2) {
+                    nbCameraShot_TargetParty_Set2(camera, info);
+                } else {
+                    nbCameraShot_Target_Set2(camera, info);
+                }
+                return 1;
+            }
+        case 1:
+            return nbCameraBoss_BSPISH_EP_IT_Set(camera);
+        }
+        break;
+    case 0x157:
+        switch (info->ptr23) {
+        case 0:
+            if (!(state & 0xC) && !(bad & 0x40) && (dds3GetRandA(dds3EffectBase) & 1)) {
+                if (effBTLSkillGetTargetNumber() >= 2) {
+                    nbCameraShot_TargetParty_Set2(camera, info);
+                } else {
+                    nbCameraShot_Target_Set2(camera, info);
+                }
+                return 1;
+            }
+        case 1:
+            if (effBTLSkillGetTargetNumber() >= 2) return nbCameraBoss_BSBERU_EP_IT_Set(camera);
+            break;
+        }
+        break;
+    case 0x141:
+        switch (info->ptr23) {
+        case 0:
+            if (!(state & 0xC) && !(bad & 0x40) && (dds3GetRandA(dds3EffectBase) & 1)) {
+                if (effBTLSkillGetTargetNumber() >= 2) {
+                    nbCameraShot_TargetParty_Set2(camera, info);
+                } else {
+                    nbCameraShot_Target_Set2(camera, info);
+                }
+                return 1;
+            }
+        case 1:
+            if (effBTLSkillGetTargetNumber() == 1) {
+                nbCameraBoss_TargetInvoke_Set(camera, -5.0f, 1.15f);
+                return 1;
+            }
+            break;
+        }
+        break;
+
+    }
+    if (effBTLModelCheckBossID(invoke) && effBTLModelGetHeight(invoke) > 500.0f) {
+        mode = info->ptr23;
+        if (mode == 0 && !(state & 0xC) && !(bad & 0x40) && (dds3GetRandA(dds3EffectBase) & 1)) {
+            if (effBTLSkillGetTargetNumber() >= 2) nbCameraShot_TargetParty_Set2(camera, info);
+            else nbCameraShot_Target_Set2(camera, info);
+            return 1;
+        }
+        if (mode == 0 || mode == 1) {
+            if (effBTLSkillGetTargetNumber() >= 2) {
+                nbCameraShot_InvokeTargetParty_Set2(camera, info);
+                return 1;
+            }
+            return nbCameraShot_BossTargetInvoke_Set(camera);
+        }
+        if (mode == 10) return nbCameraShot_BossEX02_Set(camera);
+        if (mode == 9 || mode == 11) {
+            nbCameraShot_BossTargetInvoke_Set(camera);
+            return 1;
+        }
+    }
+    if (effBTLSkillGetTargetNumber() == 0) return 0;
+    target = effBTLSkillGetTargetFormation(0);
+    id = effBTLModelGetID(target);
+    switch (id) {
+    case 0x11F:
+        if (info->HeightMin != 0.0f) info->HeightMin = 800.0f;
+        break;
+    case 0x10D:
+        mode = info->ptr23;
+        if (mode == 0 || mode == 2) {
+            if (!(state & 0xC) && !(bad & 0x40) && (dds3GetRandA(dds3EffectBase) & 1)) {
+                if (effBTLSkillGetTargetNumber() >= 2 || (data->stat & 0x4000)) {
+                    nbCameraShot_TargetParty_Set2(camera, info);
+                } else {
+                    nbCameraShot_Target_Set2(camera, info);
+                }
+                return 1;
+            }
+        }
+        if (mode == 0 || mode == 1 || mode == 2) {
+            if (effBTLSkillGetTargetNumber() < 2 && !(data->stat & 0x4000)) {
+                nbCameraShot_InvokeTarget_Set2(camera, info);
+            } else {
+                nbCameraShot_InvokeTargetParty_Set2(camera, info);
+            }
+            return 1;
+        }
+        break;
+    case 0x123:
+        if (info->HeightMin != 0.0f) info->HeightMin = 1000.0f;
+        if (info->WidthMin != 0.0f) info->WidthMin = 1000.0f;
+        switch (info->ptr23) {
+        case 8: nbCameraBoss_InvokeTarget_Set(camera, -5.0f, 0.54999997f); return 1;
+        case 9: return nbCameraBoss_BSARI1_Cut23_EX01_Set(camera);
+        case 10: return nbCameraBoss_BSARI1_Cut23_EX02_Set(camera);
+        case 11: return nbCameraBoss_BSARI1_Cut23_EX03_Set(camera);
+        case 0: case 1: case 2:
+            if (effBTLSkillGetTargetNumber() >= 2) {
+                nbCameraShot_InvokeTargetParty_Set2(camera, info);
+            } else {
+                nbCameraBoss_InvokeTarget_Set(camera, -15.0f, 0.5f);
+                effBTLModelInvokeGroupHide();
+            }
+            return 1;
+        case 12: nbCameraBoss_InvokeTarget_Set(camera, 5.0f, 0.54999997f); return 1;
+        }
+        break;
+    case 0x102:
+        switch (info->ptr23) {
+        case 0: case 1: case 2:
+            if (effBTLSkillGetTargetNumber() >= 2) nbCameraShot_InvokeTargetParty_Set2(camera, info);
+            else nbCameraShot_InvokeTarget_Set2(camera, info);
+            return 1;
+        case 9: return nbCameraBoss_BSARI2_Cut23_EX01_Set(camera);
+        case 10: return nbCameraBoss_BSARI2_Cut23_EX02_Set(camera);
+        case 11: return nbCameraBoss_BSARI2_Cut23_EX03_Set(camera);
+        case 12: nbCameraBoss_InvokeTarget_Set(camera, 10.0f, 0.69999999f); return 1;
+        }
+        break;
+    case 0x156:
+        if (info->HeightMin != 0.0f) info->HeightMin = 1000.0f;
+        if (info->WidthMin != 0.0f) info->WidthMin = 1000.0f;
+        switch (info->ptr23) {
+        case 10: return nbCameraBoss_BSMETA_Cut23_EX02_Set(camera);
+        case 9: case 11: return nbCameraBoss_BSMETA_Cut23_EX01_Set(camera);
+        case 0: case 1: case 2:
+            if (effBTLSkillGetTargetNumber() >= 2) nbCameraShot_InvokeTargetParty_Set2(camera, info);
+            else nbCameraShot_InvokeTarget_Set2(camera, info);
+            return 1;
+        }
+        break;
+    case 0x157:
+        if (info->HeightMin != 0.0f) info->HeightMin = 1000.0f;
+        if (info->WidthMin != 0.0f) info->WidthMin = 1000.0f;
+        switch (info->ptr23) {
+        case 10: return nbCameraBoss_BSBERU_Cut23_EX02_Set(camera);
+        case 9: case 11: return nbCameraBoss_BSBERU_Cut23_EX01_Set(camera);
+        case 0: case 1: case 2:
+            if (effBTLSkillGetTargetNumber() >= 2) nbCameraShot_InvokeTargetParty_Set2(camera, info);
+            else nbCameraShot_InvokeTarget_Set2(camera, info);
+            return 1;
+        }
+        break;
+    case 0x158:
+        if (info->HeightMin != 0.0f) info->HeightMin = 1000.0f;
+        if (info->WidthMin != 0.0f) info->WidthMin = 1000.0f;
+        switch (info->ptr23) {
+        case 10: return nbCameraBoss_BSLUSI_Cut23_EX02_Set(camera);
+        case 9: case 11: return nbCameraBoss_BSLUSI_Cut23_EX01_Set(camera);
+        case 0: case 1: case 2: case 8: case 12:
+            target->center.y -= 75.0f;
+            if (effBTLSkillGetTargetNumber() >= 2) {
+                nbCameraShot_InvokeTargetParty_Set2(camera, info);
+            } else {
+                nbCameraBoss_InvokeTarget_Set(camera, -5.0f, 0.25f);
+            }
+            camera->fovy = 0.87266452f;
+            target->center.y += 75.0f;
+            return 1;
+        }
+        break;
+    case 0x103: case 0x124:
+        if (info->ptr23 == 10) return nbCameraBoss_BSNET1_Cut23_EX02_Set(camera);
+        if (info->ptr23 <= 2) {
+            nbCameraShot_InvokeTarget_Set2(camera, info);
+            return 1;
+        }
+        if (info->ptr23 == 12) {
+            nbCameraBoss_InvokeTarget_Set(camera, 5.0f, 0.54999997f);
+            return 1;
+        }
+        break;
+    case 0x125:
+        mode = info->ptr23;
+        if (mode == 9 || mode == 11) return nbCameraBoss_BSKAGU_Cut23_EX01_Set(camera);
+        if (mode == 10) return nbCameraBoss_BSKAGU_Cut23_EX02_Set(camera);
+        if (mode <= 2) {
+            nbCameraShot_InvokeTarget_Set2(camera, info);
+            return 1;
+        }
+        if (mode == 12) {
+            nbCameraBoss_InvokeTarget_Set(camera, 5.0f, 1.0f);
+            return 1;
+        }
+        break;
+    case 0x108:
+        switch (info->ptr23) {
+        case 9: return nbCameraBoss_BSPISH_Cut23_EX01_Set(camera);
+        case 10: return nbCameraBoss_BSPISH_Cut23_EX02_Set(camera);
+        case 11: return nbCameraBoss_BSPISH_Cut23_EX03_Set(camera);
+        case 0: case 1: case 2:
+            nbCameraShot_InvokeTarget_Set2(camera, info);
+            return 1;
+        case 12:
+            nbCameraBoss_InvokeTarget_Set(camera, 5.0f, 1.0f);
+            return 1;
+        }
+        break;
+    }
+    if (!effBTLModelCheckBossID(target)) return 0;
+    if (effBTLModelGetHeight(target) > 500.0f && (info->ptr23 == 9 || info->ptr23 == 11)) {
+        nbCameraShot_AttackTuibi_Set(&pNbCamera);
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut2_Ptr_Init);
+#endif
 
 s32 nbCameraBoss_Cut2_Ptr_Run(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 {
