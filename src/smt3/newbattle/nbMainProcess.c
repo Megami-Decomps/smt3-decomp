@@ -501,7 +501,6 @@ void nbDebugCamera(nbMainProcessData_t *data)
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern long fptodp(f32 value);
 extern sdfGrOt_t D_002F67F8;
 extern char *nbDebugPhaseNameTable[];
 extern char *D_003FA748[];
