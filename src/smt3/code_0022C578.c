@@ -5981,7 +5981,134 @@ void cmpDrawStatusGauge(s32 x, s32 y, s8 index, s32 intensity)
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusGauge);
 #endif
 
+#include "font.h"
+
+extern s32 datGetPlayerLNDLevel(datUnitWork_t *unit);
+extern u16 datGetLevelForDraw(datUnitWork_t *unit);
+extern s32 datAdvanceDevilLevel(datUnitWork_t *unit);
+extern frFontHandle_t *frGetNameFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
+extern datDevilTableEntry_t datDevilTable[];
+extern char *datExplainTable[];
+extern char D_0054FEA8[];
+extern s16 cmpHeartsMasterPhase asm("rstHeartsMasterPhase");
+extern datUnitWork_t *volatile cmpStatusBirthLive asm("cmbBirthPanel");
+extern void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags);
+
+#ifdef NON_MATCHING
+void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
+{
+    volatile datUnitWork_t *live = unit;
+    s32 textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0xA09DC380);
+    s32 levelColor;
+    s32 spriteX = x * 16;
+    s32 spriteY = y * 8;
+    s32 nameX = (x + 0x58) * 16;
+    s32 badgeX;
+    s32 length;
+    frFontHandle_t *font;
+    frFontRequest_t *number;
+    char text[16];
+
+    if (mode == 3) {
+        datUnitWork_t *birth = cmpStatusBirthLive;
+        u16 level = live->level;
+        u16 birthLevel = ((volatile datUnitWork_t *)birth)->level;
+        if (level != birthLevel) {
+            levelColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0xFFBD8380);
+        } else {
+            if (live->badstatus & 0x800) {
+                textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x754B3D80);
+            }
+            levelColor = textColor;
+        }
+    } else {
+        if (live->badstatus & 0x800) {
+            textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x754B3D80);
+        }
+        levelColor = textColor;
+    }
+    cmpDrawStatusName(x, y, (u8 *)colors, unit);
+    fclDrawSpriteRes(spriteX, spriteY + 4, 0, colors, 1, 0, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(spriteX, spriteY + 4, 0, colors, 1, 1, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(spriteX, spriteY + 4, 0, colors, 1, 2, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(spriteX, spriteY + 4, 0, colors, 1, 3, D_00345D88, fclSpriteTable, 0x47);
+    if (unit->flag & 4) {
+        s32 level;
+        s32 raceColor = textColor;
+
+        cmpSetSkillListRows(0x14);
+        level = datGetPlayerLNDLevel(unit);
+        if (mode == 2) {
+            s16 phase;
+            raceColor = fclBlendColor(0x80C08080, textColor, cmpHeartsMasterPhase);
+            phase = cmpHeartsMasterPhase;
+            if (phase > 0) {
+                phase -= 8;
+                cmpHeartsMasterPhase = phase;
+            }
+            if (phase < 0) {
+                phase = 0;
+                cmpHeartsMasterPhase = 0;
+            }
+            cmpDrawStatusGauge(x, y, (s8)level, phase);
+        }
+        font = frwGetSmallFontFRQ2((x + 0xA) * 16, (y + 0x42) * 8, 0xFFFF,
+                                   raceColor, datExplainTable[level + 0x40], NULL);
+        func_001C7E38(font, 1, 0x47);
+        frDestroyFontRequestAfter(font);
+        cmpSetSkillListRows(-1);
+        cmpSetSkillListRows(0x14);
+        frEnableMode(1);
+        font = frGetNameFRQ(0, NULL, 0);
+        frSetDrawPosition(font, nameX, (y + 0x43) * 8);
+        frSetFontColor(font, textColor);
+        frSetPriority(font, 0xFFFF0);
+        frSetFontSpace(font, 2);
+        frDisableMode(1);
+        func_001C7E38(font, 1, 0x47);
+        frDestroyFontRequestAfter(font);
+        cmpSetSkillListRows(-1);
+    } else {
+        u16 id;
+        frFontHandle_t *race;
+
+        cmpSetSkillListRows(0x14);
+        id = live->id;
+        race = frwGetSmallFontFRQ2((x + 0xA) * 16, (y + 0x42) * 8, 0xFFFF,
+                                   textColor, datExplainTable[datDevilTable[id].race], NULL);
+        cmpSetSkillListRows(0x14);
+        id = live->id;
+        font = frwGetSmallFontFRQ2(nameX, (y + 0x43) * 8, 0xFFFF,
+                                   textColor, text2[id], race);
+        func_001C7E38(font, 1, 0x47);
+        frDestroyFontRequestAfter(font);
+        cmpSetSkillListRows(-1);
+    }
+    length = font->advance;
+    if (x + (nameX >> 4) + length < 0xB7) {
+        badgeX = (x + 0xB7) * 16;
+    } else {
+        badgeX = nameX + (x + length + 2) * 16;
+    }
+    cmpDrawStatusBadge(badgeX, (y + 0x41) * 8, colors, live->badstatus);
+    fclDrawSpriteRes(spriteX, spriteY, 0, colors, 2, 0, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(spriteX, spriteY, 0, colors, 2, 1, D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(spriteX, spriteY, 0, colors, 2, 2, D_00345D88, fclSpriteTable, 0x47);
+    sprintf(text, D_0054FE98, datGetLevelForDraw(unit));
+    number = frwGetSmallNumFontFRQ((x + 0x2C) * 16, (y + 0x62) * 8,
+                                   0xFFFF, levelColor, text, NULL);
+    func_001C7E38((frFontHandle_t *)number, 1, 0x47);
+    frDestroyFontRequestAfter((frFontHandle_t *)number);
+    sprintf(text, D_0054FEA8, datAdvanceDevilLevel(unit) - live->exp);
+    number = frwGetSmallNumFontFRQ((x + 0x7C) * 16, (y + 0x62) * 8,
+                                   0xFFFF, textColor, text, NULL);
+    func_001C7E38((frFontHandle_t *)number, 1, 0x47);
+    frDestroyFontRequestAfter((frFontHandle_t *)number);
+    cmpDrawStatusIcons(spriteX, spriteY, colors, mode, unit);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusRow);
+#endif
 
 extern s32 cmbGetHeartsParamEx(s8 devilId, s8 index, s32 registered);
 extern s32 cmbGetParam(datUnitWork_t *unit, s32 index);
