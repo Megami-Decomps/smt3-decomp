@@ -1919,7 +1919,31 @@ void ApplyChangeListIndex(lstListWindow_t *list, s16 *indices, s32 recordIndex)
 INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyChangeListIndex);
 #endif
 
+#ifdef NON_MATCHING
+void ApplyEdgeListCursor(lstListWindow_t *list)
+{
+    cmpCursorPos_t *cursor = &list->cursorPos;
+    u8 shift = cursor->Shift;
+    u8 shiftMax = cursor->ShiftMax;
+
+    if (shift == 0) {
+        if (cursor->Index > 0) {
+            cursor->DrawShift = 1;
+            cursor->Shift = 1;
+            cursor->Index--;
+            list->cursorSize.Y = list->StepY + list->cursorSize.DefY;
+        }
+    } else if (shift == shiftMax - 1 &&
+               cursor->Index + shiftMax < cursor->ListNums) {
+        cursor->Index++;
+        cursor->DrawShift = shiftMax - 2;
+        cursor->Shift = cursor->DrawShift;
+        list->cursorSize.Y = cursor->Shift * list->StepY + list->cursorSize.DefY;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyEdgeListCursor);
+#endif
 
 typedef struct {
     u8 StepY[4];
