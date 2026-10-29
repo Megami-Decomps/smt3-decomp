@@ -250,7 +250,7 @@ typedef struct {
 extern void fldSetSceneParam4(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
                               s32 bgm, s32 camMode, const char *camName);
 
-extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, u32 datasize, s32 restore);
 
 extern s32 D_0054EDF4;
 
@@ -638,7 +638,151 @@ INCLUDE_RODATA(const s32, "field/fldWap", D_00531F28);
 
 INCLUDE_RODATA(const s32, "field/fldWap", jtbl_00531F40);
 
-INCLUDE_ASM(const s32, "field/fldWap", fldDoor_WarpEx);
+extern s16 D_002FC1A2[][2];
+extern void fldSetNextField(s32 field, s32 parameter);
+extern void fldAutoMapOpenBlock2(s32 fld, s32 area, s32 SBlock);
+extern void evtBitOn(s32 no);
+extern void dds3FadeIn2(s32 frame);
+extern void fldPlayerCalc_FastStart(void);
+extern void fldSetSceneParam3(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName);
+extern void fldSetSceneParam5(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
+                            s32 bgm, const char *FoceScript);
+/* Shared with fldDoor_Warp; both native strings have retained padding. */
+extern char D_00531F18[]; /* "01pos_01" */
+extern char D_00531F28[]; /* "elvstart_label" */
+
+void fldDoor_WarpEx(s32 ex_no) {
+    fldSceneParam_t record;
+    s32 block[2];
+    s32 facility;
+    u32 nextSequence;
+    doormovetbl_s *entry;
+    s32 i;
+    s32 nextArea;
+    s32 nextFloor;
+    s32 bgmMode;
+
+    if (ex_no == 0) return;
+    for (i = 0; i < 256; i++) {
+        entry = &fldDoorParamTable.actors[i];
+        if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) continue;
+        if (entry->kind != 9) continue;
+        if (entry->motion != ex_no) continue;
+        if (entry->variantMode == 2) {
+            fldBgmFadeOut();
+            dds3FadeIn2(15);
+            fldAutoMapOpenBlock2(fldGlobalBase.area, fldGlobalBase.floor + 1, entry->sequenceValue);
+            D_0054EDF4 = fldGlobalBase.area;
+            fldDoorSiseState = fldGlobalBase.floor + 1;
+            D_0054EDFC = entry->variant;
+            D_0054EE00 = entry->sequenceKind;
+            switch ((u32)entry->variant) {
+            case 0:
+                facility = entry->sequenceKind;
+                dds3AdminiCallSequence(0x1C, &facility, 4, 0);
+                return;
+            case 1:
+                facility = entry->sequenceKind;
+                dds3AdminiCallSequence(0x1D, &facility, 4, 0);
+                return;
+            case 2:
+                facility = entry->sequenceKind;
+                dds3AdminiCallSequence(0x1B, &facility, 4, 0);
+                return;
+            case 3:
+                block[0] = 0;
+                block[1] = entry->sequenceKind;
+                if (D_002FC1A2[block[1]][0] != 0) {
+                    evtBitOn(D_002FC1A2[block[1]][0]);
+                }
+                DDS3_GBWK->previewX = block[0];
+                DDS3_GBWK->previewY = block[1];
+                dds3AdminiCallSequence(0x1F, block, 8, 0);
+                return;
+            case 4:
+                block[0] = 1;
+                block[1] = entry->sequenceKind;
+                DDS3_GBWK->previewX = block[0];
+                DDS3_GBWK->previewY = block[1];
+                dds3AdminiCallSequence(0x1F, block, 8, 0);
+                return;
+            case 5:
+                dds3AdminiCallSequence(0x1E, NULL, 0, 0);
+                return;
+            }
+            return;
+        }
+        if (entry->variantMode == 0) {
+            if (entry->variant == 0) {
+                nextArea = fldGlobalBase.area;
+            } else {
+                nextArea = entry->variant;
+            }
+            if (entry->sequenceKind == 0) {
+                nextFloor = fldGlobalBase.floor + 1;
+            } else {
+                nextFloor = entry->sequenceKind;
+            }
+            if (fldGlobalBase.area != nextArea) fldBgmFadeOut();
+            bgmMode = fldWap_SetBgm(entry);
+            if (entry->flags54 != 0) {
+                fldDoorExitFlag = entry->flags54;
+                strcpy((char *)fldDoorExitMode, entry->taskName);
+                gFldWap_after_nextidx = i + 1;
+            }
+            gFldNowDZone = entry->flags31;
+            if (nextArea < 10) fldPlayerCalc_FastStart();
+            if (entry->kind == 3 || entry->kind == 4) {
+                gfldPlayerHasiCnt = 15;
+                if (entry->linkKind == 1) {
+                    fldSetSceneParam4(&record, nextArea, nextFloor, entry->sequenceName,
+                                     entry->sequenceCode, entry->linkKind, entry->linkName);
+                    record.bgmMode = bgmMode;
+                } else {
+                    fldSetSceneParam3(&record, nextArea, nextFloor, entry->sequenceName);
+                    record.bgmMode = bgmMode;
+                }
+            } else {
+                fldSetSceneParam4(&record, nextArea, nextFloor, entry->sequenceName,
+                                 entry->sequenceCode, entry->linkKind, entry->linkName);
+                record.bgmMode = bgmMode;
+            }
+            dds3AdminiCallSequence(6, &record, sizeof(record), 0);
+            return;
+        }
+        if (entry->variantMode == 1) {
+            s32 slot = entry->variant - 1;
+            nextArea = fldGlobalBase.area;
+            nextFloor = fldDoorParamTable.headers[slot].area;
+            gFld_ElvTakasa = slot;
+            fldDoorWarpTarget = entry->sequenceKind;
+            /* The second six halfwords of the header data are elevator blocks. */
+            fldAutoMapOpenBlock2(nextArea, fldGlobalBase.floor + 1,
+                fldDoorParamTable.headers[gFld_ElvTakasa].body.data[6 + fldDoorWarpTarget]);
+            fldSetSceneParam5(&record, nextArea, nextFloor, D_00531F18, 0, D_00531F28);
+            dds3AdminiCallSequence(6, &record, sizeof(record), 0);
+            return;
+        }
+        if (entry->variantMode == 3) {
+            nextSequence = entry->variant;
+            fldSetNextField(fldGlobalBase.area, nextSequence);
+            fldBgmFadeOut();
+            if (entry->sequenceKind == 0 && entry->sequenceValue != 0) {
+                fldSetNextField(entry->sequenceValue, nextSequence);
+            }
+            if (nextSequence >= 1000U) {
+                nextSequence -= 1000;
+                block[0] = nextSequence;
+                block[1] = fldGlobalBase.area;
+                dds3AdminiCallSequence(0x12, block, 8, 0);
+            } else {
+                dds3AdminiCallSequence(7, &nextSequence, 4, 0);
+            }
+            return;
+        }
+    }
+}
+
 
 extern s16 D_002FC1A0[][2];
 extern s16 fldAllCnt[][2];
@@ -787,14 +931,6 @@ void fldWap_Load(s32 tmnltype, s32 tmnlid, fldSceneParam_t *param) {
         return;
     }
 }
-
-extern s16 D_002FC1A2[][2];
-
-extern void fldSetNextField(s32 field, s32 parameter);
-
-extern void fldAutoMapOpenBlock2(s32 fld, s32 area, s32 SBlock);
-
-extern void evtBitOn(s32 no);
 
 void fldDoor_EveBtlExit(s32 field, s32 eveno) {
     fldSceneParam_t record;
