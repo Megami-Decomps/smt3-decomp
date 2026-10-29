@@ -1286,6 +1286,7 @@ void SetKoudou(nbActionProcessData_t *a, s32 tbl, s32 kou)
 INCLUDE_ASM(const s32, "newbattle/nbAi", SetKoudou);
 #endif
 
+extern s32 Sel_AI(nbActionProcessData_t *a, s32 n, s32 group);
 INCLUDE_ASM(const s32, "newbattle/nbAi", Sel_AI);
 
 void Sel_LIFEMIN(nbActionProcessData_t *a, s32 n)
@@ -1453,7 +1454,7 @@ void Sel_PLAYER(nbActionProcessData_t *a, s32 n)
     }
 }
 
-void Sel_JOKEN(nbActionProcessData_t *a)
+void Sel_JOKEN(nbActionProcessData_t *a, s32 n)
 {
     nbFormation_t *form;
     s32 i;
@@ -1469,7 +1470,7 @@ void Sel_JOKEN(nbActionProcessData_t *a)
     }
 }
 
-void Sel_RND(nbActionProcessData_t *a)
+void Sel_RND(nbActionProcessData_t *a, s32 n)
 {
     nbFormation_t *form;
     s32 i;
@@ -1483,7 +1484,60 @@ void Sel_RND(nbActionProcessData_t *a)
     }
 }
 
+#ifdef NON_MATCHING
+s32 SetSingleTarget2(nbActionProcessData_t *a, s32 code, s32 n)
+{
+    s8 list[16];
+    s32 result = 0;
+    s32 count;
+    s32 selected;
+    s32 i;
+
+    switch (code) {
+    case TAR_CODE_AI: break;
+    case TAR_CODE_LIFEMIN: Sel_LIFEMIN(a, n); break;
+    case TAR_CODE_BAD: Sel_BAD(a, n); break;
+    case TAR_CODE_ID: Sel_ID(a, n); break;
+    case TAR_CODE_LIGHT: Sel_LIGHT(a, n); break;
+    case TAR_CODE_DARK: Sel_DARK(a, n); break;
+    case TAR_CODE_PLAYER: Sel_PLAYER(a, n); break;
+    case TAR_CODE_JOKEN: Sel_JOKEN(a, n); break;
+    case TAR_CODE_RND: Sel_RND(a, n); break;
+    case TAR_CODE_BAARLV: Sel_BAARLV(a, n); break;
+    case TAR_CODE_LVMIN: Sel_LVMIN(a, n); break;
+    default: code = 0; break;
+    }
+    for (i = 0; i < 16; i++) {
+        if (a->data->form[i].stat & 8) {
+            break;
+        }
+    }
+    if (i == 16) {
+        code = 0;
+        n = 0;
+    }
+    if (code == 0) {
+        result = Sel_AI(a, n, 0);
+    }
+    count = 0;
+    for (i = 0; i < 16; i++) {
+        if (a->data->form[i].stat & 8) {
+            list[count++] = i;
+        }
+    }
+    if (count > 0) {
+        selected = list[dds3GetRandIntA(0, count)];
+        for (i = 0; i < 16; i++) {
+            if (i != selected) {
+                a->data->form[i].stat &= ~8;
+            }
+        }
+    }
+    return result;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbAi", SetSingleTarget2);
+#endif
 
 s32 SetGroupTarget2(nbActionProcessData_t *a, s32 code, s32 n)
 {
