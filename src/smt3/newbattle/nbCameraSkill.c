@@ -137,7 +137,7 @@ extern void nbCameraState_SkillAttack_Init(void);
 extern nbCameraSkillPtr_t D_00320EB0[];
 extern nbCameraSkillInfo_t nbCameraSkillNBSInfo;
 extern void nbCamera_SkillInfo_Set(nbCameraSkillInfo_t *pInfo, nbCameraSkillPtr_t *pPtr);
-extern u32 effBTLSkillGetID(void);
+extern s32 effBTLSkillGetID(void);
 extern void nbCameraSetState(u16 state);
 extern u8 dds3EffectBase[];
 extern u32 dds3GetRandA(u8 *name);
@@ -184,11 +184,11 @@ extern f32 nbCamera_Cut1Enemy_Rate;
 extern s32 nbCamera_Cut1Enemy_Frame;
 
 #ifdef NON_MATCHING
-extern u32 effBTLSkillGetState(void);
-extern u32 effBTLModelGetBadStatus(nbFormation_t *pFormation);
+extern s32 effBTLSkillGetState(void);
+extern u16 effBTLModelGetBadStatus(nbFormation_t *pFormation);
 extern f32 effBTLModelGroupGetSphere(u32 group);
 extern u32 dds3GetRandIntA(void *state, u32 limit);
-extern s32 fptodp(f32 value);
+extern f64 fptodp(f32 value);
 extern s32 printf(const char *format, ...);
 extern f32 D_003246D0[];
 extern f32 D_003246F0[];
@@ -1911,7 +1911,7 @@ void nbCameraShot_AttackTuibiReverse_Set(nbCamera_t *pNbCamera)
 
 extern s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera);
 extern void nbCameraState_InvokeTarget_SearchSet(void);
-extern s32 fptodp(f32 value);
+extern f64 fptodp(f32 value);
 extern s32 printf(const char *format, ...);
 extern f32 D_003246D0[];
 extern f32 D_003246F0[];
