@@ -542,12 +542,7 @@ void sortSkillList(cmbUnit_t *unit)
     applySkillSortArray(unit, order);
 }
 
-typedef struct
-{
-    /* 0x00 */ u16 index;
-    /* 0x02 */ u16 unk_02;
-    /* 0x04 */ datDevilTableEntry_t *info;
-} cmbRaceSortEntry_t;
+
 
 void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count)
 {

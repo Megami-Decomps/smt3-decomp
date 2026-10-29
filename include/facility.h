@@ -66,4 +66,11 @@ typedef struct
     datUnitWork_t unit;
 } cmbUnit_t;
 
+typedef struct
+{
+    /* 0x00 */ u16 index;
+    /* 0x02 */ u16 unk_02;
+    /* 0x04 */ datDevilTableEntry_t *info;
+} cmbRaceSortEntry_t;
+
 #endif
