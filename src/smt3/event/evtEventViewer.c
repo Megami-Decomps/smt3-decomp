@@ -2,6 +2,8 @@
 #include "basic.h"
 #include "event.h"
 #include "kernel.h"
+#include "model.h"
+#include "motion.h"
 
 /* The viewer's current menu, which EnterMain switches on to decide what Enter does
  * from each one. Names from the IDB. */
@@ -157,7 +159,8 @@ extern void dds3EffectObjectBasicLinkObject(dds3Basic_t *basic, dds3Basic_t *tar
 extern s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *basic, dds3Basic_t *target, s32 index);
 extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *obj);
 extern dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *pObjectBasic);
-extern s32 evtStopMover(void *mover, s32 sw, s32 baseframe, s32 nowframe);
+typedef struct polyMovieObject_t polyMovieObject_t;
+extern s32 evtStopMover(polyMovieObject_t *mover, s32 sw, s32 baseframe, s32 nowframe);
 extern char D_0053B4A8[];
 extern s8 D_0032C9E2[];
 extern s32 PopMenu(void);
@@ -172,7 +175,7 @@ extern void evtFreeViewerInfo(void);
 extern void **dds3GetProcessData(void *id);
 extern void sdfMemFreeDirect(void *aHandle);
 extern s32 SearchNameTable(const char *name);
-extern void evtStopFrame(s32 sw, s32 nowframe);
+extern void evtStopFrame(s32 sw, u32 nowframe);
 extern void *dds3SetActiveCameraSceneBasic(void *pSceneBasic, void *pCameraBasic);
 extern f32 dds3CameraObjectBasicGetFovy(void *pBasic);
 extern void dds3SetScreenFovy(f32 fovy);
@@ -1183,7 +1186,91 @@ void SelectActiveCamera(void)
     SetActiveCamera();
 }
 
+typedef struct {
+    dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
+} evtMatterWork_t;
+
+extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
+extern void sdfMotionPause(sdfMotionCtrlr_t *motion);
+extern void sdfMotionPauseOff(sdfMotionCtrlr_t *motion);
+
+#ifdef NON_MATCHING
+void evtStopFrame(s32 sw, u32 nowFrame)
+{
+    dds3Basic_t *scene;
+    dds3SceneBasic_t *sceneWork;
+    dds3Basic_t *basic;
+    dds3Basic_t *effect;
+    dds3Basic_t *mover;
+    dds3UnitObjectBasicWorkData_t *unitWork;
+    evtMatterWork_t *matterWork;
+    dds3ObjectBaseControlWorkData_t *control;
+    mdlObj_t *model;
+    sdfMotionCtrlr_t *motion;
+    evtViewerObject_s *track;
+    evtFrameInfo_t *frame;
+    s32 slot;
+
+    if (dds3GetActiveScene() == NULL) {
+        return;
+    }
+    scene = dds3GetActiveScene();
+    sceneWork = scene->workdata;
+    for (basic = sceneWork->basictable[BASIC_TYPE_UNITOBJECT].firstbasic;
+         basic != NULL; basic = basic->next) {
+        unitWork = basic->workdata;
+        control = unitWork->pObjectBaseControlWorkData;
+        model = control->pModel;
+        if (sw == 0) {
+            sdfMotionSeek(model->first, (f32)nowFrame);
+            sdfMotionPause(model->first);
+        } else {
+            sdfMotionPauseOff(model->first);
+        }
+    }
+    for (basic = sceneWork->basictable[BASIC_TYPE_MATTEROBJECT].firstbasic;
+         basic != NULL; basic = basic->next) {
+        matterWork = basic->workdata;
+        motion = matterWork->pObjectBaseControlWorkData->pMot;
+        if (motion != NULL) {
+            if (sw == 0) {
+                sdfMotionSeek(motion, (f32)nowFrame);
+                sdfMotionPause(motion);
+            } else {
+                sdfMotionPauseOff(motion);
+            }
+        }
+    }
+    for (basic = sceneWork->basictable[BASIC_TYPE_MOVER].firstbasic;
+         basic != NULL; basic = basic->next) {
+        evtStopMover((polyMovieObject_t *)basic, sw, 0, nowFrame);
+    }
+    for (track = viewerinfo->firstobjinfo; track != NULL; track = track->next) {
+        if (track->type != 3 && track->type != 18 && track->type != 20 && track->type != 21) {
+            continue;
+        }
+        for (frame = track->p; frame != NULL; frame = frame->next) {
+            if (track->type == 18) {
+                effect = frame->work;
+            } else if (track->type == 3 || track->type == 20 || track->type == 21) {
+                slot = frame->param.sb[0];
+                if (slot < 0) continue;
+                effect = viewerinfo->effectBasic[slot];
+            } else {
+                continue;
+            }
+            if (effect != NULL) {
+                mover = dds3GetBaseControlWorkData(effect)->pBasic[1];
+                if (mover != NULL) {
+                    evtStopMover((polyMovieObject_t *)mover, sw, frame->frame, nowFrame);
+                }
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtStopFrame);
+#endif
 
 void evtViewerStopFrame(void)
 {
