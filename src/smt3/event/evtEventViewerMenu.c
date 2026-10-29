@@ -1840,7 +1840,6 @@ s32 evtMakeViewerPath(s32 kind)
 
 
 
-typedef struct pmdFrameTable_t pmdFrameTable_t;
 
 
 
@@ -1906,20 +1905,7 @@ typedef struct evtPolygonMovieWork_t {
     dds3Basic_t **effectBasicTable;
 } evtPolygonMovieWork_t;
 
-typedef struct pmdFrameTable_t {
-    u16 ObjectType;
-    u16 Frame;
-    u16 Length;
-    s16 NameIndex;
-    union {
-        s8 b[8];
-        u8 ub[8];
-        s16 h[4];
-        u16 uh[4];
-        s32 w[2];
-        f32 f[2];
-    } data;
-} pmdFrameTable_t;
+
 
 
 extern dds3Basic_t *dds3GetControlScene(void);

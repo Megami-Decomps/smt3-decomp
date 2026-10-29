@@ -148,6 +148,21 @@ typedef struct pmdHeader_t {
     pmdEntry_t entries[1];
 } pmdHeader_t;
 
+typedef struct pmdFrameTable_t {
+    u16 ObjectType;
+    u16 Frame;
+    u16 Length;
+    s16 NameIndex;
+    union {
+        s8 b[8];
+        u8 ub[8];
+        s16 h[4];
+        u16 uh[4];
+        s32 w[2];
+        f32 f[2];
+    } data;
+} pmdFrameTable_t;
+
 /* Interpolated event vector and packed colour. */
 typedef struct evtBlendVecColor_t {
     f32 vec[4];
