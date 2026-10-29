@@ -75,24 +75,52 @@ retail's operand order rather than guessed.
 
 ## sceGsExecStoreImage (sdk/libgraph, 0x68C)
 
-**Reference implementation, not a match candidate.** Assembly remains production.
+**Still assembly in production.** 1672 bytes against retail's 1680, with the
+first difference at +0x3C, where retail has its fifth prologue zero and this
+shape sinks that one initialization past the register saves. Everything the
+structure decides now agrees instruction for instruction: the seven saved
+registers and the two parameter copies, one load of each 64-bit record word
+with the width, height and pixel-store mode extracted from the loaded
+registers in that order, the 59-entry jump table with its five bodies in text
+order, the uncached `trxreg` patch, all five spin loops, the merged timeout
+blocks, both FIFO loops and the success tail. What remains is instruction
+order inside the case bodies and the cleanup block, plus three delay slots
+this compiler leaves empty for a volatile access (rule 6 in
+[sdk-matching](../../sdk-matching.md)). Measured as 142 differing lines of a
+418 against 420 instruction sequence, down from 214 before the last fix; the
+byte-level word count stays high only because the one missing instruction at
++0x3C shifts the rest.
 
-Re-measured against the whole 1680-byte span with the unit's own toolchain:
-1656 bytes, 390 of 420 words differing, first difference at +0xC, where retail
-puts the destination pointer in the saved register this draft gives to a
-counter. Declaring the five counters with initializers instead of assigning
-them does not move it. An independent description of the function confirms the
-draft's structure (one spin counter shared by every timeout, five counters
-zeroed before any branch, one jump table over the pixel-store mode, the saved
-interrupt mask in a caller-saved temporary across the success path, and the
-two syscall stubs typed 64-bit), so the residual is allocation, not shape.
+Four changes took it there, from a draft that was 1656 bytes and diverged at
++0xC:
 
-The earlier measurement, against the 1676-byte prefix: the C emits 1664 bytes. In that emitted prefix, 392 of 416 words differ;
-24 words match and 12 bytes remain uncovered. The first difference is at +0xC.
-The 59-entry format jump table has 57 differing destinations. This is a broad
-register-allocation and scheduling residual, not an almost-exact routine.
-The complete default owner remains nine exact functions; the guarded owner
-adds only this instruction/table residual.
+The DMA quadword count is masked with the unsigned `0xFFFFFFF8`, not with
+`~7`. The unsigned constant has to be materialized with `lui` plus `ori`
+where `~7` is one `addiu`, and the 16-, 8- and 4-bit bodies then share that
+register for their align-up masks, which is five instructions and most of the
+length gap.
+
+The shared cleanup is written out in full at each of the four timeout sites
+rather than reached by a `goto`. Cross-jumping then merges the `scePrintf`
+call itself, giving retail's three call sites instead of four, exactly as it
+does for the eleven-call block of `sceGsSyncPath`.
+
+The `trxreg` patch re-extracts the width from the record word instead of
+reusing the width local. Local CSE cannot share the earlier extraction across
+the block boundary, so retail has a second mask-and-sign-extend there.
+
+Each case body computes the byte remainder first, then the quadword
+remainder, then the DMA count. That is the opposite of the earlier draft's
+order and it halved the instruction-order difference.
+
+An independent description of the function confirms the rest of the shape:
+one spin counter shared by every timeout and never reset, five counters
+zeroed before any branch with the padded height set only inside the switch,
+the saved interrupt mask living in a caller-saved temporary across the
+success path (so no call may be introduced between its assignment and its
+last use), both interrupt-mask stubs typed 64-bit, and the destination
+indexed by the sum of the two counters in the quadword loop while the byte
+loop re-derives its address each iteration.
 
 The existing `sceGsSetDefStoreImage` constructor and SDF capture callers
 establish the two-argument interface and 112-byte, seven-quadword command
