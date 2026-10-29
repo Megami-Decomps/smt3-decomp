@@ -1498,7 +1498,77 @@ s32 nbMakeDeadVisualPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDeadVisualPacket);
 #endif
 
+#ifdef NON_MATCHING
+extern s32 nbMakeFlyBadPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 bad);
+
+s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type, s32 hp,
+                       s32 mp, s32 badstat, s32 hiteff, s32 dead, s32 deadtype, s32 moji,
+                       s32 animeoff)
+{
+    s32 invisible = form->formindex >= 16;
+    s32 numberFrame;
+
+    if (!invisible) {
+        if (dead) {
+            nbMakeDeadVisualPacket(startframe, uniqueid, form, deadtype, 1);
+        } else {
+            switch (badstat) {
+            case 1: case 2: case 4: case 8: case 16: case 32:
+            case 64: case 128: case 256: case 1024: case 2048:
+                nbMakeBadDamagePacket(startframe, uniqueid, form, badstat);
+                break;
+            case 512:
+                nbMakeFlyBadPacket(startframe, uniqueid, form);
+                break;
+            default:
+                if (type >= 0 && type < 3) {
+                    nbAddDmgMotKoukaPacket(startframe, uniqueid, form, 17.0f, 1);
+                } else if (type == 3) {
+                    nbAddEasyDmgMotKoukaPacket(startframe, uniqueid, form, 10.0f);
+                    nbAddSePacket(startframe, uniqueid, 0x10002);
+                }
+                break;
+            }
+        }
+        if (hiteff) {
+            if (type == 0 || type == 2) {
+                nbAddHitEffKoukaPacket(startframe, uniqueid, form, 0);
+            } else if (type == 1) {
+                nbAddHitEffKoukaPacket(startframe, uniqueid, form, 7);
+            }
+        }
+    }
+    numberFrame = startframe + animeoff + 1;
+    if (hp >= 0 && mp >= 0) {
+        if (!invisible && moji) {
+            nbAddNumEffKoukaPacket(numberFrame, 45, uniqueid, form, hp, mp, 4);
+        }
+        nbAddHpMpKoukaPacket(startframe, uniqueid, form, -hp, 0);
+        nbAddHpMpKoukaPacket(startframe, uniqueid, form, -mp, 1);
+    } else if (mp >= 0) {
+        if (!invisible && moji) {
+            nbAddNumEffKoukaPacket(numberFrame, 45, uniqueid, form, mp, 0, 1);
+        }
+        nbAddHpMpKoukaPacket(startframe, uniqueid, form, -mp, 1);
+    } else if (hp >= 0) {
+        if (!invisible && moji) {
+            nbAddNumEffKoukaPacket(numberFrame, 45, uniqueid, form, hp, 0, 0);
+        }
+        nbAddHpMpKoukaPacket(startframe, uniqueid, form, -hp, 0);
+    }
+    if (moji) {
+        if (type == 1) {
+            nbAddMojiEffKoukaPacket(numberFrame, 45, uniqueid, form, 2);
+        } else if (type == 2) {
+            nbAddMojiEffKoukaPacket(numberFrame, 45, uniqueid, form, 1);
+        }
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDamagePacket);
+#endif
 
 #ifdef NON_MATCHING
 extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
