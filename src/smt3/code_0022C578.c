@@ -8,6 +8,7 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "draw3d.h"
+#include "kernel_draw.h"
 
 typedef struct frFontHandle_t frFontHandle_t;
 typedef struct frFontRequest_t frFontRequest_t;
@@ -5789,12 +5790,6 @@ void cmpExpandColor(u64 *dst, u32 color)
     dst[1] = ((wide & 0xFF00) >> 8) | ((u64)(color & 0xFF) << 32);
 }
 
-typedef struct
-{
-    sdf3DLight_t *parallel[4];
-    sdfVector4_t ambient;
-    sdf3DFogParam_t fog;
-} dds3LightState_t;
 
 extern sdfDrawTag_t D_00574A60[2];
 extern sdf3DInitPacket_t D_00574AA0[2];

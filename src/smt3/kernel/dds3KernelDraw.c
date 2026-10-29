@@ -65,14 +65,6 @@ typedef struct dds3Filter2Param {
     /* 0x08 */ s32 rect[4];
 } dds3Filter2Param_t;
 
-/* Native offsets: parallel lights 0x00, ambient 0x10, fog 0x20. */
-typedef struct
-{
-    sdf3DLight_t *parallel[4];
-    sdfVector4_t ambient;
-    sdf3DFogParam_t fog;
-} dds3LightState_t;
-
 typedef struct
 {
     f32 fogMax;
