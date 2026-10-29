@@ -98,7 +98,6 @@ page and line to open. Conventions are in
 | 1 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 1 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 1 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
-| 1 | event/evtPicture | [event/evtPicture.md](event/evtPicture.md) |
 | 1 | event/evtMoon | [event/evtMoon.md](event/evtMoon.md) |
 | 1 | event/evtEventViewerFrameVar | [event/evtEventViewerFrameVar.md](event/evtEventViewerFrameVar.md) |
 | 1 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |

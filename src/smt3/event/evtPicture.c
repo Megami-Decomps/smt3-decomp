@@ -298,8 +298,6 @@ void LoadTexture(evtPictureProcessData_t *data, const char *texpath)
     data->tex = itfMiscLoadTexture(texpath);
 }
 
-/* NON_MATCHING: 33 of 138 words differ (first at +0x30). */
-#ifdef NON_MATCHING
 s32 evtPictureProcess1(dds3ProcessID_t *id)
 {
     evtPictureProcessData_t *work = dds3GetProcessData(id);
@@ -307,6 +305,7 @@ s32 evtPictureProcess1(dds3ProcessID_t *id)
     void *tex;
     s32 t;
     s32 a;
+    s32 delta;
     f32 dw;
 
     if (!(work->flag & 1)) {
@@ -315,20 +314,22 @@ s32 evtPictureProcess1(dds3ProcessID_t *id)
     {
         tex = work->tex;
         if (tex == NULL) {
-            return;
+            return 0;
         }
         if (work->pos_cnt > 0) {
             s32 cnt = work->pos_cnt - 1;
 
             t = work->pos_time - cnt;
-            work->x = work->pos_x0 + (work->pos_x1 - work->pos_x0) * t / work->pos_time;
-            work->y = work->pos_y0 + (work->pos_y1 - work->pos_y0) * t / work->pos_time;
             work->pos_cnt = cnt;
+            delta = work->pos_x1 - work->pos_x0;
+            work->x = work->pos_x0 + delta * t / work->pos_time;
+            delta = work->pos_y1 - work->pos_y0;
+            work->y = work->pos_y0 + delta * t / work->pos_time;
         }
         if (work->alp_cnt > 0) {
             work->alp_cnt--;
-            a = work->alp_a0 +
-                (work->alp_a1 - work->alp_a0) * (work->alp_time - work->alp_cnt) / work->alp_time;
+            delta = work->alp_a1 - work->alp_a0;
+            a = work->alp_a0 + delta * (work->alp_time - work->alp_cnt) / work->alp_time;
             if (a < 0) {
                 a = 0;
             }
@@ -339,8 +340,8 @@ s32 evtPictureProcess1(dds3ProcessID_t *id)
         }
         if (work->zoom_cnt > 0) {
             work->zoom_cnt--;
-            work->zoom = work->zoom_p0 + (f32)(work->zoom_p1 - work->zoom_p0) *
-                                             (work->zoom_time - work->zoom_cnt) / work->zoom_time;
+            dw = (f32)(work->zoom_p1 - work->zoom_p0);
+            work->zoom = work->zoom_p0 + dw * (work->zoom_time - work->zoom_cnt) / work->zoom_time;
         }
         dw = work->size_sw * work->zoom / 100.0f - work->size_sw;
         tbl.x0 = work->x - dw * 0.5f;
@@ -360,9 +361,6 @@ s32 evtPictureProcess1(dds3ProcessID_t *id)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtPicture", evtPictureProcess1);
-#endif
 
 s32 evtPictureShutdown(dds3ProcessID_t *id)
 {
