@@ -44,7 +44,7 @@ typedef struct
 {
     /* 0x00 */ void *unk_00;
     /* 0x04 */ void *unk_04;
-    /* 0x08 */ void *unk_08;
+    /* 0x08 */ sdfMemHandle_t *unk_08;
     /* 0x0C */ u8 unk_0C[0x34];
     /* 0x40 */ s32 unk_40;
     /* 0x44 */ s32 unk_44;
@@ -56,7 +56,11 @@ typedef struct
     /* 0x5C */ void *unk_5C;
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ s32 tover[5];
-    /* 0x78 */ u8 unk_78[0x10];
+    /* 0x78 */ u8 Zalpha_cnt;
+    /* 0x79 */ u8 reserved79[3];
+    /* 0x7C */ u32 Z_RGBA;
+    /* 0x80 */ u32 ZNalpha_cnt;
+    /* 0x84 */ u32 ZN_RGBA;
     /* 0x88 */ s8 unk_88;
     /* 0x89 */ u8 unk_89[3];
     /* 0x8C */ s32 unk_8C;
@@ -76,7 +80,113 @@ extern s32 evtBitOn(s32 no);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
+#ifdef NON_MATCHING
+typedef struct {
+    u16 id, reserved0, maxhp, maxmp;
+    u32 exp;
+    u16 level;
+    s8 param[6], skillparam[6];
+    u16 skillcnt, skill[24];
+    s8 mitamaparam[6], levelupparam[6];
+    u16 keisyoskill[24];
+    u8 keiattr[24];
+    u16 hensinmae, reserved1;
+    u32 flag, reserved2, hensinmaeexp;
+} fclencyceelem_t;
+
+typedef struct {
+    s32 count;
+    u8 reserved[12];
+    fclencyceelem_t records[1];
+} mselSaveData_t;
+
+extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
+extern void *memset(void *ptr, s32 value, u32 size);
+extern void *sdfChipAllocZeroDirect(s32 size);
+extern void sdfChipFreeDirect(void *ptr);
+extern s32 dds3GetRandIntA(s32 min, s32 max);
+void mselCountSaves(void);
+void Msel_TOverData_Clear(void);
+void mselFindSaveSlot(s32 *first, s32 *second, u32 start, u32 end, s8 reverse);
+
+void mselDevilChoice(void)
+{
+    mselSaveData_t *data = sdfMemGetPtr(gGlobal->unk_08);
+    s32 count = data->count;
+    s32 selected[10];
+    s32 scores[10];
+    s32 chosen[5];
+    s32 i, j, remaining, chosenCount, target, index, poolCount;
+    s32 *pool;
+
+    memset(selected, -1, sizeof(selected));
+    memset(scores, 0, sizeof(scores));
+    memset(chosen, -1, sizeof(chosen));
+    for (i = 0; i < count; i++) {
+        u32 exp = data->records[i].exp;
+        for (j = 0; j < 10; j++) {
+            if (exp >= (u32)scores[j]) {
+                mselFindSaveSlot(scores, selected, j + 1, 10, 0);
+                scores[j] = exp;
+                selected[j] = i;
+                break;
+            }
+        }
+    }
+    remaining = 0;
+    for (i = 0; i < 10; i++) {
+        if (selected[i] >= 0) {
+            remaining++;
+        }
+    }
+    mselCountSaves();
+    Msel_TOverData_Clear();
+    chosenCount = 0;
+    for (i = 0; i < 3 && remaining > 0; i++) {
+        index = dds3GetRandIntA(0, remaining);
+        remaining--;
+        gGlobal->tover[chosenCount] = selected[index];
+        gGlobal->unk_60++;
+        chosen[chosenCount++] = selected[index];
+        mselFindSaveSlot(scores, selected, index + 1, 10, 1);
+    }
+    target = ((volatile mselSaveData_t *)data)->count;
+    if (target >= 5) {
+        target = 5;
+    }
+    poolCount = count - chosenCount;
+    if (poolCount > 0) {
+        pool = sdfChipAllocZeroDirect(poolCount * sizeof(*pool));
+        if (chosenCount < target) {
+            s32 filled = 0;
+            for (i = 0; i < count; i++) {
+                for (j = 0; j < chosenCount; j++) {
+                    if (chosen[j] == i) {
+                        break;
+                    }
+                }
+                if (j == chosenCount && j != 0) {
+                    pool[filled++] = i;
+                }
+            }
+        }
+        remaining = poolCount;
+        for (i = chosenCount; i < target; i++) {
+            index = dds3GetRandIntA(0, remaining);
+            remaining--;
+            gGlobal->tover[i] = pool[index];
+            gGlobal->unk_60++;
+            chosen[i] = pool[index];
+            mselFindSaveSlot(pool, NULL, index + 1, poolCount, 1);
+        }
+        sdfChipFreeDirect(pool);
+    }
+    gGlobal->Z_RGBA = 0x64618700;
+    gGlobal->Zalpha_cnt = 0;
+}
+#else
 INCLUDE_ASM(const s32, "kernel/ModeSelect", mselDevilChoice);
+#endif
 
 void Msel_TOverData_Clear(void)
 {
