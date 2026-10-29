@@ -32,6 +32,29 @@ extern s32 SetAlarm(u16 ticks, void (*callback)(s32, s32, s32), void *argument);
 extern void gcc2_compiled__6(s32 cause, s32 address, s32 argument);
 extern s32 cdvdNcmdSema __attribute__((section(".data")));
 
+/* Same native CreateThread descriptor as the matched SDF constructor. */
+typedef struct {
+    s32 status;
+    void (*entry)(void);
+    void *stack;
+    s32 stackSize;
+    void *gp;
+    s32 priority;
+    u8 unk18[0x18];
+} sdfKernelThreadParam_t;
+
+extern s32 cdvdCallbackThreadId __attribute__((section(".data")));
+extern s32 D_00598C50 __attribute__((section(".data")));
+extern u8 D_00598C58[0x30] __attribute__((section(".data")));
+extern sdfKernelThreadParam_t D_00598C88 __attribute__((section(".data")));
+extern s32 _gp;
+extern s32 GetThreadId(void);
+extern s32 ReferThreadStatus(s32 threadId, void *status);
+extern s32 CreateThread(sdfKernelThreadParam_t *param);
+extern s32 StartThread(s32 threadId, void *argument);
+extern s32 ChangeThreadPriority(s32 threadId, s32 priority);
+void _Cdvd_cbLoop(void);
+
 typedef void (*cdvdPowerCallback_t)(void *argument);
 extern cdvdPowerCallback_t D_00598C44 __attribute__((section(".data")));
 extern void *D_00598C48 __attribute__((section(".data")));
@@ -100,7 +123,26 @@ INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_cd_callback);
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", _Cdvd_cbLoop);
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdInitEeCB);
+s32 sceCdInitEeCB(s32 priority, void *stack, s32 stackSize)
+{
+    s32 created = 1;
+
+    if (cdvdCallbackThreadId == 0) {
+        D_00598C50 = GetThreadId();
+        ReferThreadStatus(D_00598C50, D_00598C58);
+        D_00598C88.stackSize = stackSize;
+        D_00598C88.gp = &_gp;
+        D_00598C88.entry = _Cdvd_cbLoop;
+        D_00598C88.stack = stack;
+        D_00598C88.priority = priority;
+        cdvdCallbackThreadId = CreateThread(&D_00598C88);
+        StartThread(cdvdCallbackThreadId, NULL);
+    } else {
+        ChangeThreadPriority(cdvdCallbackThreadId, priority);
+        created = 0;
+    }
+    return created;
+}
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_cd_read_intr);
 

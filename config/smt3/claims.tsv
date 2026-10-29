@@ -701,3 +701,10 @@ src/smt3/newbattle/nbPanelProcess.c	z24	wip	2026-10-29	3 fn / 7900 B	nbPanelDraw
 src/smt3/field/fld_Npc.c	z24	wip	2026-10-29	5 fn / 10512 B	fldItemBoxAdd, fldNpcCalc, fldNpcDraw, fldNpcLoad, fldEADraw
 src/smt3/newbattle/nbPanelProcess.c	z24	done	2026-10-29	0 fn / 0 B	nbPanelDrawPP1 parked eight words short; nbPanelStockSelect and nbPanelDrawPP untouched; owner 57 match, 0 differ
 src/smt3/field/fld_Npc.c	z24	done	2026-10-29	0 fn / 0 B	fldItemBoxAdd parked at the native size; fldNpcCalc, fldNpcDraw, fldNpcLoad and fldEADraw untouched; owner 16 match, 0 differ
+src/smt3/effect/billManager.c	redthing1	done	2026-10-29	1 fn / 1180 B	PiM agent: DDS donor TagLink with native flat 15x8 offset stream and canonical comparator; complete owner62/0, existing VU contracts
+src/smt3/newdata/datCalc.c	redthing1	done	2026-10-29	2 fn / 1280 B	PiM agent: native field/event party damage modes, canonical unsigned RNG ABI, real persistent party view and callback reloads; complete owner77/0
+src/smt3/effect/effPCPMisc.c	redthing1	done	2026-10-29	1 fn / 2508 B	PiM agent: DDS PCP donor with native SMT3 SP1/SP2 geometry and qualified VU workspaces/callback lifetimes; reclaimed after prior scope release
+src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 SDK fn / 212 B	callback-thread initialization using the established kernel descriptor; create/start and existing-thread priority paths exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 120 B	DECI2 close, send request and poll wrappers with native packet widths and signed destination/status contracts; complete owner 6 match, 0 differ
+src/smt3/newbattle/nbTest.c	redthing1	done	2026-10-28	1 fn / 2752 B	fourteen native AI-record copies with repeated source rows and signed post-callback mode dispatch; complete owner 14 match, 0 differ
+src/smt3/sdk/libc.c	redthing1	done	2026-10-28	2 fn / 652 B SDK	power-of-five cache scaling and signed bigint difference; qualified shared pointer/limb lifetimes; complete owner 58 match, 0 differ; multiply remains assembly

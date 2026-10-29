@@ -17,12 +17,12 @@ page and line to open. Conventions are in
 | 7 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 6 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 6 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
+| 5 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
+| 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 4 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
-| 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
-| 4 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 4 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 4 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
@@ -34,7 +34,6 @@ page and line to open. Conventions are in
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
-| 3 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
@@ -50,6 +49,7 @@ page and line to open. Conventions are in
 | 2 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
+| 2 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |

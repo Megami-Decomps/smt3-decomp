@@ -111,3 +111,35 @@ Ruled out for the arm order: inverting the test so the `printf` arm is the
 (47 words out), and a `char *msg = D_005349A0;` local for the format string.
 The matching `nbCameraState_SkillAttack_Calc` needed its actual ground-collision
 callee visible as C; see [callee visibility](../../levers/callee-visibility.md).
+
+## bCameraShot_AttackInvokeTargetPartyNear_Set (newbattle/nbCameraSkill, 0x308)
+
+The draft emits 736 of the native 776 bytes. Of its 184 emitted instruction
+words, 41 match and 143 differ; 40 native bytes are uncovered. Both stack
+frames are 160 bytes. A default scratch promotion checks the complete owner
+at 32 match / 1 differ, with this target as the sole difference.
+
+The camera receives three aligned scratch vectors: base position at stack+0,
+camera position at +0x10 and temporary center at +0x20. The initial formation
+calls produce distinct invoke and target pointers, followed by an invoke-party
+mask. A call's delay slot can save the preceding provider's result; the mask
+is returned after that delay slot, and is never dereferenced as a pointer.
+
+The 32-record scan finds the lowest eligible formation height. Its first match
+initializes the minimum even for a negative or NaN height; later updates use
+strict ordered comparisons. That center and height set camera Y. The later
+bound correction compares invoke-center X with camera X, and updates camera X
+with the selected radius adjustment. It does not write Y. Native stores at
+stack+0x14 and +0x10 distinguish those two operations.
+
+The final path stores target, then the interim camera distance, normalizes and
+stores direction, stores fovy, and finally adds the scaled distance term to the
+published distance field. It retains `vf10` after the target store. The existing
+VU0 primitives reproduce each hardware operation, with no synthetic uses.
+
+The remaining frontier is register allocation and division-block structure.
+Native has radius divisions at +0x1C0 and +0x1F8; C merges them at +0x1CC.
+The group-radius division is at native +0x214 versus C +0x1E8. Keeping the
+physical radius unchanged across three ordinary distance branches preserves
+the meaning but does not alter the output. No frame padding, forced registers
+or compiler-option changes are used.

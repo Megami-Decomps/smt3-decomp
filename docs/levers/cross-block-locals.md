@@ -188,3 +188,40 @@ src/smt3/sdk/libc.c --func _lshift --alloc --no-dumps --out <output>`. For
 the first control, split `count` into `maxwds` and `zeroCount`; for the second,
 split `bitCount` into `k` and `rightShift`. Compute the complementary shift
 only in the nonzero-shift branch. The complete libc owner remains exact.
+
+## Retain bigint subtraction values
+
+`sdk/libc::__mdiff` matches all 400 bytes. Its result pointer first serves as
+the operand-swap temporary, then receives the allocated difference. Both
+subtraction loops use the same signed low-half result and unsigned limb
+intermediate. The first loop subtracts both operands; the remainder loop
+propagates the borrow through the larger operand. Each intermediate is
+consumed by the real low/high stores and the next borrow.
+
+Paired pinned-cc1 allocation traces use `--as-unit src/smt3/sdk/libc.c
+--func __mdiff --alloc --no-dumps`; all pass hooked/unhooked and plain-output
+parity. A further allocation trace with RTL dumps also passes dumped/plain
+and hooked/unhooked parity. The compiler is the pinned 2.96 binary identified
+in the preceding bigint-shift section.
+
+In `rtl.13.life`, result pseudo 88 receives the swap input at UID 76 and
+the allocator result at UIDs 53/118; global allocation assigns it $11. Low-half
+pseudo 97 receives the two loops' sums at UIDs 179/237 and supplies halfword
+stores 195/248; it receives $3. Limb pseudo 98 transforms the first input
+word through high-half subtraction/addition at UIDs 189/192 and receives
+the remainder high sum at UID 245. It supplies high-half stores 198/251
+and receives $5. These are live arithmetic values, not register ties.
+
+Independent single-property controls retain the 400-byte extent but differ:
+a separate swap pointer changes two words, first at +0x60; separate low-half
+locals for the two loops change eleven, first at +0xB8; splitting the limb
+intermediate at the remainder loop changes three, first at +0x128. The
+qualified allocator controls and the RTL definitions show the shared-pseudo
+property that restores the native allocation without claiming original
+source spelling. Reproduce the exact trace with `tools/cc1probe.sh <owner.c>
+--as-unit src/smt3/sdk/libc.c --func __mdiff --alloc --out <output>`.
+
+Keep the borrow live between the low and high half of each word. The equal
+case writes `wds = 1` and `x[0] = 0`; the allocator already initializes the
+sign. Both loops write the two halfwords through one advancing output-word
+cursor. The complete libc owner remains exact.

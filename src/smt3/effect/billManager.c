@@ -84,6 +84,9 @@ extern f64 sdfFloatToULong(f32 value) __attribute__((const));
 extern long dpcmp(f64 left, f64 right) __attribute__((const));
 extern f64 dpsub(f64 left, f64 right) __attribute__((const));
 extern f32 sdfDoubleToULong(f64 value) __attribute__((const));
+extern f64 fabs(f64 value);
+EQUATE_FPTODP();
+EQUATE_DPTOFP();
 PS2_SYMBOL_AT(sdfGrOt_t, dds3MultiBillboardOt, sdfGrOtTable, 0x580);
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
@@ -363,125 +366,113 @@ void BillboardFreeTex(dds3BillResource_tag *hResource) {
     }
 }
 
-/* NON_MATCHING: 255 of 271 words differ (first at +0x28). */
-#ifdef NON_MATCHING
+/* Adapted from Megami-Decomps/dds-decomp, effect/billManager.c at f79f86dc.
+ * Each row is eight actual X/Y offsets, consumed as a 32-byte quad stream. */
 void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
-    /* VU0 scratch is reloaded after its translation row is replaced. */
-    volatile f32 matrix[4][4] __attribute__((aligned(16)));
-    f32 viewDir[4];
-    sdfBillBoardBatch_t *batch;
-    u16 listIndex;
-    s32 count;
-    f32 hwx;
-    f32 hhy;
-    f32 cx;
-    f32 cy;
-    VTX_t *corner;
+    f32 matrix[16] __attribute__((aligned(16)));
+    f32 direction[4];
+    f32 dot;
+    sdfBillBoardBatch_t *work;
+    s32 selected;
+    void *packet;
+    u32 *vertexPacket;
+    u8 *geometry;
+    s32 index;
+    f32 x, y, halfWidth, halfHeight;
+    f32 cosine, sine;
+    f32 cornerX, cornerY;
 
-    listIndex = child->current_mode;
-    if (listIndex != obj->mode) {
-        batch = child->batch;
-        count = batch->count;
-        if (count > 0) {
-            sdfDrawTagLink(child->pBillTag[listIndex],
-                           (u32)sdfBillBoardMakeN(batch->centre, batch->color, batch->uv,
-                                                  batch->offset, count, NULL));
-            batch->count = 0;
+    selected = child->current_mode;
+    if (selected != obj->mode) {
+        work = child->batch;
+        if (work->count > 0) {
+            vertexPacket = sdfBillBoardMakeN((const u128 *)work->centre, work->color,
+                work->uv, work->offset, work->count, 0);
+            sdfDrawTagLink(child->pBillTag[selected], (u32)vertexPacket);
+            work->count = 0;
         }
-        listIndex = obj->mode;
-        child->current_mode = listIndex;
+        selected = obj->mode;
+        child->current_mode = selected;
     }
-    if (child->pBillTag[listIndex] == NULL) {
-        sdfDrawTag_t *tag;
-        void *refPacket;
-        sdfTexPacket_t *texPacket;
-        void *packet;
-        s32 texLength;
-
-        tag = sdfGrAllocPacketBuff(0x20);
-        child->pBillTag[listIndex] = tag;
-        sdfDrawTagInit(tag);
-        refPacket = sdfGrAllocPacketBuff(0x20);
-        texPacket = sdfTexGetPacket(child->hTex);
-        texLength = sdfTexGetPacketLength(child->hTex);
-        sdf3DMakeDirectRefPacket(refPacket, (u32)texPacket, texLength);
-        sdfDrawTagLinkRef(child->pBillTag[listIndex], (u32)refPacket);
-        if (child->type & 1) {
-            f32 dot;
-            f64 angle;
-
+    if (child->pBillTag[selected] == NULL) {
+        child->pBillTag[selected] = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(child->pBillTag[selected]);
+        packet = sdfGrAllocPacketBuff(0x20);
+        sdf3DMakeDirectRefPacket(packet,
+            (u32)sdfTexGetPacket(child->hTex),
+            sdfTexGetPacketLength(child->hTex));
+        sdfDrawTagLinkRef(child->pBillTag[selected], packet);
+        if ((u16)(child->type & 1) != 0) {
             SDF_VU0_LOADVECTOR(aViewTarget);
             SDF_VU0_LOADVECTOR_B(aViewEye);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
             SDF_VU0_LOADVECTOR_B(D_00317030);
             SDF_VU0_INNERPRODUCT(dot);
-            angle = sdfFloatToULong(dot);
-            if (dpcmp(angle, 0.0) < 0) {
-                angle = dpsub(0.0, angle);
-            }
-            dds3BillboardTagParam[1] = sdfDoubleToULong(dpsub(1.0, angle));
-            SDF_VU0_STOREVECTOR(viewDir);
-            SDF_VU0_COPYVECTOR_A_TO_B();
+            dds3BillboardTagParam[1] = 1.0 - fabs(dot);
+            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED();
             SDF_VU0_LOADIDENTITY();
-            SDF_VU0_LOADVECTOR(dds3BillboardTagParam);
+            SDF_VU0_LOADVECTOR_BARRIER(dds3BillboardTagParam);
             SDF_VU0_SCALE_XYZ();
             SDF_VU0_STOREMATRIX(matrix);
         } else {
             SDF_VU0_STOREIDENTITY(matrix);
         }
-        packet = sdfGrAllocPacketBuff(0x38);
-        sdfBillBoardMakeTMPacket(packet, &matrix[0][0]);
-        sdfDrawTagLink(child->pBillTag[listIndex], (u32)packet);
+        geometry = (u8 *)sdfGrAllocPacketBuff(0x38);
+        sdfBillBoardMakeTMPacket(geometry, matrix);
+        sdfDrawTagLink(child->pBillTag[selected], (u32)geometry);
         if (child->next == child) {
             child->next = dds3BillboardTag;
             dds3BillboardTag = child;
         }
     }
-    batch = child->batch;
-    count = batch->count;
-    SDF_VU0_COPYVECTOR(&batch->centre[count], obj->pos);
-    batch->color[count] = obj->abgr;
-    *(billUvQuad_t *)batch->uv[count] = child->uv;
-    corner = batch->offset[count];
-    hwx = child->width * obj->childScaleX;
-    hhy = child->height * obj->childScaleY;
-    cx = child->cx * obj->childScaleX;
-    cy = child->cy * obj->childScaleY;
+    work = child->batch;
+    index = work->count;
+    SDF_VU0_COPYVECTOR(&work->centre[index], obj->pos);
+    work->color[index] = obj->abgr;
+    memcpy(&work->uv[index], &child->uv, sizeof(child->uv));
+    x = child->cx * obj->childScaleX;
+    y = child->cy * obj->childScaleY;
+    halfWidth = child->width * obj->childScaleX;
+    halfHeight = child->height * obj->childScaleY;
     if (obj->rot == 0.0f) {
-        corner[0].x = cx - hwx;
-        corner[0].y = cy - hhy;
-        corner[1].x = cx + hwx;
-        corner[1].y = cy - hhy;
-        corner[2].x = cx + hwx;
-        corner[2].y = cy + hhy;
-        corner[3].x = cx - hwx;
-        corner[3].y = cy + hhy;
+        work->offset[index][0] = x - halfWidth;
+        work->offset[index][1] = y - halfHeight;
+        work->offset[index][2] = x + halfWidth;
+        work->offset[index][3] = y - halfHeight;
+        work->offset[index][4] = x + halfWidth;
+        work->offset[index][5] = y + halfHeight;
+        work->offset[index][6] = x - halfWidth;
+        work->offset[index][7] = y + halfHeight;
     } else {
-        f32 cosine = sdfCos(obj->rot);
-        f32 sine = sdfSin(obj->rot);
-
-        corner[0].x = (cx - hwx) * cosine - (cy - hhy) * sine;
-        corner[0].y = (cx - hwx) * sine + (cy - hhy) * cosine;
-        corner[1].x = (cx + hwx) * cosine - (cy - hhy) * sine;
-        corner[1].y = (cx + hwx) * sine + (cy - hhy) * cosine;
-        corner[2].x = (cx + hwx) * cosine - (cy + hhy) * sine;
-        corner[2].y = (cx + hwx) * sine + (cy + hhy) * cosine;
-        corner[3].x = (cx - hwx) * cosine - (cy + hhy) * sine;
-        corner[3].y = (cx - hwx) * sine + (cy + hhy) * cosine;
+        cosine = sdfCos(obj->rot);
+        sine = sdfSin(obj->rot);
+        cornerX = x - halfWidth;
+        cornerY = y - halfHeight;
+        work->offset[index][0] = cornerX * cosine - cornerY * sine;
+        work->offset[index][1] = cornerX * sine + cornerY * cosine;
+        cornerX = x + halfWidth;
+        cornerY = y - halfHeight;
+        work->offset[index][2] = cornerX * cosine - cornerY * sine;
+        work->offset[index][3] = cornerX * sine + cornerY * cosine;
+        cornerX = x + halfWidth;
+        cornerY = y + halfHeight;
+        work->offset[index][4] = cornerX * cosine - cornerY * sine;
+        work->offset[index][5] = cornerX * sine + cornerY * cosine;
+        cornerX = x - halfWidth;
+        cornerY = y + halfHeight;
+        work->offset[index][6] = cornerX * cosine - cornerY * sine;
+        work->offset[index][7] = cornerX * sine + cornerY * cosine;
     }
-    count = batch->count + 1;
-    batch->count = count;
-    if (count == 15) {
-        sdfDrawTagLink(child->pBillTag[listIndex],
-                       (u32)sdfBillBoardMakeN(batch->centre, batch->color, batch->uv,
-                                              batch->offset, 15, NULL));
-        batch->count = 0;
+    work->count++;
+    if (work->count == 15) {
+        vertexPacket = sdfBillBoardMakeN((const u128 *)work->centre, work->color,
+            work->uv, work->offset, 15, 0);
+        sdfDrawTagLink(child->pBillTag[selected], (u32)vertexPacket);
+        work->count = 0;
     }
 }
-#else
-INCLUDE_ASM(const s32, "effect/billManager", dds3BillboardTagLink);
-#endif
 
 void dds3BillboardLinkOt(void) {
     dds3BillResource_tag *res = dds3BillboardTag;

@@ -48,53 +48,6 @@ The row type is a unit-local `BillGeneralRow` of stride 8 reading its `s16` at
 `+4`, which is the same table `dds3BillboardGeneral` reaches as
 `BillboardTable[index].kind` at `0x316FF4`, four bytes into the same rows.
 
-## dds3BillboardTagLink (effect/billManager, 0x49C)
-
-16 of 271 words match at the start, and the draft emits 1084 bytes against
-retail's 1180, so it is 24 words short. The whole structure is recovered and
-reads correctly; what is missing is register allocation, not shape.
-
-Two separate things are left.
-
-The first is the corner-offset block. Retail forms the row address
-`batch + 0xC + count * 32` once into `$10` and then emits a chain of seven or
-eight plain copies of it (`daddu $4, $10, $0`, `daddu $5, $4, $0`, ... ), one
-register per `swc1`, with the `0x210`..`0x22C` member offsets left in the store
-displacements. Four source forms were measured for that block: one `VTX_t *`
-local for the row (`corner[0].x = ...`) gives one register and no copies, which
-is the 1084-byte draft kept here; `batch->offset[count][0].x` written out per
-store gives an `addiu`/`addu` pair per store at `0(reg)` and runs 1200 bytes;
-the index-cast form `((VTX_t *)((u8 *)(count * 32) + (u32)batch->offset))[0].x`
-per store gives 1132; and reassigning one `VTX_t *` local immediately before
-each store gives 1104. None reproduces the copy chain, so whatever creates one
-address pseudo per store while keeping the member offset in the displacement
-has not been found.
-
-The second is that retail holds three values in callee-saved registers across
-the calls where the draft holds two: `$21` is `&child->uv`, `$19` is
-`&child->pendingLists[listIndex]`, and `$23` is `listIndex * 4`, which retail
-re-adds to `$21` at each of the three `pendingLists[listIndex]` uses. The draft
-keeps the resolved slot address and recomputes less, so it saves `$23` and
-every later allocation shifts. Scoping `void *packet` into the tag-creation
-block (rather than at function scope) is what aligned the first sixteen words,
-so the prologue's saved-register list is now retail's apart from `$23`.
-
-The draft expresses the double-precision tail as explicit calls; natural
-floating-point expressions can also emit runtime calls. `sdfFloatToULong(dot)` widens the
-inner product, `dpcmp(x, 0.0)` is the *comparison* (its sign is tested with
-`bgez`), `dpsub(0.0, x)` negates and `dpsub(1.0, x)` subtracts, and
-`sdfDoubleToULong` returns the `f32` in `$f0`. The `1.0` double is retail's
-`ori $4, $0, 0xFFC0` / `dsll32 $4, $4, 14`, which is `0x3FF0000000000000`. The
-same four helpers are used this way in `script/scrTraceCode`.
-
-Also confirmed: the `variant & 1` arm's matrix build is
-`SDF_VU0_STOREVECTOR` of a dead stack vector, `SDF_VU0_COPYVECTOR_A_TO_B`,
-`SDF_VU0_LOADIDENTITY`, `SDF_VU0_LOADVECTOR(dds3BillboardTagParam)`,
-`SDF_VU0_SCALE_XYZ` and `SDF_VU0_STOREMATRIX`, and the other arm is a single
-`SDF_VU0_STOREIDENTITY`. Both are byte-exact in the draft. The stack frame is
-`f32 matrix[4][4]` at 0x0 then `f32 viewDir[4]` at 0x40, in that declaration
-order.
-
 ## dds3Billboard_P2AAnimDraw (effect/billManager, 0x1D0)
 
 Byte-exact as C. It is kept behind the fallback because its visibility as a

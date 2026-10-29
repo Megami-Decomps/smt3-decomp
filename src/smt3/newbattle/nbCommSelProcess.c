@@ -1120,7 +1120,165 @@ void nbCommSelShutdown(dds3ProcessID_t *id)
     sdfMemFreeDirect(s->handle);
 }
 
+/* NON_MATCHING: 382 of 410 instruction words match at the native 1640-byte size. */
+#ifdef NON_MATCHING
+typedef struct {
+    s8 skillattr;
+    s8 type;
+    s16 index;
+    u16 keisyoform;
+    s8 capacity;
+    u8 flag;
+} nbCommSkillAttr_t;
+
+typedef struct {
+    u8 flags;
+    u8 flags2;
+    u16 skill;
+    u8 reserved04[4];
+} nbCommItem_t;
+
+/* Persistent units use the same +0xA54 view as nbGetUnitWorkPointer. */
+typedef struct {
+    u8 reserved0000[0xA54];
+    datUnitWork_t unit[16];
+    u8 stockIndex[16];
+    s32 stockCount;
+    u8 itemQuantity[160];
+} nbCommSaveWork_t;
+
+extern nbCommSaveWork_t *nbCommSaveWork asm("DDS3_GBWK");
+extern nbCommSkillAttr_t attr[];
+/* The type-two access has only a proven word width and 104-byte stride. */
+extern u8 nbCommRawSkillData[] asm("attr");
+extern nbCommItem_t datItemTable[];
+extern s32 nbCheckSkillCost(s32 formindex, s32 skill);
+extern s32 nbGetEscapeSwitch(nbMainProcessData_t *data);
+extern s32 nbGetRandamStock(void);
+
+void SetCommList(nbCommSelProcessData_t *s, struct nbParty_t *my)
+{
+    datUnitWork_t *work = nbGetUnitWorkPointer(s->data, my);
+    s32 i;
+    /* A real list key in both enumerations. Qualified allocation control:
+     * separate skill/stock keys use reg90 ($16) and reg460 ($5); the shared
+     * key has 42 references, live116 and one crossed call, retaining $16.
+     * Both --alloc --no-dumps runs pass plain/hooked/unhooked parity. */
+    s32 entryId;
+    s32 limit;
+    s32 kind;
+    u32 badstatus = work->badstatus & 0xFFF;
+
+    for (i = 5; i >= 0; i--) s->commcnt[i] = 0;
+    s->commlist[0][s->commcnt[0]] = 0x8000;
+    s->commdisable[0][s->commcnt[0]] = 0;
+    s->commcnt[0]++;
+    if (work->flag & 4) {
+        s->commlist[1][s->commcnt[1]] = 0x8004;
+        s->commdisable[1][s->commcnt[1]] = 0;
+        if (badstatus == 0x200) s->commdisable[1][s->commcnt[1]] = 5;
+        s->commcnt[1]++;
+    }
+    limit = 0x200;
+    if ((s->data->stat & 0x4000000) == 0) limit = work->skillcnt;
+    for (i = 0; i < limit; i++) {
+        entryId = i;
+        if ((s->data->stat & 0x4000000) == 0) entryId = work->skill[i];
+        if (entryId != 0) {
+            kind = attr[entryId].type;
+            switch (kind) {
+            case -1:
+                break;
+            case 0:
+                if (datSkillTable.normal[entryId].use & 2) {
+                    s->commlist[0][s->commcnt[0]] = entryId;
+                    s->commdisable[0][s->commcnt[0]] = 0;
+                    if ((u8)(datSkillTable.normal[entryId].flag & 1) && (s->data->stat & 1))
+                        s->commdisable[0][s->commcnt[0]] = 1;
+                    if ((datSkillTable.normal[entryId].flag & 2) && (s->data->stat & 4))
+                        s->commdisable[0][s->commcnt[0]] = 2;
+                    if (nbCheckSkillCost(s->my->formindex, entryId) != 0)
+                        s->commdisable[0][s->commcnt[0]] = 3;
+                    if (datSkillTable.normal[entryId].koukatype == 1 &&
+                        (work->badstatus & 0xFFF) == 0x20)
+                        s->commdisable[0][s->commcnt[0]] = 5;
+                    switch (entryId) {
+                    case 0x48:
+                        if (nbGetEscapeSwitch(s->data) == 0)
+                            s->commdisable[0][s->commcnt[0]] = 1;
+                        break;
+                    case 0xDF:
+                        if (s->data->playerpcnt >= 4 || nbGetRandamStock() < 0)
+                            s->commdisable[0][s->commcnt[0]] = 6;
+                        break;
+                    }
+                    s->commcnt[0]++;
+                }
+                break;
+            case 1:
+                break;
+            case 2:
+                if (*(u32 *)(nbCommRawSkillData + entryId * 104 + 0xDA0) < 7) {
+                    s->commlist[1][s->commcnt[1]] = entryId;
+                    s->commdisable[1][s->commcnt[1]] = 0;
+                    if (badstatus == 0x200) s->commdisable[1][s->commcnt[1]] = 5;
+                    s->commcnt[1]++;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+    if (work->flag & 4) {
+        s->commlist[5][s->commcnt[5]] = 0x8001;
+        s->commdisable[5][s->commcnt[5]] = 0;
+    } else {
+        s->commlist[4][s->commcnt[4]] = 0x8003;
+        s->commdisable[4][s->commcnt[4]] = 0;
+        s->commcnt[4]++;
+        s->commlist[5][s->commcnt[5]] = 0x8001;
+        s->commdisable[5][s->commcnt[5]] = 0;
+    }
+    if (nbGetEscapeSwitch(s->data) == 0) s->commdisable[5][s->commcnt[5]] = 1;
+    s->commcnt[5]++;
+    s->commlist[0][s->commcnt[0]] = 0x8002;
+    s->commdisable[0][s->commcnt[0]] = 0;
+    s->commcnt[0]++;
+
+    if (work->flag & 4) {
+        for (i = 0; i < 160; i++) {
+            if (nbCommSaveWork->itemQuantity[i] != 0 && (datItemTable[i].flags & 2)) {
+                s->commlist[2][s->commcnt[2]] = i;
+                s->commdisable[2][s->commcnt[2]] = 0;
+                if ((u8)(datItemTable[i].flags2 & 1) && (s->data->stat & 1))
+                    s->commdisable[2][s->commcnt[2]] = 1;
+                if ((datItemTable[i].flags2 & 8) && (s->data->stat & 4))
+                    s->commdisable[2][s->commcnt[2]] = 2;
+                if (i == 0x38 && nbGetEscapeSwitch(s->data) == 0)
+                    s->commdisable[2][s->commcnt[2]] = 1;
+                s->commcnt[2]++;
+            }
+        }
+        for (i = 0; i < nbCommSaveWork->stockCount; i++) {
+            u32 flags;
+            entryId = nbCommSaveWork->stockIndex[i];
+            flags = nbCommSaveWork->unit[entryId].flag;
+            if ((flags & 1) == 0) continue;
+            if ((flags & 4) != 0) continue;
+            if ((flags & 2) != 0) continue;
+            s->commlist[3][s->commcnt[3]] = entryId;
+            s->commdisable[3][s->commcnt[3]] = 0;
+            if (nbCommSaveWork->unit[entryId].hp == 0 ||
+                nbCommSaveWork->unit[entryId].badstatus == 0x800)
+                s->commdisable[3][s->commcnt[3]] = 4;
+            s->commcnt[3]++;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", SetCommList);
+#endif
 
 void SetPrevCursor(nbCommSelProcessData_t *s, s32 type, s32 ind)
 {

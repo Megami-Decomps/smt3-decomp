@@ -5179,7 +5179,228 @@ void effPCPAgiFireballDelete(effPCPAgiFireball_tag *hData) {
     sdfChipFreeDirect(hData);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballDraw);
+/* Native look-at up vector: (0, 1, 0, 0). */
+extern f32 effPCPAgiFireballParam[4];
+
+/* Update the head, attached nodes and randomized three-channel trail. */
+void effPCPAgiFireballDraw(effPCPAgiFireball_tag *work) {
+    f32 matrix[16] __attribute__((aligned(16)));
+    f32 step[4] __attribute__((aligned(16)));
+    f32 side[4] __attribute__((aligned(16)));
+    f32 scatter[4] __attribute__((aligned(16)));
+    f32 pos[4] __attribute__((aligned(16)));
+    f32 muzzle[4] __attribute__((aligned(16)));
+    effPCPAgiFireball_tag *source = work->source;
+    s32 count;
+    s32 frame = work->frame;
+    u32 color;
+    dds3ModelHandle_t *model;
+    u32 i;
+    u32 j;
+    u32 base;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 fade;
+    f32 scale;
+    f32 randomScale;
+    f32 randomOffset;
+    f32 length;
+
+    /* Duplication may change live count; retain both entry snapshots. */
+    count = work->count;
+    if (source != NULL) {
+        effPCPAgiFireballCopySub(work, source);
+        work->source = NULL;
+    }
+    if (frame == 0) {
+        for (i = 0; i < 5; i++) {
+            dds3EffectPartSetScale(work->handleA[i], work->param.scale);
+        }
+    }
+    fadeIn = work->param.fade_in;
+    fadeOut = work->param.fade_out;
+    if (frame < fadeIn && fadeIn != 0) {
+        fade = (f32)frame / fadeIn;
+    } else if (count - frame <= fadeOut && fadeOut != 0) {
+        fade = (f32)(count - frame) / fadeOut;
+    } else {
+        fade = 1.0f;
+    }
+    color = work->color;
+    color = effColorBlend(color & 0xFFFFFF, color, fade);
+    model = dds3EffectPartGetHandle(work->headHandle);
+    if (work->mode == 0) {
+        dds3EffectPartSetPosition(work->headHandle, work->param.pos);
+        if (effBTLSkillCheckRun()) {
+            effBTLModelGetSphereCenter(effBTLSkillGetInvokeFormation());
+            SDF_VU0_STOREVECTOR_NOMEM(muzzle);
+            LookAtMatrix(work->param.pos, muzzle, effPCPAgiFireballParam);
+            ReverseMatrix();
+            SDF_VU0_RESET_ROW3();
+            SDF_VU0_STOREMATRIX(matrix);
+        } else {
+            /* Keep the VU source load and destination store as separate stages. */
+            SDF_VU0_LOADMATRIX(work->matrix);
+            SDF_VU0_STOREMATRIX(matrix);
+        }
+    } else if (work->mode == 1) {
+        effBTLModelGetSphereCenter(effBTLSkillGetInvokeFormation());
+        SDF_VU0_STOREVECTOR_NOMEM(muzzle);
+        muzzle[1] = 0.0f;
+        dds3EffectPartSetPosition(work->headHandle, muzzle);
+        if (effBTLSkillCheckRun()) {
+            pos[0] = work->param.pos[0];
+            pos[2] = work->param.pos[2];
+            pos[1] = 0.0f;
+            pos[3] = 0.0f;
+            LookAtMatrix(pos, muzzle, effPCPAgiFireballParam);
+            ReverseMatrix();
+            SDF_VU0_RESET_ROW3();
+            SDF_VU0_STOREMATRIX(matrix);
+        } else {
+            SDF_VU0_LOADMATRIX(work->matrix);
+            SDF_VU0_STOREMATRIX(matrix);
+        }
+    } else if (work->mode == 2) {
+        dds3EffectPartSetPosition(work->headHandle, work->param.pos);
+        if (effBTLSkillCheckRun()) {
+            effBTLModelGetSphereCenter(effBTLSkillGetInvokeFormation());
+            SDF_VU0_STOREVECTOR_NOMEM(muzzle);
+            /* Place the SP2 aim point 300 units from the grounded invocation center. */
+            VEC3_SPLAT(step, 300.0f);
+            pos[0] = work->param.pos[0];
+            pos[2] = work->param.pos[2];
+            muzzle[1] = 0.0f;
+            pos[1] = 0.0f;
+            SDF_VU0_LOADVECTOR(pos);
+            SDF_VU0_LOADVECTOR_B(muzzle);
+            SDF_VU0_COPYVECTOR_B_TO_C();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_LOADVECTOR_B(step);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_COPYVECTOR_C_TO_B();
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(muzzle);
+            SDF_VU0_LOADVECTOR_B(pos);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_GETLENGTH(length);
+            dds3EffectPartSetScale(work->headHandle, length / 400.0f);
+            LookAtMatrix(work->param.pos, muzzle, effPCPAgiFireballParam);
+            ReverseMatrix();
+            SDF_VU0_RESET_ROW3();
+            SDF_VU0_STOREMATRIX(matrix);
+        } else {
+            SDF_VU0_LOADMATRIX(work->matrix);
+            SDF_VU0_STOREMATRIX(matrix);
+        }
+    }
+    dds3EffectPartSetRotateMatrix(work->headHandle, matrix);
+    dds3EffectPartSetColor(work->headHandle, color);
+    mdlLink(model, D_002F69B8);
+    SDF_VU0_COPYVECTOR(work->pos_old, work->pos);
+    sdfModelGetMarkPos(model->modelRoot, 1);
+    SDF_VU0_STOREVECTOR(work->pos);
+    if (frame < count && frame > 0) {
+        for (i = 0; i < 5; i++) {
+            if (i == 4) {
+                if (work->mode == 1 ||
+                    work->mode == 2) {
+                    dds3EffectPartSetRotateMatrix(work->handleA[i], matrix);
+                }
+                dds3EffectPartSetPosition(work->handleA[i], work->pos_old);
+            } else {
+                dds3EffectPartSetPosition(work->handleA[i], work->pos);
+            }
+            dds3EffectPartSetColor(work->handleA[i], color);
+            dds3EffectPartDraw(work->handleA[i]);
+        }
+    }
+    if (frame >= 0) {
+        if (frame == 0) {
+            for (i = 0; i < 5; i++) {
+                dds3EffectPartSetPosition(work->handleB[i], work->pos);
+                dds3EffectPartSetRotateMatrix(work->handleB[i], work->matrix);
+            }
+        }
+        for (i = 0; i < 5; i++) {
+            dds3EffectPartSetColor(work->handleB[i], work->color);
+            dds3EffectPartDraw(work->handleB[i]);
+        }
+    }
+    if (frame >= work->param.OkSmokeFrame) {
+        if (frame == work->param.OkSmokeFrame) {
+            dds3EffectPartSetPosition(work->tailHandle, work->pos);
+            dds3EffectPartSetRotateMatrix(work->tailHandle, matrix);
+        }
+        dds3EffectPartSetColor(work->tailHandle, work->color);
+        dds3EffectPartDraw(work->tailHandle);
+    }
+    if (frame > 0) {
+        for (j = 0; j < 3; j++) {
+            if (work->param.TrackCount[j] > 0) {
+                if (frame < count) {
+                    base = (work->frame - 1) * work->param.TrackCount[j];
+                    SDF_VU0_LOADVECTOR(work->pos);
+                    SDF_VU0_LOADVECTOR_B(work->pos_old);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_COPYVECTOR_A_TO_C();
+                    VEC3_SPLAT(step, 1.0f / work->param.TrackCount[j]);
+                    SDF_VU0_LOADVECTOR_B(step);
+                    SDF_VU0_MULVECTOR();
+                    SDF_VU0_STOREVECTOR(step);
+                    SDF_VU0_COPYVECTOR(pos, work->pos_old);
+                    SDF_VU0_LOADVECTOR(aViewEye);
+                    SDF_VU0_LOADVECTOR_B(aViewTarget);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_COPYVECTOR_C_TO_B();
+                    SDF_VU0_OUTERPRODUCT();
+                    SDF_VU0_NORMALIZE();
+                    SDF_VU0_STOREVECTOR(side);
+                    for (i = 0; i < work->param.TrackCount[j]; i++) {
+                        if (work->list[j][base + i] == 0) {
+                            work->list[j][base + i] = dds3EffectPartCopy(work->list[j][0]);
+                            scale = work->param.scale * work->param.TrackScale[j];
+                            randomScale = work->param.TrackScale_r[j];
+                            dds3EffectPartSetScale(work->list[j][base + i], scale *
+                                (dds3GetRandFloatA(dds3EffectBase) * randomScale + (1.0f - randomScale)));
+                        }
+                        SDF_VU0_LOADVECTOR(pos);
+                        SDF_VU0_LOADVECTOR_B(step);
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_COPYVECTOR_A_TO_C();
+                        randomOffset = dds3GetRandFloatA(dds3EffectBase) - 0.5f;
+                        randomOffset = randomOffset + randomOffset;
+                        VEC3_SPLAT(scatter, work->param.TrackArea[j] * randomOffset);
+                        SDF_VU0_LOADVECTOR(side);
+                        SDF_VU0_LOADVECTOR_B(scatter);
+                        SDF_VU0_MULVECTOR();
+                        SDF_VU0_ADDVECTOR_A_C();
+                        /* Fully written here, then consumed by VU loads and callbacks. */
+                        SDF_VU0_STOREVECTOR_NOMEM(pos);
+                        dds3EffectPartSetPosition(work->list[j][base + i], pos);
+                        dds3EffectPartSetColor(work->list[j][base + i], work->color);
+                    }
+                } else {
+                    base = (count - 1) * work->param.TrackCount[j];
+                }
+                for (i = 0; i < base; i++) {
+                    if (work->list[j][i] == 0) {
+                        work->list[j][i] = dds3EffectPartCopy(work->list[j][0]);
+                        scale = work->param.scale * work->param.TrackScale[j];
+                        randomScale = work->param.TrackScale_r[j];
+                        dds3EffectPartSetScale(work->list[j][i], scale *
+                            (dds3GetRandFloatA(dds3EffectBase) * randomScale + (1.0f - randomScale)));
+                    }
+                    dds3EffectPartSetRotateMatrix(work->list[j][i], work->matrix);
+                    dds3EffectPartDraw(work->list[j][i]);
+                }
+            }
+        }
+    }
+    work->frame++;
+}
+
 
 void effPCPAgiFireballSetPosition(effPCPAgiFireball_tag *hData, const void *pPos) {
     SDF_VU0_COPYVECTOR(hData->param.pos, pPos);
