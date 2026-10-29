@@ -491,3 +491,29 @@ recovers the native NOP and the downstream alignment without an explicit pad.
 
 Reproduce with `tools/cc1probe.sh src/smt3/sdk/libc.c --func __swsetup --sched --reorg --out /tmp/swsetup-init`; require `verify: OK`. The complete owner,
 including the separate buffered-formatting reconstruction, remains exact.
+
+## Exit the stream search before initializing the selected slot
+
+`sdk/libc::__sfp` matches all 248 bytes with its selected-stream initialization
+at one `found` label after the glue and slot searches. The inner loop advances
+through the actual 0x58-byte FILE records and jumps there on a zero flags field.
+Keeping the initialization and return inside that loop emits only 232 bytes;
+the short-loop padding is absent. Moving the real initialization out recovers
+the native size, with five store-order words remaining. Marking the selected
+slot reserved (`_flags = 1`) before filling its fields closes those five words.
+There are no calls between those assignments, and no extra field is cleared.
+
+A qualified final-source `--loops --reorg --no-dumps` probe reports hooked,
+unhooked and plain assembly equality with the pinned compiler. The actual
+`mips_r5900_lengthen_loops` hook emits four NOPs before backedge uid258, whose
+condition tests the signed remaining count and whose delay slot advances the FILE
+cursor. They are the native NOPs at 0x002D981C through 0x002D9828. A separate
+padding event before outer backedge uid274 accounts for the NOP after loading
+the next glue pointer. This is the R5900 short-loop workaround; source has no
+explicit NOP, artificial iteration or dummy state.
+
+The allocator follows existing glue links, allocates four FILEs only when the
+next link is null, and sets errno 12 only on that allocation's failure. The
+shared success block preserves the native partial initialization and returns
+the selected FILE pointer. Full-owner and retail verification remain required.
+Reproduce with `tools/cc1probe.sh src/smt3/sdk/libc.c --func __sfp --loops --reorg --no-dumps --out /tmp/sfp-loop`; require `verify: OK`.
