@@ -2,6 +2,49 @@
 
 Conventions: [nonmatching drafts](../../nonmatching.md).
 
+## nbPanelDrawPP1 (0xC98)
+
+705 of 798 words differ at their retail positions, but the draft emits 798 of
+the native 806 words and the tail aligns with retail at a constant eight-word
+offset, so only eight words are missing and they are all in the middle.
+Assembly remains active; this reconstruction carries no exact-match credit.
+
+The record at 0xA50 is reached two ways and both appear in retail. The plain
+field reads are `DDS3_GBWK->akuma[j].<field>`, which folds 0xA50 into the
+index and leaves the member offset in the load displacement; only the two
+colour helpers take `(datUnitWork_t *)&DDS3_GBWK->akuma[j].flag`, whose +4
+shows as the 0xA54 constant. Reading hp through the cast instead costs the
+0xA50/0xA shape at every site. That pins three more members of
+fldAnahoriAkuma_t: maxhp at 0xC, mp at 0xE and maxmp at 0x10.
+
+The animation alpha must be a named local assigned before `nbPnl_rsetAlpha`:
+`anm = nbPnlWork[i].HpAnmCnt << 28;` ahead of the call, then `anm | 0xFFFFFF`
+as the colour argument. Folding the shift into the argument computes it after
+the call in a call-clobbered register and cost 106 differing words.
+
+The eight remaining words are two subexpressions that cse1 shares here and
+retail recomputes: `(y + 2) << 3`, shared between the two
+frwGetSmallNumFontFRQ calls, and `236 * j + 0xA50`, shared between the HP bar
+block and both the HP and MP animation blocks. Retail spills `y + 2` and
+reshifts it at each call, and rebuilds the index from the spilled `j` and
+`j * 16` in each block. Keeping one fewer long-lived value also changes which
+two parameters are spilled: retail spills `i` and keeps `jun` in a
+callee-saved register, the draft does the reverse, which is what exchanges
+$23 with $30 and $16 with $17 over most of the body.
+
+Ruled out: spelling `(y + 2) << 3` inline versus through a local, `y2 * 8`,
+every declaration order of the locals, `(u32)jun < 4` against
+`jun >= 0 && jun < 4`, `OfsX > 15` against `OfsX >= 16`, initialising `w` at
+its declaration, and inlining the effMagaCylinderCalcColor results into the
+nbPnlSprite arguments. A gcse probe shows the two shares are not PRE
+decisions: PRE's eight deletions are the frame addresses of the two local
+tables, the nbPanelLayoutTable2 %hi, `i * 2`, `j << 4` and three DDS3_GBWK
+loads, and by then `236 * j + 0xA50` already has a single occurrence.
+
+Blocks nbPanelPartyDraw and, through it, nbPanelDrawProcess: both need
+nbPanelDrawPP1 as a visible C definition in the normal build, which a parked
+draft is not.
+
 ## nbPanelPartyDraw (0x54C)
 
 332 of 339 instruction words match at the native 1356-byte size. Assembly

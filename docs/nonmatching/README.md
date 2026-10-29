@@ -20,13 +20,13 @@ page and line to open. Conventions are in
 | 5 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 5 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
+| 4 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 4 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 4 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
-| 3 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fld_Npc | [field/fld_Npc.md](field/fld_Npc.md) |
