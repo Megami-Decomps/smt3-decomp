@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pbRecordData_t.h"
 #include "kernel.h"
 #include "libsdf.h"
 #include "scr.h"
@@ -82,8 +83,6 @@ typedef struct
 typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
 typedef struct { u32 count; pbGroupData_t *group[0x40]; sdfMat_t *mat; } pbBlockDB_t;
-
-typedef struct { u8 flag[4]; void *block, *floor, *chara; } pbRecordSlot_t;
 
 typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 
@@ -305,21 +304,21 @@ void pb_proc_record_Shutdown(dds3ProcessID_t *id) {
 }
 
 void pbFreeRecord(pbRecordSlot_t *slot) {
-    if (slot->block != NULL) {
+    if (slot->characters != NULL) {
         slot->flag[0] = 0;
         slot->flag[1] = 0;
-        sdfChipFreeDelayedDirect(slot->block);
-        slot->block = NULL;
+        sdfChipFreeDelayedDirect(slot->characters);
+        slot->characters = NULL;
     }
-    if (slot->floor != NULL) {
+    if (slot->blocks != NULL) {
         slot->flag[2] = 0;
-        sdfChipFreeDelayedDirect(slot->floor);
-        slot->floor = NULL;
+        sdfChipFreeDelayedDirect(slot->blocks);
+        slot->blocks = NULL;
     }
-    if (slot->chara != NULL) {
+    if (slot->floors != NULL) {
         slot->flag[3] = 0;
-        sdfChipFreeDelayedDirect(slot->chara);
-        slot->chara = NULL;
+        sdfChipFreeDelayedDirect(slot->floors);
+        slot->floors = NULL;
     }
 }
 

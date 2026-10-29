@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pbRecordData_t.h"
 #include "kernel.h"
 #include "libsdf.h"
 #include "scr.h"
@@ -106,8 +107,6 @@ typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBloc
 typedef struct { s16 x, y; } pbGoalPos_t;
 
 typedef struct { u8 unk00[8]; pbGoalPos_t pos; } pbGoal_t;
-
-typedef struct { u8 flag[4]; void *block, *floor, *chara; } pbRecordSlot_t;
 
 typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 
