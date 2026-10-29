@@ -79,7 +79,25 @@ s32 sceCdSearchFile(u32 file, char *name)
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_ncmd_prechk);
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdNcmdDiskReady);
+extern s32 _sceCd_ncmd_prechk(s32 cmd);
+extern s32 D_0052A080 __attribute__((section(".data")));
+extern s32 cdvdNcmdSema __attribute__((section(".data")));
+
+s32 sceCdNcmdDiskReady(void)
+{
+    s32 ret;
+
+    if (!_sceCd_ncmd_prechk(2)) {
+        return 0;
+    }
+    if (sceSifCallRpc(D_0052B1D0, 14, 0, 0, 0, &D_0052A080, 4, 0, 0) < 0) {
+        SignalSema(cdvdNcmdSema);
+        return 0;
+    }
+    ret = UNCACHED(&D_0052A080)[0];
+    SignalSema(cdvdNcmdSema);
+    return ret;
+}
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdSync);
 
