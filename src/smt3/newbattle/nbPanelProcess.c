@@ -1962,7 +1962,588 @@ void nbPanelPressTurnGaugeAnimStart2(void)
     nbPanelPTAOnly = 1;
 }
 
+#ifdef NON_MATCHING
+extern nbPanelProcess_nbPanelXYZ_t nbPanelPTPartList[], nbPressTurnTable[], D_004F000C[];
+extern s32 D_004F0180[], D_004F0190[];
+extern const volatile f32 D_0054E5BC, D_0054E5C0, D_0054E5C4, D_0054E5C8, D_0054E5CC;
+extern const volatile f32 D_0054E5D0, D_0054E5D4, D_0054E5D8, D_0054E5DC, D_0054E5E0, D_0054E5E4, D_0054E5E8, D_0054E5EC;
+extern u32 D_005511D8;
+extern f32 nbPanelPTP_1_Rate;
+extern u32 effColorBlend(u32 color0, u32 color1, f32 rate);
+extern void nbPanelPolygonFlashDraw(s32 x, s32 y, s32 centerX, s32 centerY, s32 width, s32 height, u32 color0, u32 color1);
+
+void nbPanelPressTurn(nbMainProcessData_t *data)
+{
+    s32 stat, frame, shift, next;
+    s32 *currentUV, *oldUV, *titleUV;
+    s32 only;
+    u32 color, flashColor, alpha, tint, spriteColor;
+    f32 rate, value, scale0, scale1, step0, step1, height0, height1, limit0, limit1;
+    sdfTexHandle_t *texture, *spriteTexture;
+    nbPanelProcess_nbPanelTMXuv_t *uv;
+    u32 i;
+
+    if (!nbPanelPressTurnRun()) {
+        return;
+    }
+    nbPnl_setOt(0x47);
+    nbPnl_rsetAlpha(0);
+    nbPnl_rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    nbPanelBaseColorSet(nbPanelPGBaseColor);
+    stat = data->stat;
+    if (stat & 8) {
+        color = 0x71539F;
+        flashColor = 0x31109F;
+        titleUV = D_004F0180;
+        oldUV = D_004F0088;
+        currentUV = D_004F0070;
+        texture = data->pnltex[3];
+    } else {
+        color = 0x9F7153;
+        flashColor = 0x9E2212;
+        titleUV = D_004F0190;
+        oldUV = D_004F0070;
+        currentUV = D_004F0088;
+        texture = data->pnltex[2];
+    }
+    only = (u8)nbPanelPTAOnly;
+    switch (nbPanelPTAProcess) {
+    case 0:
+        only = (u8)nbPanelPTAOnly;
+        break;
+    case 1:
+        only = (u8)nbPanelPTAOnly;
+        if (!only) {
+            uv = &nbPanelParamTable[oldUV[0]];
+            spriteTexture = data->pnltex[3];
+            spriteColor = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+            nbPnlSprite(nbPressGaugeTable2[0].x + 0x15D, nbPressGaugeTable2[0].y + 1,
+                        nbPressGaugeTable2[0].w, nbPressGaugeTable2[0].h,
+                        uv->u0, uv->v0, uv->u1, uv->v1,
+                        spriteColor, spriteTexture);
+            uv = &nbPanelParamTable[oldUV[1]];
+            spriteTexture = data->pnltex[2];
+            spriteColor = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+            nbPnlSprite(nbPressGaugeTable2[1].x + 0x15D, nbPressGaugeTable2[1].y + 1,
+                        nbPressGaugeTable2[1].w, nbPressGaugeTable2[1].h,
+                        uv->u0, uv->v0, uv->u1, uv->v1,
+                        spriteColor, spriteTexture);
+        }
+        if (!only) {
+            only = (u8)nbPanelPTAOnly;
+        }
+        frame = nbPanelPTAFrame;
+        if (frame + 1 >= 0) {
+            nbPanelPTAFrame = 0;
+            nbPanelPTAProcess = 2;
+        } else {
+            nbPanelPTAFrame = frame + 1;
+        }
+        break;
+    case 2:
+        frame = nbPanelPTAFrame;
+        rate = 1.0f - (f32)frame / 6.0f;
+        alpha = (u32)(rate * 128.0f) << 24;
+        only = (u8)nbPanelPTAOnly;
+        if (!only) {
+            uv = &nbPanelParamTable[oldUV[0]];
+            spriteTexture = data->pnltex[3];
+            spriteColor = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+            nbPnlSprite(nbPressGaugeTable2[0].x + 0x15D, nbPressGaugeTable2[0].y + 1,
+                        nbPressGaugeTable2[0].w, nbPressGaugeTable2[0].h,
+                        uv->u0, uv->v0, uv->u1, uv->v1,
+                        spriteColor, spriteTexture);
+            nbPanelSpriteScaleWHDraw(0x15D, 1, &nbPressGaugeTable2[1], &nbPanelParamTable[oldUV[1]],
+                                     alpha | 0x808080, 1.0f, rate, data->pnltex[2]);
+        }
+        if (!only) {
+            only = (u8)nbPanelPTAOnly;
+            frame = nbPanelPTAFrame;
+        }
+        if (frame + 1 >= 6) {
+            value = D_0054E5BC;
+            nbPanelPTAProcess = 3;
+            nbPanelPTARate_E = value;
+            nbPanelPTAFrame = 0;
+            nbPanelPTARate_S = value;
+        } else {
+            nbPanelPTAFrame = frame + 1;
+        }
+        break;
+    case 3:
+        frame = nbPanelPTAFrame;
+        alpha = (u32)((1.0f - (f32)frame / 12.0f) * 128.0f) << 24;
+        tint = (0x80000000U - alpha) | 0x808080;
+        shift = frame < 8 ? (s32)((f32)frame * 0.125f * 40.0f) : 40;
+        next = frame < 4;
+        only = (u8)nbPanelPTAOnly;
+        if (!only) {
+            uv = &nbPanelParamTable[oldUV[0]];
+            spriteTexture = data->pnltex[3];
+            spriteColor = effMagaCylinderCalcColor(alpha | 0x808080, nbPanelBaseABGR);
+            nbPnlSprite(nbPressGaugeTable2[0].x + (0x15D - shift), nbPressGaugeTable2[0].y + 1,
+                        nbPressGaugeTable2[0].w, nbPressGaugeTable2[0].h,
+                        uv->u0, uv->v0, uv->u1, uv->v1,
+                        spriteColor, spriteTexture);
+            frame = nbPanelPTAFrame;
+            next = frame < 4;
+        }
+        if (!next) {
+            shift = 0;
+            if (frame < 8) {
+                value = nbPanelPTARate_E;
+                rate = (f32)(frame - 4) * 0.25f * value;
+                nbPanelPTARate_E = value * D_0054E5C0;
+                shift = (s32)((1.0f - rate) * 40.0f);
+                if (shift >= 41) {
+                    shift = 40;
+                }
+            }
+            uv = &nbPanelParamTable[currentUV[0]];
+            spriteTexture = data->pnltex[3];
+            spriteColor = effMagaCylinderCalcColor(tint, nbPanelBaseABGR);
+            nbPnlSprite(nbPressGaugeTable2[0].x + shift + 0x15D, nbPressGaugeTable2[0].y + 1,
+                        nbPressGaugeTable2[0].w, nbPressGaugeTable2[0].h,
+                        uv->u0, uv->v0, uv->u1, uv->v1,
+                        spriteColor, spriteTexture);
+            if (nbPanelPTAFrame >= 4) {
+                rate = nbPanelPTAFrame < 8 ? (f32)(nbPanelPTAFrame - 4) * 0.25f : 1.0f;
+                nbPanelSpriteScaleWHDraw(0x15D, 1, D_004F000C, &nbPanelParamTable[currentUV[1]],
+                                         tint, 1.0f, rate, data->pnltex[2]);
+            }
+            frame = nbPanelPTAFrame;
+        }
+        if (frame + 1 < 12) {
+            nbPanelPTAFrame = frame + 1;
+        } else {
+            nbPanelPTAFrame = 0;
+            nbPanelPTAProcess = 4;
+        }
+        only = (u8)nbPanelPTAOnly;
+        break;
+    case 4:
+        nbPanelPTAProcess = 0;
+        nbPanelPGPress = stat & 8;
+        only = (u8)nbPanelPTAOnly;
+        break;
+    }
+    if (only) {
+        nbPanelBaseColorSet(0x80808080);
+        return;
+    }
+    switch (nbPanelPT_1_Process) {
+    case 1:
+        nbPnl_rsetAlpha(1);
+        rate = (f32)nbPanelPT_1_Frame / 14.0f;
+        alpha = (u32)(rate * 32.0f) << 24;
+        nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[2].x + (nbPanelPTPartList[2].w >> 1),
+                                nbPanelPTPartList[2].y + (nbPanelPTPartList[2].h >> 1),
+                                nbPanelPTPartList[2].w + (s32)(((f32)nbPanelPTPartList[5].w - (f32)nbPanelPTPartList[2].w) * rate),
+                                nbPanelPTPartList[2].h + (s32)(((f32)nbPanelPTPartList[5].h - (f32)nbPanelPTPartList[2].h) * rate),
+                                flashColor | alpha, flashColor);
+        frame = nbPanelPT_1_Frame + 1;
+        if (frame >= 14) {
+            nbPanelPT_1_Frame = 0;
+            nbPanelPT_1_Process = 2;
+        } else {
+            nbPanelPT_1_Frame = frame;
+        }
+        break;
+    case 2:
+        nbPnl_rsetAlpha(1);
+        nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[2].x + (nbPanelPTPartList[2].w >> 1),
+                                nbPanelPTPartList[2].y + (nbPanelPTPartList[2].h >> 1),
+                                nbPanelPTPartList[5].w, nbPanelPTPartList[5].h, flashColor | 0x20000000, flashColor);
+        frame = nbPanelPT_1_Frame + 1;
+        if (frame >= 20) {
+            nbPanelPT_1_Frame = 0;
+            nbPanelPT_1_Process = 3;
+        } else {
+            nbPanelPT_1_Frame = frame;
+        }
+        break;
+    case 3:
+        nbPnl_rsetAlpha(1);
+        rate = 1.0f - (f32)nbPanelPT_1_Frame / 20.0f;
+        alpha = (u32)(rate * 32.0f) << 24;
+        rate = 1.0f - rate;
+        nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[2].x + (nbPanelPTPartList[2].w >> 1),
+                                nbPanelPTPartList[2].y + (nbPanelPTPartList[2].h >> 1),
+                                nbPanelPTPartList[5].w + (s32)(((f32)nbPanelPTPartList[8].w - (f32)nbPanelPTPartList[5].w) * rate),
+                                nbPanelPTPartList[5].h + (s32)(((f32)nbPanelPTPartList[8].h - (f32)nbPanelPTPartList[5].h) * rate),
+                                flashColor | alpha, flashColor);
+        frame = nbPanelPT_1_Frame + 1;
+        if (frame >= 20) {
+            nbPanelPT_1_Frame = 0;
+            nbPanelPT_1_Process = 4;
+        } else {
+            nbPanelPT_1_Frame = frame;
+        }
+        break;
+    case 4:
+        nbPanelPT_1_Process = 0;
+        break;
+    }
+    switch (nbPanelPT_2_Process) {
+    case 1:
+        nbPnl_rsetAlpha(1);
+        alpha = (u32)(((f32)nbPanelPT_2_Frame / 6.0f) * 128.0f) << 24;
+        nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[3].x + (nbPanelPTPartList[3].w >> 1),
+                                nbPanelPTPartList[3].y + (nbPanelPTPartList[3].h >> 1),
+                                nbPanelPTPartList[3].w, nbPanelPTPartList[3].h, color | alpha, flashColor);
+        frame = nbPanelPT_2_Frame + 1;
+        if (frame >= 6) {
+            nbPanelPT_2_Frame = 0;
+            nbPanelPT_2_Process = 2;
+        } else {
+            nbPanelPT_2_Frame = frame;
+        }
+        break;
+    case 2:
+        nbPnl_rsetAlpha(1);
+        nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[3].x + (nbPanelPTPartList[3].w >> 1),
+                                nbPanelPTPartList[3].y + (nbPanelPTPartList[3].h >> 1),
+                                nbPanelPTPartList[3].w, nbPanelPTPartList[3].h, color | 0x80000000, flashColor);
+        frame = nbPanelPT_2_Frame + 1;
+        if (frame >= 6) {
+            value = D_0054E5C4;
+            nbPanelPT_2_Process = 3;
+            nbPanelPT_2_Rate = value;
+            nbPanelPT_2_Frame = 0;
+        } else {
+            nbPanelPT_2_Frame = frame;
+        }
+        break;
+    case 3:
+        nbPnl_rsetAlpha(1);
+        rate = nbPanelPT_2_Rate;
+        value = rate * D_0054E5C8;
+        rate = ((f32)nbPanelPT_2_Frame / 10.0f) * rate;
+        nbPanelPT_2_Rate = value > 1.0f ? 1.0f : value;
+        nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[3].x + (nbPanelPTPartList[3].w >> 1),
+                                nbPanelPTPartList[3].y + (nbPanelPTPartList[3].h >> 1),
+                                nbPanelPTPartList[3].w + (s32)(((f32)nbPanelPTPartList[6].w - (f32)nbPanelPTPartList[3].w) * rate),
+                                nbPanelPTPartList[3].h + (s32)(((f32)nbPanelPTPartList[6].h - (f32)nbPanelPTPartList[3].h) * rate),
+                                color | 0x80000000, flashColor);
+        frame = nbPanelPT_2_Frame + 1;
+        if (frame >= 10) {
+            nbPanelPT_2_Frame = 0;
+            nbPanelPT_2_Process = 4;
+        } else {
+            nbPanelPT_2_Frame = frame;
+        }
+        break;
+    case 4:
+        nbPnl_rsetAlpha(1);
+        rate = 1.0f - (f32)nbPanelPT_2_Frame / 33.0f;
+        alpha = (u32)(rate * 128.0f) << 24;
+        rate = 1.0f - rate;
+        nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[3].x + (nbPanelPTPartList[3].w >> 1),
+                                nbPanelPTPartList[3].y + (nbPanelPTPartList[3].h >> 1),
+                                nbPanelPTPartList[6].w + (s32)(((f32)nbPanelPTPartList[9].w - (f32)nbPanelPTPartList[6].w) * rate),
+                                nbPanelPTPartList[6].h + (s32)(((f32)nbPanelPTPartList[9].h - (f32)nbPanelPTPartList[6].h) * rate),
+                                color | alpha, flashColor);
+        frame = nbPanelPT_2_Frame + 1;
+        if (frame >= 33) {
+            nbPanelPT_2_Frame = 0;
+            nbPanelPT_2_Process = 5;
+        } else {
+            nbPanelPT_2_Frame = frame;
+        }
+        break;
+    case 5:
+        nbPanelPT_2_Process = 0;
+        break;
+    }
+    switch (nbPanelPT_3_Process) {
+    case 1:
+        nbPnl_rsetAlpha(1);
+        value = nbPanelPT_3_Rate * D_0054E5CC;
+        rate = (f32)nbPanelPT_3_Frame / 20.0f;
+        nbPanelPT_3_Rate = value > 1.0f ? 1.0f : value;
+        alpha = (u32)(rate * 64.0f) << 24;
+        nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[4].x + (nbPanelPTPartList[4].w >> 1),
+                                nbPanelPTPartList[4].y + (nbPanelPTPartList[4].h >> 1),
+                                nbPanelPTPartList[4].w + (s32)(((f32)nbPanelPTPartList[7].w - (f32)nbPanelPTPartList[4].w) * rate),
+                                nbPanelPTPartList[4].h + (s32)(((f32)nbPanelPTPartList[7].h - (f32)nbPanelPTPartList[4].h) * rate),
+                                flashColor | alpha, flashColor);
+        frame = nbPanelPT_3_Frame + 1;
+        if (frame >= 20) {
+            nbPanelPT_3_Frame = 0;
+            nbPanelPT_3_Process = 2;
+        } else {
+            nbPanelPT_3_Frame = frame;
+        }
+        break;
+    case 2:
+        nbPnl_rsetAlpha(1);
+        rate = 1.0f - (f32)nbPanelPT_3_Frame / 20.0f;
+        alpha = (u32)(rate * 64.0f) << 24;
+        rate = 1.0f - rate;
+        nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[4].x + (nbPanelPTPartList[4].w >> 1),
+                                nbPanelPTPartList[4].y + (nbPanelPTPartList[4].h >> 1),
+                                nbPanelPTPartList[7].w + (s32)(((f32)nbPanelPTPartList[10].w - (f32)nbPanelPTPartList[7].w) * rate),
+                                nbPanelPTPartList[7].h + (s32)(((f32)nbPanelPTPartList[10].h - (f32)nbPanelPTPartList[7].h) * rate),
+                                flashColor | alpha, flashColor);
+        frame = nbPanelPT_3_Frame + 1;
+        if (frame >= 20) {
+            nbPanelPT_3_Frame = 0;
+            nbPanelPT_3_Process = 3;
+        } else {
+            nbPanelPT_3_Frame = frame;
+        }
+        break;
+    case 3:
+        nbPanelPT_3_Process = 0;
+        break;
+    }
+    nbPnl_rsetAlpha(0);
+    switch (nbPanelPTP_0_Process) {
+    case 0:
+        rate = (f32)nbPanelPTP_0_Frame / 6.0f;
+        alpha = (u32)(rate * 128.0f) << 24;
+        nbPanelSpriteScaleWHDraw(0, 0x57, &nbPanelPTPartList[0], &nbPanelParamTable[titleUV[0]],
+                                 0x80808080, 1.0f, rate, data->pnltex[3]);
+        uv = &nbPanelParamTable[titleUV[1]];
+        tint = effMagaCylinderCalcColor(alpha | 0x808080, nbPanelBaseABGR);
+        nbPnlSprite(nbPanelPTPartList[1].x, nbPanelPTPartList[1].y + (0x57 - (s32)((1.0f - rate) * 22.0f)),
+                    nbPanelPTPartList[1].w, nbPanelPTPartList[1].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, tint, texture);
+        frame = nbPanelPTP_0_Frame + 1;
+        if (frame < 6) {
+            nbPanelPTP_0_Frame = frame;
+        } else {
+            nbPanelPTP_0_Frame = 0;
+            nbPanelPTP_0_Process = 1;
+        }
+        break;
+    case 1:
+        uv = &nbPanelParamTable[titleUV[0]];
+        spriteTexture = data->pnltex[3];
+        tint = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+        nbPnlSprite(nbPanelPTPartList[0].x, nbPanelPTPartList[0].y + 0x57,
+                    nbPanelPTPartList[0].w, nbPanelPTPartList[0].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, tint, spriteTexture);
+        uv = &nbPanelParamTable[titleUV[1]];
+        tint = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+        nbPnlSprite(nbPanelPTPartList[1].x, nbPanelPTPartList[1].y + 0x57,
+                    nbPanelPTPartList[1].w, nbPanelPTPartList[1].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, tint, texture);
+        if (nbPanelPTP_1_Process == 3) {
+            nbPanelPTP_0_Process = 2;
+            D_005511D8 = 0x80808080;
+            nbPanelPTP_0_Frame = 0;
+        }
+        break;
+    case 2:
+        tint = effColorBlend(0x80808080, 0x80A0A0A0, (f32)nbPanelPTP_0_Frame / 18.0f);
+        D_005511D8 = tint;
+        uv = &nbPanelParamTable[titleUV[0]];
+        spriteTexture = data->pnltex[3];
+        tint = effMagaCylinderCalcColor(tint, nbPanelBaseABGR);
+        nbPnlSprite(nbPanelPTPartList[0].x, nbPanelPTPartList[0].y + 0x57,
+                    nbPanelPTPartList[0].w, nbPanelPTPartList[0].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, tint, spriteTexture);
+        uv = &nbPanelParamTable[titleUV[1]];
+        tint = effMagaCylinderCalcColor(D_005511D8, nbPanelBaseABGR);
+        nbPnlSprite(nbPanelPTPartList[1].x, nbPanelPTPartList[1].y + 0x57,
+                    nbPanelPTPartList[1].w, nbPanelPTPartList[1].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, tint, texture);
+        frame = nbPanelPTP_0_Frame + 1;
+        if (frame < 18) {
+            nbPanelPTP_0_Frame = frame;
+        } else {
+            nbPanelPTP_0_Process = 3;
+            D_005511D8 = 0x80A0A0A0;
+            nbPanelPTP_0_Frame = 0;
+        }
+        break;
+    case 3:
+        uv = &nbPanelParamTable[titleUV[0]];
+        spriteTexture = data->pnltex[3];
+        tint = effMagaCylinderCalcColor(D_005511D8, nbPanelBaseABGR);
+        nbPnlSprite(nbPanelPTPartList[0].x, nbPanelPTPartList[0].y + 0x57,
+                    nbPanelPTPartList[0].w, nbPanelPTPartList[0].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, tint, spriteTexture);
+        uv = &nbPanelParamTable[titleUV[1]];
+        tint = effMagaCylinderCalcColor(D_005511D8, nbPanelBaseABGR);
+        nbPnlSprite(nbPanelPTPartList[1].x, nbPanelPTPartList[1].y + 0x57,
+                    nbPanelPTPartList[1].w, nbPanelPTPartList[1].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, tint, texture);
+        if (nbPanelPTP_1_Process == 5) {
+            nbPanelPTP_0_Frame = 0;
+            nbPanelPTP_0_Process = 4;
+        }
+        break;
+    }
+    switch (nbPanelPTP_1_Process) {
+    case 0:
+        frame = nbPanelPTP_1_Frame++;
+        if (frame >= 4) {
+            nbPanelPTP_1_Frame = 0;
+            nbPanelPTP_1_Process = 1;
+        }
+        break;
+    case 1:
+        nbPnl_rsetAlpha(1);
+        scale0 = 1.0f;
+        scale1 = 1.0f;
+        step0 = D_0054E5D0;
+        step1 = D_0054E5D4;
+        height0 = (f32)nbPanelPTPartList[0].h;
+        height1 = (f32)nbPanelPTPartList[1].h;
+        i = 0;
+        while (i < (u32)nbPanelPTP_1_Frame) {
+            i++;
+            value = scale0;
+            scale0 += step0;
+            nbPanelSpriteScaleDraw(0, 0x57 - (s32)(height0 * (value - 1.0f) * 0.5f),
+                                   &nbPanelPTPartList[0], &nbPanelParamTable[titleUV[0]],
+                                   0x08808080, value, data->pnltex[3]);
+            value = scale1;
+            scale1 += step1;
+            nbPanelSpriteScaleDraw(0, 0x57 + (s32)(height1 * (value - 1.0f) * 0.5f),
+                                   &nbPanelPTPartList[1], &nbPanelParamTable[titleUV[1]],
+                                   0x08808080, value, texture);
+        }
+        frame = nbPanelPTP_1_Frame++;
+        if (frame >= 4) {
+            nbPanelPTP_1_Frame = 0;
+            nbPanelPTP_1_Process = 2;
+        }
+        break;
+    case 2:
+        nbPnl_rsetAlpha(1);
+        height0 = (f32)nbPanelPTPartList[0].h;
+        step0 = D_0054E5D8;
+        rate = (f32)nbPanelPTP_1_Frame * 0.125f;
+        step1 = D_0054E5DC;
+        height1 = (f32)nbPanelPTPartList[1].h;
+        limit0 = D_0054E5E0;
+        limit1 = D_0054E5E4;
+        scale0 = 1.0f;
+        scale1 = 1.0f;
+        for (i = 0; i < 4; i++) {
+            value = scale0 + ((limit0 - scale0) * rate);
+            scale0 += step0;
+            nbPanelSpriteScaleDraw(0, 0x57 - (s32)(height0 * (value - 1.0f) * 0.5f),
+                                   &nbPanelPTPartList[0], &nbPanelParamTable[titleUV[0]],
+                                   0x08808080, value, data->pnltex[3]);
+            value = scale1 + ((limit1 - scale1) * rate);
+            scale1 += step1;
+            nbPanelSpriteScaleDraw(0, 0x57 + (s32)(height1 * (value - 1.0f) * 0.5f),
+                                   &nbPanelPTPartList[1], &nbPanelParamTable[titleUV[1]],
+                                   0x08808080, value, texture);
+        }
+        frame = nbPanelPTP_1_Frame++;
+        if (frame >= 8) {
+            nbPanelPTP_1_Frame = 1;
+            nbPanelPTP_1_Rate = 1.0f;
+            nbPanelPTP_1_Process = 3;
+        }
+        break;
+    case 3:
+        nbPnl_rsetAlpha(1);
+        rate = nbPanelPTP_1_Rate;
+        height1 = (f32)nbPanelPTPartList[1].h;
+        nbPanelPTP_1_Rate = rate * 0.75f;
+        rate = (1.0f - (f32)nbPanelPTP_1_Frame / 18.0f) * rate;
+        scale0 = rate * D_0054E5E8 + 1.0f;
+        scale1 = rate * D_0054E5EC + 1.0f;
+        height0 = (f32)nbPanelPTPartList[0].h * (scale0 - 1.0f) * 0.5f;
+        for (i = 0; i < 4; i++) {
+            nbPanelSpriteScaleDraw(0, 0x57 - (s32)height0,
+                                   &nbPanelPTPartList[0], &nbPanelParamTable[titleUV[0]],
+                                   0x08808080, scale0, data->pnltex[3]);
+            nbPanelSpriteScaleDraw(0, 0x57 + (s32)(height1 * (scale1 - 1.0f) * 0.5f),
+                                   &nbPanelPTPartList[1], &nbPanelParamTable[titleUV[1]],
+                                   0x08808080, scale1, texture);
+        }
+        frame = nbPanelPTP_1_Frame++;
+        if (frame >= 18) {
+            nbPanelPTP_1_Frame = 0;
+            nbPanelPTP_1_Process = 4;
+        }
+        break;
+    case 4:
+        frame = nbPanelPTP_1_Frame++;
+        if (frame >= 8) {
+            nbPanelPTP_1_Process = 5;
+            nbPanelPTP_1_Rate = 1.0f;
+            nbPanelPTP_1_Frame = 0;
+        }
+        break;
+    case 5:
+        nbPnl_rsetAlpha(0);
+        rate = (f32)nbPanelPTP_1_Frame / 14.0f;
+        color = D_005511D8 & 0xFFFFFF;
+        alpha = (u32)((1.0f - rate) * 26.0f) << 24;
+        tint = color | alpha;
+        next = (s32)(rate * 26.0f);
+        shift = (s32)((f32)next * nbPanelPTP_1_Rate);
+        uv = &nbPanelParamTable[titleUV[0]];
+        spriteTexture = data->pnltex[3];
+        alpha = effMagaCylinderCalcColor(tint, nbPanelBaseABGR);
+        nbPnlSprite(nbPanelPTPartList[0].x, nbPanelPTPartList[0].y + (0x57 - shift),
+                    nbPanelPTPartList[0].w, nbPanelPTPartList[0].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, alpha, spriteTexture);
+        uv = &nbPanelParamTable[titleUV[0]];
+        spriteTexture = data->pnltex[3];
+        alpha = effMagaCylinderCalcColor(tint, nbPanelBaseABGR);
+        nbPnlSprite(nbPanelPTPartList[0].x, nbPanelPTPartList[0].y + (0x57 - next),
+                    nbPanelPTPartList[0].w, nbPanelPTPartList[0].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, alpha, spriteTexture);
+        uv = &nbPanelParamTable[titleUV[0]];
+        spriteTexture = data->pnltex[3];
+        alpha = effMagaCylinderCalcColor(tint, nbPanelBaseABGR);
+        nbPnlSprite(nbPanelPTPartList[0].x, nbPanelPTPartList[0].y + (0x57 + shift),
+                    nbPanelPTPartList[0].w, nbPanelPTPartList[0].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, alpha, spriteTexture);
+        uv = &nbPanelParamTable[titleUV[0]];
+        spriteTexture = data->pnltex[3];
+        alpha = effMagaCylinderCalcColor(tint, nbPanelBaseABGR);
+        nbPnlSprite(nbPanelPTPartList[0].x, nbPanelPTPartList[0].y + (0x57 + next),
+                    nbPanelPTPartList[0].w, nbPanelPTPartList[0].h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, alpha, spriteTexture);
+        frame = nbPanelPTP_1_Frame;
+        if (frame < 13) {
+            alpha = (u32)((1.0f - (f32)frame / 13.0f) * 128.0f) << 24;
+            uv = &nbPanelParamTable[titleUV[0]];
+            spriteTexture = data->pnltex[3];
+            tint = effMagaCylinderCalcColor(color | alpha, nbPanelBaseABGR);
+            nbPnlSprite(nbPanelPTPartList[0].x, nbPanelPTPartList[0].y + 0x57,
+                        nbPanelPTPartList[0].w, nbPanelPTPartList[0].h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, tint, spriteTexture);
+            frame = nbPanelPTP_1_Frame;
+        }
+        if (frame >= 8) {
+            nbPanelPTP_1_Rate *= 1.25f;
+        }
+        if (frame < 10) {
+            rate = (f32)frame / 10.0f;
+            alpha = (u32)((1.0f - rate) * 128.0f) << 24;
+            uv = &nbPanelParamTable[titleUV[1]];
+            tint = effMagaCylinderCalcColor(color | alpha, nbPanelBaseABGR);
+            nbPnlSprite(nbPressTurnTable[0].x, nbPressTurnTable[0].y + 0x57 + (s32)(rate * 26.0f),
+                        nbPressTurnTable[0].w, nbPressTurnTable[0].h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, tint, texture);
+            frame = nbPanelPTP_1_Frame;
+        }
+        frame++;
+        if (frame < 14) {
+            nbPanelPTP_1_Frame = frame;
+        } else {
+            nbPanelPTP_1_Frame = 0;
+            nbPanelPTP_1_Process = 6;
+        }
+        break;
+    }
+    nbPanelBaseColorSet(0x80808080);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPressTurn);
+#endif
+
 
 extern nbPanelProcess_nbPanelXYZ_t nbStockSelectTable[];
 extern nbPanelProcess_nbPanelXYZ_t D_004F01A0[];
