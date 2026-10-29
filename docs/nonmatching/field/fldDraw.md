@@ -49,28 +49,6 @@ This draft proved `fldAnahoriAkuma_t.badstatus` at `+0x12`: retail tests that
 `&akuma[0].flag`, which makes the record `datUnitWork_t` shifted by four and
 puts `badstatus` at `0x0E + 4`.
 
-## fldCamUpdateChase (field/fldDraw, 0x250)
-
-120 of 148 words match, at the exact 592-byte size. The first 119 words are exact;
-everything from `+0x16C` is one word rotated because retail schedules the
-`lw $4, 0x78($20)` that fetches `control->camera` for
-`dds3CameraObjectBasicGetCameraTM` to the top of the smoothing block, while
-ee-gcc puts it last. The rotation then drags a handful of `$f2`/`$f3`
-allocations with it.
-
-Confirmed on the way: `D_0054C380` and `D_0054C384` are `.lit4` entries
-holding `0.7f` and `3.14f`; the stick is read as the plain subscripts
-`dds3PadStickState[0][0][0]` and `[0][0][1]`, not through a `u8 *` local,
-which costs a word by making gcc form the gp-relative address in a register;
-and both vectors are zeroed with `memset` and then given a `1.0f` in `[3]`.
-
-Ruled out: a `u8 *` stick local in four spellings (plain, `&...[0][0][0]`, a
-cast of the array, `volatile`); an incomplete array declaration; all 36
-orderings of the two three-component smoothing blocks (the best is the target
-block written y, x, z, which is the draft); `node = control->camera;` as its
-own statement before each of the three uses; and a separate `dds3Basic_t *`
-local for the camera.
-
 ## fldPlayerCalcHasigo (field/fldDraw, 0xE8)
 
 14 of 58 words differ, at the exact 232-byte size, and every instruction through the

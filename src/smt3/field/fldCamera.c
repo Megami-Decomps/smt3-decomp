@@ -732,42 +732,39 @@ extern f32 D_0054ECB4;
 
 extern f32 D_0054ECB8;
 
-/* NON_MATCHING: 28 of 148 words differ (first at +0x16C). */
-#ifdef NON_MATCHING
+/* Existing camera-vector storage and construction/smoothing phases; see
+ * docs/camera-dispatch-matching.md for the Chase/Main family qualification. */
 void fldCamUpdateChase(void) {
-    union {
-        u128 q;
-        f32 f[4];
-    } eye, target;
+    sdfVector4_t eye, target;
     fldFollowCameraControl_t *control;
     dds3Basic_t *node;
 
     control = fldGetFollowCameraControl();
     memset(&eye, 0, sizeof(eye));
-    eye.f[3] = 1.0f;
+    eye.w = 1.0f;
     memset(&target, 0, sizeof(target));
-    target.f[3] = 1.0f;
+    target.w = 1.0f;
     D_0054ECB4 = (f32)(dds3PadStickState[0][0][0] - 0x80) * 0.7f + fldCamPitch;
     D_0054ECB8 = -((f32)(dds3PadStickState[0][0][1] - 0x80) * 2.5f);
-    eye.f[0] = fldGlobalBase.x - sdfSin(D_0054ECB4 * 3.14f / 180.0f) * 256.0f;
-    eye.f[1] = fldGlobalBase.y - 200.0f + D_0054ECB8;
-    eye.f[2] = fldGlobalBase.z - sdfCos(D_0054ECB4 * 3.14f / 180.0f) * 256.0f;
-    eye.f[0] = D_002FC9C0[0] + (eye.f[0] - D_002FC9C0[0]) * 0.0625f;
-    eye.f[1] = D_002FC9C0[1] + (eye.f[1] - D_002FC9C0[1]) * 0.0625f;
-    eye.f[2] = D_002FC9C0[2] + (eye.f[2] - D_002FC9C0[2]) * 0.0625f;
-    dds3CameraObjectBasicGetCameraTM(control->camera, (const sdfVector4_t *)&eye);
-    target.f[1] = fldCamTarget[1] + (fldGlobalBase.y - 200.0f - fldCamTarget[1]) * 0.0625f;
-    target.f[0] = fldCamTarget[0] + (fldGlobalBase.x - fldCamTarget[0]) * 0.0625f;
-    target.f[2] = fldCamTarget[2] + (fldGlobalBase.z - fldCamTarget[2]) * 0.0625f;
-    dds3SetPosPoseSet(control->camera, (const sdfVector4_t *)&target.q);
+    eye.x = fldGlobalBase.x - sdfSin(D_0054ECB4 * 3.14f / 180.0f) * 256.0f;
+    eye.y = fldGlobalBase.y - 200.0f + D_0054ECB8;
+    eye.z = fldGlobalBase.z - sdfCos(D_0054ECB4 * 3.14f / 180.0f) * 256.0f;
+    eye.x = D_002FC9C0[0] + (eye.x - D_002FC9C0[0]) * 0.0625f;
+    eye.y = D_002FC9C0[1] + (eye.y - D_002FC9C0[1]) * 0.0625f;
+    eye.z = D_002FC9C0[2] + (eye.z - D_002FC9C0[2]) * 0.0625f;
+    dds3CameraObjectBasicGetCameraTM(control->camera, &eye);
+    target.x = fldGlobalBase.x;
+    target.y = fldGlobalBase.y - 200.0f;
+    target.z = fldGlobalBase.z;
+    target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * 0.0625f;
+    target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * 0.0625f;
+    target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * 0.0625f;
+    dds3SetPosPoseSet(control->camera, &target);
     node = control->camera;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
     SDF_VU0_COPYVECTOR(fldCamTarget, &target);
 }
-#else
-INCLUDE_ASM(const s32, "field/fldCamera", fldCamUpdateChase);
-#endif
 
 dds3Basic_t *fldCamNowEveCamera(void) {
     dds3Basic_t *worldObject = dds3GetActiveScene();
@@ -962,7 +959,171 @@ void fldClearElvCameraScene(void)
 
 INCLUDE_RODATA(const s32, "field/fldCamera", D_00531BF0);
 
-INCLUDE_ASM(const s32, "field/fldCamera", fldCamMain);
+extern void fldPlayerAlpOn(void);
+extern void fldPlayerSvsOn(void);
+extern void fldPlayerAlpOff(void);
+extern void fldPlayerSdwOff(void);
+extern void fldPlayerSvsOff(void);
+extern void fldPlayerOff(void);
+extern void fldCamCalcSaka(void);
+extern void fldCamUpdateChase(void);
+extern void fldEventUpdateEx_Unity_2(void);
+extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *pBasic, f32 fovy);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
+extern char D_00531BF0[];
+extern s32 D_0054EC94;
+extern f32 D_0054EC98;
+extern f32 D_0054EC9C;
+
+/* Six-mode camera dispatcher; native returns NULL on every path. */
+void *fldCamMain(void) {
+    fldFollowCameraControl_t *control;
+    fldUnitControl_t *unit;
+    s32 left = 0;
+    s32 right = 0;
+    s32 up = 0;
+    s32 down = 0;
+
+    control = fldGetFollowCameraControl();
+    unit = fldGetUnitControl();
+    if (control->camera == NULL || unit->handle == NULL) {
+        return NULL;
+    }
+    fldPlayerAlpOn();
+    if (evtBitCheck(0xAF0)) {
+        if (!fldCamNowEveCamera()) {
+            if (fldGlobalBase.area >= 11) {
+                if (fldGlobalBase.mode == 0) {
+                    fldPlayerSvsOn();
+                    fldPlayerAlpOff();
+                    fldPlayerSdwOff();
+                }
+            }
+        }
+    }
+    if (fldCamNowEveCamera()) {
+        fldGlobalBase.wordF8 = 1;
+        fldCamElvTask();
+        fldPlayerSvsOff();
+        return NULL;
+    }
+    if (fldGlobalBase.area == 18 || fldGlobalBase.area == 28 || fldGlobalBase.area == 30) {
+        fldGlobalBase.cameraParamIndex = 1;
+    }
+    if (fldGlobalBase.area >= 11 && fldEncountTestFlag(0x40)) {
+        if (dds3PadStickState[0][0][0] < 0x40) {
+            left = 1;
+        }
+        if (dds3PadStickState[0][0][0] > 0xC0) {
+            right = 1;
+        }
+        if (dds3PadStickState[0][0][1] < 0x40) {
+            down = 1;
+        }
+        if (dds3PadStickState[0][0][1] > 0xC0) {
+            up = 1;
+        }
+    }
+    if (fldGlobalBase.area < 10) {
+        fldCamUpdateDefault();
+        return NULL;
+    }
+    fldCamCalcSaka();
+    if (fldNpcCamTarget) {
+        fldGlobalBase.wordF8 = 1;
+        if (fldNpcCamTarget == 2) {
+            dds3CameraObjectBasicSetFovy(control->camera, 50.0f * 3.14f / 180.0f);
+        } else {
+            dds3CameraObjectBasicSetFovy(control->camera, 40.0f * 3.14f / 180.0f);
+        }
+    } else if (fldGlobalBase.mode == 0 && evtBitCheck(0xAF0)) {
+        if (scrSearchScriptName(D_00531BF0)) {
+            dds3CameraObjectBasicSetFovy(control->camera,
+                fldCamParamTable[fldGlobalBase.cameraParamIndex].fovy * 3.14f / 180.0f);
+        } else {
+            dds3CameraObjectBasicSetFovy(control->camera, 60.0f * 3.14f / 180.0f);
+        }
+    } else {
+        dds3CameraObjectBasicSetFovy(control->camera,
+            fldCamParamTable[fldGlobalBase.cameraParamIndex].fovy * 3.14f / 180.0f);
+    }
+    if (fldGlobalBase.mode) {
+        fldCamMiwatasi = 0;
+        D_0054EC94 = 0;
+        D_0054EC98 = 0.0f;
+        D_0054EC9C = 0.0f;
+    }
+    switch (fldGlobalBase.mode) {
+    case 0:
+        if (fldNpcCamTarget) {
+            fldPlayerOff();
+        }
+        if (left || right || down || up) {
+            fldCamUpdateChase();
+            break;
+        }
+        if (fldNpcCamTarget) {
+            if (fldGlobalBase.wordCC == 0 && fldCamResetOn == 0) {
+                dds3FadeIn(1, 0, 0, 6);
+            }
+            calcCamNormalNPC();
+        } else {
+            if (fldGlobalBase.wordCC == 0 && fldCamResetOn) {
+                dds3FadeIn(2, 0, 0, 6);
+            }
+            if (evtBitCheck(0xAF0)) {
+                calcCamSyukan();
+            } else {
+                calcCamNormal();
+            }
+            fldCamResetOn = 0;
+        }
+        break;
+    case 3:
+        if (fldNpcCamTarget) {
+            fldPlayerOff();
+        }
+        if (fldNpcCamTarget) {
+            if (fldGlobalBase.wordCC == 0 && fldCamResetOn == 0) {
+                dds3FadeIn(3, 0, 0, 6);
+            }
+            calcCamNormalNPC();
+        } else {
+            if (fldGlobalBase.wordCC == 0 && fldCamResetOn) {
+                dds3FadeIn(4, 0, 0, 6);
+            }
+            calcCamDirLock();
+            fldCamResetOn = 0;
+        }
+        break;
+    case 1:
+        if (fldNpcCamTarget) {
+            fldPlayerOff();
+        }
+        if (fldNpcCamTarget) {
+            if (fldGlobalBase.wordCC == 0 && fldCamResetOn == 0) {
+                dds3FadeIn(5, 0, 0, 6);
+            }
+            calcCamNormalNPC();
+        } else {
+            if (fldGlobalBase.wordCC == 0 && fldCamResetOn) {
+                dds3FadeIn(6, 0, 0, 6);
+            }
+            fldEventUpdateEx_Unity_2();
+            fldCamResetOn = 0;
+        }
+        break;
+    case 4:
+        fldCamUpdateFollow();
+        break;
+    case 5:
+        fldPlayerOff();
+        calcCamNormalNPC();
+        break;
+    }
+    return NULL;
+}
+
 
 extern void *dds3SearchProcessName(const char *namestr);
 

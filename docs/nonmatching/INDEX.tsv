@@ -109,13 +109,12 @@ resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/nonmatching/fi
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/nonmatching/field/fldCamera.md	35
 fldSkyDrawFilter	field/fldDraw	0xAD8	682 of 694 words match	docs/nonmatching/field/fldDraw.md	5
 fldStatusSet	field/fldDraw	0xF8	36 of 62 words match	docs/nonmatching/field/fldDraw.md	32
-fldCamUpdateChase	field/fldDraw	0x250	120 of 148 words match	docs/nonmatching/field/fldDraw.md	52
-fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words differ	docs/nonmatching/field/fldDraw.md	74
-fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/nonmatching/field/fldDraw.md	106
-fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/nonmatching/field/fldDraw.md	148
-fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/nonmatching/field/fldDraw.md	197
-fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/nonmatching/field/fldDraw.md	221
-fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/nonmatching/field/fldDraw.md	259
+fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words differ	docs/nonmatching/field/fldDraw.md	52
+fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/nonmatching/field/fldDraw.md	84
+fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/nonmatching/field/fldDraw.md	126
+fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/nonmatching/field/fldDraw.md	175
+fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/nonmatching/field/fldDraw.md	199
+fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/nonmatching/field/fldDraw.md	237
 fldPlayerMotionSe	field/fldPlayer	0x5B0		docs/nonmatching/field/fldPlayer.md	2
 fldBgmBitChk	field/fldSe	0x7C	30 of 31 words match	docs/nonmatching/field/fldSe.md	3
 fldSkyDrawFilter	field/fldSky	0xAD8	682 of 694 words match	docs/nonmatching/field/fldSky.md	5
