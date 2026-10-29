@@ -77,9 +77,13 @@ typedef struct
     s32 value;
     u16 grpID;
     u16 num;
-    u8 unk08[0xA];
+    u8 unk08[8];
+    u16 kind;
     s16 cellX, cellY;
-    u8 unk16[0x9A];
+    u8 unk16[0x8A];
+    sdfMemHandle_t *blockMem;
+    /* Unrecovered bytes between the allocation handle and locked block pointer. */
+    u8 blockStorageGap[0xC];
     pbBlockEntry_t *blk;
     union {
         sdfVector4_t rotation;
@@ -293,7 +297,7 @@ extern void updateMotion(void);
 
 extern void pbFreeGroupHandles(pbBlockDB_t *db);
 
-extern void pbFreeGroupEntry(dds3ModelResrc_t *entry);
+extern void pbFreeGroupEntry(pbGroupData_t *entry);
 
 extern void fclClearFlag(s32 flag);
 
@@ -1555,17 +1559,104 @@ void *pbFindGroupEntry(pbGroupDB_t *db, u32 group) {
     return found;
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbAddGroupEntry);
+extern void pbRebuildOutline(pbGroupData_t *group);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
 
-void pbFreeGroupEntry(dds3ModelResrc_t *entry) {
-    sdfMemFreeDirect(entry->effectMemHandle);
+void pbAddGroupEntry(pbBlockDB_t *db)
+{
+    pbGroupData_t *group;
+    /* Qualified allocation traces: the scan and outline loops share one index.
+     * See docs/levers/cross-block-locals.md. */
+    u32 index, column;
+    u32 kind;
+    u32 id;
+    u32 i;
+    u16 cell;
+
+    for (index = 0; index < 20; index++) {
+        for (column = 0; column < 20; column++) {
+            cell = D_0054F5C4->area.map.blk[index][column];
+            kind = cell >> 13;
+            if (kind < 5) {
+                if (kind >= 3) {
+                    id = cell & 0x7FF;
+                    if (pbFindGroupEntry((pbGroupDB_t *)db, id) == NULL) {
+                        db->entry[db->count] = sdfChipAllocDirect(sizeof(pbGroupData_t));
+                        memset(db->entry[db->count], 0, sizeof(pbGroupData_t));
+                        group = (pbGroupData_t *)db->entry[db->count];
+                        if (kind == 3) {
+                            kind = 2;
+                            D_0054F5C4->area.map.blk[index][column] =
+                                (D_0054F5C4->area.map.blk[index][column] & 0x1FFF) | 0x4000;
+                        }
+                        group->grpID = id;
+                        group->z = (s16)index * 40 - 380;
+                        group->y = -20.0f;
+                        group->kind = kind;
+                        group->cellX = column;
+                        group->cellY = index;
+                        group->x = (s16)column * 40 - 380;
+                        if (kind == 2) {
+                            for (i = 0; i < 8; i++) group->colors[i] = 0x80D0D0D0;
+                        } else {
+                            for (i = 0; i < 8; i++) group->colors[i] = 0x80D0D0D0;
+                        }
+                        db->count++;
+                    }
+                }
+            }
+        }
+    }
+    for (index = 0; index < 20; index++) {
+        for (column = 0; column < 20; column++) {
+            s32 cellKind;
+            cell = D_0054F5C4->area.map.blk[index][column];
+            cellKind = cell >> 13;
+            if (cellKind < 6) {
+                if (cellKind >= 2) {
+                    group = pbFindGroupEntry((pbGroupDB_t *)db, cell & 0x7FF);
+                    group->num++;
+                }
+            }
+        }
+    }
+    for (index = 0; index < 20; index++) {
+        for (column = 0; column < 20; column++) {
+            u32 blockKind;
+            u16 blockCell = D_0054F5C4->area.map.blk[index][column];
+            blockKind = blockCell >> 13;
+            if (blockKind < 6) {
+                if (blockKind >= 2) {
+                    group = pbFindGroupEntry((pbGroupDB_t *)db, blockCell & 0x7FF);
+                    if (group->blk == NULL) {
+                        group->blockMem = sdfMemAllocDirect(group->num * sizeof(pbBlockEntry_t));
+                        group->blk = sdfMemLock(group->blockMem);
+                        memset(group->blk, 0, group->num * sizeof(pbBlockEntry_t));
+                    }
+                    for (i = 0; group->blk[i].kind != 0; i++) {}
+                    group->blk[i].kind = blockKind;
+                    group->blk[i].x = column - group->cellX;
+                    group->blk[i].y = index - group->cellY;
+                }
+            }
+        }
+    }
+    for (index = 0; index < db->count; index++) {
+        pbRebuildOutline((pbGroupData_t *)db->entry[index]);
+    }
+}
+
+
+void pbFreeGroupEntry(pbGroupData_t *entry) {
+    sdfMemFreeDirect(entry->blockMem);
     sdfChipFreeDelayedDirect(entry);
 }
 
 void pbFreeGroupHandles(pbBlockDB_t *db) {
     u32 i;
     for (i = 0; i < db->count; i++) {
-        pbFreeGroupEntry((dds3ModelResrc_t *)db->entry[i]);
+        pbFreeGroupEntry((pbGroupData_t *)db->entry[i]);
     }
     db->count = 0;
 }
