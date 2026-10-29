@@ -3493,14 +3493,15 @@ extern s32 fclChkSelMessage(void);
 extern s8 fclGetSelMessagePos(void);
 extern s8 fclEndMessage(void);
 
-#ifdef NON_MATCHING
 void cmpUpdateDestroyItemConfirm(void)
 {
     s32 closed = 0;
+    s32 confirm;
 
     if (fclChkSelMessage() != 0) {
-        return;
+        goto done;
     }
+    confirm = 1;
     switch (fclGetSelMessagePos()) {
     case 0:
         cmpDestroyItem(1);
@@ -3508,14 +3509,15 @@ void cmpUpdateDestroyItemConfirm(void)
         cmpChangeCursorListNums(campWork->unk_8302, campWork->unk_410C);
         if (campWork->unk_8302 == 0) {
             campWork->unk_0001 = 0;
+            campWork->unk_0004 = confirm;
             closed = 1;
-            campWork->unk_0004 = 1;
         }
         break;
     case 1:
         break;
+    case 2:
     default:
-        return;
+        goto done;
     }
     fclEndMessage();
     if (!closed) {
@@ -3523,10 +3525,9 @@ void cmpUpdateDestroyItemConfirm(void)
         campWork->previousPhase = 1;
     }
     cmpSetCrossGeneralVal(campWork->crossPanel, 0);
+done:
+    return;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateDestroyItemConfirm);
-#endif
 
 extern s32 checkConfigState(void);
 
