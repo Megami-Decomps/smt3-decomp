@@ -536,13 +536,6 @@ s32 rstCalcSeqDevilLevelUp(void)
     return 0;
 }
 
-typedef struct
-{
-    s32 mesno;
-    u8 unk_04[0x2C];
-} datMasterText_t;
-
-extern datMasterText_t master_text[];
 extern s32 datFindCommentEntry(u16 devilId);
 extern s32 cmbChkGetHearts(s32 rawId);
 extern s32 rstRollComment(void);
@@ -560,7 +553,7 @@ s32 rstPickRandomComment(void)
             EventStart->commentFromUnit = 1;
             EventStart->commentId = id;
         }
-        EventStart->commentMessage = master_text[EventStart->unit->id].mesno * 4;
+        EventStart->commentMessage = master_text[EventStart->unit->id].kucyo * 4;
         EventStart->commentMessage += dds3GetRandA(NULL) & 3;
         EventStart->commentMessage += 0x2C;
         return 1;

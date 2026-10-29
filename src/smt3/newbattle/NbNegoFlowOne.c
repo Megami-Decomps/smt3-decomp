@@ -242,22 +242,6 @@ extern datDevilFormat_t datDevilTable[];
 
 extern nbNegoSkillEntry_t D_003E1338[];
 
-
-typedef struct {
-    s32 mesno;
-    u32 flags;
-    u8 phase;
-    u8 honboutype;
-    u8 unk_0A[0xA];
-    u16 negorate;
-    datNegoPresent_t itema[4];
-    datNegoPresent_t itemb[4];
-    datNegoPresent_t stone[4];
-    u8 unk_2E[0x2];
-} datDevilNegoFormat_t;
-
-extern datDevilNegoFormat_t master_text[];
-
 extern s32 datGetPlayerLevel(void);
 
 /* The nb event script work; only the fields this unit touches are named. */
@@ -797,7 +781,7 @@ s32 Flow1_22(nbNegoProcessData_t *n)
         if ((flag & 1) && (flag & 2) &&
             !(flag & 0x38) && i != n->epartyindex) {
             work = nbGetUnitWorkPointer(data, party);
-            if (datCheckTalk(work) && master_text[work->id].phase == 1) {
+            if (datCheckTalk(work) && master_text[work->id].tokuboutype == 1) {
                 candidates[count++] = i;
             }
         }
@@ -827,9 +811,9 @@ s32 Flow1_23(nbNegoProcessData_t *n)
         return 0;
     case 1:
         mt = &master_text[work->id];
-        if (mt->phase == n->nownegophase) {
+        if (mt->tokuboutype == n->nownegophase) {
             /* Form the byte offset within the actual negotiation work first. */
-            messageOffset = mt->mesno * sizeof(n->flowmsg[0]) +
+            messageOffset = mt->kucyo * sizeof(n->flowmsg[0]) +
                             (u32)&((nbNegoProcessData_t *)0)->flowmsg;
             msg = (s32 *)((u32)n + messageOffset);
             nbSetNegoMesVar(*msg, n->pwork, work);
@@ -872,7 +856,7 @@ s32 Flow1_24(nbNegoProcessData_t *n)
         if (datCheckTalk(work) == 0) {
             continue;
         }
-        if (master_text[work->id].phase == 2) {
+        if (master_text[work->id].tokuboutype == 2) {
             continue;
         }
         if (dds3GetRandIntA(0, 100) >= chance) {
@@ -914,7 +898,7 @@ s32 Flow1_25(nbNegoProcessData_t *n)
         nbSetNegoNoMotion(n, form);
         mt = &master_text[work->id];
         /* Keep the message-array offset grouped before adding the work base. */
-        messageOffset = mt->mesno * sizeof(n->flowmsg[0]) +
+        messageOffset = mt->kucyo * sizeof(n->flowmsg[0]) +
                         (u32)&((nbNegoProcessData_t *)0)->flowmsg;
         msg = (s32 *)((u32)n + messageOffset);
         nbSetNegoMesVar(*msg, n->pwork, work);
@@ -1194,11 +1178,11 @@ s32 nbFlowGetUnitEntry(datUnitWork_t *work, datUnitWork_t *other, s32 type, s32 
         if (data != 0) {
             return 0;
         }
-        return (master_text[other->id].flags & 2) != 0;
+        return (master_text[other->id].tokucyo & 2) != 0;
     }
 
     flags = work->flag;
-    attributes = (flags & 4) ? 0x14 : master_text[work->id].flags;
+    attributes = (flags & 4) ? 0x14 : master_text[work->id].tokucyo;
     for (i = 0; i < 31; i++) {
         bit = 1u << i;
         if (!((u32)type & bit)) {

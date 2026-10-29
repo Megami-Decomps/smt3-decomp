@@ -500,27 +500,6 @@ s32 Flow6_8(nbNegoProcessData_t *n)
     return 0;
 }
 
-typedef struct {
-    u32 kucyo;
-    u32 tokucyo;
-    u8 tokuboutype;
-    u8 honboutype;
-    u8 fighttype;
-    u8 reqtype;
-    u8 tuikareqtype;
-    u8 privatesel;
-    u8 privateselindex;
-    u8 senseitype;
-    u8 inotitype;
-    u8 binjotype;
-    u16 mukantype;
-    u16 mukanindex;
-    datNegoPresent_t itema[4];
-    datNegoPresent_t itemb[4];
-    datNegoPresent_t stone[4];
-} datDevilNegoFormat_t;
-
-extern datDevilNegoFormat_t master_text[];
 extern s32 nbGetNegoRequestType(s32 reqtype);
 extern char D_00544FF0[];
 extern s32 printf(const char *format, ...);

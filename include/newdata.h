@@ -278,6 +278,17 @@ typedef struct {
 
 typedef struct { u8 ritu, item; } datNegoPresent_t;
 
+typedef struct {
+    s32 kucyo;
+    u32 tokucyo;
+    u8 tokuboutype, honboutype, fighttype, reqtype, tuikareqtype;
+    u8 privatesel, privateselindex, senseitype, inotitype, binjotype;
+    u16 mukantype, mukanindex;
+    datNegoPresent_t itema[4], itemb[4], stone[4];
+} datDevilNegoFormat_t;
+
+extern datDevilNegoFormat_t master_text[];
+
 typedef struct datSkill_t
 {
     s8 skillattr;

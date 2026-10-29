@@ -1078,14 +1078,6 @@ void cmbStartResultScript(void)
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbStartResultScript);
 #endif
 
-typedef struct
-{
-    s32 messageId;
-    u8 reserved04[0x2C];
-} cmbMasterText_t;
-
-extern cmbMasterText_t master_text[];
-
 extern void cmbRunActionSe(s32 enabled, s32 mode);
 extern s32 cmbChkPolygonMovie(void);
 extern void *cmbUpdateIntroduceModel(cmbActionData_t *work);
@@ -1108,7 +1100,7 @@ s32 cmbCalcIntroduce(void)
         return 0;
     }
     if (CMB_GBWK->unk_00004 != 0) {
-        fclSetWorkValue(8, master_text[((datUnitWork_t *)CMB_GBWK->birthPanel)->id].messageId);
+        fclSetWorkValue(8, master_text[((datUnitWork_t *)CMB_GBWK->birthPanel)->id].kucyo);
         fclSetWorkValue(9, ((datUnitWork_t *)CMB_GBWK->birthPanel)->id);
         fclSetWorkValue(10, datDevilTable[((datUnitWork_t *)CMB_GBWK->birthPanel)->id].race);
         fclScriptStart(CMB_GBWK->script, 0xC, &CMB_GBWK->scriptArg);

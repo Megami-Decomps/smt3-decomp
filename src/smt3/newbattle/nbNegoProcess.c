@@ -291,22 +291,6 @@ extern s32 nbGetInfoMsg(s32 infotype);
 
 extern void nbSetMesItem(s32 msgid, s32 it);
 
-
-typedef struct {
-    s32 mesno;
-    u8 unk_04[0x4];
-    u8 phase;
-    u8 honboutype;
-    u8 unk_0A[0xA];
-    u16 negorate;
-    datNegoPresent_t itema[4];
-    datNegoPresent_t itemb[4];
-    datNegoPresent_t stone[4];
-    u8 unk_2E[0x2];
-} datDevilNegoFormat_t;
-
-extern datDevilNegoFormat_t master_text[];
-
 extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
 /* The nb event script work; only the fields this unit touches are named. */
@@ -1428,8 +1412,8 @@ nbNegoProcessData_t *InitNegoProcessData(nbActionProcessData_t *actdata, s32 pfo
     n->eform = &n->data->form[eformindex];
     n->eformindex = eformindex;
     n->epartyindex = n->eform->partyindex;
-    n->pkucyo = master_text[n->pwork->id].mesno;
-    n->ekucyo = master_text[n->ework->id].mesno;
+    n->pkucyo = master_text[n->pwork->id].kucyo;
+    n->ekucyo = master_text[n->ework->id].kucyo;
     for (i = 0; i < 31; i++) {
         n->flowmsg[i] = -1;
         if (negoMsgTable[i].flow) {

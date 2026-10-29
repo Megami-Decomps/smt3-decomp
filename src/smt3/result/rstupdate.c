@@ -498,16 +498,7 @@ void rstUpdateSeqSkillPowerUp(void)
     }
 }
 
-
-typedef struct
-{
-    /* 0x00 */ s32 mesno;
-    /* 0x04 */ u8 unk_04[0x2C];
-} datMasterText_t;
-
 extern s32 datExplainTable[];
-
-extern datMasterText_t master_text[];
 
 void rstStartIntroduce(u16 DevilID)
 {
@@ -517,7 +508,7 @@ void rstStartIntroduce(u16 DevilID)
         fclStartMessage(0xC6);
         return;
     }
-    fclStartMessage(master_text[DevilID].mesno + 0xA8);
+    fclStartMessage(master_text[DevilID].kucyo + 0xA8);
 }
 
 void rstUpdateEvoBgFade(void)

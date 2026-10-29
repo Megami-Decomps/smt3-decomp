@@ -207,22 +207,6 @@ extern s32 nbGetInfoMsg(s32 infotype);
 
 extern void nbSetMesItem(s32 msgid, s32 it);
 
-
-typedef struct {
-    s32 mesno;
-    u8 unk_04[0x4];
-    u8 phase;
-    u8 honboutype;
-    u8 unk_0A[0xA];
-    u16 negorate;
-    datNegoPresent_t itema[4];
-    datNegoPresent_t itemb[4];
-    datNegoPresent_t stone[4];
-    u8 unk_2E[0x2];
-} datDevilNegoFormat_t;
-
-extern datDevilNegoFormat_t master_text[];
-
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;

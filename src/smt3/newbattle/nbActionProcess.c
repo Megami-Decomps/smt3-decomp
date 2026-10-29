@@ -101,17 +101,6 @@ typedef struct nbDevilData_t {
     u8 unk02[0xA2];
 } nbDevilData_t;
 
-typedef struct datDevilNegoFormat_t {
-    u8 unk00[0xF];
-    u8 talkflag;
-    u8 inotitype;
-    u8 binjotype;
-    u16 mukantype;
-    u8 unk14[0x1C];
-} datDevilNegoFormat_t;
-
-extern datDevilNegoFormat_t master_text[];
-
 /* Persistent unit work begins four bytes into the save record array. */
 typedef struct dds3LiveBattleUnitsView_t {
     u8 unk00[0xA54];
@@ -1071,7 +1060,7 @@ s32 CheckSenseiNego(nbActionProcessData_t *a)
         return 0;
     }
     work = a->work;
-    if (master_text[work->id].talkflag == 0) {
+    if (master_text[work->id].senseitype == 0) {
         return 0;
     }
     if (datCheckTalk(work) == 0) {
