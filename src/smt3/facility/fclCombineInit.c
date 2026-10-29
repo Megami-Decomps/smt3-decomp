@@ -2643,7 +2643,37 @@ s32 cmbDrawTopText(s8 index)
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawTopText);
 #endif
 
+extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+extern s32 cmpCursorBlinkColor(s32 timer);
+extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
+                              s32 *colors, s32 ot);
+
+#ifdef NON_MATCHING
+void cmbDrawStockRow(s32 x, s32 y, s32 z, u16 firstWidth, u16 secondWidth, u16 height,
+                     s32 firstColor, s32 middleColor, s32 lastColor, s8 unused,
+                     s32 timer, s32 ot)
+{
+    s32 colors[4];
+    u8 blink;
+
+    fclDrawPanelSprite2(0x48, ot);
+    blink = cmpCursorBlinkColor(timer);
+    colors[0] = firstColor;
+    colors[1] = middleColor;
+    colors[2] = firstColor;
+    colors[3] = middleColor;
+    cmpDrawBoxGDefault(x, y, z, firstWidth, height, colors, ot);
+    colors[0] = middleColor;
+    colors[1] = lastColor;
+    colors[2] = middleColor;
+    colors[3] = lastColor;
+    cmpDrawBoxGDefault(x + firstWidth * 16, y, z, secondWidth, height, colors, ot);
+    fclDrawPanelSprite2(0x44, ot);
+    cmpDrawBoxF(0x1000, y, z + 1, 0xF0, height, (blink * 38) >> 7, ot);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockRow);
+#endif
 
 /* Same native row callback contract as cmpDrawListRowBox. */
 typedef void (*cmbDrawRow_t)(s32, s32, s32, u16, u16, u16,
