@@ -3814,7 +3814,33 @@ f32 cmbGetPanelScale(s32 mode)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbRotateModelPanel);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawModelPoly);
+extern void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
+                          const u32 *colors, s32 unused, sdfMat_t *asset, s32 surfaceIndex);
+
+void cmbDrawModelPoly(u32 color0, u32 color1, const sdfVector4_t *vertices, s32 ot)
+{
+    sdfVector4_t triangle[3] __attribute__((aligned(16)));
+    u32 colors[3];
+    s32 i;
+
+    for (i = 0; i < 64; i++) {
+        colors[0] = color0;
+        colors[1] = color1;
+        colors[2] = color1;
+        SDF_VU0_COPYVECTOR(&triangle[0], &vertices[0]);
+        SDF_VU0_COPYVECTOR(&triangle[1], &vertices[1]);
+        SDF_VU0_COPYVECTOR(&triangle[2], &vertices[2]);
+        cmpDraw3DPoly(&triangle[0].x, &triangle[1].x, &triangle[2].x, colors, 0, NULL, ot);
+        colors[0] = color0;
+        colors[1] = color0;
+        colors[2] = color1;
+        SDF_VU0_COPYVECTOR(&triangle[0], &vertices[3]);
+        SDF_VU0_COPYVECTOR(&triangle[1], &vertices[4]);
+        SDF_VU0_COPYVECTOR(&triangle[2], &vertices[5]);
+        cmpDraw3DPoly(&triangle[0].x, &triangle[1].x, &triangle[2].x, colors, 0, NULL, ot);
+        vertices += 6;
+    }
+}
 
 typedef struct effEVECombParSmoke_t effEVECombParSmoke_t;
 extern void effEVECombParSmokeSetPosition(void *smoke, void *position);
