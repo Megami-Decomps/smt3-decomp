@@ -475,7 +475,26 @@ INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B658);
 
-INCLUDE_ASM(const s32, "sdk/libc", _puts_r);
+extern u32 strlen(const char *s);
+/* The newline owns a padded 16-byte read-only block in retail. */
+extern const char D_0054B660[];
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B660);
+
+s32 _puts_r(_reent *r, const char *s)
+{
+    __suio request;
+    __siov vectors[2];
+    u32 length = strlen(s);
+
+    vectors[0].iov_base = (void *)s;
+    vectors[0].iov_len = length;
+    vectors[1].iov_base = (void *)D_0054B660;
+    vectors[1].iov_len = 1;
+    request.uio_resid = length + 1;
+    request.uio_iov = vectors;
+    request.uio_iovcnt = 2;
+    return __sfvwrite(r->_stdout, &request) != 0 ? -1 : 10;
+}
 
 s32 puts(const char *s) {
     return _puts_r(_impure_ptr, s);
