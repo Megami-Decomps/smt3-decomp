@@ -654,8 +654,6 @@ void dds3Billboard_P2ADelete(billHandle_t *hData) {
     sdfChipFreeDirect(hData);
 }
 
-/* NON_MATCHING: parked so dds3Billboard_P2ADraw matches; it is byte-exact as C. */
-#ifdef NON_MATCHING
 dds3BillResource_tag *dds3Billboard_P2AAnimDraw(billHandle_t *pP2A, dds3BillAnim_tag *pBillAnim) {
     P2A_ANIMATION_tag *entry = pBillAnim->pAnim;
     dds3BillAnimResource_tag *data = pP2A->u.animationData;
@@ -719,9 +717,6 @@ dds3BillResource_tag *dds3Billboard_P2AAnimDraw(billHandle_t *pP2A, dds3BillAnim
     }
     return child;
 }
-#else
-INCLUDE_ASM(const s32, "effect/billManager", dds3Billboard_P2AAnimDraw);
-#endif
 
 /* vu0 routine: unpack two colours, multiply the lanes and pack. */
 u32 dds3Billboard_P2AColorMul(u32 color0, u32 color1) {
