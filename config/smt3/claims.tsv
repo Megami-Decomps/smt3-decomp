@@ -955,3 +955,5 @@ src/smt3/field/fldTitle.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldTit
 src/smt3/field/fldSky.c	z29	open	2026-10-29	1 fn / 2776 B	largest-first pass: fldSkyDrawFilter; skipping nbCameraBoss (z21) and nbPanelDrawPP (z27)
 src/smt3/field/fldSky.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldSkyDrawFilter 682 of 694 words at the native 2776 B; all 12 are three rotated spill slots traced to gcse PRE reaching-register creation order, an already-recorded wall
 src/smt3/newbattle/nbResultProcess.c	z29	open	2026-10-29	1 fn / 2604 B	largest-first pass: nbResultDrawPC1
+src/smt3/newbattle/nbResultProcess.c	z29	done	2026-10-29	0 matches / 1 guarded draft	nbResultDrawPC1 3 to 109 of 649 words; wide colors as initialised locals worth 81 words; the siblings two volatile casts removed with nothing needed in their place; blocked on the recorded gcse PRE availability wall
+src/smt3/sound/sndManager.c	z29	open	2026-10-29	1 fn / 2572 B	largest-first pass: dds3TitleDrawMenu
