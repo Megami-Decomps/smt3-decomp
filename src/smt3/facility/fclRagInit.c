@@ -459,24 +459,6 @@ void fclRagTexLoad(u8 *pData)
     }
 }
 
-typedef struct ragPanel
-{
-    s32 X;
-    s32 Y;
-    s32 Z;
-    s16 W;
-    s16 H;
-    s32 Col;
-    u8 Spd;
-    u8 reserved15[3];
-    s32 Timer;
-    s32 Timer2;
-    s32 Flag;
-    u8 reserved24[0x10];
-    s32 TexHandle;
-    void (*draw)(struct ragPanel *panel, s32 id);
-    void (*update)(struct ragPanel *panel);
-} ragPanel_t;
 
 
 typedef struct fclRagWork
@@ -497,7 +479,7 @@ typedef struct fclRagWork
     /* 0x4650 */ s32 backgroundTexture;
     /* 0x4654 */ s32 texture[2];
     /* 0x465C */ fclSprite_t messageSprite;
-    /* 0x4680 */ ragPanel_t panel[3];
+    /* 0x4680 */ fclPanel_t panel[3];
     /* 0x4740 */ fclRagTex_t textureCalc[2];
 } fclRagWork_t;
 
@@ -558,7 +540,7 @@ extern void *sdfMemLock(void *handle);
 extern void *sdfDevLoadFileEx(const char *name, u32 *data, u32 *size);
 extern void cmpInitSeqInfo(void *work, s32 seq);
 extern void fclRagUpdateInit(s8 type, fclRagWork_t *work);
-extern void fclInitPanel(ragPanel_t *panel, s32 x, s32 y, s32 z, s32 w,
+extern void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 w,
                          s32 h, s32 color, s8 type, s8 speed);
 extern void evtDisableMoonCalc(void);
 extern void cmpModelInit(void);
