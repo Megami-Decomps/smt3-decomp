@@ -48,7 +48,12 @@ typedef struct
     /* 0x0000 */ u8 unk_0000[0xE];
     /* 0x000E */ s16 unk_0E;
     /* 0x0010 */ u8 unk_10;
-    /* 0x0011 */ u8 unk_0011[0x102B];
+    /* 0x0011 */ u8 unk_0011[0x17];
+    /* 0x0028 */ struct {
+        cmpCursorSlot_t slot;
+        u8 reserved[8];
+    } rows[256];
+    /* 0x1028 */ u8 unk_1028[0x14];
 } cmpStockInfo_t;
 
 typedef struct cmpPadStopWork_t {

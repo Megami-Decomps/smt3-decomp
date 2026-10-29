@@ -7577,7 +7577,60 @@ s32 campDrawStockIcon(s8 a, s8 b, s8 *rows, s8 *cols, s8 force)
     return 0;
 }
 
+#ifdef NON_MATCHING
+void campDrawStockRow1(s32 x, s32 y, s32 z, s8 *rows, s8 *columns,
+                       s8 force, cmpStockWork_t *stock, s32 unused_ot)
+{
+    s32 colors[4];
+    s32 row;
+    s32 rowY = 0;
+    s32 separatorY = 0x1C8;
+    s32 xScale;
+    s32 extraX;
+    s32 color;
+
+    for (row = 0; row < 4; row++) {
+        xScale = campCalcStockScale((s8)row, 0);
+        color = campDrawStockCell(0x80808080, (s8)row, 0);
+        extraX = xScale + 0xD40;
+        colors[0] = color;
+        colors[1] = color;
+        colors[2] = color;
+        colors[3] = color;
+        fclDrawSpriteRes(xScale, rowY, 0, colors, 0, 5, D_00345D88,
+                         fclSpriteTable, 0x47);
+        fclDrawSpriteRes(xScale, rowY, 0, colors, 0, 6, D_00345D88,
+                         fclSpriteTable, 0x47);
+        if (row < 3) {
+            fclDrawSpriteRes(extraX, separatorY, 0, colors, 0, 0x12,
+                             D_00345D88, fclSpriteTable, 0x47);
+            fclDrawSpriteRes(extraX, separatorY, 0, colors, 0, 0x13,
+                             D_00345D88, fclSpriteTable, 0x47);
+        }
+        rowY += 0xC0;
+        separatorY += 0xC0;
+    }
+
+    {
+        campWork_t *work = campWorkLive;
+
+        for (row = 0; row < work->drawStock.PartyCnt; row++) {
+            s32 cursorMode = campDrawStockIcon(1, (s8)row, rows, columns, force);
+            s8 slot;
+            s32 alpha;
+
+            work = campWorkLive;
+            slot = work->drawStock.ListIdx[row];
+            alpha = campGetStockAlpha((s8)row, 0);
+            campDrawStockLabel(x, y, z, slot, (s8)row,
+                               &stock->info[0].rows[row].slot, cursorMode, alpha);
+            work = campWorkLive;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow1);
+#endif
 
 /* NON_MATCHING: 27 of 152 words differ at the exact 608-byte size. */
 #ifdef NON_MATCHING
