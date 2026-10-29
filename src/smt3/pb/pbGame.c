@@ -792,7 +792,171 @@ INCLUDE_RODATA(const s32, "pb/pbGame", D_00535EF8);
 
 INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F08);
 
+#ifdef NON_MATCHING
+extern s32 fclChkMessageDraw(void *process);
+extern s32 fclGetFlag(s8 index);
+extern s32 (*keyFunc[])(void);
+extern u32 pbGameState, pbMoveCharList;
+extern pbProcHandle_t *moveC;
+extern s32 D_00551EF4;
+extern s32 pbAddRecord_char(pbProcHandle_t *panel, s32 currentChar, pbProcHandle_t **characters);
+extern void pbSetPanelModel(pbProcHandle_t *panel, s32 index);
+extern pbProcHandle_t *pbStartMoveChar(pbProcHandle_t *parent, s32 direction, u32 scale);
+extern pbProcHandle_t *pbStartRoundBlock(pbProcHandle_t *parent, pbGroupData_t *group, s32 direction);
+extern pbProcHandle_t *pbStartMenu(pbProcHandle_t *parent, s32 mode);
+extern pbProcHandle_t *pbGetMoveChar(void);
+extern void pbInitGame(pbProcHandle_t *panel, dds3ProcessID_t *id);
+extern void CalcDegreeMode(void);
+extern void pbSetViewRotation(f32 angle, f32 radius, f32 degree);
+
+s32 game(dds3ProcessID_t *id)
+{
+    dds3ProcessID_t *message = scr_msg;
+    pbProcHandle_t *panel = id->workdata;
+    pbProcHandle_t *movingCharacter, *menu;
+    pbGroupData_t *group;
+    pbMapWork_t *map;
+    dds3ProcessID_t *process;
+    s32 direction, hit, rotation, cooldown;
+    u32 stepCount, state;
+    u8 degreeFlag, keyState;
+    f32 angle;
+    s8 pad;
+
+    if (message != NULL) {
+        if (fclChkMessageDraw(message) != 0) {
+            return 0;
+        }
+        dds3ResetProcessFlag(dds3SearchProcessName(D_00535EF8), 0x10, 2);
+        scr_msg = NULL;
+        if (fclGetFlag(0) == 0) {
+            pbMoveCharList = 0;
+            return 0;
+        }
+        if (pbGetMoveChar() != NULL) {
+            pbGetMoveChar()->flags = 0x60000;
+        }
+        return -1;
+    }
+    state = panel->state;
+    if (state == 1) {
+        pbInitGame(panel, id);
+        movingCharacter = blockDB;
+        if (movingCharacter != NULL) {
+            movingCharacter->flags = 0x10000;
+        }
+        if (panel != NULL) {
+            panel->flags = 0;
+        }
+        movingCharacter = *(pbProcHandle_t *volatile *)&moveC;
+    } else {
+        movingCharacter = *(pbProcHandle_t *volatile *)&moveC;
+        if (state != 0) {
+            movingCharacter = *(pbProcHandle_t *volatile *)&moveC;
+            if (state < 7) {
+                if (state >= 4) {
+                    return -1;
+                }
+                movingCharacter = *(pbProcHandle_t *volatile *)&moveC;
+            }
+        }
+    }
+    if (movingCharacter != NULL || moveB != NULL) {
+        return 0;
+    }
+    movingCharacter = mychar[current_char];
+    map = D_0054F5C4;
+    if (movingCharacter == NULL || map->menuProc != NULL || map->helpProc != NULL) {
+        return 0;
+    }
+    cooldown = D_00551EF4;
+    if (cooldown > 0) {
+        D_00551EF4 = cooldown - 1;
+        return 0;
+    }
+    if (pbMoveCharList != 0) {
+        return 0;
+    }
+    direction = keyFunc[map->charIndex]();
+    if (direction >= 0) {
+        pbGameState = 0;
+        pbSetPanelModel(mychar[current_char], direction);
+        hit = hitCheck(direction, &group);
+        switch (hit) {
+        case 0:
+            p2sdPlaySE(0x340001, 0x7F, 0x3F);
+            moveC = pbStartMoveChar(NULL, direction, 1);
+            break;
+        case 3:
+            p2sdPlaySE(0x340002, 0x7F, 0x3F);
+            pbAddRecord_char(record, current_char, mychar);
+            moveC = pbStartMoveChar(NULL, direction, 1);
+            moveB = pbStartMoveBlock(NULL, group, direction);
+            func_001D2D00(mychar[current_char], 2);
+            break;
+        case 4:
+            p2sdPlaySE(0x340003, 0x7F, 0x3F);
+            pbAddRecord_char(record, current_char, mychar);
+            rotation = roundDirCheck(direction, group->grpID, &stepCount);
+            moveC = pbStartMoveChar(NULL, direction, stepCount);
+            moveB = pbStartRoundBlock(NULL, group, rotation);
+            func_001D2D00(mychar[current_char], 2);
+            break;
+        case 1:
+            func_001D2D00(mychar[current_char], 1);
+            break;
+        case 2:
+            func_001D2D00(mychar[current_char], 2);
+            break;
+        }
+    }
+    state = pbGameState;
+    if (state >= 11) {
+        func_001D2D00(mychar[current_char], 0);
+    } else {
+        pbGameState = state + 1;
+    }
+    pad = dds3PadButtonState[0x20];
+    degreeFlag = *(volatile u8 *)&degree_mode;
+    if (pad < 0) {
+        keyState = pbGameKeyState;
+        degreeFlag = *(volatile u8 *)&degree_mode;
+        if (keyState == 0) {
+            movingCharacter = roundCamera;
+            degreeFlag = *(volatile u8 *)&degree_mode;
+            if (movingCharacter == NULL) {
+                movingCharacter = moveC;
+                degreeFlag = *(volatile u8 *)&degree_mode;
+                if (movingCharacter == NULL) {
+                    movingCharacter = moveB;
+                    if (movingCharacter != NULL) {
+                        degreeFlag = *(volatile u8 *)&degree_mode;
+                    } else {
+                        p2sdPlaySE(0x340005, 0x7F, 0x3F);
+                        menu = pbStartMenu(panel, 1);
+                        dds3SetProcessFlag(menu->id, 0x10, 1);
+                        process = dds3SearchProcessName(D_00535F08);
+                        if (process != NULL) {
+                            dds3ResetProcessFlag(process, 0x10, 2);
+                        }
+                        D_0054F5C4->menuProc = menu;
+                        degreeFlag = *(volatile u8 *)&degree_mode;
+                    }
+                }
+            }
+        }
+    }
+    angle = cameraAngle;
+    if (degreeFlag & 1) {
+        CalcDegreeMode();
+        angle = cameraAngle;
+    }
+    pbSetViewRotation(angle, cameraRadius, cameraDegree);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbGame", game);
+#endif
 
 void deleteGame(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
