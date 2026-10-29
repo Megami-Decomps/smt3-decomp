@@ -395,7 +395,53 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-INCLUDE_ASM(const s32, "newbattle/nbTest", SetBossDummy);
+extern datDevilAI_t D_00526B50;
+extern datDevilAI_t D_00526BF4;
+extern datDevilAI_t D_00526C98;
+extern datDevilAI_t D_00526D3C;
+extern datDevilAI_t D_00526DE0;
+extern datDevilAI_t D_00526E84;
+extern datDevilAI_t D_00526F28;
+extern datDevilAI_t D_00526FCC;
+extern datDevilAI_t D_00527070;
+extern datDevilAI_t D_00527114;
+extern datDevilAI_t D_005271B8;
+
+extern void *memcpy(void *dest, const void *src, u32 size);
+
+void SetBossDummy(void)
+{
+    memcpy(&D_003989E0[257], &D_00526B50, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[269], &D_00526BF4, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[278], &D_00526C98, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[279], &D_00526D3C, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[280], &D_00526D3C, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[281], &D_00526D3C, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[282], &D_00526D3C, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[288], &D_00526DE0, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[292], &D_00526E84, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[259], &D_00526F28, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[291], &D_00526FCC, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[258], &D_00527070, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[293], &D_00527114, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[264], &D_005271B8, sizeof(datDevilAI_t));
+    evtBitOn(0xC0B);
+    evtBitOff(0xC01);
+    evtBitOff(0xC07);
+    {
+        /* Preserve the native signed mode dispatch after the bit callbacks. */
+        s32 mode = (s32)f;
+        if (mode == 3) {
+            return;
+        }
+        if (mode < 4) {
+            if (mode == 2) {
+                evtSetAgeOfMoon(8);
+            }
+        }
+    }
+}
+
 
 INCLUDE_ASM(const s32, "newbattle/nbTest", nbSetBattleDummy);
 
