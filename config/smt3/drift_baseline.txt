@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1111 members, 504 adopted constants.
+# 0 types, 1114 members, 504 adopted constants.
 
 
 member _FRQ.unk00
@@ -1080,6 +1080,9 @@ member shpUpdateWork_t.unk_0064
 member shpUpdateWork_t.unk_2388
 member shpUpdateWork_t.unk_239C
 member skillSortEntry_t.unk_3
+member slConvertWork_t.unknown00
+member slConvertWork_t.unknown1914
+member slConvertWork_t.unknown38
 member slFileRec_t.unk25
 member sndChannel_t.unk1
 member sndChannel_t.unk2

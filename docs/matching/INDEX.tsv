@@ -136,7 +136,6 @@ dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/matching/kernel/dds3ConfigMai
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matching/kernel/dds3KernelDraw.md	3
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
 slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/matching/mc/slMain.md	3
-MovieViewerProc	movie/MovieViewer	0x24C	6 of 144 words match	docs/matching/movie/MovieViewer.md	3
 SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/matching/newbattle/nbAi.md	3
 SetSingleTarget2	newbattle/nbAi	0x26C	143 of 155 words match	docs/matching/newbattle/nbAi.md	29
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words differ	docs/matching/newbattle/nbCameraBoss.md	3
@@ -235,7 +234,6 @@ sdfModelLinkDrawPacket	sdf/sdfModel	0x208	Eighteen of 122 words match	docs/match
 sdfModelLinkShapedDrawPacket	sdf/sdfModel	0x258	Fifty of 150 words match	docs/matching/sdf/sdfModel.md	75
 sdfModelTempPacketLinkOt	sdf/sdfModel	0x468	twenty-seven of 282 words differ	docs/matching/sdf/sdfModel.md	133
 movieWaitSema	sdf/sdfMovie	212 bytes	Thirty-nine of fifty-three words differ	docs/matching/sdf/sdfMovie.md	3
-release_movieobj2	sdf/sdfMovie	596 bytes	1 of 150 words match	docs/matching/sdf/sdfMovie.md	51
 sdfSndVoiceMapInit	sdf/sdfSound	180 bytes	39 of 45 words match	docs/matching/sdf/sdfSound.md	3
 sdfTexSetPacket	sdfTex	0x168	15 of 90 words match	docs/matching/sdf/sdfTex.md	3
 corePktLoadVerts	sdfVu1	0x2C		docs/matching/sdf/sdfVu1.md	3
@@ -261,7 +259,7 @@ gcc2_compiled__1			74 of 139 words match	docs/matching/sdk/libc.md	80
 vfprintf			8 of 29 words match	docs/matching/sdk/libc.md	119
 _d2b				docs/matching/sdk/libc.md	133
 func_002D6678				docs/matching/sdk/libc.md	176
-_dtoa_r				docs/matching/sdk/libc.md	264
+_dtoa_r				docs/matching/sdk/libc.md	284
 What cracked the scmd family				docs/matching/sdk/libcdvd.md	3
 The scmd template, for the next pass				docs/matching/sdk/libcdvd.md	24
 Completion callback contracts and remaining drafts				docs/matching/sdk/libcdvd.md	51

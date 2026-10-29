@@ -47,31 +47,3 @@ local reaches 33 of 52 but reads the frame index as `0x48($3)` where retail has
 difference is the prologue's saved-register order and `ptr` taking `$19` where
 retail gives it `$18` and keeps `movieSemaId` in `$19`; those follow from the
 block above, since retail needs one more value live across it.
-
-## release_movieobj2 (sdf/sdfMovie, 596 bytes)
-
-**1 of 150 words match**, 148 instructions emitted against retail's 150. The
-first third, from the prologue through the audio-start condition and both
-bit-length computations, agrees instruction for instruction up to register
-names; everything after it differs.
-
-The retail body is ordinary C apart from two `plzcw`/`addi` bit-length idioms,
-which `PS2_WORD_BIT_LENGTH` in `include/ps2asm.h` reproduces exactly and in
-place. What it builds is a 0xB0 packet that draws the IPU output as one GS
-sprite: a DMAtag and a VIF `DIRECT` for ten quadwords, a GIFtag for a textured
-`FST` sprite with nine A+D writes, then TEX1, TEX0, CLAMP, TEXA, RGBAQ and two
-UV/XYZ2 pairs. TEX0's `TW` and `TH` are the bit length of
-`decodeCb.width - 1` and `decodeCb.height - 1`, `TBW` is `width / 64` forced
-up to 1 with a `movz`, `TBP0` is `decodeCb.resourceWord >> 6`, `TCC` is set,
-and `PSM` becomes `PSMCT16` only when `decodeCb.rgbMode` is non-zero. The two
-UV writes are `(0, 0)` and `(width, height)` in 10.4 fixed point, and the two
-XYZ2 writes are the rectangle corners with `obj->z` in the Z field.
-
-What is left to close: retail saves exactly three registers, `$16` for the
-movie object (reused for the draw tag once the object is dead), `$17` for the
-packet and `$18` for the ordering table, and nothing else lives across a call.
-This draft needs six, because cc1 hoists the constant 1 that the `TBW` `movz`
-needs, and two more values, into callee-saved registers ahead of
-`sdfGrAllocPacketBuff`. Keeping everything but those three off the
-cross-call live ranges is the next thing to try. The TEX0 OR chain's term
-order is also unverified; `sdfTex.md` records how to recover one.

@@ -98,8 +98,9 @@ list with:
 **These are not impossible, and they belong on the worklist rather than this
 page.** cc1 will never select the instruction from C, but `include/ps2asm.h`
 exists precisely to emit instructions cc1 never selects, and every VU0 and MMI
-match in the tree already works that way. No matched function contains `addi`
-yet, so the technique is untried here, not ruled out.
+match in the tree already works that way. The matched movie frame constructor
+now contains the shared SDK bit-length `addi` operation twice; its presence is
+not a reason to classify the surrounding body as handwritten.
 
 What it takes: one macro per concrete operation, opcode and registers literal
 in the body, parameters bound through operand constraints. No macro parameter

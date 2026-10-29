@@ -3382,43 +3382,51 @@ extern itfColor_t D_00332378;
 extern fclEncycStrip_t D_00332388[4];
 extern sdfTexHandle_t *D_00345D88[];
 
-#ifdef NON_MATCHING
 void DrawReadListwinCaption(fclEncyc_instance_tag *pinst)
 {
-    sdfDrawTag_t *tag = sdfGrAllocPacketBuff(sizeof(*tag));
     sdfIVector2_t pos[2];
     itfColor_t uv;
+    sdfDrawTag_t *tag;
+    fclEncycStrip_t *strip;
     s32 i;
 
+    tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     pos[0].y = 0x3B0;
     pos[1].y = 0x3F8;
-    for (i = 0; i < 4; i++) {
-        pos[0].x = D_00332388[i].left;
-        pos[1].x = D_00332388[i].right;
+    strip = D_00332388;
+    for (i = 0; i < 4; i++, strip++) {
+        pos[0].x = strip->left;
+        pos[1].x = strip->right;
         itfMiscDrawSpritePlanePrim(pos, i == 3 ? &D_00332378 : &D_00332368,
                                   0xFFFFF0, 0, tag);
     }
 
-    pos[0].x = 0x690; pos[0].y = 0x398; pos[1].x = 0x920; pos[1].y = 0x410;
+    pos[0].x = 0x690; pos[0].y = 0x398;
+    pos[1].x = 0x920; pos[1].y = 0x410;
     uv.components[0] = 0x10; uv.components[1] = 0x160;
     uv.components[2] = 0x2F0; uv.components[3] = 0x250;
-    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0, pinst->texHandle[0], 0, tag);
+    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
+                         pinst->texHandle[0], 0, tag);
 
     pos[0].x = 0xCA0; pos[1].x = 0xFA0;
     uv.components[0] = 0x300; uv.components[2] = 0x600;
     itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
 
     pos[0].x = 0x1240; pos[1].x = 0x13F0;
-    uv.components[0] = 0x610; uv.components[2] = 0x7C0;
+    uv.components[0] = 0x610; uv.components[1] = 0x160;
+    uv.components[2] = 0x7C0; uv.components[3] = 0x250;
     itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
 
-    pos[0].x = 0x1870; pos[0].y = 0x390; pos[1].x = 0x1920;
+    pos[0].x = 0x1870; pos[0].y = 0x390;
+    pos[1].x = 0x1920; pos[1].y = 0x410;
     uv.components[0] = 0xBB0; uv.components[1] = 0x250;
     uv.components[2] = 0xC60; uv.components[3] = 0x350;
-    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0, pinst->texHandle[1], 0, tag);
+    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
+                         pinst->texHandle[1], 0, tag);
 
-    pos[0].x = 0x1350; pos[0].y = 0xBB0; pos[1].x = 0x14F0; pos[1].y = 0xC98;
+    pos[0].x = 0x1350; pos[0].y = 0xBB0;
+    pos[1].x = 0x14F0; pos[1].y = 0xC98;
     uv.components[0] = 0xB50; uv.components[1] = 0x3A0;
     uv.components[2] = 0xCF0; uv.components[3] = 0x570;
     itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
@@ -3431,52 +3439,59 @@ void DrawReadListwinCaption(fclEncyc_instance_tag *pinst)
     uv.components[0] = 0xCE0; uv.components[2] = 0xCF0;
     itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
 
-    pos[0].x = 0xB50; pos[0].y = 0xCF0; pos[1].x = 0xF00; pos[1].y = 0xD98;
+    pos[0].x = 0xB50; pos[0].y = 0xCF0;
+    pos[1].x = 0xF00; pos[1].y = 0xD98;
     uv.components[0] = 0x10; uv.components[1] = 0x4B0;
     uv.components[2] = 0x3C0; uv.components[3] = 0x600;
-    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0, D_00345D88[1], 0, tag);
+    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
+                         D_00345D88[1], 0, tag);
 
     pos[0].x = 0xF00; pos[1].x = 0x2000;
     uv.components[0] = 0x3B0;
     itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
 
-    pos[0].x = 0x14A0; pos[0].y = 0xBD0; pos[1].x = 0x19E0; pos[1].y = 0xC70;
+    pos[0].x = 0x14A0; pos[0].y = 0xBD0;
+    pos[1].x = 0x19E0; pos[1].y = 0xC70;
     uv.components[0] = 0x670; uv.components[1] = 0x10;
     uv.components[2] = 0xBB0; uv.components[3] = 0x150;
-    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0, pinst->texHandle[2], 0, tag);
+    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
+                         pinst->texHandle[2], 0, tag);
 
-    pos[0].x = 0x1CC0; pos[0].y = 0xBF0; pos[1].x = 0x1DB0;
-    uv.components[0] = 0xBC0; uv.components[2] = 0xCB0; uv.components[3] = 0x110;
+    pos[0].x = 0x1CC0; pos[0].y = 0xBF0;
+    pos[1].x = 0x1DB0; pos[1].y = 0xC70;
+    uv.components[0] = 0xBC0; uv.components[1] = 0x10;
+    uv.components[2] = 0xCB0; uv.components[3] = 0x110;
     itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
 
-    pos[0].x = 0xCC0; pos[0].y = 0xCF0; pos[1].x = 0x15C0; pos[1].y = 0xD90;
+    pos[0].x = 0xCC0; pos[0].y = 0xCF0;
+    pos[1].x = 0x15C0; pos[1].y = 0xD90;
     uv.components[0] = 0x10; uv.components[1] = 0x1E0;
     uv.components[2] = 0x910; uv.components[3] = 0x320;
     itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
 
     pos[0].x = 0x1690; pos[1].x = 0x1F20;
-    uv.components[1] = 0x330; uv.components[2] = 0x8A0; uv.components[3] = 0x470;
+    uv.components[0] = 0x10; uv.components[1] = 0x330;
+    uv.components[2] = 0x8A0; uv.components[3] = 0x470;
     itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
 
-    pos[0].x = 0x10D0; pos[0].y = 0xF0; pos[1].x = 0x1C60; pos[1].y = 0x1E0;
+    pos[0].x = 0x10D0; pos[0].y = 0xF0;
+    pos[1].x = 0x1C60; pos[1].y = 0x1E0;
     uv.components[0] = 0x20; uv.components[1] = 0x2F0;
     uv.components[2] = 0xBB0; uv.components[3] = 0x4D0;
-    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0, D_00345D88[3], 0, tag);
+    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
+                         D_00345D88[3], 0, tag);
 
     pos[0].x = 0x1C60; pos[1].x = 0x2000;
-    uv.components[0] = 0xBA0;
+    uv.components[0] = 0xBA0; uv.components[2] = 0xBB0;
     itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
 
-    pos[0].x = 0x1E50; pos[0].y = 0x130; pos[1].x = 0x1F20; pos[1].y = 0x1D8;
+    pos[0].x = 0x1E50; pos[0].y = 0x130;
+    pos[1].x = 0x1F20; pos[1].y = 0x1D8;
     uv.components[0] = 0xC80; uv.components[1] = 0x10;
     uv.components[2] = 0xD50; uv.components[3] = 0x160;
     itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
-
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadListwinCaption);
-#endif
 
 extern itfColor_t D_00330930;
 extern itfColor_t D_00330960;
@@ -3924,14 +3939,6 @@ s32 DebugProcMenu_fclEncyc(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *wo
 INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcMenu_fclEncyc);
 #endif
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D828);
-
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D838);
-
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D848);
-
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D858);
-
 extern char D_0053D868[];
 extern char D_0053D878[];
 extern char D_0053D888[];
@@ -4021,6 +4028,14 @@ s32 DebugProcRegister(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D828);
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D838);
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D848);
+
+INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D858);
+
 INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcRegister);
 #endif
 

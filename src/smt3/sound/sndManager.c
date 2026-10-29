@@ -539,7 +539,7 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern s32 p2sdStopBGM(s32 id);
 extern void dds3FadeIn2(s32 frames);
-extern s32 dds3PlayMovieByIndex(s32 index);
+extern void dds3PlayMovieByIndex(s32 index);
 extern u32 dds3BackColor;
 extern s32 dds3Titlemain(dds3ProcessID_t *id);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,

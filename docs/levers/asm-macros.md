@@ -13,32 +13,37 @@ place that was tried.
     addi    $5, $0, 0x1F
     subu    $5, $5, $2
 
-the bit length of a word, used on `dimension - 1` to get `log2`. The `addi`
-writes the register the input arrived in, so the value and the scratch have to
-be one in/out operand and one early-clobber output:
+the bit length of a word, used on `dimension - 1` to get `log2`. The shared
+SDK operation has one real input/output value and the literal `$2` scratch
+clobber used by the repeated native idiom:
 
-    #define PS2_WORD_BIT_LENGTH(x) ({ s32 ps2Bits = (x); s32 ps2Lzc; __asm__ ( \
-        ".set noreorder\n\tplzcw %1, %0\n\tandi %1, %1, 0xFF\n\t" \
-        "addi %0, $0, 0x1F\n\tsubu %0, %0, %1\n\t.set reorder" \
-        : "+r" (ps2Bits), "=&r" (ps2Lzc)); ps2Bits; })
+    #define PS2_WORD_BIT_LENGTH(x) ({ s32 ps2Bits = (x); __asm__ ( \
+        ".set noreorder\n\tplzcw $2, %0\n\tandi $2, $2, 0xFF\n\t" \
+        "addi %0, $0, 0x1F\n\tsubu %0, %0, $2\n\t.set reorder" \
+        : "+r" (ps2Bits) : : "$2"); ps2Bits; })
 
-**The register binding works.** cc1 emits the four instructions contiguously,
-in retail's order, with the same two-register roles, at the point in the body
-where the C puts them, twice in one function from one macro. Nothing about
-`addi` or `plzcw` makes a function unmatchable.
+This is the established `EE_MMI_BIT_LENGTH` contract in the canonical DDS
+[inline-assembly policy](https://github.com/Megami-Decomps/dds-decomp/blob/main/docs/idioms.md#inline-asm-cop2-and-mmi),
+not a target-local register workaround. Independently of the movie body,
+SMT3 `sdfTexSetPacket` at `0x002AB918` and `0x002AB934` uses the same literal
+scratch, as does `release_movieobj2` at `0x002C5238` and `0x002C5258`.
+The macro is a pure value calculation: no volatile qualifier, memory clobber,
+dummy dependency or constrained surrounding C local is added. Its expression
+wrapper evaluates its argument once and returns the real calculated value.
 
-**What it costs is the schedule.** cc1 treats the whole block as one insn with
-unit latency, so around it the ready-list priorities are those of a
-four-instruction dependency chain collapsed to one. In `sdfTexSetPacket` that
-leaves the body the right length with the right dataflow and the tail exact,
-and the first fifty instructions in a different order from the hand-written
-routine. Leave the block whole: splitting it into one-instruction macros is
-worse, because two `addi %0, $0, 0x1F` blocks with no inputs are identical
-patterns and cc1 CSEs them into one.
+The former allocator-selected early-clobber scratch emitted the arithmetic
+but did not describe that shared SDK register contract. Aligning the single
+existing macro fixes both uses consistently, rather than introducing a second
+fixed-register variant for one target. Actual consumer owners are
+`sdf/sdfTex.c` and `sdf/sdfMovie.c`; complete owners, guarded drafts and the
+retail image qualify the shared change, separately from any new match credit.
 
-So a body with one such idiom in an otherwise ordinary function is a normal
-match; a body where the idiom sits in the middle of a long dependency graph
-may come out the right size and still not close.
+cc1 still models the whole block as one asm instruction, so source scheduling
+around it can differ. Historical measurements below used the old scratch
+contract and must not be treated as a proof that the corrected primitive's
+surrounding C is impossible. Splitting the operation into arbitrary one-word
+macros remains inappropriate. The additive movie packet reconstruction is
+qualified separately.
 
 ## A `|` chain's tree shape comes from the term order, not from parentheses
 

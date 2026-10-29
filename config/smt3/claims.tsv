@@ -905,3 +905,7 @@ nbPanelDrawPP1 chain + nbPanelFlashDraw + fldNpcDraw	z27	open	2026-10-29	3 fn	pe
 src/smt3/field/fldEveHit.c	z29	open	2026-10-29	1 fn / 6248 B	largest-first pass: fldEveHit_AddEveHit, existing broad guard as the starting point
 src/smt3/sdk/libc.c	redthing1	done	2026-10-29	0 exact / formatter output cursor	shared semantic conversion cursor recovers native GPR21 allocation; 5236 emitted bytes, 48 emitted words matching, broad nonmatching residual retained
 src/smt3/sdk/libc.c	redthing1	done	2026-10-29	0 exact / 408 B guarded	bigint-to-binary64 conversion with reviewed exponent/limb packing; 88 of 102 words match, named-word and forward-join controls inert
+src/smt3/movie/MovieViewer.c	redthing1	done	2026-10-29	1 fn / 588 B	PiM agent: native/DDS movie viewer with real shared records and canonical void player API; independently qualified prerequisite and peers
+src/smt3/sdf/sdfMovie.c	redthing1	done	2026-10-29	1 fn / 596 B	PiM agent: native movie frame packet with separately qualified shared SDK bit-length primitive; complete provider and texture peers exact
+src/smt3/mc/slMain.c	redthing1	done	2026-10-29	1 fn / 708 B	PiM agent: native save revision conversion with genuine record extents and live copy/clear extent reuse; compiler unchanged, complete owner exact
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-29	1 fn / 1576 B	PiM agent: native encyclopedia caption renderer, bounded real packet buffers and callback reloads; HD algorithm reference credited, all peers preserved
