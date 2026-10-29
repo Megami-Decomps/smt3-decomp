@@ -1756,7 +1756,73 @@ s32 nbGetButuriKaifuku(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
     return nbGetButuriAttack(nskill, sformindex, dformindex, waza);
 }
 
+extern const volatile f64 D_00544D20;
+extern const volatile f64 D_00544D28;
+
+#ifdef NON_MATCHING
+s32 nbGetMagicAttack(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
+{
+    datUnitWork_t *source;
+    datNormalSkill_t *skill;
+    f32 sourceRatio, targetRatio, power, limit, adjusted, damage, candidate;
+    s32 level, cappedLevel, parameter, i;
+    u32 flags;
+
+    source = nbGetUnitWorkFromFormindex(sformindex);
+    nbGetUnitWorkFromFormindex(dformindex);
+    sourceRatio = nbGetHojoRitu(sformindex, 5);
+    targetRatio = nbGetHojoRitu(dformindex, 7);
+    level = source->level;
+    skill = &datSkillTable.normal[nskill];
+    power = (f32)skill->magicbase + (f32)(s32)((u32)level * (u32)waza * 2) / 21.0f;
+    limit = (f32)skill->magiclimit;
+    if (limit < power) {
+        power = limit;
+    }
+    cappedLevel = level < 161 ? level : 160;
+    parameter = datGetParam(source, 2);
+    adjusted = power + (power / 100.0f) * ((parameter - ((f32)cappedLevel / 5.0f + 4.0f)) * 2.5f);
+    damage = (f32)((f64)adjusted * D_00544D20);
+    flags = source->flag;
+    if (!(flags & 0x20)) {
+        level = ((volatile datUnitWork_t *)source)->level;
+        if (level >= 101) {
+            level = ((volatile datUnitWork_t *)source)->level;
+            i = 100;
+            if (i < level) {
+                do {
+                    power = (f32)skill->magicbase + (f32)(s32)((u32)level * (u32)waza * 2) / 21.0f;
+                    limit = (f32)skill->magiclimit;
+                    if (limit < power) {
+                        power = limit;
+                    }
+                    cappedLevel = level < 161 ? level : 160;
+                    parameter = datGetParam(source, 2);
+                    adjusted = power + (power / 100.0f) * ((parameter - ((f32)cappedLevel / 5.0f + 4.0f)) * 2.5f);
+                    candidate = (f32)((f64)adjusted * D_00544D28);
+                    if (damage < candidate) {
+                        damage = candidate;
+                    }
+                    level = ((volatile datUnitWork_t *)source)->level;
+                    i++;
+                } while (i < level);
+                flags = ((volatile datUnitWork_t *)source)->flag;
+            }
+        }
+    }
+    if (flags & 0x20) {
+        damage = damage * 0.75f - 50.0f / (f32)(source->level + 10);
+        if (evtBitCheck(0xAF2) == 0) {
+            damage *= 0x1.570a3cp+0f;
+        }
+    }
+    printf(D_00544D00, (f64)sourceRatio);
+    printf(D_00544D10, (f64)targetRatio);
+    return (s32)(damage * sourceRatio * targetRatio);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetMagicAttack);
+#endif
 
 s32 nbGetMagicKaifuku(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
 {
