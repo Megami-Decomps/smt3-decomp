@@ -1402,15 +1402,43 @@ s32 sceSifLoadStartModule(const char *path, s32 argumentSize, const void *argume
     return _sceSifLoadModule(path, argumentSize, arguments, moduleResult, 0);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifLoadElfPart);
+s32 _sceSifLoadElfPart(const char *path, const char *section, u32 *result, s32 command)
+{
+    if (_lf_bind() < 0) {
+        return -65536;
+    }
+    if (_lf_version() != 0) {
+        return -65540;
+    }
+    strncpy(D_0059EA00.name, path, 0xFC);
+    D_0059EA00.name[0xFB] = 0;
+    strncpy((char *)D_0059EA00.arguments, section, 0xFC);
+    D_0059EA00.arguments[0xFB] = 0;
+    if (sceSifCallRpc(&D_0059EC00, command, 0, &D_0059EA00, 0x200,
+                      &D_0059EA00, 16, NULL, NULL) < 0) {
+        return -65537;
+    }
+    if (D_0059EA00.value == 0) {
+        return -65539;
+    }
+    result[0] = D_0059EA00.value;
+    result[1] = D_0059EA00.moduleResult;
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadElfPart);
+s32 sceSifLoadElfPart(const char *path, const char *section, u32 *result)
+{
+    return _sceSifLoadElfPart(path, section, result, 1);
+}
 
 INCLUDE_RODATA(const s32, "sdk/libkernl", D_0054BCA8);
 
 INCLUDE_RODATA(const s32, "sdk/libkernl", D_0054BCB0);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadElf);
+s32 sceSifLoadElf(const char *path, u32 *result)
+{
+    return _sceSifLoadElfPart(path, "all", result, 1);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifGetIopAddr);
 

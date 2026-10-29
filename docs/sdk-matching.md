@@ -495,3 +495,18 @@ the built-in address before the detected address reproduces the four native
 address-setup words in the version helper; the reversed declaration order is
 the same 140-byte size but differs in those words. The complete kernel owner
 checks 45 match / 0 differ at this qualification.
+
+## Matched ELF loading
+
+`_sceSifLoadElfPart` (260 bytes), `sceSifLoadElfPart` (28 bytes) and
+`sceSifLoadElf` (40 bytes) match 328 instruction bytes. The core copies and
+terminates both the 252-byte path and section fields, sends the complete
+512-byte request and receives 16 bytes. It consumes only the first two reply
+words. Bind, version and RPC failures leave caller output untouched; a zero
+entry word returns `-65539` and also leaves output untouched. Otherwise it
+copies the entry and global-pointer words and returns zero.
+
+The wrappers supply command one; the whole-file wrapper supplies the ordinary
+string literal `"all"`. No larger caller-output record is inferred from the
+16-byte receive length. The complete kernel owner checks 48 match / 0 differ
+at this qualification.
