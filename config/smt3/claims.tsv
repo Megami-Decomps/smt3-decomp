@@ -666,3 +666,4 @@ src/smt3/field/fldFileResolver.c	redthing1	done	2026-10-29	1 fn / 1152 B	PiM age
 src/smt3/effect/effBlur_Filter.c	redthing1	done	2026-10-29	2 fn / 1008 B	PiM agent: qualified DDS slot loops, canonical runtime helpers and in-place alpha attenuation; owner 29 match, 0 differ
 src/smt3/field/fld_Npc.c	redthing1	done	2026-10-29	1 fn / 2344 B	PiM agent: encounter HUD with native state gates and recovered signed getter; owner 16 match, 0 differ
 src/smt3/newbattle/nbEncount.c	redthing1	done	2026-10-29	0 matches / provider contract correction	PiM agent: s32 count getter corroborated HD/IDB, native u16 storage unchanged; owner 9 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	hearts gauge rendering at native 852-byte size; 199 of 213 words match, table/OT register pair unresolved; default owner 365 match, 0 differ
