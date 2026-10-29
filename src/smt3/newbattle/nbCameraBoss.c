@@ -486,7 +486,132 @@ void nbCameraBoss_Foru_E913_Run(void)
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Foru_E913_Run);
 #endif
 
+#ifdef NON_MATCHING
+extern u32 effBTLSkillGetTargetBit(void);
+extern f32 nbGetEnemyInterval(void);
+extern f32 nbCameraGetBossDistance(void);
+extern f32 effBTLModelGetRadius(nbFormation_t *form);
+s32 nbCameraBoss_Sp_MURET2_Run(nbCamera_t *camera);
+
+s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *camera)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *invoke;
+    nbFormation_t *forms;
+    nbFormation_t *form;
+    nbFormation_t *first = NULL;
+    u32 targets;
+    u32 count = 0;
+    u32 i;
+    f32 width = 0.0f;
+    f32 height = 0.0f;
+    f32 size;
+    f32 r;
+    f32 angle;
+    f32 firstX;
+    sdfVector4_t offset;
+    sdfVector4_t result;
+    sdfVector4_t eye;
+    sdfVector4_t center;
+    sdfVector4_t target;
+
+    if (effBTLSkillGetState() & 0xC) return 0;
+    effBTLModelAllHide();
+    effBTLModelTargetPartyShow();
+    effBTLModelInvokeShow();
+    data = nbGetMainProcessData();
+    forms = data->form;
+    invoke = effBTLSkillGetInvokeFormation();
+    targets = effBTLSkillGetTargetBit();
+    for (i = 4; i < 14; i++) {
+        form = &forms[i];
+        if (form == invoke || (targets & (1 << i))) {
+            size = form->r * form->scl;
+            width += size + size;
+            size = effBTLModelGetHeight(form);
+            if (height < size) height = size;
+            if (count == 0) first = form;
+            count++;
+        }
+    }
+    width += nbGetEnemyInterval() * (f32)(count - 1);
+    angle = sdfAtan(0.45378551f);
+    if (width < height) r = height * 0.5f;
+    else r = width * 0.5f;
+    if (r < 400.0f) r = 400.0f;
+    r /= angle;
+    target.x = 0.0f;
+    target.y = -(height * 0.5f);
+    target.z = nbCameraGetBossDistance() * 0.5f;
+    eye.x = target.x;
+    eye.y = target.y;
+    eye.z = target.z - r;
+    effBTLModelGetSphereCenter(first);
+    SDF_VU0_STOREVECTOR(&center);
+    center.y = -160.0f;
+    r = effBTLModelGetRadius(first);
+    if (r < 250.0f) r = 250.0f;
+    r /= angle;
+
+    offset.x = 0.0f; offset.y = 0.0f; offset.z = -r * 1.15f;
+    SetRotateMatrixY(1.3089967f);
+    SDF_VU0_LOADVECTOR(&offset);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_LOADVECTOR_B(&center);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&result);
+    D_0056B350[1].point[0].x = result.x;
+    D_0056B350[1].point[0].y = result.y;
+    D_0056B350[1].point[0].z = result.z;
+    firstX = result.x;
+
+    offset.x = 0.0f; offset.y = 0.0f; offset.z = -r * 1.15f;
+    SetRotateMatrixY(1.0471974f);
+    SDF_VU0_LOADVECTOR(&offset);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_LOADVECTOR_B(&center);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&result);
+    D_0056B350[1].point[1].x = firstX + (eye.x - firstX) * 0.5f;
+    D_0056B350[1].point[1].y = result.y;
+    D_0056B350[1].point[1].z = result.z;
+
+    offset.x = 0.0f; offset.y = 0.0f; offset.z = -r * 1.15f;
+    SetRotateMatrixY(0.87266455f);
+    SDF_VU0_LOADVECTOR(&offset);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_LOADVECTOR_B(&center);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&result);
+    D_0056B350[1].point[2].x = firstX + (eye.x - firstX) * 0.83333335f;
+    D_0056B350[1].point[2].y = result.y;
+    D_0056B350[1].point[2].z = result.z;
+    D_0056B350[1].point[3].x = eye.x;
+    D_0056B350[1].point[3].y = eye.y;
+    D_0056B350[1].point[3].z = eye.z;
+    D_0056B350[0].point[0].x = center.x;
+    D_0056B350[0].point[0].y = center.y;
+    D_0056B350[0].point[0].z = center.z;
+    D_0056B350[0].point[1].x = (center.x + target.x + width * 0.25f) * 0.5f;
+    D_0056B350[0].point[1].y = center.y;
+    D_0056B350[0].point[1].z = center.z;
+    D_0056B350[0].point[2].x = target.x + width * 0.25f;
+    D_0056B350[0].point[2].y = center.y;
+    D_0056B350[0].point[2].z = center.z;
+    D_0056B350[0].point[3].x = target.x;
+    D_0056B350[0].point[3].y = target.y;
+    D_0056B350[0].point[3].z = target.z;
+    D_0056B350[1].step = 0.000952380884f;
+    D_0056B350[0].weight = 0.0f;
+    D_0056B350[1].weight = 0.0f;
+    nbCameraBoss_Sp_MURET2_Accele = 0.000952380884f;
+    D_0056B350[0].step = 0.000952380884f;
+    nbCameraBoss_Sp_MURET2_Run(camera);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Sp_MURET2_Set);
+#endif
 
 s32 nbCameraBoss_Sp_MURET2_Run(nbCamera_t *pNbCamera)
 {
