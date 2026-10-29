@@ -61,7 +61,8 @@ void nmeDrawSymbolRow(s32 x, s32 y)
 }
 
 #ifdef NON_MATCHING
-extern const s8 D_00551698[3];
+extern void *memcpy(void *dest, const void *src, u32 size);
+extern const s8 D_00551698[];
 extern s32 nmeGetCursorPos(nmeWork_t *work);
 extern void cmpSetSkillListRows(s32 rows);
 extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type,
@@ -361,30 +362,23 @@ done:
 }
 
 #ifdef NON_MATCHING
-extern const s8 D_005516B0[3];
+extern const s8 D_005516B0[];
 extern const s8 D_005280C0[][2];
 extern const u8 *D_005276B8[];
 
 void nmeDrawCursorAt(s32 x, s32 y, s32 z, s8 mode, s32 ot)
 {
-    volatile s32 first = D_00551698[0];
-    volatile s32 second = D_00551698[1];
-    volatile s32 terminator = D_00551698[2];
-    volatile s32 skipFirst = D_005516B0[0];
-    volatile s32 skipSecond = D_005516B0[1];
-    volatile s32 skipThird = D_005516B0[2];
     u8 text[3];
     s8 skip[3];
     s32 rows, step, row, column;
 
-    text[0] = first;
-    text[1] = second;
-    text[2] = terminator;
-    skip[0] = skipFirst;
-    skip[1] = skipSecond;
-    skip[2] = skipThird;
+    memcpy(text, D_00551698, 3);
+    memcpy(skip, D_005516B0, 3);
     rows = (s8)namelist_buttonAnim_end->inputCursor.unk_26;
-    step = mode == 2 ? 0x17 : 0x16;
+    step = 0x16;
+    if (mode == 2) {
+        step = 0x17;
+    }
     cmpSetSkillListRows(0x18);
     for (row = 0; row < rows; row++) {
         s32 drawX = 0;

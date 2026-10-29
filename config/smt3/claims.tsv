@@ -887,3 +887,4 @@ src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	0 exact / 324 B guarded	name-r
 src/smt3/newbattle/nbAi.c	redthing1	done	2026-10-29	1 fn / 372 B	nbRunAiSub matches native rejection state, combined typed-entry offsets and shared selection publication; owner 46 match, 0 differ including data
 src/smt3/sdk/libc.c	redthing1	done	2026-10-29	0 exact / 5744 B guarded	formatted-output core reconstructed with native vector batches, parsing and conversion providers; 5488 emitted bytes, 1365 differing words and 256 uncovered bytes
 src/smt3/sdk/libm.c	redthing1	done	2026-10-29	1 SDK fn / 652 B	atanf native reduction fallthrough and separate corrected angle; qualified odd-polynomial register preference and full unit/data exact
+src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-29	0 exact / 696 B guarded	cursor template buffers use native three-byte copies rather than volatile word intermediates; native size and 62 of 174 words match; assembly fallback retained
