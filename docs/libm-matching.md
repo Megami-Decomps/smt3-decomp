@@ -137,3 +137,29 @@ compile in the actual owner,
 including the native stack transfers and return-register move. No compiler
 options, artificial state or register constraints were added. The complete
 math owner has9 matches and no differences, including readonly data.
+
+
+## __kernel_tanf
+
+All644 instruction bytes match. The tiny-input path preserves the integer
+conversion and the distinct zero/selector returns, including `1/fabsf(x)`.
+The large-input path folds both input components around the native two-part
+pi/4 constant. Thirteen assembly-owned coefficients feed the interleaved
+polynomial; the tail input participates even when no angle fold occurs. The
+selector and original sign determine the folded result. No extra exponent255
+classification is introduced.
+
+The compensated reciprocal clears the low twelve bits of both the tangent
+and its negative reciprocal. Initialize the tangent working value with `z = w`
+before reading and replacing its float word. Reading `w` directly in that
+macro instead emits648 bytes with an extra float/stack transfer. The ordinary
+read-modify-write sequence preserves the actual value used in compensation
+and closes all161 words; the reciprocal itself retains its direct word read.
+A conditional tiny-input return also preserves the native dispatch.
+
+The actual-owner `cc1probe.sh --func __kernel_tanf --expand --cse --alloc
+--no-dumps --maxlines 3500` run passes hooked/unhooked assembly parity. In its
+CSE trace, UID297 assigns the tangent to the working float, UID304 reads that
+float's word, UID325 masks it and UID329 writes the truncated float back.
+These are consumed arithmetic values, with no artificial copies, fixed
+registers or compiler-option changes.
