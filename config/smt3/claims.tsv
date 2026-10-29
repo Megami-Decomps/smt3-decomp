@@ -949,3 +949,5 @@ src/smt3/sdf/sdfIpu.c + sdfTex.c + sdfMovie.c	z29	done	2026-10-29	0 matches / 2 
 src/smt3/field/fldHit.c	z29	open	2026-10-29	1 fn / 3088 B	reclaimed: fldHitChkUnit with the VWM sibling transfer list
 src/smt3/field/fldHit.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldHitChkUnit 684 of 772 words at the native 3088 B (was 7); member access beats face pointers here, D_0054C468 is a .lit4 entry not a global; blocked on cse1 and loop both replacing the HImode 1
 src/smt3/field/fldPlayer.c	z29	open	2026-10-29	1 fn / 3068 B	largest-first pass: fldPlayerCalc_Wm2
+src/smt3/field/fldPlayer.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldPlayerCalc_Wm2 rebuilt on recovered block shapes, 606 of 768 instructions agree on shape; gcse PRE merges the pad base retail rematerialises, spilling the model handle; four .lit4 externs replaced by literals
+src/smt3/field/fldTitle.c	z29	open	2026-10-29	1 fn / 3028 B	largest-first pass: fldTitle_Process
