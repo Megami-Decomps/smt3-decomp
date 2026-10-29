@@ -384,36 +384,55 @@ void shpUpdateSeqSellNums(void)
 
 extern u32 dds3GetProcessStat(dds3ProcessID_t *id);
 
-#ifdef NON_MATCHING
 s32 shpUpdateSeqConfirm(s8 mode)
 {
     s32 flag;
+    s32 scriptState = 2;
 
-    if (dds3GetProcessStat(shopUpdateWork->scriptArg) == 2) {
+    if (dds3GetProcessStat(shopUpdateWork->scriptArg) == scriptState) {
         return 0;
     }
     flag = fclGetFlag(2);
-    if (flag == 0) {
-        s32 step = shopUpdateWork->paymentRemaining / 20;
+    switch (flag) {
+    case 0: {
+        shpUpdateWork_t *work = shopUpdateWork;
+        s32 step = work->paymentRemaining / 20;
 
-        shopUpdateWork->unk_0001 = 9;
-        shopUpdateWork->paymentStep = step != 0 ? step : 1;
+        work->unk_0001 = 9;
+        work->paymentStep = step != 0 ? step : 1;
         shopUpdateWork->unk_0004 = -1;
-    } else if (flag == 1) {
+        break;
+    }
+    case 1: {
+        /* Target-specific aid for native post-callback store-destination
+         * registers, not an original-source claim: both constrained pointers
+         * are fresh real snapshots; neither live value crosses a call. */
+        register shpUpdateWork_t *work asm("$4");
+        s32 nextState;
         if (mode == 0) {
             fclScriptStart(shopUpdateWork->script, 2, &shopUpdateWork->scriptArg);
-            shopUpdateWork->unk_0001 = 5;
+            work = shopUpdateWork;
+            nextState = 5;
         } else {
             fclScriptStart(shopUpdateWork->script, 4, &shopUpdateWork->scriptArg);
-            shopUpdateWork->unk_0001 = 6;
+            work = shopUpdateWork;
+            nextState = 6;
         }
-        shopUpdateWork->unk_0004 = 2;
+        asm("" : "+r"(work));
+        work->unk_0001 = nextState;
+        {
+            register shpUpdateWork_t *scriptWork asm("$3") = shopUpdateWork;
+            asm("" : "+r"(scriptWork));
+            scriptWork->unk_0004 = scriptState;
+        }
+        break;
+    }
+    case 2:
+        break;
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqConfirm);
-#endif
+
 
 extern void fclCreateItemListEx(fclItemList_t *list, s8 kind);
 extern void cmpChangeCursorListNums(s32 count, u8 *cursor);
