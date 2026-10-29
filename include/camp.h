@@ -35,4 +35,9 @@ typedef struct
     /* 0x34 */ s32 unk_34;
 } cmpCursorInfo_t;
 
+typedef struct cmpPadStopWork_t {
+    cmpCursorInfo_t cursor;
+    s8 unk_38;
+} cmpPadStopWork_t;
+
 #endif

@@ -61,12 +61,6 @@ extern trmUpdateWork_t *trmUpdateWork;
 
 extern void fclTerminalSetMode(s32 mode, s32 id, trmUpdateWork_t *work);
 
-typedef struct
-{
-    cmpCursorInfo_t cursor;
-    s8 unk_38;
-} cmpPadStopWork_t;
-
 extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
 
 s32 trmEndEvent(s32 BgmMode);

@@ -3033,7 +3033,6 @@ s32 cmbStockIsLocked(s32 index)
     return flag != 0;
 }
 
-typedef struct cmpPadStopWork_t cmpPadStopWork_t;
 extern s32 cmpGetPressedButton(s32 mask);
 extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
 extern s32 cmpChkPadPressUpDown(void);

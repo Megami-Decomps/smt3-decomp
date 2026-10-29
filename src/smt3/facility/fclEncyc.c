@@ -1946,11 +1946,6 @@ void ApplyEdgeListCursor(lstListWindow_t *list)
 INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyEdgeListCursor);
 #endif
 
-typedef struct {
-    cmpCursorInfo_t cursor;
-    s8 delay;
-} cmpPadStopWork_t;
-
 extern s8 dds3PadButtonState[];
 extern void lstMoveCursor(lstListWindow_t *list, s8 direction);
 extern s32 lstPageUp(lstListWindow_t *list);

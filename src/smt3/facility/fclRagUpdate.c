@@ -35,12 +35,6 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00 */ cmpCursorInfo_t cursor;
-    /* 0x38 */ s8 unk_38;
-} cmpPadStopWork_t;
-
-typedef struct
-{
     u8 reserved00000[0x15C];
     cmpCursorInfo_t listCursor;
 } ragListWindow_t;

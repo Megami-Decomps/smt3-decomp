@@ -352,12 +352,6 @@ typedef void (*cmpListRowDraw_t)(s32 x, s32 y, s32 z, u16 width, u16 height2,
 
 typedef struct
 {
-    /* 0x00 */ cmpCursorInfo_t cursor;
-    /* 0x38 */ s8 unk_38;
-} cmpPadStopWork_t;
-
-typedef struct
-{
     /* 0x0000 */ cmpCursorInfo_t cursor;
     /* 0x0038 */ u8 unk_0038[0x1004];
 } cmpListPage_t;

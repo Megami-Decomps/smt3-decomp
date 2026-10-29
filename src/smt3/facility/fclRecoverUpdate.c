@@ -35,12 +35,6 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00 */ cmpCursorInfo_t cursor;
-    /* 0x38 */ s8 unk_38;
-} cmpPadStopWork_t;
-
-typedef struct
-{
     /* 0x0000 */ s8 unk_00;
     /* 0x0001 */ s8 unk_01;
     /* 0x0002 */ s8 unk_02;
