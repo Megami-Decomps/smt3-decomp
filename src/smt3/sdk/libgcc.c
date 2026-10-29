@@ -1170,7 +1170,53 @@ u8 *libc_2D2C70(u8 *p, frameState_t *state)
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D2D90);
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D31E0);
+typedef struct frameStateInternal {
+    frameState_t state;
+    struct frameStateInternal *savedState;
+} frameStateInternal_t;
+
+typedef char frameStateInternal_size_must_be_0x480[
+    sizeof(frameStateInternal_t) == 0x480 ? 1 : -1];
+
+extern u8 *libc_2D2D90(u8 *p, frameStateInternal_t *state, cieInfo_t *info, u32 *location);
+
+frameState_t *libc_2D31E0(u32 pc, frameState_t *output)
+{
+    cieInfo_t info;
+    frameStateInternal_t state;
+    u32 *frame;
+    u8 *p;
+    u8 *end;
+    u32 payloadSize;
+    u32 location;
+    u32 *cie;
+
+    frame = libc_2D29B8(pc);
+    if (frame == NULL)
+        return NULL;
+    p = libc_2D2B60(frame, &info);
+    if (p == NULL)
+        return NULL;
+    memset(&state, 0, sizeof(state));
+    state.state.returnColumn = info.returnRegister;
+    state.state.ehPointer = info.ehPointer;
+    cie = (u32 *)((u8 *)frame - frame[1] + 4);
+    end = (u8 *)cie + cie[0] + 4;
+    while (p < end)
+        p = libc_2D2D90(p, &state, &info, NULL);
+    p = (u8 *)frame + 16;
+    if (info.augmentation[0] == 'z') {
+        p = libc_2D1E08(p, &payloadSize);
+        p += payloadSize;
+    }
+    end = (u8 *)frame + frame[0] + 4;
+    location = frame[2];
+    while (p < end && pc >= location)
+        p = libc_2D2D90(p, &state, &info, &location);
+    *output = state.state;
+    return output;
+}
+
 
 INCLUDE_ASM(const s32, "sdk/libgcc", __muldi3);
 

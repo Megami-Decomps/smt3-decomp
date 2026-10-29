@@ -957,3 +957,16 @@ a second signed base offset. The unsigned operand of `0x23` is interpreted
 through its signed 32-bit representation before the native 64-bit store.
 Unsupported operations call abort; no bounds checks or DWARF-spec corrections
 are introduced.
+
+
+## Building the public frame state
+
+`sdk/libgcc::libc_2D31E0` matches all 440 instruction bytes. It uses separate
+CIE metadata and internal-state locals, with natural sizes `0x14` and `0x480`.
+Failed frame lookup or CIE parsing returns null before writing the output.
+The CIE instruction program runs with no location pointer; the FDE program
+uses a mutable location and stops after crossing the queried PC or reaching
+the instruction end. The final structure assignment copies only the `0x478`
+public bytes and returns the caller's output pointer. The internal saved-state
+link is excluded. The compiler generates the native frame and copy loops
+from these actual records without manual padding or copy assembly.
