@@ -178,17 +178,17 @@ void mymdlAlphaSet(tagpipeBasic *pWork, u8 alpha)
     pWork = NULL;
 }
 
-void mymdlInit(tagpipeBasic *pWork, u16 sclx, f32 scly, f32 sclz, f32 sclw, f32 mdlSize)
+void mymdlInit(tagpipeBasic *pWork, f32 scaleX, f32 scaleY, f32 scaleZ, f32 scaleW, u16 count)
 {
     u16 i;
 
-    for (i = 0; i < sclx; i++) {
+    for (i = 0; i < count; i++) {
         memset(pWork, 0, 0x40);
         pWork->pos[3] = 1.0f;
-        pWork->scl[0] = scly;
-        pWork->scl[1] = sclz;
-        pWork->scl[2] = sclw;
-        pWork->scl[3] = mdlSize;
+        pWork->scl[0] = scaleX;
+        pWork->scl[1] = scaleY;
+        pWork->scl[2] = scaleZ;
+        pWork->scl[3] = scaleW;
         pWork++;
     }
 }

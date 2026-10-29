@@ -820,3 +820,4 @@ src/smt3/sdk/libgcc_floatdidf.c	redthing1	done	2026-10-28	1 SDK fn / 168 B	signe
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 288 B	execution argument packing with typed pointer header, scoped argument-loop cursor, signed count cap and TLB termination wrapper; owner 126 match, 0 differ
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 SDK fn / 360 B	stream command preserves optional three-byte mode update, fixed request extent and uncached reply before semaphore release; owner 26 match, 0 differ
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 360 B	frame-vector initialization with real inline allocation boundary, unsigned counts and native allocation-failure bounds; complete owner 29 match, 0 differ
+src/smt3/pipe/pipeObject.c	redthing1	done	2026-10-28	1 fn / 1328 B	model startup restores all twelve pool initializers, actual scale/count contract, native pool layout and regular completion call; both owners exact

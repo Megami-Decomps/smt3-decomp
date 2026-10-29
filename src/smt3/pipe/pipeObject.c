@@ -141,7 +141,105 @@ void workRelease(void)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", mymdlStartUp);
+typedef struct PIPE_EFF_t PIPE_EFF_t;
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
+extern void mymdlInit(tagpipeBasic *, f32, f32, f32, f32, u16 count);
+extern void InitModel(tagpipeBasic *, s32, s32, s32, f32, f32, f32);
+extern void mymdlSetMotion(tagpipeBasic *, f32);
+extern void dds3UnitObjectBasicSetOt(dds3Basic_t *, s32);
+extern u8 *WorkAreaPtr;
+extern tagpipeBasic *MyLine;
+extern void *makaWork;
+extern PIPE_EFF_t *pipe_CELL01_D3P, *pipe_DAMAGE01_D3P, *pipe_DAMAGE03_D3P;
+extern PIPE_EFF_t *pipe_BREAK01_D3P, *pipe_BREAK02_D3P, *pipe_ATTACK01_D3P;
+
+void mymdlStartUp(void)
+{
+    u8 *pool;
+    s32 i;
+
+    hWorkArea = sdfMemAllocDirect(0x5090);
+    WorkAreaPtr = sdfMemGetPtr(hWorkArea);
+    memset(WorkAreaPtr, 0, 0x5090);
+    pool = WorkAreaPtr;
+    ObjWork = (tagPipeObject *)pool;
+    pool += 0x12C0;
+    PipeCur = (tagpipeBasic *)pool; pool += 0x280;
+    PipeCur2 = (tagpipeBasic *)pool; pool += 0x280;
+    PipeLine = (tagpipeBasic *)pool; pool += 0x280;
+    basicMy = (tagpipeBasic *)pool; pool += 0x40;
+    MyLine = (tagpipeBasic *)pool; pool += 0x40;
+    PipeEMS = (tagpipeBasic *)pool; pool += 0xC80;
+    PipeEML = (tagpipeBasic *)pool; pool += 0xC80;
+    PipeRBOX = (tagpipeBasic *)pool; pool += 0x280;
+    PipeMaka1 = (tagpipeBasic *)pool; pool += 0xC80;
+    PipeZMaka = (tagpipeBasic *)pool; pool += 0x80;
+    PipeDMaka = (tagpipeBasic *)pool; pool += 0x100;
+    PipeDRBOX = (tagpipeBasic *)pool; pool += 0x80;
+    PartsWork = (tagpipeParts *)pool; pool += 0xF0;
+    MakaTex = (tagPipeTexture *)pool; pool += 0x40;
+    makaWork = pool; pool += 0x12C;
+    pipe_CELL01_D3P = (PIPE_EFF_t *)pool; pool += 0x1B8;
+    pipe_DAMAGE01_D3P = (PIPE_EFF_t *)pool; pool += 0x1B8;
+    pipe_DAMAGE03_D3P = (PIPE_EFF_t *)pool; pool += 0x1B8;
+    pipe_BREAK01_D3P = (PIPE_EFF_t *)pool; pool += 0x1B8;
+    pipe_BREAK02_D3P = (PIPE_EFF_t *)pool; pool += 0x1B8;
+    pipe_ATTACK01_D3P = (PIPE_EFF_t *)pool;
+
+    partsInit();
+
+    mymdlInit(basicMy, 1.0f, 1.0f, 1.0f, 1.0f, 1);
+    mymdlInit(MyLine, 1.0f, 1.0f, 1.0f, 1.0f, 1);
+    mymdlInit(PipeMaka1, 1.0f, 1.0f, 1.0f, 1.0f, 50);
+    mymdlInit(PipeZMaka, 1.0f, 1.0f, 1.0f, 1.0f, 2);
+    mymdlInit(PipeDMaka, 1.0f, 1.0f, 1.0f, 1.0f, 4);
+    mymdlInit(PipeDRBOX, 1.0f, 1.0f, 1.0f, 1.0f, 2);
+    mymdlInit(PipeLine, 1.0f, 1.0f, 1.0f, 1.0f, 10);
+    mymdlInit(PipeCur, 1.0f, 1.0f, 1.0f, 1.0f, 10);
+    mymdlInit(PipeCur2, 1.0f, 1.0f, 1.0f, 1.0f, 10);
+    mymdlInit(PipeRBOX, 1.0f, 1.0f, 1.0f, 1.0f, 10);
+    mymdlInit(PipeEMS, 1.0f, 1.0f, 1.0f, 1.0f, 50);
+    mymdlInit(PipeEML, 1.0f, 1.0f, 1.0f, 1.0f, 50);
+
+    InitModel(basicMy, 2, 16, 1, 1.0f, 1.0f, 1.0f);
+    InitModel(MyLine, 2, 32, 0, 1.0f, 1.0f, 1.0f);
+    dds3UnitObjectBasicSetOt(MyLine->base, 7);
+
+    for (i = 0; i < 50; i++) {
+        InitModel(&PipeMaka1[i], 2, 13, 0, 1.0f, 1.0f, 1.0f);
+        mymdlSetMotion(&PipeMaka1[i], -1.0f);
+    }
+    for (i = 0; i < 2; i++) {
+        InitModel(&PipeZMaka[i], 2, 14, 0, 1.0f, 1.0f, 1.0f);
+        mymdlSetMotion(&PipeZMaka[i], -1.0f);
+    }
+    for (i = 0; i < 4; i++) {
+        InitModel(&PipeDMaka[i], 2, 21, 0, 1.0f, 1.0f, 1.0f);
+    }
+    for (i = 0; i < 2; i++) {
+        InitModel(&PipeDRBOX[i], 2, 33, 0, 1.0f, 1.0f, 1.0f);
+    }
+    for (i = 0; i < 10; i++) {
+        InitModel(&PipeLine[i], 2, 8, 0, 1.0f, 1.0f, 1.0f);
+        InitModel(&PipeCur[i], 2, 10, 0, 1.0f, 1.0f, 1.0f);
+        InitModel(&PipeCur2[i], 2, 9, 0, 1.0f, 1.0f, 1.0f);
+    }
+    for (i = 0; i < 10; i++) {
+        InitModel(&PipeRBOX[i], 2, 15, -1, 1.0f, 1.0f, 1.0f);
+    }
+    for (i = 0; i < 50; i++) {
+        InitModel(&PipeEMS[i], 2, 12, -1, 1.0f, 1.0f, 1.0f);
+    }
+    for (i = 0; i < 50; i++) {
+        InitModel(&PipeEML[i], 2, 11, -1, 1.0f, 1.0f, 1.0f);
+    }
+    Initmymdl();
+    /* End the consumed initialization cursor, as Initmymdl does with mdlSize.
+     * The reset is dead; it preserves the native regular call and epilogue. */
+    i = 0;
+}
+
 
 void Initmymdl(void)
 {
