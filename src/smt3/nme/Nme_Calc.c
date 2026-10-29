@@ -3,13 +3,7 @@
 #include "nme.h"
 #include "font.h"
 
-/* Name-entry work is 0x51C8 bytes; its sequence flag is the first byte. */
-typedef struct {
-    u8 sequenceFlags;
-    u8 reserved01[0x51C7];
-} nmeCalcWork_t;
-
-extern nmeCalcWork_t *D_00552024;
+extern nmeWork_t *D_00552024;
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern s32 dds3FadeCheck(void);
 extern void cmpUpdateTerminate(void *work);
@@ -35,7 +29,7 @@ s32 nmeCalc(dds3ProcessID_t *id)
     if (dds3FadeCheck() != 0) {
         return 0;
     }
-    if (D_00552024->sequenceFlags & 0x10) {
+    if (D_00552024->sequence.flag & 0x10) {
         cmpUpdateTerminate(D_00552024);
         return -1;
     }
