@@ -206,6 +206,23 @@ def splice(path, block):
         if BEGIN in old and END in old:
             head = old[: old.index(BEGIN)]
             tail = old[old.index(END) + 1 :]
+    # Curated names own their addresses. Keeping the IDB's old name as well
+    # can reuse an identifier that was deliberately reassigned to its correct
+    # function, such as a conversion name on a packing helper.
+    symbol = re.compile(r"^(\w+) = 0x([0-9A-Fa-f]+);(.*)$")
+    curated = {int(match[2], 16) for line in head + tail
+               if (match := symbol.match(line))}
+    rows = []
+    for line in block:
+        match = symbol.match(line)
+        if not match or int(match[2], 16) in curated:
+            continue
+        kind = re.search(r"\btype:(\w+)", match[3])
+        size = re.search(r"\bsize:(0x[0-9A-Fa-f]+)", match[3])
+        rows.append(Symbol(int(match[2], 16), match[1],
+                           kind[1] if kind else None,
+                           int(size[1], 16) if size else 0))
+    block = render(rows)
     return "\n".join(head + block + tail) + "\n"
 
 
