@@ -6861,7 +6861,72 @@ void cmpDrawListItemText(s32 x, s32 y, s32 priority, u8 rowHeight,
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListItemText);
 #endif
 
+#ifdef NON_MATCHING
+void cmpDrawListFrame(s32 x, s32 y, s32 unusedZ, s32 rowHeight, s8 rowCount,
+                      s32 phase, s32 unusedOt)
+{
+    s32 colors[4];
+    s32 blinkColor;
+    s32 phaseIsEarly;
+    s32 xOffset;
+    s32 drawX;
+    u32 offset = 0;
+    s32 i;
+    s32 rowColor;
+    f32 rowScale;
+
+    blinkColor = cmpCursorBlinkColor(phase);
+    phaseIsEarly = phase < 0x101;
+    colors[0] = cmpCursorFadeChannel(blinkColor, phase, 0);
+    colors[1] = colors[0];
+    colors[2] = colors[0];
+    colors[3] = colors[0];
+    if (phaseIsEarly != 0) {
+        xOffset = ((100 * (0x100 - phase)) >> 8) << 4;
+    } else {
+        xOffset = ((100 * (phase - 0x100)) >> 8) << 4;
+    }
+    drawX = x - xOffset;
+    fclDrawSpriteRes(drawX, y, 0x10, colors, 7, 7,
+                     D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(drawX, y, 0x10, colors, 7, 8,
+                     D_00345D88, fclSpriteTable, 0x47);
+    y += rowCount * rowHeight * 8;
+    fclDrawSpriteRes(drawX, y, 0x10, colors, 7, 9,
+                     D_00345D88, fclSpriteTable, 0x47);
+    fclDrawSpriteRes(drawX, y, 0x10, colors, 7, 10,
+                     D_00345D88, fclSpriteTable, 0x47);
+
+    if (rowCount <= 0) {
+        return;
+    }
+    rowScale = 1.5f;
+    for (i = 0; i < rowCount; i++) {
+        u32 rowPosition;
+        if (phaseIsEarly != 0) {
+            u32 scaled = offset * (u32)phase;
+            rowPosition = (u32)((s32)((f32)scaled * rowScale) >> 8);
+        } else {
+            rowPosition = (u32)(i * rowHeight);
+        }
+        if (rowPosition > offset) {
+            rowPosition = offset;
+        }
+        rowColor = cmpCursorFadeChannel(blinkColor, phase, i);
+        colors[0] = rowColor;
+        colors[1] = rowColor;
+        colors[2] = rowColor;
+        colors[3] = rowColor;
+        fclDrawSpriteSize(x, rowPosition << 3, 0x10, 0xA1, rowHeight,
+                          colors, 7, 5, D_00345D88, fclSpriteTable, 0x47);
+        fclDrawSpriteSize(x, rowPosition << 3, 0x10, 0x32, rowHeight,
+                          colors, 7, 6, D_00345D88, fclSpriteTable, 0x47);
+        offset += rowHeight;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListFrame);
+#endif
 
 s32 cmpGetBlinkOffset(s32 kind, cmpPanelEff_t *eff)
 {
