@@ -71,3 +71,27 @@ src/smt3/newbattle/nbCameraStartEnd.c --func nbCameraState_Start_Animation
 --sched --alloc --no-dumps --out <output>`. The control moves element 1's
 `step` assignment before the timing globals and element 0's assignment after
 the state store, then clears element 1's `t` last.
+
+### Reload work, then capture the call argument before the store
+
+`pb/pbDraw::pbInitMapBaseDraw` matches all 196 bytes with two ordinary
+post-clear snapshots. Keep the allocation in a `void *` local for the 12-byte
+`memset`, then reload the actual typed work pointer through `panel->data.mat`.
+Capture `panel->id` before writing `mapWork->value = sw`, and pass that saved
+ID to `dds3SetProcessData`. The work value is at offset 4 in the existing
+three-word work record. Both snapshots preserve the native reads after the
+clear and before the value store.
+
+The previous direct member-store/call form emitted the native size with three
+words in the wrong order. A qualified `cc1probe --sched --reorg --no-dumps`
+run on the complete promoted unit preserves hooked/unhooked output and plain
+compilation parity. Work reload UID 160 takes `$3`, process-ID load UID 163
+takes `$4`, and UID 179 copies the panel to `$5`. Reorg accepts value-store
+UID 166 as the delay instruction for call UID 180, producing the native
+`sw $18, 4($3)` there. The complete owner and its data match.
+No volatile access, extra store or register constraint is needed.
+
+Retain the full `D_00535CE8` process-name symbol through `INCLUDE_RODATA`.
+Retail owns 24 bytes there: the 16-byte name and two aligned empty strings
+occupying eight further zero bytes. Emitting only the name as a C string
+literal leaves those bytes without an owner.

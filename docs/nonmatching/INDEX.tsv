@@ -14,8 +14,7 @@ nbCameraHelperViewer_Draw	code_001C55F8	336 bytes	48 of 83 words match	docs/nonm
 moveBlock	code_001D1470	0x8C	30 of 31 words differ	docs/nonmatching/code_001D1470.md	5
 pbInitGameCamera	code_001D1470	0x94	26 of 38 words differ	docs/nonmatching/code_001D1470.md	28
 pbStartErrorDraw	code_001D1470	0xBC	2 of 47 words differ	docs/nonmatching/code_001D1470.md	48
-pbInitMapBaseDraw	code_001D1470	0xC4	3 of 49 words differ	docs/nonmatching/code_001D1470.md	79
-func_001D4EB0, func_001D4C08	code_001D1470	0x58 and 0x94	36 of 37 words match	docs/nonmatching/code_001D1470.md	101
+func_001D4EB0, func_001D4C08	code_001D1470	0x58 and 0x94	36 of 37 words match	docs/nonmatching/code_001D1470.md	79
 func_002429C0	code_0022C578	0x54	19 of 21 words match	docs/nonmatching/code_0022C578.md	5
 cmp_241A10	code_0022C578	0x74	19 of 28 words match	docs/nonmatching/code_0022C578.md	25
 cmpClearCursorSlots	code_0022C578	0x54	18 of 21 words differ	docs/nonmatching/code_0022C578.md	50
