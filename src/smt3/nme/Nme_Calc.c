@@ -60,8 +60,6 @@ void nmeDrawSymbolRow(s32 x, s32 y)
                      (s32 *)namelist_buttonAnim_end->textures, table, ot);
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameText);
-
 #ifdef NON_MATCHING
 extern const s8 D_00551698[3];
 extern s32 nmeGetCursorPos(nmeWork_t *work);
@@ -72,7 +70,77 @@ extern void frSetDrawPosition(frFontHandle_t *request, u32 x, u32 y);
 extern void frSetPriority(frFontHandle_t *request, u32 priority);
 extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
+extern s32 nmeGetInputMode(nmeWork_t *work);
+extern u8 frDisableMode(u8 flag);
+extern u8 frEnableMode(s32 flag);
 
+void nmeDrawNameText(s32 x, s32 y, s32 secondX, s32 secondY, u32 color, s32 mode)
+{
+    volatile s32 first = D_00551698[0];
+    volatile s32 second = D_00551698[1];
+    volatile s32 terminator = D_00551698[2];
+    u8 text[3];
+    s32 cursor, i;
+
+    text[0] = first;
+    text[1] = second;
+    text[2] = terminator;
+    cursor = nmeGetCursorPos(namelist_buttonAnim_end);
+    nmeDrawCharRow((x - 0x25) * 16, (y - 4) * 8);
+    for (i = 0; i < 8; i++) {
+        s32 sprite = 8;
+        if (mode == 0 && nmeGetInputMode(namelist_buttonAnim_end) == 0 && cursor == i) {
+            sprite = 9;
+        }
+        fclDrawSpriteRes(x * 16 + 0xF0 + i * 0x150, (y + 0x16) * 8,
+                         0, NULL, 0, sprite, (s32 *)namelist_buttonAnim_end->textures,
+                         &GBWK_2, 0x47);
+    }
+    for (i = 0; i < 8; i++) {
+        s32 sprite = 8;
+        if (mode == 0 && nmeGetInputMode(namelist_buttonAnim_end) == 1 && cursor == i) {
+            sprite = 9;
+        }
+        fclDrawSpriteRes(secondX * 16 + 0xF0 + i * 0x150, (secondY + 0x16) * 8,
+                         0, NULL, 0, sprite, (s32 *)namelist_buttonAnim_end->textures,
+                         &GBWK_2, 0x47);
+    }
+    cmpSetSkillListRows(0x18);
+    fclDrawSpriteRes((x - 0x13) * 16, (y + 9) * 8, 0, NULL, 0, 0x12,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    frDisableMode(1);
+    for (i = 0; i < namelist_buttonAnim_end->inputRowEnabled[0]; i++) {
+        frFontHandle_t *font;
+        text[0] = namelist_buttonAnim_end->inputChars[0][i][0];
+        text[1] = namelist_buttonAnim_end->inputChars[0][i][1];
+        font = frLinkFontString(text, 4, 0, 0, NULL);
+        frSetDrawPosition(font, x * 16 + 0xF0 + i * 0x150, y * 8);
+        frSetFontColor(font, color);
+        frSetPriority(font, 0);
+        func_001C7E38(font, 0, 0x47);
+        frDestroyFontRequestAfter(font);
+    }
+    fclDrawSpriteRes((secondX - 0x13) * 16, (secondY + 9) * 8, 0, NULL, 0, 0x11,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    for (i = 0; i < namelist_buttonAnim_end->inputRowEnabled[1]; i++) {
+        frFontHandle_t *font;
+        text[0] = namelist_buttonAnim_end->inputChars[1][i][0];
+        text[1] = namelist_buttonAnim_end->inputChars[1][i][1];
+        font = frLinkFontString(text, 4, 0, 0, NULL);
+        frSetDrawPosition(font, secondX * 16 + 0xF0 + i * 0x150, secondY * 8);
+        frSetFontColor(font, color);
+        frSetPriority(font, 0);
+        func_001C7E38(font, 0, 0x47);
+        frDestroyFontRequestAfter(font);
+    }
+    frEnableMode(1);
+    cmpSetSkillListRows(-1);
+}
+#else
+INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameText);
+#endif
+
+#ifdef NON_MATCHING
 void nmeDrawNameString(s32 x, s32 y, u32 color, s32 mode)
 {
     volatile s32 first = D_00551698[0];
