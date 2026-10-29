@@ -377,9 +377,7 @@ member effPCPHamaCardScatterPart_tag.unk20
 member effPCPHamaCardScatterPart_tag.unk24
 member effPCPThunderSpherePolyLowParam_t.unknown00
 member effPCPThunderSpherePolyLowParam_t.unknown20
-member effPCP_PBCamera_tag.unk58
 member effPCP_PBCamera_tag.unk59
-member effPCP_PBCamera_tag.unk5C
 member effPacketDrawBank_t.unk0000
 member effPacketDrawBank_t.unk1808
 member effPacketDrawBank_t.unk1818

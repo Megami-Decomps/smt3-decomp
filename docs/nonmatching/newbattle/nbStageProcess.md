@@ -17,30 +17,6 @@ Ruled out: `data->orderindex` used directly in the loop rather than an `s8`
 local; an `s32` local, which drops the `sll 24`/`sra 24` pair retail has; and
 a `do`/`while` on `data->order[data->orderindex] < 0`.
 
-## DispComm1PanelComm (newbattle/nbStageProcess, 0xE0)
-
-53 of 56 words match, at the exact 224-byte size.
-
-The guard is `if (no <= 0x8003) { if (no >= 0x8000) return; }` over an `s32`
-local holding the `u16` parameter, which is what gives retail's two separate
-signed `slt`s rather than the subtract plus one `sltiu` that an `&&` or `||`
-range chain folds to, and what stops `shorten_compare` turning the compares
-unsigned.
-
-The three remaining words are the lower bound's encoding. Retail materialises
-0x8000 and tests `slt no, reg` with a `beqz`, the inverted-branch form of
-`LT`. ee-gcc 2.96's `fold` rewrites every spelling of `< 0x8000` and
-`>= 0x8000` into `> 0x7FFF` before the MIPS backend sees it, so the compare
-comes out as `li 0x7FFF`, `slt reg, no`, `bnez`: same test, three words off.
-
-Ruled out: both nesting orders; `||` of the complement and `&&` of the range,
-which fold; a `goto` into the `if` body so the draw block is the fallthrough;
-an `else return`; `!(no < 0x8000)`; `no <= 0x7FFF`; `no > 0x7FFF` with an
-early return; an explicit `s32` local holding the comparison result, which
-adds an `xori`; `(s32)` casts on either operand; and two distinct `s32` locals
-for the two tests, which does defeat the range fold but leaves the same
-encoding.
-
 ## CheckSenseiNego (newbattle/nbStageProcess, 0x130)
 
 57 of 74 words differ, 296 bytes against the native 300.
@@ -93,31 +69,6 @@ Ruled out: early `return 0` per arm instead of the `goto`; no `default` arm;
 an `s32`, `u16` and `u32` local for the switch value; and swapping the two
 case bodies' source order.
 
-## DispCommCursor (newbattle/nbStageProcess, 0x184)
-
-29 of 97 words differ, at the exact 388-byte size and with the same instruction
-sequence.
-
-Two register copies retail keeps are what the structure hinges on, and both
-are reproduced: the alpha `if` has to come first in the source, which makes
-`ox` a global pseudo and emits `daddu $20, $4, $0` in the entry block, and
-`ox` has to be reused for the left edge of both quads (`ox = xb + 0x7000;`
-then `ox = x1;` between the calls), which is where the second
-`daddu $20, $21, $0` comes from.
-
-What is left is a three-way register rotation: retail has `ox` in `$20`, `x1`
-in `$21` and `oy` in `$22` with `y0` sharing `oy`'s register, while the draft
-has `oy` in `$17` with `y1` sharing it, `ox` in `$21` and `x1` in `$22`. Both
-spend nine saved registers.
-
-Ruled out: every spelling that makes `y0` reuse `oy` (`yb = oy << 3;
-oy = yb + 0x7900; yb += 0x7998;` and three variants), all of which make gcse
-hoist the whole y chain into the entry block ahead of
-`dds3FontReqAllocDrawTag` and cost 27 more words; both source orders of the
-two y values; a separate local for the depth `-1`; a named local for the
-second quad's right edge; an `x` local copied from `ox`; computing `ox` after
-the `if`; and all declaration orders of the locals, which change nothing.
-
 ## nbDrawKoukaSprite (newbattle/nbStageProcess, 0x108)
 
 24 of 66 words differ, at the exact 264-byte size and with the same instruction
@@ -144,29 +95,6 @@ fused into one condition; and four spellings of the draw loop (`for (n = n - 1;
 ...)`, `for (n--; ...)`, `while (--n >= 0)`, a separate index local, and an
 `if (n > 0)` wrapping a `do`/`while`), none of which keep the decrement out of
 the delay slots.
-
-## AnimeCommandList (newbattle/nbStageProcess, 0x18C)
-
-97 of 99 words match, at the exact 396-byte size and with the same instruction
-multiset.
-
-The four flag arms (`0x20` on `helpa`, `1` and `2` on `alpha`, `8` on `ox`) are
-exact, including the `movn`/`movz` clamps and the `(s32)(ox * 0.5f)` step with
-its `d == 0 ? -1 : d` fixup.
-
-The two remaining words are the order of the two loads that open the `0x4` arm.
-Retail loads the `0.01f` literal first and `smritu` second; every source form
-tried loads `smritu` first, because gcc expands the compare's left operand
-first and then rematerialises the constant at the compare.
-
-Ruled out: `0.01f > fabsf(...)` and `!(fabsf(...) >= lim)`, both of which
-`fold` rewrites back; a block-local and a function-local `f32 lim = 0.01f`,
-which gcc rematerialises (the function-local form also hoists the load into the
-entry block and costs 95 words); `f32 a = fabsf(s->smritu)` as a separate
-statement; an `f32 ritu` local for the field; both source orders of the
-then-arm's two stores; and `extern f32 D_0054E500`/`D_0054E504` globals in
-place of the literals, which are MEMs rather than constants and get hoisted
-into the `beqz`'s delay slot, where retail has a `nop` (19 words).
 
 ## RunSake (newbattle/nbStageProcess, 0x104)
 

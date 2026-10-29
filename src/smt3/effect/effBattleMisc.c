@@ -376,7 +376,98 @@ f32 effBTLModelGroupGetSphere2(u32 group) {
     return effBTLModelGroupGetSphereExp(group, 1);
 }
 
+/* NON_MATCHING: 6 of 156 words differ in the final midpoint calculation. */
+#ifdef NON_MATCHING
+f32 effBTLModelGroupGetSphereExp(u32 group, u32 model) {
+    nbFormation_t *form;
+    sdfVector4_t center;
+    f32 radiusMax, maxX, minX, maxZ, minZ, maxHeight;
+    s32 first = 1;
+    s32 i;
+    /* Per-model radius, then the combined group radius after the scan. */
+    f32 radius;
+
+    radiusMax = 0.0f;
+    maxZ = radiusMax;
+    minZ = radiusMax;
+    form = nbGetMainProcessData()->form;
+    maxHeight = radiusMax;
+    maxX = radiusMax;
+    minX = radiusMax;
+    for (i = 31; i >= 0; i--, form++) {
+        f32 xPlus, xMinus, zPlus, zMinus;
+        f32 height;
+
+        if ((form->stat & group) == 0 || (form->stat & 1) == 0 ||
+            (model != 0 && (form->stat & 2) == 0)) {
+            continue;
+        }
+        effBTLModelGetSphereCenter(form);
+        SDF_VU0_STOREVECTOR(&center);
+
+        radius = form->r * form->scl;
+        xPlus = center.x + radius;
+        xMinus = center.x - radius;
+        zPlus = center.z + radius;
+        zMinus = center.z - radius;
+        height = form->h * form->scl * 0.5f - center.y;
+        if (first) {
+            radiusMax = radius;
+            if (xMinus < xPlus) {
+                maxX = xPlus;
+                minX = xMinus;
+            } else {
+                maxX = xMinus;
+                minX = xPlus;
+            }
+            if (zMinus < zPlus) {
+                maxZ = zPlus;
+                minZ = zMinus;
+            } else {
+                maxZ = zMinus;
+                minZ = zPlus;
+            }
+            maxHeight = height;
+            first = 0;
+        } else {
+            if (radiusMax < radius) radiusMax = radius;
+            if (maxX < xPlus) maxX = xPlus;
+            if (xPlus < minX) minX = xPlus;
+            if (maxX < xMinus) maxX = xMinus;
+            if (xMinus < minX) minX = xMinus;
+            if (maxZ < zPlus) maxZ = zPlus;
+            if (zPlus < minZ) minZ = zPlus;
+            if (maxZ < zMinus) maxZ = zMinus;
+            if (zMinus < minZ) minZ = zMinus;
+            if (maxHeight < height) maxHeight = height;
+        }
+    }
+
+    {
+        f32 xExtent, zExtent, heightExtent;
+        f32 padding;
+
+        center.w = 0.0f;
+        xExtent = (maxX - minX) * 0.5f;
+        zExtent = (maxZ - minZ) * 0.5f;
+        heightExtent = maxHeight * 0.5f;
+        center.z = (maxZ + minZ) * 0.5f;
+        center.x = (maxX + minX) * 0.5f;
+        center.y = -maxHeight * 0.5f;
+        if (zExtent < xExtent) {
+            radius = heightExtent < xExtent ? xExtent : heightExtent;
+        } else {
+            radius = heightExtent < zExtent ? zExtent : heightExtent;
+        }
+        padding = radiusMax * 0.25f;
+        radius += padding;
+        SDF_VU0_LOADVECTOR(&center);
+        return radius;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphereExp);
+#endif
 
 /* Returns world-space radius in f0 and the selected midpoint in vf10. */
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetVectorSphere);

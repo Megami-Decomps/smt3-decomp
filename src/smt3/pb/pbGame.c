@@ -215,9 +215,7 @@ extern u32 RotateBit(u32 val, s32 loop);
 
 extern void pbRoundCamera(s32 dir);
 
-typedef struct { s16 x, y; } pbCursorPos_t;
-
-extern pbCursorPos_t D_00551EC4;
+extern s16 D_00551EC4, D_00551EC6;
 
 extern sdfVector4_t D_0056CDD0[2];
 
@@ -229,7 +227,7 @@ extern void pbRotateXCamera(f32 angle);
 
 extern void pbRotateYCamera(f32 angle);
 
-extern u8 pbGetKeyAction(s32 press);
+extern u8 pbGetKeyAction(u8 press);
 
 extern void dds3SetQuake(s32 frame, s32 range);
 
@@ -251,7 +249,7 @@ extern s32 game(dds3ProcessID_t *id);
 
 extern s32 roundAutoCamera(dds3ProcessID_t *id);
 
-extern s32 pbGetKeyMode(void);
+extern u8 pbGetKeyMode(void);
 
 extern char D_00535F08[];
 
@@ -279,7 +277,7 @@ extern s32 moveBlock(dds3ProcessID_t *id);
 
 extern void deleteMoveBlock(dds3ProcessID_t *id);
 
-extern s32 p2sdPlaySE(s32 id, s32 vol, s32 pan);
+extern void p2sdPlaySE(s32 id, s32 vol, s32 pan);
 
 extern u32 pbAddRecord_flor(pbProcHandle_t *p, pbGroupData_t *grp);
 
@@ -558,14 +556,12 @@ s32 gameKey0(void) {
     return ret;
 }
 
-/* NON_MATCHING: 150 of 168 words, 672 bytes against retail's 680; the cursor pair is one splat symbol where retail has two gp-addressed globals. */
-#ifdef NON_MATCHING
 s32 gameKey1(void) {
     s32 ret = -1;
     if (dds3PadButtonState[0x22] < 0) {
         p2sdPlaySE(0x340009, 0x7F, 0x3F);
         if (pbGameKeyState == 0) {
-            pbGetMyCharcterPos2(mychar[current_char], &D_00551EC4.x, &D_00551EC4.y);
+            pbGetMyCharcterPos2(mychar[current_char], &D_00551EC4, &D_00551EC6);
             SDF_VU0_COPYVECTOR(&D_0056CDD0[0], &aViewEye);
             SDF_VU0_COPYVECTOR(&D_0056CDD0[1], &aViewTarget);
             pbGameKeyState = 1;
@@ -594,21 +590,24 @@ s32 gameKey1(void) {
     }
     if (pbGameKeyState != 0) {
         u32 flags;
-        if ((u32)(D_00551EC4.x + pbKeyTable[ret][0]) < 20) {
-            D_00551EC4.x += pbKeyTable[ret][0];
+        if ((u32)(D_00551EC4 + pbKeyTable[ret][0]) < 20) {
+            D_00551EC4 += pbKeyTable[ret][0];
         }
-        if ((u32)(D_00551EC4.y + pbKeyTable[ret][1]) < 20) {
-            D_00551EC4.y += pbKeyTable[ret][1];
+        if ((u32)(D_00551EC6 + pbKeyTable[ret][1]) < 20) {
+            D_00551EC6 += pbKeyTable[ret][1];
         }
-        pbSetGameCamera4(D_00551EC4.x, D_00551EC4.y);
-        flags = D_00551EC4.y < 0x13;
-        if (D_00551EC4.x > 0) {
+        pbSetGameCamera4(D_00551EC4, D_00551EC6);
+        flags = 0;
+        if (D_00551EC6 < 0x13) {
+            flags |= 1;
+        }
+        if (D_00551EC4 > 0) {
             flags |= 2;
         }
-        if (D_00551EC4.y > 0) {
+        if (D_00551EC6 > 0) {
             flags |= 4;
         }
-        if (D_00551EC4.x < 0x13) {
+        if (D_00551EC4 < 0x13) {
             flags |= 8;
         }
         ret = -1;
@@ -623,9 +622,6 @@ s32 gameKey1(void) {
     }
     return ret;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbGame", gameKey1);
-#endif
 
 u32 RotateBit(u32 val, s32 loop) {
     s32 i;
@@ -789,7 +785,7 @@ extern void pbClearRecord(pbProcHandle_t *panel);
 extern void pbNextCharacter(void);
 extern void func_001D2D00(pbProcHandle_t *panel, s32 arg);
 extern s32 getCharacterNum(void);
-extern s32 p2sdPlaySE(s32 id, s32 volume, s32 pan);
+extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 timer);
 extern pbProcHandle_t *pbGetMoveChar(void);
 extern pbProcHandle_t *moveC;

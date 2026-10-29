@@ -2,35 +2,6 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
-## gameKey1 (pb/pbGame, 0x2A8)
-
-150 of 168 words differ, 672 bytes against retail's 680. The whole body shape is
-there: the two `bgezl` pad tests, the map-cursor save and restore pair of
-`SDF_VU0_COPYVECTOR`s, the `(degree_mode ^ 2) | 1` toggle, the four-way key
-chain, the `movn` flag chain and the `else if` pair of `pbRoundCamera` calls.
-Almost every differing word is the same two-word shift repeated.
-
-The blocker is a data split, not a source shape. The cursor position is two
-`s16` globals that retail addresses off `$gp` one at a time: it passes
-`addiu $5, $28, %gp_rel(D_00551EC4)` and
-`addiu $6, $28, %gp_rel(D_00551EC4 + 2)` to `pbGetMyCharcterPos2`, and later
-reads each with its own `lh %gp_rel(...)($28)`. splat has only the one symbol
-`D_00551EC4` covering both halves, so any C spelling of the second half goes
-through the first one's address: gcc CSEs the taken address and emits
-`addiu $6, $5, 2` for the argument and `addiu $6, $28, 0` plus `lh 0($6)` for
-every later read, which is where the two words go. Splitting `D_00551EC4`
-into two symbols is what this needs.
-
-Ruled out: the pair as `s16 D_00551EC4[2]` with `&D_00551EC4[0]` and
-`&D_00551EC4[1]`; as a two-member struct with `&D_00551EC4.x` and
-`&D_00551EC4.y`; and the second address as `(s16 *)((u32)&D_00551EC4 + 2)`
-and `(s16 *)((u8 *)&D_00551EC4 + 2)`. All four emit the identical code.
-
-Confirmed on the way: `moveViewCamera` holds a `pbPanel_t *` (the draft sets
-its `flags` to 0x50000), `pbGameKeyState` is the `u8` at 0x0054F5F5, the flag
-word is built as `flags = y < 0x13;` then `|= 2`, `|= 4`, `|= 8` in that
-order, and `ret` is reset to -1 inside the cursor block.
-
 ## deleteMoveBlock (pb/pbGame, 0x144)
 
 46 of 77 words differ, 308 bytes against retail's 324. The first 31 words, both

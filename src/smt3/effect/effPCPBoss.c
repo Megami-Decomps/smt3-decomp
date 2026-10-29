@@ -473,11 +473,11 @@ typedef struct effPCP_PBCamera_tag
 {
     u8 matrix[0x40];
     u8 position[0x10];
-    s32 param;
-    s32 part;
-    u8 unk58;
+    s32 life;
+    effPartHandle_t *part;
+    u8 cameraOverride;
     u8 unk59[3];
-    s32 unk5C;
+    s32 frame;
 } effPCP_PBCamera_tag;
 
 typedef struct effPCPDANTE_ShowTime_Param_t
@@ -575,10 +575,10 @@ extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 extern u8 D_002F5C20[], D_002F5C30[];
 extern u8 effPCPBossTexRect[];
 extern u8 D_0031FF80[];
-extern void dds3EffectPartSetRotateMatrix(s32 hEffPart, const void *pMatrix);
-extern void dds3EffectPartSetPosition(s32 hEffPart, const void *pPos);
-extern void dds3EffectPartSetColor(s32 hEffPart, u32 abgr);
-extern void dds3EffectPartDraw(s32 hEffPart);
+extern void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, const void *pMatrix);
+extern void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, const void *pPos);
+extern void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 abgr);
+extern void dds3EffectPartDraw(effPartHandle_t *hEffPart);
 s32 effPCPDANTE_Thunder_ProcessDraw(void);
 void effPCPDANTE_Thunder_SetPosition(effPCPDANTE_Thunder_tag *hData, const void *pPos);
 void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_tag *hData, const void *pRot);
@@ -3313,9 +3313,9 @@ effPCP_PBCamera_tag *effPCP_PBCamera_Create(effPCP_PBCamera_Param_t *pParam, voi
     effPCP_PBCamera_tag *work = sdfChipAllocDirect(0x60);
     s32 value = pParam->life;
 
-    work->unk5C = 0;
-    work->param = value;
-    work->unk58 = 0;
+    work->frame = 0;
+    work->life = value;
+    work->cameraOverride = 0;
     if (pPB != NULL) {
         work->part = dds3EffectPartCreate(3, pPB);
     }
@@ -3333,7 +3333,7 @@ void effPCP_PBCamera_CreatePCF(void *parameterTable) {
 
 effPCP_PBCamera_tag *effPCP_PBCamera_Copy(effPCP_PBCamera_tag *hData, s32 bPos, s32 tbldata)
 {
-    effPCP_PBCamera_tag *work = effPCP_PBCamera_Create((effPCP_PBCamera_Param_t *)&hData->param, NULL);
+    effPCP_PBCamera_tag *work = effPCP_PBCamera_Create((effPCP_PBCamera_Param_t *)&hData->life, NULL);
 
     work->part = dds3EffectPartCopy(hData->part);
     return work;
@@ -3345,7 +3345,123 @@ void effPCP_PBCamera_Delete(effPCP_PBCamera_tag *hData)
     sdfChipFreeDirect(hData);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_Run);
+extern s32 effBTLSkillGetID(void);
+extern void mdlGetPosition(mdlObj_t *model);
+extern void effPCP_PBCamera_SetPosition(effPCP_PBCamera_tag *work, const void *position);
+extern s32 nbCameraDANTE_KAGIRI_Set(s32 frame);
+extern void nbCameraSetState(u16 state);
+extern void nbCameraHelperModelSetSub(mdlObj_t *model, u32 from, u32 to);
+
+/* nbCameraProcess camera prefix; D_00320E64 is its fovy at +0x24. */
+typedef struct effPCPBossCamera_t {
+    sdfVector4_t target;
+    sdfVector4_t direction;
+    f32 distance;
+    f32 fovy;
+    u32 state_change;
+    u32 state;
+} effPCPBossCamera_t;
+extern effPCPBossCamera_t pNbCamera;
+
+void effPCP_PBCamera_Run(effPCP_PBCamera_tag *work)
+{
+    sdfVector4_t position;
+    u32 skill;
+    effPCPBossUnit_t *invoke;
+    effPCPBossUnit_t *target;
+    u32 from;
+    u32 to;
+    mdlObj_t *model;
+
+    if (work->life > work->frame) {
+        from = 0;
+        to = 1;
+        target = NULL;
+        if (effBTLSkillCheckRun()) {
+            skill = effBTLSkillGetID();
+            invoke = effBTLSkillGetInvokeFormation();
+            target = effBTLSkillGetTargetFormation(0);
+            if ((invoke->flags & 3) == 3) {
+                mdlGetPosition((mdlObj_t *)invoke->hunit->owner);
+                SDF_VU0_STOREVECTOR(&position);
+                effPCP_PBCamera_SetPosition(work, &position);
+            }
+        } else {
+            skill = 0;
+        }
+        if (work->frame > 0) {
+            if (pNbCamera.state == 10 || pNbCamera.state_change == 10) {
+                return;
+            }
+        }
+        dds3EffectPartSetRotateMatrix(work->part, work);
+        dds3EffectPartSetPosition(work->part, work->position);
+        dds3EffectPartDraw(work->part);
+        if (target != NULL) {
+            switch (skill) {
+            case 0x108:
+                if (effBTLModelGetID(target) == 0x158) {
+                    from = 2;
+                    to = 3;
+                }
+                break;
+            case 0x10D:
+                switch ((u32)effBTLModelGetID(target)) {
+                case 0x100:
+                case 0x102:
+                case 0x108:
+                case 0x109:
+                case 0x123:
+                case 0x125:
+                case 0x158:
+                    from = 2;
+                    to = 3;
+                    break;
+                }
+                break;
+            case 0x10B:
+                switch ((u32)effBTLModelGetID(target)) {
+                case 0x102:
+                case 0x123:
+                case 0x158:
+                    nbCameraDANTE_KAGIRI_Set(work->frame);
+                    work->cameraOverride = 1;
+                    break;
+                }
+                break;
+            case 0x107:
+                switch ((u32)effBTLModelGetID(target)) {
+                case 0x108:
+                case 0x125:
+                case 0x158:
+                    work->cameraOverride = 1;
+                    work->frame++;
+                    break;
+                }
+                break;
+            }
+        }
+        if (work->cameraOverride == 0) {
+            model = dds3EffectPartGetHandle(work->part);
+            if (work->frame == 0) {
+                nbCameraSetState(0x17);
+            }
+            nbCameraHelperModelSetSub(model, from, to);
+            switch (skill) {
+            case 0x107:
+            case 0x108:
+                pNbCamera.fovy = 0x1.becde20000000p-1f;
+                break;
+            case 0x10B:
+            case 0x10D:
+                pNbCamera.fovy = 0x1.eb7c120000000p-1f;
+                break;
+            }
+        }
+        work->frame++;
+    }
+}
+
 
 void effPCP_PBCamera_SetPosition(effPCP_PBCamera_tag *hData, const void *pPos)
 {

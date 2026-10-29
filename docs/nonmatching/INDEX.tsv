@@ -58,8 +58,9 @@ dds3BillboardTagLink	effect/billManager	0x49C	16 of 271 words match	docs/nonmatc
 dds3Billboard_P2AAnimDraw	effect/billManager	0x1D0	1 of 174 words differing	docs/nonmatching/effect/billManager.md	85
 effBTLFieldColorON	effect/effBattle	0x3C4	Thirteen of 241 words differ	docs/nonmatching/effect/effBattle.md	5
 effBTLCutDraw	effect/effBattle	0x420	Eighty-eight of 263 words differ	docs/nonmatching/effect/effBattle.md	56
-effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/nonmatching/effect/effBattleMisc.md	5
-effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	4 of 146 words differ	docs/nonmatching/effect/effBattleMisc.md	36
+effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270	6 of 156 words differ	docs/nonmatching/effect/effBattleMisc.md	5
+effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/nonmatching/effect/effBattleMisc.md	41
+effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	4 of 146 words differ	docs/nonmatching/effect/effBattleMisc.md	72
 dds3EffectBlur_AlphaMultiParmSet	effect/effBlur_Filter	0xB4	Twenty-six of forty-five words differ	docs/nonmatching/effect/effBlur_Filter.md	5
 dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/nonmatching/effect/effBlur_Filter.md	39
 dds3EffectRippleBlurDraw	effect/effBlur_Filter	0x1E8		docs/nonmatching/effect/effBlur_Filter.md	74
@@ -162,6 +163,10 @@ nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	56 of 58 words match	docs
 nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	29 of 30 words match	docs/nonmatching/newbattle/nbCameraSkill.md	28
 nbCameraShot_All_Set2	newbattle/nbCameraSkill	0x248	16 of 125 words match	docs/nonmatching/newbattle/nbCameraSkill.md	51
 nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	117 of 137 words match	docs/nonmatching/newbattle/nbCameraSkill.md	88
+DispComm1PanelComm	newbattle/nbCommSelProcess	0xE0	53 of 56 words match	docs/nonmatching/newbattle/nbCommSelProcess.md	5
+DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/nonmatching/newbattle/nbCommSelProcess.md	29
+AnimeCommandList	newbattle/nbCommSelProcess	0x18C	97 of 99 words match	docs/nonmatching/newbattle/nbCommSelProcess.md	54
+DispCommandPanel (0x33C)				docs/nonmatching/newbattle/nbCommSelProcess.md	77
 Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/nonmatching/newbattle/nbE911.md	5
 nbApplyBadCurse	newbattle/nbEncProcess	0x174	80 of 93 words match	docs/nonmatching/newbattle/nbEncProcess.md	5
 nbGetEncountJoken	newbattle/nbEncount	0x174	24 of 66 words match	docs/nonmatching/newbattle/nbEncount.md	5
@@ -188,25 +193,21 @@ nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/nonmat
 nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	371
 nbPanelAuto (0x3A0)				docs/nonmatching/newbattle/nbPanelProcess.md	5
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	5
-DispComm1PanelComm	newbattle/nbStageProcess	0xE0	53 of 56 words match	docs/nonmatching/newbattle/nbStageProcess.md	20
-CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/nonmatching/newbattle/nbStageProcess.md	44
-CheckAction_STKSEL	newbattle/nbStageProcess	0xE8	9 of 58 words differ	docs/nonmatching/newbattle/nbStageProcess.md	63
-CheckAction_ESCAPE	newbattle/nbStageProcess	0xE4	9 of 57 words differ	docs/nonmatching/newbattle/nbStageProcess.md	80
-DispCommCursor	newbattle/nbStageProcess	0x184	29 of 97 words differ	docs/nonmatching/newbattle/nbStageProcess.md	96
-nbDrawKoukaSprite	newbattle/nbStageProcess	0x108	24 of 66 words differ	docs/nonmatching/newbattle/nbStageProcess.md	121
-AnimeCommandList	newbattle/nbStageProcess	0x18C	97 of 99 words match	docs/nonmatching/newbattle/nbStageProcess.md	148
-RunSake	newbattle/nbStageProcess	0x104	45 of 65 words match	docs/nonmatching/newbattle/nbStageProcess.md	171
-CheckAction_TARSEL	newbattle/nbStageProcess	0x1CC	111 of 115 words match	docs/nonmatching/newbattle/nbStageProcess.md	200
-SetDamagePacket	newbattle/nbStageProcess	0x1E0	116 of 120 words match	docs/nonmatching/newbattle/nbStageProcess.md	224
-StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/nonmatching/newbattle/nbStageProcess.md	253
+CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/nonmatching/newbattle/nbStageProcess.md	20
+CheckAction_STKSEL	newbattle/nbStageProcess	0xE8	9 of 58 words differ	docs/nonmatching/newbattle/nbStageProcess.md	39
+CheckAction_ESCAPE	newbattle/nbStageProcess	0xE4	9 of 57 words differ	docs/nonmatching/newbattle/nbStageProcess.md	56
+nbDrawKoukaSprite	newbattle/nbStageProcess	0x108	24 of 66 words differ	docs/nonmatching/newbattle/nbStageProcess.md	72
+RunSake	newbattle/nbStageProcess	0x104	45 of 65 words match	docs/nonmatching/newbattle/nbStageProcess.md	99
+CheckAction_TARSEL	newbattle/nbStageProcess	0x1CC	111 of 115 words match	docs/nonmatching/newbattle/nbStageProcess.md	128
+SetDamagePacket	newbattle/nbStageProcess	0x1E0	116 of 120 words match	docs/nonmatching/newbattle/nbStageProcess.md	152
+StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/nonmatching/newbattle/nbStageProcess.md	181
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	138 of 152 words match	docs/nonmatching/newbattle/nbUnitProcess.md	5
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/nonmatching/newdata/datCalc.md	5
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/nonmatching/nme/Nme_Init.md	5
-gameKey1	pb/pbGame	0x2A8	150 of 168 words differ	docs/nonmatching/pb/pbGame.md	5
-deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame.md	34
-pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md	59
-roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/nonmatching/pb/pbGame.md	79
-pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/nonmatching/pb/pbGame.md	104
+deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame.md	5
+pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md	30
+roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/nonmatching/pb/pbGame.md	50
+pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/nonmatching/pb/pbGame.md	75
 pbRebuildOutline	pb/pbGameDraw	0x188	16 of 95 words match	docs/nonmatching/pb/pbGameDraw.md	5
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/nonmatching/pb/pbMCard.md	5
 pbEditInitProc	pb/pbMain	0x148	79 of 82 words match	docs/nonmatching/pb/pbMain.md	5

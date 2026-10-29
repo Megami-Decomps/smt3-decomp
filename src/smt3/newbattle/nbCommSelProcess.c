@@ -29,6 +29,11 @@ extern s32 sprintf(char *buf, const char *fmt, ...);
 
 extern s32 datGetSkillCost(datUnitWork_t *w, s32 nskill);
 
+extern void nbPnl_setOt(s32 ot);
+extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte,
+                           s32 ztst);
+extern void nbPnl_rsetAlpha(s32 mode);
+
 extern void DispCommCursor(s32 ox, s32 oy, s32 a);
 
 extern void DispSummonCursor(s32 ox, s32 oy, s32 a);
@@ -393,7 +398,7 @@ INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispComm1PanelComm);
 
 #endif
 
-void DispComm1PanelTalk(void) {
+void DispComm1PanelTalk(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col) {
 }
 
 void DispComm1PanelItem(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
@@ -499,7 +504,94 @@ void DispComm1PanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s
 
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispHelpPanel);
 
+extern void DispPanelSitaji(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 color);
+extern void DispHelpPanel(nbCommSelProcessData_t *s, u16 d, s32 x, s32 y, s32 oz, u32 color,
+                          s32 helpa);
+extern void DispComm1PanelSummon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz,
+                                 u32 color);
+
+extern void DispComm1PanelComm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy,
+                                s32 oz, u32 color);
+
+/* NON_MATCHING: 203 of 207 words match with the command-row C draft visible. */
+#ifdef NON_MATCHING
+void DispCommandPanel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 alpha)
+{
+    s32 color = ((u32)alpha << 24) | 0x808080;
+    s32 count;
+    s32 rowStep = 0;
+    s32 originalX = ox;
+    s32 helpX;
+    s32 helpY;
+    s32 originalY = oy;
+    s32 motion;
+    s32 i;
+
+    nbPnl_setOt(0x47);
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    DispPanelSitaji(s, type, originalX, originalY, color);
+    DispPanelCursor(s, type, originalX, originalY, color);
+    count = GetCommListCnt(s, type);
+    motion = s->smritu * 43.0f;
+
+    if ((u32)type < 6) {
+        switch (type) {
+        case 0:
+        case 1:
+        case 2:
+        case 4:
+        case 5:
+            rowStep = 0x15;
+            ox += 0x1B;
+            oy += 0x159;
+            break;
+        case 3:
+            rowStep = 0x2B;
+            ox += 0x21;
+            oy += motion + 0x12E;
+            break;
+        }
+    }
+
+    helpX = originalX + 0x1B;
+    helpY = originalY + 0x159;
+    for (i = s->drawlisty; i < s->drawlisty + count; i++) {
+        if (i < s->commcnt[type]) {
+            u16 entry = s->commlist[type][i];
+
+            if (i == s->drawcursor) {
+                if (s->stat == 2) {
+                    DispComm1PanelCursor(s, type, ox, oy, s->oz, color);
+                }
+            }
+            if (i == s->drawcursor) {
+                DispHelpPanel(s, entry, helpX, helpY, s->oz - 1, color, s->helpa);
+            }
+
+            switch (type) {
+            case 0:
+                DispComm1PanelComm(s, entry, ox, oy, s->oz, color);
+                break;
+            case 1:
+                DispComm1PanelTalk(s, entry, ox, oy, s->oz, color);
+                break;
+            case 2:
+                DispComm1PanelItem(s, entry, ox, oy, s->oz, color);
+                break;
+            case 3:
+                DispComm1PanelSummon(s, entry, ox, oy, s->oz, color);
+                break;
+            }
+            oy += rowStep;
+        }
+    }
+    DispPanelLabel(s, type, originalX, originalY, color);
+}
+
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispCommandPanel);
+#endif
 
 /* NON_MATCHING: 2 of 99 words differ (first at +0x12C). */
 
