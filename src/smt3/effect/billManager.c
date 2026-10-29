@@ -7,6 +7,7 @@
 #include "ps2asm.h"
 
 #include "billboard.h"
+#include "draw.h"
 
 typedef struct dds3P2APolygon_tag {
     f32 dir[4][4];
@@ -500,7 +501,135 @@ void dds3BillboardLinkOt(void) {
     dds3BillboardTag = NULL;
 }
 
+#ifdef NON_MATCHING
+extern f32 D_00317060[4];
+extern f32 dds3MultiBillboardTagParam[4];
+extern void sdfGrSetFrameMaskRGB(const u8 *env, void *packet, s32 context);
+extern sdfTexPacket_t *sdfTexGetPacketCtx2(sdfTexHandle_t *handle);
+extern s32 sdfTexGetPacketCtx2Length(sdfTexHandle_t *handle);
+
+void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
+{
+    f32 matrix[16] __attribute__((aligned(16)));
+    f32 direction[4];
+    f32 dot;
+    sdfPrimTransPacket_t *blend;
+    sdfBillBoardBatch_t *batch;
+    dds3BillResource_tag *child;
+    void *packet;
+    sdfTexPacket_t *texture;
+    s32 length, index;
+    f32 x, y, halfWidth, halfHeight, cosine, sine, cornerX, cornerY;
+
+    if (node->packetList == NULL) {
+        node->packetList = sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(node->packetList);
+        packet = sdfGrAllocPacketBuff(0x40);
+        sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameMaskSource, packet, 0);
+        sdfDrawTagLinkRefGif(node->packetList, (u32)packet);
+        blend = sdfGrAllocPacketBuff(0x40);
+        blend->elem.test.reg = 0x47;
+        blend->elem.alpha.data = 0x44;
+        blend->elem.alpha.reg = 0x42;
+        blend->header.dmaWords.tag = 3;
+        blend->header.dmaWords.vif = 0x5000000310000000ULL;
+        blend->header.giftag.parm = 0x1000000000008002ULL;
+        blend->header.giftag.regs = 0xE;
+        blend->elem.test.data = 0x51001;
+        sdfDrawTagLink(node->packetList, (u32)blend);
+        blend = sdfGrAllocPacketBuff(0x40);
+        blend->header.dmaWords.tag = 3;
+        blend->header.dmaWords.vif = 0x5000000310000000ULL;
+        blend->header.giftag.parm = 0x1000000000008002ULL;
+        blend->header.giftag.regs = 0xE;
+        blend->elem.test.data = 0x51001;
+        blend->elem.test.reg = 0x48;
+        switch (node->kind) {
+        case 1: blend->elem.alpha.data = 0x54; break;
+        case 2: blend->elem.alpha.data = 0x58; break;
+        case 3: blend->elem.alpha.data = 0x52; break;
+        }
+        blend->elem.alpha.reg = 0x43;
+        sdfDrawTagLink(node->packetList, (u32)blend);
+        packet = sdfGrAllocPacketBuff(0x20);
+        texture = sdfTexGetPacket(node->children[0]->hTex);
+        length = sdfTexGetPacketLength(node->children[0]->hTex);
+        sdf3DMakeDirectRefPacket(packet, (u32)texture, length);
+        sdfDrawTagLinkRef(node->packetList, (u32)packet);
+        packet = sdfGrAllocPacketBuff(0x20);
+        texture = sdfTexGetPacketCtx2(node->children[1]->hTex);
+        length = sdfTexGetPacketCtx2Length(node->children[1]->hTex);
+        sdf3DMakeDirectRefPacket(packet, (u32)texture, length);
+        sdfDrawTagLinkRef(node->packetList, (u32)packet);
+        packet = sdfGrAllocPacketBuff(0x38);
+        if (node->cameraFacingMode == 1) {
+            SDF_VU0_LOADVECTOR(aViewTarget);
+            SDF_VU0_LOADVECTOR_B(aViewEye);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_LOADVECTOR_B(D_00317060);
+            SDF_VU0_INNERPRODUCT(dot);
+            dds3MultiBillboardTagParam[1] = 1.0 - fabs(dot);
+            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED();
+            SDF_VU0_LOADIDENTITY();
+            SDF_VU0_LOADVECTOR_BARRIER(dds3MultiBillboardTagParam);
+            SDF_VU0_SCALE_XYZ();
+            SDF_VU0_STOREMATRIX(matrix);
+        } else {
+            SDF_VU0_STOREIDENTITY(matrix);
+        }
+        sdfBillBoardMakeTMPacket(packet, matrix);
+        sdfDrawTagLink(node->packetList, (u32)packet);
+        node->next = D_00551D78;
+        D_00551D78 = node;
+    }
+    child = node->children[0];
+    index = node->children[1]->batch->count;
+    batch = child->batch;
+    memcpy(&batch->uv[index], &child->uv, sizeof(child->uv));
+    batch->color[index] = node->colors[0];
+    child = node->children[1];
+    batch = child->batch;
+    memcpy(&batch->uv[index], &child->uv, sizeof(child->uv));
+    batch->color[index] = node->colors[1];
+    x = child->cx * obj->childScaleX;
+    y = child->cy * obj->childScaleY;
+    halfWidth = child->width * obj->childScaleX;
+    halfHeight = child->height * obj->childScaleY;
+    if (obj->rot == 0.0f) {
+        batch->offset[index][0] = x - halfWidth;
+        batch->offset[index][1] = y - halfHeight;
+        batch->offset[index][2] = x + halfWidth;
+        batch->offset[index][3] = y - halfHeight;
+        batch->offset[index][4] = x + halfWidth;
+        batch->offset[index][5] = y + halfHeight;
+        batch->offset[index][6] = x - halfWidth;
+        batch->offset[index][7] = y + halfHeight;
+    } else {
+        cosine = sdfCos(obj->rot);
+        sine = sdfSin(obj->rot);
+        cornerX = x - halfWidth;
+        cornerY = y - halfHeight;
+        batch->offset[index][0] = cornerX * cosine - cornerY * sine;
+        batch->offset[index][1] = cornerX * sine + cornerY * cosine;
+        cornerX = x + halfWidth;
+        batch->offset[index][2] = cornerX * cosine - cornerY * sine;
+        batch->offset[index][3] = cornerX * sine + cornerY * cosine;
+        cornerY = y + halfHeight;
+        batch->offset[index][4] = cornerX * cosine - cornerY * sine;
+        batch->offset[index][5] = cornerX * sine + cornerY * cosine;
+        cornerX = x - halfWidth;
+        batch->offset[index][6] = cornerX * cosine - cornerY * sine;
+        batch->offset[index][7] = cornerX * sine + cornerY * cosine;
+    }
+    SDF_VU0_COPYVECTOR(&batch->centre[index], obj->pos);
+    batch->count = (s32)((u32)batch->count + 1);
+    if (batch->count == 7) dds3MultiBillboardPktLink(node);
+}
+#else
 INCLUDE_ASM(const s32, "effect/billManager", dds3MultiBillboardTagLink);
+#endif
 
 void dds3MultiBillboardPktLink(billRenderPair_t *hResource) {
     u32 colors[8][2];
