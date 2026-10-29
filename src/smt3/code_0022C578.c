@@ -5235,7 +5235,39 @@ void cmpDrawStatusIcons(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusName);
 
+extern char *datExplainTable[];
+extern u32 strlen(const char *text);
+
+#ifdef NON_MATCHING
+void cmpDrawStatusGauge(s32 x, s32 y, s8 index, s32 intensity)
+{
+    s8 length = strlen(datExplainTable[index + 0x40]) >> 1;
+    s32 width = length * 20;
+    s32 height = 20;
+    s32 delta = (s32)(0x100U - (u32)intensity);
+    s32 colors[4];
+    s32 color;
+
+    x = (x + 0x10) * 16;
+    y = (y + 0x43) * 8;
+    if (intensity < 0x100) {
+        s32 half = delta / 2;
+
+        width += delta;
+        height += delta;
+        x -= half * 16;
+        y -= half * 8;
+    }
+    color = fclBlendColor(0x80808080, 0x80808000, intensity);
+    colors[0] = colors[1] = colors[2] = colors[3] = color;
+    if (intensity > 0) {
+        fclDrawSpriteSize(x, y, 0, width, height, colors, 6, 1,
+                          D_00345D88, fclSpriteTable, 0x47);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusGauge);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusRow);
 
