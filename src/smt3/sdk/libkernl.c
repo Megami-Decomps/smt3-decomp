@@ -1144,11 +1144,34 @@ INCLUDE_ASM(const s32, "sdk/libkernl", get_iob);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceFs_Rcv_Intr);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceFsSemInit);
+extern s32 D_0052C344 __attribute__((section(".data")));
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceFsWaitS);
+void _sceFsSemInit(void)
+{
+    rpcSemaParam param;
+    if (D_0052C344 == -1) {
+        /* Only these descriptor fields are initialized by the native helper. */
+        param.initCount = 1;
+        param.maxCount = 1;
+        param.option = 0;
+        D_0052C344 = CreateSema(&param);
+    }
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceFsSigSema);
+s32 _sceFsWaitS(void)
+{
+    _sceFsSemInit();
+    WaitSema(D_0052C344);
+    return 0;
+}
+
+extern s32 SignalSema(s32 sema);
+
+/* Internal notification: callers discard the SignalSema status. */
+void _sceFsSigSema(void)
+{
+    SignalSema(D_0052C344);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", scePowerOffHandler);
 
@@ -1156,9 +1179,33 @@ INCLUDE_ASM(const s32, "sdk/libkernl", _sceFs_Poff_Intr);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceFsInit);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _fs_version);
+extern u8 D_0059E7A8[0x18];
+extern u8 D_0052C2A0[4] __attribute__((section(".data")));
+extern const void *D_0052C350 __attribute__((section(".data")));
+extern s32 memcmp(const void *left, const void *right, u32 count);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceFsReset);
+s32 _fs_version(void)
+{
+    const void *expected = D_0052C2A0;
+    const void *version = D_0059E7A8;
+    s32 mismatch = 0;
+    if (memcmp(version, expected, 4) != 0) {
+        if (memcmp(version, D_0052C350, 4) != 0) {
+            mismatch = memcmp(expected, D_0052C350, 4) != 0;
+        }
+    }
+    return mismatch;
+}
+
+extern s32 D_0052C340 __attribute__((section(".data")));
+extern void *memset(void *destination, s32 value, u32 count);
+
+s32 sceFsReset(void)
+{
+    D_0052C340 = 0;
+    memset(D_0059E7A8, 0, 4);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceOpen);
 
