@@ -4948,7 +4948,6 @@ void campDhDrawIcon(void)
 extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
 
 #ifdef NON_MATCHING
-extern void cmpDrawStatusComEx(datUnitWork_t *a, u8 alpha, s8 b, s8 c, s8 *d, s8 e, s32 color, s8 f, s8 g, s8 h);
 #endif
 
 void campDhDrawHearts(void)
@@ -6581,17 +6580,12 @@ void cmpDrawSkill(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkill);
 #endif
 
-extern void cmpDrawStatusComEx(datUnitWork_t *a, u8 alpha, s8 b, s8 c, s8 *d, s8 e, s32 color, s8 f,
-                               s8 g, s8 h);
 
 void cmpDrawStatusCom(datUnitWork_t *a, s8 b, s8 c, s8 d)
 {
     cmpDrawStatusComEx(a, 0x80, -1, 0, 0, 0, 0xA09DC380, b, c, d);
 }
 
-extern void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
-                                s8 kind, s8 detail, s8 *delta, s8 mode, u32 color,
-                                s8 show, s8 option, s8 extra, s8 full);
 
 void cmpDrawStatusComEx(datUnitWork_t *a, u8 alpha, s8 b, s8 c, s8 *d, s8 e, s32 color, s8 f, s8 g, s8 h)
 {

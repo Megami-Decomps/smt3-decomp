@@ -1,5 +1,6 @@
 #include "common.h"
 #include "facility.h"
+#include "camp.h"
 #include "fclRag.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -38,8 +39,6 @@ extern s32 datGetParam(datUnitWork_t *work, s32 index);
 
 extern void cmbSetBirthPanel(datUnitWork_t *work);
 
-extern void cmpDrawStatusComEx(datUnitWork_t *work, s32 a2, s32 a3, s32 a4, s8 *delta,
-                               s32 a6, u32 a7, s32 a8, s32 a9, s32 a10);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 

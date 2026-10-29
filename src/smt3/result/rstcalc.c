@@ -2200,8 +2200,6 @@ INCLUDE_ASM(const s32, "result/rstcalc", cmbGetLevelUpCount);
 
 extern void rstDrawNumber(s32 x, s32 y, s32 number);
 extern s32 fclChkMessage(void);
-extern void cmpDrawStatusComEx(s32 a, u8 alpha, s8 b, s8 c, s32 d,
-                               s8 e, s32 color, s8 f, s8 g, s8 h);
 
 void rstDrawGetCursorRow(void)
 {
@@ -2214,30 +2212,30 @@ void rstDrawGetCursorRow(void)
         rstDrawNumber(0, 0, (s8)work->AsignParam);
     }
     if (fclChkMessage() != 0 || (s8)rstDrawWork->AsignParamMax == 0) {
-        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, 0x80, row, 0,
-                           (s32)rstDrawWork->unk_129F, 0, 0xA09DC380, 2, 0, 0);
+        cmpDrawStatusComEx(rstDrawWork->unk_16C, 0x80, row, 0,
+                           (s8 *)rstDrawWork->unk_129F, 0, 0xA09DC380, 2, 0, 0);
     } else {
-        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, 0x80, row, 2,
-                           (s32)rstDrawWork->unk_129F, 0, 0xA09DC380, 2, 0, 0);
+        cmpDrawStatusComEx(rstDrawWork->unk_16C, 0x80, row, 2,
+                           (s8 *)rstDrawWork->unk_129F, 0, 0xA09DC380, 2, 0, 0);
     }
 }
 
 void rstDrawStatusRow(s8 mode, s8 row, s8 flags)
 {
-    cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
-                       -1, 0, (s32)rstDrawWork->unk_129F, mode,
+    cmpDrawStatusComEx(rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
+                       -1, 0, (s8 *)rstDrawWork->unk_129F, mode,
                        0xA09DC380, 2, row, flags);
 }
 
 void rstDrawStatusRow2(s8 mode, s8 row, s8 selected)
 {
     if (rstDrawWork->unk_2308 == 0) {
-        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
-                           -1, 3, (s32)rstDrawWork->unk_129F, mode,
+        cmpDrawStatusComEx(rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
+                           -1, 3, (s8 *)rstDrawWork->unk_129F, mode,
                            0xA09DC380, 2, row, 0);
     } else {
-        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
-                           selected, 3, (s32)rstDrawWork->unk_129F, mode,
+        cmpDrawStatusComEx(rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
+                           selected, 3, (s8 *)rstDrawWork->unk_129F, mode,
                            0xA09DC380, 2, row, 0);
     }
 }
@@ -2269,8 +2267,8 @@ s32 rstDrawStatusPanel(s8 mode, s8 showHelp)
         func_001C7E38(request, 1, 0x47);
         frDestroyFontRequestAfter(request);
     }
-    cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, 0x80, selected, showHelp,
-                       (s32)rstDrawWork->unk_129F, mode, 0xA09DC380, 2, 2, 0);
+    cmpDrawStatusComEx(rstDrawWork->unk_16C, 0x80, selected, showHelp,
+                       (s8 *)rstDrawWork->unk_129F, mode, 0xA09DC380, 2, 2, 0);
     return 1;
 }
 

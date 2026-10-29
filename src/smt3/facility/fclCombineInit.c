@@ -3407,8 +3407,6 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevilMaskBG);
 
 extern void cmbSetBirthPanel(datUnitWork_t *unit);
 extern s32 datGetParam(datUnitWork_t *unit, s32 type);
-extern void cmpDrawStatusComEx(datUnitWork_t *unit, u8 alpha, s8 kind, s8 mode,
-                               s8 *delta, s8 option, s32 color, s8 show, s8 extra, s8 full);
 
 #ifdef NON_MATCHING
 void cmbDrawBirthDevil(s32 hideRibbon)
