@@ -7,7 +7,7 @@ page and line to open. Conventions are in
 
 | Drafts | Unit | Page |
 |---|---|---|
-| 34 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
+| 33 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 18 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 11 |  | [sdk/libkernl.md](sdk/libkernl.md) |
