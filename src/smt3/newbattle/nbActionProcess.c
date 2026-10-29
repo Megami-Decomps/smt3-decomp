@@ -847,7 +847,174 @@ s32 GetAllUnlockTime(nbActionProcessData_t *a)
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005437F8);
 
+extern char D_005437F8[];
+#ifdef NON_MATCHING
+void GetKoukaList(nbActionProcessData_t *a, s8 koukalist[32][2], u32 select, s32 nskill)
+{
+    s8 candidates[32][2];
+    nbFormation_t *form;
+    datUnitWork_t *work;
+    s32 i, j, count, used, last, index, limit, hits, hp, minHp;
+    s32 first, second;
+    u32 animetype;
+    s8 tmp;
+
+    for (i = 0; i < 32; i++) {
+        koukalist[i][0] = -1;
+        koukalist[i][1] = 0;
+    }
+    if (a->runerr != 0) {
+        return;
+    }
+    hits = datSkillTable.normal[nskill].targetcntmin;
+    if (hits < datSkillTable.normal[nskill].targetcntmax) {
+        hits += dds3GetRandIntA(NULL, datSkillTable.normal[nskill].targetcntmax - hits + 1);
+    }
+    printf(D_005437F8, hits, select);
+    for (i = 0; i < 16; i++) {
+        if (select & (1U << i)) {
+            form = &a->data->form[i];
+            if ((form->stat & 1) && ((form->stat & 0x40) >= 0x40) &&
+                ((a->data->party[form->partyindex].flag & 0x20) || CheckTimeListDead(a, i))) {
+                select &= ~(1U << i);
+            }
+        }
+    }
+    if (datSkillTable.normal[nskill].targetrandom == 1) {
+        count = 0;
+        for (i = 0; i < 32; i++) {
+            if (select & (1U << i)) {
+                candidates[count][0] = i;
+                candidates[count][1] = 0;
+                count++;
+            }
+        }
+        if (count == 0) {
+            return;
+        }
+        limit = count + dds3GetRandIntA(NULL, 2);
+        last = -1;
+        used = 0;
+        for (i = 0; i < hits; i++) {
+            do {
+                index = dds3GetRandIntA(NULL, count);
+                j = candidates[index][0];
+            } while (count >= 2 && last == j);
+            last = j;
+            if (candidates[index][1] < limit) {
+                candidates[index][1]++;
+                for (index = 0; index < used; index++) {
+                    if (koukalist[index][0] == j) {
+                        break;
+                    }
+                }
+                if (index != used) {
+                    koukalist[index][1]++;
+                } else {
+                    koukalist[used][0] = j;
+                    koukalist[used][1] = 1;
+                    used++;
+                }
+            }
+        }
+        return;
+    }
+    if ((u32)(nskill - 0x9E) < 2) {
+        candidates[0][0] = 0;
+        count = 0;
+        minHp = 101;
+        for (i = 0; i < 16; i++) {
+            if (select & (1U << i)) {
+                form = &a->data->form[i];
+                if ((form->stat & 1) && ((form->stat & 0x40) >= 0x40)) {
+                    work = nbGetUnitWorkFromFormindex(form->formindex);
+                    if (work->hp != 0) {
+                        hp = (work->hp * 100) / work->maxhp;
+                        if (hp < minHp) {
+                            minHp = hp;
+                            candidates[0][0] = i;
+                            count = 1;
+                        } else if (hp == minHp) {
+                            candidates[count][0] = i;
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
+        index = 0;
+        if (count > 0) {
+            index = (s32)dds3GetRandIntA(NULL, count * 10) % count;
+        }
+        koukalist[0][1] = 1;
+        koukalist[0][0] = candidates[index][0];
+        return;
+    }
+    animetype = datSkillTable.visual[nskill].animetype;
+    if ((a->data->stat & 8) && nskill == 0xCC) {
+        switch (animetype) {
+        case 4: animetype = 8; break;
+        case 5: animetype = 9; break;
+        case 6: animetype = 10; break;
+        case 7: animetype = 11; break;
+        case 8: animetype = 4; break;
+        case 9: animetype = 5; break;
+        case 10: animetype = 6; break;
+        case 11: animetype = 7; break;
+        }
+    }
+    switch (animetype) {
+    case 0: case 1: case 2: case 3:
+    case 4: case 5: case 6: case 7: {
+        count = 0;
+        for (i = 0; i < 32; i++) {
+            if (select & (1U << i)) {
+                koukalist[count][0] = i;
+                koukalist[count][1] = hits;
+                count++;
+            }
+        }
+        break;
+    }
+    case 8: case 9: case 10: case 11: {
+        count = 0;
+        for (i = 31; i >= 0; i--) {
+            if (select & (1U << i)) {
+                koukalist[count][0] = i;
+                koukalist[count][1] = hits;
+                count++;
+            }
+        }
+        break;
+    }
+    case 12: case 13: case 14: case 15: {
+        count = 0;
+        for (i = 0; i < 32; i++) {
+            if (select & (1U << i)) {
+                koukalist[count][0] = i;
+                koukalist[count][1] = hits;
+                count++;
+            }
+        }
+        if (count >= 2) {
+            for (i = 0; i < 32; i++) {
+                first = dds3GetRandIntA(NULL, count);
+                second = dds3GetRandIntA(NULL, count);
+                for (j = 0; j < 2; j++) {
+                    tmp = koukalist[first][j];
+                    koukalist[first][j] = koukalist[second][j];
+                    koukalist[second][j] = tmp;
+                }
+            }
+        }
+        break;
+    }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", GetKoukaList);
+#endif
+
 
 void SetTargetPlayer(nbActionProcessData_t *a)
 {
