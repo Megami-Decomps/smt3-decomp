@@ -456,7 +456,189 @@ void fldPlayerCalc_Hit(void) {
     SDF_VU0_COPYVECTOR((u8 *)ctl->handle->poseset + 0x70, pos);
 }
 
+#ifdef NON_MATCHING
+extern f32 fldCamPitch;
+extern f32 fldPlayerWarpState;
+extern f32 D_0054C3C8, D_0054C3CC, D_0054C3D0;
+extern sdfVector4_t D_00531C50;
+extern sdfMatrix4_t D_002FA240;
+extern f32 EulerAngleAxisY(void);
+extern void InversMatrix(void);
+extern void FromRotation(f32 angle);
+extern void dds3GetRotPoseSet(dds3Basic_t *basic);
+extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rot);
+extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
+extern f32 sdfSin(f32 angle);
+extern f32 sdfCos(f32 angle);
+
+void fldPlayerCalc_WarpRun(void)
+{
+    fldUnitControl_t *control = fldGetUnitControl();
+    mdlObj_t *model = dds3ObjectBaseGetModelHandle(control->handle);
+    mdlObj_t *model2 = NULL;
+    sdfVector4_t axis __attribute__((aligned(16))) = *(volatile sdfVector4_t *)&D_00531C50;
+    sdfVector4_t position __attribute__((aligned(16)));
+    sdfVector4_t rotation __attribute__((aligned(16)));
+    sdfVector4_t oldPosition __attribute__((aligned(16)));
+    f32 collisionPosition[4];
+    f32 pitch, warp, angle, step, distance, pi;
+    dds3Basic_t *basic;
+    dds3PoseSet_t *pose;
+    s32 motion;
+
+    if (fldPlayerFastMode != 1) {
+        return;
+    }
+    if (control->handle2 != NULL) {
+        model2 = dds3ObjectBaseGetModelHandle(control->handle2);
+    }
+    dds3GetPosPoseSet(control->handle);
+    SDF_VU0_STOREVECTOR(&position);
+    fldGlobalBase.prevX = fldGlobalBase.x;
+    fldGlobalBase.prevY = fldGlobalBase.y;
+    fldGlobalBase.prevZ = fldGlobalBase.z;
+    fldGlobalBase.x = position.x;
+    fldGlobalBase.y = position.y;
+    fldGlobalBase.z = position.z;
+    if (l_UseCollision != 0) {
+        dds3OnPoseSetFlag(control->handle->poseset, 8);
+        if (control->handle2 != NULL) {
+            dds3OnPoseSetFlag(control->handle2->poseset, 8);
+        }
+        if (l_UseCollision != 0) {
+            fldGlobalBase.y = position.y + (fldGlobalBase.float130 > 0.0f ? 5.0f : 10.0f);
+        }
+    }
+    pitch = fldCamPitch;
+    if (pitch >= 360.0f) {
+        do { pitch -= 360.0f; } while (pitch >= 360.0f);
+        fldCamPitch = pitch;
+    }
+    if (pitch < 0.0f) {
+        do { pitch += 360.0f; } while (pitch < 0.0f);
+        fldCamPitch = pitch;
+    }
+    angle = fldGlobalBase.camAngle;
+    if (angle >= 360.0f) {
+        do { angle -= 360.0f; } while (angle >= 360.0f);
+        fldGlobalBase.camAngle = angle;
+    }
+    angle = fldGlobalBase.camAngle;
+    if (angle < 0.0f) {
+        do { angle += 360.0f; } while (angle < 0.0f);
+        fldGlobalBase.camAngle = angle;
+    }
+    warp = fldPlayerWarpState;
+    if (warp >= 360.0f) {
+        do { warp -= 360.0f; } while (warp >= 360.0f);
+        fldPlayerWarpState = warp;
+    }
+    if (warp < 0.0f) {
+        do { warp += 360.0f; } while (warp < 0.0f);
+        fldPlayerWarpState = warp;
+    }
+    dds3GetRotPoseSet(control->handle);
+    SDF_VU0_STOREVECTOR(&rotation);
+    EulerAngleAxisY();
+    SDF_VU0_LOADMATRIX(&D_002FA240);
+    InversMatrix();
+    control->moveFlag = 0;
+    angle = R360_LR(fldGlobalBase.camAngle, fldPlayerWarpState);
+    if (angle < 0.0f) {
+        angle = -angle;
+    }
+    pi = D_0054C3C8;
+    distance = (180.0f - angle) * D_0054C3CC;
+    position.x = fldGlobalBase.x - sdfSin((-fldPlayerWarpState * pi) / 180.0f) * distance;
+    position.y = fldGlobalBase.y;
+    position.z = fldGlobalBase.z - sdfCos((-fldPlayerWarpState * pi) / 180.0f) * distance;
+    dds3SetPosPoseSet(control->handle, &position);
+    if (l_UseCollision != 0) {
+        collisionPosition[0] = position.x;
+        collisionPosition[1] = position.y;
+        collisionPosition[2] = position.z;
+        fldGlobalBase.x = position.x;
+        fldGlobalBase.y = position.y;
+        fldGlobalBase.z = position.z;
+        fldHitChkUnit(collisionPosition);
+        if (fldGlobalBase.hitValid != 0) {
+            position.x = fldGlobalBase.hitX;
+            position.y = fldGlobalBase.hitY + 44.0f;
+            position.z = fldGlobalBase.hitZ;
+            fldGlobalBase.x = position.x;
+            fldGlobalBase.y = position.y;
+            fldGlobalBase.z = position.z;
+            dds3SetPosPoseSet(control->handle, &position);
+            fldGlobalBase.hitValid = 0;
+        }
+        dds3GetPosPoseSet(control->handle);
+        SDF_VU0_STOREVECTOR(&position);
+        basic = control->handle;
+        pose = basic->poseset;
+        oldPosition = pose->pos2;
+        if (sdfFabs(oldPosition.x - position.x) < 1.0f) {
+            pose->pos2.x = position.x;
+        } else {
+            pose->pos2.x = oldPosition.x + (position.x - oldPosition.x) / 3.0f;
+        }
+        if (sdfFabs(oldPosition.y - position.y) < 1.0f) {
+            basic->poseset->pos2.y = position.y;
+        } else {
+            basic->poseset->pos2.y = oldPosition.y + (position.y - oldPosition.y) / 3.0f;
+        }
+        if (sdfFabs(oldPosition.z - position.z) < 1.0f) {
+            basic->poseset->pos2.z = position.z;
+        } else {
+            basic->poseset->pos2.z = oldPosition.z + (position.z - oldPosition.z) / 3.0f;
+        }
+        pose = basic->poseset;
+        pose->pos2.w = 1.0f;
+        if (control->handle2 != NULL) {
+            dds3PoseSet_t *other = control->handle2->poseset;
+            other->pos2.x = pose->pos2.x;
+            other->pos2.y = pose->pos2.y;
+            other->pos2.z = pose->pos2.z;
+            other->pos2.w = pose->pos2.w;
+        }
+    }
+    angle = R360_LR(fldGlobalBase.camAngle, fldPlayerWarpState);
+    step = angle / 6.0f;
+    if (step < 0.0f) {
+        step = -step;
+    }
+    if (step < 2.0f) {
+        step = 2.0f;
+    }
+    if ((angle >= 0.0f && angle <= step) || (angle <= 0.0f && -step <= angle)) {
+        fldGlobalBase.camAngle = fldPlayerWarpState;
+    } else if (angle < 0.0f) {
+        fldGlobalBase.camAngle -= step;
+    } else {
+        fldGlobalBase.camAngle += step;
+    }
+    SDF_VU0_LOADVECTOR(&axis);
+    FromRotation(fldGlobalBase.camAngle * D_0054C3D0 / 180.0f);
+    SDF_VU0_STOREVECTOR(&rotation);
+    dds3SetRotPoseSet(control->handle, &rotation);
+    if (control->handle2 != NULL) {
+        dds3SetRotPoseSet(control->handle2, &rotation);
+    }
+    motion = fldGlobalBase.area == 23 ? 8 : 4;
+    if (model->current.h.motionIndex != motion) {
+        model->first->speed = 1.0f;
+        mdlSmoothLoopMotion(model, 0, motion, 5.0f, 5.0f);
+        if (control->handle2 != NULL) {
+            model2->first->speed = 1.0f;
+            mdlSmoothLoopMotion(model2, 0, motion, 5.0f, 5.0f);
+        }
+    }
+    fldGlobalBase.x = position.x;
+    fldGlobalBase.z = position.z;
+    fldGlobalBase.y = position.y;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_WarpRun);
+#endif
 
 /* NON_MATCHING: 14 of 58 words differ (first at +0x44). */
 #ifdef NON_MATCHING
