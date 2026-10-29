@@ -1619,7 +1619,23 @@ s32 cmbChkDevilEvo(datUnitWork_t *unit)
 INCLUDE_ASM(const s32, "result/rstcalc", cmbChkDevilEvo);
 #endif
 
+#ifdef NON_MATCHING
+s32 cmpFindKugatatiMsgEntry(datUnitWork_t *unit)
+{
+    datLevelUp_t *table = (datLevelUp_t *)datLevelUpTable;
+    datLevelUpEntry_t *entry = table[unit->id].entry;
+    s32 i;
+
+    for (i = 0; i < 24; i++) {
+        if (entry[i].kind == 5) {
+            return (s8)entry[i].level;
+        }
+    }
+    return -1;
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", cmpFindKugatatiMsgEntry);
+#endif
 
 INCLUDE_ASM(const s32, "result/rstcalc", cmbCalcEvoEvent);
 
