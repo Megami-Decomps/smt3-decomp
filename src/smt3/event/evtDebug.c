@@ -12,7 +12,7 @@ extern dds3ProcessID_t *moonprocess_id;
 
 extern s32 evtDebugState;
 
-extern void *evtSceneDispWork;
+extern s32 evtSceneDispWork;
 
 extern u32 dds3BackColor;
 
@@ -21,15 +21,15 @@ extern u8 dds3PadButtonState[];
 extern sdfGrOt_t sdfGrOtTable[];
 
 
-extern void *sdfGrAllocPacketBuff(u32 aSize);
+extern s32 sdfGrAllocPacketBuff(s32 aSize);
 
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, void *aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *, s32, s32, s32, s32);
 
-extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, ...);
+extern void *sdfDevPrintf(u32 aX, u32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
 
 extern s32 sprintf(char *, const char *, ...);
 
@@ -40,6 +40,9 @@ extern void scrStartScriptByName(s32 handle, const char *path, s32 param);
 extern void scrAllReleaseScript(void);
 
 extern void evtFreeStage(void);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 start, s32 shutdown,
+                                         dds3ProcessFunc_t process, dds3ProcessFunc_t finish, void *data);
+extern s32 dds3KillProcessName(char *name, s32 shutdown);
 
 extern void evtBitAllOff(void);
 
@@ -112,7 +115,7 @@ void evtDebugPrintCamera(void)
         cameraName = camera->name;
     }
     tag = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(tag, sdfDevPrintf(0x8680, 0x79C0, 0x00FF0000, 5,
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8680, 0x79C0, 0x00FF0000, 5,
                                      D_0054F790, cameraName));
     D_002F6978.regFunc(&D_002F6978, tag);
 }
@@ -136,17 +139,17 @@ s32 EventDebugProcess1(dds3ProcessID_t *id)
     sdfDrawTag_t *tag;
     sdfGrOt_t *ot;
 
-    tag = sdfGrAllocPacketBuff(0x20);
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     dds3ConsPanelTagLink(tag, 0x84, 0x54, 0x15, 10);
-    sdfDrawTagLink(tag, sdfDevPrintf(0x7840, 0x7BA0, 0xFEFFFF, 0, "Event Debug"));
-    sdfDrawTagLink(tag, sdfDevPrintf(0x7A80, 0x7C60, 0xFEFFFF, 6, "E%03d.BF", evtDebugState));
-    sdfDrawTagLink(tag, sdfDevPrintf(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R  = EVENT SELECT"));
-    sdfDrawTagLink(tag, sdfDevPrintf(0x7900, 0x7D80, 0xFEFFFF, 0, "RR   = ENTER"));
-    sdfDrawTagLink(tag, sdfDevPrintf(0x7900, 0x7DE0, 0xFEFFFF, 0, "RU   = SET E500"));
-    sdfDrawTagLink(tag, sdfDevPrintf(0x7900, 0x7E40, 0xFEFFFF, 0, "RL   = SET E600"));
-    sdfDrawTagLink(tag, sdfDevPrintf(0x7900, 0x7EA0, 0xFEFFFF, 0, "RD   = RESET FLAG"));
-    sdfDrawTagLink(tag, sdfDevPrintf(0x7900, 0x7F00, 0xFEFFFF, 0, "L1R1 = +-100"));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7840, 0x7BA0, 0xFEFFFF, 0, "Event Debug"));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7A80, 0x7C60, 0xFEFFFF, 6, "E%03d.BF", evtDebugState));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R  = EVENT SELECT"));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7D80, 0xFEFFFF, 0, "RR   = ENTER"));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7DE0, 0xFEFFFF, 0, "RU   = SET E500"));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7E40, 0xFEFFFF, 0, "RL   = SET E600"));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7EA0, 0xFEFFFF, 0, "RD   = RESET FLAG"));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7F00, 0xFEFFFF, 0, "L1R1 = +-100"));
     ot = &sdfGrOtTable[81];
     ((evtOtRegFunc_t)ot->regFunc)(ot, tag);
 
@@ -218,10 +221,178 @@ INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B338);
 
 INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B348);
 
+#ifdef NON_MATCHING
+typedef struct {
+    const char *name;
+    s32 type;
+    union { u16 rowCount; s16 rows; };
+    s16 count;
+} evtSceneDispRow_t;
+
+typedef struct {
+    evtSceneDispRow_t rows[17];
+} evtSceneDispRows_t;
+
+extern const evtSceneDispRows_t D_0053B348;
+extern s32 evtSceneDispTimer, evtSceneDispState;
+extern s8 dds3PadBitTable[];
+extern const char D_0054F810[], D_0054F818[];
+extern sdfGrOt_t D_002F6938;
+extern s32 dds3DebugBasic(dds3ProcessID_t *id);
+extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
+
+s32 evtSceneDispProcess(dds3ProcessID_t *id)
+{
+    evtSceneDispRows_t rows = D_0053B348;
+    evtSceneDispRow_t *row;
+    sdfDrawTag_t *textTag, *panelTag;
+    dds3Basic_t *scene, *basic;
+    dds3SceneBasic_t *sceneWork;
+    s32 rowIndex, line, x, column, attr, selected;
+    s32 delta;
+
+    textTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    selected = 0;
+    sdfDrawTagInit(textTag);
+    scene = dds3GetActiveScene();
+    if (scene == NULL) {
+        rowIndex = 0;
+        sdfDrawTagLink(textTag, (u32)sdfDevPrintf(0x7180, (4 - evtSceneDispWork) * 0x60 + 0x7900,
+                                             0xFEFFFF, 0, "NO SCENE"));
+        sceneWork = NULL;
+        line = 3;
+    } else {
+        line = 2;
+        rowIndex = 0;
+        sceneWork = scene->workdata;
+        for (row = rows.rows; row->type != 0; row++) {
+            row->count = 0;
+            row->rowCount = 0;
+            attr = 0;
+            if (evtSceneDispTimer == rowIndex) {
+                if (evtSceneDispState != 0) {
+                    attr = 5;
+                } else {
+                    attr = 4;
+                    selected = 1;
+                }
+            }
+            column = 0;
+            sdfDrawTagLink(textTag, (u32)sdfDevPrintf(0x7180, (line - evtSceneDispWork) * 0x60 + 0x7900,
+                                                 0xFEFFFF, attr, row->name));
+            sdfDrawTagLink(textTag, (u32)sdfDevPrintf(0x7900, (line - evtSceneDispWork) * 0x60 + 0x7900,
+                                                 0xFEFFFF, attr, D_0054F810,
+                                                 sceneWork->basictable[row->type].linkcount));
+            basic = sceneWork->basictable[row->type].firstbasic;
+            if (basic != NULL) {
+                x = 0x7CC0;
+                do {
+                    attr = 0xE;
+                    if (evtSceneDispTimer == rowIndex && row->count == evtSceneDispState - 1) {
+                        attr = 4;
+                        selected = 1;
+                    }
+                    column++;
+                    sdfDrawTagLink(textTag, (u32)sdfDevPrintf(x, (line - evtSceneDispWork) * 0x60 + 0x7900,
+                                                         0xFEFFFF, attr, D_0054F818, basic->serialID));
+                    x += 0x480;
+                    if (column >= 4) {
+                        x = 0x7CC0;
+                        column = 0;
+                        line++;
+                        row->rowCount++;
+                    }
+                    basic = basic->next;
+                    row->count++;
+                } while (basic != NULL);
+            }
+            if (row->count > 0 && ((u16)row->count & 3) == 0) {
+                line--;
+                row->rowCount--;
+            }
+            line++;
+            rowIndex++;
+        }
+    }
+    panelTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(panelTag);
+    dds3ConsPanelTagLink(panelTag, 0x18, (2 - evtSceneDispWork) * 0xC, 0x27, line);
+    D_002F6938.regFunc(&D_002F6938, panelTag);
+    D_002F6938.regFunc(&D_002F6938, textTag);
+    if (!selected) {
+        evtSceneDispTimer = 0;
+        evtSceneDispState = 0;
+        return 0;
+    }
+    if (dds3PadBitTable[23] & 2) {
+        if (evtSceneDispState == 0) {
+            if (evtSceneDispTimer < rowIndex - 1) {
+                delta = rows.rows[evtSceneDispTimer].rows;
+                evtSceneDispWork += delta != 0 ? delta : 1;
+                evtSceneDispTimer++;
+            }
+        } else {
+            delta = evtSceneDispState + 4;
+            *(volatile s32 *)&evtSceneDispState =
+                delta <= rows.rows[evtSceneDispTimer].count ? delta : evtSceneDispState;
+        }
+    }
+    if (dds3PadBitTable[22] & 2) {
+        if (evtSceneDispState != 0) {
+            delta = evtSceneDispState - 4;
+            if (delta > 0) {
+                evtSceneDispState = delta;
+            }
+        } else if (evtSceneDispTimer > 0) {
+            evtSceneDispTimer--;
+            delta = rows.rows[evtSceneDispTimer].rows;
+            evtSceneDispWork -= delta != 0 ? delta : 1;
+        }
+    }
+    if (dds3PadBitTable[21] & 2) {
+        if (evtSceneDispState > 0) {
+            delta = evtSceneDispState + 1;
+            *(volatile s32 *)&evtSceneDispState =
+                delta <= rows.rows[evtSceneDispTimer].count ? delta : evtSceneDispState;
+        }
+    }
+    if (dds3PadBitTable[20] & 2) {
+        if (evtSceneDispState > 0) {
+            delta = evtSceneDispState - 1;
+            *(volatile s32 *)&evtSceneDispState = delta > 0 ? delta : evtSceneDispState;
+        }
+    }
+    if (dds3PadBitTable[17] < 0 && scene != NULL) {
+        if (evtSceneDispState == 0) {
+            if (rows.rows[evtSceneDispTimer].count > 0) {
+                evtSceneDispState = 1;
+            }
+        } else {
+            delta = evtSceneDispState - 1;
+            basic = sceneWork->basictable[rows.rows[evtSceneDispTimer].type].firstbasic;
+            while (delta > 0) {
+                basic = basic->next;
+                delta--;
+            }
+            dds3SetProcessData(id, basic);
+            return (s32)dds3DebugBasic;
+        }
+    }
+    if (dds3PadBitTable[19] < 0) {
+        if (evtSceneDispState != 0) {
+            evtSceneDispState = 0;
+            return 0;
+        }
+        return -1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "event/evtDebug", evtSceneDispProcess);
+#endif
 
 void func_001EBC90(void)
 {
-    evtSceneDispWork = NULL;
+    evtSceneDispWork = 0;
 }
 
