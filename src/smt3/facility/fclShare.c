@@ -145,7 +145,7 @@ void func_002146F8(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
 
 /* NON_MATCHING: 111 of 180 words differ (first at +0x20). */
 #ifdef NON_MATCHING
-extern s32 fclDrawPanelSprite2(s32 id, s32 arg);
+extern void fclDrawPanelSprite2(s32 id, s32 arg);
 extern s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
 extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 extern s32 sdfGrAllocPacketBuff(s32 aSize);
@@ -490,7 +490,7 @@ typedef struct
     s32 flags;
 } fclPhasePanel_t;
 
-extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+extern void fclDrawPanelSprite2(s32 id, s32 ot);
 extern void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot);
 
 #ifdef NON_MATCHING
@@ -607,7 +607,7 @@ void fclDrawPanelBorder(void *work, s32 z, s32 inset, s32 ot)
                      fclSpriteTable, ot);
 }
 
-extern s32 fclDrawPanelSprite(s32 id, s32 ot);
+extern void fclDrawPanelSprite(s32 id, s32 ot);
 extern void fclDrawPhaseValue(void *work, s32 color, s32 ot);
 
 #ifdef NON_MATCHING

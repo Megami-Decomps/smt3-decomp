@@ -9,8 +9,8 @@
 extern void sdfChipFreeDirect(void *aPtr);
 
 #ifdef NON_MATCHING
-extern s32 cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g);
-extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+extern void cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g);
+extern void fclDrawPanelSprite2(s32 id, s32 ot);
 #endif
 
 void fclDrawPanelTypeDef(fclPanel_t *pPanel, s32 OtNo)
@@ -30,7 +30,7 @@ void fclUpdatePanelTypeDef(fclPanel_t *pPanel)
     }
 }
 
-extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+extern void fclDrawPanelSprite2(s32 id, s32 ot);
 extern void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot);
 
 /* NON_MATCHING: 6 of 64 words differ in the second color-constant schedule. */
@@ -73,7 +73,7 @@ INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType0Grad);
 #endif
 
 extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
-extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
+extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 *colors, s32 ot);
 
 extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
@@ -182,7 +182,7 @@ void fclUpdatePanelType0(fclPanel_t *pPanel)
 
 extern s32 D_00345D88[];
 extern fclSpriteTbl_t fclSpriteTable[];
-extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *color,
                                 s32 id, s32 spriteId, s32 *textures,
                                 fclSpriteTbl_t *table, s32 ot);
@@ -275,7 +275,7 @@ void fclDrawPanelCorners(fclPanel_t *panel, s32 ot)
 }
 
 extern s32 fclRagCalcTexSize(s32 size, s32 mode);
-extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 w, s32 h,
+extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 w, s32 h,
                               s32 *colors, s32 ot);
 
 void fclDrawPanelType3BackGrad(fclPanel_t *panel, s32 ot)
@@ -431,13 +431,13 @@ s32 fclDestroyPanel(void *pPanel)
 
 /* NON_MATCHING: 8 of 21 words differ (first at +0x10). */
 #ifdef NON_MATCHING
-extern s32 fclDrawPanelSprite(s32 id, s32 arg);
+extern void fclDrawPanelSprite(s32 id, s32 arg);
 
-s32 fclDrawPanel(fclPanel_t *pPanel, s32 OtNo)
+void fclDrawPanel(fclPanel_t *pPanel, s32 OtNo)
 {
     fclDrawPanelSprite(0x53001, OtNo);
     pPanel->draw(pPanel, OtNo);
-    return fclDrawPanelSprite(0x5101B, OtNo);
+    fclDrawPanelSprite(0x5101B, OtNo);
 }
 #else
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanel);

@@ -3262,7 +3262,7 @@ void CalcMoveViewModeRibbon(fclEncyc_readmainwork_tag *pwork)
     pwork->ribbonAlpha = alpha;
 }
 
-extern s32 fclDrawPanel(fclPanel_t *pPanel, s32 OtNo);
+extern void fclDrawPanel(fclPanel_t *pPanel, s32 OtNo);
 
 extern void lstDrawListWindow(void *pListWindow, s32 Mode, s32 OtNo);
 

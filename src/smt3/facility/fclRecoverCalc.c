@@ -357,7 +357,7 @@ void rcvDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
     frDestroyFontRequestAfter(frq);
 }
 
-extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,
                             s32 spriteId, s32 *textures, fclSpriteTbl_t *table, s32 ot);
 
@@ -378,7 +378,7 @@ void rcvDrawRowBox(fclPanelPos_t *panel, s32 ot)
 }
 
 
-extern s32 fclDrawListSprite(s32 x, s32 y, s32 z, s32 width, s32 height,
+extern void fclDrawListSprite(s32 x, s32 y, s32 z, s32 width, s32 height,
                              s32 color, s32 blend, s32 ot);
 extern frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 firstOption);
 extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
@@ -431,7 +431,7 @@ void rcvDrawRowText(s32 x, s32 y, s32 z, s32 color, s8 index, s32 ot)
 INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawRowText);
 #endif
 
-extern s32 fclDrawPanel(fclPanel_t *panel, s32 ot);
+extern void fclDrawPanel(fclPanel_t *panel, s32 ot);
 extern void fclUpdatePanel(fclPanel_t *panel);
 extern void lstDrawListWindow(lstWork_t *list, s8 noCursor, s32 ot);
 extern void lstDrawListWindowCursor(lstWork_t *list, s32 ot);

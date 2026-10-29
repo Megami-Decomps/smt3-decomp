@@ -113,7 +113,7 @@ void nmeDrawInputPanel(void)
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern void cmpUpdateTerminate(void *work);
-extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 extern void nmeDrawBlendText(s32 sprite, s32 page, sdfTexHandle_t **textures, fclSpriteTbl_t *table, u32 color, s32 animation, s32 ot);
 extern void nmeDrawNamePanel(void);
 extern void nmeDrawInputPanel(void);

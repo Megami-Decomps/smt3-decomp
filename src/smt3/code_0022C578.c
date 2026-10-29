@@ -203,15 +203,15 @@ extern s32 func_00232198(void);
 
 extern cmpPanelEff_t *cmpPanelEffList;
 
-extern s32 cmpDrawSpriteFlag(u8 id, s32 flag, s32 arg);
+extern void cmpDrawSpriteFlag(u8 id, s32 flag, s32 arg);
 
-extern s32 cmpDrawSprite(s32 id, s32 flag, s32 arg);
+extern void cmpDrawSprite(s32 id, s32 flag, s32 arg);
 
-extern s32 cmpDrawSprite2(s32 id, s32 flag, s32 arg);
+extern void cmpDrawSprite2(s32 id, s32 flag, s32 arg);
 
-extern s32 cmpDrawBoxSolid(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h);
+extern void cmpDrawBoxSolid(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h);
 
-extern s32 cmpDrawBoxG(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *colors, s32 g, s32 h);
+extern void cmpDrawBoxG(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *colors, s32 g, s32 h);
 
 
 
@@ -2425,7 +2425,7 @@ void nmeMakeGradColors(s32 *xs, s32 *ys, s32 delta0, s32 delta1, s32 delta2)
 }
 
 extern const s32 D_0053F6E8[];
-extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+extern void fclDrawPanelSprite2(s32 id, s32 ot);
 
 void nmeDrawQuadPanel(s32 color0, s32 color1, s32 alpha, s32 ot)
 {
@@ -2576,12 +2576,12 @@ void nmeDrawBlendQuad(s32 alpha, s32 ot)
 }
 
 #ifdef NON_MATCHING
-extern s32 cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g);
+extern void cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g);
 #endif
 
-s32 nmeDrawBox(s32 color, s32 unused, s32 flag)
+void nmeDrawBox(s32 color, s32 unused, s32 flag)
 {
-    return cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, color, flag);
+    cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, color, flag);
 }
 
 void nmeDrawSizedSprite(u8 id, u16 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 color, s32 size,
@@ -3009,7 +3009,7 @@ extern void campDrawInfoPanel(void);
 extern void campDrawSeq3(s8 phase);
 extern void campDrawStockRow(s8 mode);
 extern void campDrawNumber(void);
-extern s32 fclDrawPanelSprite(s32 id, s32 ot);
+extern void fclDrawPanelSprite(s32 id, s32 ot);
 extern void cmpFindPanelEffSlot(s32 ot);
 
 s32 camp_draw_Process(void)
@@ -4328,7 +4328,7 @@ INCLUDE_ASM(const s32, "code_0022C578", camp_calc_dh_Process);
 #endif
 
 #ifdef NON_MATCHING
-extern s32 cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g);
+extern void cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g);
 #endif
 
 void campDhDrawBox(s32 alpha)
@@ -4351,7 +4351,7 @@ void campDhDrawBox(s32 alpha)
     cmpDrawBoxGDefault(0, 0x410, 0, 0x200, 0x8C, corner, 0x47);
 }
 
-extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
+extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 *colors, s32 ot);
 
 #ifdef NON_MATCHING
@@ -6748,7 +6748,7 @@ extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern void *sdf2DGetPrimPtr(sdfGrPacketHeader_t *aPacketPtr);
 #endif
 
-s32 cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
+void cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
 {
     sdfGrOt_t *otp;
     void *packet;
@@ -6768,16 +6768,16 @@ s32 cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
     sdfDrawTagInit(tag);
     sdfDrawTagLink(tag, packet);
     otp = &sdfGrOtTable[ot];
-    return ((s32 (*)(sdfGrOt_t *, void *))otp->regFunc)(otp, tag);
+    otp->regFunc(otp, tag);
 }
 
 
-s32 func_00239C08(u8 id, s32 arg)
+void func_00239C08(u8 id, s32 arg)
 {
-    return cmpDrawSpriteFlag(id, 0, arg);
+    cmpDrawSpriteFlag(id, 0, arg);
 }
 
-s32 cmpDrawSprite(s32 id, s32 flag, s32 ot)
+void cmpDrawSprite(s32 id, s32 flag, s32 ot)
 {
     sdfGrOt_t *otp;
     void *packet;
@@ -6797,15 +6797,15 @@ s32 cmpDrawSprite(s32 id, s32 flag, s32 ot)
     sdfDrawTagInit(tag);
     sdfDrawTagLink(tag, packet);
     otp = &sdfGrOtTable[ot];
-    return ((s32 (*)(sdfGrOt_t *, void *))otp->regFunc)(otp, tag);
+    otp->regFunc(otp, tag);
 }
 
-s32 fclDrawPanelSprite(s32 id, s32 arg)
+void fclDrawPanelSprite(s32 id, s32 arg)
 {
-    return cmpDrawSprite(id, 0, arg);
+    cmpDrawSprite(id, 0, arg);
 }
 
-s32 cmpDrawSprite2(s32 id, s32 flag, s32 ot)
+void cmpDrawSprite2(s32 id, s32 flag, s32 ot)
 {
     sdfGrOt_t *otp;
     void *packet;
@@ -6825,12 +6825,12 @@ s32 cmpDrawSprite2(s32 id, s32 flag, s32 ot)
     sdfDrawTagInit(tag);
     sdfDrawTagLink(tag, packet);
     otp = &sdfGrOtTable[ot];
-    return ((s32 (*)(sdfGrOt_t *, void *))otp->regFunc)(otp, tag);
+    otp->regFunc(otp, tag);
 }
 
-s32 fclDrawPanelSprite2(s32 id, s32 arg)
+void fclDrawPanelSprite2(s32 id, s32 arg)
 {
-    return cmpDrawSprite2(id, 0, arg);
+    cmpDrawSprite2(id, 0, arg);
 }
 
 void cmpDrawSpriteIndexed(s32 id, s32 ot)
@@ -6915,7 +6915,7 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot)
     otp->regFunc(otp, tag);
 }
 
-s32 cmpDrawBoxSolid(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h)
+void cmpDrawBoxSolid(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h)
 {
     s32 colors[4];
 
@@ -6923,19 +6923,19 @@ s32 cmpDrawBoxSolid(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h)
     colors[1] = color;
     colors[2] = color;
     colors[0] = color;
-    return cmpDrawBoxG(a, b, c, d, e, colors, g, h);
+    cmpDrawBoxG(a, b, c, d, e, colors, g, h);
 }
 
-s32 cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
+void cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
 {
-    return cmpDrawBoxSolid(a, b, c, d, e, f, 0, g);
+    cmpDrawBoxSolid(a, b, c, d, e, f, 0, g);
 }
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawBoxG);
 
-s32 cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g)
+void cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g)
 {
-    return cmpDrawBoxG(a, b, c, d, e, f, 0, g);
+    cmpDrawBoxG(a, b, c, d, e, f, 0, g);
 }
 
 #ifdef NON_MATCHING
@@ -7082,11 +7082,11 @@ void cmp_23A8B0(s32 arg)
 
 /* NON_MATCHING: 4 of 16 words differ (first at +0x28). */
 #ifdef NON_MATCHING
-s32 cmp_23A918(s32 arg)
+void cmp_23A918(s32 arg)
 {
     func_00239C08(0, arg);
     cmpAllocRefGifTag(arg);
-    return fclDrawPanelSprite(0x5C000, arg);
+    fclDrawPanelSprite(0x5C000, arg);
 }
 #else
 INCLUDE_ASM(const s32, "code_0022C578", cmp_23A918);
@@ -7172,7 +7172,7 @@ extern void sdfDevSetPrintCB(cmpPrintControl_t *cb, s32 x, s32 y, s32 z, u32 att
 
 extern void *sdfDevPrintfEx(cmpPrintControl_t *cb, const char *str, ...);
 
-s32 cmpDrawDebugPrint(s32 x, s32 y, s32 z, u32 attr, const char *str, s32 ot)
+void cmpDrawDebugPrint(s32 x, s32 y, s32 z, u32 attr, const char *str, s32 ot)
 {
     cmpPrintControl_t cb;
     sdfGrOt_t *otp;
@@ -7183,12 +7183,12 @@ s32 cmpDrawDebugPrint(s32 x, s32 y, s32 z, u32 attr, const char *str, s32 ot)
     sdfDevSetPrintCB(&cb, x * 16 + 0x7000, y * 8 + 0x7900, z, attr);
     sdfDrawTagLink(tag, sdfDevPrintfEx(&cb, str));
     otp = &sdfGrOtTable[ot];
-    return ((s32 (*)(sdfGrOt_t *, void *))otp->regFunc)(otp, tag);
+    otp->regFunc(otp, tag);
 }
 
 extern void *dds3PrimFrameRect(s32 x, s32 y, s32 c, s32 w, s32 h, s32 f, s32 g);
 
-s32 cmpDrawFrameRect(s32 x, s32 y, s32 c, s32 w, s32 h, s32 f, s32 g, s32 ot)
+void cmpDrawFrameRect(s32 x, s32 y, s32 c, s32 w, s32 h, s32 f, s32 g, s32 ot)
 {
     sdfGrOt_t *otp;
     void *tag;
@@ -7199,7 +7199,7 @@ s32 cmpDrawFrameRect(s32 x, s32 y, s32 c, s32 w, s32 h, s32 f, s32 g, s32 ot)
     packet = dds3PrimFrameRect(x * 16 + 0x7000, y * 8 + 0x7900, c, w * 16, h * 8, f, g);
     sdfDrawTagLink(tag, packet);
     otp = &sdfGrOtTable[ot];
-    return ((s32 (*)(sdfGrOt_t *, void *))otp->regFunc)(otp, tag);
+    otp->regFunc(otp, tag);
 }
 
 
@@ -7879,7 +7879,7 @@ void cmpDrawListRowBox(s32 x, s32 y, s32 z, u16 w, u16 h2, u16 h, s32 c0, s32 c1
 
 
 #ifdef NON_MATCHING
-s32 cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
+void cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
                     s8 row, s32 scale, s8 phase, s8 layout,
                     cmpCursorInfo_t *cursor, cmpListRowDraw_t draw, s32 ot)
 {
@@ -7915,13 +7915,13 @@ s32 cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
     secondColor = fclBlendColor(baseColor, baseColor, blink);
     draw(x, y, z, secondWidth, firstWidth, height, firstColor, secondColor,
          0x1300BF00, effect, scale, ot);
-    return fclDrawPanelSprite2(0x44, ot);
+    fclDrawPanelSprite2(0x44, ot);
 }
 #else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListRows);
 #endif
 
-extern s32 cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
+extern void cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
                            s8 mode, s32 scale, s8 phase, s8 layout,
                            cmpCursorInfo_t *cursor, cmpListRowDraw_t draw, s32 ot);
 

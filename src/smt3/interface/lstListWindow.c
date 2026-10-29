@@ -19,9 +19,9 @@ extern void fclInitPanel(lstWork_t *work, s32 X, s32 Y, s32 Z, s32 W, s32 H, s32
 
 extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, u16 W, u16 H, s32 Work, void *pPanelPos);
 
-extern s32 fclDrawPanel(lstWork_t *pPanel, s32 OtNo);
+extern void fclDrawPanel(lstWork_t *pPanel, s32 OtNo);
 
-extern s32 fclDrawPanelSprite(s32 id, s32 ot);
+extern void fclDrawPanelSprite(s32 id, s32 ot);
 
 extern void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor);
 

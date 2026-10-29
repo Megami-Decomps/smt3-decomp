@@ -132,7 +132,7 @@ s32 ragCalc(dds3ProcessID_t *id)
 extern fclSpriteTbl_t D_003306B8[];
 
 
-extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
 extern ragItemReq_t *ragGetConfirmEntry(s8 kind, u8 index);
@@ -146,7 +146,7 @@ extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *color,
                                 s32 page, s32 spriteId, s32 *texList,
                                 fclSpriteTbl_t *table, s32 ot);
-extern s32 fclDrawListSprite(s32 x, s32 y, s32 color, s32 width, s32 height,
+extern void fclDrawListSprite(s32 x, s32 y, s32 color, s32 width, s32 height,
                              s32 arg6, s32 blend, s32 ot);
 extern char *pStr[];
 extern char D_0054FBA0[];
@@ -242,7 +242,7 @@ extern u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
                               s32 mode, s32 alpha);
 extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
                                           const char *text, frFontHandle_t *previous);
-extern s32 fclDrawListSprite(s32 x, s32 y, s32 z, s32 width, s32 height,
+extern void fclDrawListSprite(s32 x, s32 y, s32 z, s32 width, s32 height,
                              s32 color, s32 blend, s32 ot);
 extern char *pStr[];
 extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
@@ -388,7 +388,7 @@ extern char *D_003305E8[];
 /* NON_MATCHING: 10 of 84 words differ, the work pointer in the other
  * caller-saved register in each of the two blocks that load it. */
 #ifdef NON_MATCHING
-extern s32 fclDrawPanel(fclPanel_t *pPanel, s32 OtNo);
+extern void fclDrawPanel(fclPanel_t *pPanel, s32 OtNo);
 extern void fclUpdatePanel(fclPanel_t *pPanel);
 
 void ragDrawList2(s8 mode)

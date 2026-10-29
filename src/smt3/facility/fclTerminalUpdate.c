@@ -27,7 +27,7 @@ extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mo
 
 extern s32 fclBlendColor(s32 color, s32 mask, s32 alpha);
 
-extern s32 cmpDrawBoxF(s32 x, s32 y, s32 color, s32 w, s32 h, s32 arg6, s32 ot);
+extern void cmpDrawBoxF(s32 x, s32 y, s32 color, s32 w, s32 h, s32 arg6, s32 ot);
 
 typedef struct
 {
@@ -585,12 +585,12 @@ s32 fcl_2120B0(s16 x, s16 y, s16 w, s16 h, s16 mode, void *cursor)
     return cmpMoveCursor(cursor, 1);
 }
 
-s32 fclDrawListSprite(s32 x, s32 y, s32 color, s32 w, s32 h, s32 arg6, s32 blend, s32 ot)
+void fclDrawListSprite(s32 x, s32 y, s32 color, s32 w, s32 h, s32 arg6, s32 blend, s32 ot)
 {
     if (blend != 0) {
         arg6 = fclBlendColor(arg6, arg6 & 0xFF, 0x80);
     }
-    return cmpDrawBoxF(x, y, color, w, h, arg6, ot);
+    cmpDrawBoxF(x, y, color, w, h, arg6, ot);
 }
 
 INCLUDE_RODATA(const s32, "facility/fclTerminalUpdate", D_0053D6D8);

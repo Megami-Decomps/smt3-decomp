@@ -27,7 +27,7 @@ extern void dds3FreeConfigTexture(void *texture);
 
 extern s32 dds3ConfigBackup;
 
-extern s32 dds3DrawConfigPanel(s32 id);
+extern void dds3DrawConfigPanel(s32 id);
 
 
 

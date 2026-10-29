@@ -13,7 +13,7 @@
 extern datDevilTableEntry_t datDevilTable[];
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
-extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color, s32 ot);
+extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color, s32 ot);
 extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                               const char *text, frFontHandle_t *previous);
 extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, s32 color,

@@ -310,7 +310,7 @@ void shopDrawPrice(fclPanelPos_t *pos, s32 count, s8 drawMode, s32 ot)
                      shopSpriteTable, ot);
 }
 
-extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,
                              s32 spriteId, s32 *textures, fclSpriteTbl_t *table, s32 ot);
 
@@ -339,7 +339,7 @@ extern char *pStr[];
 extern char D_0054FB60[];
 extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 z, u32 color, const char *text, frFontHandle_t *chain);
 extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 z, u32 color, const char *text, frFontHandle_t *chain);
-extern s32 fclDrawListSprite(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 blend, s32 ot);
+extern void fclDrawListSprite(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 blend, s32 ot);
 
 void shopDrawRowText(s32 x, s32 y, s32 z, u32 color, u16 item, s32 count, s32 ot)
 {
@@ -391,7 +391,7 @@ extern void lstDrawListWindow(void *work, s8 noCursor, s32 ot);
 extern void lstDrawListWindowCursor(void *work, s32 ot);
 extern u32 cmpDrawListItemBox(void *cursor, s32 row, s32 slot, s32 mode, s32 height);
 extern s32 cmpItemHasFlag(u16 item, s8 which);
-extern s32 fclDrawPanel(fclPanel_t *panel, s32 ot);
+extern void fclDrawPanel(fclPanel_t *panel, s32 ot);
 extern void fclDrawPriceText(fclPanelPos_t *panel, u16 item, s32 ot);
 
 

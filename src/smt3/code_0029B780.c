@@ -49,7 +49,7 @@ extern char D_00548870[];
 
 
 
-extern s32 dds3DrawConfigPanel(s32 id);
+extern void dds3DrawConfigPanel(s32 id);
 
 extern char D_00548858[];
 
@@ -260,13 +260,13 @@ extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors,
     s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
 extern void dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
 extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
-extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height, s32 *colors, s32 ot);
+extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height, s32 *colors, s32 ot);
 extern void fclDrawSpriteAlpha(s32 x, s32 y, s32 z, u8 mode, s32 *colors,
     s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
 
 /* NON_MATCHING: 7 of 179 words differ, at the native 716-byte size. */
 #ifdef NON_MATCHING
-extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+extern void fclDrawPanelSprite2(s32 id, s32 ot);
 
 void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 selected, s32 ot)
 {
@@ -334,10 +334,10 @@ INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigCursor);
 #endif
 
 extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
-extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
-extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void fclDrawPanelSprite2(s32 id, s32 ot);
+extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 
-s32 dds3DrawConfigItem(s32 x, s32 y, s32 z, s32 ot)
+void dds3DrawConfigItem(s32 x, s32 y, s32 z, s32 ot)
 {
     s32 phase = dds3GetConfigAnimPhase();
     u32 color0 = fclBlendColor(0x9195EE20, 0x20, 0x100 - phase / 2);
@@ -349,14 +349,14 @@ s32 dds3DrawConfigItem(s32 x, s32 y, s32 z, s32 ot)
         cmpDrawBoxF(x, y, z, 0x200, 3, color0, ot);
         cmpDrawBoxF(x, y + 0x18, z, 0x200, 0xC, color1, ot);
         cmpDrawBoxF(x, y + 0x998, z, 0x200, 0xC, color1, ot);
-        return cmpDrawBoxF(x, y + 0x9F8, z, 0x200, 3, color0, ot);
+        cmpDrawBoxF(x, y + 0x9F8, z, 0x200, 3, color0, ot);
     }
 }
 
 extern s32 fclGetPanelAnimTarget(fclPanelAnim_t *anim);
 
 #ifdef NON_MATCHING
-s32 dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
+void dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
 {
     s32 colors[4];
     s32 target = fclGetPanelAnimTarget(&((dds3ConfigWork_t *)GBWK)->panels[0]);
@@ -371,7 +371,7 @@ s32 dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
     colors[1] = 0x80;
     colors[2] = 0;
     colors[3] = 0x80;
-    return cmpDrawBoxGDefault(x + target + 0x1120, y + 0x2B0, z, 0xEE, 0x121, colors, ot);
+    cmpDrawBoxGDefault(x + target + 0x1120, y + 0x2B0, z, 0xEE, 0x121, colors, ot);
 }
 #else
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigSlider);
@@ -512,13 +512,13 @@ s32 dds3DrawConfigBackground(s32 flags)
     fclDrawBG(sprite, flags);
 }
 
-extern s32 fclDrawPanelSprite(s32 id, s32 ot);
-extern s32 dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot);
+extern void fclDrawPanelSprite(s32 id, s32 ot);
+extern void dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot);
 extern void dds3DrawConfigText(s32 x, s32 y, s32 z, s32 count, s32 index, s32 value, s32 ot);
 
 /* NON_MATCHING: 5 of 150 words differ; exact 600-byte size. */
 #ifdef NON_MATCHING
-s32 dds3DrawConfigPanel(s32 ot)
+void dds3DrawConfigPanel(s32 ot)
 {
     s32 colors[4];
     s32 color;
@@ -546,7 +546,7 @@ s32 dds3DrawConfigPanel(s32 ot)
     fclDrawSpriteRes(0, -0x80, 0, colors, 0, 5, D_00345D88, dds3ConfigLayoutTable, ot);
     fclDrawSpriteRes(0, -0x80, 0, colors, 0, 6, D_00345D88, dds3ConfigLayoutTable, ot);
     fclDrawSpriteRes(0, -0x80, 0, colors, 0, 7, D_00345D88, dds3ConfigLayoutTable, ot);
-    return dds3DrawConfigItem(0, 0x1D8, 0, ot);
+    dds3DrawConfigItem(0, 0x1D8, 0, ot);
 }
 
 #else

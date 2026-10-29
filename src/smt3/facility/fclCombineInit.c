@@ -173,7 +173,7 @@ extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
 
 extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 
-extern s32 cmpDrawSpriteFlag(u8 id, s32 flag, s32 arg);
+extern void cmpDrawSpriteFlag(u8 id, s32 flag, s32 arg);
 
 
 
@@ -2882,7 +2882,7 @@ extern void fclDrawSpriteAlpha(s32 x, s32 y, s32 z, u8 mode, s32 *colors,
                                fclSpriteTbl_t *table, s32 ot);
 
 #ifdef NON_MATCHING
-extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 #endif
 
 void cmbDrawStockBox(s32 unusedX, s32 unusedY, s32 z, s32 unused3, s8 selected, s32 ot)
@@ -2924,7 +2924,7 @@ void cmbDrawStockBox(s32 unusedX, s32 unusedY, s32 z, s32 unused3, s8 selected, 
                      cmbSpriteTable, ot);
 }
 
-extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 extern fclSpriteTbl_t cmbSpriteTable[];
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
                              fclSpriteTbl_t *table, s32 OtNo);
@@ -2984,7 +2984,7 @@ void cmbDrawStockBg(s32 x, s32 y, s32 z, u8 mode, s32 ot)
 }
 
 extern s32 D_00345D88[];
-extern s32 fclDrawPanel(fclPanel_t *panel, s32 ot);
+extern void fclDrawPanel(fclPanel_t *panel, s32 ot);
 extern void fclUpdatePanel(fclPanel_t *panel);
 
 void cmbDrawListPanel(s32 unusedX, s32 unusedY, s32 z, s32 ot)
@@ -3111,7 +3111,7 @@ void cmbDrawResultIcon(s8 mode, s32 z, s32 unused2, s32 unused3, s32 alpha, s32 
     }
 }
 
-extern s32 fclDrawPanelSprite(s32 id, s32 ot);
+extern void fclDrawPanelSprite(s32 id, s32 ot);
 
 #ifdef NON_MATCHING
 void cmbDrawResultHeader(s32 x, s32 y, s32 z, s32 width, s32 height,
@@ -3153,7 +3153,7 @@ s32 cmbDrawPhaseDefault(s32 active)
     cmpUpdateListSelection(&pos, (u8 *)CMB_GBWK + 0x1C, 0, mode, 0x100, 0x47);
 }
 
-extern s32 fclDrawPanelSprite(s32 id, s32 arg);
+extern void fclDrawPanelSprite(s32 id, s32 arg);
 
 void cmbDrawInfoSprite(s32 unusedX, s32 unusedY, s32 z, s32 unusedOt)
 {
@@ -3197,9 +3197,9 @@ s32 cmbDrawTopText(s8 index)
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawTopText);
 #endif
 
-extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+extern void fclDrawPanelSprite2(s32 id, s32 ot);
 extern s32 cmpCursorBlinkColor(s32 timer);
-extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
+extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 *colors, s32 ot);
 
 #ifdef NON_MATCHING
@@ -3258,8 +3258,8 @@ void cmbDrawStockScrollBar(s8 mode, s32 z, s32 unused, cmpCursorInfo_t *cursor, 
 /* NON_MATCHING: 25 of 29 words match, exact size; the `color & ~0xFF` value
  * takes $3 where retail uses $2. */
 #ifdef NON_MATCHING
-extern s32 cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g);
-extern s32 fclDrawPanelSprite2(s32 id, s32 arg);
+extern void cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g);
+extern void fclDrawPanelSprite2(s32 id, s32 arg);
 
 void cmbDrawResultFooter(s32 color)
 {

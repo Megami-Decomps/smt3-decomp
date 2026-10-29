@@ -15,7 +15,7 @@ extern void cmpUpdateTerminate(void *work);
 extern fclSpriteTbl_t GBWK_2 __attribute__((section(".data")));
 extern nmeWork_t *namelist_buttonAnim_end;
 extern void frSetFontColor(frFontHandle_t *font, u32 color);
-extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
+extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 *colors, s32 ot);
 extern void nmeDrawCursorAt(s32 x, s32 y, s32 z, s8 mode, s32 ot);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page, s32 spriteId,
