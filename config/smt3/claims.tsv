@@ -794,3 +794,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 620 B	filesystem fo
 src/smt3/pipe/pipeCamera.c	redthing1	done	2026-10-28	1 fn / 436 B	base pipe camera snapshot, next-row tangent, normalized radial offset and fresh path orientation; complete owner exact with no function fallbacks
 src/smt3/event/evtEventViewerMenu.c	redthing1	done	2026-10-29	1 fn / 448 B	PiM agent: native/DDS character-grid menu geometry with truthful local callback/provider contracts; separately qualified zero-credit prerequisite, complete owner preserved
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 620 B	filesystem mount with required paths, mode/signed-size fields and full typed request transfer; complete owner exact
+src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	2 matches / 396 bytes	Native double/float packing, shared binary views and exact exponent/overflow bounds
