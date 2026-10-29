@@ -3836,7 +3836,40 @@ void campDhDrawBox(s32 alpha)
     cmpDrawBoxGDefault(0, 0x410, 0, 0x200, 0x8C, corner, 0x47);
 }
 
+extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
+                              s32 *colors, s32 ot);
+
+#ifdef NON_MATCHING
+void campDhDrawBoxSprite(s32 timer)
+{
+    s32 phase = (s32)((u32)timer * 6) % 0x200;
+    s32 rising = 1;
+    s32 offset;
+    s32 colors[4];
+
+    if (phase >= 0x100) {
+        phase = 0x200 - phase;
+    }
+    if (phase >= 0x80) {
+        phase = 0x100 - phase;
+        rising = 0;
+    }
+    offset = phase * phase * 0x50 / 0x4000;
+    if (rising) {
+        offset = 0xA0 - offset;
+    }
+    colors[0] = colors[1] = 0x006E9813;
+    colors[2] = colors[3] = 0x006E9800;
+    fclDrawPanelSprite2(0x48, 0x47);
+    cmpDrawBoxGDefault(0, -offset * 8, 0, 0x200, offset + 0xE6, colors, 0x47);
+    colors[0] = colors[1] = 0x00121800;
+    colors[2] = colors[3] = 0x00121880;
+    fclDrawPanelSprite2(0x44, 0x47);
+    cmpDrawBoxGDefault(0, 0x3B0, 0, 0x200, offset + 0x14A, colors, 0x47);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawBoxSprite);
+#endif
 
 void campDhDrawGaugeBars(s32 unusedAlpha)
 {
