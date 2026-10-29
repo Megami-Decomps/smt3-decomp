@@ -951,3 +951,4 @@ src/smt3/field/fldHit.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldHitCh
 src/smt3/field/fldPlayer.c	z29	open	2026-10-29	1 fn / 3068 B	largest-first pass: fldPlayerCalc_Wm2
 src/smt3/field/fldPlayer.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldPlayerCalc_Wm2 rebuilt on recovered block shapes, 606 of 768 instructions agree on shape; gcse PRE merges the pad base retail rematerialises, spilling the model handle; four .lit4 externs replaced by literals
 src/smt3/field/fldTitle.c	z29	open	2026-10-29	1 fn / 3028 B	largest-first pass: fldTitle_Process
+src/smt3/field/fldTitle.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldTitle_Process 755 of 757 words at the native 3028 B, two words from exact on a gp-load vs compare-constant ready-list pick; recorded in docs/levers/scheduling.md; fldTitleMini_Process was already matching
