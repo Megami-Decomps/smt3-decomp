@@ -1062,7 +1062,125 @@ void SetNextSeq(nbDebugProcessData_t *d)
     }
 }
 
+extern s32 nbGetTarSelStat(void);
+extern void nbSetOrder(s32 index);
+extern void nbSetNextOrder(void);
+
+#ifdef NON_MATCHING
+void *nbDebugProcess1(dds3ProcessID_t *id)
+{
+    nbDebugProcessData_t *d = dds3GetProcessData(id);
+    s32 advance = 0;
+    s32 result;
+    s32 nextseq;
+
+    switch (d->seq) {
+    case 0:
+        d->nextseq = 1;
+        advance = 1;
+        break;
+    case 1:
+        result = nbGetTarSelStat();
+        if (result == 0) {
+            SetTarget_nbDebugProcess(d);
+            d->nextseq = 4;
+            advance = 1;
+        } else if (result == 2) {
+            return (void *)-1;
+        } else {
+            DispHpMpBad(d);
+        }
+        break;
+    case 2:
+        result = SelectDevil();
+        if (result == -1) {
+            d->nextseq = 4;
+            advance = 1;
+        } else if (result == 1) {
+            d->nextseq = 3;
+            advance = 1;
+        }
+        break;
+    case 3:
+        if (((d->data->stat & 8) != 0 && d->side != 1) ||
+            ((d->data->stat & 8) == 0 && d->side != 0)) {
+            return (void *)-1;
+        }
+        nbSetOrder((s32)id);
+        while (d->data->party[d->data->activeunit].formindex != d->formindex) {
+            nbSetNextOrder();
+        }
+        return (void *)-1;
+    case 4:
+        result = SelectMenu(d);
+        if (result == -1) {
+            d->nextseq = 1;
+            advance = 1;
+        } else if (result == 1) {
+            switch (menucur) {
+            case 0: nextseq = 2; break;
+            case 1: nextseq = 5; break;
+            case 2: nextseq = 6; break;
+            case 3: nextseq = 7; break;
+            case 4: nextseq = 8; break;
+            default: return NULL;
+            }
+            d->nextseq = nextseq;
+            advance = 1;
+        } else {
+            DispHpMpBad2(d, d->form);
+        }
+        break;
+    case 5:
+    case 6:
+        result = SelectHpMp(d);
+        if (result == -1 || result == 1) {
+            d->nextseq = 4;
+            advance = 1;
+        } else {
+            DispHpMpBad2(d, d->form);
+        }
+        break;
+    case 7:
+        result = SelectBad(d);
+        if (result == -1) {
+            d->nextseq = 4;
+            advance = 1;
+        } else if (result != 1) {
+            DispHpMpBad2(d, d->form);
+        }
+        break;
+    case 8:
+        SelectMotData(d, 0);
+        result = SelectMot(d, 1);
+        if (result == -1) {
+            d->nextseq = 4;
+            advance = 1;
+        } else if (result == 2) {
+            d->nextseq = 9;
+            advance = 1;
+        }
+        break;
+    case 9:
+        SelectMot(d, 0);
+        if (SelectMotData(d, 1) == -1) {
+            d->nextseq = 8;
+            advance = 1;
+        }
+        break;
+    default:
+        break;
+    }
+
+    if (advance) {
+        SetNextSeq(d);
+    }
+    return NULL;
+}
+
+#else
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", nbDebugProcess1);
+#endif
 
 void nbDebugShutdown(dds3ProcessID_t *id)
 {
