@@ -3491,13 +3491,33 @@ void TerminateLibrary(void)
     InitTLB();
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", ExecPS2);
+extern const char D_0054BCF0[];
+extern s32 _ExecPS2(void *entry, void *gp, s32 count, char **arguments);
+extern void libc_2DBAC0(s32 status);
+extern void _ExecOSD(s32 count, char **arguments);
+
+s32 ExecPS2(void *entry, void *gp, s32 count, const char *const *arguments)
+{
+    SetArg(D_0054BCF0, count, arguments);
+    TerminateLibrary();
+    return _ExecPS2(entry, gp, count,
+                    &((execArgumentBlock_t *)D_0052D668)->arguments[1]);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", LoadExecPS2);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", Exit);
+void Exit(s32 status)
+{
+    TerminateLibrary();
+    libc_2DBAC0(status);
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", ExecOSD);
+void ExecOSD(s32 count, const char *const *arguments)
+{
+    SetArg(D_0054BCF0, count, arguments);
+    TerminateLibrary();
+    _ExecOSD(count, &((execArgumentBlock_t *)D_0052D668)->arguments[1]);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__17);
 
