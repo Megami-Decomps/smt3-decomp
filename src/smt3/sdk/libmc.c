@@ -40,6 +40,17 @@ typedef struct mcNameReq {
 
 extern mcNameReq D_005997F0 __attribute__((section(".data")));
 
+/* Read-specific view of the shared callback buffer. The producer supplies
+ * the second payload extent; other commands use different reply layouts. */
+typedef struct {
+    s32 firstLength;
+    s32 secondLength;
+    u8 *firstDestination;
+    u8 *secondDestination;
+    u8 firstData[0x40];
+    u8 secondData[0];
+} mcReadReplyPrefix_t;
+
 /* The 0xC0-byte block the RPC end functions read back, and the 0x400-byte
  * working directory sceMcChdir hands to mceStorePwd. */
 extern u8 D_00599C40[0xC0] __attribute__((section(".data")));
@@ -78,7 +89,7 @@ extern int scePrintf(const char *fmt, ...);
 extern const char D_0054AEE8[];
 extern void sceSifWriteBackDCache(void *addr, s32 size);
 extern void FlushCache(s32 mode);
-extern void mceIntrReadFixAlign(void);
+extern void mceIntrReadFixAlign(void *argument);
 extern void mceGetInfoApdx(void *reply);
 extern void mceStorePwd(char *dest);
 
@@ -229,7 +240,25 @@ s32 sceMcSeek(s32 fd, s32 offset, s32 origin)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "sdk/libmc", mceIntrReadFixAlign);
+void mceIntrReadFixAlign(void *argument)
+{
+    mcReadReplyPrefix_t *reply = (mcReadReplyPrefix_t *)((u32)argument | 0x20000000);
+    u8 *destination;
+    s32 i;
+
+    if (reply->firstLength != 0) {
+        destination = reply->firstDestination;
+        for (i = 0; i < reply->firstLength; i++) {
+            *destination++ = reply->firstData[i];
+        }
+    }
+    if (reply->secondLength != 0) {
+        destination = reply->secondDestination;
+        for (i = 0; i < reply->secondLength; i++) {
+            *destination++ = reply->secondData[i];
+        }
+    }
+}
 
 s32 sceMcRead(s32 a, void *b, s32 c)
 {
