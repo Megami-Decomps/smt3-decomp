@@ -824,7 +824,7 @@ void MyHitAction(tagPipeObject *object)
             playerDAMAGE = (s32)((u32)playerDAMAGE + 1);
             if (resources == 4 ||
                 (resources == 12 && (dds3GetRandA(NULL) & 0xFF) < 0xCD)) {
-                pipeDropMaka(object, 0x1.999998p-4f);
+                pipeDropMaka(object, 0.09999999404f);
             } else if (resources == 8 || (resources == 12 && rBoxNum > 0)) {
                 pipeDropRBox(object);
             }

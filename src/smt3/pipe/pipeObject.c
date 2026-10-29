@@ -323,7 +323,7 @@ u8 objLoad(tagPipeObject *object, s32 index)
     }
     radius = (f32)(s32)(mode * 60);
     if (place & 1) {
-        radius *= 0x1.6a09e6p-1f;
+        radius *= 0.7071067691f;
     }
     if (place < 4) {
         object->pos[1] = radius;
