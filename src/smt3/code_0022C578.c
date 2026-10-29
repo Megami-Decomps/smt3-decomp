@@ -395,7 +395,8 @@ typedef struct
     /* 0x0004 */ s8 unk_0004;
     /* 0x0005 */ u8 unk_0005[0xF];
     /* 0x0014 */ void *allocation;
-    /* 0x0018 */ u8 unk_0018[0x1040];
+    /* 0x0018 */ s8 stockMessagePhase;
+    /* 0x0019 */ u8 unk_0019[0x103F];
     /* 0x1058 */ cmpListPage_t page[3];
     /* 0x410C */ u8 unk_410C[0x22];
     /* 0x412E */ s16 itemCursor;
@@ -2028,7 +2029,7 @@ s32 cmpCalcDestroyItem(void)
     {
         return 0;
     }
-    campWork->unk_0018[0] = 0;
+    campWork->stockMessagePhase = 0;
     fclSetMessageVar_20743088(2, (s32)pStr[id]);
     sprintf(buf, D_0054FE40, D_00330914[0], DDS3_GBWK->stocklist[id + 4]);
     fclSetMessageVar_20743088(0xB, (s32)buf);
@@ -2165,7 +2166,7 @@ s32 cmpCalcParty(void)
                     goto finish;
                 }
 
-                campWork->unk_0018[0] = 0;
+                campWork->stockMessagePhase = 0;
                 fclSetMessageInvalid(0);
                 fclStartMessage(6);
                 fclStartSelMessage(0xB);
@@ -2307,7 +2308,7 @@ s32 cmpCalcSequence(void)
     case 13:
         break;
     case 14:
-        if (campWork->unk_0004 == 1 && (s8)campWork->unk_0018[0] == 1) {
+        if (campWork->unk_0004 == 1 && (s8)campWork->stockMessagePhase == 1) {
             s8 index = cmpGetStockInfoIndex(campWork->stock, 0, 0);
             datUnitWork_t *unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + index;
 
@@ -2774,7 +2775,7 @@ s32 camp_draw_Process(void)
     case 11: campDrawStockCursor(); break;
     case 10: campDrawSetPhase(); break;
     case 14:
-        if (*(s8 *)campWork->unk_0018 == 0) {
+        if (campWork->stockMessagePhase == 0) {
             campDrawSeq3(2);
         } else {
             campDrawSeq3(3);
@@ -3051,7 +3052,51 @@ void cmpRemoveStockDevil(void)
     cmpReCalcStockCursorPos(2);
 }
 
+extern s32 cmpSetStockRemoveEff(u8 *work);
+extern s32 fclChkSelMessage(void);
+extern s8 fclGetSelMessagePos(void);
+extern s8 fclEndMessage(void);
+
+#ifdef NON_MATCHING
+void campWaitSelMessage(void)
+{
+    if (campWork->stockMessagePhase > 0) {
+        if (campWork->stockMessagePhase == 1 &&
+            cmpSetStockRemoveEff((u8 *)campWork->stock) == 0) {
+            cmpRemoveStockDevil();
+            campWork->stockMessagePhase = 3;
+        }
+        if (fclChkMessage() == 0 && campWork->stockMessagePhase != 1) {
+            if (cmpStartStockMsg(1) == 0) {
+                cmpSetCrossGeneralVal(campWork->crossPanel, 0);
+                campWork->unk_0001 = 3;
+                campWork->unk_0004 = 1;
+            } else {
+                campWork->unk_0001 = 8;
+                campWork->unk_0004 = -1;
+                campWork->previousPhase = 3;
+            }
+        }
+    } else if (fclChkSelMessage() == 0) {
+        switch (fclGetSelMessagePos()) {
+        case 0:
+            campWork->stockMessagePhase = 1;
+            p2sdPlaySE(0x13, 0x7F, 0x3F);
+            /* fall through */
+        case 1:
+            if (campWork->stockMessagePhase == 0) {
+                fclEndMessage();
+                campWork->stockMessagePhase = 2;
+            } else {
+                campWork->unk_0004 = 1;
+            }
+            break;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campWaitSelMessage);
+#endif
 
 void campCloseInfoWindow(void)
 {
