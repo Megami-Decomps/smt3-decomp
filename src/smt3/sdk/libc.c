@@ -3544,15 +3544,3 @@ INCLUDE_RODATA(const s32, "sdk/libc", D_0054BAB0);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054BAC8);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BAE0);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BAE8);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BAF0);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BAF8);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BB00);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BB08);
-

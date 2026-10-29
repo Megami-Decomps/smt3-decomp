@@ -202,8 +202,16 @@ split in this region:
 - **A rodata block whose unit contains a 16-byte-aligned jump table must start
   16-byte aligned.** spimdisasm emits `.align 4` before such a table, and that
   directive aligns the offset within the section, so a section starting 8 bytes
-  off puts the table 8 bytes wrong. libkernl's block starts at its first jump
-  table for this reason, and the strings before it sit in libc's object.
+  off puts the table 8 bytes wrong. libkernl's block originally started at its
+  first jump table (`0x0054BB10`) for this reason. It now starts at the also
+  16-byte-aligned `0x0054BAE0`, including printfloat's contiguous 48-byte
+  string/double block before that table. This is a minimal packaging-boundary
+  extension, not recovery of the whole library's original data boundary:
+  earlier kernel strings remain in libc's object. `sdk_objects.tsv` identifies
+  printfloat by bytes and `_printf` by name as `kprintf.o`; native references
+  tie those six literals exclusively to printfloat. Moving their existing ASM
+  ownership first preserves both complete owners and the retail image before
+  C promotion.
 - **An object aligned more strictly than its code needs has to say so.**
   libkernl's first object, `klib.o`, aligns `.text` to 64, and the retail link
   pads 16 bytes after libc's last function to reach it. `TEXT_ALIGN(6)` in the

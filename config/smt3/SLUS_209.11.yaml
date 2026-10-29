@@ -599,7 +599,7 @@ segments:
       - [0x44BF60, .rodata, sdk/libm]
       - [0x44C460, .rodata, sdk/libgcc]
       - [0x44C550, .rodata, sdk/libc]
-      - [0x44CB10, .rodata, sdk/libkernl]
+      - [0x44CAE0, .rodata, sdk/libkernl]
       - [0x44CD78, .rodata, sdk/libgcc_longlong]
       - [0x44D180, .lit4, kernel/dds3PadManager]
       - [0x44D188, .lit4, kernel/dds3KernelDraw]

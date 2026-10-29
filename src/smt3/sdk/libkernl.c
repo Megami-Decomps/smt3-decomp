@@ -779,6 +779,12 @@ INCLUDE_ASM(const s32, "sdk/libkernl", ftoi);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", printfloat);
 
+INCLUDE_RODATA(const s32, "sdk/libkernl", D_0054BAF8);
+
+INCLUDE_RODATA(const s32, "sdk/libkernl", D_0054BB00);
+
+INCLUDE_RODATA(const s32, "sdk/libkernl", D_0054BB08);
+
 INCLUDE_ASM(const s32, "sdk/libkernl", _printf);
 
 /* In ee-gcc 2.9, next_arg names the first incoming stack argument. These
