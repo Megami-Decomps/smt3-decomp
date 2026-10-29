@@ -2819,13 +2819,40 @@ INCLUDE_ASM(const s32, "sdk/libkernl", supplement_crt0);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", Copy);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", kCopy);
+s32 kCopy(u32 *dst, const u32 *src, u32 count)
+{
+    u32 i;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", kFindAddress);
+    count >>= 2;
+    for (i = 0; i < count; i++) {
+        *dst++ = *src++;
+    }
+    return 0;
+}
+
+u32 *kFindAddress(u32 *start, const u32 *end, u32 instruction)
+{
+    while (*start != instruction && start < end) {
+        start++;
+    }
+    if (start >= end) {
+        start = NULL;
+    }
+    return start;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", FindAddress);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", GetSystemCallEntry);
+extern u32 *D_0052C360 __attribute__((section(".data")));
+extern s32 Copy(void *dst, const void *src, u32 count);
+
+u32 GetSystemCallEntry(s32 index)
+{
+    u32 entry;
+
+    Copy(&entry, &D_0052C360[index], 4);
+    return entry;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", GetSystemCallTableEntry);
 
