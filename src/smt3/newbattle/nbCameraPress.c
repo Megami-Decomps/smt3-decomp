@@ -72,7 +72,20 @@ void nbCameraPressProcessRun(void)
 INCLUDE_ASM(const s32, "newbattle/nbCameraPress", nbCameraPressProcessRun);
 #endif
 
+#ifdef NON_MATCHING
+void nbCameraPressProcessInit(void)
+{
+    if (nbCameraPressThrough == 0) {
+        nbCameraPressStart();
+    } else {
+        nbCameraPressRunFlag = FALSE;
+        nbCameraPressThrough = FALSE;
+        nbCameraPressFrame = 100;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraPress", nbCameraPressProcessInit);
+#endif
 
 void nbCameraPressStart(void)
 {
