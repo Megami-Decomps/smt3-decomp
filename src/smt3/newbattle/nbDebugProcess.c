@@ -507,7 +507,70 @@ void DispBadStatus(s32 x, s32 y, u32 status, s32 color)
 }
 
 
+typedef struct {
+    const char *count[20];
+    const char *aisyo[16];
+} nbDebugUnitLabels_t;
+extern nbDebugUnitLabels_t nbDebugUnitLabelTable;
+extern const char D_00545658[], D_00545668[], D_00545678[], D_00545688[];
+extern const char D_00551488[], D_00551490[];
+extern nbParty_t *nbGetPartyFromFormindex(s32 formindex);
+extern u32 nbGetAisyo(s32 nskill, s32 formindex, s32 attr);
+
+#ifdef NON_MATCHING
+void DispHpMpBad2(nbDebugProcessData_t *d, nbFormation_t *form)
+{
+    nbDebugUnitLabels_t labels;
+    datUnitWork_t *work;
+    nbParty_t *party;
+    sdfDrawTag_t *tag;
+    frFontRequest_t *request;
+    char flags[6];
+    s32 i, y, n;
+    u32 aisyo;
+
+    labels = nbDebugUnitLabelTable;
+    work = nbGetUnitWorkFromFormindex(form->formindex);
+    party = nbGetPartyFromFormindex(form->formindex);
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    request = frwGetSmallFontFRQ(0x80, 0x270, 0xFFFF80, -0x80, text2[work->id], NULL);
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, 0x7C30, 0xFEFFFF, 0, D_00545658, work->id));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, 0x7C90, 0xFEFFFF, 0, D_00545668, work->level));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, 0x7CF0, 0xFEFFFF, d->seq == 5 ? 4 : 0,
+                                         D_00545678, work->hp, work->maxhp));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, 0x7D50, 0xFEFFFF, d->seq == 6 ? 4 : 0,
+                                         D_00545688, work->mp, work->maxmp));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, 0x7DB0, 0xFEFFFF, 0, D_00551488));
+    DispBadStatus(0x50, 0x96, work->badstatus, 0);
+    y = 0x7E70;
+    for (i = 0; i < 20; i++) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, y, 0xFEFFFF, 0,
+                                             D_00551490, labels.count[i], party->count[i]));
+        y += 0x60;
+    }
+    y = 0x80D0;
+    for (i = 0; i < 12; i++) {
+        aisyo = nbGetAisyo(-1, form->formindex, i);
+        n = 0;
+        if (aisyo & 0x10000) flags[n++] = 'M';
+        if (aisyo & 0x20000) flags[n++] = 'H';
+        if (aisyo & 0x40000) flags[n++] = 'K';
+        if (aisyo & 0x100000) flags[n++] = 'B';
+        if ((s32)aisyo < 0) flags[n++] = 'W';
+        flags[n] = '\0';
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7820, y, 0xFEFFFF, 0,
+                                             D_00551490, labels.aisyo[i], aisyo & 0xFFFF));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7E20, y, 0xFEFFFF, 0, D_00551358, flags));
+        y += 0x60;
+    }
+    frDrawFont((frFontHandle_t *)request);
+    frDestroyFontRequestAfter((frFontHandle_t *)request);
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", DispHpMpBad2);
+#endif
 
 void DispHpMpBad(nbDebugProcessData_t *d)
 {
