@@ -1635,7 +1635,30 @@ s32 nbGetMaxHpWazaPoint(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
     return value;
 }
 
+#ifdef NON_MATCHING
+u32 nbGetVirtualAisyo(s32 nskill, s32 sformindex, s32 dformindex)
+{
+    s32 skillattr = nbGetNormalSkillAttr(nskill);
+    u32 aisyo;
+
+    if (skillattr == -1 || (skillattr >= 12 && skillattr < 15)) {
+        return 0;
+    }
+    aisyo = nbGetAisyo(nskill, dformindex, skillattr);
+    if (aisyo & 0x20000) {
+        return 0x20000;
+    }
+    if (aisyo & 0x40000) {
+        return 0x40000;
+    }
+    if (aisyo & 0x10000) {
+        return 0x10000;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetVirtualAisyo);
+#endif
 
 s32 nbGetVirtualKoukaPoint(s32 nskill, s32 sformindex, s32 dformindex)
 {
