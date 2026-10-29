@@ -69,7 +69,15 @@ instead of `break` in one arm, in all arms, and an explicit `default:
 continue;`; a `default:` arm holding `if (kind == 3)`, which costs 13 more
 words; the chest row as a 16-byte `fldTakaraEntry_t` array instead of the
 `u8` table the neighbouring `fldItemBoxAdd` uses (identical output); three
-declaration positions for `vec`; and a literal `0x10` for the `memset` size.
+declaration positions for `vec`; a literal `0x10` for the `memset` size; a
+`void **` local holding `fldBlurEffectId` and a `f32 *` element type for it;
+reading the element through a `u8 *` cast; and a local for the chest kind.
+
+The second pair is a scheduling tie that only an alias edge can break. Retail's
+store and the `fldBlurEffectId[0]` load have equal critical paths to the call,
+so insn order decides and the store wins; in the draft the load's chain is
+longer by one and it goes first. Nothing spellable in C makes an `f32` store
+into an address-taken local conflict with a `void *` array read.
 
 ## fldNpcLightSet (field/fld_Npc, 0x28C)
 

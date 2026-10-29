@@ -712,5 +712,5 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	5 SDK fn / 224 B	DECI2 extende
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 SDK fn / 160 B	read completion copies both payload spans through uncached descriptor, then forwards status-word pointer; complete owner exact
 src/smt3/kernel/dds3KernelDraw.c	redthing1	done	2026-10-29	1 fn / 1532 B	PiM agent: DDS scene-light update with six real shared READONLY unpack calls and canonical fog color owner; no alias/type/header/macro change; complete owner87/0
 src/smt3/sdk/libmc.c	redthing1	done	2026-10-28	1 SDK fn / 144 B	read callback copies two uncached payload spans with native signed bounds and destination increments; complete owner exact
-src/smt3/field/fld_Npc.c	z25	in progress	2026-10-29	3 fn / 6520 B	fldNpcCalc, fldNpcDraw, fldNpcLoad
-src/smt3/newbattle/nbPanelProcess.c	z25	in progress	2026-10-29	2 fn / 4680 B	nbPanelStockSelect, nbPanelDrawPP
+src/smt3/field/fld_Npc.c	z25	done	2026-10-29	0 fn / 0 B	fldNpcCalc drafted to 5 of 492 words; fldNpcDraw and fldNpcLoad untouched
+src/smt3/newbattle/nbPanelProcess.c	z25	done	2026-10-29	1 fn / 2032 B	nbPanelStockSelect; nbPanelDrawPP untouched

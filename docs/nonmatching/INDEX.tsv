@@ -123,9 +123,9 @@ fldRunDantePatr	field/fldTest	0x2D0	178 of 180 words match	docs/nonmatching/fiel
 fldTitle_Process	field/fldTitle	0xBD4		docs/nonmatching/field/fldTitle.md	5
 fldItemBoxAdd (0x680)			294 of 416 words differ	docs/nonmatching/field/fld_Npc.md	5
 fldNpcCalc	field/fld_Npc	0x7B0	487 of 492 words match	docs/nonmatching/field/fld_Npc.md	37
-fldNpcLightSet	field/fld_Npc	0x28C	125 of 163 words match	docs/nonmatching/field/fld_Npc.md	74
-fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/nonmatching/field/fld_Npc.md	106
-fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/nonmatching/field/fld_Npc.md	140
+fldNpcLightSet	field/fld_Npc	0x28C	125 of 163 words match	docs/nonmatching/field/fld_Npc.md	82
+fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/nonmatching/field/fld_Npc.md	114
+fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/nonmatching/field/fld_Npc.md	148
 frPreCalcStrWidth	interface/frFont	0xF8	Fifty-six of sixty-two words match	docs/nonmatching/interface/frFont.md	5
 frAnalyzeTag	interface/frFont	0x518		docs/nonmatching/interface/frFont.md	49
 frAnalyzeMessage	interface/frFont	0x200		docs/nonmatching/interface/frFont.md	101
