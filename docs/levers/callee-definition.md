@@ -87,3 +87,12 @@ following global reload used `$3` instead of retail's `$2`, leaving two of
 all 140 bytes; the updater remains assembly-backed under its existing guard.
 The complete owner also matches with the process callback and data accessor
 typed with `dds3ProcessID_t *`.
+
+`pb/pbGame::gameKey1` combines a real data split with a provider correction.
+The symbol map already exposes two signed-halfword cursor globals, so source
+must use both rather than one combined record. At native 680-byte size, six
+remaining register words after sound calls close with `void p2sdPlaySE(...)`,
+as defined by `sdfSound`. The key mode result and action input are `u8`, as
+defined by `pbKeyConv`. Initialize the movement mask to zero and set its four
+bits conditionally; the first bit is `y < 19`. That ordinary mask-building
+form closes the final three operand/conditional-move differences.

@@ -196,11 +196,10 @@ StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/nonmatching/
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	138 of 152 words match	docs/nonmatching/newbattle/nbUnitProcess.md	5
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/nonmatching/newdata/datCalc.md	5
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/nonmatching/nme/Nme_Init.md	5
-gameKey1	pb/pbGame	0x2A8	150 of 168 words differ	docs/nonmatching/pb/pbGame.md	5
-deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame.md	34
-pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md	59
-roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/nonmatching/pb/pbGame.md	79
-pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/nonmatching/pb/pbGame.md	104
+deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame.md	5
+pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md	30
+roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/nonmatching/pb/pbGame.md	50
+pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/nonmatching/pb/pbGame.md	75
 pbRebuildOutline	pb/pbGameDraw	0x188	16 of 95 words match	docs/nonmatching/pb/pbGameDraw.md	5
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/nonmatching/pb/pbMCard.md	5
 pbEditInitProc	pb/pbMain	0x148	79 of 82 words match	docs/nonmatching/pb/pbMain.md	5
