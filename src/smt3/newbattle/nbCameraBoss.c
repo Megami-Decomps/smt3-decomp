@@ -3591,7 +3591,58 @@ s32 nbCameraBoss_CheckFix(void)
     return 1;
 }
 
+#ifdef NON_MATCHING
+extern s32 nbCameraBoss_BSMIZ_Command_Set(nbCamera_t *pNbCamera);
+
+s32 nbCameraBoss_Command_Init(nbCamera_t *pNbCamera)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    nbFormation_t *form;
+    s32 id;
+    s32 i;
+
+    if (data == NULL || data->orderindex == -1) {
+        return 0;
+    }
+    form = &data->form[4];
+    if (data->formationtype == 9) {
+        if (form->stat & 1) {
+            if (effBTLModelGetID(form) == 0x123) {
+                return nbCameraBoss_BSARI_Command_Set(pNbCamera);
+            }
+            form = &data->form[4];
+        }
+    } else if (data->formationtype == 10) {
+        if (form->stat & 1) {
+            id = effBTLModelGetID(form);
+            if (id == 0x108 || id == 0x125) {
+                return nbCameraBoss_BSKAGU_Command_Set(pNbCamera);
+            }
+            form = &data->form[4];
+        }
+    } else if (data->formationtype == 13 && (form->stat & 1)) {
+        return nbCameraBoss_BSLUSI_Command_Set(pNbCamera);
+    }
+    for (i = 0; i < 10; i++, form++) {
+        if (form->stat & 1) {
+            switch (effBTLModelGetID(form)) {
+            case 0x109:
+            case 0x129:
+                return nbCameraBoss_BSMIZ_Command_Set(pNbCamera);
+            case 0x10D:
+                return nbCameraBoss_BSONGY_Command_Set(pNbCamera);
+            case 0x114:
+                return nbCameraBoss_BSARUS_Command_Set(pNbCamera);
+            case 0x11F:
+                return nbCameraBoss_BSSAMA_Command_Set(pNbCamera);
+            }
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Command_Init);
+#endif
 
 s32 nbCameraBoss_BSARI1_Cut23_EX01_Set(nbCamera_t *pNbCamera)
 {
