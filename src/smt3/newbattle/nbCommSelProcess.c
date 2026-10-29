@@ -298,7 +298,67 @@ void DispPanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 c)
 
 INCLUDE_RODATA(const s32, "newbattle/nbCommSelProcess", D_005441A8);
 
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispPanelLabel);
+void DispPanelLabel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 color)
+{
+    s32 margin = 0;
+    s32 count;
+    s32 rank;
+    s32 i;
+
+    nbGetUnitWorkPointer(s->data, s->my);
+    if (type == 3) {
+        margin = 0x2B - (s32)(s->smritu * 43.0f);
+    }
+    count = 0;
+    rank = 0;
+    for (i = 0; i < 6; i++) {
+        if (s->commcnt[i] > 0) {
+            if (i == type) {
+                rank = count;
+            }
+            count++;
+        }
+    }
+    for (i = 0; i < count; i++) {
+        nbPnlSprite(ox + 0x6A + i * 0x10, oy - margin + 0x144, 0x1F, 0x10,
+                    0x8F, 1, 0x1F, 0x10, color, s->data->pnltex[1]);
+    }
+    nbPnlSprite(ox + rank * 0x10 + 0x51, oy - margin + 0x13D, 0x38, 0x17,
+                0x55, 1, 0x38, 0x17, color, s->data->pnltex[1]);
+    if (rank > 0) {
+        nbPnlSprite(ox + 0x51, oy - margin + 0x13D, rank * 0x10, 0x17,
+                    0x55, 1, 1, 0x17, color, s->data->pnltex[1]);
+    }
+    if ((u32)type >= 6) {
+        return;
+    }
+    switch (type) {
+    case 0:
+        nbPnlSprite(ox + 0x15, oy + 0x141, 0x38, 0x13, 0x96, 0x16, 0x38, 0x13,
+                    color, s->data->pnltex[0]);
+        break;
+    case 1:
+        nbPnlSprite(ox + 0x15, oy + 0x141, 0x31, 0x13, 0xC5, 2, 0x31, 0x13,
+                    color, s->data->pnltex[0]);
+        break;
+    case 2:
+        nbPnlSprite(ox + 0x15, oy + 0x141, 0x2E, 0x13, 0xD0, 0x16, 0x2E, 0x13,
+                    color, s->data->pnltex[0]);
+        break;
+    case 4:
+        nbPnlSprite(ox + 0x15, oy + 0x141, 0x4A, 0x13, 0x96, 0x2A, 0x4A, 0x13,
+                    color, s->data->pnltex[0]);
+        break;
+    case 5:
+        nbPnlSprite(ox + 0x15, oy + 0x141, 0x42, 0x13, 0x6A, 0x3E, 0x42, 0x13,
+                    color, s->data->pnltex[0]);
+        break;
+    case 3:
+        nbPnlSprite(ox + 0x15, oy - margin + 0x141, 0x50, 0x13, 0xAE, 0x3E, 0x50, 0x13,
+                    color, s->data->pnltex[0]);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispPanelSitaji);
 

@@ -25,3 +25,12 @@ retail's ascending counter compared against a register holding the bound.
 `sdfPadWork`'s inner loop over the 16 button masks is 78 of 89 words out with
 `<` and matches with `!=`; its outer loop over the two pads already used `!=`
 and never reversed.
+
+`newbattle/nbCommSelProcess::DispPanelLabel` is another counted-loop case:
+its plain `for (i = 0; i < count; i++)` supplies the native single entry guard.
+An extra `if (count > 0)` around that loop survives lowering and adds eight
+bytes. Initialize the count and rank when entering the scan phase, after the
+animated margin calculation. A qualified `cc1probe --reorg --no-dumps` trace
+selects the shared count clear (uid65) for the type branch's delay slot
+(uid46), reproducing the native prefix. Plain and hooked output agree; the
+complete owner matches with the 788-byte function and its six-entry switch.
