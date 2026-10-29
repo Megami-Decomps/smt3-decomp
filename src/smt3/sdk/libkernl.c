@@ -1559,6 +1559,17 @@ typedef struct fsDevctlRequest_t {
     void *output;
     u32 outputSize;
 } fsDevctlRequest_t;
+typedef struct fsIoctl2Request_t {
+    s32 sema;
+    s32 *result;
+    s32 resultSize;
+    u32 descriptor;
+    s32 command;
+    u8 args[0x400];
+    void *output;
+    u32 outputSize;
+    u32 argSize;
+} fsIoctl2Request_t;
 typedef union fsRequest_t {
     fsCloseRequest_t close;
     fsPathRequest_t path;
@@ -1570,6 +1581,7 @@ typedef union fsRequest_t {
     fsReadlinkRequest_t readlink;
     fsFormatRequest_t format;
     fsDevctlRequest_t devctl;
+    fsIoctl2Request_t ioctl2;
     fsMountRequest_t mount;
     fsDreadRequest_t dread;
 } fsRequest_t;
@@ -1640,7 +1652,65 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceWrite);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceIoctl);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceIoctl2);
+s32 sceIoctl2(s32 descriptor, s32 command, const void *args, u32 argSize,
+              void *output, u32 outputSize)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsIoctl2Request_t *request = &D_0059D4C0.ioctl2;
+    fsRequestEntry_t *entry;
+    s32 sema;
+    s32 accepted;
+    fsRequest_t *packet;
+
+    entry = get_iob(descriptor);
+    _sceFsWaitS(26);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    if (entry == NULL || entry->active == 0) {
+        _sceFsSigSema();
+        return -9;
+    }
+    if (argSize > 0x400 || outputSize > 0x400) {
+        _sceFsSigSema();
+        return -22;
+    }
+    if (args == NULL) {
+        request->argSize = 0;
+    } else {
+        memcpy(request->args, args, argSize);
+    }
+    request->descriptor = entry->word0;
+    request->command = command;
+    request->argSize = argSize;
+    param.initCount = 0;
+    param.maxCount = 1;
+    param.option = 0;
+    packet = &D_0059D4C0;
+    sema = CreateSema(&param);
+    request->outputSize = outputSize;
+    request->result = &result;
+    request->resultSize = 4;
+    request->output = output;
+    request->sema = sema;
+    sceSifWriteBackDCache(packet, 0x420);
+    if (sceSifCallRpc(&D_0059E780, 26, 0, packet,
+                      0x420, D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
 
 s32 _sceCallCode(const char *path, s32 command)
 {
