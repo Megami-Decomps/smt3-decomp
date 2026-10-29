@@ -775,7 +775,13 @@ INCLUDE_ASM(const s32, "sdk/libkernl", func_002DE504);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitRpc);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifExitRpc);
+extern s32 D_0052C2BC;
+
+void sceSifExitRpc(void)
+{
+    sceSifExitCmd();
+    D_0052C2BC = 0;
+}
 
 typedef struct rpcPacket {
     u32 w[16];

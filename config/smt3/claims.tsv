@@ -799,3 +799,4 @@ src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	2 matches / 396 bytes	Native dou
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 52 B	command shutdown disables DMA channel, removes registered handler and clears initialization flag; complete owner exact
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 172 B	word-copy kernel service, instruction search with native probe/end ordering and single-word syscall-table accessor; owner 112 match, 0 differ
 src/smt3/pipe/pipeObject.c	redthing1	done	2026-10-28	1 fn / 320 B	path-relative object translation with refreshed object/table reads and actual vector helper prototypes; complete owner exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 36 B	RPC shutdown calls command shutdown then clears RPC initialization flag; complete owner exact
