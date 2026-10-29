@@ -209,16 +209,9 @@ typedef struct effPCPBossWork_t
 
 typedef struct effPCPBossBUNSINParam_t
 {
-    s32 pStartForm;
-    s32 pEndForm;
+    union { s32 pStartBits; nbFormation_t *pStartForm; };
+    union { s32 pEndBits; nbFormation_t *pEndForm; };
 } effPCPBossBUNSINParam_t;
-
-/* The marked node effPCPBossBUNSINCreate reads its two endpoints from. */
-typedef struct effPCPBossBUNSINNode_t
-{
-    u8 unk00[0x20];
-    f32 pos[3];
-} effPCPBossBUNSINNode_t;
 
 typedef struct effPCPBossBUNSIN_t
 {
@@ -235,10 +228,10 @@ typedef struct effPCPBossBUNSIN_t
 
 typedef struct effPCPBossBUNSIN2Head_t
 {
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
-    s32 unk0C;
+    nbFormation_t *unk00;
+    nbFormation_t *unk04;
+    nbFormation_t *unk08;
+    nbFormation_t *unk0C;
 } effPCPBossBUNSIN2Head_t;
 
 typedef struct effPCPBossBUNSIN2_t
@@ -1280,21 +1273,21 @@ s32 effPCPBossONGY2GetLength(void)
 effPCPBossBUNSIN_t *effPCPBossBUNSINCreate(effPCPBossBUNSINParam_t *pParam)
 {
     effPCPBossBUNSIN_t *work = sdfChipAllocDirect(0x34);
-    effPCPBossBUNSINNode_t *node;
+    nbFormation_t *node;
     void *matrix;
 
     work->param = *pParam;
     work->unk2C = 0;
-    node = (effPCPBossBUNSINNode_t *)work->param.pStartForm;
+    node = (nbFormation_t *)work->param.pStartBits;
     work->frame = 0;
-    work->pos_s[0] = node->pos[0];
-    work->pos_s[1] = node->pos[1];
-    work->pos_s[2] = node->pos[2];
+    work->pos_s[0] = node->pos.x;
+    work->pos_s[1] = node->pos.y;
+    work->pos_s[2] = node->pos.z;
     work->pos_s[3] = 0.0f;
-    node = (effPCPBossBUNSINNode_t *)work->param.pEndForm;
-    work->pos_e[0] = node->pos[0];
-    work->pos_e[1] = node->pos[1];
-    work->pos_e[2] = node->pos[2];
+    node = (nbFormation_t *)work->param.pEndBits;
+    work->pos_e[0] = node->pos.x;
+    work->pos_e[1] = node->pos.y;
+    work->pos_e[2] = node->pos.z;
     work->pos_e[3] = 0.0f;
     matrix = sdfMatNew();
     work->matrix = matrix;
