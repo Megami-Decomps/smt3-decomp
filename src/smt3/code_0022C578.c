@@ -5326,7 +5326,83 @@ void rstDrawNumber(s32 x, s32 y, s8 number)
     frDestroyFontRequestAfter(font);
 }
 
+extern char D_0054FEA0[];
+extern void fclDrawSpriteRect(s32 x, s32 y, s32 z, s32 width, s32 height,
+                              s32 *colors, s32 page, s32 spriteId, s32 *texList,
+                              fclSpriteTbl_t *table, s32 ot);
+
+#ifdef NON_MATCHING
+void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color,
+                          datUnitWork_t *unit, s32 flags, s32 ot)
+{
+    volatile datUnitWork_t *live = unit;
+    u8 mask = flags;
+    u16 badstatus = live->badstatus;
+    s32 kind = (badstatus & 0x800) != 0;
+    s32 value = 1;
+    s32 maximum = 1;
+    s32 colors[4];
+    s32 textColor;
+    s32 ratio;
+    s32 sprite;
+    char text[16];
+    frFontRequest_t *font;
+
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    if (mask & 5) {
+        value = live->hp;
+        maximum = live->maxhp;
+    }
+    if (mask & 0xA) {
+        maximum = live->maxmp;
+        value = live->mp;
+        kind |= (badstatus & 0x800) != 0 ? 4 : 2;
+    }
+    if (value >= 1000) {
+        value = 999;
+    }
+    if (maximum >= 1000) {
+        maximum = 999;
+    }
+    if (kind & 1) {
+        textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x754B3D80);
+    } else {
+        textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0xA09DC380);
+    }
+    if (mask & 0xC) {
+        textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0xFFBD8380);
+    }
+    fclDrawSpriteRes(x, y, z * 16, colors, 2, 6, D_00345D88, fclSpriteTable, ot);
+    fclDrawSpriteRes(x, y, z * 16, colors, 2, 5, D_00345D88, fclSpriteTable, ot);
+    ratio = value * 1000 / maximum;
+    if (ratio != 0) {
+        switch ((kind & 0xE) >> 1) {
+        case 1:
+            sprite = 8;
+            break;
+        case 2:
+            sprite = 0xB;
+            break;
+        default:
+            sprite = 4;
+            break;
+        }
+        fclDrawSpriteRect(x, y, z * 16, ratio, 1000, colors, 2, sprite,
+                          D_00345D88, fclSpriteTable, ot);
+    }
+    sprintf(text, D_0054FEA0, value);
+    font = frwGetSmallNumFontFRQ(x + 0x50, y, z, textColor, text, NULL);
+    sprintf(text, D_0054FEA0, maximum);
+    font = frwGetSmallNumFontFRQ(x + 0x2C0, y, z, textColor, text, font);
+    func_001C7E38((frFontHandle_t *)font, 1, 0x47);
+    frDestroyFontRequestAfter((frFontHandle_t *)font);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusIconRow);
+#endif
 
 extern void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color,
                                  datUnitWork_t *unit, s32 flags, s32 ot);
