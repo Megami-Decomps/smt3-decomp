@@ -70,3 +70,11 @@ calling it matches all 740 bytes. Its four real references form one global
 pseudo, with eight live units and no crossed calls, allocated to `$2`. The
 callback is still fetched afresh for each node. This is value reuse across
 sequential calls, with no dummy references or fixed-register constraint.
+
+The same return-value reservation closes `code_0022C578::cmpUseSkillTokusyu`
+at all 228 bytes. Its declaration had `void datExecSkill(u16, ...)`, while
+`newdata/datCalc` defines `s32 datExecSkill(s32, ...)` and returns zero or one.
+Correcting the caller declaration keeps the switch root constant 0x4A in
+`$3`, matching retail; the void declaration puts it in `$2` and differs in
+that constant load and its branch operand. The caller discards the result.
+The other camp caller, `cmpExecRecover`, remains exact with the real contract.

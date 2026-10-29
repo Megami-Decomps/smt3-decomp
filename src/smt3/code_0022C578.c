@@ -7561,7 +7561,7 @@ s8 cmpGetParamGaugeColor(s8 index)
 
 extern char D_005400E0[];
 
-extern void datExecSkill(u16 skill, datUnitWork_t *user, datUnitWork_t *target);
+extern s32 datExecSkill(s32 skill, datUnitWork_t *user, datUnitWork_t *target);
 
 void cmpExecRecover(u16 skill, datUnitWork_t *user, datUnitWork_t *target)
 {
@@ -7744,9 +7744,6 @@ extern void fldRiberaMaStart(void);
 extern void fldRifutoMaStart(void);
 extern void fldLightMaStart(void);
 
-/* NON_MATCHING: 55 of 57 words match, exact size; the switch root compares
-   against 0x4A out of $2 instead of $3. */
-#ifdef NON_MATCHING
 s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, s32 unused)
 {
     s32 se = 0x10;
@@ -7774,9 +7771,6 @@ s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, s32 unused)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpUseSkillTokusyu);
-#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpRecover);
 
