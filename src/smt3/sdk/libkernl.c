@@ -611,7 +611,17 @@ void deci2Putchar(s32 character)
     }
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", serialPutchar);
+extern s32 kputchar(s32 character);
+
+void serialPutchar(s32 character)
+{
+    if (character == '\n') {
+        kputchar('\r');
+        kputchar('\n');
+    } else {
+        kputchar(character);
+    }
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", ftoi);
 
