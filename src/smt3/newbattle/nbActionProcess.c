@@ -111,7 +111,7 @@ typedef struct nbDevilData_t {
 typedef struct datDevilNegoFormat_t {
     u8 unk00[0xF];
     u8 talkflag;
-    u8 unk10;
+    u8 inotitype;
     u8 binjotype;
     u16 mukantype;
     u8 unk14[0x1C];
@@ -1108,7 +1108,77 @@ INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438B0);
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438C0);
 
+#ifdef NON_MATCHING
+typedef struct {
+    u8 unk00[0xA54];
+    datUnitWork_t unit[16];
+} nbInotiGlobalWork_t;
+extern nbInotiGlobalWork_t *nbInotiGlobalWork asm("DDS3_GBWK");
+
+s32 CheckInotiNego(nbActionProcessData_t *a)
+{
+    nbFormation_t *form;
+    datUnitWork_t *work;
+    struct nbParty_t *party;
+    s32 i;
+    s32 id;
+    s32 rate;
+
+    if ((u32)((u16)a->data->StageMajor - 0xF0) < 7 || (a->data->stat & 1) != 0 ||
+        (a->party->flag & 6) != 0 || a->partyindex >= 4) {
+        return 0;
+    }
+    if (evtGetAgeOfMoon() == 8 || datCheckTalk(a->work) == 0) {
+        return 0;
+    }
+    if (a->work->nowcommand != 0 && a->work->nowcommand != 1 && a->work->nowcommand != 5) {
+        return 0;
+    }
+    if (a->data->enemypcnt != 1) {
+        return 0;
+    }
+    for (i = 4; i < 14; i++) {
+        form = &a->data->form[i];
+        if ((form->stat & 0x49) != 0x49) {
+            continue;
+        }
+        work = nbGetUnitWorkFromFormindex(i);
+        party = &a->data->party[form->partyindex];
+        if ((party->flag & 1) == 0 || (party->flag & 0x20) != 0 || CheckTimeListDead(a, i) != 0) {
+            continue;
+        }
+        id = work->id;
+        if (master_text[id].inotitype == 0) {
+            continue;
+        }
+        if ((a->data->stat & 0x2000000) == 0 && a->timelist[i].hp * 100 / work->maxhp >= 25) {
+            continue;
+        }
+        if ((a->work->flag & 4) == 0 && a->work->id == id) {
+            continue;
+        }
+        if (datCheckTalk(work) == 0) {
+            continue;
+        }
+        if ((a->data->stat & 0x2000000) != 0) {
+            rate = 100;
+        } else {
+            if (nbInotiGlobalWork->unit[0].level < work->level) {
+                continue;
+            }
+            rate = 6;
+        }
+        if ((s32)dds3GetRandIntA(NULL, 100) < rate) {
+            nbPushAction(1, form->partyindex, a->partyindex, 0);
+            printf("inoti party = %d (%X)\n", form->partyindex, work->id);
+            return 1;
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckInotiNego);
+#endif
 
 #ifdef NON_MATCHING
 s32 CheckBinjoNego(nbActionProcessData_t *a)
