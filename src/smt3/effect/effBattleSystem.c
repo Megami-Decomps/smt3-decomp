@@ -1578,7 +1578,108 @@ void effBTLSys_Hansya_Delete2(effBattleSystem_effBTLSystem_Hansya_tag *hData)
 void effBTLSys_Hansya_SetColor(void) {
 }
 
+#ifdef NON_MATCHING
+typedef struct {
+    sdfLightSources_t lights;
+} effHansyaLights_t;
+
+extern f32 D_005334C0[];
+extern sdfModelOt_t D_002F69B8[];
+extern void effBTLModelGetSphereCenter(nbFormation_t *formation);
+extern void nbMakeUnitDrawMatrix(nbFormation_t *formation);
+extern void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *packet,
+                                        sdfLightSources_t lights, f32 *ambient);
+extern void mdlLink(mdlObj_t *model, void *ot);
+
+void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work)
+{
+    f32 light[2][4] __attribute__((aligned(16)));
+    sdfVector4_t ambient;
+    sdfVector4_t position;
+    sdfMatrix4_t rotation;
+    effBTLAimParams_t aim;
+    effBTL_SkillLight_t pointLight;
+    effBTLModelColorParam_t color;
+    volatile effHansyaLights_t initial, lights;
+    mdlObj_t *model;
+    u32 frame = work->frame;
+
+    initial.lights[0] = light;
+    initial.lights[1] = NULL;
+    initial.lights[2] = NULL;
+    lights = initial;
+    if (frame >= 3) {
+        if (frame == 3) {
+            s32 skill = effBTLSkillGetID();
+            if (datSkillTable.normal[skill].koukatype == 0) {
+                pointLight.ambient = 0x80231E1E;
+                color.unknown00 = 0x808080AA;
+            } else {
+                pointLight.ambient = 0x80302212;
+                color.unknown00 = 0x80FF8080;
+            }
+            pointLight.type = 0;
+            pointLight.unknown01 = 2;
+            pointLight.unknown02 = 0;
+            pointLight.unknown04 = 0;
+            pointLight.diffuse = 0x80B4B4B4;
+            pointLight.color_anim = 0;
+            pointLight.unknown14 = 0;
+            pointLight.unknown18 = 8;
+            pointLight.unknown1C = 1;
+            color.unknown04 = 0;
+            color.unknown08 = 0;
+            color.unknown0C = 8;
+            color.unknown10 = 1;
+            effBTLPointLightSet(&pointLight, work->pFormation);
+            effBTLModelColorSet(&color, work->pFormation);
+        }
+        SDF_VU0_LOADVECTOR(&work->pFormation->rot);
+        SDF_VU0_LOADVECTOR_B(D_005334C0);
+        Mult();
+        ToMatrix();
+        SDF_VU0_STOREMATRIX(&rotation);
+        dds3EffectPartSetRotateMatrix(work->hPart, &rotation);
+        dds3EffectPartSetRotateMatrix(work->hPart2, &rotation);
+        aim.scaleKind = 0;
+        aim.aimMode = 1;
+        aim.directionMode = 0;
+        aim.rangeOverride = 0;
+        effBTLPartGetRotateMatrixPtr(&aim, &rotation);
+        dds3EffectPartSetDirection(work->hPart2, &rotation);
+        effBTLModelGetSphereCenter(work->pFormation);
+        SDF_VU0_STOREVECTOR(&position);
+        dds3EffectPartSetPosition(work->hPart, &position);
+        nbMakeUnitDrawMatrix(work->pFormation);
+        SDF_VU0_STOREVECTOR(&position);
+        dds3EffectPartSetPosition(work->hPart2, &position);
+        if (datSkillTable.normal[effBTLSkillGetID()].koukatype == 0) {
+            light[0][0] = 0.6078431010246277f;
+            light[0][1] = 0.23529410362243652f;
+            light[0][2] = 0.3529411554336548f;
+        } else {
+            light[0][0] = 0.2549019455909729f;
+            light[0][1] = 0.3333333134651184f;
+            light[0][2] = 0.45098036527633667f;
+        }
+        light[0][3] = 0.0f;
+        SDF_VU0_COPYVECTOR(&ambient, light[0]);
+        light[1][0] = -0.7299999594688416f;
+        light[1][1] = 1.5499999523162842f;
+        light[1][2] = 0.23999999463558197f;
+        light[1][3] = 0.0f;
+        sdf3DMakeLightParallelPacket(&work->lightPacket, (f32 (**)[4])lights.lights, (f32 *)&ambient);
+        model = dds3EffectPartGetHandle(work->hPart);
+        model->inner->light = &work->lightPacket;
+        mdlLink(model, D_002F69B8);
+        dds3EffectPartDraw(work->hPart2);
+        frame = work->frame;
+    }
+    work->frame = frame + 1;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSys_Hansya_Draw);
+#endif
 
 u32 effBTLSys_Hansya_GetLength(void *hData)
 {
