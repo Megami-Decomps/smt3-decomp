@@ -637,11 +637,36 @@ rpcPacket *_sceRpcGetFPacket2(rpcQueue *queue, s32 index)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _request_end_0);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _request_rdata);
+void _request_rdata(rpcPacket *request, rpcQueue *queue)
+{
+    rpcPacket *packet = _sceRpcGetFPacket(queue);
+
+    u32 packetAddress = request->w[5];
+    u32 client = request->w[7];
+
+    packet->w[5] = packetAddress;
+    packet->w[7] = client;
+    packet->w[8] = 0x8000000C;
+    isceSifSendCmd(0x80000008, packet, 0x40, (void *)request->w[8],
+                   (void *)request->w[9], request->w[10]);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifGetOtherData);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _search_svdata);
+sifRpcServerData_t *_search_svdata(s32 serviceId, rpcQueue *queue)
+{
+    sifRpcDataQueue_t *current;
+    sifRpcServerData_t *server;
+
+    for (current = queue->queues; current != NULL; current = current->next) {
+        for (server = current->link; server != NULL; server = server->link) {
+            if (server->serviceId == serviceId) {
+                return server;
+            }
+        }
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _request_bind);
 

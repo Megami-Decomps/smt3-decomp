@@ -373,3 +373,16 @@ of 452. The ordinary empty signed countdown from `0x100000` to `-1` naturally
 emits the four NOPs between decrement and comparison with the configured 2.9
 compiler. No inline assembly or volatile counter is needed. The complete
 kernel unit checks 25 match / 0 differ at this qualification.
+
+## Matched RPC read-data reply and server lookup
+
+`_request_rdata` matches 96 bytes. It obtains a forwarding packet, captures
+the incoming packet-address and client routing words before writing either,
+sets the read-data response command, and sends the incoming source,
+destination and byte count through the interrupt-safe command sender. The
+command dispatcher discards the callback result; this handler returns void.
+
+`_search_svdata` matches 76 bytes. It walks the global server-queue list and
+each queue's registered-server list, returning the first service-ID match or
+null. Registration links are distinct from pending-request links. The complete
+kernel owner checks 32 match / 0 differ at this qualification.
