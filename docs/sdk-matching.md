@@ -694,3 +694,17 @@ publication. Partial semaphore initialization, uncached acceptance capture
 before releasing filesystem access, failure cleanup and callback result
 lifetime remain the same audited completion contract. The complete kernel
 owner checks 96 match / 0 differ at this qualification.
+
+## Kernel patch copy helpers
+
+`kCopy_1` copies an unsigned byte count forward with byte loads/stores.
+`kCopy_0`, `kCopy_2` and `kCopy_3` first shift that unsigned byte count right
+by two, then copy words forward; trailing one to three bytes are ignored.
+All four explicitly return zero, including for an empty copy. The three
+word-copy bodies are byte-identical native siblings.
+
+The byte helper uses incrementing pointers and a separate unsigned loop
+index. The word helpers use ordinary indexed `u32` copies; the configured
+EE 2.9 compiler supplies their native pointer increments and loop padding.
+No copy intrinsic, assembly, extra alignment or compiler flag is needed.
+Together these are four exact SDK EE functions / 216 instruction bytes.

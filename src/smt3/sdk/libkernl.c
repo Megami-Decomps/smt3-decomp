@@ -2647,7 +2647,16 @@ INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__15);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", Copy_0);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", kCopy_0);
+s32 kCopy_0(u32 *dst, const u32 *src, u32 count)
+{
+    u32 i;
+
+    count >>= 2;
+    for (i = 0; i < count; i++) {
+        dst[i] = src[i];
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress);
 
@@ -2657,7 +2666,19 @@ INCLUDE_ASM(const s32, "sdk/libkernl", InitExecPS2);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__16);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", kCopy_1);
+s32 kCopy_1(u8 *dst, const u8 *src, u32 count)
+{
+    u32 i;
+
+    i = 0;
+    if (count != 0) {
+        do {
+            *dst++ = *src++;
+            i++;
+        } while (i < count);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", PatchIsNeeded);
 
@@ -2677,7 +2698,16 @@ INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__17);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", Copy_1);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", kCopy_2);
+s32 kCopy_2(u32 *dst, const u32 *src, u32 count)
+{
+    u32 i;
+
+    count >>= 2;
+    for (i = 0; i < count; i++) {
+        dst[i] = src[i];
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress_0);
 
@@ -2796,7 +2826,16 @@ INCLUDE_ASM(const s32, "sdk/libkernl", SetDebugHandler);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", Copy_2);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", kCopy_3);
+s32 kCopy_3(u32 *dst, const u32 *src, u32 count)
+{
+    u32 i;
+
+    count >>= 2;
+    for (i = 0; i < count; i++) {
+        dst[i] = src[i];
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress_1);
 

@@ -784,3 +784,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 480 B	symbolic-link
 src/smt3/pipe/pipeCamera.c	redthing1	done	2026-10-28	1 fn / 828 B	second pipe camera native vector sources, signed interpolation and callback-refreshed path accesses; complete owner exact
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	3 matches / 500 bytes	Integer/double conversions litodp, dptoli and dptoul; native scalar return types and shared class predicates
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 456 B	readlink with unsigned output count cap, buffer writeback and fixed shared transfer extent; complete owner exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 216 B	Kernel patch byte/word copy helpers; unsigned counts, forward copies, word-tail truncation and explicit zero results
