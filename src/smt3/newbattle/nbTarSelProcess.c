@@ -79,7 +79,35 @@ void nbSetTarSelJyokyoTime(s32 time)
     GetTarSelProcessData()->statusTime = time;
 }
 
+#ifdef NON_MATCHING
+void AnimeTargetCursor(nbTarSelProcessData_t *process)
+{
+    s32 time = (s32)((u32)process->time + 1);
+    s32 alphaA[7] = { 25, 31, 38, 64, 52, 40, 28 };
+    s32 alphaB[7] = { 128, 102, 77, 89, 102, 114, 128 };
+    f32 scaleA[7] = { 1.0f, 1.15f, 1.3f, 0.5f,
+                      0.65999998f, 0.84999998f, 1.0f };
+    f32 scaleB[7] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+    s32 index;
+    f32 rate;
+    f32 inverse;
+
+    process->time = time;
+    if (time >= 30) {
+        process->time = 0;
+    }
+    time = process->time;
+    index = time / 5;
+    rate = (f32)(time % 5) / 5.0f;
+    inverse = 1.0f - rate;
+    process->alpha_a = (s32)((f32)alphaA[index] * inverse + (f32)alphaA[index + 1] * rate);
+    process->alpha_b = (s32)((f32)alphaB[index] * inverse + (f32)alphaB[index + 1] * rate);
+    process->scale_b = scaleB[index] * inverse + scaleB[index + 1] * rate;
+    process->scale_a = scaleA[index] * inverse + scaleA[index + 1] * rate;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", AnimeTargetCursor);
+#endif
 
 extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
                         u32 rgba, sdfTexHandle_t *texture);
