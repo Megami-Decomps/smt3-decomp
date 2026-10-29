@@ -2842,7 +2842,54 @@ void RequestChangeMotion(motionWork_t *pinst, s32 flag)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", ChangeModelMotion);
 
+extern void *memset(void *dst, s32 value, u32 size);
+extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode);
+extern void ChangeDevilObjectReadMain(s32 index, fclEncyc_instance_tag *pinst);
+
+#ifdef NON_MATCHING
+void CirculateDevilObject(fclEncyc_instance_tag *pinst, s32 direction)
+{
+    cmpCursorFullWork_t work;
+    cmpCursorInfo_t *cursor = &work.cursor;
+    s32 slot = (s16)pinst->unk_58 == 1 ? 0 : 3;
+    u8 shift;
+    s32 index;
+
+    memset(&work, 0, sizeof(work));
+    shift = slot == 0 ? *(u8 *)&pinst->lw_cur[1] : pinst->unk_6C;
+    cursor->unk_22 = pinst->lw_cur[slot];
+    cursor->unk_25 = shift;
+    cursor->unk_24 = shift;
+    if ((s16)pinst->unk_58 == 1) {
+        s32 count = pinst->unk_70;
+
+        cursor->unk_20 = *(u8 *)&pinst->unk_70;
+        cursor->unk_26 = count < 8 ? count : 7;
+    } else {
+        cursor->unk_20 = fclEncycGetNum();
+        if (fclEncycGetNum() < 8) {
+            cursor->unk_26 = fclEncycGetNum();
+        } else {
+            cursor->unk_26 = 8;
+        }
+    }
+    cmpFindNextCursorItem(cursor, direction != 0 ? 1 : -1, 1);
+    pinst->lw_cur[slot] = cursor->unk_22;
+    if (slot == 0) {
+        pinst->lw_cur[1] = (u8)cursor->unk_24;
+    } else {
+        pinst->cursorShift = (u8)cursor->unk_24;
+    }
+    index = cursor->unk_22 + (u8)cursor->unk_24;
+    if ((s16)pinst->unk_58 == 1) {
+        ChangeDevilObjectRegistConfirm(pinst->entries.regist.validUnit[index], pinst);
+    } else {
+        ChangeDevilObjectReadMain(pinst->entries.read.sorted[(s8)pinst->unk_6C != 0][index], pinst);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", CirculateDevilObject);
+#endif
 
 extern void RequestModelLoad(fclEncyc_instance_tag *pinst, s32 id);
 
