@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -800,12 +801,7 @@ u16 *ragGetConfirmEntry(s8 kind, u8 index)
     }
 }
 
-typedef struct
-{
-    /* 0x00 */ u16 item;
-    /* 0x02 */ s8 count;
-    /* 0x03 */ u8 unk_03;
-} ragItemReq_t;
+
 
 s32 ragFindItemSlot(ragItemReq_t *req)
 {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -186,12 +187,7 @@ extern void cmpPlayCursorSE(u32 button);
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
-typedef struct
-{
-    /* 0x00 */ u16 item;
-    /* 0x02 */ s8 count;
-    /* 0x03 */ u8 unk_03;
-} ragItemReq_t;
+
 
 typedef struct
 {

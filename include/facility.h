@@ -51,4 +51,13 @@ typedef struct mselSaveData_t {
     fclencyceelem_t records[1];
 } mselSaveData_t;
 
+typedef struct
+{
+    /* 0x00 */ u16 item;
+    /* 0x02 */ s8 count;
+    /* 0x03 */ u8 unk_03;
+} ragItemReq_t;
+
+typedef char ragItemReqSizeCheck[(sizeof(ragItemReq_t) == 4) ? 1 : -1];
+
 #endif
