@@ -3878,7 +3878,56 @@ void effPCPDANTE_ShowTime_AreYouReady_Draw(effPCPDANTE_ShowTime_tag *hData)
     hData->frameParts[1]++;
 }
 
+extern effPCPDANTE_UV_tag effPCPDANTE_ShowTime_UV;
+#ifdef NON_MATCHING
+void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work)
+{
+    u32 frame = work->frameParts[2];
+    u32 age = frame - 23;
+    void *texture = work->hTex[1];
+    u32 color;
+    f32 rate;
+
+    if (age < 13) {
+        nbPnl_rsetAlpha(0);
+        color = ((u32)((1.0f - (f32)(s32)age / 12.0f) * 128.0f) << 24) | 0x808080;
+        effPCPDANTE_Sprite_Draw(162, 172, 1.0f, color, &effPCPDANTE_ShowTime_UV, texture);
+    }
+    if (frame - 10 < 13) {
+        nbPnl_rsetAlpha(0);
+        effPCPDANTE_Sprite_Draw(162, 172, 1.0f, 0x80808080, &effPCPDANTE_ShowTime_UV, texture);
+    }
+    if (frame < 13) {
+        nbPnl_rsetAlpha(1);
+        rate = 1.0f - (f32)(s32)frame / 12.0f;
+        effPCPDANTE_Sprite_Draw(162, 172, 2.0f * rate * rate + 1.0f, 0x20808080,
+                               &effPCPDANTE_ShowTime_UV, texture);
+        effPCPDANTE_Sprite_Draw(162, 172, rate * 1.5f * rate + 1.0f, 0x20808080,
+                               &effPCPDANTE_ShowTime_UV, texture);
+    }
+    if (frame < 7) {
+        nbPnl_rsetAlpha(1);
+        rate = (f32)(s32)frame / 6.0f;
+        effPCPDANTE_Sprite_Draw(162, 172, rate * rate + 1.0f, 0x10808080,
+                               &effPCPDANTE_ShowTime_UV, texture);
+        effPCPDANTE_Sprite_Draw(162, 172, rate * 0.75f * rate + 1.0f, 0x10808080,
+                               &effPCPDANTE_ShowTime_UV, texture);
+    }
+    age = frame - 8;
+    if (age < 15) {
+        nbPnl_rsetAlpha(1);
+        rate = (f32)(s32)age / 14.0f;
+        color = ((u32)((1.0f - rate) * 84.0f) << 24) | 0x808080;
+        effPCPDANTE_Sprite_Draw(162, 172, rate * 0.75f + 1.0f, color,
+                               &effPCPDANTE_ShowTime_UV, texture);
+        effPCPDANTE_Sprite_Draw(162, 172, rate * 0.325f + 1.0f, color,
+                               &effPCPDANTE_ShowTime_UV, texture);
+    }
+    work->frameParts[2] = (u32)work->frameParts[2] + 1;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_ShowTime_Draw);
+#endif
 
 /* NON_MATCHING: 4 of 75 words differ (first at +0x34). */
 #ifdef NON_MATCHING
@@ -4206,7 +4255,6 @@ typedef struct {
     effBlurQuadVertex_t vertex[4];
 } effBlurQuadPacket_t;
 
-extern f32 D_0054C9DC;
 extern f32 sdfCos(f32 angle);
 
 #ifdef NON_MATCHING
@@ -4217,7 +4265,7 @@ void dds3EffectBlurDrawQuad(const dds3Effect_Blur_t *source, effBlurQuadPacket_t
     f32 s0, t0, s1, t1;
     f32 centerX, centerY, scale, cosine, sine;
     f32 u0, v0, u1, v1, u2, v2, u3, v3;
-    f32 yScale = D_0054C9DC;
+    f32 yScale = 0.002232142857f;
 
     quad->r = color[0];
     quad->g = color[1];
