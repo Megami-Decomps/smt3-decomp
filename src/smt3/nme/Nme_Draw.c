@@ -168,7 +168,24 @@ s32 nmeGetCursorPos(nmeWork_t *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", func_0029A108);
+void func_0029A108(s32 mode)
+{
+    s8 row = mode;
+    s8 index = nmeGetModeFlag(nmeUpdateWork) - 1;
+
+    while (index >= 0) {
+        u8 first = nmeUpdateWork->inputChars[row][index][0];
+        u8 second = nmeUpdateWork->inputChars[row][index][1];
+
+        if (first > 0x80 || second > 0x80) {
+            nmeUpdateWork->inputRowEnabled[row] = index + 1;
+            return;
+        }
+        index--;
+    }
+    nmeUpdateWork->inputRowEnabled[row] = 0;
+}
+
 
 void nmeStepCursor(s8 delta)
 {
