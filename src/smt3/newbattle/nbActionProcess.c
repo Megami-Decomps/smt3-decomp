@@ -237,7 +237,7 @@ extern struct nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame
                                                        s32 uniqueid,
                                                        nbFormation_t *form, s32 type);
 
-extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, nbActionProcessData_t *uniqueid,
+extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, s32 uniqueid,
                                                     nbFormation_t *form, s32 sw);
 
 s32 CheckKoketaNego(nbActionProcessData_t *a);
@@ -261,7 +261,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern void nbMakeDeadVisualPacket(s32 startframe, nbActionProcessData_t *uniqueid, nbFormation_t *form,
+extern s32 nbMakeDeadVisualPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                    s32 deadtype, s32 deadpcm);
 
 void SetDeadPacket(nbActionProcessData_t *a, s32 formindex);
@@ -517,7 +517,7 @@ void SetTorafuPacket(nbActionProcessData_t *a, s32 dformindex, s32 sframe)
     nbFormation_t *form = &a->data->form[dformindex];
 
     nbMakeUnitFadeOutPacket(sframe, a, form, 0, 6, 6, 6);
-    nbAddFormOnOffPacket(sframe + 12, a, form, 0);
+    nbAddFormOnOffPacket(sframe + 12, (s32)a, form, 0);
     a->data->endtype = 3;
 }
 
@@ -1317,7 +1317,7 @@ void DokodemoPoa(nbActionProcessData_t *a)
 
         if ((form->stat & 1) != 0) {
             if ((form->stat & 0x40) != 0) {
-                nbMakeDeadVisualPacket(0, a, form, 0, 1);
+                nbMakeDeadVisualPacket(0, (s32)a, form, 0, 1);
                 SetTimeList(a, i, 0, 30, 30);
                 SetDeadPacket(a, i);
             }
@@ -2790,7 +2790,81 @@ s32 CheckAction_INVISIBLE(nbActionProcessData_t *a)
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
 
+#ifdef NON_MATCHING
+extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                  u32 col, s32 delay, s32 aframe, s32 colframe);
+extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, s32 uniqueid,
+                                                          nbFormation_t *form);
+extern void nbAddHatudoEffectEndPacket(s32 startframe, s32 uniqueid);
+extern void nbAddPanelStockFadeOutPacket(s32 startframe, s32 uniqueid);
+extern void nbAddPanelStockEndPacket(s32 startframe, s32 uniqueid);
+
+void SetAction_CHECK1(nbActionProcessData_t *a)
+{
+    s32 i;
+    s32 unlock;
+    s32 end;
+    s32 delay;
+    s32 fade;
+    nbFormation_t *form;
+
+    if (CheckTimeListDead(a, a->form->formindex) == 0 &&
+        nbGetBadStat(a->form->formindex) == 0x40 &&
+        CheckTimeListDeadEnemyParty(a, a->form->formindex) == 0 &&
+        a->data->endtype == 0 &&
+        (a->work->nowcommand != 5 || a->work->nowindex != 1) &&
+        !(a->party->flag & 0x20)) {
+        SetDamagePacket(a, a->work->maxhp >> 3);
+    }
+    unlock = GetAllUnlockTime(a);
+    for (i = 0; i < 16; i++) {
+        form = &a->data->form[i];
+        if ((form->stat & 1) && (form->stat & 0x40) &&
+            CheckTimeListDead(a, i) &&
+            !(a->data->party[a->data->form[i].partyindex].flag & 0x20)) {
+            printf("dead formindex = %d!!\n", i);
+            nbMakeDeadVisualPacket(unlock, (s32)a, &a->data->form[i], 0, 1);
+            SetTimeList(a, i, unlock, 30, 30);
+            SetDeadPacket(a, i);
+            SetTimeList(a, i, unlock, 20, 20);
+        }
+    }
+    if (CheckTimeListDead(a, a->form->formindex) == 0) {
+        end = GetAllEndTime(a);
+        unlock = GetAllUnlockTime(a);
+        delay = 0;
+        if (a->form->motendtype != 2 && !(a->stat & 0x100)) {
+            delay = 3;
+        }
+        if (a->form->stat & 0x10) {
+            if (a->form->motendtype == 2) {
+                SetTimeList(a, a->form->formindex, end, 6, 6);
+            } else {
+                SetTimeList(a, a->form->formindex, end, delay + 1, delay + 1);
+            }
+            if (a->form->motendtype == 2) {
+                unlock += delay;
+                nbMakeUnitFadeInPacket(unlock, (s32)a, a->form, 0, 2, 4, 4);
+                nbAddFormOnOffPacket(unlock, (s32)a, a->form, 0);
+                if (a->form->motendtype == 2) {
+                    nbAddMotionStopClearPacket(unlock, (s32)a, a->form);
+                }
+            }
+        }
+    }
+    a->packettime = GetAllEndTime(a);
+    nbAddHatudoEffectEndPacket(a->packettime * 70 / 100, (s32)a);
+    if (a->stat & 0x400) {
+        fade = a->packettime - 10;
+        if (fade < 0) fade = 0;
+        nbAddPanelStockFadeOutPacket(fade, (s32)a);
+        nbAddPanelStockEndPacket(a->packettime - 1, (s32)a);
+    }
+    printf("allframe %d\n", a->packettime);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAction_CHECK1);
+#endif
 
 #ifdef NON_MATCHING
 extern s8 dds3PadButtonState[];
