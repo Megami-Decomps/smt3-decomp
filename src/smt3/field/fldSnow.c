@@ -258,12 +258,6 @@ void func_00151018(s32 index) {
     }
 }
 
-typedef struct {
-    dds3Basic_t *handle;
-    dds3Basic_t *handle2;
-    s8 moveFlag;
-    s8 rotFlag;
-} fldUnitControl_t;
 
 extern fldUnitControl_t *fldGetUnitControl(void);
 extern void dds3GetPosPoseSet(dds3Basic_t *basic);

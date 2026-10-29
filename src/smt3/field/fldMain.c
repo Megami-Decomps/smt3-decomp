@@ -254,13 +254,6 @@ extern sdfGrOt_t *D_002F6A18[4];
 extern void sdfModelOtInit(void *aModelOt, sdfGrOt_t *aOt0, sdfGrOt_t *aOt1,
                            sdfGrOt_t *aOt2, sdfGrOt_t *aOt3);
 
-typedef struct
-{
-    dds3Basic_t *handle;
-    dds3Basic_t *handle2;
-    s8 moveFlag;
-    s8 rotFlag;
-} fldUnitControl_t;
 
 typedef struct
 {

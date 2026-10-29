@@ -3,6 +3,13 @@
 
 #include "common.h"
 
+typedef struct {
+    struct dds3Basic_t *handle;
+    struct dds3Basic_t *handle2;
+    s8 moveFlag;
+    s8 rotFlag;
+} fldUnitControl_t;
+
 /* Field collision record shared by the hit and camera code. */
 typedef struct collision_s collision_s;
 struct collision_s {

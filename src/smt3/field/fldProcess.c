@@ -376,12 +376,6 @@ s32 fldProcHirakenaiChk(void)
     return scrSearchScriptName("hirakenai_label") != NULL;
 }
 
-typedef struct {
-    dds3Basic_t *handle;
-    dds3Basic_t *handle2;
-    s8 moveFlag;
-    s8 rotFlag;
-} fldUnitControl_t;
 extern fldUnitControl_t *fldGetUnitControl(void);
 extern effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *param);
 extern dds3ProcessID_t *dds3SearchProcessPriority(s32 priority);
