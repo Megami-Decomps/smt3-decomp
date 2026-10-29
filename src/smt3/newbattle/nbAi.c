@@ -1720,15 +1720,16 @@ s32 nbSetAiTarget(nbActionProcessData_t *a, s32 code, s32 n)
 }
 
 
-#ifdef NON_MATCHING
 extern s32 nbGetSelectBit(nbMainProcessData_t *data);
 
 s32 nbRunAiSub(nbActionProcessData_t *a, s32 tbl)
 {
-    datDevilAIData_t *ai = (datDevilAIData_t *)D_00398A08;
     s32 action;
     s32 i;
+    s32 rejected;
     u32 target;
+    s32 tableOffset;
+    s32 actionOffset;
 
     for (i = 4; i >= 0; i--) {
         a->aichktbl[i] = 0;
@@ -1737,26 +1738,38 @@ s32 nbRunAiSub(nbActionProcessData_t *a, s32 tbl)
         action = nbPickAiAction(a, tbl);
         printf("Koukatbl = %d\n", action);
         if (action < 0) {
-            a->select = 0;
-            a->work->nowcommand = 3;
-            a->work->nowindex = 0;
             break;
         }
         SetKoudou(a, tbl, action);
-        if (ChkCost(a) == 0 && ChkClose(a) != 0) {
-            target = ai[a->work->id].table[tbl][action].target;
-            if (nbSetAiTarget(a, target >> 16, target & 0xFFFF) == 0) {
-                a->select = nbGetSelectBit(a->data);
-                break;
+        rejected = 0;
+        if (ChkCost(a) != 0) {
+            rejected = -1;
+        }
+        if (rejected == 0) {
+            if (ChkClose(a) == 0) {
+                rejected = -1;
+            }
+            tableOffset = tbl * 40;
+            actionOffset = action * 8;
+            if (rejected == 0) {
+                target = ((datDevilAITbl_t *)(D_00398A08 +
+                          (a->work->id * 164 + tableOffset + actionOffset)))->target;
+                if (nbSetAiTarget(a, target >> 16, target & 0xFFFF) == 0) {
+                    break;
+                }
             }
         }
         a->aichktbl[action] = 1;
     }
+    if (action >= 0) {
+        a->select = nbGetSelectBit(a->data);
+    } else {
+        a->select = 0;
+        a->work->nowcommand = 3;
+        a->work->nowindex = 0;
+    }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", nbRunAiSub);
-#endif
 
 void nbRunAi(nbActionProcessData_t *a)
 {
