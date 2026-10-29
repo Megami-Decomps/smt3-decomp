@@ -93,7 +93,66 @@ extern void mceIntrReadFixAlign(void *argument);
 extern void mceGetInfoApdx(void *reply);
 extern void mceStorePwd(char *dest);
 
-INCLUDE_ASM(const s32, "sdk/libmc", sceMcInit);
+typedef struct mcSemaParam_t {
+    s32 count;
+    s32 maxCount;
+    s32 initCount;
+    s32 waitThreads;
+    u32 attr;
+    u32 option;
+} mcSemaParam_t;
+extern s32 CreateSema(mcSemaParam_t *param);
+extern s32 WaitSema(s32 sema);
+extern s32 sceMcSync(s32 mode, s32 *command, s32 *result);
+extern void sceSifInitRpc(s32 mode);
+extern s32 sceSifBindRpc(mcRpcCd *client, u32 service, s32 mode);
+
+s32 sceMcInit(void)
+{
+    mcSemaParam_t param;
+    s32 ret;
+    u32 delay;
+
+    if (D_0052BB24 < 0) {
+        param.option = 0;
+        param.initCount = 1;
+        param.maxCount = 1;
+        D_0052BB24 = CreateSema(&param);
+    }
+    sceMcSync(0, NULL, NULL);
+    WaitSema(D_0052BB24);
+    sceSifInitRpc(0);
+    for (;;) {
+        if (sceSifBindRpc(&D_00599740, 0x80000400, 0) < 0) {
+            scePrintf("bind error libmc \n");
+            for (;;) {
+            }
+        }
+        if (D_00599740.bound != 0) {
+            break;
+        }
+        for (delay = 0x100000; --delay != 0;) {
+        }
+    }
+    ret = sceSifCallRpc(&D_00599740, 0xFE, 0, &D_005997C0, 0x30,
+                        &D_0059AD00, 0xC, NULL, NULL);
+    SignalSema(D_0052BB24);
+    if (ret < 0) {
+        D_00599740.bound = 0;
+        return ret - 100;
+    }
+    if (D_0059AD00.serverVersion < 0x20A) {
+        scePrintf("libmc: too old release of mcserv.irx\n");
+        D_00599740.bound = 0;
+        return -120;
+    }
+    if (D_0059AD00.managerVersion < 0x20E) {
+        scePrintf("libmc: too old release of mcman.irx\n");
+        D_00599740.bound = 0;
+        return -121;
+    }
+    return D_0059AD00.result;
+}
 
 s32 sceMcEnd(void)
 {

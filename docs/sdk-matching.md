@@ -404,3 +404,25 @@ before allocation; neither routine adds client-field cleanup after failures or
 after deleting a semaphore. Read-data uses just the packet/sequence/semaphore
 transaction prefix. The complete kernel owner checks 34 match / 0 differ at
 this qualification.
+
+## Ordinary empty bind-retry loops
+
+`sceMcInit` matches all 436 bytes with ordinary C under the configured 2.9
+compiler. Its retry delay is:
+
+```c
+for (delay = 0x100000; --delay != 0;) {
+}
+```
+
+The compiler retains the countdown, loads `0x100000`, and emits the native
+four-NOP loop body between the decrement and branch. The empty infinite loop
+after the bind-error diagnostic also receives its native padded branch block.
+Neither loop needs an inline-assembly primitive or a volatile counter.
+
+The initializer writes only the semaphore's initial count, maximum count and
+option fields. It signals the semaphore before checking the RPC result; a
+negative result returns that result minus 100. The server and manager version
+checks read the shared reply after preceding callbacks. All three diagnostics
+are ordinary string literals, with their complete read-only-data placement
+verified against retail.

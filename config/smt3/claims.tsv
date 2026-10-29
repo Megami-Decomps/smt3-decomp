@@ -728,3 +728,4 @@ src/smt3/newbattle/nbMainProcess.c	redthing1	done	2026-10-28	0 fn / 0 B; 1 guard
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 124 B	stdout/stderr dispatch with unsigned descriptor range, persistent TTY initialization and native error/result forwarding; complete owner 31 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 664 B	RPC bind and read-data transactions with exact mode-bit paths, native partial semaphore initialization and failure cleanup; complete owner 34 match, 0 differ
 src/smt3/effect/effPCPBoss.c	redthing1	done	2026-10-28	0 matches / 1 guarded reconstruction	AreYouReady native size and unsigned conversion contract recovered; 21 second-loop scheduling/register words remain
+src/smt3/sdk/libmc.c	redthing1	done	2026-10-28	1 fn / 436 B	memory-card bind retry and RPC version initialization with ordinary C delay loops and native partial semaphore fields; complete owner exact
