@@ -867,3 +867,4 @@ src/smt3/field/fldTest.c	redthing1	done	2026-10-28	1 fn / 300 B	fldRunEffSet mat
 src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	2 fn / 888 B	primary and alternate cursor dispatch preserve native mode argument and word-valued reset boundary; provider bodies unchanged, three owners exact including data
 src/smt3/facility/fclRagCalc.c	redthing1	done	2026-10-28	1 fn / 588 B	confirmation frame-edge rendering: three fixed entries, signed requested counts, inventory quantities and native font/sprite order; complete owner 5 match, 0 differ
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	0 exact / 556 B guarded	dtoa quotient/remainder helper reconstructed with typed limbs, halfword carry/borrow and correction; native size, 74 of 139 words match, allocation residual retained
+src/smt3/sdk/libm.c	redthing1	done	2026-10-28	1 SDK fn / 120 B	tanf threshold, two-float range reduction and signed reciprocal selector; complete owner exact

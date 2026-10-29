@@ -108,3 +108,14 @@ flip. Group each input's `GET_FLOAT_WORD` with its immediate magnitude mask,
 x first, then y. Performing both GETs before both masks leaves fourteen
 instruction differences at the same480-byte size; the native grouping closes
 all120 words. The earlier plain scoped unions left21 words different.
+
+## tanf
+
+All120 instruction bytes at0x002CF6B8 match. The shared unsigned word-view
+macro followed by a signed magnitude mask reproduces the wrapper under the
+qualified library profile. Magnitudes through0x3F490FDA call the tangent
+kernel with a positive-zero tail and integer selector1. Larger words pass
+through the two-float range reducer, then call the kernel with selector
+`1 - ((quadrant & 1) << 1)`, giving1 or-1. Float inputs use `$f12`/`$f13`
+independently of the integer selector in `$4`. No separate infinity/NaN gate
+or alternate reciprocal operation is introduced.

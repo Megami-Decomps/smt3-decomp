@@ -16,6 +16,7 @@
 
 extern f32 __kernel_cosf(f32 x, f32 tail);
 extern f32 __kernel_sinf(f32 x, f32 tail, s32 reduced);
+extern f32 __kernel_tanf(f32 x, f32 tail, s32 reciprocal);
 extern s32 __ieee754_rem_pio2f(f32 x, f32 *remainder);
 
 f32 cosf(f32 x)
@@ -58,7 +59,20 @@ f32 sinf(f32 x)
     }
 }
 
-INCLUDE_ASM(const s32, "sdk/libm", tanf);
+f32 tanf(f32 x)
+{
+    f32 y[2];
+    s32 magnitude;
+    s32 quadrant;
+
+    GET_FLOAT_WORD(magnitude, x);
+    magnitude &= 0x7FFFFFFF;
+    if (magnitude <= 0x3F490FDA) {
+        return __kernel_tanf(x, 0.0f, 1);
+    }
+    quadrant = __ieee754_rem_pio2f(x, y);
+    return __kernel_tanf(y[0], y[1], 1 - ((quadrant & 1) << 1));
+}
 
 INCLUDE_ASM(const s32, "sdk/libm", __ieee754_acosf);
 
