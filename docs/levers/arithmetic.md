@@ -90,3 +90,22 @@ the narrow control compares pseudo 86 directly. CSE shares the wide form's
 three ID narrowings through pseudo 93. Thus a repeated assignment is one
 explanation for a redundant narrowing, not a requirement to infer from the
 instruction alone. Preserve real data widths and explicit format conversions.
+
+
+## A dead division leaves its zero-divide trap behind
+
+A `beql rX, $0` followed by `break 0,7` with no `div` anywhere near it is the
+trace of a division whose result is dead. ee-gcc 2.96 deletes the division but
+keeps the trap, so the divisor is still tested and the `break` still stands.
+
+Standalone probe through `tools/cc.sh`:
+
+    int g(int x) { ra(0); a = x / 24; a = x * 2; ra(1); return a; }
+
+emits `li 24`, `beqzl` and `break` and no `div` at all. So where retail shows a
+bare trap, the source computed a quotient and then overwrote it before any use.
+
+On `dds3TitleDrawMenu` the draft was two words short at +0xC4 for exactly this
+reason, and writing the overwritten assignment before the four sprite calls was
+worth 74 words. The canonical rules already permit dead code whose trace
+survives in retail; this is the arithmetic shape that produces it.
