@@ -1467,22 +1467,17 @@ extern void cmbClearUnitSkills(datUnitWork_t *unit);
 extern u8 datLevelUpTable[];
 
 #ifdef NON_MATCHING
-void cmbInitStockUnit(u16 devilId, datUnitWork_t *unit)
+void cmbInitStockUnit(u16 id, datUnitWork_t *unit)
 {
-    datLevelUp_t *table = (datLevelUp_t *)datLevelUpTable;
-    datLevelUpEntry_t *entry;
+    datLevelUp_t *row;
     s32 i;
 
     cmbClearUnitSkills(unit);
-    entry = table[devilId].entry;
+    row = &((datLevelUp_t *)datLevelUpTable)[id];
     for (i = 0; i < 24; i++) {
-        if (entry[i].kind != 1) {
-            continue;
+        if (row->entry[i].kind == 1 && row->entry[i].level == 0) {
+            unit->skill[unit->skillcnt++] = row->entry[i].value;
         }
-        if (entry[i].level != 0) {
-            continue;
-        }
-        unit->skill[unit->skillcnt++] = entry[i].value;
     }
 }
 #else

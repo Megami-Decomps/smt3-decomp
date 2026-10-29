@@ -222,6 +222,7 @@ cmbGetHeartsParamByIndex	rstcalc	0x58	8 of 22 words differ	docs/nonmatching/resu
 cmbCountEvoReady	rstcalc	0x84	9 of 34 words match	docs/nonmatching/result/rstcalc.md	95
 cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/nonmatching/result/rstcalc.md	121
 rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/nonmatching/result/rstcalc.md	150
+cmbInitStockUnit			37 of 40 words match	docs/nonmatching/result/rstcalc.md	170
 rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/nonmatching/result/rstdraw.md	5
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	543 of 575 words differ	docs/nonmatching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/nonmatching/sdf/sdfGraph.md	5

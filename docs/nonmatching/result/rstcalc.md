@@ -166,3 +166,32 @@ out of the declarations, a `u8 *` walk reading `p[6]`/`p[7]` instead of a
 typed `entry[1]`, and nested `if`s instead of the `&&`. All nine compile to
 the same three-word swap. This is the same register exchange recorded above
 for `cmpFindKugatatiMsgEntry`, which walks the same table.
+
+## cmbInitStockUnit
+
+The earlier 172-byte guarded entry-pointer form has been reduced to 160
+emitted and native bytes; 37 of 40 words match. Three differing words
+at `+0x20`, `+0x24` and `+0x2C` exchange the temporaries in the multiply-by-102
+address expansion. All loads, conditions, stores, loop ordering and calls
+match. Normal builds retain assembly.
+
+The helper masks the devil ID to 16 bits, clears the unit's skills, then
+scans all 24 level-up entries in order. A kind-one, level-zero entry appends
+its 16-bit value and increments the unit's 16-bit skill count. The established
+102-byte row and four-byte entry types express the complete access path.
+
+A parity-qualified `cc1probe` run on this guarded body used `--alloc --sched
+--no-dumps --cflag -DNON_MATCHING --func cmbInitStockUnit`; hooked and unhooked
+assembly matched (`verify: OK`). In local allocation, UID33 combines pseudo91
+into92; UID37 combines92 into94; UID39 combines94 into95. The resulting
+quantity has nine references over lifetime10..26 and receives `$2`, while
+the separate pseudo93 receives `$3`. Thus the three-times-ID intermediate
+shares the final offset quantity. Native instead holds the three-times-ID
+value in `$3` and the shifted term/final offset in `$2`. This is coalescing,
+not instruction scheduling or an incorrect row size.
+
+An ordinary signed byte-offset form and a shared table/entry index control
+are inert. The direct typed-row source remains preferred. A further change
+needs a genuine source lifetime or access-path premise that explains the
+different temporary combination; manually expanding the constant multiply
+is not justified by this observation.
