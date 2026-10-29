@@ -71,16 +71,7 @@ extern void *D_00345D9C[];
 
 extern s32 campStatusActive;
 
-typedef struct
-{
-    /* 0x00 */ void *allocation;
-    /* 0x04 */ s32 texHandle[5];
-    /* 0x18 */ u8 unk_18[4];
-    /* 0x1C */ s32 cursor;
-    /* 0x20 */ u8 unk_20[0x10];
-    /* 0x30 */ s32 unk_30;
-    /* 0x34 */ s32 unk_34;
-} dds3TitleWork_t;
+
 
 typedef struct
 {
@@ -110,7 +101,6 @@ typedef struct
 
 extern fclEncyc_instance_tag *g_pinst;
 
-extern dds3TitleWork_t *titleWork;
 
 extern campInfoWork_t *campInfoWork;
 
