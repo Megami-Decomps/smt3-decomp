@@ -1,10 +1,9 @@
 function	unit	size	distance	page	line
 fldRunTamaFree	code_00116AD0	0xBC	27 of 47 words differ	docs/nonmatching/code_00116AD0.md	5
-fldRunEffSet	code_00116AD0	0x12C	67 of 73 words differ	docs/nonmatching/code_00116AD0.md	48
-fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/nonmatching/code_00116AD0.md	69
-fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/nonmatching/code_00116AD0.md	86
-fldGbFlagClear	code_00116AD0	0x124	23 of 73 words differ	docs/nonmatching/code_00116AD0.md	113
-fldAnahoriSelectInit	code_00116AD0	0x7C	10 of 30 words differ	docs/nonmatching/code_00116AD0.md	138
+fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/nonmatching/code_00116AD0.md	48
+fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/nonmatching/code_00116AD0.md	65
+fldGbFlagClear	code_00116AD0	0x124	23 of 73 words differ	docs/nonmatching/code_00116AD0.md	92
+fldAnahoriSelectInit	code_00116AD0	0x7C	10 of 30 words differ	docs/nonmatching/code_00116AD0.md	117
 slCopyNonZero	code_00144798	0x40	14 of 16 words match	docs/nonmatching/code_00144798.md	5
 fldCommand_DIR_HIT_CNTR	code_00144798	0xC0	32 of 42 words differ	docs/nonmatching/code_00144798.md	26
 fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/nonmatching/code_00144798.md	55
@@ -54,8 +53,7 @@ dds3DrawConfigBar	code_0029B780	0x1C4		docs/nonmatching/code_0029B780.md	70
 dds3DrawConfigCursor	code_0029B780	0x2CC	48 of 179 words matching	docs/nonmatching/code_0029B780.md	87
 dds3BillboardManagerInit	effect/billManager	0xB8	44 of 46 words match	docs/nonmatching/effect/billManager.md	5
 dds3Billboard_P2AAnimDraw	effect/billManager	0x1D0	1 of 174 words differing	docs/nonmatching/effect/billManager.md	51
-effBTLFieldColorON	effect/effBattle	0x3C4	Thirteen of 241 words differ	docs/nonmatching/effect/effBattle.md	5
-effBTLCutDraw	effect/effBattle	0x420	Eighty-eight of 263 words differ	docs/nonmatching/effect/effBattle.md	56
+effBTLCutDraw	effect/effBattle	0x420	Eighty-eight of 263 words differ	docs/nonmatching/effect/effBattle.md	5
 effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270	6 of 156 words differ	docs/nonmatching/effect/effBattleMisc.md	5
 effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/nonmatching/effect/effBattleMisc.md	41
 effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	4 of 146 words differ	docs/nonmatching/effect/effBattleMisc.md	72

@@ -904,23 +904,50 @@
   explicit flag local) all give the same 3 or 4, so sweep the statement's
   position rather than its form.
 - A varargs format string that retail keeps in a callee-saved register across
-  the calls that compute the arguments is a named local assigned before them,
-  and the arguments then have to be locals too. `effBTLFieldColorON` went from
-  205 of 238 differing words to 41 with `format = D_00532FE8;` placed after the
-  last VU0 macro and the six `sdfFloatToULong` results in their own `s32`
-  locals; with the literal at the call site gcc builds the address in `$4`
-  immediately before the `jal`. Anywhere from "after the last statement before
-  the first argument" through "before the fourth argument" gives the same
-  result; later than the fifth loses 40 words.
+  the calls computing its arguments can be a named local assigned before
+  them. In `effBTLFieldColorON`, the six results must have their truthful
+  `f64` type: the provider is `f64 fptodp(f32)`, and `printf` consumes six
+  `%f` arguments. The older `s32` declaration and locals happened to preserve
+  most of the body but corrupted the source-level call contract. Correcting
+  all seven types removed nine of thirteen differing words, leaving only
+  four commuted address additions. The format assignment after the VU0
+  multiply/store and before the conversions remains live across the calls.
+- A homogeneous array member and equivalent named component fields can
+  produce different address association. `effBTLFieldColorON` reads a
+  20-byte table record: four `f32` components (alpha, red, green, blue) at
+  offsets 0, 4, 8 and 12, then the packed `u32` color at 16. Keeping that
+  record and declaring its components as `f32 color[4]` matches all 241
+  words; a nested color struct or four direct named `f32` fields leaves
+  four commuted `addu` instructions at +0x80, +0xE8, +0xF8 and +0x108.
+  This is not a flat word view of a typed record: the final packed-color
+  field stays separate, and every color component is loaded as `f32`.
+
+  Qualified stock ee-gcc 2.96 `-da` dumps explain the difference. For the
+  first red read, the named-field control's `.00.rtl` UID 75 adds 4 to
+  base pseudo 105, then UID 79 adds scaled index 110. The array form's
+  UID 75 instead adds 4 to index 110, and UID 77 adds base 105. After CSE
+  shares the index and base, `.14.combine` removes the component offset
+  into the `lwc1` displacement: control UID 79 becomes `base93 + index98`,
+  while array UID 77 becomes `index98 + base93`. The same distinction
+  covers the later promoted color reads. No pointer/integer casts,
+  extra loads, artificial dependencies, or compiler options are needed.
+
+  Both forms were compiled as `src/smt3/effect/effBattle.c` with the
+  unchanged `tools/cc.sh` unit flags, once ordinarily and once with
+  `-da -dumpbase <scratch>/rtl`; full emitted assembly was byte-identical
+  after normalizing only the wrapper's random scratch-directory names.
+  This qualifies ordinary stock dumps, not debugger-hook instrumentation.
+  The final complete owner has 61 matches and zero differences, including
+  data and production-context checks. Exact bytes establish the compiler
+  property and layout, not the original source spelling.
 - The `(T *)((u8 *)(i * sizeof(T)) + (u32)base)` cast for retail's
   `addu rd, index, base` **can make things much worse**, so measure it rather
-  than applying it on the operand order alone. It also stops gcc sharing the
-  scaled index, so in a function that recomputes the row in two places
-  (`effBTLFieldColorON` computes `id * 0x14` once for the colour reads and
-  again for the printf arguments) the cast costs more than the operand order
-  earns: 13 differing words became 221 with the cast on three accesses and 230
-  with it on all of them. `effBTLCutDraw` shows the same thing for a loop row,
-  88 of 263 words with plain subscripts against 149 of 260 with the cast.
+  than applying it on the operand order alone. The old field-color draft's
+  15 access-group subsets lost scaled-index sharing; the component-array
+  representation above avoids those casts. `effBTLCutDraw` likewise has
+  88 of 263 differing words with plain subscripts against 149 of 260 with
+  the cast. Named table, row and byte-offset temporaries also shortened or
+  reordered the field-color body instead of fixing its four-word residual.
 - A dead `sw` to the frame after a colour-pack macro is a dead store to a
   stack aggregate's element, not a compiler artefact. `effBTLCutGetAllPartColor`
   ends `SDF_VU0_dds3ColorFtoI(color, 128.0f); work[0].word = color; return

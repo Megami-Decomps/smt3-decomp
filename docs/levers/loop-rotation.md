@@ -34,3 +34,24 @@ animated margin calculation. A qualified `cc1probe --reorg --no-dumps` trace
 selects the shared count clear (uid65) for the type branch's delay slot
 (uid46), reproducing the native prefix. Plain and hooked output agree; the
 complete owner matches with the 788-byte function and its six-entry switch.
+
+### Sentinel exit and per-mode effect lifetime (fldRunEffSet)
+
+`field/fldTest::fldRunEffSet` (300 instruction bytes) walks a null-terminated
+array of effect descriptions. Retail tests the resource pointer at the loop
+head (`beql`) and returns immediately for the sentinel. An open-ended loop with that
+explicit return preserves the head test and unconditional back edge; the
+former conditional `for` loop rotates its resource-pointer test to the tail.
+Initialize the table entry before the captured Dante-work pointer to preserve
+their native prologue acquisition order. The strict range test reads the
+Dante angle before the lower endpoint (`angle > min && angle < max`).
+
+The two creation modes each publish their handle and lifetime before joining
+the common placement updates. Keeping `res->cnt = entry->time` in each mode
+lets its load precede the returned handle's store and gives the native shared
+count-store tail. Factoring the lifetime into the common placement block
+instead is eight bytes short. No extra read or dependency is required.
+
+The final ordinary source is exact, and the complete owner is 37 match,
+0 differ including data. This replaces the old broad draft explanation: the
+handle loads already use the native argument register in the current owner.
