@@ -17,3 +17,15 @@
 0x002197B0	ApplyChangeListIndex	inferred	Reconstructed fclEncyc name; native extent ends at the independent ApplyEdgeListCursor entry after the restored-frame tail call.
 0x002198D8	ApplyEdgeListCursor	inferred	Independent frameless edge-correction entry reached after ApplyChangeListIndex restores its frame; name agrees with the reconstructed fclEncyc source.
 0x002D1B38	dpcmp	inferred	Native double-comparison wrapper: unpacks both arguments and calls __fpcmp_parts_df (0x002D3638); matching compiler uses dpcmp. Curated correction; IDB update pending.
+0x0052BAA0	ipuDefaultQuantizerMatrices	inferred	libipu: sceIpuInit 0x002CDA58 pairs with DDS1 0x002F5618; loads five 16-byte quantizer chunks. All 0x50 initial bytes agree.
+0x0052BAF0	ipuDefaultVqClut	inferred	libipu: sceIpuInit loads two 16-byte VQ CLUT chunks after the quantizer matrices. All 0x20 initial bytes agree with DDS1.
+0x0052BE28	_impure_ptr	inferred	newlib: active reentrancy pointer passed by malloc/free and stdio wrappers; initialized to 0x0052BB38. DDS1 names the same four-byte pointer at 0x0039BFD0.
+0x0052BE30	__malloc_av_	inferred	newlib: _malloc_r 0x002D3BE8 pairs with DDS1 0x002FF830. Bin links and top chunk use the same 0x408-byte layout; initialized self-relative links agree.
+0x0052C238	__malloc_trim_threshold	inferred	newlib: allocator state immediately after the bin array, same relative layout and initial bytes as DDS1; trim threshold starts at 0x20000.
+0x0052C240	__malloc_top_pad	inferred	newlib: allocator top padding, same relative offset and initial eight zero bytes as DDS1.
+0x0052C248	__malloc_sbrk_base	inferred	newlib: _malloc_trim_r 0x002D9C90 reads this sbrk base; initially (char *)-1, followed by padding, as in DDS1.
+0x0052C250	__malloc_max_sbrked_mem	inferred	newlib: allocator sbrk high-water mark, same relative offset and initial bytes as DDS1.
+0x0052C258	__malloc_max_total_mem	inferred	newlib: allocator total-memory high-water mark, same relative offset and initial bytes as DDS1.
+0x0052C260	__malloc_current_mallinfo	inferred	newlib: _malloc_trim_r addresses these mallinfo totals; 0x28-byte state follows the high-water marks, same layout and initial bytes as DDS1.
+0x0052C2A8	sbrkBreak	inferred	sbrk 0x002DC5A0 pairs with DDS1 0x0030B120; the same loads/stores address this current break with interrupts disabled.
+0x0054B550	_ctype_	inferred	newlib: unique 257-byte EOF-plus-character-class table, byte-identical to DDS1 0x003B7990; _strtol_r and mdlManager FileUpper index its character flags from +1.

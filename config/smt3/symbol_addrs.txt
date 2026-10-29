@@ -1,5 +1,19 @@
 // Symbols seeded from the SLUS_209.11 IDB by tools/ida_symbols.py.
 // Hand-curated symbols go above the generated block and win over it.
+// Native SDK data, identified through paired DDS1 readers and initial layout.
+ipuDefaultQuantizerMatrices = 0x0052BAA0; // type:u8 size:0x50
+ipuDefaultVqClut = 0x0052BAF0; // type:u16 size:0x20
+_impure_ptr = 0x0052BE28; // type:u32 size:0x4
+__malloc_av_ = 0x0052BE30; // type:u32 size:0x408
+__malloc_trim_threshold = 0x0052C238; // size:0x8
+__malloc_top_pad = 0x0052C240; // size:0x8
+__malloc_sbrk_base = 0x0052C248; // size:0x4
+__malloc_max_sbrked_mem = 0x0052C250; // size:0x8
+__malloc_max_total_mem = 0x0052C258; // size:0x8
+__malloc_current_mallinfo = 0x0052C260; // size:0x28
+sbrkBreak = 0x0052C2A8; // type:u32 size:0x4
+_ctype_ = 0x0054B550; // type:u8 size:0x101
+
 // .sdata's size (0x3355) is not a multiple of 4: it ends with the string
 // ".ips" plus its terminator. spimdisasm emits whole words, so the odd last
 // byte needs its own symbol or the image comes out one byte short.

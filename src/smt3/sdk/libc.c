@@ -208,7 +208,7 @@ struct _reent {
     FILE __sf[3];
 };
 
-extern _reent *D_0052BE28 __attribute__((section(".data")));
+extern _reent *_impure_ptr __attribute__((section(".data")));
 
 extern s32 _puts_r(_reent *r, const char *s);
 
@@ -387,18 +387,18 @@ void abort(void) {
 s32 atexit(void (*fn)(void)) {
     _atexit *p;
 
-    p = D_0052BE28->_atexit;
+    p = _impure_ptr->_atexit;
     if (p == NULL) {
-        p = &D_0052BE28->_atexit0;
-        D_0052BE28->_atexit = p;
+        p = &_impure_ptr->_atexit0;
+        _impure_ptr->_atexit = p;
     }
     if (p->_ind >= 32) {
         if ((p = malloc(sizeof(_atexit))) == NULL) {
             return -1;
         }
         p->_ind = 0;
-        p->_next = D_0052BE28->_atexit;
-        D_0052BE28->_atexit = p;
+        p->_next = _impure_ptr->_atexit;
+        _impure_ptr->_atexit = p;
     }
     p->_fns[p->_ind++] = fn;
     return 0;
@@ -411,16 +411,16 @@ s32 atoi(const char *s) {
 void *malloc(u32 size) {
     void *result;
 
-    __malloc_lock(D_0052BE28);
-    result = _malloc_r(D_0052BE28, size);
-    __malloc_unlock(D_0052BE28);
+    __malloc_lock(_impure_ptr);
+    result = _malloc_r(_impure_ptr, size);
+    __malloc_unlock(_impure_ptr);
     return result;
 }
 
 void free(void *ptr) {
-    __malloc_lock(D_0052BE28);
-    _free_r(D_0052BE28, ptr);
-    __malloc_unlock(D_0052BE28);
+    __malloc_lock(_impure_ptr);
+    _free_r(_impure_ptr, ptr);
+    __malloc_unlock(_impure_ptr);
 }
 
 INCLUDE_ASM(const s32, "sdk/libc", gcc2_compiled_);
@@ -463,7 +463,7 @@ s32 _printf_r(_reent *r, const char *fmt, ...) {
 }
 
 s32 printf(const char *fmt, ...) {
-    _reent *r = D_0052BE28;
+    _reent *r = _impure_ptr;
     va_list ap;
 
     va_start(ap, fmt);
@@ -471,14 +471,14 @@ s32 printf(const char *fmt, ...) {
     return vfprintf(r->_stdout, fmt, ap);
 }
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B550);
+INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B658);
 
 INCLUDE_ASM(const s32, "sdk/libc", _puts_r);
 
 s32 puts(const char *s) {
-    return _puts_r(D_0052BE28, s);
+    return _puts_r(_impure_ptr, s);
 }
 
 INCLUDE_ASM(const s32, "sdk/libc", qsort);
@@ -551,19 +551,19 @@ s32 __sigtramp_r(_reent *r, s32 sig) {
 }
 
 s32 raise(s32 sig) {
-    return _raise_r(D_0052BE28, sig);
+    return _raise_r(_impure_ptr, sig);
 }
 
 void *signal(s32 sig, void *handler) {
-    return _signal_r(D_0052BE28, sig, handler);
+    return _signal_r(_impure_ptr, sig, handler);
 }
 
 s32 _init_signal(void) {
-    return _init_signal_r(D_0052BE28);
+    return _init_signal_r(_impure_ptr);
 }
 
 s32 __sigtramp(s32 sig) {
-    return __sigtramp_r(D_0052BE28, sig);
+    return __sigtramp_r(_impure_ptr, sig);
 }
 
 s32 _kill_r(_reent *r, s32 pid, s32 sig) {
@@ -605,7 +605,7 @@ s32 sprintf(char *str, const char *fmt, ...) {
     f._flags = 0x208;
     f._bf._base = f._p = (u8 *)str;
     f._bf._size = f._w = 0x7FFFFFFF;
-    f._data = D_0052BE28;
+    f._data = _impure_ptr;
     result = vfprintf(&f, fmt, ap);
     *f._p = '\0';
     return result;
@@ -645,7 +645,7 @@ INCLUDE_ASM(const s32, "sdk/libc", strstr);
 INCLUDE_ASM(const s32, "sdk/libc", _strtol_r);
 
 long strtol(const char *s, char **end, s32 base) {
-    return _strtol_r(D_0052BE28, s, end, base);
+    return _strtol_r(_impure_ptr, s, end, base);
 }
 
 s32 gcc2_compiled__0(FILE *fp, __suio *uio) {
@@ -680,7 +680,7 @@ s32 vsprintf(char *str, const char *fmt, va_list ap) {
     f._flags = 0x208;
     f._bf._base = f._p = (u8 *)str;
     f._bf._size = f._w = 0x7FFFFFFF;
-    f._data = D_0052BE28;
+    f._data = _impure_ptr;
     result = vfprintf(&f, fmt, ap);
     *f._p = '\0';
     return result;
@@ -751,7 +751,7 @@ void _cleanup_r(_reent *r) {
 }
 
 void _cleanup(void) {
-    _cleanup_r(D_0052BE28);
+    _cleanup_r(_impure_ptr);
 }
 
 void __sinit(_reent *r) {
@@ -808,11 +808,11 @@ void *func_002DA308(_reent *r) {
 }
 
 s32 setlocale(s32 category, const char *locale) {
-    return _setlocale_r(D_0052BE28, category, locale);
+    return _setlocale_r(_impure_ptr, category, locale);
 }
 
 void *localeconv(void) {
-    return func_002DA308(D_0052BE28);
+    return func_002DA308(_impure_ptr);
 }
 
 INCLUDE_ASM(const s32, "sdk/libc", __smakebuf);
