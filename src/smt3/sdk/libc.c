@@ -1998,6 +1998,10 @@ long __sseek(void *cookie, s32 offset, s32 whence) {
     return result;
 }
 
+#ifdef NON_MATCHING
+extern s32 _close_r(_reent *r, s32 fd);
+#endif
+
 s32 __sclose(void *cookie) {
     FILE *fp = cookie;
 
