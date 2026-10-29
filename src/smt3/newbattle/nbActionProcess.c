@@ -1125,7 +1125,86 @@ void DokodemoPoa(nbActionProcessData_t *a)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetNowActionStat);
+/* Classify both HP and MP effects using the native skill-type groups. */
+void SetNowActionStat(nbActionProcessData_t *a, s32 comm, s32 nskill) {
+    s32 i;
+    s32 type;
+
+    if (a->partyindex >= 4) {
+        return;
+    }
+    switch (comm) {
+    case 0:
+        a->stat |= 0x10000;
+        break;
+    case 1:
+        if (datSkillTable.normal[nskill].koukatype == 0) {
+            for (i = 0; i < 2; i++) {
+                if (i == 0) {
+                    type = datSkillTable.normal[nskill].hptype;
+                } else {
+                    type = datSkillTable.normal[nskill].mptype;
+                }
+                switch (type) {
+                case 1: case 3: case 4: case 6: case 8:
+                case 10: case 12: case 13: case 14:
+                    a->stat |= 0x10000;
+                    break;
+                }
+            }
+        }
+        break;
+    }
+    if (comm == 1 && datSkillTable.normal[nskill].koukatype == 1) {
+        for (i = 0; i < 2; i++) {
+            if (i == 0) {
+                type = datSkillTable.normal[nskill].hptype;
+            } else {
+                type = datSkillTable.normal[nskill].mptype;
+            }
+            switch (type) {
+            case 1: case 3: case 4: case 6: case 8:
+            case 10: case 12: case 13: case 14:
+                a->stat |= 0x20000;
+                break;
+            }
+        }
+        if (datSkillTable.normal[nskill].badtype == 1 ||
+            datSkillTable.normal[nskill].badtype == 3) {
+            a->stat |= 0x20000;
+        }
+    }
+    for (i = 0; i < 2; i++) {
+        if (i == 0) {
+            type = datSkillTable.normal[nskill].hptype;
+        } else {
+            type = datSkillTable.normal[nskill].mptype;
+        }
+        switch (type) {
+        case 2: case 5: case 7: case 9: case 11: case 15:
+            a->stat |= 0x40000;
+            break;
+        }
+    }
+    if (comm == 1 && datSkillTable.normal[nskill].koukatype == 1) {
+        a->stat |= 0x80000;
+    }
+    if (comm == 5) {
+        a->stat |= 0x100000;
+    }
+    if (comm != 1) {
+        if (comm == 6) {
+            a->stat |= 0x200000;
+        }
+    } else {
+        switch (datSkillTable.normal[nskill].program) {
+        case 2:
+        case 3:
+            a->stat |= 0x200000;
+            break;
+        }
+    }
+}
 
 /* NON_MATCHING: 4 of 120 words differ (first at +0x110). */
 
