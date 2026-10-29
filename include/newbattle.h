@@ -68,6 +68,7 @@ typedef struct nbFormation_t
 } nbFormation_t;
 
 nbFormation_t *nbGetEventForm(void);
+void nbSetOrder(void);
 
 /* Decoded entry in a battle pack. */
 typedef struct nbPacEntry_t {

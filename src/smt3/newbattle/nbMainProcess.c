@@ -221,7 +221,6 @@ extern char D_00543458[];
 
 extern void nbSetHojoCounter(s32 formindex, s32 type, s32 point);
 
-extern void nbSetOrder(void);
 
 /* The 60-byte devil record; only the flag word this unit reads is named. */
 
