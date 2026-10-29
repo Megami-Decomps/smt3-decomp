@@ -1632,7 +1632,79 @@ void nbPanelPressTurnGaugeAnimStart2(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPressTurn);
 
+extern nbPanelProcess_nbPanelXYZ_t nbStockSelectTable[];
+extern nbPanelProcess_nbPanelXYZ_t D_004F01A0[];
+extern nbPanelProcess_nbPanelXYZ_t D_004EFE90[];
+extern nbPanelProcess_nbPanelTMXuv_t nbPanelParamTable[];
+extern s32 D_005511FC;
+extern void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag);
+
+#ifdef NON_MATCHING
+void nbPanelPartySelect(nbMainProcessData_t *data)
+{
+    nbPanelProcess_nbPanelXYZ_t *rect;
+    nbPanelProcess_nbPanelTMXuv_t *uv;
+    nbFormation_t *form;
+    nbParty_t *party;
+    sdfTexHandle_t *texture;
+    s32 active;
+    s32 selected;
+    s32 statindex;
+    s32 x;
+    s32 y = 0x153;
+    s32 i;
+    u32 color;
+    u32 base;
+    u32 stat;
+
+    uv = &nbPanelParamTable[7];
+    for (i = 0; i < 2; i++) {
+        rect = &nbStockSelectTable[6 + i];
+        texture = data->pnltex[1];
+        color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+        nbPnlSprite(rect->x + 0xE6, rect->y + y, rect->w, rect->h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+    }
+    party = data->party;
+    form = data->form;
+    active = party[data->order[data->orderindex]].statindex;
+    for (i = 0; i < 4; i++, form++, y += 0x17) {
+        stat = form->stat;
+        base = *(volatile u32 *)&nbPanelBaseABGR;
+        if ((stat & 0x101) == 0x101) {
+            statindex = party[form->partyindex].statindex;
+            selected = active == statindex;
+            if (stat & 8) {
+                nbPanelDrawPP(0xE6, y, selected, statindex, 0x200000);
+                x = selected ? 214 : (s32)(f32)D_005511FC;
+                texture = data->pnltex[0];
+                color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+                rect = &D_004F01A0[1];
+                uv = &nbPanelParamTable[15];
+                nbPnlSprite(rect->x + x, rect->y + y, rect->w, rect->h,
+                            uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+            } else {
+                nbPanelDrawPP(0xE6, y, selected, statindex, 0);
+            }
+        } else {
+            rect = &D_004EFE90[0];
+            uv = &nbPanelParamTable[3];
+            texture = data->pnltex[0];
+            color = effMagaCylinderCalcColor(0x80808080, base);
+            nbPnlSprite(rect->x + 0xE6, rect->y + y, rect->w, rect->h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+            rect = &D_004EFE90[1];
+            uv = &nbPanelParamTable[4];
+            texture = data->pnltex[0];
+            color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
+            nbPnlSprite(rect->x + 0xE6, rect->y + y, rect->w, rect->h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPartySelect);
+#endif
 
 void nbPanelStockInit(void)
 {
