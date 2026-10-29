@@ -2004,7 +2004,389 @@ void nbPanelAnalyzeDraw(datUnitWork_t *pUnitWork)
     pNbPanelAnalyzeUnitWork = pUnitWork;
 }
 
+#ifdef NON_MATCHING
+extern nbPanelProcess_nbPanelXYZ_t D_004F0268[], D_004F02A4[], D_004F02E0[];
+extern nbPanelProcess_nbPanelXYZ_t D_004F03A8[], D_004F0420[], D_004F045C[];
+extern nbPanelProcess_nbPanelXYZ_t D_004F0484[], D_004F0498[], D_004F04E8[];
+extern nbPanelProcess_nbPanelXYZ_t D_004F0510[], D_004F0574[], D_004F0588[];
+extern nbPanelProcess_nbPanelTMXuv_t D_004EFDD0[], D_004EFDE0[], D_004EFE00[];
+extern nbPanelProcess_nbPanelTMXuv_t D_004EFE10[], D_004EFE20[], D_004EFE30[], D_004EFE40[];
+extern datDevilFormat_t datDevilTable[];
+extern char *datExplainTable[], *text1[], *text2[];
+extern u8 D_003DC9B8[];
+extern char D_00551230[];
+extern f32 nbPanelAnalyzeRate;
+extern const volatile f32 D_0054E5F0, D_0054E5F4, D_0054E5F8, D_0054E5FC;
+extern const volatile f32 D_0054E600, D_0054E604, D_0054E608, D_0054E60C;
+extern const volatile f32 D_0054E610, D_0054E614, D_0054E618, D_0054E61C;
+extern const volatile f32 D_0054E620, D_0054E624, D_0054E628;
+extern u16 datGetLevelForDraw(datUnitWork_t *work);
+extern void cmpSetSkillListRows(s32 rows);
+extern void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color, datUnitWork_t *unit, s32 flags, s32 ot);
+
+void nbPanelAnalyzeRun(void)
+{
+    datUnitWork_t *unit = pNbPanelAnalyzeUnitWork;
+    u32 textColor = 0x80808080;
+    u32 spriteColor = 0x80808080;
+    u8 hidden;
+    f32 contentRate = 1.0f;
+    s32 drawContent = 0;
+    s32 state;
+    s32 frame;
+    s32 i;
+
+    if (unit == NULL) return;
+    nbGetMainProcessData();
+    hidden = D_003DC9B8[pNbPanelAnalyzeUnitWork->id];
+    nbPnl_rsetAlpha(0);
+    nbPanelBaseColorSet(0x80808080);
+    state = nbPanelAnalyzeProcess;
+    switch (state) {
+    case 1:
+        frame = (s32)((u32)nbPanelAnalyzeFrame + 1);
+        if (frame >= 0) {
+            nbPanelAnalyzeProcess = 2;
+            nbPanelAnalyzeRate = 1.0f;
+            nbPanelAnalyzeFrame = 0;
+        } else {
+            nbPanelAnalyzeFrame = frame;
+        }
+        break;
+    case 2: {
+        f32 rate;
+        f32 fade;
+        f32 factor;
+        s32 slide1;
+        s32 slide2;
+        s32 left1;
+        s32 left2;
+        u32 black30;
+        u32 black40;
+        u32 red70;
+        u32 red30;
+        s32 scaledY;
+        frame = nbPanelAnalyzeFrame;
+        if (frame >= 5) {
+            rate = ((f32)(frame - 5) / 10.0f) * nbPanelAnalyzeRate;
+            if (rate > 1.0f) rate = 1.0f;
+            factor = D_0054E5F0;
+            black30 = (u32)(s32)(rate * 30.0f * 128.0f * factor) << 24;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[0], black30, black30, black30, black30);
+            nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[1], black30, black30, 0, 0);
+            red70 = ((u32)(s32)(rate * 70.0f * 128.0f * factor) << 24) | 0x230508;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[2], 0x230508, 0x230508, red70, red70);
+            scaledY = (s32)((f32)D_004F0268[0].h * (1.0f - rate) * 0.5f) + 0xF6;
+            black40 = (u32)(s32)(rate * 40.0f * 128.0f * factor) << 24;
+            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[0], 1.0f, rate, black40, black40, black40, black40);
+            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[1], 1.0f, rate, 0, black40, 0, black40);
+            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[2], 1.0f, rate, black40, 0, black40, 0);
+            red30 = ((u32)(s32)(rate * 30.0f * 128.0f * factor) << 24) | 0x711E39;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[11], red30, 0x711E39, 0x711E39, 0x711E39);
+            nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[12], 0x711E39, 0x711E39, 0x711E39, red30);
+            frame = nbPanelAnalyzeFrame;
+        }
+        fade = 1.0f - ((f32)frame / 15.0f) * nbPanelAnalyzeRate;
+        if (fade <= 0.0f) {
+            slide1 = 0;
+            slide2 = 0;
+        } else {
+            slide1 = (s32)(fade * 225.0f);
+            slide2 = (s32)(fade * D_0054E5F4);
+        }
+        left1 = (s32)(0u - (u32)slide1);
+        left2 = (s32)(0u - (u32)slide2);
+        nbPanelPolygonDraw(left1, 0xF6, &D_004F02E0[0], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(left1, 0xF6, &D_004F02E0[1], 0x4CFF6484, 0xFF6484, 0x4CFF6484, 0xFF6484);
+        nbPanelPolygonDraw(left2, 0xF6, &D_004F02E0[2], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(left2, 0xF6, &D_004F02E0[3], 0x4CFF6484, 0xFF6484, 0x4CFF6484, 0xFF6484);
+        nbPanelPolygonDraw(slide2, 0xF6, &D_004F02E0[4], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(slide2, 0xF6, &D_004F02E0[5], 0xFF6484, 0x4CFF6484, 0xFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(slide1, 0xF6, &D_004F02E0[6], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(slide1, 0xF6, &D_004F02E0[7], 0xFF6484, 0x4CFF6484, 0xFF6484, 0x4CFF6484);
+        frame = nbPanelAnalyzeFrame;
+        drawContent = frame >= 12;
+        if (frame >= 2) nbPanelAnalyzeRate *= D_0054E5F8;
+        frame = (s32)((u32)frame + 1);
+        if (frame >= 15) {
+            nbPanelAnalyzeFrame = 0;
+            nbPanelAnalyzeProcess = 3;
+        } else {
+            nbPanelAnalyzeFrame = frame;
+        }
+        break;
+    }
+    case 4: {
+        f32 rate;
+        f32 fade;
+        f32 factor;
+        s32 slide1;
+        s32 slide2;
+        s32 left1;
+        s32 left2;
+        u32 black30;
+        u32 black40;
+        u32 red70;
+        u32 red30;
+        s32 scaledY;
+        frame = nbPanelAnalyzeFrame;
+        if (frame >= 0) {
+            rate = 1.0f - (f32)frame * 0.125f;
+            if (rate < 0.0f) rate = 0.0f;
+            factor = D_0054E5FC;
+            black30 = (u32)(s32)(rate * 30.0f * 128.0f * factor) << 24;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[0], black30, black30, black30, black30);
+            nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[1], black30, black30, 0, 0);
+            red70 = ((u32)(s32)(rate * 70.0f * 128.0f * factor) << 24) | 0x230508;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[2], 0x230508, 0x230508, red70, red70);
+            scaledY = (s32)((f32)D_004F0268[0].h * (1.0f - rate) * 0.5f) + 0xF6;
+            black40 = (u32)(s32)(rate * 40.0f * 128.0f * factor) << 24;
+            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[0], 1.0f, rate, black40, black40, black40, black40);
+            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[1], 1.0f, rate, 0, black40, 0, black40);
+            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[2], 1.0f, rate, black40, 0, black40, 0);
+            red30 = ((u32)(s32)(rate * 30.0f * 128.0f * factor) << 24) | 0x711E39;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[11], red30, 0x711E39, 0x711E39, 0x711E39);
+            nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[12], 0x711E39, 0x711E39, 0x711E39, red30);
+            frame = nbPanelAnalyzeFrame;
+        }
+        fade = (f32)frame * 0.125f;
+        if (fade >= 1.0f) fade = 1.0f;
+        slide1 = (s32)(fade * D_0054E600);
+        slide2 = (s32)(fade * D_0054E604);
+        contentRate = 1.0f - fade;
+        left1 = (s32)(0u - (u32)slide1);
+        left2 = (s32)(0u - (u32)slide2);
+        nbPanelPolygonDraw(left1, 0xF6, &D_004F02E0[0], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(left1, 0xF6, &D_004F02E0[1], 0x4CFF6484, 0xFF6484, 0x4CFF6484, 0xFF6484);
+        nbPanelPolygonDraw(left2, 0xF6, &D_004F02E0[2], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(left2, 0xF6, &D_004F02E0[3], 0x4CFF6484, 0xFF6484, 0x4CFF6484, 0xFF6484);
+        nbPanelPolygonDraw(slide2, 0xF6, &D_004F02E0[4], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(slide2, 0xF6, &D_004F02E0[5], 0xFF6484, 0x4CFF6484, 0xFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(slide1, 0xF6, &D_004F02E0[6], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(slide1, 0xF6, &D_004F02E0[7], 0xFF6484, 0x4CFF6484, 0xFF6484, 0x4CFF6484);
+        {
+            u32 alpha = (u32)(contentRate * 128.0f);
+            drawContent = 1;
+            textColor = alpha | 0x80808000;
+            spriteColor = ((u32)(contentRate * 128.0f) << 24) | 0x808080;
+            frame = (s32)((u32)nbPanelAnalyzeFrame + 1);
+            if (frame >= 8) {
+                nbPanelAnalyzeFrame = 0;
+                nbPanelAnalyzeProcess = 5;
+            } else {
+                nbPanelAnalyzeFrame = frame;
+            }
+        }
+        break;
+    }
+    case 3:
+        drawContent = 1;
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[0], 0x26000000, 0x26000000, 0x26000000, 0x26000000);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[1], 0x26000000, 0x26000000, 0, 0);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[2], 0x230508, 0x230508, 0x59230508, 0x59230508);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F0268[0], 0x33000000, 0x33000000, 0x33000000, 0x33000000);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F0268[1], 0, 0x33000000, 0, 0x33000000);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F0268[2], 0x33000000, 0, 0x33000000, 0);
+        nbPnl_rsetAlpha(0);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02E0[0], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02E0[1], 0x4CFF6484, 0xFF6484, 0x4CFF6484, 0xFF6484);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02E0[2], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02E0[3], 0x4CFF6484, 0xFF6484, 0x4CFF6484, 0xFF6484);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02E0[4], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02E0[5], 0xFF6484, 0x4CFF6484, 0xFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02E0[6], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02E0[7], 0xFF6484, 0x4CFF6484, 0xFF6484, 0x4CFF6484);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[11], 0x26711E39, 0x711E39, 0x711E39, 0x711E39);
+        nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[12], 0x711E39, 0x711E39, 0x711E39, 0x26711E39);
+        break;
+    case 5:
+        nbPanelAnalyzeProcess = 0;
+        nbPanelAnalyzeDraw(NULL);
+        nbPanelDraw(1);
+        return;
+    }
+    if (drawContent) {
+        nbPanelProcess_nbPanelXYZ_t *geometry;
+        nbPanelProcess_nbPanelTMXuv_t *uv;
+        sdfTexHandle_t *texture;
+        frFontHandle_t *font;
+        u32 color;
+        u32 shade;
+        char levelText[112];
+
+        geometry = &D_004F03A8[0];
+        uv = &D_004EFDD0[0];
+        texture = D_00345D88[0];
+        color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
+        nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        if (hidden & 1) {
+            shade = ((u32)(s32)(contentRate * 50.0f * 128.0f * D_0054E608) << 24) | 0x7E6260;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F03A8[14], shade, shade, shade, shade);
+            geometry = &D_004F03A8[13];
+            uv = &D_004EFDD0[6];
+            texture = D_00345D88[0];
+            color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
+            nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        } else {
+            sprintf(levelText, D_00551230, datGetLevelForDraw(pNbPanelAnalyzeUnitWork));
+            nbPanelSmallStringDraw(0, 0xF5, &D_004F03A8[1], textColor, levelText);
+        }
+        if (hidden & 2) {
+            shade = ((u32)(s32)(contentRate * 50.0f * 128.0f * D_0054E60C) << 24) | 0x7E6260;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F04E8[0], shade, shade, shade, shade);
+            geometry = &D_004F03A8[15];
+            uv = &D_004EFE40[0];
+            texture = D_00345D88[2];
+            color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
+            nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        } else {
+            cmpSetSkillListRows(19);
+            color = effMagaCylinderCalcColor(textColor, nbPanelBaseRGBA);
+            font = (frFontHandle_t *)frwGetSmallFontFRQ2(D_004F0268[18].x * 16,
+                    (D_004F0268[18].y + 0xF8) * 8, 0, color,
+                    datExplainTable[datDevilTable[pNbPanelAnalyzeUnitWork->id].race], NULL);
+            func_001C7E38(font, 1, 0x47);
+            frDestroyFontRequestAfter(font);
+            cmpSetSkillListRows(-1);
+        }
+        if (hidden & 4) {
+            shade = ((u32)(s32)(contentRate * 50.0f * 128.0f * D_0054E610) << 24) | 0x7E6260;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F0510[0], shade, shade, shade, shade);
+            geometry = &D_004F03A8[17];
+            uv = &D_004EFE40[0];
+            texture = D_00345D88[2];
+            color = effMagaCylinderCalcColor(textColor, nbPanelBaseABGR);
+            nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        } else if (pNbPanelAnalyzeUnitWork->flag & 4) {
+            font = frGetCNameFRQ(0, 1, NULL, 0);
+            frSetDrawPosition(font, (D_004F0268[19].x + 15) * 16,
+                              (D_004F0268[19].y + 0xF6) * 8);
+            frSetFontColor(font, effMagaCylinderCalcColor((textColor & 0xFF) | 0xA09DC300, nbPanelBaseRGBA));
+            func_001C7E38(font, 1, 0x47);
+            frDestroyFontRequestAfter(font);
+        } else {
+            cmpSetSkillListRows(19);
+            color = effMagaCylinderCalcColor((textColor & 0xFF) | 0xA09DC300, nbPanelBaseRGBA);
+            font = (frFontHandle_t *)frwGetSmallFontFRQ2((D_004F0268[19].x + 15) * 16,
+                    (D_004F0268[19].y + 0xF6) * 8, 0, color, text2[pNbPanelAnalyzeUnitWork->id], NULL);
+            func_001C7E38(font, 1, 0x47);
+            frDestroyFontRequestAfter(font);
+            cmpSetSkillListRows(-1);
+        }
+        geometry = &D_004F0420[0];
+        uv = &D_004EFDE0[0];
+        texture = D_00345D88[2];
+        color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
+        nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        if (!(hidden & 0x40)) {
+            i = 0;
+            if (datDevilTable[pNbPanelAnalyzeUnitWork->id].skill[0] != 0) {
+                shade = ((u32)(s32)(contentRate * 50.0f * 128.0f * D_0054E614) << 24) | 0x7E6260;
+                do {
+                    s32 px = (i % 3) * 0x74;
+                    s32 py = (i / 3) * 0x16;
+                    u16 skill;
+                    nbPanelPolygonDraw(px, py + 0xF6, &D_004F0588[0], shade, shade, shade, shade);
+                    color = effMagaCylinderCalcColor((textColor & 0xFF) | 0xA09DC300, nbPanelBaseRGBA);
+                    skill = datDevilTable[pNbPanelAnalyzeUnitWork->id].skill[i];
+                    i++;
+                    font = (frFontHandle_t *)frwGetSmallFontFRQ2((D_004F0268[23].x + px) * 16,
+                            (D_004F0268[23].y + 0xF6 + py) * 8, 0, color, text1[skill], NULL);
+                    nbCenterText(font, &D_004F0268[23]);
+                    func_001C7E38(font, 1, 0x47);
+                    frDestroyFontRequestAfter(font);
+                } while (i < 8 && datDevilTable[pNbPanelAnalyzeUnitWork->id].skill[i] != 0);
+            }
+            if (i < 8) {
+                shade = ((u32)(s32)(contentRate * 50.0f * 128.0f * D_0054E618) << 24) | 0x3F3130;
+                do {
+                    s32 px = (i % 3) * 0x74;
+                    s32 py = (i / 3) * 0x16;
+                    i++;
+                    nbPanelPolygonDraw(px, py + 0xF6, &D_004F0588[0], shade, shade, shade, shade);
+                } while (i < 8);
+            }
+        } else {
+            shade = ((u32)(s32)(contentRate * 50.0f * 128.0f * D_0054E61C) << 24) | 0x3F3130;
+            for (i = 0; i < 8; i++) {
+                nbPanelPolygonDraw((i % 3) * 0x74, (i / 3) * 0x16 + 0xF6,
+                                   &D_004F0588[0], shade, shade, shade, shade);
+            }
+            nbPanelSpriteCenteringDraw(0, 0xF6, &D_004F0574[0], &D_004F0268[24],
+                                       &D_004EFE30[0], spriteColor, D_00345D88[0]);
+        }
+        geometry = &D_004F045C[0];
+        uv = &D_004EFE00[0];
+        texture = D_00345D88[2];
+        color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
+        nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        if (hidden & 0x20) {
+            shade = ((u32)(s32)(contentRate * 50.0f * 128.0f * D_0054E620) << 24) | 0x7E6260;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F045C[17], shade, shade, shade, shade);
+            geometry = &D_004F045C[16];
+            uv = &D_004EFE00[4];
+            texture = D_00345D88[2];
+            color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
+            nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        } else if (!(pNbPanelAnalyzeUnitWork->flag & 4)) {
+            color = effMagaCylinderCalcColor((textColor & 0xFF) | 0xA09DC300, nbPanelBaseRGBA);
+            font = (frFontHandle_t *)frwGetSmallFontFRQ2(D_004F0268[26].x * 16,
+                    (D_004F0268[26].y + 0xF6) * 8, 0, color,
+                    datExplainTable[0x50 + datDevilTable[pNbPanelAnalyzeUnitWork->id].aisyoid], NULL);
+            func_001C7E38(font, 1, 0x47);
+            frDestroyFontRequestAfter(font);
+        }
+        geometry = &D_004F0484[0];
+        uv = &D_004EFE10[0];
+        texture = D_00345D88[0];
+        color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
+        nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        if (hidden & 8) {
+            shade = ((u32)(s32)(contentRate * 50.0f * 128.0f * D_0054E624) << 24) | 0x7E6260;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F0484[9], shade, shade, shade, shade);
+            geometry = &D_004F0484[8];
+            uv = &D_004EFE10[2];
+            texture = D_00345D88[0];
+            color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
+            nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        } else {
+            cmpDrawStatusIconRow(D_004F0268[20].x * 16, (D_004F0268[20].y + 0xF6) * 8,
+                    D_004F0268[20].z, textColor, pNbPanelAnalyzeUnitWork, 1, 0x47);
+        }
+        geometry = &D_004F0498[0];
+        uv = &D_004EFE20[0];
+        texture = D_00345D88[0];
+        color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
+        nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
+                    uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        if (hidden & 0x10) {
+            shade = ((u32)(s32)(contentRate * 50.0f * 128.0f * D_0054E628) << 24) | 0x7E6260;
+            nbPanelPolygonDraw(0, 0xF6, &D_004F0498[10], shade, shade, shade, shade);
+            geometry = &D_004F0498[9];
+            uv = &D_004EFE20[1];
+            texture = D_00345D88[0];
+            color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
+            nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
+                        uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
+        } else {
+            cmpDrawStatusIconRow(D_004F0268[21].x * 16, (D_004F0268[21].y + 0xF6) * 8,
+                    D_004F0268[21].z, textColor, pNbPanelAnalyzeUnitWork, 2, 0x47);
+        }
+    }
+}
+
+#else
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelAnalyzeRun);
+#endif
 
 void nbPanelAutoShow(void)
 {
