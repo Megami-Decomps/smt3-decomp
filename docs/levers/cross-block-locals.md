@@ -225,3 +225,56 @@ Keep the borrow live between the low and high half of each word. The equal
 case writes `wds = 1` and `x[0] = 0`; the allocator already initializes the
 sign. Both loops write the two halfwords through one advancing output-word
 cursor. The complete libc owner remains exact.
+
+## Command-entry scratch across skill and stock scans
+
+This completes the guarded SetCommList recorded in commit `8df31643`. Its
+matched skill and stock phases documented the same live-key reuse; the exact
+source also keeps each player/demon escape gate in its own branch before
+GCC merges the common tail. The old nonmatching entry is retired.
+
+`newbattle/nbCommSelProcess::SetCommList` matches all 1,640 bytes. Its signed
+`entry` scalar holds a skill ID in the skill pass and a stock ID in the later
+summon pass. The loops define each value before every use; no value flows
+between the passes, the address never escapes, and both values have real
+array-index and command-list consumers. No extra operation or lifetime bridge
+is needed. Independent review confirms the disjoint phases and truthful type.
+
+Paired ordinary and stock-RTL compilations use the unmodified pinned ee-gcc
+2.96, SHA-256
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
+Both the shared-entry source and a control with a separate final-loop
+`stockindex` pass full-owner ordinary/`-da` assembly equality (ignoring only
+`.file`), allocated-section equality and raw-relocation-section equality.
+This is stock compiler RTL evidence, not debugger instrumentation.
+
+Initial RTL assigns the skill ID to pseudo 93 at UIDs 226/253 and the stock
+ID to the same pseudo at UID 1274. In `20.greg`, the shared pseudo conflicts
+with hard registers 2, 3, 4 and 5 and is allocated to $16. The separate-index
+control retains the skill pseudo 93 in $16 but introduces stock pseudo 473;
+its conflicts include 2, 3 and 4, not 5, so it receives $5. That moves the
+stock-record offset and other final-pass values up through the argument
+registers: the persistent-work base changes from pseudo 572 in $6 to pseudo
+573 in $7. The control keeps the native size but differs in 24 words.
+The shared pseudo's actual allocation and merged conflict set explain the
+required ownership; matching does not establish the original local spelling.
+
+Reproduce each form with `SMT3_AS_UNIT=src/smt3/newbattle/nbCommSelProcess.c`
+and canonical `tools/cc.sh`, once normally and once with only
+`-da -dumpbase <out>/rtl` added. Preserve assembly with `SMT3_KEEP_S` and
+compare the complete owner, allocated sections and relocations before using
+the dumps. The control declares `s32 stockindex` at the start of the final
+stock loop and replaces only that loop's uses of `entry`.
+
+The signed skill-type dispatch explicitly ignores -1 and passive type 1;
+retail's 512 attribute rows contain only -1, 0, 1 and 2. Active type-0 IDs
+fit the 288-entry normal table and type-2 IDs begin at 0x180. Player and demon
+branches independently append and gate the escape command; GCC merges their
+common call tail while preserving count publication before the pass command.
+The input party argument is forwarded to `nbGetUnitWorkPointer`; the later
+skill-cost call deliberately reloads `s->my->formindex`.
+
+The 160-slot inventory scan is native behavior, not proof that the separate
+item table has 160 rows: its declared native extent remains unchanged. The
+stock scan reads byte IDs at save-work +0x1914, the count at +0x1924 and
+0xEC-byte unit records at +0xA54, independently corroborated by `datAddDevil`.
