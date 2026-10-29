@@ -183,7 +183,212 @@ extern f32 nbCamera_Cut1Enemy_Distance;
 extern f32 nbCamera_Cut1Enemy_Rate;
 extern s32 nbCamera_Cut1Enemy_Frame;
 
+#ifdef NON_MATCHING
+extern u32 effBTLSkillGetState(void);
+extern u32 effBTLModelGetBadStatus(nbFormation_t *pFormation);
+extern f32 effBTLModelGroupGetSphere(u32 group);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
+extern s32 fptodp(f32 value);
+extern s32 printf(const char *format, ...);
+extern f32 D_003246D0[];
+extern f32 D_003246F0[];
+extern f32 D_00324710[];
+extern f32 D_00324720[];
+
+void nbCamera_SkillInfo_Set(nbCameraSkillInfo_t *pInfo, nbCameraSkillPtr_t *pPtr)
+{
+    sdfVector4_t center;
+    nbFormation_t *invoke;
+    nbMainProcessData_t *data;
+    u32 state, invokeParty, targetParty, shot, choice, side;
+    f32 radius;
+
+    state = effBTLSkillGetState();
+    invoke = effBTLSkillGetInvokeFormation();
+    invokeParty = effBTLSkillGetInvokeParty();
+    targetParty = effBTLSkillGetTargetParty();
+    pInfo->ptr_1 = pPtr->ptr_shot_1;
+    pInfo->ptr23 = pPtr->ptr_shot_23;
+    printf("pPtr->ptr_shot_1:%d\n", pPtr->ptr_shot_1);
+    shot = pPtr->ptr_shot_1;
+    switch (shot) {
+    case 0: case 6: case 9: shot = 0; break;
+    case 5: case 7: shot = (invoke->stat & 0x100) ? 2 : 10; break;
+    case 8: shot = 8; break;
+    }
+    pInfo->shot_1 = shot;
+    shot = pPtr->ptr_shot_23;
+    switch (shot) {
+    case 0: shot = (dds3GetRandA(dds3EffectBase) & 1) ? 1 : 2; break;
+    case 8: shot = (invoke->stat & 0x100) ? 1 : 7; break;
+    case 9: case 11: shot = (invoke->stat & 0x100) ? 15 : 16; break;
+    case 10: shot = 5; break;
+    case 12: shot = 1; break;
+    case 13: shot = 13; break;
+    case 14: shot = 14; break;
+    }
+    pInfo->shot_23 = shot;
+    if (effBTLModelGetBadStatus(invoke) & 0x40) {
+        if (invokeParty == targetParty) {
+            pInfo->shot_23 = 20;
+            pInfo->ptr23 = 20;
+        } else if (pInfo->shot_23 == 2) {
+            pInfo->shot_23 = 1;
+            pInfo->ptr23 = 1;
+        }
+        printf("nbCamera: POISON!!!\n");
+    } else if (state & 0xC) {
+        data = nbGetMainProcessData();
+        if (effBTLSkillGetID() == 0x98 && data->encno == 0x400) {
+            printf("nbCamera: PEIRU(0x400) JIBAKU!!!\n");
+        } else {
+            if (invokeParty == targetParty) {
+                pInfo->shot_23 = 20;
+                pInfo->ptr23 = 20;
+            } else if (pInfo->shot_23 == 2) {
+                pInfo->shot_23 = 1;
+                pInfo->ptr23 = 1;
+            }
+            printf("nbCamera: HANSYA or KYUSYUU!!!\n");
+        }
+    }
+    switch (pPtr->ptr_angleH) {
+    case 0:
+        pInfo->angleH = D_003246D0[dds3GetRandA(dds3EffectBase) % 7 + 1];
+        break;
+    case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+        pInfo->angleH = D_003246D0[pPtr->ptr_angleH];
+        break;
+    case 9:
+        pInfo->angleH = D_003246D0[dds3GetRandA(dds3EffectBase) % 3 + 1];
+        break;
+    case 10:
+        pInfo->angleH = D_003246D0[dds3GetRandA(dds3EffectBase) % 3 + 5];
+        break;
+    case 11:
+        side = dds3GetRandA(dds3EffectBase) & 1;
+        if (dds3GetRandA(dds3EffectBase) & 1) {
+            pInfo->angleH = D_003246D0[side + 6];
+        } else {
+            pInfo->angleH = D_003246D0[side + 2];
+        }
+        break;
+    case 12:
+        pInfo->angleH = D_003246D0[(dds3GetRandA(dds3EffectBase) & 1) ? 7 : 3];
+        break;
+    case 13:
+        pInfo->angleH = D_003246D0[(dds3GetRandA(dds3EffectBase) & 1) ? 7 : 1];
+        break;
+    case 14:
+        pInfo->angleH = D_003246D0[(dds3GetRandA(dds3EffectBase) & 1) ? 5 : 1];
+        break;
+    case 15:
+        pInfo->angleH = D_003246D0[(dds3GetRandA(dds3EffectBase) & 1) ? 2 : 1];
+        break;
+    case 16:
+        if (dds3GetRandA(dds3EffectBase) & 1) {
+            pInfo->angleH = D_003246D0[dds3GetRandA(dds3EffectBase) % 3 + 1];
+        } else {
+            pInfo->angleH = D_003246D0[6];
+        }
+        break;
+    case 17:
+        pInfo->angleH = D_003246D0[(dds3GetRandA(dds3EffectBase) & 1) ? 3 : 2];
+        break;
+    }
+    switch (pPtr->ptr_angleW) {
+    case 0:
+        pInfo->angleW = D_003246F0[dds3GetRandA(dds3EffectBase) % 7 + 1];
+        break;
+    case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+        pInfo->angleW = D_003246F0[pPtr->ptr_angleW];
+        break;
+    case 9:
+        switch (dds3GetRandIntA(NULL, 3)) {
+        case 0: pInfo->angleW = D_003246F0[1]; break;
+        case 1: pInfo->angleW = D_003246F0[2]; break;
+        case 2: pInfo->angleW = D_003246F0[3]; break;
+        }
+        break;
+    case 10:
+        switch (dds3GetRandIntA(NULL, 3)) {
+        case 0: pInfo->angleW = D_003246F0[5]; break;
+        case 1: pInfo->angleW = D_003246F0[6]; break;
+        case 2: pInfo->angleW = D_003246F0[7]; break;
+        }
+        break;
+    case 11:
+        side = dds3GetRandA(dds3EffectBase) & 1;
+        choice = dds3GetRandIntA(NULL, 3);
+        if (choice == 0) {
+            pInfo->angleW = D_003246F0[side + 2];
+        } else if (choice == 1) {
+            pInfo->angleW = D_003246F0[side + 6];
+        } else if (choice == 2) {
+            pInfo->angleW = D_003246F0[4];
+        }
+        break;
+    case 12:
+        switch (dds3GetRandIntA(NULL, 3)) {
+        case 0: pInfo->angleW = D_003246F0[3]; break;
+        case 1: pInfo->angleW = D_003246F0[7]; break;
+        case 2: pInfo->angleW = D_003246F0[4]; break;
+        }
+        break;
+    case 13:
+        side = dds3GetRandA(dds3EffectBase) & 1;
+        if (dds3GetRandA(dds3EffectBase) & 1) {
+            pInfo->angleW = D_003246F0[side + 2];
+        } else {
+            pInfo->angleW = D_003246F0[side + 6];
+        }
+        break;
+    }
+    radius = effBTLModelGroupGetSphere(targetParty);
+    if (radius >= 700.0f) {
+        if (pInfo->angleH < D_003246D0[6]) {
+            printf("PartyWidth 14m over H!!!\n");
+            pInfo->angleH = D_003246D0[6];
+        }
+        if (D_003246F0[3] < pInfo->angleW || pInfo->angleW < D_003246F0[7]) {
+            printf("PartyWidth 14m over W!!!\n");
+            switch (dds3GetRandIntA(NULL, 3)) {
+            case 0: pInfo->angleW = D_003246F0[3]; break;
+            case 1: pInfo->angleW = D_003246F0[7]; break;
+            case 2: pInfo->angleW = D_003246F0[4]; break;
+            }
+        }
+    }
+    pInfo->HeightMin = D_00324710[pPtr->ptr_H];
+    pInfo->WidthMin = D_00324720[pPtr->ptr_W];
+    if (pInfo->HeightMin <= D_00324710[0]) {
+        radius = effBTLModelGroupGetSphere(targetParty);
+        SDF_VU0_STOREVECTOR_NOMEM(&center);
+        if (radius > 600.0f && D_003246D0[3] <= pInfo->angleH) {
+            printf("PARTY : pInfo->angleH width 12m over\n");
+            pInfo->angleH = D_003246D0[4];
+        } else if (center.y > -200.0f && D_003246D0[3] <= pInfo->angleH) {
+            printf("PARTY : pInfo->angleH height 1m under\n");
+            pInfo->angleH = D_003246D0[4];
+        } else if (radius > 250.0f && D_003246D0[3] <= pInfo->angleH) {
+            printf("PARTY : pInfo->angleH height 2m under or width 5m over\n");
+            pInfo->angleH = D_003246D0[4];
+        }
+        printf("PARTY : height %f \n", fptodp(center.y));
+    }
+    if (targetParty == 0x100) {
+        if (pInfo->angleH <= D_003246D0[6] && D_003246F0[2] <= pInfo->angleW) {
+            printf("PLAYER : pInfo->angleW over !!!!\n");
+            pInfo->angleW = -pInfo->angleW;
+        }
+    } else if (pInfo->angleH <= D_003246D0[6] && pInfo->angleW <= D_003246F0[6]) {
+        printf("ENEMY : pInfo->angleW over !!!!\n");
+        pInfo->angleW = -pInfo->angleW;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCamera_SkillInfo_Set);
+#endif
 
 /* vu0 routine: project the camera ray to the floor and rebuild its direction. */
 void nbCameraShot_GroundCollision(nbCamera_t *pNbCamera)
