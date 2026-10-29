@@ -363,7 +363,7 @@ typedef struct effPCPBossKAGU2Attack_t
     s32 duration;
     s32 fadeIn;
     s32 fadeOut;
-    s32 groupCount;
+    u32 groupCount;
     f32 randomness;
     void *polyLists[16];
     effPCPBossBED_t *hBED;
@@ -2835,7 +2835,108 @@ void effPCPBossKAGU2AttackGetSplitPoint(u128 *pPosBuff, const u128 *pPoint1, con
     }
 }
 
+#ifdef NON_MATCHING
+void effPCPBossKAGU2AttackDraw(effPCPBossKAGU2Attack_t *work)
+{
+    effPCPBossUnit_t *model;
+    effPCPBossVector_t marks[6], center, end;
+    effPCPBossPlace_t place;
+    s32 frame, limit, fadeIn, fadeOut, rest, id;
+    u32 i, count, color;
+    f32 blend, randomness;
+    void **list;
+
+    if (effBTLSkillCheckRun() != 0) {
+        model = effBTLSkillGetInvokeFormation();
+    } else {
+        model = nbGetMainProcessData()->form;
+        for (i = 0; i < 32; i++, model++) {
+            if ((model->flags & 3) == 3) {
+                id = effBTLModelGetID(model);
+                if (id == 0x125 || id == 0x108) {
+                    break;
+                }
+            }
+        }
+        if (i == 32) {
+            return;
+        }
+    }
+    frame = work->frame;
+    limit = work->duration;
+    fadeIn = work->fadeIn;
+    fadeOut = work->fadeOut;
+    if (frame < limit) {
+        if (frame < fadeIn && fadeIn != 0) {
+            blend = (f32)frame / (f32)fadeIn;
+        } else {
+            rest = limit - frame;
+            if (fadeOut >= rest && fadeOut != 0) {
+                blend = (f32)rest / (f32)fadeOut;
+            } else {
+                blend = 1.0f;
+            }
+        }
+        color = effColorBlend(work->color & 0xFFFFFF, work->color, blend);
+        center.f[0] = 0.0f;
+        center.f[1] = 0.0f;
+        center.f[2] = 0.0f;
+        for (i = 0; i < 6; i++) {
+            effBTLModelGetMarkPosition2(model, i + 0x1E);
+            SDF_VU0_STOREVECTOR(&marks[i]);
+            center.f[0] += marks[i].f[0];
+            center.f[1] += marks[i].f[1];
+            center.f[2] += marks[i].f[2];
+        }
+        center.f[3] = 0.0f;
+        center.f[2] /= 6.0f;
+        center.f[0] /= 6.0f;
+        center.f[1] /= 6.0f;
+        SDF_VU0_LOADVECTOR(&model->position);
+        SDF_VU0_LOADVECTOR_B(effPCPBossKAGU2DrawParam);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(&end);
+        count = work->groupCount;
+        randomness = work->randomness;
+        list = work->polyLists;
+        for (i = 0; i < count; i++) {
+            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
+                                              &marks[1].q, &end, &center.q, randomness, 0.0f);
+            effPCP_ThunderPolyListSetColor(*list, color);
+            effPCP_ThunderPolyListDraw(*list++);
+            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
+                                              &marks[2].q, &end, &center.q, randomness, 0.61086511611938477f);
+            effPCP_ThunderPolyListSetColor(*list, color);
+            effPCP_ThunderPolyListDraw(*list++);
+            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
+                                              &marks[4].q, &end, &center.q, randomness, -0.61086511611938477f);
+            effPCP_ThunderPolyListSetColor(*list, color);
+            effPCP_ThunderPolyListDraw(*list++);
+            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
+                                              &marks[5].q, &end, &center.q, randomness, 0.0f);
+            effPCP_ThunderPolyListSetColor(*list, color);
+            effPCP_ThunderPolyListDraw(*list++);
+        }
+        place.payload[0] = end.f[0];
+        place.payload[1] = end.f[1];
+        place.payload[2] = end.f[2];
+        place.payload[3] = 0.0f;
+        place.payload[4] = 0.0f;
+        place.payload[5] = 0.0f;
+        place.payload[6] = 0.0f;
+        place.payload[7] = 1.0f;
+        place.payload[8] = 100.0f;
+        place.payload[9] = 100.0f;
+        place.payload[10] = work->scale;
+        place.color = color;
+        effEveBEDCutSetParams(work->hBEDCut, &place);
+        effEveBEDCutDraw(work->hBEDCut);
+    }
+    work->frame++;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackDraw);
+#endif
 
 void effPCPBossKAGU2AttackSetColor(effPCPBossKAGU2Attack_t *hData, u32 abgr)
 {
