@@ -3229,13 +3229,8 @@ void cmbDrawStockRow(s32 x, s32 y, s32 z, u16 firstWidth, u16 secondWidth, u16 h
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockRow);
 #endif
 
-/* Same native row callback contract as cmpDrawListRowBox. */
-typedef void (*cmbDrawRow_t)(s32, s32, s32, u16, u16, u16,
-    s32, s32, s32, s8, s32, s32);
 extern void cmbDrawStockRow(s32, s32, s32, u16, u16, u16,
     s32, s32, s32, s8, s32, s32);
-extern void cmpDrawScrollBar(s32 x, s32 y, s32 z, s32 width, s32 height,
-    s32 color, s32 scale, s8 phase, cmpCursorInfo_t *cursor, cmbDrawRow_t draw, s32 ot);
 
 void cmbDrawStockScrollBar(s8 mode, s32 z, s32 unused, cmpCursorInfo_t *cursor, s32 ot)
 {

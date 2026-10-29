@@ -196,8 +196,6 @@ void fcl_212910(s32 x, s32 y, s32 *color, u8 page, u16 spriteId, s32 *texList,
                       color, &sprite, sprite.Flag, 0, 1, 7);
 }
 
-extern void cmpDrawScrollBar(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h,
-                             cmpCursorInfo_t *cursor, s32 j, s32 k);
 
 void fcl_2129A0(s32 a, s32 b, cmpCursorInfo_t *cursor, s32 d)
 {
