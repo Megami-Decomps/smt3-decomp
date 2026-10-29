@@ -76,6 +76,9 @@ typedef struct {
     ragOffer_t offers2[21];
     u8 reserved4FC[4];
     ragOffer_t offers3[21];
+    u8 reserved89C[0x1C];
+    u32 heartsCaption;
+    u32 offersCaption;
 } ragOfferTable_t;
 
 typedef char ragCustomUnitSizeCheck[(sizeof(ragCustomUnit_t) == 0x1C) ? 1 : -1];
