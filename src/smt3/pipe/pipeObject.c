@@ -160,7 +160,46 @@ void Initmymdl(void)
     mdlSize = 0;
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", getPosTranslate);
+typedef struct tagPipePathNode {
+    f32 position[3]; u32 opaque0C; f32 direction[3]; u32 opaque1C;
+} tagPipePathNode;
+typedef struct tagPipePosTable {
+    sdfMemHandle_t *aHandle; s32 tSize; tagPipePathNode *points; u32 opaque0C;
+} tagPipePosTable;
+extern tagPipePosTable D_00528F58;
+extern void vecTranslate(f32 *, f32 *, f32 *);
+extern f32 vecNormalize(f32 *);
+extern void mtxRotateX(sdfMatrix4_t *, f32);
+extern void mtxRotateY(sdfMatrix4_t *, f32);
+extern void mtxRotateZ(sdfMatrix4_t *, f32);
+extern void mtxStore(sdfMatrix4_t *, sdfMatrix4_t *);
+extern void vecDistance(f32 [4], f32 [4][4]);
+extern void dds3SetRotPoseSet(void *, sdfVector4_t *);
+
+extern void vecSet(f32 *, f32, f32, f32);
+extern void vecScale(f32 *, f32);
+
+void getPosTranslate(tagPipeObject *object, f32 *output)
+{
+    f32 tangent[4];
+    f32 side[4];
+    f32 basis[4];
+
+    vecSet(tangent,
+           D_00528F58.points[object->offset + 1].position[0] - D_00528F58.points[object->offset].position[0],
+           D_00528F58.points[object->offset + 1].position[1] - D_00528F58.points[object->offset].position[1],
+           D_00528F58.points[object->offset + 1].position[2] - D_00528F58.points[object->offset].position[2]);
+    vecSet(basis, D_00528F58.points[object->offset].direction[0],
+           D_00528F58.points[object->offset].direction[1], D_00528F58.points[object->offset].direction[2]);
+    vecTranslate(side, tangent, basis);
+    vecNormalize(side);
+    vecScale(side, object->pos[0]);
+    vecScale(basis, object->pos[1]);
+    output[0] = D_00528F58.points[object->offset].position[0] - side[0] + basis[0];
+    output[1] = D_00528F58.points[object->offset].position[1] - side[1] + basis[1];
+    output[2] = D_00528F58.points[object->offset].position[2] - side[2] + basis[2];
+}
+
 
 void objMyLoad(tagPipeObject *objPtr)
 {
@@ -767,22 +806,6 @@ void objVisibleAll(s8 value)
     mymdlVisibleAll(PipeRBOX, 10, value);
     value = 0;
 }
-
-typedef struct tagPipePathNode {
-    f32 position[3]; u32 opaque0C; f32 direction[3]; u32 opaque1C;
-} tagPipePathNode;
-typedef struct tagPipePosTable {
-    sdfMemHandle_t *aHandle; s32 tSize; tagPipePathNode *points; u32 opaque0C;
-} tagPipePosTable;
-extern tagPipePosTable D_00528F58;
-extern void vecTranslate(f32 *, f32 *, f32 *);
-extern f32 vecNormalize(f32 *);
-extern void mtxRotateX(sdfMatrix4_t *, f32);
-extern void mtxRotateY(sdfMatrix4_t *, f32);
-extern void mtxRotateZ(sdfMatrix4_t *, f32);
-extern void mtxStore(sdfMatrix4_t *, sdfMatrix4_t *);
-extern void vecDistance(f32 [4], f32 [4][4]);
-extern void dds3SetRotPoseSet(void *, sdfVector4_t *);
 
 void mdlTask(tagPipeObject *objPtr, tagpipeBasic *basicPtr, f32 x, f32 y, f32 z) {
     f32 cross[4];
