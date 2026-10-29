@@ -143,7 +143,7 @@ s32 sdfMcGetFreeBytes(s32 request);
 
 s32 sdfMcFuncGetInfo1(void);
 
-u8 sdfMcGetFileInfoReady(s32 request);
+s32 sdfMcGetFileInfoReady(s32 request);
 
 extern s32 slChooseData_B(void);
 
