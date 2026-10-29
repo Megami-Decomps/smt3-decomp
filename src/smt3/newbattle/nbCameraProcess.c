@@ -353,7 +353,29 @@ void nbCameraScriptSetBougai(nbFormation_t *pTargetForm)
     nbCameraSetState(0x1B);
 }
 
+#ifdef NON_MATCHING
+extern sdfVector4_t D_00320E30;
+extern void ToMatrix(void);
+
+void nbCameraScriptSet(sdfVector4_t *position, sdfVector4_t *rotation)
+{
+    effBTLModelAllPopPosition();
+    effBTLModelAllPopRotate();
+    SDF_VU0_LOADVECTOR(rotation);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&D_00320E30);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&pNbCamera.direction);
+    SDF_VU0_LOADVECTOR_B(position);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&pNbCamera.target);
+    pNbCamera.distance = 1.0f;
+    pNbCamera.fovy = 0.6981316209f;
+    nbCameraSetState(0x1C);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraProcess", nbCameraScriptSet);
+#endif
 
 void nbCameraInit(void)
 {
