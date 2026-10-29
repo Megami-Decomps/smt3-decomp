@@ -2913,7 +2913,43 @@ u32 GetSystemCallEntry(s32 index)
     return entry;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", GetSystemCallTableEntry);
+typedef struct {
+    u32 index;
+    void *entry;
+} kernelEntryPair_t;
+
+extern kernelEntryPair_t D_0052C368[2];
+extern void setup(u32 index, void *entry);
+extern u32 *FindAddress(u32 *start, const u32 *end, u32 instruction);
+
+void GetSystemCallTableEntry(void)
+{
+    u32 *searchEntry;
+    u32 *copyEntry;
+    u32 *searchBase;
+    u32 *copyBase;
+
+    setup(D_0052C368[0].index, D_0052C368[0].entry);
+    setup(D_0052C368[1].index, D_0052C368[1].entry);
+    searchEntry = FindAddress((u32 *)0x80000000, (u32 *)0x80080000,
+                              (u32)kFindAddress);
+    copyEntry = FindAddress((u32 *)0x80000000, (u32 *)0x80080000,
+                            (u32)kCopy);
+    searchBase = searchEntry - 0x83;
+    copyBase = copyEntry - 0x5A;
+    while (searchBase != copyBase) {
+        if (searchBase < copyBase) {
+            searchEntry = FindAddress(searchEntry + 1, (u32 *)0x80080000,
+                                      (u32)kFindAddress);
+            searchBase = searchEntry - 0x83;
+        } else {
+            copyEntry = FindAddress(copyEntry + 1, (u32 *)0x80080000,
+                                    (u32)kCopy);
+            copyBase = copyEntry - 0x5A;
+        }
+    }
+    D_0052C360 = searchBase;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", setup);
 
@@ -2987,10 +3023,6 @@ s32 kCopy_2(u32 *dst, const u32 *src, u32 count)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress_0);
 
-typedef struct {
-    u32 index;
-    void *entry;
-} kernelEntryPair_t;
 
 extern kernelEntryPair_t D_0052D2B0[8];
 extern kernelEntryPair_t D_0052D670[8];
