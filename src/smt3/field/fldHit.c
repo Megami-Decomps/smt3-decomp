@@ -76,7 +76,7 @@ extern void *memset(void *, int, unsigned int);
 
 extern u32 fldItemBoxObjBuf;
 
-extern u32 fldMatterTable;
+extern collision_s *fldMatterTable;
 
 extern s32 D_0054EDA0;
 
@@ -1038,7 +1038,7 @@ void fldHitChkUnitDamage(f32 *phys_pos)
     count = D_0054EDA0;
     for (pass = 0; pass < 2; pass++) {
         for (index = 0; index < count; index++) {
-            collision_s *face = &((collision_s *)fldMatterTable)[index];
+            collision_s *face = &fldMatterTable[index];
             f32 distance;
             f32 inside;
 
@@ -1052,7 +1052,7 @@ void fldHitChkUnitDamage(f32 *phys_pos)
                 count = D_0054EDA0;
                 continue;
             }
-            face = &((collision_s *)fldMatterTable)[index];
+            face = &fldMatterTable[index];
             if (face->matter != NULL) {
                 dds3PoseSet_t *pose = face->matter->poseset;
                 current.x -= pose->pos.x;
@@ -1063,7 +1063,7 @@ void fldHitChkUnitDamage(f32 *phys_pos)
                 previous.z -= pose->pos.z;
             }
             distance = fldVecDot(&current, (sdfVector4_t *)face->normal);
-            face = &((collision_s *)fldMatterTable)[index];
+            face = &fldMatterTable[index];
             distance = sdfFabs(distance - face->num);
             if ((face->pFace->attributes & 0x4000) && distance < radius) {
                 HitPositionInside2(&inside, face->mode2D, face->numedges, &current.x, face, radius);
@@ -1128,7 +1128,7 @@ void fldHitWM_Mask(void)
     pos.z = 0.0f;
     count = D_0054EDA0;
     if (count > 0) {
-        table = (collision_s *)fldMatterTable;
+        table = fldMatterTable;
         for (i = 0; i < count; i++) {
             face = &table[i];
             if (face->matter != 0) {
@@ -1151,7 +1151,7 @@ void fldHitWM_Mask(void)
                 }
                 count = D_0054EDA0;
             }
-            table = (collision_s *)fldMatterTable;
+            table = fldMatterTable;
         }
     }
     rsetTest(1, 0, 0x80, 2, 1, 1, 1, 1);
