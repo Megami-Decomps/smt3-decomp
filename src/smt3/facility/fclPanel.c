@@ -76,65 +76,94 @@ extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
 extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 *colors, s32 ot);
 
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void fclDrawPanelType0Grad(fclPanel_t *panel, u32 ot);
+
+/* NON_MATCHING: 57 of 229 words differ at the native 916-byte size. */
 #ifdef NON_MATCHING
 void fclDrawPanelType0(fclPanel_t *panel, s32 ot)
 {
-    s32 colors[4];
+    s32 value = 100;
+    u32 topLight = 0x020D1240;
+    u32 topDark = 0x020D1200;
+    u32 blendBase = 0x0602253C;
+    s32 alphaMax = 0x100;
     s32 timer = panel->Timer;
-    s32 height = (u16)panel->H;
-    s32 limit = height * 80 / 100;
-    s32 remaining = limit * (0x100 - timer) / 0x100;
-    f32 root = fsqrtf((f32)remaining);
-    s32 rising = limit - fcvtws(root * root);
-    s32 dark = ((u32)(timer * 102) >> 8) | 0x11171800;
-    s32 top;
-    s32 bottom;
-    u32 color;
+    s32 h = (u16)panel->H;
+    s32 width = ((h * 5) << 4) / value;
+    s32 t = (alphaMax - timer) * width;
+    s32 curve = t / 0x100;
+    f32 root = fsqrtf((f32)curve);
+    s32 height = h - 8;
+    s32 color;
+    s32 colors[4];
+    s32 y;
+    s32 originalY;
 
+    curve = (s32)(root * root);
+    curve = width - curve;
+
+    alphaMax = 0x66;
+    value = 0x11171800;
+    color = value | ((u32)(timer * alphaMax) >> 8);
     fclDrawPanelSprite2(0x44, ot);
-    cmpDrawBoxF(0, panel->Y + 0x20, panel->Z, 0x200, height - 8, dark, ot);
-    top = panel->Y;
-    colors[0] = 0x020D1200;
-    colors[1] = 0x020D1200;
-    colors[2] = 0x020D1240;
-    colors[3] = 0x020D1240;
+    cmpDrawBoxF(0, panel->Y + 0x20, panel->Z, 0x200, height, color, ot);
+
+    originalY = panel->Y;
+    y = originalY - 0xB0;
+    height = curve + 0x22;
+    colors[0] = topDark;
+    colors[1] = topDark;
+    colors[2] = topLight;
+    colors[3] = topLight;
     fclDrawPanelSprite2(0x44, ot);
-    cmpDrawBoxGDefault(0, top - 0xB0, panel->Z, 0x200, 0x16, colors, ot);
+    cmpDrawBoxGDefault(0, y, panel->Z, 0x200, 0x16, colors, ot);
+    y = originalY + 0x20;
     fclDrawPanelSprite2(0x44, ot);
-    cmpDrawBoxF(0, top, panel->Z, 0x200, 4, 0x80, ot);
+    cmpDrawBoxF(0, originalY, panel->Z, 0x200, 4, 0x80, ot);
     fclDrawPanelSprite2(0x48, ot);
-    cmpDrawBoxF(0, top + 0x20, panel->Z, 0x200, 4, 0x1F252B80, ot);
-    color = fclBlendColor(0x3C, 0x0602253C, 0x100 - panel->Timer);
+    cmpDrawBoxF(0, y, panel->Z, 0x200, 4, 0x1F252B80, ot);
+    y = originalY + 0x40;
+
+    color = fclBlendColor(0x3C, blendBase, 0x100 - panel->Timer);
     colors[0] = color;
     colors[1] = color;
     colors[2] = color & 0xFF;
     colors[3] = color & 0xFF;
     fclDrawPanelSprite2(0x48, ot);
-    cmpDrawBoxGDefault(0, top + 0x40, panel->Z, 0x200, 0x22, colors, ot);
-    color = fclBlendColor(0x3C, 0x0602253C, panel->Timer);
+    cmpDrawBoxGDefault(0, y, panel->Z, 0x200, 0x22, colors, ot);
+
+    color = fclBlendColor(0x3C, blendBase, panel->Timer);
     colors[0] = color;
     colors[1] = color;
     colors[2] = color & 0xFF;
     colors[3] = color & 0xFF;
     fclDrawPanelSprite2(0x48, ot);
-    cmpDrawBoxGDefault(0, top + 0x40, panel->Z, 0x200, rising + 0x22, colors, ot);
-    bottom = panel->Y + (((u16)panel->H - 8) << 3);
+    cmpDrawBoxGDefault(0, y, panel->Z, 0x200, height, colors, ot);
+
+    h = (u16)panel->H;
+    y = panel->Y;
+    y += (h - 8) << 3;
+    y -= 0x110;
     colors[0] = 0x3C;
     colors[1] = 0x3C;
-    colors[2] = 0x0602253C;
-    colors[3] = 0x0602253C;
+    colors[2] = blendBase;
+    colors[3] = blendBase;
     fclDrawPanelSprite2(0x48, ot);
-    cmpDrawBoxGDefault(0, bottom - 0x110, panel->Z, 0x200, 0x22, colors, ot);
+    cmpDrawBoxGDefault(0, y, panel->Z, 0x200, 0x22, colors, ot);
+    y += 0x110;
     fclDrawPanelSprite2(0x48, ot);
-    cmpDrawBoxF(0, bottom, panel->Z, 0x200, 4, 0x1F252B80, ot);
+    cmpDrawBoxF(0, y, panel->Z, 0x200, 4, 0x1F252B80, ot);
+    y += 0x20;
     fclDrawPanelSprite2(0x44, ot);
-    cmpDrawBoxF(0, bottom + 0x20, panel->Z, 0x200, 4, 0x80, ot);
-    colors[0] = 0x020D1240;
-    colors[1] = 0x020D1240;
-    colors[2] = 0x020D1200;
-    colors[3] = 0x020D1200;
+    cmpDrawBoxF(0, y, panel->Z, 0x200, 4, 0x80, ot);
+    y += 0x20;
+    colors[0] = topLight;
+    colors[1] = topLight;
+    colors[2] = topDark;
+    colors[3] = topDark;
     fclDrawPanelSprite2(0x44, ot);
-    cmpDrawBoxGDefault(0, bottom + 0x40, panel->Z, 0x200, 0x16, colors, ot);
+    cmpDrawBoxGDefault(0, y, panel->Z, 0x200, 0x16, colors, ot);
     fclDrawPanelSprite2(0x44, ot);
     fclDrawPanelType0Grad(panel, ot);
 }

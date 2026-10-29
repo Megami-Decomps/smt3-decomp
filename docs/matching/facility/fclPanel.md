@@ -36,3 +36,53 @@ places it at +0xAC after five argument/constant moves. All stored values agree.
 Separate X/Y arrays change the stack layout. Chained tail-color assignments
 swap two stores; a byte cast reloads the alpha and adds eight bytes. The word
 mask preserves the native size and the six-word scheduling residual.
+
+## fclDrawPanelType0 (facility/fclPanel, 0x394)
+
+172 of 229 words match at the native 916-byte size. The animation and drawing
+passes are reconstructed; the assembly fallback remains active and no exact
+matching credit is claimed.
+
+The height curve first multiplies `(256 - Timer)` by the height-derived width,
+truncates the signed integer division by 256, converts to float, takes a square
+root, squares that result, and converts back before subtracting from the width.
+The configured EE compiler emits the native `sqrt.s` and `cvt.w.s` for the
+`fsqrtf` helper and C cast. The earlier guarded source in commit `48956298`
+used `fcvtws`; that helper preserves the conversion opcode but its two volatile
+operations leave 82 differing words with these lifetimes. The ordinary cast
+emits the same native conversion here. Omitting the square root changes the
+algorithm.
+The initial background height is `H - 8`; the animated height adds 0x22 only
+after that first background callback. The first blended gradient has fixed
+height 0x22 and the second has the animated height.
+
+One four-word color array is reused throughout. The first blend reads a fresh
+`256 - Timer`; the second reads a fresh `Timer` directly. The final lower
+panels reset their palette rather than retaining the blended values. Z is
+reloaded for each drawing callback. Y is captured before the upper sprite
+callback: the first two small bars use the captured Y and Y + 0x20, and both
+blended gradients use Y + 0x40. The lower sequence reloads H and Y after the
+preceding callback and updates its own coordinate through the remaining draws.
+
+The live curve scalar follows the native integer, square-root conversion and
+complement phases. The consumed constant temporaries likewise follow the
+native normalization/opacity endpoints and denominator/RGB-base phases. These
+are ordinary arithmetic inputs, not unused copies or register constraints.
+A literal multiply by 102 expands into shifts and additions; the real opacity
+endpoint local retains the native multiply. Named palette values and the
+consumed phases restore the ordinary divide/multiply sequence.
+
+Plain and instrumented compiler output parity was checked without RTL dumps
+using the actual owner and the pinned EE 2.96 compiler. The allocator gives the combined Y
+quantity 22 references across 18 calls (priority 6518) and height four
+references across 12 calls (priority 792). Y takes `$22`, leaving height in
+`$fp`; native uses the opposite assignments. The remaining 57 words concern
+those quantities, the opening arithmetic operands/schedule, and a few color
+stores. This is a measured allocation question, not a missing buffer or draw.
+
+Splitting upper and lower Y values regressed to 908 bytes. Feeding the width
+from the mutable height before its decrement remains 916 bytes but differs in
+59 words. Changing percentage, alpha-byte, packed-color, product-order or
+cached-delta spellings was inert; chained color assignments worsened the
+result. Revisit the value ranges or compiler decision before repeating those
+source forms. The complete normal owner remains exact, including its data.

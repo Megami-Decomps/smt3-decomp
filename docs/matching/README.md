@@ -38,6 +38,7 @@ both native and emitted sizes when they differ.
 | 3 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
+| 3 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 3 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 3 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
@@ -53,7 +54,6 @@ both native and emitted sizes when they differ.
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
-| 2 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |

@@ -84,6 +84,7 @@ DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/match
 DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	46
 fclDrawPanel	fclPanel	0x54	8 of 21 words differ	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	6 of 64 words differ	docs/matching/facility/fclPanel.md	25
+fclDrawPanelType0	facility/fclPanel	0x394	172 of 229 words match	docs/matching/facility/fclPanel.md	40
 ragDrawList2, ragDrawList3	fclRagCalc	0x150 each	10 of 84 words differ	docs/matching/facility/fclRagCalc.md	3
 ragBuildList2, ragBuildList3	fclRagInit	0x174 each	22 of 93 words differ	docs/matching/facility/fclRagInit.md	3
 ragGetListItem2	fclRagInit	0xCC	29 of 51 words match	docs/matching/facility/fclRagInit.md	47
