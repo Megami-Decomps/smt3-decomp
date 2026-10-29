@@ -308,8 +308,8 @@ typedef struct {
 
 /* ---- pipeline-1 integer multiply and divide ---- */
 
-/* cc1 only ever emits mult/div/mflo on pipeline 0, so a second multiply or
- * divide issued alongside one of those has to be written out. */
+/* Use these for native pipeline-1 forms that ordinary C does not reproduce.
+ * Some ordinary expressions already emit mult1; inspect compiler output first. */
 #define EE_MULT1(out, a, b) __asm__ volatile ( \
     ".set noreorder\n\tmult1 %0, %1, %2\n\t.set reorder" \
     : "=r" (out) : "r" (a), "r" (b))
