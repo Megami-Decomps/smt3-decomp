@@ -2398,7 +2398,42 @@ s32 nbCheckFormationFriend(s32 formindex1, s32 formindex2)
     return nbCheckFormationPlayerSide(formindex1) == nbCheckFormationPlayerSide(formindex2);
 }
 
+extern f32 fabsf(f32 value);
+
+#ifdef NON_MATCHING
+s32 nbGetMakaBaramaki(datUnitWork_t *work)
+{
+    datUnitWork_t *player;
+    f32 money = (f32)DDS3_GBWK->maka / 20.0f;
+    f32 divisor;
+    f32 ratio;
+    f32 base;
+    s32 amount;
+
+    if (work->flag & 0x20) {
+        player = (datUnitWork_t *)&DDS3_GBWK->akuma[0].flag;
+        divisor = (f32)player->level / 5.0f + 4.0f;
+        ratio = (f32)datGetParam(player, 5) / divisor;
+        amount = (s32)((f32)datDevilTable[work->id].dropmakka * ratio);
+    } else {
+        divisor = (f32)work->level / 5.0f + 4.0f;
+        ratio = (f32)datGetParam(work, 5) / divisor;
+        if (fabsf(ratio) >= 0.0009999999311f) {
+            amount = (s32)(money / ratio);
+        } else {
+            amount = 0;
+        }
+    }
+    base = (f32)amount;
+    amount = (s32)(base + base * (2.0f * (dds3GetRandFloatA(NULL) - 0.5f) * 0.09999999404f));
+    if (evtBitCheck(0xAF2) != 0 && !(work->flag & 0x20)) {
+        amount /= 10;
+    }
+    return amount > 0 ? amount : 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetMakaBaramaki);
+#endif
 
 s32 nbCheckBadPanicAction(datUnitWork_t *w)
 {
