@@ -121,6 +121,9 @@ extern void sdfFileCmdReadFile(char *aFileName, void *aBuffer, s32 aLength, void
 extern s32 pbLoadSystemDataDone(s32 handle, s32 status);
 
 extern pbProcHandle_t *pbGetMoveChar(void);
+/* Opaque ABI view preserves retail annulment while the provider stays C.
+ * Same real symbol and prototype; a reconstruction aid, not original spelling. */
+extern pbProcHandle_t *pbGetMoveCharOpaque(void) __asm__("pbGetMoveChar");
 
 extern char D_00535DE0[];
 
@@ -441,23 +444,18 @@ s8 func_001D4BE8(void) {
 }
 
 
-/* NON_MATCHING: 1 of 37 words; retail annuls the epilogue restore in a beql delay slot. */
-#ifdef NON_MATCHING
 void func_001D4C08(pbProcHandle_t *panel) {
     if (pbMapIsValid() == 0) {
         dds3FadeOut(0, 0, 0, 1);
         dds3ResetProcessFlag(panel->id, 0x10, 1);
-        if (pbGetMoveChar() != 0) {
-            if (pbGetMoveChar() != 0) {
-                ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x40000;
+        if (pbGetMoveCharOpaque() != 0) {
+            if (pbGetMoveCharOpaque() != 0) {
+                ((pbProcHandle_t *)pbGetMoveCharOpaque())->flags = 0x40000;
             }
-            ((pbProcHandle_t *)pbGetMoveChar())->flags |= 1;
+            ((pbProcHandle_t *)pbGetMoveCharOpaque())->flags |= 1;
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbMain", func_001D4C08);
-#endif
 
 
 void pbMakeMapPathHdd(pbProcHandle_t *parent) {
