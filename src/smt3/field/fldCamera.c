@@ -146,8 +146,6 @@ void fldCamResetNpc(void)
     fldCamResetOn = 0;
 }
 
-INCLUDE_ASM(const s32, "field/fldCamera", fldCamCalcSaka);
-
 extern f32 fldCamPitch;
 
 typedef struct {
@@ -158,12 +156,89 @@ typedef struct {
 } fldCamParamRow_t;
 
 extern fldCamParamRow_t fldCamParamTable[];
+extern f32 fldCamDirLock;
+extern s32 fldHitChkMatter;
+extern s32 fldHitChkSlope;
+
+typedef struct {
+    s16 mode2D;
+    s16 numedges;
+    f32 normal[4];
+    f32 num;
+    f32 e_normal[4][4];
+    f32 e_num[4];
+    f32 min[4];
+    f32 max[4][4];
+    f32 point[3];
+    u32 elv;
+    u16 blockID;
+    u16 hitflag;
+    s32 resID;
+    dds3Basic_t *matter;
+    void *face;
+    void *stopData;
+    s32 hojiID;
+    s32 npcID;
+} fldCamCollision_t;
+
+extern fldCamCollision_t *fldMatterTable;
+
+#ifdef NON_MATCHING
+void fldCamCalcSaka(void)
+{
+    s32 index = fldHitChkSlope;
+    fldCamCollision_t *collision;
+    sdfVector3_t offset;
+    f32 xs[3], ys[3], zs[3];
+    f32 x, z;
+    f32 pi;
+
+    fldGlobalBase.float130 = 0.0f;
+    fldCamDirLock = 0.0f;
+    if (index == -1) {
+        index = fldHitChkMatter;
+        if (index < 0) return;
+    }
+    if (fldMatterTable == NULL) return;
+    collision = &fldMatterTable[index];
+    if (collision->matter != NULL) {
+        offset.x = collision->matter->poseset->pos.x;
+        offset.y = collision->matter->poseset->pos.y;
+        offset.z = collision->matter->poseset->pos.z;
+    } else {
+        offset.x = 0.0f;
+        offset.y = 0.0f;
+        offset.z = 0.0f;
+    }
+    pi = 3.14f;
+    xs[0] = collision->max[0][0] + offset.x;
+    ys[0] = collision->max[0][1] + offset.y;
+    zs[0] = collision->max[0][2] + offset.z;
+    xs[1] = collision->max[1][0] + offset.x;
+    ys[1] = collision->max[1][1] + offset.y;
+    zs[1] = collision->max[1][2] + offset.z;
+    xs[2] = collision->max[2][0] + offset.x;
+    ys[2] = collision->max[2][1] + offset.y;
+    zs[2] = collision->max[2][2] + offset.z;
+    x = fldGlobalBase.x - sdfSin(fldCamPitch * pi / 180.0f) *
+        fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
+    z = fldGlobalBase.z - sdfCos(fldCamPitch * pi / 180.0f) *
+        fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
+    fldCamDirLock = fldGlobalBase.y - fldCamCalcSlopeOffset(x, z, xs, ys, zs);
+    x = fldGlobalBase.x - sdfSin(-fldGlobalBase.camAngle * pi / 180.0f) *
+        fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
+    z = fldGlobalBase.z - sdfCos(-fldGlobalBase.camAngle * pi / 180.0f) *
+        fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
+    fldGlobalBase.float130 = fldGlobalBase.y - fldCamCalcSlopeOffset(x, z, xs, ys, zs);
+}
+#else
+INCLUDE_ASM(const s32, "field/fldCamera", fldCamCalcSaka);
+#endif
 
 extern void dds3GetRotPoseSet(dds3Basic_t *pBasic);
 
 extern f32 EulerAngleAxisY(void);
 
-extern f32 fldCamDirLock;
 
 extern f32 fldCamDist;
 
@@ -175,9 +250,6 @@ extern f32 D_0054ECA0;
 
 extern f32 D_0054ECDC;
 
-extern s32 fldHitChkMatter;
-
-extern s32 fldHitChkSlope;
 
 extern s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]);
 
