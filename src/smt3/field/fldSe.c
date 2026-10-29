@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 #include "basic.h"
 #include "model.h"
 #include "newdata.h"
@@ -138,7 +139,89 @@ void fldClearSe3D(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldSe", fldPlaySe3D);
+extern f32 fldCamTarget[];
+extern f32 D_002FC9C0[];
+/* Native frame counters wrap and have no signed consumers. */
+extern u32 D_0054EE38;
+extern u32 D_0054EE34;
+typedef struct {
+    f32 v[4];
+} fldSoundPosition_t;
+extern const fldSoundPosition_t D_00532110;
+void p2sdPlaySe3DEx(s32 trackId, s32 radiusInHundreds, f32 x, f32 y, f32 z);
+void p2sdSetStandPos(f32 firstX, f32 firstY, f32 firstZ,
+                    f32 secondX, f32 secondY, f32 secondZ);
+
+/* Adapted from DDS func_001415F8: SMT3 always uses the camera listener and
+ * a fixed 500-unit radius margin, with the current area resolved per call. */
+void fldPlaySe3D(void) {
+    fldSoundPosition_t position = D_00532110;
+    f32 listenerX, listenerY, listenerZ;
+    f32 dx, dy, dz, distance;
+    f32 sourceX, sourceY, sourceZ;
+    u32 tick;
+    s32 nearby;
+    s32 flags;
+    s32 i;
+    fldSe3D_tag *entry;
+
+    tick = D_0054EE38 + 1;
+    nearby = 0;
+    D_0054EE38 = tick;
+    listenerX = fldCamTarget[0] - D_002FC9C0[0];
+    listenerY = D_002FC9C0[1];
+    listenerZ = fldCamTarget[2] - D_002FC9C0[2];
+    distance = fsqrtf(listenerX * listenerX + listenerZ * listenerZ);
+    if (distance > 200.0f) {
+        listenerX = D_002FC9C0[0] + (listenerX / distance) * 200.0f;
+        listenerZ = D_002FC9C0[2] + (listenerZ / distance) * 200.0f;
+    } else {
+        listenerX = fldCamTarget[0];
+        listenerZ = fldCamTarget[2];
+    }
+    for (i = 0; i < gFldSe3DNum; i++) {
+        dx = listenerX - fldSe3DTable[i].x;
+        dy = listenerY - fldSe3DTable[i].y;
+        dz = listenerZ - fldSe3DTable[i].z;
+        distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+        if (distance < fldSe3DTable[i].r + 500.0f) {
+            nearby = 1;
+        }
+    }
+    if (nearby != 0 && (tick & 1)) {
+        p2sdSetStandPos(listenerX, listenerY, listenerZ,
+            D_002FC9C0[0], D_002FC9C0[1], D_002FC9C0[2]);
+    }
+    for (i = 0; i < gFldSe3DNum; i++) {
+        entry = &fldSe3DTable[i];
+        sourceX = fldSe3DTable[i].x;
+        sourceY = fldSe3DTable[i].y;
+        sourceZ = fldSe3DTable[i].z;
+        dx = listenerX - sourceX;
+        dy = listenerY - sourceY;
+        dz = listenerZ - sourceZ;
+        distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+        flags = entry->flg;
+        if (!(flags & 1)) {
+            if (distance < entry->r + 500.0f) {
+                position.v[0] = sourceX;
+                position.v[1] = sourceY;
+                position.v[2] = sourceZ;
+                entry->flg = flags | 1;
+                p2sdPlaySe3DEx(gFldBgmTop[fldGlobalBase.area].smgId + entry->id,
+                    (s32)(entry->r / 100.0f), position.v[0], position.v[1], position.v[2]);
+            }
+        } else if (distance < entry->r + 500.0f) {
+            position.v[0] = sourceX;
+            position.v[1] = sourceY;
+            position.v[2] = sourceZ;
+        } else {
+            entry->flg = flags & ~1;
+            p2sdStopSe(gFldBgmTop[fldGlobalBase.area].smgId + entry->id);
+        }
+    }
+    D_0054EE34++;
+}
 
 INCLUDE_RODATA(const s32, "field/fldSe", D_00532110);
 
