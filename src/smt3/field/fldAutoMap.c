@@ -87,9 +87,10 @@ extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b,
                       u32 a);
 
-extern void sdf3DSetCamera(void *aParam, void *aCamera);
+struct sdf3DScreenParam_t;
+extern void sdf3DSetCamera(struct sdf3DScreenParam_t *aParam, void *aCamera);
 
-extern u8 dds3ScreenParam[];
+extern struct sdf3DScreenParam_t dds3ScreenParam;
 
 extern u8 aProjMatrix[];
 
@@ -135,7 +136,7 @@ extern void evtEnableMoonDraw(void);
 
 extern s32 fldMenuOpenFlag[];
 
-extern void frSetFontDrawOT(s32 OtType);
+extern void frSetFontDrawOT(u32 OtType);
 
 extern void dds3VisibleSceneBasic(dds3Basic_t *basic, s32 visible);
 
@@ -238,7 +239,7 @@ extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, u8 **loadedAt, u32 *size);
 
-extern void *D_00312150[];
+extern sdfModelRootNode_t *D_00312150[];
 
 extern fldAmXYZ_t fldAutoMapModelPos[32];
 
@@ -889,7 +890,7 @@ INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawOneArea);
 void fldAutoMapDrawWindow(void) {
     SDF_VU0_LOADMATRIX(aProjMatrix);
     InversMatrix();
-    sdf3DSetCamera(dds3ScreenParam, aProjMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, aProjMatrix);
     rsetOtOfs(0x4A);
     rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
     rsetAlpha(0);
@@ -898,7 +899,7 @@ void fldAutoMapDrawWindow(void) {
                 fldAutoMapWindowTex[0]);
     D_0054EEA0 = D_0054EEA0 - 1.0f;
     fldAutoMapDrawBgOfsRF(255.0f, 250.0f, D_0054EEA0);
-    sdf3DSetCamera(dds3ScreenParam, D_002FA240);
+    sdf3DSetCamera(&dds3ScreenParam, D_002FA240);
     SDF_VU0_LOADMATRIX(D_002FA240);
     rsetOtOfs(0x51);
     rsetTest(1, 5, 0x81, 1, 0, 0, 1, 2);
@@ -1574,9 +1575,12 @@ void fldAutoMapClear(void) {
 extern f32 D_0054EEA4;
 extern s32 fldAreaFontWork;
 extern void frPreCalcStrWidth(const char *pStr, s32 Style, s32 Mode);
-extern void *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, u32 Color, const char *pStr, s32 pFRQ);
-extern u32 frGetStrWidth2(void *pFRQ);
-extern void frDestroyFontRequestAfter(void *pFRQ);
+struct frFontHandle_t;
+struct frFontRequest_t;
+extern struct frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
+                                                  const char *text, struct frFontRequest_t *previous);
+extern u32 frGetStrWidth2(struct frFontHandle_t *font);
+extern s32 frDestroyFontRequestAfter(struct frFontHandle_t *font);
 extern void fldDrawAddressPanel(s32 width, s32 x, s32 y);
 extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const char *moji);
 
