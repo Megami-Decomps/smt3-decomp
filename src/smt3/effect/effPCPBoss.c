@@ -258,18 +258,10 @@ typedef struct effPCPBossDengeki_t
     u32 color;
 } effPCPBossDengeki_t;
 
-/* The model node a formation's helper unit owns, down to the root the mark
- * lookups take. */
-typedef struct effPCPBossOwner_t
-{
-    u8 unk00[0x18];
-    void *inner;
-} effPCPBossOwner_t;
-
 typedef struct effPCPBossHUnit_t
 {
     u8 unk00[0x8C];
-    effPCPBossOwner_t *owner;
+    mdlObj_t *owner;
 } effPCPBossHUnit_t;
 
 /* One battle formation slot: the main process data holds 32 of them. */
@@ -864,9 +856,9 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     offset = height + offset;
     mdlSetScale(effPCPBossTexHandle);
     mdlSmoothLoopMotion(effPCPBossTexHandle, 0,
-                       mdlGetMotionNum((mdlObj_t *)form->hunit->owner, 0), 0.0f, 4.0f);
+                       mdlGetMotionNum(form->hunit->owner, 0), 0.0f, 4.0f);
     sdfMotionSeek(((mdlObj_t *)effPCPBossTexHandle)->first,
-                  ((mdlObj_t *)form->hunit->owner)->first->frame);
+                  (form->hunit->owner)->first->frame);
     target.f[1] -= offset;
     effPCPBossONGYModelTexRender(&target, form, renderHeight);
     if (work->frame >= 12) {
@@ -3887,7 +3879,7 @@ void effPCP_PBCamera_Run(effPCP_PBCamera_tag *work)
             invoke = effBTLSkillGetInvokeFormation();
             target = effBTLSkillGetTargetFormation(0);
             if ((invoke->flags & 3) == 3) {
-                mdlGetPosition((mdlObj_t *)invoke->hunit->owner);
+                mdlGetPosition(invoke->hunit->owner);
                 SDF_VU0_STOREVECTOR(&position);
                 effPCP_PBCamera_SetPosition(work, &position);
             }
