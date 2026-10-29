@@ -23,7 +23,7 @@ extern f32 R360_LR(f32 a, f32 b);
 
 extern f32 fabsf(f32);
 
-extern u32 fldRunDanteGunFlag[];
+extern fldDanteGunState_t fldRunDanteGunFlag;
 
 extern void dds3ObjectBaseOffFlag(void *pObjectBasic, s32 flag);
 
@@ -1101,7 +1101,7 @@ s32 fldPlayerCalc(void)
     mdlObj_t *mdl;
     s32 mode;
 
-    if (fldRunDanteGunFlag[0] != 0) {
+    if (fldRunDanteGunFlag.gunFlag != 0) {
         return 0;
     }
     if (fldAutoMapChkMode() != 0) {
