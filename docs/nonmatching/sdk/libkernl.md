@@ -185,3 +185,31 @@ The three equal pool counts share an assignment. Separate field-order
 controls retained 20 or more differing words; the preferred source has the
 eight-word store/setup residual. The configured 2.9 compiler has no supported
 qualified allocator hook, so a pass-level explanation remains open.
+
+## sceOpen
+
+640 emitted bytes against 644 native bytes; 111 of 160 emitted words match,
+49 differ and four native bytes remain uncovered. Most differences exchange
+the saved registers holding the path/request and semaphore/reply across phases.
+The native successful tail also copies the slot index into a return scratch
+before waiting on the slot semaphore; ordinary source retains the slot directly.
+
+The variadic interface saves six remaining argument registers in eight-byte
+slots. As in the matched kernel formatters, the configured 2.9 compiler's
+`__builtin_next_arg` points after that save area; subtracting six `sizeof(long)`
+slots reads the first optional mode word. Native reads it unconditionally,
+including for two-argument callers. The graph caller declaration agrees with
+this interface; its calls are unchanged.
+
+The 0x418-byte request contains masked flags, mode, a bounded 0x400-byte path
+and the reserved slot index. Only an exhausted path copy forces the last byte
+to NUL. Version rejection precedes reservation. RPC transport failure and a
+rejected reply leave the reservation intact. A negative completion releases
+the slot under its semaphore; success stores the native descriptor, ORs the
+original flags into the active word and returns the slot index. The uncached
+acceptance word is captured before releasing the filesystem semaphore.
+
+A condition-first bounded copy restores native loop peeling and most setup
+scheduling compared with the initial combined assignment/increment condition.
+Reading the mode after the copy worsens allocation. No synthetic scratch move
+or dependency was added for the final slot-return difference.

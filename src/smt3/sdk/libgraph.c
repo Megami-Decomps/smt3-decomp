@@ -89,7 +89,7 @@ typedef struct {
 extern GParam D_00529F20;
 extern void scePrintf(const char *fmt, ...);
 
-extern s32 sceOpen(const char *name, s32 flag);
+extern s32 sceOpen(const char *name, s32 flag, ...);
 extern s32 sceRead(s32 fd, void *buf, s32 size);
 extern s32 sceClose(s32 a);
 extern s32 atoi(const char *s);

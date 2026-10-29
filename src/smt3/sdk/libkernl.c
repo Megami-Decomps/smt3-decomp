@@ -1595,7 +1595,6 @@ s32 sceFsReset(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceOpen);
 
 typedef struct fsCloseRequest_t {
     s32 sema;
@@ -1714,7 +1713,17 @@ typedef struct fsIoctl2Request_t {
     u32 outputSize;
     u32 argSize;
 } fsIoctl2Request_t;
+typedef struct fsOpenRequest_t {
+    s32 sema;
+    s32 *result;
+    s32 resultSize;
+    u32 flags;
+    s32 mode;
+    char name[0x400];
+    s32 slot;
+} fsOpenRequest_t;
 typedef union fsRequest_t {
+    fsOpenRequest_t open;
     fsCloseRequest_t close;
     fsPathRequest_t path;
     fsMkdirRequest_t mkdir;
@@ -1730,6 +1739,87 @@ typedef union fsRequest_t {
     fsDreadRequest_t dread;
 } fsRequest_t;
 extern fsRequest_t D_0059D4C0;
+
+/* NON_MATCHING: 640/644 bytes; opposite saved-register assignments
+ * and final slot-return scheduling remain unresolved. */
+#ifdef NON_MATCHING
+s32 sceOpen(const char *name, s32 flags, ...)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsOpenRequest_t *request = &D_0059D4C0.open;
+    fsRequestEntry_t *entry;
+    kernelVaList_t args;
+    s32 mode;
+    s32 length;
+    s32 slot;
+    s32 sema;
+    s32 accepted;
+
+    _sceFsWaitS(0);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    if (_fs_version() != 0) {
+        _sceFsSigSema();
+        return (s32)0xFFFEFFFC;
+    }
+    entry = new_iob();
+    if (entry == NULL) {
+        _sceFsSigSema();
+        return -19;
+    }
+    args = (kernelVaList_t)__builtin_next_arg(flags) - 6 * sizeof(long);
+    mode = *(s32 *)args;
+    for (length = 0; length < 0x400; length++) {
+        if ((request->name[length] = name[length]) == 0) {
+            break;
+        }
+    }
+    if (length == 0x400) {
+        request->name[0x3FF] = 0;
+    }
+    slot = entry - D_0059E580;
+    request->flags = flags & 0x6FFFFFFF;
+    request->mode = mode;
+    request->slot = slot;
+    param.maxCount = 1;
+    param.initCount = 0;
+    param.option = 0;
+    sema = CreateSema(&param);
+    request->result = &result;
+    request->sema = sema;
+    request->resultSize = 4;
+    if (sceSifCallRpc(&D_0059E780, 0, 0, &D_0059D4C0, 0x418,
+                      D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    if (result < 0) {
+        WaitSema(D_0052C348);
+        entry->active = 0;
+        SignalSema(D_0052C348);
+        return result;
+    }
+    WaitSema(D_0052C348);
+    entry->active |= flags;
+    entry->word0 = result;
+    SignalSema(D_0052C348);
+    return slot;
+}
+
+#else
+INCLUDE_ASM(const s32, "sdk/libkernl", sceOpen);
+#endif
 
 /* NON_MATCHING: 376/380 bytes; the final nonnegative-result clamp
  * simplifies to a shorter immediate comparison. */
