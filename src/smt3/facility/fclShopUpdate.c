@@ -197,7 +197,54 @@ s32 shpAddServiceTicket(s32 Nums)
     return cmbGlobalWork->unk_1965;
 }
 
+typedef struct
+{
+    u8 weight;
+    u8 reserved;
+    u16 item;
+} shpItemBoxEntry_t;
+
+extern shpItemBoxEntry_t D_0032FBC8[][8];
+extern s32 datGetItemSlotIndex(u16 item);
+extern s32 cmbChkGetHearts(s32 id);
+extern u32 dds3GetRandA(void *state);
+
+#ifdef NON_MATCHING
+u16 shpGetItemFromItemBox(s32 box)
+{
+    shpItemBoxEntry_t candidates[8];
+    s32 count = 0;
+    u32 total = 0;
+    s32 cumulative = 0;
+    s32 roll;
+    s32 i;
+
+    for (i = 0; i < 8; i++) {
+        shpItemBoxEntry_t *entry = &D_0032FBC8[box][i];
+        u16 item = entry->item;
+        s32 slot = datGetItemSlotIndex(item);
+
+        if (slot != 0 && cmbChkGetHearts((s8)slot) != 0) {
+            continue;
+        }
+        if (item != 0) {
+            candidates[count] = *entry;
+            total += candidates[count].weight;
+            count++;
+        }
+    }
+    roll = dds3GetRandA(NULL) % total;
+    for (i = 0; i < count; i++) {
+        cumulative += candidates[i].weight;
+        if (roll < cumulative) {
+            return candidates[i].item;
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpGetItemFromItemBox);
+#endif
 
 void shpExit(void)
 {
