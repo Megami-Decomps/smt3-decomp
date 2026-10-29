@@ -4086,7 +4086,71 @@ s32 cmpSetHeartsSequenceRemove(void)
     return 0;
 }
 
+#ifdef NON_MATCHING
+extern u32 dds3GetRandA(void *state);
+extern void rstCreateBeforeSkillList(s8 heartsId, datUnitWork_t *stock, s8 levelOffset,
+                                     rstSkillInfo_t *info);
+
+void cmpInitHeartsIcon(campInfoWork_t *work)
+{
+    datUnitWork_t *unit = &DDS3_GBWK->unitwork[0];
+    cmpHeartsIcon_t *icon = (cmpHeartsIcon_t *)((u8 *)work + 0x1278);
+    s32 i;
+
+    for (i = 0; i < 25; i++, icon++) {
+        s8 id = cmpGetHeartsIconId((s8)i);
+        s8 type;
+        s32 color;
+        s8 moveType;
+
+        if (cmpHeartsIconIsVisible(id) == 0) {
+            type = -1;
+            color = 0;
+            moveType = 0;
+        } else {
+            rstSkillInfo_t skills;
+
+            type = cmpGetHeartsIconType((s8)i);
+            color = cmpGetHeartsIconColor((s8)i);
+            rstCreateBeforeSkillList(id, unit, 0, &skills);
+            moveType = 0;
+            if (skills.SkillCnt != 0) {
+                u16 level = unit->level;
+                u8 targetLevel = skills.TargetLevel[0];
+
+                moveType = 2;
+                if (level + 1 < targetLevel) {
+                    moveType = level + 4 >= targetLevel;
+                }
+                if (skills.SkillCnt == 1 && id == 1 && evtBitCheck(0x8C1) == 0) {
+                    moveType = 0;
+                }
+            }
+        }
+        icon->IconType = type;
+        icon->Stat = 0;
+        icon->IconColor = color;
+        icon->MoveType = moveType;
+        icon->Axis = 0;
+        icon->AxisChg = -1;
+        icon->Wait1st = dds3GetRandA(NULL) & 0x1F;
+        {
+            u32 wait = dds3GetRandA(NULL) & 0x1F;
+
+            icon->Angle = 0.0f;
+            icon->Wait = wait;
+        }
+        icon->DefCnt = 0;
+        icon->DefAng = 0.0f;
+        icon->Cnt = 0;
+        icon->Timer = 0;
+        icon->TimerSpd = 6;
+        icon->DistAng = 0.0f;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpInitHeartsIcon);
+#endif
 
 void cmpInitDHWindow(u8 *base)
 {
