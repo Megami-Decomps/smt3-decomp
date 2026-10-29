@@ -2247,7 +2247,70 @@ void CalcMessage(instanceMes_tag *pinst) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", CalcSelect);
+void func_001D0518(instanceMes_tag *pinst, s32 y);
+
+/* DDS itfUpdateSoundSelectionTransition (redthing1), adapted to SMT3's
+ * 20-pixel rows and absence of the donor's sprite-transition overrides. */
+void CalcSelect(instanceMes_tag *panel) {
+    select_tag *selection = &panel->select;
+    message_tag *entry = &panel->message;
+    u32 flags = panel->stat;
+    s32 top;
+    s32 bottom;
+    s32 entryY;
+
+    switch (selection->phase) {
+    case 1:
+        entryY = entry->y;
+        bottom = entryY + entry->lines * (20 << 3);
+        /* RequestSelect also permits zero rows: scale in unsigned coordinates. */
+        top = selection->y - ((selection->lines * 20U - 20U) << 3);
+        if (entry->pfont != NULL && top < bottom) {
+            func_001D0518(panel, -64);
+            return;
+        }
+        if ((flags & 0xC00) != 0x400) {
+            if (entry->pfont != NULL) {
+                ChangeFontColorAll(entry->pfont, 3);
+            }
+            selection->phase = 2;
+            panel->stat = (panel->stat & ~0x38) | 0x18;
+        }
+        break;
+    case 2:
+        if ((flags & 0x38) == 0x20 && SelectItem(panel) == 1) {
+            selection->pfont = UnchainFontHandleUnit(selection->pfont,
+                selection->select, selection->lines);
+            if ((flags & 0xC00) == 0x800) {
+                panel->stat |= 0xC00;
+            }
+            selection->select = GetMaskedIndex(selection->select, selection->mask);
+            selection->numdef = 0;
+            ForceSetCurCtr(&panel->curctr, 1, 0x7F, 0);
+            panel->stat = (panel->stat & ~0x38) | 0x28;
+            selection->glyphColorIntensity = 0x80;
+            selection->phase = 3;
+        }
+        break;
+    case 3:
+        selection->glyphColorIntensity -= 16;
+        if (selection->glyphColorIntensity <= 0) {
+            selection->glyphColorIntensity = 0;
+            selection->phase = 4;
+            InitializeCurCtr(&panel->curctr, 0);
+        }
+        ChangeFontAlpha(selection->pfont, selection->glyphColorIntensity);
+        return;
+    case 4:
+        if (entry->pfont != NULL && entry->y < 0xA88) {
+            func_001D0518(panel, 64);
+            return;
+        }
+        selection->phase = -1;
+        break;
+    }
+}
+
 
 void func_001D0518(instanceMes_tag *pinst, s32 y)
 {
