@@ -710,3 +710,4 @@ src/smt3/newbattle/nbTest.c	redthing1	done	2026-10-28	1 fn / 2752 B	fourteen nat
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	2 fn / 652 B SDK	power-of-five cache scaling and signed bigint difference; qualified shared pointer/limb lifetimes; complete owner 58 match, 0 differ; multiply remains assembly
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	5 SDK fn / 224 B	DECI2 extended transfer, send request and lock wrappers; native three-word transfer packets, u16 lengths and signed destination; complete owner 11 match, 0 differ
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 SDK fn / 160 B	read completion copies both payload spans through uncached descriptor, then forwards status-word pointer; complete owner exact
+src/smt3/kernel/dds3KernelDraw.c	redthing1	done	2026-10-29	1 fn / 1532 B	PiM agent: DDS scene-light update with six real shared READONLY unpack calls and canonical fog color owner; no alias/type/header/macro change; complete owner87/0

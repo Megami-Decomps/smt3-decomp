@@ -138,7 +138,6 @@ fclEncycFreeEntries	kernel/dds3AdminiProcess	0x1E8	120 of 122 words match	docs/n
 fcl_103420, fclEncycAllocEntry and fcl_103560	kernel/dds3AdminiProcess	0x94, 0xA8, 0xAC	32 of 43 words match	docs/nonmatching/kernel/dds3AdminiProcess.md	64
 dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/nonmatching/kernel/dds3ConfigMain.md	5
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/nonmatching/kernel/dds3KernelDraw.md	5
-dds3SceneLightUpdateFirst	kernel/dds3KernelDraw	0x5FC	forty-five of 383 words match	docs/nonmatching/kernel/dds3KernelDraw.md	45
 dds3DrawProcess	kernel/dds3KernelProcess	0x368	157 of 218 words match	docs/nonmatching/kernel/dds3KernelProcess.md	5
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/nonmatching/kernel/dds3KernelProcess.md	33
 slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/nonmatching/mc/slMain.md	5
