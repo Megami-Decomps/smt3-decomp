@@ -729,7 +729,63 @@ s32 SelectMot(nbDebugProcessData_t *d, s32 active)
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMot);
 #endif
 
+extern const char D_005514E0[];
+extern s32 devilbase;
+extern s32 devilcur;
+
+#ifdef NON_MATCHING
+s32 SelectDevil(void)
+{
+    sdfDrawTag_t *tag;
+    frFontRequest_t *request;
+    s32 i, y, yText, attr, color, result, base, selected;
+    u8 button;
+
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    dds3ConsPanelTagLinkZ(tag, 0xA2, 0x48, 15, 20, 0xFF0000);
+    y = 0x7BA0;
+    yText = 80;
+    selected = *(volatile s32 *)&devilcur;
+    for (i = 0; i < 10; i++) {
+        if (selected == i) {
+            attr = 4;
+            color = 0xFF0080;
+        } else {
+            attr = 0;
+            color = -0x80;
+        }
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7AA0, y, 0xFFFF80, attr,
+                                             D_005514E0, devilbase + i));
+        y += 0xB0;
+        request = frwGetSmallFontFRQ(0xE6 * 16, yText * 8, 0xFF0005, color,
+                                     text2[devilbase + i], NULL);
+        yText += 22;
+        frDrawFont((frFontHandle_t *)request);
+        frDestroyFontRequestAfter((frFontHandle_t *)request);
+        selected = *(volatile s32 *)&devilcur;
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+    result = dds3SelectMenu(0, 1, 0x180, 1, 10, NULL, &devilbase, NULL, &devilcur);
+    if (result == -1 || result == 1) {
+        return result;
+    }
+    button = ((volatile u8 *)dds3PadButtonState)[5];
+    base = *(volatile s32 *)&devilbase;
+    if ((button & 2) && base + 10 < 0x180) {
+        devilbase = base + 20 < 0x180 ? base + 10 : 0x176;
+    }
+    button = ((volatile u8 *)dds3PadButtonState)[4];
+    base = *(volatile s32 *)&devilbase;
+    if ((button & 2) && base > 0) {
+        base -= 10;
+        devilbase = base < 0 ? 0 : base;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectDevil);
+#endif
 
 void SetSelect(void)
 {
@@ -766,8 +822,6 @@ typedef struct
 } datDevilFormat_t;
 
 extern datDevilFormat_t datDevilTable[];
-extern s32 devilbase;
-extern s32 devilcur;
 extern void nbReturnUnit(s32 partyindex, s32 lost, s32 dead);
 extern u64 sdfDelayedResrcCheck(void);
 extern void datSetDevilWork(s32 id, datUnitWork_t *work);
