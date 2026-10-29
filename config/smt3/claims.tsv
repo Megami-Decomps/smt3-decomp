@@ -958,3 +958,4 @@ src/smt3/newbattle/nbResultProcess.c	z29	open	2026-10-29	1 fn / 2604 B	largest-f
 src/smt3/newbattle/nbResultProcess.c	z29	done	2026-10-29	0 matches / 1 guarded draft	nbResultDrawPC1 3 to 109 of 649 words; wide colors as initialised locals worth 81 words; the siblings two volatile casts removed with nothing needed in their place; blocked on the recorded gcse PRE availability wall
 src/smt3/sound/sndManager.c	z29	open	2026-10-29	1 fn / 2572 B	largest-first pass: dds3TitleDrawMenu
 src/smt3/sound/sndManager.c	z29	done	2026-10-29	1 fn / 2572 B	dds3TitleDrawMenu exact; a dead division keeps its zero-divide trap, two inherited volatiles and a dummy use were wrong, D_0054E444 is a .lit4 float; owner 13 match 0 differ
+src/smt3/effect/effModelTrackPoly.c	z29	open	2026-10-29	1 fn / 2344 B	largest-first pass: effSwordTrackPolygon2DDraw
