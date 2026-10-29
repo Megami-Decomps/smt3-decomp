@@ -3194,7 +3194,24 @@ INCLUDE_ASM(const s32, "sdk/libkernl", DIntr);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", EIntr);
 
+/* Four initialization stores differ; see docs/nonmatching/sdk/libkernl.md. */
+#ifdef NON_MATCHING
+extern s32 D_0052C378;
+extern s32 D_0052C37C;
+
+void supplement_crt0(void)
+{
+    rpcSemaParam first;
+    rpcSemaParam second;
+
+    first.maxCount = second.maxCount = 1;
+    first.initCount = second.initCount = 1;
+    D_0052C378 = CreateSema(&first);
+    D_0052C37C = CreateSema(&second);
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libkernl", supplement_crt0);
+#endif
 
 INCLUDE_ASM(const s32, "sdk/libkernl", Copy);
 
@@ -3273,7 +3290,22 @@ void GetSystemCallTableEntry(void)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", setup);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _InitSys);
+extern void supplement_crt0(void);
+extern void GetSystemCallTableEntry(void);
+extern void InitAlarm(void);
+extern s32 InitThread(void);
+extern void InitExecPS2(void);
+extern void InitTLBFunctions(void);
+
+void _InitSys(void)
+{
+    supplement_crt0();
+    GetSystemCallTableEntry();
+    InitAlarm();
+    InitThread();
+    InitExecPS2();
+    InitTLBFunctions();
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__15);
 

@@ -757,3 +757,17 @@ but continues consuming valid digits, then saturates and writes error 34.
 Other paths leave the error unchanged. The end pointer is the original
 input if no digit was accepted, including a sign or hexadecimal prefix
 without digits; otherwise it identifies the first unconsumed character.
+
+## Kernel startup sequence
+
+`_InitSys` matches all 60 bytes as a no-argument void initializer. Its sole
+caller is startup assembly and discards its result. It calls semaphore
+setup, syscall-table discovery, alarm setup, thread initialization and
+executable-patch setup in native order, then tail-calls TLB setup.
+The configured EE 2.9 compiler supplies that tail handoff directly.
+
+`InitThread` explicitly returns -1 on the early/failure paths or its stored
+thread ID on success. Both the startup and SDF callers discard that result;
+their declarations retain its integer interface. This declaration correction
+earns no matching credit. The neighboring semaphore setup remains guarded
+with a [four-store residual](nonmatching/sdk/libkernl.md#supplement_crt0-sdklibkernl-0x48).

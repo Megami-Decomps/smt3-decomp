@@ -139,3 +139,18 @@ command gives the preferred ordinary 844-byte body. No return type, qualifier,
 register constraint or artificial dependency was introduced to close the
 remaining allocation/control differences. A genuine compiler premise is
 needed before another pass over the early dispatch.
+
+## supplement_crt0 (sdk/libkernl, 0x48)
+
+4 of 18 words differ: four independent descriptor stores have a different
+order, beginning at +0x10. All 72 bytes are emitted; the other 14 words match.
+Two ordinary six-word `rpcSemaParam` locals receive initial and maximum
+counts of one before the first `CreateSema`; all remaining fields stay
+untouched. The two semaphore results are stored separately. The native
+0x50-byte frame needs no invented descriptor padding or alignment.
+
+One chained four-field initialization produced the same residual as separate
+assignments. The readable shared-field initialization retains the same four
+store differences. Extern globals use their existing data ownership without
+section overrides; there is no volatile scratch, barrier, copy assembly or
+extra flag. A follow-up needs evidence for native initialization scheduling.
