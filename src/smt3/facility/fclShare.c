@@ -582,56 +582,70 @@ extern fclSpriteTbl_t fclSpriteTable[];
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,
                              s32 spriteId, s32 *textures, fclSpriteTbl_t *table, s32 ot);
 
-#ifdef NON_MATCHING
 void fclDrawPanelBorder(void *work, s32 z, s32 inset, s32 ot)
 {
     fclPhasePanel_t *panel = work;
-    s32 timer = panel->timer;
-    s32 flags = panel->flags;
-    s32 topSprite = 6;
-    s32 bottomSprite = 8;
-    s32 topX = 5;
-    s32 bottomX = 5;
-    s32 topY = 0x1C;
-    s32 bottomY = 0x29;
-    s32 topColor = 0x80808080;
-    s32 bottomColor = 0x80808080;
+    s32 timer;
+    s32 flags;
+    s32 sprite[2];
+    s32 xOffset[2];
+    s32 yOffset[2];
     s32 colors[4];
-    s32 active = 0;
+    s32 color[2];
+    s32 active;
     s32 alpha;
 
+    sprite[0] = 6;
+    sprite[1] = 8;
+    xOffset[1] = 5;
+    xOffset[0] = 5;
+    yOffset[0] = 0x1C;
+    yOffset[1] = 0x29;
+    active = 0;
+
+    timer = panel->timer;
     if (timer > 0x100) {
         timer = 0x200 - timer;
     }
+    flags = panel->flags;
+    color[0] = 0x80808080;
+    color[1] = 0x80808080;
     alpha = (timer / 4 + 0x40) & 0xFF;
     if (flags & 1) {
-        topSprite = 7;
-        topX = -1;
-        topY = 0x15;
-        topColor = 0x80808000 | alpha;
+        sprite[0] = 7;
+        xOffset[0] = -1;
+        yOffset[0] = 0x15;
+        color[0] = 0x80808000 | alpha;
         active = 1;
     }
     if (flags & 2) {
-        bottomSprite++;
-        bottomX = -1;
-        bottomY = 0x30;
-        bottomColor = 0x80808000 | alpha;
+        sprite[1]++;
+        xOffset[1] = -1;
+        yOffset[1] = 0x30;
+        color[1] = 0x80808000 | alpha;
         active = 1;
     }
     if (active == 0) {
         panel->timer = 0;
     }
-    colors[0] = colors[1] = colors[2] = colors[3] = topColor;
-    fclDrawSpriteRes(panel->x + (inset + topX) * 16, panel->y + topY * 8,
-                     z, colors, 10, topSprite, D_00345D88, fclSpriteTable, ot);
-    colors[0] = colors[1] = colors[2] = colors[3] = bottomColor;
-    fclDrawSpriteRes(panel->x + (inset + bottomX) * 16,
-                     panel->y + (panel->height - bottomY) * 8,
-                     z, colors, 10, bottomSprite, D_00345D88, fclSpriteTable, ot);
+
+    colors[0] = color[0];
+    colors[1] = color[0];
+    colors[2] = color[0];
+    colors[3] = color[0];
+    fclDrawSpriteRes(panel->x + ((inset + xOffset[0]) * 0x10),
+                     panel->y + (yOffset[0] * 8), z, colors, 10,
+                     (u16)sprite[0], D_00345D88, fclSpriteTable, ot);
+
+    colors[0] = color[1];
+    colors[1] = color[1];
+    colors[2] = color[1];
+    colors[3] = color[1];
+    fclDrawSpriteRes(panel->x + ((inset + xOffset[1]) * 0x10),
+                     panel->y + (((u16)panel->height - yOffset[1]) * 8),
+                     z, colors, 10, (u16)sprite[1], D_00345D88,
+                     fclSpriteTable, ot);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclShare", fclDrawPanelBorder);
-#endif
 
 extern s32 fclDrawPanelSprite(s32 id, s32 ot);
 extern void fclDrawPhaseValue(void *work, s32 color, s32 ot);
