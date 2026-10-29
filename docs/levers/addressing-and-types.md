@@ -1872,3 +1872,12 @@ checks 36 match / 0 differ.
   pointer instead keeps the two index scalings separate and leaves 22 of
   128 words different at the same 512-byte size. The existing record view
   matches all 128 words; no new alias, padding or register tie is needed.
+
+- Keep packet vector accesses as direct field expressions in `nbDrawKoukaNum`.
+  The existing four-float VU store describes the initialized packet offset;
+  the later load consumes `&p->v` directly. Caching that address in a local
+  merges the conditional store address with the common draw address and
+  emits 756 bytes instead of 764 (the missing instruction also changes jump
+  table alignment). Direct accesses match all 191 words, including the
+  native address materialization after `NumEffectClip`. The complete owner
+  checks 54 match / 0 differ.

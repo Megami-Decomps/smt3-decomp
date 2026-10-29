@@ -2,6 +2,7 @@
 #include "kernel.h"
 #include "nb.h"
 #include "event.h"
+#include "ps2asm.h"
 
 
 /* nbKoukaPacket_t.type, as the kouka dispatchers switch on it. Names and
@@ -883,7 +884,80 @@ INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", NumEffectClip);
 
 INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", nbClipKoukaNum);
 
-INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", nbDrawKoukaNum);
+extern void nbGetKoukaMarkPos(nbFormation_t *form);
+extern void nbLoadKoukaPos(nbFormation_t *form);
+extern void NumEffectClip(nbKoukaPacket_t *packet);
+extern s32 nbClipEffectNum(s32 screen[4]);
+extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
+extern void nbPnl_rsetAlpha(s32 mode);
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                        s32 color, sdfTexHandle_t *texture);
+
+void nbDrawKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
+{
+    s32 screen[4];
+    u32 color;
+
+    if (p->time == 0) {
+        switch (p->data1.i) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            nbGetKoukaMarkPos(p->form);
+            break;
+        case 0:
+            nbLoadKoukaPos(p->form);
+            break;
+        }
+        NumEffectClip(p);
+        SDF_VU0_LOADVECTOR_B(&p->form->pos);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_STOREVECTOR_F32(&p->v);
+    }
+
+    color = 0x80808080;
+    if (p->data1.i < 5) {
+        if (p->data1.i > 0) {
+            if (p->time >= 16) {
+                if (p->framelength < 7) {
+                    color = ((u32)(p->framelength * 21) << 24) | 0x808080;
+                }
+            }
+        }
+    }
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    SDF_VU0_LOADVECTOR(&p->v);
+    SDF_VU0_LOADVECTOR_B(&p->form->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    if (nbClipEffectNum(screen) != 0) {
+        switch (p->data1.i) {
+        case 0:
+            nbPnlSprite(screen[0] >> 4, (screen[1] >> 3) - 38,
+                20, 38, 235, 89, 20, 38, color, k->data->pnltex[2]);
+            break;
+        case 2:
+            nbPnlSprite((screen[0] >> 4) - 36, ((screen[1] - (p->time << 2)) >> 3) - 19,
+                72, 19, 159, 1, 72, 19, color, k->data->pnltex[3]);
+            break;
+        case 1:
+            nbPnlSprite((screen[0] >> 4) - 44, ((screen[1] - (p->time << 2)) >> 3) - 18,
+                88, 18, 1, 25, 88, 18, color, k->data->pnltex[3]);
+            break;
+        case 3:
+            nbPnlSprite((screen[0] >> 4) - 21, ((screen[1] - (p->time << 2)) >> 3) - 18,
+                42, 18, 1, 1, 42, 18, color, k->data->pnltex[3]);
+            break;
+        case 4:
+            nbPnlSprite((screen[0] >> 4) - 28, ((screen[1] - (p->time << 2)) >> 3) - 17,
+                56, 17, 101, 1, 56, 17, color, k->data->pnltex[3]);
+            break;
+        }
+    }
+}
 
 void nbApplyHpMp(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {

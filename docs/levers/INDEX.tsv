@@ -1,6 +1,6 @@
 page	line	mnemonics	tell
 docs/levers/README.md	7		| Levers | Page | Section | |---|---|---|
-docs/levers/README.md	9		| 248 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
+docs/levers/README.md	9		| 249 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
 docs/levers/README.md	10		| 124 | [control-flow.md](control-flow.md) | Control flow |
 docs/levers/README.md	11		| 14 | [impossible.md](impossible.md) | Functions that cannot be written in C |
 docs/levers/README.md	12		| 10 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
@@ -273,6 +273,7 @@ docs/levers/addressing-and-types.md	1814	addu daddu sw	**A clamped accumulator t
 docs/levers/addressing-and-types.md	1823	addiu li mult	A struct's trailing filler has to be sized from the real member sizes, not from the address range:
 docs/levers/addressing-and-types.md	1832		An independent symbol view and an array-derived pointer can both be needed for one global span.
 docs/levers/addressing-and-types.md	1868		Use the existing nested save-work view for a selected unit's skill.
+docs/levers/addressing-and-types.md	1876		Keep packet vector accesses as direct field expressions in nbDrawKoukaNum.
 docs/levers/callee-visibility.md	51	$16 $29 bne sh	### One-pass model-load phase in fldAutoMap fldAutoMapModelLoad is 100 bytes and exact when its 372-byte provider, fldAmModelLoadFile, is a visible C…
 docs/levers/callee-visibility.md	72		### Skill-attack camera scheduling The unchanged nbCameraState_SkillAttack_Calc draft becomes exact at 364 bytes with the matched nbCameraShot_GroundCollision…
 docs/levers/control-flow.md	6		| two early return <same constant> reached by separate ifs, with the constant's block laid out **after** the body | nest the two tests and give them one…
