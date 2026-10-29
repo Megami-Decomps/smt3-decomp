@@ -1263,7 +1263,116 @@ void nbCameraShot_All_Set(nbCamera_t *pNbCamera)
     pNbCamera->fovy = 0.69813163f;
 }
 
+/* NON_MATCHING: 736 emitted / 776 native bytes; 41 of 184 emitted words match. */
+#ifdef NON_MATCHING
+void bCameraShot_AttackInvokeTargetPartyNear_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
+{
+    sdfVector4_t basePos;
+    sdfVector4_t cameraPos;
+    sdfVector4_t center;
+    nbFormation_t *invoke;
+    nbFormation_t *target;
+    nbFormation_t *form;
+    nbFormation_t *lowest;
+    u32 invokeParty;
+    u32 i;
+    s32 first;
+    f32 groupRadius;
+    f32 lowestHeight;
+    f32 radius;
+    f32 length;
+    f32 angle;
+    f32 distance;
+
+    effBTLModelAllShow();
+    effBTLModelAllPopRotate();
+    invoke = effBTLSkillGetInvokeFormation();
+    target = effBTLSkillGetTargetFormation(0);
+    invokeParty = effBTLSkillGetInvokeParty();
+    groupRadius = effBTLModelGroupGetSphere(invokeParty);
+    SDF_VU0_STOREVECTOR_NOMEM(&cameraPos);
+
+    form = nbGetMainProcessData()->form;
+    lowest = NULL;
+    first = 1;
+    lowestHeight = 0.0f;
+    for (i = 0; i < 32; i++, form++) {
+        u32 flags = form->stat;
+        f32 height;
+
+        if ((flags & invokeParty) == 0) {
+            continue;
+        }
+        if ((flags & 1) == 0) {
+            continue;
+        }
+        if ((flags & 2) == 0) {
+            continue;
+        }
+        height = effBTLModelGetHeight(form);
+        if (first != 0 || height < lowestHeight) {
+            lowestHeight = height;
+            lowest = form;
+            first = 0;
+        }
+    }
+
+    if (lowest != NULL) {
+        f32 halfHeight = -(lowestHeight * 0.5f);
+
+        effBTLModelGetSphereCenter(lowest);
+        SDF_VU0_STOREVECTOR_NOMEM(&center);
+        cameraPos.y = (halfHeight + center.y) * 0.5f;
+    }
+
+    effBTLModelGetSphereCenter(target);
+    SDF_VU0_STOREVECTOR_NOMEM(&basePos);
+    basePos.y = -effBTLModelGetHeight(target);
+    radius = target->r * target->scl;
+
+    SDF_VU0_LOADVECTOR(&cameraPos);
+    SDF_VU0_LOADVECTOR_B(&basePos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
+    angle = sdfAtan(0.3490658104f);
+    if (radius > 150.0f) {
+        distance = radius / angle;
+    } else if (radius > 90.0f) {
+        distance = (radius * 1.5f) / angle;
+    } else {
+        distance = (radius + radius) / angle;
+    }
+
+    angle = sdfAtan(0.4712387919f);
+    if (length + distance < groupRadius / angle) {
+        f32 angleSum = length + distance;
+        f32 adjust;
+
+        angleSum *= angle;
+        effBTLModelGetSphereCenter(invoke);
+        SDF_VU0_STOREVECTOR_NOMEM(&center);
+        adjust = groupRadius - angleSum;
+        if (center.x < cameraPos.x) {
+            cameraPos.x = cameraPos.x - adjust;
+        } else {
+            cameraPos.x = cameraPos.x + adjust;
+        }
+    }
+
+    SDF_VU0_LOADVECTOR(&cameraPos);
+    SDF_VU0_STOREVECTOR_NOMEM(pNbCamera);
+    SDF_VU0_LOADVECTOR_B(&basePos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
+    pNbCamera->distance = length;
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR_NOMEM(&pNbCamera->direction);
+    pNbCamera->fovy = 0.6981316209f;
+    pNbCamera->distance += distance * 1.049999952f;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", bCameraShot_AttackInvokeTargetPartyNear_Set);
+#endif
 
 extern f32 sdfSin(f32 aRadius);
 extern f32 fabsf(f32 x);

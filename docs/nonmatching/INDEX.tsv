@@ -156,6 +156,7 @@ nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	56 of 58 words match	docs
 nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	29 of 30 words match	docs/nonmatching/newbattle/nbCameraSkill.md	28
 nbCameraShot_All_Set2	newbattle/nbCameraSkill	0x248	16 of 125 words match	docs/nonmatching/newbattle/nbCameraSkill.md	51
 nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	117 of 137 words match	docs/nonmatching/newbattle/nbCameraSkill.md	88
+bCameraShot_AttackInvokeTargetPartyNear_Set	newbattle/nbCameraSkill	0x308		docs/nonmatching/newbattle/nbCameraSkill.md	115
 DispComm1PanelComm	newbattle/nbCommSelProcess	0xE0	53 of 56 words match	docs/nonmatching/newbattle/nbCommSelProcess.md	5
 DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/nonmatching/newbattle/nbCommSelProcess.md	29
 AnimeCommandList	newbattle/nbCommSelProcess	0x18C	97 of 99 words match	docs/nonmatching/newbattle/nbCommSelProcess.md	54
