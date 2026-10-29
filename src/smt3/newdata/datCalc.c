@@ -272,7 +272,53 @@ f32 GetAisyoRitu(s32 nskill, datUnitWork_t *s, datUnitWork_t *d)
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetSkillKouka);
 
+#ifdef NON_MATCHING
+extern s32 datGetBadStatusAttr(s32 bad);
+extern f32 D_0054E4B0;
+
+s32 datGetSkillBadKouka(s32 nskill, datUnitWork_t *source, datUnitWork_t *target)
+{
+    datNormalSkill_t *skill = &datSkillTable.normal[nskill];
+    u32 status = skill->basstatus & 0xFFF;
+    f32 affinity;
+    s32 success = 1;
+
+    if (skill->badtype == 3) {
+        s32 candidates[12];
+        s32 count = 0;
+        s32 i;
+        candidates[0] = 0; /* Retail leaves this unset; no random-status skill has an empty mask. */
+        for (i = 0; i < 12; i++) {
+            if (status & (1U << i)) {
+                candidates[count++] = i;
+            }
+        }
+        status = 1U << candidates[dds3GetRandIntA(NULL, count)];
+    }
+    if (skill->badtype == 1) {
+        s32 element = datGetBadStatusAttr(status);
+        u32 value = datGetAisyo(target, element);
+        affinity = (value & 0x170000) != 0 ? 0.0f : (f32)(s32)(value & 0xFFFF) / 100.0f;
+    } else {
+        affinity = 1.0f;
+    }
+    if (skill->badlevel != 0xFF) {
+        f32 chance = (f32)*(volatile u8 *)&skill->badlevel / 100.0f;
+        if (source->flag & 0x20) {
+            chance = chance * affinity * 100.0f * D_0054E4B0;
+        } else {
+            chance = chance * affinity * 100.0f;
+        }
+        success = (s32)dds3GetRandIntA(NULL, 100) < (s32)chance;
+    }
+    if (success != 0 && skill->badtype == 1 && (u32)(target->badstatus & 0xFFF) >= status) {
+        success = 0;
+    }
+    return success != 0 ? status : 0;
+}
+#else
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetSkillBadKouka);
+#endif
 
 extern s32 datGetSkillKouka(s32 nskill, s32 kind, datUnitWork_t *s, datUnitWork_t *d);
 extern s32 datGetSkillBadKouka(s32 nskill, datUnitWork_t *s, datUnitWork_t *d);
