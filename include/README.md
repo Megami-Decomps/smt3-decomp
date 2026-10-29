@@ -1394,6 +1394,20 @@ use until someone decompiles that effect. Also left behind:
   are not imported. The native owner/resource layer is represented by
   `mdlObj_t` and `mdlResrc_t` in `include/model.h` instead.
 
+## Movie stream records (`sdf_movie_types.h`)
+
+The existing `sdfMovie.c` and `sdfIpu.c` records are shared without changing their
+native layout. `sdfMovieCb_t` is `0xB0` bytes (the `movieOpenStream` clear size),
+and its `0x8C`-byte decoder starts at `0x24`. The viewer reads decoder `fps` at
+whole-object `0x3A`, `frameCount` at `0x64`, and `frame` at `0x6C`. The movie
+initialization descriptor is `0x14` bytes: the indexed movie table consists of
+a path pointer followed by one descriptor, with native stride `0x18`.
+
+`SdfStreamRead` is the decoder's callback taking the owning `sdfMovieCb_t *`;
+it is not the different file-command callback ABI. Existing file-command casts
+are not made canonical by this extraction. The seven new size/offset checks
+live in `tools/header_layout.c`. See [the provider evidence](../docs/movie-records.md).
+
 ## Checking these headers
 
 Size and offset assertions live in `tools/header_layout.c`, rather than in

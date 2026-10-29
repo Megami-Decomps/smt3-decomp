@@ -18,6 +18,7 @@
 #include "effect.h"
 #include "field.h"
 #include "nme.h"
+#include "sdf_movie_types.h"
 
 #define ASSERT_AT(line, cond) typedef char static_assert_##line[(cond) ? 1 : -1]
 #define SZ(line, type, bytes) ASSERT_AT(line, sizeof(type) == (bytes))
@@ -860,3 +861,12 @@ OFF(nm12, nmeWork_t, inputChars, 0x5151);
 OFF(nm13, nmeWork_t, modeCursor, 0x1C);
 OFF(nm14, nmeWork_t, primaryCursorActive, 0x30D0);
 OFF(nm15, nmeWork_t, wrapCursor, 0x4110);
+
+/* Movie stream records: native allocation/clear and viewer/provider accesses. */
+SZ(mov01, sdfIpuDecodeCb_t, 0x8C);
+SZ(mov02, sdfMovieCb_t, 0xB0);
+SZ(mov03, sdfMovieInitParm_t, 0x14);
+OFF(mov04, sdfMovieCb_t, decodeCb, 0x24);
+OFF(mov05, sdfMovieCb_t, decodeCb.fps, 0x3A);
+OFF(mov06, sdfMovieCb_t, decodeCb.frameCount, 0x64);
+OFF(mov07, sdfMovieCb_t, decodeCb.frame, 0x6C);

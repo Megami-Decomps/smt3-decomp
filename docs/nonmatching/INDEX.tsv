@@ -139,7 +139,7 @@ dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/nonmatching/kernel/dds3Config
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/nonmatching/kernel/dds3KernelDraw.md	5
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/nonmatching/kernel/dds3KernelProcess.md	5
 slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/nonmatching/mc/slMain.md	5
-MovieViewerProc	movie/MovieViewer	0x24C	6 of 144 words match	docs/nonmatching/movie/MovieViewer.md	5
+MovieViewerProc	movie/MovieViewer	0x24C		docs/nonmatching/movie/MovieViewer.md	5
 SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/nonmatching/newbattle/nbAi.md	5
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	5
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	52

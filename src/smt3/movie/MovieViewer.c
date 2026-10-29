@@ -4,9 +4,11 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
+#include "sdf_movie_types.h"
 
-extern void *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
-                              void *drawExit, void *deleteExit, void *p);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer, s32 shutdownTimer,
+                                      dds3ProcessFunc_t update, dds3ProcessFunc_t shutdown, void *work);
 
 extern void *dds3SearchProcessName(const char *namestr);
 
@@ -47,7 +49,7 @@ typedef struct
 
 extern rcvWork_t *shutdownfunc;
 
-extern u8 D_00343E40[];
+extern sdfMovieCb_t D_00343E40;
 
 extern void movieStop(void);
 
@@ -67,25 +69,11 @@ typedef struct
 
 extern movieViewerWork_t movieViewerDebugFlag;
 
-extern s32 dds3KillProcess(s32 id, s32 shutdowntimer);
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 extern s32 dds3WaitMovieEnd(void);
-
-/* The decoder's shared block, also reached as a byte buffer through
- * D_00343E40; only the two frame counters are read here. */
-typedef struct
-{
-    /* 0x00 */ u8 unk_00[0x3A];
-    /* 0x3A */ u8 viewerStep;
-    /* 0x3B */ u8 unk_3B[0x29];
-    /* 0x64 */ s32 frameCount;
-    /* 0x68 */ s32 unk_68;
-    /* 0x6C */ s32 frameIndex;
-} movieDecodeWork_t;
-
-extern movieDecodeWork_t movieDecodeWork asm("D_00343E40");
 
 /* Unsized so the reference is absolute, as retail's is. */
 extern sdfDrawTag_t *movieViewerFrame[];
@@ -109,7 +97,7 @@ extern movieViewerProcWork_t movieViewerWork;
 
 extern s8 dds3PadButtonState[];
 
-extern u8 D_00343EF0[];
+extern sdfMovieInitParm_t D_00343EF0;
 
 extern u16 D_005518D8[2];
 
@@ -119,11 +107,11 @@ extern s32 movieViewerPhase;
 
 extern sdfGrOt_t D_002F67F8;
 
-extern char *movieViewerStep(void);
+extern void *movieViewerStep(void);
 
-extern void moviePlayFile_27041744(char *path, u8 *arg);
+extern void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descriptor);
 
-extern s32 dds3PlayMovieByIndex(s32 index);
+extern void dds3PlayMovieByIndex(s32 index);
 
 extern sdfDrawTag_t *sdfPrimAllocDrawTag(void *aAllocator);
 
@@ -146,21 +134,21 @@ void MovieViewerDrawFrameInfo(void)
         sdfDrawTagLink(tag, dds3PrimFrameRect(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90,
                                               0x30000000, 0x60404040));
         sdfDrawTagLink(tag, sdfDevPrintf(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d",
-                                         movieDecodeWork.frameIndex,
-                                         movieDecodeWork.frameCount));
+                                         D_00343E40.decodeCb.frame,
+                                         D_00343E40.decodeCb.frameCount));
     }
 }
 
-/* NON_MATCHING: 6 of 144 words match; 576 bytes against retail's 588. Retail
- * reaches D_00343E7A as a split high/%lo store, which no spelling reproduces. */
+/* NON_MATCHING: legacy control-flow draft emits 576/588 bytes, 6/144 words.
+ * The shared-record/API prerequisite alone does not promote this body. */
 #ifdef NON_MATCHING
-s32 MovieViewerProc(void)
+s32 MovieViewerProc(dds3ProcessID_t *process)
 {
     char path[0x80];
     char *entry;
     s32 phase;
 
-    movieDecodeWork.viewerStep = dds3PadButtonState[0x2D] != 0 ? 1 : 0x1E;
+    D_00343E40.decodeCb.fps = dds3PadButtonState[0x2D] != 0 ? 1 : 0x1E;
     if (movieViewerWork.playing != 0) {
         if (dds3WaitMovieEnd() != 0) {
             movieViewerWork.playing = 0;
@@ -173,7 +161,7 @@ s32 MovieViewerProc(void)
             movieStop();
             strcpy(path, "pfs0:/movie/");
             strcat(path, entry + 4);
-            moviePlayFile_27041744(path, D_00343EF0);
+            moviePlayFile_27041744(path, &D_00343EF0);
             movieViewerWork.playing = 1;
         } else {
             movieStop();
@@ -219,7 +207,7 @@ INCLUDE_ASM(const s32, "movie/MovieViewer", MovieViewerProc);
 
 extern void movieViewerScanDir(void);
 
-extern s32 MovieViewerProc(void);
+extern s32 MovieViewerProc(dds3ProcessID_t *process);
 
 extern char D_0053F418[];
 
@@ -239,7 +227,7 @@ void FinishMovieViewer(void)
     void *proc = dds3SearchProcessName(D_0053F418);
 
     if (proc != NULL) {
-        dds3KillProcess((s32)proc, 0);
+        dds3KillProcess(proc, 0);
         movieViewerWork.proc = NULL;
         movieStop();
     }
@@ -255,7 +243,7 @@ void movieViewerSetFlags(void)
 void movieViewerInitRegs(void)
 {
     movieViewerDebugFlag.regAddr = 0x10002010;
-    movieViewerDebugFlag.buffer = D_00343E40;
+    movieViewerDebugFlag.buffer = (u8 *)&D_00343E40;
     movieViewerSetFlags();
 }
 

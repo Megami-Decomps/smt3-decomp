@@ -220,7 +220,7 @@ s32 trmUpdateSeqConfirm(void)
 INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateSeqRoot);
 
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
-extern s32 dds3PlayMovieByIndex(s32 index);
+extern void dds3PlayMovieByIndex(s32 index);
 extern s32 dds3WaitMovieEnd(void);
 extern void movieStop(void);
 extern dds3ProcessID_t *evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno);
