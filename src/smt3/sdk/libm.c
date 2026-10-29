@@ -232,7 +232,13 @@ INCLUDE_RODATA(const s32, "sdk/libm", D_0054B3F8);
 
 INCLUDE_ASM(const s32, "sdk/libm", atanf);
 
-INCLUDE_ASM(const s32, "sdk/libm", fabsf);
+f32 fabsf(f32 x)
+{
+    s32 word;
+    GET_FLOAT_WORD(word, x);
+    SET_FLOAT_WORD(x, (u32)word & 0x7FFFFFFFU);
+    return x;
+}
 
 f32 floorf(f32 x)
 {
@@ -301,7 +307,16 @@ f32 scalbnf(f32 x, s32 n)
     return copysignf(1.0e-30f, x) * 1.0e-30f;
 }
 
-INCLUDE_ASM(const s32, "sdk/libm", copysignf);
+f32 copysignf(f32 magnitude, f32 sign)
+{
+    s32 magnitudeWord;
+    s32 signWord;
+    GET_FLOAT_WORD(magnitudeWord, magnitude);
+    GET_FLOAT_WORD(signWord, sign);
+    SET_FLOAT_WORD(magnitude, ((u32)magnitudeWord & 0x7FFFFFFFU) |
+                             ((u32)signWord & 0x80000000U));
+    return magnitude;
+}
 
 
 #undef GET_FLOAT_WORD

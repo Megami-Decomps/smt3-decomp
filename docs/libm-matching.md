@@ -119,3 +119,21 @@ through the two-float range reducer, then call the kernel with selector
 `1 - ((quadrant & 1) << 1)`, giving1 or-1. Float inputs use `$f12`/`$f13`
 independently of the integer selector in `$4`. No separate infinity/NaN gate
 or alternate reciprocal operation is introduced.
+
+## fabsf and copysignf
+
+The sign helpers match all40 and60 native instruction bytes under the
+qualified library profile. They use the existing scoped unsigned
+`GET_FLOAT_WORD` / `SET_FLOAT_WORD` conversion boundaries: `fabsf` clears bit31;
+`copysignf` combines the first input's low31 bits with the second input's bit31.
+`fabsf` maps negative zero to positive zero; `copysignf` follows the second
+input even for zero. Both retain the other representation bits and NaN
+payloads, with no floating-point arithmetic or classification shortcut.
+
+A control with persistent unsigned union views emits36/40 bytes for `fabsf`
+(two of nine emitted words match) and56/60 for `copysignf` (one of fourteen
+emitted words matches). The shared macros close both bodies on the first
+compile in the actual owner,
+including the native stack transfers and return-register move. No compiler
+options, artificial state or register constraints were added. The complete
+math owner has9 matches and no differences, including readonly data.
