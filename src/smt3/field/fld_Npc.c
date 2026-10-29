@@ -14,20 +14,23 @@ typedef struct
     s32 id;
     s32 activationState;
     s32 activationRequested;
-    u8 unk10[0xC];
+    f32 x;                     /* 0x10 */
+    f32 y;
+    f32 z;
     f32 angle;                 /* 0x1C */
     s32 mode;                  /* 0x20 */
     void *effect;              /* 0x24 */
-    u8 unk28[8];
+    s32 unk28;                 /* 0x28 */
+    u8 pad2C[4];
 } fldTakaraSlot_t;
 
 typedef struct
 {
     s32 unk00;
-    s32 unk04;
-    s32 unk08;
-    s32 unk0C;
-    u8 unk10[0x10];
+    f32 x;                     /* 0x04 */
+    f32 y;
+    f32 z;
+    sdfVector4_t rot;          /* 0x10 */
     dds3Basic_t *object;       /* 0x20 */
     u8 unk24[0xC];
     void *effect;              /* 0x30 */
@@ -303,11 +306,202 @@ INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLightSet);
 
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLoad);
 
+extern u8 D_003129D8[];
+
+extern u8 fldTakaraTable[];
+
+extern s32 fldTakaraSlotCount;
+
+extern void *fldTakaraPacData;
+
+extern const u8 *fldTakara1Data;
+
+extern s32 fldTakara1Size;
+
+extern const u8 *fldTakara2Data;
+
+extern s32 fldTakara2Size;
+
+extern const u8 *fldTakara3Data;
+
+extern s32 fldTakara3Size;
+
+extern void *D_0054EF40;
+
+extern const char D_00532710[];
+
+extern const sdfVector4_t D_005326F0;
+
+extern const sdfVector4_t D_00532700;
+
+extern void *dds3EffectLoad(void *pData);
+
+extern void *dds3EffectCopy(s32 count);
+
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+
+extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
+
+extern s32 fldGetTakaraOpen(s32 id);
+
+extern void fldAddItemBoxObject(s32 index, f32 x, f32 y, f32 z, f32 radius, f32 height);
+
+extern void fldEveHit_AddEveHitItemBox(s32 id, f32 x, f32 y, f32 z, f32 radius);
+
+extern void dds3SetSclPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *scl);
+
+extern void dds3GetRotPoseSet(dds3Basic_t *pBasic);
+
+extern sdfTexHandle_t *sdfTexSet(void *aTex);
+
+/* NON_MATCHING: 294 of 416 words differ at the native 1664-byte size, which
+ * the draft reproduces exactly; see docs/nonmatching/field/fld_Npc.md. */
+
+#ifdef NON_MATCHING
+
+void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
+{
+    sdfVector4_t pos;
+    sdfVector4_t rotation;
+    sdfVector4_t scl;
+    sdfVector4_t lightDir;
+    sdfVector4_t axis;
+    dds3Basic_t *object;
+    mdlObj_t *model;
+    evtUnit_t *unit;
+    void *effect;
+    u8 *ptr;
+    u8 *row;
+    s32 n;
+    s32 minor;
+    f32 dir;
+    u32 light;
+    u32 ambient;
+
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+    memset(&rotation, 0, sizeof(rotation));
+    n = fldNpcModelTable;
+    fldNpcModelTable = n + 1;
+    fldModelSlotTable[n].unk00 = 0x3E7;
+    fldModelSlotTable[n].x = x;
+    fldModelSlotTable[n].y = y;
+    fldModelSlotTable[n].z = z;
+    fldModelSlotTable[n].rot.x = rot->x;
+    fldModelSlotTable[n].rot.y = rot->y;
+    fldModelSlotTable[n].rot.z = rot->z;
+    fldModelSlotTable[n].rot.w = rot->w;
+    scl = D_005326F0;
+    fldModelSlotTable[n].effect = NULL;
+    fldModelSlotTable[n].unk34 = 0;
+    fldModelSlotTable[n].unk38 = 0;
+    fldModelSlotTable[n].unk3C = 0;
+    fldModelSlotTable[n].unk40 = 0;
+    fldModelSlotTable[n].unk44 = 0;
+    fldModelSlotTable[n].room = 0;
+    fldModelSlotTable[n].unk4C = id;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
+    minor = 3;
+    switch (*(s32 *)&fldTakaraTable[id * 16]) {
+    case 0:
+    case 3:
+        if (fldTakaraSlotCount == 0) {
+            effect = dds3EffectLoad(fldTakaraPacData);
+            fldTakaraSlotCount = (s32)effect;
+        } else {
+            effect = dds3EffectCopy(fldTakaraSlotCount);
+        }
+        fldTakaraSlotTable[fldTakaraCount].effect = effect;
+        minor = 0x1C;
+        if (D_0054EF1C == NULL) {
+            D_0054EF1C = sdfMemAllocDirect(fldTakara1Size);
+            ptr = sdfMemGetPtr(D_0054EF1C);
+            memcpy(ptr, fldTakara1Data, fldTakara1Size);
+            mdlPackDecode(2, 0x1C, 0x101, ptr, fldTakara1Size);
+        }
+        break;
+    case 1:
+        minor = 0x1D;
+        if (D_0054EF20 == NULL) {
+            D_0054EF20 = sdfMemAllocDirect(fldTakara3Size);
+            ptr = sdfMemGetPtr(D_0054EF20);
+            memcpy(ptr, fldTakara3Data, fldTakara3Size);
+            mdlPackDecode(2, 0x1D, 0x101, ptr, fldTakara3Size);
+        }
+        break;
+    case 2:
+        minor = 0x1E;
+        if (D_0054EF24 == NULL) {
+            D_0054EF24 = sdfMemAllocDirect(fldTakara2Size);
+            ptr = sdfMemGetPtr(D_0054EF24);
+            memcpy(ptr, fldTakara2Data, fldTakara2Size);
+            mdlPackDecode(2, 0x1E, 0x101, ptr, fldTakara2Size);
+        }
+        break;
+    }
+    if (hEffPart == NULL) {
+        hEffPart = sdfTexSet(D_0054EF40);
+    }
+    axis = D_00532700;
+    SDF_VU0_LOADVECTOR(&axis);
+    FromRotation(3.1415925f);
+    SDF_VU0_LOADVECTOR_B(rot);
+    Mult();
+    SDF_VU0_STOREVECTOR(&rotation);
+    object = dds3AddUnitObjectBasic(dds3AllocObjectId(), &pos, &rotation);
+    dds3SetUnitObjectId(object, D_00532710);
+    dds3ObjectBaseMakeUnit(object, 2, minor);
+    dds3SetSclPoseSet(object, &scl);
+    dds3ObjectBaseOnFlag(object, 0x100);
+    model = dds3ObjectBaseGetModelHandle(object);
+    if (fldGetTakaraOpen(id)) {
+        mdlLoopMotion(model, 0, 2);
+        fldTakaraSlotTable[fldTakaraCount].activationState = 3;
+    } else {
+        mdlSingleMotion(model, 0, 0);
+        fldTakaraSlotTable[fldTakaraCount].activationState = 0;
+    }
+    fldTakaraSlotTable[fldTakaraCount].x = x;
+    fldTakaraSlotTable[fldTakaraCount].id = id;
+    fldTakaraSlotTable[fldTakaraCount].y = y;
+    fldTakaraSlotTable[fldTakaraCount].object = object;
+    fldTakaraSlotTable[fldTakaraCount].z = z;
+    dds3GetRotPoseSet(object);
+    fldTakaraSlotTable[fldTakaraCount].angle = EulerAngleAxisY() * 180.0f / 3.14f;
+    fldTakaraSlotTable[fldTakaraCount].mode = *(s32 *)&fldTakaraTable[id * 16];
+    fldTakaraSlotTable[fldTakaraCount].unk28 = id;
+    fldTakaraCount = fldTakaraCount + 1;
+    fldAddItemBoxObject(-1, x, y, z, 20.0f, 100.0f);
+    row = &D_003129D8[fldArea[0] * 8];
+    SDF_VU0_LOADVECTOR(&rotation);
+    dir = EulerAngleAxisY() * 180.0f / 3.14f + 80.0f;
+    unit = evtGetUnitHandle2(object);
+    evtUnitLightOn(unit);
+    dir = dir * 3.14f / 180.0f;
+    light = row[0] | (row[1] << 8) | (row[2] << 16) | 0x80000000;
+    ambient = row[3] | (row[4] << 8) | (row[5] << 16) | 0x80000000;
+    evtSetUnitLightAndAmbient(unit, 0, light, ambient);
+    lightDir.x = sdfSin(dir);
+    lightDir.y = 0.5f;
+    lightDir.z = sdfCos(dir);
+    lightDir.w = 0.0f;
+    SDF_VU0_LOADVECTOR(&lightDir);
+    SDF_VU0_NORMALIZE();
+    evtSetUnitLightDir(unit, 0);
+    fldEveHit_AddEveHitItemBox(id, pos.x, pos.y, pos.z, 160.0f);
+}
+
+#else
+
 INCLUDE_RODATA(const s32, "field/fld_Npc", D_005326F0);
 
 INCLUDE_RODATA(const s32, "field/fld_Npc", D_00532700);
 
 INCLUDE_ASM(const s32, "field/fld_Npc", fldItemBoxAdd);
+
+#endif
 
 void fldFindTakaraSlot(s32 id) {
     s32 i;
