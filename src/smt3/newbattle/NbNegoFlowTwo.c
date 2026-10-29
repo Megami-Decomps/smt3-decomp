@@ -814,7 +814,40 @@ s32 Flow6_19(nbNegoProcessData_t *n)
     return 0;
 }
 
+#ifdef NON_MATCHING
+s32 Flow6_20(nbNegoProcessData_t *n)
+{
+    s32 rounded;
+
+    nbAddNegoIdKouho(n, 0x60046);
+    if (n->requesttype == 1) {
+        if (evtBitCheck(8) == 0) {
+            n->requestdata /= 2;
+            rounded = (s32)((u32)n->requestdata + 5) / 10 * 10;
+            n->requestdata = rounded != 0 ? rounded : 1;
+        }
+        if (n->requesttype == 1) {
+            if (evtBitCheck(0x1A) != 0 && evtBitCheck(0x16) == 0) {
+                n->requestdata = (u32)n->requestdata * 8;
+                n->requestdata /= 10;
+                rounded = (s32)((u32)n->requestdata + 5) / 10 * 10;
+                n->requestdata = rounded != 0 ? rounded : 1;
+            }
+            if (n->requesttype == 1) {
+                nbSetMesMakka(n->flowmsg[n->ekucyo], n->requestdata);
+                nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x3F, 0);
+                nbMakaDispOn(0);
+                return 0;
+            }
+        }
+    }
+    nbSetMesItem(n->flowmsg[n->ekucyo], n->requestdata);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x40, 0);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_20);
+#endif
 
 s32 Flow6_21(nbNegoProcessData_t *n)
 {
