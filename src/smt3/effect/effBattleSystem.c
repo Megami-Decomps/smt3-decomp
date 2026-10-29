@@ -53,6 +53,7 @@ extern void dds3EffectPartSetDirection(effPartHandle_t *hEffPart, void *pMatrix)
 extern void Mult(void);
 extern void ToMatrix(void);
 extern f32 D_005335E0[4];
+extern f32 D_00533680[4];
 
 typedef struct
 {
@@ -1974,7 +1975,202 @@ void effBTLSys_AttackC_Delete2(effBattleSystem_effBTLSystem_AttackC_tag *hData)
 void effBTLSys_AttackC_SetColor(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSys_AttackC_Draw);
+void effBTLSys_AttackC_Draw(effBattleSystem_effBTLSystem_AttackC_tag *hData) {
+    effBTL_SkillLight_t light;
+    effBTLModelColorParam_t color;
+    effBTLAimParams_t aim;
+    sdfVector4_t position;
+    sdfMatrix4_t rotate;
+    sdfMatrix4_t direction;
+    nbFormation_t *invoke;
+    nbFormation_t *target;
+    s32 modelId;
+
+    if (hData->frame == 0) {
+        if (hData->pFormation->stat & 0x100) {
+            dds3SetQuake(0x14, 0x32);
+        } else {
+            dds3SetQuake(0x0F, 0x28);
+        }
+        if (hData->frame == 0) {
+            invoke = effBTLSkillGetInvokeFormation();
+            target = effBTLSkillGetTargetFormation(0);
+            modelId = effBTLModelGetID(target);
+            if (modelId != 0x123 && modelId != 0x102 && modelId != 0x124 && modelId != 0x103) {
+                light.type = 0;
+                light.unknown01 = 1;
+                light.unknown02 = 0;
+                light.unknown04 = 0;
+                light.diffuse = 0x809196A5;
+                light.ambient = 0x80303030;
+                light.color_anim = 0;
+                light.unknown14 = 0;
+                light.unknown18 = 0x0A;
+                light.unknown1C = 1;
+
+                color.unknown00 = 0x80768080;
+                color.unknown04 = 0;
+                color.unknown08 = 0;
+                color.unknown0C = 0x0A;
+                color.unknown10 = 1;
+
+                effBTLPointLightSet(&light, invoke);
+                effBTLPointLightSet(&light, target);
+                effBTLModelColorSet(&color, invoke);
+                effBTLModelColorSet(&color, target);
+            } else {
+                effBTLPointLightCompulsionOFF();
+            }
+        }
+    }
+
+    SDF_VU0_LOADVECTOR(&hData->pFormation->rot);
+    SDF_VU0_LOADVECTOR_B(D_00533680);
+    Mult();
+    ToMatrix();
+    /* VU0 writes this scratch matrix; C only passes its address to the part
+     * setters. The store needs no global memory barrier. */
+    SDF_VU0_STOREMATRIX_NOMEM(&rotate);
+
+    aim.scaleKind = 0;
+    aim.aimMode = 1;
+    aim.directionMode = 9;
+    aim.rangeOverride = 0;
+    effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+    dds3EffectPartSetPosition(hData->hPart, &position);
+    dds3EffectPartSetRotateMatrix(hData->hPart, (void *)&rotate);
+    effBTLPartGetRotateMatrixPtr(&aim, &direction);
+    dds3EffectPartSetDirection(hData->hPart, &direction);
+    dds3EffectPartDraw(hData->hPart);
+
+    aim.scaleKind = 0;
+    aim.aimMode = 1;
+    aim.directionMode = 9;
+    aim.rangeOverride = 0;
+    effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+    dds3EffectPartSetPosition(hData->hPart2, &position);
+    dds3EffectPartSetRotateMatrix(hData->hPart2, (void *)&rotate);
+    effBTLPartGetRotateMatrixPtr(&aim, &direction);
+    dds3EffectPartSetDirection(hData->hPart2, &direction);
+    dds3EffectPartDraw(hData->hPart2);
+
+    aim.scaleKind = 0;
+    aim.aimMode = 5;
+    aim.directionMode = 8;
+    aim.rangeOverride = 0;
+    effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+    dds3EffectPartSetPosition(hData->hPart3, &position);
+    dds3EffectPartSetRotateMatrix(hData->hPart3, (void *)&rotate);
+    effBTLPartGetRotateMatrixPtr(&aim, &direction);
+    dds3EffectPartSetDirection(hData->hPart3, &direction);
+    dds3EffectPartDraw(hData->hPart3);
+
+    aim.scaleKind = 0;
+    aim.aimMode = 1;
+    aim.directionMode = 8;
+    aim.rangeOverride = 0;
+    effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+    dds3EffectPartSetPosition(hData->hPart4, &position);
+    dds3EffectPartSetRotateMatrix(hData->hPart4, (void *)&rotate);
+    effBTLPartGetRotateMatrixPtr(&aim, &direction);
+    dds3EffectPartSetDirection(hData->hPart4, &direction);
+    dds3EffectPartDraw(hData->hPart4);
+
+    aim.scaleKind = 0;
+    aim.aimMode = 1;
+    aim.directionMode = 8;
+    aim.rangeOverride = 0;
+    effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+    dds3EffectPartSetPosition(hData->hPart5, &position);
+    dds3EffectPartSetRotateMatrix(hData->hPart5, (void *)&rotate);
+    effBTLPartGetRotateMatrixPtr(&aim, &direction);
+    dds3EffectPartSetDirection(hData->hPart5, &direction);
+    dds3EffectPartDraw(hData->hPart5);
+
+    if (hData->frame >= 2) {
+        aim.scaleKind = 0;
+        aim.aimMode = 1;
+        aim.directionMode = 8;
+        aim.rangeOverride = 0;
+        effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+        dds3EffectPartSetPosition(hData->hPart6, &position);
+        dds3EffectPartSetRotateMatrix(hData->hPart6, (void *)&rotate);
+        effBTLPartGetRotateMatrixPtr(&aim, &direction);
+        dds3EffectPartSetDirection(hData->hPart6, &direction);
+        dds3EffectPartDraw(hData->hPart6);
+    }
+    aim.scaleKind = 0;
+    aim.aimMode = 1;
+    aim.directionMode = 9;
+    aim.rangeOverride = 0;
+    effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+    dds3EffectPartSetPosition(hData->hPart7, &position);
+    dds3EffectPartSetRotateMatrix(hData->hPart7, (void *)&rotate);
+    effBTLPartGetRotateMatrixPtr(&aim, &direction);
+    dds3EffectPartSetDirection(hData->hPart7, &direction);
+    dds3EffectPartDraw(hData->hPart7);
+
+    aim.scaleKind = 0;
+    aim.aimMode = 1;
+    aim.directionMode = 9;
+    aim.rangeOverride = 0;
+    effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+    dds3EffectPartSetPosition(hData->hPart8, &position);
+    dds3EffectPartSetRotateMatrix(hData->hPart8, (void *)&rotate);
+    effBTLPartGetRotateMatrixPtr(&aim, &direction);
+    dds3EffectPartSetDirection(hData->hPart8, &direction);
+    dds3EffectPartDraw(hData->hPart8);
+
+    aim.scaleKind = 0;
+    aim.aimMode = 1;
+    aim.directionMode = 9;
+    aim.rangeOverride = 0;
+    effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+    dds3EffectPartSetPosition(hData->hPart9, &position);
+    dds3EffectPartSetRotateMatrix(hData->hPart9, (void *)&rotate);
+    effBTLPartGetRotateMatrixPtr(&aim, &direction);
+    dds3EffectPartSetDirection(hData->hPart9, &direction);
+    dds3EffectPartDraw(hData->hPart9);
+
+    if (hData->frame >= 3) {
+        aim.scaleKind = 0;
+        aim.aimMode = 1;
+        aim.directionMode = 9;
+        aim.rangeOverride = 0;
+        effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+        dds3EffectPartSetPosition(hData->hPart10, &position);
+        dds3EffectPartSetRotateMatrix(hData->hPart10, (void *)&rotate);
+        effBTLPartGetRotateMatrixPtr(&aim, &direction);
+        dds3EffectPartSetDirection(hData->hPart10, &direction);
+        dds3EffectPartDraw(hData->hPart10);
+    }
+
+    if (hData->frame >= 3) {
+        aim.scaleKind = 0;
+        aim.aimMode = 1;
+        aim.directionMode = 9;
+        aim.rangeOverride = 0;
+        effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+        dds3EffectPartSetPosition(hData->hPart11, &position);
+        dds3EffectPartSetRotateMatrix(hData->hPart11, (void *)&rotate);
+        effBTLPartGetRotateMatrixPtr(&aim, &direction);
+        dds3EffectPartSetDirection(hData->hPart11, &direction);
+        dds3EffectPartDraw(hData->hPart11);
+    }
+
+    aim.scaleKind = 0;
+    aim.aimMode = 1;
+    aim.directionMode = 9;
+    aim.rangeOverride = 0;
+    effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+    dds3EffectPartSetPosition(hData->hPart12, &position);
+    dds3EffectPartSetRotateMatrix(hData->hPart12, (void *)&rotate);
+    effBTLPartGetRotateMatrixPtr(&aim, &direction);
+    dds3EffectPartSetDirection(hData->hPart12, &direction);
+    dds3EffectPartDraw(hData->hPart12);
+
+    hData->frame++;
+}
 
 u32 effBTLSys_AttackC_GetLength(void *hData)
 {
