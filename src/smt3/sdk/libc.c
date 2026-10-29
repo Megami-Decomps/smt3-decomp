@@ -1064,6 +1064,23 @@ s32 __sbprintf(FILE *fp, const char *fmt, va_list ap)
     return ret;
 }
 
+/* NON_MATCHING: native 116-byte wrapper size; argument-register
+ * assignment and stream-data scheduling differ in 21 words. */
+#ifdef NON_MATCHING
+s32 vfprintf(FILE *fp, const char *fmt, va_list ap)
+{
+    if (fp->_data == NULL) {
+        fp->_data = _impure_ptr;
+    }
+    if (fp->_data->__sdidinit == 0) {
+        __sinit(fp->_data);
+    }
+    return func_002D6678(fp->_data, fp, fmt, ap);
+}
+#else
+INCLUDE_ASM(const s32, "sdk/libc", vfprintf);
+#endif
+
 INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B658);
@@ -1074,7 +1091,7 @@ INCLUDE_RODATA(const s32, "sdk/libc", D_0054B670);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B680);
 
-INCLUDE_ASM(const s32, "sdk/libc", vfprintf);
+INCLUDE_ASM(const s32, "sdk/libc", func_002D6678);
 
 extern char *_dtoa_r(_reent *r, f64 value, s32 mode, s32 digits,
                      s32 *decimalPoint, s32 *sign, char **end);

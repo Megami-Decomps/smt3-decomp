@@ -1058,3 +1058,20 @@ not their original source spellings. The archive map's old1112-byte name-only
 both forwarding entries belong to that object. Function boundaries now follow
 the independent native entries, without changing the translation-unit boundary
 or compiler profile. The forwarding functions remain assembly.
+
+## Formatted-output entry boundary
+
+The former 0x16E8-byte `vfprintf` inventory span contains two functions.
+The public wrapper is 116 instruction bytes at 0x002D6600, followed by four
+alignment bytes. It initializes FILE reentrancy/stdio, restores its 0x20-byte
+frame, and tail-jumps to `func_002D6678`. The latter has an independent
+0x290-byte frame, direct reentrant printf/sprintf callers, and 0x1670 bytes
+of formatter code ending at 0x002D7CE8. No source-object boundary changes.
+
+Curated function extents now expose both entries and retain the core's
+existing generic identity. The original `sdk_objects.tsv` name-only row
+for `vfprintf` describes the former aggregate span; it is not evidence that
+the wrapper alone has that extent or a byte-identified producer. All strings
+and the dispatch table remain with the assembly-backed core. Neither boundary
+recovery nor the guarded wrapper adds exact matching credit.
+

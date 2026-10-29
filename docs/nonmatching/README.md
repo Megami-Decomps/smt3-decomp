@@ -23,12 +23,12 @@ page and line to open. Conventions are in
 | 5 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
+| 4 |  | [sdk/libc.md](sdk/libc.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
-| 3 |  | [sdk/libc.md](sdk/libc.md) |
 | 3 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frName | [interface/frName.md](interface/frName.md) |

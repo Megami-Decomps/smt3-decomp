@@ -253,6 +253,7 @@ corePktApplyFaceDivColor	sdfVu1	0x98		docs/nonmatching/sdf/sdfVu1.md	158
 _free_r			86 of 189 words match	docs/nonmatching/sdk/libc.md	2
 gcc2_compiled_				docs/nonmatching/sdk/libc.md	43
 gcc2_compiled__1			74 of 139 words match	docs/nonmatching/sdk/libc.md	80
+vfprintf			8 of 29 words match	docs/nonmatching/sdk/libc.md	119
 What cracked the scmd family				docs/nonmatching/sdk/libcdvd.md	3
 The scmd template, for the next pass				docs/nonmatching/sdk/libcdvd.md	24
 Completion callback contracts and remaining drafts				docs/nonmatching/sdk/libcdvd.md	51

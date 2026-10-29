@@ -115,3 +115,17 @@ phase locals leave 72 differing words; a repeated inline subtraction helper
 leaves 90. Sharing the carry and low difference leaves 60, still nonmatching;
 that control is not retained. A new ordinary lifetime or source-context premise
 is needed before another attempt. No register constraints or artificial work.
+
+## vfprintf
+
+The wrapper emits its native 116 instruction bytes: 8 of 29 words match
+and 21 differ, first at +0x10. The format and argument-list saved registers
+are exchanged; stream-data reload, initialization argument and branch-delay
+scheduling also differ. The independently framed core at 0x002D6678 stays
+assembly-backed with its complete literal and dispatch-table ownership.
+
+The wrapper installs `_impure_ptr` only when the stream has no reentrancy
+record, calls `__sinit` only when that record is uninitialized, and forwards
+the fresh stream record after the call. A cached-record/explicit reload
+control emits 112 bytes and was discarded. No storage qualifiers, dummy
+references or false argument types constrain allocation.
