@@ -953,3 +953,5 @@ src/smt3/field/fldPlayer.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldPl
 src/smt3/field/fldTitle.c	z29	open	2026-10-29	1 fn / 3028 B	largest-first pass: fldTitle_Process
 src/smt3/field/fldTitle.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldTitle_Process 755 of 757 words at the native 3028 B, two words from exact on a gp-load vs compare-constant ready-list pick; recorded in docs/levers/scheduling.md; fldTitleMini_Process was already matching
 src/smt3/field/fldSky.c	z29	open	2026-10-29	1 fn / 2776 B	largest-first pass: fldSkyDrawFilter; skipping nbCameraBoss (z21) and nbPanelDrawPP (z27)
+src/smt3/field/fldSky.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldSkyDrawFilter 682 of 694 words at the native 2776 B; all 12 are three rotated spill slots traced to gcse PRE reaching-register creation order, an already-recorded wall
+src/smt3/newbattle/nbResultProcess.c	z29	open	2026-10-29	1 fn / 2604 B	largest-first pass: nbResultDrawPC1
