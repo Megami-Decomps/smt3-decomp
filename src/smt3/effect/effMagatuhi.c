@@ -2320,7 +2320,184 @@ void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross) {
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawRectLine);
 #endif
 
+#ifdef NON_MATCHING
+extern u32 D_0054F228, D_0054F22C;
+extern char D_0054F230[], D_0054F238[], D_0054F240[], D_0054F248[], D_0054F250[];
+
+void effDebugDrawMenu(effDebugMenu_t *menu)
+{
+    char text[0x70];
+    effDebugMenuItem_t *item;
+    s32 x, y, i, value, oldAttr, oldX, oldY;
+    u8 type;
+    s32 *xy;
+    const char *format;
+
+    if (menu->update != NULL && menu->mode == 1) {
+        if (menu->param != NULL) {
+            menu->update((void *)*menu->param);
+        } else {
+            menu->update(NULL);
+        }
+    }
+    if (menu == NULL || menu->itemCount == 0) {
+        return;
+    }
+    x = menu->x;
+    y = menu->y;
+    if (menu->mode != 1 && menu->update != NULL) {
+        D_0054F228++;
+        if (D_0054F228 >= 16) {
+            effDebugSetAttr(6);
+            effDebugSetPos(0x20, 0x1A0);
+            effDebugPrintf("EFFECT STOP");
+            D_0054F228 = D_0054F228 >= 31 ? 0 : D_0054F228;
+        }
+    }
+    if (D_0054F221 == 0) {
+        if (menu->mode == 1) {
+            D_0054F22C++;
+            if (D_0054F22C >= 16) {
+                effDebugSetAttr(0);
+                effDebugSetPos(0x20, 0x1A0);
+                effDebugPrintf("EFFECT RUN");
+                D_0054F22C = D_0054F22C >= 31 ? 0 : D_0054F22C;
+            }
+        }
+        if (D_0054F221 == 0) {
+            return;
+        }
+    }
+    effDebugSetAttr(5);
+    effDebugDrawRect4(x, y, 0xC4, 0x10);
+    effDebugSetPos(x + 2, y + 2);
+    sprintf(text, D_0054F230, menu->title);
+    effDebugPrintf(text);
+    y += 0x14;
+    effDebugDrawRect4(x, y, 0xC4, menu->itemCount * 0xC + 4);
+    effDebugSetPos(x + 2, y + 2);
+    item = menu->items;
+    for (i = 0; i < menu->itemCount; i++, item++) {
+        effDebugSetAttr(i == menu->selected ? 4 : 0);
+        type = item->type;
+        switch (type) {
+        case 0:
+            sprintf(text, "%-7s:%-d", item->label, *(s8 *)item->value);
+            effDebugPrintf(text);
+            break;
+        case 1:
+            sprintf(text, "%-7s:%-d", item->label, *(u8 *)item->value);
+            effDebugPrintf(text);
+            break;
+        case 2:
+            sprintf(text, "%-7s:%-d", item->label, *(s16 *)item->value);
+            effDebugPrintf(text);
+            break;
+        case 3:
+            sprintf(text, "%-7s:%-d", item->label, *(u16 *)item->value);
+            effDebugPrintf(text);
+            break;
+        case 4:
+        case 5:
+            sprintf(text, "%-7s:%-d", item->label, *(s32 *)item->value);
+            effDebugPrintf(text);
+            break;
+        case 6:
+            sprintf(text, "%-7s:%-X", item->label, *(u32 *)item->value);
+            effDebugPrintf(text);
+            break;
+        case 7:
+            sprintf(text, "%-7s:%-4.3f", item->label, *(f32 *)item->value);
+            effDebugPrintf(text);
+            break;
+        case 8:
+            sprintf(text, "%-7s:%-s", item->label, *(u8 *)item->value ? D_0054F240 : D_0054F248);
+            effDebugPrintf(text);
+            break;
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+            if (type == 9) {
+                effDebugDrawRect3(effDebugPosX + 0x1A, effDebugPosY + 8, *(u32 *)item->value);
+            }
+            oldAttr = D_00551DDC;
+            effDebugSetAttr(type == 9 ? 2 : type - 6);
+            sprintf(text, D_0054F238, item->label);
+            effDebugPrintf(text);
+            D_00551DDC = oldAttr;
+            effDebugPosY -= 0xC;
+            sprintf(text, "        %-d", ((u8 *)item->value)[type - 9]);
+            effDebugPrintf(text);
+            break;
+        case 13:
+        case 14:
+            value = *(s32 *)item->value;
+            format = NULL;
+            if (value == 0x44) format = "%-7s:SEMI";
+            if (value == 0x48) format = "%-7s:ADD";
+            if (value == 0x42) format = "%-7s:SUB";
+            if (value == 6) format = "%-7s:NEG";
+            if (format != NULL) sprintf(text, format, item->label);
+            effDebugPrintf(text);
+            break;
+        case 15:
+            value = *(s32 *)item->value;
+            format = NULL;
+            if (value == 0) format = "%-7s:OPAQ";
+            if (value == 1) format = "%-7s:SEMI";
+            if (value == 2) format = "%-7s:ADD";
+            if (value == 3) format = "%-7s:SUB";
+            if (format != NULL) sprintf(text, format, item->label);
+            effDebugPrintf(text);
+            break;
+        case 16:
+            effDebugPrintf(item->label);
+            if (i == menu->selected) {
+                xy = item->value;
+                effDebugDrawRect2(xy[0], xy[1]);
+                oldX = effDebugPosX;
+                oldY = effDebugPosY;
+                oldAttr = D_00551DDC;
+                effDebugSetAttr(0);
+                effDebugSetPos(0x20, 0x1A0);
+                sprintf(text, "XY[%d:%d]", xy[0], xy[1]);
+                effDebugPrintf(text);
+                D_00551DDC = oldAttr;
+                effDebugPosY = oldY;
+                effDebugPosX = oldX;
+            }
+            break;
+        case 18:
+            effDebugDrawRectFull();
+            break;
+        case 19:
+            oldAttr = D_00551DDC;
+            D_00551DDC = 5;
+            sprintf(text, D_0054F250, item->label);
+            effDebugPrintf(text);
+            D_00551DDC = oldAttr;
+            break;
+        case 20:
+            sprintf(text, "%-7s:%-d", item->label, *(s32 *)item->value);
+            effDebugPrintf(text);
+            if (i == menu->selected) {
+                xy = item->value2;
+                effDebugDrawRectLine(xy[0], xy[1], *(s32 *)item->value, 1);
+            }
+            break;
+        case 17:
+        case 21:
+        case 22:
+        case 23:
+            effDebugPrintf(item->label);
+            break;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawMenu);
+#endif
 
 void effDebugAllocDrawTag(void) {
     effDebugDrawTag = (struct sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
