@@ -82,7 +82,44 @@ s8 nmeGetModeFlag(nmeWork_t *work) {
     return nmeGetMaxNameLen(nmeGetInputMode(work));
 }
 
+extern const char *D_005276C8[];
+
+#ifdef NON_MATCHING
+void nmeInitNameRow(s8 mode, s32 rowValue, void *data)
+{
+    nmeWork_t *work = data;
+    s8 row = rowValue;
+    s8 tableOffset = mode * 3;
+    s32 maxLength = nmeGetMaxNameLen(row);
+    const char *name;
+    u8 (*characters)[2];
+    s8 count = 0;
+    s32 i;
+
+    for (i = 0; i < maxLength; i++) {
+        work->inputChars[row][i][0] = 0x80;
+        work->inputChars[row][i][1] = 0x80;
+    }
+    name = D_005276C8[tableOffset + row];
+    characters = work->inputChars[row];
+    while (*name != 0) {
+        if (*name & 0x80) {
+            (*characters)[0] = *name++;
+            (*characters)[1] = *name;
+        } else {
+            u32 code = nmeDecodeChar(*name);
+            (*characters)[1] = code;
+            (*characters)[0] = code >> 8;
+        }
+        name++;
+        characters++;
+        count++;
+    }
+    work->inputRowEnabled[row] = count;
+}
+#else
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameRow);
+#endif
 
 extern void nmeInitNameRow(s8 mode, s32 row, void *data);
 void nmeInitNameRows(s8 mode, nmeWork_t *work) {
