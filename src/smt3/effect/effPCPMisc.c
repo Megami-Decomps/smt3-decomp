@@ -2440,6 +2440,7 @@ void sdf3DPrimLinkTm(sdfDrawTag_t *aTag,
 u32 sdfModelGetMarkPosCount(const struct sdfModelRootNode_t *aRoot);
 
 struct sdfMat_t *sdfMatNew(void);
+void sdfMatFreeDelayed(sdfMat_t *aMat);
 
 f32 sdfCos(f32 aRadius);
 
