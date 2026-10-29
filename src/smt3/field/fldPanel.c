@@ -37,7 +37,11 @@ extern s32 fldProcCampChk(void);
 extern s32 fldProcAmChk(void);
 extern s32 fmProcessChk(void);
 extern s32 fldTitleChk(void);
+#ifdef NON_MATCHING
+extern void fldDrawAddressPanel(s32 width, s32 x, s32 y);
+#else
 extern void fldDrawAddressPanel();
+#endif
 extern void fldDrawAreaBlockFont();
 extern s32 gFldElvFloorNow;
 extern s32 fldCamMiwatasiChk(void);
@@ -210,7 +214,12 @@ s32 fldAddressProcess2(dds3ProcessID_t *id)
         return 0;
     }
     if (gFldElvFloorNow != -999) {
+#ifdef NON_MATCHING
+        /* Retail leaves x=1 from campCheckExitState and y=4 from RunProcess's pad loop, except on a process-name hash collision. */
+        fldDrawAddressPanel(0x80, 1, 4);
+#else
         fldDrawAddressPanel(0x80);
+#endif
     } else {
         fldDrawAreaBlockFont(0);
     }
