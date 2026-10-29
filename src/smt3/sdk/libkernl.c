@@ -1440,6 +1440,24 @@ typedef struct fsRenameRequest_t {
     char oldName[0x400];
     char newName[0x400];
 } fsRenameRequest_t;
+typedef struct fsStat_t {
+    u32 mode;
+    u32 attributes;
+    u32 size;
+    u8 creationTime[8];
+    u8 accessTime[8];
+    u8 modificationTime[8];
+    u32 highSize;
+    u32 privateData[6];
+} fsStat_t;
+typedef struct fsChstatRequest_t {
+    s32 sema;
+    s32 *result;
+    s32 resultSize;
+    u32 mask;
+    fsStat_t stat;
+    u8 name[0x400];
+} fsChstatRequest_t;
 typedef union fsRequest_t {
     fsCloseRequest_t close;
     fsPathRequest_t path;
@@ -1447,6 +1465,7 @@ typedef union fsRequest_t {
     fsGetstatRequest_t getstat;
     fsSyncRequest_t sync;
     fsRenameRequest_t rename;
+    fsChstatRequest_t chstat;
 } fsRequest_t;
 extern fsRequest_t D_0059D4C0;
 
@@ -1741,7 +1760,55 @@ s32 sceGetstat(const char *path, void *stat)
 }
 
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceChstat);
+s32 sceChstat(const char *path, const fsStat_t *stat, u32 mask)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsChstatRequest_t *request = &D_0059D4C0.chstat;
+    s32 length;
+    s32 sema;
+    s32 accepted;
+    fsRequest_t *packet;
+
+    _sceFsWaitS(13);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    for (length = 0; length < 0x400 &&
+         (request->name[length] = path[length]) != 0; length++) {
+    }
+    if (length == 0x400) {
+        request->name[0x3FF] = 0;
+        length = 0x3FF;
+    }
+    request->stat = *stat;
+    request->mask = mask;
+    param.initCount = 0;
+    param.maxCount = 1;
+    param.option = 0;
+    packet = &D_0059D4C0;
+    sema = CreateSema(&param);
+    request->sema = sema;
+    request->result = &result;
+    request->resultSize = 4;
+    sceSifWriteBackDCache(packet, 0x450);
+    if (sceSifCallRpc(&D_0059E780, 13, 0, packet,
+                      length + 0x51, D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
+
 
 s32 sceRename(const char *oldPath, const char *newPath)
 {
