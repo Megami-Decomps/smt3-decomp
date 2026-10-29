@@ -923,3 +923,4 @@ src/smt3/newbattle/nbActionProcess.c	z29	done	2026-10-29	0 matches / 1 guarded d
 src/smt3/field/fldPlayer.c	z29	open	2026-10-29	1 fn / 4344 B	largest-first pass: fldPlayerCalc_Nml_syukan
 src/smt3/field/fldPlayer.c	z29	open	2026-10-29	0 matches / 1 guarded draft	fldPlayerCalc_Nml_syukan drafted at 4328/4344 B, 306 of 1082 words match (was 90); native frame and all five local vectors reproduced; residual is one moving/turnLeft spill tie, probing the allocator
 src/smt3/field/fldPlayer.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldPlayerCalc_Nml_syukan probe-settled: measured allocno priorities show retail turnLeft/turnRight ordering unreachable from ordinary C here; 306 of 1082 words match
+src/smt3/newbattle/nbResultProcess.c	z29	open	2026-10-29	1 fn / 3704 B	largest-first pass: nbFindTobiwarpLabel, probe the allocator early
