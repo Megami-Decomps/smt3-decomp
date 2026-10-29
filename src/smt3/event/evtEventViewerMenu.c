@@ -1928,10 +1928,6 @@ typedef struct pmdCutInfo_t {
     s32 reserve;
 } pmdCutInfo_t;
 
-typedef struct evtBlendVecColor_t {
-    f32 vec[4];
-    u32 color;
-} evtBlendVecColor_t;
 
 typedef struct pmdSceneFogTable_t {
     evtBlendVecColor_t fog;

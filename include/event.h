@@ -5,6 +5,12 @@
 #include "model.h"
 #include "motion.h"
 
+/* Interpolated event vector and packed colour. */
+typedef struct evtBlendVecColor_t {
+    f32 vec[4];
+    u32 color;
+} evtBlendVecColor_t;
+
 /* Event-unit allocation: evtCreateUnitHandle allocates/clears 0x148 bytes.
  * SMT3 omits DDS's extra motion, shadow and vertical-movement members. */
 typedef enum evtUnitMotionState_t {
