@@ -98,7 +98,49 @@ s32 trmEndEvent(s32 BgmMode);
 
 extern s16 fldAllCnt[][2];
 
+extern u32 slGetExitMode(void);
+extern s32 evtLoadEventBgm(s32 eventId);
+extern s32 evtCheckEventBgmLoaded(s32 eventId);
+extern dds3ProcessID_t *evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno);
+
+#ifdef NON_MATCHING
+void trmStartSaveAct(s32 saved)
+{
+    s32 event;
+    s32 cut = 0;
+    u32 exitMode;
+    u16 terminal = trmUpdateWork->TerminalNo;
+
+    if (trmUpdateWork->TerminalType == 0) {
+        if ((terminal >= 18 && terminal < 20) || (terminal >= 23 && terminal < 25)) {
+            event = 0x326;
+        } else {
+            event = 0x324;
+        }
+    } else {
+        event = 0x325;
+    }
+    if (saved == 0) {
+        trmEndEvent(1);
+        trmUpdateWork->saveProcess = 0;
+        return;
+    }
+    exitMode = slGetExitMode();
+    if (exitMode == 0) {
+        trmUpdateWork->saveProcess = 0;
+        return;
+    }
+    if (exitMode == 1) {
+        cut = event == 0x324 ? 60 : 20;
+    }
+    evtLoadEventBgm(event);
+    while (evtCheckEventBgmLoaded(event) == 0) {
+    }
+    trmUpdateWork->saveProcess = (s32)evtStartPolygonMovie2(0x3E8, event, cut);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmStartSaveAct);
+#endif
 
 s32 trmCheckSaveAct(void)
 {
