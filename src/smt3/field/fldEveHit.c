@@ -292,7 +292,46 @@ void fldKaifukuTest(void) {
     p2sdPlaySE(0x10, 0x7F, 0x3F);
 }
 
+#ifdef NON_MATCHING
+typedef struct {
+    s32 words[20];
+    s32 word50;
+} fldStatusWork_t;
+
+extern fldStatusWork_t fldRunDanteGunFlag;
+extern s32 datCheckDying(datUnitWork_t *work);
+
+void fldStatusSet(void)
+{
+    s32 i;
+
+    fldRunDanteGunFlag.word50 = 0;
+    for (i = 0; i < 16; i++) {
+        fldAnahoriAkuma_t *unit = &DDS3_GBWK->akuma[i];
+        volatile u16 *badstatus = &unit->badstatus;
+
+        if ((unit->flag & 2) && unit->hp != 0) {
+            if (*badstatus & 0x40) {
+                fldRunDanteGunFlag.word50 |= 1;
+            }
+            if (*badstatus & 0x100) {
+                fldRunDanteGunFlag.word50 |= 4;
+            }
+            if (*badstatus & 0x20) {
+                fldRunDanteGunFlag.word50 |= 8;
+            }
+            if (*badstatus & 0x8000) {
+                fldRunDanteGunFlag.word50 |= 0x10;
+            }
+        }
+    }
+    if (datCheckDying((datUnitWork_t *)&DDS3_GBWK->akuma[0].flag)) {
+        fldRunDanteGunFlag.word50 |= 2;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldEveHit", fldStatusSet);
+#endif
 
 extern s32 fldEveRngPrevIdx;
 
