@@ -429,12 +429,6 @@ typedef struct {
 } fldResPut_t;
 
 typedef struct {
-    sdfVector4_t pos;
-    sdfVector4_t rot;
-    sdfVector4_t scl;
-} fldResourcePoint_t;
-
-typedef struct {
     u32 resourceID;
     u32 resourceType;
     char *resourceName;

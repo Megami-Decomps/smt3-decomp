@@ -747,7 +747,6 @@ typedef struct fldSpawnSoundDataFL2_t {
     s32 soundId;
 } fldSpawnSoundDataFL2_t;
 
-typedef struct fldResourcePoint_t fldResourcePoint_t;
 typedef struct fldEventDataHeader_t fldEventDataHeader_t;
 typedef struct fldResHead_t fldResHead_t;
 extern dds3Basic_t *dds3AddEventBasic(s32 serialID, void *data, const char *name);
