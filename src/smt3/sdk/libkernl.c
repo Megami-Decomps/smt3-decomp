@@ -1531,15 +1531,81 @@ s32 sceSifLoadElf(const char *path, u32 *result)
     return _sceSifLoadElfPart(path, "all", result, 1);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifGetIopAddr);
+s32 sceSifGetIopAddr(void *address, void *output, u32 kind)
+{
+    if (_lf_bind() < 0) {
+        return -65536;
+    }
+    if (kind >= 3) {
+        return -65538;
+    }
+    D_0059EA00.value = (s32)address;
+    D_0059EA00.moduleResult = kind;
+    if (sceSifCallRpc(&D_0059EC00, 3, 0, &D_0059EA00, 32,
+                      &D_0059EA00, 32, NULL, NULL) < 0) {
+        return -65537;
+    }
+    if (kind == 0) {
+        *(u8 *)output = *(u8 *)&D_0059EA00.value;
+    } else if (kind == 1) {
+        *(u16 *)output = *(u16 *)&D_0059EA00.value;
+    } else if (kind == 2) {
+        *(u32 *)output = D_0059EA00.value;
+    } else {
+        return -65538;
+    }
+    return 0;
+}
 
+/* NON_MATCHING: 51 of 55 words match at the native 220-byte size;
+ * the final RPC result selection uses different constant scheduling. */
+#ifdef NON_MATCHING
+s32 sceSifSetIopAddr(void *address, const void *input, u32 kind)
+{
+    if (_lf_bind() < 0) {
+        return -65536;
+    }
+    D_0059EA00.value = (s32)address;
+    D_0059EA00.moduleResult = kind;
+    if (kind == 0) {
+        *(u8 *)D_0059EA00.name = *(const u8 *)input;
+    } else if (kind == 1) {
+        *(u16 *)D_0059EA00.name = *(const u16 *)input;
+    } else if (kind == 2) {
+        *(u32 *)D_0059EA00.name = *(const u32 *)input;
+    } else {
+        return -65538;
+    }
+    return sceSifCallRpc(&D_0059EC00, 2, 0, &D_0059EA00, 32,
+                         &D_0059EA00, 16, NULL, NULL) < 0 ? -65537 : 0;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSetIopAddr);
+#endif
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifResetIop);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifIsAliveIop);
+extern u32 sceSifGetReg(u32 registerId);
+extern void sceResetttyinit(void);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSyncIop);
+s32 sceSifIsAliveIop(void)
+{
+    s32 alive = 0;
+
+    if (sceSifGetReg(4) & 0x10000) {
+        alive = 1;
+    }
+    return alive;
+}
+
+s32 sceSifSyncIop(void)
+{
+    if (sceSifGetReg(4) & 0x40000) {
+        sceResetttyinit();
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRebootIop);
 

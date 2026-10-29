@@ -14,6 +14,11 @@ the actual 64-byte protocol record already used by allocation and release.
 No field volatility or callback return changes are justified by this gap.
 The assembly fallback remains active.
 
+The boolean-result local that matches `sceSifIsAliveIop` does not recover this
+routine's native branches: it still emits 44 bytes, with 5 of 11 compared
+words matching and 16 bytes uncovered. The preferred direct-return draft is
+unchanged; do not repeat that local-result control without a new premise.
+
 ## sceSifSetRpcQueue
 
 140 of 148 native bytes, 17 of 35 compared words match; eight bytes are
@@ -59,3 +64,25 @@ The routine binds service `0x80000003` synchronously, returns `-1` for a negativ
 bind result, and retries after the native countdown while the bound server is
 null. Only successful binding clears the heap initialization flag. No new
 volatile accesses, instruction padding or forced register use are justified.
+
+## sceSifSetIopAddr
+
+51 of 55 words match at the native 220-byte size. The final four differences
+are the error constant / `-1` setup order and the zero/error conditional-move
+selection. Address/width header writes, input-width dispatch, request payload,
+RPC arguments and all earlier instructions match. The native initializes the
+error result and conditionally selects zero; the ordinary ternary uses the
+opposite selection direction.
+
+An explicit result initialized before binding retains an extra saved register
+and emits 224 bytes. Assigning that result after capturing RPC status emits
+216 bytes, as does a direct nonnegative-success return. Keep the native-sized
+ternary until a new compiler premise explains the selection; no forced use,
+volatile result or register assignment is justified.
+
+Binding failure returns `-65536`. After a successful bind, the address and kind
+header words are written before validating kind. Kinds zero, one and two copy
+one, two and four bytes respectively into request offset eight. An invalid
+kind returns `-65538` after the header writes, without reading the input or
+calling RPC. The valid transaction sends 32 bytes, receives 16 bytes, and
+returns zero for a nonnegative RPC status or `-65537` otherwise.

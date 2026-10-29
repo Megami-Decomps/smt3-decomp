@@ -546,3 +546,20 @@ query failure uses `lui`/`ori` for the all-ones result; the signed free-memory
 wrapper uses `addiu -1`. The three request-free query bodies each match
 112 bytes; the two block queries each match 124. Complete-owner checks
 qualify the shared signed reply buffer and unchanged neighboring functions.
+
+## Matched IOP address reads and status polling
+
+`sceSifGetIopAddr` (236 bytes), `sceSifIsAliveIop` (40 bytes) and
+`sceSifSyncIop` (56 bytes) match 332 instruction bytes. Address reads bind
+before checking the unsigned width kind, reject kinds outside zero through
+two before writing the request, and send/receive 32 bytes. On success they
+copy only the selected unsigned byte, halfword or word from the reply.
+Binding, invalid-width and RPC failures leave caller output untouched.
+
+The live query returns whether register four has bit `0x10000` set. The sync
+query checks bit `0x40000`, resets TTY initialization only when it is set, and
+returns zero or one accordingly. A boolean result local reproduces the native
+mask/unsigned-compare sequence; a direct comparison instead emits a shorter
+shift/low-bit sequence. Explicit width branches reproduce the native address
+reader, while a switch emits 232 bytes instead of 236. The complete kernel
+owner checks 53 match / 0 differ; the address writer remains guarded.
