@@ -425,10 +425,9 @@ void QueuePeekReadDone(ttyQueue_t *queue)
 /* Native TTY context prefix, through its receive queue. */
 typedef struct ttyState_t {
     s32 handle;
-    /* Callback-visible transfer progress and completion state. */
-    volatile s32 sendLength;
-    volatile s32 receiveLength;
-    volatile s32 sendBusy;
+    s32 sendLength;
+    s32 receiveLength;
+    s32 sendBusy;
     u8 *sendBuffer;
     u8 *receiveBuffer;
     ttyQueue_t *queue;
@@ -444,6 +443,11 @@ extern const char D_0054BA98[];
 extern const char D_0054BAB0[];
 extern const char D_0054BAC8[];
 
+/* The asynchronous callback observes progress and publishes completion with
+ * volatile word accesses. The interrupt-protected writer uses the ordinary
+ * record view. */
+#define TTY_CALLBACK_WORD(state, member) (*(volatile s32 *)&(state)->member)
+
 void sceTtyHandler(s32 event, s32 byteCount, void *argument)
 {
     /* Qualified EE 2.9 global_alloc trace: this shared receive/traversal count
@@ -457,11 +461,11 @@ void sceTtyHandler(s32 event, s32 byteCount, void *argument)
     case 1:
     case 2:
         if (byteCount != 0) {
-            if ((u32)state->receiveLength + (u32)byteCount > 320) {
+            if ((u32)TTY_CALLBACK_WORD(state, receiveLength) + (u32)byteCount > 320) {
                 kprintf(D_0054BA70);
             }
             {
-                s32 receiveOffset = state->receiveLength;
+                s32 receiveOffset = TTY_CALLBACK_WORD(state, receiveLength);
                 byteCount = sceDeci2ExRecv(state->handle,
                                           state->receiveBuffer + receiveOffset,
                                           (u16)byteCount);
@@ -469,39 +473,41 @@ void sceTtyHandler(s32 event, s32 byteCount, void *argument)
             if (byteCount < 0) {
                 kprintf(D_0054BA98);
             }
-            state->receiveLength += byteCount;
+            TTY_CALLBACK_WORD(state, receiveLength) += byteCount;
         } else {
             packet = state->receiveBuffer;
             for (byteCount = 12; byteCount < *(u16 *)packet; byteCount++) {
                 *state->queue->write = state->receiveBuffer[byteCount];
                 QueuePeekWriteDone(state->queue);
             }
-            state->receiveLength = 0;
+            TTY_CALLBACK_WORD(state, receiveLength) = 0;
         }
         return;
     case 3: {
         s32 sent = sceDeci2ExSend(state->handle, state->sendBuffer,
-                                (u16)state->sendLength);
+                                (u16)TTY_CALLBACK_WORD(state, sendLength));
         if (sent < 0) {
             kprintf(D_0054BAB0, sent);
         } else {
             state->sendBuffer += sent;
-            state->sendLength -= sent;
+            TTY_CALLBACK_WORD(state, sendLength) -= sent;
             return;
         }
         break;
     }
     case 4:
-        if (state->sendLength != 0) {
-            kprintf(D_0054BAC8, state->sendLength);
+        if (TTY_CALLBACK_WORD(state, sendLength) != 0) {
+            kprintf(D_0054BAC8, TTY_CALLBACK_WORD(state, sendLength));
         }
         break;
     default:
         return;
     }
-    state->sendBusy = 0;
+    TTY_CALLBACK_WORD(state, sendBusy) = 0;
 }
 
+
+#undef TTY_CALLBACK_WORD
 INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyWrite);
 
 
