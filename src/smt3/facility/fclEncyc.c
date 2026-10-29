@@ -2098,12 +2098,7 @@ void CreateSortIndexByLevel(s16 *pout)
     qsort(pout, count, 2, cmpLevelOrder);
 }
 
-typedef struct {
-    u32 flag;
-    u8 race;
-    u8 reserved05[0x37];
-} fclEncycDevilFormat_t;
-extern fclEncycDevilFormat_t datDevilTable[];
+extern datDevilTableEntry_t datDevilTable[];
 
 s32 cmpRaceOrder(const void *a, const void *b)
 {
