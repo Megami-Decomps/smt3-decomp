@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camp.h"
 #include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -1944,21 +1945,6 @@ void ApplyEdgeListCursor(lstListWindow_t *list)
 #else
 INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyEdgeListCursor);
 #endif
-
-typedef struct {
-    u8 StepY[4];
-    s8 StopFlag;
-    u8 reserved005[3];
-    s32 CursorSize;
-    s32 CursorPos;
-    u16 reserved010[4];
-    s32 reserved018[2];
-    u8 reserved020[2];
-    s16 reserved022;
-    s8 reserved024[2];
-    u8 reserved026[2];
-    s32 reserved028[4];
-} cmpCursorInfo_t;
 
 typedef struct {
     cmpCursorInfo_t cursor;

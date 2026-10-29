@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camp.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -59,32 +60,6 @@ typedef struct
 extern trmUpdateWork_t *trmUpdateWork;
 
 extern void fclTerminalSetMode(s32 mode, s32 id, trmUpdateWork_t *work);
-
-typedef struct
-{
-    u8 StepY[4];
-    s8 StopFlag;
-    u8 unk_05[3];
-    s32 CursorSize;
-    s32 CursorPos;
-    u16 unk_10;
-    u16 unk_12;
-    u16 unk_14;
-    u16 unk_16;
-    s32 unk_18;
-    s32 unk_1C;
-    u8 unk_20;
-    u8 unk_21;
-    s16 unk_22;
-    s8 unk_24;
-    s8 unk_25;
-    u8 unk_26;
-    u8 unk_27;
-    s32 unk_28;
-    s32 unk_2C;
-    s32 unk_30;
-    s32 unk_34;
-} cmpCursorInfo_t;
 
 typedef struct
 {

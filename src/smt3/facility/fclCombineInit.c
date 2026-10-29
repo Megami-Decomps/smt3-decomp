@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camp.h"
 #include "facility.h"
 #include "kernel.h"
 #include "basic.h"
@@ -293,31 +294,6 @@ extern void fclFilterOFF(void);
 
 extern void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2,
                          s32 V2, s32 Col, s32 TexHandle);
-
-typedef struct
-{
-    /* 0x00 */ s32 StepY;
-    /* 0x04 */ s8 StopFlag;
-    /* 0x05 */ u8 unk_05[3];
-    /* 0x08 */ s32 CursorSize;
-    /* 0x0C */ s32 CursorPos;
-    /* 0x10 */ u16 unk_10;
-    /* 0x12 */ u16 unk_12;
-    /* 0x14 */ u16 unk_14;
-    /* 0x16 */ u16 unk_16;
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ u8 unk_20;
-    /* 0x21 */ u8 unk_21;
-    /* 0x22 */ s16 unk_22;
-    /* 0x24 */ s8 unk_24;
-    /* 0x25 */ s8 unk_25;
-    /* 0x26 */ u8 unk_26;
-    /* 0x27 */ u8 unk_27[5];
-    /* 0x2C */ s32 unk_2C;
-    /* 0x30 */ s32 unk_30;
-    /* 0x34 */ s32 unk_34;
-} cmpCursorInfo_t;
 
 typedef struct
 {
