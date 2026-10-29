@@ -248,8 +248,6 @@ s32 rcvFullHeal(datUnitWork_t *unit)
 INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvFullHeal);
 #endif
 
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvCreateLocalStock);
-
 typedef struct rcvCalcWork_t {
     u8 flags;
     s8 sequence;
@@ -261,7 +259,13 @@ typedef struct rcvCalcWork_t {
     cmpCursorInfo_t cursor;
     u8 unk0058[0x1004];
     s32 recoverPrices[16];
-    u8 unk109C[0x3430];
+    u8 unk109C[0x20];
+    s8 healType;
+    u8 unk10BD;
+    rcvStockList_t stockList;
+    u8 unk10D3[0x1B9];
+    cmpCursorInfo_t listCursor;
+    u8 unk12C4[0x3208];
     s32 script;
     s32 scriptProcess;
     u8 unk44D4[0x24];
@@ -270,6 +274,57 @@ typedef struct rcvCalcWork_t {
 
 typedef struct cmpInfoWindow_t cmpInfoWindow_t;
 extern rcvCalcWork_t *rcvCalcState;
+extern void *memset(void *dst, s32 value, u32 size);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
+
+#ifdef NON_MATCHING
+void rcvCreateLocalStock(rcvStockList_t *list, s8 mask)
+{
+    s32 excludeDead = (mask & 7) != 0 && (mask & 4) == 0;
+    s32 i;
+    s32 slot;
+    s32 index;
+    s32 price;
+    datUnitWork_t *unit;
+
+    memset(list->stock, -1, 16);
+    list->reserveCount = 0;
+    list->partyCount = 0;
+    for (i = 0; i < (s32)DDS3_GBWK->stockCount; i++) {
+        slot = (s8)DDS3_GBWK->stockOrder[i];
+        unit = &DDS3_GBWK->unitwork[slot];
+        if ((unit->flag & 2) != 0 &&
+            (!excludeDead || (unit->badstatus & 0x800) == 0) &&
+            (rcvFullHeal(unit) & mask) != 0) {
+            index = list->partyCount;
+            price = rcvGetRecoverPrice(&DDS3_GBWK->unitwork[slot], (u8)mask);
+            rcvCalcState->recoverPrices[index] = price;
+            list->stock[index] = slot;
+            list->partyCount++;
+        }
+    }
+    for (i = 0; i < (s32)DDS3_GBWK->stockCount; i++) {
+        slot = (s8)DDS3_GBWK->stockOrder[i];
+        unit = &DDS3_GBWK->unitwork[slot];
+        if ((unit->flag & 2) == 0 &&
+            (!excludeDead || (unit->badstatus & 0x800) == 0) &&
+            (rcvFullHeal(unit) & mask) != 0) {
+            index = list->partyCount + list->reserveCount;
+            price = rcvGetRecoverPrice(&DDS3_GBWK->unitwork[slot], (u8)mask);
+            rcvCalcState->recoverPrices[index] = price;
+            list->stock[index] = slot;
+            list->reserveCount++;
+        }
+    }
+    rcvCalcState->healType = mask;
+    cmpInitCursorRange(&rcvCalcState->listCursor,
+                       (u8)((u8)list->partyCount + (u8)list->reserveCount), 5, 0);
+    cmpResetCursorInfo(&rcvCalcState->listCursor);
+}
+#else
+INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvCreateLocalStock);
+#endif
 extern void *dds3GetProcessData(s32 id);
 extern s32 dds3GetProcessStat(s32 id);
 extern void cmpClearCursorSlots(cmpCursorInfo_t *cursor);
