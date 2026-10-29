@@ -146,9 +146,10 @@ typedef struct nbMainProcessData_t
     nbPacHandle_t *formpack;
     u8 unk_B8[0x4];
     dds3ProcessID_t *MainProcessID;
-    u8 unk_C0[0x1C];
-    void *packdata;
-    u8 unk_E0[0x14];
+    u8 unk_C0[0x14];
+    dds3ProcessID_t *ActionProcessID[4];
+    s32 NowActionProcess;
+    u8 unk_E8[0xC];
     dds3ProcessID_t *koukaproc;
     dds3ProcessID_t *negoproc;
     u8 unk_FC[0x4];
@@ -485,7 +486,36 @@ extern char D_00545498[];
 
 extern s32 nbPanelLayoutTable2[4][6];
 
+/* The same 0x18-byte rows as nbPanelLayoutTable2, under the HD member names. */
+typedef struct
+{
+    s32 ActiveMode;
+    s32 OfsX;
+    s32 OldHp;
+    s32 OldMp;
+    s32 HpAnmCnt;
+    s32 MpAnmCnt;
+} nbPnlWork_t;
+
+extern nbPnlWork_t gnbPnlWork[4] asm("nbPanelLayoutTable2");
+
 extern s32 nbPanelDrawProcess(void);
+
+extern s32 nbGetActionSeq(dds3ProcessID_t *id);
+
+extern void nbPanelPressTurn(nbMainProcessData_t *data);
+
+extern void nbPanelAnalyzeRun(void);
+
+extern void nbPanelPressGauge(nbMainProcessData_t *data);
+
+extern void nbPanelPartySelect(nbMainProcessData_t *data);
+
+extern void nbPanelPartyDraw(void);
+
+extern u32 dds3GetRandIntA(void *state, u32 limit);
+
+extern void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessData_t *p);
 
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, void *drawExit,
@@ -558,6 +588,12 @@ extern void sdfDrawTagInit(sdfDrawTag_t *a);
 extern u64 *sdf2DMakeStdPacket(void *aPacket, s32 aLeng);
 
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, void *aPacket);
+
+extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
+
+extern void sdfPrimLinkG4(sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, u32 aColor0, s32 aX1,
+                          s32 aY1, u32 aColor1, s32 aX2, s32 aY2, u32 aColor2, s32 aX3, s32 aY3,
+                          u32 aColor3, s32 aZ, void *aAllocator);
 
 extern sdfGrOt_t sdfGrOtTable[];
 
@@ -918,13 +954,60 @@ u32 nbPanelMPColor(datUnitWork_t *pUnitWork)
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelCursorDraw);
 
-INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPolygonDraw);
+void nbPanelPolygonDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, u32 abgr0, u32 abgr1,
+                        u32 abgr2, u32 abgr3)
+{
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    s32 x0, y0, x1, y1, w, h;
+    u32 c0, c1, c2, c3;
 
-INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPolygonScaleDraw);
+    tag = dds3FontReqAllocDrawTag();
+    x0 = ((pXYZ->x + x) << 4) + 0x7000;
+    y0 = ((pXYZ->y + y) << 3) + 0x7900;
+    w = pXYZ->w << 4;
+    h = pXYZ->h << 3;
+    c0 = effMagaCylinderCalcColor(abgr0, nbPanelBaseABGR);
+    c1 = effMagaCylinderCalcColor(abgr1, nbPanelBaseABGR);
+    c2 = effMagaCylinderCalcColor(abgr2, nbPanelBaseABGR);
+    c3 = effMagaCylinderCalcColor(abgr3, nbPanelBaseABGR);
+    x1 = x0 + w;
+    y1 = y0 + h;
+    sdfPrimLinkG4(tag, 0x14C, x0, y0, c0, x1, y0, c1, x0, y1, c2, x1, y1, c3, -1, NULL);
+    ot = &sdfGrOtTable[71];
+    ot->regFunc(ot, tag);
+}
+
+void nbPanelPolygonScaleDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, f32 scale_w,
+                             f32 scale_h, u32 abgr0, u32 abgr1, u32 abgr2, u32 abgr3)
+{
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    s32 x0, y0, x1, y1;
+    s32 w, h;
+    u32 c0, c1, c2, c3;
+
+    tag = dds3FontReqAllocDrawTag();
+    w = pXYZ->w << 4;
+    h = pXYZ->h << 3;
+    w = w * scale_w;
+    h = h * scale_h;
+    x0 = ((pXYZ->x + x) << 4) + 0x7000;
+    y0 = ((pXYZ->y + y) << 3) + 0x7900;
+    c0 = effMagaCylinderCalcColor(abgr0, nbPanelBaseABGR);
+    c1 = effMagaCylinderCalcColor(abgr1, nbPanelBaseABGR);
+    c2 = effMagaCylinderCalcColor(abgr2, nbPanelBaseABGR);
+    c3 = effMagaCylinderCalcColor(abgr3, nbPanelBaseABGR);
+    x1 = x0 + w;
+    y1 = y0 + h;
+    sdfPrimLinkG4(tag, 0x14C, x0, y0, c0, x1, y0, c1, x0, y1, c2, x1, y1, c3, -1, NULL);
+    ot = &sdfGrOtTable[71];
+    ot->regFunc(ot, tag);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPolygonFlashDraw);
 
-void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *p, s32 index)
+void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *p)
 {
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
@@ -1345,9 +1428,204 @@ void nbPanelPartyHide(void)
     PanelPartyShow = 0;
 }
 
+/* NON_MATCHING: 332 of 339 words match at the native 1356-byte size. The
+ * branch form at +0x3FC needs nbPanelDrawPP1 as a visible C definition. */
+
+#ifdef NON_MATCHING
+
+void nbPanelPartyDraw(void)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    s32 partyindex[4];
+    s32 statindex[4];
+    s32 type[4];
+    s32 jun[4];
+    s32 i, j;
+    s32 oi, n;
+    s32 x, yb, y, yy;
+    s32 si;
+    s32 ofs;
+
+    if (PanelPartyShow == 0) {
+        return;
+    }
+    data = nbGetMainProcessData();
+    if (data == NULL) {
+        return;
+    }
+    form = data->form;
+    for (i = 0; i < 4; i++) {
+        partyindex[i] = -1;
+        statindex[i] = -1;
+        jun[i] = -1;
+        type[i] = -1;
+        if ((form->stat & 0x41) == 0x41) {
+            s32 pi = form->partyindex;
+            s32 ty;
+
+            partyindex[i] = pi;
+            statindex[i] = data->party[pi].statindex;
+            ty = form->type;
+            if (ty == 1) {
+                type[i] = ty;
+            }
+        }
+        form++;
+    }
+    if ((data->stat & 8) == 0) {
+        oi = data->orderindex;
+        n = 0;
+        if (oi != -1) {
+        for (i = 0; i < 12; i++) {
+            if (data->order[oi] != -1) {
+                for (j = 0; j < 4; j++) {
+                    if (data->order[oi] == partyindex[j]) {
+                        jun[j] = n;
+                        n++;
+                    }
+                }
+            }
+            oi++;
+            if (oi >= 12) {
+                oi = 0;
+            }
+        }
+        }
+    }
+    y = 0;
+    yb = 0x153;
+    for (i = 0; i < 4; i++) {
+        if (type[i] == -1) {
+            x = 230;
+            yy = y + 0x153;
+        } else {
+            x = dds3GetRandIntA(NULL, 6) + 227;
+            yy = yb + dds3GetRandIntA(NULL, 6) - 3;
+        }
+        if (partyindex[i] != -1) {
+            if (data->order[data->orderindex] == partyindex[i] && jun[i] != -1) {
+                gnbPnlWork[i].ActiveMode = 1;
+                ofs = (16 - gnbPnlWork[i].OfsX) / 3;
+                if (ofs < 1) {
+                    ofs = 1;
+                }
+                gnbPnlWork[i].OfsX += ofs;
+                if (gnbPnlWork[i].OfsX >= 17) {
+                    gnbPnlWork[i].OfsX = 16;
+                }
+            } else {
+                gnbPnlWork[i].ActiveMode = 0;
+                ofs = gnbPnlWork[i].OfsX / 3;
+                if (ofs < 1) {
+                    ofs = 1;
+                }
+                gnbPnlWork[i].OfsX -= ofs;
+                if (gnbPnlWork[i].OfsX < 0) {
+                    gnbPnlWork[i].OfsX = 0;
+                }
+            }
+            si = statindex[i];
+            if (gnbPnlWork[i].OldHp == -1) {
+                gnbPnlWork[i].OldHp =
+                    ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->hp;
+            }
+            if (type[i] == -1) {
+                if (gnbPnlWork[i].HpAnmCnt > 0) {
+                    gnbPnlWork[i].HpAnmCnt--;
+                } else {
+                    gnbPnlWork[i].OldHp =
+                        ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->hp;
+                }
+            } else {
+                gnbPnlWork[i].HpAnmCnt = 8;
+            }
+            if (gnbPnlWork[i].OldMp == -1) {
+                gnbPnlWork[i].OldMp =
+                    ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->mp;
+            }
+            if (gnbPnlWork[i].MpAnmCnt > 0) {
+                gnbPnlWork[i].MpAnmCnt--;
+                if (gnbPnlWork[i].MpAnmCnt <= 0) {
+                    gnbPnlWork[i].OldMp =
+                        ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->mp;
+                }
+            } else {
+                if (((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->mp <
+                    gnbPnlWork[i].OldMp) {
+                    gnbPnlWork[i].MpAnmCnt = 8;
+                }
+            }
+            nbPanelDrawPP1(x, yy, i, statindex[i], jun[i], gnbPnlWork[i].ActiveMode, data);
+        } else {
+            nbPanelDrawPP0(x, yy, data);
+            gnbPnlWork[i].ActiveMode = 0;
+            gnbPnlWork[i].OfsX = 0;
+            gnbPnlWork[i].OldHp = -1;
+            gnbPnlWork[i].OldMp = -1;
+            gnbPnlWork[i].HpAnmCnt = 0;
+            gnbPnlWork[i].MpAnmCnt = 0;
+        }
+        yb += 0x17;
+        y += 0x17;
+    }
+    nbPnl_rsetAlpha(0);
+    nbPnlSprite(0x103, 0x14F, 0xFD, 3, 1, 0x73, 0xFD, 3, nbPanelBaseABGR, data->pnltex[1]);
+    nbPnlSprite(0x103, 0x1AE, 0xFD, 3, 1, 0x73, 0xFD, 3, nbPanelBaseABGR, data->pnltex[1]);
+}
+
+#else
+
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPartyDraw);
 
+#endif
+
+/* NON_MATCHING: 65 of 66 words match; the one differing word is the branch form
+ * after nbPanelStockCheckRun, which turns into bne once nbPanelPartyDraw is a
+ * visible C definition in this unit. */
+
+#ifdef NON_MATCHING
+
+s32 nbPanelDrawProcess(void)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    s32 i;
+
+    data = nbGetMainProcessData();
+    if (data == NULL) {
+        return 0;
+    }
+    nbPanelPressTurn(data);
+    nbPanelAnalyzeRun();
+    if (nbPnlDrawFlag == 0) {
+        return 0;
+    }
+    nbPanelPressGauge(data);
+    nbPanelAuto(data);
+    data = nbGetMainProcessData();
+    if (data->ActionProcessID[data->NowActionProcess] != NULL && data->orderindex != -1 &&
+        nbGetActionSeq(data->ActionProcessID[data->NowActionProcess]) == 5) {
+        form = data->form;
+        for (i = 0; i < 4; i++) {
+            if ((form->stat & 0x109) == 0x109) {
+                nbPanelPartySelect(data);
+                return 0;
+            }
+            form++;
+        }
+    }
+    if (nbPanelStockCheckRun() == 0) {
+        nbPanelPartyDraw();
+    }
+    return 0;
+}
+
+#else
+
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawProcess);
+
+#endif
 
 void nbPanelShutdown(dds3ProcessID_t *id)
 {

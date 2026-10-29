@@ -611,8 +611,6 @@ void fldDrawInputCursor(s32 x, s32 y) {
     }
 }
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", D_00532720);
-
 extern s32 gFldElvFloorNow;
 extern s32 fldPlayerStatus[];
 extern f32 fldEADrawState;
@@ -625,6 +623,8 @@ extern s32 fldChkVortex(void);
 extern s32 nbGetEncountCnt(void);
 extern s32 nbGetEncountMax(s32 id);
 void fldDrawEATexQuad(s32 x, s32 y, s32 ax, s32 ay, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, f32 angle);
+
+INCLUDE_RODATA(const s32, "field/fld_Npc", D_00532720);
 
 void fldEADraw(void) {
     s32 offset;

@@ -680,6 +680,7 @@ member nbMainProcessData_t.unk_A8
 member nbMainProcessData_t.unk_B8
 member nbMainProcessData_t.unk_C0
 member nbMainProcessData_t.unk_E0
+member nbMainProcessData_t.unk_E8
 member nbMainProcessData_t.unk_FC
 member nbMakaProcessData_t.unk_14
 member nbNegoSkillEntry_t.unk_00

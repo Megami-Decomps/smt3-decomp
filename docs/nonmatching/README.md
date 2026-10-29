@@ -26,6 +26,7 @@ page and line to open. Conventions are in
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
+| 3 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fld_Npc | [field/fld_Npc.md](field/fld_Npc.md) |
@@ -67,7 +68,6 @@ page and line to open. Conventions are in
 | 1 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 1 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 1 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
-| 1 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |

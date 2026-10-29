@@ -2,6 +2,44 @@
 
 Conventions: [nonmatching drafts](../../nonmatching.md).
 
+## nbPanelPartyDraw (0x54C)
+
+332 of 339 instruction words match at the native 1356-byte size. Assembly
+remains active; this reconstruction carries no exact-match credit.
+
+The rows at 0x005753A0 are a four-element array of 0x18-byte records, not the
+`s32[4][6]` the symbol name suggests; the members in order are ActiveMode,
+OfsX, OldHp, OldMp, HpAnmCnt and MpAnmCnt. Addressing them as struct members
+is what folds the member offset into the `%hi`/`%lo` pair, which is how retail
+reaches rows 2 and 3; the array spelling adds the offset to the induction
+variable instead and costs about 130 words.
+
+The y coordinate needs two locals, one counting 0x17 per row from 0 and one
+from 0x153, with the second feeding the shaken row so that the -3 stays a
+separate `addiu` instead of folding into 0x153. The 0..11 order scan reuses
+the outer `i`, which is what puts its counter in a callee-saved register.
+
+One word differs: at +0x3FC retail has `beqzl` where the draft emits `beqz`
+on the MP-animation test. Compiling the same body with nbPanelDrawPP1 present
+as a C definition in this unit turns it into `beqzl`, so the annulled form
+follows the visibility of the callee the taken arm reaches. Six further words
+of the loop tail, the order of the two spill stores against the pointer
+increments, also fall into place under that same change.
+
+Blocks nbPanelDrawProcess, which needs nbPanelPartyDraw visible in turn.
+
+## nbPanelDrawProcess (0x108)
+
+65 of 66 instruction words match at the native 264-byte size. Assembly remains
+active; this reconstruction carries no exact-match credit.
+
+The one differing word is at +0xE4: the draft emits `bnel` where retail has
+`bne` on the test after nbPanelStockCheckRun. Compiling the same body with
+nbPanelPartyDraw present as a C definition in this unit gives a full match, so
+the branch form follows the visibility of the callee in the not-taken arm and
+not the source spelling. Reordering the test into an early return, and both
+spellings of the comparison, were ruled out.
+
 ## nbPanelAuto (0x3A0)
 
 226 of 232 instruction words match at the native 928-byte size. Assembly

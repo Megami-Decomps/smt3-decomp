@@ -898,15 +898,15 @@ s32 func_001E4510(evtUnit_t *work, s32 (*callback)(evtUnit_t *, s32)) {
     return ret;
 }
 
-INCLUDE_RODATA(const s32, "event/evtUnitManager", D_0053A850);
-
-INCLUDE_RODATA(const s32, "event/evtUnitManager", D_0053A860);
-
 extern void UnitAnime(evtUnit_t *unit);
 extern void mdlSmoothLoopMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
 extern void mdlSmoothSingleMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
 extern s32 mdlChkMotionEndEx(mdlObj_t *model, s32 group);
 extern s32 printf(const char *format, ...);
+
+INCLUDE_RODATA(const s32, "event/evtUnitManager", D_0053A850);
+
+INCLUDE_RODATA(const s32, "event/evtUnitManager", D_0053A860);
 
 s32 evtUnitManagerPrimaryFunc(dds3PoseSet_t *unused, dds3Basic_t *object) {
     s32 moving = 0;

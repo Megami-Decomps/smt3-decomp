@@ -2388,8 +2388,6 @@ s32 slQueryYesNo(void *yesFunc, void *noFunc, s32 yesNoDefault) {
     return (s32)slQueryYesNoProc;
 }
 
-INCLUDE_RODATA(const s32, "mc/slMain", D_00532948);
-
 extern char D_00528360[];
 extern char D_00528390[];
 extern char D_00528560[];
@@ -2426,6 +2424,8 @@ extern char D_00528B80[];
 extern char D_005516C8[];
 extern char D_005516D0[];
 extern char D_005516E0[];
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_00532948);
 
 void slQueryYesNoDraw(void)
 {

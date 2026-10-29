@@ -1,6 +1,14 @@
 # Addressing and types
 
 
+- A global that holds rows of records must be declared as a struct array, not
+  as `s32[N][K]`, whenever a loop walks the rows. With the struct spelling cc1
+  folds each member offset into its own `%hi`/`%lo` pair and adds the plain
+  `i * sizeof(row)` induction variable; the two-dimensional spelling adds the
+  member offset to the induction variable instead and recomputes the array
+  base inside the loop. `nbPanelPartyDraw` walks the six-word rows at
+  0x005753A0 and went from 169 to 39 differing words on that change alone,
+  with the emitted size becoming exact.
 - A struct pointer local is what keeps two index scalings apart. For
   `base[port].arr[slot]`, writing it out folds both scalings into one
   `(port * N + slot) * 4`, and a row pointer (`u32 *f = base[port].arr;`)
