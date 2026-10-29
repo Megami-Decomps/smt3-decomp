@@ -5,6 +5,29 @@
 
 typedef struct
 {
+    /* 0x00 */ s8 Stat;
+    /* 0x01 */ s8 IconType;
+    /* 0x02 */ u8 reserved02[2];
+    /* 0x04 */ u32 IconColor;
+    /* 0x08 */ s8 MoveType;
+    /* 0x09 */ s8 Axis;
+    /* 0x0A */ u8 reserved0A[2];
+    /* 0x0C */ s32 AxisChg;
+    /* 0x10 */ s32 Wait1st;
+    /* 0x14 */ s32 Wait;
+    /* 0x18 */ f32 Angle;
+    /* 0x1C */ f32 DefAng;
+    /* 0x20 */ f32 DistAng;
+    /* 0x24 */ s32 DefCnt;
+    /* 0x28 */ s32 Cnt;
+    /* 0x2C */ s32 Timer;
+    /* 0x30 */ s32 TimerSpd;
+} cmpHeartsIcon_t;
+
+typedef char cmpHeartsIconSizeCheck[(sizeof(cmpHeartsIcon_t) == 0x34) ? 1 : -1];
+
+typedef struct
+{
     /* 0x00 */ s32 StepY;
     /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
