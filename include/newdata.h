@@ -79,7 +79,7 @@ typedef struct
             u8 stockRemainder[160];
         };
     };
-    u8 boss_press[160];            /* 0x19C8 */
+    s16 boss_press[40][2];            /* 0x19C8 */
     u8 syakkincnt[640];
     u8 negoques[4];                /* 0x1CE8 */
     u8 kotowari[4];                /* 0x1CEC */

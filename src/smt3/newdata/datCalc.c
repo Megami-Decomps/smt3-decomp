@@ -1655,7 +1655,35 @@ void datCopyDevilWork(s32 id, datUnitWork_t *w)
     fclEncycRegist(w, 0);
 }
 
+#ifdef NON_MATCHING
+s32 datBossRashGetRec(s32 eid, s32 type)
+{
+    s32 i;
+
+    for (i = 0; i < 40; i++) {
+        if (datBossPress[i].encid == eid) {
+            if (type == 0) {
+                s16 best = DDS3_GBWK->boss_press[i][0];
+
+                return best > 0 ? best : 999;
+            }
+            if (type == 1) {
+                if (evtBitCheck(datBossPress[i].flag) == 0) {
+                    continue;
+                }
+                if (DDS3_GBWK->boss_press[i][type] == 0) {
+                    return 1;
+                }
+                return DDS3_GBWK->boss_press[i][1];
+            }
+            return datBossPress[i].dbest;
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newdata/datCalc", datBossRashGetRec);
+#endif
 
 void datBossRashUpdRec(s32 eid, s32 press)
 {
