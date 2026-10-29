@@ -730,7 +730,7 @@ extern u32 fldEveHit_AddEveData(fldEventDataHeader_t *resource, dds3Basic_t *bas
 extern s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic);
 extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *data, const char *name);
 extern void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room, const char *name, s32 eventIndex);
-extern void fldItemBoxAdd(s32 itemId, f32 x, f32 y, f32 z, const f32 *rotation);
+extern void fldItemBoxAdd(s32 itemId, const sdfVector4_t *rotation, f32 x, f32 y, f32 z);
 extern void fldAddSe3D(s32 soundId, f32 radius, f32 x, f32 y, f32 z);
 extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(u32 serialID, const sdfVector4_t *position, const sdfVector4_t *rotation);
 
@@ -842,7 +842,8 @@ void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
                     break;
                 }
                 case 3:
-                    fldItemBoxAdd(*(s32 *)data->data.parameters, position[0], position[1], position[2], rotation);
+                    fldItemBoxAdd(*(s32 *)data->data.parameters, (const sdfVector4_t *)rotation,
+                                  position[0], position[1], position[2]);
                     break;
                 case 7: {
                     fldSpawnSoundDataFL2_t *sound = data->data.parameters;
