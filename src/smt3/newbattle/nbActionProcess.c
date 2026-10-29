@@ -1092,7 +1092,46 @@ void CheckDeadScript(nbActionProcessData_t *a)
     }
 }
 
+#ifdef NON_MATCHING
+s32 CheckKoketaNego(nbActionProcessData_t *a)
+{
+    s8 partyList[32];
+    nbFormation_t *form;
+    datUnitWork_t *work;
+    s32 count = 0;
+    s32 i;
+    s32 status;
+
+    if ((a->party->flag & 6) != 0 || a->partyindex >= 4) {
+        return 0;
+    }
+    for (i = 4; i < 14; i++) {
+        form = &a->data->form[i];
+        if ((form->stat & 0x41) != 0x41 ||
+            (a->data->party[form->partyindex].flag & 1) == 0 ||
+            (a->data->party[form->partyindex].flag & 0x20) != 0) {
+            continue;
+        }
+        work = nbGetUnitWorkFromFormindex(i);
+        if (CheckTimeListDead(a, i) != 0) {
+            continue;
+        }
+        status = work->badstatus & 0xFFF;
+        if (status != 1 && status != 2 && status != 4 && status != 0x10 &&
+            status != 0x100 && status != 0x400) {
+            partyList[count++] = form->partyindex;
+        }
+    }
+    if (count == 0) {
+        return 0;
+    }
+    nbPushAction(3, partyList[dds3GetRandIntA(NULL, count)], a->partyindex, 0);
+    printf("escape err party\n");
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckKoketaNego);
+#endif
 
 void KyouseiPress(nbActionProcessData_t *a)
 {
