@@ -747,11 +747,11 @@ ragItemReq_t *ragGetConfirmEntry(s8 kind, u8 index)
 {
     switch (kind) {
     case 0:
-        return (ragItemReq_t *)(ragHeartsTable + 0x2 + index * 0xE);
+        return ((ragOfferTable_t *)ragHeartsTable)->hearts[index].requirements;
     case 1:
-        return (ragItemReq_t *)(ragHeartsTable + 0x180 + index * 0x2C);
+        return ((ragOfferTable_t *)ragHeartsTable)->offers2[index].requirements;
     case 2:
-        return (ragItemReq_t *)(ragHeartsTable + 0x520 + index * 0x2C);
+        return ((ragOfferTable_t *)ragHeartsTable)->offers3[index].requirements;
     default:
         return NULL;
     }

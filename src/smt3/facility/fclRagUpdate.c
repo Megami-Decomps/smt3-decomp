@@ -219,13 +219,13 @@ void ragSetSeqPhase(s8 phase)
     case 2:
         index = (u8)ragUpdateWork->itemList2Window.listCursor.unk_22 +
                 (u8)ragUpdateWork->itemList2Window.listCursor.unk_24;
-        ragSetSeqPhase2(&((ragOffer_t *)(ragHeartsTable + 0x160))[
+        ragSetSeqPhase2(&((ragOfferTable_t *)ragHeartsTable)->offers2[
             (u8)ragUpdateWork->itemList2[index]], &ragUpdateWork->previewUnit);
         return;
     case 3:
         index = (u8)ragUpdateWork->itemList3Window.listCursor.unk_22 +
                 (u8)ragUpdateWork->itemList3Window.listCursor.unk_24;
-        ragSetSeqPhase2(&((ragOffer_t *)(ragHeartsTable + 0x500))[
+        ragSetSeqPhase2(&((ragOfferTable_t *)ragHeartsTable)->offers3[
             (u8)ragUpdateWork->itemList3[index]], &ragUpdateWork->previewUnit);
         break;
     }
