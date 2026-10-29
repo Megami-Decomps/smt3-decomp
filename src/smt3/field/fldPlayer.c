@@ -688,7 +688,6 @@ extern f32 fldCamPitch, fldCamLength, D_0054ECDC;
 extern f32 D_0054C3D4, D_0054C3D8, D_0054C3DC, D_0054C3E0;
 extern f32 D_0054C3E4, D_0054C3E8, D_0054C3EC, D_0054C3F0;
 extern sdfMatrix4_t D_002FA240;
-extern sdfVector4_t fldPlayerPosRotWork[];
 extern s32 printf(const char *format, ...);
 extern s32 fldEncountTestFlag(u32 flag);
 extern s32 fldCamMiwatasiChk(void);
@@ -1269,14 +1268,14 @@ s32 fldPlayerCalc_Nml(void)
     fldGlobalBase.y = position.y;
     {
         dds3PoseSet_t *pose = control->handle->poseset;
-        fldPlayerPosRotWork[0].x = pose->pos2.x;
-        fldPlayerPosRotWork[0].y = pose->pos2.y;
-        fldPlayerPosRotWork[0].z = pose->pos2.z;
-        fldPlayerPosRotWork[0].w = pose->pos2.w;
-        fldPlayerPosRotWork[1].x = pose->rot.x;
-        fldPlayerPosRotWork[1].y = pose->rot.y;
-        fldPlayerPosRotWork[1].z = pose->rot.z;
-        fldPlayerPosRotWork[1].w = pose->rot.w;
+        fldPlayerPosRotWork.pos.x = pose->pos2.x;
+        fldPlayerPosRotWork.pos.y = pose->pos2.y;
+        fldPlayerPosRotWork.pos.z = pose->pos2.z;
+        fldPlayerPosRotWork.pos.w = pose->pos2.w;
+        fldPlayerPosRotWork.rot.x = pose->rot.x;
+        fldPlayerPosRotWork.rot.y = pose->rot.y;
+        fldPlayerPosRotWork.rot.z = pose->rot.z;
+        fldPlayerPosRotWork.rot.w = pose->rot.w;
     }
     fldPlayerMotionSe(oldMotion, motion);
     return 0;
@@ -1666,7 +1665,6 @@ extern s32 D_0054ECD8;
 extern f32 D_0054ECDC, D_0054C414, D_0054C418, D_0054C41C, D_0054C420;
 extern f32 fldCamPitch;
 extern sdfMatrix4_t D_002FA240;
-extern sdfVector4_t fldPlayerPosRotWork[];
 extern s32 fldCamMiwatasiChk(void);
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3FadeIn2(s32 frames);
@@ -2053,14 +2051,14 @@ s32 fldPlayerCalc_Nml_syukan(void)
     fldPlayerMotionSe(oldMotion, motion);
     {
         dds3PoseSet_t *pose = control->handle->poseset;
-        fldPlayerPosRotWork[0].x = pose->pos2.x;
-        fldPlayerPosRotWork[0].y = pose->pos2.y;
-        fldPlayerPosRotWork[0].z = pose->pos2.z;
-        fldPlayerPosRotWork[0].w = pose->pos2.w;
-        fldPlayerPosRotWork[1].x = pose->rot.x;
-        fldPlayerPosRotWork[1].y = pose->rot.y;
-        fldPlayerPosRotWork[1].z = pose->rot.z;
-        fldPlayerPosRotWork[1].w = pose->rot.w;
+        fldPlayerPosRotWork.pos.x = pose->pos2.x;
+        fldPlayerPosRotWork.pos.y = pose->pos2.y;
+        fldPlayerPosRotWork.pos.z = pose->pos2.z;
+        fldPlayerPosRotWork.pos.w = pose->pos2.w;
+        fldPlayerPosRotWork.rot.x = pose->rot.x;
+        fldPlayerPosRotWork.rot.y = pose->rot.y;
+        fldPlayerPosRotWork.rot.z = pose->rot.z;
+        fldPlayerPosRotWork.rot.w = pose->rot.w;
     }
     return 0;
 }
@@ -2390,7 +2388,6 @@ extern void dds3GetRotPoseSet(dds3Basic_t *basic);
 extern f32 EulerAngleAxisY(void);
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
 extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rot);
-extern sdfVector4_t fldPlayerPosRotWork[];
 
 void fldPlayerPosRot(void)
 {
@@ -2476,14 +2473,14 @@ void fldPlayerPosRot(void)
         basic = control->handle;
     }
     pose = basic->poseset;
-    fldPlayerPosRotWork[0].x = pose->pos2.x;
-    fldPlayerPosRotWork[0].y = pose->pos2.y;
-    fldPlayerPosRotWork[0].z = pose->pos2.z;
-    fldPlayerPosRotWork[0].w = pose->pos2.w;
-    fldPlayerPosRotWork[1].x = pose->rot.x;
-    fldPlayerPosRotWork[1].y = pose->rot.y;
-    fldPlayerPosRotWork[1].z = pose->rot.z;
-    fldPlayerPosRotWork[1].w = pose->rot.w;
+    fldPlayerPosRotWork.pos.x = pose->pos2.x;
+    fldPlayerPosRotWork.pos.y = pose->pos2.y;
+    fldPlayerPosRotWork.pos.z = pose->pos2.z;
+    fldPlayerPosRotWork.pos.w = pose->pos2.w;
+    fldPlayerPosRotWork.rot.x = pose->rot.x;
+    fldPlayerPosRotWork.rot.y = pose->rot.y;
+    fldPlayerPosRotWork.rot.z = pose->rot.z;
+    fldPlayerPosRotWork.rot.w = pose->rot.w;
 }
 #else
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerPosRot);

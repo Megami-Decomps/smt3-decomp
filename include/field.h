@@ -102,6 +102,8 @@ typedef struct fldResourcePoint_t
     sdfVector4_t scl;
 } fldResourcePoint_t;
 
+extern fldResourcePoint_t fldPlayerPosRotWork;
+
 /* Counted filename tables use a variable-length trailing array. The native
  * filename entry is 0x0C bytes and the file-resource row is 0x24 bytes. */
 typedef struct fldFileNameEntry_t
