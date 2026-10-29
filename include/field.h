@@ -261,7 +261,7 @@ typedef struct {
 } fldDanteGunState_t;
 
 typedef struct {
-    u8 safeUnitPoint[0x30];
+    union { u8 safeUnitPoint[0x30]; fldResourcePoint_t safeUnit; };
     u32 flag;
     s32 mode;
     u32 sequenceWord38;
