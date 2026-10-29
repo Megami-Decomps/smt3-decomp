@@ -656,7 +656,7 @@ void dds3MagatuhiParSetByType(dds3MagatuhiPar_tag *work, s32 slotValue);
 u32 func_001A8DF8(dds3MagatuhiPar_tag *work, s32 unusedSlotValue);
 /* Types zero/one dispatch from the payload base; two through four skip its prefix.
    Other types still dispatch with a zero argument; no type bounds check is added. */
-void dds3MagatuhiParCopy(dds3MagatuhiPar_tag *work);
+dds3MagatuhiPar_tag *dds3MagatuhiParCopy(dds3MagatuhiPar_tag *work);
 void InitMagatuhiEditorProcess(void);
 void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross);
 
@@ -2246,7 +2246,7 @@ u32 func_001A8DF8(dds3MagatuhiPar_tag *work, s32 unusedSlotValue) {
 
 /* Types zero/one dispatch from the payload base; two through four skip its prefix.
    Other types still dispatch with a zero argument; no type bounds check is added. */
-void dds3MagatuhiParCopy(dds3MagatuhiPar_tag *work) {
+dds3MagatuhiPar_tag *dds3MagatuhiParCopy(dds3MagatuhiPar_tag *work) {
     u32 type = work->type;
     void *handlerArg = NULL;
 
@@ -2269,7 +2269,7 @@ void dds3MagatuhiParCopy(dds3MagatuhiPar_tag *work) {
     default:
         break;
     }
-    dds3MagatuhiParCreate(type, handlerArg);
+    return dds3MagatuhiParCreate(type, handlerArg);
 }
 
 void func_001A8EA8(void) {

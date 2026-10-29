@@ -337,6 +337,16 @@ static void Bar(void);
 A function reached through a dispatch table keyed by an enum sometimes takes an
 underscore suffix naming the entry (`fooBar_A`, `fooBar_B`).
 
+A function a dispatch table reaches keeps the slot's contract, which retail
+data does not show the compiler. Where the dispatcher uses the result, the
+function returns the value retail leaves in `v0`: its final call's, when it
+ends in a tail jump or in a call that nothing after writes `v0` past (the
+effect part creators and copiers). Where the target reads the handle, the
+dispatcher passes it, even though `a0` already holds it at the call (the
+particle and billboard dispatchers). Both forms compile to the same MIPS, so a
+match never shows the difference, but a native build of the C reads whatever
+the register holds.
+
 ### Variables
 
 `camelCase` for variable names.

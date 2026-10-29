@@ -1126,11 +1126,11 @@ billHandle_t *dds3BillboardCopy(const billHandle_t *hBillboard) {
 }
 
 void dds3BillboardDelete(billHandle_t *hData) {
-    dds3BillboardFuncTable[hData->type].destroy();
+    dds3BillboardFuncTable[hData->type].destroy(hData);
 }
 
 void dds3BillboardDraw(billHandle_t *hData) {
-    hData->callback();
+    hData->callback(hData);
 }
 
 billHandle_t *dds3BillboardGeneral(s32 number) {
