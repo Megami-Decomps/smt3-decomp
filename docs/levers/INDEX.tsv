@@ -6,7 +6,7 @@ docs/levers/README.md	11		| 14 | [impossible.md](impossible.md) | Functions that
 docs/levers/README.md	12		| 10 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 docs/levers/README.md	13		| 10 | [stores.md](stores.md) | Stores |
 docs/levers/README.md	14		| 9 | [float-literals.md](float-literals.md) | Float literals |
-docs/levers/README.md	15		| 5 | [scheduling.md](scheduling.md) | Store scheduling |
+docs/levers/README.md	15		| 6 | [scheduling.md](scheduling.md) | Store scheduling |
 docs/levers/README.md	16		| 5 | [callee-visibility.md](callee-visibility.md) | Callee visibility:
 docs/levers/README.md	17	$2 $4 lw move	| 3 | [handle-registers.md](handle-registers.md) | lw $4 against lw $2 plus move $4, $2 |
 docs/levers/README.md	18		| 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
@@ -448,6 +448,7 @@ docs/levers/scheduling.md	31		### Initialize the counter before the offset snaps
 docs/levers/scheduling.md	39		### Initialize the cursor after clearing its temporary buffer pipeEffDraw2Doffset clears a four-float position buffer before assigning its effect cursor from…
 docs/levers/scheduling.md	50	sh	### Final uses can reverse independent initialization stores nbCameraState_Start_Animation initializes two real Bezier segments.
 docs/levers/scheduling.md	75	$18 $3 $4 $5 sw	### Reload work, then capture the call argument before the store pb/pbDraw::pbInitMapBaseDraw matches all 196 bytes with two ordinary post-clear snapshots.
+docs/levers/scheduling.md	99	$0 $4 addiu beq sh	### A gp load always issues before the compare constant it is tested against field/fldTitle::fldTitle_Process stops at 755 of 757 words, at the native 3028…
 docs/levers/stores.md	12	sw	Two unrelated member stores in front of an expression that loads a gp global decide the whole block's schedule, and the winning order is not the one the…
 docs/levers/stores.md	20	$0 jal sw	Where retail's last store before a jal is a constant store rather than the argument setup, hoist the argument into a local above the stores.
 docs/levers/stores.md	26	$0 sw	Two adjacent struct stores only reverse when neither value is a reload.

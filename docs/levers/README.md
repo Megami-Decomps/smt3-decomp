@@ -12,7 +12,7 @@ open the page and line it names.
 | 10 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 | 10 | [stores.md](stores.md) | Stores |
 | 9 | [float-literals.md](float-literals.md) | Float literals |
-| 5 | [scheduling.md](scheduling.md) | Store scheduling |
+| 6 | [scheduling.md](scheduling.md) | Store scheduling |
 | 5 | [callee-visibility.md](callee-visibility.md) | Callee visibility: the cause of most one-word branch-likely misses |
 | 3 | [handle-registers.md](handle-registers.md) | `lw $4` against `lw $2` plus `move $4, $2` |
 | 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |

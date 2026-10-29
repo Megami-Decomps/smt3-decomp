@@ -65,7 +65,7 @@ extern void aDrawBoxG(s32, s32, s32, s32,
 extern s32 fldSnowActive;
 extern s32 fldTitleMiniState;
 
-/* NON_MATCHING: 755 of 757 instruction words match at the native 3028-byte size. */
+/* NON_MATCHING: 755 of 757 words at the native 3028 bytes; +0x4C swaps the D_0054EF8C load with the compare constant, which sched2 ranks by priority 3 (load, cost 2) against 2 (li). */
 #ifdef NON_MATCHING
 s32 fldTitle_Process(dds3ProcessID_t *id)
 {
