@@ -653,12 +653,129 @@ s32 SelectBad(nbDebugProcessData_t *d)
     return 1;
 }
 
+extern datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
+typedef struct { const char *name[4]; } nbDebugMotionNames_t;
+extern nbDebugMotionNames_t D_00545698;
+extern const char D_005514B8[];
+extern const char D_005514C0[];
+extern const char D_005514C8[];
+extern const char D_005514D0[];
+extern s32 D_005512E8;
+extern s32 D_005512E0;
+extern s32 slSelectMotIndex;
+
+#ifdef NON_MATCHING
+s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
+{
+    nbDebugMotionNames_t typeNames;
+    sdfDrawTag_t *tag;
+    datUnitWork_t *work;
+    nbUnitVisualMotions_t *visual;
+    nbUnitMotion_t *motion;
+    s32 i, y, attr, result, selected;
+    s32 byteValue;
+    s32 halfValue;
+    u8 byteBits;
+    u16 halfBits;
+
+    typeNames = D_00545698;
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    work = nbGetUnitWorkFromFormindex(d->form->formindex);
+    dds3ConsPanelTagLinkZ(tag, 0x2E, 0x16E, 12, 5, 0xFF0000);
+    visual = (nbUnitVisualMotions_t *)nbGetUnitVisual(work);
+    motion = &visual->motions[slSelectMotIndex + D_005512E0];
+    y = 0x8490;
+    for (i = 0; i < 4; i++) {
+        selected = *(volatile s32 *)&D_005512E8;
+        attr = active && i == selected ? 4 : 0;
+        switch (i) {
+        case 0:
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+                                                 D_005514B8, typeNames.name[motion->type]));
+            break;
+        case 1:
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+                                                 D_005514C0, motion->data));
+            break;
+        case 2:
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+                                                 D_005514C8, motion->bframe));
+            break;
+        case 3:
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+                                                 D_005514D0, motion->hframe));
+            break;
+        }
+        y += 0x60;
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+    if (!active) {
+        return 0;
+    }
+    result = dds3SelectMenu(0, 1, 4, 1, 4, NULL, NULL, NULL, &D_005512E8);
+    if (result == -1) {
+        return -1;
+    }
+    selected = *(volatile s32 *)&D_005512E8;
+    if (result == 1) {
+        SetMotion(d->data, d->form, slSelectMotIndex + D_005512E0, 0);
+        return 1;
+    }
+    switch (selected) {
+    case 0:
+        if ((dds3PadButtonState[5] & 2) && motion->type < 3) {
+            motion->type++;
+        }
+        if ((dds3PadButtonState[4] & 2) && motion->type != 0) {
+            motion->type--;
+        }
+        break;
+    case 1:
+        if (dds3PadButtonState[5] & 2) {
+            motion->data = (u8)motion->data + 1;
+        }
+        if (dds3PadButtonState[4] & 2) {
+            byteValue = ((volatile nbUnitMotion_t *)motion)->data;
+            byteBits = *(volatile u8 *)&motion->data;
+            if (byteValue >= 0) {
+                motion->data = byteBits - 1;
+            }
+        }
+        break;
+    case 2:
+        if (dds3PadButtonState[5] & 2) {
+            motion->bframe = (u16)motion->bframe + 1;
+        }
+        if (dds3PadButtonState[4] & 2) {
+            halfValue = ((volatile nbUnitMotion_t *)motion)->bframe;
+            halfBits = *(volatile u16 *)&motion->bframe;
+            if (halfValue > 0) {
+                motion->bframe = halfBits - 1;
+            }
+        }
+        break;
+    case 3:
+        if (dds3PadButtonState[5] & 2) {
+            motion->hframe = (u16)motion->hframe + 1;
+        }
+        if (dds3PadButtonState[4] & 2) {
+            halfValue = ((volatile nbUnitMotion_t *)motion)->hframe;
+            halfBits = *(volatile u16 *)&motion->hframe;
+            if (halfValue > 0) {
+                motion->hframe = halfBits - 1;
+            }
+        }
+        break;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMotData);
+#endif
 
 extern const char *D_004F06F0[];
 extern const char D_005514D8[];
-extern s32 D_005512E0;
-extern s32 slSelectMotIndex;
 
 #ifdef NON_MATCHING
 s32 SelectMot(nbDebugProcessData_t *d, s32 active)
