@@ -34,6 +34,43 @@ reads the row base once and reaches the rotation members at displacements
 load arm also differs in shape: retail branches around dds3EffectCopy with the
 fldTakaraSlotCount store in the taken delay slot.
 
+## fldNpcCalc (field/fld_Npc, 0x7B0)
+
+487 of 492 words match, at the exact 1968-byte size. The whole structure is
+settled: the four early returns, the splash branch with `vec.y` reusing the
+same local the loop later uses for `fldModelSlotTable[i].y` (which is what puts
+it in `$f21` rather than `$f20`), `fldNpcBlurHandle != 0` with the two guard
+tests joined by `&&` so the single `fldNpcBlurHandle = 0` arm sits past the body
+and ee-as can take its store into the second test's branch-likely delay slot,
+`D_0054EF64 = D_0054EF64 + length` in that order so the sum lands in the
+global's own register, the chest branch written as
+`if (type == 999 && fldEncountTestFlag(0x40) == 0) { ...; continue; }` so a set
+encount flag falls through into the slot-kind handling, `fldNpcCamTarget = 2`
+after the three position stores, and the slot kind as a `switch` rather than an
+`if` chain, which is what emits both case tests before either body.
+
+Field offsets proved here: type 0x00, csize 0x24, cntf 0x34, cnti 0x38,
+cntAnmf 0x3C, cntAnmi 0x40, itemBoxIdx 0x4C, camera 0x54, name 0x60; and
+`fldGlobalBase` water height at 0xC4 and last move length at 0xC8, both `f32`
+and both reached by cast because the header's members there are not floats.
+
+Two scheduling pairs remain. Retail puts `swc1 $f0, 0xC($29)` (`vec.w = 1.0f`)
+between the `lui %hi` and the `addiu %lo` of `fldBlurEffectId`, where the draft
+keeps the address pair adjacent and the store after it. And in the chest-kind
+switch retail keeps case 3's own copy of `fldCamNpcTarget = -110.0f` as the
+fall-through block and branches the default away, where the draft's copy is
+cross-jumped into the shared `case 0: case 2:` block and the default stays
+inline; instruction counts are equal either way.
+
+Ruled out: every ordering of the four case bodies (0/2, 1, 3 and three
+permutations, each either 5 or 265 words out); the four cases split into four
+separate labels, which gives the same tree and the same merge; `continue`
+instead of `break` in one arm, in all arms, and an explicit `default:
+continue;`; a `default:` arm holding `if (kind == 3)`, which costs 13 more
+words; the chest row as a 16-byte `fldTakaraEntry_t` array instead of the
+`u8` table the neighbouring `fldItemBoxAdd` uses (identical output); three
+declaration positions for `vec`; and a literal `0x10` for the `memset` size.
+
 ## fldNpcLightSet (field/fld_Npc, 0x28C)
 
 125 of 163 words match, at the exact 652-byte size. Everything the source can say
