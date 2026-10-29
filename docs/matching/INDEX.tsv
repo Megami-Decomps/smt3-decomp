@@ -160,7 +160,7 @@ Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/matching/newbattle
 nbApplyBadCurse	newbattle/nbEncProcess	0x174	80 of 93 words match	docs/matching/newbattle/nbEncProcess.md	3
 nbGetEncountJoken	newbattle/nbEncount	0x174	24 of 66 words match	docs/matching/newbattle/nbEncount.md	3
 nbCallNewBattle	newbattle/nbInit	0xA0	29 of 40 words differ	docs/matching/newbattle/nbInit.md	3
-RunNumEffectKouka	newbattle/nbKoukaProcess	0x144	57 of 80 words match	docs/matching/newbattle/nbKoukaProcess.md	3
+RunNumEffectKouka	newbattle/nbKoukaProcess	0x144	81 of 81 words match	docs/matching/newbattle/nbKoukaProcess.md	3
 nbMainProcess1	newbattle/nbMainProcess	0x420	113 of 263 words match	docs/matching/newbattle/nbMainProcess.md	3
 nbDrawMakaNum	newbattle/nbMakaProcess	0x2B4	136 of 173 words match	docs/matching/newbattle/nbMakaProcess.md	3
 nbGetVirtualAisyo	newbattle/nbMakePacket	0xAC	39 of 43 words match	docs/matching/newbattle/nbMakePacket.md	3

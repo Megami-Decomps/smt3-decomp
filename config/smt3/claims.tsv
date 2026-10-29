@@ -928,3 +928,4 @@ src/smt3/newbattle/nbResultProcess.c	z29	done	2026-10-29	0 matches / 1 guarded d
 src/smt3/pipe/pipeMakaAnim.c	redthing1	done	2026-10-29	1 fn / 976 B	makaDrawSingle matched with local nonvolatile empty FPU constraint on real zero endpoint; owner8/0, actual published retail exact and second ninja no-op; f6648fa8
 src/smt3/pipe/pipeMakaAnim.c	redthing1	done	2026-10-29	1 fn / 1172 B	makaDrawMulti matched with local nonvolatile empty FPU constraint on real zero endpoint and native D_00548FF8 table; owner9/0, actual published retail exact and second ninja no-op; 5abcc45e
 src/smt3/field/fldHit.c	z29	open	2026-10-29	1 fn / 3256 B	largest-first pass: fldHitChkUnitVWM
+src/smt3/newbattle/nbKoukaProcess.c	redthing1	done	2026-10-29	1 fn / 324 B	RunNumEffectKouka matched with one local empty memory-input operand on the real VU direction; owner57/0, actual published retail exact, clean tree and second ninja no-op; 3e13612e
