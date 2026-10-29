@@ -206,7 +206,7 @@ deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md	30
 roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/nonmatching/pb/pbGame.md	50
 pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/nonmatching/pb/pbGame.md	75
-pbRebuildOutline	pb/pbGameDraw	0x188	16 of 95 words match	docs/nonmatching/pb/pbGameDraw.md	5
+pbRebuildOutline				docs/nonmatching/pb/pbGameDraw.md	3
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/nonmatching/pb/pbMCard.md	5
 pbEditInitProc	pb/pbMain	0x148	79 of 82 words match	docs/nonmatching/pb/pbMain.md	5
 pb_draw_mapbase_Process	pb/pbModel	0x214	126 of 133 words match	docs/nonmatching/pb/pbModel.md	3

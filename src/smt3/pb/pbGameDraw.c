@@ -56,7 +56,13 @@ typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCam
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
-typedef struct { u16 kind; s16 x, y; u16 outline_num; u8 unk08[0x88]; } pbBlockEntry_t;
+typedef struct {
+    u16 kind;
+    s16 x, y;
+    u16 outline_num;
+    u8 reserved08[8];
+    f32 outline[8][4];
+} pbBlockEntry_t;
 
 typedef struct
 {
@@ -202,7 +208,50 @@ void pbDumpBlockData(pbProcHandle_t *p) {
     }
 }
 
+typedef struct {
+    f32 from[4];
+    f32 to[4];
+} pbOutlineEdge_t;
+
+extern pbOutlineEdge_t D_00327780[];
+extern u8 pbGetBlockAt(s16 x, s16 y, s16 group);
+
+/* NON_MATCHING: 96 of 98 words match at 392 native/emitted bytes. Only the
+ * two block-address additions commute their operands (+0x4C and +0xDC). */
+#ifdef NON_MATCHING
+void pbRebuildOutline(pbGroupData_t *group)
+{
+    s32 i;
+
+    for (i = 0; i < group->num; i++) {
+        pbBlockEntry_t *block = &group->blk[i];
+        f32 x = (f32)(block->x * 40);
+        f32 z = (f32)(block->y * 40);
+        s32 bits;
+        s32 side;
+
+        block->outline_num = 0;
+        bits = pbGetBlockAt(group->cellX + block->x, group->cellY + block->y, group->grpID);
+        for (side = 0; side < 4; side++) {
+            if (((bits >> side) & 1) != 0) {
+                u16 n;
+
+                pbBlockEntry_t *destination = &group->blk[i];
+                n = destination->outline_num;
+                destination->outline_num += 2;
+                destination->outline[n][0] = D_00327780[side].from[0] + x;
+                destination->outline[n][1] = D_00327780[side].from[1];
+                destination->outline[n][2] = D_00327780[side].from[2] + z;
+                destination->outline[n + 1][0] = D_00327780[side].to[0] + x;
+                destination->outline[n + 1][1] = D_00327780[side].to[1];
+                destination->outline[n + 1][2] = D_00327780[side].to[2] + z;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbGameDraw", pbRebuildOutline);
+#endif
 
 pbProcHandle_t *pbStartDrawMapCursor(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
