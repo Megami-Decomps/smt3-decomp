@@ -357,13 +357,15 @@ typedef struct effPCPBossKAGU2Attack_t
 {
     u8 unk00[0x54];
     f32 scale;
-    u8 unk58[0xC];
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
     s32 groupCount;
-    u8 unk68[4];
+    f32 randomness;
     void *polyLists[16];
     effPCPBossBED_t *hBED;
     void *hBEDCut;
-    s32 unkB4;
+    s32 frame;
     u32 color;
 } effPCPBossKAGU2Attack_t;
 
@@ -558,7 +560,11 @@ extern void effDebugLineDraw(const void *pPos0, const void *pPos1);
 extern s32 sdfModelGetMarkPosMatrix(void *aRoot, s32 aId);
 extern void effPCPCrackInit(effPCPCrack_t *pPCPCrack);
 extern void dds3PadVibrationSet(s32 port, u8 power, s32 frames);
-extern effPCPBossUnit_t **nbGetMainProcessData(void);
+/* First field of the battle main-process record. */
+typedef struct effPCPBossMainData_t {
+    effPCPBossUnit_t *form;
+} effPCPBossMainData_t;
+extern effPCPBossMainData_t *nbGetMainProcessData(void);
 extern s32 effBTLModelGetID(effPCPBossUnit_t *pFormation);
 extern u128 *effPCP_ThunderPolyListGetParam(void *pTPolyList);
 extern void effPCP_ThunderPolyListDraw(void *hData);
@@ -1614,7 +1620,7 @@ void effPCPBossDengekiDraw(effPCPBossDengeki_t *hData)
         model = effBTLSkillGetInvokeFormation();
     } else {
         found = NULL;
-        model = *nbGetMainProcessData();
+        model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
             if ((model->flags & 3) == 3) {
                 id = effBTLModelGetID(model);
@@ -1806,7 +1812,7 @@ void effPCPBossThunderboltDraw(effPCPBossThunderbolt_t *hData)
         model = effBTLSkillGetInvokeFormation();
     } else {
         found = NULL;
-        model = *nbGetMainProcessData();
+        model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
             if ((model->flags & 3) == 3) {
                 id = effBTLModelGetID(model);
@@ -1939,7 +1945,7 @@ void effPCPBossKAGUInvokeDraw(effPCPBossKAGUInvoke_t *hData)
         model = effBTLSkillGetInvokeFormation();
     } else {
         found = NULL;
-        model = *nbGetMainProcessData();
+        model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
             if ((model->flags & 3) == 3) {
                 id = effBTLModelGetID(model);
@@ -2285,7 +2291,7 @@ void effPCPBossKAGUThunderboltDrawSub(effPCPBossKAGUThunderbolt_t *pPCPBossKAGUT
         model = effBTLSkillGetInvokeFormation();
     } else {
         found = NULL;
-        model = *nbGetMainProcessData();
+        model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
             if ((model->flags & 3) == 3) {
                 id = effBTLModelGetID(model);
@@ -2380,7 +2386,7 @@ effPCPBossKAGU2Attack_t *effPCPBossKAGU2AttackCreate(effPCPBossKAGU2Attack_t *pP
     u32 i;
 
     memcpy(work, pParam, 0x6C);
-    work->unkB4 = 0;
+    work->frame = 0;
     work->color = 0x80808080;
     if (pBEDData != NULL) {
         effPCPBossBED_t *bed;
@@ -2588,7 +2594,7 @@ void effPCPBossKAGU2MUHENKDraw(effPCPBossKAGU2MUHENK_t *pPCPBossKAGU2MUHENK)
         model = effBTLSkillGetInvokeFormation();
     } else {
         found = NULL;
-        model = *nbGetMainProcessData();
+        model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
             if ((model->flags & 3) == 3) {
                 id = effBTLModelGetID(model);
@@ -2741,7 +2747,7 @@ void effPCPBossMETATOBeamDraw(effPCPBossMETATOBeam_t *hData)
         model = effBTLSkillGetInvokeFormation();
     } else {
         found = NULL;
-        model = *nbGetMainProcessData();
+        model = nbGetMainProcessData()->form;
         for (i = 0; i < 0x20; i++) {
             if ((model->flags & 3) == 3) {
                 id = effBTLModelGetID(model);
@@ -3168,7 +3174,7 @@ effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
         work->bed = effEveBEDCreate(pBED);
     }
     delay = 1;
-    unit = *nbGetMainProcessData();
+    unit = nbGetMainProcessData()->form;
     bits = effBTLSkillGetTargetBit();
     count = 0;
     slot = work->delay;
@@ -3246,7 +3252,7 @@ void effPCPDANTE_Damage_Run(effPCPDANTE_Damage_tag *work)
     s32 total = work->param.total;
     s32 fadeIn = work->param.fadeIn;
     s32 fadeOut = work->param.fadeOut;
-    effPCPBossUnit_t *unit = *nbGetMainProcessData();
+    effPCPBossUnit_t *unit = nbGetMainProcessData()->form;
     targetBits = effBTLSkillGetTargetBit();
 
     for (i = 0; i < 0x20; i++, unit++) {

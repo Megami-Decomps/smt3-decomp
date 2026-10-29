@@ -1892,3 +1892,14 @@ The global-memory-clobber store instead retains the early address in `$21`
 and emits 1,040 bytes. A volatile matrix does not change either result.
 This case needs the existing bare-address output macro, not volatile storage
 or a read-write address constraint.
+
+- The KAGU2 attack work has signed duration/fade-in/fade-out words at
+  `+0x58/+0x5C/+0x60`, a float random-spread input at `+0x68`, and a signed
+  frame counter at `+0xB4`. The native draw path compares these timing values
+  as integers and converts only the ratio operands to float. The create path
+  resets the counter; the copied 0x6C-byte parameter head includes all timing
+  and spread fields. These recovered names preserve all existing owner bytes.
+  The battle main-process provider returns a record whose first field is the
+  formation pointer; read `main->form` rather than declaring the provider as
+  returning a pointer-to-pointer. The local formation view preserves the
+  native 0xF0 array stride. The complete owner checks 153 match / 0 differ.
