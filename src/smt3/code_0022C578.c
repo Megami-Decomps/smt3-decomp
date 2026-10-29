@@ -9820,7 +9820,106 @@ s32 cmpCursorAtLastEnabled(cmpCursorInfo_t *cursor)
     return 0;
 }
 
+#ifdef NON_MATCHING
+s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode)
+{
+    s32 origin;
+    s32 delta;
+    s32 row;
+    s32 index;
+    s32 valid;
+    s32 retry;
+    u8 shift;
+    u8 *flags;
+
+    if (cursor->unk_20 < 2) {
+        return 0;
+    }
+    if (direction == 0) {
+        cursor->StopFlag = 0;
+        return 0;
+    }
+    if (cursor->StopFlag != 0) {
+        cursor->StopFlag = 2;
+        return 0;
+    }
+
+    origin = cursor->unk_22 + (u8)cursor->unk_24;
+    do {
+        valid = 1;
+        retry = 0;
+        if (direction < 0) {
+            if (cmpCursorAtFirstEnabled(cursor)) {
+                shift = cursor->unk_21;
+                delta = (cursor->unk_26 - (s8)shift - 1) * cursor->StepY;
+                cursor->unk_22 = cursor->unk_20 - cursor->unk_26;
+                cursor->unk_24 = cursor->unk_26 - 1;
+                cursor->unk_25 = cursor->unk_26 - shift - 1;
+                cursor->CursorPos += delta;
+                cmpUpdateCursorScroll(cursor, -1);
+            } else if (mode < (u8)cursor->unk_24 || cursor->unk_22 == 0) {
+                flags = cursor->flagsData.bytes;
+                cursor->unk_24 = (u8)cursor->unk_24 - 1;
+                index = cursor->unk_22 + (u8)cursor->unk_24;
+                if (flags != NULL && (flags[index] & 2) != 0) {
+                    valid = 0;
+                    retry = 1;
+                }
+                if (valid) {
+                    cursor->unk_25--;
+                    cursor->CursorPos -= cursor->StepY;
+                }
+            } else {
+                cursor->unk_22--;
+            }
+            if (cmpCursorAtFirstEnabled(cursor)) {
+                cursor->StopFlag = 1;
+            }
+        } else {
+            if (cmpCursorAtLastEnabled(cursor)) {
+                shift = cursor->unk_21;
+                delta = (cursor->unk_26 - (s8)shift - 1) * cursor->StepY;
+                cursor->unk_22 = 0;
+                cursor->unk_24 = 0;
+                cursor->unk_25 = 0;
+                cursor->CursorPos -= delta;
+                cmpUpdateCursorScroll(cursor, 1);
+            } else if ((u8)cursor->unk_24 < (s32)(u8)cursor->unk_26 - mode - 1 ||
+                       cursor->unk_22 + (u8)cursor->unk_26 == cursor->unk_20) {
+                flags = cursor->flagsData.bytes;
+                cursor->unk_24 = (u8)cursor->unk_24 + 1;
+                index = cursor->unk_22 + (u8)cursor->unk_24;
+                if (flags != NULL && (flags[index] & 2) != 0) {
+                    valid = 0;
+                    retry = 1;
+                }
+                if (valid) {
+                    cursor->unk_25++;
+                    cursor->CursorPos += cursor->StepY;
+                }
+            } else {
+                cursor->unk_22++;
+            }
+            if (cmpCursorAtLastEnabled(cursor)) {
+                cursor->StopFlag = 1;
+            }
+        }
+    } while (retry);
+
+    if (direction != 0) {
+        if (((volatile cmpCursorInfo_t *)cursor)->unk_30 < 0x100) {
+            ((volatile cmpCursorInfo_t *)cursor)->unk_30 = 0x100;
+        }
+        ((volatile cmpCursorInfo_t *)cursor)->unk_30 = 0x100;
+        if (origin != cursor->unk_22 + (u8)cursor->unk_24) {
+            ((cmpPadStopWork_t *)cursor)->unk_38 = direction >= 0 ? 2 : 1;
+        }
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpFindNextCursorItem);
+#endif
 
 void cmpAdvanceCursorPhase(cmpCursorInfo_t *cursor)
 {
@@ -9831,7 +9930,7 @@ void cmpAdvanceCursorPhase(cmpCursorInfo_t *cursor)
 }
 
 #ifdef NON_MATCHING
-extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s32 mode);
+extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode);
 #endif
 
 s32 cmpMoveCursor(cmpCursorInfo_t *cur, s8 dir)
