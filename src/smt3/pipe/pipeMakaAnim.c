@@ -413,7 +413,54 @@ void makaDrawNormalGauge(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
 INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawNormalGauge);
 #endif
 
+#ifdef NON_MATCHING
+void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
+{
+    volatile s8 cells[16];
+    s16 positions[16];
+    s32 width = makaGetBarWidth(value);
+    s32 i;
+    s32 previous = 0;
+    s16 step = 0;
+    s16 position = 0;
+    f32 spriteWidth;
+    f32 spriteHeight;
+    s16 totalWidth;
+    u32 color = ((u32)alpha << 24) | 0x808080;
+
+    for (i = width; i >= 0; i--) {
+        cells[i] = makaGetBarCell(value, i);
+        if (i == width) {
+            step = 0;
+        } else if (previous == 9 && cells[i] == 9) {
+            step = (s16)(s32)(sx * 20.0f);
+        } else if ((previous > 0 && cells[i] > 0) ||
+                   (previous == 0 && cells[i] == 0)) {
+            step = (s16)(s32)(sx * 14.0f);
+        } else if (previous == 0 || cells[i] == 0) {
+            step = (s16)(s32)(sx * 16.0f);
+        }
+        position += step;
+        positions[i] = position;
+        previous = cells[i];
+        cells[i]++;
+    }
+
+    spriteWidth = sx * 25.0f;
+    spriteHeight = sy * 30.0f;
+    totalWidth = (s16)(s32)((f32)position + spriteWidth);
+    for (i = width; i >= 0; i--) {
+        s32 cell = cells[i];
+        eglLinkSprite((s32)(((f32)x + (f32)positions[i]) - (f32)(totalWidth >> 1)),
+                      (s32)((f32)y - spriteHeight * 0.5f),
+                      (s32)spriteWidth, (s32)spriteHeight,
+                      cell % 5 * 25 + 1, cell / 5 * 30 + 2, 25, 30,
+                      color, color, color, color, MakaTex[1].th);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawBar);
+#endif
 
 INCLUDE_RODATA(const s32, "pipe/pipeMakaAnim", D_00548FD8);
 
