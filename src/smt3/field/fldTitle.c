@@ -127,4 +127,82 @@ void fldTitleMini_Shutdown(void) {
 
 INCLUDE_RODATA(const s32, "field/fldTitle", D_00532820);
 
-INCLUDE_ASM(const s32, "field/fldTitle", fldTitleMiniStart);
+extern s32 fldTitleMiniState;
+extern s32 fldSnowActive;
+extern s32 fldArea[];
+extern s32 D_0054EFB0;
+extern s32 evtBitCheck(s32 no);
+extern s32 fldTitleMini_Process(dds3ProcessID_t *id);
+
+void fldTitleMiniStart(s32 fld)
+{
+    char path[32];
+    u32 data;
+    void *allocation;
+
+    if (fld < 0xA) {
+        return;
+    }
+    if (fld == 0xB && evtBitCheck(0x43F) == 0) return;
+    if (fld == 0xD && evtBitCheck(0x4C3) == 0) return;
+    if (fld == 0xE && evtBitCheck(0x420) == 0) return;
+    if (fld == 0xF && evtBitCheck(0x440) == 0) return;
+    if (fld == 0x10 && evtBitCheck(0x460) == 0) return;
+    if (fld == 0x11 && evtBitCheck(0x480) == 0) return;
+    if (fld == 0x12 && evtBitCheck(0x4A0) == 0) return;
+    if (fld == 0x13 && evtBitCheck(0x4C0) == 0) return;
+    if (fld == 0x14 && evtBitCheck(0x4E0) == 0) return;
+    if (fld == 0x15 && evtBitCheck(0x500) == 0) return;
+    if (fld == 0x16 && evtBitCheck(0x520) == 0) return;
+    if (fld == 0x17 && evtBitCheck(0x540) == 0) return;
+    if (fld == 0x18 && evtBitCheck(0x560) == 0) return;
+    if (fld == 0x19 && evtBitCheck(0x580) == 0) return;
+    if (fld == 0x1A && evtBitCheck(0x5A0) == 0) return;
+    if (fld == 0x1B && evtBitCheck(0x5C0) == 0) return;
+    if (fld == 0x1C && evtBitCheck(0x5E0) == 0) return;
+    if (fld == 0x1D && evtBitCheck(0x600) == 0) return;
+    if (fld == 0x1E && evtBitCheck(0x620) == 0) return;
+    if (fld == 0x1F && evtBitCheck(0x640) == 0) return;
+    if (fld == 0x20 && evtBitCheck(0x660) == 0) return;
+    if (fld == 0x21 && evtBitCheck(0x680) == 0) return;
+    if (fld == 0x22 && evtBitCheck(0x6A0) == 0) return;
+    if (fld == 0x23 && evtBitCheck(0x6E0) == 0) return;
+    if (fld == 0x26 && evtBitCheck(0x710) == 0) return;
+    if (fld == 0x28 && evtBitCheck(0x750) == 0) return;
+    if (fld == 0x29 && evtBitCheck(0x760) == 0) return;
+    if (fld == 0x2A && evtBitCheck(0x780) == 0) return;
+    if (fld == 0x2B && evtBitCheck(0x7A0) == 0) return;
+    if (fld == 0x2C && evtBitCheck(0x7C0) == 0) return;
+    if (fld == 0x2D && evtBitCheck(0x7E0) == 0) return;
+
+    if (fld == 0xC && fldArea[0] == 1) return;
+    if (fld == 0xF) {
+        if (fldArea[0] == 0x14) return;
+        if (fldArea[0] == 0x13) return;
+    }
+    if (fld == 0x22 && fldArea[0] == 2) return;
+    if (fld == 0x24) {
+        fld = 0x20;
+    }
+    if (fld == 0x25) {
+        fld = 0x20;
+    }
+
+    D_0054EFB0 = fld;
+    fldTitleMiniState = 0;
+    fldSnowActive = 0;
+    sprintf(path, "/fld/f/pnl/ds%03d.tmx", fld);
+    allocation = sdfDevLoadFileEx(path, &data, NULL);
+    fldTitleMiniTex = sdfTexSet((const TMX_HEADER_t *)data);
+    sdfMemFreeDirect((sdfMemHandle_t *)allocation);
+
+    allocation = sdfDevLoadFileEx("/fld/f/pnl/dun_04.tmx", &data, NULL);
+    fldTitleMiniWork = sdfTexSet((const TMX_HEADER_t *)data);
+    sdfMemFreeDirect((sdfMemHandle_t *)allocation);
+
+    if (fldTitleChk() == 0) {
+        dds3StartProcess(D_00532820, 0x2B0A, 0, 1, fldTitleMini_Process,
+                         (dds3ProcessFunc_t)fldTitleMini_Shutdown, NULL);
+    }
+}
+
