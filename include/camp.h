@@ -35,6 +35,14 @@ typedef struct
     /* 0x34 */ s32 unk_34;
 } cmpCursorInfo_t;
 
+typedef struct
+{
+    s8 state;
+    u8 param;
+    u8 unk_02[2];
+    s32 value;
+} cmpCursorSlot_t;
+
 typedef struct cmpPadStopWork_t {
     cmpCursorInfo_t cursor;
     s8 unk_38;

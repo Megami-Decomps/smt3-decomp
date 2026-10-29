@@ -149,14 +149,6 @@ extern rcvWork_t *shutdownfunc;
 
 extern s8 gProcessStat_3;
 
-typedef struct
-{
-    s8 state;
-    u8 param;
-    u8 unk_02[2];
-    s32 value;
-} cmpCursorSlot_t;
-
 extern cmpInfoWindow_t *cmpInfoWindow;
 
 extern cmbWork_t *D_0054FB20;
