@@ -877,7 +877,7 @@ void nbCameraShot_InvokeTargetNearReverse_Set(nbCamera_t *pNbCamera, nbCameraSki
     }
 }
 
-extern void effBTLGetGroupPos(nbFormation_t *pFormation, sdfVector4_t *pPos);
+extern void effBTLGetGroupPos(nbFormation_t *pFormation, f32 *pPos);
 
 void nbCameraShot_InvokeTargetPartyTop_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 {
@@ -968,7 +968,7 @@ void nbCameraShot_InvokeTargetPartyTop_Set(nbCamera_t *pNbCamera, nbCameraSkillI
     if (nbCameraBoss_CheckRotate(pInvoke))
         effBTLModelLook(pInvoke, &p);
 
-    effBTLGetGroupPos(pInvoke, &targetPos);
+    effBTLGetGroupPos(pInvoke, (f32 *)&targetPos);
     count = effBTLSkillGetTargetNumber();
     for (i = 0; i < count; i++) {
         pTarget = effBTLSkillGetTargetFormation(i);
@@ -1064,7 +1064,7 @@ void nbCameraShot_InvokeTargetPartyTop2_Set(nbCamera_t *pNbCamera, nbCameraSkill
     if (nbCameraBoss_CheckRotate(pInvoke))
         effBTLModelLook(pInvoke, &p);
 
-    effBTLGetGroupPos(pInvoke, &targetPos);
+    effBTLGetGroupPos(pInvoke, (f32 *)&targetPos);
     count = effBTLSkillGetTargetNumber();
     for (i = 0; i < count; i++) {
         pTarget = effBTLSkillGetTargetFormation(i);
