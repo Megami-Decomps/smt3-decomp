@@ -49,3 +49,19 @@ which separate scalars never produce. And `u32 i` is what keeps a `for (i = 0;
 i < 4; i++)` counting up: with `s32 i` gcc reverses it into a `bgez`
 countdown, while the unsigned compare retail emits as `sltiu $2, $17, 0x4`
 blocks the reversal.
+
+### Preserve both sphere results in the top-view camera setter
+
+`nbCameraShot_InvokeTargetPartyTop2_Set` matches all 720 bytes with separate
+radius and height locals and two aligned stack vectors. `effBTLModelGroupGetSphere`
+returns the radius in `$f0` and leaves the center in `vf10`: double the radius
+and preserve that center immediately with `SDF_VU0_STOREVECTOR`. The later look
+callback uses the saved center; the second vector receives the invoke group's
+position through `effBTLGetGroupPos`.
+
+The native formation scan walks all 32 records and raises the zero-initialized
+maximum only on ordered strict height comparisons. Radius above 1400 or height
+above 500 selects the existing fallback; the random fallback is gated by the
+invoke formation's `0x100` bit. Keep both rotate checks in the final target walk:
+there is a state/identity test between those two real provider calls. The
+complete normal camera-skill owner checks 31 match / 0 differ.
