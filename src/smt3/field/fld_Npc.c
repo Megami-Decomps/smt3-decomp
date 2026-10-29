@@ -1404,7 +1404,7 @@ void fldNpcCalc(void)
                 f32 length;
 
                 control = fldGetUnitControl();
-                y = *(f32 *)fldGlobalBase.unkC4;
+                y = fldGlobalBase.floatC4;
                 vec.x = control->handle->poseset->pos2.x;
                 vec.y = y;
                 vec.z = control->handle->poseset->pos2.z;
@@ -1428,7 +1428,7 @@ void fldNpcCalc(void)
             }
         } else if (fldGlobalBase.word4C != -1 && fldGlobalBase.playerMoveDistance > 3.0f) {
             control = fldGetUnitControl();
-            fldSibukiStart(control->handle->poseset->pos2.x, *(f32 *)fldGlobalBase.unkC4 - 5.0f,
+            fldSibukiStart(control->handle->poseset->pos2.x, fldGlobalBase.floatC4 - 5.0f,
                            control->handle->poseset->pos2.z);
         }
 

@@ -180,7 +180,7 @@ typedef struct fldAreaWork_t
     s32 lightMaIdx;             /* 0x0B8 */
     s32 wordBC;                 /* 0x0BC */
     s32 wordC0;                 /* 0x0C0 */
-    u8 unkC4[4];
+    f32 floatC4;               /* 0x0C4 */
     union { s32 wordC8; f32 playerMoveDistance; }; /* 0x0C8 */
     s32 wordCC;                 /* 0x0CC */
     void *pacRes[10];           /* 0x0D0: handle and mapped pointer per pac entry */
