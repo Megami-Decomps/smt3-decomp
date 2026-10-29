@@ -289,7 +289,23 @@ INCLUDE_ASM(const s32, "sdk/libkernl", VSync2);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", write);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", read);
+extern s32 D_0052C2A4 __attribute__((section(".data")));
+extern s32 sceTtyInit(void);
+extern s32 sceTtyRead(char *buffer, s32 length);
+
+s32 read(s32 descriptor, void *buffer, s32 length)
+{
+    if (descriptor == 0) {
+        if (D_0052C2A4 == 0) {
+            if (sceTtyInit() == 0) {
+                return -1;
+            }
+            D_0052C2A4 = 1;
+        }
+        return sceTtyRead(buffer, length);
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", open);
 
@@ -397,7 +413,34 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyHandler);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyWrite);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyRead);
+/* Native TTY context prefix, through its receive queue. */
+typedef struct ttyState_t {
+    s32 handle;
+    s32 sendLength;
+    s32 receiveLength;
+    s32 sendBusy;
+    u8 *sendBuffer;
+    u8 *receiveBuffer;
+    ttyQueue_t *queue;
+} ttyState_t;
+
+extern ttyState_t D_0059B690;
+
+s32 sceTtyRead(char *buffer, s32 length)
+{
+    s32 count;
+
+    for (count = 0; count < length; count++) {
+        while (D_0059B690.queue->count == 0) {
+        }
+        buffer[count] = *D_0059B690.queue->read;
+        QueuePeekReadDone(D_0059B690.queue);
+        if (buffer[count] == 10 || buffer[count] == 13) {
+            return count + 1;
+        }
+    }
+    return count;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyInit);
 

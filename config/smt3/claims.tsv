@@ -721,3 +721,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 156 B	TTY circular 
 src/smt3/field/fldInf.c	redthing1	done	2026-10-29	2 fn / 2112 B	PiM agent: native-qualified DDS InfNext and existing FastPanel draft completion; real selector recursion/current mode owner, canonical providers, full owner8/0
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 fn / 216 B	reentrant signal dispatch with invalid/default/ignored/error/custom paths and reset-before-callback semantics; complete owner exact
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 132 B	strstr first-byte and indexed continuation loops; signed byte equality views and empty-string behavior; complete owner 59 match, 0 differ
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 324 B	stdin dispatch and queue-backed TTY read; signed length, shared occupancy polling, callback-visible cursor/output reloads and CR/LF completion; complete owner 29 match, 0 differ
