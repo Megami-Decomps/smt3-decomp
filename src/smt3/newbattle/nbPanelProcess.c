@@ -486,6 +486,19 @@ extern char D_00545498[];
 
 extern s32 nbPanelLayoutTable2[4][6];
 
+/* The same 0x18-byte rows as nbPanelLayoutTable2, under the HD member names. */
+typedef struct
+{
+    s32 ActiveMode;
+    s32 OfsX;
+    s32 OldHp;
+    s32 OldMp;
+    s32 HpAnmCnt;
+    s32 MpAnmCnt;
+} nbPnlWork_t;
+
+extern nbPnlWork_t gnbPnlWork[4] asm("nbPanelLayoutTable2");
+
 extern s32 nbPanelDrawProcess(void);
 
 extern s32 nbGetActionSeq(dds3ProcessID_t *id);
@@ -499,6 +512,10 @@ extern void nbPanelPressGauge(nbMainProcessData_t *data);
 extern void nbPanelPartySelect(nbMainProcessData_t *data);
 
 extern void nbPanelPartyDraw(void);
+
+extern u32 dds3GetRandIntA(void *state, u32 limit);
+
+extern void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessData_t *p);
 
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, void *drawExit,
@@ -990,7 +1007,7 @@ void nbPanelPolygonScaleDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, f3
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPolygonFlashDraw);
 
-void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *p, s32 index)
+void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *p)
 {
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
@@ -1411,7 +1428,157 @@ void nbPanelPartyHide(void)
     PanelPartyShow = 0;
 }
 
+/* NON_MATCHING: 332 of 339 words match at the native 1356-byte size. The
+ * branch form at +0x3FC needs nbPanelDrawPP1 as a visible C definition. */
+
+#ifdef NON_MATCHING
+
+void nbPanelPartyDraw(void)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    s32 partyindex[4];
+    s32 statindex[4];
+    s32 type[4];
+    s32 jun[4];
+    s32 i, j;
+    s32 oi, n;
+    s32 x, yb, y, yy;
+    s32 si;
+    s32 ofs;
+
+    if (PanelPartyShow == 0) {
+        return;
+    }
+    data = nbGetMainProcessData();
+    if (data == NULL) {
+        return;
+    }
+    form = data->form;
+    for (i = 0; i < 4; i++) {
+        partyindex[i] = -1;
+        statindex[i] = -1;
+        jun[i] = -1;
+        type[i] = -1;
+        if ((form->stat & 0x41) == 0x41) {
+            s32 pi = form->partyindex;
+            s32 ty;
+
+            partyindex[i] = pi;
+            statindex[i] = data->party[pi].statindex;
+            ty = form->type;
+            if (ty == 1) {
+                type[i] = ty;
+            }
+        }
+        form++;
+    }
+    if ((data->stat & 8) == 0) {
+        oi = data->orderindex;
+        n = 0;
+        if (oi != -1) {
+        for (i = 0; i < 12; i++) {
+            if (data->order[oi] != -1) {
+                for (j = 0; j < 4; j++) {
+                    if (data->order[oi] == partyindex[j]) {
+                        jun[j] = n;
+                        n++;
+                    }
+                }
+            }
+            oi++;
+            if (oi >= 12) {
+                oi = 0;
+            }
+        }
+        }
+    }
+    y = 0;
+    yb = 0x153;
+    for (i = 0; i < 4; i++) {
+        if (type[i] == -1) {
+            x = 230;
+            yy = y + 0x153;
+        } else {
+            x = dds3GetRandIntA(NULL, 6) + 227;
+            yy = yb + dds3GetRandIntA(NULL, 6) - 3;
+        }
+        if (partyindex[i] != -1) {
+            if (data->order[data->orderindex] == partyindex[i] && jun[i] != -1) {
+                gnbPnlWork[i].ActiveMode = 1;
+                ofs = (16 - gnbPnlWork[i].OfsX) / 3;
+                if (ofs < 1) {
+                    ofs = 1;
+                }
+                gnbPnlWork[i].OfsX += ofs;
+                if (gnbPnlWork[i].OfsX >= 17) {
+                    gnbPnlWork[i].OfsX = 16;
+                }
+            } else {
+                gnbPnlWork[i].ActiveMode = 0;
+                ofs = gnbPnlWork[i].OfsX / 3;
+                if (ofs < 1) {
+                    ofs = 1;
+                }
+                gnbPnlWork[i].OfsX -= ofs;
+                if (gnbPnlWork[i].OfsX < 0) {
+                    gnbPnlWork[i].OfsX = 0;
+                }
+            }
+            si = statindex[i];
+            if (gnbPnlWork[i].OldHp == -1) {
+                gnbPnlWork[i].OldHp =
+                    ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->hp;
+            }
+            if (type[i] == -1) {
+                if (gnbPnlWork[i].HpAnmCnt > 0) {
+                    gnbPnlWork[i].HpAnmCnt--;
+                } else {
+                    gnbPnlWork[i].OldHp =
+                        ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->hp;
+                }
+            } else {
+                gnbPnlWork[i].HpAnmCnt = 8;
+            }
+            if (gnbPnlWork[i].OldMp == -1) {
+                gnbPnlWork[i].OldMp =
+                    ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->mp;
+            }
+            if (gnbPnlWork[i].MpAnmCnt > 0) {
+                gnbPnlWork[i].MpAnmCnt--;
+                if (gnbPnlWork[i].MpAnmCnt <= 0) {
+                    gnbPnlWork[i].OldMp =
+                        ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->mp;
+                }
+            } else {
+                if (((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->mp <
+                    gnbPnlWork[i].OldMp) {
+                    gnbPnlWork[i].MpAnmCnt = 8;
+                }
+            }
+            nbPanelDrawPP1(x, yy, i, statindex[i], jun[i], gnbPnlWork[i].ActiveMode, data);
+        } else {
+            nbPanelDrawPP0(x, yy, data);
+            gnbPnlWork[i].ActiveMode = 0;
+            gnbPnlWork[i].OfsX = 0;
+            gnbPnlWork[i].OldHp = -1;
+            gnbPnlWork[i].OldMp = -1;
+            gnbPnlWork[i].HpAnmCnt = 0;
+            gnbPnlWork[i].MpAnmCnt = 0;
+        }
+        yb += 0x17;
+        y += 0x17;
+    }
+    nbPnl_rsetAlpha(0);
+    nbPnlSprite(0x103, 0x14F, 0xFD, 3, 1, 0x73, 0xFD, 3, nbPanelBaseABGR, data->pnltex[1]);
+    nbPnlSprite(0x103, 0x1AE, 0xFD, 3, 1, 0x73, 0xFD, 3, nbPanelBaseABGR, data->pnltex[1]);
+}
+
+#else
+
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPartyDraw);
+
+#endif
 
 /* NON_MATCHING: 65 of 66 words match; the one differing word is the branch form
  * after nbPanelStockCheckRun, which turns into bne once nbPanelPartyDraw is a

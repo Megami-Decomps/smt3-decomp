@@ -28,6 +28,7 @@ page and line to open. Conventions are in
 | 4 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
+| 3 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fld_Npc | [field/fld_Npc.md](field/fld_Npc.md) |
@@ -42,7 +43,6 @@ page and line to open. Conventions are in
 | 2 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
-| 2 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
 | 2 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 2 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
