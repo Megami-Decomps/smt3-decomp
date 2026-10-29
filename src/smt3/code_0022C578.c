@@ -4978,8 +4978,9 @@ void cmpDrawStatusCom(s32 a, s8 b, s8 c, s8 d)
     cmpDrawStatusComEx(a, 0x80, -1, 0, 0, 0, 0xA09DC380, b, c, d);
 }
 
-extern void cmpDrawStatusComEx2(s32 a, s32 b, s32 c, s32 alpha, s32 d, s32 e, s32 f, s32 g,
-                                s32 color, s32 h, s32 i, s32 j, s32 k);
+extern void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
+                                s8 kind, s8 detail, s32 delta, s8 mode, u32 color,
+                                s8 show, s8 option, s8 extra, s8 full);
 
 void cmpDrawStatusComEx(s32 a, u8 alpha, s8 b, s8 c, s32 d, s8 e, s32 color, s8 f, s8 g, s8 h)
 {
@@ -5015,7 +5016,86 @@ void cmpAdvanceStatusAnim(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusComEx2);
+typedef struct
+{
+    s8 SkillCnt;
+    u8 TargetLevel[0x19];
+    u16 skill[25];
+} rstSkillInfo_t;
+
+typedef struct
+{
+    /* 0x00 */ u8 unk_00[0x10];
+} cmpModelLink_t;
+
+extern cmpModelLink_t D_002F69B8[];
+
+extern void cmpDrawStatusRow(s32, s32, s32 *, s32, datUnitWork_t *);
+extern void cmpDrawParamPanel(s32, s32, s32 *, s32, datUnitWork_t *, s32, s32, s32);
+extern void cmpDrawStatusValue(s32, s32, s32 *, s32, datUnitWork_t *);
+extern u16 itfMesMngGetStatManager(void);
+extern void rstCreateBeforeSkillList(s8, s32, s8, rstSkillInfo_t *);
+extern void cmpDrawSkill(s32, s32, s32 *, datUnitWork_t *, rstSkillInfo_t *, s32, s32,
+                         s32, s32, s32);
+extern s32 cmpDrawStatusModel(void *);
+
+void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
+                         s8 kind, s8 detail, s32 delta, s8 mode, u32 color,
+                         s8 show, s8 option, s8 extra, s8 full)
+{
+    s32 xOffset[3];
+    s32 yOffset[3];
+    rstSkillInfo_t skillData;
+    s32 colors[4];
+    datUnitWork_t target;
+    memset(xOffset, 0, sizeof(xOffset));
+    memset(yOffset, 0, sizeof(yOffset));
+    colors[0] = (alpha & 0xFF) | 0x80808000;
+    colors[1] = (alpha & 0xFF) | 0x80808000;
+    colors[2] = (alpha & 0xFF) | 0x80808000;
+    colors[3] = (alpha & 0xFF) | 0x80808000;
+
+    switch (show) {
+    case 0:
+    case 1:
+    case 4:
+        break;
+    case 2:
+        yOffset[0] = -30;
+        yOffset[1] = 0;
+        yOffset[2] = 20;
+        break;
+    case 3:
+        if (cmbBirthPanel == NULL) {
+            show = 1;
+        }
+        break;
+    }
+
+    cmpCalcTargetDevil(unit, &target);
+    cmpDrawStatusRow(x + xOffset[0], y + yOffset[0], colors, show, unit);
+    cmpDrawParamPanel(x + xOffset[1], y + yOffset[1], colors, delta, unit,
+                      kind, detail, option);
+    cmpDrawStatusBars(x + xOffset[1], y + yOffset[1] + 4, (u8 *)colors);
+    cmpDrawStatusValue(x + xOffset[1], y + yOffset[1] + 4, colors, show, unit);
+
+    if ((itfMesMngGetStatManager() & 2) == 0 || show == 2) {
+        rstCreateBeforeSkillList(DDS3_GBWK->heartsequip, (s32)&target, mode, &skillData);
+        cmpDrawSkill(x + xOffset[2], y + yOffset[2], colors, &target,
+                     &skillData, kind, detail, 0x4D4B4B4D, extra, show);
+    }
+
+    if (show == 0) {
+        fclDrawSpriteRes(x + xOffset[2], y + yOffset[2], 0, colors, 0, 0x20, D_00345D88,
+                         fclSpriteTable, 0x47);
+        fclDrawSpriteRes(x + xOffset[2], y + yOffset[2], 0, colors, 2, 0x11, D_00345D88,
+                         fclSpriteTable, 0x47);
+    }
+    if (full != 0) {
+        cmpDrawStatusModel(D_002F69B8);
+    }
+    cmpAdvanceStatusAnim();
+}
 
 extern char *pStr[];
 
@@ -5559,13 +5639,6 @@ void func_0023A9F0(f32 *rot, void *model)
     FromEuler(rot[0], rot[1], rot[2]);
     mdlSetRotate(model);
 }
-
-typedef struct
-{
-    /* 0x00 */ u8 unk_00[0x10];
-} cmpModelLink_t;
-
-extern cmpModelLink_t D_002F69B8[];
 
 extern void mdlLink(void *aHandle, cmpModelLink_t *aModelOt);
 
