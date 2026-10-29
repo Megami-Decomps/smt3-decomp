@@ -118,7 +118,7 @@ typedef struct {
 } shpPaymentGlobal_t;
 extern shpPaymentWork_t *shopProcWork;
 extern shpPaymentGlobal_t *shopMoneyGlobal asm("DDS3_GBWK");
-extern u32 shpGetSellPrice(s32 index, s8 kind);
+extern s32 shpGetSellPrice(s32 index, s8 kind);
 extern u16 shpGetItemPrice(s32 index, s8 kind);
 
 s8 shpCalcPayOfMoney(s32 index, s8 kind)
@@ -248,6 +248,7 @@ typedef struct shopDrawWork_t {
     shopChoiceCursor_t choiceCursor;
     u8 reserved11FC[0x1198];
     s32 texHandle[2];
+    fclPanel_t pricePanel;
 } shopDrawWork_t;
 
 extern u8 *shopDrawWork;
@@ -415,8 +416,6 @@ void shopDrawRowText(s32 x, s32 y, s32 z, u32 color, u16 item, s32 count, s32 ot
 }
 
 
-INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawBuyRow);
-
 typedef struct
 {
     s32 rowHeight;
@@ -447,10 +446,62 @@ typedef struct
 
 extern void lstDrawListWindow(void *work, s8 noCursor, s32 ot);
 extern void lstDrawListWindowCursor(void *work, s32 ot);
-extern s32 cmpDrawListItemBox(void *cursor, s32 row, s32 slot, s32 mode, s32 height);
+extern u32 cmpDrawListItemBox(void *cursor, s32 row, s32 slot, s32 mode, s32 height);
 extern s32 cmpItemHasFlag(u16 item, s8 which);
 extern s32 fclDrawPanel(fclPanel_t *panel, s32 ot);
 extern void fclDrawPriceText(fclPanelPos_t *panel, u16 item, s32 ot);
+
+
+extern s32 cmbChkGetHearts(s32 rawId);
+
+#ifdef NON_MATCHING
+void shopDrawBuyRow(s32 row, u8 *work, s8 mode, s32 ot)
+{
+    shopDrawListWork_t *list = (shopDrawListWork_t *)work;
+    shopDrawCursor_t *cursor = &list->cursor;
+    fclPanelPos_t pos;
+    s32 x = list->panel.x;
+    s32 y = list->panel.y;
+    s32 z = list->panel.z;
+    s32 i;
+
+    lstDrawListWindow(work, mode, ot);
+    for (i = 0; i < cursor->rowCount; i++) {
+        u16 item = shpGetItemPrice(cursor->selectedTop + i, 0);
+        s32 price;
+        s32 disabled;
+        s32 slot;
+        u32 color;
+
+        if (item == 0) {
+            break;
+        }
+        price = shpGetSellPrice(cursor->selectedTop + i, 0);
+        disabled = DDS3_GBWK->maka < shpGetSellPrice(cursor->selectedTop + i, 0);
+        slot = datGetItemSlotIndex(item);
+        if (slot != 0 && cmbChkGetHearts(slot) != 0) {
+            disabled = 1;
+        }
+        if (mode != 0) {
+            disabled |= 2;
+        }
+        color = cmpDrawListItemBox(cursor, i, i, disabled, 0x100);
+        shopDrawRowText(x, y, z, color, item, price, ot);
+        y += cursor->rowHeight * 8;
+    }
+    shopDrawRowBox((fclPanelPos_t *)&list->panel, 0, ot);
+    fclDrawPanel(&((shopDrawWork_t *)shopDrawWork)->pricePanel, 0x47);
+    fclInitPanelPos(0x1470, 0x3B0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
+    fclDrawPriceText(&pos, shpGetItemPrice(cursor->selectedTop + cursor->selectedOffset, 0), 0x47);
+    fclDrawPhaseHeader((u8 *)&((shopDrawWork_t *)shopDrawWork)->pricePanel, 0x14132D33, 1, 0x47);
+    if (mode == 0) {
+        lstDrawListWindowCursor(work, ot);
+    }
+}
+#else
+INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawBuyRow);
+#endif
+
 
 void shopDrawSellRow(s32 row, u8 *work, s8 mode, s32 id)
 {
