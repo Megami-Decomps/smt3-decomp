@@ -728,7 +728,30 @@ s32 gcc2_compiled__0(FILE *fp, __suio *uio) {
     return err;
 }
 
-INCLUDE_ASM(const s32, "sdk/libc", __sbprintf);
+/* Buffer an unbuffered stream using only the fields the native path initializes. */
+s32 __sbprintf(FILE *fp, const char *fmt, va_list ap)
+{
+    FILE fake;
+    u8 buf[1024];
+    s32 ret;
+
+    fake._data = fp->_data;
+    fake._flags = fp->_flags & ~2;
+    fake._file = fp->_file;
+    fake._cookie = fp->_cookie;
+    fake._write = fp->_write;
+    fake._bf._base = fake._p = buf;
+    fake._bf._size = fake._w = sizeof(buf);
+    fake._lbfsize = 0;
+    ret = vfprintf(&fake, fmt, ap);
+    if (ret >= 0 && fflush(&fake) != 0) {
+        ret = -1;
+    }
+    if (fake._flags & 0x40) {
+        fp->_flags |= 0x40;
+    }
+    return ret;
+}
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B670);
 
