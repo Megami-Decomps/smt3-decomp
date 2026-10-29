@@ -315,7 +315,58 @@ void pbSetPanelModel(pbProcHandle_t *panel, s32 index) {
 }
 
 
+extern sdfVector4_t D_00327248;
+extern const f64 D_00535C80[];
+extern f32 D_0054E2AC, D_0054E2B0, D_0054E2B4, D_0054E2B8;
+extern void pbSetPrimMatrix(sdfVector4_t *rotation, f32 *position, void *packet);
+extern s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags,
+                                    s32 special, sdfDrawTag_t *tag);
+
+#ifdef NON_MATCHING
+s32 pb_draw_exit_Process(dds3ProcessID_t *id)
+{
+    pbProcHandle_t *panel = id->workdata;
+    pbExit_t *work = panel->data.mat;
+    f32 position[4];
+    sdfVector4_t vertices;
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    f32 angle;
+
+    memset(position, 0, sizeof(position));
+    memset(&vertices, 0, sizeof(vertices));
+    if (panel->state == 1) {
+        if (panel != NULL) {
+            panel->flags = 0;
+        }
+    } else if (panel->state == 5) {
+        return -1;
+    }
+    if (work->flg == 0) {
+        return 0;
+    }
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdf3DPrimLinkMat(tag, work->mat, NULL);
+    angle = (f64)D_00327248.y + D_00535C80[0];
+    D_00327248.y = angle;
+    if (D_0054E2AC < angle) {
+        D_00327248.y = angle - D_0054E2B0;
+    } else if (angle < D_0054E2B4) {
+        D_00327248.y = angle + D_0054E2B8;
+    }
+    position[0] = panel->x * 40 - 380;
+    position[1] = -20.0f;
+    position[2] = panel->y * 40 - 380;
+    pbSetPrimMatrix(&D_00327248, position, tag);
+    pbDrawMapPolyTransformed(&vertices, 0x1F, 6, tag);
+    ot = &sdfGrOtTable[40];
+    ot->regFunc(ot, tag);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbModel", pb_draw_exit_Process);
+#endif
 
 void pb_draw_exit_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
