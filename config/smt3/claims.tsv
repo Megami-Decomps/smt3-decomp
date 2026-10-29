@@ -739,3 +739,4 @@ src/smt3/field/fldAutoMap.c	redthing1	done	2026-10-29	2 fn / 1660 B	PiM agent: D
 src/smt3/field/fld_Npc.c	redthing1	done	2026-10-29	1 fn / 652 B	PiM agent: native/DDS genuine RGB component reuse, canonical local model helper declarations, no unnecessary angle changes; complete owner17/0
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 456 B	load-file bind/version initialization and loader result wrappers with native retry, flag/query ordering and byte-version copy; owner 45 match, 0 differ
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	0 exact / 392 B guarded	stream read native-size draft with 95 of 98 words matching; active-check temporary-register pair unresolved
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 404 B	TTY receive/send callback with shared progress fields, native diagnostic/error behavior and allocator-qualified byte-count lifetime; complete owner 36 match, 0 differ

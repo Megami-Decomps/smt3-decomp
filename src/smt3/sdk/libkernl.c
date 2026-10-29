@@ -422,22 +422,88 @@ void QueuePeekReadDone(ttyQueue_t *queue)
     }
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyHandler);
-
-INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyWrite);
-
 /* Native TTY context prefix, through its receive queue. */
 typedef struct ttyState_t {
     s32 handle;
-    s32 sendLength;
-    s32 receiveLength;
-    s32 sendBusy;
+    /* Callback-visible transfer progress and completion state. */
+    volatile s32 sendLength;
+    volatile s32 receiveLength;
+    volatile s32 sendBusy;
     u8 *sendBuffer;
     u8 *receiveBuffer;
     ttyQueue_t *queue;
 } ttyState_t;
 
 extern ttyState_t D_0059B690;
+
+extern s32 sceDeci2ExRecv(s32 handle, void *buffer, u16 length);
+extern s32 sceDeci2ExSend(s32 handle, void *buffer, u16 length);
+extern void kprintf(const char *format, ...);
+extern const char D_0054BA70[];
+extern const char D_0054BA98[];
+extern const char D_0054BAB0[];
+extern const char D_0054BAC8[];
+
+void sceTtyHandler(s32 event, s32 byteCount, void *argument)
+{
+    /* Qualified EE 2.9 global_alloc trace: this shared receive/traversal count
+     * has 17 refs over 44 live instructions, ahead of the context's 25/78.
+     * It takes r16 and the context takes r17; splitting the count reverses them.
+     * Ordinary, dumped and hooked assembly agree; both RTL dump sets agree. */
+    ttyState_t *state = argument;
+    u8 *packet;
+
+    switch (event) {
+    case 1:
+    case 2:
+        if (byteCount != 0) {
+            if ((u32)state->receiveLength + (u32)byteCount > 320) {
+                kprintf(D_0054BA70);
+            }
+            {
+                s32 receiveOffset = state->receiveLength;
+                byteCount = sceDeci2ExRecv(state->handle,
+                                          state->receiveBuffer + receiveOffset,
+                                          (u16)byteCount);
+            }
+            if (byteCount < 0) {
+                kprintf(D_0054BA98);
+            }
+            state->receiveLength += byteCount;
+        } else {
+            packet = state->receiveBuffer;
+            for (byteCount = 12; byteCount < *(u16 *)packet; byteCount++) {
+                *state->queue->write = state->receiveBuffer[byteCount];
+                QueuePeekWriteDone(state->queue);
+            }
+            state->receiveLength = 0;
+        }
+        return;
+    case 3: {
+        s32 sent = sceDeci2ExSend(state->handle, state->sendBuffer,
+                                (u16)state->sendLength);
+        if (sent < 0) {
+            kprintf(D_0054BAB0, sent);
+        } else {
+            state->sendBuffer += sent;
+            state->sendLength -= sent;
+            return;
+        }
+        break;
+    }
+    case 4:
+        if (state->sendLength != 0) {
+            kprintf(D_0054BAC8, state->sendLength);
+        }
+        break;
+    default:
+        return;
+    }
+    state->sendBusy = 0;
+}
+
+INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyWrite);
+
 
 s32 sceTtyRead(char *buffer, s32 length)
 {
