@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 
 typedef struct fp_number_type_df {
     s32 class;

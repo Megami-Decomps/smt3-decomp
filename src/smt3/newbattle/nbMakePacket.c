@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -305,7 +306,6 @@ extern f32 sdfAtan2(f32 aY, f32 aX);
 
 extern f32 nbMakeUnitMoveGetCyDist(nbFormation_t *i_form, nbFormation_t *t_form);
 
-extern f64 fptodp(f32 value);
 
 
 

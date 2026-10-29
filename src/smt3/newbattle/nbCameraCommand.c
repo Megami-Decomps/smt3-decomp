@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -7,7 +8,6 @@
 #include "motion.h"
 #include "fpu.h"
 
-extern u64 fptodp(f32);
 extern s32 printf(const char *, ...);
 extern char D_00534BB8[]; /* Padded ground-collision diagnostic. */
 

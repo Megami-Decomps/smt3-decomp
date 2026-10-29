@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "basic.h"
 #include "kernel.h"
 #include "libsdf.h"
@@ -16,7 +17,6 @@ extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 
 extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, ...);
 
-extern f64 fptodp(f32 value);
 
 extern void dds3MenuStepValue(char *text, f32 value);
 

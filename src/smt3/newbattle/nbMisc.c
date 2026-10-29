@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "nb.h"
@@ -34,12 +35,6 @@ extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh
                         sdfTexHandle_t *th);
 
 extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
-
-/* These inherited symbol names identify the soft-double conversion and
- * comparison helpers in this executable, not integer conversion/division. */
-extern f64 fptodp(f32 value);
-
-extern long dpcmp(f64 left, f64 right);
 
 /* The selection block at +0x70 of an akuma record, which nbSetPlayerStartData
  * clears before the devil enters the stock. */

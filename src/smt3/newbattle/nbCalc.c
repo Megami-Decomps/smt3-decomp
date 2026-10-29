@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -306,7 +307,6 @@ extern char D_00544D10[];
 extern char D_00544D30[];
 extern s32 datGetNormalAtkPow(datUnitWork_t *work);
 
-extern long fptodp(f32 value);
 
 extern s32 nbGetLvAvg(nbMainProcessData_t *data, s32 side);
 

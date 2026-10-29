@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "basic.h"
 #include "kernel.h"
 #include "libsdf.h"
@@ -2144,7 +2145,6 @@ void fldRunDanteMove(void)
 }
 
 
-extern f64 fptodp(f32 value);
 
 void fldRunDantePwak(void)
 {

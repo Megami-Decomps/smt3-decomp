@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "newlib_stat.h"
 #include "ps2asm.h"
 
@@ -1105,7 +1106,6 @@ extern char *cvt(_reent *r, f64 value, s32 precision, s32 flags, char *sign,
                  s32 *decimalPoint, s32 format, s32 *length);
 extern s32 isinf(f64 value);
 extern s32 isnan(f64 value);
-extern s32 dpcmp(f64 left, f64 right);
 extern s32 exponent(char *out, s32 value, s32 marker);
 extern _reent *_impure_ptr;
 extern s32 D_0052C290 __attribute__((section(".data")));

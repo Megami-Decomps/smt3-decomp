@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "effBattle.h"
 #include "nb.h"
 #include "basic.h"
@@ -132,7 +133,6 @@ extern u32 D_0031CA90[];
 extern s32 effBTLFieldColorIsOn(void);
 extern void effBTLFieldColorGetBaseColor(void);
 extern void effBTLFieldColorStart(void);
-extern f64 fptodp(f32 value);
 
 typedef struct effBTLColor_t {
     f32 a;

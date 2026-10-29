@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "pbRecord.h"
 #include "kernel.h"
 #include "libsdf.h"
@@ -249,8 +250,6 @@ extern void pbGetCameraParam(f32 *out);
 extern void pbSetCameraRadius(f32 radius);
 extern void pbSetCameraDegree(f32 degree);
 extern void pbSetCameraDegreeInit(f32 degree);
-/* Historical name for the runtime float-to-soft-double promotion helper. */
-extern f64 fptodp(f32 value);
 extern char D_0054F620[];
 
 s32 DebugProcRadius(pbDebugWork_t *work, sdfDrawTag_t *tag)

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "model.h"
 #include "motion.h"
 #include "ps2asm.h"
@@ -837,8 +838,6 @@ extern f32 aViewEye[4];
 extern sdf3DScreenParam_t dds3ScreenParam;
 extern void MultMatrixRev(f32 *matrix);
 extern f32 sdfSin(f32 angle);
-extern f64 fptodp(f32 value);
-extern long dpcmp(f64 left, f64 right);
 extern sdfGrPacketHeader_t *effPkt2DAllocTriStrip(s32 count, s32 prim);
 extern void *effPkt2DGetPrimPtr(void *packet);
 extern void sdfGrLinkDrawFrameTex(sdfDrawTag_t *tag, const u8 *env, void *packet);

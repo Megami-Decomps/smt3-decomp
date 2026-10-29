@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "libsdf.h"
 #include "effect.h"
 
@@ -55,17 +56,6 @@ extern void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32
 extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 
 extern f32 sdfSin(f32 aRadius);
-
-extern f64 fptodp(f32 value) __attribute__((const));
-
-extern long dpcmp(f64 left, f64 right) __attribute__((const));
-
-extern f64 dpsub(f64 left, f64 right) __attribute__((const));
-
-extern f64 dpmul(f64 left, f64 right) __attribute__((const));
-
-extern u32 dptoul(f64 value) __attribute__((const));
-
 
 extern sdfGrPacketHeader_t *effPkt2DAllocTriStrip(s32 num, s32 prim);
 

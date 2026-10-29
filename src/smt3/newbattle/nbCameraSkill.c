@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdk_libgcc.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -188,7 +189,6 @@ extern s32 effBTLSkillGetState(void);
 extern u16 effBTLModelGetBadStatus(nbFormation_t *pFormation);
 extern f32 effBTLModelGroupGetSphere(u32 group);
 extern u32 dds3GetRandIntA(void *state, u32 limit);
-extern f64 fptodp(f32 value);
 extern s32 printf(const char *format, ...);
 extern f32 D_003246D0[];
 extern f32 D_003246F0[];
@@ -1911,7 +1911,6 @@ void nbCameraShot_AttackTuibiReverse_Set(nbCamera_t *pNbCamera)
 
 extern s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera);
 extern void nbCameraState_InvokeTarget_SearchSet(void);
-extern f64 fptodp(f32 value);
 extern s32 printf(const char *format, ...);
 extern f32 D_003246D0[];
 extern f32 D_003246F0[];
