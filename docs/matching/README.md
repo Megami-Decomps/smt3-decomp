@@ -12,8 +12,8 @@ both native and emitted sizes when they differ.
 | Entries | Unit | Page |
 |---|---|---|
 | 33 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
-| 18 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
+| 17 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 11 |  | [sdk/libkernl.md](sdk/libkernl.md) |
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
@@ -50,6 +50,7 @@ both native and emitted sizes when they differ.
 | 2 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 2 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 2 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
+| 2 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 2 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
@@ -77,7 +78,6 @@ both native and emitted sizes when they differ.
 | 1 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
 | 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 |  | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
-| 1 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 1 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
@@ -87,6 +87,7 @@ both native and emitted sizes when they differ.
 | 1 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
 | 1 | newbattle/nbE911 | [newbattle/nbE911.md](newbattle/nbE911.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
+| 1 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 1 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 1 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 1 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |

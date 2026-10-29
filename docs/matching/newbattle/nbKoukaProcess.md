@@ -2,11 +2,19 @@
 
 ## RunNumEffectKouka (newbattle/nbKoukaProcess, 0x144)
 
-In the 320-byte emitted prefix, 57 of 80 words match, against 324 native bytes
-(81 words). Four bytes remain uncovered by positional comparison; this is not
-a one-instruction-only residual. Initial constant/party access scheduling, party
-address registers and the final output/call setup still differ. The complete
-default owner retains all 56 C matches; assembly remains active.
+81 of 81 words match in `3e13612e`: 324 bytes plus four bytes of alignment
+fill, complete owner 57 match / 0 differ with data checks. The actual published
+commit rebuilt the exact retail image; a second `ninja` reported no work, with
+a clean tracked tree and validated object and link inputs.
+
+The ordinary reconstruction matched 73/81 words. Its remaining eight
+words were initial constant/party-access scheduling: the compiler delayed the
+forward Z store into the inactive-guard branch delay slot. One local volatile
+empty `"m"` input operand on initialized `forward.z`, immediately after loading
+`k->data`, retains the native schedule without adding instructions. Its real
+consumer is the later VU load for `dds3RotationArc`; the operand is not a general
+memory barrier. This is an SMT3 reconstruction aid, not original-source evidence.
+Qualified stock diagnostic dumps preserved production code/data output.
 
 The source zeroes a vector at stack+0 and sets its Z to -1 before selecting the
 packet's party. An inactive party returns. The signed formation index selects
@@ -24,8 +32,12 @@ void signature. Load `form->hunit` and the packet's signed parameter after the
 arc call. The existing quadword-copy and identity-vector macros describe the
 native operations; an aggregate C copy emits a different transfer.
 
-A ROT/HOMEROT switch recovers the native three-way dispatch, improving the
-corrected macro-only form from 308 to 320 bytes. A memory-input VU load confirms
-the initial Z value is consumed. It was already present in the plain-load
-object: the scheduling mismatch is not dead-store removal. A volatile input
-vector regresses to 328 bytes and is not retained.
+A ROT/HOMEROT switch preserves the native dispatch. Existing NOMEM quaternion
+store macros retain the native final output-address rematerialization, and the
+party-index pointer expression retains its native operand order. Removing only
+the empty operand from the final owner returns the 73/81-word ordinary result;
+placing it before the `k->data` load gives 79/81, exchanging that load and the Z
+store. Tied memory/float constraints regress and are not retained. The final
+source has no register binding, synthetic arithmetic, new call or runtime memory
+access. All 26 regression scripts, normal-draft and IRX checks passed before
+publication.

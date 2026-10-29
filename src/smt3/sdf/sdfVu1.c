@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eeregs.h"
 #include "ps2asm.h"
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
@@ -97,7 +98,6 @@ extern f32 sdf3DEyeOffset[4];
 
 extern u8 sdf3DScreenParam[];
 
-void corePktEmitTexTris();
 
 extern u8 corePktWorldLightMtxCache[];
 
@@ -132,6 +132,9 @@ typedef struct sdfMatPacket_t {
 } sdfMatPacket_t;
 
 #include "sdfCorePacketCb_t.h"
+
+void corePktEmitTexTris(sdfCorePacketCb_t *work);
+void corePktEmitTris(sdfCorePacketCb_t *work);
 
 extern void corePktXfmUV(void *vertices, s32 count, void *uv, void *transform);
 
@@ -1460,10 +1463,10 @@ void corePktEmitTris(work)
 
 void corePktEmitBase(sdfCorePacketCb_t *cb) {
     if ((cb->attrBits & SDF_VU_TEXTURED_FLAG) != 0) {
-        corePktEmitTexTris();
+        corePktEmitTexTris(cb);
         return;
     }
-    corePktEmitTris();
+    corePktEmitTris(cb);
 }
 
 void corePktEmitMultiTexPass(sdfCorePacketCb_t *cb) {
@@ -1611,10 +1614,6 @@ u64 *corePktClosePacket(sdfCorePacketCb_t *cb) {
 u8 *corePktVu0Run(sdfCorePacketPointBuff_tag *output, const void *source, s32 count,
                   s32 transferCount, s32 transferStride)
 {
-    volatile u32 *dmaControl = (volatile u32 *)0x10008000;
-    volatile u32 *dmaAddress = (volatile u32 *)0x10008010;
-    volatile u32 *dmaQwc = (volatile u32 *)0x10008020;
-    volatile u32 *vifStatus = (volatile u32 *)0x10003800;
     u32 input = (u32)source;
     s32 done = 0;
     s32 batch, i, qwc;
@@ -1624,11 +1623,11 @@ u8 *corePktVu0Run(sdfCorePacketPointBuff_tag *output, const void *source, s32 co
         if (batch >= 25) batch = 24;
         done += batch;
         qwc = (s32)((u32)transferStride * (u32)batch + (u32)transferCount + 15) >> 4;
-        *dmaQwc = qwc;
-        *dmaAddress = input & SDF_DMA_ADDRESS_MASK;
+        HW_WRITE(D0_QWC, qwc);
+        HW_WRITE(D0_MADR, input & SDF_DMA_ADDRESS_MASK);
         input += (u32)qwc << 4;
-        *dmaControl = 0x101;
-        while ((*dmaControl & 0x100) != 0 || (*vifStatus & 0x0F000003) != 0) { }
+        HW_WRITE(D0_CHCR, 0x101);
+        while ((HW_READ(D0_CHCR) & 0x100) != 0 || (HW_READ(VIF0_STAT) & 0x0F000003) != 0) { }
         VU0_BEGIN_POINT_UNPACK(0x60);
         for (i = 0; i < batch; i++) {
             VU0_UNPACK_POINT(output);

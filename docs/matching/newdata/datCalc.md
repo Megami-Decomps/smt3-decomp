@@ -17,3 +17,19 @@ arm; duplicating `return param - bonus` in both arms to invite cross-jumping;
 `hearts` as `u8`, as `s8` and as an `s32` with the cast at the read; and all
 36 combinations of declaration order and initialisation order of the three
 locals.
+
+## datGetSkillKouka (newdata/datCalc, 0x3F8)
+
+254 of 254 words match in `9b5853f0` (1016 bytes). The earlier private
+ordinary-C draft was 243/254
+words exact; that residual is retired. A localized empty read/write constraint
+on the real selected dispatch type holds it in `$5` immediately before the
+switch. The binding ends before any case calls. Ordering the existing type
+and current-value initializations resolves the remaining two scheduled words.
+This target-specific allocation aid is not a claim about original source
+spelling; the ordinary bridge without the constraint remains nonmatching.
+
+The complete owner passes 78 match, 0 differ. Both dispatch tables, the exact
+jitter literal `0x3d4ccccc`, full owner text, rodata and lit4, and the complete
+retail image were verified. Actual published source receipts and the next
+no-op build also pass. `datGetPlayerParam` above remains unresolved.
