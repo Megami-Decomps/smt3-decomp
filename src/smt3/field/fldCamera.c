@@ -763,7 +763,190 @@ void resetCamTgtPlayer(void) {
 
 INCLUDE_ASM(const s32, "field/fldCamera", fldEventUpdateEx_Unity_2);
 
+#ifdef NON_MATCHING
+extern void dds3SetScreenFovy(f32 fovy);
+
+void fldCamSetChaseCore(f32 divisor)
+{
+    fldFollowCameraControl_t *control = fldGetFollowCameraControl();
+    sdfVector4_t eye, target;
+    f32 x, y, z, clamped, blend = 0.0f, inverse = 0.0f;
+    f32 distance, height, sinAngle;
+    s32 cameraIndex;
+    s32 first = 0, second = 0;
+    dds3Basic_t *camera;
+
+    memset(&eye, 0, sizeof(eye));
+    eye.w = 1.0f;
+    memset(&target, 0, sizeof(target));
+    target.w = 1.0f;
+    x = fldGlobalBase.x;
+    y = fldGlobalBase.y;
+    z = fldGlobalBase.z;
+    if (fldGlobalBase.area == 1) {
+        y = -40.0f;
+    }
+    if (fldGlobalBase.area == 2) {
+        clamped = z;
+        if (clamped > 3500.0f) {
+            clamped = 3500.0f;
+        }
+        if (clamped < -4300.0f) {
+            clamped = -4300.0f;
+        }
+        first = 8;
+        second = 9;
+        blend = (clamped - 3500.0f) / -7800.0f;
+        inverse = 1.0f - blend;
+    }
+    if (fldGlobalBase.area == 3) {
+        clamped = z;
+        if (clamped > 4300.0f) {
+            clamped = 4300.0f;
+        }
+        if (clamped < -4000.0f) {
+            clamped = -4000.0f;
+        }
+        first = 10;
+        second = 11;
+        blend = (clamped - 4300.0f) / -8300.0f;
+        inverse = 1.0f - blend;
+    }
+    if (fldGlobalBase.area == 5) {
+        clamped = z;
+        if (clamped > 4600.0f) {
+            clamped = 4600.0f;
+        }
+        if (clamped < -3600.0f) {
+            clamped = -3600.0f;
+        }
+        first = 12;
+        second = 13;
+        blend = (clamped - 4600.0f) / -8200.0f;
+        inverse = 1.0f - blend;
+    }
+    if (fldGlobalBase.area == 8) {
+        clamped = z;
+        if (clamped > 1200.0f) {
+            clamped = 1200.0f;
+        }
+        if (clamped < -3100.0f) {
+            clamped = -3100.0f;
+        }
+        first = 14;
+        second = 15;
+        blend = (clamped - 1200.0f) / -4300.0f;
+        inverse = 1.0f - blend;
+    }
+    if (fldGlobalBase.area == 1) {
+        fldGlobalBase.cameraParamIndex = 6;
+        dds3SetScreenFovy(fldCamParamTable[6].fovy * 3.1399998664855957f / 180.0f);
+    } else if (fldGlobalBase.area > 0 && fldGlobalBase.area < 4) {
+        dds3SetScreenFovy((fldCamParamTable[first].fovy * inverse +
+                           fldCamParamTable[second].fovy * blend) * 3.1399998664855957f / 180.0f);
+    } else {
+        fldGlobalBase.cameraParamIndex = 7;
+        dds3SetScreenFovy(fldCamParamTable[7].fovy * 3.1399998664855957f / 180.0f);
+    }
+    switch (fldGlobalBase.area) {
+    case 1:
+        if (x < -950.0f) {
+            x = -950.0f;
+        }
+        if (x > 850.0f) {
+            x = 850.0f;
+        }
+        if (z < -1100.0f) {
+            z = -1100.0f;
+        }
+        if (z > 1100.0f) {
+            z = 1100.0f;
+        }
+        break;
+    case 4:
+        if (x < -3800.0f) {
+            x = -3800.0f;
+        }
+        if (x > 2600.0f) {
+            x = 2600.0f;
+        }
+        if (z < -4000.0f) {
+            z = -4000.0f;
+        }
+        if (z > 2800.0f) {
+            z = 2800.0f;
+        }
+        break;
+    case 6:
+    case 7:
+        if (x < -2400.0f) {
+            x = -2400.0f;
+        }
+        if (x > 2100.0f) {
+            x = 2100.0f;
+        }
+        if (z < -2348.0f) {
+            z = -2348.0f;
+        }
+        if (z > 811.0f) {
+            z = 811.0f;
+        }
+        break;
+    case 8:
+        if (x < -3000.0f) {
+            x = -3000.0f;
+        }
+        if (x > 2400.0f) {
+            x = 2400.0f;
+        }
+        if (z < -3100.0f) {
+            z = -3100.0f;
+        }
+        if (z > 1200.0f) {
+            z = 1200.0f;
+        }
+        break;
+    }
+    eye.x = x;
+    eye.z = z;
+    eye.y = y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight;
+    if (first != 0) {
+        eye.y = y + (fldCamParamTable[first].eyeHeight * inverse +
+                     fldCamParamTable[second].eyeHeight * blend);
+    }
+    if (divisor > 0.0f) {
+        eye.x = D_002FC9C0[0] + (eye.x - D_002FC9C0[0]) / divisor;
+        eye.y = D_002FC9C0[1] + (eye.y - D_002FC9C0[1]) / divisor;
+        eye.z = D_002FC9C0[2] + (eye.z - D_002FC9C0[2]) / divisor;
+    }
+    dds3CameraObjectBasicGetCameraTM(control->camera, &eye);
+    sinAngle = sdfSin(3.1399996280670166f);
+    cameraIndex = fldGlobalBase.cameraParamIndex;
+    target.y = y + fldCamParamTable[cameraIndex].targetHeight;
+    target.x = x + sinAngle * fldCamParamTable[cameraIndex].distance;
+    target.z = z + sdfCos(3.1399996280670166f) * fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
+    if (first != 0) {
+        distance = fldCamParamTable[first].distance * inverse + fldCamParamTable[second].distance * blend;
+        height = fldCamParamTable[first].targetHeight * inverse + fldCamParamTable[second].targetHeight * blend;
+        sinAngle = sdfSin(3.1399996280670166f);
+        target.y = y + height;
+        target.x = x + sinAngle * distance;
+        target.z = z + sdfCos(3.1399996280670166f) * distance;
+    }
+    if (divisor > 0.0f) {
+        target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) / divisor;
+        target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) / divisor;
+        target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) / divisor;
+    }
+    dds3SetPosPoseSet(control->camera, &target);
+    camera = control->camera;
+    ((s32 (*)(dds3Basic_t *))camera->basicfunction->mainprocuder)(camera);
+    SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
+    SDF_VU0_COPYVECTOR(fldCamTarget, &target);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldCamera", fldCamSetChaseCore);
+#endif
 
 void fldCamSetChase(void)
 {
