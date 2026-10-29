@@ -18,6 +18,19 @@ The complete owner checks 38 match, 0 differ; the entire retail image matches
 SHA-1 `5facfbf7916836613449c922e26a4ec412207b32`. Stock plain/`-da` output parity
 also passes. `fldRunEffSet` and the remaining guarded drafts are preserved.
 
+`18809150` later bound the initialized `f32` speed to `$f1` and used an empty
+`+f` asm constraint before the real division. Rechecking `87be30f1` found that
+form and the ordinary `f32 frames = distance / fldRun_Dante.speed;` form have
+identical complete owner code and data, with the same 38/0, retail checksum and
+stock plain/`-da` parity results. The ordinary form needs no constraint in that
+context. [736066f5](https://github.com/Megami-Decomps/smt3-decomp/commit/736066f58556da27ad7a094adc892051d6a5f42c)
+restores that simpler ordinary form after another complete 38/0 owner check and
+retail checksum pass on `51d66ae0`, preserving the newer SDK declarations.
+The hint emits no instructions and its live value crosses no call; it is a
+target-specific reconstruction aid, not a general memory barrier or evidence
+of the original source spelling. See the
+[SMT3-local policy](../../CONTRIBUTING.md#localized-compiler-constraints-smt3-only).
+
 ### Historical residual and controls
 
 The earlier `376abcae` draft matched 178 of 180 words at the native 720-byte
@@ -48,6 +61,6 @@ the waypoint before setting the shortcut flag preserves the native store
 ordering. A floating frame value followed by the integer timer assignment
 keeps the native FPU registers; an explicit speed snapshot adds register
 allocation differences. A one-pass timer block does not improve the two-word
-residual and is not retained. No artificial dependency or compiler flag is
-used. The map-cell fields and target-coordinate/pointer view are corroborated
-by `fldFindMapCell` and `fldRunAiCng`.
+residual and is not retained. Those ordinary-C trials used no artificial
+dependency or compiler flag. The map-cell fields and target-coordinate/pointer
+view are corroborated by `fldFindMapCell` and `fldRunAiCng`.

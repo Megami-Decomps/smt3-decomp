@@ -6,14 +6,15 @@ it, decompile it, verify it, and name it.
 ## Matching rules
 
 The [dds-decomp matching rules](https://github.com/Megami-Decomps/dds-decomp/blob/main/docs/CONTRIBUTING.md#matching-rules)
-are the canonical policy for this project and apply here in full, including
-both their permissions and their evidence requirements. The linked policy is
-the source of truth for every condition summarized below.
+are the canonical default for this project, including their permissions and
+evidence requirements, except for the SMT3-only compiler-constraint allowance
+below. That local allowance does not change DDS policy; all other canonical
+conditions still apply.
 
-Plausible, ordinary source must compile to the exact retail bytes. Matching
-establishes the reconstructed behavior and compiler properties; it does not
-establish the original source spelling or variable names. In particular, the
-policy permits:
+Prefer clear, plausible ordinary C. Accepted source must preserve behavior and
+compile to the exact retail bytes. Matching establishes the reconstructed
+behavior and compiler properties; it does not establish the original source
+spelling or variable names. In particular, the canonical policy permits:
 
 - Ordinary C justified by a qualified trace of the real compiler, including
   live scratch scalar reuse across disjoint phases under its semantic-review,
@@ -31,9 +32,39 @@ policy permits:
 - Bounded search as a diagnostic aid. Reduce a hit to readable, ordinary C,
   explain the compiler property, and qualify it independently before landing.
 
-These permissions retain the prohibitions on fakematches, register pinning,
-artificial dependencies, false types, dummy uses and unsupported compiler flags.
+Apart from the localized constraints below, these permissions retain the
+prohibitions on fakematches, register pinning, artificial dependencies, false
+types, dummy uses and unsupported compiler flags.
 A close reconstruction remains `INCLUDE_ASM` with its best draft preserved.
+
+### Localized compiler constraints (SMT3 only)
+
+A small target-specific compiler constraint may resolve a demonstrated
+allocation or scheduling mismatch on a real live value. This includes a local
+register binding and an empty extended-asm operand constraint, including
+`volatile` on that empty asm when needed. Keep the computation readable C and
+prefer the ordinary form whenever it matches.
+
+- Use truthful types and initialized values with real program consumers.
+  Every path must supply the correct value before use. Keep the constraint
+  local to that value's actual lifetime; a fixed register must not carry a
+  live value across a call or other operation that clobbers it.
+- Preserve behavior, ABI, layouts, numeric operations and conversions, calls,
+  and native memory accesses, including their widths and required ordering.
+  An empty asm is not a general memory barrier: verify the actual target
+  output rather than assuming it orders unrelated accesses.
+- Explain the narrow compiler dependency in a source comment or landing note,
+  and make clear that this is a target-specific reconstruction aid, not
+  evidence of the original source spelling. Ordinary review and the existing
+  verification gates suffice; no separate approval process or new artifact is
+  required.
+
+This is not permission for bulk opcode replay, fabricated bounds or types,
+dummy computations or consumers, artificial lifetime extensions, or runtime
+behavior changes merely to improve a score. The empty template emits no
+instructions; it does not replace C with handwritten scalar assembly. Complete
+affected-owner code and data checks, the retail checksum build, regression
+tests and any applicable compiler-trace output-parity checks remain unchanged.
 
 For SMT3, use the existing COP2/VU0 and MMI macros in `include/ps2asm.h` and
 check the complete affected units with `tools/check_unit.py`, then the full

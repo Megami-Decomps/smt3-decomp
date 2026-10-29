@@ -211,7 +211,8 @@ pbEditInitProc	pb/pbMain	0x148	79 of 82 words match	docs/matching/pb/pbMain.md	3
 pb_draw_mapbase_Process	pb/pbModel	0x214	126 of 133 words match	docs/matching/pb/pbModel.md	3
 pbDrawMapPolyTransformed			10 of 262 words matching	docs/matching/pb/pbModel.md	31
 pbAddRecord_char	pb/pbRecord	0x144	73 of 81 words match	docs/matching/pb/pbRecord.md	3
-makaDrawMulti	pipe/pipeMakaAnim	0x494		docs/matching/pipe/pipeMakaAnim.md	3
+makaDrawMulti	pipe/pipeMakaAnim	0x494	293 of 293 words match	docs/matching/pipe/pipeMakaAnim.md	3
+makaDrawSingle	pipe/pipeMakaAnim	0x3D0	244 of 244 words match	docs/matching/pipe/pipeMakaAnim.md	34
 objOption				docs/matching/pipe/pipeObject.md	3
 pipeFileLoad	pipe/pipePosTable	424 bytes	106 of 106 words match	docs/matching/pipe/pipePosTable.md	3
 ActionZMotion	pipe/pipeSection	0x140	74 of 80 words match	docs/matching/pipe/pipeSection.md	3

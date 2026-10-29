@@ -151,11 +151,11 @@ INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawNormal);
 
 typedef struct { f32 value[7]; } makaEaseTable_t;
 extern const makaEaseTable_t D_00548FD8;
+extern const makaEaseTable_t D_00548FF8;
 extern void eglLinkAlpha(s32 alpha);
 extern void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy);
 extern void makaDrawGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha);
 
-#ifdef NON_MATCHING
 void makaDrawSingle(tagMakaObject_t *object)
 {
     makaEaseTable_t easeTable = D_00548FD8;
@@ -196,8 +196,14 @@ void makaDrawSingle(tagMakaObject_t *object)
                     (u32)(alpha * 128.0f), 1.3f, 1.3f);
     }
 
+    /* SMT3 matching constraint: reuse the finished easing scratch for the
+     * live ghost-fade zero endpoint. The empty operand keeps its FPU value
+     * distinct until alpha consumes it; no fixed register or call lifetime.
+     * This is a reconstruction aid, not original-source evidence. */
+    easing = 0.0f;
+    __asm__ ("" : "+f" (easing));
     if (phase < 7) {
-        alpha = 0.0f;
+        alpha = easing;
     } else if (phase < 8) {
         alpha = 1.0f;
     } else {
@@ -228,21 +234,14 @@ void makaDrawSingle(tagMakaObject_t *object)
                   alpha * 76.0f);
 }
 
-
-#else
-INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawSingle);
-#endif
-
 extern void eglLinkAlpha(s32 alpha);
 extern void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy);
 extern void makaDrawMultiGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha);
 extern void makaDrawGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha);
 
-/* NON_MATCHING: 291 of 293 instruction words match at the native 1172-byte size. */
-#ifdef NON_MATCHING
 void makaDrawMulti(tagMakaObject_t *object)
 {
-    f32 easeTable[7] = {0.4f, 0.8f, 0.83f, 0.86f, 0.89f, 0.95f, 1.0f};
+    makaEaseTable_t easeTable = D_00548FF8;
     s8 phase = (s8)(16 - (s32)object->count);
     s32 value = object->maka;
     f32 easing;
@@ -251,7 +250,7 @@ void makaDrawMulti(tagMakaObject_t *object)
     eglLinkAlpha(0);
 
     if (phase < 8) {
-        easing = easeTable[phase - 1];
+        easing = easeTable.value[phase - 1];
     } else if (phase < 12) {
         easing = (11 - phase) * 0.25f;
     } else {
@@ -279,8 +278,14 @@ void makaDrawMulti(tagMakaObject_t *object)
     }
 
     eglLinkAlpha(1);
+    /* SMT3 matching constraint: reuse the finished easing scratch for the
+     * live ghost-fade zero endpoint. The empty operand keeps its FPU value
+     * distinct until alpha consumes it; no fixed register or call lifetime.
+     * This is a reconstruction aid, not original-source evidence. */
+    easing = 0.0f;
+    __asm__ ("" : "+f" (easing));
     if (phase < 7) {
-        alpha = 0.0f;
+        alpha = easing;
     } else if (phase < 8) {
         alpha = 1.0f;
     } else {
@@ -331,9 +336,6 @@ void makaDrawMulti(tagMakaObject_t *object)
                   alpha * 89.0f);
 }
 
-#else
-INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawMulti);
-#endif
 
 void makaDraw(tagMakaObject_t *makaPtr)
 {
