@@ -2,6 +2,42 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
+## effBTLModelGroupGetSphereExp (effect/effBattleMisc, 0x270)
+
+6 of 156 words differ at the native 624-byte size. Production
+remains assembly-backed. The six residuals are at +0x1C0, +0x1C4, +0x1D0,
++0x1E4, +0x1EC and +0x1F4: the final X/Y/Z midpoint arithmetic and component
+stores have a different order. The formation scan, bounds, extent selection,
+return and VU0 handoff otherwise match.
+
+The helper visits all 32 formation records in pointer order, filtering by the
+group mask and active bit. The model bit is also required when `model != 0`.
+Each selected record supplies a transformed center, scaled radius and upper
+height. The first selected record initializes the extrema through ordered
+comparisons; subsequent records update each maximum before its minimum.
+Height is `(h * scl) * 0.5f - center.y`; the final midpoint Y negates the
+height before multiplying by positive one-half. Keep those operations and the
+strict comparisons: replacing them with algebraic min/max shortcuts changes
+unordered and signed-zero cases. An empty group retains zero extents and a
+negative-zero midpoint Y.
+
+The radius local holds each model radius during the scan, then the selected
+group extent after the scan; these live ranges do not overlap. A qualified
+`cc1probe --alloc --sched` run traces both phases to float pseudo 95 and
+preserves hooked/unhooked, dumped/plain output parity with compiler SHA-256
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
+A separate result local coalesces with another half-extent and emits 620 bytes;
+the reused radius retains the distinct native result register and 624-byte
+shape. This follows the canonical live-scalar-reuse permission.
+
+Independent extent/midpoint statement orders do not close the residual. Explicit
+midpoint scalar snapshots, aggregate assignment and a memory-operand VU load
+leave the same six words. A volatile final output view emits 628 bytes and is
+not retained. Reusing the per-model height or X/Z bounds as final half-extents
+does not improve the native-size reconstruction. The remaining question is the
+ordinary source property that retains the current bound allocation while
+scheduling the final midpoint components in X/Y/Z order.
+
 ## effBTLModelLook2 (effect/effBattleMisc, 0x110)
 
 2 of 68 words differ, at the exact 272-byte size, and the two words are each other's:
