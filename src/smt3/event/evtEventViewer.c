@@ -116,7 +116,7 @@ struct evtViewerInfo_t {
     s32 work_base;                        /* 0x22AC */
     u8 work_x[4];
     s32 work_y;                        /* 0x22B4 */
-    u8 eventpos_y[4];
+    s32 eventpos_y;
     s32 select_y;                        /* 0x22BC */
     s32 menuItemCount;                  /* 0x22C0 */
     char *select_header;                        /* 0x22C4 */
@@ -1468,7 +1468,75 @@ s32 EnterFilename2(void)
     return done != 0 ? -1 : 0;
 }
 
+#ifdef NON_MATCHING
+s32 EnterBasicList(void)
+{
+    evtFrameInfo_t *frame = evtGetSelectFrameInfo();
+    dds3Basic_t *selected = NULL;
+    dds3Basic_t *basic;
+    dds3Basic_t *scene;
+    dds3SceneBasic_t *sceneWork;
+    s32 count = 0;
+    s32 type;
+    s32 i;
+    s32 nameIndex;
+    s8 field;
+
+    if (frame == NULL) {
+        return 0;
+    }
+    if (viewerinfo->work_base + viewerinfo->work_y != 0) {
+        for (i = 0; i < 18; i++) {
+            if (i == 3) {
+                continue;
+            }
+            scene = dds3GetActiveScene();
+            sceneWork = scene->workdata;
+            for (basic = sceneWork->basictable[i].firstbasic; basic != NULL; basic = basic->next) {
+                if (basic->name != NULL && ++count == viewerinfo->work_base + viewerinfo->work_y) {
+                    selected = basic;
+                    break;
+                }
+            }
+            if (selected != NULL) {
+                break;
+            }
+        }
+    }
+    type = viewerinfo->framelist_target->type;
+    field = D_0032C9E2[viewerinfo->framelist_x + type * 10];
+    if (field == 10) {
+        switch (type) {
+        case 3:
+            nameIndex = selected != NULL ? evtAddNameTable(selected->name) : -1;
+            frame->param.sh[3] = nameIndex;
+            break;
+        case 9:
+            scene = dds3GetActiveScene();
+            basic = dds3SceneBasicSearchNameAndType(scene, BASIC_TYPE_UNITOBJECT,
+                                                    viewerinfo->nametable[(s16)frame->param.sh[0]]);
+            if (basic != NULL) {
+                evtUnlinkLightObjectBasic(evtGetUnitHandle2(basic), 0);
+            }
+            nameIndex = selected != NULL ? evtAddNameTable(selected->name) : -1;
+            frame->param.sh[0] = nameIndex;
+            break;
+        case 18:
+            nameIndex = selected != NULL ? evtAddNameTable(selected->name) : -1;
+            frame->param.sh[1] = nameIndex;
+            break;
+        }
+    } else if (field == 13 && type >= 20 && type < 22) {
+        nameIndex = selected != NULL ? evtAddNameTable(selected->name) : -1;
+        frame->param.sb[4 + viewerinfo->eventpos_y] = nameIndex;
+    }
+    evtRunFrame(viewerinfo->nowframe);
+    PopMenu();
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "event/evtEventViewer", EnterBasicList);
+#endif
 
 s32 EnterEventPos(void)
 {
