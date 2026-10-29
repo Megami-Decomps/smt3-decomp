@@ -775,3 +775,4 @@ src/smt3/field/fldCamera.c	redthing1	done	2026-10-29	2 fn / 1852 B	PiM agent: na
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 288 B	driver registration through shared completion prefix, native acceptance snapshot and distinct semaphore cleanup; owner 88 match, 0 differ
 src/smt3/sdk/libgraph.c	redthing1	done	2026-10-28	1 SDK reference / 1676 B	Store-image transfer: audited format sizing, shared timeout, DMA/FIFO payload and distinct cleanup paths; guarded C, no exact credit
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 416 B	stat query with forwarded output buffer, unsigned path bytes and native completion lifecycle; complete owner exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 408 B	filesystem sync with exact fixed request extent, untouched shared word, bounded path and completion cleanup; owner 93 match, 0 differ

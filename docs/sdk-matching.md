@@ -636,3 +636,19 @@ before signaling. A zero acceptance deletes the semaphore and returns `-1`;
 nonzero acceptance waits for completion, deletes the semaphore and returns the
 callback's stack result. The complete kernel owner checks 88 match / 0 differ
 at this qualification; no competing request-buffer type is introduced.
+
+## Matched filesystem sync transaction
+
+`sceSync` matches all 408 instruction bytes. Its request view extends the
+shared union with mode at offset `0x10` and a 1024-byte path at `0x14`; the
+shared descriptor word at `0x0C` is left untouched. The bounded copy includes
+the terminator when found and forces path byte 1023 to zero at the limit.
+Unlike the variable-length path commands, sync always sends 1044 bytes.
+
+The routine retains the native partial semaphore initialization and unchecked
+creation result. Command nineteen receives a four-byte acceptance word, which
+is captured through the uncached alias before releasing filesystem access.
+RPC failure and zero acceptance delete the completion semaphore and return
+`-11` in their distinct native order; acceptance waits, deletes and returns
+the callback's stack result. The complete kernel owner checks 93 match / 0
+differ at this qualification.

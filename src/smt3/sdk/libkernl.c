@@ -1425,11 +1425,20 @@ typedef struct fsGetstatRequest_t {
     void *stat;
     u8 name[0x400];
 } fsGetstatRequest_t;
+typedef struct fsSyncRequest_t {
+    s32 sema;
+    s32 *result;
+    s32 resultSize;
+    u32 descriptor; /* Shared word, left untouched by sync. */
+    s32 mode;
+    char name[0x400];
+} fsSyncRequest_t;
 typedef union fsRequest_t {
     fsCloseRequest_t close;
     fsPathRequest_t path;
     fsMkdirRequest_t mkdir;
     fsGetstatRequest_t getstat;
+    fsSyncRequest_t sync;
 } fsRequest_t;
 extern fsRequest_t D_0059D4C0;
 
@@ -1733,7 +1742,49 @@ s32 sceChdir(const char *path)
     return _sceCallCode(path, 18);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSync);
+s32 sceSync(const char *path, s32 mode)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsSyncRequest_t *request = &D_0059D4C0.sync;
+    s32 length;
+    s32 sema;
+    s32 accepted;
+
+    _sceFsWaitS(19);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    for (length = 0; length < 0x400 &&
+         (request->name[length] = path[length]) != 0; length++) {
+    }
+    if (length == 0x400) {
+        request->name[0x3FF] = 0;
+    }
+    request->mode = mode;
+    param.initCount = 0;
+    param.maxCount = 1;
+    param.option = 0;
+    sema = CreateSema(&param);
+    request->result = &result;
+    request->sema = sema;
+    request->resultSize = 4;
+    if (sceSifCallRpc(&D_0059E780, 19, 0, &D_0059D4C0,
+                      0x414, D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceMount);
 
