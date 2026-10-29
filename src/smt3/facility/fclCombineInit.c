@@ -820,7 +820,65 @@ void cmbBuildResultRow(s32 mode)
     }
 }
 
+#ifdef NON_MATCHING
+extern s32 cmbGetBirthDevil(datUnitWork_t *first, datUnitWork_t *second,
+                            datUnitWork_t *third, datUnitWork_t *result,
+                            s8 available, s8 mode, s8 flag, cmpSkillList_t *skills);
+
+void cmbCreateCombineResultTable(s32 mode)
+{
+    /* Retail leaves the first invalid result unset; the UI never selects it. */
+    datUnitWork_t result = {0};
+    s32 row;
+    s32 column;
+    s32 kind;
+    s32 available;
+    s32 end;
+    datUnitWork_t *first;
+    datUnitWork_t *second;
+    datUnitWork_t *third;
+
+    mode = (s8)mode;
+    if (mode == 0) {
+        if (CMB_GBWK->resultRowsBuilt == 0) {
+            cmbBuildResultRow(0);
+        }
+        end = CMB_GBWK->resultRowsBuilt + 2;
+        if (end > (s8)CMB_GBWK->stockCursorCount) {
+            end = (s8)CMB_GBWK->stockCursorCount;
+        }
+        for (row = CMB_GBWK->resultRowsBuilt; row < end; row++) {
+            for (column = 0; column < (s8)CMB_GBWK->stockCursorCount; column++) {
+                first = &DDS3_GBWK->party[(s8)CMB_GBWK->unk_165EE[column]].unit;
+                second = &DDS3_GBWK->party[(s8)CMB_GBWK->unk_165EE[row]].unit;
+                available = cmbBirthDevilIsAvailable();
+                kind = cmbGetBirthDevil(first, second, NULL, &result, available, 0, 0,
+                                         &CMB_GBWK->resultSkills[0][row][column]);
+                CMB_GBWK->resultUnit[0][row][column] = result;
+                CMB_GBWK->resultIndex[0][row][column] = kind;
+                CMB_GBWK->resultId[0][row][column] = result.id;
+            }
+            CMB_GBWK->resultRowsBuilt++;
+        }
+    } else {
+        cmbBuildResultRow(mode);
+        for (row = 0; row < (s8)CMB_GBWK->stockCursorCount; row++) {
+            first = &DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index].unit;
+            second = &DDS3_GBWK->party[CMB_GBWK->stockSlot[1].index].unit;
+            third = &DDS3_GBWK->party[(s8)CMB_GBWK->unk_165EE[row]].unit;
+            available = cmbBirthDevilIsAvailable();
+            kind = cmbGetBirthDevil(first, second, third, &result, available, 0, 0,
+                                     &CMB_GBWK->resultSkills[mode][row][0]);
+            CMB_GBWK->resultUnit[mode][row][0] = result;
+            CMB_GBWK->resultIndex[mode][row][0] = kind;
+            CMB_GBWK->resultId[mode][row][0] = result.id;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCreateCombineResultTable);
+#endif
+
 
 void cmbCreateLocalStock(void)
 {
@@ -967,10 +1025,10 @@ s32 cmbCalcBirthDevil(void)
     if (CMB_GBWK->unk_00004 != 1) {
         return 0;
     }
-    first = &cmbGlobalWork->party[CMB_GBWK->stockSlot[0].index].unit;
-    second = &cmbGlobalWork->party[CMB_GBWK->stockSlot[1].index].unit;
+    first = &DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index].unit;
+    second = &DDS3_GBWK->party[CMB_GBWK->stockSlot[1].index].unit;
     if (CMB_GBWK->stockSlot[2].index >= 0) {
-        third = &cmbGlobalWork->party[CMB_GBWK->stockSlot[2].index].unit;
+        third = &DDS3_GBWK->party[CMB_GBWK->stockSlot[2].index].unit;
     } else {
         third = NULL;
     }
@@ -2569,7 +2627,7 @@ void cmbDrawStockEntry(s32 x, s32 y, u32 z, s8 selected, u32 selectedColor,
         }
         stock = (s8)CMB_GBWK->unk_165EE[row];
         color = cmpDrawListItemBox(cursor, row, row, disabled, 0x100);
-        cmbDrawUnitLevel(x, rowY, z << 4, color, color, &cmbGlobalWork->party[stock].unit, ot);
+        cmbDrawUnitLevel(x, rowY, z << 4, color, color, &DDS3_GBWK->party[stock].unit, ot);
         rowY += 0xB8;
     }
     if (mode == 0) {
@@ -2614,7 +2672,7 @@ void cmbDrawStockEntry(s32 x, s32 y, u32 z, s8 selected, u32 selectedColor,
                                  mode == 2 ? 0xFFBD8380 : color,
                                  &CMB_GBWK->resultUnit[table][row][choice], ot);
             } else {
-                s32 sprite = cmbGlobalWork->party[0].unit.level < datDevilTable[0].level ? 0x14 : 0x13;
+                s32 sprite = DDS3_GBWK->party[0].unit.level < datDevilTable[0].level ? 0x14 : 0x13;
 
                 fclDrawSpriteRes(0, offsetY, z << 4, NULL, 0, sprite,
                                  CMB_GBWK->texHandle, cmbSpriteTable, ot);
