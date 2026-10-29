@@ -514,4 +514,20 @@ INCLUDE_ASM(const s32, "facility/fclShare", fclDrawPhaseValue);
 
 INCLUDE_ASM(const s32, "facility/fclShare", fclDrawPanelBorder);
 
+extern s32 fclDrawPanelSprite(s32 id, s32 ot);
+extern void fclDrawPhaseValue(u8 *work, s32 color, s32 ot);
+
+#ifdef NON_MATCHING
+void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 ot)
+{
+    fclDrawPanelSprite(0x33001, ot);
+    if (mode == 1) {
+        fclDrawPhaseValue(work, color, ot);
+    } else {
+        fclDrawPhaseValue(work, 0x141D2D4C, ot);
+    }
+    fclDrawPanelSprite(0x5101B, ot);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclShare", fclDrawPhaseHeader);
+#endif
