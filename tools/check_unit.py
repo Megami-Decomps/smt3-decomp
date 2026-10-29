@@ -645,6 +645,77 @@ def inline_asm_share(text):
     return share
 
 
+def inline_asm_regions(text):
+    """Count empty/nonempty #APP regions, not just instruction-looking lines.
+
+    Directives such as .word are nonempty too: raw opcode replay must not be
+    described as an empty compiler constraint. This is diagnostic evidence,
+    not a replacement for inline_asm_share or semantic review.
+    """
+    regions, cur, app, nonempty = {}, None, False, False
+    for line in text.splitlines():
+        s = line.strip()
+        if s.startswith((".ent\t", ".ent ")):
+            cur = s.split()[1]
+        elif s.startswith((".end\t", ".end ")):
+            cur = None
+        elif s == "#APP":
+            app, nonempty = True, False
+        elif s == "#NO_APP":
+            if app:
+                counts = regions.setdefault(cur or "<file>", [0, 0])
+                counts[int(nonempty)] += 1
+            app = False
+        elif app and s.split("#", 1)[0].strip():
+            nonempty = True
+    return {name: tuple(counts) for name, counts in regions.items()}
+
+
+def source_review_diagnostics(source, assembly):
+    """Return (fatal, message) pairs; constraint notes are not approvals.
+
+    C syntax cannot prove truthful types, initialized/live values, real
+    consumers or call-clobber safety. Keep those as ordinary semantic review
+    under the SMT3 policy, without special markers or function allowlists.
+    """
+    source = drop_nonmatching(source, preserve_lines=True)
+    # Mask comments and strings together so quoted comment delimiters cannot
+    # hide source, and comments/diagnostic strings cannot create false hits.
+    tokens = r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|/\*.*?\*/|//[^\n]*'
+    code = re.sub(tokens, lambda m: re.sub(r"[^\n]", " ", m.group()),
+                  source, flags=re.S)
+    result = []
+    for pattern, why in ((r"goto\s*\*", "computed goto (write the switch)"),
+                         (r"&&\s*[A-Za-z_]\w*\s*[,}]", "label address table (write the switch)")):
+        for m in re.finditer(pattern, code):
+            line = code.count("\n", 0, m.start()) + 1
+            result.append((True, f"TRICK line {line}: {why}"))
+    bindings = list(re.finditer(
+        r"\bregister\b[^;{}]*\b(?:asm|__asm|__asm__)\s*\(", code))
+    for m in bindings:
+        line = code.count("\n", 0, m.start()) + 1
+        prefix = code[:m.start()]
+        if prefix.count("{") == prefix.count("}"):
+            result.append((True, f"TRICK line {line}: global register binding "
+                           "is not a localized compiler constraint"))
+        else:
+            result.append((False, f"CONSTRAINT line {line}: local register binding; "
+                           "review real initialized value, lifetime/ABI and compiler dependency "
+                           "(not semantic approval)"))
+    regions = inline_asm_regions(assembly)
+    for name, (empty, nonempty) in sorted(regions.items()):
+        if empty:
+            result.append((False, f"CONSTRAINT {name}: {empty} empty inline-asm region(s); "
+                           "review operands and native accesses (not semantic approval)"))
+        if nonempty and (bindings or empty):
+            result.append((False, f"INLINEASM {name}: {nonempty} nonempty inline-asm region(s) "
+                           "contain instructions or directives; not covered by the empty-constraint allowance"))
+    if bindings and not assembly:
+        result.append((False, "CONSTRAINT: emitted assembly unavailable; "
+                       "empty-template output has not been established"))
+    return result
+
+
 def owns_rodata(version, unit, section="rodata"):
     yaml = (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text()
     return re.search(rf"\.{section}, {re.escape(unit)}\]", yaml) is not None
@@ -680,7 +751,7 @@ def owned_rom_range(yaml_text, unit, section):
     return ranges[0] if len(ranges) == 1 else None
 
 
-def drop_nonmatching(text):
+def drop_nonmatching(text, *, preserve_lines=False):
     """Remove the drafts kept behind `#ifdef NON_MATCHING`.
 
     The normal build takes the `#else` branch, so for every text scan here the
@@ -692,12 +763,18 @@ def drop_nonmatching(text):
         head = line.strip()
         if head == "#ifdef NON_MATCHING":
             skipping = True
+            if preserve_lines:
+                out.append("")
             continue
         if skipping and head in ("#else", "#endif"):
             skipping = False
+            if preserve_lines:
+                out.append("")
             continue
         if not skipping:
             out.append(line)
+        elif preserve_lines:
+            out.append("")
     return "\n".join(out)
 
 
@@ -783,7 +860,8 @@ def main():
         r = subprocess.run([str(ROOT / "tools/cc.sh"), "-DSKIP_ASM", *extra,
                             str(source), "-o", str(obj)],
                            capture_output=True, text=True, env=env_s)
-        asm_share = inline_asm_share(asm_text.read_text()) if asm_text.exists() else {}
+        asm_source = asm_text.read_text() if asm_text.exists() else ""
+        asm_share = inline_asm_share(asm_source)
         if r.returncode:
             sys.stderr.write(r.stderr)
             sys.exit(f"compile failed: {args.unit}")
@@ -1455,14 +1533,11 @@ def main():
             why = ("reference the existing D_ symbol instead or keep the function as INCLUDE_ASM "
                    "(this section has no accepted per-unit source owner)")
         print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; {why}")
-    # Constructs that force codegen rather than express the original source.
-    source_text = re.sub(r"/\*.*?\*/|//[^\n]*", "", drop_nonmatching(unit.read_text()), flags=re.S)
-    for pattern, why in ((r"goto\s*\*", "computed goto (write the switch)"),
-                         (r"&&\s*[A-Za-z_]\w*\s*[,}]", "label address table (write the switch)"),
-                         (r"\bregister\b[^;]*\basm\s*\(", "register pinned with asm()")):
-        for m in re.finditer(pattern, source_text):
-            bad += 1
-            print(f"TRICK line {source_text.count(chr(10), 0, m.start()) + 1}: {why}")
+    # Localized constraints are reviewable SMT3 aids, not automatic source
+    # approval. Inspect --source when supplied, just as the compiler does.
+    for fatal, message in source_review_diagnostics(source.read_text(), asm_source):
+        bad += fatal
+        print(message)
     # A C function whose code is mostly inline asm may be handwritten code in
     # disguise. Two kinds are real C: copies of SDK routines that Sony wrote as C
     # with an asm body (`/* libvu0: sceVu0Name */` above the definition), and VU0
