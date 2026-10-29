@@ -18,11 +18,6 @@ s32 fclGetFlag(s8 index);
 
 void fclClearFlag(s8 index);
 
-typedef struct
-{
-    u8 reserved00000[0x15C];
-    cmpCursorInfo_t listCursor;
-} ragListWindow_t;
 
 typedef struct
 {
@@ -47,11 +42,11 @@ typedef struct
     /* 0x013C */ u8 reserved013C[4];
     /* 0x0140 */ cmpPadStopWork_t listCursor;
     /* 0x017C */ u8 reserved017C[0x1000];
-    /* 0x117C */ ragListWindow_t heartListWindow;
+    /* 0x117C */ lstWork_t heartListWindow;
     /* 0x1310 */ u8 reserved1310[0x1004];
-    /* 0x2314 */ ragListWindow_t itemList2Window;
+    /* 0x2314 */ lstWork_t itemList2Window;
     /* 0x24A8 */ u8 reserved24A8[0x1004];
-    /* 0x34AC */ ragListWindow_t itemList3Window;
+    /* 0x34AC */ lstWork_t itemList3Window;
     /* 0x3640 */ u8 reserved3640[0x1008];
     /* 0x4648 */ s32 script;
     /* 0x464C */ u8 *scriptArg;
@@ -374,15 +369,15 @@ void ragUpdateSeqItem(void)
         ragUpdateWork->unk_0004 = button;
         break;
     case 0x10:
-        lstMoveCursor((lstWork_t *)&ragUpdateWork->heartListWindow, -1);
+        lstMoveCursor(&ragUpdateWork->heartListWindow, -1);
         break;
     case 0x20:
-        lstMoveCursor((lstWork_t *)&ragUpdateWork->heartListWindow, 1);
+        lstMoveCursor(&ragUpdateWork->heartListWindow, 1);
         break;
     }
 
     if (cmpChkPadPressUpDown() == 0) {
-        lstMoveCursor((lstWork_t *)&ragUpdateWork->heartListWindow, 0);
+        lstMoveCursor(&ragUpdateWork->heartListWindow, 0);
     }
     button = cmpDisablePadBitStop((cmpPadStopWork_t *)&ragUpdateWork->heartListWindow.listCursor,
                                   button, 0x30);
