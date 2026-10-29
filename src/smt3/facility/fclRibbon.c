@@ -199,7 +199,35 @@ void fclRbnSetPara(fclRibbon_t *handle, s32 index,
     }
 }
 
+extern s32 printf(const char *format, ...);
+
+#ifdef NON_MATCHING
+void dumpCursorInfo(fclRibbon_t *handle)
+{
+    s32 count = handle->num;
+    fclribbon_elem_t *entry = handle->pelem;
+    s32 i;
+
+    for (i = 0; i < count; i++, entry++) {
+        printf("**[%2d]**********************\n", i);
+        printf("  pos_act  = %3d, %3d, %3d, %3d\n",
+               entry->pos_act.pm[0] >> 4, entry->pos_act.pm[1] >> 3,
+               entry->pos_act.pm[2] >> 4, entry->pos_act.pm[3] >> 3);
+        printf("  pos_deact= %3d, %3d, %3d, %3d\n",
+               entry->pos_deact.pm[0] >> 4, entry->pos_deact.pm[1] >> 3,
+               entry->pos_deact.pm[2] >> 4, entry->pos_deact.pm[3] >> 3);
+        printf("  uv_act   = %3d, %3d, %3d, %3d\n",
+               entry->uv_act.pm[0] >> 4, entry->uv_act.pm[1] >> 4,
+               entry->uv_act.pm[2] >> 4, entry->uv_act.pm[3] >> 4);
+        printf("  uv_deact = %3d, %3d, %3d, %3d\n",
+               entry->uv_deact.pm[0] >> 4, entry->uv_deact.pm[1] >> 4,
+               entry->uv_deact.pm[2] >> 4, entry->uv_deact.pm[3] >> 4);
+        printf("  texhandle = %08x\n", (u32)&entry->tex[0]);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclRibbon", dumpCursorInfo);
+#endif
 
 void MoveActive(fclRibbon_t *phandle)
 {
