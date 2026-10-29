@@ -640,7 +640,6 @@ extern void ActionBound(tagPipeObject *);
 extern void ActionKey(tagPipeObject *);
 extern void objMyStatusChange(tagPipeObject *, u8);
 
-/* NON_MATCHING: 129 of 135 instruction words match at the native 540-byte size. */
 #ifdef NON_MATCHING
 void MyAction(tagPipeObject *object)
 {
@@ -653,25 +652,25 @@ void MyAction(tagPipeObject *object)
         } else {
             object->flags &= 0xFEFF;
         }
-        if ((myStatus & 0xF) != 0 && object->count == 21) {
-            pipeEffSet(object, 6);
+        if ((myStatus & 0xF) != 0) {
+            s16 current = object->count;
+            count = *(volatile u16 *)&object->count;
+            if (current == 21) {
+                pipeEffSet(object, 6);
+                count = *(volatile u16 *)&object->count;
+            }
+        } else {
+            count = *(volatile u16 *)&object->count;
         }
-        count = object->count;
-        switch (attackCount) {
-        case 1:
-            if ((u32)count - 8 < 9) {
-                object->flags &= 0xFDFF;
-            } else {
-                object->flags |= 0x200;
+        {
+            u8 attack = *(volatile u8 *)&attackCount;
+            if (attack == 1 || attack == 2) {
+                if ((u32)count - 8 < 9) {
+                    object->flags &= 0xFDFF;
+                } else {
+                    object->flags |= 0x200;
+                }
             }
-            break;
-        case 2:
-            if ((u32)count - 8 < 9) {
-                object->flags &= 0xFDFF;
-            } else {
-                object->flags |= 0x200;
-            }
-            break;
         }
         if ((s16)count < 2) {
             object->flags &= 0xFDFF;
@@ -707,8 +706,6 @@ void MyAction(tagPipeObject *object)
         object->flags |= 0x200;
     }
     ActionKey(object);
-    /* End the consumed counter phase after the regular completion call. */
-    count = 0;
 }
 #else
 INCLUDE_ASM(const s32, "pipe/pipeSection", MyAction);
