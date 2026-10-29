@@ -5,6 +5,16 @@ ee-gcc truncates a decimal literal toward zero, so `-946.42f` lands one ULP
 away from retail and `-946.41993f` is exact. Derive the shortest decimal that
 round-trips to the retail word rather than transcribing the rounded value.
 
+Do not transcribe spimdisasm's `.float` decimal from the `.lit4` dump. It is
+the shortest decimal that round-trips under round-to-nearest, which for about
+half of all words is slightly *below* the float in magnitude, and ee-as then
+truncates to the next word toward zero. Spell the literal from the float's
+exact value rounded **away from zero** to the fewest digits that still
+truncate back to it: `-0.2699999809f` is one ULP low and `-0.27f` is exact,
+`-1819.199829f` is low and `-1819.1999f` is exact. Seventeen literals in
+`nbCameraBoss_BSARI_MASEHA_Run` closed together on that rule, and it is
+mechanical enough to script over a whole function.
+
 `check_unit.py` says so outright when it hits one: a differing word whose
 retail side is a `gp`-relative `lwc1` is reported as `D_00XXXXXX is a .lit4
 pool constant: write the float literal`. Take it at its word and inline the
