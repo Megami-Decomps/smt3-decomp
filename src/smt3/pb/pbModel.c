@@ -84,7 +84,7 @@ extern void mdlSetPosition(mdlObj_t *aHandle);
 
 extern void mdlSetRotate(mdlObj_t *aHandle);
 
-extern void FromEuler(void);
+extern void FromEuler(f32 x, f32 y, f32 z);
 
 extern void sdfChipFreeDelayedDirect(void *aPtr);
 
@@ -161,7 +161,7 @@ void pb_1D2B18(mdlObj_t *model, sdfVector4_t *rot) {
 }
 
 void pbSetModelRotate(mdlObj_t *model, f32 x, f32 y, f32 z) {
-    FromEuler();
+    FromEuler(x, y, z);
     mdlSetRotate(model);
 }
 
