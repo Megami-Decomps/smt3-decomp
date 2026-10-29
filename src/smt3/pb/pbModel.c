@@ -697,7 +697,99 @@ INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C80);
 
 INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C88);
 
+#ifdef NON_MATCHING
+extern sdfVector2_t D_00326E68[], D_00326F58[], D_00327048[], D_00327138[];
+extern u32 D_00327228[];
+extern const f64 D_00535CB8, D_00535CC0, D_00535CC8, D_00535CD0;
+
+s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags, s32 special, sdfDrawTag_t *tag)
+{
+    sdfVector4_t vertices[36] __attribute__((aligned(16)));
+    sdfVector4_t normals[36] __attribute__((aligned(16)));
+    sdf3DPrimPolyParm_t request;
+    sdfVector4_t *source, *vertex;
+    f32 x, y, z, w, sourceX, sourceY, sourceZ, sourceW;
+    u32 side, corner, count = 0, index, color;
+
+    if (drawFlags == 0) {
+        return 0;
+    }
+    memset(&request, 0, sizeof(request));
+    color = D_00327228[special];
+    request.attr = 0x4000;
+    request.color = color;
+    request.vertex = vertices;
+    request.normal = normals;
+    switch (special) {
+    case 0:
+        request.uv = D_00326D78;
+        break;
+    case 1:
+        request.uv = D_00327138;
+        break;
+    case 2:
+    case 3:
+        request.uv = D_00326E68;
+        break;
+    case 4:
+        request.uv = D_00327048;
+        break;
+    case 5:
+        request.uv = D_00326F58;
+        break;
+    }
+    for (side = 0; side < 5; side++) {
+        if ((drawFlags >> side) & 1) {
+            x = base->x;
+            y = base->y;
+            z = base->z;
+            w = base->w;
+            for (corner = 0; corner < 6; corner++) {
+                index = D_00326D50[side * 6 + corner];
+                source = &D_00326CD0[index];
+                vertex = &vertices[count + corner];
+                sourceW = source->w;
+                sourceX = source->x;
+                sourceY = source->y;
+                sourceZ = source->z;
+                vertex->x = sourceX + x;
+                vertex->y = sourceY + y;
+                vertex->z = sourceZ + z;
+                vertex->w = sourceW + w;
+                if (special == 6) {
+                    vertex->x = (f32)((f64)vertex->x * 0.5);
+                    vertex->y = (f32)((f64)vertex->y * 0.5);
+                    vertex->z = (f32)((f64)vertex->z * 0.5);
+                } else if (special == 1) {
+                    if (index >= 4) {
+                        vertex->y = vertex->y - 20.0f;
+                    }
+                    if (drawFlags & 8) {
+                        vertex->x = (f32)((f64)vertex->x - D_00535CB8);
+                    }
+                    if (drawFlags & 0x10) {
+                        vertex->x = (f32)((f64)vertex->x + D_00535CC0);
+                    }
+                    if (drawFlags & 2) {
+                        vertex->z = (f32)((f64)vertex->z - D_00535CC8);
+                    }
+                    if (drawFlags & 4) {
+                        vertex->z = (f32)((f64)vertex->z + D_00535CD0);
+                    }
+                }
+                SDF_VU0_COPYVECTOR(&normals[count + corner], &D_00326C70[side]);
+            }
+            request.faceCount += 2;
+            count += 6;
+            request.pointCount += 6;
+        }
+    }
+    sdfDrawTagLink(tag, (u32)sdf3DPrimMakePoly(&request));
+    return request.pointCount;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapPolyTransformed);
+#endif
 
 extern s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags,
                                     s32 special, sdfDrawTag_t *tag);
