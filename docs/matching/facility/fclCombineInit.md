@@ -78,3 +78,23 @@ same five references and lifetime10..36 in both; local allocation selects
 `$2` with the actual void sprite contract and `$3` in the non-void control.
 Its priority remains3846. This isolates the declaration-dependent register
 choice without inventing a scalar use, constraint or compiler flag.
+
+## cmbDrawResultPanel (fclCombineInit, 0x228)
+
+138 of 138 words match: 552 emitted and native bytes. The complete owner
+checks 183 match, 0 differ. Source commit:
+`6b234980219e4cf7cc9a003d0e7daa790456e374`. Exact-source
+[CI run 40956924261](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40956924261)
+passed build and deployment. The local target/retail, report, tooling and docs gates pass;
+the final rebase rechecked three changed guarded owners and carried the
+remaining unchanged input closure from the full 149-owner / seven-IRX pass.
+
+Retain the native three-way footer dispatch: mode 1 and default use
+`0x5FA5E240`, while mode 2 uses `0x698AEC40`. The identical colors in case 1
+and default do not justify collapsing their separate call sites. Initialize
+`alpha` to 256 after the footer calls, as native does. These two ordinary C
+changes together reproduce the owner; either change alone remains non-matching.
+
+Keep the signed `(0x200 - phase) / 2` calculation, the later recomputation
+from `sacrificePanelAnim`, and the existing global-pointer reloads across
+calls. No dummy work, opacity, constraints or ABI change is required.
