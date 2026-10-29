@@ -1705,7 +1705,99 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceRead);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceWrite);
 
+typedef union fsIoctlStatus_t {
+    s32 word;
+    s64 doubleword;
+} fsIoctlStatus_t;
+extern fsIoctlStatus_t D_0059E150;
+extern void *D_0059D484;
+extern s32 D_0052C2C0[32];
+extern void *memcpy(void *destination, const void *source, u32 size);
+
+/* NON_MATCHING: native 844-byte size; early switch allocation and
+ * pending-table setup differ in 46 instruction words. */
+#ifdef NON_MATCHING
+s32 sceIoctl(s32 descriptor, s32 command, void *argument)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsIoctl2Request_t *request = &D_0059D4C0.ioctl2;
+    fsRequestEntry_t *entry;
+    s32 index;
+    s32 sema;
+    s32 accepted;
+    fsRequest_t *packet;
+
+    entry = get_iob(descriptor);
+    _sceFsWaitS(5);
+    D_0059D484 = argument;
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    if (entry == NULL || entry->active == 0) {
+        _sceFsSigSema();
+        return -9;
+    }
+    request->output = NULL;
+    request->outputSize = 0;
+    switch (command) {
+    case 1:
+        WaitSema(D_0052C34C);
+        for (index = 0; index < 32 && D_0052C2C0[index] == -1; index++) {
+        }
+        if (index == 32) {
+            *(s32 *)D_0059D484 = 0;
+        } else {
+            *(s32 *)D_0059D484 = 1;
+        }
+        SignalSema(D_0052C34C);
+        _sceFsSigSema();
+        return 0;
+    case 2:
+        *(s32 *)argument = ((fsIoctlStatus_t *)((u32)&D_0059E150 | 0x20000000))->word;
+        _sceFsSigSema();
+        return 0;
+    case 3:
+        *(s64 *)argument = ((fsIoctlStatus_t *)((u32)&D_0059E150 | 0x20000000))->doubleword;
+        _sceFsSigSema();
+        return 0;
+    }
+    request->descriptor = entry->word0;
+    request->command = command;
+    if (argument == NULL) {
+        request->argSize = 0;
+    } else {
+        request->argSize = 0x400;
+        memcpy(request->args, argument, 0x400);
+    }
+    param.initCount = 0;
+    param.maxCount = 1;
+    param.option = 0;
+    sema = CreateSema(&param);
+    packet = &D_0059D4C0;
+    request->sema = sema;
+    request->result = &result;
+    request->resultSize = 4;
+    sceSifWriteBackDCache(packet, 0x420);
+    if (sceSifCallRpc(&D_0059E780, 5, 0, packet,
+                      0x420, D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libkernl", sceIoctl);
+#endif
 
 s32 sceIoctl2(s32 descriptor, s32 command, const void *args, u32 argSize,
               void *output, u32 outputSize)

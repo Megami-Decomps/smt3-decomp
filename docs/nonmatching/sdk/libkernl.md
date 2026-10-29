@@ -113,3 +113,29 @@ and clamping it emits the preferred comparison against zero. Writing the
 condition as `status > -1` is inert. No qualifier, false result type or
 artificial dependency was added. The remaining question is which genuine
 compiler/source property retains the native register comparison at this tail.
+
+## sceIoctl
+
+844 bytes, the native size, with 165 of 211 words matching and 46 differing.
+The differences end at +0xEC: early saved-register allocation, special-command
+dispatch and pending-table setup remain unresolved. The subsequent status
+stores, both aligned and unaligned 1024-byte copy paths, completion transaction
+and epilogue match. Ordinary constant-size `memcpy` generates both copy paths.
+
+The argument pointer is published before optional filesystem initialization.
+After validating the slot, the request words at +0x414 and +0x418 are cleared.
+Command 1 waits on the pending-table semaphore, skips entries equal to -1,
+and writes zero only when all 32 entries are free; any occupied entry writes
+one. Its output pointer is reloaded from the shared argument global after
+waiting. Commands 2 and 3 copy the uncached 32-bit or 64-bit status word to
+the caller. These special paths release the filesystem semaphore and return
+zero without RPC. Other commands forward the native descriptor and command,
+copy 1024 argument bytes when nonnull, and send the complete 0x420-byte request.
+Completion/error ordering follows the recovered filesystem transaction.
+
+An initial early pending-result local and command-first request stores emit
+836 bytes. Removing that unnecessary local and assigning descriptor before
+command gives the preferred ordinary 844-byte body. No return type, qualifier,
+register constraint or artificial dependency was introduced to close the
+remaining allocation/control differences. A genuine compiler premise is
+needed before another pass over the early dispatch.
