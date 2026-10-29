@@ -187,7 +187,8 @@ typedef struct nbMainProcessData_t
     sdfMemHandle_t *eventMemory;
     u32 unk140;
     u32 d31_rebehansya;
-    u8 d31_andahansya[8];
+    u32 d31_andahansya;
+    u32 d31_kantuu;
 } nbMainProcessData_t;
 
 typedef struct nbKoukaProcessData_t
