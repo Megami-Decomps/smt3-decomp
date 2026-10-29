@@ -1948,31 +1948,29 @@ void ApplyChangeListIndex(lstListWindow_t *list, s16 *indices, s32 recordIndex)
 INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyChangeListIndex);
 #endif
 
-#ifdef NON_MATCHING
 void ApplyEdgeListCursor(lstListWindow_t *list)
 {
     cmpCursorPos_t *cursor = &list->cursorPos;
+    s32 *stepY = &list->StepY;
+    cmpCursorSize_t *size = &list->cursorSize;
     u8 shift = cursor->Shift;
     u8 shiftMax = cursor->ShiftMax;
 
     if (shift == 0) {
         if (cursor->Index > 0) {
-            cursor->DrawShift = 1;
             cursor->Shift = 1;
             cursor->Index--;
-            list->cursorSize.Y = list->StepY + list->cursorSize.DefY;
+            cursor->DrawShift = shift + 1;
+            size->Y = *stepY + size->DefY;
         }
     } else if (shift == shiftMax - 1 &&
                cursor->Index + shiftMax < cursor->ListNums) {
         cursor->Index++;
-        cursor->DrawShift = shiftMax - 2;
-        cursor->Shift = cursor->DrawShift;
-        list->cursorSize.Y = cursor->Shift * list->StepY + list->cursorSize.DefY;
+        cursor->Shift = shiftMax - 2;
+        cursor->DrawShift = cursor->Shift;
+        size->Y = cursor->Shift * *stepY + size->DefY;
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyEdgeListCursor);
-#endif
 
 extern s8 dds3PadButtonState[];
 extern void lstMoveCursor(lstListWindow_t *list, s8 direction);
