@@ -497,7 +497,7 @@ typedef struct
     s32 MpAnmCnt;
 } nbPnlWork_t;
 
-extern nbPnlWork_t gnbPnlWork[4] asm("nbPanelLayoutTable2");
+extern nbPnlWork_t nbPnlWork[4] asm("nbPanelLayoutTable2");
 
 extern s32 nbPanelDrawProcess(void);
 
@@ -1015,9 +1015,212 @@ void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *p)
     nbPnlSprite(x + 0x36, y, 0xE4, 0x17, 0x69, 1, 1, 0x17, nbPanelBaseABGR, p->pnltex[0]);
 }
 
+extern f32 sdfSin(f32 angle);
+extern s32 sprintf(char *dst, const char *format, ...);
+extern void cmpSetSkillListRows(s32 rows);
+extern char D_00551188[];
+extern _FRQ *gnbPnlWork;
+
+/* NON_MATCHING: 798 of 806 instruction words emitted against the native
+ * 3224-byte size; the body is structurally complete and the tail aligns at a
+ * constant eight-word offset. See docs/nonmatching/newbattle/nbPanelProcess.md. */
+
+#ifdef NON_MATCHING
+
+void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessData_t *p)
+{
+    char buf[16];
+    s32 pcnum[4][2] = {{1, 1}, {0xD, 1}, {0x19, 1}, {0x24, 1}};
+    s32 bad[12][2] = {{0x55, 0x38}, {1, 0x22},    {0x16, 0x22}, {0x2B, 0x22},
+                      {0x40, 0x22}, {0x55, 0x22}, {0x6A, 0x22}, {0x7F, 0x22},
+                      {1, 0x38},    {0x16, 0x38}, {0x2B, 0x38}, {0x40, 0x38}};
+    u32 col;
+    u32 c;
+    s32 a;
+    s32 anm;
+    s32 v;
+    s32 w;
+    s32 q;
+    s32 yb;
+    s32 bs;
+    s32 idx;
+
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    x -= nbPnlWork[i].OfsX;
+    if (act) {
+        v = sdfSin(nbPnlCnt) * 48.0f;
+        v += 0xB0;
+        col = v + (v << 8) + (v << 16);
+        if (nbPnlWork[i].OfsX >= 16) {
+            col |= 0x80000000;
+            nbPnlSprite(x, y, 0x36, 0x17, 0x2D, 1, 0x36, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[3]);
+            nbPnlSprite(x + 0x36, y, nbPnlWork[i].OfsX + 0xE4, 0x17, 0x62, 1, 1, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[3]);
+        } else {
+            a = nbPnlWork[i].OfsX * 8;
+            col |= a << 24;
+            nbPnlSprite(x, y, 0x36, 0x17, 0x2D, 1, 0x36, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[3]);
+            nbPnlSprite(x + 0x36, y, nbPnlWork[i].OfsX + 0xE4, 0x17, 0x62, 1, 1, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[3]);
+            col = (col & 0xFFFFFF) | ((0x80 - a) << 24);
+            nbPnlSprite(x, y, 0x36, 0x17, 0x34, 1, 0x36, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[0]);
+            nbPnlSprite(x + 0x36, y, nbPnlWork[i].OfsX + 0xE4, 0x17, 0x69, 1, 1, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[0]);
+        }
+    } else {
+        col = 0x808080;
+        if (nbPnlWork[i].OfsX == 0) {
+            col |= 0x80000000;
+            nbPnlSprite(x, y, 0x36, 0x17, 0x34, 1, 0x36, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[0]);
+            nbPnlSprite(x + 0x36, y, nbPnlWork[i].OfsX + 0xE4, 0x17, 0x69, 1, 1, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[0]);
+        } else {
+            a = nbPnlWork[i].OfsX * 8;
+            col |= a << 24;
+            nbPnlSprite(x, y, 0x36, 0x17, 0x2D, 1, 0x36, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[3]);
+            nbPnlSprite(x + 0x36, y, nbPnlWork[i].OfsX + 0xE4, 0x17, 0x62, 1, 1, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[3]);
+            col = (col & 0xFFFFFF) | ((0x80 - a) << 24);
+            nbPnlSprite(x, y, 0x36, 0x17, 0x34, 1, 0x36, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[0]);
+            nbPnlSprite(x + 0x36, y, nbPnlWork[i].OfsX + 0xE4, 0x17, 0x69, 1, 1, 0x17,
+                        effMagaCylinderCalcColor(col, nbPanelBaseABGR), p->pnltex[0]);
+        }
+    }
+    nbPnlSprite(x + 0x15, y + 2, 0x1A, 0x13, 0x6C, 1, 0x19, 0x13, nbPanelBaseABGR, p->pnltex[0]);
+    if (jun >= 0 && jun < 4) {
+        nbPnlSprite(x + 0x1C, y + 8, 0xB, 0xB, pcnum[jun][0], pcnum[jun][1], 0xB, 0xB,
+                    nbPanelBaseABGR, p->pnltex[0]);
+    }
+    nbPnl_rsetAlpha(0);
+    w = 0;
+    yb = y + 0xF;
+    nbPnlSprite(x + 0xA4, yb, 0x32, 6, 1, 0x14, 0x32, 6, nbPanelBaseABGR, p->pnltex[0]);
+    if (DDS3_GBWK->akuma[j].hp != 0) {
+        w = 50 * DDS3_GBWK->akuma[j].hp /
+            DDS3_GBWK->akuma[j].maxhp;
+        if (w == 0) {
+            w = 1;
+        }
+        nbPnlSprite(x + 0xA4, yb, w, 6, 1, 0xD, w, 6, nbPanelBaseABGR, p->pnltex[0]);
+    }
+    if (DDS3_GBWK->akuma[j].hp < nbPnlWork[i].OldHp) {
+        q = 50 * nbPnlWork[i].OldHp /
+            DDS3_GBWK->akuma[j].maxhp;
+        anm = nbPnlWork[i].HpAnmCnt << 28;
+        nbPnl_rsetAlpha(1);
+        c = effMagaCylinderCalcColor(anm | 0xFFFFFF, nbPanelBaseABGR);
+        nbPnlSprite(x + w + 0xA4, yb, q - w, 6, w + 1, 0xD, q - w, 6, c, p->pnltex[0]);
+    }
+    c = nbPanelHPColor((datUnitWork_t *)&DDS3_GBWK->akuma[j].flag);
+    sprintf(buf, D_00551188, DDS3_GBWK->akuma[j].hp);
+    c = effMagaCylinderCalcColor(c, nbPanelBaseRGBA);
+    gnbPnlWork = frwGetSmallNumFontFRQ((x + 0xB9) << 4, (y + 2) << 3, 0, c, (char **)buf, 0);
+    func_001C7E38(gnbPnlWork, 1, 0x47);
+    frDestroyFontRequestAfter(gnbPnlWork);
+    nbPnl_rsetAlpha(0);
+    w = 0;
+    nbPnlSprite(x + 0xDA, yb, 0x32, 6, 1, 0x14, 0x32, 6, nbPanelBaseABGR, p->pnltex[0]);
+    if (DDS3_GBWK->akuma[j].mp != 0) {
+        w = 50 * DDS3_GBWK->akuma[j].mp /
+            DDS3_GBWK->akuma[j].maxmp;
+        if (w == 0) {
+            w = 1;
+        }
+        nbPnlSprite(x + 0xDA, yb, w, 6, 1, 0x1B, w, 6, nbPanelBaseABGR, p->pnltex[0]);
+    }
+    if (DDS3_GBWK->akuma[j].mp < nbPnlWork[i].OldMp) {
+        q = 50 * nbPnlWork[i].OldMp /
+            DDS3_GBWK->akuma[j].maxmp;
+        anm = nbPnlWork[i].MpAnmCnt << 28;
+        nbPnl_rsetAlpha(1);
+        c = effMagaCylinderCalcColor(anm | 0xFFFFFF, nbPanelBaseABGR);
+        nbPnlSprite(x + w + 0xDA, yb, q - w, 6, w + 1, 0x1B, q - w, 6, c, p->pnltex[0]);
+    }
+    nbPnl_rsetAlpha(0);
+    nbPnlSprite(x + 0xA8, y + 7, 0x10, 7, 0xE4, 1, 0x10, 7, nbPanelBaseABGR, p->pnltex[2]);
+    nbPnlSprite(x + 0xDE, y + 7, 0x10, 7, 0xE4, 9, 0x10, 7, nbPanelBaseABGR, p->pnltex[2]);
+    c = nbPanelMPColor((datUnitWork_t *)&DDS3_GBWK->akuma[j].flag);
+    sprintf(buf, D_00551188, DDS3_GBWK->akuma[j].mp);
+    c = effMagaCylinderCalcColor(c, nbPanelBaseRGBA);
+    gnbPnlWork = frwGetSmallNumFontFRQ((x + 0xEF) << 4, (y + 2) << 3, 0, c, (char **)buf, 0);
+    func_001C7E38(gnbPnlWork, 1, 0x47);
+    frDestroyFontRequestAfter(gnbPnlWork);
+    cmpSetSkillListRows(0x13);
+    if (DDS3_GBWK->akuma[j].flag & 4) {
+        gnbPnlWork = frGetCNameFRQ(0, 1, NULL, 0);
+        frSetDrawPosition(gnbPnlWork, (x + 0x2D) << 4, (y + 4) << 3);
+        c = effMagaCylinderCalcColor(0xA09DC380, nbPanelBaseRGBA);
+        frSetFontColor(gnbPnlWork, c);
+        func_001C7E38(gnbPnlWork, 1, 0x47);
+        frDestroyFontRequestAfter(gnbPnlWork);
+    } else {
+        c = effMagaCylinderCalcColor(0xA09DC380, nbPanelBaseRGBA);
+        gnbPnlWork = frwGetSmallFontFRQ2((x + 0x2D) << 4, (y + 4) << 3, 0, c,
+                                         text2[DDS3_GBWK->akuma[j].devilId],
+                                         NULL);
+        func_001C7E38(gnbPnlWork, 1, 0x47);
+        frDestroyFontRequestAfter(gnbPnlWork);
+    }
+    cmpSetSkillListRows(-1);
+    nbPnl_rsetAlpha(0);
+    bs = DDS3_GBWK->akuma[j].badstatus;
+    idx = -1;
+    if (bs & 0x800) {
+        idx = 0;
+    }
+    if (bs & 0x400) {
+        idx = 1;
+    }
+    if (bs & 0x200) {
+        idx = 2;
+    }
+    if (bs & 0x100) {
+        idx = 3;
+    }
+    if (bs & 0x80) {
+        idx = 4;
+    }
+    if (bs & 0x40) {
+        idx = 5;
+    }
+    if (bs & 0x20) {
+        idx = 6;
+    }
+    if (bs & 0x10) {
+        idx = 7;
+    }
+    if (bs & 8) {
+        idx = 8;
+    }
+    if (bs & 4) {
+        idx = 9;
+    }
+    if (bs & 2) {
+        idx = 10;
+    }
+    if (bs & 1) {
+        idx = 11;
+    }
+    if (idx != -1) {
+        nbPnlSprite(x + 8, y, 0x14, 0x15, bad[idx][0], bad[idx][1], 0x14, 0x15, nbPanelBaseABGR,
+                    p->pnltex[0]);
+    }
+}
+
+#else
+
 INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545300);
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawPP1);
+
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawPP);
 
@@ -1505,66 +1708,66 @@ void nbPanelPartyDraw(void)
         }
         if (partyindex[i] != -1) {
             if (data->order[data->orderindex] == partyindex[i] && jun[i] != -1) {
-                gnbPnlWork[i].ActiveMode = 1;
-                ofs = (16 - gnbPnlWork[i].OfsX) / 3;
+                nbPnlWork[i].ActiveMode = 1;
+                ofs = (16 - nbPnlWork[i].OfsX) / 3;
                 if (ofs < 1) {
                     ofs = 1;
                 }
-                gnbPnlWork[i].OfsX += ofs;
-                if (gnbPnlWork[i].OfsX >= 17) {
-                    gnbPnlWork[i].OfsX = 16;
+                nbPnlWork[i].OfsX += ofs;
+                if (nbPnlWork[i].OfsX >= 17) {
+                    nbPnlWork[i].OfsX = 16;
                 }
             } else {
-                gnbPnlWork[i].ActiveMode = 0;
-                ofs = gnbPnlWork[i].OfsX / 3;
+                nbPnlWork[i].ActiveMode = 0;
+                ofs = nbPnlWork[i].OfsX / 3;
                 if (ofs < 1) {
                     ofs = 1;
                 }
-                gnbPnlWork[i].OfsX -= ofs;
-                if (gnbPnlWork[i].OfsX < 0) {
-                    gnbPnlWork[i].OfsX = 0;
+                nbPnlWork[i].OfsX -= ofs;
+                if (nbPnlWork[i].OfsX < 0) {
+                    nbPnlWork[i].OfsX = 0;
                 }
             }
             si = statindex[i];
-            if (gnbPnlWork[i].OldHp == -1) {
-                gnbPnlWork[i].OldHp =
+            if (nbPnlWork[i].OldHp == -1) {
+                nbPnlWork[i].OldHp =
                     ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->hp;
             }
             if (type[i] == -1) {
-                if (gnbPnlWork[i].HpAnmCnt > 0) {
-                    gnbPnlWork[i].HpAnmCnt--;
+                if (nbPnlWork[i].HpAnmCnt > 0) {
+                    nbPnlWork[i].HpAnmCnt--;
                 } else {
-                    gnbPnlWork[i].OldHp =
+                    nbPnlWork[i].OldHp =
                         ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->hp;
                 }
             } else {
-                gnbPnlWork[i].HpAnmCnt = 8;
+                nbPnlWork[i].HpAnmCnt = 8;
             }
-            if (gnbPnlWork[i].OldMp == -1) {
-                gnbPnlWork[i].OldMp =
+            if (nbPnlWork[i].OldMp == -1) {
+                nbPnlWork[i].OldMp =
                     ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->mp;
             }
-            if (gnbPnlWork[i].MpAnmCnt > 0) {
-                gnbPnlWork[i].MpAnmCnt--;
-                if (gnbPnlWork[i].MpAnmCnt <= 0) {
-                    gnbPnlWork[i].OldMp =
+            if (nbPnlWork[i].MpAnmCnt > 0) {
+                nbPnlWork[i].MpAnmCnt--;
+                if (nbPnlWork[i].MpAnmCnt <= 0) {
+                    nbPnlWork[i].OldMp =
                         ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->mp;
                 }
             } else {
                 if (((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->mp <
-                    gnbPnlWork[i].OldMp) {
-                    gnbPnlWork[i].MpAnmCnt = 8;
+                    nbPnlWork[i].OldMp) {
+                    nbPnlWork[i].MpAnmCnt = 8;
                 }
             }
-            nbPanelDrawPP1(x, yy, i, statindex[i], jun[i], gnbPnlWork[i].ActiveMode, data);
+            nbPanelDrawPP1(x, yy, i, statindex[i], jun[i], nbPnlWork[i].ActiveMode, data);
         } else {
             nbPanelDrawPP0(x, yy, data);
-            gnbPnlWork[i].ActiveMode = 0;
-            gnbPnlWork[i].OfsX = 0;
-            gnbPnlWork[i].OldHp = -1;
-            gnbPnlWork[i].OldMp = -1;
-            gnbPnlWork[i].HpAnmCnt = 0;
-            gnbPnlWork[i].MpAnmCnt = 0;
+            nbPnlWork[i].ActiveMode = 0;
+            nbPnlWork[i].OfsX = 0;
+            nbPnlWork[i].OldHp = -1;
+            nbPnlWork[i].OldMp = -1;
+            nbPnlWork[i].HpAnmCnt = 0;
+            nbPnlWork[i].MpAnmCnt = 0;
         }
         yb += 0x17;
         y += 0x17;

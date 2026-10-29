@@ -29,7 +29,9 @@ typedef struct
     u32 flag;
     u16 devilId;
     u16 hp;
-    u8 unk0C[6];
+    u16 maxhp;
+    u16 mp;
+    u16 maxmp;
     u16 badstatus;
     u32 exp;
     u8 pad18[2];

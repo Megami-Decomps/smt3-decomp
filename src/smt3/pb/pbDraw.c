@@ -158,8 +158,6 @@ void func_001D4140(pbProcHandle_t *panel, s32 value) {
     panel->data.value->value = value;
 }
 
-INCLUDE_RODATA(const s32, "pb/pbDraw", D_00535CE8);
-
 
 /* Allocation and consumers in pbModel/pbGame establish this 0x370-byte owner. */
 typedef struct
@@ -201,6 +199,8 @@ extern void dds3SetFog(s32 *fog);
 extern u32 dds3DrawFlag;
 extern void pbResetKeyState(void);
 extern void p2sdPlayBGM(s32 track);
+
+INCLUDE_RODATA(const s32, "pb/pbDraw", D_00535CE8);
 
 void pbLoadTextures(s32 mode, s32 stage)
 {

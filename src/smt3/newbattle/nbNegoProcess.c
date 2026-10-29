@@ -1192,6 +1192,21 @@ void nbNegoShutdown(dds3ProcessID_t *id)
     p2sdBgmVolUp();
 }
 
+/* Negotiation skills have a 0x68-byte record; the first word selects request mode. */
+typedef struct { s32 requestmode; u8 remainder[0x64]; } nbNegoSkillEntry_t;
+extern nbNegoSkillEntry_t D_003E1338[];
+typedef struct { void *flow; void *aisyo; void *question; void *info; } nbNegoMsgEntry_t;
+extern nbNegoMsgEntry_t negoMsgTable[];
+extern u8 itfMesEmbedded_4EB810[], itfMesEmbedded_4EE8B0[];
+extern u8 itfMesEmbedded_4EF0C8[], itfMesEmbedded_4E3DD8[];
+extern void *sdfChipAllocDirect(s32 size);
+extern void *memset(void *dest, s32 value, u32 size);
+extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 index);
+extern nbParty_t *nbGetPartyFromFormindex(s32 index);
+typedef struct itfMesResource_t itfMesResource_t;
+extern s32 itfMesMngInitialize(itfMesResource_t *message);
+extern s32 nbMemoryLoadNegoSe(nbFormation_t *form);
+
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E48);
 
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E70);
@@ -1209,21 +1224,6 @@ INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EF0);
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F00);
 
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F10);
-
-/* Negotiation skills have a 0x68-byte record; the first word selects request mode. */
-typedef struct { s32 requestmode; u8 remainder[0x64]; } nbNegoSkillEntry_t;
-extern nbNegoSkillEntry_t D_003E1338[];
-typedef struct { void *flow; void *aisyo; void *question; void *info; } nbNegoMsgEntry_t;
-extern nbNegoMsgEntry_t negoMsgTable[];
-extern u8 itfMesEmbedded_4EB810[], itfMesEmbedded_4EE8B0[];
-extern u8 itfMesEmbedded_4EF0C8[], itfMesEmbedded_4E3DD8[];
-extern void *sdfChipAllocDirect(s32 size);
-extern void *memset(void *dest, s32 value, u32 size);
-extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 index);
-extern nbParty_t *nbGetPartyFromFormindex(s32 index);
-typedef struct itfMesResource_t itfMesResource_t;
-extern s32 itfMesMngInitialize(itfMesResource_t *message);
-extern s32 nbMemoryLoadNegoSe(nbFormation_t *form);
 
 nbNegoProcessData_t *InitNegoProcessData(nbActionProcessData_t *actdata, s32 pformindex,
                                       s32 eformindex, s32 negotype, s32 skillid)
