@@ -861,3 +861,4 @@ src/smt3/event/evtPicture.c	redthing1	done	2026-10-28	1 fn / 552 B	picture callb
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 308 B	SIF command DMA submission with word-sized header bitfields, optional payload descriptor and cache ordering; named descriptor fields preserve both existing consumers
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 2540 B	qsort with median sampling, equal-key partition, aligned word/byte swap helper and qualified disjoint comparison/span scratch; complete owner 75 match, 0 differ
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	0 exact / 600 B guarded	heap extension preserves noncontiguous accounting, two break requests, fenceposts and 64-bit maximum counters; 584 emitted bytes with narrowing/allocation residual
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 352 B	thread command publication and exception-handler registration; complete owner 133 match, 0 differ

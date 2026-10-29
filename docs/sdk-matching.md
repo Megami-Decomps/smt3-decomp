@@ -1010,3 +1010,19 @@ descriptor carries attribute `0x44`; the command and size are published before
 the mandatory packet flush. Mode bit 1 selects interrupt-context submission.
 The option word is untouched. Initializing the payload descriptor before the
 header gives the native store schedule using ordinary field assignments.
+
+## Thread-command publication and exception registration
+
+`iRotateThreadReadyQueue` accepts priorities 0 through 127 only while the manager
+thread ID is nonzero. It masks the current write index to 511, publishes the
+incremented index, writes command 1 and the priority byte, then signals the
+manager semaphore and returns the original priority. No queue-full check is added.
+
+`SetTLBHandler` publishes the opaque handler address and installs the native TLB
+entry for selectors 1, 2 and 3, returning the supplied address. `SetDebugHandler`
+accepts selectors 1 through 13 and indexes the existing 16-entry address table
+directly; it returns the previous address or the pointer sentinel `-1`. Selectors
+1 through 3 register the native debug entry through the TLB service, and the
+remaining selectors use the common-exception service. The hardware entries remain
+assembly. Their user callbacks have different argument sets, so the registration
+functions preserve opaque code addresses instead of imposing one callback type.

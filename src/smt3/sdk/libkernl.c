@@ -530,7 +530,23 @@ s32 InitThread(void)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", iWakeupThread);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", iRotateThreadReadyQueue);
+extern s32 iSignalSema(s32 sema);
+
+s32 iRotateThreadReadyQueue(s32 priority)
+{
+    u32 index;
+
+    if ((u32)priority >= 0x80 || D_0052C2AC == 0) {
+        return -1;
+    }
+
+    index = D_0059B178.writeIndex & 0x1FF;
+    D_0059B178.writeIndex = index + 1;
+    D_0059B178.commands[index][0] = 1;
+    D_0059B178.commands[index][1] = (u8)priority;
+    iSignalSema(threadMgrSema);
+    return priority;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", iSuspendThread);
 
@@ -3940,9 +3956,41 @@ s32 kputs(const char *text)
     return Deci2Call(16, packet);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", SetTLBHandler);
+/* Handler entries stay opaque: callers supply code addresses, and this unit
+ * does not establish a specific handler function signature. */
+extern void *D_0052D620;
+extern void *D_0052D628[16];
+extern void _kTLBException();
+extern void _kDebugException();
+extern void *SetVTLBRefillHandler(s32 index, void *handler);
+extern void *SetVCommonHandler(s32 index, void *handler);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", SetDebugHandler);
+void *SetTLBHandler(void *handler)
+{
+    D_0052D620 = handler;
+    SetVTLBRefillHandler(1, _kTLBException);
+    SetVTLBRefillHandler(2, _kTLBException);
+    SetVTLBRefillHandler(3, _kTLBException);
+    return handler;
+}
+
+void *SetDebugHandler(s32 index, void *handler)
+{
+    void *previous;
+
+    if (((u32)index - 1) >= 13) {
+        return (void *)-1;
+    }
+
+    previous = D_0052D628[index];
+    D_0052D628[index] = handler;
+    if (((u32)index - 1) < 3) {
+        SetVTLBRefillHandler(index, _kDebugException);
+    } else {
+        SetVCommonHandler(index, _kDebugException);
+    }
+    return previous;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", Copy_2);
 
