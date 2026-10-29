@@ -14,9 +14,9 @@ open the page and line it names.
 | 9 | [float-literals.md](float-literals.md) | Float literals |
 | 5 | [scheduling.md](scheduling.md) | Store scheduling |
 | 4 | [callee-visibility.md](callee-visibility.md) | Callee visibility: the cause of most one-word branch-likely misses |
+| 3 | [handle-registers.md](handle-registers.md) | `lw $4` against `lw $2` plus `move $4, $2` |
 | 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
 | 2 | [scalar-spills.md](scalar-spills.md) | Scalar declaration order and reload spill slots |
-| 2 | [handle-registers.md](handle-registers.md) | `lw $4` against `lw $2` plus `move $4, $2` |
 | 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
 | 1 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
 | 1 | [local-vectors.md](local-vectors.md) | Two local vectors: declaration order fixes the stack offsets |

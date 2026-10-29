@@ -416,7 +416,8 @@ void nbDelAllKoukaPacketType(s32 type)
     }
 }
 
-void nbDelAllMojiNumEffectKoukaPacket(nbFormation_t *form, s32 motno)
+/* The action-ready caller supplies only form; native never consumes $a1. */
+void nbDelAllMojiNumEffectKoukaPacket(nbFormation_t *form)
 {
     dds3ProcessID_t *id = nbGetMainProcessData()->KoukaProcessID;
     nbKoukaProcessData_t *work;

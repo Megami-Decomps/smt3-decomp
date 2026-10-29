@@ -1,5 +1,7 @@
 #include "common.h"
 #include "basic.h"
+#include "event.h"
+#include "effect.h"
 #include "kernel.h"
 #include "ps2asm.h"
 
@@ -21,6 +23,8 @@ typedef struct evtViewerKey_t {
         s32 words[2];
         s16 shorts[4];
         s8 bytes[8];
+        u8 unsignedBytes[8];
+        u16 unsignedShorts[4];
         f32 values[2];
     } body;                         /* 0x08 */
     u8 unk10[4];
@@ -32,7 +36,12 @@ typedef struct evtViewerKey_t {
 typedef struct evtViewerGroup_t {
     s32 type;
     s32 entryHeader;                /* 0x04 */
-    u8 unk08[0x10];
+    s32 fileIndex;
+    dds3Basic_t *basic;
+    union {
+        struct { s16 major, minor; s32 reserve; } resource;
+        struct { void *data; s32 reserve; } effect;
+    };
     s32 childCount;                 /* 0x18 */
     evtViewerKey_t *children;       /* 0x1C */
     evtViewerKey_t *lastChild;      /* 0x20 */
@@ -49,7 +58,8 @@ typedef struct {
     u8 unk001C[4];
     s32 nametablecnt;                 /* 0x20 */
     char nametable[256][32];        /* 0x24 */
-    u8 unk2024[0xC];
+    dds3Basic_t *activecamera;
+    u8 unk2028[8];
     s32 objcnt;                 /* 0x2030 */
     evtViewerGroup_t *groups;       /* 0x2034 */
     u8 unk2038[0x248];
@@ -196,8 +206,6 @@ extern void evtInitViewerInfo(void);
 extern void evtFreePolygonMovieWorkData(void *wdata);
 
 extern void *evtGetPolygonMovieWorkData2(s32 eventno, s32 cutno, s32 type);
-
-extern void evtMakeMotionName(void *pWork);
 
 extern s32 evtGetViewerObjectTypeCount(s32 type);
 
@@ -1912,7 +1920,495 @@ s32 evtMakeViewerPath(s32 kind)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewerMenu", evtMakeMotionName);
+/* PM1/PM2 layouts and pointers follow evtGetPolygonMovieWorkData1. */
+typedef struct pmdCutInfo_t {
+    s32 FirstFrame;
+    s32 LastFrame;
+    s32 TotalFrame;
+    s32 reserve;
+} pmdCutInfo_t;
+
+typedef struct evtBlendVecColor_t {
+    f32 vec[4];
+    u32 color;
+} evtBlendVecColor_t;
+
+typedef struct pmdSceneFogTable_t {
+    evtBlendVecColor_t fog;
+    s32 reserve[3];
+} pmdSceneFogTable_t;
+
+typedef struct pmdFrameTable_t pmdFrameTable_t;
+typedef struct pmdStageTable_t {
+    s32 NameIndex, FileIndex, MajorNum, MinorNum;
+} pmdStageTable_t;
+typedef struct pmdUnitTable_t {
+    s32 NameIndex, FileIndex, MajorNum, MinorNum, DataOffset, DataSize, Reserve1, Reserve2;
+} pmdUnitTable_t;
+/* Scene-light records are the three vectors consumed by SLightFrameFunc. */
+typedef struct {
+    f32 color[4], direction[4], ambient[4];
+} pmdSceneLightTable_t;
+
+typedef struct pmdEffectTable_t {
+    s32 NameIndex;
+    s32 DataOffset;
+    s32 Type;
+    s32 reserve;
+} pmdEffectTable_t;
+
+typedef struct pmdEntry_t {
+    u32 type;
+    u32 elementSize;
+    u32 value;
+    u32 offset;
+} pmdEntry_t;
+
+typedef struct pmdHeader_t {
+    u8 pad[0x10];
+    s32 count;
+    s32 kind;
+    u8 pad2[8];
+    pmdEntry_t entries[1];
+} pmdHeader_t;
+
+typedef struct evtPolygonMovieWork_t {
+    u32 movieFlags;
+    void *file04;
+    sdfMemHandle_t *mem08;
+    void *pm1data;
+    void *header1;
+    pmdEntry_t *entryTable1;
+    char (*nameTable1)[32];
+    s32 nameCount1;
+    pmdStageTable_t *stageTable;
+    s32 stageCount;
+    void *stageF1;
+    void *stageF2;
+    void *stageTB;
+    pmdUnitTable_t *unitTable;
+    s32 unitCount;
+    void *type9Data;
+    pmdEffectTable_t *effectTable;
+    s32 effectCount;
+    void *type8Data;
+    void *file4C;
+    sdfMemHandle_t *mem50;
+    void *pm2data;
+    pmdHeader_t *header2;
+    pmdEntry_t *entryTable2;
+    char (*nameTable)[32];
+    s32 nameCount2;
+    pmdCutInfo_t *cutInfo;
+    pmdFrameTable_t *frameTable;
+    s32 frameCount;
+    void *cameraTable;
+    s32 cameraCount;
+    pmdSceneLightTable_t *slightTable;
+    s32 slightCount;
+    pmdSceneFogTable_t *sfogTable;
+    s32 sfogCount;
+    dds3Effect_Blur_t *blur2Table;
+    s32 blur2Count;
+    dds3Effect_PartialMultiBlurParam_t *mblurTable;
+    s32 mblurCount;
+    dds3Effect_DistortionBlurParam_t *dblurTable;
+    s32 dblurCount;
+    dds3Effect_Filter_t *filterTable;
+    s32 filterCount;
+    dds3Effect_PartialMultiFilterParam_t *mfilterTable;
+    s32 mfilterCount;
+    dds3Effect_RippleBlurParam_t *rblurTable;
+    s32 rblurCount;
+    s32 mesHandle;
+    dds3ProcessID_t *processId;
+    s32 eventNo;
+    s32 cutNo;
+    s32 nowFrame;
+    dds3Basic_t **effectBasicTable;
+} evtPolygonMovieWork_t;
+
+typedef struct pmdFrameTable_t {
+    u16 ObjectType;
+    u16 Frame;
+    u16 Length;
+    s16 NameIndex;
+    union {
+        s8 b[8];
+        u8 ub[8];
+        s16 h[4];
+        u16 uh[4];
+        s32 w[2];
+        f32 f[2];
+    } data;
+} pmdFrameTable_t;
+
+
+extern dds3Basic_t *dds3GetControlScene(void);
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, s32 serial, s32 type);
+extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, s32 pF1, s32 pF2, const void *pTB, s32 pBF);
+extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
+extern s32 evtSetRegistUnit(s32 major, s32 minor);
+extern evtUnit_t *evtGetUnitHandle(s32 serial);
+extern void mdlSmoothSingleMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
+extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *obj);
+extern evtViewerGroup_t *evtAddViewerObject(s32 type);
+extern s32 evtAddNameTable(const char *name);
+/* Native provider only consumes the track and frame, not a third viewer argument. */
+extern evtViewerKey_t *evtAddFrameInfo(evtViewerGroup_t *group, s32 frame);
+extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *camera, f32 fovy);
+extern s32 strcmp(const char *a, const char *b);
+extern void *memcpy(void *dest, const void *src, u32 size);
+
+s32 evtMakeMotionName(evtPolygonMovieWork_t *work)
+{
+    char pathName[64];
+    s32 i;
+    s32 j;
+    s32 major;
+    s32 minor;
+    s32 serial;
+    dds3SceneBasic_t *scene;
+    dds3Basic_t *linkedBasic;
+    dds3Basic_t *basic;
+    evtViewerGroup_t *group;
+    evtViewerKey_t *key;
+    pmdFrameTable_t *frame;
+
+    if (work->stageTable != NULL) {
+        major = work->stageTable->MajorNum;
+        minor = work->stageTable->MinorNum;
+        evtLoadArea_FromMemory(major, minor, (s32)work->stageF1, (s32)work->stageF2, work->stageTB, 0);
+        group = evtAddViewerObject(0);
+        group->entryHeader = evtAddNameTable(work->nameTable1[work->stageTable->NameIndex]);
+        group->resource.major = major;
+        group->resource.minor = minor;
+    }
+    scene = dds3GetControlScene()->workdata;
+    for (basic = scene->basictable[4].firstbasic; basic != NULL; basic = basic->next) {
+        if (basic->name != NULL) {
+            group = evtAddViewerObject(2);
+            group->basic = basic;
+            group->entryHeader = evtAddNameTable(basic->name);
+        }
+    }
+    for (i = 0; i < work->unitCount; i++) {
+        major = work->unitTable[i].MajorNum;
+        minor = work->unitTable[i].MinorNum;
+        mdlPackDecode(major, minor, 0x101, (u8 *)work->header1 + work->unitTable[i].DataOffset,
+                      work->unitTable[i].DataSize);
+        serial = evtSetRegistUnit(major, minor);
+        group = evtAddViewerObject(1);
+        group->basic = dds3SearchSceneBasic(dds3GetControlScene(), serial, 5);
+        group->entryHeader = evtAddNameTable(work->nameTable1[work->unitTable[i].NameIndex]);
+        group->basic->name = viewerinfo->nametable[group->entryHeader];
+        group->resource.major = major;
+        group->resource.minor = minor;
+        mdlSmoothSingleMotion(evtGetUnitHandle(serial)->owner, 0, 0, 0.0f, 0.0f);
+    }
+    for (i = 0; i < work->effectCount; i++) {
+        switch (work->effectTable[i].Type) {
+        case 0: group = evtAddViewerObject(3); break;
+        case 1: group = evtAddViewerObject(18); break;
+        case 2: group = evtAddViewerObject(20); break;
+        case 3: group = evtAddViewerObject(21); break;
+        default: continue;
+        }
+        group->entryHeader = evtAddNameTable(work->nameTable1[work->effectTable[i].NameIndex]);
+        group->effect.data = (u8 *)work->header1 + work->effectTable[i].DataOffset;
+    }
+    for (basic = scene->basictable[9].firstbasic; basic != NULL; basic = basic->next) {
+        if (basic->name != NULL) {
+            group = evtAddViewerObject(9);
+            group->basic = basic;
+            group->entryHeader = evtAddNameTable(basic->name);
+        }
+    }
+    viewerinfo->activecamera = NULL;
+    for (basic = scene->basictable[16].firstbasic; basic != NULL; basic = basic->next) {
+        if (basic->name != NULL) {
+            for (linkedBasic = scene->basictable[4].firstbasic; linkedBasic != NULL; linkedBasic = linkedBasic->next) {
+                if (linkedBasic->name != NULL) {
+                    sprintf(pathName, "%s_MOTION", linkedBasic->name);
+                    if (strcmp(basic->name, pathName) == 0) {
+                        evtPathLinkAndMake(basic, linkedBasic);
+                    }
+                }
+            }
+            for (linkedBasic = scene->basictable[9].firstbasic; linkedBasic != NULL; linkedBasic = linkedBasic->next) {
+                if (linkedBasic->name != NULL) {
+                    sprintf(pathName, "%s_MOTION", linkedBasic->name);
+                    if (strcmp(basic->name, pathName) == 0) {
+                        evtPathLinkAndMake(basic, linkedBasic);
+                    }
+                }
+            }
+            for (linkedBasic = scene->basictable[7].firstbasic; linkedBasic != NULL; linkedBasic = linkedBasic->next) {
+                if (linkedBasic->name != NULL) {
+                    sprintf(pathName, "%s_MOTION", linkedBasic->name);
+                    if (strcmp(basic->name, pathName) == 0) {
+                        evtPathLinkAndMake(basic, linkedBasic);
+                    }
+                }
+            }
+        }
+    }
+    if (work->cutInfo != NULL) {
+        viewerinfo->headerThird = work->cutInfo->TotalFrame;
+        viewerinfo->headerFirst = work->cutInfo->FirstFrame;
+        viewerinfo->frameRange = work->cutInfo->LastFrame;
+    }
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 1) {
+            for (group = viewerinfo->groups; group != NULL; group = group->next) {
+                if (strcmp(viewerinfo->nametable[group->entryHeader], work->nameTable[frame->NameIndex]) == 0) {
+                    key = evtAddFrameInfo(group, frame->Frame);
+                    key->body.unsignedBytes[0] = frame->data.ub[0];
+                    key->nameIndex = evtAddNameTable(work->nameTable[frame->NameIndex]);
+                }
+            }
+        }
+    }
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 2) {
+            for (group = viewerinfo->groups; group != NULL; group = group->next) {
+                if (strcmp(viewerinfo->nametable[group->entryHeader], work->nameTable[frame->NameIndex]) == 0) {
+                    key = evtAddFrameInfo(group, frame->Frame);
+                    key->body.values[0] = frame->data.f[0];
+                    key->nameIndex = evtAddNameTable(work->nameTable[frame->NameIndex]);
+                    dds3CameraObjectBasicSetFovy(group->basic, key->body.values[0]);
+                }
+            }
+        }
+    }
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        switch (frame->ObjectType) {
+        case 3:
+        case 18:
+        case 20:
+        case 21:
+            for (group = viewerinfo->groups; group != NULL; group = group->next) {
+                if (strcmp(viewerinfo->nametable[group->entryHeader], work->nameTable[frame->NameIndex]) == 0) {
+                    key = evtAddFrameInfo(group, frame->Frame);
+                    switch (frame->ObjectType) {
+                    case 3:
+                        key->body.unsignedShorts[1] = frame->data.uh[1];
+                        key->body.unsignedBytes[5] = frame->data.ub[5];
+                        if (frame->data.h[3] < 0) {
+                            key->body.shorts[3] = -1;
+                        } else {
+                            key->body.shorts[3] = evtAddNameTable(work->nameTable[frame->data.h[3]]);
+                        }
+                        key->body.unsignedBytes[4] = frame->data.ub[4];
+                        if (work->header2->kind < 4) {
+                            key->index = 0;
+                        } else {
+                            key->index = frame->Length;
+                        }
+                        break;
+                    case 20:
+                    case 21:
+                        key->body.unsignedShorts[1] = frame->data.uh[1];
+                        key->index = frame->Length;
+                        for (j = 0; j < 4; j++) {
+                            if (frame->data.b[j + 4] < 0) {
+                                key->body.bytes[j + 4] = -1;
+                            } else {
+                                key->body.bytes[j + 4] = evtAddNameTable(work->nameTable[frame->data.b[j + 4]]);
+                            }
+                        }
+                        key->body.unsignedBytes[1] = frame->data.ub[1];
+                        break;
+                    case 18:
+                        key->body.unsignedShorts[0] = frame->data.uh[0];
+                        key->body.unsignedBytes[4] = frame->data.ub[4];
+                        if (frame->data.h[1] < 0) {
+                            key->body.shorts[1] = -1;
+                        } else {
+                            key->body.shorts[1] = evtAddNameTable(work->nameTable[frame->data.h[1]]);
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+    }
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 9) {
+            for (group = viewerinfo->groups; group != NULL; group = group->next) {
+                if (strcmp(viewerinfo->nametable[group->entryHeader], work->nameTable[frame->NameIndex]) == 0) {
+                    key = evtAddFrameInfo(group, frame->Frame);
+                    key->index = frame->Length;
+                    key->body.unsignedShorts[1] = frame->data.uh[1];
+                    if (frame->data.h[0] < 0) {
+                        key->body.shorts[0] = -1;
+                    } else {
+                        key->body.shorts[0] = evtAddNameTable(work->nameTable[frame->data.h[0]]);
+                    }
+                }
+            }
+        }
+    }
+    group = evtAddViewerObject(10);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 10) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.values[0] = frame->data.f[0];
+            key->body.values[1] = frame->data.f[1];
+            key->nameIndex = frame->NameIndex;
+            memcpy(key->payload, &work->slightTable[frame->Length], sizeof(pmdSceneLightTable_t));
+        }
+    }
+    group = evtAddViewerObject(11);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 11) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+            memcpy(key->payload, &work->sfogTable[frame->Length], sizeof(pmdSceneFogTable_t));
+        }
+    }
+    group = evtAddViewerObject(12);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 12) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->index = frame->Length;
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+            key->body.unsignedShorts[1] = frame->data.uh[1];
+            key->body.words[1] = frame->data.w[1];
+            if (work->header2->kind == 1) {
+                key->body.shorts[1] = 0;
+            }
+            if (work->header2->kind == 2) {
+                key->body.shorts[1] -= 128;
+                if (key->body.shorts[1] < -255) {
+                    key->body.shorts[1] = -255;
+                }
+                if (key->body.shorts[1] > 255) {
+                    key->body.shorts[1] = 255;
+                }
+            }
+        }
+    }
+    group = evtAddViewerObject(22);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 22) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+        }
+    }
+    group = evtAddViewerObject(13);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 13) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+            memcpy(key->payload, &work->blur2Table[frame->data.h[1]], sizeof(dds3Effect_Blur_t));
+        }
+    }
+    group = evtAddViewerObject(14);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 14) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+            memcpy(key->payload, &work->mblurTable[frame->data.h[1]], sizeof(dds3Effect_PartialMultiBlurParam_t));
+        }
+    }
+    group = evtAddViewerObject(15);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 15) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+            memcpy(key->payload, &work->dblurTable[frame->data.h[1]], sizeof(dds3Effect_DistortionBlurParam_t));
+        }
+    }
+    group = evtAddViewerObject(23);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 23) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+            memcpy(key->payload, &work->rblurTable[frame->data.h[1]], sizeof(dds3Effect_RippleBlurParam_t));
+        }
+    }
+    group = evtAddViewerObject(16);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 16) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+            memcpy(key->payload, &work->filterTable[frame->data.h[1]], sizeof(dds3Effect_Filter_t));
+        }
+    }
+    group = evtAddViewerObject(17);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 17) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+            memcpy(key->payload, &work->mfilterTable[frame->data.h[1]], sizeof(dds3Effect_PartialMultiFilterParam_t));
+        }
+    }
+    group = evtAddViewerObject(5);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 5) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+        }
+    }
+    group = evtAddViewerObject(19);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 19) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+            key->body.unsignedShorts[1] = frame->data.uh[1];
+        }
+    }
+    group = evtAddViewerObject(6);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 6) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->index = frame->Length;
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+        }
+    }
+    group = evtAddViewerObject(7);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 7) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->index = frame->Length;
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+        }
+    }
+    group = evtAddViewerObject(8);
+    for (i = 0; i < work->frameCount; i++) {
+        frame = &work->frameTable[i];
+        if (frame->ObjectType == 8) {
+            key = evtAddFrameInfo(group, frame->Frame);
+            key->body.unsignedShorts[0] = frame->data.uh[0];
+            key->body.unsignedShorts[1] = frame->data.uh[1];
+            key->body.unsignedShorts[2] = frame->data.uh[2];
+        }
+    }
+    evtViewerStopFrame();
+    evtRunFrame(viewerinfo->nowframe);
+    evtViewerStopFrame();
+    return 1;
+}
 
 s32 evtViewerShutdown(s32 kind)
 {

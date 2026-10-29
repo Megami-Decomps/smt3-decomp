@@ -82,3 +82,53 @@ remainder semantics. Each texture call is followed by a fresh `oStaff_UI` load
 before storing its result, so the source retains separate global accesses.
 The provider's parameter remains the actual `TMX_HEADER_t *` contract. The
 complete normal owner checks 9 match / 0 differ.
+
+### SetAction_READY: live delay/index scalar and a named display value
+
+The 3540-byte action-ready routine matches with one real `s32 i` used for the
+HP-cost delay and then reset independently for each formation scan. The delay
+is consumed in `nbAddHpMpKoukaPacket(a->timer + i, ...)`; no value from that
+phase reaches a scan. The later loops need their index across callbacks. This
+is ordinary disjoint-phase scalar reuse, not a dummy use or an added dependency.
+
+The final skill display also names its value: `s32 skillName =
+a->work->nowindex`, then tests that value against `0xF7` and passes it to
+`nbDispSkillName`. The special-name tests preceding it still read the native
+unit fields. There is no callback between this local's read, test and use.
+
+Three complete-owner sources were qualified with the canonical compiler
+SHA-256 `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`:
+the matched source, a control with a separate `delay` local, and a control
+using the final field directly in the test and call. For each, stock `-da`
+assembly and all non-debug sections, including relocation and symbol tables,
+agreed with ordinary compilation. No debugger or optimization-flag change was
+used. Reproduce a control by applying only that stated source change:
+
+```sh
+SMT3_AS_UNIT=src/smt3/newbattle/nbActionProcess.c \
+  SMT3_KEEP_S=/tmp/ordinary.s tools/cc.sh /tmp/ready.c -o /tmp/ordinary.o
+SMT3_AS_UNIT=src/smt3/newbattle/nbActionProcess.c \
+  SMT3_KEEP_S=/tmp/stock.s tools/cc.sh -da -dumpbase /tmp/ready-rtl \
+  /tmp/ready.c -o /tmp/stock.o
+```
+
+In the matched `00.rtl`, delay definitions 1884/1896/1901 and scan
+initializations 2701/2880/2963 all write pseudo92. `20.greg` assigns it `$17`.
+The separate-delay control instead writes pseudo98 for the delay and assigns
+it `$8`, leaving three instruction-register differences. Both values are
+real signed integers and both controls preserve the native callback reloads.
+
+For the named display value, `00.rtl` instruction3611 produces SI pseudo730.
+In `19.lreg` it stays live through the guard into the call's argument copy;
+`20.greg` assigns it `$4`. The direct-field control's test uses pseudo732 in
+`$3`, dies at the guard, and its call loads the field separately. That lets
+`29.dbr` move the test load into the preceding comparison's delay slot and
+remove another load, producing a body eight bytes short. Naming the consumed
+value retains retail's two branch-likely loads of `$4` and final `beq`.
+
+The complete action owner checks **79 match, 0 differ**, including the native
+strings and eight switch tables. The visual pointer is a deliberate snapshot
+across preparation callbacks; formation, action and unit fields are freshly
+read where retail reloads them. File requests use the provider's pointer type,
+and the first movement packet explicitly narrows its selection to `u16`
+while the reverse-target shift retains the provider's full-width mask.
