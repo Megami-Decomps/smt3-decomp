@@ -2676,13 +2676,38 @@ extern fldDanteDoor_t D_002FBF40, D_002FBF50, D_002FBF60;
 extern char D_0054EAE0[];
 extern s32 fldGetRestoreMode(void);
 
+static inline void fldRunDanteDoorPosition(void)
+{
+    if (fldRun_Dante.pDoor != NULL) {
+        fldRun_Dante.ix = fldRun_Dante.pDoor->ix;
+        fldRun_Dante.angleToPlayer = fldRun_Dante.pDoor->angle;
+        fldRun_Dante.iz = fldRun_Dante.pDoor->iz;
+    }
+    fldRun_Dante.turn = 180.0f - fldRun_Dante.angleToPlayer;
+    fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
+    fldRunAiCng(2);
+    fldRunDanteSetModel();
+}
+
+static inline void fldRunDanteSpecialDoor(void)
+{
+    fldRun_Dante.angleToPlayer = D_002FBF00.angle;
+    fldRun_Dante.ix = D_002FBF00.ix;
+    fldRun_Dante.iz = D_002FBF00.iz;
+    fldRun_Dante.turn = 180.0f - D_002FBF00.angle;
+    fldRun_Dante.pDoor = NULL;
+    fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
+    fldRun_Dante.flag |= 0x20;
+    fldRunAiCng(1);
+    fldRunDanteSetModel();
+    fldRun_Dante.stance = 9;
+}
+
 void fldRunDanteStanceSet(s32 stance)
 {
     sdfVector4_t position;
     s32 restore;
     s32 mode;
-    s32 doorPosition = 0;
-    s32 specialDoor = 0;
 
     memset(&position, 0, sizeof(position));
     position.w = 1.0f;
@@ -2722,14 +2747,14 @@ void fldRunDanteStanceSet(s32 stance)
             break;
         }
         if (evtBitCheck(0x7B1) && evtBitCheck(0x7B2)) {
-            specialDoor = 1;
+            fldRunDanteSpecialDoor();
         } else {
             if (fldGlobalBase.previousFloor == 3 || !(fldGlobalBase.z < -4000.0f)) {
                 fldRun_Dante.pDoor = &D_002FBF20;
             } else {
                 fldRun_Dante.pDoor = &D_002FBF10;
             }
-            doorPosition = 1;
+            fldRunDanteDoorPosition();
         }
         break;
     case 3:
@@ -2742,7 +2767,7 @@ void fldRunDanteStanceSet(s32 stance)
             break;
         }
         fldRun_Dante.pDoor = fldGlobalBase.z < -4000.0f ? &D_002FBF40 : &D_002FBF50;
-        doorPosition = 1;
+        fldRunDanteDoorPosition();
         break;
     case 6:
         restore = fldGetRestoreMode();
@@ -2754,7 +2779,7 @@ void fldRunDanteStanceSet(s32 stance)
             break;
         }
         fldRun_Dante.pDoor = &D_002FBF60;
-        doorPosition = 1;
+        fldRunDanteDoorPosition();
         break;
     case 9:
         if (fldGlobalBase.previousFloor == 7 && fldRun_Dante.old_status != 1) {
@@ -2775,7 +2800,7 @@ void fldRunDanteStanceSet(s32 stance)
         fldRunDanteSetModel();
         break;
     case 10:
-        specialDoor = 1;
+        fldRunDanteSpecialDoor();
         break;
     case 11:
     case 12:
@@ -2791,29 +2816,6 @@ void fldRunDanteStanceSet(s32 stance)
         }
         fldRunDanteSetModel();
         break;
-    }
-    if (doorPosition) {
-        if (fldRun_Dante.pDoor != NULL) {
-            fldRun_Dante.ix = fldRun_Dante.pDoor->ix;
-            fldRun_Dante.angleToPlayer = fldRun_Dante.pDoor->angle;
-            fldRun_Dante.iz = fldRun_Dante.pDoor->iz;
-        }
-        fldRun_Dante.turn = 180.0f - fldRun_Dante.angleToPlayer;
-        fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
-        fldRunAiCng(2);
-        fldRunDanteSetModel();
-    }
-    if (specialDoor) {
-        fldRun_Dante.angleToPlayer = D_002FBF00.angle;
-        fldRun_Dante.ix = D_002FBF00.ix;
-        fldRun_Dante.iz = D_002FBF00.iz;
-        fldRun_Dante.turn = 180.0f - D_002FBF00.angle;
-        fldRun_Dante.pDoor = NULL;
-        fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
-        fldRun_Dante.flag |= 0x20;
-        fldRunAiCng(1);
-        fldRunDanteSetModel();
-        fldRun_Dante.stance = 9;
     }
 }
 #else
