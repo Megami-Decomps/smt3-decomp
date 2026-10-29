@@ -843,3 +843,4 @@ src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 424 B	frame descripto
 src/smt3/pipe/pipeObject.c	redthing1	done	2026-10-28	1 fn / 808 B	part rotation restores native direction-pair axes, dispatch order and vector handoff; owner 40 match, 0 differ including data
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 272 B	CIE metadata parser with true 20-byte info record, unaligned EH decoding and existing augmentation data; complete owner 32 match, 0 differ
 src/smt3/sdk/libmc.c	redthing1	done	2026-10-28	0 exact / typed guard	write request fields preserve const bulk pointer and unsigned inline count; native instruction extent corrected to 380 bytes, existing seven-word residual unchanged
+src/smt3/pipe/pipeSection.c	redthing1	done	2026-10-28	0 exact / 540 B guarded	MyAction corrects action-zero fallthrough and callback count reloads; 129 of 135 words match, six post-effect load-scheduling differences remain

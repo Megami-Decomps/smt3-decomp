@@ -214,6 +214,7 @@ objOption				docs/nonmatching/pipe/pipeObject.md	3
 pipeFileLoad	pipe/pipePosTable	424 bytes	103 of 106 words match	docs/nonmatching/pipe/pipePosTable.md	5
 ActionZMotion	pipe/pipeSection	0x140	74 of 80 words match	docs/nonmatching/pipe/pipeSection.md	5
 EmTask	pipe/pipeSection	0x34C		docs/nonmatching/pipe/pipeSection.md	29
+MyAction	pipe/pipeSection	0x21C		docs/nonmatching/pipe/pipeSection.md	68
 cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/nonmatching/result/rstcalc.md	5
 cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/nonmatching/result/rstcalc.md	27
 datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/nonmatching/result/rstcalc.md	49

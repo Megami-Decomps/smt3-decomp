@@ -644,7 +644,84 @@ void MyTask(tagPipeObject *object)
 }
 
 
+extern void pipeEffSet(tagPipeObject *, s32);
+extern void ActionBound(tagPipeObject *);
+extern void ActionKey(tagPipeObject *);
+extern void objMyStatusChange(tagPipeObject *, u8);
+
+/* NON_MATCHING: 129 of 135 instruction words match at the native 540-byte size. */
+#ifdef NON_MATCHING
+void MyAction(tagPipeObject *object)
+{
+    u16 count;
+    switch (object->action) {
+    case 1:
+        object->count--;
+        if ((u16)(object->count - 6) < 19) {
+            object->flags |= 0x100;
+        } else {
+            object->flags &= 0xFEFF;
+        }
+        if ((myStatus & 0xF) != 0 && object->count == 21) {
+            pipeEffSet(object, 6);
+        }
+        count = object->count;
+        switch (attackCount) {
+        case 1:
+            if ((u32)count - 8 < 9) {
+                object->flags &= 0xFDFF;
+            } else {
+                object->flags |= 0x200;
+            }
+            break;
+        case 2:
+            if ((u32)count - 8 < 9) {
+                object->flags &= 0xFDFF;
+            } else {
+                object->flags |= 0x200;
+            }
+            break;
+        }
+        if ((s16)count < 2) {
+            object->flags &= 0xFDFF;
+            attackCount = 0;
+            count = object->count;
+        }
+        if (count == 0) {
+            objMyStatusChange(object, 0);
+        }
+        break;
+    case 2:
+        object->count--;
+        if ((u16)(object->count - 21) < 9) {
+            object->flags |= 0x400;
+        } else {
+            object->flags &= 0xFBFF;
+        }
+        if (object->count < 20) {
+            object->flags &= 0xFDFF;
+        }
+        if (object->count == 0) {
+            objMyStatusChange(object, 0);
+        }
+        break;
+    case 30:
+        ActionBound(object);
+        if (object->count == 0) {
+            object->action = 0;
+        }
+        break;
+    }
+    if ((f32)(D_00528F58.tSize - 0x600) + 256.0f < (f32)offsetCount) {
+        object->flags |= 0x200;
+    }
+    ActionKey(object);
+    /* End the consumed counter phase after the regular completion call. */
+    count = 0;
+}
+#else
 INCLUDE_ASM(const s32, "pipe/pipeSection", MyAction);
+#endif
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", MyHitAction);
 

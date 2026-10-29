@@ -63,3 +63,29 @@ establish an ordinary source change that produces the native copy into `$4`.
 Hooked/unhooked assembly and normal-output parity passed without RTL dumps
 using compiler SHA-256
 `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
+
+
+## MyAction (pipe/pipeSection, 0x21C)
+
+129 of 135 instruction words match at the native 540-byte size. Production
+retains assembly. Action zero still reaches the shared offset-window test
+and `ActionKey`; the older reconstruction incorrectly returned early.
+
+The action-specific paths preserve wrapped halfword countdown ranges,
+separate attack modes one and two, signed low-count tests, and callback-visible
+count reloads. The post-effect snapshot is an unsigned halfword; its signed
+interpretation is used only for the low-count clamp. Resetting the byte attack
+mode can alias the object, so that path refreshes the snapshot before testing
+zero. The other path retains the existing snapshot as native does.
+
+The six residual words are at +0x98, +0x9C, +0xAC, +0xB0, +0xB4 and +0xB8.
+Native places the post-effect count load before the attack-mode load; the
+draft schedules the mode load into the preceding branch and the count load
+into the first mode-test delay slot. Qualified compiler output parity confirms
+that ordering. No volatile qualifier or artificial dependency constrains it.
+
+The consumed counter reset after `ActionKey` follows the existing same-owner
+`ObjectDraw` and `ActionZMotion` regular-call precedent. Qualified traces retain
+reset UID422 through sibling selection, remove it in life analysis, and keep
+call UID418 regular. Removing only the reset emits 532 bytes with a sibling
+call. Both controls pass normal/dumped/hooked assembly and all RTL parity.
