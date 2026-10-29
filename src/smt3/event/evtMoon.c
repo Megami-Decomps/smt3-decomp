@@ -611,6 +611,8 @@ block_73:
                 glowAlpha0 = 40.0f;
                 glowAlpha1 = 60.0f;
                 glowU = 1;
+                glowUW = 0x3A;
+                glowVH = 0x3E;
                 glowScale0 = 65.0f;
                 glowScale1 = 85.0f;
                 goto drawPhaseGlow;
