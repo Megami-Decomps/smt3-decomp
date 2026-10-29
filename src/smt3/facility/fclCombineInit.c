@@ -1001,7 +1001,75 @@ void cmbSeqBuildResultTable(void)
     }
 }
 
+typedef struct {
+    s32 texture0;
+    s32 u0, v0, width0, height0;
+    s32 texture1;
+    s32 u1, v1, width1, height1;
+} cmbRibbonImage_t;
+
+extern fclRibbon_t *fclRbnInit(s32 count, s32 active,
+                                sdfTexHandle_t *tex0, sdfTexHandle_t *tex1);
+extern void fclRbnSetPara(fclRibbon_t *ribbon, s32 index,
+                           const sdfIVector4_t *pos0, const sdfIVector4_t *pos1,
+                           const sdfIVector4_t *uv0, const sdfIVector4_t *uv1,
+                           sdfTexHandle_t *tex0, sdfTexHandle_t *tex1);
+
+#ifdef NON_MATCHING
+void cmbSetupBirthPanel(s32 mode)
+{
+    u16 ribbons[5][5] = {
+        {1, 239, 0, 0, 0},
+        {1, 0, 238, 0, 0},
+        {1, 0, 0, 230, 0},
+        {3, 153, 231, 0, 308},
+        {4, 113, 191, 265, 348}
+    };
+    cmbRibbonImage_t images[4] = {
+        {2, 204, 1, 44, 20, 4, 1, 1, 53, 31},
+        {2, 154, 68, 47, 20, 4, 55, 1, 55, 31},
+        {2, 154, 89, 59, 20, 4, 111, 1, 67, 31},
+        {2, 202, 68, 53, 20, 4, 179, 1, 63, 31}
+    };
+    sdfIVector4_t pos0, pos1, uv0, uv1;
+    s32 active = mode == 3 ? 2 : (mode == 4 ? 3 : 0);
+    s32 count = 0;
+    s32 i;
+
+    CMB_GBWK->ribbon = fclRbnInit(ribbons[mode][0], active,
+                                   (sdfTexHandle_t *)(u32)CMB_GBWK->texHandle[2],
+                                   (sdfTexHandle_t *)(u32)CMB_GBWK->texHandle[3]);
+    for (i = 0; i < 4; i++) {
+        s32 width = ribbons[mode][i + 1];
+        cmbRibbonImage_t *image = &images[i];
+        if (width == 0) {
+            continue;
+        }
+        pos0.pm[0] = (width - 4) << 4;
+        pos0.pm[1] = 0x18;
+        pos0.pm[2] = (width - 4 + image->width1) << 4;
+        pos0.pm[3] = (image->height1 + 3) << 3;
+        pos1.pm[0] = width << 4;
+        pos1.pm[1] = 0x40;
+        pos1.pm[2] = (width + image->width0) << 4;
+        pos1.pm[3] = (image->height0 + 8) << 3;
+        uv0.pm[0] = image->u1 << 4;
+        uv0.pm[1] = image->v1 << 4;
+        uv0.pm[2] = (image->u1 + image->width1) << 4;
+        uv0.pm[3] = (image->v1 + image->height1) << 4;
+        uv1.pm[0] = image->u0 << 4;
+        uv1.pm[1] = image->v0 << 4;
+        uv1.pm[2] = (image->u0 + image->width0) << 4;
+        uv1.pm[3] = (image->v0 + image->height0) << 4;
+        fclRbnSetPara(CMB_GBWK->ribbon, count++, &pos0, &pos1, &uv0, &uv1,
+                      (sdfTexHandle_t *)(u32)CMB_GBWK->texHandle[(s8)image->texture0],
+                      (sdfTexHandle_t *)(u32)CMB_GBWK->texHandle[(s8)image->texture1]);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSetupBirthPanel);
+#endif
+
 
 extern void cmbSetupBirthPanel(s32 index);
 extern void *memcpy(void *dst, const void *src, u32 size);
