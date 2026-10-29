@@ -4,6 +4,7 @@
 #include "event.h"
 #include "model.h"
 #include "ps2asm.h"
+#include "effDebug.h"
 
 typedef struct effEveBEDParams_t {
     f32 center[4];
@@ -65,20 +66,6 @@ typedef struct effScreenDrawParams_t {
 } effScreenDrawParams_t;
 
 
-/* A setup record occupies 0x40 bytes in the paired static data blocks.
- * The final word and the callback-adjacent words remain semantically unknown. */
-typedef struct effEventSetupRecord_t {
-    u8 unknown00[0x1C];
-    void *source;
-    void *destination;
-    u32 copyBytes;
-    u8 unknown28[4];
-    s32 (*callback)(void *);
-    u8 unknown30[8];
-    s32 *callbackResult;
-    u32 unknown3C;
-} effEventSetupRecord_t;
-
 extern s8 Eve_BlurShow;
 extern effScreenDrawParams_t Eve_Blur;
 extern s8 Eve_PartialMultiBlurShow;
@@ -107,30 +94,27 @@ dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_P
 extern u8 D_00320298[];
 effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam);
 extern s8 D_0054F2C5;
-/* callbackResult must be valid whenever callback is present. */
-extern effEventSetupRecord_t D_003203E0;
+/* The result slot must be valid whenever the create callback is present. */
+extern effDebugMenu_t D_003203E0;
 extern void *memcpy(void *, const void *, u32);
-/* Native callers pass the record address as a word; return it unchanged. */
-u32 dblurUpdateHandle(u32 pMenu);
 extern void effDebugAllocDrawTag(void);
-extern void effDebugDrawMenu(void *);
 extern void effDebugLinkDrawTag(void);
 extern s8 D_005298CB[];
 extern effScreenDrawParams_t D_003202C8;
 extern s8 mblurDone;
-extern effEventSetupRecord_t mblurDebugMenu;
+extern effDebugMenu_t mblurDebugMenu;
 extern dds3Effect_PartialMultiBlurParam_t D_00320420;
 extern s8 dblurDone;
-extern effEventSetupRecord_t dblurDebugMenu;
+extern effDebugMenu_t dblurDebugMenu;
 extern dds3Effect_DistortionBlurParam_t D_00320598;
 extern s8 evtViewerDirty;
-extern effEventSetupRecord_t filterDebugMenu;
+extern effDebugMenu_t filterDebugMenu;
 extern dds3Effect_Filter_t D_00320770;
 extern s8 mfilterDone;
-extern effEventSetupRecord_t mfilterDebugMenu;
+extern effDebugMenu_t mfilterDebugMenu;
 extern dds3Effect_PartialMultiFilterParam_t D_00320870;
 extern s8 rblurDone;
-extern effEventSetupRecord_t rblurDebugMenu;
+extern effDebugMenu_t rblurDebugMenu;
 extern dds3Effect_RippleBlurParam_t D_003209B0;
 extern sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 number);
 
@@ -520,10 +504,10 @@ s32 func_001AD6E8(void) {
     u8 ready = D_0054F2C5;
 
     if (D_0054F2C5 == 0) {
-        effEventSetupRecord_t *state = &D_003203E0;
+        effDebugMenu_t *state = &D_003203E0;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(state->source);
+        if (state->create != NULL) {
+            *state->param = state->create(state->source);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -534,7 +518,7 @@ s32 func_001AD6E8(void) {
         D_0054F2C5 = ready;
     }
     if (ready != 0) {
-        dblurUpdateHandle((u32)&D_003203E0);
+        dblurUpdateHandle(&D_003203E0);
         effDebugAllocDrawTag();
         effDebugDrawMenu(&D_003203E0);
         effDebugLinkDrawTag();
@@ -561,10 +545,10 @@ s32 mblurProcess(void) {
     u8 ready = mblurDone;
 
     if (mblurDone == 0) {
-        effEventSetupRecord_t *state = &mblurDebugMenu;
+        effDebugMenu_t *state = &mblurDebugMenu;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&D_00320420);
+        if (state->create != NULL) {
+            *state->param = state->create(&D_00320420);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -575,7 +559,7 @@ s32 mblurProcess(void) {
         mblurDone = ready;
     }
     if (ready != 0) {
-        dblurUpdateHandle((u32)&mblurDebugMenu);
+        dblurUpdateHandle(&mblurDebugMenu);
         effDebugAllocDrawTag();
         effDebugDrawMenu(&mblurDebugMenu);
         effDebugLinkDrawTag();
@@ -601,10 +585,10 @@ s32 dblurProcess(void) {
     u8 ready = dblurDone;
 
     if (dblurDone == 0) {
-        effEventSetupRecord_t *state = &dblurDebugMenu;
+        effDebugMenu_t *state = &dblurDebugMenu;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&D_00320598);
+        if (state->create != NULL) {
+            *state->param = state->create(&D_00320598);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -615,7 +599,7 @@ s32 dblurProcess(void) {
         dblurDone = ready;
     }
     if (ready != 0) {
-        dblurUpdateHandle((u32)&dblurDebugMenu);
+        dblurUpdateHandle(&dblurDebugMenu);
         effDebugAllocDrawTag();
         effDebugDrawMenu(&dblurDebugMenu);
         effDebugLinkDrawTag();
@@ -641,10 +625,10 @@ s32 evtViewerCheckDirty(void) {
     u8 ready = evtViewerDirty;
 
     if (evtViewerDirty == 0) {
-        effEventSetupRecord_t *state = &filterDebugMenu;
+        effDebugMenu_t *state = &filterDebugMenu;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(state->source);
+        if (state->create != NULL) {
+            *state->param = state->create(state->source);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -655,7 +639,7 @@ s32 evtViewerCheckDirty(void) {
         evtViewerDirty = ready;
     }
     if (ready != 0) {
-        dblurUpdateHandle((u32)&filterDebugMenu);
+        dblurUpdateHandle(&filterDebugMenu);
         effDebugAllocDrawTag();
         effDebugDrawMenu(&filterDebugMenu);
         effDebugLinkDrawTag();
@@ -681,10 +665,10 @@ s32 mfilterRun(void) {
     u8 ready = mfilterDone;
 
     if (mfilterDone == 0) {
-        effEventSetupRecord_t *state = &mfilterDebugMenu;
+        effDebugMenu_t *state = &mfilterDebugMenu;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&D_00320870);
+        if (state->create != NULL) {
+            *state->param = state->create(&D_00320870);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -695,7 +679,7 @@ s32 mfilterRun(void) {
         mfilterDone = ready;
     }
     if (ready != 0) {
-        dblurUpdateHandle((u32)&mfilterDebugMenu);
+        dblurUpdateHandle(&mfilterDebugMenu);
         effDebugAllocDrawTag();
         effDebugDrawMenu(&mfilterDebugMenu);
         effDebugLinkDrawTag();
@@ -721,10 +705,10 @@ s32 rblurProcess(void) {
     u8 ready = rblurDone;
 
     if (rblurDone == 0) {
-        effEventSetupRecord_t *state = &rblurDebugMenu;
+        effDebugMenu_t *state = &rblurDebugMenu;
 
-        if (state->callback != NULL) {
-            *state->callbackResult = state->callback(&D_003209B0);
+        if (state->create != NULL) {
+            *state->param = state->create(&D_003209B0);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -735,7 +719,7 @@ s32 rblurProcess(void) {
         rblurDone = ready;
     }
     if (ready != 0) {
-        dblurUpdateHandle((u32)&rblurDebugMenu);
+        dblurUpdateHandle(&rblurDebugMenu);
         effDebugAllocDrawTag();
         effDebugDrawMenu(&rblurDebugMenu);
         effDebugLinkDrawTag();

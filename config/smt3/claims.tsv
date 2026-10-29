@@ -682,3 +682,4 @@ src/smt3/field/fldHit.c	redthing1	done	2026-10-29	1 fn / 388 B	PiM agent: native
 src/smt3/event/evtUnitManager.c	redthing1	done	2026-10-29	1 fn / 1560 B	PiM agent: DDS motion state machine with native SMT3 vertical-motion difference and genuine two-ID restart arms
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / guarded selection renderer	list selection snapshots, signed row extent, drawing callbacks and cursor-slot update; exact-size draft with 11 scheduling words unresolved
 src/smt3/sdk/libcdvd.c	redthing1	done	2026-10-28	1 fn / 180 B	power-off RPC 33 with uncached result/status words and native semaphore ordering; complete owner exact
+src/smt3/effect/effMagatuhi.c	redthing1	done	2026-10-28	0 matches / shared menu recovery	native editor menu and item records unify effect setup and battle viewer contracts; three complete owners remain exact

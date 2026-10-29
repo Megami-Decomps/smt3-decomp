@@ -1461,3 +1461,18 @@ names its four signed halfwords `n`, `m`, `a` and `b`. The header preserves
 the normal and visual regions and appends this previously omitted tail.
 `tools/header_layout.c` checks both the individual record sizes and the
 region offsets and complete extent.
+
+### Effect editor menu records (`effDebug.h`)
+
+The effect editor, effect setup tasks and battle viewer share the original
+`effDebugMenu_t` and `effDebugMenuItem_t` records named in
+`config/smt3/ida_members.txt`. Items have a 24-byte stride and an unsigned type
+byte at +4. Menu navigation reads the parent at +0x18; setup copies the
+parameter at +0x1C to its saved destination at +0x20 for +0x24 bytes, while
+the reset action copies in the reverse direction. Create, draw and destroy
+callbacks occupy +0x2C/+0x30/+0x34 and use the handle slot at +0x38.
+`dblurUpdateHandle` also invokes the recreate callback at +0x3C; the word
+after `dblurDebugMenu` contains `dds3EffectDistortionBlurCreate`, corroborating
+the native 0x40-byte extent beyond the advisory 0x3C IDB size. The input
+handler returns the current menu, which can change on entering or leaving a
+child; callers use a pointer return contract.

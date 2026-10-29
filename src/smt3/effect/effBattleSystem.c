@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effDebug.h"
 #include "motion.h"
 #include "model.h"
 #include "event.h"
@@ -3464,16 +3465,6 @@ void nb_175440(void)
     }
 }
 
-typedef struct
-{
-    char *label;
-    u8 type;
-    u8 pad5[3];
-    void *value;
-    void *value2;
-    s32 unk16;
-    s32 unk20;
-} effDebugMenuItem_t;
 
 extern effDebugMenuItem_t D_0031CF88[5];
 extern char D_0056A920[0x20];
@@ -3566,7 +3557,6 @@ void eff_1757A8(void)
 }
 
 extern s8 dds3PadBitTable[];
-extern void *dblurUpdateHandle(void *viewer);
 
 void eff_1757D8(void)
 {
@@ -3595,7 +3585,6 @@ extern u8 D_0054F1C0;
 extern s8 dds3PadButtonState[];
 extern void effBTLCutDebugPrint(void);
 extern void effDebugAllocDrawTag(void);
-extern void effDebugDrawMenu(void *menu);
 extern void effDebugLinkDrawTag(void);
 extern void nbCameraSetTarget(nbFormation_t *target);
 

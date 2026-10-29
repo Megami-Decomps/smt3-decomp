@@ -3,6 +3,7 @@
 #include "ps2asm.h"
 
 #include "effect.h"
+#include "effDebug.h"
 
 
 extern sdfGrOt_t *D_00320030[4];
@@ -364,25 +365,6 @@ typedef struct {
 } effMagaPoint4_tag;
 
 /* Effect subrecord with byte fields at +0x20/+0x40/+0x50 (0x51); DDS1/2 game/code_0018CAC8/00194700.c. */
-/* Debug viewer record: the destroy hook with its handle slot, the create hook
-   with its parameter, and the record that supersedes this one. */
-/* Debug blur work: only the flag the pad toggle flips is known. */
-typedef struct effDblurWork_t {
-    u8 unk00[0x28]; /* 0x00 */
-    s32 toggle; /* 0x28 */
-} effDblurWork_t;
-
-typedef struct effDebugViewer_t {
-    u8 unk00[0x18]; /* 0x00 */
-    struct effDebugViewer_t *replacement; /* 0x18 */
-    void *createParam; /* 0x1C */
-    u8 unk20[0xC]; /* 0x20 */
-    s32 (*create)(void *); /* 0x2C */
-    u8 unk30[4]; /* 0x30 */
-    void (*destroy)(void *); /* 0x34 */
-    s32 *handle; /* 0x38 */
-} effDebugViewer_t;
-
 typedef struct effSub_t {
     u8 unk0[0x20];
     u8 type0SubSlot;
@@ -468,7 +450,7 @@ extern s8 dds3PadStickStatusPrev[2][2];
 
 extern s8 dds3PadStickStatusState[2][2];
 
-extern effDblurWork_t *D_0054F224;
+extern effDebugMenu_t *D_0054F224;
 
 extern sdfGrOt_t D_002F6978;
 
@@ -677,13 +659,13 @@ void dds3MagatuhiParCopy(dds3MagatuhiPar_tag *work);
 void InitMagatuhiEditorProcess(void);
 void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross);
 
-effDebugViewer_t *func_001AA310(effDebugViewer_t *viewer);
+effDebugMenu_t *func_001AA310(effDebugMenu_t *viewer);
 
 s32 func_001AA5A0(void);
 
-effDblurWork_t *dblurUpdateHandle(effDblurWork_t *pMenu);
+effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *pMenu);
 
-void effDebugDrawMenu(effDblurWork_t *menu);
+void effDebugDrawMenu(effDebugMenu_t *menu);
 
 void func_001AA6D0(void);
 
@@ -2377,25 +2359,25 @@ void effDebugDrawRect4(s32 x, s32 y, s32 width, s32 height) {
                                           0x80806020));
 }
 
-effDebugViewer_t *func_001AA310(effDebugViewer_t *viewer) {
+effDebugMenu_t *func_001AA310(effDebugMenu_t *viewer) {
     void (*destroy)(void *);
     s32 (*create)(void *);
 
     destroy = viewer->destroy;
     if (destroy != NULL) {
-        if (viewer->handle != NULL) {
-            destroy(*(void **)viewer->handle);
+        if (viewer->param != NULL) {
+            destroy(*(void **)viewer->param);
         } else {
             destroy(NULL);
         }
     }
-    if (viewer->replacement != NULL) {
-        viewer = viewer->replacement;
+    if (viewer->parent != NULL) {
+        viewer = viewer->parent;
     }
     create = viewer->create;
     if (create != NULL) {
-        if (viewer->createParam != NULL) {
-            *viewer->handle = create(viewer->createParam);
+        if (viewer->source != NULL) {
+            *viewer->param = create(viewer->source);
         } else {
             create(NULL);
         }
@@ -2423,7 +2405,7 @@ s32 eff_1AA3B0(void) {
         }
         if (dds3PadBitTable[2] < 0) {
             if (D_0054F224 != NULL) {
-                D_0054F224->toggle ^= 1;
+                D_0054F224->mode ^= 1;
             }
         }
         if (D_0054F221 != 0) {
