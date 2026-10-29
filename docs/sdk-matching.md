@@ -972,3 +972,25 @@ the instruction end. The final structure assignment copies only the `0x478`
 public bytes and returns the caller's output pointer. The internal saved-state
 link is excluded. The compiler generates the native frame and copy loops
 from these actual records without manual padding or copy assembly.
+
+
+## CFI interpreter and dispatch table
+
+`sdk/libgcc::libc_2D2D90` matches all 1100 instruction bytes and its 48-entry
+jump table. Opcodes zero, seven and eight are native no-ops. The primary
+bit tests retain their original order, including the emitted third restore
+arm; they are not rewritten into standard class comparisons. Ordinary
+offset rules skip the CFA register at `0x3F8`, not the return column.
+
+Compact advances multiply by code alignment; the explicit one-, two- and
+four-byte advances add the raw decoded value. Packed encoded values preserve
+unaligned reads. Register-to-register rules zero-extend their operand, while
+offset products and the arguments-size operand keep the native signed
+32-to-64-bit widening. Negative offsets do not inherit the ordinary CFA
+register exclusion.
+
+Remember/restore uses the real `0x480`-byte internal record and linked saved
+state, with the native unchecked allocation. Structure assignments generate
+the copy loops. Expression blocks reset CFA fields, then call the matched
+expression decoder through the encoded end. Window-save rules cover registers
+16 through 31 with four-byte offsets. No instruction or data padding is added.

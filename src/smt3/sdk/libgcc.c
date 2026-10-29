@@ -1166,8 +1166,6 @@ INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B480);
 
 INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B488);
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D2D90);
-
 typedef struct frameStateInternal {
     frameState_t state;
     struct frameStateInternal *savedState;
@@ -1176,7 +1174,136 @@ typedef struct frameStateInternal {
 typedef char frameStateInternal_size_must_be_0x480[
     sizeof(frameStateInternal_t) == 0x480 ? 1 : -1];
 
-extern u8 *libc_2D2D90(u8 *p, frameStateInternal_t *state, cieInfo_t *info, u32 *location);
+
+typedef union __attribute__((packed)) {
+    u16 half;
+    u32 word;
+} cfiEncodedValue_t;
+
+u8 *libc_2D2D90(u8 *p, frameStateInternal_t *state, cieInfo_t *info, u32 *location)
+{
+    union {
+        s32 signedValue;
+        u32 unsignedValue;
+    } offset;
+    u32 reg;
+    u32 sourceReg;
+    u32 opcode = *p++;
+
+    if (opcode & 0x40) {
+        *location += (opcode & 0x3f) * info->codeAlignment;
+    } else if (opcode & 0x80) {
+        reg = opcode & 0x3f;
+        p = libc_2D1E08(p, &offset.unsignedValue);
+        if (reg != state->state.cfaRegister) {
+            offset.signedValue *= info->dataAlignment;
+            state->state.saved[reg] = 1;
+            state->state.registerOrOffset[reg] = offset.signedValue;
+        }
+    } else if (opcode & 0xc0) {
+        reg = opcode & 0x3f;
+        state->state.saved[reg] = 0;
+    } else switch (opcode) {
+    case 0:
+    case 7:
+    case 8:
+        break;
+    case 1:
+        *location = ((const cfiEncodedValue_t *)p)->word;
+        p += 4;
+        break;
+    case 2:
+        *location += *p++;
+        break;
+    case 3:
+        *location += ((const cfiEncodedValue_t *)p)->half;
+        p += 2;
+        break;
+    case 4:
+        *location += ((const cfiEncodedValue_t *)p)->word;
+        p += 4;
+        break;
+    case 5:
+        p = libc_2D1E08(p, &reg);
+        p = libc_2D1E08(p, &offset.unsignedValue);
+        if (reg != state->state.cfaRegister) {
+            offset.signedValue *= info->dataAlignment;
+            state->state.saved[reg] = 1;
+            state->state.registerOrOffset[reg] = offset.signedValue;
+        }
+        break;
+    case 6:
+        p = libc_2D1E08(p, &reg);
+        state->state.saved[reg] = 0;
+        break;
+    case 9:
+        p = libc_2D1E08(p, &reg);
+        p = libc_2D1E08(p, &sourceReg);
+        state->state.saved[reg] = 2;
+        state->state.registerOrOffset[reg] = sourceReg;
+        break;
+    case 0x0c:
+        p = libc_2D1E08(p, &reg);
+        p = libc_2D1E08(p, &offset.unsignedValue);
+        state->state.cfaRegister = reg;
+        state->state.cfaOffset = offset.signedValue;
+        break;
+    case 0x0d:
+        p = libc_2D1E08(p, &reg);
+        state->state.cfaRegister = reg;
+        break;
+    case 0x0e:
+        p = libc_2D1E08(p, &offset.unsignedValue);
+        state->state.cfaOffset = offset.signedValue;
+        break;
+    case 0x0f: {
+        u8 *end;
+        state->state.cfaRegister = 0;
+        state->state.cfaOffset = 0;
+        state->state.baseOffset = 0;
+        state->state.indirect = 0;
+        p = libc_2D1E08(p, &offset.unsignedValue);
+        end = p + offset.unsignedValue;
+        while (p < end)
+            p = libc_2D2C70(p, &state->state);
+        break;
+    }
+    case 0x0a: {
+        frameStateInternal_t *saved = malloc(sizeof(*saved));
+        *saved = *state;
+        state->savedState = saved;
+        break;
+    }
+    case 0x0b: {
+        frameStateInternal_t *saved = state->savedState;
+        *state = *saved;
+        free(saved);
+        break;
+    }
+    case 0x2d:
+        for (reg = 16; reg < 32; reg++) {
+            state->state.saved[reg] = 1;
+            state->state.registerOrOffset[reg] = (reg - 16) * sizeof(void *);
+        }
+        break;
+    case 0x2e:
+        p = libc_2D1E08(p, &offset.unsignedValue);
+        state->state.argumentSize = offset.signedValue;
+        break;
+    case 0x2f:
+        p = libc_2D1E08(p, &reg);
+        p = libc_2D1E08(p, &offset.unsignedValue);
+        offset.signedValue *= info->dataAlignment;
+        state->state.saved[reg] = 1;
+        state->state.registerOrOffset[reg] = (s32)(0u - (u32)offset.signedValue);
+        break;
+    default:
+        abort();
+    }
+    return p;
+}
+
+
 
 frameState_t *libc_2D31E0(u32 pc, frameState_t *output)
 {
