@@ -98,7 +98,45 @@ void fclUpdatePanelType0(fclPanel_t *pPanel)
     }
 }
 
+typedef struct
+{
+    void *res;
+    void *entries;
+} fclSpriteTbl_t;
+extern s32 D_00345D88[];
+extern fclSpriteTbl_t fclSpriteTable[];
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *color,
+                                s32 id, s32 spriteId, s32 *textures,
+                                fclSpriteTbl_t *table, s32 ot);
+extern void fclDrawSpriteSizeFilter(s32 x, s32 y, s32 z, s32 width, s32 height,
+                                    u8 filter, s32 *color, s32 id, u16 spriteId,
+                                    s32 *textures, fclSpriteTbl_t *table, s32 ot);
+extern void fclDrawPanelBorder(fclPanel_t *panel, s32 z, s32 type, s32 ot);
+
+#ifdef NON_MATCHING
+void fclDrawPanelType1(fclPanel_t *panel, s32 ot)
+{
+    s32 border = (panel->Flag & 0x10000) != 0 ? 0x18 : 6;
+    s32 width = (u16)panel->W;
+    s32 z = panel->Z << 4;
+
+    fclDrawPanelSprite2(0x44, ot);
+    cmpDrawBoxF(panel->X, panel->Y, panel->Z, border, (u16)panel->H, 0x13141559, ot);
+    cmpDrawBoxF(panel->X + ((border + 0x13) << 4), panel->Y, panel->Z,
+                width - border - 0x13, (u16)panel->H, 0x13141559, ot);
+    fclDrawSpriteFilter(panel->X + (border << 4), panel->Y, z, 0, NULL,
+                        10, 3, D_00345D88, fclSpriteTable, ot);
+    fclDrawSpriteSizeFilter(panel->X + (border << 4), panel->Y + 0xC8, z, 0x13,
+                            (u16)panel->H - 0x32, 0, NULL, 10, 5,
+                            D_00345D88, fclSpriteTable, ot);
+    fclDrawSpriteFilter(panel->X + (border << 4), panel->Y + (((u16)panel->H - 0x19) << 3),
+                        z, 0, NULL, 10, 4, D_00345D88, fclSpriteTable, ot);
+    fclDrawPanelBorder(panel, z, border, ot);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType1);
+#endif
 
 void fclUpdatePanelType1(fclPanel_t *pPanel)
 {
@@ -220,21 +258,6 @@ void fclDrawPanelEdges(fclPanel_t *panel, s32 ot)
         y += 0xE8;
     }
 }
-
-typedef struct
-{
-    void *res;
-    void *entries;
-} fclSpriteTbl_t;
-extern s32 D_00345D88[];
-extern fclSpriteTbl_t fclSpriteTable[];
-extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *color,
-                                s32 id, s32 spriteId, s32 *textures,
-                                fclSpriteTbl_t *table, s32 ot);
-extern void fclDrawSpriteSizeFilter(s32 x, s32 y, s32 z, s32 width, s32 height,
-                                    u8 filter, s32 *color, s32 id, u16 spriteId,
-                                    s32 *textures, fclSpriteTbl_t *table, s32 ot);
-extern void fclDrawPanelBorder(fclPanel_t *panel, s32 z, s32 type, s32 ot);
 
 #ifdef NON_MATCHING
 void fclDrawPanelType3(fclPanel_t *panel, s32 ot)
