@@ -434,7 +434,40 @@ INCLUDE_ASM(const s32, "pb/pbModel", pbFindBlockSlot);
 
 INCLUDE_ASM(const s32, "pb/pbModel", func_001D35F0);
 
+extern sdfVector2_t D_00326D78[];
+extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+
+#ifdef NON_MATCHING
+void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag)
+{
+    sdfVector4_t vertices[6];
+    sdf3DPrimPolyParm_t request;
+    f32 x = base->x;
+    f32 y = base->y;
+    f32 z = base->z;
+    f32 w = base->w;
+    u32 i;
+
+    for (i = 0; i < 6; i++) {
+        sdfVector4_t *vertex = &D_00326CD0[D_00326D50[i]];
+        vertices[i].x = vertex->x + x;
+        vertices[i].y = vertex->y + y;
+        vertices[i].z = vertex->z + z;
+        vertices[i].w = vertex->w + w;
+    }
+    memset(&request, 0, sizeof(request));
+    request.faceCount = 2;
+    request.pointCount = 6;
+    request.color = 0x80808080;
+    request.vertex = vertices;
+    request.normal = D_0056CB30;
+    request.uv = D_00326D78;
+    sdfDrawTagLink(tag, (u32)sdf3DPrimMakePoly(&request));
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapPoly);
+#endif
 
 extern void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag);
 
