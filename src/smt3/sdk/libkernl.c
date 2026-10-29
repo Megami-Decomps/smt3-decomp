@@ -1405,7 +1405,17 @@ typedef struct fsCloseRequest_t {
     u32 descriptor;
     s32 slot;
 } fsCloseRequest_t;
-extern fsCloseRequest_t D_0059D4C0;
+typedef struct fsPathRequest_t {
+    s32 sema;
+    s32 *result;
+    s32 resultSize;
+    char name[0x400];
+} fsPathRequest_t;
+typedef union fsRequest_t {
+    fsCloseRequest_t close;
+    fsPathRequest_t path;
+} fsRequest_t;
+extern fsRequest_t D_0059D4C0;
 
 /* NON_MATCHING: 376/380 bytes; the final nonnegative-result clamp
  * simplifies to a shorter immediate comparison. */
@@ -1414,7 +1424,7 @@ s32 sceClose(s32 descriptor)
 {
     rpcSemaParam param;
     s32 result;
-    fsCloseRequest_t *request = &D_0059D4C0;
+    fsCloseRequest_t *request = &D_0059D4C0.close;
     fsRequestEntry_t *entry;
     s32 sema;
     s32 accepted;
@@ -1436,7 +1446,7 @@ s32 sceClose(s32 descriptor)
     param.initCount = 0;
     param.option = 0;
     sema = CreateSema(&param);
-    D_0059D4C0.sema = sema;
+    D_0059D4C0.close.sema = sema;
     request->result = &result;
     request->resultSize = 4;
     if (sceSifCallRpc(&D_0059E780, 1, 0, request, 0x14,
@@ -1474,9 +1484,49 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceIoctl);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceIoctl2);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceCallCode);
+s32 _sceCallCode(const char *path, s32 command)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsPathRequest_t *request = &D_0059D4C0.path;
+    s32 length;
+    s32 sema;
+    s32 accepted;
 
-extern s32 _sceCallCode(const char *path, s32 command);
+    _sceFsWaitS(command);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    for (length = 0; length < 0x400 &&
+         (request->name[length] = path[length]) != 0; length++) {
+    }
+    if (length == 0x400) {
+        request->name[0x3FF] = 0;
+        length = 0x3FF;
+    }
+    param.initCount = 0;
+    param.maxCount = 1;
+    param.option = 0;
+    sema = CreateSema(&param);
+    request->result = &result;
+    request->sema = sema;
+    request->resultSize = 4;
+    if (sceSifCallRpc(&D_0059E780, command, 0, &D_0059D4C0,
+                      length + 0xD, D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
 
 s32 sceRemove(const char *path)
 {
@@ -1539,13 +1589,19 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceChstat);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceRename);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceChdir);
+s32 sceChdir(const char *path)
+{
+    return _sceCallCode(path, 18);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSync);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceMount);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceUmount);
+s32 sceUmount(const char *path)
+{
+    return _sceCallCode(path, 21);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceLseek64);
 
