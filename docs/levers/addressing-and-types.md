@@ -1927,3 +1927,25 @@ correcting only the declaration instead leaves the green and blue stores
 exchanged. The actual provider contract and ordinary donor store order close
 the pair without a store-order sweep or an invented dependency. The complete
 19-function browser owner and retail checksum remain exact.
+
+
+## Field sequence loading and callback contracts
+
+`field/fldProcess::ProcSequence` is exact at 2,136 bytes with complete typed
+blur parameter records and distinct loading/stage state. The final two words
+were the register receiving `fldSequenceState` and its zero branch. The caller
+declared `fldLoadNextTask` as `void`, while its matched defining unit returns
+`s32`. Correcting that declaration reproduces both instructions without an
+artificial use of the result. The full owner remains exact.
+
+The three 44-byte blur parameter records occupy native stack slots at 0, 0x30
+and 0x60. Ordinary member-order initialization reproduces the third record's
+store schedule; no padding or volatile fields are needed. The controller and
+scene-parameter pointers retain their actual types across callbacks.
+
+The automap tail calls `fldAutoMapChkMode` twice when gun mode is clear: once
+after `fldAutoMapProc`, then again for the NPC/item-box gate. Keep both calls.
+BGM continuation has one shared path for restore modes 1/4/6 or a pending field
+change, and `bgmMode` is signed 16-bit, corroborated by the native `lh` and the
+recovered field declaration. `fldPanelSet(s32 mode)` is an empty release stub;
+the recovered signature and native callers preserve its unused mode argument.

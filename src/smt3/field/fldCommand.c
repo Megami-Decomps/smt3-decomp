@@ -855,7 +855,7 @@ s32 fldCommand_SET_ALLPANEL(void)
     return 1;
 }
 
-void fldPanelSet(void) {
+void fldPanelSet(s32 mode) {
 }
 
 s32 fldCommand_SET_CASH_F(void) {
