@@ -1820,6 +1820,14 @@
   read in the small-data section and costs the `lui`; `extern char
   *D_00330914[];` with `D_00330914[0]` gives retail's two instructions.
   `cmpCalcDestroyItem` turned on that one line.
+- Where retail forms a small-data base, `addiu rd, $28, %gp_rel(sym)` plus
+  `lw rt, N(rd)`, and a direct member access folds the displacement into one
+  `lw N($28)`, the source reads that object at **two** places: one pointer
+  local declared at the top of the function and used at both. `ProcDraw` tests
+  `fldAutoMapSeqFlags.stage` early and again before the blur passes, and only
+  the two-use pointer local reaches retail's base form; the pointer local at
+  the second site alone still folds, and it also decides the `bne` versus
+  `bnel` on the earlier test.
 - `mult rd, rs, rt` against a constant materialised with `addiu`, where a
   literal gives a shift-and-add chain, comes from a local holding the factor:
   `s32 scale = 0x66; x = alpha * scale / 0x100;`. `synth_mult` runs at expand
