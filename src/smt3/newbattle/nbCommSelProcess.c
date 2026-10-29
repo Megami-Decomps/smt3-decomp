@@ -365,7 +365,42 @@ void DispPanelLabel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 col
     }
 }
 
+#ifdef NON_MATCHING
+void DispPanelSitaji(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 color)
+{
+    s32 margin = 0;
+    s32 y;
+    s32 lineX;
+
+    if (type == 3) {
+        margin = 43 - (s32)(s->ritu * 43.0f);
+    }
+    if ((u32)type < 6) {
+        y = oy - margin;
+        nbPnlSprite(ox, y + 0x13D, 0xE7, 0x2A, 1, 0x1C, 0xE7, 0x2A,
+                    color, s->data->pnltex[1]);
+        nbPnlSprite(ox, y + 0x167, 0xE7, margin + 0x48, 1, 0x45, 0xE7, 2,
+                    color, s->data->pnltex[1]);
+        nbPnlSprite(ox + 0x51, y + 0x153, 0x9A, 2, 1, 0x7A, 0x9A, 1,
+                    color, s->data->pnltex[1]);
+        nbPnlSprite(ox, oy + 0x1AF, 0xEB, 2, 1, 0x7D, 0xEB, 2,
+                    color, s->data->pnltex[1]);
+        nbPnlSprite(ox, y + 0x13D, 0x51, 0x18, 1, 1, 0x51, 0x19,
+                    color, s->data->pnltex[1]);
+        if (type != 3) {
+            lineX = ox + 0x17;
+            nbPnlSprite(lineX, y + 0x16C, 0xC5, 2, 1, 0x77, 0xC5, 2,
+                        color, s->data->pnltex[1]);
+            nbPnlSprite(lineX, y + 0x181, 0xC5, 2, 1, 0x77, 0xC5, 2,
+                        color, s->data->pnltex[1]);
+            nbPnlSprite(lineX, y + 0x196, 0xC5, 2, 1, 0x77, 0xC5, 2,
+                        color, s->data->pnltex[1]);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispPanelSitaji);
+#endif
 
 /* NON_MATCHING: 3 of 56 words differ (first at +0x28). */
 
