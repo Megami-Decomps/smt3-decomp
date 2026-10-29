@@ -700,7 +700,133 @@ s32 nbCameraBoss_Sp_DOUTYO_TPFix_Set(nbCamera_t *pNbCamera)
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Sp_DOUTYO_TPFix_Set);
 #endif
 
+#ifdef NON_MATCHING
+s32 nbCameraBoss_Sp_DOUTYO_Run(nbCamera_t *camera);
+
+s32 nbCameraBoss_Sp_DOUTYO_Set(nbCamera_t *camera)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    sdfVector4_t playerPos, enemyPos, scale, point, playerDir, enemyDir;
+    f32 playerHeight, enemyHeight, enemyWidth, playerRadius, height, radius;
+    f32 interval, angle, distance, groupRadius, playerDistance, enemyDistance;
+    u32 i, playerCount, enemyCount;
+
+    effBTLModelAllShow();
+    data = nbGetMainProcessData();
+    playerHeight = enemyHeight = enemyWidth = playerRadius = 0.0f;
+    playerCount = enemyCount = 0;
+    form = data->form;
+    for (i = 0; i < 32; i++, form++) {
+        if ((form->stat & 0x201) == 0x201) {
+            enemyWidth += 2.0f * (form->r * form->scl);
+            height = effBTLModelGetHeight(form);
+            if (enemyHeight < height) enemyHeight = height;
+            enemyCount++;
+        } else if ((form->stat & 0x101) == 0x101) {
+            height = effBTLModelGetHeight(form);
+            if (playerHeight < height) playerHeight = height;
+            radius = form->r * form->scl;
+            if (playerRadius < radius) playerRadius = radius;
+            playerCount++;
+        }
+    }
+    interval = nbGetEnemyInterval();
+    if (enemyCount >= 2) enemyWidth += interval * (f32)(enemyCount - 1);
+    if (enemyWidth < enemyHeight) radius = enemyHeight * 0.5f;
+    else radius = enemyWidth * 0.5f;
+    if (radius < 400.0f) radius = 400.0f;
+    camera->target.x = 0.0f;
+    camera->target.y = -(enemyHeight * 0.5f);
+    camera->target.z = nbCameraGetBossDistance() * 0.5f;
+    angle = sdfAtan(0.523598671f);
+    camera->fovy = 0.69813163f;
+    enemyDistance = radius * 0.75f / angle;
+    enemyPos.x = 0.0f;
+    enemyPos.y = -playerHeight;
+    enemyPos.z = -nbCameraGetBossDistance() * 0.5f;
+    /* Retail leaves these vector lanes unset; positions and scales use 1.0. */
+    enemyPos.w = 1.0f;
+    scale.w = 1.0f;
+    SDF_VU0_LOADVECTOR(&camera->target);
+    SDF_VU0_LOADVECTOR_B(&enemyPos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(distance);
+    groupRadius = effBTLModelGroupGetSphere(0x100);
+    if (groupRadius < 250.0f) groupRadius = 250.0f;
+    playerDistance = distance + groupRadius / angle;
+    effBTLModelGetSphereCenter(data->form);
+    SDF_VU0_STOREVECTOR(&playerPos);
+    if (playerCount < 4) playerPos.x = -550.0f;
+    playerPos.y = camera->target.y;
+    scale.x = scale.y = scale.z = -enemyDistance;
+    SDF_VU0_LOADVECTOR(&camera->target);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(&playerPos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(&scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&point);
+    nbCamera_DOUTYO_B4P.point[0].x = point.x;
+    nbCamera_DOUTYO_B4P.point[0].z = point.z;
+    nbCamera_DOUTYO_B4P.point[0].y = point.y;
+    height = -effBTLModelGetHeight(data->form);
+    if (height < playerPos.y) playerPos.y = height;
+    scale.x = scale.y = scale.z = -playerDistance;
+    SDF_VU0_LOADVECTOR(&camera->target);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(&playerPos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&playerDir);
+    SDF_VU0_LOADVECTOR_B(&scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&point);
+    nbCamera_DOUTYO_B4P.point[1].x = point.x;
+    nbCamera_DOUTYO_B4P.point[1].z = point.z;
+    nbCamera_DOUTYO_B4P.point[1].y = point.y;
+    SDF_VU0_LOADVECTOR(&camera->target);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(&enemyPos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&enemyDir);
+    SDF_VU0_LOADVECTOR_B(&playerDir);
+    VU0_LERP_VF10_VF11(0.5f);
+    SDF_VU0_LOADVECTOR_B(&scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&point);
+    nbCamera_DOUTYO_B4P.point[2].x = point.x;
+    nbCamera_DOUTYO_B4P.point[2].z = point.z;
+    nbCamera_DOUTYO_B4P.point[2].y = point.y;
+    SDF_VU0_LOADVECTOR(&camera->target);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(&enemyPos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(&scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(&point);
+    nbCamera_DOUTYO_B4P.point[3].x = point.x;
+    nbCamera_DOUTYO_B4P.step = 0.0124999993f;
+    nbCamera_DOUTYO_B4P.point[3].y = point.y;
+    nbCamera_DOUTYO_B4P.point[3].z = point.z;
+    nbCamera_DOUTYO_B4P.weight = 0.0f;
+    nbCameraBoss_Sp_DOUTYO_Run(camera);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Sp_DOUTYO_Set);
+#endif
 
 s32 nbCameraBoss_Sp_DOUTYO_Run(nbCamera_t *pNbCamera)
 {
