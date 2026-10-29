@@ -27,3 +27,31 @@ moves thirteen prologue words, including the template-copy temporaries. Explicit
 aggregate assignment leaves that residual unchanged. A named status local and
 moving the table declaration leave the preferred seven-word result unchanged.
 No artificial register constraint or pointer offset is used.
+
+## pbDrawMapPolyTransformed
+
+The retained source emits 1060 bytes against 1056 native bytes. Its bounded
+prefix has 29 matching words and 235 differing words; four emitted bytes
+exceed the native extent. The frame is 0x570 versus native 0x560. Allocation
+and scheduling differences remain broad; assembly remains active.
+
+Native geometry uses two distinct 36-vector local arrays and the existing
+44-byte request. Only five faces are emitted, six vertices per enabled face;
+the signed point count is returned. Six-face template data corroborates the
+array capacities. Each active face snapshots all four base components before
+the inner conversion calls.
+
+Selector 6 scales xyz in binary64 by 0.5, leaving w intact. Selector 1 applies
+its binary32 height change before sequential binary64 x/z adjustments; each
+assignment rounds back to float. Opposing mask bits retain both operations.
+Four distinct readonly labels hold the double word 0x3FC9999999999999.
+Mutable geometry/color declarations are preserved: read-only use in this
+function does not establish global const storage.
+
+Replacing only the normal-copy primitive with a plain-C quadword copy emits
+1040 bytes: 8 prefix words match, 252 differ and 16 native bytes are uncovered.
+That control was discarded. A separate indexed/literal reconstruction emits
+1048 bytes with 10 of 262 words matching and unqualified readonly relocation
+ownership; an explicit input-row offset is inert. Its cursor form emits
+1064 bytes with 24 matching prefix words. Those duplicate bodies were retired;
+the existing published source remains preferred, with no additional credit.

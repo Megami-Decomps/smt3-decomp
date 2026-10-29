@@ -46,6 +46,7 @@ both native and emitted sizes when they differ.
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
+| 2 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 2 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 2 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 2 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
@@ -72,7 +73,6 @@ both native and emitted sizes when they differ.
 | 1 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
 | 1 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 1 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
-| 1 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 1 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
 | 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 |  | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
