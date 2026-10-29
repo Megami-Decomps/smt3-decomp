@@ -1377,6 +1377,10 @@ void cmpCreateLocalItem(u8 mode)
     }
 }
 
+extern s32 fclStartMessage(s32 message);
+extern s32 cmpClearButtonGuide(s32 skill, u32 select);
+extern s32 cmpStartSkillMsg(u16 skill, s32 errorFlags);
+extern s32 cmpGetKugatatiMsg(void);
 extern s32 fldEsutoMaChk(void);
 extern s32 fldRiberaMaChk(void);
 extern s32 fldRifutoMaChk(void);
@@ -1520,7 +1524,40 @@ s32 cmpGetKugatatiMsg(void)
 INCLUDE_ASM(const s32, "code_0022C578", cmpGetKugatatiMsg);
 #endif
 
+#ifdef NON_MATCHING
+s32 cmpStartItemMsg(u16 item, s32 errorFlags)
+{
+    u16 skill = datItemTable[cmpGetSelectItemID()].skill;
+    s32 guide;
+    s32 mode;
+    s32 index;
+
+    if (item == 0x3A) {
+        fclStartMessage(cmpGetKugatatiMsg());
+        return 0;
+    }
+    guide = cmpClearButtonGuide(skill, errorFlags);
+    mode = guide > 0 && guide < 5;
+    if (cmpStartItemTokusyuMsg(item) != 0) {
+        return 2;
+    }
+    index = cmpFindItemMsgIndex(mode, item);
+    if (index > 0) {
+        if (mode == 0) {
+            fclStartMessage(index + 0x13);
+        } else {
+            fclStartMessage(index + 0x20);
+        }
+        return mode;
+    }
+    if (skill != 0) {
+        return cmpStartSkillMsg(skill, errorFlags);
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpStartItemMsg);
+#endif
 
 extern s32 datGetItemSkillNo(s32 itemid);
 extern s32 cmpStartItemMsg(u16 item, s32 errorFlags);
