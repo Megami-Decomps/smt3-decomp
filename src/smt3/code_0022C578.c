@@ -823,7 +823,8 @@ extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
 extern char D_0054FC20[];
 
-extern void *frwGetSmallFontFRQ2(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
+extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
+                                               const char *text, frFontHandle_t *previous);
 
 extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 arg);
 
@@ -5094,7 +5095,34 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawParamGauge);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawParamPanel);
 
+extern datDevilTableEntry_t datDevilTable[];
+extern char *datExplainTable[];
+extern s16 datGetDevilParam(u8 devilId);
+
+#ifdef NON_MATCHING
+void cmpDrawStatusValue(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
+{
+    s32 color = 0xA09DC380;
+    s32 affinity;
+    frFontHandle_t *font;
+
+    if (mode == 4) {
+        color = 0x64B2B580;
+    }
+    color = cmpGetPanelAlphaOrDefault((u8 *)colors, color);
+    if (unit->flag & 4) {
+        affinity = datGetDevilParam(DDS3_GBWK->heartsequip);
+    } else {
+        affinity = datDevilTable[unit->id].aisyoid;
+    }
+    font = frwGetSmallFontFRQ2((x + 0x18) * 16, (y + 0x115) * 8,
+                               0xFFFFF, color, datExplainTable[affinity + 0x50], 0);
+    func_001C7E38(font, 1, 0x47);
+    frDestroyFontRequestAfter(font);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusValue);
+#endif
 
 void cmpDrawStatusBars(s32 x, s32 y, u8 *alpha)
 {
@@ -5258,7 +5286,8 @@ void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
 
 extern char *pStr[];
 
-extern void *frwGetSmallFontFRQ2(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
+extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
+                                               const char *text, frFontHandle_t *previous);
 
 void cmpDrawItemListHeader(s32 x, s32 y, s32 c, u16 index)
 {
