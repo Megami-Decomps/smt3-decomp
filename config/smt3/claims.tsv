@@ -629,9 +629,9 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 228 B	field skill disp
 src/smt3/field/fldTitle.c	redthing1	done	2026-10-28	1 fn / 1072 B	miniature field-title initialization with event gates, independent area remaps, native texture lifetimes and process registration; owner 6 match, 0 differ
 src/smt3/newbattle/nbActionProcess.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	negotiation result setup at native 1172-byte size; 272 of 293 words match, pointer and count register choices remain
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	365 C matches / 0 differences	camp_update_stock_Process +140 bytes; truthful void cursor updater declaration and process pointer contract; complete owner and retail verified
-src/smt3/facility/fclCombineInit.c	KiB	done	2026-10-28	1 fn / 132 B	fusion action sound selection, stop/play dispatch and qualified final-call selector reset; owner 176 match, 0 differ
-src/smt3/facility/fclEncyc.c	KiB	done	2026-10-28	1 fn / 500 B	encyclopedia record comparison with qualified live index reuse; owner 104 match, 0 differ
-src/smt3/pipe/pipeSection.c	KiB	done	2026-10-28	1 fn / 420 B	streaming object and linked-part loading with coherent header/node/descriptor types; owners 28, 7 and 28 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 132 B	fusion action sound selection, stop/play dispatch and qualified final-call selector reset; owner 176 match, 0 differ
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 500 B	encyclopedia record comparison with qualified live index reuse; owner 104 match, 0 differ
+src/smt3/pipe/pipeSection.c	redthing1	done	2026-10-28	1 fn / 420 B	streaming object and linked-part loading with coherent header/node/descriptor types; owners 28, 7 and 28 match, 0 differ
 src/smt3/kernel/dds3KernelDraw.c	PiM	done	2026-10-29	1 fn / 348 B	z-clear packet initialization from matched DDS live coordinate payloads; complete owner and retail checksum verified
 src/smt3/effect/effPCPBoss.c	PiM	done	2026-10-29	1 fn / 2544 B	crack trail and flash-cell rendering from DDS donor; full work layout, owner and retail checksum verified
 src/smt3/newbattle/nbActionProcess.c	redthing1	done	2026-10-28	1 fn / 1172 B	negotiation result setup with fresh battle-work views and a separate final party cursor; qualified allocation parity, owner 77 match, 0 differ
@@ -650,8 +650,10 @@ src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	camer
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 696 B	absorption renderer with native selector-first local records, shared VU matrix contract and callback-sensitive four/eight-frame gates; owner 290 match, 0 differ
 src/smt3/field/fldTitle.c	redthing1	done	2026-10-28	1 fn / 2088 B	miniature field title process; native drawing phases, callback-sensitive frame reads and gradient opacity; owner 7 match, 0 differ
 src/smt3/newbattle/nbCameraStartEnd.c	redthing1	done	2026-10-28	1 fn / 644 B	start animation state machine with qualified final-use initialization scheduling; owner 11 match, 0 differ
-src/smt3/pb/pbModel.c	KiB	done	2026-10-28	1 fn / 284 B	map block draw guard, three real zeroed vectors, signed grid coordinates and provider result; owner 26 match, 0 differ
-src/smt3/code_0022C578.c	KiB	done	2026-10-28	1 fn / 308 B	segmented gauge drawing with cumulative thresholds and callback-sensitive panel reloads; owner 367 match, 0 differ
-src/smt3/newbattle/nbActionProcess.c	KiB	done	2026-10-28	1 fn / 528 B	bad-status action dispatch with native recovery, curse and packet-completion paths; owner 78 match, 0 differ
-src/smt3/newbattle/nbCalc.c	KiB	done	2026-10-28	1 fn / 632 B	battle escape eligibility, rate calculation and native random/moon outcomes; owner 55 match, 0 differ
+src/smt3/pb/pbModel.c	redthing1	done	2026-10-28	1 fn / 284 B	map block draw guard, three real zeroed vectors, signed grid coordinates and provider result; owner 26 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 308 B	segmented gauge drawing with cumulative thresholds and callback-sensitive panel reloads; owner 367 match, 0 differ
+src/smt3/newbattle/nbActionProcess.c	redthing1	done	2026-10-28	1 fn / 528 B	bad-status action dispatch with native recovery, curse and packet-completion paths; owner 78 match, 0 differ
+src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 632 B	battle escape eligibility, rate calculation and native random/moon outcomes; owner 55 match, 0 differ
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	0 matches / reflection packet recovery	SDK parallel-light packet embedded at work offset zero, native 240-byte allocation and model-light consumer; owner 290 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 488 B	heart panel sprite rendering with native corner colors and callback reloads; owner 368 match, 0 differ
+src/smt3/newbattle/nbEncProcess.c	redthing1	done	2026-10-28	1 fn / 724 B	bad-curse weighted action table initialization with native status mapping; owner 20 match, 0 differ
