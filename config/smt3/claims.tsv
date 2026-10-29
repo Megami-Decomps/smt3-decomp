@@ -767,3 +767,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 144 B	VSync native 
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 556 B	paired filesystem semaphores and RPC initialization; native interrupt restoration, bind retry, 32-row flags reset and uncached four-byte version transfer; complete owner 72 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	0 exact / 376 B guarded	close transaction and callback completion reconstructed; native 380 B final result-clamp comparison unresolved
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 164 B	VSync2 ordered hardware/flag polling and fresh 64-bit kernel output after interrupt restore; complete owner exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 284 B	directory-open reservation lifecycle and remove/rmdir/driver-delete command wrappers; native branch-local signal argument capture; owner 83 match, 0 differ

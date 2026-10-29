@@ -605,3 +605,19 @@ The basic buffer wrapper supplies a real local result slot and ignores its
 contents; the start wrapper forwards the caller's result pointer. Both return
 the core's result. All four match on the first complete-owner compilation,
 which checks 77 match / 0 differ at this qualification.
+
+## Matched directory open and path-command wrappers
+
+`sceDopen` (200 bytes), `sceRemove`, `sceRmdir` and `sceDelDrv` (28 bytes each)
+match 284 instruction bytes. Directory open waits for filesystem access,
+initializes it when necessary, releases that semaphore, then reserves a request
+slot. Exhaustion returns `-19`. A failed remote open clears only the reservation
+word under the table semaphore; success stores the remote handle and returns
+the slot index. Both completion paths signal the table semaphore.
+
+Each completion branch captures the semaphore ID after its wait and slot write,
+before the common signal call. This reproduces the native separate loads and
+register allocation; reading the global only at that common call instead emits
+192 bytes. The three siblings return the path-command result for commands six,
+eight and sixteen, preserving the native call/return sequence. The complete
+kernel owner checks 83 match / 0 differ at this qualification.

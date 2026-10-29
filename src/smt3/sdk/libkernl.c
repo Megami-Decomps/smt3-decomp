@@ -1476,19 +1476,58 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceIoctl2);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceCallCode);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceRemove);
+extern s32 _sceCallCode(const char *path, s32 command);
+
+s32 sceRemove(const char *path)
+{
+    return _sceCallCode(path, 6);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceMkdir);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceRmdir);
+s32 sceRmdir(const char *path)
+{
+    return _sceCallCode(path, 8);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceFormat);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceAddDrv);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDelDrv);
+s32 sceDelDrv(const char *path)
+{
+    return _sceCallCode(path, 16);
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDopen);
+s32 sceDopen(const char *path)
+{
+    fsRequestEntry_t *entry;
+    s32 result;
+    s32 sema;
+
+    _sceFsWaitS(9);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    _sceFsSigSema();
+    entry = new_iob();
+    if (entry == NULL) {
+        return -19;
+    }
+    result = _sceCallCode(path, 9);
+    if (result < 0) {
+        WaitSema(D_0052C348);
+        entry->active = 0;
+        sema = D_0052C348;
+    } else {
+        WaitSema(D_0052C348);
+        entry->word0 = result;
+        sema = D_0052C348;
+        result = entry - D_0059E580;
+    }
+    SignalSema(sema);
+    return result;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceDclose);
 
