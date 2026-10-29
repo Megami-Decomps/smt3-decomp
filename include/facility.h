@@ -29,6 +29,15 @@ typedef struct
 
 typedef struct
 {
+    u8 reserved00[2];
+    s8 partyCount;
+    s8 reserveCount;
+    u8 reserved04;
+    s8 stock[16];
+} rcvStockList_t;
+
+typedef struct
+{
     /* 0x00 */ u8 animState;
     /* 0x01 */ u8 reserved01[3];
     /* 0x04 */ s32 target;

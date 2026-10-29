@@ -31,11 +31,10 @@ typedef struct
     /* 0x0020 */ cmpCursorInfo_t listCursor;
     /* 0x0058 */ u8 unk_0058[0x1004];
     /* 0x105C */ s32 recoverPrices[16];
-    /* 0x109C */ u8 reserved109C[0x24];
-    /* 0x10C0 */ s8 partyCount;
-    /* 0x10C1 */ s8 reserveCount;
-    /* 0x10C2 */ u8 reserved10C2;
-    /* 0x10C3 */ s8 targetStock[16];
+    /* 0x109C */ u8 reserved109C[0x20];
+    /* 0x10BC */ u8 healType;
+    /* 0x10BD */ u8 reserved10BD;
+    /* 0x10BE */ rcvStockList_t stockList;
     /* 0x10D3 */ u8 reserved10D3[0x33F9];
     /* 0x44CC */ s32 script;
     /* 0x44D0 */ s32 scriptArg;
@@ -136,7 +135,7 @@ s32 rcvUpdateData(void)
         s8 unitIndex;
 
         slot = (s8)(*((u8 *)work + 0x12AE) + *((u8 *)work + 0x12B0));
-        unitIndex = work->targetStock[slot];
+        unitIndex = work->stockList.stock[slot];
         unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + unitIndex;
     } else {
         slot = 0;
@@ -173,7 +172,7 @@ s32 rcvUpdateData(void)
     return 1;
 }
 
-extern void rcvCreateLocalStock(void *stock, s8 mask);
+extern void rcvCreateLocalStock(rcvStockList_t *stock, s8 mask);
 
 s32 rcvUpdateCallSeq(s8 sequence)
 {
@@ -189,26 +188,26 @@ s32 rcvUpdateCallSeq(s8 sequence)
     case 1:
         script = 1;
         notice = 8;
-        rcvCreateLocalStock((u8 *)rcvUpdateWork + 0x10BE, 7);
+        rcvCreateLocalStock(&rcvUpdateWork->stockList, 7);
         break;
     case 2:
         script = 1;
-        rcvCreateLocalStock((u8 *)rcvUpdateWork + 0x10BE, 1);
+        rcvCreateLocalStock(&rcvUpdateWork->stockList, 1);
         break;
     case 3:
         script = 1;
-        rcvCreateLocalStock((u8 *)rcvUpdateWork + 0x10BE, 2);
+        rcvCreateLocalStock(&rcvUpdateWork->stockList, 2);
         break;
     case 4:
         script = 3;
         notice = 10;
-        rcvCreateLocalStock((u8 *)rcvUpdateWork + 0x10BE, 4);
+        rcvCreateLocalStock(&rcvUpdateWork->stockList, 4);
         break;
     case 5:
         script = 2;
         notice = 9;
         check = 1;
-        *((u8 *)rcvUpdateWork + 0x10BC) = 0;
+        rcvUpdateWork->healType = 0;
         break;
     case 6:
         fclSetWorkValue(2, 1);
@@ -227,7 +226,7 @@ s32 rcvUpdateCallSeq(s8 sequence)
     }
     switch (check) {
     case 0:
-        if (rcvUpdateWork->partyCount + rcvUpdateWork->reserveCount == 0) {
+        if (rcvUpdateWork->stockList.partyCount + rcvUpdateWork->stockList.reserveCount == 0) {
             if (rcvUpdateWork->unk_01 != 0) {
                 rcvUpdateCallSeq(0);
                 return 0;
@@ -513,13 +512,13 @@ void rcvUpdateSeqRoot(void)
         } else {
             rcvUpdateCallSeq(selection);
             rcvUpdateWork->unk_0004 = button;
-            for (i = 0; i < rcvUpdateWork->partyCount; i++) {
-                printf("P : %d %d\n", rcvUpdateWork->targetStock[i],
+            for (i = 0; i < rcvUpdateWork->stockList.partyCount; i++) {
+                printf("P : %d %d\n", rcvUpdateWork->stockList.stock[i],
                        rcvUpdateWork->recoverPrices[i]);
             }
-            for (i = 0; i < rcvUpdateWork->reserveCount; i++) {
+            for (i = 0; i < rcvUpdateWork->stockList.reserveCount; i++) {
                 printf("S : %d %d\n",
-                       rcvUpdateWork->targetStock[rcvUpdateWork->partyCount + i],
+                       rcvUpdateWork->stockList.stock[rcvUpdateWork->stockList.partyCount + i],
                        rcvUpdateWork->recoverPrices[i]);
             }
             printf("\n");
