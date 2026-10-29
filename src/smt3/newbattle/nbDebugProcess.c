@@ -393,8 +393,6 @@ void SetMotion(nbMainProcessData_t *data, nbFormation_t *form, s32 motion, s32 m
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", nbDebugStockSelect);
-
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
@@ -403,6 +401,83 @@ extern const char *nbBadStatusNames[12];
 extern const char D_00551358[];
 extern const char D_00551360[];
 extern sdfGrOt_t D_002F67F8;
+
+
+extern const char *D_004F06D8[];
+typedef struct frFontRequest_t frFontRequest_t;
+extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
+                                        const char *text, frFontRequest_t *request);
+extern s32 frDrawFont(frFontHandle_t *request);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
+extern void dds3ConsPanelTagLinkZ(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy, s32 z);
+extern s32 dds3SelectMenu(s32 pad, s32 listsx, s32 listsy, s32 winsx, s32 winsy,
+                         s32 *basex, s32 *basey, s32 *x, s32 *y);
+
+extern void DispBadStatus(s32 x, s32 y, u32 status, s32 color);
+
+extern s32 D_005512EC;
+extern s32 D_005512F0;
+extern const char D_005512F8[];
+extern char *text2[];
+
+#ifdef NON_MATCHING
+s32 nbDebugStockSelect(void)
+{
+    sdfDrawTag_t *tag;
+    frFontRequest_t *request;
+    fldAnahoriAkuma_t *unit;
+    s32 i, y, color, attr, base, result, index;
+    u32 flags;
+    u16 name;
+
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    dds3ConsPanelTagLinkZ(tag, 0xA2, 0x3E, 16, 21, 0xFEFFFB);
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    base = *(volatile s32 *)&D_005512F0;
+    y = 70;
+    for (i = 0; i < 12; i++) {
+        unit = &DDS3_GBWK->akuma[base + i];
+        if (D_005512EC == i) {
+            attr = 4;
+            color = 0xFF0080;
+        } else {
+            attr = 0;
+            color = -0x80;
+        }
+        DispBadStatus(0xAA, y + 4, unit->badstatus, attr);
+        flags = unit->flag;
+        if (flags & 1) {
+            name = 0xFF;
+            if (!(flags & 4)) {
+                name = unit->devilId;
+            }
+            request = frwGetSmallFontFRQ(0xFA * 16, y * 8, 0xFFFF80, color, text2[name], NULL);
+            frDrawFont((frFontHandle_t *)request);
+            frDestroyFontRequestAfter((frFontHandle_t *)request);
+        } else {
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7FA0, (y + 4) * 8 + 0x7900,
+                                                  0xFFFF80, attr, D_005512F8, 0, 0xFF));
+        }
+        y += 20;
+        base = *(volatile s32 *)&D_005512F0;
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+    result = dds3SelectMenu(0, 1, 16, 1, 12, NULL, &D_005512F0, NULL, &D_005512EC);
+    if (result == -1) {
+        return -2;
+    }
+    if (result != 1) {
+        return -1;
+    }
+    index = D_005512F0 + D_005512EC;
+    return (DDS3_GBWK->akuma[index].flag & 1) ? index : -1;
+}
+#else
+INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", nbDebugStockSelect);
+#endif
 
 void DispBadStatus(s32 x, s32 y, u32 status, s32 color)
 {
@@ -450,16 +525,6 @@ void DispHpMpBad(nbDebugProcessData_t *d)
         DispHpMpBad2(d, form);
     }
 }
-
-extern const char *D_004F06D8[];
-typedef struct frFontRequest_t frFontRequest_t;
-extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
-                                        const char *text, frFontRequest_t *request);
-extern s32 frDrawFont(frFontHandle_t *request);
-extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
-extern void dds3ConsPanelTagLinkZ(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy, s32 z);
-extern s32 dds3SelectMenu(s32 pad, s32 listsx, s32 listsy, s32 winsx, s32 winsy,
-                         s32 *basex, s32 *basey, s32 *x, s32 *y);
 
 s32 SelectMenu(nbDebugProcessData_t *d)
 {
