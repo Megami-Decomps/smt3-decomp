@@ -270,134 +270,94 @@ f32 GetAisyoRitu(s32 nskill, datUnitWork_t *s, datUnitWork_t *d)
     return ritu;
 }
 
-#ifdef NON_MATCHING
 struct sdfRandCB_t;
 extern f32 dds3GetRandFloatA(struct sdfRandCB_t *state);
-extern f32 D_0054E4AC;
 
-s32 datGetSkillKouka(s32 nskill, s32 kind, datUnitWork_t *source, datUnitWork_t *target)
+s32 datGetSkillKouka(s32 nskill, s32 kind, datUnitWork_t *s, datUnitWork_t *d)
 {
-    datNormalSkill_t *skill = &datSkillTable.normal[nskill];
     s32 damage = -1;
-    s32 recovery = -1;
     s32 base = 0;
-    s32 strength = 0;
-    u16 current = 0;
-    u16 maximum = 0;
-    u16 type = 0;
-    f32 affinity = GetAisyoRitu(nskill, source, target);
-
-    if (kind == 0) {
-        maximum = target->maxhp;
-        current = target->hp;
-        type = skill->hptype;
-        strength = skill->hpn;
-        base = skill->hpbase;
-    } else if (kind == 1) {
-        maximum = target->maxmp;
-        current = target->mp;
-        base = skill->mpbase;
-        type = skill->mptype;
-        strength = skill->mpn;
+    s32 heal = -1;
+    f32 affinity = GetAisyoRitu(nskill, s, d);
+    s32 value = 0;
+    s32 type = 0;
+    s32 maximum = 0;
+    s32 current = 0;
+    s32 power;
+    switch (kind) {
+    case 0:
+        maximum = d->maxhp;
+        current = d->hp;
+        power = datSkillTable.normal[nskill].hpn;
+        base = datSkillTable.normal[nskill].hpbase;
+        type = datSkillTable.normal[nskill].hptype;
+        break;
+    case 1:
+        maximum = d->maxmp;
+        current = d->mp;
+        power = datSkillTable.normal[nskill].mpn;
+        base = datSkillTable.normal[nskill].mpbase;
+        type = datSkillTable.normal[nskill].mptype;
+        break;
+    default: power = 0; break;
+    }
+    {
+        /* SMT3 compiler constraint: hold the selected dispatch type in a1
+         * at this boundary. Its ordinary scalar consumer is the switch below;
+         * the binding ends before any case calls. This reconstructs allocation,
+         * not the original source spelling. */
+        register s32 selectedType __asm__("$5") = type;
+        __asm__("" : "+r" (selectedType));
+        type = selectedType;
     }
     switch (type) {
-    case 0:
-        return 0;
-    case 5:
-        recovery = strength + base;
-        break;
-    case 15:
-        recovery = (s32)(dds3GetRandIntA(NULL, strength) + (u32)base);
-        break;
-    case 9:
-    case 11: {
-        s32 amount = type == 9 ? current : maximum;
-        s32 product = (s32)((u32)amount * (u32)strength);
-        recovery = product / 100 + base;
-        if (recovery <= 0) {
-            recovery = 1;
-        }
-        break;
-    }
-    case 2: {
-        s32 amount = 0;
-        if (skill->koukatype == 0) {
-            amount = GetButuriKaifuku(nskill, source, target, strength);
-        } else if (skill->koukatype == 1) {
-            amount = GetMagicKaifuku(nskill, source, target, strength);
-        }
-        recovery = amount + base;
-        break;
-    }
-    case 7:
-        recovery = GetMaxHpWazaPoint(nskill, source, target, strength) + base;
-        break;
-    case 4:
-    case 13:
-        damage = strength + base;
-        break;
-    case 8:
-    case 10: {
-        s32 amount = type == 8 ? current : maximum;
-        s32 product = (s32)((u32)amount * (u32)strength);
-        damage = product / 100 + base;
-        break;
-    }
-    case 1:
-    case 12:
-    case 14: {
-        s32 amount = 0;
-        if (skill->koukatype == 0) {
-            u16 status;
-            amount = GetButuriAttack(nskill, source, target, strength);
-            status = source->badstatus & 0xFFF;
-            if (status == 0x40 || status == 0x200) {
-                amount /= 2;
-            }
-        } else if (skill->koukatype == 1) {
-            amount = GetMagicAttack(nskill, source, target, strength);
-        }
-        damage = amount + base;
-        break;
-    }
-    case 6:
-        damage = GetMaxHpWazaPoint(nskill, source, target, strength) + base;
-        break;
-    case 3:
-        if (strength + base < current) {
-            damage = current - (strength + base);
-        }
-        break;
-    }
-    switch (skill->hptype) {
-    case 1:
-    case 6:
-    case 12:
-        if (damage > 0) {
-            f32 value = (f32)damage;
-            f32 spread = 2.0f * (dds3GetRandFloatA(NULL) - 0.5f) * D_0054E4AC;
-            damage = (s32)(value + value * spread);
-            if (damage < 0) {
-                damage = 0;
-            }
-            damage = (s32)((f32)damage * affinity);
-        }
-        break;
+    case 0: return 0;
+    case 5: heal = power + base; break;
+    case 15: heal = dds3GetRandIntA(0, power) + base; break;
+    case 9: heal = current * power / 100 + base; if (heal <= 0) heal = 1; break;
+    case 11: heal = maximum * power / 100 + base; if (heal <= 0) heal = 1; break;
     case 2:
-    case 7:
-        if (recovery > 0) {
-            recovery = (s32)((f32)recovery * affinity);
+        switch (datSkillTable.normal[nskill].koukatype) {
+        case 0: value = GetButuriKaifuku(nskill, s, d, power); break;
+        case 1: value = GetMagicKaifuku(nskill, s, d, power); break;
+        }
+        heal = value + base;
+        break;
+    case 7: heal = GetMaxHpWazaPoint(nskill, s, d, power) + base; break;
+    case 4: case 13: damage = power + base; break;
+    case 8: damage = current * power / 100 + base; break;
+    case 10: damage = maximum * power / 100 + base; break;
+    case 1: case 12: case 14:
+        switch (datSkillTable.normal[nskill].koukatype) {
+        case 0:
+            value = GetButuriAttack(nskill, s, d, power);
+            if ((s->badstatus & 0xFFF) == 0x40 || (s->badstatus & 0xFFF) == 0x200)
+                value /= 2;
+            break;
+        case 1: value = GetMagicAttack(nskill, s, d, power); break;
+        }
+        damage = value + base;
+        break;
+    case 6: damage = GetMaxHpWazaPoint(nskill, s, d, power) + base; break;
+    case 3: if (power + base < current) damage = current - (power + base); break;
+    }
+    switch (datSkillTable.normal[nskill].hptype) {
+    case 1: case 6: case 12:
+        if (damage > 0) {
+            damage = damage + damage * ((dds3GetRandFloatA(0) - 0.5f) * 2.0f * 0.04999999702f);
+            if (damage < 0) damage = 0;
+            damage *= affinity;
         }
         break;
+    case 2: case 7:
+        if (heal > 0) heal *= affinity;
+        break;
     }
-    if (recovery >= 0) {
-        return recovery;
-    }
-    return (s32)(0U - (u32)(damage == 0 ? 1 : damage));
+    if (damage == 0) damage = 1;
+    return heal >= 0 ? heal : -damage;
 }
-#else
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetSkillKouka);
-#endif
+
+
 
 #ifdef NON_MATCHING
 extern s32 datGetBadStatusAttr(s32 bad);
