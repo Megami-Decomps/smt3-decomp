@@ -696,15 +696,13 @@ extern sdf3DLightParallelPacket_t D_0056ADF0;
 extern f32 sdfAtan(f32 value);
 extern u32 mdlGetColor(mdlObj_t *model);
 extern void mdlSetColor(mdlObj_t *model, u32 color);
-extern void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *packet,
-                                        sdfLightSources_t lights, f32 *ambient);
 
 void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32 height)
 {
-    f32 light[2][4] __attribute__((aligned(16)));
+    sdf3DLight_t light __attribute__((aligned(16)));
     sdfVector4_t ambient;
     sdfVector4_t distance;
-    volatile struct { sdfLightSources_t list; } initial, lights;
+    volatile struct { sdf3DLight_t *list[3]; } initial, lights;
     nbFormation_t *forms, *found;
     evtUnit_t *unit;
     mdlObj_t *model;
@@ -713,7 +711,7 @@ void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32
     u32 i;
     f32 scale;
 
-    initial.list[0] = light;
+    initial.list[0] = &light;
     initial.list[1] = NULL;
     initial.list[2] = NULL;
     lights = initial;
@@ -751,21 +749,21 @@ void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32
         unit = found->hunit;
         color = unit->color;
         MMI_RGBA_UNPACK(&color, 0x3C000000);
-        SDF_VU0_STOREVECTOR(light[0]);
+        SDF_VU0_STOREVECTOR(&light.color);
         color = found->hunit->color50;
         MMI_RGBA_UNPACK(&color, 0x3C000000);
         SDF_VU0_STOREVECTOR(&ambient);
-        SDF_VU0_COPYVECTOR(light[1], found->hunit->vec10);
-        sdf3DMakeLightParallelPacket(&D_0056ADF0, (f32 (**)[4])lights.list, (f32 *)&ambient);
+        SDF_VU0_COPYVECTOR(&light.v, found->hunit->vec10);
+        sdf3DMakeLightParallelPacket(&D_0056ADF0, (sdf3DLight_t **)lights.list, &ambient);
         model = effPCPBossTexHandle;
         model->inner->light = &D_0056ADF0;
         mdlSetColor(effPCPBossTexHandle, (mdlGetColor(found->hunit->owner) & 0xFFFFFF) | 0x80000000);
     } else {
         color = 0x80808080;
         MMI_RGBA_UNPACK(&color, 0x3C000000);
-        SDF_VU0_STOREVECTOR(light[0]);
+        SDF_VU0_STOREVECTOR(&light.color);
         SDF_VU0_STOREVECTOR(&ambient);
-        sdf3DMakeLightParallelPacket(&D_0056ADF0, (f32 (**)[4])lights.list, (f32 *)&ambient);
+        sdf3DMakeLightParallelPacket(&D_0056ADF0, (sdf3DLight_t **)lights.list, &ambient);
         model = effPCPBossTexHandle;
         model->inner->light = &D_0056ADF0;
         mdlSetColor(model, 0x80808080);

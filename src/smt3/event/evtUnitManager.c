@@ -742,8 +742,6 @@ typedef struct {
 
 
 
-void sdf3DMakeLightParallelPacket(void *aPacket, sdf3DLight_t **aLights, sdfVector4_t *aAmbient);
-
 /* vu0 routine: unpack the unit's colours into a parallel light packet. */
 void MakeLightPacket(evtUnit_t *h) {
     sdf3DLight_t source;
