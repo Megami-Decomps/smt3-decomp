@@ -353,7 +353,52 @@ s32 Flow15_1(nbNegoProcessData_t *n)
     return 0;
 }
 
+#ifdef NON_MATCHING
+extern s32 datGetRace(datUnitWork_t *work);
+extern s32 datSearchDevilStock(s32 id);
+extern s32 datCheckStockFull(void);
+extern s32 datGetPlayerLevel(void);
+extern s32 datCheckItemFull(s32 id);
+extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
+extern s32 nbGetNegoYaruItemB(datUnitWork_t *work);
+
+s32 Flow15_5(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xF0006);
+    n->requesttype = dds3GetRandIntA(0, 4);
+    if (datGetRace(n->ework) == 0x15 || datGetRace(n->ework) == 0x16 ||
+        datGetRace(n->ework) == 0x17) {
+        n->requesttype = 0;
+    }
+    for (;;) {
+        switch (n->requesttype) {
+        case 0:
+            if (datSearchDevilStock(n->ework->id) < 0 && datCheckStockFull() == 0 &&
+                datGetPlayerLevel() >= n->ework->level) {
+                return 0;
+            }
+            n->requesttype = 1;
+            continue;
+        case 1:
+            n->requestdata = nbGetNegoYaruMakkaB(n, n->pwork, n->ework);
+            break;
+        case 2:
+            n->requestdata = nbGetNegoYaruItemB(n->ework);
+            if (n->requestdata == 0) {
+                n->requestdata = 1;
+            }
+            if (datCheckItemFull(n->requestdata) != 0) {
+                n->requesttype = 1;
+                continue;
+            }
+            break;
+        }
+        return 0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowInoti", Flow15_5);
+#endif
 
 s32 Flow15_6(nbNegoProcessData_t *n)
 {
