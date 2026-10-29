@@ -33,3 +33,11 @@ Reproduce on the guarded body with `tools/cc1probe.sh <owner.c> --as-unit
 src/smt3/field/fldTitle.c --func fldTitle_Process --cflag -DNON_MATCHING
 --sched --alloc --no-dumps --out <output>`. No source-backed dependency that
 places the constant before the phase load has been established.
+
+A qualified `cc1probe` run explains the C dispatch order by critical-path
+priority. In both scheduling passes, the phase load (UID 1748, cost 2,
+priority 3) is chosen before the case-one constant (UID 1750, cost 1, priority
+2). This is not an instruction-order tie; changing only the UIDs would not
+reverse the choice. Plain, hooked and unhooked assembly agree. Reproduce with
+`tools/cc1probe.sh src/smt3/field/fldTitle.c --func fldTitle_Process --sched --no-dumps --cflag -DNON_MATCHING --out /tmp/title-dispatch`.
+The source premise behind retail's opposite order remains unknown.
