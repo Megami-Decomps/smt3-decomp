@@ -1938,7 +1938,72 @@ void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(panel);
 }
 
+#ifdef NON_MATCHING
+extern s32 D_00536000[4][4];
+extern s32 D_00327800[4][4], D_00327840[4][4], D_00327880[4][4];
+extern f32 pbMapCursorWork;
+extern const volatile f32 D_0054E324, D_0054E328;
+extern sdfGrOt_t D_002F67F8;
+extern f32 sdfSin(f32 angle);
+extern void itfMiscDrawSpritePrim(void *vertices, void *uv, void *color, s32 z,
+                                  sdfTexHandle_t *texture, s32 context, sdfDrawTag_t *tag);
+
+s32 pb_draw_map_cursor_Process(dds3ProcessID_t *id)
+{
+    s32 offsets[4][4];
+    s32 positions[4], colors[4][4];
+    pbProcHandle_t *panel;
+    pbPanelValue_t *work;
+    sdfDrawTag_t *tag;
+    f32 phase;
+    s32 amplitude, offset, base, c0, c1, c2, c3;
+    s32 side, component;
+    u16 state;
+
+    __builtin_memcpy(offsets, D_00536000, sizeof(offsets));
+    panel = id->workdata;
+    state = panel->state;
+    work = panel->data.value;
+    if (state == 5) {
+        return -1;
+    }
+    if (state == 1 && panel != NULL) {
+        panel->flags = 0;
+    }
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    amplitude = (s32)((f64)sdfSin(pbMapCursorWork) * 50.0);
+    for (side = 0; side < 4; side++) {
+        if (work->value & (1 << side)) {
+            for (component = 0; component < 4; component++) {
+                offset = offsets[side][component];
+                base = D_00327800[side][component];
+                c0 = D_00327880[component][0];
+                c1 = D_00327880[component][1];
+                c2 = D_00327880[component][2];
+                c3 = D_00327880[component][3];
+                positions[component] = base + amplitude * offset;
+                colors[component][0] = c0 - amplitude;
+                colors[component][1] = c1 - amplitude;
+                colors[component][2] = c2 - amplitude;
+                colors[component][3] = c3 - amplitude;
+            }
+            itfMiscDrawSpritePrim(positions, D_00327840[side], colors[side], 0xFF000000,
+                                  D_0054F5C4->tex348, 0, tag);
+        }
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+    phase = pbMapCursorWork + D_0054E324;
+    if (D_0054E328 <= phase) {
+        pbMapCursorWork = 0.0f;
+    } else {
+        pbMapCursorWork = phase;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbGame", pb_draw_map_cursor_Process);
+#endif
 
 void pb_draw_map_cursor_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
