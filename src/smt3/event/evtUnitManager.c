@@ -902,4 +902,186 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_0053A850);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_0053A860);
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", evtUnitManagerPrimaryFunc);
+extern void UnitAnime(evtUnit_t *unit);
+extern void mdlSmoothLoopMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
+extern void mdlSmoothSingleMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
+extern s32 mdlChkMotionEndEx(mdlObj_t *model, s32 group);
+extern s32 printf(const char *format, ...);
+
+s32 evtUnitManagerPrimaryFunc(dds3PoseSet_t *unused, dds3Basic_t *object) {
+    s32 moving = 0;
+    s32 wobble = 0;
+    dds3UnitObjectBasicWorkData_t *data = object->workdata;
+    evtUnit_t *unit = data->hUnit;
+    mdlObj_t *model;
+    s32 i;
+    u8 enabled;
+    s32 (*callback)(evtUnit_t *, s32);
+
+    if (unit == NULL) {
+        return 0;
+    }
+    model = unit->owner;
+    UnitAnime(unit);
+    switch (unit->motionState) {
+    case EVT_UNIT_MOTION_STATE_IDLE:
+    case EVT_UNIT_MOTION_STATE_VECTOR:
+        if (unit->flags & 0x80) {
+            if (unit->flags & 1) {
+                mdlSmoothLoopMotion(model, 0, unit->motionSetup.motionId, (f32)unit->motionSetup.startFrame, (f32)unit->motionSetup.endFrame);
+            } else {
+                mdlSmoothSingleMotion(model, 0, unit->motionSetup.motionId, (f32)unit->motionSetup.startFrame, (f32)unit->motionSetup.endFrame);
+            }
+            unit->flags &= ~0x80;
+        } else if (unit->flags & 0x20) {
+            /* Keep selected-ID and current-ID restarts distinct; native retains the
+             * current index load even after merging the two paths. */
+            s32 currentMotion = model->current.h.motionIndex;
+
+            if (unit->waitMotion != currentMotion) {
+                if (model->first->stat == 5) {
+                    mdlSmoothLoopMotion(model, 0, unit->waitMotion,
+                                        (f32)unit->waitBlendStart,
+                                        (f32)unit->waitBlendEnd);
+                    model->first->speed = unit->transitionMotionScale;
+                    unit->motionTicks = 0;
+                }
+            } else {
+                if (model->first->stat == 5) {
+                    mdlSmoothLoopMotion(model, 0, currentMotion,
+                                        (f32)unit->waitBlendStart,
+                                        (f32)unit->waitBlendEnd);
+                    model->first->speed = unit->transitionMotionScale;
+                    unit->motionTicks = 0;
+                }
+            }
+        }
+        if (unit->flags & 0x40) {
+            wobble = 1;
+        } else {
+            wobble = 0;
+        }
+        if (unit->motionState == EVT_UNIT_MOTION_STATE_VECTOR) {
+            if (evtUnitRotationQuat(unit, unit->targetVector, (f32)unit->motionParameter / 100.0f) !=
+                0) {
+                unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
+            }
+        }
+        break;
+    case EVT_UNIT_MOTION_STATE_SOURCE:
+        if (evtCheckMoveEnd(unit) != 1 ||
+            evtGetNextMovePos(unit) != 0) {
+            if (unit->motionSetup.motionId != model->current.h.motionIndex) {
+                if (unit->flags & 1) {
+                    mdlSmoothLoopMotion(model, 0, unit->motionSetup.motionId, (f32)unit->motionSetup.startFrame, (f32)unit->motionSetup.endFrame);
+                } else {
+                    mdlSmoothSingleMotion(model, 0, unit->motionSetup.motionId, (f32)unit->motionSetup.startFrame, (f32)unit->motionSetup.endFrame);
+                }
+            }
+            switch (unit->motionSubmode) {
+            case 0:
+            case 1:
+                moving = evtUnitMoveType0(unit);
+                break;
+            case 2:
+                break;
+            case 3:
+                moving = evtUnitMoveTypePathTrace(unit);
+                break;
+            default:
+                unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
+                break;
+            }
+            callback = unit->motionCallback;
+            if (callback != NULL && callback(unit, 0) == 1) {
+                unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
+            }
+        } else {
+            unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
+        }
+        break;
+    case EVT_UNIT_MOTION_STATE_MOTION:
+        if (unit->motionTicks == 0) {
+            if (unit->flags & 1) {
+                mdlSmoothLoopMotion(model, 0, unit->motionSetup.motionId, (f32)unit->motionSetup.startFrame, (f32)unit->motionSetup.endFrame);
+            } else {
+                mdlSmoothSingleMotion(model, 0, unit->motionSetup.motionId, (f32)unit->motionSetup.startFrame, (f32)unit->motionSetup.endFrame);
+            }
+            unit->flags &= ~0x80;
+        } else if (model->first->stat == 5) {
+            unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
+        } else if ((unit->flags & 0x800000) && (f32)unit->motionEndFrame <= model->first->frame) {
+            s32 currentMotion;
+
+            unit->motionState = EVT_UNIT_MOTION_STATE_VALUE;
+            currentMotion = model->current.h.motionIndex;
+            unit->flags &= ~0x800000;
+            if (unit->waitMotion != currentMotion) {
+                mdlSmoothLoopMotion(model, 0, unit->waitMotion,
+                                    (f32)unit->waitBlendStart,
+                                    (f32)unit->waitBlendEnd);
+                model->first->speed = unit->transitionMotionScale;
+                unit->motionTicks = 0;
+            }
+        }
+        break;
+    case EVT_UNIT_MOTION_STATE_VALUE:
+        callback = unit->motionCallback;
+        if (callback != NULL) {
+            if (callback(unit, 0) == 1) {
+                unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
+            }
+        } else {
+            unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
+        }
+        break;
+    default:
+        return 0;
+    }
+    if (unit->flags & 0x400000) {
+        wobble = 1;
+    }
+    if (wobble != 0) {
+        unit->wobblePhase += 0.104719755f;
+        if (6.2831853f <= unit->wobblePhase) {
+            unit->wobblePhase -= 6.2831853f;
+        }
+        unit->effObj->poseset->flag = (unit->effObj->poseset->flag | 1) & ~2;
+    }
+    for (i = 1; i < 12; i++) {
+        enabled = unit->slotFlags[i] & 1;
+        if (enabled != 0) {
+            if (unit->slotFlags[i] & 2) {
+                unit->slotFlags[i] &= ~2;
+                printf("set exmot %d_%d\n", i, unit->slotA[i]);
+                if (unit->slotFlags[i] & 8) {
+                    mdlSmoothLoopMotion(model, i, unit->slotA[i], (f32)unit->slotB[i], (f32)unit->slotC[i]);
+                } else {
+                    mdlSmoothSingleMotion(model, i, unit->slotA[i], (f32)unit->slotB[i], (f32)unit->slotC[i]);
+                }
+            }
+            if (mdlChkMotionEndEx(model, i) != 0 &&
+                (unit->slotFlags[i] & 4)) {
+                mdlSmoothLoopMotion(model, i, unit->tableValues[i], 0.0f, 0.0f);
+            }
+        }
+    }
+    MakeLightPacket(unit);
+    if (unit->motionTicks < 0x7FFF) {
+        unit->motionTicks++;
+    }
+    if (moving != 0) {
+        if (unit->movingTicks < 0x7FFF) {
+            unit->movingTicks++;
+        }
+        unit->idleTicks = 0;
+    } else {
+        if (unit->idleTicks < 0x7FFF) {
+            unit->idleTicks++;
+        }
+        if (unit->idleTicks >= 6) {
+            unit->movingTicks = 0;
+        }
+    }
+    return moving;
+}

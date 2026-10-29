@@ -945,65 +945,55 @@ void fldHitChkUnitElvOnly(f32 *phys_pos) {
     }
 }
 
-/* NON_MATCHING: 34 of 97 words differ (first at +0x48). */
-#ifdef NON_MATCHING
-void fldHitChkUnitElv(f32 *phys_pos) {
-    f32 result[4];
-    f32 previous[4];
-    f32 delta[4];
-    collision_s *record;
+/* Adapted from Megami-Decomps/dds-decomp, fldFileResolver.c at f79f86dc.
+ * Keep native indexed fields and old/new position snapshots. SMT3 has one
+ * moving platform, unlike the DDS primary-plus-secondary platform path. */
+void fldHitChkUnitElv(f32 *position) {
+    f32 newPosition[3];
+    f32 previous[3];
+    f32 movement[4];
     s32 index;
-    f32 x;
-    f32 y;
-    f32 z;
 
-    memset(delta, 0, sizeof(delta));
-    delta[3] = 1.0f;
+    memset(movement, 0, sizeof(movement));
+    movement[3] = 1.0f;
     fldGlobalBase.hitValid = 0;
+    if (fldGlobalBase.hitMatterIndex == -1) {
+        fldHitChkUnitElvOnly(position);
+    }
     index = fldGlobalBase.hitMatterIndex;
-    if (index == -1) {
-        fldHitChkUnitElvOnly(phys_pos);
-        index = fldGlobalBase.hitMatterIndex;
+    if (index != -1) {
+        if (((collision_s *)fldMatterTable)[index].matter != 0) {
+            dds3PoseSet_t *transform;
+
+            transform = ((collision_s *)fldMatterTable)[index].matter->poseset;
+            movement[0] = transform->pos.x - ((collision_s *)fldMatterTable)[index].point[0];
+            movement[1] = transform->pos.y - ((collision_s *)fldMatterTable)[index].point[1];
+            movement[2] = transform->pos.z - ((collision_s *)fldMatterTable)[index].point[2];
+            ((collision_s *)fldMatterTable)[index].point[0] = transform->pos.x;
+            ((collision_s *)fldMatterTable)[index].point[1] = transform->pos.y;
+            ((collision_s *)fldMatterTable)[index].point[2] = transform->pos.z;
+        }
+        if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                               ((collision_s *)fldMatterTable)[index].hojiID) == 0) {
+            newPosition[0] = position[0] + movement[0];
+            newPosition[1] = position[1] + movement[1];
+            newPosition[2] = position[2] + movement[2];
+            previous[0] = fldHitChkWork[0];
+            previous[1] = fldHitChkWork[1];
+            previous[2] = fldHitChkWork[2];
+            fldGlobalBase.hitValid = 1;
+            fldGlobalBase.hitX = newPosition[0];
+            fldGlobalBase.hitY = newPosition[1];
+            fldGlobalBase.hitZ = newPosition[2];
+            position[0] = newPosition[0];
+            position[1] = newPosition[1];
+            position[2] = newPosition[2];
+            fldHitChkWork[0] = newPosition[0];
+            fldHitChkWork[1] = newPosition[1];
+            fldHitChkWork[2] = newPosition[2];
+        }
     }
-    if (index == -1) {
-        return;
-    }
-    record = &((collision_s *)fldMatterTable)[index];
-    if (record->matter != NULL) {
-        delta[0] = record->matter->poseset->pos.x - record->point[0];
-        delta[1] = record->matter->poseset->pos.y - record->point[1];
-        delta[2] = record->matter->poseset->pos.z - record->point[2];
-        record->point[0] = record->matter->poseset->pos.x;
-        record->point[1] = record->matter->poseset->pos.y;
-        record->point[2] = record->matter->poseset->pos.z;
-    }
-    if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
-                    record->hojiID) != 0) {
-        return;
-    }
-    x = phys_pos[0] + delta[0];
-    y = phys_pos[1] + delta[1];
-    z = phys_pos[2] + delta[2];
-    previous[0] = fldHitChkWork[0];
-    previous[1] = fldHitChkWork[1];
-    previous[2] = fldHitChkWork[2];
-    fldGlobalBase.hitValid = 1;
-    fldGlobalBase.hitX = x;
-    fldGlobalBase.hitY = y;
-    fldGlobalBase.hitZ = z;
-    phys_pos[0] = x;
-    phys_pos[1] = y;
-    phys_pos[2] = z;
-    fldHitChkWork[0] = x;
-    fldHitChkWork[1] = y;
-    fldHitChkWork[2] = z;
-    result[0] = x;
-    result[1] = y;
-    result[2] = z;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnitElv);
-#endif
 
 INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnitDamage);
 

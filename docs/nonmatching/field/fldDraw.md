@@ -307,37 +307,6 @@ the default arm; the default arm written before the two cases; a `switch` with
 the `stat` guard, which costs 16 bytes; and both `goto` spellings of the mode
 dispatch, which ee-gcc normalises back to the draft's layout.
 
-## fldHitChkUnitElv (field/fldDraw, 0x184)
-
-63 of 97 words match, at the exact 388-byte size. The first 63 words, the whole
-`fldHitChkUnitElvOnly` guard and the elevator-delta block, are retail's.
-
-Two things differ. The record address: retail computes it once as
-`addu a0, index, base` and copies it (`move v1, a0`), so two registers hold the
-same pointer, and the draft keeps one register and forms it `addu v1, base,
-index`. And in the tail, retail keeps nine float registers live at once -
-`$f0`-`$f2` the three summed components, `$f3`-`$f5` the deltas, `$f6`-`$f8` the
-three `fldHitChkWork` reads - while the draft interleaves the adds with the
-`fldHitChkWork` loads and reuses six, which rotates every register in the
-eighteen stores that follow. The store list itself is retail's.
-
-Confirmed on the way: the frame holds three 4-float vectors, a result at `0x0`
-and a `fldHitChkWork` snapshot at `0x10` that nothing in the function reads,
-plus the delta at `0x20` that `memset` clears and whose `[3]` is `1.0f`; the
-`-1` lives in a callee-saved register because `index` is a local read before
-`fldHitChkUnitElvOnly` and re-read inside the guard (writing
-`fldGlobalBase.hitMatterIndex == -1` twice instead makes gcc compare the second
-load against the first, which it knows is `-1`); and the three components have
-to be `x`/`y`/`z` locals, since `position[0] = fldGlobalBase.hitX;` reloads the
-global and costs twelve words.
-
-Ruled out: `(u8 *)(index * 0xE4) + (u32)fldMatterTable` for the record, and the
-subscript form at the `worldNode` and `sceneFlag` uses (the `sceneFlag` one
-costs 42 words by adding a second `addu`); `delta[0] + position[0]` for the sum;
-all six orders of the three `fldHitChkWork` reads, before and after the sums;
-and hiding `fldHitChkUnitElvOnly`'s definition, which leaves the one `beql` for
-`beq` at `+0x5C` exactly where it is.
-
 ## fldInfChkFastPanel (field/fldDraw, 0x2E0)
 
 183 of 184 words differ positionally and the draft is 8 instructions (32 bytes)
