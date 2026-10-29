@@ -28,3 +28,36 @@ Ruled out:
   words out and `sdfSndMap[0x74]`/`[0x75]` for the zeroes emits an extra word.
 - A `sndMergedWork_t *` local for the whole function, which loses the first
   loop as well.
+- Declaring the function `s32` and falling off the end, to keep `$2` live past
+  the store. No effect; the dead note stays on the store.
+- A `sndChannel_t *` local for the allocation store (17 words out: it survives
+  into the first loop and renames its registers).
+
+### The scheduling trace, and what it asks for
+
+    tools/cc1probe.sh <candidate> --as-unit src/smt3/sdf/sdfSound.c --version smt3 \
+        --func sdfSndVoiceMapInit --sched --no-dumps --out <dir>     # verify: OK
+
+sched1 reaches the post-call block with four ready insns: the three stores and
+the `6` the slot loop needs. All three stores have priority 2, because the
+`addiu $2, $3, 0x190` that follows them is an anti-dependence on the base
+register, so no store is ordered against another: one base register plus
+disjoint constant offsets is provably non-overlapping, whatever the field
+spelling. The tie goes to `INSN_REG_WEIGHT`, and the allocation store is the
+only one that frees a register:
+
+    uid179 = (set (mem:SI (plus (reg 139) 24)) (reg:SI $2))   regw=-1, DEAD $2
+    uid169 = (set (mem:SI (plus (reg 139) 464)) 0)            regw=0
+    uid174 = (set (mem:SI (plus (reg 139) 468)) 0)            regw=0
+    rank A=uid169 B=uid179 ... => decided@reg_weight (smaller reg_weight wins) -> B first
+
+`reg_weight` is `sets - dead notes`, so the allocation store scores -1 for
+killing the call's result and sorts ahead of both zero stores regardless of
+source order. That is why all six statement orders leave it first, and why the
+`-1` the slot loop needs lands in `$3` (the base dies earlier) instead of
+retail's `$5`.
+
+Retail's order needs either the allocation's value live past its store, which
+no reading of the function provides, or a memory dependence between the stores,
+which one base register forbids. A second base register would create one, but
+retail forms all three addresses off the single `addiu $3, $16, %lo(sdfSndMap)`.
