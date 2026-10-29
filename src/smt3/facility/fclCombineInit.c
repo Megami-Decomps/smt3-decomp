@@ -2551,7 +2551,96 @@ void cmbDrawStockIcon(s32 x, s32 y, s32 z, s8 icon, u32 ot)
     fclDrawSpriteRes(x, y, z * 16, 0, 1, spriteId, CMB_GBWK->texHandle, cmbSpriteTable, ot);
 }
 
+extern u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
+                              s32 mode, s32 alpha);
+extern void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor);
+
+#ifdef NON_MATCHING
+void cmbDrawStockEntry(s32 x, s32 y, u32 z, s8 selected, u32 selectedColor,
+                       cmpCursorInfo_t *cursor, u8 mode, s32 ot)
+{
+    s32 table;
+    s32 choice;
+    s32 row;
+    s32 rowY = y;
+
+    if (mode < 2) {
+        table = 0;
+        choice = CMB_GBWK->stockCursorGroup[0].cursor.unk_22 +
+                 (u8)CMB_GBWK->stockCursorGroup[0].cursor.unk_24;
+    } else {
+        table = 1;
+        choice = 0;
+    }
+    for (row = 0; row < (s8)CMB_GBWK->stockCursorCount; row++) {
+        s32 disabled = 0;
+        s32 stock;
+        u32 color;
+
+        if (mode != 0) {
+            disabled = CMB_GBWK->resultId[table][row][choice] == 0;
+        }
+        stock = (s8)CMB_GBWK->unk_165EE[row];
+        color = cmpDrawListItemBox(cursor, row, row, disabled, 0x100);
+        cmbDrawUnitLevel(x, rowY, z << 4, color, color, &cmbGlobalWork->party[stock].unit, ot);
+        rowY += 0xB8;
+    }
+    if (mode == 0) {
+        if (CMB_GBWK->resultRowsBuilt >= (s8)CMB_GBWK->stockCursorCount) {
+            rowY = y;
+            for (row = 0; row < (s8)CMB_GBWK->stockCursorCount; row++) {
+                s32 column;
+                s32 iconX = x + 0xD50;
+
+                for (column = 0; column < (s8)CMB_GBWK->stockCursorCount; column++) {
+                    s8 icon = column == row ? -1 : CMB_GBWK->resultIndex[table][row][column];
+
+                    cmbDrawStockIcon(iconX, rowY, z >> 4, icon, ot);
+                    iconX += 0x140;
+                }
+                rowY += 0xB8;
+            }
+        }
+    } else {
+        s32 offsetY = 0;
+
+        choice = mode == 1 ? CMB_GBWK->stockCursorGroup[0].cursor.unk_22 +
+                             (u8)CMB_GBWK->stockCursorGroup[0].cursor.unk_24 : 0;
+        rowY = y;
+        for (row = 0; row < (s8)CMB_GBWK->stockCursorCount; row++) {
+            u16 id = CMB_GBWK->resultId[table][row][choice];
+            s32 disabled = 0;
+            u32 color = row == selected ? selectedColor : 0xA09DC380;
+
+            if (id == 0) {
+                disabled = 1;
+                color = 0x4D4B4B4D;
+            }
+            cmbDrawStockIcon(x + 0xE00, rowY, z >> 4,
+                             CMB_GBWK->resultIndex[table][row][choice], ot);
+            fclDrawSpriteRes(0, offsetY, z, NULL, 0, 0x12,
+                             CMB_GBWK->texHandle, cmbSpriteTable, ot);
+            if (id != 0) {
+                u32 boxColor = cmpDrawListItemBox(cursor, row, row, disabled, 0x100);
+
+                cmbDrawUnitLevel(x + 0xF20, rowY, z << 4, boxColor,
+                                 mode == 2 ? 0xFFBD8380 : color,
+                                 &CMB_GBWK->resultUnit[table][row][choice], ot);
+            } else {
+                s32 sprite = cmbGlobalWork->party[0].unit.level < datDevilTable[0].level ? 0x14 : 0x13;
+
+                fclDrawSpriteRes(0, offsetY, z << 4, NULL, 0, sprite,
+                                 CMB_GBWK->texHandle, cmbSpriteTable, ot);
+            }
+            rowY += 0xB8;
+            offsetY += 0xB8;
+        }
+    }
+    cmpUpdateCursorSlots(cursor);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockEntry);
+#endif
 
 extern void fclDrawSpriteAlpha(s32 x, s32 y, s32 z, u8 mode, s32 *colors,
                                s32 page, s32 sprite, s32 *textures,
@@ -2993,43 +3082,46 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultPanel);
 #endif
 
 #ifdef NON_MATCHING
-extern void cmbDrawStockEntry(s32 x, s32 y, s32 color, s8 count, s32 color2, u8 *rows, s32 mode, s32 flags);
+extern void cmbDrawStockEntry(s32 x, s32 y, u32 z, s8 selected, u32 color, cmpCursorInfo_t *cursor, u8 mode, s32 ot);
 #endif
 
 void cmbDrawStockPanel1(void)
 {
-    s8 count = *((u8 *)CMB_GBWK + 0x107A) + *((u8 *)CMB_GBWK + 0x107C);
+    s8 count = (u8)CMB_GBWK->stockCursorGroup[0].cursor.unk_22 +
+               (u8)CMB_GBWK->stockCursorGroup[0].cursor.unk_24;
 
     cmbDrawStockList(0x180, 0x3F0, 0xFFFF, 0, count, 0, 0x47);
     cmbDrawStockEntry(0x300, 0x408, 0xFFFFF, count, 0x89FEFF80,
-                      (u8 *)CMB_GBWK + 0x1058, 0, 0x47);
-    if (CMB_GBWK->resultRowsBuilt >= *(s8 *)((u8 *)CMB_GBWK + 0x165ED)) {
+                      &CMB_GBWK->stockCursorGroup[0].cursor, 0, 0x47);
+    if (CMB_GBWK->resultRowsBuilt >= (s8)CMB_GBWK->stockCursorCount) {
         cmbDrawStockScrollBar(0, 0xFFFFF, 0x50807080, &CMB_GBWK->stockCursorGroup[0].cursor,
                               0x47);
     }
 }
 
-extern void cmbDrawStockEntry(s32 x, s32 y, s32 color, s8 count, s32 color2,
-                              u8 *rows, s32 mode, s32 flags);
+extern void cmbDrawStockEntry(s32 x, s32 y, u32 z, s8 selected, u32 color,
+                              cmpCursorInfo_t *cursor, u8 mode, s32 ot);
 
 void cmbDrawStockPanel2(void)
 {
-    s8 count = *((u8 *)CMB_GBWK + 0x20b6) + *((u8 *)CMB_GBWK + 0x20b8);
+    s8 count = (u8)CMB_GBWK->stockCursorGroup[1].cursor.unk_22 +
+               (u8)CMB_GBWK->stockCursorGroup[1].cursor.unk_24;
 
     cmbDrawStockList(0x180, 0x3F0, 0xFFFF, 0, count, 1, 0x47);
     cmbDrawStockEntry(0x300, 0x408, 0xFFFFF, count, 0x89FEFF80,
-                      (u8 *)CMB_GBWK + 0x2094, 1, 0x47);
+                      &CMB_GBWK->stockCursorGroup[1].cursor, 1, 0x47);
     cmbDrawStockScrollBar(1, 0xFFFFF, 0x50807080, &CMB_GBWK->stockCursorGroup[1].cursor,
                           0x47);
 }
 
 void cmbDrawStockPanel3(void)
 {
-    s8 count = *((u8 *)CMB_GBWK + 0x30f2) + *((u8 *)CMB_GBWK + 0x30f4);
+    s8 count = (u8)CMB_GBWK->stockCursorGroup[2].cursor.unk_22 +
+               (u8)CMB_GBWK->stockCursorGroup[2].cursor.unk_24;
 
     cmbDrawStockList(0x180, 0x3F0, 0xFFFF, 0, count, 1, 0x47);
     cmbDrawStockEntry(0x300, 0x408, 0xFFFFF, count, 0x89FEFF80,
-                      (u8 *)CMB_GBWK + 0x30d0, 2, 0x47);
+                      &CMB_GBWK->stockCursorGroup[2].cursor, 2, 0x47);
     cmbDrawStockScrollBar(1, 0xFFFFF, 0x50807080, &CMB_GBWK->stockCursorGroup[2].cursor,
                           0x47);
 }
