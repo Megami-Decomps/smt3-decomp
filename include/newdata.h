@@ -104,9 +104,11 @@ typedef struct
     f32 moonTimer;      /* 0xA44 */
     s32 maka;
     u32 maFlags;                  /* 0xA4C */
-    fldAnahoriAkuma_t akuma[16];   /* 0xA50 */
-    /* 0x1910..0x1CF4, split on the IDB's names for the span. */
-    u8 unk1910[4];
+    union {
+        struct { fldAnahoriAkuma_t akuma[16]; u8 unk1910[4]; };
+        struct { u32 unitPrefix; datUnitWork_t unitwork[16]; };
+    };
+    /* 0x1914..0x1CF4, split on the IDB's names for the span. */
     union {
         u8 unk1914[0x10];
         u8 stockOrder[16];
