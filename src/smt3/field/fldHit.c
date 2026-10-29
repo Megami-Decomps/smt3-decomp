@@ -244,11 +244,11 @@ void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
                 record->normal[3] = 0.0f;
                 for (i = 0; i < record->numedges; i++) {
                     for (component = 0; component < 3; component++) {
-                        record->max[i][component] = copiedVertices[i][component];
+                        record->point[i][component] = copiedVertices[i][component];
                     }
-                    record->max[i][3] = 1.0f;
+                    record->point[i][3] = 1.0f;
                 }
-                record->num = fldVecDot(record->normal, record->max[0]);
+                record->num = fldVecDot(record->normal, record->point[0]);
                 absX = record->normal[0];
                 absX = ffabsf(absX);
                 absY = ffabsf(record->normal[1]);
@@ -896,11 +896,11 @@ void fldHitChkUnitElvOnly(f32 *phys_pos) {
             }
             if (inside == 1 && ((collision_s *)fldMatterTable)[index].matter != NULL) {
                 fldGlobalBase.hitMatterIndex = index;
-                ((collision_s *)fldMatterTable)[index].point[0] =
+                ((collision_s *)fldMatterTable)[index].previousPosition[0] =
                     ((collision_s *)fldMatterTable)[index].matter->poseset->pos.x;
-                ((collision_s *)fldMatterTable)[index].point[1] =
+                ((collision_s *)fldMatterTable)[index].previousPosition[1] =
                     ((collision_s *)fldMatterTable)[index].matter->poseset->pos.y;
-                ((collision_s *)fldMatterTable)[index].point[2] =
+                ((collision_s *)fldMatterTable)[index].previousPosition[2] =
                     ((collision_s *)fldMatterTable)[index].matter->poseset->pos.z;
             }
         }
@@ -936,12 +936,12 @@ void fldHitChkUnitElv(f32 *position) {
             dds3PoseSet_t *transform;
 
             transform = ((collision_s *)fldMatterTable)[index].matter->poseset;
-            movement[0] = transform->pos.x - ((collision_s *)fldMatterTable)[index].point[0];
-            movement[1] = transform->pos.y - ((collision_s *)fldMatterTable)[index].point[1];
-            movement[2] = transform->pos.z - ((collision_s *)fldMatterTable)[index].point[2];
-            ((collision_s *)fldMatterTable)[index].point[0] = transform->pos.x;
-            ((collision_s *)fldMatterTable)[index].point[1] = transform->pos.y;
-            ((collision_s *)fldMatterTable)[index].point[2] = transform->pos.z;
+            movement[0] = transform->pos.x - ((collision_s *)fldMatterTable)[index].previousPosition[0];
+            movement[1] = transform->pos.y - ((collision_s *)fldMatterTable)[index].previousPosition[1];
+            movement[2] = transform->pos.z - ((collision_s *)fldMatterTable)[index].previousPosition[2];
+            ((collision_s *)fldMatterTable)[index].previousPosition[0] = transform->pos.x;
+            ((collision_s *)fldMatterTable)[index].previousPosition[1] = transform->pos.y;
+            ((collision_s *)fldMatterTable)[index].previousPosition[2] = transform->pos.z;
         }
         if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
                                ((collision_s *)fldMatterTable)[index].hojiID) == 0) {
@@ -1082,9 +1082,9 @@ void fldHitChkUnit(f32 *position)
         collision_s *face = &fldMatterTable[fldGlobalBase.hitMatterIndex];
         if (face->matter != NULL) {
             dds3PoseSet_t *pose = face->matter->poseset;
-            movement.x = pose->pos.x - face->point[0];
-            movement.y = (pose->pos.y - face->point[1]) + 10.0f;
-            movement.z = pose->pos.z - face->point[2];
+            movement.x = pose->pos.x - face->previousPosition[0];
+            movement.y = (pose->pos.y - face->previousPosition[1]) + 10.0f;
+            movement.z = pose->pos.z - face->previousPosition[2];
         }
         fldGlobalBase.hitMatterIndex = -1;
     }
@@ -1202,7 +1202,7 @@ void fldHitChkUnit(f32 *position)
                         if (data->special[0] == 1) {
                             sky = data->special[1];
                         } else if (data->special[0] == 3) {
-                            *(f32 *)fldGlobalBase.unkC4 = face->max[0][1];
+                            *(f32 *)fldGlobalBase.unkC4 = face->point[0][1];
                         }
                     }
                 }
@@ -1345,9 +1345,9 @@ void fldHitChkUnitVWM(f32 *position)
         collision_s *face = &fldMatterTable[fldGlobalBase.hitMatterIndex];
         if (face->matter != NULL) {
             dds3PoseSet_t *pose = face->matter->poseset;
-            movement.x = pose->pos.x - face->point[0];
-            movement.y = (pose->pos.y - face->point[1]) + 10.0f;
-            movement.z = pose->pos.z - face->point[2];
+            movement.x = pose->pos.x - face->previousPosition[0];
+            movement.y = (pose->pos.y - face->previousPosition[1]) + 10.0f;
+            movement.z = pose->pos.z - face->previousPosition[2];
         }
         fldGlobalBase.hitMatterIndex = -1;
     }
@@ -1462,7 +1462,7 @@ void fldHitChkUnitVWM(f32 *position)
                         if (data->special[0] == 1) {
                             sky = data->special[1];
                         } else if (data->special[0] == 3) {
-                            *(f32 *)fldGlobalBase.unkC4 = face->max[0][1];
+                            *(f32 *)fldGlobalBase.unkC4 = face->point[0][1];
                         }
                     }
                 }
@@ -1496,9 +1496,9 @@ void fldHitChkUnitVWM(f32 *position)
                                     f32 xs[3], ys[3], zs[3];
                                     s32 vertex;
                                     for (vertex = 0; vertex < 3; vertex++) {
-                                        xs[vertex] = face->max[vertex][0];
-                                        ys[vertex] = face->max[vertex][1];
-                                        zs[vertex] = face->max[vertex][2];
+                                        xs[vertex] = face->point[vertex][0];
+                                        ys[vertex] = face->point[vertex][1];
+                                        zs[vertex] = face->point[vertex][2];
                                     }
                                     current.y = fldCamCalcSlopeOffset(current.x, current.z, xs, ys, zs) - 35.0f;
                                     fldHitChkMatter = index;
@@ -1657,14 +1657,14 @@ void fldHitWM_Mask(void)
                 face->pFace->special[0] != 3) {
                 if (face->numedges == 3) {
                     fldDrawPoly3(0x80000000, 0x80000000, 0x80000000,
-                                 face->max[0][0] + pos.x, face->max[0][1] + pos.y, face->max[0][2] + pos.z,
-                                 face->max[1][0] + pos.x, face->max[1][1] + pos.y, face->max[1][2] + pos.z,
-                                 face->max[2][0] + pos.x, face->max[2][1] + pos.y, face->max[2][2] + pos.z);
+                                 face->point[0][0] + pos.x, face->point[0][1] + pos.y, face->point[0][2] + pos.z,
+                                 face->point[1][0] + pos.x, face->point[1][1] + pos.y, face->point[1][2] + pos.z,
+                                 face->point[2][0] + pos.x, face->point[2][1] + pos.y, face->point[2][2] + pos.z);
                 } else {
-                    fldDrawPoly4(0x80000000, face->max[0][0] + pos.x, face->max[0][1] + pos.y, face->max[0][2] + pos.z,
-                                 0x80000000, face->max[1][0] + pos.x, face->max[1][1] + pos.y, face->max[1][2] + pos.z,
-                                 0x80000000, face->max[2][0] + pos.x, face->max[2][1] + pos.y, face->max[2][2] + pos.z,
-                                 0x80000000, face->max[3][0] + pos.x, face->max[3][1] + pos.y, face->max[3][2] + pos.z);
+                    fldDrawPoly4(0x80000000, face->point[0][0] + pos.x, face->point[0][1] + pos.y, face->point[0][2] + pos.z,
+                                 0x80000000, face->point[1][0] + pos.x, face->point[1][1] + pos.y, face->point[1][2] + pos.z,
+                                 0x80000000, face->point[2][0] + pos.x, face->point[2][1] + pos.y, face->point[2][2] + pos.z,
+                                 0x80000000, face->point[3][0] + pos.x, face->point[3][1] + pos.y, face->point[3][2] + pos.z);
                 }
                 count = D_0054EDA0;
             }

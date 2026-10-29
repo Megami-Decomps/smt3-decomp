@@ -37,8 +37,8 @@ struct collision_s {
     f32 e_normal[4][4];
     f32 e_num[4];
     f32 min[4];
-    f32 max[4][4];
-    f32 point[3];
+    f32 point[4][4];
+    f32 previousPosition[3];
     u32 elv;
     u16 blockID;
     u16 hitflag;
