@@ -52,6 +52,7 @@ extern void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, void *pMatr
 extern void dds3EffectPartSetDirection(effPartHandle_t *hEffPart, void *pMatrix);
 extern void Mult(void);
 extern void ToMatrix(void);
+extern f32 D_00533510[4];
 extern f32 D_005335E0[4];
 extern f32 D_00533680[4];
 
@@ -1639,7 +1640,94 @@ void effBTLSys_Kyusyuu_Delete2(effBattleSystem_effBTLSystem_Kyusyuu_tag *hData)
 void effBTLSys_Kyusyuu_SetColor(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSys_Kyusyuu_Draw);
+void effBTLSys_Kyusyuu_Draw(effBattleSystem_effBTLSystem_Kyusyuu_tag *hData) {
+    effBTLAimParams_t aim;
+    effBTL_SkillLight_t light;
+    effBTLModelColorParam_t color;
+    sdfVector4_t position;
+    sdfMatrix4_t rotation;
+    sdfMatrix4_t direction;
+    u32 frame;
+
+    if (hData->frame == 0) {
+        light.type = 3;
+        light.unknown01 = 3;
+        light.unknown02 = 8;
+        light.unknown04 = 0;
+        light.diffuse = 0x808A8A8A;
+        light.ambient = 0x801E1E1E;
+        light.color_anim = 0;
+        light.unknown14 = 2;
+        light.unknown18 = 0;
+        light.unknown1C = 2;
+
+        color.unknown00 = 0x809BEB86;
+        color.unknown04 = 0;
+        color.unknown08 = 2;
+        color.unknown0C = 0x28;
+        color.unknown10 = 1;
+
+        effBTLPointLightSet(&light, hData->pFormation);
+        effBTLModelColorSet(&color, hData->pFormation);
+    }
+
+    SDF_VU0_LOADVECTOR(&hData->pFormation->rot);
+    SDF_VU0_LOADVECTOR_B(D_00533510);
+    Mult();
+    ToMatrix();
+    SDF_VU0_STOREMATRIX_NOMEM(&rotation);
+
+    aim.scaleKind = 0;
+    aim.aimMode = 1;
+    aim.directionMode = 9;
+    aim.rangeOverride = 0;
+    effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+    dds3EffectPartSetPosition(hData->hPart, &position);
+    dds3EffectPartSetRotateMatrix(hData->hPart, (void *)&rotation);
+    effBTLPartGetRotateMatrixPtr(&aim, &direction);
+    dds3EffectPartSetDirection(hData->hPart, &direction);
+    dds3EffectPartDraw(hData->hPart);
+
+    frame = hData->frame;
+    if (frame >= 4) {
+        aim.scaleKind = 0;
+        aim.aimMode = 4;
+        aim.directionMode = 9;
+        aim.rangeOverride = 0;
+        effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+        dds3EffectPartSetPosition(hData->hPart2, &position);
+        dds3EffectPartSetRotateMatrix(hData->hPart2, (void *)&rotation);
+        effBTLPartGetRotateMatrixPtr(&aim, &direction);
+        dds3EffectPartSetDirection(hData->hPart2, &direction);
+        dds3EffectPartDraw(hData->hPart2);
+        frame = hData->frame;
+    }
+    if (frame >= 8) {
+        aim.scaleKind = 0;
+        aim.aimMode = 4;
+        aim.directionMode = 9;
+        aim.rangeOverride = 0;
+        effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+        dds3EffectPartSetPosition(hData->hPart3, &position);
+        dds3EffectPartSetRotateMatrix(hData->hPart3, (void *)&rotation);
+        effBTLPartGetRotateMatrixPtr(&aim, &direction);
+        dds3EffectPartSetDirection(hData->hPart3, &direction);
+        dds3EffectPartDraw(hData->hPart3);
+    }
+
+    aim.scaleKind = 0;
+    aim.aimMode = 1;
+    aim.directionMode = 8;
+    aim.rangeOverride = 0;
+    effBTLPartGetPositionPtr(hData->pFormation, &aim, &position);
+    dds3EffectPartSetPosition(hData->hPart4, &position);
+    dds3EffectPartSetRotateMatrix(hData->hPart4, (void *)&rotation);
+    effBTLPartGetRotateMatrixPtr(&aim, &direction);
+    dds3EffectPartSetDirection(hData->hPart4, &direction);
+    dds3EffectPartDraw(hData->hPart4);
+
+    hData->frame++;
+}
 
 u32 effBTLSys_Kyusyuu_GetLength(void *hData)
 {
