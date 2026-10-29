@@ -115,7 +115,13 @@ typedef struct nbMainProcessData_t
     u32 stat;
     u8 unk_64[0x4];
     u8 turn;
-    u8 unk_69[0xF];
+    s8 phase;
+    s8 nextphase;
+    u8 esccnt;
+    u16 phasetime;
+    u16 pad_6E;
+    u32 battletime;
+    f32 press3;
     s16 press4_p;
     s16 pressturn;
     u16 stagemajor;
@@ -2047,7 +2053,70 @@ s32 nbCheckSensei(nbMainProcessData_t *data)
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbCheckBackAttack);
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbCheckEscape);
+extern s32 datCheckSkillInParty(s32 skill);
+extern const char D_00544DE0[];
+
+s32 nbCheckEscape(nbMainProcessData_t *data)
+{
+    s32 i;
+    s32 allDisabled;
+    datUnitWork_t *unit;
+    s32 player4;
+    s32 player5;
+    s32 enemy4;
+    s32 enemy5;
+    s32 rate;
+    s32 moonRoll;
+    f32 ratio;
+
+    if (nbEncountFormTable[data->encno].senseiFlags & 0x20) return 1;
+    allDisabled = 1;
+    for (i = 4; i < 14; i++) {
+        unit = nbGetUnitWorkFromFormindex(i);
+        if (unit != NULL) {
+            switch (unit->badstatus & 0xFFF) {
+            case 1:
+            case 2:
+            case 4:
+            case 0x10:
+            case 0x100:
+            case 0x400:
+                break;
+            default:
+                allDisabled = 0;
+                break;
+            }
+        }
+    }
+    if (allDisabled != 0) return 1;
+    player4 = nbGetParamAvg(data, 0, 4);
+    player5 = nbGetParamAvg(data, 0, 5);
+    enemy4 = nbGetParamAvg(data, 1, 4);
+    enemy5 = nbGetParamAvg(data, 1, 5);
+    ratio = (f32)(player4 + player5) / (enemy4 + enemy5);
+    rate = (s32)(data->esccnt * 20 + ratio * 20.0f);
+    if (datCheckSkillInParty(0x128) != 0) {
+        rate = rate * datSkillTable.special[8].n / 100;
+    }
+    if (evtBitCheck(0xAF2) == 0) return 0;
+    rate *= 2;
+    printf(D_00544DE0, rate);
+    if (rate >= (s32)dds3GetRandIntA(0, 100)) {
+        if (evtGetAgeOfMoon() == 8) {
+            moonRoll = dds3GetRandIntA(0, 4);
+            if (moonRoll != 1) {
+                if (evtBitCheck(0xAF2) != 0) {
+                    if ((dds3GetRandIntA(0, 2) & 1) != 0) return 1;
+                }
+            } else {
+                return moonRoll;
+            }
+        } else {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 s32 nbGetEscapeSwitch(nbMainProcessData_t *data)
 {
