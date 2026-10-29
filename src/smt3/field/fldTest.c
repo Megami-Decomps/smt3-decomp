@@ -5,6 +5,8 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "field.h"
+#include "event.h"
+#include "model.h"
 
 extern s32 fldDoor_ElvTakasaToFloor(s32 takasa);
 
@@ -1500,7 +1502,110 @@ void fldRunDantePatr(void)
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDantePatr);
 #endif
 
+#ifdef NON_MATCHING
+typedef struct {
+    s32 words[19];
+    s32 counter;
+} fldDanteGunCounter_t;
+
+extern fldDanteGunCounter_t fldRunDanteGunFlag;
+extern dds3Basic_t *D_0054EAF0;
+extern s32 fldPlayerStepDist;
+extern u32 dds3GetRandA(void *name);
+extern void datPartyDamageFld(s32 mode);
+extern void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 r);
+extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
+
+void fldRunDanteGun1(void)
+{
+    f32 frames[4] = { 2.0f, 10.0f, 19.0f, 28.0f };
+    s32 marks[4] = { 20, 21, 20, 21 };
+    sdfVector4_t pos __attribute__((aligned(16)));
+    f32 distance;
+    f32 oldframe;
+    f32 nowframe;
+    s32 i;
+
+    if (fldRun_Dante.cnt_ex < 300) {
+        fldRun_Dante.cnt_ex++;
+    }
+    if (fldRun_Dante.nextframe > 0) {
+        fldRun_Dante.nextframe--;
+    }
+    fldRun_Dante.angleToPlayer = fldRun_Dante.d_p_dir;
+    distance = fldRun_Dante.d_p_len;
+    fldRun_Dante.turn = fldTurnToward(fldRun_Dante.turn, 180.0f - fldRun_Dante.d_p_dir, 10.0f, 1.0f);
+    if (distance > 100.0f) {
+        f32 pi = 3.1399999f;
+        fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * pi / 180.0f) * fldRun_Dante.speed;
+        fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * pi / 180.0f) * fldRun_Dante.speed;
+    }
+    if (fldRun_Dante.flag & 2) {
+        oldframe = 0.0f;
+        nowframe = 0.0f;
+    } else {
+        oldframe = fldRun_Dante.oldframe;
+        nowframe = fldRun_Dante.nowframe;
+    }
+    for (i = 0; i < 4; i++) {
+        if (oldframe < frames[i] && frames[i] <= nowframe) {
+            s32 hit = 0;
+            u32 roll;
+            s32 mark;
+
+            fldRun_Dante.gunlight_anime = 8;
+            fldRun_Dante.flag |= 8;
+            if (fldRunDanteGunFlag.counter != 0) {
+                continue;
+            }
+            roll = (dds3GetRandA(NULL) >> 3) % 100;
+            if (!(fldRun_Dante.flag & 1)) {
+                if (distance > 2400.0f && roll < 2) {
+                    hit = 1;
+                } else if (distance > 1800.0f && roll < 5) {
+                    hit = 1;
+                } else if (distance > 1200.0f && roll < 20) {
+                    hit = 1;
+                } else if (distance > 600.0f && roll < 30) {
+                    hit = 1;
+                } else if (roll < 50) {
+                    hit = 1;
+                }
+            }
+            if (hit) {
+                s32 offset;
+
+                fldGlobalBase.word78 = 1;
+                fldPlayerStepDist = 8;
+                datPartyDamageFld(3);
+                offset = (s32)((dds3GetRandA(NULL) >> 3) % 40) - 20;
+                pos.x = fldGlobalBase.x + (f32)offset;
+                offset = (s32)((dds3GetRandA(NULL) >> 3) % 40) - 20;
+                pos.y = fldGlobalBase.y - 140.0f + (f32)offset;
+                offset = (s32)((dds3GetRandA(NULL) >> 3) % 40) - 20;
+                pos.z = fldGlobalBase.z + (f32)offset;
+                fldRunEffSet(0, pos.x, pos.y, pos.z, 0.0f);
+            }
+            mark = marks[i];
+            if (mark == 20) {
+                fldRun_Dante.flag |= 0x10;
+            }
+            if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(D_0054EAF0)->owner->inner, mark) != 0) {
+                SDF_VU0_STOREVECTOR(&pos);
+                fldRunEffSet(1, pos.x, pos.y, pos.z, fldRun_Dante.turn);
+            }
+        }
+    }
+    FroFtoI(fldRun_Dante.x, fldRun_Dante.z, (u16 *)&fldRun_Dante.ix, (u16 *)&fldRun_Dante.iz);
+    if (fldRun_Dante.bgm_mode != 1) {
+        fldRun_Dante.bgm_mode = 1;
+        fldRun_Dante.flag |= 4;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteGun1);
+#endif
 
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteGun2);
 
