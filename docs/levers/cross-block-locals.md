@@ -81,3 +81,27 @@ The four `DispComm1` renderers consume six arguments: process, halfword entry
 ID, X, Y, depth and packed color. Their sole native caller supplies those six;
 the unused trailing `listidx` and `col2` declarations are removed. All four
 renderer bodies remain byte-exact.
+
+## Share the interpolation delta across template fields
+
+`effPCPFLEACHBlurDraw` uses one `delta` for the five successive end-minus-start
+interpolations: area, rotation, scale and the two center coordinates. Each
+value is consumed immediately by its field's interpolation, and the local
+retains the same meaning throughout. Independent expression temporaries leave
+35 of 131 words different at the same 524-byte size.
+
+Qualified `cc1probe.sh --alloc` traces of pinned cc1
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`
+verify hooked/unhooked and dump/plain output parity for both forms. In the
+exact form, RTL UIDs 134, 202, 216, 232 and 250 assign the five differences
+to pseudo 90. Its combined ten references, live length 21 and zero crossed
+calls produce one global allocation; conflicts with `$f0` through `$f7` and
+`$f12` leave `$f8`. This reproduces all five native `sub.s $f8` operations
+and the surrounding scheduling without register constraints. The complete
+owner checks 385 match / 0 differ.
+
+The local parameter's rectangle coordinates are filled by the draw provider
+from its area and center before rendering. The native caller leaves those
+four words unset; only the consumed area, color, blend, rotation, scale and
+center fields are constructed here. The parameter setter copies the actual
+0x2C-byte partial-blur body, preserving the owned texture tail.

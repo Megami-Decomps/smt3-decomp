@@ -374,8 +374,8 @@ void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *work) {
 }
 
 /* Copy only the serialized parameters, leaving the owned work tail intact. */
-void dds3EffectPartialMultiBlurSetParam(effBlurScatterWork_t *hPartialMultiBlur, dds3Effect_DistortionBlurParam_t *pParam) {
-    hPartialMultiBlur->params = *pParam;
+void dds3EffectPartialMultiBlurSetParam(effBlurTemplate_t *hPartialMultiBlur, const dds3Effect_PartialMultiBlurParam_t *pParam) {
+    hPartialMultiBlur->body = *pParam;
 }
 
 /* Supply a source handle for the first blur variant. */

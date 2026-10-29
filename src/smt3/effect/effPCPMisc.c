@@ -7718,7 +7718,55 @@ void effPCPFLEACHBlurDelete(effPCPFLEACHBlur_tag *hData) {
     sdfChipFreeDirect(hData);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFLEACHBlurDraw);
+extern void dds3EffectPartialMultiBlurSetParam(dds3Effect_PartialMultiBlur_t *work,
+    const dds3Effect_PartialMultiBlurParam_t *param);
+
+void effPCPFLEACHBlurDraw(effPCPFLEACHBlur_tag *work)
+{
+    dds3Effect_PartialMultiBlurParam_t param;
+    s32 duration = work->param.duration;
+    s32 frame = work->frame;
+    s32 fadeIn = work->param.fadeIn;
+    s32 fadeOut = work->param.fadeOut;
+    f32 rate;
+    /* One end-minus-start delta across the five interpolations; qualified
+     * allocation evidence is in docs/levers/cross-block-locals.md. */
+    f32 delta;
+    u32 color;
+
+    if (duration >= frame) {
+        if (frame < fadeIn && fadeIn != 0) {
+            rate = (f32)frame / (f32)fadeIn;
+        } else if (duration - frame <= fadeOut && fadeOut != 0) {
+            rate = (f32)(duration - frame) / (f32)fadeOut;
+        } else {
+            rate = 1.0f;
+        }
+        color = effColorBlend(work->abgr & 0xFFFFFF, work->abgr, rate);
+        if (frame != 0) {
+            rate = (f32)frame / (f32)duration;
+        } else {
+            rate = 1.0f;
+        }
+        delta = (f32)work->param.end.area - (f32)work->param.start.area;
+        param.area = work->param.start.area + (s32)(delta * rate);
+        param.Blur.abgr = effMagaCylinderCalcColor(
+            effColorBlend(work->param.start.Blur.abgr, work->param.end.Blur.abgr, rate), color);
+        param.Blur.blend = work->param.end.Blur.blend;
+        delta = work->param.end.Blur.rotate - work->param.start.Blur.rotate;
+        param.Blur.rotate = work->param.start.Blur.rotate + delta * rate;
+        delta = work->param.end.Blur.scale - work->param.start.Blur.scale;
+        param.Blur.scale = work->param.start.Blur.scale + delta * rate;
+        delta = (f32)work->param.end.Blur.center[0] - (f32)work->param.start.Blur.center[0];
+        param.Blur.center[0] = (s32)((f32)work->param.start.Blur.center[0] + delta * rate);
+        delta = (f32)work->param.end.Blur.center[1] - (f32)work->param.start.Blur.center[1];
+        param.Blur.center[1] = (s32)((f32)work->param.start.Blur.center[1] + delta * rate);
+        dds3EffectPartialMultiBlurSetParam(work->hMultiBlur, &param);
+        dds3EffectPartialMultiBlurDraw(work->hMultiBlur);
+        work->frame++;
+    }
+}
+
 
 void effPCPFLEACHBlurSetColor(effPCPFLEACHBlur_tag *hData, u32 abgr) {
     hData->abgr = abgr;
