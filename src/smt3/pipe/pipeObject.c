@@ -291,7 +291,89 @@ u8 objMake(tagPipeObject *objPtr, s32 offset, u8 id, u8 way, u8 action, u8 value
 
 
 
+extern const u8 D_00548B50[16];
+extern void *memcpy(void *dest, const void *src, u32 size);
+extern void objCopy2(s32 offset, f32 x, f32 y, u8 id, u8 action,
+                     s16 count, s16 num, s32 range);
+extern u32 dds3GetRandA(void *state);
+extern void objOptionInc(tagPipeObject *objPtr, u8 op);
+extern u16 myStatus;
+
+/* NON_MATCHING: 78 of 152 words match at 608 native/emitted bytes. The
+ * table-copy temporaries, status-threshold allocation and loop scheduling
+ * remain different; the corrected sixteen-construction behavior is retained. */
+#ifdef NON_MATCHING
+void objOption(tagPipeObject *objPtr, u8 option)
+{
+    tagPipeObject object;
+    u8 ways[16];
+    u8 action = objPtr->action;
+    u8 *way = ways;
+    u8 id;
+
+    memcpy(ways, D_00548B50, sizeof(ways));
+    if (action == 0x1A) {
+        objCopy2(objPtr->offset, objPtr->pos[0], objPtr->pos[1], 5, 0, 0, 5, 100);
+        return;
+    }
+    id = (u8)objPtr->id;
+    if (id & 0xF0) {
+        return;
+    }
+    if (id == 10) {
+        s32 status = (myStatus & 0xF00) >> 8;
+        u32 randomValue;
+        u32 threshold = option;
+
+        switch (status) {
+        case 0:
+            threshold += 0x80;
+            randomValue = dds3GetRandA(NULL) & 0xFF;
+            break;
+        case 1:
+            randomValue = dds3GetRandA(NULL) & 0xFF;
+            break;
+        case 2:
+            randomValue = dds3GetRandA(NULL) & 0x1FF;
+            break;
+        default:
+            return;
+        }
+        if (randomValue >= threshold) {
+            objAdd(objPtr);
+        }
+        return;
+    }
+    if (option < 100) {
+        objAdd(objPtr);
+        if (option == 0 || option == 20 || option == 40 || option == 60 || option == 80) {
+            return;
+        }
+        do {
+            objOptionInc(objPtr, option);
+            objAdd(objPtr);
+            option--;
+        } while (option != 0 && option != 20 && option != 40 && option != 60 && option != 80);
+        return;
+    }
+    if (option == 100) {
+        u8 remaining = 15;
+        for (; remaining != 0xFF; remaining--) {
+            u8 wayCode = *way++;
+            objMake(&object, objPtr->offset, (u8)objPtr->id, wayCode, objPtr->action, 0);
+            objAdd(&object);
+        }
+        return;
+    }
+    if (option == 101) {
+        objPtr->flags |= 0x4000;
+        objAdd(objPtr);
+    }
+}
+
+#else
 INCLUDE_ASM(const s32, "pipe/pipeObject", objOption);
+#endif
 
 void objOptionInc(tagPipeObject *objPtr, u8 op)
 {

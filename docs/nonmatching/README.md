@@ -62,6 +62,7 @@ page and line to open. Conventions are in
 | 1 | sdf/sdfCoreDraw | [sdf/sdfCoreDraw.md](sdf/sdfCoreDraw.md) |
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
 | 1 | pipe/pipePosTable | [pipe/pipePosTable.md](pipe/pipePosTable.md) |
+| 1 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
 | 1 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 1 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
 | 1 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
