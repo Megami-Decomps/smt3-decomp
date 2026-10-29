@@ -406,6 +406,10 @@ extern char D_005435F8[];
 
 /* Qualified reorg traces: the preceding C reward routine removes $2 from
  * the fall-through live set, preserving the final plain loading-state branch. */
+#ifdef NON_MATCHING
+extern s32 printf(const char *fmt, ...);
+#endif
+
 s32 nbResultProcess2(dds3ProcessID_t *id)
 {
     nbMainProcessData_t *data;

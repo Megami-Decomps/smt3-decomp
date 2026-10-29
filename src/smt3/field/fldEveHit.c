@@ -753,6 +753,8 @@ typedef struct {
 } fldEveTreasure_t;
 extern fldEveTreasure_t fldTakaraTable[];
 
+extern void fldPurgeEveRngProcesses(void);
+
 void fldEveHit_ChkEveHit(dds3Basic_t *player)
 {
     sdfVector4_t scratch __attribute__((aligned(16)));

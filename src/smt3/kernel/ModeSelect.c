@@ -349,6 +349,10 @@ extern void dds3ConfigRestoreBackup(void);
 
 extern s32 evtBitOn(s32 no);
 
+#ifdef NON_MATCHING
+extern void dds3CreateGameData(s32 no);
+#endif
+
 s32 mselStartDataSet(void)
 {
     if (gGlobal->unk_A8 == 0) {

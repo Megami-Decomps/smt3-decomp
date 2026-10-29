@@ -463,6 +463,10 @@ f32 effBTLSystem_GetScalePtr(nbFormation_t *pFormation)
     }
 }
 
+#ifdef NON_MATCHING
+extern void *memcpy(void *, const void *, unsigned int);
+#endif
+
 void effBTLSystem_Part_DataLoad(effBattleSystem_effBTLSystem_Part_tag *pPartList, u32 count)
 {
     u32 i;
@@ -1854,6 +1858,10 @@ void effBTLSys_Attack_Delete2(effBattleSystem_effBTLSystem_Attack_tag *hData)
 void effBTLSys_Attack_SetColor(void) {
 }
 
+#ifdef NON_MATCHING
+extern void dds3SetQuake(s32 frame, s32 range);
+#endif
+
 void effBTLSys_Attack_Draw(effBattleSystem_effBTLSystem_Attack_tag *hData) {
     effBTL_SkillLight_t light;
     effBTLModelColorParam_t color;
@@ -2535,6 +2543,10 @@ void effBTLSystemDelete2(effBTLSystemHandle_t *hEffBTLSys)
     sdfChipFreeDirect(hEffBTLSys);
 }
 
+#ifdef NON_MATCHING
+extern u32 mdlGetColor(mdlObj_t *aHandle);
+#endif
+
 void effBTLSystemDraw(effBTLSystemHandle_t *hEffBTLSys)
 {
     s32 family = hEffBTLSys->family;
@@ -2967,6 +2979,10 @@ typedef struct
 extern void mdlSetColor(mdlObj_t *model, u32 color);
 extern u32 effColorBlend(u32 color1, u32 color2, f32 ratio);
 
+#ifdef NON_MATCHING
+extern void *memset(void *a, s32 b, u32 c);
+#endif
+
 void *effCAMPBadCreate(effCAMPBadParams_t *params, s32 id)
 {
     effBattleSystem_effCAMPBad_tag *work;
@@ -3059,6 +3075,10 @@ s32 eff_174898(void)
 {
     return D_0054F0F4;
 }
+
+#ifdef NON_MATCHING
+extern s32 sprintf(char *str, const char *fmt, ...);
+#endif
 
 char *effMakeBedFileName(u32 id)
 {

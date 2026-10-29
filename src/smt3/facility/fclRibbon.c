@@ -181,6 +181,10 @@ void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index)
     }
 }
 
+#ifdef NON_MATCHING
+extern void *memcpy(void *, const void *, unsigned int);
+#endif
+
 void fclRbnSetPara(fclRibbon_t *handle, s32 index,
     const sdfIVector4_t *pos_act, const sdfIVector4_t *pos_deact,
     const sdfIVector4_t *uv_act, const sdfIVector4_t *uv_deact,

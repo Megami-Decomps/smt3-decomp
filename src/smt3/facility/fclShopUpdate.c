@@ -238,6 +238,10 @@ u16 shpGetItemFromItemBox(s32 box)
 INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpGetItemFromItemBox);
 #endif
 
+#ifdef NON_MATCHING
+extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
+#endif
+
 void shpExit(void)
 {
     cmpMoveCursorListEnd(&shopUpdateWork->listCursor);
@@ -749,6 +753,10 @@ void shopStartScript(void)
         shopUpdateWork->unk_0004 = 1;
     }
 }
+
+#ifdef NON_MATCHING
+extern void fclSetPanelAnimState(fclPanelAnim_t *anim, u8 state);
+#endif
 
 void shopUpdatePanelAnim(void)
 {

@@ -446,6 +446,10 @@ void trmUpdateSaveActIn(void)
     }
 }
 
+#ifdef NON_MATCHING
+extern s8 trmStartEvent(void);
+#endif
+
 void trmUpdateSaveActOut(void)
 {
     if (trmCheckSaveAct() == 0) {
