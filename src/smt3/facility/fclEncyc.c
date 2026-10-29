@@ -3648,7 +3648,97 @@ void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst)
     ot->regFunc(ot, tag);
 }
 
+extern itfColor_t D_003309C0;
+
+#ifdef NON_MATCHING
+void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
+    sdfDrawTag_t *tag;
+    sdfIVector2_t pos[2];
+    itfColor_t uv;
+    itfColor_t color;
+    s32 x;
+    s32 y;
+
+    if (work->help[1].alpha > 0) {
+        tag = sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(tag);
+        x = work->help[1].x;
+        y = work->help[1].y;
+        color.components[0] = 0x80;
+        color.components[1] = 0x80;
+        color.components[2] = 0x80;
+        color.components[3] = work->help[1].alpha;
+        pos[0].x = x; pos[0].y = y;
+        pos[1].x = x + 0xC90; pos[1].y = y + 0xF0;
+        itfMiscDrawSpritePrim(pos, D_003309B0, &color, 0xFFFFF0,
+                              pinst->texHandle[3], 0, tag);
+        pos[0].x = x + 0x720; pos[0].y = y + 0x28;
+        pos[1].x = x + 0xAD0; pos[1].y = y + 0xC8;
+        itfMiscDrawSpritePrim2(pos, &D_003309C0, &color, 0xFFFFF0, 0, tag);
+        D_002F67F8.regFunc(&D_002F67F8, tag);
+    }
+    if (work->help[0].alpha > 0) {
+        tag = sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(tag);
+        x = work->help[0].x;
+        y = work->help[0].y;
+        color.components[0] = 0x80;
+        color.components[1] = 0x80;
+        color.components[2] = 0x80;
+        color.components[3] = work->help[0].alpha;
+        uv.components[0] = 0x930; uv.components[1] = 0x1E0;
+        uv.components[2] = 0xFD0; uv.components[3] = 0x430;
+        pos[0].x = x; pos[0].y = y;
+        pos[1].x = x + 0x6A0; pos[1].y = y + 0x128;
+        itfMiscDrawSpritePrim(pos, &uv, &color, 0xFFFFF0, pinst->texHandle[2], 0, tag);
+        pos[0].x = x + 0x2000; pos[1].x = x + 0x1960;
+        itfMiscDrawSpritePrim2(pos, &uv, &color, 0xFFFFF0, 0, tag);
+        uv.components[0] = 0xFC0;
+        pos[0].x = x + 0x6A0;
+        itfMiscDrawSpritePrim2(pos, &uv, &color, 0xFFFFF0, 0, tag);
+        uv.components[0] = 0x6C0; uv.components[1] = 0x660;
+        uv.components[2] = 0x880; uv.components[3] = 0x7F0;
+        pos[0].x = x + 0x880; pos[0].y = y + 0x38;
+        pos[1].x = x + 0xA40; pos[1].y = y + 0x100;
+        itfMiscDrawSpritePrim2(pos, &uv, &color, 0xFFFFF0, 0, tag);
+        uv.components[0] = 0x4D0; uv.components[2] = 0x6B0;
+        pos[0].x = x + 0xDB0; pos[1].x = x + 0xF90;
+        itfMiscDrawSpritePrim2(pos, &uv, &color, 0xFFFFF0, 0, tag);
+        uv.components[0] = 0xD60; uv.components[1] = 0x590;
+        uv.components[2] = 0xEC0; uv.components[3] = 0x720;
+        pos[0].x = x + 0x15B0; pos[0].y = y + 0x30;
+        pos[1].x = x + 0x1710; pos[1].y = y + 0xF8;
+        itfMiscDrawSpritePrim2(pos, &uv, &color, 0xFFFFF0, 0, tag);
+        uv.components[0] = 0xA40; uv.components[1] = 0x1F0;
+        uv.components[2] = 0xBA0; uv.components[3] = 0x360;
+        pos[0].x = x + 0x390; pos[0].y = y + 0x38;
+        pos[1].x = x + 0x4F0; pos[1].y = y + 0xF0;
+        itfMiscDrawSpritePrim(pos, &uv, &color, 0xFFFFF0, pinst->texHandle[1], 0, tag);
+        uv.components[0] = 0x240; uv.components[1] = 0x560;
+        uv.components[2] = 0x480; uv.components[3] = 0x6D0;
+        pos[0].x = x + 0x4F0; pos[1].x = x + 0x730;
+        itfMiscDrawSpritePrim(pos, &uv, &color, 0xFFFFF0, pinst->texHandle[4], 0, tag);
+        uv.components[0] = 0x10; uv.components[1] = 0x560;
+        uv.components[2] = 0x230; uv.components[3] = 0x6F0;
+        pos[0].x = x + 0xA40; pos[0].y = y + 0x38;
+        pos[1].x = x + 0xC60; pos[1].y = y + 0x100;
+        itfMiscDrawSpritePrim2(pos, &uv, &color, 0xFFFFF0, 0, tag);
+        uv.components[0] = 0x490; uv.components[1] = 0x560;
+        uv.components[2] = 0x960; uv.components[3] = 0x6F0;
+        pos[0].x = x + 0xF90; pos[1].x = x + 0x1460;
+        itfMiscDrawSpritePrim2(pos, &uv, &color, 0xFFFFF0, 0, tag);
+        uv.components[0] = 0x970; uv.components[2] = 0xED0;
+        pos[0].x = x + 0x1710; pos[0].y = y + 0x30;
+        pos[1].x = x + 0x1C70; pos[1].y = y + 0xF8;
+        itfMiscDrawSpritePrim2(pos, &uv, &color, 0xFFFFF0, 0, tag);
+        D_002F67F8.regFunc(&D_002F67F8, tag);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadMainHelp);
+#endif
 
 void InitializeDebug_fclEncyc(void)
 {
