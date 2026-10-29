@@ -632,6 +632,12 @@ s32 fldWap_SetBgm(doormovetbl_s *pWap) {
 
 INCLUDE_ASM(const s32, "field/fldWap", fldDoor_Warp);
 
+INCLUDE_RODATA(const s32, "field/fldWap", D_00531F18);
+
+INCLUDE_RODATA(const s32, "field/fldWap", D_00531F28);
+
+INCLUDE_RODATA(const s32, "field/fldWap", jtbl_00531F40);
+
 extern s16 D_002FC1A2[][2];
 extern void fldSetNextField(s32 field, s32 parameter);
 extern void fldAutoMapOpenBlock2(s32 fld, s32 area, s32 SBlock);
@@ -644,12 +650,6 @@ extern void fldSetSceneParam5(fldSceneParam_t *pParam, s32 loadField, s32 loadAr
 /* Shared with fldDoor_Warp; both native strings have retained padding. */
 extern char D_00531F18[]; /* "01pos_01" */
 extern char D_00531F28[]; /* "elvstart_label" */
-
-INCLUDE_RODATA(const s32, "field/fldWap", D_00531F18);
-
-INCLUDE_RODATA(const s32, "field/fldWap", D_00531F28);
-
-INCLUDE_RODATA(const s32, "field/fldWap", jtbl_00531F40);
 
 void fldDoor_WarpEx(s32 ex_no) {
     fldSceneParam_t record;
