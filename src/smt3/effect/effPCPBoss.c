@@ -5,6 +5,7 @@
 #include "motion.h"
 #include "draw3d.h"
 #include "effect.h"
+#include "event.h"
 
 typedef struct
 {
@@ -258,12 +259,6 @@ typedef struct effPCPBossDengeki_t
     u32 color;
 } effPCPBossDengeki_t;
 
-typedef struct effPCPBossHUnit_t
-{
-    u8 unk00[0x8C];
-    mdlObj_t *owner;
-} effPCPBossHUnit_t;
-
 /* One battle formation slot: the main process data holds 32 of them. */
 typedef struct effPCPBossUnit_t
 {
@@ -285,7 +280,7 @@ typedef struct effPCPBossUnit_t
     u32 time;
     s32 flags;
     u8 unk7C[0x10];
-    effPCPBossHUnit_t *hunit;
+    evtUnit_t *hunit;
     u8 unk90[0x60];
 } effPCPBossUnit_t;
 
