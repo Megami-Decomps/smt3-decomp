@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mviManager.h"
 #include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -52,17 +53,8 @@ extern s32 dds3WaitMovieEnd(void);
 
 /* The decoder's shared block, also reached as a byte buffer through
  * D_00343E40; only the two frame counters are read here. */
-typedef struct
-{
-    /* 0x00 */ u8 unk_00[0x3A];
-    /* 0x3A */ u8 viewerStep;
-    /* 0x3B */ u8 unk_3B[0x29];
-    /* 0x64 */ s32 frameCount;
-    /* 0x68 */ s32 unk_68;
-    /* 0x6C */ s32 frameIndex;
-} movieDecodeWork_t;
 
-extern movieDecodeWork_t movieDecodeWork asm("D_00343E40");
+
 
 /* Unsized so the reference is absolute, as retail's is. */
 extern sdfDrawTag_t *movieViewerFrame[];

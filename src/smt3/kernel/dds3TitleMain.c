@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mviManager.h"
 #include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
