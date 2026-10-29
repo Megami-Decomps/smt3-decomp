@@ -286,9 +286,9 @@ extern void *dds3EffectDistortionBlurCreate(fldBlurParam_t *pParam);
 
 extern void dds3EffectDelete(void *pData);
 
-extern s32 fldTakaraSlotCount;
+extern struct effNode_t *fldTakaraSlotCount;
 
-extern s32 fldNpcLoadIdx;
+extern struct effNode_t *fldNpcLoadIdx;
 
 extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
@@ -402,7 +402,7 @@ extern u32 fldTakara3Size;
 
 extern void *fldPacFileHandle;
 
-extern void *fldNpcPacData;
+extern struct effResourceHeader_t *fldNpcPacData;
 
 extern void *fldTakaraPacData;
 

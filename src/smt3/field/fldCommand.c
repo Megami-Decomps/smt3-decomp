@@ -401,9 +401,9 @@ extern void *fldNpcBlurHandle;
 
 extern void fldBgmPlay(void);
 
-extern s32 fldTakaraSlotCount;
+extern struct effNode_t *fldTakaraSlotCount;
 
-extern s32 fldNpcLoadIdx;
+extern struct effNode_t *fldNpcLoadIdx;
 
 extern f32 slNextPageDraw_fc;
 

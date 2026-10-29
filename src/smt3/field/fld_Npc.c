@@ -10,6 +10,12 @@
 #include "billboard.h"
 #include "effect.h"
 
+struct effNode_t;
+struct effResourceHeader_t;
+
+extern struct effNode_t *dds3EffectLoad(struct effResourceHeader_t *data);
+extern struct effNode_t *dds3EffectCopy(struct effNode_t *effect);
+
 typedef struct
 {
     dds3Basic_t *object;
@@ -48,7 +54,7 @@ typedef struct
     s32 camera;                /* 0x54 */
     s32 modelMajor;            /* 0x58 */
     s32 modelIndex;            /* 0x5C */
-    u8 unk60[0x10];
+    char name[0x10];
 } fldNpcSlot_t;
 
 typedef struct
@@ -316,7 +322,7 @@ INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLoad);
 extern u8 D_003129D8[];
 
 
-extern s32 fldTakaraSlotCount;
+extern struct effNode_t *fldTakaraSlotCount;
 
 extern void *fldTakaraPacData;
 
@@ -339,10 +345,6 @@ extern const char D_00532710[];
 extern const sdfVector4_t D_005326F0;
 
 extern const sdfVector4_t D_00532700;
-
-extern void *dds3EffectLoad(void *pData);
-
-extern void *dds3EffectCopy(s32 count);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -415,7 +417,7 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
     case 3:
         if (fldTakaraSlotCount == 0) {
             effect = dds3EffectLoad(fldTakaraPacData);
-            fldTakaraSlotCount = (s32)effect;
+            fldTakaraSlotCount = effect;
         } else {
             effect = dds3EffectCopy(fldTakaraSlotCount);
         }
@@ -1299,7 +1301,7 @@ void fldNpcCalc(void)
                 s32 talk = 0;
 
                 if (fldAutoMapSeqTestFlag(1) == 0 && fldEncountTestFlag(0x40) == 0 &&
-                    (fldCheckEveRngN(i) != 0 || fldCamNpcCamChk(&fldModelSlotTable[i].unk60) != 0)) {
+                    (fldCheckEveRngN(i) != 0 || fldCamNpcCamChk(fldModelSlotTable[i].name) != 0)) {
                     if (fldModelSlotTable[i].cntAnmi == 0) {
                         fldSePlay(0x2D);
                         D_0054EEB0 = i;
