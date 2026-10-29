@@ -305,7 +305,7 @@ extern f32 sdfAtan2(f32 aY, f32 aX);
 
 extern f32 nbMakeUnitMoveGetCyDist(nbFormation_t *i_form, nbFormation_t *t_form);
 
-extern s32 fptodp(f32 value);
+extern f64 fptodp(f32 value);
 
 
 
@@ -1757,7 +1757,210 @@ f32 nbMakeUnitMoveGetCyDist(nbFormation_t *i_form, nbFormation_t *t_form)
     return result;
 }
 
+#ifdef NON_MATCHING
+extern void nbMakeUnitMatrix(nbFormation_t *form);
+extern f32 nbCameraGetBossDistance(void);
+extern f32 sdfCos(f32 angle);
+extern f32 sdfAcos(f32 value);
+extern void dds3RotationArc(void);
+extern void Lerp(f32 ratio);
+
+s32 nbMakeUnitMovePacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                         u32 select, s32 movetype, f32 ritu)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *target, *it;
+    sdfVector4_t pos, rotation, axis, rotatedAxis, invokeCenter, targetCenter, center;
+    f32 distance, scale, dot;
+    f64 x, y, z, w;
+    s32 i, targetIndex, count, sameSide, moveFrames, rotate, frames;
+    u32 activeCount, formStat;
+
+    rotate = 0;
+    moveFrames = 100;
+    targetIndex = 0;
+    memset(&axis, 0, sizeof(axis));
+    axis.z = 1.0f;
+    data = nbGetMainProcessData();
+    if (!(form->stat & 0x40)) {
+        printf("formindex = %d\n", form->formindex);
+        for (;;) {}
+    }
+    SDF_VU0_LOADVECTOR(&form->orgrot);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&axis);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&rotatedAxis);
+    count = 0;
+    for (i = 0; i < 16; i++) {
+        if (select & (1U << i)) {
+            count++;
+            targetIndex = i;
+        }
+    }
+    if (count > 0) {
+        if (movetype == 4) count = 1;
+        else if (movetype == 5) count = 2;
+    }
+    if (movetype != 1) {
+        if (movetype > 0 && movetype < 6 && count != 0) {
+            if (count == 1) {
+                sameSide = 0;
+                if (form->formindex < 4) {
+                    if (targetIndex < 4) sameSide = 1;
+                } else if (form->formindex < 14) {
+                    sameSide = (u32)(targetIndex - 4) < 10;
+                }
+                nbMakeUnitMatrix(form);
+                SDF_VU0_STOREVECTOR(&invokeCenter);
+                target = &data->form[targetIndex];
+                nbMakeUnitMatrix(target);
+                SDF_VU0_STOREVECTOR(&targetCenter);
+                if (sameSide) {
+                    SDF_VU0_LOADVECTOR(&invokeCenter);
+                    SDF_VU0_LOADVECTOR_B(&targetCenter);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_SETVECTOR_Y(0.0f);
+                    SDF_VU0_NORMALIZE();
+                    target = &data->form[targetIndex];
+                    scale = target->r * target->scl + form->cr * form->scl;
+                    SDF_VU0_SCALEVECTOR(scale);
+                    SDF_VU0_LOADVECTOR_B(&targetCenter);
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_SETVECTOR_Y(form->orgpos.y);
+                    SDF_VU0_STOREVECTOR(&pos);
+                    SDF_VU0_LOADVECTOR(&targetCenter);
+                    SDF_VU0_LOADVECTOR_B(&invokeCenter);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_SETVECTOR_Y(0.0f);
+                    SDF_VU0_NORMALIZE();
+                    SDF_VU0_STOREVECTOR(&rotation);
+                    moveFrames = 40;
+                } else {
+                    if (movetype == 3) distance = nbMakeUnitMoveGetCyDist(form, target);
+                    else distance = 0.0f;
+                    SDF_VU0_LOADVECTOR(&invokeCenter);
+                    SDF_VU0_LOADVECTOR_B(&targetCenter);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_VECTOR_W_SET_ZERO();
+                    SDF_VU0_SETVECTOR_Y(0.0f);
+                    SDF_VU0_NORMALIZE();
+                    target = &data->form[targetIndex];
+                    scale = target->r * target->scl + form->cr * form->scl;
+                    scale += distance;
+                    SDF_VU0_SCALEVECTOR(scale);
+                    SDF_VU0_LOADVECTOR_B(&targetCenter);
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_SETVECTOR_Y(form->orgpos.y);
+                    SDF_VU0_STOREVECTOR(&pos);
+                    SDF_VU0_COPYVECTOR_A_TO_B();
+                    SDF_VU0_LOADVECTOR(&targetCenter);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_SETVECTOR_Y(0.0f);
+                    SDF_VU0_NORMALIZE();
+                    SDF_VU0_STOREVECTOR(&rotation);
+                    moveFrames = 20;
+                }
+                rotate = 1;
+            }
+            if (count >= 2) {
+                SDF_VU0_LOADIDENTITYVECTOR();
+                distance = nbCameraGetBossDistance() * 0.5f;
+                formStat = form->stat;
+                if (formStat & 0x200) distance = 600.0f - distance;
+                else distance -= 600.0f;
+                SDF_VU0_SETVECTOR_Z(distance);
+                SDF_VU0_VECTOR_W_SET_ZERO();
+                SDF_VU0_STOREVECTOR(&pos);
+                center.x = 0.0f;
+                center.y = 0.0f;
+                center.z = 0.0f;
+                /* Retail leaves this position lane unset; directions use zero. */
+                center.w = 1.0f;
+                SDF_VU0_LOADVECTOR_B(&center);
+                it = data->form;
+                activeCount = 0;
+                for (i = 0; i < 16; i++, it++) {
+                    if ((it->stat & 9) == 9) {
+                        SDF_VU0_LOADVECTOR(&it->orgpos);
+                        SDF_VU0_ADDVECTOR_B_A();
+                        activeCount++;
+                    }
+                }
+                SDF_VU0_STOREVECTOR_B(&center);
+                if (activeCount != 0) {
+                    center.x /= (f32)activeCount;
+                    center.y /= (f32)activeCount;
+                    center.z /= (f32)activeCount;
+                    SDF_VU0_LOADVECTOR(&center);
+                    SDF_VU0_LOADVECTOR_B(&pos);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_SETVECTOR_Y(0.0f);
+                    SDF_VU0_NORMALIZE();
+                    SDF_VU0_VECTOR_W_SET_ZERO();
+                    SDF_VU0_STOREVECTOR(&rotation);
+                } else {
+                    SDF_VU0_LOADIDENTITYVECTOR();
+                    if (formStat & 0x200) SDF_VU0_SETVECTOR_Z(-1.0f);
+                    else SDF_VU0_SETVECTOR_Z(1.0f);
+                }
+                SDF_VU0_STOREVECTOR(&rotation);
+                moveFrames = 20;
+                rotate = 1;
+            }
+            nbAddTargetMoveKoukaPacket(startframe, uniqueid, form->partyindex, &pos, ritu * 0.199999989f);
+            if (rotate) {
+                frames = (s32)((f32)moveFrames * ritu);
+                if (frames >= 101) frames = 100;
+                nbAddRotKoukaPacket(startframe, uniqueid, form->partyindex, &rotation, frames);
+            }
+        }
+    } else if (count != 0) {
+        if (count == 1) {
+            if (form->formindex == targetIndex) return 1;
+            nbMakeUnitMatrix(form);
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            nbMakeUnitMatrix(&data->form[targetIndex]);
+            SDF_VU0_COPYVECTOR_C_TO_B();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_SETVECTOR_Y(0.0f);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(&form->orgrot);
+            ToMatrix();
+            SDF_VU0_LOADVECTOR(&axis);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_INNERPRODUCT(dot);
+            SDF_VU0_STOREVECTOR(&rotatedAxis);
+            if (dot < sdfCos(1.221730352f)) {
+                dds3RotationArc();
+                Lerp(70.0f / sdfAcos(dot));
+                ToMatrix();
+                SDF_VU0_LOADVECTOR(&rotatedAxis);
+                SDF_VU0_APPLYMATRIX();
+                SDF_VU0_STOREVECTOR(&rotation);
+            } else {
+                SDF_VU0_STOREVECTOR_B(&rotation);
+            }
+            moveFrames = 25;
+            rotate = 1;
+        }
+        if (rotate) {
+            frames = (s32)((f32)moveFrames * ritu);
+            if (frames >= 101) frames = 100;
+            x = fptodp(rotation.x);
+            y = fptodp(rotation.y);
+            z = fptodp(rotation.z);
+            w = fptodp(rotation.w);
+            printf("rotv_rot %f, %f, %f, %f\n", x, y, z, w);
+            nbAddRotKoukaPacket(startframe, uniqueid, form->partyindex, &rotation, frames);
+        }
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMovePacket);
+#endif
 
 s32 nbMakeNegoWorkPosPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                             nbFormation_t *target)
