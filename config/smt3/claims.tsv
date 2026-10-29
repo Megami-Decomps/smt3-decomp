@@ -673,3 +673,5 @@ src/smt3/effect/effPCPMisc.c	redthing1	done	2026-10-29	1 fn / 592 B	PiM agent: D
 src/smt3/pb/pbDraw.c	redthing1	done	2026-10-29	1 fn / 808 B	PiM agent: native resource initializer using canonical map work and three-row camera arrays
 src/smt3/pb/pbGame.c	redthing1	done	2026-10-29	0 matches / canonical camera contract	PiM agent: declare actual three-row camera storage and preserve existing row-zero consumer bytes
 src/smt3/interface/itfTestMesManager.c	redthing1	done	2026-10-29	0 matches / declaration cleanup	PiM agent: remove two unused contradictory scalar camera declarations; complete owner unchanged
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 572 B	seven-row registry font rendering with native table lookups and chained handles; owner 105 match, 0 differ
+src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 660 B	physical attack calculation with ordered arithmetic and truthful floating diagnostic promotions; owner 56 match, 0 differ
