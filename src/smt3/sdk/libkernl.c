@@ -426,7 +426,45 @@ INCLUDE_ASM(const s32, "sdk/libkernl", iEnableDmac);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", iDisableDmac);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", topThread);
+typedef struct threadMgrQueue_t {
+    u32 readIndex;
+    u32 writeIndex;
+    u8 commands[512][2];
+} threadMgrQueue_t;
+
+extern s32 threadMgrSema;
+extern s32 WaitSema(s32 sema);
+extern s32 WakeupThread(s32 threadId);
+extern s32 RotateThreadReadyQueue(s32 priority);
+extern s32 SuspendThread(s32 threadId);
+extern void kprintf(const char *format, ...);
+extern const char D_0054BA48[];
+
+void topThread(void *argument)
+{
+    threadMgrQueue_t *queue = argument;
+    u32 index;
+
+    for (;;) {
+        WaitSema(threadMgrSema);
+        index = queue->readIndex & 0x1FF;
+        queue->readIndex = index + 1;
+        switch (queue->commands[index][0]) {
+        case 0:
+            WakeupThread(queue->commands[index][1]);
+            break;
+        case 1:
+            RotateThreadReadyQueue(queue->commands[index][1]);
+            break;
+        case 2:
+            SuspendThread(queue->commands[index][1]);
+            break;
+        default:
+            kprintf(D_0054BA48);
+            break;
+        }
+    }
+}
 
 typedef struct rpcSemaParam {
     s32 count;
@@ -447,11 +485,6 @@ typedef struct kernelThreadParam_t {
     s32 priority;
     u8 opaque[0x18];
 } kernelThreadParam_t;
-typedef struct threadMgrQueue_t {
-    u32 readIndex;
-    u32 writeIndex;
-    u8 commands[512][2];
-} threadMgrQueue_t;
 extern s32 D_0052C2AC __attribute__((section(".data")));
 extern s32 threadMgrSema;
 extern u8 D_0059AD70[0x400];
