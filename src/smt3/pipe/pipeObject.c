@@ -248,11 +248,9 @@ void Initmymdl(void)
     mdlSize = 0;
 }
 
-typedef struct tagPipePathNode {
-    f32 position[3]; u32 opaque0C; f32 direction[3]; u32 opaque1C;
-} tagPipePathNode;
+
 typedef struct tagPipePosTable {
-    sdfMemHandle_t *aHandle; s32 tSize; tagPipePathNode *points; u32 opaque0C;
+    sdfMemHandle_t *aHandle; s32 tSize; tagPipePosData *points; u32 opaque0C;
 } tagPipePosTable;
 extern tagPipePosTable D_00528F58;
 extern void vecTranslate(f32 *, f32 *, f32 *);
@@ -1048,13 +1046,13 @@ void mdlTask(tagPipeObject *objPtr, tagpipeBasic *basicPtr, f32 x, f32 y, f32 z)
     f32 translated[4];
     sdfMatrix4_t matrix;
     f32 radians;
-    tagPipePathNode *node;
-    tagPipePathNode *nextNode;
+    tagPipePosData *node;
+    tagPipePosData *nextNode;
 
     getPosTranslate(objPtr, translated);
     /* Preserve the index-first EE address sum; see
      * docs/levers/addressing-and-types.md. */
-    node = (tagPipePathNode *)((u32)offsetCount * sizeof(tagPipePathNode) + (u32)D_00528F58.points);
+    node = (tagPipePosData *)((u32)offsetCount * sizeof(tagPipePosData) + (u32)D_00528F58.points);
     nextNode = node + 1;
     position[0] = node->direction[0];
     radians = 0x1.1df46ap-6f;

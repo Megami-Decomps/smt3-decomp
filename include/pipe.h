@@ -17,6 +17,13 @@ typedef struct tagPipeObject {
     u16 flags;
 } tagPipeObject;
 
+typedef struct tagPipePosData {
+    f32 position[3];
+    u32 opaque0C;
+    f32 direction[3];
+    u32 opaque1C;
+} tagPipePosData;
+
 typedef struct tagPipeLinkData {
     u16 id;
     s16 partsID;

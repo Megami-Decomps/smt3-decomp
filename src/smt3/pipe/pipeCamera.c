@@ -79,17 +79,12 @@ void getViewPortMatrix(sdfMatrix4_t *matrix)
 /* Shared pipe records: node stride is 0x20; PosTable.points is at +8. */
 
 
-typedef struct tagPipePathNode {
-    f32 position[3];
-    u32 opaque0C;
-    f32 direction[3];
-    u32 opaque1C;
-} tagPipePathNode;
+
 
 typedef struct tagPipePosTable {
     sdfMemHandle_t *aHandle;
     s32 tSize;
-    tagPipePathNode *points;
+    tagPipePosData *points;
     u32 opaque0C;
 } tagPipePosTable;
 
@@ -453,8 +448,8 @@ void CamActionQuake(void)
     if (CameraAction != 0) {
         /* Preserve the index-first EE address sum; see
          * docs/levers/addressing-and-types.md. */
-        tagPipePathNode *node = (tagPipePathNode *)(
-            (u32)offsetCount * sizeof(tagPipePathNode) + (u32)D_00528F58.points);
+        tagPipePosData *node = (tagPipePosData *)(
+            (u32)offsetCount * sizeof(tagPipePosData) + (u32)D_00528F58.points);
         s32 action;
 
         vecSet(vector, node->direction[0], node->direction[1], node->direction[2]);
