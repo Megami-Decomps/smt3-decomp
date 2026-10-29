@@ -125,14 +125,14 @@ void fldTitleMini_Shutdown(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "field/fldTitle", D_00532820);
-
 extern s32 fldTitleMiniState;
 extern s32 fldSnowActive;
 extern s32 fldArea[];
 extern s32 D_0054EFB0;
 extern s32 evtBitCheck(s32 no);
 extern s32 fldTitleMini_Process(dds3ProcessID_t *id);
+
+INCLUDE_RODATA(const s32, "field/fldTitle", D_00532820);
 
 void fldTitleMiniStart(s32 fld)
 {

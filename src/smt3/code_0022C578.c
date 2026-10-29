@@ -1866,14 +1866,14 @@ void cmpSetItemTSL(u16 itemId)
     cmpSetSkillTSL(skill);
 }
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F4F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F500);
-
 extern void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func,
                                  void *data, s32 value, s32 alpha);
 extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
 extern void cmpDrawSkillList();
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053F4F0);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053F500);
 
 void cmpCalcSkill(void)
 {

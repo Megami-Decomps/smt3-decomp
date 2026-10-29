@@ -1491,8 +1491,6 @@ void nbCameraState_SkillCut1_Calc(void)
     nbCameraShot_GroundCollision(&pNbCamera);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbCameraSkill", D_00534A20);
-
 extern char D_00534A20[];
 extern s32 nbCameraHero_Cut2_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
 extern s32 nbCameraDANTE_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
@@ -1504,6 +1502,8 @@ extern void nbCameraShot_InvokeTargetPartyTop2_Set(nbCamera_t *pNbCamera, nbCame
 extern void nbCameraShot_InvokeTargetNear_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
 extern void nbCameraShot_InvokeTargetNearReverse_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
 extern u32 effBTLModelGetGroupNumber(u32 group);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCameraSkill", D_00534A20);
 
 void nbCameraState_SkillCut2_Init(void)
 {

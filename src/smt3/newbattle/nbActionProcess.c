@@ -1619,6 +1619,11 @@ s32 CheckAction_NEGO(nbActionProcessData_t *a)
     return 0;
 }
 
+extern s32 nbGetNakama(datUnitWork_t *work);
+extern void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 rate);
+extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate);
+extern void nbCameraSetTaizi(nbFormation_t *invoke, nbFormation_t *target);
+
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543E20);
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543E38);
@@ -1642,11 +1647,6 @@ INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", jtbl_00543F80);
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543FA8);
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543FB8);
-
-extern s32 nbGetNakama(datUnitWork_t *work);
-extern void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 rate);
-extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate);
-extern void nbCameraSetTaizi(nbFormation_t *invoke, nbFormation_t *target);
 
 void SetAction_NEGORESULT(nbActionProcessData_t *a)
 {

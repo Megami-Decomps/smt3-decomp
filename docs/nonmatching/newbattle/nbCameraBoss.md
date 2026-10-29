@@ -173,3 +173,60 @@ that delay slot, and every word of the tail then sits one position earlier.
 Ruled out: `distance = 1.0f` before, between and after the three component adds
 and the `fovy` store (all six orders of those three statements); computing the
 three sums into float locals and storing them after the `fovy` store.
+
+## nbCameraBoss_Cut2_Init (newbattle/nbCameraBoss, 0x3A8)
+
+179 of 230 words differ at 920 bytes against 936, but the body is right: the
+jump table over model IDs `0xCB` to `0x161`, every arm's skill test and every
+`.lit4` entry line up, and the 179 are almost all branch displacements carried
+by a uniform four-word shift.
+
+Retail leaves a `nop` in four branch delay slots, at `+0x38`, `+0xD0`, `+0xEC`
+and `+0x250`, where the draft fills the slot with the arm's next comparison
+constant. Retail materialises every comparison constant in `$2` and reaches
+the shared `return 0` with `bnel` and the zero in the annulled slot; cc1 gives
+the second constant of each pair `$3`, which makes the `addiu` legal in the
+preceding branch's delay slot and lets `relax_delay_slots` drop the annul bit.
+Both halves follow from one register assignment, so this closes as one change
+or not at all.
+
+Ruled out: `||` against `&&` against nested `if` for the two-constant arms,
+`s32` for `id` and `skill`, four declaration orders, a one-pass `do` block
+around the switch, and renaming `nbCameraBoss_Foru_SIMON_Set`'s definition so
+only the `extern` remains, which is the callee-visibility test and changes
+nothing here.
+
+Confirmed on the way: the jump table's 151 entries decode to the case list
+`0x100`, `0x101`/`0x111`/`0x113`/`0x126`-`0x128`, `0x10D`, `0x11F`, `0x115`,
+`0x146`-`0x148`, `0x120`, `0x124`, `0x103`, `0x123`, `0x102`, `0x125`,
+`0x108`, `0x156`-`0x158`, `0xCB`/`0x161` in that source order; retail calls
+`nbCameraBoss_Sp_JAREIH_Set` for skill `0x99` where the HD rebuild just
+returns 1; and the four pooled constants are `0.55f`, `0.85f`, `0.55f` and
+`0.9f` in code order.
+
+## nbCameraBoss_BSARI_MASEHA_Run (newbattle/nbCameraBoss, 0x440)
+
+204 of 272 words match at the exact 1088-byte size. All eight arms, both
+shared tails, the `.lit4` order and every literal are right; the 68 are a
+one-instruction rotation at the head of each of the three lerp arms, plus the
+float registers and the two frame-address temps that rotation drags with it.
+
+Retail opens each lerp arm with `addiu $3, $29, 0x10`, the address the
+following `SDF_VU0_LOADVECTOR` wants, and only then materialises the arm's
+constants; cc1 schedules that `addiu` last, next to the `lqc2`, which also
+swaps `$2` and `$3` between the two vectors. Nothing else in the arm moves.
+
+Ruled out: `PS2_FLOAT_BITS` after the `LOADVECTOR` pair instead of before it
+(worth 31 words on its own, so that part is settled), the `rate` division
+below the vector stores rather than above them (3 more words), and three
+declaration orders for `mark`, `from`, `to`, `bits`, `type` and `rate`.
+
+Confirmed on the way: the dispatch needs a `u32 type` local, because
+`switch (nbCameraBoss_BSARI_MASEHA_Type)` on the signed extern makes
+`balance_case_nodes` add an `slti` range split that retail does not have, the
+same shape the matching `nbCameraBoss_BSARI_SIMANO_Run` next door uses; the
+blend factor reaches both lerps of an arm through one `PS2_FLOAT_BITS` GPR;
+`nbCameraBoss_BSARI_MASEHA_Frame` is signed, since every frame threshold is
+`slti`; and spimdisasm's ten-digit `.lit4` decimals are each one ULP low for
+ee-as, which truncates toward zero, so the literals have to be spelled from
+the exact float value rounded away from zero.

@@ -402,15 +402,15 @@ docs/levers/control-flow.md	333	$22 jal sh	### Reset a consumed cursor-row local
 docs/levers/control-flow.md	392	slti sltiu	### A shared selection store can need a separate completion block Flow6_32 selects a negotiation candidate after a support-skill message.
 docs/levers/cross-jumping.md	8	lui ori	Where retail computes a value in both arms of an if but converts or stores it once at the join, the source most likely duplicates the whole tail in both arms…
 docs/levers/cross-jumping.md	15	and div nop	The merge stops as soon as one register differs, which is why retail can keep two of three float-to-int conversions inside the arms and share only the third.
-docs/levers/float-literals.md	39	abs.s lh lhu lwc1 mtc1	Where retail loads every field of one struct before storing any of them into another, and the two pointed-to types are different alias sets so the scheduler…
-docs/levers/float-literals.md	54	$28 $gp addiu lui lwc1	The reverse of the $gp row above, on a symbol retail *does* reach through $gp:
-docs/levers/float-literals.md	65	$f20 $f22 add	A **repeated subexpression written out again** is what decides a commutative add.s's operand order when no spelling of the statement reaches it.
-docs/levers/float-literals.md	77	$f12 daddu jal lui lwc1	ee-gcc does not constant-fold fsqrtf of a literal, so a sqrt.s on a constant in the retail text is just fsqrtf(4096.0f) in the source.
-docs/levers/float-literals.md	104		| retail word | exact value | %.8g, which missed | what matched | | --- | --- | --- | --- |
-docs/levers/float-literals.md	106		| 0xc46a8f5b | -938.23992919921875 | -938.23993f | -938.23993f |
-docs/levers/float-literals.md	107		| 0xc3fcef5b | -505.86996459960938 | -505.86996f | -505.86997f |
-docs/levers/float-literals.md	108		| 0x41119998 | 9.0999984741210938 | 9.0999985f | 9.0999985f |
-docs/levers/float-literals.md	109	li lui	| 0x3ecccccc | 0.39999997615814209 | 0.39999998f | 0.39999998f | The shortest round-tripping decimal is the wrong thing to reach for:
+docs/levers/float-literals.md	49	abs.s lh lhu lwc1 mtc1	Where retail loads every field of one struct before storing any of them into another, and the two pointed-to types are different alias sets so the scheduler…
+docs/levers/float-literals.md	64	$28 $gp addiu lui lwc1	The reverse of the $gp row above, on a symbol retail *does* reach through $gp:
+docs/levers/float-literals.md	75	$f20 $f22 add	A **repeated subexpression written out again** is what decides a commutative add.s's operand order when no spelling of the statement reaches it.
+docs/levers/float-literals.md	87	$f12 daddu jal lui lwc1	ee-gcc does not constant-fold fsqrtf of a literal, so a sqrt.s on a constant in the retail text is just fsqrtf(4096.0f) in the source.
+docs/levers/float-literals.md	114		| retail word | exact value | %.8g, which missed | what matched | | --- | --- | --- | --- |
+docs/levers/float-literals.md	116		| 0xc46a8f5b | -938.23992919921875 | -938.23993f | -938.23993f |
+docs/levers/float-literals.md	117		| 0xc3fcef5b | -505.86996459960938 | -505.86996f | -505.86997f |
+docs/levers/float-literals.md	118		| 0x41119998 | 9.0999984741210938 | 9.0999985f | 9.0999985f |
+docs/levers/float-literals.md	119	li lui	| 0x3ecccccc | 0.39999997615814209 | 0.39999998f | 0.39999998f | The shortest round-tripping decimal is the wrong thing to reach for:
 docs/levers/float-registers.md	13	$2 $3 lui mfc1 mtc1	SDF_VU0_SCALEVECTOR against SDF_VU0_SCALEVECTOR_BITS with the float expression passed straight to the "r" operand is a scheduling lever, not only a spelling.
 docs/levers/float-registers.md	24		A word the **next** block needs, read right after a volatile asm and before the stores of the previous block's result, belongs in its own local.
 docs/levers/float-registers.md	31	$f12 $f20 mov.s	A float argument's **position in the argument list** is a pure scheduling lever and nothing else.

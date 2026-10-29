@@ -885,6 +885,13 @@ s32 evtFrameListHead(void *tag, s32 ox, s32 oy)
 INCLUDE_ASM(const s32, "event/evtEventViewerMenu", evtFrameListHead);
 #endif
 
+extern char D_0054FA40[], D_0054FA48[], D_0054FA50[], D_0054FA58[];
+extern char D_0054FA60[], D_0054FA68[], D_0054FA70[], D_0054FA78[];
+extern char D_0054FA80[], D_0054FA88[];
+extern char *evtItemFadeNames[];
+extern char *D_0032CB30[];
+extern void *memcpy(void *, const void *, u32);
+
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C230);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C240);
@@ -900,13 +907,6 @@ INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C280);
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C290);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C2A0);
-
-extern char D_0054FA40[], D_0054FA48[], D_0054FA50[], D_0054FA58[];
-extern char D_0054FA60[], D_0054FA68[], D_0054FA70[], D_0054FA78[];
-extern char D_0054FA80[], D_0054FA88[];
-extern char *evtItemFadeNames[];
-extern char *D_0032CB30[];
-extern void *memcpy(void *, const void *, u32);
 
 void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtViewerKey_t *f)
 {
