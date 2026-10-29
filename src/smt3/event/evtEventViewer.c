@@ -321,7 +321,152 @@ void SortFrameInfo(evtViewerObject_s *parent) {
     }
 }
 
+#ifdef NON_MATCHING
+/* The viewer copies these records through pointers with no alignment guarantee. */
+typedef struct __attribute__((packed)) { dds3Effect_Blur_t value; } evtBlurCopy_t;
+typedef struct __attribute__((packed)) { dds3Effect_PartialMultiBlurParam_t value; } evtMultiBlurCopy_t;
+typedef struct __attribute__((packed)) { dds3Effect_DistortionBlurParam_t value; } evtDistBlurCopy_t;
+typedef struct __attribute__((packed)) { dds3Effect_RippleBlurParam_t value; } evtRippleBlurCopy_t;
+typedef struct __attribute__((packed)) { dds3Effect_Filter_t value; } evtFilterCopy_t;
+typedef struct __attribute__((packed)) { dds3Effect_PartialMultiFilterParam_t value; } evtMultiFilterCopy_t;
+
+extern dds3LightState_t dds3LightParam;
+extern f32 sdfFaceDivSoften, sdfFaceDivBias;
+#endif
+
+#ifdef NON_MATCHING
+extern s32 evtAddNameTable(const char *name);
+extern effBlurTemplate_t *Eve_PartialMultiBlurGetParams(void);
+extern effBlurScatterWork_t *Eve_DistortionBlurGetParams(void);
+extern effBlurScaleWork_t *Eve_RippleBlurGetParams(void);
+extern dds3Effect_Filter_t *Eve_FilterGetParams(void);
+extern dds3Effect_PartialMultiFilter_t *Eve_PartialMultiFilterGetParams(void);
+
+evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber, evtViewerInfo_t *unused)
+{
+    evtFrameInfo_t *frame = sdfChipAllocDirect(0x20);
+    pmdSceneLightTable_t *sceneLight;
+    pmdSceneFogTable_t *sceneFog;
+    sdf3DLight_t *light;
+    void *work;
+    s32 nameIndex;
+
+    memset(frame, 0, 0x20);
+    frame->frame = frameNumber;
+    frame->nameIndex = -1;
+    LinkFrameInfo(track, frame);
+    switch (track->type) {
+    case 2:
+        frame->param.sf[0] = 0.5235987305641174f;
+        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        break;
+    case 1:
+        nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        frame->param.sb[0] = 0;
+        frame->nameIndex = nameIndex;
+        break;
+    case 3:
+        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        frame->param.sb[5] = -1;
+        frame->param.sh[3] = -1;
+        frame->param.sb[0] = -1;
+        frame->param.sh[1] = 0;
+        frame->param.sb[4] = 0;
+        break;
+    case 18:
+        nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        ((volatile evtFrameInfo_t *)frame)->param.sh[0] = 0;
+        frame->nameIndex = nameIndex;
+        frame->param.sh[1] = -1;
+        ((volatile evtFrameInfo_t *)frame)->param.sb[0] = 0;
+        break;
+    case 20:
+    case 21:
+        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        frame->param.sb[7] = -1;
+        frame->param.sb[0] = -1;
+        frame->param.sb[1] = 0;
+        frame->param.sh[1] = 0;
+        frame->param.sb[4] = -1;
+        frame->param.sb[5] = -1;
+        frame->param.sb[6] = -1;
+        break;
+    case 9:
+        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        frame->param.sh[0] = -1;
+        frame->param.sh[1] = 1;
+        break;
+    case 12:
+        frame->param.sh[0] = 1;
+        frame->param.sh[1] = 0x80;
+        frame->param.sw[1] = 0;
+        break;
+    case 22:
+        frame->param.sh[0] = 1;
+        break;
+    case 10:
+        sceneLight = sdfChipAllocDirect(0x30);
+        light = dds3LightParam.parallel[0];
+        SDF_VU0_COPYVECTOR(sceneLight->color, &light->color);
+        SDF_VU0_COPYVECTOR(sceneLight->direction, &light->v);
+        SDF_VU0_COPYVECTOR(sceneLight->ambient, &dds3LightParam.ambient);
+        frame->work = sceneLight;
+        frame->param.sf[0] = sdfFaceDivSoften;
+        frame->param.sf[1] = sdfFaceDivBias;
+        frame->nameIndex = 1;
+        break;
+    case 11:
+        sceneFog = sdfChipAllocDirect(0x20);
+        sceneFog->fog.vec[0] = dds3LightParam.fog.fogMin;
+        sceneFog->fog.color = dds3LightParam.fog.color;
+        frame->work = sceneFog;
+        sceneFog->fog.vec[1] = dds3LightParam.fog.fogMax;
+        sceneFog->fog.vec[2] = dds3LightParam.fog.fogNear;
+        sceneFog->fog.vec[3] = dds3LightParam.fog.fogFar;
+        frame->param.sh[0] = 1;
+        break;
+    case 13:
+        work = sdfChipAllocDirect(0x28);
+        frame->work = work;
+        *(volatile evtBlurCopy_t *)work = *(volatile evtBlurCopy_t *)&evtGetUnityCalcArea()->source;
+        frame->param.sh[0] = 1;
+        break;
+    case 14:
+        work = sdfChipAllocDirect(0x2C);
+        frame->work = work;
+        *(volatile evtMultiBlurCopy_t *)work = *(volatile evtMultiBlurCopy_t *)&Eve_PartialMultiBlurGetParams()->body;
+        frame->param.sh[0] = 1;
+        break;
+    case 15:
+        work = sdfChipAllocDirect(0x2C);
+        frame->work = work;
+        *(volatile evtDistBlurCopy_t *)work = *(volatile evtDistBlurCopy_t *)&Eve_DistortionBlurGetParams()->params;
+        frame->param.sh[0] = 1;
+        break;
+    case 23:
+        work = sdfChipAllocDirect(0x2C);
+        frame->work = work;
+        *(volatile evtRippleBlurCopy_t *)work = *(volatile evtRippleBlurCopy_t *)&Eve_RippleBlurGetParams()->params;
+        frame->param.sh[0] = 1;
+        break;
+    case 16:
+        work = sdfChipAllocDirect(0x18);
+        frame->work = work;
+        *(volatile evtFilterCopy_t *)work = *(volatile evtFilterCopy_t *)Eve_FilterGetParams();
+        frame->param.sh[0] = 1;
+        break;
+    case 17:
+        work = sdfChipAllocDirect(0x24);
+        frame->work = work;
+        *(volatile evtMultiFilterCopy_t *)work = *(volatile evtMultiFilterCopy_t *)&Eve_PartialMultiFilterGetParams()->param;
+        frame->param.sh[0] = 1;
+        break;
+    }
+    return frame;
+}
+#else
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtAddFrameInfo);
+#endif
 
 evtFrameInfo_t *AddFrameInfo2(evtViewerObject_s *group, s32 frame, evtViewerInfo_t *viewer)
 {
@@ -1735,16 +1880,6 @@ s32 EnterEventPos(void)
 }
 
 #ifdef NON_MATCHING
-/* The viewer copies these records through pointers with no alignment guarantee. */
-typedef struct __attribute__((packed)) { dds3Effect_Blur_t value; } evtBlurCopy_t;
-typedef struct __attribute__((packed)) { dds3Effect_PartialMultiBlurParam_t value; } evtMultiBlurCopy_t;
-typedef struct __attribute__((packed)) { dds3Effect_DistortionBlurParam_t value; } evtDistBlurCopy_t;
-typedef struct __attribute__((packed)) { dds3Effect_RippleBlurParam_t value; } evtRippleBlurCopy_t;
-typedef struct __attribute__((packed)) { dds3Effect_Filter_t value; } evtFilterCopy_t;
-typedef struct __attribute__((packed)) { dds3Effect_PartialMultiFilterParam_t value; } evtMultiFilterCopy_t;
-
-extern dds3LightState_t dds3LightParam;
-extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 extern dds3Effect_PartialMultiBlurParam_t *mblurGetParam(void);
 extern dds3Effect_DistortionBlurParam_t *dblurGetParam(void);
 extern dds3Effect_RippleBlurParam_t *rblurGetParam(void);
