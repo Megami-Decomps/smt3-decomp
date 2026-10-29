@@ -124,7 +124,157 @@ void dds3TitleUpdateCursor(void)
     }
 }
 
+#ifdef NON_MATCHING
+extern void rsetOtOfs(s32 offset);
+extern void rsetAlpha(s32 mode);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
+extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                        s32 color, sdfTexHandle_t *texture);
+extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0,
+                      u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2,
+                      u32 r3, u32 g3, u32 b3, u32 a3);
+extern f32 sdfSin(f32 angle);
+extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const u8 *text);
+extern const u8 *D_00342FD0[], *D_00342FD8[], *D_00342FE0[], *D_00342FE8[];
+extern volatile f32 D_0054FD30;
+extern const volatile f32 D_0054E444;
+
+void dds3TitleDrawMenu(void)
+{
+    dds3TitleWork_t *work;
+    s32 frame, cursor, alpha, shift, glow;
+    u32 color;
+    f32 phase;
+
+    rsetOtOfs(0x48);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    rsetAlpha(1);
+    aDrawBoxG(0, 0, 0xBE, 0xBE, 0x25, 0x27, 0x54, 0x3D,
+              0x25, 0x27, 0x54, 0, 0x25, 0x27, 0x54, 0, 0x25, 0x27, 0x54, 0);
+    rsetAlpha(0);
+    DrwSprite2D(0, 0x1D, 0xFC, 0x1C, 2, 3, 0xFC, 0x1C, 0x80808080, titleWork->texHandle[3]);
+    DrwSprite2D(0xFC, 0x1D, 0x104, 0x1C, 0xFD, 3, 1, 0x1C, 0x80808080, titleWork->texHandle[3]);
+    DrwSprite2D(0, 0xC7, 0xFC, 5, 2, 0x22, 0xFC, 5, 0x80808080, titleWork->texHandle[3]);
+    DrwSprite2D(0xFC, 0xC7, 0x104, 5, 0xFD, 0x22, 1, 5, 0x80808080, titleWork->texHandle[3]);
+    frame = titleWork->unk_2C;
+    alpha = (s32)((u32)frame << 7) / 24;
+    aDrawBoxG(0, 0x1C, 0x100, 0x48, 0, 0, 0, alpha,
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, alpha);
+    frame = titleWork->unk_2C;
+    alpha = (s32)((u32)frame * 0x73) / 24;
+    aDrawBoxG(0xC4, 0x1C, 0x13C, 0x48, 0, 0, 0, 0,
+              0, 0, 0, alpha, 0, 0, 0, alpha, 0, 0, 0, 0);
+    work = titleWork;
+    if (work->unk_2C >= 12) {
+        rsetAlpha(1);
+        work = titleWork;
+        if (work->unk_2C < 24) {
+            (void)D_0054FD30;
+            glow = (s32)(sdfSin(D_0054FD30) * 20.0f + 10.0f) + 0x5C;
+            work = titleWork;
+            glow = glow * (work->unk_2C - 12) / 12;
+        } else {
+            phase = D_0054FD30 + D_0054E444;
+            D_0054FD30 = phase;
+            glow = (s32)(sdfSin(phase) * 20.0f + 10.0f) + 0x5C;
+            work = titleWork;
+        }
+        aDrawBoxG(0, work->cursor * 15 + 0x24, 0xDF, 0xB,
+                  0, 0, 0x80, glow, 0x40, 0, 0x80, 1,
+                  0x60, 0, 0x80, 1, 0x20, 0, 0x80, glow);
+        rsetAlpha(0);
+        work = titleWork;
+    }
+    DrwSprite2D(0x11, 0x23, 0x80, 0x17, 2, 0x59, 0x80, 0x17, 0x80808080, work->texHandle[3]);
+    work = titleWork;
+    frame = work->unk_2C;
+    cursor = work->cursor;
+    alpha = (s32)((u32)frame * 8U - 0U);
+    if (alpha < 0) alpha = 0;
+    if (alpha > 0x80) alpha = 0x80;
+    shift = (s32)((u32)frame * 24U - 0x100U);
+    if (shift > 0) shift = 0;
+    color = ((u32)alpha << 24) | 0x808080;
+    if (cursor == 0) {
+        DrwSprite2D(shift + 0x29, 0x47, 0x14, 0x15, 0xDE, 0x69, 0x14, 0x15, color, titleWork->texHandle[3]);
+        DrwSprite2D(shift + 0x39, 0x46, 0x86, 0x17, 0x2, 0x29, 0x86, 0x17, color, titleWork->texHandle[3]);
+    } else {
+        DrwSprite2D(shift + 0x2E, 0x4C, 0xA, 0xB, 0xF4, 0x73, 0xA, 0xB, color, titleWork->texHandle[3]);
+        DrwSprite2D(shift + 0x40, 0x4B, 0x7A, 0xE, 0x2, 0x71, 0x7A, 0xE, color, titleWork->texHandle[3]);
+    }
+    work = titleWork;
+    frame = work->unk_2C;
+    cursor = work->cursor;
+    alpha = (s32)((u32)frame * 8U - 8U);
+    if (alpha < 0) alpha = 0;
+    if (alpha > 0x80) alpha = 0x80;
+    shift = (s32)((u32)frame * 24U - 0x120U);
+    if (shift > 0) shift = 0;
+    color = ((u32)alpha << 24) | 0x808080;
+    if (cursor == 1) {
+        DrwSprite2D(shift + 0x29, 0x65, 0x14, 0x15, 0xDE, 0x69, 0x14, 0x15, color, titleWork->texHandle[3]);
+        DrwSprite2D(shift + 0x39, 0x64, 0x80, 0x17, 0x2, 0x41, 0x80, 0x17, color, titleWork->texHandle[3]);
+    } else {
+        DrwSprite2D(shift + 0x2E, 0x6A, 0xA, 0xB, 0xF4, 0x73, 0xA, 0xB, color, titleWork->texHandle[3]);
+        DrwSprite2D(shift + 0x40, 0x69, 0x73, 0xE, 0x85, 0x42, 0x73, 0xE, color, titleWork->texHandle[3]);
+    }
+    work = titleWork;
+    frame = work->unk_2C;
+    cursor = work->cursor;
+    alpha = (s32)((u32)frame * 8U - 16U);
+    if (alpha < 0) alpha = 0;
+    if (alpha > 0x80) alpha = 0x80;
+    shift = (s32)((u32)frame * 24U - 0x140U);
+    if (shift > 0) shift = 0;
+    color = ((u32)alpha << 24) | 0x808080;
+    if (cursor == 2) {
+        DrwSprite2D(shift + 0x29, 0x83, 0x14, 0x15, 0xDE, 0x69, 0x14, 0x15, color, titleWork->texHandle[3]);
+        DrwSprite2D(shift + 0x39, 0x82, 0x55, 0x17, 0x89, 0x29, 0x55, 0x17, color, titleWork->texHandle[3]);
+    } else {
+        DrwSprite2D(shift + 0x2E, 0x88, 0xA, 0xB, 0xF4, 0x73, 0xA, 0xB, color, titleWork->texHandle[3]);
+        DrwSprite2D(shift + 0x40, 0x87, 0x48, 0xE, 0x85, 0x60, 0x48, 0xE, color, titleWork->texHandle[3]);
+    }
+    work = titleWork;
+    frame = work->unk_2C;
+    cursor = work->cursor;
+    alpha = (s32)((u32)frame * 8U - 16U);
+    if (alpha < 0) alpha = 0;
+    if (alpha > 0x80) alpha = 0x80;
+    shift = (s32)((u32)frame * 24U - 0x160U);
+    if (shift > 0) shift = 0;
+    color = ((u32)alpha << 24) | 0x808080;
+    if (cursor == 3) {
+        DrwSprite2D(shift + 0x2A, 0xA1, 0x80, 0x15, 0, 0x17, 0x80, 0x15, color, work->texHandle[4]);
+    } else {
+        DrwSprite2D(shift + 0x2A, 0xA1, 0x80, 0x15, 0, 0, 0x80, 0x15, color, work->texHandle[4]);
+    }
+    work = titleWork;
+    if (work->unk_2C >= 24) {
+        switch (work->cursor) {
+        case 0:
+            fldKanjiDraw(0x117, 0x28, 0x64618780, D_00342FD8[0]);
+            fldKanjiDraw(0x117, 0x34, 0x64618780, D_00342FD8[1]);
+            break;
+        case 1:
+            fldKanjiDraw(0x117, 0x28, 0x64618780, D_00342FD0[0]);
+            fldKanjiDraw(0x117, 0x34, 0x64618780, D_00342FD0[1]);
+            break;
+        case 2:
+            fldKanjiDraw(0x117, 0x28, 0x64618780, D_00342FE0[0]);
+            fldKanjiDraw(0x117, 0x34, 0x64618780, D_00342FE0[1]);
+            break;
+        case 3:
+            fldKanjiDraw(0x117, 0x28, 0x64618780, D_00342FE8[0]);
+            fldKanjiDraw(0x117, 0x34, 0x64618780, D_00342FE8[1]);
+            fldKanjiDraw(0x117, 0x40, 0x64618780, D_00342FE8[2]);
+            break;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "sound/sndManager", dds3TitleDrawMenu);
+#endif
 
 #ifdef NON_MATCHING
 extern void rsetAlpha(s32 mode);
