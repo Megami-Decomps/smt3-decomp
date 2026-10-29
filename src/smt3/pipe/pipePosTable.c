@@ -9,13 +9,6 @@ extern void (*D_00551828)(void);
 
 typedef struct tagPipePosTable tagPipePosTable;
 
-typedef struct tagPipePartsInfo {
-    u16 partsID;
-    u8 inWay;
-    u8 goWay;
-    tagPipePartsType *data;
-} tagPipePartsInfo;
-
 
 extern tagPipePartsInfo D_00529030[];
 

@@ -522,13 +522,6 @@ typedef struct tagPipeObjectEntry {
     u8 parameters[4];
 } tagPipeObjectEntry;
 
-typedef struct tagPipePartsInfo {
-    u16 partsID;
-    u8 inWay;
-    u8 goWay;
-    tagPipePartsType *data;
-} tagPipePartsInfo;
-
 typedef struct tagPipeLinkData {
     u16 id;
     s16 partsID;

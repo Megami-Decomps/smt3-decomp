@@ -3,6 +3,7 @@
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
+#include "pipe.h"
 
 struct pipeTextureFile_t;
 
@@ -1184,7 +1185,6 @@ void partsDel(tagpipeParts *pPtr)
 
 
 
-struct tagPipePartsInfo { u16 partsID; u8 inWay; u8 goWay; void *extent; };
 extern void FromEuler(f32 x, f32 y, f32 z);
 
 void PipemdlRot(tagpipeBasic *work, tagPipePartsInfo *part)
