@@ -792,7 +792,35 @@ s32 nbCameraBoss_Ongy_BUNSIN_Set(nbCamera_t *pNbCamera)
     return 1;
 }
 
+#ifdef NON_MATCHING
+s32 nbCameraBoss_Ongy_BUNSIN_Run(nbCamera_t *pNbCamera)
+{
+    sdfVector4_t pos;
+    sdfVector4_t center;
+
+    pos.x = -397.3999939f;
+    pos.y = -200.0f;
+    pos.z = -1306.5f;
+    effBTLModelGroupGetSphere(0x200);
+    SDF_VU0_STOREVECTOR(&center);
+    center.y *= 0.5f;
+    SDF_VU0_LOADVECTOR(&center);
+    SDF_VU0_STOREVECTOR(&pNbCamera->target);
+    SDF_VU0_LOADVECTOR_B(&pos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(pNbCamera->distance);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+    pNbCamera->fovy = 0.6981316209f;
+    SetRotateMatrixY(pNbCamera->frame * -0.0021816615f);
+    SDF_VU0_LOADVECTOR(&pNbCamera->direction);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Ongy_BUNSIN_Run);
+#endif
 
 s32 nbCameraBoss_BSARUS_Command_Set(nbCamera_t *pNbCamera)
 {
