@@ -52,10 +52,11 @@ block above, since retail needs one more value live across it.
 
 ## release_movieobj2 (sdf/sdfMovie, 596 bytes)
 
-**1 of 150 words match**, 148 instructions emitted against retail's 150. The
-first third, from the prologue through the audio-start condition and both
-bit-length computations, agrees instruction for instruction up to register
-names; everything after it differs.
+With the shared SDK bit-length scratch contract, **0 of 148 words match**, 592 bytes against native 596. The prior allocator-selected-scratch
+measurement had one matching word among 150; it is superseded. The guarded body still uses
+the old 64-bit TEX0 temporaries and raw packet draft. The notes below describe
+that historical reconstruction, not a proof that the corrected shared primitive
+or ordinary packet source cannot match.
 
 The retail body is ordinary C apart from two `plzcw`/`addi` bit-length idioms,
 which `PS2_WORD_BIT_LENGTH` in `include/ps2asm.h` reproduces exactly and in
