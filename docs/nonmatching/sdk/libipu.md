@@ -23,15 +23,17 @@ while `sceIpuStopDMA`, which masks before testing, pads only three because the
     nop
     bnez $v0, ...
 
-So the original wrote the pad explicitly. Reproducing it needs the house
-inline-asm idiom:
+Under the configured SDK compiler, `ee-gcc 2.9-991111-01`, a single
+`__asm__ volatile ("nop")` barrier makes the compiler add the remaining
+padding: two nops after the masked read, or three after an unmasked signed
+read. The assembled loops above are reproduced by `IPU_POLL_BARRIER`.
+Spelling all three/four nops inside one asm statement overcounts the wait,
+because the compiler still inserts that padding. This is a hardware-read
+barrier, not a general instruction-scheduling lever.
 
-    #define IPU_HAZARD_WAIT() __asm__ volatile ("nop\nnop\nnop\nnop")
-
-and the loop as a `do`/`while` over a local, because the value has to be read
-before the pad and tested after it. This is also why the three unmatched
-functions here looked unreachable before: the shortfall was always a multiple
-of four instructions.
+`sceIpuStopDMA` matches all 228 instruction bytes with that barrier and the
+nine-word DMA snapshot already used by the movie decoder. It saves the final
+IPU control word, but the restart routine does not write that word back.
 
 ## sceIpuSync
 
@@ -42,11 +44,19 @@ The last instruction is block placement: retail branches to the `mode == 1`
 body out of line with `beq`, where the draft falls into it and branches around
 with `bne`.
 
-## sceIpuStopDMA and sceIpuRestartDMA
+## sceIpuRestartDMA
 
-Both carry the same hazard pads, and adding them gets the instruction count
-right but 8 and 12 bytes long respectively: holding the polled word in a local
-costs a register copy retail does not make. Retail tests the loaded register
-directly, so the pad has to sit between the load and its use without a C
-variable in between — which the `do`/`while` form cannot express. These need
-either a different macro shape or the loop written as one asm block.
+74 of 84 words match at the native 336-byte size under the configured 2.9
+compiler. The ten differences are in the prefix registers holding the saved
+bit pointer, its two buffered-qword fields, and the saved input address/count.
+Both waits and all DMA restore operations match after that prefix.
+
+The buffered input count is `((bp >> 8) & 15) + ((bp >> 16) & 3)`; it is
+added to saved QWC and subtracted, times 16, from saved MADR. The output
+channel restores only when both its address and count are nonzero. The input
+channel has the same independent gate after both IPU waits and the bit-position
+command. Field arithmetic is unsigned, and the IPU control polls are signed.
+
+Using the record fields directly instead of a bit-pointer snapshot, and
+separate named buffered-count fields, leave the same ten-word result. Do not
+repeat those controls or change the snapshot contract to force allocation.

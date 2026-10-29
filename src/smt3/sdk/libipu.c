@@ -23,10 +23,12 @@ extern s32 EIntr(void);
  * gcc2_compiled label as its name. */
 extern void gcc2_compiled__7(u32 chcr);
 
-/* The IPU needs four slots after a CTRL read before the value is usable; the
- * test instruction counts as one of them, so a masked read pads three. */
+/* Retained sync draft's explicit wait; see docs/nonmatching/sdk/libipu.md. */
 #define IPU_HAZARD_WAIT() __asm__ volatile ("nop\nnop\nnop\nnop")
-#define IPU_HAZARD_WAIT3() __asm__ volatile ("nop\nnop\nnop")
+/* With the configured 2.9 compiler, this barrier plus its generated padding
+ * leaves four slots after an IPU_CTRL read: three nops after a mask, or four
+ * nops before a signed test. See docs/nonmatching/sdk/libipu.md. */
+#define IPU_POLL_BARRIER() __asm__ volatile ("nop")
 
 void gcc2_compiled__7(u32 chcr)
 {
@@ -46,9 +48,75 @@ void setD4_CHCR(u32 chcr)
     EIntr();
 }
 
-INCLUDE_ASM(const s32, "sdk/libipu", sceIpuStopDMA);
+typedef struct sdfIpuDmaRegs_t {
+    u32 inputAddress;
+    u32 inputTagAddress;
+    u32 inputQwords;
+    u32 inputControl;
+    u32 outputAddress;
+    u32 outputQwords;
+    u32 outputControl;
+    u32 bitPointer;
+    u32 ipuControl;
+} sdfIpuDmaRegs_t;
 
+void sceIpuStopDMA(sdfIpuDmaRegs_t *state)
+{
+    u32 ctrl;
+
+    setD4_CHCR(1);
+    state->inputAddress = D4_MADR;
+    state->inputTagAddress = D4_TADR;
+    state->inputQwords = D4_QWC;
+    state->inputControl = D4_CHCR;
+    do {
+        ctrl = IPU_CTRL & 0xF0;
+        IPU_POLL_BARRIER();
+    } while (ctrl != 0);
+    gcc2_compiled__7(0);
+    state->outputAddress = D3_MADR;
+    state->outputQwords = D3_QWC;
+    state->outputControl = D3_CHCR;
+    state->bitPointer = IPU_BP;
+    state->ipuControl = IPU_CTRL;
+}
+
+/* NON_MATCHING: 74 of 84 words match at the native 336-byte size; the
+ * bit-pointer fields and saved input counts use different prefix registers. */
+#ifdef NON_MATCHING
+void sceIpuRestartDMA(sdfIpuDmaRegs_t *state)
+{
+    u32 bp = state->bitPointer;
+    u32 buffered = ((bp >> 8) & 15) + ((bp >> 16) & 3);
+    u32 bit = bp & 127;
+    u32 qwc = state->inputQwords + buffered;
+    u32 madr = state->inputAddress - (buffered << 4);
+    s32 ctrl;
+
+    if (state->outputAddress != 0 && state->outputQwords != 0) {
+        D3_MADR = state->outputAddress;
+        D3_QWC = state->outputQwords;
+        gcc2_compiled__7(state->outputControl | 0x100);
+    }
+    do {
+        ctrl = IPU_CTRL;
+        IPU_POLL_BARRIER();
+    } while (ctrl < 0);
+    IPU_CMD = bit;
+    do {
+        ctrl = IPU_CTRL;
+        IPU_POLL_BARRIER();
+    } while (ctrl < 0);
+    if (madr != 0 && qwc != 0) {
+        D4_MADR = madr;
+        D4_TADR = state->inputTagAddress;
+        D4_QWC = qwc;
+        setD4_CHCR(state->inputControl | 0x100);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libipu", sceIpuRestartDMA);
+#endif
 
 /* NON_MATCHING: 100 bytes against retail's 104; the mode == 1 arm is emitted
  * inline where retail branches to it out of line. */
