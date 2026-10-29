@@ -3781,7 +3781,33 @@ void campHideInfoWindow(void)
     }
 }
 
+#ifdef NON_MATCHING
+extern s32 cmpAddQuePanelEff(s32 x, s32 y, s32 z, u16 width, u16 height, u8 step,
+                             u8 delay, s32 color0, s32 color1, u8 kind);
+extern void rstCreateBeforeSkillList(s8 heartsId, datUnitWork_t *stock, s8 levelOffset,
+                                     rstSkillInfo_t *info);
+
+void cmpSetStatusStartEff(void)
+{
+    rstSkillInfo_t skills;
+    volatile f32 alpha;
+    s32 i;
+
+    cmpAddQuePanelEff(-0xFA0, 0x8A8, 0xFFFFFF, 0x1EA, 0x19, 0x20, 0,
+                      0x4686E180, 0x4686E100, 6);
+    rstCreateBeforeSkillList((s8)DDS3_GBWK->heartsequip, &DDS3_GBWK->unitwork[0], 0, &skills);
+    if (skills.SkillCnt > 0) {
+        alpha = 48.0f;
+        for (i = 0; i < skills.SkillCnt; i++) {
+            cmpAddQuePanelEff((i / 4) * 0x740 + 0x1010, (i % 4) * 0xB0 + 0x9E0,
+                              0xFFFFFF, 0x72, 0x13, (u8)(u32)alpha, 5,
+                              0x4686E180, 0x4686E100, 6);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetStatusStartEff);
+#endif
 
 extern campInfoWork_t *volatile campDhCalcStateLive asm("campDhCalcState");
 extern campWork_t *volatile campWorkLive asm("campWork");
