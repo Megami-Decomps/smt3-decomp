@@ -1010,7 +1010,78 @@ void func_0013B660(void) {
 void func_0013B668(void) {
 }
 
+#ifdef NON_MATCHING
+extern void rsetOtOfs(s32 offset);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
+extern void rsetAlpha(s32 mode);
+extern void rsetFrameMaskRgbOn(void);
+extern void rsetFrameMaskRgbOff(void);
+extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b, u32 a);
+extern void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 z, u32 r, u32 g, u32 b, u32 a);
+extern void fldDrawPoly3(s32 c0, s32 c1, s32 c2,
+                         f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1,
+                         f32 x2, f32 y2, f32 z2);
+extern void fldDrawPoly4(s32 c0, f32 x0, f32 y0, f32 z0,
+                         s32 c1, f32 x1, f32 y1, f32 z1,
+                         s32 c2, f32 x2, f32 y2, f32 z2,
+                         s32 c3, f32 x3, f32 y3, f32 z3);
+
+void fldHitWM_Mask(void)
+{
+    s32 i;
+    s32 count;
+    collision_s *table;
+    collision_s *face;
+    sdfVector4_t pos;
+
+    rsetOtOfs(0x2F);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    rsetAlpha(1);
+    rsetFrameMaskRgbOn();
+    aDrawBoxF(0, 0, 0x200, 0xE0, 0x80, 0, 0, 0x10);
+
+    pos.w = 1.0f;
+    pos.x = 0.0f;
+    pos.y = 0.0f;
+    pos.z = 0.0f;
+    count = D_0054EDA0;
+    if (count > 0) {
+        table = (collision_s *)fldMatterTable;
+        for (i = 0; i < count; i++) {
+            face = &table[i];
+            if (face->matter != 0) {
+                pos.x = face->matter->poseset->pos.x;
+                pos.y = face->matter->poseset->pos.y;
+                pos.z = face->matter->poseset->pos.z;
+            }
+            if ((face->pFace->attributes & 0x8000) && face->pFace->special[0] != 1 &&
+                face->pFace->special[0] != 3) {
+                if (face->numedges == 3) {
+                    fldDrawPoly3(0x80000000, 0x80000000, 0x80000000,
+                                 face->max[0][0] + pos.x, face->max[0][1] + pos.y, face->max[0][2] + pos.z,
+                                 face->max[1][0] + pos.x, face->max[1][1] + pos.y, face->max[1][2] + pos.z,
+                                 face->max[2][0] + pos.x, face->max[2][1] + pos.y, face->max[2][2] + pos.z);
+                } else {
+                    fldDrawPoly4(0x80000000, face->max[0][0] + pos.x, face->max[0][1] + pos.y, face->max[0][2] + pos.z,
+                                 0x80000000, face->max[1][0] + pos.x, face->max[1][1] + pos.y, face->max[1][2] + pos.z,
+                                 0x80000000, face->max[2][0] + pos.x, face->max[2][1] + pos.y, face->max[2][2] + pos.z,
+                                 0x80000000, face->max[3][0] + pos.x, face->max[3][1] + pos.y, face->max[3][2] + pos.z);
+                }
+                count = D_0054EDA0;
+            }
+            table = (collision_s *)fldMatterTable;
+        }
+    }
+    rsetTest(1, 0, 0x80, 2, 1, 1, 1, 1);
+    rsetAlpha(0);
+    aDrawBoxFZ(0, 0, 0x200, 0xE0, -1, 0x80, 0x80, 0x80, 0x80);
+    rsetFrameMaskRgbOff();
+    rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+    rsetAlpha(0);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldHit", fldHitWM_Mask);
+#endif
 
 f32 HitPositionInside3(s32 mode2D, s32 numE, f32 pos, f32 *r, collision_s *collision) {
     f32 projectedPosition[3];
