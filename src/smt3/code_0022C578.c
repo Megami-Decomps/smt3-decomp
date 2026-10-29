@@ -2518,7 +2518,48 @@ void campSkillTargetIsSelf(u16 skillId, s8 value)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow);
+void campDrawStockRow(s8 mode)
+{
+    u8 stockIndex = (u8)cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
+
+    if (mode == 0) {
+        campWork->drawPhase = 1;
+        switch (campWork->previousPhase) {
+        case 3:
+            switch (campWork->page[1].cursor.unk_22 + (u8)campWork->page[1].cursor.unk_24) {
+            case 0:
+                campDrawText(0xD, 0);
+                break;
+            case 1:
+                campDrawText(0xE, 0);
+                break;
+            case 2:
+                campDrawText(0xF, 0);
+                break;
+            }
+            break;
+        case 2:
+            campDrawText(5, 0);
+            break;
+        }
+    } else {
+        switch (campWork->previousPhase) {
+        case 2:
+            campSkillTargetIsSelf(cmbGlobalWork->party[stockIndex].unit.skill[
+                campWork->itemCursor + campWork->itemScroll], 3);
+            campDrawText(6, 0);
+            break;
+        case 1:
+            campSkillTargetIsSelf(datItemTable[campWork->itemId[
+                campWork->itemCursor + campWork->itemScroll]].skill, 5);
+            campDrawText(6, 0);
+            break;
+        case 3:
+            campWork->drawPhase = 3;
+            break;
+        }
+    }
+}
 
 void campDrawSetPhase(void)
 {

@@ -1864,3 +1864,11 @@ $16. Splitting the input and adjusted category produces separate $22/$16
 allocations and 34 instruction differences at the same 572-byte size. Both
 traces pass hooked/unhooked and dump/plain output parity. The complete owner
 checks 36 match / 0 differ.
+
+- Use the existing nested save-work view for a selected unit's skill. In
+  `campDrawStockRow`, `cmbGlobalWork->party[index].unit.skill[ordinal]`
+  lets cc1 combine the 236-byte unit stride and two-byte skill stride into
+  the native halfword-scaled address. Casting `DDS3_GBWK + 0xA54` to a unit
+  pointer instead keeps the two index scalings separate and leaves 22 of
+  128 words different at the same 512-byte size. The existing record view
+  matches all 128 words; no new alias, padding or register tie is needed.

@@ -133,6 +133,11 @@ at the top; `NULL` against `0` for the random stream; the second loop as a
 `param->delayStep` into a local and deriving `count` from the slot pointer are
 both far worse (78 and 80 words), which confirms the loop body is right.
 
+After recovering the complete 16-byte parameter record, replacing the generic
+copy with `work->param = *param` still leaves 71 of 90 words matching at the
+360-byte size. Typed aggregate assignment does not close this
+allocation residual either.
+
 ## effPCPBossBUNSINDrawPoly2 (effect/effPCPBoss, 468 bytes)
 
 108 of 117 words match, at the exact 468-byte size.

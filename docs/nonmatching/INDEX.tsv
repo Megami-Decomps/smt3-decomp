@@ -74,8 +74,8 @@ effPCP_BED_Create	effect/effPCPBoss	248 bytes	33 of 63 words match	docs/nonmatch
 effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	71 of 75 words match	docs/nonmatching/effect/effPCPBoss.md	55
 effPCPBossMETATOBeamDraw	effect/effPCPBoss	0x25C	7 of 151 words differ	docs/nonmatching/effect/effPCPBoss.md	73
 effPCPDANTE_Damage_Create	effect/effPCPBoss	360 bytes	71 of 90 words match	docs/nonmatching/effect/effPCPBoss.md	102
-effPCPBossBUNSINDrawPoly2	effect/effPCPBoss	468 bytes	108 of 117 words match	docs/nonmatching/effect/effPCPBoss.md	136
-effPCPBossKAGUInvokeDraw	effect/effPCPBoss	0x2E0	181 of 184 words match	docs/nonmatching/effect/effPCPBoss.md	166
+effPCPBossBUNSINDrawPoly2	effect/effPCPBoss	468 bytes	108 of 117 words match	docs/nonmatching/effect/effPCPBoss.md	141
+effPCPBossKAGUInvokeDraw	effect/effPCPBoss	0x2E0	181 of 184 words match	docs/nonmatching/effect/effPCPBoss.md	171
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790	462 of 484 words match	docs/nonmatching/effect/parManager.md	5
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/nonmatching/effect/parManager.md	35
 evtEventViewerProcess3	event/evtEventViewer	0x16C	88 of 91 words match	docs/nonmatching/event/evtEventViewer.md	5
