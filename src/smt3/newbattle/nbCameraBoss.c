@@ -463,7 +463,35 @@ void nbCameraBoss_Foru_E913_Set(void)
     pNbCamera.frame = 0;
 }
 
+#ifdef NON_MATCHING
+extern sdfVector4_t D_003259C0;
+extern sdfVector4_t D_003259D0;
+extern sdfVector4_t D_003259E0;
+extern sdfVector4_t D_003259F0;
+
+void nbCameraBoss_Foru_E913_Run(void)
+{
+    u32 frame = Foru_E913_Frame;
+    f32 rate = (s32)frame / 190.0f;
+
+    if (rate > 1.0f) {
+        rate = 1.0f;
+    }
+    SDF_VU0_LOADVECTOR(&D_003259C0);
+    SDF_VU0_LOADVECTOR_B(&D_003259E0);
+    VU0_LERP_VF10_VF11(rate);
+    SDF_VU0_STOREVECTOR(&pNbCamera.target);
+    SDF_VU0_LOADVECTOR(&D_003259D0);
+    SDF_VU0_LOADVECTOR_B(&D_003259F0);
+    VU0_LERP_VF10_VF11(rate);
+    SDF_VU0_STOREVECTOR(&pNbCamera.direction);
+    pNbCamera.distance = 1.0f;
+    pNbCamera.fovy = 0.6981316209f;
+    Foru_E913_Frame = frame + 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Foru_E913_Run);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Sp_MURET2_Set);
 
