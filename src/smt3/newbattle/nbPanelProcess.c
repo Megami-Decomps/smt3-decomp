@@ -957,7 +957,82 @@ void nbPanelPolygonScaleDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, f3
     ot->regFunc(ot, tag);
 }
 
+#ifdef NON_MATCHING
+#include "fpu.h"
+
+extern sdfGrOt_t D_002F67F8;
+extern void sdfPrimLinkG3(sdfDrawTag_t *tag, s32 prim, s32 x0, s32 y0, s32 color0,
+                          s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2,
+                          s32 z, s32 (*allocator)(s32));
+
+void nbPanelPolygonFlashDraw(s32 x, s32 y, s32 offsetX, s32 offsetY,
+                             s32 width, s32 height, u32 color0, u32 color1)
+{
+    s32 centerXi = (u32)x + (u32)offsetX;
+    s32 centerYi = (u32)y + (u32)offsetY;
+    f32 centerX = (f32)centerXi;
+    f32 centerY = (f32)centerYi;
+    s32 halfWidth = width >> 1;
+    s32 halfHeight = height >> 1;
+    f32 rootHeight = fsqrtf((f32)halfHeight);
+    sdfDrawTag_t *tag;
+    f32 ratio;
+    f32 step;
+    f32 t;
+    f32 previousX;
+    f32 previousUpperY;
+    f32 previousLowerY;
+    u32 firstColor;
+    u32 secondColor;
+    s32 i;
+
+    tag = dds3FontReqAllocDrawTag();
+    firstColor = effMagaCylinderCalcColor(color0, nbPanelBaseABGR);
+    ratio = (f32)halfWidth / rootHeight;
+    secondColor = effMagaCylinderCalcColor(color1, nbPanelBaseABGR);
+    step = -((rootHeight + rootHeight) / 40.0f);
+    t = rootHeight + step;
+    previousX = centerX + (f32)halfWidth;
+    previousUpperY = centerY;
+    previousLowerY = centerY;
+
+    for (i = 0; i < 40; i++) {
+        s32 oldGSX = ((u32)(s32)previousX << 4) + 0x7000;
+        s32 oldGSUpperY = ((u32)(s32)previousUpperY << 3) + 0x7900;
+        f32 curve = (f32)halfHeight - t * t;
+        f32 nextX = centerX + t * ratio;
+        f32 upperY = centerY + curve;
+        f32 lowerY = centerY - curve;
+        s32 nextGSX = ((u32)(s32)nextX << 4) + 0x7000;
+        s32 nextGSUpperY = ((u32)(s32)upperY << 3) + 0x7900;
+        s32 nextGSLowerY;
+        s32 oldGSLowerY;
+
+        previousX = nextX;
+        previousUpperY = upperY;
+        sdfPrimLinkG3(tag, 0x14C,
+                      ((u32)centerXi << 4) + 0x7000, ((u32)centerYi << 3) + 0x7900, (s32)firstColor,
+                      oldGSX, oldGSUpperY, (s32)secondColor,
+                      nextGSX, nextGSUpperY, (s32)secondColor,
+                      -1, 0);
+        oldGSLowerY = ((u32)(s32)previousLowerY << 3) + 0x7900;
+        previousLowerY = lowerY;
+        nextGSLowerY = ((u32)(s32)lowerY << 3) + 0x7900;
+        sdfPrimLinkG3(tag, 0x14C,
+                      ((u32)centerXi << 4) + 0x7000, ((u32)centerYi << 3) + 0x7900, (s32)firstColor,
+                      oldGSX, oldGSLowerY, (s32)secondColor,
+                      nextGSX, nextGSLowerY, (s32)secondColor,
+                      -1, 0);
+        if (i < 39) {
+            t += step;
+        }
+    }
+
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPolygonFlashDraw);
+#endif
 
 void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *p)
 {
