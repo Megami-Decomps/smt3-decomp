@@ -9,9 +9,9 @@ typedef struct effDebugMenuItem_t {
     u8 type;
     u8 pad5[3];
     void *value;
-    void *value2;
-    s32 unk16;
-    s32 unk20;
+    union { void *value2; s32 minValue; };
+    s32 maxValue;
+    s32 step;
 } effDebugMenuItem_t;
 
 /* Shared by effect setup and the interactive editor. Setup copies source to
