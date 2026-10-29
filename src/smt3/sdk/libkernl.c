@@ -797,7 +797,69 @@ sifRpcServerData_t *sceSifGetNextRequest(sifRpcDataQueue_t *queue)
     return request;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifExecRequest);
+/* DMA descriptor words: source, destination, byte count, attributes. */
+typedef u32 sifDmaTransfer_t[4];
+
+extern s32 sceSifSetDma(sifDmaTransfer_t *transfers, s32 count);
+extern void sceSifWriteBackDCache(void *address, s32 size);
+
+void sceSifExecRequest(sifRpcServerData_t *server)
+{
+    sifDmaTransfer_t transfers[2];
+    rpcPacket *packet;
+    void *reply;
+    s32 replySize = 0;
+    s32 count;
+    s32 status;
+    s32 delay;
+
+    reply = server->handler(server->rpcNumber, server->buffer, server->size);
+    if (reply != NULL) {
+        replySize = server->receiveSize;
+    }
+    if (server->size > 0) {
+        sceSifWriteBackDCache(server->buffer, server->size);
+    }
+    if (replySize > 0) {
+        sceSifWriteBackDCache(reply, replySize);
+    }
+    DIntr();
+    if (server->requestId & 4) {
+        packet = _sceRpcGetFPacket2(&D_0059D440, (u32)server->requestId >> 16);
+    } else {
+        packet = _sceRpcGetFPacket(&D_0059D440);
+    }
+    EIntr();
+    packet->w[8] = 0x8000000A;
+    packet->w[7] = (u32)server->client;
+    if (server->mode != 0) {
+        while (sceSifSendCmd(0x80000008, packet, 0x40, reply, server->receiveBuffer, replySize) == 0) {
+        }
+        return;
+    }
+    packet->w[6] = 0;
+    count = 0;
+    packet->w[4] = 0;
+    if (replySize > 0) {
+        transfers[0][0] = (u32)reply;
+        transfers[0][1] = (u32)server->receiveBuffer;
+        transfers[0][2] = replySize;
+        transfers[0][3] = 0;
+        count++;
+    }
+    transfers[count][0] = (u32)packet;
+    transfers[count][1] = (u32)server->packetAddress;
+    transfers[count][2] = 0x40;
+    transfers[count][3] = 0;
+    count++;
+    do {
+        status = sceSifSetDma(transfers, count);
+        if (status == 0) {
+            for (delay = 0x100000; delay != -1; delay--) {
+            }
+        }
+    } while (status == 0);
+}
 
 extern void sceSifExecRequest(sifRpcServerData_t *request);
 extern s32 SleepThread(void);

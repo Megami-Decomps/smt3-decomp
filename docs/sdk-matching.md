@@ -354,3 +354,22 @@ installed. Dispatch requires a nonnull callback and a clear guard.
 The HDD consumer uses that same function-pointer/user-pointer interface, with
 its semaphore ID carried as the user argument. Updating its placeholder
 declaration and handler parameter preserves all three existing HDD functions.
+
+## Matched RPC request execution
+
+`sceSifExecRequest` matches all 452 instruction bytes. It calls the registered
+handler, retains a reply length only for a nonnull result, writes back positive
+request/reply spans, and selects a forwarding packet under disabled interrupts.
+Command mode retries the send immediately. DMA mode clears the native packet
+fields and submits an optional reply descriptor followed by the packet descriptor.
+Only a failed DMA submission runs the native countdown before retrying.
+
+Each DMA descriptor is four wire words: source address, destination address,
+byte count and attributes. A two-element array of four-word records reproduces
+the native field-address calculations. A C structure of four named fields has
+the same 16-byte extent but changes scheduling and saved-register allocation
+(77 of 113 words match); a flattened eight-word array emits 468 bytes instead
+of 452. The ordinary empty signed countdown from `0x100000` to `-1` naturally
+emits the four NOPs between decrement and comparison with the configured 2.9
+compiler. No inline assembly or volatile counter is needed. The complete
+kernel unit checks 25 match / 0 differ at this qualification.
