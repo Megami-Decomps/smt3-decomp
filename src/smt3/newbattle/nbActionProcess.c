@@ -2553,7 +2553,77 @@ INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
 
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAction_CHECK1);
 
+#ifdef NON_MATCHING
+extern s8 dds3PadButtonState[];
+extern void nbPanelAnalyzeEnd(void);
+extern void nbOnOffKoukaPacketFlag(s32 type, u32 flag, s32 on);
+extern void nbUpdateOrder(void);
+extern s32 CheckInotiNego(nbActionProcessData_t *a);
+extern void datClearCommMemory(datUnitWork_t *work);
+extern char D_00544058[];
+
+s32 CheckAction_CHECK1(nbActionProcessData_t *a)
+{
+    datUnitWork_t *work;
+
+    if (a->stat & 0x10) {
+        if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x23] < 0) {
+            a->stat &= ~0x10;
+            nbPanelAnalyzeEnd();
+            a->packettime = 21;
+            nbOnOffKoukaPacketFlag(14, 2, 0);
+        } else {
+            nbOnOffKoukaPacketFlag(14, 2, 1);
+        }
+        return 0;
+    }
+    if (a->packettime >= 16) {
+        a->packettime--;
+        return 0;
+    }
+    nbUpdateOrder();
+    if (CheckTimeListDead(a, a->form->formindex) == 0) {
+        CheckInotiNego(a);
+    }
+    if (CheckTimeListDead(a, a->form->formindex) == 0) {
+        CheckBinjoNego(a);
+    }
+    if (CheckTimeListDead(a, a->form->formindex) == 0 && a->form->motendtype == 3) {
+        a->form->stat |= 0x4000;
+    }
+    CheckDeadScript(a);
+    work = nbGetUnitWorkPointer(a->data, a->party);
+    if (work == NULL) {
+        a->data->prevflag = 0;
+        a->data->previndex = 0;
+        a->data->prevcommand = 0;
+        a->data->prevcommind = 0;
+    } else {
+        a->data->previndex = a->partyindex;
+        a->data->prevcommand = work->nowcommand;
+        a->data->prevcommind = work->nowindex;
+        printf(D_00544058, work->nowindex);
+        a->data->prevflag = 0;
+        if (a->stat & 8) {
+            a->data->prevflag = 1;
+        }
+        if (work->nowcommand == 0 || work->nowcommand == 3 ||
+            (work->nowcommand == 1 && work->nowindex != 0x31 && work->nowindex != 0x32 &&
+             (work->nowindex < 0xA4 || work->nowindex > 0xA6) && work->nowindex != 0xF7)) {
+            work->prevcommand = work->nowcommand;
+            work->prevtform = work->nowtform;
+            work->previndex = work->nowindex;
+            work->prevtarea = work->nowtarea;
+        } else if (work->nowcommand != 1 || work->nowindex == 0x31 || work->nowindex == 0x32) {
+            datClearCommMemory(work);
+        }
+    }
+    SetNextActionSeq(a, 20);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_CHECK1);
+#endif
 
 void SetAction_CHECK3(void) {
 }
