@@ -1011,7 +1011,105 @@ void RunFrameUnit(evtViewerObject_s *track, s32 nowFrame)
 INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrameUnit);
 #endif
 
+extern void RunFrameUnit(evtViewerObject_s *track, s32 nowFrame);
+extern void RunFrame2(evtViewerObject_s *track, evtFrameInfo_t *next,
+                      evtFrameInfo_t *previous, s32 nowFrame, s32 *nearestFrame);
+extern evtViewerObject_s *evt_camera;
+extern s8 dds3ScreenBlurFlag;
+
+#ifdef NON_MATCHING
+void evtRunFrame(s32 nowFrame)
+{
+    evtViewerObject_s *track;
+    evtFrameInfo_t *frame;
+    evtFrameInfo_t *next;
+    evtFrameInfo_t *previous;
+    s32 length;
+    s32 endFrame;
+    s32 nearestFrame = 10000;
+
+    viewerinfo->drawblur2 = 0;
+    track = viewerinfo->firstobjinfo;
+    viewerinfo->drawmblur = 0;
+    viewerinfo->filter = 0;
+    viewerinfo->flags &= ~6;
+    viewerinfo->drawmfilter = 0;
+    viewerinfo->drawdblur = 0;
+    viewerinfo->drawrblur = 0;
+    for (; track != NULL; track = track->next) {
+        if (track->type == 1) {
+            RunFrameUnit(track, nowFrame);
+            continue;
+        }
+        for (frame = track->p; frame != NULL; frame = frame->next) {
+            switch (track->type) {
+            case 3:
+            case 20:
+            case 21:
+                endFrame = (s16)frame->param.sh[1];
+                if (endFrame == 0) {
+                    length = viewerinfo->totalframe - frame->frame;
+                } else {
+                    length = endFrame - frame->frame;
+                    if (length < 0) length = 0;
+                }
+                break;
+            case 18:
+                endFrame = (s16)frame->param.sh[0];
+                if (endFrame == 0) {
+                    length = viewerinfo->totalframe - frame->frame;
+                } else {
+                    length = endFrame - frame->frame;
+                    if (length < 0) length = 0;
+                }
+                break;
+            case 9:
+                for (next = frame->next; next != NULL; next = next->next) {
+                    if ((s16)next->param.sh[0] == (s16)frame->param.sh[0]) break;
+                }
+                if (next != NULL) {
+                    length = next->frame - frame->frame;
+                } else {
+                    length = viewerinfo->totalframe - frame->frame;
+                }
+                break;
+            default:
+                length = frame->index;
+                break;
+            }
+            if ((length == 0 && nowFrame == frame->frame) ||
+                (length > 0 && nowFrame >= frame->frame && nowFrame < frame->frame + length)) {
+                RunFrame1(track, frame, nowFrame);
+            } else {
+                OutFrame1(track, frame);
+            }
+        }
+    }
+    track = viewerinfo->firstobjinfo;
+    evt_camera = NULL;
+    for (; track != NULL; track = track->next) {
+        for (frame = track->p; frame != NULL && nowFrame >= frame->frame; frame = frame->next) {
+        }
+        previous = frame != NULL ? frame->prev : track->lastChild;
+        RunFrame2(track, frame, previous, nowFrame, &nearestFrame);
+    }
+    if (evt_camera != NULL) {
+        viewerinfo->gamecamera = evt_camera->unitHandle;
+        SetActiveCamera();
+    }
+    RunFrame3(nowFrame);
+    if (viewerinfo->flags & 1) {
+        if (!(viewerinfo->flags & 2)) {
+            dds3StopQuake();
+        }
+        if (!(viewerinfo->flags & 4)) {
+            dds3ScreenBlurFlag = 0;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtRunFrame);
+#endif
 
 void DrawActiveCameraName(void)
 {
