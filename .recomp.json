@@ -27,5 +27,5 @@
     "VU1 microcode matching"
   ],
   "tags": ["atlus", "sdf-engine", "mips", "ee-gcc"],
-  "notes": "Matching build: the linked ELF is byte-identical to retail SLUS_209.11, reproduced from a clean tree. 5,363 of 9,694 functions are in C (593,740 of 1,976,292 code bytes); the rest are assembly fallbacks. Names and types come from SMT3 HD symbol recovery. Same engine as Digital Devil Saga 1 and 2, so dds-decomp's compiler findings carry over. This is analysis and documentation, not a port: it produces the original executable, not a playable build."
+  "notes": "Matching build: the linked ELF is byte-identical to retail SLUS_209.11. The progress site reports current, verified compiler-owned game-code coverage separately from SDK, assembly fallbacks and non-matching C. Names and types come from SMT3 HD symbol recovery. Same engine as Digital Devil Saga 1 and 2, so dds-decomp compiler findings and source help reconstruct counterparts. The build reproduces the original executable."
 }

@@ -1,28 +1,32 @@
 # Porting dds-decomp's C into smt3
 
-DDS1 and DDS2 run on the same sdf engine as SMT3, and
-[dds-decomp](https://github.com/Megami-Decomps/dds-decomp) has most of that engine
-in C already: 9343 of the 9566 functions in its main `.text` are written out, with
-145 still `INCLUDE_ASM`. SMT3 has 9698 functions and 6930 of them are still
-`INCLUDE_ASM`. The question this doc answers is how much of that remaining work
-dds-decomp's C can serve, and how to use it without letting a guess into the build.
+DDS1 and DDS2 run on the same sdf engine as SMT3. Their reconstructed C in
+[dds-decomp](https://github.com/Megami-Decomps/dds-decomp) is useful evidence
+for SMT3's remaining assembly fallbacks. Check the current
+[progress report](progress.md) for coverage; the measurements below are dated
+snapshots of the original reuse analysis.
 
-`tools/dds_reuse.py` produces the numbers. It reads only source: this repo's
-`INCLUDE_ASM` lists and split asm, and dds-decomp's `.c` files and `asm/` tree. No
-DDS1 binary is involved, which is the main limit (see Limits below).
+`tools/dds_reuse.py` reads source, split assembly and symbol tables. It can
+find candidate counterparts without a DDS executable, using retail sizes,
+call counts and shared literals. Its confidence describes a pairing, not
+whether donor C matches SMT3.
 
-## Why names do not work
+## Names and counterparts
 
-dds-decomp's symbols are its own recovered names, not the original ones. Exactly 11
-function names are shared between the two trees, so name matching finds nothing.
-The sdfMat example from the table below is typical: smt3's `sdfTexListAdd` is
-dds-decomp's `sdfAppendResourceListItem`, and smt3's `sdfMatInitSystem` is
-`sdfRegisterResourceQueueCallbacks`. Pairing has to go through addresses or code
-shape.
+Both projects now use many original names recovered from SMT3 HD. The early
+observation that only 11 function names agreed is obsolete. A shared original
+name is a useful starting point; compare the native assembly before copying
+a body, because layouts, signatures and behaviour can differ between games.
+See [Names](names.md) for the provenance of SMT3's names.
 
-Unit names are the one exception that does carry over, because
-`config/smt3/tu_candidates.tsv` already holds translation unit names recovered on
-the DDS side. They are used as a check on the alignment, not as an input to it.
+Older recovered names also differ: historical pairings called
+`sdfTexListAdd` / `sdfMatInitSystem` on this side were named
+`sdfAppendResourceListItem` / `sdfRegisterResourceQueueCallbacks` in DDS.
+Use the current symbol tables rather than assuming those spellings persist.
+
+Unit names and order help locate counterparts, but do not prove original
+file boundaries. Literal strings and the code itself are stronger evidence
+for an individual pairing.
 
 ## Method
 
@@ -123,9 +127,8 @@ function for function in the same order. 23 of 29 functions came out of it,
 donor unit also tends to mean a shared type or helper, which is what makes the
 rest of the family cheap once the first body is out.
 
-Two agents independently reported the HD reconstruction ([Names](names.md)) as
-more useful than the per-function pairings, and it is what names the original
-translation unit in the first place.
+The HD reconstruction ([Names](names.md)) also supplies original names and
+source-file candidates that help locate the donor.
 
 `build/dds_reuse.tsv` carries a row per function, not per fallback. Filter on
 `smt3_state == "asm"` before counting anything: a tally over every row counts work
@@ -156,11 +159,10 @@ games by a field offset, an extra argument or an inlined call.
 
 ## Limits
 
-- **No DDS1 ELF and no DDS1 IDB in this session.** Every pair above rests on sizes,
-  call counts and literals. With a DDS1 binary, `tools/pair_dds1.py` can hash each
-  function with register and immediate fields masked out and pair on the hash, which
-  is near-proof per function and would collapse the medium and low tiers into either
-  high or none. That is the single thing that would unblock byte-level pairing.
+- **The historical measurement did not use a DDS1 ELF.** The pairs above rest
+  on sizes, call counts and literals. With a locally supplied DDS1 executable,
+  `tools/pair_dds1.py` can compare masked instruction hashes. Treat that as
+  stronger corroboration, then check operands and behaviour against both binaries.
 - **Donor sizes are retail sizes.** dds-decomp's C is verified byte-identical for
   those functions, so a donor size equal to an smt3 size is meaningful. But a size
   match across two games is still weaker than a masked-hash match.
@@ -189,8 +191,8 @@ is a hint about structure, never proof.
    recovered names or its local typedefs wholesale; they are a different game's
    recovery and would spread names this repo has not earned.
 5. Verify. `python tools/check_unit.py <file>` must report 0 differ, and a full
-   `ninja` must end on `check config/smt3/checksum.sha1`. Anything that will not
-   match goes back to `INCLUDE_ASM` in address order.
+   `ninja` must end on `check config/smt3/checksum.sha1`. Non-matching C can remain behind `#ifdef NON_MATCHING`, with the original
+   `INCLUDE_ASM` fallback in its `#else` branch, in address order.
 
 Families pay off far better than single functions. The sdf motion batch landed 36
 functions, and most of them came in groups that share one body: 11 node generators

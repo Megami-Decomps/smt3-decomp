@@ -130,7 +130,7 @@ retail. Objdiff answers "does this C emit the retail instructions for this
 function in isolation". Only the checksum build answers "do the retail bytes at
 this address come from C".
 
-## Measured on 2026-10-28
+## Measured on 2026-10-28 (`15347d1e`)
 
 The full build reproduced retail SHA-1
 `5facfbf7916836613449c922e26a4ec412207b32`, and `ninja report` verified the
@@ -138,13 +138,13 @@ following linked-image ownership:
 
 | Measure | Game code (293 units) | Whole binary (315 units) |
 |---|---|---|
-| Code bytes matched | 985,208 / 1,851,268 (53.218%) | 1,003,620 / 2,036,072 (49.292%) |
-| Functions matched | 7,456 / 9,022 (82.642%) | 7,614 / 9,699 (78.503%) |
+| Code bytes matched | 1,320,380 / 1,851,228 (71.325%) | 1,340,236 / 2,036,032 (65.826%) |
+| Functions matched | 8,373 / 9,045 (92.570%) | 8,542 / 9,722 (87.863%) |
 
 `python tools/progress.py smt3` reports the same game-code source coverage:
-7,456 functions and 985,208 bytes. Its inventory excludes `src/smt3/sdk/`,
-matching the primary report's scope. Of 1,566 game functions still assembled,
-261 have a non-matching draft, accounting for 96,960 of 866,060 remaining
+8,373 functions and 1,320,380 bytes. Its inventory excludes `src/smt3/sdk/`,
+matching the primary report's scope. Of 672 game functions still assembled,
+245 have non-matching C, accounting for 109,808 of 530,848 remaining
 bytes. Those drafts earn zero credit.
 
 The whole-binary source inventory is not a substitute for the ownership
@@ -154,7 +154,7 @@ outside the game-code denominator in either case.
 
 | Excluded category | Units | Code bytes | Matched code bytes |
 |---|---|---|---|
-| `sdk` | 12 | 125,024 | 18,412 |
+| `sdk` | 12 | 125,024 | 19,856 |
 | `handwritten` | 1 | 468 | 0 |
 | `vu1` | 2 | 59,312 | 0 in the EE ownership report |
 | `data` | 7 | 0 | n/a |
