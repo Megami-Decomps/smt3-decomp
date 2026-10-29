@@ -134,38 +134,61 @@ Ruled out: `position.w` assigned first, last, and between the coordinates;
 (which goes back to `$gp` and 31 words); and a `void **p = fldBlurEffectId`
 local feeding the three calls.
 
-## fldNpcDraw (0x8E0) is not started
+## fldNpcDraw (field/fld_Npc, 0x8DC)
 
-No draft yet; the assembly is still the only version. What a reading of retail
-settles, so the next attempt does not have to re-derive it:
+145 of 561 words match, six words short of the native 2268 bytes. The whole
+structure is settled and reproduced: `memset(&pos, 0, 0x10)` with `pos.w = 1.0f`
+under `fldGlobalBase.area < 200 && fldAutoMapSeqTestFlag(1) == 0`; the chest loop
+over `fldTakaraSlotTable` as `switch (mode)` with `case 1` an empty `break` and
+cases 0, 2 and 3 sharing the body; the three-way `activationState` split written
+`if (as >= 3) break; if (as <= 0) { if (as != 0) break; A } else { B }`, which is
+what puts retail's `bgtzl` before the `bnel` and leaves the `as == 0` arm as the
+fall-through block; the item-box arm's chest kind as
+`switch (*(s32 *)&fldTakaraTable[slot->unk28 * 16 + 8])` with cases 2 and 3 against
+a `default`; the billboard block with `dir` holding the negated eye delta and
+`w = 1.0f`, `fsqrtf` of the dot product, `SDF_VU0_LOADVECTOR` /
+`SDF_VU0_NORMALIZE` / `SDF_VU0_STOREVECTOR` into a third stack vector, and
+`pos -= norm * 50.0f` written back into both `pos` and `sprite.pos`; the fade as
+`alpha = 0; if (dist < 500.0f) {} else if (dist > 3000.0f) ... else
+(s32)((dist - 500.0f) * 128.0f / 2500.0f)` clamped to 0..0x80, where the empty
+then-arm is what gives retail's `c.lt.s dist, 500.0f` with an inverted branch
+rather than the `c.le.s 500.0f, dist` an `if (dist >= 500.0f)` produces; and
+`eye = aViewEye` as `SDF_VU0_COPYVECTOR(&eye, &aViewEye)`, the only spelling that
+gives retail's `lq $2`/`sq $2` through two `addiu` address temporaries.
 
-The frame is 0x110 with no parameters. The locals are a `sdfVector4_t` mark
-position at 0x0, a second one at 0x10 whose `w` is 1.0f, a normalised direction
-at 0x20, and a sprite3D record from 0x30 to 0x78 (three `f32` at 0x30, eight
-`s16` at 0x40 to 0x4E, eight `f32` at 0x50 to 0x6C, two packed colours at 0x70
-and 0x74). The body is `memset(&mark, 0, 0x10)` then
-`if (fldGlobalBase.field04 < 200 && fldAutoMapSeqTestFlag(1) == 0)`, and
-everything else sits inside that.
+The frame comes out at the native 0x110 with the same five aggregates at the same
+offsets: `pos` at 0x0, `dir` at 0x10, `norm` at 0x20, a `Sprite3D_t` at 0x30 and
+`eye` at 0x80. `3000.0f` and `2500.0f` are the unit's last two `.lit4` entries,
+`0x54C570` and `0x54C574`; every other constant has a zero low halfword and comes
+out as `lui`/`mtc1`.
 
-The chest loop walks `fldTakaraSlotTable` (0x30 stride) and switches on `mode`
-with cases 0, 1, 2 and 3, case 1 an empty `break`: that four-case list is what
-puts the `== 1` test at the root of the tree and leaves `mode > 1` as an
-`slti 2` with an inverted branch. `activationState` then splits three ways,
-`>= 3` leaving the case, `> 0` taking the item-box arm and `== 0` the effect
-arm. The item-box arm reads `*(s32 *)&fldTakaraTable[slot.unk28 * 16 + 8]` and
-picks `D_0054EEDC` for 2 and 3, `fldItemBoxCount` otherwise.
+Two things remain, and the second follows from the first.
 
-The billboard block computes `eye - mark` into a vector whose three components
-are stored negated, takes `sqrt` of the dot product for the distance, then
-normalises through the VU0 macro pair and scales the result by 50.0f. The fade
-is `alpha = 0` below 500.0f, `0x80` above `D_0054C570`, and
-`(s32)((dist - 500.0f) * 128.0f / D_0054C574)` clamped to 0..0x80 between,
-packed as `alpha << 24 | 0x808080` and passed with `rsetOtOfs(0x2C)` before
-`drawSprite3D(hEffPart, &sprite)`.
+The chest loop hoists one float invariant too many. Retail hoists only `64.0f`
+and `-64.0f`, the eight sprite corner values, into `$f24` and `$f23` and
+rematerialises `50.0f` with a `lui`/`mtc1` pair inside the body; the draft hoists
+`50.0f` as well, two extra words in the preheader. With `$f21` spent on it, the
+eye deltas and the distance land in `$f7`, `$f6`, `$f4` instead of retail's
+`$f20`, `$f21`, `$f22`, which is most of the remaining word count: the corner
+stores, the three scaling multiplies, the `500.0f` compare and the store schedule
+around the `sprite.pos` writes all differ by register name only.
 
-The NPC loop walks `fldModelSlotTable` (0x70 stride) and keeps five separate
-base pointers into the row, one each at +0x0, +0x4, +0xC, +0x20 and +0x50,
-which is what gives the loop its five `addiu` increments; `type == 0x3E7` skips
-the row. Its float constants are 10.0f and 1.5f in callee-saved registers and
-60.0f, 90.0f, 50.0f, 150.0f, 3.0f, 250.0f, 95.0f, 29.0f, 75.0f, 60.0f and
-110.0f at their use sites.
+The NPC loop builds three induction variables where retail builds five. Retail
+keeps byte offsets for +0x0, +0x20 and +0x50 plus row pointers at +0x4 and +0x30;
+the draft keeps +0x0, +0x50 and the +0x30 pointer, and recomputes `base + 4` and
+`i * 0x70 + 0x20` inside the body. The missing +0x20 offset variable is why retail
+re-reads `object` as `addu $2, giv, base` before each `dds3ObjectBaseOnFlag` while
+the draft shares the one address it computed for the `dds3GetPosPoseSet` call, and
+the missing `base + 4` pointer is why `csize` reads through an `addu` instead of
+retail's `0x20($21)`.
+
+Ruled out: the uv and corner block before the position scaling (295 words out
+against 278); `sprite.pos.x = pos.x = ...` chained assignments and three named
+`f32` temporaries for the scaled components (both identical to the plain form);
+reordering the three scalings x, z, y (282); `alpha = 0` moved from before the
+scaling to after the corner stores; inlining the `evtUnit_t *` local into the
+`sdfModelGetMarkPos` argument; `if (kind < 4) { if (kind >= 2) ... }` with the
+`default` arm written twice, which gcc cross-jumps into the same code the `switch`
+gives; and `count > 0x80 ? ... ` as a single clamp plus one store, which gives a
+`movz` where retail cross-jumps two `fldNpcDrawCount` stores into one and puts the
+`0x80` in a branch-likely delay slot.

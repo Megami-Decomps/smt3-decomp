@@ -1,5 +1,7 @@
+#include "fpu.h"
 #include "common.h"
 #include "basic.h"
+#include "billboard.h"
 #include "model.h"
 #include "motion.h"
 #include "newdata.h"
@@ -44,7 +46,7 @@ typedef struct
     s32 itemBoxIdx;            /* 0x4C */
     s32 kind;                  /* 0x50 */
     s32 camera;                /* 0x54 */
-    u8 unk58[4];
+    s32 unk58;                 /* 0x58 */
     s32 modelIndex;            /* 0x5C */
     u8 unk60[0x10];
 } fldNpcSlot_t;
@@ -1408,7 +1410,262 @@ void fldNpcCalc(void)
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcCalc);
 #endif
 
+extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *b);
+
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, s32 aId);
+
+extern void dds3EffectDraw(void *pData);
+
+extern void dds3EffectPartSetPosition(void *hEffPart, const sdfVector4_t *pPos);
+
+extern void dds3EffectPartDraw(void *hEffPart);
+
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *pObjectBasic, s32 flag);
+
+extern void dds3DrawUnitObjectShadow(s32 alpha, f32 x, f32 y, f32 z, f32 radius);
+
+extern void dds3EffectDistortionBlurDraw(void *work);
+
+extern void drawSprite3D(sdfTexHandle_t *th, Sprite3D_t *spr3d);
+
+extern void *fldBlurEffectHandle;
+
+extern sdfVector4_t aViewEye;
+
+/* NON_MATCHING: 145 of 561 words match, six words short of the native 2268
+ * bytes; the remaining difference is one loop-invariant float too many. */
+#ifdef NON_MATCHING
+void fldNpcDraw(void) {
+    sdfVector4_t pos;
+    sdfVector4_t dir;
+    sdfVector4_t norm;
+    Sprite3D_t sprite;
+    sdfVector4_t eye;
+    evtUnit_t *unit;
+    s32 i;
+    s32 alpha;
+    s32 kind;
+    s32 count;
+    f32 dist;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 x;
+    f32 y;
+    f32 z;
+
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+    if (fldGlobalBase.area < 200 && fldAutoMapSeqTestFlag(1) == 0) {
+        for (i = 0; i < fldTakaraCount; i++) {
+            switch (fldTakaraSlotTable[i].mode) {
+            case 1:
+                break;
+            case 0:
+            case 2:
+            case 3:
+                if (fldTakaraSlotTable[i].activationState >= 3) {
+                    break;
+                }
+                if (fldTakaraSlotTable[i].activationState <= 0) {
+                    if (fldTakaraSlotTable[i].activationState != 0) {
+                        break;
+                    }
+                    if (fldTakaraSlotTable[i].mode == 0 || fldTakaraSlotTable[i].mode == 3) {
+                        if (fldTakaraSlotTable[i].effect != NULL) {
+                            unit = dds3GetUnitHandleObjectBasic(fldTakaraSlotTable[i].object);
+                            if (sdfModelGetMarkPos(unit->owner->inner, 2) != 0) {
+                                SDF_VU0_STOREVECTOR(&pos);
+                            }
+                            dds3EffectSetPosition(fldTakaraSlotTable[i].effect, &pos);
+                            dds3EffectDraw(fldTakaraSlotTable[i].effect);
+                        }
+                    }
+                    unit = dds3GetUnitHandleObjectBasic(fldTakaraSlotTable[i].object);
+                    if (sdfModelGetMarkPos(unit->owner->inner, 1) != 0) {
+                        SDF_VU0_STOREVECTOR(&pos);
+                    }
+                    dx = aViewEye.x - pos.x;
+                    dy = aViewEye.y - pos.y;
+                    dz = aViewEye.z - pos.z;
+                    dir.w = 1.0f;
+                    dir.x = -dx;
+                    dir.y = -dy;
+                    dir.z = -dz;
+                    dist = fsqrtf(dx * dx + dy * dy + dz * dz);
+                    SDF_VU0_LOADVECTOR(&dir);
+                    SDF_VU0_NORMALIZE();
+                    SDF_VU0_STOREVECTOR(&norm);
+                    alpha = 0;
+                    pos.x = pos.x - norm.x * 50.0f;
+                    pos.y = pos.y - norm.y * 50.0f;
+                    pos.z = pos.z - norm.z * 50.0f;
+                    sprite.col = 0x80808080;
+                    sprite.pos.x = pos.x;
+                    sprite.pos.y = pos.y;
+                    sprite.pos.z = pos.z;
+                    sprite.uv[0].u = 0;
+                    sprite.uv[0].v = 0;
+                    sprite.uv[1].u = 0x200;
+                    sprite.uv[1].v = 0;
+                    sprite.uv[2].u = 0x200;
+                    sprite.uv[2].v = 0x200;
+                    sprite.uv[3].u = 0;
+                    sprite.uv[3].v = 0x200;
+                    sprite.vt[0].x = -64.0f;
+                    sprite.vt[0].y = -64.0f;
+                    sprite.vt[1].x = 64.0f;
+                    sprite.vt[1].y = -64.0f;
+                    sprite.vt[2].x = 64.0f;
+                    sprite.vt[2].y = 64.0f;
+                    sprite.vt[3].x = -64.0f;
+                    sprite.vt[3].y = 64.0f;
+                    sprite.rot = 0.0f;
+                    if (dist < 500.0f) {
+                    } else if (dist > 3000.0f) {
+                        alpha = 0x80;
+                    } else {
+                        alpha = (s32)((dist - 500.0f) * 128.0f / 2500.0f);
+                        if (alpha > 0x80) {
+                            alpha = 0x80;
+                        }
+                        if (alpha < 0) {
+                            alpha = 0;
+                        }
+                    }
+                    sprite.col = (alpha << 24) | 0x808080;
+                    rsetOtOfs(0x2C);
+                    drawSprite3D(hEffPart, &sprite);
+                } else {
+                    unit = dds3GetUnitHandleObjectBasic(fldTakaraSlotTable[i].object);
+                    if (sdfModelGetMarkPos(unit->owner->inner, 1) != 0) {
+                        SDF_VU0_STOREVECTOR(&pos);
+                    }
+                    kind = *(s32 *)&fldTakaraTable[fldTakaraSlotTable[i].unk28 * 16 + 8];
+                    switch (kind) {
+                    case 2:
+                    case 3:
+                        if (dds3EffectGetState(D_0054EEDC) != 0) {
+                            dds3EffectSetPosition(D_0054EEDC, &pos);
+                            dds3EffectDraw(D_0054EEDC);
+                        }
+                        break;
+                    default:
+                        if (fldItemBoxCount != NULL) {
+                            dds3EffectPartSetPosition(fldItemBoxCount, &pos);
+                            dds3EffectPartDraw(fldItemBoxCount);
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        for (i = 0; i < fldNpcModelTable; i++) {
+            if (fldModelSlotTable[i].room != 0 &&
+                fldGbChkNpc(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                            fldModelSlotTable[i].room) != 0) {
+                if (fldModelSlotTable[i].object != NULL) {
+                    dds3ObjectBaseOnFlag(fldModelSlotTable[i].object, 1);
+                }
+                continue;
+            }
+            x = fldModelSlotTable[i].x;
+            y = fldModelSlotTable[i].y;
+            z = fldModelSlotTable[i].z;
+            if (fldModelSlotTable[i].type == 0x3E7) {
+                continue;
+            }
+            switch (fldModelSlotTable[i].kind) {
+            case 0:
+                if (fldGlobalBase.area == 1) {
+                    break;
+                }
+                if (fldGlobalBase.area >= 11) {
+                    dds3DrawUnitObjectShadow(0x60, x, y - 10.0f, z, 60.0f);
+                } else {
+                    dds3DrawUnitObjectShadow(0x60, x, y - 10.0f - 90.0f, z, 60.0f);
+                }
+                if (fldModelSlotTable[i].cntAnmi != 0 && fldGlobalBase.area >= 10) {
+                    break;
+                }
+                pos.x = x;
+                if (fldGlobalBase.area == 1) {
+                    pos.y = y - 50.0f + sdfSin(fldModelSlotTable[i].cntf * 1.5f) * 3.0f;
+                } else {
+                    pos.y = y - 150.0f + sdfSin(fldModelSlotTable[i].cntf * 1.5f) * 10.0f;
+                }
+                pos.z = z;
+                dds3EffectSetPosition(fldModelSlotTable[i].effect, &pos);
+                dds3EffectDraw(fldModelSlotTable[i].effect);
+                break;
+            case 1:
+                SDF_VU0_COPYVECTOR(&eye, &aViewEye);
+                if (fldModelSlotTable[i].object == NULL) {
+                    break;
+                }
+                dds3ObjectBaseOffFlag(fldModelSlotTable[i].object, 1);
+                dds3GetPosPoseSet(fldModelSlotTable[i].object);
+                SDF_VU0_STOREVECTOR(&pos);
+                dy = eye.y - pos.y;
+                if (dy < 0.0f) {
+                    dy = -dy;
+                }
+                if (dy < 250.0f) {
+                    dx = eye.x - pos.x;
+                    dz = eye.z - pos.z;
+                    dist = fsqrtf(dx * dx + dz * dz);
+                    if (fldModelSlotTable[i].csize >= 79.0f) {
+                        if (dist < 95.0f) {
+                            dds3ObjectBaseOnFlag(fldModelSlotTable[i].object, 1);
+                        }
+                    } else if (fldModelSlotTable[i].csize >= 29.0f) {
+                        if (dist < 75.0f) {
+                            dds3ObjectBaseOnFlag(fldModelSlotTable[i].object, 1);
+                        }
+                    } else if (dist < 60.0f) {
+                        dds3ObjectBaseOnFlag(fldModelSlotTable[i].object, 1);
+                    }
+                    if (fldModelSlotTable[i].unk58 == 6 &&
+                        fldModelSlotTable[i].modelIndex == 0x49 && dist < 110.0f) {
+                        dds3ObjectBaseOnFlag(fldModelSlotTable[i].object, 1);
+                    }
+                }
+                break;
+            }
+        }
+        if (fldGlobalBase.area >= 11 && fldNpcCamTarget == 1 && D_0054EEB0 != -1 &&
+            fldModelSlotTable[D_0054EEB0].kind == 0) {
+            count = fldNpcDrawCount + 3;
+            if (count > 0x80) {
+                fldNpcDrawCount = 0x80;
+            } else {
+                fldNpcDrawCount = count;
+            }
+            mdlSetColor(dds3ObjectBaseGetModelHandle(fldNpcFreeCount),
+                        (fldNpcDrawCount << 24) | 0x808080);
+            dds3EffectDistortionBlurDraw(fldBlurEffectHandle);
+        }
+        if (fldDmgBlurHandle != 0) {
+            if (dds3EffectGetState(D_0054EED0) != 0) {
+                dds3EffectDraw(D_0054EED0);
+            } else {
+                fldDmgBlurHandle = 0;
+            }
+        }
+        if (fldNpcBlurHandle != 0) {
+            if (dds3EffectGetState(fldBlurEffectId[0]) != 0) {
+                dds3EffectDraw(fldBlurEffectId[0]);
+            }
+        }
+        fldEADraw();
+        fldVLDraw();
+    }
+}
+
+#else
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcDraw);
+#endif
 
 void fldNpcHojiRefresh(void) {
     s32 i;

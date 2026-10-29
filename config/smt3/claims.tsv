@@ -840,3 +840,4 @@ src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 616 B	DrawReadList
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 620 B	drawRegistSprites matched by the same truthful texture-pointer field; unchanged drawing body and qualified alias evidence; c845b5aa
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	0 exact SDK B	guarded filesystem completion reconstruction with exact copy paths/table; final semaphore search remains 948/960 bytes, no matching credit
 src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 424 B	frame descriptor lookup preserves lazy initialization, failure retry/raw fallback and post-unlock sorted search; complete owner 31 match, 0 differ
+src/smt3/field/fld_Npc.c	z28	done	2026-10-29	0 exact / 2268 B parked	fldNpcDraw structure settled at the native frame; 145 of 561 words match, one loop-invariant float too many
