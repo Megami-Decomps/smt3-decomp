@@ -2501,7 +2501,26 @@ void nmeDrawFrame(s32 type, s32 frame)
     nmeDrawQuadPanel(0x9192FF4C, 0x88D8FC33, pulse, 7);
 }
 
+#ifdef NON_MATCHING
+void nmeDrawBlendText(s32 sprite, s32 page, sdfTexHandle_t **textures,
+                      fclSpriteTbl_t *table, u32 color, s32 frame, s32 ot)
+{
+    s32 pulse = nmeLerp(100, frame % 0x100, 0x100);
+    s32 phase = frame % 0x300;
+    s32 size = nmeLerp(0x8C, phase, 0x300);
+    s32 shade;
+
+    nmeLerp2(0x100, phase, 0x300);
+    nmeDrawSizedSprite(sprite, page, (s32 *)textures, table, 0x80808080, 0, ot);
+    nmeDrawSizedSprite(sprite, page, (s32 *)textures, table, 0x80808080, size, ot);
+    shade = fclBlendColor(0x35, 0x1C, pulse * 0x100 / 100);
+    nmeDrawBox(shade, pulse, ot);
+    nmeDrawBlendQuad(pulse, ot);
+    nmeDrawQuadPanel(0x756E6866, 0x14140A66, pulse * 2, ot);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", nmeDrawBlendText);
+#endif
 
 extern frFontRequest_t *frwGetHelpFRQ(s32 x, s32 y, s32 priority, s8 bank, u16 index, s8 mode);
 extern void frSetFontColor(frFontHandle_t *request, u32 color);
