@@ -447,7 +447,66 @@ s32 shpUpdateSeqConfirm(s8 mode)
 INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqConfirm);
 #endif
 
+extern void fclCreateItemListEx(fclItemList_t *list, s8 kind);
+extern void cmpChangeCursorListNums(s32 count, u8 *cursor);
+extern void datAddMaka(s32 amount);
+extern s32 fclAddItem(u16 item, s32 count);
+extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
+
+#ifdef NON_MATCHING
+void shpUpdateSeqPay(void)
+{
+    s32 sell = shopUpdateWork->unk_0003 != 5;
+    cmpCursorInfo_t *cursor = &shopUpdateWork->sellList.listCursor;
+    u16 item = shpGetItemPrice(cursor->unk_22 + (u8)cursor->unk_24, sell);
+    s32 sequence = cmpChkSeqInfo((cmbGbWork_t *)shopUpdateWork);
+
+    if (sequence == 1) {
+        return;
+    }
+    if (sequence == 2) {
+        shopUpdateWork->quantity = 1;
+        if (sell == 0) {
+            fclScriptStart(shopUpdateWork->script, 1, &shopUpdateWork->scriptArg);
+            shopUpdateWork->unk_0001 = 1;
+        } else {
+            fclCreateItemListEx(&shopUpdateWork->sellItems, 1);
+            cmpChangeCursorListNums(shopUpdateWork->sellItems.count,
+                                    (u8 *)&shopUpdateWork->sellList.listCursor);
+            if (shopUpdateWork->sellItems.count == 0) {
+                fclScriptStart(shopUpdateWork->script, 8, &shopUpdateWork->scriptArg);
+                shopUpdateWork->unk_0001 = 0;
+            } else {
+                fclScriptStart(shopUpdateWork->script, 3, &shopUpdateWork->scriptArg);
+                shopUpdateWork->unk_0001 = 2;
+            }
+        }
+        shopUpdateWork->unk_0004 = 1;
+    } else if (shopUpdateWork->paymentRemaining > 0) {
+        if (shopUpdateWork->paymentRemaining < shopUpdateWork->paymentStep) {
+            datAddMaka(sell ? shopUpdateWork->paymentRemaining : -shopUpdateWork->paymentRemaining);
+            if (sell == 0) {
+                shopUpdateWork->totalPay += shopUpdateWork->paymentRemaining;
+            }
+            shopUpdateWork->paymentRemaining = 0;
+        } else {
+            datAddMaka(sell ? shopUpdateWork->paymentStep : -shopUpdateWork->paymentStep);
+            if (sell == 0) {
+                shopUpdateWork->totalPay += shopUpdateWork->paymentStep;
+            }
+            shopUpdateWork->paymentRemaining -= shopUpdateWork->paymentStep;
+        }
+        p2sdPlaySE(5, 0x7F, 0x3F);
+    } else {
+        fclAddItem(item, sell ? -shopUpdateWork->quantity : shopUpdateWork->quantity);
+        shopUpdateWork->unk_0005 = 1;
+        shopUpdateWork->unk_0008 = fclScriptStart(shopUpdateWork->script, 7,
+                                                 &shopUpdateWork->scriptArg);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqPay);
+#endif
 
 void shpServiceTicketItem(void)
 {
