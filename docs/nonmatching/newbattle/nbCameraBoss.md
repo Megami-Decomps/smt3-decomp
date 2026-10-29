@@ -100,3 +100,33 @@ whatever makes that first `return 1` a bare jump to the shared exit.
 
 The jump table differs as a consequence; the case set itself is confirmed by
 the default entries, which all resolve to the one default block.
+
+## nbCameraBoss_Cut2_Init (newbattle/nbCameraBoss, 0x3A8)
+
+179 of 230 words differ at 920 bytes against 936, but the body is right: the
+jump table over model IDs `0xCB` to `0x161`, every arm's skill test and every
+`.lit4` entry line up, and the 179 are almost all branch displacements carried
+by a uniform four-word shift.
+
+Retail leaves a `nop` in four branch delay slots, at `+0x38`, `+0xD0`, `+0xEC`
+and `+0x250`, where the draft fills the slot with the arm's next comparison
+constant. Retail materialises every comparison constant in `$2` and reaches
+the shared `return 0` with `bnel` and the zero in the annulled slot; cc1 gives
+the second constant of each pair `$3`, which makes the `addiu` legal in the
+preceding branch's delay slot and lets `relax_delay_slots` drop the annul bit.
+Both halves follow from one register assignment, so this closes as one change
+or not at all.
+
+Ruled out: `||` against `&&` against nested `if` for the two-constant arms,
+`s32` for `id` and `skill`, four declaration orders, a one-pass `do` block
+around the switch, and renaming `nbCameraBoss_Foru_SIMON_Set`'s definition so
+only the `extern` remains, which is the callee-visibility test and changes
+nothing here.
+
+Confirmed on the way: the jump table's 151 entries decode to the case list
+`0x100`, `0x101`/`0x111`/`0x113`/`0x126`-`0x128`, `0x10D`, `0x11F`, `0x115`,
+`0x146`-`0x148`, `0x120`, `0x124`, `0x103`, `0x123`, `0x102`, `0x125`,
+`0x108`, `0x156`-`0x158`, `0xCB`/`0x161` in that source order; retail calls
+`nbCameraBoss_Sp_JAREIH_Set` for skill `0x99` where the HD rebuild just
+returns 1; and the four pooled constants are `0.55f`, `0.85f`, `0.55f` and
+`0.9f` in code order.

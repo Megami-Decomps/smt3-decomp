@@ -21,12 +21,12 @@ page and line to open. Conventions are in
 | 5 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 4 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
+| 4 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 4 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
-| 3 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 3 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |

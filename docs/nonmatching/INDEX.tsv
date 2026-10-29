@@ -138,6 +138,7 @@ SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/nonmatching/newbattle
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	5
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	48
 nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	77
+nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	104
 dds3EffectFileListCreate	newbattle/nbCameraHelper	1080 bytes	269 of 270 words match	docs/nonmatching/newbattle/nbCameraHelper.md	5
 dds3EffectFileListWindowDrawSprite	newbattle/nbCameraHelper	280 bytes	Two of 70 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	21
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/nonmatching/newbattle/nbCameraPress.md	5

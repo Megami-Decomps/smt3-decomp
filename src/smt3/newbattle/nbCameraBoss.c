@@ -2155,7 +2155,179 @@ s32 nbCameraBoss_Cut1_Run(nbCamera_t *pNbCamera)
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut1_Run);
 #endif
 
+extern s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *pNbCamera);
+
+extern s32 nbCameraBoss_Sukady_DAIJIS_Set(nbCamera_t *pNbCamera);
+
+extern s32 nbCameraBoss_Kagu_Attack_Set(nbCamera_t *pNbCamera);
+
+extern s32 nbCameraBoss_Kagu_MJINKO_Set(nbCamera_t *pNbCamera);
+
+extern s32 nbCameraBoss_BSKAGU_EP_IT_Set(nbCamera_t *pNbCamera);
+
+extern s32 nbCameraBoss_Beru_HAENO1_Set(nbCamera_t *pNbCamera);
+
+extern void nbCameraBoss_TargetInvoke_Set(nbCamera_t *pNbCamera, f32 height, f32 rate);
+
+extern void nbCameraShot_InvokeTargetParty_Set2(nbCamera_t *pNbCamera,
+                                                nbCameraSkillInfo_t *pNBSInfo);
+
+extern void effBTLModelAllPopPosition(void);
+
+extern void effBTLModelAllPopRotate(void);
+
+extern s32 nbCameraBoss_Kagu_MJINKO_Type;
+
+/* NON_MATCHING: 179 of 230 words differ, 4 words short; retail nops four
+ * branch delay slots this fills with the next comparison constant. */
+#ifdef NON_MATCHING
+s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera)
+{
+    nbCameraSkillInfo_t work;
+    nbFormation_t *pForm;
+    u32 id;
+    u32 skill;
+
+    pForm = effBTLSkillGetInvokeFormation();
+    id = effBTLModelGetID(pForm);
+    skill = effBTLSkillGetID();
+    switch (id) {
+    case 0x100:
+        if (skill == 0xA || skill == 0xF4) {
+            return nbCameraBoss_Foru_SIMON_Set(pNbCamera);
+        }
+        return 0;
+    case 0x101:
+    case 0x111:
+    case 0x113:
+    case 0x126:
+    case 0x127:
+    case 0x128:
+        if (skill == 0xFC) {
+            return nbCameraBoss_Sp_MURET2_Set(pNbCamera);
+        }
+        if (skill == 0x99) {
+            return nbCameraBoss_Sp_JAREIH_Set(pNbCamera);
+        }
+        if (skill == 0xBF) {
+            return nbCameraBoss_Sp_PSYSTL_Set(pNbCamera);
+        }
+        return 0;
+    case 0x10D:
+        if (skill != 0xE9) {
+            return 0;
+        }
+        return nbCameraBoss_Ongy_BUNSIN_Set(pNbCamera);
+    case 0x11F:
+        if (skill == 0xF2) {
+            return nbCameraBoss_Samael_AKUI_Set(pNbCamera);
+        }
+        if (skill == 0 || skill == 0xA5) {
+            nbCameraBoss_TargetInvoke_Set(pNbCamera, 0.0f, 0.55f);
+            return 1;
+        }
+        return 0;
+    case 0x115:
+        if (skill != 0x9B) {
+            return 0;
+        }
+        return nbCameraBoss_Sukady_DAIJIS_Set(pNbCamera);
+    case 0x146:
+    case 0x147:
+    case 0x148:
+        if (skill != 0) {
+            return 0;
+        }
+        effBTLModelAllPopPosition();
+        effBTLModelAllPopRotate();
+        nbCameraBoss_TargetInvoke_Set(pNbCamera, -12.5f, 1.25f);
+        return 1;
+    case 0x120:
+        if (skill != 0xC9) {
+            return 0;
+        }
+        return nbCameraBoss_Baal_BAELNO_Set(pNbCamera);
+    case 0x124:
+        if (skill == 0xA9 || skill == 0xAA) {
+            return nbCameraBoss_Bsnet_Attack_Set(pNbCamera);
+        }
+        if (skill != 0xEA) {
+            return 0;
+        }
+        return nbCameraBoss_Bsnet_AISHOH_Set(pNbCamera);
+    case 0x103:
+        if (skill == 0xA9 || skill == 0xAA) {
+            nbCameraBoss_TargetInvoke_Set(pNbCamera, 15.0f, 0.85f);
+            return 1;
+        }
+        if (skill != 0xEA) {
+            return 0;
+        }
+        return nbCameraBoss_Bsnet_AISHOH_Set(pNbCamera);
+    case 0x123:
+        if (skill != 0xAB) {
+            return 0;
+        }
+        nbCameraBoss_TargetInvoke_Set(pNbCamera, 15.0f, 0.55f);
+        return 1;
+    case 0x102:
+        if (skill != 0xAE) {
+            return 0;
+        }
+        nbCameraBoss_TargetInvoke_Set(pNbCamera, -5.0f, 0.9f);
+        return 1;
+    case 0x125:
+        if (skill == 0xAC) {
+            if (dds3GetRandA(dds3EffectBase) & 1) {
+                return nbCameraBoss_BSKAGU_EP_IT_Set(pNbCamera);
+            }
+            return nbCameraBoss_Kagu_Attack_Set(pNbCamera);
+        }
+        if (skill == 0xFE) {
+            return nbCameraBoss_Kagu_FLEACH_Set(pNbCamera);
+        }
+        if (skill != 0xF1) {
+            return 0;
+        }
+        nbCameraBoss_Kagu_MJINKO_Type = dds3GetRandIntA(0, 3);
+        return nbCameraBoss_Kagu_MJINKO_Set(pNbCamera);
+    case 0x108:
+        if (skill == 0xDB || skill == 0xDC) {
+            return nbCameraBoss_Pish_PRESS_Set(pNbCamera);
+        }
+        if (skill != 0xDD) {
+            return 0;
+        }
+        return 1;
+    case 0x156:
+        if (skill != 0xEB) {
+            return 0;
+        }
+        return nbCameraBoss_Meta_METAT1_0_Set(pNbCamera);
+    case 0x157:
+        if (skill != 0x103) {
+            return 0;
+        }
+        return nbCameraBoss_Beru_HAENO1_Set(pNbCamera);
+    case 0x158:
+        if (skill != 0x111) {
+            return 0;
+        }
+        return nbCameraBoss_Lusi_OHNOOH_Set(pNbCamera);
+    case 0xCB:
+    case 0x161:
+        if (skill != 0x9F) {
+            return 0;
+        }
+        nbCameraShot_InvokeTargetParty_Set2(pNbCamera, &work);
+        return 1;
+    default:
+        return 0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut2_Init);
+#endif
 
 /* NON_MATCHING: 92 of 138 words, 2 short; the 0x11F arm's first `return 1`
  * becomes a local block instead of a delay-slot constant. */
