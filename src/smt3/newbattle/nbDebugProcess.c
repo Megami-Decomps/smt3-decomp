@@ -655,7 +655,79 @@ s32 SelectBad(nbDebugProcessData_t *d)
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMotData);
 
+extern const char *D_004F06F0[];
+extern const char D_005514D8[];
+extern s32 D_005512E0;
+extern s32 slSelectMotIndex;
+
+#ifdef NON_MATCHING
+s32 SelectMot(nbDebugProcessData_t *d, s32 active)
+{
+    sdfDrawTag_t *tag;
+    frFontRequest_t *request;
+    s32 i, y, yText, attr, color, result, base, selected;
+    u8 button;
+
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    nbGetUnitWorkFromFormindex(d->form->formindex);
+    dds3ConsPanelTagLinkZ(tag, 0x18C, 0x4C, 8, 20, 0xFF0000);
+    y = 0x7BA0;
+    yText = 80;
+    selected = *(volatile s32 *)&D_005512E0;
+    for (i = 0; i < 10; i++) {
+        attr = 0;
+        color = -0x80;
+        if (selected == i) {
+            if (active) {
+                attr = 4;
+                color = 0xFF0080;
+            } else {
+                attr = 5;
+                color = 0xFFFF00;
+            }
+        }
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8900, y, 0xFFFF80, attr,
+                                             D_005514D8, slSelectMotIndex + i));
+        y += 0xB0;
+        request = frwGetSmallFontFRQ(0x1AE * 16, yText * 8, 0xFF0005, color,
+                                     D_004F06F0[slSelectMotIndex + i], NULL);
+        yText += 22;
+        frDrawFont((frFontHandle_t *)request);
+        frDestroyFontRequestAfter((frFontHandle_t *)request);
+        selected = *(volatile s32 *)&D_005512E0;
+    }
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+    if (!active) {
+        return 0;
+    }
+    result = dds3SelectMenu(0, 1, 26, 1, 10, NULL, &slSelectMotIndex, NULL, &D_005512E0);
+    if (result == -1) {
+        return -1;
+    }
+    if (result == 1) {
+        SetMotion(d->data, d->form, slSelectMotIndex + D_005512E0, 0);
+        return 1;
+    }
+    button = ((volatile u8 *)dds3PadButtonState)[5];
+    base = *(volatile s32 *)&slSelectMotIndex;
+    if ((button & 2) && base + 10 < 26) {
+        slSelectMotIndex = base + 20 < 26 ? base + 10 : 16;
+    }
+    button = ((volatile u8 *)dds3PadButtonState)[4];
+    base = *(volatile s32 *)&slSelectMotIndex;
+    if ((button & 2) && base > 0) {
+        base -= 10;
+        slSelectMotIndex = base < 0 ? 0 : base;
+    }
+    if ((s8)dds3PadButtonState[0x20] < 0) {
+        return 2;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMot);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectDevil);
 
