@@ -3880,7 +3880,39 @@ s32 cmbFindUnitScene(void *work)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateCameraPos);
 
+extern s8 cmbActionStep;
+extern s8 cmbActionMode;
+
+#ifdef NON_MATCHING
+void cmbUpdateCameraZoom(void)
+{
+    f32 zoom = CMB_GBWK->actionZoom;
+    s32 target;
+
+    if (cmbActionStep != 0 || CMB_GBWK->actionFrame < 80) {
+        return;
+    }
+    if (CMB_GBWK->actionFrame < 220) {
+        zoom = 0.0f;
+    }
+    target = CMB_GBWK->actionTargetIndex;
+    if (cmbActionMode == 1) {
+        if (target >= 0 && target < 5) {
+            cmbLoadTargetModel(target, 1, zoom);
+        } else if (target == 5) {
+            cmbLoadTargetModel(5, 0, zoom);
+        }
+    } else {
+        if (target >= 0 && target < 2) {
+            cmbLoadTargetModel(target, 1, zoom);
+        } else if (target == 2) {
+            cmbLoadTargetModel(2, 0, zoom);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateCameraZoom);
+#endif
 
 datUnitWork_t *cmbGetBirthDevilPanel(void)
 {
