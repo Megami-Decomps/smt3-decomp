@@ -913,3 +913,4 @@ src/smt3/field/fldEveHit.c	z29	done	2026-10-29	0 matches / 1 guarded draft	fldEv
 src/smt3/newbattle/nbPanelProcess.c	z29	open	2026-10-29	1 fn / 5400 B	largest-first pass: nbPanelPressGauge, no prior draft
 src/smt3/facility/fclRagCalc.c	redthing1	done	2026-10-29	2 fn / 672 B	PiM agents: ragDrawList2/3 use canonical Rag list/window/panel members and truthful void providers; existing drafts and shared-record/API prerequisites credited; whole owner exact
 src/smt3/newbattle/nbPanelProcess.c	z29	done	2026-10-29	0 matches / 1 guarded draft	nbPanelPressGauge drafted at 5360/5400 B, 1046 of 1350 mnemonics in order; D_004F0034/48 resolved as nbPressGaugeTable[1..2]; residual is one extra spilled color local
+src/smt3/newbattle/nbActionProcess.c	z29	open	2026-10-29	1 fn / 5160 B	largest-first pass: SetAction_SKILL
