@@ -213,6 +213,29 @@ use the198/32 extents and this natural index. The two arrays remain
 assembly-owned; this boundary correction changes no instructions, values
 or matching credit.
 
+## __kernel_rem_pio2f
+
+All 2,148 instruction bytes at 0x002D0338 match. The six integer-bank
+arguments are the input chunks, output pointer, exponent, chunk count,
+precision selector and two-over-pi digits. Four actual 20-element work arrays
+occupy the native frame: integer digits and three float arrays. Signed
+quotient division, base-256 distillation, carry complementation, extra-digit
+recomputation and zero stripping retain their native order. The final result
+is the quotient modulo eight.
+
+The precision dispatch preserves the native one-, two- and three-component
+output paths, including both compensated passes for the latter. The current
+caller selects precision two. The initialization fragment contains 4, 7, 9
+followed by a zero word; this does not establish a general-purpose contract
+for arbitrary selectors or inputs.
+
+Keep the complete readonly imports. The pi/2 fragment at 0x0054B358 also
+contains neighboring constants, so its declaration leaves the extent open.
+Express the two high-digit mask cases as `switch (q0)` with cases one and two;
+nested conditions leave branch/scheduling differences. No compiler setting,
+extra storage or register constraint is needed. The complete math owner
+passes all 15 C functions together, including its data.
+
 ## Math forwarding wrappers
 
 The ordinary C bodies at0x002CF730 (`__ieee754_acosf`) and0x002CF748
