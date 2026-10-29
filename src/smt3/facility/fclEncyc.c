@@ -3085,20 +3085,19 @@ void DrawListWindowBack(void *obj, fclPanel_t *plistwin)
     lstDrawListWindow(obj, 0, 0x47);
 }
 
-typedef struct { s32 x, y; } fclEncycVertex_t;
 typedef struct { s32 left, right; } fclEncycStrip_t;
 typedef struct { u32 components[4]; } fclEncycColor_t;
 extern fclEncycColor_t D_00332330;
 extern fclEncycStrip_t D_00332340[5];
 extern fclEncycColor_t g_uv_summon_back[];
 extern sdfGrOt_t D_002F67F8;
-extern void itfMiscDrawSpritePlanePrim(fclEncycVertex_t *, fclEncycColor_t *, u32, s32, sdfDrawTag_t *);
+extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *, fclEncycColor_t *, u32, s32, sdfDrawTag_t *);
 extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
-extern void itfMiscDrawSpritePrim2(fclEncycVertex_t *, fclEncycColor_t *, fclEncycColor_t *, u32, s32, sdfDrawTag_t *);
+extern void itfMiscDrawSpritePrim2(sdfIVector2_t *, fclEncycColor_t *, fclEncycColor_t *, u32, s32, sdfDrawTag_t *);
 
 void drawRegistSprites(fclEncyc_instance_tag *pinst)
 {
-    fclEncycVertex_t pos[2];
+    sdfIVector2_t pos[2];
     fclEncycColor_t uv;
     sdfDrawTag_t *tag;
     fclEncycStrip_t *strip;
@@ -3154,7 +3153,7 @@ void DrawRegistListwinElem(fclEncyc_instance_tag *pinst)
 {
     fclEncycRegistAllWork_t *work = (fclEncycRegistAllWork_t *)pinst->pwork;
     sdfDrawTag_t *tag = sdfGrAllocPacketBuff(0x20);
-    fclEncycVertex_t pos[2];
+    sdfIVector2_t pos[2];
     frFontHandle_t *request;
     s32 y = 0x300;
     s32 i;
@@ -3204,7 +3203,7 @@ void DrawReadListwinElem(fclEncyc_instance_tag *pinst)
     fclEncycReadTopWork_t *work = (fclEncycReadTopWork_t *)pinst->pwork;
     s32 selected = work->list.cursorPos.Shift;
     sdfDrawTag_t *tag = sdfGrAllocPacketBuff(0x20);
-    fclEncycVertex_t pos[2];
+    sdfIVector2_t pos[2];
     frFontHandle_t *request;
     s32 y = 0x4A0;
     s32 i;
@@ -3257,9 +3256,9 @@ extern u8 D_003323A8[];
 extern u8 D_003323B0[];
 extern sdfGrOt_t D_002F67F8;
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void itfMiscDrawSpritePlanePrim(fclEncycVertex_t *pos, fclEncycColor_t *color,
+extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, fclEncycColor_t *color,
                                       u32 z, s32 context, sdfDrawTag_t *tag);
-extern void itfMiscDrawRectanglePrim(fclEncycVertex_t *vertices, fclEncycColor_t *colors,
+extern void itfMiscDrawRectanglePrim(sdfIVector2_t *vertices, fclEncycColor_t *colors,
                                    u8 *vertexIndex, u8 *colorIndex, u32 z, sdfDrawTag_t *tag);
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *tag, s32 active, s32 context);
 
@@ -3267,12 +3266,12 @@ void DrawExplainBack(s32 alpha)
 {
     sdfDrawTag_t *tag;
     s32 shade;
-    fclEncycVertex_t pos[4];
+    sdfIVector2_t pos[4];
     /* The initial plane corners share the first rectangle color slot. */
     union {
         fclEncycColor_t colors[2];
         struct {
-            fclEncycVertex_t corners[2];
+            sdfIVector2_t corners[2];
             fclEncycColor_t color;
         } plane;
     } draw;
@@ -3318,12 +3317,12 @@ void DrawExplainBack(s32 alpha)
 
 
 
-extern fclEncycVertex_t D_003323B8[2];
+extern sdfIVector2_t D_003323B8[2];
 extern fclEncycColor_t D_003323C8[1];
 extern sdfGrOt_t sdfGrOtTable[];
 extern void *sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void itfMiscDrawSpritePlanePrim(fclEncycVertex_t *pos, fclEncycColor_t *color,
+extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, fclEncycColor_t *color,
                                        u32 z, s32 context, sdfDrawTag_t *tag);
 
 void DrawBackBlackBoard(s32 y, s32 ratio)
@@ -3347,13 +3346,13 @@ extern fclEncycColor_t g_uv_summon_back[];
 extern fclEncycColor_t D_003309B0[];
 extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 tail,
                                   sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *tag);
-extern void itfMiscDrawSpritePrim2(fclEncycVertex_t *pos, fclEncycColor_t *uv,
+extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, fclEncycColor_t *uv,
                                    fclEncycColor_t *color, u32 z, s32 context,
                                    sdfDrawTag_t *tag);
 
 void DrawRegistAllHelp(fclEncyc_instance_tag *pinst)
 {
-    fclEncycVertex_t pos[2];
+    sdfIVector2_t pos[2];
     fclEncycColor_t uv;
     sdfDrawTag_t *tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
@@ -3380,14 +3379,14 @@ void DrawRegistAllHelp(fclEncyc_instance_tag *pinst)
 
 
 typedef struct {
-    fclEncycVertex_t pos[2];
+    sdfIVector2_t pos[2];
     fclEncycColor_t color;
 } fclEncycDrawPrim_t;
 extern fclEncycColor_t D_003309B0[];
 extern fclEncycColor_t D_003309D0[];
 extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 tail,
                                   sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *tag);
-extern void itfMiscDrawSpritePrim2(fclEncycVertex_t *pos, fclEncycColor_t *uv,
+extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, fclEncycColor_t *uv,
                                    fclEncycColor_t *color, u32 z, s32 context,
                                    sdfDrawTag_t *tag);
 

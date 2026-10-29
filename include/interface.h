@@ -52,9 +52,4 @@ typedef struct itfpanel_t {
 } itfpanel_t;
 
 /* Point written by the panel vertex builders. */
-typedef struct sdfIVector2_t {
-    s32 x;
-    s32 y;
-} sdfIVector2_t;
-
 #endif /* INTERFACE_H */

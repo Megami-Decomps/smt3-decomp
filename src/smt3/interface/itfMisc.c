@@ -40,8 +40,6 @@ typedef struct
 
 typedef struct { s32 x, y, z, w; } itfColorVector_t;
 
-typedef struct { s32 x, y; } itfVertex_t;
-
 typedef struct { u32 components[4]; } itfColor_t;
 
 typedef struct { u8 unk00[0x20]; u64 value, registerCode; } itfGsState_t;
@@ -271,7 +269,7 @@ sdfTexHandle_t *itfMiscLoadTexture(const char *filename) {
 
 /* Emit three per-vertex RGBA/XYZ2 records; PRIM's low bits select a triangle.
  * Coordinates receive the native GS screen biases; no clipping is performed. */
-void itfMiscDrawTrianglePrim(itfVertex_t *pvertex, itfColor_t *pcolor, s32 x, s32 y, u32 z, sdfDrawTag_t *pdrawtag) {
+void itfMiscDrawTrianglePrim(sdfIVector2_t *pvertex, itfColor_t *pcolor, s32 x, s32 y, u32 z, sdfDrawTag_t *pdrawtag) {
     sdfGrPacketHeader_t *packet;
     u64 *dst;
     s32 i;
@@ -293,7 +291,7 @@ void itfMiscDrawTrianglePrim(itfVertex_t *pvertex, itfColor_t *pcolor, s32 x, s3
 }
 
 /* Emit an indexed four-vertex triangle fan with a color record per vertex. */
-void itfMiscDrawRectanglePrim(itfVertex_t *vertices, itfColor_t *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, sdfDrawTag_t *command) {
+void itfMiscDrawRectanglePrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, sdfDrawTag_t *command) {
     sdfGrPacketHeader_t *packet;
     u64 *dst;
     s32 i;
@@ -302,7 +300,7 @@ void itfMiscDrawRectanglePrim(itfVertex_t *vertices, itfColor_t *colors, u8 *ver
     sdf2DMakePrimPacketHeader(packet, ITF_QUAD_FAN_PRIMITIVE_BITS, 2, 0x51, ITF_QUAD_VERTEX_COUNT);
     dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < ITF_QUAD_VERTEX_COUNT; i++) {
-        itfVertex_t *vertex = &vertices[*vertexIndex++];
+        sdfIVector2_t *vertex = &vertices[*vertexIndex++];
         itfColor_t *color = &colors[*colorIndex++];
 
         dst[0] = (u64)color->components[0] | ((u64)color->components[1] << 32);
@@ -317,7 +315,7 @@ void itfMiscDrawRectanglePrim(itfVertex_t *vertices, itfColor_t *colors, u8 *ver
 
 /* Emit a textured triangle fan: each four-float input supplies S/T/Q only.
  * The fourth float is skipped, and the context word is shifted without masking. */
-void itfMiscDrawTexPoly(itfVertex_t *pvertex, f32 *pstq, itfColor_t *pcolor, u32 z, s32 context, sdfDrawTag_t *pdrawtag) {
+void itfMiscDrawTexPoly(sdfIVector2_t *pvertex, f32 *pstq, itfColor_t *pcolor, u32 z, s32 context, sdfDrawTag_t *pdrawtag) {
     sdfGrPacketHeader_t *packet;
     u64 *dst;
     s32 i;
@@ -348,7 +346,7 @@ void itfMiscDrawTexPoly(itfVertex_t *pvertex, f32 *pstq, itfColor_t *pcolor, u32
 /* Bind the texture and emit one two-corner sprite using two packed UV pairs.
  * Unwritten padding words in the native packet remain untouched. */
 void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 tail, sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *command) {
-    itfVertex_t *vertices = vertexData;
+    sdfIVector2_t *vertices = vertexData;
     itfColor_t *uv = uvData;
     itfColor_t *colors = colorData;
     sdfGrPacketHeader_t *packet;
@@ -375,7 +373,7 @@ void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 
 }
 
 /* Emit a colored textured sprite without binding a texture in this function. */
-void itfMiscDrawSpritePrim2(itfVertex_t *pos, itfColor_t *uv, itfColor_t *color, u32 z, s32 context, sdfDrawTag_t *pdrawtag) {
+void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv, itfColor_t *color, u32 z, s32 context, sdfDrawTag_t *pdrawtag) {
     sdfGrPacketHeader_t *packet;
     u64 *dst;
     s32 x0, y0, x1, y1;
@@ -399,7 +397,7 @@ void itfMiscDrawSpritePrim2(itfVertex_t *pos, itfColor_t *uv, itfColor_t *color,
 }
 
 /* Emit an untextured two-corner GS sprite. */
-void itfMiscDrawSpritePlanePrim(itfVertex_t *pos, itfColor_t *color, u32 z, s32 context, sdfDrawTag_t *pdrawtag) {
+void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, itfColor_t *color, u32 z, s32 context, sdfDrawTag_t *pdrawtag) {
     sdfGrPacketHeader_t *packet;
     u64 *dst;
 
@@ -419,7 +417,7 @@ void itfMiscDrawSpritePlanePrim(itfVertex_t *pos, itfColor_t *color, u32 z, s32 
 
 /* Emit an indexed triangle strip, packing two vertices per GIF loop.
  * Header loop count truncates odd vertex counts; the native writer does not. */
-void itfMiscDrawTriangleStripPrim(itfVertex_t *vertices, itfColor_t *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, sdfDrawTag_t *command) {
+void itfMiscDrawTriangleStripPrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, sdfDrawTag_t *command) {
     sdfGrPacketHeader_t *packet;
     u64 *dst;
     s32 pairCount = count >> 1;
@@ -429,7 +427,7 @@ void itfMiscDrawTriangleStripPrim(itfVertex_t *vertices, itfColor_t *colors, u8 
     sdf2DMakePrimPacketHeader(packet, ITF_TRIANGLE_STRIP_PRIMITIVE_BITS, 4, 0x5151, pairCount);
     dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < count; i++) {
-        itfVertex_t *vertex = &vertices[*vertexIndex++];
+        sdfIVector2_t *vertex = &vertices[*vertexIndex++];
         itfColor_t *color = &colors[*colorIndex++];
 
         dst[0] = (u64)color->components[0] | ((u64)color->components[1] << 32);
@@ -443,7 +441,7 @@ void itfMiscDrawTriangleStripPrim(itfVertex_t *vertices, itfColor_t *colors, u8 
 }
 
 /* Emit indexed RGBA/XYZ2 records with the line-strip primitive. */
-void itfMiscDrawLineStripPrim(itfVertex_t *vertices, itfColor_t *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, sdfDrawTag_t *command) {
+void itfMiscDrawLineStripPrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, sdfDrawTag_t *command) {
     sdfGrPacketHeader_t *packet;
     u64 *dst;
     s32 i;
@@ -452,7 +450,7 @@ void itfMiscDrawLineStripPrim(itfVertex_t *vertices, itfColor_t *colors, u8 *ver
     sdf2DMakePrimPacketHeader(packet, ITF_LINE_STRIP_PRIMITIVE_BITS, 2, 0x51, count);
     dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < count; i++) {
-        itfVertex_t *vertex = &vertices[*vertexIndex++];
+        sdfIVector2_t *vertex = &vertices[*vertexIndex++];
         itfColor_t *color = &colors[*colorIndex++];
 
         dst[0] = (u64)color->components[0] | ((u64)color->components[1] << 32);
@@ -466,7 +464,7 @@ void itfMiscDrawLineStripPrim(itfVertex_t *vertices, itfColor_t *colors, u8 *ver
 }
 
 /* Emit indexed RGBA/XYZ2 records with independent line primitives. */
-void itfMiscDrawLinePrim(itfVertex_t *vertices, itfColor_t *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, sdfDrawTag_t *command) {
+void itfMiscDrawLinePrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, sdfDrawTag_t *command) {
     sdfGrPacketHeader_t *packet;
     u64 *dst;
     s32 i;
@@ -475,7 +473,7 @@ void itfMiscDrawLinePrim(itfVertex_t *vertices, itfColor_t *colors, u8 *vertexIn
     sdf2DMakePrimPacketHeader(packet, ITF_LINES_PRIMITIVE_BITS, 2, 0x51, count);
     dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
     for (i = 0; i < count; i++) {
-        itfVertex_t *vertex = &vertices[*vertexIndex++];
+        sdfIVector2_t *vertex = &vertices[*vertexIndex++];
         itfColor_t *color = &colors[*colorIndex++];
 
         dst[0] = (u64)color->components[0] | ((u64)color->components[1] << 32);
@@ -521,9 +519,9 @@ void itfMiscDrawClampPrim(sdfDrawTag_t *pdrawtag, s32 context, s32 wms, s32 wmt,
 /* Draw filled and remaining quad regions. The optional highlight is produced
  * as signed fixed-point vectors and passed as their four-word RGBA image. */
 void itfMiscDrawGauge(s32 portion, s32 entire, s32 shadow,
-                   itfVertex_t *pos, u32 z, itfColor_t *pcolor_portion,
+                   sdfIVector2_t *pos, u32 z, itfColor_t *pcolor_portion,
                    itfColor_t *pcolor_entire, sdfDrawTag_t *pdrawtag) {
-    itfVertex_t vertices[6];
+    sdfIVector2_t vertices[6];
     itfColorVector_t highlightColors[4];
     s32 left = pos[0].x;
     s32 right = pos[1].x;

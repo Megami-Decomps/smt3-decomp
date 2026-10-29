@@ -13,12 +13,6 @@ typedef struct
 
 typedef struct
 {
-    s32 x;
-    s32 y;
-} itfVertex_t;
-
-typedef struct
-{
     u32 components[4];
 } itfColor_t;
 
@@ -34,7 +28,7 @@ extern itfColor_t D_00332438;
 
 extern itfColor_t D_00332448;
 
-extern void itfMiscDrawSpritePrim2(itfVertex_t *pos, itfColor_t *uv, itfColor_t *color,
+extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv, itfColor_t *color,
                                    u32 z, s32 context, sdfDrawTag_t *pdrawtag);
 
 extern void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index);
@@ -207,7 +201,7 @@ void DrawBackFrame(fclRibbon_t *handle, s32 x, s32 y, u32 z, s32 alpha,
                    s32 flag, sdfDrawTag_t *tag)
 {
     itfColor_t color = {{128, 128, 128, 128}};
-    itfVertex_t pos[2];
+    sdfIVector2_t pos[2];
 
     if (flag & 1) {
         pos[0].x = 0;
@@ -248,7 +242,7 @@ extern itfColor_t D_00332408, D_00332418, D_00332428;
 void DrawBack(fclRibbon_t *handle, s32 x, s32 y, u32 z, s32 alpha, sdfDrawTag_t *tag)
 {
     itfColor_t color = {{128, 128, 128, 128}};
-    itfVertex_t position[2];
+    sdfIVector2_t position[2];
 
     color.components[3] = (128 * alpha) >> 7;
     position[0].x = x;
@@ -313,7 +307,7 @@ void DrawHexagon(fclRibbon_t *handle, s32 x, s32 y, u32 z, s32 alpha,
 
 void DrawHexagonElem(sdfIVector3_t *std_pos, itfColor_t *color, u32 z, sdfDrawTag_t *pdrawtag)
 {
-    itfVertex_t pos[2];
+    sdfIVector2_t pos[2];
 
     pos[0].x = std_pos->pm[0] - 320;
     pos[0].y = std_pos->pm[2];
@@ -338,7 +332,7 @@ void DrawElem(fclRibbon_t *handle, s32 x, s32 y, u32 z,
               s32 alpha, sdfDrawTag_t *tag)
 {
     itfColor_t color = D_0053DA08;
-    itfVertex_t pos[2];
+    sdfIVector2_t pos[2];
     fclribbon_elem_t *entry = handle->pelem;
     s32 count = handle->num;
     s32 i;
