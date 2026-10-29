@@ -653,7 +653,47 @@ s32 rstChkPartyDevilSkillPowerUp(void)
     return result;
 }
 
+#ifdef NON_MATCHING
+extern s32 rstRollPowerUpSkill(u16 skill, datUnitWork_t *unit);
+
+s32 rstCalcSkillPowerUpCore(void)
+{
+    u16 newSkill = rstRndGetPowerUpSkill(EventStart->unit, &EventStart->powerSlot);
+    s32 result;
+
+    EventStart->powerSkill = newSkill;
+    if (newSkill == 0 ||
+        rstChkBeforeSkillOwner(*(volatile u16 *)&EventStart->powerSkill,
+                               (s8)-(u8)EventStart->LevelUpCnt, EventStart->unit) != 0) {
+        return 0;
+    }
+    result = rstChkSkillPowerUp2();
+    if (result == 0) {
+        result = cmbChkSkillOwner(EventStart->powerSkill, EventStart->unit) >= 0;
+        if (rstChkDevilSkillPowerUp(EventStart->unit) != 0) {
+            return 0;
+        }
+        if (rstChkPartyDevilSkillPowerUp() != 0) {
+            result = 1;
+        }
+        if (result == 0) {
+            EventStart->unit->flag |= 0x40;
+            return 1;
+        }
+    }
+    if (result == 1) {
+        s32 rolled = rstRollPowerUpSkill(EventStart->unit->skill[EventStart->powerSlot],
+                                         EventStart->unit);
+        if (rolled != 0) {
+            EventStart->powerSkill = rolled;
+            return 2;
+        }
+    }
+    return 3;
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", rstCalcSkillPowerUpCore);
+#endif
 
 extern s32 rstChkSkillPowerUp1(void);
 
