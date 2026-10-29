@@ -1570,4 +1570,37 @@ __asm__ volatile ( \
     : "=&r"(rgba[0]) \
     : "r"(age), "r"(unit))
 
+/* VU0 scratchpad unpack and reference-map lighting. */
+#define VU0_BEGIN_POINT_UNPACK(address) __asm__ volatile ( \
+    "ctc2.i %0, $vi2" : : "r" (address))
+#define VU0_UNPACK_POINT(dst) __asm__ volatile ( \
+    ".set noreorder\n\tvlqi.xyzw vf4, ($vi2++)\n\tvlqi.xyzw vf5, ($vi2++)\n\t" \
+    "vilwr.w $vi10, ($vi2)\n\tvlqi.xyzw vf6, ($vi2++)\n\tvlqi.xyzw vf7, ($vi2++)\n\t" \
+    "sqc2 vf4, 0(%0)\n\tsqc2 vf5, 16(%0)\n\tsqc2 vf6, 48(%0)\n\t" \
+    "cfc2.ni $2, $vi10\n\tsqc2 vf7, 32(%0)\n\tandi $3, $2, 3\n\t" \
+    "sra $2, $2, 6\n\tpextlb $2, $2, $3\n\tsw $2, 80(%0)\n\t.set reorder" \
+    : : "r" (dst) : "$2", "$3", "memory")
+#define VU0_REFMAP_CACHED_BASIS(cache) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf24, 0(%0)\n\tlqc2 vf25, 16(%0)\n\tlqc2 vf26, 32(%0)\n\t" \
+    "vmul.xyz vf24, vf24, vf10\n\tvmul.xyz vf25, vf25, vf10\n\tvmul.xyz vf26, vf26, vf10\n\t" \
+    "vaddy.x vf24, vf24, vf24y\n\tvaddy.x vf25, vf25, vf25y\n\tvaddy.x vf26, vf26, vf26y\n\t" \
+    "vaddz.x vf24, vf24, vf24z\n\tvaddz.x vf25, vf25, vf25z\n\tvaddz.x vf26, vf26, vf26z\n\t.set reorder" \
+    : : "r" (cache) : "memory")
+#define VU0_REFMAP_DIRECT_BASIS() __asm__ volatile ( \
+    ".set noreorder\n\tvaddx.x vf24, vf0, vf10x\n\tvaddy.x vf25, vf0, vf10y\n\t" \
+    "vaddz.x vf26, vf0, vf10z\n\t.set reorder")
+#define VU0_REFMAP_COLORS(material, color, scale) __asm__ volatile ( \
+    ".set noreorder\n\tpextlb $2, $0, %0\n\tpextlh $2, $0, $2\n\tqmtc2.ni $2, vf4\n\t" \
+    "vitof0.xyzw vf4, vf4\n\tpextlb $2, $0, %1\n\tpextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, vf6\n\tvitof0.xyzw vf6, vf6\n\tqmtc2.ni %2, vf5\n\t" \
+    "vmulx.xyz vf6, vf6, vf5x\n\tvmulw.y vf5, vf5, vf4w\n\tvmul.xyz vf6, vf6, vf4\n\t.set reorder" \
+    : : "r" (material), "r" (color), "r" (scale) : "$2")
+#define VU0_REFMAP_LOAD_NORMAL(node) __asm__ volatile ( \
+    "lqc2 vf2, 16(%0)" : : "r" (node) : "memory")
+#define VU0_REFMAP_STEP(node, next) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.x ACC, vf24, vf2x\n\tvmadday.x ACC, vf25, vf2y\n\t" \
+    "vmaddz.x vf5, vf26, vf2z\n\tlqc2 vf2, 16(%1)\n\t" \
+    "sqc2 vf6, 32(%0)\n\tsqc2 vf5, 48(%0)\n\t.set reorder" \
+    : : "r" (node), "r" (next) : "memory")
+
 #endif /* PS2ASM_H */
