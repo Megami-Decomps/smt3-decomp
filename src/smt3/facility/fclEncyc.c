@@ -3384,7 +3384,7 @@ extern sdfTexHandle_t *D_00345D88[];
 #ifdef NON_MATCHING
 void DrawReadListwinCaption(fclEncyc_instance_tag *pinst)
 {
-    sdfDrawTag_t *tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *tag = sdfGrAllocPacketBuff(sizeof(*tag));
     sdfIVector2_t pos[2];
     itfColor_t uv;
     s32 i;
@@ -3552,7 +3552,7 @@ void DrawReadStatusMoney(fclEncyc_instance_tag *pinst)
     sdfDrawTag_t *tag;
 
     color.components[3] = alpha;
-    tag = sdfGrAllocPacketBuff(0x20);
+    tag = sdfGrAllocPacketBuff(sizeof(*tag));
     sdfDrawTagInit(tag);
     pos[0].x = x + 0x12F0;
     pos[0].y = y;
@@ -3761,7 +3761,7 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
     s32 y;
 
     if (work->help[1].alpha > 0) {
-        tag = sdfGrAllocPacketBuff(0x20);
+        tag = sdfGrAllocPacketBuff(sizeof(*tag));
         sdfDrawTagInit(tag);
         x = work->help[1].x;
         y = work->help[1].y;
@@ -3779,7 +3779,7 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
         D_002F67F8.regFunc(&D_002F67F8, tag);
     }
     if (work->help[0].alpha > 0) {
-        tag = sdfGrAllocPacketBuff(0x20);
+        tag = sdfGrAllocPacketBuff(sizeof(*tag));
         sdfDrawTagInit(tag);
         x = work->help[0].x;
         y = work->help[0].y;
