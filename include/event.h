@@ -119,6 +119,13 @@ typedef struct pmdStageTable_t {
     s32 NameIndex, FileIndex, MajorNum, MinorNum;
 } pmdStageTable_t;
 
+typedef struct pmdCutInfo_t {
+    s32 FirstFrame;
+    s32 LastFrame;
+    s32 TotalFrame;
+    s32 reserve;
+} pmdCutInfo_t;
+
 /* Interpolated event vector and packed colour. */
 typedef struct evtBlendVecColor_t {
     f32 vec[4];

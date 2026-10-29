@@ -1836,12 +1836,7 @@ s32 evtMakeViewerPath(s32 kind)
 }
 
 /* PM1/PM2 layouts and pointers follow evtGetPolygonMovieWorkData1. */
-typedef struct pmdCutInfo_t {
-    s32 FirstFrame;
-    s32 LastFrame;
-    s32 TotalFrame;
-    s32 reserve;
-} pmdCutInfo_t;
+
 
 
 

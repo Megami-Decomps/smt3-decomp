@@ -9,10 +9,7 @@
 void *dds3GetProcessData(dds3ProcessID_t *id);
 
 /* SMT3 allocates and clears 0xD4 bytes; the process flag helpers use its head. */
-typedef struct pmdCutInfo_t {
-    s32 FirstFrame;
-    s32 LastFrame;
-} pmdCutInfo_t;
+
 
 
 
