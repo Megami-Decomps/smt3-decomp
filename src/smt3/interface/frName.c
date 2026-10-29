@@ -151,7 +151,27 @@ void frRestoreNameImage(s8 target)
 INCLUDE_ASM(const s32, "interface/frName", frRestoreNameImage);
 #endif
 
+extern void frGetMessageCode(u16 code);
+extern frFontHandle_t *frSetUserImage(GsFont_t *font, frFontHandle_t *chain);
+extern void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst);
+extern s32 frGetYShiftLev(s8 style, s32 fontNo);
+
+#ifdef NON_MATCHING
+frFontHandle_t *frCreateNameHandle(s8 target, s8 glyph, frFontHandle_t *chain)
+{
+    u8 *codeBytes = frNameGlobalWork->nameGlyphCodes[target][glyph];
+    s32 shiftIndex = ((codeBytes[0] << 8) | codeBytes[1]) - 0x20;
+
+    frGetMessageCode(shiftIndex + 0x20);
+    chain = frSetUserImage(pFont[target][glyph], chain);
+    chain->lastChild->glyphCodeOrContext.glyphCode = shiftIndex + 0x20;
+    frGetXShiftLev(chain->lastChild, shiftIndex, 0);
+    chain->lastChild->y = frGetYShiftLev(0, shiftIndex);
+    return chain;
+}
+#else
 INCLUDE_ASM(const s32, "interface/frName", frCreateNameHandle);
+#endif
 
 frFontHandle_t *frGetName1NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption)
 {
