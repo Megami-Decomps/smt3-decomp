@@ -1,4 +1,10 @@
 #include "common.h"
+
+#ifdef NON_MATCHING
+extern void evtBitOff(s32 no);
+extern void evtSetAgeOfMoon(u8 age);
+extern s32 evtBitCheck(s32 no);
+#endif
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
