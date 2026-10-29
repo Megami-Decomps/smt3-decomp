@@ -734,3 +734,26 @@ tail-calls TLB setup; neither initializer manufactures a return value.
 The installed copy implementations have explicit zero results, so their
 copy syscall declarations retain that integer return. Cache flushing and
 setup calls discard their results.
+
+
+## Signed long conversion
+
+`_strtol_r` matches all 568 instruction bytes with 64-bit `long` and
+`unsigned long`, as required by the EE ABI. Signed character loads feed
+`_ctype_ + 1`; the routine consumes whitespace and one optional sign, selects
+hexadecimal after an eligible `0x` prefix, and otherwise selects octal or
+decimal when the base is zero. It adds no base-range validation.
+
+The unsigned cutoff magnitude is `0x8000000000000000` for negative input
+and `0x7fffffffffffffff` otherwise. Remainder is computed before quotient;
+the corresponding providers are the existing `__umoddi3` and the inferred
+`__udivdi3` at `0x002E6048`. Digit accumulation uses the inferred `__muldi3`
+at `0x002D3398`; both newly named providers keep their assembly bodies.
+
+An unclassified character breaks the scan; a classified digit outside the
+base goes directly to the shared completion label. This preserves the
+native loop layout. An overflowing magnitude stops updating the accumulator
+but continues consuming valid digits, then saturates and writes error 34.
+Other paths leave the error unchanged. The end pointer is the original
+input if no digit was accepted, including a sign or hexadecimal prefix
+without digits; otherwise it identifies the first unconsumed character.
