@@ -160,6 +160,16 @@ extern fldTakaraTbl_t fldTakaraTable[];
 
 typedef struct {
     u8 x;
+    u8 y;
+    u8 z;
+    u8 w;
+    u8 unk04[4];
+    u32 routeOffset; /* byte offset from the map header */
+    u32 routeCount;
+} fldMapCell_t;
+
+typedef struct {
+    u8 x;
     u8 z;
     u16 angle;
 } fldRoutePoint_t;

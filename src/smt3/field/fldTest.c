@@ -44,16 +44,6 @@ extern void dds3GetPosPoseSet(dds3Basic_t *pBasic);
 extern void fldRunDanteShutdown(void);
 
 typedef struct {
-    u8 x;
-    u8 y;
-    u8 z;
-    u8 w;
-    u8 unk04[4];
-    u32 routeOffset; /* byte offset from the map header */
-    u32 routeCount;
-} fldMapCell_t;
-
-typedef struct {
     u32 firstOffset;
     u32 cellCount;
     u32 secondOffset;
