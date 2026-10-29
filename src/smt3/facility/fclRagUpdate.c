@@ -159,10 +159,7 @@ extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
 
 
-typedef struct
-{
-    datUnitWork_t unit;
-} cmbUnit_t;
+
 
 s8 cmbFindStockSlot(cmbUnit_t *list, u8 count);
 

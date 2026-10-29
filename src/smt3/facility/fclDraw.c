@@ -1,4 +1,5 @@
 #include "common.h"
+#include "facility.h"
 #include "camp.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -7,10 +8,7 @@
 #include "event.h"
 #include "font.h"
 
-typedef struct
-{
-    /* 0x00 */ datUnitWork_t unit;
-} cmbUnit_t;
+
 
 extern datDevilTableEntry_t datDevilTable[];
 

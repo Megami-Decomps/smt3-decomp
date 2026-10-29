@@ -84,10 +84,7 @@ typedef struct
     u16 result;
 } cmbPairEntry_t;
 
-typedef struct
-{
-    /* 0x00 */ datUnitWork_t unit;
-} cmbUnit_t;
+
 
 extern cmbRaceEntry_t D_0032DA70[];
 
