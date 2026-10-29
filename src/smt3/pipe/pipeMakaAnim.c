@@ -35,11 +35,11 @@ extern tagPipeTexture *MakaTex;
 
 extern s32 ZmakaCount;
 
-extern void makaDrawNormal(void);
+extern void makaDrawNormal(tagMakaObject_t *object);
 
-extern void makaDrawSingle(void);
+extern void makaDrawSingle(tagMakaObject_t *object);
 
-extern void makaDrawMulti(void);
+extern void makaDrawMulti(tagMakaObject_t *object);
 
 extern void *makaWork;
 
@@ -113,12 +113,12 @@ void makaDraw(tagMakaObject_t *makaPtr)
 {
     if (makaPtr->maka < 0) {
         if (ZmakaCount == 1) {
-            makaDrawSingle();
+            makaDrawSingle(makaPtr);
         } else {
-            makaDrawMulti();
+            makaDrawMulti(makaPtr);
         }
     } else {
-        makaDrawNormal();
+        makaDrawNormal(makaPtr);
         makaPtr = NULL;
     }
 }
