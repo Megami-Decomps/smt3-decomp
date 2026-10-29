@@ -725,3 +725,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 324 B	stdin dispatc
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 452 B	RPC request execution with native reply/cache order, forwarding packet selection, two four-word DMA descriptors and retry countdown; complete owner 25 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	2 SDK fn / 172 B	RPC read-data reply and registered-server lookup with captured routing fields and distinct queue/registration links; complete owner 32 match, 0 differ
 src/smt3/newbattle/nbMainProcess.c	redthing1	done	2026-10-28	0 fn / 0 B; 1 guarded draft	native-audited main diagnostic renderer, 2664/2672 B with row-coordinate/control residual; no exact credit
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 124 B	stdout/stderr dispatch with unsigned descriptor range, persistent TTY initialization and native error/result forwarding; complete owner 31 match, 0 differ

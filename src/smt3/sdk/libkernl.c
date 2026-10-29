@@ -287,11 +287,24 @@ INCLUDE_ASM(const s32, "sdk/libkernl", VSync);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", VSync2);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", write);
-
 extern s32 D_0052C2A4 __attribute__((section(".data")));
 extern s32 sceTtyInit(void);
 extern s32 sceTtyRead(char *buffer, s32 length);
+extern s32 sceTtyWrite(const char *buffer, s32 length);
+
+s32 write(s32 descriptor, const void *buffer, s32 length)
+{
+    if ((u32)descriptor - 1 < 2) {
+        if (D_0052C2A4 == 0) {
+            if (sceTtyInit() == 0) {
+                return -1;
+            }
+            D_0052C2A4 = 1;
+        }
+        return sceTtyWrite(buffer, length);
+    }
+    return -1;
+}
 
 s32 read(s32 descriptor, void *buffer, s32 length)
 {
