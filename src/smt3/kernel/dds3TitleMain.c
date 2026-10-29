@@ -48,7 +48,384 @@ extern void eglLinkSprite(s32 x, s32 y, s32 w, s32 h,
                           s32 u, s32 v, s32 uw, s32 vh,
                           u32 rgba0, u32 rgba1, u32 rgba2, u32 rgba3, sdfTexHandle_t *th);
 
+#ifdef NON_MATCHING
+extern dds3TitleWork_t *titleWork;
+extern s32 D_0054FD2C, D_0054FD38, dds3KernelDebugSign;
+extern char D_0053DDA8[];
+extern s32 printf(const char *format, ...);
+extern void rsetOtOfs(s32 offset);
+extern void rsetAlpha(s32 mode);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
+extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                        s32 color, sdfTexHandle_t *texture);
+extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h,
+                      u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1,
+                      u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3);
+extern s32 p2sdLoadCheckMidi(s32 id);
+extern void p2sdLoadSMGFile(s32 id);
+extern s32 p2sdPlayBGM(s32 id);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeIn2(s32 frames);
+extern s32 dds3FadeCheck(void);
+extern s32 dds3PlayMovieByIndex(s32 index);
+extern s32 dds3WaitMovieEnd(void);
+extern void movieStop(void);
+extern void dds3TitleClearFade(void);
+extern void dds3TitleSetFade(void);
+extern void dds3TitleUpdateFade(void);
+extern void dds3TitleUpdateCursor(void);
+extern void dds3TitleDrawMenu(void);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 restore);
+
+#define TITLE_BUTTON_ACTIVE() (dds3PadButtonState[0x21] != 0 || dds3PadButtonState[0x23] != 0 || \
+    dds3PadButtonState[0x22] != 0 || dds3PadButtonState[0x20] != 0 || dds3PadButtonState[0x2C] != 0)
+#define TITLE_BUTTON_PRESSED() (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x23] < 0 || \
+    dds3PadButtonState[0x22] < 0 || dds3PadButtonState[0x20] < 0 || dds3PadButtonState[0x2C] < 0)
+
+s32 dds3Titlemain(dds3ProcessID_t *id)
+{
+    s32 counter;
+    s32 alpha;
+    s32 endFrame;
+    u32 initialMode;
+
+    rsetOtOfs(0x48);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    initialMode = (u32)titleWork->mode;
+    switch (initialMode) {
+    case 0:
+        if (p2sdLoadCheckMidi(0x3A0000) != 0) {
+            titleWork->mode = 2;
+            titleWork->unk_20 = 0;
+        } else {
+            p2sdLoadSMGFile(0x3A0000);
+            titleWork->unk_20 = 0;
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        }
+        aDrawBoxG(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80, 0, 0, 0, 0x80,
+                  0, 0, 0, 0x80, 0, 0, 0, 0x80);
+        break;
+    case 1:
+        if (p2sdLoadCheckMidi(0x3A0000) != 0) {
+            titleWork->unk_20 = 0;
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        }
+        break;
+    case 2:
+        dds3FadeIn(0, 0, 0, 20);
+        titleWork->unk_20 = 0;
+        titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        dds3KernelDebugSign = 0;
+        movieStop();
+        break;
+    case 3:
+        DrwSprite2D(0x5A, 0x90, 0x13C, 0x81, 0x7C, 0, 0x13C, 0x81, 0x80808080, titleWork->texHandle[0]);
+        if (dds3FadeCheck() == 0) {
+            titleWork->unk_20 = 0;
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+            movieStop();
+        }
+        break;
+    case 4:
+        DrwSprite2D(0x5A, 0x90, 0x13C, 0x81, 0x7C, 0, 0x13C, 0x81, 0x80808080, titleWork->texHandle[0]);
+        if (TITLE_BUTTON_ACTIVE()) titleWork->unk_20 = 50;
+        counter = titleWork->unk_20;
+        if (counter < 50) titleWork->unk_20 = (s32)((u32)counter + 1);
+        else {
+            titleWork->unk_20 = 0;
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        }
+        break;
+    case 5:
+        alpha = (s32)(128U - ((u32)titleWork->unk_20 << 3));
+        if (alpha > 0)
+            DrwSprite2D(0x5A, 0x90, 0x13C, 0x81, 0x7C, 0, 0x13C, 0x81,
+                        ((u32)alpha << 24) | 0x808080, titleWork->texHandle[0]);
+        counter = titleWork->unk_20;
+        if (counter < 22) titleWork->unk_20 = (s32)((u32)counter + 1);
+        else {
+            titleWork->unk_20 = 0;
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        }
+        break;
+    case 6:
+        alpha = (s32)((u32)titleWork->unk_20 * 6U);
+        if (alpha > 128) alpha = 128;
+        if (alpha > 0)
+            DrwSprite2D(0xA4, 0x5E, 0xB8, 0x104, 0, 0, 0x7B, 0xAE,
+                        ((u32)alpha << 24) | 0x808080, titleWork->texHandle[0]);
+        counter = titleWork->unk_20;
+        if (counter < 20) titleWork->unk_20 = (s32)((u32)counter + 1);
+        else {
+            titleWork->unk_20 = 0;
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        }
+        break;
+    case 7:
+        DrwSprite2D(0xA4, 0x5E, 0xB8, 0x104, 0, 0, 0x7B, 0xAE, 0x80808080, titleWork->texHandle[0]);
+        if (TITLE_BUTTON_ACTIVE()) titleWork->unk_20 = 50;
+        counter = titleWork->unk_20;
+        if (counter < 50) titleWork->unk_20 = (s32)((u32)counter + 1);
+        else {
+            dds3FadeOut(0, 0, 0, 20);
+            titleWork->unk_20 = 0;
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        }
+        break;
+    case 8:
+        if (titleWork->unk_20 < 22) {
+            DrwSprite2D(0xA4, 0x5E, 0xB8, 0x104, 0, 0, 0x7B, 0xAE, 0x80808080, titleWork->texHandle[0]);
+            titleWork->unk_20 = (s32)((u32)titleWork->unk_20 + 1);
+        } else {
+            titleWork->unk_34 = -1;
+            dds3FadeIn(0, 0, 0, 30);
+            if (D_0054FD38 & 1) {
+                dds3PlayMovieByIndex(24);
+                titleWork->unk_3C = 1;
+            } else {
+                dds3PlayMovieByIndex(23);
+                titleWork->unk_3C = 0;
+            }
+            D_0054FD38 = (s32)((u32)D_0054FD38 + 1);
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+            titleWork->unk_20 = 0;
+        }
+        break;
+    case 9:
+        if (movieDecodeWork.frameIndex >= 2700) {
+            dds3TitleClearFade();
+            titleWork->unk_20 = 0;
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        } else if (TITLE_BUTTON_ACTIVE()) {
+            dds3FadeOut(255, 255, 255, 15);
+            titleWork->mode = 23;
+            titleWork->unk_20 = 0;
+        }
+        break;
+    case 10:
+        dds3TitleUpdateFade();
+        endFrame = (s32)((u32)movieDecodeWork.frameCount - 20U);
+        if (dds3WaitMovieEnd() != 0 || movieDecodeWork.frameIndex >= endFrame) {
+            dds3FadeOut(0, 0, 0, 15);
+            titleWork->mode = 13;
+            titleWork->unk_20 = 0;
+        } else if (TITLE_BUTTON_ACTIVE()) {
+            dds3FadeOut(0, 0, 0, 15);
+            p2sdPlaySE(0x3A0001, 127, 63);
+            titleWork->mode = 11;
+            titleWork->unk_20 = 0;
+        }
+        break;
+    case 11: case 20: case 23:
+        if (dds3FadeCheck() == 0) {
+            movieStop();
+            titleWork->unk_20 = 0;
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        }
+        break;
+    case 12:
+        counter = titleWork->unk_20;
+        if (counter < 4) titleWork->unk_20 = (s32)((u32)counter + 1);
+        else {
+            dds3FadeIn2(15);
+            dds3PlayMovieByIndex(13);
+            titleWork->mode = 18;
+            titleWork->unk_24 = 0;
+            titleWork->unk_2C = 0;
+            titleWork->cursor = 0;
+            titleWork->unk_20 = 0;
+        }
+        break;
+    case 13:
+        dds3TitleUpdateFade();
+        counter = titleWork->unk_20;
+        if (counter < 15) titleWork->unk_20 = (s32)((u32)counter + 1);
+        else if (dds3WaitMovieEnd() != 0) {
+            movieStop();
+            titleWork->mode = 2;
+            titleWork->unk_20 = 0;
+        }
+        break;
+    case 14:
+        dds3FadeIn2(15);
+        titleWork->unk_28 = 128;
+        titleWork->unk_20 = 0;
+        titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        titleWork->unk_30 = 0;
+        dds3TitleSetFade();
+        break;
+    case 15:
+        dds3TitleUpdateFade();
+        titleWork->unk_20 = (s32)((u32)titleWork->unk_20 + 1);
+        if (dds3FadeCheck() == 0) {
+            titleWork->unk_20 = 0;
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        }
+        break;
+    case 16:
+        dds3TitleUpdateFade();
+        if (movieDecodeWork.frameCount == 0) {
+            printf(D_0053DDA8);
+        } else {
+            endFrame = (s32)((u32)movieDecodeWork.frameCount - 20U);
+            if (dds3WaitMovieEnd() != 0 || movieDecodeWork.frameIndex >= endFrame) {
+                dds3FadeOut(0, 0, 0, 15);
+                titleWork->mode = 13;
+                titleWork->unk_20 = 0;
+                break;
+            }
+        }
+        if (TITLE_BUTTON_PRESSED()) {
+            dds3FadeOut(0, 0, 0, 15);
+            p2sdPlaySE(0x3A0001, 127, 63);
+            titleWork->mode = 17;
+            titleWork->unk_20 = 0;
+        }
+        break;
+    case 17:
+        dds3TitleUpdateFade();
+        if (titleWork->unk_20 == 16) movieStop();
+        counter = titleWork->unk_20;
+        if (counter < 18) titleWork->unk_20 = (s32)((u32)counter + 1);
+        else {
+            titleWork->unk_20 = 0;
+            titleWork->mode = 12;
+        }
+        break;
+    case 18: case 22:
+        titleWork->unk_2C = (s32)((u32)titleWork->unk_2C + 1);
+        dds3TitleDrawMenu();
+        counter = titleWork->unk_20;
+        if (counter < 24) {
+            titleWork->unk_20 = (s32)((u32)counter + 1);
+            alpha = (s32)((u32)titleWork->unk_28 - 5U);
+            titleWork->unk_28 = alpha;
+            if (alpha < 0) titleWork->unk_28 = 0;
+        } else {
+            titleWork->unk_24 = 0;
+            if (initialMode == 18) {
+                titleWork->unk_20 = 0;
+                titleWork->mode = (s32)((u32)titleWork->mode + 1);
+            } else {
+                titleWork->mode = 19;
+                titleWork->unk_20 = 0;
+            }
+        }
+        break;
+    case 19:
+        if (titleWork->unk_24 == 1) {
+            titleWork->unk_24 = 0;
+            dds3PlayMovieByIndex(13);
+        } else if (dds3WaitMovieEnd() != 0) {
+            movieStop();
+            titleWork->unk_24 = 1;
+        }
+        dds3TitleUpdateCursor();
+        dds3TitleDrawMenu();
+        if (dds3PadButtonState[0x23] < 0) {
+            p2sdPlaySE(10, 127, 63);
+            dds3FadeOut(0, 0, 0, 14);
+            titleWork->mode = 25;
+            titleWork->unk_20 = 0;
+        } else if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x2C] < 0) {
+            if (titleWork->cursor == 1) dds3FadeOut(0, 0, 0, 60);
+            else dds3FadeOut(0, 0, 0, 15);
+            p2sdPlaySE(8, 127, 63);
+            titleWork->unk_20 = 0;
+            titleWork->mode = (s32)((u32)titleWork->mode + 1);
+        }
+        break;
+    case 21:
+        counter = titleWork->unk_20;
+        if (counter < 4) titleWork->unk_20 = (s32)((u32)counter + 1);
+        else {
+            switch (titleWork->cursor) {
+            case 0:
+                D_0054FD2C = -1;
+                dds3AdminiCallSequence(3, NULL, 0, 0);
+                titleWork->mode = 28;
+                break;
+            case 1:
+                if (counter < 30) titleWork->unk_20 = (s32)((u32)counter + 1);
+                else {
+                    dds3FadeIn(0, 0, 0, 10);
+                    dds3AdminiCallSequence(41, NULL, 0, 0);
+                    titleWork->mode = 28;
+                }
+                break;
+            case 2:
+                dds3FadeIn(0, 0, 0, 10);
+                p2sdPlayBGM(0x3A0000);
+                dds3AdminiCallSequence(17, NULL, 0, 0);
+                titleWork->mode = 28;
+                break;
+            case 3:
+                if (counter < 30) titleWork->unk_20 = (s32)((u32)counter + 1);
+                else {
+                    titleWork->unk_20 = 0;
+                    titleWork->mode = 26;
+                    dds3FadeIn(0, 0, 0, 60);
+                    dds3PlayMovieByIndex(0);
+                }
+                break;
+            }
+        }
+        break;
+    case 24:
+        counter = (s32)((u32)titleWork->unk_20 + 1);
+        titleWork->unk_20 = counter;
+        if (counter >= 6) {
+            dds3PlayMovieByIndex(18);
+            titleWork->mode = 14;
+            titleWork->unk_20 = 0;
+        }
+        break;
+    case 25:
+        dds3TitleDrawMenu();
+        counter = titleWork->unk_20;
+        if (counter < 15) titleWork->unk_20 = (s32)((u32)counter + 1);
+        else {
+            movieStop();
+            titleWork->mode = 24;
+            titleWork->unk_20 = 0;
+        }
+        break;
+    case 26:
+        counter = titleWork->unk_20;
+        if (counter > 0) titleWork->unk_20 = (s32)((u32)counter + 1);
+        else if (dds3WaitMovieEnd() != 0 || (movieDecodeWork.frameIndex >= 31 && TITLE_BUTTON_PRESSED())) {
+            dds3FadeOut(255, 255, 255, 60);
+            titleWork->unk_20 = 1;
+        }
+        if (titleWork->unk_20 >= 60) {
+            movieStop();
+            titleWork->mode = 27;
+            titleWork->unk_20 = 0;
+        }
+        break;
+    case 27:
+        counter = (s32)((u32)titleWork->unk_20 + 1);
+        titleWork->unk_20 = counter;
+        if (counter >= 5) {
+            dds3FadeIn(255, 255, 255, 15);
+            dds3PlayMovieByIndex(13);
+            titleWork->mode = 22;
+            titleWork->unk_28 = 128;
+            titleWork->unk_2C = 0;
+            titleWork->unk_20 = 0;
+            titleWork->unk_30 = 0;
+        }
+        break;
+    }
+    return 0;
+}
+#undef TITLE_BUTTON_ACTIVE
+#undef TITLE_BUTTON_PRESSED
+#else
 INCLUDE_ASM(const s32, "kernel/dds3TitleMain", dds3Titlemain);
+#endif
 
 s32 titleStart(s32 mode)
 {
