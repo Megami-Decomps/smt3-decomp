@@ -140,7 +140,40 @@ GParam *sceGsGetGParam(void)
     return &D_00529F20;
 }
 
+/* The VIF1 register-initialization packet pushed through the FIFO. */
+extern const u128 D_00529F30[2];
+
+/* Resets VU1 through COP2 control register 28; the operand is an input even
+ * though the block writes it, so the zero has to be materialized first. */
+#define EE_VU1_RESET(t) __asm__ volatile ( \
+    ".set noreorder\n\tcfc2.ni %0, $vi28\n\tori %0, %0, 0x200\n\t" \
+    "ctc2.ni %0, $vi28\n\tsync.p\n\t.set reorder" : : "r" (t))
+
+/* NON_MATCHING: 108 bytes against retail's 104. Everything through the VU1
+ * reset matches. Retail ends with the GIF_CTRL write in the jr delay slot,
+ * which this compiler will not do for a volatile access, and writing it
+ * through a plain pointer instead turns the address into a two-instruction
+ * assembler macro that is equally ineligible. Taking the address from a
+ * declaration-initialized pointer local does fill the slot at the right 104
+ * bytes, but then the address is materialized 12 words early, before the
+ * asm block, where retail materializes it between the first quadword load
+ * and its store. */
+#ifdef NON_MATCHING
+void sceGsResetPath(void)
+{
+    u32 vu1 = 0;
+
+    *(volatile u32 *)0x10003C10 = 1;
+    *(volatile u32 *)0x10003C20 = 2;
+    EE_SYNC();
+    EE_VU1_RESET(vu1);
+    *(volatile u128 *)0x10005000 = D_00529F30[0];
+    *(volatile u128 *)0x10005000 = D_00529F30[1];
+    *(volatile u32 *)0x10003000 = 1;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsResetPath);
+#endif
 
 s32 checkModelVersion(void)
 {
@@ -164,7 +197,99 @@ s32 checkModelVersion(void)
 
 INCLUDE_ASM(const s32, "sdk/libgraph", _GetGsDxDyOffset);
 
+/* NON_MATCHING: 892 bytes against retail's 888, 40 of 222 words differing,
+ * all of them inside the NTSC and PAL display arithmetic. Everything before it
+ * matches: the parameter-block call, the mode range test, the model-version
+ * path, the _GetGsDxDyOffset call with its four frame addresses, the shared
+ * zeroing block with the reloaded mode halfword duplicated into both
+ * predecessors, pmode, the three cross-jumped smode2 stores and dispfb.
+ * Two differences remain in the display term. Retail adds the horizontal
+ * offset constant to the frame word 64-bit (daddiu) and only then the
+ * dx-by-magnification product, where the plain C here keeps that sum 32-bit;
+ * writing the term with a 64-bit operand does produce daddiu but folds the
+ * constant into the product instead and costs seven more words elsewhere. And
+ * retail decrements the magnification in the mflo register after both
+ * multiplies, where this shape needs one extra register copy first. */
+#ifdef NON_MATCHING
+extern void _GetGsDxDyOffset(s32 mode, s32 *dx, s32 *dy, s32 *w, s32 *h);
+extern void scePrintf(const char *fmt, ...);
+extern const char D_0054A3F0[];
+
+void sceGsSetDefDispEnv(sceGsDispEnv *disp, s16 psm, s16 w, s16 h, s16 dx, s16 dy)
+{
+    s32 offsetX;
+    s32 offsetY;
+    s32 sizeX;
+    s32 sizeY;
+    GParam *param;
+    s32 magh;
+
+    param = sceGsGetGParam();
+    if (param->mode != 2 && param->mode != 3 && checkModelVersion() != 0) {
+        _GetGsDxDyOffset((s16)param->mode, &offsetX, &offsetY, &sizeX, &sizeY);
+    } else {
+        sizeY = 0;
+        sizeX = 0;
+        offsetY = 0;
+        offsetX = 0;
+    }
+    disp->pmode = 0x66;
+    if (param->interlace != 0) {
+        if (param->fieldMode != 0) {
+            disp->smode2 = 3;
+        } else {
+            disp->smode2 = 1;
+        }
+    } else {
+        disp->smode2 = 2;
+    }
+    disp->dispfb = ((u64)(psm & 0xF) << 15) | ((u64)(((w + 63) >> 6) & 0x3F) << 9);
+    if ((s16)param->mode == 2) {
+        if (param->interlace == 1) {
+            magh = (2560 + w - 1) / w;
+            disp->display = ((u64)(magh - 1) << 23) |
+                ((u64)((param->fieldMode != 0 ? h * 2 : h) - 1) << 44) |
+                ((u64)((636 + dx * magh + offsetX) & 0xFFF)) |
+                ((u64)((dy + offsetY + 50) & 0xFFF) << 12) |
+                ((u64)((magh * w) - 1) << 32);
+        } else {
+            magh = (2560 + w - 1) / w;
+            disp->display = ((u64)(magh - 1) << 23) |
+                ((u64)(h - 1) << 44) |
+                ((u64)((636 + dx * magh + offsetX) & 0xFFF)) |
+                ((u64)((dy + offsetY + 25) & 0xFFF) << 12) |
+                ((u64)((magh * w) - 1) << 32);
+        }
+    } else if ((s16)param->mode == 3) {
+        if (param->interlace == 1) {
+            magh = (2560 + w - 1) / w;
+            disp->display = ((u64)(magh - 1) << 23) |
+                ((u64)((param->fieldMode != 0 ? h * 2 : h) - 1) << 44) |
+                ((u64)((656 + dx * magh + offsetX) & 0xFFF)) |
+                ((u64)((dy + offsetY + 72) & 0xFFF) << 12) |
+                ((u64)((magh * w) - 1) << 32);
+        } else {
+            magh = (2560 + w - 1) / w;
+            disp->display = ((u64)(magh - 1) << 23) |
+                ((u64)(h - 1) << 44) |
+                ((u64)((656 + dx * magh + offsetX) & 0xFFF)) |
+                ((u64)((dy + offsetY + 36) & 0xFFF) << 12) |
+                ((u64)((magh * w) - 1) << 32);
+        }
+    } else if ((s16)param->mode == 80) {
+        disp->display = ((u64)(h - 1) << 44) |
+            ((u64)((w * 2) - 1) << 32) |
+            0x800000 |
+            ((u64)((dy + offsetY + 35) & 0xFFF) << 12) |
+            ((u64)((232 + dx * 2 + ((720 - w) / 2) * 2 + offsetX) & 0xFFF));
+    } else {
+        scePrintf(D_0054A3F0, (s16)param->mode);
+    }
+    disp->bgcolor = 0;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsSetDefDispEnv);
+#endif
 
 void sceGsPutDispEnv(sceGsDispEnv *disp)
 {
@@ -184,7 +309,130 @@ void sceGsPutDispEnv(sceGsDispEnv *disp)
     }
 }
 
+
+#define D1_CHCR   (*(volatile u32 *)0x10009000)
+#define VIF1_STAT (*(volatile u32 *)0x10003C00)
+#define GIF_STAT  (*(volatile u32 *)0x10003020)
+
+/* VPU_STAT, COP2 control register 29. */
+#define EE_GET_VPU_STAT(out) __asm__ volatile ( \
+    ".set noreorder\n\tcfc2.ni %0, $vi29\n\t.set reorder" : "=r" (out))
+
+/* NON_MATCHING: 828 bytes against retail's 792, nine words of it the unfilled
+ * delay slots of the ten diagnostic calls. Retail reads each register in its
+ * scePrintf delay slot off an address held in a register (lui plus ori, zero
+ * displacement), which is the shape this compiler emits only for a volatile
+ * access, and it never moves a volatile access into a delay slot. A plain read
+ * is eligible but then the address collapses into a single two-instruction
+ * macro load, which is ineligible for the slot in turn, and ee-as does not
+ * swap instructions into delay slots at all. Everything else matches: the five
+ * spin loops and their rotated shape, the shared eleven-call tail that
+ * cross-jumping merges out of the five written-out copies, the counter test,
+ * and the five conditional moves of the non-blocking section. The two
+ * remaining words are branch displacements that the extra nops shift. */
+#ifdef NON_MATCHING
+/* The five timeout messages and the ten register-dump formats. */
+extern const char D_0054A428[];
+extern const char D_0054A458[];
+extern const char D_0054A468[];
+extern const char D_0054A478[];
+extern const char D_0054A488[];
+extern const char D_0054A498[];
+extern const char D_0054A4A8[];
+extern const char D_0054A4B8[];
+extern const char D_0054A4C8[];
+extern const char D_0054A4D8[];
+extern const char D_0054A4F0[];
+extern const char D_0054A508[];
+extern const char D_0054A538[];
+extern const char D_0054A568[];
+extern const char D_0054A590[];
+
+#define DUMP(fmt, addr)                      \
+    scePrintf(fmt, *(volatile u32 *)(addr))
+
+#define DUMP_REGS()                          \
+    DUMP(D_0054A458, 0x10009000);            \
+    DUMP(D_0054A468, 0x10009030);            \
+    DUMP(D_0054A478, 0x10009010);            \
+    DUMP(D_0054A488, 0x10009020);            \
+    DUMP(D_0054A498, 0x1000A000);            \
+    DUMP(D_0054A4A8, 0x1000A030);            \
+    DUMP(D_0054A4B8, 0x1000A010);            \
+    DUMP(D_0054A4C8, 0x1000A020);            \
+    DUMP(D_0054A4D8, 0x10003C00);            \
+    DUMP(D_0054A4F0, 0x10003020)
+
+s32 sceGsSyncPath(s32 mode, u16 timeout)
+{
+    u32 stat;
+    u32 i = 0;
+
+    if (mode == 0) {
+        while (D1_CHCR & 0x100) {
+            if (i++ > 0x1000000) {
+                scePrintf(D_0054A428);
+                DUMP_REGS();
+                return -1;
+            }
+        }
+        while (D2_CHCR & 0x100) {
+            if (i++ > 0x1000000) {
+                scePrintf(D_0054A508);
+                DUMP_REGS();
+                return -1;
+            }
+        }
+        while (VIF1_STAT & 0x1F000003) {
+            if (i++ > 0x1000000) {
+                scePrintf(D_0054A538);
+                DUMP_REGS();
+                return -1;
+            }
+        }
+        EE_GET_VPU_STAT(stat);
+        while (stat & 0x100) {
+            if (i++ > 0x1000000) {
+                scePrintf(D_0054A568);
+                DUMP_REGS();
+                return -1;
+            }
+            EE_GET_VPU_STAT(stat);
+        }
+        while (GIF_STAT & 0xC00) {
+            if (i++ > 0x1000000) {
+                scePrintf(D_0054A590);
+                DUMP_REGS();
+                return -1;
+            }
+        }
+        return 0;
+    } else {
+        s32 result = 0;
+
+
+        if (D1_CHCR & 0x100) {
+            result |= 1;
+        }
+        if (D2_CHCR & 0x100) {
+            result |= 2;
+        }
+        if (VIF1_STAT & 0x1F000003) {
+            result |= 4;
+        }
+        EE_GET_VPU_STAT(stat);
+        if (stat & 0x100) {
+            result |= 8;
+        }
+        if (GIF_STAT & 0xC00) {
+            result |= 16;
+        }
+        return result;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsSyncPath);
+#endif
 
 s32 sceGsSetDefLoadImage(sceGsLoadImage *p, s16 dbp, s16 dbw, s16 dpsm, s16 dsax, s16 dsay,
                          s16 rrw, s16 rrh)
