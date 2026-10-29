@@ -1259,31 +1259,43 @@ void RunFrame3(s32 nowframe) {
     }
 }
 
-#ifdef NON_MATCHING
 void RunFrameUnit(evtViewerObject_s *track, s32 nowFrame)
 {
-    evtFrameInfo_t *frame;
+    evtFrameInfo_t *frame = track->children;
     s32 mode = 0;
     s32 otherMode = 2;
+    s32 value;
 
-    for (frame = track->children; frame != NULL && nowFrame >= frame->frame;
-         frame = frame->next) {
-        s32 value = frame->param.sb[0];
-
-        if (value >= 0) {
-            if (value < 2) {
-                mode = value;
-            } else if (value < 5) {
-                otherMode = value;
-            }
-        }
+    goto test_frame;
+next_frame:
+    frame = frame->next;
+test_frame:
+    if (frame == NULL) {
+        goto finished;
     }
+    if (nowFrame < frame->frame) {
+        goto finished;
+    }
+    value = frame->param.sb[0];
+    switch (value) {
+    case 0:
+    case 1:
+        mode = value;
+        break;
+    case 2:
+    case 3:
+    case 4:
+        otherMode = value;
+        break;
+    default:
+        break;
+    }
+    goto next_frame;
+finished:
     evtRunUnitMode(track->basic, mode);
     evtRunUnitMode(track->basic, otherMode);
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrameUnit);
-#endif
+
 
 extern void RunFrameUnit(evtViewerObject_s *track, s32 nowFrame);
 extern void RunFrame2(evtViewerObject_s *track, evtFrameInfo_t *next,
