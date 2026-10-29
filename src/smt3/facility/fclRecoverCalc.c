@@ -30,7 +30,7 @@ extern char D_0053D3F8[];
 
 extern char D_0053D408[];
 
-extern void frDestroyFontRequestAfter(void *pFRQ);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *font);
 
 extern s32 sprintf(char *out, const char *fmt, ...);
 
@@ -50,7 +50,7 @@ extern void fclDrawSpriteFilter(s32 x, s32 y, s32 d, u8 filter, s32 *color, s32 
 
 extern void *frwGetNumFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
 
-extern void func_001C7E38(void *frq, s32 mode, s32 arg);
+extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
 
 extern fclSpriteTbl_t fclSpriteTable[];
 
@@ -378,7 +378,58 @@ void rcvDrawRowBox(fclPanelPos_t *panel, s32 ot)
 }
 
 
+extern s32 fclDrawListSprite(s32 x, s32 y, s32 z, s32 width, s32 height,
+                             s32 color, s32 blend, s32 ot);
+extern frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 firstOption);
+extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
+extern void frSetPriority(frFontHandle_t *font, u32 priority);
+extern void frSetFontColor(frFontHandle_t *font, u32 color);
+extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
+                                          const char *text, frFontHandle_t *previous);
+extern void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color,
+                                 datUnitWork_t *unit, s32 flags, s32 ot);
+extern char *text2[];
+
+#ifdef NON_MATCHING
+void rcvDrawRowText(s32 x, s32 y, s32 z, s32 color, s8 index, s32 ot)
+{
+    const s32 xOffsets[4] = {0x24, 0x9E, 0xFD, 0x15A};
+    const s32 yOffsets[4] = {14, 13, 13, 10};
+    s32 textX = x + (xOffsets[0] << 4);
+    s32 textY = y + (yOffsets[0] << 3);
+    datUnitWork_t *unit;
+    frFontHandle_t *font;
+    s32 statusIcon;
+
+    fclDrawListSprite(textX - 0x50, textY + 0xA0, z, 0x198, 2, 0x22242F80, 0, ot);
+    unit = &DDS3_GBWK->unitwork[rcvDrawWork->stockList.stock[index]];
+    if (unit->flag & 4) {
+        font = frGetCNameFRQ(0, 1, NULL, 0);
+        frSetDrawPosition(font, textX, textY);
+        frSetPriority(font, z << 4);
+        frSetFontColor(font, color);
+    } else {
+        font = frwGetSmallFontFRQ2(textX, textY, z, color, text2[unit->id], NULL);
+    }
+    func_001C7E38(font, 1, ot);
+    frDestroyFontRequestAfter(font);
+    cmpDrawStatusIconRow(x + (xOffsets[1] << 4), y + (yOffsets[1] << 3), z,
+                         0x80808080, unit, 1, ot);
+    cmpDrawStatusIconRow(x + (xOffsets[2] << 4), y + (yOffsets[2] << 3), z,
+                         0x80808080, unit, 2, ot);
+    switch (unit->badstatus) {
+    case 0x40: statusIcon = 2; break;
+    case 0x20: statusIcon = 3; break;
+    case 0x800: statusIcon = 4; break;
+    case 0x100: statusIcon = 5; break;
+    default: return;
+    }
+    fclDrawSpriteRes(x + (xOffsets[3] << 4), y + (yOffsets[3] << 3), z << 4,
+                     NULL, 0, statusIcon, rcvDrawWork->texHandle, D_00330800, ot);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawRowText);
+#endif
 
 extern s32 fclDrawPanel(fclPanel_t *panel, s32 ot);
 extern void fclUpdatePanel(fclPanel_t *panel);
