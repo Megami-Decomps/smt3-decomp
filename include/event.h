@@ -17,6 +17,11 @@ typedef struct pmdSceneFogTable_t {
     s32 reserve[3];
 } pmdSceneFogTable_t;
 
+/* Scene-light records are the three vectors consumed by SLightFrameFunc. */
+typedef struct {
+    f32 color[4], direction[4], ambient[4];
+} pmdSceneLightTable_t;
+
 /* Event-unit allocation: evtCreateUnitHandle allocates/clears 0x148 bytes.
  * SMT3 omits DDS's extra motion, shadow and vertical-movement members. */
 typedef enum evtUnitMotionState_t {

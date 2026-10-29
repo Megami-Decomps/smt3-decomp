@@ -1937,10 +1937,6 @@ typedef struct pmdStageTable_t {
 typedef struct pmdUnitTable_t {
     s32 NameIndex, FileIndex, MajorNum, MinorNum, DataOffset, DataSize, Reserve1, Reserve2;
 } pmdUnitTable_t;
-/* Scene-light records are the three vectors consumed by SLightFrameFunc. */
-typedef struct {
-    f32 color[4], direction[4], ambient[4];
-} pmdSceneLightTable_t;
 
 typedef struct pmdEffectTable_t {
     s32 NameIndex;
