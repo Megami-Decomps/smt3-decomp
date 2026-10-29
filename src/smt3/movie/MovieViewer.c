@@ -139,21 +139,25 @@ void MovieViewerDrawFrameInfo(void)
     }
 }
 
-/* NON_MATCHING: legacy control-flow draft emits 576/588 bytes, 6/144 words.
- * The shared-record/API prerequisite alone does not promote this body. */
-#ifdef NON_MATCHING
 s32 MovieViewerProc(dds3ProcessID_t *process)
 {
     char path[0x80];
     char *entry;
-    s32 phase;
+    s32 nextTop;
 
-    D_00343E40.decodeCb.fps = dds3PadButtonState[0x2D] != 0 ? 1 : 0x1E;
+    if (dds3PadButtonState[0x2D] != 0) {
+        D_00343E40.decodeCb.fps = 1;
+    } else {
+        D_00343E40.decodeCb.fps = 0x1E;
+    }
     if (movieViewerWork.playing != 0) {
         if (dds3WaitMovieEnd() != 0) {
             movieViewerWork.playing = 0;
-        } else if (((D_005518D8[0] ^ D_00551F96) & D_005518D8[0]) != 0) {
-            movieViewerWork.playing = 0;
+        } else {
+            s32 previousButtons = D_00551F96;
+            if (((D_005518D8[0] ^ previousButtons) & D_005518D8[0]) != 0) {
+                movieViewerWork.playing = 0;
+            }
         }
     } else if (dds3PadButtonState[0x21] < 0) {
         entry = movieViewerStep();
@@ -166,32 +170,25 @@ s32 MovieViewerProc(dds3ProcessID_t *process)
         } else {
             movieStop();
             dds3PlayMovieByIndex(movieViewerPhase);
-            phase = movieViewerPhase + 1;
-            if (phase >= 0x19) {
-                phase = 0;
+            movieViewerPhase++;
+            if (movieViewerPhase >= 0x19) {
+                movieViewerPhase = 0;
             }
-            if (phase == 0xA || phase == 0xE || phase == 0x12) {
-                movieViewerPhase = phase + 1;
-            } else {
-                movieViewerPhase = phase;
+            if (movieViewerPhase == 0xA || movieViewerPhase == 0xE || movieViewerPhase == 0x12) {
+                movieViewerPhase++;
             }
         }
-    } else {
-        if (dds3PadButtonState[0x27] & 2) {
-            if (movieViewerWork.cursor < movieViewerWork.count - 1) {
-                movieViewerWork.cursor++;
-                if (movieViewerWork.scrollTop < movieViewerWork.cursor - 7) {
-                    movieViewerWork.scrollTop = movieViewerWork.cursor - 7;
-                }
-            }
+    } else if ((dds3PadButtonState[0x27] & 2) &&
+               movieViewerWork.cursor < movieViewerWork.count - 1) {
+        movieViewerWork.cursor++;
+        nextTop = movieViewerWork.cursor - 7;
+        if (movieViewerWork.scrollTop < nextTop) {
+            movieViewerWork.scrollTop = nextTop;
         }
-        if (dds3PadButtonState[0x26] & 2) {
-            if (movieViewerWork.cursor > 0) {
-                movieViewerWork.cursor--;
-                if (movieViewerWork.cursor < movieViewerWork.scrollTop) {
-                    movieViewerWork.scrollTop = movieViewerWork.cursor;
-                }
-            }
+    } else if ((dds3PadButtonState[0x26] & 2) && movieViewerWork.cursor > 0) {
+        movieViewerWork.cursor--;
+        if (movieViewerWork.cursor < movieViewerWork.scrollTop) {
+            movieViewerWork.scrollTop = movieViewerWork.cursor;
         }
     }
     movieViewerWork.tag = sdfPrimAllocDrawTag(NULL);
@@ -201,9 +198,6 @@ s32 MovieViewerProc(dds3ProcessID_t *process)
     D_00551F96 = D_005518D8[0];
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "movie/MovieViewer", MovieViewerProc);
-#endif
 
 extern void movieViewerScanDir(void);
 
