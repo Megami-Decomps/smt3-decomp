@@ -621,3 +621,18 @@ register allocation; reading the global only at that common call instead emits
 192 bytes. The three siblings return the path-command result for commands six,
 eight and sixteen, preserving the native call/return sequence. The complete
 kernel owner checks 83 match / 0 differ at this qualification.
+
+## Matched driver registration
+
+`sceAddDrv` matches all 288 instruction bytes using the existing filesystem
+completion-request prefix. It publishes the driver address in request word
+three, initializes only the semaphore maximum/initial/option fields, and sends
+command fifteen with a 16-byte request and four-byte acceptance reply. It adds
+no semaphore-creation failure check absent from native code.
+
+RPC failure deletes the semaphore before signaling filesystem access and
+returns `-1`. Success snapshots the acceptance word through the uncached alias
+before signaling. A zero acceptance deletes the semaphore and returns `-1`;
+nonzero acceptance waits for completion, deletes the semaphore and returns the
+callback's stack result. The complete kernel owner checks 88 match / 0 differ
+at this qualification; no competing request-buffer type is introduced.

@@ -772,3 +772,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 476 B	generic path-
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 428 B	directory creation with typed mode/path request, bounded name and callback completion; complete owner exact
 src/smt3/field/fldCamera.c	redthing1	done	2026-10-29	1 fn / 1228 B	PiM agent: native first-person geometry and callback order, real collision arrays and evidenced native vector traces; complete owner20/0
 src/smt3/field/fldCamera.c	redthing1	done	2026-10-29	2 fn / 1852 B	PiM agent: native dispatcher and real Chase construction/smoothing closure; existing Chase draft credited to tge-was-taken; complete owner22/0, reset drafts unchanged
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 288 B	driver registration through shared completion prefix, native acceptance snapshot and distinct semaphore cleanup; owner 88 match, 0 differ

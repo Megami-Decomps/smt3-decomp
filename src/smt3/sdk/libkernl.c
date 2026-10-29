@@ -1594,7 +1594,42 @@ s32 sceRmdir(const char *path)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceFormat);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceAddDrv);
+s32 sceAddDrv(void *driver)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsCloseRequest_t *request = &D_0059D4C0.close;
+    s32 sema;
+    s32 accepted;
+
+    _sceFsWaitS(15);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    request->descriptor = (u32)driver;
+    param.maxCount = 1;
+    param.initCount = 0;
+    param.option = 0;
+    sema = CreateSema(&param);
+    D_0059D4C0.close.sema = sema;
+    request->result = &result;
+    request->resultSize = 4;
+    if (sceSifCallRpc(&D_0059E780, 15, 0, request, 16,
+                      D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -1;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -1;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
 
 s32 sceDelDrv(const char *path)
 {
