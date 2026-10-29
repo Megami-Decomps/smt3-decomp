@@ -47,3 +47,22 @@ one word for power-off, eight clock bytes for clock-read. The shared
 `s32 D_0052B200[4]` declaration preserves the native single-base addressing.
 `sceCdSync` is 156 against 160: unlike `sceCdSyncS` its branch polarity is the
 other way round, and inverting it makes things worse rather than better.
+
+## Completion callback contracts and remaining drafts
+
+The completion callback takes one signed reason and returns void; registration
+returns the previous callback pointer. This agrees with the
+[PS2SDK public interface](https://github.com/ps2dev/ps2sdk/blob/master/common/include/libcdvd-common.h).
+The recovered setter and callback slot use that function-pointer type instead
+of an integer placeholder, preserving the setter's 92 bytes and all 22
+matching functions in the owner.
+
+The completion-producer draft emits 140 of 160 bytes. Native reloads status
+after storing it, twice before any call. A module-wide volatile declaration
+only reaches 148 bytes and makes the retained teardown draft grow from 148 to
+152 bytes, so it is not an established access contract. The thread consumer
+emits 184 of 188 bytes: its final callback uses the reason-test register for
+the argument, while native reloads the argument in the call delay slot and
+keeps the callback in another register. Naming a typed callback snapshot does
+not change that result. Changing its return type to steer those registers
+would contradict the interface. Both bodies remain assembly-backed.

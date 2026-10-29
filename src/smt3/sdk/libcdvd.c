@@ -2,7 +2,8 @@
 #include "ps2asm.h"
 
 extern s32 D_0052BA70 __attribute__((section(".data")));
-extern s32 D_00598C40 __attribute__((section(".data")));
+typedef void (*cdvdCallback_t)(s32 reason);
+extern cdvdCallback_t D_00598C40 __attribute__((section(".data")));
 extern u8 D_00598ED8[] __attribute__((section(".data")));
 
 extern s32 D_0052A010 __attribute__((section(".data")));
@@ -78,10 +79,10 @@ void sceCdDelayThread(u16 ticks)
     DeleteSema(sema);
 }
 
-s32 sceCdCallback(s32 func)
+cdvdCallback_t sceCdCallback(cdvdCallback_t func)
 {
     s32 intr;
-    s32 old;
+    cdvdCallback_t old;
 
     if (sceCdSync(1) != 0) {
         return 0;
