@@ -44,3 +44,40 @@ corners again before the second call, and reload its geometry from the state
 after the first call. Omitting the two neutral-corner stores shortens the
 function by eight bytes. The native square-root operation is
 `fsqrtf(50.0f) * frame * (1.0f / 256.0f)`, followed by integer squaring for the box offset.
+
+## Normalize the live command-list coordinate
+
+`DispCommandList2` matches all 648 bytes with the incoming `ox` updated to
+the draw position in its layout branch. Both values are X coordinates; the
+normalized coordinate is then passed to each renderer and the selected-row
+help callback. A separate `drawX` local leaves 28 of 162 words different at
+the same size when every other statement is unchanged.
+
+Paired full-owner `cc1probe --alloc` runs with pinned cc1
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`
+pass hooked/unhooked output equality and dumps/plain equality (`verify: OK`).
+In `17.sched`, UID 8 loads the incoming X into pseudo 86; UIDs 51 and 63
+update it by the two layout offsets. The exact variant retains that pseudo
+in $21 with 15 references, live length 119 and six crossed calls. The split
+control keeps incoming pseudo 86 in $6 (three references, live length 11,
+no crossed call) and puts normalized pseudo 90 in $21 (12 references, live
+length 108, six crossed calls). Keeping the input and normalized coordinate
+in one live value recovers native entry and argument setup.
+
+The mutable row Y is initialized from the incoming Y before layout selection.
+After `GetCommListCnt`, snapshot that row Y as the help baseline. The count
+and baseline are genuine live values, stored at native frame offsets +8 and
++0xC. Start the row index at `drawlisty`, and reload it for the loop limit
+after callbacks; `drawcursor` instead selects the highlighted and help row.
+Reload `commcnt`, disable state and the post-render help selection at their
+native boundaries. Advance row Y only for an entry within `commcnt`.
+
+Reproduce with `tools/cc1probe.sh <owner.c> --as-unit
+src/smt3/newbattle/nbCommSelProcess.c --func DispCommandList2 --alloc
+--out <output>`. The control declares `s32 drawX`, assigns it from `ox` plus
+the layout offset, and passes it in the five drawing/help call sites.
+
+The four `DispComm1` renderers consume six arguments: process, halfword entry
+ID, X, Y, depth and packed color. Their sole native caller supplies those six;
+the unused trailing `listidx` and `col2` declarations are removed. All four
+renderer bodies remain byte-exact.

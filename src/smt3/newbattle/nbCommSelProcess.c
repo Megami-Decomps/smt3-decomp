@@ -33,7 +33,7 @@ extern void DispCommCursor(s32 ox, s32 oy, s32 a);
 
 extern void DispSummonCursor(s32 ox, s32 oy, s32 a);
 
-extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba,
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 rgba,
                         sdfTexHandle_t *th);
 
 extern f32 fabsf(f32 value);
@@ -518,8 +518,7 @@ INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", AnimeCommandList);
 
 #endif
 
-void DispComm1Summon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col,
-                     s32 listidx, s32 col2)
+void DispComm1Summon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
 {
     char buf[16];
     datUnitWork_t *w = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + d;
@@ -563,8 +562,7 @@ void DispComm1Summon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u
     cmpSetSkillListRows(-1);
 }
 
-void DispComm1Item(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col,
-                   s32 listidx, s32 col2)
+void DispComm1Item(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
 {
     char buf[16];
     void *frq;
@@ -578,8 +576,7 @@ void DispComm1Item(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32
     cmpSetSkillListRows(-1);
 }
 
-void DispComm1Talk(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col,
-                   s32 listidx, s32 col2)
+void DispComm1Talk(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
 {
     void *frq;
 
@@ -594,8 +591,7 @@ void DispComm1Talk(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32
     cmpSetSkillListRows(-1);
 }
 
-void DispComm1Comm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col,
-                   s32 listidx, s32 col2)
+void DispComm1Comm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
 {
     char buf[16];
     datUnitWork_t *work = nbGetUnitWorkPointer(s->data, s->my);
@@ -635,7 +631,72 @@ void DispComm1Comm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32
 
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispHelp1);
 
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispCommandList2);
+extern void DispHelp1(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, s32 alpha);
+
+void DispCommandList2(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 alpha)
+{
+    s32 rowStep;
+    s32 count;
+    s32 y = oy;
+    s32 baseY;
+    s32 index;
+    s32 id;
+    s32 color = 0;
+    s32 oz = s->oz;
+    s32 slide = (s32)(s->smritu * 43.0f);
+
+    /* Keep the normalized X in its live coordinate; allocation evidence:
+     * docs/levers/cross-block-locals.md. */
+    if (type == 3) {
+        rowStep = 0x2B;
+        y += slide + 0x12E;
+        ox += 0x21;
+    } else {
+        rowStep = 0x15;
+        ox += 0x1B;
+        y += 0x159;
+    }
+    count = GetCommListCnt(s, type);
+    baseY = y;
+    index = s->drawlisty;
+    while (index < s->drawlisty + count) {
+        if (index < s->commcnt[type]) {
+            id = s->commlist[type][index];
+            if (index == s->drawcursor) {
+                color = 0x89FEFF80;
+            } else if (s->commdisable[type][index] == 0) {
+                color = 0xA09DC380;
+            }
+            if (s->commdisable[type][index] != 0) {
+                color = 0x4D4B4B4D;
+            }
+            color = (color & ~0xFF) | alpha;
+            if ((u32)type < 6) {
+                switch (type) {
+                case 0:
+                case 4:
+                case 5:
+                    DispComm1Comm(s, id, ox, y, oz, color);
+                    break;
+                case 1:
+                    DispComm1Talk(s, id, ox, y, oz, color);
+                    break;
+                case 2:
+                    DispComm1Item(s, id, ox, y, oz, color);
+                    break;
+                case 3:
+                    DispComm1Summon(s, id, ox, y, oz, color);
+                    break;
+                }
+            }
+            if (index == s->drawcursor) {
+                DispHelp1(s, id, ox, baseY, oz, s->helpa);
+            }
+            y += rowStep;
+        }
+        index++;
+    }
+}
 
 s32 CheckSelectError(nbCommSelProcessData_t *s)
 {
