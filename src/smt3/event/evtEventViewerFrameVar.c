@@ -8,21 +8,7 @@
 
 
 /* Shared track prefix recovered by evtEventViewer. */
-typedef struct evtViewerObject_s {
-    s32 type;
-    s32 nameindex;
-    s32 fileindex;
-    s32 unitHandle;
-    union {
-        u8 unk10[8];
-        struct { void *effectData; u8 unk14[4]; } effect;
-    };
-    s32 childCount;
-    evtFrameInfo_t *p;
-    evtFrameInfo_t *lastChild;
-    struct evtViewerObject_s *next;
-    struct evtViewerObject_s *prev;
-} evtViewerObject_s;
+
 
 typedef struct {
     u16 mode;
@@ -129,7 +115,7 @@ s32 FrameVarProcess(dds3ProcessID_t *id)
     sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8B60, 0x8580, 0xFEFFFF, 0, D_0054F910,
                                           viewerinfo->lastframe));
     if (viewerinfo->framelist_target != NULL && viewerinfo->menusw == 1) {
-        frame = viewerinfo->framelist_target->p;
+        frame = viewerinfo->framelist_target->children;
         i = 0;
         while (frame != NULL) {
             if (i == viewerinfo->frameCursor + viewerinfo->frameFirst) {

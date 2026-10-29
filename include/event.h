@@ -26,6 +26,23 @@ typedef struct evtFrameInfo_t {
     struct evtFrameInfo_t *prev;
 } evtFrameInfo_t;
 
+typedef struct evtViewerObject_s {
+    s32 type;
+    s32 entryHeader;
+    s32 fileIndex;
+    dds3Basic_t *basic;
+    union {
+        u8 unk10[8];
+        struct { s16 major, minor; s32 reserve; } resource;
+        struct { void *data; s32 reserve; } effect;
+    };
+    s32 childCount;
+    evtFrameInfo_t *children;
+    evtFrameInfo_t *lastChild;
+    struct evtViewerObject_s *next;
+    struct evtViewerObject_s *prev;
+} evtViewerObject_s;
+
 /* Interpolated event vector and packed colour. */
 typedef struct evtBlendVecColor_t {
     f32 vec[4];

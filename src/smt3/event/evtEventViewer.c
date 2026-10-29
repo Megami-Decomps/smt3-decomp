@@ -32,22 +32,7 @@ typedef enum EVT_VIEWER_MENU {
 
 
 /* Track prefix consumed by the intrusive-list helpers. */
-typedef struct evtViewerObject_s {
-    s32 type;
-    s32 nameindex;
-    s32 fileindex;
-    dds3Basic_t *unitHandle;       /* 0x0C */
-    union {
-        u8 unk10[8];
-        /* Effect tracks carry their loaded resource at 0x10. */
-        struct { void *effectData; u8 unk14[4]; } effect;
-    };
-    s32 childCount;                /* 0x18 */
-    evtFrameInfo_t *p;      /* 0x1C */
-    evtFrameInfo_t *lastChild;     /* 0x20 */
-    struct evtViewerObject_s *next;  /* 0x24 */
-    struct evtViewerObject_s *prev;  /* 0x28 */
-} evtViewerObject_s;
+
 
 /* Registered model record in the viewer's movie work table. */
 typedef struct {
@@ -223,10 +208,10 @@ void DelViewerObject(evtViewerObject_s *obj);
 
 /* Insert after existing equal keys, keeping ascending order and incrementing count. */
 void LinkFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f) {
-    evtFrameInfo_t *cursor = parent->p;
+    evtFrameInfo_t *cursor = parent->children;
 
     if (cursor == 0) {
-        parent->p = f;
+        parent->children = f;
         parent->lastChild = f;
         f->next = 0;
         f->prev = 0;
@@ -234,7 +219,7 @@ void LinkFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f) {
         while (cursor != 0) {
             if (f->frame < cursor->frame) {
                 if (cursor->prev == 0) {
-                    parent->p = f;
+                    parent->children = f;
                     cursor->prev = f;
                     f->next = cursor;
                     f->prev = 0;
@@ -264,7 +249,7 @@ void UnlinkFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f) {
     evtFrameInfo_t *nextNode = f->next;
     evtFrameInfo_t *previousNode = f->prev;
     if (previousNode == 0) {
-        parent->p = nextNode;
+        parent->children = nextNode;
     } else {
         previousNode->next = nextNode;
     }
@@ -288,7 +273,7 @@ void UnlinkFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f) {
 /* Walk the linked list and reinsert the first out-of-order successor. */
 void SortFrameInfo(evtViewerObject_s *parent) {
     if (parent != 0) {
-        evtFrameInfo_t *anchorNode = parent->p;
+        evtFrameInfo_t *anchorNode = parent->children;
         while (anchorNode != 0) {
             evtFrameInfo_t *resumeNode = anchorNode->next;
             evtFrameInfo_t *candidateNode = resumeNode;
@@ -344,15 +329,15 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber, evtVi
     switch (track->type) {
     case 2:
         frame->param.sf[0] = 0.5235987305641174f;
-        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
         break;
     case 1:
-        nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
         frame->param.sb[0] = 0;
         frame->nameIndex = nameIndex;
         break;
     case 3:
-        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
         frame->param.sb[5] = -1;
         frame->param.sh[3] = -1;
         frame->param.sb[0] = -1;
@@ -360,7 +345,7 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber, evtVi
         frame->param.sb[4] = 0;
         break;
     case 18:
-        nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
         ((volatile evtFrameInfo_t *)frame)->param.sh[0] = 0;
         frame->nameIndex = nameIndex;
         frame->param.sh[1] = -1;
@@ -368,7 +353,7 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber, evtVi
         break;
     case 20:
     case 21:
-        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
         frame->param.sb[7] = -1;
         frame->param.sb[0] = -1;
         frame->param.sb[1] = 0;
@@ -378,7 +363,7 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber, evtVi
         frame->param.sb[6] = -1;
         break;
     case 9:
-        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->nameindex]);
+        frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
         frame->param.sh[0] = -1;
         frame->param.sh[1] = 1;
         break;
@@ -469,7 +454,7 @@ evtFrameInfo_t *evtGetSelectFrameInfo(void)
     if (group == NULL) {
         return NULL;
     }
-    node = group->p;
+    node = group->children;
     for (i = 0; i < viewer->frameCursor + viewer->frameFirst; i++) {
         if (node == NULL) {
             break;
@@ -587,8 +572,8 @@ evtViewerObject_s *evtAddViewerObject(s32 type)
     }
     memset(track, 0, 0x2C);
     track->type = type;
-    track->nameindex = -1;
-    track->fileindex = -1;
+    track->entryHeader = -1;
+    track->fileIndex = -1;
     LinkViewerObject(track);
     return track;
 }
@@ -621,8 +606,8 @@ s32 evtGetAllFrameInfoCount(void)
 
 void DelViewerObject(evtViewerObject_s *obj)
 {
-    while (obj->p != NULL) {
-        DelFrameInfo(obj, obj->p);
+    while (obj->children != NULL) {
+        DelFrameInfo(obj, obj->children);
     }
     UnlinkViewerObject(obj);
     sdfChipFreeDirect(obj);
@@ -799,7 +784,7 @@ s32 AddEffectTable2(s32 nowframe, evtViewerObject_s *object, evtFrameInfo_t *fra
     type = object->type;
     switch (type) {
     case 3:
-        effect = dds3AddD3PEffectObjectBasic2(object->effect.effectData, position, scale);
+        effect = dds3AddD3PEffectObjectBasic2(object->effect.data, position, scale);
         if (frame->param.sb[4] != 0) {
             dds3EffectObjectPresetMG12(effect);
         }
@@ -814,10 +799,10 @@ s32 AddEffectTable2(s32 nowframe, evtViewerObject_s *object, evtFrameInfo_t *fra
 
         switch (type) {
         case 20:
-            effect = dds3AddMG12EffectObjectBasic2(1, object->effect.effectData);
+            effect = dds3AddMG12EffectObjectBasic2(1, object->effect.data);
             break;
         case 21:
-            effect = dds3AddMG12EffectObjectBasic2(2, object->effect.effectData);
+            effect = dds3AddMG12EffectObjectBasic2(2, object->effect.data);
             break;
         }
         part0 = SearchBasicFromNameIndex_evtEventViewer(frame->param.sb[4]);
@@ -997,7 +982,7 @@ void RunFrame1(evtViewerObject_s *track, evtFrameInfo_t *frameInfo, s32 nowFrame
     case 18:
         if (nowFrame == frameInfo->frame) {
             DelBED(frameInfo);
-            frameInfo->work = AddBED(track->effect.effectData, frameInfo->param.sb[4],
+            frameInfo->work = AddBED(track->effect.data, frameInfo->param.sb[4],
                                      (s16)frameInfo->param.sh[1], -1,
                                      frameInfo->frame);
         }
@@ -1077,7 +1062,7 @@ void RunFrame3(s32 nowframe) {
             if (track->type != 9) {
                 continue;
             }
-            for (frameInfo = track->p; frameInfo != NULL;
+            for (frameInfo = track->children; frameInfo != NULL;
                  frameInfo = frameInfo->next) {
                 dds3Basic_t *namedBasic;
 
@@ -1096,7 +1081,7 @@ void RunFrame3(s32 nowframe) {
                 }
                 bestFrameNumber = frameInfo->frame;
                 bestFrame = frameInfo;
-                lightBasic = track->unitHandle;
+                lightBasic = track->basic;
             }
         }
 
@@ -1129,7 +1114,7 @@ void RunFrameUnit(evtViewerObject_s *track, s32 nowFrame)
     s32 mode = 0;
     s32 otherMode = 2;
 
-    for (frame = track->p; frame != NULL && nowFrame >= frame->frame;
+    for (frame = track->children; frame != NULL && nowFrame >= frame->frame;
          frame = frame->next) {
         s32 value = frame->param.sb[0];
 
@@ -1141,8 +1126,8 @@ void RunFrameUnit(evtViewerObject_s *track, s32 nowFrame)
             }
         }
     }
-    evtRunUnitMode(track->unitHandle, mode);
-    evtRunUnitMode(track->unitHandle, otherMode);
+    evtRunUnitMode(track->basic, mode);
+    evtRunUnitMode(track->basic, otherMode);
 }
 #else
 INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrameUnit);
@@ -1178,7 +1163,7 @@ void evtRunFrame(s32 nowFrame)
             RunFrameUnit(track, nowFrame);
             continue;
         }
-        for (frame = track->p; frame != NULL; frame = frame->next) {
+        for (frame = track->children; frame != NULL; frame = frame->next) {
             switch (track->type) {
             case 3:
             case 20:
@@ -1225,13 +1210,13 @@ void evtRunFrame(s32 nowFrame)
     track = viewerinfo->firstobjinfo;
     evt_camera = NULL;
     for (; track != NULL; track = track->next) {
-        for (frame = track->p; frame != NULL && nowFrame >= frame->frame; frame = frame->next) {
+        for (frame = track->children; frame != NULL && nowFrame >= frame->frame; frame = frame->next) {
         }
         previous = frame != NULL ? frame->prev : track->lastChild;
         RunFrame2(track, frame, previous, nowFrame, &nearestFrame);
     }
     if (evt_camera != NULL) {
-        viewerinfo->gamecamera = evt_camera->unitHandle;
+        viewerinfo->gamecamera = evt_camera->basic;
         SetActiveCamera();
     }
     RunFrame3(nowFrame);
@@ -1380,7 +1365,7 @@ void evtStopFrame(s32 sw, u32 nowFrame)
         if (track->type != 3 && track->type != 18 && track->type != 20 && track->type != 21) {
             continue;
         }
-        for (frame = track->p; frame != NULL; frame = frame->next) {
+        for (frame = track->children; frame != NULL; frame = frame->next) {
             if (track->type == 18) {
                 effect = frame->work;
             } else if (track->type == 3 || track->type == 20 || track->type == 21) {
