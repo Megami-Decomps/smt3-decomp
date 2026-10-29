@@ -176,10 +176,10 @@ typedef struct
     /* 0x2240 */ u8 itemCount;
     /* 0x2241 */ u8 reserved2241;
     /* 0x2242 */ fclItemList_t sellItems;
-    /* 0x2384 */ u8 reserved2384[4];
+    /* 0x2384 */ s32 paymentStep;
     /* 0x2388 */ void *unk_2388;
     /* 0x238C */ s32 script;
-    /* 0x2390 */ s32 scriptArg;
+    /* 0x2390 */ dds3ProcessID_t *scriptArg;
     /* 0x2394 */ s32 texHandle[2];
     /* 0x239C */ u8 unk_239C[0x80];
     /* 0x241C */ fclPanelAnim_t anim;
@@ -414,7 +414,38 @@ void shpUpdateSeqSellNums(void)
     func_002413B8(button, 3);
 }
 
+extern u32 dds3GetProcessStat(dds3ProcessID_t *id);
+
+#ifdef NON_MATCHING
+s32 shpUpdateSeqConfirm(s8 mode)
+{
+    s32 flag;
+
+    if (dds3GetProcessStat(shopUpdateWork->scriptArg) == 2) {
+        return 0;
+    }
+    flag = fclGetFlag(2);
+    if (flag == 0) {
+        s32 step = shopUpdateWork->paymentRemaining / 20;
+
+        shopUpdateWork->unk_0001 = 9;
+        shopUpdateWork->paymentStep = step != 0 ? step : 1;
+        shopUpdateWork->unk_0004 = -1;
+    } else if (flag == 1) {
+        if (mode == 0) {
+            fclScriptStart(shopUpdateWork->script, 2, &shopUpdateWork->scriptArg);
+            shopUpdateWork->unk_0001 = 5;
+        } else {
+            fclScriptStart(shopUpdateWork->script, 4, &shopUpdateWork->scriptArg);
+            shopUpdateWork->unk_0001 = 6;
+        }
+        shopUpdateWork->unk_0004 = 2;
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqConfirm);
+#endif
 
 INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqPay);
 
