@@ -370,7 +370,6 @@ extern dds3Basic_t *D_00551634;
 
 extern dds3Basic_t *D_00551638;
 
-nbFormation_t *nbGetEventForm();
 
 void MoveSub(nbEventProcessData_t *ed)
 {
@@ -542,7 +541,7 @@ s32 nbE913_Test(nbEventProcessData_t *e)
 {
     nbFormation_t *form;
 
-    form = nbGetEventForm(e);
+    form = nbGetEventForm();
     nbPanelAllHide();
     nbSingleFormExceptedDispOff(form);
     evtSetUnitMotion(form->hunit, 0x17, 0, 0, 2);

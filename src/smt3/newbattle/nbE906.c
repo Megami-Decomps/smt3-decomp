@@ -335,7 +335,6 @@ nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *
 
 void nbBgmFadeOut(void);
 
-nbFormation_t *nbGetEventForm();
 
 extern s32 (*nbE906Table[])(nbEventProcessData_t *e);
 
@@ -612,7 +611,7 @@ s32 Model2Wait_1(nbEventProcessData_t *ed)
     nbFormation_t *form;
     void *res;
 
-    form = nbGetEventForm(ed);
+    form = nbGetEventForm();
     evtSetUnitMotion(form->hunit, 0x11, 0xA, 0, 0);
     dds3DrawFlag |= 0x2000000;
     res = evtGetResorceData(0x38B, 2);

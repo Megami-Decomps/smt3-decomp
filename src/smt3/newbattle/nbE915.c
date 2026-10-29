@@ -433,7 +433,6 @@ void nbFormDispOff2(nbFormation_t *form);
 
 void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
 
-nbFormation_t *nbGetEventForm();
 
 void nbUpdateEventProcessData(dds3ProcessID_t *id);
 

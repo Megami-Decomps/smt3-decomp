@@ -13,7 +13,6 @@ extern char D_00544020[];
 
 extern s32 printf(const char *format, ...);
 
-extern nbFormation_t *nbGetEventForm();
 
 extern void nbPanelDraw(s32 flag);
 

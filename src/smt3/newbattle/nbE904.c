@@ -337,7 +337,6 @@ nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *
 
 void nbBgmFadeOut(void);
 
-nbFormation_t *nbGetEventForm();
 
 extern s32 (*D_005274A0[])(nbEventProcessData_t *e);
 

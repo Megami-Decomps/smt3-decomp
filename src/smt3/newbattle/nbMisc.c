@@ -23,7 +23,6 @@ extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, s32 aId);
 
 extern void nbDrawTargetCursor(nbMainProcessData_t *data, s32 x, s32 y);
 
-extern nbFormation_t *nbGetEventForm();
 
 extern s32 evtGetAgeOfMoon16(void);
 

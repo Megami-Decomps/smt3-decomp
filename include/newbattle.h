@@ -67,6 +67,8 @@ typedef struct nbFormation_t
     sdfVector4_t startpos;
 } nbFormation_t;
 
+nbFormation_t *nbGetEventForm(void);
+
 /* Decoded entry in a battle pack. */
 typedef struct nbPacEntry_t {
     u8 unk_00[0x8];

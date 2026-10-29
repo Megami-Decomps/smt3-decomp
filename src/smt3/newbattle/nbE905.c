@@ -298,7 +298,6 @@ nbKoukaPacket_t *nbAddFadeOutKoukaPacket(s32 startframe, s32 uniqueid, s32 lengt
 
 nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *bed, s32 cutno, nbFormation_t *form);
 
-nbFormation_t *nbGetEventForm();
 
 extern s32 (*D_005274A8[])(nbEventProcessData_t *e);
 
@@ -453,7 +452,7 @@ s32 nbE906_Test(nbEventProcessData_t *e)
 {
     nbFormation_t *form;
 
-    form = nbGetEventForm(e);
+    form = nbGetEventForm();
     nbPanelAllHide();
     nbSingleFormExceptedDispOff(form);
     evtSetUnitMotion(form->hunit, 0x17, 0, 0, 2);

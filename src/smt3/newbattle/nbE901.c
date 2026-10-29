@@ -350,7 +350,6 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 dds3Basic_t *nbCreateBasicEffect(void *p, void *pos, void *rot);
 
-nbFormation_t *nbGetEventForm();
 
 void nbUpdateEventProcessData(dds3ProcessID_t *id);
 

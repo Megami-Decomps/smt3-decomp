@@ -302,7 +302,6 @@ nbKoukaPacket_t *nbAddFadeOutKoukaPacket(s32 startframe, s32 uniqueid, s32 lengt
 
 nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *bed, s32 cutno, nbFormation_t *form);
 
-nbFormation_t *nbGetEventForm();
 
 extern s32 (*D_00527690[])(nbEventProcessData_t *e);
 
@@ -312,7 +311,6 @@ extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *b);
 
 extern void nbCameraHelperModelSet(dds3Basic_t *hModel);
 
-extern nbFormation_t *nbGetEventForm(void);
 
 extern void nbCameraSetState(s32 state);
 
