@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "facility.h"
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
@@ -15,16 +16,6 @@ extern s32 dds3GetGlobalConfigFlag(s32 index);
 
 extern void dds3PadVibrationSet(s32 port, s32 strength, s32 frames);
 
-typedef struct fclPanelAnim_t {
-    u8 animState;
-    u8 unk01[3];
-    s32 target;
-    u8 unk08[0xC];
-    s32 phase;
-    s32 phaseStep;
-    s32 unk1C;
-    void (*calcSizes)();
-} fclPanelAnim_t;
 
 typedef fclPanelAnim_t fclRagTex_t;
 
