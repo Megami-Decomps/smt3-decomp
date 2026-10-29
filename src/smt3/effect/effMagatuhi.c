@@ -1,6 +1,7 @@
 #include "common.h"
 #include "libsdf.h"
 #include "ps2asm.h"
+#include "fpu.h"
 
 #include "effect.h"
 #include "effDebug.h"
@@ -2280,7 +2281,294 @@ void InitMagatuhiEditorProcess(void) {
 
 INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00533EF0);
 
+#ifdef NON_MATCHING
+extern u8 D_005518E2[];
+extern void *memcpy(void *dst, const void *src, u32 size);
+
+effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
+{
+    effDebugMenuItem_t *item = NULL;
+    s32 delta = 0;
+    s32 changed = 0;
+    s32 min, max, value, axisX, axisY;
+    u32 word;
+    u8 type;
+    f32 number, low, high;
+
+    if (menu == NULL) {
+        return NULL;
+    }
+    if (menu->itemCount != 0) {
+        if (dds3PadBitTable[6] & 2) {
+            do {
+                menu->selected = menu->selected == 0 ? menu->itemCount - 1 : menu->selected - 1;
+                item = &menu->items[menu->selected];
+            } while ((u8)(item->type + 0xEE) < 2);
+        } else if (dds3PadBitTable[7] & 2) {
+            do {
+                menu->selected = menu->selected == menu->itemCount - 1 ? 0 : menu->selected + 1;
+                item = &menu->items[menu->selected];
+            } while ((u8)(item->type + 0xEE) < 2);
+        }
+        item = &menu->items[menu->selected];
+        if (dds3PadBitTable[5] & 2) {
+            delta = item->step;
+            changed = 1;
+        } else if (dds3PadBitTable[4] & 2) {
+            delta = (s32)(0U - (u32)item->step);
+            changed = 1;
+        } else if (dds3PadBitTable[11] & 2) {
+            delta = (s32)((u32)item->step * 10U);
+            changed = 1;
+        } else if (dds3PadBitTable[9] & 2) {
+            delta = (s32)((0U - (u32)item->step) * 10U);
+            changed = 1;
+        }
+        if (changed) {
+            switch (item->type) {
+            case 0:
+                *(u8 *)item->value += delta;
+                min = item->minValue;
+                max = item->maxValue;
+                if (min != max) {
+                    value = *(s8 *)item->value;
+                    if (value < min) {
+                        *(u8 *)item->value = min;
+                    }
+                    else if (value > max) {
+                        *(u8 *)item->value = max;
+                    }
+                }
+                break;
+            case 1:
+                if (delta < 0 && *(u8 *)item->value < (s32)(0U - (u32)delta)) {
+                    *(u8 *)item->value = 0;
+                } else {
+                    *(u8 *)item->value += delta;
+                    if (item->minValue != item->maxValue && *(u8 *)item->value > item->maxValue) {
+                        *(u8 *)item->value = item->maxValue;
+                    }
+                }
+                break;
+            case 2:
+                min = item->minValue;
+                max = item->maxValue;
+                value = (s16)(*(u16 *)item->value + delta);
+                *(u16 *)item->value = value;
+                if (min != max) {
+                    if (value < min) {
+                        *(u16 *)item->value = min;
+                    }
+                    else if (value > max) {
+                        *(u16 *)item->value = max;
+                    }
+                }
+                break;
+            case 3:
+                if (delta < 0 && *(u16 *)item->value < (s32)(0U - (u32)delta)) {
+                    *(u16 *)item->value = 0;
+                } else {
+                    min = item->minValue;
+                    max = item->maxValue;
+                    value = (u16)(*(u16 *)item->value + delta);
+                    *(u16 *)item->value = value;
+                    if (min != max && value > max) {
+                        *(u16 *)item->value = max;
+                    }
+                }
+                break;
+            case 4:
+                value = (s32)((u32)*(s32 *)item->value + (u32)delta);
+                *(s32 *)item->value = value;
+                min = item->minValue;
+                max = item->maxValue;
+                if (min != max) {
+                    if (value < min) {
+                        *(s32 *)item->value = min;
+                    }
+                    else if (value > max) {
+                        *(s32 *)item->value = max;
+                    }
+                }
+                break;
+            case 5:
+            case 6:
+            case 15:
+                if (delta < 0 && *(u32 *)item->value < (0U - (u32)delta)) {
+                    *(u32 *)item->value = 0;
+                } else {
+                    word = *(u32 *)item->value + (u32)delta;
+                    *(u32 *)item->value = word;
+                    if (item->minValue != item->maxValue && word > (u32)item->maxValue) {
+                        *(u32 *)item->value = item->maxValue;
+                    }
+                }
+                break;
+            case 7:
+                low = (f32)item->minValue;
+                high = (f32)item->maxValue;
+                number = *(f32 *)item->value + (f32)delta / 1000.0f;
+                *(f32 *)item->value = number;
+                if (low != high) {
+                    if (number < low) {
+                        *(f32 *)item->value = low;
+                    }
+                    else if (number > high) {
+                        *(f32 *)item->value = high;
+                    }
+                }
+                break;
+            case 8:
+                *(u8 *)item->value ^= 1;
+                break;
+            case 9:
+                word = *(u32 *)item->value;
+                *(u32 *)item->value = (word & 0xFFFFFF00) | ((word + (u32)delta) & 0xFF);
+                break;
+            case 10:
+                value = *((u8 *)item->value + 1);
+                word = *(u32 *)item->value;
+                *(u32 *)item->value = (word & 0xFFFF00FF) | ((((u32)value + (u32)delta) & 0xFF) << 8);
+                break;
+            case 11:
+                value = *((u8 *)item->value + 2);
+                word = *(u32 *)item->value;
+                *(u32 *)item->value = (word & 0xFF00FFFF) | ((((u32)value + (u32)delta) & 0xFF) << 16);
+                break;
+            case 12:
+                word = *(u32 *)item->value;
+                *(u32 *)item->value = (word & 0x00FFFFFF) | (((word >> 24) + (u32)delta) << 24);
+                break;
+            case 13:
+                value = *(s32 *)item->value;
+                if (delta > 0) {
+                    if (value == 0x44) {
+                        value = 0x48;
+                    }
+                    else if (value == 0x48) {
+                        value = 0x42;
+                    }
+                    else if (value == 0x42) {
+                        value = 0x44;
+                    }
+                } else {
+                    if (value == 0x44) {
+                        value = 0x42;
+                    }
+                    else if (value == 0x48) {
+                        value = 0x44;
+                    }
+                    else if (value == 0x42) {
+                        value = 0x44;
+                    }
+                }
+                *(s32 *)item->value = value;
+                break;
+            case 14:
+                value = *(s32 *)item->value;
+                if (delta > 0) {
+                    if (value == 0x44) {
+                        value = 0x48;
+                    }
+                    else if (value == 0x48) {
+                        value = 0x42;
+                    }
+                    else if (value == 0x42) {
+                        value = 6;
+                    }
+                    else if (value == 6) {
+                        value = 0x44;
+                    }
+                } else {
+                    if (value == 0x44) {
+                        value = 6;
+                    }
+                    else if (value == 0x48) {
+                        value = 0x44;
+                    }
+                    else if (value == 0x42) {
+                        value = 0x48;
+                    }
+                    else if (value == 6) {
+                        value = 0x42;
+                    }
+                }
+                *(s32 *)item->value = value;
+                break;
+            case 20:
+                *(u32 *)item->value += delta;
+                break;
+            }
+        }
+        type = item->type;
+        if (type == 16) {
+            axisX = (s8)(D_005518E2[0] + 0x80);
+            axisY = (s8)(D_005518E2[1] + 0x80);
+            if ((axisX < 0 ? -axisX : axisX) >= 65) {
+                changed = 1;
+                ((s32 *)item->value)[0] = fcvtws((f32)((s32 *)item->value)[0] + (f32)axisX * 6.0f * 0.0078125f);
+            }
+            if ((axisY < 0 ? -axisY : axisY) >= 65) {
+                changed = 1;
+                ((s32 *)item->value)[1] = fcvtws((f32)((s32 *)item->value)[1] + (f32)axisY * 6.0f * 0.0078125f);
+            }
+            type = item->type;
+        }
+        D_0054F222 = type != 16;
+        if (changed == 1 && menu->recreate != NULL) {
+            if (menu->destroy != NULL && menu->param != NULL) {
+                menu->destroy(*menu->param);
+            }
+            if (menu->param != NULL) {
+                *menu->param = menu->recreate(menu->source);
+            } else {
+                menu->recreate(menu->source);
+            }
+        }
+    }
+    if ((dds3PadBitTable[1] < 0 || (dds3PadBitTable[5] < 0 && dds3PadBitTable[13] != 0)) && menu->itemCount > 0) {
+        type = item->type;
+        if (type == 22 || type == 21) {
+            if (menu->destroy != NULL) {
+                menu->destroy(menu->param != NULL ? *menu->param : NULL);
+            }
+            if (type == 22) {
+                effDebugMenu_t *child = item->value;
+                child->parent = menu;
+                menu = child;
+            } else {
+                memcpy(menu->source, menu->destination, menu->copyBytes);
+            }
+            if (menu->create != NULL) {
+                if (menu->source != NULL) {
+                    *menu->param = menu->create(menu->source);
+                } else {
+                    menu->create(NULL);
+                }
+            }
+        } else if (type == 23) {
+            ((void (*)(void))item->value)();
+        }
+    } else if (dds3PadBitTable[3] < 0) {
+        if (menu->destroy != NULL) {
+            menu->destroy(menu->param != NULL ? *menu->param : NULL);
+        }
+        if (menu->parent != NULL) {
+            menu = menu->parent;
+        }
+        if (menu->create != NULL) {
+            if (menu->source != NULL) {
+                *menu->param = menu->create(menu->source);
+            } else {
+                menu->create(NULL);
+            }
+        }
+    }
+    return menu;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effMagatuhi", dblurUpdateHandle);
+#endif
 
 void effDebugDrawRect3(s32 x, s32 y, u32 fillColor) {
     sdfDrawTagLink(effDebugDrawTag,
