@@ -57,7 +57,8 @@ typedef struct nbMainProcessData_t
     s32 unk_28;
     u8 unk_2C[0x8];
     s32 encno;
-    u8 unk_38[0x8];
+    s32 formationtype;
+    s32 unk_3C;
     s32 actionstackp;
     u32 endtype;
     u8 unk_48[0x18];
@@ -634,7 +635,100 @@ f32 nbGetEnemyInterval(void)
 
 INCLUDE_RODATA(const s32, "newbattle/nbFormation", D_005458B0);
 
+#ifdef NON_MATCHING
+extern f32 sdfAtan(f32 value);
+extern f32 sdfSin(f32 value);
+extern f32 sdfCos(f32 value);
+extern s32 effBTLModelGetID(nbFormation_t *form);
+extern s32 printf(const char *format, ...);
+extern sdfVector4_t D_00526400;
+extern sdfVector4_t D_00526410;
+
+void nbSetPartyFormation(nbMainProcessData_t *data, s32 group)
+{
+    sdfVector4_t pos;
+    sdfVector4_t rot;
+    s32 list[32];
+    s32 count = 0;
+    s32 i;
+    s32 formation;
+    s32 id;
+    f32 width = 0.0f;
+    f32 interval = 0.0f;
+    f32 halfWidth;
+    f32 totalAngle;
+    f32 gapAngle;
+    f32 angle;
+    f32 unitAngle;
+    f32 distance;
+    f32 sign;
+    nbFormation_t *form;
+    u32 stat;
+
+    for (i = 0; i < 32; i++) {
+        form = &data->form[i];
+        stat = form->stat;
+        if ((stat & group) && ((stat & 1) || (stat & 0x808) == 0x808)) {
+            list[count++] = i;
+            halfWidth = form->r * form->scl;
+            width += halfWidth + halfWidth;
+        }
+    }
+    if (count == 0) return;
+    if (count > 1) {
+        interval = 50.0f;
+        if (!(1200.0f < width)) {
+            interval = (1200.0f - width) / (f32)(u32)(count - 1);
+            if (interval < 50.0f) interval = 50.0f;
+            else if (interval > 100.0f) interval = 100.0f;
+        }
+    }
+    if (group & 0x100) D_005514F8 = interval;
+    else nbFormEnemyInterval = interval;
+    gapAngle = sdfAtan(interval / 1200.0f);
+    totalAngle = -gapAngle;
+    for (i = 0; i < count; i++) {
+        form = &data->form[list[i]];
+        halfWidth = form->r * form->scl;
+        totalAngle += sdfAtan((halfWidth + halfWidth) / 1200.0f);
+        totalAngle += gapAngle;
+    }
+    distance = 1200.0f;
+    if (width < 800.0f) width = 800.0f;
+    else if (width > 800.0f) width = 800.0f;
+    distance -= width * 0.5f;
+    angle = -totalAngle * 0.5f;
+    sign = 1.0f;
+    if (!(group & 0x100)) sign = -1.0f;
+    if (group & 0x100) SDF_VU0_COPYVECTOR(&rot, &D_00526400);
+    else SDF_VU0_COPYVECTOR(&rot, &D_00526410);
+    formation = data->formationtype >= 8 && data->formationtype < 11;
+    for (i = 0; i < count; i++) {
+        form = &data->form[list[i]];
+        unitAngle = sdfAtan(form->r * form->scl / 1200.0f);
+        angle += unitAngle;
+        pos.x = sdfSin(angle) * 1200.0f;
+        pos.y = 0.0f;
+        pos.z = (distance - sdfCos(angle) * 1200.0f) * sign;
+        id = effBTLModelGetID(form);
+        if ((form->stat & 0x100) && id == 0x9B && !formation) {
+            printf("nbSetPartyFormation : DV_ALBION\n");
+            pos.z -= form->r * form->scl * 0.85f * sign;
+        }
+        nbSetFormPos(form, &pos);
+        SDF_VU0_COPYVECTOR(&form->orgpos, &pos);
+        nbSetFormRot(form, &rot);
+        SDF_VU0_COPYVECTOR(&form->orgrot, &rot);
+        angle += unitAngle;
+        angle += gapAngle;
+        if (!(data->stat & 0x10) && (form->stat & 0x2000)) {
+            form->stat &= ~0x2000;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbFormation", nbSetPartyFormation);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbFormation", nbSetEnemyFormation);
 
