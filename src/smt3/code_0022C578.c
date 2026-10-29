@@ -7446,13 +7446,54 @@ s8 rstGetPanelEffState(s32 index)
     return cmpPanelEffList[index].state;
 }
 
+extern cmpPanelEff_t *volatile cmpPanelEffLive asm("cmpPanelEffList");
+extern void cmpRandomizePanelEff(s32 width, s32 height, s32 kind,
+                                cmpPanelEffAnim_t *anim);
+
+#ifdef NON_MATCHING
+void cmpAddPanelEffEntry(s32 index, s32 x, s32 y, s32 z, u16 width, u16 height,
+                         u8 step, u8 delay, s32 color4, s32 color8, u8 kind)
+{
+    volatile cmpPanelEffState_t *entry = (cmpPanelEffState_t *)&cmpPanelEffList[index].state;
+    volatile cmpPanelEffState_t *live;
+
+    entry->frame = 0;
+    entry->height = height;
+    entry->x = x;
+    entry->width = width;
+    entry->y = y;
+    entry->z = z;
+    entry->color4 = color4;
+    entry->color8 = color8;
+    entry->step = step;
+    live = (cmpPanelEffState_t *)&cmpPanelEffLive[index].state;
+    live->delay = delay;
+    live = (cmpPanelEffState_t *)&cmpPanelEffLive[index].state;
+    live->kind = kind;
+    live = (cmpPanelEffState_t *)&cmpPanelEffLive[index].state;
+    live->state = 1;
+    switch (kind) {
+    case 0:
+    case 1:
+    case 2:
+    case 5:
+    case 6:
+        live = (cmpPanelEffState_t *)&cmpPanelEffLive[index].state;
+        cmpRandomizePanelEff(width, height, kind,
+                             (cmpPanelEffAnim_t *)live->anim);
+        break;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpAddPanelEffEntry);
+#endif
 
 /* NON_MATCHING: 6 of 46 words differ at the exact size: retail keeps the -1
  * return value in $2 across the null test, which moves the list pointer to
  * $3 and frees the delay slot. */
 #ifdef NON_MATCHING
-extern void cmpAddPanelEffEntry();
+extern void cmpAddPanelEffEntry(s32 index, s32 x, s32 y, s32 z, u16 width, u16 height,
+                                u8 step, u8 delay, s32 color4, s32 color8, u8 kind);
 
 s32 cmpAddQuePanelEff(s32 a1, s32 a2, s32 a3, u16 a4, u16 a5, u8 a6, u8 a7, s32 a8, s32 a9, u8 a10)
 {
