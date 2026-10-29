@@ -28,8 +28,6 @@ typedef struct tagPipeObject {
 
 typedef struct tagPipePosTable tagPipePosTable;
 
-typedef struct tagPipeLinkData tagPipeLinkData;
-
 typedef struct tagPipeLinkInfo {
     sdfMemHandle_t *aHandle;
     tagPipeLinkData *head;
@@ -521,14 +519,6 @@ typedef struct tagPipeObjectEntry {
     s32 offset;
     u8 parameters[4];
 } tagPipeObjectEntry;
-
-typedef struct tagPipeLinkData {
-    u16 id;
-    s16 partsID;
-    struct tagPipeLinkData *next;
-    struct tagPipeLinkData *prev;
-    u8 unk0C[4];
-} tagPipeLinkData;
 
 extern tagPipePartsInfo *getPartsInfo(s16 partsID);
 extern u8 objLoad(tagPipeObject *object, s32 index);

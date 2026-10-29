@@ -3,6 +3,14 @@
 
 #include "common.h"
 
+typedef struct tagPipeLinkData {
+    u16 id;
+    s16 partsID;
+    struct tagPipeLinkData *next;
+    struct tagPipeLinkData *prev;
+    u8 unk0C[4];
+} tagPipeLinkData;
+
 typedef struct tagPipePartsType {
     f32 radius;
     f32 length;
