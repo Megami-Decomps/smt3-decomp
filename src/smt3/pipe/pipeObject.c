@@ -290,7 +290,87 @@ void objMyLoad(tagPipeObject *objPtr)
     }
 }
 
+typedef struct {
+    s32 offset;
+    u8 id;
+    u8 way;
+    u8 action;
+    u8 value;
+} pipeObjectSource_t;
+
+extern pipeObjectSource_t *D_00528F70;
+extern u32 dds3GetRandA(void *state);
+
+#ifdef NON_MATCHING
+u8 objLoad(tagPipeObject *object, s32 index)
+{
+    pipeObjectSource_t *source = &D_00528F70[index];
+    u32 random = (u32)(unsigned long)source + dds3GetRandA(NULL);
+    u32 mode = source->way / 10;
+    u32 place = source->way - mode * 10;
+    f32 radius;
+    tagPipeEnemyInfo *info;
+
+    if (mode >= 10) {
+        mode = random % 9 + 1;
+    }
+    if (place == 0) {
+        place = random % 9 + 1;
+        while (place == 5) {
+            random += random >> 1;
+            place = random % 9 + 1;
+        }
+    }
+    radius = (f32)(s32)(mode * 60);
+    if (place & 1) {
+        radius *= 0x1.6a09e6p-1f;
+    }
+    if (place < 4) {
+        object->pos[1] = radius;
+    } else if (place < 7) {
+        object->pos[1] = 0.0f;
+    } else {
+        object->pos[1] = -radius;
+    }
+    switch (place) {
+    case 1:
+    case 4:
+    case 7:
+        object->pos[0] = -radius;
+        break;
+    case 3:
+    case 6:
+    case 9:
+        object->pos[0] = radius;
+        break;
+    default:
+        object->pos[0] = 0.0f;
+        break;
+    }
+    object->id = source->id;
+    object->enabled = 1;
+    object->offset = source->offset;
+    object->count = 0;
+    object->action = source->action;
+    if (!(object->id & 0x10)) {
+        info = objInfo(object->id);
+        if (info == NULL) {
+            return 0;
+        }
+        object->w = info->w;
+    }
+    if (!(object->id & 0xF0) &&
+        (object->action == 6 || object->action == 15 || object->action == 16)) {
+        object->offset = (s32)((u32)object->offset - 0x230);
+    }
+    if (object->id & 0x10) {
+        object->count = source->value * 10;
+    }
+    return source->value;
+}
+#else
 INCLUDE_ASM(const s32, "pipe/pipeObject", objLoad);
+#endif
 
 extern u32 dds3GetRandA(void *state);
 
