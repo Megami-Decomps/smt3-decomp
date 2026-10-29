@@ -1905,7 +1905,117 @@ s32 cmpCalcDestroyItem(void)
     return 1;
 }
 
+#ifdef NON_MATCHING
+extern void cmpCalcItemEntry(fclPanelPos_t *pos, cmpCursorInfo_t *cursor, s32 context,
+                             s8 flag, s32 alpha, s32 ot);
+
+s32 cmpCalcItem(void)
+{
+    s8 status = campWork->unk_0004;
+    s8 phase;
+    s32 result = 0;
+
+    if (status != 0) {
+        phase = campWork->previousPhase;
+        switch (phase) {
+        case 0:
+            cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0,
+                                cmpUpdateListSelection,
+                                &campWork->page[0].cursor, 0, 0);
+            break;
+        case 1:
+            cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0, NULL, NULL, 0, 0);
+            if (campWork->unk_0004 == phase) {
+                switch (campWork->page[0].cursor.unk_22 +
+                        (u8)campWork->page[0].cursor.unk_24) {
+                case 0:
+                case 1:
+                    cmpCreateLocalItem(0);
+                    break;
+                case 2:
+                    cmpCreateLocalItem(1);
+                    break;
+                case 3:
+                    cmpCreateLocalItem(2);
+                    break;
+                }
+                campWork->unk_0001 = 0xB;
+                cmpInitSelectCursor((s8)campWork->unk_8302);
+                cmpSetAfterCrossFunc(campWork->crossPanel, 0x120, 0x288,
+                                    cmpCalcItemEntry,
+                                    campWork->unk_410C, 0, 0);
+            } else {
+                campWork->unk_0001 = 0;
+                cmpInitStockCursorPos();
+            }
+            break;
+        case 11:
+            if (status == 1) {
+                switch (campWork->page[0].cursor.unk_22 +
+                        (u8)campWork->page[0].cursor.unk_24) {
+                case 0:
+                    if (cmpGetSkillTargetArea(datItemTable[cmpGetSelectItemID()].skill) == 0) {
+                        cmpUseItem();
+                        campWork->unk_0001 = phase;
+                        return 1;
+                    }
+                    campWork->unk_0001 = 9;
+                    break;
+                case 1:
+                    if (cmpCalcDestroyItem() == 0) {
+                        return 1;
+                    }
+                    campWork->unk_0001 = 0x10;
+                    campWork->unk_0004 = status;
+                    result = 1;
+                    break;
+                case 2:
+                case 3:
+                    campWork->unk_0001 = phase;
+                    return 0;
+                }
+                cmpSetCrossGeneralVal(campWork->crossPanel, 1);
+                if (result != 0) {
+                    return 1;
+                }
+            } else {
+                cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0,
+                                    cmpUpdateListSelection,
+                                    &campWork->page[0].cursor, 0, 0);
+                campWork->unk_0001 = 1;
+            }
+            break;
+        case 9:
+            if (status == 2) {
+                campWork->unk_0001 = 0xB;
+                cmpSetCrossGeneralVal(campWork->crossPanel, 0);
+            } else {
+                if (cmpUseItem() != 0) {
+                    campWork->unk_0001 = phase;
+                } else {
+                    campWork->unk_0001 = 0xB;
+                    cmpSetAfterCrossFunc(campWork->crossPanel, 0x120, 0x288,
+                                        cmpCalcItemEntry,
+                                        campWork->unk_410C, 0, 0);
+                    cmpSetCrossGeneralVal(campWork->crossPanel, 0);
+                }
+            }
+            break;
+        }
+        campWork->previousPhase = 1;
+    }
+    if (campWork->unk_0001 == 9) {
+        cmpSetItemTSL(cmpGetSelectItemID());
+    } else {
+        campWork->stock[0].count = 0xF;
+        cmpBuildStockNameList(&campWork->stock[0]);
+        cmpReCalcStockCursorPos(0);
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcItem);
+#endif
 
 s32 cmpSetPartyDSL(void)
 {
