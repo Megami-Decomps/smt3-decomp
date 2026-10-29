@@ -3181,7 +3181,99 @@ s32 cmbDrawPhasePanel(void)
     }
 }
 
+extern void fclDrawBG(fclSprite_t *sprite, s32 ot);
+extern void cmbUpdateCameraZoom(void);
+extern void cmbUpdateCameraPos(void);
+
+#ifdef NON_MATCHING
+s32 cmbDrawSequence(void)
+{
+    s32 phase = CMB_GBWK->unk_00001;
+
+    switch (phase) {
+    case 0: case 1: case 3: case 4: case 5: case 6:
+    case 8: case 13: case 14: case 16:
+        break;
+    default:
+        fclDrawBG(&CMB_GBWK->backgroundSprite, 7);
+        break;
+    }
+    if (CMB_GBWK->unk_00000 & 0x20) {
+        cmpUpdateTerminate((cmpInfoWindow_t *)CMB_GBWK);
+        return -1;
+    }
+    switch (CMB_GBWK->unk_00001) {
+    case 0:
+        cmbDrawPhaseDefault(1);
+        break;
+    case 2:
+        func_00201FB0(0);
+        break;
+    case 3:
+        cmbDrawPhase3(1);
+        break;
+    case 4:
+        cmbDrawPhaseDefault(0);
+        break;
+    case 5:
+        cmbDrawTopText(0);
+        if ((s8)CMB_GBWK->displayFlags[0] == 0) {
+            cmbDrawResultPanel(0);
+        }
+        cmbDrawStockPanel1();
+        break;
+    case 6:
+        cmbDrawTopText(1);
+        if ((s8)CMB_GBWK->displayFlags[0] == 0) {
+            cmbDrawResultPanel(1);
+        }
+        cmbDrawStockPanel2();
+        break;
+    case 7:
+        cmpDrawStatusCom(&CMB_GBWK->birthUnit[0], 1, 0, 2);
+        break;
+    case 8:
+        cmbDrawTopText(2);
+        if ((s8)CMB_GBWK->displayFlags[0] == 0) {
+            cmbDrawResultPanel(2);
+        }
+        cmbDrawStockPanel3();
+        break;
+    case 9:
+        cmbDrawStatus();
+        break;
+    case 10:
+        cmbDrawBirthDevil(0);
+        break;
+    case 11:
+        cmbDrawBirthDevil(1);
+        break;
+    case 13:
+        cmbUpdateCameraZoom();
+        break;
+    case 14:
+        if (CMB_GBWK->introductionFlag == 0) {
+            cmbUpdateCameraPos();
+        }
+        break;
+    case 15:
+        if (CMB_GBWK->unk_00003 == 10) {
+            cmpDrawStatusCom(&CMB_GBWK->birthUnit[0], 1, 0, 2);
+            cmbDrawBirthDevilMaskBG();
+        }
+        break;
+    case 16:
+        cmbDrawPhasePanel();
+        break;
+    }
+    if ((s8)CMB_GBWK->displayFlags[0] != 0) {
+        cmbDrawInfoSprite(0, 0, 0xFFFFF, 0x47);
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawSequence);
+#endif
 
 void cmbExit(void)
 {
