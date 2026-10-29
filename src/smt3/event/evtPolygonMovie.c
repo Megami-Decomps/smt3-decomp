@@ -3,6 +3,7 @@
 #include "libsdf.h"
 #include "effect.h"
 #include "event.h"
+#include "evtPolygonMovie.h"
 #include "ps2asm.h"
 
 
@@ -20,61 +21,7 @@ void *dds3GetProcessData(dds3ProcessID_t *id);
 
 
 
-typedef struct evtPolygonMovieWork_t {
-    u32 movieFlags;
-    void *file04;
-    sdfMemHandle_t *mem08;
-    void *pm1data;
-    void *header1;
-    pmdEntry_t *entryTable1;
-    char (*nameTable1)[32];
-    s32 nameCount1;
-    void *stageTable;
-    s32 stageCount;
-    void *stageF1;
-    void *stageF2;
-    void *stageTB;
-    void *unitTable;
-    s32 unitCount;
-    void *type9Data;
-    pmdEffectTable_t *effectTable;
-    s32 effectCount;
-    void *type8Data;
-    void *file4C;
-    sdfMemHandle_t *mem50;
-    void *pm2data;
-    pmdHeader_t *header2;
-    pmdEntry_t *entryTable2;
-    char (*nameTable)[32];
-    s32 nameCount2;
-    pmdCutInfo_t *cutInfo;
-    pmdFrameTable_t *frameTable;
-    s32 frameCount;
-    void *cameraTable;
-    s32 cameraCount;
-    f32 (*slightTable)[12];
-    s32 slightCount;
-    pmdSceneFogTable_t *sfogTable;
-    s32 sfogCount;
-    dds3Effect_Blur_t *blur2Table;
-    s32 blur2Count;
-    dds3Effect_PartialMultiBlurParam_t *mblurTable;
-    s32 mblurCount;
-    dds3Effect_DistortionBlurParam_t *dblurTable;
-    s32 dblurCount;
-    dds3Effect_Filter_t *filterTable;
-    s32 filterCount;
-    dds3Effect_PartialMultiFilterParam_t *mfilterTable;
-    s32 mfilterCount;
-    dds3Effect_RippleBlurParam_t *rblurTable;
-    s32 rblurCount;
-    s32 mesHandle;
-    dds3ProcessID_t *processId;
-    s32 eventNo;
-    s32 cutNo;
-    s32 nowFrame;
-    dds3Basic_t **effectBasicTable;
-} evtPolygonMovieWork_t;
+
 
 
 
@@ -769,11 +716,11 @@ void SLightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
         hokan = f->NameIndex;
         soften1 = f->data.f[0];
         bias1 = f->data.f[1];
-        key1 = wdata->slightTable[f->Length];
+        key1 = wdata->slightTable[f->Length].color;
         if (nf != NULL) {
             bias2 = nf->data.f[1];
             soften2 = nf->data.f[0];
-            key2 = wdata->slightTable[nf->Length];
+            key2 = wdata->slightTable[nf->Length].color;
         } else {
             soften2 = 7.0f;
             bias2 = 0.0f;
@@ -785,7 +732,7 @@ void SLightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
         soften1 = 7.0f;
         bias1 = 0.0f;
         soften2 = f->data.f[0];
-        key2 = wdata->slightTable[f->Length];
+        key2 = wdata->slightTable[f->Length].color;
     }
     evtHokanSceneLight(hokan, ratio, key1, key2, D_0056CFF0);
     dds3SetLightColor(0, 0, D_0056CFF0);
@@ -1191,8 +1138,8 @@ s32 evtPolygonMovieProcess1(dds3ProcessID_t *id)
     }
     printf(D_0053BAF8, work->eventNo, work->cutNo);
     if (work->stageTable != NULL) {
-        major = ((pmdStageTable_t *)work->stageTable)->MajorNum;
-        minor = ((pmdStageTable_t *)work->stageTable)->MinorNum;
+        major = work->stageTable->MajorNum;
+        minor = work->stageTable->MinorNum;
         mapNo = (major << 16) + minor;
         printf(D_0053BB20, major, minor);
         if (dds3GetMapNo(dds3GetControlScene()) != mapNo) {
@@ -1202,14 +1149,14 @@ s32 evtPolygonMovieProcess1(dds3ProcessID_t *id)
     }
     sceneWork = (dds3SceneBasic_t *)dds3GetActiveScene()->workdata;
     for (i = 0; i < work->unitCount; i++) {
-        major = ((pmdUnitTable_t *)work->unitTable)[i].MajorNum;
-        minor = ((pmdUnitTable_t *)work->unitTable)[i].MinorNum;
+        major = work->unitTable[i].MajorNum;
+        minor = work->unitTable[i].MinorNum;
         mdlPackDecode(major, minor, 0x101,
-                      (u8 *)work->header1 + ((pmdUnitTable_t *)work->unitTable)[i].DataOffset,
-                      ((pmdUnitTable_t *)work->unitTable)[i].DataSize);
+                      (u8 *)work->header1 + work->unitTable[i].DataOffset,
+                      work->unitTable[i].DataSize);
         serial = evtSetRegistUnit(major, minor);
         basic = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
-        basic->name = work->nameTable1[((pmdUnitTable_t *)work->unitTable)[i].NameIndex];
+        basic->name = work->nameTable1[work->unitTable[i].NameIndex];
         unit = evtGetUnitHandle(serial);
         mdlSmoothSingleMotion(unit->owner, 0, 0, 0.0f, 0.0f);
     }
@@ -1792,7 +1739,7 @@ evtPolygonMovieWork_t *evtGetPolygonMovieWorkData1(evtPolygonMovieWork_t *wdata,
             wdata->cameraCount = wdata->entryTable2[i].value;
             break;
         case 13:
-            wdata->slightTable = (f32 (*)[12])((u8 *)pm2data + wdata->entryTable2[i].offset);
+            wdata->slightTable = (pmdSceneLightTable_t *)((u8 *)pm2data + wdata->entryTable2[i].offset);
             wdata->slightCount = wdata->entryTable2[i].value;
             break;
         case 14:

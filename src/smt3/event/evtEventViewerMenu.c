@@ -1,6 +1,7 @@
 #include "common.h"
 #include "basic.h"
 #include "event.h"
+#include "evtPolygonMovie.h"
 #include "effect.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -10,11 +11,6 @@ extern char D_0054F9E0[];
 extern char D_0054F9E8[];
 extern char D_0054F9F0[];
 extern char D_0054F9B0[]; /* "     %d" */
-/* Viewer timeline key; the viewer links these on a group's child list. */
-
-/* Group prefix: the viewer walks the group chain and each group's keys. */
-
-
 extern evtViewerInfo_t *viewerinfo;
 extern s32 (*D_0032CB48[])(s32, s32);
 void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtFrameInfo_t *f);
@@ -1849,61 +1845,7 @@ s32 evtMakeViewerPath(s32 kind)
 
 
 
-typedef struct evtPolygonMovieWork_t {
-    u32 movieFlags;
-    void *file04;
-    sdfMemHandle_t *mem08;
-    void *pm1data;
-    void *header1;
-    pmdEntry_t *entryTable1;
-    char (*nameTable1)[32];
-    s32 nameCount1;
-    pmdStageTable_t *stageTable;
-    s32 stageCount;
-    void *stageF1;
-    void *stageF2;
-    void *stageTB;
-    pmdUnitTable_t *unitTable;
-    s32 unitCount;
-    void *type9Data;
-    pmdEffectTable_t *effectTable;
-    s32 effectCount;
-    void *type8Data;
-    void *file4C;
-    sdfMemHandle_t *mem50;
-    void *pm2data;
-    pmdHeader_t *header2;
-    pmdEntry_t *entryTable2;
-    char (*nameTable)[32];
-    s32 nameCount2;
-    pmdCutInfo_t *cutInfo;
-    pmdFrameTable_t *frameTable;
-    s32 frameCount;
-    void *cameraTable;
-    s32 cameraCount;
-    pmdSceneLightTable_t *slightTable;
-    s32 slightCount;
-    pmdSceneFogTable_t *sfogTable;
-    s32 sfogCount;
-    dds3Effect_Blur_t *blur2Table;
-    s32 blur2Count;
-    dds3Effect_PartialMultiBlurParam_t *mblurTable;
-    s32 mblurCount;
-    dds3Effect_DistortionBlurParam_t *dblurTable;
-    s32 dblurCount;
-    dds3Effect_Filter_t *filterTable;
-    s32 filterCount;
-    dds3Effect_PartialMultiFilterParam_t *mfilterTable;
-    s32 mfilterCount;
-    dds3Effect_RippleBlurParam_t *rblurTable;
-    s32 rblurCount;
-    s32 mesHandle;
-    dds3ProcessID_t *processId;
-    s32 eventNo;
-    s32 cutNo;
-    s32 nowFrame;
-    dds3Basic_t **effectBasicTable;
-} evtPolygonMovieWork_t;
+
 
 
 

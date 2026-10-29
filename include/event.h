@@ -53,7 +53,7 @@ typedef struct {
 struct evtViewerInfo_t {
     void *block;
     s32 flags;                          /* 0x0004 */
-    void *workdata;    /* 0x0008 */
+    struct evtPolygonMovieWork_t *workdata;    /* 0x0008 */
     s32 totalframe;                     /* 0x000C */
     s32 firstframe;                     /* 0x0010 */
     s32 lastframe;                      /* 0x0014 */

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "basic.h"
 #include "event.h"
+#include "evtPolygonMovie.h"
 #include "effect.h"
 #include "kernel_draw.h"
 #include "ps2asm.h"
@@ -27,23 +28,6 @@ typedef enum EVT_VIEWER_MENU {
     EVT_VIEWER_MENU_MAX = 13
 } EVT_VIEWER_MENU;
 
-/* evtAddFrameInfo allocates/clears a 0x20-byte key. Its parameter bytes
- * depend on the owning track kind; only the list and payload are needed here. */
-
-
-/* Track prefix consumed by the intrusive-list helpers. */
-
-
-/* Registered model record in the viewer's movie work table. */
-
-
-typedef struct {
-    u8 unk00[0x34];
-    pmdUnitTable_t *units;        /* 0x34 */
-    s32 unitCount;                 /* 0x38 */
-} evtViewerMovieWork_t;
-
-/* One pushed viewer menu mode; menuDepth indexes these. */
 
 
 
@@ -594,9 +578,9 @@ void evtUnRegistUnit(void)
     s32 index;
 
     if (viewerinfo->workdata != NULL) {
-        for (i = 0; i < ((evtViewerMovieWork_t *)viewerinfo->workdata)->unitCount; i++) {
-            model = ((evtViewerMovieWork_t *)viewerinfo->workdata)->units[i].MajorNum;
-            index = ((evtViewerMovieWork_t *)viewerinfo->workdata)->units[i].MinorNum;
+        for (i = 0; i < viewerinfo->workdata->unitCount; i++) {
+            model = viewerinfo->workdata->unitTable[i].MajorNum;
+            index = viewerinfo->workdata->unitTable[i].MinorNum;
             printf("unregist %d, %d\n", model, index);
             mdlUnRegist(model, index);
         }
