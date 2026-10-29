@@ -219,17 +219,11 @@ typedef struct effPCPBossBUNSIN_t
     s32 frame;
 } effPCPBossBUNSIN_t;
 
-typedef struct effPCPBossBUNSIN2Head_t
-{
-    nbFormation_t *unk00;
-    nbFormation_t *unk04;
-    nbFormation_t *unk08;
-    nbFormation_t *unk0C;
-} effPCPBossBUNSIN2Head_t;
+
 
 typedef struct effPCPBossBUNSIN2_t
 {
-    effPCPBossBUNSIN2Head_t head;
+    effPCPBossBUNSIN2Param_t head;
     s32 frame;
     s32 state;
     effPCPBossBUNSIN_t *parts[3];
@@ -1600,14 +1594,14 @@ effPCPBossBUNSIN2_t *effPCPBossBUNSIN2Create(effPCPBossBUNSIN2_t *param, void *u
     work->head = param->head;
     work->frame = 0;
     work->state = 0;
-    sub.pStartForm = work->head.unk00;
-    sub.pEndForm = work->head.unk04;
+    sub.pStartForm = work->head.pStartForm;
+    sub.pEndForm = work->head.pForm1;
     work->parts[0] = effPCPBossBUNSINCreate(&sub);
-    sub.pStartForm = work->head.unk00;
-    sub.pEndForm = work->head.unk08;
+    sub.pStartForm = work->head.pStartForm;
+    sub.pEndForm = work->head.pForm2L;
     work->parts[1] = effPCPBossBUNSINCreate(&sub);
-    sub.pStartForm = work->head.unk04;
-    sub.pEndForm = work->head.unk0C;
+    sub.pStartForm = work->head.pForm1;
+    sub.pEndForm = work->head.pForm2R;
     work->parts[2] = effPCPBossBUNSINCreate(&sub);
     return work;
 }

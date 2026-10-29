@@ -238,13 +238,7 @@ typedef struct nbKoukaProcessData_t
 
 
 
-typedef struct effPCPBossBUNSIN2Param_t
-{
-    nbFormation_t *pStartForm;
-    nbFormation_t *pForm1;
-    nbFormation_t *pForm2L;
-    nbFormation_t *pForm2R;
-} effPCPBossBUNSIN2Param_t;
+
 
 
 
