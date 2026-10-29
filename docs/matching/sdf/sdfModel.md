@@ -2,40 +2,62 @@
 
 ## sdfModelSetOneSkinDrawPacket (sdf/sdfModel, 0x180)
 
-Three of ninety words match, 360 bytes against retail's 384, and the whole
-body is shifted because the register assignment differs by one value. Every
-instruction otherwise corresponds one for one, in retail's order, including
-the two spill slots, the `6C07C000` constant in a saved register, the bone
-loop and the three tail tags.
+82 of 96 words match at the exact 384-byte size, first difference at +0x38.
+Four source properties got it from 3 of 90 to here, and all four are worth
+carrying to the sibling packet writers:
 
-The one difference is which of two values loses the last saved register.
-Retail keeps `qwc` (the low half of the `packetSize`/`matIndex` word) in a
-saved register and spills the `0x0FFFFFFF` address mask, so the mask's
-constant is built as `lui`, spill, reload, `ori`, spill and the loop reads it
-with `lw 0($29)`, while the tail rematerialises it as a fresh `lui`/`ori`
-pair. The draft keeps the mask in the saved register and spills `qwc`
-instead, which is six words shorter: two words for the mask's `lui`/`ori`
-against five for the split spill, plus the loop's reload.
+1. **`qwc` is the `packed` word narrowed in place**, not a separate `u16`.
+   Retail loads the `packetSize`/`matIndex` word into `$22`, takes `matIndex`
+   with `srl $5, $22, 16`, then `andi $22, $22, 0xFFFF` and keeps `$22` to the
+   final `sh $22, 0($17)`. That is one variable with five references,
+   `packed &= 0xFFFF;`, which is what wins `$22` over the mask in
+   `allocno_compare`. With a separate `u16 qwc` the mask takes the saved
+   register and the function comes out six words short.
+2. **`ofs = aId << 7;` sits after the `sdfModelSetMatRefPacket` call.** That
+   makes `aId`'s pseudo live across the call, so it gets `$16` and retail's
+   `daddu $16, $7, $0` plus `sll $16, $16, 7` appear; the shift's result is
+   spilled to `4($29)` after the call, which frees `$16` for the bone cursor
+   `addiu $16, $30, 0x10`. Written before the call the shift is one word
+   shorter, the spill lands in the call's delay slot and the bone cursor takes
+   `$17`, rotating every later saved register.
+3. **The mask is one local for the loop and the literal `0x0FFFFFFF` in the
+   tail.** The local is spilled, so its constant is built through the slot
+   (`lui`, `sw`, `lw`, `ori`, `sw`), and the literal gives the tail its own
+   rematerialised `lui`/`ori` pair. One local for both sites reloads the tail
+   copy with `lw 0($29)` and is a word short; two locals or a literal in the
+   loop run over 0x180.
+4. **The bone packet's address is a local assigned before the `dat0`/`dat1`
+   stores.** A call flushes the scheduler's memory lists, so a store written
+   before `sdfModelAllocTmPacket` cannot move after it. Retail stores `qwc`
+   and `id`, calls, then stores `dat0`, `dat1` and `addr`, which only comes
+   out of `addr = (u32)sdfModelAllocTmPacket(node);` as its own statement.
+   That one change fixed the whole loop body, 13 words.
 
-Ruled out, each measured on this binary: the mask as one local used in both
-the loop and the tail (360 bytes, mask in a register), as a literal at both
-sites (368, same), as a local for the loop and a literal for the tail (368),
-as a literal for the loop and a local for the tail (388, two mask pseudos and
-three spill slots, but the tail one does get retail's exact spill pattern),
-two separate locals (388), `const u32`, `~0xF0000000`, the mask declared
-first, last and assigned as a statement, `ofs` as `u32`, `ofs` split into
-`ofs = aIdx; ofs <<= 7;`, `qwc` assigned as a statement after the
-declarations, `qwc` as `u32` with an explicit `& 0xFFFF`, `matIndex` as
-`s32`, `count` as `s16`, a reused `u32 addr` local for the masked address at
-both sites, a `(u8 *)` cast inside the loop's address sum, `vuAddr` written
-as `i * 7 + 1`, and the bone id read as `aPacket->boneId[i]` instead of
-`*boneId++`. All of them land on 360, 368 or 388 and none moves the pair.
+The residual is one allocation tie plus the tail ordering that follows it.
+`aDataPtr` and the hoisted `0x6C07C000` constant are both `refs=5 live=64`:
 
-This is an allocation-priority tie: by `allocno_compare` the mask's single
-use inside the loop carries enough frequency to beat `qwc`'s four
-low-frequency references, and nothing the source says separates them.
-Whoever picks this up needs a change that adds a reference to `qwc` or
-removes frequency from the mask, not another spelling of either.
+    tools/cc1probe.sh <candidate> --as-unit src/smt3/sdf/sdfModel.c --version smt3 \
+        --func sdfModelSetOneSkinDrawPacket --alloc --no-dumps --out <dir>   # verify: OK
+
+    a1 {reg85  refs=5 live=64 calls=3}  pri=1562  => $23   (aDataPtr)
+    a17{reg108 refs=5 live=64 calls=3}  pri=1562  => $fp   (0x6C07C000)
+
+Equal priority, so `allocno_compare` decides on the allocno number, and the
+parameter's pseudo is always lower than a constant cse creates. Retail has the
+constant in `$23` and `aDataPtr` in `$30`, so retail's compile broke the tie
+the other way: either `aDataPtr` has four references there, or the constant has
+six. `refs` is frequency weighted (a reference at loop depth 1 counts twice),
+which is how a two-insn constant with one use in the loop reaches five.
+
+Measured and ruled out for the tie: the constant as a declared local, assigned
+at the top, after the call and just before the loop; `0x6C07C000 | vuAddr`;
+`u32 count`; a second pointer local for the tail read of `dataBody` (combine
+propagates it back); and reading `boneCount` or `boneId` before the call.
+Nothing moves either number. The last six differing words are the tail's
+restore ordering, which follows the swap: with the pair the right way round
+retail schedules `ld $16, 0x10($29)` into the slot after `lw $3, 8($30)`.
+Moving `tag->dat0 = 0;` behind the `addr` store wins that one word by accident
+(83 of 96) and is kept out of the draft as the wrong reason.
 
 ## sdfModelLinkDrawPacket (sdf/sdfModel, 0x208)
 
