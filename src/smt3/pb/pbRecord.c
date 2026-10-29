@@ -73,7 +73,7 @@ typedef struct
     f32 x, y, z;
 } pbGroupData_t;
 typedef struct { s16 x, y; u16 status; } pbRecordCell_t;
-typedef struct { s32 status; s16 x, y; } pbRecordCharacter_t;
+typedef struct { union { s32 status; s8 statusByte; }; s16 x, y; } pbRecordCharacter_t;
 
 typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
