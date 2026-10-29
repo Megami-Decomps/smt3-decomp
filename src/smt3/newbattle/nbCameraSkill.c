@@ -1263,7 +1263,7 @@ void nbCameraShot_All_Set(nbCamera_t *pNbCamera)
     pNbCamera->fovy = 0.69813163f;
 }
 
-/* NON_MATCHING: 736 emitted / 776 native bytes; 41 of 184 emitted words match. */
+/* NON_MATCHING: 188 of 194 words match at native 776-byte size. */
 #ifdef NON_MATCHING
 void bCameraShot_AttackInvokeTargetPartyNear_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 {
@@ -1280,8 +1280,10 @@ void bCameraShot_AttackInvokeTargetPartyNear_Set(nbCamera_t *pNbCamera, nbCamera
     f32 groupRadius;
     f32 lowestHeight;
     f32 radius;
+    f32 span;
     f32 length;
-    f32 angle;
+    f32 radiusAngle;
+    f32 boundAngle;
     f32 distance;
 
     effBTLModelAllShow();
@@ -1292,9 +1294,9 @@ void bCameraShot_AttackInvokeTargetPartyNear_Set(nbCamera_t *pNbCamera, nbCamera
     groupRadius = effBTLModelGroupGetSphere(invokeParty);
     SDF_VU0_STOREVECTOR_NOMEM(&cameraPos);
 
+    first = 1;
     form = nbGetMainProcessData()->form;
     lowest = NULL;
-    first = 1;
     lowestHeight = 0.0f;
     for (i = 0; i < 32; i++, form++) {
         u32 flags = form->stat;
@@ -1310,19 +1312,21 @@ void bCameraShot_AttackInvokeTargetPartyNear_Set(nbCamera_t *pNbCamera, nbCamera
             continue;
         }
         height = effBTLModelGetHeight(form);
-        if (first != 0 || height < lowestHeight) {
+        if (first != 0) {
             lowestHeight = height;
             lowest = form;
             first = 0;
+        } else if (height < lowestHeight) {
+            lowestHeight = height;
+            lowest = form;
         }
     }
 
     if (lowest != NULL) {
-        f32 halfHeight = -(lowestHeight * 0.5f);
-
+        cameraPos.y = -(lowestHeight * 0.5f);
         effBTLModelGetSphereCenter(lowest);
         SDF_VU0_STOREVECTOR_NOMEM(&center);
-        cameraPos.y = (halfHeight + center.y) * 0.5f;
+        cameraPos.y = (cameraPos.y + center.y) * 0.5f;
     }
 
     effBTLModelGetSphereCenter(target);
@@ -1334,28 +1338,26 @@ void bCameraShot_AttackInvokeTargetPartyNear_Set(nbCamera_t *pNbCamera, nbCamera
     SDF_VU0_LOADVECTOR_B(&basePos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(length);
-    angle = sdfAtan(0.3490658104f);
-    if (radius > 150.0f) {
-        distance = radius / angle;
-    } else if (radius > 90.0f) {
-        distance = (radius * 1.5f) / angle;
+    radiusAngle = sdfAtan(0.34906582f);
+    if (150.0f < radius) {
+        distance = radius / radiusAngle;
+    } else if (90.0f < radius) {
+        distance = (radius * 1.5f) / radiusAngle;
     } else {
-        distance = (radius + radius) / angle;
+        distance = (radius + radius) / radiusAngle;
     }
 
-    angle = sdfAtan(0.4712387919f);
-    if (length + distance < groupRadius / angle) {
-        f32 angleSum = length + distance;
-        f32 adjust;
-
-        angleSum *= angle;
+    /* Keep the combined extent live across the next atan call. */
+    span = length + distance;
+    boundAngle = sdfAtan(0.4712388f);
+    if (span < groupRadius / boundAngle) {
+        span *= boundAngle;
         effBTLModelGetSphereCenter(invoke);
         SDF_VU0_STOREVECTOR_NOMEM(&center);
-        adjust = groupRadius - angleSum;
-        if (center.x < cameraPos.x) {
-            cameraPos.x = cameraPos.x - adjust;
+        if (cameraPos.x > center.x) {
+            cameraPos.x = cameraPos.x - (groupRadius - span);
         } else {
-            cameraPos.x = cameraPos.x + adjust;
+            cameraPos.x = cameraPos.x + (groupRadius - span);
         }
     }
 
@@ -1363,12 +1365,11 @@ void bCameraShot_AttackInvokeTargetPartyNear_Set(nbCamera_t *pNbCamera, nbCamera
     SDF_VU0_STOREVECTOR_NOMEM(pNbCamera);
     SDF_VU0_LOADVECTOR_B(&basePos);
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_GETLENGTH(length);
-    pNbCamera->distance = length;
+    SDF_VU0_GETLENGTH(pNbCamera->distance);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(&pNbCamera->direction);
     pNbCamera->fovy = 0.6981316209f;
-    pNbCamera->distance += distance * 1.049999952f;
+    pNbCamera->distance += distance * 1.05f;
 }
 #else
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", bCameraShot_AttackInvokeTargetPartyNear_Set);

@@ -278,3 +278,34 @@ The 160-slot inventory scan is native behavior, not proof that the separate
 item table has 160 rows: its declared native extent remains unchanged. The
 stock scan reads byte IDs at save-work +0x1914, the count at +0x1924 and
 0xEC-byte unit records at +0xA54, independently corroborated by `datAddDevil`.
+
+## Snapshot the camera span before the angle call
+
+The guarded `bCameraShot_AttackInvokeTargetPartyNear_Set` now reproduces the
+native 776-byte size and 188 of 194 words. Keep the physical radius and the
+later combined span as separate locals, and compute `span = length + distance`
+before the second atan call. A single reused radius/span local emits identical
+bytes; it is not required and is absent from the preferred source.
+
+A qualified final-source `--alloc --sched --no-dumps` probe uses cc1 SHA-256
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`
+and reports `verify: OK`, with hooked/unhooked output equality and parity with
+plain compilation. UID286 computes radius in pseudo95; UID360 computes span
+in pseudo96, and UID391 scales that span. These distinct pseudos both receive
+`$f20` because their live ranges do not overlap. Distance pseudo100 receives
+`$f21`, and the earlier vector-length pseudo97 receives `$f22`. These are used
+geometry values, with no extra lifetime or dependency introduced.
+
+The first-found scan has two real arms: initialize the minimum and clear the
+first flag, or replace only a strictly lower minimum. Publish the midpoint's
+camera-Y field before the sphere-center call and reload it afterward. Finally,
+write the last vector length directly to the camera distance field before
+normalizing direction. These source boundaries recover native operations that
+the earlier shared-tail/local-output form omitted.
+
+Six words remain: the two atan-result quantities receive `$f1` rather than
+native `$f2`. Their moves, divisions and span multiply account for every miss;
+the allocation trace does not show a real constraint excluding `$f1`. Do not
+invent a live value or fixed register to create one. For a reproducible probe,
+use an otherwise unchanged full-owner copy with only this draft promoted, then
+run `tools/cc1probe.sh /tmp/near.c --as-unit src/smt3/newbattle/nbCameraSkill.c --func bCameraShot_AttackInvokeTargetPartyNear_Set --alloc --sched --no-dumps --out /tmp/near-alloc` and require `verify: OK`.

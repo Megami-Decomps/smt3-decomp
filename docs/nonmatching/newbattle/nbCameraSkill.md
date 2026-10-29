@@ -114,32 +114,32 @@ callee visible as C; see [callee visibility](../../levers/callee-visibility.md).
 
 ## bCameraShot_AttackInvokeTargetPartyNear_Set (newbattle/nbCameraSkill, 0x308)
 
-The draft emits 736 of the native 776 bytes. Of its 184 emitted instruction
-words, 41 match and 143 differ; 40 native bytes are uncovered. Both stack
-frames are 160 bytes. A default scratch promotion checks the complete owner
-at 32 match / 1 differ, with this target as the sole difference.
+The draft emits the native 776 bytes, with 188 of 194 words matching. Both
+frames are 160 bytes and no native bytes are uncovered. A default scratch
+promotion checks 32 match / 1 differ, with this target as the sole difference;
+the normal build retains its assembly fallback.
 
-The camera receives three aligned scratch vectors: base position at stack+0,
-camera position at +0x10 and temporary center at +0x20. The initial formation
-calls produce distinct invoke and target pointers, followed by an invoke-party
-mask. A call's delay slot can save the preceding provider's result; the mask
-is returned after that delay slot, and is never dereferenced as a pointer.
+The three aligned vectors are base position at stack+0, camera position at
++0x10 and temporary center at +0x20. The formation calls produce separate
+invoke and target pointers, followed by a party mask. Call delay slots save
+preceding provider results; the returned mask is never a formation pointer.
 
-The 32-record scan finds the lowest eligible formation height. Its first match
-initializes the minimum even for a negative or NaN height; later updates use
-strict ordered comparisons. That center and height set camera Y. The later
-bound correction compares invoke-center X with camera X, and updates camera X
-with the selected radius adjustment. It does not write Y. Native stores at
-stack+0x14 and +0x10 distinguish those two operations.
+The 32-record scan has separate first-found and strict-lower arms. Only the
+first arm clears `first`; it accepts the first eligible height even when it
+is negative or NaN. The minimum-height midpoint publishes camera Y before
+querying the selected center, then reloads it afterward. The later radius
+correction compares camera X to invoke-center X and writes camera X.
 
-The final path stores target, then the interim camera distance, normalizes and
-stores direction, stores fovy, and finally adds the scaled distance term to the
-published distance field. It retains `vf10` after the target store. The existing
-VU0 primitives reproduce each hardware operation, with no synthetic uses.
+Keep the combined `span = length + distance` before the second atan call.
+This gives it the native live range across that call; radius, span and distance
+remain separate ordinary locals. A radius/span reuse variant emits identical
+bytes and was reduced to the separate locals. The final length macro writes
+the camera distance field directly before direction normalization; the fovy
+store precedes the final distance addition.
 
-The remaining frontier is register allocation and division-block structure.
-Native has radius divisions at +0x1C0 and +0x1F8; C merges them at +0x1CC.
-The group-radius division is at native +0x214 versus C +0x1E8. Keeping the
-physical radius unchanged across three ordinary distance branches preserves
-the meaning but does not alter the output. No frame padding, forced registers
-or compiler-option changes are used.
+The remaining six words are at +0x1A0, +0x1C0, +0x1F8, +0x208, +0x214 and
++0x228. The two atan results use `$f1` where native uses `$f2`; their moves,
+divisions and final span multiply account for every difference. There is no
+missing operation, division block or frame gap. Splitting the two angle locals
+and reversing the strict radius comparison operands leave these words unchanged.
+See [the geometry-span trace](../../levers/cross-block-locals.md#snapshot-the-camera-span-before-the-angle-call).
