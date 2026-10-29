@@ -451,3 +451,24 @@ supports the three-word allocation request and the existing one-word requests
 without inventing neighboring storage. The complete kernel owner checks 38
 match / 0 differ; heap initialization remains a guarded draft with its native
 assembly fallback.
+
+## Matched load-file module management
+
+`sceSifUnloadModule` (144 bytes), `sceSifSearchModuleByName` (160 bytes) and
+`sceSifSearchModuleByAddress` (144 bytes) match 448 instruction bytes. All
+bind first and require the supported service version. They distinguish bind
+failure (`-65536`), unsupported version (`-65540`) and RPC failure (`-65537`),
+returning the shared reply word after a successful transaction.
+
+The name-search RPC sends the complete 512-byte request region: the BSS map's
+two-word header followed by 252 name bytes and 252 argument bytes. The loader
+that shares this buffer reads the second header word as its module result.
+Name search copies at most 252 name bytes and forces name byte 251 to zero,
+leaving the two header words and argument storage untouched. Unload and address search send only four bytes.
+All three receive their result into the first request word.
+
+Writing the RPC failure return first emits the native branch-likely result
+load with the configured 2.9 compiler. A nonnegative-result-first form leaves
+one branch-word difference in each four-byte transaction and adds eight bytes
+to name search. The complete kernel owner checks 41 match / 0 differ at this
+qualification.

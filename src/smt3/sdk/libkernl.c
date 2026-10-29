@@ -1209,11 +1209,68 @@ INCLUDE_ASM(const s32, "sdk/libkernl", _sceSifLoadModuleBuffer);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifStopModule);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifUnloadModule);
+/* The load-file RPC sends this complete 0x200-byte shared request region. */
+typedef struct lfRequest_t {
+    s32 value;
+    s32 moduleResult;
+    char name[0xFC];
+    u8 arguments[0xFC];
+} lfRequest_t;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSearchModuleByName);
+extern lfRequest_t D_0059EA00;
+extern rpcClient D_0059EC00;
+extern s32 _lf_bind(void);
+extern s32 _lf_version(void);
+extern char *strncpy(char *destination, const char *source, u32 count);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSearchModuleByAddress);
+s32 sceSifUnloadModule(s32 moduleId)
+{
+    if (_lf_bind() < 0) {
+        return -65536;
+    }
+    if (_lf_version() != 0) {
+        return -65540;
+    }
+    D_0059EA00.value = moduleId;
+    if (sceSifCallRpc(&D_0059EC00, 8, 0, &D_0059EA00, 4,
+                      &D_0059EA00, 4, NULL, NULL) < 0) {
+        return -65537;
+    }
+    return D_0059EA00.value;
+}
+
+s32 sceSifSearchModuleByName(const char *name)
+{
+    if (_lf_bind() < 0) {
+        return -65536;
+    }
+    if (_lf_version() != 0) {
+        return -65540;
+    }
+    strncpy(D_0059EA00.name, name, 0xFC);
+    D_0059EA00.name[0xFB] = 0;
+    if (sceSifCallRpc(&D_0059EC00, 9, 0, &D_0059EA00, 512,
+                      &D_0059EA00, 4, NULL, NULL) < 0) {
+        return -65537;
+    }
+    return D_0059EA00.value;
+}
+
+s32 sceSifSearchModuleByAddress(void *address)
+{
+    if (_lf_bind() < 0) {
+        return -65536;
+    }
+    if (_lf_version() != 0) {
+        return -65540;
+    }
+    D_0059EA00.value = (s32)address;
+    if (sceSifCallRpc(&D_0059EC00, 10, 0, &D_0059EA00, 4,
+                      &D_0059EA00, 4, NULL, NULL) < 0) {
+        return -65537;
+    }
+    return D_0059EA00.value;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifLoadModuleBuffer);
 
