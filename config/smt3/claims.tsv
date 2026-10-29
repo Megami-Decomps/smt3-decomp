@@ -963,3 +963,4 @@ src/smt3/effect/effModelTrackPoly.c	z29	done	2026-10-29	0 matches / 1 guarded dr
 src/smt3/field/fldProcess.c	z29	open	2026-10-29	1 fn / 2252 B	largest-first pass: ProcDraw; skipping fldNpcDraw (z27)
 src/smt3/sound/sndManager.c	redthing1	done	2026-10-29	1 fn / 1272 B	KiB agent: dds3TitleDrawFade exact (318/318 words), ordinary C with live age/alpha reuse and independent callback-sensitive guards; owner 14 match 0 differ; source 224abeee0e9ef9e6367c74bc6cf534de158535db, exact-source hosted CI 40949890330 passed; dds3TitleDrawMenu is separate prior work
 src/smt3/field/fldProcess.c	z29	done	2026-10-29	1 fn / 2252 B	ProcDraw exact from 169 of 563; unsized extern array for the lui/%lo debug word, one struct pointer read twice, a plain braced block instead of do/while(0), and 0.986f spelling; owner 23 match 0 differ
+src/smt3/effect/parManager.c	z29	open	2026-10-29	2 fn / 3984 B	largest-first pass: dds3Particle_SparkBuffInit and its SparkOffset sibling
