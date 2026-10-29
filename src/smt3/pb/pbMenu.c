@@ -124,7 +124,7 @@ extern void sdfFileCmdReadFile(char *aFileName, void *aBuffer, s32 aLength, void
 
 extern s32 pbLoadSystemDataDone(s32 handle, s32 status);
 
-extern s32 pbGetMoveChar(void);
+extern pbProcHandle_t *pbGetMoveChar(void);
 
 extern void dds3AdminiCallSequence(s32, s32, s32, s32);
 
@@ -174,7 +174,7 @@ void func_001D4E10(void) {
 void exitPB(pbProcHandle_t *p) {
     dds3ResetProcessFlag(p->id, 0x10, 1);
     if (pbGetMoveChar() != 0) {
-        ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x60000;
+        pbGetMoveChar()->flags = 0x60000;
     }
     dds3AdminiCallSequence(0, 0, 0, 0);
 }
@@ -189,7 +189,7 @@ void func_001D4E70(pbProcHandle_t *panel) {
 void func_001D4EB0(pbProcHandle_t *panel) {
     dds3ResetProcessFlag(panel->id, 0x10, 1);
     if (pbGetMoveChar() != 0) {
-        ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x10000;
+        pbGetMoveChar()->flags = 0x10000;
     }
     panel->flags = 0x50000;
 }
@@ -201,7 +201,7 @@ void func_001D4F08(void) {
 
 void pbSetDebugOwner(pbProcHandle_t *panel) {
     pbPanelValue_t *work = panel->data.value;
-    pbProcHandle_t *help = pbStartHelp((pbProcHandle_t *)pbGetMoveChar(), work->value);
+    pbProcHandle_t *help = pbStartHelp(pbGetMoveChar(), work->value);
     dds3ProcessID_t *id;
     D_0054F5C4->helpProc = help;
     dds3SetProcessFlag(help->id, 0x10, 1);
@@ -375,7 +375,7 @@ s32 pb_load_mapdata_Process(dds3ProcessID_t *id) {
             dds3ResetProcessFlag(parent->id, 0x10, 1);
             parent->flags = 0x50000;
             if (pbGetMoveChar() != 0) {
-                ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x10000;
+                pbGetMoveChar()->flags = 0x10000;
             }
             if (panelValue->value == loadState) {
                 memcpy(&D_00327458, D_0054F5C4->unk01C, 0x320);
@@ -384,7 +384,7 @@ s32 pb_load_mapdata_Process(dds3ProcessID_t *id) {
         }
     } else if (pbLoadState == 1) {
         if (pbGetMoveChar() != 0) {
-            ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x10000;
+            pbGetMoveChar()->flags = 0x10000;
         }
         memcpy(&D_00327458, D_0054F5C4->unk01C, 0x320);
         result = -1;
