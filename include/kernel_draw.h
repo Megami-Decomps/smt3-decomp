@@ -43,4 +43,7 @@ typedef struct
     sdf3DLightParallelPacket_t subLight;
 } dds3DrawBank_t;
 
+/* Native frame renderer ordering table: map size 0xAA0, stride 0x20. */
+extern sdfGrOt_t sdfGrOtTable[85];
+
 #endif

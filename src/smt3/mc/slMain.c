@@ -588,83 +588,98 @@ u32 slVersionConvert_GetSize(void) {
     return (u32)(version_convert_ver - 3) < 2 ? 0x16DC0 : 0x1A510;
 }
 
-INCLUDE_RODATA(const s32, "mc/slMain", D_00532860);
 
-#ifdef NON_MATCHING
-extern s32 printf(const char *format, ...);
-extern void *slConvertMemcpy(void *destination, const void *source, u32 size) __asm__("memcpy");
-extern char D_00532878[], D_005328A0[];
+
+/* Save fields used by revision conversion; the party and encyclopedia
+ * records share the persistent allocation owned by dds3GlobalWorkInit. */
+typedef struct {
+    u8 unknown00[0x34];
+    sdfMemHandle_t *memHandle;
+    u8 unknown38[0xA54 - 0x38];
+    datUnitWork_t unitwork[16];
+    u8 unknown1914[0x11E90 - 0x1914];
+    fclencyceelem_t encyclopedia[184];
+} slConvertWork_t;
+
+extern char D_00532878[];
+extern char D_005328A0[];
+extern s32 printf(const char *, ...);
 
 void slVersionConvert_Step3(void)
 {
-    dds3GlobalWork_t *work = DDS3_GBWK;
-    sdfMemHandle_t *handle = work->memHandle;
-    u8 *source;
-    s32 i, j;
+    sdfMemHandle_t *handle = DDS3_GBWK->memHandle;
+    u8 *src;
+    dds3GlobalWork_t *work;
+    s32 i;
+    s32 j;
+    s32 skill;
+    u32 bytes;
 
-    switch (version_convert_ver) {
-    case 1:
-        source = slLoadFileHandle;
-        slConvertMemcpy(work, source, 0x10);
-        slConvertMemcpy(&work->unk10[0x20], source + 0x10, 0x1BF4);
-        slConvertMemcpy(&work->syakkincnt[0x23C], source + 0x1C04, 0xDD8C);
-        break;
-    case 2:
-        slConvertMemcpy(work, slLoadFileHandle, 0xFA30);
-        break;
-    case 3:
+    if (version_convert_ver == 1) {
+        work = DDS3_GBWK;
+        src = slLoadFileHandle;
+        bytes = 0x10;
+        memcpy(work, src, bytes);
+        src += bytes;
+        bytes = 0x1BF4;
+        memcpy((u8 *)work + 0x30, src, bytes);
+        src += bytes;
+        bytes = 0xDD8C;
+        memcpy((u8 *)work + 0x1CA4, src, bytes);
+    } else if (version_convert_ver == 2) {
+        bytes = 0xFA30;
+        memcpy(DDS3_GBWK, slLoadFileHandle, bytes);
+    } else if (version_convert_ver == 3) {
         printf(D_00532878);
         work = DDS3_GBWK;
-        source = slLoadFileHandle;
-        memset(work, 0, 0x1A510);
-        slConvertMemcpy(work, source, 0x16DC0);
-        work = DDS3_GBWK;
+        src = slLoadFileHandle;
+        bytes = 0x1A510;
+        memset(work, 0, bytes);
+        bytes = 0x16DC0;
+        memcpy(work, src, bytes);
         for (i = 0; i < 16; i++) {
             for (j = 0; j < 24; j++) {
-                u16 skill = work->unitwork[i].skill[j];
-                if ((u32)(skill - 0x100) < 0x60) {
-                    work->unitwork[i].skill[j] = skill + 0x20;
+                skill = ((slConvertWork_t *)DDS3_GBWK)->unitwork[i].skill[j];
+                if (skill >= 0x100 && skill < 0x160) {
+                    ((slConvertWork_t *)DDS3_GBWK)->unitwork[i].skill[j] = skill + 0x20;
                 }
             }
             for (j = 0; j < 24; j++) {
-                u16 skill = work->unitwork[i].keisyoskill[j];
-                if ((u16)(skill - 0x100) < 0x60) {
-                    work->unitwork[i].keisyoskill[j] = skill + 0x20;
+                if (((slConvertWork_t *)DDS3_GBWK)->unitwork[i].keisyoskill[j] >= 0x100 &&
+                    ((slConvertWork_t *)DDS3_GBWK)->unitwork[i].keisyoskill[j] < 0x160) {
+                    ((slConvertWork_t *)DDS3_GBWK)->unitwork[i].keisyoskill[j] += 0x20;
                 }
             }
         }
         for (i = 0; i < 168; i++) {
             for (j = 0; j < 24; j++) {
-                u16 skill = work->encycRecords[i].skill[j];
-                if ((u16)(skill - 0x100) < 0x60) {
-                    work->encycRecords[i].skill[j] = skill + 0x20;
+                if (((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].skill[j] >= 0x100 &&
+                    ((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].skill[j] < 0x160) {
+                    ((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].skill[j] += 0x20;
                 }
             }
             for (j = 0; j < 24; j++) {
-                u16 skill = work->encycRecords[i].keisyoskill[j];
-                if ((u16)(skill - 0x100) < 0x60) {
-                    work->encycRecords[i].keisyoskill[j] = skill + 0x20;
+                if (((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].keisyoskill[j] >= 0x100 &&
+                    ((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].keisyoskill[j] < 0x160) {
+                    ((slConvertWork_t *)DDS3_GBWK)->encyclopedia[i].keisyoskill[j] += 0x20;
                 }
             }
         }
-        work->memHandle = handle;
-        return;
-    case 4:
-        printf(D_005328A0, slLoadFileHandle);
+    } else if (version_convert_ver == 4) {
+        printf(D_005328A0);
         work = DDS3_GBWK;
-        source = slLoadFileHandle;
-        memset(work, 0, 0x1A510);
-        slConvertMemcpy(work, source, 0x16DC0);
-        break;
-    default:
-        slConvertMemcpy(work, slLoadFileHandle, 0x1A510);
-        break;
+        src = slLoadFileHandle;
+        bytes = 0x1A510;
+        memset(work, 0, bytes);
+        bytes = 0x16DC0;
+        memcpy(work, src, bytes);
+    } else {
+        bytes = 0x1A510;
+        memcpy(DDS3_GBWK, slLoadFileHandle, bytes);
     }
     DDS3_GBWK->memHandle = handle;
 }
-#else
-INCLUDE_ASM(const s32, "mc/slMain", slVersionConvert_Step3);
-#endif
+
 
 u8 slGetPadTrig(s32 map) {
     return map != 0 && slProcShutDownFlg == 1;
@@ -2332,14 +2347,6 @@ s32 slFileSelCalc(void)
 INCLUDE_ASM(const s32, "mc/slMain", slFileSelCalc);
 #endif
 
-INCLUDE_RODATA(const s32, "mc/slMain", D_005328C0);
-
-INCLUDE_RODATA(const s32, "mc/slMain", D_005328D0);
-
-INCLUDE_RODATA(const s32, "mc/slMain", D_005328E0);
-
-INCLUDE_RODATA(const s32, "mc/slMain", D_005328F0);
-
 extern f32 D_0054F074, D_0054C58C, slFileSelWork;
 extern char D_005287F0[], D_00528800[], D_00528810[];
 extern char D_005516D8[], D_005516E8[];
@@ -2554,6 +2561,20 @@ s32 slFileSelDraw(s32 id)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "mc/slMain", D_00532860);
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_00532878);
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_005328A0);
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_005328C0);
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_005328D0);
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_005328E0);
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_005328F0);
+
 INCLUDE_ASM(const s32, "mc/slMain", slFileSelDraw);
 #endif
 

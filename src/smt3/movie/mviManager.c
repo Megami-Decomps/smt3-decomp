@@ -5,6 +5,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "sdf_movie_types.h"
 
 extern void *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
                               void *drawExit, void *deleteExit, void *p);
@@ -26,9 +27,9 @@ extern rcvWork_t *shutdownfunc;
 
 extern void sdfChipFreeDirect(void *aPtr);
 
-extern u8 D_00343E40[];
+extern sdfMovieCb_t D_00343E40;
 
-extern s32 sdfMovieIsFinished(void *movie);
+extern s32 sdfMovieIsFinished(sdfMovieCb_t *movie);
 
 extern void movieStop(void);
 
@@ -38,21 +39,21 @@ extern s32 scrGetIntPara(s32 n);
 
 extern void scrSetIntReturnValue(s32 i);
 
-extern s32 dds3PlayMovieByIndex(s32 index);
+extern void dds3PlayMovieByIndex(s32 index);
 
 extern sdfGrOt_t sdfGrOtTable[85];
 
-extern void release_movieobj2(void *movie, sdfGrOt_t *ot);
+extern void release_movieobj2(sdfMovieCb_t *movie, sdfGrOt_t *ot);
 
 typedef struct
 {
-    /* 0x00 */ s32 unk_00;
-    /* 0x04 */ char name[0x14];
+    /* 0x00 */ const char *path;
+    /* 0x04 */ sdfMovieInitParm_t descriptor;
 } dds3MovieEntry_t;
 
 extern dds3MovieEntry_t D_00343BE8[];
 
-extern s32 moviePlayFile_27041744(s32 arg0, char *name);
+extern void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descriptor);
 
 extern u16 dds3VblanksPerFrame;
 
@@ -60,7 +61,7 @@ extern s32 PlayingNo;
 
 extern void sdfIpuRunDecode(s32 frames);
 
-extern void movieCloseStream(u8 *stream);
+extern void movieCloseStream(sdfMovieCb_t *stream);
 
 extern s32 dds3KillProcess(s32 id, s32 shutdowntimer);
 
@@ -68,35 +69,35 @@ extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 s32 movieDrawProc(void)
 {
-    release_movieobj2(D_00343E40, &sdfGrOtTable[57]);
+    release_movieobj2(&D_00343E40, &sdfGrOtTable[57]);
     return 0;
 }
 
-extern void movieOpenStream(dds3MovieEntry_t *stream, char *desc, s32 path);
+extern void movieOpenStream(sdfMovieCb_t *stream, sdfMovieInitParm_t *descriptor, const char *path);
 
 extern char D_0053F3C8[];
 
-s32 moviePlayFile_27041744(s32 no, char *name)
+void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descriptor)
 {
     if (PlayingNo == 0)
     {
-        movieOpenStream(D_00343E40, name, no);
+        movieOpenStream(&D_00343E40, descriptor, path);
         PlayingNo =
             (s32)dds3StartProcess(D_0053F3C8, 0x2AFB, 1, 1, movieDrawProc, NULL, NULL);
     }
 }
 
-s32 dds3PlayMovieByIndex(s32 index)
+void dds3PlayMovieByIndex(s32 index)
 {
     dds3MovieEntry_t *entry = &D_00343BE8[index];
 
-    return moviePlayFile_27041744(entry->unk_00, entry->name);
+    moviePlayFile_27041744(entry->path, &entry->descriptor);
 }
 
 void movieStop(void)
 {
     if (PlayingNo != 0) {
-        movieCloseStream(D_00343E40);
+        movieCloseStream(&D_00343E40);
         dds3KillProcess(PlayingNo, 0);
         PlayingNo = 0;
     }
@@ -104,7 +105,7 @@ void movieStop(void)
 
 s32 dds3WaitMovieEnd(void)
 {
-    return sdfMovieIsFinished(D_00343E40);
+    return sdfMovieIsFinished(&D_00343E40);
 }
 
 u8 func_0022B7F8(void)

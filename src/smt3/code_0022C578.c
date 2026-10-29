@@ -9307,10 +9307,6 @@ void campDrawStockSlots(s8 *indices, s8 active, s8 *flags,
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockSlots);
 #endif
 
-#ifndef NON_MATCHING
-INCLUDE_ASM(const s32, "code_0022C578", cmpRandomizePanelEff);
-#endif
-
 typedef struct
 {
     /* 0x00 */ s32 pos;
@@ -9320,17 +9316,17 @@ typedef struct
     /* 0x10 */ s32 target;
     /* 0x14 */ s32 unk_14;
     /* 0x18 */ s32 width;
-    /* 0x1C */ s32 unk_1C;
+    /* 0x1C */ u8 reflected;
     /* 0x20 */ s32 total;
     /* 0x24 */ s32 left;
     /* 0x28 */ s32 unk_28;
 } cmpPanelEffAnim_t;
 
-#ifdef NON_MATCHING
 void cmpRandomizePanelEff(s32 width, s32 height, s32 kind, cmpPanelEffAnim_t *anim)
 {
     u32 color;
     s32 i;
+    cmpPanelEffAnim_t *entry;
 
     switch (kind) {
     case 1: color = 0xFF51D980; break;
@@ -9339,40 +9335,29 @@ void cmpRandomizePanelEff(s32 width, s32 height, s32 kind, cmpPanelEffAnim_t *an
     case 6: color = 0x5551FF80; break;
     default: color = 0xC2FF5180; break;
     }
-    for (i = 0; i < 16; i++, anim++) {
-        u32 random;
-        u32 divisor;
-        u32 remainder;
-        u8 *direction = (u8 *)&anim->unk_1C;
-
-        anim->width = ((dds3GetRandA(NULL) & 7) + 8) * 16;
-        *direction = dds3GetRandA(NULL) & 1;
-        random = dds3GetRandA(NULL);
-        divisor = (u32)(width / 6);
-        remainder = divisor != 0 ? random % divisor : random;
-        anim->pos = remainder << 4;
-        random = dds3GetRandA(NULL);
-        anim->start = anim->pos;
-        anim->unk_0C = (random % (u32)height) << 3;
-        anim->unk_04 = anim->unk_0C;
-        random = dds3GetRandA(NULL);
-        divisor = (u32)(width / 3 - (anim->width >> 4));
-        remainder = divisor != 0 ? random % divisor : random;
-        anim->unk_14 = anim->unk_0C;
-        anim->target = (u32)anim->start + (remainder << 4);
-        random = dds3GetRandA(NULL);
-        anim->unk_28 = color;
-        anim->left = (random & 7) + 1;
-        anim->total = anim->left;
-        if (*direction != 0) {
-            anim->pos = 0U - (u32)anim->pos;
-            anim->start = 0U - (u32)anim->start;
-            anim->target = 0U - (u32)anim->target;
-            anim->width = 0U - (u32)anim->width;
+    entry = anim;
+    for (i = 0; i < 16; i++) {
+        entry->width = ((dds3GetRandA(NULL) & 7) + 8) << 4;
+        entry->reflected = dds3GetRandA(NULL) & 1;
+        entry->pos = (dds3GetRandA(NULL) % (width / 6)) << 4;
+        entry->unk_04 = (dds3GetRandA(NULL) % height) << 3;
+        entry->start = entry->pos;
+        entry->unk_0C = entry->unk_04;
+        entry->target = entry->start + ((dds3GetRandA(NULL) % (width / 3 - (entry->width >> 4))) << 4);
+        entry->unk_14 = entry->unk_0C;
+        entry->total = (dds3GetRandA(NULL) & 7) + 1;
+        entry->left = entry->total;
+        entry->unk_28 = color;
+        if (entry->reflected != 0) {
+            entry->pos = -entry->pos;
+            entry->start = -entry->start;
+            entry->target = -entry->target;
+            entry->width = -entry->width;
         }
+        entry++;
     }
 }
-#endif
+
 
 
 typedef struct

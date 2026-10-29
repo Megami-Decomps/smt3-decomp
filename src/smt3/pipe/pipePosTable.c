@@ -24,23 +24,21 @@ extern char D_00548E78[]; /* "size %d\n" */
 extern char D_00548E88[]; /* "tMAX %d\n" */
 extern char D_00548E98[]; /* "linkNodeNum %d\n" */
 
-typedef struct fileRequest_t fileRequest_t;
+typedef struct fileRequest fileRequest_t;
 extern fileRequest_t *D_005517E0;
 
 extern void DEBUG_PRINT(const char *format, ...);
 extern fileRequest_t *fileLoad(const char *filename);
 extern s32 pacFileCheckEnd(const fileRequest_t *fileHandle);
-extern s32 *fileGetLoadPtr(const fileRequest_t *fileHandle);
+extern u8 *fileGetLoadPtr(const fileRequest_t *fileHandle);
 extern sdfMemHandle_t *fileGetMemHandle(const fileRequest_t *fileHandle);
-extern void fileHandleFree(fileRequest_t *fileHandle);
+extern s32 fileHandleFree(fileRequest_t *fileHandle);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 LoadLinkData(tagPipeLinkInfo *table, pipeLinkSource_t *source, s32 mode);
 
-#ifdef NON_MATCHING
-/* NON_MATCHING: 103 of 106 words match at the exact 424-byte size. */
 s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
                  tagPipeLinkInfo *link)
 {
@@ -62,7 +60,7 @@ s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
         return 0;
     }
     DEBUG_PRINT(D_005517E8, 0x20);
-    header = fileGetLoadPtr(D_005517E0);
+    header = (s32 *)fileGetLoadPtr(D_005517E0);
     count = header[0];
     src = (u8 *)header + header[1];
     pos->tSize = count;
@@ -99,9 +97,6 @@ s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
     D_005517E0 = NULL;
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "pipe/pipePosTable", pipeFileLoad);
-#endif
 
 
 tagPipePartsInfo *getPartsInfo(s16 partsID)
@@ -147,6 +142,12 @@ void func_002A2F48(void) {
 
 void func_002A2F50(void) {
 }
+INCLUDE_RODATA(const s32, "pipe/pipePosTable", D_00548E78);
+
+INCLUDE_RODATA(const s32, "pipe/pipePosTable", D_00548E88);
+
+INCLUDE_RODATA(const s32, "pipe/pipePosTable", D_00548E98);
+
 INCLUDE_SDATA(const s32, "pipe/pipePosTable", D_005517E0);
 
 INCLUDE_SDATA(const s32, "pipe/pipePosTable", D_005517E8);
