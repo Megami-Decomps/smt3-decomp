@@ -719,7 +719,264 @@ void nbSetPartyFormation(nbMainProcessData_t *data, s32 group)
 INCLUDE_ASM(const s32, "newbattle/nbFormation", nbSetPartyFormation);
 #endif
 
+#ifdef NON_MATCHING
+void nbSetEnemyFormation(nbMainProcessData_t *data)
+{
+    sdfVector4_t pos, other;
+    nbFormation_t *form, *second;
+    datUnitWork_t *work;
+    u32 i, id;
+    f32 scale;
+
+    switch (data->formationtype) {
+    case 0:
+        printf("nbSetEnemyFormation:ENC_FORMATION_NORMAL\n");
+        nbSetPartyFormation(data, 0x200);
+        break;
+    case 1:
+        printf("nbSetEnemyFormation:ENC_FORMATION_ARSIEL\n");
+        nbSetPartyFormation(data, 0x200);
+        form = &data->form[4];
+        for (i = 0; i < 10; i++, form++) {
+            if (form->stat & 1) {
+                nbLoadUnitPos(form);
+                SDF_VU0_STOREVECTOR_NOMEM(&pos);
+                pos.z += 300.0f;
+                nbSetFormPos(form, &pos);
+                SDF_VU0_COPYVECTOR(&form->orgpos, &pos);
+            }
+        }
+        break;
+    case 2:
+        printf("nbSetEnemyFormation:ENC_FORMATION_GIRIME\n");
+        nbSetPartyFormation(data, 0x200);
+        break;
+    case 3:
+        printf("nbSetEnemyFormation:ENC_FORMATION_MARA\n");
+        nbSetPartyFormation(data, 0x200);
+        nbSetPartyFormation(data, 0x200);
+        form = &data->form[4];
+        for (i = 0; i < 10; i++, form++) {
+            if (form->stat & 1) {
+                nbLoadUnitPos(form);
+                SDF_VU0_STOREVECTOR_NOMEM(&pos);
+                pos.z += 420.0f;
+                nbSetFormPos(form, &pos);
+                SDF_VU0_COPYVECTOR(&form->orgpos, &pos);
+            }
+        }
+        break;
+    case 4:
+        printf("nbSetEnemyFormation:ENC_FORMATION_3SISTER\n");
+        nbSetPartyFormation(data, 0x200);
+        form = &data->form[5];
+        if (form->stat & 1) {
+            nbLoadUnitPos(form);
+            SDF_VU0_STOREVECTOR_NOMEM(&pos);
+            second = &data->form[4];
+            nbLoadUnitPos(second);
+            SDF_VU0_STOREVECTOR_NOMEM(&other);
+            if (second->stat & 1) {
+                other.z = pos.z;
+                other.x = pos.x - 231.0f;
+                nbSetFormPos(second, &other);
+                SDF_VU0_COPYVECTOR(&second->orgpos, &other);
+            }
+            second = &data->form[6];
+            nbLoadUnitPos(second);
+            SDF_VU0_STOREVECTOR_NOMEM(&other);
+            if (second->stat & 1) {
+                other.z = pos.z;
+                other.x = pos.x + 268.5f;
+                nbSetFormPos(second, &other);
+                SDF_VU0_COPYVECTOR(&second->orgpos, &other);
+            }
+        } else {
+            form = &data->form[4];
+            nbLoadUnitPos(form);
+            SDF_VU0_STOREVECTOR_NOMEM(&pos);
+            if (form->stat & 1) {
+                second = &data->form[6];
+                nbLoadUnitPos(second);
+                SDF_VU0_STOREVECTOR_NOMEM(&other);
+                if (second->stat & 1) {
+                    other.z = pos.z;
+                    other.x = pos.x + 345.0f;
+                    nbSetFormPos(second, &other);
+                    SDF_VU0_COPYVECTOR(&second->orgpos, &other);
+                }
+            }
+        }
+        break;
+    case 5:
+        printf("nbSetEnemyFormation:ENC_FORMATION_ALBION\n");
+        nbSetPartyFormation(data, 0x200);
+        form = &data->form[4];
+        for (i = 0; i < 10; i++, form++) {
+            if (form->stat & 1) {
+                work = nbGetUnitWorkFromFormindex(form->formindex);
+                nbLoadUnitPos(form);
+                SDF_VU0_STOREVECTOR_NOMEM(&pos);
+                switch (work->id) {
+                case 0x116: pos.z += 900.0f; break;
+                case 0x117: pos.z += 600.0f; pos.x -= 100.0f; break;
+                case 0x118: pos.z += 600.0f; pos.x -= 200.0f; break;
+                case 0x119: pos.z += 600.0f; pos.x += 200.0f; break;
+                case 0x11A: pos.z += 600.0f; pos.x += 100.0f; break;
+                }
+                nbSetFormPos(form, &pos);
+                SDF_VU0_COPYVECTOR(&form->orgpos, &pos);
+            }
+        }
+        break;
+    case 6:
+        printf("nbSetEnemyFormation:ENC_FORMATION_TENSI\n");
+        nbSetPartyFormation(data, 0x200);
+        break;
+    case 7:
+        printf("nbSetEnemyFormation:ENC_FORMATION_BAAL\n");
+        nbSetPartyFormation(data, 0x200);
+        form = &data->form[4];
+        if (form->stat & 1) {
+            nbLoadUnitPos(form);
+            SDF_VU0_STOREVECTOR_NOMEM(&pos);
+            pos.x -= 120.0f;
+            nbSetFormPos(form, &pos);
+            SDF_VU0_COPYVECTOR(&form->orgpos, &pos);
+        }
+        break;
+    case 8:
+        printf("nbSetEnemyFormation:ENC_FORMATION_NET\n");
+        nbSetPartyFormation(data, 0x200);
+        form = &data->form[4];
+        if (form->stat & 1) {
+            pos.w = 0.0f;
+            pos.x = 410.0f;
+            pos.y = 0.0f;
+            pos.z = 600.0f;
+            nbSetFormPos(form, &pos);
+            SDF_VU0_COPYVECTOR(&form->orgpos, &pos);
+            id = effBTLModelGetID(form);
+            if (id == 0x103) {
+                form->r = 400.0f;
+                form->center.z = -150.0f;
+                form->h = 780.0f;
+                form->center.x = 410.0f;
+                form->center.y = -450.0f;
+            } else if (id == 0x124) {
+                form->r = 400.0f;
+                form->center.z = -220.0f;
+                form->h = 780.0f;
+                form->center.x = 410.0f;
+                form->center.y = -450.0f;
+            }
+        }
+        break;
+    case 9:
+    case 11:
+        printf("nbSetEnemyFormation:ENC_FORMATION_ARI\n");
+        nbSetPartyFormation(data, 0x200);
+        form = &data->form[4];
+        if (form->stat & 1) {
+            pos.w = 0.0f;
+            pos.x = 0.0f;
+            pos.y = 0.0f;
+            pos.z = 600.0f;
+            nbSetFormPos(form, &pos);
+            SDF_VU0_COPYVECTOR(&form->orgpos, &pos);
+            id = effBTLModelGetID(form);
+            switch (id) {
+            case 0x102:
+                form->r = 350.0f;
+                form->center.z = -150.0f;
+                form->h = 650.0f;
+                form->center.y = -390.0f;
+                form->center.x = 0.0f;
+                break;
+            case 0x123:
+                form->r = 350.0f;
+                form->center.z = -230.0f;
+                form->h = 750.0f;
+                form->center.y = -650.0f;
+                form->center.x = 0.0f;
+                break;
+            case 0x156:
+                pos.x = 0.0f;
+                pos.y = 0.0f;
+                pos.z = 1000.0f;
+                nbSetFormPos(form, &pos);
+                SDF_VU0_COPYVECTOR(&form->orgpos, &pos);
+                scale = form->scl;
+                form->center.x = 0.0f;
+                form->r = 200.0f / scale;
+                form->center.z = 250.0f / scale;
+                form->h = 700.0f / scale;
+                form->center.y = -375.0f / scale;
+                break;
+            }
+        }
+        break;
+    case 10:
+        printf("nbSetEnemyFormation:ENC_FORMATION_KAGU\n");
+        nbSetPartyFormation(data, 0x200);
+        form = &data->form[4];
+        if (form->stat & 1) {
+            /* Retail reads a prior frame's zero or return address, an EE denormal. */
+            pos.z = 0.0f;
+            pos.w = 0.0f;
+            /* Retail leaves x and y unset for IDs absent from type-10 encounters. */
+            pos.x = 0.0f;
+            pos.y = 0.0f;
+            id = effBTLModelGetID(form);
+            if (id == 0x108) {
+                pos.x = 0.0f;
+                pos.y = 0.0f;
+                pos.z += 1450.0f;
+                form->r = 500.0f;
+                form->h = 1000.0f;
+                form->center.y = -800.0f;
+                form->center.z = 150.0f;
+                form->center.x = 0.0f;
+            } else if (id == 0x125) {
+                pos.y = -659.99994f;
+                pos.z += 960.0f;
+                pos.x = 0.0f;
+                form->r = 600.0f;
+                form->h = 900.0f;
+                form->center.y = 300.0f;
+                form->center.z = 100.0f;
+                form->center.x = 0.0f;
+            }
+            nbSetFormPos(form, &pos);
+            SDF_VU0_COPYVECTOR(&form->orgpos, &pos);
+        }
+        break;
+    case 12:
+        printf("nbSetEnemyFormation:ENC_FORMATION_BERU\n");
+        nbSetPartyFormation(data, 0x200);
+        break;
+    case 13:
+        printf("nbSetEnemyFormation:ENC_FORMATION_LUSI\n");
+        nbSetPartyFormation(data, 0x200);
+        form = &data->form[4];
+        nbLoadUnitPos(form);
+        SDF_VU0_STOREVECTOR_NOMEM(&pos);
+        pos.z += 700.0f;
+        pos.y -= 200.0f;
+        nbSetFormPos(form, &pos);
+        SDF_VU0_COPYVECTOR(&form->orgpos, &pos);
+        scale = form->scl;
+        form->r = 200.0f / scale;
+        form->h = 1500.0f / scale;
+        form->center.z = 300.0f / scale;
+        form->center.y = -800.0f / scale;
+        form->center.x = 0.0f / scale;
+        break;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbFormation", nbSetEnemyFormation);
+#endif
 
 void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty)
 {
