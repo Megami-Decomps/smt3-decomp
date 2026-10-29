@@ -3,6 +3,9 @@
 #include "nb.h"
 #include "event.h"
 #include "ps2asm.h"
+#include "fpu.h"
+
+EQUATE_FPTODP();
 
 
 /* nbKoukaPacket_t.type, as the kouka dispatchers switch on it. Names and
@@ -880,7 +883,153 @@ void RunHitEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     }
 }
 
+/* NON_MATCHING: 1044 emitted / 1036 native bytes; 62 native words match. */
+#ifdef NON_MATCHING
+extern void effBTLModelGetSphereCenter(nbFormation_t *form);
+extern s32 effBTLSkillCheckRun(void);
+extern s32 effBTLSkillGetID(void);
+extern nbFormation_t *effBTLSkillGetInvokeFormation(void);
+extern u32 effBTLSkillGetTargetNumber(void);
+extern nbFormation_t *effBTLSkillGetTargetFormation(s32 index);
+extern s32 effBTLModelGetID(nbFormation_t *form);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
+extern char D_00544560[];
+extern char D_00544588[];
+extern char D_005445B0[];
+extern char D_005445D0[];
+extern char D_005445F0[];
+extern char D_00544610[];
+
+extern s32 nbClipEffectNum(s32 screenPosition[4]);
+
+void NumEffectClip(nbKoukaPacket_t *packet)
+{
+    s32 screen[4];
+    s32 mark10Screen[4];
+    s32 mark0Screen[4];
+    sdfVector4_t mark10;
+    sdfVector4_t mark0;
+    sdfVector4_t incoming;
+    sdfVector4_t sphereCenter;
+    nbFormation_t *form;
+    nbFormation_t *invoke;
+    nbFormation_t *target;
+    s32 skill;
+    s32 x;
+    s32 y;
+    s32 dx;
+    s32 dy;
+    s32 screenDistance[2];
+    s32 screenResult;
+    u32 targetCount;
+    s32 i;
+    s32 modelID;
+    f32 distance;
+
+    SDF_VU0_STOREVECTOR(&incoming);
+    screenResult = nbClipEffectNum(screen);
+    x = screen[0] >> 4;
+    y = screen[1] >> 3;
+    if (!(screenResult != 0 && x >= 13 && x < 500 && y >= 75 && y < 324)) {
+        effBTLModelGetSphereCenter(form);
+        SDF_VU0_STOREVECTOR(&sphereCenter);
+        if (effBTLSkillCheckRun() != 0) {
+            skill = effBTLSkillGetID();
+            if ((skill >= 0x107 && skill <= 0x108) || skill == 0x10B || skill == 0x10D) {
+                invoke = effBTLSkillGetInvokeFormation();
+                modelID = effBTLModelGetID(invoke);
+                if (modelID == 0xC0) {
+                    form = packet->form;
+                    sphereCenter.y += form->h * form->scl * 0.35f;
+                    SDF_VU0_LOADVECTOR(&sphereCenter);
+                    printf(D_00544560);
+                    return;
+                }
+            }
+            if (skill == 0x9E) {
+                targetCount = effBTLSkillGetTargetNumber();
+                if ((s32)targetCount > 0) {
+                    for (i = 0; i < (s32)targetCount; i++) {
+                        target = effBTLSkillGetTargetFormation(i);
+                        modelID = effBTLModelGetID(target);
+                        if (modelID == 0x158) {
+                            SDF_VU0_LOADVECTOR(&sphereCenter);
+                            printf(D_00544588);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        form = packet->form;
+        if (sdfModelGetMarkPos(form->hunit->owner->inner, 10) == 0)
+            SDF_VU0_LOADVECTOR(&sphereCenter);
+        SDF_VU0_STOREVECTOR(&mark10);
+        screenResult = nbClipEffectNum(mark10Screen);
+        if (screenResult == 0) {
+            mark10Screen[0] = 0x200;
+            mark10Screen[1] = 0x1C0;
+            screenDistance[0] = 0;
+        } else {
+            mark10Screen[0] >>= 4;
+            mark10Screen[1] >>= 3;
+            dx = x - mark10Screen[0];
+            dy = y - mark10Screen[1];
+            screenDistance[0] = (s32)fsqrtf((f32)(dx * dx) + (f32)(dy * dy));
+        }
+
+        form = packet->form;
+        if (sdfModelGetMarkPos(form->hunit->owner->inner, 0) == 0)
+            SDF_VU0_LOADVECTOR(&sphereCenter);
+        SDF_VU0_STOREVECTOR(&mark0);
+        screenResult = nbClipEffectNum(mark0Screen);
+        if (screenResult == 0) {
+            mark0Screen[0] = 0x200;
+            mark0Screen[1] = 0x1C0;
+            screenDistance[1] = 0;
+        } else {
+            mark0Screen[0] >>= 4;
+            mark0Screen[1] >>= 3;
+            dx = x - mark0Screen[0];
+            dy = y - mark0Screen[1];
+            screenDistance[1] = (s32)fsqrtf((f32)(dx * dx) + (f32)(dy * dy));
+        }
+
+        if (screenDistance[0] < screenDistance[1] &&
+            mark10Screen[0] >= 13 && mark10Screen[0] < 500 &&
+            mark10Screen[1] >= 75 && mark10Screen[1] < 324) {
+            SDF_VU0_LOADVECTOR(&mark10);
+            printf(D_005445B0);
+            return;
+        }
+        if (mark0Screen[0] >= 13 && mark0Screen[0] < 500 &&
+            mark0Screen[1] >= 75 && mark0Screen[1] < 324) {
+            SDF_VU0_LOADVECTOR(&mark0);
+            printf(D_005445D0);
+            return;
+        }
+
+        SDF_VU0_LOADVECTOR(&mark0);
+        SDF_VU0_LOADVECTOR_B(&sphereCenter);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_GETLENGTH(distance);
+        if (distance < 1000.0f) {
+            form = packet->form;
+            sphereCenter.y -= form->h * form->scl * 0.35f;
+            SDF_VU0_LOADVECTOR(&sphereCenter);
+            printf(D_005445F0);
+        } else {
+            SDF_VU0_LOADVECTOR(&mark10);
+            printf(D_00544610);
+        }
+    } else {
+        SDF_VU0_LOADVECTOR(&incoming);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", NumEffectClip);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", nbClipKoukaNum);
 
