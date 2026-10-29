@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eeregs.h"
 #include "mviManager.h"
 #include "facility.h"
 #include "fpu.h"
@@ -221,14 +222,54 @@ void movieViewerInitRegs(void)
 
 extern void *memcpy(void *a, const void *b, u32 c);
 
+#ifdef NON_MATCHING
+static s32 movieViewerIsRegister(u32 address)
+{
+    return (address >= 0x10000000 && address < 0x10010000) ||
+           (address >= 0x12000000 && address < 0x12002000);
+}
+#endif
+
 /* Refresh the window from its two source addresses. */
 void movieViewerDrawInfo(void)
 {
     if (movieViewerDebugFlag.wordPending != 0) {
-        movieViewerDebugFlag.word = *(s32 *)movieViewerDebugFlag.regAddr;
+#ifdef NON_MATCHING
+        if (movieViewerIsRegister(movieViewerDebugFlag.regAddr)) {
+            movieViewerDebugFlag.word = HW_READ((volatile s32 *)movieViewerDebugFlag.regAddr);
+        } else
+#endif
+        {
+            movieViewerDebugFlag.word = *(s32 *)movieViewerDebugFlag.regAddr;
+        }
     }
     if (movieViewerDebugFlag.blockPending != 0) {
-        memcpy(movieViewerDebugFlag.block, movieViewerDebugFlag.buffer, 0x40);
+#ifdef NON_MATCHING
+        u32 base = (u32)movieViewerDebugFlag.buffer;
+        u64 end = (u64)base + sizeof(movieViewerDebugFlag.block);
+        if (((u64)base < 0x10010000 && end > 0x10000000) ||
+            ((u64)base < 0x12002000 && end > 0x12000000)) {
+            u32 lastRegister = ~0U;
+            u32 value = 0;
+            u32 i;
+            for (i = 0; i < sizeof(movieViewerDebugFlag.block); i++) {
+                u32 address = base + i;
+                if (movieViewerIsRegister(address)) {
+                    u32 aligned = address & ~3U;
+                    if (aligned != lastRegister) {
+                        value = HW_READ((volatile u32 *)aligned);
+                        lastRegister = aligned;
+                    }
+                    movieViewerDebugFlag.block[i] = value >> ((address & 3) * 8);
+                } else {
+                    movieViewerDebugFlag.block[i] = *(u8 *)address;
+                }
+            }
+        } else
+#endif
+        {
+            memcpy(movieViewerDebugFlag.block, movieViewerDebugFlag.buffer, 0x40);
+        }
     }
 }
 
