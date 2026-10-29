@@ -2482,7 +2482,64 @@ void campDrawText(s32 id, s32 *colors)
 INCLUDE_ASM(const s32, "code_0022C578", campDrawText);
 #endif
 
+#ifdef NON_MATCHING
+extern const volatile f32 D_0054E45C;
+extern void cmpDrawPanelEffCell(s32 x0, s32 y0, s32 z0, s32 x1, s32 y1, s32 z1, s32 color, s32 ot);
+
+void func_002306A0(s32 x, s32 y, s32 z, s32 size, u32 color, s32 edgeColor, s8 direction, s32 ot)
+{
+    u32 xs[3], ys[3], colors[3];
+    s32 half = size / 2;
+    s32 height = (s32)((f32)size / D_0054E45C);
+
+    switch (direction) {
+    case 0:
+        xs[0] = x + half * 16;
+        xs[1] = x - half * 16;
+        xs[2] = x;
+        ys[0] = y;
+        ys[1] = y;
+        ys[2] = y - height * 8;
+        break;
+    case 1:
+        xs[0] = x - half * 16;
+        xs[1] = x + half * 16;
+        xs[2] = x;
+        ys[0] = y;
+        ys[1] = y;
+        ys[2] = y + height * 8;
+        break;
+    case 2:
+        xs[0] = x;
+        xs[1] = x;
+        xs[2] = x - height * 16;
+        ys[0] = y - half * 8;
+        ys[1] = y + half * 8;
+        ys[2] = y;
+        break;
+    case 3:
+        xs[0] = x;
+        xs[1] = x;
+        xs[2] = x + height * 16;
+        ys[0] = y + half * 8;
+        ys[1] = y - half * 8;
+        ys[2] = y;
+        break;
+    default:
+        /* Retail leaves the coordinates unset; no retail caller takes this path. */
+        xs[0] = xs[1] = xs[2] = 0;
+        ys[0] = ys[1] = ys[2] = 0;
+        break;
+    }
+    colors[0] = colors[1] = colors[2] = color;
+    cmpDrawTriG(xs, ys, z, colors, ot);
+    cmpDrawPanelEffCell(xs[0], ys[0], z, xs[1], ys[1], z, edgeColor, ot);
+    cmpDrawPanelEffCell(xs[1], ys[1], z, xs[2], ys[2], z, edgeColor, ot);
+    cmpDrawPanelEffCell(xs[2], ys[2], z, xs[0], ys[0], z, edgeColor, ot);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", func_002306A0);
+#endif
 
 extern s32 cmpGetSkillTargetArea(u16 skillId);
 
