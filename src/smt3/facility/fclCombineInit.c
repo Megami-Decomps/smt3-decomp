@@ -268,6 +268,12 @@ typedef struct
     /* 0x0411C */ union {
         u8 birthPanel[0x2C8];
         datUnitWork_t birthUnit[3];
+        struct {
+            datUnitWork_t birthData[3];
+            s8 birthKind;
+            s8 birthVariant;
+            u8 birthReserved[2];
+        };
     };
     /* 0x043E4 */ s8 resultRowsBuilt;
     /* 0x043E5 */ s8 resultIndex[2][12][12];
@@ -276,7 +282,7 @@ typedef struct
     /* 0x04746 */ u8 reserved04746[2];
     /* Native table construction copies a complete unit into each cell. */
     /* 0x04748 */ datUnitWork_t resultUnit[2][12][12];
-    /* 0x150C8 */ u8 reserved150C8[0x1440];
+    /* 0x150C8 */ cmpSkillList_t resultSkills[2][12][12];
     /* 0x16508 */ u8 displayFlags[2];
     /* 0x1650A */ s8 unk_1650A;
     /* 0x1650B */ s8 unk_1650B;
