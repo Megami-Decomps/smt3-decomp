@@ -6,6 +6,10 @@
 #include "ps2asm.h"
 #include "newdata.h"
 
+#ifdef NON_MATCHING
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+#endif
+
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];

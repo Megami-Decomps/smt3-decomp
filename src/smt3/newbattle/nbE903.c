@@ -8,6 +8,10 @@
 #include "event.h"
 #include "model.h"
 
+#ifdef NON_MATCHING
+extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
+#endif
+
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
 typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
