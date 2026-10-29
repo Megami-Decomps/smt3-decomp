@@ -3061,7 +3061,27 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevilMaskBG);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevil);
 
+#ifdef NON_MATCHING
+s32 func_00201FB0(s32 active)
+{
+    s32 work = fclEncycWork();
+    fclPanelPos_t pos;
+    s32 mode;
+
+    if (work != 0) {
+        return work;
+    }
+    mode = fclGetFlag(0) != 0 ? 0 : 2;
+    if (active != 0) {
+        mode = 1;
+    }
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x64, 0, 0, (fclPanel_t *)&pos);
+    cmpUpdateListSelection(&pos, (u8 *)&CMB_GBWK->resultCursor, 0, mode, 0x100, 0x47);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", func_00201FB0);
+#endif
 
 s32 cmbDrawPhase3(s32 active)
 {
