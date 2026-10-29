@@ -2147,7 +2147,40 @@ void SetRecordToUnitCore(datUnitWork_t *punit, fclencyceelem_t *pelem)
     punit->hensinmaeexp = pelem->hensinmaeexp;
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CompareUnitToRecord);
+extern s8 D_003322C0[];
+
+s32 CompareUnitToRecord(datUnitWork_t *unit, fclencyceelem_t *record)
+{
+    s32 i;
+    s32 index;
+    u16 skill;
+    s32 count;
+
+    if (record->flag != (unit->flag & 0x240)) return 1;
+    if (record->maxhp != unit->maxhp) return 2;
+    if (record->maxmp != unit->maxmp) return 3;
+    if (record->exp != unit->exp) return 4;
+    if (record->level != unit->level) return 5;
+    for (i = 0; i < 5; i++) {
+        index = D_003322C0[i];
+        if (record->param[index] != unit->param[index]) return 6;
+        if (record->skillparam[index] != unit->skillparam[index]) return 7;
+        if (record->mitamaparam[index] != unit->mitamaparam[index]) return 8;
+        if (record->levelupparam[index] != unit->levelupparam[index]) return 9;
+    }
+    if (record->skillcnt != unit->skillcnt) return 10;
+    count = record->skillcnt;
+    for (i = 0; i < count; i++) {
+        skill = record->skill[i];
+        for (index = 0; index < count; index++) {
+            if (skill == unit->skill[index]) break;
+        }
+        if (index >= count) return 11;
+    }
+    if (record->hensinmae != unit->hensinmae) return 12;
+    if (record->hensinmaeexp != unit->hensinmaeexp) return 13;
+    return 0;
+}
 
 extern s32 datAddDevil(u16 id, s32 sw);
 

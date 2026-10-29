@@ -27,9 +27,11 @@ typedef struct tagPipeObject {
 
 typedef struct tagPipePosTable tagPipePosTable;
 
+typedef struct tagPipeLinkData tagPipeLinkData;
+
 typedef struct tagPipeLinkInfo {
     sdfMemHandle_t *aHandle;
-    s32 curNum;
+    tagPipeLinkData *head;
     s32 maxNum;
     s32 nextId;
 } tagPipeLinkInfo;
@@ -512,7 +514,86 @@ void PipeMain(void)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", pipeLoadObjects);
+typedef struct tagPipeObjectEntry {
+    s32 offset;
+    u8 parameters[4];
+} tagPipeObjectEntry;
+
+typedef struct tagPipePartsType {
+    f32 radius;
+    f32 length;
+    u32 frame;
+} tagPipePartsType;
+
+typedef struct tagPipePartsInfo {
+    u16 partsID;
+    u8 inWay;
+    u8 goWay;
+    tagPipePartsType *data;
+} tagPipePartsInfo;
+
+typedef struct tagPipeLinkData {
+    u16 id;
+    s16 partsID;
+    struct tagPipeLinkData *next;
+    struct tagPipeLinkData *prev;
+    u8 unk0C[4];
+} tagPipeLinkData;
+
+extern tagPipePartsInfo *getPartsInfo(s16 partsID);
+extern u8 objLoad(tagPipeObject *object, s32 index);
+extern void objOption(tagPipeObject *object, u8 option);
+extern void partsAdd(tagPipeLinkData *node, s32 offset);
+
+void pipeLoadObjects(void)
+{
+    tagPipeObject object;
+    tagPipeLinkData *node = linkHeader00.head;
+    s32 count = D_00528F68.tabMax;
+    s8 *loaded = D_00528F68.data;
+    tagPipeObjectEntry *entry = D_00528F68.tabPtr;
+    tagPipePartsInfo *info;
+
+    while (count != 0) {
+        if (*loaded == 0 && entry->offset <= offsetCount + 500) {
+            memset(&object, 0, sizeof(object));
+            objOption(&object, objLoad(&object, D_00528F68.tabMax - count));
+            *loaded = 1;
+        }
+        count--;
+        entry++;
+        loaded++;
+    }
+
+    getPartsInfo(node->partsID);
+    count = 0;
+    while (count < D_0055173C) {
+        info = getPartsInfo(node->partsID);
+        node = node->next;
+        count += info->data->frame;
+        if (node->id == 0xFFFF) {
+            break;
+        }
+    }
+
+    count = 5;
+    while (count != 0 && node->id != 0xFFFF) {
+        info = getPartsInfo(node->partsID);
+        if (D_0055173C < offsetCount - 400) {
+            node = node->next;
+            D_0055173C += info->data->frame;
+        } else {
+            if (D_0055173C > offsetCount + 1520) {
+                break;
+            }
+            partsAdd(node, D_0055173C);
+            count--;
+            node = node->next;
+            D_0055173C += info->data->frame;
+        }
+    }
+}
+
 
 extern void MyAction(tagPipeObject *object);
 extern void objMdlAlphaSet(tagPipeObject *object, u8 alpha);

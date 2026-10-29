@@ -407,3 +407,31 @@ and RTL parity, and dump/plain assembly parity; the commented final source
 was independently qualified. This is the one-forward-branch permission in
 [the matching policy](../CONTRIBUTING.md#matching-rules), not a general reason
 to replace ordinary returns with jumps.
+
+## A selected-parameter index reused by a later skill search
+
+`CompareUnitToRecord` in `facility/fclEncyc` compares five selected parameter
+rows, then checks each recorded skill against the unit's skills. One signed
+`index` local holds the selected parameter index in the first loop and the
+search index in the later inner loop. Both values have real array consumers;
+the inner loop resets it to zero, the parameter value is dead by then, and its
+address never escapes. The skill and skill-count snapshots are also real values:
+retail loads each recorded skill once outside its search and snapshots the count
+once after comparing the two counts.
+
+This was qualified with the canonical ee-gcc 2.96 compile and its stock `-da`
+pass dumps, with no compiler hooks or changed optimization flags. Complete-owner
+assembly, allocated sections and relocation bytes agree between ordinary and
+traced output for both the shared-index and separate-index forms. In initial
+RTL, shared `index` is SI pseudo 87: UID 104 defines the table-selected value,
+UID 302 resets the skill-search index, and UID 339 increments it. With separate
+locals, the selected parameter is pseudo 88 and the search index is pseudo 87.
+The `20.greg` conflict graph records hard registers 2, 3, 4 and 5 among shared
+pseudo 87's conflicts, inherited from its first phase; the separate search
+pseudo conflicts with 2 but not 3, 4 or 5. Global allocation consequently gives
+the shared index register 6 and the skill value register 5. The separate form
+gives the search index register 5 and the skill value register 6 instead.
+Those eight operand differences are the entire target difference; no operation
+is added or removed. Reuse produces all 500 native bytes, with the complete
+owner checking as 104 match, 0 differ. This establishes a shared-pseudo
+allocation dependency, not the original source spelling.

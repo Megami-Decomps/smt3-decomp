@@ -3870,7 +3870,26 @@ void cmbSetActionWorkValues(void)
     fclSetWorkValue(6, ((datUnitWork_t *)CMB_GBWK->birthPanel)->id);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbRunActionSe);
+extern s32 p2sdStopSe(s32 sound);
+
+void cmbRunActionSe(s32 enabled, s32 mode)
+{
+    s32 sound = 0x380003;
+
+    if (mode != 1) {
+        sound = CMB_GBWK->stockSlot[2].index >= 0 ? 0x380002 : 0x380001;
+    }
+    if (enabled == 0) {
+        p2sdStopSe(sound);
+        printf("ACT SE END...\n");
+        return;
+    }
+    p2sdPlaySE(sound, 0x7F, 0x3F);
+    printf("ACT SE START!!!\n");
+    /* As in fclCombineBGM, this consumed-selector reset survives sibling-call
+     * selection, then dies in life analysis, preserving the retail jal. */
+    mode = 0;
+}
 
 extern void fclCombineBGM(s8 Mode);
 

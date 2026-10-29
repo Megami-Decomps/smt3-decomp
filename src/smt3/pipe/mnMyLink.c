@@ -26,7 +26,7 @@ f32 func_002A7DF8(f32 base, f32 exponent);
 
 typedef struct tagPipeLinkData {
     u16 id;
-    u8 partsID[2];
+    s16 partsID;
     struct tagPipeLinkData *next;
     struct tagPipeLinkData *prev;
     u8 unk0C[4];
@@ -34,7 +34,7 @@ typedef struct tagPipeLinkData {
 
 typedef struct tagPipeLinkInfo {
     sdfMemHandle_t *aHandle;
-    s32 curNum;
+    tagPipeLinkData *head;
     s32 maxNum;
     s32 nextId;
 } tagPipeLinkInfo;
@@ -93,7 +93,7 @@ s32 pipeInitLink(tagPipeLinkInfo *pInfo)
             pNode += 8;
         } while (i != 0);
     }
-    pInfo->curNum = 0;
+    pInfo->head = NULL;
     pInfo->nextId = 1;
     return 0;
 }
