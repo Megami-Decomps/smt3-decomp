@@ -743,15 +743,15 @@ void func_0020ADE0(void)
     }
 }
 
-u16 *ragGetConfirmEntry(s8 kind, u8 index)
+ragItemReq_t *ragGetConfirmEntry(s8 kind, u8 index)
 {
     switch (kind) {
     case 0:
-        return (u16 *)(ragHeartsTable + 0x2 + index * 0xE);
+        return (ragItemReq_t *)(ragHeartsTable + 0x2 + index * 0xE);
     case 1:
-        return (u16 *)(ragHeartsTable + 0x180 + index * 0x2C);
+        return (ragItemReq_t *)(ragHeartsTable + 0x180 + index * 0x2C);
     case 2:
-        return (u16 *)(ragHeartsTable + 0x520 + index * 0x2C);
+        return (ragItemReq_t *)(ragHeartsTable + 0x520 + index * 0x2C);
     default:
         return NULL;
     }

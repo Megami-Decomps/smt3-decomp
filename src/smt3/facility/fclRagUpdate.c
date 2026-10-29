@@ -325,7 +325,7 @@ s32 ragUpdateCallSeq(s32 SeqNo)
     return 1;
 }
 
-extern u16 *ragGetConfirmEntry(s8 kind, u8 flag);
+extern ragItemReq_t *ragGetConfirmEntry(s8 kind, u8 flag);
 extern u16 ragCheckHeartsChoice(s8 index);
 extern s32 datGetItemSlotIndex(u16 id);
 extern s32 cmbChkGetHearts(s32 rawId);
@@ -336,7 +336,7 @@ extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 void ragUpdateSeqItem(void)
 {
     s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
-    ragItemReq_t *entry = (ragItemReq_t *)ragGetConfirmEntry(0, ragGetHeartsFlag(1));
+    ragItemReq_t *entry = ragGetConfirmEntry(0, ragGetHeartsFlag(1));
 
     if (fclGetFlag(0) == 0) {
         return;
@@ -402,7 +402,7 @@ extern s32 cmpModelSetup(s32 a, s32 b);
 void ragUpdateSeq2(void)
 {
     s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
-    ragItemReq_t *entry = (ragItemReq_t *)ragGetConfirmEntry(1, ragGetHeartsFlag(2));
+    ragItemReq_t *entry = ragGetConfirmEntry(1, ragGetHeartsFlag(2));
 
     if (fclGetFlag(0) == 0) {
         return;
@@ -446,7 +446,7 @@ void ragUpdateSeq2(void)
 void ragUpdateSeq3(void)
 {
     s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
-    ragItemReq_t *entry = (ragItemReq_t *)ragGetConfirmEntry(2, ragGetHeartsFlag(3));
+    ragItemReq_t *entry = ragGetConfirmEntry(2, ragGetHeartsFlag(3));
 
     if (fclGetFlag(0) == 0) {
         return;
@@ -578,16 +578,16 @@ s32 ragUpdateSeqConfirm(void)
     }
     switch (ragUpdateWork->unk_0003) {
     case 1:
-        items = (ragItemReq_t *)ragGetConfirmEntry(0, ragGetHeartsFlag(1));
+        items = ragGetConfirmEntry(0, ragGetHeartsFlag(1));
         fclAddItem(ragCheckHeartsChoice(1), 1);
         break;
     case 2:
-        items = (ragItemReq_t *)ragGetConfirmEntry(1, ragGetHeartsFlag(2));
+        items = ragGetConfirmEntry(1, ragGetHeartsFlag(2));
         slot = cmbAddCustomDevilToStock(&ragUpdateWork->previewUnit,
                                         (cmbUnit_t *)&DDS3_GBWK->akuma[4].flag, 12);
         break;
     case 3:
-        items = (ragItemReq_t *)ragGetConfirmEntry(2, ragGetHeartsFlag(3));
+        items = ragGetConfirmEntry(2, ragGetHeartsFlag(3));
         slot = cmbAddCustomDevilToStock(&ragUpdateWork->previewUnit,
                                         (cmbUnit_t *)&DDS3_GBWK->akuma[4].flag, 12);
         break;

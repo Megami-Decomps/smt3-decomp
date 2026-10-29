@@ -2,6 +2,12 @@
 #define FCL_RAG_H
 
 #include "newdata.h"
+#include "facility.h"
+
+typedef struct {
+    u16 item;
+    ragItemReq_t requirements[3];
+} ragHeartsEntry_t;
 
 /* Inline custom values begin at +4 in each 0x2C-byte offer record. */
 typedef struct {
