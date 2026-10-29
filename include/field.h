@@ -2,6 +2,7 @@
 #define FIELD_H
 
 #include "common.h"
+#include "sdf_types.h"
 
 typedef struct {
     struct dds3Basic_t *handle;
