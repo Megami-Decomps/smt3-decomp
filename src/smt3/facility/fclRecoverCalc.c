@@ -248,7 +248,35 @@ void sfply_AdjustPrepEnd(datUnitWork_t *unit)
     rcvClearStatusBits(unit);
 }
 
+#ifdef NON_MATCHING
+s32 rcvFullHeal(datUnitWork_t *unit)
+{
+    u32 hp = unit->hp;
+    s32 result = hp < datGetMaxHp(unit);
+    u32 mp = unit->mp;
+    u16 status;
+
+    if (mp < datGetMaxMp(unit)) {
+        result = 1;
+    }
+    status = unit->badstatus;
+    if (status & 0x20) {
+        result |= 2;
+    }
+    if (status & 0x40) {
+        result |= 2;
+    }
+    if (status & 0x100) {
+        result |= 2;
+    }
+    if (status & 0x800) {
+        result |= 4;
+    }
+    return result;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvFullHeal);
+#endif
 
 INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvCreateLocalStock);
 
