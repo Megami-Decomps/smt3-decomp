@@ -12,34 +12,7 @@
 
 
 
-typedef struct {
-    void *block;
-    s32 flags;
-    void *workdata;
-    s32 totalframe;
-    s32 firstframe;
-    s32 lastframe;
-    s32 nowframe;
-    s32 oldframe;
-    s32 nametablecnt;
-    char nametable[256][32];
-    dds3Basic_t *activecamera;
-    u8 freecamera[4];
-    dds3Basic_t *gamecamera;
-    s32 objcnt;
-    evtViewerObject_s *firstobjinfo;
-    evtViewerObject_s *lastTrack;
-    void *effectBasic[0x7F];
-    s32 framedisp;                  /* 0x2238 */
-    evtViewerMenuEntry_t menuStack[8];
-    s32 sp;
-    s32 nowmenu;
-    s32 menusw;                     /* 0x2284 */
-    u8 unk2288[0x78];
-    s32 frameFirst;                 /* 0x2300 */
-    s32 frameCursor;                /* 0x2304 */
-    evtViewerObject_s *framelist_target; /* 0x2308 */
-} evtViewerInfo_t;
+
 
 extern evtViewerInfo_t *viewerinfo;
 

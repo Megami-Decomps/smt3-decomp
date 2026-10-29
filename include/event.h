@@ -50,6 +50,67 @@ typedef struct {
     u16 unk06;
 } evtViewerMenuEntry_t;
 
+struct evtViewerInfo_t {
+    void *block;
+    s32 flags;                          /* 0x0004 */
+    void *workdata;    /* 0x0008 */
+    s32 totalframe;                     /* 0x000C */
+    s32 firstframe;                     /* 0x0010 */
+    s32 lastframe;                      /* 0x0014 */
+    s32 nowframe;                   /* 0x0018 */
+    s32 oldframe;                   /* 0x001C */
+    s32 nametablecnt;                     /* 0x0020 */
+    char nametable[256][32];            /* 0x0024 */
+    dds3Basic_t *activecamera;          /* 0x2024 */
+    u8 freecamera[4];
+    dds3Basic_t *gamecamera;         /* 0x202C */
+    s32 objcnt;                     /* 0x2030 */
+    evtViewerObject_s *firstobjinfo;            /* 0x2034 */
+    evtViewerObject_s *lastTrack;         /* 0x2038 */
+    void *effectBasic[0x7F];            /* 0x203C */
+    s32 framedisp;                        /* 0x2238 */
+    evtViewerMenuEntry_t menuStack[8];  /* 0x223C */
+    s32 sp;                      /* 0x227C */
+    s32 nowmenu;                     /* 0x2280 */
+    s32 menusw;                   /* 0x2284 */
+    s32 fldfilter;
+    /* Cancelled and cleared by the menu-step handler. */
+    struct dds3ProcessID_t *menuProcess;
+    s32 drawblur2;                      /* 0x2290 */
+    s32 drawmblur;                      /* 0x2294 */
+    s32 drawdblur;                 /* 0x2298 */
+    s32 filter;                         /* 0x229C */
+    s32 drawmfilter;                    /* 0x22A0 */
+    s32 drawrblur;                     /* 0x22A4 */
+    s32 fileMode;                       /* 0x22A8 */
+    s32 work_base;                        /* 0x22AC */
+    u8 work_x[4];
+    s32 work_y;                        /* 0x22B4 */
+    s32 eventpos_y;
+    s32 select_y;                        /* 0x22BC */
+    s32 menuItemCount;                  /* 0x22C0 */
+    char *select_header;                        /* 0x22C4 */
+    union { s32 *menuTable; char **itemNames; };                     /* 0x22C8 */
+    s32 filename_x;                        /* 0x22CC */
+    s32 filename_y;                        /* 0x22D0 */
+    char nameStorage[0xD];              /* 0x22D4 */
+    u8 unk22E1[7];
+    union { char filename[0x14]; struct { char filenameText[0xC]; s32 objlist_y; s32 objlist_base; }; };                /* 0x22E8 */
+    s32 framelist_x;                    /* 0x22FC */
+    s32 frameFirst;                     /* 0x2300 */
+    s32 frameCursor;                    /* 0x2304 */
+    evtViewerObject_s *framelist_target;        /* 0x2308 */
+    s32 framelist_type;
+    s32 value;                          /* 0x2310 */
+    s32 min;                       /* 0x2314 */
+    s32 max;                       /* 0x2318 */
+    f32 fvalue;
+    f32 floatMin;
+    f32 floatMax;                     /* 0x231C */
+};
+
+typedef struct evtViewerInfo_t evtViewerInfo_t;
+
 /* Interpolated event vector and packed colour. */
 typedef struct evtBlendVecColor_t {
     f32 vec[4];

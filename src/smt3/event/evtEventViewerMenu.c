@@ -14,59 +14,7 @@ extern char D_0054F9B0[]; /* "     %d" */
 
 /* Group prefix: the viewer walks the group chain and each group's keys. */
 
-typedef struct {
-    u8 unk0000[4];
-    s32 flags;                      /* 0x04 */
-    void *workdata;                /* 0x08 */
-    s32 headerThird;                /* 0x0C */
-    s32 headerFirst;
-    s32 frameRange;
-    s32 nowframe;               /* 0x18 */
-    u8 unk001C[4];
-    s32 nametablecnt;                 /* 0x20 */
-    char nametable[256][32];        /* 0x24 */
-    dds3Basic_t *activecamera;
-    u8 unk2028[8];
-    s32 objcnt;                 /* 0x2030 */
-    evtViewerObject_s *groups;       /* 0x2034 */
-    u8 unk2038[0x248];
-    s32 nowmenu;                 /* 0x2280 */
-    u8 unk2284[8];
-    s32 menusw;               /* 0x228C */
-    u32 drawblur2;
-    u32 drawmblur;
-    u32 drawdblur;
-    u32 drawfilter;
-    u32 drawmfilter;
-    u32 drawrblur;
-    s32 mainCursor;                 /* 0x22A8 */
-    s32 groupFirst;                 /* 0x22AC */
-    u8 work_x[4];
-    s32 groupCursor;                /* 0x22B4 */
-    s32 eventpos_y;                  /* 0x22B8 */
-    s32 select_y;                 /* 0x22BC */
-    s32 itemCount;                  /* 0x22C0 */
-    char *select_header;                    /* 0x22C4 */
-    char **itemNames;               /* 0x22C8 */
-    s32 filename_x;                    /* 0x22CC */
-    s32 filename_y;                    /* 0x22D0 */
-    char nameStorage[0xD];          /* 0x22D4 */
-    u8 unk22E1[7];
-    char filename[0xC];             /* 0x22E8 */
-    s32 objlist_y;               /* 0x22F4 */
-    s32 objlist_base;               /* 0x22F8 */
-    s32 framelist_x;                /* 0x22FC */
-    s32 frameFirst;
-    s32 frameCursor;
-    evtViewerObject_s *framelist_target;   /* 0x2308 */
-    s32 commandCategory;
-    s32 value;                      /* 0x2310 */
-    s32 min;
-    s32 max;
-    f32 fvalue;                 /* 0x231C */
-    f32 floatMin;
-    f32 floatMax;
-} evtViewerInfo_t;
+
 extern evtViewerInfo_t *viewerinfo;
 extern s32 (*D_0032CB48[])(s32, s32);
 void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtFrameInfo_t *f);
@@ -456,8 +404,8 @@ s32 evtFrameChangeMenu(s32 x, s32 y)
     if (viewerinfo->value < 0) {
         viewerinfo->value = 0;
     }
-    if (viewerinfo->value >= viewerinfo->headerThird) {
-        viewerinfo->value = viewerinfo->headerThird - 1;
+    if (viewerinfo->value >= viewerinfo->totalframe) {
+        viewerinfo->value = viewerinfo->totalframe - 1;
     }
     if (dds3PadButtonState[0x2C] != 0) {
         if (viewerinfo->nowframe != viewerinfo->value) {
@@ -483,7 +431,7 @@ void evtMainMenuItem(void *tag, s32 ox, s32 oy, s32 no)
     s32 color;
 
     if (no < 7) {
-        if (viewerinfo->mainCursor == no) {
+        if (viewerinfo->fileMode == no) {
             color = viewerinfo->nowmenu == 1 ? 4 : 5;
         } else {
             color = 0;
@@ -501,7 +449,7 @@ s32 evtMainMenu(s32 x, s32 y)
     if (viewerinfo->nowmenu != 1) {
         return 0;
     }
-    return dds3SelectMenu(0, 1, 7, 1, 7, NULL, NULL, NULL, &viewerinfo->mainCursor);
+    return dds3SelectMenu(0, 1, 7, 1, 7, NULL, NULL, NULL, &viewerinfo->fileMode);
 }
 
 s32 evtSelectHead(void *tag, s32 ox, s32 oy)
@@ -518,7 +466,7 @@ void evtSelectItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     s32 color;
 
-    if (no < viewerinfo->itemCount) {
+    if (no < viewerinfo->menuItemCount) {
         if (viewerinfo->select_y == no) {
             color = viewerinfo->nowmenu == 2 ? 4 : 5;
         } else {
@@ -540,13 +488,13 @@ s32 evtSelectMenu(s32 x, s32 y)
             width = 6;
         }
     }
-    evtMenuDisp(list, x, y, width, viewerinfo->itemCount + 3, 0, viewerinfo->itemCount,
+    evtMenuDisp(list, x, y, width, viewerinfo->menuItemCount + 3, 0, viewerinfo->menuItemCount,
                 evtSelectHead, evtSelectItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
     if (viewerinfo->nowmenu != 2) {
         return 0;
     }
-    return dds3SelectMenu(0, 1, viewerinfo->itemCount, 1, viewerinfo->itemCount,
+    return dds3SelectMenu(0, 1, viewerinfo->menuItemCount, 1, viewerinfo->menuItemCount,
                           NULL, NULL, NULL, &viewerinfo->select_y);
 }
 
@@ -792,7 +740,7 @@ void evtObjectListItem(void *tag, s32 ox, s32 oy, s32 no)
         return;
     }
     if (no < viewerinfo->objcnt) {
-        group = viewerinfo->groups;
+        group = viewerinfo->firstobjinfo;
         for (i = 0; i < no; i++) {
             group = group->next;
         }
@@ -1113,7 +1061,7 @@ void evtBasicListItem(void *tag, s32 ox, s32 oy, s32 no)
     dds3Basic_t *basic;
 
     color = 4;
-    if (viewerinfo->groupFirst + viewerinfo->groupCursor != no) {
+    if (viewerinfo->work_base + viewerinfo->work_y != no) {
         color = 0;
     }
     if (no == 0) {
@@ -1158,7 +1106,7 @@ s32 evtBasicListMenu(s32 x, s32 y)
         }
     }
     count++;
-    evtMenuDisp(list, x, y, 0x1A, 0x17, viewerinfo->groupFirst, count, NULL, evtBasicListItem);
+    evtMenuDisp(list, x, y, 0x1A, 0x17, viewerinfo->work_base, count, NULL, evtBasicListItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
     if (viewerinfo->nowmenu != 0xA) {
         return 0;
@@ -1166,8 +1114,8 @@ s32 evtBasicListMenu(s32 x, s32 y)
     if (count < shown) {
         shown = count;
     }
-    return dds3SelectMenu(0, 1, count, 1, shown, NULL, &viewerinfo->groupFirst, NULL,
-                          &viewerinfo->groupCursor);
+    return dds3SelectMenu(0, 1, count, 1, shown, NULL, &viewerinfo->work_base, NULL,
+                          &viewerinfo->work_y);
 }
 
 void evtEventPosItem(void *tag, s32 ox, s32 oy, s32 no)
@@ -1219,7 +1167,7 @@ s32 evtEventPosMenu(s32 x, s32 y)
 s32 mfilter_Process(void)
 {
     if (mfilterRun() == 0) {
-        viewerinfo->menusw = 0;
+        viewerinfo->menuProcess = 0;
         return -1;
     }
     return 0;
@@ -1227,7 +1175,7 @@ s32 mfilter_Process(void)
 s32 evtViewerExit(void)
 {
     if (evtViewerCheckDirty() == 0) {
-        viewerinfo->menusw = 0;
+        viewerinfo->menuProcess = 0;
         return -1;
     }
     return 0;
@@ -1253,7 +1201,7 @@ s32 func_001F79A8(void)
         break;
     case 0x10:
     case 0x11:
-        if (viewerinfo->menusw == 0) {
+        if (viewerinfo->menuProcess == 0) {
             return 1;
         }
         break;
@@ -1269,11 +1217,11 @@ s32 func_001F79A8(void)
     if (busy != 0) {
         return 0;
     }
-    if (viewerinfo->menusw == 0) {
+    if (viewerinfo->menuProcess == 0) {
         return 1;
     }
-    dds3KillProcess((void *)viewerinfo->menusw, 1);
-    viewerinfo->menusw = 0;
+    dds3KillProcess((void *)viewerinfo->menuProcess, 1);
+    viewerinfo->menuProcess = 0;
     return 1;
 }
 #else
@@ -1299,7 +1247,7 @@ s32 evtCountObjType10(void)
     s32 childIndex = 0;
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0xA) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1314,7 +1262,7 @@ s32 evtCountObjType11(void)
     s32 childIndex = 0;
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0xB) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1329,7 +1277,7 @@ s32 evtCountObjType13(void)
     s32 childIndex = 0;
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0xD) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1344,7 +1292,7 @@ s32 evtCountObjType14(void)
     s32 childIndex = 0;
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0xE) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1359,7 +1307,7 @@ s32 evtCountObjType15(void)
     s32 childIndex = 0;
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0xF) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1374,7 +1322,7 @@ s32 evtCountObjType23(void)
     s32 childIndex = 0;
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0x17) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1389,7 +1337,7 @@ s32 evtCountObjType16(void)
     s32 childIndex = 0;
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0x10) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1404,7 +1352,7 @@ s32 evtCountObjType17(void)
     s32 childIndex = 0;
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0x11) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1628,9 +1576,9 @@ void evtSaveViewerInfo(s32 fd)
 {
     s32 header[4];
 
-    header[0] = viewerinfo->headerFirst;
-    header[1] = viewerinfo->frameRange;
-    header[2] = viewerinfo->headerThird;
+    header[0] = viewerinfo->firstframe;
+    header[1] = viewerinfo->lastframe;
+    header[2] = viewerinfo->totalframe;
     header[3] = 0;
     evtWriteRecord(fd, header, 0x10);
 }
@@ -1646,7 +1594,7 @@ void evtSaveFrameList(s32 fd)
 {
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         evtFrameInfo_t *key;
 
         for (key = group->children; key != NULL; key = key->next) {
@@ -1669,7 +1617,7 @@ void evtSaveFrameList(s32 fd)
                     if (key->next != NULL) {
                         record.span = key->next->frame - key->frame;
                     } else {
-                        record.span = (u16)viewerinfo->frameRange - key->frame;
+                        record.span = (u16)viewerinfo->lastframe - key->frame;
                     }
                 }
             }
@@ -1690,7 +1638,7 @@ void evtSaveObjType2(s32 fd)
 {
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 2) {
             s32 header[4];
             header[0] = group->entryHeader;
@@ -1706,7 +1654,7 @@ void evtSaveObjType10(s32 fd)
 {
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0xA) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1719,7 +1667,7 @@ void evtSaveObjType11(s32 fd)
 {
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0xB) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1732,7 +1680,7 @@ void evtSaveObjType13(s32 fd)
 {
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0xD) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1745,7 +1693,7 @@ void evtSaveObjType14(s32 fd)
 {
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0xE) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1758,7 +1706,7 @@ void evtSaveObjType15(s32 fd)
 {
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0xF) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1771,7 +1719,7 @@ void evtSaveObjType23(s32 fd)
 {
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0x17) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1784,7 +1732,7 @@ void evtSaveObjType16(s32 fd)
 {
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0x10) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1797,7 +1745,7 @@ void evtSaveObjType17(s32 fd)
 {
     evtViewerObject_s *group;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
         if (group->type == 0x11) {
             evtFrameInfo_t *key;
             for (key = group->children; key != NULL; key = key->next) {
@@ -1813,7 +1761,7 @@ s32 evtMakeViewerPath(s32 kind)
     s32 fd;
     s32 i;
 
-    for (group = viewerinfo->groups; group != NULL; group = group->next) {
+    for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
     }
     if (kind == 0) {
         if (sdfHddValid) {
@@ -2109,14 +2057,14 @@ s32 evtMakeMotionName(evtPolygonMovieWork_t *work)
         }
     }
     if (work->cutInfo != NULL) {
-        viewerinfo->headerThird = work->cutInfo->TotalFrame;
-        viewerinfo->headerFirst = work->cutInfo->FirstFrame;
-        viewerinfo->frameRange = work->cutInfo->LastFrame;
+        viewerinfo->totalframe = work->cutInfo->TotalFrame;
+        viewerinfo->firstframe = work->cutInfo->FirstFrame;
+        viewerinfo->lastframe = work->cutInfo->LastFrame;
     }
     for (i = 0; i < work->frameCount; i++) {
         frame = &work->frameTable[i];
         if (frame->ObjectType == 1) {
-            for (group = viewerinfo->groups; group != NULL; group = group->next) {
+            for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
                 if (strcmp(viewerinfo->nametable[group->entryHeader], work->nameTable[frame->NameIndex]) == 0) {
                     key = evtAddFrameInfo(group, frame->Frame);
                     key->body.unsignedBytes[0] = frame->data.ub[0];
@@ -2128,7 +2076,7 @@ s32 evtMakeMotionName(evtPolygonMovieWork_t *work)
     for (i = 0; i < work->frameCount; i++) {
         frame = &work->frameTable[i];
         if (frame->ObjectType == 2) {
-            for (group = viewerinfo->groups; group != NULL; group = group->next) {
+            for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
                 if (strcmp(viewerinfo->nametable[group->entryHeader], work->nameTable[frame->NameIndex]) == 0) {
                     key = evtAddFrameInfo(group, frame->Frame);
                     key->body.values[0] = frame->data.f[0];
@@ -2145,7 +2093,7 @@ s32 evtMakeMotionName(evtPolygonMovieWork_t *work)
         case 18:
         case 20:
         case 21:
-            for (group = viewerinfo->groups; group != NULL; group = group->next) {
+            for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
                 if (strcmp(viewerinfo->nametable[group->entryHeader], work->nameTable[frame->NameIndex]) == 0) {
                     key = evtAddFrameInfo(group, frame->Frame);
                     switch (frame->ObjectType) {
@@ -2195,7 +2143,7 @@ s32 evtMakeMotionName(evtPolygonMovieWork_t *work)
     for (i = 0; i < work->frameCount; i++) {
         frame = &work->frameTable[i];
         if (frame->ObjectType == 9) {
-            for (group = viewerinfo->groups; group != NULL; group = group->next) {
+            for (group = viewerinfo->firstobjinfo; group != NULL; group = group->next) {
                 if (strcmp(viewerinfo->nametable[group->entryHeader], work->nameTable[frame->NameIndex]) == 0) {
                     key = evtAddFrameInfo(group, frame->Frame);
                     key->index = frame->Length;
