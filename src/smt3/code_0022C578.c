@@ -3016,7 +3016,52 @@ void campUpdateStockCursor(void)
         (cmpPadStopWork_t *)campWork->unk_410C, button, 0x30));
 }
 
+extern s32 cmpChkDoNotUseSkill(u16 skill);
+extern campWork_t *volatile cmpSkillSelectWork asm("campWork");
+
+#ifdef NON_MATCHING
+void cmpUpdateSkillSelect(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+    u8 index = cmpGetStockInfoIndex(campWork->stock, 0, 0);
+    u16 skill = cmbGlobalWork->party[index].unit.skill[campWork->itemCursor + campWork->itemScroll];
+
+    if (fclChkMessage() != 0) {
+        return;
+    }
+    switch (button) {
+    case 1: {
+        s32 blocked = cmpChkDoNotUseSkill(skill);
+        campWork_t *work = cmpSkillSelectWork;
+
+        if (blocked != 0) {
+            button = 0x8000;
+        } else {
+            work->unk_0001 = 2;
+            campWork->unk_0004 = 1;
+        }
+        break;
+    }
+    case 2:
+        campWork->unk_0001 = 2;
+        campWork->unk_0004 = 2;
+        cmpDisableInfoWindow();
+        break;
+    case 0x10:
+        cmpMoveCursor2((cmpCursorInfo_t *)campWork->unk_410C, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor2((cmpCursorInfo_t *)campWork->unk_410C, 1);
+        break;
+    }
+    cmpMoveCursor2((cmpCursorInfo_t *)campWork->unk_410C, 0);
+    button = (u16)cmpDisablePadBitStop((cmpPadStopWork_t *)campWork->unk_410C,
+                                       button, 0x30);
+    cmpPlayCursorSE(button);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateSkillSelect);
+#endif
 
 extern u8 cmpClearStatusFlags(void);
 extern void *cmpStartProcessStatus(s8 arg, cmpSeqInfo_t *parent);
