@@ -6,7 +6,7 @@ INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E5320);
 
 INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __moddi3);
 
-INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E6048);
+INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __udivdi3);
 
 INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __umoddi3);
 

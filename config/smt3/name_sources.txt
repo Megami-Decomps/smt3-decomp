@@ -41,3 +41,5 @@
 0x002DC2C0	_ExecOSD	evidence	Native SDK routine paired with DDS; was libc_2DC2C0. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
 0x00116BB8	dds3GlobalWorkDestroy	inferred	HD original dds3GlobalWork.c identity: GBWK task destruction or its registered runtime/playtime tick callback; was func_00116BB8.
 0x00116C08	dds3GlobalWorkMainProc	inferred	HD original dds3GlobalWork.c identity: GBWK task destruction or its registered runtime/playtime tick callback; was func_00116C08.
+0x002D3398	__muldi3	inferred	Compiler 64-bit product libcall; native combines low-word product and cross terms into the low 64 bits; binary64 multiplication and strtol accumulation call this address.
+0x002E6048	__udivdi3	inferred	Compiler unsigned 64-bit quotient libcall; native unsigned normalization, divu quotient digits and unsigned correction; strtol cutoff division calls this address.

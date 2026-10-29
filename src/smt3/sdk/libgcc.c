@@ -742,7 +742,7 @@ INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D2D90);
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D31E0);
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D3398);
+INCLUDE_ASM(const s32, "sdk/libgcc", __muldi3);
 
 void sdfUnpackFloat(const void *input, fp_number_type *number) {
     f32_bits bits;
