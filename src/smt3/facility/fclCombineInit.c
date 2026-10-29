@@ -3968,7 +3968,78 @@ f32 cmbGetPanelScale(s32 mode)
     return scale.v[mode & 3];
 }
 
+extern f32 sdfCos(f32 angle);
+extern f32 sdfSin(f32 angle);
+
+#ifdef NON_MATCHING
+void cmbRotateModelPanel(const f32 *center, s32 mode, u32 color,
+                         sdfVector4_t *vertices, u32 *colors, f32 radius, f32 height)
+{
+    f32 diameter = radius + radius;
+    f32 panelHeight = height * 2.5f;
+    f32 bottom = -radius * 2.5f - 40.0f;
+    f32 angle;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 firstOffset;
+    f32 secondOffset;
+    s32 i;
+
+    if (mode == 1) {
+        bottom += panelHeight;
+        panelHeight = 40.0f;
+    } else if (mode == 2) {
+        bottom = bottom + panelHeight + 40.0f;
+        panelHeight = 40.0f;
+    }
+    for (i = 0; i < 64; i++) {
+        if ((i & 1) == 0) {
+            secondOffset = 0.0f;
+            firstOffset = cmbGetPanelScale(i);
+        } else {
+            firstOffset = 0.0f;
+            secondOffset = cmbGetPanelScale(i);
+        }
+        angle = ((f32)i * 5.53846125f * 3.141592503f) / 180.0f;
+        x = sdfCos(angle) * diameter + center[0];
+        y = center[1] + bottom + firstOffset;
+        z = sdfSin(angle) * diameter + center[2];
+        vertices[4].x = x;
+        vertices[0].x = x;
+        vertices[1].x = x;
+        vertices[4].y = y;
+        vertices[0].y = y;
+        colors[0] = color;
+        colors[1] = color;
+        colors[4] = color;
+        vertices[1].y = y + panelHeight;
+        vertices[4].z = z;
+        vertices[0].z = z;
+        vertices[1].z = z;
+        angle = ((f32)((i + 1) % 64) * 5.53846125f * 3.141592503f) / 180.0f;
+        x = sdfCos(angle) * diameter + center[0];
+        y = center[1] + bottom + secondOffset;
+        z = sdfSin(angle) * diameter + center[2];
+        colors[2] = color;
+        vertices[5].x = x;
+        vertices[2].x = x;
+        vertices[3].y = y;
+        vertices[3].x = x;
+        colors[3] = color;
+        vertices[5].y = y + panelHeight;
+        vertices[5].z = z;
+        vertices[2].y = y + panelHeight;
+        vertices[2].z = z;
+        vertices[3].z = z;
+        vertices += 6;
+        colors[5] = color;
+        colors += 6;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbRotateModelPanel);
+#endif
 
 extern void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
                           const u32 *colors, s32 unused, sdfMat_t *asset, s32 surfaceIndex);
