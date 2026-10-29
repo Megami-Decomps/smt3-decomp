@@ -1563,7 +1563,52 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_All_Set2);
 #endif
 
 
+#ifdef NON_MATCHING
+void nbCameraShot_All_Set3(nbCamera_t *camera, sdfVector4_t *target)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    sdfVector4_t pos;
+    f32 playerHeight, height, radius, angle, distance;
+    u32 i;
+
+    effBTLModelAllShow();
+    data = nbGetMainProcessData();
+    playerHeight = 0.0f;
+    form = data->form;
+    for (i = 0; i < 32; i++, form++) {
+        if ((form->stat & 0x201) == 0x201) {
+            effBTLModelGetHeight(form);
+        } else if ((form->stat & 0x101) == 0x101) {
+            height = effBTLModelGetHeight(form);
+            if (playerHeight < height) playerHeight = height;
+        }
+    }
+    nbGetEnemyInterval();
+    camera->target.x = target->x;
+    camera->target.y = target->y;
+    camera->target.z = target->z;
+    angle = sdfAtan(0.523598671f);
+    camera->fovy = 0.69813163f;
+    pos.x = 0.0f;
+    pos.y = -playerHeight * 0.75f;
+    pos.z = -nbCameraGetBossDistance() * 0.5f;
+    /* Retail leaves the position lane unset; the resulting direction has w = 0. */
+    pos.w = 1.0f;
+    SDF_VU0_LOADVECTOR(&camera->target);
+    SDF_VU0_LOADVECTOR_B(&pos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(distance);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SETVECTOR_W(0.0f);
+    SDF_VU0_STOREVECTOR(&camera->direction);
+    radius = effBTLModelGroupGetSphere(0x100);
+    if (radius < 250.0f) radius = 250.0f;
+    camera->distance = distance + radius / angle;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_All_Set3);
+#endif
 
 void nbCameraState_Analyze_Set(nbCamera_t *pNbCamera)
 {
