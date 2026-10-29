@@ -377,6 +377,10 @@ typedef struct
     /* 0x34 */ s32 unk_34;
 } cmpCursorInfo_t;
 
+typedef void (*cmpListRowDraw_t)(s32 x, s32 y, s32 z, u16 width, u16 height2,
+                                 u16 height, s32 color0, s32 color1, s32 color2,
+                                 s8 phase, s32 scale, s32 ot);
+
 typedef struct
 {
     /* 0x00 */ cmpCursorInfo_t cursor;
@@ -837,8 +841,9 @@ extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 arg);
 
 extern void fmProcTrigSequence(s32 mode);
 
-extern void cmpDrawScrollBar(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h,
-                             cmpCursorInfo_t *cursor, s32 j, s32 k);
+extern void cmpDrawScrollBar(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
+                             s32 alpha, s8 row, cmpCursorInfo_t *cursor,
+                             cmpListRowDraw_t draw, s32 ot);
 
 void fclDrawSpriteSize(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color, s32 id, s32 idx, s32 *texList, fclSpriteTbl_t *table, s32 OtNo);
 
@@ -6812,9 +6817,6 @@ void cmpDrawListRowBox(s32 x, s32 y, s32 z, u16 w, u16 h2, u16 h, s32 c0, s32 c1
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListRows);
 
-typedef void (*cmpListRowDraw_t)(s32 x, s32 y, s32 z, u16 width, u16 height2,
-                                 u16 height, s32 color0, s32 color1, s32 color2,
-                                 s8 phase, s32 scale, s32 ot);
 extern s32 cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
                            s8 mode, s32 scale, s8 phase, s8 layout,
                            cmpCursorInfo_t *cursor, cmpListRowDraw_t draw, s32 ot);
@@ -6850,7 +6852,33 @@ void cmpDrawListColumn(s32 x, s32 y, s32 z, s32 width, s32 height, s8 mode,
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListColumn);
 #endif
 
+#ifdef NON_MATCHING
+void cmpDrawScrollBar(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
+                      s32 alpha, s8 row, cmpCursorInfo_t *cursor,
+                      cmpListRowDraw_t draw, s32 ot)
+{
+    s8 phase = 0;
+
+    if (cursor != NULL) {
+        phase = ((cmpPadStopWork_t *)cursor)->unk_38;
+        if (phase < 0) {
+            alpha = 0x100 - cursor->unk_30;
+        }
+    }
+    if (draw == NULL) {
+        draw = cmpDrawListRowBox;
+    }
+    fclDrawPanelSprite(0x7101B, ot);
+    cmpDrawListRows(x, y, z, width, height, color, row, alpha,
+                    phase, 0, cursor, draw, ot);
+    fclDrawPanelSprite(0x5101B, ot);
+    if (cursor != NULL) {
+        cmpDrawListColumn(x, y, z, width, height, row, alpha, cursor, draw);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawScrollBar);
+#endif
 
 void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s32 kind)
 {
@@ -6906,7 +6934,7 @@ void cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 unused,
         s32 blink = cmpCursorBlinkColor(alpha);
         cmpDrawScrollBar(x, y + 0x280, 0x10, 0xA4, 0x16,
                          blink, alpha, cursor->unk_25, cursor,
-                         (s32)cmpDrawListRowBox, 0x47);
+                         cmpDrawListRowBox, 0x47);
     } else {
         cursor->unk_34 = 0;
     }
