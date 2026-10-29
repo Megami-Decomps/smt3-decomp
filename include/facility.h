@@ -67,7 +67,7 @@ typedef struct
     /* 0x0360 */ void *explainData;
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
-    /* 0x036C */ s32 pwork;
+    /* 0x036C */ void *pwork;
 } fclEncyc_instance_tag;
 
 typedef struct

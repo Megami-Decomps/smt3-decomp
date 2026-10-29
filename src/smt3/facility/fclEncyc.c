@@ -540,7 +540,7 @@ void *allocPhaseBuffer(fclEncyc_instance_tag *work, s32 aSize)
     void *locked = sdfMemLock(buf);
 
     work->allocation = buf;
-    work->pwork = (s32)locked;
+    work->pwork = locked;
     return locked;
 }
 
@@ -800,7 +800,7 @@ extern void ReleaseFontList(void **ppfont, s32 num);
 
 void DestPhaseRegistTop(fclEncyc_instance_tag *pinst)
 {
-    s32 base = pinst->pwork;
+    u8 *base = pinst->pwork;
 
     if (*(void **)(base + 0x11DC) != NULL)
     {
@@ -1039,7 +1039,7 @@ extern void CreateFontListRead(void *work, s32 sort, s16 *indices);
 
 void InitPhaseReadTop(fclEncyc_instance_tag *pinst)
 {
-    fclEncycReadTopWork_t *work = allocPhaseBuffer(pinst, 0x1210);
+    fclEncycReadTopWork_t *work = allocPhaseBuffer(pinst, sizeof(*work));
     s32 geometry[4];
     s32 cursor[4];
     s32 panelRange[4];
@@ -1287,13 +1287,13 @@ extern void cmpDrawStatusComEx(s32 unit, u8 alpha, s8 kind, s8 mode, s32 value, 
 
 void DrawPhaseReadStatus(fclEncyc_instance_tag *pinst)
 {
-    s32 base = pinst->pwork;
+    u8 *base = pinst->pwork;
 
     DrawBackBlackBoard(*(s32 *)(base + 0x58), *(s16 *)(base + 0x5C));
     if (cmpGetEncycWork() != 0) {
         pinst->stat |= 0x400;
     }
-    cmpDrawStatusComEx(base + 0x90, *(u8 *)(base + 0x1E), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
+    cmpDrawStatusComEx((s32)(base + 0x90), *(u8 *)(base + 0x1E), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
     DrawExplainBack(*(s16 *)(base + 0x5E));
     fclRbnDraw(*(s32 *)(base + 0x80), *(s32 *)(base + 0xC), *(s32 *)(base + 0x10), 0xFFFFF0,
                *(s16 *)(base + 0x1C), 5, 0x3A0, 0x47);
@@ -1309,7 +1309,7 @@ extern void ReleaseFontExplain(fclEncyc_instance_tag *pinst, s32 release_mesmng)
 
 void DestPhaseReadStatus(fclEncyc_instance_tag *pinst)
 {
-    s32 base = pinst->pwork;
+    u8 *base = pinst->pwork;
     void *scene;
 
     ReleaseFontExplain(pinst, 1);
@@ -1373,13 +1373,13 @@ void CalcPhaseReadSummon(fclEncyc_instance_tag *pinst)
 
 void DrawPhaseReadSummon(fclEncyc_instance_tag *pinst)
 {
-    s32 base = pinst->pwork;
+    u8 *base = pinst->pwork;
 
     DrawBackBlackBoard(*(s32 *)(base + 0x58), *(s16 *)(base + 0x5C));
     if (cmpGetEncycWork() != 0) {
         pinst->stat |= 0x400;
     }
-    cmpDrawStatusComEx(base + 0x90, *(u8 *)(base + 0x1E), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
+    cmpDrawStatusComEx((s32)(base + 0x90), *(u8 *)(base + 0x1E), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
     DrawExplainBack(*(s16 *)(base + 0x5E));
     fclRbnDraw(*(s32 *)(base + 0x80), *(s32 *)(base + 0xC), *(s32 *)(base + 0x10), 0xFFFFF0,
                *(s16 *)(base + 0x1C), 5, 0x3A0, 0x47);
@@ -2236,7 +2236,7 @@ extern void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker);
 
 void ReleaseFontExplain(fclEncyc_instance_tag *pinst, s32 release_mesmng)
 {
-    s32 base = pinst->pwork;
+    u8 *base = pinst->pwork;
 
     itfMesMngRequestMessageRelease(*(s32 *)(base + 8), 0);
     if (*(void **)(base + 0x88) != NULL)
@@ -2881,7 +2881,7 @@ void ChangeDevilObjectRegistConfirm(s32 unitIndex, fclEncyc_instance_tag *pinst)
 
 void ChangeDevilObjectReadMain(s32 recindex, fclEncyc_instance_tag *pinst)
 {
-    s32 base = pinst->pwork;
+    u8 *base = pinst->pwork;
     fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)DDS3_GBWK + recindex * 0xB0 + 0x11E90);
 
     *(u16 *)base = recindex;
