@@ -7,6 +7,9 @@
 #include "field.h"
 #include "effect.h"
 
+extern s32 D_0054EB54;
+extern u32 fldEncountTimer;
+
 extern char D_0054EA38[], D_0054EA40[], D_0054EA48[], D_0054EA50[], D_0054EA58[];
 
 extern dds3Basic_t *dds3GetControlScene(void);
@@ -319,7 +322,164 @@ void fldRegistUnitPad(void);
 
 INCLUDE_RODATA(const s32, "field/fldProcess", D_00531860);
 
+#ifdef NON_MATCHING
+extern sdfVector4_t D_002FC490;
+extern s32 fldPlayerStatus[];
+extern s32 fldPlayerStepDist;
+extern s32 fldSequenceMode;
+extern s32 fldEncountCheckWork;
+extern s32 fldEncountSagasiFlag;
+extern u32 D_0054EB94;
+extern dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *scene);
+extern void dds3GetPosPoseSet(dds3Basic_t *basic);
+extern s32 evtGetAgeOfMoon16(void);
+extern void evtMoonAddMove(f32 distance);
+extern void datPartyDamageFld(s32 mode);
+extern void datFieldSkillKaifuku(void);
+extern s32 datCheckSkillTakaraSagasi(void);
+extern void datDebugPrintf(const char *format, ...);
+extern s32 fldCheckEveRngEncount(void);
+extern s32 fldRunEncountChk(void);
+extern u32 nbEncountCalc(s32 encounter, f32 distance);
+extern void CallBattleSub(s32 encno, s32 eventno);
+extern void fclClearTerminalState(void);
+extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+
+s32 ProcRandomEncountCheck(void)
+{
+    dds3Basic_t *scene;
+    dds3Basic_t *unit;
+    f32 distance;
+    f32 damageDistance;
+    s32 oldMoon;
+    s32 newMoon;
+    s32 encounter;
+    s32 damageMode;
+    s32 specialFloor;
+
+    if (fldGlobalBase.menuOpenFlag > 0) fldGlobalBase.menuOpenFlag--;
+    if (fldGlobalBase.encountState > 0) fldGlobalBase.encountState--;
+    if (fldGlobalBase.word5C > 0) fldGlobalBase.word5C--;
+    if (fldEncountTestFlag(0x40) == 0) return 0;
+    if (fldAutoMapSeqTestFlag(1) == 1) return 0;
+    scene = dds3GetActiveScene();
+    if (scene == NULL) return 0;
+    unit = dds3GetActiveUnitSceneBasic(scene);
+    if (unit == NULL) return 0;
+
+    dds3GetPosPoseSet(unit);
+    SDF_VU0_LOADVECTOR_B(&D_002FC490);
+    SDF_VU0_STOREVECTOR(&D_002FC490);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(distance);
+    if (distance < 0.1999999881f) distance = 0.0f;
+    fldGlobalBase.playerMoveDistance = distance;
+    oldMoon = evtGetAgeOfMoon16();
+    if (fldGlobalBase.word5C > 0) {
+        dds3GetPosPoseSet(unit);
+        SDF_VU0_STOREVECTOR(&D_002FC490);
+        fldGlobalBase.wordC8 = 0;
+        return 0;
+    }
+    if (fldGlobalBase.area < 10) evtMoonAddMove(distance * 4.0f);
+    else evtMoonAddMove(distance);
+    if (fldGlobalBase.consumedFlags & 0xF) {
+        fldReleaseUnitPad();
+        dds3SceneBasicStartScript(dds3GetActiveScene(), D_00531860);
+        fldPlayerPosRot();
+        return 0;
+    }
+    newMoon = evtGetAgeOfMoon16();
+    specialFloor = (fldGlobalBase.area == 42 && (fldGlobalBase.floor == 13 || fldGlobalBase.floor == 25)) ||
+                   (fldGlobalBase.area == 44 && (fldGlobalBase.floor == 2 || fldGlobalBase.floor == 4 || fldGlobalBase.floor == 24));
+    if (specialFloor) {
+        if (fldSequenceMode != 0) {
+            fldGlobalBase.floatB4 += distance;
+            if (fldGlobalBase.floatB4 > 450.0f) {
+                fldEncountClearFlag(0x40);
+                fldGlobalBase.word80 = 60;
+                fldGlobalBase.floatB4 = 0.0f;
+                datPartyDamageFld(4);
+                return 0;
+            }
+        }
+    } else if (fldGlobalBase.wordB0 != 0 || (fldPlayerStatus[0] & 1)) {
+        damageDistance = 450.0f;
+        fldGlobalBase.floatB4 += distance;
+        if (fldGlobalBase.wordB0 == 0 && (fldPlayerStatus[0] & 1)) damageDistance = 1000.0f;
+        if (damageDistance < fldGlobalBase.floatB4) {
+            if (fldGlobalBase.wordB0 != 0) {
+                if (DDS3_GBWK->maFlags & 4) {
+                    fldGlobalBase.floatB4 = 0.0f;
+                    fldPlayerStepDist = 0;
+                    damageMode = 0;
+                } else damageMode = 2;
+            } else damageMode = 1;
+            if (damageMode != 0) {
+                fldPlayerStepDist = 60;
+                fldGlobalBase.floatB4 = 0.0f;
+                datPartyDamageFld(damageMode);
+            }
+        }
+    } else {
+        fldGlobalBase.floatB4 = 450.0f;
+    }
+    if (oldMoon != newMoon) datFieldSkillKaifuku();
+    if (fldLoadNextGetStatus() == 1) return 0;
+    if (fldGlobalBase.area < 10 && fldCheckEveRngEncount() == 0 &&
+        fldEncountCheckWork != evtGetAgeOfMoon16() && DDS3_GBWK->unkA42[0] == 0) {
+        datDebugPrintf("Takara Sagasi Try!!\n");
+        fldEncountSagasiFlag = datCheckSkillTakaraSagasi();
+        if (fldEncountSagasiFlag != 0) {
+            fldReleaseUnitPad();
+            dds3SceneBasicStartScript(dds3GetActiveScene(), "takarasagasi_label");
+            fldEncountCheckWork = evtGetAgeOfMoon16();
+            datDebugPrintf("Takara Sagasi Dvl[%x]\n", fldEncountSagasiFlag);
+            return 0;
+        }
+    }
+    fldEncountCheckWork = evtGetAgeOfMoon16();
+    if (fldRunDanteGunFlag.enabled != 0 && fldRunEncountChk() != 0 && fldRunDanteGunFlag.word5C != 0) {
+        fldEveHit_End();
+        fldAutoMapSeqSetFlag(1);
+        fldAutoMapSeqSetFlag(2);
+        fldReleaseUnitPad();
+        evtKillFieldScript();
+        D_0054EB94 = 0x40A;
+        fldEncountTimer = 0;
+        switch (fldGlobalBase.floor) {
+        case 3: fldSetNextField(43, 200); break;
+        case 4: case 5: fldSetNextField(43, 201); break;
+        case 7: case 8: case 9: case 10: fldSetNextField(43, 202); break;
+        }
+        CallBattleSub(0x40A, 0);
+        return -1;
+    }
+    if (distance < 9998.0f && fldRunDanteGunFlag.enabled == 0) return 0;
+    if (fldEncountTestFlag(0x10) == 0) return 0;
+    encounter = fldGlobalBase.wordC0;
+    if (encounter == 0) encounter = fldGlobalBase.wordBC;
+    fldEncountTimer = encounter;
+    D_0054EB94 = nbEncountCalc(encounter, distance);
+    if (D_0054EB94 == 0) return 0;
+    if (fldRunDanteGunFlag.enabled == 1 || distance > 9998.0f) {
+        fldEveHit_End();
+        fldAutoMapSeqSetFlag(1);
+        fldAutoMapSeqSetFlag(2);
+        fldReleaseUnitPad();
+        evtKillFieldScript();
+        return -1;
+    }
+    fclClearTerminalState();
+    p2sdPlaySE(15, 127, 63);
+    dds3FadeIn(128, 128, 128, 6);
+    D_0054EB54++;
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldProcess", ProcRandomEncountCheck);
+#endif
 
 s32 fldProcKiretaChk(void)
 {
@@ -337,8 +497,8 @@ extern dds3ProcessID_t *dds3SearchProcessPriority(s32 priority);
 extern dds3Basic_t *D_0054EAE8;
 extern u32 dds3BackColor;
 extern s32 fldSequenceState, gFldStart, fldSkyEnable, gfldPlayerHasiCnt;
-extern s32 fldWmWarpMode, D_0054EB54;
-extern u32 fldEncountTimer;
+extern s32 fldWmWarpMode;
+
 extern s32 fmProcessChk(void), fldGetRestoreMode(void), fldWaitBgmReload(void);
 extern s32 dds3FadeCheck(void), fldEveHit_ChkEveHitAfter(void), fldPlayerCalc(void);
 extern void fldEveHit_ChkEveHit(dds3Basic_t *basic);
