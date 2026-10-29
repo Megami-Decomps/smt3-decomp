@@ -2,49 +2,6 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
-## dds3InitZClearDrawTag (kernel/dds3KernelDraw, 0x15C)
-
-Sixty-six of 87 words match, at the exact 348-byte size, and every
-instruction's opcode and offset is right: all 21 differing words are register
-names. Retail puts the two XYZ2 payloads in the callee-saved pair,
-`$17 = 0x79007000` and `$16 = 0x87009000`, and the TEST_1 and the second
-GIFtag in temporaries, `$25 = 0x32001` and `$24 = 0x1003400000000004`; the
-draft swaps those two pairs. The same swap also puts the address induction
-variable in `$6` and the constant 5 in `$5` where retail has them the other
-way round. Nothing in the loop body, the two counters, the `sll $2, state, 5`
-addressing or the constant materialisation sequences differs.
-
-The shape is settled: a `for (state = 0; state < 3; state++)` over an inner
-`for (buffer = 0; buffer < 2; buffer++)` whose index the body does not use, so
-it becomes retail's `addiu -1` / `bgez` downcounter, with the packet addressed
-as `dds3ZClearDrawTag[state][buffer]` written out at each field. Indexing the
-element inside the inner loop is what gives retail's `sll $2, $5, 5` with the
-outer induction variable stepping 0xB; a row pointer hoisted to the outer loop
-(`packet = dds3ZClearDrawTag[state]` plus `packet++`) makes gcc step a single
-biv by 352 instead and costs two words as well.
-
-Ruled out, all 21 or worse: both orders of `.data` and `.reg` within every
-A+D register entry, independently for the TEST, colour, position and blend
-pairs (16 combinations) - the scheduler normalises the position pair either
-way, so the emitted order is not evidence of source order there; a
-`dds3ZClearPacket_t *packet` local assigned inside the inner loop, assigned as
-its initializer, and as `dds3ZClearDrawTag[state] + buffer`; a row pointer
-with `row[buffer].field`; `(u8 *)dds3ZClearDrawTag + state * 0x160` and the
-same through a `u32 ofs` local; a 32-byte `sdfGrPacketHeader_t *` cast indexed
-`[state * 11]`; `u32` for either loop counter (either one costs a word);
-`while` loops; one combined declaration; an explicit `buffer = 1; buffer >= 0`
-downcounter; and seven orderings of the eleven field groups. Writing the two
-position entries before the colour entries reaches 19 words and fixes the
-saved-register pair, but reorders the stores in the body, so it trades six
-register names for six store offsets. Two `u64` locals holding the position
-payloads, declared before the loop with and without initializers, is 29.
-
-The remaining difference is an allocation tie: every one of these constants is
-hoisted to the preheader, referenced once per iteration and live across the
-whole loop, so `allocno_compare` cannot separate them on refs, frequency or
-live length. Someone attacking this needs to change the order the preheader
-pseudos are created in while leaving the body's store order alone.
-
 ## dds3DrawFade (kernel/dds3KernelDraw, 0x2A8)
 
 A hundred and eighteen of 170 words match, at the exact 680-byte size, with

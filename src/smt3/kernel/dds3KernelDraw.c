@@ -573,12 +573,14 @@ void dds3StopQuake(void)
     dds3QuakeFlag = 0;
 }
 
-/* NON_MATCHING: 21 of 87 words differ (first at +0x14). */
-#ifdef NON_MATCHING
+/* The two live XYZ2 payload locals follow the matched DDS engine source.
+ * Creating each before its RGBAQ pair preserves the native hoisted constants. */
 void dds3InitZClearDrawTag(void)
 {
     s32 state;
     s32 buffer;
+    u64 topLeft;
+    u64 bottomRight;
 
     for (state = 0; state < 3; state++) {
         for (buffer = 0; buffer < 2; buffer++) {
@@ -594,14 +596,16 @@ void dds3InitZClearDrawTag(void)
             dds3ZClearDrawTag[state][buffer].test.data = 0x32001;
             dds3ZClearDrawTag[state][buffer].clearGif.parm = 0x1003400000000004;
             dds3ZClearDrawTag[state][buffer].clearGif.regs = 0xE;
+            topLeft = 0x79007000;
             dds3ZClearDrawTag[state][buffer].colorA.reg = 1;
             dds3ZClearDrawTag[state][buffer].colorA.data = 0x3F80000000000000;
             dds3ZClearDrawTag[state][buffer].positionA.reg = 5;
-            dds3ZClearDrawTag[state][buffer].positionA.data = 0x79007000;
+            dds3ZClearDrawTag[state][buffer].positionA.data = topLeft;
+            bottomRight = 0x87009000;
             dds3ZClearDrawTag[state][buffer].colorB.reg = 1;
             dds3ZClearDrawTag[state][buffer].colorB.data = 0x3F80000000000000;
             dds3ZClearDrawTag[state][buffer].positionB.reg = 5;
-            dds3ZClearDrawTag[state][buffer].positionB.data = 0x87009000;
+            dds3ZClearDrawTag[state][buffer].positionB.data = bottomRight;
             dds3ZClearDrawTag[state][buffer].blendGif.parm = 0x1000000000008002;
             dds3ZClearDrawTag[state][buffer].blendGif.regs = 0xE;
             dds3ZClearDrawTag[state][buffer].blend[0].reg = 0x47;
@@ -611,9 +615,7 @@ void dds3InitZClearDrawTag(void)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3InitZClearDrawTag);
-#endif
+
 
 sdfDrawTag_t *dds3LinkZClearDrawTag(s32 sw)
 {

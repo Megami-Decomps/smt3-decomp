@@ -3,6 +3,7 @@
 #include "fpu.h"
 #include "model.h"
 #include "draw3d.h"
+#include "effect.h"
 
 typedef struct
 {
@@ -69,25 +70,42 @@ typedef struct effPCPCrackPart_t
     effPCPCrackPartFlash_t *pSize;
 } effPCPCrackPart_t;
 
+/* Parameter fields below are read directly by effPCPCrackDraw. The complete
+ * 0x8C head is copied by Create/Copy, followed by the 0x20 runtime suffix. */
 typedef struct effPCPCrack_t
 {
-    u8 position[0x10];
-    u8 unk10[4];
+    f32 position[4];
+    u8 drawTrail;
     f32 frameStep;
     f32 scale;
-    u8 unk1C[0x1C];
+    f32 trailWidth;
+    s32 trailColorStartFrame;
+    s32 trailColorTransitionFrames;
+    u32 trailStartCenterColor;
+    u32 trailStartEdgeColor;
+    u32 trailEndCenterColor;
+    u32 trailEndEdgeColor;
     u16 drawBucket;
     u8 unk3A[2];
     u8 hasCells;
-    u8 unk3D[7];
+    u8 cellCountFromFrame;
+    s32 cellStartFrame;
     s32 delaySpread;
-    u8 unk48[0x10];
+    s32 cellDuration;
+    s32 cellFadeIn;
+    s32 cellFadeOut;
+    s32 offsetRampFrames;
     f32 offsetDistance;
     f32 offsetRandomness;
     f32 baseExtent;
     f32 tipExtent;
     f32 extentRandomness;
-    u8 unk6C[0x18];
+    s32 cellColorStartAge;
+    s32 cellColorTransitionFrames;
+    u32 cellStartCenterColor;
+    u32 cellStartEdgeColor;
+    u32 cellEndCenterColor;
+    u32 cellEndEdgeColor;
     s32 blend;
     u8 directionMode;
     u8 unk89[3];
@@ -98,7 +116,7 @@ typedef struct effPCPCrack_t
     u8 unk9A[2];
     s32 frame;
     u32 abgr;
-    void *system;
+    parSystem_t *system;
     effPartHandle_t *part;
 } effPCPCrack_t;
 
@@ -1089,7 +1107,308 @@ void effPCPCrackDelete(effPCPCrack_t *hData)
     sdfChipFreeDirect(hData);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrackDraw);
+extern f32 D_0031FF70[4];
+extern void mdlSetScale(mdlObj_t *model);
+extern void dds3TrackPolyDraw(parSystem_t *system);
+extern void dds3FlashPolyListDraw(void *pool);
+extern void dds3FlashPolyListSetABGR(void *pool, u32 color);
+extern u32 effMagaCylinderCalcColor(u32 color, u32 scale);
+
+/* Same native algorithm as dds-decomp/redthing1's effPCPCrackDraw: transform
+ * each trail sample, then emit and fade its delayed flash cells. */
+void effPCPCrackDraw(effPCPCrack_t *work) {
+    f32 perpendicular[4];
+    f32 direction[4];
+    f32 axis[4];
+    f32 scaleVector[4];
+    f32 widthVector[4];
+    f32 displacement[4];
+    f32 baseVector[4];
+    f32 tipVector[4];
+    mdlObj_t *model;
+    struct sdfModelRootNode_t *map;
+    s32 i;
+    s32 colorStart;
+    s32 mode;
+    u32 tint;
+    u32 center;
+    u128 *historyStart;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 ramp;
+    s32 colorFrames;
+    u8 cellCountFromFrame;
+    effPCPCrackPart_t *group;
+    effPCPCrackPartFlash_t *cell;
+    parCell_t *historyCell;
+    u128 *positions; /* Position workspace reused for trail history and cell vertices. */
+    u32 *colorWords;
+    s32 frame;
+    s32 groupCount;
+    s32 colorCellCount;
+    s32 j, count;
+    s32 historyCount;
+    s32 age, currentAge;
+    u32 edge, alphaColor;
+    f32 blend, trailLength, cellLength, taperStep;
+    f32 taperRange;
+    f32 baseExtent, tipExtent;
+
+    frame = work->frame;
+    mode = work->directionMode;
+    model = dds3EffectPartGetHandle(work->part);
+    map = model->inner;
+    SDF_VU0_LOADVECTOR(work->position);
+    mdlSetPosition(model);
+    scaleVector[0] = work->scale;
+    scaleVector[1] = work->scale;
+    scaleVector[2] = work->scale;
+    scaleVector[3] = 0.0f;
+    SDF_VU0_LOADVECTOR(scaleVector);
+    mdlSetScale(model);
+    mdlLink(model, D_002F69B8);
+    if (work->drawTrail) {
+        colorStart = work->trailColorStartFrame;
+        if (frame > colorStart) {
+            if (work->trailColorTransitionFrames > 0) {
+                blend = (f32)(frame - colorStart) / work->trailColorTransitionFrames;
+                center = effColorBlend(work->trailStartCenterColor, work->trailEndCenterColor, blend);
+                edge = effColorBlend(work->trailStartEdgeColor, work->trailEndEdgeColor, blend);
+            } else {
+                center = work->trailEndCenterColor;
+                edge = work->trailEndEdgeColor;
+            }
+        } else {
+            center = work->trailStartCenterColor;
+            edge = work->trailStartEdgeColor;
+        }
+        groupCount = work->MarkCount;
+        for (i = 0; i < groupCount; i++) {
+            colorWords = work->system->cells[i].colors;
+            colorCellCount = work->cellCount;
+            if (colorCellCount != 0) {
+                j = colorCellCount;
+                do {
+                    colorWords[0] = edge;
+                    colorWords[1] = center;
+                    colorWords[2] = edge;
+                    colorWords += 3;
+                    --j;
+                } while (j != 0);
+            }
+            groupCount = work->MarkCount;
+        }
+    }
+    groupCount = work->MarkCount;
+    widthVector[0] = (work->trailWidth * 0.5f) * scaleVector[0];
+    widthVector[1] = (work->trailWidth * 0.5f) * scaleVector[0];
+    widthVector[2] = (work->trailWidth * 0.5f) * scaleVector[0];
+    widthVector[3] = 0.0f;
+    perpendicular[0] = perpendicular[1] = perpendicular[2] = perpendicular[3] = widthVector[3];
+    tint = work->abgr;
+    i = 0;
+    if (groupCount > 0) {
+        taperRange = -1.0f;
+        do {
+            historyCell = &work->system->cells[i];
+            positions = historyCell->history;
+            historyCell->color = tint;
+            if (mode == 2) {
+                direction[0] = 0.0f;
+                direction[1] = 0.0f;
+                direction[2] = 1.0f;
+                sdfModelGetMarkPosMatrix(map, i);
+                SDF_VU0_LOADVECTOR(direction);
+                SDF_VU0_APPLYMATRIX_XYZ();
+                SDF_VU0_STOREVECTOR(direction);
+                work->pPart[i].dir[0] = direction[0];
+                work->pPart[i].dir[1] = direction[1];
+                work->pPart[i].dir[2] = direction[2];
+            }
+            sdfModelGetMarkPos(map, i);
+            if (frame < work->cellCount) {
+                historyCount = historyCell->vertexCount;
+                SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount);
+                SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 1);
+                SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 2);
+                historyCell->vertexCount += 3;
+                taperStep = taperRange / frame;
+                blend = 1.0f;
+                SDF_VU0_LOADVECTOR_C(D_0031FF70);
+                if (frame > 0) {
+                    const f32 *trailWidth = widthVector;
+                    j = frame;
+                    do {
+                        SDF_VU0_LOADVECTOR(positions + 4);
+                        SDF_VU0_LOADVECTOR_B(positions + 1);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_GETLENGTH(trailLength);
+                        if (trailLength > 1.0f) {
+                            SDF_VU0_COPYVECTOR_C_TO_B();
+                            SDF_VU0_OUTERPRODUCT();
+                            SDF_VU0_NORMALIZE();
+                            SDF_VU0_STOREVECTOR(perpendicular);
+                        } else {
+                            SDF_VU0_LOADVECTOR(perpendicular);
+                        }
+                        SDF_VU0_LOADVECTOR_B(trailWidth);
+                        SDF_VU0_SCALEVECTOR_B_BITS(blend);
+                        SDF_VU0_MULVECTOR();
+                        SDF_VU0_COPYVECTOR_A_TO_B();
+                        SDF_VU0_LOADVECTOR(positions + 1);
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_STOREVECTOR(positions);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_STOREVECTOR(positions + 2);
+                        --j;
+                        blend += taperStep;
+                        positions += 3;
+                    } while (j != 0);
+                }
+            }
+            i++;
+        } while (i < groupCount);
+    }
+    if (work->drawTrail) {
+        dds3TrackPolyDraw(work->system);
+    }
+    if (work->groupsHandle != NULL) {
+        duration = work->cellDuration;
+        count = frame - work->cellStartFrame;
+        fadeIn = work->cellFadeIn;
+        fadeOut = work->cellFadeOut;
+        colorStart = work->cellColorStartAge;
+        colorFrames = work->cellColorTransitionFrames;
+        cellCountFromFrame = work->cellCountFromFrame;
+        if (count > 0) {
+            ramp = work->offsetRampFrames;
+            if (cellCountFromFrame == 1) count = frame;
+            if (count > work->cellCount) count = work->cellCount;
+            group = work->pPart;
+            for (i = 0; i < groupCount; i++, group++) {
+                historyCell = &work->system->cells[i];
+                historyStart = historyCell->history;
+                cell = group->pSize;
+                dds3FlashPolyListSetABGR(group->hFlash, tint);
+                for (j = 0; j < count - 1; j++, cell++, historyStart += 3) {
+                    positions = (u128 *)dds3FlashPolyListGetVertex(group->hFlash, j);
+                    colorWords = dds3FlashPolyListGetVC(group->hFlash, j)->color;
+                    age = cell->frame;
+                    if (age > colorStart) {
+                        if (work->cellColorTransitionFrames > 0 && age < colorStart + colorFrames) {
+                            blend = (f32)(age - colorStart) / colorFrames;
+                            center = effColorBlend(work->cellStartCenterColor, work->cellEndCenterColor, blend);
+                            edge = effColorBlend(work->cellStartEdgeColor, work->cellEndEdgeColor, blend);
+                        } else {
+                            center = work->cellEndCenterColor;
+                            edge = work->cellEndEdgeColor;
+                        }
+                    } else {
+                        center = work->cellStartCenterColor;
+                        edge = work->cellStartEdgeColor;
+                    }
+                    center &= 0xFFFFFF;
+                    edge &= 0xFFFFFF;
+                    currentAge = cell->frame;
+                    if (currentAge >= 0) {
+                        if (currentAge >= ramp) direction[1] = cell->length;
+                        else direction[1] = (cell->length * currentAge) / ramp;
+                        displacement[0] = group->dir[0] * direction[1];
+                        displacement[1] = group->dir[1] * direction[1];
+                        displacement[2] = group->dir[2] * direction[1];
+                        displacement[3] = 0.0f;
+                        if (mode == 2 && currentAge >= group->rotationStartAge) {
+                            SDF_VU0_LOADVECTOR(historyStart + 4);
+                            SDF_VU0_LOADVECTOR_B(historyStart + 1);
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_NORMALIZE();
+                            SDF_VU0_STOREVECTOR_NOMEM(axis);
+                            SetRotateMatrixAxis(group->rotate, axis);
+                            SDF_VU0_LOADVECTOR(displacement);
+                            SDF_VU0_APPLYMATRIX_XYZ();
+                            SDF_VU0_STOREVECTOR(displacement);
+                            group->rotate += group->rotate_add;
+                        }
+                        baseExtent = cell->width_in;
+                        baseVector[0] = baseExtent;
+                        baseVector[1] = baseExtent;
+                        baseVector[2] = baseExtent;
+                        baseVector[3] = 0.0f;
+                        tipExtent = cell->width_out;
+                        tipVector[0] = tipExtent;
+                        tipVector[1] = tipExtent;
+                        tipVector[2] = tipExtent;
+                        tipVector[3] = 0.0f;
+                        SDF_VU0_LOADVECTOR(historyStart + 4);
+                        SDF_VU0_LOADVECTOR_B(historyStart + 1);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_GETLENGTH(cellLength);
+                        if (cellLength > 1.0f) {
+                            SDF_VU0_NORMALIZE();
+                            SDF_VU0_COPYVECTOR_A_TO_B();
+                            SDF_VU0_LOADVECTOR(tipVector);
+                            SDF_VU0_MULVECTOR();
+                            SDF_VU0_STOREVECTOR(tipVector);
+                            SDF_VU0_LOADVECTOR(baseVector);
+                            SDF_VU0_MULVECTOR();
+                            SDF_VU0_STOREVECTOR(baseVector);
+                            SDF_VU0_LOADVECTOR_C(displacement);
+                            SDF_VU0_LOADVECTOR(historyStart + 4);
+                            SDF_VU0_LOADVECTOR_B(baseVector);
+                            SDF_VU0_STOREVECTOR(positions + 3);
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(positions + 2);
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_STOREVECTOR(positions + 4);
+                            SDF_VU0_LOADVECTOR(historyStart + 4);
+                            SDF_VU0_LOADVECTOR_B(tipVector);
+                            SDF_VU0_ADDVECTOR_A_C();
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(positions);
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_STOREVECTOR(positions + 1);
+                        } else {
+                            SDF_VU0_LOADIDENTITYVECTOR();
+                            SDF_VU0_STOREVECTOR(positions);
+                            SDF_VU0_STOREVECTOR(positions + 1);
+                            SDF_VU0_STOREVECTOR(positions + 2);
+                            SDF_VU0_STOREVECTOR(positions + 3);
+                            SDF_VU0_STOREVECTOR(positions + 4);
+                        }
+                        alphaColor = 0;
+                        if (age <= duration) {
+                            if (age < fadeIn && fadeIn != 0) {
+                                blend = (f32)age / fadeIn;
+                                alphaColor = effMagaCylinderCalcColor(((u32)(blend * 2147483648.0f) & 0xFF000000) | 0x808080, tint);
+                            } else if (duration - age <= fadeOut && fadeOut != 0) {
+                                blend = (f32)(duration - age) / fadeOut;
+                                alphaColor = effMagaCylinderCalcColor(((u32)(blend * 2147483648.0f) & 0xFF000000) | 0x808080, tint);
+                            } else alphaColor = tint;
+                        }
+                        colorWords[0] = effMagaCylinderCalcColor(edge, alphaColor);
+                        colorWords[1] = effMagaCylinderCalcColor(edge, alphaColor);
+                        if (cell->type) {
+                            colorWords[2] = effMagaCylinderCalcColor(0x80000000, alphaColor);
+                            colorWords[3] = effMagaCylinderCalcColor(center | 0xFF000000, alphaColor);
+                            colorWords[4] = colorWords[2];
+                        } else {
+                            colorWords[2] = effMagaCylinderCalcColor(0xFF000000, alphaColor);
+                            colorWords[3] = effMagaCylinderCalcColor(center | 0x40000000, alphaColor);
+                            colorWords[4] = colorWords[2];
+                        }
+                    }
+                    cell->frame++;
+                }
+                dds3FlashPolyListDraw(group->hFlash);
+            }
+        }
+    }
+    work->frame++;
+}
 
 void effPCPCrackSetPosition(effPCPCrack_t *hData, const void *pPos)
 {

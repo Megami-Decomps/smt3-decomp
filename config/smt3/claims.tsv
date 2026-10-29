@@ -632,3 +632,5 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	365 C matches / 0 differences
 src/smt3/facility/fclCombineInit.c	KiB	done	2026-10-28	1 fn / 132 B	fusion action sound selection, stop/play dispatch and qualified final-call selector reset; owner 176 match, 0 differ
 src/smt3/facility/fclEncyc.c	KiB	done	2026-10-28	1 fn / 500 B	encyclopedia record comparison with qualified live index reuse; owner 104 match, 0 differ
 src/smt3/pipe/pipeSection.c	KiB	done	2026-10-28	1 fn / 420 B	streaming object and linked-part loading with coherent header/node/descriptor types; owners 28, 7 and 28 match, 0 differ
+src/smt3/kernel/dds3KernelDraw.c	PiM	done	2026-10-29	1 fn / 348 B	z-clear packet initialization from matched DDS live coordinate payloads; complete owner and retail checksum verified
+src/smt3/effect/effPCPBoss.c	PiM	done	2026-10-29	1 fn / 2544 B	crack trail and flash-cell rendering from DDS donor; full work layout, owner and retail checksum verified
