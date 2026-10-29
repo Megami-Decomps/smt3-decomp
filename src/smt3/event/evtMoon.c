@@ -187,10 +187,13 @@ extern f32 D_0054F770;
 extern f32 evtMoonTimer, evtMoonPhase, evtMoonState;
 extern s32 evtMoonMove;
 
-/* NON_MATCHING: 3984/4508 bytes; 13 of 996 emitted words match. */
 #ifdef NON_MATCHING
 s32 evtMoonProcess2(dds3ProcessID_t *id) {
     s32 glyphUW;
+    s32 glyphKind;
+    s32 drawPulse;
+    s32 drawOverlay;
+    s32 drawGlow;
     s32 overlayUW;
     s32 glowUW;
     s32 glyphVH;
@@ -247,6 +250,7 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
     u8 glowPhase;
     u8 finalPhase;
     evtMoonProcessData_t *data;
+    dds3GlobalWork_t *moonWork;
 
     moveScale = 0.0f;
     firstAlpha = 0;
@@ -287,9 +291,10 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
             rsetAlpha(0);
             rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
             DrwSprite2D(offsetX + 0x10, iconY, 0x61, 0x2B, 1, 1, 0x61, 0x2B, 0x80808080, data->MoonTmx1);
+            glyphKind = 0;
             glyphPhase = DDS3_GBWK->moonPhase;
-            switch (glyphPhase) {           /* switch 1 */
-            case 0:                     /* switch 1 */
+            switch (glyphPhase) {
+            case 0:
                 glyphX = offsetX + 0x3C;
                 glyphY = offsetY + 0x23;
                 glyphW = 0x40;
@@ -299,40 +304,31 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
                 glyphV = 0x27;
                 glyphUW = 0x40;
                 glyphVH = 0x12;
-drawGlyph:
-                DrwSprite2D(glyphX, glyphY, glyphW, glyphH, glyphU, glyphV, glyphUW, glyphVH, 0x80808080, glyphTexture);
+                glyphKind = 1;
                 break;
-            case 1:                     /* switch 1 */
-            case 15:                    /* switch 1 */
+            case 1:
+            case 15:
                 splitX = offsetX + 0x3D;
                 splitY = offsetY + 0x22;
                 splitU = 1;
-drawSplitGlyph:
-                DrwSprite2D(splitX, splitY, 0xE, 0x13, splitU, 1, 0xE, 0x13, 0x80808080, data->MoonTmx3);
-                glyphX = offsetX + 0x4A;
-                glyphY = offsetY + 0x27;
-                glyphW = 0x15;
-                glyphTexture = data->MoonTmx3;
-                glyphH = 0x13;
-                glyphU = 0x6A;
-                glyphV = 1;
-                glyphUW = 0x15;
-                glyphVH = 0x13;
-                goto drawGlyph;
-            case 2:                     /* switch 1 */
-            case 14:                    /* switch 1 */
+                glyphKind = 2;
+                break;
+            case 2:
+            case 14:
                 splitX = offsetX + 0x3D;
                 splitY = offsetY + 0x22;
                 splitU = 0x10;
-                goto drawSplitGlyph;
-            case 3:                     /* switch 1 */
-            case 13:                    /* switch 1 */
+                glyphKind = 2;
+                break;
+            case 3:
+            case 13:
                 splitX = offsetX + 0x3D;
                 splitY = offsetY + 0x22;
                 splitU = 0x1F;
-                goto drawSplitGlyph;
-            case 4:                     /* switch 1 */
-            case 12:                    /* switch 1 */
+                glyphKind = 2;
+                break;
+            case 4:
+            case 12:
                 glyphX = offsetX + 0x3C;
                 glyphY = offsetY + 0x23;
                 glyphW = 0x2F;
@@ -342,107 +338,128 @@ drawSplitGlyph:
                 glyphV = 0x2D;
                 glyphUW = 0x2F;
                 glyphVH = 0x12;
-                goto drawGlyph;
-            case 5:                     /* switch 1 */
-            case 11:                    /* switch 1 */
+                glyphKind = 1;
+                break;
+            case 5:
+            case 11:
                 splitX = offsetX + 0x3D;
                 splitY = offsetY + 0x22;
                 splitU = 0x3D;
-                goto drawSplitGlyph;
-            case 6:                     /* switch 1 */
-            case 10:                    /* switch 1 */
+                glyphKind = 2;
+                break;
+            case 6:
+            case 10:
                 splitX = offsetX + 0x3D;
                 splitY = offsetY + 0x22;
                 splitU = 0x4C;
-                goto drawSplitGlyph;
-            case 7:                     /* switch 1 */
-            case 9:                     /* switch 1 */
+                glyphKind = 2;
+                break;
+            case 7:
+            case 9:
                 splitX = offsetX + 0x3D;
                 splitY = offsetY + 0x22;
                 splitU = 0x5B;
-                goto drawSplitGlyph;
-            case 8:                     /* switch 1 */
+                glyphKind = 2;
+                break;
+            case 8:
                 DrwSprite2D(offsetX + 0x3C, offsetY + 0x23, 0x2F, 0x12, 2, 0x27, 0x2F, 0x12, 0x80808080, data->MoonTmx4);
                 break;
             }
+            if (glyphKind == 2) {
+                DrwSprite2D(splitX, splitY, 0xE, 0x13, splitU, 1, 0xE, 0x13, 0x80808080, data->MoonTmx3);
+                DrwSprite2D(offsetX + 0x4A, offsetY + 0x27, 0x15, 0x13, 0x6A, 1, 0x15, 0x13, 0x80808080, data->MoonTmx3);
+            } else if (glyphKind == 1) {
+                DrwSprite2D(glyphX, glyphY, glyphW, glyphH, glyphU, glyphV, glyphUW, glyphVH, 0x80808080, glyphTexture);
+            }
             rsetAlpha(1);
+            drawPulse = 1;
             pulsePhase = DDS3_GBWK->moonPhase;
-            switch (pulsePhase) {         /* switch 2 */
-            case 5:                     /* switch 2 */
-            case 11:                    /* switch 2 */
+            switch (pulsePhase) {
+            case 5:
+            case 11:
                 pulseAlpha0 = 20.0f;
                 pulseAlpha1 = 10.0f;
-drawPulse:
-                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x3E, 1, 0x3A, 0x3E, 0x808080, data->MoonTmx2, offsetX, offsetY, evtMoonTimer, pulseAlpha0, pulseAlpha1, 100.0f, 100.0f);
                 break;
-            case 6:                     /* switch 2 */
-            case 10:                    /* switch 2 */
+            case 6:
+            case 10:
                 pulseAlpha0 = 40.0f;
-pulseAlpha20:
                 pulseAlpha1 = 20.0f;
-                goto drawPulse;
-            case 7:                     /* switch 2 */
-            case 9:                     /* switch 2 */
-                pulseAlpha0 = 50.0f;
-                goto pulseAlpha20;
-            case 8:                     /* switch 2 */
-                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x3E, 1, 0x3A, 0x3E, 0x808080, data->MoonTmx2, offsetX, offsetY, evtMoonTimer, 30.0f, 100.0f, 100.0f, 100.0f);
                 break;
+            case 7:
+            case 9:
+                pulseAlpha0 = 50.0f;
+                pulseAlpha1 = 20.0f;
+                break;
+            case 8:
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x3E, 1, 0x3A, 0x3E, 0x808080, data->MoonTmx2, offsetX, offsetY, evtMoonTimer, 30.0f, 100.0f, 100.0f, 100.0f);
+                drawPulse = 0;
+                break;
+            default:
+                drawPulse = 0;
+                break;
+            }
+            if (drawPulse) {
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x3E, 1, 0x3A, 0x3E, 0x808080, data->MoonTmx2, offsetX, offsetY, evtMoonTimer, pulseAlpha0, pulseAlpha1, 100.0f, 100.0f);
             }
             rsetAlpha(0);
             alphaPhase = DDS3_GBWK->moonPhase;
-            switch (alphaPhase) {         /* switch 3 */
-            case 0:                     /* switch 3 */
-            case 1:                     /* switch 3 */
-            case 15:                    /* switch 3 */
+            switch (alphaPhase) {
+            case 0:
+            case 1:
+            case 15:
                 firstAlpha = 0;
                 secondAlpha = 0;
                 baseAlpha = 0x80;
                 break;
-            case 2:                     /* switch 3 */
-            case 14:                    /* switch 3 */
+            case 2:
+            case 14:
                 firstAlpha = 0;
                 secondAlpha = 0x80;
                 baseAlpha = 0x46;
                 break;
-            case 3:                     /* switch 3 */
-            case 13:                    /* switch 3 */
+            case 3:
+            case 13:
                 firstAlpha = 0;
                 secondAlpha = 0x73;
                 baseAlpha = 0x26;
                 break;
-            case 4:                     /* switch 3 */
-            case 12:                    /* switch 3 */
+            case 4:
+            case 12:
                 firstAlpha = 0;
                 secondAlpha = 0x80;
-baseAlphaZero:
                 baseAlpha = 0;
                 break;
-            case 5:                     /* switch 3 */
-            case 11:                    /* switch 3 */
+            case 5:
+            case 11:
                 firstAlpha = 0x2C;
                 secondAlpha = 0x53;
-                goto baseAlphaZero;
-            case 6:                     /* switch 3 */
-            case 10:                    /* switch 3 */
+                baseAlpha = 0;
+                break;
+            case 6:
+            case 10:
                 firstAlpha = 0x40;
                 secondAlpha = 0x40;
-                goto baseAlphaZero;
-            case 7:                     /* switch 3 */
-            case 9:                     /* switch 3 */
+                baseAlpha = 0;
+                break;
+            case 7:
+            case 9:
                 firstAlpha = 0x53;
                 secondAlpha = 0x2C;
-                goto baseAlphaZero;
-            case 8:                     /* switch 3 */
+                baseAlpha = 0;
+                break;
+            case 8:
                 firstAlpha = 0x80;
                 secondAlpha = 0;
-                goto baseAlphaZero;
+                baseAlpha = 0;
+                break;
             }
             iconX = offsetX + 0x1E;
             DrwSprite2D(iconX, iconY, 0x1C, 0x1C, 0x1E, 0x15, 0x1C, 0x1C, ((u32)firstAlpha << 0x18) | 0x808080, data->MoonTmx3);
             DrwSprite2D(iconX, iconY, 0x1C, 0x1C, 0x63, 0x1E, 0x1C, 0x1C, ((u32)secondAlpha << 0x18) | 0x808080, data->MoonTmx1);
             rsetAlpha(1);
-            overlayPhase = DDS3_GBWK->moonPhase;
+            drawOverlay = 1;
+            moonWork = DDS3_GBWK;
+            overlayPhase = moonWork->moonPhase;
             switch (overlayPhase) {
             case 5:
             case 11:
@@ -459,7 +476,7 @@ baseAlphaZero:
                 overlayVH = 0x20;
                 overlayTexture = data->MoonTmx4;
                 overlayAlpha = 35.0f;
-                goto drawSecondOverlay;
+                break;
             case 6:
             case 10:
                 evtDrawDeadMoonSprite(0x1A, 0x12, 0x27, 0x24, 0x29, 1,
@@ -475,7 +492,7 @@ baseAlphaZero:
                 overlayVH = 0x24;
                 overlayTexture = data->MoonTmx4;
                 overlayAlpha = 35.0f;
-                goto drawSecondOverlay;
+                break;
             case 7:
             case 9:
                 evtDrawDeadMoonSprite(0x18, 0xF, 0x2B, 0x2A, 0x2D, 1,
@@ -491,7 +508,7 @@ baseAlphaZero:
                 overlayVH = 0x2A;
                 overlayTexture = data->MoonTmx5;
                 overlayAlpha = 40.0f;
-                goto drawSecondOverlay;
+                break;
             case 8:
                 evtDrawDeadMoonSprite(0x12, 0xA, 0x36, 0x33, 0x39, 1,
                                       0x36, 0x33, 0x808080, data->MoonTmx6,
@@ -506,16 +523,19 @@ baseAlphaZero:
                 overlayVH = 0x33;
                 overlayTexture = data->MoonTmx6;
                 overlayAlpha = 35.0f;
-                goto drawSecondOverlay;
+                break;
+            default:
+                drawOverlay = 0;
+                break;
             }
-            goto block_73;
-drawSecondOverlay:
-            evtDrawDeadMoonSprite(overlayX, overlayY, overlayW, overlayH, overlayU, 1,
-                                  overlayUW, overlayVH, 0x808080, overlayTexture,
-                                  offsetX, offsetY, evtMoonState,
-                                  100.0f, overlayAlpha, 100.0f, 100.0f);
-block_73:
-            glowPhase = DDS3_GBWK->moonPhase;
+            if (drawOverlay) {
+                evtDrawDeadMoonSprite(overlayX, overlayY, overlayW, overlayH, overlayU, 1,
+                                      overlayUW, overlayVH, 0x808080, overlayTexture,
+                                      offsetX, offsetY, evtMoonState,
+                                      100.0f, overlayAlpha, 100.0f, 100.0f);
+            }
+            drawGlow = 1;
+            glowPhase = moonWork->moonPhase;
             switch (glowPhase) {
             case 0:
                 spriteRgb = 0x4A40FF;
@@ -528,7 +548,7 @@ block_73:
                 glowVH = 0x1C;
                 glowAlpha1 = 70.0f;
                 glowScale0 = 70.0f;
-                goto drawPhaseGlow;
+                break;
             case 1:
             case 15:
                 spriteRgb = 0x6060B0;
@@ -541,7 +561,7 @@ block_73:
                 glowUW = 0x1C;
                 glowVH = 0x1C;
                 glowAlpha1 = 75.0f;
-                goto drawPhaseGlow;
+                break;
             case 2:
             case 14:
                 spriteRgb = 0x7070A0;
@@ -554,7 +574,7 @@ block_73:
                 glowUW = 0x1C;
                 glowVH = 0x1C;
                 glowAlpha1 = 75.0f;
-                goto drawPhaseGlow;
+                break;
             case 3:
             case 13:
                 spriteRgb = 0x808090;
@@ -567,7 +587,7 @@ block_73:
                 glowUW = 0x1C;
                 glowVH = 0x1C;
                 glowAlpha1 = 75.0f;
-                goto drawPhaseGlow;
+                break;
             case 4:
             case 12:
                 spriteRgb = 0x808080;
@@ -583,7 +603,7 @@ block_73:
                 glowUW = 0x3A;
                 glowVH = 0x3E;
                 glowAlpha1 = 20.0f;
-                goto drawPhaseGlow;
+                break;
             case 5:
             case 11:
                 spriteRgb = 0x808080;
@@ -599,7 +619,7 @@ block_73:
                 glowU = 1;
                 glowUW = 0x3A;
                 glowVH = 0x3E;
-                goto drawPhaseGlow;
+                break;
             case 6:
             case 10:
                 spriteRgb = 0x808080;
@@ -615,7 +635,7 @@ block_73:
                 glowVH = 0x3E;
                 glowScale0 = 65.0f;
                 glowScale1 = 85.0f;
-                goto drawPhaseGlow;
+                break;
             case 7:
             case 9:
                 spriteRgb = 0x808080;
@@ -631,7 +651,7 @@ block_73:
                 glowU = 1;
                 glowUW = 0x3A;
                 glowVH = 0x3E;
-                goto drawPhaseGlow;
+                break;
             case 8:
                 evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1, 0x1C, 0x1C,
                                       0x808080, data->MoonTmx1, offsetX, offsetY,
@@ -642,73 +662,85 @@ block_73:
                 evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 1, 1, 0x3A, 0x3E,
                                       0x808080, data->MoonTmx2, offsetX, offsetY,
                                       D_0054F770, 60.0f, 80.0f, 100.0f, 130.0f);
+                drawGlow = 0;
+                break;
+            default:
+                drawGlow = 0;
                 break;
             }
-            goto block_90;
-drawPhaseGlow:
-            evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, glowU, 1,
-                                  glowUW, glowVH, spriteRgb, glowTexture,
-                                  offsetX, offsetY, glowAngle, glowAlpha0,
-                                  glowAlpha1, glowScale0, glowScale1);
-block_90:
+            if (drawGlow) {
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, glowU, 1,
+                                      glowUW, glowVH, spriteRgb, glowTexture,
+                                      offsetX, offsetY, glowAngle, glowAlpha0,
+                                      glowAlpha1, glowScale0, glowScale1);
+            }
             rsetAlpha(0);
             if (evtMoonMove > 0) {
                 evtMoonMove -= 1;
                 rsetAlpha(1);
                 movePhase = DDS3_GBWK->moonPhase;
-                switch (movePhase) {     /* switch 6 */
-                case 0:                 /* switch 6 */
+                switch (movePhase) {
+                case 0:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
                     moveScale = 100.0f;
-computeMoveAlpha:
                     moveAlpha = (moveTimer * moveStrength) / 30.0f;
                     break;
-                case 1:                 /* switch 6 */
-                case 15:                /* switch 6 */
+                case 1:
+                case 15:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
                     moveScale = 100.0f;
-                    goto computeMoveAlpha;
-                case 2:                 /* switch 6 */
-                case 14:                /* switch 6 */
+                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    break;
+                case 2:
+                case 14:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
                     moveScale = 100.0f;
-                    goto computeMoveAlpha;
-                case 3:                 /* switch 6 */
-                case 13:                /* switch 6 */
+                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    break;
+                case 3:
+                case 13:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
                     moveScale = 100.0f;
-                    goto computeMoveAlpha;
-                case 4:                 /* switch 6 */
-                case 12:                /* switch 6 */
+                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    break;
+                case 4:
+                case 12:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 35.0f;
                     moveScale = 110.0f;
-                    goto computeMoveAlpha;
-                case 5:                 /* switch 6 */
-                case 11:                /* switch 6 */
+                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    break;
+                case 5:
+                case 11:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 60.0f;
-moveScale120:
                     moveScale = 120.0f;
-                    goto computeMoveAlpha;
-                case 6:                 /* switch 6 */
-                case 10:                /* switch 6 */
+                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    break;
+                case 6:
+                case 10:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 80.0f;
-                    goto moveScale120;
-                case 7:                 /* switch 6 */
-                case 9:                 /* switch 6 */
+                    moveScale = 120.0f;
+                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    break;
+                case 7:
+                case 9:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 80.0f;
-                    goto moveScale120;
-                case 8:                 /* switch 6 */
+                    moveScale = 120.0f;
+                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    break;
+                case 8:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 100.0f;
-                    goto moveScale120;
+                    moveScale = 120.0f;
+                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    break;
                 }
                 evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1, 0x1C, 0x1C, 0xFFFFFF, data->MoonTmx1, offsetX, offsetY, 0.0f, moveAlpha, moveAlpha, moveScale, moveScale);
                 rsetAlpha(0);
