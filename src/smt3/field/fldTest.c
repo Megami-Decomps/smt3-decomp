@@ -299,7 +299,7 @@ typedef struct
     u16 targetIx;
     u16 targetIz;
     u16 tikamiti;
-    u16 wkmode;
+    s16 wkmode;
     fldMapCell_t *routeCell;
     void *RouteDataTop;
     s32 now;
@@ -1183,7 +1183,209 @@ f32 fldTurnToward(f32 cur, f32 target, f32 speed, f32 minStep) {
     return delta;
 }
 
+#ifdef NON_MATCHING
+extern s32 printf(const char *format, ...);
+extern u32 dds3GetRandA(void *name);
+extern s32 fldHitChkEnemy(const f32 *position, const f32 *target, f32 *hitPosition);
+extern char D_0054EAC0[];
+extern char D_0054EAC8[];
+
+void fldRunAiCng(s32 mode)
+{
+    volatile f32 distance = fldRun_Dante.d_p_len;
+    volatile f32 angle = fldRun_Dante.d_p_dir;
+    fldMapCell_t *cell;
+    fldRoutePoint_t *route;
+    f32 targetX;
+    f32 targetZ;
+
+    fldRun_Dante.cnt_ex = 0;
+    fldRun_Dante.tikamiti = 0;
+    if (mode == 0) {
+        printf("AI:[ NULL ]\n");
+        fldRun_Dante.status = 0;
+        fldRun_Dante.speed = 0.0f;
+        fldRun_Dante.wkmode = 0;
+        fldRun_Dante.nextframe = 0;
+    } else if (mode == 1) {
+        printf("AI:[ STND ]\n");
+        fldRun_Dante.status = mode;
+        fldRun_Dante.nextframe = 30;
+        fldRun_Dante.update_flag = 3;
+        fldRun_Dante.flag |= 2;
+        fldRun_Dante.wkmode = 0;
+        fldRun_Dante.speed = 0.0f;
+    } else if (mode == 2) {
+        printf("AI:[ WAIT ]\n");
+        fldRun_Dante.status = mode;
+        fldRun_Dante.nextframe = 30;
+        fldRun_Dante.update_flag = 3;
+        fldRun_Dante.flag |= 2;
+        fldRun_Dante.wkmode = 0;
+        fldRun_Dante.speed = 0.0f;
+    } else if (mode == 9) {
+        printf("AI:[ DOIN ]\n");
+        fldRun_Dante.status = mode;
+        fldRun_Dante.update_flag = 2;
+        fldRun_Dante.nextframe = 80;
+        fldRun_Dante.speed = 10.0f;
+        fldRun_Dante.flag |= 2;
+    } else if (mode == 6) {
+        printf("AI:[ PRUN ]\n");
+        fldRun_Dante.status = mode;
+        fldRun_Dante.wkmode = 0;
+        FroFtoI(fldRun_Dante.x, fldRun_Dante.z, (u16 *)&fldRun_Dante.ix, (u16 *)&fldRun_Dante.iz);
+        cell = fldFindMapCell(fldRun_Dante.ix, fldRun_Dante.iz, (s16)fldRunDanteStartX[0], (s16)fldRunDanteStartX[1]);
+        fldRun_Dante.routeCell = cell;
+        fldRun_Dante.targetIx = fldRunDanteStartX[0];
+        fldRun_Dante.targetIz = fldRunDanteStartX[1];
+        if (cell != NULL) {
+            fldRun_Dante.now = 0;
+            route = (fldRoutePoint_t *)((u8 *)fldRunMapHeader + cell->routeOffset);
+            fldRun_Dante.speed = 20.0f;
+            fldRun_Dante.nextframe = 30;
+            fldRun_Dante.goal = cell->routeCount - 1;
+            fldRun_Dante.RouteDataTop = route;
+            fldRun_Dante.angleToPlayer = route->angle;
+        } else {
+            printf(D_0054EAC0);
+            fldRun_Dante.RouteDataTop = NULL;
+            fldRun_Dante.speed = 0.0f;
+            fldRun_Dante.nextframe = 20;
+            fldRun_Dante.now = 0;
+            fldRun_Dante.goal = 0;
+            fldRun_Dante.angleToPlayer = 0.0f;
+        }
+        fldRun_Dante.update_flag = 0;
+        fldRun_Dante.flag |= 2;
+    } else if (mode == 5) {
+        printf("AI:[ PWAK ]\n");
+        fldRun_Dante.status = mode;
+        fldRun_Dante.wkmode = 1;
+        FroFtoI(fldRun_Dante.x, fldRun_Dante.z, (u16 *)&fldRun_Dante.ix, (u16 *)&fldRun_Dante.iz);
+        FroFtoI(fldGlobalBase.x, fldGlobalBase.z, &fldRunDanteStartX[0], &fldRunDanteStartX[1]);
+        cell = fldFindMapCell(fldRun_Dante.ix, fldRun_Dante.iz, (s16)fldRunDanteStartX[0], (s16)fldRunDanteStartX[1]);
+        fldRun_Dante.routeCell = cell;
+        fldRun_Dante.targetIx = fldRunDanteStartX[0];
+        fldRun_Dante.targetIz = fldRunDanteStartX[1];
+        if (cell != NULL) {
+            fldRun_Dante.now = 0;
+            route = (fldRoutePoint_t *)((u8 *)fldRunMapHeader + cell->routeOffset);
+            fldRun_Dante.speed = 5.0f;
+            fldRun_Dante.nextframe = 120;
+            fldRun_Dante.goal = cell->routeCount - 1;
+            fldRun_Dante.RouteDataTop = route;
+            fldRun_Dante.angleToPlayer = route->angle;
+        } else {
+            fldRun_Dante.speed = 0.0f;
+            fldRun_Dante.nextframe = 20;
+            fldRun_Dante.RouteDataTop = NULL;
+            fldRun_Dante.now = 0;
+            fldRun_Dante.goal = 0;
+            fldRun_Dante.angleToPlayer = 0.0f;
+        }
+        fldRun_Dante.update_flag = 2;
+        fldRun_Dante.flag |= 2;
+    } else if (mode == 3) {
+        u32 delay;
+        printf("AI:[ SOBA ]\n");
+        fldRun_Dante.status = mode;
+        delay = (dds3GetRandA(NULL) >> 3) % 40;
+        fldRun_Dante.update_flag = 0;
+        fldRun_Dante.speed = 25.0f;
+        fldRun_Dante.flag |= 2;
+        fldRun_Dante.nextframe = delay + 40;
+    } else if (mode == 4) {
+        printf("AI:[ PATR ]\n");
+        fldRun_Dante.status = 4;
+        FroFtoI(fldRun_Dante.x, fldRun_Dante.z, (u16 *)&fldRun_Dante.ix, (u16 *)&fldRun_Dante.iz);
+        FroFtoI(fldGlobalBase.x, fldGlobalBase.z, &fldRunDanteStartX[0], &fldRunDanteStartX[1]);
+        cell = fldFindMapCell(fldRun_Dante.ix, fldRun_Dante.iz, (s16)fldRunDanteStartX[0], (s16)fldRunDanteStartX[1]);
+        fldRun_Dante.routeCell = cell;
+        fldRun_Dante.targetIx = fldRunDanteStartX[0];
+        fldRun_Dante.targetIz = fldRunDanteStartX[1];
+        if (cell != NULL) {
+            fldRoutePoint_t *routeBase;
+            f32 d;
+            f32 a;
+
+            fldRun_Dante.now = 0;
+            fldRun_Dante.nextframe = 0;
+            fldRun_Dante.goal = cell->routeCount - 1;
+            fldRun_Dante.speed = fldRun_Dante.wkmode != 0 ? 6.0f : 20.0f;
+            routeBase = (fldRoutePoint_t *)((u8 *)fldRunMapHeader + fldRun_Dante.routeCell->routeOffset);
+            route = routeBase;
+            if (fldRun_Dante.routeCell->routeCount >= 2) {
+                f32 position[4];
+                f32 targetPos[4];
+                f32 hitPosition[4];
+
+                route++;
+                fldMapIndexToPos(route->x, route->z, &targetX, &targetZ);
+                position[0] = fldRun_Dante.x;
+                position[1] = 0.0f;
+                position[2] = fldRun_Dante.z;
+                position[3] = 1.0f;
+                targetPos[0] = targetX;
+                targetPos[1] = 0.0f;
+                targetPos[2] = targetZ;
+                targetPos[3] = 1.0f;
+                if (fldHitChkEnemy(position, targetPos, hitPosition) != -1) {
+                    route = routeBase;
+                } else {
+                    printf(D_0054EAC8);
+                    fldRun_Dante.now++;
+                }
+            }
+            fldMapIndexToPos(route->x, route->z, &targetX, &targetZ);
+            fldGetDistAngleTo(&d, &a, targetX, targetZ);
+            distance = d;
+            angle = a;
+            fldRun_Dante.angleToPlayer = angle;
+            fldRun_Dante.nextframe = (s32)(distance / fldRun_Dante.speed);
+        } else {
+            fldRun_Dante.nextframe = 20;
+            fldRun_Dante.now = 0;
+            fldRun_Dante.goal = 0;
+            fldRun_Dante.angleToPlayer = 0.0f;
+            fldRun_Dante.speed = 0.0f;
+            if (fldRun_Dante.ix == (s16)fldRunDanteStartX[0] && fldRun_Dante.iz == (s16)fldRunDanteStartX[1]) {
+                f32 d;
+                f32 a;
+                fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &targetX, &targetZ);
+                fldGetDistAngleTo(&d, &a, targetX, targetZ);
+                distance = d;
+                angle = a;
+                fldRun_Dante.speed = fldRun_Dante.wkmode != 0 ? 6.0f : 20.0f;
+                fldRun_Dante.angleToPlayer = angle;
+                fldRun_Dante.nextframe = (s32)(distance / fldRun_Dante.speed);
+            }
+        }
+        fldRun_Dante.update_flag = fldRun_Dante.wkmode != 0 ? 2 : 0;
+        fldRun_Dante.flag |= 2;
+    } else if (mode == 7) {
+        u32 delay;
+        printf("AI:[ GUN1 ]\n");
+        fldRun_Dante.status = mode;
+        fldRun_Dante.wkmode = 0;
+        delay = (dds3GetRandA(NULL) >> 3) % 60;
+        fldRun_Dante.update_flag = 1;
+        fldRun_Dante.speed = 8.0f;
+        fldRun_Dante.flag |= 2;
+        fldRun_Dante.nextframe = delay + 50;
+    } else if (mode == 8) {
+        printf("AI:[ GUN2 ]\n");
+        fldRun_Dante.status = mode;
+        fldRun_Dante.update_flag = 4;
+        fldRun_Dante.nextframe = 90;
+        fldRun_Dante.flag |= 2;
+        fldRun_Dante.wkmode = 0;
+        fldRun_Dante.speed = 0.0f;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldTest", fldRunAiCng);
+#endif
 
 void func_0011C790(void) {
 }
@@ -1227,7 +1429,7 @@ void fldRunDanteDoin(void)
     FroFtoI(fldRun_Dante.x, fldRun_Dante.z, &fldRun_Dante.ix, &fldRun_Dante.iz);
 }
 
-extern s32 fldHitChkEnemy(f32 *position, f32 *target, f32 *hitPosition);
+extern s32 fldHitChkEnemy(const f32 *position, const f32 *target, f32 *hitPosition);
 extern void fldRunAiCng(s32 mode);
 extern s32 printf(const char *format, ...);
 

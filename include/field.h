@@ -103,6 +103,12 @@ typedef struct fldAreaWork_t
 extern fldAreaWork_t fldGlobalBase;
 
 typedef struct {
+    u8 x;
+    u8 z;
+    u16 angle;
+} fldRoutePoint_t;
+
+typedef struct {
     s32 gunFlag;
     s32 word04;
     s32 word08;
