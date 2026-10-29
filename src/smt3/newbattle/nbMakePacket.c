@@ -276,11 +276,9 @@ extern void *effPCPBossBUNSINCreate(effPCPBossBUNSINParam_t *pParam);
 
 extern s32 effPCPBossBUNSIN2GetLength(void);
 
-extern void *effPCPBossBUNSIN2Create(effPCPBossBUNSIN2Param_t *pParam);
 
 extern s32 effPCPBossONGYGetLength(void);
 
-extern void *effPCPBossONGYCreate(effPCPBossONGYParam_t *pParam);
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
@@ -292,7 +290,6 @@ extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t 
 
 extern s32 effPCPBossONGY2GetLength(void);
 
-extern void *effPCPBossONGY2Create(effPCPBossONGYParam_t *pParam);
 
 extern void *memset(void *a, s32 b, u32 c);
 

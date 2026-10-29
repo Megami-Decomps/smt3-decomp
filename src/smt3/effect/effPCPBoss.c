@@ -781,7 +781,7 @@ s32 effPCPBossONGYModelTexRenderCheck(void)
     return effPCPBossONGY_RFrame != dds3GetKernelCount();
 }
 
-effPCPBossONGY_t *effPCPBossONGYCreate(effPCPBossONGYParam_t *param, void *unused)
+effPCPBossONGY_t *effPCPBossONGYCreate(effPCPBossONGYParam_t *param)
 {
     effPCPBossONGY_t *work = sdfChipAllocDirect(0x10);
     nbFormation_t *value = param->pFormation;
@@ -1009,7 +1009,7 @@ s32 effPCPBossONGYGetLength(void)
     return 0x16;
 }
 
-effPCPBossONGY_t *effPCPBossONGY2Create(effPCPBossONGYParam_t *param, void *unused)
+effPCPBossONGY_t *effPCPBossONGY2Create(effPCPBossONGYParam_t *param)
 {
     effPCPBossONGY_t *work = sdfChipAllocDirect(0x10);
     nbFormation_t *value = param->pFormation;
@@ -1586,12 +1586,12 @@ s32 effPCPBossBUNSINGetLength(void)
     return 0x18;
 }
 
-effPCPBossBUNSIN2_t *effPCPBossBUNSIN2Create(effPCPBossBUNSIN2_t *param, void *unused)
+effPCPBossBUNSIN2_t *effPCPBossBUNSIN2Create(effPCPBossBUNSIN2Param_t *param)
 {
     effPCPBossBUNSIN2_t *work = sdfChipAllocDirect(0x24);
     effPCPBossBUNSINParam_t sub;
 
-    work->head = param->head;
+    work->head = *param;
     work->frame = 0;
     work->state = 0;
     sub.pStartForm = work->head.pStartForm;
