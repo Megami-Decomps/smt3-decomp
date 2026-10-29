@@ -3,6 +3,8 @@
 #include "motion.h"
 #include "ps2asm.h"
 #include "draw3d.h"
+#include "draw.h"
+#include "effect.h"
 
 typedef struct
 {
@@ -828,7 +830,211 @@ void effSwordTrackPolygonDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
     ot->regFunc(ot, list);
 }
 
+#ifdef NON_MATCHING
+extern f32 D_0054C9F4;
+extern f32 D_002FA240[16];
+extern f32 aViewEye[4];
+extern sdf3DScreenParam_t dds3ScreenParam;
+extern void MultMatrixRev(f32 *matrix);
+extern f32 sdfSin(f32 angle);
+extern f64 fptodp(f32 value);
+extern long dpcmp(f64 left, f64 right);
+extern sdfGrPacketHeader_t *effPkt2DAllocTriStrip(s32 count, s32 prim);
+extern void *effPkt2DGetPrimPtr(void *packet);
+extern void sdfGrLinkDrawFrameTex(sdfDrawTag_t *tag, const u8 *env, void *packet);
+
+void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
+{
+    dds3HermitianTrackPoly_tag *history = track->hPoly;
+    sdfDrawTag_t *list;
+    sdfPrimTransPacket_t *trans;
+    sdfGrPacketHeader_t *state, *quadPacket;
+    sdfGrTagStdReg_t *reg;
+    effBlurPrimTriStrip_t *quad;
+    sdfVector4_t world[2] __attribute__((aligned(16)));
+    s32 screen[4][4] __attribute__((aligned(16)));
+    f32 distances[2];
+    f32 angle = 0.0f;
+    f32 angleStep, wave, length, dx, dy, inverseLength, offsetX, offsetY;
+    s32 starts[2], runCounts[2];
+    s32 start, count, run, i, j;
+    u128 *vertices;
+    const u8 *color = (const u8 *)&track->param_dante.abgr;
+    sdfGrOt_t *ot;
+    void *texturePacket;
+
+    angleStep = D_0054C9F4 / (f32)((u32)track->param_dante.historyLength * (u32)history->split);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    trans = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
+    trans->elem.test.data = 0x35801;
+    trans->elem.test.reg = 0x47;
+    trans->elem.alpha.data = 0x44;
+    trans->elem.alpha.reg = 0x42;
+    trans->header.dmaWords.tag = 3;
+    trans->header.dmaWords.vif = 0x5000000310000000ULL;
+    trans->header.giftag.parm = 0x1000000000008002ULL;
+    trans->header.giftag.regs = 0xE;
+    sdfDrawTagLink(list, (u32)trans);
+    texturePacket = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfGrLinkDrawFrameTex(list, dds3DrawEnv[dds3GetFrameID()].frameTex, texturePacket);
+    state = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(0x30);
+    reg = (sdfGrTagStdReg_t *)(state + 1);
+    reg->data = 0x0000037C00000008ULL;
+    reg->reg = 8;
+    state->dmaWords.tag = 2;
+    state->dmaWords.vif = 0x5000000210000000ULL;
+    state->giftag.parm = 0x1000000000008001ULL;
+    state->giftag.regs = 0xE;
+    sdfDrawTagLink(list, (u32)state);
+    state = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(0x30);
+    reg = (sdfGrTagStdReg_t *)(state + 1);
+    reg->data = 0x60;
+    state->dmaWords.tag = 2;
+    state->dmaWords.vif = 0x5000000210000000ULL;
+    state->giftag.parm = 0x1000000000008001ULL;
+    state->giftag.regs = 0xE;
+    reg->reg = 0x14;
+    sdfDrawTagLink(list, (u32)state);
+
+    count = history->count;
+    start = (s32)((u32)history->current - (u32)count);
+    starts[1] = 0; /* Retail leaves this unset when the second run is skipped. */
+    if (start < 2) {
+        start = (s32)((u32)start - 2);
+        runCounts[0] = (s32)(0U - (u32)start);
+        runCounts[1] = (s32)((u32)count - (u32)runCounts[0] + 2);
+        starts[0] = (s32)((u32)start + (u32)history->point);
+    } else {
+        starts[0] = start;
+        runCounts[0] = count;
+        runCounts[1] = 0;
+    }
+    SDF_VU0_LOADMATRIX(D_002FA240);
+    MultMatrixRev(dds3ScreenParam.TM.m);
+    for (run = 0; run < 2; run++) {
+        count = (s32)((u32)runCounts[run] - 2);
+        if (count < 4) continue;
+        vertices = history->pVertex + starts[run];
+        wave = sdfSin(angle);
+        SDF_VU0_LOADVECTOR(vertices + 1);
+        SDF_VU0_LOADVECTOR_B(vertices);
+        SDF_VU0_STOREVECTOR_B(&world[0]);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_GETLENGTH(length);
+        SDF_VU0_NORMALIZE();
+        length *= wave;
+        SDF_VU0_SCALEVECTOR(length);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR(&world[1]);
+        for (i = 0; i < 2; i++) {
+            SDF_VU0_LOADVECTOR(&world[i]);
+            SDF_VU0_APPLYMATRIX_XYZ1();
+            SDF_VU0_PERSVECTOR();
+            SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.scale);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_FTOI4();
+            SDF_VU0_STOREVECTOR(screen[i]);
+            screen[i][0] = (s32)((u32)screen[i][0] - 0x7000);
+            screen[i][1] = (s32)((u32)screen[i][1] - 0x7900);
+        }
+        for (i = 0; i < count; i += 2) {
+            quadPacket = effPkt2DAllocTriStrip(1, 0);
+            quad = effPkt2DGetPrimPtr(quadPacket);
+            quad->r = color[0];
+            quad->g = color[1];
+            quad->b = color[2];
+            quad->a = color[3];
+            wave = sdfSin(angle);
+            SDF_VU0_LOADVECTOR(vertices + 3);
+            vertices += 2;
+            SDF_VU0_LOADVECTOR_B(vertices);
+            SDF_VU0_STOREVECTOR_B(&world[0]);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_GETLENGTH(length);
+            SDF_VU0_NORMALIZE();
+            length *= wave;
+            SDF_VU0_SCALEVECTOR(length);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(&world[1]);
+            angle += angleStep;
+            for (j = 0; j < 2; j++) {
+                SDF_VU0_LOADVECTOR(&world[j]);
+                SDF_VU0_LOADVECTOR_B(aViewEye);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_GETLENGTH(distances[j]);
+                SDF_VU0_LOADVECTOR(&world[j]);
+                SDF_VU0_APPLYMATRIX_XYZ1();
+                SDF_VU0_PERSVECTOR();
+                SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.scale);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_FTOI4();
+                SDF_VU0_STOREVECTOR(screen[j + 2]);
+                screen[j + 2][0] = (s32)((u32)screen[j + 2][0] - 0x7000);
+                screen[j + 2][1] = (s32)((u32)screen[j + 2][1] - 0x7900);
+            }
+            if (dpcmp(fptodp(distances[0]), 16.0) > 0 && dpcmp(fptodp(distances[1]), 16.0) > 0 &&
+                (((u32)screen[0][0] <= 0x2000 && (u32)screen[0][1] <= 0xE00) ||
+                 ((u32)screen[1][0] <= 0x2000 && (u32)screen[1][1] <= 0xE00) ||
+                 ((u32)screen[2][0] <= 0x2000 && (u32)screen[2][1] <= 0xE00) ||
+                 ((u32)screen[3][0] <= 0x2000 && (u32)screen[3][1] <= 0xE00))) {
+                for (j = 0; j < 4; j++) {
+                    quad->vtx[j].x = (s32)((u32)screen[j][0] + 0x7000);
+                    quad->vtx[j].y = (s32)((u32)screen[j][1] + 0x7900);
+                }
+                quad->vtx[1].s = (f32)screen[1][0] * 0.0001220703125f;
+                quad->vtx[0].s = (f32)screen[0][0] * 0.0001220703125f;
+                quad->vtx[0].t = (f32)screen[0][1] * 0.000244140625f;
+                quad->vtx[1].t = (f32)screen[1][1] * 0.000244140625f;
+                quad->vtx[2].s = (f32)screen[2][0] * 0.0001220703125f;
+                quad->vtx[2].t = (f32)screen[2][1] * 0.000244140625f;
+                quad->vtx[3].s = (f32)screen[3][0] * 0.0001220703125f;
+                quad->vtx[3].t = (f32)screen[3][1] * 0.000244140625f;
+                dx = (f32)(s32)((u32)screen[2][0] - (u32)screen[0][0]);
+                dy = (f32)(s32)((u32)screen[2][1] - (u32)screen[0][1]);
+                if (dx != 0.0f || dy != 0.0f) {
+                    inverseLength = sdfSqrt(dx * dx + dy * dy);
+                    dy /= inverseLength;
+                    dx /= inverseLength;
+                }
+                quad->vtx[0].z = 0xFF0000;
+                quad->vtx[1].z = 0xFF0000;
+                quad->vtx[0].adc = 0;
+                offsetX = dx * 144.0f * 0.0001220703125f;
+                offsetY = dy * 144.0f * 0.000244140625f;
+                quad->vtx[0].s += offsetX;
+                quad->vtx[0].t += offsetY;
+                quad->vtx[2].s += offsetX;
+                quad->vtx[2].t += offsetY;
+                offsetX = dx * 272.0f * 0.0001220703125f;
+                offsetY = dy * 272.0f * 0.000244140625f;
+                quad->vtx[1].s += offsetX;
+                quad->vtx[1].t += offsetY;
+                quad->vtx[3].s += offsetX;
+                quad->vtx[3].t += offsetY;
+                quad->vtx[1].adc = 0;
+                quad->vtx[3].adc = 0;
+                quad->vtx[2].z = 0xFF0000;
+                quad->vtx[2].adc = 0;
+                quad->vtx[3].z = 0xFF0000;
+                sdfDrawTagLink(list, (u32)quadPacket);
+            }
+            screen[0][0] = screen[2][0];
+            screen[0][1] = screen[2][1];
+            screen[1][0] = screen[3][0];
+            screen[1][1] = screen[3][1];
+        }
+    }
+    ot = &sdfGrOtTable[track->otIndex];
+    ot->regFunc(ot, list);
+}
+#else
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", effSwordTrackPolygon2DDraw);
+#endif
 
 void effSwordTrackDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
 {
