@@ -68,7 +68,58 @@ void nbResultCountEntries(s32 x, s32 y)
     }
 }
 
+extern void nbPnl_setOt(s32 otofs);
+extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail,
+                           s32 date, s32 datm, s32 zte, s32 ztst);
+extern void nbPnl_rsetAlpha(s32 mode);
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v,
+                        s32 uw, s32 vh, s32 rgba, sdfTexHandle_t *texture);
+
+#ifdef NON_MATCHING
+void nbResultInitLabels(void)
+{
+    nbResultCaption_t *caption;
+    s32 i;
+    s32 age;
+    s32 alpha;
+    s32 height;
+    s32 y;
+
+    nbPnl_setOt(0x48);
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    for (i = 0; i < 64; i++) {
+        caption = &D_00574F50[i];
+        if (caption->flag != 0) {
+            caption->life--;
+            if (caption->life <= 0) {
+                caption->flag = 0;
+            } else {
+                age = 20 - caption->life;
+                y = caption->y - age;
+                alpha = 0x80;
+                height = 0x16;
+                if (age >= 11) {
+                    alpha = 0x80 - (age - 10) * 12;
+                    if (alpha < 0) {
+                        alpha = 0;
+                    }
+                }
+                if (age < 4) {
+                    height = age * 5;
+                    y += (0x16 - height) / 2;
+                }
+                nbPnlSprite(caption->x, y, 0x5C, height, 0xA0, 0x68,
+                            0x5F, 0x16, ((u32)alpha << 24) | 0x808080,
+                            nbResultTex1);
+            }
+        }
+    }
+    nbPnl_setOt(0x47);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultInitLabels);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultDrawPC1);
 
