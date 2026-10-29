@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 
 #include "basic.h"
 #include "dds3obj.h"
@@ -245,7 +246,6 @@ extern void fldInitBlurEffect(void);
 
 extern s32 sdfDevLoadTexList(const char *aFilename);
 
-extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, void **destination, u32 *size);
 
 extern void fldSetupDoorScenes(void);
 
@@ -1101,7 +1101,7 @@ void fldFileResolverFL1(fldFileInfoHeaderFL1_t *info)
             if (fldResolverFL1Data[i] != NULL) {
                 fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
                 sprintf(path, D_0054EBC0, directory, fldResolverFL1Data[i]);
-                D_0055DA98[i] = sdfDevLoadFileEx(path, &D_0055DAA8[i], NULL);
+                D_0055DA98[i] = sdfDevLoadFileEx(path, (u32 *)&D_0055DAA8[i], NULL);
             }
         }
     }
@@ -1524,7 +1524,7 @@ u32 fldLoadFile(const char *name) {
         sprintf(path, D_0054EC10, name);
         fldFileBuf2 = (u32)fldLoadNextFileF2(&fileData, field, area);
         if (fldFileBuf2 == 0) {
-            fldFileBuf2 = sdfDevLoadFileEx(path, &fileData, 0);
+            fldFileBuf2 = (u32)sdfDevLoadFileEx(path, (u32 *)&fileData, 0);
         }
         chunk = (fldTransferChunk_t *)((u8 *)fileData + 8);
         mat_line = fileData;
@@ -1534,7 +1534,7 @@ u32 fldLoadFile(const char *name) {
         sprintf(path, D_0054EC18, name);
         D_0054EBD4 = (u32)fldLoadNextFileF1(&fileData, field, area);
         if (D_0054EBD4 == 0) {
-            D_0054EBD4 = sdfDevLoadFileEx(path, &fileData, 0);
+            D_0054EBD4 = (u32)sdfDevLoadFileEx(path, (u32 *)&fileData, 0);
         }
         chunk = (fldTransferChunk_t *)((u8 *)fileData + 8);
         mat_black = fileData;

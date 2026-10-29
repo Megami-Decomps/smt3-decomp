@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "basic.h"
 #include "model.h"
 #include "newdata.h"
@@ -548,7 +549,6 @@ extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
 
 extern sdfTexHandle_t *sdfTexSet(void *aTex);
 
-extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, void **dataOut, s32 flag);
 
 extern void evtBitOn(s32 no);
 
@@ -2639,10 +2639,10 @@ void fmProcTrigSequence(s32 mode) {
 
     dds3SoftResetOff();
     slDDS3To31Flg = 0;
-    handle = sdfDevLoadFileEx("/fld/f/pnl/save_01.tmx", &data, 0);
+    handle = sdfDevLoadFileEx("/fld/f/pnl/save_01.tmx", (u32 *)&data, 0);
     slProcPtr = sdfTexSet(data);
     sdfMemFreeDirect(handle);
-    handle = sdfDevLoadFileEx("/fld/f/pnl/save_02.tmx", &data, 0);
+    handle = sdfDevLoadFileEx("/fld/f/pnl/save_02.tmx", (u32 *)&data, 0);
     _saveUI = sdfTexSet(data);
     sdfMemFreeDirect(handle);
     if (mode == 0) {

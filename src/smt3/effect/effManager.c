@@ -6,7 +6,6 @@
 extern void dds3ParticleManagerExit(void);
 extern void dds3PolygonManagerExit(void);
 extern void dds3BillboardManagerExit(void);
-extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *address, s32 flags);
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 /* An effect handle: the type's entry in EffMajorTable plus the instance that

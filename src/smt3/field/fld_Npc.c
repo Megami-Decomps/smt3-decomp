@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "basic.h"
 #include "dds3obj.h"
 #include "model.h"
@@ -325,7 +326,6 @@ extern struct effNode_t *fldNpcLoadIdx;
 extern struct effResourceHeader_t *fldNpcPacData;
 extern const u8 *fldGenNpcData;
 extern u32 fldGenNpcSize;
-extern void *sdfDevLoadFileEx(const char *name, u32 *outData, u32 *outSize);
 extern void dds3SetSclPoseSet(dds3Basic_t *basic, const sdfVector4_t *scale);
 extern void FromEuler(f32 x, f32 y, f32 z);
 extern void fldAddItemBoxObject(s32 index, f32 x, f32 y, f32 z, f32 radius, f32 height);

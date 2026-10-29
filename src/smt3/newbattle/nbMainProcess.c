@@ -77,7 +77,6 @@ extern void nbInitDebugProcess(nbMainProcessData_t *data);
 
 extern s32 D_0054F0F4;
 
-extern sdfMemHandle_t *sdfDevLoadFileEx(s32 path, void *destination, void *size);
 
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
@@ -1454,7 +1453,7 @@ void SetJyocyuData(nbMainProcessData_t *data)
 {
     sdfMemHandle_t *handle;
 
-    handle = sdfDevLoadFileEx(D_0054F0F4, 0, 0);
+    handle = sdfDevLoadFileEx((const char *)D_0054F0F4, 0, 0);
     data->HatudoEff = effBTLCreate(sdfMemLock(handle));
     sdfMemFreeDirect(handle);
 }

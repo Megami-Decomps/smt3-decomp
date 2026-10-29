@@ -35,7 +35,6 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 extern void fclRagTexCalcSizes();
 
 /* Called above its definition, where ee-gcc assumed int. */
-void *sdfDevLoadFileEx(char *name, void **data, s32 *size);
 
 extern void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 id);
 
@@ -43,7 +42,6 @@ extern s32 fclGetPanelAnimTarget(fclPanelAnim_t *anim);
 
 extern s32 fclGetPanelAnimPhase(fclPanelAnim_t *anim);
 
-extern void *sdfDevLoadFileEx(char *name, void **data, s32 *size);
 
 extern s32 sdfTexSet(void *aTex);
 
@@ -54,7 +52,7 @@ s32 fclLoadTexture(char *pFileName)
     void *file;
     s32 handle;
 
-    file = sdfDevLoadFileEx(pFileName, &data, &size);
+    file = sdfDevLoadFileEx(pFileName, (u32 *)&data, &size);
     handle = sdfTexSet(data);
     sdfMemFreeDirect(file);
     return handle;

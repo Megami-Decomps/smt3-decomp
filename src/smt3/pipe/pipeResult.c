@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "sdf_resource.h"
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
@@ -147,7 +148,6 @@ extern u8 messIdx;
 extern s32 mapIndex, pipeObjList, pipeObjTail, myMaka;
 extern u32 D_00551810;
 extern s32 D_00551818;
-extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
 extern s8 fclInitMessage(void *data);
 extern void DEBUG_PRINT(const char *format, ...);
 

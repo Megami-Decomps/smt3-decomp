@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "scr.h"
 #include "basic.h"
 #include "kernel.h"
@@ -29,7 +30,6 @@ void dds3SceneBasicFreeScene(dds3Basic_t *pBasic);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
-extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *address, s32 flags);
 extern s32 scrSearchProcedureName(void *scrdata, char *procname);
 int printf(const char *fmt, ...);
 

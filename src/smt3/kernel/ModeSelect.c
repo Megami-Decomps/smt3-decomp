@@ -218,7 +218,6 @@ const char D_0053DEF0[] = "/title/mseldata.bmd";
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
-extern void *sdfDevLoadFileEx(const char *path, u32 *address, u32 *size);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer, s32 shutdownTimer,
                                          dds3ProcessFunc_t processFunc, dds3ProcessFunc_t shutdownFunc, void *work);
 extern s32 mselMain(dds3ProcessID_t *id);

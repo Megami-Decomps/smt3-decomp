@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "sdf_resource.h"
 #include "ps2asm.h"
 #include "basic.h"
 #include "dds3obj.h"
@@ -10,7 +11,6 @@ struct pipeTextureFile_t;
 
 extern void (*D_00551828)(void);
 
-extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *data, s32 mode);
 
 extern sdfTexHandle_t *sdfTexSet(struct pipeTextureFile_t *aTex);
 

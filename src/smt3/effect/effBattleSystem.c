@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdk_libgcc.h"
 #include "newbattle.h"
 #include "effDebug.h"
@@ -87,7 +88,6 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern s32 sdfFileRead(void *handle, void *dst, s32 size);
 extern void sdfFileClose(void *handle);
-extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
 extern s32 printf(const char *format, ...);
 extern char D_00533300[];
 

@@ -554,7 +554,6 @@ void fclCombineInitRagTex(u8 *work)
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
-extern void *sdfDevLoadFileEx(char *name, void **data, s32 *size);
 extern void cmpInitSeqInfo(void *work, void *parent);
 extern void fclInitCursorWindow(void *work, void *data, u8 count);
 extern void fclSetCursorList(void *work, s32 mode);
@@ -582,9 +581,9 @@ void fclUpdateInit(void)
     cmpInitSeqInfo(CMB_GBWK, NULL);
 
     CMB_GBWK->resourceHandle_1650C =
-        sdfDevLoadFileEx(D_0053C890, (void **)&CMB_GBWK->script, NULL);
+        sdfDevLoadFileEx(D_0053C890, (u32 *)&CMB_GBWK->script, NULL);
     CMB_GBWK->resourceHandle_16518 =
-        sdfDevLoadFileEx(D_0053C8B8, &CMB_GBWK->explainData, NULL);
+        sdfDevLoadFileEx(D_0053C8B8, (u32 *)&CMB_GBWK->explainData, NULL);
     CMB_GBWK->unk_00001 = 0;
     CMB_GBWK->unk_00003 = 0;
     CMB_GBWK->unk_00004 = 1;
@@ -4573,9 +4572,6 @@ extern void mdlGetFilebase(s32 aMajor, u16 aMinor, char *aName, s32 aNameLeng);
 extern s32 sprintf(char *out, const char *fmt, ...);
 
 extern char D_0053CD68[];
-
-/* Called above its definition, where ee-gcc assumed int. */
-void *sdfDevLoadFileEx(char *name, void **data, s32 *size);
 
 s32 cmbMakeModelPath(u16 id, s32 *size)
 {

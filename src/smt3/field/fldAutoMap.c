@@ -1,5 +1,6 @@
 #include "fileManager.h"
 #include "common.h"
+#include "sdf_resource.h"
 #include "basic.h"
 #include "model.h"
 #include "newdata.h"
@@ -238,7 +239,6 @@ extern struct effNode_t *fldNpcLoadIdx;
 
 extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
-extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, u8 **loadedAt, u32 *size);
 
 extern sdfModelRootNode_t *D_00312150[];
 
@@ -448,7 +448,7 @@ void fldAmModelLoadFile(void) {
     plain:
         sprintf(path, "%sf%03d.amb", dir, fldGlobalBase.area);
     }
-    fldAutoMapBuf = sdfDevLoadFileEx(path, &data, 0);
+    fldAutoMapBuf = sdfDevLoadFileEx(path, (u32 *)&data, 0);
     transferStart = data + 8;
     fldAddressResolver(data, transferStart);
     info = (fldAmInfoHeader_t *)fldGetInfoHeader(transferStart);
@@ -2146,9 +2146,9 @@ void fldInitPacLoader(void) {
     D_0054EF1C = NULL;
     D_0054EF20 = NULL;
     D_0054EF24 = NULL;
-    fldTakara1File = sdfDevLoadFileEx("/fld/f/bin/takara1.PB", &fldTakara1Data, &fldTakara1Size);
-    fldTakara3File = sdfDevLoadFileEx("/fld/f/bin/takara3.PB", &fldTakara3Data, &fldTakara3Size);
-    fldTakara2File = sdfDevLoadFileEx("/fld/f/bin/takara2.PB", &fldTakara2Data, &fldTakara2Size);
+    fldTakara1File = sdfDevLoadFileEx("/fld/f/bin/takara1.PB", (u32 *)&fldTakara1Data, &fldTakara1Size);
+    fldTakara3File = sdfDevLoadFileEx("/fld/f/bin/takara3.PB", (u32 *)&fldTakara3Data, &fldTakara3Size);
+    fldTakara2File = sdfDevLoadFileEx("/fld/f/bin/takara2.PB", (u32 *)&fldTakara2Data, &fldTakara2Size);
     request = pacLoad("/fld/f/bin/fldmix.LB");
     pacSync(request);
     work = request->pac.resrcHead;

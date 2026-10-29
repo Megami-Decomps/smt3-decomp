@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "event.h"
 #include "kernel.h"
 #include "scr.h"
@@ -202,8 +203,6 @@ typedef u8 sdfTextureClampMode_t;
 
 void sdfMemFreeDirect(struct sdfMemHandle_t *aHandle);
 
-struct sdfMemHandle_t *sdfDevLoadFileEx(
-    const char *name, u32 *outAddress, u32 *outSize);
 
 
 struct sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *aTex);

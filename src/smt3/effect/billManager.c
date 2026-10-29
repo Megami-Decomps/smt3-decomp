@@ -47,7 +47,6 @@ extern struct dds3BillResource_tag *dds3BillboardTag;
 extern void sdfMemFreeDirect(struct sdfMemHandle_t *aHandle);
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 extern void *sdfMemGetPtr(struct sdfMemHandle_t *aHandle);
-extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *address, s32 flags);
 extern fileRequest_t *pacLoad(const char *filename);
 extern void pacSync(fileRequest_t *pacFileHandle);
 extern void pacFileHandleFree_(void *pacHandle);

@@ -482,7 +482,6 @@ extern void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst);
 
 u32 frPreCalcStrWidth(s8 *pStr, s32 Style, s32 Mode);
 
-extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, u32 *destination, s32 size);
 
 s32 frCalcStringHash(s8 *text);
 

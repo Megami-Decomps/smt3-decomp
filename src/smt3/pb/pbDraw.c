@@ -182,7 +182,6 @@ extern pbMapWork_t *D_0054F5C4;
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern sdfTexHandle_t *sdfDevLoadTex(const char *filename);
-extern void *sdfDevLoadFileEx(const char *name, u32 *outData, u32 *outSize);
 /* Native initialization writes all three four-float rows. pbInitCameraParam
  * and pbCameraVec2 are the second rows, consumed by pbInitGameCamera. */
 extern f32 pbGameCameraParam[3][4];
