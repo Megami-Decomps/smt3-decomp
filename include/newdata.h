@@ -287,6 +287,13 @@ typedef struct
 
 extern datSkillTable_t datSkillTable;
 
+typedef struct nbNegoSkillCondition_t {
+    s32 ptype;
+    s32 etype;
+    s32 message;
+} nbNegoSkillCondition_t;
+
+
 
 /* Target codes for the AI's group and single target helpers. SMT3HD recovers this
  * enum in its own newdata.h and never cites it from a body, so the names come from

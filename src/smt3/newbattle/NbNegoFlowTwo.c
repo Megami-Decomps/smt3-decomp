@@ -368,12 +368,6 @@ u32 nbGetPrevNegoId(nbNegoProcessData_t *n);
 
 void nbSetMesMakka(s32 msgid, s32 i);
 
-typedef struct nbNegoSkillCondition_t {
-    s32 ptype;
-    s32 etype;
-    s32 message;
-} nbNegoSkillCondition_t;
-
 typedef struct nbNegoSkillEntry_t {
     s32 requestmode;
     u8 rate[4];
