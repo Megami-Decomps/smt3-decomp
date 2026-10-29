@@ -141,7 +141,94 @@ void fldClearSe3D(void) {
     }
 }
 
+#ifdef NON_MATCHING
+typedef struct __attribute__((packed)) {
+    f32 x, y, z, w;
+} fldSePosition_t;
+
+extern const fldSePosition_t D_00532110;
+extern f32 D_002FC9C0[];
+extern f32 fldCamTarget[];
+extern s32 D_0054EE34, D_0054EE38;
+extern void p2sdSetStandPos(f32 cameraX, f32 cameraY, f32 cameraZ,
+                           f32 playerX, f32 playerY, f32 playerZ);
+extern void p2sdPlaySe3DEx(s32 midiNo, s32 x, f32 y, f32 z, f32 limit);
+
+void fldPlaySe3D(void)
+{
+    volatile fldSePosition_t scratch = D_00532110;
+    f32 dx = fldCamTarget[0] - D_002FC9C0[0];
+    f32 dz = fldCamTarget[2] - D_002FC9C0[2];
+    f32 distance = fsqrtf(dx * dx + dz * dz);
+    f32 listenerX, listenerY = D_002FC9C0[1], listenerZ;
+    s32 frame = ++D_0054EE38;
+    s32 count, i, inRange = 0;
+    fldSe3D_tag *entry;
+
+    if (distance > 200.0f) {
+        listenerX = D_002FC9C0[0] + dx / distance * 200.0f;
+        listenerZ = D_002FC9C0[2] + dz / distance * 200.0f;
+    } else {
+        listenerX = fldCamTarget[0];
+        listenerZ = fldCamTarget[2];
+    }
+    count = gFldSe3DNum;
+    for (i = 0; i < count; i++) {
+        f32 dy;
+
+        entry = &fldSe3DTable[i];
+        dx = listenerX - entry->x;
+        dy = listenerY - entry->y;
+        dz = listenerZ - entry->z;
+        distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+        if (distance < entry->r + 500.0f) {
+            inRange = 1;
+        }
+    }
+    if (inRange && (frame & 1)) {
+        p2sdSetStandPos(listenerX, listenerY, listenerZ,
+                        D_002FC9C0[0], D_002FC9C0[1], D_002FC9C0[2]);
+        count = gFldSe3DNum;
+    }
+    for (i = 0; i < count; i++) {
+        f32 x, y, z, dy, radius;
+        s32 flags;
+
+        entry = &fldSe3DTable[i];
+        x = entry->x;
+        y = entry->y;
+        z = entry->z;
+        dx = listenerX - x;
+        dy = listenerY - y;
+        dz = listenerZ - z;
+        flags = entry->flg;
+        distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+        radius = entry->r;
+        if (flags & 1) {
+            if (distance < radius + 500.0f) {
+                scratch.x = x;
+                scratch.y = y;
+                scratch.z = z;
+            } else {
+                entry->flg = flags & ~1;
+                p2sdStopSe(gFldBgmTop[fldGlobalBase.area].smgId + entry->id);
+                count = gFldSe3DNum;
+            }
+        } else if (distance < radius + 500.0f) {
+            scratch.x = x;
+            scratch.y = y;
+            scratch.z = z;
+            entry->flg = flags | 1;
+            p2sdPlaySe3DEx(gFldBgmTop[fldGlobalBase.area].smgId + entry->id,
+                           (s32)(radius / 100.0f), x, y, z);
+            count = gFldSe3DNum;
+        }
+    }
+    D_0054EE34++;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldSe", fldPlaySe3D);
+#endif
 
 INCLUDE_RODATA(const s32, "field/fldSe", D_00532110);
 
