@@ -317,7 +317,221 @@ void fldNpcLightSet(evtUnit_t *hEveUnit) {
     evtSetUnitLightAndAmbient(hEveUnit, 0, light, ambient);
 }
 
+#ifdef NON_MATCHING
+typedef struct {
+    s16 type;
+    s16 modelMajor;
+    s16 modelMinor;
+    s16 motion;
+    s16 hitSize;
+    s16 camera;
+    s16 flag;
+    s16 flagSwitch;
+} fldNpcTable_t;
+
+typedef struct {
+    s8 field;
+    s8 floor;
+    char name[14];
+    u8 unused;
+    s8 modelMajor;
+    u8 modelMinor;
+    s8 motion;
+    s8 hitSize;
+    s8 camera;
+    s16 eventBit;
+} fldNpcOverride_t;
+
+typedef struct { char name[12][24]; } fldNpcPathGroup1_t;
+typedef struct { char name[24][24]; } fldNpcPathGroup2_t;
+typedef union {
+    struct {
+        fldNpcPathGroup1_t first;
+        fldNpcPathGroup2_t second;
+    } groups;
+    char names[36][24];
+} fldNpcPaths_t;
+
+extern fldNpcTable_t D_003121D0[];
+extern fldNpcOverride_t D_00314100[];
+extern const fldNpcPathGroup1_t D_00532358;
+extern const fldNpcPathGroup2_t D_00532478;
+extern const volatile sdfVector4_t D_00532338, D_00532348;
+extern const char D_005326B8[];
+extern sdfMemHandle_t *fldBlurEffectTable[];
+extern struct effNode_t *fldNpcLoadIdx;
+extern struct effResourceHeader_t *fldNpcPacData;
+extern const u8 *fldGenNpcData;
+extern u32 fldGenNpcSize;
+extern void *sdfDevLoadFileEx(const char *name, u32 *outData, u32 *outSize);
+extern void dds3SetSclPoseSet(dds3Basic_t *basic, const sdfVector4_t *scale);
+extern void FromEuler(f32 x, f32 y, f32 z);
+extern void fldAddItemBoxObject(s32 index, f32 x, f32 y, f32 z, f32 radius, f32 height);
+extern void fldEveHit_AddEveHitNpc(char *name, s32 eventIndex, f32 x, f32 y, f32 z,
+                                  f32 radius, s32 room, s32 npcIndex);
+extern s32 strcmp(const char *left, const char *right);
+extern char *strcpy(char *destination, const char *source);
+
+void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
+                const char *name, s32 eventIndex)
+{
+    sdfVector4_t position __attribute__((aligned(16)));
+    sdfVector4_t rot __attribute__((aligned(16)));
+    sdfVector4_t scale __attribute__((aligned(16)));
+    sdfVector4_t axis __attribute__((aligned(16)));
+    fldNpcPaths_t paths;
+    fldNpcSlot_t *slot;
+    const fldNpcTable_t *defaults;
+    s32 index;
+    s32 kind, major, minor, motion, size, camera;
+    f32 radius, range, height, displaySize;
+    s32 i;
+
+    memset(&position, 0, sizeof(position));
+    position.w = 1.0f;
+    memset(&rot, 0, sizeof(rot));
+    scale = D_00532338;
+    axis = D_00532348;
+    paths.groups.first = D_00532358;
+    paths.groups.second = D_00532478;
+    index = fldNpcModelTable;
+    slot = &fldModelSlotTable[index];
+    slot->x = x;
+    slot->y = y;
+    slot->z = z;
+    slot->rot.x = rotation[0];
+    slot->rot.y = rotation[1];
+    slot->type = npcId;
+    slot->cnti = 0;
+    slot->rot.z = rotation[2];
+    slot->cntAnmi = 0;
+    slot->unk44 = 0;
+    slot->rot.w = rotation[3];
+    slot->cntf = 0.0f;
+    slot->cntAnmf = 0.0f;
+    slot->room = room;
+    slot->effect = NULL;
+    slot->itemBoxIdx = 0;
+    slot->object = NULL;
+    strcpy(slot->name, name);
+    defaults = &D_003121D0[npcId];
+    kind = defaults->type;
+    size = defaults->hitSize;
+    major = defaults->modelMajor;
+    minor = defaults->modelMinor;
+    motion = defaults->motion;
+    camera = defaults->camera;
+    for (i = 0; i < 448; i++) {
+        fldNpcOverride_t *override = &D_00314100[i];
+        if (override->field != fldGlobalBase.area || override->floor != fldGlobalBase.floor + 1 ||
+            strcmp(override->name, name) != 0) {
+            continue;
+        }
+        if (override->eventBit != 0 && evtBitCheck(override->eventBit) == 0) {
+            return;
+        }
+        camera = override->camera;
+        major = override->modelMajor;
+        kind = major != 0;
+        size = override->hitSize;
+        minor = override->modelMinor;
+        motion = override->motion;
+        break;
+    }
+    slot->kind = kind;
+    slot->camera = camera;
+    slot->modelMajor = major;
+    slot->modelIndex = minor;
+    if (size == 1) {
+        radius = 50.0f;
+        range = 180.0f;
+        height = 100.0f;
+        displaySize = 30.0f;
+    } else if (size == 2) {
+        radius = 100.0f;
+        range = 230.0f;
+        height = 100.0f;
+        displaySize = 80.0f;
+    } else {
+        radius = 20.0f;
+        range = 160.0f;
+        height = 100.0f;
+        displaySize = 0.0f;
+    }
+    slot->csize = displaySize;
+    if (kind == 0) {
+        s16 resourceIndex = fldGlobalBase.area < 10 ? 11 : minor;
+        if (fldBlurEffectTable[resourceIndex] == NULL) {
+            char *path;
+            if (resourceIndex < 35) {
+                path = paths.names[resourceIndex];
+            } else {
+                path = paths.groups.second.name[resourceIndex - 35];
+            }
+            fldBlurEffectTable[resourceIndex] = sdfDevLoadFileEx(path, (u32 *)&D_00568E90[resourceIndex],
+                                                                (u32 *)&D_00568F90[resourceIndex]);
+        }
+        slot->unk44 = 0;
+        if (fldGlobalBase.area == 1) {
+            dds3Basic_t *object;
+            if (fldNpcModelCount == NULL) {
+                fldNpcModelCount = sdfDevLoadFileEx(D_005326B8, (u32 *)&fldGenNpcData, &fldGenNpcSize);
+                mdlPackDecode(2, 31, 0x101, fldGenNpcData, fldGenNpcSize);
+            }
+            position.x = x;
+            position.y = -35.0f;
+            position.z = z;
+            object = dds3AddUnitObjectBasic(dds3AllocObjectId(), &position, &rot);
+            dds3SetUnitObjectId(object, "GENNPC_UNIT");
+            dds3ObjectBaseMakeUnit(object, 2, 31);
+            mdlLoopMotion(dds3ObjectBaseGetModelHandle(object), 0, 0);
+            FromEuler(-1.04666651f, 0.0f, 0.0f);
+            SDF_VU0_STOREVECTOR(&rot);
+            dds3SetRotPoseSet(object, &rot);
+        } else {
+            if (fldGlobalBase.area < 10) {
+                slot->y += 90.0f;
+            }
+            if (fldNpcLoadIdx == NULL) {
+                slot->effect = dds3EffectLoad(fldNpcPacData);
+                fldNpcLoadIdx = slot->effect;
+            } else {
+                slot->effect = dds3EffectCopy(fldNpcLoadIdx);
+            }
+        }
+    } else if (kind == 1) {
+        dds3Basic_t *object;
+        mdlObj_t *model;
+        position.x = x;
+        position.y = y;
+        position.z = z;
+        SDF_VU0_LOADVECTOR(&axis);
+        FromRotation(3.1415926f);
+        SDF_VU0_LOADVECTOR_B(rotation);
+        Mult();
+        SDF_VU0_STOREVECTOR(&rot);
+        object = dds3AddUnitObjectBasic(dds3AllocObjectId(), &position, &rot);
+        dds3SetUnitObjectId(object, "NPC_MDL_UNIT");
+        slot->object = object;
+        dds3ObjectBaseMakeUnit(object, major, minor);
+        dds3SetSclPoseSet(object, &scale);
+        model = dds3ObjectBaseGetModelHandle(object);
+        model->first->speed = 1.0f;
+        mdlLoopMotion(model, 0, motion);
+        dds3ObjectBaseOnFlag(object, 0x400);
+        fldNpcLightSet(evtGetUnitHandle2(object));
+    }
+    if (fldGlobalBase.area < 10) {
+        fldEveHit_AddEveHitNpc((char *)name, eventIndex, x, y, z, 40.0f, room, fldNpcModelTable);
+    } else {
+        fldAddItemBoxObject(room, x, y, z, radius, height);
+        fldEveHit_AddEveHitNpc((char *)name, eventIndex, x, y, z, range, room, fldNpcModelTable);
+    }
+    fldNpcModelTable++;
+}
+#else
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLoad);
+#endif
 
 extern u8 D_003129D8[];
 
