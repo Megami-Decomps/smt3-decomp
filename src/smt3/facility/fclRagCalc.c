@@ -1,5 +1,6 @@
 #include "common.h"
 #include "interface.h"
+#include "fclRag.h"
 #include "facility.h"
 #include "camp.h"
 #include "fpu.h"
@@ -247,13 +248,13 @@ void ragDrawListFrame(fclPanelPos_t *pos, s8 kind, u8 item, s32 ot)
     ragDrawFrameEdge(pos, kind, item, ot);
 }
 
-void ragDrawHeartsFooter(fclPanel_t *panel, s32 id)
+void ragDrawHeartsFooter(fclPanelPos_t *panel, s32 id)
 {
-    cmpDrawBoxF(0x520, 0x200, panel->Z, 0x7b, 9, 0x19191e59, id);
-    fclDrawSpriteRes(0, 0, panel->Z << 4, 0, 0, 3,
+    cmpDrawBoxF(0x520, 0x200, panel->unk_08, 0x7b, 9, 0x19191e59, id);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 3,
                      ragDrawWork->texHandle, D_003306B8, id);
-    cmpDrawBoxF(0xf60, 0x200, panel->Z, 0xe5, 9, 0x161e276e, id);
-    fclDrawSpriteRes(0, 0, panel->Z << 4, 0, 0, 4,
+    cmpDrawBoxF(0xf60, 0x200, panel->unk_08, 0xe5, 9, 0x161e276e, id);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 4,
                      ragDrawWork->texHandle, D_003306B8, id);
 }
 
@@ -267,7 +268,63 @@ void ragDrawListFooter(fclPanel_t *panel, s32 id)
                      ragDrawWork->texHandle, D_003306B8, id);
 }
 
+extern ragItemReq_t *ragGetConfirmEntry(s8 kind, u8 index);
+extern s32 ragFindItemSlot(ragItemReq_t *requirements);
+extern s32 datGetItemSlotIndex(u16 item);
+extern s32 cmbChkGetHearts(s32 index);
+extern void lstDrawListWindow(lstWork_t *work, s8 noCursor, s32 ot);
+extern void lstDrawListWindowCursor(lstWindowWork_t *work, s32 ot);
+extern void cmpSetSkillListRows(s32 rows);
+extern u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
+                              s32 mode, s32 alpha);
+extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
+                                          const char *text, frFontHandle_t *previous);
+extern s32 fclDrawListSprite(s32 x, s32 y, s32 z, s32 width, s32 height,
+                             s32 color, s32 blend, s32 ot);
+extern char *pStr[];
+extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *font);
+
+#ifdef NON_MATCHING
+void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
+{
+    cmpCursorInfo_t *cursor = &list->listCursor;
+    s32 x = list->pos.unk_00;
+    s32 y = list->pos.unk_04;
+    s32 z = list->pos.unk_08;
+    s32 i;
+
+    lstDrawListWindow(list, mode, ot);
+    cmpSetSkillListRows(0x13);
+    for (i = 0; i < cursor->unk_26; i++) {
+        s8 index = rows[i];
+        u8 flag = (u8)rows[i];
+        u16 item = ((ragHeartsEntry_t *)ragHeartsTable)[index].item;
+        ragItemReq_t *requirements = ragGetConfirmEntry((s8)kind, flag);
+        s32 disabled = ragFindItemSlot(requirements) == 0;
+        s32 slot = datGetItemSlotIndex(item);
+        u32 color;
+        frFontHandle_t *font;
+
+        if (slot != 0 && cmbChkGetHearts(slot) != 0) {
+            disabled = 1;
+        }
+        color = cmpDrawListItemBox(cursor, i, i, disabled | (mode != 0 ? 2 : 0), 0x100);
+        font = frwGetSmallFontFRQ2(x + 0x310, y + 0xC0, z, color, pStr[item], NULL);
+        func_001C7E38(font, 1, ot);
+        frDestroyFontRequestAfter(font);
+        fclDrawListSprite(x + 0x210, y + 0x160, z, 0x93, 2, 0x22242F80, 0, ot);
+        y += cursor->StepY << 3;
+    }
+    cmpSetSkillListRows(-1);
+    ragDrawHeartsFooter(&list->pos, ot);
+    if (mode == 0) {
+        lstDrawListWindowCursor((lstWindowWork_t *)list, ot);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawHeartsRows);
+#endif
 
 INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawListRows);
 
