@@ -774,7 +774,7 @@ void DrawPhaseRegistTop(fclEncyc_instance_tag *pinst)
     DrawRegistAllHelp(pinst);
 }
 
-extern void ReleaseFontList(void **ppfont, s32 num);
+extern void ReleaseFontList(frFontHandle_t **ppfont, s32 num);
 
 void DestPhaseRegistTop(fclEncyc_instance_tag *pinst)
 {
@@ -785,7 +785,7 @@ void DestPhaseRegistTop(fclEncyc_instance_tag *pinst)
         frDestroyFontRequestAfter(*(void **)(base + 0x11DC));
         *(void **)(base + 0x11DC) = NULL;
     }
-    ReleaseFontList((void **)(base + 0x11E0), 7);
+    ReleaseFontList((frFontHandle_t **)(base + 0x11E0), 7);
     if (*(s32 *)(base + 0x11FC) != 0)
     {
         dds3KillProcess(*(s32 *)(base + 0x11FC), 0);
@@ -1006,7 +1006,7 @@ typedef struct fclEncycReadTopWork_t {
     fclPanel_t listPanel;
     fclRibbon_t *ribbon;
     frFontHandle_t *requests[3];
-    void *fontList[8];
+    frFontHandle_t *fontList[8];
     u8 groupStart[8]; /* 0x1208: CreateFontListRead marks race/level groups. */
 } fclEncycReadTopWork_t;
 
@@ -1099,7 +1099,48 @@ void InitPhaseReadTop(fclEncyc_instance_tag *pinst)
     SetScreenOffset(pinst, 0);
 }
 
+extern s32 AcceptKeyChangeSort(fclEncyc_instance_tag *pinst);
+
+#ifdef NON_MATCHING
+void CalcPhaseReadTop(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadTopWork_t *work = pinst->pwork;
+    s32 action;
+    s32 index;
+    s32 flags;
+    s8 sort;
+
+    fclRbnCalc(work->ribbon);
+    if (AcceptKeyChangeSort(pinst) != 0) {
+        return;
+    }
+    action = AcceptKeyListWindow(&work->list, 1);
+    switch (action) {
+    case -1:
+        flags = pinst->stat;
+        pinst->unk_5A = 8;
+        pinst->stat = flags | 2;
+        break;
+    case 1:
+        index = work->list.cursorPos.Shift + work->list.cursorPos.Index;
+        PushListwinCursor(pinst, &work->list, 1);
+        sort = (s8)pinst->unk_6C;
+        flags = pinst->stat;
+        index = pinst->entries.read.sorted[sort != 0][index];
+        pinst->unk_5A = 4;
+        pinst->selectedIndex = index;
+        pinst->stat = flags | 2;
+        break;
+    case 2:
+        sort = (s8)pinst->unk_6C;
+        CreateFontListRead(work, sort, pinst->entries.read.sorted[sort != 0]);
+        break;
+    }
+    CalcListElemColor(&work->list, work->fontList, 8, 0);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadTop);
+#endif
 
 extern void DrawListWindowBack(void *obj, fclPanel_t *panel);
 
@@ -2127,7 +2168,7 @@ void drawRegistList(fclEncyc_instance_tag *pinst)
     s32 count;
     char text[64];
 
-    ReleaseFontList((void **)fonts, 7);
+    ReleaseFontList(fonts, 7);
     count = pinst->unk_70;
     for (index = cursor->Index; row < 7 && index < count; index++, row++, y += 0xE0) {
         datUnitWork_t *unit = &encycSaveWork->party[pinst->entries.regist.validUnit[index]].unit;
@@ -2149,10 +2190,10 @@ void drawRegistList(fclEncyc_instance_tag *pinst)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CreateFontListRead);
 
-void ReleaseFontList(void **ppfont, s32 num)
+void ReleaseFontList(frFontHandle_t **ppfont, s32 num)
 {
     if (num > 0) {
-        void **p = ppfont;
+        frFontHandle_t **p = ppfont;
         s32 i = num;
 
         do {
