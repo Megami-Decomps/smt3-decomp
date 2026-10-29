@@ -19,7 +19,7 @@ typedef struct
     /* 0x04 */ sdfTexHandle_t *tex[2];
     /* 0x0C */ s32 stat;
     /* 0x10 */ s16 act;
-    /* 0x12 */ u16 deact;
+    /* 0x12 */ s16 deact;
     /* 0x14 */ s32 ctr_act;
     /* 0x18 */ s32 ctr_deact;
     /* 0x1C */ s32 ctr;
