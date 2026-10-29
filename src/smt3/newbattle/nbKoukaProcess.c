@@ -1044,7 +1044,63 @@ void NumEffectClip(nbKoukaPacket_t *p)
     }
 }
 
+#ifdef NON_MATCHING
+extern void nbGetKoukaMarkPos(nbFormation_t *form);
+extern void NumEffectClip(nbKoukaPacket_t *packet);
+extern s32 nbClipEffectNum(s32 screen[4]);
+extern void nbDrawKoukaSprite(sdfTexHandle_t *th, u32 value, s32 x, s32 y, u32 col, s32 align);
+
+void nbClipKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
+{
+    s32 screen[4];
+    u32 color = 0;
+    u32 color2 = 0;
+    u32 alpha;
+    nbFormation_t *form;
+
+    if (p->time == 0) {
+        nbGetKoukaMarkPos(p->form);
+        NumEffectClip(p);
+        form = p->form;
+        SDF_VU0_LOADVECTOR_B(&form->pos);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_STOREVECTOR(&p->v);
+    } else {
+        form = p->form;
+    }
+    switch (p->data1.i) {
+    case 0: color = 0x80808080; break;
+    case 1: color = 0x80803080; break;
+    case 2: color = 0x80308030; break;
+    case 3: color = 0x80808020; break;
+    case 4: color = 0x80808080; color2 = 0x80803080; break;
+    case 5: color = 0x80308030; color2 = 0x80808020; break;
+    }
+    if (p->time >= 16 && p->framelength < 7) {
+        alpha = (u32)(p->framelength * 21) << 24;
+        color = (color & 0xFFFFFF) | alpha;
+        color2 = (color2 & 0xFFFFFF) | alpha;
+    }
+    SDF_VU0_LOADVECTOR(&p->v);
+    SDF_VU0_LOADVECTOR_B(&form->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    if (nbClipEffectNum(screen) != 0) {
+        if (p->data1.i >= 0 && p->data1.i < 4) {
+            nbDrawKoukaSprite(k->data->pnltex[2], p->data2.i, screen[0],
+                              screen[1] - p->time * 4, color, 0);
+        } else if (p->data1.i >= 4 && p->data1.i < 6) {
+            nbDrawKoukaSprite(k->data->pnltex[2], p->data2.i, screen[0],
+                              screen[1] - (p->time + 12) * 4, color, -1);
+            nbDrawKoukaSprite(k->data->pnltex[2], p->partyno, screen[0],
+                              screen[1] - p->time * 4, color2, 1);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", nbClipKoukaNum);
+#endif
 
 extern void nbGetKoukaMarkPos(nbFormation_t *form);
 extern void nbLoadKoukaPos(nbFormation_t *form);
