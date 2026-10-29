@@ -1019,7 +1019,44 @@ void deleteRoundAutoCamera(dds3ProcessID_t *id) {
     roundCamera = NULL;
 }
 
+#ifdef NON_MATCHING
+s32 viewModeCamera(dds3ProcessID_t *id)
+{
+    pbProcHandle_t *panel = id->workdata;
+    pbViewCamWork_t *work = panel->data.viewCam;
+    volatile f32 *eye = &work->eye.x;
+    volatile f32 *target = &work->target.x;
+    f32 step[4];
+    f64 scale;
+    s32 i;
+
+    if (panel->state == 1) {
+        if (panel != NULL) {
+            panel->flags = 0;
+        }
+    } else if (panel->state == 5) {
+        return -1;
+    }
+    scale = work->scale;
+    if (!(scale < 1.025)) {
+        return -1;
+    }
+    work->scale = scale + 0.005;
+    for (i = 0; i < 4; i++) {
+        f32 current = eye[i];
+        f32 destination = target[i];
+
+        step[i] = current - destination;
+        step[i] *= work->scale;
+        eye[i] = step[i] + target[i];
+    }
+    SDF_VU0_COPYVECTOR(&aViewEye, &work->eye);
+    SDF_VU0_COPYVECTOR(&aViewTarget, &work->target);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbGame", viewModeCamera);
+#endif
 
 void deleteViewModeCamera(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
