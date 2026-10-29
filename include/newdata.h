@@ -40,6 +40,49 @@ typedef struct
     u8 unk6E[0x7E];
 } fldAnahoriAkuma_t;
 
+/* The IDB's field order at PS2 widths: narrowing its 0x120-byte record, where
+ * skillcnt is s32 and skill is s32[24], gives this 0xEC record with no gap.
+ * Three HD bodies pin the names against retail: rstChkAddSkill tests
+ * skillcnt at +0x38, SetAction_AI stores nowcommand and nowindex at +0x6A and
+ * +0x6C, and datGetBaseParam sums param, skillparam and mitamaparam.
+ * See docs/idb-corrections.md. */
+typedef struct datUnitWork_t
+{
+    /* 0x00 */ u32 flag;
+    /* 0x04 */ u16 id;
+    /* 0x06 */ u16 hp;
+    /* 0x08 */ u16 maxhp;
+    /* 0x0A */ u16 mp;
+    /* 0x0C */ u16 maxmp;
+    /* 0x0E */ u16 badstatus;
+    /* 0x10 */ u32 exp;
+    /* 0x14 */ u16 level;
+    /* 0x16 */ s8 param[6];
+    /* 0x1C */ s8 skillparam[6];
+    /* 0x22 */ u16 uniqueid;
+    /* 0x24 */ u16 reserve1;
+    /* 0x26 */ u16 reserve2;
+    /* 0x28 */ u16 namecode[8];
+    /* 0x38 */ u16 skillcnt;
+    /* 0x3A */ u16 skill[24];
+    /* 0x6A */ s16 nowcommand;
+    /* 0x6C */ u16 nowindex;
+    /* 0x6E */ s16 nowtarea;
+    /* 0x70 */ s16 nowtform;
+    /* 0x72 */ s16 prevcommand;
+    /* 0x74 */ u16 previndex;
+    /* 0x76 */ s16 prevtarea;
+    /* 0x78 */ s16 prevtform;
+    /* 0x7A */ s8 mitamaparam[6];
+    /* 0x80 */ s8 levelupparam[6];
+    /* 0x86 */ u16 keisyoskill[24];
+    /* 0xB6 */ u8 keiattr[24];
+    /* 0xCE */ u16 hensinmae;
+    /* 0xD0 */ u16 getdevilhearts[4];
+    /* 0xD8 */ u32 hensinmaeexp;
+    /* 0xDC */ u16 fullnamecode[8];
+} datUnitWork_t;
+
 /* Shared persistent work, recovered through its consumers. These fields form
  * a partial view, not a claim about the complete save-work allocation. */
 typedef struct
@@ -149,48 +192,7 @@ typedef struct
     /* 0x3B */ u8 reserve1;
 } datDevilTableEntry_t;
 
-/* The IDB's field order at PS2 widths: narrowing its 0x120-byte record, where
- * skillcnt is s32 and skill is s32[24], gives this 0xEC record with no gap.
- * Three HD bodies pin the names against retail: rstChkAddSkill tests
- * skillcnt at +0x38, SetAction_AI stores nowcommand and nowindex at +0x6A and
- * +0x6C, and datGetBaseParam sums param, skillparam and mitamaparam.
- * See docs/idb-corrections.md. */
-typedef struct datUnitWork_t
-{
-    /* 0x00 */ u32 flag;
-    /* 0x04 */ u16 id;
-    /* 0x06 */ u16 hp;
-    /* 0x08 */ u16 maxhp;
-    /* 0x0A */ u16 mp;
-    /* 0x0C */ u16 maxmp;
-    /* 0x0E */ u16 badstatus;
-    /* 0x10 */ u32 exp;
-    /* 0x14 */ u16 level;
-    /* 0x16 */ s8 param[6];
-    /* 0x1C */ s8 skillparam[6];
-    /* 0x22 */ u16 uniqueid;
-    /* 0x24 */ u16 reserve1;
-    /* 0x26 */ u16 reserve2;
-    /* 0x28 */ u16 namecode[8];
-    /* 0x38 */ u16 skillcnt;
-    /* 0x3A */ u16 skill[24];
-    /* 0x6A */ s16 nowcommand;
-    /* 0x6C */ u16 nowindex;
-    /* 0x6E */ s16 nowtarea;
-    /* 0x70 */ s16 nowtform;
-    /* 0x72 */ s16 prevcommand;
-    /* 0x74 */ u16 previndex;
-    /* 0x76 */ s16 prevtarea;
-    /* 0x78 */ s16 prevtform;
-    /* 0x7A */ s8 mitamaparam[6];
-    /* 0x80 */ s8 levelupparam[6];
-    /* 0x86 */ u16 keisyoskill[24];
-    /* 0xB6 */ u8 keiattr[24];
-    /* 0xCE */ u16 hensinmae;
-    /* 0xD0 */ u16 getdevilhearts[4];
-    /* 0xD8 */ u32 hensinmaeexp;
-    /* 0xDC */ u16 fullnamecode[8];
-} datUnitWork_t;
+
 
 /* The 0x1C-byte motion records at datUnitVisual_t +0x2C; the shared view splits
  * the same bytes as part[], six bytes later. */
