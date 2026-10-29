@@ -1411,9 +1411,17 @@ typedef struct fsPathRequest_t {
     s32 resultSize;
     char name[0x400];
 } fsPathRequest_t;
+typedef struct fsMkdirRequest_t {
+    s32 sema;
+    s32 *result;
+    s32 resultSize;
+    s32 mode;
+    char name[0x400];
+} fsMkdirRequest_t;
 typedef union fsRequest_t {
     fsCloseRequest_t close;
     fsPathRequest_t path;
+    fsMkdirRequest_t mkdir;
 } fsRequest_t;
 extern fsRequest_t D_0059D4C0;
 
@@ -1533,7 +1541,51 @@ s32 sceRemove(const char *path)
     return _sceCallCode(path, 6);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceMkdir);
+s32 sceMkdir(const char *path, s32 mode)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsMkdirRequest_t *request = &D_0059D4C0.mkdir;
+    s32 length;
+    s32 sema;
+    s32 accepted;
+
+    _sceFsWaitS(7);
+    if (D_0052C340 == 0) {
+        sceFsInit();
+    }
+    for (length = 0; length < 0x400 &&
+         (request->name[length] = path[length]) != 0; length++) {
+    }
+    if (length == 0x400) {
+        request->name[0x3FF] = 0;
+        length = 0x3FF;
+    }
+    request->mode = mode;
+    param.initCount = 0;
+    param.maxCount = 1;
+    param.option = 0;
+    sema = CreateSema(&param);
+    request->result = &result;
+    request->sema = sema;
+    request->resultSize = 4;
+    if (sceSifCallRpc(&D_0059E780, 7, 0, &D_0059D4C0,
+                      length + 0x11, D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return result;
+}
+
 
 s32 sceRmdir(const char *path)
 {

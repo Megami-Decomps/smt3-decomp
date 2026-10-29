@@ -769,3 +769,4 @@ src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	0 exact / 376 B guarded	close 
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 164 B	VSync2 ordered hardware/flag polling and fresh 64-bit kernel output after interrupt restore; complete owner exact
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	4 SDK fn / 284 B	directory-open reservation lifecycle and remove/rmdir/driver-delete command wrappers; native branch-local signal argument capture; owner 83 match, 0 differ
 src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	3 SDK fn / 476 B	generic path-command transaction and chdir/unmount wrappers; concurrent remove/rmdir bodies and credit preserved; complete owner exact
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-28	1 SDK fn / 428 B	directory creation with typed mode/path request, bounded name and callback completion; complete owner exact
