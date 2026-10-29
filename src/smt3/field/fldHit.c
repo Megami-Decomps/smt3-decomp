@@ -1335,7 +1335,283 @@ void fldHitChkUnit(f32 *position)
 INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnit);
 #endif
 
+#ifdef NON_MATCHING
+extern f32 D_0054C46C;
+extern f32 fldCamCalcSlopeOffset(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
+
+void fldHitChkUnitVWM(f32 *position)
+{
+    sdfVector4_t current, previous, delta, movement;
+    f32 radius, distance, clearance;
+    s32 axis, pass, index, floorHit = -1;
+    s16 sky = -1;
+    s32 debug;
+
+    memset(&movement, 0, 16);
+    debug = fldRunDanteGunFlag.word18 != 0;
+    movement.w = 1.0f;
+    fldHitChkSlope = -1;
+    fldHitChkMatter = -1;
+    fldAutoMapNameD(-1);
+    fldGlobalBase.word44 = 0;
+    if (fldGlobalBase.hitMatterIndex != -1) {
+        collision_s *face = &fldMatterTable[fldGlobalBase.hitMatterIndex];
+        if (face->matter != NULL) {
+            dds3PoseSet_t *pose = face->matter->poseset;
+            movement.x = pose->pos.x - face->point[0];
+            movement.y = (pose->pos.y - face->point[1]) + 10.0f;
+            movement.z = pose->pos.z - face->point[2];
+        }
+        fldGlobalBase.hitMatterIndex = -1;
+    }
+    if (debug) {
+        rsetOtOfs(0x51);
+        rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+        rsetAlpha(0);
+    }
+    current.x = position[0] + movement.x;
+    current.y = position[1] + movement.y;
+    current.z = position[2] + movement.z;
+    previous.x = fldHitChkWork[0];
+    previous.y = fldHitChkWork[1];
+    previous.z = fldHitChkWork[2];
+    if (fldGlobalBase.area == 1) {
+        radius = 25.0f;
+    } else if (fldGlobalBase.area < 10) {
+        radius = 30.0f;
+    } else {
+        radius = 45.0f;
+    }
+    current.y -= 35.0f;
+    delta.x = current.x - previous.x;
+    delta.y = current.y - previous.y;
+    delta.z = current.z - previous.z;
+    if (MATH_VectorLength(&delta) < D_0054C46C) {
+        position[0] = previous.x;
+        position[2] = previous.z;
+        position[1] = previous.y;
+        return;
+    }
+    for (index = 0; index < D_0054EDA0; index++) {
+        fldMatterTable[index].hitflag = 0;
+    }
+    axis = sdfFabs(current.z - previous.z) < sdfFabs(current.x - previous.x) ? 0 : 2;
+    fldGlobalBase.word4C = -1;
+    fldGlobalBase.wordC0 = 0;
+    fldHitChkUnitElvOnly(position);
+    for (pass = 0; pass < 2; pass++) {
+        for (index = 0; index < D_0054EDA0; index++) {
+            collision_s *face = &fldMatterTable[index];
+            fldCollisionFace_t *data;
+            u32 attributes;
+            s32 moved;
+            f32 signedDistance;
+
+            if ((pass == 0 && face->mode2D == axis) ||
+                (pass != 0 && face->mode2D != axis)) {
+                continue;
+            }
+            if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1, face->hojiID) != 0) {
+                continue;
+            }
+            face = &fldMatterTable[index];
+            if (face->npcID > 0 && fldGbChkNpc(fldGlobalBase.area, fldGlobalBase.floor + 1, face->npcID) != 0) {
+                continue;
+            }
+            face = &fldMatterTable[index];
+            moved = face->matter != NULL;
+            if (moved) {
+                dds3PoseSet_t *pose = face->matter->poseset;
+                current.x -= pose->pos.x;
+                current.y -= pose->pos.y;
+                current.z -= pose->pos.z;
+                previous.x -= pose->pos.x;
+                previous.y -= pose->pos.y;
+                previous.z -= pose->pos.z;
+            }
+            face = &fldMatterTable[index];
+            data = face->pFace;
+            attributes = data->attributes;
+            signedDistance = fldVecDot(&current, (sdfVector4_t *)face->normal) - face->num;
+            distance = sdfFabs(signedDistance);
+            if (attributes & 0x40) {
+                if (distance < radius) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
+                    if (!(clearance < 0.0f)) {
+                        u8 floor = fldMatterTable[index].pFace->moveFloor;
+                        fldAutoMapNameD((floor & 15) * 10 + (floor >> 4));
+                    }
+                }
+            } else if (attributes & 0x1000) {
+                if (distance < radius) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
+                    if (!(clearance < 0.0f)) {
+                        fldAutoMapNameD(fldMatterTable[index].pFace->place);
+                    }
+                }
+            } else if (attributes & 0x2000) {
+                if (distance < radius) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
+                    if (!(clearance < 0.0f)) {
+                        fldGlobalBase.wordC0 = fldMatterTable[index].pFace->encounter;
+                    }
+                }
+            } else if (attributes & 0x200) {
+                if (distance < radius) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
+                    if (!(clearance < 0.0f)) {
+                        fldGlobalBase.word44 = fldMatterTable[index].pFace->sound;
+                        if (fldGlobalBase.word44 == 3) {
+                            fldGlobalBase.word4C = index;
+                        }
+                    }
+                }
+            } else if (attributes & 0x8000) {
+                if (distance < radius) {
+                    HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
+                    if (!(clearance < 0.0f)) {
+                        face = &fldMatterTable[index];
+                        data = face->pFace;
+                        if (data->special[0] == 1) {
+                            sky = data->special[1];
+                        } else if (data->special[0] == 3) {
+                            *(f32 *)fldGlobalBase.unkC4 = face->max[0][1];
+                        }
+                    }
+                }
+            } else if (!(attributes & 0x400)) {
+                if (attributes & 0x800) {
+                    if (distance < radius) {
+                        HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
+                        if (!(clearance < 0.0f)) {
+                            fldAutoMapOpenBlock(fldMatterTable[index].pFace->automap[0]);
+                            if (fldMatterTable[index].pFace->automap[1] != 0) {
+                                fldAutoMapNameU(fldMatterTable[index].pFace->automap[1]);
+                            }
+                        }
+                    }
+                } else if (!(attributes & 0x4000)) {
+                    if (attributes & 0x100) {
+                        if (distance < radius) {
+                            HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
+                            if (!(clearance < 0.0f)) {
+                                fldHitChkSlope = index;
+                            }
+                        }
+                    } else {
+                        if (distance < radius) {
+                            HitPositionInside2(&clearance, face->mode2D, face->numedges, &current.x, face, radius);
+                            if (!(clearance < 0.0f) &&
+                                (fldRunDanteGunFlag.counter == 0 || dds3PadButtonState[0x2B] == 0)) {
+                                sdfVector4_t projected;
+                                face = &fldMatterTable[index];
+                                if (face->mode2D == 1) {
+                                    f32 xs[3], ys[3], zs[3];
+                                    s32 vertex;
+                                    for (vertex = 0; vertex < 3; vertex++) {
+                                        xs[vertex] = face->max[vertex][0];
+                                        ys[vertex] = face->max[vertex][1];
+                                        zs[vertex] = face->max[vertex][2];
+                                    }
+                                    current.y = fldCamCalcSlopeOffset(current.x, current.z, xs, ys, zs) - 35.0f;
+                                    fldHitChkMatter = index;
+                                    fldGlobalBase.hitValid = 1;
+                                    fldMatterTable[index].hitflag = 1;
+                                    fldGlobalBase.hitX = current.x;
+                                    fldGlobalBase.hitY = current.y;
+                                    fldGlobalBase.hitZ = current.z;
+                                    D_0054ED90 = index;
+                                } else {
+                                    projected.x = current.x - face->normal[0] * signedDistance;
+                                    projected.y = current.y - face->normal[1] * signedDistance;
+                                    projected.z = current.z - face->normal[2] * signedDistance;
+                                    if (face->normal[1] < -0.75f) {
+                                        fldHitChkMatter = index;
+                                        if (floorHit >= 0 && clearance < distance) {
+                                            clearance = distance;
+                                        }
+                                        current.x = projected.x + face->normal[0] * clearance;
+                                        current.y = (projected.y + face->normal[1] * clearance) - 1.0f;
+                                        current.z = projected.z + face->normal[2] * clearance;
+                                        if (clearance == radius) {
+                                            floorHit = index;
+                                        }
+                                        if (face->matter != NULL) {
+                                            dds3PoseSet_t *pose = face->matter->poseset;
+                                            moved = 0;
+                                            current.x += pose->pos.x;
+                                            current.y += pose->pos.y;
+                                            current.z += pose->pos.z;
+                                            previous.x += pose->pos.x;
+                                            previous.y += pose->pos.y;
+                                            previous.z += pose->pos.z;
+                                        }
+                                        face->hitflag = 1;
+                                        fldGlobalBase.hitX = current.x;
+                                        fldGlobalBase.hitY = current.y;
+                                        fldGlobalBase.hitZ = current.z;
+                                        fldGlobalBase.hitValid = 1;
+                                        D_0054ED90 = index;
+                                    } else if (!(signedDistance < 0.0f)) {
+                                        if (clearance < distance) {
+                                            clearance = distance;
+                                        }
+                                        current.x = projected.x + face->normal[0] * clearance;
+                                        current.y = projected.y + face->normal[1] * clearance;
+                                        current.z = projected.z + face->normal[2] * clearance;
+                                        if (face->matter != NULL) {
+                                            dds3PoseSet_t *pose = face->matter->poseset;
+                                            moved = 0;
+                                            current.x += pose->pos.x;
+                                            current.y += pose->pos.y;
+                                            current.z += pose->pos.z;
+                                            previous.x += pose->pos.x;
+                                            previous.y += pose->pos.y;
+                                            previous.z += pose->pos.z;
+                                        }
+                                        face->hitflag = 1;
+                                        fldGlobalBase.hitValid = 1;
+                                        fldGlobalBase.hitX = current.x;
+                                        fldGlobalBase.hitY = current.y;
+                                        fldGlobalBase.hitZ = current.z;
+                                        D_0054ED90 = index;
+                                    }
+                                }
+                            }
+                        }
+                        if (moved) {
+                            dds3PoseSet_t *pose = fldMatterTable[index].matter->poseset;
+                            current.x += pose->pos.x;
+                            current.y += pose->pos.y;
+                            current.z += pose->pos.z;
+                            previous.x += pose->pos.x;
+                            previous.y += pose->pos.y;
+                            previous.z += pose->pos.z;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (sky != -1) {
+        fldSkySetTblUpper(sky, 5);
+    } else {
+        fldSkySetTblModosu(5);
+    }
+    delta.x = current.x - previous.x;
+    delta.y = current.y - previous.y;
+    delta.z = current.z - previous.z;
+    MATH_VectorLength(&delta);
+    position[0] = current.x;
+    position[2] = current.z;
+    position[1] = current.y;
+    fldHitChkWork[2] = current.z;
+    fldHitChkWork[0] = current.x;
+    fldHitChkWork[1] = current.y;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnitVWM);
+#endif
 
 void func_0013B658(void) {
 }
