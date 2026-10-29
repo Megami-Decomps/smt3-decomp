@@ -1206,8 +1206,6 @@ typedef struct fclEncycHelpPanel_t {
     u8 reserved0E[2];
 } fclEncycHelpPanel_t;
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadStatus);
-
 typedef struct fclEncycReadStatusWork_t {
     fclEncyc_readmainwork_tag phase;
     u8 reserved0030[0x10];
@@ -1231,6 +1229,107 @@ typedef struct fclEncycReadStatusWork_t {
     void *messageProcess;
     datUnitWork_t unit;
 } fclEncycReadStatusWork_t;
+
+extern void ChangeDevilObjectReadMain(s32 index, fclEncyc_instance_tag *pinst);
+extern void ResetReadMainRibbon(fclEncyc_readmainwork_tag *work);
+
+#ifdef NON_MATCHING
+void InitPhaseReadStatus(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadStatusWork_t *work = allocPhaseBuffer(pinst, sizeof(*work));
+    sdfIVector4_t vectors[4];
+    void *scene;
+    s32 flags;
+    u16 phaseFlags;
+
+    work->phase.statusAlpha = 0x80;
+    work->boardY = 0xC00;
+    work->help[0].y = 0xCE8;
+    work->viewIdleTimer = 0x14;
+    work->help[1].x = 0x1370;
+    work->help[1].y = 0xD20;
+    work->help[1].speed = 0x20;
+    work->phase.msgid = -1;
+    work->phase.flags = 0;
+    work->boardAlpha = 0;
+    work->explainAlpha = 0;
+    work->help[0].x = 0;
+    work->help[0].speed = 0x20;
+    work->help[0].alpha = 0;
+    work->help[1].alpha = 0;
+    work->explainFont = NULL;
+    scene = dds3GetActiveScene();
+    if (scene != NULL) {
+        dds3VisibleSceneBasic(scene, 0);
+    }
+    ChangeDevilObjectReadMain(pinst->selectedIndex, pinst);
+    ResetReadMainRibbon(&work->phase);
+    work->ribbon = fclRbnInit(3, 1, pinst->texHandle[2], pinst->texHandle[3]);
+    vectors[0].pm[0] = 0x810;
+    vectors[0].pm[1] = 0x10;
+    vectors[0].pm[2] = 0xB50;
+    vectors[0].pm[3] = 0x108;
+    vectors[1].pm[0] = 0x850;
+    vectors[1].pm[1] = 0x40;
+    vectors[1].pm[2] = 0xB10;
+    vectors[1].pm[3] = 0xE0;
+    vectors[2].pm[0] = 0xCB0;
+    vectors[2].pm[1] = 0x160;
+    vectors[2].pm[2] = 0xFF0;
+    vectors[2].pm[3] = 0x350;
+    vectors[3].pm[0] = 0xBF0;
+    vectors[3].pm[1] = 0x10;
+    vectors[3].pm[2] = 0xEB0;
+    vectors[3].pm[3] = 0x150;
+    fclRbnSetPara(work->ribbon, 0, &vectors[0], &vectors[1], &vectors[2], &vectors[3],
+                  pinst->texHandle[3], pinst->texHandle[3]);
+    vectors[0].pm[0] = 0xDB0;
+    vectors[0].pm[1] = 0x10;
+    vectors[0].pm[2] = 0x1270;
+    vectors[0].pm[3] = 0x108;
+    vectors[1].pm[0] = 0xE00;
+    vectors[1].pm[1] = 0x40;
+    vectors[1].pm[2] = 0x1220;
+    vectors[1].pm[3] = 0xE0;
+    vectors[2].pm[0] = 0x560;
+    vectors[2].pm[1] = 0x360;
+    vectors[2].pm[2] = 0xA20;
+    vectors[2].pm[3] = 0x550;
+    vectors[3].pm[0] = 0x880;
+    vectors[3].pm[1] = 0x160;
+    vectors[3].pm[2] = 0xCA0;
+    vectors[3].pm[3] = 0x2A0;
+    fclRbnSetPara(work->ribbon, 1, &vectors[0], &vectors[1], &vectors[2], &vectors[3],
+                  pinst->texHandle[3], pinst->texHandle[3]);
+    vectors[0].pm[0] = 0x1380;
+    vectors[0].pm[1] = 0x10;
+    vectors[0].pm[2] = 0x1940;
+    vectors[0].pm[3] = 0x108;
+    vectors[1].pm[0] = 0x13C0;
+    vectors[1].pm[1] = 0x40;
+    vectors[1].pm[2] = 0x1900;
+    vectors[1].pm[3] = 0xE0;
+    vectors[2].pm[0] = 0xA30;
+    vectors[2].pm[1] = 0x360;
+    vectors[2].pm[2] = 0xFF0;
+    vectors[2].pm[3] = 0x550;
+    vectors[3].pm[0] = 0x10;
+    vectors[3].pm[1] = 0x360;
+    vectors[3].pm[2] = 0x550;
+    vectors[3].pm[3] = 0x4A0;
+    fclRbnSetPara(work->ribbon, 2, &vectors[0], &vectors[1], &vectors[2], &vectors[3],
+                  pinst->texHandle[3], pinst->texHandle[3]);
+    work->countFont = NULL;
+    drawSummonCount(&work->countFont, 0x1D00, 0xA0, 0);
+    SetScreenOffset(pinst, 1);
+    flags = pinst->stat;
+    phaseFlags = work->phase.flags;
+    pinst->stat = flags & ~8;
+    work->phase.flags = phaseFlags | 0x10;
+}
+#else
+INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadStatus);
+#endif
 
 struct fclEncycReadHelpWork_t;
 extern void FadeInRibbon(fclEncyc_readmainwork_tag *work);
