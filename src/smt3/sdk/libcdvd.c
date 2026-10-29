@@ -55,6 +55,20 @@ extern s32 StartThread(s32 threadId, void *argument);
 extern s32 ChangeThreadPriority(s32 threadId, s32 priority);
 void _Cdvd_cbLoop(void);
 
+/* Consumed transfer view: payloads begin at 0x10 and 0x50. The trailing
+ * array leaves the second payload extent to the producer; no total size is known. */
+typedef struct {
+    s32 firstLength;
+    s32 secondLength;
+    u8 *firstDestination;
+    u8 *secondDestination;
+    u8 firstData[0x40];
+    u8 secondData[0];
+} cdvdReadReplyPrefix_t;
+
+extern s32 D_0052A054 __attribute__((section(".data")));
+void _sceCd_cd_callback(s32 *reason);
+
 typedef void (*cdvdPowerCallback_t)(void *argument);
 extern cdvdPowerCallback_t D_00598C44 __attribute__((section(".data")));
 extern void *D_00598C48 __attribute__((section(".data")));
@@ -144,7 +158,26 @@ s32 sceCdInitEeCB(s32 priority, void *stack, s32 stackSize)
     return created;
 }
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_cd_read_intr);
+void _sceCd_cd_read_intr(void *argument)
+{
+    cdvdReadReplyPrefix_t *reply = (cdvdReadReplyPrefix_t *)((u32)argument | 0x20000000);
+    u8 *destination;
+    s32 i;
+
+    if (reply->firstLength > 0) {
+        destination = reply->firstDestination;
+        for (i = 0; i < reply->firstLength; i++) {
+            destination[i] = reply->firstData[i];
+        }
+    }
+    if (reply->secondLength > 0) {
+        destination = reply->secondDestination;
+        for (i = 0; i < reply->secondLength; i++) {
+            destination[i] = reply->secondData[i];
+        }
+    }
+    _sceCd_cd_callback(&D_0052A054);
+}
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", cmd_sem_init);
 
