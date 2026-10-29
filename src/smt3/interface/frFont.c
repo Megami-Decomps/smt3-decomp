@@ -1420,7 +1420,7 @@ u32 frGetStrWidth2(frFontHandle_t *pFRQ) {
     return totalAdvance;
 }
 
-/* NON_MATCHING: 8 of 62 words differ (first at +0x2C). */
+/* NON_MATCHING: 6 of 62 words differ (first at +0x2C). */
 #ifdef NON_MATCHING
 u32 frPreCalcStrWidth(s8 *pStr, s32 Style, s32 Mode) {
     frTextHandle_t glyph;
@@ -1434,30 +1434,29 @@ u32 frPreCalcStrWidth(s8 *pStr, s32 Style, s32 Mode) {
     glyph.cellDimensions.cellWidth = frGetDefaultFontWidth(Style);
     glyph.cellDimensions.cellHeight = frGetDefaultFontHeight(glyph.renderValueOrSetupOrShade.setupBytes.fontIndex);
     length = strlen((const char *)pStr);
-    if (length == 0) {
-        return totalWidth;
-    }
-    do {
-        u32 code = (u8)pStr[i];
-        s32 shiftIndex;
+    if (length != 0) {
+        do {
+            u32 code = (u8)pStr[i];
+            s32 shiftIndex;
 
-        if (code >= 0x80) {
-            shiftIndex = code << FR_FONT_BYTE_SHIFT;
+            if (code >= 0x80) {
+                shiftIndex = code << FR_FONT_BYTE_SHIFT;
+                i++;
+                code = shiftIndex | (u8)pStr[i];
+            }
+            glyph.glyphCodeOrContext.glyphCode = code;
+            if (code < 0x80) {
+                shiftIndex = code - 0x20;
+            } else {
+                u32 relative = code - 0x8080;
+
+                shiftIndex = ((relative & FR_FONT_MIDDLE_BYTE_MASK) >> 1) + (relative & 0x7F);
+            }
+            frGetXShiftLev(&glyph, shiftIndex, i == 0);
             i++;
-            code = shiftIndex | (u8)pStr[i];
-        }
-        glyph.glyphCodeOrContext.glyphCode = code;
-        if (code < 0x80) {
-            shiftIndex = code - 0x20;
-        } else {
-            u32 relative = code - 0x8080;
-
-            shiftIndex = ((relative & FR_FONT_MIDDLE_BYTE_MASK) >> 1) + (relative & 0x7F);
-        }
-        frGetXShiftLev(&glyph, shiftIndex, i == 0);
-        i++;
-        totalWidth += glyph.advance + 3;
-    } while (i < length);
+            totalWidth += glyph.advance + 3;
+        } while (i < length);
+    }
     return totalWidth;
 }
 #else

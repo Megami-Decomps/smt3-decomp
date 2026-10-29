@@ -123,9 +123,9 @@ fldTitle_Process	field/fldTitle	0xBD4		docs/nonmatching/field/fldTitle.md	5
 fldNpcLightSet	field/fld_Npc	0x28C	125 of 163 words match	docs/nonmatching/field/fld_Npc.md	5
 fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/nonmatching/field/fld_Npc.md	37
 fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/nonmatching/field/fld_Npc.md	71
-frPreCalcStrWidth	interface/frFont	0xF8	Fifty-four of sixty-two words match	docs/nonmatching/interface/frFont.md	5
-frAnalyzeTag	interface/frFont	0x518		docs/nonmatching/interface/frFont.md	48
-frAnalyzeMessage	interface/frFont	0x200		docs/nonmatching/interface/frFont.md	100
+frPreCalcStrWidth	interface/frFont	0xF8	Fifty-six of sixty-two words match	docs/nonmatching/interface/frFont.md	5
+frAnalyzeTag	interface/frFont	0x518		docs/nonmatching/interface/frFont.md	49
+frAnalyzeMessage	interface/frFont	0x200		docs/nonmatching/interface/frFont.md	101
 frRestoreNameImage	interface/frName	0xD8	42 of 54 words match	docs/nonmatching/interface/frName.md	5
 frGetCNameFRQ	interface/frName	0x158	82 of 86 words match	docs/nonmatching/interface/frName.md	28
 DrawSelectCursor	interface/itfMesManager	0x2FC		docs/nonmatching/interface/itfMesManager.md	5
