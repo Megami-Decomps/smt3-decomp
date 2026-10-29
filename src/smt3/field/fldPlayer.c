@@ -15,7 +15,7 @@
 #include "event.h"
 #include "effect.h"
 
-void dds3SetPosPoseSet(dds3Basic_t *pBasic, u128 *pos);
+void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos);
 
 dds3Basic_t *dds3GetActiveScene(void);
 
@@ -449,7 +449,7 @@ void fldPlayerCalc_Hit(void) {
     pos[0] = fldGlobalBase.hitX;
     pos[1] = fldGlobalBase.hitY;
     pos[2] = fldGlobalBase.hitZ;
-    dds3SetPosPoseSet(ctl->handle, (u128 *)pos);
+    dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)pos);
     fldGlobalBase.hitValid = 0;
     dds3GetPosPoseSet(ctl->handle);
     SDF_VU0_STOREVECTOR(pos);
@@ -476,7 +476,7 @@ s32 fldPlayerCalcHasigo(void) {
         fldGlobalBase.z = pos[2];
         pos[1] = fldGlobalBase.y;
         pos[2] = fldGlobalBase.z;
-        dds3SetPosPoseSet(ctl->handle, (u128 *)pos);
+        dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)pos);
     } else if (gfldPlayerDamegeCnt < 0) {
         dds3GetPosPoseSet(ctl->handle);
         SDF_VU0_STOREVECTOR(pos);
@@ -489,7 +489,7 @@ s32 fldPlayerCalcHasigo(void) {
         fldGlobalBase.z = pos[2];
         pos[1] = fldGlobalBase.y;
         pos[2] = fldGlobalBase.z;
-        dds3SetPosPoseSet(ctl->handle, (u128 *)pos);
+        dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)pos);
     } else {
         return 0;
     }
@@ -814,7 +814,7 @@ s32 fldPlayerFastSet(void)
             pos[1] = fldGlobalBase.y;
             pos[2] = fldGlobalBase.hitZ;
             fldGlobalBase.z = fldGlobalBase.hitZ;
-            dds3SetPosPoseSet(ctl->handle, (u128 *)pos);
+            dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)pos);
             fldGlobalBase.hitValid = 0;
         }
         dds3GetPosPoseSet(ctl->handle);
@@ -842,7 +842,7 @@ s32 fldPlayerFastSet(void)
             pos[0] = fldGlobalBase.x;
             pos[1] = fldGlobalBase.y;
             pos[2] = fldGlobalBase.z;
-            dds3SetPosPoseSet(ctl->handle, (u128 *)pos);
+            dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)pos);
             fldGlobalBase.hitValid = 0;
         }
         dds3GetPosPoseSet(ctl->handle);
@@ -885,7 +885,109 @@ void fldPlayerMotReset2(void) {
                     9, 0.0f);
 }
 
+#ifdef NON_MATCHING
+extern void dds3GetRotPoseSet(dds3Basic_t *basic);
+extern f32 EulerAngleAxisY(void);
+extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
+extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rot);
+extern sdfVector4_t fldPlayerPosRotWork[];
+
+void fldPlayerPosRot(void)
+{
+    fldUnitControl_t *control = fldGetUnitControl();
+    sdfVector4_t pos __attribute__((aligned(16)));
+    sdfVector4_t rot __attribute__((aligned(16)));
+    sdfVector4_t oldPos __attribute__((aligned(16)));
+    dds3Basic_t *basic;
+    dds3PoseSet_t *pose;
+    f32 angle;
+    volatile f32 *camAngle = &fldGlobalBase.camAngle;
+    volatile f32 *camAngle2 = &fldGlobalBase.camAngle2;
+
+    if (control == NULL || control->handle == NULL) {
+        return;
+    }
+    dds3ObjectBaseGetModelHandle(control->handle);
+    dds3GetRotPoseSet(control->handle);
+    angle = EulerAngleAxisY() * 180.0f / 3.1399999f;
+    *camAngle2 = angle;
+    *camAngle = angle;
+    dds3GetPosPoseSet(control->handle);
+    SDF_VU0_STOREVECTOR(&pos);
+    fldGlobalBase.prevX = fldGlobalBase.x;
+    fldGlobalBase.prevY = fldGlobalBase.y;
+    fldGlobalBase.prevZ = fldGlobalBase.z;
+    fldGlobalBase.x = pos.x;
+    fldGlobalBase.y = pos.y;
+    fldGlobalBase.z = pos.z;
+    dds3OnPoseSetFlag(control->handle->poseset, 1);
+    dds3OnPoseSetFlag(control->handle->poseset, 8);
+    if (control->handle2 != NULL) {
+        dds3OnPoseSetFlag(control->handle2->poseset, 1);
+        dds3OnPoseSetFlag(control->handle2->poseset, 8);
+    }
+    if (gfldPlayerDamegeCnt != 0) {
+        basic = control->handle;
+        pose = basic->poseset;
+        SDF_VU0_COPYVECTOR(&pose->pos2, &pose->pos);
+    } else {
+        fldPlayerSdwOn();
+        basic = control->handle;
+        pose = basic->poseset;
+        SDF_VU0_COPYVECTOR(&oldPos, &pose->pos2);
+        if (sdfFabs(oldPos.x - pos.x) < 1.0f) {
+            pose->pos2.x = pos.x;
+        } else {
+            pose->pos2.x = oldPos.x + (pos.x - oldPos.x) / 3.0f;
+        }
+        if (sdfFabs(oldPos.y - pos.y) < 1.0f) {
+            basic->poseset->pos2.y = pos.y;
+        } else {
+            basic->poseset->pos2.y = oldPos.y + (pos.y - oldPos.y) / 3.0f;
+        }
+        if (sdfFabs(oldPos.z - pos.z) < 1.0f) {
+            basic->poseset->pos2.z = pos.z;
+        } else {
+            basic->poseset->pos2.z = oldPos.z + (pos.z - oldPos.z) / 3.0f;
+        }
+        basic->poseset->pos2.w = 1.0f;
+    }
+    if (control->handle2 != NULL) {
+        dds3PoseSet_t *other = control->handle2->poseset;
+        pose = basic->poseset;
+        other->pos2.x = pose->pos2.x;
+        other->pos2.y = pose->pos2.y;
+        other->pos2.z = pose->pos2.z;
+        other->pos2.w = pose->pos2.w;
+        other->pos.x = pose->pos.x;
+        other->pos.y = pose->pos.y;
+        other->pos.z = pose->pos.z;
+        other->pos.w = pose->pos.w;
+        other->rot.x = pose->rot.x;
+        other->rot.y = pose->rot.y;
+        other->rot.z = pose->rot.z;
+        other->rot.w = pose->rot.w;
+        rot.x = pose->rot.x;
+        rot.y = pose->rot.y;
+        rot.z = pose->rot.z;
+        rot.w = pose->rot.w;
+        dds3SetPosPoseSet(control->handle2, &pos);
+        dds3SetRotPoseSet(control->handle2, &rot);
+        basic = control->handle;
+    }
+    pose = basic->poseset;
+    fldPlayerPosRotWork[0].x = pose->pos2.x;
+    fldPlayerPosRotWork[0].y = pose->pos2.y;
+    fldPlayerPosRotWork[0].z = pose->pos2.z;
+    fldPlayerPosRotWork[0].w = pose->pos2.w;
+    fldPlayerPosRotWork[1].x = pose->rot.x;
+    fldPlayerPosRotWork[1].y = pose->rot.y;
+    fldPlayerPosRotWork[1].z = pose->rot.z;
+    fldPlayerPosRotWork[1].w = pose->rot.w;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerPosRot);
+#endif
 INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerWarpState);
 
 INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerFastMode);
