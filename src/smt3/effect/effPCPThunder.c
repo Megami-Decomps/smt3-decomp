@@ -769,15 +769,15 @@ void effPCPThunderSpherePolyLowDelete(effPCPThunderSpherePoly_t *hData) {
     sdfMemFreeDirect(hData->allocationHandle);
 }
 
-void effPCPThunderSpherePolyLowCreate(void *pParam) {
+effPCPThunderSpherePoly_t *effPCPThunderSpherePolyLowCreate(void *pParam) {
     void *parameters;
 
     parameters = dds3EffectPCPDataGetData(pParam, EFF_THUNDER_PARAMETER_BLOCK);
-    effBTLBindCreateTrack(parameters);
+    return effBTLBindCreateTrack(parameters);
 }
 
-void effPCPThunderSpherePolyLowCopy(void *parameters) {
-    effBTLBindCreateTrack(parameters);
+effPCPThunderSpherePoly_t *effPCPThunderSpherePolyLowCopy(void *parameters) {
+    return effBTLBindCreateTrack(parameters);
 }
 
 void effPCPThunderSpherePolyLowSetPosition(void *hData, void *pPos) {

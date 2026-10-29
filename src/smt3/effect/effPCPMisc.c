@@ -4154,7 +4154,7 @@ effPCPMultiBlurExp2_tag *effPCPMultiFilterExpCreatePCF(void *data) {
     return effPCPMultiFilterExpCreate(dds3EffectPCPDataGetData(data, 0));
 }
 
-void effPCPMultiFilterExpCopy(effPCPMultiBlurExp2_tag *work) {
+effPCPMultiBlurExp2_tag *effPCPMultiFilterExpCopy(effPCPMultiBlurExp2_tag *work) {
     effPCPMultiFilterExpParam_t params;
 
     params.type = work->flags;
@@ -4164,7 +4164,7 @@ void effPCPMultiFilterExpCopy(effPCPMultiBlurExp2_tag *work) {
     params.area_s = work->startExtent;
     params.area_e = work->endExtent;
     memcpy(&params.res, &work->resource.rectangle->param, sizeof(params.res));
-    effPCPMultiFilterExpCreate(&params);
+    return effPCPMultiFilterExpCreate(&params);
 }
 
 void effPCPMultiFilterExpDelete(effPCPMultiBlurExp2_tag *hData) {
@@ -4245,7 +4245,7 @@ effPCPMultiBlurExp2_tag *effPCPMultiBlurExp2CreatePCF(void *data) {
     return effPCPMultiBlurExp2Create(dds3EffectPCPDataGetData(data, 0));
 }
 
-void effPCPMultiBlurExp2Copy(effPCPMultiBlurExp2_tag *work) {
+effPCPMultiBlurExp2_tag *effPCPMultiBlurExp2Copy(effPCPMultiBlurExp2_tag *work) {
     effPCPMultiBlurExp2Param_t params;
 
     params.type = work->flags;
@@ -4255,7 +4255,7 @@ void effPCPMultiBlurExp2Copy(effPCPMultiBlurExp2_tag *work) {
     params.area_s = work->startExtent;
     params.area_e = work->endExtent;
     params.MultiBlur = work->resource.blur->param;
-    effPCPMultiBlurExp2Create(&params);
+    return effPCPMultiBlurExp2Create(&params);
 }
 
 void effPCPMultiBlurExp2Delete(effPCPMultiBlurExp2_tag *hData) {
@@ -4446,7 +4446,7 @@ effPCPDistortionBlurExp_tag *effPCPDistortionBlurExpCreatePCF(void *data) {
     return effPCPDistortionBlurExpCreate(dds3EffectPCPDataGetData(data, 0));
 }
 
-void effPCPDistortionBlurExpCopy(effPCPDistortionBlurExp_tag *work) {
+effPCPDistortionBlurExp_tag *effPCPDistortionBlurExpCopy(effPCPDistortionBlurExp_tag *work) {
     effPCPDistortionBlurExpParam_t params;
 
     params.type = work->type;
@@ -4456,7 +4456,7 @@ void effPCPDistortionBlurExpCopy(effPCPDistortionBlurExp_tag *work) {
     params.area_s = work->area_s;
     params.area_e = work->area_e;
     params.DistBlur = work->resource.scatter->params;
-    effPCPDistortionBlurExpCreate(&params);
+    return effPCPDistortionBlurExpCreate(&params);
 }
 
 void effPCPDistortionBlurExpDelete(effPCPDistortionBlurExp_tag *hData) {
@@ -4542,7 +4542,7 @@ effPCPDistortionBlurExp_tag *effPCPRippleBlurExpCreatePCF(void *data) {
     return effPCPRippleBlurExpCreate(dds3EffectPCPDataGetData(data, 0));
 }
 
-void effPCPRippleBlurExpCopy(effPCPDistortionBlurExp_tag *work) {
+effPCPDistortionBlurExp_tag *effPCPRippleBlurExpCopy(effPCPDistortionBlurExp_tag *work) {
     effPCPRippleBlurExpParam_t params;
 
     params.type = work->type;
@@ -4552,7 +4552,7 @@ void effPCPRippleBlurExpCopy(effPCPDistortionBlurExp_tag *work) {
     params.area_s = work->area_s;
     params.area_e = work->area_e;
     params.res = work->resource.scale->params;
-    effPCPRippleBlurExpCreate(&params);
+    return effPCPRippleBlurExpCreate(&params);
 }
 
 void effPCPRippleBlurExpDelete(effPCPDistortionBlurExp_tag *hData) {
@@ -4918,7 +4918,7 @@ effPCPAgiraoFire_tag *effPCPAgiraoFireCreate(effPCPAgiraoFireParam_t *pParam, ef
     return work;
 }
 
-void effPCPAgiraoFireCreatePCF(void *data) {
+effPCPAgiraoFire_tag *effPCPAgiraoFireCreatePCF(void *data) {
     effPCPAgiraoFireParam_t *params;
     effPCPAgiraoFirePartList_t *descriptors[7];
     effPCPAgiraoFirePartList_t **dst;
@@ -4932,7 +4932,7 @@ void effPCPAgiraoFireCreatePCF(void *data) {
         *dst = dds3EffectPCPDataGetData(data, i);
         dst++;
     } while (i < 7);
-    effPCPAgiraoFireCreate(params, descriptors);
+    return effPCPAgiraoFireCreate(params, descriptors);
 }
 
 effPCPAgiraoFire_tag *effPCPAgiraoFireCopy(effPCPAgiraoFire_tag *src) {
@@ -5456,7 +5456,7 @@ effPCPAgiFireball2_tag *effPCPAgiFireball2Create(effPCPAgiFireball2Param_t *pAFB
     return work;
 }
 
-void effPCPAgiFireball2CreatePCF(void *args) {
+effPCPAgiFireball2_tag *effPCPAgiFireball2CreatePCF(void *args) {
     effPCPBlockSetInputs_t set;
     void **group;
     void *first;
@@ -5480,7 +5480,7 @@ void effPCPAgiFireball2CreatePCF(void *args) {
         set.selected.pStart[j] = dds3EffectPCPDataGetData(args, idx++);
     }
     set.selected.pOkSmoke = dds3EffectPCPDataGetData(args, idx);
-    effPCPAgiFireball2Create(first, &set);
+    return effPCPAgiFireball2Create(first, &set);
 }
 
 effPCPAgiFireball2_tag *effPCPAgiFireball2Copy(effPCPAgiFireball2_tag *src) {
@@ -6599,7 +6599,7 @@ effPCPRadiateThunder_tag *effPCPRadiateThunderCreate(const effPCPRadiateThunderP
     return groupSet;
 }
 
-void effPCPRadiateThunderCreatePCF(void *args) {
+effPCPRadiateThunder_tag *effPCPRadiateThunderCreatePCF(void *args) {
     effPCPRadiateThunderParam_t *work;
     void *resources[4];
     u32 i;
@@ -6612,7 +6612,7 @@ void effPCPRadiateThunderCreatePCF(void *args) {
             resources[i] = NULL;
         }
     }
-    effPCPRadiateThunderCreate(work, resources);
+    return effPCPRadiateThunderCreate(work, resources);
 }
 
 effPCPRadiateThunder_tag *effPCPRadiateThunderCopy(effPCPRadiateThunder_tag *work) {

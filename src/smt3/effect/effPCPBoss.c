@@ -1737,13 +1737,13 @@ effPCPCrack_t *effPCPCrackCreate(effPCPCrackParam_t *pParam, void *pPB)
     return work;
 }
 
-void effPCPCrackCreatePCF(void *parameterTable) {
+effPCPCrack_t *effPCPCrackCreatePCF(void *parameterTable) {
     effPCPCrackParam_t *bossParams;
     void *effectParams;
 
     bossParams = dds3EffectPCPDataGetData(parameterTable, 0);
     effectParams = dds3EffectPCPDataGetData(parameterTable, 1);
-    effPCPCrackCreate(bossParams, effectParams);
+    return effPCPCrackCreate(bossParams, effectParams);
 }
 
 effPCPCrack_t *effPCPCrackCopy(effPCPCrack_t *src)
@@ -2100,7 +2100,7 @@ effPCPBossBael_t *effPCPBossBaelCreate(void *pParam, void *pPB, void *pPCF)
     return work;
 }
 
-void effPCPBossBaelCreatePCF(void *parameterTable) {
+effPCPBossBael_t *effPCPBossBaelCreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
     void *thirdBlock;
@@ -2108,7 +2108,7 @@ void effPCPBossBaelCreatePCF(void *parameterTable) {
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
     thirdBlock = dds3EffectPCPDataGetData(parameterTable, 2);
-    effPCPBossBaelCreate(firstBlock, secondBlock, thirdBlock);
+    return effPCPBossBaelCreate(firstBlock, secondBlock, thirdBlock);
 }
 
 effPCPBossBael_t *effPCPBossBaelCopy(effPCPBossBael_t *hData, s32 bPos, s32 tbldata)
@@ -2209,13 +2209,13 @@ effPCPBossDengeki_t *effPCPBossDengekiCreate(effPCPBossDengeki_t *pParam, void *
     return work;
 }
 
-void effPCPBossDengekiCreatePCF(void *parameterTable) {
+effPCPBossDengeki_t *effPCPBossDengekiCreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
 
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
-    effPCPBossDengekiCreate(firstBlock, secondBlock);
+    return effPCPBossDengekiCreate(firstBlock, secondBlock);
 }
 
 effPCPBossDengeki_t *effPCPBossDengekiCopy(effPCPBossDengeki_t *hData, s32 bPos, s32 tbldata)
@@ -2725,13 +2725,13 @@ effPCPBossKAGUAttack_t *effPCPBossKAGUAttackCreate(effPCPBossKAGUAttack_t *pPara
     return work;
 }
 
-void effPCPBossKAGUAttackCreatePCF(void *parameterTable) {
+effPCPBossKAGUAttack_t *effPCPBossKAGUAttackCreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
 
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
-    effPCPBossKAGUAttackCreate(firstBlock, secondBlock);
+    return effPCPBossKAGUAttackCreate(firstBlock, secondBlock);
 }
 
 effPCPBossKAGUAttack_t *effPCPBossKAGUAttackCopy(effPCPBossKAGUAttack_t *hData, s32 bPos, s32 tbldata)
@@ -2967,7 +2967,7 @@ effPCPBossKAGUThunderbolt_t *effPCPBossKAGUThunderboltCreate(effPCPBossKAGUThund
     return work;
 }
 
-void effPCPBossKAGUThunderboltCreatePCF(void *parameterTable) {
+effPCPBossKAGUThunderbolt_t *effPCPBossKAGUThunderboltCreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
     void *thirdBlock;
@@ -2975,7 +2975,7 @@ void effPCPBossKAGUThunderboltCreatePCF(void *parameterTable) {
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
     thirdBlock = dds3EffectPCPDataGetData(parameterTable, 2);
-    effPCPBossKAGUThunderboltCreate(firstBlock, secondBlock, thirdBlock);
+    return effPCPBossKAGUThunderboltCreate(firstBlock, secondBlock, thirdBlock);
 }
 
 /* NON_MATCHING: 23 of 44 words differ (first at +0x8). */
@@ -3172,13 +3172,13 @@ effPCPBossKAGU2Attack_t *effPCPBossKAGU2AttackCreate(effPCPBossKAGU2Attack_t *pP
     return work;
 }
 
-void effPCPBossKAGU2AttackCreatePCF(void *parameterTable) {
+effPCPBossKAGU2Attack_t *effPCPBossKAGU2AttackCreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
 
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
-    effPCPBossKAGU2AttackCreate(firstBlock, secondBlock);
+    return effPCPBossKAGU2AttackCreate(firstBlock, secondBlock);
 }
 
 effPCPBossKAGU2Attack_t *effPCPBossKAGU2AttackCopy(effPCPBossKAGU2Attack_t *hData, s32 bPos,
@@ -3503,13 +3503,13 @@ effPCPCrack_t *effPCPCrack2Create(effPCPCrackParam_t *pParam, void *pPB)
     return work;
 }
 
-void effPCPCrack2CreatePCF(void *data) {
+effPCPCrack_t *effPCPCrack2CreatePCF(void *data) {
     effPCPCrackParam_t *bossParams;
     void *effectParams;
 
     bossParams = dds3EffectPCPDataGetData(data, 0);
     effectParams = dds3EffectPCPDataGetData(data, 1);
-    effPCPCrack2Create(bossParams, effectParams);
+    return effPCPCrack2Create(bossParams, effectParams);
 }
 
 effPCPCrack_t *effPCPCrack2Copy(effPCPCrack_t *src)
@@ -3683,13 +3683,13 @@ effPCPScreenCrackModel_t *effPCPScreenCrackModelCreate(effPCPScreenCrackModel_t 
     return work;
 }
 
-void effPCPScreenCrackModelCreatePCF(void *parameterTable) {
+effPCPScreenCrackModel_t *effPCPScreenCrackModelCreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
 
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
-    effPCPScreenCrackModelCreate(firstBlock, secondBlock);
+    return effPCPScreenCrackModelCreate(firstBlock, secondBlock);
 }
 
 effPCPScreenCrackModel_t *effPCPScreenCrackModelCopy(effPCPScreenCrackModel_t *hData, s32 bPos,
@@ -3786,13 +3786,13 @@ effPCPMuzzleFlash_tag *effPCPMuzzleFlashCreate(effPCPMuzzleFlashParam_t *pParam,
     return work;
 }
 
-void effPCPMuzzleFlashCreatePCF(void *parameterTable) {
+effPCPMuzzleFlash_tag *effPCPMuzzleFlashCreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
 
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
-    effPCPMuzzleFlashCreate(firstBlock, secondBlock);
+    return effPCPMuzzleFlashCreate(firstBlock, secondBlock);
 }
 
 effPCPMuzzleFlash_tag *effPCPMuzzleFlashCopy(effPCPMuzzleFlash_tag *hData, s32 bPos, s32 tbldata)
@@ -4062,13 +4062,13 @@ effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Create);
 #endif
 
-void effPCPDANTE_Damage_CreatePCF(void *parameterTable) {
+effPCPDANTE_Damage_tag *effPCPDANTE_Damage_CreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
 
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
-    effPCPDANTE_Damage_Create(firstBlock, secondBlock);
+    return effPCPDANTE_Damage_Create(firstBlock, secondBlock);
 }
 
 effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Copy(effPCPDANTE_Damage_tag *hData, s32 bPos, s32 tbldata)
@@ -4188,13 +4188,13 @@ effPCP_PBCamera_tag *effPCP_PBCamera_Create(effPCP_PBCamera_Param_t *pParam, voi
     return work;
 }
 
-void effPCP_PBCamera_CreatePCF(void *parameterTable) {
+effPCP_PBCamera_tag *effPCP_PBCamera_CreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
 
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
-    effPCP_PBCamera_Create(firstBlock, secondBlock);
+    return effPCP_PBCamera_Create(firstBlock, secondBlock);
 }
 
 effPCP_PBCamera_tag *effPCP_PBCamera_Copy(effPCP_PBCamera_tag *hData, s32 bPos, s32 tbldata)
@@ -4356,7 +4356,7 @@ effPCPDANTE_ShowTime_tag *effPCPDANTE_ShowTime_Create(effPCPDANTE_ShowTime_Param
     return work;
 }
 
-void effPCPDANTE_ShowTime_CreatePCF(void *parameterTable) {
+effPCPDANTE_ShowTime_tag *effPCPDANTE_ShowTime_CreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
     void *thirdBlock;
@@ -4364,7 +4364,7 @@ void effPCPDANTE_ShowTime_CreatePCF(void *parameterTable) {
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
     thirdBlock = dds3EffectPCPDataGetData(parameterTable, 2);
-    effPCPDANTE_ShowTime_Create(firstBlock, secondBlock, thirdBlock);
+    return effPCPDANTE_ShowTime_Create(firstBlock, secondBlock, thirdBlock);
 }
 
 effPCPDANTE_ShowTime_tag *effPCPDANTE_ShowTime_Copy(effPCPDANTE_ShowTime_tag *hData, s32 bPos, s32 tbldata)
@@ -4664,13 +4664,13 @@ effPCP_BED_tag *effPCP_BED_Create(effPCP_BED_Param_t *pParam, void *pBED)
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_Create);
 #endif
 
-void effPCP_BED_CreatePCF(void *parameterTable) {
+effPCP_BED_tag *effPCP_BED_CreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
 
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
-    effPCP_BED_Create(firstBlock, secondBlock);
+    return effPCP_BED_Create(firstBlock, secondBlock);
 }
 
 effPCP_BED_tag *effPCP_BED_Copy(effPCP_BED_tag *hData, s32 bPos, s32 tbldata)
@@ -4811,7 +4811,7 @@ effPCP_HBED2_tag *effPCP_HBED2_Create(effPCP_HBED2_Param_t *pParam, void *pPBDat
     return work;
 }
 
-void effPCP_HBED2_CreatePCF(void *parameterTable) {
+effPCP_HBED2_tag *effPCP_HBED2_CreatePCF(void *parameterTable) {
     void *firstBlock;
     void *secondBlock;
     void *thirdBlock;
@@ -4819,7 +4819,7 @@ void effPCP_HBED2_CreatePCF(void *parameterTable) {
     firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
     secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
     thirdBlock = dds3EffectPCPDataGetData(parameterTable, 2);
-    effPCP_HBED2_Create(firstBlock, secondBlock, thirdBlock);
+    return effPCP_HBED2_Create(firstBlock, secondBlock, thirdBlock);
 }
 
 effPCP_HBED2_tag *effPCP_HBED2_Copy(effPCP_HBED2_tag *hData, s32 bPos, s32 tbldata)

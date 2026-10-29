@@ -1558,11 +1558,11 @@ effAPPoint4_tag *effAPPoint4Create(const effAPPoint4Param_t *pParams, u16 type, 
 }
 
 /* Forward block 0, block 1's word-2 kind (narrowed to u16), and block 1 unchanged. */
-void effAPPoint4CreatePCF(void *data) {
+effAPPoint4_tag *effAPPoint4CreatePCF(void *data) {
     void *block0 = dds3EffectPCPDataGetData(data, 0);
     void *block1 = dds3EffectPCPDataGetData(data, 1);
 
-    effAPPoint4Create(block0, dds3EffectPCPDataGetType(data, 1), block1);
+    return effAPPoint4Create(block0, dds3EffectPCPDataGetType(data, 1), block1);
 }
 
 /* Clone channel work, allocate slots and duplicate a parameter template per record.

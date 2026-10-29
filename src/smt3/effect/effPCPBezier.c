@@ -173,13 +173,13 @@ effPCPBezierBill_tag *effPCPBezierBillCreate(const effPCPBezierBillParam_t *pPar
     return work;
 }
 
-void effPCPBezierBillCreatePCF(void *paramTable) {
+effPCPBezierBill_tag *effPCPBezierBillCreatePCF(void *paramTable) {
     void *firstBlock;
     void *secondBlock;
 
     firstBlock = dds3EffectPCPDataGetData(paramTable, 0);
     secondBlock = dds3EffectPCPDataGetData(paramTable, 1);
-    effPCPBezierBillCreate(firstBlock, secondBlock);
+    return effPCPBezierBillCreate(firstBlock, secondBlock);
 }
 
 effPCPBezierBill_tag *effPCPBezierBillCopy(effPCPBezierBill_tag *src) {
