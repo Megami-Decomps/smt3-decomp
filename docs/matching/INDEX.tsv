@@ -290,5 +290,6 @@ sceMcSync				docs/matching/sdk/libmc.md	61
 sceMcSetFileInfo				docs/matching/sdk/libmc.md	72
 sceSifMUnBindRpc			60 of 71 words match	docs/matching/sdk/libmrpc.md	3
 scePadPortOpen				docs/matching/sdk/libpad.md	3
+dds3TitleDrawFade	sound/sndManager	0x4F8	318 of 318 words match	docs/matching/sound/sndManager.md	3
 stfMain2	staff/stfMain	0x2D4	145 of 181 words match	docs/matching/staff/stfMain.md	3
 ObjDispOff	staff/stfMain	0x504	303 of 321 words match	docs/matching/staff/stfMain.md	34
