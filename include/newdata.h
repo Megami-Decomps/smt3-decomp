@@ -210,6 +210,26 @@ typedef struct nbUnitMotion_t {
 } nbUnitMotion_t;
 
 
+/* Complete motion-bank view of a native 0x310-byte model-visual row. */
+typedef struct {
+    sdfVector4_t center;
+    f32 formsize;
+    f32 formheight;
+    f32 formscale;
+    f32 oneshotr;
+    f32 allshotr;
+    u16 modelsize;
+    u16 shadowsize;
+    u16 badframe;
+    u16 autowait;
+    nbUnitMotion_t motions[26];
+    u32 reserved[3];
+} nbUnitVisualMotions_t;
+
+typedef char nbUnitVisualMotions_size_must_be_0x310[
+    sizeof(nbUnitVisualMotions_t) == 0x310 ? 1 : -1];
+
+
 /* Model-visual records have a 0x310-byte native stride. The upstream packet
  * helpers use the scalar prefix; the action helpers index 0x1C-byte
  * visual-part records starting at +0x32, up to index 11. */

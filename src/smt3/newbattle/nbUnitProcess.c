@@ -255,25 +255,6 @@ s32 nbSetNegoWaitMotion(nbFormation_t *form)
     }
 }
 
-/* Complete motion-bank view of a native 0x310-byte model-visual row. */
-typedef struct {
-    sdfVector4_t center;
-    f32 formsize;
-    f32 formheight;
-    f32 formscale;
-    f32 oneshotr;
-    f32 allshotr;
-    u16 modelsize;
-    u16 shadowsize;
-    u16 badframe;
-    u16 autowait;
-    nbUnitMotion_t motions[26];
-    u32 reserved[3];
-} nbUnitVisualMotions_t;
-
-typedef char nbUnitVisualMotions_size_must_be_0x310[
-    sizeof(nbUnitVisualMotions_t) == 0x310 ? 1 : -1];
-
 extern s32 nbGetMotionNo(nbFormation_t *form, s32 motion);
 extern void evtSetUnitMotion(evtUnit_t *unit, s32 motion, s32 before, s32 smooth, s32 mode);
 extern void evtSetWaitHokanFrame(evtUnit_t *unit, s32 before, s32 smooth);
