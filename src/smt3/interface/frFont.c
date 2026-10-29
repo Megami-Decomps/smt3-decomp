@@ -2201,7 +2201,123 @@ void frSetVariableRequest(s32 VarNo, s32 pStr) {
     gVarStr[VarNo] = pStr;
 }
 
+#ifdef NON_MATCHING
+typedef struct
+{
+    u32 header[4];
+    u64 words[32];
+} frFontDumpSlot_t;
+typedef char frFontDumpSlotSizeCheck[(sizeof(frFontDumpSlot_t) == 0x110) ? 1 : -1];
+
+extern sdfDrawTag_t D_0056B690[2];
+extern frFontGsPacket_t D_0056B6D0[2];
+extern sdfDrawTag_t D_0056B7D0[2];
+extern frFontDumpSlot_t frDumpFontTexturePacket[2];
+extern sdfGrOt_t D_002F67F8;
+
+void frDumpFontTexture(s32 x, s32 y, s32 depth)
+{
+    frFontDumpSlot_t *slot;
+    frFontGsPacket_t *drawEnv;
+    sdfDrawTag_t *drawEnvTag;
+    sdfDrawTag_t *textureTag;
+    u32 frame, imageBase, widthExponent, bufferWidth, heightExponent, bufferBase;
+    s32 atlasWidth, atlasHeight;
+    s32 width;
+    s32 height;
+    s32 left;
+    s32 right;
+    s32 top;
+    s32 bottom;
+    u64 depthBits;
+    u64 texture;
+    u64 color;
+    u64 widthHeight;
+    u64 heightBits;
+    u64 topLeft;
+    u64 topRight;
+    u64 bottomLeft;
+    u64 bottomRight;
+
+    frame = (u32)dds3GetFrameID() & 0xFF;
+    atlasHeight = gFT.atlas.height;
+    atlasWidth = gFT.atlas.width;
+    imageBase = gFT.imageBuffers[0];
+    widthExponent = gFT.atlas.widthExponent;
+    bufferWidth = gFT.atlas.bufferWidth;
+    heightExponent = gFT.atlas.heightExponent;
+    bufferBase = gFT.atlas.bufferBase;
+    width = (s32)((u32)atlasWidth << 4);
+    height = (s32)((u32)atlasHeight << 4);
+    left = (s32)(((u32)x << 4) + 0x7000);
+    right = (s32)((u32)left + (u32)width);
+    top = (s32)(((u32)y << 3) + 0x7900);
+    bottom = (s32)((u32)top + ((u32)atlasHeight << 3));
+    depthBits = (u64)depth << 32;
+    widthHeight = (u64)(s64)width | ((u64)(s64)height << 16);
+    heightBits = (u64)(s64)height << 16;
+    topLeft = (u64)(s64)left | ((u64)(s64)top << 16) | depthBits;
+    topRight = (u64)(s64)right | ((u64)(s64)top << 16) | depthBits;
+    bottomLeft = (u64)(s64)left | ((u64)(s64)bottom << 16) | depthBits;
+    bottomRight = (u64)(s64)right | ((u64)(s64)bottom << 16) | depthBits;
+    texture = bufferBase | 0x8000000000000000ULL |
+        ((u64)widthExponent << 26) | 0x40000000ULL |
+        ((u64)bufferWidth << 14) | 0x01400000ULL |
+        ((u64)heightExponent << 30) | ((u64)imageBase << 37);
+    color = 0x3F800000FFFFFFFFULL;
+    slot = &frDumpFontTexturePacket[frame];
+    drawEnv = &D_0056B6D0[frame];
+    drawEnvTag = &D_0056B690[frame];
+    textureTag = &D_0056B7D0[frame];
+
+    slot->header[3] = 0x50000010;
+    slot->header[0] = 0x70000010;
+    slot->header[1] = 0;
+    slot->header[2] = 0;
+    slot->words[0] = 0x10AE40000000800FULL;
+    slot->words[1] = 0xE;
+    slot->words[2] = texture;
+    slot->words[8] = widthHeight;
+    slot->words[12] = bottomRight;
+    slot->words[4] = 0x60;
+    slot->words[5] = 0x14;
+    slot->words[3] = 6;
+    slot->words[6] = 5;
+    slot->words[7] = 8;
+    slot->words[9] = 3;
+    slot->words[11] = 1;
+    slot->words[13] = 4;
+    slot->words[10] = color;
+    slot->words[15] = 3;
+    slot->words[17] = 1;
+    slot->words[14] = heightBits;
+    slot->words[18] = bottomLeft;
+    slot->words[30] = topLeft;
+    slot->words[24] = topRight;
+    slot->words[20] = (u64)(s64)width;
+    slot->words[27] = 3;
+    slot->words[29] = 1;
+    slot->words[31] = 4;
+    slot->words[28] = color;
+    slot->words[19] = 4;
+    slot->words[16] = color;
+    slot->words[21] = 3;
+    slot->words[23] = 1;
+    slot->words[25] = 4;
+    slot->words[22] = color;
+    slot->words[26] = 0;
+
+    frCreateDrawEnvPacket(drawEnv);
+    sdfDrawTagInit(drawEnvTag);
+    sdfDrawTagLink(drawEnvTag, (u32)drawEnv);
+    D_002F67F8.regFunc(&D_002F67F8, drawEnvTag);
+    sdfDrawTagInit(textureTag);
+    sdfDrawTagLink(textureTag, (u32)slot);
+    D_002F67F8.regFunc(&D_002F67F8, textureTag);
+}
+#else
 INCLUDE_ASM(const s32, "interface/frFont", frDumpFontTexture);
+#endif
 
 INCLUDE_RODATA(const s32, "interface/frFont", D_00535968);
 
