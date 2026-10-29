@@ -2579,7 +2579,24 @@ void cmbDrawTopSprite(s32 unusedX, s32 unusedY, u32 unusedZ, s32 unusedOt)
     fclDrawSpriteRes(0, 0, 0xFFFFF0, 0, 0, 0x23, CMB_GBWK->texHandle, cmbSpriteTable, 0x47);
 }
 
+extern const char *D_0032DE10[];
+
+#ifdef NON_MATCHING
+s32 cmbDrawTopText(s8 index)
+{
+    void *request = frwGetSmallFontFRQ2(0, 0, 0xFFFFF, 0x8CA0FF80,
+                                       D_0032DE10[index], NULL);
+
+    frSetDrawPosition(request, 0x280, 0x78);
+    fclDrawPanelSprite(0x33001, 0x47);
+    cmbDrawTopSprite(0, 0, 0xFFFFF0, 0x47);
+    fclDrawPanelSprite(0x5101B, 0x47);
+    func_001C7E38(request, 1, 0x47);
+    return frDestroyFontRequestAfter(request);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawTopText);
+#endif
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockRow);
 
