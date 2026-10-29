@@ -5992,7 +5992,7 @@ extern char *datExplainTable[];
 extern char D_0054FEA8[];
 extern s16 cmpHeartsMasterPhase asm("rstHeartsMasterPhase");
 extern datUnitWork_t *volatile cmpStatusBirthLive asm("cmbBirthPanel");
-extern void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags);
+extern void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags, s32 unused);
 
 #ifdef NON_MATCHING
 void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
@@ -6090,7 +6090,7 @@ void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
     } else {
         badgeX = nameX + (x + length + 2) * 16;
     }
-    cmpDrawStatusBadge(badgeX, (y + 0x41) * 8, colors, live->badstatus);
+    cmpDrawStatusBadge(badgeX, (y + 0x41) * 8, colors, live->badstatus, 0x100);
     fclDrawSpriteRes(spriteX, spriteY, 0, colors, 2, 0, D_00345D88, fclSpriteTable, 0x47);
     fclDrawSpriteRes(spriteX, spriteY, 0, colors, 2, 1, D_00345D88, fclSpriteTable, 0x47);
     fclDrawSpriteRes(spriteX, spriteY, 0, colors, 2, 2, D_00345D88, fclSpriteTable, 0x47);
@@ -8670,7 +8670,7 @@ void campDrawStatusRow1(s32 x, s32 y, u32 color, datUnitWork_t *unit)
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStatusRow1);
 #endif
 
-void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags)
+void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags, s32 unused)
 {
     u32 flags = statusFlags;
     s32 xOffset = 0;
@@ -8838,7 +8838,7 @@ void campDrawStockStatus(s32 x, s32 y, s32 z, s32 color,
         colors[0] = thirdColor;
         colors[1] = thirdColor;
         colors[3] = thirdColor;
-        cmpDrawStatusBadge(x, y, colors, unit->badstatus);
+        cmpDrawStatusBadge(x, y, colors, unit->badstatus, 0x100);
         campDrawStatusRow2(x, y, secondColor, unit);
         campDrawStatusRow3(x, y, thirdColor, unit);
     }
