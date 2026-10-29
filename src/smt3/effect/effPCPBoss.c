@@ -224,7 +224,10 @@ typedef struct effPCPBossBUNSIN_t
     f32 pos_e[4];
     effPCPBossBUNSINParam_t param;
     void *matrix;
-    s32 unk2C;
+    union {
+        s32 unk2C;
+        f32 radian;
+    };
     s32 frame;
 } effPCPBossBUNSIN_t;
 
@@ -1052,7 +1055,102 @@ void effPCPBossBUNSINDelete(effPCPBossBUNSIN_t *pPCPBossBUNSIN)
     sdfChipFreeDirect(pPCPBossBUNSIN);
 }
 
+#ifdef NON_MATCHING
+void effPCPBossBUNSINDrawPoly(sdfDrawTag_t *tag, effPCPBossBUNSIN_t *work,
+                              const u128 *center, u32 color, f32 sway, f32 angleRange,
+                              f32 width, f32 height)
+{
+    effPCPBossVector_t points[32];
+    f32 uv[64];
+    effPCPBossVector_t *point;
+    f32 *st;
+    f32 angle, angleStep, y, yStep, v, nextV, x, halfWidth;
+    u32 i;
+    u16 count;
+
+    SDF_VU0_LOADIDENTITY();
+    SDF_VU0_LOADVECTOR(center);
+    VU0_ADD_VF31_VF10_XYZ();
+    sdf3DPrimLinkTm(tag, 0);
+    LookAtMatrix(D_002F5C20, D_002F5C30, effPCPBossTexRect);
+    ReverseMatrix();
+    yStep = height / 100.0f;
+    angle = work->radian;
+    halfWidth = width * 0.5f;
+    effPCPBossWork.vertexCount = 32;
+    effPCPBossWork.primCount = 16;
+    effPCPBossWork.positions = points;
+    angleStep = (angleRange * 3.141592502593994140625f) / 100.0f;
+    effPCPBossWork.colors = NULL;
+    y = -(height * 0.5f);
+    work->radian = angle + 0.052359871566295624f;
+    effPCPBossWork.uvs = uv;
+    effPCPBossWork.color = color;
+    point = points;
+    st = uv;
+    v = 0.0f;
+    count = 0;
+    for (i = 0; i < 100; i++) {
+        nextV = v + 0.01f;
+        st[0] = 0.0f;
+        st[1] = v;
+        st[2] = 1.0f;
+        st[3] = v;
+        st[4] = 0.0f;
+        st[5] = nextV;
+        st[6] = 1.0f;
+        st[7] = nextV;
+        st += 8;
+        x = sdfSin(angle) * sway;
+        point[0].f[0] = x - halfWidth;
+        point[0].f[1] = y;
+        point[0].f[2] = 0.0f;
+        point[0].f[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(&point[0]);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&point[0]);
+        point[1].f[0] = halfWidth + x;
+        point[1].f[1] = y;
+        point[1].f[2] = 0.0f;
+        point[1].f[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(&point[1]);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&point[1]);
+        point[2].f[0] = x - halfWidth;
+        point[2].f[1] = y + yStep;
+        point[2].f[2] = 0.0f;
+        point[2].f[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(&point[2]);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&point[2]);
+        point[3].f[0] = halfWidth + x;
+        point[3].f[1] = y + yStep;
+        point[3].f[2] = 0.0f;
+        point[3].f[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(&point[3]);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&point[3]);
+        point += 4;
+        count += 4;
+        y += yStep;
+        angle += angleStep;
+        if (count >= 32) {
+            st = uv;
+            sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+            count = 0;
+            point = points;
+        }
+        v = nextV;
+    }
+    if (count >= 4) {
+        effPCPBossWork.primCount = count >> 1;
+        effPCPBossWork.vertexCount = count;
+        sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+    }
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDrawPoly);
+#endif
 
 /* vu0 routine: the BUNSIN billboard quad. */
 /* NON_MATCHING: 9 of 117 words differ (first at +0x90). */
