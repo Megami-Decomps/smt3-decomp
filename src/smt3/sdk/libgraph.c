@@ -35,10 +35,12 @@ typedef union {
 } sceGifTag;
 
 typedef struct {
-    s16 unk0;
-    u16 mode;
-    s16 unk4;
     s16 interlace;
+    u16 mode;
+    s16 fieldMode;
+    s16 version;
+    s32 intcHandlerEnabled;
+    s32 intcHandlerId;
 } GParam;
 
 typedef struct {
@@ -92,7 +94,46 @@ extern s32 sceRead(s32 fd, void *buf, s32 size);
 extern s32 sceClose(s32 a);
 extern s32 atoi(const char *s);
 
-INCLUDE_ASM(const s32, "sdk/libgraph", sceGsResetGraph);
+extern s32 DisableIntc(s32 cause);
+extern s32 RemoveIntcHandler(s32 cause, s32 handlerId);
+/* Syscall 2 has the SetGsCrt void interface. */
+extern void libc_2DBAA0(s16 interlace, s16 mode, s16 fieldMode);
+GParam *sceGsGetGParam(void);
+
+void sceGsResetGraph(s16 mode, s16 interlace, s16 outputMode, s16 fieldMode)
+{
+    GParam *param;
+
+    switch (mode) {
+    case 0:
+        param = sceGsGetGParam();
+        *(volatile u64 *)0x12001000 = 0x200;
+        param->interlace = interlace;
+        param->mode = outputMode;
+        param->version = (*(volatile u64 *)0x12001000 >> 16) & 0xFF;
+        GsPutIMR(0xFF00);
+        param->fieldMode = fieldMode != 0;
+        if (param->intcHandlerEnabled != 0) {
+            DisableIntc(2);
+            RemoveIntcHandler(2, param->intcHandlerId);
+            param->intcHandlerEnabled = 0;
+            param->intcHandlerId = 0;
+        }
+        libc_2DBAA0(interlace & 1, outputMode & 0xFF, fieldMode & 1);
+        break;
+    case 1:
+        *(volatile u64 *)0x12001000 = 0x100;
+        break;
+    case 5:
+        param = sceGsGetGParam();
+        param->fieldMode = fieldMode != 0;
+        param->interlace = interlace;
+        param->mode = outputMode;
+        param->version = (*(volatile u64 *)0x12001000 >> 16) & 0xFF;
+        libc_2DBAA0(interlace & 1, outputMode & 0xFF, fieldMode & 1);
+        break;
+    }
+}
 
 GParam *sceGsGetGParam(void)
 {
@@ -129,7 +170,7 @@ void sceGsPutDispEnv(sceGsDispEnv *disp)
 {
     GParam *gp = sceGsGetGParam();
 
-    if (gp->interlace == 1) {
+    if (gp->version == 1) {
         *(volatile u64 *)0x12000000 = disp->pmode;
         *(volatile u64 *)0x12000070 = disp->dispfb;
         *(volatile u64 *)0x12000080 = disp->display;
@@ -225,13 +266,16 @@ s32 sceGsSetDefStoreImage(sceGsStoreImage *p, s16 sbp, s16 sbw, s16 spsm, s16 ss
     return 7;
 }
 
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A6E0);
+extern const char D_0054A6E0[]; /* DMA channel timeout diagnostic, with native padding. */
+
 s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
 {
     u32 i = 0;
 
     while (D2_CHCR & 0x100) {
         if (i++ > 0x1000000) {
-            scePrintf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
+            scePrintf(D_0054A6E0);
             return -1;
         }
     }
@@ -244,7 +288,7 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
     D2_CHCR = 0x101;
     while (D2_CHCR & 0x100) {
         if (i++ > 0x1000000) {
-            scePrintf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
+            scePrintf(D_0054A6E0);
             return -1;
         }
     }

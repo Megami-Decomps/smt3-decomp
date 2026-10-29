@@ -13,8 +13,6 @@
 # 0 types, 1120 members, 504 adopted constants.
 
 
-member GParam.unk0
-member GParam.unk4
 member _FRQ.unk00
 member _FRQ.unk_00
 member arg.unk4
