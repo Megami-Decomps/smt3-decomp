@@ -503,7 +503,75 @@ void fld_1457F8(s32 mode) {
     }
 }
 
+#ifdef NON_MATCHING
+void fldBgmLoad(void)
+{
+    s32 track;
+    s32 base;
+    s32 floor;
+    s32 special;
+
+    if (fldGlobalBase.area == 20 && fldGlobalBase.floor == 2) {
+        return;
+    }
+    track = fldGetBgmTrack(fldGlobalBase.sequenceCode);
+    if (track == -1) {
+        if (fldGlobalBase.area >= 50) {
+            return;
+        }
+        base = gFldBgmTop[fldGlobalBase.area].smgId;
+        track = base + fldGlobalBase.sequenceCode;
+        if (fldGlobalBase.area == 14) {
+            fldSeSmgId = base;
+            if (evtBitCheck(5) != 0) {
+                if (fldGlobalBase.sequenceCode != 1) {
+                    fldBgmStop();
+                }
+                fldGlobalBase.sequenceCode = 1;
+            }
+            base = gFldBgmTop[fldGlobalBase.area].smgId;
+            track = base + fldGlobalBase.sequenceCode;
+        }
+        if (fldGlobalBase.area == 20) {
+            floor = fldGlobalBase.floor;
+            special = floor == 5 || floor == 8 || floor == 13 || floor == 14 ||
+                      floor == 15 || floor == 24;
+            if (!special) {
+                fldSeSmgId = base;
+                if (floor == 12 && evtBitCheck(0x16) != 0) {
+                    special = 1;
+                }
+            }
+            if (special) {
+                fldSeSmgId = gFldBgmTop[55].smgId;
+                track = fldSeSmgId + fldGlobalBase.sequenceCode;
+            }
+        } else {
+            fldSeSmgId = base;
+        }
+        if (fldGlobalBase.area == 0x22 || fldGlobalBase.area == 0x20 ||
+            fldGlobalBase.area == 0x25 || fldGlobalBase.area == 0x24 ||
+            fldGlobalBase.area == 0x29 || fldGlobalBase.area == 0x2A ||
+            fldGlobalBase.area == 0x2B || fldGlobalBase.area == 0x2C ||
+            fldGlobalBase.area == 0x2D) {
+            if (evtBitCheck(fldBgmParamTable[fldGlobalBase.area].bit) != 0) {
+                gFldBgmBit = 1;
+                fldGlobalBase.sequenceCode = fldBgmParamTable[fldGlobalBase.area].alternate[fldGlobalBase.floor + 1];
+            } else {
+                gFldBgmBit = 0;
+                fldGlobalBase.sequenceCode = fldBgmParamTable[fldGlobalBase.area].normal[fldGlobalBase.floor + 1];
+            }
+            base = gFldBgmTop[fldGlobalBase.area].smgId;
+            fldSeSmgId = base;
+            track = base + fldGlobalBase.sequenceCode;
+        }
+    }
+    MidiNo = track;
+    fldBgmReloadStep = 0;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldSe", fldBgmLoad);
+#endif
 
 s32 fldWaitBgmReload(void) {
     switch (fldBgmReloadStep) {
