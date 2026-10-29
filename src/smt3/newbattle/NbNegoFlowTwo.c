@@ -1571,7 +1571,56 @@ s32 Flow6_55(nbNegoProcessData_t *n)
     return 0;
 }
 
+typedef struct nbNegoSkillCondition_t {
+    s32 ptype;
+    s32 etype;
+    s32 message;
+} nbNegoSkillCondition_t;
+
+typedef struct nbNegoSkillEntry_t {
+    s32 requestmode;
+    s32 unknown;
+    nbNegoSkillCondition_t condition[8];
+} nbNegoSkillEntry_t;
+
+extern nbNegoSkillEntry_t D_003E1338[];
+extern s32 nbFlowCheckUnit2(datUnitWork_t *pwork, datUnitWork_t *ework,
+                            s32 ptype, s32 etype, s32 data);
+
+#ifdef NON_MATCHING
+s32 Flow6_56(nbNegoProcessData_t *n)
+{
+    datUnitWork_t *work;
+    nbNegoSkillCondition_t *condition;
+    s32 skill;
+    s32 ptype;
+    s32 etype;
+    s32 i;
+
+    nbAddNegoIdKouho(n, 0x60039);
+    skill = n->hojoskillid;
+    if ((skill < 0x19C || skill >= 0x1A2) &&
+        (skill < 0x1A3 || skill >= 0x1A5)) {
+        n->hojoaisyo = 0;
+    } else {
+        work = nbGetUnitWorkPointer(n->data, &n->data->party[n->hojopartyindex]);
+        condition = D_003E1338[n->hojoskillid - 0x180].condition;
+        for (i = 0; i < 4; i++, condition++) {
+            ptype = condition->ptype;
+            etype = condition->etype;
+            if ((ptype != 0 || etype != 0) &&
+                nbFlowCheckUnit2(work, n->ework, ptype, etype, 1)) {
+                n->hojoaisyo = 1;
+                n->hojoaisyomes = condition->message;
+                break;
+            }
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_56);
+#endif
 
 s32 Flow6_57(nbNegoProcessData_t *n)
 {
