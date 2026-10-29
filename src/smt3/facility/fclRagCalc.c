@@ -385,21 +385,18 @@ extern void ragDrawListRows(lstWork_t *list, u8 kind, u8 *rows, s8 mode, s32 ot)
 
 extern char *D_003305E8[];
 
-/* NON_MATCHING: 10 of 84 words differ, the work pointer in the other
- * caller-saved register in each of the two blocks that load it. */
-#ifdef NON_MATCHING
 extern void fclDrawPanel(fclPanel_t *pPanel, s32 OtNo);
 extern void fclUpdatePanel(fclPanel_t *pPanel);
 
 void ragDrawList2(s8 mode)
 {
     fclPanelPos_t pos;
-    u8 *work = (u8 *)ragDrawWork;
-    s32 top = *(s16 *)(work + 0x2492);
-    u8 *rows = work + top + 0x3B;
-    s8 item = *(s8 *)(work + top + *(u8 *)(work + 0x2494) + 0x3B);
+    ragDrawWork_t *work = ragDrawWork;
+    s32 top = work->list.window2.listCursor.unk_22;
+    u8 *rows = (u8 *)&work->list.list2[top];
+    s8 item = work->list.list2[top + (u8)work->list.window2.listCursor.unk_24];
 
-    fclDrawPanel((fclPanel_t *)(work + 0x4700), 0x47);
+    fclDrawPanel(&work->panel[2], 0x47);
     fclUpdatePanel((fclPanel_t *)((u8 *)ragDrawWork + 0x4700));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
     trmDrawListText(&pos, *(char **)(ragHeartsTable + 0x8BC), ragDrawWork->texHandle, D_003306B8, 0x47);
@@ -411,21 +408,16 @@ void ragDrawList2(s8 mode)
     fclDrawPhaseHeader((u8 *)ragDrawWork + 0x46C0, 0x1121D33, 1, 0x47);
     fclDrawPhaseHeader((u8 *)ragDrawWork + 0x2314, 0x80808080, 0, 0x47);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawList2);
-#endif
 
-/* NON_MATCHING: 10 of 84 words differ, the same residual as ragDrawList2. */
-#ifdef NON_MATCHING
 void ragDrawList3(s8 mode)
 {
     fclPanelPos_t pos;
-    u8 *work = (u8 *)ragDrawWork;
-    s32 top = *(s16 *)(work + 0x362A);
-    u8 *rows = work + top + 0x44;
-    s8 item = *(s8 *)(work + top + *(u8 *)(work + 0x362C) + 0x44);
+    ragDrawWork_t *work = ragDrawWork;
+    s32 top = work->list.window3.listCursor.unk_22;
+    u8 *rows = (u8 *)&work->list.list3[top];
+    s8 item = work->list.list3[top + (u8)work->list.window3.listCursor.unk_24];
 
-    fclDrawPanel((fclPanel_t *)(work + 0x4700), 0x47);
+    fclDrawPanel(&work->panel[2], 0x47);
     fclUpdatePanel((fclPanel_t *)((u8 *)ragDrawWork + 0x4700));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
     trmDrawListText(&pos, D_003305E8[0], ragDrawWork->texHandle, D_003306B8, 0x47);
@@ -437,9 +429,6 @@ void ragDrawList3(s8 mode)
     fclDrawPhaseHeader((u8 *)ragDrawWork + 0x46C0, 0x14132D33, 1, 0x47);
     fclDrawPhaseHeader((u8 *)ragDrawWork + 0x34AC, 0x80808080, 0, 0x47);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawList3);
-#endif
 
 INCLUDE_RODATA(const s32, "facility/fclRagCalc", D_0053D240);
 
