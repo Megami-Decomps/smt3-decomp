@@ -15,11 +15,7 @@
 
 
 
-typedef struct
-{
-    /* 0x00 */ s8 tex;
-    /* 0x02 */ fclSpriteRect_t rect;
-} fclSpriteRes_t;
+
 
 typedef struct
 {

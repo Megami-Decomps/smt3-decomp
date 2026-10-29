@@ -20,11 +20,7 @@ extern s32 shopUpdateItemList(s32 mode);
 
 
 
-typedef struct
-{
-    /* 0x00 */ s8 tex;
-    /* 0x02 */ fclSpriteRect_t rect;
-} fclSpriteRes_t;
+
 
 typedef struct
 {
