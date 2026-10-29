@@ -301,4 +301,10 @@ typedef struct GameFileInfo_t {
     u8 autoMapOpenEX[15];
 } GameFileInfo_t;
 
+/* Field encounter control and the native placement table. */
+#include "fldNpc_tag.h"
+extern u32 fldEncountFlags;
+extern fldNpcSlot_t fldModelSlotTable[32];
+extern s32 fldNpcModelTable;
+
 #endif /* FIELD_H */

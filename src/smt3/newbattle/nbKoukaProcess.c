@@ -1382,8 +1382,9 @@ extern s32 evtSetRegistUnit(s32 major, s32 minor);
 extern dds3Basic_t *dds3GetActiveScene(void);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *basic, u32 serial, s32 type);
 extern void dds3LinkLightObjectToUnitObject(dds3Basic_t *light, dds3Basic_t *unit, s32 frame);
-extern void dds3SetPosPoseSet(dds3Basic_t *basic, const sdfVector4_t *pos);
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rot);
+#include "basic.h"
+#include "dds3obj.h"
+
 extern void mdlSetPosition(mdlObj_t *model);
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 mask);
 extern sdfVector4_t D_003FB2E0;

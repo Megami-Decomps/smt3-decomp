@@ -100,9 +100,10 @@ void dds3PathBasicControlGetRot(dds3PathBasicControl_t *pControl);
 
 s32 dds3PathBasicControlIsFinished(dds3PathBasicControl_t *path);
 
-void dds3SetPosPoseSet(dds3Basic_t *pBasic, u128 *pos);
+#include "basic.h"
+#include "dds3obj.h"
 
-void dds3SetRotPoseSet(dds3Basic_t *pBasic, u128 *rot);
+
 
 void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ);
 

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "ps2asm.h"
 #include "field.h"
 #include "effBattle.h"
@@ -213,8 +214,8 @@ extern void dds3BillboardDraw(struct billHandle_t *hData);
 void effEveBEDCutDraw(effEveBEDCutHandle_t *hEveBEDCut);
 dds3Basic_t *dds3AddSceneBasicData(s32 type);
 void dds3ObjectBaseCreateMover(dds3Basic_t *pObjectBasic);
-void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos);
-void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
+
+
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);
 dds3Basic_t *AddP2AEffect(void *p2a, void *pos, s32 rot);
 extern billHandle_t *dds3BillboardFileLoad(s32 kind, const char *path);

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "model.h"
 #include "ps2asm.h"
 
@@ -11,9 +12,9 @@ extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
 
 extern void dds3ObjectBaseCreateMover(dds3Basic_t *pObjectBasic);
 
-extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, void *pos);
 
-extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, void *rot);
+
+
 
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *pose);
 

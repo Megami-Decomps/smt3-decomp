@@ -1,5 +1,6 @@
 #include "common.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "ps2asm.h"
 
 /* The matter object caches its path position at +0x20, independently of pose. */
@@ -15,8 +16,8 @@ extern f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *pControl);
 extern void dds3PathBasicControlNextStep(dds3PathBasicControl_t *work, fldResourceLightPath_t *output);
 extern s32 dds3PathBasicControlIsFinished(dds3PathBasicControl_t *work);
 extern void dds3SetLightObjectPathResoruce(dds3Basic_t *basic, fldResourceLightPath_t *resource);
-extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos);
-extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
+
+
 extern void dds3BackupPoseSet(dds3PoseSet_t *pPoseSet);
 extern void dds3GetSclPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *scale);
 extern void dds3AddRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);

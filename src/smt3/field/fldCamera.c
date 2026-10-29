@@ -4,6 +4,7 @@
 #include "kernel.h"
 #include "ps2asm.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "billboard.h"
 #include "draw.h"
 #include "scr.h"
@@ -23,7 +24,7 @@ f32 sdfCos(f32 aRadius);
 
 fldFollowCameraControl_t *fldGetFollowCameraControl(void);
 
-void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos);
+
 
 extern f32 fldCamPhokanSelX[];
 

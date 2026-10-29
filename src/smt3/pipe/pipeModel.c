@@ -2,6 +2,7 @@
 #include "common.h"
 #include "ps2asm.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "motion.h"
 #include "pipe.h"
 
@@ -36,9 +37,9 @@ extern void mdlSetColor(void *aHandle, u32 aColor);
 
 extern void dds3ObjectBaseOnFlag(void *basic, u32 flag);
 
-extern void dds3SetPosPoseSet(void *pBasic, f32 *pos);
 
-extern void dds3SetRotPoseSet(void *pBasic, f32 *rot);
+
+
 
 extern void dds3SetSclPoseSet(void *pBasic, f32 *scl);
 

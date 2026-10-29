@@ -3,6 +3,7 @@
 #include "pipe.h"
 #include "ps2asm.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "motion.h"
 
 
@@ -32,7 +33,7 @@ extern void dds3SetScreenFovy(f32 fovy);
 
 extern s32 pipeCheckLevel(s32 level, s32 type);
 
-extern void dds3SetPosPoseSet(void *pBasic, f32 *pos);
+
 
 extern void CalcCamera(void);
 

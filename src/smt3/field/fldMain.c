@@ -1,5 +1,6 @@
 #include "common.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "model.h"
 #include "kernel.h"
 #include "libsdf.h"
@@ -68,7 +69,7 @@ extern void dds3ConfigSaveBackup(void);
 
 extern void dds3ConfigRestoreBackup(void);
 
-extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, void *pos);
+
 
 extern mdlObj_t *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 

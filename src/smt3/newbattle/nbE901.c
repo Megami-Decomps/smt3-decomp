@@ -2,6 +2,7 @@
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
@@ -241,7 +242,7 @@ extern u32 f;
 
 extern dds3Basic_t *D_005515B4;
 
-extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, sdfVector4_t *pos);
+
 
 extern void nbSetFormPos(nbFormation_t *form, sdfVector4_t *pos);
 

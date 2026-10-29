@@ -35,7 +35,7 @@ void Mult(void);
 
 dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
 
-void dds3SetRotPoseSet(dds3Basic_t *pBasic, u128 *rot);
+
 
 f32 scrGetFloatPara(s32 n);
 
@@ -131,7 +131,7 @@ extern s32 fldGb[];
 
 void fldSetSceneParam3(s32 pParam, s32 loadField, s32 loadArea, char *pointResName);
 
-void dds3SetPosPoseSet(dds3Basic_t *pBasic, u128 *pos);
+
 
 struct dds3Basic_t *fldGetUnitFollowCamera(void);
 
@@ -218,6 +218,7 @@ void evtSetUnitColorA(evtUnit_t *h, s32 frame, u32 a);
 
 
 #include "basic.h"
+#include "dds3obj.h"
 #include "ps2asm.h"
 extern void dds3EffectObjectPresetMG12(dds3Basic_t *eff);
 

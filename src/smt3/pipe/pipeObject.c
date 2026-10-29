@@ -2,6 +2,7 @@
 #include "common.h"
 #include "ps2asm.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "motion.h"
 #include "pipe.h"
 
@@ -241,7 +242,7 @@ extern void mtxRotateY(sdfMatrix4_t *, f32);
 extern void mtxRotateZ(sdfMatrix4_t *, f32);
 extern void mtxStore(sdfMatrix4_t *, sdfMatrix4_t *);
 extern void vecDistance(f32 [4], f32 [4][4]);
-extern void dds3SetRotPoseSet(void *, sdfVector4_t *);
+
 
 extern void vecSet(f32 *, f32, f32, f32);
 extern void vecScale(f32 *, f32);

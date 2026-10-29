@@ -6,6 +6,7 @@
 #include "model.h"
 #include "motion.h"
 #include "basic.h"
+#include "dds3obj.h"
 
 /* 16-byte rows indexed by camera state; +0xC selects the per-state reset. */
 typedef struct nbCameraStateEntry_t {
@@ -433,7 +434,7 @@ extern void nbCameraCommandSetFixPosition(void);
 extern void nbCameraShot_CommandFixPos_Set(nbCamera_t *camera);
 extern void effBTLModelShowRun(void);
 extern void nbCameraPressProcessRun(void);
-extern void dds3SetPosPoseSet(dds3Basic_t *basic, const sdfVector4_t *pos);
+
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *basic, f32 fovy);
 
 s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "basic.h"
+#include "dds3obj.h"
 
 #include "ps2asm.h"
 
@@ -11,8 +12,8 @@ extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 flag);
 extern s32 dds3CheckPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *pose);
-extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos);
-extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
+
+
 extern dds3Basic_t *dds3GetControlScene(void);
 extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pBasic);
 extern void dds3SetScreenFovy(f32 fovy);

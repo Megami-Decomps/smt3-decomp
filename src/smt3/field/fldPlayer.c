@@ -4,6 +4,7 @@
 #include "kernel.h"
 #include "ps2asm.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "billboard.h"
 #include "draw.h"
 #include "scr.h"
@@ -15,7 +16,7 @@
 #include "event.h"
 #include "effect.h"
 
-void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos);
+
 
 dds3Basic_t *dds3GetActiveScene(void);
 
@@ -452,7 +453,7 @@ extern f32 EulerAngleAxisY(void);
 extern void InversMatrix(void);
 extern void FromRotation(f32 angle);
 extern void dds3GetRotPoseSet(dds3Basic_t *basic);
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rot);
+
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
 extern f32 sdfSin(f32 angle);
 extern f32 sdfCos(f32 angle);
@@ -700,7 +701,7 @@ extern void fldDmgStart(f32 x, f32 y, f32 z);
 extern void mdlSingleMotion(mdlObj_t *model, s32 group, s32 motion);
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flags);
 extern void dds3GetRotPoseSet(dds3Basic_t *basic);
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+
 extern void InversMatrix(void);
 extern f32 EulerAngleAxisY(void);
 extern void FromRotation(f32 angle);
@@ -1360,7 +1361,7 @@ extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3PadVibrationSet(s32 port, s32 power, s32 frames);
 extern void fldStatusSet(void);
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flags);
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rot);
+
 extern void FromEuler(f32 x, f32 y, f32 z);
 extern void InversMatrix(void);
 extern f32 sdfSin(f32 angle);
@@ -1675,7 +1676,7 @@ extern void fldDmgStart(f32 x, f32 y, f32 z);
 extern void mdlSingleMotion(mdlObj_t *model, s32 group, s32 motion);
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flags);
 extern void dds3GetRotPoseSet(dds3Basic_t *basic);
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+
 extern void InversMatrix(void);
 extern f32 EulerAngleAxisY(void);
 extern void FromRotation(f32 angle);
@@ -2387,7 +2388,7 @@ void fldPlayerMotReset2(void) {
 extern void dds3GetRotPoseSet(dds3Basic_t *basic);
 extern f32 EulerAngleAxisY(void);
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rot);
+
 
 void fldPlayerPosRot(void)
 {

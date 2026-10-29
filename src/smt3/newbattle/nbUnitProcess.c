@@ -138,7 +138,8 @@ extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 ritu);
 
 extern f32 dds3GetRandFloatA(s32 name);
 
-extern void dds3SetPosPoseSet(struct dds3Basic_t *pBasic, sdfVector4_t *pos);
+#include "basic.h"
+#include "dds3obj.h"
 
 extern void nbReturnUnit(s32 partyno, s32 lost, s32 dead);
 
@@ -171,7 +172,7 @@ extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serial, s32 typ
 
 extern void dds3LinkLightObjectToUnitObject(dds3Basic_t *light, dds3Basic_t *unit, s32 flag);
 
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, u128 *rot);
+
 
 extern void dds3ObjectBaseOffFlag(dds3Basic_t *basic, s32 flag);
 

@@ -113,7 +113,8 @@ extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pBasic);
 
 extern dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 
-extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
+#include "basic.h"
+#include "dds3obj.h"
 
 extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *pBasic);
 
@@ -123,7 +124,7 @@ extern void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ);
 
 extern s32 evtLoadArea(s32 fld, s32 area);
 
-extern void dds3SetPosPoseSet(struct dds3Basic_t *pBasic, sdfVector4_t *pos);
+
 
 extern nbStageState_t nbStageState;
 

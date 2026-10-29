@@ -1,5 +1,6 @@
 #include "common.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "model.h"
 #include "motion.h"
 #include "newdata.h"
@@ -150,7 +151,7 @@ extern f32 sdfCos(f32 aRadius);
 
 extern s32 fldArea[];
 
-extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
+
 
 extern void mdlSingleMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 

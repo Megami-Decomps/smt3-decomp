@@ -1,5 +1,6 @@
 #include "common.h"
 #include "basic.h"
+#include "dds3obj.h"
 
 /* The event constructor allocates a complete 16-byte payload. */
 typedef struct
@@ -16,8 +17,8 @@ extern s32 dds3CheckPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *pose);
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
-extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos);
-extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
+
+
 
 u32 EventObjectBasicConstructor(dds3Basic_t *pBasic)
 {

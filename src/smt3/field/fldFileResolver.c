@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "basic.h"
+#include "dds3obj.h"
 #include "field.h"
 #include "fileManager.h"
 
@@ -521,7 +522,7 @@ extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, s32);
 extern void dds3EffectObjectBasicStatOff(dds3Basic_t *, s32);
 extern void dds3EffectObjectBasicSetFldEx(dds3Basic_t *, fldResourceEffect_t *);
 extern dds3Basic_t *dds3AddLightObjectBasic(s32);
-extern void dds3SetPosPoseSet(dds3Basic_t *, const sdfVector4_t *);
+
 extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
 extern void dds3SetLightObjectResoruce(dds3Basic_t *, fldResourceLight_t *);
 extern dds3Basic_t *dds3AddPathBasic(s32, void *, const char *);

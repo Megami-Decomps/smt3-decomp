@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdk_libgcc.h"
 #include "basic.h"
+#include "dds3obj.h"
 #include "kernel.h"
 #include "libsdf.h"
 #include "ps2asm.h"
@@ -72,7 +73,7 @@ extern s32 sprintf(char *text, const char *format, ...);
 
 extern sdfMemHandle_t *sdfDevLoadFileEx(char *path, void *destination, void *size);
 
-extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, void *pos);
+
 
 extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 
@@ -170,7 +171,7 @@ extern char D_002FBD40[];
 
 extern void FromRotation(f32 aAngle);
 
-extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
+
 
 extern dds3Basic_t *D_0054EAB0;
 
