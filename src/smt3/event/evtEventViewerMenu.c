@@ -1849,9 +1849,7 @@ typedef struct pmdFrameTable_t pmdFrameTable_t;
 typedef struct pmdStageTable_t {
     s32 NameIndex, FileIndex, MajorNum, MinorNum;
 } pmdStageTable_t;
-typedef struct pmdUnitTable_t {
-    s32 NameIndex, FileIndex, MajorNum, MinorNum, DataOffset, DataSize, Reserve1, Reserve2;
-} pmdUnitTable_t;
+
 
 typedef struct pmdEffectTable_t {
     s32 NameIndex;

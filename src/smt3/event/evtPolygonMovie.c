@@ -162,9 +162,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          dds3ProcessFunc_t deleteExit, void *p);
 evtPolygonMovieWork_t *evtGetPolygonMovieWorkData1(evtPolygonMovieWork_t *wdata, void *pm1data, void *pm2data);
 s32 evtPolygonMovieProcess1(dds3ProcessID_t *id);
-typedef struct pmdUnitTable_t {
-    s32 NameIndex, FileIndex, MajorNum, MinorNum, DataOffset, DataSize, Reserve1, Reserve2;
-} pmdUnitTable_t;
+
 typedef struct pmdCameraTable_t {
     s32 NameIndex, Reserve1, Reserve2, Reserve3;
 } pmdCameraTable_t;

@@ -35,16 +35,11 @@ typedef enum EVT_VIEWER_MENU {
 
 
 /* Registered model record in the viewer's movie work table. */
-typedef struct {
-    u8 unk00[8];
-    s32 model;                     /* 0x08 */
-    s32 index;                     /* 0x0C */
-    u8 unk10[0x10];
-} evtViewerUnit_t;
+
 
 typedef struct {
     u8 unk00[0x34];
-    evtViewerUnit_t *units;        /* 0x34 */
+    pmdUnitTable_t *units;        /* 0x34 */
     s32 unitCount;                 /* 0x38 */
 } evtViewerMovieWork_t;
 
@@ -600,8 +595,8 @@ void evtUnRegistUnit(void)
 
     if (viewerinfo->workdata != NULL) {
         for (i = 0; i < ((evtViewerMovieWork_t *)viewerinfo->workdata)->unitCount; i++) {
-            model = ((evtViewerMovieWork_t *)viewerinfo->workdata)->units[i].model;
-            index = ((evtViewerMovieWork_t *)viewerinfo->workdata)->units[i].index;
+            model = ((evtViewerMovieWork_t *)viewerinfo->workdata)->units[i].MajorNum;
+            index = ((evtViewerMovieWork_t *)viewerinfo->workdata)->units[i].MinorNum;
             printf("unregist %d, %d\n", model, index);
             mdlUnRegist(model, index);
         }

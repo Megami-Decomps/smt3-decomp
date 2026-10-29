@@ -111,6 +111,10 @@ struct evtViewerInfo_t {
 
 typedef struct evtViewerInfo_t evtViewerInfo_t;
 
+typedef struct pmdUnitTable_t {
+    s32 NameIndex, FileIndex, MajorNum, MinorNum, DataOffset, DataSize, Reserve1, Reserve2;
+} pmdUnitTable_t;
+
 /* Interpolated event vector and packed colour. */
 typedef struct evtBlendVecColor_t {
     f32 vec[4];
