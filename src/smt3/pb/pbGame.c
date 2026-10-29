@@ -480,7 +480,77 @@ u32 pushCheck(s32 direction, u32 grpID, pbGroupData_t **pGroup)
     return status;
 }
 
+#ifdef NON_MATCHING
+extern s32 roundDirCheck(s32 direction, u32 groupID, u32 *stepCount);
+extern void rotXY(s16 *x, s16 *y, s32 direction);
+
+s32 roundCheck(s32 direction, u32 groupID, pbGroupData_t **pGroup)
+{
+    pbGroupData_t *group;
+    pbBlockEntry_t *entry;
+    pbMapWork_t *map;
+    s16 x, y, rotatedX, rotatedY, centerX, centerY;
+    s32 rotation;
+    u32 stepCount, i, firstKind, secondKind;
+    u16 firstCell, secondCell;
+
+    *pGroup = pbSearchGroupDB(blockDB, groupID);
+    pbGetMyCharcterPos2(mychar[current_char], &x, &y);
+    group = *pGroup;
+    centerX = group->cellX;
+    centerY = group->cellY;
+    if (x == centerX || y == centerY) {
+        return 2;
+    }
+    rotation = roundDirCheck(direction, groupID, &stepCount);
+    for (i = 0; i <= stepCount; i++) {
+        if (D_0054F5C4->area.map.blk[y + pbKeyTable[direction][1] * i]
+                                      [x + pbKeyTable[direction][0] * i] & 0x800) {
+            return 1;
+        }
+    }
+    group = *pGroup;
+    i = 0;
+    if (group->num != 0) {
+        do {
+            entry = &group->blk[i];
+            y = entry->y;
+            x = entry->x;
+            rotatedX = entry->x;
+            rotatedY = entry->y;
+            centerX = group->cellX;
+            centerY = group->cellY;
+            rotXY(&rotatedX, &rotatedY, rotation);
+            if (pbFindProcHandle(centerX + rotatedX, centerY + rotatedY) == 1) {
+                return 2;
+            }
+            if (pbFindProcHandle(centerX + rotatedX + x, centerY + rotatedY + y) == 1) {
+                return 2;
+            }
+            map = D_0054F5C4;
+            firstCell = map->area.map.blk[centerY + rotatedY][centerX + rotatedX];
+            secondCell = map->area.map.blk[centerY + rotatedY + y][centerX + rotatedX + x];
+            firstKind = firstCell >> 13;
+            secondKind = secondCell >> 13;
+            if (firstKind == 1 || secondKind == 1) {
+                return 2;
+            }
+            group = *pGroup;
+            if (firstKind >= 2 && (firstCell & 0x7FF) != group->grpID) {
+                return 2;
+            }
+            if (secondKind >= 2 &&
+                (map->area.map.blk[centerY + rotatedY + y][centerX + rotatedX + x] & 0x7FF) != group->grpID) {
+                return 2;
+            }
+            i++;
+        } while (i < group->num);
+    }
+    return 4;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbGame", roundCheck);
+#endif
 
 #ifdef NON_MATCHING
 s32 roundDirCheck(s32 direction, u32 groupID, u32 *stepCount)
