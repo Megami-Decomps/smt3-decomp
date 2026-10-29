@@ -98,6 +98,8 @@ typedef struct
     /* 0x01D3B */ u8 devilSlot[0x100];
     /* 0x01E3B */ u8 reserved01E3B[0x10045];
     /* 0x11E80 */ s32 encycNum;
+    /* 0x11E84 */ u8 reserved11E84[0xC];
+    /* 0x11E90 */ fclencyceelem_t records[0xA8];
 } encycSaveWork_t;
 
 /* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
@@ -2948,12 +2950,12 @@ void ChangeDevilObjectRegistConfirm(s32 unitIndex, fclEncyc_instance_tag *pinst)
 
 void ChangeDevilObjectReadMain(s32 recindex, fclEncyc_instance_tag *pinst)
 {
-    u8 *base = pinst->pwork;
-    fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)DDS3_GBWK + recindex * 0xB0 + 0x11E90);
+    fclEncycReadStatusWork_t *work = pinst->pwork;
+    fclencyceelem_t *record = &encycSaveWork->records[recindex];
 
-    *(u16 *)base = recindex;
+    work->phase.recordIndex = recindex;
     RequestModelLoad(pinst, record->id);
-    SetRecordToUnitCore((datUnitWork_t *)(base + 0x90), record);
+    SetRecordToUnitCore(&work->unit, record);
 }
 
 void CalcMoveRegistKeyHelp(fclEncyc_registconfirmwork_tag *pwork)
