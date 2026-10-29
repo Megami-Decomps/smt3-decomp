@@ -1420,7 +1420,6 @@ INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcCalc);
 
 #ifdef NON_MATCHING
 extern sdfVector4_t aViewEye;
-extern f32 D_0054C570, D_0054C574;
 extern effBlurScatterWork_t *fldBlurEffectHandle;
 extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
@@ -1515,8 +1514,8 @@ void fldNpcDraw(void)
             alpha = 0;
             if (!(distance < 500.0f)) {
                 alpha = 128;
-                if (!(D_0054C570 < distance)) {
-                    alpha = (s32)((distance - 500.0f) * 128.0f / D_0054C574);
+                if (!(3000.0f < distance)) {
+                    alpha = (s32)((distance - 500.0f) * 128.0f / 2500.0f);
                     if (alpha > 128) alpha = 128;
                     if (alpha < 0) alpha = 0;
                 }
