@@ -67,7 +67,11 @@ typedef struct vrefParam {
  * the state and request name tables, D_0054AA80 the empty string both
  * stringify functions fall back to. */
 extern padState D_005989D0[2][4] __attribute__((section(".data")));
-extern u8 D_00598980[0x18] __attribute__((section(".data")));
+typedef struct padRpcClient_t {
+    u32 reserved[9];
+    void *server;
+} padRpcClient_t;
+extern padRpcClient_t D_00598980[2] __attribute__((section(".data")));
 extern padRpc D_00598BC0 __attribute__((section(".data")));
 extern s32 D_00529FA8 __attribute__((section(".data")));
 
@@ -82,7 +86,7 @@ extern s32 sceSifCallRpc(void *cd, u32 fno, u32 mode, void *send, s32 ssize,
 extern int _send_to_iop(int port, int slot);
 
 /* D_00598AC0 is the command-block array the IOP DMAs from, D_00529FAC the
- * debug-print flag. Only the two parked drafts below reach them. */
+ * debug-print flag used by initialization and command diagnostics. */
 typedef struct sceSifDmaData {
     void *src;
     void *dest;
@@ -136,7 +140,45 @@ int _send_to_iop(int port, int slot)
 INCLUDE_ASM(const s32, "sdk/libpad", _send_to_iop);
 #endif
 
-INCLUDE_ASM(const s32, "sdk/libpad", scePadInit);
+extern s32 sceSifBindRpc(void *client, u32 service, s32 mode);
+extern int scePadGetModVersion(void);
+extern int scePadInit2(int mode);
+
+int scePadInit(int mode)
+{
+    s32 delay;
+    s32 version;
+    s32 major;
+
+    D_00529FA8 = 1;
+    for (;;) {
+        sceSifBindRpc(&D_00598980[0], 0x80000100, 0);
+        if (D_00598980[0].server != NULL) {
+            break;
+        }
+        for (delay = 0x10000; --delay != -1;) {
+        }
+    }
+    for (;;) {
+        sceSifBindRpc(&D_00598980[1], 0x80000101, 0);
+        if (D_00598980[1].server != NULL) {
+            break;
+        }
+        for (delay = 0x10000; --delay != -1;) {
+        }
+    }
+    version = scePadGetModVersion();
+    major = version >> 8;
+    if (major != 4) {
+        if (D_00529FAC != 0) {
+            scePrintf("libpad: Module version mismatch ");
+            scePrintf("[libpad.a = %d.%d, padman.irx = %d.%d]\n",
+                      4, 0, major, version & 0xFF);
+        }
+        return 0;
+    }
+    return scePadInit2(mode);
+}
 
 int scePadInit2(int mode)
 {

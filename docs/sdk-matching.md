@@ -427,6 +427,15 @@ checks read the shared reply after preceding callbacks. All three diagnostics
 are ordinary string literals, with their complete read-only-data placement
 verified against retail.
 
+`scePadInit` independently matches all 320 bytes with the same ordinary
+countdown mechanism, using `for (delay = 0x10000; --delay != -1;) {}` for
+both client retries. The native `lui 1` initializes 0x10000; the first
+comparison sees 0xFFFF and the final one sees -1. The two RPC clients are
+consecutive 0x28-byte records with server pointers at +0x24. Bind results
+are ignored; each retry waits for its server pointer before continuing.
+The version gate forwards the original mode only when the signed major
+version is 4, otherwise optionally prints the mismatch and returns zero.
+
 ## Matched heap allocation and release wrappers
 
 `sceSifAllocSysMemory` (128 bytes), `sceSifFreeSysMemory` (120 bytes) and
