@@ -252,6 +252,10 @@ extern void gcc2_compiled__2(FILE *fp, s32 flags, s32 file, _reent *data);
 
 extern _glue *__sfmoreglue(_reent *r, s32 n);
 
+extern void __sinit(_reent *r);
+
+extern void __smakebuf(FILE *fp);
+
 extern s32 __sigtramp_r(_reent *r, s32 sig);
 
 extern void *__deregister_frame_info(void *fn);
@@ -789,7 +793,36 @@ s32 vsprintf_r(_reent *r, char *str, const char *fmt, va_list ap) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "sdk/libc", __swsetup);
+s32 __swsetup(FILE *fp)
+{
+    /* Keep attachment and initialization as one phase; see levers/control-flow.md. */
+    do {
+        if (fp->_data == NULL) fp->_data = _impure_ptr;
+        if (!fp->_data->__sdidinit) __sinit(fp->_data);
+    } while (0);
+    if (!(fp->_flags & 8)) {
+        if (!(fp->_flags & 0x10)) return -1;
+        if (fp->_flags & 4) {
+            if (fp->_ub._base != NULL) {
+                if (fp->_ub._base != fp->_ubuf)
+                    _free_r(fp->_data, fp->_ub._base);
+                fp->_ub._base = NULL;
+            }
+            fp->_flags &= ~(4 | 0x20);
+            fp->_r = 0;
+            fp->_p = fp->_bf._base;
+        }
+        fp->_flags |= 8;
+    }
+    if (fp->_bf._base == NULL) __smakebuf(fp);
+    if (fp->_flags & 1) {
+        fp->_w = 0;
+        fp->_lbfsize = -fp->_bf._size;
+    } else {
+        fp->_w = (fp->_flags & 2) ? 0 : fp->_bf._size;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libc", gcc2_compiled__1);
 

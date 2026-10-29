@@ -460,3 +460,34 @@ from 16 bytes over to exact when its dispatch global was declared
 
 Both ways are worth trying before rewriting the arms: this is a one-word edit
 and it moves every offset in the function.
+
+## Keep stream attachment and initialization in one phase
+
+`sdk/libc::__swsetup` matches all 268 instruction bytes when its initial
+reentrancy setup is a single-pass block:
+
+```c
+do {
+    if (fp->_data == NULL) fp->_data = _impure_ptr;
+    if (!fp->_data->__sdidinit) __sinit(fp->_data);
+} while (0);
+```
+
+These checks attach an absent context and initialize its streams before the
+write-mode and buffer transitions. The block adds no operation or repeated
+execution. Removing only that boundary emits 260 bytes: the native padding
+at +0x2C and the later alignment at +0xE4 disappear. It does not change the
+stream fields, provider contracts or error behavior. A compile containing only
+this function has the same short result, so splitting archive objects is not
+the explanation for this residual.
+
+The qualified final-source `--sched --reorg` probe preserves hooked/unhooked,
+dumped/plain assembly and RTL parity with the pinned compiler. In `00.rtl` and
+`11.cfg`, `NOTE_INSN_LOOP_BEG` uid10 and `LOOP_END` uid45 surround the context
+checks and `__sinit` call uid35. The notes survive into `29.dbr` (begin uid305,
+end uid45). Its generated assembly puts `.p2align 3,,7` immediately before the
+second initialization test's label; the flat form has no alignment there. This
+recovers the native NOP and the downstream alignment without an explicit pad.
+
+Reproduce with `tools/cc1probe.sh src/smt3/sdk/libc.c --func __swsetup --sched --reorg --out /tmp/swsetup-init`; require `verify: OK`. The complete owner,
+including the separate buffered-formatting reconstruction, remains exact.
