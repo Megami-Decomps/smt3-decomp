@@ -963,7 +963,45 @@ INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaBadDamage);
 
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544BA8);
 
+extern const char D_00544BE8[];
+
+#ifdef NON_MATCHING
+u32 nbGetKoukaBadKaifuku(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s32 nvirtual)
+{
+    volatile datNormalSkill_t *skill = &datSkillTable.normal[nskill];
+    datUnitWork_t *source;
+    datUnitWork_t *target;
+    u32 status;
+    s32 sourceParam;
+    s32 targetParam;
+    s32 success = 1;
+    f32 chance;
+
+    if (skill->badtype != 2) {
+        return 0;
+    }
+    source = nbGetUnitWorkFromFormindex(sformindex);
+    target = nbGetUnitWorkFromFormindex(dformindex);
+    status = skill->basstatus & 0xFFF;
+    if (skill->badlevel != 0xFF && nvirtual == 0) {
+        chance = (f32)skill->badlevel;
+        sourceParam = datGetParam(source, 2);
+        sourceParam += datGetParam(source, 5) / 4;
+        chance *= (f32)sourceParam;
+        targetParam = datGetParam(target, 2);
+        targetParam += datGetParam(target, 5) / 4;
+        chance = (chance / 100.0f) * ((ritu * 100.0f) / (f32)targetParam);
+        printf(D_00544BE8, (double)chance);
+        success = (s32)dds3GetRandIntA(NULL, 100) < (s32)chance;
+    }
+    if (success && (status & (target->badstatus & 0xFFF))) {
+        return status;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaBadKaifuku);
+#endif
 
 u32 nbCheckHitEffect(s32 nskill, s32 sformindex, s32 dformindex)
 {
