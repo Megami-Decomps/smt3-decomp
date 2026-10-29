@@ -161,6 +161,8 @@ extern s32 gFldInf_WpExit;
 
 extern u8 *fldDoor_Find2(const char *);
 
+s32 fldDoor_GetHasigoTbl(s32 getmode);
+
 s32 evtBitCheck(s32 no);
 
 /* fldDoorTable is fldDoorParamTable.actors: the same 100-byte waypoint record,
@@ -197,8 +199,6 @@ const char *fldInf_FindTypeEveNpc(const char *evename) {
     return 0;
 }
 
-/* NON_MATCHING: 183 of 184 words differ (first at +0x0). */
-#ifdef NON_MATCHING
 s32 fldInfChkFastPanel(s32 aline) {
     s32 value;
     s32 slot;
@@ -263,28 +263,172 @@ s32 fldInfChkFastPanel(s32 aline) {
     }
     index = value - 0xA;
     if (fldInfTable.sets[gFldInfIdx].messages[index].kind == -1) {
-        return fldInfChkFastPanel(aline);
+        return fldInfChkFastPanel(value);
     }
-    if ((u16)fldInfTable.sets[gFldInfIdx].messages[index].kind >= 2) {
-        return 0;
-    }
-    switch (fldInfTable.sets[gFldInfIdx].eventHit) {
-    case 0:
-        return 0xC7;
-    case 1:
-        return 2;
-    case 2:
-        return 0x64;
-    case 3:
-        return 1;
+    if ((u16)fldInfTable.sets[gFldInfIdx].messages[index].kind < 2) {
+        switch (fldInfTable.sets[gFldInfIdx].eventHit) {
+        case 0:
+            return 0xC7;
+        case 1:
+            return 2;
+        case 2:
+            return 0x64;
+        case 3:
+            return 1;
+        }
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldInf", fldInfChkFastPanel);
-#endif
 
-INCLUDE_ASM(const s32, "field/fldInf", fldInfNext);
+/* INF actions consume the existing field, scene and event-unit contracts. */
+extern dds3Basic_t *D_0054EAE8;
+void evtBitOff(s32 no);
+void evtBitOn(s32 no);
+void fldKaifukuTest(void);
+void datAddItem(s32 id, s32 num);
+void datAddMaka(s32 addmaka);
+void fldPlayerOn(void);
+void fldPlayerOff(void);
+dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name);
+dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 id, s32 type);
+void evtSetUnitPos(u32 unitID, u32 posID);
+dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_t *camera);
+dds3Basic_t *fldCamNowEveCamera(void);
+dds3Basic_t *fldGetUnitFollowCamera(void);
+void resetCamNormal(void);
+void resetCamTgtPlayer(void);
+void scrAllReleaseScript(void);
+void fldSetNextField(s32 fld, s32 area);
+void CallBattleSub2(s32 encno);
+
+s32 fldInfNext(s32 messageId, s32 slot) {
+    s32 row;
+    s8 target;
+    s8 extraAction = 0;
+    s32 viewIndex = 0;
+    dds3Basic_t *world;
+    dds3Basic_t *node;
+    dds3Basic_t *camera;
+    evtUnit_t *unit;
+
+    if (messageId < 10) {
+        row = messageId - 1;
+        if (fldInfTable.sets[gFldInfIdx].flags[row].flag == 0) {
+            target = fldInfTable.sets[gFldInfIdx].flags[row].offTarget;
+        } else if (evtBitCheck(fldInfTable.sets[gFldInfIdx].flags[row].flag) != 0) {
+            target = fldInfTable.sets[gFldInfIdx].flags[row].onTarget;
+        } else {
+            target = fldInfTable.sets[gFldInfIdx].flags[row].offTarget;
+        }
+    } else {
+        row = messageId - 10;
+        target = fldInfTable.sets[gFldInfIdx].messages[row].targets[slot];
+    }
+    if (target >= 10) {
+        if (fldInfTable.sets[gFldInfIdx].messages[target - 10].flags[0] != 0) {
+            evtBitOff(fldInfTable.sets[gFldInfIdx].messages[target - 10].flags[0]);
+        }
+        if (fldInfTable.sets[gFldInfIdx].messages[target - 10].flags[1] != 0) {
+            evtBitOn(fldInfTable.sets[gFldInfIdx].messages[target - 10].flags[1]);
+        }
+    }
+    world = dds3GetActiveScene();
+    if (target >= 10) {
+        extraAction = (s8)fldInfTable.sets[gFldInfIdx].messages[target - 10].extraAction;
+    }
+    if (extraAction != 0) {
+        if ((s16)fldInfTable.extraActions[extraAction].action == 1) {
+            fldKaifukuTest();
+        } else if ((s16)fldInfTable.extraActions[extraAction].action == 2) {
+            datAddItem(fldInfTable.extraActions[extraAction].parameter0,
+                                  fldInfTable.extraActions[extraAction].parameter1);
+        } else if ((s16)fldInfTable.extraActions[extraAction].action == 3) {
+            datAddMaka(fldInfTable.extraActions[extraAction].parameter0);
+        }
+    }
+    if (target >= 10) {
+        viewIndex = (s8)fldInfTable.sets[gFldInfIdx].messages[target - 10].view;
+    }
+    if (viewIndex != 0) {
+        unit = ((dds3UnitObjectBasicWorkData_t *)D_0054EAE8->workdata)->hUnit;
+        if (unit != NULL) {
+            if (fldInfTable.views[viewIndex].player != 0) {
+                fldPlayerOn();
+            } else {
+                fldPlayerOff();
+            }
+        }
+        if (fldInfTable.views[viewIndex].positionName[0] != 0) {
+            node = dds3SceneBasicSearchName(world, (const char *)fldInfTable.views[viewIndex].positionName);
+            if (node != NULL) {
+                evtSetUnitPos(D_0054EAE8->serialID, node->serialID);
+            }
+        }
+        if (fldInfTable.views[viewIndex].cameraName[0] != 0) {
+            node = dds3SceneBasicSearchName(world, (const char *)fldInfTable.views[viewIndex].cameraName);
+            if (node != NULL) {
+                camera = dds3SearchSceneBasic(world, node->serialID, 4);
+                if (camera != NULL) {
+                    dds3SetActiveCameraSceneBasic(world, camera);
+                }
+            }
+        } else if (fldCamNowEveCamera() != 0) {
+            dds3SetActiveCameraSceneBasic(world, fldGetUnitFollowCamera());
+            switch (fldGlobalBase.mode) {
+            case 0:
+            case 3:
+                resetCamNormal();
+                break;
+            case 1:
+                resetCamTgtPlayer();
+                break;
+            case 2:
+            case 4:
+                break;
+            }
+        }
+    }
+    if (target == 0) {
+        if ((s8)fldInfTable.sets[gFldInfIdx].messages[row].extraAction != 0) {
+            if ((s16)fldInfTable.extraActions[(s8)fldInfTable.sets[gFldInfIdx].messages[row].extraAction].action == 4) {
+                s32 command;
+                s32 flag;
+
+                scrAllReleaseScript();
+                command = fldInfTable.extraActions[(s8)fldInfTable.sets[gFldInfIdx].messages[row].extraAction].parameter0;
+                flag = fldInfTable.extraActions[(s8)fldInfTable.sets[gFldInfIdx].messages[row].extraAction].parameter1;
+                fldSetNextField(fldGlobalBase.area, command);
+                CallBattleSub2(command);
+                if (flag == 1) {
+                    fldGlobalBase.wordCC = flag;
+                }
+                return command + 200;
+            }
+        }
+        /* The action callbacks can replace the player's transition work. */
+        unit = ((dds3UnitObjectBasicWorkData_t *)D_0054EAE8->workdata)->hUnit;
+        if (unit != NULL) {
+            unit->owner->flags &= ~1;
+        }
+        if (fldCamNowEveCamera() != 0) {
+            switch (fldGlobalBase.mode) {
+            case 0:
+            case 3:
+                resetCamNormal();
+                break;
+            case 1:
+                resetCamTgtPlayer();
+                break;
+            case 2:
+            case 4:
+                break;
+            }
+        }
+        return target;
+    }
+    return target;
+}
+
 
 s32 fldInfGet(s32 aline, s32 acol) {
     s32 message = aline - 10;
