@@ -66,3 +66,31 @@ the argument, while native reloads the argument in the call delay slot and
 keeps the callback in another register. Naming a typed callback snapshot does
 not change that result. Changing its return type to steer those registers
 would contradict the interface. Both bodies remain assembly-backed.
+
+## sceCdStRead
+
+392 bytes, 95 of 98 words matching. Only the stream-active flag check at
++0x58 differs: the candidate uses r3 for the address and r2 for its loaded
+value; retail uses r2 and r3 respectively, including the following branch.
+The remaining instructions and complete frame match. The three diagnostic
+literals follow native text; production assembly retains their ownership.
+The guarded whole-owner diagnostic additionally reports three shared-rodata
+ownership warnings for the target's assembly fallback.
+
+The initial diagnostic precedes sticky-error initialization. Initializing
+that error at declaration moves the prologue and emits only 74 matching
+words; moving initialization after the inactive guard swaps two saved
+registers and leaves 88 matching words. Initializing it between diagnostic
+and guard gives the preferred 95-word result. An explicit active-flag local
+is inert and was removed. A positive outer guard changes the control layout
+and was discarded; no further scheduling search was performed.
+
+The inactive path returns zero without writing the status output. Mode zero
+performs one read and splits its reply into sector count and error. Nonzero
+mode accumulates sectors, remembers the most recent nonzero error, and
+continues after a partial read even when that read reports an error. A zero
+error with zero progress delays eight ticks; a nonzero error with zero
+progress terminates. Each subsequent request uses remaining sectors and the
+buffer offset in 2048-byte sectors. The final diagnostic precedes publishing
+the sticky error. The configured SDK 2.9 register choice at the active check
+remains unresolved; no dummy dependency, qualifier or primitive was added.

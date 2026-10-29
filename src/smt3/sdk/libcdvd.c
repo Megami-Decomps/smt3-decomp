@@ -429,7 +429,58 @@ s32 sceCdStStop(void)
     return sceCdStream(0, 0, 0, 3, D_00598ED8);
 }
 
+/* NON_MATCHING: native size; the active-flag address/load uses the opposite
+ * pair of temporary registers (three words). */
+#ifdef NON_MATCHING
+s32 sceCdStRead(s32 sectors, void *buffer, s32 mode, s32 *status)
+{
+    s32 error;
+    s32 completed;
+    s32 read;
+    u32 reply;
+    s32 currentError;
+
+    if (D_0052A010 > 0) {
+        scePrintf("sceCdStRead call read size= %d mode= %d\n", sectors, mode);
+    }
+    error = 0;
+    if (D_0052BA70 == 0) {
+        return 0;
+    }
+    completed = 0;
+    sceSifWriteBackDCache(buffer, sectors << 11);
+    if (mode != 0) {
+        do {
+            reply = sceCdStream(0, sectors - completed,
+                               (u8 *)buffer + (completed << 11), 2, D_00598ED8);
+            read = reply & 0xFFFF;
+            currentError = reply >> 16;
+            completed += read;
+            if (currentError != 0) {
+                error = currentError;
+                if (D_0052A010 > 0) {
+                    scePrintf("sceCdStRead BLK Read cur_size= %d read_size= %d req_size= %d err 0x%x\n",
+                              completed, read, sectors, currentError);
+                }
+            } else if (read == 0) {
+                sceCdDelayThread(8);
+            }
+        } while (completed != sectors && (currentError == 0 || read != 0));
+        if (D_0052A010 > 0) {
+            scePrintf("sceCdStRead BLK Read Ended\n");
+        }
+        *status = error;
+    } else {
+        reply = sceCdStream(0, sectors, buffer, 2, D_00598ED8);
+        currentError = reply >> 16;
+        completed = reply & 0xFFFF;
+        *status = currentError;
+    }
+    return completed;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdStRead);
+#endif
 
 s32 sceCdStPause(void)
 {
