@@ -45,3 +45,4 @@
 0x002E6048	__udivdi3	inferred	Compiler unsigned 64-bit quotient libcall; native unsigned normalization, divu quotient digits and unsigned correction; strtol cutoff division calls this address.
 0x002D6600	vfprintf	evidence	Native 116-byte wrapper installs FILE reentrancy and initializes stdio, restores its frame and tail-calls the independent formatter at 0x002D6678; four alignment bytes follow.
 0x002D6678	func_002D6678	evidence	Independent 0x290-byte frame at direct printf/sprintf reentrant call target after the restored-frame vfprintf tail jump; core ends at 0x002D7CE8. Existing generic identity retained.
+0x00239FA0	uiDrawUniformRgbRange	inferred	Existing DDS descriptive name; audited relocation-only native counterpart repeats one color for three triangle vertices; was cmp_239FA0.

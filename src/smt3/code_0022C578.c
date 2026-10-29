@@ -6879,7 +6879,7 @@ void func_00239F88(s32 *work, s32 value)
     work[3] = value;
 }
 
-void cmp_239FA0(const u32 *xs, const u32 *ys, u32 z, u32 color, u32 ot)
+void uiDrawUniformRgbRange(const u32 *xs, const u32 *ys, u32 z, u32 color, u32 ot)
 {
     u32 colors[3];
 
