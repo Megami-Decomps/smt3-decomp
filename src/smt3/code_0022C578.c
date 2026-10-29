@@ -6472,7 +6472,119 @@ void cmpDrawSkillIcons(s32 x, s32 y, s8 index)
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillIcons);
 #endif
 
+extern s32 cmpFindSkillEntry(u16 skillId);
+extern char *text1[];
+extern volatile s32 cmpSkillAnimLive[] asm("cmpStatusAnimCount");
+
+#ifdef NON_MATCHING
+void cmpDrawSkill(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
+                  rstSkillInfo_t *skills, s8 selected, s8 selectMode,
+                  s32 specialColor, s8 highlightMode, s32 rowMode)
+{
+    volatile datUnitWork_t *liveUnit = unit;
+    s32 textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0xA09DC380);
+    s32 i;
+
+    cmpDrawSkillRowText(x, y, colors, unit, rowMode, &skills->SkillCnt);
+    cmpSetSkillListRows(0x12);
+    for (i = 0; i < liveUnit->skillcnt; i++) {
+        s32 column = i / 4;
+        s32 row = i % 4;
+        u16 skill;
+        frFontHandle_t *font;
+
+        textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0xA09DC380);
+        if (selected >= 0 && selectMode == 1 && i == selected) {
+            textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x80C08080);
+        }
+        if (highlightMode == 2 && cmpFindSkillEntry(liveUnit->skill[i]) != 0) {
+            textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x80C08080);
+        }
+        if (selected >= 0 && (selectMode == 1 || selectMode == 3) && i == selected) {
+            textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x80C08080);
+        }
+        skill = liveUnit->skill[i];
+        font = frwGetSmallFontFRQ2(0, 0, 0xFFFFF, textColor, text1[skill], NULL);
+        frSetDrawPosition(font, (x + 0x18 + column * 0x74 + (0x74 - font->advance) / 2) * 16,
+                          (y + 0x13B + row * 0x16) * 8);
+        func_001C7E38(font, 1, 0x47);
+        frDestroyFontRequestAfter(font);
+    }
+    cmpSetSkillListRows(-1);
+    if ((selected >= liveUnit->skillcnt && selectMode == 1) || highlightMode == 1) {
+        textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x80C08080);
+    } else if (highlightMode == 0 || highlightMode == 2) {
+        textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, specialColor);
+    }
+    cmpSetSkillListRows(0x12);
+    for (i = 0; i < skills->SkillCnt; i++) {
+        s32 column = i / 4;
+        s32 row = i % 4;
+        s32 dx = column * 0x74;
+        s32 dy = row * 0x16;
+
+        if (i == 0 && (skills->skill[0] != 0x165 || evtBitCheck(0x8C1) != 0)) {
+            frFontHandle_t *font;
+            if (selected >= 0 && selectMode == 1 && selected == 8) {
+                textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x80C08080);
+            }
+            font = frwGetSmallFontFRQ2(0, 0, 0xFFFFF, textColor, text1[skills->skill[i]], NULL);
+            frSetDrawPosition(font, (x + 0x101 + dx + (0x72 - font->advance) / 2) * 16,
+                              (y + 0x13C + dy) * 8);
+            func_001C7E38(font, 1, 0x47);
+            frDestroyFontRequestAfter(font);
+        } else {
+            fclDrawSpriteRes((x + dx) * 16, (y + dy) * 8, 0, colors, 5, 0,
+                             D_00345D88, fclSpriteTable, 0x47);
+        }
+        textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x4D4B4B4D);
+    }
+    cmpSetSkillListRows(-1);
+    if (highlightMode == 1 || selectMode == 3) {
+        cmpDrawSkillIcons(x, y, (s8)rstSkillActFlag);
+    }
+    if (selected >= 0 && selectMode == 1) {
+        s32 dx = (selected / 4) * 0x74;
+        s32 dy = (selected % 4) * 0x16;
+        s32 frame;
+        s32 expansionX;
+        s32 expansionY;
+        s32 color;
+        s32 pulseColors[4];
+
+        if (selected >= 8) {
+            dx++;
+        }
+        fclDrawSpriteRes((x + dx) * 16, (y + dy) * 8, 0, NULL, 6, 4,
+                         D_00345D88, fclSpriteTable, 0x47);
+        frame = cmpSkillAnimLive[2];
+        if (frame < 0x100) {
+            frame += 8;
+            cmpSkillAnimLive[2] = frame;
+            if (frame >= 0x100) {
+                cmpSkillAnimLive[2] = 0;
+            }
+        } else {
+            cmpSkillAnimLive[2] = 0;
+        }
+        frame = cmpSkillAnimLive[2];
+        expansionX = frame * 24 / 256;
+        expansionY = frame / 64;
+        dy -= expansionY / 2;
+        dx -= expansionX / 2;
+        color = ((0x100 - frame) / 2) | 0x80808000;
+        pulseColors[0] = color;
+        pulseColors[1] = color;
+        pulseColors[2] = color;
+        pulseColors[3] = color;
+        fclDrawSpriteSize((x + dx) * 16, (y + dy) * 8, 0,
+                          expansionX + 0x76, expansionY + 0x13, pulseColors,
+                          6, 4, D_00345D88, fclSpriteTable, 0x47);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkill);
+#endif
 
 extern void cmpDrawStatusComEx(datUnitWork_t *a, u8 alpha, s8 b, s8 c, s8 *d, s8 e, s32 color, s8 f,
                                s8 g, s8 h);
@@ -6532,8 +6644,8 @@ extern void cmpDrawParamPanel(s32, s32, s32 *, s8 *, datUnitWork_t *, s8, s8, s8
 extern void cmpDrawStatusValue(s32, s32, s32 *, s32, datUnitWork_t *);
 extern u16 itfMesMngGetStatManager(void);
 extern void rstCreateBeforeSkillList(s8, datUnitWork_t *, s8, rstSkillInfo_t *);
-extern void cmpDrawSkill(s32, s32, s32 *, datUnitWork_t *, rstSkillInfo_t *, s32, s32,
-                         s32, s32, s32);
+extern void cmpDrawSkill(s32, s32, s32 *, datUnitWork_t *, rstSkillInfo_t *, s8, s8,
+                         s32, s8, s32);
 extern s32 cmpDrawStatusModel(void *);
 
 void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
