@@ -3931,7 +3931,97 @@ INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D848);
 
 INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D858);
 
+extern char D_0053D868[];
+extern char D_0053D878[];
+extern char D_0053D888[];
+extern void DebugRemoveRecord(s32 id);
+extern void DebugUpdateListwin(fclEncyc_instance_tag *pinst);
+
+#ifdef NON_MATCHING
+s32 DebugProcRegister(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
+                      sdfDrawTag_t *tag)
+{
+    s32 changed = 0;
+    s32 id;
+    s32 i;
+    datUnitWork_t unit;
+
+    if (dds3PadButtonState[0x33] < 0) {
+        work->state = 0;
+    }
+    if (((u8)dds3PadButtonState[0x34] | (u8)dds3PadButtonState[0x36]) & 2) {
+        work->row -= (u8)dds3PadButtonState[0x34] != 0 ? 16 : 1;
+        if (work->row < 0) {
+            s16 offset = work->row;
+
+            work->row = 0;
+            work->firstId += offset;
+            if (work->firstId < 0) {
+                if ((dds3PadButtonState[0x34] | dds3PadButtonState[0x36]) < 0) {
+                    work->firstId = 0x170;
+                    work->row = 15;
+                } else {
+                    work->firstId = 0;
+                    work->row = 0;
+                }
+            }
+        }
+    } else if (((u8)dds3PadButtonState[0x35] | (u8)dds3PadButtonState[0x37]) & 2) {
+        work->row += (u8)dds3PadButtonState[0x35] != 0 ? 16 : 1;
+        if (work->row >= 16) {
+            s16 offset = work->row;
+
+            work->row = 15;
+            work->firstId += offset - 15;
+            if (work->firstId > 0x170) {
+                if ((dds3PadButtonState[0x35] | dds3PadButtonState[0x37]) < 0) {
+                    work->firstId = 0;
+                    work->row = 0;
+                } else {
+                    work->firstId = 0x170;
+                    work->row = 15;
+                }
+            }
+        }
+    }
+    id = work->firstId + work->row;
+    if (dds3PadButtonState[0x31] < 0) {
+        if (fclEncycSearch(id) < 0) {
+            cmbCopyDefaultDevilToStock((u16)id, &unit);
+            fclEncycRegist(&unit, 1);
+        } else {
+            DebugRemoveRecord(id);
+        }
+        changed = 1;
+    } else if (dds3PadButtonState[0x32] < 0) {
+        id = 1;
+        while (fclEncycGetNum() < 0xB8) {
+            cmbCopyDefaultDevilToStock((u16)id, &unit);
+            id++;
+            fclEncycRegist(&unit, 1);
+            changed = 1;
+        }
+    }
+    if (changed != 0 && (pinst->stat & 0x200) != 0) {
+        CreateSortIndexByRace(pinst->entries.read.sorted[0]);
+        CreateSortIndexByLevel(pinst->entries.read.sorted[1]);
+        if (pinst->unk_58 == 3) {
+            DebugUpdateListwin(pinst);
+        }
+    }
+    dds3ConsPanelTagLink(tag, 0x10, 0x10, 0x16, 0x12);
+    for (i = 0; i < 16; i++) {
+        const char *status = fclEncycSearch(work->firstId + i) < 0 ? D_0053D868 : D_0053D878;
+        const char *marker = work->row == i ? D_0054FCE0 : D_0054FCC8;
+
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7A00 + i * 0x60, 0xFFFFF0,
+                                               0, D_0053D888, marker, work->firstId + i, status));
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcRegister);
+#endif
 
 extern s8 dds3PadButtonState[];
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,
