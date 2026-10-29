@@ -40,3 +40,23 @@ instructions feeding and following the two bit-length computations differ from
 the order the hand-written routine used. Splitting the block into separate
 one-instruction macros makes it worse, because cc1 then CSEs the two
 `addi $0, 0x1F` into one.
+
+### Measured: the one-insn asm block decides the opening order
+
+`tools/cc1probe.sh scratch/sdfTex_try.c --as-unit src/smt3/sdf/sdfTex.c
+--version smt3 --func sdfTexSetPacket --sched --no-dumps` (verify: OK) shows
+each bit-length block entering the ready list as one insn,
+`(parallel [(set (reg:SI N) (asm_operands ...)) (clobber (reg:QI $2))])`, with
+`cost 1`. Both carry priority 5, and sched1 issues the height block at clock 1
+and the width block at clock 3, with the two `addiu -1`s and the `sra` for
+`TBW` placed around them by the same priority list. Retail opens
+`sra $12,$5,6` / `addiu $5,$5,-1` / the width block / `addiu $6,$6,-1` /
+`sll $12,$12,14` / `sll $5,$5,26` / the height block, which interleaves the
+two four-instruction idioms with their consumers: an order the unit-latency
+one-insn model does not produce, because the clock the asm insn occupies is
+what the surrounding insns are packed around.
+
+Swapping the `th` and `tw` statements so the width idiom is written first
+leaves the emitted bytes identical, so the source order of the two
+computations is not the lever either. The conclusion recorded in
+[../../levers/impossible.md](../../levers/impossible.md) still holds.
