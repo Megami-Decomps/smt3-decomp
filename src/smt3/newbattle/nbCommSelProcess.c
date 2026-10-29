@@ -689,9 +689,90 @@ void DispComm1Comm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32
     cmpSetSkillListRows(-1);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispHelp1);
+typedef struct frFontRequest_t frFontRequest_t;
+typedef struct frTextBank_t frTextBank_t;
+typedef struct frFontHandle_t frFontHandle_t;
+extern frFontRequest_t *frGetHelpPos(s32 x, s32 y, s32 priority, s32 bank, s32 index);
+extern u8 *MessageNumSearch(s32 index, frTextBank_t *bank, s32 size);
+extern frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 style, s32 color0,
+                                        s32 color1, s32 color2, u8 *text,
+                                        frFontHandle_t *previous);
+extern void frSetFontColor(frFontHandle_t *font, u32 color);
+extern s16 D_00551134;
+extern frTextBank_t itfMesEmbedded_3F7FC8;
 
-extern void DispHelp1(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, s32 alpha);
+void DispHelp1(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, s32 alpha)
+{
+    s32 x;
+    s32 y;
+    s32 index = d;
+    void *font = NULL;
+
+    if (evtBitCheck(0xC0E) != 0) {
+        return;
+    }
+
+    x = (ox + 0xA9) << 4;
+    y = (oy - 0x1F) << 3;
+    cmpSetSkillListRows(0x13);
+    switch (s->drawtype) {
+    case 0:
+        switch (index) {
+        case 0x8000:
+            font = MessageRequestNS(x, y, oz, 1, 0, 0, 0x80,
+                                    MessageNumSearch(1, &itfMesEmbedded_3F7FC8, 0), NULL);
+            D_00551134 = 0;
+            break;
+        case 0x8001:
+            font = MessageRequestNS(x, y, oz, 1, 0, 0, 0x80,
+                                    MessageNumSearch(4, &itfMesEmbedded_3F7FC8, 0), NULL);
+            D_00551134 = 0;
+            break;
+        case 0x8002:
+            font = MessageRequestNS(x, y, oz, 1, 0, 0, 0x80,
+                                    MessageNumSearch(2, &itfMesEmbedded_3F7FC8, 0), NULL);
+            D_00551134 = 0;
+            break;
+        case 0x8003:
+            font = MessageRequestNS(x, y, oz, 1, 0, 0, 0x80,
+                                    MessageNumSearch(5, &itfMesEmbedded_3F7FC8, 0), NULL);
+            D_00551134 = 0;
+            break;
+        default:
+            font = frGetHelpPos(x, y, oz, 0, index);
+            break;
+        }
+        break;
+    case 1:
+        if (index != 0x8004) {
+            cmpSetSkillListRows(0x12);
+            font = frGetHelpPos(x, y, oz, 0, index);
+        } else {
+            font = MessageRequestNS(x, y, oz, 1, 0, 0, 0x80,
+                                    MessageNumSearch(3, &itfMesEmbedded_3F7FC8, 0), NULL);
+        }
+        break;
+    case 2:
+        cmpSetSkillListRows(0x12);
+        font = frGetHelpPos(x, y, oz, 1, index);
+        break;
+    case 4:
+        font = MessageRequestNS(x, y, oz, 1, 0, 0, 0x80,
+                                MessageNumSearch(5, &itfMesEmbedded_3F7FC8, 0), NULL);
+        break;
+    case 5:
+        font = MessageRequestNS(x, y, oz, 1, 0, 0, 0x80,
+                                MessageNumSearch(4, &itfMesEmbedded_3F7FC8, 0), NULL);
+        break;
+    }
+
+    if (font != NULL) {
+        frSetFontColor(font, 0x80808000 | alpha);
+        frDrawFontEx(font, 1);
+        frDestroyFontRequestAfter(font);
+    }
+    cmpSetSkillListRows(-1);
+}
 
 void DispCommandList2(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 alpha)
 {
