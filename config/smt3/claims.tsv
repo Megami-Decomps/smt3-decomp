@@ -848,3 +848,4 @@ src/smt3/pipe/pipeSection.c	redthing1	done	2026-10-28	0 exact / 540 B guarded	My
 src/smt3/sdk/libgcc_dpdiv.c	redthing1	done	2026-10-28	1 SDK fn / 320 B	binary64 division with real unpacked-record helper, native class dispatch and qualified current/next remainder loop; complete owner exact
 src/smt3/sdk/libc.c	redthing1	done	2026-10-28	1 SDK fn / 364 B	top-chunk page trimming with 64-bit rounding, fresh break/top queries, failed-shrink repair and allocator unlock on every exit; owner 74 match, 0 differ
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	0 exact / guard improvement	default skill initialization reduced from 172 to native160 bytes; parity-qualified multiply coalescing explains remaining three words
+src/smt3/sdk/libgcc.c	redthing1	done	2026-10-28	1 SDK fn / 288 B	CFA expression decoding with grounded frame state, signed operand widening and native regx fallthrough; complete owner 33 match, 0 differ

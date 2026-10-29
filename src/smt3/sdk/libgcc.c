@@ -909,7 +909,62 @@ u8 *libc_2D2B60(u32 *frame, cieInfo_t *info)
 INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B488);
 
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D2C70);
+typedef struct {
+    void *cfa;
+    void *ehPointer;
+    s64 cfaOffset;
+    s64 baseOffset;
+    s64 argumentSize;
+    s64 registerOrOffset[123];
+    u16 cfaRegister;
+    u16 returnColumn;
+    u8 saved[123];
+    u8 indirect;
+} frameState_t;
+
+typedef char frameState_size_must_be_0x478[
+    sizeof(frameState_t) == 0x478 ? 1 : -1];
+
+u8 *libc_2D2C70(u8 *p, frameState_t *state)
+{
+    u32 opcode = *p++;
+    union {
+        s32 signedValue;
+        u32 unsignedValue;
+    } value;
+
+    switch (opcode) {
+    case 0x50 ... 0x6f:
+        state->cfaRegister = opcode - 0x50;
+        break;
+    case 0x90:
+        p = libc_2D1E50(p, &value.signedValue);
+        state->cfaRegister = value.signedValue;
+        /* The native regx case falls through and replaces this register. */
+    case 0x70 ... 0x8f:
+        state->cfaRegister = opcode - 0x70;
+        p = libc_2D1E50(p, &value.signedValue);
+        state->baseOffset = value.signedValue;
+        break;
+    case 0x92:
+        p = libc_2D1E50(p, &value.signedValue);
+        state->cfaRegister = value.signedValue;
+        p = libc_2D1E50(p, &value.signedValue);
+        state->baseOffset = value.signedValue;
+        break;
+    case 0x06:
+        state->indirect = 1;
+        break;
+    case 0x23:
+        p = libc_2D1E08(p, &value.unsignedValue);
+        state->cfaOffset = value.signedValue;
+        break;
+    default:
+        abort();
+    }
+    return p;
+}
+
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D2D90);
 

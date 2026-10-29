@@ -938,3 +938,22 @@ GPR8. A direct in-place update or a speculative next-value initialization
 leaves an extra loop-entry transfer and emits 328 bytes; the single
 next-state calculation gives the native 320-byte body without extra uses,
 flags, constraints or instruction padding.
+
+## CFA expression state and decoder
+
+`sdk/libgcc::libc_2D2C70` matches all 288 instruction bytes. The native
+register-array stride and boundaries establish 123 eight-byte register
+slots. Their saved-rule bytes end at `0x476`, followed by the indirect flag
+at `0x477`. The public state is `0x478` bytes; internal remember/restore
+snapshots add a saved-state link at `0x478` and occupy `0x480` bytes.
+The caller copies the public record as `0x460` bytes plus a `0x18` tail.
+
+The [June 2000 GCC CFA-expression patch](https://gcc.gnu.org/legacy-ml/gcc-patches/2000-06/msg00872.html)
+provides the base-offset and indirect-field context missing from the older
+header. Native field widths and copy extents determine this target's layout.
+The expression decoder preserves its `0x90` fallthrough: the first signed
+register operand is stored, then replaced with register 32 before reading
+a second signed base offset. The unsigned operand of `0x23` is interpreted
+through its signed 32-bit representation before the native 64-bit store.
+Unsupported operations call abort; no bounds checks or DWARF-spec corrections
+are introduced.
