@@ -2,6 +2,7 @@
 #include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
+#include "fileManager.h"
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
@@ -218,10 +219,6 @@ void dds3TitleUpdateFade(void)
 INCLUDE_ASM(const s32, "sound/sndManager", dds3TitleUpdateFade);
 #endif
 
-typedef struct titlePacFileRequest_t {
-    u8 fileRequestHeader[0x30];
-    sdfPacDecodeCb_t packet;
-} titlePacFileRequest_t;
 
 extern char D_0053DD68[];
 extern char D_0053DD98[];
@@ -231,7 +228,7 @@ extern s32 pacFileHandleFree_(void *request);
 
 s32 titleLoadTextures(void)
 {
-    titlePacFileRequest_t *request;
+    fileRequest_t *request;
     sdfPacDecodeResrc_t *entry;
     s32 index = 0;
 
@@ -239,7 +236,7 @@ s32 titleLoadTextures(void)
         titleWork->texHandle[1] = titleWork->texHandle[0] = 0;
     request = pacLoad(D_0053DD68);
     pacSync(request);
-    for (entry = request->packet.resrcHead; entry != NULL; entry = entry->next) {
+    for (entry = request->pac.resrcHead; entry != NULL; entry = entry->next) {
         switch (index) {
         case 0:
             titleWork->texHandle[0] = entry->resrc;

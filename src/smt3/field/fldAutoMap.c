@@ -1,3 +1,4 @@
+#include "fileManager.h"
 #include "common.h"
 #include "basic.h"
 #include "model.h"
@@ -313,17 +314,11 @@ typedef struct
 } fldAmLightParam_t;
 
 
-typedef struct
-{
-    u8 pad0[0x60];
-    sdfPacDecodeResrc_t *queueHead;
-} fldPacRequest_t;
+extern fileRequest_t *pacLoad(const char *filename);
 
-extern fldPacRequest_t *pacLoad(const char *filename);
+extern void pacSync(fileRequest_t *pacFileHandle);
 
-extern void pacSync(fldPacRequest_t *pacFileHandle);
-
-extern void pacFileHandleFree_(fldPacRequest_t *pacHandle);
+extern void pacFileHandleFree_(fileRequest_t *pacHandle);
 
 extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
 
@@ -2143,7 +2138,7 @@ INCLUDE_ASM(const s32, "field/fldAutoMap", fldDrawAreaBlockFont);
 #endif
 
 void fldInitPacLoader(void) {
-    fldPacRequest_t *request;
+    fileRequest_t *request;
     sdfPacDecodeResrc_t *work;
     sdfMemHandle_t *handle;
     u32 i;
@@ -2156,7 +2151,7 @@ void fldInitPacLoader(void) {
     fldTakara2File = sdfDevLoadFileEx("/fld/f/bin/takara2.PB", &fldTakara2Data, &fldTakara2Size);
     request = pacLoad("/fld/f/bin/fldmix.LB");
     pacSync(request);
-    work = request->queueHead;
+    work = request->pac.resrcHead;
     for (i = 0; work != NULL; i++) {
         switch (i) {
     case 0:

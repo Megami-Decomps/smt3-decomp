@@ -3,6 +3,7 @@
 #include "draw3d.h"
 
 #include "libsdf.h"
+#include "fileManager.h"
 #include "ps2asm.h"
 
 #include "billboard.h"
@@ -36,10 +37,6 @@ typedef struct billGeneralRow_t {
     u8 pad06[2];
 } billGeneralRow_t;
 
-typedef struct fileRequest_t {
-    u8 pad00[0x60];
-    sdfPacDecodeResrc_t *queueHead;
-} fileRequest_t;
 
 extern billGeneralEntry_t BillboardTable[];
 extern billGeneralRow_t D_00316FF0[];
@@ -282,7 +279,7 @@ void dds3BillboardManagerInit(void) {
     dds3BillboardTag = NULL;
     request = pacLoad("/bill/billtmx.LB");
     pacSync(request);
-    work = request->queueHead;
+    work = request->pac.resrcHead;
     if (work != NULL) {
         slot = hGeneralBillboard;
         row = D_00316FF0;

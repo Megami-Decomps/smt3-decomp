@@ -2,6 +2,7 @@
 
 #include "basic.h"
 #include "field.h"
+#include "fileManager.h"
 
 enum fldPackedResourceKind
 {
@@ -28,10 +29,6 @@ typedef struct fldMoverWork_t fldMoverWork_t;
 typedef struct fldTransferChunk_t fldTransferChunk_t;
 
 
-typedef struct fileRequest_t fileRequest_t;
-
-typedef struct filePacRequest_t filePacRequest_t;
-
 typedef struct fldNpcPalette_t fldNpcPalette_t;
 
 typedef struct fldSkyBuffer_t fldSkyBuffer_t;
@@ -52,12 +49,6 @@ struct fldTransferChunk_t {
     u32 unk00; /* 0x00: opaque descriptor word */
     s32 offset; /* 0x04: signed byte offset from the resource base */
     u32 size; /* 0x08: byte length of the transferred payload */
-};
-
-
-/* A PAC archive request (kind 1), with its dispatch packet at 0x30. */
-struct filePacRequest_t {
-    u8 kind; /* 0x00 */ u8 state; /* 0x01 */ u8 retryCount; /* 0x02 */ u8 allocationMode; /* 0x03: a callback request's mode */ struct filePacRequest_t *next; /* 0x04 */ char *name; /* 0x08: the duplicated request name */ void *deviceRequest; /* 0x0C */ s32 transferBytes; /* 0x10: a value-pair request's byte count */ s32 totalBytes; /* 0x14 */ void * completionCallback; /* 0x18 */ void *completionArg; /* 0x1C */ sdfMemHandle_t *allocationHandle; /* 0x20: descriptor passed to sdfResourceRetainAddress */ u32 retainedAddress; /* 0x24: a value-pair request's source data */ u32 transferAddress; /* 0x28 */ struct filePacRequest_t *completionNext; /* 0x2C */ sdfPacDecodeCb_t packet; /* 0x30: PAC requests */ u16 readinessEnabled; /* 0x68: a gate on completion, not a state value */ u16 slot; /* 0x6A: the device-read slot */ struct filePacRequest_t *callbackNext; /* 0x6C: PAC completion callback queue link */
 };
 
 
@@ -172,9 +163,9 @@ s32 fldLoadNextFile_BtlRet(void);
 void fldFreeNextFile(void);
 
 
-extern struct fileRequest_t *pFldNextFileDataF2;
+extern fileRequest_t *pFldNextFileDataF2;
 
-struct fileRequest_t *pacLoad(const char *filename);
+fileRequest_t *pacLoad(const char *filename);
 
 extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle);
 
@@ -182,7 +173,7 @@ extern s32 pacFileHandleFree_(void *pacHandle);
 
 u8 fldLoadNextGetStatus2(void);
 
-extern s32 pacCheckEnd(const struct fileRequest_t *pacHandle);
+extern s32 pacCheckEnd(const fileRequest_t *pacHandle);
 
 s32 fldLoadNextGetStatus3(s32 field, s32 area);
 
@@ -209,18 +200,15 @@ void fldPreloadNextFile(char *out);
 extern s32 evtBitCheck(s32 no);
 
 
-
-
-
 extern char fldFieldPackFlag[];
 
 void fldLoadFieldPack(void);
 
 extern char * strcpy(char *, const char *);
 
-extern struct fileRequest_t *gFldFileF1;
+extern fileRequest_t *gFldFileF1;
 
-extern void pacSync(struct fileRequest_t *pacFileHandle);
+extern void pacSync(fileRequest_t *pacFileHandle);
 
 extern void fldInfLoadFromMem(const void *);
 
@@ -310,9 +298,7 @@ extern void *D_0055DAA8[];
 
 extern u32 D_0054EBCC;
 
-extern struct fileRequest_t *fldFileBuf1;
-
-
+extern fileRequest_t *fldFileBuf1;
 
 
 extern u8 D_0054EC00[];
@@ -326,12 +312,9 @@ void fldHojiDebugView2(void);
 extern s32 fldGetAnimeFlag(s32 field, s32 area, s32 block);
 
 
-
 extern void fldDbgPrint2D(s32 x, s32 y, const char *str);
 
 extern s32 fldGbChkHit(s32 fld, s32 area, s32 blk);
-
-
 
 
 extern char D_0054EC20[]; /* "%02d" */
@@ -1222,7 +1205,7 @@ s32 fldLoadNextFile(s32 field, s32 area) {
 
 void fldFreeNextFile(void) {
     if (pFldNextFileDataF2 != 0) {
-        sdfPacDecodeResrc_t *work = ((filePacRequest_t *)pFldNextFileDataF2)->packet.resrcHead;
+        sdfPacDecodeResrc_t *work = pFldNextFileDataF2->pac.resrcHead;
 
         if (work != NULL) {
             do {
@@ -1371,7 +1354,7 @@ u8 fldCheckNextFile(void) {
 
 void fldLoadFieldPack(void) {
     char name[32];
-    filePacRequest_t *request;
+    fileRequest_t *request;
     sdfPacDecodeResrc_t *work;
 
     if (fldGlobalBase.area < 200) {
@@ -1379,8 +1362,8 @@ void fldLoadFieldPack(void) {
         strcpy(fldFieldPackFlag, name);
         gFldFileF1 = pacLoad(name);
         pacSync(gFldFileF1);
-        request = (filePacRequest_t *)gFldFileF1;
-        for (work = request->packet.resrcHead; work != NULL; work = work->next) {
+        request = gFldFileF1;
+        for (work = request->pac.resrcHead; work != NULL; work = work->next) {
             switch (((sdfPacStdBlockHeader_t *)work->header)->kind) {
             case FLD_PACKED_RESOURCE_INFO_TABLE:
                 fldInfLoadFromMem(work->data);
@@ -1491,7 +1474,7 @@ u32 fldLoadFile(const char *name) {
         D_0054EB98 = 0;
         D_0054EBD0 = 0;
         index = 0;
-        work = ((filePacRequest_t *)fldFileBuf1)->packet.resrcHead;
+        work = fldFileBuf1->pac.resrcHead;
         if (work != NULL) {
             do {
                 switch (index) {
@@ -1609,7 +1592,7 @@ u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, vo
 
 void fldFreeFile(void) {
     s32 i;
-    filePacRequest_t *request;
+    fileRequest_t *request;
     sdfPacDecodeResrc_t *work;
 
     if (dds3SearchProcessName("PipeMain") != 0) {
@@ -1680,9 +1663,9 @@ void fldFreeFile(void) {
             fldGlobalBase.previousFloor = fldGlobalBase.floor;
         }
     }
-    request = (filePacRequest_t *)fldFileBuf1;
+    request = fldFileBuf1;
     if (request != NULL) {
-        work = request->packet.resrcHead;
+        work = request->pac.resrcHead;
         i = 0;
         if (work != NULL) {
             do {

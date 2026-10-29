@@ -2,6 +2,7 @@
 #include "newdata.h"
 #include "kernel.h"
 #include "libsdf.h"
+#include "fileManager.h"
 
 extern f32 gMoonCnt;
 
@@ -30,25 +31,6 @@ typedef struct
     sdfTexHandle_t *MoonTmx6;
 } evtMoonProcessData_t;
 
-typedef struct evtMoonPacRequest_t
-{
-    u8 kind;
-    u8 state;
-    u8 retryCount;
-    u8 mode;
-    struct evtMoonPacRequest_t *next;
-    char *name;
-    void *deviceRequest;
-    s32 transferBytes;
-    s32 totalBytes;
-    void *callback;
-    void *callbackArg;
-    sdfMemHandle_t *allocationHandle;
-    u32 retainedAddress;
-    u32 transferAddress;
-    struct evtMoonPacRequest_t *completionNext;
-    sdfPacDecodeCb_t packet;
-} evtMoonPacRequest_t;
 
 s32 evtMoonProcess1(dds3ProcessID_t *id);
 extern s32 evtMoonProcess2(dds3ProcessID_t *id);
@@ -831,7 +813,7 @@ INCLUDE_RODATA(const s32, "event/evtMoon", D_0053B1F8);
 s32 evtMoonProcess1(dds3ProcessID_t *id)
 {
     evtMoonProcessData_t *work = sdfChipAllocDirect(sizeof(*work));
-    evtMoonPacRequest_t *request;
+    fileRequest_t *request;
     sdfPacDecodeResrc_t *entry;
     s32 index = 0;
 
@@ -843,7 +825,7 @@ s32 evtMoonProcess1(dds3ProcessID_t *id)
     work->MoonTmx6 = NULL;
     request = pacLoad(D_0053B1F8);
     pacSync(request);
-    entry = request->packet.resrcHead;
+    entry = request->pac.resrcHead;
     if (entry != NULL) {
         do {
             switch (index) {
