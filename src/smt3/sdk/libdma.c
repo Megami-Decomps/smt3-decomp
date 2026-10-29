@@ -19,11 +19,13 @@
 
 
 
+/* The four byte fields select D_CTRL's channel numbers: STS (bits 4-5), STD
+ * (bits 6-7), MFD (bits 2-3) and the release cycle (bit 1, bits 8-9). */
 typedef struct {
-    u8 relative;
-    u8 mfifo;
-    u8 stall;
-    u8 cycle;
+    u8 sts;
+    u8 std;
+    u8 mfd;
+    u8 rcyc;
     u16 pcr_hi;
     u16 pcr_lo;
     u16 sqwc_lo;
@@ -132,9 +134,14 @@ int sceDmaReset(int enable)
     return dmae;
 }
 
-/* NON_MATCHING: 21 of 118 words differ, one instruction long; the return move
- * does not sink into the jr delay slot because the struct copy leaves $v0
- * free, where retail uses it as the copy's scratch. */
+/* NON_MATCHING: 15 of 118 words differ at the right 472 bytes. Loading
+ * env->rbor with the other field values, ahead of the register writes, gives
+ * retail's struct copy and its $v0 delay-slot return. What is left is one
+ * scheduling decision: the compiler issues that load with the five field
+ * loads before the D_CTRL write, which costs a sixth live register, where
+ * retail issues it late, in the slot before the D_SQWC write, and lets pcr
+ * and rbor share $a2. Computing sqwc before pcr is three words closer but
+ * does not close it either. */
 #ifdef NON_MATCHING
 int sceDmaPutEnv(sceDmaEnv *env)
 {
@@ -144,34 +151,34 @@ int sceDmaPutEnv(sceDmaEnv *env)
     u32 rbor = *VD_RBOR;
     u32 rbsr = *VD_RBSR;
 
-    if (env->relative >= 10) {
+    if (env->sts >= 10) {
         return -1;
     }
-    if (env->mfifo >= 10) {
+    if (env->std >= 10) {
         return -2;
     }
-    if (env->stall >= 10) {
+    if (env->mfd >= 10) {
         return -3;
     }
-    if (env->cycle >= 7) {
+    if (env->rcyc >= 7) {
         return -4;
     }
-    ctrl = (ctrl & ~0x30) | (D_0054A930[env->relative] << 4);
-    ctrl = (ctrl & ~0xC0) | (D_0054A940[env->mfifo] << 6);
-    ctrl = (ctrl & ~0xC) | (D_0054A950[env->stall] << 2);
-    if (env->cycle != 0) {
+    ctrl = (ctrl & ~0x30) | (D_0054A930[env->sts] << 4);
+    ctrl = (ctrl & ~0xC0) | (D_0054A940[env->std] << 6);
+    ctrl = (ctrl & ~0xC) | (D_0054A950[env->mfd] << 2);
+    if (env->rcyc != 0) {
         ctrl |= 2;
-        ctrl = (ctrl & ~0x300) | ((env->cycle - 1) << 8);
+        ctrl = (ctrl & ~0x300) | ((env->rcyc - 1) << 8);
     } else {
         ctrl &= ~2;
     }
     pcr = (env->pcr_hi << 16) | env->pcr_lo;
     sqwc = (env->sqwc_hi << 16) | env->sqwc_lo;
+    rbor = env->rbor;
     rbsr = env->rbsr;
     *VD_CTRL = ctrl;
     *VD_PCR = pcr;
     *VD_SQWC = sqwc;
-    rbor = env->rbor;
     *VD_RBOR = rbor;
     *VD_RBSR = rbsr;
     D_00598940 = *env;
