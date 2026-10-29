@@ -50,7 +50,7 @@ effDebugPolyParams_t	effPCPFlash_dds3FlashPolyListDrawJob	4	1
 effBlurScatterWork_t	effDistortionBlurHandle_t	4	0
 effBTLSystemHandle_t	effBattleSystem_effBTLSystem_FuncTable_tag	4	0
 dds3SpPolyEntry_t	dds3EffectTable_t	4	0
-dds3AdminiEntry_t	dds3AdminiList_t	4	0
+dds3AdminiList_t	dds3AdminiList_t	4	0
 shpUpdateWork_t	fclDataShop_t	3	1
 ragUpdateWork_t	fclDataRag_t	3	1
 effBTLFieldFilter_t	effBattle_effBTL_FieldColor_Filter_tag	3	1

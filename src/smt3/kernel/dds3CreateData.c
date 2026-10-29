@@ -31,7 +31,7 @@ typedef struct
 
 extern void evtFreeStage(void);
 
-extern void func_00116BB8(void);
+extern void dds3GlobalWorkDestroy(void);
 
 extern void dds3GlobalWorkInit(void);
 
@@ -85,7 +85,7 @@ extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 void dds3CreateGameData(s32 no)
 {
     evtFreeStage();
-    func_00116BB8();
+    dds3GlobalWorkDestroy();
     dds3GlobalWorkInit();
 }
 

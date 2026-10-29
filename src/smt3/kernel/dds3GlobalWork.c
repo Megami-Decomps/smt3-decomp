@@ -17,9 +17,9 @@ extern void dds3GlobalWorkUserInit(void);
 
 extern void func_00116C30(void);
 
-extern void func_00116BB8(void);
+extern void dds3GlobalWorkDestroy(void);
 
-extern s32 func_00116C08(dds3ProcessID_t *id);
+extern s32 dds3GlobalWorkMainProc(dds3ProcessID_t *id);
 
 extern s32 dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -166,12 +166,12 @@ void dds3GlobalWorkInit(void)
     work->memHandle = handle;
     work->unk38 = 0;
     work->playtime = 0;
-    dds3StartProcess(D_0054EA08, DDS3_PRIORITY_GLOBALWORK, 0, 0, func_00116C08, NULL, work);
+    dds3StartProcess(D_0054EA08, DDS3_PRIORITY_GLOBALWORK, 0, 0, dds3GlobalWorkMainProc, NULL, work);
     DDS3_GBWK = work;
     return func_00116C30();
 }
 
-void func_00116BB8(void)
+void dds3GlobalWorkDestroy(void)
 {
     sdfMemHandle_t *handle;
 
@@ -183,7 +183,7 @@ void func_00116BB8(void)
     DDS3_GBWK = NULL;
 }
 
-s32 func_00116C08(dds3ProcessID_t *id)
+s32 dds3GlobalWorkMainProc(dds3ProcessID_t *id)
 {
     DDS3_GBWK->unk38++;
     DDS3_GBWK->playtime++;

@@ -1,7 +1,7 @@
 #include "common.h"
 #include "kernel.h"
 
-typedef struct dds3AdminiWork
+typedef struct dds3AdminiData_t
 {
     u32 Stat;
     u32 RunTimer;
@@ -16,12 +16,12 @@ typedef struct dds3AdminiWork
     u8 CallCount;
 } dds3AdminiData_t;
 
-typedef struct dds3AdminiEntry
+typedef struct dds3AdminiList_t
 {
-    s32 (*startfunc)(s32 restored, void *reqdata);
-    s32 (*endfunc)(void);
-    s32 (*mainfunc)(void);
-} dds3AdminiEntry_t;
+    s32 (*start)(s32 restored, void *reqdata);
+    s32 (*end)(void);
+    s32 (*check)(void);
+} dds3AdminiList_t;
 
 /* Named scheduler slots: retail strides entries by 0x44 bytes. */
 typedef struct
@@ -55,7 +55,7 @@ extern char D_0052DF60[];  /* "restore sequence!!\n" */
 
 int printf(const char *fmt, ...);
 
-extern dds3AdminiEntry_t dds3AdminiList[];
+extern dds3AdminiList_t dds3AdminiList[];
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
@@ -212,7 +212,7 @@ s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
             }
             work->SequenceHistory[work->HistoryPointer] = work->NowSequence;
             work->FlagHistory[work->HistoryPointer] = 0;
-            startfunc = dds3AdminiList[work->NowSequence].startfunc;
+            startfunc = dds3AdminiList[work->NowSequence].start;
             if (startfunc != NULL) {
                 startfunc(restored, work->CallData);
             }
@@ -237,7 +237,7 @@ s32 dds3AdminiEndCheck(dds3ProcessID_t *id)
     s32 wait;
 
     if (sequence >= 0) {
-        endfunc = dds3AdminiList[sequence].endfunc;
+        endfunc = dds3AdminiList[sequence].end;
         if (endfunc != NULL) {
             wait = endfunc();
             if (wait < 0) {
@@ -259,7 +259,7 @@ s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
     work = dds3GetProcessData(id);
     if (!(work->Stat & 2)) {
         if (work->NowSequence >= 0) {
-            mainfunc = dds3AdminiList[work->NowSequence].mainfunc;
+            mainfunc = dds3AdminiList[work->NowSequence].check;
             if (mainfunc != NULL) {
                 if (mainfunc() != 0) {
                     work->Stat |= 2;
@@ -303,7 +303,7 @@ void dds3AdminiNeoShutdown(dds3ProcessID_t *id)
     s32 sequence = work->NowSequence;
 
     if (sequence >= 0) {
-        s32 (*endfunc)(void) = dds3AdminiList[sequence].endfunc;
+        s32 (*endfunc)(void) = dds3AdminiList[sequence].end;
 
         if (endfunc != NULL) {
             endfunc();
