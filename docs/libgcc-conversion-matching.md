@@ -17,3 +17,22 @@ though the preceding 32-bit saturation bound makes its left-shift arm unreachabl
 The same unit now declares the double returns of `__pack_df`, `__make_dp`,
 `fptodp`, `dpadd` and `dpsub` with their floating types. All existing matched
 functions remain exact. Complete libgcc owner: 23 match / 0 differ.
+
+
+## Native unpacking and comparison
+
+`sdfUnpackFloat` (92 bytes), `sdfUnpackDouble` (188) and `__fpcmp_parts_df`
+(288) add 568 exact instruction bytes. Both unpackers store the sign and classify
+exponent-zero inputs as zero without clearing the remaining output fields.
+The float helper treats every nonzero exponent as a normal value; the double
+helper separately preserves infinity and NaN classes and payloads. Its binary64
+view uses the native 52/11/1-bit fields, rather than rebuilding them from two
+32-bit word loads.
+
+Comparison returns a signed 32-bit result, including one for unordered inputs.
+Signed zeros compare equal. Finite values use signed exponent and unsigned
+fraction comparisons, with magnitude order reversed for negative values.
+Returning directly from each magnitude comparison preserves native control
+flow; collecting the order first emitted a different, shorter body. The existing
+`dpcmp` wrapper retains all 76 matching bytes with its corrected signed return.
+Complete libgcc owner: 26 match / 0 differ.

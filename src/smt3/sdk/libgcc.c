@@ -374,7 +374,7 @@ extern void sdfUnpackDouble(const double *x, fp_number_type_df *u);
 
 extern fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_number_type_df *b, fp_number_type_df *r);
 
-extern long __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df *b);
+extern s32 __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df *b);
 
 
 void __do_global_dtors(void) {
@@ -432,7 +432,7 @@ f64 dpsub(double a, double b) {
 
 INCLUDE_ASM(const s32, "sdk/libgcc", dpmul);
 
-long dpcmp(double a, double b) {
+s32 dpcmp(double a, double b) {
     fp_number_type_df ua;
     fp_number_type_df ub;
 
@@ -441,7 +441,11 @@ long dpcmp(double a, double b) {
     return __fpcmp_parts_df(&ua, &ub);
 }
 
-/* fp-bit class predicates: zero is tag 2, infinity is tag 4. */
+/* fp-bit tags: NaN classes 0/1, zero 2, normal 3, infinity 4. */
+static inline s32 dfIsNaN(const fp_number_type_df *number) {
+    return (u32)number->class < 2;
+}
+
 static inline s32 dfIsZero(const fp_number_type_df *number) {
     return number->class == 2;
 }
@@ -726,7 +730,23 @@ INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D31E0);
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D3398);
 
-INCLUDE_ASM(const s32, "sdk/libgcc", sdfUnpackFloat);
+void sdfUnpackFloat(const void *input, fp_number_type *number) {
+    f32_bits bits;
+    u32 exponent;
+    u32 fraction;
+
+    bits.f = *(const f32 *)input;
+    exponent = (bits.u >> 23) & 0xFF;
+    fraction = bits.u & 0x7FFFFF;
+    number->sign = bits.u >> 31;
+    if (exponent == 0) {
+        number->class = 2;
+        return;
+    }
+    number->normal_exp = exponent - 127;
+    number->class = 3;
+    number->fraction = (fraction << 7) | 0x40000000;
+}
 
 f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant) {
     fp_number_type u;
@@ -740,8 +760,85 @@ f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant) {
 
 INCLUDE_ASM(const s32, "sdk/libgcc", __pack_df);
 
-INCLUDE_ASM(const s32, "sdk/libgcc", sdfUnpackDouble);
+typedef union sdfDoubleBits_t {
+    double value;
+    struct {
+        u64 fraction : 52;
+        u32 exponent : 11;
+        u32 sign : 1;
+    } fields;
+} sdfDoubleBits_t;
 
-INCLUDE_ASM(const s32, "sdk/libgcc", __fpcmp_parts_df);
+void sdfUnpackDouble(const double *x, fp_number_type_df *u) {
+    sdfDoubleBits_t input;
+    u64 fraction;
+    u32 exponent;
+
+    input.value = *x;
+    exponent = input.fields.exponent;
+    fraction = input.fields.fraction;
+    u->sign = input.fields.sign;
+    if (exponent == 0) {
+        u->class = 2;
+    } else if (exponent == 0x7FF) {
+        u->normal_exp = 0x3FF;
+        if (fraction == 0) {
+            u->class = 4;
+            u->fraction = (u64)1 << 60;
+        } else {
+            if (fraction & ((u64)1 << 51)) {
+                u->class = 1;
+            } else {
+                u->class = 0;
+            }
+            u->fraction = fraction;
+        }
+    } else {
+        fraction = (fraction << 8) | ((u64)1 << 60);
+        u->normal_exp = exponent - 0x3FF;
+        u->class = 3;
+        u->fraction = fraction;
+    }
+}
+
+s32 __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df *b) {
+    if (dfIsNaN(a) || dfIsNaN(b)) {
+        return 1;
+    }
+    if (dfIsInfinity(a) && dfIsInfinity(b)) {
+        return b->sign - a->sign;
+    }
+    if (dfIsInfinity(a)) {
+        return a->sign ? -1 : 1;
+    }
+    if (dfIsInfinity(b)) {
+        return b->sign ? 1 : -1;
+    }
+    if (dfIsZero(a) && dfIsZero(b)) {
+        return 0;
+    }
+    if (dfIsZero(a)) {
+        return b->sign ? 1 : -1;
+    }
+    if (dfIsZero(b)) {
+        return a->sign ? -1 : 1;
+    }
+    if (a->sign != b->sign) {
+        return a->sign ? -1 : 1;
+    }
+    if (a->normal_exp > b->normal_exp) {
+        return a->sign ? -1 : 1;
+    }
+    if (a->normal_exp < b->normal_exp) {
+        return a->sign ? 1 : -1;
+    }
+    if ((u64)a->fraction > (u64)b->fraction) {
+        return a->sign ? -1 : 1;
+    }
+    if ((u64)a->fraction < (u64)b->fraction) {
+        return a->sign ? 1 : -1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libgcc", sdfPackFloat);
