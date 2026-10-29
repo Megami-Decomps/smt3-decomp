@@ -271,7 +271,44 @@ s32 sceCdPowerOff(s32 *result)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdReadClock);
+typedef struct sdfCdClock_t {
+    u8 status;
+    u8 second;
+    u8 minute;
+    u8 hour;
+    u8 pad04;
+    u8 day;
+    u8 month;
+    u8 year;
+} sdfCdClock_t;
+
+static const char D_0054AC78[32] = "Libcdvd call Clock read 1\n";
+static const char D_0054AC98[32] = "Libcdvd call Clock read 2\n";
+
+s32 sceCdReadClock(sdfCdClock_t *clock)
+{
+    s32 result;
+
+    if (!_sceCd_scmd_prechk(0xF)) {
+        return 0;
+    }
+    if (D_0052A010 > 0) {
+        scePrintf(D_0054AC78);
+    }
+    if (sceSifCallRpc(D_0052BA48, 1, 0, NULL, 0,
+                      D_0052B200, 16, NULL, NULL) < 0) {
+        SignalSema(D_0052A02C);
+        return 0;
+    }
+    *clock = *(sdfCdClock_t *)UNCACHED(&D_0052B200[1]);
+    if (D_0052A010 > 0) {
+        scePrintf(D_0054AC98);
+    }
+    result = UNCACHED(D_0052B200)[0];
+    SignalSema(D_0052A02C);
+    return result;
+}
+
 
 s32 sceCdStInit(u32 bufmax, u32 bankmax, void *buf)
 {
