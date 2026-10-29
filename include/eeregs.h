@@ -46,4 +46,14 @@
 #define HW_WRITE(reg, value) (*(reg) = (value))
 #endif
 
+/* A register reached as a struct's member (a DMA channel's chcr through
+ * sceDmaGetChan) is named as the member itself, since taking its address
+ * changes ee-gcc's code: read, its bits set, its bits cleared. A plain
+ * access, unless the build supplies its own. */
+#ifndef HW_FIELD_READ
+#define HW_FIELD_READ(field) (field)
+#define HW_FIELD_OR(field, bits) ((field) |= (bits))
+#define HW_FIELD_AND(field, mask) ((field) &= (mask))
+#endif
+
 #endif /* EEREGS_H */
