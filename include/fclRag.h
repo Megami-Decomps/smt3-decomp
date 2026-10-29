@@ -3,11 +3,31 @@
 
 #include "newdata.h"
 #include "facility.h"
+#include "interface.h"
 
 typedef struct {
     u16 item;
     ragItemReq_t requirements[3];
 } ragHeartsEntry_t;
+
+typedef struct {
+    u8 reserved00[0x1A];
+    s8 heartItems[32];
+    s8 heartCount;
+    s8 list2[8];
+    s8 list2Count;
+    s8 list3[8];
+    s8 list3Count;
+    s8 hasUnregistered;
+    u8 reserved4E[0xF2];
+    cmpCursorInfo_t cursor;
+    u8 reserved178[0x1004];
+    lstWork_t heartWindow;
+    u8 reserved1310[0x1004];
+    lstWork_t window2;
+    u8 reserved24A8[0x1004];
+    lstWork_t window3;
+} ragListWork_t;
 
 /* Inline custom values begin at +4 in each 0x2C-byte offer record. */
 typedef struct {

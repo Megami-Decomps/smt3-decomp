@@ -243,25 +243,6 @@ void ragInitList3(s32 count, lstWork_t *work)
     cmpInitCursorRange(&work->listCursor, count, 7, 0);
 }
 
-typedef struct {
-    u8 reserved00[0x1A];
-    s8 heartItems[32];
-    s8 heartCount;
-    s8 list2[8];
-    s8 list2Count;
-    s8 list3[8];
-    s8 list3Count;
-    s8 hasUnregistered;
-    u8 reserved4E[0xF2];
-    cmpCursorInfo_t cursor;
-    u8 reserved178[0x1004];
-    lstWork_t heartWindow;
-    u8 reserved1310[0x1004];
-    lstWork_t window2;
-    u8 reserved24A8[0x1004];
-    lstWork_t window3;
-} ragListWork_t;
-
 extern ragHeartsEntry_t ragHeartEntries[] asm("ragHeartsTable");
 extern u8 D_0032FC58[][32];
 extern s32 datGetItemSlotIndex(u16 item);
