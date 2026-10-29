@@ -773,7 +773,6 @@ s32 nbGetNegoTuikaRequestType(s32 tuikareqtype)
     return 0;
 }
 
-typedef struct { s32 requestmode; u8 remainder[0x64]; } nbNegoSkillEntry_t;
 #ifdef NON_MATCHING
 typedef struct { s8 skillattr; s8 type; s16 index; u16 keisyoform; s8 capacity; u8 flag; } nbSkillAttr_t;
 extern nbSkillAttr_t attr[];

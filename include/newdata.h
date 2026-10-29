@@ -293,6 +293,13 @@ typedef struct nbNegoSkillCondition_t {
     s32 message;
 } nbNegoSkillCondition_t;
 
+typedef struct nbNegoSkillEntry_t {
+    s32 requestmode;
+    u8 rate[4];
+    nbNegoSkillCondition_t condition[8];
+} nbNegoSkillEntry_t;
+
+
 
 
 /* Target codes for the AI's group and single target helpers. SMT3HD recovers this

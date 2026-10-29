@@ -285,8 +285,6 @@ extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern datDevilFormat_t datDevilTable[];
 
-typedef struct { s32 unk_00; u8 pad[0x64]; } nbNegoSkillEntry_t;
-
 extern nbNegoSkillEntry_t D_003E1338[];
 
 typedef struct { u8 rate; u8 item; } nbMasterTextKouho_t;
@@ -1133,7 +1131,7 @@ s32 Flow1_34(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x10023);
     nbAddNegoIdKouho(n, 0x10026);
-    if (D_003E1338[n->negoskillid - 0x180].unk_00 == 0) {
+    if (D_003E1338[n->negoskillid - 0x180].requestmode == 0) {
         n->nextnegoid = n->nextkouho[0];
     } else {
         n->nextnegoid = n->nextkouho[1];
