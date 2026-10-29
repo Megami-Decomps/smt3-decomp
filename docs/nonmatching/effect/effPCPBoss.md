@@ -247,3 +247,48 @@ constraint is used.
 
 Reproduce with `tools/check_unit.py src/smt3/effect/effPCPBoss.c
 --cflags=-DNON_MATCHING --func effPCPBossONGYDraw -v`.
+
+
+## effPCPDANTE_ShowTime_AreYouReady_Draw (1276 bytes)
+
+The guarded reconstruction matches 298 of 319 instruction words at the native
+1276-byte size. Normal builds retain assembly; this receives no exact matching
+credit. All 153 existing owner functions and the unit data remain exact.
+
+The work allocation is 0xD8 bytes. Its three animation counters begin at 0xC8;
+this routine snapshots the middle counter at 0xCC, independently of the main
+counter at 0xC4. Texture reads remain after their preceding callbacks, and the
+final increment reloads the live animation counter.
+
+Both loop indices and the intermediate alpha values are unsigned. Native emits
+the full unsigned integer/float conversion paths, even though ordinary frames
+use small positive values. Six leading sprites use a reflected, squared fade;
+four trailing sprites use the signed squared phase for vertical displacement.
+Preserve division by 12, the two separate phase offsets 4 and 26, and the final
+scale factors 0.75 and 0.325. The last literal reproduces pool word 0x3EA66666.
+
+The first loop advances its phase alongside the index. Keep the hold phase
+separate. The final frame-interval test uses the captured frame directly:
+`frame >= 10 && frame <= 26`. Testing the saved hold-phase range twice instead
+leaves a comparison result live across the middle loop, adds a saved register,
+and lowers the comparison to 204 matching words. Both forms describe the same
+valid animation interval.
+
+Qualified 2.96 compiler measurements used `--alloc --no-dumps` with CSE or GCSE
+logging; hooked/unhooked output parity passed. In the repeated-test form,
+comparison pseudo 136 has three references, live length 89 and four crossed
+calls, receiving $22. In the retained form, GCSE expression 39 combines the two
+frame-minus-ten values (UIDs 244 and 481), while the two predicates remain
+separate expressions 40 and 70. The UV-address high part can then receive $23
+instead of an extra saved frame-pointer register. A final guarded-source run
+with `--gcse --alloc --no-dumps --cflag -DNON_MATCHING` also passed parity.
+
+The remaining 21 words start at +0x26C. They concern the raw and rebased phase
+registers in the second loop, the move across the alpha-reset call, and its
+subsequent conversion/argument schedule. Separate raw-phase locals cause loop
+strength reduction and worsen the result; moving rebasing before the range
+test also worsens it. Explicit signed range spelling is neutral. No padding,
+register constraint, artificial dependency or added volatile access is used.
+
+Reproduce with `tools/check_unit.py src/smt3/effect/effPCPBoss.c
+--cflags=-DNON_MATCHING --func effPCPDANTE_ShowTime_AreYouReady_Draw -v`.

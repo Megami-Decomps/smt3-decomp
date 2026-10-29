@@ -495,7 +495,7 @@ typedef struct effPCPDANTE_ShowTime_tag
     u8 flash[3][0x38];
     void *hTex[2];
     s32 frame;
-    u8 frameParts[0xC];
+    s32 frameParts[3];
     u8 texLoaded;
 } effPCPDANTE_ShowTime_tag;
 
@@ -3746,7 +3746,82 @@ void effPCPDANTE_Sprite_Draw(s32 x, s32 y, f32 scale, u32 color, effPCPDANTE_UV_
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Bingo_Draw);
 
+/* NON_MATCHING: native 1276-byte size; 21 second-loop words differ. */
+#ifdef NON_MATCHING
+extern effPCPDANTE_UV_tag effPCPDANTE_AreYouReady_UV;
+extern void nbPnl_rsetAlpha(s32 mode);
+
+void effPCPDANTE_ShowTime_AreYouReady_Draw(effPCPDANTE_ShowTime_tag *work)
+{
+    s32 frame = work->frameParts[1];
+    u32 i;
+    s32 phase;
+    s32 holdPhase;
+    u32 baseAlpha;
+    u32 color;
+    s32 y;
+    f32 t;
+    f32 fade;
+
+    phase = frame - 6;
+    for (i = 0; i < 6; i++, phase++) {
+        baseAlpha = (u32)(((f32)i / 6.0f) * 80.0f) + 48;
+        if ((u32)phase < 17) {
+            t = (f32)phase * 0.125f;
+            if (t > 1.0f) {
+                fade = 2.0f - t;
+            } else {
+                fade = t;
+            }
+            if (phase < 9) {
+                fade *= fade;
+                nbPnl_rsetAlpha(0);
+                y = 184 - (s32)((t * 92.0f) * t);
+                color = ((u32)((f32)baseAlpha * fade) << 24) | 0x808080;
+                effPCPDANTE_Sprite_Draw(32, y, 1.0f, color,
+                                       &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
+                if (phase == 8) {
+                    nbPnl_rsetAlpha(1);
+                    effPCPDANTE_Sprite_Draw(32, y, 1.0f, 0x20808080,
+                                           &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
+                }
+            }
+        }
+    }
+    holdPhase = frame - 10;
+    if ((u32)holdPhase < 17) {
+        nbPnl_rsetAlpha(0);
+        effPCPDANTE_Sprite_Draw(32, 92, 1.0f, 0x80808080,
+                               &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
+    }
+    for (i = 0; i < 4; i++) {
+        s32 elapsed = frame + i - 4;
+
+        baseAlpha = (u32)(((f32)i * 0.25f) * 112.0f) + 16;
+        if ((u32)(elapsed - 26) < 13) {
+            elapsed -= 26;
+            nbPnl_rsetAlpha(0);
+            t = 1.0f - (f32)elapsed / 12.0f;
+            color = ((u32)((f32)baseAlpha * t) << 24) | 0x808080;
+            y = 92 - (s32)((f32)(elapsed * elapsed) * 3.0f);
+            effPCPDANTE_Sprite_Draw(32, y, 1.0f, color,
+                                   &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
+        }
+    }
+    if (frame >= 10 && frame <= 26) {
+        nbPnl_rsetAlpha(1);
+        t = (f32)holdPhase * 0.0625f;
+        color = ((u32)((1.0f - t) * 80.0f) << 24) | 0x808080;
+        effPCPDANTE_Sprite_Draw(32, 92, 1.0f + (t * 0.75f) * t, color,
+                               &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
+        effPCPDANTE_Sprite_Draw(32, 92, 1.0f + (t * 0.325f) * t, color,
+                               &effPCPDANTE_AreYouReady_UV, work->hTex[0]);
+    }
+    work->frameParts[1]++;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_AreYouReady_Draw);
+#endif
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_ShowTime_Draw);
 
