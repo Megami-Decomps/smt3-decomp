@@ -33,7 +33,7 @@ typedef struct
 typedef struct
 {
     /* 0x00 */ sdfMemHandle_t *allocation;
-    /* 0x04 */ s32 texHandle[5];
+    /* 0x04 */ sdfTexHandle_t *texHandle[5];
     /* 0x18 */ s32 mode;
     /* 0x1C */ s32 cursor;
     /* 0x20 */ s32 unk_20;
@@ -62,7 +62,7 @@ extern s32 scrGetIntPara(s32 n);
 
 extern s32 p2sdPlayBGM(s32 MidiNo);
 
-extern void sdfTexFree(s32 aHandle);
+extern void sdfTexFree(sdfTexHandle_t *aHandle);
 
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
@@ -175,7 +175,71 @@ void dds3TitleSetFade(void)
     titleWork->unk_30 = 0x32;
 }
 
+extern void rsetOtOfs(s32 offset);
+extern void rsetAlpha(s32 mode);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm,
+                     s32 zte, s32 ztst);
+extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                        s32 color, sdfTexHandle_t *texture);
+extern f32 sdfSin(f32 angle);
+extern f32 dds3TitleFadeLevel;
+extern void dds3TitleDrawFade(void);
+
+#ifdef NON_MATCHING
+void dds3TitleUpdateFade(void)
+{
+    s32 alpha = 0;
+    s32 glowAlpha;
+    s32 frame;
+    u32 color;
+
+    if (titleWork->unk_34 == -1) {
+        return;
+    }
+    rsetOtOfs(0x48);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    frame = titleWork->unk_34;
+    if (titleWork->unk_3C == 0) {
+        if (frame >= 0x7E) {
+            frame -= 0x7D;
+            if (frame > 30) frame = 30;
+            alpha = (s32)((u32)frame << 7) / 30;
+        }
+    } else {
+        if (frame > 12) frame = 12;
+        alpha = (s32)((u32)frame << 7) / 12;
+    }
+    if (alpha <= 0) {
+        dds3TitleFadeLevel = 0.0f;
+    } else {
+        glowAlpha = alpha;
+        if (alpha == 0x80) {
+            glowAlpha += (s32)(sdfSin(dds3TitleFadeLevel) * 32.0f);
+            dds3TitleFadeLevel += 0.04999999702f;
+        }
+        rsetAlpha(1);
+        DrwSprite2D(0x67, 0xCD, 0x132, 0x3C, 1, 0xBD, 0x132, 0x3C,
+                    ((u32)glowAlpha << 24) | 0x808080, titleWork->texHandle[1]);
+        rsetAlpha(0);
+        DrwSprite2D(0x6C, 0xD8, 0x128, 0x27, 0xCC, 0x85, 0x128, 0x27,
+                    ((u32)alpha << 24) | 0x808080, titleWork->texHandle[1]);
+    }
+    frame = titleWork->unk_34;
+    if (frame > 12) frame = 12;
+    color = ((u32)((s32)((u32)frame << 7) / 12) << 24) | 0x808080;
+    DrwSprite2D(0xF, 0x54, 0x1D5, 0x7D, 2, 2, 0x1D4, 0x7D,
+                color, titleWork->texHandle[1]);
+    DrwSprite2D(0x128, 0xAC, 0xC6, 0x34, 2, 0x84, 0xC6, 0x34,
+                color, titleWork->texHandle[1]);
+    if (titleWork->unk_34 >= 13) {
+        dds3TitleDrawFade();
+    }
+    titleWork->unk_34 = (s32)((u32)titleWork->unk_34 + 1);
+}
+#else
 INCLUDE_ASM(const s32, "sound/sndManager", dds3TitleUpdateFade);
+#endif
 
 typedef struct titlePacFileRequest_t {
     u8 fileRequestHeader[0x30];
@@ -201,19 +265,19 @@ s32 titleLoadTextures(void)
     for (entry = request->packet.resrcHead; entry != NULL; entry = entry->next) {
         switch (index) {
         case 0:
-            titleWork->texHandle[0] = (s32)entry->resrc;
+            titleWork->texHandle[0] = entry->resrc;
             break;
         case 1:
-            titleWork->texHandle[1] = (s32)entry->resrc;
+            titleWork->texHandle[1] = entry->resrc;
             break;
         case 2:
-            titleWork->texHandle[2] = (s32)entry->resrc;
+            titleWork->texHandle[2] = entry->resrc;
             break;
         case 3:
-            titleWork->texHandle[3] = (s32)entry->resrc;
+            titleWork->texHandle[3] = entry->resrc;
             break;
         case 4:
-            titleWork->texHandle[4] = (s32)entry->resrc;
+            titleWork->texHandle[4] = entry->resrc;
             break;
         }
         index++;
