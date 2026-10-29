@@ -469,10 +469,10 @@ typedef struct {
 
 typedef struct __attribute__((packed, aligned(1))) {
     u64 part[2];
-} fldPackedQuaternion_t;
+} fldPackedVector_t;
 
 extern fldEncounterFloorTable_t D_003D51E0[];
-extern const fldPackedQuaternion_t D_005316A0;
+extern const fldPackedVector_t D_005316A0;
 extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
 extern fldResourcePoint_t *dds3PointBasicGetResource(dds3Basic_t *basic);
 extern void dds3SetActiveScene(dds3Basic_t *scene);
@@ -497,7 +497,7 @@ void fldReadyScene(void)
     QWORD_ALIGNED fldResourcePoint_t adjustedPoint;
     QWORD_ALIGNED union {
         sdfVector4_t vector;
-        fldPackedQuaternion_t packed;
+        fldPackedVector_t packed;
     } rotation;
     fldResourcePoint_t *point = NULL;
     fldEncounterFloorTable_t *encounters;
@@ -829,7 +829,217 @@ INCLUDE_RODATA(const s32, "field/fldMain", D_005317A0);
 
 INCLUDE_RODATA(const s32, "field/fldMain", D_005317B0);
 
+#ifdef NON_MATCHING
+extern const fldPackedVector_t D_00531770, D_00531780, D_00531790, D_005317A0, D_005317B0;
+extern s32 D_002FC41C;
+extern s32 l_UseCollision;
+extern s32 fldCamUnit[];
+extern dds3Basic_t *D_0054EAE8, *D_0054EAF0, *fldPlayerUnit;
+extern char D_0054EB38[];
+extern void *mhfldAnaFile;
+extern void evtBitOff(s32 no);
+extern dds3Basic_t *dds3SetActiveUnitSceneBasic(dds3Basic_t *scene, dds3Basic_t *unit);
+extern void dds3UnitObjectBasicSetOt(dds3Basic_t *unit, s32 index);
+extern void dds3SetSclPoseSet(dds3Basic_t *unit, const sdfVector4_t *scale);
+extern void mdlLoopMotion(mdlObj_t *model, s32 group, s32 number);
+extern void sdfModelSetFaceDivParm(sdfModelRootNode_t *model, f32 soften, f32 bias);
+extern void fldJDataLoad(void);
+extern void fldRunDanteInit(void);
+extern void fldRunDanteClear(void);
+extern s32 p2sdStopBGM(s32 id);
+extern void fldSkySetTbl(s32 index, s32 blend);
+extern void fldSkySetTableAnime(s32 type);
+extern void fldSkySetTblLightMaDZ(s32 index);
+extern s32 fldLightMaChk(void);
+extern void fldLightMaStart(void);
+extern s32 fldPlayerFastSet(void);
+extern void fldWaveInit(void);
+extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *data, char *name);
+
+void fldSetUnit(fldResourcePoint_t *point)
+{
+    QWORD_ALIGNED sdfVector4_t zeroPosition;
+    QWORD_ALIGNED sdfVector4_t rotation;
+    QWORD_ALIGNED union { sdfVector4_t vector; fldPackedVector_t packed; } axis;
+    QWORD_ALIGNED union { sdfVector4_t vector; fldPackedVector_t packed; } scale;
+    QWORD_ALIGNED union { sdfVector4_t vector; fldPackedVector_t packed; } mirrorScale;
+    QWORD_ALIGNED union { sdfVector4_t vector; fldPackedVector_t packed; } dantePosition;
+    QWORD_ALIGNED union { sdfVector4_t vector; fldPackedVector_t packed; } danteScale;
+    mdlObj_t *model;
+    s32 area;
+    s32 floor;
+    s32 mirror;
+    s32 oldDante;
+    s32 enableDante;
+    s32 lightZone;
+    s32 lightCheck;
+
+    memset(&zeroPosition, 0, sizeof(zeroPosition));
+    zeroPosition.w = 1.0f;
+    memset(&rotation, 0, sizeof(rotation));
+    rotation.w = 1.0f;
+    axis.packed = D_00531770;
+    scale.packed = D_00531780;
+    mirrorScale.packed = D_00531790;
+    dantePosition.packed = D_005317A0;
+    danteScale.packed = D_005317B0;
+    SDF_VU0_LOADVECTOR(&axis.vector);
+    FromRotation(3.141592503f);
+    SDF_VU0_LOADVECTOR_B(&point->rot);
+    Mult();
+    SDF_VU0_STOREVECTOR(&rotation);
+    fldUnitControl.handle = dds3AddUnitObjectBasic(dds3AllocObjectId(), point, &rotation);
+    dds3SetUnitObjectId(fldUnitControl.handle, "PLAYER_UNIT");
+    dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldUnitControl.handle);
+    D_0054EAE8 = fldUnitControl.handle;
+    if (l_UseCollision != 0) dds3ObjectBaseOffFlag(fldUnitControl.handle, 0x20);
+    if (fldGlobalBase.area < 10) {
+        fldJDataLoad();
+        dds3ObjectBaseMakeUnit(fldUnitControl.handle, 2, 4);
+        if (fldGlobalBase.area != 1) dds3ObjectBaseOnFlag(fldUnitControl.handle, 0x400);
+        else dds3UnitObjectBasicSetOt(fldUnitControl.handle, 7);
+    } else {
+        fldJDataLoad();
+        dds3ObjectBaseMakeUnit(fldUnitControl.handle, 2, D_002FC41C);
+    }
+    dds3SetSclPoseSet(fldUnitControl.handle, &scale.vector);
+    model = dds3ObjectBaseGetModelHandle(fldUnitControl.handle);
+    if (fldGlobalBase.area < 10) {
+        dds3GetRadiusPoseSet(fldUnitControl.handle, 30.0f);
+        mdlLoopMotion(model, 0, 0);
+    } else {
+        dds3GetRadiusPoseSet(fldUnitControl.handle, 90.0f);
+        mdlLoopMotion(model, 0, 0);
+        sdfModelSetFaceDivParm(model->inner, 15.0f, 0.0f);
+    }
+    fldPlayerUnit = NULL;
+    area = fldGlobalBase.area;
+    mirror = 0;
+    if (area == 18 || area == 28 || area == 30) {
+        mirror = 1;
+    } else if (area == 33) {
+        floor = fldGlobalBase.floor;
+        mirror = floor == 0 || floor == 6 || floor == 23 || floor == 27;
+    } else if (area == 17) {
+        floor = fldGlobalBase.floor;
+        mirror = floor == 1 || floor == 2 || floor == 3;
+    } else if (area == 14) {
+        mirror = fldGlobalBase.floor == 16;
+    } else if (area == 15) {
+        floor = fldGlobalBase.floor;
+        mirror = floor == 16 || floor == 9;
+    } else if (area == 34) {
+        mirror = fldGlobalBase.floor == 0;
+    }
+    if (mirror) {
+        SDF_VU0_LOADVECTOR(&axis.vector);
+        FromRotation(3.141592503f);
+        SDF_VU0_LOADVECTOR_B(&point->rot);
+        Mult();
+        SDF_VU0_STOREVECTOR(&rotation);
+        fldUnitControl.handle2 = dds3AddUnitObjectBasic(dds3AllocObjectId(), point, &rotation);
+        dds3SetUnitObjectId(fldUnitControl.handle2, "PLAYER_UNIT2");
+        fldPlayerUnit = fldUnitControl.handle2;
+        dds3ObjectBaseMakeUnit(fldUnitControl.handle2, 2, D_002FC41C);
+        dds3SetSclPoseSet(fldUnitControl.handle2, &mirrorScale.vector);
+        model = dds3ObjectBaseGetModelHandle(fldUnitControl.handle2);
+        dds3GetRadiusPoseSet(fldUnitControl.handle, 90.0f);
+        mdlLoopMotion(model, 0, 0);
+        sdfModelSetFaceDivParm(model->inner, 15.0f, 0.0f);
+        model->inner->flags |= 8;
+        dds3ObjectBaseOnFlag(fldUnitControl.handle, 0x400);
+    } else {
+        dds3ObjectBaseOnFlag(fldUnitControl.handle, 0x200);
+    }
+    D_0054EAF0 = NULL;
+    oldDante = evtBitCheck(0xAF3);
+    evtBitOff(0xAF3);
+    evtBitOff(0xAF4);
+    if (fldGlobalBase.area == 43 && evtBitCheck(0x105) == 0) {
+        enableDante = 0;
+        switch (fldGlobalBase.floor) {
+        case 3: enableDante = evtBitCheck(0x7B9) == 0; break;
+        case 4: enableDante = evtBitCheck(0x7BA) == 0; break;
+        case 5:
+            if (evtBitCheck(0x7BA) == 0) {
+                if (evtBitCheck(0x7B1) == 0) enableDante = 1;
+                else enableDante = evtBitCheck(0x7B2) == 0;
+            }
+            break;
+        case 7: case 8: case 9: case 10:
+            enableDante = evtBitCheck(0x7BB) == 0;
+            break;
+        }
+        if (enableDante) {
+            evtBitOn(0xAF3);
+            evtBitOn(0xAF4);
+            fldCamUnit[0] = 24;
+        }
+    }
+    if (evtBitCheck(0xAF3) != 0) {
+        SDF_VU0_LOADVECTOR(&axis.vector);
+        FromRotation(4.712388515f);
+        SDF_VU0_LOADVECTOR_B(&point->rot);
+        Mult();
+        SDF_VU0_STOREVECTOR(&rotation);
+        D_0054EAF0 = dds3AddUnitObjectBasic(dds3AllocObjectId(), point, &rotation);
+        dds3SetUnitObjectId(D_0054EAF0, "DANTE_UNIT");
+        dds3ObjectBaseMakeUnit(D_0054EAF0, 2, 7);
+        dds3SetSclPoseSet(D_0054EAF0, &danteScale.vector);
+        model = dds3ObjectBaseGetModelHandle(D_0054EAF0);
+        dds3GetRadiusPoseSet(D_0054EAF0, 90.0f);
+        mdlLoopMotion(model, 0, 3);
+        sdfModelSetFaceDivParm(model->inner, 15.0f, 0.0f);
+        dds3ObjectBaseOffFlag(D_0054EAF0, 1);
+        dds3SetPosPoseSet(D_0054EAF0, &dantePosition.vector);
+        fldRunDanteInit();
+    } else {
+        fldRunDanteClear();
+        if (oldDante != 0) p2sdStopBGM(0x820000);
+    }
+    if (fldGlobalBase.area < 200) {
+        fldSkySetTblLightMa(0, 0);
+        fldSkySetTbl(fldRunDanteGunFlag.skyTable, 0);
+        fldSkySetTableAnime(fldRunDanteGunFlag.word30);
+        lightCheck = fldLightMaChk();
+        lightZone = gFldNowDZone;
+        if (lightCheck == 1) {
+            if (gFldNowDZone == 0) {
+                fldGlobalBase.lightMaIdx = 0;
+                fldSkySetTblLightMa(0, 0);
+                fldSkySetTbl(fldRunDanteGunFlag.skyTable, 0);
+                fldSkySetTableAnime(fldRunDanteGunFlag.word30);
+            } else {
+                fldLightMaStart();
+            }
+            lightZone = gFldNowDZone;
+        } else if (lightZone == 0) {
+            fldGlobalBase.lightMaIdx = 0;
+        }
+        fldSkySetTblLightMaDZ(lightZone);
+    }
+    fldPlayerFastSet();
+    if (mhfldAnaFile != NULL) {
+        zeroPosition.x = 0.0f;
+        rotation.w = 1.0f;
+        zeroPosition.y = 0.0f;
+        zeroPosition.z = 0.0f;
+        zeroPosition.w = 1.0f;
+        rotation.x = 0.0f;
+        rotation.y = 0.0f;
+        rotation.z = 0.0f;
+        fldAnaBasic = dds3AddUnitObjectBasic(dds3AllocObjectId(), &zeroPosition, &rotation);
+        dds3ObjectBaseMakeUnit(fldAnaBasic, 2, 5);
+        dds3ObjectBaseOnFlag(fldAnaBasic, 1);
+        dds3ObjectBaseOnFlag(fldAnaBasic, 0x100);
+        dds3SetUnitObjectId(fldAnaBasic, "ANA_UNIT");
+    }
+    if (fldGlobalBase.area >= 11) fldWaveInit();
+    dds3AddPointBasic(dds3AllocObjectId(), &fldPlayerPosRotWork, D_0054EB38);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldMain", fldSetUnit);
+#endif
 
 void fldAnaStart(f32 x, f32 y, f32 z)
 {
