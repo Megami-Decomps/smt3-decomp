@@ -85,19 +85,6 @@ typedef struct
     /* 0x241C */ fclPanelAnimState_t anim;
 } shpUpdateWork_t;
 
-typedef struct
-{
-    /* 0x00 */ u8 unk_00;
-    /* 0x01 */ u8 unk_01[3];
-    /* 0x04 */ s32 unk_04;
-    /* 0x08 */ s32 unk_08;
-    /* 0x0C */ s32 unk_0C;
-    /* 0x10 */ s32 unk_10;
-    /* 0x14 */ s32 unk_14;
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ void (*calcSizes)();
-} fclRagTex_t;
 
 extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f,
                           void (*calc)());

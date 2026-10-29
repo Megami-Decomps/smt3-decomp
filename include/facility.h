@@ -14,6 +14,19 @@ typedef struct
     /* 0x0A */ u16 v1;
 } fclSpriteRect_t;
 
+typedef struct fclRagTex_t {
+    u8 unk_00;
+    u8 unk_01[3];
+    s32 unk_04;
+    s32 unk_08;
+    s32 unk_0C;
+    s32 unk_10;
+    s32 unk_14;
+    s32 unk_18;
+    s32 unk_1C;
+    void (*calcSizes)();
+} fclRagTex_t;
+
 typedef struct cmbStockSlot_t {
     s8 index;
     u8 unk_01;

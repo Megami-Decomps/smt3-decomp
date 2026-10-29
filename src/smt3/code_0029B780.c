@@ -17,7 +17,6 @@ extern s32 dds3GetGlobalConfigFlag(s32 index);
 extern void dds3PadVibrationSet(s32 port, s32 strength, s32 frames);
 
 
-typedef fclPanelAnim_t fclRagTex_t;
 
 typedef struct dds3ConfigWork_t {
     u8 prefix[0x14];
