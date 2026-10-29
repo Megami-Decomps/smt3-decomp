@@ -128,15 +128,6 @@ s32 ragCalc(dds3ProcessID_t *id)
 }
 
 
-typedef struct
-{
-    /* 0x0000 */ u8 unk_00[3];
-    /* 0x0003 */ s8 unk_03;
-    /* 0x0004 */ u8 unk_0004[0x4650];
-    /* 0x4654 */ s32 texHandle[1];
-} ragDrawWork_t;
-
-extern ragDrawWork_t *ragDrawWork;
 
 extern fclSpriteTbl_t D_003306B8[];
 

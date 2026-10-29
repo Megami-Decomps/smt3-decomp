@@ -29,6 +29,31 @@ typedef struct {
     lstWork_t window3;
 } ragListWork_t;
 
+typedef union {
+    struct {
+        u8 flags;
+        s8 seq;
+        u8 unk_02;
+        s8 unk_03;
+        u8 unk_0004[0x4C];
+        u8 customSource[4];
+        u16 devilId;
+        u8 unk_0056[0x4606];
+        s32 bgTexHandle[1];
+        u8 unk_4660[0x14];
+        s32 boxColor;
+    };
+    struct {
+        u8 calcPrefix[0x4654];
+        s32 texHandle[2];
+        fclSprite_t messageSprite;
+        fclPanel_t panel[3];
+    };
+    ragListWork_t list;
+} ragDrawWork_t;
+
+extern ragDrawWork_t *ragDrawWork;
+
 /* Inline custom values begin at +4 in each 0x2C-byte offer record. */
 typedef struct {
     u8 level;

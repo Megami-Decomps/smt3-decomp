@@ -1,5 +1,6 @@
 #include "common.h"
 #include "facility.h"
+#include "fclRag.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -14,22 +15,6 @@ void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pP
 extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
                                   s32 mode, s32 b, s32 id);
 
-typedef struct
-{
-    /* 0x0000 */ u8 flags;
-    /* 0x0001 */ s8 seq;
-    /* 0x0002 */ u8 unk_02;
-    /* 0x0003 */ s8 unk_03;
-    /* 0x0004 */ u8 unk_0004[0x4C];
-    /* 0x0050 */ u8 customSource[4];
-    /* 0x0054 */ u16 devilId;
-    /* 0x0056 */ u8 unk_0056[0x4606];
-    /* 0x465C */ s32 bgTexHandle[1];
-    /* 0x4660 */ u8 unk_4660[0x14];
-    /* 0x4674 */ s32 boxColor;
-} ragDrawWork_t;
-
-extern ragDrawWork_t *ragDrawWork;
 
 extern void ragDrawList2(s32 mode);
 
