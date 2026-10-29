@@ -6,6 +6,10 @@
 #include "ps2asm.h"
 #include "newdata.h"
 
+extern void evtBitOff(s32 no);
+extern s32 evtBitCheck(s32 no);
+extern void evtSetAgeOfMoon(u8 age);
+
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];
