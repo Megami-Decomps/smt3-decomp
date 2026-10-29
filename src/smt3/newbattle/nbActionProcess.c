@@ -77,7 +77,7 @@ typedef struct nbActionProcessData_t {
     /* Asynchronous requests returned by fileLoad; the sound id is bank << 16. */
     struct fileRequest *bedfile;
     struct fileRequest *midifile;
-    u32 unk80;
+    sdfMemHandle_t *midibuf;
     u32 midino;
     nbTimeList_t timelist[32];
     u32 packettime;
@@ -2313,7 +2313,118 @@ void SetAction_READY(nbActionProcessData_t *a)
     cmpSetSkillListRows(-1);
 }
 
+#ifdef NON_MATCHING
+extern char D_00551128[];
+extern void datDebugPrintf(const char *format, ...);
+extern s32 nbGetUnitFromAction(nbFormation_t *form, s32 motion);
+extern s32 p2sdLoadCheckMidi(s32 midi);
+extern struct nbKoukaPacket_t *nbAddSePacket2(s32 frame, s32 uniqueid, s32 midi);
+extern s32 pacFileCheckEnd(const struct fileRequest *file);
+extern sdfMemHandle_t *fileGetMemHandle(const struct fileRequest *file);
+extern u32 fileGetLoadSize(const struct fileRequest *file);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern s32 fileHandleFree(struct fileRequest *file);
+extern void p2sdSetPcmBuffer(s32 data, s32 size);
+extern struct effBTL_t *effBTLCreate(void *data);
+
+s32 CheckAction_READY(nbActionProcessData_t *a)
+{
+    s32 size;
+    void *buffer;
+    sdfMemHandle_t *handle;
+
+    switch (a->seqcnt) {
+    case 0:
+        a->skilltime++;
+        if (a->motse) {
+            if (p2sdLoadCheckMidi(nbGetUnitFromAction(a->form, a->motion)) == 0) {
+                printf("mot se wait(1)..\n");
+                return 0;
+            }
+            a->data->stat &= ~0x200;
+            nbAddSePacket2(0, (s32)a, nbGetUnitFromAction(a->form, a->motion));
+        }
+        datDebugPrintf(D_00551128);
+        a->hEffBTL = NULL;
+        if (a->bedfile == NULL && a->midifile == NULL) {
+            a->seqcnt = 5;
+        } else if (a->midifile != NULL) {
+            a->seqcnt = 1;
+        } else {
+            a->seqcnt = 3;
+        }
+        break;
+    case 1:
+        a->skilltime++;
+        if (pacFileCheckEnd(a->midifile)) {
+            a->midibuf = fileGetMemHandle(a->midifile);
+            size = fileGetLoadSize(a->midifile);
+            buffer = sdfMemLock(a->midibuf);
+            printf("se size = %d\n", size);
+            if (p2sdLoadCheckMidi(a->midino) == 0) {
+                p2sdSetPcmBuffer((s32)buffer, size);
+                a->data->stat |= 0x200;
+            }
+            datDebugPrintf("load end\n");
+            a->seqcnt = 2;
+        } else {
+            printf("load se or bed\n");
+            datDebugPrintf("load se or bed..\n");
+        }
+        break;
+    case 2:
+        a->skilltime++;
+        if (p2sdLoadCheckMidi(a->midino)) {
+            printf("se ok!! [%08X]\n", a->midino);
+            datDebugPrintf("se ok!! [%08X]\n", a->midino);
+            sdfMemFreeDirect(a->midibuf);
+            fileHandleFree(a->midifile);
+            a->seqcnt = a->bedfile != NULL ? 3 : 5;
+            a->data->stat &= ~0x200;
+        } else {
+            printf("se wait(2)..\n");
+            datDebugPrintf("se wait..\n");
+        }
+        break;
+    case 3:
+        a->skilltime++;
+        if (pacFileCheckEnd(a->bedfile)) {
+            printf("bed ok!!\n");
+            datDebugPrintf("bed ok!!\n");
+            handle = fileGetMemHandle(a->bedfile);
+            a->hEffBTL = effBTLCreate(sdfMemLock(handle));
+            sdfMemFreeDirect(handle);
+            fileHandleFree(a->bedfile);
+            a->seqcnt = 5;
+        } else {
+            printf("load bed\n");
+            datDebugPrintf("load bed..\n");
+        }
+        break;
+    case 5:
+        if (a->timer && (u16)a->seqtime < a->timer) {
+            return 0;
+        }
+        switch (a->work->nowcommand) {
+        case 0: case 1: case 5: case 6: SetNextActionSeq(a, 8); break;
+        case 2: SetNextActionSeq(a, 13); break;
+        case 3: case 8: case 9: case 10: SetNextActionSeq(a, 12); break;
+        case 4: SetNextActionSeq(a, 9); break;
+        case 7: SetNextActionSeq(a, 14); break;
+        }
+        datDebugPrintf("TOTAL SETUP TIME = %d/%d\n", a->skilltime, a->timer);
+        if (a->jyokyomes > 0) {
+            nbDispJyokyoHelp(a->data->mesmngid, a->jyokyomes, a->jyo_varid, a->jyo_varind);
+            a->jyokyomes = 0;
+        }
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_READY);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAction_SKILL);
 
