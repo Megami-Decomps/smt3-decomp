@@ -918,3 +918,4 @@ src/smt3/effect/billManager.c	redthing1	done	2026-10-29	1 fn / 464 B	dds3Billboa
 src/smt3/pipe/pipePosTable.c	redthing1	done	2026-10-29	1 fn / 424 B	pipeFileLoad matched with truthful providers and native56B rodata/16B sdata preserved; actual published retail exact; 5d31d1d9
 src/smt3/code_0022C578.c	redthing1	done	2026-10-29	1 fn / 472 B	cmpRandomizePanelEff matched via native byte reflection field and ordinary loop reversal; owner370/0 and actual published retail exact; f7d17230
 src/smt3/field/fldTest.c	redthing1	done	2026-10-29	1 fn / 720 B	fldRunDantePatr matched with native diagnostic identity and exact140B sdata; owner38/0 and actual published retail exact; b62c6009
+src/smt3/sdk/libkernl.c	redthing1	done	2026-10-29	1 SDK fn / 360 B	PiM agents: native printfloat with real raw-conversion chain and separately qualified48B literal ownership extension; ee-gcc2.9 unchanged, independent review and owner/data/retail/parity exact; game credit0
