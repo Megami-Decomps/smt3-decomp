@@ -256,7 +256,38 @@ s32 rstSetLevelUpCount(datUnitWork_t *unit)
     return 0;
 }
 
+#ifdef NON_MATCHING
+s32 rstSetCurrentDevil(void)
+{
+    datUnitWork_t *unit = NULL;
+    s32 result = 0;
+
+    for (;;) {
+        rstData_t *work = EventStart;
+        s8 index = (s8)work->stockIndex;
+        u8 next = *(volatile u8 *)&work->stockIndex + 1;
+        s8 slot;
+        if (index >= 16) {
+            break;
+        }
+        work->stockIndex = next;
+        slot = DDS3_GBWK->stock[index];
+        if (slot >= 0) {
+            unit = &(*(dds3GlobalWork_t *volatile *)&DDS3_GBWK)->unitwork[slot];
+            if (rstSetLevelUpCount(unit) != 0) {
+                result = rstChkParamLimitAll(unit) == 0 ? 1 : 2;
+                break;
+            }
+        }
+    }
+    if (result != 0) {
+        EventStart->unit = unit;
+    }
+    return result;
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", rstSetCurrentDevil);
+#endif
 
 extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
 extern void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst);
