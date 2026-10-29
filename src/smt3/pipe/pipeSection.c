@@ -1176,7 +1176,54 @@ INCLUDE_ASM(const s32, "pipe/pipeSection", ActionZMotion);
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionKey);
 
+#ifdef NON_MATCHING
+extern volatile s32 pbHitCheckCur;
+
+tagPipeObject *HITCHECK_CUR(tagPipeObject *object, f32 extension)
+{
+    s32 cursor = pbHitCheckCur;
+    s32 remaining = 150;
+    tagPipeObject *candidate = ObjWork;
+
+    while (remaining != cursor) {
+        remaining--;
+        candidate++;
+    }
+    remaining = cursor - 1;
+    while (remaining != -1) {
+        u8 id = candidate->id;
+        pbHitCheckCur = remaining;
+        if (id != 0xFF && id != object->id) {
+            f32 candidateRadius = candidate->w;
+            f32 extra = candidate->action == 5 ? candidateRadius : 0.0f;
+            f32 radius = object->w + candidateRadius + extension;
+            f32 reach = radius + extra;
+            s32 difference = (s32)((u32)candidate->offset - (u32)object->offset);
+            s32 distance;
+
+            if (difference >= 0) {
+                distance = (s32)((u32)difference * 40);
+            } else {
+                difference = (s32)((u32)object->offset - (u32)candidate->offset);
+                distance = (s32)((u32)difference * 40);
+            }
+            if ((f32)distance <= reach) {
+                f32 dx = *(volatile f32 *)&object->pos[0] - *(volatile f32 *)&candidate->pos[0];
+                f32 dy = *(volatile f32 *)&object->pos[1] - *(volatile f32 *)&candidate->pos[1];
+                if (dx * dx + dy * dy <= radius * radius) {
+                    return candidate;
+                }
+            }
+        }
+        candidate++;
+        remaining = pbHitCheckCur - 1;
+    }
+    pbHitCheckCur = 150;
+    return NULL;
+}
+#else
 INCLUDE_ASM(const s32, "pipe/pipeSection", HITCHECK_CUR);
+#endif
 
 
 
