@@ -398,12 +398,63 @@ void rstInitWorkStock(s8 IkenieChk)
     }
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstCreateBeforeSkillList);
+extern s32 datGetDevilSlotState(u8 devilId);
+extern u8 datLevelUpTable[];
 
-extern void rstCreateBeforeSkillList(s8 HeartsID, s32 pStock, s8 SkillLevOfs,
+#ifdef NON_MATCHING
+void rstCreateBeforeSkillList(s8 heartsId, datUnitWork_t *stock, s8 levelOffset,
+                              rstSkillInfo_t *info)
+{
+    s32 i;
+    s8 level;
+    u16 skill;
+
+    if (stock == NULL) {
+        return;
+    }
+    info->SkillCnt = 0;
+    if (stock->id == 0) {
+        if (heartsId == 0) {
+            return;
+        }
+        for (i = datGetDevilSlotState((u8)heartsId); i < 8; i++) {
+            datRaceEntry_t *race = &D_00339E00[heartsId];
+
+            skill = race->heartConditions[i].skill;
+            level = (s8)race->heartConditions[i].condition;
+            if (skill != 0 && cmbChkSkillOwner(skill, stock) < 0) {
+                info->TargetLevel[info->SkillCnt] = level;
+                info->skill[info->SkillCnt++] = skill;
+            }
+        }
+    } else {
+        datLevelUp_t *table = (datLevelUp_t *)datLevelUpTable;
+        datLevelUpEntry_t *entry = table[stock->id].entry;
+
+        for (i = 0; i < 24; i++) {
+            s32 kind = stock->hensinmae == 0 ? 1 : 6;
+
+            if (entry[i].kind == kind) {
+                level = (s8)entry[i].level;
+                if (stock->level + levelOffset < level) {
+                    skill = entry[i].value;
+                    if (cmbChkSkillOwner(skill, stock) < 0) {
+                        info->TargetLevel[info->SkillCnt] = level;
+                        info->skill[info->SkillCnt++] = skill;
+                    }
+                }
+            }
+        }
+    }
+}
+#else
+INCLUDE_ASM(const s32, "result/rstcalc", rstCreateBeforeSkillList);
+#endif
+
+extern void rstCreateBeforeSkillList(s8 HeartsID, datUnitWork_t *pStock, s8 SkillLevOfs,
                                      rstSkillInfo_t *pInfo);
 
-s32 rstChkBeforeSkillOwner(u16 SkillID, s8 LevelOfs, s32 pStock)
+s32 rstChkBeforeSkillOwner(u16 SkillID, s8 LevelOfs, datUnitWork_t *pStock)
 {
     rstSkillInfo_t list;
     s32 i;
