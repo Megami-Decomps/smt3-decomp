@@ -9,19 +9,10 @@
 
 typedef struct
 {
-    u8 flag;
-    u8 unk_01[3];
-    u8 race;
-    u8 unk_05;
-    u8 unk_06[54];
-} datDevilInfo_t;
-
-typedef struct
-{
     /* 0x00 */ datUnitWork_t unit;
 } cmbUnit_t;
 
-extern datDevilInfo_t datDevilTable[];
+extern datDevilTableEntry_t datDevilTable[];
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
 extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color, s32 ot);
@@ -497,8 +488,8 @@ s32 cmpSkillOrder(const void *a, const void *b)
 
 s32 cmbSetEvoResult(const void *a, const void *b)
 {
-    datDevilInfo_t *eb = *(datDevilInfo_t **)((u8 *)b + 4);
-    datDevilInfo_t *ea = *(datDevilInfo_t **)((u8 *)a + 4);
+    datDevilTableEntry_t *eb = *(datDevilTableEntry_t **)((u8 *)b + 4);
+    datDevilTableEntry_t *ea = *(datDevilTableEntry_t **)((u8 *)a + 4);
 
     if (ea->race > eb->race) {
         return 1;
@@ -506,10 +497,10 @@ s32 cmbSetEvoResult(const void *a, const void *b)
     if (ea->race < eb->race) {
         return -1;
     }
-    if (ea->unk_05 > eb->unk_05) {
+    if (ea->level > eb->level) {
         return -1;
     }
-    return ea->unk_05 < eb->unk_05;
+    return ea->level < eb->level;
 }
 
 void buildSkillSortArray(cmbUnit_t *unit, skillSortEntry_t *out)
@@ -557,7 +548,7 @@ typedef struct
 {
     /* 0x00 */ u16 index;
     /* 0x02 */ u16 unk_02;
-    /* 0x04 */ datDevilInfo_t *info;
+    /* 0x04 */ datDevilTableEntry_t *info;
 } cmbRaceSortEntry_t;
 
 void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count)
@@ -565,7 +556,7 @@ void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count)
     s32 i = 0;
 
     if (count != 0) {
-        datDevilInfo_t *info = datDevilTable;
+        datDevilTableEntry_t *info = datDevilTable;
         cmbRaceSortEntry_t *p = list;
 
         do {

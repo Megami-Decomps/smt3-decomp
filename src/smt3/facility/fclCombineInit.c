@@ -86,15 +86,6 @@ typedef struct
 
 typedef struct
 {
-    u8 flag;
-    u8 unk_01[3];
-    u8 race;
-    u8 baseLevel;
-    u8 unk_06[54];
-} datDevilInfo_t;
-
-typedef struct
-{
     /* 0x00 */ datUnitWork_t unit;
 } cmbUnit_t;
 
@@ -104,7 +95,7 @@ extern cmbPairEntry_t D_0032DB78[];
 
 extern cmbPairEntry_t D_0032DB90[];
 
-extern datDevilInfo_t datDevilTable[];
+extern datDevilTableEntry_t datDevilTable[];
 
 extern u8 D_0032DBD8[][4];
 
@@ -1408,7 +1399,7 @@ s32 cmbGetEvoTable(u16 devilId, datUnitWork_t *unit)
 
 s32 cmbGetCombineRace(u16 devilA, u16 devilB, u16 devilC)
 {
-    datDevilInfo_t *table = datDevilTable;
+    datDevilTableEntry_t *table = datDevilTable;
     u8 race[3];
     s8 swap;
 
@@ -1458,8 +1449,8 @@ extern cmbRacePairEntry_t D_0032DC90[];
 
 u16 cmbFindCombineResult(u16 first, u16 second, u16 thirdId)
 {
-    datDevilInfo_t *devilTable = datDevilTable;
-    datDevilInfo_t *third = &devilTable[thirdId];
+    datDevilTableEntry_t *devilTable = datDevilTable;
+    datDevilTableEntry_t *third = &devilTable[thirdId];
     cmbRacePairEntry_t *table = D_0032DC90;
     s32 pass = 0;
     u8 race[2];
@@ -1638,8 +1629,8 @@ s32 cmbLookupCombine(u16 devilA, u16 devilB, s8 flag)
 {
     u8 race[2];
     u8 temp;
-    datDevilInfo_t *first = &datDevilTable[devilA];
-    datDevilInfo_t *second = &datDevilTable[devilB];
+    datDevilTableEntry_t *first = &datDevilTable[devilA];
+    datDevilTableEntry_t *second = &datDevilTable[devilB];
 
     race[0] = first->race;
     race[1] = second->race;
@@ -1665,11 +1656,11 @@ s32 cmbCalcResultLevel(cmbUnit_t *unitA, cmbUnit_t *unitB, cmbUnit_t *unitC, s8 
     s32 a, b;
     s32 c = 0;
     if (flag == 0) {
-        datDevilInfo_t *table = datDevilTable;
-        a = table[unitA->unit.id].baseLevel;
-        b = table[unitB->unit.id].baseLevel;
+        datDevilTableEntry_t *table = datDevilTable;
+        a = table[unitA->unit.id].level;
+        b = table[unitB->unit.id].level;
         if (unitC != NULL) {
-            c = table[unitC->unit.id].baseLevel;
+            c = table[unitC->unit.id].level;
         }
     } else {
         a = unitA->unit.level;
@@ -1739,7 +1730,7 @@ s32 cmbEntryIsValid(u16 devilId)
 
 s32 cmbDevilIsSpecial(u16 devilId)
 {
-    return datDevilTable[devilId].flag & 2;
+    return datDevilTable[devilId].flagByte & 2;
 }
 
 s32 cmbIsFullMoon(void)
@@ -1783,7 +1774,7 @@ s32 cmbBuildDevilEntry(u16 devilId)
 {
     datUnitWork_t unit;
     datUnitWork_t *leader = &cmbGlobalWork->party[0].unit;
-    datDevilInfo_t *table = datDevilTable;
+    datDevilTableEntry_t *table = datDevilTable;
     s32 found = 0;
     s8 attempt = 1;
     u16 candidate;
@@ -1885,7 +1876,7 @@ void cmbCalcIkenieExp(datUnitWork_t *work, datUnitWork_t *otherA,
 
 s32 cmbDevilCanBirth(u16 devilId)
 {
-    datDevilInfo_t *entry = &datDevilTable[devilId];
+    datDevilTableEntry_t *entry = &datDevilTable[devilId];
     u32 flag;
 
     if (entry->race == 0) {
@@ -2065,7 +2056,7 @@ extern void cmbInitStockUnit(u16 id, datUnitWork_t *unit);
 
 void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst)
 {
-    datDevilInfo_t *entry;
+    datDevilTableEntry_t *entry;
     const u8 *sourceParam;
     s8 *destParam;
     s32 i;
@@ -2074,9 +2065,9 @@ void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst)
     dst->flag = 1;
     dst->id = devilId;
     entry = &datDevilTable[devilId];
-    sourceParam = &entry->unk_06[0xA];
+    sourceParam = (const u8 *)entry->param;
     destParam = dst->param;
-    dst->level = entry->baseLevel;
+    dst->level = entry->level;
     for (i = 0; i < 6; i++) {
         *destParam++ = *sourceParam++;
     }
@@ -2387,7 +2378,7 @@ void cmbDrawUnitLevel(s32 x, s32 y, s32 z, u32 color, u32 levelColor,
     request = frwGetSmallFontFRQ2(x + 0x460, y + 8, z, color, text2[unit->id], NULL);
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
-    if (unit->level == datDevilTable[unit->id].baseLevel) {
+    if (unit->level == datDevilTable[unit->id].level) {
         levelColor = color;
     }
     sprintf(text, D_0054FB10, datGetLevelForDraw(unit));

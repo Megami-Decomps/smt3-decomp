@@ -9,19 +9,10 @@
 
 typedef struct
 {
-    u8 flag;
-    u8 unk_01[3];
-    u8 race;
-    u8 unk_05;
-    u8 unk_06[54];
-} datDevilInfo_t;
-
-typedef struct
-{
     /* 0x00 */ datUnitWork_t unit;
 } cmbUnit_t;
 
-extern datDevilInfo_t datDevilTable[];
+extern datDevilTableEntry_t datDevilTable[];
 
 typedef struct
 {

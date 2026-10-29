@@ -8,19 +8,7 @@
 #include "kernel.h"
 #include "font.h"
 
-typedef struct
-{
-    u8 flag;
-    u8 unk_01[3];
-    u8 race;
-    u8 level;
-    u8 unk_06[0x20];
-    s16 keisyotype;
-    u16 keisyoform;
-    u8 unk_2A[0x12];
-} datDevilInfo_t;
-
-extern datDevilInfo_t datDevilTable[];
+extern datDevilTableEntry_t datDevilTable[];
 
 extern u32 dds3GetRandA(void *state);
 
@@ -1870,7 +1858,7 @@ s32 cmbChkDevilEvo(datUnitWork_t *unit)
 
     for (i = 0; i < 24; i++) {
         if (p[-1] == 5) {
-            datDevilInfo_t *info = &datDevilTable[*(u16 *)p];
+            datDevilTableEntry_t *info = &datDevilTable[*(u16 *)p];
 
             return (s8)info->level;
         }

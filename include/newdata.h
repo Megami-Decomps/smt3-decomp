@@ -167,7 +167,7 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00 */ u32 flag;
+    /* 0x00 */ union { u32 flag; struct { u8 flagByte; u8 flagReserved[3]; }; };
     /* 0x04 */ u8 race;
     /* 0x05 */ u8 level;
     /* 0x06 */ u16 hp;
