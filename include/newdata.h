@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "libsdf.h"
+#include "facility.h"
 
 /* Field-flag rows and the persistent digging-party records used by the
  * upstream field helpers. Their strides are 0x1E and 0xEC respectively. */
@@ -161,6 +162,8 @@ typedef struct
     u8 takaraOpenEx[0x20];         /* 0x11A80 */
     u8 reserved11AA0[0x20];
     u16 heartsSkills[32][12];    /* 0x11AC0 */
+    u8 reserved11DC0[0xD0];
+    fclencyceelem_t encycRecords[168]; /* 0x11E90 */
 } dds3GlobalWork_t;
 
 extern dds3GlobalWork_t *DDS3_GBWK;
