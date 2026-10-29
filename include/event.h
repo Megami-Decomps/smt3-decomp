@@ -11,6 +11,12 @@ typedef struct evtBlendVecColor_t {
     u32 color;
 } evtBlendVecColor_t;
 
+/* Fog record in a polygon movie's scene table. */
+typedef struct pmdSceneFogTable_t {
+    evtBlendVecColor_t fog;
+    s32 reserve[3];
+} pmdSceneFogTable_t;
+
 /* Event-unit allocation: evtCreateUnitHandle allocates/clears 0x148 bytes.
  * SMT3 omits DDS's extra motion, shadow and vertical-movement members. */
 typedef enum evtUnitMotionState_t {
