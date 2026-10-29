@@ -194,14 +194,6 @@ s32 fldGetBgmTrack(s32 code) {
     return track;
 }
 
-INCLUDE_ASM(const s32, "field/fldSe", fldBgmPlay);
-
-void fldPlayFieldBgm(void) {
-    if (D_002FC020[0] == 0x80) {
-        p2sdPlayBGM(fldBgmTrackTable[0] + 1);
-    }
-}
-
 typedef struct {
     s16 bit;
     s8 normal[32];
@@ -212,6 +204,76 @@ extern fldBgmParam_t fldBgmParamTable[];
 extern s32 gFldStart;
 extern void fldBgmStop(void);
 extern void p2sdResumeBgm(s32 track);
+
+#ifdef NON_MATCHING
+void fldBgmPlay(void)
+{
+    s32 track;
+    s32 base;
+    s32 floor;
+
+    if (fldGlobalBase.area == 20 && fldGlobalBase.floor == 2) {
+        return;
+    }
+    track = fldGetBgmTrack(fldGlobalBase.sequenceCode);
+    if (track == -1) {
+        if (fldGlobalBase.area >= 50) {
+            return;
+        }
+        base = gFldBgmTop[fldGlobalBase.area].smgId;
+        fldSeSmgId = base;
+        track = base + fldGlobalBase.sequenceCode;
+        if (fldGlobalBase.area == 14 && evtBitCheck(5) != 0) {
+            if (fldGlobalBase.sequenceCode != 1) {
+                fldBgmStop();
+            }
+            fldGlobalBase.sequenceCode = 1;
+            base = gFldBgmTop[fldGlobalBase.area].smgId;
+            fldSeSmgId = base;
+            track = base + 1;
+        }
+        if (fldGlobalBase.area == 20) {
+            floor = fldGlobalBase.floor;
+            if (floor == 5 || floor == 8 || floor == 13 || floor == 14 ||
+                floor == 15 || floor == 24 || (floor == 12 && evtBitCheck(0x16) != 0)) {
+                fldSeSmgId = gFldBgmTop[55].smgId;
+                track = fldSeSmgId + fldGlobalBase.sequenceCode;
+            }
+        }
+        if (fldGlobalBase.area == 0x22 || fldGlobalBase.area == 0x20 ||
+            fldGlobalBase.area == 0x25 || fldGlobalBase.area == 0x24 ||
+            fldGlobalBase.area == 0x29 || fldGlobalBase.area == 0x2A ||
+            fldGlobalBase.area == 0x2B || fldGlobalBase.area == 0x2C ||
+            fldGlobalBase.area == 0x2D) {
+            if (evtBitCheck(fldBgmParamTable[fldGlobalBase.area].bit) != 0) {
+                gFldBgmBit = 1;
+                fldGlobalBase.sequenceCode = fldBgmParamTable[fldGlobalBase.area].alternate[fldGlobalBase.floor + 1];
+            } else {
+                gFldBgmBit = 0;
+                fldGlobalBase.sequenceCode = fldBgmParamTable[fldGlobalBase.area].normal[fldGlobalBase.floor + 1];
+            }
+            base = gFldBgmTop[fldGlobalBase.area].smgId;
+            fldSeSmgId = base;
+            track = base + fldGlobalBase.sequenceCode;
+        }
+    }
+    if (gFldStart != 1) {
+        if (fldSeLastBgm != track) {
+            p2sdStopBGM(fldSeLastBgm);
+        }
+        fldSeLastBgm = track;
+        p2sdPlayBGM(track);
+    }
+}
+#else
+INCLUDE_ASM(const s32, "field/fldSe", fldBgmPlay);
+#endif
+
+void fldPlayFieldBgm(void) {
+    if (D_002FC020[0] == 0x80) {
+        p2sdPlayBGM(fldBgmTrackTable[0] + 1);
+    }
+}
 
 #ifdef NON_MATCHING
 void fldBgmContinue(void)
