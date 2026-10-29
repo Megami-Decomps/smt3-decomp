@@ -1132,7 +1132,6 @@ s32 func_002D6678(_reent *r, FILE *fp, const char *format, va_list ap)
     char prefix[2];
     char floatSign;
     char signByte;
-    char *number;
     char *text;
     char *decimalPoint;
     const char *scanStart;
@@ -1162,7 +1161,6 @@ s32 func_002D6678(_reent *r, FILE *fp, const char *format, va_list ap)
     s64 signedLong;
     u64 unsignedLong;
     f64 floatValue;
-    char *digits;
     s32 *countWord;
     s16 *countShort;
     s64 *countLong;
@@ -1229,7 +1227,6 @@ s32 func_002D6678(_reent *r, FILE *fp, const char *format, va_list ap)
         precision = -1;
         integerPrecision = 0;
         textBytes = 0;
-        text = numberBuffer;
 read_conversion:
         conversion = (s8)*cursor++;
 dispatch_conversion:
@@ -1403,7 +1400,7 @@ dispatch_conversion:
                 renderedLength = 3;
             } else {
                 flags |= 0x100;
-                digits = cvt(r, floatValue, precision, flags, &floatSign,
+                text = cvt(r, floatValue, precision, flags, &floatSign,
                              &decimalPosition, conversion, &digitLength);
                 if (conversion == 'g' || conversion == 'G') {
                     if (decimalPosition < -3 || precision < decimalPosition)
@@ -1450,7 +1447,7 @@ format_integer:
         {
             const char *alphabet = conversion == 'X' ? D_0054B6C0 : D_0054B6A0;
             char *end = numberBuffer + sizeof(numberBuffer);
-            number = end;
+            text = end;
             nonzero = unsignedLong != 0;
             integerPrecision = precision;
             if (precision >= 0) flags &= ~0x80;
@@ -1459,19 +1456,19 @@ format_integer:
             if (precision != 0 || unsignedLong != 0) {
                 if (base == 1) {
                     while (unsignedLong >= 10) {
-                        *--number = (char)('0' + unsignedLong % 10);
+                        *--text = (char)('0' + unsignedLong % 10);
                         unsignedLong /= 10;
                     }
-                    *--number = (char)('0' + unsignedLong);
+                    *--text = (char)('0' + unsignedLong);
                 } else if (base == 0) {
                     do {
-                        *--number = (char)('0' + (unsignedLong & 7));
+                        *--text = (char)('0' + (unsignedLong & 7));
                         unsignedLong >>= 3;
                     } while (unsignedLong != 0);
-                    if ((flags & 1) && *number != '0') *--number = '0';
+                    if ((flags & 1) && *text != '0') *--text = '0';
                 } else if (base == 2) {
                     do {
-                        *--number = alphabet[unsignedLong & 15];
+                        *--text = alphabet[unsignedLong & 15];
                         unsignedLong >>= 4;
                     } while (unsignedLong != 0);
                 } else {
@@ -1480,8 +1477,7 @@ format_integer:
                     goto emit_field;
                 }
             }
-            textBytes = end - number;
-            text = number;
+            textBytes = end - text;
         }
 
 emit_field:
@@ -1510,13 +1506,13 @@ emit_field:
             PRINT(text, textBytes);
         } else if (conversion == 'e' || conversion == 'E') {
             if (digitLength < 2 && !(flags & 1)) {
-                PRINT(digits, 1);
+                PRINT(text, 1);
             } else {
-                prefix[0] = digits[0];
+                prefix[0] = text[0];
                 prefix[1] = '.';
                 PRINT(prefix, 2);
                 if (dpcmp(floatValue, 0.0) != 0) {
-                    PRINT(digits + 1, digitLength - 1);
+                    PRINT(text + 1, digitLength - 1);
                 } else if (digitLength - 1 > 0) {
                     PAD(D_0054B680, digitLength - 1);
                 }
@@ -1531,14 +1527,14 @@ emit_field:
             if (decimalPosition != 0 || digitLength != 0) {
                 PRINT(decimalPoint, 1);
                 if (decimalPosition < 0) PAD(D_0054B680, -decimalPosition);
-                PRINT(digits, digitLength);
+                PRINT(text, digitLength);
             }
         } else if (decimalPosition < digitLength) {
-            PRINT(digits, decimalPosition);
+            PRINT(text, decimalPosition);
             PRINT(D_0054B700, 1);
-            PRINT(digits + decimalPosition, digitLength - decimalPosition);
+            PRINT(text + decimalPosition, digitLength - decimalPosition);
         } else {
-            PRINT(digits, digitLength);
+            PRINT(text, digitLength);
             if (decimalPosition > digitLength)
                 PAD(D_0054B680, decimalPosition - digitLength);
             if (flags & 1) PRINT(D_0054B700, 1);

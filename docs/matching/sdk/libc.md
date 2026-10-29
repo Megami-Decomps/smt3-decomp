@@ -177,8 +177,8 @@ extra arithmetic or artificial lifetime extensions were added.
 
 The 5744-byte formatted-output core is independently bounded by its entry,
 frame and direct reentrant callers; see [SDK matching](../../sdk-matching.md).
-Its guarded reconstruction emits 5308 bytes: 40 of 1327 emitted words match,
-1287 differ, and 436 native bytes are uncovered. The frame is 0x2A0 rather
+Its guarded reconstruction emits 5236 bytes: 48 of 1309 emitted words match,
+1261 differ, and 508 native bytes are uncovered. The frame is 0x2A0 rather
 than 0x290. Assembly remains active and this adds no exact matching credit.
 
 The reconstruction uses the native eight-entry output-vector batches and
@@ -248,16 +248,36 @@ pointer; the overall frame remains 16 bytes larger than native.
 
 The float sign, wide-character output, multibyte state, decimal position and
 digit-length outputs retain their already-correct offsets 0x1D0, 0x1D4,
-0x1D8, 0x1DC and 0x1E0. This adds two matching words with unchanged body and
-frame sizes. Before/after actual-owner allocation probes pass hooked/unhooked
+0x1D8, 0x1DC and 0x1E0. At buffer-placement revision `b7759264`, this added two matching words with
+unchanged body and frame sizes. Before/after actual-owner allocation probes pass hooked/unhooked
 and plain-output parity; the target also emits identical assembly with and
 without `SKIP_ASM`. Reproduce with `tools/cc1probe.sh src/smt3/sdk/libc.c
 --func func_002D6678 --alloc --no-dumps --cflag -DNON_MATCHING --maxlines 2500
 --out <output>`. The remaining frame gap is not an aggregate-size mismatch;
 no local has been resized or added to force it.
 
-Control-flow layout, register allocation and scalar spill lifetimes remain
-broad frontiers. The source does not attempt to
+Converted output now has one `text` cursor. Integer conversion backfills
+from the end of `numberBuffer`; strings and special values select their own
+read-only text; finite floats select the `cvt` result. These alternatives do
+not need their pointers concurrently. Their physical buffers remain distinct,
+and writes through the cursor are confined to integer backfill. The unused
+conversion-entry text initialization is removed. Literal scanning retains its
+separate const-qualified pointer; sharing that role was code-identical and is
+not retained.
+
+Qualified actual-owner allocation/RTL probes pass hooked/unhooked, dump/plain
+and target `SKIP_ASM`/full-guard assembly parity. Before consolidation, UID1122
+receives the `cvt` result in pseudo122: 16 references, live length1112, 41 calls
+crossed, no available register, and a spill at stack+0x218. Afterward UID1119
+receives it in pseudo92, also used by integer backfill (UID1415): 87 references,
+live length478, 19 calls crossed, assigned GPR21. This recovers the native
+formatted-cursor role without a register constraint or an artificial use.
+Reproduce with `tools/cc1probe.sh src/smt3/sdk/libc.c --func func_002D6678
+--alloc --cflag -DNON_MATCHING --maxlines 10000 --out <output>`.
+
+The cursor change adds eight matching words and removes 72 emitted bytes;
+72 more native bytes remain uncovered. Frame size stays 0x2A0. Control-flow
+layout, register allocation and scalar spill lifetimes remain broad frontiers. The source does not attempt to
 fill missing bytes or force the native frame. A new compiler-property
 premise is required before allocation or control-flow tuning.
 
