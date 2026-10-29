@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+typedef struct {
+    u8 level;
+    u8 kind;
+    u16 value;
+} fclSkillParam_t;
+
 typedef struct
 {
     s8 SkillCnt;
