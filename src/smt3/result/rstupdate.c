@@ -164,17 +164,11 @@ s32 rstBuildDestroyList(void)
     return count;
 }
 
-typedef struct
-{
-    /* 0x00 */ u8 unk_00[0x22];
-    /* 0x22 */ u8 unk_22;
-    /* 0x23 */ u8 unk_23;
-    /* 0x24 */ u8 unk_24;
-} rstSkillSlot_t;
 
-u16 rstSkillSlotIsFull(datUnitWork_t *skills, rstSkillSlot_t *slot)
+
+u16 rstSkillSlotIsFull(datUnitWork_t *skills, cmpCursorInfo_t *slot)
 {
-    s8 index = slot->unk_22 + slot->unk_24;
+    s8 index = *(u8 *)&slot->unk_22 + (u8)slot->unk_24;
 
     if (index >= skills->skillcnt) {
         if (startPos->pCurrentStock->id == 0) {

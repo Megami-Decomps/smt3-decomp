@@ -1,5 +1,6 @@
 #include "common.h"
 #include "facility.h"
+#include "camp.h"
 #include "result2.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -165,12 +166,7 @@ extern void rstSetDestroySkillMaxHpMp(void);
 
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
-typedef struct {
-    u8 unk_00[0x22];
-    u8 unk_22;
-    u8 unk_23;
-    u8 unk_24;
-} rstSkillSlot_t;
+
 
 typedef struct
 {
@@ -183,8 +179,8 @@ typedef struct
     /* 0x129E */ s8 unk_129E;
     /* 0x129F */ u8 unk_129F[6];
     /* 0x12A5 */ u8 unk_12A5[3];
-    /* 0x12A8 */ rstSkillSlot_t skillSlot;
-    /* 0x12CD */ u8 unk_12CD[0x1017];
+    /* 0x12A8 */ cmpCursorInfo_t skillSlot;
+    /* 0x12E0 */ u8 unk_12E0[0x1004];
     /* 0x22E4 */ u8 unk_22E4;
     /* 0x22E5 */ u8 unk_22E5[0x23];
     /* 0x2308 */ s32 unk_2308;
@@ -2209,7 +2205,7 @@ void rstDrawStatusRow2(s8 mode, s8 row, s8 selected)
 
 extern s32 fclChkMessage(void);
 extern void cmpDrawStatusBars(s32 x, s32 y, s32 z);
-extern u16 rstSkillSlotIsFull(datUnitWork_t *unit, rstSkillSlot_t *slot);
+extern u16 rstSkillSlotIsFull(datUnitWork_t *unit, cmpCursorInfo_t *slot);
 extern frFontHandle_t *frGetHelpPos(s32 x, s32 y, s32 priority, s32 bank, s32 index);
 extern void frSetFontColor(frFontHandle_t *request, u32 color);
 extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
@@ -2217,7 +2213,7 @@ extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 
 s32 rstDrawStatusPanel(s8 mode, s8 showHelp)
 {
-    s8 selected = rstDrawWork->skillSlot.unk_22 + rstDrawWork->skillSlot.unk_24;
+    s8 selected = *(u8 *)&rstDrawWork->skillSlot.unk_22 + (u8)rstDrawWork->skillSlot.unk_24;
     frFontHandle_t *request;
 
     if (showHelp == 0 || fclChkMessage() != 0) {
