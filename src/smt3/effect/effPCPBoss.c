@@ -1055,7 +1055,222 @@ void effPCPBossONGY2Delete(effPCPBossONGY_t *pPCPBossONGY2)
     sdfChipFreeDirect(pPCPBossONGY2);
 }
 
+#ifdef NON_MATCHING
+void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
+{
+    effPCPBossVector_t origin, scale, target, points[32];
+    f32 uv[64];
+    u32 colors[32];
+    volatile u32 colorScratch, convertedColor;
+    nbFormation_t *form;
+    sdfDrawTag_t *tag;
+    effPCPBossVector_t *point;
+    f32 *st;
+    u32 *color;
+    sdfGrOt_t *ot;
+    mdlObj_t *model;
+    u32 count, i;
+    f32 width, height, offset, scaleValue;
+    f32 rate, filledHeight, y, v, nextV, angle, initialSway, sway, fade;
+
+    if (!dds3CheckRenderTexture()) {
+
+        return;
+
+    }
+    if (!dds3GetRenderTexture()) {
+        return;
+    }
+    model = effPCPBossTexHandle;
+    if (!model) {
+        return;
+    }
+    form = work->param;
+    width = 271.999969482421875f;
+    height = 340.0f;
+    offset = 0.0f;
+    SDF_VU0_LOADVECTOR(&form->pos);
+    SDF_VU0_STOREVECTOR_MEMOPS(origin);
+    SDF_VU0_STOREVECTOR(&target);
+    mdlSetPosition(model);
+    SDF_VU0_LOADVECTOR(&form->rot);
+    SDF_VU0_LOADVECTOR_B(&D_00533DA0);
+    Mult();
+    mdlSetRotate(effPCPBossTexHandle);
+    scaleValue = form->scl;
+    scale.f[3] = 0.0f;
+    scale.f[2] = scaleValue;
+    scale.f[0] = scaleValue;
+    scale.f[1] = scaleValue;
+    SDF_VU0_LOADVECTOR(&scale);
+    offset = height + offset;
+    mdlSetScale(effPCPBossTexHandle);
+    mdlSmoothLoopMotion(effPCPBossTexHandle, 0,
+                        mdlGetMotionNum(form->hunit->owner, 0), 0.0f, 4.0f);
+    sdfMotionSeek(((mdlObj_t *)effPCPBossTexHandle)->first, form->hunit->owner->first->frame);
+    target.f[1] -= offset;
+    effPCPBossONGYModelTexRender(&target, form, height);
+    if (work->frame >= 17) {
+        return;
+    }
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    origin.f[1] -= height;
+    SDF_VU0_LOADIDENTITY();
+    SDF_VU0_LOADVECTOR_MEMOPS(origin);
+    VU0_ADD_VF31_VF10_XYZ();
+    sdf3DPrimLinkTm(tag, 0);
+    sdfMatSetTex(work->pMat, dds3GetRenderTexture());
+    sdf3DPrimLinkMat(tag, work->pMat, 0);
+    LookAtMatrix(D_002F5C20, D_002F5C30, effPCPBossTexRect);
+    ReverseMatrix();
+    effPCPBossWork.color = 0x80808080;
+    effPCPBossWork.positions = points;
+    effPCPBossWork.colors = colors;
+    effPCPBossWork.uvs = uv;
+    rate = (1.0f - (f32)work->frame / 17.0f) * 0.800000011920929f;
+    filledHeight = rate * 680.0f;
+    if (rate > 0.0f) {
+        uv[0] = 0.0f;
+        uv[1] = 0.0f;
+        uv[2] = 1.0f;
+        uv[3] = 0.0f;
+        uv[4] = 0.0f;
+        uv[5] = rate;
+        uv[6] = 1.0f;
+        uv[7] = rate;
+        point = points;
+        point->f[0] = -width;
+        point->f[1] = -height;
+        point->f[2] = 0.0f;
+        point->f[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(point);
+        point++;
+        point->f[0] = width;
+        point->f[1] = -height;
+        point->f[2] = 0.0f;
+        point->f[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(point);
+        point++;
+        point->f[0] = -width;
+        point->f[1] = filledHeight - height;
+        point->f[2] = 0.0f;
+        point->f[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(point);
+        point++;
+        point->f[0] = width;
+        point->f[1] = filledHeight - height;
+        point->f[2] = 0.0f;
+        point->f[3] = 0.0f;
+        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(point);
+        effPCPBossWork.vertexCount = 4;
+        colors[3] = 0x80808080;
+        colors[0] = 0x80808080;
+        colors[1] = 0x80808080;
+        colors[2] = 0x80808080;
+        effPCPBossWork.primCount = 2;
+        sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+    }
+    ot = &sdfGrOtTable[43];
+    if (rate < 1.0f) {
+        angle = work->radian;
+        effPCPBossWork.vertexCount = 32;
+        effPCPBossWork.primCount = 16;
+        y = filledHeight - height;
+        work->radian = angle + 0.15707962214946747f;
+        v = rate;
+        initialSway = sdfSin(angle) * 27.199995040893555f;
+        fade = 1.0f;
+        count = 0;
+        point = points;
+        st = uv;
+        color = colors;
+        for (i = 0; i < 100; i++) {
+            nextV = v + 0.001999999862164259f;
+            st[1] = v;
+            st[0] = 0.0f;
+            st[2] = 1.0f;
+            st[3] = v;
+            st[5] = nextV;
+            st[4] = 0.0f;
+            st[6] = 1.0f;
+            st[7] = nextV;
+            st += 8;
+            sway = initialSway - sdfSin(angle) * 27.199995040893555f;
+            point->f[1] = y;
+            point->f[2] = 0.0f;
+            point->f[3] = 0.0f;
+            point->f[0] = sway - width;
+            SDF_VU0_LOADVECTOR(point);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR(point);
+            point++;
+            point->f[1] = y;
+            point->f[2] = 0.0f;
+            point->f[3] = 0.0f;
+            point->f[0] = width + sway;
+            SDF_VU0_LOADVECTOR(point);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR(point);
+            point++;
+            point->f[2] = 0.0f;
+            point->f[3] = 0.0f;
+            point->f[0] = sway - width;
+            point->f[1] = y + 1.3599997758865356f;
+            SDF_VU0_LOADVECTOR(point);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR(point);
+            point++;
+            point->f[2] = 0.0f;
+            point->f[3] = 0.0f;
+            point->f[0] = width + sway;
+            point->f[1] = y + 1.3599997758865356f;
+            SDF_VU0_LOADVECTOR(point);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR(point);
+            point++;
+            colorScratch = 0x80808080;
+            MMI_RGBA_UNPACK(&colorScratch, 0x3C000000);
+            SDF_VU0_SCALEVECTOR(fade);
+            MMI_RGBA_PACK_128(convertedColor);
+            count += 4;
+            color[0] = 0x80808080;
+            color[1] = 0x80808080;
+            color[2] = 0x80808080;
+            color[3] = 0x80808080;
+            color += 4;
+            y += 1.3599997758865356f;
+            v = nextV;
+            fade += -0.009999999776482582f;
+            angle += 0.18849553167819977f;
+            if (count >= 32) {
+                sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+                count = 0;
+                point = points;
+                st = uv;
+                color = colors;
+            }
+        }
+        if (count >= 4) {
+            effPCPBossWork.primCount = count >> 1;
+            effPCPBossWork.vertexCount = count;
+            sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+        }
+    }
+    ot->regFunc(ot, tag);
+    work->frame++;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGY2Draw);
+#endif
 
 s32 effPCPBossONGY2GetLength(void)
 {
