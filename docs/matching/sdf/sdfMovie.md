@@ -33,17 +33,38 @@ local and to the global; and `count` read before or after the field. A `u64` or
 `s64` local does keep the `xor` and the cmov, but pays for it with `lwu` and two
 `dsll32`/`dsra32` extension pairs and lands at 54 words.
 
+Mixed arms fold too: with `count = movieSemaCount;` read into a local first,
+all four of `(count != frame) ? frame : movieSemaCount`,
+`(movieSemaCount != frame) ? frame : count`, `(count ^ frame) ? frame : ...`
+and `(count != frame) ? frame : count` emit the same single
+`lw $2, 0x6C($19)` plus `sw $2, %gp_rel(movieSemaCount)($28)`, four words where
+retail has eight. A local on one side and the global on the other is not enough
+to stop it, so the simplification is on the value, not on the spelling.
+
 So the missing fact is below the C: either the arms were not the same value in
 retail's source, or that compile did not run the simplification. Do not sweep
 cmov spellings again; look for a reading of the arm in which the compared value
 and the stored value are genuinely different.
 
-The draft kept here is the natural shape at retail's exact size. Two other
-points on the curve were measured: the same body with `u8 *ptr;` uninitialised
-is 47 of 50 words (three short, and the `ptr = NULL` then lands in the arm
-rather than the prologue), and a `sdfIpuDecodeCb_t *node = &movieSemaId->soundNode;`
-local reaches 33 of 52 but reads the frame index as `0x48($3)` where retail has
-`0x6C($19)`, so it buys words by getting the addressing wrong. The rest of the
-difference is the prologue's saved-register order and `ptr` taking `$19` where
-retail gives it `$18` and keeps `movieSemaId` in `$19`; those follow from the
-block above, since retail needs one more value live across it.
+### The draft now kept, and the block shape it establishes
+
+21 of 52 words match, one word short, first difference at +0x44. The arms are
+nested rather than an `else if` chain, and `ptr` is uninitialised:
+
+    } else {
+        ptr = obj->ringBuffer + obj->ringOffset;
+        if (obj->ringLength < aSize) { ptr = NULL; ... } else { ... }
+    }
+
+That is retail's shape. The sum lands in `addu $18, $3, $4` ahead of the
+`ringLength` test, with `daddu $18, $0, $0` in the short arm, which is why the
+prologue, the whole `scratchSize` arm and the epilogue now match; the earlier
+`else if` draft with `ptr = NULL` in the prologue matched only 14 of 53 and the
+same chain with `ptr` uninitialised only 3 of 50. What is left is the missing
+`movn` word and the register pairs that follow it: retail needs `ringOffset` in
+`$4` and `ringBuffer` in `$3`, and the draft the other way round, because
+retail carries one more value across the arm.
+
+A `sdfIpuDecodeCb_t *node = &movieSemaId->soundNode;` local reaches 33 of 52
+differing but reads the frame index as `0x48($3)` where retail has `0x6C($19)`,
+so it buys words by getting the addressing wrong.
