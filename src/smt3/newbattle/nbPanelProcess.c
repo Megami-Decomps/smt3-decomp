@@ -1104,7 +1104,7 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
     nbPnlSprite(x + 0xA4, yb, 0x32, 6, 1, 0x14, 0x32, 6, nbPanelBaseABGR, p->pnltex[0]);
     if (DDS3_GBWK->akuma[j].hp != 0) {
         w = 50 * DDS3_GBWK->akuma[j].hp /
-            DDS3_GBWK->akuma[j].maxhp;
+            *(u16 *)&DDS3_GBWK->akuma[j].unk0C[0];
         if (w == 0) {
             w = 1;
         }
@@ -1112,7 +1112,7 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
     }
     if (DDS3_GBWK->akuma[j].hp < nbPnlWork[i].OldHp) {
         q = 50 * nbPnlWork[i].OldHp /
-            DDS3_GBWK->akuma[j].maxhp;
+            *(u16 *)&DDS3_GBWK->akuma[j].unk0C[0];
         anm = nbPnlWork[i].HpAnmCnt << 28;
         nbPnl_rsetAlpha(1);
         c = effMagaCylinderCalcColor(anm | 0xFFFFFF, nbPanelBaseABGR);
@@ -1127,17 +1127,17 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
     nbPnl_rsetAlpha(0);
     w = 0;
     nbPnlSprite(x + 0xDA, yb, 0x32, 6, 1, 0x14, 0x32, 6, nbPanelBaseABGR, p->pnltex[0]);
-    if (DDS3_GBWK->akuma[j].mp != 0) {
-        w = 50 * DDS3_GBWK->akuma[j].mp /
-            DDS3_GBWK->akuma[j].maxmp;
+    if (*(u16 *)&DDS3_GBWK->akuma[j].unk0C[2] != 0) {
+        w = 50 * *(u16 *)&DDS3_GBWK->akuma[j].unk0C[2] /
+            *(u16 *)&DDS3_GBWK->akuma[j].unk0C[4];
         if (w == 0) {
             w = 1;
         }
         nbPnlSprite(x + 0xDA, yb, w, 6, 1, 0x1B, w, 6, nbPanelBaseABGR, p->pnltex[0]);
     }
-    if (DDS3_GBWK->akuma[j].mp < nbPnlWork[i].OldMp) {
+    if (*(u16 *)&DDS3_GBWK->akuma[j].unk0C[2] < nbPnlWork[i].OldMp) {
         q = 50 * nbPnlWork[i].OldMp /
-            DDS3_GBWK->akuma[j].maxmp;
+            *(u16 *)&DDS3_GBWK->akuma[j].unk0C[4];
         anm = nbPnlWork[i].MpAnmCnt << 28;
         nbPnl_rsetAlpha(1);
         c = effMagaCylinderCalcColor(anm | 0xFFFFFF, nbPanelBaseABGR);
@@ -1147,7 +1147,7 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
     nbPnlSprite(x + 0xA8, y + 7, 0x10, 7, 0xE4, 1, 0x10, 7, nbPanelBaseABGR, p->pnltex[2]);
     nbPnlSprite(x + 0xDE, y + 7, 0x10, 7, 0xE4, 9, 0x10, 7, nbPanelBaseABGR, p->pnltex[2]);
     c = nbPanelMPColor((datUnitWork_t *)&DDS3_GBWK->akuma[j].flag);
-    sprintf(buf, D_00551188, DDS3_GBWK->akuma[j].mp);
+    sprintf(buf, D_00551188, *(u16 *)&DDS3_GBWK->akuma[j].unk0C[2]);
     c = effMagaCylinderCalcColor(c, nbPanelBaseRGBA);
     gnbPnlWork = frwGetSmallNumFontFRQ((x + 0xEF) << 4, (y + 2) << 3, 0, c, (char **)buf, 0);
     func_001C7E38(gnbPnlWork, 1, 0x47);

@@ -120,3 +120,13 @@ Reproduce the trace with `tools/cc1probe.sh
 src/smt3/newbattle/nbPanelProcess.c --func nbPanelAuto --cflag -DNON_MATCHING
 --sched --no-dumps --out <output>`. Preserve `verify: OK` before relying on
 its instruction IDs; declaration or source changes can renumber them.
+
+### Why the akuma fields are reached by offset here
+
+`fldAnahoriAkuma_t` 0x0C, 0x0E and 0x10 are the devil's max HP, MP and max MP:
+the stores in this unit prove it. Naming them in `include/newdata.h`, which is
+where that struct lives, cannot be done yet. Splitting `u8 unk0C[6]` into three
+`u16` members changes the alias set of every read through it, and that reorders
+`Flow6_54` in `newbattle/NbNegoFlowTwo` enough to move 20 bytes of the image.
+So the draft reads them as `*(u16 *)&...unk0C[n]` and the header keeps the byte
+array until that unit is reconstructed too.
