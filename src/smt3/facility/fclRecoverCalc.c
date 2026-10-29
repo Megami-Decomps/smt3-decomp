@@ -303,7 +303,9 @@ typedef struct
 {
     /* 0x0000 */ u8 unk_0000[0x105C];
     /* 0x105C */ s32 recoverPrices[16];
-    /* 0x109C */ u8 unk_109C[0x94];
+    /* 0x109C */ u8 unk_109C[0x22];
+    /* 0x10BE */ rcvStockList_t stockList;
+    /* 0x10D3 */ u8 unk_10D3[0x5D];
     /* 0x1130 */ lstWork_t list;
     /* 0x12C4 */ u8 unk_12C4[0x3210];
     /* 0x44D4 */ s32 texHandle[3];
