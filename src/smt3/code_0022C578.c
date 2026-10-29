@@ -6299,7 +6299,31 @@ void cmp_23C918(fclPanelPos_t *pos, s32 full, s32 total, s32 color1, s32 color2,
 INCLUDE_ASM(const s32, "code_0022C578", cmp_23C918);
 #endif
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_23C9C0);
+void camp_23C9C0(fclPanelPos_t *pos, s32 width, s32 gap,
+                  s32 first, s32 second, s32 third, s32 total,
+                  s32 color1, s32 color2, s32 color3, s32 color4, s32 flag)
+{
+    s32 firstEnd = (((u16)pos->unk_0C * first / total) << 4) + pos->unk_00;
+    s32 secondEnd = (((u16)pos->unk_0C * second / total) << 4) + firstEnd;
+    s32 thirdEnd = (((u16)pos->unk_0C * third / total) << 4) + secondEnd;
+    s32 x;
+    s32 color;
+
+    for (x = pos->unk_00; x < pos->unk_00 + ((u16)pos->unk_0C << 4);
+         x += (width + gap) << 4) {
+        if (x < firstEnd) {
+            color = color1;
+        } else if (x < secondEnd) {
+            color = color2;
+        } else if (x < thirdEnd) {
+            color = color3;
+        } else {
+            color = color4;
+        }
+        cmpDrawBoxF(x, pos->unk_04, pos->unk_08, width,
+                    (u16)pos->unk_0E, color, flag);
+    }
+}
 
 void camp_23CAF8(s32 x, s32 y, s32 a, s32 b, s32 color, s32 g)
 {
