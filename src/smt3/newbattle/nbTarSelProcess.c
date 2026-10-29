@@ -102,7 +102,48 @@ void nbDrawTargetCursor(nbMainProcessData_t *data, s32 x, s32 y)
                 color, data->pnltex[3]);
 }
 
+#ifdef NON_MATCHING
+s32 CheckFormCursor(s32 targetForm, s32 ctype, s32 crule, s32 carea, s32 formindex)
+{
+    nbMainProcessData_t *data = GetTarSelProcessData()->data;
+    nbFormation_t *form = &data->form[formindex];
+    s32 reversed = (data->stat & 8) != 0;
+    s32 allowed = 1;
+    u32 stat;
+
+    if (ctype != 2) {
+        allowed = 0;
+        if ((carea & 3) == 3) {
+            allowed = 1;
+        } else if (carea & 1) {
+            allowed = reversed ? (u32)formindex - 4 < 10 : formindex < 4;
+        } else if (carea & 2) {
+            allowed = reversed ? formindex < 4 : (u32)formindex - 4 < 10;
+        }
+    }
+    if (allowed && (crule & 1)) {
+        allowed = targetForm == formindex;
+    }
+    if (allowed && (crule & 2)) {
+        allowed = targetForm != formindex;
+    }
+    if (allowed) {
+        stat = form->stat;
+        if (!(stat & 1)) {
+            allowed = (crule & 4) != 0 && (stat & 0x800) != 0;
+        }
+        if (allowed && (crule & 8)) {
+            allowed = (stat & 1) == 0;
+        }
+        if (allowed && (stat & 0x40) && (data->party[form->partyindex].flag & 0x38)) {
+            allowed = 0;
+        }
+    }
+    return allowed;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", CheckFormCursor);
+#endif
 
 extern s32 CheckFormCursor(s32 targetForm, s32 ctype, s32 crule, s32 carea, s32 formindex);
 
