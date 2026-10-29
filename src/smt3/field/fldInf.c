@@ -129,7 +129,7 @@ extern u32 gEvnRngPid[];
 
 extern scrProcessWork_s *scrSearchScriptName(char *scriptname);
 
-extern fldFileResource_t *gEvnRng[];
+extern fldResHead_t *gEvnRng[];
 
 s32 dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
 

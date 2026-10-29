@@ -71,18 +71,18 @@ typedef struct fldFileNameTable_t
     fldFileNameEntry_t entries[1];
 } fldFileNameTable_t;
 
-typedef struct fldFileResource_t
+typedef struct fldResHead_t
 {
     u32 id;
     u32 word04;
     const char *name;
     u32 word0C;
-    const f32 *transform; /* Serialized translation and rotation input. */
+    fldResourcePoint_t *transform;
     u32 word14;
     fldFileNameTable_t *names;
     u32 word1C;
     void *data;
-} fldFileResource_t;
+} fldResHead_t;
 
 /* Shared view of fldGlobalBase through the last recovered position component.
  * Unknown gaps remain opaque; this is not the complete global allocation. */

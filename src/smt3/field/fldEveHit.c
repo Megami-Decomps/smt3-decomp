@@ -221,7 +221,7 @@ extern s32 gFldEveRngIdx_N;
 
 extern s32 fldEveRngCount;
 
-extern fldFileResource_t *gEvnRng[];
+extern fldResHead_t *gEvnRng[];
 
 extern s32 gFldEveRngIdx;
 
@@ -427,18 +427,6 @@ typedef struct {
     s32 visible;
     fldResPutEveBall_t *ball;
 } fldResPut_t;
-
-typedef struct {
-    u32 resourceID;
-    u32 resourceType;
-    char *resourceName;
-    u32 flag;
-    fldResourcePoint_t *sisei;
-    void *areaName;
-    void *resourceLink;
-    char *blockName;
-    fldResPut_t *put;
-} fldResHead_t;
 
 typedef struct {
     fldResPutEveBall_t ball;  /* 0x00 */
@@ -770,7 +758,7 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
     scene = dds3GetControlScene();
     for (i = 0; i < fldEveRngCount; i++) {
         fldRoomState_t *room = &fldEveHitTable[i];
-        fldFileResource_t *event;
+        fldResHead_t *event;
         fldTaskInfo_t *info;
         const f32 *position;
         char *script;
@@ -788,7 +776,7 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
         info = event->data;
         kind = info->shape->kind;
         if (kind == 0) {
-            position = event->transform;
+            position = &event->transform->pos.x;
             playerPose.r = 30.0f;
             playerPose.pos.x = player->poseset->pos.x;
             playerPose.pos.y = player->poseset->pos.y;
@@ -820,7 +808,7 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
             }
         } else if (kind == 1) {
             f32 x, y, z;
-            position = event->transform;
+            position = &event->transform->pos.x;
             x = position[0];
             y = position[1];
             z = position[2];
@@ -933,9 +921,9 @@ void fld_13F6B8(void) {
     s32 count = fldEveRngCount;
     s32 i = 0;
     if (count > 0) {
-        fldFileResource_t **entry = gEvnRng;
+        fldResHead_t **entry = gEvnRng;
         do {
-            fldDrawPos((*entry)->transform);
+            fldDrawPos((f32 *)(*entry)->transform);
             i++;
             entry++;
         } while (i < fldEveRngCount);
@@ -1003,11 +991,11 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
 
     id = dds3AllocObjectId();
     event = dds3AddEventBasic(id, "itembox_label", D_002FCD70);
-    D_002FCFA0[i].event.resourceID = id;
+    D_002FCFA0[i].event.id = id;
     D_002FCFA0[i].put.eveIndex =
         fldEveHit_AddEveData((fldEventDataHeader_t *)&D_002FCFA0[i].event, event);
     D_002FCFA0[i].put.visible = 1;
-    D_002FCFA0[i].hit.put = &D_002FCFA0[i].put;
+    D_002FCFA0[i].hit.data = &D_002FCFA0[i].put;
     D_002FCFA0[i].ball.Type = 0;
     D_002FCFA0[i].ball.r = r;
     D_002FCFA0[i].put.type = 1;
@@ -1025,11 +1013,11 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
     sisei->scl.y = 1.0f;
     sisei->scl.z = 1.0f;
     sisei->scl.w = 1.0f;
-    D_002FCFA0[i].hit.sisei = sisei;
+    D_002FCFA0[i].hit.transform = sisei;
     pointId = dds3AllocObjectId();
-    D_002FCFA0[i].hit.resourceID = pointId;
-    D_002FCFA0[i].hit.resourceName = D_002FCD70;
-    point = dds3AddPointBasic(pointId, D_002FCFA0[i].hit.sisei, D_002FCD80);
+    D_002FCFA0[i].hit.id = pointId;
+    D_002FCFA0[i].hit.name = D_002FCD70;
+    point = dds3AddPointBasic(pointId, D_002FCFA0[i].hit.transform, D_002FCD80);
     slot = fldEveHit_AddEveHit(&D_002FCFA0[i].hit, point);
     fldEveHitCount++;
     box = (fldEveRngBox_t *)&fldEveHitTable[slot].unk120;
@@ -1054,7 +1042,7 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     fldResourcePoint_t *sisei;
     D_002FCFA0[i].put.ball = &D_002FCFA0[i].ball;
     D_002FCFA0[i].ball.Type = 0;
-    D_002FCFA0[i].hit.put = &D_002FCFA0[i].put;
+    D_002FCFA0[i].hit.data = &D_002FCFA0[i].put;
     D_002FCFA0[i].ball.r = r;
     D_002FCFA0[i].put.eveIndex = eveidx;
     D_002FCFA0[i].put.type = 1;
@@ -1072,11 +1060,11 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     sisei->scl.y = 1.0f;
     sisei->scl.z = 1.0f;
     sisei->scl.w = 1.0f;
-    D_002FCFA0[i].hit.sisei = sisei;
+    D_002FCFA0[i].hit.transform = sisei;
     id = dds3AllocObjectId();
-    D_002FCFA0[i].hit.resourceID = id;
-    D_002FCFA0[i].hit.resourceName = resname;
-    point = dds3AddPointBasic(id, D_002FCFA0[i].hit.sisei, D_002FCD80);
+    D_002FCFA0[i].hit.id = id;
+    D_002FCFA0[i].hit.name = resname;
+    point = dds3AddPointBasic(id, D_002FCFA0[i].hit.transform, D_002FCD80);
     slot = fldEveHit_AddEveHit(&D_002FCFA0[i].hit, point);
     fldEveHitCount++;
     box = (fldEveRngBox_t *)&fldEveHitTable[slot].unk120;

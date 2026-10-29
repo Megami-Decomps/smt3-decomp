@@ -74,7 +74,7 @@ dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 modelRangeID);
 /* Return the borrowed secondary world node, or NULL when no world is active. */
 dds3Basic_t *dds3GetControlScene(void);
 
-extern fldFileResource_t *g_pHitData;
+extern fldResHead_t *g_pHitData;
 
 extern u32 g_nHitData;
 
@@ -123,7 +123,7 @@ extern void dds3ObjectBaseMakeMatter(dds3Basic_t *pObjectBasic);
 
 extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *pObjectBasic);
 
-extern fldFileResource_t *D_00551C8C;
+extern fldResHead_t *D_00551C8C;
 
 extern u32 D_00551C90;
 
@@ -431,7 +431,7 @@ dds3Basic_t *fldMakeDmyMatter(void) {
 dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 modelRangeID) {
     u32 resourceIndex = 0;
     dds3Basic_t *secondaryWorld = dds3GetControlScene();
-    fldFileResource_t *resource = g_pHitData;
+    fldResHead_t *resource = g_pHitData;
 
     for (; resourceIndex < g_nHitData; resourceIndex++, resource++) {
         if (modelRangeID == resource->id) {
@@ -461,7 +461,7 @@ dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 modelRangeID) {
 dds3Basic_t *fldGetModelRange_From_MatterName(const char *matterName) {
     u32 resourceIndex = 0;
     dds3Basic_t *secondaryWorld = dds3GetControlScene();
-    fldFileResource_t *resource = g_pHitData;
+    fldResHead_t *resource = g_pHitData;
 
     for (; resourceIndex < g_nHitData; resourceIndex++, resource++) {
         if (resource->names != NULL) {
@@ -485,7 +485,7 @@ dds3Basic_t *fldGetModelRange_From_MatterName(const char *matterName) {
 typedef struct fldSpawnBatch_t {
     u32 kind;
     u32 count;
-    fldFileResource_t *entries;
+    fldResHead_t *entries;
 } fldSpawnBatch_t;
 
 typedef struct fldBillConfigView_t {
@@ -558,7 +558,7 @@ void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
     u32 batchIndex;
     u32 resourceCount;
     u32 resourceIndex;
-    fldFileResource_t *resource;
+    fldResHead_t *resource;
     dds3Basic_t *spawnedObject;
     u32 pathIndex;
 
@@ -585,14 +585,14 @@ void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
                 const char * const *resourcePathSuffixes;
                 u32 cacheByteOffset;
                 if (resource->transform != NULL) {
-                    position[0] = resource->transform[0];
-                    position[1] = resource->transform[1];
-                    position[2] = resource->transform[2];
+                    position[0] = resource->transform->pos.x;
+                    position[1] = resource->transform->pos.y;
+                    position[2] = resource->transform->pos.z;
                     position[3] = 0.0f;
-                    rotation[0] = resource->transform[4];
-                    rotation[1] = resource->transform[5];
-                    rotation[2] = resource->transform[6];
-                    rotation[3] = resource->transform[7];
+                    rotation[0] = resource->transform->rot.x;
+                    rotation[1] = resource->transform->rot.y;
+                    rotation[2] = resource->transform->rot.z;
+                    rotation[3] = resource->transform->rot.w;
                 } else {
                     position[0] = 0.0f;
                     position[1] = 0.0f;
@@ -659,14 +659,14 @@ void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
         case FLD_SPAWN_BATCH_KIND_LIGHT:
             for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
                 if (resource->transform != NULL) {
-                    position[0] = resource->transform[0];
-                    position[1] = resource->transform[1];
-                    position[2] = resource->transform[2];
+                    position[0] = resource->transform->pos.x;
+                    position[1] = resource->transform->pos.y;
+                    position[2] = resource->transform->pos.z;
                     position[3] = 0.0f;
-                    rotation[0] = resource->transform[4];
-                    rotation[1] = resource->transform[5];
-                    rotation[2] = resource->transform[6];
-                    rotation[3] = resource->transform[7];
+                    rotation[0] = resource->transform->rot.x;
+                    rotation[1] = resource->transform->rot.y;
+                    rotation[2] = resource->transform->rot.z;
+                    rotation[3] = resource->transform->rot.w;
                 } else {
                     position[0] = 0.0f;
                     position[1] = 0.0f;
@@ -698,14 +698,14 @@ void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
             for (resourceIndex = 0, pathIndex = 1; resourceIndex < resourceCount; resourceIndex++, resource++, pathIndex++) {
                 resource->id |= 0x20000;
                 if (resource->transform != NULL) {
-                    position[0] = resource->transform[0];
-                    position[1] = resource->transform[1];
-                    position[2] = resource->transform[2];
+                    position[0] = resource->transform->pos.x;
+                    position[1] = resource->transform->pos.y;
+                    position[2] = resource->transform->pos.z;
                     position[3] = 0.0f;
-                    rotation[0] = resource->transform[4];
-                    rotation[1] = resource->transform[5];
-                    rotation[2] = resource->transform[6];
-                    rotation[3] = resource->transform[7];
+                    rotation[0] = resource->transform->rot.x;
+                    rotation[1] = resource->transform->rot.y;
+                    rotation[2] = resource->transform->rot.z;
+                    rotation[3] = resource->transform->rot.w;
                 } else {
                     position[0] = 0.0f;
                     position[1] = 0.0f;
@@ -748,7 +748,6 @@ typedef struct fldSpawnSoundDataFL2_t {
 } fldSpawnSoundDataFL2_t;
 
 typedef struct fldEventDataHeader_t fldEventDataHeader_t;
-typedef struct fldResHead_t fldResHead_t;
 extern dds3Basic_t *dds3AddEventBasic(s32 serialID, void *data, const char *name);
 extern u32 fldEveHit_AddEveData(fldEventDataHeader_t *resource, dds3Basic_t *basic);
 extern s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic);
@@ -765,7 +764,7 @@ void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
     u32 batchIndex;
     u32 resourceCount;
     u32 resourceIndex;
-    fldFileResource_t *resource;
+    fldResHead_t *resource;
     dds3Basic_t *spawnedObject;
     u32 pathIndex;
 
@@ -789,14 +788,14 @@ void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
             for (resourceIndex = 0, pathIndex = 1; resourceIndex < resourceCount; resourceIndex++, resource++, pathIndex++) {
                 resource->id |= 0x10000;
                 if (resource->transform != NULL) {
-                    position[0] = resource->transform[0];
-                    position[1] = resource->transform[1];
-                    position[2] = resource->transform[2];
+                    position[0] = resource->transform->pos.x;
+                    position[1] = resource->transform->pos.y;
+                    position[2] = resource->transform->pos.z;
                     position[3] = 0.0f;
-                    rotation[0] = resource->transform[4];
-                    rotation[1] = resource->transform[5];
-                    rotation[2] = resource->transform[6];
-                    rotation[3] = resource->transform[7];
+                    rotation[0] = resource->transform->rot.x;
+                    rotation[1] = resource->transform->rot.y;
+                    rotation[2] = resource->transform->rot.z;
+                    rotation[3] = resource->transform->rot.w;
                 } else {
                     position[0] = 0.0f;
                     position[1] = 0.0f;
@@ -831,14 +830,14 @@ void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
             for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
                 fldSpawnPointDataFL2_t *data;
                 if (resource->transform != NULL) {
-                    position[0] = resource->transform[0];
-                    position[1] = resource->transform[1];
-                    position[2] = resource->transform[2];
+                    position[0] = resource->transform->pos.x;
+                    position[1] = resource->transform->pos.y;
+                    position[2] = resource->transform->pos.z;
                     position[3] = 0.0f;
-                    rotation[0] = resource->transform[4];
-                    rotation[1] = resource->transform[5];
-                    rotation[2] = resource->transform[6];
-                    rotation[3] = resource->transform[7];
+                    rotation[0] = resource->transform->rot.x;
+                    rotation[1] = resource->transform->rot.y;
+                    rotation[2] = resource->transform->rot.z;
+                    rotation[3] = resource->transform->rot.w;
                 } else {
                     position[0] = 0.0f;
                     position[1] = 0.0f;
@@ -852,11 +851,11 @@ void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
                 data = resource->data;
                 switch (data->kind) {
                 case 0:
-                    dds3AddPointBasic(resource->id, (fldResourcePoint_t *)resource->transform, resource->name);
+                    dds3AddPointBasic(resource->id, resource->transform, resource->name);
                     break;
                 case 1:
-                    spawnedObject = dds3AddPointBasic(resource->id, (fldResourcePoint_t *)resource->transform, resource->name);
-                    fldEveHit_AddEveHit((fldResHead_t *)resource, spawnedObject);
+                    spawnedObject = dds3AddPointBasic(resource->id, resource->transform, resource->name);
+                    fldEveHit_AddEveHit(resource, spawnedObject);
                     break;
                 case 2: {
                     s32 npcId = *(s32 *)data->parameters;
@@ -879,14 +878,14 @@ void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
         case FLD_SPAWN_BATCH_KIND_CAMERA:
             for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
                 if (resource->transform != NULL) {
-                    position[0] = resource->transform[0];
-                    position[1] = resource->transform[1];
-                    position[2] = resource->transform[2];
+                    position[0] = resource->transform->pos.x;
+                    position[1] = resource->transform->pos.y;
+                    position[2] = resource->transform->pos.z;
                     position[3] = 0.0f;
-                    rotation[0] = resource->transform[4];
-                    rotation[1] = resource->transform[5];
-                    rotation[2] = resource->transform[6];
-                    rotation[3] = resource->transform[7];
+                    rotation[0] = resource->transform->rot.x;
+                    rotation[1] = resource->transform->rot.y;
+                    rotation[2] = resource->transform->rot.z;
+                    rotation[3] = resource->transform->rot.w;
                 } else {
                     position[0] = 0.0f;
                     position[1] = 0.0f;
@@ -927,7 +926,7 @@ void fldMakeBlockBasicFL2(fldConstruntAreaFL2_t *pBlockTable, u32 nBlock) {
 void fldMakeObjectBasic2(void) {
     f32 position[4];
     f32 rotation[4];
-    fldFileResource_t *resource = D_00551C8C;
+    fldResHead_t *resource = D_00551C8C;
     u32 count = D_00551C90;
 
     if (resource != NULL) {
@@ -938,19 +937,19 @@ void fldMakeObjectBasic2(void) {
             fldModelData_t *data = (fldModelData_t *)resource->data;
             dds3Basic_t *matter;
             u32 hitIndex;
-            fldFileResource_t *hit;
+            fldResHead_t *hit;
             fldResourceAreaRef_t *areaRef;
 
             dds3AddModelBasic2(resource->id, data->modelDef, data->playBook, D_0054EB98, resource->name);
             if (resource->transform != NULL) {
-                position[0] = resource->transform[0];
-                position[1] = resource->transform[1];
-                position[2] = resource->transform[2];
+                position[0] = resource->transform->pos.x;
+                position[1] = resource->transform->pos.y;
+                position[2] = resource->transform->pos.z;
                 position[3] = 0.0f;
-                rotation[0] = resource->transform[4];
-                rotation[1] = resource->transform[5];
-                rotation[2] = resource->transform[6];
-                rotation[3] = resource->transform[7];
+                rotation[0] = resource->transform->rot.x;
+                rotation[1] = resource->transform->rot.y;
+                rotation[2] = resource->transform->rot.z;
+                rotation[3] = resource->transform->rot.w;
             } else {
                 position[0] = 0.0f;
                 position[1] = 0.0f;
