@@ -933,7 +933,7 @@ typedef struct fclEncycModelLink_t {
 
 extern fclEncycModelLink_t D_002F69B8[];
 extern void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
-    s8 kind, s8 detail, s32 delta, s8 mode, u32 color, s8 show,
+    s8 kind, s8 detail, s8 *delta, s8 mode, u32 color, s8 show,
     s8 option, s8 extra, s32 full);
 extern s32 cmpDrawStatusModel(void *links);
 extern void fclRbnDraw(fclRibbon_t *ribbon, s32 x, s32 y, u32 z,
@@ -1416,22 +1416,22 @@ void CalcPhaseReadStatus(fclEncyc_instance_tag *pinst)
 extern void DrawExplainBack(s32 alpha);
 extern void DrawReadMainHelp(fclEncyc_instance_tag *pinst);
 extern void DrawReadStatusMoney(fclEncyc_instance_tag *work);
-extern void cmpDrawStatusComEx(s32 unit, u8 alpha, s8 kind, s8 mode, s32 value, s8 option, s32 color, s8 show, s8 extra, s8 full);
+extern void cmpDrawStatusComEx(datUnitWork_t *unit, u8 alpha, s8 kind, s8 mode, s8 *value, s8 option, s32 color, s8 show, s8 extra, s8 full);
 #endif
 
 void DrawPhaseReadStatus(fclEncyc_instance_tag *pinst)
 {
-    u8 *base = pinst->pwork;
+    fclEncycReadStatusWork_t *work = pinst->pwork;
 
-    DrawBackBlackBoard(*(s32 *)(base + 0x58), *(s16 *)(base + 0x5C));
+    DrawBackBlackBoard(work->boardY, work->boardAlpha);
     if (cmpGetEncycWork() != 0) {
         pinst->stat |= 0x400;
     }
-    cmpDrawStatusComEx((s32)(base + 0x90), *(u8 *)(base + 0x1E), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
-    DrawExplainBack(*(s16 *)(base + 0x5E));
-    fclRbnDraw(*(s32 *)(base + 0x80), *(s32 *)(base + 0xC), *(s32 *)(base + 0x10), 0xFFFFF0,
-               *(s16 *)(base + 0x1C), 5, 0x3A0, 0x47);
-    if (*(s16 *)(base + 0x1C) < 0x80) {
+    cmpDrawStatusComEx(&work->unit, (u8)work->phase.statusAlpha, -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
+    DrawExplainBack(work->explainAlpha);
+    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY, 0xFFFFF0,
+               work->phase.ribbonAlpha, 5, 0x3A0, 0x47);
+    if (work->phase.ribbonAlpha < 0x80) {
         DrawReadStatusMoney(pinst);
     }
     DrawReadMainHelp(pinst);
@@ -1507,17 +1507,17 @@ void CalcPhaseReadSummon(fclEncyc_instance_tag *pinst)
 
 void DrawPhaseReadSummon(fclEncyc_instance_tag *pinst)
 {
-    u8 *base = pinst->pwork;
+    fclEncycReadStatusWork_t *work = pinst->pwork;
 
-    DrawBackBlackBoard(*(s32 *)(base + 0x58), *(s16 *)(base + 0x5C));
+    DrawBackBlackBoard(work->boardY, work->boardAlpha);
     if (cmpGetEncycWork() != 0) {
         pinst->stat |= 0x400;
     }
-    cmpDrawStatusComEx((s32)(base + 0x90), *(u8 *)(base + 0x1E), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
-    DrawExplainBack(*(s16 *)(base + 0x5E));
-    fclRbnDraw(*(s32 *)(base + 0x80), *(s32 *)(base + 0xC), *(s32 *)(base + 0x10), 0xFFFFF0,
-               *(s16 *)(base + 0x1C), 5, 0x3A0, 0x47);
-    if (*(s16 *)(base + 0x1C) < 0x80) {
+    cmpDrawStatusComEx(&work->unit, (u8)work->phase.statusAlpha, -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
+    DrawExplainBack(work->explainAlpha);
+    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY, 0xFFFFF0,
+               work->phase.ribbonAlpha, 5, 0x3A0, 0x47);
+    if (work->phase.ribbonAlpha < 0x80) {
         DrawReadStatusMoney(pinst);
     }
     DrawReadMainHelp(pinst);
@@ -1590,8 +1590,8 @@ void CalcPhaseReadExplain(fclEncyc_instance_tag *pinst)
 }
 
 extern s32 cmpGetEncycWork(void);
-extern void cmpDrawStatusComEx(s32 unit, u8 alpha, s8 kind, s8 mode,
-    s32 value, s8 option, s32 color, s8 show, s8 extra, s8 full);
+extern void cmpDrawStatusComEx(datUnitWork_t *unit, u8 alpha, s8 kind, s8 mode,
+    s8 *value, s8 option, s32 color, s8 show, s8 extra, s8 full);
 extern void DrawExplainBack(s32 alpha);
 extern void DrawReadMainHelp(fclEncyc_instance_tag *pinst);
 extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
@@ -1604,7 +1604,7 @@ void DrawPhaseReadExplain(fclEncyc_instance_tag *pinst)
     if (cmpGetEncycWork() != 0) {
         pinst->stat |= 0x400;
     }
-    cmpDrawStatusComEx((s32)&work->unit, (u8)work->phase.statusAlpha, -1, 0, 0, 0,
+    cmpDrawStatusComEx(&work->unit, (u8)work->phase.statusAlpha, -1, 0, 0, 0,
                        0xA09DC380, 1, 0, 0);
     DrawExplainBack(work->explainAlpha);
     fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY,
@@ -1712,7 +1712,7 @@ void DrawPhaseReadView(fclEncyc_instance_tag *pinst)
         if (cmpGetEncycWork() != 0) {
             pinst->stat |= 0x400;
         }
-        cmpDrawStatusComEx((s32)&work->unit, (u8)work->phase.statusAlpha, -1,
+        cmpDrawStatusComEx(&work->unit, (u8)work->phase.statusAlpha, -1,
                            0, 0, 0, 0xA09DC380, 1, 0, 0);
     }
     DrawExplainBack(work->explainAlpha);

@@ -3005,7 +3005,7 @@ void cmbDrawStockPanel3(void)
                           0x47);
 }
 
-extern void cmpDrawStatusCom(s32 unit, s8 mode, s8 second, s8 third);
+extern void cmpDrawStatusCom(datUnitWork_t *unit, s8 mode, s8 second, s8 third);
 extern void fclRbnDraw(fclRibbon_t *ribbon, s32 x, s32 y, u32 z,
                       s32 alpha, s32 flag, s32 width, s32 ot);
 
@@ -3027,7 +3027,7 @@ void cmbDrawStatus(void)
                               (u8)work->stockCursorGroup[2].cursor.unk_24];
         break;
     }
-    cmpDrawStatusCom((s32)&cmbGlobalWork->party[slot].unit, 1, 0, 0);
+    cmpDrawStatusCom(&cmbGlobalWork->party[slot].unit, 1, 0, 0);
     fclRbnDraw(CMB_GBWK->ribbon, 0, 0x98, 0, 0x80, 2, -0x80, 0x47);
 }
 

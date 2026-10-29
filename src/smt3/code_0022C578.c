@@ -4466,18 +4466,18 @@ void campDhDrawIcon(void)
 extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
 
 #ifdef NON_MATCHING
-extern void cmpDrawStatusComEx(s32 a, u8 alpha, s8 b, s8 c, s32 d, s8 e, s32 color, s8 f, s8 g, s8 h);
+extern void cmpDrawStatusComEx(datUnitWork_t *a, u8 alpha, s8 b, s8 c, s8 *d, s8 e, s32 color, s8 f, s8 g, s8 h);
 #endif
 
 void campDhDrawHearts(void)
 {
-    u8 hearts[6];
+    s8 hearts[6];
     s32 i;
 
     for (i = 0; i < 6; i++) {
         hearts[i] = cmbGetHeartsParam(DDS3_GBWK->heartsequip, (s8)i);
     }
-    cmpDrawStatusComEx((s32)((u8 *)DDS3_GBWK + 0xA54), 0x80, -1, 0, (s32)hearts, 0, 0xA09DC380,
+    cmpDrawStatusComEx(&DDS3_GBWK->unitwork[0], 0x80, -1, 0, hearts, 0, 0xA09DC380,
                        4, 4, 0);
 }
 
@@ -5612,19 +5612,19 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillIcons);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkill);
 
-extern void cmpDrawStatusComEx(s32 a, u8 alpha, s8 b, s8 c, s32 d, s8 e, s32 color, s8 f,
+extern void cmpDrawStatusComEx(datUnitWork_t *a, u8 alpha, s8 b, s8 c, s8 *d, s8 e, s32 color, s8 f,
                                s8 g, s8 h);
 
-void cmpDrawStatusCom(s32 a, s8 b, s8 c, s8 d)
+void cmpDrawStatusCom(datUnitWork_t *a, s8 b, s8 c, s8 d)
 {
     cmpDrawStatusComEx(a, 0x80, -1, 0, 0, 0, 0xA09DC380, b, c, d);
 }
 
 extern void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
-                                s8 kind, s8 detail, s32 delta, s8 mode, u32 color,
+                                s8 kind, s8 detail, s8 *delta, s8 mode, u32 color,
                                 s8 show, s8 option, s8 extra, s8 full);
 
-void cmpDrawStatusComEx(s32 a, u8 alpha, s8 b, s8 c, s32 d, s8 e, s32 color, s8 f, s8 g, s8 h)
+void cmpDrawStatusComEx(datUnitWork_t *a, u8 alpha, s8 b, s8 c, s8 *d, s8 e, s32 color, s8 f, s8 g, s8 h)
 {
     cmpDrawStatusComEx2(a, 0, 0, alpha, b, c, d, e, color, f, g, h, 1);
 }
@@ -5666,16 +5666,16 @@ typedef struct
 extern cmpModelLink_t D_002F69B8[];
 
 extern void cmpDrawStatusRow(s32, s32, s32 *, s32, datUnitWork_t *);
-extern void cmpDrawParamPanel(s32, s32, s32 *, s32, datUnitWork_t *, s32, s32, s32);
+extern void cmpDrawParamPanel(s32, s32, s32 *, s8 *, datUnitWork_t *, s32, s32, s32);
 extern void cmpDrawStatusValue(s32, s32, s32 *, s32, datUnitWork_t *);
 extern u16 itfMesMngGetStatManager(void);
-extern void rstCreateBeforeSkillList(s8, s32, s8, rstSkillInfo_t *);
+extern void rstCreateBeforeSkillList(s8, datUnitWork_t *, s8, rstSkillInfo_t *);
 extern void cmpDrawSkill(s32, s32, s32 *, datUnitWork_t *, rstSkillInfo_t *, s32, s32,
                          s32, s32, s32);
 extern s32 cmpDrawStatusModel(void *);
 
 void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
-                         s8 kind, s8 detail, s32 delta, s8 mode, u32 color,
+                         s8 kind, s8 detail, s8 *delta, s8 mode, u32 color,
                          s8 show, s8 option, s8 extra, s8 full)
 {
     s32 xOffset[3];
@@ -5715,7 +5715,7 @@ void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
     cmpDrawStatusValue(x + xOffset[1], y + yOffset[1] + 4, colors, show, unit);
 
     if ((itfMesMngGetStatManager() & 2) == 0 || show == 2) {
-        rstCreateBeforeSkillList(DDS3_GBWK->heartsequip, (s32)&target, mode, &skillData);
+        rstCreateBeforeSkillList(DDS3_GBWK->heartsequip, &target, mode, &skillData);
         cmpDrawSkill(x + xOffset[2], y + yOffset[2], colors, &target,
                      &skillData, kind, detail, 0x4D4B4B4D, extra, show);
     }
@@ -6590,7 +6590,7 @@ s32 camp_draw_status_Process(s32 id)
         cmpUpdateTerminate((cmpInfoWindow_t *)cmpStatusPhase);
         return -1;
     }
-    cmpDrawStatusCom((s32)unit, 0, 0, 0);
+    cmpDrawStatusCom(unit, 0, 0, 0);
     return 0;
 }
 
