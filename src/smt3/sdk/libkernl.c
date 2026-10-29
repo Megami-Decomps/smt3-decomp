@@ -1373,7 +1373,71 @@ s32 sceFsReset(void)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceOpen);
 
+typedef struct fsCloseRequest_t {
+    s32 sema;
+    s32 *result;
+    s32 resultSize;
+    u32 descriptor;
+    s32 slot;
+} fsCloseRequest_t;
+extern fsCloseRequest_t D_0059D4C0;
+
+/* NON_MATCHING: 376/380 bytes; the final nonnegative-result clamp
+ * simplifies to a shorter immediate comparison. */
+#ifdef NON_MATCHING
+s32 sceClose(s32 descriptor)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsCloseRequest_t *request = &D_0059D4C0;
+    fsRequestEntry_t *entry;
+    s32 sema;
+    s32 accepted;
+    s32 status;
+
+    entry = get_iob(descriptor);
+    _sceFsWaitS(1);
+    if (D_0052C340 == 0) {
+        _sceFsSigSema();
+        return -1;
+    }
+    if (entry == NULL || entry->active == 0) {
+        _sceFsSigSema();
+        return -9;
+    }
+    request->descriptor = entry->word0;
+    request->slot = entry - D_0059E580;
+    param.maxCount = 1;
+    param.initCount = 0;
+    param.option = 0;
+    sema = CreateSema(&param);
+    D_0059D4C0.sema = sema;
+    request->result = &result;
+    request->resultSize = 4;
+    if (sceSifCallRpc(&D_0059E780, 1, 0, request, 0x14,
+                      D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    entry->active = 0;
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    status = result;
+    if (status >= 0) {
+        status = 0;
+    }
+    return status;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libkernl", sceClose);
+#endif
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceLseek);
 

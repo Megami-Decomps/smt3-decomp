@@ -86,3 +86,30 @@ one, two and four bytes respectively into request offset eight. An invalid
 kind returns `-65538` after the header writes, without reading the input or
 calling RPC. The valid transaction sends 32 bytes, receives 16 bytes, and
 returns zero for a nonnegative RPC status or `-65537` otherwise.
+
+## sceClose
+
+376 bytes against retail's 380, with 80 of 94 emitted words matching and
+14 differing; four native bytes remain uncovered. Through the completion
+result load at +0x14C, all instructions match apart from four exit-branch
+displacements caused by the shorter tail. Native loads -1 into a register,
+compares it with the signed completion result, and selects zero for a
+nonnegative result. The draft emits `slti result,0` and `movz`, shortening
+the clamp by one instruction and shifting the epilogue.
+
+The 20-byte shared close request contains completion semaphore, result
+pointer, result size, native descriptor and request-table index. Only
+maximum count, initial count and option are initialized in the semaphore
+descriptor. RPC failure leaves the slot active, deletes the semaphore,
+unlocks and returns -11. RPC success clears the slot, captures the uncached
+reply before unlocking, and either rejects a zero reply or waits for the
+completion callback before reading its stack result. Uninitialized service
+and invalid-slot exits return -1 and -9 respectively, after unlocking.
+
+Modifying the address-taken result directly emits a stack write and a
+384-byte body. Returning either ternary spelling emits 376 bytes with a
+comparison against one; copying the completion into a separate status scalar
+and clamping it emits the preferred comparison against zero. Writing the
+condition as `status > -1` is inert. No qualifier, false result type or
+artificial dependency was added. The remaining question is which genuine
+compiler/source property retains the native register comparison at this tail.

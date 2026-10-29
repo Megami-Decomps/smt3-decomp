@@ -15,8 +15,8 @@ page and line to open. Conventions are in
 | 9 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 8 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 7 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
+| 6 |  | [sdk/libkernl.md](sdk/libkernl.md) |
 | 6 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
-| 5 |  | [sdk/libkernl.md](sdk/libkernl.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 5 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |

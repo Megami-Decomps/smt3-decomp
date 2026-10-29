@@ -264,6 +264,7 @@ sceSifSetRpcQueue				docs/nonmatching/sdk/libkernl.md	22
 sceSifRegisterRpc				docs/nonmatching/sdk/libkernl.md	37
 sceSifInitIopHeap			31 of 34 words match	docs/nonmatching/sdk/libkernl.md	50
 sceSifSetIopAddr			51 of 55 words match	docs/nonmatching/sdk/libkernl.md	68
+sceClose				docs/nonmatching/sdk/libkernl.md	90
 sceMcWrite				docs/nonmatching/sdk/libmc.md	30
 sceMcSync				docs/nonmatching/sdk/libmc.md	49
 sceMcSetFileInfo				docs/nonmatching/sdk/libmc.md	60
