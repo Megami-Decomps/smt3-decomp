@@ -39,6 +39,7 @@ page and line to open. Conventions are in
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
 | 2 | interface/frName | [interface/frName.md](interface/frName.md) |
+| 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 2 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
