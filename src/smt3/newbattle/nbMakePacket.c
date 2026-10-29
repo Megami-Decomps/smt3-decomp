@@ -243,10 +243,7 @@ typedef struct nbKoukaProcessData_t
 
 
 
-typedef struct effPCPBossONGY2Param_t
-{
-    nbFormation_t *pFormation;
-} effPCPBossONGY2Param_t;
+
 
 extern char D_00544890[]; /* "カット長 = %d\n" */
 
@@ -295,7 +292,7 @@ extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t 
 
 extern s32 effPCPBossONGY2GetLength(void);
 
-extern void *effPCPBossONGY2Create(effPCPBossONGY2Param_t *pParam);
+extern void *effPCPBossONGY2Create(effPCPBossONGYParam_t *pParam);
 
 extern void *memset(void *a, s32 b, u32 c);
 
@@ -1194,7 +1191,7 @@ nbKoukaPacket_t *nbAddOngOutPacket(s32 startframe, s32 uniqueid, nbFormation_t *
 
 nbKoukaPacket_t *nbAddOngOut2Packet(s32 startframe, s32 uniqueid, nbFormation_t *form)
 {
-    effPCPBossONGY2Param_t param;
+    effPCPBossONGYParam_t param;
     nbKoukaProcessData_t *k;
     nbKoukaPacket_t *p;
     void *h;
