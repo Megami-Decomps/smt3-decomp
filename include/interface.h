@@ -31,6 +31,10 @@ typedef struct
     cmpCursorInfo_t listCursor;
 } lstWork_t;
 
+typedef struct {
+    u32 components[4];
+} itfColor_t;
+
 /* Common draw record allocated by the interface object constructors (0x34). */
 /* Allocation fields own general-heap descriptors, not retained payload addresses. */
 typedef struct itfpanel_t {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "interface.h"
 #include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -10,11 +11,6 @@ typedef struct
 {
     s32 pm[3];
 } sdfIVector3_t;
-
-typedef struct
-{
-    u32 components[4];
-} itfColor_t;
 
 extern void sdfMemFreeDirect(void *aHandle);
 

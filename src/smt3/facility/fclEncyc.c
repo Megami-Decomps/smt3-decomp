@@ -1,4 +1,5 @@
 #include "common.h"
+#include "interface.h"
 #include "camp.h"
 #include "facility.h"
 #include "fpu.h"
@@ -3086,19 +3087,18 @@ void DrawListWindowBack(void *obj, fclPanel_t *plistwin)
 }
 
 typedef struct { s32 left, right; } fclEncycStrip_t;
-typedef struct { u32 components[4]; } fclEncycColor_t;
-extern fclEncycColor_t D_00332330;
+extern itfColor_t D_00332330;
 extern fclEncycStrip_t D_00332340[5];
-extern fclEncycColor_t g_uv_summon_back[];
+extern itfColor_t g_uv_summon_back[];
 extern sdfGrOt_t D_002F67F8;
-extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *, fclEncycColor_t *, u32, s32, sdfDrawTag_t *);
+extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *, itfColor_t *, u32, s32, sdfDrawTag_t *);
 extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
-extern void itfMiscDrawSpritePrim2(sdfIVector2_t *, fclEncycColor_t *, fclEncycColor_t *, u32, s32, sdfDrawTag_t *);
+extern void itfMiscDrawSpritePrim2(sdfIVector2_t *, itfColor_t *, itfColor_t *, u32, s32, sdfDrawTag_t *);
 
 void drawRegistSprites(fclEncyc_instance_tag *pinst)
 {
     sdfIVector2_t pos[2];
-    fclEncycColor_t uv;
+    itfColor_t uv;
     sdfDrawTag_t *tag;
     fclEncycStrip_t *strip;
     s32 i;
@@ -3145,10 +3145,10 @@ void drawRegistSprites(fclEncyc_instance_tag *pinst)
 
 /* NON_MATCHING: 83 of 99 words match at native 396-byte size. */
 #ifdef NON_MATCHING
-extern fclEncycColor_t D_00330930;
-extern fclEncycColor_t D_00330940;
-extern fclEncycColor_t D_00330950;
-extern fclEncycColor_t g_uv_summon_back[];
+extern itfColor_t D_00330930;
+extern itfColor_t D_00330940;
+extern itfColor_t D_00330950;
+extern itfColor_t g_uv_summon_back[];
 void DrawRegistListwinElem(fclEncyc_instance_tag *pinst)
 {
     fclEncycRegistAllWork_t *work = (fclEncycRegistAllWork_t *)pinst->pwork;
@@ -3191,12 +3191,12 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawRegistListwinElem);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadListwinCaption);
 
-extern fclEncycColor_t D_00330930;
-extern fclEncycColor_t D_00330960;
-extern fclEncycColor_t D_00330970;
-extern fclEncycColor_t D_00330980;
-extern fclEncycColor_t D_00330990;
-extern fclEncycColor_t D_003309A0;
+extern itfColor_t D_00330930;
+extern itfColor_t D_00330960;
+extern itfColor_t D_00330970;
+extern itfColor_t D_00330980;
+extern itfColor_t D_00330990;
+extern itfColor_t D_003309A0;
 
 void DrawReadListwinElem(fclEncyc_instance_tag *pinst)
 {
@@ -3256,9 +3256,9 @@ extern u8 D_003323A8[];
 extern u8 D_003323B0[];
 extern sdfGrOt_t D_002F67F8;
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, fclEncycColor_t *color,
+extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, itfColor_t *color,
                                       u32 z, s32 context, sdfDrawTag_t *tag);
-extern void itfMiscDrawRectanglePrim(sdfIVector2_t *vertices, fclEncycColor_t *colors,
+extern void itfMiscDrawRectanglePrim(sdfIVector2_t *vertices, itfColor_t *colors,
                                    u8 *vertexIndex, u8 *colorIndex, u32 z, sdfDrawTag_t *tag);
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *tag, s32 active, s32 context);
 
@@ -3269,10 +3269,10 @@ void DrawExplainBack(s32 alpha)
     sdfIVector2_t pos[4];
     /* The initial plane corners share the first rectangle color slot. */
     union {
-        fclEncycColor_t colors[2];
+        itfColor_t colors[2];
         struct {
             sdfIVector2_t corners[2];
-            fclEncycColor_t color;
+            itfColor_t color;
         } plane;
     } draw;
     if (alpha <= 0) {
@@ -3318,11 +3318,11 @@ void DrawExplainBack(s32 alpha)
 
 
 extern sdfIVector2_t D_003323B8[2];
-extern fclEncycColor_t D_003323C8[1];
+extern itfColor_t D_003323C8[1];
 extern sdfGrOt_t sdfGrOtTable[];
 extern void *sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, fclEncycColor_t *color,
+extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, itfColor_t *color,
                                        u32 z, s32 context, sdfDrawTag_t *tag);
 
 void DrawBackBlackBoard(s32 y, s32 ratio)
@@ -3342,18 +3342,18 @@ void DrawBackBlackBoard(s32 y, s32 ratio)
     ot->regFunc(ot, tag);
 }
 
-extern fclEncycColor_t g_uv_summon_back[];
-extern fclEncycColor_t D_003309B0[];
+extern itfColor_t g_uv_summon_back[];
+extern itfColor_t D_003309B0[];
 extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 tail,
                                   sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *tag);
-extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, fclEncycColor_t *uv,
-                                   fclEncycColor_t *color, u32 z, s32 context,
+extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv,
+                                   itfColor_t *color, u32 z, s32 context,
                                    sdfDrawTag_t *tag);
 
 void DrawRegistAllHelp(fclEncyc_instance_tag *pinst)
 {
     sdfIVector2_t pos[2];
-    fclEncycColor_t uv;
+    itfColor_t uv;
     sdfDrawTag_t *tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     pos[0].x = 0x1370; pos[0].y = 0xA0;
@@ -3380,14 +3380,14 @@ void DrawRegistAllHelp(fclEncyc_instance_tag *pinst)
 
 typedef struct {
     sdfIVector2_t pos[2];
-    fclEncycColor_t color;
+    itfColor_t color;
 } fclEncycDrawPrim_t;
-extern fclEncycColor_t D_003309B0[];
-extern fclEncycColor_t D_003309D0[];
+extern itfColor_t D_003309B0[];
+extern itfColor_t D_003309D0[];
 extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 tail,
                                   sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *tag);
-extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, fclEncycColor_t *uv,
-                                   fclEncycColor_t *color, u32 z, s32 context,
+extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv,
+                                   itfColor_t *color, u32 z, s32 context,
                                    sdfDrawTag_t *tag);
 
 void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst)

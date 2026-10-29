@@ -1,4 +1,5 @@
 #include "common.h"
+#include "interface.h"
 #include "libsdf.h"
 #include "kernel.h"
 
@@ -39,8 +40,6 @@ typedef struct
 } itfmisclinkstack_t;
 
 typedef struct { s32 x, y, z, w; } itfColorVector_t;
-
-typedef struct { u32 components[4]; } itfColor_t;
 
 typedef struct { u8 unk00[0x20]; u64 value, registerCode; } itfGsState_t;
 
