@@ -339,7 +339,7 @@ void ragDrawListRows(lstWork_t *list, u8 kind, u8 *rows, s8 mode, s32 ot)
 INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawListRows);
 #endif
 
-extern s32 fclDrawPanel(fclPanel_t *panel, s32 ot);
+extern void fclDrawPanel(fclPanel_t *panel, s32 ot);
 extern void fclUpdatePanel(fclPanel_t *panel);
 extern void fclDrawPriceText(fclPanelPos_t *pos, u16 price, s32 ot);
 extern ragOfferTable_t ragOffers asm("ragHeartsTable");
