@@ -49,12 +49,7 @@ typedef struct {
 } evtViewerMovieWork_t;
 
 /* One pushed viewer menu mode; menuDepth indexes these. */
-typedef struct {
-    u16 mode;
-    u16 unk02;
-    u16 unk04;
-    u16 unk06;
-} evtViewerMenuEntry_t;
+
 
 struct evtViewerInfo_t {
     void *block;

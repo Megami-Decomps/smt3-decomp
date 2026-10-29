@@ -10,12 +10,7 @@
 /* Shared track prefix recovered by evtEventViewer. */
 
 
-typedef struct {
-    u16 mode;
-    u16 unk02;
-    u16 unk04;
-    u16 unk06;
-} evtViewerMenuEntry_t;
+
 
 typedef struct {
     void *block;

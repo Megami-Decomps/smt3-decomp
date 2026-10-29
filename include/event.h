@@ -43,6 +43,13 @@ typedef struct evtViewerObject_s {
     struct evtViewerObject_s *prev;
 } evtViewerObject_s;
 
+typedef struct {
+    u16 mode;
+    u16 unk02;
+    u16 unk04;
+    u16 unk06;
+} evtViewerMenuEntry_t;
+
 /* Interpolated event vector and packed colour. */
 typedef struct evtBlendVecColor_t {
     f32 vec[4];
