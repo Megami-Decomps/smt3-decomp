@@ -349,7 +349,7 @@ extern void sdfUnpackFloat(const void *x, fp_number_type *u);
 
 extern f32 sdfPackFloat(const fp_number_type *u);
 
-extern long __make_dp(s32 kind, s32 sign, s32 exp, long mant);
+extern f64 __make_dp(s32 kind, s32 sign, s32 exp, long mant);
 
 #define va_start(ap, last) __builtin_stdarg_start((ap), last)
 
@@ -368,7 +368,7 @@ typedef struct fp_number_type_df {
     long fraction;
 } fp_number_type_df;
 
-extern long __pack_df(const fp_number_type_df *u);
+extern f64 __pack_df(const fp_number_type_df *u);
 
 extern void sdfUnpackDouble(const double *x, fp_number_type_df *u);
 
@@ -400,7 +400,7 @@ void __main(void) {
     }
 }
 
-long fptodp(f32 x) {
+f64 fptodp(f32 x) {
     fp_number_type u;
 
     sdfUnpackFloat(&x, &u);
@@ -409,7 +409,7 @@ long fptodp(f32 x) {
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D1590);
 
-long dpadd(double a, double b) {
+f64 dpadd(double a, double b) {
     fp_number_type_df ua;
     fp_number_type_df ub;
     fp_number_type_df r;
@@ -419,7 +419,7 @@ long dpadd(double a, double b) {
     return __pack_df(libc_2D1590(&ua, &ub, &r));
 }
 
-long dpsub(double a, double b) {
+f64 dpsub(double a, double b) {
     fp_number_type_df ua;
     fp_number_type_df ub;
     fp_number_type_df r;
@@ -441,11 +441,65 @@ long dpcmp(double a, double b) {
     return __fpcmp_parts_df(&ua, &ub);
 }
 
-INCLUDE_ASM(const s32, "sdk/libgcc", litodp);
+/* fp-bit class predicates: zero is tag 2, infinity is tag 4. */
+static inline s32 dfIsZero(const fp_number_type_df *number) {
+    return number->class == 2;
+}
 
-INCLUDE_ASM(const s32, "sdk/libgcc", dptoli);
+static inline s32 dfIsInfinity(const fp_number_type_df *number) {
+    return number->class == 4;
+}
 
-long __make_dp(s32 kind, s32 sign, s32 exp, long mant) {
+f64 litodp(s32 n) {
+    fp_number_type_df value;
+
+    value.class = 3;
+    value.sign = (u32)n >> 31;
+    if (n == 0) {
+        value.class = 2;
+    } else {
+        value.normal_exp = 60;
+        if (value.sign != 0) {
+            if (n == (-2147483647 - 1)) {
+                return -2147483648.0;
+            }
+            value.fraction = -n;
+        } else {
+            value.fraction = n;
+        }
+        while ((u64)value.fraction <= 0x0FFFFFFFFFFFFFFFULL) {
+            value.fraction = (u64)value.fraction << 1;
+            value.normal_exp--;
+        }
+    }
+    return __pack_df(&value);
+}
+
+s32 dptoli(f64 value) {
+    fp_number_type_df number;
+    s32 result;
+
+    sdfUnpackDouble(&value, &number);
+    if (dfIsZero(&number)) {
+        return 0;
+    }
+    if ((u32)number.class < 2) {
+        return 0;
+    }
+    if (dfIsInfinity(&number)) {
+        return number.sign ? (s32)0x80000000 : 0x7FFFFFFF;
+    }
+    if (number.normal_exp < 0) {
+        return 0;
+    }
+    if (number.normal_exp > 30) {
+        return number.sign ? (s32)0x80000000 : 0x7FFFFFFF;
+    }
+    result = (unsigned long)number.fraction >> (60 - number.normal_exp);
+    return number.sign ? -result : result;
+}
+
+f64 __make_dp(s32 kind, s32 sign, s32 exp, long mant) {
     fp_number_type_df u;
 
     u.class = kind;
@@ -476,7 +530,32 @@ u32 dptofp(double x) {
     return sdfPackQuad(u.class, u.sign, u.normal_exp, m);
 }
 
-INCLUDE_ASM(const s32, "sdk/libgcc", dptoul);
+u32 dptoul(f64 value) {
+    fp_number_type_df number;
+    sdfUnpackDouble(&value, &number);
+    if (dfIsZero(&number)) {
+        return 0;
+    }
+    if ((u32)number.class < 2) {
+        return 0;
+    }
+    if (number.sign != 0) {
+        return 0;
+    }
+    if (dfIsInfinity(&number)) {
+        return 0xFFFFFFFFU;
+    }
+    if (number.normal_exp < 0) {
+        return 0;
+    }
+    if (number.normal_exp > 31) {
+        return 0xFFFFFFFFU;
+    }
+    if (number.normal_exp > 60) {
+        return (unsigned long)number.fraction << (number.normal_exp - 60);
+    }
+    return (unsigned long)number.fraction >> (60 - number.normal_exp);
+}
 
 u8 *libc_2D1E08(u8 *p, u32 *out) {
     u32 b;

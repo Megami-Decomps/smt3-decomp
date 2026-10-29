@@ -131,7 +131,7 @@ relink is the final check once a body lands in its unit.
 |---|---|---|---|---|
 | `libkernl.a` | 313 | 37,012 | 21 | threads, intc/dmac, sif cmd and rpc, tty, file I/O, loadfile, TLB, exec |
 | `libc.a` | 85 | 32,640 | 46 | newlib: stdio, malloc, dtoa, qsort, strtol, locale, signal |
-| `libgcc` | 31 | 10,032 | 14 | fp-bit double emulation, dwarf2 frame unwinding, `__main` |
+| `libgcc` | 31 | 10,032 | 14 | [fp-bit conversions](libgcc-conversion-matching.md), dwarf2 frame unwinding, `__main` |
 | `libm.a` | 14 | 7,624 | 14 | fdlibm single-precision: sin, cos, tan, acos, atan2, sqrt, rem_pio2 |
 | `libcdvd.a` | 30 | 6,976 | 5 | `cdvd000.o` and four numbered siblings |
 | `libmc.a` | 28 | 6,248 | 1 | one object |
