@@ -515,7 +515,81 @@ s32 fldElvCheckEnd(void)
 
 INCLUDE_RODATA(const s32, "field/fldTest", D_00530F30);
 
+#ifdef NON_MATCHING
+extern volatile s8 dds3PadButtonState[];
+
+void fldElvDrawFloorNum(void)
+{
+    s32 delays[6] = { 50, 45, 30, 20, 15, 15 };
+    volatile s32 *timer = &fldElvFloorTarget;
+    volatile s32 *target = &fldElvFloorTo;
+    volatile s32 *from = &fldElvFloorFrom;
+    volatile s32 *displayFloor = &fldElvFloorDisp;
+    volatile s32 *state = &fldElvState;
+    s32 floor = gFldElvFloorNow;
+    s32 timerValue;
+    s32 targetFloor;
+    s32 fromDistance;
+    s32 toDistance;
+    s32 distance;
+    s32 display;
+    s8 button;
+
+    if (floor == -999) {
+        return;
+    }
+    timerValue = *timer;
+    targetFloor = *target;
+    if (timerValue != -999) {
+        *timer = (s32)((u32)timerValue + 1);
+        toDistance = (s32)((u32)targetFloor - (u32)floor);
+        fromDistance = (s32)((u32)*from - (u32)floor);
+        if (toDistance < 0) {
+            toDistance = (s32)(0U - (u32)toDistance);
+        }
+        if (fromDistance < 0) {
+            fromDistance = (s32)(0U - (u32)fromDistance);
+        }
+        distance = fromDistance < toDistance ? fromDistance : toDistance;
+        if (distance >= 6) {
+            distance = 5;
+        }
+        if (delays[distance] < *timer) {
+            *timer = 0;
+            if (floor < targetFloor) {
+                floor = (s32)((u32)floor + 1);
+                if (floor == 0) {
+                    floor++;
+                }
+                gFldElvFloorNow = floor;
+            } else if (targetFloor < floor) {
+                floor = (s32)((u32)floor - 1);
+                if (floor == 0) {
+                    floor--;
+                }
+                gFldElvFloorNow = floor;
+            }
+        }
+    }
+    button = dds3PadButtonState[0x23];
+    display = *displayFloor;
+    if (button < 0) {
+        *state = 1;
+        display = *displayFloor;
+    }
+    if (display < 1001) {
+        display = fldElvFloorNum;
+        if (display < 1001 || floor != display % 1000) {
+            display = floor;
+        }
+    } else if (floor != display % 1000) {
+        display = floor;
+    }
+    fldElvGetFloorDigits(380, 26, display);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldTest", fldElvDrawFloorNum);
+#endif
 
 void drawSceneBasicList(void) {
     s32 hasEligibleBackground = 0;
