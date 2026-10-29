@@ -333,3 +333,16 @@ Reset UID 149 follows ordinary call UID 145 in `.01.sibling` and remains
 in `.11.cfg`; it disappears in `.13.life`. The in-range call UID 110 is
 already a sibling call and remains one. Removing the reset makes the
 otherwise exact initializer eight bytes short. The complete unit stays exact.
+
+## u32 on the switched value drops the range test
+
+A dense `switch` over 0..N-1 whose value is `s32` gets a balanced tree with an
+`slti`/`sltiu` range test picking a subtree. The same switch over a `u32` value
+emits the plain equality chain, middle case first, that retail has.
+`nbCameraBoss_Beru_HAENO1_Set` (four cases, 0..3) went from four words over to
+exact on `u32 type` alone, and `nbCameraBoss_Kagu_MJINKO_Set` (three cases) went
+from 16 bytes over to exact when its dispatch global was declared
+`extern u32`. Nothing else about the arms changed.
+
+Both ways are worth trying before rewriting the arms: this is a one-word edit
+and it moves every offset in the function.

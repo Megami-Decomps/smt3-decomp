@@ -11,7 +11,7 @@ open the page and line it names.
 | 14 | [impossible.md](impossible.md) | Functions that cannot be written in C |
 | 10 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 | 10 | [stores.md](stores.md) | Stores |
-| 4 | [float-literals.md](float-literals.md) | Float literals |
+| 9 | [float-literals.md](float-literals.md) | Float literals |
 | 3 | [scheduling.md](scheduling.md) | Store scheduling |
 | 3 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
 | 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
