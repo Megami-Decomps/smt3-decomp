@@ -1413,7 +1413,31 @@ u16 rstCheckHeartsSlot(u8 id, datUnitWork_t *unit)
     return 0;
 }
 
+extern void cmbClearUnitSkills(datUnitWork_t *unit);
+extern u8 datLevelUpTable[];
+
+#ifdef NON_MATCHING
+void cmbInitStockUnit(u16 devilId, datUnitWork_t *unit)
+{
+    datLevelUp_t *table = (datLevelUp_t *)datLevelUpTable;
+    datLevelUpEntry_t *entry;
+    s32 i;
+
+    cmbClearUnitSkills(unit);
+    entry = table[devilId].entry;
+    for (i = 0; i < 24; i++) {
+        if (entry[i].kind != 1) {
+            continue;
+        }
+        if (entry[i].level != 0) {
+            continue;
+        }
+        unit->skill[unit->skillcnt++] = entry[i].value;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "result/rstcalc", cmbInitStockUnit);
+#endif
 
 extern void cmbClearUnitSkills(datUnitWork_t *unit);
 extern u8 datLevelUpTable[];
