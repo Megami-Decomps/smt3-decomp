@@ -311,8 +311,8 @@ typedef struct nbEventProcessData_t {
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern nbKoukaPacket_t *nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
-                                            s32 type, s32 hp, s32 mp, s32 badstat);
+extern s32 nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                               s32 type, s32 hp, s32 mp, u32 badstat);
 
 extern s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type, s32 hp,
                               s32 mp, s32 badstat, s32 hiteff, s32 dead, s32 deadtype, s32 moji,

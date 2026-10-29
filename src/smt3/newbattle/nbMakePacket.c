@@ -401,7 +401,7 @@ extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 se);
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern s32 nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
-                               s32 type, s32 hp, s32 mp, s32 badstat);
+                               s32 type, s32 hp, s32 mp, u32 badstat);
 
 extern s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type, s32 hp,
                               s32 mp, s32 badstat, s32 hiteff, s32 dead, s32 deadtype, s32 moji,
@@ -1574,7 +1574,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDamagePacket);
 extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
 
 s32 nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
-                        s32 type, s32 hp, s32 mp, s32 badstat)
+                        s32 type, s32 hp, s32 mp, u32 badstat)
 {
     s32 hidden = form->formindex >= 16;
 

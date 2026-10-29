@@ -309,8 +309,8 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern void nbPanelDraw(s32 flag);
 
-extern nbKoukaPacket_t *nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
-                                            s32 type, s32 hp, s32 mp, s32 badstat);
+extern s32 nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                               s32 type, s32 hp, s32 mp, u32 badstat);
 
 extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 

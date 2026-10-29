@@ -1628,7 +1628,7 @@ void SetAction_BAD(nbActionProcessData_t *a)
 
 extern s32 nbMakeBadKaifukuPacket(s32 frame, s32 id, nbFormation_t *form);
 extern s32 nbMakeKaifukuPacket(s32 frame, s32 id,
-    nbFormation_t *form, s32 type, s32 hp, s32 mp, s32 flag);
+    nbFormation_t *form, s32 type, s32 hp, s32 mp, u32 badstat);
 extern s32 nbApplyBadCurse(nbActionProcessData_t *a);
 extern s32 nbCheckBadCurse(s32 formindex);
 

@@ -28,6 +28,19 @@ first three inputs: its later `$7` values are newly initialized locals. Keep
 the caller-supplied formal rather than adding a use or removing the argument.
 This reconciles the source interface without changing the native behavior.
 
+## Recovery and death packet status contracts
+
+`nbMakeKaifukuPacket` and `nbMakeDeadVisualPacket` return a signed integer
+status. Their native epilogues at 0x002641D0 and 0x00263BD0 both set `$v0` to1;
+these are not packet-pointer results. Current callers discard the status.
+The recovered prototypes corroborate both returns and their 32-bit integer
+`uniqueid` parameters. Death-visual callers explicitly convert action addresses
+to that ID. Recovery's seventh argument is the unsigned `badstat` word.
+
+The `const s32` in an `INCLUDE_ASM` invocation describes the imported assembly
+symbol and is not evidence of a function's C signature. Check the native return
+paths and actual callers before adopting an inherited declaration.
+
 ## Sources
 
 Same order of authority as [IDB corrections](idb-corrections.md).

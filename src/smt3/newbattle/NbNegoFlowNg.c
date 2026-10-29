@@ -319,8 +319,8 @@ extern s32 nbGetHojoSkillWorkCnt(nbNegoProcessData_t *n);
 
 extern void nbPanelDraw(s32 flag);
 
-extern nbKoukaPacket_t *nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
-                                            s32 type, s32 hp, s32 mp, s32 badstat);
+extern s32 nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                               s32 type, s32 hp, s32 mp, u32 badstat);
 
 extern s32 nbCheckFlowUnit(nbNegoProcessData_t *n);
 
