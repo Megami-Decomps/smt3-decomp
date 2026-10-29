@@ -2284,8 +2284,9 @@ void fldRunDanteSoba(void)
     }
 }
 
-/* NON_MATCHING: 178 of 180 words match, native 720-byte size; timer load order. */
-#ifdef NON_MATCHING
+/* Native "Re1KO\n" string: seven bytes including NUL; keep its .sdata slot. */
+extern const char D_0054EAD0[];
+
 void fldRunDantePatr(void)
 {
     fldMapCell_t *cell;
@@ -2337,7 +2338,7 @@ void fldRunDantePatr(void)
             if (fldHitChkEnemy(position, target, hitPosition) != -1) {
                 routeEntry = routeBase;
             } else {
-                printf("Re1KO\n");
+                printf(D_0054EAD0);
                 fldRun_Dante.now++;
                 fldRun_Dante.tikamiti = 1;
             }
@@ -2377,10 +2378,6 @@ void fldRunDantePatr(void)
         fldRun_Dante.flag |= 4;
     }
 }
-
-#else
-INCLUDE_ASM(const s32, "field/fldTest", fldRunDantePatr);
-#endif
 
 extern fldDanteGunState_t fldRunDanteGunFlag;
 extern dds3Basic_t *D_0054EAF0;
