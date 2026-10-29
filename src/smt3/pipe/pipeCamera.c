@@ -75,9 +75,6 @@ void getViewPortMatrix(sdfMatrix4_t *matrix)
     matrix->m[15] = 1.0f;
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeCamera", PipeCamera);
-
-
 /* Shared pipe records: node stride is 0x20; PosTable.points is at +8. */
 typedef struct tagPipeObject {
     s32 offset;
@@ -114,6 +111,45 @@ extern void getPosTranslate(tagPipeObject *object, f32 *position);
 extern void vecSet(f32 *vector, f32 x, f32 y, f32 z);
 extern void vecScale(f32 *vector, f32 scale);
 extern void pipeCameraLerp(f32 *vector, f32 angle);
+
+void PipeCamera(void)
+{
+    f32 difference[4];
+    f32 forward[4];
+    f32 up[4];
+    f32 position[4];
+    s32 offset = offsetCount;
+    tagPipeObject *object = objMyData();
+
+    if (object == NULL) {
+        return;
+    }
+    getPosTranslate(object, position);
+    difference[0] = position[0] - D_00528F58.points[offset].position[0];
+    difference[1] = position[1] - D_00528F58.points[offset].position[1];
+    difference[2] = position[2] - D_00528F58.points[offset].position[2] - 0.01f;
+    vecSet(forward,
+           D_00528F58.points[offset + 1].position[0] - D_00528F58.points[offset].position[0],
+           D_00528F58.points[offset + 1].position[1] - D_00528F58.points[offset].position[1],
+           D_00528F58.points[offset + 1].position[2] - D_00528F58.points[offset].position[2]);
+    vecSet(up, D_00528F58.points[offset].direction[0],
+           D_00528F58.points[offset].direction[1], D_00528F58.points[offset].direction[2]);
+    pipeCamShakeVec[0] = position[0];
+    pipeCamShakeVec[1] = position[1];
+    pipeCamShakeVec[2] = position[2];
+    vecNormalize(forward);
+    vecScale(forward, -600.0f);
+    vecNormalize(up);
+    vecScale(up, -50.0f);
+    pipeCamShake[0] = position[0] + forward[0] + up[0];
+    pipeCamShake[1] = position[1] + forward[1] + up[1];
+    pipeCamShake[2] = position[2] + forward[2] + up[2];
+    pipeCameraPos[0] = D_00528F58.points[offset].direction[0];
+    pipeCameraPos[1] = D_00528F58.points[offset].direction[1];
+    pipeCameraPos[2] = D_00528F58.points[offset].direction[2];
+}
+
+
 
 void PipeCameraAction(void)
 {
