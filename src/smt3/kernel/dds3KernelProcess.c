@@ -169,7 +169,138 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
 INCLUDE_ASM(const s32, "kernel/dds3KernelProcess", dds3DrawFirstProcess);
 #endif
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelProcess", dds3DrawProcess);
+typedef struct sdfGrRefPacketHeader_t sdfGrRefPacketHeader_t;
+
+/* Sprite GIF payload: RGBAQ followed by UV/XYZ2 for each corner.
+ * The GS ignores the unused lanes; native writes XYZ's 16-bit ADC lane. */
+typedef struct {
+    s32 u, v;
+    u8 unusedUV[8];
+    s32 x, y, z;
+    s16 adc;
+    u8 unusedXYZ[2];
+} dds3BlurCorner_t;
+typedef struct {
+    s32 r, g, b, a;
+    dds3BlurCorner_t corner[2];
+} dds3BlurSprite_t;
+extern sdfModelOt_t D_002F69B8[];
+extern sdfGrOt_t D_002F6938;
+extern u8 dds3ScreenBlurFlag, dds3DrawProcessFlag;
+extern s16 dds3ScreenBlurAlpha, dds3ScreenBlurScale;
+extern s32 dds3ScreenBlurOfsX[2];
+extern sdfDrawTag_t *dds3ClosedDrawTag;
+extern u32 dds3DrawFlag;
+extern s8 D_00551888;
+extern void dds3DrawDistRipOverError(void);
+extern void dds3FadeUpdate(void);
+extern void dds3DrawFade(void);
+extern void dds3BlurUpdate(void);
+extern u32 dds3NullDrawProc(void);
+extern void sdfModelDrawEnvLinkOt(sdfGrOt_t **, sdfModelDrawEnv_t *);
+extern s32 sdfGrAllocPacketBuff(s32);
+extern void sdfDrawTagInit(sdfDrawTag_t *);
+extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *, u32, sdfGrRefPacketHeader_t *);
+extern sdfGrPacketHeader_t *sdf2DAllocSprite(s32);
+extern void *sdf2DGetPrimPtr(sdfGrPacketHeader_t *);
+extern sdfDrawTag_t *sdfGrOtClose(sdfGrOt_t *);
+extern void sdfGrFlushOtChain(u32 *);
+extern void sdfGrReqDraw(sdfDrawTag_t *, sdfPreDrawChain_t *);
+
+/* DDS1 kwlnRenderFrame donor, with SMT3's eleven model groups and draw bank. */
+s32 dds3DrawProcess(dds3ProcessID_t *task) {
+    s32 bufferIndex = dds3GetFrameID();
+    sdfModelOt_t *groupHeads;
+    sdfModelDrawEnv_t *packetGroups;
+    sdfDrawTag_t *packetList;
+    u64 *texturePacket;
+    u64 *blendPacket;
+    dds3BlurSprite_t *vertex;
+    void *spritePacket;
+    sdfDrawTag_t *poolHead;
+    s32 edgeDistances[4];
+    s32 i;
+
+    dds3DrawDistRipOverError();
+    dds3FadeUpdate();
+    dds3DrawFade();
+    dds3BlurUpdate();
+    groupHeads = D_002F69B8;
+    packetGroups = dds3DrawEnv[bufferIndex].modelEnv;
+    for (i = 10; i >= 0; i--) {
+        sdfModelDrawEnvLinkOt(groupHeads->ot, packetGroups);
+        groupHeads++;
+        packetGroups++;
+    }
+    if (dds3ScreenBlurFlag != 0 && dds3NullDrawProc() == 0) {
+        packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(packetList);
+        sdfGrLinkDispFrameTex(packetList, (u32)&dds3DrawEnv[bufferIndex].stdEnv, (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(0x20));
+        texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+        texturePacket[0] = 3;
+        /* VIF FLUSHA, then DIRECT for the three following quadwords. */
+        texturePacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
+        texturePacket[2] = ((u64)0x10000000 << 32) | 0x8002;
+        texturePacket[3] = 0xE;
+        texturePacket[4] = ((u64)0x80 << 32) | 0x80;
+        texturePacket[5] = 0x3B;
+        texturePacket[6] = 0;
+        texturePacket[7] = 0x3F;
+        sdfDrawTagLink(packetList, (u32)texturePacket);
+        blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+        blendPacket[0] = 3;
+        blendPacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
+        blendPacket[2] = ((u64)0x10000000 << 32) | 0x8002;
+        blendPacket[3] = 0xE;
+        blendPacket[4] = 0x31001;
+        blendPacket[5] = 0x47;
+        blendPacket[6] = 0x44;
+        blendPacket[7] = 0x42;
+        sdfDrawTagLink(packetList, (u32)blendPacket);
+        edgeDistances[0] = dds3ScreenBlurOfsX[0] + 0x100;
+        edgeDistances[1] = dds3ScreenBlurOfsX[1] + 0xE0;
+        edgeDistances[2] = 0x100 - dds3ScreenBlurOfsX[0];
+        edgeDistances[3] = 0xE0 - dds3ScreenBlurOfsX[1];
+        /* Signed Q12 scale; X and Y use distinct GS coordinate units below. */
+        for (i = 0; i != 4; i++) {
+            edgeDistances[i] = edgeDistances[i] * dds3ScreenBlurScale >> 12;
+        }
+        spritePacket = sdf2DAllocSprite(1);
+        vertex = (dds3BlurSprite_t *)sdf2DGetPrimPtr(spritePacket);
+        vertex->r = 0x80;
+        vertex->g = 0x80;
+        vertex->b = 0x80;
+        vertex->a = dds3ScreenBlurAlpha;
+        vertex->corner[0].u = 0;
+        vertex->corner[0].v = 0;
+        vertex->corner[0].x = 0x7000 - edgeDistances[0] * 16;
+        vertex->corner[0].y = 0x7900 - edgeDistances[1] * 8;
+        vertex->corner[0].z = 0;
+        vertex->corner[0].adc = 0;
+        vertex->corner[1].u = 0x2000;
+        vertex->corner[1].v = 0xE00;
+        vertex->corner[1].x = 0x9000 + edgeDistances[2] * 16;
+        vertex->corner[1].y = 0x8700 + edgeDistances[3] * 8;
+        vertex->corner[1].z = 0;
+        vertex->corner[1].adc = 0;
+        sdfDrawTagLink(packetList, (u32)spritePacket);
+        D_002F6938.regFunc(&D_002F6938, packetList);
+    }
+    poolHead = sdfGrOtClose(sdfGrOtTable);
+    dds3ClosedDrawTag = poolHead;
+    if (dds3DrawProcessFlag != 0) {
+        sdfGrFlushOtChain((u32 *)poolHead->head);
+        dds3DrawProcessFlag = 0;
+    }
+    if (!(dds3DrawFlag & 0x2000000)) {
+        sdfGrReqDraw(poolHead, &D_002F6A70);
+    } else {
+        dds3DrawFlag &= 0xFDFFFFFF;
+    }
+    D_00551888 = 0;
+    return 0;
+}
 
 s32 dds3BasicMainProcess(dds3ProcessID_t *id) {
     dds3CallBasicMainProc(dds3TheWorld);
