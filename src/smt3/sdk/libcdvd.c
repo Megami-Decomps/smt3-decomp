@@ -178,7 +178,22 @@ s32 sceCdStatus(void)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdPowerOff);
+s32 sceCdPowerOff(s32 *result)
+{
+    s32 ret;
+
+    if (!_sceCd_scmd_prechk(33)) {
+        return 0;
+    }
+    if (sceSifCallRpc(D_0052BA48, 33, 0, 0, 0, D_0052B200, 8, 0, 0) < 0) {
+        SignalSema(D_0052A02C);
+        return 0;
+    }
+    *result = UNCACHED(D_0052B200 + 1)[0];
+    ret = UNCACHED(D_0052B200)[0];
+    SignalSema(D_0052A02C);
+    return ret;
+}
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdReadClock);
 
