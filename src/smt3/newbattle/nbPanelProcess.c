@@ -1029,7 +1029,7 @@ extern _FRQ *gnbPnlWork;
 
 void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessData_t *p)
 {
-    char buf[16];
+    char buf[112];
     s32 pcnum[4][2] = {{1, 1}, {0xD, 1}, {0x19, 1}, {0x24, 1}};
     s32 bad[12][2] = {{0x55, 0x38}, {1, 0x22},    {0x16, 0x22}, {0x2B, 0x22},
                       {0x40, 0x22}, {0x55, 0x22}, {0x6A, 0x22}, {0x7F, 0x22},
@@ -1222,7 +1222,244 @@ INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawPP1);
 
 #endif
 
+/* NON_MATCHING: 671 of 673 words match at the native 2692-byte size. The two
+ * differing words read hp and maxhp out of their spill slots. */
+
+#ifdef NON_MATCHING
+
+extern sdfTexHandle_t *D_00345D88[];
+extern nbPanelProcess_nbPanelXYZ_t D_004EFE90[];
+extern nbPanelProcess_nbPanelXYZ_t D_004F01A0[];
+extern nbPanelProcess_nbPanelTMXuv_t nbPanelParamTable[];
+
+void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
+{
+    char buf[112];
+    nbMainProcessData_t *p;
+    s32 hp;
+    s32 maxhp;
+    s32 mp;
+    s32 maxmp;
+    f32 rate;
+    u32 col;
+
+    p = nbGetMainProcessData();
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    hp = 0;
+    maxhp = 0;
+    if (!(flag & 8)) {
+        if (select == 0) {
+            nbPanelProcess_nbPanelXYZ_t *xyz0 = &D_004EFE90[0];
+            nbPanelProcess_nbPanelTMXuv_t *uv0 = &nbPanelParamTable[3];
+            nbPanelProcess_nbPanelXYZ_t *xyz1;
+            nbPanelProcess_nbPanelTMXuv_t *uv1;
+            sdfTexHandle_t *hTex0 = p->pnltex[0];
+            sdfTexHandle_t *hTex1;
+
+            nbPnlSprite(xyz0->x + x, xyz0->y + y, xyz0->w, xyz0->h, uv0->u0, uv0->v0, uv0->u1,
+                        uv0->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex0);
+            xyz1 = &D_004EFE90[1];
+            uv1 = &nbPanelParamTable[4];
+            hTex1 = p->pnltex[0];
+            nbPnlSprite(xyz1->x + x, xyz1->y + y, xyz1->w, xyz1->h, uv1->u0, uv1->v0, uv1->u1,
+                        uv1->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex1);
+        } else {
+            nbPanelProcess_nbPanelXYZ_t *xyz0 = &D_004EFE90[12];
+            nbPanelProcess_nbPanelTMXuv_t *uv0 = &nbPanelParamTable[3];
+            nbPanelProcess_nbPanelXYZ_t *xyz1;
+            nbPanelProcess_nbPanelTMXuv_t *uv1;
+            nbPanelProcess_nbPanelXYZ_t *xyz2;
+            nbPanelProcess_nbPanelTMXuv_t *uv2;
+            nbPanelProcess_nbPanelXYZ_t *xyz3;
+            nbPanelProcess_nbPanelTMXuv_t *uv3;
+            sdfTexHandle_t *hTex0 = p->pnltex[0];
+            sdfTexHandle_t *hTex1;
+            sdfTexHandle_t *hTex2;
+            sdfTexHandle_t *hTex3;
+
+            nbPnlSprite(xyz0->x + x, xyz0->y + y, xyz0->w, xyz0->h, uv0->u0, uv0->v0, uv0->u1,
+                        uv0->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex0);
+            xyz1 = &D_004EFE90[13];
+            uv1 = &nbPanelParamTable[4];
+            hTex1 = p->pnltex[0];
+            nbPnlSprite(xyz1->x + x, xyz1->y + y, xyz1->w, xyz1->h, uv1->u0, uv1->v0, uv1->u1,
+                        uv1->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex1);
+            col = (s32)(sdfSin((f32)p->battletime * 0.2f) * 48.0f) + 0xB0;
+            xyz2 = &D_004EFE90[15];
+            uv2 = &nbPanelParamTable[17];
+            col = col + ((col << 16) + (col << 8)) + 0x80000000;
+            hTex2 = p->pnltex[3];
+            nbPnlSprite(xyz2->x + x, xyz2->y + y, xyz2->w, xyz2->h, uv2->u0, uv2->v0, uv2->u1,
+                        uv2->v1, effMagaCylinderCalcColor(col, nbPanelBaseABGR), hTex2);
+            xyz3 = &D_004EFE90[16];
+            uv3 = &nbPanelParamTable[18];
+            hTex3 = p->pnltex[3];
+            nbPnlSprite(xyz3->x + x, xyz3->y + y, xyz3->w, xyz3->h, uv3->u0, uv3->v0, uv3->u1,
+                        uv3->v1, effMagaCylinderCalcColor(col, nbPanelBaseABGR), hTex3);
+        }
+    }
+    if (select != 0) {
+        x -= 0x10;
+    }
+    if (!(flag & 0x10)) {
+        nbPanelProcess_nbPanelXYZ_t *xyz = &D_004EFE90[14];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelParamTable[16];
+        sdfTexHandle_t *hTex = p->pnltex[0];
+
+        nbPnlSprite(xyz->x + x, xyz->y + y, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1, uv->v1,
+                    effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex);
+    }
+    if (!(flag & 2)) {
+        nbPanelProcess_nbPanelXYZ_t *xyz0 = &D_004EFE90[6];
+        nbPanelProcess_nbPanelTMXuv_t *uv0 = &nbPanelParamTable[5];
+        nbPanelProcess_nbPanelXYZ_t *xyz1 = &D_004EFE90[5];
+        nbPanelProcess_nbPanelTMXuv_t *uv1 = &nbPanelParamTable[2];
+        sdfTexHandle_t *hTex0 = p->pnltex[2];
+        sdfTexHandle_t *hTex1;
+        fldAnahoriAkuma_t *ak;
+        s32 ofs;
+        u32 col;
+
+        nbPnlSprite(xyz0->x + x, xyz0->y + y, xyz0->w, xyz0->h, uv0->u0, uv0->v0, uv0->u1,
+                    uv0->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex0);
+        hTex1 = p->pnltex[0];
+        nbPnlSprite(xyz1->x + x, xyz1->y + y, xyz1->w, xyz1->h, uv1->u0, uv1->v0, uv1->u1,
+                    uv1->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex1);
+        ofs = statindex * sizeof(fldAnahoriAkuma_t) + 0xA50;
+        ak = (fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + ofs);
+        hp = ak->hp;
+        maxhp = *(u16 *)&ak->unk0C[0];
+        if (hp != 0 && maxhp != 0) {
+            nbPanelProcess_nbPanelXYZ_t *xyz2 = &D_004EFE90[4];
+            nbPanelProcess_nbPanelTMXuv_t *uv2 = &nbPanelParamTable[0];
+            sdfTexHandle_t *hTex2;
+
+            rate = (f32)hp;
+            rate = rate / (f32)maxhp;
+            hTex2 = p->pnltex[0];
+            nbPnlSprite(xyz2->x + x, xyz2->y + y, xyz2->w * rate, xyz2->h, uv2->u0, uv2->v0,
+                        uv2->u1 * rate, uv2->v1,
+                        effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex2);
+        }
+        sprintf(buf, D_00551188, hp);
+        col = nbPanelHPColor((datUnitWork_t *)&DDS3_GBWK->akuma[statindex].flag);
+        nbPanelSmallStringDraw(x, y, &D_004EFE90[3], col, (char **)buf);
+    }
+    if (!(flag & 4)) {
+        nbPanelProcess_nbPanelXYZ_t *xyz0 = &D_004EFE90[10];
+        nbPanelProcess_nbPanelTMXuv_t *uv0 = &nbPanelParamTable[6];
+        nbPanelProcess_nbPanelXYZ_t *xyz1 = &D_004EFE90[9];
+        nbPanelProcess_nbPanelTMXuv_t *uv1 = &nbPanelParamTable[2];
+        sdfTexHandle_t *hTex0 = p->pnltex[2];
+        sdfTexHandle_t *hTex1;
+        fldAnahoriAkuma_t *ak;
+        s32 ofs;
+        u32 col;
+
+        nbPnlSprite(xyz0->x + x, xyz0->y + y, xyz0->w, xyz0->h, uv0->u0, uv0->v0, uv0->u1,
+                    uv0->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex0);
+        hTex1 = p->pnltex[0];
+        nbPnlSprite(xyz1->x + x, xyz1->y + y, xyz1->w, xyz1->h, uv1->u0, uv1->v0, uv1->u1,
+                    uv1->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex1);
+        ofs = statindex * sizeof(fldAnahoriAkuma_t) + 0xA50;
+        ak = (fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + ofs);
+        mp = *(u16 *)&ak->unk0C[2];
+        maxmp = *(u16 *)&ak->unk0C[4];
+        if (mp != 0 && maxmp != 0) {
+            rate = (f32)mp / (f32)maxmp;
+            if (hp == 0 || maxhp == 0) {
+                nbPanelProcess_nbPanelXYZ_t *xyz2 = &D_004EFE90[8];
+                nbPanelProcess_nbPanelTMXuv_t *uv2 = &nbPanelParamTable[56];
+                sdfTexHandle_t *hTex2 = D_00345D88[0];
+
+                nbPnlSprite(xyz2->x + x, xyz2->y + y, xyz2->w * rate, xyz2->h, uv2->u0, uv2->v0,
+                            uv2->u1 * rate, uv2->v1,
+                            effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex2);
+            } else {
+                nbPanelProcess_nbPanelXYZ_t *xyz2 = &D_004EFE90[8];
+                nbPanelProcess_nbPanelTMXuv_t *uv2 = &nbPanelParamTable[1];
+                sdfTexHandle_t *hTex2 = p->pnltex[0];
+
+                nbPnlSprite(xyz2->x + x, xyz2->y + y, xyz2->w * rate, xyz2->h, uv2->u0, uv2->v0,
+                            uv2->u1 * rate, uv2->v1,
+                            effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex2);
+            }
+        }
+        sprintf(buf, D_00551188, mp);
+        col = nbPanelMPColor((datUnitWork_t *)&DDS3_GBWK->akuma[statindex].flag);
+        nbPanelSmallStringDraw(x, y, &D_004EFE90[7], col, (char **)buf);
+    }
+    if (flag & 0x200000) {
+        nbPanelProcess_nbPanelXYZ_t *xyz;
+        nbPanelProcess_nbPanelTMXuv_t *uv;
+        sdfTexHandle_t *hTex;
+        u32 c;
+
+        col = (s32)(sdfSin((f32)p->battletime * 0.2f) * 96.0f) + 0xA0;
+        xyz = &D_004F01A0[0];
+        uv = &nbPanelParamTable[14];
+        c = col + ((col << 16) + (col << 8)) + 0x80000000;
+        hTex = p->pnltex[0];
+        nbPnlSprite(xyz->x + x, xyz->y + y, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1, uv->v1,
+                    effMagaCylinderCalcColor(c, nbPanelBaseABGR), hTex);
+    }
+    if (!(flag & 1)) {
+        if (flag & 0x100000) {
+            nbPanelSmallNameStringDraw(x, y, &D_004EFE90[2], 0x89FEFF80, statindex);
+        } else if (flag & 0x200000) {
+            nbPanelSmallNameStringDraw(x, y, &D_004EFE90[2], 0x89FEFF80, statindex);
+        } else {
+            nbPanelSmallNameStringDraw(x, y, &D_004EFE90[2], 0xA09DC380, statindex);
+        }
+    }
+    if (!(flag & 0x20)) {
+        s32 bs = DDS3_GBWK->akuma[statindex].badstatus;
+        s32 idx;
+
+        if (bs & 0x800) {
+            idx = 0xD;
+        } else if (bs & 0x400) {
+            idx = 0x13;
+        } else if (bs & 0x200) {
+            idx = 0x14;
+        } else if (bs & 0x100) {
+            idx = 0x15;
+        } else if (bs & 0x80) {
+            idx = 0x16;
+        } else if (bs & 0x40) {
+            idx = 0x17;
+        } else if (bs & 0x10) {
+            idx = 0x19;
+        } else if (bs & 4) {
+            idx = 0x1B;
+        } else if (bs & 2) {
+            idx = 0x1C;
+        } else if (bs & 1) {
+            idx = 0x1D;
+        } else if (bs & 0x20) {
+            idx = 0x18;
+        } else if (bs & 8) {
+            idx = 0x1A;
+        } else {
+            idx = -1;
+        }
+        if (idx != -1) {
+            nbPanelProcess_nbPanelXYZ_t *xyz = &D_004EFE90[17];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelParamTable[idx];
+            sdfTexHandle_t *hTex = p->pnltex[0];
+
+            nbPnlSprite(xyz->x + x, xyz->y + y, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1, uv->v1,
+                        effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex);
+        }
+    }
+}
+
+#else
+
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawPP);
+
+#endif
 
 void nbPanelPressGaugeInit(void)
 {
@@ -1474,6 +1711,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     s32 n;
     u32 blink;
     f32 rate;
+    u32 col;
 
     if (pad != 0 && nbPanelStockPad != 0) {
         ret = nbPanelStockSelectCtrl();

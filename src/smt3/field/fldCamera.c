@@ -957,8 +957,6 @@ void fldClearElvCameraScene(void)
     fldElvCameraScene = 0;
 }
 
-INCLUDE_RODATA(const s32, "field/fldCamera", D_00531BF0);
-
 extern void fldPlayerAlpOn(void);
 extern void fldPlayerSvsOn(void);
 extern void fldPlayerAlpOff(void);
@@ -976,6 +974,8 @@ extern f32 D_0054EC98;
 extern f32 D_0054EC9C;
 
 /* Six-mode camera dispatcher; native returns NULL on every path. */
+INCLUDE_RODATA(const s32, "field/fldCamera", D_00531BF0);
+
 void *fldCamMain(void) {
     fldFollowCameraControl_t *control;
     fldUnitControl_t *unit;

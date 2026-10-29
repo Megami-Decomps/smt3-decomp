@@ -476,15 +476,9 @@ s32 printf(const char *fmt, ...) {
     return vfprintf(r->_stdout, fmt, ap);
 }
 
-INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B658);
-
 extern u32 strlen(const char *s);
 /* The newline owns a padded 16-byte read-only block in retail. */
 extern const char D_0054B660[];
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B660);
-
 s32 _puts_r(_reent *r, const char *s)
 {
     __suio request;
@@ -758,6 +752,12 @@ s32 __sbprintf(FILE *fp, const char *fmt, va_list ap)
     return ret;
 }
 
+INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B658);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B660);
+
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B670);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B680);
@@ -986,22 +986,6 @@ s32 _fwalk(_reent *r, s32 (*func)(void *)) {
     }
     return ret;
 }
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8A0);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8A8);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8B0);
-
-INCLUDE_RODATA(const s32, "sdk/libc", jtbl_0054B8C0);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8D8);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B908);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B910);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B918);
 
 extern char D_0054B908[];
 extern char D_0054B918[];
@@ -1639,6 +1623,22 @@ long _read_r(_reent *r, s32 fd, char *buf, s32 n) {
     }
     return result;
 }
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8A0);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8A8);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8B0);
+
+INCLUDE_RODATA(const s32, "sdk/libc", jtbl_0054B8C0);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8D8);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B908);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B910);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B918);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B91C);
 

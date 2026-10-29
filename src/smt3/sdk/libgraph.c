@@ -301,8 +301,6 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A6E0);
-
 /* Reference implementation; see docs/nonmatching/sdk/libgraph.md. */
 #ifdef NON_MATCHING
 extern const char D_0054A720[];
@@ -561,6 +559,8 @@ transfer_error:
     return -1;
 }
 #else
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A6E0);
+
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsExecStoreImage);
 #endif
 
