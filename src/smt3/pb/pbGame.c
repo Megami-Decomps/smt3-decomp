@@ -299,7 +299,7 @@ extern void pbFreeGroupHandles(pbBlockDB_t *db);
 
 extern void pbFreeGroupEntry(pbGroupData_t *entry);
 
-extern void fclClearFlag(s32 flag);
+extern void fclClearFlag(s8 flag);
 
 extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 

@@ -100,3 +100,14 @@ fixes the loop registers but changes the final label register; it remains five
 words short of exact. Explicit postincrement in the final draw call, a do-loop,
 and carrying map-validation status in the index do not close the gap. The
 preferred draft keeps the separate index, cursor and script-label values.
+
+A current parity-qualified allocation observation also identifies the fixed
+character-array base as pseudo 129 (three references, 64 live instructions,
+three crossed calls), assigned GPR19. It is distinct from the advancing cursor
+pseudo 87/GPR17 and ordinal pseudo 86/GPR18; changing the source to name that
+fixed array base explicitly preserves the same 152 matching words. Reusing a
+signed index for the ordinal and script label gives 158/164 matching words:
+the loop bound becomes signed and the final label still occupies the wrong
+register. These controls do not close the residual. The facility flag-clear
+declaration now agrees with its actual signed-byte provider; both callers
+here pass literal zero, so their emitted instructions stay unchanged.
