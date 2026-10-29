@@ -20,6 +20,9 @@ typedef struct evtViewerKey_t {
             u16 typeIndex;          /* 0x0A */
         } f;
         s32 words[2];
+        s16 shorts[4];
+        s8 bytes[8];
+        f32 values[2];
     } body;                         /* 0x08 */
     u8 unk10[4];
     void *payload;                  /* 0x14 */
@@ -159,9 +162,12 @@ extern dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *nam
 
 extern evtViewerKey_t *evtGetSelectFrameInfo(void);
 
-extern s16 evtFrameList[];
-
-extern s8 D_0032C9E2[];
+/* A signed column count followed by eight signed column kinds, ten bytes per track. */
+typedef struct evtFrameColumns_t {
+    s16 count;
+    s8 columns[8];
+} evtFrameColumns_t;
+extern evtFrameColumns_t evtFrameList[];
 
 extern char *frameheadstr[];
 
@@ -866,11 +872,11 @@ s32 evtFrameListHead(void *tag, s32 ox, s32 oy)
     s32 type = viewerinfo->framelist_target->type;
     s32 i;
 
-    for (i = 0; i < evtFrameList[type * 5]; i++) {
-        s32 w = framelist_xcnt[D_0032C9E2[i + type * 10]] * 0xC0;
+    for (i = 0; i < evtFrameList[type].count; i++) {
+        s32 w = framelist_xcnt[evtFrameList[type].columns[i]] * 0xC0;
 
         sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0xE, D_0054F9B8,
-                                               frameheadstr[D_0032C9E2[i + type * 10]]));
+                                               frameheadstr[evtFrameList[type].columns[i]]));
         ox += w;
     }
     return 1;
@@ -895,7 +901,154 @@ INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C290);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C2A0);
 
-INCLUDE_ASM(const s32, "event/evtEventViewerMenu", evtFrameListItemSub);
+extern char D_0054FA40[], D_0054FA48[], D_0054FA50[], D_0054FA58[];
+extern char D_0054FA60[], D_0054FA68[], D_0054FA70[], D_0054FA78[];
+extern char D_0054FA80[], D_0054FA88[];
+extern char *evtItemFadeNames[];
+extern char *D_0032CB30[];
+extern void *memcpy(void *, const void *, u32);
+
+void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtViewerKey_t *f)
+{
+    char name[32];
+    s32 type = viewerinfo->framelist_target->type;
+    s32 column;
+    s32 color;
+    /* Unknown track/kind combinations retain the preceding column value. */
+    s32 value = 0;
+
+    for (column = 0; column < evtFrameList[type].count; column++) {
+        color = viewerinfo->framelist_x == column ? co : 0;
+        switch (evtFrameList[type].columns[column]) {
+        case 0:
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA40, f->frame));
+            break;
+        case 9:
+            switch (type) {
+            case 18: value = f->body.shorts[0]; break;
+            case 3: value = f->body.shorts[1]; break;
+            case 20: case 21: value = f->body.shorts[1]; break;
+            }
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA40, value));
+            break;
+        case 15:
+            switch (type) {
+            case 3: case 20: case 21: value = f->index; break;
+            }
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA40, value));
+            break;
+        case 1:
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA40, f->index));
+            break;
+        case 13:
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA48));
+            break;
+        case 14:
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, "%.1f %.2f", (f64)f->body.values[0], (f64)f->body.values[1]));
+            break;
+        case 2:
+            if (type == 7) value = f->body.shorts[0];
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA40, value));
+            break;
+        case 3:
+            switch (type) {
+            case 8: value = f->body.shorts[0]; break;
+            case 12: value = f->body.shorts[1]; break;
+            }
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA40, value));
+            break;
+        case 4:
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA40, f->body.shorts[1]));
+            break;
+        case 5:
+            switch (type) {
+            case 8: value = f->body.shorts[2]; break;
+            case 10: value = f->nameIndex; break;
+            case 11: case 13: case 14: case 15: case 16: case 17: case 23: value = f->body.shorts[0]; break;
+            }
+            if (value != 0) {
+                sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA50));
+            } else {
+                sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA58));
+            }
+            break;
+        case 12:
+            switch (type) {
+            case 12:
+                switch (f->body.shorts[0]) {
+                case 0: sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA60)); break;
+                case 1: sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA68)); break;
+                case 2: sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA70)); break;
+                }
+                break;
+            case 6:
+                sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054F9B8, evtItemFadeNames[f->body.shorts[0]]));
+                break;
+            case 19:
+                sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054F9B8, evtItemFadeNames[4 + f->body.shorts[0]]));
+                break;
+            case 1:
+                sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054F9B8, D_0032CB30[f->body.bytes[0]]));
+                break;
+            }
+            break;
+        case 11:
+            switch (type) {
+            case 22: value = f->body.shorts[0]; break;
+            case 9: value = f->body.shorts[1]; break;
+            }
+            if (value != 0) {
+                sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA50));
+            } else {
+                sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA58));
+            }
+            break;
+        case 16:
+            switch (type) {
+            case 20: case 21: value = f->body.bytes[1]; break;
+            case 3: value = f->body.bytes[4]; break;
+            }
+            if (value != 0) {
+                sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA50));
+            } else {
+                sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA58));
+            }
+            break;
+        case 6:
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA78, (f64)(f->body.values[0] * 57.2957763671875f)));
+            break;
+        case 8:
+            switch (type) {
+            case 5: value = f->body.shorts[0]; break;
+            case 19: value = f->body.shorts[1]; break;
+            case 3: value = f->body.bytes[5]; break;
+            case 12: value = f->body.words[1]; break;
+            case 18: value = f->body.bytes[4]; break;
+            }
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA80, value));
+            break;
+        case 7:
+            if (type == 5) value = f->body.shorts[1];
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA40, value));
+            break;
+        case 10:
+            switch (type) {
+            case 3: value = f->body.shorts[3]; break;
+            case 18: value = f->body.shorts[1]; break;
+            case 9: value = f->body.shorts[0]; break;
+            }
+            if (value < 0) {
+                sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, "-----------"));
+            } else {
+                memcpy(name, viewerinfo->nametable[value], sizeof(name));
+                sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA88, name));
+            }
+            break;
+        }
+        ox += framelist_xcnt[evtFrameList[type].columns[column]] * 0xC0;
+    }
+}
+
 
 s32 evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no)
 {
@@ -938,7 +1091,7 @@ s32 evtFrameListMenu(s32 x, s32 y)
         return 0;
     }
     group = viewerinfo->framelist_target;
-    if (evtFrameList[group->type * 5] == 0) {
+    if (evtFrameList[group->type].count == 0) {
         return -1;
     }
     list = dds3FontReqAllocDrawTag();
@@ -953,8 +1106,8 @@ s32 evtFrameListMenu(s32 x, s32 y)
     } else {
         visible = 0x18;
     }
-    ret = dds3SelectMenu(0, evtFrameList[group->type * 5], group->childCount + 1,
-                         evtFrameList[group->type * 5], visible, NULL,
+    ret = dds3SelectMenu(0, evtFrameList[group->type].count, group->childCount + 1,
+                         evtFrameList[group->type].count, visible, NULL,
                          &viewerinfo->frameCursor, &viewerinfo->framelist_x,
                          &viewerinfo->frameFirst);
     if (dds3PadButtonState[0x20] < 0) {
