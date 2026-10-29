@@ -52,7 +52,56 @@ void frInitNameData(void)
     } while (i <= 0);
 }
 
+extern void *sdfChipAllocDirect(s32 size);
+extern GsFont_t *pFont[4][16];
+extern GsFont_t *frTranslateUserData(s32 width, s32 height, void *data, s8 dataFreeMode);
+
+/* NON_MATCHING: 74 of 122 native words differ; emits 496 of 488 bytes. */
+#ifdef NON_MATCHING
+void frSetNameData(s8 target, s8 type, s8 glyphCount, u8 *imageData)
+{
+    s32 firstSlot;
+    s32 oldCount;
+    s32 slot;
+    s32 count;
+    u8 *source;
+
+    if (type == 0) {
+        firstSlot = 0;
+        oldCount = (s8)frNameGlobalWork->nameCounts[(s32)target][0];
+    } else {
+        firstSlot = (s8)frNameGlobalWork->nameCounts[(s32)target][0];
+        oldCount = (s8)frNameGlobalWork->nameCounts[(s32)target][1];
+    }
+
+    for (slot = firstSlot; slot < firstSlot + oldCount; slot++) {
+        pFont[(s32)target][slot] = NULL;
+    }
+
+    if (glyphCount > 0) {
+        slot = firstSlot;
+        count = glyphCount;
+        source = imageData;
+        do {
+            u8 *copy = sdfChipAllocDirect(0x120);
+            GsFont_t *font;
+
+            memcpy(copy, source, 0x120);
+            font = frTranslateUserData(24, 24, copy, 1);
+            pFont[(s32)target][slot] = font;
+            font->font_no = (u16)target;
+
+            source += 0x120;
+            slot++;
+        } while (--count != 0);
+    }
+
+    printf("NAME[%d] : Translate. \n", (s32)target);
+}
+
+#else
 INCLUDE_ASM(const s32, "interface/frName", frSetNameData);
+#endif
 
 void frTransNameImage(s8 target, s8 type)
 {

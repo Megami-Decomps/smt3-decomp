@@ -51,3 +51,32 @@ copy at the loop bound and is four bytes over. Changing the increment to the
 condition and initializing the loop counter first does not remove that copy.
 The next useful question is the native loop-header/address lifetime, not the
 already audited pair conversion or font API.
+
+## frSetNameData
+
+The guarded reconstruction emits 496 bytes against 488 native bytes, with
+48 of 122 native instruction words matching. Normal builds retain assembly;
+this adds no exact matching credit. The first 100 bytes match. Remaining
+differences include the cleared-slot counter register and the bitmap-copy
+source induction. The compiler advances the source pointer while establishing
+the inline copy endpoint, with an extra move in each alignment arm; native
+forms a temporary endpoint and advances the saved source after translation.
+
+The parameters are signed bytes. Type zero clears old slots starting at zero;
+other types start at the signed first-name count and clear the signed second
+count. Clearing stores null pointers without releasing fonts. A positive
+input glyph count allocates and copies exactly `0x120` bytes per glyph, calls
+`frTranslateUserData(24, 24, copy, 1)`, stores the returned font in its target
+slot, and writes the target to `GsFont_t.font_no`. The copy is nine 32-byte
+chunks. Logging occurs even when the input count is nonpositive.
+
+The allocator declaration is its real pointer-returning contract from
+`sdf/sdfChip.c`. An initial draft without that declaration happened to emit
+488 bytes; its implicit integer return is not a permissible matching lever.
+Direct global-work reads in the two selection arms recover the native prefix.
+A pre-tested versus post-tested positive countdown and using the memcpy result
+for the allocated image are compiler-inert. Sharing the two loop counters
+changes three register words but retains the eight-byte excess; the preferred
+source keeps distinct counters. Advancing the incoming parameter directly
+rather than a local cursor worsens allocation and retains the excess. A real
+copy-induction/lifetime premise is needed before further trials.

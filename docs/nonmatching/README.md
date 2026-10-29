@@ -30,6 +30,7 @@ page and line to open. Conventions are in
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
+| 3 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
@@ -43,7 +44,6 @@ page and line to open. Conventions are in
 | 2 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 2 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
-| 2 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 2 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |

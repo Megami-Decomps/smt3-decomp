@@ -128,6 +128,7 @@ frAnalyzeTag	interface/frFont	0x518		docs/nonmatching/interface/frFont.md	49
 frAnalyzeMessage	interface/frFont	0x200		docs/nonmatching/interface/frFont.md	101
 frRestoreNameImage	interface/frName	0xD8	42 of 54 words match	docs/nonmatching/interface/frName.md	5
 frGetCNameFRQ	interface/frName	0x158	82 of 86 words match	docs/nonmatching/interface/frName.md	28
+frSetNameData				docs/nonmatching/interface/frName.md	55
 DrawSelectCursor	interface/itfMesManager	0x2FC		docs/nonmatching/interface/itfMesManager.md	5
 itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/nonmatching/interface/itfMesManager.md	40
 lstDrawListWindow	interface/lstListWindow	0x84	26 of 33 words match	docs/nonmatching/interface/lstListWindow.md	5
