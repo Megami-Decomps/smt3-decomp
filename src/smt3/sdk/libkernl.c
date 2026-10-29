@@ -588,6 +588,8 @@ typedef struct rpcQueue {
     sifRpcDataQueue_t *queues;
 } rpcQueue;
 
+extern rpcQueue D_0059D440;
+
 extern s32 DIntr(void);
 extern s32 EIntr(void);
 
@@ -664,7 +666,79 @@ void _request_rdata(rpcPacket *request, rpcQueue *queue)
                    (void *)request->w[9], request->w[10]);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifGetOtherData);
+/* Shared transaction fields used by read-data completion. */
+typedef struct rpcTransactionPrefix {
+    void *packet;
+    u32 sequence;
+    s32 sema;
+} rpcTransactionPrefix;
+
+typedef struct rpcClient {
+    void *packet;
+    u32 sequence;
+    s32 sema;
+    u32 unk_C;
+    u32 serverId;
+    void *buffer;
+    void *cbuffer;
+    void (*endFunction)(void *);
+    void *endParam;
+    void *server;
+} rpcClient;
+
+typedef struct rpcSemaParam {
+    s32 count;
+    s32 maxCount;
+    s32 initCount;
+    s32 waitThreads;
+    u32 attr;
+    u32 option;
+} rpcSemaParam;
+
+extern s32 CreateSema(rpcSemaParam *param);
+extern s32 WaitSema(s32 sema);
+extern s32 DeleteSema(s32 sema);
+
+s32 sceSifGetOtherData(rpcTransactionPrefix *client, void *source, void *destination, s32 size, s32 mode)
+{
+    rpcSemaParam param;
+    rpcPacket *packet;
+
+    packet = _sceRpcGetPacket_0(&D_0059D440);
+    if (packet == NULL) {
+        return -1;
+    }
+    client->packet = packet;
+    client->sequence = packet->w[6];
+    packet->w[8] = (u32)source;
+    packet->w[9] = (u32)destination;
+    packet->w[10] = size;
+    packet->w[5] = (u32)packet;
+    packet->w[7] = (u32)client;
+    if ((mode & 1) == 0) {
+        param.maxCount = 1;
+        param.initCount = 0;
+        client->sema = CreateSema(&param);
+        if (client->sema < 0) {
+            _sceRpcFreePacket_0(packet);
+            return -3;
+        }
+        if (sceSifSendCmd(0x8000000C, packet, 0x40, NULL, NULL, 0) == 0) {
+            _sceRpcFreePacket_0(packet);
+            DeleteSema(client->sema);
+            return -2;
+        }
+        WaitSema(client->sema);
+        DeleteSema(client->sema);
+        return 0;
+    }
+    client->sema = -1;
+    if (sceSifSendCmd(0x8000000C, packet, 0x40, NULL, NULL, 0) == 0) {
+        _sceRpcFreePacket_0(packet);
+        return -2;
+    }
+    return 0;
+}
 
 sifRpcServerData_t *_search_svdata(s32 serviceId, rpcQueue *queue)
 {
@@ -683,7 +757,46 @@ sifRpcServerData_t *_search_svdata(s32 serviceId, rpcQueue *queue)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _request_bind);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifBindRpc);
+s32 sceSifBindRpc(rpcClient *client, u32 serverId, s32 mode)
+{
+    rpcSemaParam param;
+    rpcPacket *packet;
+
+    client->serverId = 0;
+    client->server = NULL;
+    packet = _sceRpcGetPacket_0(&D_0059D440);
+    if (packet == NULL) {
+        return -1;
+    }
+    client->packet = packet;
+    client->sequence = packet->w[6];
+    packet->w[8] = serverId;
+    packet->w[5] = (u32)packet;
+    packet->w[7] = (u32)client;
+    if ((mode & 1) == 0) {
+        param.maxCount = 1;
+        param.initCount = 0;
+        client->sema = CreateSema(&param);
+        if (client->sema < 0) {
+            _sceRpcFreePacket_0(packet);
+            return -3;
+        }
+        if (sceSifSendCmd(0x80000009, packet, 0x40, NULL, NULL, 0) == 0) {
+            _sceRpcFreePacket_0(packet);
+            DeleteSema(client->sema);
+            return -2;
+        }
+        WaitSema(client->sema);
+        DeleteSema(client->sema);
+        return 0;
+    }
+    client->sema = -1;
+    if (sceSifSendCmd(0x80000009, packet, 0x40, NULL, NULL, 0) == 0) {
+        _sceRpcFreePacket_0(packet);
+        return -2;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _request_call);
 
@@ -714,7 +827,6 @@ s32 sceSifCheckStatRpc(rpcClientPrefix *client)
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifCheckStatRpc);
 #endif
 
-extern rpcQueue D_0059D440;
 
 /* NON_MATCHING: 140 of 148 native bytes; linked-list cursor copies coalesce. */
 #ifdef NON_MATCHING

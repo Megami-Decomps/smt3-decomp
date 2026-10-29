@@ -386,3 +386,21 @@ command dispatcher discards the callback result; this handler returns void.
 each queue's registered-server list, returning the first service-ID match or
 null. Registration links are distinct from pending-request links. The complete
 kernel owner checks 32 match / 0 differ at this qualification.
+
+## Matched synchronous and asynchronous RPC transactions
+
+`sceSifBindRpc` (320 bytes) and `sceSifGetOtherData` (344 bytes) match exactly.
+Both allocate a request packet, capture its sequence in the transaction record,
+and select synchronous or asynchronous completion using only mode bit zero.
+Synchronous calls create a semaphore, send, wait and delete it; asynchronous
+calls store semaphore ID `-1` and send without waiting. Packet exhaustion returns
+`-1`, semaphore creation failure returns `-3`, and send failure returns `-2`.
+The native packet release and semaphore deletion order is preserved on failures.
+
+Unlike the multi-threaded bind variant, these routines initialize only the
+semaphore's maximum count and initial count. They leave the other four words
+untouched. Bind clears only the client service-ID and server-pointer fields
+before allocation; neither routine adds client-field cleanup after failures or
+after deleting a semaphore. Read-data uses just the packet/sequence/semaphore
+transaction prefix. The complete kernel owner checks 34 match / 0 differ at
+this qualification.
