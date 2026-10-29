@@ -6,6 +6,7 @@
 #include "scr.h"
 #include "event.h"
 #include "field.h"
+#include "fldNpc_tag.h"
 #include "ps2asm.h"
 #include "billboard.h"
 #include "effect.h"
@@ -31,31 +32,6 @@ typedef struct
     s32 tableIndex;            /* 0x28 */
     u8 pad2C[4];
 } fldTakaraSlot_t;
-
-typedef struct
-{
-    s32 type;                  /* 0x00 */
-    f32 x;                     /* 0x04 */
-    f32 y;
-    f32 z;
-    sdfVector4_t rot;          /* 0x10 */
-    dds3Basic_t *object;       /* 0x20 */
-    f32 csize;                 /* 0x24 */
-    u8 unk28[8];
-    void *effect;              /* 0x30 */
-    f32 cntf;                  /* 0x34 */
-    s32 cnti;                  /* 0x38 */
-    f32 cntAnmf;               /* 0x3C */
-    s32 cntAnmi;               /* 0x40 */
-    s32 unk44;
-    s32 room;                  /* 0x48 */
-    s32 itemBoxIdx;            /* 0x4C */
-    s32 kind;                  /* 0x50 */
-    s32 camera;                /* 0x54 */
-    s32 modelMajor;            /* 0x58 */
-    s32 modelIndex;            /* 0x5C */
-    char name[0x10];
-} fldNpcSlot_t;
 
 typedef struct
 {

@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "scr.h"
 #include "field.h"
+#include "fldNpc_tag.h"
 #include "ps2asm.h"
 
 typedef struct
@@ -23,26 +24,6 @@ typedef struct
     void *effect;              /* 0x24 */
     u8 unk28[8];
 } fldTakaraSlot_t;
-
-typedef struct
-{
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
-    s32 unk0C;
-    u8 unk10[0x10];
-    dds3Basic_t *object;       /* 0x20 */
-    u8 unk24[0xC];
-    void *effect;              /* 0x30 */
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    s32 room;                  /* 0x48 */
-    s32 unk4C;
-    u8 unk50[0x20];
-} fldNpcSlot_t;
 
 enum sl_slot_flag
 {
@@ -1937,18 +1918,18 @@ void fldClearModelSlots(void) {
     for (i = 0; i < 32; i++) {
         void *effect = fldModelSlotTable[i].effect;
 
-        fldModelSlotTable[i].unk00 = 0;
-        fldModelSlotTable[i].unk04 = 0;
-        fldModelSlotTable[i].unk08 = 0;
-        fldModelSlotTable[i].unk0C = 0;
+        fldModelSlotTable[i].type = 0;
+        fldModelSlotTable[i].x = 0;
+        fldModelSlotTable[i].y = 0;
+        fldModelSlotTable[i].z = 0;
         fldModelSlotTable[i].object = NULL;
-        fldModelSlotTable[i].unk34 = 0;
-        fldModelSlotTable[i].unk38 = 0;
-        fldModelSlotTable[i].unk3C = 0;
-        fldModelSlotTable[i].unk40 = 0;
+        fldModelSlotTable[i].cntf = 0;
+        fldModelSlotTable[i].cnti = 0;
+        fldModelSlotTable[i].cntAnmf = 0;
+        fldModelSlotTable[i].cntAnmi = 0;
         fldModelSlotTable[i].unk44 = 0;
         fldModelSlotTable[i].room = 0;
-        fldModelSlotTable[i].unk4C = 0;
+        fldModelSlotTable[i].itemBoxIdx = 0;
         if (effect != NULL) {
             dds3EffectDelete(effect);
         }
