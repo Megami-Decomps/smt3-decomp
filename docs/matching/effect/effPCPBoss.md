@@ -347,3 +347,7 @@ and function contracts agree for both baseline and candidate, covering
 Final local gates pass the retail checksum, 26 tooling test files / 427 cases,
 all 147 guarded owners / 532 drafts with stable source/compiler inputs,
 seven IRX owners, and reconciled production reports.
+
+Source commit `21fd7386d3f34b42d9269dd681bb8a467cf67f2a` passed exact-source
+hosted CI [41114522908](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41114522908),
+attempt 1, including build and Pages deployment.
