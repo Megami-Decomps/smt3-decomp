@@ -14,7 +14,7 @@ both native and emitted sizes when they differ.
 | 37 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
-| 11 |  | [sdk/libkernl.md](sdk/libkernl.md) |
+| 12 |  | [sdk/libkernl.md](sdk/libkernl.md) |
 | 11 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 10 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 10 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |

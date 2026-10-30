@@ -242,3 +242,26 @@ The preferred 948-byte source is retained until a genuine SDK 2.9 allocation
 or loop-control premise explains this tail. No qualified allocator hook is
 available for this compiler; no register pins, volatile scratch or padding
 were introduced.
+
+## sceDclose
+
+Matched all 360 native instruction bytes. The typed filesystem request uses
+command 10 and a 20-byte send; its slot word is deliberately left untouched.
+Submission failure preserves the active descriptor, deletes the completion
+semaphore and unlocks. Successful submission clears the descriptor, captures
+the uncached acceptance before unlocking, and either rejects zero acceptance
+or waits, deletes the semaphore and reads its signed 32-bit completion.
+Only native maximum-count, initial-count and option semaphore fields are set.
+
+The ordinary reconstruction emitted 356/360 bytes: its final nonnegative
+clamp folded to `slti`/`movz`, shifting four exit branches and the epilogue.
+The native tail instead materializes signed -1 and consumes it in a register
+comparison followed by `movn`. A narrow nonvolatile empty `+r` constraint on
+that real local threshold, immediately before `threshold < status`, preserves
+the genuine value and consumer. It binds no register, crosses no calls, and
+adds no instruction, memory effect, artificial use or changed result width.
+The complete owner advances from 143 to 144 exact functions; plain/dump
+normalized assembly and allocated-section/relocation parity pass.
+
+This is a target-specific reconstruction aid, not evidence of the original
+source spelling.

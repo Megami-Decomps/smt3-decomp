@@ -353,6 +353,7 @@ supplement_crt0	sdk/libkernl	0x48	4 of 18 words differ	docs/matching/sdk/libkern
 sceSifInitRpc			95 of 103 words matching	docs/matching/sdk/libkernl.md	158
 sceOpen				docs/matching/sdk/libkernl.md	189
 _sceFs_Rcv_Intr				docs/matching/sdk/libkernl.md	217
+sceDclose				docs/matching/sdk/libkernl.md	246
 __ieee754_sqrtf				docs/matching/sdk/libm.md	3
 sceMcWrite			88 of 95 words match	docs/matching/sdk/libmc.md	30
 sceMcSync				docs/matching/sdk/libmc.md	61
