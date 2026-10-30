@@ -240,6 +240,7 @@ nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanel
 nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	127
 nbPanelDrawProcess (0x108)				docs/matching/newbattle/nbPanelProcess.md	153
 nbPanelAuto (0x3A0)				docs/matching/newbattle/nbPanelProcess.md	165
+nbCheckBattleSkillError3	newbattle/nbSkillError	0x184	97 of 97 words match	docs/matching/newbattle/nbSkillError.md	3
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/matching/newbattle/nbStageProcess.md	3
 CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/matching/newbattle/nbStageProcess.md	18
 CheckAction_STKSEL	newbattle/nbStageProcess	0xE8	9 of 58 words differ	docs/matching/newbattle/nbStageProcess.md	37

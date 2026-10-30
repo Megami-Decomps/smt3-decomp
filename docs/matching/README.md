@@ -92,6 +92,7 @@ both native and emitted sizes when they differ.
 | 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 |  | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
 | 1 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
+| 1 | newbattle/nbSkillError | [newbattle/nbSkillError.md](newbattle/nbSkillError.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
