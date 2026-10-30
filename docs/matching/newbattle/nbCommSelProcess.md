@@ -2,27 +2,33 @@
 
 ## DispComm1PanelComm (newbattle/nbCommSelProcess, 0xE0)
 
-53 of 56 words match, at the exact 224-byte size.
+56 of 56 words match, at the native 224-byte size (2026-10-30).
 
-The guard is `if (no <= 0x8003) { if (no >= 0x8000) return; }` over an `s32`
-local holding the `u16` parameter, which is what gives retail's two separate
-signed `slt`s rather than the subtract plus one `sltiu` that an `&&` or `||`
-range chain folds to, and what stops `shorten_compare` turning the compares
-unsigned.
+The guard remains `if (no <= 0x8003) { if (no >= threshold) return; }`
+over an `s32` local holding the `u16` parameter. Native zero-extends that
+parameter and uses two signed comparisons, rejecting exactly 0x8000..0x8003
+before the skill-table access. Other inputs retain the original lookup and
+sprite-call behavior.
 
-The three remaining words are the lower bound's encoding. Retail materialises
-0x8000 and tests `slt no, reg` with a `beqz`, the inverted-branch form of
-`LT`. ee-gcc 2.96's `fold` rewrites every spelling of `< 0x8000` and
-`>= 0x8000` into `> 0x7FFF` before the MIPS backend sees it, so the compare
-comes out as `li 0x7FFF`, `slt reg, no`, `bnez`: same test, three words off.
+The ordinary literal lower bound was 53/56 words: `li 0x7FFF`, reversed
+`slt`, and `bnez`, rather than retail's `li 0x8000`, `slt no, threshold`,
+and `beqz`. Paired full-owner compiler output shows this complementary
+endpoint already in initial RTL; this does not identify an instrumented
+internal folding pass.
 
-Ruled out: both nesting orders; `||` of the complement and `&&` of the range,
-which fold; a `goto` into the `if` body so the draw block is the fallthrough;
-an `else return`; `!(no < 0x8000)`; `no <= 0x7FFF`; `no > 0x7FFF` with an
-early return; an explicit `s32` local holding the comparison result, which
-adds an `xori`; `(s32)` casts on either operand; and two distinct `s32` locals
-for the two tests, which does defeat the range fold but leaves the same
-encoding.
+An initialized `s32 threshold = 0x8000` inside the existing outer branch,
+with one nonvolatile empty `+r` constraint immediately before its genuine
+comparison, preserves the native endpoint. This is a localized target-specific
+compiler reconstruction aid, not evidence of original source spelling. There
+is no dummy consumer, fixed register, call crossed, memory clobber, or ABI,
+type, layout, access-width or call-order change. Plain and `-da` builds agree
+on normalized assembly and allocated/relocation sections. The promoted owner
+checks at 31 match / 0 differ.
+
+Earlier ordinary forms ruled out: both nesting orders; complement `||` and
+range `&&`; a forward `goto`; `else return`; `!(no < 0x8000)`;
+`no <= 0x7FFF`; `no > 0x7FFF`; an explicit comparison-result local;
+operand casts; and separate locals for the two tests.
 
 ## DispCommCursor (newbattle/nbCommSelProcess, 0x184)
 
@@ -75,8 +81,8 @@ into the `beqz`'s delay slot, where retail has a `nop` (19 words).
 ## DispCommandPanel (0x33C)
 
 203 of 207 instruction words match at the native 828-byte size when the
-existing `DispComm1PanelComm` C draft is visible. Both functions remain
-assembly-backed in the normal build; there is no exact-match credit.
+existing `DispComm1PanelComm` C draft is visible. The caller remains
+assembly-backed; the row callee is now matched as documented above.
 
 The five inputs are process, command type, X, Y and opacity. Preserve the
 original coordinates for the background, cursor setup, help origin and final
@@ -110,8 +116,8 @@ unchanged.
 A truthful command-row forward declaration alone leaves this caller at
 836 bytes with 132 matching instruction words and 75 differing words in the
 native overlap. Making the existing genuine command-row C body visible
-recovers the native size and leaves the four words above. That callee still
-has its documented three-word lower-bound residual, so it cannot yet replace
-its fallback. Reproduce the caller measurement with
+recovers the native size and leaves the four words above. The row callee's former
+three-word lower-bound residual is now resolved independently; this does not
+resolve the caller's scheduling differences. Reproduce the caller measurement with
 `tools/check_unit.py src/smt3/newbattle/nbCommSelProcess.c
 --cflags=-DNON_MATCHING --func DispCommandPanel -v`.

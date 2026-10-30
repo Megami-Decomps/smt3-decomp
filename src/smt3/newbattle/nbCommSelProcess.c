@@ -395,16 +395,15 @@ void DispPanelSitaji(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 co
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispPanelSitaji);
 #endif
 
-/* NON_MATCHING: 3 of 56 words differ (first at +0x28). */
-
-#ifdef NON_MATCHING
-
 void DispComm1PanelComm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
 {
     s32 no = d;
 
     if (no <= 0x8003) {
-        if (no >= 0x8000) {
+        s32 threshold = 0x8000;
+        /* Keep the real native signed comparison endpoint local to its use. */
+        __asm__("" : "+r"(threshold));
+        if (no >= threshold) {
             return;
         }
     }
@@ -419,12 +418,6 @@ void DispComm1PanelComm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz
         break;
     }
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispComm1PanelComm);
-
-#endif
 
 void DispComm1PanelTalk(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col) {
 }
