@@ -3026,7 +3026,6 @@ void SetAction_READY(nbActionProcessData_t *a)
     cmpSetSkillListRows(-1);
 }
 
-#ifdef NON_MATCHING
 extern char D_00551128[];
 extern void datDebugPrintf(const char *format, ...);
 extern s32 nbGetUnitFromAction(nbFormation_t *form, s32 motion);
@@ -3043,6 +3042,7 @@ extern struct effBTL_t *effBTLCreate(void *data);
 
 s32 CheckAction_READY(nbActionProcessData_t *a)
 {
+    s32 complete = 0;
     s32 size;
     void *buffer;
     sdfMemHandle_t *handle;
@@ -3051,12 +3051,13 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
     case 0:
         a->skilltime++;
         if (a->motse) {
-            if (p2sdLoadCheckMidi(nbGetUnitFromAction(a->form, a->motion)) == 0) {
+            if (p2sdLoadCheckMidi(nbGetUnitFromAction(a->form, a->motion))) {
+                a->data->stat &= ~0x200;
+                nbAddSePacket2(0, (s32)a, nbGetUnitFromAction(a->form, a->motion));
+            } else {
                 printf("mot se wait(1)..\n");
-                return 0;
+                break;
             }
-            a->data->stat &= ~0x200;
-            nbAddSePacket2(0, (s32)a, nbGetUnitFromAction(a->form, a->motion));
         }
         datDebugPrintf(D_00551128);
         a->hEffBTL = NULL;
@@ -3093,7 +3094,11 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
             datDebugPrintf("se ok!! [%08X]\n", a->midino);
             sdfMemFreeDirect(a->midibuf);
             fileHandleFree(a->midifile);
-            a->seqcnt = a->bedfile != NULL ? 3 : 5;
+            if (a->bedfile != NULL) {
+                a->seqcnt = 3;
+            } else {
+                a->seqcnt = 5;
+            }
             a->data->stat &= ~0x200;
         } else {
             printf("se wait(2)..\n");
@@ -3117,12 +3122,13 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
         break;
     case 5:
         if (a->timer && (u16)a->seqtime < a->timer) {
-            return 0;
+            break;
         }
+        complete = 1;
         switch (a->work->nowcommand) {
         case 0: case 1: case 5: case 6: SetNextActionSeq(a, 8); break;
-        case 2: SetNextActionSeq(a, 13); break;
         case 3: case 8: case 9: case 10: SetNextActionSeq(a, 12); break;
+        case 2: SetNextActionSeq(a, 13); break;
         case 4: SetNextActionSeq(a, 9); break;
         case 7: SetNextActionSeq(a, 14); break;
         }
@@ -3131,13 +3137,10 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
             nbDispJyokyoHelp(a->data->mesmngid, a->jyokyomes, a->jyo_varid, a->jyo_varind);
             a->jyokyomes = 0;
         }
-        return 1;
+        break;
     }
-    return 0;
+    return complete;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_READY);
-#endif
 
 /* NON_MATCHING: 1118 of 1280 words differ (first at +0xC8); 10 words short of retail's 1290. */
 #ifdef NON_MATCHING
