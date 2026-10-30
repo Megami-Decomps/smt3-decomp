@@ -2154,7 +2154,6 @@ void SetAction_COMM(nbActionProcessData_t *a)
     nbInitCommSelProcess(a->data, a->party, a);
 }
 
-#ifdef NON_MATCHING
 extern s8 dds3PadButtonState[];
 extern void nbSetAutoCommSel(void);
 extern s32 nbGetCommSelStat(void);
@@ -2168,11 +2167,10 @@ extern s32 nbCheckBattleSkillError1(s32 skill);
 s32 CheckAction_COMM(nbActionProcessData_t *a)
 {
     s32 result = 0;
-    s32 close = 0;
-    s32 sound = 0;
+    /* Target-specific allocation aid for the live close flag; $20 is callee-saved. */
+    register s32 close __asm__("$20") = 0;
     datUnitWork_t *work;
     s32 command;
-    u16 currentCommand;
     s32 skill;
     s32 err;
 
@@ -2193,31 +2191,31 @@ s32 CheckAction_COMM(nbActionProcessData_t *a)
         nbSetAutoCommSel();
     }
     if (nbGetCommSelStat() == 3) {
-        sound = 8;
+        s32 sound = 8;
         work = nbGetUnitWorkPointer(a->data, a->party);
         command = work->nowcommand;
-        currentCommand = *(volatile u16 *)&work->nowcommand;
         switch (command) {
         case 0:
             SetNextActionSeq(a, 5);
             result = 1;
             break;
         case 1:
-        case 5:
-            skill = work->nowindex;
-            if (command == 1) {
-                switch (skill) {
-                case 0xDE: case 0xDF: case 0xE2: case 0xE3: case 0xE4:
-                case 0xE5: case 0xE6: case 0xFC:
-                    nbClearActionFlags(a->data);
-                    nbSetActionCommand(a->data, 0);
-                    currentCommand = work->nowcommand;
-                    skill = work->nowindex;
-                    break;
-                }
+            switch (work->nowindex) {
+            case 0xDE: case 0xDF: case 0xE2: case 0xE3: case 0xE4:
+            case 0xE5: case 0xE6: case 0xFC:
+                nbClearActionFlags(a->data);
+                nbSetActionCommand(a->data, 0);
+                break;
             }
-            if ((s16)currentCommand != 1) {
-                skill = nbGetItemSkillNo(a, work->nowindex);
+            /* Fall through to the skill/item validation path. */
+        case 5: {
+            /* Keep the live item/skill index in its argument register. This
+             * target-specific aid avoids a redundant copy; index is not used
+             * after nbGetItemSkillNo can clobber $5. */
+            register s32 index __asm__("$5") = work->nowindex;
+            skill = index;
+            if (work->nowcommand != 1) {
+                skill = nbGetItemSkillNo(a, index);
                 printf("item no = %d\n", work->nowindex);
                 printf("skill no = %d\n", skill);
             }
@@ -2227,15 +2225,22 @@ s32 CheckAction_COMM(nbActionProcessData_t *a)
                 nbDispSkillErrorMessage(err);
                 nbSetCommSelStat(2);
             } else {
-                if ((a->party->flag & 6) || !(datSkillTable.normal[skill].targetarea & 1) ||
-                    (datSkillTable.normal[skill].targetarea & 0xC)) {
+                if (a->party->flag & 6) {
                     SetNextActionSeq(a, 5);
+                    result = 1;
+                } else if (!(datSkillTable.normal[skill].targetarea & 1)) {
+                    SetNextActionSeq(a, 5);
+                    result = 1;
+                } else if (datSkillTable.normal[skill].targetarea & 0xC) {
+                    SetNextActionSeq(a, 5);
+                    result = 1;
                 } else {
                     SetNextActionSeq(a, 6);
+                    result = 1;
                 }
-                result = 1;
             }
             break;
+        }
         case 4:
             a->negotype = 0;
             result = 1;
@@ -2247,7 +2252,7 @@ s32 CheckAction_COMM(nbActionProcessData_t *a)
             nbSetActionCommand(a->data, 0);
             SetNextActionSeq(a, 5);
             break;
-        default:
+        case 2: case 3: case 7: case 8:
             SetNextActionSeq(a, 7);
             close = 1;
             result = 1;
@@ -2260,9 +2265,6 @@ s32 CheckAction_COMM(nbActionProcessData_t *a)
     if (close) nbCloseCommSel();
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_COMM);
-#endif
 
 void SetAction_AI(nbActionProcessData_t *a)
 {
