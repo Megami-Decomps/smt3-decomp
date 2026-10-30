@@ -38,3 +38,26 @@ owners / 589 drafts, seven IRX owners, 26 tooling test files / 427 cases, shell
 mocks and documentation checks. Source commit `76d2379f33b8ca616657414d24bf8510f3f6c82d` passed exact-source
 hosted CI [40990612021](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40990612021),
 including build and deploy.
+
+## rcvDrawPanelAt (facility/fclRecoverCalc, 0x1AC)
+
+107 of 107 words match at 428 bytes. An ordinary per-iteration `s32 price`
+snapshot loads `rcvDrawWork->recoverPrices[i]` before comparing it with
+`DDS3_GBWK->maka`. Both fields are signed 32-bit values. This expresses
+retail's price-before-money load order and resolves the previous five-word
+load/register-order residual. No declaration, helper, compiler constraint,
+volatile qualifier or provider change is involved.
+
+The price has a genuine comparison consumer. There is no intervening call or
+write between the two operand loads, and the snapshot stays inside the loop.
+Draw callbacks, subsequent cursor and row-spacing reloads, the loop bound,
+and end-of-function callbacks are unchanged. This is a measured source/output
+relationship, not a claim about an internal compiler pass or original source
+spelling.
+
+Independent semantic review and canonical complete-owner checking pass
+22 match, 0 differ, with owned data exact.
+
+Combined local gates pass the retail checksum, 26 tooling test files / 427
+cases, all 147 guarded owners / 537 drafts with stable source/compiler inputs,
+seven IRX owners, and reconciled production reports.

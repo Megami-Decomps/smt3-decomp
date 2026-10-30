@@ -118,6 +118,7 @@ ragBuildHeartsList	fclRagInit	0x124	73 of 73 words match	docs/matching/facility/
 ragCheckHeartsChoice	fclRagUpdate	0x80	22 of 29 words match	docs/matching/facility/fclRagUpdate.md	3
 ragUpdateSeqConfirm	facility/fclRagUpdate	0x208	130 of 130 words match	docs/matching/facility/fclRagUpdate.md	28
 rcvCreateLocalStock	facility/fclRecoverCalc	0x25C	151 of 151 words match	docs/matching/facility/fclRecoverCalc.md	3
+rcvDrawPanelAt	facility/fclRecoverCalc	0x1AC	107 of 107 words match	docs/matching/facility/fclRecoverCalc.md	42
 DrawElem	facility/fclRibbon	0x368	218 of 218 words match	docs/matching/facility/fclRibbon.md	3
 Qualified allocation evidence (2026-10-30)				docs/matching/facility/fclRibbon.md	33
 fclDrawSpriteAngleCore	fclShare	0x4A8	212 of 298 words match	docs/matching/facility/fclShare.md	3
@@ -258,6 +259,7 @@ UpdateFormAnime	newbattle/nbUnitProcess	0x260	138 of 152 words match	docs/matchi
 nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	23
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/matching/newdata/datCalc.md	3
 datGetSkillKouka	newdata/datCalc	0x3F8	254 of 254 words match	docs/matching/newdata/datCalc.md	21
+datBossRashGetRec	newdata/datCalc	0x108	66 of 66 words match	docs/matching/newdata/datCalc.md	37
 nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_Calc.md	3
 nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_Init.md	3

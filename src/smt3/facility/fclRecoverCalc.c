@@ -433,7 +433,6 @@ extern s32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 row, s32 slot,
 extern void rcvDrawRowText(s32 x, s32 y, s32 z, s32 color, s8 index, s32 ot);
 extern void fclDrawPhaseHeader(lstWork_t *list, s32 color, s32 mode, s32 ot);
 
-#ifdef NON_MATCHING
 void rcvDrawPanelAt(lstWork_t *list, s8 flag, s32 ot)
 {
     cmpCursorInfo_t *cursor = &list->listCursor;
@@ -447,7 +446,8 @@ void rcvDrawPanelAt(lstWork_t *list, s8 flag, s32 ot)
     fclUpdatePanel(&rcvDrawWork->panel);
     lstDrawListWindow(list, flag, ot);
     for (i = 0; i < cursor->unk_26; i++) {
-        s32 mode = DDS3_GBWK->maka < rcvDrawWork->recoverPrices[i];
+        s32 price = rcvDrawWork->recoverPrices[i];
+        s32 mode = DDS3_GBWK->maka < price;
         s32 color;
 
         if (flag != 0) {
@@ -465,9 +465,6 @@ void rcvDrawPanelAt(lstWork_t *list, s8 flag, s32 ot)
         lstDrawListWindowCursor(list, ot);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawPanelAt);
-#endif
 
 void rcvDrawSeq1(void)
 {
