@@ -536,70 +536,71 @@ extern s32 cmbAddCustomDevilToStock(datUnitWork_t *custom, cmbUnit_t *list, u8 c
 extern s32 fclEncycRegist(datUnitWork_t *unit, s32 overwrite);
 extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
 
-#ifdef NON_MATCHING
 s32 ragUpdateSeqConfirm(void)
 {
     ragItemReq_t *items = NULL;
     datUnitWork_t *unit;
     s32 slot = 0;
     s32 state;
+    s32 sequence;
     s32 i;
 
-    state = cmpChkSeqInfo((cmbGbWork_t *)ragUpdateWork);
-    if (state == 1) {
-        return 1;
+    sequence = cmpChkSeqInfo((cmbGbWork_t *)ragUpdateWork);
+    if (sequence == 1) {
+        goto complete;
     }
-    if (state == 2) {
-        ragUpdateReturn();
-        return 1;
+    if (sequence == 2) {
+        goto return_selection;
     }
     if (dds3GetProcessStat((dds3ProcessID_t *)ragUpdateWork->scriptArg) == 2) {
         return 0;
     }
     state = fclGetFlag(2);
-    if (state == 1) {
-        ragUpdateReturn();
-        return 1;
-    }
-    if (state != 0) {
-        return 1;
-    }
-    switch (ragUpdateWork->unk_0003) {
+    switch (state) {
     case 1:
-        items = ragGetConfirmEntry(0, ragGetHeartsFlag(1));
-        fclAddItem(ragCheckHeartsChoice(1), 1);
-        break;
-    case 2:
-        items = ragGetConfirmEntry(1, ragGetHeartsFlag(2));
-        slot = cmbAddCustomDevilToStock(&ragUpdateWork->previewUnit,
-                                        (cmbUnit_t *)&DDS3_GBWK->akuma[4].flag, 12);
-        break;
-    case 3:
-        items = ragGetConfirmEntry(2, ragGetHeartsFlag(3));
-        slot = cmbAddCustomDevilToStock(&ragUpdateWork->previewUnit,
-                                        (cmbUnit_t *)&DDS3_GBWK->akuma[4].flag, 12);
-        break;
-    }
-    p2sdPlaySE(0x19, 0x7F, 0x3F);
-    if (slot >= 0) {
-        unit = (datUnitWork_t *)&DDS3_GBWK->akuma[4 + slot].flag;
-        unit->hp = unit->maxhp;
-        unit->mp = unit->maxmp;
-        fclEncycRegist(unit, 0);
-        for (i = 0; i < 3; i++) {
-            if (items[i].item != 0) {
-                fclAddItem(items[i].item, -items[i].count);
+        goto return_selection;
+    case 0:
+        switch (ragUpdateWork->unk_0003) {
+        case 1:
+            items = ragGetConfirmEntry(0, ragGetHeartsFlag(1));
+            fclAddItem(ragCheckHeartsChoice(1), 1);
+            break;
+        case 2:
+            items = ragGetConfirmEntry(1, ragGetHeartsFlag(2));
+            slot = cmbAddCustomDevilToStock(&ragUpdateWork->previewUnit,
+                                            (cmbUnit_t *)&DDS3_GBWK->akuma[4].flag, 12);
+            break;
+        case 3:
+            items = ragGetConfirmEntry(2, ragGetHeartsFlag(3));
+            slot = cmbAddCustomDevilToStock(&ragUpdateWork->previewUnit,
+                                            (cmbUnit_t *)&DDS3_GBWK->akuma[4].flag, 12);
+            break;
+        }
+        p2sdPlaySE(0x19, 0x7F, 0x3F);
+        if (slot >= 0) {
+            unit = (datUnitWork_t *)&DDS3_GBWK->akuma[4 + slot].flag;
+            DDS3_GBWK->unitwork[4 + slot].hp = DDS3_GBWK->unitwork[4 + slot].maxhp;
+            DDS3_GBWK->unitwork[4 + slot].mp = DDS3_GBWK->unitwork[4 + slot].maxmp;
+            fclEncycRegist(unit, 0);
+            for (i = 0; i < 3; i++) {
+                if (items[i].item != 0) {
+                    fclAddItem(items[i].item, -items[i].count);
+                }
             }
         }
+        ragUpdateWork->unk_0005 = 1;
+        ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 9,
+                                                  &ragUpdateWork->scriptArg);
+        return 0;
+    case 2:
+        break;
     }
-    ragUpdateWork->unk_0005 = 1;
-    ragUpdateWork->unk_0008 = fclScriptStart(ragUpdateWork->script, 9,
-                                              &ragUpdateWork->scriptArg);
-    return 0;
+    return 1;
+return_selection:
+    ragUpdateReturn();
+complete:
+    return 1;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqConfirm);
-#endif
 
 void ragUpdateSeqMitama(void)
 {
