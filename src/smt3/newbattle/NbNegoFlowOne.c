@@ -1116,46 +1116,63 @@ s32 nbNegoFlowOne(nbNegoProcessData_t *n)
     return D_004EF4B0[(u16)n->nownegoid](n);
 }
 
-#ifdef NON_MATCHING
 s32 nbFlowGetUnitEntry(datUnitWork_t *work, datUnitWork_t *other, s32 type, s32 data)
 {
-    u32 flags;
     u32 attributes;
     u32 bit;
     s32 i;
 
     switch ((u32)type) {
     case 0x80000000:
-        if (evtGetAgeOfMoon() != 0) {
-            return 0;
+        if (evtGetAgeOfMoon() == 0) {
+            if (datDevilTable[other->id].race != 0x13) {
+                return 1;
+            }
         }
-        return datDevilTable[other->id].race != 0x13;
+        return 0;
     case 0x80000001:
-        if ((s32)other->level - 10 < (s32)work->level) {
-            return 0;
+        if ((s32)other->level - 10 >= (s32)work->level) {
+            if (dds3GetRandIntA(0, 100) < 70) {
+                return 1;
+            }
         }
-        return dds3GetRandIntA(0, 100) < 70;
+        return 0;
     case 0x80000002:
-        if (data != 0) {
-            return 0;
+        if (data == 0) {
+            if (master_text[other->id].tokucyo & 2) {
+                return 1;
+            }
         }
-        return (master_text[other->id].tokucyo & 2) != 0;
+        return 0;
     }
 
-    flags = work->flag;
-    attributes = (flags & 4) ? 0x14 : master_text[work->id].tokucyo;
+    if (work->flag & 4) {
+        attributes = 0x14;
+    } else {
+        attributes = master_text[work->id].tokucyo;
+    }
     for (i = 0; i < 31; i++) {
         bit = 1u << i;
         if (!((u32)type & bit)) {
             continue;
         }
         switch (bit) {
+        case 1:
+            break;
         case 2:
+            if (!(attributes & 2)) return 0;
+            break;
         case 4:
+            if (!(attributes & 4)) return 0;
+            break;
         case 8:
+            if (!(attributes & 8)) return 0;
+            break;
         case 0x10:
+            if (!(attributes & 0x10)) return 0;
+            break;
         case 0x20:
-            if (!(attributes & bit)) return 0;
+            if (!(attributes & 0x20)) return 0;
             break;
         case 0x40:
             if ((s32)work->level < (s32)other->level + 10) return 0;
@@ -1164,7 +1181,7 @@ s32 nbFlowGetUnitEntry(datUnitWork_t *work, datUnitWork_t *other, s32 type, s32 
             if ((s32)other->level - 10 < (s32)work->level) return 0;
             break;
         case 0x100:
-            if ((flags & 4) || (other->flag & 4) ||
+            if ((work->flag & 4) || (other->flag & 4) ||
                 datDevilTable[work->id].race != datDevilTable[other->id].race) return 0;
             break;
         case 0x200:
@@ -1177,9 +1194,7 @@ s32 nbFlowGetUnitEntry(datUnitWork_t *work, datUnitWork_t *other, s32 type, s32 
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", nbFlowGetUnitEntry);
-#endif
+
 
 s32 nbFlowCheckUnit(nbNegoProcessData_t *n, s32 ptype, s32 etype, s32 data)
 {
