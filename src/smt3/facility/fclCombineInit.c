@@ -3471,15 +3471,14 @@ void cmbDrawBirthDevil(s32 hideRibbon)
     }
 }
 
-#ifdef NON_MATCHING
-s32 func_00201FB0(s32 active)
+void func_00201FB0(s32 active)
 {
     s32 work = fclEncycWork();
     fclPanelPos_t pos;
     s32 mode;
 
     if (work != 0) {
-        return work;
+        return;
     }
     mode = fclGetFlag(0) != 0 ? 0 : 2;
     if (active != 0) {
@@ -3487,13 +3486,9 @@ s32 func_00201FB0(s32 active)
     }
     fclInitPanelPos(0, 0, 0xFFFFF, 0x64, 0, 0, (fclPanel_t *)&pos);
     cmpUpdateListSelection(&pos, (u8 *)&CMB_GBWK->resultCursor, 0, mode, 0x100, 0x47);
-    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", func_00201FB0);
-#endif
 
-s32 cmbDrawPhase3(s32 active)
+void cmbDrawPhase3(s32 active)
 {
     fclPanelPos_t pos;
     s32 mode = 1;
@@ -3512,19 +3507,21 @@ s32 cmbDrawPhase3(s32 active)
 }
 
 #ifdef NON_MATCHING
-extern s32 func_00201FB0(s32 mode);
+extern void func_00201FB0(s32 mode);
 #endif
 
-s32 cmbDrawPhasePanel(void)
+void cmbDrawPhasePanel(void)
 {
     s32 phase = (s8)CMB_GBWK->unk_00002;
 
     switch (phase)
     {
     case 3:
-        return cmbDrawPhase3(0);
+        cmbDrawPhase3(0);
+        return;
     case 2:
-        return func_00201FB0(1);
+        func_00201FB0(1);
+        return;
     default:
         cmbDrawPhaseDefault(1);
         phase = 0;
@@ -5108,14 +5105,15 @@ s32 cmbFindUnitScene(mdlObj_t *work)
 extern const char *D_0032F59C[];
 extern sdfModelOt_t D_002F69B8[];
 
-#ifdef NON_MATCHING
 void cmbUpdateCameraPos(void)
 {
     f32 mark[4] __attribute__((aligned(16)));
-    s32 index;
+    s32 index = 4;
 
     memset(mark, 0, sizeof(mark));
-    index = CMB_GBWK->birthVariant == 0 ? 3 : 4;
+    if (CMB_GBWK->birthVariant == 0) {
+        index = 3;
+    }
     if ((__SIZE_TYPE__)CMB_GBWK + (__SIZE_TYPE__)&((cmbGbWork_t *)0)->cameraPosition == 0) {
         return;
     }
@@ -5126,18 +5124,15 @@ void cmbUpdateCameraPos(void)
         sdfModelGetMarkPos(CMB_GBWK->actionData[index].model->inner, 0);
         SDF_VU0_STOREVECTOR(mark);
     }
-    fclSetWorkValue(11, fcvtws(mark[0]));
-    fclSetWorkValue(12, fcvtws(mark[1]));
-    fclSetWorkValue(13, fcvtws(mark[2]));
+    fclSetWorkValue(11, (s32)mark[0]);
+    fclSetWorkValue(12, (s32)mark[1]);
+    fclSetWorkValue(13, (s32)mark[2]);
     mdlSetColorWithEffect(CMB_GBWK->actionData[index].model, 0x80808080);
     cmbFindUnitScene(CMB_GBWK->actionData[index].model);
     cmbDrawActionModel(CMB_GBWK->actionData[index].model,
                        (u16)CMB_GBWK->actionData[index].id,
                        CMB_GBWK->cameraPosition, 0x80808080, D_002F69B8);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateCameraPos);
-#endif
 
 extern s8 cmbActionStep;
 extern s8 cmbActionMode;

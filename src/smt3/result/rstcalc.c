@@ -1939,16 +1939,16 @@ INCLUDE_ASM(const s32, "result/rstcalc", cmpFindKugatatiMsgEntry);
 
 extern s8 cmbCountEvoReady(datUnitWork_t *unit, u8 count);
 
-#ifdef NON_MATCHING
 void cmbCalcEvoEvent(datUnitWork_t *unit, fclSkillParam_t *entry,
                      s8 hasNext, datUnitWork_t *result)
 {
     u16 devilId;
 
     if (hasNext != 0 && entry[1].kind == 5) {
-        s8 half = cmbCountEvoCandidates(unit, 16) / 2;
+        s32 candidateCount = cmbCountEvoCandidates(unit, 16);
+        s32 half = candidateCount / 2;
 
-        if (half < cmbCountEvoReady(unit, 16)) {
+        if ((s8)half < cmbCountEvoReady(unit, 16)) {
             devilId = entry[0].value;
         } else {
             devilId = entry[1].value;
@@ -1975,9 +1975,6 @@ void cmbCalcEvoEvent(datUnitWork_t *unit, fclSkillParam_t *entry,
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbCalcEvoEvent);
-#endif
 
 s32 rstCalcEvoLevelDiff(datUnitWork_t *a, datUnitWork_t *b, datUnitWork_t *c, s32 level)
 {

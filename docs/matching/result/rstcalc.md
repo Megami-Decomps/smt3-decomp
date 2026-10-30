@@ -303,3 +303,30 @@ seven IRX owners, 26 tooling test files / 427 cases, shell mocks and documentati
 checks. Source commit `052a211d71c3b81c4f876ef3fe1a50fd195300d9` passed exact-source
 hosted CI [40983613150](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40983613150),
 including build and deploy.
+
+## cmbCalcEvoEvent (result/rstcalc, 0x140)
+
+80 of 80 words match at 320 bytes in ordinary C. The truthful signed-byte
+candidate count is promoted into a real `s32` local, divided by two into a
+real `s32 half`, then explicitly converted to `s8` at the comparison with
+the ready-count call. Both providers retain their signed-byte return types
+and original arguments. The first count call still precedes the ready-count
+call; later entry observations, callbacks, result construction and writes
+are unchanged.
+
+For every possible signed-byte count, division truncating toward zero gives
+-64..63, so the explicit narrowing preserves its value. Independent review
+checks all 65,536 pairs of signed-byte returns for equal scalar selection;
+this is not a whole-function execution proof. No nonnegative-count assumption,
+false provider declaration, constraint or artificial consumer is introduced.
+
+An earlier diagnostic used a quotient identity constraint, but independent
+ablation removed it and still passed. The final ordinary source is exact;
+the constraint is neither retained nor required. Diagnostic traces from other
+variants do not establish the final ordinary source's internal compiler cause.
+Independent final-source complete-owner checking gives 86 match, 0 differ,
+with normal owned-data checks.
+
+Combined local gates pass the retail checksum, 26 tooling test files / 427
+cases, all 147 guarded owners / 533 drafts with stable source/compiler inputs,
+seven IRX owners, and reconciled production reports.

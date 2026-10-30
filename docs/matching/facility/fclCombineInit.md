@@ -362,3 +362,54 @@ all 780 tracked files and final Ninja no-op checks.
 Source commit `40e9d025e6951ae2a2951eec3f8a2146f8de58f9` has exact-source hosted CI
 [41005099595](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41005099595):
 build and deploy both completed successfully.
+
+## func_00201FB0 (facility/fclCombineInit, 0x94)
+
+37 of 37 words match at 148 bytes after recovering the local drawing chain's
+void return contract. The target, its declaration, and the already matched
+`cmbDrawPhase3` and `cmbDrawPhasePanel` are consistently void. Early exits
+use bare returns; panel arms call their helper and return without propagating
+incidental register contents. Only the target is new matching credit; both
+existing peers retain exact emitted bytes.
+
+This correction uses native bodies and actual consumers, not merely an
+ignored result at one call site. The target and phase-three helper finish
+after the void list-selection update without constructing a result. The
+panel dispatch tail-calls those helpers. All recovered sequence callers
+reach a common path that overwrites the return register before reading it,
+then constructs its own result. Independent direct-call scanning agrees with
+source references; an aligned-word scan finds no absolute function pointers
+for these three functions. These scans corroborate the recovered contract,
+not the absence of every hypothetical computed indirect target.
+
+Arguments, conditions, callback order and memory effects are unchanged. No
+value is fabricated from the void provider. The original singleton emits
+152 bytes with an extra zero-result instruction; the corrected chain passes
+independent complete-owner checking at 191 match, 0 differ, with owned data
+exact. This recovers a usable contract without claiming historical spelling.
+
+## cmbUpdateCameraPos (facility/fclCombineInit, 0x14C)
+
+83 of 83 words match at 332 bytes. An ordinary real index starts at four
+before the buffer clear and changes to three only for a zero birth variant
+observed afterward. Both valid indices have actual model/address consumers;
+no field observation moves across the clear. Three ordinary `s32` casts
+replace scalar-assembly conversion calls in this target. Existing supported
+VU vector storage into the aligned four-float mark buffer is unchanged.
+
+All three assembled conversion words are `0x46000064`, matching retail at
+0x20534C, 0x205360 and 0x205374. This is raw instruction and complete-output
+evidence, not an inference from a mnemonic or RTL pattern name. No rounding
+mode is changed or assumed, and no portable C guarantee is claimed for NaN
+or out-of-range inputs. The initialized zero coordinates and model-derived
+coordinates both have real work-value consumers. Callback-sensitive global
+and model reloads and subsequent model/action calls retain native order.
+
+The combined owner, including the void drawing-chain correction above,
+passes independent canonical checking at 192 match, 0 differ, with normal owned-data
+checks. No new constraint, binding, false type, provider change or compiler
+flag is introduced.
+
+Combined local gates pass the retail checksum, 26 tooling test files / 427
+cases, all 147 guarded owners / 533 drafts with stable source/compiler inputs,
+seven IRX owners, and reconciled production reports.

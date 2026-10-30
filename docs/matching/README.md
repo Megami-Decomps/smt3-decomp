@@ -15,8 +15,8 @@ both native and emitted sizes when they differ.
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 12 |  | [sdk/libkernl.md](sdk/libkernl.md) |
-| 11 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
-| 10 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
+| 12 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
+| 12 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 10 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
@@ -63,6 +63,7 @@ both native and emitted sizes when they differ.
 | 2 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 2 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 2 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
+| 2 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
@@ -103,7 +104,6 @@ both native and emitted sizes when they differ.
 | 1 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
 | 1 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
-| 1 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
 | 1 | newbattle/NbNegoFlowOne | [newbattle/NbNegoFlowOne.md](newbattle/NbNegoFlowOne.md) |
 | 1 | newbattle/NbNegoFlowInoti | [newbattle/NbNegoFlowInoti.md](newbattle/NbNegoFlowInoti.md) |
 | 1 | newbattle/NbNegoFlowFullMoon | [newbattle/NbNegoFlowFullMoon.md](newbattle/NbNegoFlowFullMoon.md) |

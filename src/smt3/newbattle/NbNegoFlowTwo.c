@@ -715,7 +715,6 @@ s32 Flow6_19(nbNegoProcessData_t *n)
     return 0;
 }
 
-#ifdef NON_MATCHING
 s32 Flow6_20(nbNegoProcessData_t *n)
 {
     s32 rounded;
@@ -738,17 +737,15 @@ s32 Flow6_20(nbNegoProcessData_t *n)
                 nbSetMesMakka(n->flowmsg[n->ekucyo], n->requestdata);
                 nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x3F, 0);
                 nbMakaDispOn(0);
-                return 0;
+                goto complete;
             }
         }
     }
     nbSetMesItem(n->flowmsg[n->ekucyo], n->requestdata);
     nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x40, 0);
+complete:
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_20);
-#endif
 
 s32 Flow6_21(nbNegoProcessData_t *n)
 {

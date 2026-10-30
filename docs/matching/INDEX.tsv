@@ -98,6 +98,8 @@ cmbCalcBirthDevil	facility/fclCombineInit	0x434	269 of 269 words match	docs/matc
 cmbUpdateBirthDevil	facility/fclCombineInit	0x3B8	238 of 238 words match	docs/matching/facility/fclCombineInit.md	255
 cmbDrawBirthDevil	facility/fclCombineInit	0x274	157 of 157 words match	docs/matching/facility/fclCombineInit.md	289
 cmbUpdateRoot	facility/fclCombineInit	0x1F4	125 of 125 words match	docs/matching/facility/fclCombineInit.md	327
+func_00201FB0	facility/fclCombineInit	0x94	37 of 37 words match	docs/matching/facility/fclCombineInit.md	366
+cmbUpdateCameraPos	facility/fclCombineInit	0x14C	83 of 83 words match	docs/matching/facility/fclCombineInit.md	391
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/matching/facility/fclEncyc.md	22
 DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	46
@@ -182,6 +184,7 @@ Flow2_6	newbattle/NbNegoFlowFullMoon	0x278	158 of 158 words match	docs/matching/
 Flow15_5	newbattle/NbNegoFlowInoti	0x148	82 of 82 words match	docs/matching/newbattle/NbNegoFlowInoti.md	3
 nbFlowGetUnitEntry	newbattle/NbNegoFlowOne	0x384	225 of 225 words match	docs/matching/newbattle/NbNegoFlowOne.md	3
 Flow6_24	newbattle/NbNegoFlowTwo	0x4FC	319 of 319 words match	docs/matching/newbattle/NbNegoFlowTwo.md	3
+Flow6_20	newbattle/NbNegoFlowTwo	0x1A0	104 of 104 words match	docs/matching/newbattle/NbNegoFlowTwo.md	49
 CheckAction_READY	newbattle/nbActionProcess	0x3EC	251 of 251 words match	docs/matching/newbattle/nbActionProcess.md	3
 CheckAction_COMM	newbattle/nbActionProcess	0x354	213 of 213 words match	docs/matching/newbattle/nbActionProcess.md	26
 CheckAction_CHECK1	newbattle/nbActionProcess	0x28C	163 of 163 words match	docs/matching/newbattle/nbActionProcess.md	60
@@ -298,6 +301,7 @@ cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	168
 rstSetCurrentDevil	176 bytes	matched		docs/matching/result/rstcalc.md	197
 rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	230
 cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	266
+cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	307
 rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3

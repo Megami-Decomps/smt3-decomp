@@ -45,3 +45,30 @@ guarded EE/IRX and report checks passed for source commit
 `f245ab2f90610e7f64f90a829978234b47eb2746`. Exact-source CI
 [41036132155](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41036132155)
 completed successfully, with all steps green.
+
+## Flow6_20 (newbattle/NbNegoFlowTwo, 0x1A0)
+
+104 of 104 words match at 416 bytes. An ordinary forward branch replaces
+the currency path's separate zero return with a jump to the existing final
+zero return. Retail likewise shares that completion point between currency
+and item paths. The original singleton had three differing words at the
+same size; this single control-flow change gives complete-owner 71 match,
+0 differ, with owned data exact.
+
+Both old exits already returned zero. The currency path still skips all item
+messages, and the item path falls through to the shared return. No intervening
+cleanup, initialization, memory operation or callback is skipped or added.
+Repeated request-type observations across callbacks, message arguments,
+request arithmetic and conversions remain unchanged. No new scalar,
+constraint, type, provider change or artificial data dependency is introduced.
+
+Independent review and complete-owner checking confirm 71 match, 0 differ.
+Paired plain and diagnostic builds preserve full assembly and 71-function /
+8-contract output parity. Expansion exposes the shared zero-return label;
+final delay-slot output restores the currency-path register before that
+common zero assignment, matching native. This is compiler-shape evidence
+for the forward completion branch, not historical-source recovery.
+
+Combined local gates pass the retail checksum, 26 tooling test files / 427
+cases, all 147 guarded owners / 533 drafts with stable source/compiler inputs,
+seven IRX owners, and reconciled production reports.
