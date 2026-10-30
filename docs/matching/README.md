@@ -16,8 +16,8 @@ both native and emitted sizes when they differ.
 | 17 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 11 |  | [sdk/libkernl.md](sdk/libkernl.md) |
 | 11 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
+| 10 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
-| 9 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 8 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 8 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
@@ -28,16 +28,17 @@ both native and emitted sizes when they differ.
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
+| 5 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 5 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 5 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 4 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
-| 4 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 3 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
+| 3 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
@@ -52,7 +53,6 @@ both native and emitted sizes when they differ.
 | 2 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 2 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
-| 2 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 2 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
 | 2 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 2 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |

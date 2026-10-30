@@ -323,3 +323,42 @@ all 780 tracked files and final Ninja no-op checks. Source commit
 `fb259583d38dc35d3e818448e3f1356171a52554` passed exact-source hosted CI
 [41001938999](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41001938999):
 including build and deploy.
+
+## cmbUpdateRoot (facility/fclCombineInit, 0x1F4)
+
+125 of 125 words match at 500 bytes in ordinary C. The actual cursor-sum
+expression directly combines the original two byte observations, and the
+selection-1 action tests the signed-byte stock count below two first. A separate
+sum with that branch order reached 117 of 125 words; the direct expression
+resolved the remaining allocation/branch differences. No constraints, false
+types, fabricated bounds or artificial values are used. This measures the
+reconstructed compiler output, not historical source spelling.
+
+The index observation is the unsigned byte at cursor+0x22, not the enclosing
+signed16 field; the offset at +0x24 is also observed as an unsigned byte.
+The real promoted sum spans 1..511, with low-byte storage and a separate
+signed-byte selected value. Wrapping is preserved for the full byte domain,
+not merely menu-valid indices. The signed-byte conversion is verified for
+this compiler/native output, not claimed portable across C implementations.
+Independent review checked all 65,536 input pairs. There is no intervening callback or write
+between those two observations, and emitted access order matches native.
+
+The original u16 button snapshot remains live across callbacks. A zero flag
+still exits before common pad handling. The insufficient-stock path preserves
+script argument publication, script result, and independent global work
+reloads; script startup can alter flags and script state. Selection 3 keeps
+the signed selected value across its callback, selection 4/button 2 retain
+cmbExit, and default selection/button behavior is unchanged. Cursor movement,
+up/down handling, pad disabling and sound retain their order and original
+button conversions. No global pointer is cached across callback-sensitive
+observations.
+
+Independent complete-owner verification gives 190 match, 0 differ,
+preserving all 189 peers and normal owned-data checks. Full qualification
+passes the retail checksum, 149 guarded owners / 572 drafts, seven IRX owners,
+26 tooling files / 427 tests, shell mocks and docs checks. Actual-published
+verification repeats the owner, retail, report, all 90 owner dependencies,
+all 780 tracked files and final Ninja no-op checks.
+Source commit `40e9d025e6951ae2a2951eec3f8a2146f8de58f9` has exact-source hosted CI
+[41005099595](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41005099595):
+build and deploy both completed successfully.

@@ -55,3 +55,40 @@ That control was discarded. A separate indexed/literal reconstruction emits
 ownership; an explicit input-row offset is inert. Its cursor form emits
 1064 bytes with 24 matching prefix words. Those duplicate bodies were retired;
 the existing published source remains preferred, with no additional credit.
+
+## pb_draw_exit_Process (pb/pbModel, 0x1C0)
+
+112 of 112 words match at 448 bytes in ordinary C. A state switch handles
+1 / 5 / default, followed by a positive drawing guard and shared return.
+State 1 clears the full panel flags when the panel exists; state 5 returns
+-1; every other unsigned-16 state continues. Any nonzero signed-32 drawing
+flag, including negative values, draws. Both real local-array clears remain
+before dispatch. No constraints, register bindings or type changes are used.
+
+Actual literal ownership matters here. The configured legacy compiler emits
+native double bits `0x3f947ae147ae147a` from `0.02`; this is not a claim about
+modern decimal parsing or rounding. The real binary32 tau literal is written
+`6.28318500518798828125f`: a shorter tested decimal emitted one ULP too low.
+The four native float words are `40490fda / 40c90fda / c0490fda / 40c90fda`.
+The target's now-reproduced `D_00535C80` rodata import is removed; reference
+and ownership checks found no other consuming function. Other imports remain
+unchanged, and complete-owner checks verify the resulting owned data.
+
+Angle update keeps float-to-double promotion, the native addition and one
+float assignment before strict upper/lower tests. It wraps once, leaves equal
+endpoints alone and preserves the native exceptional-value instruction
+sequence rather than substituting host behavior. Signed-16 coordinates times
+40 minus 380 fit signed32 for the full input range. Material, matrix, polygon
+and late-loaded ordering-table callbacks retain their order and observations;
+no pointer is cached across a callback where the native code reloads it.
+Existing pointer-validity requirements remain unchanged.
+
+Independent complete-owner verification gives 27 match, 0 differ, preserving
+26 peers and normal owned-data checks. Full qualification passes the retail
+checksum, 149 guarded owners / 574 drafts, seven IRX owners, 26 tooling files /
+427 tests, shell mocks and docs checks. Actual-published verification repeats
+the owner, retail, report, all 28 owner dependencies, all 780 tracked files
+and final Ninja no-op checks. Source commit
+`326dd982de60131a3bd0dc421456a83a75fdbd51` has exact-source hosted CI
+[41003758538](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41003758538):
+build and deploy both completed successfully.

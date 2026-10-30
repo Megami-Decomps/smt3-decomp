@@ -94,10 +94,12 @@ cmbUpdateStockCursor2	facility/fclCombineInit	0x22C	139 of 139 words match	docs/
 cmbCalcBirthDevil	facility/fclCombineInit	0x434	269 of 269 words match	docs/matching/facility/fclCombineInit.md	208
 cmbUpdateBirthDevil	facility/fclCombineInit	0x3B8	238 of 238 words match	docs/matching/facility/fclCombineInit.md	255
 cmbDrawBirthDevil	facility/fclCombineInit	0x274	157 of 157 words match	docs/matching/facility/fclCombineInit.md	289
+cmbUpdateRoot	facility/fclCombineInit	0x1F4	125 of 125 words match	docs/matching/facility/fclCombineInit.md	327
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/matching/facility/fclEncyc.md	22
 DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	46
 ApplyEdgeListCursor	facility/fclEncyc	0xA8	42 of 42 words match	docs/matching/facility/fclEncyc.md	70
+ChangeModelMotion	facility/fclEncyc	0x104	65 of 65 words match	docs/matching/facility/fclEncyc.md	105
 fclDrawPanel	fclPanel	0x54	8 of 21 words differ	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	6 of 64 words differ	docs/matching/facility/fclPanel.md	25
 fclDrawPanelType0	facility/fclPanel	0x394	172 of 229 words match	docs/matching/facility/fclPanel.md	40
@@ -243,6 +245,7 @@ pbEditInitProc	pb/pbMain	0x148	79 of 82 words match	docs/matching/pb/pbMain.md	3
 pb_draw_bg_Process	pb/pbMain	0x26C	155 of 155 words match	docs/matching/pb/pbMain.md	23
 pb_draw_mapbase_Process	pb/pbModel	0x214	126 of 133 words match	docs/matching/pb/pbModel.md	3
 pbDrawMapPolyTransformed			10 of 262 words matching	docs/matching/pb/pbModel.md	31
+pb_draw_exit_Process	pb/pbModel	0x1C0	112 of 112 words match	docs/matching/pb/pbModel.md	59
 pbAddRecord_char	pb/pbRecord	0x144	73 of 81 words match	docs/matching/pb/pbRecord.md	3
 pbPopRecord	pb/pbRecord	0x2F0	188 of 188 words match	docs/matching/pb/pbRecord.md	27
 makaDrawMulti	pipe/pipeMakaAnim	0x494	293 of 293 words match	docs/matching/pipe/pipeMakaAnim.md	3

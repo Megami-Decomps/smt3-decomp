@@ -101,3 +101,40 @@ independent halfword load. Moving the index decrement between the real shift
 and draw-shift publications closes the final two store differences. These
 are measured source/output comparisons, not an attribution to an unqualified
 internal compiler pass or a claim about historical source spelling.
+
+## ChangeModelMotion (facility/fclEncyc, 0x104)
+
+65 of 65 words match at 260 bytes in ordinary C. Completing the whole
+`flags & 0x80` arm with its existing speed assignment and return lets the
+compiler share the genuine loop-motion calls. The other arm retains the
+final assignment, so each returning path stores speed exactly once. No
+constraint, artificial dependency, fabricated bounds, prototype or layout
+change is involved; the source still contains real separate calls.
+
+Qualified full-owner baseline/final dumps locate the observed sharing at
+`27.jump2`: final has two `mdlLoopMotion` callsites through `25.sched2`, then
+one at `27.jump2`; baseline retains two through `29.dbr`. Both plain and
+`-da` builds preserve normalized whole assembly, text, relocations and
+initialized data. Independent review reproduced final output parity. This
+establishes the measured late jump-pass boundary, not a unique historical
+source spelling or an unobserved optimizer heuristic.
+
+The 0x80 arm reads table motion and speed before getters/actions; 0x400 then
+selects the conditional smooth action versus unconditional loop action.
+Without 0x80, motion getter precedes scale getter and the signed-index table
+comparison; loop is conditional and 0x400 is irrelevant. True u8/u16 getter
+conversions and all signed-id accesses remain unchanged. Speed survives the
+callback, but `model->first` is reloaded afterward before storing speed:
+loop/smooth providers can actually create a controller and replace `first`.
+Caching the old controller would be wrong. No new validity assumptions or
+invalid-index safety are claimed, and no float arithmetic is introduced.
+
+Independent complete-owner verification gives 111 match, 0 differ,
+preserving all 110 peers and normal owned-data checks. Full qualification passes the retail
+checksum, 149 guarded owners / 573 drafts, seven IRX owners, 26 tooling files /
+427 tests, shell mocks and docs checks. Actual-published verification repeats
+the owner, retail, report, all 65 owner dependencies, all 780 tracked files
+and final Ninja no-op checks.
+Source commit `8d93e95e72468d79834e91faad818113c4e2533a` has exact-source hosted CI
+[41004448827](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41004448827):
+build and deploy both completed successfully.
