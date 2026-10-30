@@ -42,6 +42,7 @@ both native and emitted sizes when they differ.
 | 3 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
+| 3 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 3 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
@@ -62,7 +63,6 @@ both native and emitted sizes when they differ.
 | 2 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 2 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
-| 2 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
