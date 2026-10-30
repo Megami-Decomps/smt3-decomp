@@ -167,6 +167,7 @@ dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/matching/kernel/dds3ConfigMai
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matching/kernel/dds3KernelDraw.md	3
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
 slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/matching/mc/slMain.md	3
+Flow15_5	newbattle/NbNegoFlowInoti	0x148	82 of 82 words match	docs/matching/newbattle/NbNegoFlowInoti.md	3
 SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/matching/newbattle/nbAi.md	3
 SetSingleTarget2	newbattle/nbAi	0x26C	143 of 155 words match	docs/matching/newbattle/nbAi.md	29
 nbGetVirtualAisyo	newbattle/nbCalc	0xAC	43 of 43 words match	docs/matching/newbattle/nbCalc.md	3
@@ -227,6 +228,7 @@ RunSake	newbattle/nbStageProcess	0x104	45 of 65 words match	docs/matching/newbat
 CheckAction_TARSEL	newbattle/nbStageProcess	0x1CC	111 of 115 words match	docs/matching/newbattle/nbStageProcess.md	126
 SetDamagePacket	newbattle/nbStageProcess	0x1E0	116 of 120 words match	docs/matching/newbattle/nbStageProcess.md	150
 StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/matching/newbattle/nbStageProcess.md	179
+UpdateSelect	newbattle/nbTarSelProcess	0x174	93 of 93 words match	docs/matching/newbattle/nbTarSelProcess.md	3
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	138 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/matching/newdata/datCalc.md	3
 datGetSkillKouka	newdata/datCalc	0x3F8	254 of 254 words match	docs/matching/newdata/datCalc.md	21
