@@ -4030,15 +4030,14 @@ s32 cmbUpdateSacConfirm(void)
     return 1;
 }
 
-#ifdef NON_MATCHING
 void cmbUpdateStockCursor2(void)
 {
     u16 button = cmpGetPressedButton(0x237);
 
     switch (button) {
     case 1: {
-        cmpCursorInfo_t *cursor = &CMB_GBWK->stockCursorGroup[2].cursor;
-        s8 selected = *(u8 *)&cursor->unk_22 + (u8)cursor->unk_24;
+        s8 selected = *(u8 *)&CMB_GBWK->stockCursorGroup[2].cursor.unk_22
+            + (u8)CMB_GBWK->stockCursorGroup[2].cursor.unk_24;
 
         CMB_GBWK->stockSlot[2].unk_01 = selected;
         CMB_GBWK->stockSlot[2].index = CMB_GBWK->unk_165EE[(s8)CMB_GBWK->stockSlot[2].unk_01];
@@ -4085,9 +4084,6 @@ void cmbUpdateStockCursor2(void)
     cmpPlayCursorSE((u16)cmpDisablePadBitStop(
         (cmpPadStopWork_t *)&CMB_GBWK->stockCursorGroup[2].cursor, button, 0x30));
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateStockCursor2);
-#endif
 
 #ifdef NON_MATCHING
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
