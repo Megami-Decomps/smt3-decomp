@@ -74,44 +74,57 @@ extern s32 evtLoadEventBgm(s32 eventId);
 extern s32 evtCheckEventBgmLoaded(s32 eventId);
 extern dds3ProcessID_t *evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno);
 
-#ifdef NON_MATCHING
 void trmStartSaveAct(s32 saved)
 {
     s32 event;
     s32 cut = 0;
+    s32 cuts[3];
     u32 exitMode;
-    u16 terminal = trmUpdateWork->TerminalNo;
+    s32 terminal = trmUpdateWork->TerminalNo;
 
-    if (trmUpdateWork->TerminalType == 0) {
-        if ((terminal >= 18 && terminal < 20) || (terminal >= 23 && terminal < 25)) {
-            event = 0x326;
-        } else {
-            event = 0x324;
-        }
-    } else {
-        event = 0x325;
-    }
+    if (terminal < 18) goto normal_terminal;
+    if (terminal < 20) goto special_terminal;
+    if (terminal >= 25) goto normal_terminal;
+    if (terminal < 23) goto normal_terminal;
+special_terminal:
+    if (trmUpdateWork->TerminalType != 0) goto other_type;
+    cuts[0] = 10;
+    cuts[1] = 20;
+    cuts[2] = 30;
+    event = 0x326;
+    goto selected;
+normal_terminal:
+    if (trmUpdateWork->TerminalType != 0) goto other_type;
+    cuts[0] = 50;
+    cuts[1] = 60;
+    cuts[2] = 70;
+    event = 0x324;
+    goto selected;
+other_type:
+    cuts[0] = 10;
+    cuts[1] = 20;
+    cuts[2] = 30;
+    event = 0x325;
+selected:
     if (saved == 0) {
         trmEndEvent(1);
         trmUpdateWork->saveProcess = 0;
         return;
     }
     exitMode = slGetExitMode();
-    if (exitMode == 0) {
+    switch (exitMode) {
+    case 0:
         trmUpdateWork->saveProcess = 0;
         return;
-    }
-    if (exitMode == 1) {
-        cut = event == 0x324 ? 60 : 20;
+    case 1:
+        cut = cuts[1];
+        break;
     }
     evtLoadEventBgm(event);
     while (evtCheckEventBgmLoaded(event) == 0) {
     }
     trmUpdateWork->saveProcess = evtStartPolygonMovie2(0x3E8, event, cut);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmStartSaveAct);
-#endif
 
 s32 trmCheckSaveAct(void)
 {
