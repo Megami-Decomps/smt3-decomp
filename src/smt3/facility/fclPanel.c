@@ -33,8 +33,6 @@ void fclUpdatePanelTypeDef(fclPanel_t *pPanel)
 extern void fclDrawPanelSprite2(s32 id, s32 ot);
 extern void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot);
 
-/* NON_MATCHING: 6 of 64 words differ in the second color-constant schedule. */
-#ifdef NON_MATCHING
 void fclDrawPanelType0Grad(fclPanel_t *panel, u32 ot)
 {
     u32 coords[2][3];
@@ -68,9 +66,6 @@ void fclDrawPanelType0Grad(fclPanel_t *panel, u32 ot)
 
     fclDrawPanelSprite2(0x44, ot);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType0Grad);
-#endif
 
 extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
 extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,

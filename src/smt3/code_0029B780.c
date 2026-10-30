@@ -264,8 +264,6 @@ extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height, s32 *
 extern void fclDrawSpriteAlpha(s32 x, s32 y, s32 z, u8 mode, s32 *colors,
     s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
 
-/* NON_MATCHING: 7 of 179 words differ, at the native 716-byte size. */
-#ifdef NON_MATCHING
 extern void fclDrawPanelSprite2(s32 id, s32 ot);
 
 void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 selected, s32 ot)
@@ -296,7 +294,7 @@ void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 select
         colors[2] = 0x2200842C;
         colors[3] = blended;
         cmpDrawBoxGDefault(x + (half << 4), y, z, half, height, colors, ot);
-        depth = z << 4;
+        depth = (s32)((u32)z << 4);
         fclDrawPanelSprite2(0x44, ot);
         fadedColor = dds3GetConfigFadeAlpha() | 0x80808000;
         colors[0] = fadedColor;
@@ -322,16 +320,13 @@ void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 select
         colors[1] = color;
         colors[2] = color;
         colors[3] = color;
-        depth = z << 4;
+        depth = (s32)((u32)z << 4);
         fclDrawSpriteRes(0x1A0, y, depth, colors, 0, 0xD, D_00345D88, dds3ConfigLayoutTable, ot);
         fclDrawSpriteRes(0x1DC0, y, depth, colors, 0, 0xD, D_00345D88, dds3ConfigLayoutTable, ot);
         break;
     }
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigCursor);
-#endif
 
 extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
 extern void fclDrawPanelSprite2(s32 id, s32 ot);
