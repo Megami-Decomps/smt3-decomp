@@ -126,17 +126,17 @@ extern s32 datGetItemSlotIndex(u16 item);
 extern s32 cmbChkGetHearts(s32 id);
 extern u32 dds3GetRandA(void *state);
 
-#ifdef NON_MATCHING
 u16 shpGetItemFromItemBox(s32 box)
 {
-    shpItemBoxEntry_t candidates[8];
+    s32 capacity = 8;
+    shpItemBoxEntry_t candidates[capacity];
     s32 count = 0;
     u32 total = 0;
     s32 cumulative = 0;
     s32 roll;
     s32 i;
 
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < capacity; i++) {
         shpItemBoxEntry_t *entry = &D_0032FBC8[box][i];
         u16 item = entry->item;
         s32 slot = datGetItemSlotIndex(item);
@@ -159,9 +159,6 @@ u16 shpGetItemFromItemBox(s32 box)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpGetItemFromItemBox);
-#endif
 
 #ifdef NON_MATCHING
 extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
