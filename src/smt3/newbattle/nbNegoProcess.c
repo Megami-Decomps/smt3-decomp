@@ -672,7 +672,6 @@ s32 nbGetNegoTuikaRequestType(s32 tuikareqtype)
     return 0;
 }
 
-#ifdef NON_MATCHING
 extern datSkill_t attr[];
 extern nbNegoSkillEntry_t D_003E1338[];
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t *party);
@@ -680,24 +679,19 @@ extern s32 datCheckTalk(datUnitWork_t *work);
 
 void nbSetAllHojoSkillWork(nbNegoProcessData_t *n)
 {
-    nbParty_t *party;
     datUnitWork_t *work;
     s32 i;
     s32 j;
     s32 count;
     u16 skill;
-    u16 *slot;
 
     for (i = 0; i < 14; i++) {
-        party = &n->data->party[i];
-        slot = party->hojoskill;
         for (j = 0; j < 8; j++) {
-            *slot++ = 0;
+            n->data->party[i].hojoskill[j] = 0;
         }
-        party = &n->data->party[i];
-        party->flag &= ~0x80;
-        if (i < 4 && (party->flag & 1) != 0 && i != n->ppartyindex) {
-            work = nbGetUnitWorkPointer(n->data, party);
+        n->data->party[i].flag &= ~0x80;
+        if (i < 4 && (n->data->party[i].flag & 1) != 0 && i != n->ppartyindex) {
+            work = nbGetUnitWorkPointer(n->data, &n->data->party[i]);
             if (datCheckTalk(work) != 0) {
                 count = 0;
                 for (j = 0; j < work->skillcnt; j++) {
@@ -710,9 +704,6 @@ void nbSetAllHojoSkillWork(nbNegoProcessData_t *n)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbSetAllHojoSkillWork);
-#endif
 
 s32 nbGetHojoSkillWorkCnt(nbNegoProcessData_t *n)
 {
