@@ -1225,15 +1225,16 @@ s32 nbNegoSetProcessData(dds3ProcessID_t *id)
     return -1;
 }
 
-#ifdef NON_MATCHING
 extern s32 nbGetUniqueIdKoukaPacketCnt(s32 uniqueid);
 extern s32 (*D_004EF468[])(nbNegoProcessData_t *n);
 
 void *nbNegoProcess1(dds3ProcessID_t *id)
 {
     nbNegoProcessData_t *n = dds3GetProcessData(id);
+    /* The callback-table index is dead before the candidate-search index is reset. */
     s32 result;
-    s32 i;
+    s32 index;
+    s32 waitFrames;
 
     if (nbGetUniqueIdKoukaPacketCnt((s32)n->actdata) > 0) {
         return NULL;
@@ -1254,7 +1255,8 @@ void *nbNegoProcess1(dds3ProcessID_t *id)
         } else if (n->endid != 1 && n->nextnegoid == 0) {
             n->nextnegoid = 0;
             n->nextkouhocnt = 0;
-            result = D_004EF468[n->nownegoid >> 16](n);
+            index = n->nownegoid >> 16;
+            result = D_004EF468[index](n);
             n->nownegophase++;
             if (result != 0) {
                 n->endid = 1;
@@ -1266,15 +1268,19 @@ void *nbNegoProcess1(dds3ProcessID_t *id)
             if (n->nextnegoid != 0 && (n->data->stat & 0x400000)) {
                 n->stat |= 1;
                 n->selectcur = 0;
-                for (i = 0; i < n->nextkouhocnt; i++) {
-                    if (n->nextkouho[i] == n->nextnegoid) {
-                        n->selectcur = i;
+                for (index = 0; index < n->nextkouhocnt; index++) {
+                    if (n->nextkouho[index] == n->nextnegoid) {
+                        n->selectcur = index;
                         break;
                     }
                 }
             }
         }
-        if (nbGetUniqueIdKoukaPacketCnt((s32)n->actdata) > 0 || n->waitframe > 0) {
+        if (nbGetUniqueIdKoukaPacketCnt((s32)n->actdata) > 0) {
+            return NULL;
+        }
+        waitFrames = n->waitframe;
+        if (waitFrames > 0) {
             return NULL;
         }
         if (n->nowmsgid >= 0) {
@@ -1300,9 +1306,6 @@ void *nbNegoProcess1(dds3ProcessID_t *id)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbNegoProcess1);
-#endif
 
 void nbNegoShutdown(dds3ProcessID_t *id)
 {
