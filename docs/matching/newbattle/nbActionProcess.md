@@ -196,3 +196,51 @@ owners and report gates passed for source
 `b362bd871f355c758be545f97a43237e7f324ead`. Exact-source CI
 [41078870717](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41078870717)
 completed successfully, with every actual step passing and none skipped.
+
+## SetAction_CHECK1 (newbattle/nbActionProcess, 0x34C)
+
+211 of 211 words match at 844 bytes. The living-actor timestamp retains the
+GetAllEndTime snapshot, then performs GetAllUnlockTime but discards its return.
+End plus actual motion delay supplies the three packet consumers; it is not
+unlock time and is not recomputed after SetTimeList. Earlier unlock still
+supplies the dead-formation loop timestamp. Callback-sensitive form/motendtype
+reloads and final recheck remain native. Independent loop guards consume the
+real status snapshot without combining mask 0x41. The loop stays 0..15; form
+addresses use the actual EE32 base/index/240-byte stride and only form the final
+valid typed pointer, with no invented bounds or portable-provenance claim.
+
+Three localized empty identity regions act on initialized actual values:
+frameScratch `+r` retains the real previous delay on the conditional-move path;
+block-local motionMode=2 `+r` feeds the actual first comparison without keeping
+that constant through the join; actual signed16 motendtype `+m` at the join
+inhibits reuse of its earlier load, preserving the native second halfword
+read. The last operand is an identity, **not an invented field write**. Empty
+templates emit no instruction/store and assert no global memory barrier.
+There is no fixed register binding, false volatile or altered provider ABI.
+These are explicitly compiler reconstruction aids, not historical source facts.
+
+Final scratch phases are genuine and disjoint: initialized 0/3 supplies motion
+delay, then a fresh packettime-10 definition supplies the later stock-panel
+fade clamp. Qualified local-allocation RTL marks pseudo88 dead at its end+delay
+consumer UID631, redefines it at UID825, and marks it dead after clamp use
+UID848. No value or artificial consumer extends across that phase boundary.
+Unsigned packettime arithmetic and explicit unsigned end+delay preserve native
+modulo32 operations before target s32 conversion and signed clamp; no timestamp
+range assumption is invented. The skipped native delay-slot assignment on a
+no-consumer path has no observable effect.
+
+Qualified ordinary GCSE propagates scratch to zero and CSE removes the second
+motendtype load. Final retains the real scratch arm, second halfword load and
+fresh later mode constant. Independent final/ordinary complete-owner plain/dump
+comparisons preserve normalized assembly, allocated-section headers/contents,
+relocations/symbol contracts and function inventory. These are actual pass
+observations, not an unobserved comparator mechanism. Reduction removed an
+unnecessary fixed mode binding; combining the separate initialization operands
+regressed allocation. No broader barrier or extra field store replaces them.
+
+Independent complete-owner verification gives 86 match, 0 differ, preserving
+all 85 peers and owned data. Retail checksum, 427 tests, 147 guarded owners /
+543 drafts, seven IRX owners and report gates passed for source
+`df2cf13c91edaa9dfdc6dcae1a91b1a96290d359`. Exact-source CI
+[41088837974](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41088837974)
+attempt 1 completed successfully, with every actual step passing and none skipped.

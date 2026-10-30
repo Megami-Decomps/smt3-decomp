@@ -24,10 +24,10 @@ both native and emitted sizes when they differ.
 | 7 |  | [sdk/libc.md](sdk/libc.md) |
 | 7 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 6 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
+| 6 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
-| 5 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 5 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |

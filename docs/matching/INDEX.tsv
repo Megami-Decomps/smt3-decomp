@@ -186,6 +186,7 @@ CheckAction_COMM	newbattle/nbActionProcess	0x354	213 of 213 words match	docs/mat
 CheckAction_CHECK1	newbattle/nbActionProcess	0x28C	163 of 163 words match	docs/matching/newbattle/nbActionProcess.md	60
 CheckCounter	newbattle/nbActionProcess	0x238	142 of 142 words match	docs/matching/newbattle/nbActionProcess.md	105
 CheckBinjoNego	newbattle/nbActionProcess	0x258	150 of 150 words match	docs/matching/newbattle/nbActionProcess.md	153
+SetAction_CHECK1	newbattle/nbActionProcess	0x34C	211 of 211 words match	docs/matching/newbattle/nbActionProcess.md	200
 SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/matching/newbattle/nbAi.md	3
 SetSingleTarget2	newbattle/nbAi	0x26C	143 of 155 words match	docs/matching/newbattle/nbAi.md	29
 Sel_AI	newbattle/nbAi	0x358	214 of 214 words match	docs/matching/newbattle/nbAi.md	43
