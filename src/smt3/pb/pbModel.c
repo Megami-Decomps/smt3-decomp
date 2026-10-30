@@ -320,7 +320,6 @@ extern void pbSetPrimMatrix(sdfVector4_t *rotation, f32 *position, void *packet)
 extern s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags,
                                     s32 special, sdfDrawTag_t *tag);
 
-#ifdef NON_MATCHING
 s32 pb_draw_exit_Process(dds3ProcessID_t *id)
 {
     pbProcHandle_t *panel = id->workdata;
@@ -333,38 +332,36 @@ s32 pb_draw_exit_Process(dds3ProcessID_t *id)
 
     memset(position, 0, sizeof(position));
     memset(&vertices, 0, sizeof(vertices));
-    if (panel->state == 1) {
+    switch (panel->state) {
+    case 1:
         if (panel != NULL) {
             panel->flags = 0;
         }
-    } else if (panel->state == 5) {
+        break;
+    case 5:
         return -1;
     }
-    if (work->flg == 0) {
-        return 0;
+    if (work->flg != 0) {
+        tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(tag);
+        sdf3DPrimLinkMat(tag, work->mat, NULL);
+        angle = (f64)D_00327248.y + 0.02;
+        D_00327248.y = angle;
+        if (3.141592503f < angle) {
+            D_00327248.y = angle - 6.28318500518798828125f;
+        } else if (angle < -3.141592503f) {
+            D_00327248.y = angle + 6.28318500518798828125f;
+        }
+        position[0] = panel->x * 40 - 380;
+        position[1] = -20.0f;
+        position[2] = panel->y * 40 - 380;
+        pbSetPrimMatrix(&D_00327248, position, tag);
+        pbDrawMapPolyTransformed(&vertices, 0x1F, 6, tag);
+        ot = &sdfGrOtTable[40];
+        ot->regFunc(ot, tag);
     }
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit(tag);
-    sdf3DPrimLinkMat(tag, work->mat, NULL);
-    angle = (f64)D_00327248.y + D_00535C80[0];
-    D_00327248.y = angle;
-    if (D_0054E2AC < angle) {
-        D_00327248.y = angle - D_0054E2B0;
-    } else if (angle < D_0054E2B4) {
-        D_00327248.y = angle + D_0054E2B8;
-    }
-    position[0] = panel->x * 40 - 380;
-    position[1] = -20.0f;
-    position[2] = panel->y * 40 - 380;
-    pbSetPrimMatrix(&D_00327248, position, tag);
-    pbDrawMapPolyTransformed(&vertices, 0x1F, 6, tag);
-    ot = &sdfGrOtTable[40];
-    ot->regFunc(ot, tag);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbModel", pb_draw_exit_Process);
-#endif
 
 void pb_draw_exit_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
@@ -693,7 +690,6 @@ void pb_1D3940(s32 x, s32 y, sdfDrawTag_t *tag)
     pbDrawMapPoly(&geometry, tag);
 }
 
-INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C80);
 
 INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C88);
 
