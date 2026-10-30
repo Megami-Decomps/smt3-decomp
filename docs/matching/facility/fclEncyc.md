@@ -66,3 +66,38 @@ font-array cursor regressed to 71 of 99 words matching and was discarded.
 A default scratch promotion qualified the complete owner at 105 match / 1
 differ with this target as the sole difference. The retail build retains its
 assembly fallback.
+
+## ApplyEdgeListCursor (facility/fclEncyc, 0xA8)
+
+42 of 42 words match at 168 bytes in ordinary C. The complete owner checks
+110 match, 0 differ, including owned data. Source commit: `f173c1fadb534e63fd19fc84463ac9e4af0a46cf`.
+Exact-source [CI run 40976126797](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40976126797)
+passed build and deployment.
+
+Keep explicit pointers to the existing cursor, geometry and vertical-step
+subobjects. Snapshot the actual shift and maximum-shift bytes. At the upper
+edge the observed shift is zero; `Shift = 1`, the index decrement, then
+`DrawShift = shift + 1` express the actual transition to row one. Both one
+values have real consumers. This source ordering produces the native store
+ordering without a constraint, dummy value, artificial branch or new type.
+At the lower edge, assign the truncated new row to the byte-sized `Shift`
+then copy that stored value to `DrawShift` before calculating geometry.
+
+Signed index comparisons remain distinct from the native unsigned-halfword
+observation used for index updates. The geometry calculation preserves the
+existing vertical-step multiplication and default Y addition. This does not
+invent range guarantees for arbitrary list contents or alter the existing
+valid-list contract. Independent review establishes StepY 28 and DefY 11
+for the initialized Encyc windows; even row 253 gives Y 7095, safely within
+signed 32-bit range. This is evidence for that UI domain, not a whole-program
+proof against later arbitrary memory mutation or an arbitrary-raw-state
+signed-overflow guarantee.
+
+The inherited draft emits 160 bytes. Explicit real subobjects restore the
+native size with 28 of 42 words matching. Store ordering reaches 33; using
+`shift + 1` reaches 37. A separate unsigned index snapshot emits 176 bytes,
+while treating the index update as only a signed observation misses native's
+independent halfword load. Moving the index decrement between the real shift
+and draw-shift publications closes the final two store differences. These
+are measured source/output comparisons, not an attribution to an unqualified
+internal compiler pass or a claim about historical source spelling.

@@ -132,3 +132,37 @@ The current global work pointer is reloaded for the script and argument
 address, and again after `fclScriptStart` before its actual return value is
 stored at offset 8. The declaration and return-value consumer remain
 unchanged.
+
+## cmbGetBirthPhase (fclCombineInit, 0x88)
+
+34 of 34 words match at 136 bytes in ordinary C. The complete owner checks
+185 match, 0 differ, including owned data. Source commit: `85baa43edce88819d8bde6f068752a63814a2a1c`.
+Exact-source [CI run 40974879934](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40974879934)
+passed build and deployment.
+
+Use the real switch cases 5, 6 and default, in that order. Each arm performs
+its own selected stock-byte lookup from the group's signed 16-bit row plus
+unsigned 8-bit cursor column. Mode 5 selects group 0, mode 6 selects group 1,
+and every other signed mode selects group 2. Interpret the selected stock
+byte as signed 8-bit, select that party entry's unsigned 16-bit unit ID and
+tail-call `cmpModelSetup(id, 0)`. The valid cursor and party-index contracts
+remain unchanged; no fabricated bounds or new pointer assumptions are used.
+There are no intervening callbacks, new stores, constraints or ABI changes.
+The same per-arm expression shape appears in matched `cmbDrawStatus`.
+
+The inherited selected-cursor draft emits 120 bytes. Real per-arm row/column
+snapshots reach the native 136 bytes but only 12 of 34 words; the actual
+switch order reaches 22. Reversing the two cases reaches 14. Narrower truthful
+snapshot types and a separate unit-ID local do not improve 22; factoring only
+the sum into the arms reaches 15. Putting the complete real signed stock-byte
+lookup in each arm produces all 34 words without artificial cases or work.
+
+Qualified compiler dumps retain three stock-byte accesses through `sched2`,
+then merge their common suffix in `jump2`. The resulting shared sum uses $2,
+the signed stock byte uses $4, and the DDS3 work base loads into $3 at the
+native point. Early source-level factoring instead allocates the sum to $3
+and the DDS3 base to $6, hoisting the latter. Whole-owner plain/dump assembly
+agrees apart from the scratch `.file` pathname; text and relocations agree,
+and text agrees with the canonical checker's full object, for both the
+snapshot-switch control and exact per-arm form. This is observed compiler
+behavior, not proof of the original source spelling.

@@ -52,6 +52,7 @@ dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
 dds3DrawConfigBar	code_0029B780	0x1C4		docs/matching/code_0029B780.md	68
 dds3DrawConfigCursor	code_0029B780	0x2CC	48 of 179 words matching	docs/matching/code_0029B780.md	85
+dds3DrawConfigSlider	code_0029B780	0xE4	57 of 57 words match	docs/matching/code_0029B780.md	121
 dds3BillboardManagerInit	effect/billManager	0xB8	44 of 46 words match	docs/matching/effect/billManager.md	3
 effBTLCutDraw	effect/effBattle	0x420	Eighty-eight of 263 words differ	docs/matching/effect/effBattle.md	3
 effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270	6 of 156 words differ	docs/matching/effect/effBattleMisc.md	3
@@ -82,9 +83,11 @@ func_00206308, func_002065C8	fclCombineInit	0x2C0 each	35 of 176 words differ	do
 cmbDrawFullScreenPanel	fclCombineInit	0x68	20 of 26 words match	docs/matching/facility/fclCombineInit.md	41
 cmbDrawResultPanel	fclCombineInit	0x228	138 of 138 words match	docs/matching/facility/fclCombineInit.md	82
 cmbStartResultScript	fclCombineInit	0x84	33 of 33 words match	docs/matching/facility/fclCombineInit.md	102
+cmbGetBirthPhase	fclCombineInit	0x88	34 of 34 words match	docs/matching/facility/fclCombineInit.md	136
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/matching/facility/fclEncyc.md	22
 DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	46
+ApplyEdgeListCursor	facility/fclEncyc	0xA8	42 of 42 words match	docs/matching/facility/fclEncyc.md	70
 fclDrawPanel	fclPanel	0x54	8 of 21 words differ	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	6 of 64 words differ	docs/matching/facility/fclPanel.md	25
 fclDrawPanelType0	facility/fclPanel	0x394	172 of 229 words match	docs/matching/facility/fclPanel.md	40
