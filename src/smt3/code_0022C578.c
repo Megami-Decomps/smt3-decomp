@@ -6310,30 +6310,31 @@ extern datDevilTableEntry_t datDevilTable[];
 extern char *datExplainTable[];
 extern s16 datGetDevilParam(u8 devilId);
 
-#ifdef NON_MATCHING
 void cmpDrawStatusValue(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
 {
-    s32 color = 0xA09DC380;
+    s32 color;
     s32 affinity;
     frFontHandle_t *font;
 
     if (mode == 4) {
-        color = 0x64B2B580;
+        color = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x64B2B580);
+        goto color_ready;
+    } else {
+        color = cmpGetPanelAlphaOrDefault((u8 *)colors, 0xA09DC380);
+        goto color_ready;
     }
-    color = cmpGetPanelAlphaOrDefault((u8 *)colors, color);
+color_ready:
     if (unit->flag & 4) {
         affinity = datGetDevilParam(DDS3_GBWK->heartsequip);
     } else {
         affinity = datDevilTable[unit->id].aisyoid;
     }
-    font = frwGetSmallFontFRQ2((x + 0x18) * 16, (y + 0x115) * 8,
+    font = frwGetSmallFontFRQ2((s32)(((u32)x + 0x18u) << 4),
+                               (s32)(((u32)y + 0x115u) << 3),
                                0xFFFFF, color, datExplainTable[affinity + 0x50], 0);
     func_001C7E38(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusValue);
-#endif
 
 void cmpDrawStatusBars(s32 x, s32 y, u8 *alpha)
 {
