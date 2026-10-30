@@ -172,7 +172,6 @@ s8 pbCheckPopRecord(pbProcHandle_t *p) {
     return slot->characters != NULL;
 }
 
-#ifdef NON_MATCHING
 extern void pbGetCellY(pbProcHandle_t *panel, s16 x, s16 y);
 extern void pbSetPanelValue(pbProcHandle_t *panel, s8 value);
 extern void *pbSearchGroupDB(pbProcHandle_t *panel, u32 groupID);
@@ -214,55 +213,43 @@ s32 pbPopRecord(pbProcHandle_t *panel, pbProcHandle_t **characters, pbProcHandle
     savedCells = slot->blocks;
     current = slot->flag[0];
     group = pbSearchGroupDB(database, savedCells[0].status & 0x7FF);
-    if (group != NULL && group->count != 0) {
-        map = D_0054F5C4;
-        entry = group->blockEntries;
-        i = 0;
-        do {
-            y = group->cellY + entry->y;
-            x = group->cellX + entry->x;
-            map->map[y][x] &= 0x1800;
-            entry++;
-        } while (++i < group->count);
+    if (group != NULL) {
+        for (i = 0; i < group->count; i++) {
+            map = D_0054F5C4;
+            entry = &group->blockEntries[i];
+            map->map[group->cellY + entry->y][group->cellX + entry->x] &= 0x1800;
+        }
     }
-    if (slot->flag[2] != 0) {
+    for (i = 0; i < slot->flag[2]; i++) {
         map = D_0054F5C4;
         savedCells = slot->blocks;
-        i = 0;
-        do {
-            y = savedCells[i].y;
-            x = savedCells[i].x;
-            map->map[y][x] &= 0x800;
-            y = savedCells[i].y;
-            x = savedCells[i].x;
-            map->map[y][x] |= savedCells[i].status;
-        } while (++i < slot->flag[2]);
+        map->map[savedCells[i].y][savedCells[i].x] &= 0x800;
+        map->map[savedCells[i].y][savedCells[i].x] |= savedCells[i].status;
     }
-    map = D_0054F5C4;
-    for (y = 0; y < 20; y++) {
-        for (x = 0; x < 20; x++) {
-            cell = map->map[y][x];
+    {
+    pbMapWork_t *wholeMap = D_0054F5C4;
+    for (i = 0; i < 20; i++) {
+        u32 column;
+        for (column = 0; column < 20; column++) {
+            u16 *cellAddress = (u16 *)((u8 *)wholeMap + 0x1C + (i * 20 + column) * sizeof(u16));
+            cell = *cellAddress;
             if ((cell >> 13) == 2) {
-                map->map[y][x] = (cell & 0x1FFF) | 0x6000;
+                *cellAddress = (cell & 0x1FFF) | 0x6000;
             }
         }
     }
-    if (slot->flag[2] == slot->flag[3] && slot->flag[3] != 0) {
-        map = D_0054F5C4;
-        savedCells = slot->floors;
-        i = 0;
-        do {
-            y = savedCells[i].y;
-            x = savedCells[i].x;
-            map->map[y][x] |= savedCells[i].status;
-        } while (++i < slot->flag[3]);
+    }
+    if (slot->flag[2] == slot->flag[3]) {
+        for (i = 0; i < slot->flag[3]; i++) {
+            map = D_0054F5C4;
+            savedCells = slot->floors;
+            map->map[savedCells[i].y][savedCells[i].x] |= savedCells[i].status;
+        }
     }
     pbFreeRecord(slot);
     return current;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbRecord", pbPopRecord);
-#endif
+
 
 #ifdef NON_MATCHING
 s32 pbAddRecord_blk(pbProcHandle_t *panel, pbGroupData_t *group)
