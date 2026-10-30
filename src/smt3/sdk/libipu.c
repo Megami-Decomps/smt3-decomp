@@ -23,8 +23,6 @@ extern s32 EIntr(void);
  * gcc2_compiled label as its name. */
 extern void ipuWriteFromIpuChcr(u32 chcr);
 
-/* Retained sync draft's explicit wait; see docs/matching/sdk/libipu.md. */
-#define IPU_HAZARD_WAIT() __asm__ volatile ("nop\nnop\nnop\nnop")
 /* With the configured 2.9 compiler, this barrier plus its generated padding
  * leaves four slots after an IPU_CTRL read: three nops after a mask, or four
  * nops before a signed test. See docs/matching/sdk/libipu.md. */
@@ -118,31 +116,27 @@ void sceIpuRestartDMA(sdfIpuDmaRegs_t *state)
 INCLUDE_ASM(const s32, "sdk/libipu", sceIpuRestartDMA);
 #endif
 
-/* NON_MATCHING: 100 bytes against retail's 104; the mode == 1 arm is emitted
- * inline where retail branches to it out of line. */
-#ifdef NON_MATCHING
 u32 sceIpuSync(s32 mode)
 {
     u32 ret = 0;
 
-    if (mode != 0) {
-        if (mode == 1) {
-            ret = IPU_CTRL >> 31;
-        }
-    } else {
+    switch (mode) {
+    case 0: {
         s32 ctrl;
 
         do {
             ctrl = IPU_CTRL;
-            IPU_HAZARD_WAIT();
+            IPU_POLL_BARRIER();
         } while (ctrl < 0);
         ret = 0;
+        break;
+    }
+    case 1:
+        ret = IPU_CTRL >> 31;
+        break;
     }
     return ret;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libipu", sceIpuSync);
-#endif
 
 void gcc2_compiled__8(u32 chcr)
 {

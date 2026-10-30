@@ -37,12 +37,19 @@ IPU control word, but the restart routine does not write that word back.
 
 ## sceIpuSync
 
-100 bytes against retail's 104, with the hazard pad in place and the arms in
-retail's order (`if (mode != 0) { if (mode == 1) ... } else { <wait> }`, which
-is what puts the `ret = 0` initialisation in the first branch's delay slot).
-The last instruction is block placement: retail branches to the `mode == 1`
-body out of line with `beq`, where the draft falls into it and branches around
-with `bne`.
+Matches all 104 instruction bytes with `switch (mode)` and the established
+single-nop `IPU_POLL_BARRIER`. Case 0 polls the signed control word until clear
+and returns zero; case 1 returns its unsigned busy bit; other modes return the
+initialized zero without a hardware read.
+
+The switch puts both case bodies after the zero/one comparison chain, unlike
+the former nested `if`, whose mode-one body fell through inline. Actual compiler
+expansion branches to the two case labels and the default return join; delay-slot
+reorganization retains that layout, fills the first branch's slot with the
+zero initialization and the second with the result copy, and adds three nops
+after the explicit poll barrier. Ordinary and `-da` builds have identical full
+`.text` and normalized assembly. The former four-nop macro overcounted the
+wait; changing only that macro fixed the padding but not the dispatch layout.
 
 ## sceIpuRestartDMA
 
