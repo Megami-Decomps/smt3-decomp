@@ -2590,20 +2590,17 @@ void SetAction_STKSEL(nbActionProcessData_t *a)
     StkSelId = -1;
 }
 
-/* NON_MATCHING: 9 of 58 words differ (first at +0x38). */
-
-#ifdef NON_MATCHING
-
 s32 CheckAction_STKSEL(nbActionProcessData_t *a)
 {
     nbFormation_t *form;
     s32 i;
+    u32 clearMask;
 
     switch (StkSelId) {
     default:
         nbPanelStockSelect(a->data, 0);
         nbCloseCommSel();
-        a->select = 1 << (StkSelId + 0x10);
+        a->select = 1u << (StkSelId + 0x10);
         SetNextActionSeq(a, 7);
         a->stat |= 0x400;
         nbPlaySe(8);
@@ -2612,9 +2609,10 @@ s32 CheckAction_STKSEL(nbActionProcessData_t *a)
         StkSelId = nbPanelStockSelect(a->data, 1);
         break;
     case -2:
+        clearMask = ~8u;
         form = a->data->form;
         for (i = 0xF; i >= 0; i--) {
-            form->stat &= ~8;
+            form->stat &= clearMask;
             form++;
         }
         nbSetCommSelStat(2);
@@ -2626,11 +2624,6 @@ s32 CheckAction_STKSEL(nbActionProcessData_t *a)
     return 0;
 }
 
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_STKSEL);
-
-#endif
 
 /* Native item rows, as consumed by the command and inventory providers. */
 typedef struct {
@@ -4459,4 +4452,3 @@ INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", StkSelId);
 INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", D_00551124);
 
 INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", D_00551128);
-
