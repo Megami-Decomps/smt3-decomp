@@ -3435,7 +3435,6 @@ extern s32 fclChkSelMessage(void);
 extern s8 fclGetSelMessagePos(void);
 extern s8 fclEndMessage(void);
 
-#ifdef NON_MATCHING
 void campWaitSelMessage(void)
 {
     if (campWork->stockMessagePhase > 0) {
@@ -3466,15 +3465,22 @@ void campWaitSelMessage(void)
                 fclEndMessage();
                 campWork->stockMessagePhase = 2;
             } else {
-                campWork->unk_0004 = 1;
+                /* Keep this initialized publication value in native $2.
+                 * The ordinary and generic-constraint forms reuse a saved
+                 * constant, changing dispatch and the shared exit. */
+                register s32 confirm __asm__("$2") = 1;
+                __asm__("" : "+r"(confirm));
+                campWork->unk_0004 = confirm;
             }
             break;
+        case 2:
+        default:
+            goto done;
         }
     }
+done:
+    return;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campWaitSelMessage);
-#endif
 
 #ifdef NON_MATCHING
 extern s32 campInfoWorkExists(void);
