@@ -245,3 +245,71 @@ constraint is used.
 
 Reproduce with `tools/check_unit.py src/smt3/effect/effPCPBoss.c
 --cflags=-DNON_MATCHING --func effPCPBossONGYDraw -v`.
+
+## effPCPBossKAGU2AttackDraw (effect/effPCPBoss, 0x424)
+
+265 of 265 words match at 1060 bytes in ordinary C. The signed bounded search
+keeps distinct current/found pointers and a fallback-only NULL return; the
+direct skill path bypasses that guard. Frame/duration/fade snapshots precede
+blend, while count/randomness follow the real VU endpoint store. Actual aligned
+place/marks/center/end objects explain the native 0x110 frame without padding.
+Existing VU helpers hand produced vf10 values to real scratch immediately,
+then read XYZ for accumulation. Real lists remain 16 slots, four entries per
+group, with marks 1/2/4/5 and angles zero/positive/negative/zero. No new clamp,
+consumer or type recovery is claimed. List pointers and BED/frame fields
+retain their actual callback reloads and native increment timing.
+
+Independent BED payload stores before SetParams recover native scheduling
+without barriers or constraints. Qualified **pre-scheduler** regmove has
+field9 UID772 carrying the actual base's REG_DEAD274; field8 UID767 does not.
+Sched1 moves field9 before fields7/10/XYZ/color, then zeros4/5/6, field8 and
+zero3. Its **post-scheduler** death marker transfers to later field8: that
+output annotation is not evidence that field8 was the dying input use.
+Complete-owner plain/dump normalized assembly, allocated-section contracts,
+relocations and function inventory agree, independently checked. This records
+observed scheduling, not an unseen comparator rule or original source spelling.
+
+Independent verification gives 155 match, 0 differ, preserving all peers and
+owned data; the first KAGU remained unchanged at this source. Retail checksum,
+427 tests, 147 guarded owners / 545 drafts, seven IRX owners and report gates
+passed. Source `910bd87f2ed6d9271eaa2794aaa67076ef33c3c4` has green exact-source CI
+[41082732651](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41082732651).
+
+## effPCPBossKAGUAttackDraw (effect/effPCPBoss, 0x35C)
+
+215 of 215 words match at 860 bytes. Two explicit local `$22` bindings are
+SMT3 reconstruction aids on **nonoverlapping real lifetimes**, not historical
+source evidence. Fallback found initializes NULL, receives only an actual
+matching formation and feeds the NULL/early-return guard; the direct path
+bypasses it. Qualified life RTL marks that hard-register value dead at the
+guard. Only later does groupIndex initialize zero for its genuine outer-loop
+comparison, addressing and increment. Both use ABI-preserved callee-saved
+storage across actual callbacks; prologue/epilogue save and restore `$22`.
+No live caller-clobbered binding, overlap, fake consumer, artificial lifetime
+or instruction-emitting scalar asm is introduced. Existing VU helpers are
+actual hardware handoffs, not part of this allocation allowance.
+
+Unsigned i genuinely indexes eight marks, dies at that phase's exit, then
+reinitializes for each eight-polygon loop with the native index-6 exclusion.
+Qualified life/global-allocation observations establish the disjoint consumers
+and final pseudo93-to-hard19 allocation. The later group loop and actual
+linear-list index retain independent unsigned increments in cursor order.
+No phase value leaks across reset; no extra memory operation or callback is
+added. Real eight-entry groups, 32 slots, fallback domain, BED stores and VU
+scratch remain unchanged, without fabricated bounds or padding.
+
+Controls isolate the dependency: fallback binding plus faithful BED order
+reaches 197/215 words, the disjoint group binding 203/215, genuine index reuse
+210/215, and native independent cursor increment order completes the match.
+A broad work-pointer binding disrupted induction and was rejected. Final merged
+owner plain/dump assembly, allocated sections, relocation contracts and complete
+function inventory pass independent parity; KAGU2's body is unchanged. The
+older first-only study owner contained a stale sibling and is not the final
+owner acceptance evidence. No unobserved allocator comparator is claimed.
+
+Independent final verification gives 156 match, 0 differ, including owned data.
+Retail checksum, 427 tests, 147 guarded owners / 544 drafts, seven IRX owners
+and report gates passed for source `cd029e510e43fd3259bbd3d6fc9989b28e655100`.
+Exact-source CI
+[41083876389](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41083876389)
+attempt 1 completed successfully, with every actual step passing and none skipped.

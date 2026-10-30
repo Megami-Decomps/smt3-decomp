@@ -17,10 +17,10 @@ both native and emitted sizes when they differ.
 | 11 |  | [sdk/libkernl.md](sdk/libkernl.md) |
 | 11 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 10 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
+| 10 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
-| 8 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 7 |  | [sdk/libc.md](sdk/libc.md) |
 | 7 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 6 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
