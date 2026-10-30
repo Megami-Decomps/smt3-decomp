@@ -56,3 +56,48 @@ all 81 peers and owned data. Retail checksum, 427 tooling tests, guarded EE/IRX
 and report gates passed. Source `b2ad5f7a1ab45adc298969a021f4fe0d75693306`
 has green exact-source CI
 [41052309663](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41052309663).
+
+## CheckAction_CHECK1 (newbattle/nbActionProcess, 0x28C)
+
+163 of 163 words match at 652 bytes in ordinary C. The actual signed-halfword
+command switch copies for commands 0/3; command 1 clears indices 0x31/0x32,
+retains previous memory for 0xA4..0xA6 and 0xF7, and otherwise copies. All
+other commands, including negatives, clear. Unsigned16 subtraction casts
+preserve native modular range tests over the full index domain. Both real
+clear-call sites remain, with no widened fields or invented bounds.
+
+Printf precedes fresh command/index and action status/data observations.
+Form/time/death checks retain callback-sensitive reloads, and packettime
+remains unsigned for its comparison/decrement. Providers keep truthful types;
+the final return/next sequence remain 1/20. Source/destination memory fields
+are actual disjoint members, not fabricated views. The now-owned printf string
+is its actual literal; final whole-owner checking resolves ownership without
+the discarded private promotion wrapper's inactive-fallback sharing artifact.
+
+The switch-only control has the native size but ten differing load/store
+words. Qualified paired regmove/sched1 observations guide two natural
+increasing-address source-order changes. In null-work initialization, the
+last actual data-pointer use changes from the 0x5A store to the 0x5C store;
+sched1 moves that last-use store first, yielding native 0x5C/0x56/0x58/0x5A
+order. In command-memory copy, the last actual pointer use becomes previous
+form at 0x78 rather than previous area at 0x76. Final sched1 loads current
+area/form at 0x6E/0x70, then stores 0x72/0x78/0x74/0x76, exactly native.
+These are observed pass outputs and genuine last uses, not a guessed internal
+scheduler priority or original-source claim. No extra access, consumer,
+constraint, binding, volatility, ABI change or artificial dependency is added.
+The owner's pre-existing unrelated bindings remain unchanged.
+
+Control and final each independently pass full-owner plain/dump normalized
+assembly, allocated-section contracts, relocations and function-inventory
+parity. Bounded classification models pass 851,968 implementation cases and
+1,310,720 independent-review cases spanning all u16 indices or all s16 commands
+against representative values of the other variable. They test clear/copy/
+retain decisions, not the exhaustive Cartesian product, callback execution
+or arbitrary-memory behavior; exact accesses and call ordering remain required.
+
+Independent complete-owner verification gives 83 match, 0 differ, preserving
+all 82 peers and owned data. Retail checksum, 427 tests across 26 tooling files,
+148 guarded owners / 551 drafts, seven IRX owners and report gates passed for
+source `43b917262373f48e4cc269a792e472cd19ad0595`. Exact-source CI
+[41072560237](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41072560237)
+completed successfully, with every actual step passing and none skipped.
