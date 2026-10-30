@@ -3320,9 +3320,14 @@ void campUpdateStockCursor(void)
 }
 
 extern s32 cmpChkDoNotUseSkill(u16 skill);
-extern campWork_t *volatile cmpSkillSelectWork asm("campWork");
 
-#ifdef NON_MATCHING
+/* Exact-type view of the existing provider, deliberately hiding its earlier
+ * definition. In paired complete-owner builds, the direct call moves the
+ * common cursor-work load into the button-one branch delay slot; this view
+ * preserves retail's no-op there and load in the default exit's delay slot.
+ * The provider and ABI are unchanged. This is a target-specific visibility
+ * aid, not evidence of original source spelling. */
+extern s32 cmpChkDoNotUseSkillView(u16 skill) asm("cmpChkDoNotUseSkill");
 void cmpUpdateSkillSelect(void)
 {
     u16 button = cmpGetPressedButton(0x33);
@@ -3334,15 +3339,14 @@ void cmpUpdateSkillSelect(void)
     }
     switch (button) {
     case 1: {
-        s32 blocked = cmpChkDoNotUseSkill(skill);
-        campWork_t *work = cmpSkillSelectWork;
+        s32 blocked = cmpChkDoNotUseSkillView(skill);
 
         if (blocked != 0) {
             button = 0x8000;
-        } else {
-            work->unk_0001 = 2;
-            campWork->unk_0004 = 1;
+            break;
         }
+        campWork->unk_0001 = 2;
+        campWork->unk_0004 = button;
         break;
     }
     case 2:
@@ -3362,9 +3366,6 @@ void cmpUpdateSkillSelect(void)
                                        button, 0x30);
     cmpPlayCursorSE(button);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateSkillSelect);
-#endif
 
 extern u8 cmpClearStatusFlags(void);
 extern void *cmpStartProcessStatus(s8 arg, cmpSeqInfo_t *parent);
