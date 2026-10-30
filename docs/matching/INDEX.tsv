@@ -171,7 +171,10 @@ dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/matching/kernel/dds3ConfigMai
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matching/kernel/dds3KernelDraw.md	3
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
 slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/matching/mc/slMain.md	3
+Flow2_6	newbattle/NbNegoFlowFullMoon	0x278	158 of 158 words match	docs/matching/newbattle/NbNegoFlowFullMoon.md	3
 Flow15_5	newbattle/NbNegoFlowInoti	0x148	82 of 82 words match	docs/matching/newbattle/NbNegoFlowInoti.md	3
+nbFlowGetUnitEntry	newbattle/NbNegoFlowOne	0x384	225 of 225 words match	docs/matching/newbattle/NbNegoFlowOne.md	3
+Flow6_24	newbattle/NbNegoFlowTwo	0x4FC	319 of 319 words match	docs/matching/newbattle/NbNegoFlowTwo.md	3
 SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/matching/newbattle/nbAi.md	3
 SetSingleTarget2	newbattle/nbAi	0x26C	143 of 155 words match	docs/matching/newbattle/nbAi.md	29
 nbGetVirtualAisyo	newbattle/nbCalc	0xAC	43 of 43 words match	docs/matching/newbattle/nbCalc.md	3
@@ -218,6 +221,7 @@ ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/matching/newbattle
 nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/matching/newbattle/nbMakePacket.md	333
 nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/matching/newbattle/nbMakePacket.md	361
 nbSetAllHojoSkillWork	newbattle/nbNegoProcess	0x184	97 of 97 words match	docs/matching/newbattle/nbNegoProcess.md	3
+nbSearchHojoSkillWork	newbattle/nbNegoProcess	0x3CC	243 of 243 words match	docs/matching/newbattle/nbNegoProcess.md	46
 nbPanelDrawPP (0xA84)			671 of 673 words match	docs/matching/newbattle/nbPanelProcess.md	3
 nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanelProcess.md	65
 nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	127
