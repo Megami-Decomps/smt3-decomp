@@ -1711,11 +1711,10 @@ s32 cmbFindEvoEntry(u16 devilId)
 
 extern datSkill_t attr[];
 
-#ifdef NON_MATCHING
 s32 cmbCopyEvoDevil(datUnitWork_t *unit, u16 skill)
 {
-    u16 skillForm = attr[skill].keisyoform;
     s8 skillAttr = attr[skill].skillattr;
+    u16 skillForm = attr[skill].keisyoform;
     s16 devilType = datDevilTable[unit->id].keisyotype;
     u16 devilForm = datDevilTable[unit->id].keisyoform;
     u32 value = cmbCopyEvoStats(skillAttr, devilType);
@@ -1723,7 +1722,7 @@ s32 cmbCopyEvoDevil(datUnitWork_t *unit, u16 skill)
 
     if (result != 0) {
         u8 quotient = value / (u32)cmbFindEvoEntry(skill);
-        s32 level = quotient + unit->level - datDevilTable[unit->id].level + 1;
+        s32 level = quotient + (unit->level - datDevilTable[unit->id].level) + 1;
 
         if (level >= 100) {
             level = 99;
@@ -1732,9 +1731,6 @@ s32 cmbCopyEvoDevil(datUnitWork_t *unit, u16 skill)
     }
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbCopyEvoDevil);
-#endif
 
 extern u16 D_00339BA8[];
 
