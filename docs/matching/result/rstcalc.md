@@ -226,3 +226,39 @@ owners, 26 tooling test files / 427 cases, shell mocks and documentation checks.
 Source commit `ee3811254c1dfa0a09931f37f9ec61c5478ec292` passed exact-source
 hosted CI [40977985806](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40977985806),
 including build and deploy.
+
+## rstChkSkillPowerUp2 (result/rstcalc, 0xA8)
+
+42 of 42 words match at 168 bytes in the unsigned random interval check. The
+unit ID selects one call to the existing `u32 dds3GetRandA(void *)` provider with `NULL`, which
+uses the mutable global RNG state. The result is reduced modulo 254. The first
+arm tests the low interval below 112 and then unsigned `roll - 112 < 142`; the
+other tests below 128 and the remaining interval below 254. The shared fallback
+preserves retail's return-two path, although that path is unreachable for the
+actual modulo-reduced roll. No extra bounds or optimizer assumptions are added.
+
+The ordinary shared-fallback form reaches 39/42 words at the correct size;
+three words differ only in the first arm's interval temporary register. A single
+localized empty operand constraint retains both real initialized values at the
+boundary after RNG/modulo: the unsigned delta uses native `$5`, while the roll
+uses a generic `+r` operand. The subsequent low and interval tests consume these
+values, and neither constrained lifetime crosses a call. Constraining the delta
+alone coalesces the roll into `$5` and changes the test ordering, so it is not the
+accepted reconstruction. The paired form emits the native roll in `$4`, delta
+in `$5`, and complete branch/delay-slot/epilogue sequence.
+
+This is a target-specific compiler aid, not evidence of original source spelling
+or a claim about an unmeasured internal compiler pass. The diagnostic plain
+and stock-dump complete-owner assembly pair has qualified parity; this
+establishes output parity for that diagnostic source, not a debugger-hook trace
+of the final source. No false provider declaration,
+fabricated consumer, instruction-emitting asm or new pointer bounds are used.
+The existing valid `EventStart` and unit-pointer contracts remain unchanged.
+
+Independent final-source owner checking gives 84 match, 0 differ with normal
+owned-data checks, including the previously published `rstSetCurrentDevil`.
+Final-source gates pass the retail checksum, all 149 guarded owners / 599 drafts,
+seven IRX owners, 26 tooling test files / 427 cases, shell mocks and documentation
+checks. Source commit `cf18b20a8a57745e600ca3c1467549745b9cd8f8` passed exact-source
+hosted CI [40982354001](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40982354001),
+including build and deploy.
