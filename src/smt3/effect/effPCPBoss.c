@@ -3298,30 +3298,35 @@ void effPCPBossKAGU2AttackGetSplitPoint(u128 *pPosBuff, const u128 *pPoint1, con
     }
 }
 
-#ifdef NON_MATCHING
 void effPCPBossKAGU2AttackDraw(effPCPBossKAGU2Attack_t *work)
 {
     nbFormation_t *model;
-    effPCPBossVector_t marks[6], center, end;
+    nbFormation_t *found;
+    s32 searchIndex;
     effPCPBossPlace_t place;
+    effPCPBossVector_t marks[6], center, end;
     s32 frame, limit, fadeIn, fadeOut, rest, id;
-    u32 i, count, color;
+    u32 i, count, color, listIndex;
     f32 blend, randomness;
-    void **list;
 
     if (effBTLSkillCheckRun() != 0) {
         model = effBTLSkillGetInvokeFormation();
     } else {
+        found = NULL;
         model = nbGetMainProcessData()->form;
-        for (i = 0; i < 32; i++, model++) {
+        searchIndex = 0;
+        while (searchIndex < 32) {
+            ++searchIndex;
             if ((model->stat & 3) == 3) {
                 id = effBTLModelGetID(model);
                 if (id == 0x125 || id == 0x108) {
+                    found = model;
                     break;
                 }
             }
+            model++;
         }
-        if (i == 32) {
+        if (found == NULL) {
             return;
         }
     }
@@ -3346,60 +3351,64 @@ void effPCPBossKAGU2AttackDraw(effPCPBossKAGU2Attack_t *work)
         center.f[2] = 0.0f;
         for (i = 0; i < 6; i++) {
             effBTLModelGetMarkPosition2(model, i + 0x1E);
-            SDF_VU0_STOREVECTOR(&marks[i]);
+            SDF_VU0_STOREVECTOR_NOMEM(&marks[i]);
             center.f[0] += marks[i].f[0];
             center.f[1] += marks[i].f[1];
             center.f[2] += marks[i].f[2];
         }
         center.f[3] = 0.0f;
-        center.f[2] /= 6.0f;
-        center.f[0] /= 6.0f;
-        center.f[1] /= 6.0f;
+        center.f[0] = center.f[0] / 6.0f;
+        center.f[1] = center.f[1] / 6.0f;
+        center.f[2] = center.f[2] / 6.0f;
         SDF_VU0_LOADVECTOR(&model->pos);
         SDF_VU0_LOADVECTOR_B(effPCPBossKAGU2DrawParam);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(&end);
+        SDF_VU0_STOREVECTOR_NOMEM(&end);
         count = work->groupCount;
         randomness = work->randomness;
-        list = work->polyLists;
-        for (i = 0; i < count; i++) {
-            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
-                                              &marks[1].q, &end, &center.q, randomness, 0.0f);
-            effPCP_ThunderPolyListSetColor(*list, color);
-            effPCP_ThunderPolyListDraw(*list++);
-            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
-                                              &marks[2].q, &end, &center.q, randomness, 0.61086511611938477f);
-            effPCP_ThunderPolyListSetColor(*list, color);
-            effPCP_ThunderPolyListDraw(*list++);
-            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
-                                              &marks[4].q, &end, &center.q, randomness, -0.61086511611938477f);
-            effPCP_ThunderPolyListSetColor(*list, color);
-            effPCP_ThunderPolyListDraw(*list++);
-            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
-                                              &marks[5].q, &end, &center.q, randomness, 0.0f);
-            effPCP_ThunderPolyListSetColor(*list, color);
-            effPCP_ThunderPolyListDraw(*list++);
+        i = 0;
+        if (count != 0) {
+            listIndex = 0;
+            do {
+                effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(work->polyLists[listIndex]),
+                                                  &marks[1].q, &end, &center.q, randomness, 0.0f);
+                effPCP_ThunderPolyListSetColor(work->polyLists[listIndex], color);
+                effPCP_ThunderPolyListDraw(work->polyLists[listIndex]);
+                listIndex++;
+                effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(work->polyLists[listIndex]),
+                                                  &marks[2].q, &end, &center.q, randomness, 0.61086511611938477f);
+                effPCP_ThunderPolyListSetColor(work->polyLists[listIndex], color);
+                effPCP_ThunderPolyListDraw(work->polyLists[listIndex]);
+                listIndex++;
+                effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(work->polyLists[listIndex]),
+                                                  &marks[4].q, &end, &center.q, randomness, -0.61086511611938477f);
+                effPCP_ThunderPolyListSetColor(work->polyLists[listIndex], color);
+                effPCP_ThunderPolyListDraw(work->polyLists[listIndex]);
+                listIndex++;
+                effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(work->polyLists[listIndex]),
+                                                  &marks[5].q, &end, &center.q, randomness, 0.0f);
+                effPCP_ThunderPolyListSetColor(work->polyLists[listIndex], color);
+                effPCP_ThunderPolyListDraw(work->polyLists[listIndex]);
+                listIndex++;
+            } while (++i < count);
         }
-        place.payload[0] = end.f[0];
-        place.payload[1] = end.f[1];
-        place.payload[2] = end.f[2];
-        place.payload[3] = 0.0f;
         place.payload[4] = 0.0f;
         place.payload[5] = 0.0f;
         place.payload[6] = 0.0f;
-        place.payload[7] = 1.0f;
         place.payload[8] = 100.0f;
         place.payload[9] = 100.0f;
+        place.payload[7] = 1.0f;
         place.payload[10] = work->scale;
+        place.payload[0] = end.f[0];
+        place.payload[1] = end.f[1];
+        place.payload[2] = end.f[2];
         place.color = color;
+        place.payload[3] = 0.0f;
         effEveBEDCutSetParams(work->hBEDCut, &place);
         effEveBEDCutDraw(work->hBEDCut);
     }
     work->frame++;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackDraw);
-#endif
 
 void effPCPBossKAGU2AttackSetColor(effPCPBossKAGU2Attack_t *hData, u32 abgr)
 {
