@@ -3413,9 +3413,9 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevilMaskBG);
 extern void cmbSetBirthPanel(datUnitWork_t *unit);
 extern s32 datGetParam(datUnitWork_t *unit, s32 type);
 
-#ifdef NON_MATCHING
 void cmbDrawBirthDevil(s32 hideRibbon)
 {
+    s32 hasBase = 0;
     datUnitWork_t *selected = cmbGetBirthDevilPanel();
     s32 type = CMB_GBWK->birthKind;
 
@@ -3426,11 +3426,11 @@ void cmbDrawBirthDevil(s32 hideRibbon)
         datUnitWork_t display;
         datUnitWork_t base;
         s8 delta[6];
-        s32 hasBase = 0;
         s32 i;
 
         cmbCopyCustomDevilToStock(&display, selected);
-        if (type == 2) {
+        switch (type) {
+        case 2: {
             datUnitWork_t *source = &DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index].unit;
 
             if (datDevilTable[source->id].race == 8) {
@@ -3438,11 +3438,15 @@ void cmbDrawBirthDevil(s32 hideRibbon)
             }
             cmbCopyCustomDevilToStock(&base, source);
             hasBase = 1;
-        } else if (type == 8 || type == 9) {
+            break;
+        }
+        case 8:
+        case 9:
             cmbCopyDefaultDevilToStock(selected->id, &base);
             hasBase = 1;
-        } else {
-            for (i = 5; i >= 0; i--) {
+            break;
+        default:
+            for (i = 0; i < 6; i++) {
                 delta[i] = 0;
             }
         }
@@ -3466,9 +3470,6 @@ void cmbDrawBirthDevil(s32 hideRibbon)
         fclRbnDraw(CMB_GBWK->ribbon, 0, 0x98, 0, 0x80, 0, -0x80, 0x47);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevil);
-#endif
 
 #ifdef NON_MATCHING
 s32 func_00201FB0(s32 active)
