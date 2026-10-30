@@ -1472,13 +1472,11 @@ extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
 extern void sdfMotionPause(sdfMotionCtrlr_t *motion);
 extern void sdfMotionPauseOff(sdfMotionCtrlr_t *motion);
 
-#ifdef NON_MATCHING
 void evtStopFrame(s32 sw, u32 nowFrame)
 {
     dds3Basic_t *scene;
     dds3SceneBasic_t *sceneWork;
     dds3Basic_t *basic;
-    dds3Basic_t *effect;
     dds3Basic_t *mover;
     dds3UnitObjectBasicWorkData_t *unitWork;
     dds3MatterObjectBasicWorkData_t *matterWork;
@@ -1509,7 +1507,8 @@ void evtStopFrame(s32 sw, u32 nowFrame)
     for (basic = sceneWork->basictable[BASIC_TYPE_MATTEROBJECT].firstbasic;
          basic != NULL; basic = basic->next) {
         matterWork = basic->workdata;
-        motion = matterWork->pObjectBaseControlWorkData->pMot;
+        control = matterWork->pObjectBaseControlWorkData;
+        motion = control->pMot;
         if (motion != NULL) {
             if (sw == 0) {
                 sdfMotionSeek(motion, (f32)nowFrame);
@@ -1524,21 +1523,27 @@ void evtStopFrame(s32 sw, u32 nowFrame)
         evtStopMover((polyMovieObject_t *)basic, sw, 0, nowFrame);
     }
     for (track = viewerinfo->firstobjinfo; track != NULL; track = track->next) {
-        if (track->type != 3 && track->type != 18 && track->type != 20 && track->type != 21) {
+        switch (track->type) {
+        case 3: case 18: case 20: case 21:
+            break;
+        default:
             continue;
         }
         for (frame = track->children; frame != NULL; frame = frame->next) {
-            if (track->type == 18) {
-                effect = frame->work;
-            } else if (track->type == 3 || track->type == 20 || track->type == 21) {
+            switch (track->type) {
+            case 3: case 20: case 21:
                 slot = frame->param.sb[0];
                 if (slot < 0) continue;
-                effect = viewerinfo->effectBasic[slot];
-            } else {
+                basic = viewerinfo->effectBasic[slot];
+                break;
+            case 18:
+                basic = frame->work;
+                break;
+            default:
                 continue;
             }
-            if (effect != NULL) {
-                mover = dds3GetBaseControlWorkData(effect)->pBasic[1];
+            if (basic != NULL) {
+                mover = dds3GetBaseControlWorkData(basic)->pBasic[1];
                 if (mover != NULL) {
                     evtStopMover((polyMovieObject_t *)mover, sw, frame->frame, nowFrame);
                 }
@@ -1546,9 +1551,6 @@ void evtStopFrame(s32 sw, u32 nowFrame)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtStopFrame);
-#endif
 
 void evtViewerStopFrame(void)
 {
