@@ -2,27 +2,33 @@
 
 ## DispComm1PanelComm (newbattle/nbCommSelProcess, 0xE0)
 
-53 of 56 words match, at the exact 224-byte size.
+56 of 56 words match, at the native 224-byte size (2026-10-30).
 
-The guard is `if (no <= 0x8003) { if (no >= 0x8000) return; }` over an `s32`
-local holding the `u16` parameter, which is what gives retail's two separate
-signed `slt`s rather than the subtract plus one `sltiu` that an `&&` or `||`
-range chain folds to, and what stops `shorten_compare` turning the compares
-unsigned.
+The guard remains `if (no <= 0x8003) { if (no >= threshold) return; }`
+over an `s32` local holding the `u16` parameter. Native zero-extends that
+parameter and uses two signed comparisons, rejecting exactly 0x8000..0x8003
+before the skill-table access. Other inputs retain the original lookup and
+sprite-call behavior.
 
-The three remaining words are the lower bound's encoding. Retail materialises
-0x8000 and tests `slt no, reg` with a `beqz`, the inverted-branch form of
-`LT`. ee-gcc 2.96's `fold` rewrites every spelling of `< 0x8000` and
-`>= 0x8000` into `> 0x7FFF` before the MIPS backend sees it, so the compare
-comes out as `li 0x7FFF`, `slt reg, no`, `bnez`: same test, three words off.
+The ordinary literal lower bound was 53/56 words: `li 0x7FFF`, reversed
+`slt`, and `bnez`, rather than retail's `li 0x8000`, `slt no, threshold`,
+and `beqz`. Paired full-owner compiler output shows this complementary
+endpoint already in initial RTL; this does not identify an instrumented
+internal folding pass.
 
-Ruled out: both nesting orders; `||` of the complement and `&&` of the range,
-which fold; a `goto` into the `if` body so the draw block is the fallthrough;
-an `else return`; `!(no < 0x8000)`; `no <= 0x7FFF`; `no > 0x7FFF` with an
-early return; an explicit `s32` local holding the comparison result, which
-adds an `xori`; `(s32)` casts on either operand; and two distinct `s32` locals
-for the two tests, which does defeat the range fold but leaves the same
-encoding.
+An initialized `s32 threshold = 0x8000` inside the existing outer branch,
+with one nonvolatile empty `+r` constraint immediately before its genuine
+comparison, preserves the native endpoint. This is a localized target-specific
+compiler reconstruction aid, not evidence of original source spelling. There
+is no dummy consumer, fixed register, call crossed, memory clobber, or ABI,
+type, layout, access-width or call-order change. Plain and `-da` builds agree
+on normalized assembly and allocated/relocation sections. The promoted owner
+checks at 31 match / 0 differ.
+
+Earlier ordinary forms ruled out: both nesting orders; complement `||` and
+range `&&`; a forward `goto`; `else return`; `!(no < 0x8000)`;
+`no <= 0x7FFF`; `no > 0x7FFF`; an explicit comparison-result local;
+operand casts; and separate locals for the two tests.
 
 ## DispCommCursor (newbattle/nbCommSelProcess, 0x184)
 
@@ -51,32 +57,42 @@ the `if`; and all declaration orders of the locals, which change nothing.
 
 ## AnimeCommandList (newbattle/nbCommSelProcess, 0x18C)
 
-97 of 99 words match, at the exact 396-byte size and with the same instruction
-multiset.
+99 of 99 words match, at the native 396-byte size (2026-10-30).
 
-The four flag arms (`0x20` on `helpa`, `1` and `2` on `alpha`, `8` on `ox`) are
-exact, including the `movn`/`movz` clamps and the `(s32)(ox * 0.5f)` step with
-its `d == 0 ? -1 : d` fixup.
+The integer animation arms (`0x20` help opacity, `1`/`2` alpha and `8`
+X position) retain their original comparisons, clamps and float-to-int step.
+The flag-4 arm uses a real initialized `f32 endpoint = 0.01f`, with one
+volatile empty `+f` constraint immediately after initialization. Its only
+consumers are the absolute-smritu comparison, minimum-step comparison and
+minimum-step assignment. The multiply by 0.6f, subtraction, zero clamp and
+state writes are unchanged; the endpoint crosses no call.
 
-The two remaining words are the order of the two loads that open the `0x4` arm.
-Retail loads the `0.01f` literal first and `smritu` second; every source form
-tried loads `smritu` first, because gcc expands the compare's left operand
-first and then rematerialises the constant at the compare.
+The ordinary baseline and nonvolatile `+f` control both retained the former
+two-load residual at +0x12C/+0x130. Actual RTL showed that sched1 moved the
+independent smritu load (UID265) before endpoint initialization (UID260) and
+the constraint (UID262). The qualifier-only volatile control adds the actual
+`insn_list 262` scheduling dependency on UID265 and keeps the native endpoint
+load before smritu. Final output preserves this order. This is a localized
+target-specific compiler reconstruction aid, not evidence of historical
+source spelling or a claim that empty asm is a general memory barrier.
 
-Ruled out: `0.01f > fabsf(...)` and `!(fabsf(...) >= lim)`, both of which
-`fold` rewrites back; a block-local and a function-local `f32 lim = 0.01f`,
-which gcc rematerialises (the function-local form also hoists the load into the
-entry block and costs 95 words); `f32 a = fabsf(s->smritu)` as a separate
-statement; an `f32 ritu` local for the field; both source orders of the
-then-arm's two stores; and `extern f32 D_0054E500`/`D_0054E504` globals in
-place of the literals, which are MEMs rather than constants and get hoisted
-into the `beqz`'s delay slot, where retail has a `nop` (19 words).
+Plain and `-da` output agree on normalized assembly and allocated/relocation
+sections. The endpoint and multiplier literal bits remain `0x3C23D70A` and
+`0x3F199999`, matching retail. No dummy consumer, fixed register, memory
+clobber, added arithmetic/conversion, or ABI/layout/access-width change is
+introduced. The combined owner checks at 32 match / 0 differ.
+
+Earlier ordinary forms ruled out: inverted comparisons, ordinary endpoint
+locals, a separate absolute-smritu snapshot, swapped store order and external
+globals substituted for literal-pool constants. The nonvolatile control's
+negative result remains useful: maintaining the endpoint alone did not
+constrain the independent load's schedule.
 
 ## DispCommandPanel (0x33C)
 
 203 of 207 instruction words match at the native 828-byte size when the
-existing `DispComm1PanelComm` C draft is visible. Both functions remain
-assembly-backed in the normal build; there is no exact-match credit.
+existing `DispComm1PanelComm` C draft is visible. The caller remains
+assembly-backed; the row callee is now matched as documented above.
 
 The five inputs are process, command type, X, Y and opacity. Preserve the
 original coordinates for the background, cursor setup, help origin and final
@@ -110,8 +126,8 @@ unchanged.
 A truthful command-row forward declaration alone leaves this caller at
 836 bytes with 132 matching instruction words and 75 differing words in the
 native overlap. Making the existing genuine command-row C body visible
-recovers the native size and leaves the four words above. That callee still
-has its documented three-word lower-bound residual, so it cannot yet replace
-its fallback. Reproduce the caller measurement with
+recovers the native size and leaves the four words above. The row callee's former
+three-word lower-bound residual is now resolved independently; this does not
+resolve the caller's scheduling differences. Reproduce the caller measurement with
 `tools/check_unit.py src/smt3/newbattle/nbCommSelProcess.c
 --cflags=-DNON_MATCHING --func DispCommandPanel -v`.
