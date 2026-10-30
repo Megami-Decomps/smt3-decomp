@@ -181,6 +181,7 @@ Flow6_24	newbattle/NbNegoFlowTwo	0x4FC	319 of 319 words match	docs/matching/newb
 CheckAction_READY	newbattle/nbActionProcess	0x3EC	251 of 251 words match	docs/matching/newbattle/nbActionProcess.md	3
 CheckAction_COMM	newbattle/nbActionProcess	0x354	213 of 213 words match	docs/matching/newbattle/nbActionProcess.md	26
 CheckAction_CHECK1	newbattle/nbActionProcess	0x28C	163 of 163 words match	docs/matching/newbattle/nbActionProcess.md	60
+CheckCounter	newbattle/nbActionProcess	0x238	142 of 142 words match	docs/matching/newbattle/nbActionProcess.md	105
 SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/matching/newbattle/nbAi.md	3
 SetSingleTarget2	newbattle/nbAi	0x26C	143 of 155 words match	docs/matching/newbattle/nbAi.md	29
 Sel_AI	newbattle/nbAi	0x358	214 of 214 words match	docs/matching/newbattle/nbAi.md	43

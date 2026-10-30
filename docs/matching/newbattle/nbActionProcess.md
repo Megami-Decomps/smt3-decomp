@@ -101,3 +101,51 @@ all 82 peers and owned data. Retail checksum, 427 tests across 26 tooling files,
 source `43b917262373f48e4cc269a792e472cd19ad0595`. Exact-source CI
 [41072560237](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41072560237)
 completed successfully, with every actual step passing and none skipped.
+
+## CheckCounter (newbattle/nbActionProcess, 0x238)
+
+142 of 142 words match at 568 bytes. A signed switch on the masked status
+preserves all 4096 values and native balanced rejection of 1,2,4,0x10,0x80,
+0x100,0x400; zero and other combinations proceed. Counter initializes only
+after rejection, before every use. An early zero-counter return precedes the
+real action/printf success tail. The existing sentinel loop already supplies
+native induction, not a newly invented loop. Arrays remain skills[4] with
+-1 sentinel and counters[3]; the sentinel stops before a fourth counter access.
+Skill callbacks precede denominator reads; party indices retain post-callback
+observations. Signed division, including the native zero-denominator trap,
+is not clamped or repaired. Actual constant/string ownership checks pass.
+
+The typed-address control is 568 bytes with two differing words: it combines
+the base to datSkillTable+0x3F08 and loads offset zero. Retail instead starts
+from the actual special subarray at +0x4808, adds skill*8 and loads at -0x900.
+Final source expresses this as unsigned32 integer arithmetic from the real
+subarray base, adding the skill offset then subtracting 0x120 records. Only
+the final valid address becomes a datSpecialSkill_t pointer and reads its
+signed16 n member. There is no intermediate invalid C pointer, fabricated
+offset pointer, false extent or altered field type.
+
+This is explicitly pinned EE32, not portable ISO-C provenance reasoning.
+Compiler assertions establish four-byte pointer/u32 representations, eight-byte
+records and n at offset zero. The real array has 95 records; actual skills
+0x133/0x132/0x131 yield indices 19/18/17. At the retail table location the
+integer operations do not wrap, and every final pointer is aligned inside
+that real array. Intermediate integers need not themselves designate objects.
+The pointer/integer conversions remain target-specific implementation behavior,
+not a historical-source claim or general portability guarantee.
+
+Qualified paired expansion/CSE/combine observations explain the difference:
+typed control subtracts 2304 before the variable offset and CSE records the
+combined symbol+0x3F08; final adds the real offset first, and combine folds
+its later subtraction into the actual signed-halfword memory operand. Each
+complete-owner plain/dump pair passes normalized assembly, allocated-section
+contracts, relocations and function-inventory parity, independently rerun.
+No constraint, binding, extra consumer, volatile, alias or provider change
+is introduced. Bounded models cover all status halfwords and the three actual
+addresses; they are not whole-target execution or arbitrary-input proofs.
+
+Independent complete-owner verification gives 84 match, 0 differ, preserving
+all 83 peers and owned data. Retail checksum, 427 tests across 26 tooling files,
+148 guarded owners / 550 drafts, seven IRX owners and report gates passed for
+source `0e182dd0654b7576aead7a4f983de7b6b5c25f38`. Exact-source CI
+[41074871555](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41074871555)
+completed successfully, with every actual step passing and none skipped.
