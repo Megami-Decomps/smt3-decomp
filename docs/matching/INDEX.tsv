@@ -155,6 +155,7 @@ frSetNameData				docs/matching/interface/frName.md	53
 DrawSelectCursor	interface/itfMesManager	0x2FC		docs/matching/interface/itfMesManager.md	3
 itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/matching/interface/itfMesManager.md	38
 lstDrawListWindow	interface/lstListWindow	0x84	26 of 33 words match	docs/matching/interface/lstListWindow.md	3
+mselDevilChoice	ModeSelect	0x33C	207 of 207 words match	docs/matching/kernel/ModeSelect.md	3
 fclEncycFindFreeSlot	kernel/dds3AdminiProcess	0x1C4	111 of 113 words match	docs/matching/kernel/dds3AdminiProcess.md	3
 fclEncycFreeEntries	kernel/dds3AdminiProcess	0x1E8	120 of 122 words match	docs/matching/kernel/dds3AdminiProcess.md	39
 fcl_103420, fclEncycAllocEntry and fcl_103560	kernel/dds3AdminiProcess	0x94, 0xA8, 0xAC	32 of 43 words match	docs/matching/kernel/dds3AdminiProcess.md	62
@@ -232,6 +233,7 @@ deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/matching/pb/pbGame.md
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/matching/pb/pbGame.md	28
 roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/matching/pb/pbGame.md	48
 pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/matching/pb/pbGame.md	73
+roundDirCheck	pbGame	0x2B4	173 of 173 words match	docs/matching/pb/pbGame.md	113
 pbRebuildOutline				docs/matching/pb/pbGameDraw.md	3
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/matching/pb/pbMCard.md	3
 pbEditInitProc	pb/pbMain	0x148	79 of 82 words match	docs/matching/pb/pbMain.md	3

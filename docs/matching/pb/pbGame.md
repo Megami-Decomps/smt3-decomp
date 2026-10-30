@@ -109,3 +109,38 @@ the loop bound becomes signed and the final label still occupies the wrong
 register. These controls do not close the residual. The facility flag-clear
 declaration now agrees with its actual signed-byte provider; both callers
 here pass literal zero, so their emitted instructions stay unchanged.
+
+## roundDirCheck (pbGame, 0x2B4)
+
+173 of 173 words match at 692 bytes using ordinary C. Explicit initialized-false
+axis classification retains the native less/equal/greater distinction: less
+and equal leave false, greater selects true. Coordinates and centers are signed
+16-bit values, safely promoted for the comparisons. A real second direction
+switch separates horizontal cases 0/2 from vertical cases 1/3. The first switch
+uses native body order 0, 2, 1, 3; writing groupID on the left of equality
+reproduces the final three native comparison operand orders. No register aids,
+asm, declaration changes, extra consumers or compiler flags are needed.
+
+Group search occurs before character lookup; signed center snapshots precede
+the position-provider call. Every direction writes stepCount=1. Directions
+outside 0..3 retain rotation -1 and perform no neighbor tests. For valid cases,
+the two neighbor accesses preserve native order and asymmetric bounds: positive
+neighbor <20 and negative neighbor >=0, without invented complementary checks.
+Each matching low-11-bit map cell sets stepCount=2 without skipping the second
+access. The comparison uses the full unsigned groupID; repeated map-global
+loads after potentially aliasing output stores remain intact.
+
+Null group/character, invalid character indices and out-of-map coordinates
+retain the native validity requirements, not new corruption guarantees. No
+caching, noalias promise, early-return fusion or new validation is introduced.
+The observed source shapes explain matching output, not historical spelling
+or an unobserved optimizer mechanism. The complete owner checks 62 match,
+0 differ, preserving all 61 prior C peers and owned data.
+
+Independent guard-removed review and full qualification pass the retail
+checksum, 149 guarded owners / 580 drafts, seven IRX owners, and 26 tooling
+files / 427 tests. Actual published-checkout verification confirms all 779
+tracked files, 40 owner dependencies, source identity and no-op builds.
+Source commit `f0b01710d19a260271ee032185ecaa60a9b3f8c2` passed exact-source hosted CI
+[40998601934](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40998601934),
+including build and deploy.
