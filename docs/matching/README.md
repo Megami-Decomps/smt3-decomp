@@ -109,6 +109,7 @@ both native and emitted sizes when they differ.
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
 | 1 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
+| 1 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 1 | field/fldTitle | [field/fldTitle.md](field/fldTitle.md) |
 | 1 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 1 | field/fldSnow | [field/fldSnow.md](field/fldSnow.md) |

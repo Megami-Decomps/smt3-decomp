@@ -149,6 +149,7 @@ fldSkyDrawFilter	field/fldSky	0xAD8	682 of 694 words match	docs/matching/field/f
 fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3
 fldRunDantePatr	field/fldTest	0x2D0	180 of 180 words match	docs/matching/field/fldTest.md	3
 fldTitle_Process	field/fldTitle	0xBD4		docs/matching/field/fldTitle.md	3
+fldSetupDoorScenes	field/fldWap	0xBC8	754 of 754 words match	docs/matching/field/fldWap.md	3
 fldItemBoxAdd (0x680)			294 of 416 words differ	docs/matching/field/fld_Npc.md	3
 fldNpcCalc	field/fld_Npc	0x7B0	487 of 492 words match	docs/matching/field/fld_Npc.md	35
 fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/matching/field/fld_Npc.md	80
