@@ -142,6 +142,7 @@ fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/matching/fi
 fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/matching/field/fldDraw.md	173
 fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/matching/field/fldDraw.md	197
 fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/matching/field/fldDraw.md	235
+fldReadyScene	field/fldMain	0x594	357 of 357 words match	docs/matching/field/fldMain.md	3
 fldPlayerMotionSe	field/fldPlayer	0x5B0		docs/matching/field/fldPlayer.md	2
 fldBgmBitChk	field/fldSe	0x7C	30 of 31 words match	docs/matching/field/fldSe.md	3
 fldBgmPlay	field/fldSe	0x2D0	161 of 180 words match	docs/matching/field/fldSe.md	27
