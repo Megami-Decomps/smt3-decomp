@@ -40,6 +40,7 @@ both native and emitted sizes when they differ.
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
+| 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
 | 3 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
@@ -56,8 +57,9 @@ both native and emitted sizes when they differ.
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
-| 2 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
+| 2 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
+| 2 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 2 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 2 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
@@ -102,10 +104,8 @@ both native and emitted sizes when they differ.
 | 1 | field/fldSnow | [field/fldSnow.md](field/fldSnow.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
 | 1 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
-| 1 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 1 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
-| 1 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 1 | event/evtMoon | [event/evtMoon.md](event/evtMoon.md) |
 | 1 | event/evtEventViewerFrameVar | [event/evtEventViewerFrameVar.md](event/evtEventViewerFrameVar.md) |
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |

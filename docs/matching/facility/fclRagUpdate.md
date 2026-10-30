@@ -24,3 +24,32 @@ Ruled out: `index == 1` with a `goto` to a trailing table arm (8 of 30 match);
 a `u16 ret` local assigned in each arm with one trailing `return` (8 of 30);
 the same with explicit `goto done;` out of each arm (15 of 29); and
 `(flag * 7) * 2` in place of `flag * 14` at the subscript.
+
+## ragUpdateSeqConfirm (facility/fclRagUpdate, 0x208)
+
+130 of 130 words match at 520 bytes with ordinary C. A shared completed return
+and late return-selection call reproduce genuine native joins. The actual flag
+switch and direct existing unitwork fields preserve the confirmation paths;
+all register constraints from intermediate diagnostics were discarded.
+
+The existing DDS3 work union's unit prefix and 236-byte stride establish that
+its typed hp/maxhp/mp/maxmp fields address the same live unit bytes. Exact output
+preserves the separate unit pointer passed to registration, post-callback global
+reloads and halfword accesses. Three real requirements are traversed; negating
+the signed-byte count after integer promotion cannot overflow. Calls and final
+process-result publication retain their native ordering.
+
+The flag provider currently normalizes its result to zero or one, so the explicit
+no-op case two is not claimed reachable. The inherited valid selector, stock and
+table contracts remain; an invalid kind still has the native NULL-requirement
+risk and is not newly declared safe. No provider purity, pointer bound or extra
+reachability assumption is introduced.
+
+Independent complete-owner checking gives 19 match, 0 differ with normal data
+checks. Qualified diagnostic plain/stock-dump complete-owner assembly, text and
+relocation parity is output evidence, not an internal debugger trace. Final-source
+checks pass the retail checksum, all 149 guarded owners / 591 drafts, seven IRX
+owners, 26 tooling files / 427 cases, shell mocks and documentation checks.
+Source commit `87ba2423024040605637c92fd918c5adacb1b9b4` passed exact-source hosted CI
+[40988954268](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40988954268),
+including build and deploy.

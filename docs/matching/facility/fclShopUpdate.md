@@ -80,3 +80,35 @@ and documentation checks.
 Source commit `6de3a0947aaf3cf6dc88ea98dc33709dea102b05` passed exact-source hosted CI
 [40986716570](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40986716570),
 including build and deploy.
+
+## shpUpdateSeqPay (facility/fclShopUpdate, 0x218)
+
+134 of 134 words match at 536 bytes. Native-backed branch-local quantity stores,
+reuse of the actual sequence-two value and distinct final item calls reconstruct
+the payment flow. Real callback-dependent process/global reloads remain intact;
+the payment-progress arm's explicit return retains the native sound tail call.
+
+Payment negation, total addition and remaining subtraction use explicit unsigned
+32-bit arithmetic followed by target `s32` conversion, preserving native wrap
+without invented bounds on totals or step. That conversion is target/compiler-
+defined, not a claim of universally portable C. Signed comparisons remain signed;
+the signed-byte quantity's promoted negation is representable. Existing work,
+cursor and table contracts remain, with no positive-step or guaranteed-progress
+assumption and no claim about arbitrary out-of-contract inputs inside providers.
+
+A single generic empty `+r` operand constraint applies to an initialized real
+one, consumed by the actual sequence comparison, quantity stores and state
+publications. There is no fixed register declaration. Complete output retains it
+across calls in native callee-saved register 18, with the matching frame saves
+and restores. Removing only that constraint gives 124/134 words because one and
+the retained item swap saved-register allocation and alter prologue scheduling.
+Qualified complete-owner plain/stock-dump assembly, text and relocation parity
+supports this paired output comparison, not an internal allocator claim. The
+empty asm is not used as a memory barrier.
+
+Independent final-source checking gives 18 match, 0 differ with normal owned-data
+checks, preserving ShopItem and ShopConfirm. Final-source retail, all 149 guarded
+owners / 590 drafts, seven IRX owners, 26 tooling files / 427 cases, shell mocks
+and documentation checks pass. Source commit `e68fbd7b4e47e6060c325479aa9e92d6fc1be368` passed exact-source
+hosted CI [40989525901](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40989525901),
+including build and deploy.
