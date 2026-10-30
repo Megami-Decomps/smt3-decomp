@@ -530,33 +530,39 @@ s32 rstChkSkillPowerUp1(void)
     return ret;
 }
 
-#ifdef NON_MATCHING
 s32 rstChkSkillPowerUp2(void)
 {
     u32 roll;
 
     if (EventStart->unit->id == 0) {
+        register u32 delta __asm__("$5");
+
         roll = dds3GetRandA(NULL) % 254;
+        delta = roll - 112;
+        /* Retail keeps the roll and interval delta live together here.
+         * The localized constraint prevents their coalescing and the low
+         * test moving before this boundary; it is a compiler aid, not
+         * evidence of the original source spelling. Neither crosses a call. */
+        __asm__("" : "+r" (delta), "+r" (roll));
         if (roll < 112) {
             return 0;
         }
-        if (roll < 254) {
+        if (delta < 142) {
             return 1;
         }
-        return 2;
+        goto fallback;
     }
     roll = dds3GetRandA(NULL) % 254;
     if (roll < 128) {
         return 0;
     }
-    if (roll < 254) {
+    if (roll >= 128 && roll < 254) {
         return 1;
     }
+    goto fallback;
+fallback:
     return 2;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", rstChkSkillPowerUp2);
-#endif
 
 extern s32 rstFindPowerUpSkill(u16 skillId);
 
