@@ -47,6 +47,7 @@ campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_
 campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	651
 cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	703
 cmpUpdateDestroyItemConfirm	code_0022C578	0xE0	56 of 56 words match	docs/matching/code_0022C578.md	733
+cmpDrawStatusValue	code_0022C578	0xF4	61 of 61 words match	docs/matching/code_0022C578.md	771
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
