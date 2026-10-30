@@ -732,10 +732,6 @@ void DispCommandPanel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 a
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispCommandPanel);
 #endif
 
-/* NON_MATCHING: 2 of 99 words differ (first at +0x12C). */
-
-#ifdef NON_MATCHING
-
 void AnimeCommandList(nbCommSelProcessData_t *s)
 {
     if (s->animeflag & 0x20) {
@@ -786,14 +782,17 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         }
     }
     if (s->animeflag & 4) {
-        if (fabsf(s->smritu) < 0.01f) {
+        f32 endpoint = 0.01f;
+        /* Keep the native floating endpoint live for its comparison and clamp. */
+        __asm__ volatile("" : "+f"(endpoint));
+        if (fabsf(s->smritu) < endpoint) {
             s->smritu = 0.0f;
             s->animeflag &= ~4;
         } else {
             f32 d = s->smritu * 0.6f;
 
-            if (d < 0.01f) {
-                d = 0.01f;
+            if (d < endpoint) {
+                d = endpoint;
             }
             s->smritu -= d;
             if (s->smritu < 0.0f) {
@@ -802,12 +801,6 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         }
     }
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", AnimeCommandList);
-
-#endif
 
 void DispComm1Summon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
 {

@@ -57,26 +57,36 @@ the `if`; and all declaration orders of the locals, which change nothing.
 
 ## AnimeCommandList (newbattle/nbCommSelProcess, 0x18C)
 
-97 of 99 words match, at the exact 396-byte size and with the same instruction
-multiset.
+99 of 99 words match, at the native 396-byte size (2026-10-30).
 
-The four flag arms (`0x20` on `helpa`, `1` and `2` on `alpha`, `8` on `ox`) are
-exact, including the `movn`/`movz` clamps and the `(s32)(ox * 0.5f)` step with
-its `d == 0 ? -1 : d` fixup.
+The integer animation arms (`0x20` help opacity, `1`/`2` alpha and `8`
+X position) retain their original comparisons, clamps and float-to-int step.
+The flag-4 arm uses a real initialized `f32 endpoint = 0.01f`, with one
+volatile empty `+f` constraint immediately after initialization. Its only
+consumers are the absolute-smritu comparison, minimum-step comparison and
+minimum-step assignment. The multiply by 0.6f, subtraction, zero clamp and
+state writes are unchanged; the endpoint crosses no call.
 
-The two remaining words are the order of the two loads that open the `0x4` arm.
-Retail loads the `0.01f` literal first and `smritu` second; every source form
-tried loads `smritu` first, because gcc expands the compare's left operand
-first and then rematerialises the constant at the compare.
+The ordinary baseline and nonvolatile `+f` control both retained the former
+two-load residual at +0x12C/+0x130. Actual RTL showed that sched1 moved the
+independent smritu load (UID265) before endpoint initialization (UID260) and
+the constraint (UID262). The qualifier-only volatile control adds the actual
+`insn_list 262` scheduling dependency on UID265 and keeps the native endpoint
+load before smritu. Final output preserves this order. This is a localized
+target-specific compiler reconstruction aid, not evidence of historical
+source spelling or a claim that empty asm is a general memory barrier.
 
-Ruled out: `0.01f > fabsf(...)` and `!(fabsf(...) >= lim)`, both of which
-`fold` rewrites back; a block-local and a function-local `f32 lim = 0.01f`,
-which gcc rematerialises (the function-local form also hoists the load into the
-entry block and costs 95 words); `f32 a = fabsf(s->smritu)` as a separate
-statement; an `f32 ritu` local for the field; both source orders of the
-then-arm's two stores; and `extern f32 D_0054E500`/`D_0054E504` globals in
-place of the literals, which are MEMs rather than constants and get hoisted
-into the `beqz`'s delay slot, where retail has a `nop` (19 words).
+Plain and `-da` output agree on normalized assembly and allocated/relocation
+sections. The endpoint and multiplier literal bits remain `0x3C23D70A` and
+`0x3F199999`, matching retail. No dummy consumer, fixed register, memory
+clobber, added arithmetic/conversion, or ABI/layout/access-width change is
+introduced. The combined owner checks at 32 match / 0 differ.
+
+Earlier ordinary forms ruled out: inverted comparisons, ordinary endpoint
+locals, a separate absolute-smritu snapshot, swapped store order and external
+globals substituted for literal-pool constants. The nonvolatile control's
+negative result remains useful: maintaining the endpoint alone did not
+constrain the independent load's schedule.
 
 ## DispCommandPanel (0x33C)
 

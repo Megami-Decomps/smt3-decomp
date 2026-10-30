@@ -211,8 +211,8 @@ nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	117 of 137 words ma
 bCameraShot_AttackInvokeTargetPartyNear_Set	newbattle/nbCameraSkill	0x308	188 of 194 words matching	docs/matching/newbattle/nbCameraSkill.md	113
 DispComm1PanelComm	newbattle/nbCommSelProcess	0xE0	56 of 56 words match	docs/matching/newbattle/nbCommSelProcess.md	3
 DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/matching/newbattle/nbCommSelProcess.md	33
-AnimeCommandList	newbattle/nbCommSelProcess	0x18C	97 of 99 words match	docs/matching/newbattle/nbCommSelProcess.md	58
-DispCommandPanel (0x33C)				docs/matching/newbattle/nbCommSelProcess.md	81
+AnimeCommandList	newbattle/nbCommSelProcess	0x18C	99 of 99 words match	docs/matching/newbattle/nbCommSelProcess.md	58
+DispCommandPanel (0x33C)				docs/matching/newbattle/nbCommSelProcess.md	91
 nbDebugProcess1	newbattle/nbDebugProcess	0x2A8	170 of 170 words match	docs/matching/newbattle/nbDebugProcess.md	3
 Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/matching/newbattle/nbE911.md	3
 nbApplyBadCurse	newbattle/nbEncProcess	0x174	80 of 93 words match	docs/matching/newbattle/nbEncProcess.md	3
