@@ -262,3 +262,44 @@ seven IRX owners, 26 tooling test files / 427 cases, shell mocks and documentati
 checks. Source commit `cf18b20a8a57745e600ca3c1467549745b9cd8f8` passed exact-source
 hosted CI [40982354001](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40982354001),
 including build and deploy.
+
+## cmbCopyEvoDevil (result/rstcalc, 0x100)
+
+64 of 64 words match at 256 bytes with ordinary C. Declaring the real signed
+skill-attribute load before the skill-form halfword load gives the native
+address formation and register allocation. These are independent ordinary
+observations before all calls; no volatile access, write or call lies between
+them. Their source declaration order is not a claim about machine load order:
+the exact output schedules the form before the attribute as retail does.
+Grouping the real unit-level minus species-level difference before adding the
+narrowed quotient then reproduces the native arithmetic sequence. No compiler
+constraints, aliases, provider declarations or data layouts change.
+
+The actual output preserves the pre-call skill/devil observations, the calls to
+`cmbCopyEvoStats` and `cmbCheckEvoPair`, the conditional `cmbFindEvoEntry` call,
+and the later unit-ID, unit-level and species-level reloads. The truthful
+providers remain `u8 cmbCopyEvoStats(s16, s16)`,
+`s32 cmbCheckEvoPair(u16, u16)` and `s32 cmbFindEvoEntry(u16)`.
+
+The arithmetic regrouping is defined for every value of the declared fields:
+unit level is `u16`, species level is `u8`, and the quotient is narrowed to `u8`
+before addition. All promote to signed `int`; the difference ranges from -255
+to 65535 and the final sum from -254 to 65791. There is no signed overflow.
+Only results at least 100 are capped to 99. Other results, including negative
+intermediates, narrow to `u8`; no lower clamp is added. Existing valid pointer,
+index and table-key contracts remain required. A nonzero divisor is not assumed:
+the inherited undefined C division / native break path for zero is unchanged.
+
+For the original draft, 51 of 64 words match. After grouping the level difference,
+55 of 64 words match; the attribute-first declaration completes the match. Diagnostic
+plain and stock-dump complete-owner assembly, text and relocations have qualified
+parity. This is output evidence for the diagnostic source, not a debugger-hook
+trace or proof of the original spelling or an unmeasured internal comparator.
+
+Independent final-source checking gives 85 match, 0 differ with normal
+owned-data checks, preserving both `rstSetCurrentDevil` and `rstChkSkillPowerUp2`.
+Final-source gates pass the retail checksum, all 149 guarded owners / 598 drafts,
+seven IRX owners, 26 tooling test files / 427 cases, shell mocks and documentation
+checks. Source commit `052a211d71c3b81c4f876ef3fe1a50fd195300d9` passed exact-source
+hosted CI [40983613150](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40983613150),
+including build and deploy.
