@@ -3879,7 +3879,6 @@ s32 cmbChkIkenieEnable(void)
     return evtBitCheck(0x25) != 0;
 }
 
-#ifdef NON_MATCHING
 void cmbUpdateBirthDevil(void)
 {
     u16 button = cmpGetPressedButton(0x303);
@@ -3890,23 +3889,27 @@ void cmbUpdateBirthDevil(void)
         s32 first;
         s32 second;
         u16 firstId;
+        datUnitWork_t *firstUnit;
+        datUnitWork_t *secondUnit;
 
         if (CMB_GBWK->unk_1650A != 3) {
             CMB_GBWK->unk_1650A = 3;
             cmpSetModelReloadFlag();
         }
-        first = ((volatile cmbGbWork_t *)CMB_GBWK)->stockSlot[0].index;
-        second = ((volatile cmbGbWork_t *)CMB_GBWK)->stockSlot[1].index;
+        first = CMB_GBWK->stockSlot[0].index;
+        second = CMB_GBWK->stockSlot[1].index;
+        firstUnit = &DDS3_GBWK->party[first].unit;
+        secondUnit = &DDS3_GBWK->party[second].unit;
         birthId = CMB_GBWK->birthUnit[0].id;
-        firstId = ((volatile dds3GlobalWork_t *)DDS3_GBWK)->party[first].unit.id;
-        if (firstId != birthId && DDS3_GBWK->party[second].unit.id != birthId &&
+        firstId = firstUnit->id;
+        if (firstId != birthId && secondUnit->id != birthId &&
             cmbCheckEvoUnlocked(birthId, &DDS3_GBWK->party[0].unit, 16) >= 0) {
             CMB_GBWK->unk_00001 = 15;
             CMB_GBWK->unk_00004 = button;
             CMB_GBWK->unk_1650B = 2;
         } else {
             if (evtBitCheck(0x8A0) == 0 &&
-                DDS3_GBWK->party[0].unit.level < CMB_GBWK->birthUnit[0].level) {
+                CMB_GBWK->birthUnit[0].level > DDS3_GBWK->party[0].unit.level) {
                 CMB_GBWK->unk_00001 = 15;
                 CMB_GBWK->unk_00004 = 1;
                 CMB_GBWK->unk_1650B = 1;
@@ -3924,11 +3927,15 @@ void cmbUpdateBirthDevil(void)
         break;
     }
     case 2:
-        if (cmpLoadStatusModel() != 0) {
-            button = 0x8000;
-        } else {
-            CMB_GBWK->unk_00001 = CMB_GBWK->stockSlot[2].index == -1 ? 6 : 8;
+        if (cmpLoadStatusModel() == 0) {
+            if (CMB_GBWK->stockSlot[2].index == -1) {
+                CMB_GBWK->unk_00001 = 6;
+            } else {
+                CMB_GBWK->unk_00001 = 8;
+            }
             CMB_GBWK->unk_00004 = 2;
+        } else {
+            button = 0x8000;
         }
         break;
     case 0x100:
@@ -3960,9 +3967,6 @@ void cmbUpdateBirthDevil(void)
     }
     cmpPlayCursorSE(button);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateBirthDevil);
-#endif
 
 extern void cmbAddBirthDevilToStock(datUnitWork_t *unit, u8 count);
 
