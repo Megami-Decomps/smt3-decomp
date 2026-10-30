@@ -144,3 +144,49 @@ tracked files, 40 owner dependencies, source identity and no-op builds.
 Source commit `f0b01710d19a260271ee032185ecaa60a9b3f8c2` passed exact-source hosted CI
 [40998601934](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40998601934),
 including build and deploy.
+
+## pb_draw_map_cursor_Process (pb/pbGame, 0x268)
+
+154 of 154 words match at 616 bytes using ordinary C. Real positions[4],
+colors[4][4] and offsets[4][4] declaration order reproduces the native frame;
+the 64-byte offset copy and every array extent are genuine. The ordinary state
+switch handles 1, 5 and default; a real mask `1 << side` uses side 0..3 and is
+consumed by the work-bit test. A temporary empty-asm diagnostic constraint was
+removed successfully: no asm, fixed register or artificial operand remains.
+All 62 prior C peers, including roundDirCheck, and owned data remain exact.
+
+Each selected side initializes all four positions and sixteen color components
+before drawing. Passing colors[side] and the corresponding UV row is intentional:
+the actual sprite provider consumes four color/UV words and two 2D vertices.
+Work bits and texture are reobserved across callback-bearing draws, while the
+real saved work pointer is retained. No fabricated mask range or array extent
+is imposed. Native constructor storage is a 16-byte panel and four-byte value;
+unsigned-16-bit state semantics and the pre-null-test dereference are preserved.
+
+The amplitude retains sdfSin's float result converted to double, multiplication
+by 50.0 and then signed-integer conversion. Native integer offsets and products
+remain in order. This preserves the existing valid game-state domain; it does
+not promise defined C behavior for NaN-to-integer conversion, arbitrary
+nonfinite phase, extreme injected sine results or corrupt pointers.
+
+The tag callback precedes phase reload. Addition precedes the ordered
+threshold comparison, equality resets to positive zero, and the native final
+store placement is reproduced. Tail comparison behavior alone is not a claim
+that the whole sine-to-integer path accepts nonfinite inputs. The pinned old
+compiler emits literal words 0x3e4ccccc and 0x40490fda from 0.2f and 3.1415927f;
+independent assembled-pool and mapped-retail-byte checks confirm both. Modern
+host rounding must not replace these measured target literals. No invented
+volatile pool globals remain.
+
+Independent full-owner checking gives 63 match, 0 differ. Plain and `-da`
+complete-owner output agree in normalized assembly, text, data, rodata, lit4
+and emitted relocation sections. This is output parity, not a claim of
+historical spelling or internal pass causality. Outside-target source bytes
+are identical to the committed baseline.
+Full retail checksum, 149 guarded owners / 576 drafts, seven IRX owners and
+26 tooling files / 427 tests pass. Actual published-checkout verification proves
+all 780 tracked files, 39 owner dependencies, report/provenance equality and
+no-op builds.
+Source commit `35a11cd4cd99a5a5073c1493efc915b132f1c757` passed exact-source hosted CI
+[41001048339](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41001048339),
+including build and deploy.
