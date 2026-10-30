@@ -1303,7 +1303,6 @@ extern void RunFrame2(evtViewerObject_s *track, evtFrameInfo_t *next,
 extern evtViewerObject_s *evt_camera;
 extern s8 dds3ScreenBlurFlag;
 
-#ifdef NON_MATCHING
 void evtRunFrame(s32 nowFrame)
 {
     evtViewerObject_s *track;
@@ -1312,16 +1311,17 @@ void evtRunFrame(s32 nowFrame)
     evtFrameInfo_t *previous;
     s32 length;
     s32 endFrame;
-    s32 nearestFrame = 10000;
+    s32 nearestFrame;
 
-    viewerinfo->drawblur2 = 0;
     track = viewerinfo->firstobjinfo;
     viewerinfo->drawmblur = 0;
     viewerinfo->filter = 0;
-    viewerinfo->flags &= ~6;
+    viewerinfo->flags &= ~2;
+    viewerinfo->flags &= ~4;
     viewerinfo->drawmfilter = 0;
     viewerinfo->drawdblur = 0;
     viewerinfo->drawrblur = 0;
+    viewerinfo->drawblur2 = 0;
     for (; track != NULL; track = track->next) {
         if (track->type == 1) {
             RunFrameUnit(track, nowFrame);
@@ -1334,7 +1334,7 @@ void evtRunFrame(s32 nowFrame)
             case 21:
                 endFrame = (s16)frame->param.sh[1];
                 if (endFrame == 0) {
-                    length = viewerinfo->totalframe - frame->frame;
+                    length = (s32)((u32)viewerinfo->totalframe - (u32)frame->frame);
                 } else {
                     length = endFrame - frame->frame;
                     if (length < 0) length = 0;
@@ -1343,7 +1343,7 @@ void evtRunFrame(s32 nowFrame)
             case 18:
                 endFrame = (s16)frame->param.sh[0];
                 if (endFrame == 0) {
-                    length = viewerinfo->totalframe - frame->frame;
+                    length = (s32)((u32)viewerinfo->totalframe - (u32)frame->frame);
                 } else {
                     length = endFrame - frame->frame;
                     if (length < 0) length = 0;
@@ -1356,7 +1356,7 @@ void evtRunFrame(s32 nowFrame)
                 if (next != NULL) {
                     length = next->frame - frame->frame;
                 } else {
-                    length = viewerinfo->totalframe - frame->frame;
+                    length = (s32)((u32)viewerinfo->totalframe - (u32)frame->frame);
                 }
                 break;
             default:
@@ -1364,13 +1364,14 @@ void evtRunFrame(s32 nowFrame)
                 break;
             }
             if ((length == 0 && nowFrame == frame->frame) ||
-                (length > 0 && nowFrame >= frame->frame && nowFrame < frame->frame + length)) {
+                (length > 0 && nowFrame >= frame->frame && nowFrame < (s32)((u32)frame->frame + (u32)length))) {
                 RunFrame1(track, frame, nowFrame, length);
             } else {
                 OutFrame1(track, frame, nowFrame, length);
             }
         }
     }
+    nearestFrame = 10000;
     track = viewerinfo->firstobjinfo;
     evt_camera = NULL;
     for (; track != NULL; track = track->next) {
@@ -1393,9 +1394,6 @@ void evtRunFrame(s32 nowFrame)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtRunFrame);
-#endif
 
 void DrawActiveCameraName(void)
 {
