@@ -138,3 +138,53 @@ and final Ninja no-op checks.
 Source commit `8d93e95e72468d79834e91faad818113c4e2533a` has exact-source hosted CI
 [41004448827](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41004448827):
 build and deploy both completed successfully.
+
+## GetViewModeKey (facility/fclEncyc, 0x1D4)
+
+117 of 117 words match at 468 bytes in ordinary C. The three mode arms
+retain their own real input snapshots instead of merging modes zero and one
+into a shared arm. Analog mask results are held in `s32` locals before the
+key-mask tests; no register binding, empty asm or new input observation is
+introduced. This records the landed source shape, not an attribution to an
+unobserved compiler pass or a claim about original source spelling.
+
+Modes zero and one map analog bits 0..3 to output bits 1..4 and pad bytes
+4..7 to output bits 5..8. Mode zero takes zoom from pad bytes 9 and 11;
+mode one takes it from analog bits 6 and 7. Mode two maps analog bits 0..3
+to output bits 5..8 and bits 4..7 to output bits 1..4, taking zoom from
+pad bytes 6 and 7. Every recognized mode takes output bit zero from the
+negative test on pad byte 0x22. Other modes return zero after the initial
+`GetAnalogPad` call. Signed byte observations and nonzero tests remain
+distinct; the local directional names do not redefine the provider's mapping.
+
+Source commit `4d093b726e02d74376266a0ca337c7854042a807` has successful
+exact-source hosted [CI 41012173652](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41012173652).
+The recorded landing check was 112 match, 0 differ for the complete owner.
+This historical result is not a new local validation run.
+
+## CalcPhaseReadTop (facility/fclEncyc, 0x144)
+
+81 of 81 words match at 324 bytes in ordinary C. The accepted source keeps
+the list position and selected record as separate real values. It computes
+`Index + Shift` before `PushListwinCursor`, then reads the signed sort byte
+after that callback and selects an existing `s16` index-array pointer with
+an explicit conditional. The record load remains after the cursor push.
+The refresh arm uses the same explicit pointer selection for its font-list
+call. No array extent, structure layout or provider declaration changes.
+
+Ribbon calculation precedes sort-key handling. A sort change returns early.
+Otherwise cancellation publishes phase 8 and sets status bit 1; confirmation
+publishes phase 4, updates status, then stores the selected record index.
+The refresh action rebuilds the font list. The common list-color update
+remains after the switch. In particular, the status update is not replaced
+by a snapshot retained across the cursor callback. Existing valid-list and
+sorted-index contracts are preserved, not strengthened into an arbitrary-input
+safety guarantee. These are source/output facts, not a compiler-trace claim.
+
+Source commit `1420c409a6fd4866e5e8c90d674b8f5336666396` has successful
+exact-source hosted [CI 41013516551](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41013516551).
+Its retail build/checksum, tooling tests, guarded EE and IRX compilation,
+reports, report-scope check and progress-site deployment all completed
+successfully rather than being skipped. The recorded landing check was
+113 match, 0 differ for the complete owner. This historical owner result
+and hosted evidence do not claim a new local build in the recovery workspace.

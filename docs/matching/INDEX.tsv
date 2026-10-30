@@ -100,6 +100,8 @@ DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/match
 DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	46
 ApplyEdgeListCursor	facility/fclEncyc	0xA8	42 of 42 words match	docs/matching/facility/fclEncyc.md	70
 ChangeModelMotion	facility/fclEncyc	0x104	65 of 65 words match	docs/matching/facility/fclEncyc.md	105
+GetViewModeKey	facility/fclEncyc	0x1D4	117 of 117 words match	docs/matching/facility/fclEncyc.md	142
+CalcPhaseReadTop	facility/fclEncyc	0x144	81 of 81 words match	docs/matching/facility/fclEncyc.md	165
 fclDrawPanel	fclPanel	0x54	8 of 21 words differ	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	6 of 64 words differ	docs/matching/facility/fclPanel.md	25
 fclDrawPanelType0	facility/fclPanel	0x394	172 of 229 words match	docs/matching/facility/fclPanel.md	40
@@ -113,6 +115,8 @@ ragBuildHeartsList	fclRagInit	0x124	73 of 73 words match	docs/matching/facility/
 ragCheckHeartsChoice	fclRagUpdate	0x80	22 of 29 words match	docs/matching/facility/fclRagUpdate.md	3
 ragUpdateSeqConfirm	facility/fclRagUpdate	0x208	130 of 130 words match	docs/matching/facility/fclRagUpdate.md	28
 rcvCreateLocalStock	facility/fclRecoverCalc	0x25C	151 of 151 words match	docs/matching/facility/fclRecoverCalc.md	3
+DrawElem	facility/fclRibbon	0x368	218 of 218 words match	docs/matching/facility/fclRibbon.md	3
+Qualified allocation evidence (2026-10-30)				docs/matching/facility/fclRibbon.md	33
 fclDrawSpriteAngleCore	fclShare	0x4A8	212 of 298 words match	docs/matching/facility/fclShare.md	3
 fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/matching/facility/fclShare.md	48
 shop_Process	facility/fclShopCalc	256 bytes	37 of 64 words match	docs/matching/facility/fclShopCalc.md	3
