@@ -63,3 +63,37 @@ first future node stops traversal. The defaults are 0 and 2, with the last
 qualifying update winning independently for each mode. The two
 `evtRunUnitMode` calls retain their order and separate `track->basic`
 reads; the second remains the native tail call.
+
+## evtRunFrame (event/evtEventViewer, 0x2BC)
+
+175 of 175 words match at 700 bytes in ordinary C. Separate real flag clears,
+initialization of `nearestFrame` only at the second traversal, and ordering of
+independent pre-callback blur resets produce the native sequence. There are no
+constraints, aliases, new types or declaration changes. All 51 previously
+matching peers, including RunFrameUnit, and owned data remain exact.
+
+The distinct reset fields have no intervening callback observation. Separate
+`flags &= ~2` and `flags &= ~4` yield the native two AND operations and one final
+store, not extra volatile observations. `nearestFrame` is initialized before
+every consumer; its address is first taken in the second traversal. Both
+traversals retain the real frame/track links observed after callbacks, and the
+second reloads the global first-object pointer after the first traversal.
+Camera publication, RunFrame3, quake handling and later flag/blur observations
+preserve their native order and reloads.
+
+Differences involving promoted signed-16-bit end-frame and unsigned-16-bit
+frame/index fields are within signed-32-bit range. Total-frame subtraction and
+frame-plus-length addition instead use explicit unsigned-32-bit arithmetic,
+then convert to signed with the pinned target's bit-preserving behavior. This
+preserves native wrap without invented overflow bounds or a universal ISO-C
+portability claim. Existing valid pointer/list domains remain inherited; cyclic
+or adversarially mutated lists are not newly guaranteed to terminate.
+
+Independent final-source owner checking gives 52 match, 0 differ. Diagnostic
+complete-owner plain/stock-dump assembly, text and relocation parity is verified;
+no historical spelling or internal scheduler-decision claim follows from that.
+Final qualification passes the retail checksum, all 149 guarded owners / 586
+drafts, seven IRX owners, 26 tooling files / 427 tests, shell mocks and docs checks.
+Source commit `5fac154cda0e857968ae35f52c62aa13163e78de` passed exact-source hosted CI
+[40993213967](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40993213967),
+including build and deploy.

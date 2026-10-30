@@ -204,3 +204,50 @@ guarded owners / 588 drafts, seven IRX owners, 26 tooling test files / 427 cases
 shell mocks and documentation checks. Source commit `dd0e8255e7b22c6bbb7cffbe2cc6564281a4b28d` passed exact-source
 hosted CI [40991191105](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40991191105),
 including build and deploy.
+
+## cmbCalcBirthDevil (facility/fclCombineInit, 0x434)
+
+269 of 269 words match at 1,076 bytes. The production owner has 187 matching
+functions and no differences, including the previously published StockCursor2
+and normal owned-data checks. The reconstruction uses a real initialized phase
+flag, reuses it for the later boolean, shares the two actual zero-return exits,
+and dispatches results 10, 11 and default with an ordinary switch. The unit
+snapshots, independent third-slot observations, complete unit copies, panel and
+availability callbacks, fresh result pointer, birth-kind publication and skill
+callback retain their native order. No register constraints or opaque aliases
+are retained.
+
+The match also corrects a consistent availability argument boundary: both
+`cmbGetBirthDevil` declarations now take `s32`, and its actual guarded definition
+receives `s32 availableInput` and immediately initializes `s8 available` from it.
+All later provider uses consume that narrowed local. All three native callers
+forward the availability result directly into argument register 8. The native
+provider itself performs a left shift by 24 followed by an arithmetic right
+shift by 24 before observing that value. Thus every incoming 32-bit pattern is
+converted to the sign-extended low byte, as in the explicit conversion under the
+pinned target compiler. This is an evidence-backed representation of the native
+machine boundary, not uniquely recovered historical C signature spelling. It
+is not a caller-only false declaration, and does not assume the producer can
+return only zero or one. Signed narrowing is target/compiler-defined.
+
+The final-source counterfactual restoring the narrow declarations and definition
+emits 1,084 bytes with redundant caller-side sign extension; its owner is 186/1.
+The shared real zero-return label separately resolves the remaining initial
+allocation differences. Complete-owner plain/stock-dump assembly, text and
+relocation parity is qualified for the diagnostic source; it is not a hooked
+allocator trace or a claim about an unmeasured compiler decision.
+
+The provider is still guarded and is **not** credited as matching. Its old and
+new C diagnostics emit 1,256 and 1,264 bytes respectively, versus retail's 1,252,
+with the same owned-rodata context warning at 0x2A9. Its C output changes; it is
+neither invariant nor exact. The other guarded caller also remains nonmatching.
+Production continues to use those assembly implementations. Existing pointer,
+stock/table index and callback contracts are inherited without extra bounds or
+termination claims.
+
+Independent final-source checking gives 187 match, 0 differ. Full qualification
+passes the retail checksum, all 149 guarded owners / 587 drafts, seven IRX
+owners, 26 tooling files / 427 tests, shell mocks and documentation checks.
+Source commit `f0b8209e21c8000163a002297e0f1a3045fbeb23` passed exact-source hosted CI
+[40992706526](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40992706526),
+including build and deploy.
