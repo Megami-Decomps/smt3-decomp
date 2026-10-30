@@ -65,6 +65,7 @@ dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/matching/effect/ef
 effEveBEDCutDraw	effect/effEvent	0x1DC	117 of 119 words match	docs/matching/effect/effEvent.md	3
 effDebugDrawRectLine	effect/effMagatuhi	0x154	72 of 85 words match	docs/matching/effect/effMagatuhi.md	3
 func_001AA6D0	effect/effMagatuhi	0x628		docs/matching/effect/effMagatuhi.md	37
+effDebugDrawMenu	effect/effMagatuhi	0x764	473 of 473 words match	docs/matching/effect/effMagatuhi.md	74
 effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words match	docs/matching/effect/effPCPBoss.md	3
 effPCP_BED_Create	effect/effPCPBoss	248 bytes	33 of 63 words match	docs/matching/effect/effPCPBoss.md	20
 effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	71 of 75 words match	docs/matching/effect/effPCPBoss.md	53
@@ -182,6 +183,7 @@ CheckAction_READY	newbattle/nbActionProcess	0x3EC	251 of 251 words match	docs/ma
 CheckAction_COMM	newbattle/nbActionProcess	0x354	213 of 213 words match	docs/matching/newbattle/nbActionProcess.md	26
 CheckAction_CHECK1	newbattle/nbActionProcess	0x28C	163 of 163 words match	docs/matching/newbattle/nbActionProcess.md	60
 CheckCounter	newbattle/nbActionProcess	0x238	142 of 142 words match	docs/matching/newbattle/nbActionProcess.md	105
+CheckBinjoNego	newbattle/nbActionProcess	0x258	150 of 150 words match	docs/matching/newbattle/nbActionProcess.md	153
 SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/matching/newbattle/nbAi.md	3
 SetSingleTarget2	newbattle/nbAi	0x26C	143 of 155 words match	docs/matching/newbattle/nbAi.md	29
 Sel_AI	newbattle/nbAi	0x358	214 of 214 words match	docs/matching/newbattle/nbAi.md	43

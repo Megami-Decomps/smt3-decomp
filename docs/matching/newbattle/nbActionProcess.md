@@ -149,3 +149,50 @@ all 83 peers and owned data. Retail checksum, 427 tests across 26 tooling files,
 source `0e182dd0654b7576aead7a4f983de7b6b5c25f38`. Exact-source CI
 [41074871555](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41074871555)
 completed successfully, with every actual step passing and none skipped.
+
+## CheckBinjoNego (newbattle/nbActionProcess, 0x258)
+
+150 of 150 words match at 600 bytes. Independent ordered form/party flag tests
+preserve every bit pattern; the signed party-index test rejects >=4, not
+negative indices. Moon precedes the fresh work observation for Talk, whose
+actual result is returned only on its zero edge. Iteration remains 4..13.
+The per-iteration form pointer is a real snapshot across callbacks; success
+reloads current action data/party while taking partyindex from that saved
+form. Push and printf each observe the current form index. The real limit
+100 feeds both boosted rate and RNG bound, without an invented consumer.
+
+Initial, form and party statuses remain separate locals. Shared-status spelling
+also matched but was unnecessary, so no phase-reuse dependency is claimed.
+Diagnostic address and mask constraints were removed independently without
+losing exactness; no new constraint, binding, volatile or alias remains.
+
+Address arithmetic starts with the signed16 index scaled by the real unsigned
+sizeof(nbParty_t), adds the actual array base in unsigned32 arithmetic, and
+forms only the final typed pointer. Pinned probes establish four-byte pointer,
+u32 and size_t, 128-byte party records and the actual halfword flag at zero.
+This preserves EE32 LH/SLL7/ADDU behavior without an intermediate invalid C
+pointer, fabricated offset pointer or false extent. Valid final accesses retain
+the original precondition: arbitrary signed indices are not promised safe,
+and this is not portable ISO-C provenance reasoning.
+
+The typed-address control differs only in using ordinary array indexing and
+leaves seven target words different. Qualified expansion observes final
+offset-first versus control base-first addition and actual index/base load
+order. Local allocation assigns final pointer/status to hard2/hard3 versus
+control hard3/hard2. Both full-owner plain/dump pairs independently pass
+normalized assembly, allocated-section contracts, relocations and function
+inventory. These are observed lowering/allocation facts, not an unseen
+comparator rule or original-source claim. Earlier data diagnostics were
+secondary to incomplete target relocation recognition; exact target passes
+unchanged owned-data checks without new imports or manufactured literals.
+
+Bounded models pass 196,608 single-field flag/stage predicate cases and 262,144
+low32 address cases over all index patterns and four representative bases.
+They do not prove all state combinations, callbacks, pointer validity or
+whole-program execution. Independent complete-owner checking gives 85 match,
+0 differ, preserving all 84 peers and owned data. Combined retail checksum,
+427 tests across 26 tooling files, 147 guarded owners / 547 drafts, seven IRX
+owners and report gates passed for source
+`b362bd871f355c758be545f97a43237e7f324ead`. Exact-source CI
+[41078870717](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41078870717)
+completed successfully, with every actual step passing and none skipped.
