@@ -3639,13 +3639,11 @@ extern s32 cmpChkPadPressUpDown(void);
 extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 extern void cmpPlayCursorSE(u32 button);
 
-#ifdef NON_MATCHING
 void cmbUpdateRoot(void)
 {
     u16 button = cmpGetPressedButton(0x33);
     s8 selected;
-    u8 offset;
-    u8 index;
+    s32 cursorSum;
 
     fclSetWorkValue(2, 0);
     if (fclGetFlag(0) == 0) {
@@ -3653,15 +3651,13 @@ void cmbUpdateRoot(void)
     }
     switch (button) {
     case 1:
-        offset = (u8)CMB_GBWK->combineCursor.unk_24;
-        index = *(u8 *)&CMB_GBWK->combineCursor.unk_22;
-        selected = (s8)(index + offset + 1);
-        CMB_GBWK->unk_00001 = selected;
+        cursorSum = *(u8 *)&CMB_GBWK->combineCursor.unk_22 +
+                    (u8)CMB_GBWK->combineCursor.unk_24 + 1;
+        selected = (s8)cursorSum;
+        CMB_GBWK->unk_00001 = cursorSum;
         switch (selected) {
         case 1:
-            if ((s8)CMB_GBWK->stockCursorCount >= 2) {
-                CMB_GBWK->unk_00004 = 1;
-            } else {
+            if ((s8)CMB_GBWK->stockCursorCount < 2) {
                 CMB_GBWK->unk_00005 = 1;
                 CMB_GBWK->unk_00008 = fclScriptStart(CMB_GBWK->script, 4,
                                                      &CMB_GBWK->scriptArg);
@@ -3669,6 +3665,8 @@ void cmbUpdateRoot(void)
                 CMB_GBWK->unk_00003 = 0x10;
                 CMB_GBWK->unk_00004 = -1;
                 CMB_GBWK->unk_00002 = 0;
+            } else {
+                CMB_GBWK->unk_00004 = 1;
             }
             break;
         case 3:
@@ -3700,9 +3698,6 @@ void cmbUpdateRoot(void)
     cmpPlayCursorSE((u16)cmpDisablePadBitStop(
         (cmpPadStopWork_t *)&CMB_GBWK->combineCursor, button, 0x30));
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateRoot);
-#endif
 
 s32 cmbStockIsLocked(s32 index)
 {
