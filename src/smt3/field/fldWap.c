@@ -154,7 +154,7 @@ extern s32 gFldInf_WpExit;
 
 extern u8 *fldDoor_Find2(const char *);
 
-dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const u8 *name);
+dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
 
 dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 
@@ -1352,59 +1352,92 @@ void fldGetDoorEntry(const void *source) {
     memcpy(&fldDoorParamTable, source, sizeof(fldDoorParamTable));
 }
 
-#ifdef NON_MATCHING
 extern fldResHead_t *gEvnRng[];
 extern dds3Basic_t *dds3GetControlScene(void);
 extern f32 EulerAngleAxisY(void);
 
 #define SET_DOOR_MOTION(x, y, z, mode, direction) do { \
-    if ((mode) >= 1 && (mode) <= 8) { \
-        f32 step = (mode) <= 4 ? 7.5f : 3.75f; \
-        if ((mode) == 3 || (mode) == 7) { \
-            (x) = 0.0f; (y) = -step; (z) = 0.0f; \
-        } else if ((mode) == 4 || (mode) == 8) { \
-            (x) = 0.0f; (y) = step; (z) = 0.0f; \
-        } else { \
-            if ((mode) == 2 || (mode) == 6) step = -step; \
-            switch (direction) { \
-            case 0: (x) = -step; (y) = 0.0f; (z) = 0.0f; break; \
-            case 1: (x) = 0.0f; (y) = 0.0f; (z) = step; break; \
-            case 2: (x) = step; (y) = 0.0f; (z) = 0.0f; break; \
-            case 3: (x) = 0.0f; (y) = 0.0f; (z) = -step; break; \
-            } \
+    switch (mode) { \
+    case 1: \
+        switch (direction) { \
+        case 0: (x) = -7.5f; (y) = 0.0f; (z) = 0.0f; break; \
+        case 1: (x) = 0.0f; (y) = 0.0f; (z) = 7.5f; break; \
+        case 2: (x) = 7.5f; (y) = 0.0f; (z) = 0.0f; break; \
+        case 3: (x) = 0.0f; (y) = 0.0f; (z) = -7.5f; break; \
         } \
-    } else { \
-        (x) = 0.0f; (y) = 0.0f; (z) = 0.0f; \
+        break; \
+    case 2: \
+        switch (direction) { \
+        case 0: (x) = 7.5f; (y) = 0.0f; (z) = 0.0f; break; \
+        case 1: (x) = 0.0f; (y) = 0.0f; (z) = -7.5f; break; \
+        case 2: (x) = -7.5f; (y) = 0.0f; (z) = 0.0f; break; \
+        case 3: (x) = 0.0f; (y) = 0.0f; (z) = 7.5f; break; \
+        } \
+        break; \
+    case 3: \
+        (x) = 0.0f; (y) = -7.5f; (z) = 0.0f; break; \
+    case 4: \
+        (x) = 0.0f; (y) = 7.5f; (z) = 0.0f; break; \
+    case 5: \
+        switch (direction) { \
+        case 0: (x) = -3.75f; (y) = 0.0f; (z) = 0.0f; break; \
+        case 1: (x) = 0.0f; (y) = 0.0f; (z) = 3.75f; break; \
+        case 2: (x) = 3.75f; (y) = 0.0f; (z) = 0.0f; break; \
+        case 3: (x) = 0.0f; (y) = 0.0f; (z) = -3.75f; break; \
+        } \
+        break; \
+    case 6: \
+        switch (direction) { \
+        case 0: (x) = 3.75f; (y) = 0.0f; (z) = 0.0f; break; \
+        case 1: (x) = 0.0f; (y) = 0.0f; (z) = -3.75f; break; \
+        case 2: (x) = -3.75f; (y) = 0.0f; (z) = 0.0f; break; \
+        case 3: (x) = 0.0f; (y) = 0.0f; (z) = 3.75f; break; \
+        } \
+        break; \
+    case 7: \
+        (x) = 0.0f; (y) = -3.75f; (z) = 0.0f; break; \
+    case 8: \
+        (x) = 0.0f; (y) = 3.75f; (z) = 0.0f; break; \
+    default: (x) = 0.0f; (y) = 0.0f; (z) = 0.0f; break; \
     } \
 } while (0)
 
-#define LOAD_DOOR_ANGLE(resource, angle) do { \
+/* VU0 observes these component stores through the bare-address load helper.
+   Only the hand-off stores need volatile accesses; initialization is ordinary C.
+   Plain blocks avoid the extra join alignment of one-pass loop macros. */
+#define LOAD_DOOR_ANGLE(resource, angle) { \
+    s32 resourceID = (resource)->id; \
     fldResourcePoint_t *point = (resource)->transform; \
-    quaternion.x = point->rot.x; \
-    quaternion.y = point->rot.y; \
-    quaternion.z = point->rot.z; \
-    quaternion.w = point->rot.w; \
+    work->evehit_resid = resourceID; \
+    ((volatile sdfVector4_t *)&quaternion)->x = point->rot.x; \
+    ((volatile sdfVector4_t *)&quaternion)->y = point->rot.y; \
+    ((volatile sdfVector4_t *)&quaternion)->z = point->rot.z; \
+    ((volatile sdfVector4_t *)&quaternion)->w = point->rot.w; \
     SDF_VU0_LOADVECTOR(&quaternion); \
-    (angle) = EulerAngleAxisY() * 180.0f / 3.139999866f; \
+    (angle) = EulerAngleAxisY() * 180.0f / 3.14f; \
     while ((angle) < 0.0f) (angle) += 360.0f; \
     while ((angle) > 360.0f) (angle) -= 360.0f; \
-} while (0)
+}
 
-#define SET_DOOR_DIRECTION(angle, direction) do { \
+#define SET_DOOR_DIRECTION(angle, direction) { \
     if ((angle) >= 45.0f && (angle) <= 135.0f) (direction) = 1; \
     else if ((angle) >= 135.0f && (angle) <= 225.0f) (direction) = 0; \
     else if ((angle) >= 225.0f && (angle) <= 315.0f) (direction) = 3; \
     else (direction) = 2; \
-} while (0)
+}
 
 void fldSetupDoorScenes(void)
 {
-    QWORD_ALIGNED volatile sdfVector4_t quaternion;
+    QWORD_ALIGNED sdfVector4_t quaternion;
     dds3Basic_t *scene;
     dds3Basic_t *matter;
-    fldResHead_t *resource;
+    /* Local reconstruction constraint: keep the reloaded resource in v0 until
+       its id and transform have been fetched. It is dead before the VU call;
+       removing the binding coalesces it with the id and changes 21 words. */
+    register fldResHead_t *resource __asm__("$2");
     doormovetbl_s *door;
     doormovework_s *work;
+    /* These directions intentionally persist between door entries. */
     s32 direction1 = 0;
     s32 direction2 = 0;
     s32 index;
@@ -1423,12 +1456,11 @@ void fldSetupDoorScenes(void)
             for (i = 0; i < fldEveRngCount; i++) {
                 if (gEvnRng[i]->name != NULL && strcmp(gEvnRng[i]->name, door->name) == 0) {
                     resource = gEvnRng[i];
-                    work->evehit_resid = resource->id;
+                    __asm__("" : "+r"(resource));
                     LOAD_DOOR_ANGLE(resource, angle);
                     work->x1 = angle;
                 }
             }
-            work->z2 = 0.0f;
             work->stat = 0;
             work->cnt1 = 0;
             work->cnt2 = 0;
@@ -1436,31 +1468,39 @@ void fldSetupDoorScenes(void)
             work->z1 = 0.0f;
             work->x2 = 0.0f;
             work->y2 = 0.0f;
+            work->z2 = 0.0f;
         } else if (door->kind == 1 && door->floor == fldArea[0] + 1) {
             work->matter_resid1 = -1;
             if (door->motion != 0) {
-                matter = dds3SceneBasicSearchNameAndType(scene, 6, (const u8 *)door->motionName);
+                matter = dds3SceneBasicSearchNameAndType(scene, 6, door->motionName);
                 if (matter != NULL) {
                     work->matter_resid1 = matter->serialID;
                     for (i = 0; i < fldEveRngCount; i++) {
                         if (gEvnRng[i]->name != NULL && strcmp(gEvnRng[i]->name, door->name) == 0) {
                             resource = gEvnRng[i];
-                            work->evehit_resid = resource->id;
+                            __asm__("" : "+r"(resource));
                             LOAD_DOOR_ANGLE(resource, angle);
                             SET_DOOR_DIRECTION(angle, direction1);
                         }
                     }
                 }
             }
-            work->matter_resid2 = -1;
+            {
+                /* Keep the live missing-matter sentinel before the secondary
+                   mode read. The empty volatile constraint emits no code and
+                   preserves the native shared-entry scheduling. */
+                s32 missingID = -1;
+                __asm__ volatile ("" : "+r"(missingID));
+                work->matter_resid2 = missingID;
+            }
             if (door->secondaryMotion != 0) {
-                matter = dds3SceneBasicSearchNameAndType(scene, 6, (const u8 *)door->otherName);
+                matter = dds3SceneBasicSearchNameAndType(scene, 6, door->otherName);
                 if (matter != NULL) {
                     work->matter_resid2 = matter->serialID;
                     for (i = 0; i < fldEveRngCount; i++) {
                         if (gEvnRng[i]->name != NULL && strcmp(gEvnRng[i]->name, door->name) == 0) {
                             resource = gEvnRng[i];
-                            work->evehit_resid = resource->id;
+                            __asm__("" : "+r"(resource));
                             LOAD_DOOR_ANGLE(resource, angle);
                             SET_DOOR_DIRECTION(angle, direction2);
                         }
@@ -1499,9 +1539,7 @@ void fldSetupDoorScenes(void)
 #undef SET_DOOR_MOTION
 #undef LOAD_DOOR_ANGLE
 #undef SET_DOOR_DIRECTION
-#else
-INCLUDE_ASM(const s32, "field/fldWap", fldSetupDoorScenes);
-#endif
+
 
 void fldFindDoorEvent(s32 id) {
     doormovework_s *e;
