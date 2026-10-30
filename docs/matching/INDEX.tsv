@@ -78,6 +78,8 @@ dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/m
 evtEventViewerProcess3	event/evtEventViewer	0x16C	88 of 91 words match	docs/matching/event/evtEventViewer.md	3
 RunFrameUnit	event/evtEventViewer	0x94	37 of 37 words match	docs/matching/event/evtEventViewer.md	31
 evtRunFrame	event/evtEventViewer	0x2BC	175 of 175 words match	docs/matching/event/evtEventViewer.md	67
+evtStopFrame	event/evtEventViewer	0x2A4	169 of 169 words match	docs/matching/event/evtEventViewer.md	101
+evtEventViewerProcess4	event/evtEventViewer	0x280	160 of 160 words match	docs/matching/event/evtEventViewer.md	139
 FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
 func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
 evtFrameListHead	event/evtEventViewerMenu	0x138	39 of 78 words differ	docs/matching/event/evtEventViewerMenu.md	22
@@ -90,6 +92,7 @@ cmbStartResultScript	fclCombineInit	0x84	33 of 33 words match	docs/matching/faci
 cmbGetBirthPhase	fclCombineInit	0x88	34 of 34 words match	docs/matching/facility/fclCombineInit.md	136
 cmbUpdateStockCursor2	facility/fclCombineInit	0x22C	139 of 139 words match	docs/matching/facility/fclCombineInit.md	170
 cmbCalcBirthDevil	facility/fclCombineInit	0x434	269 of 269 words match	docs/matching/facility/fclCombineInit.md	208
+cmbUpdateBirthDevil	facility/fclCombineInit	0x3B8	238 of 238 words match	docs/matching/facility/fclCombineInit.md	255
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/matching/facility/fclEncyc.md	22
 DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	46

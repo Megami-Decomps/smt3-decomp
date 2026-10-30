@@ -19,14 +19,15 @@ both native and emitted sizes when they differ.
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
+| 8 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 8 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 7 |  | [sdk/libc.md](sdk/libc.md) |
-| 7 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
+| 5 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 5 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
@@ -43,7 +44,6 @@ both native and emitted sizes when they differ.
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
 | 3 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
-| 3 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |

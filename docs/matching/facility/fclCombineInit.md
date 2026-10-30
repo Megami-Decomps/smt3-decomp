@@ -251,3 +251,37 @@ owners, 26 tooling files / 427 tests, shell mocks and documentation checks.
 Source commit `f0b8209e21c8000163a002297e0f1a3045fbeb23` passed exact-source hosted CI
 [40992706526](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40992706526),
 including build and deploy.
+
+## cmbUpdateBirthDevil (facility/fclCombineInit, 0x3B8)
+
+238 of 238 words match at 952 bytes in ordinary C. Direct snapshots of the
+real signed-byte stock indices replace broad draft volatile aggregate views;
+two actual unit pointers recover the native address calculations. The idle
+success arm comes first, and explicit phase alternatives retain the exact
+`index == -1` distinction. There are no constraints, register bindings, new
+types, changed prototypes or ABI changes. The previously documented BirthCalc
+availability boundary and all 187 prior matching peers remain unchanged.
+
+Both unit pointers are formed after the model-reload callback and consumed
+before another call. The second address is formed unconditionally, but its ID
+load remains short-circuited after the first comparison. This retains the
+engine's valid selected-party-index contract, not safety for arbitrary negative
+or out-of-range indices. Model, script, ribbon and cursor callbacks and their
+required global reloads remain in native order. The signed unlock result and
+its nonnegative test are unchanged.
+
+Writing the unsigned-16-bit level comparison as birth greater than player is
+value-equivalent over its complete domain and produces the native load order
+after the event-bit callback. This is measured output, not a claim that C
+operand spelling mandates left-to-right evaluation. Zero-first load-status
+branching is equivalent for every return value; it does not assume only the
+provider's currently observed zero/one/two results.
+
+Independent guard-removed full-owner checking gives 188 match, 0 differ with
+normal owned-data checks. Complete-owner plain/stock-dump assembly, text and
+relocation parity is qualified, and the plain text equals the checker object.
+Full qualification passes the retail checksum, 149 guarded owners / 584 drafts,
+seven IRX owners, 26 tooling files / 427 tests, shell mocks and docs checks.
+Source commit `8923543b5266dd2dbc7a61ad10f3fdf035bf2fe1` passed exact-source hosted CI
+[40995071024](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40995071024),
+including build and deploy.

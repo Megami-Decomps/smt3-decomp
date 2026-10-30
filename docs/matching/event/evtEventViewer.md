@@ -97,3 +97,85 @@ drafts, seven IRX owners, 26 tooling files / 427 tests, shell mocks and docs che
 Source commit `5fac154cda0e857968ae35f52c62aa13163e78de` passed exact-source hosted CI
 [40993213967](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40993213967),
 including build and deploy.
+
+## evtStopFrame (event/evtEventViewer, 0x2A4)
+
+169 of 169 words match at 676 bytes in ordinary C. Two signed track-type
+switches retain cases 3, 18, 20 and 21 and skip every other signed value.
+The real basic pointer is reused only after its earlier traversals finish;
+the same correctly typed control pointer feeds the genuine model and motion
+consumers in disjoint phases. There are no dummy uses, artificial lifetimes,
+constraints, new types, prototype changes or ABI changes. All 52 prior matches,
+including evtRunFrame, and normal owned data remain exact.
+
+Both active-scene calls are retained. Unit, matter and mover traversal order,
+post-callback next loads, and fresh effect-viewer observations are preserved.
+Unit model-first is reloaded after Seek before Pause, while matter motion is
+intentionally snapshotted. Zero `sw` seeks then pauses; every nonzero value
+unpauses. Conversion of unsigned nowFrame to float preserves the high-bit
+path, and the existing signed mover parameter receives the same low 32 bits
+under the target ABI. Inner switch default advances the child, not the track.
+
+Effect case 18 uses its work pointer. Cases 3/20/21 skip negative signed-byte
+slots, without inventing an upper bound. The 127-entry array's slot 127 remains
+outside the inherited valid index contract; this is not a claim that arbitrary
+inputs are safe. Null selected basics and null mover payloads skip as native;
+the native control-provider dereference still relies on a valid eligible
+payload. No defensive check, list termination guarantee or callback cache is
+introduced.
+
+Qualified complete-owner plain/stock-dump assembly, text and relocation parity
+covers the two-switch, basic-reuse and control-reuse controls. Initial RTL
+assigns the same correctly typed control pseudo in the unit and matter phases;
+its measured allocated home changes from v1 to v0. This supports truthful scalar
+reuse, not an invented internal scheduling explanation or historical-source
+claim. Independent guard-removed checking gives 53 match, 0 differ.
+Final qualification passes the retail checksum, 149 guarded owners / 583 drafts,
+seven IRX owners, 26 tooling files / 427 tests, shell mocks and docs checks.
+Source commit `08f344607276167c36247afc66440c54fce5cdcd` passed exact-source hosted CI
+[40995572614](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40995572614),
+including build and deploy.
+
+## evtEventViewerProcess4 (event/evtEventViewer, 0x280)
+
+160 of 160 words match at 640 bytes in ordinary C. Signed action-result and
+menu-state switches preserve their complete domains. A forward label inside
+the loop places the real PopMenu call after the normal continuation and then
+exits once. Direct accesses use the existing menuStack entries, with initialized
+x, y and mode argument locals. Reordering independent state stores and real
+argument initialization recovers the native output without constraints,
+volatility, artificial dependencies, shifted structs or before-array pointers.
+No layout, prototype or ABI change is introduced.
+
+DrawEffect precedes traversal. Index starts at one and compares live stack
+depth; callbacks are followed by fresh menu/viewer observations. The first
+dispatch result survives the optional supplementary mode-four dispatch, whose
+result is intentionally ignored. Action zero records the current mode and
+continues; minus one pops once and exits; every other signed action calls the
+existing callback. Callback result one returns Process5_0 immediately, minus
+one sets done, and every other signed result leaves done unchanged. Every
+non-early callback path exits the loop.
+
+The u16 x coordinate plus s16 window offset fits signed32; y and mode retain
+zero extension. Window movement keeps its else-if priority and representable
+signed16 stores. Process killing is followed by a fresh viewer reload before
+clearing its current process slot. Menu state zero resets the real fields,
+sets state one and pushes the menu; state one clears it and sets done; all
+other signed states remain unchanged. The final nowmenu test and Process3
+transition retain the existing EE32 function-pointer return convention.
+
+The eight-entry stack's active indices one through seven and live object
+contract remain inherited. The callback table still requires an eligible mode
+with a real nonnull callback; no invented bound, defensive fallback or arbitrary
+malformed-input termination guarantee is added.
+
+Complete-owner plain/stock-dump assembly, text and relocation parity is
+qualified for the ordered, argument-load and cleaned final controls. This is
+measured source/output evidence, not historical-source spelling or an unobserved
+optimizer explanation. Independent target-only rebasing onto published StopFrame
+preserves its surrounding bytes and gives 54 match, 0 differ, including RunFrame
+and StopFrame. Full qualification passes the retail checksum, 149 guarded owners /
+582 drafts, seven IRX owners, 26 tooling files / 427 tests, shell mocks and docs
+checks. Source commit `127dbb80bec3b72661d7586294dfad93c54398e4` passed exact-source hosted CI
+[40996592892](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40996592892),
+including build and deploy.
