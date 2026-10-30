@@ -57,6 +57,7 @@ both native and emitted sizes when they differ.
 | 2 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 2 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 2 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
+| 2 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 2 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 2 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
@@ -87,7 +88,6 @@ both native and emitted sizes when they differ.
 | 1 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
 | 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 |  | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
-| 1 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 1 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
@@ -96,6 +96,7 @@ both native and emitted sizes when they differ.
 | 1 | newbattle/nbEncount | [newbattle/nbEncount.md](newbattle/nbEncount.md) |
 | 1 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
 | 1 | newbattle/nbE911 | [newbattle/nbE911.md](newbattle/nbE911.md) |
+| 1 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
 | 1 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 1 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |

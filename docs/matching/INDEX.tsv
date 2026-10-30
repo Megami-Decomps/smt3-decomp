@@ -196,6 +196,7 @@ DispComm1PanelComm	newbattle/nbCommSelProcess	0xE0	53 of 56 words match	docs/mat
 DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/matching/newbattle/nbCommSelProcess.md	27
 AnimeCommandList	newbattle/nbCommSelProcess	0x18C	97 of 99 words match	docs/matching/newbattle/nbCommSelProcess.md	52
 DispCommandPanel (0x33C)				docs/matching/newbattle/nbCommSelProcess.md	75
+nbDebugProcess1	newbattle/nbDebugProcess	0x2A8	170 of 170 words match	docs/matching/newbattle/nbDebugProcess.md	3
 Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/matching/newbattle/nbE911.md	3
 nbApplyBadCurse	newbattle/nbEncProcess	0x174	80 of 93 words match	docs/matching/newbattle/nbEncProcess.md	3
 nbGetEncountJoken	newbattle/nbEncount	0x174	24 of 66 words match	docs/matching/newbattle/nbEncount.md	3
@@ -238,6 +239,7 @@ SetDamagePacket	newbattle/nbStageProcess	0x1E0	116 of 120 words match	docs/match
 StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/matching/newbattle/nbStageProcess.md	179
 UpdateSelect	newbattle/nbTarSelProcess	0x174	93 of 93 words match	docs/matching/newbattle/nbTarSelProcess.md	3
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	138 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
+nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	23
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/matching/newdata/datCalc.md	3
 datGetSkillKouka	newdata/datCalc	0x3F8	254 of 254 words match	docs/matching/newdata/datCalc.md	21
 nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_Calc.md	3
