@@ -249,7 +249,6 @@ extern char *pStr[];
 extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *font);
 
-#ifdef NON_MATCHING
 void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
 {
     cmpCursorInfo_t *cursor = &list->listCursor;
@@ -270,8 +269,13 @@ void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
         u32 color;
         frFontHandle_t *font;
 
-        if (slot != 0 && cmbChkGetHearts(slot) != 0) {
-            disabled = 1;
+        if (slot != 0) {
+            s32 hasHearts = cmbChkGetHearts(slot);
+            /* Target-specific allocation aid for the real unavailable flag.
+             * Its native $4 lifetime starts after the query and ends before
+             * the next call; ordinary C instead selects $3. */
+            register s32 unavailable __asm__("$4") = 1;
+            disabled = hasHearts != 0 ? unavailable : disabled;
         }
         color = cmpDrawListItemBox(cursor, i, i, disabled | (mode != 0 ? 2 : 0), 0x100);
         font = frwGetSmallFontFRQ2(x + 0x310, y + 0xC0, z, color, pStr[item], NULL);
@@ -286,9 +290,6 @@ void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
         lstDrawListWindowCursor((lstWindowWork_t *)list, ot);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawHeartsRows);
-#endif
 
 extern datDevilTableEntry_t datDevilTable[];
 extern char *text2[];
