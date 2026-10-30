@@ -2077,9 +2077,6 @@ s32 sceOpen(const char *name, s32 flags, ...)
 INCLUDE_ASM(const s32, "sdk/libkernl", sceOpen);
 #endif
 
-/* NON_MATCHING: 376/380 bytes; the final nonnegative-result clamp
- * simplifies to a shorter immediate comparison. */
-#ifdef NON_MATCHING
 s32 sceClose(s32 descriptor)
 {
     rpcSemaParam param;
@@ -2089,6 +2086,7 @@ s32 sceClose(s32 descriptor)
     s32 sema;
     s32 accepted;
     s32 status;
+    s32 threshold;
 
     entry = get_iob(descriptor);
     _sceFsWaitS(1);
@@ -2125,14 +2123,15 @@ s32 sceClose(s32 descriptor)
     WaitSema(sema);
     DeleteSema(sema);
     status = result;
-    if (status >= 0) {
+    threshold = -1;
+    /* Keep the real native signed threshold in a general register for its
+     * comparison. No instruction, fixed register or memory effect is added. */
+    __asm__("" : "+r"(threshold));
+    if (threshold < status) {
         status = 0;
     }
     return status;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", sceClose);
-#endif
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceLseek);
 
