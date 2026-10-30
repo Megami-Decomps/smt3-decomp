@@ -2841,67 +2841,94 @@ void ControlModel(fclEncyc_instance_tag *pinst, mdlObj_t *model, s32 key)
 
 extern s32 GetAnalogPad(void);
 
-#ifdef NON_MATCHING
 s32 GetViewModeKey(fclEncyc_instance_tag *pinst)
 {
     s32 analog = GetAnalogPad();
     s8 mode = pinst->unk_6D;
     s32 keys = 0;
-    s8 up;
-    s8 down;
-    s8 left;
-    s8 right;
-    s8 zoomIn;
-    s8 zoomOut;
 
     switch (mode) {
-    case 0:
-    case 1:
-        keys = dds3PadButtonState[0x22] < 0;
-        up = dds3PadButtonState[4];
-        down = dds3PadButtonState[5];
-        left = dds3PadButtonState[6];
-        if (mode == 0) {
-            zoomIn = dds3PadButtonState[9];
-            right = dds3PadButtonState[7];
-            zoomOut = dds3PadButtonState[11];
-        } else {
-            right = dds3PadButtonState[7];
-            zoomIn = analog & 0x40;
-            zoomOut = analog & 0x80;
-        }
-        if (analog & 1) keys |= 2;
-        if (analog & 2) keys |= 4;
-        if (analog & 4) keys |= 8;
-        if (analog & 8) keys |= 0x10;
-        if (up != 0) keys |= 0x20;
-        if (down != 0) keys |= 0x40;
-        if (left != 0) keys |= 0x80;
-        if (right != 0) keys |= 0x100;
-        if (zoomIn != 0) keys |= 0x200;
-        if (zoomOut != 0) keys |= 0x400;
-        break;
-    case 2:
-        keys = dds3PadButtonState[0x22] < 0;
-        zoomOut = dds3PadButtonState[7];
-        zoomIn = dds3PadButtonState[6];
-        if (analog & 1) keys |= 0x20;
-        if (analog & 2) keys |= 0x40;
-        if (analog & 4) keys |= 0x80;
-        if (analog & 8) keys |= 0x100;
-        if (analog & 0x10) keys |= 2;
-        if (analog & 0x20) keys |= 4;
-        if (analog & 0x40) keys |= 8;
-        if (analog & 0x80) keys |= 0x10;
+    case 0: {
+        s32 analogLeft, analogRight, analogUp, analogDown, padUp, padRight, padDown, padLeft;
+        s32 zoomIn, zoomOut;
+        analogLeft = analog & 1;
+        analogRight = analog & 2;
+        analogUp = analog & 4;
+        analogDown = analog & 8;
+        if (dds3PadButtonState[0x22] < 0) keys |= 1;
+        padUp = dds3PadButtonState[4];
+        padRight = dds3PadButtonState[5];
+        padDown = dds3PadButtonState[6];
+        zoomIn = dds3PadButtonState[9];
+        padLeft = dds3PadButtonState[7];
+        zoomOut = dds3PadButtonState[11];
+        if (analogLeft != 0) keys |= 0x2;
+        if (analogRight != 0) keys |= 0x4;
+        if (analogUp != 0) keys |= 0x8;
+        if (analogDown != 0) keys |= 0x10;
+        if (padUp != 0) keys |= 0x20;
+        if (padRight != 0) keys |= 0x40;
+        if (padDown != 0) keys |= 0x80;
+        if (padLeft != 0) keys |= 0x100;
         if (zoomIn != 0) keys |= 0x200;
         if (zoomOut != 0) keys |= 0x400;
         break;
     }
+    case 1: {
+        s32 analogLeft, analogRight, analogUp, analogDown, padUp, padRight, padDown, padLeft;
+        s32 zoomIn, zoomOut;
+        analogLeft = analog & 1;
+        analogRight = analog & 2;
+        analogUp = analog & 4;
+        analogDown = analog & 8;
+        if (dds3PadButtonState[0x22] < 0) keys |= 1;
+        padUp = dds3PadButtonState[4];
+        padRight = dds3PadButtonState[5];
+        padDown = dds3PadButtonState[6];
+        zoomIn = analog & 0x40;
+        padLeft = dds3PadButtonState[7];
+        zoomOut = analog & 0x80;
+        if (analogLeft != 0) keys |= 0x2;
+        if (analogRight != 0) keys |= 0x4;
+        if (analogUp != 0) keys |= 0x8;
+        if (analogDown != 0) keys |= 0x10;
+        if (padUp != 0) keys |= 0x20;
+        if (padRight != 0) keys |= 0x40;
+        if (padDown != 0) keys |= 0x80;
+        if (padLeft != 0) keys |= 0x100;
+        if (zoomIn != 0) keys |= 0x200;
+        if (zoomOut != 0) keys |= 0x400;
+        break;
+    }
+    case 2: {
+        s32 analogLeft, analogRight, analogUp, analogDown, otherLeft, otherRight, otherUp, otherDown;
+        s32 zoomIn, zoomOut;
+        analogLeft = analog & 1;
+        analogRight = analog & 2;
+        analogUp = analog & 4;
+        analogDown = analog & 8;
+        otherLeft = analog & 0x10;
+        otherRight = analog & 0x20;
+        otherUp = analog & 0x40;
+        otherDown = analog & 0x80;
+        if (dds3PadButtonState[0x22] < 0) keys |= 1;
+        zoomOut = dds3PadButtonState[7];
+        zoomIn = dds3PadButtonState[6];
+        if (analogLeft != 0) keys |= 0x20;
+        if (analogRight != 0) keys |= 0x40;
+        if (analogUp != 0) keys |= 0x80;
+        if (analogDown != 0) keys |= 0x100;
+        if (otherLeft != 0) keys |= 0x2;
+        if (otherRight != 0) keys |= 0x4;
+        if (otherUp != 0) keys |= 0x8;
+        if (otherDown != 0) keys |= 0x10;
+        if (zoomIn != 0) keys |= 0x200;
+        if (zoomOut != 0) keys |= 0x400;
+        break;
+    }
+    }
     return keys;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", GetViewModeKey);
-#endif
 
 extern u8 dds3PadStickState[2][2][2];
 
