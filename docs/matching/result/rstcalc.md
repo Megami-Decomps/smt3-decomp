@@ -193,3 +193,36 @@ are inert. The direct typed-row source remains preferred. A further change
 needs a genuine source lifetime or access-path premise that explains the
 different temporary combination; manually expanding the constant multiply
 is not justified by this observation.
+
+## rstSetCurrentDevil (176 bytes, matched)
+
+The signed stock scan is now exact at 44/44 words. Existing signed and unsigned
+union views of the index byte express retail's `lb`/`lbu` observations without
+volatile casts. A real `DDS3_GBWK` snapshot before the index-byte store supplies
+the stock access; the later global observation supplies the unit pointer.
+The labeled retry and shared exhaustion exit preserve native control flow,
+call order, and the conditional publication of `EventStart->unit`.
+
+An initialized success value of one has a real return-choice consumer after
+`rstSetLevelUpCount` and `rstChkParamLimitAll`. A localized empty `+r` constraint
+keeps that value live across the scan and calls without fixing a register.
+The allocator retains it in saved `$18`; the unconstrained ordinary form sinks
+one after the final call and produces 168 bytes rather than retail's 176.
+This is a target-specific compiler aid, not original-source evidence or a claim
+about an unmeasured compiler pass. The constraint is not a memory barrier;
+the complete target output establishes the required accesses and ordering.
+
+The inherited contract still requires valid stock and unit indices whenever
+those accesses occur. The signed scan is not a new lower-bound check, and no
+bounds or guaranteed retry termination under arbitrary callbacks are invented.
+The byte increment is promoted before narrowing back to the stored byte.
+Return zero leaves the published unit unchanged; a qualifying unit selects two
+unless the parameter-limit check returns zero, selecting the retained one.
+
+Independent complete-owner checking gives 83 match, 0 differ, including the
+caller and both helpers, with owned-data checks enabled. Final-source checks
+also pass the retail checksum, all 149 guarded owners / 601 drafts, seven IRX
+owners, 26 tooling test files / 427 cases, shell mocks and documentation checks.
+Source commit `ee3811254c1dfa0a09931f37f9ec61c5478ec292` passed exact-source
+hosted CI [40977985806](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40977985806),
+including build and deploy.

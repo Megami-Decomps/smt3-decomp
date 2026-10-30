@@ -15,8 +15,8 @@ both native and emitted sizes when they differ.
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 11 |  | [sdk/libkernl.md](sdk/libkernl.md) |
+| 9 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
-| 8 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 8 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 8 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
