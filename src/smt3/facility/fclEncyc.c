@@ -3036,7 +3036,6 @@ extern void mdlLoopMotion(mdlObj_t *model, s32 group, s32 motion);
 extern void mdlSmoothLoopMotion(mdlObj_t *model, s32 group, s32 motion,
                                 f32 beforeLength, f32 smoothLength);
 
-#ifdef NON_MATCHING
 void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
 {
     s32 motion;
@@ -3052,6 +3051,8 @@ void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
         } else {
             mdlLoopMotion(model, 0, motion);
         }
+        model->first->speed = speed;
+        return;
     } else {
         motion = cmpGetModelMotionId((u16)id);
         speed = cmpGetModelScale((u16)id);
@@ -3061,9 +3062,6 @@ void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
     }
     model->first->speed = speed;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", ChangeModelMotion);
-#endif
 
 extern void *memset(void *dst, s32 value, u32 size);
 extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode);
