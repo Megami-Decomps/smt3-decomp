@@ -248,21 +248,21 @@ extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh
 extern dds3ProcessID_t *pbGetMessageScriptProc(void);
 extern s32 fclGetFlag(s8 index);
 
-#ifdef NON_MATCHING
 s32 pb_draw_bg_Process(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     s32 state = panel->state;
-    s32 number;
     s32 tens;
-    s32 ones;
-    pbMapWork_t *map;
 
-    if (state == 1) {
+    switch (state) {
+    case 1:
         if (panel != NULL) {
             panel->flags = 0;
         }
-    } else if (state == 5) {
+        break;
+    case 5:
         return -1;
+    default:
+        break;
     }
 
     rsetOtOfs(0x27);
@@ -283,22 +283,16 @@ s32 pb_draw_bg_Process(dds3ProcessID_t *id) {
     DrwSprite2D(0x100, 0, 0x100, 0xC8, 0x100, 0, 0x100, 0xC8,
                 0x80808080, D_0054F5C4->tex348);
 
-    map = D_0054F5C4;
-    number = map->stage + 1;
-    ones = number % 10;
-    DrwSprite2D(0x1C4, 0x1B, 0xD, 0x14, ones * 0x14 + 0x28, 0x1CC, 0xD, 0x14,
-                0x80808080, map->tex348);
-    map = D_0054F5C4;
-    tens = (map->stage + 1) / 10;
+    DrwSprite2D(0x1C4, 0x1B, 0xD, 0x14,
+                ((D_0054F5C4->stage + 1) % 10) * 0x14 + 0x28,
+                0x1CC, 0xD, 0x14, 0x80808080, D_0054F5C4->tex348);
+    tens = (D_0054F5C4->stage + 1) / 10;
     if (tens > 0) {
         DrwSprite2D(0x1B7, 0x1B, 0xD, 0x14, tens * 0x14 + 0x28, 0x1CC, 0xD, 0x14,
-                    0x80808080, map->tex348);
+                    0x80808080, D_0054F5C4->tex348);
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbMain", pb_draw_bg_Process);
-#endif
 
 void pb_draw_bg_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(id->workdata);
