@@ -97,12 +97,14 @@ ragDrawHeartsList	fclRagCalc	0x1D0	116 of 116 words match	docs/matching/facility
 ragBuildList2, ragBuildList3	fclRagInit	0x174 each	22 of 93 words differ	docs/matching/facility/fclRagInit.md	3
 ragGetListItem2	fclRagInit	0xCC	29 of 51 words match	docs/matching/facility/fclRagInit.md	47
 ragGetListItem3	fclRagInit	0xCC	29 of 51 words match	docs/matching/facility/fclRagInit.md	74
+ragBuildHeartsList	fclRagInit	0x124	73 of 73 words match	docs/matching/facility/fclRagInit.md	80
 ragCheckHeartsChoice	fclRagUpdate	0x80	22 of 29 words match	docs/matching/facility/fclRagUpdate.md	3
 fclDrawSpriteAngleCore	fclShare	0x4A8	212 of 298 words match	docs/matching/facility/fclShare.md	3
 fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/matching/facility/fclShare.md	48
 shop_Process	facility/fclShopCalc	256 bytes	37 of 64 words match	docs/matching/facility/fclShopCalc.md	3
 shpUpdateSeqConfirm	facility/fclShopUpdate	0xFC	63 of 63 words match	docs/matching/facility/fclShopUpdate.md	3
 fclTerminalLoadTextures	fclTerminalInit	0x70	16 of 27 words match	docs/matching/facility/fclTerminalInit.md	3
+trmStartSaveAct	fclTerminalUpdate	0x140	80 of 80 words match	docs/matching/facility/fclTerminalUpdate.md	3
 fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	40 of 42 words match	docs/matching/field/fldAutoMap.md	3
 fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244	10 of 146 words match	docs/matching/field/fldAutoMap.md	30
 fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/matching/field/fldAutoMap.md	77

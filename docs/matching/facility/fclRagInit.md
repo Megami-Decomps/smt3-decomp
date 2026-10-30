@@ -76,3 +76,36 @@ declared before `weight`; and `item = weight + kind * 7 + 7`.
 29 of 51 words match, at the exact size. Byte-identical to
 `ragGetListItem2` above except for the table, `D_0032FCE0`, and it differs
 in the same 22 words for the same reason. Fix one and the other follows.
+
+## ragBuildHeartsList (fclRagInit, 0x124)
+
+73 of 73 words match at 292 bytes. A truthful `s8 *items = work->heartItems`
+local is shared by the existing indexed store and `qsort`; the original
+`count++` expression stays intact. The declared signed-byte array begins at
+work + 0x1A. Retaining that real subobject address reproduces retail's base and
+old-count copy/increment/address/store/narrow sequence, rather than the draft's
+work + 0x19 walking-pointer form. No shifted or fabricated object, type change,
+constraint, dummy consumer or provider change is used.
+
+The loop executes 32 iterations and increments its initially zero signed-byte
+count at most once per iteration. Thus count stays in 0..32 and every actual
+store index is in 0..31; the count cannot overflow. Existing item-byte narrowing
+is retained. Valid table/type indices and a live work object remain inherited
+contracts, not newly assumed bounds. Keeping the array address does not cache
+its contents or the post-sort work fields. The same slot lookup, conditional
+registered-heart check, zero-item filtering and flag updates remain; `qsort`
+sorts count one-byte elements with the existing comparator, and the final work
+value call still reloads the signed unregistered flag afterward.
+
+Reduction controls establish that the pointer alone suffices; an earlier
+explicit old-count local was removed from the preferred source. Qualified
+plain/dump complete-owner assembly, text and relocations agree for each
+measured source. This is output parity and an output-based explanation, not a
+claim about a debugger-observed optimizer decision.
+
+Independent final-source owner checking gives 24 match, 0 differ with normal
+owned-data checks. Final-source gates pass the retail checksum, all 149 guarded
+owners / 596 drafts, seven IRX owners, 26 tooling test files / 427 cases, shell
+mocks and documentation checks. Source commit `30a7de849aff13665770c5f9bf987f4592b0025a` passed exact-source
+hosted CI [40985106175](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40985106175),
+including build and deploy.

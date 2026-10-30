@@ -32,6 +32,7 @@ both native and emitted sizes when they differ.
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
+| 4 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 4 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
@@ -39,7 +40,6 @@ both native and emitted sizes when they differ.
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
-| 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
@@ -101,6 +101,7 @@ both native and emitted sizes when they differ.
 | 1 | field/fldSnow | [field/fldSnow.md](field/fldSnow.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
 | 1 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
+| 1 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 1 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
 | 1 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
