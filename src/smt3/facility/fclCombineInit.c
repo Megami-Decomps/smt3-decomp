@@ -825,7 +825,7 @@ void cmbBuildResultRow(s32 mode)
 #ifdef NON_MATCHING
 extern s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
                             cmbUnit_t *third, datUnitWork_t *result,
-                            s8 available, s8 mode, s8 flag, cmpSkillList_t *skills);
+                            s32 available, s8 mode, s8 flag, cmpSkillList_t *skills);
 
 void cmbCreateCombineResultTable(s32 mode)
 {
@@ -1077,9 +1077,8 @@ extern void cmbSetupBirthPanel(s32 index);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
                             cmbUnit_t *third, datUnitWork_t *result,
-                            s8 available, s8 mode, s8 flag, cmpSkillList_t *skills);
+                            s32 available, s8 mode, s8 flag, cmpSkillList_t *skills);
 
-#ifdef NON_MATCHING
 s32 cmbCalcBirthDevil(void)
 {
     cmbUnit_t *first;
@@ -1090,10 +1089,10 @@ s32 cmbCalcBirthDevil(void)
     s32 available;
     s32 result;
     u16 id;
-    s8 flag;
+    s32 flag = 1;
 
-    if (CMB_GBWK->unk_00004 != 1) {
-        return 0;
+    if (CMB_GBWK->unk_00004 != flag) {
+        goto no_birth;
     }
     first = &DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index];
     second = &DDS3_GBWK->party[CMB_GBWK->stockSlot[1].index];
@@ -1121,12 +1120,16 @@ s32 cmbCalcBirthDevil(void)
     available = cmbBirthDevilIsAvailable();
     result = cmbGetBirthDevil(first, second, third, &CMB_GBWK->birthUnit[2],
                               available, 0, flag, NULL);
-    if (result == 10) {
+    switch (result) {
+    case 10:
         CMB_GBWK->birthVariant = 1;
-    } else if (result == 11) {
+        break;
+    case 11:
         CMB_GBWK->birthVariant = 2;
-    } else {
+        break;
+    default:
         CMB_GBWK->birthVariant = 0;
+        break;
     }
     if (id == 0) {
         CMB_GBWK->unk_00001 = 6;
@@ -1135,11 +1138,9 @@ s32 cmbCalcBirthDevil(void)
     cmpModelSetup(id, 0);
     CMB_GBWK->unk_1650A = 3;
     cmpStatSetTimer(0, 0);
+no_birth:
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcBirthDevil);
-#endif
 
 extern s32 cmbAddCustomDevilToStock(datUnitWork_t *custom, cmbUnit_t *list, u8 count);
 extern s32 cmbGetSpecialItemId(void);
@@ -2586,7 +2587,7 @@ no:
 #ifdef NON_MATCHING
 s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
                      cmbUnit_t *third, datUnitWork_t *output,
-                     s8 available, s8 mode, s8 accidentEnabled, cmpSkillList_t *skills)
+                     s32 availableInput, s8 mode, s8 accidentEnabled, cmpSkillList_t *skills)
 {
     u16 ids[3];
     u8 races[3];
@@ -2595,6 +2596,7 @@ s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
     s32 inheritedFlag;
     s32 result;
     s32 accident = 0;
+    s8 available = (s8)availableInput;
     s32 moonResult;
     u8 kind;
 
