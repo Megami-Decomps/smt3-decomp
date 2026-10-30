@@ -4051,7 +4051,9 @@ s32 CheckAction_INVISIBLE(nbActionProcessData_t *a)
     return 1;
 }
 
-#ifdef NON_MATCHING
+
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
+
 extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                   u32 col, s32 delay, s32 aframe, s32 colframe);
 extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, s32 uniqueid,
@@ -4065,8 +4067,9 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
     s32 i;
     s32 unlock;
     s32 end;
-    s32 delay;
-    s32 fade;
+    /* Disjoint phases: motion delay, then final stock-panel fade time. */
+    s32 frameScratch;
+    s32 formStatus;
     nbFormation_t *form;
 
     if (CheckTimeListDead(a, a->form->formindex) == 0 &&
@@ -4079,9 +4082,12 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
     }
     unlock = GetAllUnlockTime(a);
     for (i = 0; i < 16; i++) {
-        form = &a->data->form[i];
-        if ((form->stat & 1) && (form->stat & 0x40) &&
-            CheckTimeListDead(a, i) &&
+        /* EE address arithmetic: form only the final array pointer. */
+        form = (nbFormation_t *)((u32)(i * sizeof(nbFormation_t)) + (u32)a->data->form);
+        formStatus = form->stat;
+        if (!(formStatus & 1)) continue;
+        if (!(formStatus & 0x40)) continue;
+        if (CheckTimeListDead(a, i) &&
             !(a->data->party[a->data->form[i].partyindex].flag & 0x20)) {
             printf("dead formindex = %d!!\n", i);
             nbMakeDeadVisualPacket(unlock, (s32)a, &a->data->form[i], 0, 1);
@@ -4092,23 +4098,32 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
     }
     if (CheckTimeListDead(a, a->form->formindex) == 0) {
         end = GetAllEndTime(a);
-        unlock = GetAllUnlockTime(a);
-        delay = 0;
-        if (a->form->motendtype != 2 && !(a->stat & 0x100)) {
-            delay = 3;
+        /* The native call is retained; these packets use the end snapshot. */
+        GetAllUnlockTime(a);
+        frameScratch = 0;
+        /* Local compiler constraints retain the live frameScratch/mode values and
+           the native field reload; these empty templates change no values. */
+        __asm__("" : "+r"(frameScratch));
+        {
+            s32 motionMode = 2;
+            __asm__("" : "+r"(motionMode));
+            if (a->form->motendtype != motionMode) {
+                frameScratch = (a->stat & 0x100) ? frameScratch : 3;
+            }
         }
+        __asm__("" : "+m"(a->form->motendtype));
         if (a->form->stat & 0x10) {
             if (a->form->motendtype == 2) {
                 SetTimeList(a, a->form->formindex, end, 6, 6);
             } else {
-                SetTimeList(a, a->form->formindex, end, delay + 1, delay + 1);
+                SetTimeList(a, a->form->formindex, end, frameScratch + 1, frameScratch + 1);
             }
             if (a->form->motendtype == 2) {
-                unlock += delay;
-                nbMakeUnitFadeInPacket(unlock, (s32)a, a->form, 0, 2, 4, 4);
-                nbAddFormOnOffPacket(unlock, (s32)a, a->form, 0);
+                end = (s32)((u32)end + (u32)frameScratch);
+                nbMakeUnitFadeInPacket(end, (s32)a, a->form, 0, 2, 4, 4);
+                nbAddFormOnOffPacket(end, (s32)a, a->form, 0);
                 if (a->form->motendtype == 2) {
-                    nbAddMotionStopClearPacket(unlock, (s32)a, a->form);
+                    nbAddMotionStopClearPacket(end, (s32)a, a->form);
                 }
             }
         }
@@ -4116,18 +4131,13 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
     a->packettime = GetAllEndTime(a);
     nbAddHatudoEffectEndPacket(a->packettime * 70 / 100, (s32)a);
     if (a->stat & 0x400) {
-        fade = a->packettime - 10;
-        if (fade < 0) fade = 0;
-        nbAddPanelStockFadeOutPacket(fade, (s32)a);
+        frameScratch = (s32)(a->packettime - 10);
+        nbAddPanelStockFadeOutPacket(frameScratch < 0 ? 0 : frameScratch, (s32)a);
         nbAddPanelStockEndPacket(a->packettime - 1, (s32)a);
     }
     printf("allframe %d\n", a->packettime);
 }
-#else
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
 
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAction_CHECK1);
-#endif
 
 extern s8 dds3PadButtonState[];
 extern void nbPanelAnalyzeEnd(void);
