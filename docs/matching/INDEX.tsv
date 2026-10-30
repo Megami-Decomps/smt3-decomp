@@ -93,6 +93,7 @@ cmbGetBirthPhase	fclCombineInit	0x88	34 of 34 words match	docs/matching/facility
 cmbUpdateStockCursor2	facility/fclCombineInit	0x22C	139 of 139 words match	docs/matching/facility/fclCombineInit.md	170
 cmbCalcBirthDevil	facility/fclCombineInit	0x434	269 of 269 words match	docs/matching/facility/fclCombineInit.md	208
 cmbUpdateBirthDevil	facility/fclCombineInit	0x3B8	238 of 238 words match	docs/matching/facility/fclCombineInit.md	255
+cmbDrawBirthDevil	facility/fclCombineInit	0x274	157 of 157 words match	docs/matching/facility/fclCombineInit.md	289
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/matching/facility/fclEncyc.md	22
 DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	46

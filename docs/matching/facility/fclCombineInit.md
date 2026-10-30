@@ -285,3 +285,41 @@ seven IRX owners, 26 tooling files / 427 tests, shell mocks and docs checks.
 Source commit `8923543b5266dd2dbc7a61ad10f3fdf035bf2fe1` passed exact-source hosted CI
 [40995071024](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40995071024),
 including build and deploy.
+
+## cmbDrawBirthDevil (facility/fclCombineInit, 0x274)
+
+157 of 157 words match at 628 bytes in ordinary C. The genuine `hasBase`
+flag is initialized before the first panel callback, a signed switch selects
+cases 2 / 8 / 9 / default, and an ascending loop clears the actual six-byte
+local delta array. The compiler emits the native descending clear. No
+constraints, register bindings, artificial objects, type or prototype changes,
+or ABI aids are introduced. This measures the SMT3 output; it does not prove
+historical source spelling or a particular internal optimizer pass.
+
+The early flag initialization is invisible to callbacks: its address never
+escapes and its later adjustment guard is a real consumer. Dispatch preserves
+every signed birthKind value, including negatives, and the type-12 conversion
+still depends on the signed third stock index. Delta stores are unobservable
+until clearing completes, with no intervening callback or escaped array
+pointer. Both stat loops use the real six-element bounds. Display and base
+remain complete, distinct unit objects with lifetimes covering the callbacks.
+
+Panel, mode, party and ribbon observations retain their callback-sensitive
+reloads and native call order. Cases 8/9 still observe selected->id after the first copy callback.
+Parameter differences are within -39..39;
+the signed-byte parameter update retains the native low-byte narrowing.
+The base panel pointer is cleared before the mask callback on every mode-3
+path; the default path never exposes an uninitialized base. Existing valid
+party/table index contracts remain unchanged, without invented negative-index
+safety. The full signed hideRibbon argument still uses only its zero test.
+
+Independent guard-removed full-owner checking gives 189 match, 0 differ,
+including all 188 prior peers and normal owned-data checks. Earlier BirthCalc,
+BirthUpdate and stock-cursor matches are unchanged. Full qualification passes
+the retail checksum, 149 guarded owners / 575 drafts, seven IRX owners,
+26 tooling files / 427 tests, shell mocks and docs checks. Actual-published
+verification repeats the owner, retail, report, all 91 owner dependencies,
+all 780 tracked files and final Ninja no-op checks. Source commit
+`fb259583d38dc35d3e818448e3f1356171a52554` passed exact-source hosted CI
+[41001938999](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41001938999):
+including build and deploy.
