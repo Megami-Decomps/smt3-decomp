@@ -1754,31 +1754,76 @@ s32 CheckInotiNego(nbActionProcessData_t *a)
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckInotiNego);
 #endif
 
-#ifdef NON_MATCHING
 s32 CheckBinjoNego(nbActionProcessData_t *a)
 {
     nbFormation_t *form;
     datUnitWork_t *work;
-    struct nbParty_t *party;
     s32 i;
     s32 id;
     s32 rate;
+    s32 talkResult;
+    s32 rollLimit;
+    s32 initialStatus;
+    s32 formStatus;
+    s32 partyStatus;
 
-    if ((u32)((u16)a->data->StageMajor - 0xF0) < 7 || (a->data->stat & 1) != 0 ||
-        (a->party->flag & 6) != 0 || a->partyindex >= 4 || (a->stat & 8) == 0) {
+    initialStatus = (u32)((u16)a->data->StageMajor - 0xF0) < 7;
+    if (initialStatus) {
         return 0;
     }
-    if (evtGetAgeOfMoon() == 8 || datCheckTalk(a->work) == 0) {
+    initialStatus = a->data->stat & 1;
+    if (initialStatus != 0) {
         return 0;
+    }
+    initialStatus = a->party->flag & 6;
+    if (initialStatus != 0) {
+        return 0;
+    }
+    initialStatus = a->partyindex;
+    if (initialStatus >= 4) {
+        return 0;
+    }
+    initialStatus = a->stat & 8;
+    if (initialStatus == 0) {
+        return 0;
+    }
+    if (evtGetAgeOfMoon() == 8) {
+        return 0;
+    }
+    talkResult = datCheckTalk(a->work);
+    if (talkResult == 0) {
+        return talkResult;
     }
     for (i = 4; i < 14; i++) {
         form = &a->data->form[i];
-        if ((form->stat & 0x49) != 0x41) {
+        formStatus = form->stat;
+        if ((formStatus & 1) == 0) {
             continue;
         }
-        party = &a->data->party[form->partyindex];
-        if ((party->flag & 1) == 0 || (party->flag & 0x60) != 0) {
+        if ((formStatus & 8) != 0) {
             continue;
+        }
+        if ((formStatus & 0x40) == 0) {
+            continue;
+        }
+        {
+            /* On the EE's 32-bit ABI, sum the real array base and byte offset
+               as integers, then form only the final party pointer. */
+            struct nbParty_t *partyAddress = (struct nbParty_t *)(
+                (u32)((s32)form->partyindex * sizeof(struct nbParty_t)) +
+                (u32)a->data->party);
+            u16 partyFlags;
+            partyFlags = partyAddress->flag;
+            partyStatus = (u16)(partyFlags & 1);
+            if (partyStatus == 0) {
+                continue;
+            }
+            if ((partyFlags & 0x20) != 0) {
+                continue;
+            }
+            if ((partyFlags & 0x40) != 0) {
+                continue;
+            }
         }
         work = nbGetUnitWorkFromFormindex(i);
         if (CheckTimeListDead(a, i) != 0) {
@@ -1794,8 +1839,9 @@ s32 CheckBinjoNego(nbActionProcessData_t *a)
         if (datSearchDevilStock(id) >= 0 || datCheckTalk(work) == 0) {
             continue;
         }
-        rate = (a->data->stat & 0x2000000) != 0 ? 100 : 2;
-        if ((s32)dds3GetRandIntA(NULL, 100) < rate) {
+        rollLimit = 100;
+        rate = (a->data->stat & 0x2000000) != 0 ? rollLimit : 2;
+        if ((s32)dds3GetRandIntA(NULL, rollLimit) < rate) {
             a->data->party[form->partyindex].flag |= 0x40;
             nbPushAction(2, form->partyindex, a->partyindex, 0);
             printf("binjo party = %d\n", form->partyindex);
@@ -1804,9 +1850,6 @@ s32 CheckBinjoNego(nbActionProcessData_t *a)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckBinjoNego);
-#endif
 
 void CheckDeadScript(nbActionProcessData_t *a)
 {

@@ -2608,7 +2608,6 @@ void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross) {
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawRectLine);
 #endif
 
-#ifdef NON_MATCHING
 extern u32 D_0054F228, D_0054F22C;
 extern char D_0054F230[], D_0054F238[], D_0054F240[], D_0054F248[], D_0054F250[];
 
@@ -2619,7 +2618,6 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
     s32 x, y, i, value, oldAttr, oldX, oldY;
     u8 type;
     s32 *xy;
-    const char *format;
 
     if (menu->update != NULL && menu->mode == 1) {
         if (menu->param != NULL) {
@@ -2686,6 +2684,9 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
             effDebugPrintf(text);
             break;
         case 4:
+            sprintf(text, "%-7s:%-d", item->label, *(s32 *)item->value);
+            effDebugPrintf(text);
+            break;
         case 5:
             sprintf(text, "%-7s:%-d", item->label, *(s32 *)item->value);
             effDebugPrintf(text);
@@ -2698,45 +2699,69 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
             sprintf(text, "%-7s:%-4.3f", item->label, *(f32 *)item->value);
             effDebugPrintf(text);
             break;
-        case 8:
-            sprintf(text, "%-7s:%-s", item->label, *(u8 *)item->value ? D_0054F240 : D_0054F248);
-            effDebugPrintf(text);
-            break;
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-            if (type == 9) {
-                effDebugDrawRect3(effDebugPosX + 0x1A, effDebugPosY + 8, *(u32 *)item->value);
-            }
-            oldAttr = D_00551DDC;
-            effDebugSetAttr(type == 9 ? 2 : type - 6);
-            sprintf(text, D_0054F238, item->label);
-            effDebugPrintf(text);
-            D_00551DDC = oldAttr;
-            effDebugPosY -= 0xC;
-            sprintf(text, "        %-d", ((u8 *)item->value)[type - 9]);
-            effDebugPrintf(text);
-            break;
         case 13:
         case 14:
             value = *(s32 *)item->value;
-            format = NULL;
-            if (value == 0x44) format = "%-7s:SEMI";
-            if (value == 0x48) format = "%-7s:ADD";
-            if (value == 0x42) format = "%-7s:SUB";
-            if (value == 6) format = "%-7s:NEG";
-            if (format != NULL) sprintf(text, format, item->label);
+            if (value == 0x44) {
+                sprintf(text, "%-7s:SEMI", item->label);
+            } else if (value == 0x48) {
+                sprintf(text, "%-7s:ADD", item->label);
+            } else if (value == 0x42) {
+                sprintf(text, "%-7s:SUB", item->label);
+            } else if (value == 6) {
+                sprintf(text, "%-7s:NEG", item->label);
+            }
             effDebugPrintf(text);
             break;
         case 15:
             value = *(s32 *)item->value;
-            format = NULL;
-            if (value == 0) format = "%-7s:OPAQ";
-            if (value == 1) format = "%-7s:SEMI";
-            if (value == 2) format = "%-7s:ADD";
-            if (value == 3) format = "%-7s:SUB";
-            if (format != NULL) sprintf(text, format, item->label);
+            switch ((u32)value) {
+            case 0: sprintf(text, "%-7s:OPAQ", item->label); break;
+            case 1: sprintf(text, "%-7s:SEMI", item->label); break;
+            case 2: sprintf(text, "%-7s:ADD", item->label); break;
+            case 3: sprintf(text, "%-7s:SUB", item->label); break;
+            }
+            effDebugPrintf(text);
+            break;
+        case 9:
+            effDebugDrawRect3(effDebugPosX + 0x1A, effDebugPosY + 8, *(u32 *)item->value);
+            oldAttr = D_00551DDC;
+            effDebugSetAttr(2);
+            sprintf(text, D_0054F238, item->label);
+            effDebugPrintf(text);
+            D_00551DDC = oldAttr;
+            effDebugPosY -= 0xC;
+            sprintf(text, "        %-d", ((u8 *)item->value)[0]);
+            effDebugPrintf(text);
+            break;
+        case 10:
+            oldAttr = D_00551DDC;
+            effDebugSetAttr(4);
+            sprintf(text, D_0054F238, item->label);
+            effDebugPrintf(text);
+            D_00551DDC = oldAttr;
+            effDebugPosY -= 0xC;
+            sprintf(text, "        %-d", ((u8 *)item->value)[1]);
+            effDebugPrintf(text);
+            break;
+        case 11:
+            oldAttr = D_00551DDC;
+            effDebugSetAttr(5);
+            sprintf(text, D_0054F238, item->label);
+            effDebugPrintf(text);
+            D_00551DDC = oldAttr;
+            effDebugPosY -= 0xC;
+            sprintf(text, "        %-d", ((u8 *)item->value)[2]);
+            effDebugPrintf(text);
+            break;
+        case 12:
+            oldAttr = D_00551DDC;
+            effDebugSetAttr(6);
+            sprintf(text, D_0054F238, item->label);
+            effDebugPrintf(text);
+            D_00551DDC = oldAttr;
+            effDebugPosY -= 0xC;
+            sprintf(text, "        %-d", ((u8 *)item->value)[3]);
             effDebugPrintf(text);
             break;
         case 16:
@@ -2756,6 +2781,18 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
                 effDebugPosX = oldX;
             }
             break;
+        case 20:
+            sprintf(text, "%-7s:%-d", item->label, *(s32 *)item->value);
+            effDebugPrintf(text);
+            if (i == menu->selected) {
+                xy = item->value2;
+                effDebugDrawRectLine(xy[0], xy[1], *(s32 *)item->value, 1);
+            }
+            break;
+        case 8:
+            sprintf(text, "%-7s:%-s", item->label, *(u8 *)item->value ? D_0054F240 : D_0054F248);
+            effDebugPrintf(text);
+            break;
         case 18:
             effDebugDrawRectFull();
             break;
@@ -2766,14 +2803,6 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
             effDebugPrintf(text);
             D_00551DDC = oldAttr;
             break;
-        case 20:
-            sprintf(text, "%-7s:%-d", item->label, *(s32 *)item->value);
-            effDebugPrintf(text);
-            if (i == menu->selected) {
-                xy = item->value2;
-                effDebugDrawRectLine(xy[0], xy[1], *(s32 *)item->value, 1);
-            }
-            break;
         case 17:
         case 21:
         case 22:
@@ -2783,9 +2812,6 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawMenu);
-#endif
 
 void effDebugAllocDrawTag(void) {
     effDebugDrawTag = (struct sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
