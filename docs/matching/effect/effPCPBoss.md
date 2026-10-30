@@ -99,42 +99,50 @@ registers the fade chain needs); and `found` declared first rather than last.
 
 ## effPCPDANTE_Damage_Create (effect/effPCPBoss, 360 bytes)
 
-71 of 90 words match, at the exact 360-byte size.
+90 of 90 words match, at the native 360-byte size (2026-10-30).
 
-Two callee-saved registers swapped. Retail keeps the parameter pointer in `$20`
-and the accepted-target count in `$21`; the draft has them the other way round,
-so every instruction that names either differs, and the swap pulls `swaps =
-count * 2` into the other dead register and the byte-swap temporary out of
-`$19` into `$5`. Everything else is exact, including the two 32-iteration
-conditions, the branch-likely forms and the shuffle loop.
+Only the truthful `u8` held-byte local is bound to native `$19`, a localized
+target-specific compiler reconstruction aid, not evidence of historical source
+spelling. No empty asm is needed. Count is an ordinary `u32` local: it
+initializes after setup callbacks and has real increment/range/multiply
+consumers. Its native `$21` allocation is preserved across both RNG providers.
+Held initializes from the real unsigned-byte load after both
+calls and dies in its byte store before the next iteration's calls. The old
+delay value in `$19` and parameter pointer in `$20` are dead in this phase;
+the overlapping live swap bound naturally occupies `$20`.
 
-Two source facts carried it most of the way, both reusable:
+An ordinary `u32 shiftBase = 1u` value, assigned after count initialization and
+before slot formation, supplies the actual mask-shift operand. It preserves
+defined unsigned shifting for all 32 iterations, including bit 31. Actual RTL
+shows its definition before slot formation throughout loop optimization and
+scheduling. The prior literal was introduced inside the loop then hoisted
+after slot formation, leaving the two setup instructions reversed.
 
-- `delay = 1` has to be assigned before the `nbGetMainProcessData` and
-  `effBTLSkillGetTargetBit` calls. With the assignment after them the value
-  lands in `$4` instead of a callee-saved register, the frame shrinks by 16
-  bytes and 54 words differ; retail fills the first call's delay slot with
-  `addiu $19, $0, 0x1`.
-- The formation walk is a pointer increment, not `unit[i]`. Retail reads
-  `lw $2, 0x78($16)` with `$16` advancing by `0xF0`; the subscript form biases
-  the pointer by `0x78` and adds a word of setup.
+The local delay accumulator is `u32`, while the parameter record's signed
+`wait` field is unchanged. This reproduces native `addu` modulo-32-bit
+accumulation and low-byte `sb` storage for every signed wait value, without
+assuming a parameter range that would prevent signed overflow. The correction
+leaves all allocated and relocation section bytes identical to the signed
+control. Count is at most 32; its doubled swap bound is at most 64. No RNG is
+called when count is zero; otherwise native unsigned remainder yields indexes
+below count, within the 32-byte delay array. Equal indexes are safe.
 
-Ruled out for the register swap: `count` declared first, last and in the
-middle (declaration order is inert here, as elsewhere); `count` as `s32`;
-`swaps` as `count + count`, inlined into the loop condition, and through a
-separate index variable for the second loop; the parameter typed and the
-`memcpy` taking it directly or through a `void *` cast; the array index form in
-the first loop; `slot` initialised before the calls; a `range` local for the
-two `dds3GetRandIntA` arguments; `held` as `s32`; `a`/`b` as `s32` and declared
-at the top; `NULL` against `0` for the random stream; the second loop as a
-`while`; the two conditions merged with `&&` and spelled `!= 0`. Hoisting
-`param->delayStep` into a local and deriving `count` from the slot pointer are
-both far worse (78 and 80 words), which confirms the loop body is right.
+Qualified plain/`-da` assembly and allocated/relocation sections agree. The
+complete owner checks at 158 match / 0 differ; no ABI, layout, access width,
+call sequence or extra consumer is introduced.
 
-After recovering the complete 16-byte parameter record, replacing the generic
-copy with `work->param = *param` still leaves 71 of 90 words matching at the
-360-byte size. Typed aggregate assignment does not close this
-allocation residual either.
+Retained negative controls explain the minimal final form: count-only reached
+83/90; held with nonvolatile empty `+r` reached 85/90 but reordered three loop
+instructions; volatile reached 76/90. Removing the empty asm while retaining
+the held declaration reached 88/90, leaving only setup order. The ordinary
+shift-base local closed those last two words. Final necessity ablations with
+unsigned delay and shiftBase found both bindings removed at 73/90, count-only
+at 85/90, and held-only at 90/90; the redundant count binding was therefore
+removed. Earlier declaration permutations,
+changed count/index types, `count + count`, merged conditions, parameter-copy
+forms, array-index formation walking, and a held `s32` did not close the match.
+The initial delay assignment before setup calls and formation-pointer increment
+remain important native source shapes.
 
 ## effPCPBossBUNSINDrawPoly2 (effect/effPCPBoss, 468 bytes)
 

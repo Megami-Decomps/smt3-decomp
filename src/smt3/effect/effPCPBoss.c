@@ -4025,15 +4025,16 @@ void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_tag *hData, const v
     SDF_VU0_STOREMATRIX(hData->matrix);
 }
 
-/* NON_MATCHING: 19 of 90 words differ (first at +0x4). */
-#ifdef NON_MATCHING
+/* The local held-byte register declaration reconstructs native allocation;
+ * a target-specific compiler aid, not evidence of original source spelling. */
 effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
 {
     const effPCPDANTE_Damage_Param_t *param = pParam;
     effPCPDANTE_Damage_tag *work = sdfChipAllocZeroDirect(sizeof(effPCPDANTE_Damage_tag));
     nbFormation_t *unit;
     u32 bits;
-    s32 delay;
+    u32 shiftBase;
+    u32 delay;
     u8 *slot;
     u32 count;
     u32 i;
@@ -4050,10 +4051,11 @@ effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
     unit = nbGetMainProcessData()->form;
     bits = effBTLSkillGetTargetBit();
     count = 0;
+    shiftBase = 1u;
     slot = work->delay;
     for (i = 0; i < 32; i++, unit++) {
         if (unit->stat & 1) {
-            if (bits & (1 << i)) {
+            if (bits & (shiftBase << i)) {
                 *slot++ = delay;
                 count++;
                 delay += param->wait;
@@ -4064,16 +4066,13 @@ effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
     for (i = 0; i < swaps; i++) {
         u32 a = dds3GetRandIntA(NULL, count);
         u32 b = dds3GetRandIntA(NULL, count);
-        u8 held = work->delay[a];
+        register u8 held asm("$19") = work->delay[a];
 
         work->delay[a] = work->delay[b];
         work->delay[b] = held;
     }
     return work;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Create);
-#endif
 
 effPCPDANTE_Damage_tag *effPCPDANTE_Damage_CreatePCF(void *parameterTable) {
     void *firstBlock;
@@ -5024,4 +5023,3 @@ INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F208);
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F210);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F218);
-
