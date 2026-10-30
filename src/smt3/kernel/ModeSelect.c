@@ -9,13 +9,13 @@
 #include "kernel.h"
 #include "field.h"
 
-extern void dds3KillProcessName(char *name, s32 shutdowntimer);
+extern s32 dds3KillProcessName(char *name, s32 shutdowntimer);
 
 extern s32 fldWmapEnabled;
 
 extern dds3ProcessID_t *mselShutDown(u32 mode);
 
-extern char D_0053DF08[];
+extern const char D_0053DF08[];
 
 extern void mselFreeResources(s32 arg);
 
@@ -247,7 +247,7 @@ dds3ProcessID_t *mselShutDown(u32 mode)
     gGlobal->unk_58 = fileHandle;
     fclInitMessage(gGlobal->unk_5C);
     dds3BackColor = 0x80000000;
-    return dds3StartProcess(D_0053DF08, 0x2B19, 0, 0, mselMain, NULL, NULL);
+    return dds3StartProcess((char *)D_0053DF08, 0x2B19, 0, 0, mselMain, NULL, NULL);
 }
 
 extern void mselFreeTextures(void);
@@ -265,9 +265,8 @@ void mselFreeResources(s32 arg)
     gGlobal = NULL;
 }
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DF08);
+const char D_0053DF08[] = "mselProc";
 
-#ifdef NON_MATCHING
 extern void *memcpy(void *dest, const void *src, u32 size);
 extern s8 dds3PadButtonState[];
 extern void rsetOtOfs(s32 offset);
@@ -278,7 +277,7 @@ extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern s32 dds3FadeCheck(void);
-extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, u32 size, s32 mode);
 extern s32 evtBitOff(s32 no);
 extern s32 fclChkMessage(void);
 extern s32 fclChkSelMessage(void);
@@ -291,7 +290,7 @@ extern void fclUpdateMessage(void);
 extern s32 fclEncycRegist2(fclencyceelem_t *record, s32 mode);
 extern void fmProcTrigSequence(s32 sequence);
 extern s32 fmProcessChk(void);
-extern s32 slGetExitMode(void);
+extern u32 slGetExitMode(void);
 extern s32 p2sdLoadCheckMidi(s32 id);
 extern void p2sdLoadSMGFile(s32 id);
 extern void p2sdPlayBGMFade(s32 id);
@@ -306,7 +305,7 @@ extern void mselStartGame(void);
 
 s32 mselMain(dds3ProcessID_t *id)
 {
-    s32 selection, counter, alpha, count, time, digit, i, sequence;
+    s32 selection, count, digit, hours, seconds, i, sequence;
     mselSaveData_t *save;
     dds3GlobalWork_t *snapshot;
     sdfMemHandle_t *handle;
@@ -343,20 +342,27 @@ s32 mselMain(dds3ProcessID_t *id)
     case 3:
         mselDrawTitleAnim();
         if (dds3FadeCheck() == 0) {
+            /* Keep the live cursor alias in a2 until its field read. Ordinary
+             * allocation merges it with the mode/store base; this local EE
+             * constraint preserves native scheduling, not original spelling. */
+            register mselGlobalWork_t *cursorWork __asm__("$6");
+            s32 titleMode;
             mselUpdateCursor();
-            if (gGlobal->unk_A8 == 0 && dds3PadButtonState[0x23] < 0) {
+            titleMode = gGlobal->unk_A8;
+            cursorWork = gGlobal;
+            if (titleMode == 0 && dds3PadButtonState[0x23] < 0) {
                 gGlobal->unk_50 = 0;
                 gGlobal->unk_4C = 22;
                 dds3FadeOut(0, 0, 0, 20);
                 p2sdStopBGM(0x710001);
                 p2sdPlaySE(10, 127, 63);
             } else if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x2C] < 0) {
-                if (gGlobal->cursor != 0) {
-                    fldWmapEnabled = 1;
-                    evtBitOff(0xAF2);
-                } else {
+                if (cursorWork->cursor == 0) {
                     fldWmapEnabled = 0;
                     evtBitOn(0xAF2);
+                } else {
+                    fldWmapEnabled = 1;
+                    evtBitOff(0xAF2);
                 }
                 p2sdPlaySE(8, 127, 63);
                 gGlobal->unk_A8 = 1;
@@ -370,32 +376,15 @@ s32 mselMain(dds3ProcessID_t *id)
         break;
     case 15:
         mselDrawTitleAnim();
-        /* fall through */
-    case 17:
-        if (dds3FadeCheck() == 0) {
-            dds3FadeIn(0, 0, 0, 20);
-            fclStartMessage(0);
-            gGlobal->unk_4C = 4;
-        }
-        break;
+        goto startMessage;
     case 16:
-    case 19:
-        if (gGlobal->unk_4C == 16) mselDrawTitleAnim();
-        else mselDrawBackground();
-        if (dds3FadeCheck() == 0) {
-            if (gGlobal->unk_40 != 0) {
-                sdfTexFreeDelayed(gGlobal->unk_40);
-                gGlobal->unk_40 = 0;
-            }
-            selection = fclLoadTexture("/title/att_font.tmx");
-            gGlobal->unk_4C = 13;
-            gGlobal->unk_44 = selection;
-            gGlobal->unk_50 = 0;
-            dds3FadeIn(0, 0, 0, 90);
-        }
-        break;
+        mselDrawTitleAnim();
+        goto loadAttention;
     case 20:
         mselDrawTitleAnim2(0);
+        /* fall through */
+    case 17:
+    startMessage:
         if (dds3FadeCheck() == 0) {
             dds3FadeIn(0, 0, 0, 20);
             fclStartMessage(0);
@@ -435,16 +424,17 @@ s32 mselMain(dds3ProcessID_t *id)
             selection = fclGetSelMessagePos();
             fclEndMessage();
             Msel_TOverData_Clear();
-            if (selection != 0) {
-                p2sdStopBGM(0x710001);
-                gGlobal->unk_4C = 19;
-            } else {
+            if (selection == 0) {
                 snapshot = sdfMemGetPtr(gGlobal->unk_04);
                 *snapshot = *DDS3_GBWK;
                 gGlobal->unk_4C = 18;
                 gGlobal->unk_50 = 0;
+                dds3FadeOut(0, 0, 0, 20);
+            } else {
+                p2sdStopBGM(0x710001);
+                gGlobal->unk_4C = 19;
+                dds3FadeOut(0, 0, 0, 20);
             }
-            dds3FadeOut(0, 0, 0, 20);
         } else fclUpdateMessage();
         break;
     case 18:
@@ -456,16 +446,29 @@ s32 mselMain(dds3ProcessID_t *id)
             fmProcTrigSequence(4);
         }
         break;
+    case 19:
+        mselDrawBackground();
+    loadAttention:
+        if (dds3FadeCheck() == 0) {
+            if (gGlobal->unk_40 != 0) {
+                sdfTexFreeDelayed(gGlobal->unk_40);
+                gGlobal->unk_40 = 0;
+            }
+            selection = fclLoadTexture("/title/att_font.tmx");
+            gGlobal->unk_4C = 13;
+            gGlobal->unk_44 = selection;
+            gGlobal->unk_50 = 0;
+            dds3FadeIn(0, 0, 0, 90);
+        }
+        break;
     case 7:
         if (fmProcessChk() == 0) {
-            selection = slGetExitMode();
-            if (selection == 0) {
-                gGlobal->unk_4C = 17;
-                gGlobal->unk_50 = 0;
-                dds3FadeOut(0, 0, 0, 0);
-            } else if (selection == 2) {
-                save = sdfMemGetPtr(gGlobal->unk_08);
-                *save = DDS3_GBWK->encyclopedia;
+            u32 exitMode = slGetExitMode();
+            if (exitMode != 0) {
+                mselSaveData_t *loadedSave;
+                if (exitMode != 2) break;
+                loadedSave = sdfMemGetPtr(gGlobal->unk_08);
+                *loadedSave = DDS3_GBWK->encyclopedia;
                 memcpy(&gGlobal->fileInfo, DDS3_GBWK, sizeof(GameFileInfo_t));
                 handle = DDS3_GBWK->memHandle;
                 snapshot = sdfMemGetPtr(gGlobal->unk_04);
@@ -482,6 +485,10 @@ s32 mselMain(dds3ProcessID_t *id)
                     gGlobal->unk_50 = 0;
                     fclStartMessage(3);
                 }
+            } else {
+                gGlobal->unk_4C = 17;
+                gGlobal->unk_50 = 0;
+                dds3FadeOut(0, 0, 0, 0);
             }
         }
         break;
@@ -536,75 +543,92 @@ s32 mselMain(dds3ProcessID_t *id)
         break;
     case 12:
         evtBitOn(0x8B1);
-        count = (s32)((u32)gGlobal->fileInfo.endCounterWord + 1);
+        count = (s16)gGlobal->fileInfo.endcnt + 1;
         if (count <= 0) count = 1;
         if (count > 0) evtBitOn(0x8B6);
         if (count >= 2) evtBitOn(0x8B7);
         if (count >= 3) evtBitOn(0x8B8);
         if (count >= 4) evtBitOn(0x8B9);
         if (count >= 5) evtBitOn(0x8BA);
-        time = gGlobal->fileInfo.PlayTime;
-        if (time > 0x066FEBF8) time = 0x066FEBF8;
-        digit = (time % 108000) / 1800 % 10;
-        if (digit == 0) evtBitOn(0x8B2);
-        if (digit == 8) evtBitOn(0x8B3);
-        if (digit == 4) evtBitOn(0x8B4);
-        if (digit == 5) evtBitOn(0x8B5);
+        count = gGlobal->fileInfo.PlayTime;
+        if (count > 0x066FEBF8) count = 0x066FEBF8;
+        /* The retail residue retains the divisors of a full h/m/s split.
+         * As in the live save-preview family, compute that split before the
+         * minute digit; ee-gcc removes the unused hours/seconds arithmetic
+         * but retains divisor setup from its division guards. The live count
+         * scalar is reused across completion-count, tick and digit phases. */
+        hours = count / 108000;
+        digit = (count % 108000) / 1800;
+        seconds = (count % 1800) / 30;
+        count = digit % 10;
+        if (count == 0) evtBitOn(0x8B2);
+        if (count == 8) evtBitOn(0x8B3);
+        if (count == 4) evtBitOn(0x8B4);
+        if (count == 5) evtBitOn(0x8B5);
         save = sdfMemGetPtr(gGlobal->unk_08);
         for (i = 0; i < 5; i++) {
-            selection = gGlobal->tover[i];
-            if (selection != -1) fclEncycRegist2(&save->records[selection], 1);
+            s32 entry = gGlobal->tover[i];
+            if (entry != -1) fclEncycRegist2(&save->records[entry], 1);
         }
         p2sdStopBGM(0x710001);
-        if (gGlobal->unk_40 != 0) {
-            sdfTexFreeDelayed(gGlobal->unk_40);
-            gGlobal->unk_40 = 0;
+        {
+            /* Local v0 allocation only covers the pre-call handle reads.
+             * Reload gGlobal after free; this is not a cross-call cache. */
+            register mselGlobalWork_t *textureWork __asm__("$2") = gGlobal;
+            if (textureWork->unk_40 != 0) {
+                sdfTexFreeDelayed(textureWork->unk_40);
+                gGlobal->unk_40 = 0;
+            }
         }
         selection = fclLoadTexture("/title/att_font.tmx");
         gGlobal->unk_4C = 13;
         gGlobal->unk_44 = selection;
         gGlobal->unk_50 = 0;
         break;
-    case 13:
+    case 13: {
+        s32 fadeCounter, opacity, nextCounter;
         rsetOtOfs(0x47);
         rsetAlpha(0);
         rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-        counter = gGlobal->unk_50;
-        alpha = 128;
-        if ((u32)counter - 240 < 91) {
-            alpha = 128 - (s32)(((u32)counter << 7) - 0x7800) / 90;
-            if (alpha < 0) alpha = 0;
-            if (alpha > 128) alpha = 128;
+        fadeCounter = gGlobal->unk_50;
+        opacity = 128;
+        if ((u32)fadeCounter - 240 < 91) {
+            /* Preserve the live 128 endpoint in a0 for subtraction and clamp;
+             * ordinary allocation reuses opacity and schedules div differently.
+             * This target-specific aid emits no arithmetic instructions. */
+            register s32 maximum __asm__("$4") = 128;
+            opacity = maximum - (fadeCounter - 240) * 128 / 90;
+            if (opacity < 0) opacity = 0;
+            if (opacity > 128) opacity = maximum;
         }
-        if (counter >= 330) alpha = 0;
+        if (fadeCounter >= 330) opacity = 0;
         DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
-                    ((u32)alpha << 24) | 0x808080, (sdfTexHandle_t *)gGlobal->unk_44);
+                    ((u32)opacity << 24) | 0x808080, (sdfTexHandle_t *)gGlobal->unk_44);
+        if (gGlobal->unk_50 == 330) dds3FadeOut(255, 255, 255, 60);
         work = gGlobal;
-        if (work->unk_50 == 330) dds3FadeOut(255, 255, 255, 60);
-        counter = work->unk_50;
-        if (counter >= 390) {
+        nextCounter = work->unk_50;
+        if (nextCounter >= 390) {
             work->unk_50 = 0;
             work->unk_4C = 14;
             mselStartGame();
-        } else work->unk_50 = (s32)((u32)counter + 1);
+        } else work->unk_50 = (s32)((u32)nextCounter + 1);
         break;
-    case 22:
+    }
+    case 22: {
+        s32 exitCounter;
         mselDrawTitleAnim();
-        counter = gGlobal->unk_50;
-        if (counter >= 21) {
+        exitCounter = gGlobal->unk_50;
+        if (exitCounter >= 21) {
             gGlobal->unk_50 = 0;
             gGlobal->unk_4C = 14;
             sequence = 3;
             dds3AdminiCallSequence(2, &sequence, sizeof(sequence), 0);
-        } else gGlobal->unk_50 = (s32)((u32)counter + 1);
+        } else gGlobal->unk_50 = (s32)((u32)exitCounter + 1);
         break;
+    }
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "kernel/ModeSelect", mselMain);
-#endif
-
 s32 mselExit(u32 mode)
 {
     mselShutDown(mode);
@@ -614,7 +638,7 @@ s32 mselExit(u32 mode)
 s32 mselInit(void)
 {
     mselFreeResources(0);
-    dds3KillProcessName(D_0053DF08, 1);
+    dds3KillProcessName((char *)D_0053DF08, 1);
     return 0;
 }
 
@@ -659,7 +683,7 @@ extern fldDanteGunState_t fldRunDanteGunFlag;
 
 extern void fldSetNextField(s32 a, s32 b);
 
-extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, u32 datasize, s32 restore);
 
 void mselStartGame(void)
 {
