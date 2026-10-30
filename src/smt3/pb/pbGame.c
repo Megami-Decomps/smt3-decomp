@@ -552,7 +552,6 @@ s32 roundCheck(s32 direction, u32 groupID, pbGroupData_t **pGroup)
 INCLUDE_ASM(const s32, "pb/pbGame", roundCheck);
 #endif
 
-#ifdef NON_MATCHING
 s32 roundDirCheck(s32 direction, u32 groupID, u32 *stepCount)
 {
     pbGroupData_t *group = pbSearchGroupDB(blockDB, groupID);
@@ -561,47 +560,56 @@ s32 roundDirCheck(s32 direction, u32 groupID, u32 *stepCount)
     pbProcHandle_t *character = mychar[currentIndex];
     s16 centerY = group->cellY;
     s16 x, y;
-    s32 right, below;
+    s32 right = 0, below = 0;
     s32 rotation = -1;
 
     pbGetMyCharcterPos2(character, &x, &y);
-    right = x > centerX;
-    below = y > centerY;
+    if (x < centerX) {
+        right = 0;
+    } else if (x > centerX) {
+        right = 1;
+    }
+    if (y < centerY) {
+        below = 0;
+    } else if (y > centerY) {
+        below = 1;
+    }
     switch (direction) {
     case 0:
         rotation = right ? -1 : 1;
         break;
-    case 1:
-        rotation = below ? 1 : -1;
-        break;
     case 2:
         rotation = right ? 1 : -1;
+        break;
+    case 1:
+        rotation = below ? 1 : -1;
         break;
     case 3:
         rotation = below ? -1 : 1;
         break;
     }
     *stepCount = 1;
-    if (direction == 0 || direction == 2) {
-        if (x + 1 < 20 && (D_0054F5C4->area.map.blk[y][x + 1] & 0x7FF) == groupID) {
+    switch (direction) {
+    case 0:
+    case 2:
+        if (x + 1 < 20 && groupID == (D_0054F5C4->area.map.blk[y][x + 1] & 0x7FF)) {
             *stepCount = 2;
         }
-        if (x - 1 >= 0 && (D_0054F5C4->area.map.blk[y][x - 1] & 0x7FF) == groupID) {
+        if (x - 1 >= 0 && groupID == (D_0054F5C4->area.map.blk[y][x - 1] & 0x7FF)) {
             *stepCount = 2;
         }
-    } else if (direction == 1 || direction == 3) {
-        if (y + 1 < 20 && (D_0054F5C4->area.map.blk[y + 1][x] & 0x7FF) == groupID) {
+        break;
+    case 1:
+    case 3:
+        if (y + 1 < 20 && groupID == (D_0054F5C4->area.map.blk[y + 1][x] & 0x7FF)) {
             *stepCount = 2;
         }
-        if (y - 1 >= 0 && (D_0054F5C4->area.map.blk[y - 1][x] & 0x7FF) == groupID) {
+        if (y - 1 >= 0 && groupID == (D_0054F5C4->area.map.blk[y - 1][x] & 0x7FF)) {
             *stepCount = 2;
         }
     }
     return rotation;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbGame", roundDirCheck);
-#endif
 
 s8 hallCheck(pbGroupData_t *grp) {
     u32 i;
