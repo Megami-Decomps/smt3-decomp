@@ -33,11 +33,11 @@ both native and emitted sizes when they differ.
 | 5 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
+| 4 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 4 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
-| 3 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 3 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 3 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |

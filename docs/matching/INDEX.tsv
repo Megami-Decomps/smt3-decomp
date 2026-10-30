@@ -274,6 +274,7 @@ pipeFileLoad	pipe/pipePosTable	424 bytes	106 of 106 words match	docs/matching/pi
 ActionZMotion	pipe/pipeSection	0x140	74 of 80 words match	docs/matching/pipe/pipeSection.md	3
 EmTask	pipe/pipeSection	0x34C		docs/matching/pipe/pipeSection.md	27
 MyAction	pipe/pipeSection	0x21C		docs/matching/pipe/pipeSection.md	66
+ActionKey	pipe/pipeSection	0x5EC	379 of 379 words match	docs/matching/pipe/pipeSection.md	91
 cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/matching/result/rstcalc.md	3
 cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/matching/result/rstcalc.md	25
 datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/matching/result/rstcalc.md	47
