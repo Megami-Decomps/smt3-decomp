@@ -1545,9 +1545,9 @@ s32 CheckArrCounter(nbActionProcessData_t *a)
     return 1;
 }
 
-#ifdef NON_MATCHING
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543880);
+
 extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
-extern char D_005438C0[];
 
 s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to)
 {
@@ -1555,7 +1555,7 @@ s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to)
     s32 counters[] = { 0xA6, 0xA5, 0xA4 };
     datUnitWork_t *work;
     s32 badstatus;
-    s32 counter = 0;
+    s32 counter;
     s32 i;
     s32 rate;
 
@@ -1564,29 +1564,33 @@ s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to)
     }
     work = nbGetUnitWorkFromFormindex(from);
     badstatus = work->badstatus & 0xFFF;
-    if (badstatus == 1 || badstatus == 2 || badstatus == 4 || badstatus == 0x10 ||
-        badstatus == 0x80 || badstatus == 0x100 || badstatus == 0x400) {
+    switch (badstatus) {
+    case 1: case 2: case 4: case 0x10:
+    case 0x80: case 0x100: case 0x400:
         return 0;
     }
+    counter = 0;
     for (i = 0; skills[i] >= 0; i++) {
         if (datCheckSyojiSkill(work, skills[i]) != 0) {
-            rate = 100 / datSkillTable.special[skills[i] - 0x120].n;
+            /* Keep the real subarray base and skill-number offset separate in
+               the EE's 32-bit address arithmetic. Only the final, in-range
+               element address is converted back to a pointer. */
+            u32 address = (u32)datSkillTable.special + (u32)skills[i] * sizeof(datSpecialSkill_t);
+            datSpecialSkill_t *special = (datSpecialSkill_t *)(address - 0x120u * sizeof(datSpecialSkill_t));
+            rate = 100 / special->n;
             if ((s32)dds3GetRandIntA(NULL, 100) < rate) {
                 counter = counters[i];
                 break;
             }
         }
     }
-    if (counter != 0) {
-        nbPushAction(4, a->data->form[from].partyindex, a->data->form[to].partyindex, counter);
-        printf(D_005438C0);
-        return 1;
+    if (counter == 0) {
+        return 0;
     }
-    return 0;
+    nbPushAction(4, a->data->form[from].partyindex, a->data->form[to].partyindex, counter);
+    printf("\xA5\xAB\xA5\xA6\xA5\xF3\xA5\xBF\xA1\xBC\xC8\xAF\xC0\xB8!!!\n");
+    return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckCounter);
-#endif
 
 s32 CheckMukanNego(nbActionProcessData_t *a)
 {
@@ -1743,13 +1747,9 @@ s32 CheckInotiNego(nbActionProcessData_t *a)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543880);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438A0);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438B0);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438C0);
 
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckInotiNego);
 #endif
