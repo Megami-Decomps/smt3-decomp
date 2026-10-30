@@ -1219,27 +1219,31 @@ INCLUDE_ASM(const s32, "newbattle/nbAi", SetKoudou);
 #endif
 
 extern s32 Sel_AI(nbActionProcessData_t *a, s32 n, s32 group);
-#ifdef NON_MATCHING
-extern s32 nbGetVirtualAisyo(s32 skill, s32 source, s32 target);
+extern u32 nbGetVirtualAisyo(s32 skill, s32 source, s32 target);
 extern s32 nbGetVirtualKoukaPoint(s32 skill, s32 source, s32 target);
 
 s32 Sel_AI(nbActionProcessData_t *a, s32 n, s32 group)
 {
     s32 points[32];
+    s32 pointIndex;
     s32 level = D_003989E0[a->work->id].ailevel;
     s32 skill;
-    s32 count = 0;
+    s32 count;
     s32 i;
     s32 point;
     s32 affinity;
     s32 best;
     s32 bestIndex;
 
-    if (a->work->nowcommand == 0) {
+    count = 0;
+    switch (a->work->nowcommand) {
+    case 0:
         skill = 0;
-    } else if (a->work->nowcommand == 1) {
+        break;
+    case 1:
         skill = a->work->nowindex;
-    } else {
+        break;
+    default:
         printf("no skill\n");
         return 0;
     }
@@ -1252,27 +1256,36 @@ s32 Sel_AI(nbActionProcessData_t *a, s32 n, s32 group)
         }
         break;
     case 1:
-        for (i = 0; i < 16; i++) {
+        count = 0;
+        for (i = 0, pointIndex = 0; i < 16; i++) {
             if (a->data->form[i].stat & 4) {
-                points[count++] = nbGetVirtualKoukaPoint(skill, a->form->formindex, i);
+                points[pointIndex++] = nbGetVirtualKoukaPoint(skill, a->form->formindex, i);
+                count++;
             }
         }
         break;
     case 2:
-        for (i = 0; i < 16; i++) {
+        count = 0;
+        for (i = 0, pointIndex = 0; i < 16; i++) {
             if (a->data->form[i].stat & 4) {
-                affinity = nbGetVirtualAisyo(skill, a->form->formindex, i);
-                if (affinity != 0x10000 && affinity != 0x20000 && affinity != 0x40000) {
+                affinity = (s32)nbGetVirtualAisyo(skill, a->form->formindex, i);
+                switch (affinity) {
+                case 0x10000:
+                case 0x20000:
+                case 0x40000:
+                    break;
+                default:
                     point = nbGetVirtualKoukaPoint(skill, a->form->formindex, i);
                     if (point != 0) {
-                        points[count++] = point;
+                        points[pointIndex++] = point;
+                        count++;
                     }
                 }
             }
         }
         break;
     }
-    if (level == 0 || level >= 3) {
+    if (level >= 3 || level == 0) {
         return 0;
     }
     if (count == 0) {
@@ -1285,30 +1298,28 @@ s32 Sel_AI(nbActionProcessData_t *a, s32 n, s32 group)
                 a->data->form[i].stat |= 8;
             }
         }
-        return 0;
-    }
-    best = 0;
-    bestIndex = 0;
-    for (i = 0; i < count; i++) {
-        if (best < points[i]) {
-            best = points[i];
-            bestIndex = i;
+    } else {
+        best = 0;
+        bestIndex = 0;
+        for (i = 0; i < count; i++) {
+            if (best < points[i]) {
+                best = points[i];
+                bestIndex = i;
+            }
         }
-    }
-    count = 0;
-    for (i = 0; i < 16; i++) {
-        if (a->data->form[i].stat & 4) {
-            if (count++ == bestIndex) {
-                a->data->form[i].stat |= 8;
-                break;
+        count = 0;
+        for (i = 0; i < 16; i++) {
+            if (a->data->form[i].stat & 4) {
+                if (count == bestIndex) {
+                    a->data->form[i].stat |= 8;
+                    break;
+                }
+                count++;
             }
         }
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", Sel_AI);
-#endif
 
 void Sel_LIFEMIN(nbActionProcessData_t *a, s32 n)
 {
