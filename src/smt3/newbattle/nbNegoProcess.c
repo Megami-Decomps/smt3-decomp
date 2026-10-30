@@ -730,7 +730,6 @@ s32 nbGetHojoSkillWorkCnt(nbNegoProcessData_t *n)
     return cnt;
 }
 
-#ifdef NON_MATCHING
 extern s32 datGetParam(datUnitWork_t *work, s32 type);
 
 s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type)
@@ -738,8 +737,8 @@ s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type)
     s32 partyList[4];
     s32 skills[8];
     s32 count = 0;
-    s32 i, j, temp, skillCount, selected;
-    u16 skill;
+    s32 i, j, temp, skillCount;
+    s32 skill;
     nbParty_t *party;
     datUnitWork_t *first, *second, *work;
     s32 firstParam, secondParam;
@@ -749,74 +748,86 @@ s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type)
             partyList[count++] = i;
         }
     }
-    for (i = 0; i < count - 1; i++) {
-        for (j = i + 1; j < count; j++) {
-            first = nbGetUnitWorkPointer(n->data, &n->data->party[partyList[i]]);
-            second = nbGetUnitWorkPointer(n->data, &n->data->party[partyList[j]]);
-            firstParam = datGetParam(first, 4);
-            secondParam = datGetParam(second, 4);
-            if (firstParam < secondParam) {
-                temp = partyList[i];
-                partyList[i] = partyList[j];
-                partyList[j] = temp;
+    if (count == 0) return 0;
+    if (count >= 2) {
+        for (i = 0; i < count - 1; i++) {
+            for (j = i + 1; j < count; j++) {
+                first = nbGetUnitWorkPointer(n->data, &n->data->party[partyList[i]]);
+                second = nbGetUnitWorkPointer(n->data, &n->data->party[partyList[j]]);
+                firstParam = datGetParam(first, 4);
+                secondParam = datGetParam(second, 4);
+                if (firstParam < secondParam) {
+                    temp = partyList[i];
+                    partyList[i] = partyList[j];
+                    partyList[j] = temp;
+                }
             }
         }
     }
     for (i = 0; i < count; i++) {
+        skillCount = 0;
         party = &n->data->party[partyList[i]];
         work = nbGetUnitWorkPointer(n->data, party);
         if (party->flag & 0x80) {
             continue;
         }
-        skillCount = 0;
         for (j = 0; j < 8; j++) {
-            volatile u16 *slot = &party->hojoskill[j];
-
-            skill = *slot;
-            if (skill == 0 || (skill & 0x8000)) {
+            s32 available = party->hojoskill[j];
+            if (available == 0 || (available & 0x8000)) {
                 continue;
             }
-            skill = *slot;
+            /* Keep retail's second halfword read after the eligibility test.
+             * This local compiler constraint emits no instructions. */
+            __asm__ volatile ("" : "+m" (party->hojoskill[j]));
+            skill = party->hojoskill[j];
             switch (type) {
             case 0:
                 if (skill == 0x199) skills[skillCount++] = skill;
                 break;
             case 1:
-                if (skill == 0x19A || skill == 0x1A2 || skill == 0x1A3) {
+                switch (skill) {
+                case 0x19A: case 0x1A2: case 0x1A3:
                     skills[skillCount++] = skill;
+                    break;
                 }
                 break;
             case 2:
-                if (skill == 0x19B || skill == 0x1A3) skills[skillCount++] = skill;
+                switch (skill) {
+                case 0x19B: case 0x1A3:
+                    skills[skillCount++] = skill;
+                    break;
+                }
                 break;
             case 3:
-                if (skill == 0x19C) {
-                    if (datDevilTable[work->id].race == datDevilTable[n->ework->id].race) {
+                switch (skill) {
+                case 0x19C:
+                    if (datDevilTable[work->id].race == datDevilTable[n->ework->id].race)
                         skills[skillCount++] = skill;
-                    }
-                } else if ((skill >= 0x19D && skill <= 0x1A1) ||
-                           skill == 0x1A3 || skill == 0x1A4) {
-                    skills[skillCount++] = skill;
+                    break;
+                case 0x19D: skills[skillCount++] = skill; break;
+                case 0x19E: skills[skillCount++] = skill; break;
+                case 0x19F: skills[skillCount++] = skill; break;
+                case 0x1A0: skills[skillCount++] = skill; break;
+                case 0x1A1: skills[skillCount++] = skill; break;
+                case 0x1A3: skills[skillCount++] = skill; break;
+                case 0x1A4: skills[skillCount++] = skill; break;
                 }
                 break;
             }
         }
         if (skillCount > 0) {
-            selected = skills[dds3GetRandIntA(NULL, skillCount)];
+            skill = skills[dds3GetRandIntA(NULL, skillCount)];
             for (j = 0; j < 8; j++) {
-                if (party->hojoskill[j] == selected) {
+                if (party->hojoskill[j] == skill) {
                     party->hojoskill[j] |= 0x8000;
                 }
             }
             party->flag |= 0x80;
-            return (partyList[i] << 16) | selected;
+            return (partyList[i] << 16) | skill;
         }
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbSearchHojoSkillWork);
-#endif
 
 #ifdef NON_MATCHING
 extern u8 D_003E2508[][4];
