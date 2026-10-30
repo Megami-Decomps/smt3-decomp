@@ -43,3 +43,40 @@ and consumed immediately. The actual output retains `lw $4`, the common
 constraint is not assumed to be a memory barrier: the native loads, stores,
 widths and ordering were checked in the object. This is a target-specific
 allocation aid, not evidence of the original source spelling.
+
+## shpGetItemFromItemBox (facility/fclShopUpdate, 0x148)
+
+82 of 82 words match at 328 bytes. An initialized capacity of 8 is shared by
+the real candidate-list VLA and its collection loop. Retail saves the stack
+and frame pointer, dynamically allocates another 32 bytes for the eight real
+four-byte candidate records, and restores the saved stack on both return paths.
+This directly supports the dynamic aggregate; it is not unused frame padding
+or proof of the original source spelling. The static-array draft emits 292
+bytes. No constraints, aliases, volatile accesses or provider changes are added.
+
+The eight-iteration loop appends at most once per iteration, establishing
+count 0..8 and written indices 0..7. The second loop reads only initialized
+candidate records. Eight unsigned-byte weights bound total and cumulative
+weight by 2040, so accumulation and the nonzero-total remainder conversion
+cannot overflow. Zero total is not assigned a fabricated guarantee: C modulo
+zero remains an inherited undefined path, with retail's divide trap retained
+in the exact output. The existing valid table-row contract is unchanged.
+
+The item snapshot used for filtering remains before the slot/heart callbacks;
+the actual four-byte record copy remains after them. No stale pre-call copy,
+purity assumption or observation collapse is introduced. Signed slot narrowing,
+record order, one RNG call after collection, weighted strict-less-than selection
+and the fallback are preserved. The unchanged `dds3GetRandA(void *)` provider
+receives `NULL`, selecting the mutable global RNG state.
+
+Canonical complete-owner plain/dump assembly, text and relocations have qualified
+parity. Initial RTL distinguishes real dynamic extent calculation and stack
+allocation from the static-array control; this is stock-output evidence, not
+a debugger-hook claim. Independent final-source checking gives 17 match,
+0 differ with normal data checks, including the previously published
+`shpUpdateSeqConfirm`. Final gates pass the retail checksum, 149 guarded owners /
+594 drafts, seven IRX owners, 26 tooling test files / 427 cases, shell mocks
+and documentation checks.
+Source commit `6de3a0947aaf3cf6dc88ea98dc33709dea102b05` passed exact-source hosted CI
+[40986716570](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40986716570),
+including build and deploy.

@@ -48,6 +48,8 @@ campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	651
 cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	703
 cmpUpdateDestroyItemConfirm	code_0022C578	0xE0	56 of 56 words match	docs/matching/code_0022C578.md	733
 cmpDrawStatusValue	code_0022C578	0xF4	61 of 61 words match	docs/matching/code_0022C578.md	771
+campWaitSelMessage	code_0022C578	0x15C	87 of 87 words match	docs/matching/code_0022C578.md	819
+cmpUpdateSkillSelect	code_0022C578	0x184	97 of 97 words match	docs/matching/code_0022C578.md	856
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
@@ -103,6 +105,7 @@ fclDrawSpriteAngleCore	fclShare	0x4A8	212 of 298 words match	docs/matching/facil
 fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/matching/facility/fclShare.md	48
 shop_Process	facility/fclShopCalc	256 bytes	37 of 64 words match	docs/matching/facility/fclShopCalc.md	3
 shpUpdateSeqConfirm	facility/fclShopUpdate	0xFC	63 of 63 words match	docs/matching/facility/fclShopUpdate.md	3
+shpGetItemFromItemBox	facility/fclShopUpdate	0x148	82 of 82 words match	docs/matching/facility/fclShopUpdate.md	47
 fclTerminalLoadTextures	fclTerminalInit	0x70	16 of 27 words match	docs/matching/facility/fclTerminalInit.md	3
 trmStartSaveAct	fclTerminalUpdate	0x140	80 of 80 words match	docs/matching/facility/fclTerminalUpdate.md	3
 fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	40 of 42 words match	docs/matching/field/fldAutoMap.md	3
