@@ -218,11 +218,11 @@ extern s32 datGetItemSlotIndex(u16 item);
 extern s32 cmbChkGetHearts(s32 id);
 extern s32 cmpItemOrder(u8 *a, u8 *b);
 
-#ifdef NON_MATCHING
 s32 ragBuildHeartsList(u8 type, ragListWork_t *work)
 {
     s8 count = 0;
     s32 i;
+    s8 *items = work->heartItems;
 
     work->hasUnregistered = 0;
     for (i = 0; i < 32; i++) {
@@ -237,16 +237,13 @@ s32 ragBuildHeartsList(u8 type, ragListWork_t *work)
             work->hasUnregistered = 1;
         }
         if (item != 0) {
-            work->heartItems[count++] = index;
+            items[count++] = index;
         }
     }
-    qsort(work->heartItems, count, 1, (s32 (*)(const void *, const void *))cmpItemOrder);
+    qsort(items, count, 1, (s32 (*)(const void *, const void *))cmpItemOrder);
     fclSetWorkValue(4, work->hasUnregistered);
     return count;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagInit", ragBuildHeartsList);
-#endif
 
 extern void shuffleIndices(s8 *order, s32 count, s32 rounds);
 
