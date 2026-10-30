@@ -166,3 +166,41 @@ agrees apart from the scratch `.file` pathname; text and relocations agree,
 and text agrees with the canonical checker's full object, for both the
 snapshot-switch control and exact per-arm form. This is observed compiler
 behavior, not proof of the original source spelling.
+
+## cmbUpdateStockCursor2 (facility/fclCombineInit, 0x22C)
+
+139 of 139 words match at 556 bytes. The sole body correction removes the local
+cursor-subobject pointer and expresses the same two observations directly
+through `CMB_GBWK->stockCursorGroup[2].cursor`. The original unsigned-character
+low-byte view of signed16 `unk_22` and unsigned8 conversion of signed8 `unk_24`
+are retained. No alias, constraint, new type or fabricated address is added.
+
+The real cursor starts at global+0x30D0; its fields are at +0x30F2 and +0x30F4.
+Retail reads the byte at +0x30F4 before the byte at +0x30F2. The draft's local
+subobject pointer materializes an extra +0x30D0 address and shifts the prefix
+until alignment absorbs the instruction, leaving 117 of 139 words matching.
+Direct whole-object fields produce the exact native addresses, observation
+order and registers. Target-compiler layout assertions verify these offsets and
+the corresponding stock-slot fields. Complete-owner plain and stock-dump
+assembly, text and relocations agree for both diagnostic forms. This is paired
+output evidence, not a claim about an unmeasured compiler comparator or original
+source spelling.
+
+Both observed bytes promote to int, so their sum 0..510 cannot overflow. The
+existing target signed-byte narrowing is preserved. The selected byte is
+published and reloaded for the stock map, the mapped stock index is published
+and reloaded for `cmbStockIsLocked`, and a fresh global is observed after that
+callback before the result lookup. Later movement, input and sound calls and
+all native callback-dependent reloads remain unchanged. The disabled-result
+early return and lock-failure button 0x8000 retain their behavior. Existing
+valid cursor, map, stock and result-table index contracts remain required;
+arbitrary negative or oversized indices are not claimed safe. Provider types
+and call targets are unchanged.
+
+Independent final-source owner checking gives 186 match, 0 differ with normal
+owned-data checks, including the earlier result-panel, result-script and
+birth-phase matches. Final-source gates pass the retail checksum, all 149
+guarded owners / 588 drafts, seven IRX owners, 26 tooling test files / 427 cases,
+shell mocks and documentation checks. Source commit `dd0e8255e7b22c6bbb7cffbe2cc6564281a4b28d` passed exact-source
+hosted CI [40991191105](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40991191105),
+including build and deploy.

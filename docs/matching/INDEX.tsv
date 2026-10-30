@@ -87,6 +87,7 @@ cmbDrawFullScreenPanel	fclCombineInit	0x68	20 of 26 words match	docs/matching/fa
 cmbDrawResultPanel	fclCombineInit	0x228	138 of 138 words match	docs/matching/facility/fclCombineInit.md	82
 cmbStartResultScript	fclCombineInit	0x84	33 of 33 words match	docs/matching/facility/fclCombineInit.md	102
 cmbGetBirthPhase	fclCombineInit	0x88	34 of 34 words match	docs/matching/facility/fclCombineInit.md	136
+cmbUpdateStockCursor2	facility/fclCombineInit	0x22C	139 of 139 words match	docs/matching/facility/fclCombineInit.md	170
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/matching/facility/fclEncyc.md	22
 DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	46
@@ -102,6 +103,7 @@ ragGetListItem3	fclRagInit	0xCC	29 of 51 words match	docs/matching/facility/fclR
 ragBuildHeartsList	fclRagInit	0x124	73 of 73 words match	docs/matching/facility/fclRagInit.md	80
 ragCheckHeartsChoice	fclRagUpdate	0x80	22 of 29 words match	docs/matching/facility/fclRagUpdate.md	3
 ragUpdateSeqConfirm	facility/fclRagUpdate	0x208	130 of 130 words match	docs/matching/facility/fclRagUpdate.md	28
+rcvCreateLocalStock	facility/fclRecoverCalc	0x25C	151 of 151 words match	docs/matching/facility/fclRecoverCalc.md	3
 fclDrawSpriteAngleCore	fclShare	0x4A8	212 of 298 words match	docs/matching/facility/fclShare.md	3
 fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/matching/facility/fclShare.md	48
 shop_Process	facility/fclShopCalc	256 bytes	37 of 64 words match	docs/matching/facility/fclShopCalc.md	3
