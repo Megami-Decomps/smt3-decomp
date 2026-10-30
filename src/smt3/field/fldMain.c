@@ -460,7 +460,6 @@ s32 fldGetRestoreMode(void)
     return fldSceneParam.mode != 0 ? 2 : 0;
 }
 
-#ifdef NON_MATCHING
 #include "encount.h"
 
 typedef struct __attribute__((packed, aligned(1))) {
@@ -498,10 +497,9 @@ void fldReadyScene(void)
     fldResourcePoint_t *point = NULL;
     fldEncounterFloorTable_t *encounters;
     dds3Basic_t *basic;
+    fldSceneParam_t *param = &fldSceneParam;
     s32 reused;
     s32 previous;
-    s32 area;
-    s32 showTitle;
     s32 eventSet;
     s32 cameraMode;
 
@@ -509,40 +507,44 @@ void fldReadyScene(void)
     defaultPoint.pos.w = 1.0f;
     defaultPoint.rot.w = 1.0f;
     memset(&adjustedPoint, 0, sizeof(adjustedPoint));
-    adjustedPoint.rot.w = 1.0f;
     adjustedPoint.pos.w = 1.0f;
+    adjustedPoint.rot.w = 1.0f;
     rotation.packed = D_005316A0;
-    if (fldSceneParam.loadMode == 1)
-        fldWap_Load(DDS3_GBWK->previewX, DDS3_GBWK->previewY, &fldSceneParam);
+    if (param->loadMode == 1)
+        fldWap_Load(DDS3_GBWK->previewX, DDS3_GBWK->previewY, param);
     reused = fldGlobalBase.reuseAreaResources;
-    evtLoadArea(fldSceneParam.loadField, fldSceneParam.loadArea);
+    evtLoadArea(param->loadField, param->loadArea);
     dds3SetActiveScene(NULL);
-    if (fldSceneParam.mode == 0) {
-        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x11, fldSceneParam.pointResName);
+    if (param->mode == 0) {
+        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x11, param->pointResName);
         point = basic != NULL ? dds3PointBasicGetResource(basic) : &defaultPoint;
-        if (fldSceneParam.callmode == 3) {
+        if (param->callmode == 3) {
             adjustedPoint.pos.x = point->pos.x;
             adjustedPoint.pos.y = point->pos.y;
             adjustedPoint.pos.z = point->pos.z;
+            point = &fldSceneParam.safeUnit;
             SDF_VU0_LOADVECTOR(&rotation.vector);
             FromRotation(3.141592503f);
-            SDF_VU0_LOADVECTOR_B(&fldSceneParam.safeUnit.rot);
+            SDF_VU0_LOADVECTOR_B(&point->rot);
             Mult();
-            SDF_VU0_STOREVECTOR(&fldSceneParam.safeUnit.rot);
-            adjustedPoint.rot.x = fldSceneParam.safeUnit.rot.x;
-            adjustedPoint.rot.y = fldSceneParam.safeUnit.rot.y;
-            adjustedPoint.rot.z = fldSceneParam.safeUnit.rot.z;
-            adjustedPoint.rot.w = fldSceneParam.safeUnit.rot.w;
+            SDF_VU0_STOREVECTOR(&point->rot);
+            /* SMT3 compiler constraint: keep the live point base for the
+             * following x load instead of reusing the VU rot address. */
+            __asm__("" : "+r" (point));
+            adjustedPoint.rot.x = point->rot.x;
+            adjustedPoint.rot.y = point->rot.y;
+            adjustedPoint.rot.z = point->rot.z;
+            adjustedPoint.rot.w = point->rot.w;
             point = &adjustedPoint;
         }
-        if (fldSceneParam.loadField < FLD_ENCOUNTER_FIELDS) {
-            encounters = &fldEncounterFloorTable[fldSceneParam.loadField];
+        if (param->loadField < FLD_ENCOUNTER_FIELDS) {
+            encounters = &fldEncounterFloorTable[param->loadField];
             eventSet = 0;
             if (encounters->eventFlag != 0) eventSet = evtBitCheck(encounters->eventFlag) != 0;
             if (eventSet == 0)
-                fldGlobalBase.defaultEncounterId = fldEncounterFloorTable[fldSceneParam.loadField].normal[fldSceneParam.loadArea];
+                fldGlobalBase.defaultEncounterId = fldEncounterFloorTable[param->loadField].normal[param->loadArea];
             else
-                fldGlobalBase.defaultEncounterId = fldEncounterFloorTable[fldSceneParam.loadField].alternate[fldSceneParam.loadArea];
+                fldGlobalBase.defaultEncounterId = fldEncounterFloorTable[param->loadField].alternate[param->loadArea];
         }
         if (((u32)fldGlobalBase.area - 11) < 35 && fldGlobalBase.area != 39 &&
             fldGetRestoreMode() != 4 && reused == 0) {
@@ -551,61 +553,43 @@ void fldReadyScene(void)
             } else {
                 if (fldGetRestoreMode() == 2) {
                     previous = fldGlobalBase.word10;
-                    showTitle = 0;
-                    switch (previous) {
-                    case 40:
-                        area = fldGlobalBase.area;
-                        showTitle = ((u32)area - 41) < 5;
-                        break;
-                    case 41:
-                        area = fldGlobalBase.area;
-                        showTitle = area == 40 || area == 42;
-                        break;
-                    case 42:
-                        area = fldGlobalBase.area;
-                        showTitle = area == 40 || area == 41 || area == 43;
-                        break;
-                    case 43:
-                        area = fldGlobalBase.area;
-                        showTitle = area == 40 || area == 42 || area == 44;
-                        break;
-                    case 44:
-                        area = fldGlobalBase.area;
-                        showTitle = area == 40 || area == 43 || area == 45;
-                        break;
-                    case 45:
-                        area = fldGlobalBase.area;
-                        showTitle = area == 40 || area == 44;
-                        break;
-                    }
-                    if (showTitle) fldTitleMiniStart(fldGlobalBase.area);
+                    if ((previous == 40 && ((u32)fldGlobalBase.area - 41) < 5) ||
+                        (previous == 41 && (fldGlobalBase.area == 40 || fldGlobalBase.area == 42)) ||
+                        (previous == 42 && (fldGlobalBase.area == 40 || (fldGlobalBase.area == 41 || fldGlobalBase.area == 43))) ||
+                        (previous == 43 && (fldGlobalBase.area == 40 || fldGlobalBase.area == 42 || fldGlobalBase.area == 44)) ||
+                        (previous == 44 && (fldGlobalBase.area == 40 || fldGlobalBase.area == 43 || fldGlobalBase.area == 45)) ||
+                        (previous == 45 && (fldGlobalBase.area == 44 || fldGlobalBase.area == 40)))
+                        fldTitleMiniStart(fldGlobalBase.area);
                 }
                 if (fldGetRestoreMode() != 2) {
-                    previous = fldGlobalBase.word10;
-                    area = fldGlobalBase.area;
-                    if (!((previous == 32 && (area == 36 || area == 37)) ||
-                          (previous == 36 && (area == 32 || area == 37)) ||
-                          (previous == 37 && (area == 32 || area == 36))))
-                        fldTitleMiniStart(area);
+                    /* SMT3 compiler constraint: this live city comparison
+                     * value uses a2 only until the predicates finish. The
+                     * later literal 32 remains a separate materialization. */
+                    register s32 firstArea __asm__("$6") = 32;
+                    __asm__("" : "+r" (firstArea));
+                    if (!((fldGlobalBase.word10 == firstArea && (fldGlobalBase.area == 36 || fldGlobalBase.area == 37)) ||
+                          (fldGlobalBase.word10 == 36 && (fldGlobalBase.area == firstArea || fldGlobalBase.area == 37)) ||
+                           (fldGlobalBase.word10 == 37 && (fldGlobalBase.area == 32 || fldGlobalBase.area == 36))))
+                        fldTitleMiniStart(fldGlobalBase.area);
                 }
             }
         }
-    } else if (fldSceneParam.mode == 1) {
+    } else if (param->mode == 1) {
         point = &fldSceneParam.safeUnit;
         SDF_VU0_LOADVECTOR(&rotation.vector);
         FromRotation(3.141592503f);
-        SDF_VU0_LOADVECTOR_B(&fldSceneParam.safeUnit.rot);
+        SDF_VU0_LOADVECTOR_B(&point->rot);
         Mult();
-        SDF_VU0_STOREVECTOR(&fldSceneParam.safeUnit.rot);
+        SDF_VU0_STOREVECTOR(&point->rot);
         nbBgmFadeOut();
     }
     fldSetUnit(point);
     fldRegistUnitPad();
     fldSetUnitFollowCamera();
-    if (fldSceneParam.mode == 0) {
-        cameraMode = fldSceneParam.camMode;
+    if (param->mode == 0) {
+        cameraMode = param->camMode;
         if (cameraMode == 1) {
-            basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 4, fldSceneParam.camName);
+            basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 4, param->camName);
             if (basic != NULL) {
                 fldGlobalBase.mode = cameraMode;
                 fldGlobalBase.campos.x = basic->poseset->pos.x;
@@ -618,17 +602,16 @@ void fldReadyScene(void)
                 else resetCamNormal();
             }
         } else {
-            fldGlobalBase.mode = cameraMode == 2 ? 3 : 0;
-            if (fldSceneParam.callmode == 3) resetCamNormal2();
+            if (cameraMode == 2) fldGlobalBase.mode = 3;
+            else fldGlobalBase.mode = 0;
+            if (param->callmode == 3) resetCamNormal2();
             else if (fldGlobalBase.area < 10) fldCamSetChase();
             else resetCamNormal();
         }
     }
     gfldPlayerDamegeCnt = 0;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldMain", fldReadyScene);
-#endif
+
 
 void fldPlayerALoad(void)
 {
