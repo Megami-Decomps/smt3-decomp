@@ -60,6 +60,7 @@ both native and emitted sizes when they differ.
 | 2 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 2 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 2 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
+| 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
@@ -107,7 +108,6 @@ both native and emitted sizes when they differ.
 | 1 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 1 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
-| 1 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
 | 1 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 1 | field/fldTitle | [field/fldTitle.md](field/fldTitle.md) |

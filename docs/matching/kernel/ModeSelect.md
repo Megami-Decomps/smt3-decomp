@@ -51,3 +51,68 @@ identity and no-op builds.
 Source commit `86df3ba0a84b78250fe6af2a8c7feda4f1565801` passed exact-source hosted CI
 [40999068438](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40999068438),
 including build and deploy.
+
+## mselMain (ModeSelect, 0xD7C)
+
+863 of 863 words match at 3452 bytes, including native readonly data and
+the 23-entry dispatch table. Explicit continuations preserve physical case
+order 15/16/20/17: 15/20 share the message path, while 16/19 share attention
+loading. This reconstructs control flow, not a claimed callback bug in the
+old pre-draw phase test. Case 6 keeps the real fade in both choice arms;
+case 7 preserves unsigned exit-mode handling and snapshot restoration.
+Case 12 corrects completion-count access to the native signed halfword
+`(s16)fileInfo.endcnt`, not the old word alias. Case 13 reloads gGlobal after
+the conditional fade-out before its next counter access. Both texture-free
+paths and fclLoadTexture likewise retain native post-call global reloads.
+The loaded save pointer genuinely survives record-registration callbacks,
+while each registration observes the current global base. Snapshot/header
+copies retain actual aggregate layouts; no smaller fabricated views are used.
+
+Three localized bindings have actual initialized consumers and end before
+calls: cursorWork in `$6` after cursor update supplies its field test;
+textureWork in `$2` supplies the handle condition/free argument, then the
+code reloads gGlobal; maximum in `$4` supplies the real 128 subtraction/clamp
+endpoint inside the bounded fade interval. Removing these bindings separately
+changes 39, two and five words respectively. Ordinary pointer/endpoint and
+if/else controls do not match. No empty asm or instruction-emitting asm is
+introduced. These are measured target reconstruction aids, not original-source
+claims. Separate save/exit/entry/counter locals avoid unnecessary reuse.
+
+The native mselProc name is genuinely readonly owned data. Explicit casts to
+legacy char* APIs are supported by their actual read-only consumers:
+dds3StartProcess reads and copies the bytes; dds3KillProcessName delegates
+to a read/hash/compare search. No writable replacement or invented const ABI
+is used. Local declarations now match providers: slGetExitMode returns u32,
+dds3AdminiCallSequence takes u32 size, and dds3KillProcessName returns s32
+with char*/s32 parameters. The process callback remains
+`s32 (dds3ProcessID_t *)`, and fclGetSelMessagePos remains s8.
+
+The timer has two distinct evidence requirements. **Hours and seconds are
+dead**, retained only under the narrow native-residue exception. A matching
+DDS save-preview family has the same 0x066FEBF8 cap, 30-frame clock and
+108000/1800/30 decomposition with real formatted/drawn hours, minutes and
+seconds; SMT3 slFileSelDraw corroborates live hours/minutes. Final-owner
+compiler dumps show redundant/dead arithmetic removed at CSE, while divisor
+guards retain the three native unused definitions through allocation. Final
+code omits those guards but leaves the definitions. The no-consumer audit
+separately distinguishes those dead constants from the actual live divisors.
+This supports a family-shaped reconstruction, not historical copying.
+
+Completion-count/ticks/minute-digit **live scalar reuse is separate**. Every
+phase assigns before use. In the exact final owner, PlayTime loads into
+count pseudo86 and allocates to s0; a control separating only timerTicks
+allocates its load to v0 instead. Both final and control separately pass
+plain/dump normalized complete assembly, allocated-section headers/bytes,
+relocation/symbol-contract and function-inventory parity. The earlier
+exploratory owner with a 3428-byte target is not the acceptance basis. The final
+owner containing the 3452-byte target and an independent fresh parity run qualify
+the observations.
+Positive divisors keep the added dead expressions defined across signed s32
+PlayTime without new calls, reads or altered event conditions.
+
+Independent complete-owner verification gives 14 match, 0 differ, preserving
+all 13 peers and owned data. Integrated retail checksum, full tests, IRX,
+report and fresh full guarded-source checks passed for source commit
+`b95a2a093bfc656c5c55eb50af46a0d0987f1412`. Exact-source CI
+[41042604248](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41042604248)
+completed successfully, including every build/deploy step and retail checksum.
