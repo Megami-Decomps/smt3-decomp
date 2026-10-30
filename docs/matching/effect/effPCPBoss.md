@@ -313,3 +313,37 @@ and report gates passed for source `cd029e510e43fd3259bbd3d6fc9989b28e655100`.
 Exact-source CI
 [41083876389](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41083876389)
 attempt 1 completed successfully, with every actual step passing and none skipped.
+
+## effPCPDANTE_ShowTime_ShowTime_Draw (effect/effPCPBoss, 0x358)
+
+214 of 214 words match at 856 bytes. The first fade quotient is assigned to
+the existing real `f32 rate` scalar before its color expression. Later phases
+assign that same scalar before their existing scale/color consumers. There
+is no new entry initialization, artificial consumer, constraint, register
+binding, helper or provider change.
+
+The first quotient is consumed by the actual alpha calculation and is not
+carried into a later phase. Existing unsigned frame-window tests, floating
+operation order, alpha-mode changes and sprite calls remain intact. Every
+later rate use follows its own assignment. The texture/frame snapshots and
+the final fresh frame load with unsigned increment are unchanged. No callback
+observation or memory access is added by naming the quotient.
+
+Qualified expansion records the baseline first quotient in temporary SF
+pseudo93, while the candidate writes the same division into the existing
+rate variable, SF pseudo89. Its real color subtraction carries REG_DEAD;
+later phases define fresh values before their own consumers. Post-global
+allocation places the candidate quotient in f21, with native division
+`div.s f21,f2,f1`, rather than the baseline's f1. This establishes the actual
+shared pseudo and allocation outcome, not an unobserved allocator tie-break
+rule or original-source spelling.
+
+Independent semantic review and canonical complete-owner checking give
+157 match, 0 differ, preserving all 156 peers and owned data. Independently
+verified complete-owner plain/dump assembly and allocated-section, relocation
+and function contracts agree for both baseline and candidate, covering
+157 functions and seven contracts in each pair.
+
+Final local gates pass the retail checksum, 26 tooling test files / 427 cases,
+all 147 guarded owners / 532 drafts with stable source/compiler inputs,
+seven IRX owners, and reconciled production reports.

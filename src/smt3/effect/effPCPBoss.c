@@ -4556,7 +4556,6 @@ void effPCPDANTE_ShowTime_AreYouReady_Draw(effPCPDANTE_ShowTime_tag *hData)
 }
 
 extern effPCPDANTE_UV_tag effPCPDANTE_ShowTime_UV;
-#ifdef NON_MATCHING
 void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work)
 {
     u32 frame = work->frameParts[2];
@@ -4567,7 +4566,8 @@ void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work)
 
     if (age < 13) {
         nbPnl_rsetAlpha(0);
-        color = ((u32)((1.0f - (f32)(s32)age / 12.0f) * 128.0f) << 24) | 0x808080;
+        rate = (f32)(s32)age / 12.0f;
+        color = ((u32)((1.0f - rate) * 128.0f) << 24) | 0x808080;
         effPCPDANTE_Sprite_Draw(162, 172, 1.0f, color, &effPCPDANTE_ShowTime_UV, texture);
     }
     if (frame - 10 < 13) {
@@ -4602,9 +4602,6 @@ void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work)
     }
     work->frameParts[2] = (u32)work->frameParts[2] + 1;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_ShowTime_Draw);
-#endif
 
 /* NON_MATCHING: 4 of 75 words differ (first at +0x34). */
 #ifdef NON_MATCHING

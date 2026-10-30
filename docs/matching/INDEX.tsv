@@ -76,6 +76,7 @@ effPCPBossKAGUInvokeDraw	effect/effPCPBoss	0x2E0	181 of 184 words match	docs/mat
 effPCPBossONGYDraw (1432 bytes)				docs/matching/effect/effPCPBoss.md	204
 effPCPBossKAGU2AttackDraw	effect/effPCPBoss	0x424	265 of 265 words match	docs/matching/effect/effPCPBoss.md	249
 effPCPBossKAGUAttackDraw	effect/effPCPBoss	0x35C	215 of 215 words match	docs/matching/effect/effPCPBoss.md	278
+effPCPDANTE_ShowTime_ShowTime_Draw	effect/effPCPBoss	0x358	214 of 214 words match	docs/matching/effect/effPCPBoss.md	317
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790	462 of 484 words match	docs/matching/effect/parManager.md	3
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/matching/effect/parManager.md	33
 evtEventViewerProcess3	event/evtEventViewer	0x16C	88 of 91 words match	docs/matching/event/evtEventViewer.md	3
