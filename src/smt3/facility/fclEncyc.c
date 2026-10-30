@@ -1068,14 +1068,14 @@ void InitPhaseReadTop(fclEncyc_instance_tag *pinst)
 
 extern s32 AcceptKeyChangeSort(fclEncyc_instance_tag *pinst);
 
-#ifdef NON_MATCHING
 void CalcPhaseReadTop(fclEncyc_instance_tag *pinst)
 {
     fclEncycReadTopWork_t *work = pinst->pwork;
     s32 action;
     s32 index;
-    s32 flags;
+    s32 selected;
     s8 sort;
+    s16 *indices;
 
     fclRbnCalc(work->ribbon);
     if (AcceptKeyChangeSort(pinst) != 0) {
@@ -1084,30 +1084,26 @@ void CalcPhaseReadTop(fclEncyc_instance_tag *pinst)
     action = AcceptKeyListWindow(&work->list, 1);
     switch (action) {
     case -1:
-        flags = pinst->stat;
         pinst->unk_5A = 8;
-        pinst->stat = flags | 2;
+        pinst->stat |= 2;
         break;
     case 1:
-        index = work->list.cursorPos.Shift + work->list.cursorPos.Index;
+        index = work->list.cursorPos.Index + work->list.cursorPos.Shift;
         PushListwinCursor(pinst, &work->list, 1);
         sort = (s8)pinst->unk_6C;
-        flags = pinst->stat;
-        index = pinst->entries.read.sorted[sort != 0][index];
+        indices = sort != 0 ? pinst->entries.read.sorted[1] : pinst->entries.read.sorted[0];
+        selected = indices[index];
         pinst->unk_5A = 4;
-        pinst->selectedIndex = index;
-        pinst->stat = flags | 2;
+        pinst->stat |= 2;
+        pinst->selectedIndex = selected;
         break;
     case 2:
         sort = (s8)pinst->unk_6C;
-        CreateFontListRead(work, sort, pinst->entries.read.sorted[sort != 0]);
+        CreateFontListRead(work, sort, sort != 0 ? pinst->entries.read.sorted[1] : pinst->entries.read.sorted[0]);
         break;
     }
     CalcListElemColor(&work->list, work->fontList, 8, 0);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadTop);
-#endif
 
 extern void DrawListWindowBack(void *obj, fclPanel_t *panel);
 
