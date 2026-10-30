@@ -332,48 +332,66 @@ s32 CheckEnemy(nbTarSelProcessData_t *t, s32 formindex)
     return 0;
 }
 
-#ifdef NON_MATCHING
 void UpdateSelect(nbTarSelProcessData_t *process)
 {
-    nbFormation_t *form;
     u32 stat;
-    s32 selected;
     s32 i;
 
     for (i = 0; i < 16; i++) {
-        form = &process->data->form[i];
-        stat = form->stat;
-        form->stat = stat & ~8u;
+        stat = process->data->form[i].stat;
+        process->data->form[i].stat = stat & ~8u;
         if (stat & 4) {
-            selected = 0;
+            /* SMT3 allocation aid: keep the live selection flag in s2;
+             * ordinary allocation swaps it with the loop index in s1. */
+            register s32 selected asm("$18") = 0;
             switch (process->ctype) {
-            case 0:
-                if ((process->nowcarea == 1 && process->friendno[process->nowno] == i) ||
-                    (process->nowcarea == 2 && process->enemyno[process->nowno] == i)) {
-                    process->nowform = i;
+            case 0: {
+                /* The selected signed formation number is consumed below,
+                 * before any call; retail keeps this short-lived value in v1. */
+                register s32 candidate asm("$3");
+                switch (process->nowcarea) {
+                case 1:
+                    candidate = process->friendno[process->nowno];
+compare_selection:
+                    if (candidate == i) {
+                        process->nowform = i;
+                        selected = 1;
+                    }
+                    break;
+                case 2:
+                    candidate = process->enemyno[process->nowno];
+                    goto compare_selection;
+                }
+                break;
+            }
+            case 1: {
+                s32 eligible;
+                switch (process->nowcarea) {
+                case 1:
+                    eligible = CheckFriend(process, i);
+                    break;
+                case 2:
+                    eligible = CheckEnemy(process, i);
+                    break;
+                default:
+                    goto selection_done;
+                }
+                if (eligible) {
                     selected = 1;
                 }
                 break;
-            case 1:
-                if (process->nowcarea == 1) {
-                    selected = CheckFriend(process, i);
-                } else if (process->nowcarea == 2) {
-                    selected = CheckEnemy(process, i);
-                }
-                break;
+            }
             case 2:
                 selected = 1;
                 break;
             }
+selection_done:
             if (selected) {
                 process->data->form[i].stat |= 8;
             }
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", UpdateSelect);
-#endif
 
 #ifdef NON_MATCHING
 void OnOffTargetCursor(nbTarSelProcessData_t *process)
