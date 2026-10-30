@@ -32,12 +32,11 @@ extern void evtBitOn(s32 no);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
-#ifdef NON_MATCHING
 extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
 extern void *memset(void *ptr, s32 value, u32 size);
 extern void *sdfChipAllocZeroDirect(s32 size);
 extern void sdfChipFreeDirect(void *ptr);
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 void mselCountSaves(void);
 void Msel_TOverData_Clear(void);
 void mselFindSaveSlot(s32 *first, s32 *second, u32 start, u32 end, s8 reverse);
@@ -75,17 +74,18 @@ void mselDevilChoice(void)
     mselCountSaves();
     Msel_TOverData_Clear();
     chosenCount = 0;
-    for (i = 0; i < 3 && remaining > 0; i++) {
-        index = dds3GetRandIntA(0, remaining);
+    target = 5;
+    for (i = 0; remaining > 0 && i < 3; i++) {
+        index = dds3GetRandIntA(NULL, remaining);
         remaining--;
         gGlobal->tover[chosenCount] = selected[index];
         gGlobal->unk_60++;
         chosen[chosenCount++] = selected[index];
         mselFindSaveSlot(scores, selected, index + 1, 10, 1);
     }
-    target = ((volatile mselSaveData_t *)data)->count;
-    if (target >= 5) {
-        target = 5;
+    {
+        s32 freshCount = data->count;
+        if (freshCount < 5) target = freshCount;
     }
     poolCount = count - chosenCount;
     if (poolCount > 0) {
@@ -94,32 +94,30 @@ void mselDevilChoice(void)
             s32 filled = 0;
             for (i = 0; i < count; i++) {
                 for (j = 0; j < chosenCount; j++) {
-                    if (chosen[j] == i) {
+                    if (i == chosen[j]) {
                         break;
                     }
                 }
-                if (j == chosenCount && j != 0) {
+                if (j >= chosenCount && j != 0) {
                     pool[filled++] = i;
                 }
             }
         }
         remaining = poolCount;
         for (i = chosenCount; i < target; i++) {
-            index = dds3GetRandIntA(0, remaining);
-            remaining--;
+            index = dds3GetRandIntA(NULL, poolCount);
+            poolCount--;
             gGlobal->tover[i] = pool[index];
             gGlobal->unk_60++;
             chosen[i] = pool[index];
-            mselFindSaveSlot(pool, NULL, index + 1, poolCount, 1);
+            mselFindSaveSlot(pool, NULL, index + 1, remaining, 1);
         }
         sdfChipFreeDirect(pool);
     }
     gGlobal->Z_RGBA = 0x64618700;
     gGlobal->Zalpha_cnt = 0;
 }
-#else
-INCLUDE_ASM(const s32, "kernel/ModeSelect", mselDevilChoice);
-#endif
+
 
 void Msel_TOverData_Clear(void)
 {
