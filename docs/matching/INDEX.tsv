@@ -212,6 +212,7 @@ nbCollectBadCurseUnits	newbattle/nbEncProcess	0xA4	23 of 41 words match	docs/mat
 ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/matching/newbattle/nbMakePacket.md	312
 nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/matching/newbattle/nbMakePacket.md	333
 nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/matching/newbattle/nbMakePacket.md	361
+nbSetAllHojoSkillWork	newbattle/nbNegoProcess	0x184	97 of 97 words match	docs/matching/newbattle/nbNegoProcess.md	3
 nbPanelDrawPP (0xA84)			671 of 673 words match	docs/matching/newbattle/nbPanelProcess.md	3
 nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanelProcess.md	65
 nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	127

@@ -86,6 +86,7 @@ both native and emitted sizes when they differ.
 | 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 |  | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
 | 1 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
+| 1 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 1 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
