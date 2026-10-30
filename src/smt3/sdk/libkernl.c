@@ -285,7 +285,12 @@ INCLUDE_ASM(const s32, "sdk/libkernl", GetMemorySize);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _InitTLB);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceResetttyinit);
+extern s32 D_0052C2A4 __attribute__((section(".data")));
+
+void sceResetttyinit(void)
+{
+    D_0052C2A4 = 0;
+}
 
 extern s32 DIntr(void);
 extern s32 EIntr(void);
