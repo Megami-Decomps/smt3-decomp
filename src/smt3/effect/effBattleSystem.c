@@ -1655,18 +1655,18 @@ void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work)
         dds3EffectPartSetPosition(work->hPart2, &position);
         if (datSkillTable.normal[effBTLSkillGetID()].koukatype == 0) {
             light.color.x = 0.6078431010246277f;
-            light.color.y = 0.23529410362243652f;
+            light.color.y = 0.23529411f;
             light.color.z = 0.3529411554336548f;
         } else {
-            light.color.x = 0.2549019455909729f;
-            light.color.y = 0.3333333134651184f;
+            light.color.x = 0.25490195f;
+            light.color.y = 0.33333332f;
             light.color.z = 0.45098036527633667f;
         }
         light.color.w = 0.0f;
         SDF_VU0_COPYVECTOR(&ambient, &light.color);
         light.v.x = -0.7299999594688416f;
         light.v.y = 1.5499999523162842f;
-        light.v.z = 0.23999999463558197f;
+        light.v.z = 0.24f;
         light.v.w = 0.0f;
         sdf3DMakeLightParallelPacket(&work->lightPacket, (sdf3DLight_t **)lights.lights, &ambient);
         model = dds3EffectPartGetHandle(work->hPart);

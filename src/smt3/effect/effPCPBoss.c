@@ -1206,7 +1206,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
             point->f[2] = 0.0f;
             point->f[3] = 0.0f;
             point->f[0] = sway - width;
-            point->f[1] = y + 1.3599997758865356f;
+            point->f[1] = y + 1.3599998f;
             SDF_VU0_LOADVECTOR(point);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(point);
@@ -1214,7 +1214,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
             point->f[2] = 0.0f;
             point->f[3] = 0.0f;
             point->f[0] = width + sway;
-            point->f[1] = y + 1.3599997758865356f;
+            point->f[1] = y + 1.3599998f;
             SDF_VU0_LOADVECTOR(point);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(point);
@@ -1229,9 +1229,9 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
             color[2] = 0x80808080;
             color[3] = 0x80808080;
             color += 4;
-            y += 1.3599997758865356f;
+            y += 1.3599998f;
             v = nextV;
-            fade += -0.009999999776482582f;
+            fade += -0.01f;
             angle += 0.18849553167819977f;
             if (count >= 32) {
                 sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
@@ -1549,7 +1549,7 @@ void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR(&direction);
-        width = (frame < 10 ? 1.0f : 1.0f - (f32)(frame - 10) / 14.0f) * 33.999996185302734f;
+        width = (frame < 10 ? 1.0f : 1.0f - (f32)(frame - 10) / 14.0f) * 33.999997f;
         SDF_VU0_LOADVECTOR(work->pos_s);
         y = work->pos_s[1] - 340.0f;
         SDF_VU0_SETVECTOR_Y(y);
@@ -1572,7 +1572,7 @@ void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
             MMI_RGBA_PACK_128(convertedColor);
             color = effColorBlend(0x303030, 0x40808080, t);
             effPCPBossBUNSINDrawPoly(tag, work, &segment, color, width, 20.0f, 543.99993896484375f, 680.0f);
-            t += 0.06666666269302368f;
+            t += 0.06666667f;
         }
     }
     ot = &sdfGrOtTable[43];

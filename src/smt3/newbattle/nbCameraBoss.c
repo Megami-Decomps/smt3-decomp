@@ -689,7 +689,7 @@ s32 nbCameraBoss_Sp_DOUTYO_TPFix_Set(nbCamera_t *pNbCamera)
     pNbCamera->direction.x = 0.0f;
     pNbCamera->target.x = pNbCamera->direction.x;
     pNbCamera->target.y = -88.75f;
-    pNbCamera->target.z = -888.9399414f;
+    pNbCamera->target.z = -888.94f;
     pNbCamera->distance = 1.0f;
     pNbCamera->direction.y = pNbCamera->direction.x;
     pNbCamera->direction.z = 1.0f;
@@ -1737,7 +1737,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             pNbCamera->distance = 1.0f;
             pNbCamera->fovy = 0.69813163f;
         } else {
-            pNbCamera->direction.x = 0.55000002f;
+            pNbCamera->direction.x = 0.55f;
             pNbCamera->direction.y = 0.58f;
             pNbCamera->direction.z = 0.6f;
             pNbCamera->target.x = -1710.3499f;
@@ -1773,7 +1773,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             from.x = 0.29f;
             from.y = -0.3f;
             from.z = 0.91f;
-            to.x = -0.43000001f;
+            to.x = -0.43f;
             to.y = -0.3f;
             to.z = 0.85f;
             SDF_VU0_LOADVECTOR(&from);
@@ -2218,18 +2218,18 @@ s32 nbCameraBoss_Kagu_MJINKO_Set(nbCamera_t *pNbCamera)
     case 2:
         if (pNbCamera->frame < 75) {
             pNbCamera->direction.x = -0.25f;
-            pNbCamera->direction.y = 0.209999993f;
+            pNbCamera->direction.y = 0.21f;
             pNbCamera->direction.z = 0.939999998f;
             pNbCamera->target.x = 902.299988f;
-            pNbCamera->target.y = -1260.7998f;
+            pNbCamera->target.y = -1260.7999f;
             pNbCamera->target.z = -1761.79993f;
         } else {
-            pNbCamera->direction.x = -0.179999992f;
-            pNbCamera->direction.y = 0.0899999961f;
-            pNbCamera->direction.z = 0.979999959f;
-            pNbCamera->target.x = 532.409912f;
-            pNbCamera->target.y = -458.449951f;
-            pNbCamera->target.z = -1987.56982f;
+            pNbCamera->direction.x = -0.18f;
+            pNbCamera->direction.y = 0.09f;
+            pNbCamera->direction.z = 0.98f;
+            pNbCamera->target.x = 532.40992f;
+            pNbCamera->target.y = -458.44996f;
+            pNbCamera->target.z = -1987.5699f;
         }
         pNbCamera->distance = 1.0f;
         pNbCamera->fovy = 0.698131621f;

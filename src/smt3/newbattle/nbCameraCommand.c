@@ -394,7 +394,7 @@ void nbCameraShot_CommandFixPos_Calc2(nbCamera_t *camera, nbFormation_t *target)
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_GETLENGTH(camera->distance);
 
-    cameraAngle = sdfAtan(0.3490658104f);
+    cameraAngle = sdfAtan(0.34906582f);
     bodyRadius = target->r * target->scl;
     if (effBTLDebug_CameraAllEditCheck() != 0) {
         if ((dds3PadBitTable[4] & 2) != 0) {
@@ -432,7 +432,7 @@ void nbCameraShot_CommandFixPos_Calc2(nbCamera_t *camera, nbFormation_t *target)
     }
     camera->distance += bodyRadius * 0.9f + addDistance;
 
-    cameraAngle = sdfAtan(0.495673418f);
+    cameraAngle = sdfAtan(0.49567342f);
     if (minimumHeight < 150.0f && maximumHeight > 150.0f && groupRadius < 550.0f) {
         groupRadius = 550.0f;
     }
@@ -483,7 +483,7 @@ void nbCameraShot_CommandFixPos_Calc2(nbCamera_t *camera, nbFormation_t *target)
         for (i = 0; i < 32; i++) {
             form = &forms[i];
             if ((form->stat & 0x203) == 0x203 && form != target) {
-                effBTLModelLook2(form, &position, 0.3490658104f);
+                effBTLModelLook2(form, &position, 0.34906582f);
             }
         }
     }
