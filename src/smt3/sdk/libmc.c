@@ -681,12 +681,13 @@ s32 sceMcFlush(s32 port)
     return ret;
 }
 
-/* NON_MATCHING: 464 bytes against retail's 472; retail spends one more
- * saved register, so its frame is 0xA0 where this draft needs 0x90. */
-#ifdef NON_MATCHING
 s32 sceMcSetFileInfo(s32 port, s32 slot, char *name, mcEntInfo *info, s32 flags)
 {
     s32 ret;
+    /* Keep the live flags separate from the request cursor in $16. This
+     * localized compiler constraint reconstructs the native allocation; it
+     * does not establish the historical source spelling. $17 is callee-saved. */
+    register s32 fileFlags __asm__("$17") = flags;
 
     if (PollSema(D_0052BB24) < 0) {
         return -200;
@@ -701,7 +702,7 @@ s32 sceMcSetFileInfo(s32 port, s32 slot, char *name, mcEntInfo *info, s32 flags)
     }
     D_005997F0.port = port;
     D_005997F0.slot = slot;
-    D_005997F0.flag = flags & 7;
+    D_005997F0.flag = fileFlags & 7;
     D_00599780 = *info;
     D_005997F0.pwd = &D_00599780;
     strncpy(D_005997F0.name, name, 0x3FF);
@@ -715,9 +716,6 @@ s32 sceMcSetFileInfo(s32 port, s32 slot, char *name, mcEntInfo *info, s32 flags)
     }
     return ret;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libmc", sceMcSetFileInfo);
-#endif
 
 s32 sceMcRename(s32 port, s32 slot, char *name, char *newname)
 {

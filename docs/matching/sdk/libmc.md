@@ -1,7 +1,7 @@
 # sdk/libmc
 
-Eighteen of the library's twenty-one `sceMc*` entry points match. Every one
-follows the same template, so the three drafts below differ only in their own
+Nineteen of the library's twenty-one `sceMc*` entry points match. Every one
+follows the same template, so the two remaining drafts differ only in their own
 detail, not in the frame:
 
     if (PollSema(D_0052BB24) < 0) return -200;
@@ -69,8 +69,23 @@ it as `while (check() != 0) delay(60); done = 0;` is 12 bytes short, so the
 `done = 0`-per-iteration shape is the right one and only its scheduling is
 wrong.
 
-## sceMcSetFileInfo
+## sceMcSetFileInfo (sdk/libmc, 0x1D8)
 
-464 bytes against retail's 472. Retail spends one more saved register, so its
-frame is 0xA0 where the draft needs 0x90; the `ldl`/`ldr` copy and the request
-stores are otherwise identical.
+Matched: all 472 native instruction bytes. The 64-byte entry-info copy keeps
+its truthful 4-byte alignment and native unaligned doubleword operations.
+
+The incoming flags have a real lifetime from function entry, across the
+semaphore poll and validation branches, to the masked request-field store.
+A local binding retains that value in native callee-saved `$17`, separately
+from the request cursor in `$16`. The ordinary draft coalesces those roles,
+emits only 464 bytes and uses a 0x90-byte frame; this constraint restores the
+native 0xA0-byte frame and complete instruction sequence. It is a localized
+compiler reconstruction aid, not a claim about historical source spelling.
+There is no empty asm operand, new memory access, helper or ABI change.
+
+Ablating only the binding restores the 464-byte residual. Paired plain and
+RTL-dump EE 2.9 builds have identical assembly, complete-owner text and
+relocations for both baseline and final source. The final owner checks
+26 functions exact with no differing owned data. The early -200, -100 and
+-210 results, name validation, `flags & 7`, info copy, name termination,
+cache flush, RPC arguments and semaphore release behavior are unchanged.
