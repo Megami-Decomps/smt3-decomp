@@ -2,23 +2,30 @@
 
 ## pbEditInitProc (pb/pbMain, 0x148)
 
-79 of 82 words match at the exact 328-byte size. The constructor table uses
+82 of 82 words match at the exact 328-byte size. The constructor table uses
 the editor root's process-link prefix and returns a panel handle; its zero
 stub follows the same parent/handle signature as the game and help constructors.
 The dispatcher preserves the seven-entry jump table, previous/next/direct
 editor transitions, both halt paths, conditional return to the administrative
 sequence, and process-name/state diagnostics. Native strings and jump-table
-entries were checked with the reconstruction.
+entries are preserved.
 
-The remaining three words follow `p2sdStopBGM`: the map-work pointer is loaded
-into `$3`, its byte at `+0x35C` into `$2`, and the branch reads `$2`; retail
-uses `$2` for the pointer and `$3` for the byte and branch. The actual sound
-provider returns a signed command status, so the declaration remains `s32`.
-An incorrect `void` declaration reproduces all 328 bytes but is not a qualified
-match. Explicitly discarding the result and naming the map/flag locals leave
-the same three differences. An early return for a zero flag instead merges
-the two administrative-call tails and emits only 304 bytes. The accurate API
-and ordinary conditional call are the preferred draft; production keeps assembly.
+A localized register binding gives the real map-work pointer native `$2` after
+`p2sdStopBGM`. Its value is initialized from `D_0054F5C4` only after that call,
+consumed by the unsigned byte load at offset `0x35C`, and dead before any next
+call. The preceding diagnostic and sound calls cannot clobber a live value;
+the later administrative call does not consume or reuse it. The actual sound
+provider continues to return signed command status. No ABI change, dummy use,
+extra memory access, empty asm, or new compiler flag is involved.
+
+The ordinary direct expression and the same named pointer without the binding
+both reproduce 79/82 words: the map pointer and byte result exchange `$2` and
+`$3`. Binding the initialized address alone closes those three words. This is
+a target-specific reconstruction aid, not evidence of historical spelling.
+Plain and RTL-dumped builds have identical normalized assembly, complete text,
+target bytes, and relocation entries. Complete-owner checking gives 25 match,
+0 differ; no guarded drafts remain in this owner. Final retail and independent
+review evidence accompanies the promotion.
 
 ## pb_draw_bg_Process (pb/pbMain, 0x26C)
 

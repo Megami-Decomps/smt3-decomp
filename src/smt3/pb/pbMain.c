@@ -158,8 +158,7 @@ extern void dds3AdminiCallSequence(s32 sequence, void *data, u32 size, s32 resto
 extern s32 p2sdStopBGM(s32 midi);
 extern char D_0054F5C0[]; /* Shared "%s\n" process-name format. */
 
-/* NON_MATCHING: 3 of 82 words differ at the exact 328-byte size. */
-#ifdef NON_MATCHING
+/* Exact native dispatcher; see docs/matching/pb/pbMain.md. */
 s32 pbEditInitProc(dds3ProcessID_t *id)
 {
     if (pbEditWork == 0) {
@@ -187,13 +186,19 @@ s32 pbEditInitProc(dds3ProcessID_t *id)
         pbEditWork = 0;
         pbEditorState = pbMoveChar->unk04;
         break;
-    case 6:
+    case 6: {
+        register pbMapWork_t *map __asm__("$2");
         printf("********* Puzzle boy process halted (1).\n");
         p2sdStopBGM(0x340000);
-        if (D_0054F5C4->unk35C[0] != 0) {
+        /* Local reconstruction aid: the live map address uses native $2.
+         * Its lifetime starts after the sound call and ends at the byte read;
+         * it does not carry a value across either call. */
+        map = D_0054F5C4;
+        if (map->unk35C[0] != 0) {
             dds3AdminiCallSequence(0, NULL, 0, 0);
         }
         return -1;
+    }
     case 0:
     case 1:
         break;
@@ -204,9 +209,7 @@ s32 pbEditInitProc(dds3ProcessID_t *id)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbMain", pbEditInitProc);
-#endif
+
 
 
 

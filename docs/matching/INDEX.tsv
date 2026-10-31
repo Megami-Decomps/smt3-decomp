@@ -277,8 +277,8 @@ roundDirCheck	pbGame	0x2B4	173 of 173 words match	docs/matching/pb/pbGame.md	113
 pb_draw_map_cursor_Process	pb/pbGame	0x268	154 of 154 words match	docs/matching/pb/pbGame.md	148
 pbRebuildOutline				docs/matching/pb/pbGameDraw.md	3
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/matching/pb/pbMCard.md	3
-pbEditInitProc	pb/pbMain	0x148	79 of 82 words match	docs/matching/pb/pbMain.md	3
-pb_draw_bg_Process	pb/pbMain	0x26C	155 of 155 words match	docs/matching/pb/pbMain.md	23
+pbEditInitProc	pb/pbMain	0x148	82 of 82 words match	docs/matching/pb/pbMain.md	3
+pb_draw_bg_Process	pb/pbMain	0x26C	155 of 155 words match	docs/matching/pb/pbMain.md	30
 pb_draw_mapbase_Process	pb/pbModel	0x214	126 of 133 words match	docs/matching/pb/pbModel.md	3
 pbDrawMapPolyTransformed			10 of 262 words matching	docs/matching/pb/pbModel.md	31
 pb_draw_exit_Process	pb/pbModel	0x1C0	112 of 112 words match	docs/matching/pb/pbModel.md	59
