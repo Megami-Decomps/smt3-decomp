@@ -93,3 +93,8 @@ symbol contracts including 104 function records, and 1,759 ordered relocation
 and addend contracts. The final commented production object agrees with the
 qualified ordinary object on those contracts and the ELF header; differing
 scratch filenames occur only in non-emitting debug metadata.
+
+Source commit `7d166188accf3d9459e84105b002c7134f3c4696` passed exact-source
+hosted CI [41176090359](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41176090359),
+attempt 1, including build and deploy. The run completed successfully at
+06:21:55 UTC on 2026-10-31; the deployment reported success at 06:21:52 UTC.
