@@ -2839,6 +2839,11 @@ s32 slQueryYesNoProc(void)
             return 0;
         }
         cardStatus = sdfMcGetFileInfoReady(mccb);
+        if (cardStatus == 2) {
+            slQueryYesNoMsg = 0;
+            slQueryYesNoCursor = -1;
+            return slQueryYesFunc();
+        }
         if (cardStatus != 1) {
             slQueryYesNoMsg = 5;
         }
