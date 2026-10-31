@@ -957,7 +957,7 @@ void fldSetUnit(fldResourcePoint_t *point)
     }
     if (evtBitCheck(0xAF3) != 0) {
         SDF_VU0_LOADVECTOR(&axis.vector);
-        FromRotation(4.712388515f);
+        FromRotation(4.7123886f);
         SDF_VU0_LOADVECTOR_B(&point->rot);
         Mult();
         SDF_VU0_STOREVECTOR(&rotation);
