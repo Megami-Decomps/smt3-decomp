@@ -35,3 +35,61 @@ Ruled out: the declaration and assignment order of the two pointer locals;
 address is created first; `slot` as `u32`; writing the `+0x8` store
 base-first and the `+0x1`/`+0x2`/`+0x24` stores index-first with explicit
 casts; and five orderings of the last six stores.
+
+## slFileSelCalc (mc/slMain, 0x340)
+
+208 of 208 words match at 832 bytes in ordinary C. The selected index owns
+its actual decrement, increment and normalization results. An ordinary
+branch-local old-index snapshot feeds the subtraction; normalization updates
+`selected += 50` and then `selected %= selectionRange`, where the real divisor
+is five. All diagnostic register bindings and empty identity operands were
+removed together and the complete owner remained exact. None is retained or
+claimed necessary by the final reconstruction.
+
+The initial paging condition reads the actual count. A later count snapshot
+is placed at each genuine branch exit: after the increment in its arm, before
+the selected-index reload in the other paging arm, and in the low-count arm.
+Each path still makes one final observation, with no callback between the
+moved operations. Selected-index reloads remain after the relevant pad/sound
+callbacks. The final C writes the save mode before the query message, while emitted
+instructions store the query message before the save mode, matching native.
+These are adjacent ordinary stores to distinct globals with no intervening
+callback; the source order produces the desired compiler scheduling rather
+than directly specifying the native order. No artificial memory access or
+dependency is added.
+The original signed arithmetic and remainder contracts remain unchanged;
+this is not a claim of safety for arbitrarily corrupted index values.
+
+The early zero-info exit and the genuine default no-action path share the
+existing final zero return. Qualified CSE evidence for this control retains
+the shared zero definition, where the earlier separate-exit form eliminated
+it. The observed delay-slot pass then places that definition in the annulled
+branch delay slot, producing the native branch-likely/zero-result sequence.
+No action work, callback or cleanup is bypassed by the shared label.
+
+The final ordinary source has its own qualified scheduler evidence. Before
+sched1, the divisor definition UID214 precedes the genuine in-place add
+UID217, and the add has no REG_DEAD annotation. Sched1 reports equal priority
+39 and cost one, with three dependents for the divisor and two for the add,
+and actually issues the divisor before the add. Divmod then consumes both
+real values and the global store consumes the normalized result. An earlier
+diagnostic's REG_WEIGHT explanation was an inference, not a directly observed
+hooked tie-break event; it is not asserted as the final source's definitive
+cause. No original-source spelling is inferred.
+
+Independent semantic review and canonical complete-owner checking give
+100 match, 0 differ, preserving all
+99 peers and owned data. Final ordinary plain versus stock/verbose dump
+assembly agrees after excluding only the first `.file` scratch-path directive,
+and whole-owner text bytes agree. This qualifies the retained compiler
+observations without calling raw assembly byte-identical.
+
+Final local gates pass the retail checksum, 26 tooling test files / 427 cases,
+all 146 guarded owners / 523 drafts with stable source/compiler inputs,
+seven IRX owners, and reconciled production reports.
+
+Complete-object comparison also confirms all five allocated sections, 766
+symbol contracts including 104 function records, and 1,759 ordered relocation
+and addend contracts. The final commented production object agrees with the
+qualified ordinary object on those contracts and the ELF header; differing
+scratch filenames occur only in non-emitting debug metadata.

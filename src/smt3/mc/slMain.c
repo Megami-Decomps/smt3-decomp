@@ -2245,32 +2245,42 @@ s32 slLoadProc_closeFile(void) {
     return (s32)slErrorWait;
 }
 
-#ifdef NON_MATCHING
 s32 slFileSelCalc(void)
 {
     s32 selectionCount;
+    s32 selectionRange;
     s32 selected;
     s32 action;
     s32 ready;
     u32 flags;
 
     if (gSlFileErroeFlg == 0) {
-        selectionCount = gSlSelCnt;
         selected = slFileSelError;
-        if (selectionCount >= 21) {
+        if (gSlSelCnt >= 21) {
             if (slGetPadRep(((u8)dds3PadButtonState[0x26] >> 1) & 1)) {
                 p2sdPlaySE(0, 0x7F, 0x3F);
-                slFileSelError--;
+                {
+                    s32 oldIndex = slFileSelError;
+                    selected = oldIndex - 1;
+                    slFileSelError = selected;
+                }
             }
             if (slGetPadRep(((u8)dds3PadButtonState[0x27] >> 1) & 1)) {
                 p2sdPlaySE(0, 0x7F, 0x3F);
-                selected = slFileSelError + 1;
+                selected = slFileSelError;
+                selected++;
+                selectionCount = gSlSelCnt;
             } else {
+                selectionCount = gSlSelCnt;
                 selected = slFileSelError;
             }
+        } else {
             selectionCount = gSlSelCnt;
         }
-        slFileSelError = (selected + 50) % 5;
+        selectionRange = 5;
+        selected += 50;
+        selected %= selectionRange;
+        slFileSelError = selected;
         if (selectionCount >= 21) {
             if (slGetPadTrig(dds3PadButtonState[0x21] < 0)) {
                 gSlFileErroeFlg = 1;
@@ -2281,7 +2291,8 @@ s32 slFileSelCalc(void)
         }
     }
     if (sdfMcFuncGetInfo1() == 0) {
-        return 0;
+        /* Share the zero-result block for CSE/DBR; see docs/matching/mc/slMain.md. */
+        goto no_action;
     }
     ready = sdfMcGetFileInfoReady(mccb);
     action = gSlFileErroeFlg;
@@ -2300,12 +2311,12 @@ s32 slFileSelCalc(void)
             if ((flags & 0xB) == 0xB) {
                 p2sdPlaySE(8, 0x7F, 0x3F);
                 if (gSlEndingMode != 0) {
-                    slQueryYesNoMsg = action;
                     gSlSaveMode = action;
+                    slQueryYesNoMsg = action;
                     return slQueryYesNo(slEndingUpd2, slFileSel, 1);
                 }
-                slQueryYesNoMsg = action;
                 gSlSaveMode = action;
+                slQueryYesNoMsg = action;
                 return slQueryYesNo(slSaveData, slFileSel, 1);
             }
             if ((flags & 0xA) == 2) {
@@ -2340,11 +2351,9 @@ s32 slFileSelCalc(void)
         }
         return slCancel();
     }
+no_action:
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "mc/slMain", slFileSelCalc);
-#endif
 
 extern f32 D_0054F074, D_0054C58C, slFileSelWork;
 extern char D_005287F0[], D_00528800[], D_00528810[];

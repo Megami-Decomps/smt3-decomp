@@ -64,6 +64,7 @@ both native and emitted sizes when they differ.
 | 2 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 2 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 2 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
+| 2 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
@@ -108,7 +109,6 @@ both native and emitted sizes when they differ.
 | 1 | newbattle/NbNegoFlowInoti | [newbattle/NbNegoFlowInoti.md](newbattle/NbNegoFlowInoti.md) |
 | 1 | newbattle/NbNegoFlowInnen | [newbattle/NbNegoFlowInnen.md](newbattle/NbNegoFlowInnen.md) |
 | 1 | newbattle/NbNegoFlowFullMoon | [newbattle/NbNegoFlowFullMoon.md](newbattle/NbNegoFlowFullMoon.md) |
-| 1 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 1 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 1 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |

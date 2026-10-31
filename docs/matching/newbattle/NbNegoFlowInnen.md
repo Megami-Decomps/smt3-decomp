@@ -70,3 +70,8 @@ Final local gates pass the retail checksum, 26 tooling test files / 427 cases,
 all 147 guarded owners / 527 drafts with stable source/compiler inputs,
 seven IRX owners, and reconciled production reports. The unchanged
 `nbNegoProcess.c` owner also passes 44 match, 0 differ.
+
+Source commit `9360b924f3307fb01c208e73ead68968805467f4` passed exact-source
+hosted CI [41172587625](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41172587625),
+attempt 1, including build and deploy. The run completed successfully at
+05:28:48 UTC on 2026-10-31; the deployment reported success at 05:28:46 UTC.

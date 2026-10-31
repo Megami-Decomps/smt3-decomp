@@ -181,6 +181,7 @@ dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/matching/kernel/dds3ConfigMai
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matching/kernel/dds3KernelDraw.md	3
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
 slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/matching/mc/slMain.md	3
+slFileSelCalc	mc/slMain	0x340	208 of 208 words match	docs/matching/mc/slMain.md	39
 Flow2_6	newbattle/NbNegoFlowFullMoon	0x278	158 of 158 words match	docs/matching/newbattle/NbNegoFlowFullMoon.md	3
 Flow5_3	newbattle/NbNegoFlowInnen	0x164	89 of 89 words match	docs/matching/newbattle/NbNegoFlowInnen.md	3
 Flow15_5	newbattle/NbNegoFlowInoti	0x148	82 of 82 words match	docs/matching/newbattle/NbNegoFlowInoti.md	3
