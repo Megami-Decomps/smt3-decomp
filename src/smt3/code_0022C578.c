@@ -8867,7 +8867,7 @@ s32 campDrawStockLabel2(s32 x, s32 y, s32 z, s8 slot, s8 localSlot,
 
     colors[0] = colors[1] = colors[2] = colors[3] = (alpha / 2) | 0x80808000;
     if (flags & 4) {
-        return 1;
+        return 0;
     }
     if (!(flags & 1)) {
         return 0;
@@ -11364,7 +11364,7 @@ void cmpChangeCursorListNums(s32 countValue, u8 *cursorData)
         cursor->unk_24 = visible - 1;
     }
     offset = range - (s8)cursor->unk_21 - 1;
-    if (offset >= (u8)cursor->unk_25) {
+    if (offset < (u8)cursor->unk_25) {
         cursor->unk_25 = offset;
     }
     if (cursor->CursorPos != 0) {

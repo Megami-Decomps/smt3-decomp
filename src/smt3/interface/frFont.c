@@ -2272,7 +2272,7 @@ void frDumpFontTexture(s32 x, s32 y, s32 depth)
     bottomLeft = (u64)(s64)left | ((u64)(s64)bottom << 16) | depthBits;
     bottomRight = (u64)(s64)right | ((u64)(s64)bottom << 16) | depthBits;
     texture = bufferBase | 0x8000000000000000ULL |
-        ((u64)widthExponent << 26) | 0x40000000ULL |
+        ((u64)widthExponent << 26) | 0x400000000ULL |
         ((u64)bufferWidth << 14) | 0x01400000ULL |
         ((u64)heightExponent << 30) | ((u64)imageBase << 37);
     color = 0x3F800000FFFFFFFFULL;

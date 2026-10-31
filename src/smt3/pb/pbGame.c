@@ -504,8 +504,10 @@ s32 roundCheck(s32 direction, u32 groupID, pbGroupData_t **pGroup)
     }
     rotation = roundDirCheck(direction, groupID, &stepCount);
     for (i = 0; i <= stepCount; i++) {
-        if (D_0054F5C4->area.map.blk[y + pbKeyTable[direction][1] * i]
-                                      [x + pbKeyTable[direction][0] * i] & 0x800) {
+        /* Signed: a step off the map reads the cell before it, as retail's
+         * 32-bit addition does. */
+        if (D_0054F5C4->area.map.blk[(s32)(y + pbKeyTable[direction][1] * i)]
+                                      [(s32)(x + pbKeyTable[direction][0] * i)] & 0x800) {
             return 1;
         }
     }
