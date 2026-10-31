@@ -2456,8 +2456,6 @@ pop_menu:
     return 0;
 }
 
-/* NON_MATCHING: 3 of 91 words differ (first at +0x110). */
-#ifdef NON_MATCHING
 s32 evtEventViewerProcess3(void)
 {
     if (viewerinfo->nowframe != viewerinfo->oldframe) {
@@ -2491,8 +2489,13 @@ s32 evtEventViewerProcess3(void)
     }
     if ((viewerinfo->flags & 1) != 0) {
         FrameSelect();
-        if ((viewerinfo->flags & 1) != 0) {
-            return 0;
+        {
+            /* Reconstruction aid: keep the real pause test in the native
+             * return register. Its value dies at the branch, before any call. */
+            register s32 paused __asm__("$2") = viewerinfo->flags & 1;
+            if (paused != 0) {
+                return 0;
+            }
         }
     }
     if (viewerinfo->nowframe >= viewerinfo->lastframe) {
@@ -2503,9 +2506,6 @@ s32 evtEventViewerProcess3(void)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerProcess3);
-#endif
 
 s32 evtEventViewerProcess2(void *id)
 {
