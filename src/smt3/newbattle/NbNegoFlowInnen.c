@@ -213,22 +213,26 @@ typedef struct { u16 item; u16 cnt; } nbInnenPhase_t;
 
 typedef struct { s16 phase; s16 side; s16 motion; } nbInnenMotion_t;
 
-/* 60-byte entries; only the fields this unit reads are named. */
-typedef struct {
-    s16 id;
-    u16 pid;
-    u16 eid;
-    u16 unk_06;
-    union {
+/* Complete 60-byte records, interpreted as phase items or message/motion data. */
+typedef union {
+    struct {
+        s16 id;
+        u16 pid;
+        u16 eid;
+        u16 unk_06;
         nbInnenPhase_t phase[13];
-        struct {
-            u8 unk_08[24];
-            u16 mainmes;
-            u16 mescnt;
-            u8 unk_24[6];
-            nbInnenMotion_t motion[3];
-        } message;
-    } data;
+    } phase_record;
+    struct {
+        s16 id;
+        u16 pid;
+        u16 eid;
+        u16 unk_06;
+        u8 unk_08[24];
+        u16 mainmes;
+        u16 mescnt;
+        u8 unk_24[6];
+        nbInnenMotion_t motion[3];
+    } message;
 } nbInnenRec_t;
 
 extern nbInnenRec_t D_003E3158[];
@@ -316,35 +320,29 @@ s32 Flow5_2(nbNegoProcessData_t *n)
     return 0;
 }
 
-#ifdef NON_MATCHING
 typedef struct nbKoukaPacket_t nbKoukaPacket_t;
 extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid,
                                                nbFormation_t *form, s32 motion);
 
 s32 Flow5_3(nbNegoProcessData_t *n)
 {
-    nbInnenMotion_t *motion;
     nbFormation_t *form;
     s32 i;
 
-    if (n->nownegophase >= D_003E3158[n->innen_id].data.message.mescnt) {
+    if (n->nownegophase >= D_003E3158[n->innen_id].message.mescnt) {
         nbAddNegoIdKouho(n, 0x50004);
     } else {
         nbDispNegoMessage(n, n->innenmsg,
-                          D_003E3158[n->innen_id].data.message.mainmes + n->nownegophase, 0);
+                          D_003E3158[n->innen_id].message.mainmes + n->nownegophase, 0);
         for (i = 0; i < 3; i++) {
-            motion = &D_003E3158[n->innen_id].data.message.motion[i];
-            if (motion->phase == n->nownegophase + 1) {
-                form = motion->side == 1 ? n->pform : n->eform;
-                nbAddMotionKoukaPacket(0, 0, form, motion->motion == 1 ? 14 : 15);
+            if (D_003E3158[n->innen_id].message.motion[i].phase == n->nownegophase + 1) {
+                form = D_003E3158[n->innen_id].message.motion[i].side == 1 ? n->pform : n->eform;
+                nbAddMotionKoukaPacket(0, 0, form, D_003E3158[n->innen_id].message.motion[i].motion == 1 ? 14 : 15);
             }
         }
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowInnen", Flow5_3);
-#endif
 
 s32 Flow5_4(nbNegoProcessData_t *n)
 {
@@ -371,12 +369,12 @@ s32 Flow5_6(nbNegoProcessData_t *n)
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (D_003E3158[n->innen_id].data.phase[i].item == 0) {
+        if (D_003E3158[n->innen_id].phase_record.phase[i].item == 0) {
             break;
         }
-        n->getitem = D_003E3158[n->innen_id].data.phase[i].item;
-        datAddItem(D_003E3158[n->innen_id].data.phase[i].item,
-                   ((nbInnenPhase_t *)&D_003E3158[n->innen_id].data.phase[i])->cnt);
+        n->getitem = D_003E3158[n->innen_id].phase_record.phase[i].item;
+        datAddItem(D_003E3158[n->innen_id].phase_record.phase[i].item,
+                   ((nbInnenPhase_t *)&D_003E3158[n->innen_id].phase_record.phase[i])->cnt);
     }
     nbAddNegoIdKouho(n, 0x50009);
     return 0;
@@ -397,10 +395,10 @@ s32 Flow5_8(nbNegoProcessData_t *n)
 
 s32 Flow5_9(nbNegoProcessData_t *n)
 {
-    if (D_003E3158[n->innen_id].data.phase[n->nownegophase].item == 0) {
+    if (D_003E3158[n->innen_id].phase_record.phase[n->nownegophase].item == 0) {
         return 2;
     }
-    n->getitem = D_003E3158[n->innen_id].data.phase[n->nownegophase].item;
+    n->getitem = D_003E3158[n->innen_id].phase_record.phase[n->nownegophase].item;
     nbSetMesItem(n->helpmsg, n->getitem);
     nbDispNegoMessage(n, n->helpmsg, 8, 0);
     return 0;
@@ -456,12 +454,12 @@ s32 Flow5_18(nbNegoProcessData_t *n)
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (D_003E3158[n->innen_id].data.phase[i].item == 0) {
+        if (D_003E3158[n->innen_id].phase_record.phase[i].item == 0) {
             break;
         }
-        n->getitem = D_003E3158[n->innen_id].data.phase[i].item;
-        datAddItem(D_003E3158[n->innen_id].data.phase[i].item,
-                   ((nbInnenPhase_t *)&D_003E3158[n->innen_id].data.phase[i])->cnt);
+        n->getitem = D_003E3158[n->innen_id].phase_record.phase[i].item;
+        datAddItem(D_003E3158[n->innen_id].phase_record.phase[i].item,
+                   ((nbInnenPhase_t *)&D_003E3158[n->innen_id].phase_record.phase[i])->cnt);
     }
     nbAddNegoIdKouho(n, 0x50015);
     return 0;
@@ -482,10 +480,10 @@ s32 Flow5_20(nbNegoProcessData_t *n)
 
 s32 Flow5_21(nbNegoProcessData_t *n)
 {
-    if (D_003E3158[n->innen_id].data.phase[n->nownegophase].item == 0) {
+    if (D_003E3158[n->innen_id].phase_record.phase[n->nownegophase].item == 0) {
         return 6;
     }
-    n->getitem = D_003E3158[n->innen_id].data.phase[n->nownegophase].item;
+    n->getitem = D_003E3158[n->innen_id].phase_record.phase[n->nownegophase].item;
     nbSetMesItem(n->helpmsg, n->getitem);
     nbDispNegoMessage(n, n->helpmsg, 5, 0);
     return 0;
@@ -495,3 +493,22 @@ s32 nbNegoFlowInnen(nbNegoProcessData_t *n)
 {
     return D_004EF810[(u16)n->nownegoid](n);
 }
+
+/* Target-compiler checks of both complete record interpretations. */
+typedef char nbInnenRecSizeCheck[sizeof(nbInnenRec_t) == 60 ? 1 : -1];
+typedef char nbInnenPhaseSizeCheck[sizeof(nbInnenPhase_t) == 4 ? 1 : -1];
+typedef char nbInnenMotionSizeCheck[sizeof(nbInnenMotion_t) == 6 ? 1 : -1];
+typedef char nbInnenOffset_phase_record_id[((unsigned long)&((nbInnenRec_t *)0)->phase_record.id) == 0 ? 1 : -1];
+typedef char nbInnenOffset_phase_record_pid[((unsigned long)&((nbInnenRec_t *)0)->phase_record.pid) == 2 ? 1 : -1];
+typedef char nbInnenOffset_phase_record_eid[((unsigned long)&((nbInnenRec_t *)0)->phase_record.eid) == 4 ? 1 : -1];
+typedef char nbInnenOffset_phase_record_unk_06[((unsigned long)&((nbInnenRec_t *)0)->phase_record.unk_06) == 6 ? 1 : -1];
+typedef char nbInnenOffset_phase_record_phase[((unsigned long)&((nbInnenRec_t *)0)->phase_record.phase) == 8 ? 1 : -1];
+typedef char nbInnenOffset_message_id[((unsigned long)&((nbInnenRec_t *)0)->message.id) == 0 ? 1 : -1];
+typedef char nbInnenOffset_message_pid[((unsigned long)&((nbInnenRec_t *)0)->message.pid) == 2 ? 1 : -1];
+typedef char nbInnenOffset_message_eid[((unsigned long)&((nbInnenRec_t *)0)->message.eid) == 4 ? 1 : -1];
+typedef char nbInnenOffset_message_unk_06[((unsigned long)&((nbInnenRec_t *)0)->message.unk_06) == 6 ? 1 : -1];
+typedef char nbInnenOffset_message_unk_08[((unsigned long)&((nbInnenRec_t *)0)->message.unk_08) == 8 ? 1 : -1];
+typedef char nbInnenOffset_message_mainmes[((unsigned long)&((nbInnenRec_t *)0)->message.mainmes) == 32 ? 1 : -1];
+typedef char nbInnenOffset_message_mescnt[((unsigned long)&((nbInnenRec_t *)0)->message.mescnt) == 34 ? 1 : -1];
+typedef char nbInnenOffset_message_unk_24[((unsigned long)&((nbInnenRec_t *)0)->message.unk_24) == 36 ? 1 : -1];
+typedef char nbInnenOffset_message_motion[((unsigned long)&((nbInnenRec_t *)0)->message.motion) == 42 ? 1 : -1];
