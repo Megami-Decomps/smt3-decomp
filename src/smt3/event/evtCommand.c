@@ -367,7 +367,7 @@ extern void evtSetPolygonMovieFlag(void *id, s32 flag);
 
 extern void evtResetPolygonMovieFlag(void *id, s32 flag);
 
-extern s32 evtCheckPolygonMovieFlag(void *id, s32 flag);
+extern u8 evtCheckPolygonMovieFlag(void *id, s32 flag);
 
 extern void sdfTexFreeDelayed(void *aHandle);
 
