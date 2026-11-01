@@ -346,6 +346,11 @@ typedef struct {
 #define EE_SYNC() __asm__ volatile ("sync")
 #define EE_SYNC_P() __asm__ volatile ("sync.p")
 
+/* The body of a busy-wait loop that reads no hardware: without a side effect
+ * cc1 deletes the countdown. The loop's remaining nops are cc1's own
+ * load-use padding, which it emits whether or not this one is there. */
+#define EE_SPIN_NOP() __asm__ volatile ("nop")
+
 /* Additional working-register operations used by the trail interpolator. */
 #define SDF_VU0_ADDVECTOR_A_C() __asm__ volatile ( \
     ".set noreorder\n\tvadd.xyzw vf10, vf10, vf12\n\t.set reorder")
