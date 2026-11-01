@@ -349,8 +349,8 @@ __umoddi3	sdk/libgcc_longlong	0x568	130 of 346 words match	docs/matching/sdk/lib
 __moddi3	sdk/libgcc_longlong	0x690		docs/matching/sdk/libgcc_longlong.md	33
 sceGsExecStoreImage	sdk/libgraph	0x68C	392 of 416 words differ	docs/matching/sdk/libgraph.md	3
 The IPU hazard wait				docs/matching/sdk/libipu.md	3
-sceIpuSync				docs/matching/sdk/libipu.md	38
-sceIpuRestartDMA			80 of 84 words	docs/matching/sdk/libipu.md	54
+sceIpuSync				docs/matching/sdk/libipu.md	43
+sceIpuRestartDMA			80 of 84 words	docs/matching/sdk/libipu.md	59
 sceSifCheckStatRpc				docs/matching/sdk/libkernl.md	3
 sceSifSetRpcQueue				docs/matching/sdk/libkernl.md	22
 sceSifRegisterRpc				docs/matching/sdk/libkernl.md	37

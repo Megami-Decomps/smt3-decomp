@@ -3,8 +3,8 @@
 ## The IPU hazard wait
 
 Every `IPU_CTRL` poll in this unit pads **four slots between the load and the
-branch that uses it**, and no plain C loop emits them. Retail's
-`sceIpuSync` wait is
+branch that uses it**, and cc1 emits them for a plain C loop on its own.
+Retail's `sceIpuSync` wait is
 
     lw   $v0, 0($v1)
     nop
@@ -23,22 +23,27 @@ while `sceIpuStopDMA`, which masks before testing, pads only three because the
     nop
     bnez $v0, ...
 
-Under the configured SDK compiler, `ee-gcc 2.9-991111-01`, a single
-`__asm__ volatile ("nop")` barrier makes the compiler add the remaining
-padding: two nops after the masked read, or three after an unmasked signed
-read. The assembled loops above are reproduced by `IPU_POLL_BARRIER`.
-Spelling all three/four nops inside one asm statement overcounts the wait,
-because the compiler still inserts that padding. This is a hardware-read
-barrier, not a general instruction-scheduling lever.
+This padding is the compiler's, not the source's. Both `ee-gcc
+2.9-991111-01` and 2.96 fill the load-use slots after a volatile read whose
+branch consumes it, with the same count whether or not the loop body holds a
+`__asm__ volatile ("nop")`: the hand-written nop only takes one of the slots
+cc1 would have filled anyway. The unit carried an `IPU_POLL_BARRIER` macro
+for this; removing it from all four polls leaves every function in the unit
+byte-exact, so the barrier is gone. Spelling the nops out by hand still
+overcounts the wait, because cc1 pads after them.
 
-`sceIpuStopDMA` matches all 228 instruction bytes with that barrier and the
-nine-word DMA snapshot already used by the movie decoder. It saves the final
+A nop in the source is load-bearing only where the loop reads no hardware at
+all, as in `sdfSndTransToIOP`: there the countdown has no side effect and cc1
+deletes the loop. `EE_SPIN_NOP` in `include/ps2asm.h` is that case.
+
+`sceIpuStopDMA` matches all 228 instruction bytes with the plain C loop and
+the nine-word DMA snapshot already used by the movie decoder. It saves the final
 IPU control word, but the restart routine does not write that word back.
 
 ## sceIpuSync
 
-Matches all 104 instruction bytes with `switch (mode)` and the established
-single-nop `IPU_POLL_BARRIER`. Case 0 polls the signed control word until clear
+Matches all 104 instruction bytes with `switch (mode)` and a plain C poll
+loop. Case 0 polls the signed control word until clear
 and returns zero; case 1 returns its unsigned busy bit; other modes return the
 initialized zero without a hardware read.
 

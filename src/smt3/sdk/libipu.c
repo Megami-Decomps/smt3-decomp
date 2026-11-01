@@ -23,11 +23,6 @@ extern s32 EIntr(void);
  * gcc2_compiled label as its name. */
 extern void ipuWriteFromIpuChcr(u32 chcr);
 
-/* With the configured 2.9 compiler, this barrier plus its generated padding
- * leaves four slots after an IPU_CTRL read: three nops after a mask, or four
- * nops before a signed test. See docs/matching/sdk/libipu.md. */
-#define IPU_POLL_BARRIER() __asm__ volatile ("nop")
-
 void ipuWriteFromIpuChcr(u32 chcr)
 {
     DIntr();
@@ -69,7 +64,6 @@ void sceIpuStopDMA(sdfIpuDmaRegs_t *state)
     state->inputControl = D4_CHCR;
     do {
         ctrl = IPU_CTRL & 0xF0;
-        IPU_POLL_BARRIER();
     } while (ctrl != 0);
     ipuWriteFromIpuChcr(0);
     state->outputAddress = D3_MADR;
@@ -98,12 +92,10 @@ void sceIpuRestartDMA(sdfIpuDmaRegs_t *state)
     }
     do {
         ctrl = IPU_CTRL;
-        IPU_POLL_BARRIER();
     } while (ctrl < 0);
     IPU_CMD = bit;
     do {
         ctrl = IPU_CTRL;
-        IPU_POLL_BARRIER();
     } while (ctrl < 0);
     if (madr != 0 && qwc != 0) {
         D4_MADR = madr;
@@ -124,7 +116,6 @@ u32 sceIpuSync(s32 mode)
 
         do {
             ctrl = IPU_CTRL;
-            IPU_POLL_BARRIER();
         } while (ctrl < 0);
         ret = 0;
         break;
