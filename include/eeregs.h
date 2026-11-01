@@ -47,6 +47,15 @@
 #define SDF_SCRATCHPAD_POINT_BUFFER 0x70001000
 #endif
 
+/* VU0's data memory, reached from the EE side as ordinary memory while VU0
+ * is idle. sdfCoreDraw.c writes transform, light and texture data here
+ * directly ahead of a VU0 microprogram run, bypassing the vf-register
+ * macros. A build with no VU0 data memory mapped this way defines this to
+ * wherever that data lands instead. */
+#ifndef SDF_VU0_DATA_MEMORY
+#define SDF_VU0_DATA_MEMORY ((volatile u128 *)0x11004000)
+#endif
+
 /* Register access: a plain volatile access, unless the build supplies its
  * own. */
 #ifndef HW_READ
