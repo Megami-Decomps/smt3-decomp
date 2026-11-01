@@ -20,7 +20,7 @@ extern dds3Basic_t *dds3GetControlScene(void);
 extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type);
 extern dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 bufcnt);
 extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *hndl);
-extern u32 dds3GetBasicArrayCount(dds3BasicArrayHandle_t *hndl);
+extern u16 dds3GetBasicArrayCount(dds3BasicArrayHandle_t *hndl);
 extern void dds3ForEachBasicArray(dds3BasicArrayHandle_t *handle, dds3BasicProc_t func);
 extern s32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *hndl);
 extern s32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *hndl);

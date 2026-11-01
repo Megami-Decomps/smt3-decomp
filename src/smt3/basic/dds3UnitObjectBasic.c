@@ -44,7 +44,7 @@ extern dds3Basic_t *dds3GetControlScene(void);
 
 extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type);
 
-extern s32 dds3GetBasicArrayCount(dds3BasicArrayHandle_t *hndl);
+extern u16 dds3GetBasicArrayCount(dds3BasicArrayHandle_t *hndl);
 
 extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *hndl);
 
