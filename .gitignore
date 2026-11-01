@@ -39,3 +39,6 @@ __pycache__/
 # tools/cc.sh scratch directories
 /.[0-9a-f][0-9a-f]/
 /.[0-9a-f][0-9a-f][0-9a-f][0-9a-f]/
+
+# Playwright MCP scratch output
+/.playwright-mcp/
