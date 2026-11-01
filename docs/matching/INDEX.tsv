@@ -297,14 +297,14 @@ cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/matching/result/
 cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/matching/result/rstcalc.md	25
 datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/matching/result/rstcalc.md	47
 cmbGetHeartsParamByIndex	rstcalc	0x58	22 of 22 words match	docs/matching/result/rstcalc.md	70
-cmbCountEvoReady	rstcalc	0x84	9 of 34 words match	docs/matching/result/rstcalc.md	92
-cmbGetLevelUpCount	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	118
-rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/matching/result/rstcalc.md	142
-cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	162
-rstSetCurrentDevil	176 bytes	matched		docs/matching/result/rstcalc.md	191
-rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	224
-cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	260
-cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	301
+cmbCountEvoReady	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	92
+cmbGetLevelUpCount	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	113
+rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/matching/result/rstcalc.md	137
+cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	157
+rstSetCurrentDevil	176 bytes	matched		docs/matching/result/rstcalc.md	186
+rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	219
+cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	255
+cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	296
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3

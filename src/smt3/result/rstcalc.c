@@ -1750,29 +1750,31 @@ s32 cmbEvoEntryExists(u16 devilId)
     return 0;
 }
 
-/* NON_MATCHING: 25 of 34 words differ, 136 against retail's 132 bytes; the
- * narrowed count parameter copied into its own register in retail. */
-#ifdef NON_MATCHING
+/* Keep the initial byte count separate from the full-width countdown and
+ * start the unit cursor only on the nonempty path. */
 s8 cmbCountEvoReady(datUnitWork_t *unit, u8 count)
 {
     u8 ready = 0;
 
-    while (count != 0) {
-        if ((unit->flag & 1) != 0) {
-            if ((unit->flag & 4) == 0) {
-                if (cmbEvoEntryExists(unit->id) != 0) {
-                    ready++;
+    if (count != 0) {
+        datUnitWork_t *cursor = unit;
+        u32 remaining = count;
+
+        do {
+            if ((cursor->flag & 1) != 0) {
+                if ((cursor->flag & 4) == 0) {
+                    if (cmbEvoEntryExists(cursor->id) != 0) {
+                        ready++;
+                    }
                 }
             }
-        }
-        unit++;
-        count--;
+            cursor++;
+            remaining--;
+        } while (remaining != 0);
     }
     return ready;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbCountEvoReady);
-#endif
+
 
 typedef struct
 {

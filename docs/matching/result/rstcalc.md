@@ -91,29 +91,24 @@ publication gate.
 
 ## cmbCountEvoReady (rstcalc, 0x84)
 
-9 of 34 words match, 25 of 34 differ, 136 against retail's 132 bytes. Counts
-how many of `count` consecutive `datUnitWork_t` entries are alive, not already
-evolved, and have an entry in the evolution table.
+33 of 33 words match at 132 bytes using ordinary C. The initial u8 count
+guards a nonempty traversal. Inside that path, a separate unit cursor and
+u32 countdown retain the native initial copies and full-width decrement.
+The countdown starts in 1..255 and stops at zero, so it never underflows;
+this preserves the byte-count traversal without an extra per-step mask.
 
-The body is settled: the single `lw` of `flag` masked twice, the `beql`/`bnel`
-pair that carries the `count--` into both delay slots, the `(u8)(ready + 1)`
-with its `andi`, the `unit++` by `0xEC` in the loop-back delay slot and the
-`(s8)` return. Written with three nested `if`s rather than one `&&` chain,
-which is worth three words.
+Each unit's flags are observed before its conditional evolution lookup:
+alive bit 1 must be set and evolved bit 4 clear. The lookup receives the
+unit ID as a halfword. The u8 result count wraps as before and is returned
+through the existing signed-byte interface. Unit stride remains 0xEC.
+No new bounds, provider contracts, constraints or compiler options are used.
 
-What is left is one register. Retail narrows the count parameter in place,
-`andi $5, $5, 0xFF`, and then copies it into `$17`; this narrows straight into
-`$17`, which is one word shorter and leaves a spare callee-saved register that
-shifts the rest of the allocation. Nothing in the source reaches that copy: a
-separate `u8 n = count;` local, a separate `datUnitWork_t *p = unit;` local and
-a `for (; count != 0; count--, unit++)` head all coalesce it away exactly as
-the plain `while` does. See the row on un-coalesced copies in
-[When to stop](../levers/when-to-stop.md).
-
-Ruled out: `ready++` against `ready = ready + 1` against an `s32 ready` with an
-explicit `(u8)` cast, all three identical; the `&&` chain against nested `if`s,
-where nested is three words better and is the draft; and the two loop forms
-above.
+A full-width while countdown gives 24/33 words at 132 bytes. An explicit
+nonempty do-loop with shared return gives 26/33 while mutating the incoming
+unit parameter; using the separate traversal cursor in that same shape gives
+33/33. The early-return form gives 140 bytes and is not retained. These
+controls isolate actual countdown width, guard shape and cursor lifetime,
+rather than the previously exhausted standalone byte-local copies.
 
 ## cmbGetLevelUpCount (rstcalc, 0x84)
 
