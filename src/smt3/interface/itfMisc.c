@@ -70,8 +70,6 @@ extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *, sdfTexHandle_t *, s32);
 
 extern void sdfDrawTagLink(sdfDrawTag_t *, u32 aPacket);
 
-extern s32 dds3AdminiGetActiveSequence(void);
-
 extern void dds3AdminiExitSequence(void);
 
 #include "sdk_libc.h"

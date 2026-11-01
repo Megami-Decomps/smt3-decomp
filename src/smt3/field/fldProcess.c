@@ -67,8 +67,9 @@ extern s16 fldRun_MAP_BX;
 
 extern s16 fldRun_MAP_BZ;
 
-extern s32 dds3AdminiGetNextSequence(void);
-
+/* Not s32 upstream of this call: dds3AdminiGetPrevHistoryFlag really returns
+ * u8, but narrowing this declaration to match makes ee-gcc 2.96 add an extra
+ * andi here that retail doesn't have (see kernel.h). Left s32 on purpose. */
 extern s32 dds3AdminiGetPrevHistoryFlag(void);
 
 extern void fldDoor_EveBtlExit(s32 field, s32 eveno);
@@ -320,8 +321,6 @@ void InitOoyTest(void);
 
 void fldRegistUnitPad(void);
 
-INCLUDE_RODATA(const s32, "field/fldProcess", D_00531860);
-
 #ifdef NON_MATCHING
 extern sdfVector4_t D_002FC490;
 extern s32 fldPlayerStatus[];
@@ -478,6 +477,8 @@ s32 ProcRandomEncountCheck(void)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "field/fldProcess", D_00531860);
+
 INCLUDE_ASM(const s32, "field/fldProcess", ProcRandomEncountCheck);
 #endif
 
