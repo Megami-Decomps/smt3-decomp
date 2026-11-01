@@ -69,26 +69,25 @@ rematerialised the table inside the loop or added another induction variable.
 
 ## cmbGetHeartsParamByIndex (rstcalc, 0x58)
 
-8 of 22 words differ, at the exact 88-byte size. Reads one of two byte tables inside
-`datRaceEntry_t`, at `+6` and `+0xC` of a 66-byte row.
+22 of 22 words match at 88 bytes. The signed-byte race and index select one
+of two flat signed-byte tables, preserving each native symbol and byte load.
+Their sum is formed as index + race * 66: the signed-byte inputs keep this
+calculation within s32 range. The existing valid table-index contract is
+unchanged; no new bounds or pointer assumptions are introduced.
 
-The two tables have to be flat `extern s8 D_00339E06[]` / `D_00339E0C[]`
-indexed by `race * 66 + index`: that is what folds the `+6` and `+0xC` into the
-symbol's `%hi`/`%lo` pair the way retail does. Reached through
-`D_00339E00[race].field[index]` with the row struct split instead, cc1 keeps
-the constant in the load displacement and the function is 12 words out.
+Each arm binds its real initialized table offset to $2, used immediately by
+the byte load and never live across a call. This localized target-specific
+allocation aid makes the assembler use $at for the load address, as retail
+does; it is not evidence of the original source spelling. No empty asm,
+fabricated consumer, instruction replay or provider change is involved.
 
-What is left is one register. Retail puts each arm's `index + row` sum in `$2`,
-the register the sign-extended index already occupies, so `ee-as` has to expand
-`lb $2, D_00339E0C($2)` through `$at`; this puts the sum in `$3` and the
-assembler then uses `$2` itself as the macro's temp, which changes all three
-words of each arm's load.
-
-Ruled out: `index + race * 66` instead of `race * 66 + index`, which fixes the
-`addu` operand order but moves the `sll`/`sra` pair and costs four more words;
-an `s32 ofs` local inside each arm's own block, which gives the identical eight
-words; and an `s32 row = race * 66;` local above the branch, in both summation
-orders, which splits the row multiply across the test and loses six more.
+The original operand order without bindings gives 14/22 words. Binding the
+offset while retaining that order gives 16/22; index-first without binding
+gives 10/22; both changes give 22/22, all at 88 bytes. Final diagnostic owner
+checking gives 87 match / 0 differ including owned data. Plain and stock-dump
+builds have identical allocated/relocation section bytes and normalized
+assembly. Independent current-tree and retail qualification remain the
+publication gate.
 
 ## cmbCountEvoReady (rstcalc, 0x84)
 
@@ -330,3 +329,4 @@ with normal owned-data checks.
 Combined local gates pass the retail checksum, 26 tooling test files / 427
 cases, all 147 guarded owners / 533 drafts with stable source/compiler inputs,
 seven IRX owners, and reconciled production reports.
+

@@ -296,15 +296,15 @@ ActionKey	pipe/pipeSection	0x5EC	379 of 379 words match	docs/matching/pipe/pipeS
 cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/matching/result/rstcalc.md	3
 cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/matching/result/rstcalc.md	25
 datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/matching/result/rstcalc.md	47
-cmbGetHeartsParamByIndex	rstcalc	0x58	8 of 22 words differ	docs/matching/result/rstcalc.md	70
-cmbCountEvoReady	rstcalc	0x84	9 of 34 words match	docs/matching/result/rstcalc.md	93
-cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/matching/result/rstcalc.md	119
-rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/matching/result/rstcalc.md	148
-cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	168
-rstSetCurrentDevil	176 bytes	matched		docs/matching/result/rstcalc.md	197
-rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	230
-cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	266
-cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	307
+cmbGetHeartsParamByIndex	rstcalc	0x58	22 of 22 words match	docs/matching/result/rstcalc.md	70
+cmbCountEvoReady	rstcalc	0x84	9 of 34 words match	docs/matching/result/rstcalc.md	92
+cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/matching/result/rstcalc.md	118
+rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/matching/result/rstcalc.md	147
+cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	167
+rstSetCurrentDevil	176 bytes	matched		docs/matching/result/rstcalc.md	196
+rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	229
+cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	265
+cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	306
 rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3

@@ -1355,18 +1355,21 @@ s16 datGetDevilParam(u8 devilId)
     return D_00339E00[devilId].param;
 }
 
-/* NON_MATCHING: 8 of 22 words differ (first at +0x28). */
-#ifdef NON_MATCHING
+/* Target-specific allocation aid: each live table offset occupies $2, so
+ * the byte-load address macro uses $at as in retail. No calls cross either
+ * offset lifetime; this is not evidence of the original source spelling. */
 s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra)
 {
     if (extra != 0) {
-        return D_00339E0C[race * 66 + index];
+        register s32 offset __asm__("$2") = index + race * 66;
+        return D_00339E0C[offset];
     }
-    return D_00339E06[race * 66 + index];
+    {
+        register s32 offset __asm__("$2") = index + race * 66;
+        return D_00339E06[offset];
+    }
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbGetHeartsParamByIndex);
-#endif
+
 
 extern s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra);
 
@@ -2340,3 +2343,4 @@ s32 rstResetEncycPanel2(void)
     }
     *(s32 *)(*(u8 **)((u8 *)cmpGetEncycWork() + 0x18) + 0x80) = 0;
 }
+
