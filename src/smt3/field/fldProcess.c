@@ -67,11 +67,6 @@ extern s16 fldRun_MAP_BX;
 
 extern s16 fldRun_MAP_BZ;
 
-/* Not s32 upstream of this call: dds3AdminiGetPrevHistoryFlag really returns
- * u8, but narrowing this declaration to match makes ee-gcc 2.96 add an extra
- * andi here that retail doesn't have (see kernel.h). Left s32 on purpose. */
-extern s32 dds3AdminiGetPrevHistoryFlag(void);
-
 extern void fldDoor_EveBtlExit(s32 field, s32 eveno);
 
 

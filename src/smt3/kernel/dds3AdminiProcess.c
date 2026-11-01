@@ -140,7 +140,7 @@ s8 dds3AdminiGetPrevSequence(void)
     return work->SequenceHistory[(work->HistoryPointer + 7) & 7];
 }
 
-u8 dds3AdminiGetPrevHistoryFlag(void)
+s32 dds3AdminiGetPrevHistoryFlag(void)
 {
     dds3AdminiData_t *work;
 

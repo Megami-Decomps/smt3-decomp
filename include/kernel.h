@@ -55,17 +55,18 @@ typedef struct dds3AdminiList_t
     s32 (*check)(void);
 } dds3AdminiList_t;
 
-/* Return the narrow dds3AdminiData_t fields above by value. Declared once
- * here so callers can't redeclare them at a different width.
+/* Return the dds3AdminiData_t fields above by value. Declared once here so
+ * callers can't redeclare them at a different width.
  *
- * dds3AdminiGetPrevHistoryFlag is deliberately not declared here: narrowing
- * its return type to u8 (matching FlagHistory's element type and its own
- * definition) makes ee-gcc 2.96 emit an extra zero-extending `andi` at its
- * one call site in fldProcess.c's fldProcNextJump, which no longer matches
- * retail. See docs/idb-corrections.md and the dds3Admini audit notes. */
+ * GetPrevHistoryFlag returns s32, not FlagHistory's own u8: narrowing its
+ * declaration makes ee-gcc 2.96 emit an extra `andi` at its one call site
+ * (fldProcess.c's fldProcNextJump) that retail does not have. The EE's byte
+ * load already zero extends, so widening the return costs nothing and dds-
+ * decomp's own equivalent does the same, returning its field as a full word. */
 s8 dds3AdminiGetActiveSequence(void);
 s8 dds3AdminiGetNextSequence(void);
 s8 dds3AdminiGetPrevSequence(void);
+s32 dds3AdminiGetPrevHistoryFlag(void);
 
 /* Process list slots. Lower runs earlier; dds3KernelMain walks the list in
  * priority order. Cross-checked against 113 dds3StartProcess call sites. */
