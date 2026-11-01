@@ -30,21 +30,39 @@ fixing the declaration would itself change codegen (as with
 `dds3AdminiGetPrevHistoryFlag` above); that is the exception, not the
 default.
 
-Whether a mismatch is dangerous on a native port, not just untidy, depends on
-what the caller does with the value, not on how the check reads:
+The real discriminator is whether any caller uses the value at all, not
+whether the use looks like a sign check or a magnitude check or a boolean
+test. A narrow return read through a wide declaration has undefined upper
+bits on a native build. Nothing about `==`, `!=`, array indexing, or a bare
+`if (x)` inspects fewer of those bits than a `< 0` sign check does; garbage
+in the upper bits makes a logically-zero value test as non-zero (or the
+reverse) under any of them equally. There is no safe "boolean-looking" use,
+because the ABI does not know the caller only meant to ask a yes/no
+question.
 
-- **Dangerous**: the value is used in any comparison (`==`, `!=`, `<`, `>`),
-  as an array index, stored into a wider field with no narrowing in between,
-  or tested with bare truthiness (`if (x)`, `if (!x)`). A "boolean-looking"
-  check is not exempt: garbage upper bits can flip a logically-zero value to
-  look nonzero (or the reverse) under any full-width inspection, truthiness
-  included.
-- **Harmless**: some C-level operation between the call and the value's use
-  re-narrows it to the true width in a way the compiler must honor, e.g.
-  assignment into a variable declared with the true narrow type, or an
-  implicit truncation on return through a function whose own declared return
-  type is the true narrow width. Also harmless if the caller discards the
-  result outright.
+- **Dangerous**: the value is used by the caller in any way at all:
+  comparison (`==`, `!=`, `<`, `>`), array indexing, storage into a wider
+  field with no narrowing in between, or bare truthiness (`if (x)`,
+  `if (!x)`). Whether the failure shows up as a wrong sign check or a wrong
+  magnitude check is how it manifests, not what makes it dangerous; both come
+  from the same undefined upper bits.
+- **Safe**: either nobody reads the return value, or some C-level operation
+  between the call and the value's use re-narrows it to the true width in a
+  way the compiler must honor, e.g. assignment into a variable declared with
+  the true narrow type, or an implicit truncation on return through a
+  function whose own declared return type is the true narrow width.
+
+**The first triage used the weaker criterion and was wrong on four of six.**
+It separated dangerous from harmless by whether a caller's use "depended on
+sign or magnitude," and judged six callers safe because they used the value
+as a boolean or discarded it. A second pass over those six found four of
+them dangerous: a boolean-looking `== 0` or bare `if (x)` is exactly as
+exposed to garbage upper bits as a sign comparison is. The one case that
+held up, `rstAddSkillToSlot`, is safe for an unrelated reason: its only
+mismatched-declaration caller discards the return value outright, not
+because its use was boolean. A future porter reading this should not repeat
+that mistake: "the caller only checks truthiness" is not a reason to call a
+mismatch safe.
 
 Every fix below keeps the image byte-identical to retail
 (`5facfbf7916836613449c922e26a4ec412207b32`), verified before, not after,
@@ -65,7 +83,9 @@ each commit.
 | `evtCheckPolygonMovieFlag` | `u8` (`evtPolygonMovie.c`) | `extern s32` in `evtCommand.c` | yes, its one caller compares the result against `0` with `!=` | fixed, `55173e5a` |
 | `rstAddSkillToSlot` | `s8` (`fclCombineInit.c`) | `extern s32` in `rstupdate.c` | no: the one cross-unit caller (`rstupdate.c:71`) discards the return value outright | not fixed, no fix needed |
 
-Nine of the ten were dangerous and are now fixed by correcting the caller's
-declaration to the true type; the tenth was confirmed harmless because its
-only mismatched-declaration caller never reads the value at all. The commits
-above also hold the per-symbol reasoning and the checksum confirmation.
+Nine of the ten had a caller that reads the value and are now fixed by
+correcting that caller's declaration to the true type; the tenth,
+`rstAddSkillToSlot`, is safe only because its one mismatched-declaration
+caller never reads the value at all, not because of anything about how it
+would have used it. The commits above also hold the per-symbol reasoning and
+the checksum confirmation.
