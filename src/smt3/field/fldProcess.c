@@ -321,6 +321,8 @@ void InitOoyTest(void);
 
 void fldRegistUnitPad(void);
 
+INCLUDE_RODATA(const s32, "field/fldProcess", D_00531860);
+
 #ifdef NON_MATCHING
 extern sdfVector4_t D_002FC490;
 extern s32 fldPlayerStatus[];
@@ -477,8 +479,6 @@ s32 ProcRandomEncountCheck(void)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldProcess", D_00531860);
-
 INCLUDE_ASM(const s32, "field/fldProcess", ProcRandomEncountCheck);
 #endif
 
