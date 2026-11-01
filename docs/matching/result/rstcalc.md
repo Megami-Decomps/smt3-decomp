@@ -117,32 +117,27 @@ above.
 
 ## cmbGetLevelUpCount (rstcalc, 0x84)
 
-22 of 32 words match, 10 of 32 differ, 128 against retail's 132 bytes. Copies a
-devil into a scratch `datUnitWork_t`, adds the experience, and counts how many
-levels that buys by stepping `datAdvanceDevilLevel` until the experience no
-longer reaches the next threshold or the level hits 0xFF.
+33 of 33 words match at 132 bytes. The routine copies the input devil into
+the real scratch unit, adds experience with unsigned arithmetic, and calls
+the existing level-threshold provider until experience is insufficient or
+the observed level reaches 255. The level increment is stored as a halfword
+before checking the old level, preserving native behavior even at the cap.
+The count increments only after a successful below-cap iteration.
 
-Settled: the `b` into the loop test, the `sltu` of the stored experience against
-the call's return, the 0x110 frame for the 0xEC scratch struct, and the level
-step written so that the `sh` of `level + 1` lands unconditionally in the
-`bnez` delay slot, which is what the store-before-test order gives:
+The old-level snapshot and the value incremented/stored have separate real
+consumers. One nonvolatile empty asm with a generic +r operand on the latter
+retains the native copy before incrementing. Both values are initialized by
+the same halfword load and dead before the next callback. No fixed register,
+volatile access, invented use, provider change or instruction replay is used.
+This is a localized target-specific reconstruction aid, not evidence of the
+original source spelling.
 
-    level = work.level;
-    work.level = level + 1;
-    if (level >= 0xFF) {
-        break;
-    }
-    count++;
-
-What is left is the copy. Retail emits `daddu $3, $2, $0` so the 0xFF compare
-reads the copy while the increment overwrites the original; every shape tried
-compares and increments out of the one register and comes out a word short.
-
-Ruled out: `u16`, `u32` and `s32` for the level local, all identical; the test
-before the store, which is one word shorter again; `work.level++`; a positive
-`if (work.level < 0xFF) { ... } else break;`, which reaches the right size but
-13 of 33 words; and `level = work.level + 1;` with the old value re-read for the
-compare, also the right size at 13 of 33.
+Ordinary separate snapshots coalesce to 128 bytes, 22/32 matching words.
+Constraining only the old comparison snapshot gives 132 bytes but 27/33
+matching words. Constraining only the increment/store operand gives the
+exact result; a paired-operand constraint and an old-snapshot $3 binding were
+therefore removed as unnecessary. Final-source owner, compiler parity and
+independent retail checks qualify publication.
 
 ## rstFindEvoEntryType5, rstFindEvoEntryType7 (rstcalc, 0x6C each)
 
@@ -329,4 +324,3 @@ with normal owned-data checks.
 Combined local gates pass the retail checksum, 26 tooling test files / 427
 cases, all 147 guarded owners / 533 drafts with stable source/compiler inputs,
 seven IRX owners, and reconciled production reports.
-

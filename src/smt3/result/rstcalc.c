@@ -2181,9 +2181,9 @@ s8 func_00223890(datUnitWork_t *unit, s32 rawLevel)
 }
 
 
-/* NON_MATCHING: 10 of 32 words differ, 128 against retail's 132 bytes; the
- * level read copied into its own register in retail. */
-#ifdef NON_MATCHING
+/* A localized empty operand constraint retains the native old-level copy
+ * separately from the value incremented and stored. Both have real consumers
+ * before the next callback; this aid is not original-source evidence. */
 s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp)
 {
     datUnitWork_t work;
@@ -2193,18 +2193,19 @@ s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp)
     cmbCopyCustomDevilToStock(&work, unit);
     work.exp += exp;
     while (work.exp >= datAdvanceDevilLevel(&work)) {
+        u32 previous;
         level = work.level;
+        previous = level;
+        __asm__ ("" : "+r"(level));
         work.level = level + 1;
-        if (level >= 0xFF) {
+        if (previous >= 0xFF) {
             break;
         }
         count++;
     }
     return count;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbGetLevelUpCount);
-#endif
+
 
 extern void rstDrawNumber(s32 x, s32 y, s32 number);
 extern s32 fclChkMessage(void);
@@ -2343,4 +2344,3 @@ s32 rstResetEncycPanel2(void)
     }
     *(s32 *)(*(u8 **)((u8 *)cmpGetEncycWork() + 0x18) + 0x80) = 0;
 }
-
