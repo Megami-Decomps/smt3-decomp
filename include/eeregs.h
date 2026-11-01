@@ -39,6 +39,14 @@
 #define GS_CSR ((volatile u64 *)0x12001000)
 #define GS_BUSDIR ((volatile u64 *)0x12001040)
 
+/* Scratchpad RAM: 16KB of on-chip memory with no cache, mapped at a fixed
+ * physical address. sdfVu1.c's point buffer uses one fixed region of it as
+ * a second ring alongside corePktPointBuff. A build with no scratchpad
+ * defines this as a host buffer's address instead. */
+#ifndef SDF_SCRATCHPAD_POINT_BUFFER
+#define SDF_SCRATCHPAD_POINT_BUFFER 0x70001000
+#endif
+
 /* Register access: a plain volatile access, unless the build supplies its
  * own. */
 #ifndef HW_READ
