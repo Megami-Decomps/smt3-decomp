@@ -201,7 +201,7 @@ void makaDrawSingle(tagMakaObject_t *object)
      * distinct until alpha consumes it; no fixed register or call lifetime.
      * This is a reconstruction aid, not original-source evidence. */
     easing = 0.0f;
-    __asm__ ("" : "+f" (easing));
+    FAKEMATCH_ASM_LIVE_F32(easing);
     if (phase < 7) {
         alpha = easing;
     } else if (phase < 8) {
@@ -283,7 +283,7 @@ void makaDrawMulti(tagMakaObject_t *object)
      * distinct until alpha consumes it; no fixed register or call lifetime.
      * This is a reconstruction aid, not original-source evidence. */
     easing = 0.0f;
-    __asm__ ("" : "+f" (easing));
+    FAKEMATCH_ASM_LIVE_F32(easing);
     if (phase < 7) {
         alpha = easing;
     } else if (phase < 8) {

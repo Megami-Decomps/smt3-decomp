@@ -377,7 +377,7 @@ s32 pb_draw_mapbase_Process(dds3ProcessID_t *id)
     s32 (*callbacks[2])(s16 x, s16 y, s32 mode);
     /* Reconstruction aid: this real panel address lives only through the
      * initial dispatch, before the first call, and uses native $4. */
-    register pbProcHandle_t *panel __asm__("$4");
+    FAKEMATCH_ASM_REG(pbProcHandle_t *, panel, "$4");
     pbExit_t *work;
     sdfDrawTag_t *tag;
     sdfGrOt_t *ot;
@@ -827,5 +827,4 @@ INCLUDE_RODATA(const s32, "pb/pbModel", D_00535CC0);
 INCLUDE_RODATA(const s32, "pb/pbModel", D_00535CC8);
 
 INCLUDE_RODATA(const s32, "pb/pbModel", D_00535CD0);
-
 

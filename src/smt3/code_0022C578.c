@@ -1582,7 +1582,7 @@ s32 cmpChkDoNotUseSkill(u16 skill)
     /* Target-specific constraint: keep the live comparison result opaque to
      * boolean-range folding, preserving retail's sltiu logical negation.
      * This emits no instruction and does not assert original source spelling. */
-    asm("" : "+r"(normalSkill));
+    FAKEMATCH_ASM_LIVE(normalSkill);
     return normalSkill == 0;
 }
 
@@ -1756,7 +1756,7 @@ void cmpReCalcStockCursorPos(s8 index)
         s32 count;
         {
             s32 partyCount = campWork->stock[0].PartyCnt;
-            register s32 stockCount __asm__("$4") = (u8)campWork->stock[0].StockCnt;
+            FAKEMATCH_ASM_REG(s32, stockCount, "$4") = (u8)campWork->stock[0].StockCnt;
             stockCount = partyCount + stockCount;
             count = stockCount & 0xFF;
         }
@@ -1766,7 +1766,7 @@ void cmpReCalcStockCursorPos(s8 index)
         s32 count;
         {
             s32 partyCount = campWork->stock[1].PartyCnt;
-            register s32 stockCount __asm__("$4") = (u8)campWork->stock[1].StockCnt;
+            FAKEMATCH_ASM_REG(s32, stockCount, "$4") = (u8)campWork->stock[1].StockCnt;
             stockCount = partyCount + stockCount;
             count = stockCount & 0xFF;
         }
@@ -3477,8 +3477,8 @@ void campWaitSelMessage(void)
                 /* Keep this initialized publication value in native $2.
                  * The ordinary and generic-constraint forms reuse a saved
                  * constant, changing dispatch and the shared exit. */
-                register s32 confirm __asm__("$2") = 1;
-                __asm__("" : "+r"(confirm));
+                FAKEMATCH_ASM_REG(s32, confirm, "$2") = 1;
+                FAKEMATCH_ASM_LIVE(confirm);
                 campWork->unk_0004 = confirm;
             }
             break;
@@ -4858,7 +4858,7 @@ void campDhDrawHeartsGauge(campDhIconGauge_t *gauge, s8 arg)
     s32 baseOt = 0x47;
     /* SMT3-only allocation aid for the live first-phase table. Its consumers
      * preserve $16; no table value is carried into the later drawing phases. */
-    register fclSpriteTbl_t *table asm("$16") = fclSpriteTable;
+    FAKEMATCH_ASM_REG(fclSpriteTbl_t *, table, "$16") = fclSpriteTable;
     s32 amount;
     s32 sprite;
     s32 color;

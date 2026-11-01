@@ -1117,15 +1117,15 @@ void *nbDebugProcess1(dds3ProcessID_t *id)
                 void *exitResult = (void *)-1;
                 /* Keep this real early-exit value distinct from the later
                  * side check's return, preserving the native epilogue edge. */
-                __asm__("" : "+r"(exitResult));
+                FAKEMATCH_ASM_LIVE(exitResult);
                 return exitResult;
             }
         } else {
             s32 side = d->side;
             /* Local EE allocation aid for the actual comparison operand;
              * no calls cross its lifetime. Not original-source evidence. */
-            register s32 playerSide __asm__("$2") = 1;
-            __asm__("" : "+r"(playerSide));
+            FAKEMATCH_ASM_REG(s32, playerSide, "$2") = 1;
+            FAKEMATCH_ASM_LIVE(playerSide);
             if (side != playerSide) return (void *)-1;
         }
         nbSetOrder();

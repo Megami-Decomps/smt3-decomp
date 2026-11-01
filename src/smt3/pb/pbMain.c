@@ -187,7 +187,7 @@ s32 pbEditInitProc(dds3ProcessID_t *id)
         pbEditorState = pbMoveChar->unk04;
         break;
     case 6: {
-        register pbMapWork_t *map __asm__("$2");
+        FAKEMATCH_ASM_REG(pbMapWork_t *, map, "$2");
         printf("********* Puzzle boy process halted (1).\n");
         p2sdStopBGM(0x340000);
         /* Local reconstruction aid: the live map address uses native $2.

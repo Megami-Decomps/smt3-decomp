@@ -687,7 +687,7 @@ s32 sceMcSetFileInfo(s32 port, s32 slot, char *name, mcEntInfo *info, s32 flags)
     /* Keep the live flags separate from the request cursor in $16. This
      * localized compiler constraint reconstructs the native allocation; it
      * does not establish the historical source spelling. $17 is callee-saved. */
-    register s32 fileFlags __asm__("$17") = flags;
+    FAKEMATCH_ASM_REG(s32, fileFlags, "$17") = flags;
 
     if (PollSema(D_0052BB24) < 0) {
         return -200;

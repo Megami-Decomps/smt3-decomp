@@ -3340,8 +3340,8 @@ _Bigint *_d2b(_reent *r, f64 d, s32 *e, s32 *bitsOut) {
      * $5 only through the test and stack copy, before _lo0bits can clobber it.
      * This constrains reconstruction, not the historical source spelling. */
     {
-        register u32 rawLowWord __asm__("$5") = value.word[0];
-        __asm__("" : "+r"(rawLowWord));
+        FAKEMATCH_ASM_REG(u32, rawLowWord, "$5") = value.word[0];
+        FAKEMATCH_ASM_LIVE(rawLowWord);
         if (rawLowWord != 0) {
             u32 lowWord = rawLowWord;
             trailingBits = _lo0bits(&lowWord);
@@ -3544,3 +3544,4 @@ INCLUDE_RODATA(const s32, "sdk/libc", D_0054BA98);
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054BAB0);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054BAC8);
+

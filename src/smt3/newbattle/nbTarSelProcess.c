@@ -343,12 +343,12 @@ void UpdateSelect(nbTarSelProcessData_t *process)
         if (stat & 4) {
             /* SMT3 allocation aid: keep the live selection flag in s2;
              * ordinary allocation swaps it with the loop index in s1. */
-            register s32 selected asm("$18") = 0;
+            FAKEMATCH_ASM_REG(s32, selected, "$18") = 0;
             switch (process->ctype) {
             case 0: {
                 /* The selected signed formation number is consumed below,
                  * before any call; retail keeps this short-lived value in v1. */
-                register s32 candidate asm("$3");
+                FAKEMATCH_ASM_REG(s32, candidate, "$3");
                 switch (process->nowcarea) {
                 case 1:
                     candidate = process->friendno[process->nowno];

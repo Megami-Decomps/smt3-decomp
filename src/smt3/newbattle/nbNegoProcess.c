@@ -778,7 +778,7 @@ s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type)
             }
             /* Keep retail's second halfword read after the eligibility test.
              * This local compiler constraint emits no instructions. */
-            __asm__ volatile ("" : "+m" (party->hojoskill[j]));
+            FAKEMATCH_ASM_LIVE_MEM(party->hojoskill[j]);
             skill = party->hojoskill[j];
             switch (type) {
             case 0:

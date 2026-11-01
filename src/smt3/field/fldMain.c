@@ -530,7 +530,7 @@ void fldReadyScene(void)
             SDF_VU0_STOREVECTOR(&point->rot);
             /* SMT3 compiler constraint: keep the live point base for the
              * following x load instead of reusing the VU rot address. */
-            __asm__("" : "+r" (point));
+            FAKEMATCH_ASM_LIVE(point);
             adjustedPoint.rot.x = point->rot.x;
             adjustedPoint.rot.y = point->rot.y;
             adjustedPoint.rot.z = point->rot.z;
@@ -565,8 +565,8 @@ void fldReadyScene(void)
                     /* SMT3 compiler constraint: this live city comparison
                      * value uses a2 only until the predicates finish. The
                      * later literal 32 remains a separate materialization. */
-                    register s32 firstArea __asm__("$6") = 32;
-                    __asm__("" : "+r" (firstArea));
+                    FAKEMATCH_ASM_REG(s32, firstArea, "$6") = 32;
+                    FAKEMATCH_ASM_LIVE(firstArea);
                     if (!((fldGlobalBase.word10 == firstArea && (fldGlobalBase.area == 36 || fldGlobalBase.area == 37)) ||
                           (fldGlobalBase.word10 == 36 && (fldGlobalBase.area == firstArea || fldGlobalBase.area == 37)) ||
                            (fldGlobalBase.word10 == 37 && (fldGlobalBase.area == 32 || fldGlobalBase.area == 36))))

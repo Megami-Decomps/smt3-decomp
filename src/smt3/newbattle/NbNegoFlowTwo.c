@@ -1036,17 +1036,17 @@ s32 Flow6_24(nbNegoProcessData_t *n)
      * These local bindings and the instruction-free input constraint preserve
      * native allocation; they are reconstruction aids, not original spelling. */
     {
-        register datUnitWork_t *playerWork asm("$3") = n->pwork;
-        register s32 enemyReload asm("$18");
-        register s32 playerReload asm("$16");
+        FAKEMATCH_ASM_REG(datUnitWork_t *, playerWork, "$3") = n->pwork;
+        FAKEMATCH_ASM_REG(s32, enemyReload, "$18");
+        FAKEMATCH_ASM_REG(s32, playerReload, "$16");
         enemyReload = n->ework->level;
         playerReload = playerWork->level;
-        asm("" : : "r" (playerReload), "r" (enemyReload));
+        FAKEMATCH_ASM_READ_PAIR(playerReload, enemyReload);
         enemyLevel = enemyReload;
         playerLevel = playerReload;
     }
     {
-        register s32 belowThreshold asm("$2") = playerLevel - 17 < enemyLevel;
+        FAKEMATCH_ASM_REG(s32, belowThreshold, "$2") = playerLevel - 17 < enemyLevel;
         if (!belowThreshold && dds3GetRandIntA(0, 100) < 4) {
             rate[2] += rate[3];
             rate[3] = 0;

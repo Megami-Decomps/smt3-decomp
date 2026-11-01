@@ -2843,7 +2843,7 @@ void effPCPBossKAGUAttackDraw(effPCPBossKAGUAttack_t *work)
     if (effBTLSkillCheckRun() != 0) {
         model = effBTLSkillGetInvokeFormation();
     } else {
-        register nbFormation_t *found asm("$22") = NULL;
+        FAKEMATCH_ASM_REG(nbFormation_t *, found, "$22") = NULL;
         model = nbGetMainProcessData()->form;
         searchIndex = 0;
         while (searchIndex < 32) {
@@ -2896,7 +2896,7 @@ void effPCPBossKAGUAttackDraw(effPCPBossKAGUAttack_t *work)
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(&end);
         {
-            register u32 groupIndex asm("$22");
+            FAKEMATCH_ASM_REG(u32, groupIndex, "$22");
             groupCount = work->groupCount;
             listIndex = 0;
             for (groupIndex = 0; groupIndex < groupCount; groupIndex++) {
@@ -4066,7 +4066,7 @@ effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
     for (i = 0; i < swaps; i++) {
         u32 a = dds3GetRandIntA(NULL, count);
         u32 b = dds3GetRandIntA(NULL, count);
-        register u8 held asm("$19") = work->delay[a];
+        FAKEMATCH_ASM_REG(u8, held, "$19") = work->delay[a];
 
         work->delay[a] = work->delay[b];
         work->delay[b] = held;
@@ -5023,3 +5023,4 @@ INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F208);
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F210);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F218);
+

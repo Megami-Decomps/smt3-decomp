@@ -401,7 +401,7 @@ void shopDrawBuyRow(s32 row, u8 *work, s8 mode, s32 ot)
 {
     /* Target-specific aid: keep the real list in callee-saved s5; every
      * crossed call preserves it. Ordinary allocation swaps list and y. */
-    register shopDrawListWork_t *list asm("$21") = (shopDrawListWork_t *)work;
+    FAKEMATCH_ASM_REG(shopDrawListWork_t *, list, "$21") = (shopDrawListWork_t *)work;
     shopDrawCursor_t *cursor = &list->cursor;
     fclPanelPos_t pos;
     s32 x = list->panel.x;

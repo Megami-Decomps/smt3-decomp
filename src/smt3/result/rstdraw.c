@@ -96,7 +96,7 @@ s32 rstDraw(dds3ProcessID_t *id)
         case 17:
         case 18:
             {
-                register rstData_t *rowWork __asm__("$2");
+                FAKEMATCH_ASM_REG(rstData_t *, rowWork, "$2");
                 rstResetEncycPanel();
                 rowWork = rstDrawWork;
                 rstDrawStatusRow(-rowWork->unk_1B, 2, 0);
@@ -104,7 +104,7 @@ s32 rstDraw(dds3ProcessID_t *id)
             break;
         case 20:
             {
-                register rstData_t *rowWork __asm__("$2");
+                FAKEMATCH_ASM_REG(rstData_t *, rowWork, "$2");
                 rstResetEncycPanel2();
                 rowWork = rstDrawWork;
                 rstDrawStatusRow(-rowWork->unk_1B, 0, 1);

@@ -1545,9 +1545,9 @@ s32 CheckArrCounter(nbActionProcessData_t *a)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543880);
-
 extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
+
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543880);
 
 s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to)
 {
@@ -2211,7 +2211,7 @@ s32 CheckAction_COMM(nbActionProcessData_t *a)
 {
     s32 result = 0;
     /* Target-specific allocation aid for the live close flag; $20 is callee-saved. */
-    register s32 close __asm__("$20") = 0;
+    FAKEMATCH_ASM_REG(s32, close, "$20") = 0;
     datUnitWork_t *work;
     s32 command;
     s32 skill;
@@ -2255,7 +2255,7 @@ s32 CheckAction_COMM(nbActionProcessData_t *a)
             /* Keep the live item/skill index in its argument register. This
              * target-specific aid avoids a redundant copy; index is not used
              * after nbGetItemSkillNo can clobber $5. */
-            register s32 index __asm__("$5") = work->nowindex;
+            FAKEMATCH_ASM_REG(s32, index, "$5") = work->nowindex;
             skill = index;
             if (work->nowcommand != 1) {
                 skill = nbGetItemSkillNo(a, index);
@@ -4045,8 +4045,6 @@ s32 CheckAction_INVISIBLE(nbActionProcessData_t *a)
 }
 
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
-
 extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                   u32 col, s32 delay, s32 aframe, s32 colframe);
 extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, s32 uniqueid,
@@ -4054,6 +4052,8 @@ extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, s32 un
 extern void nbAddHatudoEffectEndPacket(s32 startframe, s32 uniqueid);
 extern void nbAddPanelStockFadeOutPacket(s32 startframe, s32 uniqueid);
 extern void nbAddPanelStockEndPacket(s32 startframe, s32 uniqueid);
+
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
 
 void SetAction_CHECK1(nbActionProcessData_t *a)
 {
@@ -4096,15 +4096,15 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
         frameScratch = 0;
         /* Local compiler constraints retain the live frameScratch/mode values and
            the native field reload; these empty templates change no values. */
-        __asm__("" : "+r"(frameScratch));
+        FAKEMATCH_ASM_LIVE(frameScratch);
         {
             s32 motionMode = 2;
-            __asm__("" : "+r"(motionMode));
+            FAKEMATCH_ASM_LIVE(motionMode);
             if (a->form->motendtype != motionMode) {
                 frameScratch = (a->stat & 0x100) ? frameScratch : 3;
             }
         }
-        __asm__("" : "+m"(a->form->motendtype));
+        FAKEMATCH_ASM_LIVE_MEM(a->form->motendtype);
         if (a->form->stat & 0x10) {
             if (a->form->motendtype == 2) {
                 SetTimeList(a, a->form->formindex, end, 6, 6);
@@ -4452,3 +4452,4 @@ INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", StkSelId);
 INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", D_00551124);
 
 INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", D_00551128);
+

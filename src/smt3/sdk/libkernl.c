@@ -2131,7 +2131,7 @@ s32 sceClose(s32 descriptor)
     threshold = -1;
     /* Keep the real native signed threshold in a general register for its
      * comparison. No instruction, fixed register or memory effect is added. */
-    __asm__("" : "+r"(threshold));
+    FAKEMATCH_ASM_LIVE(threshold);
     if (threshold < status) {
         status = 0;
     }
@@ -2584,7 +2584,7 @@ s32 sceDclose(s32 descriptor)
     threshold = -1;
     /* Keep the real native signed threshold in a general register for its
      * comparison. No instruction, fixed register or memory effect is added. */
-    __asm__("" : "+r"(threshold));
+    FAKEMATCH_ASM_LIVE(threshold);
     if (threshold < status) {
         status = 0;
     }

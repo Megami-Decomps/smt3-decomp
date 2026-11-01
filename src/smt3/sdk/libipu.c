@@ -86,7 +86,7 @@ void sceIpuRestartDMA(sdfIpuDmaRegs_t *state)
     u32 bp = state->bitPointer;
     u32 bit = bp & 127;
     u32 buffered = ((bp >> 16) & 3) + ((bp >> 8) & 15);
-    register u32 inputQwords __asm__("$4") = state->inputQwords;
+    FAKEMATCH_ASM_REG(u32, inputQwords, "$4") = state->inputQwords;
     u32 qwc = inputQwords + buffered;
     u32 madr = state->inputAddress - (buffered << 4);
     s32 ctrl;

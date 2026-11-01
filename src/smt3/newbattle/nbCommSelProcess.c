@@ -402,7 +402,7 @@ void DispComm1PanelComm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz
     if (no <= 0x8003) {
         s32 threshold = 0x8000;
         /* Keep the real native signed comparison endpoint local to its use. */
-        __asm__("" : "+r"(threshold));
+        FAKEMATCH_ASM_LIVE(threshold);
         if (no >= threshold) {
             return;
         }
@@ -784,7 +784,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
     if (s->animeflag & 4) {
         f32 endpoint = 0.01f;
         /* Keep the native floating endpoint live for its comparison and clamp. */
-        __asm__ volatile("" : "+f"(endpoint));
+        FAKEMATCH_ASM_LIVE_F32_VOLATILE(endpoint);
         if (fabsf(s->smritu) < endpoint) {
             s->smritu = 0.0f;
             s->animeflag &= ~4;

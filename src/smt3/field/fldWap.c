@@ -1434,7 +1434,7 @@ void fldSetupDoorScenes(void)
     /* Local reconstruction constraint: keep the reloaded resource in v0 until
        its id and transform have been fetched. It is dead before the VU call;
        removing the binding coalesces it with the id and changes 21 words. */
-    register fldResHead_t *resource __asm__("$2");
+    FAKEMATCH_ASM_REG(fldResHead_t *, resource, "$2");
     doormovetbl_s *door;
     doormovework_s *work;
     /* These directions intentionally persist between door entries. */
@@ -1456,7 +1456,7 @@ void fldSetupDoorScenes(void)
             for (i = 0; i < fldEveRngCount; i++) {
                 if (gEvnRng[i]->name != NULL && strcmp(gEvnRng[i]->name, door->name) == 0) {
                     resource = gEvnRng[i];
-                    __asm__("" : "+r"(resource));
+                    FAKEMATCH_ASM_LIVE(resource);
                     LOAD_DOOR_ANGLE(resource, angle);
                     work->x1 = angle;
                 }
@@ -1478,7 +1478,7 @@ void fldSetupDoorScenes(void)
                     for (i = 0; i < fldEveRngCount; i++) {
                         if (gEvnRng[i]->name != NULL && strcmp(gEvnRng[i]->name, door->name) == 0) {
                             resource = gEvnRng[i];
-                            __asm__("" : "+r"(resource));
+                            FAKEMATCH_ASM_LIVE(resource);
                             LOAD_DOOR_ANGLE(resource, angle);
                             SET_DOOR_DIRECTION(angle, direction1);
                         }
@@ -1490,7 +1490,7 @@ void fldSetupDoorScenes(void)
                    mode read. The empty volatile constraint emits no code and
                    preserves the native shared-entry scheduling. */
                 s32 missingID = -1;
-                __asm__ volatile ("" : "+r"(missingID));
+                FAKEMATCH_ASM_LIVE_VOLATILE(missingID);
                 work->matter_resid2 = missingID;
             }
             if (door->secondaryMotion != 0) {
@@ -1500,7 +1500,7 @@ void fldSetupDoorScenes(void)
                     for (i = 0; i < fldEveRngCount; i++) {
                         if (gEvnRng[i]->name != NULL && strcmp(gEvnRng[i]->name, door->name) == 0) {
                             resource = gEvnRng[i];
-                            __asm__("" : "+r"(resource));
+                            FAKEMATCH_ASM_LIVE(resource);
                             LOAD_DOOR_ANGLE(resource, angle);
                             SET_DOOR_DIRECTION(angle, direction2);
                         }

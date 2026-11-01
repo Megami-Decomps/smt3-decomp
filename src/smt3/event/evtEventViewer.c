@@ -2492,7 +2492,7 @@ s32 evtEventViewerProcess3(void)
         {
             /* Reconstruction aid: keep the real pause test in the native
              * return register. Its value dies at the branch, before any call. */
-            register s32 paused __asm__("$2") = viewerinfo->flags & 1;
+            FAKEMATCH_ASM_REG(s32, paused, "$2") = viewerinfo->flags & 1;
             if (paused != 0) {
                 return 0;
             }

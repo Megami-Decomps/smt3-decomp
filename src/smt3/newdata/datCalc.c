@@ -306,8 +306,8 @@ s32 datGetSkillKouka(s32 nskill, s32 kind, datUnitWork_t *s, datUnitWork_t *d)
          * at this boundary. Its ordinary scalar consumer is the switch below;
          * the binding ends before any case calls. This reconstructs allocation,
          * not the original source spelling. */
-        register s32 selectedType __asm__("$5") = type;
-        __asm__("" : "+r" (selectedType));
+        FAKEMATCH_ASM_REG(s32, selectedType, "$5") = type;
+        FAKEMATCH_ASM_LIVE(selectedType);
         type = selectedType;
     }
     switch (type) {

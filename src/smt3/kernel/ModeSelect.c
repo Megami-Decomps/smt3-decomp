@@ -345,7 +345,7 @@ s32 mselMain(dds3ProcessID_t *id)
             /* Keep the live cursor alias in a2 until its field read. Ordinary
              * allocation merges it with the mode/store base; this local EE
              * constraint preserves native scheduling, not original spelling. */
-            register mselGlobalWork_t *cursorWork __asm__("$6");
+            FAKEMATCH_ASM_REG(mselGlobalWork_t *, cursorWork, "$6");
             s32 titleMode;
             mselUpdateCursor();
             titleMode = gGlobal->unk_A8;
@@ -574,7 +574,7 @@ s32 mselMain(dds3ProcessID_t *id)
         {
             /* Local v0 allocation only covers the pre-call handle reads.
              * Reload gGlobal after free; this is not a cross-call cache. */
-            register mselGlobalWork_t *textureWork __asm__("$2") = gGlobal;
+            FAKEMATCH_ASM_REG(mselGlobalWork_t *, textureWork, "$2") = gGlobal;
             if (textureWork->unk_40 != 0) {
                 sdfTexFreeDelayed(textureWork->unk_40);
                 gGlobal->unk_40 = 0;
@@ -596,7 +596,7 @@ s32 mselMain(dds3ProcessID_t *id)
             /* Preserve the live 128 endpoint in a0 for subtraction and clamp;
              * ordinary allocation reuses opacity and schedules div differently.
              * This target-specific aid emits no arithmetic instructions. */
-            register s32 maximum __asm__("$4") = 128;
+            FAKEMATCH_ASM_REG(s32, maximum, "$4") = 128;
             opacity = maximum - (fadeCounter - 240) * 128 / 90;
             if (opacity < 0) opacity = 0;
             if (opacity > 128) opacity = maximum;

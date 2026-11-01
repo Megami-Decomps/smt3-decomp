@@ -230,7 +230,7 @@ s32 rstSetCurrentDevil(void)
     /* Keep the initialized success result live across the scan and calls.
      * The empty operand constraint preserves retail's retained value without
      * fixing a register; it is a compiler aid, not original-source evidence. */
-    __asm__("" : "+r" (success));
+    FAKEMATCH_ASM_LIVE(success);
 again:
     {
         rstData_t *work = EventStart;
@@ -535,7 +535,7 @@ s32 rstChkSkillPowerUp2(void)
     u32 roll;
 
     if (EventStart->unit->id == 0) {
-        register u32 delta __asm__("$5");
+        FAKEMATCH_ASM_REG(u32, delta, "$5");
 
         roll = dds3GetRandA(NULL) % 254;
         delta = roll - 112;
@@ -543,7 +543,7 @@ s32 rstChkSkillPowerUp2(void)
          * The localized constraint prevents their coalescing and the low
          * test moving before this boundary; it is a compiler aid, not
          * evidence of the original source spelling. Neither crosses a call. */
-        __asm__("" : "+r" (delta), "+r" (roll));
+        FAKEMATCH_ASM_LIVE_PAIR(delta, roll);
         if (roll < 112) {
             return 0;
         }
@@ -1361,11 +1361,11 @@ s16 datGetDevilParam(u8 devilId)
 s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra)
 {
     if (extra != 0) {
-        register s32 offset __asm__("$2") = index + race * 66;
+        FAKEMATCH_ASM_REG(s32, offset, "$2") = index + race * 66;
         return D_00339E0C[offset];
     }
     {
-        register s32 offset __asm__("$2") = index + race * 66;
+        FAKEMATCH_ASM_REG(s32, offset, "$2") = index + race * 66;
         return D_00339E06[offset];
     }
 }
@@ -2198,7 +2198,7 @@ s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp)
         u32 previous;
         level = work.level;
         previous = level;
-        __asm__ ("" : "+r"(level));
+        FAKEMATCH_ASM_LIVE(level);
         work.level = level + 1;
         if (previous >= 0xFF) {
             break;

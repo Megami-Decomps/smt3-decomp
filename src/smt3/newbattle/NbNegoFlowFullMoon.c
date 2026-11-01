@@ -430,11 +430,11 @@ s32 Flow2_6(nbNegoProcessData_t *n)
     s32 bonus = 0;
     s32 player;
     /* Local constraints retain retail's live saved-register allocation. */
-    register s32 success asm("$16");
+    FAKEMATCH_ASM_REG(s32, success, "$16");
     s32 type;
     u16 questionType;
 
-    register s32 higher asm("$18");
+    FAKEMATCH_ASM_REG(s32, higher, "$18");
 
     nbAddNegoIdKouho(n, 0x20007);
     nbAddNegoIdKouho(n, 0x2000D);
@@ -444,7 +444,7 @@ s32 Flow2_6(nbNegoProcessData_t *n)
         questionType = question->type;
         higher = question->higher;
         /* Retain the native order of these two live byte loads. */
-        asm("" : "+r"(higher));
+        FAKEMATCH_ASM_LIVE(higher);
         bonus = question->lower;
         switch (questionType) {
         case 0:

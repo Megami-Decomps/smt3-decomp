@@ -620,7 +620,7 @@ void RunNumEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     /* SMT3 reconstruction aid: keep forward.z materialized here for the
      * later VU load / RotationArc. The verified native schedule places its
      * store before party lookup; this empty operand is not a memory barrier. */
-    __asm__ volatile ("" : : "m"(forward.z));
+    FAKEMATCH_ASM_READ_MEM(forward.z);
     party = (nbParty_t *)((u8 *)(p->partyno * 0x80) + (u32)data->party);
     if ((u16)(party->flag & 1) != 0) {
         form = &data->form[party->formindex];
@@ -1054,7 +1054,7 @@ void nbClipKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         /* Keep the real form base available for the later VU position load.
            This target-specific operand prevents PRE from retaining only the
            derived pos address; it is not a memory barrier. */
-        __asm__("" : "+r" (form));
+        FAKEMATCH_ASM_LIVE(form);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_VECTOR_W_SET_ZERO();
         SDF_VU0_STOREVECTOR(&p->v);

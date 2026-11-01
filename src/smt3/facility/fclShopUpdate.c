@@ -404,7 +404,7 @@ s32 shpUpdateSeqConfirm(s8 mode)
         /* Target-specific aid for native post-callback store-destination
          * registers, not an original-source claim: both constrained pointers
          * are fresh real snapshots; neither live value crosses a call. */
-        register shpUpdateWork_t *work asm("$4");
+        FAKEMATCH_ASM_REG(shpUpdateWork_t *, work, "$4");
         s32 nextState;
         if (mode == 0) {
             fclScriptStart(shopUpdateWork->script, 2, &shopUpdateWork->scriptArg);
@@ -415,11 +415,11 @@ s32 shpUpdateSeqConfirm(s8 mode)
             work = shopUpdateWork;
             nextState = 6;
         }
-        asm("" : "+r"(work));
+        FAKEMATCH_ASM_LIVE(work);
         work->unk_0001 = nextState;
         {
-            register shpUpdateWork_t *scriptWork asm("$3") = shopUpdateWork;
-            asm("" : "+r"(scriptWork));
+            FAKEMATCH_ASM_REG(shpUpdateWork_t *, scriptWork, "$3") = shopUpdateWork;
+            FAKEMATCH_ASM_LIVE(scriptWork);
             scriptWork->unk_0004 = scriptState;
         }
         break;
@@ -450,7 +450,7 @@ void shpUpdateSeqPay(void)
      * register allocation. The unconstrained paired form swaps it with item.
      * This empty generic operand constraint is a target-specific compiler aid;
      * no fixed register is held across calls. */
-    asm("" : "+r" (one));
+    FAKEMATCH_ASM_LIVE(one);
     sell = shopUpdateWork->unk_0003 != 5;
     cursor = &shopUpdateWork->sellList.listCursor;
     item = shpGetItemPrice(cursor->unk_22 + (u8)cursor->unk_24, sell);

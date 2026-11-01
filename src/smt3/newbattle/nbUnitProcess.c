@@ -456,10 +456,10 @@ void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formin
      * every constrained pointer is consumed below and dies before either call. */
     switch (side) {
     case 1: {
-        register nbParty_t *base __asm__("$3");
+        FAKEMATCH_ASM_REG(nbParty_t *, base, "$3");
         nbParty_t *slots;
         base = state->party;
-        __asm__("" : "+r"(base));
+        FAKEMATCH_ASM_LIVE(base);
         slots = base;
         for (i = 4; i < 14; i++) {
             if ((u16)(slots[i].flag & 1) == 0) {
@@ -480,10 +480,10 @@ void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formin
         break;
     }
     case 0: {
-        register nbParty_t *base __asm__("$3");
+        FAKEMATCH_ASM_REG(nbParty_t *, base, "$3");
         nbParty_t *slots;
         base = state->party;
-        __asm__("" : "+r"(base));
+        FAKEMATCH_ASM_LIVE(base);
         slots = base;
         for (i = 0; i < 4; i++) {
             if ((u16)(slots[i].flag & 1) == 0) {
@@ -514,10 +514,10 @@ void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formin
      * affinity callback. Reuse party for the
      * entry stores and later affinity copy so it represents both real phases. */
     {
-        register nbParty_t *base __asm__("$3");
+        FAKEMATCH_ASM_REG(nbParty_t *, base, "$3");
         nbParty_t *entry;
         base = state->party;
-        __asm__("" : "+r"(base));
+        FAKEMATCH_ASM_LIVE(base);
         entry = (nbParty_t *)((u32)(partyindex * sizeof(nbParty_t)) + (u32)base);
         party = entry;
         party->flag = partyflag;

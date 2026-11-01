@@ -274,7 +274,7 @@ void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
             /* Target-specific allocation aid for the real unavailable flag.
              * Its native $4 lifetime starts after the query and ends before
              * the next call; ordinary C instead selects $3. */
-            register s32 unavailable __asm__("$4") = 1;
+            FAKEMATCH_ASM_REG(s32, unavailable, "$4") = 1;
             disabled = hasHearts != 0 ? unavailable : disabled;
         }
         color = cmpDrawListItemBox(cursor, i, i, disabled | (mode != 0 ? 2 : 0), 0x100);

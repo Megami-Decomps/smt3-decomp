@@ -272,14 +272,14 @@ void trmUpdateSeqRoot(void)
                 trmUpdateWork->unk_0004 = button;
                 break;
             case 3: {
-                register trmUpdateWork_t *work __asm__("$3");
+                FAKEMATCH_ASM_REG(trmUpdateWork_t *, work, "$3");
 
                 fclSetTerminalMode(3);
                 fclScriptForcedEnd(trmUpdateWork->ScriptPID);
                 work = trmUpdateWork;
                 /* Target-specific allocation aid: this post-call work pointer is
                  * consumed by both stores below and is not live across a call. */
-                __asm__("" : "+r"(work));
+                FAKEMATCH_ASM_LIVE(work);
                 work->unk_0001 = selection;
                 work->ScriptPID = 0;
             publish_selection:

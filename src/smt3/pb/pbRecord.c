@@ -347,7 +347,7 @@ s32 pbAddRecord_char(pbProcHandle_t *panel, s32 currentChar,
             /* Keep the freshly reloaded snapshot base in the native call-free
              * home. This compiler allocation aid ends before the status call;
              * rec and its slot are read again after that callback. */
-            register pbRecordCharacter_t *snapshot asm("$2") = (pbRecordCharacter_t *)rec->slot[rec->pos].characters;
+            FAKEMATCH_ASM_REG(pbRecordCharacter_t *, snapshot, "$2") = (pbRecordCharacter_t *)rec->slot[rec->pos].characters;
             snapshot[i].x = x;
             snapshot[i].y = y;
         }
