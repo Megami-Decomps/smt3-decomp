@@ -339,7 +339,7 @@ extern s32 nbSelectKureItemB(s32 lv_idx);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
-extern s32 itfMesMngGetSelPhase(s32 msgid);
+extern s16 itfMesMngGetSelPhase(s32 msgid);
 
 extern void itfMesMngSetSelPhase(s32 msgid, s32 phase);
 
@@ -347,7 +347,7 @@ extern s32 itfMesMngGetSelectNo(s32 msgid);
 
 extern void itfMesMngRequestSelectRelease(s32 id);
 
-extern s32 itfMesMngGetPhase(s32 msgid);
+extern s8 itfMesMngGetPhase(s32 msgid);
 
 extern void itfMesMngSetPhase(s32 msgid, s32 phase);
 
