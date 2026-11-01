@@ -79,4 +79,9 @@ Independent review accepted the exact source and its defined wrapping arithmetic
 Final local gates passed: retail SHA-1, all 427 tests, 145 guarded owners /
 514 drafts with stable inputs, all seven IRX checks, and reconciled reports.
 The primary report now records 8,560 / 9,045 functions and 1,465,680 /
-1,851,228 code bytes (79.173392%). Exact-source CI is pending publication.
+1,851,228 code bytes (79.173392%). Source commit
+`ee02c5c97038af410de1d59c9d9a6b91587fc4ab` passed exact-source hosted
+[CI run 41278901834](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41278901834),
+attempt 1, including build and deployment. Raw logs confirm this exact checkout,
+tooling, guarded EE/IRX checks, retail checksum, report scope and uploads; the
+deployment identifies this commit and reports success.
