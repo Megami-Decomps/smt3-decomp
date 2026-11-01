@@ -1773,22 +1773,6 @@ s32 EnterObjList(void)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B700);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B710);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B720);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B730);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B740);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B750);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B760);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B770);
-
 #ifdef NON_MATCHING
 extern char *D_0032C6E8[], *D_0032C6F8[], *D_0032C738[];
 extern char *evtFrameListTable[], *evtFrameFadeNames[];
@@ -2070,6 +2054,22 @@ s32 EnterFrameList(s32 action)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B700);
+
+INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B710);
+
+INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B720);
+
+INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B730);
+
+INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B740);
+
+INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B750);
+
+INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B760);
+
+INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B770);
+
 INCLUDE_ASM(const s32, "event/evtEventViewer", EnterFrameList);
 #endif
 

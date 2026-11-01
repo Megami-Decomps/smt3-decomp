@@ -211,16 +211,6 @@ void evtChkEndProcess(void)
     evtFreeStage();
 }
 
-INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B308);
-
-INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B318);
-
-INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B328);
-
-INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B338);
-
-INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B348);
-
 #ifdef NON_MATCHING
 typedef struct {
     const char *name;
@@ -388,6 +378,16 @@ s32 evtSceneDispProcess(dds3ProcessID_t *id)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B308);
+
+INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B318);
+
+INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B328);
+
+INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B338);
+
+INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B348);
+
 INCLUDE_ASM(const s32, "event/evtDebug", evtSceneDispProcess);
 #endif
 

@@ -693,10 +693,6 @@ void pb_1D3940(s32 x, s32 y, sdfDrawTag_t *tag)
     pbDrawMapPoly(&geometry, tag);
 }
 
-INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C80);
-
-INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C88);
-
 #ifdef NON_MATCHING
 extern sdfVector2_t D_00326E68[], D_00326F58[], D_00327048[], D_00327138[];
 extern u32 D_00327228[];
@@ -788,6 +784,10 @@ s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags, s32 special, sdfD
     return request.pointCount;
 }
 #else
+INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C80);
+
+INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C88);
+
 INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapPolyTransformed);
 #endif
 

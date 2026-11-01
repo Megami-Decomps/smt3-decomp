@@ -2279,8 +2279,6 @@ void InitMagatuhiEditorProcess(void) {
     dds3AdminiCallSequence(0, 0, 0, 0);
 }
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00533EF0);
-
 #ifdef NON_MATCHING
 extern u8 D_005518E2[];
 extern void *memcpy(void *dst, const void *src, u32 size);
@@ -2567,6 +2565,8 @@ effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
     return menu;
 }
 #else
+INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00533EF0);
+
 INCLUDE_ASM(const s32, "effect/effMagatuhi", dblurUpdateHandle);
 #endif
 

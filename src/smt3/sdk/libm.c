@@ -670,19 +670,6 @@ f32 __kernel_tanf(f32 x, f32 y, s32 selector)
 }
 
 
-INCLUDE_RODATA(const s32, "sdk/libm", D_0054AF60);
-
-INCLUDE_RODATA(const s32, "sdk/libm", D_0054B278);
-
-INCLUDE_RODATA(const s32, "sdk/libm", D_0054B348);
-
-INCLUDE_RODATA(const s32, "sdk/libm", D_0054B358);
-
-INCLUDE_RODATA(const s32, "sdk/libm", D_0054B3C0);
-
-INCLUDE_RODATA(const s32, "sdk/libm", D_0054B3F8);
-
-INCLUDE_RODATA(const s32, "sdk/libm", D_0054B404);
 extern const f32 D_0054B3F8[4];
 extern const f32 D_0054B404;
 extern const f32 D_0054B408[4];
@@ -839,6 +826,20 @@ f32 copysignf(f32 magnitude, f32 sign)
 
 #undef GET_FLOAT_WORD
 #undef SET_FLOAT_WORD
+
+INCLUDE_RODATA(const s32, "sdk/libm", D_0054AF60);
+
+INCLUDE_RODATA(const s32, "sdk/libm", D_0054B278);
+
+INCLUDE_RODATA(const s32, "sdk/libm", D_0054B348);
+
+INCLUDE_RODATA(const s32, "sdk/libm", D_0054B358);
+
+INCLUDE_RODATA(const s32, "sdk/libm", D_0054B3C0);
+
+INCLUDE_RODATA(const s32, "sdk/libm", D_0054B3F8);
+
+INCLUDE_RODATA(const s32, "sdk/libm", D_0054B404);
 
 INCLUDE_RODATA(const s32, "sdk/libm", D_0054B408);
 

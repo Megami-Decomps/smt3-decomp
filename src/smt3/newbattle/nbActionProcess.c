@@ -1272,8 +1272,6 @@ s32 GetAllUnlockTime(nbActionProcessData_t *a)
     return max;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005437F8);
-
 #ifdef NON_MATCHING
 void GetKoukaList(nbActionProcessData_t *a, s8 koukalist[32][2], u32 select, s32 nskill)
 {
@@ -1438,6 +1436,8 @@ void GetKoukaList(nbActionProcessData_t *a, s8 koukalist[32][2], u32 select, s32
     }
 }
 #else
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005437F8);
+
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", GetKoukaList);
 #endif
 

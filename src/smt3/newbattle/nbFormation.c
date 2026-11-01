@@ -611,8 +611,6 @@ f32 nbGetEnemyInterval(void)
     return nbFormEnemyInterval;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbFormation", D_005458B0);
-
 #ifdef NON_MATCHING
 extern f32 sdfAtan(f32 value);
 extern f32 sdfSin(f32 value);
@@ -706,6 +704,8 @@ void nbSetPartyFormation(nbMainProcessData_t *data, s32 group)
     }
 }
 #else
+INCLUDE_RODATA(const s32, "newbattle/nbFormation", D_005458B0);
+
 INCLUDE_ASM(const s32, "newbattle/nbFormation", nbSetPartyFormation);
 #endif
 

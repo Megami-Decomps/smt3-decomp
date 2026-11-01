@@ -267,8 +267,6 @@ void mselFreeResources(s32 arg)
     gGlobal = NULL;
 }
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DF08);
-
 #ifdef NON_MATCHING
 extern void *memcpy(void *dest, const void *src, u32 size);
 extern s8 dds3PadButtonState[];
@@ -604,6 +602,8 @@ s32 mselMain(dds3ProcessID_t *id)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DF08);
+
 INCLUDE_ASM(const s32, "kernel/ModeSelect", mselMain);
 #endif
 

@@ -797,34 +797,6 @@ void fldReleaseUnitPad(void)
     fldEncountCheckCount = 4;
 }
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531690);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_005316A0);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_005316B0);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_005316D0);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_005316F0);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531710);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531728);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531740);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531758);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531770);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531780);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531790);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_005317A0);
-
-INCLUDE_RODATA(const s32, "field/fldMain", D_005317B0);
-
 #ifdef NON_MATCHING
 extern const fldPackedVector_t D_00531770, D_00531780, D_00531790, D_005317A0, D_005317B0;
 extern s32 D_002FC41C;
@@ -1034,6 +1006,34 @@ void fldSetUnit(fldResourcePoint_t *point)
     dds3AddPointBasic(dds3AllocObjectId(), &fldPlayerPosRotWork, D_0054EB38);
 }
 #else
+INCLUDE_RODATA(const s32, "field/fldMain", D_00531690);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_005316A0);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_005316B0);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_005316D0);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_005316F0);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_00531710);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_00531728);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_00531740);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_00531758);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_00531770);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_00531780);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_00531790);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_005317A0);
+
+INCLUDE_RODATA(const s32, "field/fldMain", D_005317B0);
+
 INCLUDE_ASM(const s32, "field/fldMain", fldSetUnit);
 #endif
 

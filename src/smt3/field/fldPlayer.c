@@ -673,10 +673,6 @@ s32 fldPlayerCalcHasigo(void) {
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalcHasigo);
 #endif
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531C50);
-
-INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531C60);
-
 #ifdef NON_MATCHING
 extern const volatile sdfVector4_t D_00531C60;
 extern const char D_00531C70[], D_00531C80[];
@@ -1283,6 +1279,10 @@ s32 fldPlayerCalc_Nml(void)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531C50);
+
+INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531C60);
+
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Nml);
 #endif
 

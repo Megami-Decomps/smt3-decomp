@@ -643,15 +643,15 @@ void fclCombineDestroy(void)
     evtDisableMoonDraw();
 }
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C890);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C8B8);
-
 extern dds3Basic_t *dds3GetActiveScene(void);
 extern void dds3VisibleSceneBasic(void *scene, s32 visible);
 extern void evtEnableMoonDraw(void);
 extern s32 fclEncycWork(void);
 extern s32 cmbCalcSequence(void);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C890);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C8B8);
 
 s32 fclCombineCalc(void)
 {
@@ -5180,30 +5180,6 @@ datUnitWork_t *cmbGetBirthDevilPanel(void)
     return panel;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD28);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD38);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD48);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD58);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD68);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD80);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDA8);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDC8);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDE8);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE10);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE38);
-
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE48);
-
 typedef struct
 {
     u32 frame;
@@ -5253,6 +5229,30 @@ void cmbUpdateTimeTable(void)
     work->actionFrame = (s32)((u32)work->actionFrame + 1);
 }
 #else
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD28);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD38);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD48);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD58);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD68);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD80);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDA8);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDC8);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDE8);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE10);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE38);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE48);
+
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateTimeTable);
 #endif
 

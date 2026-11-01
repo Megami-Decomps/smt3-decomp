@@ -1158,12 +1158,6 @@ u8 *libc_2D2C70(u8 *p, frameState_t *state)
     return p;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B460);
-
-INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B480);
-
-INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B488);
-
 typedef struct frameStateInternal {
     frameState_t state;
     struct frameStateInternal *savedState;
@@ -1177,6 +1171,12 @@ typedef union __attribute__((packed)) {
     u16 half;
     u32 word;
 } cfiEncodedValue_t;
+
+INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B460);
+
+INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B480);
+
+INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B488);
 
 u8 *libc_2D2D90(u8 *p, frameStateInternal_t *state, cieInfo_t *info, u32 *location)
 {

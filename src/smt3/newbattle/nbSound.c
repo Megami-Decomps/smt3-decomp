@@ -684,12 +684,6 @@ s32 nbMaeCheckDone()
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C38);
-
-INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C58);
-
-INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C78);
-
 #ifdef NON_MATCHING
 extern s32 nbInitMaeTableDefault(void);
 extern s32 nbInitMaeTable(u32 code);
@@ -841,6 +835,12 @@ void nbSetMaeFlag(s32 code)
 }
 
 #else
+INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C38);
+
+INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C58);
+
+INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C78);
+
 INCLUDE_ASM(const s32, "newbattle/nbSound", nbSetMaeFlag);
 #endif
 

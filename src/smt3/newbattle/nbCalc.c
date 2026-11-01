@@ -465,10 +465,6 @@ s32 nbCheckKoukaJyoken(s32 nskill, s32 sformindex, s32 dformindex)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_005449E0);
-
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_005449F8);
-
 extern char D_005449E0[], D_005449F8[], D_00551140[];
 extern const volatile f32 D_0054E528, D_0054E52C;
 extern u32 nbGetDevilFormatFlag(s32 formindex);
@@ -610,6 +606,10 @@ s32 nbGetKoukaType(s32 nskill, s32 sformindex, s32 dformindex)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_005449E0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_005449F8);
+
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaType);
 #endif
 

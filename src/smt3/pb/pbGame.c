@@ -788,10 +788,6 @@ s32 gameKey2(void) {
     return ret;
 }
 
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535EF8);
-
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F08);
-
 #ifdef NON_MATCHING
 extern s32 fclChkMessageDraw(void *process);
 extern s32 fclGetFlag(s8 index);
@@ -955,6 +951,10 @@ s32 game(dds3ProcessID_t *id)
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "pb/pbGame", D_00535EF8);
+
+INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F08);
+
 INCLUDE_ASM(const s32, "pb/pbGame", game);
 #endif
 

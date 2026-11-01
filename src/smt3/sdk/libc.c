@@ -1081,16 +1081,6 @@ s32 vfprintf(FILE *fp, const char *fmt, va_list ap)
 INCLUDE_ASM(const s32, "sdk/libc", vfprintf);
 #endif
 
-INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B658);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B660);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B670);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B680);
-
 /* NON_MATCHING: formatter control flow, frame and allocation remain different. */
 #ifdef NON_MATCHING
 /* Formatted-output core. Arguments occupy the EE ABI's eight-byte slots. */
@@ -1562,6 +1552,16 @@ error_exit:
 }
 
 #else
+INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B658);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B660);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B670);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B680);
+
 INCLUDE_ASM(const s32, "sdk/libc", func_002D6678);
 #endif
 
@@ -1785,10 +1785,6 @@ s32 gcc2_compiled__1(_Bigint *dividend, _Bigint *divisor)
 #else
 INCLUDE_ASM(const s32, "sdk/libc", gcc2_compiled__1);
 #endif
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B880);
-
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B890);
 
 /* Little-endian IEEE binary64 word view used by the numeric helpers. */
 typedef union libcDoubleBits_t {
@@ -2348,6 +2344,10 @@ oneDigit:
     goto bigintDone;
 }
 #else
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B880);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B890);
+
 INCLUDE_ASM(const s32, "sdk/libc", _dtoa_r);
 #endif
 
