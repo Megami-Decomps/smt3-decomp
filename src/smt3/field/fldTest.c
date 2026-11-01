@@ -23,7 +23,7 @@ extern s32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *hndl);
 
 extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *hndl);
 
-extern s32 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, u32 flag);
+extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, u32 flag);
 
 extern void rsetOtOfs(u32 otofs);
 
