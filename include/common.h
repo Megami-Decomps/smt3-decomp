@@ -42,6 +42,39 @@ typedef double f64;
     __asm__(#name " = " #base " + " #offset)
 #endif
 
+/* Localized compiler constraints on a real live value. None of them emits an
+ * instruction: the binding only fixes which register cc1 keeps the value in,
+ * and the empty template only forces it into a register, or into its storage,
+ * at that point. docs/CONTRIBUTING.md says when these are permitted. */
+#ifndef FAKEMATCH_ASM_REG
+#define FAKEMATCH_ASM_REG(type, name, reg) register type name __asm__(reg)
+#endif
+#ifndef FAKEMATCH_ASM_LIVE
+#define FAKEMATCH_ASM_LIVE(value) __asm__("" : "+r" (value))
+#endif
+#ifndef FAKEMATCH_ASM_LIVE_PAIR
+#define FAKEMATCH_ASM_LIVE_PAIR(first, second) __asm__("" : "+r" (first), "+r" (second))
+#endif
+#ifndef FAKEMATCH_ASM_LIVE_F32
+#define FAKEMATCH_ASM_LIVE_F32(value) __asm__("" : "+f" (value))
+#endif
+/* The _VOLATILE forms hold the constraint where cc1 would otherwise drop it. */
+#ifndef FAKEMATCH_ASM_LIVE_VOLATILE
+#define FAKEMATCH_ASM_LIVE_VOLATILE(value) __asm__ volatile ("" : "+r" (value))
+#endif
+#ifndef FAKEMATCH_ASM_LIVE_F32_VOLATILE
+#define FAKEMATCH_ASM_LIVE_F32_VOLATILE(value) __asm__ volatile ("" : "+f" (value))
+#endif
+#ifndef FAKEMATCH_ASM_READ_PAIR
+#define FAKEMATCH_ASM_READ_PAIR(first, second) __asm__("" : : "r" (first), "r" (second))
+#endif
+#ifndef FAKEMATCH_ASM_LIVE_MEM
+#define FAKEMATCH_ASM_LIVE_MEM(lvalue) __asm__ volatile ("" : "+m" (lvalue))
+#endif
+#ifndef FAKEMATCH_ASM_READ_MEM
+#define FAKEMATCH_ASM_READ_MEM(lvalue) __asm__ volatile ("" : : "m" (lvalue))
+#endif
+
 typedef volatile u8 vu8;
 typedef volatile u16 vu16;
 typedef volatile u32 vu32;
