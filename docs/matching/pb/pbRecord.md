@@ -2,27 +2,26 @@
 
 ## pbAddRecord_char (pb/pbRecord, 0x144)
 
-73 of 81 words match, at the exact 324-byte size. Saves character positions
-and display flags into the current record slot using the actual eight-byte
-character snapshot. Allocates even for a zero character count and reads the
-live global count after callbacks.
+All 81 words match at 324 bytes. A narrowly scoped initialized snapshot-array
+base bound to `$2` closes the eight register-allocation differences in the
+post-position-callback coordinate stores. The ordinary indexed base local
+remains 73/81; binding the final element address instead reaches 80/81 but
+commutes the final address add. Binding the actual array base preserves the
+native indexed add without an arithmetic rewrite or an empty asm.
 
-The remaining eight words, starting at +0xB8, concern the coordinate loads
-and the record-position/slot-base address calculation after the position
-callback. The final status-call, record reload and status-store sequence
-matches. The callback result is assigned directly to the snapshot field;
-its destination address is recomputed after the call.
+The base is loaded from the live current record slot after
+`pbGetMyCharcterPos2`, consumed by the two actual coordinate stores, and dead
+before `pbMyCharacterDispStat`. The status assignment still rereads the
+record position, slots and characters after that callback. Input entries and
+the live global count retain their callback-sensitive reloads. The snapshot
+allocation still occurs for a zero character count. The fixed register is
+only a target compiler reconstruction aid, not an original-source claim.
 
-A separate status local gave 66 of 81 matching words. Direct typed field
-accesses and the provider call on the assignment right-hand side close seven
-words. The generated code reloads the character input entry for the second
-callback and reloads the record position, slots and snapshot after callbacks.
-
-Ruled out: reversed coordinate stores; refreshed signed slot-index locals;
-actual slot byte-offset expressions; and coordinate pairs represented by a
-two-element array or two-field structure. The index forms retain the residual;
-the coordinate aggregates lose four more matching words. No shifted owner
-view, unused storage or artificial dependency is used.
+Complete owner checking gives 11 match, 0 differ with owned data unchanged;
+the remaining block-snapshot draft compiles. Normal and stock `-da` complete
+owner builds have equal allocated sections, relocations, target bytes and
+normalized assembly. This establishes output parity, not an unmeasured
+internal compiler mechanism.
 
 ## pbPopRecord (pb/pbRecord, 0x2F0)
 

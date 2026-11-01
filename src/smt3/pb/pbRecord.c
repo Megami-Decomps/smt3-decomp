@@ -323,8 +323,6 @@ s32 pbAddRecord_flor(pbProcHandle_t *panel, pbGroupData_t *group)
     return position;
 }
 
-#ifdef NON_MATCHING
-/* 73 of 81 words match; coordinate/slot address setup differs. See docs/matching/pb/pbRecord.md. */
 extern void pbGetMyCharcterPos2(pbProcHandle_t *panel, s16 *x, s16 *y);
 extern u32 pbMyCharacterDispStat(pbProcHandle_t *panel);
 
@@ -345,16 +343,19 @@ s32 pbAddRecord_char(pbProcHandle_t *panel, s32 currentChar,
 
     for (i = 0; i < D_0054F5C4->pcharNum; i++) {
         pbGetMyCharcterPos2(*characters, &x, &y);
-        ((pbRecordCharacter_t *)rec->slot[rec->pos].characters)[i].x = x;
-        ((pbRecordCharacter_t *)rec->slot[rec->pos].characters)[i].y = y;
+        {
+            /* Keep the freshly reloaded snapshot base in the native call-free
+             * home. This compiler allocation aid ends before the status call;
+             * rec and its slot are read again after that callback. */
+            register pbRecordCharacter_t *snapshot asm("$2") = (pbRecordCharacter_t *)rec->slot[rec->pos].characters;
+            snapshot[i].x = x;
+            snapshot[i].y = y;
+        }
         ((pbRecordCharacter_t *)rec->slot[rec->pos].characters)[i].status =
             pbMyCharacterDispStat(*characters++);
     }
     return rec->pos;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_char);
-#endif
 
 #include "sdk_libc.h"
 

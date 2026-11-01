@@ -283,8 +283,8 @@ pb_draw_bg_Process	pb/pbMain	0x26C	155 of 155 words match	docs/matching/pb/pbMai
 pb_draw_mapbase_Process	pb/pbModel	0x214	133 of 133 words match	docs/matching/pb/pbModel.md	3
 pbDrawMapPolyTransformed			10 of 262 words matching	docs/matching/pb/pbModel.md	38
 pb_draw_exit_Process	pb/pbModel	0x1C0	112 of 112 words match	docs/matching/pb/pbModel.md	66
-pbAddRecord_char	pb/pbRecord	0x144	73 of 81 words match	docs/matching/pb/pbRecord.md	3
-pbPopRecord	pb/pbRecord	0x2F0	188 of 188 words match	docs/matching/pb/pbRecord.md	27
+pbAddRecord_char	pb/pbRecord	0x144		docs/matching/pb/pbRecord.md	3
+pbPopRecord	pb/pbRecord	0x2F0	188 of 188 words match	docs/matching/pb/pbRecord.md	26
 makaDrawMulti	pipe/pipeMakaAnim	0x494	293 of 293 words match	docs/matching/pipe/pipeMakaAnim.md	3
 makaDrawSingle	pipe/pipeMakaAnim	0x3D0	244 of 244 words match	docs/matching/pipe/pipeMakaAnim.md	34
 objOption				docs/matching/pipe/pipeObject.md	3
