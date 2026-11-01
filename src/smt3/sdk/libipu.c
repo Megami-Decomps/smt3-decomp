@@ -79,15 +79,15 @@ void sceIpuStopDMA(sdfIpuDmaRegs_t *state)
     state->ipuControl = IPU_CTRL;
 }
 
-/* NON_MATCHING: 74 of 84 words match at the native 336-byte size; the
- * bit-pointer fields and saved input counts use different prefix registers. */
-#ifdef NON_MATCHING
+/* The saved input count occupies $a0 only while forming the pre-call DMA
+ * snapshot. See docs/matching/sdk/libipu.md for the allocation ablation. */
 void sceIpuRestartDMA(sdfIpuDmaRegs_t *state)
 {
     u32 bp = state->bitPointer;
-    u32 buffered = ((bp >> 8) & 15) + ((bp >> 16) & 3);
     u32 bit = bp & 127;
-    u32 qwc = state->inputQwords + buffered;
+    u32 buffered = ((bp >> 16) & 3) + ((bp >> 8) & 15);
+    register u32 inputQwords __asm__("$4") = state->inputQwords;
+    u32 qwc = inputQwords + buffered;
     u32 madr = state->inputAddress - (buffered << 4);
     s32 ctrl;
 
@@ -112,9 +112,7 @@ void sceIpuRestartDMA(sdfIpuDmaRegs_t *state)
         setD4_CHCR(state->inputControl | 0x100);
     }
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libipu", sceIpuRestartDMA);
-#endif
+
 
 u32 sceIpuSync(s32 mode)
 {
