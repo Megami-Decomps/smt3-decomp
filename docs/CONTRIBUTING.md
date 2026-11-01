@@ -97,8 +97,30 @@ aid, not permission to redirect a call or invent an ABI. All conditions apply:
 This allowance does not authorize broader symbol redirection, false types,
 fabricated side effects, instruction-emitting assembly or relaxed verification.
 
-For SMT3, use the existing COP2/VU0 and MMI macros in `include/ps2asm.h` and
-check the complete affected units with `tools/check_unit.py`, then the full
+### No instruction-emitting `__asm__` in a C unit
+
+A `.c` file must not spell `__asm__` with a template that emits instructions.
+Use the COP2/VU0 and MMI macros in `include/ps2asm.h`: one macro per concrete
+operation, named after what the operation does, with every opcode, suffix and
+`vf`/`vi` register literal inside the macro body. Add a macro there when the
+operation is missing. A macro defined in the unit itself is the same
+violation with one more step.
+
+Two forms emit nothing and so are not covered by that rule. A localized
+compiler constraint goes through the `FAKEMATCH_ASM_*` macros in
+`include/common.h`: `FAKEMATCH_ASM_REG` for a register binding on a
+declaration, and `FAKEMATCH_ASM_LIVE*` for an empty template holding a value
+in a register, a float register or its storage. An assembler label on a
+declaration (`asm("name")`) names a linker symbol and stays as written.
+
+`tools/check_inline_asm.py` enforces this, and every C unit's compile depends
+on it, so an offending unit fails before `cc1` runs. `src/smt3/sdf/sdfVu1.c`,
+`src/smt3/sdf/sdfCoreDraw.c`, `src/smt3/sdf/sdfSound.c` and
+`src/smt3/sdk/libipu.c` predate the rule and are listed in
+`config/inline_asm_allow.txt`; move their blocks into `ps2asm.h` when next
+touching those units and drop the line.
+
+Check the complete affected units with `tools/check_unit.py`, then the full
 retail checksum build with `ninja`. An unchanged DDS donor does not need
 donor-side requalification; changes made to DDS itself must pass its own checks too.
 
