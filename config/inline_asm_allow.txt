@@ -2,5 +2,3 @@
 # This list only shrinks: move the blocks into include/ps2asm.h and drop the line.
 src/smt3/sdf/sdfVu1.c
 src/smt3/sdf/sdfCoreDraw.c
-src/smt3/sdf/sdfSound.c
-src/smt3/sdk/libipu.c

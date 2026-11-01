@@ -114,9 +114,8 @@ in a register, a float register or its storage. An assembler label on a
 declaration (`asm("name")`) names a linker symbol and stays as written.
 
 `tools/check_inline_asm.py` enforces this, and every C unit's compile depends
-on it, so an offending unit fails before `cc1` runs. `src/smt3/sdf/sdfVu1.c`,
-`src/smt3/sdf/sdfCoreDraw.c`, `src/smt3/sdf/sdfSound.c` and
-`src/smt3/sdk/libipu.c` predate the rule and are listed in
+on it, so an offending unit fails before `cc1` runs. `src/smt3/sdf/sdfVu1.c`
+and `src/smt3/sdf/sdfCoreDraw.c` predate the rule and are listed in
 `config/inline_asm_allow.txt`; move their blocks into `ps2asm.h` when next
 touching those units and drop the line.
 
