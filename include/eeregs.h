@@ -69,6 +69,18 @@
 #define EE_UNCACHED_RING(addr) ((addr) | 0x30000000)
 #endif
 
+/* The EE hardware register space and the GS privileged register space, as
+ * address ranges rather than individual registers: MovieViewer.c's debug
+ * watcher classifies an arbitrary address by whether it falls in one of
+ * them. A build with no mapped register range defines these so the test
+ * never matches. */
+#ifndef EE_REG_RANGE_BASE
+#define EE_REG_RANGE_BASE 0x10000000
+#define EE_REG_RANGE_END 0x10010000
+#define GS_PRIV_REG_RANGE_BASE 0x12000000
+#define GS_PRIV_REG_RANGE_END 0x12002000
+#endif
+
 /* Register access: a plain volatile access, unless the build supplies its
  * own. */
 #ifndef HW_READ
