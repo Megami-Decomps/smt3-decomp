@@ -1,4 +1,3 @@
 # C units with inline asm that predate the rule in docs/CONTRIBUTING.md.
 # This list only shrinks: move the blocks into include/ps2asm.h and drop the line.
 src/smt3/sdf/sdfVu1.c
-src/smt3/sdf/sdfCoreDraw.c

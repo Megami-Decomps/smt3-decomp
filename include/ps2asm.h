@@ -41,6 +41,13 @@ typedef struct {
 #define PS2_STORE_ZERO_QUAD(dst) __asm__ volatile ( \
     "sq $0, 0(%0)" : : "r" (dst) : "memory")
 
+/* sq from a GPR: stores all 128 physical bits of the register, so a 64-bit
+ * value carries whatever sits in its upper half (zero here, left by a load).
+ * cc1's own 64-bit stores (sd) only ever write the low 64 bits. */
+#define PS2_STORE_QUAD_GPR(dst, value) __asm__ volatile ( \
+    ".set noreorder\n\tsq %1, %0\n\t.set reorder" \
+    : "=m" (*(volatile u128 *)(dst)) : "r" ((u64)(value)))
+
 /* ---- quadword between memory and the VU0 register file ---- */
 
 /* The _TO/_FROM forms take a C lvalue and let cc1 pick the addressing mode;
@@ -669,6 +676,12 @@ typedef struct {
 #define EE_SYNC_EI_BARRIER() __asm__ volatile ( \
     ".set noreorder\n\tsync\n\tei\n\t.set reorder" : : : "memory")
 
+/* vf0 is the hardware (0, 0, 0, 1) constant. Broadcasting its w into vf1.xyz
+ * gives ones there, and subtracting it from itself zeros vf1.w. */
+#define VU0_VF1_ONES_XYZ_ZERO_W() __asm__ volatile ( \
+    ".set noreorder\n\tvaddw.xyz vf1, vf0, vf0w\n\t" \
+    "vsubw.w vf1, vf0, vf0w\n\t.set reorder")
+
 /* ---- quaternion operations shared by the blend routines ---- */
 
 /* vf10 . vf11 over all four lanes, read back as a C float. vf1.xyz is set to
@@ -794,6 +807,11 @@ typedef struct {
 #define VU0_LOAD_VF24_VF25_VF26(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf24, 0(%0)\n\tlqc2 vf25, 16(%0)\n\t" \
     "lqc2 vf26, 32(%0)\n\t.set reorder" \
+    : : "r" (src))
+/* Same triple, one quadword further in: src's first quadword is skipped. */
+#define VU0_LOAD_VF24_VF25_VF26_AT16(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf24, 16(%0)\n\tlqc2 vf25, 32(%0)\n\t" \
+    "lqc2 vf26, 48(%0)\n\t.set reorder" \
     : : "r" (src))
 #define VU0_MATRIX4_MUL_BANK_B_LEFT() __asm__ volatile ( \
     ".set noreorder\n\t" \
