@@ -551,6 +551,8 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         f"{sys.executable} tools/production_report.py record-link $out $map $in",
         description="ld $out",
     )
+    n.rule("asmcheck", f"{sys.executable} tools/check_inline_asm.py $in && touch $out",
+           description="asm-check $in")
     n.rule("objcopy", f"{OBJCOPY} -O binary $in $out", description="objcopy $out")
     n.rule("check", "sha1sum --quiet -c $in && touch $out", description="check $in")
     n.rule("configure", f"{sys.executable} configure.py $args", description="configure", generator=True)
@@ -600,15 +602,19 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                                        unit_asflags(version).get(unit, "")).strip()}
                 configs = [f"config/{version}/cflags.txt", f"config/{version}/compilers.txt",
                            f"config/{version}/asflags.txt"]
+                # Instruction-emitting inline asm in the unit fails before it compiles.
+                asmcheck = Path("build") / version / "asmcheck" / src.with_suffix(".stamp")
+                n.build(str(asmcheck), "asmcheck", str(src),
+                        implicit=["tools/check_inline_asm.py", "config/inline_asm_allow.txt"])
                 n.build(str(obj), "cc", str(src),
-                        implicit=eeasm + ["include/macro.inc", *configs,
+                        implicit=eeasm + [str(asmcheck), "include/macro.inc", *configs,
                                           "tools/production_report.py"],
                         implicit_outputs=[str(obj) + ".s", str(obj) + ".proof.json"],
                         variables={"cdefs": cdefs, "cflags": flags, **tools})
                 # objdiff base: the same unit without its INCLUDE_ASM fallbacks, so only C counts.
                 base = Path("build") / version / "base" / src.with_suffix(".o")
                 n.build(str(base), "cc", str(src),
-                        implicit=[*configs, "include/macro.inc",
+                        implicit=[str(asmcheck), *configs, "include/macro.inc",
                                   "tools/production_report.py"],
                         implicit_outputs=[str(base) + ".s", str(base) + ".proof.json"],
                         variables={"cdefs": f"{cdefs} -DSKIP_ASM", "cflags": flags, **tools})

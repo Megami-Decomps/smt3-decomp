@@ -120,6 +120,8 @@ def write_ninja(args) -> None:
                description="linker script $module", generator=True)
         n.rule("configure", f"$python {TOOLS}/irx_configure.py",
                description="irx_configure.py", generator=True)
+        n.rule("asmcheck", f"$python {TOOLS}/check_inline_asm.py $in && touch $out",
+               description="asm-check $in")
         n.variable("python", sys.executable)
         n.newline()
 
@@ -142,8 +144,13 @@ def write_ninja(args) -> None:
                 generated = Path("include") / "irx" / f"{module}.h"
                 if (ROOT / generated).exists():
                     headers.append(str(generated))
+                # Instruction-emitting inline asm in the unit fails before it compiles.
+                asmcheck = b / "asmcheck.stamp"
+                n.build(str(asmcheck), "asmcheck", [str(src)],
+                        implicit=[str(TOOLS / "check_inline_asm.py"),
+                                  "config/inline_asm_allow.txt"])
                 n.build(str(b / "text.o"), "iopcc", [str(src)],
-                        implicit=deps + headers)
+                        implicit=deps + headers + [str(asmcheck)])
             else:
                 text_s = b / "text.s"
                 n.build(str(text_s), "textlist", [], variables={"module": module})
