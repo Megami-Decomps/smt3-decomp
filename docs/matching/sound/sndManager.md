@@ -33,3 +33,50 @@ not the game. The other phase's `0x33` multiplier is distinct and remains intact
 The already-matched `dds3TitleDrawMenu` sibling supplied useful examples of
 real scalar reuse, signed arithmetic and packing, but is a separate existing
 match. Its retained dead division was not copied: this target needs none.
+
+## dds3TitleUpdateFade (sound/sndManager, 0x278)
+
+158 of 158 words match at 632 bytes in ordinary C. The first alpha-calculation
+frame observation is placed inside each exclusive mode branch, so exactly
+one of those two reads executes. The earlier sentinel test and later frame
+reloads remain distinct. No constraint, binding, extra executed observation,
+volatile access, endpoint substitution or artificial dependency is added.
+Mode and frame observations have no intervening callback; the existing
+render-state calls and subsequent callback-sensitive reloads are preserved.
+
+All three frame scaling expressions use `(s32)((u32)frame << 7)` before signed
+division, and the final counter increment wraps in unsigned arithmetic before
+conversion back to `s32`. Thus no signed-multiplication overflow or invented
+nonnegative-frame assumption is needed for the upper-only clamps. These
+conversions describe the pinned target compiler and native low-word behavior,
+not an unrestricted portable-C conversion guarantee. Real alpha/color and
+frame consumers, floating endpoint expressions, sprite parameters and calls
+are unchanged by the branch-local observation control.
+
+Qualified exact-source RTL retains the alternate branch's real frame load
+through sched1. In that block the load and clamp constant issue at modeled
+cycle 0, the trap constant at cycle 1, and compare/trap at cycle 2, followed
+by conditional clamp, shift and division at cycles 3/4/5. This exposes the
+actual two-cycle load availability rather than a guessed scheduler ranking
+rule. Allocation then uses the native compare and two constant registers.
+The later delay-branch pass moves that frame load into the mode branch's
+delay slot and removes the duplicate fallthrough load, preserving one dynamic
+read while producing the native common-load arrangement.
+
+The earlier defined-wrap source had six differing words at the exact size;
+these are repaired by the real branch-local load timing without any diagnostic
+constraint. The division's constant and its zero-trap constant remain real
+compiler consumers; no dead initializer was invented to force duplication.
+This is measured reconstruction evidence, not historical source spelling.
+
+Canonical complete-owner checking gives 15 match, 0 differ, preserving all
+14 peers and owned data. Plain and exact-source diagnostic assembly agree
+excluding only the first `.file` metadata line; raw assembly identity is not
+claimed. All six allocated sections, 143 non-file symbol contracts and 197
+ordered relocations agree, with addends covered by the compared section bytes.
+
+Independent review accepted the exact source and its defined wrapping arithmetic.
+Final local gates passed: retail SHA-1, all 427 tests, 145 guarded owners /
+514 drafts with stable inputs, all seven IRX checks, and reconciled reports.
+The primary report now records 8,560 / 9,045 functions and 1,465,680 /
+1,851,228 code bytes (79.173392%). Exact-source CI is pending publication.

@@ -393,10 +393,9 @@ extern f32 sdfSin(f32 angle);
 extern f32 dds3TitleFadeLevel;
 extern void dds3TitleDrawFade(void);
 
-#ifdef NON_MATCHING
 void dds3TitleUpdateFade(void)
 {
-    s32 alpha = 0;
+    s32 alpha;
     s32 glowAlpha;
     s32 frame;
     u32 color;
@@ -404,23 +403,23 @@ void dds3TitleUpdateFade(void)
     if (titleWork->unk_34 == -1) {
         return;
     }
+    alpha = 0;
     rsetOtOfs(0x48);
     rsetAlpha(0);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    frame = titleWork->unk_34;
     if (titleWork->unk_3C == 0) {
+        frame = titleWork->unk_34;
         if (frame >= 0x7E) {
             frame -= 0x7D;
             if (frame > 30) frame = 30;
             alpha = (s32)((u32)frame << 7) / 30;
         }
     } else {
+        frame = titleWork->unk_34;
         if (frame > 12) frame = 12;
         alpha = (s32)((u32)frame << 7) / 12;
     }
-    if (alpha <= 0) {
-        dds3TitleFadeLevel = 0.0f;
-    } else {
+    if (alpha > 0) {
         glowAlpha = alpha;
         if (alpha == 0x80) {
             glowAlpha += (s32)(sdfSin(dds3TitleFadeLevel) * 32.0f);
@@ -432,6 +431,8 @@ void dds3TitleUpdateFade(void)
         rsetAlpha(0);
         DrwSprite2D(0x6C, 0xD8, 0x128, 0x27, 0xCC, 0x85, 0x128, 0x27,
                     ((u32)alpha << 24) | 0x808080, titleWork->texHandle[1]);
+    } else {
+        dds3TitleFadeLevel = 0.0f;
     }
     frame = titleWork->unk_34;
     if (frame > 12) frame = 12;
@@ -440,14 +441,12 @@ void dds3TitleUpdateFade(void)
                 color, titleWork->texHandle[1]);
     DrwSprite2D(0x128, 0xAC, 0xC6, 0x34, 2, 0x84, 0xC6, 0x34,
                 color, titleWork->texHandle[1]);
-    if (titleWork->unk_34 >= 13) {
+    frame = titleWork->unk_34;
+    if (frame >= 13) {
         dds3TitleDrawFade();
     }
     titleWork->unk_34 = (s32)((u32)titleWork->unk_34 + 1);
 }
-#else
-INCLUDE_ASM(const s32, "sound/sndManager", dds3TitleUpdateFade);
-#endif
 
 
 extern char D_0053DD68[];

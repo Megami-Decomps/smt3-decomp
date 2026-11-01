@@ -55,6 +55,7 @@ both native and emitted sizes when they differ.
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
+| 2 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 2 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 2 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
@@ -77,7 +78,6 @@ both native and emitted sizes when they differ.
 | 2 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
-| 1 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 1 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 1 |  | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 1 |  | [sdk/libm.md](sdk/libm.md) |
