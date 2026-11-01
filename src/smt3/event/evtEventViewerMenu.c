@@ -1375,8 +1375,7 @@ typedef struct {
     s32 offset;                     /* 0x0C */
 } evtViewerDirEntry_t;
 
-/* NON_MATCHING: 2 of 256 words differ (first at +0x1B4). */
-#ifdef NON_MATCHING
+/* Exact retail header/directory writer; see docs/matching/event/evtEventViewerMenu.md. */
 void evtSaveViewerHeader(s32 fd, s32 mode)
 {
     evtViewerFileHeader_t header;
@@ -1453,12 +1452,17 @@ void evtSaveViewerHeader(s32 fd, s32 mode)
     header.reserved00 = 0;
     header.reserved01 = 0;
     header.reserved02 = 0;
-    header.count = 12;
-    header.tag[0] = 'P';
-    header.tag[1] = 'M';
-    header.tag[2] = 'D';
-    header.tag[3] = '2';
-    header.byteLength = byteLength;
+    {
+        /* Initialize the real directory count before writing the native
+         * header field sequence; its lifetime ends at the count store. */
+        s32 headerCount = 12;
+        header.byteLength = byteLength;
+        header.tag[0] = 'P';
+        header.tag[1] = 'M';
+        header.tag[2] = 'D';
+        header.tag[3] = '2';
+        header.count = headerCount;
+    }
     header.kind = 4;
     header.reserved0C = 0;
     header.reserved18 = 0;
@@ -1561,9 +1565,6 @@ void evtSaveViewerHeader(s32 fd, s32 mode)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewerMenu", evtSaveViewerHeader);
-#endif
 
 void evtSaveViewerInfo(s32 fd)
 {

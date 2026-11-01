@@ -40,27 +40,26 @@ re-read twice.
 
 ## evtSaveViewerHeader (event/evtEventViewerMenu, 0x400)
 
-254 of 256 words match, exact size. Every count call, the twelve byteLength products,
-the 21-entry jump table, all fourteen directory arms and the `mtlo`/`madd`/`mflo`
-payload advance match. What is left is two stores in the file header swapped:
-retail writes `byteLength` (0x04) before `count` (0x10), the C writes them the
-other way round, with the same registers holding the same values on both sides.
+256 of 256 words match at 1024 bytes in ordinary C. A block-local signed
+`headerCount = 12` is initialized before the header writes. The writes then
+follow retail order: byteLength, tag[0..3], count, kind, and the remaining
+reserved fields. The real count local dies at its store, before evtWriteRecord.
+It changes no calls, types, field widths, values, or arithmetic.
 
-Two placements are load-bearing and should be kept: `payloadOffset = 0xE0` has to
-be a statement after the `if (mode != 2) return;`, not an initializer (as an
-initializer the function is two words long), and `i` has to be declared before
-`payloadOffset` so the two take retail's spill slots at 0x34 and 0x38 (declared
-the other way every later slot shifts by four and 54 words differ).
+The previous draft matched 254 of 256 words, with count and byteLength stores
+exchanged. Merely reordering the direct constant stores changed their register
+allocation. Separating the real count initialization from its store preserves
+both the desired allocation and store sequence. A diagnostic native-register
+binding first established the candidate, but binding-only ablation remained
+exact, so the final source uses no register binding or empty asm. This is a
+source/code-generation reconstruction, not a claim about historical spelling.
 
-A sweep of all 210 orderings of the header's seven value stores (byteLength, the
-four tag bytes in order, count, kind) bottoms out at these two words: the order
-count, tag[0..3], byteLength, kind gives retail's constant-to-register mapping
-and 2 differing words, while retail's emitted store order (byteLength, tag[0..3],
-count, kind) gives the right stores and rotates all six constant registers
-instead. No ordering gives both, so the remaining difference is the scheduler
-interleaving the constant materialisations with the store run. Also ruled out:
-`header.tag[3] = mode + '0'` (13 words; cse does not fold it against the early
-return), `count` through a local assigned beside `payloadOffset` (an extra local
-moves every spill slot, 235 words), moving the six zero stores to the front or
-the back of the block, and computing `byteLength` in one expression or deferring
-its last term.
+Keep payloadOffset = 0xE0 after the mode != 2 early return, and i declared before
+payloadOffset: the existing body, all twelve byte-length products, 21-entry jump
+table, fourteen directory arms and payload advance remain unchanged. The native
+writer consumes the same initialized 32-byte header and directory records.
+
+Qualification: complete owner 59 match, 0 differ including owned data;
+normal and RTL-dump compilation agree in all allocated/relocation sections,
+normalized instruction assembly and target bytes. Full retail and regression
+qualification accompanies the promotion.

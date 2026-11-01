@@ -87,7 +87,7 @@ evtEventViewerProcess4	event/evtEventViewer	0x280	160 of 160 words match	docs/ma
 FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
 func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
 evtFrameListHead	event/evtEventViewerMenu	0x138	39 of 78 words differ	docs/matching/event/evtEventViewerMenu.md	22
-evtSaveViewerHeader	event/evtEventViewerMenu	0x400	254 of 256 words match	docs/matching/event/evtEventViewerMenu.md	41
+evtSaveViewerHeader	event/evtEventViewerMenu	0x400	256 of 256 words match	docs/matching/event/evtEventViewerMenu.md	41
 evtMoonProcess2	event/evtMoon	0x119C	13 of 996 words match	docs/matching/event/evtMoon.md	3
 func_00206308, func_002065C8	fclCombineInit	0x2C0 each	35 of 176 words differ	docs/matching/facility/fclCombineInit.md	3
 cmbDrawFullScreenPanel	fclCombineInit	0x68	20 of 26 words match	docs/matching/facility/fclCombineInit.md	41
