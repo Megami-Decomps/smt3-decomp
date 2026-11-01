@@ -1594,6 +1594,142 @@ __asm__ volatile ( \
     : "=&r"(rgba[0]) \
     : "r"(age), "r"(unit))
 
+/* sdfVu1.c lit-vertex transform pipeline. vf28-vf31 hold the screen matrix
+ * and vf24-vf26 the world light row that corePktLoadWorldLightMtx and the
+ * matrix multiply leave behind; nothing in C writes them. vf16-vf18 hold a
+ * UV transform's three rows. */
+
+/* corePktNormalizeNorms: vf2.xyz /= |vf2.xyz|, vrsqrt rather than dividing
+ * by zero. vf1.x is the engine's resident 1.0. */
+#define VU0_LOAD_VF2_AT16(src) __asm__ volatile ( \
+    "lqc2 vf2, 16(%0)" : : "r" (src) : "memory")
+#define VU0_MUL_XYZ_VF3_VF2_VF2() __asm__ volatile ( \
+    "vmul.xyz vf3, vf2, vf2")
+#define VU0_ADDAY_X_ACC_VF3_VF3Y() __asm__ volatile ( \
+    "vadday.x ACC, vf3, vf3y")
+#define VU0_MADDZ_X_VF4_VF1_VF3Z() __asm__ volatile ( \
+    "vmaddz.x vf4, vf1, vf3z")
+#define VU0_RSQRT_Q_VF0W_VF4X() __asm__ volatile ( \
+    "vrsqrt Q, vf0w, vf4x")
+#define VU0_WAITQ() __asm__ volatile ("vwaitq")
+#define VU0_MULQ_XYZ_VF2_VF2_Q() __asm__ volatile ( \
+    "vmulq.xyz vf2, vf2, Q")
+#define VU0_STORE_VF2_AT16(dst) __asm__ volatile ( \
+    "sqc2 vf2, 16(%0)" : : "r" (dst) : "memory")
+
+/* corePktLoadLight: vf19-vf21 = the light; each light-row basis scales by
+ * the light's W (vf19x). */
+#define VU0_LOAD_VF19_VF20_VF21(src) __asm__ volatile ( \
+    "lqc2 vf19, 0(%0)\n\tlqc2 vf20, 16(%0)\n\tlqc2 vf21, 32(%0)" \
+    : : "r" (src) : "memory")
+#define VU0_MULX_W_VF24_VF19() __asm__ volatile ( \
+    "vmulx.w vf24, vf19, vf24x")
+#define VU0_MULX_W_VF25_VF19() __asm__ volatile ( \
+    "vmulx.w vf25, vf19, vf25x")
+#define VU0_MULX_W_VF26_VF19() __asm__ volatile ( \
+    "vmulx.w vf26, vf19, vf26x")
+
+/* corePktLoadUvTransform: vf16-vf18 = a texture transform's three 64-bit
+ * rows. Each ld/qmtc2.ni pair must stay fused: the GPR carries the loaded
+ * row between the two instructions. */
+#define VU0_LOAD_VF16_AT0(src) __asm__ volatile ( \
+    "ld $2, 0(%0)\n\tqmtc2.ni $2, vf16" : : "r" (src) : "$2")
+#define VU0_LOAD_VF17_AT8(src) __asm__ volatile ( \
+    "ld $3, 8(%0)\n\tqmtc2.ni $3, vf17" : : "r" (src) : "$3")
+#define VU0_LOAD_VF18_AT16(src) __asm__ volatile ( \
+    "ld $2, 16(%0)\n\tqmtc2.ni $2, vf18" : : "r" (src) : "$2")
+
+/* corePktLightVertex: shared lighting and screen transform. vf6 is the
+ * normal (or its negation), vf2 the position. */
+#define VU0_MULAY_W_ACC_VF0_VF19Y() __asm__ volatile ( \
+    "vmulay.w ACC, vf0, vf19y")
+#define VU0_MADDAX_W_ACC_VF24_VF6X() __asm__ volatile ( \
+    "vmaddax.w ACC, vf24, vf6x")
+#define VU0_MADDAY_W_ACC_VF25_VF6Y() __asm__ volatile ( \
+    "vmadday.w ACC, vf25, vf6y")
+#define VU0_MADDZ_W_VF7_VF26_VF6Z() __asm__ volatile ( \
+    "vmaddz.w vf7, vf26, vf6z")
+#define VU0_MULAX_XYZW_ACC_VF28_VF2X() __asm__ volatile ( \
+    "vmulax.xyzw ACC, vf28, vf2x")
+#define VU0_MADDAY_XYZW_ACC_VF29_VF2Y() __asm__ volatile ( \
+    "vmadday.xyzw ACC, vf29, vf2y")
+#define VU0_MADDAZ_XYZW_ACC_VF30_VF2Z() __asm__ volatile ( \
+    "vmaddaz.xyzw ACC, vf30, vf2z")
+#define VU0_MADDW_XYZW_VF3_VF31_VF0W() __asm__ volatile ( \
+    "vmaddw.xyzw vf3, vf31, vf0w")
+#define VU0_ADDAW_W_ACC_VF7_VF7W() __asm__ volatile ( \
+    "vaddaw.w ACC, vf7, vf7w")
+#define VU0_MSUBW_W_VF6_VF0_VF0W() __asm__ volatile ( \
+    "vmsubw.w vf6, vf0, vf0w")
+#define VU0_MAXX_W_VF8_VF7_VF0X() __asm__ volatile ( \
+    "vmaxx.w vf8, vf7, vf0x")
+#define VU0_CLIPW_XYZW_VF3_VF3W() __asm__ volatile ( \
+    "vclipw.xyzw vf3, vf3w")
+#define VU0_MULAX_XY_ACC_VF16_VF4X() __asm__ volatile ( \
+    "vmulax.xy ACC, vf16, vf4x")
+#define VU0_ADDW_X_VF9_VF0_VF6W() __asm__ volatile ( \
+    "vaddw.x vf9, vf0, vf6w")
+#define VU0_MADDAY_XY_ACC_VF17_VF4Y() __asm__ volatile ( \
+    "vmadday.xy ACC, vf17, vf4y")
+#define VU0_MINIW_W_VF8_VF8_VF0W() __asm__ volatile ( \
+    "vminiw.w vf8, vf8, vf0w")
+#define VU0_MADDW_XY_VF5_VF18_VF0W() __asm__ volatile ( \
+    "vmaddw.xy vf5, vf18, vf0w")
+/* cfc2 through the last sqc2/sb must stay one statement: the GPR carries
+ * the clip byte across the stores that follow it. */
+#define VU0_CLIP_VF9_STORE_VERTEX_UV(dst) __asm__ volatile ( \
+    "cfc2.ni $2, $vi18\n\t" \
+    "vclipw.xyzw vf9, vf0w\n\tvmulaw.xyzw ACC, vf20, vf0w\n\t" \
+    "vmaddw.xyzw vf8, vf21, vf8w\n\t" \
+    "sqc2 vf3, 0(%0)\n\tsqc2 vf6, 16(%0)\n\tsqc2 vf5, 48(%0)\n\tsqc2 vf8, 32(%0)\n\t" \
+    "sb $2, 81(%0)" \
+    : : "r" (dst) : "$2", "memory")
+#define VU0_STORE_CLIP_UNDEROVER_AT80(dst) __asm__ volatile ( \
+    "cfc2.ni $2, $vi18\n\tandi $2, $2, 3\n\tsb $2, 80(%0)" \
+    : : "r" (dst) : "$2", "memory")
+#define VU0_STORE_VF3_AT0(dst) __asm__ volatile ( \
+    "sqc2 vf3, 0(%0)" : : "r" (dst) : "memory")
+#define VU0_STORE_VF6_AT16(dst) __asm__ volatile ( \
+    "sqc2 vf6, 16(%0)" : : "r" (dst) : "memory")
+#define VU0_MULAW_XYZW_ACC_VF20_VF0W() __asm__ volatile ( \
+    "vmulaw.xyzw ACC, vf20, vf0w")
+#define VU0_CLIP_VF9_STORE_VF8_VI18(dst) __asm__ volatile ( \
+    "cfc2.ni $2, $vi18\n\tvmaddw.xyzw vf8, vf21, vf8w\n\tvclipw.xyzw vf9, vf0w\n\t" \
+    "vnop\n\tvnop\n\tsqc2 vf8, 32(%0)\n\tsb $2, 81(%0)" \
+    : : "r" (dst) : "$2", "memory")
+
+/* corePktXfmLightClip/UV: norm -> vf6, vert -> vf2, both through the
+ * unaligned load CORE_VU_LOAD_XYZ builds; its GPR must not be split from
+ * the qmtc2.ni that consumes it. */
+#define CORE_VU_LOAD_XYZ(p) \
+    "ldr $2, 0(" p ")\n\tldl $2, 7(" p ")\n\tlw $3, 8(" p ")\n\tpcpyld $3, $3, $2\n\t"
+#define VU0_LOAD_NORM_VF6_VERT_VF2(vert, norm) __asm__ volatile ( \
+    CORE_VU_LOAD_XYZ("%1") "qmtc2.ni $3, vf6\n\t" CORE_VU_LOAD_XYZ("%0") "qmtc2.ni $3, vf2" \
+    : : "r" (vert), "r" (norm) : "$2", "$3")
+#define VU0_LOAD_UV_VF4(uv) __asm__ volatile ( \
+    "ld $2, 0(%0)\n\tqmtc2.ni $2, vf4" : : "r" (uv) : "$2")
+
+/* corePktXfmLightClipPB/UVPB: position and normal already sit in the
+ * point buffer record. */
+#define VU0_LOAD_VF6_AT16(src) __asm__ volatile ( \
+    "lqc2 vf6, 16(%0)" : : "r" (src) : "memory")
+#define VU0_LOAD_VF2_AT0(src) __asm__ volatile ( \
+    "lqc2 vf2, 0(%0)" : : "r" (src) : "memory")
+
+/* corePktRelightBackFaces: the normal is flipped in place and the shade
+ * and clip bytes recomputed; the position and its clip flags are
+ * untouched. */
+#define VU0_SUB_XYZ_VF6_VF0_VF6() __asm__ volatile ( \
+    "vsub.xyz vf6, vf0, vf6")
+#define VU0_CLIPW_XYZW_VF9_VF0W() __asm__ volatile ( \
+    "vclipw.xyzw vf9, vf0w")
+#define VU0_MADDW_XYZW_VF8_VF21_VF8W() __asm__ volatile ( \
+    "vmaddw.xyzw vf8, vf21, vf8w")
+#define VU0_NOP() __asm__ volatile ("vnop")
+#define VU0_STORE_CLIP_VF8_AT80(dst) __asm__ volatile ( \
+    "cfc2.ni $2, $vi18\n\tsqc2 vf8, 32(%0)\n\tandi $2, $2, 3\n\tsb $2, 80(%0)" \
+    : : "r" (dst) : "$2", "memory")
+
 /* VU0 scratchpad unpack and reference-map lighting. */
 #define VU0_BEGIN_POINT_UNPACK(address) __asm__ volatile ( \
     "ctc2.i %0, $vi2" : : "r" (address))
