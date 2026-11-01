@@ -16,6 +16,10 @@ quickstart.
   invented.
 - [IDB corrections](idb-corrections.md): names and layouts in the IDA database
   that the retail code proves wrong, and the proof for each.
+- [Return-width mismatches](return-width-mismatches.md): functions whose
+  definition and some caller's declaration disagree on return width, invisible
+  on retail hardware but fatal to a native port, and which callers are
+  actually at risk.
 - [Building the IRX modules](irx-modules.md): how the three IOP modules in
 - [What iop-gcc 2.8.1 wants](irx-idioms.md): the source shapes that reproduce the IRX modules' instructions
   `USERIRX/` build byte-identical from source, the container format, and where
