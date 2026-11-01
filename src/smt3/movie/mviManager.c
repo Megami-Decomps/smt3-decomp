@@ -174,7 +174,7 @@ typedef struct movieViewerChip_t
 /* Also declared above as void *movieViewerWork[], which is how the loader
  * paths use it; this is the chip list the viewer walks. One object, two
  * readings, so the alias stays. */
-extern movieViewerChipList_t movieViewerChips asm("movieViewerWork");
+extern movieViewerChipList_t movieViewerChips FAKEMATCH_ASM_NAME("movieViewerWork");
 
 void movieViewerFree(void)
 {

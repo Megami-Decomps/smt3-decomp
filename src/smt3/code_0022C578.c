@@ -316,7 +316,7 @@ typedef struct
     /* 0x20 */ datSkillBadWindow_t bad;
 } datSkillBadEntry_t;
 
-extern datSkillBadEntry_t datSkillBadEntries[] asm("datSkillTable");
+extern datSkillBadEntry_t datSkillBadEntries[] FAKEMATCH_ASM_NAME("datSkillTable");
 
 extern campWork_t *campWork;
 
@@ -2718,7 +2718,7 @@ void cmpDisableInfoWindow(void)
     cmpSetInfoWindowHidden();
 }
 
-extern const char *cmpMenuStrings[] asm("cmpMenuTextTable");
+extern const char *cmpMenuStrings[] FAKEMATCH_ASM_NAME("cmpMenuTextTable");
 extern void cmpSetSkillListRows(s32 rows);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors, s32 page,
                              s32 spriteId, s32 *texList,
@@ -3335,7 +3335,7 @@ extern s32 cmpChkDoNotUseSkill(u16 skill);
  * preserves retail's no-op there and load in the default exit's delay slot.
  * The provider and ABI are unchanged. This is a target-specific visibility
  * aid, not evidence of original source spelling. */
-extern s32 cmpChkDoNotUseSkillView(u16 skill) asm("cmpChkDoNotUseSkill");
+extern s32 cmpChkDoNotUseSkillView(u16 skill) FAKEMATCH_ASM_NAME("cmpChkDoNotUseSkill");
 void cmpUpdateSkillSelect(void)
 {
     u16 button = cmpGetPressedButton(0x33);
@@ -4286,8 +4286,8 @@ void cmpSetStatusStartEff(void)
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetStatusStartEff);
 #endif
 
-extern campInfoWork_t *volatile campDhCalcStateLive asm("campDhCalcState");
-extern campWork_t *volatile campWorkLive asm("campWork");
+extern campInfoWork_t *volatile campDhCalcStateLive FAKEMATCH_ASM_NAME("campDhCalcState");
+extern campWork_t *volatile campWorkLive FAKEMATCH_ASM_NAME("campWork");
 extern void cmpSetStatusStartEff(void);
 extern void cmpModelInit(void);
 
@@ -4590,7 +4590,7 @@ void fclGetArrowCursorEntry(s32 x, s32 y, s32 z, s8 index, s32 extra)
     }
 }
 
-extern campDhWork_t *volatile campDhBackgroundWork asm("campDhDrawWork");
+extern campDhWork_t *volatile campDhBackgroundWork FAKEMATCH_ASM_NAME("campDhDrawWork");
 
 #ifdef NON_MATCHING
 void campDhDrawBackground(s32 x, s32 y, s32 unused, s32 alpha)
@@ -5270,7 +5270,7 @@ typedef struct
     /* 0x1178 */ s32 iconTimer[64];
 } campDhTimerWork_t;
 
-extern campDhTimerWork_t *campDhTimerWork asm("campDhUpdateWork");
+extern campDhTimerWork_t *campDhTimerWork FAKEMATCH_ASM_NAME("campDhUpdateWork");
 
 #ifdef NON_MATCHING
 extern void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
@@ -5531,7 +5531,7 @@ typedef struct
     campDhEntry_t entries[25];
 } campDhEntryWork_t;
 
-extern campDhEntryWork_t *campDhEntryWork asm("campDhUpdateWork");
+extern campDhEntryWork_t *campDhEntryWork FAKEMATCH_ASM_NAME("campDhUpdateWork");
 
 void campDhScanEntries(void)
 {
@@ -5996,8 +5996,8 @@ extern frFontHandle_t *frGetNameFRQ(s8 target, frFontHandle_t *chain, s32 firstO
 extern datDevilTableEntry_t datDevilTable[];
 extern char *datExplainTable[];
 extern char D_0054FEA8[];
-extern s16 cmpHeartsMasterPhase asm("rstHeartsMasterPhase");
-extern datUnitWork_t *volatile cmpStatusBirthLive asm("cmbBirthPanel");
+extern s16 cmpHeartsMasterPhase FAKEMATCH_ASM_NAME("rstHeartsMasterPhase");
+extern datUnitWork_t *volatile cmpStatusBirthLive FAKEMATCH_ASM_NAME("cmbBirthPanel");
 extern void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags, s32 unused);
 
 #ifdef NON_MATCHING
@@ -6118,7 +6118,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusRow);
 
 extern s32 cmbGetHeartsParamEx(s8 devilId, s8 index, s32 registered);
 extern s32 cmbGetParam(datUnitWork_t *unit, s32 index);
-extern volatile s32 cmpGaugeAnimLive[] asm("cmpStatusAnimCount");
+extern volatile s32 cmpGaugeAnimLive[] FAKEMATCH_ASM_NAME("cmpStatusAnimCount");
 
 #ifdef NON_MATCHING
 void cmpDrawParamGauge(s32 x, s32 y, s32 *colors, s32 rowHeight,
@@ -6428,7 +6428,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillRowText);
 #endif
 
 extern s8 D_00551FB9;
-extern volatile s32 cmpStatusAnimLive[] asm("cmpStatusAnimCount");
+extern volatile s32 cmpStatusAnimLive[] FAKEMATCH_ASM_NAME("cmpStatusAnimCount");
 
 #ifdef NON_MATCHING
 void cmpDrawSkillIcons(s32 x, s32 y, s8 index)
@@ -6481,7 +6481,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillIcons);
 
 extern s32 cmpFindSkillEntry(u16 skillId);
 extern char *text1[];
-extern volatile s32 cmpSkillAnimLive[] asm("cmpStatusAnimCount");
+extern volatile s32 cmpSkillAnimLive[] FAKEMATCH_ASM_NAME("cmpStatusAnimCount");
 
 #ifdef NON_MATCHING
 void cmpDrawSkill(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
@@ -9476,7 +9476,7 @@ s8 rstGetPanelEffState(s32 index)
     return cmpPanelEffList[index].state;
 }
 
-extern cmpPanelEff_t *volatile cmpPanelEffLive asm("cmpPanelEffList");
+extern cmpPanelEff_t *volatile cmpPanelEffLive FAKEMATCH_ASM_NAME("cmpPanelEffList");
 extern void cmpRandomizePanelEff(s32 width, s32 height, s32 kind,
                                 cmpPanelEffAnim_t *anim);
 
@@ -10329,7 +10329,7 @@ s32 cmpDrawStatusModel(void *scene)
     return err;
 }
 
-extern dds3GlobalWork_t *volatile cmpRebuildGlobalWork asm("DDS3_GBWK");
+extern dds3GlobalWork_t *volatile cmpRebuildGlobalWork FAKEMATCH_ASM_NAME("DDS3_GBWK");
 
 #ifdef NON_MATCHING
 void cmpRebuildStockList(void)
@@ -10626,7 +10626,7 @@ s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, s32 unused)
     return 0;
 }
 
-extern dds3GlobalWork_t *volatile cmpRecoverGlobalWork asm("DDS3_GBWK");
+extern dds3GlobalWork_t *volatile cmpRecoverGlobalWork FAKEMATCH_ASM_NAME("DDS3_GBWK");
 
 #ifdef NON_MATCHING
 void cmpRecover(u16 skill, datUnitWork_t *user, datUnitWork_t *target)

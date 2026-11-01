@@ -97,27 +97,30 @@ aid, not permission to redirect a call or invent an ABI. All conditions apply:
 This allowance does not authorize broader symbol redirection, false types,
 fabricated side effects, instruction-emitting assembly or relaxed verification.
 
-### No instruction-emitting `__asm__` in a C unit
+### No `asm` keyword in a C unit
 
-A `.c` file must not spell `__asm__` with a template that emits instructions.
-Use the COP2/VU0 and MMI macros in `include/ps2asm.h`: one macro per concrete
-operation, named after what the operation does, with every opcode, suffix and
-`vf`/`vi` register literal inside the macro body. Add a macro there when the
-operation is missing. A macro defined in the unit itself is the same
-violation with one more step.
+A `.c` file must not spell `asm` or `__asm__` itself. Every form has a macro
+home, so a unit carries no opcode, register name or assembler label of its own:
 
-Two forms emit nothing and so are not covered by that rule. A localized
-compiler constraint goes through the `FAKEMATCH_ASM_*` macros in
-`include/common.h`: `FAKEMATCH_ASM_REG` for a register binding on a
-declaration, and `FAKEMATCH_ASM_LIVE*` for an empty template holding a value
-in a register, a float register or its storage. An assembler label on a
-declaration (`asm("name")`) names a linker symbol and stays as written.
+- Emitted EE instructions: the COP2/VU0 and MMI macros in `include/ps2asm.h`,
+  one macro per concrete operation, named after what the operation does, with
+  every opcode, suffix and `vf`/`vi` register literal inside the macro body.
+  `EE_SPIN_NOP` is there too, for a busy-wait loop that reads no hardware.
+- A localized compiler constraint: `FAKEMATCH_ASM_REG` for a register binding
+  on a declaration, `FAKEMATCH_ASM_LIVE*` for an empty template holding a
+  value in a register, a float register or its storage, both in
+  `include/common.h`.
+- A declaration whose symbol keeps its retail name:
+  `FAKEMATCH_ASM_NAME("retailName")`, also in `include/common.h`.
 
-`tools/check_inline_asm.py` enforces this, and every C unit's compile depends
-on it, so an offending unit fails before `cc1` runs. `src/smt3/sdf/sdfVu1.c`
-and `src/smt3/sdf/sdfCoreDraw.c` predate the rule and are listed in
-`config/inline_asm_allow.txt`; move their blocks into `ps2asm.h` when next
-touching those units and drop the line.
+Add a macro to the right header when the form is missing. A macro defined in
+the unit itself is the same violation with one more step.
+
+`tools/check_inline_asm.py` enforces this, and every C unit's compile in both
+the EE and the IOP build depends on it, so an offending unit fails before
+`cc1` runs. `src/smt3/sdf/sdfVu1.c` and `src/smt3/sdf/sdfCoreDraw.c` predate
+the rule and are listed in `config/inline_asm_allow.txt`; move their blocks
+into `ps2asm.h` when next touching those units and drop the line.
 
 Check the complete affected units with `tools/check_unit.py`, then the full
 retail checksum build with `ninja`. An unchanged DDS donor does not need

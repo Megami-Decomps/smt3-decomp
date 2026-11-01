@@ -123,7 +123,7 @@ extern s32 pbLoadSystemDataDone(s32 handle, s32 status);
 extern pbProcHandle_t *pbGetMoveChar(void);
 /* Opaque ABI view preserves retail annulment while the provider stays C.
  * Same real symbol and prototype; a reconstruction aid, not original spelling. */
-extern pbProcHandle_t *pbGetMoveCharOpaque(void) __asm__("pbGetMoveChar");
+extern pbProcHandle_t *pbGetMoveCharOpaque(void) FAKEMATCH_ASM_NAME("pbGetMoveChar");
 
 extern char D_00535DE0[];
 

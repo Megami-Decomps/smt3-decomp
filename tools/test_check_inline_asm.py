@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pin what counts as inline asm in a unit, NON_MATCHING drafts included."""
+"""Pin where an asm keyword is a violation, NON_MATCHING drafts included."""
 import sys
 import tempfile
 import unittest
@@ -12,20 +12,19 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 class Violations(unittest.TestCase):
-    def check(self, body: str) -> list[str]:
+    def check(self, body: str) -> list[int]:
         with tempfile.TemporaryDirectory() as tmp:
             unit = Path(tmp) / "unit.c"
             unit.write_text(body)
-            return [what for _, what in cia.violations(unit)]
+            return cia.violations(unit)
 
     def test_instruction_statement(self):
-        self.assertEqual(self.check('void f(void) { __asm__ volatile ("nop"); }'),
-                         ["inline asm statement"])
+        self.assertEqual(self.check('void f(void) { __asm__ volatile ("nop"); }'), [1])
 
     def test_macro_defined_in_the_unit(self):
         body = ('#define COPY(dst) __asm__ volatile ( \\\n'
                 '    "lq $2, 0(%0)" : : "r" (dst))\n')
-        self.assertEqual(self.check(body), ["asm macro defined in the unit"])
+        self.assertEqual(self.check(body), [1])
 
     def test_draft_behind_the_non_matching_guard(self):
         body = ('#ifdef NON_MATCHING\n'
@@ -33,27 +32,23 @@ class Violations(unittest.TestCase):
                 '#else\n'
                 'INCLUDE_ASM(const s32, "sdf/unit", f);\n'
                 '#endif\n')
-        self.assertEqual(self.check(body), ["inline asm statement"])
-
-    def test_statement_after_a_directive_is_not_a_declaration(self):
-        for prefix in ("#ifdef NON_MATCHING\n", "#endif\n", "#include \"x.h\"\n"):
-            with self.subTest(prefix=prefix):
-                self.assertEqual(self.check(prefix + '__asm__ volatile ("nop");\n'),
-                                 ["inline asm statement"])
-
-    def test_declaration_after_a_directive_keeps_its_label(self):
-        body = '#include "common.h"\nextern void g(void) __asm__("retailName");\n'
-        self.assertEqual(self.check(body), [])
+        self.assertEqual(self.check(body), [2])
 
     def test_empty_constraint_template(self):
-        for form in ('__asm__("" : "+r" (x));', '__asm__ volatile ("" : : "m" (x));',
-                     '__asm__("" : "+r" (x), "+r" (y));'):
-            with self.subTest(form=form):
-                self.assertEqual(self.check("void f(void) { " + form + " }"), [])
+        self.assertEqual(self.check('void f(void) { __asm__("" : "+r" (x)); }'), [1])
 
     def test_declaration_label_and_register_binding(self):
         body = ('extern void g(void) __asm__("retailName");\n'
                 'void f(void) { register s32 x asm("$5") = 1; }\n')
+        self.assertEqual(self.check(body), [1, 2])
+
+    def test_the_macros_themselves_are_not_asm(self):
+        body = ('extern void g(void) FAKEMATCH_ASM_NAME("retailName");\n'
+                'void f(void) {\n'
+                '    FAKEMATCH_ASM_REG(s32, x, "$5") = 1;\n'
+                '    FAKEMATCH_ASM_LIVE(x);\n'
+                '    EE_SPIN_NOP();\n'
+                '}\n')
         self.assertEqual(self.check(body), [])
 
     def test_comments_and_strings_are_not_code(self):
@@ -71,7 +66,7 @@ class Allowlist(unittest.TestCase):
                 self.assertTrue((ROOT / path).exists(), "listed unit is gone")
                 self.assertTrue(cia.violations(path), "nothing left to grandfather")
 
-    def test_no_other_unit_has_inline_asm(self):
+    def test_no_other_unit_spells_asm(self):
         listed = cia.load_allowlist()
         for unit in sorted(ROOT.glob("src/**/*.c")):
             path = unit.relative_to(ROOT)

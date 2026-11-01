@@ -61,7 +61,7 @@ typedef struct
     u8 item[0xA0];
 } fclGlobalWorkItemInventory_t;
 
-extern fclGlobalWorkItemInventory_t *fclGlobalWorkItems asm("DDS3_GBWK");
+extern fclGlobalWorkItemInventory_t *fclGlobalWorkItems FAKEMATCH_ASM_NAME("DDS3_GBWK");
 
 extern s32 datAddItem(s32 id, s32 num);
 

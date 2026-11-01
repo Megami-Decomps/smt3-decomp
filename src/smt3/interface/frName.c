@@ -13,7 +13,7 @@ typedef struct
     u8 cNameCounts[4];
 } frNameGlobalWork_t;
 
-extern frNameGlobalWork_t *frNameGlobalWork asm("DDS3_GBWK");
+extern frNameGlobalWork_t *frNameGlobalWork FAKEMATCH_ASM_NAME("DDS3_GBWK");
 extern s32 D_0056BD50[4];
 extern const char *D_003263B0[4];
 extern void frAllocNameData(void);

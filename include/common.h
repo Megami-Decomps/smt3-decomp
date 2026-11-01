@@ -46,6 +46,12 @@ typedef double f64;
  * instruction: the binding only fixes which register cc1 keeps the value in,
  * and the empty template only forces it into a register, or into its storage,
  * at that point. docs/CONTRIBUTING.md says when these are permitted. */
+/* Declares NAME while the symbol it binds to keeps its retail name, for a
+ * second view of one object or a definition the linker must see under another
+ * name. It emits nothing: the label only names the symbol. */
+#ifndef FAKEMATCH_ASM_NAME
+#define FAKEMATCH_ASM_NAME(symbol) __asm__(symbol)
+#endif
 #ifndef FAKEMATCH_ASM_REG
 #define FAKEMATCH_ASM_REG(type, name, reg) register type name __asm__(reg)
 #endif

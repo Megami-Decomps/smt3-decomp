@@ -889,7 +889,7 @@ typedef struct
     datUnitWork_t unitwork[16];
 } nbStockGlobalWork_t;
 
-extern nbStockGlobalWork_t *nbStockGlobalWork asm("DDS3_GBWK");
+extern nbStockGlobalWork_t *nbStockGlobalWork FAKEMATCH_ASM_NAME("DDS3_GBWK");
 extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 s32 nbGetRandamStock(void)

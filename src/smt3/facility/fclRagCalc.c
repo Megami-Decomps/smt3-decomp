@@ -344,7 +344,7 @@ INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawListRows);
 extern void fclDrawPanel(fclPanel_t *panel, s32 ot);
 extern void fclUpdatePanel(fclPanel_t *panel);
 extern void fclDrawPriceText(fclPanelPos_t *pos, u16 price, s32 ot);
-extern ragOfferTable_t ragOffers asm("ragHeartsTable");
+extern ragOfferTable_t ragOffers FAKEMATCH_ASM_NAME("ragHeartsTable");
 
 void ragDrawHeartsList(s8 mode)
 {

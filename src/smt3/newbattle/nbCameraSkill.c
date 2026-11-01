@@ -63,9 +63,9 @@ extern sdfVector4_t D_0056B330;
 
 extern sdfVector4_t nbCameraEnemyBadFlag;
 
-extern f32 nbCameraEnemyBadFlagLanes[] asm("nbCameraEnemyBadFlag");
+extern f32 nbCameraEnemyBadFlagLanes[] FAKEMATCH_ASM_NAME("nbCameraEnemyBadFlag");
 
-extern f32 D_0056B330Lanes[] asm("D_0056B330");
+extern f32 D_0056B330Lanes[] FAKEMATCH_ASM_NAME("D_0056B330");
 
 extern f32 nbCameraEnemyBadStep;
 

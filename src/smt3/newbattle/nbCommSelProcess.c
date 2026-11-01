@@ -1453,7 +1453,7 @@ typedef struct {
     s32 stockcnt;
     u8 item[160];
 } nbCommGlobalWork_t;
-extern nbCommGlobalWork_t *nbCommGlobalWork asm("DDS3_GBWK");
+extern nbCommGlobalWork_t *nbCommGlobalWork FAKEMATCH_ASM_NAME("DDS3_GBWK");
 
 extern s32 nbCheckSkillCost(s32 formindex, s32 nskill);
 extern s32 nbGetEscapeSwitch(nbMainProcessData_t *data);

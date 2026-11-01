@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Reject instruction-emitting inline asm written directly in a source file.
+"""Reject an asm keyword written directly in a C unit.
 
     python3 tools/check_inline_asm.py src/smt3/sdf/sdfTex.c [--all]
 
-Emitted EE instructions belong in one named macro in include/ps2asm.h. An empty
-constraint template and a declaration's asm label or register binding emit
-nothing and pass. Only C units are checked, since headers are where the macros
+Every form has a macro home: emitted EE instructions in include/ps2asm.h, a
+compiler constraint or a symbol name in a FAKEMATCH_ASM_* macro in
+include/common.h. Only C units are checked, since headers are where the macros
 live; config/inline_asm_allow.txt grandfathers the units that predate the rule.
 """
 import argparse
@@ -16,8 +16,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 ALLOW_FILE = ROOT / "config" / "inline_asm_allow.txt"
 MACRO_HOME = Path("include/ps2asm.h")
+CONSTRAINT_HOME = Path("include/common.h")
 ASM_KEYWORD = re.compile(r"\b(?:__asm__|__asm|asm)\b")
-VOLATILE = re.compile(r"\s*(?:volatile|__volatile__)?\s*")
 
 
 def load_allowlist() -> set[Path]:
@@ -31,13 +31,9 @@ def load_allowlist() -> set[Path]:
     return paths
 
 
-def code_view(text: str) -> tuple[str, dict[int, str]]:
-    """Blank comments and literal bodies; return the view and the literals by offset.
-
-    Positions are preserved, so an offset in the view indexes the original text.
-    """
+def code_view(text: str) -> str:
+    """The text with comments and literal bodies blanked, positions preserved."""
     view = list(text)
-    literals: dict[int, str] = {}
     i, n = 0, len(text)
     while i < n:
         c = text[i]
@@ -59,89 +55,18 @@ def code_view(text: str) -> tuple[str, dict[int, str]]:
             while i < n and text[i] != c:
                 i += 2 if text[i] == "\\" else 1
             i = min(i + 1, n)
-            literals[start] = text[start + 1:i - 1]
             for j in range(start + 1, i - 1):
                 if text[j] != "\n":
                     view[j] = " "
         else:
             i += 1
-    return "".join(view), literals
+    return "".join(view)
 
 
-def in_directive(view: str, pos: int) -> bool:
-    """True if pos sits on a preprocessor directive, following line continuations."""
-    line_start = view.rfind("\n", 0, pos) + 1
-    while True:
-        if view[line_start:pos].lstrip().startswith("#"):
-            return True
-        if line_start == 0:
-            return False
-        prev_end = line_start - 1
-        if view[:prev_end].rstrip(" \t").endswith("\\"):
-            pos = line_start
-            line_start = view.rfind("\n", 0, prev_end) + 1
-            continue
-        return False
-
-
-def statement_prefix(view: str, pos: int) -> str:
-    """The code between the enclosing statement's start and pos.
-
-    A preprocessor directive is a boundary too: an asm after `#ifdef
-    NON_MATCHING` starts a statement, it does not continue a declaration.
-    """
-    start = max(view.rfind(ch, 0, pos) for ch in ";{}") + 1
-    lines = view[start:pos].split("\n")
-    keep = 0
-    for i, line in enumerate(lines):
-        if line.lstrip().startswith("#"):
-            keep = i + 1
-            while keep < len(lines) and lines[keep - 1].rstrip().endswith("\\"):
-                keep += 1
-    return "\n".join(lines[keep:]).strip()
-
-
-def template(view: str, literals: dict[int, str], pos: int) -> str | None:
-    """The asm template at pos: the literals before the first colon, concatenated.
-
-    None when the operand list holds anything but string literals, which means a
-    macro reaches the assembler and the template is not verifiably empty.
-    """
-    open_paren = VOLATILE.match(view, pos).end()
-    if open_paren >= len(view) or view[open_paren] != "(":
-        return None
-    i = open_paren + 1
-    parts = []
-    while i < len(view):
-        c = view[i]
-        if c in " \t\r\n":
-            i += 1
-        elif c == "\\" and view[i + 1:i + 2] == "\n":
-            i += 2
-        elif c == '"':
-            parts.append(literals.get(i, "x"))
-            i = view.find('"', i + 1) + 1
-        elif c in ":)":
-            return "".join(parts)
-        else:
-            return None
-    return None
-
-
-def violations(path: Path) -> list[tuple[int, str]]:
-    text = (ROOT / path).read_text(errors="replace")
-    view, literals = code_view(text)
-    found = []
-    for match in ASM_KEYWORD.finditer(view):
-        body = template(view, literals, match.end())
-        if body == "":
-            continue
-        line = view.count("\n", 0, match.start()) + 1
-        if in_directive(view, match.start()):
-            found.append((line, "asm macro defined in the unit"))
-        elif not statement_prefix(view, match.start()):
-            found.append((line, "inline asm statement"))
-    return found
+def violations(path: Path) -> list[int]:
+    """The lines of the unit that spell an asm keyword themselves."""
+    view = code_view((ROOT / path).read_text(errors="replace"))
+    return [view.count("\n", 0, m.start()) + 1 for m in ASM_KEYWORD.finditer(view)]
 
 
 def main() -> None:
@@ -159,8 +84,10 @@ def main() -> None:
     for path in dict.fromkeys(sources):
         if path in allowed:
             continue
-        for line, what in violations(path):
-            print(f"{path}:{line}: {what}; put the operation in {MACRO_HOME} "
+        for line in violations(path):
+            print(f"{path}:{line}: a C unit does not spell asm itself; emitted "
+                  f"instructions go in {MACRO_HOME}, a compiler constraint or a "
+                  f"symbol name in a FAKEMATCH_ASM_* macro in {CONSTRAINT_HOME} "
                   f"(docs/CONTRIBUTING.md)", file=sys.stderr)
             failed = True
     sys.exit(1 if failed else 0)

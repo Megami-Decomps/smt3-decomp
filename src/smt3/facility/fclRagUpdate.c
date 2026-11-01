@@ -67,7 +67,7 @@ typedef struct
     u8 item[0xA0];
 } ragGlobalWorkData_t;
 
-extern ragGlobalWorkData_t *ragGlobalWork asm("DDS3_GBWK");
+extern ragGlobalWorkData_t *ragGlobalWork FAKEMATCH_ASM_NAME("DDS3_GBWK");
 
 extern s32 fclRunPanelAnim(void *work);
 

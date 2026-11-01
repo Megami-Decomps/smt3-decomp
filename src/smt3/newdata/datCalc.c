@@ -1000,7 +1000,7 @@ typedef struct {
 } datPartyWork_t;
 
 /* The same persistent-work pointer, through its recovered party/stock view. */
-extern datPartyWork_t *datPartyWork asm("DDS3_GBWK");
+extern datPartyWork_t *datPartyWork FAKEMATCH_ASM_NAME("DDS3_GBWK");
 
 void datPartyDamage(s32 mode)
 {

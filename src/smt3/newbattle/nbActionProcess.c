@@ -681,7 +681,7 @@ s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to);
 void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sformindex,
                   s32 dformindex, s32 count, s32 frame, f32 rate)
 {
-    extern u32 nbSetAllGetDevilFormatFlag(s32 formindex) asm("nbGetDevilFormatFlag");
+    extern u32 nbSetAllGetDevilFormatFlag(s32 formindex) FAKEMATCH_ASM_NAME("nbGetDevilFormatFlag");
     datNormalSkill_t *skill = &datSkillTable.normal[nskill];
     datUnitWork_t *work;
     s32 target = dformindex, originalTarget = dformindex;

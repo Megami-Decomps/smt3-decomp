@@ -17,9 +17,10 @@ measured on DDS and not on this ELF, it says so; keep that distinction when edit
 Follow `docs/CONTRIBUTING.md`, which adopts dds-decomp's current matching rules
 as the canonical default, with the SMT3-only localized compiler-constraint and
 conservative same-symbol ABI-view allowances documented there.
-Instruction-emitting inline asm belongs in an `include/ps2asm.h` macro and a
-compiler constraint in a `FAKEMATCH_ASM_*` macro from `include/common.h`; a `.c` unit
-never spells `__asm__` itself, and `tools/check_inline_asm.py` fails its compile if it does.
+A `.c` unit never spells `asm` itself: emitted instructions belong in an
+`include/ps2asm.h` macro, a compiler constraint or a retail symbol name in a
+`FAKEMATCH_ASM_*` macro from `include/common.h`, and `tools/check_inline_asm.py`
+fails the unit's compile if it does.
 Ordinary C need not reproduce the original source spelling. Compiler traces,
 live scalar reuse, one-pass blocks and the narrow frame/dead-code exceptions
 are permitted under that policy's conditions; exact complete-unit and retail

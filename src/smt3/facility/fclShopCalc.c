@@ -60,7 +60,7 @@ typedef struct {
     u8 items[0xA0];
 } shpPaymentGlobal_t;
 extern shpPaymentWork_t *shopProcWork;
-extern shpPaymentGlobal_t *shopMoneyGlobal asm("DDS3_GBWK");
+extern shpPaymentGlobal_t *shopMoneyGlobal FAKEMATCH_ASM_NAME("DDS3_GBWK");
 extern s32 shpGetSellPrice(s32 index, s8 kind);
 extern u16 shpGetItemPrice(s32 index, s8 kind);
 

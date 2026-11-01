@@ -212,7 +212,7 @@ void ragInitList3(s32 count, lstWork_t *work)
     cmpInitCursorRange(&work->listCursor, count, 7, 0);
 }
 
-extern ragHeartsEntry_t ragHeartEntries[] asm("ragHeartsTable");
+extern ragHeartsEntry_t ragHeartEntries[] FAKEMATCH_ASM_NAME("ragHeartsTable");
 extern u8 D_0032FC58[][32];
 extern s32 datGetItemSlotIndex(u16 item);
 extern s32 cmbChkGetHearts(s32 id);

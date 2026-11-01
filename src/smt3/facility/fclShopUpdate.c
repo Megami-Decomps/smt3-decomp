@@ -177,7 +177,7 @@ typedef struct {
     u8 reserved0000[0x1928];
     u8 items[0xA0];
 } shopInventory_t;
-extern shopInventory_t *shopInventory asm("DDS3_GBWK");
+extern shopInventory_t *shopInventory FAKEMATCH_ASM_NAME("DDS3_GBWK");
 extern s32 datGetItemSlotIndex(u16 item);
 extern s32 cmbChkGetHearts(s32 id);
 extern s8 shpChkChoiceMax(s32 index, s8 kind, s8 preserveTotal);

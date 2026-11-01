@@ -298,7 +298,7 @@ nmeWork_t *nmeLoadFont(s8 target, s8 mode, s32 parent)
 }
 
 #ifdef NON_MATCHING
-extern dds3GlobalWork_t *volatile nmeFontGlobalWork asm("DDS3_GBWK");
+extern dds3GlobalWork_t *volatile nmeFontGlobalWork FAKEMATCH_ASM_NAME("DDS3_GBWK");
 
 typedef struct {
     u32 packedRows[24][3];

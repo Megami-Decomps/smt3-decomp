@@ -429,7 +429,7 @@ typedef struct
     s32 MpAnmCnt;
 } nbPnlWork_t;
 
-extern nbPnlWork_t nbPnlWork[4] asm("nbPanelLayoutTable2");
+extern nbPnlWork_t nbPnlWork[4] FAKEMATCH_ASM_NAME("nbPanelLayoutTable2");
 
 extern s32 nbPanelDrawProcess(void);
 
