@@ -2,31 +2,38 @@
 
 ## pb_draw_mapbase_Process (pb/pbModel, 0x214)
 
-126 of 133 words match at the native 532-byte size. The only remaining
-instruction differences are the panel and status registers at offsets 0x48,
-0x4C, 0x50, 0x54, 0x5C, 0x70 and 0x74. Native uses register 4 for the panel
-and 5 for its status; the draft uses 2 and 4. The two tile passes, calls,
-callback results, accumulator updates and ordering-table registration match.
-The assembly fallback remains active.
+133 of 133 words match at the native 532-byte size. The complete owner has
+28 matches and no differences, including the unchanged 284-byte block renderer.
+A single local binding puts the real panel pointer in native register 4. It is
+initialized from `id->workdata`, consumed by the state/work loads and possible
+flag clear, and dead before the first call. The binding is a localized compiler
+reconstruction aid, not a claim about original source spelling. No empty asm,
+new memory access or artificial consumer is used.
+
+The block renderer accepts the signed 32-bit callback result and converts it to
+its actual unsigned-byte draw flag at entry. Native callers pass the wide value
+without masks; native provider immediately masks it to eight bits. Its public
+prototype and definition now agree on that wide input with an explicit `u8`
+local. This keeps its own instructions exact and removes two artificial caller
+masks induced by the previous narrow parameter. All known declarations/calls
+are in this owner; the two call sites and provider are checked together.
 
 The map contains 20 by 20 unsigned halfwords at work offset 0x1C. Its draw
 counter is at 0x36C. Each tile first draws unless bit 0x800 is set, then draws
 its second face independently when its upper three bits equal one. The second
 predicate reloads the map after the first draw. Each draw also reloads the
-global work pointer before updating its counter.
+global work pointer before updating its counter. Callback coordinates remain
+signed halfwords; table ownership, callback results, accumulator updates and
+ordering-table registration are unchanged.
 
-The initial draw mask is 0x1F. When the material work flag is zero, its selector
-chooses one of the two copied callbacks; otherwise the previous mask survives.
-Callback coordinates are signed halfwords, while the block renderer accepts
-wide coordinates and masks its draw argument to eight bits inside the provider.
-Declaring that argument narrow adds two call-site mask instructions. The
-callback table keeps its existing data owner.
-
-A copied two-pointer struct closes the panel/status register differences but
-moves thirteen prologue words, including the template-copy temporaries. Explicit
-aggregate assignment leaves that residual unchanged. A named status local and
-moving the table declaration leave the preferred seven-word result unchanged.
-No artificial register constraint or pointer offset is used.
+The latest ordinary baseline matches 124/133 words. Binding the panel alone
+matches 131/133, retaining two caller masks. Correcting the provider boundary
+alone matches 126/133; both changes give 133/133. Moving the explicit flag
+conversion past the clears changes provider code and was rejected. Actual
+plain/dump compiler output has equal allocated sections, relocations and
+normalized assembly. Independent current-tree qualification passes: all owned code/data, four
+remaining drafts, the exact retail checksum, 26 tool programs and seven IRX
+groups. Whole-tree draft evidence is reused only for unchanged inputs.
 
 ## pbDrawMapPolyTransformed
 
@@ -92,3 +99,4 @@ and final Ninja no-op checks. Source commit
 `326dd982de60131a3bd0dc421456a83a75fdbd51` has exact-source hosted CI
 [41003758538](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41003758538):
 build and deploy both completed successfully.
+

@@ -143,7 +143,7 @@ extern void sdf3DPrimLinkMat(sdfDrawTag_t *tag, sdfMat_t *mat,
 
 extern sdfGrOt_t sdfGrOtTable[85];
 
-extern s32 pbDrawMapBlock(s32 x, s32 y, u8 drawFlags, s32 special,
+extern s32 pbDrawMapBlock(s32 x, s32 y, s32 flags, s32 special,
                           sdfDrawTag_t *tag);
 
 void pbSetModelPos(mdlObj_t *aHandle, const f32 *pos) {
@@ -371,12 +371,13 @@ void pb_draw_exit_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(panel);
 }
 
-/* NON_MATCHING: 7 of 133 words differ; see docs/matching/pb/pbModel.md. */
-#ifdef NON_MATCHING
+/* Exact native map draw; see docs/matching/pb/pbModel.md. */
 s32 pb_draw_mapbase_Process(dds3ProcessID_t *id)
 {
     s32 (*callbacks[2])(s16 x, s16 y, s32 mode);
-    pbProcHandle_t *panel;
+    /* Reconstruction aid: this real panel address lives only through the
+     * initial dispatch, before the first call, and uses native $4. */
+    register pbProcHandle_t *panel __asm__("$4");
     pbExit_t *work;
     sdfDrawTag_t *tag;
     sdfGrOt_t *ot;
@@ -439,9 +440,6 @@ s32 pb_draw_mapbase_Process(dds3ProcessID_t *id)
     return 0;
 }
 
-#else
-INCLUDE_ASM(const s32, "pb/pbModel", pb_draw_mapbase_Process);
-#endif
 
 void pb_draw_mapbase_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
@@ -790,9 +788,11 @@ INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapPolyTransformed);
 extern s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags,
                                     s32 special, sdfDrawTag_t *tag);
 
-s32 pbDrawMapBlock(s32 x, s32 y, u8 drawFlags, s32 special,
+s32 pbDrawMapBlock(s32 x, s32 y, s32 flags, s32 special,
                    sdfDrawTag_t *tag)
 {
+    /* Retail accepts the full callback result and narrows it at entry. */
+    u8 drawFlags = flags;
     sdfVector4_t rotation __attribute__((aligned(16)));
     sdfVector4_t position __attribute__((aligned(16)));
     sdfVector4_t geometry __attribute__((aligned(16)));
@@ -827,4 +827,5 @@ INCLUDE_RODATA(const s32, "pb/pbModel", D_00535CC0);
 INCLUDE_RODATA(const s32, "pb/pbModel", D_00535CC8);
 
 INCLUDE_RODATA(const s32, "pb/pbModel", D_00535CD0);
+
 
