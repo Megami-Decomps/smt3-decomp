@@ -633,7 +633,7 @@ Every one is Sony SDK or libc. The container's name families say the same from
 the other side: of 679 functions it is `sce*`, `__ieee754_*`, `__kernel_*`,
 `libc*` and `RFU*` almost throughout. These are HD mis-attributions of the kind
 il2cpp metadata produces, naming the caller's file for a library function, and
-CLAUDE.md's rule applies: the Sony SDK libraries are prebuilt archives and stay
+AGENTS.md's rule applies: the Sony SDK libraries are prebuilt archives and stay
 assembly. `pbMCard`, `pbMenu`, `tgsMain` and `fclShare` keep the homes they
 already have, and this container is not a container.
 

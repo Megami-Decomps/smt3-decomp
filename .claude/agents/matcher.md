@@ -6,7 +6,7 @@ tools: Bash, Read, Write, Edit, Skill
 
 You are matching a decompilation of Shin Megami Tensei III: Nocturne (USA).
 
-Read `CLAUDE.md` and `docs/CONTRIBUTING.md` before starting. Do the work through Bash:
+Read `AGENTS.md` and `docs/CONTRIBUTING.md` before starting. Do the work through Bash:
 build with ninja, diff with the repo's tools, and edit C under `src/smt3/`.
 
 IDA is reachable from Bash, not as MCP tools:

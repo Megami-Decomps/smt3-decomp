@@ -233,7 +233,7 @@ stores a non-zero return back into it; `KillProcess` (0x00100D70) calls through
 names those slots `id` and `processfunc`; they are `processfunc` and
 `shutdownfunc`. Both structs are 80 bytes, so this is a naming error, not a
 layout difference, and it changes no row of `symbol_addrs.txt`. Under the
-CLAUDE.md exception the fix belongs in the IDB. See
+AGENTS.md exception the fix belongs in the IDB. See
 [IDB corrections](idb-corrections.md).
 
 ## Order of work

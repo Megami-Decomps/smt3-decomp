@@ -307,7 +307,7 @@ Open, and reported rather than resolved:
 
 ## 6. IDB improvement, separate from TU boundaries
 
-Each of these needs the proof CLAUDE.md requires, which is retail code that forces the
+Each of these needs the proof AGENTS.md requires, which is retail code that forces the
 conclusion, not a debug-build string that suggests it. Listed in descending order of
 how close the evidence already is.
 
