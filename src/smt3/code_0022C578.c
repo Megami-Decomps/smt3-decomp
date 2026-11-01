@@ -1745,26 +1745,34 @@ void cmpInitStockCursorPos(void)
     cmpInitCursorRange((u8 *)campWork + 0x726C, (u8)rows, (u8)rows, 0);
 }
 
-/* NON_MATCHING: 6 of 33 words differ (first at +0x28). */
-#ifdef NON_MATCHING
+/* Target-specific allocation aid for the real stock-count accumulator; this
+ * does not imply a hardware register requirement or original source spelling.
+ * The binding ends before each call. See docs/matching/code_0022C578.md. */
 extern void cmpChangeCursorListNums(s32 count, u8 *cursor);
 
 void cmpReCalcStockCursorPos(s8 index)
 {
     if (index == 0 || index == 2) {
-        cmpChangeCursorListNums(
-            (campWork->stock[0].PartyCnt + (u8)campWork->stock[0].StockCnt) & 0xFF,
-            &campWork->unk_6230[0]);
+        s32 count;
+        {
+            s32 partyCount = campWork->stock[0].PartyCnt;
+            register s32 stockCount __asm__("$4") = (u8)campWork->stock[0].StockCnt;
+            stockCount = partyCount + stockCount;
+            count = stockCount & 0xFF;
+        }
+        cmpChangeCursorListNums(count, &campWork->unk_6230[0]);
     }
     if (index == 1 || index == 2) {
-        cmpChangeCursorListNums(
-            (campWork->stock[1].PartyCnt + (u8)campWork->stock[1].StockCnt) & 0xFF,
-            &campWork->unk_6230[0x103C]);
+        s32 count;
+        {
+            s32 partyCount = campWork->stock[1].PartyCnt;
+            register s32 stockCount __asm__("$4") = (u8)campWork->stock[1].StockCnt;
+            stockCount = partyCount + stockCount;
+            count = stockCount & 0xFF;
+        }
+        cmpChangeCursorListNums(count, &campWork->unk_6230[0x103C]);
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpReCalcStockCursorPos);
-#endif
 
 void cmpInitRootCursorPos(void)
 {
