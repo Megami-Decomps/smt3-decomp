@@ -56,6 +56,19 @@
 #define SDF_VU0_DATA_MEMORY ((volatile u128 *)0x11004000)
 #endif
 
+/* Forces an address into the EE's uncached mirror by setting one of the top
+ * two address bits, for a DMA engine or coprocessor reading memory the CPU
+ * just wrote: EE_UNCACHED (bit 29) for an ordinary buffer or struct,
+ * EE_UNCACHED_RING (bit 28) for a DMA ring address. On a host build there is
+ * no cache to bypass and no mirror to land in, so both default to the plain
+ * address. */
+#ifndef EE_UNCACHED
+#define EE_UNCACHED(addr) ((addr) | 0x20000000)
+#endif
+#ifndef EE_UNCACHED_RING
+#define EE_UNCACHED_RING(addr) ((addr) | 0x30000000)
+#endif
+
 /* Register access: a plain volatile access, unless the build supplies its
  * own. */
 #ifndef HW_READ
