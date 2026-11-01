@@ -66,7 +66,7 @@ extern void MultMatrixRevNoArg(void);
 extern void Normalize(void);
 extern void dds3EffectSetRotateMatrix(void *pData, const sdfMatrix4_t *pMatrix);
 extern s32 dds3EffectGetState(void *hEffect);
-extern s32 dds3BillboardGetAnimState(void *hBillboard);
+extern u16 dds3BillboardGetAnimState(void *hBillboard);
 extern void effEveBEDCutSetParams(void *hEveBEDCut, const void *pParams);
 
 

@@ -83,7 +83,7 @@ extern sdfVector4_t D_00531D08;
 
 extern sdfVector4_t D_00531D18;
 
-extern s32 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, s32 flag);
+extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, s32 flag);
 
 extern void dds3GetPosPoseSet(dds3Basic_t *pBasic);
 
