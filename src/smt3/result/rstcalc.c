@@ -222,38 +222,43 @@ s32 rstSetLevelUpCount(datUnitWork_t *unit)
     return 0;
 }
 
-#ifdef NON_MATCHING
 s32 rstSetCurrentDevil(void)
 {
     datUnitWork_t *unit = NULL;
     s32 result = 0;
-
-    for (;;) {
+    s32 success = 1;
+    /* Keep the initialized success result live across the scan and calls.
+     * The empty operand constraint preserves retail's retained value without
+     * fixing a register; it is a compiler aid, not original-source evidence. */
+    __asm__("" : "+r" (success));
+again:
+    {
         rstData_t *work = EventStart;
-        s8 index = (s8)work->stockIndex;
-        u8 next = *(volatile u8 *)&work->stockIndex + 1;
+        s32 index = work->unk_0072;
+        s32 next = work->stockIndex + 1;
         s8 slot;
-        if (index >= 16) {
-            break;
-        }
+        dds3GlobalWork_t *global;
+        if (index >= 16)
+            goto done;
+        /* The byte update separates the stock-base observation from the
+         * later unitwork-base observation, as in retail. */
+        global = DDS3_GBWK;
         work->stockIndex = next;
-        slot = DDS3_GBWK->stock[index];
-        if (slot >= 0) {
-            unit = &(*(dds3GlobalWork_t *volatile *)&DDS3_GBWK)->unitwork[slot];
-            if (rstSetLevelUpCount(unit) != 0) {
-                result = rstChkParamLimitAll(unit) == 0 ? 1 : 2;
-                break;
-            }
-        }
+        slot = global->stock[index];
+        if (slot < 0)
+            goto again;
+        unit = &DDS3_GBWK->unitwork[slot];
+        if (rstSetLevelUpCount(unit) == 0)
+            goto again;
+        result = 2;
+        if (rstChkParamLimitAll(unit) == 0)
+            result = success;
     }
-    if (result != 0) {
+done:
+    if (result != 0)
         EventStart->unit = unit;
-    }
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", rstSetCurrentDevil);
-#endif
 
 extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
 extern void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst);
@@ -525,33 +530,39 @@ s32 rstChkSkillPowerUp1(void)
     return ret;
 }
 
-#ifdef NON_MATCHING
 s32 rstChkSkillPowerUp2(void)
 {
     u32 roll;
 
     if (EventStart->unit->id == 0) {
+        register u32 delta __asm__("$5");
+
         roll = dds3GetRandA(NULL) % 254;
+        delta = roll - 112;
+        /* Retail keeps the roll and interval delta live together here.
+         * The localized constraint prevents their coalescing and the low
+         * test moving before this boundary; it is a compiler aid, not
+         * evidence of the original source spelling. Neither crosses a call. */
+        __asm__("" : "+r" (delta), "+r" (roll));
         if (roll < 112) {
             return 0;
         }
-        if (roll < 254) {
+        if (delta < 142) {
             return 1;
         }
-        return 2;
+        goto fallback;
     }
     roll = dds3GetRandA(NULL) % 254;
     if (roll < 128) {
         return 0;
     }
-    if (roll < 254) {
+    if (roll >= 128 && roll < 254) {
         return 1;
     }
+    goto fallback;
+fallback:
     return 2;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", rstChkSkillPowerUp2);
-#endif
 
 extern s32 rstFindPowerUpSkill(u16 skillId);
 
@@ -1344,18 +1355,21 @@ s16 datGetDevilParam(u8 devilId)
     return D_00339E00[devilId].param;
 }
 
-/* NON_MATCHING: 8 of 22 words differ (first at +0x28). */
-#ifdef NON_MATCHING
+/* Target-specific allocation aid: each live table offset occupies $2, so
+ * the byte-load address macro uses $at as in retail. No calls cross either
+ * offset lifetime; this is not evidence of the original source spelling. */
 s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra)
 {
     if (extra != 0) {
-        return D_00339E0C[race * 66 + index];
+        register s32 offset __asm__("$2") = index + race * 66;
+        return D_00339E0C[offset];
     }
-    return D_00339E06[race * 66 + index];
+    {
+        register s32 offset __asm__("$2") = index + race * 66;
+        return D_00339E06[offset];
+    }
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbGetHeartsParamByIndex);
-#endif
+
 
 extern s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra);
 
@@ -1700,11 +1714,10 @@ s32 cmbFindEvoEntry(u16 devilId)
 
 extern datSkill_t attr[];
 
-#ifdef NON_MATCHING
 s32 cmbCopyEvoDevil(datUnitWork_t *unit, u16 skill)
 {
-    u16 skillForm = attr[skill].keisyoform;
     s8 skillAttr = attr[skill].skillattr;
+    u16 skillForm = attr[skill].keisyoform;
     s16 devilType = datDevilTable[unit->id].keisyotype;
     u16 devilForm = datDevilTable[unit->id].keisyoform;
     u32 value = cmbCopyEvoStats(skillAttr, devilType);
@@ -1712,7 +1725,7 @@ s32 cmbCopyEvoDevil(datUnitWork_t *unit, u16 skill)
 
     if (result != 0) {
         u8 quotient = value / (u32)cmbFindEvoEntry(skill);
-        s32 level = quotient + unit->level - datDevilTable[unit->id].level + 1;
+        s32 level = quotient + (unit->level - datDevilTable[unit->id].level) + 1;
 
         if (level >= 100) {
             level = 99;
@@ -1721,9 +1734,6 @@ s32 cmbCopyEvoDevil(datUnitWork_t *unit, u16 skill)
     }
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbCopyEvoDevil);
-#endif
 
 extern u16 D_00339BA8[];
 
@@ -1740,29 +1750,31 @@ s32 cmbEvoEntryExists(u16 devilId)
     return 0;
 }
 
-/* NON_MATCHING: 25 of 34 words differ, 136 against retail's 132 bytes; the
- * narrowed count parameter copied into its own register in retail. */
-#ifdef NON_MATCHING
+/* Keep the initial byte count separate from the full-width countdown and
+ * start the unit cursor only on the nonempty path. */
 s8 cmbCountEvoReady(datUnitWork_t *unit, u8 count)
 {
     u8 ready = 0;
 
-    while (count != 0) {
-        if ((unit->flag & 1) != 0) {
-            if ((unit->flag & 4) == 0) {
-                if (cmbEvoEntryExists(unit->id) != 0) {
-                    ready++;
+    if (count != 0) {
+        datUnitWork_t *cursor = unit;
+        u32 remaining = count;
+
+        do {
+            if ((cursor->flag & 1) != 0) {
+                if ((cursor->flag & 4) == 0) {
+                    if (cmbEvoEntryExists(cursor->id) != 0) {
+                        ready++;
+                    }
                 }
             }
-        }
-        unit++;
-        count--;
+            cursor++;
+            remaining--;
+        } while (remaining != 0);
     }
     return ready;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbCountEvoReady);
-#endif
+
 
 typedef struct
 {
@@ -1932,16 +1944,16 @@ INCLUDE_ASM(const s32, "result/rstcalc", cmpFindKugatatiMsgEntry);
 
 extern s8 cmbCountEvoReady(datUnitWork_t *unit, u8 count);
 
-#ifdef NON_MATCHING
 void cmbCalcEvoEvent(datUnitWork_t *unit, fclSkillParam_t *entry,
                      s8 hasNext, datUnitWork_t *result)
 {
     u16 devilId;
 
     if (hasNext != 0 && entry[1].kind == 5) {
-        s8 half = cmbCountEvoCandidates(unit, 16) / 2;
+        s32 candidateCount = cmbCountEvoCandidates(unit, 16);
+        s32 half = candidateCount / 2;
 
-        if (half < cmbCountEvoReady(unit, 16)) {
+        if ((s8)half < cmbCountEvoReady(unit, 16)) {
             devilId = entry[0].value;
         } else {
             devilId = entry[1].value;
@@ -1968,9 +1980,6 @@ void cmbCalcEvoEvent(datUnitWork_t *unit, fclSkillParam_t *entry,
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbCalcEvoEvent);
-#endif
 
 s32 rstCalcEvoLevelDiff(datUnitWork_t *a, datUnitWork_t *b, datUnitWork_t *c, s32 level)
 {
@@ -2174,9 +2183,9 @@ s8 func_00223890(datUnitWork_t *unit, s32 rawLevel)
 }
 
 
-/* NON_MATCHING: 10 of 32 words differ, 128 against retail's 132 bytes; the
- * level read copied into its own register in retail. */
-#ifdef NON_MATCHING
+/* A localized empty operand constraint retains the native old-level copy
+ * separately from the value incremented and stored. Both have real consumers
+ * before the next callback; this aid is not original-source evidence. */
 s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp)
 {
     datUnitWork_t work;
@@ -2186,18 +2195,19 @@ s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp)
     cmbCopyCustomDevilToStock(&work, unit);
     work.exp += exp;
     while (work.exp >= datAdvanceDevilLevel(&work)) {
+        u32 previous;
         level = work.level;
+        previous = level;
+        __asm__ ("" : "+r"(level));
         work.level = level + 1;
-        if (level >= 0xFF) {
+        if (previous >= 0xFF) {
             break;
         }
         count++;
     }
     return count;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbGetLevelUpCount);
-#endif
+
 
 extern void rstDrawNumber(s32 x, s32 y, s32 number);
 extern s32 fclChkMessage(void);

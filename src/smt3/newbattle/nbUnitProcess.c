@@ -435,15 +435,15 @@ extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
 extern s16 rstGetEquipHeartsAisyo(void);
 extern u32 datAisyoTable[248][16];
 
-#ifdef NON_MATCHING
 void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex)
 {
-    volatile nbMainProcessData_t *state = data;
+    nbMainProcessData_t *state = data;
     datUnitWork_t *work = NULL;
+    s32 index = formindex;
     datUnitVisual_t *visual = NULL;
-    volatile nbParty_t *party;
-    volatile nbFormation_t *form;
-    volatile datUnitVisual_t *vvisual;
+    nbParty_t *party;
+    nbFormation_t *form;
+    datUnitVisual_t *vvisual;
     s32 partyindex = -1;
     s32 partyflag = 0;
     s32 hearts = 0;
@@ -451,61 +451,85 @@ void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formin
     f32 size;
     f32 allshot;
 
-    if (side == 0 || side == 1) {
-        s32 first = side == 0 ? 0 : 4;
-        s32 end = side == 0 ? 4 : 14;
-        volatile nbParty_t *slots = state->party;
-
-        for (i = first; i < end; i++) {
-            if (!(slots[i].flag & 1)) {
+    /* Keep each loaded party base separate from the scan pointer. These local
+     * constraints reproduce the target compiler allocation, not source spelling;
+     * every constrained pointer is consumed below and dies before either call. */
+    switch (side) {
+    case 1: {
+        register nbParty_t *base __asm__("$3");
+        nbParty_t *slots;
+        base = state->party;
+        __asm__("" : "+r"(base));
+        slots = base;
+        for (i = 4; i < 14; i++) {
+            if ((u16)(slots[i].flag & 1) == 0) {
                 partyindex = i;
                 break;
             }
         }
-        if (side == 0) {
-            datUnitWork_t *updated;
-            u16 count;
-            u32 flags;
-
-            work = &DDS3_GBWK->unitwork[stockno];
-            nbGetUnitID(work);
-            visual = nbGetUnitVisual(work);
-            updated = &DDS3_GBWK->unitwork[stockno];
-            count = state->playerpcnt;
-            flags = ((volatile datUnitWork_t *)updated)->flag;
-            state->playerpcnt = count + 1;
-            ((volatile datUnitWork_t *)updated)->flag = flags | 2;
-            partyflag = 1;
-        } else {
-            datUnitWork_t *updated;
-            u16 count;
-            u32 flags;
+        {
 
             work = &state->enemyunit[stockno];
             nbGetUnitID(work);
             visual = nbGetUnitVisual(work);
-            updated = &state->enemyunit[stockno];
-            count = state->enemypcnt;
-            flags = ((volatile datUnitWork_t *)updated)->flag;
-            state->enemypcnt = count + 1;
-            ((volatile datUnitWork_t *)updated)->flag = flags | 0x22;
             partyflag = 3;
+            state->enemypcnt++;
+            (&state->enemyunit[stockno])->flag |= 0x22;
+
+        }
+        break;
+    }
+    case 0: {
+        register nbParty_t *base __asm__("$3");
+        nbParty_t *slots;
+        base = state->party;
+        __asm__("" : "+r"(base));
+        slots = base;
+        for (i = 0; i < 4; i++) {
+            if ((u16)(slots[i].flag & 1) == 0) {
+                partyindex = i;
+                break;
+            }
+        }
+        {
+
+            work = &DDS3_GBWK->unitwork[stockno];
+            nbGetUnitID(work);
+            visual = nbGetUnitVisual(work);
+            partyflag = 1;
+            state->playerpcnt++;
+            (&DDS3_GBWK->unitwork[stockno])->flag |= 2;
+
+        }
+        break;
+    }
+
+    }
+
+    /* Address sums below use the EE ABI's flat 32-bit addresses and native
+     * record strides. Convert the real array base to u32, add the byte offset,
+     * then convert the resulting address back; no offset is treated as an
+     * object pointer. This target-specific spelling retains native addu order. */
+    /* Keep the reloaded setup base in v1; this constraint ends before either
+     * affinity callback. Reuse party for the
+     * entry stores and later affinity copy so it represents both real phases. */
+    {
+        register nbParty_t *base __asm__("$3");
+        nbParty_t *entry;
+        base = state->party;
+        __asm__("" : "+r"(base));
+        entry = (nbParty_t *)((u32)(partyindex * sizeof(nbParty_t)) + (u32)base);
+        party = entry;
+        party->flag = partyflag;
+        party->statindex = stockno;
+        party->formindex = index;
+        for (i = 19; i >= 0; i--) {
+            party->count[i] = 0;
         }
     }
 
-    party = &state->party[partyindex];
-    party->flag = partyflag;
-    party->statindex = stockno;
-    party->formindex = formindex;
-    for (i = 19; i >= 0; i--) {
-        party->count[i] = 0;
-    }
-
-    if (((volatile datUnitWork_t *)work)->flag & 4) {
-        hearts = rstGetEquipHeartsAisyo();
-    }
-    if (hearts != 0) {
-        party = &state->party[partyindex];
+    if ((work->flag & 4) && (hearts = rstGetEquipHeartsAisyo()) != 0) {
+        party = (nbParty_t *)((u32)(partyindex * sizeof(nbParty_t)) + (u32)state->party);
         for (i = 0; i < 16; i++) {
             party->aisyo[i] = datAisyoTable[hearts][i];
         }
@@ -516,22 +540,23 @@ void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formin
         }
     }
 
-    form = &state->form[formindex];
-    form->stat = 0x41;
-    if (formindex < 4) {
-        form->stat = 0x141;
-    } else if (formindex < 14) {
-        form->stat = 0x241;
+    state->form[index].stat = 0x41;
+    if (index < 4) {
+        state->form[index].stat |= 0x100;
+    } else if (index < 14) {
+        state->form[index].stat |= 0x200;
     } else {
-        form->stat = 0x441;
+        state->form[index].stat |= 0x400;
     }
     vvisual = visual;
-    if (vvisual->autowait == 1) {
-        form->stat |= 0x80;
+    switch (vvisual->autowait) {
+    case 0: break;
+    case 1: state->form[index].stat |= 0x80; break;
     }
+    form = (nbFormation_t *)((u32)(index * sizeof(nbFormation_t)) + (u32)state->form);
     size = vvisual->formsize;
     form->partyindex = partyindex;
-    form->formindex = formindex;
+    form->formindex = index;
     form->r = size;
     form->cr = 0;
     SDF_VU0_COPYVECTOR(&form->center, &visual->center);
@@ -543,9 +568,6 @@ void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formin
     form->allshotr = allshot;
     nbGetMotionNo((nbFormation_t *)form, 0);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbAddUnitStock);
-#endif
 
 void nbSummonUnit(s32 side, s32 stockno, s32 formindex)
 {

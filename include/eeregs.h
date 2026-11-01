@@ -39,6 +39,48 @@
 #define GS_CSR ((volatile u64 *)0x12001000)
 #define GS_BUSDIR ((volatile u64 *)0x12001040)
 
+/* Scratchpad RAM: 16KB of on-chip memory with no cache, mapped at a fixed
+ * physical address. sdfVu1.c's point buffer uses one fixed region of it as
+ * a second ring alongside corePktPointBuff. A build with no scratchpad
+ * defines this as a host buffer's address instead. */
+#ifndef SDF_SCRATCHPAD_POINT_BUFFER
+#define SDF_SCRATCHPAD_POINT_BUFFER 0x70001000
+#endif
+
+/* VU0's data memory, reached from the EE side as ordinary memory while VU0
+ * is idle. sdfCoreDraw.c writes transform, light and texture data here
+ * directly ahead of a VU0 microprogram run, bypassing the vf-register
+ * macros. A build with no VU0 data memory mapped this way defines this to
+ * wherever that data lands instead. */
+#ifndef SDF_VU0_DATA_MEMORY
+#define SDF_VU0_DATA_MEMORY ((volatile u128 *)0x11004000)
+#endif
+
+/* Forces an address into the EE's uncached mirror by setting one of the top
+ * two address bits, for a DMA engine or coprocessor reading memory the CPU
+ * just wrote: EE_UNCACHED (bit 29) for an ordinary buffer or struct,
+ * EE_UNCACHED_RING (bit 28) for a DMA ring address. On a host build there is
+ * no cache to bypass and no mirror to land in, so both default to the plain
+ * address. */
+#ifndef EE_UNCACHED
+#define EE_UNCACHED(addr) ((addr) | 0x20000000)
+#endif
+#ifndef EE_UNCACHED_RING
+#define EE_UNCACHED_RING(addr) ((addr) | 0x30000000)
+#endif
+
+/* The EE hardware register space and the GS privileged register space, as
+ * address ranges rather than individual registers: MovieViewer.c's debug
+ * watcher classifies an arbitrary address by whether it falls in one of
+ * them. A build with no mapped register range defines these so the test
+ * never matches. */
+#ifndef EE_REG_RANGE_BASE
+#define EE_REG_RANGE_BASE 0x10000000
+#define EE_REG_RANGE_END 0x10010000
+#define GS_PRIV_REG_RANGE_BASE 0x12000000
+#define GS_PRIV_REG_RANGE_END 0x12002000
+#endif
+
 /* Register access: a plain volatile access, unless the build supplies its
  * own. */
 #ifndef HW_READ

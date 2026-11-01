@@ -99,42 +99,50 @@ registers the fade chain needs); and `found` declared first rather than last.
 
 ## effPCPDANTE_Damage_Create (effect/effPCPBoss, 360 bytes)
 
-71 of 90 words match, at the exact 360-byte size.
+90 of 90 words match, at the native 360-byte size (2026-10-30).
 
-Two callee-saved registers swapped. Retail keeps the parameter pointer in `$20`
-and the accepted-target count in `$21`; the draft has them the other way round,
-so every instruction that names either differs, and the swap pulls `swaps =
-count * 2` into the other dead register and the byte-swap temporary out of
-`$19` into `$5`. Everything else is exact, including the two 32-iteration
-conditions, the branch-likely forms and the shuffle loop.
+Only the truthful `u8` held-byte local is bound to native `$19`, a localized
+target-specific compiler reconstruction aid, not evidence of historical source
+spelling. No empty asm is needed. Count is an ordinary `u32` local: it
+initializes after setup callbacks and has real increment/range/multiply
+consumers. Its native `$21` allocation is preserved across both RNG providers.
+Held initializes from the real unsigned-byte load after both
+calls and dies in its byte store before the next iteration's calls. The old
+delay value in `$19` and parameter pointer in `$20` are dead in this phase;
+the overlapping live swap bound naturally occupies `$20`.
 
-Two source facts carried it most of the way, both reusable:
+An ordinary `u32 shiftBase = 1u` value, assigned after count initialization and
+before slot formation, supplies the actual mask-shift operand. It preserves
+defined unsigned shifting for all 32 iterations, including bit 31. Actual RTL
+shows its definition before slot formation throughout loop optimization and
+scheduling. The prior literal was introduced inside the loop then hoisted
+after slot formation, leaving the two setup instructions reversed.
 
-- `delay = 1` has to be assigned before the `nbGetMainProcessData` and
-  `effBTLSkillGetTargetBit` calls. With the assignment after them the value
-  lands in `$4` instead of a callee-saved register, the frame shrinks by 16
-  bytes and 54 words differ; retail fills the first call's delay slot with
-  `addiu $19, $0, 0x1`.
-- The formation walk is a pointer increment, not `unit[i]`. Retail reads
-  `lw $2, 0x78($16)` with `$16` advancing by `0xF0`; the subscript form biases
-  the pointer by `0x78` and adds a word of setup.
+The local delay accumulator is `u32`, while the parameter record's signed
+`wait` field is unchanged. This reproduces native `addu` modulo-32-bit
+accumulation and low-byte `sb` storage for every signed wait value, without
+assuming a parameter range that would prevent signed overflow. The correction
+leaves all allocated and relocation section bytes identical to the signed
+control. Count is at most 32; its doubled swap bound is at most 64. No RNG is
+called when count is zero; otherwise native unsigned remainder yields indexes
+below count, within the 32-byte delay array. Equal indexes are safe.
 
-Ruled out for the register swap: `count` declared first, last and in the
-middle (declaration order is inert here, as elsewhere); `count` as `s32`;
-`swaps` as `count + count`, inlined into the loop condition, and through a
-separate index variable for the second loop; the parameter typed and the
-`memcpy` taking it directly or through a `void *` cast; the array index form in
-the first loop; `slot` initialised before the calls; a `range` local for the
-two `dds3GetRandIntA` arguments; `held` as `s32`; `a`/`b` as `s32` and declared
-at the top; `NULL` against `0` for the random stream; the second loop as a
-`while`; the two conditions merged with `&&` and spelled `!= 0`. Hoisting
-`param->delayStep` into a local and deriving `count` from the slot pointer are
-both far worse (78 and 80 words), which confirms the loop body is right.
+Qualified plain/`-da` assembly and allocated/relocation sections agree. The
+complete owner checks at 158 match / 0 differ; no ABI, layout, access width,
+call sequence or extra consumer is introduced.
 
-After recovering the complete 16-byte parameter record, replacing the generic
-copy with `work->param = *param` still leaves 71 of 90 words matching at the
-360-byte size. Typed aggregate assignment does not close this
-allocation residual either.
+Retained negative controls explain the minimal final form: count-only reached
+83/90; held with nonvolatile empty `+r` reached 85/90 but reordered three loop
+instructions; volatile reached 76/90. Removing the empty asm while retaining
+the held declaration reached 88/90, leaving only setup order. The ordinary
+shift-base local closed those last two words. Final necessity ablations with
+unsigned delay and shiftBase found both bindings removed at 73/90, count-only
+at 85/90, and held-only at 90/90; the redundant count binding was therefore
+removed. Earlier declaration permutations,
+changed count/index types, `count + count`, merged conditions, parameter-copy
+forms, array-index formation walking, and a held `s32` did not close the match.
+The initial delay assignment before setup calls and formation-pointer increment
+remain important native source shapes.
 
 ## effPCPBossBUNSINDrawPoly2 (effect/effPCPBoss, 468 bytes)
 
@@ -245,3 +253,109 @@ constraint is used.
 
 Reproduce with `tools/check_unit.py src/smt3/effect/effPCPBoss.c
 --cflags=-DNON_MATCHING --func effPCPBossONGYDraw -v`.
+
+## effPCPBossKAGU2AttackDraw (effect/effPCPBoss, 0x424)
+
+265 of 265 words match at 1060 bytes in ordinary C. The signed bounded search
+keeps distinct current/found pointers and a fallback-only NULL return; the
+direct skill path bypasses that guard. Frame/duration/fade snapshots precede
+blend, while count/randomness follow the real VU endpoint store. Actual aligned
+place/marks/center/end objects explain the native 0x110 frame without padding.
+Existing VU helpers hand produced vf10 values to real scratch immediately,
+then read XYZ for accumulation. Real lists remain 16 slots, four entries per
+group, with marks 1/2/4/5 and angles zero/positive/negative/zero. No new clamp,
+consumer or type recovery is claimed. List pointers and BED/frame fields
+retain their actual callback reloads and native increment timing.
+
+Independent BED payload stores before SetParams recover native scheduling
+without barriers or constraints. Qualified **pre-scheduler** regmove has
+field9 UID772 carrying the actual base's REG_DEAD274; field8 UID767 does not.
+Sched1 moves field9 before fields7/10/XYZ/color, then zeros4/5/6, field8 and
+zero3. Its **post-scheduler** death marker transfers to later field8: that
+output annotation is not evidence that field8 was the dying input use.
+Complete-owner plain/dump normalized assembly, allocated-section contracts,
+relocations and function inventory agree, independently checked. This records
+observed scheduling, not an unseen comparator rule or original source spelling.
+
+Independent verification gives 155 match, 0 differ, preserving all peers and
+owned data; the first KAGU remained unchanged at this source. Retail checksum,
+427 tests, 147 guarded owners / 545 drafts, seven IRX owners and report gates
+passed. Source `910bd87f2ed6d9271eaa2794aaa67076ef33c3c4` has green exact-source CI
+[41082732651](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41082732651).
+
+## effPCPBossKAGUAttackDraw (effect/effPCPBoss, 0x35C)
+
+215 of 215 words match at 860 bytes. Two explicit local `$22` bindings are
+SMT3 reconstruction aids on **nonoverlapping real lifetimes**, not historical
+source evidence. Fallback found initializes NULL, receives only an actual
+matching formation and feeds the NULL/early-return guard; the direct path
+bypasses it. Qualified life RTL marks that hard-register value dead at the
+guard. Only later does groupIndex initialize zero for its genuine outer-loop
+comparison, addressing and increment. Both use ABI-preserved callee-saved
+storage across actual callbacks; prologue/epilogue save and restore `$22`.
+No live caller-clobbered binding, overlap, fake consumer, artificial lifetime
+or instruction-emitting scalar asm is introduced. Existing VU helpers are
+actual hardware handoffs, not part of this allocation allowance.
+
+Unsigned i genuinely indexes eight marks, dies at that phase's exit, then
+reinitializes for each eight-polygon loop with the native index-6 exclusion.
+Qualified life/global-allocation observations establish the disjoint consumers
+and final pseudo93-to-hard19 allocation. The later group loop and actual
+linear-list index retain independent unsigned increments in cursor order.
+No phase value leaks across reset; no extra memory operation or callback is
+added. Real eight-entry groups, 32 slots, fallback domain, BED stores and VU
+scratch remain unchanged, without fabricated bounds or padding.
+
+Controls isolate the dependency: fallback binding plus faithful BED order
+reaches 197/215 words, the disjoint group binding 203/215, genuine index reuse
+210/215, and native independent cursor increment order completes the match.
+A broad work-pointer binding disrupted induction and was rejected. Final merged
+owner plain/dump assembly, allocated sections, relocation contracts and complete
+function inventory pass independent parity; KAGU2's body is unchanged. The
+older first-only study owner contained a stale sibling and is not the final
+owner acceptance evidence. No unobserved allocator comparator is claimed.
+
+Independent final verification gives 156 match, 0 differ, including owned data.
+Retail checksum, 427 tests, 147 guarded owners / 544 drafts, seven IRX owners
+and report gates passed for source `cd029e510e43fd3259bbd3d6fc9989b28e655100`.
+Exact-source CI
+[41083876389](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41083876389)
+attempt 1 completed successfully, with every actual step passing and none skipped.
+
+## effPCPDANTE_ShowTime_ShowTime_Draw (effect/effPCPBoss, 0x358)
+
+214 of 214 words match at 856 bytes. The first fade quotient is assigned to
+the existing real `f32 rate` scalar before its color expression. Later phases
+assign that same scalar before their existing scale/color consumers. There
+is no new entry initialization, artificial consumer, constraint, register
+binding, helper or provider change.
+
+The first quotient is consumed by the actual alpha calculation and is not
+carried into a later phase. Existing unsigned frame-window tests, floating
+operation order, alpha-mode changes and sprite calls remain intact. Every
+later rate use follows its own assignment. The texture/frame snapshots and
+the final fresh frame load with unsigned increment are unchanged. No callback
+observation or memory access is added by naming the quotient.
+
+Qualified expansion records the baseline first quotient in temporary SF
+pseudo93, while the candidate writes the same division into the existing
+rate variable, SF pseudo89. Its real color subtraction carries REG_DEAD;
+later phases define fresh values before their own consumers. Post-global
+allocation places the candidate quotient in f21, with native division
+`div.s f21,f2,f1`, rather than the baseline's f1. This establishes the actual
+shared pseudo and allocation outcome, not an unobserved allocator tie-break
+rule or original-source spelling.
+
+Independent semantic review and canonical complete-owner checking give
+157 match, 0 differ, preserving all 156 peers and owned data. Independently
+verified complete-owner plain/dump assembly and allocated-section, relocation
+and function contracts agree for both baseline and candidate, covering
+157 functions and seven contracts in each pair.
+
+Final local gates pass the retail checksum, 26 tooling test files / 427 cases,
+all 147 guarded owners / 532 drafts with stable source/compiler inputs,
+seven IRX owners, and reconciled production reports.
+
+Source commit `21fd7386d3f34b42d9269dd681bb8a467cf67f2a` passed exact-source
+hosted CI [41114522908](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41114522908),
+attempt 1, including build and Pages deployment.

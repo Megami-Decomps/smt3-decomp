@@ -859,7 +859,7 @@ extern s32 devilbase;
 extern s32 devilcur;
 
 #ifdef NON_MATCHING
-s32 SelectDevil(void)
+s32 SelectDevil(nbDebugProcessData_t *d)
 {
     sdfDrawTag_t *tag;
     frFontRequest_t *request;
@@ -1026,100 +1026,70 @@ void SetNextSeq(nbDebugProcessData_t *d)
 extern s32 nbGetTarSelStat(void);
 extern void nbSetNextOrder(void);
 
-#ifdef NON_MATCHING
+extern s32 SelectMotData(nbDebugProcessData_t *d, s32 active);
+extern s32 SelectMot(nbDebugProcessData_t *d, s32 active);
+extern s32 SelectDevil(nbDebugProcessData_t *d);
+
 void *nbDebugProcess1(dds3ProcessID_t *id)
 {
     nbDebugProcessData_t *d = dds3GetProcessData(id);
     s32 advance = 0;
     s32 result;
-    s32 nextseq;
-
+    nbMainProcessData_t *data;
     switch (d->seq) {
-    case 0:
-        d->nextseq = 1;
-        advance = 1;
-        break;
+    case 0: d->nextseq = 1; advance = 1; break;
     case 1:
         result = nbGetTarSelStat();
-        if (result == 0) {
+        switch (result) {
+        case 0:
             SetTarget_nbDebugProcess(d);
             d->nextseq = 4;
             advance = 1;
-        } else if (result == 2) {
-            return (void *)-1;
-        } else {
-            DispHpMpBad(d);
+            break;
+        case 2: return (void *)-1;
+        default: DispHpMpBad(d); break;
         }
         break;
-    case 2:
-        result = SelectDevil();
-        if (result == -1) {
-            d->nextseq = 4;
-            advance = 1;
-        } else if (result == 1) {
-            d->nextseq = 3;
-            advance = 1;
-        }
-        break;
-    case 3:
-        if (((d->data->stat & 8) != 0 && d->side != 1) ||
-            ((d->data->stat & 8) == 0 && d->side != 0)) {
-            return (void *)-1;
-        }
-        nbSetOrder();
-        while (d->data->party[d->data->activeunit].formindex != d->formindex) {
-            nbSetNextOrder();
-        }
-        return (void *)-1;
     case 4:
         result = SelectMenu(d);
-        if (result == -1) {
-            d->nextseq = 1;
-            advance = 1;
-        } else if (result == 1) {
+        switch (result) {
+        case -1: d->nextseq = 1; advance = 1; break;
+        case 1:
             switch (menucur) {
-            case 0: nextseq = 2; break;
-            case 1: nextseq = 5; break;
-            case 2: nextseq = 6; break;
-            case 3: nextseq = 7; break;
-            case 4: nextseq = 8; break;
-            default: return NULL;
+            case 0: d->nextseq = 2; advance = 1; break;
+            case 1: d->nextseq = 5; advance = 1; break;
+            case 2: d->nextseq = 6; advance = 1; break;
+            case 3: d->nextseq = 7; advance = 1; break;
+            case 4: d->nextseq = 8; advance = 1; break;
             }
-            d->nextseq = nextseq;
-            advance = 1;
-        } else {
-            DispHpMpBad2(d, d->form);
+            break;
+        default: DispHpMpBad2(d, d->form); break;
         }
         break;
     case 5:
     case 6:
         result = SelectHpMp(d);
-        if (result == -1 || result == 1) {
-            d->nextseq = 4;
-            advance = 1;
-        } else {
-            DispHpMpBad2(d, d->form);
+        switch (result) {
+        case -1: goto menu;
+        case 1: d->nextseq = 4; advance = 1; break;
+        default: DispHpMpBad2(d, d->form); break;
         }
         break;
     case 7:
         result = SelectBad(d);
-        if (result == -1) {
-            d->nextseq = 4;
-            advance = 1;
-        } else if (result != 1) {
+        switch (result) {
+        case -1: goto menu;
+        case 1: break;
+        default:
             DispHpMpBad2(d, d->form);
+            break;
         }
         break;
     case 8:
         SelectMotData(d, 0);
         result = SelectMot(d, 1);
-        if (result == -1) {
-            d->nextseq = 4;
-            advance = 1;
-        } else if (result == 2) {
-            d->nextseq = 9;
-            advance = 1;
-        }
+        if (result == -1) goto menu;
+        else if (result == 2) { d->nextseq = 9; advance = 1; }
         break;
     case 9:
         SelectMot(d, 0);
@@ -1128,19 +1098,47 @@ void *nbDebugProcess1(dds3ProcessID_t *id)
             advance = 1;
         }
         break;
-    default:
+    case 2:
+        result = SelectDevil(d);
+        switch (result) {
+        case -1: goto menu;
+        case 1: d->nextseq = 3; advance = 1; break;
+        menu:
+            /* All cancel paths share this genuine menu transition. */
+            d->nextseq = 4;
+            advance = 1;
+            break;
+        }
         break;
+    case 3:
+        if (!(d->data->stat & 8)) {
+            s32 side = d->side;
+            if (side != 0) {
+                void *exitResult = (void *)-1;
+                /* Keep this real early-exit value distinct from the later
+                 * side check's return, preserving the native epilogue edge. */
+                __asm__("" : "+r"(exitResult));
+                return exitResult;
+            }
+        } else {
+            s32 side = d->side;
+            /* Local EE allocation aid for the actual comparison operand;
+             * no calls cross its lifetime. Not original-source evidence. */
+            register s32 playerSide __asm__("$2") = 1;
+            __asm__("" : "+r"(playerSide));
+            if (side != playerSide) return (void *)-1;
+        }
+        nbSetOrder();
+        data = d->data;
+        while (data->party[data->activeunit].formindex != d->formindex) {
+            nbSetNextOrder();
+            data = d->data;
+        }
+        return (void *)-1;
     }
-
-    if (advance) {
-        SetNextSeq(d);
-    }
+    if (advance) SetNextSeq(d);
     return NULL;
 }
-
-#else
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", nbDebugProcess1);
-#endif
 
 void nbDebugShutdown(dds3ProcessID_t *id)
 {

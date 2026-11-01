@@ -24,6 +24,32 @@ does not compile to retail's `$5` setup.
 
 ## fclDrawPanelType0Grad (facility/fclPanel, 0x100)
 
+64 of 64 words match at 256 bytes. A current-snapshot scan of 147 guarded owners /
+543 drafts identified this singleton alongside ConfigCursor. Removing only the
+guard, fallback and obsolete residual comment makes the existing ordinary body
+exact; no helper, prototype or body change is needed. The historical six-word
+second-color residual below is stale for this measured context. No historical
+compiler cause or original-source spelling is claimed.
+
+Two actual `u32 coords[2][3]` subarrays supply independently bounded X/Y triples.
+The triangle provider consumes all six coordinates and all three initialized
+colors, with real per-vertex palette/alpha roles. The second negative X is an
+unsigned word for native modulo32 GS-offset addition, not a fabricated pointer
+or overflow assumption. Panel Z is freshly loaded and converted to the unsigned
+depth argument after each preceding callback. Sprite 0x48, both triangles and
+sprite 0x44 keep native ordering and truthful provider types. No constraints,
+volatile, dead scratch, fake extent or scalar phase-reuse rationale is needed.
+
+Independent whole-owner checking gives 16 match, 0 differ, preserving all
+15 peers; this owner emits no allocated data payload. Other guarded functions
+remain unchanged. Combined retail checksum, 427 tests across 26 tooling files,
+147 guarded owners / 541 drafts, seven IRX owners and report gates passed for
+source `efc12ecfd119cb16699f1afdd2508de80df5e137`. Exact-source CI
+[41096589522](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41096589522)
+attempt 1 completed successfully, with every actual step passing and none skipped.
+
+### Historical residual and controls (superseded measurement)
+
 6 of 64 words differ at the exact 256-byte size. Two gradient triangles sit
 between sprite passes 0x48 and 0x44. Each triangle reloads panel Z after the
 preceding callback; the third vertex keeps the first color's low-byte alpha.

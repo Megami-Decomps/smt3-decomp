@@ -126,17 +126,17 @@ extern s32 datGetItemSlotIndex(u16 item);
 extern s32 cmbChkGetHearts(s32 id);
 extern u32 dds3GetRandA(void *state);
 
-#ifdef NON_MATCHING
 u16 shpGetItemFromItemBox(s32 box)
 {
-    shpItemBoxEntry_t candidates[8];
+    s32 capacity = 8;
+    shpItemBoxEntry_t candidates[capacity];
     s32 count = 0;
     u32 total = 0;
     s32 cumulative = 0;
     s32 roll;
     s32 i;
 
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < capacity; i++) {
         shpItemBoxEntry_t *entry = &D_0032FBC8[box][i];
         u16 item = entry->item;
         s32 slot = datGetItemSlotIndex(item);
@@ -159,9 +159,6 @@ u16 shpGetItemFromItemBox(s32 box)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpGetItemFromItemBox);
-#endif
 
 #ifdef NON_MATCHING
 extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
@@ -384,36 +381,55 @@ void shpUpdateSeqSellNums(void)
 
 extern u32 dds3GetProcessStat(dds3ProcessID_t *id);
 
-#ifdef NON_MATCHING
 s32 shpUpdateSeqConfirm(s8 mode)
 {
     s32 flag;
+    s32 scriptState = 2;
 
-    if (dds3GetProcessStat(shopUpdateWork->scriptArg) == 2) {
+    if (dds3GetProcessStat(shopUpdateWork->scriptArg) == scriptState) {
         return 0;
     }
     flag = fclGetFlag(2);
-    if (flag == 0) {
-        s32 step = shopUpdateWork->paymentRemaining / 20;
+    switch (flag) {
+    case 0: {
+        shpUpdateWork_t *work = shopUpdateWork;
+        s32 step = work->paymentRemaining / 20;
 
-        shopUpdateWork->unk_0001 = 9;
-        shopUpdateWork->paymentStep = step != 0 ? step : 1;
+        work->unk_0001 = 9;
+        work->paymentStep = step != 0 ? step : 1;
         shopUpdateWork->unk_0004 = -1;
-    } else if (flag == 1) {
+        break;
+    }
+    case 1: {
+        /* Target-specific aid for native post-callback store-destination
+         * registers, not an original-source claim: both constrained pointers
+         * are fresh real snapshots; neither live value crosses a call. */
+        register shpUpdateWork_t *work asm("$4");
+        s32 nextState;
         if (mode == 0) {
             fclScriptStart(shopUpdateWork->script, 2, &shopUpdateWork->scriptArg);
-            shopUpdateWork->unk_0001 = 5;
+            work = shopUpdateWork;
+            nextState = 5;
         } else {
             fclScriptStart(shopUpdateWork->script, 4, &shopUpdateWork->scriptArg);
-            shopUpdateWork->unk_0001 = 6;
+            work = shopUpdateWork;
+            nextState = 6;
         }
-        shopUpdateWork->unk_0004 = 2;
+        asm("" : "+r"(work));
+        work->unk_0001 = nextState;
+        {
+            register shpUpdateWork_t *scriptWork asm("$3") = shopUpdateWork;
+            asm("" : "+r"(scriptWork));
+            scriptWork->unk_0004 = scriptState;
+        }
+        break;
+    }
+    case 2:
+        break;
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqConfirm);
-#endif
+
 
 extern void fclCreateItemListEx(fclItemList_t *list, s8 kind);
 extern void cmpChangeCursorListNums(s32 count, u8 *cursor);
@@ -421,23 +437,35 @@ extern void datAddMaka(s32 amount);
 extern s32 fclAddItem(u16 item, s32 count);
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
-#ifdef NON_MATCHING
 void shpUpdateSeqPay(void)
 {
-    s32 sell = shopUpdateWork->unk_0003 != 5;
-    cmpCursorInfo_t *cursor = &shopUpdateWork->sellList.listCursor;
-    u16 item = shpGetItemPrice(cursor->unk_22 + (u8)cursor->unk_24, sell);
-    s32 sequence = cmpChkSeqInfo((cmbGbWork_t *)shopUpdateWork);
+    s32 one;
+    s32 sell;
+    cmpCursorInfo_t *cursor;
+    u16 item;
+    s32 sequence;
 
-    if (sequence == 1) {
+    one = 1;
+    /* Retain the real comparison/quantity/state value in the native saved
+     * register allocation. The unconstrained paired form swaps it with item.
+     * This empty generic operand constraint is a target-specific compiler aid;
+     * no fixed register is held across calls. */
+    asm("" : "+r" (one));
+    sell = shopUpdateWork->unk_0003 != 5;
+    cursor = &shopUpdateWork->sellList.listCursor;
+    item = shpGetItemPrice(cursor->unk_22 + (u8)cursor->unk_24, sell);
+    sequence = cmpChkSeqInfo((cmbGbWork_t *)shopUpdateWork);
+
+    if (sequence == one) {
         return;
     }
     if (sequence == 2) {
-        shopUpdateWork->quantity = 1;
         if (sell == 0) {
+            shopUpdateWork->quantity = one;
             fclScriptStart(shopUpdateWork->script, 1, &shopUpdateWork->scriptArg);
-            shopUpdateWork->unk_0001 = 1;
+            shopUpdateWork->unk_0001 = one;
         } else {
+            shopUpdateWork->quantity = one;
             fclCreateItemListEx(&shopUpdateWork->sellItems, 1);
             cmpChangeCursorListNums(shopUpdateWork->sellItems.count,
                                     (u8 *)&shopUpdateWork->sellList.listCursor);
@@ -446,35 +474,43 @@ void shpUpdateSeqPay(void)
                 shopUpdateWork->unk_0001 = 0;
             } else {
                 fclScriptStart(shopUpdateWork->script, 3, &shopUpdateWork->scriptArg);
-                shopUpdateWork->unk_0001 = 2;
+                shopUpdateWork->unk_0001 = sequence;
             }
         }
-        shopUpdateWork->unk_0004 = 1;
+        shopUpdateWork->unk_0004 = one;
     } else if (shopUpdateWork->paymentRemaining > 0) {
         if (shopUpdateWork->paymentRemaining < shopUpdateWork->paymentStep) {
-            datAddMaka(sell ? shopUpdateWork->paymentRemaining : -shopUpdateWork->paymentRemaining);
+            datAddMaka(sell ? shopUpdateWork->paymentRemaining :
+                       (s32)(0U - (u32)shopUpdateWork->paymentRemaining));
             if (sell == 0) {
-                shopUpdateWork->totalPay += shopUpdateWork->paymentRemaining;
+                shopUpdateWork->totalPay = (s32)((u32)shopUpdateWork->totalPay +
+                                                (u32)shopUpdateWork->paymentRemaining);
             }
             shopUpdateWork->paymentRemaining = 0;
         } else {
-            datAddMaka(sell ? shopUpdateWork->paymentStep : -shopUpdateWork->paymentStep);
+            datAddMaka(sell ? shopUpdateWork->paymentStep :
+                       (s32)(0U - (u32)shopUpdateWork->paymentStep));
             if (sell == 0) {
-                shopUpdateWork->totalPay += shopUpdateWork->paymentStep;
+                shopUpdateWork->totalPay = (s32)((u32)shopUpdateWork->totalPay +
+                                                (u32)shopUpdateWork->paymentStep);
             }
-            shopUpdateWork->paymentRemaining -= shopUpdateWork->paymentStep;
+            shopUpdateWork->paymentRemaining =
+                (s32)((u32)shopUpdateWork->paymentRemaining -
+                      (u32)shopUpdateWork->paymentStep);
         }
         p2sdPlaySE(5, 0x7F, 0x3F);
+        return;
     } else {
-        fclAddItem(item, sell ? -shopUpdateWork->quantity : shopUpdateWork->quantity);
+        if (sell == 0) {
+            fclAddItem(item, shopUpdateWork->quantity);
+        } else {
+            fclAddItem(item, -shopUpdateWork->quantity);
+        }
         shopUpdateWork->unk_0005 = 1;
         shopUpdateWork->unk_0008 = fclScriptStart(shopUpdateWork->script, 7,
                                                  &shopUpdateWork->scriptArg);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqPay);
-#endif
 
 void shpServiceTicketItem(void)
 {

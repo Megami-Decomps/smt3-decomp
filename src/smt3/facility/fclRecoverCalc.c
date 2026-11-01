@@ -211,7 +211,6 @@ extern void *memset(void *dst, s32 value, u32 size);
 extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
 extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
 
-#ifdef NON_MATCHING
 void rcvCreateLocalStock(rcvStockList_t *list, s8 mask)
 {
     s32 excludeDead = (mask & 7) != 0 && (mask & 4) == 0;
@@ -219,17 +218,15 @@ void rcvCreateLocalStock(rcvStockList_t *list, s8 mask)
     s32 slot;
     s32 index;
     s32 price;
-    datUnitWork_t *unit;
 
     memset(list->stock, -1, 16);
     list->reserveCount = 0;
     list->partyCount = 0;
     for (i = 0; i < (s32)DDS3_GBWK->stockCount; i++) {
         slot = (s8)DDS3_GBWK->stockOrder[i];
-        unit = &DDS3_GBWK->unitwork[slot];
-        if ((unit->flag & 2) != 0 &&
-            (!excludeDead || (unit->badstatus & 0x800) == 0) &&
-            (rcvFullHeal(unit) & mask) != 0) {
+        if ((DDS3_GBWK->akuma[slot].flag & 2) != 0 &&
+            (!excludeDead || (DDS3_GBWK->akuma[slot].badstatus & 0x800) == 0) &&
+            (rcvFullHeal(&DDS3_GBWK->unitwork[slot]) & mask) != 0) {
             index = list->partyCount;
             price = rcvGetRecoverPrice(&DDS3_GBWK->unitwork[slot], (u8)mask);
             rcvCalcState->recoverPrices[index] = price;
@@ -239,10 +236,9 @@ void rcvCreateLocalStock(rcvStockList_t *list, s8 mask)
     }
     for (i = 0; i < (s32)DDS3_GBWK->stockCount; i++) {
         slot = (s8)DDS3_GBWK->stockOrder[i];
-        unit = &DDS3_GBWK->unitwork[slot];
-        if ((unit->flag & 2) == 0 &&
-            (!excludeDead || (unit->badstatus & 0x800) == 0) &&
-            (rcvFullHeal(unit) & mask) != 0) {
+        if ((DDS3_GBWK->akuma[slot].flag & 2) == 0 &&
+            (!excludeDead || (DDS3_GBWK->akuma[slot].badstatus & 0x800) == 0) &&
+            (rcvFullHeal(&DDS3_GBWK->unitwork[slot]) & mask) != 0) {
             index = list->partyCount + list->reserveCount;
             price = rcvGetRecoverPrice(&DDS3_GBWK->unitwork[slot], (u8)mask);
             rcvCalcState->recoverPrices[index] = price;
@@ -255,9 +251,6 @@ void rcvCreateLocalStock(rcvStockList_t *list, s8 mask)
                        (u8)((u8)list->partyCount + (u8)list->reserveCount), 5, 0);
     cmpResetCursorInfo(&rcvCalcState->listCursor);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvCreateLocalStock);
-#endif
 extern void *dds3GetProcessData(s32 id);
 extern s32 dds3GetProcessStat(s32 id);
 extern void cmpClearCursorSlots(cmpCursorInfo_t *cursor);
@@ -440,7 +433,6 @@ extern s32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 row, s32 slot,
 extern void rcvDrawRowText(s32 x, s32 y, s32 z, s32 color, s8 index, s32 ot);
 extern void fclDrawPhaseHeader(lstWork_t *list, s32 color, s32 mode, s32 ot);
 
-#ifdef NON_MATCHING
 void rcvDrawPanelAt(lstWork_t *list, s8 flag, s32 ot)
 {
     cmpCursorInfo_t *cursor = &list->listCursor;
@@ -454,7 +446,8 @@ void rcvDrawPanelAt(lstWork_t *list, s8 flag, s32 ot)
     fclUpdatePanel(&rcvDrawWork->panel);
     lstDrawListWindow(list, flag, ot);
     for (i = 0; i < cursor->unk_26; i++) {
-        s32 mode = DDS3_GBWK->maka < rcvDrawWork->recoverPrices[i];
+        s32 price = rcvDrawWork->recoverPrices[i];
+        s32 mode = DDS3_GBWK->maka < price;
         s32 color;
 
         if (flag != 0) {
@@ -472,9 +465,6 @@ void rcvDrawPanelAt(lstWork_t *list, s8 flag, s32 ot)
         lstDrawListWindowCursor(list, ot);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawPanelAt);
-#endif
 
 void rcvDrawSeq1(void)
 {

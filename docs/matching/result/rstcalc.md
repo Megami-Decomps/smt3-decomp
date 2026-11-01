@@ -69,81 +69,70 @@ rematerialised the table inside the loop or added another induction variable.
 
 ## cmbGetHeartsParamByIndex (rstcalc, 0x58)
 
-8 of 22 words differ, at the exact 88-byte size. Reads one of two byte tables inside
-`datRaceEntry_t`, at `+6` and `+0xC` of a 66-byte row.
+22 of 22 words match at 88 bytes. The signed-byte race and index select one
+of two flat signed-byte tables, preserving each native symbol and byte load.
+Their sum is formed as index + race * 66: the signed-byte inputs keep this
+calculation within s32 range. The existing valid table-index contract is
+unchanged; no new bounds or pointer assumptions are introduced.
 
-The two tables have to be flat `extern s8 D_00339E06[]` / `D_00339E0C[]`
-indexed by `race * 66 + index`: that is what folds the `+6` and `+0xC` into the
-symbol's `%hi`/`%lo` pair the way retail does. Reached through
-`D_00339E00[race].field[index]` with the row struct split instead, cc1 keeps
-the constant in the load displacement and the function is 12 words out.
+Each arm binds its real initialized table offset to $2, used immediately by
+the byte load and never live across a call. This localized target-specific
+allocation aid makes the assembler use $at for the load address, as retail
+does; it is not evidence of the original source spelling. No empty asm,
+fabricated consumer, instruction replay or provider change is involved.
 
-What is left is one register. Retail puts each arm's `index + row` sum in `$2`,
-the register the sign-extended index already occupies, so `ee-as` has to expand
-`lb $2, D_00339E0C($2)` through `$at`; this puts the sum in `$3` and the
-assembler then uses `$2` itself as the macro's temp, which changes all three
-words of each arm's load.
-
-Ruled out: `index + race * 66` instead of `race * 66 + index`, which fixes the
-`addu` operand order but moves the `sll`/`sra` pair and costs four more words;
-an `s32 ofs` local inside each arm's own block, which gives the identical eight
-words; and an `s32 row = race * 66;` local above the branch, in both summation
-orders, which splits the row multiply across the test and loses six more.
+The original operand order without bindings gives 14/22 words. Binding the
+offset while retaining that order gives 16/22; index-first without binding
+gives 10/22; both changes give 22/22, all at 88 bytes. Final diagnostic owner
+checking gives 87 match / 0 differ including owned data. Plain and stock-dump
+builds have identical allocated/relocation section bytes and normalized
+assembly. Independent current-tree and retail qualification remain the
+publication gate.
 
 ## cmbCountEvoReady (rstcalc, 0x84)
 
-9 of 34 words match, 25 of 34 differ, 136 against retail's 132 bytes. Counts
-how many of `count` consecutive `datUnitWork_t` entries are alive, not already
-evolved, and have an entry in the evolution table.
+33 of 33 words match at 132 bytes using ordinary C. The initial u8 count
+guards a nonempty traversal. Inside that path, a separate unit cursor and
+u32 countdown retain the native initial copies and full-width decrement.
+The countdown starts in 1..255 and stops at zero, so it never underflows;
+this preserves the byte-count traversal without an extra per-step mask.
 
-The body is settled: the single `lw` of `flag` masked twice, the `beql`/`bnel`
-pair that carries the `count--` into both delay slots, the `(u8)(ready + 1)`
-with its `andi`, the `unit++` by `0xEC` in the loop-back delay slot and the
-`(s8)` return. Written with three nested `if`s rather than one `&&` chain,
-which is worth three words.
+Each unit's flags are observed before its conditional evolution lookup:
+alive bit 1 must be set and evolved bit 4 clear. The lookup receives the
+unit ID as a halfword. The u8 result count wraps as before and is returned
+through the existing signed-byte interface. Unit stride remains 0xEC.
+No new bounds, provider contracts, constraints or compiler options are used.
 
-What is left is one register. Retail narrows the count parameter in place,
-`andi $5, $5, 0xFF`, and then copies it into `$17`; this narrows straight into
-`$17`, which is one word shorter and leaves a spare callee-saved register that
-shifts the rest of the allocation. Nothing in the source reaches that copy: a
-separate `u8 n = count;` local, a separate `datUnitWork_t *p = unit;` local and
-a `for (; count != 0; count--, unit++)` head all coalesce it away exactly as
-the plain `while` does. See the row on un-coalesced copies in
-[When to stop](../levers/when-to-stop.md).
-
-Ruled out: `ready++` against `ready = ready + 1` against an `s32 ready` with an
-explicit `(u8)` cast, all three identical; the `&&` chain against nested `if`s,
-where nested is three words better and is the draft; and the two loop forms
-above.
+A full-width while countdown gives 24/33 words at 132 bytes. An explicit
+nonempty do-loop with shared return gives 26/33 while mutating the incoming
+unit parameter; using the separate traversal cursor in that same shape gives
+33/33. The early-return form gives 140 bytes and is not retained. These
+controls isolate actual countdown width, guard shape and cursor lifetime,
+rather than the previously exhausted standalone byte-local copies.
 
 ## cmbGetLevelUpCount (rstcalc, 0x84)
 
-22 of 32 words match, 10 of 32 differ, 128 against retail's 132 bytes. Copies a
-devil into a scratch `datUnitWork_t`, adds the experience, and counts how many
-levels that buys by stepping `datAdvanceDevilLevel` until the experience no
-longer reaches the next threshold or the level hits 0xFF.
+33 of 33 words match at 132 bytes. The routine copies the input devil into
+the real scratch unit, adds experience with unsigned arithmetic, and calls
+the existing level-threshold provider until experience is insufficient or
+the observed level reaches 255. The level increment is stored as a halfword
+before checking the old level, preserving native behavior even at the cap.
+The count increments only after a successful below-cap iteration.
 
-Settled: the `b` into the loop test, the `sltu` of the stored experience against
-the call's return, the 0x110 frame for the 0xEC scratch struct, and the level
-step written so that the `sh` of `level + 1` lands unconditionally in the
-`bnez` delay slot, which is what the store-before-test order gives:
+The old-level snapshot and the value incremented/stored have separate real
+consumers. One nonvolatile empty asm with a generic +r operand on the latter
+retains the native copy before incrementing. Both values are initialized by
+the same halfword load and dead before the next callback. No fixed register,
+volatile access, invented use, provider change or instruction replay is used.
+This is a localized target-specific reconstruction aid, not evidence of the
+original source spelling.
 
-    level = work.level;
-    work.level = level + 1;
-    if (level >= 0xFF) {
-        break;
-    }
-    count++;
-
-What is left is the copy. Retail emits `daddu $3, $2, $0` so the 0xFF compare
-reads the copy while the increment overwrites the original; every shape tried
-compares and increments out of the one register and comes out a word short.
-
-Ruled out: `u16`, `u32` and `s32` for the level local, all identical; the test
-before the store, which is one word shorter again; `work.level++`; a positive
-`if (work.level < 0xFF) { ... } else break;`, which reaches the right size but
-13 of 33 words; and `level = work.level + 1;` with the old value re-read for the
-compare, also the right size at 13 of 33.
+Ordinary separate snapshots coalesce to 128 bytes, 22/32 matching words.
+Constraining only the old comparison snapshot gives 132 bytes but 27/33
+matching words. Constraining only the increment/store operand gives the
+exact result; a paired-operand constraint and an old-snapshot $3 binding were
+therefore removed as unnecessary. Final-source owner, compiler parity and
+independent retail checks qualify publication.
 
 ## rstFindEvoEntryType5, rstFindEvoEntryType7 (rstcalc, 0x6C each)
 
@@ -193,3 +182,140 @@ are inert. The direct typed-row source remains preferred. A further change
 needs a genuine source lifetime or access-path premise that explains the
 different temporary combination; manually expanding the constant multiply
 is not justified by this observation.
+
+## rstSetCurrentDevil (176 bytes, matched)
+
+The signed stock scan is now exact at 44/44 words. Existing signed and unsigned
+union views of the index byte express retail's `lb`/`lbu` observations without
+volatile casts. A real `DDS3_GBWK` snapshot before the index-byte store supplies
+the stock access; the later global observation supplies the unit pointer.
+The labeled retry and shared exhaustion exit preserve native control flow,
+call order, and the conditional publication of `EventStart->unit`.
+
+An initialized success value of one has a real return-choice consumer after
+`rstSetLevelUpCount` and `rstChkParamLimitAll`. A localized empty `+r` constraint
+keeps that value live across the scan and calls without fixing a register.
+The allocator retains it in saved `$18`; the unconstrained ordinary form sinks
+one after the final call and produces 168 bytes rather than retail's 176.
+This is a target-specific compiler aid, not original-source evidence or a claim
+about an unmeasured compiler pass. The constraint is not a memory barrier;
+the complete target output establishes the required accesses and ordering.
+
+The inherited contract still requires valid stock and unit indices whenever
+those accesses occur. The signed scan is not a new lower-bound check, and no
+bounds or guaranteed retry termination under arbitrary callbacks are invented.
+The byte increment is promoted before narrowing back to the stored byte.
+Return zero leaves the published unit unchanged; a qualifying unit selects two
+unless the parameter-limit check returns zero, selecting the retained one.
+
+Independent complete-owner checking gives 83 match, 0 differ, including the
+caller and both helpers, with owned-data checks enabled. Final-source checks
+also pass the retail checksum, all 149 guarded owners / 601 drafts, seven IRX
+owners, 26 tooling test files / 427 cases, shell mocks and documentation checks.
+Source commit `ee3811254c1dfa0a09931f37f9ec61c5478ec292` passed exact-source
+hosted CI [40977985806](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40977985806),
+including build and deploy.
+
+## rstChkSkillPowerUp2 (result/rstcalc, 0xA8)
+
+42 of 42 words match at 168 bytes in the unsigned random interval check. The
+unit ID selects one call to the existing `u32 dds3GetRandA(void *)` provider with `NULL`, which
+uses the mutable global RNG state. The result is reduced modulo 254. The first
+arm tests the low interval below 112 and then unsigned `roll - 112 < 142`; the
+other tests below 128 and the remaining interval below 254. The shared fallback
+preserves retail's return-two path, although that path is unreachable for the
+actual modulo-reduced roll. No extra bounds or optimizer assumptions are added.
+
+The ordinary shared-fallback form reaches 39/42 words at the correct size;
+three words differ only in the first arm's interval temporary register. A single
+localized empty operand constraint retains both real initialized values at the
+boundary after RNG/modulo: the unsigned delta uses native `$5`, while the roll
+uses a generic `+r` operand. The subsequent low and interval tests consume these
+values, and neither constrained lifetime crosses a call. Constraining the delta
+alone coalesces the roll into `$5` and changes the test ordering, so it is not the
+accepted reconstruction. The paired form emits the native roll in `$4`, delta
+in `$5`, and complete branch/delay-slot/epilogue sequence.
+
+This is a target-specific compiler aid, not evidence of original source spelling
+or a claim about an unmeasured internal compiler pass. The diagnostic plain
+and stock-dump complete-owner assembly pair has qualified parity; this
+establishes output parity for that diagnostic source, not a debugger-hook trace
+of the final source. No false provider declaration,
+fabricated consumer, instruction-emitting asm or new pointer bounds are used.
+The existing valid `EventStart` and unit-pointer contracts remain unchanged.
+
+Independent final-source owner checking gives 84 match, 0 differ with normal
+owned-data checks, including the previously published `rstSetCurrentDevil`.
+Final-source gates pass the retail checksum, all 149 guarded owners / 599 drafts,
+seven IRX owners, 26 tooling test files / 427 cases, shell mocks and documentation
+checks. Source commit `cf18b20a8a57745e600ca3c1467549745b9cd8f8` passed exact-source
+hosted CI [40982354001](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40982354001),
+including build and deploy.
+
+## cmbCopyEvoDevil (result/rstcalc, 0x100)
+
+64 of 64 words match at 256 bytes with ordinary C. Declaring the real signed
+skill-attribute load before the skill-form halfword load gives the native
+address formation and register allocation. These are independent ordinary
+observations before all calls; no volatile access, write or call lies between
+them. Their source declaration order is not a claim about machine load order:
+the exact output schedules the form before the attribute as retail does.
+Grouping the real unit-level minus species-level difference before adding the
+narrowed quotient then reproduces the native arithmetic sequence. No compiler
+constraints, aliases, provider declarations or data layouts change.
+
+The actual output preserves the pre-call skill/devil observations, the calls to
+`cmbCopyEvoStats` and `cmbCheckEvoPair`, the conditional `cmbFindEvoEntry` call,
+and the later unit-ID, unit-level and species-level reloads. The truthful
+providers remain `u8 cmbCopyEvoStats(s16, s16)`,
+`s32 cmbCheckEvoPair(u16, u16)` and `s32 cmbFindEvoEntry(u16)`.
+
+The arithmetic regrouping is defined for every value of the declared fields:
+unit level is `u16`, species level is `u8`, and the quotient is narrowed to `u8`
+before addition. All promote to signed `int`; the difference ranges from -255
+to 65535 and the final sum from -254 to 65791. There is no signed overflow.
+Only results at least 100 are capped to 99. Other results, including negative
+intermediates, narrow to `u8`; no lower clamp is added. Existing valid pointer,
+index and table-key contracts remain required. A nonzero divisor is not assumed:
+the inherited undefined C division / native break path for zero is unchanged.
+
+For the original draft, 51 of 64 words match. After grouping the level difference,
+55 of 64 words match; the attribute-first declaration completes the match. Diagnostic
+plain and stock-dump complete-owner assembly, text and relocations have qualified
+parity. This is output evidence for the diagnostic source, not a debugger-hook
+trace or proof of the original spelling or an unmeasured internal comparator.
+
+Independent final-source checking gives 85 match, 0 differ with normal
+owned-data checks, preserving both `rstSetCurrentDevil` and `rstChkSkillPowerUp2`.
+Final-source gates pass the retail checksum, all 149 guarded owners / 598 drafts,
+seven IRX owners, 26 tooling test files / 427 cases, shell mocks and documentation
+checks. Source commit `052a211d71c3b81c4f876ef3fe1a50fd195300d9` passed exact-source
+hosted CI [40983613150](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40983613150),
+including build and deploy.
+
+## cmbCalcEvoEvent (result/rstcalc, 0x140)
+
+80 of 80 words match at 320 bytes in ordinary C. The truthful signed-byte
+candidate count is promoted into a real `s32` local, divided by two into a
+real `s32 half`, then explicitly converted to `s8` at the comparison with
+the ready-count call. Both providers retain their signed-byte return types
+and original arguments. The first count call still precedes the ready-count
+call; later entry observations, callbacks, result construction and writes
+are unchanged.
+
+For every possible signed-byte count, division truncating toward zero gives
+-64..63, so the explicit narrowing preserves its value. Independent review
+checks all 65,536 pairs of signed-byte returns for equal scalar selection;
+this is not a whole-function execution proof. No nonnegative-count assumption,
+false provider declaration, constraint or artificial consumer is introduced.
+
+An earlier diagnostic used a quotient identity constraint, but independent
+ablation removed it and still passed. The final ordinary source is exact;
+the constraint is neither retained nor required. Diagnostic traces from other
+variants do not establish the final ordinary source's internal compiler cause.
+Independent final-source complete-owner checking gives 86 match, 0 differ,
+with normal owned-data checks.
+
+Combined local gates pass the retail checksum, 26 tooling test files / 427
+cases, all 147 guarded owners / 533 drafts with stable source/compiler inputs,
+seven IRX owners, and reconciled production reports.

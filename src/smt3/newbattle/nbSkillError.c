@@ -509,7 +509,6 @@ s32 nbCheckBattleSkillError2(s32 nskill, u32 select)
     return result;
 }
 
-#ifdef NON_MATCHING
 s32 nbCheckBattleSkillError3(s32 nskill, u32 select)
 {
     datUnitWork_t *unitList[32];
@@ -519,6 +518,7 @@ s32 nbCheckBattleSkillError3(s32 nskill, u32 select)
     s32 unitCount = 0;
     s32 partyCount = 0;
     s32 i;
+    s32 result = 0;
 
     nbGetMainProcessData();
     for (i = 0; i < 16; i++) {
@@ -533,23 +533,21 @@ s32 nbCheckBattleSkillError3(s32 nskill, u32 select)
             }
         }
     }
-    if (unitCount != 0) {
-        switch (nskill) {
-        case 0x34: case 0x35: case 0x36:
-        case 0x40: case 0x41: case 0x42: case 0x43:
-        case 0xCB: case 0xCC: case 0xCD: case 0xCE:
-        case 0x109: case 0x114:
-            if (CheckHojo(partyList, partyCount, datSkillTable.normal[nskill].hojotype) == 0) {
-                return 3;
-            }
-            break;
-        }
+    if (unitCount == 0) {
+        return 0;
     }
-    return 0;
+    switch (nskill) {
+    case 0x34: case 0x35: case 0x36:
+    case 0x40: case 0x41: case 0x42: case 0x43:
+    case 0xCB: case 0xCC: case 0xCD: case 0xCE:
+    case 0x109: case 0x114:
+        if (CheckHojo(partyList, partyCount, datSkillTable.normal[nskill].hojotype) == 0) {
+            result = 3;
+        }
+        break;
+    }
+    return result;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbCheckBattleSkillError3);
-#endif
 
 s32 cmpClearButtonGuide(s32 skill, u32 select)
 {

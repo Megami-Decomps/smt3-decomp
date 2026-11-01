@@ -1545,9 +1545,9 @@ s32 CheckArrCounter(nbActionProcessData_t *a)
     return 1;
 }
 
-#ifdef NON_MATCHING
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543880);
+
 extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
-extern char D_005438C0[];
 
 s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to)
 {
@@ -1555,7 +1555,7 @@ s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to)
     s32 counters[] = { 0xA6, 0xA5, 0xA4 };
     datUnitWork_t *work;
     s32 badstatus;
-    s32 counter = 0;
+    s32 counter;
     s32 i;
     s32 rate;
 
@@ -1564,29 +1564,33 @@ s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to)
     }
     work = nbGetUnitWorkFromFormindex(from);
     badstatus = work->badstatus & 0xFFF;
-    if (badstatus == 1 || badstatus == 2 || badstatus == 4 || badstatus == 0x10 ||
-        badstatus == 0x80 || badstatus == 0x100 || badstatus == 0x400) {
+    switch (badstatus) {
+    case 1: case 2: case 4: case 0x10:
+    case 0x80: case 0x100: case 0x400:
         return 0;
     }
+    counter = 0;
     for (i = 0; skills[i] >= 0; i++) {
         if (datCheckSyojiSkill(work, skills[i]) != 0) {
-            rate = 100 / datSkillTable.special[skills[i] - 0x120].n;
+            /* Keep the real subarray base and skill-number offset separate in
+               the EE's 32-bit address arithmetic. Only the final, in-range
+               element address is converted back to a pointer. */
+            u32 address = (u32)datSkillTable.special + (u32)skills[i] * sizeof(datSpecialSkill_t);
+            datSpecialSkill_t *special = (datSpecialSkill_t *)(address - 0x120u * sizeof(datSpecialSkill_t));
+            rate = 100 / special->n;
             if ((s32)dds3GetRandIntA(NULL, 100) < rate) {
                 counter = counters[i];
                 break;
             }
         }
     }
-    if (counter != 0) {
-        nbPushAction(4, a->data->form[from].partyindex, a->data->form[to].partyindex, counter);
-        printf(D_005438C0);
-        return 1;
+    if (counter == 0) {
+        return 0;
     }
-    return 0;
+    nbPushAction(4, a->data->form[from].partyindex, a->data->form[to].partyindex, counter);
+    printf("\xA5\xAB\xA5\xA6\xA5\xF3\xA5\xBF\xA1\xBC\xC8\xAF\xC0\xB8!!!\n");
+    return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckCounter);
-#endif
 
 s32 CheckMukanNego(nbActionProcessData_t *a)
 {
@@ -1743,42 +1747,83 @@ s32 CheckInotiNego(nbActionProcessData_t *a)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543880);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438A0);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438B0);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005438C0);
 
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckInotiNego);
 #endif
 
-#ifdef NON_MATCHING
 s32 CheckBinjoNego(nbActionProcessData_t *a)
 {
     nbFormation_t *form;
     datUnitWork_t *work;
-    struct nbParty_t *party;
     s32 i;
     s32 id;
     s32 rate;
+    s32 talkResult;
+    s32 rollLimit;
+    s32 initialStatus;
+    s32 formStatus;
+    s32 partyStatus;
 
-    if ((u32)((u16)a->data->StageMajor - 0xF0) < 7 || (a->data->stat & 1) != 0 ||
-        (a->party->flag & 6) != 0 || a->partyindex >= 4 || (a->stat & 8) == 0) {
+    initialStatus = (u32)((u16)a->data->StageMajor - 0xF0) < 7;
+    if (initialStatus) {
         return 0;
     }
-    if (evtGetAgeOfMoon() == 8 || datCheckTalk(a->work) == 0) {
+    initialStatus = a->data->stat & 1;
+    if (initialStatus != 0) {
         return 0;
+    }
+    initialStatus = a->party->flag & 6;
+    if (initialStatus != 0) {
+        return 0;
+    }
+    initialStatus = a->partyindex;
+    if (initialStatus >= 4) {
+        return 0;
+    }
+    initialStatus = a->stat & 8;
+    if (initialStatus == 0) {
+        return 0;
+    }
+    if (evtGetAgeOfMoon() == 8) {
+        return 0;
+    }
+    talkResult = datCheckTalk(a->work);
+    if (talkResult == 0) {
+        return talkResult;
     }
     for (i = 4; i < 14; i++) {
         form = &a->data->form[i];
-        if ((form->stat & 0x49) != 0x41) {
+        formStatus = form->stat;
+        if ((formStatus & 1) == 0) {
             continue;
         }
-        party = &a->data->party[form->partyindex];
-        if ((party->flag & 1) == 0 || (party->flag & 0x60) != 0) {
+        if ((formStatus & 8) != 0) {
             continue;
+        }
+        if ((formStatus & 0x40) == 0) {
+            continue;
+        }
+        {
+            /* On the EE's 32-bit ABI, sum the real array base and byte offset
+               as integers, then form only the final party pointer. */
+            struct nbParty_t *partyAddress = (struct nbParty_t *)(
+                (u32)((s32)form->partyindex * sizeof(struct nbParty_t)) +
+                (u32)a->data->party);
+            u16 partyFlags;
+            partyFlags = partyAddress->flag;
+            partyStatus = (u16)(partyFlags & 1);
+            if (partyStatus == 0) {
+                continue;
+            }
+            if ((partyFlags & 0x20) != 0) {
+                continue;
+            }
+            if ((partyFlags & 0x40) != 0) {
+                continue;
+            }
         }
         work = nbGetUnitWorkFromFormindex(i);
         if (CheckTimeListDead(a, i) != 0) {
@@ -1794,8 +1839,9 @@ s32 CheckBinjoNego(nbActionProcessData_t *a)
         if (datSearchDevilStock(id) >= 0 || datCheckTalk(work) == 0) {
             continue;
         }
-        rate = (a->data->stat & 0x2000000) != 0 ? 100 : 2;
-        if ((s32)dds3GetRandIntA(NULL, 100) < rate) {
+        rollLimit = 100;
+        rate = (a->data->stat & 0x2000000) != 0 ? rollLimit : 2;
+        if ((s32)dds3GetRandIntA(NULL, rollLimit) < rate) {
             a->data->party[form->partyindex].flag |= 0x40;
             nbPushAction(2, form->partyindex, a->partyindex, 0);
             printf("binjo party = %d\n", form->partyindex);
@@ -1804,9 +1850,6 @@ s32 CheckBinjoNego(nbActionProcessData_t *a)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckBinjoNego);
-#endif
 
 void CheckDeadScript(nbActionProcessData_t *a)
 {
@@ -2154,7 +2197,6 @@ void SetAction_COMM(nbActionProcessData_t *a)
     nbInitCommSelProcess(a->data, a->party, a);
 }
 
-#ifdef NON_MATCHING
 extern s8 dds3PadButtonState[];
 extern void nbSetAutoCommSel(void);
 extern s32 nbGetCommSelStat(void);
@@ -2168,11 +2210,10 @@ extern s32 nbCheckBattleSkillError1(s32 skill);
 s32 CheckAction_COMM(nbActionProcessData_t *a)
 {
     s32 result = 0;
-    s32 close = 0;
-    s32 sound = 0;
+    /* Target-specific allocation aid for the live close flag; $20 is callee-saved. */
+    register s32 close __asm__("$20") = 0;
     datUnitWork_t *work;
     s32 command;
-    u16 currentCommand;
     s32 skill;
     s32 err;
 
@@ -2193,31 +2234,31 @@ s32 CheckAction_COMM(nbActionProcessData_t *a)
         nbSetAutoCommSel();
     }
     if (nbGetCommSelStat() == 3) {
-        sound = 8;
+        s32 sound = 8;
         work = nbGetUnitWorkPointer(a->data, a->party);
         command = work->nowcommand;
-        currentCommand = *(volatile u16 *)&work->nowcommand;
         switch (command) {
         case 0:
             SetNextActionSeq(a, 5);
             result = 1;
             break;
         case 1:
-        case 5:
-            skill = work->nowindex;
-            if (command == 1) {
-                switch (skill) {
-                case 0xDE: case 0xDF: case 0xE2: case 0xE3: case 0xE4:
-                case 0xE5: case 0xE6: case 0xFC:
-                    nbClearActionFlags(a->data);
-                    nbSetActionCommand(a->data, 0);
-                    currentCommand = work->nowcommand;
-                    skill = work->nowindex;
-                    break;
-                }
+            switch (work->nowindex) {
+            case 0xDE: case 0xDF: case 0xE2: case 0xE3: case 0xE4:
+            case 0xE5: case 0xE6: case 0xFC:
+                nbClearActionFlags(a->data);
+                nbSetActionCommand(a->data, 0);
+                break;
             }
-            if ((s16)currentCommand != 1) {
-                skill = nbGetItemSkillNo(a, work->nowindex);
+            /* Fall through to the skill/item validation path. */
+        case 5: {
+            /* Keep the live item/skill index in its argument register. This
+             * target-specific aid avoids a redundant copy; index is not used
+             * after nbGetItemSkillNo can clobber $5. */
+            register s32 index __asm__("$5") = work->nowindex;
+            skill = index;
+            if (work->nowcommand != 1) {
+                skill = nbGetItemSkillNo(a, index);
                 printf("item no = %d\n", work->nowindex);
                 printf("skill no = %d\n", skill);
             }
@@ -2227,15 +2268,22 @@ s32 CheckAction_COMM(nbActionProcessData_t *a)
                 nbDispSkillErrorMessage(err);
                 nbSetCommSelStat(2);
             } else {
-                if ((a->party->flag & 6) || !(datSkillTable.normal[skill].targetarea & 1) ||
-                    (datSkillTable.normal[skill].targetarea & 0xC)) {
+                if (a->party->flag & 6) {
                     SetNextActionSeq(a, 5);
+                    result = 1;
+                } else if (!(datSkillTable.normal[skill].targetarea & 1)) {
+                    SetNextActionSeq(a, 5);
+                    result = 1;
+                } else if (datSkillTable.normal[skill].targetarea & 0xC) {
+                    SetNextActionSeq(a, 5);
+                    result = 1;
                 } else {
                     SetNextActionSeq(a, 6);
+                    result = 1;
                 }
-                result = 1;
             }
             break;
+        }
         case 4:
             a->negotype = 0;
             result = 1;
@@ -2247,7 +2295,7 @@ s32 CheckAction_COMM(nbActionProcessData_t *a)
             nbSetActionCommand(a->data, 0);
             SetNextActionSeq(a, 5);
             break;
-        default:
+        case 2: case 3: case 7: case 8:
             SetNextActionSeq(a, 7);
             close = 1;
             result = 1;
@@ -2260,9 +2308,6 @@ s32 CheckAction_COMM(nbActionProcessData_t *a)
     if (close) nbCloseCommSel();
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_COMM);
-#endif
 
 void SetAction_AI(nbActionProcessData_t *a)
 {
@@ -2545,20 +2590,17 @@ void SetAction_STKSEL(nbActionProcessData_t *a)
     StkSelId = -1;
 }
 
-/* NON_MATCHING: 9 of 58 words differ (first at +0x38). */
-
-#ifdef NON_MATCHING
-
 s32 CheckAction_STKSEL(nbActionProcessData_t *a)
 {
     nbFormation_t *form;
     s32 i;
+    u32 clearMask;
 
     switch (StkSelId) {
     default:
         nbPanelStockSelect(a->data, 0);
         nbCloseCommSel();
-        a->select = 1 << (StkSelId + 0x10);
+        a->select = 1u << (StkSelId + 0x10);
         SetNextActionSeq(a, 7);
         a->stat |= 0x400;
         nbPlaySe(8);
@@ -2567,9 +2609,10 @@ s32 CheckAction_STKSEL(nbActionProcessData_t *a)
         StkSelId = nbPanelStockSelect(a->data, 1);
         break;
     case -2:
+        clearMask = ~8u;
         form = a->data->form;
         for (i = 0xF; i >= 0; i--) {
-            form->stat &= ~8;
+            form->stat &= clearMask;
             form++;
         }
         nbSetCommSelStat(2);
@@ -2581,11 +2624,6 @@ s32 CheckAction_STKSEL(nbActionProcessData_t *a)
     return 0;
 }
 
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_STKSEL);
-
-#endif
 
 /* Native item rows, as consumed by the command and inventory providers. */
 typedef struct {
@@ -3026,7 +3064,6 @@ void SetAction_READY(nbActionProcessData_t *a)
     cmpSetSkillListRows(-1);
 }
 
-#ifdef NON_MATCHING
 extern char D_00551128[];
 extern void datDebugPrintf(const char *format, ...);
 extern s32 nbGetUnitFromAction(nbFormation_t *form, s32 motion);
@@ -3043,6 +3080,7 @@ extern struct effBTL_t *effBTLCreate(void *data);
 
 s32 CheckAction_READY(nbActionProcessData_t *a)
 {
+    s32 complete = 0;
     s32 size;
     void *buffer;
     sdfMemHandle_t *handle;
@@ -3051,12 +3089,13 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
     case 0:
         a->skilltime++;
         if (a->motse) {
-            if (p2sdLoadCheckMidi(nbGetUnitFromAction(a->form, a->motion)) == 0) {
+            if (p2sdLoadCheckMidi(nbGetUnitFromAction(a->form, a->motion))) {
+                a->data->stat &= ~0x200;
+                nbAddSePacket2(0, (s32)a, nbGetUnitFromAction(a->form, a->motion));
+            } else {
                 printf("mot se wait(1)..\n");
-                return 0;
+                break;
             }
-            a->data->stat &= ~0x200;
-            nbAddSePacket2(0, (s32)a, nbGetUnitFromAction(a->form, a->motion));
         }
         datDebugPrintf(D_00551128);
         a->hEffBTL = NULL;
@@ -3093,7 +3132,11 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
             datDebugPrintf("se ok!! [%08X]\n", a->midino);
             sdfMemFreeDirect(a->midibuf);
             fileHandleFree(a->midifile);
-            a->seqcnt = a->bedfile != NULL ? 3 : 5;
+            if (a->bedfile != NULL) {
+                a->seqcnt = 3;
+            } else {
+                a->seqcnt = 5;
+            }
             a->data->stat &= ~0x200;
         } else {
             printf("se wait(2)..\n");
@@ -3117,12 +3160,13 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
         break;
     case 5:
         if (a->timer && (u16)a->seqtime < a->timer) {
-            return 0;
+            break;
         }
+        complete = 1;
         switch (a->work->nowcommand) {
         case 0: case 1: case 5: case 6: SetNextActionSeq(a, 8); break;
-        case 2: SetNextActionSeq(a, 13); break;
         case 3: case 8: case 9: case 10: SetNextActionSeq(a, 12); break;
+        case 2: SetNextActionSeq(a, 13); break;
         case 4: SetNextActionSeq(a, 9); break;
         case 7: SetNextActionSeq(a, 14); break;
         }
@@ -3131,13 +3175,10 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
             nbDispJyokyoHelp(a->data->mesmngid, a->jyokyomes, a->jyo_varid, a->jyo_varind);
             a->jyokyomes = 0;
         }
-        return 1;
+        break;
     }
-    return 0;
+    return complete;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_READY);
-#endif
 
 /* NON_MATCHING: 1118 of 1280 words differ (first at +0xC8); 10 words short of retail's 1290. */
 #ifdef NON_MATCHING
@@ -4003,7 +4044,9 @@ s32 CheckAction_INVISIBLE(nbActionProcessData_t *a)
     return 1;
 }
 
-#ifdef NON_MATCHING
+
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
+
 extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                   u32 col, s32 delay, s32 aframe, s32 colframe);
 extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, s32 uniqueid,
@@ -4017,8 +4060,9 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
     s32 i;
     s32 unlock;
     s32 end;
-    s32 delay;
-    s32 fade;
+    /* Disjoint phases: motion delay, then final stock-panel fade time. */
+    s32 frameScratch;
+    s32 formStatus;
     nbFormation_t *form;
 
     if (CheckTimeListDead(a, a->form->formindex) == 0 &&
@@ -4031,9 +4075,12 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
     }
     unlock = GetAllUnlockTime(a);
     for (i = 0; i < 16; i++) {
-        form = &a->data->form[i];
-        if ((form->stat & 1) && (form->stat & 0x40) &&
-            CheckTimeListDead(a, i) &&
+        /* EE address arithmetic: form only the final array pointer. */
+        form = (nbFormation_t *)((u32)(i * sizeof(nbFormation_t)) + (u32)a->data->form);
+        formStatus = form->stat;
+        if (!(formStatus & 1)) continue;
+        if (!(formStatus & 0x40)) continue;
+        if (CheckTimeListDead(a, i) &&
             !(a->data->party[a->data->form[i].partyindex].flag & 0x20)) {
             printf("dead formindex = %d!!\n", i);
             nbMakeDeadVisualPacket(unlock, (s32)a, &a->data->form[i], 0, 1);
@@ -4044,23 +4091,32 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
     }
     if (CheckTimeListDead(a, a->form->formindex) == 0) {
         end = GetAllEndTime(a);
-        unlock = GetAllUnlockTime(a);
-        delay = 0;
-        if (a->form->motendtype != 2 && !(a->stat & 0x100)) {
-            delay = 3;
+        /* The native call is retained; these packets use the end snapshot. */
+        GetAllUnlockTime(a);
+        frameScratch = 0;
+        /* Local compiler constraints retain the live frameScratch/mode values and
+           the native field reload; these empty templates change no values. */
+        __asm__("" : "+r"(frameScratch));
+        {
+            s32 motionMode = 2;
+            __asm__("" : "+r"(motionMode));
+            if (a->form->motendtype != motionMode) {
+                frameScratch = (a->stat & 0x100) ? frameScratch : 3;
+            }
         }
+        __asm__("" : "+m"(a->form->motendtype));
         if (a->form->stat & 0x10) {
             if (a->form->motendtype == 2) {
                 SetTimeList(a, a->form->formindex, end, 6, 6);
             } else {
-                SetTimeList(a, a->form->formindex, end, delay + 1, delay + 1);
+                SetTimeList(a, a->form->formindex, end, frameScratch + 1, frameScratch + 1);
             }
             if (a->form->motendtype == 2) {
-                unlock += delay;
-                nbMakeUnitFadeInPacket(unlock, (s32)a, a->form, 0, 2, 4, 4);
-                nbAddFormOnOffPacket(unlock, (s32)a, a->form, 0);
+                end = (s32)((u32)end + (u32)frameScratch);
+                nbMakeUnitFadeInPacket(end, (s32)a, a->form, 0, 2, 4, 4);
+                nbAddFormOnOffPacket(end, (s32)a, a->form, 0);
                 if (a->form->motendtype == 2) {
-                    nbAddMotionStopClearPacket(unlock, (s32)a, a->form);
+                    nbAddMotionStopClearPacket(end, (s32)a, a->form);
                 }
             }
         }
@@ -4068,27 +4124,20 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
     a->packettime = GetAllEndTime(a);
     nbAddHatudoEffectEndPacket(a->packettime * 70 / 100, (s32)a);
     if (a->stat & 0x400) {
-        fade = a->packettime - 10;
-        if (fade < 0) fade = 0;
-        nbAddPanelStockFadeOutPacket(fade, (s32)a);
+        frameScratch = (s32)(a->packettime - 10);
+        nbAddPanelStockFadeOutPacket(frameScratch < 0 ? 0 : frameScratch, (s32)a);
         nbAddPanelStockEndPacket(a->packettime - 1, (s32)a);
     }
     printf("allframe %d\n", a->packettime);
 }
-#else
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
 
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAction_CHECK1);
-#endif
 
-#ifdef NON_MATCHING
 extern s8 dds3PadButtonState[];
 extern void nbPanelAnalyzeEnd(void);
 extern void nbOnOffKoukaPacketFlag(s32 type, u32 flag, s32 on);
 extern void nbUpdateOrder(void);
 extern s32 CheckInotiNego(nbActionProcessData_t *a);
 extern void datClearCommMemory(datUnitWork_t *work);
-extern char D_00544058[];
 
 s32 CheckAction_CHECK1(nbActionProcessData_t *a)
 {
@@ -4122,36 +4171,43 @@ s32 CheckAction_CHECK1(nbActionProcessData_t *a)
     CheckDeadScript(a);
     work = nbGetUnitWorkPointer(a->data, a->party);
     if (work == NULL) {
-        a->data->prevflag = 0;
         a->data->previndex = 0;
         a->data->prevcommand = 0;
         a->data->prevcommind = 0;
+        a->data->prevflag = 0;
     } else {
         a->data->previndex = a->partyindex;
         a->data->prevcommand = work->nowcommand;
         a->data->prevcommind = work->nowindex;
-        printf(D_00544058, work->nowindex);
+        printf("prev commind = %d\n", work->nowindex);
         a->data->prevflag = 0;
         if (a->stat & 8) {
             a->data->prevflag = 1;
         }
-        if (work->nowcommand == 0 || work->nowcommand == 3 ||
-            (work->nowcommand == 1 && work->nowindex != 0x31 && work->nowindex != 0x32 &&
-             (work->nowindex < 0xA4 || work->nowindex > 0xA6) && work->nowindex != 0xF7)) {
+        switch (work->nowcommand) {
+        case 1:
+            if ((u16)(work->nowindex - 0x31) < 2) {
+                datClearCommMemory(work);
+                break;
+            }
+            if ((u16)(work->nowindex - 0xA4) < 3 || work->nowindex == 0xF7) {
+                break;
+            }
+        case 0:
+        case 3:
             work->prevcommand = work->nowcommand;
-            work->prevtform = work->nowtform;
             work->previndex = work->nowindex;
             work->prevtarea = work->nowtarea;
-        } else if (work->nowcommand != 1 || work->nowindex == 0x31 || work->nowindex == 0x32) {
+            work->prevtform = work->nowtform;
+            break;
+        default:
             datClearCommMemory(work);
+            break;
         }
     }
     SetNextActionSeq(a, 20);
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_CHECK1);
-#endif
 
 void SetAction_CHECK3(void) {
 }
@@ -4396,4 +4452,3 @@ INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", StkSelId);
 INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", D_00551124);
 
 INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", D_00551128);
-

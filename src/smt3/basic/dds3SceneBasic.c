@@ -380,8 +380,13 @@ s32 dds3SceneBasicStartScript(dds3Basic_t *scene, char *procname)
     if (dds3SearchProcessName(procname) != NULL) {
         return 0;
     }
-    scrStartScript2(0x3EA, script, procedure);
-    script = NULL;
+    /* The started process, which retail returns in v0 (callers keep it:
+     * fldEveHit_ScriptStart's gEvnRngPid, which ACT_WIN_DSP finds its
+     * trigger by). The nesting keeps ee-gcc from turning this into a
+     * sibling call (calls.c tries none inside a loop). */
+    do {
+        return (s32)scrStartScript2(0x3EA, script, procedure);
+    } while (0);
 }
 
 void dds3SceneBasicEndScript(dds3Basic_t *scene, const char *procname)

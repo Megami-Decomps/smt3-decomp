@@ -403,7 +403,6 @@ s32 Flow2_5(nbNegoProcessData_t *n)
     return 0;
 }
 
-#ifdef NON_MATCHING
 typedef struct { u16 type; u8 lower; u8 higher; } nbNormalQuestion_t;
 typedef struct {
     s8 type3[3][2];
@@ -420,56 +419,75 @@ s32 Flow2_6(nbNegoProcessData_t *n)
 {
     nbNormalQuestion_t *question;
     s32 rate = 50;
+    /* One live scalar carries the lower rate before the roll and the
+     * Kotowari point type afterwards. The qualified allocation trace shows
+     * that this shared pseudo survives both phases in retail's saved register;
+     * separate locals gain an extra save. Each phase assigns before use. */
+    /* Retain retail's unused default zero (0x2746AC) under the narrow
+     * dead-code exception: Flow2_5/9/13 have the live zero-default qtype
+     * switch shape; Flow7_22 corroborates this residue. This does not imply
+     * historical copying and is separate from the live scalar reuse above. */
     s32 bonus = 0;
     s32 player;
-    s32 less;
-    s32 success;
+    /* Local constraints retain retail's live saved-register allocation. */
+    register s32 success asm("$16");
     s32 type;
     u16 questionType;
-    u8 lower;
-    u8 higher;
+
+    register s32 higher asm("$18");
 
     nbAddNegoIdKouho(n, 0x20007);
     nbAddNegoIdKouho(n, 0x2000D);
-    if (n->qtype == 0) {
+    switch (n->qtype) {
+    case 0:
         question = &D_003E2538[n->ekucyo][n->qindex];
         questionType = question->type;
         higher = question->higher;
-        lower = question->lower;
-        if (questionType == 0) {
+        /* Retain the native order of these two live byte loads. */
+        asm("" : "+r"(higher));
+        bonus = question->lower;
+        switch (questionType) {
+        case 0:
             player = datGetParam(n->pwork, 1);
-            less = player < datGetParam(n->ework, 1);
-        } else if (questionType == 1) {
-            less = n->pwork->level < n->ework->level;
-        } else {
-            less = -1;
+            player = player < datGetParam(n->ework, 1);
+            if (!player) goto lower_rate;
+            goto higher_rate;
+        case 1:
+            if (n->pwork->level < n->ework->level) goto higher_rate;
+lower_rate:
+            rate = bonus;
+            if (n->nowselect != 0) rate = 100 - bonus;
+            goto roll;
+higher_rate:
+            rate = higher;
+            if (n->nowselect != 0) rate = 100 - higher;
         }
-        if (less >= 0) {
-            rate = less ? higher : lower;
-            if (n->nowselect != 0) {
-                rate = 100 - rate;
-            }
-        }
-    } else if (n->qtype > 0 && n->qtype < 4) {
+        break;
+    case 1:
+    case 2:
+    case 3:
         player = datGetParam(n->pwork, 1);
-        rate = player < datGetParam(n->ework, 1) ? 30 : 70;
+        player = player < datGetParam(n->ework, 1);
+        rate = 70;
+        if (player) rate = 30;
     }
-    success = (s32)dds3GetRandIntA(NULL, 100) < rate;
+roll:
+    success = 0;
+    if ((s32)dds3GetRandIntA(NULL, 100) < rate) success = 1;
     type = n->qtype;
     switch (type) {
-    case 1: bonus = D_003E28A0[n->qindex].type1[n->nowselect][0]; break;
-    case 2: bonus = D_003E28A0[n->qindex].type2[n->nowselect][0]; break;
-    case 3: bonus = D_003E28A0[n->qindex].type3[n->nowselect][0]; break;
+    case 1: bonus = D_003E28A0[n->ekucyo].type1[n->nowselect][0]; break;
+    case 2: bonus = D_003E28A0[n->ekucyo].type2[n->nowselect][0]; break;
+    case 3: bonus = D_003E28A0[n->ekucyo].type3[n->nowselect][0]; break;
     }
-    if (type > 0 && type < 4) {
-        datAddKotowariPoint(bonus, 1);
+    if (type < 4) {
+        if (type > 0) datAddKotowariPoint(bonus, 1);
     }
-    n->nextnegoid = n->nextkouho[success ? 0 : 1];
+    if (success) n->nextnegoid = n->nextkouho[0];
+    else n->nextnegoid = n->nextkouho[1];
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowFullMoon", Flow2_6);
-#endif
+
 
 s32 Flow2_7(nbNegoProcessData_t *n)
 {

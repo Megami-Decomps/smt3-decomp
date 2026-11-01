@@ -226,155 +226,189 @@ extern void cmpSetSkillListRows(s32 rows);
 #include "sdk_libc.h"
 
 #ifdef NON_MATCHING
+/* 109 of 649 words match at 649 against the native 651 words; first difference
+   at +0x8. Block structure, frame size and every block's addressing match;
+   retail spills the scoreIndex parameter to 0x20 and keeps a table-address
+   pseudo in a callee-saved register across the first three blocks, where this
+   draft gives scoreIndex that register and rematerialises the address. The
+   allocation priorities decide it: cc1probe --alloc (verify: OK) puts
+   scoreIndex at refs=14 live=402 (priority 0.1045) just ahead of the entry
+   block's row-address pseudo at refs=4 live=77 (0.1039), so it takes the last
+   callee-saved register and everything after it renumbers. The two-word
+   shortfall is the two address rematerialisations that pseudo would save.
+   Same family as the gcse availability accident in docs/levers/when-to-stop.md. */
 void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
                      datUnitWork_t *work, s32 unitId, nbMainProcessData_t *data)
 {
-    volatile nbResultScore_t *entry = &nbResultScoreTable[scoreIndex];
-    s32 alpha, stop, current, increment;
+    char buf[16];
+    s32 alpha;
     s32 drawX;
     s32 level;
+
+    s32 count;
     s32 expAtLevel;
     s32 expNextLevel;
     s32 exp;
-    u32 maxExp, counter;
+    u32 expCnt;
+    u32 maxExp;
     s32 width;
     u32 spriteColor;
     u32 drawColor;
     u32 fontColor;
-    u32 labelColor;
-    char buf[16];
+    u32 baseColor = 0x808080;
+    u32 rewardColor = 0xA09DC300;
 
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
-    stop = entry->stopcnt;
-    if (stop > 0) {
-        entry->stopcnt = stop - 1;
+    if (nbResultScoreTable[scoreIndex].stopcnt > 0) {
+        nbResultScoreTable[scoreIndex].stopcnt--;
     }
     if (frame > 0) {
-        alpha = frame < 8 ? frame * 16 : 0x80;
-        drawX = (s32)((u32)entry->ofsx * 0x46) / 100;
-        entry->ofsx = drawX;
-        spriteColor = 0x808080 | ((u32)alpha << 24);
+        if (frame < 8) {
+            alpha = frame * 16;
+        } else {
+            alpha = 0x80;
+        }
+        drawX = nbResultScoreTable[scoreIndex].ofsx * 0x46 / 100;
+        nbResultScoreTable[scoreIndex].ofsx = drawX;
+        spriteColor = ((u32)alpha << 24) | baseColor;
         nbPnlSprite(x + drawX, y, 0x25, 0x22, 0xBF, 1, 0x25, 0x22, spriteColor, nbResultTex1);
         nbPnlSprite(x + drawX + 0x25, y, 0x11F, 0x22, 0xE3, 1, 1, 0x22, spriteColor, nbResultTex1);
         nbPnlSprite(x + drawX + 0x144, y, 0x78, 0x22, 0x6A, 0x2E, 0x78, 0x22, spriteColor, nbResultTex1);
     }
     if (frame >= 13) {
-        if (nbResultTobiwarpLabel > 0 && entry->stopcnt == 0) {
-            increment = entry->resultadd;
-            current = (u32)entry->exp_cnt + (u32)increment;
-            entry->exp_cnt = current;
-            increment = entry->addexp;
-            maxExp = work->exp + increment;
-            if ((u32)current < maxExp) {
-                nbResultCounter |= 1;
+        if (nbResultTobiwarpLabel > 0 && nbResultScoreTable[scoreIndex].stopcnt == 0) {
+            expCnt = nbResultScoreTable[scoreIndex].exp_cnt +
+                     nbResultScoreTable[scoreIndex].resultadd;
+            nbResultScoreTable[scoreIndex].exp_cnt = expCnt;
+            maxExp = work->exp + nbResultScoreTable[scoreIndex].addexp;
+            if (expCnt >= maxExp) {
+                nbResultScoreTable[scoreIndex].exp_cnt = maxExp;
             } else {
-                entry->exp_cnt = maxExp;
+                nbResultCounter |= 1;
             }
         }
-        if (entry->lvupanmflg != 0) {
-            current = (u32)entry->lvupanmcnt + 1;
-            entry->lvupanmcnt = current;
-            if (current >= 16) {
-                entry->lvupanmflg = 0;
-                entry->lvupanmcnt = 0;
+        if (nbResultScoreTable[scoreIndex].lvupanmflg != 0) {
+            count = nbResultScoreTable[scoreIndex].lvupanmcnt + 1;
+            nbResultScoreTable[scoreIndex].lvupanmcnt = count;
+            if (count >= 16) {
+                nbResultScoreTable[scoreIndex].lvupanmflg = 0;
+                nbResultScoreTable[scoreIndex].lvupanmcnt = 0;
             }
         }
-        expAtLevel = rstCalcExpFromLevel((u8)unitId, entry->l_lv);
-        expNextLevel = rstCalcExpFromLevel((u8)unitId, (s32)((u32)entry->l_lv + 1));
-        exp = entry->exp_cnt;
-        level = rstCalcLevelFromExp((u8)unitId, exp);
-        if (entry->l_lv < level) {
-            counter = *(volatile u32 *)&nbResultCounter;
-            entry->lvupflg = 1;
-            entry->l_lv = level;
-            entry->stopcnt = 0xF;
-            entry->lvupanmflg = 1;
-            *(volatile u32 *)&nbResultCounter = counter | 2;
-            entry->lvupanmcnt = 0;
+        expAtLevel = rstCalcExpFromLevel(unitId, nbResultScoreTable[scoreIndex].l_lv);
+        expNextLevel = rstCalcExpFromLevel(unitId, nbResultScoreTable[scoreIndex].l_lv + 1);
+        exp = nbResultScoreTable[scoreIndex].exp_cnt;
+        level = rstCalcLevelFromExp(unitId, exp);
+        if (nbResultScoreTable[scoreIndex].l_lv < level) {
+            nbResultScoreTable[scoreIndex].lvupflg = 1;
+            nbResultScoreTable[scoreIndex].l_lv = level;
+            nbResultScoreTable[scoreIndex].stopcnt = 0xF;
+            nbResultScoreTable[scoreIndex].lvupanmflg = 1;
+            nbResultCounter |= 2;
+            nbResultScoreTable[scoreIndex].lvupanmcnt = 0;
             nbResultCountEntries(x + 0xFE, y + 0x13);
         }
-        alpha = frame < 0x22 ? frame * 6 - 0x48 : 0x80;
-        if (alpha >= 0x81) {
+        if (frame < 0x22) {
+            alpha = frame * 6 - 0x48;
+            if (alpha > 0x80) {
+                alpha = 0x80;
+            }
+        } else {
             alpha = 0x80;
         }
-        spriteColor = 0x808080 | ((u32)alpha << 24);
+        spriteColor = ((u32)alpha << 24) | baseColor;
         nbPnlSprite(x + 0x17, y + 0x18, 8, 7, 0x98, 0x23, 8, 7, spriteColor, nbResultTex1);
         nbPnlSprite(x + 0x1F, y + 0x18, 0xAA, 7, 0x9F, 0x23, 1, 7, spriteColor, nbResultTex1);
         nbPnlSprite(x + 0xC9, y + 0x18, 8, 7, 0xA1, 0x23, 8, 7, spriteColor, nbResultTex1);
-        drawX = y + 8;
-        drawColor = spriteColor;
-        if (entry->lvupflg != 0) {
-            nbPnlSprite(x + 0x20, drawX, 0x34, 0x1E, 0x9F, 1, 0x34, 0x1E, 0x80808080, nbResultTex2);
-            current = (u32)entry->lvuplvanmcnt + 1;
-            entry->lvuplvanmcnt = current;
-            if (current >= 9) {
-                entry->lvuplvanmcnt = 8;
+        if (nbResultScoreTable[scoreIndex].lvupflg != 0) {
+            nbPnlSprite(x + 0x20, y + 8, 0x34, 0x1E, 0x9F, 1, 0x34, 0x1E, 0x80808080,
+                        nbResultTex2);
+            count = nbResultScoreTable[scoreIndex].lvuplvanmcnt + 1;
+            nbResultScoreTable[scoreIndex].lvuplvanmcnt = count;
+            if (count >= 9) {
+                nbResultScoreTable[scoreIndex].lvuplvanmcnt = 8;
             }
             alpha = 0x80;
-            drawColor = 0x80808080;
         }
-        nbPnlSprite(x + 0x27, y + 0x11, 0x12, 0xC, 0xAC, 0x1E, 0x12, 0xC, drawColor, nbResultTex1);
-        fontColor = 0xA09DC300 | alpha;
-        current = entry->l_lv;
-        sprintf(buf, D_005510F0, current < 0x64 ? current : 0x63);
-        D_00551FBC = (frFontHandle_t *)frwGetSmallNumFontFRQ(
-            (x + 0x3C) * 16, (y + 0x10) * 8, 0, fontColor, buf, NULL);
+        drawColor = ((u32)alpha << 24) | baseColor;
+        nbPnlSprite(x + 0x27, y + 0x11, 0x12, 0xC, 0xAC, 0x1E, 0x12, 0xC, drawColor,
+                    nbResultTex1);
+        fontColor = rewardColor | alpha;
+        level = nbResultScoreTable[scoreIndex].l_lv;
+        sprintf(buf, D_005510F0, level < 100 ? level : 99);
+        D_00551FBC = (frFontHandle_t *)frwGetSmallNumFontFRQ((x + 0x3C) << 4, (y + 0x10) << 3,
+                                                            0, fontColor, buf, NULL);
         frDrawFontEx(D_00551FBC, 1);
         frDestroyFontRequestAfter(D_00551FBC);
         nbPnlSprite(x + 0xCA, y, 0x9B, 0x1F, 1, 0x51, 0x9B, 0x1F, drawColor, nbResultTex1);
-        nbPnlSprite(x + 0xD6, drawX, 0x27, 0x18, 0x70, 0x12, 0x27, 0x18, drawColor, nbResultTex1);
-        if (entry->lvupanmflg != 0) {
-            current = entry->lvupanmcnt;
-            if (current >= 6) {
-                labelColor = 0xA09DC300 | ((s32)(((u32)current << 7) - 0x280) / 10);
-                sprintf(buf, D_005510F8, (s32)((u32)expNextLevel - (u32)exp));
-                alpha = 0x80;
+        nbPnlSprite(x + 0xD6, y + 8, 0x27, 0x18, 0x70, 0x12, 0x27, 0x18, drawColor,
+                    nbResultTex1);
+        if (nbResultScoreTable[scoreIndex].lvupanmflg != 0) {
+            if (nbResultScoreTable[scoreIndex].lvupanmcnt >= 6) {
+                alpha = (nbResultScoreTable[scoreIndex].lvupanmcnt * 128 - 640) / 10;
+                sprintf(buf, D_005510F8, expNextLevel - exp);
                 fontColor = 0xA09DC380;
-                D_00551FBC = (frFontHandle_t *)frwGetSmallNumFontFRQ((x + 0x11D) * 16, (y + 7) * 8, 0,
-                    labelColor, buf, 0);
+                D_00551FBC = (frFontHandle_t *)frwGetSmallNumFontFRQ(
+                    (x + 0x11D) << 4, (y + 7) << 3, 0, rewardColor | alpha, buf, NULL);
+                alpha = 0x80;
                 frDrawFontEx(D_00551FBC, 1);
                 frDestroyFontRequestAfter(D_00551FBC);
             }
         } else {
-            sprintf(buf, D_005510F8, (s32)((u32)expNextLevel - (u32)exp));
+            sprintf(buf, D_005510F8, expNextLevel - exp);
             D_00551FBC = (frFontHandle_t *)frwGetSmallNumFontFRQ(
-                (x + 0x11D) * 16, (y + 7) * 8, 0, fontColor, buf, NULL);
+                (x + 0x11D) << 4, (y + 7) << 3, 0, fontColor, buf, NULL);
             frDrawFontEx(D_00551FBC, 1);
             frDestroyFontRequestAfter(D_00551FBC);
         }
-        spriteColor = 0x808080 | ((u32)alpha << 24);
-        if (entry->lvupanmflg != 0) {
-            current = entry->lvupanmcnt;
-            if (current < 2) {
-                width = (s32)(0xE - (u32)current * 7);
+        if (nbResultScoreTable[scoreIndex].lvupanmflg != 0) {
+            count = nbResultScoreTable[scoreIndex].lvupanmcnt;
+            if (count < 2) {
+                width = 0xE - count * 7;
+                spriteColor = ((u32)alpha << 24) | 0x808080;
                 nbPnlSprite(x + 0xF9, y - width / 2 + 0x18, 0x68, width, 1, 0x2E, 0x68, 0xE,
-                    spriteColor, nbResultTex1);
-            } else if (current >= 0xB) {
-                width = (s32)((u32)current * 0xE - 0x8C) / 5;
+                            spriteColor, nbResultTex1);
+            } else if (count >= 0xB) {
+                width = (count * 0xE - 0x8C) / 5;
+                spriteColor = ((u32)alpha << 24) | 0x808080;
                 nbPnlSprite(x + 0xF9, y - width / 2 + 0x18, 0x68, width, 1, 0x3D, 0x68, 0xE,
-                    spriteColor, nbResultTex1);
+                            spriteColor, nbResultTex1);
             }
         } else {
-            nbPnlSprite(x + 0xF9, y + 0x11, 0x68, 0xE, 1, 0x3D, 0x68, 0xE, spriteColor, nbResultTex1);
-            width = (s32)(((u32)exp - (u32)expAtLevel) * 0x68) /
-                    (s32)((u32)expNextLevel - (u32)expAtLevel);
-            if (width < 0) width = 0;
-            if (width >= 0x69) width = 0x68;
-            if (expAtLevel < exp && width < 2) width = 2;
-            if (exp < expNextLevel && width >= 0x68) width = 0x67;
-            nbPnlSprite(x + 0xF9, y + 0x11, width, 0xE, 1, 0x2E, width, 0xE, spriteColor, nbResultTex1);
+            spriteColor = ((u32)alpha << 24) | 0x808080;
+            nbPnlSprite(x + 0xF9, y + 0x11, 0x68, 0xE, 1, 0x3D, 0x68, 0xE, spriteColor,
+                        nbResultTex1);
+            width = (exp - expAtLevel) * 0x68 / (expNextLevel - expAtLevel);
+            if (width < 0) {
+                width = 0;
+            }
+            if (width > 0x68) {
+                width = 0x68;
+            }
+            if (expAtLevel < exp) {
+                if (width < 2) {
+                    width = 2;
+                }
+            }
+            if (exp < expNextLevel) {
+                if (width >= 0x68) {
+                    width = 0x67;
+                }
+            }
+            nbPnlSprite(x + 0xF9, y + 0x11, width, 0xE, 1, 0x2E, width, 0xE, spriteColor,
+                        nbResultTex1);
         }
         cmpSetSkillListRows(0x14);
         if (work->flag & 4) {
             D_00551FBC = frGetCNameFRQ(0, 1, 0, 0);
-            frSetDrawPosition(D_00551FBC, (x + 0x59) * 16, (y + 0xC) * 8);
+            frSetDrawPosition(D_00551FBC, (x + 0x59) << 4, (y + 0xC) << 3);
             frSetFontColor(D_00551FBC, fontColor);
             frDrawFont(D_00551FBC);
             frDestroyFontRequestAfter(D_00551FBC);
         } else {
             D_00551FBC = (frFontHandle_t *)frwGetSmallFontFRQ(
-                (x + 0x59) * 16, (y + 0xC) * 8, 0, fontColor, text2[work->id], NULL);
+                (x + 0x59) << 4, (y + 0xC) << 3, 0, fontColor, text2[work->id], NULL);
             frDrawFont(D_00551FBC);
             frDestroyFontRequestAfter(D_00551FBC);
         }

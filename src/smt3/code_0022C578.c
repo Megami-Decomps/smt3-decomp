@@ -1745,26 +1745,34 @@ void cmpInitStockCursorPos(void)
     cmpInitCursorRange((u8 *)campWork + 0x726C, (u8)rows, (u8)rows, 0);
 }
 
-/* NON_MATCHING: 6 of 33 words differ (first at +0x28). */
-#ifdef NON_MATCHING
+/* Target-specific allocation aid for the real stock-count accumulator; this
+ * does not imply a hardware register requirement or original source spelling.
+ * The binding ends before each call. See docs/matching/code_0022C578.md. */
 extern void cmpChangeCursorListNums(s32 count, u8 *cursor);
 
 void cmpReCalcStockCursorPos(s8 index)
 {
     if (index == 0 || index == 2) {
-        cmpChangeCursorListNums(
-            (campWork->stock[0].PartyCnt + (u8)campWork->stock[0].StockCnt) & 0xFF,
-            &campWork->unk_6230[0]);
+        s32 count;
+        {
+            s32 partyCount = campWork->stock[0].PartyCnt;
+            register s32 stockCount __asm__("$4") = (u8)campWork->stock[0].StockCnt;
+            stockCount = partyCount + stockCount;
+            count = stockCount & 0xFF;
+        }
+        cmpChangeCursorListNums(count, &campWork->unk_6230[0]);
     }
     if (index == 1 || index == 2) {
-        cmpChangeCursorListNums(
-            (campWork->stock[1].PartyCnt + (u8)campWork->stock[1].StockCnt) & 0xFF,
-            &campWork->unk_6230[0x103C]);
+        s32 count;
+        {
+            s32 partyCount = campWork->stock[1].PartyCnt;
+            register s32 stockCount __asm__("$4") = (u8)campWork->stock[1].StockCnt;
+            stockCount = partyCount + stockCount;
+            count = stockCount & 0xFF;
+        }
+        cmpChangeCursorListNums(count, &campWork->unk_6230[0x103C]);
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpReCalcStockCursorPos);
-#endif
 
 void cmpInitRootCursorPos(void)
 {
@@ -3320,9 +3328,14 @@ void campUpdateStockCursor(void)
 }
 
 extern s32 cmpChkDoNotUseSkill(u16 skill);
-extern campWork_t *volatile cmpSkillSelectWork asm("campWork");
 
-#ifdef NON_MATCHING
+/* Exact-type view of the existing provider, deliberately hiding its earlier
+ * definition. In paired complete-owner builds, the direct call moves the
+ * common cursor-work load into the button-one branch delay slot; this view
+ * preserves retail's no-op there and load in the default exit's delay slot.
+ * The provider and ABI are unchanged. This is a target-specific visibility
+ * aid, not evidence of original source spelling. */
+extern s32 cmpChkDoNotUseSkillView(u16 skill) asm("cmpChkDoNotUseSkill");
 void cmpUpdateSkillSelect(void)
 {
     u16 button = cmpGetPressedButton(0x33);
@@ -3334,15 +3347,14 @@ void cmpUpdateSkillSelect(void)
     }
     switch (button) {
     case 1: {
-        s32 blocked = cmpChkDoNotUseSkill(skill);
-        campWork_t *work = cmpSkillSelectWork;
+        s32 blocked = cmpChkDoNotUseSkillView(skill);
 
         if (blocked != 0) {
             button = 0x8000;
-        } else {
-            work->unk_0001 = 2;
-            campWork->unk_0004 = 1;
+            break;
         }
+        campWork->unk_0001 = 2;
+        campWork->unk_0004 = button;
         break;
     }
     case 2:
@@ -3362,9 +3374,6 @@ void cmpUpdateSkillSelect(void)
                                        button, 0x30);
     cmpPlayCursorSE(button);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateSkillSelect);
-#endif
 
 extern u8 cmpClearStatusFlags(void);
 extern void *cmpStartProcessStatus(s8 arg, cmpSeqInfo_t *parent);
@@ -3435,7 +3444,6 @@ extern s32 fclChkSelMessage(void);
 extern s8 fclGetSelMessagePos(void);
 extern s8 fclEndMessage(void);
 
-#ifdef NON_MATCHING
 void campWaitSelMessage(void)
 {
     if (campWork->stockMessagePhase > 0) {
@@ -3466,15 +3474,22 @@ void campWaitSelMessage(void)
                 fclEndMessage();
                 campWork->stockMessagePhase = 2;
             } else {
-                campWork->unk_0004 = 1;
+                /* Keep this initialized publication value in native $2.
+                 * The ordinary and generic-constraint forms reuse a saved
+                 * constant, changing dispatch and the shared exit. */
+                register s32 confirm __asm__("$2") = 1;
+                __asm__("" : "+r"(confirm));
+                campWork->unk_0004 = confirm;
             }
             break;
+        case 2:
+        default:
+            goto done;
         }
     }
+done:
+    return;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campWaitSelMessage);
-#endif
 
 #ifdef NON_MATCHING
 extern s32 campInfoWorkExists(void);
@@ -3493,14 +3508,15 @@ extern s32 fclChkSelMessage(void);
 extern s8 fclGetSelMessagePos(void);
 extern s8 fclEndMessage(void);
 
-#ifdef NON_MATCHING
 void cmpUpdateDestroyItemConfirm(void)
 {
     s32 closed = 0;
+    s32 confirm;
 
     if (fclChkSelMessage() != 0) {
-        return;
+        goto done;
     }
+    confirm = 1;
     switch (fclGetSelMessagePos()) {
     case 0:
         cmpDestroyItem(1);
@@ -3508,14 +3524,15 @@ void cmpUpdateDestroyItemConfirm(void)
         cmpChangeCursorListNums(campWork->unk_8302, campWork->unk_410C);
         if (campWork->unk_8302 == 0) {
             campWork->unk_0001 = 0;
+            campWork->unk_0004 = confirm;
             closed = 1;
-            campWork->unk_0004 = 1;
         }
         break;
     case 1:
         break;
+    case 2:
     default:
-        return;
+        goto done;
     }
     fclEndMessage();
     if (!closed) {
@@ -3523,10 +3540,9 @@ void cmpUpdateDestroyItemConfirm(void)
         campWork->previousPhase = 1;
     }
     cmpSetCrossGeneralVal(campWork->crossPanel, 0);
+done:
+    return;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateDestroyItemConfirm);
-#endif
 
 extern s32 checkConfigState(void);
 
@@ -6309,30 +6325,31 @@ extern datDevilTableEntry_t datDevilTable[];
 extern char *datExplainTable[];
 extern s16 datGetDevilParam(u8 devilId);
 
-#ifdef NON_MATCHING
 void cmpDrawStatusValue(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
 {
-    s32 color = 0xA09DC380;
+    s32 color;
     s32 affinity;
     frFontHandle_t *font;
 
     if (mode == 4) {
-        color = 0x64B2B580;
+        color = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x64B2B580);
+        goto color_ready;
+    } else {
+        color = cmpGetPanelAlphaOrDefault((u8 *)colors, 0xA09DC380);
+        goto color_ready;
     }
-    color = cmpGetPanelAlphaOrDefault((u8 *)colors, color);
+color_ready:
     if (unit->flag & 4) {
         affinity = datGetDevilParam(DDS3_GBWK->heartsequip);
     } else {
         affinity = datDevilTable[unit->id].aisyoid;
     }
-    font = frwGetSmallFontFRQ2((x + 0x18) * 16, (y + 0x115) * 8,
+    font = frwGetSmallFontFRQ2((s32)(((u32)x + 0x18u) << 4),
+                               (s32)(((u32)y + 0x115u) << 3),
                                0xFFFFF, color, datExplainTable[affinity + 0x50], 0);
     func_001C7E38(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusValue);
-#endif
 
 void cmpDrawStatusBars(s32 x, s32 y, u8 *alpha)
 {
@@ -8858,7 +8875,7 @@ s32 campDrawStockLabel2(s32 x, s32 y, s32 z, s8 slot, s8 localSlot,
 
     colors[0] = colors[1] = colors[2] = colors[3] = (alpha / 2) | 0x80808000;
     if (flags & 4) {
-        return 1;
+        return 0;
     }
     if (!(flags & 1)) {
         return 0;
@@ -10012,7 +10029,9 @@ void cmpModelFreeResource(void)
 
 s32 cmpPrepareStatusModel(s32 group, s32 id, s32 blocking)
 {
-    D_0054FEE0 = mdlPrepare(group, id, blocking);
+    /* mdlPrepare's result, which retail returns in v0 (cmpLoadStatusModel
+     * reads it); the store after the call keeps it no sibling call. */
+    return D_0054FEE0 = mdlPrepare(group, id, blocking);
 }
 
 typedef struct
@@ -11257,8 +11276,13 @@ s32 cmpMoveCursor(cmpCursorInfo_t *cur, s8 dir)
     {
         cmpAdvanceCursorPhase(cur);
     }
-    cmpFindNextCursorItem(cur, dir, 1);
-    cur = NULL;
+    /* Whether the cursor moved, which retail returns in v0 (lstMoveCursor's
+     * loop reads it). The nesting keeps ee-gcc from turning this into a
+     * sibling call, as in cmpMoveCursor2. */
+    do
+    {
+        return cmpFindNextCursorItem(cur, dir, 1);
+    } while (0);
 }
 
 s32 cmpGetCursorMoveMode(cmpCursorInfo_t *cursor)
@@ -11348,7 +11372,7 @@ void cmpChangeCursorListNums(s32 countValue, u8 *cursorData)
         cursor->unk_24 = visible - 1;
     }
     offset = range - (s8)cursor->unk_21 - 1;
-    if (offset >= (u8)cursor->unk_25) {
+    if (offset < (u8)cursor->unk_25) {
         cursor->unk_25 = offset;
     }
     if (cursor->CursorPos != 0) {

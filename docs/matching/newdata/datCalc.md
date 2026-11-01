@@ -33,3 +33,28 @@ The complete owner passes 78 match, 0 differ. Both dispatch tables, the exact
 jitter literal `0x3d4ccccc`, full owner text, rodata and lit4, and the complete
 retail image were verified. Actual published source receipts and the next
 no-op build also pass. `datGetPlayerParam` above remains unresolved.
+
+## datBossRashGetRec (newdata/datCalc, 0x108)
+
+66 of 66 words match at 264 bytes. In the `type == 0` branch, an ordinary
+local result starts at 999 and is replaced by the signed 16-bit record when
+`best > type`. The dominating branch proves that comparison equivalent to
+`best > 0`; other type values remain unrestricted. The default has a genuine
+return consumer when the stored record is nonpositive. No dead initializer,
+artificial consumer, compiler constraint, type or provider change is added.
+
+The original singleton emits 268 bytes with 17 differing words and retains
+999 in an extra saved register. The branch-local result and native comparison
+operand produce the exact 264-byte output. This describes observed output,
+not an unverified internal optimization mechanism. The type-one callback,
+its subsequent global reloads, the other-type return and loop behavior stay
+unchanged.
+
+Independent semantic review and canonical complete-owner checking pass
+79 match, 0 differ, with owned data exact. Review also exhaustively compares
+the changed type-zero selection over all 65,536 signed 16-bit record values;
+this is a bounded selection check, not a whole-function execution proof.
+
+Combined local gates pass the retail checksum, 26 tooling test files / 427
+cases, all 147 guarded owners / 537 drafts with stable source/compiler inputs,
+seven IRX owners, and reconciled production reports.

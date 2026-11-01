@@ -39,20 +39,25 @@ void rstDrawEvoBgFade(void)
     cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, rstDrawWork->fadeColor, 7);
 }
 
-/* NON_MATCHING: 103 of 116 words match at the exact size; retail keeps a register
- * copy of the work pointer that the C coalesces away. */
-#ifdef NON_MATCHING
+/* The entry snapshot is ordinary C. Localized target-specific bindings on
+ * post-reset row snapshots resolve the remaining load-register mismatch.
+ * Each row pointer is assigned after its provider call and last consumed
+ * before the next call. These aids are not original-source evidence. */
 extern void cmpFindPanelEffSlot(s32 arg);
 extern void cmpUpdateTerminate(void *work);
 
 s32 rstDraw(dds3ProcessID_t *id)
 {
-    rstDrawWork = dds3GetProcessData(id);
-    if (rstDrawWork->flags & 0x20) {
-        cmpUpdateTerminate(rstDrawWork);
-        return -1;
+    {
+        rstData_t *frameWork;
+        rstDrawWork = dds3GetProcessData(id);
+        frameWork = rstDrawWork;
+        if (rstDrawWork->flags & 0x20) {
+            cmpUpdateTerminate(rstDrawWork);
+            return -1;
+        }
+        nmeDrawFrame(0x10, frameWork->unk_2310);
     }
-    nmeDrawFrame(0x10, rstDrawWork->unk_2310);
     rstDrawEvoBgFade();
     if (rstDrawWork->flags & 2) {
         switch (rstDrawWork->phase) {
@@ -90,12 +95,20 @@ s32 rstDraw(dds3ProcessID_t *id)
             break;
         case 17:
         case 18:
-            rstResetEncycPanel();
-            rstDrawStatusRow(-rstDrawWork->unk_1B, 2, 0);
+            {
+                register rstData_t *rowWork __asm__("$2");
+                rstResetEncycPanel();
+                rowWork = rstDrawWork;
+                rstDrawStatusRow(-rowWork->unk_1B, 2, 0);
+            }
             break;
         case 20:
-            rstResetEncycPanel2();
-            rstDrawStatusRow(-rstDrawWork->unk_1B, 0, 1);
+            {
+                register rstData_t *rowWork __asm__("$2");
+                rstResetEncycPanel2();
+                rowWork = rstDrawWork;
+                rstDrawStatusRow(-rowWork->unk_1B, 0, 1);
+            }
             break;
         case 21:
             rstDrawStatusPanel(-rstDrawWork->unk_1B, 1);
@@ -108,6 +121,5 @@ s32 rstDraw(dds3ProcessID_t *id)
     cmpFindPanelEffSlot(0x48);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstdraw", rstDraw);
-#endif
+
+

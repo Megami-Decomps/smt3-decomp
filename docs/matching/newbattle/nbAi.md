@@ -39,3 +39,42 @@ source-level array capacity. The 16-element reconstruction remains guarded
 until actual storage evidence explains that difference. The RNG declaration
 now agrees with its provider: state pointer, unsigned limit and unsigned
 return. This correction leaves the emitted instructions unchanged.
+
+## Sel_AI (newbattle/nbAi, 0x358)
+
+214 of 214 words match at 856 bytes in ordinary C. Separate compact-output
+index and accepted count have independent real consumers: score-array
+addressing and the later scan bound. The index form compiles
+to the native advancing-pointer code. A direct-pointer control is semantically
+correct and 856 bytes but matches only 208 of 214 words because initialization
+is scheduled earlier. No constraints, asm, dummy uses or invented bounds are
+needed. The 32-word score buffer is not gratuitously initialized; actual
+formation loops scan 16 records of the existing 240-byte type.
+
+The local nbGetVirtualAisyo declaration now truthfully returns u32, matching
+its provider. An explicit s32 selector preserves native signed sparse dispatch,
+rejecting exactly 0x10000/0x20000/0x40000. Command 0 selects skill zero, command
+1 the actual work skill; other commands print and return zero. AI level 0
+marks every current bit-4 formation, unsupported levels return zero. Level 1
+retains all signed scores, including zero/negative. Level 2 skips the three
+affinities and zero scores but retains negative scores. Formation and battle
+data are freshly observed across callbacks, including between affinity and
+score calls; no stale pointer is cached.
+
+If no score is accepted, the function prints a diagnostic and returns -1
+before group handling. A nonzero
+group marks all current bit-4 entries, not merely accepted-score entries.
+Single selection starts best=0/index=0 and uses strict greater-than, preserving
+first ties and index zero when all scores are nonpositive. The native compact
+rank is mapped through all current bit-4 formations without repeating affinity
+or zero-score filtering; this can select an earlier rejected candidate and is
+intentionally not repaired. The native branch delay slot also increments count on the selected path,
+where that updated value is unused. The C need not add an increment before
+its selected-path break; its ordinary loop already compiles exactly. These
+findings do not establish original source spelling.
+
+Independent complete-owner verification gives 47 match, 0 differ, preserving
+all 46 peers, layouts and owned data. Full local gates passed for source
+`b953764bb48d99d9e97febabe7b3950b3984221e`. Exact-source CI
+[41053166184](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41053166184)
+completed successfully, including every build/deploy step and retail checksum.

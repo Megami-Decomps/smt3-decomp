@@ -778,25 +778,29 @@ s32 cmbCheckProcessStat(void)
 
 extern s32 cmpModelSetup(u16 id, s32 blocking);
 
-#ifdef NON_MATCHING
 s32 cmbGetBirthPhase(void)
 {
-    cmpCursorInfo_t *cursor;
     s32 stockIndex;
 
-    if (CMB_GBWK->unk_00003 == 5) {
-        cursor = &CMB_GBWK->stockCursorGroup[0].cursor;
-    } else if (CMB_GBWK->unk_00003 == 6) {
-        cursor = &CMB_GBWK->stockCursorGroup[1].cursor;
-    } else {
-        cursor = &CMB_GBWK->stockCursorGroup[2].cursor;
+    switch (CMB_GBWK->unk_00003) {
+    case 5:
+        stockIndex = (s8)CMB_GBWK->unk_165EE[
+            CMB_GBWK->stockCursorGroup[0].cursor.unk_22 +
+            (u8)CMB_GBWK->stockCursorGroup[0].cursor.unk_24];
+        break;
+    case 6:
+        stockIndex = (s8)CMB_GBWK->unk_165EE[
+            CMB_GBWK->stockCursorGroup[1].cursor.unk_22 +
+            (u8)CMB_GBWK->stockCursorGroup[1].cursor.unk_24];
+        break;
+    default:
+        stockIndex = (s8)CMB_GBWK->unk_165EE[
+            CMB_GBWK->stockCursorGroup[2].cursor.unk_22 +
+            (u8)CMB_GBWK->stockCursorGroup[2].cursor.unk_24];
+        break;
     }
-    stockIndex = (s8)CMB_GBWK->unk_165EE[cursor->unk_22 + (u8)cursor->unk_24];
     return cmpModelSetup(DDS3_GBWK->party[stockIndex].unit.id, 0);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthPhase);
-#endif
 
 s32 cmbBirthDevilIsAvailable(void)
 {
@@ -821,7 +825,7 @@ void cmbBuildResultRow(s32 mode)
 #ifdef NON_MATCHING
 extern s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
                             cmbUnit_t *third, datUnitWork_t *result,
-                            s8 available, s8 mode, s8 flag, cmpSkillList_t *skills);
+                            s32 available, s8 mode, s8 flag, cmpSkillList_t *skills);
 
 void cmbCreateCombineResultTable(s32 mode)
 {
@@ -1073,9 +1077,8 @@ extern void cmbSetupBirthPanel(s32 index);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
                             cmbUnit_t *third, datUnitWork_t *result,
-                            s8 available, s8 mode, s8 flag, cmpSkillList_t *skills);
+                            s32 available, s8 mode, s8 flag, cmpSkillList_t *skills);
 
-#ifdef NON_MATCHING
 s32 cmbCalcBirthDevil(void)
 {
     cmbUnit_t *first;
@@ -1086,10 +1089,10 @@ s32 cmbCalcBirthDevil(void)
     s32 available;
     s32 result;
     u16 id;
-    s8 flag;
+    s32 flag = 1;
 
-    if (CMB_GBWK->unk_00004 != 1) {
-        return 0;
+    if (CMB_GBWK->unk_00004 != flag) {
+        goto no_birth;
     }
     first = &DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index];
     second = &DDS3_GBWK->party[CMB_GBWK->stockSlot[1].index];
@@ -1117,12 +1120,16 @@ s32 cmbCalcBirthDevil(void)
     available = cmbBirthDevilIsAvailable();
     result = cmbGetBirthDevil(first, second, third, &CMB_GBWK->birthUnit[2],
                               available, 0, flag, NULL);
-    if (result == 10) {
+    switch (result) {
+    case 10:
         CMB_GBWK->birthVariant = 1;
-    } else if (result == 11) {
+        break;
+    case 11:
         CMB_GBWK->birthVariant = 2;
-    } else {
+        break;
+    default:
         CMB_GBWK->birthVariant = 0;
+        break;
     }
     if (id == 0) {
         CMB_GBWK->unk_00001 = 6;
@@ -1131,11 +1138,9 @@ s32 cmbCalcBirthDevil(void)
     cmpModelSetup(id, 0);
     CMB_GBWK->unk_1650A = 3;
     cmpStatSetTimer(0, 0);
+no_birth:
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcBirthDevil);
-#endif
 
 extern s32 cmbAddCustomDevilToStock(datUnitWork_t *custom, cmbUnit_t *list, u8 count);
 extern s32 cmbGetSpecialItemId(void);
@@ -1176,24 +1181,23 @@ void cmbAddBirthDevilToStock(datUnitWork_t *units, u8 count)
 }
 
 
-#ifdef NON_MATCHING
 void cmbStartResultScript(void)
 {
     s32 entry = 0;
 
     if (CMB_GBWK->unk_00004 != 0) {
-        if (CMB_GBWK->unk_1650B == 1) {
-            entry = 5;
-        } else if (CMB_GBWK->unk_1650B == 2) {
+        switch (CMB_GBWK->unk_1650B) {
+        case 2:
             entry = 6;
+            break;
+        case 1:
+            entry = 5;
+            break;
         }
         CMB_GBWK->unk_00005 = 1;
         CMB_GBWK->unk_00008 = fclScriptStart(CMB_GBWK->script, entry, &CMB_GBWK->scriptArg);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbStartResultScript);
-#endif
 
 extern void cmbRunActionSe(s32 enabled, s32 mode);
 extern s32 cmbChkPolygonMovie(void);
@@ -2583,7 +2587,7 @@ no:
 #ifdef NON_MATCHING
 s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
                      cmbUnit_t *third, datUnitWork_t *output,
-                     s8 available, s8 mode, s8 accidentEnabled, cmpSkillList_t *skills)
+                     s32 availableInput, s8 mode, s8 accidentEnabled, cmpSkillList_t *skills)
 {
     u16 ids[3];
     u8 races[3];
@@ -2592,6 +2596,7 @@ s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
     s32 inheritedFlag;
     s32 result;
     s32 accident = 0;
+    s8 available = (s8)availableInput;
     s32 moonResult;
     u8 kind;
 
@@ -3269,21 +3274,27 @@ extern void cmbDrawResultHeader(s32 x, s32 y, s32 z, s32 width, s32 height,
 extern void cmbDrawResultFooter(s32 color);
 extern s32 fclGetPanelAnimPhase(fclPanelAnim_t *anim);
 
-#ifdef NON_MATCHING
 void cmbDrawResultPanel(s32 mode)
 {
-    s32 alpha = 0x100;
+    s32 alpha;
 
     cmbDrawResultHeader(0x1360, 0x1C0, 0xFFFFF, 0xCA, 0x16,
                         0xB8B8F820, 0x30303040, 0x47);
     cmbDrawDevilNameLevel(0x13A0, 0x1D0, 0xFFFFF, &DDS3_GBWK->party[0].unit, 0x47);
     fclDrawPanelSprite(0x33001, 0x47);
     fclDrawPanelSprite2(0x48, 0x47);
-    if (mode == 2) {
-        cmbDrawResultFooter(0x698AEC40);
-    } else {
+    switch (mode) {
+    case 1:
         cmbDrawResultFooter(0x5FA5E240);
+        break;
+    case 2:
+        cmbDrawResultFooter(0x698AEC40);
+        break;
+    default:
+        cmbDrawResultFooter(0x5FA5E240);
+        break;
     }
+    alpha = 0x100;
     if (mode != 2) {
         alpha = (0x200 - fclGetPanelAnimPhase(&CMB_GBWK->resultPanelAnim)) / 2;
     }
@@ -3299,9 +3310,6 @@ void cmbDrawResultPanel(s32 mode)
     fclDrawPanelSprite(0x3101B, 0x47);
     fclDrawPanelSprite2(0x44, 0x47);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultPanel);
-#endif
 
 #ifdef NON_MATCHING
 extern void cmbDrawStockEntry(s32 x, s32 y, u32 z, s8 selected, u32 color, cmpCursorInfo_t *cursor, u8 mode, s32 ot);
@@ -3405,9 +3413,9 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevilMaskBG);
 extern void cmbSetBirthPanel(datUnitWork_t *unit);
 extern s32 datGetParam(datUnitWork_t *unit, s32 type);
 
-#ifdef NON_MATCHING
 void cmbDrawBirthDevil(s32 hideRibbon)
 {
+    s32 hasBase = 0;
     datUnitWork_t *selected = cmbGetBirthDevilPanel();
     s32 type = CMB_GBWK->birthKind;
 
@@ -3418,11 +3426,11 @@ void cmbDrawBirthDevil(s32 hideRibbon)
         datUnitWork_t display;
         datUnitWork_t base;
         s8 delta[6];
-        s32 hasBase = 0;
         s32 i;
 
         cmbCopyCustomDevilToStock(&display, selected);
-        if (type == 2) {
+        switch (type) {
+        case 2: {
             datUnitWork_t *source = &DDS3_GBWK->party[CMB_GBWK->stockSlot[0].index].unit;
 
             if (datDevilTable[source->id].race == 8) {
@@ -3430,11 +3438,15 @@ void cmbDrawBirthDevil(s32 hideRibbon)
             }
             cmbCopyCustomDevilToStock(&base, source);
             hasBase = 1;
-        } else if (type == 8 || type == 9) {
+            break;
+        }
+        case 8:
+        case 9:
             cmbCopyDefaultDevilToStock(selected->id, &base);
             hasBase = 1;
-        } else {
-            for (i = 5; i >= 0; i--) {
+            break;
+        default:
+            for (i = 0; i < 6; i++) {
                 delta[i] = 0;
             }
         }
@@ -3458,19 +3470,15 @@ void cmbDrawBirthDevil(s32 hideRibbon)
         fclRbnDraw(CMB_GBWK->ribbon, 0, 0x98, 0, 0x80, 0, -0x80, 0x47);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevil);
-#endif
 
-#ifdef NON_MATCHING
-s32 func_00201FB0(s32 active)
+void func_00201FB0(s32 active)
 {
     s32 work = fclEncycWork();
     fclPanelPos_t pos;
     s32 mode;
 
     if (work != 0) {
-        return work;
+        return;
     }
     mode = fclGetFlag(0) != 0 ? 0 : 2;
     if (active != 0) {
@@ -3478,13 +3486,9 @@ s32 func_00201FB0(s32 active)
     }
     fclInitPanelPos(0, 0, 0xFFFFF, 0x64, 0, 0, (fclPanel_t *)&pos);
     cmpUpdateListSelection(&pos, (u8 *)&CMB_GBWK->resultCursor, 0, mode, 0x100, 0x47);
-    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", func_00201FB0);
-#endif
 
-s32 cmbDrawPhase3(s32 active)
+void cmbDrawPhase3(s32 active)
 {
     fclPanelPos_t pos;
     s32 mode = 1;
@@ -3503,19 +3507,21 @@ s32 cmbDrawPhase3(s32 active)
 }
 
 #ifdef NON_MATCHING
-extern s32 func_00201FB0(s32 mode);
+extern void func_00201FB0(s32 mode);
 #endif
 
-s32 cmbDrawPhasePanel(void)
+void cmbDrawPhasePanel(void)
 {
     s32 phase = (s8)CMB_GBWK->unk_00002;
 
     switch (phase)
     {
     case 3:
-        return cmbDrawPhase3(0);
+        cmbDrawPhase3(0);
+        return;
     case 2:
-        return func_00201FB0(1);
+        func_00201FB0(1);
+        return;
     default:
         cmbDrawPhaseDefault(1);
         phase = 0;
@@ -3630,13 +3636,11 @@ extern s32 cmpChkPadPressUpDown(void);
 extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 extern void cmpPlayCursorSE(u32 button);
 
-#ifdef NON_MATCHING
 void cmbUpdateRoot(void)
 {
     u16 button = cmpGetPressedButton(0x33);
     s8 selected;
-    u8 offset;
-    u8 index;
+    s32 cursorSum;
 
     fclSetWorkValue(2, 0);
     if (fclGetFlag(0) == 0) {
@@ -3644,15 +3648,13 @@ void cmbUpdateRoot(void)
     }
     switch (button) {
     case 1:
-        offset = (u8)CMB_GBWK->combineCursor.unk_24;
-        index = *(u8 *)&CMB_GBWK->combineCursor.unk_22;
-        selected = (s8)(index + offset + 1);
-        CMB_GBWK->unk_00001 = selected;
+        cursorSum = *(u8 *)&CMB_GBWK->combineCursor.unk_22 +
+                    (u8)CMB_GBWK->combineCursor.unk_24 + 1;
+        selected = (s8)cursorSum;
+        CMB_GBWK->unk_00001 = cursorSum;
         switch (selected) {
         case 1:
-            if ((s8)CMB_GBWK->stockCursorCount >= 2) {
-                CMB_GBWK->unk_00004 = 1;
-            } else {
+            if ((s8)CMB_GBWK->stockCursorCount < 2) {
                 CMB_GBWK->unk_00005 = 1;
                 CMB_GBWK->unk_00008 = fclScriptStart(CMB_GBWK->script, 4,
                                                      &CMB_GBWK->scriptArg);
@@ -3660,6 +3662,8 @@ void cmbUpdateRoot(void)
                 CMB_GBWK->unk_00003 = 0x10;
                 CMB_GBWK->unk_00004 = -1;
                 CMB_GBWK->unk_00002 = 0;
+            } else {
+                CMB_GBWK->unk_00004 = 1;
             }
             break;
         case 3:
@@ -3691,9 +3695,6 @@ void cmbUpdateRoot(void)
     cmpPlayCursorSE((u16)cmpDisablePadBitStop(
         (cmpPadStopWork_t *)&CMB_GBWK->combineCursor, button, 0x30));
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateRoot);
-#endif
 
 s32 cmbStockIsLocked(s32 index)
 {
@@ -3871,7 +3872,6 @@ s32 cmbChkIkenieEnable(void)
     return evtBitCheck(0x25) != 0;
 }
 
-#ifdef NON_MATCHING
 void cmbUpdateBirthDevil(void)
 {
     u16 button = cmpGetPressedButton(0x303);
@@ -3882,23 +3882,27 @@ void cmbUpdateBirthDevil(void)
         s32 first;
         s32 second;
         u16 firstId;
+        datUnitWork_t *firstUnit;
+        datUnitWork_t *secondUnit;
 
         if (CMB_GBWK->unk_1650A != 3) {
             CMB_GBWK->unk_1650A = 3;
             cmpSetModelReloadFlag();
         }
-        first = ((volatile cmbGbWork_t *)CMB_GBWK)->stockSlot[0].index;
-        second = ((volatile cmbGbWork_t *)CMB_GBWK)->stockSlot[1].index;
+        first = CMB_GBWK->stockSlot[0].index;
+        second = CMB_GBWK->stockSlot[1].index;
+        firstUnit = &DDS3_GBWK->party[first].unit;
+        secondUnit = &DDS3_GBWK->party[second].unit;
         birthId = CMB_GBWK->birthUnit[0].id;
-        firstId = ((volatile dds3GlobalWork_t *)DDS3_GBWK)->party[first].unit.id;
-        if (firstId != birthId && DDS3_GBWK->party[second].unit.id != birthId &&
+        firstId = firstUnit->id;
+        if (firstId != birthId && secondUnit->id != birthId &&
             cmbCheckEvoUnlocked(birthId, &DDS3_GBWK->party[0].unit, 16) >= 0) {
             CMB_GBWK->unk_00001 = 15;
             CMB_GBWK->unk_00004 = button;
             CMB_GBWK->unk_1650B = 2;
         } else {
             if (evtBitCheck(0x8A0) == 0 &&
-                DDS3_GBWK->party[0].unit.level < CMB_GBWK->birthUnit[0].level) {
+                CMB_GBWK->birthUnit[0].level > DDS3_GBWK->party[0].unit.level) {
                 CMB_GBWK->unk_00001 = 15;
                 CMB_GBWK->unk_00004 = 1;
                 CMB_GBWK->unk_1650B = 1;
@@ -3916,11 +3920,15 @@ void cmbUpdateBirthDevil(void)
         break;
     }
     case 2:
-        if (cmpLoadStatusModel() != 0) {
-            button = 0x8000;
-        } else {
-            CMB_GBWK->unk_00001 = CMB_GBWK->stockSlot[2].index == -1 ? 6 : 8;
+        if (cmpLoadStatusModel() == 0) {
+            if (CMB_GBWK->stockSlot[2].index == -1) {
+                CMB_GBWK->unk_00001 = 6;
+            } else {
+                CMB_GBWK->unk_00001 = 8;
+            }
             CMB_GBWK->unk_00004 = 2;
+        } else {
+            button = 0x8000;
         }
         break;
     case 0x100:
@@ -3952,9 +3960,6 @@ void cmbUpdateBirthDevil(void)
     }
     cmpPlayCursorSE(button);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateBirthDevil);
-#endif
 
 extern void cmbAddBirthDevilToStock(datUnitWork_t *unit, u8 count);
 
@@ -4024,15 +4029,14 @@ s32 cmbUpdateSacConfirm(void)
     return 1;
 }
 
-#ifdef NON_MATCHING
 void cmbUpdateStockCursor2(void)
 {
     u16 button = cmpGetPressedButton(0x237);
 
     switch (button) {
     case 1: {
-        cmpCursorInfo_t *cursor = &CMB_GBWK->stockCursorGroup[2].cursor;
-        s8 selected = *(u8 *)&cursor->unk_22 + (u8)cursor->unk_24;
+        s8 selected = *(u8 *)&CMB_GBWK->stockCursorGroup[2].cursor.unk_22
+            + (u8)CMB_GBWK->stockCursorGroup[2].cursor.unk_24;
 
         CMB_GBWK->stockSlot[2].unk_01 = selected;
         CMB_GBWK->stockSlot[2].index = CMB_GBWK->unk_165EE[(s8)CMB_GBWK->stockSlot[2].unk_01];
@@ -4079,9 +4083,6 @@ void cmbUpdateStockCursor2(void)
     cmpPlayCursorSE((u16)cmpDisablePadBitStop(
         (cmpPadStopWork_t *)&CMB_GBWK->stockCursorGroup[2].cursor, button, 0x30));
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateStockCursor2);
-#endif
 
 #ifdef NON_MATCHING
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
@@ -5104,14 +5105,15 @@ s32 cmbFindUnitScene(mdlObj_t *work)
 extern const char *D_0032F59C[];
 extern sdfModelOt_t D_002F69B8[];
 
-#ifdef NON_MATCHING
 void cmbUpdateCameraPos(void)
 {
     f32 mark[4] __attribute__((aligned(16)));
-    s32 index;
+    s32 index = 4;
 
     memset(mark, 0, sizeof(mark));
-    index = CMB_GBWK->birthVariant == 0 ? 3 : 4;
+    if (CMB_GBWK->birthVariant == 0) {
+        index = 3;
+    }
     if ((__SIZE_TYPE__)CMB_GBWK + (__SIZE_TYPE__)&((cmbGbWork_t *)0)->cameraPosition == 0) {
         return;
     }
@@ -5122,18 +5124,15 @@ void cmbUpdateCameraPos(void)
         sdfModelGetMarkPos(CMB_GBWK->actionData[index].model->inner, 0);
         SDF_VU0_STOREVECTOR(mark);
     }
-    fclSetWorkValue(11, fcvtws(mark[0]));
-    fclSetWorkValue(12, fcvtws(mark[1]));
-    fclSetWorkValue(13, fcvtws(mark[2]));
+    fclSetWorkValue(11, (s32)mark[0]);
+    fclSetWorkValue(12, (s32)mark[1]);
+    fclSetWorkValue(13, (s32)mark[2]);
     mdlSetColorWithEffect(CMB_GBWK->actionData[index].model, 0x80808080);
     cmbFindUnitScene(CMB_GBWK->actionData[index].model);
     cmbDrawActionModel(CMB_GBWK->actionData[index].model,
                        (u16)CMB_GBWK->actionData[index].id,
                        CMB_GBWK->cameraPosition, 0x80808080, D_002F69B8);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateCameraPos);
-#endif
 
 extern s8 cmbActionStep;
 extern s8 cmbActionMode;

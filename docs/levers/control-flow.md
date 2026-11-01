@@ -492,6 +492,13 @@ recovers the native NOP and the downstream alignment without an explicit pad.
 Reproduce with `tools/cc1probe.sh src/smt3/sdk/libc.c --func __swsetup --sched --reorg --out /tmp/swsetup-init`; require `verify: OK`. The complete owner,
 including the separate buffered-formatting reconstruction, remains exact.
 
+The same row read backwards: a `do { ... } while (0)` macro repeated at many
+call sites leaves those loop notes at every site, and gcc aligns the join label
+after one of them. `field/fldProcess::ProcDraw` draws twelve blur packets
+through one macro and retail pads neither join; a plain braced block instead of
+`do/while` drops the `.p2align 3,,7` before the area-23 label and the stray
+`nop` with it, which was the last word of 563.
+
 ## Exit the stream search before initializing the selected slot
 
 `sdk/libc::__sfp` matches all 248 bytes with its selected-stream initialization

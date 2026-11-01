@@ -1206,7 +1206,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
             point->f[2] = 0.0f;
             point->f[3] = 0.0f;
             point->f[0] = sway - width;
-            point->f[1] = y + 1.3599997758865356f;
+            point->f[1] = y + 1.3599998f;
             SDF_VU0_LOADVECTOR(point);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(point);
@@ -1214,7 +1214,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
             point->f[2] = 0.0f;
             point->f[3] = 0.0f;
             point->f[0] = width + sway;
-            point->f[1] = y + 1.3599997758865356f;
+            point->f[1] = y + 1.3599998f;
             SDF_VU0_LOADVECTOR(point);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(point);
@@ -1229,9 +1229,9 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
             color[2] = 0x80808080;
             color[3] = 0x80808080;
             color += 4;
-            y += 1.3599997758865356f;
+            y += 1.3599998f;
             v = nextV;
-            fade += -0.009999999776482582f;
+            fade += -0.01f;
             angle += 0.18849553167819977f;
             if (count >= 32) {
                 sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
@@ -1549,7 +1549,7 @@ void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR(&direction);
-        width = (frame < 10 ? 1.0f : 1.0f - (f32)(frame - 10) / 14.0f) * 33.999996185302734f;
+        width = (frame < 10 ? 1.0f : 1.0f - (f32)(frame - 10) / 14.0f) * 33.999997f;
         SDF_VU0_LOADVECTOR(work->pos_s);
         y = work->pos_s[1] - 340.0f;
         SDF_VU0_SETVECTOR_Y(y);
@@ -1572,7 +1572,7 @@ void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
             MMI_RGBA_PACK_128(convertedColor);
             color = effColorBlend(0x303030, 0x40808080, t);
             effPCPBossBUNSINDrawPoly(tag, work, &segment, color, width, 20.0f, 543.99993896484375f, 680.0f);
-            t += 0.06666666269302368f;
+            t += 0.06666667f;
         }
     }
     ot = &sdfGrOtTable[43];
@@ -2828,32 +2828,36 @@ void effPCPBossKAGUAttackGetSplitPoint(u128 *pPosBuff, const u128 *pPoint1, cons
     }
 }
 
-#ifdef NON_MATCHING
 void effPCPBossKAGUAttackDraw(effPCPBossKAGUAttack_t *work)
 {
     nbFormation_t *model;
+    s32 searchIndex;
+    effPCPBossPlace_t place;
     effPCPBossVector_t marks[8];
     effPCPBossVector_t center;
     effPCPBossVector_t end;
-    effPCPBossPlace_t place;
     s32 frame, limit, fadeIn, fadeOut, rest, id;
-    u32 i, j, groupCount, color;
+    u32 i, groupCount, color, listIndex;
     f32 blend;
-    void **list;
 
     if (effBTLSkillCheckRun() != 0) {
         model = effBTLSkillGetInvokeFormation();
     } else {
+        register nbFormation_t *found asm("$22") = NULL;
         model = nbGetMainProcessData()->form;
-        for (i = 0; i < 32; i++, model++) {
+        searchIndex = 0;
+        while (searchIndex < 32) {
+            ++searchIndex;
             if ((model->stat & 3) == 3) {
                 id = effBTLModelGetID(model);
                 if (id == 0x125 || id == 0x108) {
+                    found = model;
                     break;
                 }
             }
+            model++;
         }
-        if (i == 32) {
+        if (found == NULL) {
             return;
         }
     }
@@ -2878,51 +2882,51 @@ void effPCPBossKAGUAttackDraw(effPCPBossKAGUAttack_t *work)
         center.f[2] = 0.0f;
         for (i = 0; i < 8; i++) {
             effBTLModelGetMarkPosition2(model, i + 0x14);
-            SDF_VU0_STOREVECTOR(&marks[i]);
+            SDF_VU0_STOREVECTOR_NOMEM(&marks[i]);
             center.f[0] += marks[i].f[0];
             center.f[1] += marks[i].f[1];
             center.f[2] += marks[i].f[2];
         }
         center.f[3] = 0.0f;
-        center.f[2] *= 0.125f;
-        center.f[0] *= 0.125f;
-        center.f[1] *= 0.125f;
+        center.f[0] = center.f[0] * 0.125f;
+        center.f[1] = center.f[1] * 0.125f;
+        center.f[2] = center.f[2] * 0.125f;
         SDF_VU0_LOADVECTOR(&model->pos);
         SDF_VU0_LOADVECTOR_B(effPCPBossKAGUDrawParam);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(&end);
-        groupCount = work->groupCount;
-        list = work->polyLists;
-        for (i = 0; i < groupCount; i++) {
-            for (j = 0; j < 8; j++, list++) {
-                if (j != 6) {
-                    effPCPBossKAGUAttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
-                                                      &marks[j].q, &end.q, &center.q);
-                    effPCP_ThunderPolyListSetColor(*list, color);
-                    effPCP_ThunderPolyListDraw(*list);
+        SDF_VU0_STOREVECTOR_NOMEM(&end);
+        {
+            register u32 groupIndex asm("$22");
+            groupCount = work->groupCount;
+            listIndex = 0;
+            for (groupIndex = 0; groupIndex < groupCount; groupIndex++) {
+                for (i = 0; i < 8; listIndex++, i++) {
+                    if (i != 6) {
+                        effPCPBossKAGUAttackGetSplitPoint(effPCP_ThunderPolyListGetParam(work->polyLists[listIndex]),
+                                                          &marks[i].q, &end.q, &center.q);
+                        effPCP_ThunderPolyListSetColor(work->polyLists[listIndex], color);
+                        effPCP_ThunderPolyListDraw(work->polyLists[listIndex]);
+                    }
                 }
             }
         }
-        place.payload[0] = end.f[0];
-        place.payload[1] = end.f[1];
-        place.payload[2] = end.f[2];
-        place.payload[3] = 0.0f;
         place.payload[4] = 0.0f;
         place.payload[5] = 0.0f;
         place.payload[6] = 0.0f;
-        place.payload[7] = 1.0f;
         place.payload[8] = 100.0f;
         place.payload[9] = 100.0f;
+        place.payload[7] = 1.0f;
         place.payload[10] = work->scale;
+        place.payload[0] = end.f[0];
+        place.payload[1] = end.f[1];
+        place.payload[2] = end.f[2];
         place.color = color;
+        place.payload[3] = 0.0f;
         effEveBEDCutSetParams(work->cut, &place);
         effEveBEDCutDraw(work->cut);
     }
     work->frame++;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUAttackDraw);
-#endif
 
 void effPCPBossKAGUAttackSetColor(effPCPBossKAGUAttack_t *hData, u32 abgr)
 {
@@ -3298,30 +3302,35 @@ void effPCPBossKAGU2AttackGetSplitPoint(u128 *pPosBuff, const u128 *pPoint1, con
     }
 }
 
-#ifdef NON_MATCHING
 void effPCPBossKAGU2AttackDraw(effPCPBossKAGU2Attack_t *work)
 {
     nbFormation_t *model;
-    effPCPBossVector_t marks[6], center, end;
+    nbFormation_t *found;
+    s32 searchIndex;
     effPCPBossPlace_t place;
+    effPCPBossVector_t marks[6], center, end;
     s32 frame, limit, fadeIn, fadeOut, rest, id;
-    u32 i, count, color;
+    u32 i, count, color, listIndex;
     f32 blend, randomness;
-    void **list;
 
     if (effBTLSkillCheckRun() != 0) {
         model = effBTLSkillGetInvokeFormation();
     } else {
+        found = NULL;
         model = nbGetMainProcessData()->form;
-        for (i = 0; i < 32; i++, model++) {
+        searchIndex = 0;
+        while (searchIndex < 32) {
+            ++searchIndex;
             if ((model->stat & 3) == 3) {
                 id = effBTLModelGetID(model);
                 if (id == 0x125 || id == 0x108) {
+                    found = model;
                     break;
                 }
             }
+            model++;
         }
-        if (i == 32) {
+        if (found == NULL) {
             return;
         }
     }
@@ -3346,60 +3355,64 @@ void effPCPBossKAGU2AttackDraw(effPCPBossKAGU2Attack_t *work)
         center.f[2] = 0.0f;
         for (i = 0; i < 6; i++) {
             effBTLModelGetMarkPosition2(model, i + 0x1E);
-            SDF_VU0_STOREVECTOR(&marks[i]);
+            SDF_VU0_STOREVECTOR_NOMEM(&marks[i]);
             center.f[0] += marks[i].f[0];
             center.f[1] += marks[i].f[1];
             center.f[2] += marks[i].f[2];
         }
         center.f[3] = 0.0f;
-        center.f[2] /= 6.0f;
-        center.f[0] /= 6.0f;
-        center.f[1] /= 6.0f;
+        center.f[0] = center.f[0] / 6.0f;
+        center.f[1] = center.f[1] / 6.0f;
+        center.f[2] = center.f[2] / 6.0f;
         SDF_VU0_LOADVECTOR(&model->pos);
         SDF_VU0_LOADVECTOR_B(effPCPBossKAGU2DrawParam);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(&end);
+        SDF_VU0_STOREVECTOR_NOMEM(&end);
         count = work->groupCount;
         randomness = work->randomness;
-        list = work->polyLists;
-        for (i = 0; i < count; i++) {
-            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
-                                              &marks[1].q, &end, &center.q, randomness, 0.0f);
-            effPCP_ThunderPolyListSetColor(*list, color);
-            effPCP_ThunderPolyListDraw(*list++);
-            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
-                                              &marks[2].q, &end, &center.q, randomness, 0.61086511611938477f);
-            effPCP_ThunderPolyListSetColor(*list, color);
-            effPCP_ThunderPolyListDraw(*list++);
-            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
-                                              &marks[4].q, &end, &center.q, randomness, -0.61086511611938477f);
-            effPCP_ThunderPolyListSetColor(*list, color);
-            effPCP_ThunderPolyListDraw(*list++);
-            effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(*list),
-                                              &marks[5].q, &end, &center.q, randomness, 0.0f);
-            effPCP_ThunderPolyListSetColor(*list, color);
-            effPCP_ThunderPolyListDraw(*list++);
+        i = 0;
+        if (count != 0) {
+            listIndex = 0;
+            do {
+                effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(work->polyLists[listIndex]),
+                                                  &marks[1].q, &end, &center.q, randomness, 0.0f);
+                effPCP_ThunderPolyListSetColor(work->polyLists[listIndex], color);
+                effPCP_ThunderPolyListDraw(work->polyLists[listIndex]);
+                listIndex++;
+                effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(work->polyLists[listIndex]),
+                                                  &marks[2].q, &end, &center.q, randomness, 0.61086511611938477f);
+                effPCP_ThunderPolyListSetColor(work->polyLists[listIndex], color);
+                effPCP_ThunderPolyListDraw(work->polyLists[listIndex]);
+                listIndex++;
+                effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(work->polyLists[listIndex]),
+                                                  &marks[4].q, &end, &center.q, randomness, -0.61086511611938477f);
+                effPCP_ThunderPolyListSetColor(work->polyLists[listIndex], color);
+                effPCP_ThunderPolyListDraw(work->polyLists[listIndex]);
+                listIndex++;
+                effPCPBossKAGU2AttackGetSplitPoint(effPCP_ThunderPolyListGetParam(work->polyLists[listIndex]),
+                                                  &marks[5].q, &end, &center.q, randomness, 0.0f);
+                effPCP_ThunderPolyListSetColor(work->polyLists[listIndex], color);
+                effPCP_ThunderPolyListDraw(work->polyLists[listIndex]);
+                listIndex++;
+            } while (++i < count);
         }
-        place.payload[0] = end.f[0];
-        place.payload[1] = end.f[1];
-        place.payload[2] = end.f[2];
-        place.payload[3] = 0.0f;
         place.payload[4] = 0.0f;
         place.payload[5] = 0.0f;
         place.payload[6] = 0.0f;
-        place.payload[7] = 1.0f;
         place.payload[8] = 100.0f;
         place.payload[9] = 100.0f;
+        place.payload[7] = 1.0f;
         place.payload[10] = work->scale;
+        place.payload[0] = end.f[0];
+        place.payload[1] = end.f[1];
+        place.payload[2] = end.f[2];
         place.color = color;
+        place.payload[3] = 0.0f;
         effEveBEDCutSetParams(work->hBEDCut, &place);
         effEveBEDCutDraw(work->hBEDCut);
     }
     work->frame++;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackDraw);
-#endif
 
 void effPCPBossKAGU2AttackSetColor(effPCPBossKAGU2Attack_t *hData, u32 abgr)
 {
@@ -4012,15 +4025,16 @@ void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_tag *hData, const v
     SDF_VU0_STOREMATRIX(hData->matrix);
 }
 
-/* NON_MATCHING: 19 of 90 words differ (first at +0x4). */
-#ifdef NON_MATCHING
+/* The local held-byte register declaration reconstructs native allocation;
+ * a target-specific compiler aid, not evidence of original source spelling. */
 effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
 {
     const effPCPDANTE_Damage_Param_t *param = pParam;
     effPCPDANTE_Damage_tag *work = sdfChipAllocZeroDirect(sizeof(effPCPDANTE_Damage_tag));
     nbFormation_t *unit;
     u32 bits;
-    s32 delay;
+    u32 shiftBase;
+    u32 delay;
     u8 *slot;
     u32 count;
     u32 i;
@@ -4037,10 +4051,11 @@ effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
     unit = nbGetMainProcessData()->form;
     bits = effBTLSkillGetTargetBit();
     count = 0;
+    shiftBase = 1u;
     slot = work->delay;
     for (i = 0; i < 32; i++, unit++) {
         if (unit->stat & 1) {
-            if (bits & (1 << i)) {
+            if (bits & (shiftBase << i)) {
                 *slot++ = delay;
                 count++;
                 delay += param->wait;
@@ -4051,16 +4066,13 @@ effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
     for (i = 0; i < swaps; i++) {
         u32 a = dds3GetRandIntA(NULL, count);
         u32 b = dds3GetRandIntA(NULL, count);
-        u8 held = work->delay[a];
+        register u8 held asm("$19") = work->delay[a];
 
         work->delay[a] = work->delay[b];
         work->delay[b] = held;
     }
     return work;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Create);
-#endif
 
 effPCPDANTE_Damage_tag *effPCPDANTE_Damage_CreatePCF(void *parameterTable) {
     void *firstBlock;
@@ -4543,7 +4555,6 @@ void effPCPDANTE_ShowTime_AreYouReady_Draw(effPCPDANTE_ShowTime_tag *hData)
 }
 
 extern effPCPDANTE_UV_tag effPCPDANTE_ShowTime_UV;
-#ifdef NON_MATCHING
 void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work)
 {
     u32 frame = work->frameParts[2];
@@ -4554,7 +4565,8 @@ void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work)
 
     if (age < 13) {
         nbPnl_rsetAlpha(0);
-        color = ((u32)((1.0f - (f32)(s32)age / 12.0f) * 128.0f) << 24) | 0x808080;
+        rate = (f32)(s32)age / 12.0f;
+        color = ((u32)((1.0f - rate) * 128.0f) << 24) | 0x808080;
         effPCPDANTE_Sprite_Draw(162, 172, 1.0f, color, &effPCPDANTE_ShowTime_UV, texture);
     }
     if (frame - 10 < 13) {
@@ -4589,9 +4601,6 @@ void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work)
     }
     work->frameParts[2] = (u32)work->frameParts[2] + 1;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_ShowTime_Draw);
-#endif
 
 /* NON_MATCHING: 4 of 75 words differ (first at +0x34). */
 #ifdef NON_MATCHING
@@ -5014,4 +5023,3 @@ INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F208);
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F210);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F218);
-

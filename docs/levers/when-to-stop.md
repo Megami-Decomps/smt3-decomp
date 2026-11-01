@@ -50,11 +50,18 @@ These have been ruled out repeatedly and are not worth a second attempt:
   through the arithmetic and a `for` head that moves the update all coalesce
   the same way. The copy is the register allocator declining to coalesce, not
   a source shape, so measure it and move on.
-- A set of reload spill slots that appear in a rotated order. The slot offsets
-  follow pseudo-register numbers, so the fix would have to change which pass
-  creates a value rather than its source shape. `fldSkyDrawFilter` sits at 682
-  of 694 words on a three-slot rotation that twenty-odd source shapes, nine
-  declaration orders and every pointer form tried leave untouched.
+- A set of reload spill slots that appear in a rotated order. `alter_reg`
+  hands slots out in ascending pseudo number, so the fix would have to change
+  which pass creates a value rather than its source shape. `fldSkyDrawFilter`
+  sits at 682 of 694 words on a three-slot rotation that twenty-odd source
+  shapes, nine declaration orders and every pointer form tried leave
+  untouched. Traced to the end there: the three pseudos are gcse PRE reaching
+  registers that `pre_delete` creates while walking the expression hash table,
+  and the bucket is the expression's hash modulo a table size gcse derives
+  from the function's insn count. Shifting every local pseudo by 1 through 16
+  does not move the order; dropping a block of the body does. Measuring the
+  rotation is cheap (`--reload` for the slots, `--gcse` for the creation
+  order) and tells you to stop.
 - An epilogue duplicated into a branch-likely delay slot is **no longer in
   this list**: the cause is known and it is usually fixable. See the section
   on callee visibility below. Note the narrow scope: ee-gcc 2.96 emits `bnel` from

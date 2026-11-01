@@ -89,30 +89,25 @@ returns zero for a nonnegative RPC status or `-65537` otherwise.
 
 ## sceClose
 
-376 bytes against retail's 380, with 80 of 94 emitted words matching and
-14 differing; four native bytes remain uncovered. Through the completion
-result load at +0x14C, all instructions match apart from four exit-branch
-displacements caused by the shorter tail. Native loads -1 into a register,
-compares it with the signed completion result, and selects zero for a
-nonnegative result. The draft emits `slti result,0` and `movz`, shortening
-the clamp by one instruction and shifting the epilogue.
+Matched all 380 native instruction bytes. The 20-byte close request contains
+completion semaphore, signed 32-bit result pointer/size, native descriptor and
+request-table index. Only maximum count, initial count and option are set in
+the semaphore descriptor. Submission failure preserves the active slot and
+cleans up; success clears it, captures the uncached acceptance before unlock,
+and either rejects zero acceptance or waits for completion and deletes the
+semaphore. Negative completion results are returned unchanged; others return 0.
 
-The 20-byte shared close request contains completion semaphore, result
-pointer, result size, native descriptor and request-table index. Only
-maximum count, initial count and option are initialized in the semaphore
-descriptor. RPC failure leaves the slot active, deletes the semaphore,
-unlocks and returns -11. RPC success clears the slot, captures the uncached
-reply before unlocking, and either rejects a zero reply or waits for the
-completion callback before reading its stack result. Uninitialized service
-and invalid-slot exits return -1 and -9 respectively, after unlocking.
-
-Modifying the address-taken result directly emits a stack write and a
-384-byte body. Returning either ternary spelling emits 376 bytes with a
-comparison against one; copying the completion into a separate status scalar
-and clamping it emits the preferred comparison against zero. Writing the
-condition as `status > -1` is inert. No qualifier, false result type or
-artificial dependency was added. The remaining question is which genuine
-compiler/source property retains the native register comparison at this tail.
+The prior ordinary draft emitted 376/380 bytes because the signed clamp folded
+to `slti`/`movz`. Direct-result mutation and ternary spellings did not recover
+the native tail. As independently evidenced in `sceDclose`, native materializes
+signed -1 for a real register comparison. A narrow nonvolatile empty `+r`
+constraint on that threshold immediately before `threshold < status` retains
+the native `slt`/`movn` sequence without fixed registers, false uses, calls
+crossed, memory effects or width changes. Combined with `sceDclose`, the owner
+has 145 exact functions; both native tails and all existing data match.
+Plain/dump normalized assembly and allocated-section/relocation parity pass.
+The same target-specific reconstruction aid is used here; original source
+spelling is not established.
 
 ## sceIoctl
 
@@ -242,3 +237,26 @@ The preferred 948-byte source is retained until a genuine SDK 2.9 allocation
 or loop-control premise explains this tail. No qualified allocator hook is
 available for this compiler; no register pins, volatile scratch or padding
 were introduced.
+
+## sceDclose
+
+Matched all 360 native instruction bytes. The typed filesystem request uses
+command 10 and a 20-byte send; its slot word is deliberately left untouched.
+Submission failure preserves the active descriptor, deletes the completion
+semaphore and unlocks. Successful submission clears the descriptor, captures
+the uncached acceptance before unlocking, and either rejects zero acceptance
+or waits, deletes the semaphore and reads its signed 32-bit completion.
+Only native maximum-count, initial-count and option semaphore fields are set.
+
+The ordinary reconstruction emitted 356/360 bytes: its final nonnegative
+clamp folded to `slti`/`movz`, shifting four exit branches and the epilogue.
+The native tail instead materializes signed -1 and consumes it in a register
+comparison followed by `movn`. A narrow nonvolatile empty `+r` constraint on
+that real local threshold, immediately before `threshold < status`, preserves
+the genuine value and consumer. It binds no register, crosses no calls, and
+adds no instruction, memory effect, artificial use or changed result width.
+The complete owner advances from 143 to 144 exact functions; plain/dump
+normalized assembly and allocated-section/relocation parity pass.
+
+This is a target-specific reconstruction aid, not evidence of the original
+source spelling.

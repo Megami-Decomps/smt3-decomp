@@ -11,54 +11,72 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 33 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
+| 37 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
-| 11 |  | [sdk/libkernl.md](sdk/libkernl.md) |
+| 12 |  | [sdk/libkernl.md](sdk/libkernl.md) |
+| 12 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
+| 12 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
+| 11 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
-| 8 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 8 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
-| 8 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 7 |  | [sdk/libc.md](sdk/libc.md) |
+| 7 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
+| 6 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
+| 6 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
+| 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
-| 5 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
+| 5 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 5 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
-| 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
+| 4 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
+| 4 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
-| 3 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
+| 3 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
+| 3 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
+| 3 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
+| 3 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
-| 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
+| 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
+| 3 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 3 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
-| 3 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
+| 3 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
+| 2 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 2 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 2 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
-| 2 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
+| 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
+| 2 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
 | 2 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 2 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
-| 2 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
-| 2 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
+| 2 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
+| 2 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
+| 2 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
+| 2 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
+| 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
+| 2 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
+| 2 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
-| 2 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
+| 2 | facility/fclRibbon | [facility/fclRibbon.md](facility/fclRibbon.md) |
+| 2 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
+| 2 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
-| 2 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 1 |  | [sdk/libmrpc.md](sdk/libmrpc.md) |
@@ -74,37 +92,37 @@ both native and emitted sizes when they differ.
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
 | 1 | pipe/pipePosTable | [pipe/pipePosTable.md](pipe/pipePosTable.md) |
 | 1 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
-| 1 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
-| 1 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
 | 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 |  | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
-| 1 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
+| 1 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
+| 1 | newbattle/nbSkillError | [newbattle/nbSkillError.md](newbattle/nbSkillError.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
-| 1 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
 | 1 | newbattle/nbEncount | [newbattle/nbEncount.md](newbattle/nbEncount.md) |
 | 1 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
 | 1 | newbattle/nbE911 | [newbattle/nbE911.md](newbattle/nbE911.md) |
+| 1 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
 | 1 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
-| 1 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
+| 1 | newbattle/NbNegoFlowOne | [newbattle/NbNegoFlowOne.md](newbattle/NbNegoFlowOne.md) |
+| 1 | newbattle/NbNegoFlowInoti | [newbattle/NbNegoFlowInoti.md](newbattle/NbNegoFlowInoti.md) |
+| 1 | newbattle/NbNegoFlowInnen | [newbattle/NbNegoFlowInnen.md](newbattle/NbNegoFlowInnen.md) |
+| 1 | newbattle/NbNegoFlowFullMoon | [newbattle/NbNegoFlowFullMoon.md](newbattle/NbNegoFlowFullMoon.md) |
 | 1 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 1 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
+| 1 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 1 | field/fldTitle | [field/fldTitle.md](field/fldTitle.md) |
 | 1 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 1 | field/fldSnow | [field/fldSnow.md](field/fldSnow.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
 | 1 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
+| 1 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
-| 1 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
-| 1 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
-| 1 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 1 | event/evtMoon | [event/evtMoon.md](event/evtMoon.md) |
 | 1 | event/evtEventViewerFrameVar | [event/evtEventViewerFrameVar.md](event/evtEventViewerFrameVar.md) |
-| 1 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 1 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 1 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |

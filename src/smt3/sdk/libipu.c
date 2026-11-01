@@ -23,8 +23,6 @@ extern s32 EIntr(void);
  * gcc2_compiled label as its name. */
 extern void ipuWriteFromIpuChcr(u32 chcr);
 
-/* Retained sync draft's explicit wait; see docs/matching/sdk/libipu.md. */
-#define IPU_HAZARD_WAIT() __asm__ volatile ("nop\nnop\nnop\nnop")
 /* With the configured 2.9 compiler, this barrier plus its generated padding
  * leaves four slots after an IPU_CTRL read: three nops after a mask, or four
  * nops before a signed test. See docs/matching/sdk/libipu.md. */
@@ -81,15 +79,15 @@ void sceIpuStopDMA(sdfIpuDmaRegs_t *state)
     state->ipuControl = IPU_CTRL;
 }
 
-/* NON_MATCHING: 74 of 84 words match at the native 336-byte size; the
- * bit-pointer fields and saved input counts use different prefix registers. */
-#ifdef NON_MATCHING
+/* The saved input count occupies $a0 only while forming the pre-call DMA
+ * snapshot. See docs/matching/sdk/libipu.md for the allocation ablation. */
 void sceIpuRestartDMA(sdfIpuDmaRegs_t *state)
 {
     u32 bp = state->bitPointer;
-    u32 buffered = ((bp >> 8) & 15) + ((bp >> 16) & 3);
     u32 bit = bp & 127;
-    u32 qwc = state->inputQwords + buffered;
+    u32 buffered = ((bp >> 16) & 3) + ((bp >> 8) & 15);
+    register u32 inputQwords __asm__("$4") = state->inputQwords;
+    u32 qwc = inputQwords + buffered;
     u32 madr = state->inputAddress - (buffered << 4);
     s32 ctrl;
 
@@ -114,35 +112,29 @@ void sceIpuRestartDMA(sdfIpuDmaRegs_t *state)
         setD4_CHCR(state->inputControl | 0x100);
     }
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libipu", sceIpuRestartDMA);
-#endif
 
-/* NON_MATCHING: 100 bytes against retail's 104; the mode == 1 arm is emitted
- * inline where retail branches to it out of line. */
-#ifdef NON_MATCHING
+
 u32 sceIpuSync(s32 mode)
 {
     u32 ret = 0;
 
-    if (mode != 0) {
-        if (mode == 1) {
-            ret = IPU_CTRL >> 31;
-        }
-    } else {
+    switch (mode) {
+    case 0: {
         s32 ctrl;
 
         do {
             ctrl = IPU_CTRL;
-            IPU_HAZARD_WAIT();
+            IPU_POLL_BARRIER();
         } while (ctrl < 0);
         ret = 0;
+        break;
+    }
+    case 1:
+        ret = IPU_CTRL >> 31;
+        break;
     }
     return ret;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libipu", sceIpuSync);
-#endif
 
 void gcc2_compiled__8(u32 chcr)
 {

@@ -264,8 +264,6 @@ extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height, s32 *
 extern void fclDrawSpriteAlpha(s32 x, s32 y, s32 z, u8 mode, s32 *colors,
     s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
 
-/* NON_MATCHING: 7 of 179 words differ, at the native 716-byte size. */
-#ifdef NON_MATCHING
 extern void fclDrawPanelSprite2(s32 id, s32 ot);
 
 void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 selected, s32 ot)
@@ -296,7 +294,7 @@ void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 select
         colors[2] = 0x2200842C;
         colors[3] = blended;
         cmpDrawBoxGDefault(x + (half << 4), y, z, half, height, colors, ot);
-        depth = z << 4;
+        depth = (s32)((u32)z << 4);
         fclDrawPanelSprite2(0x44, ot);
         fadedColor = dds3GetConfigFadeAlpha() | 0x80808000;
         colors[0] = fadedColor;
@@ -322,16 +320,13 @@ void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 select
         colors[1] = color;
         colors[2] = color;
         colors[3] = color;
-        depth = z << 4;
+        depth = (s32)((u32)z << 4);
         fclDrawSpriteRes(0x1A0, y, depth, colors, 0, 0xD, D_00345D88, dds3ConfigLayoutTable, ot);
         fclDrawSpriteRes(0x1DC0, y, depth, colors, 0, 0xD, D_00345D88, dds3ConfigLayoutTable, ot);
         break;
     }
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigCursor);
-#endif
 
 extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
 extern void fclDrawPanelSprite2(s32 id, s32 ot);
@@ -355,10 +350,10 @@ void dds3DrawConfigItem(s32 x, s32 y, s32 z, s32 ot)
 
 extern s32 fclGetPanelAnimTarget(fclPanelAnim_t *anim);
 
-#ifdef NON_MATCHING
 void dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
 {
     s32 colors[4];
+    s32 alpha = 0x80;
     s32 target = fclGetPanelAnimTarget(&((dds3ConfigWork_t *)GBWK)->panels[0]);
 
     fclDrawPanelSprite2(0x44, ot);
@@ -366,16 +361,14 @@ void dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
     colors[1] = 0;
     colors[2] = 0x15043A40;
     colors[3] = 0;
-    cmpDrawBoxGDefault(x - target, y + 0x2B0, z, 0x9E, 0x121, colors, ot);
+    cmpDrawBoxGDefault((s32)((u32)x - (u32)target), (s32)((u32)y + 0x2B0u), z, 0x9E, 0x121, colors, ot);
+    target = (s32)((u32)target + 0x1120u);
     colors[0] = 0;
-    colors[1] = 0x80;
+    colors[1] = alpha;
     colors[2] = 0;
-    colors[3] = 0x80;
-    cmpDrawBoxGDefault(x + target + 0x1120, y + 0x2B0, z, 0xEE, 0x121, colors, ot);
+    colors[3] = alpha;
+    cmpDrawBoxGDefault((s32)((u32)x + (u32)target), (s32)((u32)y + 0x2B0u), z, 0xEE, 0x121, colors, ot);
 }
-#else
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigSlider);
-#endif
 
 extern const s32 D_00548888[3][4];
 extern void *memcpy(void *destination, const void *source, u32 size);

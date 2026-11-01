@@ -630,7 +630,7 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
     }
     axis = D_00532700;
     SDF_VU0_LOADVECTOR(&axis);
-    FromRotation(3.1415925f);
+    FromRotation(3.1415926f);
     SDF_VU0_LOADVECTOR_B(rot);
     Mult();
     SDF_VU0_STOREVECTOR(&rotation);

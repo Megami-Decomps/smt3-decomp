@@ -74,44 +74,57 @@ extern s32 evtLoadEventBgm(s32 eventId);
 extern s32 evtCheckEventBgmLoaded(s32 eventId);
 extern dds3ProcessID_t *evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno);
 
-#ifdef NON_MATCHING
 void trmStartSaveAct(s32 saved)
 {
     s32 event;
     s32 cut = 0;
+    s32 cuts[3];
     u32 exitMode;
-    u16 terminal = trmUpdateWork->TerminalNo;
+    s32 terminal = trmUpdateWork->TerminalNo;
 
-    if (trmUpdateWork->TerminalType == 0) {
-        if ((terminal >= 18 && terminal < 20) || (terminal >= 23 && terminal < 25)) {
-            event = 0x326;
-        } else {
-            event = 0x324;
-        }
-    } else {
-        event = 0x325;
-    }
+    if (terminal < 18) goto normal_terminal;
+    if (terminal < 20) goto special_terminal;
+    if (terminal >= 25) goto normal_terminal;
+    if (terminal < 23) goto normal_terminal;
+special_terminal:
+    if (trmUpdateWork->TerminalType != 0) goto other_type;
+    cuts[0] = 10;
+    cuts[1] = 20;
+    cuts[2] = 30;
+    event = 0x326;
+    goto selected;
+normal_terminal:
+    if (trmUpdateWork->TerminalType != 0) goto other_type;
+    cuts[0] = 50;
+    cuts[1] = 60;
+    cuts[2] = 70;
+    event = 0x324;
+    goto selected;
+other_type:
+    cuts[0] = 10;
+    cuts[1] = 20;
+    cuts[2] = 30;
+    event = 0x325;
+selected:
     if (saved == 0) {
         trmEndEvent(1);
         trmUpdateWork->saveProcess = 0;
         return;
     }
     exitMode = slGetExitMode();
-    if (exitMode == 0) {
+    switch (exitMode) {
+    case 0:
         trmUpdateWork->saveProcess = 0;
         return;
-    }
-    if (exitMode == 1) {
-        cut = event == 0x324 ? 60 : 20;
+    case 1:
+        cut = cuts[1];
+        break;
     }
     evtLoadEventBgm(event);
     while (evtCheckEventBgmLoaded(event) == 0) {
     }
     trmUpdateWork->saveProcess = evtStartPolygonMovie2(0x3E8, event, cut);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmStartSaveAct);
-#endif
 
 s32 trmCheckSaveAct(void)
 {
@@ -223,9 +236,9 @@ extern s32 rcvRootHasItems(rcvRootWork_t *work);
 extern void fclSetTerminalMode(s8 mode);
 extern s8 trmGetCallMode(void);
 
-#ifdef NON_MATCHING
 void trmUpdateSeqRoot(void)
 {
+    s8 selection;
     u16 button = cmpGetPressedButton(0x33);
 
     if (fclGetFlag(0) == 0) {
@@ -233,49 +246,55 @@ void trmUpdateSeqRoot(void)
     }
     switch (button) {
     case 1:
-        if (rcvRootHasItems((rcvRootWork_t *)&trmUpdateWork->rootCursor) == 0) {
+        if (rcvRootHasItems((rcvRootWork_t *)&trmUpdateWork->rootCursor) != 0) {
+            selection = (s8)(*(u8 *)&trmUpdateWork->rootCursor.unk_22 +
+                         (u8)trmUpdateWork->rootCursor.unk_24 + 1);
+            switch (selection) {
+            case 1: {
+                s8 terminalType = trmUpdateWork->TerminalType;
+
+                trmUpdateWork->rootSelection = 0;
+                if (terminalType == 0) {
+                    fclScriptStart(trmUpdateWork->scriptData, 2, &trmUpdateWork->ScriptPID);
+                    trmUpdateWork->unk_0001 = 1;
+                    goto publish_selection;
+                } else {
+                    fclSetWorkValue(0, trmGetJumpTerminalNo());
+                    fclScriptStart(trmUpdateWork->scriptData, 3, &trmUpdateWork->ScriptPID);
+                    trmUpdateWork->unk_0001 = 5;
+                }
+                trmUpdateWork->unk_0004 = button;
+                break;
+            }
+            case 2:
+                dds3FadeOut(0, 0, 0, 10);
+                trmUpdateWork->unk_0001 = 7;
+                trmUpdateWork->unk_0004 = button;
+                break;
+            case 3: {
+                register trmUpdateWork_t *work __asm__("$3");
+
+                fclSetTerminalMode(3);
+                fclScriptForcedEnd(trmUpdateWork->ScriptPID);
+                work = trmUpdateWork;
+                /* Target-specific allocation aid: this post-call work pointer is
+                 * consumed by both stores below and is not live across a call. */
+                __asm__("" : "+r"(work));
+                work->unk_0001 = selection;
+                work->ScriptPID = 0;
+            publish_selection:
+                trmUpdateWork->unk_0004 = button;
+                break;
+            }
+            case 4:
+                if (trmGetCallMode() == 0) {
+                    dds3FadeOut(0, 0, 0, 20);
+                }
+                trmUpdateWork->unk_0001 = selection;
+                break;
+            }
+        } else {
             button = 0x8000;
-            break;
-        }
-        switch ((s8)(*(u8 *)&trmUpdateWork->rootCursor.unk_22 +
-                     (u8)trmUpdateWork->rootCursor.unk_24 + 1)) {
-        case 1: {
-            s8 terminalType = trmUpdateWork->TerminalType;
-
-            trmUpdateWork->rootSelection = 0;
-            if (terminalType == 0) {
-                fclScriptStart(trmUpdateWork->scriptData, 2, &trmUpdateWork->ScriptPID);
-                trmUpdateWork->unk_0001 = 1;
-            } else {
-                fclSetWorkValue(0, trmGetJumpTerminalNo());
-                fclScriptStart(trmUpdateWork->scriptData, 3, &trmUpdateWork->ScriptPID);
-                trmUpdateWork->unk_0001 = 5;
-            }
-            trmUpdateWork->unk_0004 = 1;
-            break;
-        }
-        case 2:
-            dds3FadeOut(0, 0, 0, 10);
-            trmUpdateWork->unk_0001 = 7;
-            trmUpdateWork->unk_0004 = 1;
-            break;
-        case 3: {
-            trmUpdateWork_t *work;
-
-            fclSetTerminalMode(3);
-            fclScriptForcedEnd(trmUpdateWork->ScriptPID);
-            work = trmUpdateWork;
-            work->unk_0001 = 3;
-            work->ScriptPID = 0;
-            trmUpdateWork->unk_0004 = 1;
-            break;
-        }
-        case 4:
-            if (trmGetCallMode() == 0) {
-                dds3FadeOut(0, 0, 0, 20);
-            }
-            trmUpdateWork->unk_0001 = 4;
-            break;
         }
         break;
     case 2:
@@ -297,9 +316,6 @@ void trmUpdateSeqRoot(void)
     cmpPlayCursorSE((u16)cmpDisablePadBitStop(
         (cmpPadStopWork_t *)&trmUpdateWork->rootCursor, button, 0x30));
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateSeqRoot);
-#endif
 
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3PlayMovieByIndex(s32 index);

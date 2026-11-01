@@ -78,3 +78,338 @@ same five references and lifetime10..36 in both; local allocation selects
 `$2` with the actual void sprite contract and `$3` in the non-void control.
 Its priority remains3846. This isolates the declaration-dependent register
 choice without inventing a scalar use, constraint or compiler flag.
+
+## cmbDrawResultPanel (fclCombineInit, 0x228)
+
+138 of 138 words match: 552 emitted and native bytes. The complete owner
+checks 183 match, 0 differ. Source commit:
+`6b234980219e4cf7cc9a003d0e7daa790456e374`. Exact-source
+[CI run 40956924261](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40956924261)
+passed build and deployment. The local target/retail, report, tooling and docs gates pass;
+the final rebase rechecked three changed guarded owners and carried the
+remaining unchanged input closure from the full 149-owner / seven-IRX pass.
+
+Retain the native three-way footer dispatch: mode 1 and default use
+`0x5FA5E240`, while mode 2 uses `0x698AEC40`. The identical colors in case 1
+and default do not justify collapsing their separate call sites. Initialize
+`alpha` to 256 after the footer calls, as native does. These two ordinary C
+changes together reproduce the owner; either change alone remains non-matching.
+
+Keep the signed `(0x200 - phase) / 2` calculation, the later recomputation
+from `sacrificePanelAnim`, and the existing global-pointer reloads across
+calls. No dummy work, opacity, constraints or ABI change is required.
+
+## cmbStartResultScript (fclCombineInit, 0x84)
+
+33 of 33 words match at 132 bytes in ordinary C. The complete owner has
+184 matching functions and no differences, including its owned data.
+Source commit: `6f214449f849679f552b9d80cf03e49b14f7c88e`.
+Exact-source [CI run 40972478153](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40972478153)
+passed build and deployment.
+
+Use the actual two-case switch, with case 2 written before case 1. Case 2
+selects script entry 6, case 1 selects entry 5, and all other signed-byte
+values retain the initialized entry 0. This source order gives retail's
+`beql` with the entry-6 assignment in its slot and the correct shared
+publication block. The inherited `if`/`else if` form emits 120 bytes;
+the switch with case 1 written first emits 140 bytes. No empty cases,
+compiler constraints, ABI changes or dummy operations are needed.
+
+Qualified dumps show the case-order effect. With case 2 first, `jump2`
+leaves its inequality branch targeted at the shared join and the entry-6
+assignment on the fallthrough path. Delay-slot reorganization reverses and
+annuls that branch into the native equality test with entry 6 in its slot;
+the entry-5 block then falls into common state publication. The opposite
+case order leaves both assignments out of line, adding a jump/alignment
+and duplicating the state-byte store. For both switch orders, whole-owner
+plain/dump assembly agrees apart from the scratch `.file` pathname, and
+text, data and relocations agree. This describes observed compiler output,
+not the original source spelling.
+
+The signed enable byte still gates all state changes and the script call.
+When enabled, the state byte at offset 5 is set to 1 before script setup.
+The current global work pointer is reloaded for the script and argument
+address, and again after `fclScriptStart` before its actual return value is
+stored at offset 8. The declaration and return-value consumer remain
+unchanged.
+
+## cmbGetBirthPhase (fclCombineInit, 0x88)
+
+34 of 34 words match at 136 bytes in ordinary C. The complete owner checks
+185 match, 0 differ, including owned data. Source commit: `85baa43edce88819d8bde6f068752a63814a2a1c`.
+Exact-source [CI run 40974879934](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40974879934)
+passed build and deployment.
+
+Use the real switch cases 5, 6 and default, in that order. Each arm performs
+its own selected stock-byte lookup from the group's signed 16-bit row plus
+unsigned 8-bit cursor column. Mode 5 selects group 0, mode 6 selects group 1,
+and every other signed mode selects group 2. Interpret the selected stock
+byte as signed 8-bit, select that party entry's unsigned 16-bit unit ID and
+tail-call `cmpModelSetup(id, 0)`. The valid cursor and party-index contracts
+remain unchanged; no fabricated bounds or new pointer assumptions are used.
+There are no intervening callbacks, new stores, constraints or ABI changes.
+The same per-arm expression shape appears in matched `cmbDrawStatus`.
+
+The inherited selected-cursor draft emits 120 bytes. Real per-arm row/column
+snapshots reach the native 136 bytes but only 12 of 34 words; the actual
+switch order reaches 22. Reversing the two cases reaches 14. Narrower truthful
+snapshot types and a separate unit-ID local do not improve 22; factoring only
+the sum into the arms reaches 15. Putting the complete real signed stock-byte
+lookup in each arm produces all 34 words without artificial cases or work.
+
+Qualified compiler dumps retain three stock-byte accesses through `sched2`,
+then merge their common suffix in `jump2`. The resulting shared sum uses $2,
+the signed stock byte uses $4, and the DDS3 work base loads into $3 at the
+native point. Early source-level factoring instead allocates the sum to $3
+and the DDS3 base to $6, hoisting the latter. Whole-owner plain/dump assembly
+agrees apart from the scratch `.file` pathname; text and relocations agree,
+and text agrees with the canonical checker's full object, for both the
+snapshot-switch control and exact per-arm form. This is observed compiler
+behavior, not proof of the original source spelling.
+
+## cmbUpdateStockCursor2 (facility/fclCombineInit, 0x22C)
+
+139 of 139 words match at 556 bytes. The sole body correction removes the local
+cursor-subobject pointer and expresses the same two observations directly
+through `CMB_GBWK->stockCursorGroup[2].cursor`. The original unsigned-character
+low-byte view of signed16 `unk_22` and unsigned8 conversion of signed8 `unk_24`
+are retained. No alias, constraint, new type or fabricated address is added.
+
+The real cursor starts at global+0x30D0; its fields are at +0x30F2 and +0x30F4.
+Retail reads the byte at +0x30F4 before the byte at +0x30F2. The draft's local
+subobject pointer materializes an extra +0x30D0 address and shifts the prefix
+until alignment absorbs the instruction, leaving 117 of 139 words matching.
+Direct whole-object fields produce the exact native addresses, observation
+order and registers. Target-compiler layout assertions verify these offsets and
+the corresponding stock-slot fields. Complete-owner plain and stock-dump
+assembly, text and relocations agree for both diagnostic forms. This is paired
+output evidence, not a claim about an unmeasured compiler comparator or original
+source spelling.
+
+Both observed bytes promote to int, so their sum 0..510 cannot overflow. The
+existing target signed-byte narrowing is preserved. The selected byte is
+published and reloaded for the stock map, the mapped stock index is published
+and reloaded for `cmbStockIsLocked`, and a fresh global is observed after that
+callback before the result lookup. Later movement, input and sound calls and
+all native callback-dependent reloads remain unchanged. The disabled-result
+early return and lock-failure button 0x8000 retain their behavior. Existing
+valid cursor, map, stock and result-table index contracts remain required;
+arbitrary negative or oversized indices are not claimed safe. Provider types
+and call targets are unchanged.
+
+Independent final-source owner checking gives 186 match, 0 differ with normal
+owned-data checks, including the earlier result-panel, result-script and
+birth-phase matches. Final-source gates pass the retail checksum, all 149
+guarded owners / 588 drafts, seven IRX owners, 26 tooling test files / 427 cases,
+shell mocks and documentation checks. Source commit `dd0e8255e7b22c6bbb7cffbe2cc6564281a4b28d` passed exact-source
+hosted CI [40991191105](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40991191105),
+including build and deploy.
+
+## cmbCalcBirthDevil (facility/fclCombineInit, 0x434)
+
+269 of 269 words match at 1,076 bytes. The production owner has 187 matching
+functions and no differences, including the previously published StockCursor2
+and normal owned-data checks. The reconstruction uses a real initialized phase
+flag, reuses it for the later boolean, shares the two actual zero-return exits,
+and dispatches results 10, 11 and default with an ordinary switch. The unit
+snapshots, independent third-slot observations, complete unit copies, panel and
+availability callbacks, fresh result pointer, birth-kind publication and skill
+callback retain their native order. No register constraints or opaque aliases
+are retained.
+
+The match also corrects a consistent availability argument boundary: both
+`cmbGetBirthDevil` declarations now take `s32`, and its actual guarded definition
+receives `s32 availableInput` and immediately initializes `s8 available` from it.
+All later provider uses consume that narrowed local. All three native callers
+forward the availability result directly into argument register 8. The native
+provider itself performs a left shift by 24 followed by an arithmetic right
+shift by 24 before observing that value. Thus every incoming 32-bit pattern is
+converted to the sign-extended low byte, as in the explicit conversion under the
+pinned target compiler. This is an evidence-backed representation of the native
+machine boundary, not uniquely recovered historical C signature spelling. It
+is not a caller-only false declaration, and does not assume the producer can
+return only zero or one. Signed narrowing is target/compiler-defined.
+
+The final-source counterfactual restoring the narrow declarations and definition
+emits 1,084 bytes with redundant caller-side sign extension; its owner is 186/1.
+The shared real zero-return label separately resolves the remaining initial
+allocation differences. Complete-owner plain/stock-dump assembly, text and
+relocation parity is qualified for the diagnostic source; it is not a hooked
+allocator trace or a claim about an unmeasured compiler decision.
+
+The provider is still guarded and is **not** credited as matching. Its old and
+new C diagnostics emit 1,256 and 1,264 bytes respectively, versus retail's 1,252,
+with the same owned-rodata context warning at 0x2A9. Its C output changes; it is
+neither invariant nor exact. The other guarded caller also remains nonmatching.
+Production continues to use those assembly implementations. Existing pointer,
+stock/table index and callback contracts are inherited without extra bounds or
+termination claims.
+
+Independent final-source checking gives 187 match, 0 differ. Full qualification
+passes the retail checksum, all 149 guarded owners / 587 drafts, seven IRX
+owners, 26 tooling files / 427 tests, shell mocks and documentation checks.
+Source commit `f0b8209e21c8000163a002297e0f1a3045fbeb23` passed exact-source hosted CI
+[40992706526](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40992706526),
+including build and deploy.
+
+## cmbUpdateBirthDevil (facility/fclCombineInit, 0x3B8)
+
+238 of 238 words match at 952 bytes in ordinary C. Direct snapshots of the
+real signed-byte stock indices replace broad draft volatile aggregate views;
+two actual unit pointers recover the native address calculations. The idle
+success arm comes first, and explicit phase alternatives retain the exact
+`index == -1` distinction. There are no constraints, register bindings, new
+types, changed prototypes or ABI changes. The previously documented BirthCalc
+availability boundary and all 187 prior matching peers remain unchanged.
+
+Both unit pointers are formed after the model-reload callback and consumed
+before another call. The second address is formed unconditionally, but its ID
+load remains short-circuited after the first comparison. This retains the
+engine's valid selected-party-index contract, not safety for arbitrary negative
+or out-of-range indices. Model, script, ribbon and cursor callbacks and their
+required global reloads remain in native order. The signed unlock result and
+its nonnegative test are unchanged.
+
+Writing the unsigned-16-bit level comparison as birth greater than player is
+value-equivalent over its complete domain and produces the native load order
+after the event-bit callback. This is measured output, not a claim that C
+operand spelling mandates left-to-right evaluation. Zero-first load-status
+branching is equivalent for every return value; it does not assume only the
+provider's currently observed zero/one/two results.
+
+Independent guard-removed full-owner checking gives 188 match, 0 differ with
+normal owned-data checks. Complete-owner plain/stock-dump assembly, text and
+relocation parity is qualified, and the plain text equals the checker object.
+Full qualification passes the retail checksum, 149 guarded owners / 584 drafts,
+seven IRX owners, 26 tooling files / 427 tests, shell mocks and docs checks.
+Source commit `8923543b5266dd2dbc7a61ad10f3fdf035bf2fe1` passed exact-source hosted CI
+[40995071024](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40995071024),
+including build and deploy.
+
+## cmbDrawBirthDevil (facility/fclCombineInit, 0x274)
+
+157 of 157 words match at 628 bytes in ordinary C. The genuine `hasBase`
+flag is initialized before the first panel callback, a signed switch selects
+cases 2 / 8 / 9 / default, and an ascending loop clears the actual six-byte
+local delta array. The compiler emits the native descending clear. No
+constraints, register bindings, artificial objects, type or prototype changes,
+or ABI aids are introduced. This measures the SMT3 output; it does not prove
+historical source spelling or a particular internal optimizer pass.
+
+The early flag initialization is invisible to callbacks: its address never
+escapes and its later adjustment guard is a real consumer. Dispatch preserves
+every signed birthKind value, including negatives, and the type-12 conversion
+still depends on the signed third stock index. Delta stores are unobservable
+until clearing completes, with no intervening callback or escaped array
+pointer. Both stat loops use the real six-element bounds. Display and base
+remain complete, distinct unit objects with lifetimes covering the callbacks.
+
+Panel, mode, party and ribbon observations retain their callback-sensitive
+reloads and native call order. Cases 8/9 still observe selected->id after the first copy callback.
+Parameter differences are within -39..39;
+the signed-byte parameter update retains the native low-byte narrowing.
+The base panel pointer is cleared before the mask callback on every mode-3
+path; the default path never exposes an uninitialized base. Existing valid
+party/table index contracts remain unchanged, without invented negative-index
+safety. The full signed hideRibbon argument still uses only its zero test.
+
+Independent guard-removed full-owner checking gives 189 match, 0 differ,
+including all 188 prior peers and normal owned-data checks. Earlier BirthCalc,
+BirthUpdate and stock-cursor matches are unchanged. Full qualification passes
+the retail checksum, 149 guarded owners / 575 drafts, seven IRX owners,
+26 tooling files / 427 tests, shell mocks and docs checks. Actual-published
+verification repeats the owner, retail, report, all 91 owner dependencies,
+all 780 tracked files and final Ninja no-op checks. Source commit
+`fb259583d38dc35d3e818448e3f1356171a52554` passed exact-source hosted CI
+[41001938999](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41001938999):
+including build and deploy.
+
+## cmbUpdateRoot (facility/fclCombineInit, 0x1F4)
+
+125 of 125 words match at 500 bytes in ordinary C. The actual cursor-sum
+expression directly combines the original two byte observations, and the
+selection-1 action tests the signed-byte stock count below two first. A separate
+sum with that branch order reached 117 of 125 words; the direct expression
+resolved the remaining allocation/branch differences. No constraints, false
+types, fabricated bounds or artificial values are used. This measures the
+reconstructed compiler output, not historical source spelling.
+
+The index observation is the unsigned byte at cursor+0x22, not the enclosing
+signed16 field; the offset at +0x24 is also observed as an unsigned byte.
+The real promoted sum spans 1..511, with low-byte storage and a separate
+signed-byte selected value. Wrapping is preserved for the full byte domain,
+not merely menu-valid indices. The signed-byte conversion is verified for
+this compiler/native output, not claimed portable across C implementations.
+Independent review checked all 65,536 input pairs. There is no intervening callback or write
+between those two observations, and emitted access order matches native.
+
+The original u16 button snapshot remains live across callbacks. A zero flag
+still exits before common pad handling. The insufficient-stock path preserves
+script argument publication, script result, and independent global work
+reloads; script startup can alter flags and script state. Selection 3 keeps
+the signed selected value across its callback, selection 4/button 2 retain
+cmbExit, and default selection/button behavior is unchanged. Cursor movement,
+up/down handling, pad disabling and sound retain their order and original
+button conversions. No global pointer is cached across callback-sensitive
+observations.
+
+Independent complete-owner verification gives 190 match, 0 differ,
+preserving all 189 peers and normal owned-data checks. Full qualification
+passes the retail checksum, 149 guarded owners / 572 drafts, seven IRX owners,
+26 tooling files / 427 tests, shell mocks and docs checks. Actual-published
+verification repeats the owner, retail, report, all 90 owner dependencies,
+all 780 tracked files and final Ninja no-op checks.
+Source commit `40e9d025e6951ae2a2951eec3f8a2146f8de58f9` has exact-source hosted CI
+[41005099595](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41005099595):
+build and deploy both completed successfully.
+
+## func_00201FB0 (facility/fclCombineInit, 0x94)
+
+37 of 37 words match at 148 bytes after recovering the local drawing chain's
+void return contract. The target, its declaration, and the already matched
+`cmbDrawPhase3` and `cmbDrawPhasePanel` are consistently void. Early exits
+use bare returns; panel arms call their helper and return without propagating
+incidental register contents. Only the target is new matching credit; both
+existing peers retain exact emitted bytes.
+
+This correction uses native bodies and actual consumers, not merely an
+ignored result at one call site. The target and phase-three helper finish
+after the void list-selection update without constructing a result. The
+panel dispatch tail-calls those helpers. All recovered sequence callers
+reach a common path that overwrites the return register before reading it,
+then constructs its own result. Independent direct-call scanning agrees with
+source references; an aligned-word scan finds no absolute function pointers
+for these three functions. These scans corroborate the recovered contract,
+not the absence of every hypothetical computed indirect target.
+
+Arguments, conditions, callback order and memory effects are unchanged. No
+value is fabricated from the void provider. The original singleton emits
+152 bytes with an extra zero-result instruction; the corrected chain passes
+independent complete-owner checking at 191 match, 0 differ, with owned data
+exact. This recovers a usable contract without claiming historical spelling.
+
+## cmbUpdateCameraPos (facility/fclCombineInit, 0x14C)
+
+83 of 83 words match at 332 bytes. An ordinary real index starts at four
+before the buffer clear and changes to three only for a zero birth variant
+observed afterward. Both valid indices have actual model/address consumers;
+no field observation moves across the clear. Three ordinary `s32` casts
+replace scalar-assembly conversion calls in this target. Existing supported
+VU vector storage into the aligned four-float mark buffer is unchanged.
+
+All three assembled conversion words are `0x46000064`, matching retail at
+0x20534C, 0x205360 and 0x205374. This is raw instruction and complete-output
+evidence, not an inference from a mnemonic or RTL pattern name. No rounding
+mode is changed or assumed, and no portable C guarantee is claimed for NaN
+or out-of-range inputs. The initialized zero coordinates and model-derived
+coordinates both have real work-value consumers. Callback-sensitive global
+and model reloads and subsequent model/action calls retain native order.
+
+The combined owner, including the void drawing-chain correction above,
+passes independent canonical checking at 192 match, 0 differ, with normal owned-data
+checks. No new constraint, binding, false type, provider change or compiler
+flag is introduced.
+
+Combined local gates pass the retail checksum, 26 tooling test files / 427
+cases, all 147 guarded owners / 533 drafts with stable source/compiler inputs,
+seven IRX owners, and reconciled production reports.

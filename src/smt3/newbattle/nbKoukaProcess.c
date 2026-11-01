@@ -1033,7 +1033,6 @@ void NumEffectClip(nbKoukaPacket_t *p)
     }
 }
 
-#ifdef NON_MATCHING
 extern void nbGetKoukaMarkPos(nbFormation_t *form);
 extern void NumEffectClip(nbKoukaPacket_t *packet);
 extern s32 nbClipEffectNum(s32 screen[4]);
@@ -1052,6 +1051,10 @@ void nbClipKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         NumEffectClip(p);
         form = p->form;
         SDF_VU0_LOADVECTOR_B(&form->pos);
+        /* Keep the real form base available for the later VU position load.
+           This target-specific operand prevents PRE from retaining only the
+           derived pos address; it is not a memory barrier. */
+        __asm__("" : "+r" (form));
         SDF_VU0_SUBVECTOR();
         SDF_VU0_VECTOR_W_SET_ZERO();
         SDF_VU0_STOREVECTOR(&p->v);
@@ -1061,9 +1064,9 @@ void nbClipKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     switch (p->data1.i) {
     case 0: color = 0x80808080; break;
     case 1: color = 0x80803080; break;
+    case 4: color = 0x80808080; color2 = 0x80803080; break;
     case 2: color = 0x80308030; break;
     case 3: color = 0x80808020; break;
-    case 4: color = 0x80808080; color2 = 0x80803080; break;
     case 5: color = 0x80308030; color2 = 0x80808020; break;
     }
     if (p->time >= 16 && p->framelength < 7) {
@@ -1076,20 +1079,24 @@ void nbClipKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     SDF_VU0_ADDVECTOR();
     SDF_VU0_VECTOR_W_SET_ZERO();
     if (nbClipEffectNum(screen) != 0) {
-        if (p->data1.i >= 0 && p->data1.i < 4) {
+        switch (p->data1.i) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
             nbDrawKoukaSprite(k->data->pnltex[2], p->data2.i, screen[0],
                               screen[1] - p->time * 4, color, 0);
-        } else if (p->data1.i >= 4 && p->data1.i < 6) {
+            break;
+        case 4:
+        case 5:
             nbDrawKoukaSprite(k->data->pnltex[2], p->data2.i, screen[0],
-                              screen[1] - (p->time + 12) * 4, color, -1);
+                              screen[1] - ((u32)(p->time + 12) << 2), color, -1);
             nbDrawKoukaSprite(k->data->pnltex[2], p->partyno, screen[0],
                               screen[1] - p->time * 4, color2, 1);
+            break;
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", nbClipKoukaNum);
-#endif
 
 extern void nbGetKoukaMarkPos(nbFormation_t *form);
 extern void nbLoadKoukaPos(nbFormation_t *form);

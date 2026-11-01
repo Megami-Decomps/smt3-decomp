@@ -389,7 +389,7 @@ s32 nbGetHitType(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s32 dform
     } else if (status == 4 || status == 16) {
         factor = 8.0f;
     }
-    if ((a->data->form[dformindex].flag & 0x2000) && evtBitCheck(0xAF2) == 0) {
+    if ((a->data->form[dformindex].stat & 0x2000) && evtBitCheck(0xAF2) == 0) {
         factor = 100.0f;
     }
     if (nskill == 0 && nbHatudoCheckSkill(source, 0x12B)) {
@@ -1101,9 +1101,9 @@ u32 nbGetKoukaBadDamage(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s3
         } else if (random < 80) {
             status = 0x20;
         } else if (random < 90) {
-            status = 0x40;
-        } else {
             status = 0x100;
+        } else {
+            status = 0x40;
         }
     } else if (skill->badtype == 3) {
         count = 0;

@@ -1647,13 +1647,13 @@ s32 fldPlayerCalc_Wm2(void)
         work.z = fldWmapPlayerPos.z;
         a = sdfAtan2(work.x, work.y);
         zAbs = a < 0.0f ? -a : a;
-        zrot = 3.1399996f - zAbs;
+        zrot = 3.1399997f - zAbs;
         if (a < 0.0f) {
             zrot = -zrot;
         }
         b = sdfAtan2(work.z, work.y);
         xAbs = b < 0.0f ? -b : b;
-        xrot = 3.1399996f - xAbs;
+        xrot = 3.1399997f - xAbs;
         if (b >= 0.0f) {
             xrot = -xrot;
         }

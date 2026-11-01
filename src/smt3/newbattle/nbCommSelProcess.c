@@ -395,16 +395,15 @@ void DispPanelSitaji(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 co
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispPanelSitaji);
 #endif
 
-/* NON_MATCHING: 3 of 56 words differ (first at +0x28). */
-
-#ifdef NON_MATCHING
-
 void DispComm1PanelComm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
 {
     s32 no = d;
 
     if (no <= 0x8003) {
-        if (no >= 0x8000) {
+        s32 threshold = 0x8000;
+        /* Keep the real native signed comparison endpoint local to its use. */
+        __asm__("" : "+r"(threshold));
+        if (no >= threshold) {
             return;
         }
     }
@@ -419,12 +418,6 @@ void DispComm1PanelComm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz
         break;
     }
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispComm1PanelComm);
-
-#endif
 
 void DispComm1PanelTalk(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col) {
 }
@@ -739,10 +732,6 @@ void DispCommandPanel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 a
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispCommandPanel);
 #endif
 
-/* NON_MATCHING: 2 of 99 words differ (first at +0x12C). */
-
-#ifdef NON_MATCHING
-
 void AnimeCommandList(nbCommSelProcessData_t *s)
 {
     if (s->animeflag & 0x20) {
@@ -793,14 +782,17 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         }
     }
     if (s->animeflag & 4) {
-        if (fabsf(s->smritu) < 0.01f) {
+        f32 endpoint = 0.01f;
+        /* Keep the native floating endpoint live for its comparison and clamp. */
+        __asm__ volatile("" : "+f"(endpoint));
+        if (fabsf(s->smritu) < endpoint) {
             s->smritu = 0.0f;
             s->animeflag &= ~4;
         } else {
             f32 d = s->smritu * 0.6f;
 
-            if (d < 0.01f) {
-                d = 0.01f;
+            if (d < endpoint) {
+                d = endpoint;
             }
             s->smritu -= d;
             if (s->smritu < 0.0f) {
@@ -809,12 +801,6 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         }
     }
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", AnimeCommandList);
-
-#endif
 
 void DispComm1Summon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
 {

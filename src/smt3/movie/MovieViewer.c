@@ -215,7 +215,7 @@ void movieViewerSetFlags(void)
 
 void movieViewerInitRegs(void)
 {
-    movieViewerDebugFlag.regAddr = 0x10002010;
+    movieViewerDebugFlag.regAddr = (u32)IPU_CTRL;
     movieViewerDebugFlag.buffer = (u8 *)&D_00343E40;
     movieViewerSetFlags();
 }
@@ -225,8 +225,8 @@ extern void *memcpy(void *a, const void *b, u32 c);
 #ifdef NON_MATCHING
 static s32 movieViewerIsRegister(u32 address)
 {
-    return (address >= 0x10000000 && address < 0x10010000) ||
-           (address >= 0x12000000 && address < 0x12002000);
+    return (address >= EE_REG_RANGE_BASE && address < EE_REG_RANGE_END) ||
+           (address >= GS_PRIV_REG_RANGE_BASE && address < GS_PRIV_REG_RANGE_END);
 }
 #endif
 
@@ -247,8 +247,8 @@ void movieViewerDrawInfo(void)
 #ifdef NON_MATCHING
         u32 base = (u32)movieViewerDebugFlag.buffer;
         u64 end = (u64)base + sizeof(movieViewerDebugFlag.block);
-        if (((u64)base < 0x10010000 && end > 0x10000000) ||
-            ((u64)base < 0x12002000 && end > 0x12000000)) {
+        if (((u64)base < EE_REG_RANGE_END && end > EE_REG_RANGE_BASE) ||
+            ((u64)base < GS_PRIV_REG_RANGE_END && end > GS_PRIV_REG_RANGE_BASE)) {
             u32 lastRegister = ~0U;
             u32 value = 0;
             u32 i;

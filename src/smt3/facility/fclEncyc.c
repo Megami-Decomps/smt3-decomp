@@ -1068,14 +1068,14 @@ void InitPhaseReadTop(fclEncyc_instance_tag *pinst)
 
 extern s32 AcceptKeyChangeSort(fclEncyc_instance_tag *pinst);
 
-#ifdef NON_MATCHING
 void CalcPhaseReadTop(fclEncyc_instance_tag *pinst)
 {
     fclEncycReadTopWork_t *work = pinst->pwork;
     s32 action;
     s32 index;
-    s32 flags;
+    s32 selected;
     s8 sort;
+    s16 *indices;
 
     fclRbnCalc(work->ribbon);
     if (AcceptKeyChangeSort(pinst) != 0) {
@@ -1084,30 +1084,26 @@ void CalcPhaseReadTop(fclEncyc_instance_tag *pinst)
     action = AcceptKeyListWindow(&work->list, 1);
     switch (action) {
     case -1:
-        flags = pinst->stat;
         pinst->unk_5A = 8;
-        pinst->stat = flags | 2;
+        pinst->stat |= 2;
         break;
     case 1:
-        index = work->list.cursorPos.Shift + work->list.cursorPos.Index;
+        index = work->list.cursorPos.Index + work->list.cursorPos.Shift;
         PushListwinCursor(pinst, &work->list, 1);
         sort = (s8)pinst->unk_6C;
-        flags = pinst->stat;
-        index = pinst->entries.read.sorted[sort != 0][index];
+        indices = sort != 0 ? pinst->entries.read.sorted[1] : pinst->entries.read.sorted[0];
+        selected = indices[index];
         pinst->unk_5A = 4;
-        pinst->selectedIndex = index;
-        pinst->stat = flags | 2;
+        pinst->stat |= 2;
+        pinst->selectedIndex = selected;
         break;
     case 2:
         sort = (s8)pinst->unk_6C;
-        CreateFontListRead(work, sort, pinst->entries.read.sorted[sort != 0]);
+        CreateFontListRead(work, sort, sort != 0 ? pinst->entries.read.sorted[1] : pinst->entries.read.sorted[0]);
         break;
     }
     CalcListElemColor(&work->list, work->fontList, 8, 0);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadTop);
-#endif
 
 extern void DrawListWindowBack(void *obj, fclPanel_t *panel);
 
@@ -1948,31 +1944,29 @@ void ApplyChangeListIndex(lstListWindow_t *list, s16 *indices, s32 recordIndex)
 INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyChangeListIndex);
 #endif
 
-#ifdef NON_MATCHING
 void ApplyEdgeListCursor(lstListWindow_t *list)
 {
     cmpCursorPos_t *cursor = &list->cursorPos;
+    s32 *stepY = &list->StepY;
+    cmpCursorSize_t *size = &list->cursorSize;
     u8 shift = cursor->Shift;
     u8 shiftMax = cursor->ShiftMax;
 
     if (shift == 0) {
         if (cursor->Index > 0) {
-            cursor->DrawShift = 1;
             cursor->Shift = 1;
             cursor->Index--;
-            list->cursorSize.Y = list->StepY + list->cursorSize.DefY;
+            cursor->DrawShift = shift + 1;
+            size->Y = *stepY + size->DefY;
         }
     } else if (shift == shiftMax - 1 &&
                cursor->Index + shiftMax < cursor->ListNums) {
         cursor->Index++;
-        cursor->DrawShift = shiftMax - 2;
-        cursor->Shift = cursor->DrawShift;
-        list->cursorSize.Y = cursor->Shift * list->StepY + list->cursorSize.DefY;
+        cursor->Shift = shiftMax - 2;
+        cursor->DrawShift = cursor->Shift;
+        size->Y = cursor->Shift * *stepY + size->DefY;
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyEdgeListCursor);
-#endif
 
 extern s8 dds3PadButtonState[];
 extern void lstMoveCursor(lstListWindow_t *list, s8 direction);
@@ -2843,67 +2837,94 @@ void ControlModel(fclEncyc_instance_tag *pinst, mdlObj_t *model, s32 key)
 
 extern s32 GetAnalogPad(void);
 
-#ifdef NON_MATCHING
 s32 GetViewModeKey(fclEncyc_instance_tag *pinst)
 {
     s32 analog = GetAnalogPad();
     s8 mode = pinst->unk_6D;
     s32 keys = 0;
-    s8 up;
-    s8 down;
-    s8 left;
-    s8 right;
-    s8 zoomIn;
-    s8 zoomOut;
 
     switch (mode) {
-    case 0:
-    case 1:
-        keys = dds3PadButtonState[0x22] < 0;
-        up = dds3PadButtonState[4];
-        down = dds3PadButtonState[5];
-        left = dds3PadButtonState[6];
-        if (mode == 0) {
-            zoomIn = dds3PadButtonState[9];
-            right = dds3PadButtonState[7];
-            zoomOut = dds3PadButtonState[11];
-        } else {
-            right = dds3PadButtonState[7];
-            zoomIn = analog & 0x40;
-            zoomOut = analog & 0x80;
-        }
-        if (analog & 1) keys |= 2;
-        if (analog & 2) keys |= 4;
-        if (analog & 4) keys |= 8;
-        if (analog & 8) keys |= 0x10;
-        if (up != 0) keys |= 0x20;
-        if (down != 0) keys |= 0x40;
-        if (left != 0) keys |= 0x80;
-        if (right != 0) keys |= 0x100;
-        if (zoomIn != 0) keys |= 0x200;
-        if (zoomOut != 0) keys |= 0x400;
-        break;
-    case 2:
-        keys = dds3PadButtonState[0x22] < 0;
-        zoomOut = dds3PadButtonState[7];
-        zoomIn = dds3PadButtonState[6];
-        if (analog & 1) keys |= 0x20;
-        if (analog & 2) keys |= 0x40;
-        if (analog & 4) keys |= 0x80;
-        if (analog & 8) keys |= 0x100;
-        if (analog & 0x10) keys |= 2;
-        if (analog & 0x20) keys |= 4;
-        if (analog & 0x40) keys |= 8;
-        if (analog & 0x80) keys |= 0x10;
+    case 0: {
+        s32 analogLeft, analogRight, analogUp, analogDown, padUp, padRight, padDown, padLeft;
+        s32 zoomIn, zoomOut;
+        analogLeft = analog & 1;
+        analogRight = analog & 2;
+        analogUp = analog & 4;
+        analogDown = analog & 8;
+        if (dds3PadButtonState[0x22] < 0) keys |= 1;
+        padUp = dds3PadButtonState[4];
+        padRight = dds3PadButtonState[5];
+        padDown = dds3PadButtonState[6];
+        zoomIn = dds3PadButtonState[9];
+        padLeft = dds3PadButtonState[7];
+        zoomOut = dds3PadButtonState[11];
+        if (analogLeft != 0) keys |= 0x2;
+        if (analogRight != 0) keys |= 0x4;
+        if (analogUp != 0) keys |= 0x8;
+        if (analogDown != 0) keys |= 0x10;
+        if (padUp != 0) keys |= 0x20;
+        if (padRight != 0) keys |= 0x40;
+        if (padDown != 0) keys |= 0x80;
+        if (padLeft != 0) keys |= 0x100;
         if (zoomIn != 0) keys |= 0x200;
         if (zoomOut != 0) keys |= 0x400;
         break;
     }
+    case 1: {
+        s32 analogLeft, analogRight, analogUp, analogDown, padUp, padRight, padDown, padLeft;
+        s32 zoomIn, zoomOut;
+        analogLeft = analog & 1;
+        analogRight = analog & 2;
+        analogUp = analog & 4;
+        analogDown = analog & 8;
+        if (dds3PadButtonState[0x22] < 0) keys |= 1;
+        padUp = dds3PadButtonState[4];
+        padRight = dds3PadButtonState[5];
+        padDown = dds3PadButtonState[6];
+        zoomIn = analog & 0x40;
+        padLeft = dds3PadButtonState[7];
+        zoomOut = analog & 0x80;
+        if (analogLeft != 0) keys |= 0x2;
+        if (analogRight != 0) keys |= 0x4;
+        if (analogUp != 0) keys |= 0x8;
+        if (analogDown != 0) keys |= 0x10;
+        if (padUp != 0) keys |= 0x20;
+        if (padRight != 0) keys |= 0x40;
+        if (padDown != 0) keys |= 0x80;
+        if (padLeft != 0) keys |= 0x100;
+        if (zoomIn != 0) keys |= 0x200;
+        if (zoomOut != 0) keys |= 0x400;
+        break;
+    }
+    case 2: {
+        s32 analogLeft, analogRight, analogUp, analogDown, otherLeft, otherRight, otherUp, otherDown;
+        s32 zoomIn, zoomOut;
+        analogLeft = analog & 1;
+        analogRight = analog & 2;
+        analogUp = analog & 4;
+        analogDown = analog & 8;
+        otherLeft = analog & 0x10;
+        otherRight = analog & 0x20;
+        otherUp = analog & 0x40;
+        otherDown = analog & 0x80;
+        if (dds3PadButtonState[0x22] < 0) keys |= 1;
+        zoomOut = dds3PadButtonState[7];
+        zoomIn = dds3PadButtonState[6];
+        if (analogLeft != 0) keys |= 0x20;
+        if (analogRight != 0) keys |= 0x40;
+        if (analogUp != 0) keys |= 0x80;
+        if (analogDown != 0) keys |= 0x100;
+        if (otherLeft != 0) keys |= 0x2;
+        if (otherRight != 0) keys |= 0x4;
+        if (otherUp != 0) keys |= 0x8;
+        if (otherDown != 0) keys |= 0x10;
+        if (zoomIn != 0) keys |= 0x200;
+        if (zoomOut != 0) keys |= 0x400;
+        break;
+    }
+    }
     return keys;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", GetViewModeKey);
-#endif
 
 extern u8 dds3PadStickState[2][2][2];
 
@@ -3038,7 +3059,6 @@ extern void mdlLoopMotion(mdlObj_t *model, s32 group, s32 motion);
 extern void mdlSmoothLoopMotion(mdlObj_t *model, s32 group, s32 motion,
                                 f32 beforeLength, f32 smoothLength);
 
-#ifdef NON_MATCHING
 void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
 {
     s32 motion;
@@ -3054,6 +3074,8 @@ void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
         } else {
             mdlLoopMotion(model, 0, motion);
         }
+        model->first->speed = speed;
+        return;
     } else {
         motion = cmpGetModelMotionId((u16)id);
         speed = cmpGetModelScale((u16)id);
@@ -3063,9 +3085,6 @@ void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
     }
     model->first->speed = speed;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", ChangeModelMotion);
-#endif
 
 extern void *memset(void *dst, s32 value, u32 size);
 extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode);

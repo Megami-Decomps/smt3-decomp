@@ -689,7 +689,7 @@ s32 nbCameraBoss_Sp_DOUTYO_TPFix_Set(nbCamera_t *pNbCamera)
     pNbCamera->direction.x = 0.0f;
     pNbCamera->target.x = pNbCamera->direction.x;
     pNbCamera->target.y = -88.75f;
-    pNbCamera->target.z = -888.9399414f;
+    pNbCamera->target.z = -888.94f;
     pNbCamera->distance = 1.0f;
     pNbCamera->direction.y = pNbCamera->direction.x;
     pNbCamera->direction.z = 1.0f;
@@ -1737,7 +1737,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             pNbCamera->distance = 1.0f;
             pNbCamera->fovy = 0.69813163f;
         } else {
-            pNbCamera->direction.x = 0.55000002f;
+            pNbCamera->direction.x = 0.55f;
             pNbCamera->direction.y = 0.58f;
             pNbCamera->direction.z = 0.6f;
             pNbCamera->target.x = -1710.3499f;
@@ -1773,7 +1773,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             from.x = 0.29f;
             from.y = -0.3f;
             from.z = 0.91f;
-            to.x = -0.43000001f;
+            to.x = -0.43f;
             to.y = -0.3f;
             to.z = 0.85f;
             SDF_VU0_LOADVECTOR(&from);
@@ -2218,18 +2218,18 @@ s32 nbCameraBoss_Kagu_MJINKO_Set(nbCamera_t *pNbCamera)
     case 2:
         if (pNbCamera->frame < 75) {
             pNbCamera->direction.x = -0.25f;
-            pNbCamera->direction.y = 0.209999993f;
+            pNbCamera->direction.y = 0.21f;
             pNbCamera->direction.z = 0.939999998f;
             pNbCamera->target.x = 902.299988f;
-            pNbCamera->target.y = -1260.7998f;
+            pNbCamera->target.y = -1260.7999f;
             pNbCamera->target.z = -1761.79993f;
         } else {
-            pNbCamera->direction.x = -0.179999992f;
-            pNbCamera->direction.y = 0.0899999961f;
-            pNbCamera->direction.z = 0.979999959f;
-            pNbCamera->target.x = 532.409912f;
-            pNbCamera->target.y = -458.449951f;
-            pNbCamera->target.z = -1987.56982f;
+            pNbCamera->direction.x = -0.18f;
+            pNbCamera->direction.y = 0.09f;
+            pNbCamera->direction.z = 0.98f;
+            pNbCamera->target.x = 532.40992f;
+            pNbCamera->target.y = -458.44996f;
+            pNbCamera->target.z = -1987.5699f;
         }
         pNbCamera->distance = 1.0f;
         pNbCamera->fovy = 0.698131621f;
@@ -3431,10 +3431,14 @@ s32 nbCameraBoss_Cut1_Init(nbCamera_t *pNbCamera)
     nbFormation_t *pForm;
     u32 id;
     u32 skill;
+    s32 shot;
 
     pForm = effBTLSkillGetInvokeFormation();
     id = effBTLModelGetID(pForm);
     skill = effBTLSkillGetID();
+    /* An arm's setter says whether the boss's own camera takes the cut,
+     * which retail returns in v0 (nbCameraState_SkillCut1_Init falls back to
+     * the hero's camera on 0). */
     switch (id) {
     case 0x101:
     case 0x111:
@@ -3443,44 +3447,44 @@ s32 nbCameraBoss_Cut1_Init(nbCamera_t *pNbCamera)
     case 0x127:
     case 0x128:
         if (skill == 0x99) {
-            nbCameraBoss_Sp_JAREIH_Cut1_Set(pNbCamera);
+            shot = nbCameraBoss_Sp_JAREIH_Cut1_Set(pNbCamera);
             break;
         }
         return 0;
     case 0x103:
     case 0x124:
         if (skill == 0xA9 || skill == 0xAA) {
-            nbCameraBoss_Bsnet_Attack_Cut1_Set(pNbCamera);
+            shot = nbCameraBoss_Bsnet_Attack_Cut1_Set(pNbCamera);
         } else {
-            nbCameraBoss_Bsnet_Cut1_Set(pNbCamera);
+            shot = nbCameraBoss_Bsnet_Cut1_Set(pNbCamera);
         }
         break;
     case 0x123:
         if (skill == 0xFD) {
-            nbCameraBoss_BSARI_MASEHA_Set(pNbCamera);
+            shot = nbCameraBoss_BSARI_MASEHA_Set(pNbCamera);
         } else if (skill == 0xA8) {
-            nbCameraBoss_BSARI_SIMANO_Set(pNbCamera);
+            shot = nbCameraBoss_BSARI_SIMANO_Set(pNbCamera);
         } else {
-            nbCameraBoss_BSARI_Cut1_Set(pNbCamera);
+            shot = nbCameraBoss_BSARI_Cut1_Set(pNbCamera);
         }
         break;
     case 0x102:
         if (skill == 0xFD) {
-            nbCameraBoss_BSARI_MASEHA_Set(pNbCamera);
+            shot = nbCameraBoss_BSARI_MASEHA_Set(pNbCamera);
         } else if (skill == 0xA8) {
-            nbCameraBoss_BSARI_SIMANO_Set(pNbCamera);
+            shot = nbCameraBoss_BSARI_SIMANO_Set(pNbCamera);
         } else {
-            nbCameraBoss_BSARI2_Cut1_Set(pNbCamera);
+            shot = nbCameraBoss_BSARI2_Cut1_Set(pNbCamera);
         }
         break;
     case 0x125:
-        nbCameraBoss_Bskagu_Cut1_Set(pNbCamera);
+        shot = nbCameraBoss_Bskagu_Cut1_Set(pNbCamera);
         break;
     case 0x108:
         if (skill == 0xDD) {
-            nbCameraBoss_Pish_MUHENK_Set(pNbCamera);
+            shot = nbCameraBoss_Pish_MUHENK_Set(pNbCamera);
         } else {
-            nbCameraBoss_Bspish_Cut1_Set(pNbCamera);
+            shot = nbCameraBoss_Bspish_Cut1_Set(pNbCamera);
         }
         break;
     case 0x158:
@@ -3491,6 +3495,7 @@ s32 nbCameraBoss_Cut1_Init(nbCamera_t *pNbCamera)
     default:
         return 0;
     }
+    return shot;
 }
 
 /* NON_MATCHING: 33 of 117 words differ, 2 short; two arms call callees still in
@@ -3501,58 +3506,62 @@ s32 nbCameraBoss_Cut1_Run(nbCamera_t *pNbCamera)
     nbFormation_t *pForm;
     u32 id;
     u32 skill;
+    s32 shot;
     pForm = effBTLSkillGetInvokeFormation();
     id = effBTLModelGetID(pForm);
     skill = effBTLSkillGetID();
+    /* An arm's camera says whether it takes the cut, which retail returns
+     * in v0 (nbCameraState_SkillCut1_Calc runs the hero's camera on 0). */
     switch (id) {
     case 0x103:
     case 0x124:
         if (skill == 0xA9 || skill == 0xAA) {
-            nbCameraBoss_Bsnet_Attack_Cut1_Run(pNbCamera);
+            shot = nbCameraBoss_Bsnet_Attack_Cut1_Run(pNbCamera);
         } else {
-            nbCameraBoss_Bsnet_Cut1_Run(pNbCamera);
+            shot = nbCameraBoss_Bsnet_Cut1_Run(pNbCamera);
         }
         break;
     case 0x123:
         if (skill == 0xFD) {
-            nbCameraBoss_BSARI_MASEHA_Run(pNbCamera);
+            shot = nbCameraBoss_BSARI_MASEHA_Run(pNbCamera);
         } else if (skill == 0xA8) {
-            nbCameraBoss_BSARI_SIMANO_Run(pNbCamera);
+            shot = nbCameraBoss_BSARI_SIMANO_Run(pNbCamera);
         } else {
-            nbCameraBoss_BSARI_Cut1_Run(pNbCamera);
+            shot = nbCameraBoss_BSARI_Cut1_Run(pNbCamera);
         }
         break;
     case 0x102:
         if (skill == 0xFD) {
-            nbCameraBoss_BSARI_MASEHA_Run(pNbCamera);
+            shot = nbCameraBoss_BSARI_MASEHA_Run(pNbCamera);
         } else if (skill == 0xA8) {
-            nbCameraBoss_BSARI_SIMANO_Run(pNbCamera);
+            shot = nbCameraBoss_BSARI_SIMANO_Run(pNbCamera);
         } else {
-            nbCameraBoss_BSARI2_Cut1_Run(pNbCamera);
+            shot = nbCameraBoss_BSARI2_Cut1_Run(pNbCamera);
         }
         break;
     case 0x125:
-        nbCameraBoss_Bskagu_Cut1_Run(pNbCamera);
+        shot = nbCameraBoss_Bskagu_Cut1_Run(pNbCamera);
         break;
     case 0x108:
         if (skill == 0xDD) {
-            nbCameraBoss_Pish_MUHENK_Run(pNbCamera);
+            shot = nbCameraBoss_Pish_MUHENK_Run(pNbCamera);
         } else {
-            nbCameraBoss_Bspish_Cut1_Run(pNbCamera);
+            shot = nbCameraBoss_Bspish_Cut1_Run(pNbCamera);
         }
         break;
     case 0x158:
         if (skill == 0x10F) {
-            nbCameraBoss_Lusi_ASIKIK_Set(pNbCamera);
+            shot = nbCameraBoss_Lusi_ASIKIK_Set(pNbCamera);
             break;
         }
         if (skill == 0x111 || skill == 0x10E) {
-            nbCameraBoss_Lusi_Cut1_Set(pNbCamera);
+            shot = nbCameraBoss_Lusi_Cut1_Set(pNbCamera);
             break;
         }
     default:
         return 0;
     }
+    return shot;
 }
 #else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut1_Run);
@@ -3739,10 +3748,14 @@ s32 nbCameraBoss_Cut2_Run(nbCamera_t *pNbCamera)
     nbFormation_t *pForm;
     u32 id;
     u32 skill;
+    s32 shot;
 
     pForm = effBTLSkillGetInvokeFormation();
     id = effBTLModelGetID(pForm);
     skill = effBTLSkillGetID();
+    /* An arm's camera says whether it takes the cut, which retail returns
+     * in v0 (nbCameraState_SkillAttack_Calc and nbCameraState_SkillCut2_Calc fall back
+     * to the generic or the hero's camera on 0). */
     switch (id) {
     case 0x101:
     case 0x111:
@@ -3751,23 +3764,23 @@ s32 nbCameraBoss_Cut2_Run(nbCamera_t *pNbCamera)
     case 0x127:
     case 0x128:
         if (skill == 0xFC) {
-            nbCameraBoss_Sp_MURET2_Run(pNbCamera);
+            shot = nbCameraBoss_Sp_MURET2_Run(pNbCamera);
             break;
         }
         if (skill == 0x99) {
-            nbCameraBoss_Sp_JAREIH_Run(pNbCamera);
+            shot = nbCameraBoss_Sp_JAREIH_Run(pNbCamera);
             break;
         }
         return 0;
     case 0x10D:
         if (skill == 0xE9) {
-            nbCameraBoss_Ongy_BUNSIN_Run(pNbCamera);
+            shot = nbCameraBoss_Ongy_BUNSIN_Run(pNbCamera);
             break;
         }
         return 0;
     case 0x11F:
         if (skill == 0xF2) {
-            nbCameraBoss_Samael_AKUI_Run(pNbCamera);
+            shot = nbCameraBoss_Samael_AKUI_Run(pNbCamera);
             break;
         }
         if (skill != 0 && skill != 0xA5) {
@@ -3776,7 +3789,7 @@ s32 nbCameraBoss_Cut2_Run(nbCamera_t *pNbCamera)
         return 1;
     case 0x120:
         if (skill == 0xC9) {
-            nbCameraBoss_Baal_BAELNO_Run(pNbCamera);
+            shot = nbCameraBoss_Baal_BAELNO_Run(pNbCamera);
             break;
         }
         return 0;
@@ -3790,53 +3803,54 @@ s32 nbCameraBoss_Cut2_Run(nbCamera_t *pNbCamera)
     case 0x103:
     case 0x124:
         if (skill == 0xA9 || skill == 0xAA) {
-            nbCameraBoss_Bsnet_Attack_Run(pNbCamera);
+            shot = nbCameraBoss_Bsnet_Attack_Run(pNbCamera);
             break;
         }
         return 1;
     case 0x102:
     case 0x123:
         if (skill == 0xFD) {
-            nbCameraBoss_BSARI_MASEHA_Run(pNbCamera);
+            shot = nbCameraBoss_BSARI_MASEHA_Run(pNbCamera);
             break;
         }
         if (skill == 0xA8) {
-            nbCameraBoss_BSARI_SIMANO_Run(pNbCamera);
+            shot = nbCameraBoss_BSARI_SIMANO_Run(pNbCamera);
             break;
         }
         return 1;
     case 0x125:
         if (skill == 0xF1) {
-            nbCameraBoss_Kagu_MJINKO_Set(pNbCamera);
+            shot = nbCameraBoss_Kagu_MJINKO_Set(pNbCamera);
             break;
         }
         return 0;
     case 0x108:
         if (skill == 0xDD) {
-            nbCameraBoss_Pish_MUHENK_Run(pNbCamera);
+            shot = nbCameraBoss_Pish_MUHENK_Run(pNbCamera);
             break;
         }
         return 0;
     case 0x156:
         if (skill == 0xEB) {
-            nbCameraBoss_Meta_METAT1_1_Set(pNbCamera);
+            shot = nbCameraBoss_Meta_METAT1_1_Set(pNbCamera);
             break;
         }
         return 0;
     case 0x157:
         if (skill == 0x103) {
-            nbCameraBoss_Beru_HAENO1_Set(pNbCamera);
+            shot = nbCameraBoss_Beru_HAENO1_Set(pNbCamera);
             break;
         }
         return 0;
     case 0x158:
         if (skill == 0x110) {
-            nbCameraBoss_Lusi_TWORLD_Set(pNbCamera);
+            shot = nbCameraBoss_Lusi_TWORLD_Set(pNbCamera);
             break;
         }
     default:
         return 0;
     }
+    return shot;
 }
 #else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut2_Run);

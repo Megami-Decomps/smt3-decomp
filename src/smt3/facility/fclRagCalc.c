@@ -249,7 +249,6 @@ extern char *pStr[];
 extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *font);
 
-#ifdef NON_MATCHING
 void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
 {
     cmpCursorInfo_t *cursor = &list->listCursor;
@@ -270,8 +269,13 @@ void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
         u32 color;
         frFontHandle_t *font;
 
-        if (slot != 0 && cmbChkGetHearts(slot) != 0) {
-            disabled = 1;
+        if (slot != 0) {
+            s32 hasHearts = cmbChkGetHearts(slot);
+            /* Target-specific allocation aid for the real unavailable flag.
+             * Its native $4 lifetime starts after the query and ends before
+             * the next call; ordinary C instead selects $3. */
+            register s32 unavailable __asm__("$4") = 1;
+            disabled = hasHearts != 0 ? unavailable : disabled;
         }
         color = cmpDrawListItemBox(cursor, i, i, disabled | (mode != 0 ? 2 : 0), 0x100);
         font = frwGetSmallFontFRQ2(x + 0x310, y + 0xC0, z, color, pStr[item], NULL);
@@ -286,9 +290,6 @@ void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
         lstDrawListWindowCursor((lstWindowWork_t *)list, ot);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawHeartsRows);
-#endif
 
 extern datDevilTableEntry_t datDevilTable[];
 extern char *text2[];
@@ -345,26 +346,24 @@ extern void fclUpdatePanel(fclPanel_t *panel);
 extern void fclDrawPriceText(fclPanelPos_t *pos, u16 price, s32 ot);
 extern ragOfferTable_t ragOffers asm("ragHeartsTable");
 
-#ifdef NON_MATCHING
 void ragDrawHeartsList(s8 mode)
 {
     ragDrawWork_t *work = ragDrawWork;
     s32 top = work->list.heartWindow.listCursor.unk_22;
     s8 *rows = &work->list.heartItems[top];
-    s8 index = rows[(u8)work->list.heartWindow.listCursor.unk_24];
+    s8 index = work->list.heartItems[top + (u8)work->list.heartWindow.listCursor.unk_24];
     u16 price = ragOffers.hearts[index].item;
     fclPanelPos_t pos;
 
     fclDrawPanel(&work->panel[2], 0x47);
     fclUpdatePanel(&ragDrawWork->panel[2]);
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, (char *)ragOffers.heartsCaption,
+    trmDrawListText(&pos, *(char **)(ragHeartsTable + 0x8B8),
                     ragDrawWork->texHandle, D_003306B8, 0x47);
     ragDrawHeartsRows(&ragDrawWork->list.heartWindow,
                       0, rows, mode, 0x47);
     fclDrawPanel(&ragDrawWork->panel[1], 0x47);
-    work = ragDrawWork;
-    fclInitPanelPos(work->panel[1].X, work->panel[1].Y, work->panel[1].Z,
+    fclInitPanelPos(ragDrawWork->panel[1].X, ragDrawWork->panel[1].Y, ragDrawWork->panel[1].Z,
                     0, 0, 0, (fclPanel_t *)&pos);
     ragDrawListFrame(&pos, 0, (u8)index, 0x47);
     fclDrawPhaseHeader((u8 *)&ragDrawWork->panel[1],
@@ -377,9 +376,6 @@ void ragDrawHeartsList(s8 mode)
     fclDrawPhaseHeader((u8 *)&ragDrawWork->list.heartWindow,
                        0x80808080, 0, 0x47);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawHeartsList);
-#endif
 
 
 extern void ragDrawListRows(lstWork_t *list, u8 kind, u8 *rows, s8 mode, s32 ot);

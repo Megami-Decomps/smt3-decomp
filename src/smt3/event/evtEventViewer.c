@@ -1259,31 +1259,43 @@ void RunFrame3(s32 nowframe) {
     }
 }
 
-#ifdef NON_MATCHING
 void RunFrameUnit(evtViewerObject_s *track, s32 nowFrame)
 {
-    evtFrameInfo_t *frame;
+    evtFrameInfo_t *frame = track->children;
     s32 mode = 0;
     s32 otherMode = 2;
+    s32 value;
 
-    for (frame = track->children; frame != NULL && nowFrame >= frame->frame;
-         frame = frame->next) {
-        s32 value = frame->param.sb[0];
-
-        if (value >= 0) {
-            if (value < 2) {
-                mode = value;
-            } else if (value < 5) {
-                otherMode = value;
-            }
-        }
+    goto test_frame;
+next_frame:
+    frame = frame->next;
+test_frame:
+    if (frame == NULL) {
+        goto finished;
     }
+    if (nowFrame < frame->frame) {
+        goto finished;
+    }
+    value = frame->param.sb[0];
+    switch (value) {
+    case 0:
+    case 1:
+        mode = value;
+        break;
+    case 2:
+    case 3:
+    case 4:
+        otherMode = value;
+        break;
+    default:
+        break;
+    }
+    goto next_frame;
+finished:
     evtRunUnitMode(track->basic, mode);
     evtRunUnitMode(track->basic, otherMode);
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrameUnit);
-#endif
+
 
 extern void RunFrameUnit(evtViewerObject_s *track, s32 nowFrame);
 extern void RunFrame2(evtViewerObject_s *track, evtFrameInfo_t *next,
@@ -1291,7 +1303,6 @@ extern void RunFrame2(evtViewerObject_s *track, evtFrameInfo_t *next,
 extern evtViewerObject_s *evt_camera;
 extern s8 dds3ScreenBlurFlag;
 
-#ifdef NON_MATCHING
 void evtRunFrame(s32 nowFrame)
 {
     evtViewerObject_s *track;
@@ -1300,16 +1311,17 @@ void evtRunFrame(s32 nowFrame)
     evtFrameInfo_t *previous;
     s32 length;
     s32 endFrame;
-    s32 nearestFrame = 10000;
+    s32 nearestFrame;
 
-    viewerinfo->drawblur2 = 0;
     track = viewerinfo->firstobjinfo;
     viewerinfo->drawmblur = 0;
     viewerinfo->filter = 0;
-    viewerinfo->flags &= ~6;
+    viewerinfo->flags &= ~2;
+    viewerinfo->flags &= ~4;
     viewerinfo->drawmfilter = 0;
     viewerinfo->drawdblur = 0;
     viewerinfo->drawrblur = 0;
+    viewerinfo->drawblur2 = 0;
     for (; track != NULL; track = track->next) {
         if (track->type == 1) {
             RunFrameUnit(track, nowFrame);
@@ -1322,7 +1334,7 @@ void evtRunFrame(s32 nowFrame)
             case 21:
                 endFrame = (s16)frame->param.sh[1];
                 if (endFrame == 0) {
-                    length = viewerinfo->totalframe - frame->frame;
+                    length = (s32)((u32)viewerinfo->totalframe - (u32)frame->frame);
                 } else {
                     length = endFrame - frame->frame;
                     if (length < 0) length = 0;
@@ -1331,7 +1343,7 @@ void evtRunFrame(s32 nowFrame)
             case 18:
                 endFrame = (s16)frame->param.sh[0];
                 if (endFrame == 0) {
-                    length = viewerinfo->totalframe - frame->frame;
+                    length = (s32)((u32)viewerinfo->totalframe - (u32)frame->frame);
                 } else {
                     length = endFrame - frame->frame;
                     if (length < 0) length = 0;
@@ -1344,7 +1356,7 @@ void evtRunFrame(s32 nowFrame)
                 if (next != NULL) {
                     length = next->frame - frame->frame;
                 } else {
-                    length = viewerinfo->totalframe - frame->frame;
+                    length = (s32)((u32)viewerinfo->totalframe - (u32)frame->frame);
                 }
                 break;
             default:
@@ -1352,13 +1364,14 @@ void evtRunFrame(s32 nowFrame)
                 break;
             }
             if ((length == 0 && nowFrame == frame->frame) ||
-                (length > 0 && nowFrame >= frame->frame && nowFrame < frame->frame + length)) {
+                (length > 0 && nowFrame >= frame->frame && nowFrame < (s32)((u32)frame->frame + (u32)length))) {
                 RunFrame1(track, frame, nowFrame, length);
             } else {
                 OutFrame1(track, frame, nowFrame, length);
             }
         }
     }
+    nearestFrame = 10000;
     track = viewerinfo->firstobjinfo;
     evt_camera = NULL;
     for (; track != NULL; track = track->next) {
@@ -1381,9 +1394,6 @@ void evtRunFrame(s32 nowFrame)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtRunFrame);
-#endif
 
 void DrawActiveCameraName(void)
 {
@@ -1462,13 +1472,11 @@ extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
 extern void sdfMotionPause(sdfMotionCtrlr_t *motion);
 extern void sdfMotionPauseOff(sdfMotionCtrlr_t *motion);
 
-#ifdef NON_MATCHING
 void evtStopFrame(s32 sw, u32 nowFrame)
 {
     dds3Basic_t *scene;
     dds3SceneBasic_t *sceneWork;
     dds3Basic_t *basic;
-    dds3Basic_t *effect;
     dds3Basic_t *mover;
     dds3UnitObjectBasicWorkData_t *unitWork;
     dds3MatterObjectBasicWorkData_t *matterWork;
@@ -1499,7 +1507,8 @@ void evtStopFrame(s32 sw, u32 nowFrame)
     for (basic = sceneWork->basictable[BASIC_TYPE_MATTEROBJECT].firstbasic;
          basic != NULL; basic = basic->next) {
         matterWork = basic->workdata;
-        motion = matterWork->pObjectBaseControlWorkData->pMot;
+        control = matterWork->pObjectBaseControlWorkData;
+        motion = control->pMot;
         if (motion != NULL) {
             if (sw == 0) {
                 sdfMotionSeek(motion, (f32)nowFrame);
@@ -1514,21 +1523,27 @@ void evtStopFrame(s32 sw, u32 nowFrame)
         evtStopMover((polyMovieObject_t *)basic, sw, 0, nowFrame);
     }
     for (track = viewerinfo->firstobjinfo; track != NULL; track = track->next) {
-        if (track->type != 3 && track->type != 18 && track->type != 20 && track->type != 21) {
+        switch (track->type) {
+        case 3: case 18: case 20: case 21:
+            break;
+        default:
             continue;
         }
         for (frame = track->children; frame != NULL; frame = frame->next) {
-            if (track->type == 18) {
-                effect = frame->work;
-            } else if (track->type == 3 || track->type == 20 || track->type == 21) {
+            switch (track->type) {
+            case 3: case 20: case 21:
                 slot = frame->param.sb[0];
                 if (slot < 0) continue;
-                effect = viewerinfo->effectBasic[slot];
-            } else {
+                basic = viewerinfo->effectBasic[slot];
+                break;
+            case 18:
+                basic = frame->work;
+                break;
+            default:
                 continue;
             }
-            if (effect != NULL) {
-                mover = dds3GetBaseControlWorkData(effect)->pBasic[1];
+            if (basic != NULL) {
+                mover = dds3GetBaseControlWorkData(basic)->pBasic[1];
                 if (mover != NULL) {
                     evtStopMover((polyMovieObject_t *)mover, sw, frame->frame, nowFrame);
                 }
@@ -1536,9 +1551,6 @@ void evtStopFrame(s32 sw, u32 nowFrame)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtStopFrame);
-#endif
 
 void evtViewerStopFrame(void)
 {
@@ -2366,7 +2378,6 @@ extern s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y);
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 extern s32 (*D_0032C750[])(s32 action, s32 previousMenu);
 
-#ifdef NON_MATCHING
 s32 evtEventViewerProcess4(void)
 {
     s32 index;
@@ -2374,32 +2385,39 @@ s32 evtEventViewerProcess4(void)
     s32 done = 0;
     s32 action;
     s32 result;
-    evtViewerMenuEntry_t *entry;
-    evtViewerInfo_t *viewer;
+    s32 mode;
+    s32 x;
+    s32 y;
 
     DrawEffect();
     for (index = 1; index <= viewerinfo->sp; index++) {
-        entry = &viewerinfo->menuStack[index];
-        action = evtViewerDispatch(entry->mode, entry->unk02 + winoff_x, entry->unk04);
-        entry = &viewerinfo->menuStack[index];
-        if (viewerinfo->nowmenu == entry->mode && viewerinfo->nowmenu == 4) {
+        x = viewerinfo->menuStack[index].unk02 + winoff_x;
+        y = viewerinfo->menuStack[index].unk04;
+        mode = viewerinfo->menuStack[index].mode;
+        action = evtViewerDispatch(mode, x, y);
+        if (viewerinfo->nowmenu == viewerinfo->menuStack[index].mode && viewerinfo->nowmenu == 4) {
             evtViewerDispatch(5, winoff_x + 0x90, 0x48);
         }
-        if (action == 0) {
-            previousMenu = viewerinfo->menuStack[index].mode;
-            continue;
-        }
-        if (action == -1) {
-            PopMenu();
-        } else {
+        if (action != 0) {
+            if (action == -1) {
+                goto pop_menu;
+            }
             result = D_0032C750[viewerinfo->menuStack[index].mode](action, previousMenu);
-            if (result == 1) {
+            switch (result) {
+            case -1:
+                done = 1;
+                break;
+            case 0:
+                break;
+            case 1:
                 return (s32)evtEventViewerProcess5_0;
             }
-            if (result == -1) {
-                done = 1;
-            }
+            break;
         }
+        previousMenu = viewerinfo->menuStack[index].mode;
+        continue;
+pop_menu:
+        PopMenu();
         break;
     }
 
@@ -2408,39 +2426,36 @@ s32 evtEventViewerProcess4(void)
     } else if (winoff_x >= -99 && dds3PadButtonState[0x2B] != 0) {
         winoff_x -= 10;
     }
-    viewer = viewerinfo;
     if (dds3PadButtonState[0x22] < 0) {
-        if (viewer->menuProcess != NULL) {
-            dds3KillProcess(viewer->menuProcess, 1);
+        if (viewerinfo->menuProcess != NULL) {
+            dds3KillProcess(viewerinfo->menuProcess, 1);
             viewerinfo->menuProcess = NULL;
-            viewer = viewerinfo;
         }
-        if (viewer->menusw == 0) {
-            viewer->nowmenu = 0;
-            viewer->menusw = 1;
-            viewer->sp = 0;
+        switch (viewerinfo->menusw) {
+        case 0:
+            viewerinfo->sp = 0;
+            viewerinfo->menusw = 1;
+            viewerinfo->nowmenu = 0;
             PushMenu(4, 0x24, 0x18);
-            viewer = viewerinfo;
-        } else if (viewer->menusw == 1) {
-            viewer->menusw = 0;
+            break;
+        case 1:
+            viewerinfo->menusw = 0;
             done = 1;
-            viewer = viewerinfo;
+            break;
         }
     }
-    if (viewer->nowmenu == 0 || done) {
-        viewer->menusw = 0;
-        viewer->nowmenu = 0;
-        viewer->sp = 0;
+    if (viewerinfo->nowmenu == 0) {
+        done = 1;
+    }
+    if (done) {
+        viewerinfo->nowmenu = 0;
+        viewerinfo->sp = 0;
+        viewerinfo->menusw = 0;
         return (s32)evtEventViewerProcess3;
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerProcess4);
-#endif
 
-/* NON_MATCHING: 3 of 91 words differ (first at +0x110). */
-#ifdef NON_MATCHING
 s32 evtEventViewerProcess3(void)
 {
     if (viewerinfo->nowframe != viewerinfo->oldframe) {
@@ -2474,8 +2489,13 @@ s32 evtEventViewerProcess3(void)
     }
     if ((viewerinfo->flags & 1) != 0) {
         FrameSelect();
-        if ((viewerinfo->flags & 1) != 0) {
-            return 0;
+        {
+            /* Reconstruction aid: keep the real pause test in the native
+             * return register. Its value dies at the branch, before any call. */
+            register s32 paused __asm__("$2") = viewerinfo->flags & 1;
+            if (paused != 0) {
+                return 0;
+            }
         }
     }
     if (viewerinfo->nowframe >= viewerinfo->lastframe) {
@@ -2486,9 +2506,6 @@ s32 evtEventViewerProcess3(void)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerProcess3);
-#endif
 
 s32 evtEventViewerProcess2(void *id)
 {

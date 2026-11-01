@@ -285,7 +285,12 @@ INCLUDE_ASM(const s32, "sdk/libkernl", GetMemorySize);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _InitTLB);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceResetttyinit);
+extern s32 D_0052C2A4 __attribute__((section(".data")));
+
+void sceResetttyinit(void)
+{
+    D_0052C2A4 = 0;
+}
 
 extern s32 DIntr(void);
 extern s32 EIntr(void);
@@ -2077,9 +2082,6 @@ s32 sceOpen(const char *name, s32 flags, ...)
 INCLUDE_ASM(const s32, "sdk/libkernl", sceOpen);
 #endif
 
-/* NON_MATCHING: 376/380 bytes; the final nonnegative-result clamp
- * simplifies to a shorter immediate comparison. */
-#ifdef NON_MATCHING
 s32 sceClose(s32 descriptor)
 {
     rpcSemaParam param;
@@ -2089,6 +2091,7 @@ s32 sceClose(s32 descriptor)
     s32 sema;
     s32 accepted;
     s32 status;
+    s32 threshold;
 
     entry = get_iob(descriptor);
     _sceFsWaitS(1);
@@ -2125,14 +2128,15 @@ s32 sceClose(s32 descriptor)
     WaitSema(sema);
     DeleteSema(sema);
     status = result;
-    if (status >= 0) {
+    threshold = -1;
+    /* Keep the real native signed threshold in a general register for its
+     * comparison. No instruction, fixed register or memory effect is added. */
+    __asm__("" : "+r"(threshold));
+    if (threshold < status) {
         status = 0;
     }
     return status;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", sceClose);
-#endif
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceLseek);
 
@@ -2532,7 +2536,60 @@ s32 sceDopen(const char *path)
     return result;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceDclose);
+s32 sceDclose(s32 descriptor)
+{
+    rpcSemaParam param;
+    s32 result;
+    fsCloseRequest_t *request = &D_0059D4C0.close;
+    fsRequestEntry_t *entry;
+    s32 sema;
+    s32 accepted;
+    s32 status;
+    s32 threshold;
+
+    entry = get_iob(descriptor);
+    _sceFsWaitS(10);
+    if (D_0052C340 == 0) {
+        _sceFsSigSema();
+        return -1;
+    }
+    if (entry == NULL || entry->active == 0) {
+        _sceFsSigSema();
+        return -9;
+    }
+    request->descriptor = entry->word0;
+    param.maxCount = 1;
+    param.initCount = 0;
+    param.option = 0;
+    sema = CreateSema(&param);
+    D_0059D4C0.close.sema = sema;
+    request->result = &result;
+    request->resultSize = 4;
+    if (sceSifCallRpc(&D_0059E780, 10, 0, request, 0x14,
+                      D_0059E100, 4, NULL, NULL) < 0) {
+        DeleteSema(sema);
+        _sceFsSigSema();
+        return -11;
+    }
+    entry->active = 0;
+    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    _sceFsSigSema();
+    if (accepted == 0) {
+        DeleteSema(sema);
+        return -11;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    status = result;
+    threshold = -1;
+    /* Keep the real native signed threshold in a general register for its
+     * comparison. No instruction, fixed register or memory effect is added. */
+    __asm__("" : "+r"(threshold));
+    if (threshold < status) {
+        status = 0;
+    }
+    return status;
+}
 
 s32 sceDread(s32 descriptor, void *directoryEntry)
 {

@@ -34,22 +34,35 @@ Ruled out: `goto` to one trailing `return 0` (69 words, worse); both
 polarities of the `0x2000000` test; `rate` preset to 0x64 before the test; and
 an intermediate local for the `21 / enemypcnt` quotient.
 
-## CheckAction_STKSEL (newbattle/nbStageProcess, 0xE8)
+## CheckAction_STKSEL (newbattle/nbActionProcess, 0xE8)
 
-9 of 58 words differ, at the exact 232-byte size.
+58 of 58 words match at 232 bytes. The current baseline had only the two
+mask/counter setup words left; the older 49/58 result in this note was superseded. An ordinary initialized `u32 clearMask = ~8u` value, assigned
+before forming the stock-form pointer, supplies the existing sixteen `stat`
+clears. This deliberate reconstruction aid prevents late loop-invariant
+materialization; it is not a claim about the original source. No register
+binding or inline assembly is needed.
 
-A `switch (StkSelId)` written `default:`, `case -1:`, `case -2:` gives
-retail's two forward `beq`s and the body order (the normal arm first, then the
--1 arm, then the -2 arm); the ascending order runs over size.
+The existing default / -1 / -2 switch order and all calls, stores and return
+values remain unchanged. The shift now uses unsigned `1u`, including bit 31,
+and still reloads `StkSelId` after both calls rather than caching it. In normal
+initialized roster state, sixteen-slot stock IDs are 0..15; selector startup
+is 0, initialization writes -1, and polling returns -2, -1 or a stock ID.
+Thus the reloaded value plus 16 is in 14..31. This is a state invariant, not
+validation of corrupt saves or arbitrary bytes.
 
-What is left is two `$2`/`$3` swaps and one pair of adjacent constant inits.
-Retail materialises the loop's `~8` mask before the `0xF` counter and the
-draft does the reverse, and retail holds `StkSelId` in `$2` with the shifted 1
-in `$3` where the draft has them swapped.
+The empty-list edge was checked against native layout rather than assumed
+unreachable: UP can leave cursor -1, and confirm reads the word immediately
+before `StockIDList`, the fourth panel's MP-animation counter (0..8); cursor
+0 reads a zero-initialized or previously valid table entry. Native navigation
+keeps an empty list's top at 0 and cursor in {-1, 0}. This existing out-of-bounds
+UI quirk is not repaired or justified as a C array access here; its native
+producer result still fits the selector shift domain. Counter initialization,
+positive-only decrement, reset and assignment of 8 were independently audited.
 
-Ruled out: `do`/`while` and a pre-loop `i` init for the stat-clearing loop;
-`form->stat = form->stat & ~8` written out; a named local for
-`StkSelId + 0x10`; and a `(u32)1` shift base.
+Qualification: complete owner 87/0, with the nine remaining guarded drafts
+still compiling. The clear loop visits exactly sixteen `u32 stat` fields and
+preserves the native mask, pointer stride and memory access order.
 
 ## CheckAction_ESCAPE (newbattle/nbStageProcess, 0xE4)
 
