@@ -41,7 +41,7 @@ extern void sdfFileCmdReadFile(const char *aFileName, s32 aBuffer, s32 aLength, 
 
 extern void itfMesMngSetVarImmediate(s32 id, s8 index, s32 pstr);
 
-extern s32 itfMesMngGetSelectNo(s32 msgid);
+extern s16 itfMesMngGetSelectNo(s32 msgid);
 
 extern s16 itfMesMngGetSelPhase(s32 msgid);
 

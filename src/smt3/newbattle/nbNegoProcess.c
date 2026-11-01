@@ -343,7 +343,7 @@ extern s16 itfMesMngGetSelPhase(s32 msgid);
 
 extern void itfMesMngSetSelPhase(s32 msgid, s32 phase);
 
-extern s32 itfMesMngGetSelectNo(s32 msgid);
+extern s16 itfMesMngGetSelectNo(s32 msgid);
 
 extern void itfMesMngRequestSelectRelease(s32 id);
 
