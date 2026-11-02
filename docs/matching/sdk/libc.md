@@ -118,17 +118,18 @@ is needed before another attempt. No register constraints or artificial work.
 
 ## vfprintf
 
-The wrapper emits its native 116 instruction bytes: 8 of 29 words match
-and 21 differ, first at +0x10. The format and argument-list saved registers
-are exchanged; stream-data reload, initialization argument and branch-delay
-scheduling also differ. The independently framed core at 0x002D6678 stays
-assembly-backed with its complete literal and dispatch-table ownership.
+116 bytes / 29 words match in ordinary C. A one-pass block keeps stream
+attachment and initialization in one phase, transferring the shape already
+used by the matched `__swsetup` in this owner. Removing the block leaves the
+same 116-byte size but only 8 of 29 words matching: the saved format and
+argument-list registers exchange, and stream-data/branch scheduling changes.
+No register constraints, storage qualifiers or ABI changes are needed.
 
 The wrapper installs `_impure_ptr` only when the stream has no reentrancy
 record, calls `__sinit` only when that record is uninitialized, and forwards
-the fresh stream record after the call. A cached-record/explicit reload
-control emits 112 bytes and was discarded. No storage qualifiers, dummy
-references or false argument types constrain allocation.
+the fresh stream record after the call. The one-pass block does not cache the
+record across initialization. The independently framed formatter core at
+0x002D6678 remains assembly-backed with its literal and dispatch-table ownership.
 
 ## _d2b
 
