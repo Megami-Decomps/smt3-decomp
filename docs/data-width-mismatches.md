@@ -238,18 +238,43 @@ importing it through `.venv/bin/python`, which is the interpreter
 future reader's branch order differs, check that version first: this account
 is of 1.40.2 and of nothing else.
 
-`config/smt3/SLUS_209.11.yaml:42` sets `data_string_guesser_level: 2`. So byte
-or `.asciz` emission has exactly two causes and no others:
+`config/smt3/SLUS_209.11.yaml:42` sets `data_string_guesser_level: 2`. Two of
+the three causes of byte emission come from that function:
 
-- the user type means bytes: `u8`, `char`, `char*` or `asciz`. The first two
-  of those return true before the string predicate is consulted at all, which
+- the user type means bytes: `u8`, `char`, `char*` or `asciz`. `char` and
+  `char*` return true before the string predicate is consulted at all, which
   makes `type:char` on a pointer-bearing object the worst case of the class;
 - no user type, and the bytes look like a string. `hasNoType()` returns true at
   every level from 1 up.
 
 A user-provided type suppresses the guess at **every** level, because the only
 level-gated escape needs `hasOnlyAutodetectedType()` and a user type is not
-that.
+that. The restriction's own wording is at `GlobalConfig.py:333`.
+
+The third cause is a separate dispatch and is not reachable from `isString()`
+at all, which is why reading that function exhaustively does not find it.
+`isByte()` at `ContextSymbols.py:330`, reached from `MipsSymbolBase.py:177`
+and `:237`:
+
+```python
+if not GlobalConfig.USE_DOT_BYTE: return False
+currentType = self.getTypeSpecial()
+if gAccessKinds[rabbitizer.AccessType.BYTE].typeMatchesAccess(currentType): return True
+if currentType is not None: return False
+if self.accessType == rabbitizer.AccessType.BYTE: return True
+return False
+```
+
+`USE_DOT_BYTE` defaults true (`GlobalConfig.py:281`). So a symbol with no user
+type and an **autodetected byte access type** is emitted `.byte` with the
+string guesser never consulted. That access type is inferred from the code
+that touches the object, not from the bytes themselves.
+
+Measured by the consumer who found it: of thirteen untyped labels in their
+audit, all thirteen emit `.byte`, none emit `.asciz`, and eleven are not
+string-shaped, so the guesser explains none of them. Their control is the
+convincing half: `D_00333930` is untyped and byte-shaped and emits 242
+`.word`, so byte-shaped content does not force byte emission.
 
 The consequence is sharper than "fix the wrong annotations". An untyped
 pointer-bearing object is not protected, it is unguarded: it emits words only
@@ -267,7 +292,14 @@ because of the first.
 So the rule to apply when touching any data entry: **a pointer-bearing object
 wants an explicit word-wide type**, and a `size:` correction that enlarges an
 object into the pointer-bearing class creates that requirement where none
-existed.
+existed. An explicit word type closes all three paths at once, which is why
+the fix does not depend on knowing which one fired.
+
+The third path also widens the instability. A `size:` change alters the extent
+the string predicate runs over, and the autodetected access type is inferred
+from the code that touches the object, so an untyped symbol's lack of
+protection can be revoked by a change on either side: its own extent, or the
+code that reads it.
 
 **The retail checksum is blind to this.** The same bytes emitted as `.byte` or
 as `.word` assemble identically, so the image matches either way and no check
