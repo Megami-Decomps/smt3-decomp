@@ -92,5 +92,9 @@ game/engine denominator; zero padding adds no function or instruction credit.
 
 Final local tooling passes all 27 test files (436 cases), the inline-assembly
 gate, and all seven IRX checks. A fresh two-worker guard run passes all
-145 owners / 506 drafts with identical before/after inputs. Reconciled primary and all-code reports also pass. Exact-source hosted CI
-is pending publication.
+145 owners / 506 drafts with identical before/after inputs. Reconciled primary and all-code reports also pass. Source commit
+`b096bc42ccb44d0f518d8a8ee95043aa271a2b1f` passed exact-source hosted
+[CI run 41376898338](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41376898338),
+attempt 1, including build and Pages deployment. Raw logs verify the exact
+checkout and deployed commit; the run completed successfully on 2026-11-02
+at 02:19:51 UTC.

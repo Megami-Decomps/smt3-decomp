@@ -4920,25 +4920,33 @@ void cmbGetModelMarkPos(f32 (*positions)[4], f32 *sizes, s32 *found)
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetModelMarkPos);
 #endif
 
-/* NON_MATCHING: 20 of 26 words match, exact size; the two `fclDrawPanelSprite`
- * calls put the `ori` of the sprite id in the delay slot where retail puts the
- * flags copy. */
+/* These localized constraints reconstruct the native argument scheduling:
+ * complete each real sprite ID before its call, and bind the box's real X/OT
+ * arguments only until their immediate consumer. They emit no instructions,
+ * are not memory barriers, and do not establish original source spelling. */
 extern void cmpAllocRefGifTag(s32 ot);
 extern void cmpDisableRGB(s32 ot);
-
-#ifdef NON_MATCHING
 
 void cmbDrawFullScreenPanel(s32 flags)
 {
     cmpDisableRGB(flags);
-    fclDrawPanelSprite(0x34000, flags);
-    cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, 0, flags);
+    {
+        s32 spriteId = 0x34000;
+        FAKEMATCH_ASM_LIVE_VOLATILE(spriteId);
+        fclDrawPanelSprite(spriteId, flags);
+    }
+    {
+        FAKEMATCH_ASM_REG(s32, boxX, "$4") = 0;
+        FAKEMATCH_ASM_REG(s32, boxOt, "$10") = flags;
+        cmpDrawBoxF(boxX, 0, 0, 0x200, 0x1C0, 0, boxOt);
+    }
     cmpAllocRefGifTag(flags);
-    fclDrawPanelSprite(0x34000, flags);
+    {
+        s32 spriteId = 0x34000;
+        FAKEMATCH_ASM_LIVE_VOLATILE(spriteId);
+        fclDrawPanelSprite(spriteId, flags);
+    }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawFullScreenPanel);
-#endif
 
 extern void cmbRotateModelPanel(const f32 *center, s32 mode, u32 color,
                                 sdfVector4_t *vertices, u32 *colors, f32 radius, f32 height);

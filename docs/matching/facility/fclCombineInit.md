@@ -40,22 +40,48 @@ comes from the type or from an `aligned(4)` field, so it cannot be one.
 
 ## cmbDrawFullScreenPanel (fclCombineInit, 0x68)
 
-20 of 26 words match, at the exact 104-byte size. Calls `cmpDisableRGB`, draws
-sprite 0x34000, fills the screen with `cmpDrawBoxF`, allocates a ref GIF tag
-and tail-calls the same sprite draw again.
+26 of 26 words match at 104 bytes. The former 20/26 scheduling residual is
+superseded. The five calls retain their original order: disable RGB, draw
+sprite 0x34000, draw the box, allocate the reference GIF tag, and tail-call
+the same sprite draw. Providers retain truthful void interfaces and every
+argument, packet/callback effect and conversion is unchanged.
 
-Every instruction is retail's, in retail's registers. The six differing words
-are the delay slots of the two `fclDrawPanelSprite` calls and the epilogue
-they shift. Retail schedules `lui $4` then `ori $4, $4, 0x4000` and fills the
-`jal` delay slot with `daddu $5, $16, $0`; this schedules `lui`, the flags
-copy, and then fills the delay slot with the `ori`. Same instructions, same
-count, so what is left is ee-gcc's second scheduling pass, as in `cmp_23A918`
-above.
+Four localized reconstruction aids apply only to actual initialized values.
+Each sprite call has a separate scoped `s32` ID of 0x34000 and an empty
+`FAKEMATCH_ASM_LIVE_VOLATILE` operand immediately before its real consumer.
+Neither ID is pinned, carried across an earlier call or exposed by address.
+For the box call, real `s32 boxX = 0` and `s32 boxOt = flags` values are bound
+to their actual EE argument registers `$4` and `$10` immediately before the
+seven-argument call. All other arguments are constants, with no intervening
+call or side-effecting argument evaluation. These bound values are consumed
+by that call and never relied on after its clobbers; `flags` remains an
+ordinary value independently live for later calls.
 
-Ruled out: an `extern s32 fclDrawPanelSprite(s32 id, s32 arg);` prototype above
-the function, which the unit otherwise leaves implicit; an `s32 id = 0x34000;`
-local for the sprite id, which the `cmp_23A918` entry also rules out; and
-passing `flags` to `cmpDisableRGB`, which the unit's other caller does not.
+No artificial consumer, memory barrier, instruction replay, false ABI or
+compiler flag is introduced. The constraints emit no instructions. Exact
+output initializes box X before OT, then supplies the remaining real box
+arguments and the native call with zero color in its delay slot. This is a
+measured target-specific source/output relationship, not an internal compiler
+pass explanation, hardware requirement or original-source spelling claim.
+
+The ordinary-X control gives 19/26. Five deletion-only controls from the
+exact source also fail: removing OT gives 20/26; first ID gives 1/26 at
+116 bytes; tail ID gives 22/26; both box bindings give 20/26; both ID operands
+give 20/26. All other controls remain 104 bytes, with peers/data preserved.
+These results support the retained four aids and establish no tested simpler
+exact form, not absolute irreducibility over all possible reconstructions.
+The old nonvoid-prototype experiment is historical negative evidence; its
+unsupported contract is not retained.
+
+Independent canonical checks of both frozen and comment-cleaned sources give
+193 match, 0 differ, with owned data exact. The ablation runs were independently
+inspected rather than independently recompiled. No diagnostic compiler-pass
+or normal/diagnostic parity claim is made.
+
+Final landing gates pass the retail checksum, all 27 test files (436 cases),
+the inline-assembly gate, all 145 guarded owners / 505 drafts with stable
+inputs, seven IRX checks and reconciled reports. Exact-source hosted CI is
+pending publication.
 
 ### Matched result footer
 
