@@ -159,34 +159,24 @@ The existing source shape remains important: `nowcommand != 1` encloses the
 `== 5` arm with `no = -1` above it, so retail's `== 1` arm stays last; the
 sixteen `form[i].stat &= ~8` clears use the plain ascending loop.
 
-## SetDamagePacket (newbattle/nbStageProcess, 0x1E0)
+## SetDamagePacket (newbattle/nbActionProcess, 0x1E0)
 
-116 of 120 words match, at the exact 480-byte size and with zero instruction
-differences in the multiset.
+Exact: 120 of 120 words, 480 bytes, ordinary C. A block-local `s32 moji = 1`
+immediately before `nbMakeDamagePacket`, used for its real eleventh argument,
+restores the native constant schedule and register. It is initialized after
+`CheckTimeListDead` and consumed by the stack-argument store before the packet
+call. No extra load, store, call, conversion or ABI change is introduced.
 
-Both kuisibari guards are exact, including the two separate `GetTimeListHp`
-calls (one for the `hp >= ` compare, one for the `- 1` assignment), the
-`else if` chain between the two skills, and the dead arm written first with
-the live arm as the branched-to block, both ending in a `j SetTimeList`
-sibling call.
+The old literal form was 116/120. A diagnostic `$3` binding with an empty
+operand constraint reached 120/120; removing the operand still matched, and
+removing the binding also matched. The final source retains only the ordinary
+block-local constant. Earlier named-local experiments recorded here did not
+establish this exact scoped source in the current complete owner context.
 
-What is left is where the `moji` argument's `1` is materialised. Retail emits
-`addiu $3, $0, 1` before the `lw $6, 0x28($17)` that fetches `a->form`, so
-`$2` still holds the `CheckTimeListDead` return and the constant lands in
-`$3`; every source shape tried emits the load and the `sltu` first and then
-puts the constant in `$2`, which is free by then. The four differing words are
-those three rotated and the one `sw` that names the register. ee-gcc 2.96 runs
-only sched1 (before reload) at -O2, so the register choice follows the
-schedule and nothing in the source reaches it.
-
-Ruled out: `dead` as the raw return with `!= 0` inlined at the call (which
-moves the `sltu` into the argument block and costs 52 words), `!!`, `== 0 ? 0
-: 1`, `> 0`, a `u32` and an `s16` `dead`, `if (dead)` against `if (dead != 0)`,
-a named `moji = 1` local, `1u`, a `nbFormation_t *form` local for the third
-argument, both declaration orders of `start` and `dead`, `start` assigned
-rather than initialised, an extra live local to shift the pseudo numbering,
-and dropping the `nbMakeDamagePacket` and `nbAddSkillNamePacket` prototypes so
-the callees are implicitly declared.
+Both kuisibari guards remain intact, including separate `GetTimeListHp` calls
+for comparison and subtraction, the skill `else if`, and the dead arm before
+the live arm. Native callback reloads, stack-argument spacing, and the final
+`SetTimeList` sibling call remain unchanged.
 
 ## StageLoad (newbattle/nbStageProcess, 0x1B4)
 

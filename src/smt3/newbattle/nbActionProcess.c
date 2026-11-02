@@ -2026,10 +2026,6 @@ void SetNowActionStat(nbActionProcessData_t *a, s32 comm, s32 nskill) {
     }
 }
 
-/* NON_MATCHING: 4 of 120 words differ (first at +0x110). */
-
-#ifdef NON_MATCHING
-
 void SetDamagePacket(nbActionProcessData_t *a, s32 hp)
 {
     s32 start = GetAllUnlockTime(a);
@@ -2054,7 +2050,10 @@ void SetDamagePacket(nbActionProcessData_t *a, s32 hp)
     }
     AddTimeListHp(a, a->form->formindex, -hp);
     dead = CheckTimeListDead(a, a->form->formindex) != 0;
-    nbMakeDamagePacket(start, (s32)a, a->form, 3, hp, -1, 0, 0, dead, 0, 1, 0);
+    {
+        s32 moji = 1;
+        nbMakeDamagePacket(start, (s32)a, a->form, 3, hp, -1, 0, 0, dead, 0, moji, 0);
+    }
     if (dead != 0) {
         SetTimeList(a, a->form->formindex, start, 0x1E, 0x1E);
         SetDeadPacket(a, a->form->formindex);
@@ -2063,12 +2062,6 @@ void SetDamagePacket(nbActionProcessData_t *a, s32 hp)
         SetTimeList(a, a->form->formindex, start, 0x1E, 0x1E);
     }
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetDamagePacket);
-
-#endif
 
 void SetAction_NON(void) {
 }
