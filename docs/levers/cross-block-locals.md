@@ -281,13 +281,21 @@ stock scan reads byte IDs at save-work +0x1914, the count at +0x1924 and
 
 ## Snapshot the camera span before the angle call
 
-The guarded `bCameraShot_AttackInvokeTargetPartyNear_Set` now reproduces the
-native 776-byte size and 188 of 194 words. Keep the physical radius and the
-later combined span as separate locals, and compute `span = length + distance`
+The earlier separate-angle draft of
+`bCameraShot_AttackInvokeTargetPartyNear_Set` reproduced the native 776-byte
+size and 188 of 194 words. The function is now matched at 194/194 in
+[`02fa5963`](https://github.com/Megami-Decomps/smt3-decomp/commit/02fa5963df61d12d0bdcee7d922e49674aaa6670),
+using one ordinary `f32 angle` for the two disjoint atan-result phases; see
+[the current matching note](../matching/newbattle/nbCameraSkill.md#bcamerashot_attackinvoketargetpartynear_set-newbattlenbcameraskill-0x308).
+The trace below describes the earlier separate-angle draft, not that final
+angle-reuse change.
+
+Keep the physical radius and the later combined span as separate locals, and compute `span = length + distance`
 before the second atan call. A single reused radius/span local emits identical
 bytes; it is not required and is absent from the preferred source.
 
-A qualified final-source `--alloc --sched --no-dumps` probe uses cc1 SHA-256
+A qualified separate-angle-source `--alloc --sched --no-dumps` probe uses
+cc1 SHA-256
 `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`
 and reports `verify: OK`, with hooked/unhooked output equality and parity with
 plain compilation. UID286 computes radius in pseudo95; UID360 computes span
@@ -303,13 +311,13 @@ write the last vector length directly to the camera distance field before
 normalizing direction. These source boundaries recover native operations that
 the earlier shared-tail/local-output form omitted.
 
-Six words remain: the two atan-result quantities receive `$f1` rather than
-native `$f2`. Their moves, divisions and span multiply account for every miss;
-the allocation trace does not show a real constraint excluding `$f1`. Do not
-invent a live value or fixed register to create one. For a reproducible probe,
-use an otherwise unchanged full-owner copy with only this draft promoted, then
+In that earlier draft, six words remained: the two atan-result quantities
+received `$f1` rather than native `$f2`. Their moves, divisions and span multiply accounted for every miss;
+the allocation trace does not show a real constraint excluding `$f1`. This did
+not justify inventing a live value or fixed register to create one. The original probe used
+an otherwise unchanged full-owner copy with only the separate-angle draft
+promoted. To reproduce that historical experiment, restore that draft, then
 run `tools/cc1probe.sh /tmp/near.c --as-unit src/smt3/newbattle/nbCameraSkill.c --func bCameraShot_AttackInvokeTargetPartyNear_Set --alloc --sched --no-dumps --out /tmp/near-alloc` and require `verify: OK`.
-
 
 ## Stream flags followed by callback status
 

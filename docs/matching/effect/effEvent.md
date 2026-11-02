@@ -2,7 +2,35 @@
 
 ## effEveBEDCutDraw (effect/effEvent, 0x1DC)
 
-117 of 119 words match, at the exact 476-byte size. The two differing words are
+119 of 119 words match at 476 bytes. Independent complete-owner verification
+gives 86 match, 0 differ, including owned data and full compiler context.
+
+The byte observation now occurs inside the non-null `works[0]` guard, as in
+retail. A genuine `u32 markKind = 5` comparison value has a local `$2` register
+binding and feeds only `kind != markKind`. This retains the native constant
+in the null-branch delay slot and the following conditional byte load into
+`$3`. No empty asm is needed. The constant may execute on the null path, but
+has no effect there; the byte read remains conditional. Its lifetime ends
+at the comparison, before every call. Matrix/VU work, callback tests, frame
+reloads and updates, and all interfaces remain unchanged.
+
+The ordinary below-guard byte/local-constant form has 116/119 words matching;
+removing the binding from the exact source reproduces those three register
+differences. Adding a live-operand constraint to the comparison constant is
+also exact but unnecessary and omitted. Constraining the loaded byte instead
+was not equivalent as a compiler aid: the narrow read/write operand introduced
+an extra zero-extension, and a truthful widened comparison snapshot removed
+that repair but still changed the branch layout. Those controls are not retained.
+This is a localized reconstruction aid on an actual value, not original-source
+spelling or an unmeasured internal-pass claim.
+
+Integrated retail SHA1/byte comparison and no-op rebuild, 436 tooling tests,
+inline-asm gate, all 143 guarded owners / 499 drafts with stable inputs,
+7 IRX checks and reconciled reports pass. Exact-source CI is pending publication.
+
+### Earlier residual and controls
+
+The earlier draft has 117 of 119 words matching, at the exact 476-byte size. The two differing words are
 adjacent and hold the same two instructions in the other order: retail puts
 `addiu $2, $0, 5` in the `beqz`'s delay slot and `lbu $3, 0x8($18)` after it,
 the draft the reverse. The registers, both operands and every other word are
@@ -38,7 +66,8 @@ with flags 0x11. The constant is therefore not an independent ready
 instruction competing with the byte load at that point: it is beyond the
 branch. A bounded one-pass per-entry block with a null-slot `break` leaves
 the same 117/119-word result and was discarded. The earlier source-placement
-and type controls remain ruled out; the native ordering is still unresolved.
+and type controls remain ruled out; the native ordering was still unresolved by that control. The comparison-value
+binding described above closes it without another empty operand.
 
 What the draft establishes, since the rest is exact:
 

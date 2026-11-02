@@ -777,8 +777,8 @@ void effEveBEDCutSetUnitHandle(effEveBEDCut_t *hEveBEDCut, void *hUnit) {
     hEveBEDCut->actor = hUnit;
 }
 
-/* NON_MATCHING: 2 of 119 words differ (first at +0xA8). */
-#ifdef NON_MATCHING
+/* The real mark-kind comparison value has a local register binding to keep
+ * the native constant/byte-load order; see docs/matching/effect/effEvent.md. */
 void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
     sdfVector4_t position;
     sdfMatrix4_t base;
@@ -793,7 +793,6 @@ void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
     u32 color;
     s32 remaining;
     u16 count;
-    u8 kind;
 
     SDF_VU0_LOADVECTOR(hEveBEDCut->init.rot);
     SDF_VU0_LOADVECTOR_B(&D_005343D0);
@@ -808,9 +807,10 @@ void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
         works = cut->parameterWorks;
         do {
             if (entry->timing < frame) {
-                kind = entry->pos_ptr.scaleKind;
                 if (works[0] != NULL) {
-                    if (kind != 5 || hEveBEDCut->actor == NULL) {
+                    u8 kind = entry->pos_ptr.scaleKind;
+                    FAKEMATCH_ASM_REG(u32, markKind, "$2") = 5;
+                    if (kind != markKind || hEveBEDCut->actor == NULL) {
                         effEveBEDPartGetPositionPtr(&hEveBEDCut->init, &entry->pos_ptr);
                         SDF_VU0_STOREVECTOR(&position);
                         dds3EffectPartSetPosition(works[0], &position);
@@ -841,9 +841,6 @@ void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
     }
     cut->currentFrame++;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effEvent", effEveBEDCutDraw);
-#endif
 
 /* Initialize a holder and its effect record; the teardown flag starts set. */
 effSimpleBED_t *effSimpleBEDCreate(effBTL_t *pData, f32 scale) {
