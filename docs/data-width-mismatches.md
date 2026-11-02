@@ -195,3 +195,39 @@ across every scalar global the method covers that found nothing else of the
 dangerous shape. The method and this negative result are the lasting value;
 the signedness and aggregate gaps above are exactly scoped, not swept under
 anything, for whoever picks this up next.
+
+## A related class the checksum cannot see: emission width
+
+A data object's `type:` in `config/smt3/symbol_addrs.txt` controls how splat
+emits it, and for an object holding pointers that choice decides whether the
+pointer words carry a label reference or a literal address.
+
+`dds3LightParam2` at `0x002F5EE0` was annotated `type:u8`, so splat emitted
+its 0x38 bytes as 56 `.byte` directives. Its first four words are pointers,
+dereferenced through `dds3LightParam2.parallel` at
+`kernel/dds3KernelProcess.c:107`, and `include/kernel_draw.h`'s
+`dds3LightState_t` declares them that way. Byte-wise emission gave those words
+no relocation, so they stayed literal retail addresses: on the EE that is
+correct, and in a native host build the dereference faults, which is how it
+was found. Typed `u32` the same object emits `.word D_002F5E20` and a host
+link relocates it.
+
+**The retail checksum is blind to this.** The same bytes emitted as `.byte` or
+as `.word` assemble identically, so the image matches either way and no check
+in this repository fails. That makes `type:` on a pointer-bearing data object
+load-bearing for consumers and unverifiable here. Two consequences worth
+keeping:
+
+- a before-and-after extent check across a `type:` change must count bytes on
+  both sides, never directives: a directive count is not a byte count until
+  you know the directive's width, and the width is exactly what the annotation
+  under test controls. 56 `.byte` and 14 `.word` are the same 0x38 bytes and
+  the same declared size;
+- the type belongs in the IDB, not in the generated block of
+  `symbol_addrs.txt`. Correcting it there is the documented exception for a
+  type the retail code proves wrong.
+
+Where the right type depends on a struct layout nobody has measured, say so
+rather than deciding it in passing. The IDB puts `sdf3DFogParam_t` at 0x14
+where `kernel_draw.h`'s offsets imply 0x18; that disagreement is left visible
+rather than resolved inside a commit about an annotation.
