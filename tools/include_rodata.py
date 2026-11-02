@@ -162,12 +162,12 @@ def place(version):
         for sym, pos in compiled_at.items():
             if not any(a[2] == sym for a in anchors):
                 anchors.append((int(labels[sym], 16), pos, None, False))
-        for s in [s for s in nonmatchings.glob("*.s") if "glabel " not in s.read_text()]:
+        for s in sorted(s for s in nonmatchings.glob("*.s") if "glabel " not in s.read_text()):
             align_file(s)
             m = LABEL.search(s.read_text())
             if m and m.group(1) in owned and not any(sym == m.group(1) for _, _, sym, _ in anchors):
                 anchors.append((int(m.group(2), 16), None, m.group(1), m.group(1) not in have))
-        anchors.sort(key=lambda a: a[0])
+        anchors.sort(key=lambda a: (a[0], a[1] is None, a[1] if a[1] is not None else -1, a[2] or ""))
         # Floating symbols take the position of the next anchored one.
         following = len(text)
         placed = []
