@@ -20,6 +20,9 @@ quickstart.
   definition and some caller's declaration disagree on return width, invisible
   on retail hardware but fatal to a native port, and which callers are
   actually at risk.
+- [FPU native semantics](fpu-native-semantics.md): the EE FPU's non-IEEE 754
+  behaviour behind `include/fpu.h`'s four inline-asm sites, and the native
+  `NATIVE_FPU` replacements that reproduce it for a non-EE build.
 - [Building the IRX modules](irx-modules.md): how the three IOP modules in
 - [What iop-gcc 2.8.1 wants](irx-idioms.md): the source shapes that reproduce the IRX modules' instructions
   `USERIRX/` build byte-identical from source, the container format, and where
