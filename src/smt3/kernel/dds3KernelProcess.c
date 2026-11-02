@@ -183,7 +183,7 @@ typedef struct {
     dds3BlurCorner_t corner[2];
 } dds3BlurSprite_t;
 extern sdfModelOt_t D_002F69B8[];
-extern sdfGrOt_t D_002F6938;
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
 extern u8 dds3ScreenBlurFlag, dds3DrawProcessFlag;
 extern s16 dds3ScreenBlurAlpha, dds3ScreenBlurScale;
 extern s32 dds3ScreenBlurOfsX[2];

@@ -345,7 +345,8 @@ extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format,
 extern const char *nbBadStatusNames[12];
 extern const char D_00551358[];
 extern const char D_00551360[];
-extern sdfGrOt_t D_002F67F8;
+extern sdfGrOt_t sdfGrOtTable[];
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 
 
 extern const char *D_004F06D8[];

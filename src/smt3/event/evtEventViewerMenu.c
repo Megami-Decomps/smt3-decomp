@@ -34,7 +34,8 @@ extern void *sdfDevPrintf(u32 aX, u32 aY, u32 aZ, s32 aAttr, const char *aStr, .
 
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 
-extern void *D_002F6978[];
+extern sdfGrOt_t sdfGrOtTable[];
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
 extern void *dds3FontReqAllocDrawTag(void);
 
@@ -233,7 +234,7 @@ s32 evtFloatChangeMenu(s32 x, s32 y)
     f32 step;
 
     evtMenuDisp(list, x, y, 0x16, 9, 0, 1, evtFloatChangeHead, evtFloatChangeItem);
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
+    D_002F6978.regFunc(&D_002F6978, list);
     if (viewerinfo->nowmenu != 8) {
         return 0;
     }
@@ -296,7 +297,7 @@ s32 evtIntChangeMenu(s32 x, s32 y)
     s32 step;
 
     evtMenuDisp(list, x, y, 0x16, 9, 0, 1, evtIntChangeHead, evtIntChangeItem);
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
+    D_002F6978.regFunc(&D_002F6978, list);
     if (viewerinfo->nowmenu != 7) {
         return 0;
     }
@@ -368,7 +369,7 @@ s32 evtFrameChangeMenu(s32 x, s32 y)
     s32 step;
 
     evtMenuDisp(list, x, y, 0x16, 0xB, 0, 1, evtFrameChangeHead, evtFrameChangeItem);
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
+    D_002F6978.regFunc(&D_002F6978, list);
     if (viewerinfo->nowmenu != 6) {
         return 0;
     }
@@ -438,7 +439,7 @@ s32 evtMainMenu(s32 x, s32 y)
     void *list = dds3FontReqAllocDrawTag();
 
     evtMenuDisp(list, x, y, 0xF, 7, 0, 7, NULL, evtMainMenuItem);
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
+    D_002F6978.regFunc(&D_002F6978, list);
     if (viewerinfo->nowmenu != 1) {
         return 0;
     }
@@ -483,7 +484,7 @@ s32 evtSelectMenu(s32 x, s32 y)
     }
     evtMenuDisp(list, x, y, width, viewerinfo->menuItemCount + 3, 0, viewerinfo->menuItemCount,
                 evtSelectHead, evtSelectItem);
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
+    D_002F6978.regFunc(&D_002F6978, list);
     if (viewerinfo->nowmenu != 2) {
         return 0;
     }
@@ -530,7 +531,7 @@ s32 evtFileNameMenu(s32 x, s32 y)
     s32 key;
 
     evtMenuDisp(list, x, y, 0xE, 6, 0, 4, evtFileNameHead, evtFileNameItem);
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
+    D_002F6978.regFunc(&D_002F6978, list);
     if (viewerinfo->nowmenu != 3) {
         return 0;
     }
@@ -618,7 +619,7 @@ s32 evtFileName2Menu(s32 x, s32 y)
     u32 num;
 
     evtMenuDisp(list, x, y, 0x11, 0xB, 0, 8, evtFileName2Head, evtFileName2Item);
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
+    D_002F6978.regFunc(&D_002F6978, list);
     if (viewerinfo->nowmenu != 9) {
         return 0;
     }
@@ -763,7 +764,7 @@ s32 evtOjbectListMenu(s32 x, s32 y)
 
     evtMenuDisp(list, x, y, 8, 0x1D, viewerinfo->objlist_base, viewerinfo->objcnt,
                 NULL, evtObjectListItem);
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
+    D_002F6978.regFunc(&D_002F6978, list);
     if (viewerinfo->nowmenu != 4) {
         return 0;
     }
@@ -1016,7 +1017,7 @@ s32 evtFrameListMenu(s32 x, s32 y)
     list = dds3FontReqAllocDrawTag();
     evtMenuDisp(list, x, y, 0x1C, 0x19, viewerinfo->frameCursor, group->childCount + 1,
                 evtFrameListHead, evtFrameListItem);
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
+    D_002F6978.regFunc(&D_002F6978, list);
     if (viewerinfo->nowmenu != 5) {
         return 0;
     }
@@ -1100,7 +1101,7 @@ s32 evtBasicListMenu(s32 x, s32 y)
     }
     count++;
     evtMenuDisp(list, x, y, 0x1A, 0x17, viewerinfo->work_base, count, NULL, evtBasicListItem);
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
+    D_002F6978.regFunc(&D_002F6978, list);
     if (viewerinfo->nowmenu != 0xA) {
         return 0;
     }
@@ -1150,7 +1151,7 @@ s32 evtEventPosMenu(s32 x, s32 y)
         return -1;
     }
     evtMenuDisp(list, x, y, 0x1C, rows, 0, rows, NULL, evtEventPosItem);
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
+    D_002F6978.regFunc(&D_002F6978, list);
     if (viewerinfo->nowmenu != 0xC) {
         return 0;
     }

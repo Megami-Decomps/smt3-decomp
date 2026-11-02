@@ -59,7 +59,7 @@ extern void *dds3FontReqAllocDrawTag(void);
 extern const char D_0054F790[];
 extern const char *D_0054F788;
 extern u32 evtDebugCameraPage;
-extern sdfGrOt_t D_002F6978;
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
 void evtDebugPrintCamera(void)
 {

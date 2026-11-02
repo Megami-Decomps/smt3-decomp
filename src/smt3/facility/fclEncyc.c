@@ -3284,7 +3284,7 @@ typedef struct { s32 left, right; } fclEncycStrip_t;
 extern itfColor_t D_00332330;
 extern fclEncycStrip_t D_00332340[5];
 extern itfColor_t g_uv_summon_back[];
-extern sdfGrOt_t D_002F67F8;
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *, itfColor_t *, u32, s32, sdfDrawTag_t *);
 extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 extern void itfMiscDrawSpritePrim2(sdfIVector2_t *, itfColor_t *, itfColor_t *, u32, s32, sdfDrawTag_t *);

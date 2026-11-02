@@ -965,7 +965,7 @@ void nbPanelPolygonScaleDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, f3
 #ifdef NON_MATCHING
 #include "fpu.h"
 
-extern sdfGrOt_t D_002F67F8;
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern void sdfPrimLinkG3(sdfDrawTag_t *tag, s32 prim, s32 x0, s32 y0, s32 color0,
                           s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2,
                           s32 z, s32 (*allocator)(s32));

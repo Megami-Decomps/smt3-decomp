@@ -454,7 +454,8 @@ extern s8 dds3PadStickStatusState[2][2];
 
 extern effDebugMenu_t *D_0054F224;
 
-extern sdfGrOt_t D_002F6978;
+extern sdfGrOt_t sdfGrOtTable[];
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
 extern struct sdfDrawTag_t *effDebugDrawTag;
 

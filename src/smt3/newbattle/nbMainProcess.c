@@ -388,7 +388,8 @@ extern char D_00550F88[];
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
-extern sdfGrOt_t D_002F6978;
+extern sdfGrOt_t sdfGrOtTable[];
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
 void nbDebugCamera(nbMainProcessData_t *data)
 {
@@ -458,7 +459,7 @@ void nbDebugCamera(nbMainProcessData_t *data)
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern sdfGrOt_t D_002F67F8;
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern char *nbDebugPhaseNameTable[];
 extern char *D_003FA748[];
 extern char D_00551060[]; /* "Turn:%d", shared small-data strings. */

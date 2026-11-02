@@ -110,7 +110,8 @@ extern dds3Basic_t *dds3GetActiveScene(void);
 extern char *D_0054F830;
 extern char *D_0054F834;
 extern char D_0054F838[];
-extern void *D_002F6978[];
+extern sdfGrOt_t sdfGrOtTable[];
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 extern void *dds3FontReqAllocDrawTag(void);
 extern s32 sdfDevPrintf(s32 aX, s32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
 extern void sdfDrawTagLink(void *aTag, u32 aPacket);
@@ -1417,7 +1418,7 @@ void DrawActiveCameraName(void)
     }
     tag = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8680, 0x79C0, 0xFEFFFF, 5, D_0054F838, name));
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, tag);
+    D_002F6978.regFunc(&D_002F6978, tag);
 }
 
 void SelectActiveCamera(void)

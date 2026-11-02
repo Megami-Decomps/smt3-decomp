@@ -2224,7 +2224,7 @@ extern sdfDrawTag_t D_0056B690[2];
 extern frFontGsPacket_t D_0056B6D0[2];
 extern sdfDrawTag_t D_0056B7D0[2];
 extern frFontDumpSlot_t frDumpFontTexturePacket[2];
-extern sdfGrOt_t D_002F67F8;
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 
 void frDumpFontTexture(s32 x, s32 y, s32 depth)
 {

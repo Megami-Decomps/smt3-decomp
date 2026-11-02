@@ -84,7 +84,8 @@ extern u16 D_00551F96;
 
 extern s32 movieViewerPhase;
 
-extern sdfGrOt_t D_002F67F8;
+extern sdfGrOt_t sdfGrOtTable[];
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 
 extern void *movieViewerStep(void);
 
@@ -280,7 +281,7 @@ extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 extern void sdfPrimLinkRect(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0,
                             s32 aX1, s32 aY1, s32 aZ, s32 (*aAllocator)(s32));
 
-extern sdfGrOt_t D_002F6938;
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
 
 /* "%08X", "%02X" and "**", in .sdata where a literal cannot go. */
 extern char D_0054FDB8[];

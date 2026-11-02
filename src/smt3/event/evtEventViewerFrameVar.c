@@ -20,7 +20,8 @@ extern char D_0053BC98[];
 
 extern char D_0054F910[];
 
-extern void *D_002F6978[];
+extern sdfGrOt_t sdfGrOtTable[];
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
 extern void *dds3FontReqAllocDrawTag(void);
 
@@ -101,9 +102,9 @@ s32 FrameVarProcess(dds3ProcessID_t *id)
             frame = frame->next;
         }
     }
-    ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, tag);
+    D_002F6978.regFunc(&D_002F6978, tag);
     if (cursorTag != NULL) {
-        ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, cursorTag);
+        D_002F6978.regFunc(&D_002F6978, cursorTag);
     }
     return 0;
 }

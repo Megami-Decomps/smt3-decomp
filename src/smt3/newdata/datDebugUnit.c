@@ -114,7 +114,8 @@ extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
 extern void DispList(s32 x, s32 y, sdfDrawTag_t *tag);
 extern void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag);
-extern sdfGrOt_t D_002F6938;
+extern sdfGrOt_t sdfGrOtTable[];
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
 const char D_005431C8[] = "     ID     LV  HP       MP     STAT";
 
 s32 datDebugUnitProcess(dds3ProcessID_t *id)

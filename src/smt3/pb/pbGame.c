@@ -2114,7 +2114,7 @@ void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id) {
 extern s32 D_00536000[4][4];
 extern s32 D_00327800[4][4], D_00327840[4][4], D_00327880[4][4];
 extern f32 pbMapCursorWork;
-extern sdfGrOt_t D_002F67F8;
+PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern f32 sdfSin(f32 angle);
 extern void itfMiscDrawSpritePrim(void *vertices, void *uv, void *color, s32 z,
                                   sdfTexHandle_t *texture, s32 context, sdfDrawTag_t *tag);

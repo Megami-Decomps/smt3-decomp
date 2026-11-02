@@ -77,9 +77,6 @@ D_0056B350 = 0x0056B350;
 D_0054F200 = 0x0054F200; // type:s32 size:0x8
 D_0054F208 = 0x0054F208; // type:s32 size:0x8
 
-// Retail accesses this ordering-table entry through its own address.
-D_002F64B8 = 0x002F64B8; // size:0x20
-
 // Facility script flags at gp-0x21F0, between trmUpdateWork and EventStart.
 D_00551F80 = 0x00551F80;
 
