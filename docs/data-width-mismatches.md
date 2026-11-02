@@ -232,11 +232,22 @@ return False
 That is the file the build itself imports, pinned so a later reader can tell
 whether they are looking at the same code: spimdisasm 1.40.2 under splat
 0.39.1, `.venv/lib/python3.13/site-packages/spimdisasm/common/ContextSymbols.py`,
-`isString` at line 360, file sha256 beginning `ec6591668d344d34`. Verified by
-importing it through `.venv/bin/python`, which is the interpreter
-`configure.py` runs under, rather than by reading a copy found on disk. If a
-future reader's branch order differs, check that version first: this account
-is of 1.40.2 and of nothing else.
+`isString` at line 360, file sha256 beginning `ec6591668d344d34`. If a future
+reader's branch order differs, check that identity first: **this account is of
+those bytes and of nothing else.**
+
+The identity is the hash, not an interpreter path, and that distinction was
+paid for. This account first claimed it was verified through the interpreter
+`configure.py` runs under, which holds in this checkout, where `build.ninja`
+records `/home/wsl/projects/smt3-decomp/.venv/bin/python`. It does not hold
+generally: a consumer whose submodule checkout has no `.venv` reports
+`build.ninja` recording `/usr/bin/python3`, which cannot import `splat` at all,
+so their split ran under a `PYTHONPATH` that nothing on disk records. **A build
+can record an interpreter that cannot import the tool it ran, so the recorded
+interpreter is not evidence of which library version produced the output.**
+Hash the candidates instead: of nine copies of this file under `/home/wsl`,
+seven are byte-identical including the one read here, and the two that differ
+belong to unrelated projects on their own pins.
 
 `config/smt3/SLUS_209.11.yaml:42` sets `data_string_guesser_level: 2`. Two of
 the three causes of byte emission come from that function:
