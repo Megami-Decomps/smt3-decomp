@@ -64,22 +64,24 @@ It verifies as a false alarm, for the reason the Method section gives: the
 - The lower neighbour settles where it starts: `dds3KernelMain.c:17` declares
   `extern s16 D_0054E82A`, two bytes at `0x0054E82A`, ending exactly at
   `0x0054E82C`.
-- The upper neighbour is a confirmation, not load-bearing proof, and its
-  source is build-generated rather than checked in: splat, run through
-  `python configure.py` against the local retail ELF per `config/smt3/`,
-  writes `asm/smt3/nonmatchings/kernel/dds3KernelMain/D_0054E82E.s`, which
-  reads `.short 0x0000` at `0x0054E82E` (starts immediately after
-  `dds3VblanksPerFrame`'s own two bytes). `asm/` is gitignored (it is derived
-  from the copyrighted retail image, which this repo never tracks; see the
-  project's `CLAUDE.md` on the Remote), so that file will not exist until
-  `configure.py` has been run with the retail ELF in place, and a grep
-  limited to tracked files will not find it. With it: a 4-byte read at
-  `0x0054E82C` would concatenate `dds3VblanksPerFrame` with `D_0054E82E`, an
-  unrelated, separately-addressed variable, wrong on every byte order rather
-  than a little-endian accident that only breaks on big-endian. Without it,
-  `size:0x2` in `symbol_addrs.txt` and the lower neighbour's end address
-  already fix both the extent and the start, which is sufficient on its own
-  for the conclusion that follows.
+- The upper neighbour is a confirmation, not load-bearing proof, but it too is
+  in tracked source: `dds3KernelMain.c:293` carries
+  `INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", D_0054E82E);`, two lines
+  below the directive for `dds3VblanksPerFrame` itself, so a separately
+  addressed object exists there regardless of its value. The value needs the
+  build-generated side: splat, run through `python configure.py` against the
+  local retail ELF per `config/smt3/`, writes
+  `asm/smt3/nonmatchings/kernel/dds3KernelMain/{D_0054E82A,dds3VblanksPerFrame,D_0054E82E}.s`,
+  which read, back to back, one `.short` each: `.short 0x0000` at
+  `0x0054E82A`, `.short 0x0002` at `0x0054E82C`, `.short 0x0000` at
+  `0x0054E82E`. `asm/` is gitignored (it is derived from the copyrighted
+  retail image, which this repo never tracks; see the project's `CLAUDE.md`
+  on the Remote), so those files will not exist until `configure.py` has been
+  run with the retail ELF in place, and a grep limited to tracked files will
+  not find the value, only the directive that proves the object exists.
+  Without the value: `size:0x2` in `symbol_addrs.txt` and the lower
+  neighbour's end address already fix both the extent and the start, which is
+  sufficient on its own for the conclusion that follows.
 - All three consumers already declare `extern u16 dds3VblanksPerFrame;`, no
   `const`. They agree with each other and with the true width. `stfMain.c`'s
   writes (`dds3VblanksPerFrame = 2;` / `= 1;`) are ordinary assignment through
@@ -95,14 +97,27 @@ was considered and rejected:
   build without touching the matching build, the same way
   `include/fpu.h`'s `NATIVE_FPU` bodies or `sdfMovie.c`'s `movieMemcpy`
   split do for other properties) is not just unneeded here, it is wrong: per
-  the layout above, the extra two bytes are `D_0054E82E`'s, not slack. A
-  native port that read this object at 4 bytes would be reading a different
-  retail variable into its upper half. It is not "the same number today
-  because `D_0054E82E` happens to hold 0", because nothing establishes that
-  invariant: `D_0054E82E` has no current reader or writer in this source
-  tree (plausibly still-unrecovered retail behaviour, or padding), so nothing
-  here guarantees it stays 0, and a port built on a wrong assumption like that
-  is exactly the kind of silent failure this audit exists to catch.
+  the layout above, the extra two bytes are `D_0054E82E`'s, not slack. The
+  three reads (`dds3KernelMain.c:229`, `:230`, `mviManager.c:118`) would not
+  announce this on a little-endian target: the EE and a typical x86-64 port
+  host are both little-endian, `D_0054E82E` currently holds `0x0000`, and a
+  4-byte load at `0x0054E82C` reads `02 00 00 00`, still `2`. Only a
+  big-endian target would get the wrong number from the read. The real,
+  byte-order-independent damage is in the writes. `stfMain.c:324` and `:357`
+  assign `2` and `1` through the `extern u16` at `stfMain.c:18`; widened to
+  `s32`, those become 4-byte stores that overwrite `D_0054E82E`'s two bytes
+  with whatever lands in the upper half of the stored value, `0x0000` for
+  both `2` and `1`. That happens to match what is already there, so the
+  corruption would not change a single observable bit today. It depends on
+  `D_0054E82E` never meaning anything, which nothing here establishes:
+  `D_0054E82E` has no current reader or writer in this source tree (plausibly
+  still-unrecovered retail behaviour, or padding), so nothing guarantees it
+  stays irrelevant. Widening would have produced a correct frame rate, a
+  correct movie divider, and a silent four-byte store over a neighbour,
+  passing any smoke test and waiting for `D_0054E82E` to acquire a use. A
+  visibly wrong value gets found and fixed; this would have been accepted and
+  stayed, which is exactly the kind of silent failure this audit exists to
+  catch.
 - **Centralizing the three `extern u16` declarations into a shared header**
   would be a pure style change with no defect behind it: all three already
   say the same thing, matching retail's own data. This family of kernel
