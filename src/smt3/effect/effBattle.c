@@ -437,9 +437,13 @@ void effBTLCutSetCameraState(effBTLCut_t *hBTLCutEffect) {
     }
 }
 
-/* NON_MATCHING: 88 of 263 words differ (first at +0x34). */
-#ifdef NON_MATCHING
-/* Called above its definition, where ee-gcc assumed int. */
+INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EA0);
+INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EB0);
+INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EC0);
+INCLUDE_RODATA(const s32, "effect/effBattle", D_00532ED0);
+
+/* Canonical declaration of the provider defined below. */
+extern char D_00532ED0[];
 u32 effBTLSkillGetInvokeParty(void);
 
 void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
@@ -453,9 +457,9 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     effBTL_SkillPartsList_t *entry;
     effBTLAimParams_t *aim;
     nbFormation_t *formation;
+    s32 count;
     u32 frame;
     u32 color;
-    s32 count;
     s32 flags;
     s32 i;
     u8 kind;
@@ -472,7 +476,7 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
         if (list->shake < 0x1F) {
             dds3SetQuake(list->shakeFade, list->shake * 10);
         } else {
-            printf("effBattle : shake over[%d]\n", list->shake);
+            printf(D_00532ED0, list->shake);
             dds3SetQuake(list->shakeFade, 0x12C);
         }
     }
@@ -539,7 +543,10 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
             effBTLModelGetMarkMatrix2(formation, entry->pos_ptr.aimMode);
             SDF_VU0_LOADMATRIX_B(&base);
             MultMatrixNoArg();
-            SDF_VU0_STOREMATRIX(&marked);
+            /* VU writes marked for the next external call, with no intervening
+             * C access to marked. This target's verified bare-address handoff
+             * preserves those stores without a general memory barrier. */
+            SDF_VU0_STOREMATRIX_NOMEM(&marked);
             dds3EffectPartSetRotateMatrix(hBTLCutEffect->parameterWorks[i], &marked);
             break;
         }
@@ -558,15 +565,6 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     effBTLCutSetMax(hBTLCutEffect->kind, hBTLCutEffect->currentFrame);
     hBTLCutEffect->currentFrame++;
 }
-#else
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EA0);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EB0);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EC0);
-
-INCLUDE_ASM(const s32, "effect/effBattle", effBTLCutDraw);
-#endif
 
 void effBTLCutSetScale(effBTLCut_t *hBTLCutEffect, f32 scale) {
     s32 i;
