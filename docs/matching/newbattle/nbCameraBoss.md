@@ -60,7 +60,10 @@ its negative result did not test this final source form.
 
 Integrated retail SHA1/byte comparison and no-op rebuild, 436 tooling tests,
 inline-asm gate, all 142 guarded owners / 493 drafts with stable inputs,
-7 IRX checks and reconciled reports pass. Exact-source CI is pending publication.
+7 IRX checks and reconciled reports pass. Source commit
+`c6b04227ce2449fb276c31a7d1c47ffd13db8ea4`; exact-source
+[CI 41424180915](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41424180915)
+attempt 1 passed build and Pages deployment.
 
 ## nbCameraBoss_Cut2_Run (newbattle/nbCameraBoss, 0x230)
 
