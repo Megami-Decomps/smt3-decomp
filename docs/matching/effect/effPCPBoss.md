@@ -371,3 +371,40 @@ call across the `sdfSin` delay slot. That is `s = u*cosine - v*sine` and
 `t = u*sine + v*cosine`, the same sign convention and operand order the draft
 uses for `quad->vtx[i].s`/`.t`. The remaining words are register allocation and
 scheduling across the four unrolled vertices, not a value or sign difference.
+
+## effPCPScreenCrackModelCopy (effect/effPCPBoss, 72 bytes)
+
+18 of 18 words match in the preserved `NON_MATCHING` diagnostic, but that
+uninitialized-local C is unsafe and is **not** accepted as a semantic match.
+The ordinary build selects assembly. This corrects game-source coverage by
+one function / 72 bytes; it is not a new match.
+
+Retail `0x19E860..0x19E8A8` saves incoming `s1` but does not initialize it before
+`jal effPCPScreenCrackModelCreate` at `0x19E878`: the delay slot at `0x19E87C`
+is `move a0,s1`. The actual `hData` argument was preserved in `s0` at
+`0x19E86C`. Only after Create returns is `s1` assigned the allocated work
+pointer, at `0x19E888`. Create dereferences its first argument at `0x19E7C4`
+and stores that first word into the new object's `param` at `0x19E7D4`.
+Passing `hData` instead would change the native memory read and value; passing
+NULL, substituting a constant, or inventing a formal hidden argument is not
+a valid reconstruction either.
+
+The observed normal dispatch route explains the caller-register dependency,
+not a portable C contract. The callback pointer is at `0x31EEEC`, offset
+`0x0C` in `effPCPScreenCrackModelTable` (`0x31EEE0`), which is category 98 of
+the 40-byte `EffectPCPFuncTable` entries starting at `0x31DF90`.
+`dds3EffectPCPCopy` keeps the source PCP wrapper in `s1` at `0x176040`, then
+calls its copy callback at `0x1760B8` with `a0 = wrapper->pHandle` in the
+`0x1760BC` delay slot. **Through this route**, Create therefore reads the
+wrapper's category word (98), not `hData->param`. This observation does not
+claim that every possible caller supplies that register value or that `s1`
+is an ABI argument. The family Draw/SetColor methods do not consume `param`,
+but that does not justify deleting or changing the native read.
+
+The historical C body remains guarded only to document how the pinned
+compiler reproduced this native defect. A fresh complete-owner check before
+guarding reported 158 matches / 0 differences, including these 72 bytes;
+that byte comparison alone did not establish defined C behavior. No truthful
+initialized-input correction was supported by the native evidence, and no
+such behavioral repair was adopted. The provider, callback table, signatures
+and data layout are unchanged.

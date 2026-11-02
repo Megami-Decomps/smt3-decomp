@@ -3705,6 +3705,12 @@ effPCPScreenCrackModel_t *effPCPScreenCrackModelCreatePCF(void *parameterTable) 
     return effPCPScreenCrackModelCreate(firstBlock, secondBlock);
 }
 
+/* NON_MATCHING: byte-exact but unsafe C diagnostic, not a valid C match.
+ * Retail passes entry s1 to Create before defining its local work pointer.
+ * Keep assembly to preserve that caller-register-dependent native behavior;
+ * initializing work from hData would change the input memory read.
+ */
+#ifdef NON_MATCHING
 effPCPScreenCrackModel_t *effPCPScreenCrackModelCopy(effPCPScreenCrackModel_t *hData, s32 bPos,
                                                      s32 tbldata)
 {
@@ -3714,6 +3720,9 @@ effPCPScreenCrackModel_t *effPCPScreenCrackModelCopy(effPCPScreenCrackModel_t *h
     work->hModel = dds3EffectPartCopy(hData->hModel);
     return work;
 }
+#else
+INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelCopy);
+#endif
 
 void effPCPScreenCrackModelDelete(effPCPScreenCrackModel_t *hData)
 {
