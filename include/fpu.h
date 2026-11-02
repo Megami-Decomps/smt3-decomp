@@ -43,7 +43,7 @@
 #define EE_FPU_EXP  0x7F800000u
 #define EE_FPU_FMAX 0x7F7FFFFFu /* FLT_MAX's bit pattern */
 
-typedef union { float f; uint32_t u; } EeFpuWord;
+typedef union { float f; uint32_t u; } eeFpuWord_t;
 
 /* Read a 32-bit EE float bit pattern as a double, the literal way the
  * hardware does: exponent field 0 is a signed zero (no denormals), and any
@@ -136,7 +136,7 @@ static inline float fsqrtf(float x)
  * so no result clamp is needed. See docs/fpu-native-semantics.md. */
 static inline float fsqrtf(float x)
 {
-    EeFpuWord in, out;
+    eeFpuWord_t in, out;
     in.f = x;
     if ((in.u & EE_FPU_EXP) == 0) {
         out.u = 0;
@@ -175,7 +175,7 @@ static inline float frsqrtf(float numerator, float x)
  * docs/fpu-native-semantics.md. */
 static inline float frsqrtf(float numerator, float x)
 {
-    EeFpuWord ft, fs, out;
+    eeFpuWord_t ft, fs, out;
     double root, num;
     ft.f = x;
     fs.f = numerator;
@@ -213,7 +213,7 @@ static inline float ffabsf(float x)
  * hardware. */
 static inline float ffabsf(float x)
 {
-    EeFpuWord w;
+    eeFpuWord_t w;
     w.f = x;
     w.u &= ~EE_FPU_SIGN;
     return w.f;
@@ -246,7 +246,7 @@ static inline int fcvtws(float value)
  * hardware. */
 static inline int fcvtws(float value)
 {
-    EeFpuWord w;
+    eeFpuWord_t w;
     w.f = value;
     if ((w.u & EE_FPU_EXP) <= 0x4E800000u)
         return (int)value;
