@@ -12,6 +12,7 @@
 #include "billboard.h"
 #include "draw.h"
 #include "draw3d.h"
+#include "kernel_draw.h"
 #include "event.h"
 #include "newdata.h"
 #include "nb.h"
@@ -24,6 +25,12 @@
 #define SZ(line, type, bytes) ASSERT_AT(line, sizeof(type) == (bytes))
 #define OFF(line, type, field, at) \
     ASSERT_AT(line, ((char *)&((type *)0)->field - (char *)(type *)0) == (at))
+
+/* kernel_draw.h: v05/v50 below check the fog payload size and color offset.
+ * These enclosing offsets do not establish the native allocation extent. */
+OFF(kfog01, dds3LightState_t, ambient, 0x10);
+OFF(kfog02, dds3LightState_t, fog, 0x20);
+OFF(kfog03, dds3LightState_t, fog.color, 0x30);
 
 /* kernel.h: native administration allocation and dispatcher strides. */
 SZ(kadm01, dds3AdminiData_t, 0x24);

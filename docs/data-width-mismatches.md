@@ -284,7 +284,15 @@ keeping:
   `symbol_addrs.txt`. Correcting it there is the documented exception for a
   type the retail code proves wrong.
 
-Where the right type depends on a struct layout nobody has measured, say so
-rather than deciding it in passing. The IDB puts `sdf3DFogParam_t` at 0x14
-where `kernel_draw.h`'s offsets imply 0x18; that disagreement is left visible
-rather than resolved inside a commit about an annotation.
+Distinguish a C type's size from a native symbol's extent. With the pinned
+EE compiler, `sizeof(sdf3DFogParam_t)` is 0x14 and
+`sizeof(dds3LightState_t)` is 0x34: ambient is at +0x10, fog at +0x20,
+and its color at +0x10 within fog. Retail `dds3SetFog` (0x1055A8) copies
+exactly 0x14 bytes; `sdf3DMakeFogPacket` (0x2BA508) reads four floats at
++0, +4, +8, +0xC and the color word at +0x10. The frame renderer passes
+0x2F5F00 as the second state's fog base. Its proven payload therefore ends
+at 0x2F5F14, before the next named object at 0x2F5F18. That intervening zero
+word does not establish a sixth fog field or a 0x18-byte fog type. Keep
+`dds3LightParam2`'s 0x38-byte symbol extent separate from these C sizes;
+the trailing word's ownership and native allocation size remain unproven.
+This measurement does not verify or change the IDB's types.
