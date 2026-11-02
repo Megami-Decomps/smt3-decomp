@@ -3,6 +3,10 @@
 
     python3 tools/include_rodata.py [smt3]
 
+Run it through configure.py, or at least follow it with include_sdata.py: on its
+own it leaves 52 units with their sdata block mid-move, which looks like 52
+spurious edits. The pair is idempotent and the tree is committed in its output.
+
 With per-unit .rodata (tools/split_rodata.py) a unit's rodata is emitted in
 source order: each INCLUDE_ASM brings the rodata splat migrated into that
 function's asm file, and each C function brings what the compiler emits for it
