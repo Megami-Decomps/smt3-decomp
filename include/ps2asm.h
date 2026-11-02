@@ -1766,12 +1766,11 @@ __asm__ volatile ( \
 /* The EE's load/store ordering barrier. */
 #define EE_SYNC_L() __asm__ volatile ("sync.l")
 
-/* FBRST, COP2 control register 28: read it, set bits, write it back. aTmp is
- * declared an input that the sequence also writes, which is the form retail's
- * register allocation needs. */
+/* FBRST, COP2 control register 28: read it, set bits, write it back.
+ * aTmp is an output scratch register; its prior C value is not read. */
 #define EE_FBRST_SET(aTmp, aBits) __asm__ volatile ( \
     ".set noreorder\n\tcfc2.ni %0, $vi28\n\tori %0, %0, " #aBits "\n\t" \
-    "ctc2.ni %0, $vi28\n\tsync.p\n\t.set reorder" : : "r" (aTmp))
+    "ctc2.ni %0, $vi28\n\tsync.p\n\t.set reorder" : "=r" (aTmp))
 
 /* VPU_STAT, COP2 control register 29. */
 #define EE_GET_VPU_STAT(aOut) __asm__ volatile ( \

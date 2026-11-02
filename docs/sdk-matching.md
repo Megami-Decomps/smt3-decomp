@@ -158,8 +158,11 @@ numbers as well as on the 8-bytes-per-saved-register frame layout.
 
 Switching the SDK units to the 2.10 assembler keeps every function that already
 matched: 489 of them across the eight 2.9-pinned units, with the same two
-libkernl drafts differing before and after. It also closes `sceGsResetPath` and
-`sceGsSyncPath` exactly.
+libkernl drafts differing before and after. It also enabled the initial `sceGsResetPath` and `sceGsSyncPath` matches.
+The ResetPath claim was subsequently withdrawn: its input-only FBRST asm
+operand was actually overwritten. The truthful output-only draft is 100 bytes
+against 104 native and remains guarded; see [libgraph notes](matching/sdk/libgraph.md).
+The SyncPath output operand is separate and is not affected by this correction.
 
 Two corrections to earlier notes in this file. The zero-length
 `.mdebug.eabi64` section is a product of `-g`, not of a particular package:

@@ -1,22 +1,24 @@
 # Matching notes: sdk/libgraph
 
-## sceGsResetPath (0x68)
+## sceGsResetPath (sdk/libgraph, 0x68)
 
-Matches, all 104 bytes, and is C in the unit.
+**Assembly remains production.** The truthful C draft emits 100 bytes against
+retail's 104; the earlier match claim is withdrawn.
 
-What closed it was two things. The source form is the one the SDK header uses:
-pointer-valued volatile register macros with put accessors over them, no local
-pointer anywhere, so each access materializes its own address with `lui` plus
-`ori` and a zero displacement. And the eight-word VIF packet is read as two
-quadwords through a cast of its first and fifth words, not indexed as a
-quadword array; indexing it as `u128[2]` costs nine words of register
-allocation even though the instruction count is the same. The data stays in
-asm at `D_00529F30`, declared here as `extern const u32 [8]`.
+`EE_FBRST_SET` reads COP2 control register 28 into its scratch, ORs the reset
+bits and writes the result back. Its scratch is an output, not an input:
+the previous input-only constraint hid an actual register write from the
+compiler. The macro now uses `"=r"`, and its caller does not initialize the
+output. A paired `"=&r"` control also emits 100 bytes. Keeping a read-write
+operand merely to retain an otherwise unused zero setup has no justified
+input consumer and was rejected. No invalid contract is retained for credit.
 
-The last word, the GIF_CTRL write in the return's delay slot, was never a
-source question: it is the SDK assembler's delay-slot filling, which the 2.9
-package's assembler does not do. See the sweep in
-[sdk-matching](../../sdk-matching.md).
+The pointer-valued volatile register accesses, actual two-quadword VIF packet,
+register operations and return are retained in the guarded reference. The
+native fallback preserves all 104 bytes, including its dead zero setup;
+recovering that extra instruction needs an independently justified source
+premise. The SDK's 2.10 assembler selection remains in effect, but is not by
+itself evidence that an input-only overwritten operand is sound.
 
 ## sceGsSyncPath (0x314)
 

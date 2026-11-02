@@ -32,7 +32,7 @@ both native and emitted sizes when they differ.
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 5 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 5 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
-| 4 |  | [sdk/libgraph.md](sdk/libgraph.md) |
+| 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |

@@ -153,9 +153,11 @@ GParam *sceGsGetGParam(void)
 
 extern const u32 D_00529F30[8];
 
+#ifdef NON_MATCHING
+/* The truthful output-only FBRST scratch omits retail's dead zero setup. */
 void sceGsResetPath(void)
 {
-    u32 vu1 = 0;
+    u32 vu1;
 
     putVIF1_FBRST(1);
     putVIF1_ERR(2);
@@ -165,6 +167,9 @@ void sceGsResetPath(void)
     putVIF1_FIFO(*(u128 *)&D_00529F30[4]);
     putGIF_CTRL(1);
 }
+#else
+INCLUDE_ASM(const s32, "sdk/libgraph", sceGsResetPath);
+#endif
 
 s32 checkModelVersion(void)
 {
