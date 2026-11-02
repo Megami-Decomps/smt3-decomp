@@ -26,7 +26,10 @@ spelling or an unmeasured internal-pass claim.
 
 Integrated retail SHA1/byte comparison and no-op rebuild, 436 tooling tests,
 inline-asm gate, all 143 guarded owners / 499 drafts with stable inputs,
-7 IRX checks and reconciled reports pass. Exact-source CI is pending publication.
+7 IRX checks and reconciled reports pass. Source commit
+`e748342375682ca6e80eee0411da3b39639066c0`; exact-source
+[CI 41413305990](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41413305990)
+attempt 1 passed build and Pages deployment.
 
 ### Earlier residual and controls
 

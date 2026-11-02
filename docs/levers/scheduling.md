@@ -96,27 +96,23 @@ Retail owns 24 bytes there: the 16-byte name and two aligned empty strings
 occupying eight further zero bytes. Emitting only the name as a C string
 literal leaves those bytes without an owner.
 
-### A gp load always issues before the compare constant it is tested against
+### A real transition value can retain dispatch-constant ordering
 
-`field/fldTitle::fldTitle_Process` stops at 755 of 757 words, at the native
-3028 bytes, on the two words at +0x4C: retail materialises the dispatch
-constant (`addiu $4, $0, 1`) before loading `D_0054EF8C`, and every source
-shape emits the load first.
+`field/fldTitle::fldTitle_Process` now matches all 757 words at 3028 bytes.
+A real `s32 nextPhase = 1` value, assigned after the entry render calls and
+consumed by the existing case-zero transition store, retains the native
+constant before the phase load. The switch observation and all state writes
+remain unchanged. No constraint, padding or artificial consumer is needed;
+see [the matching note](../matching/field/fldTitle.md).
 
-A qualified `tools/cc1probe.sh <candidate.c> --as-unit src/smt3/field/fldTitle.c
---version smt3 --func fldTitle_Process --sched --no-dumps` run (`verify: OK`,
-hooked, unhooked and plain assembly identical) gives the reason. In both sched1
-and sched2 the load and the constant are the last two insns of the entry block
-and both feed the `beq`. The load's result cost is 2, so its priority is 3,
-against the constant's 2, and the load is ready in the call's own issue cycle.
-`rank_for_schedule` therefore never reaches the register-weight, dependents or
-original-order tiers that a source change could move. A priority tie would not
-help either: the index load has the smaller luid, so the original-order tier
-would pick it again.
+The earlier literal-store draft had two words reversed. Its qualified
+plain/hooked/unhooked scheduler trace selected phase load UID1748 at priority
+3/cost2 before constant UID1750 at priority2/cost1 in both passes. This was
+not an original-order tie for that source. It did not establish that all
+ordinary source forms must share the same graph or priorities.
 
-Measured and rejected: a local snapshot assigned immediately before the
-`switch` (identical output), a local initialised above the three `rset` calls
-(26 words worse, the snapshot goes callee-saved), and a `(u32)` index (loses
-the compare tree). The constant is already shared with case 0's
-`D_0054EF8C = 1` store in both compiles, so the residual is the ready-list
-pick alone.
+Earlier phase-snapshot placement, unsigned-index and phase-increment controls
+failed. The exact ordinary transition-local form is a distinct control.
+Removing that local while retaining the unsigned color-packing fixes restores
+only the original two-word residual, with peers/data exact. This is measured
+source/output evidence, not a new debugger-observed scheduling mechanism.

@@ -2,40 +2,50 @@
 
 ## fldTitle_Process (field/fldTitle, 0xBD4)
 
-755 of 757 instruction words match at the native 3,028-byte size. Production
-remains assembly-backed. The only residual is instruction order at +0x4C and
-+0x50: native loads the case-one constant before the global phase, while C
-loads the global phase first. The remaining 755 words match, including all
-sprite arguments, callback-visible frame reloads and animation transitions.
+757 of 757 words match at 3028 bytes in ordinary C. Independent complete-owner
+verification gives 8 match, 0 differ, including owned data and the existing
+2088-byte Mini process. No compiler constraint or additional asm is used.
 
-The entry background shrinks vertically, followed by overlay fades, horizontal
-strips moving at 56 units per frame, and the title's white and colored layers.
-The fixed layout keeps its native interleaved upper/lower strip order. Exit
-strips move at 72 units per frame; their lower displacement is formed before
-negation. Drawing stages use separate color lifetimes. No padding, fixed
-registers or artificial dependency is used to alter scheduling.
+A real `s32 nextPhase` receives one immediately after the final entry render
+setup call. The existing case-zero transition stores that value into the
+phase global when its countdown finishes. The switch still reads its phase
+after the setup calls, and all animation/callback-visible state accesses are
+unchanged. This explicit transition value produces the native constant-before-
+phase-load dispatch order. Its sole source consumer is the actual state store;
+it is not a dummy value, an invented dependency, or a recovered spelling claim.
 
-A local phase snapshot and direct global switch produce the same residual.
+The prior literal-store draft is 755/757, differing only at +0x4C and +0x50.
+The ordinary transition-local form is exact before any packing corrections.
+Independent deletion of that local while retaining all packing corrections
+returns exactly to 755/757, with all seven peers and data unchanged. These
+are source/output comparisons, not a new internal scheduler trace.
 
-A qualified `cc1probe.sh --sched --alloc --no-dumps` trace reproduces the
-residual with hooked/unhooked and plain-output equality. In both scheduling
-passes, phase load UID 1748 has priority 3 and cost 2; constant-one UID 1750
-has priority 2 and cost 1. The load therefore issues first because of its
-critical-path priority, rather than an original-order tie. The constant also
-feeds the case-zero transition store. Replacing that transition's assignment
-with a phase increment is behavior-equivalent on this path and leaves the
-same two-word residual; the full owner preserves its seven existing matches
-and data. This control is not retained.
+The body keeps native entry shrink, overlay fades, interleaved moving strips,
+white/colored title layers, exit displacement order, callback behavior
+and state transitions. Thirteen alpha-packing shifts now convert to `u32`
+before shifting by 24: eight in this target and five in the already-matched
+Mini process. Signed alpha 128 occurs in normal animation and previously
+made that shift undefined. Signed pre-pack calculations and clamps remain;
+signed packet locals/parameters retain the verified EE bit-pattern conversion,
+which is implementation-defined for high-bit results rather than a portable
+signed-wrap guarantee. The changes are byte-inert for both functions.
 
-Reproduce on the guarded body with `tools/cc1probe.sh <owner.c> --as-unit
-src/smt3/field/fldTitle.c --func fldTitle_Process --cflag -DNON_MATCHING
---sched --alloc --no-dumps --out <output>`. No source-backed dependency that
-places the constant before the phase load has been established.
+Normal initialized animation progression is bounded, but this does not assert
+new bounds against arbitrary global mutation or invalid raw state. Countdown
+decrement and earlier signed arithmetic are unchanged. Native reloads after
+callbacks and the Mini lower-strip condition's existing title-state read
+remain intact. This fixes packing, not every possible arithmetic input.
 
-A qualified `cc1probe` run explains the C dispatch order by critical-path
-priority. In both scheduling passes, the phase load (UID 1748, cost 2,
-priority 3) is chosen before the case-one constant (UID 1750, cost 1, priority
-2). This is not an instruction-order tie; changing only the UIDs would not
-reverse the choice. Plain, hooked and unhooked assembly agree. Reproduce with
-`tools/cc1probe.sh src/smt3/field/fldTitle.c --func fldTitle_Process --sched --no-dumps --cflag -DNON_MATCHING --out /tmp/title-dispatch`.
-The source premise behind retail's opposite order remains unknown.
+### Earlier scheduling diagnosis
+
+On the earlier guarded literal-store source, a qualified plain/hooked/unhooked
+trace selected phase load UID1748 (priority 3, cost 2) before constant-one
+UID1750 (priority 2, cost 1) in both scheduling passes. That was a critical-path
+choice, not an original-order tie. A phase snapshot and a phase-increment
+transition were inert. This earlier graph does not prove that every truthful
+source form must retain its priorities, nor establish the internal mechanism
+of the now-exact transition-local form.
+
+Integrated retail SHA1/byte comparison and no-op rebuild, 436 tooling tests,
+inline-asm gate, all 142 guarded owners / 496 drafts with stable inputs,
+7 IRX checks and reconciled reports pass. Exact-source CI is pending publication.

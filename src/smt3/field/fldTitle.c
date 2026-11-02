@@ -65,20 +65,22 @@ extern void aDrawBoxG(s32, s32, s32, s32,
 extern s32 fldSnowActive;
 extern s32 fldTitleMiniState;
 
-/* NON_MATCHING: 755 of 757 words at the native 3028 bytes; +0x4C swaps the D_0054EF8C load with the compare constant, which sched2 ranks by priority 3 (load, cost 2) against 2 (li). */
-#ifdef NON_MATCHING
+/* Retain the real next-phase value through dispatch and the case-zero
+ * transition; see docs/matching/field/fldTitle.md. */
 s32 fldTitle_Process(dds3ProcessID_t *id)
 {
     s32 height;
+    s32 nextPhase;
 
     rsetOtOfs(0x47);
     rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
     rsetAlpha(0);
+    nextPhase = 1;
     switch (D_0054EF8C) {
     case 0: {
         D_0054EF94--;
         if (D_0054EF94 <= 0) {
-            D_0054EF8C = 1;
+            D_0054EF8C = nextPhase;
             fldTitleState = 0;
         }
         break;
@@ -96,7 +98,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
         if (fldTitleState >= 19) {
             alpha = (fldTitleState * 128 - 0x900) / 10;
             if (alpha > 128) alpha = 128;
-            alpha <<= 24;
+            alpha = (s32)((u32)alpha << 24);
             alpha |= 0x00808080;
             DrwSprite2D(0x1B, 0x5F, 0x1CA, 0xAC, 0, 0, 0x80, 0x40,
                         alpha, D_0054EF9C);
@@ -111,7 +113,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
         if (fldTitleState >= 19) {
             alpha = (fldTitleState * 128 - 0x900) / 6;
             if (alpha > 128) alpha = 128;
-            alpha <<= 24;
+            alpha = (s32)((u32)alpha << 24);
             alpha |= 0x00808080;
             x = fldTitleState * 56 - 0x530;
             if (x > 0) x = 0;
@@ -136,7 +138,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
             alpha = (fldTitleState * 128 - 2432) / 15;
             if (alpha > 128) alpha = 128;
             DrwSprite2D(129, 115, 254, 69, 1, 1, 254, 69,
-                        0x00808080 | (alpha << 24), D_0054EF98);
+                        0x00808080 | ((u32)alpha << 24), D_0054EF98);
         }
 
         if ((u32)(fldTitleState - 20) < 10) {
@@ -146,7 +148,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
             if (alpha > 128) alpha = 128;
             if (alpha < 0) alpha = 0;
             DrwSprite2D(0x81, 0x73, 0xFE, 0x45, 1, 1, 0xFE, 0x45,
-                        0x00807060 | (alpha << 24), D_0054EF98);
+                        0x00807060 | ((u32)alpha << 24), D_0054EF98);
             rsetAlpha(0);
         }
 
@@ -157,7 +159,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
             if (alpha > 128) alpha = 128;
             if (alpha < 0) alpha = 0;
             DrwSprite2D(0x81, 0x73, 0xFE, 0x45, 1, 1, 0xFE, 0x45,
-                        0x00807060 | (alpha << 24), D_0054EF98);
+                        0x00807060 | ((u32)alpha << 24), D_0054EF98);
             rsetAlpha(0);
         }
 
@@ -211,7 +213,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
         if (alpha < 0) alpha = 0;
         if (alpha > 128) alpha = 128;
         DrwSprite2D(0, 0x7F, 0x200, 0x6A, 0, 0, 0x100, 0x80,
-                    0x00808080 | (alpha << 24), D_0054EFA0);
+                    0x00808080 | ((u32)alpha << 24), D_0054EFA0);
         rsetAlpha(0);
 
         {
@@ -219,7 +221,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
             alpha = (10 - fldTitleState) * 128 / 10;
             if (alpha < 0) alpha = 0;
             if (alpha > 128) alpha = 128;
-            color = 0x00808080 | (alpha << 24);
+            color = 0x00808080 | ((u32)alpha << 24);
             DrwSprite2D(0x1B, 0x5F, 0x1CA, 0xAC, 0, 0, 0x80, 0x40,
                         color, D_0054EF9C);
             DrwSprite2D(0x4B, 0x96, 0x64, 0x3A, 2, 5, 0x64, 0x3A,
@@ -261,7 +263,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
         if (alpha < 0) alpha = 0;
         if (alpha > 128) alpha = 128;
         DrwSprite2D(0x81, 0x73, 0xFE, 0x45, 1, 1, 0xFE, 0x45,
-                    0x00808080 | (alpha << 24), D_0054EF98);
+                    0x00808080 | ((u32)alpha << 24), D_0054EF98);
 
         if (++fldTitleState >= 61) {
             fldTitleState = 0;
@@ -274,9 +276,6 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldTitle", fldTitle_Process);
-#endif
 
 void fldTitle_Shutdown(void) {
     if (D_0054EF98 != NULL) {
@@ -361,7 +360,7 @@ s32 fldTitleMini_Process(dds3ProcessID_t *id)
                 x = fldTitleMiniState * 80 - 752;
                 if (x > 0) x = 0;
                 if (alpha > 128) alpha = maxAlpha;
-                stripColor = 0x00808080 | (alpha << 24);
+                stripColor = 0x00808080 | ((u32)alpha << 24);
 
                 DrwSprite2D(x, 340, 9, 8, 2, 1, 9, 8, stripColor, fldTitleMiniWork);
                 DrwSprite2D(x + 9, 340, 503, 8, 10, 1, 1, 8, stripColor,
@@ -392,7 +391,7 @@ s32 fldTitleMini_Process(dds3ProcessID_t *id)
             if (fldTitleMiniState >= 9) {
                 alpha = fldTitleMiniState * 16 - 128;
                 if (alpha > 128) alpha = maxAlpha;
-                DrwSprite2D(128, 313, 256, 128, 0, 0, 256, 128, 0x00808080 | (alpha << 24),
+                DrwSprite2D(128, 313, 256, 128, 0, 0, 256, 128, 0x00808080 | ((u32)alpha << 24),
                             fldTitleMiniTex);
             }
 
@@ -440,7 +439,7 @@ s32 fldTitleMini_Process(dds3ProcessID_t *id)
             }
             if (x < 512) {
                 s32 stripColor;
-                stripColor = 0x00808080 | (alpha << 24);
+                stripColor = 0x00808080 | ((u32)alpha << 24);
                 DrwSprite2D(x, 340, 9, 8, 2, 1, 9, 8, stripColor, fldTitleMiniWork);
                 DrwSprite2D(x + 9, 340, 503, 8, 10, 1, 1, 8, stripColor,
                             fldTitleMiniWork);
@@ -454,7 +453,7 @@ s32 fldTitleMini_Process(dds3ProcessID_t *id)
             }
             if (x >= -511) {
                 s32 stripColor;
-                stripColor = 0x00808080 | (alpha << 24);
+                stripColor = 0x00808080 | ((u32)alpha << 24);
                 DrwSprite2D(x, 378, 9, 8, 2, 8, 9, -8, stripColor, fldTitleMiniWork);
                 DrwSprite2D(x + 9, 378, 503, 8, 10, 8, 1, -8, stripColor,
                             fldTitleMiniWork);
@@ -479,7 +478,7 @@ s32 fldTitleMini_Process(dds3ProcessID_t *id)
             alpha = (25 - fldTitleMiniState) * 128 / 25;
             if (alpha < 0) alpha = 0;
             if (alpha > 128) alpha = 128;
-            DrwSprite2D(128, 313, 256, 128, 0, 0, 256, 128, 0x00808080 | (alpha << 24),
+            DrwSprite2D(128, 313, 256, 128, 0, 0, 256, 128, 0x00808080 | ((u32)alpha << 24),
                         fldTitleMiniTex);
 
             if (++fldTitleMiniState >= 31) {
