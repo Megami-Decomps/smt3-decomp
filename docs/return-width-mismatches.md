@@ -1,5 +1,8 @@
 # Return-width mismatches
 
+See also [data-object width mismatches](data-width-mismatches.md) for the
+same defect shape in a global variable rather than a function return.
+
 A function defined with a narrow return type (`s8`, `u8`, `s16`, `u16`) but
 declared `extern` with a wider type (`s32`, `u32`) at some call site. Retail
 never shows it: the EE's own return sequence leaves the full `$v0` correctly

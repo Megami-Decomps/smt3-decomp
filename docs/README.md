@@ -20,6 +20,10 @@ quickstart.
   definition and some caller's declaration disagree on return width, invisible
   on retail hardware but fatal to a native port, and which callers are
   actually at risk.
+- [Data-object width mismatches](data-width-mismatches.md): the same shape in
+  a global variable, why `INCLUDE_SDATA`/`INCLUDE_RODATA`'s `TYPE` argument is
+  not type information, and the sweep that found none of this shape in the
+  current tree.
 - [FPU native semantics](fpu-native-semantics.md): the EE FPU's non-IEEE 754
   behaviour behind `include/fpu.h`'s four inline-asm sites, and the native
   `NATIVE_FPU` replacements that reproduce it for a non-EE build.
