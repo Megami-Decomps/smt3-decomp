@@ -2504,10 +2504,6 @@ void SetAction_TARSEL(nbActionProcessData_t *a)
     SetTarget_nbActionProcess(a);
 }
 
-/* NON_MATCHING: 4 of 115 words differ (first at +0x120). */
-
-#ifdef NON_MATCHING
-
 extern s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid);
 extern void nbCloseCommSel(void);
 extern void nbSetAutoCommSel(void);
@@ -2545,8 +2541,15 @@ s32 CheckAction_TARSEL(nbActionProcessData_t *a)
 
                 if (err != 0) {
                     nbDispSkillErrorMessage(err);
-                    if (err == 4) {
-                        nbSetTarSelJyokyoTime(0x1D);
+                    {
+                        /* Real error code 4 for the comparison below. The
+                         * local binding restores native allocation; it is
+                         * initialized after the callback and dies before
+                         * another call. No instructions are supplied here. */
+                        FAKEMATCH_ASM_REG(s32, errorFour, "$2") = 4;
+                        if (err == errorFour) {
+                            nbSetTarSelJyokyoTime(0x1D);
+                        }
                     }
                     nbSetTarSelStat(1);
                     break;
@@ -2569,18 +2572,15 @@ s32 CheckAction_TARSEL(nbActionProcessData_t *a)
             a->data->form[i].stat &= ~8;
         }
         nbSetCommSelStat(2);
-        a->seq = 1;
+        {
+            s32 nextSequence = 1;
+            a->seq = nextSequence;
+        }
         break;
     }
     }
     return ret;
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_TARSEL);
-
-#endif
 
 void SetAction_STKSEL(nbActionProcessData_t *a)
 {

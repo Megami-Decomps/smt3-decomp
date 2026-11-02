@@ -136,29 +136,28 @@ all produce the identical object; an `f32 q = -power` local for the negation;
 and `f32 phase`/`f32 power` locals shared by both arms, which reload nothing
 and cost 2 words.
 
-## CheckAction_TARSEL (newbattle/nbStageProcess, 0x1CC)
+## CheckAction_TARSEL (newbattle/nbActionProcess, 0x1CC)
 
-111 of 115 words match, at the exact 460-byte size and with zero instruction
-differences: every remaining word is a register name.
+Exact: 115 of 115 words, 460 bytes. The dispatch, callback-visible reads,
+error handling and sixteen formation-status clears retain their native behavior.
 
-The whole dispatch and all three arms are exact. Two source facts carry it: the
-`nowcommand` test is written `if (work->nowcommand != 1) { if (... == 5) ... }
-else { no = work->nowindex; }` with `no = -1` above it, so the `== 1` arm is the
-branched-to block retail places last and the `-1` lands in the `beq`'s delay
-slot (the `== 1`/`else if` spelling costs 14 words); and the sixteen
-`form[i].stat &= ~8` clears are a plain ascending `for`, which ee-gcc turns
-into retail's countdown.
+The former draft differed in four register operands: the error code `4` used
+in a comparison after `nbDispSkillErrorMessage`, and the sequence `1` stored
+after `nbSetCommSelStat`. An ordinary block-local `nextSequence = 1` restores
+the latter. The error code needs a localized `FAKEMATCH_ASM_REG` binding to
+`$2`, initialized after the message callback and consumed by the comparison
+before any further call. It is a compiler-allocation reconstruction aid, not
+evidence of original source spelling. No empty operand constraint is needed.
 
-What is left is that retail holds two short-lived constants in `$2` where the
-draft holds them in `$3`: the `4` the `err` test compares against, and the `1`
-stored to `a->seq` in the `case 2` arm. Both are dead immediately and `$2` is
-reused for the return value one word later in retail.
+Ablation in the complete current owner: ordinary named locals match 113/115;
+only the error binding matches 115/115; only the sequence binding remains
+113/115; both bindings also match 115/115. The redundant sequence binding and
+both diagnostic empty operands were removed. No ABI, load/store width, callback
+order, return value or extra runtime operation changes.
 
-Ruled out: `return ret;` in place of `break;` in the error arm, the select arm
-and the `case 2` arm, each of which rearranges the whole epilogue; `u32 ret`; a
-separate `ret = 0;` statement after the declaration; `if (err != 4) {} else`;
-and both source orders of `nbSetCommSelStat(2)` against `a->seq = 1` and
-against `a->stat |= 0x80`.
+The existing source shape remains important: `nowcommand != 1` encloses the
+`== 5` arm with `no = -1` above it, so retail's `== 1` arm stays last; the
+sixteen `form[i].stat &= ~8` clears use the plain ascending loop.
 
 ## SetDamagePacket (newbattle/nbStageProcess, 0x1E0)
 
