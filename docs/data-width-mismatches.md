@@ -22,7 +22,14 @@ confirms this from the writing side: every line it generates reads literally
 of the symbol's real type. Grepping the whole tree shows every existing
 `INCLUDE_SDATA`/`INCLUDE_RODATA` call uses that same literal "const s32".
 It is leftover boilerplate from the macro's template, not a type declaration,
-and must not be read as one.
+and must not be read as one. The generalisation: an `INCLUDE_` directive is
+never a declaration, so the only authorities on a split-assembled object's
+width are `symbol_addrs.txt`'s `type:` and `size:` fields, the retail bytes
+themselves, and the neighbouring symbols' extents; that false signal sits
+identically on every one of the 4657 `INCLUDE_SDATA`/`INCLUDE_RODATA` call
+sites in `src/smt3/` (`grep -ro "INCLUDE_SDATA(\|INCLUDE_RODATA(" src/smt3/ |
+wc -l`), so reading any one of them as a width claim is one step from the
+same error this document exists to head off.
 
 For these objects the true width comes from the retail bytes themselves (the
 directive in the `.s` file: `.byte`/`.short`/`.word` and its count) and from
@@ -54,14 +61,25 @@ It verifies as a false alarm, for the reason the Method section gives: the
   bytes.
 - `symbol_addrs.txt` agrees: `dds3VblanksPerFrame = 0x0054E82C; // type:u16
   size:0x2`.
-- The neighbouring symbols leave no room for more: `D_0054E82A` is `.short
-  0x0000` at `0x0054E82A` (ends `0x0054E82C`) and `D_0054E82E` is `.short
-  0x0000` at `0x0054E82E` (starts immediately after). A 4-byte read at
-  `0x0054E82C` would not sign- or zero-extend `dds3VblanksPerFrame`; it would
-  concatenate it with `D_0054E82E`, an unrelated, separately-addressed
-  variable. That is wrong on every byte order, not a little-endian accident
-  that only breaks on big-endian: the extra 16 bits belong to a different
-  retail variable, not to padding.
+- The lower neighbour settles where it starts: `dds3KernelMain.c:17` declares
+  `extern s16 D_0054E82A`, two bytes at `0x0054E82A`, ending exactly at
+  `0x0054E82C`.
+- The upper neighbour is a confirmation, not load-bearing proof, and its
+  source is build-generated rather than checked in: splat, run through
+  `python configure.py` against the local retail ELF per `config/smt3/`,
+  writes `asm/smt3/nonmatchings/kernel/dds3KernelMain/D_0054E82E.s`, which
+  reads `.short 0x0000` at `0x0054E82E` (starts immediately after
+  `dds3VblanksPerFrame`'s own two bytes). `asm/` is gitignored (it is derived
+  from the copyrighted retail image, which this repo never tracks; see the
+  project's `CLAUDE.md` on the Remote), so that file will not exist until
+  `configure.py` has been run with the retail ELF in place, and a grep
+  limited to tracked files will not find it. With it: a 4-byte read at
+  `0x0054E82C` would concatenate `dds3VblanksPerFrame` with `D_0054E82E`, an
+  unrelated, separately-addressed variable, wrong on every byte order rather
+  than a little-endian accident that only breaks on big-endian. Without it,
+  `size:0x2` in `symbol_addrs.txt` and the lower neighbour's end address
+  already fix both the extent and the start, which is sufficient on its own
+  for the conclusion that follows.
 - All three consumers already declare `extern u16 dds3VblanksPerFrame;`, no
   `const`. They agree with each other and with the true width. `stfMain.c`'s
   writes (`dds3VblanksPerFrame = 2;` / `= 1;`) are ordinary assignment through
