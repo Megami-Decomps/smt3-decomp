@@ -32,7 +32,10 @@ claim that no simpler ordinary matching form exists.
 
 Integrated retail SHA1 and byte comparison, no-op rebuild, 436 tooling tests,
 inline-asm gate, all 144 guarded owners / 501 drafts with stable inputs,
-7 IRX checks and reconciled reports pass. Exact-source CI is pending publication.
+7 IRX checks and reconciled reports pass. Source commit
+`a16a594a9c235c3065897e325641a8484821bb92`; exact-source
+[CI 41406322067](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41406322067)
+attempt 1 passed build and Pages deployment.
 
 ## nbAddUnitStock (newbattle/nbUnitProcess, 0x370)
 

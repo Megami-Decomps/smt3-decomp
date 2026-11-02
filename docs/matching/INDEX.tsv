@@ -251,6 +251,7 @@ nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanel
 nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	127
 nbPanelDrawProcess (0x108)				docs/matching/newbattle/nbPanelProcess.md	153
 nbPanelAuto (0x3A0)				docs/matching/newbattle/nbPanelProcess.md	165
+nbPanelPressGauge	newbattle/nbPanelProcess	0x1518		docs/matching/newbattle/nbPanelProcess.md	214
 nbCheckBattleSkillError3	newbattle/nbSkillError	0x184	97 of 97 words match	docs/matching/newbattle/nbSkillError.md	3
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/matching/newbattle/nbStageProcess.md	3
 CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/matching/newbattle/nbStageProcess.md	18
@@ -263,7 +264,7 @@ SetDamagePacket	newbattle/nbActionProcess	0x1E0	120 of 120 words	docs/matching/n
 StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/matching/newbattle/nbStageProcess.md	181
 UpdateSelect	newbattle/nbTarSelProcess	0x174	93 of 93 words match	docs/matching/newbattle/nbTarSelProcess.md	3
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	152 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
-nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	37
+nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	40
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/matching/newdata/datCalc.md	3
 datGetSkillKouka	newdata/datCalc	0x3F8	254 of 254 words match	docs/matching/newdata/datCalc.md	21
 datBossRashGetRec	newdata/datCalc	0x108	66 of 66 words match	docs/matching/newdata/datCalc.md	37

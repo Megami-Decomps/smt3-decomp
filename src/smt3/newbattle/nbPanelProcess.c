@@ -374,6 +374,12 @@ extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 kind);
 
 extern u32 effMagaCylinderCalcColor(u32 color, u32 scale);
 
+/* The two-coordinate center used by the panel blend draw. */
+typedef struct {
+    s32 x;
+    s32 y;
+} nbPanelPoint_t;
+
 /* A panel rectangle: position, then width and height. */
 typedef struct {
     s32 x;
@@ -784,7 +790,7 @@ void nbPanelSpriteScaleWHDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, n
 }
 
 void nbPanelSpriteBlendDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ_0, nbPanelProcess_nbPanelTMXuv_t *pXYZ_1, u32 rate,
-                            nbPanelProcess_nbPanelXYZ_t *pUV, f32 abgr, sdfTexHandle_t *hTex)
+                            nbPanelPoint_t *pUV, f32 abgr, sdfTexHandle_t *hTex)
 {
     s32 x0;
     s32 y0;
@@ -1545,17 +1551,14 @@ void nbPanelPressGaugeEncountHide(void)
     nbPanelPGEncount = 1;
 }
 
-/* NON_MATCHING: 1340 words emitted against the native 5400-byte (1350-word)
- * size, 210 matching at the same offset, first differing at +0x0. The body is
- * structurally complete (1046 of 1350 mnemonics align in order), but one extra
- * colour local spills, so the frame is 0xD0 against 0xC0 and the register
- * allocation diverges from the prologue on. */
+/* NON_MATCHING: the remaining differences include a spilled fade color,
+ * table-address lifetimes and instruction scheduling. */
 
 #ifdef NON_MATCHING
 extern void nbPanelPressTurnGaugeAnimStart(void);
 extern s32 nbPanelPressTurnGaugeRun(void);
 extern nbPanelProcess_nbPanelXYZ_t nbPressGaugeTable[], nbPressGaugeTable2[];
-extern nbPanelProcess_nbPanelXYZ_t D_00551178[];
+extern nbPanelPoint_t D_00551178;
 extern s32 D_004F0070[], D_004F0088[];
 extern f32 D_004F0628[][4];
 extern const volatile f32 D_0054E5AC, D_0054E5B0;
@@ -1775,12 +1778,12 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
                     glowColor = ((u32)(trailScale * 48.0f) << 24) | 0x808080;
                     trailScale *= 0.5f;
                     nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[0],
-                        &nbPanelParamTable[uvIndexes[2]], glowColor, &D_00551178[0], glow, data->pnltex[2]);
+                        &nbPanelParamTable[uvIndexes[2]], glowColor, &D_00551178, glow, data->pnltex[2]);
                     glow -= step;
                 }
                 if (cycle == 6) {
                     nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[0],
-                        &nbPanelParamTable[uvIndexes[2]], 0x30808080, &D_00551178[0], 1.25f, data->pnltex[2]);
+                        &nbPanelParamTable[uvIndexes[2]], 0x30808080, &D_00551178, 1.25f, data->pnltex[2]);
                 }
                 glow = ((D_004F0628[cycle][0] - 1.0f) * 1.25f) + 1.0f;
                 step = (glow - 1.0f) * 0.5f;
@@ -1790,13 +1793,13 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
                     trailScale *= 0.5f;
                     extraColor = glowColor;
                     nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[2],
-                        &nbPanelParamTable[uvIndexes[4]], glowColor, &D_00551178[0], glow, data->pnltex[2]);
+                        &nbPanelParamTable[uvIndexes[4]], glowColor, &D_00551178, glow, data->pnltex[2]);
                     glow -= step;
                 }
                 if (cycle == 6) {
                     extraColor = 0x30808080;
                     nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[2],
-                        &nbPanelParamTable[uvIndexes[4]], extraColor, &D_00551178[0], 1.25f, data->pnltex[2]);
+                        &nbPanelParamTable[uvIndexes[4]], extraColor, &D_00551178, 1.25f, data->pnltex[2]);
                 }
                 x -= 0x2E;
                 index++;
@@ -1844,9 +1847,9 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
                                 nbPressGaugeTable[2].w, nbPressGaugeTable[2].h,
                                 uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
                     nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[1],
-                        &nbPanelParamTable[uvIndexes[3]], blendColor, &D_00551178[0], scale, data->pnltex[2]);
+                        &nbPanelParamTable[uvIndexes[3]], blendColor, &D_00551178, scale, data->pnltex[2]);
                     nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[3],
-                        &nbPanelParamTable[uvIndexes[5]], blendColor, &D_00551178[0], scale, data->pnltex[2]);
+                        &nbPanelParamTable[uvIndexes[5]], blendColor, &D_00551178, scale, data->pnltex[2]);
                     nbPnl_rsetAlpha(1);
                     trailCount = (s32)((u32)nbPanelPGFrame - 5);
                     if (trailCount > 0) {
@@ -1858,9 +1861,9 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
                             u32 alpha = (u32)((f32)(trailCount - i) * 268435456.0f / (f32)trailCount);
                             extraColor = (alpha & 0xFF000000) | (blendColor & 0xFFFFFF);
                             nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[1],
-                                &nbPanelParamTable[uvIndexes[3]], extraColor, &D_00551178[0], trailScale, data->pnltex[2]);
+                                &nbPanelParamTable[uvIndexes[3]], extraColor, &D_00551178, trailScale, data->pnltex[2]);
                             nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[3],
-                                &nbPanelParamTable[uvIndexes[5]], extraColor, &D_00551178[0], trailScale, data->pnltex[2]);
+                                &nbPanelParamTable[uvIndexes[5]], extraColor, &D_00551178, trailScale, data->pnltex[2]);
                             trailScale += step;
                         }
                     }
@@ -1918,17 +1921,17 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
                         step = (1.0f - scale) / (f32)trailCount;
                         for (i = 0; i < trailCount; i++) {
                             nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[1],
-                                &nbPanelParamTable[uvIndexes[3]], blendColor, &D_00551178[0], trailScale, data->pnltex[2]);
+                                &nbPanelParamTable[uvIndexes[3]], blendColor, &D_00551178, trailScale, data->pnltex[2]);
                             nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[3],
-                                &nbPanelParamTable[uvIndexes[5]], extraColor, &D_00551178[0], trailScale, data->pnltex[2]);
+                                &nbPanelParamTable[uvIndexes[5]], extraColor, &D_00551178, trailScale, data->pnltex[2]);
                             trailScale += step;
                         }
                         nbPnl_rsetAlpha(0);
                     } else {
                         nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[1],
-                            &nbPanelParamTable[uvIndexes[3]], blendColor, &D_00551178[0], scale, data->pnltex[2]);
+                            &nbPanelParamTable[uvIndexes[3]], blendColor, &D_00551178, scale, data->pnltex[2]);
                         nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[3],
-                            &nbPanelParamTable[uvIndexes[5]], blendColor, &D_00551178[0], scale, data->pnltex[2]);
+                            &nbPanelParamTable[uvIndexes[5]], blendColor, &D_00551178, scale, data->pnltex[2]);
                     }
                     x -= 0x2E;
                     index++;

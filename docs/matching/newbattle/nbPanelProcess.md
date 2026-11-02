@@ -209,3 +209,42 @@ where that struct lives, cannot be done yet. Splitting `u8 unk0C[6]` into three
 `Flow6_54` in `newbattle/NbNegoFlowTwo` enough to move 20 bytes of the image.
 So the draft reads them as `*(u16 *)&...unk0C[n]` and the header keeps the byte
 array until that unit is reconstructed too.
+
+
+## nbPanelPressGauge (newbattle/nbPanelProcess, 0x1518)
+
+The target remains assembly-backed. The corrected privately promoted draft
+emits 5320 of the native 5400 bytes: 102 matching and 1228 differing words in
+the 1330-word emitted prefix. This is a diagnostic score, not matching credit.
+
+`D_00551178` is a single eight-byte signed XY point containing 77 and 37,
+bounded by the independent `nbPanelBaseABGR` object at `0x00551180`.
+The sixth parameter of `nbPanelSpriteBlendDraw` reads only offsets zero and
+four and does not retain or forward that pointer. All twelve direct native
+calls are in this function and pass that origin. A dedicated point type now
+replaces the incomplete array of twenty-byte rectangle records for this
+object and parameter; all existing rectangle types and object storage remain
+unchanged. Independent retained-owner verification gives 59 match, 0 differ.
+
+The old incomplete declaration also hid the small-data size from the compiler.
+Qualified plain/dump comparisons found identical target compiler assembly in SKIP_ASM
+and full compilation, but the assembler expanded address pseudos differently
+when the full unit defined the small-data label. The truthful complete point
+declaration removes that context discrepancy; both forms now emit 5320 bytes.
+This establishes the measured visibility effect, not original source spelling.
+
+The extra fifth local spill in the older baseline was fadedColor, not the
+carry-over extraColor. A genuine saved-register binding removes that spill
+and restores the native frame, but leaves broad differences and is not
+retained. The entry zero and carry-over extraColor values must be preserved:
+later global frame observations follow calls. Moving UV address arithmetic
+after the color helper or moving the count observation after GaugeRun also
+remains nonmatching. GaugeRun itself is read-only, so that count-ordering
+control is not evidence of a behavior bug. Continued investigation concerns
+actual loop-address lifetimes and allocation, not more register bindings.
+
+The type-only retained-source correction passes independent and integrated
+complete-owner checks (59/0), retail SHA1/byte comparison/no-op rebuild,
+436 tests, the inline-asm gate, all 144 guarded owners / 501 drafts with
+stable inputs, 7 IRX checks and reconciled reports. Exact-source CI is
+pending publication. No exact-match credit is added.
