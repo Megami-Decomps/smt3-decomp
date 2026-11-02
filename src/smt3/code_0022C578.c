@@ -3002,8 +3002,8 @@ void campDrawFade(void)
 
 
 
-#ifdef NON_MATCHING
-/* Two argument-setup words differ; see docs/matching/code_0022C578.md. */
+/* The first sprite ID uses a localized live-value constraint; see the
+ * matching note for the paired ordinary and nonvolatile controls. */
 struct campCrossPanel_t;
 extern void campRunPanelCallback(struct campCrossPanel_t *panel);
 extern void campDrawSkillPanel(void);
@@ -3044,15 +3044,20 @@ s32 camp_draw_Process(void)
     case 16: campDrawStockCursor(); break;
     }
     campDrawNumber();
-    fclDrawPanelSprite(0x33001, 0x48);
+    {
+        s32 spriteId = 0x33001;
+        /* Keep this actual draw argument complete before the call, leaving
+         * the OT argument in its native delay slot. This empty constraint
+         * emits no instructions and is not a memory barrier. */
+        FAKEMATCH_ASM_LIVE_VOLATILE(spriteId);
+        fclDrawPanelSprite(spriteId, 0x48);
+    }
     cmpFindPanelEffSlot(0x48);
     fclDrawPanelSprite(0x5101B, 0x48);
     campDrawFade();
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", camp_draw_Process);
-#endif
+
 
 extern u32 dds3DebugSign;
 
