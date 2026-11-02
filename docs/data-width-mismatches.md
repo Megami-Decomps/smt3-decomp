@@ -229,6 +229,15 @@ if self.hasOnlyAutodetectedType():
 return False
 ```
 
+That is the file the build itself imports, pinned so a later reader can tell
+whether they are looking at the same code: spimdisasm 1.40.2 under splat
+0.39.1, `.venv/lib/python3.13/site-packages/spimdisasm/common/ContextSymbols.py`,
+`isString` at line 360, file sha256 beginning `ec6591668d344d34`. Verified by
+importing it through `.venv/bin/python`, which is the interpreter
+`configure.py` runs under, rather than by reading a copy found on disk. If a
+future reader's branch order differs, check that version first: this account
+is of 1.40.2 and of nothing else.
+
 `config/smt3/SLUS_209.11.yaml:42` sets `data_string_guesser_level: 2`. So byte
 or `.asciz` emission has exactly two causes and no others:
 
