@@ -246,5 +246,7 @@ actual loop-address lifetimes and allocation, not more register bindings.
 The type-only retained-source correction passes independent and integrated
 complete-owner checks (59/0), retail SHA1/byte comparison/no-op rebuild,
 436 tests, the inline-asm gate, all 144 guarded owners / 501 drafts with
-stable inputs, 7 IRX checks and reconciled reports. Exact-source CI is
-pending publication. No exact-match credit is added.
+stable inputs, 7 IRX checks and reconciled reports. Source commit
+`655853776250951c1ec39b1484ded04ec0c186fd`; exact-source
+[CI 41407188989](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41407188989)
+attempt 1 passed build and Pages deployment. No exact-match credit is added.
