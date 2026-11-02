@@ -212,6 +212,54 @@ correct, and in a native host build the dereference faults, which is how it
 was found. Typed `u32` the same object emits `.word D_002F5E20` and a host
 link relocates it.
 
+### What actually decides the emission
+
+`type:u8` is one of two causes, not the mechanism. splat delegates data
+disassembly to spimdisasm, and the decision is `isString()` in
+`spimdisasm/common/ContextSymbols.py:360`, whose branch order is the whole
+rule:
+
+```python
+if currentType in {"char", "char*", "asciz"}: return True
+if not self.isMaybeString: return False
+if stringGuesserLevel < 1: return False
+if self.hasNoType(): return True
+if self.hasOnlyAutodetectedType():
+    if stringGuesserLevel >= 4: return True
+return False
+```
+
+`config/smt3/SLUS_209.11.yaml:42` sets `data_string_guesser_level: 2`. So byte
+or `.asciz` emission has exactly two causes and no others:
+
+- the user type means bytes: `u8`, `char`, `char*` or `asciz`. The first two
+  of those return true before the string predicate is consulted at all, which
+  makes `type:char` on a pointer-bearing object the worst case of the class;
+- no user type, and the bytes look like a string. `hasNoType()` returns true at
+  every level from 1 up.
+
+A user-provided type suppresses the guess at **every** level, because the only
+level-gated escape needs `hasOnlyAutodetectedType()` and a user type is not
+that.
+
+The consequence is sharper than "fix the wrong annotations". An untyped
+pointer-bearing object is not protected, it is unguarded: it emits words only
+because its bytes do not happen to look like a string. `fldAutoMapRect`
+(`size:0x10`, no type, four `.word`) is correct by that accident, not by
+anything anyone chose. Retail bytes never change, so nothing latent breaks on
+its own, but the accident is **not** stable under symbol edits: the predicate
+runs over the bytes of the symbol's own extent, so correcting a `size:` can
+change what the guesser sees. `nbCameraStateTable` is that case in both
+directions at once, `size:0x4` truncating 68 function pointers, where fixing
+the size produces a pointer-bearing object that then needs a word type to stay
+word-emitted. One entry, two mechanisms, and the second is necessary only
+because of the first.
+
+So the rule to apply when touching any data entry: **a pointer-bearing object
+wants an explicit word-wide type**, and a `size:` correction that enlarges an
+object into the pointer-bearing class creates that requirement where none
+existed.
+
 **The retail checksum is blind to this.** The same bytes emitted as `.byte` or
 as `.word` assemble identically, so the image matches either way and no check
 in this repository fails. That makes `type:` on a pointer-bearing data object
