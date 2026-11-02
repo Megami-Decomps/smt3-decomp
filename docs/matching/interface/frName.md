@@ -64,17 +64,12 @@ the required reloads but emitted 352 bytes, with 30 of 86 words matching and
 an early adjusted pointer plus extra tail copy. These are not alternatives
 to the matched indexed-output form.
 
-## frSetNameData
+## frSetNameData (interface/frName, 0x1E8)
 
-The guarded reconstruction emits 496 bytes against 488 native bytes, with
-48 of 122 native instruction words matching. Normal builds retain assembly;
-this adds no exact matching credit. The first 100 bytes match. Remaining
-differences include the cleared-slot counter register and the bitmap-copy
-source induction. The compiler advances the source pointer while establishing
-the inline copy endpoint, with an extra move in each alignment arm; native
-forms a temporary endpoint and advances the saved source after translation.
+122 of 122 words match at the native 488-byte size in ordinary C. The
+complete owner checks seven exact functions, with no code or data discrepancy.
 
-The parameters are signed bytes. Type zero clears old slots starting at zero;
+The three scalar parameters are signed bytes. Type zero clears old slots starting at zero;
 other types start at the signed first-name count and clear the signed second
 count. Clearing stores null pointers without releasing fonts. A positive
 input glyph count allocates and copies exactly `0x120` bytes per glyph, calls
@@ -82,13 +77,50 @@ input glyph count allocates and copies exactly `0x120` bytes per glyph, calls
 slot, and writes the target to `GsFont_t.font_no`. The copy is nine 32-byte
 chunks. Logging occurs even when the input count is nonpositive.
 
-The allocator declaration is its real pointer-returning contract from
+The glyph loop indexes `imageData + slot * 0x120` and stores the result at
+`pFont[target][firstSlot + slot]`. This byte view follows the actual inline
+`nameBitmap[4][16][0x120]` layout and the two slices passed by
+`frTransNameImage`; it adds no type or alignment assumption. The index is
+reinitialized to zero after clearing, so the two phases share a real scalar
+without sharing an incoming value or changing either loop's bounds.
+
+Qualified compiler dumps establish two dependencies. With the previous
+explicit source cursor, the compiler advanced that cursor while forming the
+inline-copy endpoint, adding a move in each alignment arm. Indexing instead
+lets the loop pass derive a source induction pointer after copy expansion,
+leaving the two alignment-arm endpoints separate. A minimal indexed control
+with the old separate countdown emitted the native size but retained 22
+instruction differences in allocation and setup.
+
+The final ordinary for loop uses the same index scalar as the clear loop.
+The loop pass derives independent source and destination pointers and then
+reverses the glyph index into a countdown. That real scalar crosses the
+allocator and translation calls and occupies the native saved register in
+both phases; the derived source and destination pointers take the other two
+saved registers. A precise ablation retaining the same indexed for loop but
+using a distinct glyph index emitted 480 rather than 488 bytes: the clear
+index became call-free, its setup copy disappeared, and allocation changed.
+This isolates the shared-scalar dependency from merely changing the loop
+syntax. The reuse is an ordinary reconstruction aid, not proof of historical
+source spelling.
+
+Plain and `-da -fsched-verbose=5` builds of the baseline, indexed control,
+final source and separate-index ablation had identical allocated section
+bytes, non-file symbols, ordered relocations and normalized assembly within
+each pair. The final source also compiled cleanly with uninitialized-value
+and implicit-declaration diagnostics, with the same output. These diagnostics
+are not production flags. No compiler constraint is needed.
+
+Historical controls: the explicit-cursor draft emitted 496 bytes, with the
+first 100 bytes exact. Direct global-work reads in the two selection arms
+recovered that prefix. A pre-tested versus post-tested positive countdown
+and using the memcpy result for the allocated image were compiler-inert.
+Sharing the two loop counters in that old cursor form changed three register
+words but retained the eight-byte excess. Advancing the incoming parameter
+directly rather than a local cursor worsened allocation and retained the
+excess. Those controls did not supply the late-derived source induction of
+the matched indexed form.
+
+The allocator declaration remains its real pointer-returning contract from
 `sdf/sdfChip.c`. An initial draft without that declaration happened to emit
 488 bytes; its implicit integer return is not a permissible matching lever.
-Direct global-work reads in the two selection arms recover the native prefix.
-A pre-tested versus post-tested positive countdown and using the memcpy result
-for the allocated image are compiler-inert. Sharing the two loop counters
-changes three register words but retains the eight-byte excess; the preferred
-source keeps distinct counters. Advancing the incoming parameter directly
-rather than a local cursor worsens allocation and retains the excess. A real
-copy-induction/lifetime premise is needed before further trials.
