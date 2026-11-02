@@ -124,8 +124,8 @@ rcvCreateLocalStock	facility/fclRecoverCalc	0x25C	151 of 151 words match	docs/ma
 rcvDrawPanelAt	facility/fclRecoverCalc	0x1AC	107 of 107 words match	docs/matching/facility/fclRecoverCalc.md	42
 DrawElem	facility/fclRibbon	0x368	218 of 218 words match	docs/matching/facility/fclRibbon.md	3
 Qualified allocation evidence (2026-10-30)				docs/matching/facility/fclRibbon.md	33
-fclDrawSpriteAngleCore	fclShare	0x4A8	212 of 298 words match	docs/matching/facility/fclShare.md	3
-fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/matching/facility/fclShare.md	48
+fclDrawSpriteAngleCore	fclShare	0x4A8	209 of 298 words match	docs/matching/facility/fclShare.md	3
+fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/matching/facility/fclShare.md	67
 shop_Process	facility/fclShopCalc	256 bytes	37 of 64 words match	docs/matching/facility/fclShopCalc.md	3
 shopDrawBuyRow	facility/fclShopCalc	0x20C	131 of 131 words match	docs/matching/facility/fclShopCalc.md	24
 shpUpdateSeqConfirm	facility/fclShopUpdate	0xFC	63 of 63 words match	docs/matching/facility/fclShopUpdate.md	3
@@ -200,14 +200,14 @@ SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/matching/newbattle/nb
 SetSingleTarget2	newbattle/nbAi	0x26C	143 of 155 words match	docs/matching/newbattle/nbAi.md	29
 Sel_AI	newbattle/nbAi	0x358	214 of 214 words match	docs/matching/newbattle/nbAi.md	43
 nbGetVirtualAisyo	newbattle/nbCalc	0xAC	43 of 43 words match	docs/matching/newbattle/nbCalc.md	3
-nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words differ	docs/matching/newbattle/nbCameraBoss.md	3
-nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	docs/matching/newbattle/nbCameraBoss.md	50
-nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	79
-nbCameraBoss_BSMIZ_Command_Set	newbattle/nbCameraBoss	0x218	68 of 131 words differ	docs/matching/newbattle/nbCameraBoss.md	106
-nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	docs/matching/newbattle/nbCameraBoss.md	136
-nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/matching/newbattle/nbCameraBoss.md	158
-nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/matching/newbattle/nbCameraBoss.md	179
-nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440	204 of 272 words match	docs/matching/newbattle/nbCameraBoss.md	209
+nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	9 of 119 words differing	docs/matching/newbattle/nbCameraBoss.md	3
+nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	125 of 125 words match	docs/matching/newbattle/nbCameraBoss.md	23
+nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	68
+nbCameraBoss_BSMIZ_Command_Set	newbattle/nbCameraBoss	0x218	68 of 131 words differ	docs/matching/newbattle/nbCameraBoss.md	95
+nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	docs/matching/newbattle/nbCameraBoss.md	125
+nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/matching/newbattle/nbCameraBoss.md	147
+nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/matching/newbattle/nbCameraBoss.md	168
+nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440	204 of 272 words match	docs/matching/newbattle/nbCameraBoss.md	198
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/matching/newbattle/nbCameraPress.md	3
 nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	56 of 58 words match	docs/matching/newbattle/nbCameraSkill.md	3
 nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	29 of 30 words match	docs/matching/newbattle/nbCameraSkill.md	26

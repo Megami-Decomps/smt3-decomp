@@ -48,4 +48,7 @@ of the now-exact transition-local form.
 
 Integrated retail SHA1/byte comparison and no-op rebuild, 436 tooling tests,
 inline-asm gate, all 142 guarded owners / 496 drafts with stable inputs,
-7 IRX checks and reconciled reports pass. Exact-source CI is pending publication.
+7 IRX checks and reconciled reports pass. Source commit
+`cac817b4d1b0eafccce5c8670b18ffc8fb8d1949`; exact-source
+[CI 41416864184](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41416864184)
+attempt 1 passed build and Pages deployment.

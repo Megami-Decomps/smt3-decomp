@@ -2,7 +2,7 @@
 
 ## fclDrawSpriteAngleCore (fclShare, 0x4A8)
 
-212 of 298 words match, 86 of 298 differ, at the exact 1192-byte size. Builds the
+209 of 298 words match, 89 of 298 differ, at the exact 1192-byte size. Builds the
 four-vertex rotated sprite packet: sets the texture filter, allocates the prim
 buffer, turns the rectangle into a centre plus half extents, calls
 `fclCalcRotPos` once per corner, writes the four colour pairs, then the UV,
@@ -15,11 +15,11 @@ on. Three facts are load-bearing and should not be re-derived:
 - `sdf2DGetPrimPacketSize(3, 4)` and `sdf2DMakePrimPacketHeader(packet, 0x15C,
   3, 0x531, 4)`, the four-vertex counterpart of the five-vertex numbers in
   `fclDrawSpriteCore`.
-- The four corners live in an addressable array of a two-`u32` struct at
-  `sp+0x10`, and the UVs in a `u32 uv[4]` at `sp+0x0`, which is what gives the
-  `sw`/`lwu` round trips through the frame. The corner members have to be `u32`,
-  not `s32`: retail reloads them with `lwu`, and `s32` members give `lw` with the
-  same instruction count. The `fclCalcRotPos` calls then need `(s32 *)` casts.
+- The four corners live in an addressable array of two signed `s32` members
+  at `sp+0x10`, matching the actual `fclCalcRotPos(s32 *, s32 *, ...)` output
+  contract. The UVs remain `u32 uv[4]` at `sp+0x0`. Convert each signed corner
+  to `u32` when packing its low/high lane into a `u64`; this gives the native
+  `lwu` reloads without inventing unsigned output storage or pointer casts.
 - In the `color != NULL` arm, the two assignments have to be written low pair
   first, `prim[1]` before `prim[0]` and so on for all four vertices. Written the
   other way round ee-gcc folds both of `prim[0]`'s shifts into `lbu 0x2` and
@@ -44,6 +44,25 @@ both of which run eight words long; `c = color[0]` against
 `c = *(u32 *)color`; `flags & 1` against `(flags & 1) != 0`; and three orders
 for the quadword block, grouping the UVs in pairs, all four UVs first, and
 depth before UV, all of which give the same 86 words.
+
+### Guarded coordinate-lane correction
+
+The corner fields remain signed because the rotation provider writes signed
+coordinates. Directly ORing signed X with `(u64)Y << 32` first converts X to
+`u64`: for negative X its high 32 bits become all ones, overwriting the packed
+Y lane. Native instead zero-extends both 32-bit words before combining them.
+The guarded draft now explicitly uses `(u32)x | ((u64)(u32)y << 32)` at all four
+point stores. For every 32-bit X/Y pattern, this produces low 32=X and high 32=Y;
+no nonnegative-coordinate domain is assumed. The high-lane cast is also
+explicit, preserving the native unsigned load width. The real signed provider,
+array layout, all reads/stores and call interfaces are unchanged.
+
+A focused control confirms all eight point reloads change from `lw` to `lwu`.
+The positional score remains 209/298 at 1192 bytes because independent scheduling
+residuals remain. One ordinary shared vertex-pair temporary gives 210/298 but does
+not resolve them and is not retained. This is a guarded-draft correctness fix,
+not a promotion or matching credit. The broader existing geometry arithmetic
+and input contracts are not newly qualified by this local lane proof.
 
 ## fclDrawSpriteCore (fclShare, 0x2D8)
 

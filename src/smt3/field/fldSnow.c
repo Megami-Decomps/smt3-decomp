@@ -95,8 +95,6 @@ void fldSetSnowActive(void) {
 }
 
 
-/* NON_MATCHING: 107 of 109 instruction words match at the native 436-byte size. */
-#ifdef NON_MATCHING
 extern void fldSnowSeedInit(void);
 
 void fldSnowInit(void) {
@@ -139,8 +137,12 @@ void fldSnowInit(void) {
         if (floor == 0x18) {
             return;
         }
-        gFldSnowSpd = -3.0f;
-        gFldSnowMode = 1;
+        {
+            /* Keep the actual speed in its native FPU home across mode publication. */
+            FAKEMATCH_ASM_REG(f32, speed, "$f0") = -3.0f;
+            gFldSnowMode = 1;
+            gFldSnowSpd = speed;
+        }
         gFldSnowYD = 10000.0f;
         life = 0xF0;
         width = 25.0f;
@@ -174,9 +176,7 @@ initSeeds:
     fldSnowSeedInit();
     fldSnowSeedReset();
 }
-#else
-INCLUDE_ASM(const s32, "field/fldSnow", fldSnowInit);
-#endif
+
 
 
 void fldFreeSnowSeed(void) {

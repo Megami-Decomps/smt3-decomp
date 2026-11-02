@@ -2,8 +2,9 @@
 
 ## fldSnowInit (field/fldSnow, 0x1B4)
 
-107 of 109 instruction words match at the native 436-byte size. Assembly
-remains active. The former draft emitted 444 bytes with 28 matching words.
+109 of 109 instruction words match at 436 bytes. Independent complete-owner
+verification gives 9 match, 0 differ, including owned data. The former draft
+emitted 444 bytes with 28 matching words.
 Native instruction bytes exclude the four-byte alignment after the return.
 
 The two area cases have independent floor locals. The floor-zero path and
@@ -15,15 +16,27 @@ allocation instruction. It avoids duplicating the allocation/lock sequence.
 Coordinate chains preserve equal X/Z initialization. Resetting the mode before
 those coordinates, and defining the area-0x18 speed before its height step,
 recover the native constant registers and first-area store order. The life and
-width defaults precede their floor-specific overrides. Qualified compiler
-probes confirm normal/dumped/hooked assembly and all RTL output parity for the
-nearby control and final draft; independent native/provider review confirms
+width defaults precede their floor-specific overrides. Earlier qualified compiler
+probes confirmed normal/dumped/hooked assembly and RTL parity for the nearby
+control and then-retained near-match, not the new binding variant. Independent
+native/provider review confirms
 every early return, value and shared allocation path.
 
-Only +0xE0 and +0xF0 differ: native stores the integer mode before the floor-five
-branch and the floating speed in its delay slot; C exchanges those two stores.
-Their values and all other instructions agree. Reversing the two area cases
-or changing to a switch loses native dispatch; reusing the Y scalar for speed
-changes floating allocation. A separate speed local and default-setting order
-changes do not close the store exchange. No qualifier, register constraint,
-extra operation or artificial dependency forces their order.
+The prior retained draft exchanged the mode and speed stores at +0xE0 and
++0xF0. A scoped real `f32 speed = -3.0f` bound to `$f0`, followed by mode
+publication and the existing speed store, gives the native order. The actual
+negative speed bits are `0xC0400000`; the sole value consumer is the real
+global speed store. No call or FPU-register clobber occurs during its lifetime.
+No empty asm, extra memory access or runtime barrier is added.
+
+Deleting the binding gives 104/109 words; restoring the old speed-before-mode
+source order with the binding gives 107/109. All eight peers and owned data
+remain exact. This is a local reconstruction aid with paired output evidence,
+not a hardware register requirement or proof of original source spelling.
+All branches, floor defaults and early returns, allocation/lock/seed calls,
+other state stores and literal ownership remain unchanged. The unresolved
+SnowTask reconstruction is separate and is not promoted by this match.
+
+Integrated retail SHA1/byte comparison and no-op rebuild, 436 tooling tests,
+inline-asm gate, all 142 guarded owners / 492 drafts with stable inputs,
+7 IRX checks and reconciled reports pass. Exact-source CI is pending publication.

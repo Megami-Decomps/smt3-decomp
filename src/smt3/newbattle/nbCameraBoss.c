@@ -3071,25 +3071,28 @@ s32 nbCameraBoss_BSLUSI_Command_Calc(nbCamera_t *pNbCamera, nbFormation_t *pCmdF
     return 1;
 }
 
-/* NON_MATCHING: 21 of 125 words, exact size; the rate bits land in $3, not $4. */
-#ifdef NON_MATCHING
+/* Keep the real interpolation rate and its consumed word representation in
+ * their native registers; see docs/matching/newbattle/nbCameraBoss.md. */
 s32 nbCameraBoss_Lusi_Cut1_Set(nbCamera_t *pNbCamera)
 {
     sdfVector4_t from;
     sdfVector4_t to;
-    f32 rate;
-    u32 bits;
+    FAKEMATCH_ASM_REG(f32, rate, "$f1");
+    union { f32 f; u32 u; } rateValue;
+    FAKEMATCH_ASM_REG(u32, bits, "$4");
     u32 type;
 
     if (pNbCamera->frame == 0) {
         effBTLModelAllShow();
     }
-    rate = pNbCamera->frame / 103.0f;
-    if (rate > 1.0f) {
-        rate = 1.0f;
-    }
-    PS2_FLOAT_BITS(bits, rate);
+    rate = pNbCamera->frame;
+    rate = rate / 103.0f;
+    rateValue.f = rate;
+    bits = rateValue.u;
     type = nbCameraBoss_BSLUSI_Type;
+    if (rate > 1.0f) {
+        PS2_FLOAT_BITS(bits, 1.0f);
+    }
     switch (type) {
     case 0:
         from.x = -921.4f;
@@ -3140,9 +3143,6 @@ s32 nbCameraBoss_Lusi_Cut1_Set(nbCamera_t *pNbCamera)
     pNbCamera->fovy = 0.69813163f;
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Lusi_Cut1_Set);
-#endif
 
 s32 nbCameraBoss_Lusi_TWORLD_Set(nbCamera_t *pNbCamera)
 {

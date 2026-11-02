@@ -2,79 +2,68 @@
 
 ## nbCameraBoss_Cut1_Run (newbattle/nbCameraBoss, 0x1DC)
 
-33 of 117 words differ, two words short of retail's 119.
+After the exact Lusi provider promotion below, a private caller-only promotion
+emits the native 476 bytes with 9 of 119 words differing. The complete owner
+has 108 match, 1 differ. Production keeps this caller assembly-backed.
 
-The dispatch is a `switch` on `effBTLModelGetID` of the invoke formation whose
-arms each run one `nbCameraBoss_*_Cut1_Run`. Retail does that as `jal callee`,
-then `b` to one shared epilogue with `ld $16` in the delay slot, with the result
-left in `$2` and never copied; the default arms put `daddu $2, $0, $0` in a
-compare's delay slot.
+The current truthful body assigns each selected callee result to `shot` and
+returns it; default paths return zero. The caller's consumer uses that result.
+An older experimental fall-through-return description is obsolete and is not
+a valid reconstruction to restore. The case order, shared MASEHA/SIMANO calls,
+and the final arm's fall-through to default remain native.
 
-Two facts got the draft from 59 words to 33:
-
-The arms must only call, not assign. `return callee(pCamera);` tail-calls every
-arm (30 words over) and `ret = callee(pCamera); break;` with one trailing
-`return ret;` allocates `ret` to `$3`, costing a `daddu` per arm. Dropping both
-and letting the function fall off the end of the `switch` leaves the callee's
-value in `$2`, which is what retail returns.
-
-The last arm's failing guard must fall into `default`, not run its own
-`return 0`. With `case 0x158: ... else { return 0; } break; default: return 0;`
-the `skill` local lands in `$4` and every compare against it shifts; writing the
-arm as two `if (...) { call; break; }` tests followed directly by the `default:`
-label puts `skill` in `$3` as retail has it. A nested `switch (skill)` for that
-arm also frees `$3` but runs three words over.
-
-What is left is two branch delay slots. On the tests whose arms call
-`BSARI_MASEHA_Run` and `Lusi_Cut1_Set`, retail leaves a `nop` and uses `bnel`
-where the draft fills the slot with the following `addiu $2, $0, <const>` and
-uses `bne`. `BSARI_MASEHA_Run` and `Lusi_Cut1_Set` remain assembly-backed after the
-`Pish_MUHENK_Run` reconstruction. Enabling their guarded C definitions makes
-this caller's output byte-identical in a compiler-context diagnostic; an
-isolated caller promotion still emits 468 of the native 476 bytes with 33
-compared words differing. The default build does not use those guarded callees,
-so the context-dependent result does not qualify a caller promotion. This is
-the "a caller can need its callee's definition" row in
-[matching-levers.md](matching-levers.md). Permuting
-the caller does not reach it. Ruled out at 33 words: forward prototypes for the
-three assembly callees and removing the two that exist; `return callee(...)`
-with the sibling call blocked by an address-taken dummy local (identical
-output); early-`break` instead of `else if` in the `0x123` and `0x102` arms;
-`switch (skill)` for those two arms (six words worse).
-
-The case bodies are laid out in retail as `{0x103, 0x124}`, `0x123`, `0x102`,
-`0x125`, `0x108`, `0x158`, and that order is what the draft uses. The `0x123`
-and `0x102` arms share their `BSARI_MASEHA_Run` and `BSARI_SIMANO_Run` calls by
-cross-jumping, which the draft reproduces.
+The remaining observed differences are MASEHA-arm scheduling at +0xD8..+0xF4
+and the ordinary-versus-likely branch at +0xFC. Earlier all-draft compilation
+with both guarded Lusi and MASEHA definitions visible produced a code-zero
+context diagnostic. That did not authorize promoting either nonmatching
+provider or this caller. The new Lusi-only production-context test still
+fails, so Lusi's match does not automatically unlock the caller. MASEHA remains
+a separate source problem; further context effects must be measured again.
 
 ## nbCameraBoss_Lusi_Cut1_Set (newbattle/nbCameraBoss, 0x1F4)
 
-21 of 125 words differ, at the exact 500-byte size.
+125 of 125 words match at 500 bytes. Independent complete-owner verification
+gives 108 match, 0 differ, including owned data and full compiler context.
 
-Two independent differences remain, and nothing in the rest of the function
-differs:
+The signed frame is reloaded after the conditional AllShow call, converted
+to a real `f32 rate`, then divided by 103.0f in a separate assignment. A local
+`$f1` binding retains the native conversion/division value. A compiler-supported
+union representation read supplies the real rate bits to a local `$4` binding;
+if the original floating `rate > 1.0f` comparison succeeds, the existing
+`PS2_FLOAT_BITS` macro supplies the bits of 1.0f instead. No integer comparison
+of floating values or numeric float-to-integer conversion is substituted.
 
-The blend factor's bits are allocated to `$3` where retail uses `$4`, and the
-switch value to `$2` where retail uses `$3`, so the whole allocation is shifted
-down by one. That also shows up as `qmtc2.ni $3` instead of `$4` in all four
-`SDF_VU0_INTERPOLATE` sites. Retail also duplicates the `mfc1` into both arms
-of the clamp (`mfc1 $4, $f1` before the `bc1f`, `mfc1 $4, $f2` on the
-fallthrough) where the draft's `if (rate > 1.0f) rate = 1.0f;` gives one
-`mov.s` and one `mfc1`. Writing the clamp over the bits instead
-(`PS2_FLOAT_BITS(bits, rate); if (rate > 1.0f) PS2_FLOAT_BITS(bits, 1.0f);`, or
-the same as an `if`/`else`) does produce the two `mfc1`s but reorders the
-divide and the 1.0 materialisation ahead of them, which is worse: 106 to 114
-words differing instead of 21.
+The unconditional type read remains after AllShow, moved before the clamp
+without crossing a call, memory write or memory-clobber operation. Native
+executes that read on both comparison outcomes. The rate binding dies before
+coordinate register reuse; the word binding feeds the four textual existing
+interpolation sites (two on a selected path), without a call or intervening
+clobber. COP1 f1 and COP2 vf1 are different register files. The six-coordinate
+loads and stores, vector operations and memory contracts, final distance/fovy
+stores, default-type behavior and return remain unchanged. Negative frames
+are not newly clamped or assumed absent. The representation read is qualified
+for the pinned EE compiler/ABI, not claimed portable to every C implementation.
 
-In the first of case 0's two lerps ee-gcc rotates two fp registers, emitting
-two `lwc1` and two `swc1` at a time where retail loads all six constants and
-then stores all six. Case 1's identical block comes out with retail's six and
-six, and so do the same blocks in `nbCameraDANTE_DCOMBO_Set` and
-`nbCameraDANTE_DCOMBO_KAGU_Set`, so this is pressure local to that one arm.
+No empty asm remains. Earlier conversion and postdivision empty constraints
+were removed while preserving exact output. Removing the final rate binding
+or merging conversion/division gives six differences at 500 bytes. A clean
+independent deletion of the final bits binding gives 508 bytes and a failing
+owner. These controls establish current-form allocation effects, not an
+absolute minimality proof or an internal optimizer-pass explanation.
 
-Ruled out: reading `nbCameraBoss_BSLUSI_Type` before the divide, between the
-clamp and the `PS2_FLOAT_BITS`, and after it; declaring `type` before `bits`;
-and a named `one` local for the 1.0 comparand.
+The old ordinary float clamp was 21/125 words different. A direct volatile
+bit-clamp changed division/constant scheduling; an ordinary union bit-clamp
+with the actual bits binding reduced the residual, and the split conversion
+plus mixed union/conditional transfer and type observation completed it.
+The older unbound-union follow-up was explicitly released without a match;
+its negative result did not test this final source form.
+
+Integrated retail SHA1/byte comparison and no-op rebuild, 436 tooling tests,
+inline-asm gate, all 142 guarded owners / 493 drafts with stable inputs,
+7 IRX checks and reconciled reports pass. Source commit
+`c6b04227ce2449fb276c31a7d1c47ffd13db8ea4`; exact-source
+[CI 41424180915](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41424180915)
+attempt 1 passed build and Pages deployment.
 
 ## nbCameraBoss_Cut2_Run (newbattle/nbCameraBoss, 0x230)
 

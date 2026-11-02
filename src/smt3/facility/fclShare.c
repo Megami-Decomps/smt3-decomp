@@ -255,7 +255,7 @@ typedef struct
 
 extern void fclCalcRotPos(s32 *pBufX, s32 *pBufY, f32 DistX, s32 DistY, s32 CenterX, s32 CenterY, s32 Angle);
 
-/* NON_MATCHING: 86 of 298 words differ at the exact size: the angle `mov.s`
+/* NON_MATCHING: 89 of 298 words differ at the exact size: the angle `mov.s`
  * scheduled out of three call delay slots, one byte of the colour read as a
  * shift rather than a load, and the quadword block hoisted. */
 #ifdef NON_MATCHING
@@ -343,17 +343,19 @@ void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
         prim[19] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
         prim[18] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
     }
+    /* Rotation writes signed coordinates; pack their independent 32-bit lanes
+     * without sign-extending X into the high Y lane. */
     prim[2] = uv[0] | ((u64)uv[1] << 32);
-    prim[4] = pt[0].x | ((u64)pt[0].y << 32);
+    prim[4] = (u32)pt[0].x | ((u64)(u32)pt[0].y << 32);
     prim[5] = (u32)(pSprite->Z >> 4);
     prim[8] = uv[2] | ((u64)uv[1] << 32);
-    prim[10] = pt[1].x | ((u64)pt[1].y << 32);
+    prim[10] = (u32)pt[1].x | ((u64)(u32)pt[1].y << 32);
     prim[11] = (u32)(pSprite->Z >> 4);
     prim[14] = uv[0] | ((u64)uv[3] << 32);
-    prim[16] = pt[2].x | ((u64)pt[2].y << 32);
+    prim[16] = (u32)pt[2].x | ((u64)(u32)pt[2].y << 32);
     prim[17] = (u32)(pSprite->Z >> 4);
     prim[20] = uv[2] | ((u64)uv[3] << 32);
-    prim[22] = pt[3].x | ((u64)pt[3].y << 32);
+    prim[22] = (u32)pt[3].x | ((u64)(u32)pt[3].y << 32);
     prim[23] = (u32)(pSprite->Z >> 4);
     switch (AlphaFlag) {
     case 1:
