@@ -35,3 +35,20 @@ assembly and intermediate representations. Remaining differences include
 row/count register allocation, row-pointer scheduling, and the destination
 pointer addressing the first byte rather than the native second byte. The
 assembly fallback remains active; this is not an exact-match promotion.
+
+## nmeBuildNameFont (nme/Nme_Init, 0x348)
+
+1 of 206 words match; native is 840 bytes against the draft's 824. Checked
+against `asm/smt3/nonmatchings/nme/Nme_Init/nmeBuildNameFont.s` word by word
+rather than trusted at this match rate: the `fontNo` arithmetic (`addu $5,$6,$5`
+against the `0xFFFF7F80` constant, i.e. `(decoded - 0x8080)` masked and
+shifted) matches the draft's formula exactly, and the per-row reload of
+`work->inputRowEnabled[row]` inside the loop condition (retail reloads it with
+`lb` every pass rather than caching it) matches the draft's unconditional
+re-read. The size and instruction-count gap is explained by one copy: retail
+copies the 0x120-byte `nmeNameGlyphImage_t` with an explicit alignment-tested
+manual loop (`ldl`/`ldr`/`sdl`/`sdr` selected by `andi $3,$3,0x7`, falling back
+to the IRX's unaligned-copy helper when needed), while the draft's plain
+`*destination = *(nmeNameGlyphImage_t *)source;` lets the compiler choose its
+own copy strategy for the same bytes. Confirmed as a codegen-shape difference,
+not a wrong value, lane or layout; the assembly fallback remains production.

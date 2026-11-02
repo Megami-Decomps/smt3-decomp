@@ -77,6 +77,7 @@ effPCPBossONGYDraw (1432 bytes)				docs/matching/effect/effPCPBoss.md	212
 effPCPBossKAGU2AttackDraw	effect/effPCPBoss	0x424	265 of 265 words match	docs/matching/effect/effPCPBoss.md	257
 effPCPBossKAGUAttackDraw	effect/effPCPBoss	0x35C	215 of 215 words match	docs/matching/effect/effPCPBoss.md	286
 effPCPDANTE_ShowTime_ShowTime_Draw	effect/effPCPBoss	0x358	214 of 214 words match	docs/matching/effect/effPCPBoss.md	325
+dds3EffectBlurDrawQuad	effect/effPCPBoss	640 bytes	55 of 160 words match	docs/matching/effect/effPCPBoss.md	363
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790	462 of 484 words match	docs/matching/effect/parManager.md	3
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/matching/effect/parManager.md	33
 evtEventViewerProcess3	event/evtEventViewer	0x16C	91 of 91 words match	docs/matching/event/evtEventViewer.md	3
@@ -180,6 +181,7 @@ fcl_103420, fclEncycAllocEntry and fcl_103560	kernel/dds3AdminiProcess	0x94, 0xA
 dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/matching/kernel/dds3ConfigMain.md	3
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matching/kernel/dds3KernelDraw.md	3
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
+dds3Titlemain	kernel/dds3TitleMain	0xD20	307 of 834 words match	docs/matching/kernel/dds3TitleMain.md	3
 slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/matching/mc/slMain.md	3
 slFileSelCalc	mc/slMain	0x340	208 of 208 words match	docs/matching/mc/slMain.md	39
 Flow2_6	newbattle/NbNegoFlowFullMoon	0x278	158 of 158 words match	docs/matching/newbattle/NbNegoFlowFullMoon.md	3
@@ -270,6 +272,7 @@ nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_C
 nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_Init.md	3
 nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Init.md	22
+nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_Init.md	39
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/matching/pb/pbGame.md	3
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/matching/pb/pbGame.md	28
 roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/matching/pb/pbGame.md	48
@@ -372,5 +375,6 @@ sceSifMUnBindRpc			60 of 71 words match	docs/matching/sdk/libmrpc.md	3
 scePadPortOpen				docs/matching/sdk/libpad.md	3
 dds3TitleDrawFade	sound/sndManager	0x4F8	318 of 318 words match	docs/matching/sound/sndManager.md	3
 dds3TitleUpdateFade	sound/sndManager	0x278	158 of 158 words match	docs/matching/sound/sndManager.md	37
+titleAllocWork	sound/sndManager	0x110	57 of 68 words match	docs/matching/sound/sndManager.md	89
 stfMain2	staff/stfMain	0x2D4	145 of 181 words match	docs/matching/staff/stfMain.md	3
 ObjDispOff	staff/stfMain	0x504	303 of 321 words match	docs/matching/staff/stfMain.md	34

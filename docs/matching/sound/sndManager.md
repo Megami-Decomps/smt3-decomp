@@ -85,3 +85,14 @@ The primary report now records 8,560 / 9,045 functions and 1,465,680 /
 attempt 1, including build and deployment. Raw logs confirm this exact checkout,
 tooling, guarded EE/IRX checks, retail checksum, report scope and uploads; the
 deployment identifies this commit and reports success.
+
+## titleAllocWork (sound/sndManager, 0x110)
+
+57 of 68 words match, at the exact 272-byte size (84%). The residual starts at
++0x40 and looks like a benign store-order permutation of three adjacent field
+resets (`mode`/`cursor`/`unk_20` are all zeroed in the same basic block); no
+value, branch or call target differs anywhere in the function. Not promoted to
+a match, but the draft's field resets, the `mode`-to-`cursor` mapping (2->0,
+1->2, 3->1), the conditional fade/movie sequence, and the trailing
+`dds3StartProcess(..., dds3Titlemain, NULL, NULL)` call all check out against
+retail.

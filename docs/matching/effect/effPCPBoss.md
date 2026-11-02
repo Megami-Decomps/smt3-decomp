@@ -359,3 +359,15 @@ seven IRX owners, and reconciled production reports.
 Source commit `21fd7386d3f34b42d9269dd681bb8a467cf67f2a` passed exact-source
 hosted CI [41114522908](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41114522908),
 attempt 1, including build and Pages deployment.
+
+## dds3EffectBlurDrawQuad (effect/effPCPBoss, 640 bytes)
+
+55 of 160 words match, at the exact 640-byte size. Low word match, but hand
+traced against `asm/smt3/nonmatchings/effect/effPCPBoss/dds3EffectBlurDrawQuad.s`
+rather than judged by the percentage alone: retail's rotated texcoord pair is
+`f14 = f8 - f1` and `f15 = f7 + f2`, where `f8 = u*cosine`, `f1 = v*sine`,
+`f7 = u*sine`, `f2 = v*cosine`, `cosine` held in `f20` from the prior `sdfCos`
+call across the `sdfSin` delay slot. That is `s = u*cosine - v*sine` and
+`t = u*sine + v*cosine`, the same sign convention and operand order the draft
+uses for `quad->vtx[i].s`/`.t`. The remaining words are register allocation and
+scheduling across the four unrolled vertices, not a value or sign difference.
