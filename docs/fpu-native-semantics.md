@@ -65,9 +65,30 @@ before every commit that touches this header, not after.
   exponent field 255 or past it) lands on that same bit pattern on hardware,
   not on `Fmax`: hardware's divide-by-zero sentinel and its arithmetic
   overflow clamp are bit-identical. An underflowing quotient flushes to a
-  signed zero. `tests/cpu/vu0_macro/divsqrt.expected`'s `vrsqrt:` section
-  corroborates the same sentinel-signed-by-numerator behaviour on VU0's
-  divide/rsqrt unit, a separate but related EE-era FPU.
+  signed zero.
+
+  The numerator-only sign rule above is specific to the EE's scalar FPU,
+  measured in `tests/cpu/ee_fpu/sqrt.expected`. It does not hold for VU0.
+  VU0's own `vdiv` signs its divide-by-zero sentinel by the **XOR** of both
+  operands' signs, not the numerator alone, measured in
+  `tests/cpu/vu0_macro/divsqrt.expected`'s `vdiv:` section: `-0 / -0`,
+  `-1 / -0`, and `-max / -0` all give `7fffffff` (positive), not `ffffffff`,
+  despite a negative numerator in every case, because the denominator is
+  negative too. VU0's `vrsqrt` only looks like it follows the EE's rule
+  because its divisor is `sqrt(|ft|)`, which is never negative, so the XOR
+  collapses to the numerator's sign alone there; that is a consequence of
+  `vrsqrt`'s own structure, not a second instance of the EE's rule. A rule
+  measured on one unit is silent about the other: neither the EE's
+  numerator-only rule nor VU0's XOR rule should be carried over to the other
+  unit's code (`ps2asm.h`, the VU0 macros) on this document's authority.
+
+  The two units do agree on one thing: `divsqrt.expected` shows VU0 treating
+  a denormal divisor exactly like positive zero (e.g. `+1 / dnmax` and
+  `+1 / +0` give the identical result and status flags), the same
+  denormal-flushing this header's `EeFpuEncodeExtended`/`frsqrtf` already
+  implement for the EE's scalar FPU. That agreement is about flushing a
+  denormal operand before dividing, not about which operand signs the
+  result, so it does not extend the numerator-only rule to VU0 either.
 - **`abs.s`**: a bare sign-bit clear, not an arithmetic absolute value.
   Unlike every other EE FPU op it never flushes a denormal or clamps a
   maximum-exponent pattern. The replacement masks the bit directly rather
