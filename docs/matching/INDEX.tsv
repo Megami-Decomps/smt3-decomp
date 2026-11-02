@@ -262,8 +262,8 @@ CheckAction_TARSEL	newbattle/nbActionProcess	0x1CC	115 of 115 words	docs/matchin
 SetDamagePacket	newbattle/nbActionProcess	0x1E0	120 of 120 words	docs/matching/newbattle/nbStageProcess.md	162
 StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/matching/newbattle/nbStageProcess.md	181
 UpdateSelect	newbattle/nbTarSelProcess	0x174	93 of 93 words match	docs/matching/newbattle/nbTarSelProcess.md	3
-UpdateFormAnime	newbattle/nbUnitProcess	0x260	138 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
-nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	23
+UpdateFormAnime	newbattle/nbUnitProcess	0x260	152 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
+nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	37
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/matching/newdata/datCalc.md	3
 datGetSkillKouka	newdata/datCalc	0x3F8	254 of 254 words match	docs/matching/newdata/datCalc.md	21
 datBossRashGetRec	newdata/datCalc	0x108	66 of 66 words match	docs/matching/newdata/datCalc.md	37

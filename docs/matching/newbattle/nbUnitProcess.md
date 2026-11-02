@@ -2,23 +2,37 @@
 
 ## UpdateFormAnime (newbattle/nbUnitProcess, 0x260)
 
-138 of 152 words match, at the exact 608-byte size. Production remains
-assembly-backed.
+152 of 152 words match at 608 bytes. Independent complete-owner verification
+gives 39 match, 0 differ, including owned data and full compiler context.
 
-The typed draft preserves the dying-motion gate, acceleration and progress
-clamps, VU0 interpolation of the position, pose callback, movement-bit clearing
-and HP scale update. It keeps pre-update progress separate from the published
-blend value, and clears movement bit 0x20 from the captured animation status.
-After the pose callback it reloads both status and progress; the no-callback
-path retains the snapshots, as retail does.
+The typed reconstruction preserves the dying-motion gate, acceleration and
+progress clamps, VU0 position interpolation, pose callback, movement-bit
+clearing and HP scale update. Status and blend are reloaded after the pose
+callback; the no-callback path retains its snapshots, as retail does.
 
-The fourteen remaining words are concentrated in the interpolation block.
-Retail copies animation status from $6 into $3 in the first branch delay slot,
-and blend from $f1 into $f2 before subtracting the complementary weight. The
-draft coalesces these values, changes the first branch to its annulled form,
-and shifts the scale/vector-selection sequence. All other instructions match.
-A separate movement local and a one-pass complementary-weight block did not
-restore either copy. No dummy copies or register constraints are retained.
+Two localized reconstruction aids retain real values with distinct consumers.
+Inside the active-animation branch, `movement = anime` feeds the actual
+`0x20` vector-selection test. `FAKEMATCH_ASM_LIVE_VOLATILE(movement)` preserves
+that copy without a fixed integer register or a new memory access. The real
+`interpolationBlend = blend` input to the second vector scale is locally bound
+to FPU `$f2`; the original blend still feeds the complementary weight and
+completion comparison. No empty float constraint is needed. No call occurs
+while the bound float is live, and the intervening macros use COP2 vector
+registers rather than clobbering FPU `$f2`. Both added snapshots are dead before
+the pose callback. The empty constraint is not a memory barrier.
+
+The ordinary separate float local is inert at 138/152 words. An unbound float
+live constraint reaches 143/152; the float binding alone reaches 149/152.
+Combining that binding with the branch-local volatile movement constraint is
+exact. Deleting the float binding from the exact source gives 140/152;
+deleting the movement constraint gives 149/152. All these controls preserve
+38 exact peers and owned data. These are measured source/output dependencies,
+not an internal-pass attribution, proof of original source spelling, or a
+claim that no simpler ordinary matching form exists.
+
+Integrated retail SHA1 and byte comparison, no-op rebuild, 436 tooling tests,
+inline-asm gate, all 144 guarded owners / 501 drafts with stable inputs,
+7 IRX checks and reconciled reports pass. Exact-source CI is pending publication.
 
 ## nbAddUnitStock (newbattle/nbUnitProcess, 0x370)
 

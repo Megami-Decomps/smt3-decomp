@@ -5,6 +5,7 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
+#include "font.h"
 
 typedef struct evtUnitHandle_t
 {
@@ -285,11 +286,12 @@ extern void nbPnl_rsetAlpha(s32 mode);
 extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 rgba,
                         void *th);
 
-extern void *frwGetNumFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
+extern frFontHandle_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                      const char *text, frFontHandle_t *previous);
 
-extern void func_001C7E38(void *frq, s32 mode, s32 arg);
+extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 flags);
 
-extern void frDestroyFontRequestAfter(void *pFRQ);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *frq);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -400,7 +402,7 @@ void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 alpha)
 {
     char *nums[10];
     nbMainProcessData_t *data;
-    void *frq;
+    frFontHandle_t *frq;
     s32 dx;
     s32 dy;
     s32 base;
@@ -415,7 +417,7 @@ void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 alpha)
     nbPnl_setOt(0x48);
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
-    col = (col & 0xFFFFFF) | (alpha << 24);
+    col = (col & 0xFFFFFF) | ((u32)alpha << 24);
     nbPnlSprite(x, y, 0x36, 0x21, 2, 0x5D, 0x36, 0x21, col, data->pnltex[3]);
     nbPnlSprite(x + 0xE1, y, -0x36, 0x21, 2, 0x5D, 0x36, 0x21, col, data->pnltex[3]);
     nbPnlSprite(x + 0x36, y, 0x75, 0x21, 0x37, 0x5D, 1, 0x21, col, data->pnltex[3]);
@@ -430,7 +432,7 @@ void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 alpha)
             started = 1;
         }
         if (started != 0) {
-            frq = frwGetNumFontFRQ(dx << 4, dy << 3, 0xFF0051, col, nums[v % base], 0);
+            frq = frwGetNumFontFRQ((s32)((u32)dx << 4), (s32)((u32)dy << 3), 0xFF0051, col, nums[v % base], 0);
             func_001C7E38(frq, 1, 0x48);
             frDestroyFontRequestAfter(frq);
         }

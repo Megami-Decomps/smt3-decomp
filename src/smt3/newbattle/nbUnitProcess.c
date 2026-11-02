@@ -944,8 +944,9 @@ s32 nbCheckLoadGroup(s32 side)
     return 0;
 }
 
-/* NON_MATCHING: 14 of 152 words differ; see docs/matching/newbattle/nbUnitProcess.md. */
-#ifdef NON_MATCHING
+/* The movement snapshot and VU interpolation weight have separate native
+ * lifetimes from the status/completion snapshots. Local constraints preserve
+ * their copies; see docs/matching/newbattle/nbUnitProcess.md. */
 extern void nbSetHpScale(nbFormation_t *form);
 
 void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork_t *work)
@@ -955,6 +956,7 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
     f32 phase;
     f32 inversePhase;
     f32 blend;
+    FAKEMATCH_ASM_REG(f32, interpolationBlend, "$f2");
     f32 power;
     f32 step;
     s32 motionIndex;
@@ -975,6 +977,9 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
 
     anime = form->anime;
     if ((anime & 0x60) != 0) {
+        u32 movement = anime;
+        /* Keep the real movement test separate from the completion status. */
+        FAKEMATCH_ASM_LIVE_VOLATILE(movement);
         phase = form->range;
         power = form->shakePower;
         step = (1.0f - phase) * power;
@@ -988,16 +993,17 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
         }
         SDF_VU0_LOADVECTOR(&form->startpos);
         blend = form->range;
+        interpolationBlend = blend;
         inversePhase = 1.0f - blend;
         PS2_FLOAT_BITS(phaseBits, inversePhase);
         SDF_VU0_SCALEVECTOR_BITS(phaseBits);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        if ((anime & 0x20) != 0) {
+        if ((movement & 0x20) != 0) {
             SDF_VU0_LOADVECTOR(&form->tarpos);
         } else {
             SDF_VU0_LOADVECTOR(&form->orgpos);
         }
-        PS2_FLOAT_BITS(phaseBits, blend);
+        PS2_FLOAT_BITS(phaseBits, interpolationBlend);
         SDF_VU0_SCALEVECTOR_BITS(phaseBits);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_VECTOR_W_SET_ZERO();
@@ -1020,9 +1026,6 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
         nbSetHpScale(form);
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", UpdateFormAnime);
-#endif
 
 void UpdateFormPosRot(nbFormation_t *form)
 {
