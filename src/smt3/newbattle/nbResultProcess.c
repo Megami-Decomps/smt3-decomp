@@ -483,14 +483,14 @@ extern void rsetAlpha(s32 mode);
 
 #ifdef NON_MATCHING
 /* 788 of 926 words match at the native 3704-byte size; first difference at
-   +0x380. Retail's four float-to-int casts are cvt.w.s, which the configured
-   ee-gcc 2.96 never selects (it always emits trunc.w.s), and reaching the
-   opcode through the fpu.h asm helper costs 82 more words of scheduling. The
-   rest is callee-saved assignment in the item-text loop and the two tail
-   blocks. The inherited volatile cast in the item-collect loop reproduces
-   retail's second lbu of the same byte and is worth about 30 words, but
-   volatile is not a legitimate match device, so that loop needs a real
-   explanation before this function could land. */
+   +0x3AC. The ordinary casts already emit the four native CVT.W.S words
+   (function 0x24); decompals objdump calls those bits trunc.w.s. Check raw
+   opcodes rather than that mnemonic. Remaining differences include saved-
+   register assignment and scheduling in the item-text loop and tail blocks.
+   The inherited volatile cast in the item-collect loop reproduces retail's
+   second lbu of the same byte and was worth about 30 words in earlier
+   experiments, but volatile is not a legitimate match device, so that loop
+   needs a real explanation before this function could land. */
 void nbFindTobiwarpLabel(nbMainProcessData_t *data)
 {
     char numberText[16];

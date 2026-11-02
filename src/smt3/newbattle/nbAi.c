@@ -213,15 +213,7 @@ extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 extern s32 nbCheckSkillCost(s32 formindex, s32 nskill);
 
-/* 164-byte entries indexed by devil id; only the field this unit reads is named. */
-typedef struct {
-    u8 unk_00[0x2];
-    u16 ailevel;
-    struct { u32 joken[2]; s32 no; } entry[13];
-    u8 unk_A4[0x4];
-} datDevilAI_t;
-
-extern datDevilAI_t D_003989E0[];
+extern datDevilAIData_t D_003989E0[];
 
 extern s32 nbSetAiTarget(nbActionProcessData_t *a, s32 code, s32 n);
 
@@ -261,7 +253,6 @@ extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
 extern s32 nbGetAiEntry(nbActionProcessData_t *a, s32 index);
 
-extern s32 D_003989EC[][41];
 
 extern char D_00545840[];
 
@@ -1790,7 +1781,7 @@ void nbRunAi(nbActionProcessData_t *a)
     no = 0;
     for (i = 0; i < 3; i++) {
         if (nbGetAiEntry(a, i) != 0) {
-            no = D_003989EC[a->work->id][i * 3];
+            no = D_003989E0[a->work->id].entry[i].no;
             break;
         }
     }

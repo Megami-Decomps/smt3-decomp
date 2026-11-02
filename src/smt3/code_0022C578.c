@@ -9522,10 +9522,6 @@ void cmpAddPanelEffEntry(s32 index, s32 x, s32 y, s32 z, u16 width, u16 height,
 INCLUDE_ASM(const s32, "code_0022C578", cmpAddPanelEffEntry);
 #endif
 
-/* NON_MATCHING: 6 of 46 words differ at the exact size: retail keeps the -1
- * return value in $2 across the null test, which moves the list pointer to
- * $3 and frees the delay slot. */
-#ifdef NON_MATCHING
 extern void cmpAddPanelEffEntry(s32 index, s32 x, s32 y, s32 z, u16 width, u16 height,
                                 u8 step, u8 delay, s32 color4, s32 color8, u8 kind);
 
@@ -9533,31 +9529,26 @@ s32 cmpAddQuePanelEff(s32 a1, s32 a2, s32 a3, u16 a4, u16 a5, u8 a6, u8 a7, s32 
 {
     cmpPanelEff_t *eff;
     s32 slot = -1;
-    s32 ret = -1;
     s32 i;
 
-    if (cmpPanelEffList != NULL)
+    if (cmpPanelEffList == NULL)
+        return -1;
+    eff = (cmpPanelEff_t *)((u8 *)cmpPanelEffList + 0x18);
+    for (i = 0; i < 32; i++)
     {
-        eff = (cmpPanelEff_t *)((u8 *)cmpPanelEffList + 0x18);
-        for (i = 0; i < 32; i++)
+        if (eff->flags == 0)
         {
-            if (eff->flags == 0)
-            {
-                slot = i;
-            }
-            eff++;
+            slot = i;
         }
-        if (slot >= 0)
-        {
-            cmpAddPanelEffEntry(slot, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
-            return slot;
-        }
+        eff++;
     }
-    return ret;
+    if (slot >= 0)
+    {
+        cmpAddPanelEffEntry(slot, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+        return slot;
+    }
+    return -1;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpAddQuePanelEff);
-#endif
 
 #ifdef NON_MATCHING
 void cmpDrawPanelEffBox(void *entry, s32 ot)

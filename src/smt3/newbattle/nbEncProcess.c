@@ -600,15 +600,16 @@ zero:
     return 0;
 }
 
+/* NON_MATCHING: native 396-byte size; 41 of 99 words differ. */
 #ifdef NON_MATCHING
-extern datDevilAIData_t D_00398A08[];
+extern datDevilAIData_t D_003989E0[];
 extern s32 nbSkillIsInRange(s32 skill, s32 type);
 
 s32 nbFindBadCurseTarget(nbActionProcessData_t *a, s32 step)
 {
     s16 skills[64];
     datUnitWork_t *work;
-    datDevilAIData_t *ai;
+    s32 aiId;
     s32 count = 0;
     s32 i;
     s32 j;
@@ -623,10 +624,11 @@ s32 nbFindBadCurseTarget(nbActionProcessData_t *a, s32 step)
             }
         }
     } else {
-        ai = &D_00398A08[a->work->id];
+        aiId = a->work->id;
         for (i = 0; i < 3; i++) {
-            for (j = 0; j < 5; j++) {
-                skill = ai->table[i][j].skill;
+            datDevilAITbl_t *entry = D_003989E0[aiId].table[i];
+            for (j = 0; j < 5; j++, entry++) {
+                skill = entry->skill;
                 if (skill != 0 && (skill & 0x8000) == 0 && nbSkillIsInRange(skill, step) != 0) {
                     skills[count++] = skill;
                 }

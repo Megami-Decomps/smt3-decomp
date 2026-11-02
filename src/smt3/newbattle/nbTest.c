@@ -213,15 +213,7 @@ typedef struct nbNegoProcessData_t
 
 #include "sdk_libc.h"
 
-/* 164-byte entries indexed by devil id; only the field this unit reads is named. */
-typedef struct {
-    u8 unk_00[0x2];
-    u16 ailevel;
-    struct { u32 joken[2]; s32 no; } entry[13];
-    u8 unk_A4[0x4];
-} datDevilAI_t;
-
-extern datDevilAI_t D_003989E0[];
+extern datDevilAIData_t D_003989E0[];
 
 extern s32 D_00551500;
 
@@ -343,36 +335,36 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-extern datDevilAI_t D_00526B50;
-extern datDevilAI_t D_00526BF4;
-extern datDevilAI_t D_00526C98;
-extern datDevilAI_t D_00526D3C;
-extern datDevilAI_t D_00526DE0;
-extern datDevilAI_t D_00526E84;
-extern datDevilAI_t D_00526F28;
-extern datDevilAI_t D_00526FCC;
-extern datDevilAI_t D_00527070;
-extern datDevilAI_t D_00527114;
-extern datDevilAI_t D_005271B8;
+extern datDevilAIData_t D_00526B50;
+extern datDevilAIData_t D_00526BF4;
+extern datDevilAIData_t D_00526C98;
+extern datDevilAIData_t D_00526D3C;
+extern datDevilAIData_t D_00526DE0;
+extern datDevilAIData_t D_00526E84;
+extern datDevilAIData_t D_00526F28;
+extern datDevilAIData_t D_00526FCC;
+extern datDevilAIData_t D_00527070;
+extern datDevilAIData_t D_00527114;
+extern datDevilAIData_t D_005271B8;
 
 extern void *memcpy(void *dest, const void *src, u32 size);
 
 void SetBossDummy(void)
 {
-    memcpy(&D_003989E0[257], &D_00526B50, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[269], &D_00526BF4, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[278], &D_00526C98, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[279], &D_00526D3C, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[280], &D_00526D3C, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[281], &D_00526D3C, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[282], &D_00526D3C, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[288], &D_00526DE0, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[292], &D_00526E84, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[259], &D_00526F28, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[291], &D_00526FCC, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[258], &D_00527070, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[293], &D_00527114, sizeof(datDevilAI_t));
-    memcpy(&D_003989E0[264], &D_005271B8, sizeof(datDevilAI_t));
+    memcpy(&D_003989E0[257], &D_00526B50, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[269], &D_00526BF4, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[278], &D_00526C98, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[279], &D_00526D3C, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[280], &D_00526D3C, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[281], &D_00526D3C, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[282], &D_00526D3C, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[288], &D_00526DE0, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[292], &D_00526E84, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[259], &D_00526F28, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[291], &D_00526FCC, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[258], &D_00527070, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[293], &D_00527114, sizeof(datDevilAIData_t));
+    memcpy(&D_003989E0[264], &D_005271B8, sizeof(datDevilAIData_t));
     evtBitOn(0xC0B);
     evtBitOff(0xC01);
     evtBitOff(0xC07);

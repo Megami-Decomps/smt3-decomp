@@ -320,9 +320,15 @@ typedef struct datUnitVisual_t
 
 typedef struct { u16 ritu, skill; u32 target; } datDevilAITbl_t;
 
+typedef struct { u16 script, event; } datDevilAIDeath_t;
+
+/* Full 0xA4-byte AI record; action tables begin at +0x28. */
 typedef struct {
-    datDevilAITbl_t table[4][5];
-    u32 reserved_A0;
+    u16 aiscript;
+    u16 ailevel;
+    struct { u32 joken[2]; s32 no; } entry[3];
+    datDevilAITbl_t table[3][5];
+    datDevilAIDeath_t death;
 } datDevilAIData_t;
 
 typedef struct { u8 ritu, item; } datNegoPresent_t;

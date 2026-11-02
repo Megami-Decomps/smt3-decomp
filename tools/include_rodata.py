@@ -90,18 +90,48 @@ def place(version):
                 retail_refs[f.group(1)] = set(re.findall(r"%lo\((\w+)\)", f.group(2)))
         bodies = {m.group(1): function_text(text, m.start()) for m in DEF.finditer(text)}
 
-        def named_refs(name, visited):
-            if name in visited:
-                return set()
-            visited.add(name)
-            code = bodies[name]
-            refs = unit_rodata.intersection(re.findall(r"\b[A-Za-z_]\w*\b", code))
+        # A source-local macro can name an external rodata symbol just like a
+        # private helper. Join continuation lines before following its tokens;
+        # do not mistake those references for literals emitted by the compiler.
+        def code_tokens(code):
+            # Macro names inside comments or literals are not expanded by C.
+            return re.sub(r'/\*.*?\*/|//[^\n]*|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'',
+                          " ", code, flags=re.S)
+
+        macro_text = code_tokens(re.sub(r"\\\n", "", text))
+        macros = {
+            name: (bool(params), body)
+            for name, params, body in re.findall(
+                r"^[ \t]*#[ \t]*define[ \t]+(\w+)(?:(\([^\n]*?\))[ \t]*|[ \t]+)([^\n]*)",
+                macro_text, re.M)
+        }
+
+        def code_refs(code, visited):
+            code = code_tokens(code)
+            tokens = set(re.findall(r"\b[A-Za-z_]\w*\b", code))
+            calls = set(re.findall(r"\b(\w+)\s*\(", code))
+            refs = unit_rodata.intersection(tokens)
+            for token in tokens:
+                if token in macros and ("macro", token) not in visited:
+                    function_like, body = macros[token]
+                    if function_like and token not in calls:
+                        continue
+                    visited.add(("macro", token))
+                    refs.update(code_refs(body, visited))
             # A private inline helper has no separate native function entry.
-            # Follow those calls without changing another retail function's ownership.
-            for callee in set(re.findall(r"\b(\w+)\s*\(", code)):
+            # Follow those calls, including calls inside macros, without changing
+            # another retail function's ownership. Tag visited nodes so cycles
+            # through either kind of source-local indirection terminate.
+            for callee in calls:
                 if callee in bodies and callee not in retail_refs:
                     refs.update(named_refs(callee, visited))
             return refs
+
+        def named_refs(name, visited):
+            if ("function", name) in visited:
+                return set()
+            visited.add(("function", name))
+            return code_refs(bodies[name], visited)
 
         compiled = set()
         for name in bodies:

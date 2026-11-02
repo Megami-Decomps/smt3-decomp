@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdk_libgcc.h"
 #include "newbattle.h"
+#include "newdata.h"
 #include "kernel.h"
 #include "nb.h"
 #include "ps2asm.h"
@@ -123,15 +124,6 @@ typedef struct nbDevilInfo_t {
 
 extern nbDevilInfo_t datDevilTable[];
 
-
-
-/* Rows of the same 164-byte stride, a separate object from D_003989E0. */
-typedef struct nbDeadEvent_t {
-    u16 script;
-    u16 event;
-    u8 unk04[0xA0];
-} nbDeadEvent_t;
-
 #include "encount.h"
 
 void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag);
@@ -187,7 +179,7 @@ extern datUnitVisual_t datModelParamTable[];
 
 extern datUnitVisual_t D_003494B0;
 
-extern nbDeadEvent_t D_00398A80[];
+extern datDevilAIData_t D_003989E0[];
 
 extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 
@@ -1035,12 +1027,12 @@ datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work)
 s32 nbCheckEventDead(nbFormation_t *form)
 {
     s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->formindex));
-    nbDeadEvent_t *p;
+    datDevilAIDeath_t *p;
 
     if (id == 0) {
         return 0;
     }
-    p = &D_00398A80[id];
+    p = &D_003989E0[id].death;
     if (p->script != 0) {
         return 1;
     }
@@ -1050,12 +1042,12 @@ s32 nbCheckEventDead(nbFormation_t *form)
 s32 nbCheckDeadScript(nbFormation_t *form)
 {
     s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->formindex));
-    nbDeadEvent_t *p;
+    datDevilAIDeath_t *p;
 
     if (id == 0) {
         return 0;
     }
-    p = &D_00398A80[id];
+    p = &D_003989E0[id].death;
     if (p->script != 0) {
         return p->script;
     }
@@ -1065,12 +1057,12 @@ s32 nbCheckDeadScript(nbFormation_t *form)
 s32 nbCheckDeadEvent(nbFormation_t *form)
 {
     s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->formindex));
-    nbDeadEvent_t *p;
+    datDevilAIDeath_t *p;
 
     if (id == 0) {
         return 0;
     }
-    p = &D_00398A80[id];
+    p = &D_003989E0[id].death;
     if (p->event != 0) {
         return p->event;
     }

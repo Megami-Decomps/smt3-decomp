@@ -27,3 +27,37 @@ to function scope, spelling its address as base-plus-index, or capturing the
 timer locally does not resolve allocation. A pointer-increment traversal
 changes more of the loop. No register pins, dummy uses or alternate types are
 used; another attempt needs a concrete lifetime or compiler-allocation premise.
+
+## nbFindBadCurseTarget (newbattle/nbEncProcess, 0x18C)
+
+The guarded draft now emits the native 396 bytes, with 58 of 99 instruction
+words matching. It remains assembly in production and earns no exact credit.
+Target-only whole-owner checks preserve all 21 existing compiled peers.
+
+The enemy branch captures the actual devil ID once, then takes a typed
+entry cursor within each of the three five-action tables of the full AI row.
+Each cursor advances only within its five-element array, including its legal
+one-past value after the final iteration. The shared row is 164 bytes, with
+three condition records followed by three action tables; the older
+four-action-table view at an interior symbol was merely a stride overlay.
+The independently observed script ID and death-script/event fields complete
+the same row, rather than separate overlapping arrays.
+
+The player branch preserves the work pointer and re-reads its skill count
+after each predicate call. The enemy branch reads each skill before its
+predicate and does not refresh the captured ID across callbacks. Both append
+the original sixteen-bit skill to the signed scratch array, then use the
+existing RNG call and signed-halfword result. No extra filtering, capacity
+limit or initialization is introduced.
+
+The target-only baseline emits 408 bytes. Correcting the row type alone is
+inert. A full-row-pointer plus scoped entry cursor emits 392 bytes; capturing
+the actual ID instead of the full-row pointer gives the preferred 396-byte
+form. A common result variable at the return tail also emits 392 bytes and
+was rejected. Earlier all-NON_MATCHING scores used a different compiler
+context and are not promotion evidence.
+
+The remaining 41 word differences include saved-register choices, the skill
+field displacement, the outer loop's two native address inductions and the
+return-tail shape. No register constraints, artificial arithmetic expansion
+or cursor outside the actual typed subobjects is justified by this residual.

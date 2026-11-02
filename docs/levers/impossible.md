@@ -83,16 +83,30 @@ unwritable too until the split is corrected:
 Both are `docs/tu-recovery.md` work, not matching work: drop the epilogue symbol
 from the split and the function above it compiles as one piece.
 
-A retail `cvt.w.s` is not reachable from a C cast. The configured
-`ee-gcc2.96` emits `trunc.w.s` for every float-to-int cast: `(s32)f`,
-`(unsigned)f` and `(s32)(g * 2.0f)` all give `trunc.w.s`, four out of four on a
-three-line probe through `tools/cc.sh`. Where retail holds the raw word
-`0x46000064`, the only route to the opcode is `fpu.h`'s `fcvtws`, and its two
-volatile asm blocks are scheduling barriers: on `nbFindTobiwarpLabel` they
-restore the four conversion words and cost 82 others, and a non-volatile local
-copy of the same helper costs 63. So the four words come back only by losing
-more than they are worth, and a function whose only residual is `cvt.w.s`
-cannot land.
+### Corrected: ordinary casts can produce CVT.W.S
+
+The earlier claim that `ee-gcc2.96` cannot select retail `cvt.w.s` from an
+ordinary C cast was incorrect for the pinned toolchain. Signed, unsigned,
+scaled and squared float-to-integer cast probes through `tools/cc.sh` emit
+`cvt.w.s` in the compiler's own assembly, outside inline-asm blocks. The
+assembled words have COP1 single format and function 0x24. The configured
+assembler keeps an explicit `trunc.w.s` distinct, with function 0x0D.
+
+Do not infer an opcode mismatch from a disassembler mnemonic alone:
+`mips-ps2-decompals-objdump` labels these function-0x24 words `trunc.w.s`.
+Check the raw instruction bits. `tools/test_ee_codegen.py` checks the cast
+probes directly in the compiled ELF, without depending on register choices
+or that disassembler's spelling.
+
+The ordinary cast in `fclDrawPanelType0` and all four casts in the current
+`nbFindTobiwarpLabel` draft already emit the native word `0x46000064`.
+The latter remains 788/926 words at 3704 bytes, with its first current
+same-offset difference at +0x3AC; no conversion-opcode repair is needed.
+Historical `fcvtws` helper experiments regressed scheduling by 82 words
+(volatile) or 63 words (non-volatile), but those observations do not establish
+that the helper is required. The remaining allocation/scheduling differences
+and inherited volatile-loop caveat still apply. This corrects the diagnosis;
+it does not promote either guarded function or earn matching credit.
 
 ## Written in assembly, and reachable only through an asm macro
 

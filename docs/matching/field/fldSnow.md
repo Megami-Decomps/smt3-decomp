@@ -39,4 +39,7 @@ SnowTask reconstruction is separate and is not promoted by this match.
 
 Integrated retail SHA1/byte comparison and no-op rebuild, 436 tooling tests,
 inline-asm gate, all 142 guarded owners / 492 drafts with stable inputs,
-7 IRX checks and reconciled reports pass. Exact-source CI is pending publication.
+7 IRX checks and reconciled reports pass. Source commit
+`996fef5f597220ca8af9a8e0cd99a87f0118a3a8`; exact-source
+[CI 41433004720](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41433004720)
+attempt 1 passed build and Pages deployment.

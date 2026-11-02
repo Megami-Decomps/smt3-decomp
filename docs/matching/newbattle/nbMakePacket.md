@@ -376,16 +376,41 @@ is `D_00398A08 + work->id * 164 + tbl * 40` over 8-byte entries, so the
 `datDevilAITbl_t` added for it is `{ u16 ritu; u16 skill; u32 target; }`, the
 same record the HD sources carry.
 
-Worth recording about the data: the AI table region is 40-byte strided with
-5 entries of 8 bytes, which the unit's existing `datDevilAI_t` overlay models
-as `entry[13]` of 12 bytes over the same 0x04..0xA0 span. The two views cannot
-both be right, and `D_00398A08` (`D_003989E0 + 0x28`) is where the 40-byte
-tables start, so the 164-byte record is most likely a 0x28-byte header
-(including three 12-byte check rows) followed by three 40-byte action tables
-and a trailing word. Nothing here needed the overlay changed, and it was left
-alone.
+The shared `datDevilAIData_t` now describes the complete 164-byte row:
+a script ID and AI level, three twelve-byte condition records, three forty-byte
+action tables, and the death-script/event pair. `D_00398A08` is the interior
+action-table base at row +0x28, not a separate array of four action tables.
+The earlier thirteen-condition overlay is removed. These type corrections
+preserve the existing matched owner functions; they do not resolve this
+function's two-zero scheduling residual.
 
 Ruled out for the two zeros: `i = 0;` before the `dds3GetRandIntA` call, after
 it, and in a `for (i = 0, acc = 0; ...)` or `for (acc = 0, i = 0; ...)` init;
 a `while` with the increment written out; and an explicit `s32 *` cursor over
 `list` in place of the subscript, which costs two more words.
+
+A qualified compiler-dump pass localizes the remaining pair. Plain compilation
+and `-da -fsched-verbose=5` produce identical allocated sections, non-file
+symbols, ordered relocations and normalized assembly (4 sections, 300 symbols,
+144 relocations). In `combine`, the original index-zero assignment is deleted;
+the loop-entry comparison becomes a replacement index-zero assignment as its
+test folds to `count <= 0`. The accumulator-zero assignment survives. Thus
+source initialization order alone does not determine the surviving pair's
+order. `sched2` selects accumulator zero, random-result copy, index zero, then
+the branch; delay-slot reorganization puts index zero in the `blez` slot.
+These are observed compiler stages, not a runtime trace of the scheduler's
+comparator tie-break or a claim about original source spelling.
+
+A separate ordinary second-loop index changes the frontier to 66/70 words at
+280 bytes: the zero sequence is correct, but four loop-body words swap the
+accumulator/index register roles. Binding that initialized, genuinely consumed
+index to native `$7`, with a read-only operand constraint alongside the random
+result, emits 284 bytes and matches 44/70 native-prefix words. Removing the
+read-only operand while retaining the binding also emits 284 bytes and matches
+44/70; neither closes the loop-entry/control-flow residual. The index lifetime
+crosses no call. All 47 matched peers remain exact in these checks.
+
+The production draft remains the 68/70 ordinary form. The scoped-index and
+constraint controls are not retained, and no exact matching credit is added.
+Further work needs a different evidence-backed premise rather than more
+initialization-order or register permutations.

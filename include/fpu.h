@@ -65,7 +65,7 @@ static inline double EeFpuLiteralValue(uint32_t bits)
 }
 
 /* Encode a double back into a host-safe 32-bit float: clamp a magnitude that
- * would need exponent field 254 or past it to +/-FLT_MAX instead (hardware
+ * would need exponent field 255 or past it to +/-FLT_MAX instead (hardware
  * would keep going through exponent 255 and then its own divide-by-zero
  * sentinel; see the file comment above for why this header stops one
  * exponent early), and flush a magnitude too small to represent to a
@@ -220,7 +220,8 @@ static inline float ffabsf(float x)
 }
 #endif
 
-/* Convert using the EE FPU's current rounding mode. */
+/* EE conversion truncates toward zero and saturates out-of-range inputs;
+ * see docs/fpu-native-semantics.md. */
 #ifndef NATIVE_FPU
 static inline int fcvtws(float value)
 {

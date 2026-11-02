@@ -117,6 +117,92 @@ class IncludeRodataTests(unittest.TestCase):
         self.assertIn('INCLUDE_RODATA(const s32, "game/testUnit", D_00300000);', first)
         self.assert_stable(first)
 
+    def test_macro_preserves_named_rodata(self) -> None:
+        self.prepare(
+            "#define DUMP(fmt) print(fmt)\n"
+            "#define DUMP_REGS() \\\n    DUMP(D_00300000)\n"
+            "void dump(void) {\n    DUMP_REGS();\n}\n",
+            [("D_00300000", 0x00300000)],
+            "glabel dump\n    addiu $2, $2, %lo(D_00300000)\nendlabel dump\n",
+        )
+        first = self.place()
+        self.assertIn('INCLUDE_RODATA(const s32, "game/testUnit", D_00300000);', first)
+        self.assert_stable(first)
+
+    def test_nested_object_macro_preserves_named_rodata_and_stops_cycles(self) -> None:
+        self.prepare(
+            "#define MESSAGE D_00300000\n"
+            "#define INNER() print(MESSAGE)\n"
+            "#define OUTER() INNER(); CYCLE\n"
+            "#define CYCLE OUTER()\n"
+            "void dump(void) {\n    OUTER();\n}\n",
+            [("D_00300000", 0x00300000)],
+            "glabel dump\n    addiu $2, $2, %lo(D_00300000)\nendlabel dump\n",
+        )
+        first = self.place()
+        self.assertIn('INCLUDE_RODATA(const s32, "game/testUnit", D_00300000);', first)
+        self.assert_stable(first)
+
+    def test_unused_macro_does_not_keep_compiled_literal(self) -> None:
+        self.prepare(
+            "#define UNUSED D_00300000\n"
+            'void dump(void) {\n    print("literal");\n}\n',
+            [("D_00300000", 0x00300000)],
+            "glabel dump\n    addiu $2, $2, %lo(D_00300000)\nendlabel dump\n",
+        )
+        first = self.place()
+        self.assertNotIn("INCLUDE_RODATA", first)
+        self.assert_stable(first)
+
+    def test_macro_names_in_literals_comments_and_bare_function_names_do_not_expand(self) -> None:
+        for statement in ('print("UNUSED()");', '/* UNUSED() */ print("literal");',
+                          '// UNUSED()\n    print("literal");', 'takeAddress(UNUSED);'):
+            with self.subTest(statement=statement):
+                self.prepare(
+                    "#define UNUSED() D_00300000\n"
+                    + "void dump(void) {\n    " + statement + "\n}\n",
+                    [("D_00300000", 0x00300000)],
+                    "glabel dump\n    addiu $2, $2, %lo(D_00300000)\nendlabel dump\n",
+                )
+                first = self.place()
+                self.assertNotIn("INCLUDE_RODATA", first)
+                self.assert_stable(first)
+
+    def test_macro_body_literals_and_comments_do_not_name_rodata(self) -> None:
+        self.prepare(
+            '#define PRINT() print("D_00300000"); /* D_00300000 */\n'
+            "void dump(void) {\n    PRINT();\n}\n",
+            [("D_00300000", 0x00300000)],
+            "glabel dump\n    addiu $2, $2, %lo(D_00300000)\nendlabel dump\n",
+        )
+        first = self.place()
+        self.assertNotIn("INCLUDE_RODATA", first)
+        self.assert_stable(first)
+
+    def test_macro_can_call_private_helper_and_cycle_back(self) -> None:
+        self.prepare(
+            "#define OUTER() helper()\n"
+            "static inline const u32 *helper(void) {\n"
+            "    OUTER();\n    return D_00300000;\n}\n"
+            "void dump(void) {\n    OUTER();\n}\n",
+            [("D_00300000", 0x00300000)],
+            "glabel dump\n    addiu $2, $2, %lo(D_00300000)\nendlabel dump\n",
+        )
+        first = self.place()
+        self.assertIn('INCLUDE_RODATA(const s32, "game/testUnit", D_00300000);', first)
+        self.assert_stable(first)
+
+    def test_function_macro_does_not_require_space_after_parameters(self) -> None:
+        self.prepare(
+            "#define PRINT()print(D_00300000)\n"
+            "void dump(void) {\n    PRINT();\n}\n",
+            [("D_00300000", 0x00300000)],
+            "glabel dump\n    addiu $2, $2, %lo(D_00300000)\nendlabel dump\n",
+        )
+        first = self.place()
+        self.assertIn('INCLUDE_RODATA(const s32, "game/testUnit", D_00300000);', first)
+        self.assert_stable(first)
+
     def test_inline_helper_preserves_named_rodata(self) -> None:
         self.prepare(
             "extern const u32 D_00300000[];\n"
