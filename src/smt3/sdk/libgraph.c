@@ -311,13 +311,7 @@ void sceGsPutDispEnv(sceGsDispEnv *disp)
 #define GIF_STAT  (*(volatile u32 *)0x10003020)
 
 
-/* MATCHES under the SDK toolchain's 2.10 assembler: 788 bytes plus retail's
- * four bytes of alignment fill, every word equal. It is held as assembly only
- * for packaging: the ten register-dump format strings have no per-symbol
- * rodata piece, splat leaves them in the unit's whole-rodata file, and writing
- * them as C literals loses retail's eight-byte string alignment and shifts the
- * image by 16 bytes. Give them a piece and this body can be promoted as is. */
-#ifdef NON_MATCHING
+/* Native diagnostic strings are retained through DUMP_REGS macro ownership. */
 /* The five timeout messages and the ten register-dump formats. */
 extern const char D_0054A428[];
 extern const char D_0054A458[];
@@ -417,9 +411,36 @@ s32 sceGsSyncPath(s32 mode, u16 timeout)
         return result;
     }
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libgraph", sceGsSyncPath);
-#endif
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A428);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A458);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A468);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A478);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A488);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A498);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A4A8);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A4B8);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A4C8);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A4D8);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A4F0);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A508);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A538);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A568);
+
+INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A590);
 
 s32 sceGsSetDefLoadImage(sceGsLoadImage *p, s16 dbp, s16 dbw, s16 dpsm, s16 dsax, s16 dsay,
                          s16 rrw, s16 rrh)

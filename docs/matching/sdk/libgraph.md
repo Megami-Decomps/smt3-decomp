@@ -20,19 +20,27 @@ recovering that extra instruction needs an independently justified source
 premise. The SDK's 2.10 assembler selection remains in effect, but is not by
 itself evidence that an input-only overwritten operand is sound.
 
-## sceGsSyncPath (0x314)
+## sceGsSyncPath (sdk/libgraph, 0x314)
 
-The C matches: 788 bytes plus retail's four bytes of alignment fill, every
-word equal, under the SDK toolchain's 2.10 assembler. It is still `INCLUDE_ASM`
-for one packaging reason, and the body is kept beside it ready to promote.
+The C matches all 788 bytes under the SDK toolchain's 2.10 assembler. The
+native function span also contains four bytes of alignment fill.
 
-The ten register-dump format strings have no per-symbol rodata piece. While the
-function was assembly they rode in its own `.s`; once it is C, splat leaves
-them in the unit's whole-rodata file, which nothing includes, and the link ends
-176 bytes short in rodata. Writing them as C literals instead loses retail's
-eight-byte string alignment and shortens the image by 16 bytes. Giving those
-ten strings a piece, the way `D_0054A428` and the other four messages have one,
-is all that is left.
+The packaging blocker was rodata ownership discovery, not missing native
+strings. The ten register-dump format symbols are named inside the source-local
+`DUMP_REGS()` macro, rather than directly in `sceGsSyncPath`. Previously,
+`include_rodata.py` followed private C helpers but not macros, so it incorrectly
+treated those ten external symbols as compiler-emitted literals and omitted
+their native pieces. Following referenced source-local macro bodies preserves
+all ten original symbol blocks, including their native alignment. No C padding,
+forced string alignment, or new compiler constraint is needed.
+
+An isolated native-file reproduction emits zero of the ten dump-string includes
+with the old generator and all ten with macro traversal; both outputs are
+stable on a second pass. The regression suite covers continued and nested
+function-like/object-like macros, cycles, unused macros, and non-expansion in
+comments, literals and bare function-like macro names. The ordinary C body is
+unchanged by this packaging repair. Full-owner and retail gates must accompany
+the promotion; exact function bytes alone do not verify rodata placement.
 
 The body itself needed: the counter in the unused timeout parameter's register,
 five spin loops with their rotated do-while shape and top tests, a
