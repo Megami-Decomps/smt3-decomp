@@ -425,25 +425,23 @@ void fclTerminalResetCommands(s8 mode, u16 id, void *commands, void *work)
 
 extern char *D_00330808[];
 
-/* NON_MATCHING: 16 of 27 words match, 108 bytes against retail's 112; the `u8`
- * counter normalizes with `andi 0xff` where retail has sll 24 / sra 24. */
-#ifdef NON_MATCHING
 extern s32 fclLoadTexture(char *pFileName);
 
 void fclTerminalLoadTextures(void *work)
 {
-    u8 i;
+    s8 i;
     s32 *tex = (s32 *)((u8 *)work + 0x2238);
 
     for (i = 0; i < 1U; i++) {
+        /* Keep the live signed counter indexed; ordinary signed induction
+         * strength-reduces the name table to a second walking pointer. */
+        FAKEMATCH_ASM_LIVE(i);
         *tex = fclLoadTexture(D_00330808[i]);
         tex++;
     }
     printf("TERMINAL : Tex load.\n");
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalLoadTextures);
-#endif
+
 
 void fclTerminalFreeTextures(void *work)
 {

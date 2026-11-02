@@ -131,7 +131,7 @@ shopDrawBuyRow	facility/fclShopCalc	0x20C	131 of 131 words match	docs/matching/f
 shpUpdateSeqConfirm	facility/fclShopUpdate	0xFC	63 of 63 words match	docs/matching/facility/fclShopUpdate.md	3
 shpGetItemFromItemBox	facility/fclShopUpdate	0x148	82 of 82 words match	docs/matching/facility/fclShopUpdate.md	47
 shpUpdateSeqPay	facility/fclShopUpdate	0x218	134 of 134 words match	docs/matching/facility/fclShopUpdate.md	84
-fclTerminalLoadTextures	fclTerminalInit	0x70	16 of 27 words match	docs/matching/facility/fclTerminalInit.md	3
+fclTerminalLoadTextures	fclTerminalInit	0x70	28 of 28 words match	docs/matching/facility/fclTerminalInit.md	3
 trmStartSaveAct	fclTerminalUpdate	0x140	80 of 80 words match	docs/matching/facility/fclTerminalUpdate.md	3
 trmUpdateSeqRoot	facility/fclTerminalUpdate	0x290	164 of 164 words match	docs/matching/facility/fclTerminalUpdate.md	37
 fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	40 of 42 words match	docs/matching/field/fldAutoMap.md	3

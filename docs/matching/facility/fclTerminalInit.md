@@ -2,6 +2,28 @@
 
 ## fclTerminalLoadTextures (fclTerminalInit, 0x70)
 
+28 of 28 words match at the native 112-byte size. A signed-byte counter plus
+one localized `FAKEMATCH_ASM_LIVE(i)` immediately before its real table-index
+consumer preserves the indexed filename load and signed counter normalization.
+The constraint emits no instruction and is a target-specific reconstruction
+aid, not a claim about original source spelling. The counter is not bound to
+a fixed register and no artificial call-crossing lifetime is introduced.
+
+The counter starts at zero, loads the sole filename, increments to one and
+exits. The slot pointer advances by four after the handle store. The native
+call, word store, signed-byte update and final diagnostic tail call are
+preserved. No volatile memory access, provider/type change, dummy computation,
+or additional executed memory access is introduced.
+
+Fresh complete-owner checks give 31 match / 0 differ, including owned data;
+no guarded function remains. Plain and `-da` builds have identical allocated
+sections, relocation sections and assembly after removing only the generated
+source-path directive. Paired ablations: unsigned counter without the constraint
+is 16/27 at 108 bytes; signed counter without it is 8/27 at 108 bytes, with
+filename indexing strength-reduced to a second walking pointer.
+
+### Historical ordinary-source residual (superseded)
+
 16 of 27 words match, 108 emitted bytes against retail's 112. Loads the
 terminal's one texture from the name table at `D_00330808` and prints
 `D_0053D5E8`.
