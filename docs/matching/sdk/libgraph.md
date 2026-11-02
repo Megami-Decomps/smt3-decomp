@@ -1,15 +1,128 @@
 # Matching notes: sdk/libgraph
 
+## sceGsResetPath (0x68)
+
+Matches, all 104 bytes, and is C in the unit.
+
+What closed it was two things. The source form is the one the SDK header uses:
+pointer-valued volatile register macros with put accessors over them, no local
+pointer anywhere, so each access materializes its own address with `lui` plus
+`ori` and a zero displacement. And the eight-word VIF packet is read as two
+quadwords through a cast of its first and fifth words, not indexed as a
+quadword array; indexing it as `u128[2]` costs nine words of register
+allocation even though the instruction count is the same. The data stays in
+asm at `D_00529F30`, declared here as `extern const u32 [8]`.
+
+The last word, the GIF_CTRL write in the return's delay slot, was never a
+source question: it is the SDK assembler's delay-slot filling, which the 2.9
+package's assembler does not do. See the sweep in
+[sdk-matching](../../sdk-matching.md).
+
+## sceGsSyncPath (0x314)
+
+The C matches: 788 bytes plus retail's four bytes of alignment fill, every
+word equal, under the SDK toolchain's 2.10 assembler. It is still `INCLUDE_ASM`
+for one packaging reason, and the body is kept beside it ready to promote.
+
+The ten register-dump format strings have no per-symbol rodata piece. While the
+function was assembly they rode in its own `.s`; once it is C, splat leaves
+them in the unit's whole-rodata file, which nothing includes, and the link ends
+176 bytes short in rodata. Writing them as C literals instead loses retail's
+eight-byte string alignment and shortens the image by 16 bytes. Giving those
+ten strings a piece, the way `D_0054A428` and the other four messages have one,
+is all that is left.
+
+The body itself needed: the counter in the unused timeout parameter's register,
+five spin loops with their rotated do-while shape and top tests, a
+post-increment counter test against 0x1000000, two COP2 control-register-29
+reads around the VU1 loop, the eleven-call diagnostic block written out at each
+of the five timeout sites so cross-jumping merges the tails, a literal zero
+return on the blocking path with the result local confined to the non-blocking
+section, and five single-statement ifs that `-O2` turns into four conditional
+moves.
+
+## sceGsSetDefDispEnv (0x374)
+
+892 bytes against retail's 888, with the first 64 words exact. The assembler
+pin does not touch this one: it has no unfilled delay slot. Matched: the
+`sceGsGetGParam` call kept external, the `mode == 2 || mode == 3` range test,
+the `checkModelVersion` path, the `_GetGsDxDyOffset` call with the four frame
+addresses formed by OR-ing into the stack pointer, the zeroing block with its
+descending stores and the mode halfword reloaded into both predecessors by
+delay-slot filling, `pmode`, the three `smode2` stores that cross-jumping
+merges into one, and `dispfb`.
+
+Two findings closed most of it. The display-mode field is read unsigned for
+the range test and sign-extended (`sll` 16, `sra` 16) for the dispatch and the
+diagnostic argument, so it is not cached in a local; reading `param->mode` at
+each use reproduces retail's reloads exactly. And `smode2` is written in each
+arm of the nested if rather than selected into a local, which is what keeps
+the three constants in branch delay slots: selecting a value gives a
+conditional move instead.
+
+The residual is in the NTSC and PAL display term. Retail adds the horizontal
+constant to the frame word with a 64-bit `daddiu` and only then the
+offset-times-magnification product, where plain C keeps that sum 32-bit.
+Giving the term a 64-bit operand does produce the `daddiu`, but gcc then folds
+the constant into the product instead and seven words are lost elsewhere, so
+the draft keeps the 32-bit form. Retail also decrements the magnification in
+the `mflo` register after both multiplies, where this shape needs one register
+copy first, and that one extra instruction shifts the remainder of the
+function.
+
+The vertical terms are written offset-plus-frame-word-plus-constant and the
+two multiplies in the order the horizontal term needs; both were read off
+retail's operand order rather than guessed.
+
 ## sceGsExecStoreImage (sdk/libgraph, 0x68C)
 
-**Reference implementation, not a match candidate.** Assembly remains production.
+**Still assembly in production.** 1668 bytes against retail's 1680 under the
+pinned assembler (1672 before it), with the first difference at +0x3C, where
+retail has its fifth prologue zero and this shape sinks that one
+initialization past the register saves. Everything the
+structure decides now agrees instruction for instruction: the seven saved
+registers and the two parameter copies, one load of each 64-bit record word
+with the width, height and pixel-store mode extracted from the loaded
+registers in that order, the 59-entry jump table with its five bodies in text
+order, the uncached `trxreg` patch, all five spin loops, the merged timeout
+blocks, both FIFO loops and the success tail. What remains is instruction
+order inside the case bodies and the cleanup block, plus three delay slots
+this compiler leaves empty for a volatile access (rule 6 in
+[sdk-matching](../../sdk-matching.md)). Measured as 142 differing lines of a
+418 against 420 instruction sequence, down from 214 before the last fix; the
+byte-level word count stays high only because the one missing instruction at
++0x3C shifts the rest.
 
-The C emits 1664 of 1676 bytes. In that emitted prefix, 392 of 416 words differ;
-24 words match and 12 bytes remain uncovered. The first difference is at +0xC.
-The 59-entry format jump table has 57 differing destinations. This is a broad
-register-allocation and scheduling residual, not an almost-exact routine.
-The complete default owner remains nine exact functions; the guarded owner
-adds only this instruction/table residual.
+Four changes took it there, from a draft that was 1656 bytes and diverged at
++0xC:
+
+The DMA quadword count is masked with the unsigned `0xFFFFFFF8`, not with
+`~7`. The unsigned constant has to be materialized with `lui` plus `ori`
+where `~7` is one `addiu`, and the 16-, 8- and 4-bit bodies then share that
+register for their align-up masks, which is five instructions and most of the
+length gap.
+
+The shared cleanup is written out in full at each of the four timeout sites
+rather than reached by a `goto`. Cross-jumping then merges the `scePrintf`
+call itself, giving retail's three call sites instead of four, exactly as it
+does for the eleven-call block of `sceGsSyncPath`.
+
+The `trxreg` patch re-extracts the width from the record word instead of
+reusing the width local. Local CSE cannot share the earlier extraction across
+the block boundary, so retail has a second mask-and-sign-extend there.
+
+Each case body computes the byte remainder first, then the quadword
+remainder, then the DMA count. That is the opposite of the earlier draft's
+order and it halved the instruction-order difference.
+
+An independent description of the function confirms the rest of the shape:
+one spin counter shared by every timeout and never reset, five counters
+zeroed before any branch with the padded height set only inside the switch,
+the saved interrupt mask living in a caller-saved temporary across the
+success path (so no call may be introduced between its assignment and its
+last use), both interrupt-mask stubs typed 64-bit, and the destination
+indexed by the sum of the two counters in the quadword loop while the byte
+loop re-derives its address each iteration.
 
 The existing `sceGsSetDefStoreImage` constructor and SDF capture callers
 establish the two-argument interface and 112-byte, seven-quadword command

@@ -43,7 +43,8 @@ for id in ee-gcc2.96 ee-gcc2.9-991111-01; do
             ;;
         *)
             ccpath="$repo/tools/compilers/ee-gcc2.9-991111-01/lib/gcc-lib/ee/2.9-ee-991111-01/cc1"
-            aspath="$repo/tools/compilers/ee-gcc2.9-991111-01/ee/bin/as"
+            # The SDK units assemble with the 2.10 as (configure.py's note).
+            aspath="$repo/tools/compilers/ee-gcc2.96/ee/bin/as"
             minor=9
             grepcc='-fno-common'
             grepas='-G0'

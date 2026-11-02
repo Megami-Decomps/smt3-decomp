@@ -63,6 +63,9 @@ EE_AS_FLAGS = "-EL -G8 -g -Iinclude"
 
 # The Sony EE libraries were compiled by an older ee-gcc than the game code, at
 # the flags their own makefile records. docs/sdk-matching.md has the evidence.
+# Their assembler fills branch delay slots, which the 2.9 package's own as
+# never does; from one cc1 output only the 2.10 as gives retail's
+# sceGsResetPath. Filling is on because these units carry no -g.
 EEGCC29 = TOOLS / "compilers" / "ee-gcc2.9-991111-01"
 TOOLCHAINS = {
     "ee-gcc2.96": {
@@ -76,7 +79,7 @@ TOOLCHAINS = {
         "cc1": EEGCC29 / "lib" / "gcc-lib" / "ee" / "2.9-ee-991111-01" / "cc1",
         "defines": CC1_DEFINES.replace("-D__GNUC_MINOR__=96", "-D__GNUC_MINOR__=9"),
         "flags": "-quiet -O2 -G 0 -fno-common",
-        "as": EEGCC29 / "ee" / "bin" / "as",
+        "as": EE_AS,
         "as_flags": "-EL -G0 -Iinclude",
     },
 }

@@ -3,7 +3,9 @@
 # for the permuter and quick experiments:
 #   tools/cc.sh [extra cc1 flags] in.c -o out.o
 # SMT3_VERSION selects the INCLUDE_ASM tree (default smt3); SMT3_I386_LIBDIR as
-# for configure.py when the system has no 32-bit loader.
+# for configure.py when the system has no 32-bit loader. SMT3_COMPILER
+# overrides the unit's configured compiler, and SMT3_AS the assembler binary,
+# for point-release sweeps.
 set -e
 root=$(cd "$(dirname "$0")/.." && pwd)
 in= out= flags=
@@ -32,6 +34,7 @@ if [ -n "$canon" ]; then
     fi
     [ -z "$configured" ] || compiler=$configured
 fi
+[ -z "$SMT3_COMPILER" ] || compiler=$SMT3_COMPILER
 case $compiler in
     ee-gcc2.96)
         ee="$root/tools/compilers/ee-gcc2.96"
@@ -46,6 +49,22 @@ case $compiler in
         minor=9
         ccflags='-quiet -O2 -G 0 -fno-common'
         asflags='-EL -G0 -Iinclude'
+        # Delay-slot filling: configure.py's note on the 2.10 assembler.
+        as_default="$root/tools/compilers/ee-gcc2.96/ee/bin/as"
+        ;;
+    ee-gcc2.9-*)
+        ee="$root/tools/compilers/$compiler"
+        cc1=$(echo "$ee"/lib/gcc-lib/ee/*/cc1)
+        minor=9
+        ccflags='-quiet -O2 -G 0 -fno-common'
+        asflags='-EL -G0 -Iinclude'
+        ;;
+    ee-gcc2.95*)
+        ee="$root/tools/compilers/$compiler"
+        cc1=$(echo "$ee"/lib/gcc-lib/ee/*/cc1)
+        minor=95
+        ccflags='-quiet -O2 -G 0 -fno-common'
+        asflags='-EL -G0 -Iinclude'
         ;;
     *) echo "unsupported compiler for $canon: $compiler" >&2; exit 2 ;;
 esac
@@ -58,6 +77,14 @@ patched_sha=d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1
 if ! grep -qx "$patched_sha" "$root/tools/compilers/ee-gcc2.96/lib/gcc-lib/ee/2.96-ee-001003-1/cc1.aslr-fixed" 2>/dev/null; then
     [ -z "$SMT3_ALLOW_ASLR" ] && command -v setarch >/dev/null && aslr="setarch $(uname -m) -R"
 fi
+# decomp.me packages some builds as a wrapper script with their own loader.
+runcc() {
+    if [ "$(head -c4 "$cc1" | od -An -tx1 | tr -d ' \n')" = "7f454c46" ]; then
+        run "$@"
+    else
+        $aslr "$@"
+    fi
+}
 run() {
     if [ -n "$SMT3_I386_LIBDIR" ]; then
         $aslr "$SMT3_I386_LIBDIR/ld-linux.so.2" --library-path "$SMT3_I386_LIBDIR" "$@"
@@ -87,7 +114,7 @@ if [ -n "$canon" ]; then
     unit_asflags=$(sed -n "s|^[[:space:]]*$rel[[:space:]]\{1,\}\([^#]*\).*|\1|p" "config/$version/asflags.txt" 2>/dev/null || :)
     asflags="$asflags $unit_asflags"
 fi
-run "$cc1" \
+runcc "$cc1" \
     -D__GNUC__=2 "-D__GNUC_MINOR__=$minor" -D__GNUC_PATCHLEVEL__=0 \
     -Dmips -DMIPSEL -DR5900 -D_mips -D_MIPSEL -D_R5900 -D__ee__ \
     -D__mips__ -D__MIPSEL__ -D__R5900__ -D__mips -D__MIPSEL -D__R5900 -D__OPTIMIZE__ \
@@ -98,4 +125,9 @@ run "$cc1" \
     $ccflags $flags "$cc_in" -o "$cc_out"
 # SMT3_KEEP_S=path keeps the compiler's assembly (check_unit measures inline asm).
 if [ -n "$SMT3_KEEP_S" ]; then cp "$cc_out" "$SMT3_KEEP_S"; fi
-run "$ee/ee/bin/as" $asflags -o "$out" "$cc_out"
+as_bin=${SMT3_AS:-${as_default:-"$ee/ee/bin/as"}}
+if [ "$(head -c4 "$as_bin" | od -An -tx1 | tr -d ' \n')" = "7f454c46" ]; then
+    run "$as_bin" $asflags -o "$out" "$cc_out"
+else
+    $aslr "$as_bin" $asflags -o "$out" "$cc_out"
+fi
