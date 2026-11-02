@@ -26,41 +26,47 @@ agree. No extra loop block or dummy copies are retained.
 
 ## EmTask (pipe/pipeSection, 0x34C)
 
-189 of 211 instruction words match at the native 844-byte size. Production
-remains assembly-backed. The complete 101-entry action table and its target
-layout are reproduced by the C switch, including the explicit no-action case.
+211 of 211 words match at the native 844-byte size in ordinary C. No register
+binding, empty operand, new asm macro or changed interface is retained.
+The complete 101-entry action table and target layout are reproduced.
 
-The body preserves the two lifetime windows, flag-dependent counter clearing,
-two independent player-follow paths and all action callbacks. The second
-player-follow path reads the current ID after the first callback. Deactivation
-from an action still reaches model positioning; lifetime expiration returns
-earlier. The zeroed temporary is the real 32-byte object passed to construction
-and insertion. Constructor and insertion declarations match their providers.
+One ordinary `tagPipeObject *player` serves the two independent follow phases.
+Each phase assigns the actual `objMyData()` result before reading X and Y;
+the first value is dead before the second call. The intervening object-ID
+observation remains a reload after the first callback. Offset and count remain
+separate block-local values, so their lifetimes are not merged with each other
+or across the two phases.
 
-Separate entry/dispatch action snapshots reproduce the initial byte registers.
-Capturing the object offset before the global counter reproduces the lifetime
-comparison operands. A signed halfword snapshot of each decremented follow
-count reproduces the native extent. All 22 remaining differences occur in the
-two player-follow blocks: the global offset and player-pointer registers,
-counter narrowing, and load/store scheduling differ. Native stores the counter
-before loading the player's Y coordinate and carries the player pointer in a
-separate register. A raw word count snapshot loses two instructions per block;
-checking the pre-decrement before copying Y gives 188 matching words instead of
-189. Capturing the stored pre-decrement result after X also loses two words per
-block; an unsigned halfword snapshot does not close the gap.
+The countdown is observed as its unsigned 16-bit pattern, then decremented in
+`s32` (range -1 through 65534, without overflow). The store and signed-halfword
+zero test narrow that result using the verified EE low-halfword behavior.
+The result therefore matches native for all 65536 input patterns, including
+zero wrapping to 0xffff, 0x8000 becoming 0x7fff and 0xffff becoming 0xfffe.
+This does not claim portable signed narrowing outside that target. Offset
+publication, X copy, count publication, Y observation and deactivation retain
+the native order; no callback, additional read or artificial consumer is added.
 
-A qualified pinned-compiler `--alloc --no-dumps` trace identifies the current
-allocation in the first follow block (local-alloc block 11). Call-result pseudo
-116 has the `$2` suggestion and is assigned `$2`, retaining the player pointer
-through the count load. Offset pseudo 117 has live interval `[6,16]` and no
-suggestion, and receives `$4`. Halfword count pseudo 121 has interval `[10,28]`
-and receives `$3`. The suggested call-result quantity is allocated before the
-unsuggested quantities; the count's priority is 15000 versus the offset's 2000.
-This accounts for the current pointer/count register arrangement. It does not
-establish an ordinary source change that produces the native copy into `$4`.
-Hooked/unhooked assembly and normal-output parity passed without RTL dumps
-using compiler SHA-256
-`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
+The old separate-pointer/signed-count form gives 189/211 at 844 bytes. Shared pointer,
+offset and count locals with the old narrow arithmetic give 852 bytes. Explicit
+wide decrement and narrowed zero test with separate ordinary pointers gives
+836 bytes; a shared player pointer with separate offset/count phases is exact.
+Sharing all three wide-phase locals instead leaves 199/211 at 844 bytes. Diagnostic
+bindings of the actual pointers also reached exact output with the corrected
+counter expression, but were reduced away and are not retained. These are
+source/output dependencies, not original-source or internal-pass claims.
+
+The body preserves both lifetime windows, flag-dependent clearing and all
+action callbacks. Action deactivation still reaches model positioning, while
+lifetime expiration returns earlier. Construction/insertion receive the real
+zeroed 32-byte temporary, with their truthful provider interfaces unchanged.
+
+### Historical allocation observation
+
+The earlier 189/211 draft's qualified no-dumps trace assigned the first
+call-result pseudo 116 to its suggested `$2`, before offset 117 and count 121.
+That explained the old arrangement but did not establish a permanent source
+boundary. The exact ordinary reuse form above is newly measured; no debugger
+trace of its internal allocation is claimed.
 
 
 ## MyAction (pipe/pipeSection, 0x21C)

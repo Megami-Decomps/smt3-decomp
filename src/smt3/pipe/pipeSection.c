@@ -836,8 +836,8 @@ void MyHitAction(tagPipeObject *object)
 INCLUDE_ASM(const s32, "pipe/pipeSection", MyHitAction);
 #endif
 
-/* NON_MATCHING: 22 of 211 words differ; see docs/matching/pipe/pipeSection.md. */
-#ifdef NON_MATCHING
+/* The player pointer is reused in two independent follow phases. Each phase
+ * observes a fresh player and decrements/tests the low 16 counter bits. */
 extern u8 objMake(tagPipeObject *object, s32 offset, u8 id, u8 way, u8 action, u8 value);
 extern s32 objAdd(tagPipeObject *object);
 extern void ActionRot(tagPipeObject *object);
@@ -856,6 +856,7 @@ void EmTask(tagPipeObject *object)
     tagPipeObject temporary;
     u8 action;
     u8 nextAction;
+    tagPipeObject *player;
 
     memset(&temporary, 0, sizeof(temporary));
     action = object->action;
@@ -878,28 +879,38 @@ void EmTask(tagPipeObject *object)
     }
 
     if (object->id == 0xB) {
-        tagPipeObject *player = objMyData();
-        s32 currentOffset = offsetCount;
-        s16 count = object->count - 1;
+        s32 currentOffset;
+        s32 count;
+
+        player = objMyData();
+        currentOffset = offsetCount;
+        /* Keep the native low-halfword decrement; narrowing is only needed
+         * for the stored counter and the zero test, not the arithmetic. */
+        count = (u16)object->count - 1;
 
         object->offset = currentOffset;
         object->pos[0] = player->pos[0];
         object->count = count;
         object->pos[1] = player->pos[1];
-        if (count == 0) {
+        if ((s16)count == 0) {
             object->enabled = 0;
         }
     }
     if (object->id == 0xC) {
-        tagPipeObject *player = objMyData();
-        s32 currentOffset = offsetCount;
-        s16 count = object->count - 1;
+        s32 currentOffset;
+        s32 count;
+
+        player = objMyData();
+        currentOffset = offsetCount;
+        /* Keep the native low-halfword decrement; narrowing is only needed
+         * for the stored counter and the zero test, not the arithmetic. */
+        count = (u16)object->count - 1;
 
         object->offset = currentOffset;
         object->pos[0] = player->pos[0];
         object->count = count;
         object->pos[1] = player->pos[1];
-        if (count == 0) {
+        if ((s16)count == 0) {
             object->enabled = 0;
         }
     }
@@ -1001,9 +1012,6 @@ void EmTask(tagPipeObject *object)
     }
     objMdlPosSet(object);
 }
-#else
-INCLUDE_ASM(const s32, "pipe/pipeSection", EmTask);
-#endif
 
 extern void vecRotate2D(f32 *vector, f32 angle);
 
