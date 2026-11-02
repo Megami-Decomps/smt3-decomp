@@ -524,7 +524,6 @@ extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTime
                                          s32 shutdownTimer, dds3ProcessFunc_t process,
                                          dds3ProcessFunc_t shutdown, void *work);
 
-#ifdef NON_MATCHING
 dds3ProcessID_t *titleAllocWork(s32 mode)
 {
     sdfMemHandle_t *allocation;
@@ -536,13 +535,13 @@ dds3ProcessID_t *titleAllocWork(s32 mode)
     titleWork = work;
     work->unk_34 = -1;
     work->allocation = allocation;
-    work->unk_2C = 0;
     work->mode = 0;
     work->cursor = 0;
     work->unk_20 = 0;
     work->unk_30 = 0;
     work->unk_38 = 0;
     work->unk_3C = 0;
+    work->unk_2C = 0;
     titleLoadTextures();
     if (mode == 2) {
         titleWork->cursor = 0;
@@ -557,17 +556,19 @@ dds3ProcessID_t *titleAllocWork(s32 mode)
         p2sdStopBGM(0x3A0000);
         dds3FadeIn2(15);
         dds3PlayMovieByIndex(13);
-        titleWork->mode = 22;
-        titleWork->unk_28 = 0x80;
-        titleWork->unk_20 = 0;
-        titleWork->unk_30 = 0;
+        {
+            dds3TitleWork_t *state = titleWork;
+            s32 alpha = 0x80;
+            s32 nextMode = 22;
+            state->mode = nextMode;
+            state->unk_28 = alpha;
+            state->unk_30 = 0;
+            state->unk_20 = 0;
+        }
     }
     dds3BackColor = 0x80000000;
     return dds3StartProcess(D_0053DD98, 0x2B19, 0, 0, dds3Titlemain, NULL, NULL);
 }
-#else
-INCLUDE_ASM(const s32, "sound/sndManager", titleAllocWork);
-#endif
 
 s32 titleFreeWork(s32 arg)
 {

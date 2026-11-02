@@ -88,11 +88,38 @@ deployment identifies this commit and reports success.
 
 ## titleAllocWork (sound/sndManager, 0x110)
 
-57 of 68 words match, at the exact 272-byte size (84%). The residual starts at
-+0x40 and looks like a benign store-order permutation of three adjacent field
-resets (`mode`/`cursor`/`unk_20` are all zeroed in the same basic block); no
-value, branch or call target differs anywhere in the function. Not promoted to
-a match, but the draft's field resets, the `mode`-to-`cursor` mapping (2->0,
-1->2, 3->1), the conditional fade/movie sequence, and the trailing
-`dds3StartProcess(..., dds3Titlemain, NULL, NULL)` call all check out against
-retail.
+68 of 68 words match at 272 bytes in ordinary C, without compiler constraints.
+The allocation, texture setup, mode-to-cursor mapping, movie/fade calls and
+process-start tail retain their native behavior and truthful provider types.
+
+The previous 57/68 draft had three distinct scheduling differences, not just
+three adjacent zero stores: seven initial zero stores rotated by one, the
+22/128 constant materializations swapped, and the final two zero stores
+reversed. Left-rotating the seven independent initialization statements gives
+64/68; reversing the final zero statements gives 66/68. These remain ordinary
+stores of the same widths to distinct fields, with no intervening observer.
+
+After the movie call, a local `state = titleWork` captures the actual freshly
+loaded work pointer for the four following field stores. Native code likewise
+loads it once after that call. The live `alpha = 0x80` and `nextMode = 22`
+locals initialize the existing alpha and mode fields; neither value crosses
+a call or gains an artificial consumer. Declaring alpha before nextMode in
+this phase gives the exact native materialization order. Reversing those
+local declarations retains 66/68. A plain nonzero-store swap gives 64/68;
+alpha locals without the state snapshot change pointer allocation and give
+61/68. All these controls retain the native 272-byte size.
+
+The existing pre-call allocation pointer is not reused across callbacks:
+the post-movie snapshot observes the current global exactly where retail does.
+There is no extra memory access, volatile qualifier, register binding, empty
+operand, ABI change or compiler-flag change. This measured source/output
+relationship does not establish original-source spelling or an internal
+optimizer-pass mechanism.
+
+The complete affected owner checks 16 match, 0 differ, independently
+reproduced with allocated/relocation-section and normalized-assembly parity
+between ordinary and diagnostic builds. The retail checksum and direct image
+comparison pass, followed by a no-op build. All 27 tooling test files (436
+cases), the shell wrapper, inline-assembly gate, 144 guarded owners / 504
+drafts, seven IRX checks and reconciled game/all-code report scope pass.
+Hosted CI is checked on the published commit separately.

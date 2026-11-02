@@ -375,6 +375,6 @@ sceSifMUnBindRpc			60 of 71 words match	docs/matching/sdk/libmrpc.md	3
 scePadPortOpen				docs/matching/sdk/libpad.md	3
 dds3TitleDrawFade	sound/sndManager	0x4F8	318 of 318 words match	docs/matching/sound/sndManager.md	3
 dds3TitleUpdateFade	sound/sndManager	0x278	158 of 158 words match	docs/matching/sound/sndManager.md	37
-titleAllocWork	sound/sndManager	0x110	57 of 68 words match	docs/matching/sound/sndManager.md	89
+titleAllocWork	sound/sndManager	0x110	68 of 68 words match	docs/matching/sound/sndManager.md	89
 stfMain2	staff/stfMain	0x2D4	145 of 181 words match	docs/matching/staff/stfMain.md	3
 ObjDispOff	staff/stfMain	0x504	303 of 321 words match	docs/matching/staff/stfMain.md	34
