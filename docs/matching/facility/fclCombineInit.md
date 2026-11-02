@@ -80,8 +80,12 @@ or normal/diagnostic parity claim is made.
 
 Final landing gates pass the retail checksum, all 27 test files (436 cases),
 the inline-assembly gate, all 145 guarded owners / 505 drafts with stable
-inputs, seven IRX checks and reconciled reports. Exact-source hosted CI is
-pending publication.
+inputs, seven IRX checks and reconciled reports. Source commit
+`29f5a04f4e09bd446ef79dba7caa69fbf9971ad8` passed exact-source hosted
+[CI run 41377958870](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41377958870),
+attempt 1, including build and Pages deployment. Raw logs verify the exact
+checkout and deployed commit; the run completed successfully on 2026-11-02
+at 02:32:35 UTC.
 
 ### Matched result footer
 

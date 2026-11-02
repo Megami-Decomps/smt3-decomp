@@ -91,16 +91,16 @@ evtSaveViewerHeader	event/evtEventViewerMenu	0x400	256 of 256 words match	docs/m
 evtMoonProcess2	event/evtMoon	0x119C	13 of 996 words match	docs/matching/event/evtMoon.md	3
 func_00206308, func_002065C8	fclCombineInit	0x2C0 each	35 of 176 words differ	docs/matching/facility/fclCombineInit.md	3
 cmbDrawFullScreenPanel	fclCombineInit	0x68	26 of 26 words match	docs/matching/facility/fclCombineInit.md	41
-cmbDrawResultPanel	fclCombineInit	0x228	138 of 138 words match	docs/matching/facility/fclCombineInit.md	108
-cmbStartResultScript	fclCombineInit	0x84	33 of 33 words match	docs/matching/facility/fclCombineInit.md	128
-cmbGetBirthPhase	fclCombineInit	0x88	34 of 34 words match	docs/matching/facility/fclCombineInit.md	162
-cmbUpdateStockCursor2	facility/fclCombineInit	0x22C	139 of 139 words match	docs/matching/facility/fclCombineInit.md	196
-cmbCalcBirthDevil	facility/fclCombineInit	0x434	269 of 269 words match	docs/matching/facility/fclCombineInit.md	234
-cmbUpdateBirthDevil	facility/fclCombineInit	0x3B8	238 of 238 words match	docs/matching/facility/fclCombineInit.md	281
-cmbDrawBirthDevil	facility/fclCombineInit	0x274	157 of 157 words match	docs/matching/facility/fclCombineInit.md	315
-cmbUpdateRoot	facility/fclCombineInit	0x1F4	125 of 125 words match	docs/matching/facility/fclCombineInit.md	353
-func_00201FB0	facility/fclCombineInit	0x94	37 of 37 words match	docs/matching/facility/fclCombineInit.md	392
-cmbUpdateCameraPos	facility/fclCombineInit	0x14C	83 of 83 words match	docs/matching/facility/fclCombineInit.md	417
+cmbDrawResultPanel	fclCombineInit	0x228	138 of 138 words match	docs/matching/facility/fclCombineInit.md	112
+cmbStartResultScript	fclCombineInit	0x84	33 of 33 words match	docs/matching/facility/fclCombineInit.md	132
+cmbGetBirthPhase	fclCombineInit	0x88	34 of 34 words match	docs/matching/facility/fclCombineInit.md	166
+cmbUpdateStockCursor2	facility/fclCombineInit	0x22C	139 of 139 words match	docs/matching/facility/fclCombineInit.md	200
+cmbCalcBirthDevil	facility/fclCombineInit	0x434	269 of 269 words match	docs/matching/facility/fclCombineInit.md	238
+cmbUpdateBirthDevil	facility/fclCombineInit	0x3B8	238 of 238 words match	docs/matching/facility/fclCombineInit.md	285
+cmbDrawBirthDevil	facility/fclCombineInit	0x274	157 of 157 words match	docs/matching/facility/fclCombineInit.md	319
+cmbUpdateRoot	facility/fclCombineInit	0x1F4	125 of 125 words match	docs/matching/facility/fclCombineInit.md	357
+func_00201FB0	facility/fclCombineInit	0x94	37 of 37 words match	docs/matching/facility/fclCombineInit.md	396
+cmbUpdateCameraPos	facility/fclCombineInit	0x14C	83 of 83 words match	docs/matching/facility/fclCombineInit.md	421
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	103 of 106 words match	docs/matching/facility/fclEncyc.md	22
 DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	46
