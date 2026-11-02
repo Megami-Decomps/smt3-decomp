@@ -268,6 +268,7 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
     subprocess.run([sys.executable, "tools/include_rodata.py", version], cwd=ROOT, check=True)
     subprocess.run([sys.executable, "tools/include_sdata.py", version], cwd=ROOT, check=True)
     subprocess.run([sys.executable, "tools/vu_include.py", version], cwd=ROOT, check=True)
+    subprocess.run([sys.executable, "tools/label_string_padding.py", version], cwd=ROOT, check=True)
     align_bss(ROOT / "build" / version / f"{VERSIONS[version]['serial']}.ld")
     provide_data_symbols(version)
     restore_unchanged_timestamps(snapshot)
