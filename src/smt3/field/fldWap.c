@@ -140,7 +140,7 @@ void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
 devState_t *sdfFileOpen(const char *aFileName);
 
-void sdfFileRead(devState_t *aHandle, void *aPtr, s32 aLeng);
+s32 sdfFileRead(devState_t *aHandle, void *aPtr, s32 aLeng);
 
 void sdfFileClose(devState_t *aHandle);
 

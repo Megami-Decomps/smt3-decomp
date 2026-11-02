@@ -100,7 +100,7 @@ extern char D_005327A0[];
 
 extern s32 sdfFileOpen(const char *aFileName);
 
-extern void sdfFileRead(s32 aHandle, void *aPtr, s32 aLeng);
+extern s32 sdfFileRead(s32 aHandle, void *aPtr, s32 aLeng);
 
 extern void sdfFileClose(s32 aHandle);
 
