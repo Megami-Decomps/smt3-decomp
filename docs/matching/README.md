@@ -36,7 +36,6 @@ both native and emitted sizes when they differ.
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
-| 4 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
@@ -50,6 +49,7 @@ both native and emitted sizes when they differ.
 | 3 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
+| 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 3 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |

@@ -141,15 +141,17 @@ extern u8 D_0032FC98[];
 
 extern u8 D_0032FCE0[];
 
-/* NON_MATCHING: 22 of 51 words differ (first at +0x8). */
-#ifdef NON_MATCHING
 u8 ragGetListItem2(u8 index, s8 kind)
 {
-    u32 limit = D_0032FC98[index * 35 + 6] + 1;
+    s32 row = index * 35;
+    u32 limit = D_0032FC98[row + 6] + 1;
     s32 pick = (u32)dds3GetRandA(0) % limit;
-    u8 *weight = &D_0032FC98[index * 35];
-    u8 *item = &D_0032FC98[kind * 7] + index * 35 + 7;
+    u8 *weight = &D_0032FC98[row];
+    u8 *itemBase = &D_0032FC98[kind * 7];
+    u8 *item;
     s32 i;
+
+    item = itemBase + row + 7;
 
     for (i = 0; i < 7; i++) {
         if (*weight >= pick) {
@@ -160,19 +162,18 @@ u8 ragGetListItem2(u8 index, s8 kind)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagInit", ragGetListItem2);
-#endif
 
-/* NON_MATCHING: 22 of 51 words differ (first at +0x8). */
-#ifdef NON_MATCHING
 u8 ragGetListItem3(u8 index, s8 kind)
 {
-    u32 limit = D_0032FCE0[index * 35 + 6] + 1;
+    s32 row = index * 35;
+    u32 limit = D_0032FCE0[row + 6] + 1;
     s32 pick = (u32)dds3GetRandA(0) % limit;
-    u8 *weight = &D_0032FCE0[index * 35];
-    u8 *item = &D_0032FCE0[kind * 7] + index * 35 + 7;
+    u8 *weight = &D_0032FCE0[row];
+    u8 *itemBase = &D_0032FCE0[kind * 7];
+    u8 *item;
     s32 i;
+
+    item = itemBase + row + 7;
 
     for (i = 0; i < 7; i++) {
         if (*weight >= pick) {
@@ -183,9 +184,6 @@ u8 ragGetListItem3(u8 index, s8 kind)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagInit", ragGetListItem3);
-#endif
 
 #ifdef NON_MATCHING
 extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, lstWork_t *work);

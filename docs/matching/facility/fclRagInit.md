@@ -44,38 +44,36 @@ and measures 86 of 91; and `&work[0x3B]`, `(u8 *)((u32)work + 0x3B)` and a
 `u8 *list = work;` local, none of which reproduce retail's `daddu $16, $5, $0`
 copy of the second parameter.
 
-## ragGetListItem2 (fclRagInit, 0xCC)
+## ragGetListItem2, ragGetListItem3 (fclRagInit, 0xCC each)
 
-29 of 51 words match, at the exact size. Rolls `dds3GetRandA` modulo the
-count byte at +6 of a 35-byte row of `D_0032FC98`, then walks the row's seven
-weights and returns the matching byte out of the seven-entry table the second
-argument selects.
+Both weighted item lookups have 51 of 51 words matching at 204 bytes each
+using ordinary C. A named signed row byte offset and a real `itemBase = &table[kind * 7]`
+intermediate, followed by a separate `item = itemBase + row + 7` assignment,
+retain the native post-random-call address grouping and allocation. The table
+base, row offset and item pointer retain their actual native meanings. There
+are no compiler constraints, volatile accesses, fabricated objects or ABI changes.
 
-The loop, the `divu` with its divide-by-zero `break`, the `mfhi`, the
-`weight++` hoisted into the `bnez` delay slot and the two `nop`s are all
-identical. What differs is one register more in flight: retail holds the row
-offset in $17 and the count in $16, carries `pick` in $6 and the counter in
-$5, and re-derives the item pointer as `(7 * kind + table) + row` then `+ 7`
-after the divide; every shape tried allocates the pair the other way round,
-runs `pick` and the counter one register lower, and folds the `+ 7` in before
-the divide.
+Each function snapshots the row count byte before `dds3GetRandA`, as retail
+does; the weight and selected item bytes are still loaded after that call.
+The unsigned modulo and seven-entry walk are unchanged, including the zero
+fallback. The `u8` row index makes `index * 35` fit in signed 32 bits; the
+count byte plus one is 1..256, and the remainder fits in signed 32 bits.
+Valid table and kind indices remain the existing caller contract, not new
+assumed bounds. No value is pinned across the random callback.
 
-Settled on the way: the division has to be unsigned (`(u32)dds3GetRandA(0) %
-limit` with `u32 limit`), otherwise it is `div` where retail has `divu`; and
-the row has to be an `s32` byte offset into the array rather than a `u8 *`
-row pointer, which otherwise merges the table base into one pointer and runs
-20 bytes short.
+The old direct item-pointer initializer matches 29/51 words. Diagnostic
+row/weight bindings and a live item-base operand isolated the address-shape
+residual, but all were removed: the separated ordinary-C item assignment alone
+matches both helpers in the complete owner. A live-only control without the
+weight binding regresses to 35/51; retaining it is unnecessary. These are
+output-based source-shape observations, not claims about original spelling or
+an unmeasured compiler pass.
 
-Ruled out: `row` as a variable and as `index * 35` repeated inline, both of
-which give the same 22 words; `weight` declared before `pick`; `pick`
-assigned in a statement after the declarations, which adds a register; `item`
-declared before `weight`; and `item = weight + kind * 7 + 7`.
-
-## ragGetListItem3 (fclRagInit, 0xCC)
-
-29 of 51 words match, at the exact size. Byte-identical to
-`ragGetListItem2` above except for the table, `D_0032FCE0`, and it differs
-in the same 22 words for the same reason. Fix one and the other follows.
+Final complete-owner checking gives 26 match, 0 differ, including owned data.
+Independent normal/diagnostic allocated-section, relocation and normalized
+assembly parity passes. Integrated retail checksum and direct byte comparison,
+436 tests in 27 files, shell wrapper, inline-assembly gate, all 144 guarded
+owners / 502 drafts, seven IRX checks and reconciled report scope pass.
 
 ## ragBuildHeartsList (fclRagInit, 0x124)
 

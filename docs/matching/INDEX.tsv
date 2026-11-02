@@ -116,9 +116,8 @@ ragDrawList2, ragDrawList3	fclRagCalc	0x150 each		docs/matching/facility/fclRagC
 ragDrawHeartsList	fclRagCalc	0x1D0	116 of 116 words match	docs/matching/facility/fclRagCalc.md	21
 ragDrawHeartsRows	fclRagCalc	0x21C	135 of 135 words match	docs/matching/facility/fclRagCalc.md	41
 ragBuildList2, ragBuildList3	fclRagInit	0x174 each	22 of 93 words differ	docs/matching/facility/fclRagInit.md	3
-ragGetListItem2	fclRagInit	0xCC	29 of 51 words match	docs/matching/facility/fclRagInit.md	47
-ragGetListItem3	fclRagInit	0xCC	29 of 51 words match	docs/matching/facility/fclRagInit.md	74
-ragBuildHeartsList	fclRagInit	0x124	73 of 73 words match	docs/matching/facility/fclRagInit.md	80
+ragGetListItem2, ragGetListItem3	fclRagInit	0xCC each	51 of 51 words matching	docs/matching/facility/fclRagInit.md	47
+ragBuildHeartsList	fclRagInit	0x124	73 of 73 words match	docs/matching/facility/fclRagInit.md	78
 ragCheckHeartsChoice	fclRagUpdate	0x80	22 of 29 words match	docs/matching/facility/fclRagUpdate.md	3
 ragUpdateSeqConfirm	facility/fclRagUpdate	0x208	130 of 130 words match	docs/matching/facility/fclRagUpdate.md	28
 rcvCreateLocalStock	facility/fclRecoverCalc	0x25C	151 of 151 words match	docs/matching/facility/fclRecoverCalc.md	3
