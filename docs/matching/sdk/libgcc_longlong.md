@@ -63,3 +63,34 @@ while frame size, scalar allocation and the normalized core remain residuals.
 A temporary host oracle with undefined-behavior checks passes400,240 boundary
 and deterministic random cases, including minimum signed inputs and both
 divisor signs. Native sign/borrow and divmod paths were independently reviewed.
+
+## __errno_8 (sdk/libgcc_longlong_tail, 0xC)
+
+3 of 3 words match at 12 bytes in ordinary C. The accessor returns the address
+of the actual first `_errno` member of the existing `struct _reent`, through
+its global `_impure_ptr`. The incomplete tagged declaration agrees with the
+canonical libc definition, whose first member is `s32 _errno`; converting
+that struct pointer to `s32 *` obtains the member address. It loads the global
+pointer, not the errno value. The existing `.data` declaration and native
+symbol address agree. No fabricated prefix type, inline assembly, special
+compiler flag or instruction replay is used.
+
+The accessor ends at file offset 0x1E7E3C (VRAM 0x2E6E3C). The next twenty
+native bytes are zero: eight bytes end native `.text` at VRAM 0x2E6E44, and
+twelve precede `.vutext` at VRAM 0x2E6E50. A separate padding subsegment covers
+file offsets [0x1E7E3C, 0x1E7E50). Full production regeneration removes the
+old trailing assembly zeros and emits that interval exactly once; a simple
+16-byte alignment would not describe all twenty bytes. This is native image
+layout evidence, not an original errno archive-object boundary claim.
+
+Independent semantic and native-layout review accepts the reconstruction.
+Canonical owner checking gives 1 match, 0 differ. The regenerated full
+production image passes the retail SHA-1 and direct byte comparison, followed
+by a no-op Ninja build. No generic linker behavior change is required. This
+adds one function and twelve bytes to SDK coverage, outside the primary
+game/engine denominator; zero padding adds no function or instruction credit.
+
+Final local tooling passes all 27 test files (436 cases), the inline-assembly
+gate, and all seven IRX checks. A fresh two-worker guard run passes all
+145 owners / 506 drafts with identical before/after inputs. Reconciled primary and all-code reports also pass. Exact-source hosted CI
+is pending publication.

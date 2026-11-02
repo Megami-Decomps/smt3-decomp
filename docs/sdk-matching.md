@@ -843,8 +843,12 @@ integer substitute type.
 
 `config/smt3/sdk_objects.tsv` identifies the entire 168-byte helper as
 `_floatdidf.o` by bytes. Its recovered C unit starts at `0x002E6D88` and ends
-at `0x002E6E30`; the remaining errno accessor and native padding keep a
-separate assembly-backed tail. The earlier combined archive unit starts at
+at `0x002E6E30`. The following 12-byte `__errno_8` accessor now matches in
+ordinary C in `sdk/libgcc_longlong_tail`; its following 20 native zero bytes
+are a separate padding subsegment. Eight belong to the native `.text` tail
+and twelve to the gap before `.vutext`, not to the accessor's instruction
+extent. This preserves the observed image layout without asserting the
+original errno archive object's extent. The earlier combined archive unit starts at
 `0x002E52FC`, which is only four-byte aligned. Keeping the new C function in
 that aggregate raises its alignment and adds padding, shifting the linked
 image despite a standalone instruction match. The object-backed split

@@ -67,8 +67,8 @@ segments:
       # The first splat run reports candidate boundaries (find_file_boundaries);
       # each confirmed one becomes another c subsegment named code_<vram>.
       - [0x1000, asm, hand/crt0]  # 8 pad bytes, _start (0x100008, clears all 128-bit GPRs), 2 stubs; ends where dds3FirstInit begins, as in DDS
-      # .vutext (0x002E6E50, 0xE7B0): VU1 microcode, never EE code. The 12 zero
-      # bytes of .text tail padding before it fall at the end of the unit above.
+      # .vutext (0x002E6E50, 0xE7B0): VU1 microcode, never EE code.
+      # Its native leading gap is preserved by text_tail_padding below.
       - [0x11D8, c, kernel/dds3KernelMain]
       - [0x15E8, c, kernel/dds3KernelCore]
       - [0x2C50, c, sdf/sdfDefaultMain]
@@ -381,7 +381,9 @@ segments:
       - [0x1E7B30, c, sdk/libgcc_fixunsdfdi]  # _fixunsdfdi.o: byte-identified 280-byte object
       - [0x1E7C48, c, sdk/libgcc_dpdiv]  # byte-identified 320-byte _div_df.o, still assembly
       - [0x1E7D88, c, sdk/libgcc_floatdidf]  # _floatdidf.o: byte-identified 168-byte object
-      - [0x1E7E30, c, sdk/libgcc_longlong_tail]  # remaining errno accessor and native padding
+      - [0x1E7E30, c, sdk/libgcc_longlong_tail]  # errno accessor; following native zero padding is a separate subsegment
+      # Native zero tail: 8 bytes in .text, then 12 bytes before .vutext.
+      - [0x1E7E3C, pad, text_tail_padding]
       - [0x1E7E50, textbin, vutext]
       # .ctors + .dtors (both ffffffff 00000000) + .reginfo, then zeros to .data.
       - [0x1F6600, databin, ctors_dtors_reginfo]

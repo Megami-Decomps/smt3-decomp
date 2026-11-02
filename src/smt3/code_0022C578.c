@@ -7566,17 +7566,20 @@ void cmp_23A8B0(s32 arg)
     func_00239C08(1, arg);
 }
 
-/* NON_MATCHING: 4 of 16 words differ (first at +0x28). */
-#ifdef NON_MATCHING
+/* This target-specific constraint completes the real sprite ID before the
+ * tail-call argument copy/restores. Ordinary and nonvolatile forms retain a
+ * four-word scheduling difference. It emits no instructions, is not a memory
+ * barrier, and does not establish the original source spelling. */
 void cmp_23A918(s32 arg)
 {
     func_00239C08(0, arg);
     cmpAllocRefGifTag(arg);
-    fclDrawPanelSprite(0x5C000, arg);
+    {
+        s32 spriteId = 0x5C000;
+        FAKEMATCH_ASM_LIVE_VOLATILE(spriteId);
+        fclDrawPanelSprite(spriteId, arg);
+    }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmp_23A918);
-#endif
 
 void func_0023A958(f32 *pos)
 {
