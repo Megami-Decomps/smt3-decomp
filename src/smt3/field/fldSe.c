@@ -285,7 +285,7 @@ extern s32 gFldStart;
 extern void fldBgmStop(void);
 extern void p2sdResumeBgm(s32 track);
 
-#ifdef NON_MATCHING
+/* Actual bank snapshots have separate phases; see docs/matching/field/fldSe.md. */
 void fldBgmPlay(void)
 {
     s32 track;
@@ -302,15 +302,26 @@ void fldBgmPlay(void)
         }
         base = gFldBgmTop[fldGlobalBase.area].smgId;
         fldSeSmgId = base;
+        /* The published bank also feeds the track sum. Keep those two real
+         * uses on either side of this local reconstruction aid, matching
+         * native publication-before-add order; this is not a memory barrier. */
+        FAKEMATCH_ASM_LIVE(base);
         track = base + fldGlobalBase.sequenceCode;
-        if (fldGlobalBase.area == 14 && evtBitCheck(5) != 0) {
-            if (fldGlobalBase.sequenceCode != 1) {
-                fldBgmStop();
+        {
+            /* Actual area-14 comparison value, dead before evtBitCheck or
+             * any other call. The binding preserves the native operand choice. */
+            FAKEMATCH_ASM_REG(s32, specialArea, "$4") = 14;
+            if (fldGlobalBase.area == specialArea && evtBitCheck(5) != 0) {
+                if (fldGlobalBase.sequenceCode != 1) {
+                    fldBgmStop();
+                }
+                fldGlobalBase.sequenceCode = 1;
+                {
+                    s32 refreshBase = gFldBgmTop[fldGlobalBase.area].smgId;
+                    fldSeSmgId = refreshBase;
+                    track = refreshBase + 1;
+                }
             }
-            fldGlobalBase.sequenceCode = 1;
-            base = gFldBgmTop[fldGlobalBase.area].smgId;
-            fldSeSmgId = base;
-            track = base + 1;
         }
         if (fldGlobalBase.area == 20) {
             floor = fldGlobalBase.floor;
@@ -332,9 +343,11 @@ void fldBgmPlay(void)
                 gFldBgmBit = 0;
                 fldGlobalBase.sequenceCode = fldBgmParamTable[fldGlobalBase.area].normal[fldGlobalBase.floor + 1];
             }
-            base = gFldBgmTop[fldGlobalBase.area].smgId;
-            fldSeSmgId = base;
-            track = base + fldGlobalBase.sequenceCode;
+            {
+                s32 selectedBase = gFldBgmTop[fldGlobalBase.area].smgId;
+                fldSeSmgId = selectedBase;
+                track = selectedBase + fldGlobalBase.sequenceCode;
+            }
         }
     }
     if (gFldStart == 1) {
@@ -346,9 +359,6 @@ void fldBgmPlay(void)
     fldSeLastBgm = track;
     p2sdPlayBGM(track);
 }
-#else
-INCLUDE_ASM(const s32, "field/fldSe", fldBgmPlay);
-#endif
 
 void fldPlayFieldBgm(void) {
     if (fldGlobalBase.sequenceCode == 0x80) {
@@ -676,8 +686,7 @@ s32 fldWaitBgmReload(void) {
     return 0;
 }
 
-/* NON_MATCHING: 1 of 31 words differs; see docs/matching/field/fldSe.md. */
-#ifdef NON_MATCHING
+/* Exact with the real fldBgmPlay C provider visible; see matching notes. */
 void fldBgmBitChk(void)
 {
     if (fldGb != 0x22) {
@@ -698,9 +707,6 @@ void fldBgmBitChk(void)
         fldBgmPlay();
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldSe", fldBgmBitChk);
-#endif
 
 
 void fldMotionSePlay(s32 seid, s32 subid) {

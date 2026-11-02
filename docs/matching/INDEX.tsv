@@ -152,8 +152,8 @@ fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/matching/field/fld
 fldEveHit_AddEveHit	field/fldEveHit	0x1868		docs/matching/field/fldEveHit.md	3
 fldReadyScene	field/fldMain	0x594	357 of 357 words match	docs/matching/field/fldMain.md	3
 fldPlayerMotionSe	field/fldPlayer	0x5B0		docs/matching/field/fldPlayer.md	2
-fldBgmBitChk	field/fldSe	0x7C	30 of 31 words match	docs/matching/field/fldSe.md	3
-fldBgmPlay	field/fldSe	0x2D0	161 of 180 words match	docs/matching/field/fldSe.md	27
+fldBgmBitChk	field/fldSe	0x7C	31 of 31 words match	docs/matching/field/fldSe.md	3
+fldBgmPlay	field/fldSe	0x2D0	180 of 180 words match	docs/matching/field/fldSe.md	34
 fldSkyDrawFilter	field/fldSky	0xAD8	682 of 694 words match	docs/matching/field/fldSky.md	3
 fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3
 fldRunDantePatr	field/fldTest	0x2D0	180 of 180 words match	docs/matching/field/fldTest.md	3
