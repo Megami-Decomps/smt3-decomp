@@ -869,3 +869,19 @@ OFF(mov04, sdfMovieCb_t, decodeCb, 0x24);
 OFF(mov05, sdfMovieCb_t, decodeCb.fps, 0x3A);
 OFF(mov06, sdfMovieCb_t, decodeCb.frameCount, 0x64);
 OFF(mov07, sdfMovieCb_t, decodeCb.frame, 0x6C);
+
+/* AI rows: nbGetAiEntry, nbRunAi, action scans and SetBossDummy copies. */
+SZ(dai01, datDevilAIData_t, 0xA4);
+OFF(dai02, datDevilAIData_t, ailevel, 0x02);
+OFF(dai03, datDevilAIData_t, entry, 0x04);
+OFF(dai04, datDevilAIData_t, entry[1], 0x10);
+OFF(dai05, datDevilAIData_t, entry[0].no, 0x0C);
+OFF(dai06, datDevilAIData_t, table, 0x28);
+OFF(dai07, datDevilAIData_t, table[1], 0x50);
+OFF(dai08, datDevilAIData_t, death, 0xA0);
+SZ(dai09, datDevilAITbl_t, 0x08);
+OFF(dai10, datDevilAITbl_t, skill, 0x02);
+OFF(dai11, datDevilAITbl_t, target, 0x04);
+OFF(dai12, datDevilAIData_t, aiscript, 0x00);
+SZ(dai13, datDevilAIDeath_t, 0x04);
+OFF(dai14, datDevilAIData_t, death.event, 0xA2);

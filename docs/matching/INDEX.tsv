@@ -35,21 +35,21 @@ cmp_23C918	code_0022C578	0xA8		docs/matching/code_0022C578.md	448
 cmpGetKugatatiMsg	code_0022C578	0xA0	22 of 40 words differ	docs/matching/code_0022C578.md	468
 campCheckStockRoom	code_0022C578	0x9C	14 of 39 words differ	docs/matching/code_0022C578.md	486
 cmpAddQuePanelEff	code_0022C578	0xB8	46 of 46 words match	docs/matching/code_0022C578.md	502
-campDrawInfoText	code_0022C578	0xBC	17 of 47 words differ	docs/matching/code_0022C578.md	534
-cmpDrawItemListRow	code_0022C578	0xB8	2 of 46 words differ	docs/matching/code_0022C578.md	554
-campDhDrawHelpText	code_0022C578	0x158	82 of 86 words match	docs/matching/code_0022C578.md	571
-camp_draw_Process	code_0022C578	0x1A0	104 of 104 words match	docs/matching/code_0022C578.md	592
-campDrawStatusRow2	code_0022C578	0x134	69 of 77 words match	docs/matching/code_0022C578.md	634
-campDebugRegistAll	code_0022C578	0x43C	271 of 271 words match	docs/matching/code_0022C578.md	649
-cmpDrawPanelEffQuad	code_0022C578	0x20C	128 of 131 words match	docs/matching/code_0022C578.md	688
-campDhUpdateCursor	code_0022C578	0x248	143 of 146 words match	docs/matching/code_0022C578.md	723
-campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	750
-campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	774
-cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	826
-cmpUpdateDestroyItemConfirm	code_0022C578	0xE0	56 of 56 words match	docs/matching/code_0022C578.md	856
-cmpDrawStatusValue	code_0022C578	0xF4	61 of 61 words match	docs/matching/code_0022C578.md	894
-campWaitSelMessage	code_0022C578	0x15C	87 of 87 words match	docs/matching/code_0022C578.md	942
-cmpUpdateSkillSelect	code_0022C578	0x184	97 of 97 words match	docs/matching/code_0022C578.md	979
+campDrawInfoText	code_0022C578	0xBC	17 of 47 words differ	docs/matching/code_0022C578.md	537
+cmpDrawItemListRow	code_0022C578	0xB8	2 of 46 words differ	docs/matching/code_0022C578.md	557
+campDhDrawHelpText	code_0022C578	0x158	82 of 86 words match	docs/matching/code_0022C578.md	574
+camp_draw_Process	code_0022C578	0x1A0	104 of 104 words match	docs/matching/code_0022C578.md	595
+campDrawStatusRow2	code_0022C578	0x134	69 of 77 words match	docs/matching/code_0022C578.md	637
+campDebugRegistAll	code_0022C578	0x43C	271 of 271 words match	docs/matching/code_0022C578.md	652
+cmpDrawPanelEffQuad	code_0022C578	0x20C	128 of 131 words match	docs/matching/code_0022C578.md	691
+campDhUpdateCursor	code_0022C578	0x248	143 of 146 words match	docs/matching/code_0022C578.md	726
+campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	753
+campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	777
+cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	829
+cmpUpdateDestroyItemConfirm	code_0022C578	0xE0	56 of 56 words match	docs/matching/code_0022C578.md	859
+cmpDrawStatusValue	code_0022C578	0xF4	61 of 61 words match	docs/matching/code_0022C578.md	897
+campWaitSelMessage	code_0022C578	0x15C	87 of 87 words match	docs/matching/code_0022C578.md	945
+cmpUpdateSkillSelect	code_0022C578	0x184	97 of 97 words match	docs/matching/code_0022C578.md	982
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
@@ -219,8 +219,10 @@ DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/match
 AnimeCommandList	newbattle/nbCommSelProcess	0x18C	99 of 99 words match	docs/matching/newbattle/nbCommSelProcess.md	58
 DispCommandPanel (0x33C)				docs/matching/newbattle/nbCommSelProcess.md	91
 nbDebugProcess1	newbattle/nbDebugProcess	0x2A8	170 of 170 words match	docs/matching/newbattle/nbDebugProcess.md	3
+SelectDevil	newbattle/nbDebugProcess	0x218	79 of 134 words match	docs/matching/newbattle/nbDebugProcess.md	43
 Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/matching/newbattle/nbE911.md	3
 nbApplyBadCurse	newbattle/nbEncProcess	0x174	80 of 93 words match	docs/matching/newbattle/nbEncProcess.md	3
+nbFindBadCurseTarget	newbattle/nbEncProcess	0x18C		docs/matching/newbattle/nbEncProcess.md	31
 nbGetEncountJoken	newbattle/nbEncount	0x174	24 of 66 words match	docs/matching/newbattle/nbEncount.md	3
 nbCallNewBattle	newbattle/nbInit	0xA0	29 of 40 words differ	docs/matching/newbattle/nbInit.md	3
 RunNumEffectKouka	newbattle/nbKoukaProcess	0x144	81 of 81 words match	docs/matching/newbattle/nbKoukaProcess.md	3

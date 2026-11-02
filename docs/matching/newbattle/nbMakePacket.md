@@ -376,14 +376,13 @@ is `D_00398A08 + work->id * 164 + tbl * 40` over 8-byte entries, so the
 `datDevilAITbl_t` added for it is `{ u16 ritu; u16 skill; u32 target; }`, the
 same record the HD sources carry.
 
-Worth recording about the data: the AI table region is 40-byte strided with
-5 entries of 8 bytes, which the unit's existing `datDevilAI_t` overlay models
-as `entry[13]` of 12 bytes over the same 0x04..0xA0 span. The two views cannot
-both be right, and `D_00398A08` (`D_003989E0 + 0x28`) is where the 40-byte
-tables start, so the 164-byte record is most likely a 0x28-byte header
-(including three 12-byte check rows) followed by three 40-byte action tables
-and a trailing word. Nothing here needed the overlay changed, and it was left
-alone.
+The shared `datDevilAIData_t` now describes the complete 164-byte row:
+a script ID and AI level, three twelve-byte condition records, three forty-byte
+action tables, and the death-script/event pair. `D_00398A08` is the interior
+action-table base at row +0x28, not a separate array of four action tables.
+The earlier thirteen-condition overlay is removed. These type corrections
+preserve the existing matched owner functions; they do not resolve this
+function's two-zero scheduling residual.
 
 Ruled out for the two zeros: `i = 0;` before the `dds3GetRandIntA` call, after
 it, and in a `for (i = 0, acc = 0; ...)` or `for (acc = 0, i = 0; ...)` init;

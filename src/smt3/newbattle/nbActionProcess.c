@@ -1,5 +1,6 @@
 #include "common.h"
 #include "newbattle.h"
+#include "newdata.h"
 #include "kernel.h"
 #include "nb.h"
 #include "ps2asm.h"
@@ -91,12 +92,6 @@ typedef struct nbActionFunc_t {
     void (*set)(nbActionProcessData_t *a);
     s32 (*check)(nbActionProcessData_t *a);
 } nbActionFunc_t;
-
-/* 164-byte rows indexed by datUnitWork_t::id. */
-typedef struct nbDevilData_t {
-    u16 aiscript;
-    u8 unk02[0xA2];
-} nbDevilData_t;
 
 /* Persistent unit work begins four bytes into the save record array. */
 typedef struct dds3LiveBattleUnitsView_t {
@@ -305,7 +300,7 @@ extern void nbCameraSetState(u16 state);
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
-extern nbDevilData_t D_003989E0[];
+extern datDevilAIData_t D_003989E0[];
 
 extern void nbAddFlareChargePacket(s32 startframe, nbActionProcessData_t *uniqueid, s32 point);
 

@@ -344,6 +344,30 @@ with `scrGetIntPara` and returns 1.
 
 ### newdata.h
 
+`datDevilAIData_t` is the full 0xA4-byte row at `D_003989E0`, not an
+array beginning at its interior action-table symbol. `nbGetAiEntry`
+(`0x2867A8`) reads two condition words at row + 4/+8 with a 12-byte
+condition stride; `nbRunAi` (`0x287CB8`) scans three conditions and reads
+the dispatch number at +0xC. AI-level readers use an unsigned halfword at
++2. Actions begin at +0x28: `nbFindBadCurseTarget` (`0x28E5C8`) scans three
+tables of five eight-byte entries, reading each skill at +2; the action
+providers read probability, skill and target at +0/+2/+4. `SetBossDummy`
+(`0x28B628`) copies 0xA0 bytes followed by a four-byte tail, and its source
+records are 0xA4 bytes apart. `nbActionProcess` reads the unsigned script ID at +0 with `lhu`
+at `0x2537DC` and `0x253C7C`. The final four bytes are the death script/event halfwords:
+`nbCheckEventDead`, `nbCheckDeadScript` and `nbCheckDeadEvent` use
+`D_00398A80` (full row +0xA0), reading unsigned halfwords at +0/+2 with
+the same 0xA4 stride. It is an interior field, not a separate row array. The earlier thirteen-condition and four-action-
+table overlays were stride views, not evidence for those array bounds.
+
+IDB type synchronization remains pending: apply this 0xA4-byte row at
+`D_003989E0` in the `SLUS_209.11` database and make `D_003989EC`,
+`D_00398A08` and `D_00398A80` consistent interior aliases for the first
+condition's dispatch number, the action tables and the death fields. The
+source/header checks do not establish that the IDB was updated. Existing
+names and addresses are unchanged; no generated symbol block was edited.
+
+
 `dds3GlobalWork_t` is a partial view of `DDS3_GBWK`, shared by the interpreter
 and gameplay data helpers, not a claim about the allocation's complete size.
 `fldMainLoadStart` reads the signed transition halfword at +0xE before
