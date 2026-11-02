@@ -437,14 +437,17 @@ void effBTLCutSetCameraState(effBTLCut_t *hBTLCutEffect) {
     }
 }
 
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EA0);
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EB0);
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EC0);
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532ED0);
-
 /* Canonical declaration of the provider defined below. */
 extern char D_00532ED0[];
 u32 effBTLSkillGetInvokeParty(void);
+
+INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EA0);
+
+INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EB0);
+
+INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EC0);
+
+INCLUDE_RODATA(const s32, "effect/effBattle", D_00532ED0);
 
 void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     sdfVector4_t position;
