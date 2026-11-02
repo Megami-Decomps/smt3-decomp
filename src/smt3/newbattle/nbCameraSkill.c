@@ -1707,8 +1707,7 @@ void nbCameraShot_All_Set(nbCamera_t *pNbCamera)
     pNbCamera->fovy = 0.69813163f;
 }
 
-/* NON_MATCHING: 188 of 194 words match at native 776-byte size. */
-#ifdef NON_MATCHING
+/* The two angle calculations use the same temporary in disjoint phases. */
 void bCameraShot_AttackInvokeTargetPartyNear_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 {
     sdfVector4_t basePos;
@@ -1726,8 +1725,7 @@ void bCameraShot_AttackInvokeTargetPartyNear_Set(nbCamera_t *pNbCamera, nbCamera
     f32 radius;
     f32 span;
     f32 length;
-    f32 radiusAngle;
-    f32 boundAngle;
+    f32 angle;
     f32 distance;
 
     effBTLModelAllShow();
@@ -1782,20 +1780,20 @@ void bCameraShot_AttackInvokeTargetPartyNear_Set(nbCamera_t *pNbCamera, nbCamera
     SDF_VU0_LOADVECTOR_B(&basePos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(length);
-    radiusAngle = sdfAtan(0.34906582f);
+    angle = sdfAtan(0.34906582f);
     if (150.0f < radius) {
-        distance = radius / radiusAngle;
+        distance = radius / angle;
     } else if (90.0f < radius) {
-        distance = (radius * 1.5f) / radiusAngle;
+        distance = (radius * 1.5f) / angle;
     } else {
-        distance = (radius + radius) / radiusAngle;
+        distance = (radius + radius) / angle;
     }
 
     /* Keep the combined extent live across the next atan call. */
     span = length + distance;
-    boundAngle = sdfAtan(0.4712388f);
-    if (span < groupRadius / boundAngle) {
-        span *= boundAngle;
+    angle = sdfAtan(0.4712388f);
+    if (span < groupRadius / angle) {
+        span *= angle;
         effBTLModelGetSphereCenter(invoke);
         SDF_VU0_STOREVECTOR_NOMEM(&center);
         if (cameraPos.x > center.x) {
@@ -1815,9 +1813,6 @@ void bCameraShot_AttackInvokeTargetPartyNear_Set(nbCamera_t *pNbCamera, nbCamera
     pNbCamera->fovy = 0.6981316209f;
     pNbCamera->distance += distance * 1.05f;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", bCameraShot_AttackInvokeTargetPartyNear_Set);
-#endif
 
 extern f32 sdfSin(f32 aRadius);
 extern f32 fabsf(f32 x);

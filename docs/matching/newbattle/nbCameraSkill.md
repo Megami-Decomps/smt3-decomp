@@ -112,10 +112,8 @@ callee visible as C; see [callee visibility](../../levers/callee-visibility.md).
 
 ## bCameraShot_AttackInvokeTargetPartyNear_Set (newbattle/nbCameraSkill, 0x308)
 
-The draft emits the native 776 bytes, with 188 of 194 words matching. Both
-frames are 160 bytes and no native bytes are uncovered. A default scratch
-promotion checks 32 match / 1 differ, with this target as the sole difference;
-the normal build retains its assembly fallback.
+194 of 194 words match at the native 776-byte size. The frame remains
+160 bytes, with no uncovered or excess native bytes.
 
 The three aligned vectors are base position at stack+0, camera position at
 +0x10 and temporary center at +0x20. The formation calls produce separate
@@ -135,9 +133,18 @@ bytes and was reduced to the separate locals. The final length macro writes
 the camera distance field directly before direction normalization; the fovy
 store precedes the final distance addition.
 
-The remaining six words are at +0x1A0, +0x1C0, +0x1F8, +0x208, +0x214 and
-+0x228. The two atan results use `$f1` where native uses `$f2`; their moves,
-divisions and final span multiply account for every difference. There is no
-missing operation, division block or frame gap. Splitting the two angle locals
-and reversing the strict radius comparison operands leave these words unchanged.
-See [the geometry-span trace](../../levers/cross-block-locals.md#snapshot-the-camera-span-before-the-angle-call).
+One ordinary `f32 angle` holds the two real `sdfAtan` results in separate,
+disjoint phases. The first value is the divisor for the radius-derived
+distance and dies before the second atan call. The second value is the divisor
+for the group bound and, conditionally, the multiplier that corrects the span.
+Every use follows the corresponding assignment; no value is expected to
+survive a later callback. The native second-phase multiply executes in the
+sphere-center call's delay slot. No register constraint or empty assembly
+operand is retained, and providers, memory accesses and arithmetic are unchanged.
+
+Separate ordinary angle locals, including separate lexical scopes, give
+188/194 words. Reusing the actual angle-result local alone gives 194/194 at
+776 bytes. Diagnostic binding of either separate result gives 191/194; binding
+both gives 194/194 but is unnecessary and was removed. This records a measured
+source/output dependency, not an internal-pass attribution or original-source
+claim. See [the geometry-span trace](../../levers/cross-block-locals.md#snapshot-the-camera-span-before-the-angle-call).
