@@ -124,8 +124,8 @@ rcvCreateLocalStock	facility/fclRecoverCalc	0x25C	151 of 151 words match	docs/ma
 rcvDrawPanelAt	facility/fclRecoverCalc	0x1AC	107 of 107 words match	docs/matching/facility/fclRecoverCalc.md	42
 DrawElem	facility/fclRibbon	0x368	218 of 218 words match	docs/matching/facility/fclRibbon.md	3
 Qualified allocation evidence (2026-10-30)				docs/matching/facility/fclRibbon.md	33
-fclDrawSpriteAngleCore	fclShare	0x4A8	212 of 298 words match	docs/matching/facility/fclShare.md	3
-fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/matching/facility/fclShare.md	48
+fclDrawSpriteAngleCore	fclShare	0x4A8	209 of 298 words match	docs/matching/facility/fclShare.md	3
+fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/matching/facility/fclShare.md	67
 shop_Process	facility/fclShopCalc	256 bytes	37 of 64 words match	docs/matching/facility/fclShopCalc.md	3
 shopDrawBuyRow	facility/fclShopCalc	0x20C	131 of 131 words match	docs/matching/facility/fclShopCalc.md	24
 shpUpdateSeqConfirm	facility/fclShopUpdate	0xFC	63 of 63 words match	docs/matching/facility/fclShopUpdate.md	3
