@@ -720,8 +720,8 @@ void camp_22C610(void)
 void func_0022C658(void) {
 }
 
-/* NON_MATCHING: 6 of 271 words differ at the exact 1084-byte size. */
-#ifdef NON_MATCHING
+/* The final add shares the preceding slot publication. Each arm captures the
+ * current work root after its callback; derive the list only for its consumer. */
 extern void cmbClearStockEntry(cmbUnit_t *unit);
 extern s32 cmbAddDevilToStock(u16 devilId, cmbUnit_t *list, u8 count);
 extern void fclEncycDebugRegist(void);
@@ -733,7 +733,7 @@ void campDebugRegistAll(void)
     s32 i;
     u16 lastDevil;
     u32 registered;
-    cmbUnit_t *nextList;
+    dds3GlobalWork_t *nextWork;
 
     if (dds3PadButtonState[0x28] != 0) {
         return;
@@ -768,8 +768,7 @@ void campDebugRegistAll(void)
         slot = cmbAddDevilToStock(0x8A, &DDS3_GBWK->party[4], 12);
         DDS3_GBWK->party[4 + slot].unit.flag = registered;
         slot = cmbAddDevilToStock(0x8B, &DDS3_GBWK->party[4], 12);
-        nextList = &DDS3_GBWK->party[4];
-        DDS3_GBWK->party[4 + slot].unit.flag = registered;
+        nextWork = DDS3_GBWK;
         lastDevil = 0x6D;
     } else {
         slot = cmbAddDevilToStock(0x35, &DDS3_GBWK->party[4], 12);
@@ -783,12 +782,12 @@ void campDebugRegistAll(void)
         slot = cmbAddDevilToStock(0x50, &DDS3_GBWK->party[4], 12);
         DDS3_GBWK->party[4 + slot].unit.flag = registered;
         slot = cmbAddDevilToStock(0x0B, &DDS3_GBWK->party[4], 12);
-        nextList = &DDS3_GBWK->party[4];
-        DDS3_GBWK->party[4 + slot].unit.flag = registered;
+        nextWork = DDS3_GBWK;
         lastDevil = 0x9A;
     }
 
-    slot = cmbAddDevilToStock(lastDevil, nextList, 12);
+    DDS3_GBWK->party[4 + slot].unit.flag = registered;
+    slot = cmbAddDevilToStock(lastDevil, &nextWork->party[4], 12);
     DDS3_GBWK->party[4 + slot].unit.flag = registered;
     fclEncycDebugRegist();
 
@@ -800,9 +799,6 @@ void campDebugRegistAll(void)
     evtBitOn(0x28);
     evtBitOn(0x915);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDebugRegistAll);
-#endif
 
 void dds3ClearStockTable(void)
 {
