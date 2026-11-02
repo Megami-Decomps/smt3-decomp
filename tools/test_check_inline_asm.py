@@ -60,7 +60,7 @@ class Violations(unittest.TestCase):
 class Allowlist(unittest.TestCase):
     def test_every_listed_unit_still_has_inline_asm(self):
         listed = cia.load_allowlist()
-        self.assertTrue(listed)
+        # An empty allowlist is valid once every unit has migrated.
         for path in sorted(listed):
             with self.subTest(path=path):
                 self.assertTrue((ROOT / path).exists(), "listed unit is gone")
