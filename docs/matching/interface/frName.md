@@ -25,30 +25,44 @@ property explaining the initial address and count allocation.
 
 ## frGetCNameFRQ (interface/frName, 0x158)
 
-82 of 86 words match at the exact 344-byte size. Four setup instructions at
-`+0x68` through `+0x74` differ: retail places the dynamic text-buffer address
-copy in the empty-name branch delay slot, then initializes the input stride
-and output cursor; the draft copies the buffer address before the branch and
-puts the output-cursor copy in its slot. All conversion, provider-call and
-stack-restoration instructions after that window are exact.
+86 of 86 words match at the native 344-byte size in ordinary C. Output stores use `text[length]`, retaining the
+conditional and unconditional length increments and final NUL store. The
+complete owner checks six exact functions, with no code or data discrepancy.
 
-The VLA holds twice the current character count plus the terminator, matching
-the native aligned dynamic allocation. Each input pair emits its second byte;
-a nonzero first byte is emitted before it. Count and global-work reloads are
-preserved, and the output is NUL terminated. Mode 1 surrounds
+The VLA holds twice the current character count plus the terminator. Each input
+pair emits its second byte; a nonzero first byte is emitted before it. Count
+and global-work reloads are preserved. Mode 1 surrounds
 `frLinkFontString(text, style, firstOption, 0, chain)`; font spacing is then
-set to 4. The fourth input is retained as a full scalar until the link
-provider's signed-byte conversion. Input chain and returned font are distinct
-locals, which closes the initial register rotation (15 differing words).
+set to 4. The fourth input remains a full scalar until the link provider's
+signed-byte conversion; input chain and returned font are distinct locals.
 
-Ruled out: a signed-byte fourth input (72 differences, four bytes over),
-reusing the input-chain local for the result (15 differences), and an explicit
-nonempty guard around a for loop (two tests remain, eight bytes over). A
-guarded do/while restores the branch-slot setup but adds a global-pointer
-copy at the loop bound and is four bytes over. Changing the increment to the
-condition and initializing the loop counter first does not remove that copy.
-The next useful question is the native loop-header/address lifetime, not the
-already audited pair conversion or font API.
+The previous explicit output cursor was exact-sized with four setup words
+wrong at `+0x68` through `+0x74`. Qualified compiler dumps establish the
+reason: initial RTL defined both the VLA base and cursor before the loop;
+the jump pass introduced the empty-name guard after both, and delay filling
+put the cursor copy in its slot. Indexed stores instead let the loop pass
+combine their address induction into a derived pointer initialized only in
+the nonempty successor. The length counter remains live for the final NUL.
+Delay filling then puts the buffer-base copy in the empty-name branch slot,
+followed by stride and cursor setup in retail order. The original rotated
+loop also preserves CSE forwarding from the loop-condition global-work
+pointer to the first byte load, without an extra adjusted-pointer tail copy.
+
+Plain and `-da -fsched-verbose=5` builds of the indexed owner had identical
+allocated section bytes, non-file symbols, ordered relocations and normalized
+assembly. This establishes the measured optimization, not historical source
+spelling. No compiler constraint, explicit extra guard or global snapshot is
+needed.
+
+Historical negative controls: a signed-byte fourth input (72 differences,
+four bytes over), input-chain/result reuse (15 differences), and a nonempty
+guard around a for loop (two tests remain, eight bytes over). A guarded
+do/while recovered the branch-slot setup but added a global-pointer copy at
+the loop bound, four bytes over. Increment-in-condition and counter-first
+variants did not remove it. An explicit global-work snapshot/refresh retained
+the required reloads but emitted 352 bytes, with 30 of 86 words matching and
+an early adjusted pointer plus extra tail copy. These are not alternatives
+to the matched indexed-output form.
 
 ## frSetNameData
 

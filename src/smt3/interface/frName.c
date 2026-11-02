@@ -225,12 +225,9 @@ extern u8 frDisableMode(u8 flag);
 extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type, frFontHandle_t *chain);
 extern void frSetFontSpace(frFontHandle_t *font, s32 spacing);
 
-/* NON_MATCHING: 4 of 86 words differ, exact size; empty-name loop setup. */
-#ifdef NON_MATCHING
 frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 firstOption)
 {
     u8 text[frNameGlobalWork->cNameCounts[target] * 2 + 1];
-    u8 *out = text;
     s32 length = 0;
     s32 i;
     frFontHandle_t *font;
@@ -238,13 +235,12 @@ frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 fi
     for (i = 0; i < frNameGlobalWork->cNameCounts[target]; i++) {
         u8 first = frNameGlobalWork->cNames[target][i * 2];
         if (first == 0) {
-            *out = frNameGlobalWork->cNames[target][i * 2 + 1];
+            text[length] = frNameGlobalWork->cNames[target][i * 2 + 1];
         } else {
-            *out++ = first;
+            text[length] = first;
             length++;
-            *out = frNameGlobalWork->cNames[target][i * 2 + 1];
+            text[length] = frNameGlobalWork->cNames[target][i * 2 + 1];
         }
-        out++;
         length++;
     }
     text[length] = 0;
@@ -254,9 +250,6 @@ frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 fi
     frSetFontSpace(font, 4);
     return font;
 }
-#else
-INCLUDE_ASM(const s32, "interface/frName", frGetCNameFRQ);
-#endif
 
 INCLUDE_SDATA(const s32, "interface/frName", D_0054F448);
 
