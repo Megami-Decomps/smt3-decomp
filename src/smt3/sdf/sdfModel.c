@@ -84,6 +84,8 @@ typedef struct QWORD_ALIGNED
 
 /* One frame's 128-byte VU1 transform packet. The 4-aligned element type is
  * what gives retail's runtime 8-byte-alignment dispatch over the copy. */
+/* sdfModelCopyStat below keeps its stride as (frame << 7) rather than a
+ * sizeof: the multiply there changes two words of the copy's addressing. */
 typedef struct
 {
     s32 words[0x80 / 4];
@@ -378,7 +380,7 @@ sdfModelNode_t *sdfModelSearchNode(sdfModelRootNode_t *aRoot, s32 aId)
 
 sdfDmaTag_t *sdfModelSetTmRefPacket(sdfModelNode_t *aNode, sdfDmaTag_t *aBuffer, s32 aId)
 {
-    u32 addr = EE_PHYSICAL(EE_ADDR((u8 *)aNode->tmPacket + (aId << 7)));
+    u32 addr = EE_PHYSICAL(EE_ADDR((u8 *)aNode->tmPacket + aId * sizeof(sdfModelTmImage_t)));
 
     *(u64 *)aBuffer = ((u64)addr << 32) | 0x30000008;
     aBuffer->dat1 = 0x6C07C000;
@@ -876,7 +878,7 @@ void sdfModelEvalNode(sdfModelNode_t *aNode, const f32 (*aParentTm)[4], s32 aFra
     SDF_VU0_STOREMATRIX(transformed);
     workspace = aNode->tmPacket;
     if (workspace != NULL) {
-        sdf3DPrimSetTmPacket((void *)(workspace + (aFrameId << 7)));
+        sdf3DPrimSetTmPacket((void *)(workspace + aFrameId * sizeof(sdfModelTmImage_t)));
     }
     child = aNode->children;
     if (child == 0) {
