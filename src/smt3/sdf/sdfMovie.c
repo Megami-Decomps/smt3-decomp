@@ -161,7 +161,7 @@ void release_movieobj2(sdfMovieCb_t *obj, sdfGrOt_t *ot)
         (u32)((s16)obj->x + (s16)obj->width);
     packet->vertexExtent.reg = 0x05;
     tag = sdfPrimAllocDrawTag(NULL);
-    sdfDrawTagLink(tag, (u32)packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     ot->regFunc(ot, tag);
 }
 

@@ -1127,7 +1127,7 @@ void sdfPrimLinkRect(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0
     packet->dmaTag = 0x20000003ULL;
     packet->vifCommands = 0x5000000310000000ULL;
     sdfPrimSetRectElem(&packet->elem, aColor, aPrim, aX0, aY0, aX1, aY1, aZ);
-    sdfDrawTagLink(aTag, (u32)packet);
+    sdfDrawTagLink(aTag, EE_ADDR(packet));
 }
 
 void sdfPrimSetLineElem(sdfPrimRectElem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aX1, s32 aY1, s32 aZ) {
@@ -1153,7 +1153,7 @@ void sdfPrimLinkLine(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0
     packet->dmaTag = 0x20000003ULL;
     packet->vifCommands = 0x5000000310000000ULL;
     sdfPrimSetLineElem(&packet->elem, aColor, aPrim, aX0, aY0, aX1, aY1, aZ);
-    sdfDrawTagLink(aTag, (u32)packet);
+    sdfDrawTagLink(aTag, EE_ADDR(packet));
 }
 
 void sdfPrimSetBoxLineElem(sdfPrimBoxLineElem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aX1, s32 aY1, s32 aZ) {

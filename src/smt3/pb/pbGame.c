@@ -2084,8 +2084,8 @@ s32 pb_proc_block_DB_Process(dds3ProcessID_t *id)
             matrix.v[3].z = group->z;
             LoadMatrix(&matrix);
             if (group->blk[j].outline_num != 0) {
-                sdfDrawTagLink(outlineTag, (u32)sdfDrawRotatedModel(group->blk[j].outlineVertices,
-                    group->colors, group->blk[j].outline_num, 0x80));
+                sdfDrawTagLink(outlineTag, EE_ADDR(sdfDrawRotatedModel(group->blk[j].outlineVertices,
+                    group->colors, group->blk[j].outline_num, 0x80)));
             }
         }
     }

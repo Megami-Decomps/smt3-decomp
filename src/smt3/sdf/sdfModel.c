@@ -591,7 +591,7 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
         i++;
     } while (i != listCount);
     QUAD_ZERO(*(u128 *)tag);
-    sdfDrawTagLink2(aDrawTag, (u32)buf, (u32)tag);
+    sdfDrawTagLink2(aDrawTag, EE_ADDR(buf), EE_ADDR(tag));
 }
 #else
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelLinkShapedDrawPacket);
@@ -1080,7 +1080,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                 buf->parm.itop = 0x04000004;
                 buf->parm.mscal = 0x14000000;
                 *(u64 *)&buf->parm.next.dat0 = parmTag;
-                sdfDrawTagLink2(tag, (u32)buf, (u32)&buf->parm);
+                sdfDrawTagLink2(tag, EE_ADDR(buf), EE_ADDR(&buf->parm));
             }
             packets = (sdfShapePacket_t **)header->packet;
             while ((pkt = *packets++) != NULL) {
@@ -1101,7 +1101,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                     body++;
                     *(u64 *)body = 0x20000000;
                     *(u64 *)&body->dat0 = 0;
-                    sdfDrawTagLink2(tag, (u32)buf, (u32)body);
+                    sdfDrawTagLink2(tag, EE_ADDR(buf), EE_ADDR(body));
                 }
             }
         }
@@ -1239,7 +1239,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
                 buf->parm.faceDivBias = bias;
                 buf->parm.itop = 0x04000004;
                 buf->parm.mscal = 0x14000000;
-                sdfDrawTagLinkRef(tag, (u32)buf);
+                sdfDrawTagLinkRef(tag, EE_ADDR(buf));
             }
             switch (header->type) {
             case MODEL_PACKET_HEADER_TYPE_NORMAL:
@@ -1250,7 +1250,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
                     ref->qwc = 0;
                     ref->addr = (void *)EE_PHYSICAL(EE_ADDR(header + 1));
                     *(u64 *)&ref->dat0 = 0;
-                    sdfDrawTagLinkCall(tag, (u32)ref);
+                    sdfDrawTagLinkCall(tag, EE_ADDR(ref));
                 }
                 break;
             case MODEL_PACKET_HEADER_TYPE_SHAPE:
@@ -1266,7 +1266,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
                 gen = sdfCorePacketGen(node, header->dataPtr, attr, color, soften, bias, frame,
                                        reverse);
                 if (gen != NULL) {
-                    sdfDrawTagLink(tag, (u32)gen);
+                    sdfDrawTagLink(tag, EE_ADDR(gen));
                 }
                 break;
             }
@@ -1366,13 +1366,13 @@ void sdfModelSetDrawEnv(sdfModelDrawEnv_t *aEnv)
     for (i = 0; i != 4; i++) {
         set->transPacket.header.dmatag.dat0 = 0x11000000;
         sdfDrawTagInit(&set->drawTag);
-        sdfDrawTagLink(&set->drawTag, (u32)&set->transPacket);
+        sdfDrawTagLink(&set->drawTag, EE_ADDR(&set->transPacket));
         set++;
     }
     sdfDrawTagInit(&aEnv->term.drawTag);
     *(u64 *)&aEnv->term.footer = 0;
     *(u64 *)&aEnv->term.footer.dat0 = 0x13000000;
-    sdfDrawTagLink(&aEnv->term.drawTag, (u32)&aEnv->term.footer);
+    sdfDrawTagLink(&aEnv->term.drawTag, EE_ADDR(&aEnv->term.footer));
 }
 
 void sdfModelDrawEnvLinkOt(sdfGrOt_t **aOt, sdfModelDrawEnv_t *aEnv)

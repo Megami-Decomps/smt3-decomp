@@ -308,7 +308,7 @@ s32 pb_draw_error_Process(dds3ProcessID_t *id)
         sdfDrawTagInit(tag);
         packet = sdfGrAllocPacketBuff(0x40);
         sdfPrimSetOpaquePacket(packet);
-        sdfDrawTagLink(tag, (u32)packet);
+        sdfDrawTagLink(tag, EE_ADDR(packet));
         sdfDrawTagLink(tag, dds3PrimFrameRect(x + 0x6FD0, 0x7FB8, 0xFFFF7F,
                                               len * pitch + 0x60, 0x90,
                                               0x20000000, 0x40008000));

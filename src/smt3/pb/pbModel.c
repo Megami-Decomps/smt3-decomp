@@ -664,7 +664,7 @@ void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag)
     request.vertex = vertices;
     request.normal = D_0056CB30;
     request.uv = D_00326D78;
-    sdfDrawTagLink(tag, (u32)sdf3DPrimMakePoly(&request));
+    sdfDrawTagLink(tag, EE_ADDR(sdf3DPrimMakePoly(&request)));
 }
 #else
 INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapPoly);
@@ -776,7 +776,7 @@ s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags, s32 special, sdfD
             request.pointCount += 6;
         }
     }
-    sdfDrawTagLink(tag, (u32)sdf3DPrimMakePoly(&request));
+    sdfDrawTagLink(tag, EE_ADDR(sdf3DPrimMakePoly(&request)));
     return request.pointCount;
 }
 #else
