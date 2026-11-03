@@ -205,7 +205,7 @@ Final owner 55/0 and ordinary target-active 55/1 checks pass with data intact. T
 
 ## evtAddFrameInfo (event/evtEventViewer, 0x540)
 
-302 of 336 words match at the native 1344-byte size. The ordinary reconstruction
+305 of 336 words match at the native 1344-byte size. The ordinary reconstruction
 remains guarded, with 55 exact peer functions and valid owned data and jump table.
 There is no matching credit or source promotion.
 
@@ -246,3 +246,31 @@ three strict modes and complete plain/dump parity pass. Fresh stable 140-owner /
 480-draft sweep, 459 tests, 817 layout assertions, inline/shell checks, seven IRX
 modules, retail SHA1/byte comparison/no-op and reconciled reports pass. Game
 coverage remains 8594 functions and 1485744 bytes; this batch earns zero credit.
+
+### Ordinary fog-subobject refinement
+
+A real sdf3DFogParam_t pointer initialized to &dds3LightParam.fog after the
+type-11 allocation improves the guarded target from 302/336 to 305/336 words,
+still at the native 1344 bytes. Five field reads use that exact subobject;
+allocation, minimum/color stores, work-pointer publication, maximum/near/far
+stores and the final flag retain their ordering. There is no intervening call,
+escaped pointer, new qualifier, constraint, layout change or tail initialization.
+The native 0x20 parent offset and five field offsets are independently verified.
+Seven fog register/scheduling differences remain, along with other residuals.
+
+This ordinary 305/336 result is distinct from the rejected 305/336 diagnostic
+that retained the redundant type-18 byte store. That store remains absent and
+the earlier rejection remains in force. Neither result is an exact C match.
+
+Whole active-control text also changes six EnterSelect jump-table words despite
+unchanged EnterSelect source. They move from a known SKIP_ASM-only mismatch to
+the native sequence; the production function was already exact. Complete owner
+and paired output-contract checks qualify both contexts, without claiming an
+isolated target-only text change or any additional matching credit.
+
+Fresh integrated qualification preserves production owner 55/0 and confirms the
+305/336 active diagnostic with data intact. Three strict modes and full canonical
+and active plain/dump parity pass; production and SKIP object contracts equal the
+prior published version. The fresh stable 140-owner/480-draft sweep, 459 tests,
+817 layout assertions, inline/shell checks, seven IRX modules, retail byte
+comparison/SHA1/no-op and unchanged coverage reports all pass. Zero exact credit.

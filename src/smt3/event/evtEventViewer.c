@@ -237,6 +237,7 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
     evtFrameInfo_t *frame = sdfChipAllocDirect(0x20);
     pmdSceneLightTable_t *sceneLight;
     pmdSceneFogTable_t *sceneFog;
+    sdf3DFogParam_t *sourceFog;
     sdf3DLight_t *light;
     void *work;
     s32 nameIndex;
@@ -308,12 +309,13 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
         break;
     case 11:
         sceneFog = sdfChipAllocDirect(0x20);
-        sceneFog->fog.vec[0] = dds3LightParam.fog.fogMin;
-        sceneFog->fog.color = dds3LightParam.fog.color;
+        sourceFog = &dds3LightParam.fog;
+        sceneFog->fog.vec[0] = sourceFog->fogMin;
+        sceneFog->fog.color = sourceFog->color;
         frame->work = sceneFog;
-        sceneFog->fog.vec[1] = dds3LightParam.fog.fogMax;
-        sceneFog->fog.vec[2] = dds3LightParam.fog.fogNear;
-        sceneFog->fog.vec[3] = dds3LightParam.fog.fogFar;
+        sceneFog->fog.vec[1] = sourceFog->fogMax;
+        sceneFog->fog.vec[2] = sourceFog->fogNear;
+        sceneFog->fog.vec[3] = sourceFog->fogFar;
         frame->param.sh[0] = 1;
         break;
     case 13:
