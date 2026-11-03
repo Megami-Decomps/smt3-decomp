@@ -1130,13 +1130,13 @@ void fldSdwDraw(dds3Basic_t *basic)
                 triParams.pointCount += 3;
                 triParams.faceCount++;
                 if (triParams.faceCount >= 16) {
-                    sdfDrawTagLink(triTag, (u32)sdf3DPrimMakePoly(&triParams));
+                    sdfDrawTagLink(triTag, EE_ADDR(sdf3DPrimMakePoly(&triParams)));
                     triParams.faceCount = 0;
                     triParams.pointCount = 0;
                 }
             }
             if (triParams.faceCount != 0) {
-                sdfDrawTagLink(triTag, (u32)sdf3DPrimMakePoly(&triParams));
+                sdfDrawTagLink(triTag, EE_ADDR(sdf3DPrimMakePoly(&triParams)));
                 triParams.faceCount = 0;
                 triParams.pointCount = 0;
             }
@@ -1192,7 +1192,7 @@ void fldSdwDraw(dds3Basic_t *basic)
                         quadParams.pointCount += 4;
                         quadParams.faceCount += 2;
                         if (quadParams.faceCount >= 15) {
-                            sdfDrawTagLink(quadTag, (u32)sdf3DPrimMakePoly(&quadParams));
+                            sdfDrawTagLink(quadTag, EE_ADDR(sdf3DPrimMakePoly(&quadParams)));
                             quadParams.faceCount = 0;
                             quadParams.pointCount = 0;
                         }
@@ -1200,7 +1200,7 @@ void fldSdwDraw(dds3Basic_t *basic)
                 }
             }
             if (quadParams.faceCount != 0) {
-                sdfDrawTagLink(quadTag, (u32)sdf3DPrimMakePoly(&quadParams));
+                sdfDrawTagLink(quadTag, EE_ADDR(sdf3DPrimMakePoly(&quadParams)));
                 quadParams.faceCount = 0;
                 quadParams.pointCount = 0;
             }

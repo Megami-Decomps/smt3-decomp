@@ -474,34 +474,34 @@ void mdlPibDrawEffectInfo(sdfDrawTag_t *tag, s32 x, s32 y, s32 z, s32 attr, pibH
             char *label = data->group == PIB_CHUNK_TYPE_P2A ? D_0054F648 : D_0054F650;
 
             if (data->parameter.part.count == 1) {
-                sdfDrawTagLink(tag, (u32)(sdfDevPrintf(x, y, z, attr,
+                sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, y, z, attr,
                                                                     "%s %d,%d", label, data->payload.word,
                                                                     data->parameter.part.partIndex)));
                 return;
             }
-            sdfDrawTagLink(tag, (u32)(sdfDevPrintf(x, y, z, attr,
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, y, z, attr,
                                                                 "%s %d~%d,%d", label, data->payload.word,
                                                                 data->payload.word + data->parameter.part.count - 1,
                                                                 data->parameter.part.partIndex)));
             return;
         }
         case PIB_CHUNK_TYPE_TRACK:
-            sdfDrawTagLink(tag, (u32)(sdfDevPrintf(x, y, z, attr,
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, y, z, attr,
                                                                 "TRACK %d~%d", data->payload.word,
                                                                 data->parameter.word)));
             return;
         case PIB_CHUNK_TYPE_BLUR:
-            sdfDrawTagLink(tag, (u32)(sdfDevPrintf(x, y, z, attr,
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, y, z, attr,
                                                                 "BLUR %d,%d", data->payload.stream.selectorA,
                                                                 data->payload.stream.selectorB)));
             return;
         case IPU:
-            sdfDrawTagLink(tag, (u32)(sdfDevPrintf(x, y, z, attr,
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, y, z, attr,
                                                                 "IPU %08x", data->payload.word)));
             return;
         }
     } else {
-        sdfDrawTagLink(tag, (u32)(sdfDevPrintf(x, y, z, attr,
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, y, z, attr,
                                                             "UNKNOWN[%3d]", data->group)));
     }
 }
@@ -514,26 +514,26 @@ void mdlPibDrawTrackInfo(sdfDrawTag_t *tag, s32 x, s32 y, s32 z, mdlTrackParams_
     s32 colorIndex;
     s32 channelIndex;
 
-    sdfDrawTagLink(tag, (u32)(sdfDevPrintf(labelX, y, z, 0, "MARK0:%d", data->mark0)));
-    sdfDrawTagLink(tag, (u32)(sdfDevPrintf(labelX, y + 0x60, z, 0, "MARK1:%d", data->mark1)));
-    sdfDrawTagLink(tag, (u32)(sdfDevPrintf(labelX, y + 0xC0, z, 0, "START:%d", data->start)));
-    sdfDrawTagLink(tag, (u32)(sdfDevPrintf(labelX, y + 0x120, z, 0, "END  :%d", data->end)));
-    sdfDrawTagLink(tag, (u32)(sdfDevPrintf(labelX, y + 0x180, z, 0, "ITRVL:%d", data->interval)));
-    sdfDrawTagLink(tag, (u32)(sdfDevPrintf(labelX, y + 0x1E0, z, 0, "FACE :%d", data->face)));
-    sdfDrawTagLink(tag, (u32)(sdfDevPrintf(labelX, y + 0x240, z, 0, "BLEND:%d", data->blend)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(labelX, y, z, 0, "MARK0:%d", data->mark0)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(labelX, y + 0x60, z, 0, "MARK1:%d", data->mark1)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(labelX, y + 0xC0, z, 0, "START:%d", data->start)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(labelX, y + 0x120, z, 0, "END  :%d", data->end)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(labelX, y + 0x180, z, 0, "ITRVL:%d", data->interval)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(labelX, y + 0x1E0, z, 0, "FACE :%d", data->face)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(labelX, y + 0x240, z, 0, "BLEND:%d", data->blend)));
     for (colorIndex = 0; colorIndex != MDL_MARK_COLOR_COUNT; colorIndex++) {
         packedColor = data->colors[colorIndex];
-        sdfDrawTagLink(tag, (u32)(dds3PrimFrameRect(x + 0x480, colorY, z, 0x300, 0x180, (packedColor & 0xFFFFFF) | 0x80000000, 0x60404040)));
+        sdfDrawTagLink(tag, EE_ADDR(dds3PrimFrameRect(x + 0x480, colorY, z, 0x300, 0x180, (packedColor & 0xFFFFFF) | 0x80000000, 0x60404040)));
         for (channelIndex = 0; channelIndex != MDL_COLOR_CHANNEL_COUNT; channelIndex++) {
-            sdfDrawTagLink(tag, (u32)(sdfDevPrintf(labelX, colorY, z, D_0032C4C8[channelIndex], D_0032C4D0[channelIndex])));
-            sdfDrawTagLink(tag, (u32)(sdfDevPrintf(x + 0x240, colorY, z, 0, D_0054F678, packedColor & MDL_COLOR_BYTE_MASK)));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(labelX, colorY, z, D_0032C4C8[channelIndex], D_0032C4D0[channelIndex])));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x + 0x240, colorY, z, 0, D_0054F678, packedColor & MDL_COLOR_BYTE_MASK)));
             packedColor >>= MDL_COLOR_BYTE_BITS;
             colorY += 0x60;
         }
         colorY += 0x60;
     }
     if (cursor >= 0) {
-        sdfDrawTagLink(tag, (u32)(sdfDevPrintf(x, y + D_0032C498[cursor], z, 0, D_0054F680)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, y + D_0032C498[cursor], z, 0, D_0054F680)));
     }
 }
 
@@ -1063,19 +1063,19 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
         state->blinkTick = 0;
     }
     sdfDrawTagLink(state->packetList,
-                    (u32)dds3PrimFrameRect(0x8650, 0x79A8, 0xFF007F, 0x8A0, 0xAB0,
-                                  0x60000000, 0x40806020));
+                    EE_ADDR(dds3PrimFrameRect(0x8650, 0x79A8, 0xFF007F, 0x8A0, 0xAB0,
+                                  0x60000000, 0x40806020)));
     label = D_0032C4E0;
     for (labelIndex = 0; labelIndex != 4; labelIndex++, label++) {
         sdfDrawTagLink(state->packetList,
-                        (u32)sdfDevPrintf(label->x, label->y,
+                        EE_ADDR(sdfDevPrintf(label->x, label->y,
                                                          0xFF0080, label->style,
-                                                         label->format));
+                                                         label->format)));
     }
     if (state->editing == 0 && state->blinkTick < 20) {
         sdfDrawTagLink(state->packetList,
-                        (u32)sdfDevPrintf(0x8680, D_0032C510[state->selection],
-                                                         0xFF0080, 0, D_0054F6A0));
+                        EE_ADDR(sdfDevPrintf(0x8680, D_0032C510[state->selection],
+                                                         0xFF0080, 0, D_0054F6A0)));
     }
     selected = state->selection;
     y = 0x7A20;
@@ -1089,11 +1089,11 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
                 directionStyle = selected == 3;
             }
             sdfDrawTagLink(state->packetList,
-                            (u32)dds3PrimLine3D(0x88C0, directionY, 0xFF0080, directionStyle));
+                            EE_ADDR(dds3PrimLine3D(0x88C0, directionY, 0xFF0080, directionStyle)));
             for (j = 0; j != 3; j++) {
                 sdfDrawTagLink(state->packetList,
-                                (u32)sdfDevPrintf(0x8A40, y + 0x120 + j * 0x60, 0xFF0080,
-                                                                 0, D_0054F6A8, light[1][j]));
+                                EE_ADDR(sdfDevPrintf(0x8A40, y + 0x120 + j * 0x60, 0xFF0080,
+                                                                 0, D_0054F6A8, light[1][j])));
             }
             color = light[0];
         } else {
@@ -1262,9 +1262,9 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
         }
     }
     sdfDrawTagLink(mdlDebugScaleWork.packetList,
-                    (u32)dds3PrimFrameRect(0x8590, 0x79A8, 0xFF007F, 0x960, 0x570, 0x60000000, 0x40806020));
+                    EE_ADDR(dds3PrimFrameRect(0x8590, 0x79A8, 0xFF007F, 0x960, 0x570, 0x60000000, 0x40806020)));
     sdfDrawTagLink(mdlDebugScaleWork.packetList,
-                    (u32)sdfDevPrintf(D_0032C548.x, D_0032C548.y, 0xFF0080, D_0032C548.style, D_0032C548.format));
+                    EE_ADDR(sdfDevPrintf(D_0032C548.x, D_0032C548.y, 0xFF0080, D_0032C548.style, D_0032C548.format)));
     if (mdlDebugScaleWork.editing == 0 && mdlDebugScaleWork.blinkTick < 0x14) {
         s32 y;
 
@@ -1273,17 +1273,17 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
         } else {
             y = mdlDebugScaleWork.selection * 0x60 + 0x7AE0;
         }
-        sdfDrawTagLink(mdlDebugScaleWork.packetList, (u32)sdfDevPrintf(0x85C0, y, 0xFF0080, 0, D_0054F6E0));
+        sdfDrawTagLink(mdlDebugScaleWork.packetList, EE_ADDR(sdfDevPrintf(0x85C0, y, 0xFF0080, 0, D_0054F6E0)));
     }
     for (i = 0; i != 4; i++) {
         s32 y = mdlDebugEntryTable[i].y;
 
-        sdfDrawTagLink(mdlDebugScaleWork.packetList, (u32)sdfDevPrintf(0x8680, y, 0xFF0080, 0, mdlDebugEntryTable[i].label));
+        sdfDrawTagLink(mdlDebugScaleWork.packetList, EE_ADDR(sdfDevPrintf(0x8680, y, 0xFF0080, 0, mdlDebugEntryTable[i].label)));
         value = *mdlDebugEntryTable[i].target + 0.5f;
         sdfDrawTagLink(mdlDebugScaleWork.packetList,
-                        (u32)sdfDevPrintf(0x8A40, y, 0xFF0080,
+                        EE_ADDR(sdfDevPrintf(0x8A40, y, 0xFF0080,
                                                           (mdlDebugScaleWork.editing == 1 && mdlDebugScaleWork.selection == i) ? 6 : 0,
-                                                          mdlDebugEntryTable[i].format, value));
+                                                          mdlDebugEntryTable[i].format, value)));
     }
     mdlDebugTextBox(0x8680, 0x7C60, dds3LightParam.fogColor, mdlDebugScaleWork.selection - 4);
     { sdfGrOt_t *ot = &sdfGrOtTable[81]; ((mdlOtRegFunc_t)ot->regFunc)(ot, mdlDebugScaleWork.packetList); }
@@ -1373,35 +1373,35 @@ s32 soften_bias_Process(dds3ProcessID_t *task) {
     }
 
     sdfDrawTagLink(softenBiasWork.packetList,
-                    (u32)dds3PrimFrameRect(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
-                                  0x60000000, 0x40806020));
+                    EE_ADDR(dds3PrimFrameRect(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
+                                  0x60000000, 0x40806020)));
     label = D_0032C5B8;
     for (i = 0; i != 4; i++, label++) {
         sdfDrawTagLink(softenBiasWork.packetList,
-                        (u32)sdfDevPrintf(label->x, label->y,
+                        EE_ADDR(sdfDevPrintf(label->x, label->y,
                                                          0xFF0080, label->style,
-                                                         label->format));
+                                                         label->format)));
     }
     if (softenBiasWork.control.fields.active == 0 && softenBiasWork.control.fields.blink < 20) {
         sdfDrawTagLink(softenBiasWork.packetList,
-                        (u32)sdfDevPrintf(0x8500,
+                        EE_ADDR(sdfDevPrintf(0x8500,
                                                          D_0032C5E8[softenBiasWork.control.fields.cursor],
-                                                         0xFF0080, 0, D_0054F700));
+                                                         0xFF0080, 0, D_0054F700)));
     }
 
     /* Ignore the blink byte when testing the active mode and selected row. */
     valueStyle = (softenBiasWork.control.packed & 0xFFFF00FF) == 1 ? 6 : 0;
     sdfDrawTagLink(softenBiasWork.packetList,
-                    (u32)sdfDevPrintf(0x8B00, 0x7A80, 0xFF0080,
-                                                     valueStyle, D_0054F708, softenBiasWork.value));
+                    EE_ADDR(sdfDevPrintf(0x8B00, 0x7A80, 0xFF0080,
+                                                     valueStyle, D_0054F708, softenBiasWork.value)));
     adjustmentStyle = (softenBiasWork.control.packed & 0xFFFF00FF) == 0x10001 ? 6 : 0;
     sdfDrawTagLink(softenBiasWork.packetList,
-                    (u32)sdfDevPrintf(0x8B00, 0x7AE0, 0xFF0080,
-                                                     adjustmentStyle, D_0054F710, softenBiasWork.adjustment));
+                    EE_ADDR(sdfDevPrintf(0x8B00, 0x7AE0, 0xFF0080,
+                                                     adjustmentStyle, D_0054F710, softenBiasWork.adjustment)));
     format = corePktSoftenBias == 0 ? D_0054F718 : D_0054F720;
     sdfDrawTagLink(softenBiasWork.packetList,
-                    (u32)sdfDevPrintf(0x8B00, 0x7BA0, 0xFF0080,
-                                                     0, format));
+                    EE_ADDR(sdfDevPrintf(0x8B00, 0x7BA0, 0xFF0080,
+                                                     0, format)));
     { sdfGrOt_t *ot = &sdfGrOtTable[81]; ((mdlOtRegFunc_t)ot->regFunc)(ot, softenBiasWork.packetList); }
     sdfFaceDivSoften = softenBiasWork.value;
     sdfFaceDivBias = softenBiasWork.adjustment;
