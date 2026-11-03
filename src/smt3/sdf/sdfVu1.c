@@ -1476,7 +1476,7 @@ void corePktEmitTexTris(work)
         do {
             s32 chunk = (remaining <= 0x10) ? remaining : 0x10;
             remaining -= chunk;
-            while (((u32)cursor & 0xC) != 4) {
+            while ((EE_ADDR(cursor) & 0xC) != 4) {
                 *cursor++ = 0;
             }
             if (first) {
@@ -1615,7 +1615,7 @@ void corePktEmitTris(work)
         do {
             s32 batchTriangles = (remainingTriangles <= 0x18) ? remainingTriangles : 0x18;
             remainingTriangles -= batchTriangles;
-            while (((u32)packetCursor & 0xC) != 4) {
+            while ((EE_ADDR(packetCursor) & 0xC) != 4) {
                 *packetCursor++ = 0;
             }
             *packetCursor++ = 0x6501C000;
@@ -1797,7 +1797,7 @@ u64 *corePktClosePacket(sdfCorePacketCb_t *cb) {
 u8 *corePktVu0Run(sdfCorePacketPointBuff_tag *output, const void *source, s32 count,
                   s32 transferCount, s32 transferStride)
 {
-    u32 input = (u32)source;
+    u32 input = EE_ADDR(source);
     s32 done = 0;
     s32 batch, i, qwc;
 

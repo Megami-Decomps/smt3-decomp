@@ -578,7 +578,7 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
 
         for (m = 0; m < used; m++) {
             sdfModelShapeEntry_t *entry =
-                (sdfModelShapeEntry_t *)((u8 *)(out[m].targetId * 8) + (u32)list);
+                (sdfModelShapeEntry_t *)((u8 *)(out[m].targetId * 8) + EE_ADDR(list));
 
             *(u64 *)&tag->dat0 = 0;
             *(u64 *)tag = SDF_DMA_TAG((u32)entry[1].dataPtr,
@@ -601,7 +601,7 @@ sdfModelPacketHeader_tag *sdfModelNewPacketHeader(sdfModelNode_t *aNode, s32 aOt
 {
     sdfModelPacketHeader_tag *packet = sdfChipAllocDirect(sizeof(*packet));
     sdfModelPacketHeader_tag **head =
-        (sdfModelPacketHeader_tag **)((u32)aId * sizeof(*aNode->drawPacket) + (u32)aNode +
+        (sdfModelPacketHeader_tag **)((u32)aId * sizeof(*aNode->drawPacket) + EE_ADDR(aNode) +
                                     (u32)&((sdfModelNode_t *)0)->drawPacket);
     sdfModelPacketHeader_tag *next = *head;
 
@@ -642,7 +642,7 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *aNode, void *aShape, s32 aOtIndex, s
         sdfMemHandle_t *handle = sdfMemAllocDirect(bytes);
         sdfModelPacketHeader_tag *chunk = (sdfModelPacketHeader_tag *)sdfMemLock(handle);
         sdfModelPacketHeader_tag **head =
-            (sdfModelPacketHeader_tag **)((u32)aId * sizeof(*aNode->drawPacket) + (u32)aNode +
+            (sdfModelPacketHeader_tag **)((u32)aId * sizeof(*aNode->drawPacket) + EE_ADDR(aNode) +
                                         (u32)&((sdfModelNode_t *)0)->drawPacket);
 
         tag = (sdfDmaTag_t *)(chunk + 1);
@@ -1062,8 +1062,8 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
 
                 tag = sdfPrimAllocDrawTag(NULL);
                 *(f32 *)&tag->z = zValue;
-                tag->lightPacket = (u32)light;
-                tag->fogPacket = (u32)fog;
+                tag->lightPacket = EE_ADDR(light);
+                tag->fogPacket = EE_ADDR(fog);
                 tags[otIndex] = tag;
                 buf = sdfGrAllocPacketBuff(sizeof(*buf));
                 *(u64 *)&buf->tmTag = 0x10000008;
@@ -1224,9 +1224,9 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
 
                 tag = sdfPrimAllocDrawTag(NULL);
                 *(f32 *)&tag->z = zValue;
-                tag->lightPacket = (u32)light;
+                tag->lightPacket = EE_ADDR(light);
                 tags[j] = tag;
-                tag->fogPacket = (u32)fog;
+                tag->fogPacket = EE_ADDR(fog);
                 buf = sdfGrAllocPacketBuff(sizeof(*buf));
                 sdfModelSetTmRefPacket(node, &buf->tmRef, frame);
                 *(u64 *)&buf->parm.next = 0x20000002;

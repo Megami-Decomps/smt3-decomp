@@ -488,7 +488,7 @@ s32 SdfIopFileRpc(const char *aName, s32 aDataSize, const void *aData, s32 *aOut
         memcpy((u8 *)request + nameLength + 9, aData, aDataSize);
     }
     /* The two-word reply has to start on a 64-byte boundary for the SIF. */
-    reply = (u32 *)(((u32)replyScratch + SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK) &
+    reply = (u32 *)((EE_ADDR(replyScratch) + SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK) &
                     ~SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK);
     result = sceSifMCallRpc((sceSifMClientData *)&sdfIopRpcClient, 1, 0, request, requestBytes, reply, 8, NULL, NULL);
     if (result >= 0) {
