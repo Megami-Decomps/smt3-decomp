@@ -184,9 +184,9 @@ dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/matching/kernel/dds3ConfigMai
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matching/kernel/dds3KernelDraw.md	3
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
 dds3Titlemain	kernel/dds3TitleMain	0xD20	307 of 834 words match	docs/matching/kernel/dds3TitleMain.md	3
-slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/matching/mc/slMain.md	3
-slFileSelCalc	mc/slMain	0x340	208 of 208 words match	docs/matching/mc/slMain.md	39
-slCopyNonZero	mc/slMain	0x40	16 of 16 words match	docs/matching/mc/slMain.md	102
+slSaveData_writeFile	mc/slMain	0x238	94 of 142 words match	docs/matching/mc/slMain.md	3
+slFileSelCalc	mc/slMain	0x340	208 of 208 words match	docs/matching/mc/slMain.md	76
+slCopyNonZero	mc/slMain	0x40	16 of 16 words match	docs/matching/mc/slMain.md	139
 Flow2_6	newbattle/NbNegoFlowFullMoon	0x278	158 of 158 words match	docs/matching/newbattle/NbNegoFlowFullMoon.md	3
 Flow5_3	newbattle/NbNegoFlowInnen	0x164	89 of 89 words match	docs/matching/newbattle/NbNegoFlowInnen.md	3
 Flow15_5	newbattle/NbNegoFlowInoti	0x148	82 of 82 words match	docs/matching/newbattle/NbNegoFlowInoti.md	3
@@ -386,5 +386,5 @@ scePadPortOpen				docs/matching/sdk/libpad.md	3
 dds3TitleDrawFade	sound/sndManager	0x4F8	318 of 318 words match	docs/matching/sound/sndManager.md	3
 dds3TitleUpdateFade	sound/sndManager	0x278	158 of 158 words match	docs/matching/sound/sndManager.md	37
 titleAllocWork	sound/sndManager	0x110	68 of 68 words match	docs/matching/sound/sndManager.md	89
-stfMain2	staff/stfMain	0x2D4	145 of 181 words match	docs/matching/staff/stfMain.md	3
-ObjDispOff	staff/stfMain	0x504	311 of 321 words match	docs/matching/staff/stfMain.md	34
+stfMain2	staff/stfMain	0x2D4	155 of 181 words match	docs/matching/staff/stfMain.md	3
+ObjDispOff	staff/stfMain	0x504	311 of 321 words match	docs/matching/staff/stfMain.md	69

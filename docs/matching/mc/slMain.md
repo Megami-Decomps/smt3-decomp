@@ -2,9 +2,11 @@
 
 ## slSaveData_writeFile (mc/slMain, 0x238)
 
-106 of 142 words match, at the exact 568-byte size.
+94 of 142 words match in the refreshed owner, at the exact 568-byte size.
+The qualified control below records the current allocation boundary.
 
-The 36 remaining words are one register renaming carried through the whole
+Historically, 106/142 words matched. Those 36 residual words were one register
+renaming carried through the whole
 record-copy block. The instruction sequence is identical; retail holds the
 byte offset `52 * slot` in `$5` and `%lo(D_00569740)` in `$2`, and the draft
 holds the offset in `$2` and the base in `$7`, so every address temp after it
@@ -35,6 +37,41 @@ Ruled out: the declaration and assignment order of the two pointer locals;
 address is created first; `slot` as `u32`; writing the `+0x8` store
 base-first and the `+0x1`/`+0x2`/`+0x24` stores index-first with explicit
 casts; and five orderings of the last six stores.
+
+### Qualified scaled-offset control (2026-11-03)
+
+With the current owner, the retained draft emits 568 bytes with 94 of 142
+words matching; all 101 existing C functions and owned data remain exact.
+The historical 106/142 result above describes its earlier compilation context.
+Restoring only `slCopyNonZero` to its prior fallback preserves all 568 target
+bytes and 33 ordered target relocations, and the same 94/142 score. Its newly
+visible C body therefore does not explain this historical difference; the
+cause remains unproven.
+
+Qualified compiler dumps show a wider allocation interaction than the later
+record stores alone. The scaled slot offset is a shift/add chain for `52 * slot`.
+The first scheduler interleaves its early operations and the record-table high
+address with the preceding 20-byte header copy. Local allocation puts the
+scaled-offset chain in `$2` and table base in `$6`. Reload then assigns the
+header copy's scratch registers around those live values. Retail instead keeps
+the offset in `$5` and table base in `$2`, and its copy chunk registers differ
+accordingly. This is observed pass evidence, not a traced allocator tie-break.
+
+Extracting the actual byte offset for the cached record pointer is entirely
+inert, as is a local native-register binding without an operand. Both preserve
+all allocated sections, non-file symbols, relocations and normalized assembly,
+not merely the score. A read-only operand on the initialized offset and header
+pointer makes the binding effective but duplicates the indexed-store offset
+calculation after the operand boundary: 592 bytes, 50 matching prefix words,
+92 differing words and 24 excess bytes. None of these controls is promoted.
+The actual record/header types, callback reloads and copy accesses are unchanged;
+no fabricated array extent or ordinary-RAM volatile access is introduced.
+
+Plain and diagnostic builds have qualified parity on five allocated sections,
+768 non-file symbols and normalized assembly. Baseline and the two inert
+controls have 1780 ordered relocations; the operand control has 1781. Further
+work needs a genuine scaled-offset/block-copy lifetime premise, rather than
+another pointer spelling or register grid.
 
 ## slFileSelCalc (mc/slMain, 0x340)
 

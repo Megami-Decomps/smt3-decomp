@@ -2,34 +2,69 @@
 
 ## stfMain2 (staff/stfMain, 0x2D4)
 
-145 of 181 words match, at retail's exact size of 724 bytes.
+155 of 181 words match at the native 724-byte size in the guarded draft.
+The target remains assembly-backed; this is not exact-match credit.
 
-Three things got the draft there. The centred row writes the same `sprintf` and
-`stfDrawText` pair in both arms of the `text1 == NULL` test, because retail
-emits that pair twice; one pair before the test is 24 words short. The centred
-arm then ends in `continue`, which is what lets cross-jumping merge its
-`jal stfDrawStaffText` with the second row's. And the state dispatch is one
-`if (state != 0) { guard } else { fade; return 0; }` with the scroll update
-after it, which is the only arrangement that puts the fade block between the
-guard and the scroll update the way retail lays it out.
+The earlier 145-word draft duplicated the centered row's `sprintf` and
+`stfDrawText` calls in the two text arms, used `continue` for the centered
+row, and placed the fade block between the state guard and scroll update.
+Those choices remain. Moving the common drawing calls before the text test
+was 24 words short; nesting all updates under a single trailing return gave
+99 matching words. The centered coordinate and local declaration spellings
+were also previously tested without improvement.
 
-What is left is one guard. Retail tests the range as `bltz` plus a separate
-`slti 3` with `beql`, two branches into the trailing `return 0`. Every spelling
-that keeps the operands equal, `state < 0 || state >= 3` and
-`state >= 0 && state < 3` with an empty arm, folds in `fold_truthop` to the one
-`sltiu $2, $2, 3` the draft emits, and the branch comes out as `bnel` past the
-return instead of `beql` into it. Spellings that block the fold by reading
-`oStaff_UI->reserved00E4` again for one side do keep two branches, but run a
-word over and drop to 106 matching words. Ruled out: `state > 2` for the upper
-bound (identical output), swapping the two operands, and a single trailing
-`return 0` with the scroll update nested inside the guard (99 words).
+The previous compound state guard used the same observed scalar for
+`state >= 0 && state < 3`. Qualified initial RTL already contains one unsigned
+comparison against three. The guard is already folded by the initial RTL
+snapshot; the exact frontend or expansion routine is not identified. Repeated
+RAM-observation variants were previously worse and are not used here.
 
-The remaining 36 words are that branch plus two register-naming knock-ons it
-drags along: `subu $3, $6, $3` for `0x100 - w / 2` comes out as
-`subu $6, $6, $3`, and the `$2`/`$3` pair in the two divisions is swapped. None
-of those three moved under any source spelling of the expressions themselves
-(a named local for the coordinate, `w = w / 2` first, and reordering the `w`
-and `y` declarations all give byte-identical output), so they follow the guard.
+Separate lower and upper tests with immediate returns retain both signed
+bounds but emit 740 bytes, 16 too many. Sending rejected states to one real
+common return instead gives 153/181 at 724 bytes. Naming the real scroll
+continuation as well gives the current 155/181. State zero still performs the
+fade and reset, states one and two update scrolling, and all negative states
+or states at least three return without those actions. Exactly one state
+observation is used, with no barrier, volatile qualifier, extra RAM read,
+constraint or fabricated comparison.
+
+### Qualified remaining delay-slot boundary
+
+The explicit destinations preserve separate signed bounds through the
+compiler passes. The lower branch's delay slot receives the upper comparison,
+as in native code. The remaining upper-branch mismatch is later: the second
+scheduler places the first saved-register restore before the return-zero
+assignment in the common exit. Its dump reports priority four/cost two for
+the restore and priority three/cost one for zero, issuing the memory operation
+first and then the ALU operation in the same modeled cycle. The delay-branch
+pass copies that restore into the upper branch's slot and retargets the branch
+past its original copy. Native instead uses an annulled zero-return assignment
+there. This is a qualified scheduler/delay-fill boundary, not the old
+compound-range-fold blocker.
+
+Changing only the fade path back to a direct return restores the native
+upper branch-likely/zero-slot shape, but emits 732 bytes, eight too many, and
+108 words match in the compared prefix. That control is not retained. No dummy
+return-value use or unrelated memory dependency is justified to force a slot.
+Other residuals include the centered coordinate's register choice, fade-reset
+store scheduling and the later division schedules. They are not established
+as consequences of the state guard alone.
+
+Potentially overflowing row/scroll coordinates, the noncentered width
+subtraction, scroll increment and end-row arithmetic use explicit unsigned
+wrapping before signed interpretation. Signed division remains truncating as
+in native code. The centered width calculation and remaining division offsets
+are within full-range signed bounds. Conversions back to `s32` use the pinned
+EE compiler's low-word interpretation, not a portable-C out-of-range guarantee.
+These arithmetic changes preserve the 155-word output, including all
+callback-sensitive reloads.
+
+Plain and diagnostic builds of the final source agree on six allocated
+sections, 108 non-file symbols, 80 ordered relocations and normalized assembly.
+The five existing C functions and owned data remain exact. Uninitialized-value
+and implicit-declaration diagnostics are clean and produce identical output;
+these options are not production flags. The adjacent guarded `ObjDispOff`
+improvement is unchanged.
 
 ## ObjDispOff (staff/stfMain, 0x504)
 

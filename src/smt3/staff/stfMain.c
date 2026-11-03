@@ -68,8 +68,8 @@ extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
 extern void GetoStaffUI(void);
 extern void dds3AdminiCallSequence(s32 kind, void *arg, s32 a, s32 b);
 
-/* NON_MATCHING: 145 of 181 words match at the exact size. The range guard
- * folds to one sltiu where retail keeps slti plus bltz. */
+/* NON_MATCHING: 155 of 181 words match at the native size. Explicit shared
+ * exits retain both signed bounds; the return delay slot still differs. */
 #ifdef NON_MATCHING
 s32 stfMain2(dds3ProcessID_t *id)
 {
@@ -81,7 +81,8 @@ s32 stfMain2(dds3ProcessID_t *id)
     s32 state;
 
     for (i = 0; i < 0xB5; i++) {
-        y = D_00343018[i].y - oStaff_UI->scrollY / 2 + 0x1C0;
+        y = (s32)((u32)D_00343018[i].y
+                  - (u32)(oStaff_UI->scrollY / 2) + 0x1C0u);
         if (i == 0xB4) {
             if (y < 0xE0) {
                 y = 0xE0;
@@ -97,7 +98,7 @@ s32 stfMain2(dds3ProcessID_t *id)
                 }
                 sprintf(buf, D_0054FD90, D_00343018[i].text0);
                 w = stfDrawText(1, 0x80808080, buf);
-                stfDrawStaffText(0xF1 - w, y, D_00343018[i].style0, 0x80808080, buf);
+                stfDrawStaffText((s32)(0xF1u - (u32)w), y, D_00343018[i].style0, 0x80808080, buf);
             }
             if (D_00343018[i].text1 != NULL) {
                 sprintf(buf, D_0054FD90, D_00343018[i].text1);
@@ -106,13 +107,16 @@ s32 stfMain2(dds3ProcessID_t *id)
         }
     }
 
+    /* Use the one observed state for both bounds, with no extra RAM read. */
     state = oStaff_UI->reserved00E4;
     if (state != 0) {
-        if (state >= 0 && state < 3) {
-            /* in range; the scroll update below runs */
-        } else {
-            return 0;
+        if (state < 0) {
+            goto done;
         }
+        if (state < 3) {
+            goto scroll;
+        }
+        goto done;
     } else {
         dds3FadeIn(0, 0, 0, 0x1E);
         oStaff_UI->reserved00E4 = 2;
@@ -120,18 +124,22 @@ s32 stfMain2(dds3ProcessID_t *id)
         oStaff_UI->scrollY = 0;
         oStaff_UI->reserved00F4 = 0;
         oStaff_UI->unk_0110 = 0;
-        return 0;
+        goto done;
     }
 
-    oStaff_UI->scrollY = oStaff_UI->scrollY + 1;
+scroll:
+    oStaff_UI->scrollY = (s32)((u32)oStaff_UI->scrollY + 1u);
     GetoStaffUI();
-    if (oStaff_UI->scrollY == (D_00343018[0xB4].y + 0xE0) / 0x1E * 0x3C + 0x12C) {
+    if (oStaff_UI->scrollY ==
+        (s32)((u32)((s32)((u32)D_00343018[0xB4].y + 0xE0u) / 0x1E)
+              * 0x3Cu + 0x12Cu)) {
         dds3FadeOut(0, 0, 0, 0x28);
     }
-    if ((D_00343018[0xB4].y + 0xE0) / 0x1E + 6 < oStaff_UI->scrollY / 0x3C) {
+    if ((s32)((u32)D_00343018[0xB4].y + 0xE0u) / 0x1E + 6 < oStaff_UI->scrollY / 0x3C) {
         arg = 0x2B4;
         dds3AdminiCallSequence(7, &arg, 4, 0);
     }
+done:
     return 0;
 }
 #else
