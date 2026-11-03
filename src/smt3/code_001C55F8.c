@@ -310,7 +310,7 @@ void nbCameraHelperViewer_PB_Draw(void *pData)
         destroy = nbCameraHelperViewerPBParam.destroy;
         if (destroy != NULL) {
             if (nbCameraHelperViewerPBParam.handle != NULL) {
-                destroy((void *)*nbCameraHelperViewerPBParam.handle);
+                destroy(EE_ADDR_AS(void *, *nbCameraHelperViewerPBParam.handle));
             } else {
                 destroy(NULL);
             }

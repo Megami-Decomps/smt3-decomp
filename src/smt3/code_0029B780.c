@@ -499,7 +499,7 @@ s32 dds3DrawConfigBackground(s32 flags)
         GBWK[0x19] = ret;
         return ret;
     }
-    fclSetSprite((s32)sprite, 0x200, 0x1C0, 0, 0, 0, 0xFF, 0x7F, 0x80808080,
+    fclSetSprite(EE_ADDR_S(sprite), 0x200, 0x1C0, 0, 0, 0, 0xFF, 0x7F, 0x80808080,
                  *(s32 *)(GBWK + 0x10A4));
     fclDrawBG(sprite, flags);
 }
