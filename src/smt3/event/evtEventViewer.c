@@ -38,7 +38,7 @@ extern void evtInitViewerInfo(void);
 extern s32 dds3KillProcessName(const char *name, s32 shutdowntimer);
 extern evtViewerInfo_t *viewerinfo;
 extern void *memset(void *a, s32 b, ps2Size_t c);
-extern void *sdfChipAllocDirect(u32 aSize);
+extern void *sdfChipAllocDirect(s32 aSize);
 extern void evtFreePolygonMovieWorkData(void *wdata);
 extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
 extern void *dds3AddBEDEffectObjectBasic2(void *data, f32 *pos, f32 *rot);
@@ -225,6 +225,7 @@ extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 
 #ifdef NON_MATCHING
 extern s32 evtAddNameTable(const char *name);
+extern void *memcpy(void *destination, const void *source, u32 size);
 extern effBlurTemplate_t *Eve_PartialMultiBlurGetParams(void);
 extern effBlurScatterWork_t *Eve_DistortionBlurGetParams(void);
 extern effBlurScaleWork_t *Eve_RippleBlurGetParams(void);
@@ -236,6 +237,7 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
     evtFrameInfo_t *frame = sdfChipAllocDirect(0x20);
     pmdSceneLightTable_t *sceneLight;
     pmdSceneFogTable_t *sceneFog;
+    sdf3DFogParam_t *sourceFog;
     sdf3DLight_t *light;
     void *work;
     s32 nameIndex;
@@ -245,8 +247,10 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
     frame->nameIndex = -1;
     LinkFrameInfo(track, frame);
     switch (track->type) {
+    case 0:
+        break;
     case 2:
-        frame->param.sf[0] = 0.5235987305641174f;
+        frame->param.sf[0] = 0.52359874f;
         frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
         break;
     case 1:
@@ -264,10 +268,9 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
         break;
     case 18:
         nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
-        ((volatile evtFrameInfo_t *)frame)->param.sh[0] = 0;
+        frame->param.sh[0] = 0;
         frame->nameIndex = nameIndex;
         frame->param.sh[1] = -1;
-        ((volatile evtFrameInfo_t *)frame)->param.sb[0] = 0;
         break;
     case 20:
     case 21:
@@ -306,48 +309,49 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
         break;
     case 11:
         sceneFog = sdfChipAllocDirect(0x20);
-        sceneFog->fog.vec[0] = dds3LightParam.fog.fogMin;
-        sceneFog->fog.color = dds3LightParam.fog.color;
+        sourceFog = &dds3LightParam.fog;
+        sceneFog->fog.vec[0] = sourceFog->fogMin;
+        sceneFog->fog.color = sourceFog->color;
         frame->work = sceneFog;
-        sceneFog->fog.vec[1] = dds3LightParam.fog.fogMax;
-        sceneFog->fog.vec[2] = dds3LightParam.fog.fogNear;
-        sceneFog->fog.vec[3] = dds3LightParam.fog.fogFar;
+        sceneFog->fog.vec[1] = sourceFog->fogMax;
+        sceneFog->fog.vec[2] = sourceFog->fogNear;
+        sceneFog->fog.vec[3] = sourceFog->fogFar;
         frame->param.sh[0] = 1;
         break;
     case 13:
         work = sdfChipAllocDirect(0x28);
         frame->work = work;
-        *(volatile evtBlurCopy_t *)work = *(volatile evtBlurCopy_t *)&evtGetUnityCalcArea()->source;
+        memcpy(work, &evtGetUnityCalcArea()->source, sizeof(dds3Effect_Blur_t));
         frame->param.sh[0] = 1;
         break;
     case 14:
         work = sdfChipAllocDirect(0x2C);
         frame->work = work;
-        *(volatile evtMultiBlurCopy_t *)work = *(volatile evtMultiBlurCopy_t *)&Eve_PartialMultiBlurGetParams()->body;
+        memcpy(work, &Eve_PartialMultiBlurGetParams()->body, sizeof(dds3Effect_PartialMultiBlurParam_t));
         frame->param.sh[0] = 1;
         break;
     case 15:
         work = sdfChipAllocDirect(0x2C);
         frame->work = work;
-        *(volatile evtDistBlurCopy_t *)work = *(volatile evtDistBlurCopy_t *)&Eve_DistortionBlurGetParams()->params;
+        memcpy(work, &Eve_DistortionBlurGetParams()->params, sizeof(dds3Effect_DistortionBlurParam_t));
         frame->param.sh[0] = 1;
         break;
     case 23:
         work = sdfChipAllocDirect(0x2C);
         frame->work = work;
-        *(volatile evtRippleBlurCopy_t *)work = *(volatile evtRippleBlurCopy_t *)&Eve_RippleBlurGetParams()->params;
+        memcpy(work, &Eve_RippleBlurGetParams()->params, sizeof(dds3Effect_RippleBlurParam_t));
         frame->param.sh[0] = 1;
         break;
     case 16:
         work = sdfChipAllocDirect(0x18);
         frame->work = work;
-        *(volatile evtFilterCopy_t *)work = *(volatile evtFilterCopy_t *)Eve_FilterGetParams();
+        memcpy(work, Eve_FilterGetParams(), sizeof(dds3Effect_Filter_t));
         frame->param.sh[0] = 1;
         break;
     case 17:
         work = sdfChipAllocDirect(0x24);
         frame->work = work;
-        *(volatile evtMultiFilterCopy_t *)work = *(volatile evtMultiFilterCopy_t *)&Eve_PartialMultiFilterGetParams()->param;
+        memcpy(work, &Eve_PartialMultiFilterGetParams()->param, sizeof(dds3Effect_PartialMultiFilterParam_t));
         frame->param.sh[0] = 1;
         break;
     }

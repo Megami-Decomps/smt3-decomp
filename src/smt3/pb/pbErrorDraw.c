@@ -65,7 +65,7 @@ extern pbProcHandle_t *blockDB;
 
 extern pbProcHandle_t *pbStartErrorDraw(pbProcHandle_t *parent, s32 eCode, s32 frame);
 
-extern void *sdfChipAllocDirect(u32 aSize);
+extern void *sdfChipAllocDirect(s32 aSize);
 
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
@@ -79,11 +79,12 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
 
-/* NON_MATCHING: 2 of 47 words; the process load and the data store swap delay slots. */
-#ifdef NON_MATCHING
+extern void *memcpy(void *destination, const void *source, u32 size);
+
 pbProcHandle_t *pbStartErrorDraw(pbProcHandle_t *parent, s32 eCode, s32 frame) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbErrorWork_t *work;
+    dds3ProcessID_t *process;
     panel->id = dds3StartProcess("pb-draw-error", 0x2AFD, 1, 1, pb_draw_error_Process,
                                       (dds3ProcessFunc_t)pb_draw_error_Shutdown, NULL);
     if (parent != NULL) {
@@ -93,14 +94,13 @@ pbProcHandle_t *pbStartErrorDraw(pbProcHandle_t *parent, s32 eCode, s32 frame) {
     work->code = eCode;
     work->timer = frame;
     work->unk04 = 0;
-    panel->flags = 0x10000;
     panel->data.error = work;
-    dds3SetProcessData(panel->id, panel);
+    panel->flags = 0x10000;
+    /* Copy the actual ID representation; this keeps the native load schedule. */
+    memcpy(&process, &panel->id, sizeof(process));
+    dds3SetProcessData(process, panel);
     return panel;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbErrorDraw", pbStartErrorDraw);
-#endif
 
 INCLUDE_RODATA(const s32, "pb/pbErrorDraw", D_005365E8);
 

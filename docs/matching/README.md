@@ -24,11 +24,11 @@ both native and emitted sizes when they differ.
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 8 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 7 |  | [sdk/libc.md](sdk/libc.md) |
+| 7 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 6 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 6 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 6 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
-| 6 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
@@ -100,6 +100,7 @@ both native and emitted sizes when they differ.
 | 1 | pipe/mnMyLink | [pipe/mnMyLink.md](pipe/mnMyLink.md) |
 | 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 |  | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
+| 1 | nme/Nme_Draw | [nme/Nme_Draw.md](nme/Nme_Draw.md) |
 | 1 | newbattle/nbTest | [newbattle/nbTest.md](newbattle/nbTest.md) |
 | 1 | newbattle/nbSkillError | [newbattle/nbSkillError.md](newbattle/nbSkillError.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
