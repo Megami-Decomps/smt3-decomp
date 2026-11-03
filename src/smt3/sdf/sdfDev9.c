@@ -102,12 +102,12 @@ u64 sdf_2BFC58(void *dst, s32 size)
     counter = 0x002BFCAC;
     entry = (u32)counter + (u32)index * 4;
     for (i = 7 - index; i >= 0; i--) {
-        PS2_STORE_ZERO_QUAD((void *)(address + (u32)i * 16));
+        PS2_STORE_ZERO_QUAD(EE_ADDR_AS(void *, address + (u32)i * 16));
     }
     while ((counter -= 8) >= 0) {
         address += 0x80;
         for (i = 7; i >= 0; i--) {
-            PS2_STORE_ZERO_QUAD((void *)(address + (u32)i * 16));
+            PS2_STORE_ZERO_QUAD(EE_ADDR_AS(void *, address + (u32)i * 16));
         }
     }
     return entry;

@@ -586,7 +586,7 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
             tag++;
         }
         *(u64 *)&tag->dat0 = 0;
-        *(u64 *)tag = SDF_DMA_TAG((u32)list->next, list->count | 0x30000000);
+        *(u64 *)tag = SDF_DMA_TAG(EE_ADDR(list->next), list->count | 0x30000000);
         tag++;
         i++;
     } while (i != listCount);

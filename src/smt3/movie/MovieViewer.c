@@ -237,7 +237,7 @@ void movieViewerDrawInfo(void)
     if (movieViewerDebugFlag.wordPending != 0) {
 #ifdef NON_MATCHING
         if (movieViewerIsRegister(movieViewerDebugFlag.regAddr)) {
-            movieViewerDebugFlag.word = HW_READ((volatile s32 *)movieViewerDebugFlag.regAddr);
+            movieViewerDebugFlag.word = HW_READ(EE_ADDR_AS(volatile s32 *, movieViewerDebugFlag.regAddr));
         } else
 #endif
         {
@@ -258,7 +258,7 @@ void movieViewerDrawInfo(void)
                 if (movieViewerIsRegister(address)) {
                     u32 aligned = address & ~3U;
                     if (aligned != lastRegister) {
-                        value = HW_READ((volatile u32 *)aligned);
+                        value = HW_READ(EE_ADDR_AS(volatile u32 *, aligned));
                         lastRegister = aligned;
                     }
                     movieViewerDebugFlag.block[i] = value >> ((address & 3) * 8);

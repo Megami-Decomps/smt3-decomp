@@ -359,7 +359,7 @@ void UnitAnime(evtUnit_t *unit) {
                 mdlGetPosition(unit->owner);
             }
             SDF_VU0_STOREVECTOR_NOMEM(position);
-            SDF_VU0_LOADVECTOR_B(&((dds3Basic_t *)unit->currentTransitionValue)->poseset->pos);
+            SDF_VU0_LOADVECTOR_B(&EE_ADDR_AS(dds3Basic_t *, unit->currentTransitionValue)->poseset->pos);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_STOREVECTOR_NOMEM(targetDirection);
             SDF_VU0_GETLENGTH(distance);
@@ -374,7 +374,7 @@ void UnitAnime(evtUnit_t *unit) {
             if (previous) {
                 f32 previousDistance;
                 SDF_VU0_LOADVECTOR(position);
-                SDF_VU0_LOADVECTOR_B(&((dds3Basic_t *)unit->previousTransitionValue)->poseset->pos);
+                SDF_VU0_LOADVECTOR_B(&EE_ADDR_AS(dds3Basic_t *, unit->previousTransitionValue)->poseset->pos);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_STOREVECTOR_NOMEM(previousDirection);
                 SDF_VU0_GETLENGTH(previousDistance);

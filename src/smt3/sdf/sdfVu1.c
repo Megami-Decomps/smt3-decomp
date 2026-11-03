@@ -1780,7 +1780,7 @@ u64 *corePktClosePacket(sdfCorePacketCb_t *cb) {
     quadwords = (s32)(cursor - start) >> 4;
 
     while (((u32)cursor & 0x30) != 0) {
-        QUAD_ZERO(*(u128 *)cursor);
+        QUAD_ZERO(*EE_ADDR_AS(u128 *, cursor));
         cursor += 0x10;
     }
 

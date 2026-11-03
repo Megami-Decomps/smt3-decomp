@@ -1436,7 +1436,7 @@ void fldDbgPrint2DC(s32 x, s32 y, s32 col, s32 str) {
     quad.pz = 0x0FFFFF7F;
     initDrawTag(&quad);
     sdfDevSetPrintCB(&packet, quad.cx + x, quad.cy + y, quad.cz, col);
-    sdfDrawTagLink(quad.tag, EE_ADDR(sdfDevPrintfEx(&packet, (const char *)str)));
+    sdfDrawTagLink(quad.tag, EE_ADDR(sdfDevPrintfEx(&packet, EE_ADDR_AS(const char *, str))));
     LF(&quad);
     {
         sdfGrOt_t *textOt = &sdfGrOtTable[81];
@@ -1508,7 +1508,7 @@ void fldDbgPrintStr2D(s32 x, s32 y, s32 str) {
     quad.pz = 0x0FFFFF7F;
     initDrawTag(&quad);
     sdfDevSetPrintCB(&packet, quad.cx + x * 16, quad.cy + y * 8, quad.cz, 0);
-    sdfDrawTagLink(quad.tag, EE_ADDR(sdfDevPrintfEx(&packet, (const char *)str)));
+    sdfDrawTagLink(quad.tag, EE_ADDR(sdfDevPrintfEx(&packet, EE_ADDR_AS(const char *, str))));
     LF(&quad);
     {
         sdfGrOt_t *textOt = &sdfGrOtTable[81];
@@ -1532,7 +1532,7 @@ void fldDbgPrintStr2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.pz = 0x0FFFFF7F;
     initDrawTag(&quad);
     sdfDevSetPrintCB(&packet, quad.cx + x * 16, quad.cy + y * 8, quad.cz, packetField);
-    sdfDrawTagLink(quad.tag, EE_ADDR(sdfDevPrintfEx(&packet, (const char *)drawValue)));
+    sdfDrawTagLink(quad.tag, EE_ADDR(sdfDevPrintfEx(&packet, EE_ADDR_AS(const char *, drawValue))));
     LF(&quad);
     {
         sdfGrOt_t *textOt = &sdfGrOtTable[81];
@@ -1556,7 +1556,7 @@ void fldDbgPrintStr2DCF(s32 x, s32 y, f32 col, f32 str) {
     quad.pz = 0x0FFFFF7F;
     initDrawTag(&quad);
     sdfDevSetPrintCB(&packet, quad.cx + (s32)(col * 16.0f), quad.cy + (s32)(str * 8.0f), quad.cz, x);
-    sdfDrawTagLink(quad.tag, EE_ADDR(sdfDevPrintfEx(&packet, (const char *)y)));
+    sdfDrawTagLink(quad.tag, EE_ADDR(sdfDevPrintfEx(&packet, EE_ADDR_AS(const char *, y))));
     LF(&quad);
     {
         sdfGrOt_t *textOt = &sdfGrOtTable[81];

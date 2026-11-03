@@ -195,6 +195,7 @@ def convert(paths, kinds, report):
     return done, skipped
 
 
+NOPARENS = str.maketrans("", "", "()")
 UNEXPAND = {"EE_ADDR": "(u32)", "EE_ADDR_S": "(s32)", "EE_ADDR_PTR": "(void *)(u32)"}
 
 
@@ -258,7 +259,12 @@ def verify(paths):
         if a != b:
             n = next(k for k in range(min(len(a), len(b)) + 1)
                      if k == len(a) or k == len(b) or a[k] != b[k])
-            print(f"{rel}: differs at {n}\n  HEAD {a[max(0, n - 60):n + 60]}"
+            # Un-expansion drops the parens a macro expansion puts back, so a
+            # difference in parens alone is the verifier's own artefact. It
+            # still has to be read: a wrongly scoped operand looks the same.
+            kind = ("parens only" if a.translate(NOPARENS) == b.translate(NOPARENS)
+                    else "differs")
+            print(f"{rel}: {kind} at {n}\n  HEAD {a[max(0, n - 60):n + 60]}"
                   f"\n  tree {b[max(0, n - 60):n + 60]}")
             bad += 1
     print(f"verify: {len(paths) - bad}/{len(paths)} files token-identical to HEAD")
