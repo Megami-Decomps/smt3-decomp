@@ -47,6 +47,7 @@ both native and emitted sizes when they differ.
 | 3 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 3 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 3 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
+| 3 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 3 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 3 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 3 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
@@ -65,7 +66,6 @@ both native and emitted sizes when they differ.
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
 | 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
 | 2 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
-| 2 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 2 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 2 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
 | 2 | newbattle/nbResultProcess | [newbattle/nbResultProcess.md](newbattle/nbResultProcess.md) |
@@ -130,6 +130,7 @@ both native and emitted sizes when they differ.
 | 1 | event/evtEventViewerFrameVar | [event/evtEventViewerFrameVar.md](event/evtEventViewerFrameVar.md) |
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 1 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
+| 1 | effect/effBattleSystem | [effect/effBattleSystem.md](effect/effBattleSystem.md) |
 | 1 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
 | 1 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 1 | code_001C55F8 | [code_001C55F8.md](code_001C55F8.md) |
