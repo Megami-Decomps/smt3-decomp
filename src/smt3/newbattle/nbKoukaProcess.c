@@ -586,7 +586,7 @@ void RunSkillEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 void nbRunKoukaCase1(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
     s32 partyno = p->partyno;
-    nbParty_t *party = (nbParty_t *)((u8 *)(partyno * 0x80) + (u32)k->data->party);
+    nbParty_t *party = (nbParty_t *)(EE_ADDR_AS(u8 *, (partyno * 0x80)) + EE_ADDR(k->data->party));
 
     if ((party->flag & 1) == 0) {
         return;
@@ -621,7 +621,7 @@ void RunNumEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
      * later VU load / RotationArc. The verified native schedule places its
      * store before party lookup; this empty operand is not a memory barrier. */
     FAKEMATCH_ASM_READ_MEM(forward.z);
-    party = (nbParty_t *)((u8 *)(p->partyno * 0x80) + (u32)data->party);
+    party = (nbParty_t *)(EE_ADDR_AS(u8 *, (p->partyno * 0x80)) + EE_ADDR(data->party));
     if ((u16)(party->flag & 1) != 0) {
         form = &data->form[party->formindex];
         switch (p->type) {

@@ -456,7 +456,7 @@ void *nbEventProcess3(dds3ProcessID_t *id)
     if (nbEventEntryTable[data->eventno].unk_04 != 0) {
         event->unk_18 = NULL;
         nbGetEventEntry(data);
-        return (void *)nbEventEntryTable[data->eventno].unk_04;
+        return EE_ADDR_AS(void *, nbEventEntryTable[data->eventno].unk_04);
     }
     return (void *)-1;
 }

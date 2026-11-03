@@ -786,7 +786,7 @@ s32 nbGetNakama(datUnitWork_t *s)
     }
     datSetDevilWork(s->id, stock);
     fclEncycRegist(stock, 0);
-    *((u8 *)(*(s32 *)((u8 *)DDS3_GBWK + 0x1924)) + (u32)DDS3_GBWK + 0x1914) = i;
+    *(EE_ADDR_AS(u8 *, (*(s32 *)((u8 *)DDS3_GBWK + 0x1924))) + EE_ADDR(DDS3_GBWK) + 0x1914) = i;
     *(s32 *)((u8 *)DDS3_GBWK + 0x1924) = *(s32 *)((u8 *)DDS3_GBWK + 0x1924) + 1;
     return 1;
 }

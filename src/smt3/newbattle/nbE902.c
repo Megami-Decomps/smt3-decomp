@@ -447,7 +447,7 @@ s32 Bunshin1(nbEventProcessData_t *ed)
     nbFormation_t *form;
 
     form = ed->data->form;
-    nbAddOngBunshin2Packet(0, (s32)ed, &form[5], &form[6], &form[4], &form[7]);
+    nbAddOngBunshin2Packet(0, EE_ADDR_S(ed), &form[5], &form[6], &form[4], &form[7]);
     nbCameraBoss_Ongy_BUNSIN_Run(pNbCamera);
     nbFreeEffectSlot(ed);
     return 0;

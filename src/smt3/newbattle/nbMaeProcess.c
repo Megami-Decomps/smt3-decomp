@@ -35,7 +35,7 @@ s32 nbMaeProcess02Wait(void)
 s32 nbMaeProcess02Loop(void)
 {
     if (nbMaeCheckDone() == 1) {
-        return (s32)nbMaeProcess02Wait;
+        return EE_ADDR_S(nbMaeProcess02Wait);
     }
     return 0;
 }
@@ -43,7 +43,7 @@ s32 nbMaeProcess02Loop(void)
 s32 nbMaeProcess02Step(void)
 {
     nbSetMaeFlag(0);
-    return (s32)nbMaeProcess02Loop;
+    return EE_ADDR_S(nbMaeProcess02Loop);
 }
 
 s32 nbMaeProcess02(void)
@@ -54,7 +54,7 @@ s32 nbMaeProcess02(void)
     if (nbCheckEventEntries(data) != 0) {
         if (nbCheckEventPackLoaded(data) != 0) {
             dds3ResetProcessFlag(data->StageProcessID, 0x20, 0);
-            return (s32)nbMaeProcess02Step;
+            return EE_ADDR_S(nbMaeProcess02Step);
         }
     }
     return 0;
@@ -68,7 +68,7 @@ s32 nbMaeProcess01(void)
     nbStartEventPacks(data);
     nbLoadDefaultModelPack(data);
     dds3SetProcessFlag(data->StageProcessID, 0x20, 0);
-    return (s32)nbMaeProcess02;
+    return EE_ADDR_S(nbMaeProcess02);
 }
 
 s32 nbMaeProcess0(void)
@@ -78,7 +78,7 @@ s32 nbMaeProcess0(void)
     data = nbGetMainProcessData();
     nbSetStageParam(data->StageMajor, data->StageMinor);
     effBTLEncountStart();
-    return (s32)nbMaeProcess01;
+    return EE_ADDR_S(nbMaeProcess01);
 }
 
 void nbMaeShutdown(void)

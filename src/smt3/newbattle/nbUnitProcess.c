@@ -399,7 +399,7 @@ s32 nbCalcUnitVisual2(nbFormation_t *form, s32 part)
 s32 nbGetMotionActframe(nbFormation_t *form, s32 motion, f32 ritu)
 {
     nbUnitMotion_t *mot = (nbUnitMotion_t *)((u8 *)(motion * sizeof(nbUnitMotion_t)) +
-        (u32)nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->formindex)) + 0x2C);
+        EE_ADDR(nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->formindex))) + 0x2C);
     s32 frame = mot->actframe;
 
     return frame / nbGetMotionSpeed(form, motion, ritu);
@@ -518,7 +518,7 @@ void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formin
         nbParty_t *entry;
         base = state->party;
         FAKEMATCH_ASM_LIVE(base);
-        entry = (nbParty_t *)((u32)(partyindex * sizeof(nbParty_t)) + (u32)base);
+        entry = EE_ADDR_AS(nbParty_t *, ((u32)(partyindex * sizeof(nbParty_t)) + EE_ADDR(base)));
         party = entry;
         party->flag = partyflag;
         party->statindex = stockno;
@@ -529,7 +529,7 @@ void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formin
     }
 
     if ((work->flag & 4) && (hearts = rstGetEquipHeartsAisyo()) != 0) {
-        party = (nbParty_t *)((u32)(partyindex * sizeof(nbParty_t)) + (u32)state->party);
+        party = EE_ADDR_AS(nbParty_t *, ((u32)(partyindex * sizeof(nbParty_t)) + EE_ADDR(state->party)));
         for (i = 0; i < 16; i++) {
             party->aisyo[i] = datAisyoTable[hearts][i];
         }
@@ -705,7 +705,7 @@ void nbRunKoukaType1(s32 partyindex, sdfVector4_t *pos, f32 time)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
     struct nbParty_t *party =
-        (struct nbParty_t *)((u8 *)(partyindex * 0x80) + (u32)data->party);
+        (struct nbParty_t *)(EE_ADDR_AS(u8 *, (partyindex * 0x80)) + EE_ADDR(data->party));
     nbFormation_t *form;
 
     if ((party->flag & 1) == 0) {
@@ -738,7 +738,7 @@ void nbRunKoukaType2(s32 partyindex, f32 time)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
     struct nbParty_t *party =
-        (struct nbParty_t *)((u8 *)(partyindex * 0x80) + (u32)data->party);
+        (struct nbParty_t *)(EE_ADDR_AS(u8 *, (partyindex * 0x80)) + EE_ADDR(data->party));
     nbFormation_t *form;
 
     if ((party->flag & 1) == 0) {

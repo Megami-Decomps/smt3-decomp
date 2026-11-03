@@ -534,7 +534,7 @@ void nbCheckPackLoad(nbMainProcessData_t *data)
 
     ofs = 0;
     for (i = 9; i >= 0; i--) {
-        stat = (nbStatWork_t *)((s32)data->statwork + ofs);
+        stat = EE_ADDR_AS(nbStatWork_t *, (EE_ADDR_S(data->statwork) + ofs));
         if (stat->id != 0) {
             for (j = 0; j < 0x1A; j++) {
                 if (stat->file[j] != NULL) {

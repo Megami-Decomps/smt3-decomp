@@ -298,7 +298,7 @@ s32 Flow16_1(nbNegoProcessData_t *n)
 
     nbAddNegoIdKouho(n, 0x100002);
     nbAddNegoIdKouho(n, 0x100003);
-    nbAddMojiEffKoukaPacket(0, 0x1E, (s32)n->actdata, n->eform, 0);
+    nbAddMojiEffKoukaPacket(0, 0x1E, EE_ADDR_S(n->actdata), n->eform, 0);
     nbCameraSetBougai(n->eform);
     race = datGetRace(n->ework);
     if (race < 0x18) {

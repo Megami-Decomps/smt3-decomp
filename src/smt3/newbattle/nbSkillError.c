@@ -666,7 +666,7 @@ s32 cmpClearButtonGuide(s32 skill, u32 select)
 void nbLoadDefaultModelPack(nbMainProcessData_t *data)
 {
     if (data->encno == 0x14D && data->modelpack == NULL) {
-        data->modelpack = (void *)nbMakeModelPackName(0xFF);
+        data->modelpack = EE_ADDR_AS(void *, nbMakeModelPackName(0xFF));
     }
 }
 
@@ -722,7 +722,7 @@ void nbLoadModelPackIfEnabled(nbFormation_t *form, s32 group, s32 no)
 {
     if (form->packh == NULL) {
         if (evtBitCheck(0xC0F)) {
-            form->packh = (nbPacHandle_t *)nbMakeModelPackName(no);
+            form->packh = EE_ADDR_AS(nbPacHandle_t *, nbMakeModelPackName(no));
         } else {
             mdlPrepare(group, no, 0);
             nbLoadMidiFile(no);

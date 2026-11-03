@@ -596,7 +596,7 @@ s32 Flow1_12(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0x10027);
     n->workid[3] = 0x1000F;
     n->nextnegoid = n->nextkouho[1];
-    cnt = *(u8 *)(datDevilTable[n->ework->id].race + (s32)DDS3_GBWK + 0x1CA8);
+    cnt = *EE_ADDR_AS(u8 *, (datDevilTable[n->ework->id].race + EE_ADDR_S(DDS3_GBWK) + 0x1CA8));
     if (cnt >= 3 && DDS3_GBWK->maka >= 0x1F4) {
         if ((u32)(cnt - 3) < 3) {
             rate = 0x1E;
@@ -642,7 +642,7 @@ s32 Flow1_16(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x10011);
     n->getmakka = DDS3_GBWK->maka / 3;
-    *(u8 *)(datDevilTable[n->ework->id].race + (s32)DDS3_GBWK + 0x1CA8) = 0;
+    *EE_ADDR_AS(u8 *, (datDevilTable[n->ework->id].race + EE_ADDR_S(DDS3_GBWK) + 0x1CA8)) = 0;
     return 0;
 }
 
@@ -851,7 +851,7 @@ s32 Flow1_25(nbNegoProcessData_t *n)
 
     switch (phase) {
     case 0:
-        nbAddMojiEffKoukaPacket(0, 0x1E, (s32)n->actdata, form, 0);
+        nbAddMojiEffKoukaPacket(0, 0x1E, EE_ADDR_S(n->actdata), form, 0);
         nbCameraSetBougai(form);
         nbMemoryLoadNegoSe(form);
         return 0;
@@ -978,7 +978,7 @@ s32 Flow1_31(nbNegoProcessData_t *n)
             nbGetMotionNo(n->pform, 0);
             n->pform->cr = 100.0f / n->pform->scl;
             n->eform->cr = 100.0f / n->eform->scl;
-            nbMakeUnitMovePacket(0, (s32)n->actdata, n->pform,
+            nbMakeUnitMovePacket(0, EE_ADDR_S(n->actdata), n->pform,
                                  (u16)n->actdata->select, 3, 1.0f);
             nbCameraSetTaizi(n->pform, n->eform);
             break;
@@ -988,7 +988,7 @@ s32 Flow1_31(nbNegoProcessData_t *n)
             nbGetMotionNo(n->eform, 0);
             n->pform->cr = 100.0f / n->pform->scl;
             n->eform->cr = 100.0f / n->eform->scl;
-            nbMakeUnitMovePacket(0, (s32)n->actdata, n->eform,
+            nbMakeUnitMovePacket(0, EE_ADDR_S(n->actdata), n->eform,
                                  (u16)n->actdata->select, 3, 1.0f);
             nbCameraSetTaizi(n->pform, n->eform);
             break;
@@ -996,7 +996,7 @@ s32 Flow1_31(nbNegoProcessData_t *n)
             nbGetMotionNo(n->eform, 0);
             n->pform->cr = 100.0f / n->pform->scl;
             n->eform->cr = 100.0f / n->eform->scl;
-            nbMakeUnitMovePacket(0, (s32)n->actdata, n->eform,
+            nbMakeUnitMovePacket(0, EE_ADDR_S(n->actdata), n->eform,
                                  (u16)n->actdata->select, 3, 1.0f);
             nbCameraSetTaizi(n->pform, n->eform);
             break;

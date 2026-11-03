@@ -413,7 +413,7 @@ s32 RunUgou(nbEventProcessData_t *e)
     nbCameraBoss_Sp_DOUTYO_TP_Set(pNbCamera);
     nbDispText(text1[0xE8], NULL, 0, 0x5A, 0x89FEFF80);
     if (evtBitCheck(0xC0F) != 0) {
-        e->pfile = (nbPacHandle_t *)nbMakeModelPackName(D_005515C0);
+        e->pfile = EE_ADDR_AS(nbPacHandle_t *, nbMakeModelPackName(D_005515C0));
     } else {
         mdlPrepare(1, D_005515C0, 0);
     }
@@ -511,7 +511,7 @@ s32 SyuGo2(nbEventProcessData_t *ed)
         if (ed->seqtime == 0xB) {
             ofs = 0x3C0;
             for (i = 9; i >= 0; i--) {
-                form = (nbFormation_t *)((u8 *)ofs + EE_ADDR(ed->data->form));
+                form = (nbFormation_t *)(EE_ADDR_AS(u8 *, ofs) + EE_ADDR(ed->data->form));
                 ofs += 0xF0;
                 if (form->stat & 1) {
                     nbAddMotionKoukaPacket(0, 0, form, 4);

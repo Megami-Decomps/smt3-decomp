@@ -456,7 +456,7 @@ void dds3EffectListSetTexture(nbCameraHelper_effFLWinHandle_t *work, char *textu
         work->textureHandle = NULL;
     }
     loadedResource = sdfDevLoadFileEx(textureResource, resourceWords, 0);
-    texture = sdfTexSet((void *)(resourceWords[0]));
+    texture = sdfTexSet(EE_ADDR_AS(void *, (resourceWords[0])));
     work->textureHandle = texture;
     sdfMemFreeDirect(loadedResource);
 }

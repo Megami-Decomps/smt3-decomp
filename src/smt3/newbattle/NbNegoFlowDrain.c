@@ -380,13 +380,13 @@ s32 Flow11_3(nbNegoProcessData_t *n)
         if (nbCheckKuisibariSkill(n->pformindex) != 0) {
             if (drain > 0 && drain >= n->pwork->hp) {
                 drain = n->pwork->hp - 1;
-                nbAddSkillNamePacket(0x2D, (s32)n->actdata, 0x159);
+                nbAddSkillNamePacket(0x2D, EE_ADDR_S(n->actdata), 0x159);
                 nbSetKuisibariStop(n->pformindex);
             }
         } else if (nbCheckKuisibari2Skill(n->pformindex) != 0) {
             if (drain > 0 && drain >= n->pwork->hp) {
                 drain = n->pwork->hp - 1;
-                nbAddSkillNamePacket(0x2D, (s32)n->actdata, 0x168);
+                nbAddSkillNamePacket(0x2D, EE_ADDR_S(n->actdata), 0x168);
                 nbSetKuisibariStop(n->pformindex);
             }
         }
@@ -394,13 +394,13 @@ s32 Flow11_3(nbNegoProcessData_t *n)
         nbAddTimeListHp(n->actdata, n->pformindex,
                         -(n->pwork->hp < drain ? n->pwork->hp : drain));
         dead = !alive;
-        nbMakeDamagePacket(0x2D, (s32)n->actdata, n->pform, 3, drain, -1, 0, 0, dead, 0, 1, 0);
+        nbMakeDamagePacket(0x2D, EE_ADDR_S(n->actdata), n->pform, 3, drain, -1, 0, 0, dead, 0, 1, 0);
         if (dead != 0) {
-            nbMakeDeadPacket(0x4B, (s32)n->actdata, n->pform, 0);
+            nbMakeDeadPacket(0x4B, EE_ADDR_S(n->actdata), n->pform, 0);
         }
     } else {
-        nbMakeKaifukuPacket(0xF, (s32)n->actdata, n->eform, 0, -1, n->requestdata, 0);
-        nbMakeDamagePacket(0x2D, (s32)n->actdata, n->pform, 3, -1, n->requestdata, 0, 0, 0, 0, 1,
+        nbMakeKaifukuPacket(0xF, EE_ADDR_S(n->actdata), n->eform, 0, -1, n->requestdata, 0);
+        nbMakeDamagePacket(0x2D, EE_ADDR_S(n->actdata), n->pform, 3, -1, n->requestdata, 0, 0, 0, 0, 1,
                            0);
         if (n->requestdata > 0) {
             n->requestdata = n->pwork->mp * 100 / n->requestdata;

@@ -376,11 +376,11 @@ s32 nbDebugStockSelect(void)
     u32 flags;
     u16 name;
 
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     dds3ConsPanelTagLinkZ(tag, 0xA2, 0x3E, 16, 21, 0xFEFFFB);
     D_002F67F8.regFunc(&D_002F67F8, tag);
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     base = *(volatile s32 *)&D_005512F0;
     y = 70;
@@ -433,7 +433,7 @@ void DispBadStatus(s32 x, s32 y, u32 status, s32 color)
     const char **name;
 
     i = 0;
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     bit = 1;
     name = nbBadStatusNames;
@@ -478,7 +478,7 @@ void DispHpMpBad2(nbDebugProcessData_t *d, nbFormation_t *form)
     labels = nbDebugUnitLabelTable;
     work = nbGetUnitWorkFromFormindex(form->formindex);
     party = nbGetPartyFromFormindex(form->formindex);
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     request = frwGetSmallFontFRQ(0x80, 0x270, 0xFFFF80, -0x80, text2[work->id], NULL);
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7C30, 0xFEFFFF, 0, D_00545658, work->id)));
@@ -550,7 +550,7 @@ s32 SelectMenu(nbDebugProcessData_t *d)
         frDrawFont((frFontHandle_t *)request);
         frDestroyFontRequestAfter((frFontHandle_t *)request);
     }
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     dds3ConsPanelTagLinkZ(tag, x - 8, 0x5C, 10, 12, 0xFF0000);
     D_002F67F8.regFunc(&D_002F67F8, tag);
@@ -632,7 +632,7 @@ s32 SelectBad(nbDebugProcessData_t *d)
 
     i = 0;
     y = 100;
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     work = nbGetUnitWorkFromFormindex(d->form->formindex);
     dds3ConsPanelTagLinkZ(tag, 0x160, 0x5C, 10, 15, 0xFEFFFE);
@@ -688,7 +688,7 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
     u16 halfBits;
 
     typeNames = D_00545698;
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     work = nbGetUnitWorkFromFormindex(d->form->formindex);
     dds3ConsPanelTagLinkZ(tag, 0x2E, 0x16E, 12, 5, 0xFF0000);
@@ -794,7 +794,7 @@ s32 SelectMot(nbDebugProcessData_t *d, s32 active)
     s32 i, y, yText, attr, color, result, base, selected;
     u8 button;
 
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     nbGetUnitWorkFromFormindex(d->form->formindex);
     dds3ConsPanelTagLinkZ(tag, 0x18C, 0x4C, 8, 20, 0xFF0000);
@@ -873,7 +873,7 @@ s32 SelectDevil(nbDebugProcessData_t *d)
     s32 xText = 0xE6;
     s32 x = 0xAA0;
 
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     dds3ConsPanelTagLinkZ(tag, 0xA2, 0x48, 15, 20, 0xFF0000);
     y = 0x7BA0;
@@ -976,7 +976,7 @@ void SetTarget_nbDebugProcess(nbDebugProcessData_t *a)
     a->form = NULL;
     a->formindex = 0;
     for (i = 0; i < 0x10; i++) {
-        form = (nbFormation_t *)(i * sizeof(nbFormation_t) + (s32)a->data->form);
+        form = (nbFormation_t *)(i * sizeof(nbFormation_t) + EE_ADDR_S(a->data->form));
         if (form->stat & 8) {
             a->formindex = i;
             a->form = form;
