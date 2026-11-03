@@ -25,6 +25,11 @@
 #define D1_CHCR ((volatile u32 *)0x10009000)
 #define D1_MADR ((volatile u32 *)0x10009010)
 #define D1_TADR ((volatile u32 *)0x10009030)
+/* Channel 2 is the GIF's. sdk/libgraph.c spells this register itself, as a
+ * dereference rather than a pointer, because it includes no eeregs.h; a
+ * consumer transcribing sceGsSyncPath reads it through HW_READ and needs the
+ * pointer form here. */
+#define D2_CHCR ((volatile u32 *)0x1000A000)
 #define D3_CHCR ((volatile u32 *)0x1000B000)
 #define D3_MADR ((volatile u32 *)0x1000B010)
 #define D3_QWC ((volatile u32 *)0x1000B020)
