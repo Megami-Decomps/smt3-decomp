@@ -32,3 +32,25 @@ This repairs a compiler-check/source-declaration blocker, not a demonstrated
 runtime bug or a blanket warning-free guarantee. Final owners remain 290/0 and 13/0. Full retail byte comparison/checksum/no-op,
 450 tests, 817 layout assertions, fresh stable 141-owner/481-draft checks,
 seven IRX checks and reconciled unchanged reports pass.
+
+### First-position hardware-handoff control (not retained)
+
+A later diagnostic, motivated by the exact StageLoad hardware-handoff sibling,
+changes only the first position store after `effBTLModelGetSphereCenter` to
+the existing `SDF_VU0_STOREVECTOR_NOMEM`. The model type-3 dispatch and its
+actual quadword consumer are verified; no intervening C access or retained
+input pointer exists. The canonical pointer-list qualifiers, other stores and
+callback-sensitive reloads remain unchanged.
+
+This restores the real store-address/call-address split: qualified RTL retains
+consumer-address instruction 368 through CSE instead of merging it into
+store-address pseudo 143. Output uses v0 for the store, then separately
+materializes s0 for the call. It remains nonmatching at 696/720 bytes and 10
+matching prefix words, versus 688/720 and 9 for the baseline. The 8-byte
+growth comprises the 4-byte rematerialization and 4 bytes of assembler branch
+alignment. Both complete owners retain 290 matches plus Hansya's difference;
+allocated data agrees, and whole-owner plain/dump assembly, sections, symbols
+and relocations have parity. This is diagnostic evidence only, with no
+retained source change or matching credit. The matrix and second-position
+substitutions remain held because their asset-selected PCP consumer contracts
+are unresolved.

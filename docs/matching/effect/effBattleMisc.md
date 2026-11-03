@@ -69,7 +69,7 @@ declaring `x` before or after the other locals.
 
 ## effBTLPartPtrModelGroupGetCenterAndHeight (effect/effBattleMisc, 0x248)
 
-4 of 146 words differ, at the exact 584-byte size. One instruction is wrong and the
+142 of 146 words match, at the exact 584-byte size. One instruction is wrong and the
 three stores after it are scheduled one slot early as a consequence: retail
 rematerialises the zero it stores into the accumulator vector
 (`mtc1 $0, $f0`), the draft copies it out of the saved register that already
@@ -79,7 +79,9 @@ dependency, so ee-gcc's scheduler fills the next three slots with the two
 
 cc1's copy propagation is what does it: `front = 0.0f;` leaves 0.0 available
 in a pseudo that lives across the `nbGetMainProcessData` call, and the later
-`zero = 0.0f;` becomes a copy of it. Nothing tried stops that. Ruled out:
+`zero = 0.0f;` becomes a copy of it. The ordinary-source controls below
+do not stop that; the later operand control stops the copy but regresses
+other instructions. Ruled out:
 spelling the second zero `0.0`, `0`, `-0.0f` (two words, worse), a chained
 `sum.x = sum.y = sum.z = 0.0f`, a literal at each of the three stores (which
 reverts to the shared register and costs 114 words), `sum.* = front`, and all
@@ -98,3 +100,100 @@ The rest of the function matches, and four source facts were needed:
   word.
 - `group & 0x100` is a `u32` local, read twice (once for the `top` select,
   once inside the loop), which is what keeps it in a saved register.
+
+
+### Two-live-value operand control (2026-11-03, rejected)
+
+The complete owner at `04bca9b7494be522d465bd74a1a9ac906ed3fb16`
+reproduced the retained draft's 142/146 words at 584 bytes, with 77 exact
+peers. One bounded control applied the existing nonvolatile
+`FAKEMATCH_ASM_LIVE_F32` separately to initialized `front` and `total`,
+immediately before the unchanged `nbGetMainProcessData` call. Both have
+real later consumers; neither was fixed to a register or given a memory
+clobber. The control restored the independent zero but worsened to 140/146
+words, still 584 bytes. Relative to retail, prologue words at +0x04,
++0x08, +0x0C and +0x10 changed, and the sum X/Z stores at +0x80 and +0x84
+were exchanged. This store order is not a new regression against the
+baseline: both first-scheduler outputs already store Z,X,Y, while native
+stores X,Z,Y. The restored zero exposes that pre-existing order at the retail
+store slots. Both rtl.16 inputs place group-copy UID4 before front-zero
+UID26; rtl.17 linearizes them as 4 then 26 in the baseline and 26 then 4 in
+the operand control. This is the earliest observed prologue precursor;
+post-reload save/write scheduling yields the four different words with the
+same physical registers and frame. No internal ranking or tie-break cause
+is proved. Grouping the operands has no supported causal premise, so no new
+control was tried. The control was rejected, not retained or promoted. No
+further placement, register or store-order controls were run.
+
+Qualified whole-owner plain versus `-da` output establishes the deciding
+pass: in the baseline's `rtl.02.jump`, UID57 assigns positive-zero
+`const_double` to SF pseudo98; `rtl.03.cse` changes that source to SF
+pseudo91 (`front`). UID26 initializes pseudo91, and UID29 copies it to
+pseudo92 (`total`). In the operand control, UIDs31/33 constrain those two
+real values and UID61 retains positive-zero `const_double` through the
+first CSE pass. Thus the first CSE transformation is measured, not inferred
+only from final bytes. Plain/dump assembly, allocated sections, non-file
+symbols and ordered relocations agree for each complete owner. Comparing
+the two controls changes only target text; all allocated nontext data,
+non-file symbols and ordered relocations agree. Compiler SHA-256:
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
+GDB was unavailable, so this is qualified RTL-pass evidence, not a
+qualified debugger-hook log or recovered original source spelling.
+
+The unchanged semantic contract includes exactly 32 formation rows,
+selection before each center callback, radius/model observations after
+callbacks, strict float comparisons, separate count conversions/divisions,
+and native output store order. Valid live formation/model objects,
+in-range center-offset indices, writable aligned output objects and the
+native alias/order contract remain required. The constraints are not
+memory barriers and do not justify moving those observations.
+
+The native sum and scale scratch vectors initialize XYZ only. Raw VU
+quadword operations also process W: lane-wise addition/multiplication does
+not feed W into XYZ, but the nonempty output includes W and VU flags may
+reflect W operations. The known same-owner caller consumes center XYZ,
+not W; this does not prove all external W or flag consumers absent. No W
+initialization, scalar C read of an uninitialized W lane, deterministic W
+result or portable uninitialized-lane semantics is asserted. Preserve the
+raw target hardware handoff and its side effects in any future review.
+
+The measured warning modes must not be conflated. Both controls compiled
+in ordinary production context and with `-da`, with existing owner
+warnings; the `SKIP_ASM` whole-owner checker reported 77 match, 1 differ
+for each. A production-context baseline compile with
+`-Werror-implicit-function-declaration` exited 33 at the existing
+`effBTLModelGroupGetWidthX` call to `effBTLGetGroupPos` (canonical line 342).
+Its truthful `extern void effBTLGetGroupPos(nbFormation_t *form, f32 *out)`
+exists at canonical line 322 but is inside `#ifdef NON_MATCHING`; its
+unconditional definition is at canonical line 757. Consequently production
+mode encounters the call before a visible declaration. Existing later
+`GroupRotate`/`GroupDiameterDisposition` calls also warn because their
+`sdfVector4_t *` arguments do not match that `f32 *` parameter. This control
+did not change the declaration, provider or unrelated guards. Strict pair,
+strict `SKIP_ASM` and full `NON_MATCHING` modes were not measured in this
+investigation. No full retail build or regression pass is claimed for the
+rejected source.
+
+### Declaration visibility follow-up
+
+The existing `void effBTLGetGroupPos(nbFormation_t *, f32 *)` declaration is
+now visible before the early call; only its NON_MATCHING guard pair was
+removed. This is a measured EE/GNU visibility correction, not a body change,
+runtime bug repair or certificate of ISO-C pointer validity. The three
+calls in this affected owner still pass incompatible `sdfVector4_t *`
+arguments and still warn. Native frame locations and the raw quadword
+provider store were reviewed; four adjacent float members do not establish
+a C float array or a general 16-byte alignment guarantee. Existing mixed
+cross-unit declarations remain unresolved and unchanged. No casts, signatures,
+layouts or unrelated call sites were modified.
+
+Independent baseline/candidate output contracts and normalized assembly
+agree in production, SKIP_ASM and retained modes. Strict implicit-declaration
+status changes from 33/33/0 to 0/0/0; this is not blanket warning-free output.
+The guarded GroupCenter body and its raw W-lane qualification remain unchanged.
+
+Final integrated owners 77/0 (center), 20/0 (name) and unchanged Hansya
+owner 290/0 pass. Fresh stable 140-owner/480-draft qualification, 450 tests,
+817 layout assertions, canonical strict/plain/dump parity, inline/shell checks,
+seven IRX modules, retail SHA1/byte comparison/no-op and reconciled reports
+pass. Coverage remains 8594 functions / 1485744 bytes; zero matching credit.
