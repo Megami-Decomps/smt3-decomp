@@ -120,10 +120,10 @@ store slots. Both rtl.16 inputs place group-copy UID4 before front-zero
 UID26; rtl.17 linearizes them as 4 then 26 in the baseline and 26 then 4 in
 the operand control. This is the earliest observed prologue precursor;
 post-reload save/write scheduling yields the four different words with the
-same physical registers and frame. No internal ranking or tie-break cause
-is proved. Grouping the operands has no supported causal premise, so no new
-control was tried. The control was rejected, not retained or promoted. No
-further placement, register or store-order controls were run.
+same physical registers and frame. At this historical RTL-only stage, no
+internal ranking or tie-break cause was proved, and no further controls
+were run. The pair was rejected, not retained or promoted. Later live
+measurements and two rejected controls are recorded below.
 
 Qualified whole-owner plain versus `-da` output establishes the deciding
 pass: in the baseline's `rtl.02.jump`, UID57 assigns positive-zero
@@ -137,8 +137,9 @@ symbols and ordered relocations agree for each complete owner. Comparing
 the two controls changes only target text; all allocated nontext data,
 non-file symbols and ordered relocations agree. Compiler SHA-256:
 `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
-GDB was unavailable, so this is qualified RTL-pass evidence, not a
-qualified debugger-hook log or recovered original source spelling.
+GDB was unavailable during this historical investigation, so its evidence
+was limited to qualified RTL passes. The later QEMU observation below
+resolves scheduler comparisons, not original source spelling.
 
 The unchanged semantic contract includes exactly 32 formation rows,
 selection before each center callback, radius/model observations after
@@ -173,6 +174,53 @@ did not change the declaration, provider or unrelated guards. Strict pair,
 strict `SKIP_ASM` and full `NON_MATCHING` modes were not measured in this
 investigation. No full retail build or regression pass is claimed for the
 rejected source.
+
+### Later qualified scheduler and allocation observations (2026-11-03)
+
+Fresh complete-owner checks reproduce the baseline at 142/146 words and
+historical two-operand pair at 140/146, both 584 bytes with 77 exact peers.
+The [upstream QEMU observer](../../cc1probe.md#qemu-observation-without-gdb)
+provides actual comparator and issue records without GDB. For each of these
+cases and the two controls below, all 5,565 frozen input hashes and all 28
+fresh baseline/observed artifacts agree, including whole assembly/object,
+22 RTL dumps and four logs. Ordinary wrapper, direct plain and direct dump
+assembly/object also agree. All four target passes enter and exit, 34
+exercised hooks pass opcode checks, and compilation ends normally (`W00`).
+Owned loopback listeners and compiler processes are absent after cleanup.
+This qualifies these allocation-mode cases, not every hook or source.
+
+- Before reload, baseline group-copy/front-zero priorities are 3/3;
+  register weights 0/1 select group first. In the historical pair, front
+  priority rises to 4 while group remains 3, so priority selects front.
+  After reload, baseline save-group/save-front ties resolve by LUID;
+  the pair instead selects save-front and front-zero by priority. The
+  deciding tiers are measured, but priority-construction recursion was
+  not traced: a unique cause for the increase is not established.
+- Both cases select the Z sum store first by register weight (-1 versus
+  X/Y at 0), then X before Y by LUID. Postreload LUID preserves Z,X,Y.
+  This explains a pre-existing mismatch, not a new pair regression.
+- Interleaving the real copy between the two operands restores 3/3 and
+  group-first scheduling, but the total copy moves after the call.
+  Total's compiler live length falls from 172 to 84 and calls crossed
+  from two to one. Allocation priorities reorder total/top/front to
+  f20/f21/f22 and also reorder back and the loop-index pseudo. The result
+  is rejected at **119/146 relocation-aware words**, not the raw 117/146.
+- Making only the interleaved total operand volatile restores a before-call
+  anti-dependence and two calls crossed, but total's live length is 83
+  and the wrong FPR allocation persists. This control is rejected at
+  **106/146 relocation-aware words**. Before-call placement alone is
+  insufficient. Both controls remain 584 bytes with 77 exact peers.
+
+The compiler live-length fields are not C lifetime proofs. Grouped operands,
+a group/register constraint, or textual postcall placement have no proved
+matching rationale here. The conditional Z,Y,X second controls were never
+run because their eligibility checks failed. No source candidate is retained;
+the 142/146 baseline remains. No new exact match, original-source recovery,
+full retail relink or regression pass is claimed for these rejected sources.
+The raw W/flags, valid-object, alias/order and mixed-pointer qualifications
+above still apply; three incompatible-pointer warnings persist. Neither
+empty operands nor volatility establish a general memory barrier or portable
+whole-call semantics.
 
 ### Declaration visibility follow-up
 

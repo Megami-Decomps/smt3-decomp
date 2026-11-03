@@ -75,3 +75,27 @@ source change; a neutral observation is not a matching result.
 On `src/smt3/kernel/dds3Randomize.c`, all decision families ran with identical
 hooked and unhooked assembly and RTL dumps. The same check passed without
 dumps. This qualifies the wrapper on that unit, not every future trace.
+
+## QEMU observation without GDB
+
+The upstream DDS [standard-library observer guide](https://github.com/Megami-Decomps/dds-decomp/blob/648e39e3cdda433ec839232f5b4d65f7d8b8022a/docs/compiler-live-observer.md)
+and [entry point](https://github.com/Megami-Decomps/dds-decomp/blob/648e39e3cdda433ec839232f5b4d65f7d8b8022a/tools/ee_gcc_observe.py)
+provide allocation and scheduler observation through QEMU without GDB.
+Use an upstream checkout at that revision; these tools are not vendored in
+SMT3. This is not a drop-in replacement for all GDB probe modes, and operand
+mode has not been qualified on SMT3.
+
+Keep the compiler pin above unchanged. Freeze the actual wrapper-resolved
+argv, working directory, environment and hash closure, including source,
+headers, fallback assembly, configuration, tools and runtime. Require fresh
+ordinary/direct plain/direct dump equality and fresh baseline/observed
+artifact equality for each case, plus opcode, target-discovery and
+completion guards. Use only supported Unix transport or strictly owned
+loopback transport, never an all-interface fallback; verify child/listener
+cleanup. An exit-zero `--nohook` run remains insufficient evidence of parity.
+
+The `dds3InitRandCB` allocation smoke case qualified 138 inputs and 28 fresh
+artifacts, with 85 events and 24 exercised hooks, not all 45 hooks. Later
+[GroupCenter cases](matching/effect/effBattleMisc.md#later-qualified-scheduler-and-allocation-observations-2026-11-03)
+each qualified 5,565 inputs, 28 artifacts and 34 exercised hooks. These are
+case-specific observations, not blanket neutrality or matching claims.
