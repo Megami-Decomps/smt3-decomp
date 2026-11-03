@@ -11,6 +11,10 @@ Two modes, because they answer different questions.
           diagnostics promoted to errors. A unit that passes accept can still
           fail this, and that is the interesting failure: it compiles and is
           wrong.
+  trunc   does the unit store an EE_ADDR result in a 32-bit declaration. This
+          is what survives naming every cast: the address is no longer
+          truncated by the cast, it is truncated by the declaration it lands
+          in, which only widening that declaration can fix.
 
 Nothing here is part of the retail build.
 """
@@ -47,6 +51,15 @@ WIDTH = [
     "-Werror=pointer-to-int-cast", "-Werror=int-to-pointer-cast",
     "-Werror=int-conversion", "-Werror=incompatible-pointer-types",
 ]
+
+TRUNC = ["-Wno-all", "-Wno-extra", "-Werror=conversion",
+         "-Wno-error=sign-conversion"]
+# gcc prints a cast's result as its underlying type and a declared variable as
+# its typedef name plus {aka ...}, so anchoring on `from '<type>' to` selects
+# the EE_ADDR expansions and rejects u64 and ps2Size_t variables, which are
+# the two classes that would otherwise be counted here. Keyed on ee_addr_t's
+# spelling: `long unsigned int` would also match every sizeof.
+TRUNC_RE = re.compile(r"error: conversion from .long long unsigned int. to")
 
 CLASSES = [
     ("pointer narrowed to a 32-bit integer", r"cast from pointer to integer of different size"),
@@ -86,27 +99,38 @@ def classify(stderr):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=("accept", "width"))
+    ap.add_argument("mode", choices=("accept", "width", "trunc"))
     ap.add_argument("--cc", default="gcc")
     ap.add_argument("--jobs", type=int, default=0)
     ap.add_argument("--list-failures", action="store_true")
     args = ap.parse_args()
 
-    extra = ACCEPT if args.mode == "accept" else WIDTH
+    extra = {"accept": ACCEPT, "width": WIDTH, "trunc": TRUNC}[args.mode]
     all_units = units()
     failed = []
     counts = {}
+    sites = 0
     with concurrent.futures.ThreadPoolExecutor(args.jobs or None) as pool:
         for path, rc, stderr in pool.map(
                 lambda p: compile_one(args.cc, extra, p), all_units):
+            if args.mode == "trunc":
+                hits = len(TRUNC_RE.findall(stderr))
+                sites += hits
+                if hits:
+                    failed.append(path)
+                continue
             if rc == 0:
                 continue
             failed.append(path)
             for name in classify(stderr):
                 counts[name] = counts.get(name, 0) + 1
 
-    print(f"{args.mode}: {len(all_units) - len(failed)}/{len(all_units)} units compile "
-          f"({args.cc} -m64)")
+    if args.mode == "trunc":
+        print(f"trunc: {sites} EE_ADDR results stored in a 32-bit declaration, "
+              f"over {len(failed)} units ({args.cc} -m64)")
+    else:
+        print(f"{args.mode}: {len(all_units) - len(failed)}/{len(all_units)} "
+              f"units compile ({args.cc} -m64)")
     for name, count in sorted(counts.items(), key=lambda kv: -kv[1]):
         print(f"  {count:4d} units: {name}")
     if args.list_failures:

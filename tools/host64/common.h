@@ -32,7 +32,11 @@ typedef __SIZE_TYPE__ ps2Size_t;
 
 /* An EE address in a host-pointer-wide integer. The retail expansion is
  * ((u32)(ptr)); here the width follows the host pointer so no address is
- * truncated, and the two stay inverse to each other. */
+ * truncated, and the two stay inverse to each other.
+ *
+ * The spelling is load-bearing for the probe's trunc mode, which recognizes a
+ * truncated address by the source type gcc names. unsigned long is how LP64
+ * spells size_t and the type of every sizeof, so this must not be that. */
 typedef unsigned long long ee_addr_t;
 #define EE_ADDR(ptr) ((ee_addr_t)(__UINTPTR_TYPE__)(ptr))
 #define EE_ADDR_PTR(addr) ((void *)(__UINTPTR_TYPE__)(addr))
