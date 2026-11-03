@@ -193,7 +193,7 @@ typedef struct
     /* 0x20 */ void (*calcSizes)();
 } fclPanelAnim_t;
 
-typedef char fclPanelAnimStateSizeCheck[(sizeof(fclPanelAnimState_t) == 0x20) ? 1 : -1];
+PS2_SIZE_CHECK(fclPanelAnimStateSizeCheck, fclPanelAnimState_t, 0x20);
 
 typedef struct fclencyceelem_t {
     u16 id;
@@ -223,7 +223,7 @@ typedef struct mselSaveData_t {
     u8 reserved[12];
     fclencyceelem_t records[184];
 } mselSaveData_t;
-typedef char mselSaveDataSizeCheck[(sizeof(mselSaveData_t) == 0x7E90) ? 1 : -1];
+PS2_SIZE_CHECK(mselSaveDataSizeCheck, mselSaveData_t, 0x7E90);
 
 typedef struct
 {
@@ -232,7 +232,7 @@ typedef struct
     /* 0x03 */ u8 unk_03;
 } ragItemReq_t;
 
-typedef char ragItemReqSizeCheck[(sizeof(ragItemReq_t) == 4) ? 1 : -1];
+PS2_SIZE_CHECK(ragItemReqSizeCheck, ragItemReq_t, 4);
 
 
 struct datDevilTableEntry_t;

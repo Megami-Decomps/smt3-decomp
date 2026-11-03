@@ -47,6 +47,17 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 typedef float f32;
 typedef double f64;
 
+/* Asserts a structure's retail size, by the negative-array-size trick ee-gcc
+ * 2.96 accepts. The typedef emits nothing, so this costs no code. The check
+ * applies only where a pointer is four bytes: a wider pointer moves every
+ * member after one, so the retail size is the wrong question there and the
+ * members' own types stay the record of the layout. */
+#ifndef PS2_SIZE_CHECK
+#define PS2_SIZE_CHECK(name, type, size) \
+    typedef char name[(sizeof(void *) != 4 || sizeof(type) == (size)) ? 1 : -1]
+#endif
+
+
 /* Binds NAME as an assembler alias for BASE + OFFSET, for a view into
  * another object that has no symbol of its own. The assembler does the
  * arithmetic, so nothing is allocated and the reference stays gp-relative.
