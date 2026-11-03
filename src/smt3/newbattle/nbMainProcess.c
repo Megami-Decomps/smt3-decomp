@@ -787,7 +787,7 @@ s32 CheckErrorActionStack(nbMainProcessData_t *data, s32 index)
     datUnitWork_t *unit;
     s32 type;
 
-    act = (nbActionStack_t *)((u8 *)(index * sizeof(nbActionStack_t)) + (u32)data->actionstack);
+    act = (nbActionStack_t *)((u8 *)(index * sizeof(nbActionStack_t)) + EE_ADDR(data->actionstack));
     party = (nbParty_t *)((u8 *)(act->to * sizeof(nbParty_t)) + (u32)data->party);
     if ((party->flag & 1) == 0) {
         return 1;

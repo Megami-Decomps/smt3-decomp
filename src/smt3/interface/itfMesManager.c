@@ -1873,9 +1873,9 @@ void OpenMessageWindow(instanceMes_tag *pinst) {
 
     if (place->mes == NULL) {
         if (pinst->type != 2) {
-            place->mes = itfPnlRegist2(6, (u32)itfMesMngManager.windowTexture);
+            place->mes = itfPnlRegist2(6, EE_ADDR(itfMesMngManager.windowTexture));
         } else {
-            place->mes = itfPnlRegist2(8, (u32)itfMesMngManager.windowTexture);
+            place->mes = itfPnlRegist2(8, EE_ADDR(itfMesMngManager.windowTexture));
         }
     }
     itfPnlSetPosition(place->mes, mes->x + place->mes_offset[0], mes->y + place->mes_offset[1],
@@ -1890,7 +1890,7 @@ void OpenCheckSpeakerWindow(instanceMes_tag *pinst) {
     if (origin->pfont != NULL && !(pinst->stat & 0x10000)) {
         if (place->spk == NULL) {
             s32 width = origin->pfont->advance * 16;
-            place->spk = itfPnlRegist2(7, (u32)itfMesMngManager.windowTexture);
+            place->spk = itfPnlRegist2(7, EE_ADDR(itfMesMngManager.windowTexture));
             itfPnlSetPosition(place->spk, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xE8, pinst->z);
             itfPnlSetColor(place->spk, 0x7F, 0x7F, 0x7F, 0);
         }

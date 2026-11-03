@@ -553,7 +553,7 @@ void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formin
     case 0: break;
     case 1: state->form[index].stat |= 0x80; break;
     }
-    form = (nbFormation_t *)((u32)(index * sizeof(nbFormation_t)) + (u32)state->form);
+    form = (nbFormation_t *)((u32)(index * sizeof(nbFormation_t)) + EE_ADDR(state->form));
     size = vvisual->formsize;
     form->partyindex = partyindex;
     form->formindex = index;

@@ -511,7 +511,7 @@ s32 SyuGo2(nbEventProcessData_t *ed)
         if (ed->seqtime == 0xB) {
             ofs = 0x3C0;
             for (i = 9; i >= 0; i--) {
-                form = (nbFormation_t *)((u8 *)ofs + (u32)ed->data->form);
+                form = (nbFormation_t *)((u8 *)ofs + EE_ADDR(ed->data->form));
                 ofs += 0xF0;
                 if (form->stat & 1) {
                     nbAddMotionKoukaPacket(0, 0, form, 4);

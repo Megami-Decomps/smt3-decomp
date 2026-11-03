@@ -4064,7 +4064,7 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
     unlock = GetAllUnlockTime(a);
     for (i = 0; i < 16; i++) {
         /* EE address arithmetic: form only the final array pointer. */
-        form = (nbFormation_t *)((u32)(i * sizeof(nbFormation_t)) + (u32)a->data->form);
+        form = (nbFormation_t *)((u32)(i * sizeof(nbFormation_t)) + EE_ADDR(a->data->form));
         formStatus = form->stat;
         if (!(formStatus & 1)) continue;
         if (!(formStatus & 0x40)) continue;

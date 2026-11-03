@@ -435,7 +435,7 @@ void fldDoorRun_FindStart(s32 resid) {
         return;
     }
     if (resid != 0) {
-        name = fldEveHitResName_Find((u32)scrGetScriptHandle()->ProcessID);
+        name = fldEveHitResName_Find(EE_ADDR(scrGetScriptHandle()->ProcessID));
         if (name == 0) return;
         if (fldDoor_Find2(name) == 0) return;
     }

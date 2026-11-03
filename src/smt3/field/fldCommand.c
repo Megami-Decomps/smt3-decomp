@@ -457,7 +457,7 @@ s32 fldCommand_ACT_WIN_DSP(void) {
         return 1;
     }
     hit = dds3SearchSceneBasic(
-        scene, fldEveHitResID_Find((u32)scrGetScriptHandle()->ProcessID), 0x11);
+        scene, fldEveHitResID_Find(EE_ADDR(scrGetScriptHandle()->ProcessID)), 0x11);
     if (hit == NULL) {
         scrSetIntReturnValue(0);
         return 1;
@@ -490,7 +490,7 @@ s32 fldCommand_ACT_WIN_DSP2(void) {
         return 1;
     }
     hit = dds3SearchSceneBasic(
-        scene, fldEveHitResID_Find((u32)scrGetScriptHandle()->ProcessID), 0x11);
+        scene, fldEveHitResID_Find(EE_ADDR(scrGetScriptHandle()->ProcessID)), 0x11);
     if (hit == NULL) {
         scrSetIntReturnValue(0);
         return 1;
@@ -550,7 +550,7 @@ s32 fldCommand_DIR_HIT_CNTR(void) {
         return 1;
     }
     hit = dds3SearchSceneBasic(
-        scene, fldEveHitResID_Find((u32)scrGetScriptHandle()->ProcessID), 0x11);
+        scene, fldEveHitResID_Find(EE_ADDR(scrGetScriptHandle()->ProcessID)), 0x11);
     if (hit == NULL) {
         scrSetIntReturnValue(0);
         return 1;
@@ -1362,7 +1362,7 @@ s32 fldCommand_FLD_CHK_EVE(void) {
 }
 
 s32 fldCommand_FLD_GET_TAKARA_TBL(void) {
-    s32 index = fldFindEveRngIndex((u32)scrGetScriptHandle()->ProcessID);
+    s32 index = fldFindEveRngIndex(EE_ADDR(scrGetScriptHandle()->ProcessID));
 
     switch (scrGetIntPara(0)) {
     case 0:
@@ -1391,13 +1391,13 @@ u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
     s32 room;
 
     script = scrGetScriptHandle();
-    room = fldFindEveRngIndex((u32)script->ProcessID);
+    room = fldFindEveRngIndex(EE_ADDR(script->ProcessID));
     fldSetTakaraOpen(room);
     return 1;
 }
 
 u32 fldCommand_FLD_CHK_TAKARA_OPEN(void) {
-    if (fldGetTakaraOpen(fldFindEveRngIndex((u32)scrGetScriptHandle()->ProcessID)) != 0) {
+    if (fldGetTakaraOpen(fldFindEveRngIndex(EE_ADDR(scrGetScriptHandle()->ProcessID))) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -1413,7 +1413,7 @@ s32 fldCommand_FLD_WARP_CALL_FIELD(void) {
         fldDoor_Warp(NULL);
         return 1;
     }
-    entry = fldEveHitResName_Find((u32)scrGetScriptHandle()->ProcessID);
+    entry = fldEveHitResName_Find(EE_ADDR(scrGetScriptHandle()->ProcessID));
     if (entry != NULL) {
         fldDoor_Warp(entry);
     }
@@ -1438,8 +1438,8 @@ s32 fldCommand_FLD_WARP_CASH_F(void) {
         return 1;
     }
     command = scrGetScriptHandle();
-    id = fldEveHitResID_Find((u32)command->ProcessID);
-    name = fldEveHitResName_Find((u32)command->ProcessID);
+    id = fldEveHitResID_Find(EE_ADDR(command->ProcessID));
+    name = fldEveHitResName_Find(EE_ADDR(command->ProcessID));
     hit = dds3SearchSceneBasic(scene, id, 0x11);
     if (hit == NULL) {
         return 1;
@@ -1510,7 +1510,7 @@ u32 fldCommand_FLD_WARP_RUN_START(void) {
     if (fldDoor_ChkWarp()) {
         scene = 0;
     } else {
-        scene = fldEveHitResID_Find((u32)scrGetScriptHandle()->ProcessID);
+        scene = fldEveHitResID_Find(EE_ADDR(scrGetScriptHandle()->ProcessID));
     }
     fldDoorRun_FindStart(scene);
     return 1;
@@ -1642,7 +1642,7 @@ s32 fldCommand_FLD_SET_ENCOUNT(void) {
 
 s32 fldCommand_FLD_EXIT_CAMERA(void) {
     scrProcessWork_s *command = scrGetScriptHandle();
-    const char *record = fldEveHitResName_Find((u32)command->ProcessID);
+    const char *record = fldEveHitResName_Find(EE_ADDR(command->ProcessID));
 
     if (record != NULL) {
         fldDoor_ExitCamera(record);
