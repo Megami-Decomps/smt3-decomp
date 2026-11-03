@@ -20,12 +20,12 @@ both native and emitted sizes when they differ.
 | 12 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
+| 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 8 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 7 |  | [sdk/libc.md](sdk/libc.md) |
 | 6 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 6 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
-| 6 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 6 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
