@@ -1596,7 +1596,7 @@ s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
         return 0;
     }
     for (i = 0; i < 256; i++) {
-        e = (doormovework_s *)((u8 *)(i * 0x54) + (u32)fldDoorEventTable);
+        e = (doormovework_s *)(EE_ADDR_AS(u8 *, (i * 0x54)) + EE_ADDR(fldDoorEventTable));
         if (e->matter_resid1 == matter_resid) {
             if (e->stat == 2) {
                 s32 count = e->cnt1;

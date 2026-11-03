@@ -1079,7 +1079,7 @@ void fldSdwDraw(dds3Basic_t *basic)
             }
         }
         for (pass = 0; pass < 2; pass++) {
-            sdfDrawTag_t *quadTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+            sdfDrawTag_t *quadTag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
             sdfDrawTag_t *triTag;
             sdf3DPrimPolyParm_t quadParams, triParams;
             sdfGrOt_t *ot;
@@ -1092,7 +1092,7 @@ void fldSdwDraw(dds3Basic_t *basic)
             quadParams.faceCount = 0;
             quadParams.pointCount = 0;
             quadParams.color = pass == 0 ? 0x8080F080 : 0x408080F0;
-            triTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+            triTag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
             sdfDrawTagInit(triTag);
             sdf3DPrimLinkResetTm(triTag, NULL);
             sdf3DPrimLinkMat(triTag, fldDrawEnv, NULL);
@@ -1641,14 +1641,14 @@ void fldMakeFroFileName(void) {
     fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
     sprintf(path, "%sF%03d_%03d.FRO", directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
     fldRunMapData = sdfDevLoadFileEx(path, (u32 *)&resource, 0);
-    base = (u32)resource;
+    base = EE_ADDR(resource);
     first = base + resource->firstOffset;
     second = base + resource->secondOffset;
-    third = base + ((fldRunMapGrid_t *)second)->cellsOffset;
-    fldRunMapHeader = (fldRunMapHeader_t *)base;
-    fldRunMapCellData = (fldMapCell_t *)first;
-    pFroMapHead = (fldRunMapGrid_t *)second;
-    fldRunMapScale = (void *)third;
+    third = base + (EE_ADDR_AS(fldRunMapGrid_t *, second))->cellsOffset;
+    fldRunMapHeader = EE_ADDR_AS(fldRunMapHeader_t *, base);
+    fldRunMapCellData = EE_ADDR_AS(fldMapCell_t *, first);
+    pFroMapHead = EE_ADDR_AS(fldRunMapGrid_t *, second);
+    fldRunMapScale = EE_ADDR_AS(void *, third);
 }
 
 void fldFreeRunMapData(void)

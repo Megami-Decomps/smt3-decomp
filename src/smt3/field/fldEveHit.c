@@ -277,7 +277,7 @@ void fldKaifukuTest(void) {
     for (i = 0; i < 16; i++) {
         datAddHp((datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54), 9999);
         datAddMp((datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54), 9999);
-        *(u16 *)((u8 *)ofs + (u32)DDS3_GBWK + 0xA62) = 0;
+        *(u16 *)(EE_ADDR_AS(u8 *, ofs) + EE_ADDR(DDS3_GBWK) + 0xA62) = 0;
         ofs += 0xEC;
     }
     p2sdPlaySE(0x10, 0x7F, 0x3F);
@@ -1142,8 +1142,8 @@ s32 fldEveHit_ScriptEnd(char *pScriptName, u32 idx) {
 u32 fldEveHit_ScriptEnd2(u32 idx) {
     u32 *task = &gEvnRngPid[idx];
 
-    if (dds3ExistProcess((dds3ProcessID_t *)*task) != 0) {
-        dds3KillProcess((dds3ProcessID_t *)*task, 0);
+    if (dds3ExistProcess(EE_ADDR_AS(dds3ProcessID_t *, *task)) != 0) {
+        dds3KillProcess(EE_ADDR_AS(dds3ProcessID_t *, *task), 0);
     }
     *task = 0;
     return 0;
@@ -1411,7 +1411,7 @@ void fldPurgeEveRngProcesses(void) {
     if (count > 0) {
         u32 *taskSlot = gEvnRngPid;
         do {
-            if (dds3ExistProcess((dds3ProcessID_t *)*taskSlot) == 0) {
+            if (dds3ExistProcess(EE_ADDR_AS(dds3ProcessID_t *, *taskSlot)) == 0) {
                 *taskSlot = 0;
             }
             slotIndex++;
