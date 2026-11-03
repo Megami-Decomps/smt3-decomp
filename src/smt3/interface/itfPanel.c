@@ -200,7 +200,7 @@ extern itfDrawColor_t D_003264D0;
 
 extern u32 sdf2DMakeStdPacket(u32, s32);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 extern void (*D_00326428[])();
 extern void (*CreateColorTable[])();

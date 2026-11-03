@@ -584,7 +584,7 @@ extern u32 frFontEntryTable[];
 extern sdfGrOt_t sdfGrOtTable[];
 extern void *sdfGrAllocPacketBuff(u32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 
 void frCreateDrawFontPacket_20550848(s32 x, s32 y, s32 width, s32 height, u8 style,
     u32 color, u32 depth, s32 filtered, const frFontUvRect_t *uv,

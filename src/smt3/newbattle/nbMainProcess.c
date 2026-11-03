@@ -387,7 +387,7 @@ extern char *D_00550F7C;
 extern char D_00550F88[];
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern sdfGrOt_t sdfGrOtTable[];
 PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 

@@ -1196,12 +1196,12 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
-extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 extern s32 dds3BillboardGetTex(void *hBillboard);
 extern sdfTexPacket_t *sdfTexGetPacket(sdfTexHandle_t *aHandle);
 extern s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle);
-extern void sdf3DMakeDirectRefPacket(void *aPacket, u32 aData, s32 aLeng);
+extern void sdf3DMakeDirectRefPacket(void *aPacket, ps2Addr_t aData, s32 aLeng);
 extern void sdfBillBoardMakeTMPacket(void *aPacket, const f32 *aTM);
 extern u32 *sdfBillBoardMakeN(const sdfVector4_t *aCenter, const void *aColor,
                               const void *aUVList, const void *aXYOffsetList, s32 aNum,

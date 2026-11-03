@@ -85,7 +85,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          dds3ProcessFunc_t deleteExit, void *p);
 extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 s32 dds3EffectManagerRunF(dds3ProcessID_t *ProcessID);
 s32 dds3EffectManagerRun(dds3ProcessID_t *ProcessID);
 void dds3EffectManagerExit(void);

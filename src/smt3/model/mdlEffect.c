@@ -295,7 +295,7 @@ extern void dds3EffectSetScale(mdlEffect_t *, f32);
 
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
+extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t);
 
 extern void *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 

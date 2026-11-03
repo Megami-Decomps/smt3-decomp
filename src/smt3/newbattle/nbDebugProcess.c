@@ -340,7 +340,7 @@ void SetMotion(nbMainProcessData_t *data, nbFormation_t *form, s32 motion, s32 m
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
 extern const char *nbBadStatusNames[12];
 extern const char D_00551358[];

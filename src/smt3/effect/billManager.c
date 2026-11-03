@@ -73,8 +73,8 @@ extern f32 atan2f(f32 y, f32 x);
 
 extern sdfTexPacket_t *sdfTexGetPacket(sdfTexHandle_t *aHandle);
 extern s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle);
-extern void sdf3DMakeDirectRefPacket(void *aPacket, u32 aData, s32 aLeng);
-extern void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdf3DMakeDirectRefPacket(void *aPacket, ps2Addr_t aData, s32 aLeng);
+extern void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 extern void sdfBillBoardMakeTMPacket(void *aPacket, const f32 *aTM);
 extern f32 sdfCos(f32 aRadius);
 extern f32 sdfSin(f32 aRadius);
@@ -85,7 +85,7 @@ extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
 extern u32 dds3GetFrameID(void);
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
-extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 extern u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor,
                               const void *aUVList, const void *aXYOffsetList,
@@ -206,7 +206,7 @@ extern void *memcpy(void *a, const void *b, ps2Size_t c);
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 /* Build a quad packet from paired colors and per-corner UV sets. */
 u32 *sdfMultiBillBoardMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));

@@ -79,7 +79,7 @@ extern u32 sdfTexGetPacket(sdfTexHandle_t *aHandle);
 
 extern s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle);
 
-extern void sdf3DMakeDirectRefPacket(void *aPacket, u32 aData, s32 aLeng);
+extern void sdf3DMakeDirectRefPacket(void *aPacket, ps2Addr_t aData, s32 aLeng);
 
 extern void sdfDrawTagLinkRef(void *aTag, void *aPacket);
 

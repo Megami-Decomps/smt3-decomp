@@ -195,7 +195,7 @@ typedef struct sdf3DScreenParam_t {
     f32 cameraPos[4]; /* 0x90 */
 } sdf3DScreenParam_t;
 
-void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 
 
@@ -251,7 +251,7 @@ void sdf3DSetCamera(sdf3DScreenParam_t *aParam, void *aCamera);
 
 void sdf3DMakeFogPacket(sdf3DFogPacket_t *aPacket, sdf3DFogParam_t *aParam);
 
-void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng);
+void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, ps2Addr_t aData, s32 aLeng);
 
 void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket);
 
@@ -461,7 +461,7 @@ void sdf3DMakeFogPacket(sdf3DFogPacket_t *aPacket, sdf3DFogParam_t *aParam) {
     aPacket->scale = ((farZ * nearZ) * (rangeMin - rangeMax)) / depthRange;
 }
 
-void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng) {
+void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, ps2Addr_t aData, s32 aLeng) {
     s32 quadwordCount = (aLeng + 15) >> SDF_DMA_QWORD_SHIFT;
     aPacket->quadwords = quadwordCount;
     aPacket->address = EE_PHYSICAL(aData);

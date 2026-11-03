@@ -3887,7 +3887,7 @@ void ReleaseDebug_fclEncyc(void)
 extern s8 dds3PadButtonState[];
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 width, s32 height);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr, const char *format, ...);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern const char *D_003323D8[4];
 extern char D_0054FCE0[];
 
@@ -4050,7 +4050,7 @@ extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,
                                   s32 width, s32 height);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr,
                           const char *format, ...);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern char D_0053D898[];
 
 s32 DebugProcViewkey(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,

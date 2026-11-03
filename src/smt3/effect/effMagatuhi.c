@@ -491,9 +491,9 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
-void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 /* Build XYZ and attribute VIF streams; return the packet address.
  * vertexCount must be positive; n retains its native count/byte-size reuse. */
@@ -501,7 +501,7 @@ void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
 u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor, const void *aUVList, const void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
 
 /* Round payloadBytes up to quadwords and pair FLUSHA with VIF DIRECT. */
-void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *aPacket, u32 aData, s32 aLeng);
+void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *aPacket, ps2Addr_t aData, s32 aLeng);
 
 f32 sdfCos(f32 aRadius);
 

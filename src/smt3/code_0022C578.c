@@ -457,7 +457,7 @@ extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern void sdfDrawTagLinkRefGif(void *aTag, u32 aPacket);
+extern void sdfDrawTagLinkRefGif(void *aTag, ps2Addr_t aPacket);
 
 extern void cmpReCalcStockCursorPos(s8 index);
 
@@ -7162,7 +7162,7 @@ extern void sdf3DMakeScreenParam(sdf3DScreenParam_t *);
 extern void sdfDrawTagInit(sdfDrawTag_t *);
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, sdf3DInitPacket_t *);
 extern void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *, sdf3DScreenParam_t *, sdfMatrix4_t *);
-extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
+extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t);
 
 void cmpDrawSetup3DView(void)
 {

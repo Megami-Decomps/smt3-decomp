@@ -510,7 +510,7 @@ extern const f32 D_003FADB0[][4];
 extern const u32 D_003FAED0[];
 extern sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors,
                                                 s32 vertexCount, u32 primitiveFlags);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern void MultMatrixNoArg(void);
 extern void SetRotateMatrixX_B(f32 angle);
 

@@ -102,7 +102,7 @@ extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
 extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag, void *aAllocator);
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat, void *aAllocator);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 extern void *effPkt3DPrimMakePoly(effBezierDrawParam_t *aParm);
 
 extern effBezierDrawParam_t dds3BezierVertexCount, dds3BezierTrackPolyVertex;

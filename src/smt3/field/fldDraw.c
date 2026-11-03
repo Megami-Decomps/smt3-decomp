@@ -86,7 +86,7 @@ sdfGrPacketHeader_t *sdf2DAllocSprite(s32 aNumOfSpr);
 
 void sdfDrawTagInit(sdfDrawTag_t *a);
 
-void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 s32 sdfGrAllocPacketBuff(s32 aSize);
 
@@ -124,9 +124,9 @@ s32 sdfTexGetPacketLength(const sdfTexHandle_t *aHandle);
 
 void SetRotateMatrixZ(f32 aAngle);
 
-void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
-extern void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *, u32, s32);
+extern void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *, ps2Addr_t, s32);
 
 extern void sdfBillBoardMakeTMPacket(u8 *, const f32 *);
 
@@ -215,9 +215,9 @@ extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
-extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, void *aPkt);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, ps2Addr_t aEnv, void *aPkt);
 
 void fldDrawInit(void) {
     if (D_0054EC44 == 0) {

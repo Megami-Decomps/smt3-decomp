@@ -49,7 +49,7 @@ extern f32 sdfFaceDivBias;
 extern const char D_00529428[];
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
-extern void sdfDrawTagLink2(sdfDrawTag_t *aTag, u32 aHeadPacket, u32 aTailPacket);
+extern void sdfDrawTagLink2(sdfDrawTag_t *aTag, ps2Addr_t aHeadPacket, ps2Addr_t aTailPacket);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
@@ -66,7 +66,7 @@ extern sdfModelRootNode_t *sdfModelRootNew(void);
 extern void sdfModelAllocNodeList(sdfModelRootNode_t *aRoot, s32 aLeng);
 
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 extern void sdfPrimSetOpaquePacket(sdfPrimTransPacket_t *aPkt);
 extern void sdfPrimSetSemiTransPacket(sdfPrimTransPacket_t *aPkt);
 extern void sdfPrimSetAddTransPacket(sdfPrimTransPacket_t *aPkt);
@@ -939,7 +939,7 @@ extern void *sdf3DFogDefault;
 extern u8 corePktSoftenBias;
 extern u8 sdf3DScreenTm[];
 extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*aAllocator)(s32));
-extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 extern void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, u32 aPacket);
 extern void sdfCoreDrawSetZBias(f32 z);
 extern void sdfCoreDrawSetLight(void *light);

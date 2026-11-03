@@ -26,7 +26,7 @@ extern s32 sdfGrAllocPacketBuff(s32 aSize);
 
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *, s32, s32, s32, s32);
 

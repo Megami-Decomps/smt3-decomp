@@ -315,7 +315,7 @@ extern char *D_0054F4D0[2];
 
 extern char D_0054F4F0[];
 
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr,
                                   const char *aStr, ...);

@@ -10,7 +10,7 @@ const char D_005431B8[] = "STOCKLIST:";
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...);
 extern const char D_00550EB0[];
 
@@ -112,7 +112,7 @@ void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag)
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...);
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
 extern void DispList(s32 x, s32 y, sdfDrawTag_t *tag);

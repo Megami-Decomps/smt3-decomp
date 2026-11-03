@@ -522,7 +522,7 @@ extern void LookAtMatrix(const void *aTarget, const void *aEye, const void *aDow
 extern void ReverseMatrix(void);
 extern void sdf3DPrimLinkTm(void *aTag, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(effPCPBossWork_t *aParm);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 extern u8 D_002F5C20[], D_002F5C30[];
 extern u8 effPCPBossTexRect[];
 extern u8 D_0031FF80[];

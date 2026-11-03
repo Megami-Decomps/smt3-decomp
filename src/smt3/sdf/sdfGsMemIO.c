@@ -80,8 +80,8 @@ typedef struct sdfGrFrameSet_t {
 } sdfGrFrameSet_t;
 
 
-void sdfDrawTagLink2(struct sdfDrawTag_t *aTag, u32 aHeadPacket,
-                          u32 aTailPacket);
+void sdfDrawTagLink2(struct sdfDrawTag_t *aTag, ps2Addr_t aHeadPacket,
+                          ps2Addr_t aTailPacket);
 
 /* Resource upload payload and its terminal primitive-reset tag (0xF0). */
 typedef struct sdfStoreImagePacket_t {

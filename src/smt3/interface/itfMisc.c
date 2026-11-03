@@ -68,7 +68,7 @@ extern u32 sdf2DMakeStdPacket(u32 aPacket, s32 aLeng);
 
 extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *, sdfTexHandle_t *, s32);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t aPacket);
 
 extern void dds3AdminiExitSequence(void);
 

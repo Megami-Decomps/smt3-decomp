@@ -56,7 +56,7 @@ extern effDrawSurface_t *D_0031F550[];
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(void *a);
-extern void sdfDrawTagLink(void *aTag, u32 aPacket);
+extern void sdfDrawTagLink(void *aTag, ps2Addr_t aPacket);
 extern void sdf3DPrimLinkMat(void *aTag, void *aMat, s32 aAllocator);
 extern void sdf3DPrimLinkTm(void *aTag, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(effPrimParam_t *aParm);

@@ -2025,7 +2025,7 @@ extern void StoreMatrix(void *matrix);
 extern void LoadMatrix(const void *matrix);
 extern sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors,
                                                s32 count, u32 flags);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern sdfGrOt_t sdfGrOtTable[85];
 
 s32 pb_proc_block_DB_Process(dds3ProcessID_t *id)

@@ -1067,7 +1067,7 @@ s32 nbFlowFindUnitEntry(nbNegoProcessData_t *n)
 
 extern void *sdfGrAllocPacketBuff(u32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
 extern sdfGrOt_t sdfGrOtTable[];
 PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);

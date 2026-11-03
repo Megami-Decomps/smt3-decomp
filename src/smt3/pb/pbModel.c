@@ -637,7 +637,7 @@ INCLUDE_ASM(const s32, "pb/pbModel", func_001D35F0);
 
 extern sdfVector2_t D_00326D78[];
 extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 
 #ifdef NON_MATCHING
 void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag)

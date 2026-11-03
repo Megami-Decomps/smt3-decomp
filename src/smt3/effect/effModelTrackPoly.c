@@ -90,7 +90,7 @@ PS2_SYMBOL_AT(sdfGrOt_t, D_002F64B8, sdfGrOtTable, 0x5A0);
 extern u32 dds3GetFrameID(void);
 extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
-extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 /* dds3DrawBank_t stride; only the held frame texture block at 0x1300 is used here. */
 typedef struct
@@ -105,7 +105,7 @@ extern void sdfMatFreeDelayed(sdfMat_t *aMat);
 extern void sdfMatSetConstant(sdfMat_t *aMat, f32 aRatio);
 extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag, s32 aAllocator);
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);

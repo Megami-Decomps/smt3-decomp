@@ -267,10 +267,10 @@ typedef struct SdfDmaTag {
     u64 vifCommands;
 } QWORD_ALIGNED SdfDmaTag;
 
-void sdfDrawTagLink2(struct sdfDrawTag_t *aTag, u32 aHeadPacket,
-                          u32 aTailPacket);
+void sdfDrawTagLink2(struct sdfDrawTag_t *aTag, ps2Addr_t aHeadPacket,
+                          ps2Addr_t aTailPacket);
 
-void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 /* One 0x10-byte entry in the three-slot frame packet submission ring. */
 typedef struct sdfDrawReqRec_t {
@@ -325,7 +325,7 @@ typedef struct sdfGrStdDrawEnv_t {
 
 void sdfGrStdDrawEnvPredraw(sdfGrStdDrawEnv_t *aPre, s32 aEvenOdd);
 
-void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, u32 aRegs, s32 aNumRegs);
+void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, ps2Addr_t aRegs, s32 aNumRegs);
 
 void sdfGrSetDrawDefParmPacket(sdfGrRefGifPacketHeader_t *aDef);
 
@@ -357,9 +357,9 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void sdfDrawTagInit(sdfDrawTag_t *a);
 
-void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
-void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, u32 aPacket);
 
@@ -398,7 +398,7 @@ void sdfGrSetDrawFrame(sdfGrDrawFrame_t *aFrame, s32 aFrameAddr, s32 aW, s32 aH,
 
 void sdfGrLinkStdDrawEnv(sdfDrawTag_t *aTag, sdfPreDrawTag_t *aPreDrawTag, sdfPreDrawHook_t *aEnv);
 
-void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt);
+void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, ps2Addr_t aEnv, sdfGrRefPacketHeader_t *aPkt);
 
 void sdfGrLinkDrawFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt);
 
@@ -421,7 +421,7 @@ void sdfDrawTagInit(sdfDrawTag_t *a) {
     a->texPacket[1] = 0;
 }
 
-void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket) {
+void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket) {
     s32 last;
 
     last = aTag->tail;
@@ -435,7 +435,7 @@ void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket) {
     aTag->tail = aPacket;
 }
 
-void sdfDrawTagLink2(sdfDrawTag_t *aTag, u32 aHeadPacket, u32 aTailPacket) {
+void sdfDrawTagLink2(sdfDrawTag_t *aTag, ps2Addr_t aHeadPacket, ps2Addr_t aTailPacket) {
     s32 previousTailAddress;
 
     previousTailAddress = aTag->tail;
@@ -449,7 +449,7 @@ void sdfDrawTagLink2(sdfDrawTag_t *aTag, u32 aHeadPacket, u32 aTailPacket) {
     aTag->tail = aTailPacket;
 }
 
-void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, u32 aPacket) {
+void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, ps2Addr_t aPacket) {
     s32 previousTailAddress;
 
     (EE_ADDR_AS(SdfDmaTag *, aPacket))->kind = SDF_DMA_TAG_REF_BYTE;
@@ -464,7 +464,7 @@ void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, u32 aPacket) {
     aTag->tail = aPacket + SDF_QWORD_BYTES;
 }
 
-void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket) {
+void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket) {
     s32 previousTailAddress;
 
     previousTailAddress = aTag->tail;
@@ -700,7 +700,7 @@ void sdfGrSetRegsPacketHeader(sdfGrPacketHeader_t *header, s32 payloadQwords) {
     header->giftag.regs = SDF_GIF_REGISTER_AD;
 }
 
-void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, u32 aRegs, s32 aNumRegs) {
+void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, ps2Addr_t aRegs, s32 aNumRegs) {
     aPacket->dmatag.data = SDF_DMA_CNT_ONE_WORD;
     aPacket->dmatag.reg = SDF_VIF_DIRECT_ONE_FLUSHE;
     aPacket->giftag.data = (u64)aNumRegs | SDF_GIF_PACKED_AD_BITS;
@@ -886,7 +886,7 @@ void sdfGrSetFrameMaskReset(const u8 *aEnv, sdfGrRefGifPacketHeader_t *aHdr, s32
     sdfGrSetRefGifPacket(aHdr, EE_ADDR((aEnv + 0xb0)), 1);
 }
 
-void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt) {
+void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, ps2Addr_t aEnv, sdfGrRefPacketHeader_t *aPkt) {
     aPkt->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
     aPkt->dmaTag = SDF_DMA_TAG(aEnv + 0x1a0, 0x30000004);
     QUAD_ZERO(aPkt->nextTag);

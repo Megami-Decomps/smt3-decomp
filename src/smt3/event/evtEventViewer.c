@@ -114,7 +114,7 @@ extern sdfGrOt_t sdfGrOtTable[];
 PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 extern void *dds3FontReqAllocDrawTag(void);
 extern s32 sdfDevPrintf(s32 aX, s32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
-extern void sdfDrawTagLink(void *aTag, u32 aPacket);
+extern void sdfDrawTagLink(void *aTag, ps2Addr_t aPacket);
 extern void SetActiveCamera(void);
 extern s32 evtEventViewerProcess3(void);
 extern s32 evtEventViewerProcess4(void);

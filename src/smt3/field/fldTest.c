@@ -651,7 +651,7 @@ extern void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY,
                                f32 *normalZ, f32 *planeConstant);
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *tag, s32 (*allocator)(s32));
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *tag, sdfMat_t *material, s32 (*allocator)(s32));
 extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *parameters);

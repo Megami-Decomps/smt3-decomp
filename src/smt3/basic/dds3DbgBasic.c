@@ -11,7 +11,7 @@ extern s8 dds3PadButtonState[];
 
 extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, ...);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 extern void *sdfGrAllocPacketBuff(u32 aSize);
 

@@ -72,7 +72,7 @@ typedef struct sdf2DTexPacket_t {
     sdfGrTagStdReg_t clamp;
 } sdf2DTexPacket_t;
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 /* Per-texture reference count and non-owning clone source (0x8). */
 /* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */

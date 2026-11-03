@@ -18,7 +18,7 @@ extern char D_0054F738[];
 
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
+extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t);
 
 extern void *sdfGrAllocPacketBuff(u32);
 
