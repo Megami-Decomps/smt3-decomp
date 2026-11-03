@@ -1,25 +1,42 @@
 # Matching notes: facility/fclShopCalc
 
-## shop_Process (facility/fclShopCalc, 256 bytes)
+## shop_Process (facility/fclShopCalc, 0x100)
 
-37 of 64 words match at the exact 256-byte size. The prologue is exact: the
-`shopProcWork = dds3GetProcessData(id)` store in the `fclChkDbgProcess` delay
-slot, the `started` guard around `shopStartEvent(1)`, the `fclGetFlag(1)` exit,
-and at the other end the shared `step = 0` tail, the `flags & 0x10` test and the
-`cmpUpdateTerminate` exit returning -1.
+37 of 64 words match at the exact 256-byte size. A fresh complete-owner
+check retains all sixteen existing C peers and reports no owned-data differences.
+The draft remains assembly-backed.
 
-The difference is the dispatch on `state`. Retail is a `beql` to the `state == 0`
-body with the `step` load in its delay slot, then `bltz` to the default, then a
-`beql` for `state == 8`, then `b` to the default; the draft's two-case switch
-emits `beq`, `beql`, `b` and no `bltz`. `emit_case_nodes` drops the
-`index < low` test to the default when the node's right subtree is a single
-value, so retail's switch had a third node, and the `bltz` reaching the same
-block as the default means that extra case's body is empty.
+Native dispatch observes signed-byte state once: zero enters its body,
+negative goes to shared step reset, eight enters its body, and other values
+also reach reset. Both native body-entry branches are `beql` with the step
+load in their delay slots. The two-case draft lacks the negative guard.
+An older explanation attributed this to `emit_case_nodes` and inferred a
+third empty case; the current measurements do not establish that internal
+mechanism or the original source's switch cardinality.
 
-Ruled out: an empty `case -1:` or `case -2:` ahead of the others (42 of 64, one
-word over), an empty `case 9:` after them (32 of 64, one word over), and an
-`if (state == 0) ... else if (state >= 0) { if (state == 8) ... }` chain, which
-puts both bodies inline and is 43 of 63.
+Historical rejected controls: empty `case -1:` or `case -2:` (42/64, one
+word over), empty `case 9:` (32/64, one word over), and the inline nested
+zero/nonnegative/eight chain (43/63).
+
+A new ordinary explicit-destination control names only the actual zero,
+eight and shared-reset blocks, with one signed state observation and the
+native negative guard. It regresses to 22/64 at 264 bytes, eight excess.
+All sixteen existing C peers remain exact. The control restores `bltz`,
+but emits a non-likely zero branch with a pointer move in its delay slot,
+an inverted eight/default branch, then a separate branch and step load.
+The late flags register and branch-likely differences also remain.
+
+Each baseline/control plain versus `-da -fsched-verbose=5` pair agrees in
+all five allocated sections, non-file symbols, ordered relocations and
+normalized assembly. Current pass snapshots show the control's separate
+comparisons and actual destinations; they do not prove an internal switch
+lowering decision or historical spelling. All callback-sensitive global
+reloads are preserved, with no artificial case, bound or consumer.
+
+Next evidence must explain the native two likely body-entry branches and
+step-load delay slots while retaining the real callback observations.
+Extra empty-case guesses and repeated inline-if controls are not a new
+premise. The explicit-destination control is rejected, not a promoted draft.
 
 ## shopDrawBuyRow (facility/fclShopCalc, 0x20C)
 

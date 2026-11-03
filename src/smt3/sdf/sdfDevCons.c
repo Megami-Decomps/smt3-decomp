@@ -1,4 +1,5 @@
 #include "common.h"
+#include "libdma.h"
 #include "eeregs.h"
 #include "sdfDevCons.h"
 #include "libsdf.h"
@@ -81,7 +82,6 @@ typedef struct
     u64 secondPosition;
 } sdfDevConsGlyph_t;
 
-extern s32 sceDmaSync(void *channel, s32 mode, s32 timeout);
 extern void sceDmaSendN(void *channel, void *address, s32 quadwords);
 extern s32 sceGsSyncPath(s32 mode, s32 timeout);
 extern void *sceDmaGetChan(s32 channel);
@@ -340,7 +340,7 @@ void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *aCB) {
     packetBytes = aCB->tag - aCB->start;
     if ((packetBytes >> 3) != 0) {
         channelRegisters = aCB->dmaCh;
-        sceDmaSync(channelRegisters, 0, 0);
+        sceDmaSync((sceDmaChan *)channelRegisters, 0, 0);
         HW_WRITE((volatile u32 *)channelRegisters, HW_READ((volatile u32 *)channelRegisters) | 0x40); /* CHCR bit 6: tag-transfer enable */
         EE_SYNC_BARRIER();
         sceDmaSendN(channelRegisters, (void *)((u32)aCB->start & 0x0FFFFFFF), packetBytes >> 4);

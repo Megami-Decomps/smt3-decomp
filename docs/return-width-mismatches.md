@@ -95,22 +95,36 @@ the checksum confirmation.
 
 ## A third kind: an arity mismatch
 
-The same mechanism that hides a width mismatch hides a parameter-count one.
-`sceDmaSync` is defined at `sdk/libdma.c:280` as
-`int sceDmaSync(sceDmaChan *chan, int mode)`, two parameters. Both callers
-declare and pass three: `sdf/sdfCoreDraw.c:19` spells it `(void *, s32, s32)`
-and calls `sceDmaSync(dmaChannel, 0, 0)` at `:347`, and
-`sdf/sdfDevCons.c:84` spells it `(void *channel, s32 mode, s32 timeout)` and
-calls it the same way at `:343`.
+`sceDmaSync` previously had a two-parameter C definition in `sdk/libdma.c`,
+`int sceDmaSync(sceDmaChan *chan, int mode)`, while `sdfCoreDrawInit` and
+`sdfDevConsDrawFlush` declared and passed three parameters. Their declarations
+also used `void *` instead of `sceDmaChan *`: adding a third formal alone would
+not make these function types compatible. Separate translation units and an
+untyped linker symbol hid the disagreement; the native calling convention did
+not make the mismatched C declarations a sound interface.
 
-Nothing reports it. C has no mangling, each unit carries its own `extern`, and
-the extra argument is discarded by the calling convention on the EE and on a
-host alike. It is harmless in retail and harmless in a port **only because
-both call sites pass 0**, so the correctness rests on an argument's value
-rather than on the interface. A third call site passing a real timeout would
-change nothing and be silently ignored.
+The retail function at `0x002C9E70` (56 bytes) consumes the channel and mode,
+not the incoming third argument. Mode 1 reads CHCR bit 8; other modes call
+`WaitDma` and return zero. `WaitDma` uses its own fixed countdown, not that
+argument. The two direct callers at `0x002B9BD8` and `0x002BCB7C` explicitly
+set the third argument to zero. Its value is ignored by this implementation
+regardless of whether it is zero; this is not a timeout parameter with
+reconstructed semantics. Reading only two argument registers also does not
+establish whether the original source had an unused third formal.
 
-Recorded here rather than fixed: the definition is retail's and matching it is
-required. What a consumer should do is take the third parameter and ignore it,
-so no call site depends on the ABI dropping it, which is what
-sdfport's own override does.
+The reconstructed contract now uses one shared declaration in `libdma.h`,
+`int sceDmaSync(sceDmaChan *chan, int mode, int unused)`, matching the provider
+and both callers. The callers retain their existing channel-register storage
+and convert the actual register-base addresses to `sceDmaChan *` only at these
+calls. The provider accepts but does not use the third argument. This resolves
+the parameter-count and pointer-type disagreements without changing native
+behavior or other SDK interfaces; it does not claim the historical SDK
+signature or general host portability.
+
+Fresh paired complete-owner builds of `sdk/libdma`, `sdf/sdfCoreDraw` and
+`sdf/sdfDevCons` preserve every allocated section's bytes and metadata,
+non-file symbols, ordered relocations and compiler assembly (apart from the
+source-file directive). The SDK owner uses its configured ee-gcc 2.9 and the
+two callers use their configured ee-gcc 2.96. This is a C-contract correction,
+not new matching coverage. Reports about a downstream host override were not
+reproduced as part of this qualification.

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "libdma.h"
 #include "eeregs.h"
 #include "ps2asm.h"
 #include "model.h"
@@ -16,7 +17,6 @@ extern u8 vu1MicroPacket[];
 extern s32 corePktPointBuff;
 extern sdfMemHandle_t *sdfCoreDrawBuffHandle;
 
-extern s32 sceDmaSync(void *, s32, s32);
 extern void *sceDmaGetChan(s32);
 extern void sceDmaSendN(void *, void *, s32);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
@@ -344,7 +344,7 @@ void sdfCoreDrawInit(s32 buffSize) {
     u32 *dmaChannel = sceDmaGetChan(0);
     HW_WRITE(dmaChannel, HW_READ(dmaChannel) & ~SDF_DMA_CHCR_TTE);
     sceDmaSendN(dmaChannel, vu0MicroPacket, (vu1MicroPacket - vu0MicroPacket) >> SDF_DMA_QWORD_SHIFT);
-    sceDmaSync(dmaChannel, 0, 0);
+    sceDmaSync((sceDmaChan *)dmaChannel, 0, 0);
     sdfMemFreeHandleDirect(&sdfCoreDrawBuffHandle);
     sdfCoreDrawBuffHandle = sdfMemAllocDirect(buffSize);
     corePktPointBuff = (u32)sdfMemLock(sdfCoreDrawBuffHandle);

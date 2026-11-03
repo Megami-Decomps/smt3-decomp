@@ -277,7 +277,7 @@ void sceDmaRecvI(sceDmaChan *chan, void *data, u32 qwc)
     chan->chcr = ((((int)chan->chcr & ~0xC) | 0x8) & ~1) | 0x100;
 }
 
-int sceDmaSync(sceDmaChan *chan, int mode)
+int sceDmaSync(sceDmaChan *chan, int mode, int unused)
 {
     if (mode == 1) {
         return (chan->chcr >> 8) & 1;

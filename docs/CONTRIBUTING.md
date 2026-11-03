@@ -118,9 +118,8 @@ the unit itself is the same violation with one more step.
 
 `tools/check_inline_asm.py` enforces this, and every C unit's compile in both
 the EE and the IOP build depends on it, so an offending unit fails before
-`cc1` runs. `src/smt3/sdf/sdfVu1.c` and `src/smt3/sdf/sdfCoreDraw.c` predate
-the rule and are listed in `config/inline_asm_allow.txt`; move their blocks
-into `ps2asm.h` when next touching those units and drop the line.
+`cc1` runs. `config/inline_asm_allow.txt` currently has no grandfathered units;
+the former exceptions have been migrated out of the C units.
 
 Check the complete affected units with `tools/check_unit.py`, then the full
 retail checksum build with `ninja`. An unchanged DDS donor does not need
