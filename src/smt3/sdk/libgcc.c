@@ -1002,8 +1002,8 @@ void libc_2D2850(object *entry)
     sorted = libc_2D1FA0(&vectors, count);
     if (sorted != NULL)
         entry->fde_array = sorted;
-    entry->pc_begin = (void *)minimum;
-    entry->pc_end = (void *)maximum;
+    entry->pc_begin = EE_ADDR_AS(void *, minimum);
+    entry->pc_end = EE_ADDR_AS(void *, maximum);
 }
 
 
@@ -1018,7 +1018,7 @@ u32 *libc_2D29B8(u32 pc)
     for (entry = D_0059AD60; entry != NULL; entry = entry->next) {
         if (entry->pc_begin == NULL)
             libc_2D2850(entry);
-        if (pc >= (u32)entry->pc_begin && pc < (u32)entry->pc_end)
+        if (pc >= EE_ADDR(entry->pc_begin) && pc < EE_ADDR(entry->pc_end))
             break;
     }
     if (entry == NULL) {

@@ -120,7 +120,7 @@ int _send_to_iop(int port, int slot)
         }
     }
     seq = c->seq + 1;
-    destination = (void *)(D_005989D0[port][slot].iopAddr + ((seq & 1) << 5));
+    destination = EE_ADDR_AS(void *, (D_005989D0[port][slot].iopAddr + ((seq & 1) << 5)));
     c->seq = seq;
     SyncDCache(c, (u8 *)c + 0x20);
     dma[0].dest = destination;
@@ -222,7 +222,7 @@ int scePadPortOpen(int port, int slot, void *addr)
     padCmd *c;
     int i;
 
-    if (((u32)addr & 0x3F) != 0) {
+    if ((EE_ADDR(addr) & 0x3F) != 0) {
         if (D_00529FAC != 0) {
             scePrintf("libpad: buffer addr is not 64 byte align. %08x\n", addr);
         }
@@ -247,7 +247,7 @@ int scePadPortOpen(int port, int slot, void *addr)
     D_00598BC0.cmd = 1;
     D_00598BC0.port = port;
     D_00598BC0.slot = slot;
-    D_00598BC0.a.w[1] = (s32)addr;
+    D_00598BC0.a.w[1] = EE_ADDR_S(addr);
     if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
         return 0;
     }

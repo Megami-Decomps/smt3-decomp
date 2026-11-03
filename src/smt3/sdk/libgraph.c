@@ -535,10 +535,10 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
         }
     }
     D2_QWC = 6;
-    if (((u32)pkt & 0x70000000) == 0x70000000) {
-        D2_MADR = ((u32)pkt & 0xFFFFFFF) | 0x80000000;
+    if ((EE_ADDR(pkt) & 0x70000000) == 0x70000000) {
+        D2_MADR = (EE_ADDR(pkt) & 0xFFFFFFF) | 0x80000000;
     } else {
-        D2_MADR = (u32)pkt & 0xFFFFFFF;
+        D2_MADR = EE_ADDR(pkt) & 0xFFFFFFF;
     }
     D2_CHCR = 0x101;
     while (D2_CHCR & 0x100) {
@@ -548,10 +548,10 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
         }
     }
     D2_QWC = pkt->imagetag.f.NLOOP;
-    if (((u32)addr & 0x70000000) == 0x70000000) {
-        D2_MADR = ((u32)addr & 0xFFFFFFF) | 0x80000000;
+    if ((EE_ADDR(addr) & 0x70000000) == 0x70000000) {
+        D2_MADR = (EE_ADDR(addr) & 0xFFFFFFF) | 0x80000000;
     } else {
-        D2_MADR = (u32)addr & 0xFFFFFFF;
+        D2_MADR = EE_ADDR(addr) & 0xFFFFFFF;
     }
     D2_CHCR = 0x101;
     return 0;
@@ -687,7 +687,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
         break;
     }
     if (byteTail != 0) {
-        *(volatile u64 *)(((u32)&pkt->trxreg) | 0x20000000) =
+        *EE_ADDR_AS(volatile u64 *, ((EE_ADDR(&pkt->trxreg)) | 0x20000000)) =
             (u64)(u32)(s32)(pkt->trxreg & 0xFFF) |
             ((u64)(u32)roundedHeight << 32);
     }
@@ -706,7 +706,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
     restoreImr = GsPutIMR(GsGetIMR() | 0x200);
     *(volatile u64 *)0x12001000 = 2;
     *(volatile u32 *)0x10009020 = 7;
-    dmaAddress = (u32)pkt;
+    dmaAddress = EE_ADDR(pkt);
     if ((dmaAddress & 0x70000000) == 0x70000000) {
         dmaAddress = (dmaAddress & 0x0FFFFFFF) | 0x80000000;
     } else {
@@ -743,7 +743,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
 
     if (dmaQwc != 0) {
         *(volatile u32 *)0x10009020 = dmaQwc;
-        dmaAddress = (u32)addr;
+        dmaAddress = EE_ADDR(addr);
         if ((dmaAddress & 0x70000000) == 0x70000000) {
             dmaAddress = (dmaAddress & 0x0FFFFFFF) | 0x80000000;
         } else {
