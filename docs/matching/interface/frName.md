@@ -2,26 +2,52 @@
 
 ## frRestoreNameImage (interface/frName, 0xD8)
 
-42 of 54 words match at the exact 216-byte size. The remaining 12 words are
-count/counter setup: retail forms the name-count pointer before the counter
-index, uses `$4` for the counter pointer and `$6` for the summed count, and
-uses the assembler temporary for the counter array address. The draft swaps
-these roles and two setup instructions. The release loop and diagnostic tail
-are exact.
+54 of 54 words match at the native 216-byte size. The complete owner checks
+eight exact functions with no code or owned-data discrepancy. A single
+localized binding holds the initialized first name-count byte in `$6` until
+it is added to the second byte. The resulting `count` is an ordinary,
+unbound scalar; no fixed-register value remains live across a release call.
+The source comment identifies this as a reconstruction aid, not evidence of
+original spelling.
 
 `pFont` is a four-by-sixteen table of `GsFont_t *`: its 0x100-byte symbol
 extent, 0x40-byte target stride, `frSetNameData` writes and
 `frCreateNameHandle` image-provider calls establish the view. Entries release
 `font_mem` at offset 8 through the actual `fmRetFontMem` provider. The loop
-uses the sum of both name-count bytes and skips null entries. It runs only
-when a nonzero reference count is decremented to zero; a zero glyph count
-still reaches the restoration diagnostic.
+uses the sum of both unsigned name-count bytes and skips null entries. It
+runs only when a nonzero reference count is decremented to zero; a zero
+glyph count still reaches the restoration diagnostic. Counter accesses,
+byte-load widths, call order and the signed-byte input remain unchanged.
 
-Ruled out: a separate `activeCount` local, a named counter pointer,
-pre-decrement versus explicit decrement/store, and nested guards versus early
-returns (all retain 12 differences). Capturing the name-count byte pointer
-instead makes 30 words differ. Do not repeat these without a new compiler
-property explaining the initial address and count allocation.
+Qualified compiler dumps isolate the allocation dependency. In the ordinary
+baseline, the first-byte value and sum occupy `$4`, while the reference-count
+pointer occupies `$6`. Binding only the short-lived first-byte value gives
+the ordinary sum a `$6` preference, the counter pointer a `$4` preference,
+and the second-byte address `$5`. The final scheduler then emits the native
+name-count address before the counter-index setup. The compiler's indexed
+`la` now has the same destination and index register, so the assembler uses
+its temporary for the counter-array address. No array-layout change or
+handwritten instruction is involved. The derived release countdown uses a
+saved register as before.
+
+Removing only the first-byte binding restores the exact-size 42-of-54
+baseline. An intermediate counter-pointer-only binding reached 47 of 54,
+but swapped the count/address roles and needed an annulled empty-count
+branch to avoid clobbering the count. Adding the first-byte binding matched;
+then both the counter binding and the named counter-pointer local were
+removed without losing the match. Neither is retained.
+
+Plain and `-da -fsched-verbose=5` builds of the final source and controls
+had identical allocated section bytes, non-file symbols, ordered relocations
+and normalized assembly within each pair. The final source also compiled
+cleanly with uninitialized-value and implicit-declaration diagnostics and
+identical output; these are not production flags.
+
+Historical ordinary controls: a separate `activeCount` local, named counter
+pointer, pre-decrement versus explicit decrement/store, and nested guards
+versus early returns all retained 12 differences. Capturing the name-count
+byte pointer instead made 30 words differ. These did not supply the
+short-lived first-byte allocation dependency.
 
 ## frGetCNameFRQ (interface/frName, 0x158)
 

@@ -118,13 +118,14 @@ void frTransNameImage(s8 target, s8 type)
 extern GsFont_t *pFont[4][16];
 extern void fmRetFontMem(FontMem_t *memory);
 
-/* NON_MATCHING: 12 of 54 words differ, exact size; count/counter setup ordering. */
-#ifdef NON_MATCHING
 void frRestoreNameImage(s8 target)
 {
     s32 index;
-    s32 count = frNameGlobalWork->nameCounts[target][0] +
-                frNameGlobalWork->nameCounts[target][1];
+    /* This initialized first-byte temporary ends at the sum, before calls.
+     * The localized binding is a reconstruction aid, not original spelling;
+     * count remains ordinary C across the font-release loop. */
+    FAKEMATCH_ASM_REG(s32, firstCount, "$6") = frNameGlobalWork->nameCounts[target][0];
+    s32 count = firstCount + frNameGlobalWork->nameCounts[target][1];
 
     if (D_0056BD50[target] != 0) {
         if (--D_0056BD50[target] == 0) {
@@ -137,9 +138,6 @@ void frRestoreNameImage(s8 target)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "interface/frName", frRestoreNameImage);
-#endif
 
 extern void frGetMessageCode(u16 code);
 extern frFontHandle_t *frSetUserImage(GsFont_t *font, frFontHandle_t *chain);
