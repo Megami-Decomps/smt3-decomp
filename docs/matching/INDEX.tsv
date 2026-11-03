@@ -11,8 +11,8 @@ nbCameraBoss_BSKAGU_EP_IT_Set	code_001B0858	0x144	19 of 79 words before the firs
 nbCameraBoss_Sukady_DAIJIS_Set	code_001B0858	0x134	4 of 77 words differ	docs/matching/code_001B0858.md	23
 nbCameraHelperViewer_Draw	code_001C55F8	336 bytes	48 of 83 words match	docs/matching/code_001C55F8.md	3
 moveBlock	code_001D1470	0x8C	30 of 31 words differ	docs/matching/code_001D1470.md	3
-pbStartErrorDraw	code_001D1470	0xBC	2 of 47 words differ	docs/matching/code_001D1470.md	26
-func_001D4C08	pb/pbMain	0x94		docs/matching/code_001D1470.md	57
+pbStartErrorDraw	pb/pbErrorDraw	0xBC	47 of 47 words match	docs/matching/code_001D1470.md	26
+func_001D4C08	pb/pbMain	0x94		docs/matching/code_001D1470.md	101
 cmp_241A10	code_0022C578	0x74	19 of 28 words match	docs/matching/code_0022C578.md	3
 cmpClearCursorSlots	code_0022C578	0x54	18 of 21 words differ	docs/matching/code_0022C578.md	28
 cmpSetCursorSlot	code_0022C578	0x3C	8 of 15 words differ	docs/matching/code_0022C578.md	49
