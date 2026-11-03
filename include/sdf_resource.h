@@ -140,12 +140,12 @@ typedef struct TMX_HEADER_t
 typedef struct sdfDrawTag_t
 {
     struct sdfDrawTag_t *next;
-    u32 head;
-    u32 tail;
+    ps2Addr_t head;
+    ps2Addr_t tail;
     u32 z;
-    u32 lightPacket; /* Optional first DMA reference prefix. */
-    u32 fogPacket;   /* Optional second DMA reference prefix. */
-    u32 texPacket[2];
+    ps2Addr_t lightPacket; /* Optional first DMA reference prefix. */
+    ps2Addr_t fogPacket;   /* Optional second DMA reference prefix. */
+    ps2Addr_t texPacket[2];
 } sdfDrawTag_t;
 
 #endif /* SDF_RESOURCE_H */

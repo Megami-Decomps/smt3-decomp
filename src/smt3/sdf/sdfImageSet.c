@@ -58,7 +58,7 @@ typedef struct sdfImageSetCB
     s32 semaId;
     sdfImageSetPacket_tag *packetHead;
     sdfImageSetPacket_tag *packetTail;
-    u32 tagHead;
+    ps2Addr_t tagHead;
     sdfImageSetTag_t *tagTail;
 } sdfImageSetCb_t;
 
