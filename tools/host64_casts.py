@@ -233,6 +233,16 @@ def unexpand(text):
     return "".join(out)
 
 
+def unexpand_all(text):
+    """unexpand to a fixed point, because the macros nest."""
+    for _ in range(8):
+        once = unexpand(text)
+        if once == text:
+            return text
+        text = once
+    raise ValueError("unexpand did not settle")
+
+
 def verify(paths):
     bad = 0
     for path in paths:
@@ -243,8 +253,8 @@ def verify(paths):
             print(f"{rel}: not in HEAD")
             bad += 1
             continue
-        a = "".join(unexpand(head.stdout).split())
-        b = "".join(unexpand(path.read_text()).split())
+        a = "".join(unexpand_all(head.stdout).split())
+        b = "".join(unexpand_all(path.read_text()).split())
         if a != b:
             n = next(k for k in range(min(len(a), len(b)) + 1)
                      if k == len(a) or k == len(b) or a[k] != b[k])

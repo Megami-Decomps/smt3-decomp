@@ -220,11 +220,11 @@ void fileUnlinkCloseWait(fileMngCb_tag *cb, fileRequest_t *fileHandle) {
 fileRequest_t *pacLoadEx(const char *filename, u32 headOrTail, u32 callback, u32 pendCallback, u32 callbackParm) {
     fileRequest_t *req = sdfChipAllocZeroDirect(sizeof(fileRequest_t));
 
-    sdfPacInit(&req->pac, (void *)callback);
+    sdfPacInit(&req->pac, EE_ADDR_AS(void *, callback));
     if (headOrTail != 0) {
         sdfPacSetFromTail(&req->pac);
     }
-    fileLinkQueue(req, 1, filename, (void *)pendCallback, (void *)callbackParm);
+    fileLinkQueue(req, 1, filename, EE_ADDR_AS(void *, pendCallback), EE_ADDR_AS(void *, callbackParm));
     return req;
 }
 
@@ -240,7 +240,7 @@ fileRequest_t *fileLoadEx(const char *filename, u32 headOrTail, u32 endCallback,
     fileRequest_t *req = sdfChipAllocZeroDirect(0x30);
 
     req->mode = headOrTail;
-    fileLinkQueue(req, 0, filename, (void *)endCallback, (void *)callbackParm);
+    fileLinkQueue(req, 0, filename, EE_ADDR_AS(void *, endCallback), EE_ADDR_AS(void *, callbackParm));
     return req;
 }
 
@@ -257,7 +257,7 @@ sdfMemHandle_t *fileGetMemHandle(const fileRequest_t *fileHandle) {
 }
 
 u8 *fileGetLoadPtr(const fileRequest_t *fileHandle) {
-    return (u8 *)fileHandle->top;
+    return EE_ADDR_AS(u8 *, fileHandle->top);
 }
 
 u32 fileGetLoadSize(const fileRequest_t *fileHandle) {
@@ -311,11 +311,11 @@ void fileSyncAll(void) {
 fileRequest_t *fileSaveEx(const char *filename, const void *buff, s32 size, s32 endCallback, s32 callbackParm) {
     fileRequest_t *req = sdfChipAllocZeroDirect(0x30);
 
-    req->top = (u32)buff;
-    req->ptr = (u32)buff;
+    req->top = EE_ADDR(buff);
+    req->ptr = EE_ADDR(buff);
     req->size = size;
     req->rest = size;
-    fileLinkQueue(req, 2, filename, (void *)endCallback, (void *)callbackParm);
+    fileLinkQueue(req, 2, filename, EE_ADDR_AS(void *, endCallback), EE_ADDR_AS(void *, callbackParm));
     return req;
 }
 
@@ -424,7 +424,7 @@ void fileRead(fileCb_t *fileHandle) {
     }
     fileHandle->state = 4;
     SignalSema(q->semaId);
-    sdfFileCmdRead(fileHandle->dev, (void *)fileHandle->ptr, fileHandle->rest <= 0x8000 ? fileHandle->rest : 0x8000);
+    sdfFileCmdRead(fileHandle->dev, EE_ADDR_AS(void *, fileHandle->ptr), fileHandle->rest <= 0x8000 ? fileHandle->rest : 0x8000);
 }
 
 s32 fileLoadCallback(void *fileHandle, s32 cause, s32 buffer, s32 length, fileCb_t *data) {
@@ -523,7 +523,7 @@ void fileWrite(fileCb_t *fileHandle) {
     }
     fileHandle->state = 4;
     SignalSema(q->semaId);
-    sdfFileCmdWrite(fileHandle->dev, (void *)fileHandle->ptr, fileHandle->rest <= 0x8000 ? fileHandle->rest : 0x8000);
+    sdfFileCmdWrite(fileHandle->dev, EE_ADDR_AS(void *, fileHandle->ptr), fileHandle->rest <= 0x8000 ? fileHandle->rest : 0x8000);
 }
 
 s32 fileSaveCallback(void *fileHandle, s32 cause, s32 buffer, s32 length, fileCb_t *data) {
@@ -659,7 +659,7 @@ void fileExecCallback(void) {
     while ((node = work->endCallbackLink) != NULL) {
         work->endCallbackLink = node->donenext;
         SignalSema(work->semaId);
-        node->callback(node, (u32)node->arg);
+        node->callback(node, EE_ADDR(node->arg));
         WaitSema(work->semaId);
     }
     SignalSema(work->semaId);
@@ -729,7 +729,7 @@ void fileSysInit(void) {
     memset(&fileQueueHead, 0, 0x40);
     fileQueueHead.freeCount = 4;
     fileQueueHead.semaId = sdfCreateSema(1, 0x7F, 0);
-    fileQueueHead.buffer = (u8 *)sdfMemLock(sdfMemAllocDirect(0x40000));
+    fileQueueHead.buffer = EE_ADDR_AS(u8 *, sdfMemLock(sdfMemAllocDirect(0x40000)));
     dds3StartProcess(D_00551650, 0x384, 1, 0, fileManagerProc, 0, 0);
     p2sdSmgBuf = fileManager;
 }

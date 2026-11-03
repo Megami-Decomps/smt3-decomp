@@ -199,7 +199,7 @@ s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID)
     {
         fclScriptForcedEnd(*(u8 **)pPID);
     }
-    handle = (s32)scrStartScript2(0x7D0, (void *)pScriptData, StartNo);
+    handle = EE_ADDR_S(scrStartScript2(0x7D0, EE_ADDR_AS(void *, pScriptData), StartNo));
     fclClearFlag(0);
     if (pPID != NULL)
     {
@@ -221,7 +221,7 @@ void func_00213BB8(fclItemList_t *list)
 
     list->count = 0;
     for (item = 1; item < 0xA0; item++) {
-        if (((u8 *)item + (u32)DDS3_GBWK)[0x1928] != 0) {
+        if ((EE_ADDR_AS(u8 *, item) + EE_ADDR(DDS3_GBWK))[0x1928] != 0) {
             list->item[list->count++] = item;
         }
     }

@@ -204,7 +204,7 @@ s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
             printf(D_0054E8E0);
         }
     }
-    return (s32)dds3AdminiNeoProcess;
+    return EE_ADDR_S(dds3AdminiNeoProcess);
 }
 
 s32 dds3AdminiEndCheck(dds3ProcessID_t *id)
@@ -225,7 +225,7 @@ s32 dds3AdminiEndCheck(dds3ProcessID_t *id)
             work->NowSequence = -1;
         }
     }
-    return (s32)dds3AdminiStartSequence;
+    return EE_ADDR_S(dds3AdminiStartSequence);
 }
 
 s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
@@ -269,7 +269,7 @@ s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
     }
     if (work->Stat & 1) {
         if (work->NextSequence >= 0) {
-            return (s32)dds3AdminiEndCheck;
+            return EE_ADDR_S(dds3AdminiEndCheck);
         }
     }
     return 0;

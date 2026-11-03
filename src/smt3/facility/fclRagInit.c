@@ -370,7 +370,7 @@ void ragCreateAllList(s32 onlyHearts, s32 type, ragListWork_t *work)
             ragListFlags[2] |= 2;
             work->cursor.unk_21++;
         }
-        cmpSetCursorFlag(&work->cursor, (s32)ragListFlags);
+        cmpSetCursorFlag(&work->cursor, EE_ADDR_S(ragListFlags));
         ragInitList3(work->list3Count, &work->window3);
     }
 }
@@ -658,7 +658,7 @@ s32 ragFindItemSlot(ragItemReq_t *req)
     for (i = 0; i < 3; i++) {
         u32 item = req->item;
 
-        if (item != 0 && ((u8 *)item + EE_ADDR(base))[0x1920] < req->count) {
+        if (item != 0 && (EE_ADDR_AS(u8 *, item) + EE_ADDR(base))[0x1920] < req->count) {
             return 0;
         }
         req++;

@@ -445,7 +445,7 @@ void CamActionQuake(void)
         /* Preserve the index-first EE address sum; see
          * docs/levers/addressing-and-types.md. */
         tagPipePosData *node = (tagPipePosData *)(
-            (u32)offsetCount * sizeof(tagPipePosData) + (u32)D_00528F58.points);
+            (u32)offsetCount * sizeof(tagPipePosData) + EE_ADDR(D_00528F58.points));
         s32 action;
 
         vecSet(vector, node->direction[0], node->direction[1], node->direction[2]);

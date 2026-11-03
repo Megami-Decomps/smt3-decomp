@@ -603,7 +603,7 @@ s32 mselMain(dds3ProcessID_t *id)
         }
         if (fadeCounter >= 330) opacity = 0;
         DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
-                    ((u32)opacity << 24) | 0x808080, (sdfTexHandle_t *)gGlobal->unk_44);
+                    ((u32)opacity << 24) | 0x808080, EE_ADDR_AS(sdfTexHandle_t *, gGlobal->unk_44));
         if (gGlobal->unk_50 == 330) dds3FadeOut(255, 255, 255, 60);
         work = gGlobal;
         nextCounter = work->unk_50;

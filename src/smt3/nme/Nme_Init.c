@@ -243,13 +243,13 @@ extern s32 evtBitCheck(s32 bit);
 
 void nmeTexLoad(s8 mode, nmeWork_t *work)
 {
-    work->textures[0] = (sdfTexHandle_t *)fclLoadTexture(D_00548780);
-    work->textures[1] = (sdfTexHandle_t *)fclLoadTexture(D_00548798);
-    work->textures[2] = (sdfTexHandle_t *)fclLoadTexture(D_005487B0);
+    work->textures[0] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_00548780));
+    work->textures[1] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_00548798));
+    work->textures[2] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_005487B0));
     if (evtBitCheck(0x8B0) != 0 && mode == 0) {
-        work->textures[3] = (sdfTexHandle_t *)fclLoadTexture(D_005276B0);
+        work->textures[3] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_005276B0));
     } else {
-        work->textures[3] = (sdfTexHandle_t *)fclLoadTexture(nmeCharTexFile[mode]);
+        work->textures[3] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(nmeCharTexFile[mode]));
     }
 }
 

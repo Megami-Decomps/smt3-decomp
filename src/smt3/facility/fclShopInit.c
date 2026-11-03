@@ -186,7 +186,7 @@ void fclShopGetTexPath(void *work, s32 mode)
     } else {
         path = "/facility/scr/shop/message.bf";
     }
-    *(s32 *)((u8 *)work + 0x2388) = (s32)sdfDevLoadFileEx(path, (u32 *)((u8 *)work + 0x238C), 0);
+    *(s32 *)((u8 *)work + 0x2388) = EE_ADDR_S(sdfDevLoadFileEx(path, (u32 *)((u8 *)work + 0x238C), 0));
 }
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
@@ -239,7 +239,7 @@ void shop_update_Shutdown(void)
         return;
     }
     fclShopTexFree((shpUpdateWork_t *)D_0054FB20);
-    fclScriptForcedEnd((u8 *)((shpUpdateWork_t *)D_0054FB20)->scriptArg);
+    fclScriptForcedEnd(EE_ADDR_AS(u8 *, ((shpUpdateWork_t *)D_0054FB20)->scriptArg));
     sdfMemFreeDirect(((shpUpdateWork_t *)D_0054FB20)->unk_2388);
     fclShopEventEnd();
     sdfMemFreeDirect(((shpUpdateWork_t *)D_0054FB20)->allocation);

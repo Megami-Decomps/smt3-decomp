@@ -269,7 +269,7 @@ void fclEncycSetTexHandle(s32 *texhandle)
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        g_pinst->texHandle[i] = (sdfTexHandle_t *)texhandle[i];
+        g_pinst->texHandle[i] = EE_ADDR_AS(sdfTexHandle_t *, texhandle[i]);
     }
 }
 

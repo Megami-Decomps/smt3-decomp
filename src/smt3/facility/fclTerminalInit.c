@@ -263,7 +263,7 @@ s32 trmEndEvent(s32 BgmMode)
     if (BgmMode != 0) {
         trmEndBGM();
     }
-    fclScriptForcedEnd((u8 *)GBWK_3->ScriptPID);
+    fclScriptForcedEnd(EE_ADDR_AS(u8 *, GBWK_3->ScriptPID));
     GBWK_3->ScriptPID = 0;
     fclSetTerminalMode(0);
     if (trmCreateEventProcessName(0, name) != 0) {
@@ -299,7 +299,7 @@ s32 trmChkEventWait(void)
 void trmSetProcessTerm(void)
 {
     if (gCallMode != 0) {
-        fclScriptForcedEnd((u8 *)GBWK_3->ScriptPID);
+        fclScriptForcedEnd(EE_ADDR_AS(u8 *, GBWK_3->ScriptPID));
         fclSetTerminalMode(5);
         gProcessStat_3 = 2;
         gCallMode = 0;
@@ -510,7 +510,7 @@ void fclDestroyTerminal(dds3ProcessID_t *id)
         gProcessStat_3 = 0;
         fclTerminalFreeTextures(GBWK_3);
         fldProcSetTerminal(GBWK_3->terminalType, GBWK_3->terminalNo);
-        fclScriptForcedEnd((u8 *)GBWK_3->ScriptPID);
+        fclScriptForcedEnd(EE_ADDR_AS(u8 *, GBWK_3->ScriptPID));
         sdfMemFreeDirect(GBWK_3->scriptAllocationHandle);
         sdfMemFreeDirect(GBWK_3->allocation);
         GBWK_3 = NULL;

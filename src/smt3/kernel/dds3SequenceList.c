@@ -450,7 +450,7 @@ void CallNewBattleTest(u32 flg, s32 *data)
             nbInitBattleTest();
             return;
         }
-        nbCallNewBattle(data[0], (void *)data[1]);
+        nbCallNewBattle(data[0], EE_ADDR_AS(void *, data[1]));
         return;
     }
     dds3AdminiExitSequence();

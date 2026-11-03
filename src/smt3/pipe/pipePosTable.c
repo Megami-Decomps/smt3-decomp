@@ -121,7 +121,7 @@ s32 getPartsType(s32 id)
     s32 base = (s8)(shiftedId * 2);
 
     if (pInfo == NULL) {
-        return (s32)pInfo;
+        return EE_ADDR_S(pInfo);
     }
     return base + ((pInfo->goWay + pInfo->inWay == 7) ? 1 : 2);
 }

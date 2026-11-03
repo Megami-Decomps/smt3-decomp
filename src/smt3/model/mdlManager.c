@@ -674,12 +674,12 @@ s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode) {
     entity = mdlSearchResrc(aMajor, aMinor);
     if (entity != NULL) {
         SignalSema(mdlManagerWork);
-        return (s32)entity;
+        return EE_ADDR_S(entity);
     }
     if (mdlCheckLoading(aMajor, aMinor)) {
         SignalSema(mdlManagerWork);
         if (aBlockMode != 0) {
-            return (s32)mdlWaitLoadEnd(aMajor, aMinor);
+            return EE_ADDR_S(mdlWaitLoadEnd(aMajor, aMinor));
         }
         return -1;
     }
@@ -708,25 +708,25 @@ s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode) {
         if (paths->texFile != NULL) {
             request->resourceListRequested = 1;
             mdlSetFileName(requestPath, paths->texFile);
-            fileLoadEx(requestPath, 0, (u32)TbLoadCallback, (u32)request);
+            fileLoadEx(requestPath, 0, EE_ADDR(TbLoadCallback), EE_ADDR(request));
         }
         request->itemsRequested = 1;
         mdlSetFileName(requestPath, paths->modelFile);
-        fileLoadEx(requestPath, 0, (u32)MbLoadCallback, (u32)request);
+        fileLoadEx(requestPath, 0, EE_ADDR(MbLoadCallback), EE_ADDR(request));
         if (paths->motionFile != NULL) {
             mdlSetFileName(requestPath, paths->motionFile);
-            fileLoadEx(requestPath, 0, (u32)AbLoadCallback, (u32)request);
+            fileLoadEx(requestPath, 0, EE_ADDR(AbLoadCallback), EE_ADDR(request));
         }
     }
     if (aBlockMode != 0) {
-        return (s32)mdlWaitLoadEnd(aMajor, aMinor);
+        return EE_ADDR_S(mdlWaitLoadEnd(aMajor, aMinor));
     }
     return 0;
 }
 
 dds3ModelResrc_t *mdlLoadPrepare(u32 group, u32 id)
 {
-    return (dds3ModelResrc_t *)mdlPrepare(group, id, 1);
+    return EE_ADDR_AS(dds3ModelResrc_t *, mdlPrepare(group, id, 1));
 }
 
 void mdlUnlinkResrc(mdlObj_t *aHandle)

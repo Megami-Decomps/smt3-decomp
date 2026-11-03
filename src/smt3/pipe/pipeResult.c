@@ -156,7 +156,7 @@ const char D_00548F30[24] = "MAKA ALL Complete!!\n";
 
 void pipeMessInit(void) {
     pipeMessData = sdfDevLoadFileEx(D_00548F18, &D_00551810, NULL);
-    fclInitMessage((void *)D_00551810);
+    fclInitMessage(EE_ADDR_AS(void *, D_00551810));
     if (pipeObjTail < 8) {
         D_00551818 = pipeObjList * 5 + (100 << pipeObjTail) - 100;
     } else {

@@ -399,7 +399,7 @@ extern s32 dds3GetProcessStat(void *id);
 
 s32 rcvUpdateSeqDispel(s32 arg)
 {
-    if (dds3GetProcessStat((void *)rcvUpdateWork->scriptArg) == 2) {
+    if (dds3GetProcessStat(EE_ADDR_AS(void *, rcvUpdateWork->scriptArg)) == 2) {
         return 0;
     }
     switch (fclGetFlag(2)) {

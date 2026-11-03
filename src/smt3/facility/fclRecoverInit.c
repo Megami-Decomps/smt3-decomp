@@ -128,7 +128,7 @@ void fclRecoverLoadTextures(void *workp)
     s8 i;
 
     for (i = 0; i < 3; i++) {
-        work->texHandle[i] = (s32)fclLoadTexture(D_003306C0[i]);
+        work->texHandle[i] = EE_ADDR_S(fclLoadTexture(D_003306C0[i]));
     }
     fclSetPanelTex(work->panel, 0, 0, 0x100, 0x80, work->texHandle[2]);
     printf("RECOVER : Tex load.\n");

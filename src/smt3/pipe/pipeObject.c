@@ -1114,7 +1114,7 @@ void mdlTask(tagPipeObject *objPtr, tagpipeBasic *basicPtr, f32 x, f32 y, f32 z)
     getPosTranslate(objPtr, translated);
     /* Preserve the index-first EE address sum; see
      * docs/levers/addressing-and-types.md. */
-    node = (tagPipePosData *)((u32)offsetCount * sizeof(tagPipePosData) + (u32)D_00528F58.points);
+    node = (tagPipePosData *)((u32)offsetCount * sizeof(tagPipePosData) + EE_ADDR(D_00528F58.points));
     nextNode = node + 1;
     position[0] = node->direction[0];
     radians = 0x1.1df46ap-6f;
