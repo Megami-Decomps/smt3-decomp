@@ -9,7 +9,7 @@ typedef struct
     u8 reserved0000[0x1D7C];
     u8 nameBitmap[4][16][0x120];
     u8 nameCounts[4][2];
-    u8 nameGlyphCodes[4][16][2];
+    u8 nameGlyphCodes[64][2];
     u8 cNames[4][20];
     u8 cNameCounts[4];
 } frNameGlobalWork_t;
@@ -44,10 +44,10 @@ void frInitNameData(void)
     i = 0;
     do {
         nameLength = (s8)strlen(name);
-        memcpy(frNameGlobalWork->nameGlyphCodes[i][0], name, nameLength);
+        memcpy(frNameGlobalWork->nameGlyphCodes[i * 16], name, nameLength);
         frNameGlobalWork->nameCounts[i][0] = nameLength / 2;
         secondLength = (s8)strlen(name);
-        memcpy((u8 *)frNameGlobalWork->nameGlyphCodes[i][0] + nameLength,
+        memcpy((u8 *)frNameGlobalWork->nameGlyphCodes[i * 16] + nameLength,
                name, secondLength);
         frNameGlobalWork->nameCounts[i][1] = secondLength / 2;
         cNameLength = (s8)strlen(D_003263B0[i]);
@@ -144,22 +144,22 @@ extern frFontHandle_t *frSetUserImage(GsFont_t *font, frFontHandle_t *chain);
 extern void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst);
 extern s32 frGetYShiftLev(s8 style, s32 fontNo);
 
-#ifdef NON_MATCHING
 frFontHandle_t *frCreateNameHandle(s8 target, s8 glyph, frFontHandle_t *chain)
 {
-    u8 *codeBytes = frNameGlobalWork->nameGlyphCodes[target][glyph];
-    s32 shiftIndex = ((codeBytes[0] << 8) | codeBytes[1]) - 0x20;
+    s32 slot = target * 16 + glyph;
+    s32 shiftIndex = frNameGlobalWork->nameGlyphCodes[slot][0];
+    frTextHandle_t *child;
 
-    frGetMessageCode(shiftIndex + 0x20);
+    shiftIndex = (shiftIndex << 8) | frNameGlobalWork->nameGlyphCodes[slot][1];
+    frGetMessageCode(shiftIndex);
+    shiftIndex -= 0x20;
     chain = frSetUserImage(pFont[target][glyph], chain);
-    chain->lastChild->glyphCodeOrContext.glyphCode = shiftIndex + 0x20;
-    frGetXShiftLev(chain->lastChild, shiftIndex, 0);
+    child = chain->lastChild;
+    child->glyphCodeOrContext.glyphCode = shiftIndex + 0x20;
+    frGetXShiftLev(child, shiftIndex, 0);
     chain->lastChild->y = frGetYShiftLev(0, shiftIndex);
     return chain;
 }
-#else
-INCLUDE_ASM(const s32, "interface/frName", frCreateNameHandle);
-#endif
 
 frFontHandle_t *frGetName1NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption)
 {
