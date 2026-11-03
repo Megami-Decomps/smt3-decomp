@@ -178,3 +178,27 @@ and StopFrame. Full qualification passes the retail checksum, 149 guarded owners
 checks. Source commit `127dbb80bec3b72661d7586294dfad93c54398e4` passed exact-source hosted CI
 [40996592892](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40996592892),
 including build and deploy.
+
+## EnterData (event/evtEventViewer, 0x378)
+
+189 of 222 words match at the native 888-byte size; the ordinary draft remains guarded.
+
+EnterData's ordinary reconstruction was investigated without promoting it. The complete owner retains its 55 existing exact functions. The strongest ordinary body emits the correct 888-byte extent and matches 189 of 222 instruction positions, while preserving typed, unaligned parameter-record copies, actual lighting hardware copies, source-subobject origins and callback ordering. One separately retained selected-frame allocation diagnostic matches 203 positions but is also nonmatching.
+
+The remaining differences concern pointer allocation, lighting address materialization and a post-light global observation. No fake volatile, padding, register search or memory barrier was introduced. Real callback arguments and the target-only declaration visibility adjustment were qualified separately.
+
+Both diagnostic bodies pass strict production, SKIP_ASM and NON_MATCHING compilation. Full-owner plain/dump assembly, allocated sections, symbols and ordered relocations agree. The proposed guarded ordinary draft preserves the production fallback and checks 55 match, 0 differ; it earns no new matching credit. Independent review approved only the ordinary guarded proposal. The private investigation did not run full repository gates; final integration results are recorded below.
+
+The canonical patch changes only the guarded ordinary definition and its
+truthful `s32 EnterData(s32 action, s32 previousMenu)` callback contract.
+Native ignores the incoming arguments and returns zero after evtRunFrame and
+PopMenu. The separate 203/222 diagnostic binds a real selected frame, but
+that binding and private diagnostic declaration-visibility changes are not
+retained. Its higher score does not authorize promotion.
+
+Provider copies use the qualified packed/unaligned record views and native
+lighting helpers, with valid live allocations and the EE GNU object domain.
+This is not a portable ISO C, overlapping/corrupt-storage or asynchronous
+mutation claim. No source ownership or literal changes are made.
+
+Final owner 55/0 and ordinary target-active 55/1 checks pass with data intact. Three strict modes, production/retained plain-dump parity, fresh stable 141-owner/481-draft qualification, 450 tests, 817 layout assertions, seven IRX modules, retail checksum/byte comparison/no-op and reconciled unchanged reports pass.

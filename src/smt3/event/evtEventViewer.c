@@ -2304,72 +2304,70 @@ extern dds3Effect_RippleBlurParam_t *rblurGetParam(void);
 extern dds3Effect_Filter_t *dblurGetParam2(void);
 extern dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void);
 
-s32 EnterData(void)
+s32 EnterData(s32 action, s32 previousMenu)
 {
     evtFrameInfo_t *frame = evtGetSelectFrameInfo();
-    evtViewerInfo_t *viewer = viewerinfo;
-    evtViewerInfo_t *volatile *currentViewer = &viewerinfo;
     void *destination;
     pmdSceneFogTable_t *fog;
+    sdf3DFogParam_t *sourceFog;
 
-    switch (viewer->framelist_target->type) {
+    switch (viewerinfo->framelist_target->type) {
     case 10:
-        if (viewer->framelist_type == 13) {
+        switch (viewerinfo->framelist_type) {
+        case 13: {
             sdf3DLight_t *light = dds3LightParam.parallel[0];
             pmdSceneLightTable_t *sceneLight = frame->work;
             SDF_VU0_COPYVECTOR(sceneLight->color, &light->color);
             SDF_VU0_COPYVECTOR(sceneLight->direction, &light->v);
             SDF_VU0_COPYVECTOR(sceneLight->ambient, &dds3LightParam.ambient);
-        } else if (viewer->framelist_type == 14) {
+            break;
+        }
+        case 14: {
             frame->param.sf[0] = sdfFaceDivSoften;
             frame->param.sf[1] = sdfFaceDivBias;
-            viewer = *currentViewer;
+            break;
+        }
         }
         break;
     case 11:
         fog = frame->work;
-        viewer = *currentViewer;
-        fog->fog.vec[0] = dds3LightParam.fog.fogMin;
-        fog->fog.color = dds3LightParam.fog.color;
-        fog->fog.vec[1] = dds3LightParam.fog.fogMax;
-        fog->fog.vec[2] = dds3LightParam.fog.fogNear;
-        fog->fog.vec[3] = dds3LightParam.fog.fogFar;
+        sourceFog = &dds3LightParam.fog;
+        fog->fog.vec[0] = sourceFog->fogMin;
+        fog->fog.color = sourceFog->color;
+        fog->fog.vec[1] = sourceFog->fogMax;
+        fog->fog.vec[2] = sourceFog->fogNear;
+        fog->fog.vec[3] = sourceFog->fogFar;
         break;
     case 13:
         destination = frame->work;
-        *(volatile evtBlurCopy_t *)destination = *(volatile evtBlurCopy_t *)&evtGetUnityCalcArea()->source;
-        viewer = *currentViewer;
+        *(evtBlurCopy_t *)destination = *(evtBlurCopy_t *)&evtGetUnityCalcArea()->source;
         break;
     case 14:
         destination = frame->work;
-        *(volatile evtMultiBlurCopy_t *)destination = *(volatile evtMultiBlurCopy_t *)mblurGetParam();
-        viewer = *currentViewer;
+        *(evtMultiBlurCopy_t *)destination = *(evtMultiBlurCopy_t *)mblurGetParam();
         break;
     case 15:
         destination = frame->work;
-        *(volatile evtDistBlurCopy_t *)destination = *(volatile evtDistBlurCopy_t *)dblurGetParam();
-        viewer = *currentViewer;
+        *(evtDistBlurCopy_t *)destination = *(evtDistBlurCopy_t *)dblurGetParam();
         break;
     case 23:
         destination = frame->work;
-        *(volatile evtRippleBlurCopy_t *)destination = *(volatile evtRippleBlurCopy_t *)rblurGetParam();
-        viewer = *currentViewer;
+        *(evtRippleBlurCopy_t *)destination = *(evtRippleBlurCopy_t *)rblurGetParam();
         break;
     case 16:
         destination = frame->work;
-        *(volatile evtFilterCopy_t *)destination = *(volatile evtFilterCopy_t *)dblurGetParam2();
-        viewer = *currentViewer;
+        *(evtFilterCopy_t *)destination = *(evtFilterCopy_t *)dblurGetParam2();
         break;
     case 17:
         destination = frame->work;
-        *(volatile evtMultiFilterCopy_t *)destination = *(volatile evtMultiFilterCopy_t *)mfilterGetParam();
-        viewer = *currentViewer;
+        *(evtMultiFilterCopy_t *)destination = *(evtMultiFilterCopy_t *)mfilterGetParam();
         break;
     }
-    evtRunFrame(viewer->nowframe);
+    evtRunFrame(viewerinfo->nowframe);
     PopMenu();
     return 0;
 }
+
 #else
 INCLUDE_ASM(const s32, "event/evtEventViewer", EnterData);
 #endif
