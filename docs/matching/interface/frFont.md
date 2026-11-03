@@ -16,9 +16,9 @@ The six remaining words are two separate things:
   this is not the reverse-source-order store rule; three of the six are 8
   words out and three are 9.
 - Four words: the `code < 0x80` flag lands in `$2` where retail uses `$4`,
-  which costs the two `sltiu`s and the two `bnez`es that read it. Mine
-  coalesces the flag with the `addu text, i` address temp; retail keeps them
-  apart.
+  which costs the two `sltiu`s and the two `bnez`es that read it. The draft independently allocates the flag and the `addu text, i`
+  address temp to the same hard register at different times; the qualified
+  trace below corrects the earlier coalescing explanation.
 The previous early return for `length == 0` added a third residual: a branch
 annulment and duplicated epilogue load. Guarding the conversion do/while with
 `if (length != 0)` and keeping one common return closes those two words,
@@ -43,6 +43,38 @@ stack rather than reusing the parameter. One local serves both the
 in `$5`. `frGetXShiftLev` takes a third argument it never reads: it
 overwrites `$6` with 1 as its second instruction, and the caller still
 computes `i == 0` into `$6`.
+
+### Qualified predicate allocation and seed-store scheduling
+
+An unchanged complete-owner allocation/scheduler observation qualifies against
+ordinary, plain, dump and fresh observed output: 5,565 frozen inputs and 28
+artifacts agree byte-for-byte, with all four pass gates, normal completion and
+owned loopback listener/process cleanup verified. The case records 1,775 events
+and 35 exercised guarded hooks. This is exact-case observer qualification, not
+a blanket neutrality claim.
+
+The address pseudo98 receives hard2 in local allocation. The real predicate
+pseudo116 is still unallocated before global allocation; it is not coalesced
+with that address. Its local combine attempts return false. Global allocation
+records zero calls crossed, no preferences and conflicts with hard3/28/29;
+hard0/1 are blocked and hard2 is the first eligible free candidate. Hard4 is
+not blocked, but the search stops at hard2. This is an independent register
+choice, not a copy-coalescing dependency.
+
+For the setup stores, prereload scheduling compares Mode at glyph+0x17 and
+Style at glyph+0x15 with equal priority6 but weights -1 and0. The register-weight
+tier selects Mode first. Postreload priorities and weights tie, and LUID retains
+that order. Source-order permutations already ruled out above remain closed.
+
+One bounded control made both real code-range comparisons explicit through a
+local predicate bound to hard4. Each value is initialized before its real branch
+consumer and dies before the glyph-provider call; no extra consumer or scheduling
+constraint was added. It emits two extra moves, still computing comparisons in
+hard2, and regresses to 256 bytes against native248 (25 matching prefix words).
+All 77 exact peers and the independent setup-store residual are preserved.
+Ordinary/plain/dump complete outputs agree for this control and three strict
+implicit-declaration compile contexts pass. It is rejected; no source is retained.
+Do not repeat binding, operand or setup-order variants without new evidence.
 
 ## frAnalyzeTag (interface/frFont, 0x518)
 

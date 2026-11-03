@@ -172,8 +172,8 @@ fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/matching/field/
 fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/matching/field/fld_Npc.md	114
 fldNpcDraw	field/fld_Npc	0x8DC	145 of 561 words match	docs/matching/field/fld_Npc.md	135
 frPreCalcStrWidth	interface/frFont	0xF8	Fifty-six of sixty-two words match	docs/matching/interface/frFont.md	3
-frAnalyzeTag	interface/frFont	0x518		docs/matching/interface/frFont.md	47
-frAnalyzeMessage	interface/frFont	0x200		docs/matching/interface/frFont.md	99
+frAnalyzeTag	interface/frFont	0x518		docs/matching/interface/frFont.md	79
+frAnalyzeMessage	interface/frFont	0x200		docs/matching/interface/frFont.md	131
 frRestoreNameImage	interface/frName	0xD8	54 of 54 words match	docs/matching/interface/frName.md	3
 frGetCNameFRQ	interface/frName	0x158	86 of 86 words match	docs/matching/interface/frName.md	52
 frSetNameData	interface/frName	0x1E8	122 of 122 words match	docs/matching/interface/frName.md	93
