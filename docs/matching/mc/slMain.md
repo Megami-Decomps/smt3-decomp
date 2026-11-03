@@ -98,3 +98,42 @@ Source commit `7d166188accf3d9459e84105b002c7134f3c4696` passed exact-source
 hosted CI [41176090359](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41176090359),
 attempt 1, including build and deploy. The run completed successfully at
 06:21:55 UTC on 2026-10-31; the deployment reported success at 06:21:52 UTC.
+
+## slCopyNonZero (mc/slMain, 0x40)
+
+16 of 16 words match at the native 64-byte size. The complete owner checks
+101 exact C functions and owned data. The two-byte input-pair loop preserves
+the conditional nonzero lead-byte copy, unconditional tail-byte copy and final
+NUL store. Signed nonpositive counts still skip the input loop and write only
+the terminator. Loads and stores retain their native byte widths and order,
+including when source and destination ranges overlap.
+
+One localized empty operand constrains the initialized, live source cursor at
+the trailing-store boundary. It emits no instruction and has no memory clobber;
+it is not a general memory barrier. The cursor still feeds its genuine increment
+and subsequent input loads. The independent source/destination increments then
+occur in source-before-destination order. No fixed register, extra memory
+access, fabricated bounds, dummy consumer or production compiler flag is added.
+
+Qualified final compiler dumps show the specific dependency: in the unmodified
+14/16 draft, the second scheduler queues the tail store for two modeled cycles
+after its load, issuing the source increment in cycle zero and the countdown
+in cycle one before the store. With the localized volatile operand, the store
+precedes the operand, and the countdown and cursor increments follow it. The
+source increment issues before the destination increment; the delay-slot pass
+places the latter in the loop branch's delay slot. These are measured compiler
+snapshots, not a claim about original source spelling or a universal ordering
+guarantee for empty operands.
+
+Removing the operand while retaining the increment order returns to 14/16.
+Making only the operand nonvolatile gives 13/16. Keeping the volatile operand
+but the old destination-before-source increment order gives 14/16: the tail
+store is correct but the two increments occupy opposite sides of the branch.
+An ordinary explicit countdown loop also gives 13/16 and changes the branch
+from nonzero to greater-than-zero. All these controls remain 64 bytes and
+preserve the 100 previous C matches.
+
+Plain, diagnostic (`-da -fsched-verbose=5`) and uninitialized-warning builds of
+the final source agree on all five allocated sections, 766 non-file symbols,
+1759 ordered relocations and normalized assembly. The warning log is empty.
+The diagnostic options are not production settings.

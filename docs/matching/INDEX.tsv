@@ -4,9 +4,9 @@ fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/matching/code_001
 fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/matching/code_00116AD0.md	63
 fldGbFlagClear	code_00116AD0	0x124	23 of 73 words differ	docs/matching/code_00116AD0.md	90
 fldAnahoriSelectInit	code_00116AD0	0x7C	10 of 30 words differ	docs/matching/code_00116AD0.md	115
-slCopyNonZero	code_00144798	0x40	14 of 16 words match	docs/matching/code_00144798.md	3
-fldCommand_DIR_HIT_CNTR	code_00144798	0xC0	32 of 42 words differ	docs/matching/code_00144798.md	24
-fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/matching/code_00144798.md	53
+slCopyNonZero	historical code_00144798	0x40	16 of 16 words now match	docs/matching/code_00144798.md	3
+fldCommand_DIR_HIT_CNTR	code_00144798	0xC0	32 of 42 words differ	docs/matching/code_00144798.md	30
+fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/matching/code_00144798.md	59
 nbCameraBoss_BSKAGU_EP_IT_Set	code_001B0858	0x144	19 of 79 words before the first difference	docs/matching/code_001B0858.md	3
 nbCameraBoss_Sukady_DAIJIS_Set	code_001B0858	0x134	4 of 77 words differ	docs/matching/code_001B0858.md	23
 nbCameraHelperViewer_Draw	code_001C55F8	336 bytes	48 of 83 words match	docs/matching/code_001C55F8.md	3
@@ -186,6 +186,7 @@ dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3Ke
 dds3Titlemain	kernel/dds3TitleMain	0xD20	307 of 834 words match	docs/matching/kernel/dds3TitleMain.md	3
 slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/matching/mc/slMain.md	3
 slFileSelCalc	mc/slMain	0x340	208 of 208 words match	docs/matching/mc/slMain.md	39
+slCopyNonZero	mc/slMain	0x40	16 of 16 words match	docs/matching/mc/slMain.md	102
 Flow2_6	newbattle/NbNegoFlowFullMoon	0x278	158 of 158 words match	docs/matching/newbattle/NbNegoFlowFullMoon.md	3
 Flow5_3	newbattle/NbNegoFlowInnen	0x164	89 of 89 words match	docs/matching/newbattle/NbNegoFlowInnen.md	3
 Flow15_5	newbattle/NbNegoFlowInoti	0x148	82 of 82 words match	docs/matching/newbattle/NbNegoFlowInoti.md	3
@@ -386,4 +387,4 @@ dds3TitleDrawFade	sound/sndManager	0x4F8	318 of 318 words match	docs/matching/so
 dds3TitleUpdateFade	sound/sndManager	0x278	158 of 158 words match	docs/matching/sound/sndManager.md	37
 titleAllocWork	sound/sndManager	0x110	68 of 68 words match	docs/matching/sound/sndManager.md	89
 stfMain2	staff/stfMain	0x2D4	145 of 181 words match	docs/matching/staff/stfMain.md	3
-ObjDispOff	staff/stfMain	0x504	303 of 321 words match	docs/matching/staff/stfMain.md	34
+ObjDispOff	staff/stfMain	0x504	311 of 321 words match	docs/matching/staff/stfMain.md	34

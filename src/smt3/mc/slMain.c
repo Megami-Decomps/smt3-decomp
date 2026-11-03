@@ -689,8 +689,6 @@ u8 slGetPadRep(s32 map) {
 }
 
 
-/* NON_MATCHING: 14 of 16 words, exact size; the trailing store and src++ are swapped. */
-#ifdef NON_MATCHING
 void slCopyNonZero(u8 *dst, u8 *src, s32 count) {
     s32 i;
 
@@ -703,14 +701,14 @@ void slCopyNonZero(u8 *dst, u8 *src, s32 count) {
             src++;
         }
         *dst = *src;
-        dst++;
+        /* Keep the live source cursor at the trailing-store boundary. This
+         * local scheduling constraint is not a general memory barrier. */
+        FAKEMATCH_ASM_LIVE_VOLATILE(src);
         src++;
+        dst++;
     }
     *dst = 0;
 }
-#else
-INCLUDE_ASM(const s32, "mc/slMain", slCopyNonZero);
-#endif
 
 
 void slKanjiDraw(s32 x, s32 y, u32 rgba, const char *moji) {
