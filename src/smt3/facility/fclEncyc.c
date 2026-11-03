@@ -3934,11 +3934,11 @@ s32 DebugProcMenu_fclEncyc(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *wo
     y = 0x7A00;
     label = D_003323D8;
     for (i = 2; i >= 0; i--) {
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7380, y, 0xFFFFF0, 0, *label++));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7380, y, 0xFFFFF0, 0, *label++)));
         y += 0x60;
     }
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7A00 + work->selection * 0x60,
-                                         0xFFFFF0, 0, D_0054FCE0));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00 + work->selection * 0x60,
+                                         0xFFFFF0, 0, D_0054FCE0)));
     return 0;
 }
 #else
@@ -4028,8 +4028,8 @@ s32 DebugProcRegister(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
         const char *status = fclEncycSearch(work->firstId + i) < 0 ? D_0053D868 : D_0053D878;
         const char *marker = work->row == i ? D_0054FCE0 : D_0054FCC8;
 
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7A00 + i * 0x60, 0xFFFFF0,
-                                               0, D_0053D888, marker, work->firstId + i, status));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00 + i * 0x60, 0xFFFFF0,
+                                               0, D_0053D888, marker, work->firstId + i, status)));
     }
     return 0;
 }
@@ -4075,8 +4075,8 @@ s32 DebugProcViewkey(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
     }
 
     dds3ConsPanelTagLink(tag, 0x10, 0x10, 0x16, 3);
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7A00, 0x00FFFFF0, 0,
-                                          D_0053D898, (s8)pinst->unk_6D));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00, 0x00FFFFF0, 0,
+                                          D_0053D898, (s8)pinst->unk_6D)));
     return 0;
 }
 
@@ -4108,16 +4108,16 @@ s32 DebugProcDispBound(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *debugW
         radius -= datModelParamTable[devilId].formsize;
         radius -= 80.0f;
 
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7A00, 0x00FFFFF0, 0,
-                                               D_0053D8B0, devilId));
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7A60, 0x00FFFFF0, 0,
-                                               D_0053D8C0, radius));
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7AC0, 0x00FFFFF0, 0,
-                                               D_0053D8D0, work->phase.cameraAngle));
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7B20, 0x00FFFFF0, 0,
-                                               D_0053D8E0, work->reserved040));
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7180, 0x7B80, 0x00FFFFF0, 0,
-                                               D_0053D8F0, work->reserved044));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00, 0x00FFFFF0, 0,
+                                               D_0053D8B0, devilId)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A60, 0x00FFFFF0, 0,
+                                               D_0053D8C0, radius)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7AC0, 0x00FFFFF0, 0,
+                                               D_0053D8D0, work->phase.cameraAngle)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7B20, 0x00FFFFF0, 0,
+                                               D_0053D8E0, work->reserved040)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7B80, 0x00FFFFF0, 0,
+                                               D_0053D8F0, work->reserved044)));
     }
     return 0;
 }

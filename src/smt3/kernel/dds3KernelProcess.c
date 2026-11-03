@@ -97,7 +97,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
             renderTag = dds3FontReqAllocDrawTag();
             renderFog = (sdf3DFogPacket_t *)sdfGrAllocPacketBuff(0x50);
             sdf3DMakeFogPacket(renderFog, &D_002F5D30);
-            sdfDrawTagLink(renderTag, (u32)renderFog);
+            sdfDrawTagLink(renderTag, EE_ADDR(renderFog));
             sdfGrOtTable[1].regFunc(&sdfGrOtTable[1], renderTag);
         }
     }
@@ -113,7 +113,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
         subTag = dds3FontReqAllocDrawTag();
         subFog = (sdf3DFogPacket_t *)sdfGrAllocPacketBuff(0x50);
         sdf3DMakeFogPacket(subFog, &dds3FogParam2);
-        sdfDrawTagLink(subTag, (u32)subFog);
+        sdfDrawTagLink(subTag, EE_ADDR(subFog));
         sdfGrOtTable[73].regFunc(&sdfGrOtTable[73], subTag);
     }
     sdf3DMakeLightParallelPacket(&dds3DrawEnv[frame].light, dds3LightParam.parallel, &dds3AmbientColor);
@@ -139,7 +139,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
     sceneTag = dds3FontReqAllocDrawTag();
     sceneFog = (sdf3DFogPacket_t *)sdfGrAllocPacketBuff(0x50);
     sdf3DMakeFogPacket(sceneFog, &dds3FogParamMain);
-    sdfDrawTagLink(sceneTag, (u32)sceneFog);
+    sdfDrawTagLink(sceneTag, EE_ADDR(sceneFog));
     sdfGrOtTable[7].regFunc(&sdfGrOtTable[7], sceneTag);
     sdfPreDrawChainLink(&D_002F6A70, &dds3DrawEnv[frame].preDrawTag);
     sdfModelOtInit(&D_002F69B8[0], &sdfGrOtTable[39], &sdfGrOtTable[40], &sdfGrOtTable[44], &sdfGrOtTable[45]);
@@ -245,7 +245,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
         texturePacket[5] = 0x3B;
         texturePacket[6] = 0;
         texturePacket[7] = 0x3F;
-        sdfDrawTagLink(packetList, (u32)texturePacket);
+        sdfDrawTagLink(packetList, EE_ADDR(texturePacket));
         blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
         blendPacket[0] = 3;
         blendPacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
@@ -255,7 +255,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
         blendPacket[5] = 0x47;
         blendPacket[6] = 0x44;
         blendPacket[7] = 0x42;
-        sdfDrawTagLink(packetList, (u32)blendPacket);
+        sdfDrawTagLink(packetList, EE_ADDR(blendPacket));
         edgeDistances[0] = dds3ScreenBlurOfsX[0] + 0x100;
         edgeDistances[1] = dds3ScreenBlurOfsX[1] + 0xE0;
         edgeDistances[2] = 0x100 - dds3ScreenBlurOfsX[0];
@@ -282,7 +282,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
         vertex->corner[1].y = 0x8700 + edgeDistances[3] * 8;
         vertex->corner[1].z = 0;
         vertex->corner[1].adc = 0;
-        sdfDrawTagLink(packetList, (u32)spritePacket);
+        sdfDrawTagLink(packetList, EE_ADDR(spritePacket));
         D_002F6938.regFunc(&D_002F6938, packetList);
     }
     poolHead = sdfGrOtClose(sdfGrOtTable);

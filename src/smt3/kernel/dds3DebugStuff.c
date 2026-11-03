@@ -297,11 +297,11 @@ void dds3PrimDebugTextBox(void *packetList, s32 x, s32 y, s32 selected, f32 *val
         }
         color |= 0x80000000;
     }
-    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x510, y + 0x18,
-                     0xFF0080, 0x240, 0xF0, color, 0x40806020));
+    sdfDrawTagLink(packetList, EE_ADDR(dds3PrimFrameRect(x + 0x510, y + 0x18,
+                     0xFF0080, 0x240, 0xF0, color, 0x40806020)));
     for (i = 0; i != 3; i++) {
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x, y,
-                        0xFF0080, D_002FA930[i], D_002FA938[i]));
+        sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(x, y,
+                        0xFF0080, D_002FA930[i], D_002FA938[i])));
         style = selected == i ? 6 : 0;
         if (values == NULL) {
             text[0] = '-';
@@ -312,8 +312,8 @@ void dds3PrimDebugTextBox(void *packetList, s32 x, s32 y, s32 selected, f32 *val
         } else {
             dds3MenuStepValue(text, values[i]);
         }
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x + 0x180,
-                        y, 0xFF0080, style, text));
+        sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(x + 0x180,
+                        y, 0xFF0080, style, text)));
         y += 0x60;
     }
 }
@@ -326,8 +326,8 @@ void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y, s32 selected,
     const char *label;
 
     color = (color & 0xFFFFFF) | 0x80000000;
-    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x510, y + 0x18,
-                    0xFF0080, 0x240, 0xF0, color, 0x40806020));
+    sdfDrawTagLink(packetList, EE_ADDR(dds3PrimFrameRect(x + 0x510, y + 0x18,
+                    0xFF0080, 0x240, 0xF0, color, 0x40806020)));
     for (i = 0; i != 3; i++) {
         switch (i) {
         case 0:
@@ -346,17 +346,17 @@ void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y, s32 selected,
             channel = (color >> 16) & 0xFF;
             break;
         }
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-                        x, y, 0xFF0080, style, label));
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(
+                        x, y, 0xFF0080, style, label)));
+        sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(
                         x + 0x180, y, 0xFF0080, i == selected ? 6 : 0,
-                        D_0054EA50, channel));
+                        D_0054EA50, channel)));
         if (showNormalized != 0) {
-            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-                            x, y + 0x180, 0xFF0080, style, label));
-            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+            sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(
+                            x, y + 0x180, 0xFF0080, style, label)));
+            sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(
                             x + 0x240, y + 0x180, 0xFF0080, 0,
-                            D_0054EA58, fptodp(channel * (1.0f / 255.0f))));
+                            D_0054EA58, fptodp(channel * (1.0f / 255.0f)))));
         }
         y += 0x60;
     }
