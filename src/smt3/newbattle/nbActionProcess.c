@@ -147,7 +147,7 @@ extern char D_005440D8[];
 
 extern void nbPlaySe(s32 no);
 
-extern struct nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se);
+extern struct nbKoukaPacket_t *nbAddSePacket(s32 startframe, ps2AddrS_t uniqueid, s32 se);
 
 extern void nbPanelStockEnd(void);
 
@@ -161,11 +161,11 @@ extern void SetTarget_nbActionProcess(nbActionProcessData_t *a);
 
 extern s32 AddTimeListHp(nbActionProcessData_t *a, s32 formindex, s32 add);
 
-extern s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeDamagePacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                               s32 type, s32 hp, s32 mp, s32 badstat, s32 hiteff, s32 dead,
                               s32 deadtype, s32 moji, s32 animeoff);
 
-extern struct nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, s32 uniqueid,
+extern struct nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, ps2AddrS_t uniqueid,
                                                     s32 id);
 
 extern s32 nbCheckKuisibariSkill(s32 formindex);
@@ -202,16 +202,16 @@ extern s32 nbAddReturnKoukaPacket(s32 startframe, nbActionProcessData_t *uniquei
 
 extern s32 nbCheckEscape(nbMainProcessData_t *data);
 
-extern s32 nbMakePressPacket(s32 startframe, s32 uniqueid, f32 press);
+extern s32 nbMakePressPacket(s32 startframe, ps2AddrS_t uniqueid, f32 press);
 
-extern s32 nbMakeNewPressPacket(s32 startframe, s32 uniqueid, s32 ptype,
+extern s32 nbMakeNewPressPacket(s32 startframe, ps2AddrS_t uniqueid, s32 ptype,
                                 nbFormation_t *form);
 
 extern struct nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame,
-                                                       s32 uniqueid,
+                                                       ps2AddrS_t uniqueid,
                                                        nbFormation_t *form, s32 type);
 
-extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, s32 uniqueid,
+extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, ps2AddrS_t uniqueid,
                                                     nbFormation_t *form, s32 sw);
 
 s32 CheckKoketaNego(nbActionProcessData_t *a);
@@ -235,7 +235,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern s32 nbMakeDeadVisualPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeDeadVisualPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                    s32 deadtype, s32 deadpcm);
 
 void SetDeadPacket(nbActionProcessData_t *a, s32 formindex);
@@ -661,12 +661,12 @@ extern u32 nbGetBadStat(s32 formindex);
 extern f32 nbGetGensyoRitu(s32 skill, s32 source, s32 target);
 extern s32 nbCheckBadKaifuku(datUnitWork_t *work, s32 type);
 extern void nbSetBadStat(s32 formindex, s32 sw, s32 bad);
-extern s32 nbMakeBadKaifukuPacket(s32 frame, s32 uniqueid, nbFormation_t *form);
-extern s32 nbMakeKaifukuPacket(s32 frame, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeBadKaifukuPacket(s32 frame, ps2AddrS_t uniqueid, nbFormation_t *form);
+extern s32 nbMakeKaifukuPacket(s32 frame, ps2AddrS_t uniqueid, nbFormation_t *form,
                                 s32 type, s32 hp, s32 mp, u32 bad);
-extern struct nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 frame, s32 uniqueid,
+extern struct nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 frame, ps2AddrS_t uniqueid,
                                                      nbFormation_t *form, s32 type);
-extern struct nbKoukaPacket_t *nbAddHojoKoukaPacket(s32 frame, s32 uniqueid,
+extern struct nbKoukaPacket_t *nbAddHojoKoukaPacket(s32 frame, ps2AddrS_t uniqueid,
                                                     nbFormation_t *form, u32 type, s32 point);
 extern datDevilFormat_t datDevilTable[];
 s32 GetTimeListHp(nbActionProcessData_t *a, s32 formindex);
@@ -2362,8 +2362,8 @@ void SetAction_BAD(nbActionProcessData_t *a)
     nbPanelPressGaugeShow();
 }
 
-extern s32 nbMakeBadKaifukuPacket(s32 frame, s32 id, nbFormation_t *form);
-extern s32 nbMakeKaifukuPacket(s32 frame, s32 id,
+extern s32 nbMakeBadKaifukuPacket(s32 frame, ps2AddrS_t id, nbFormation_t *form);
+extern s32 nbMakeKaifukuPacket(s32 frame, ps2AddrS_t id,
     nbFormation_t *form, s32 type, s32 hp, s32 mp, u32 badstat);
 extern s32 nbApplyBadCurse(nbActionProcessData_t *a);
 extern s32 nbCheckBadCurse(s32 formindex);
@@ -2648,27 +2648,27 @@ extern struct fileRequest *fileLoad(const char *filename);
 extern char D_00575360[];
 extern void nbDelAllMojiNumEffectKoukaPacket(nbFormation_t *form);
 extern struct nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 startframe,
-    s32 uniqueid, nbFormation_t *form, s32 sw, u32 flag);
+    ps2AddrS_t uniqueid, nbFormation_t *form, s32 sw, u32 flag);
 extern s32 nbCalcUnitVisual(nbFormation_t *form, s32 part);
 extern s32 nbCalcUnitVisual2(nbFormation_t *form, s32 part);
 extern s32 nbGetMotionNo(nbFormation_t *form, s32 motion);
 extern struct nbKoukaPacket_t *nbAddSkillMotionKoukaPacket(s32 startframe,
-    s32 uniqueid, nbFormation_t *form, s32 motion, s32 endtype, f32 rate);
+    ps2AddrS_t uniqueid, nbFormation_t *form, s32 motion, s32 endtype, f32 rate);
 extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 rate);
 extern s32 nbGetMotionActframe(nbFormation_t *form, s32 motion, f32 rate);
 extern s32 nbMemoryLoadMotionSe(nbFormation_t *form, s32 motion);
 extern s32 datGetSkillCost(datUnitWork_t *work, s32 nskill);
 extern struct nbKoukaPacket_t *nbAddHpMpKoukaPacket(s32 startframe,
-    s32 uniqueid, nbFormation_t *form, s32 n, s32 type);
+    ps2AddrS_t uniqueid, nbFormation_t *form, s32 n, s32 type);
 extern struct nbKoukaPacket_t *nbAddHatudoEffectKoukaPacket(s32 startframe, s32 framelength,
-    s32 uniqueid, nbFormation_t *form, s32 type, s32 mottype, s32 skillid);
+    ps2AddrS_t uniqueid, nbFormation_t *form, s32 type, s32 mottype, s32 skillid);
 extern struct nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe,
-    s32 uniqueid, nbFormation_t *form, s32 type);
+    ps2AddrS_t uniqueid, nbFormation_t *form, s32 type);
 extern void nbSetNormalSkill0(datUnitWork_t *work);
 extern void effBTLSkillEnd(void);
 extern void effBTLSkillSetFormationInfo(s32 invokeId, u32 targetBit);
 extern void effBTLSkillStart(u32 id, u32 stat);
-extern s32 nbMakeUnitMovePacket(s32 startframe, s32 uniqueid,
+extern s32 nbMakeUnitMovePacket(s32 startframe, ps2AddrS_t uniqueid,
     nbFormation_t *form, u32 targetMask, s32 type, f32 speed);
 extern void cmpSetSkillListRows(s32 rows);
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 nskill);
@@ -3056,7 +3056,7 @@ extern char D_00551128[];
 extern void datDebugPrintf(const char *format, ...);
 extern s32 nbGetUnitFromAction(nbFormation_t *form, s32 motion);
 extern s32 p2sdLoadCheckMidi(s32 midi);
-extern struct nbKoukaPacket_t *nbAddSePacket2(s32 frame, s32 uniqueid, s32 midi);
+extern struct nbKoukaPacket_t *nbAddSePacket2(s32 frame, ps2AddrS_t uniqueid, s32 midi);
 extern s32 pacFileCheckEnd(const struct fileRequest *file);
 extern sdfMemHandle_t *fileGetMemHandle(const struct fileRequest *file);
 extern u32 fileGetLoadSize(const struct fileRequest *file);
@@ -3186,14 +3186,14 @@ extern u32 effBTLCutGetCutEndFrame(struct effBTLCut_t *cut);
 extern void effBTLCutSetDrawEndFrame(struct effBTLCut_t *cut, u32 frame);
 extern void effBTLCutSetCameraState(struct effBTLCut_t *cut);
 extern f64 fptodp(f32 value);
-extern struct nbKoukaPacket_t *nbAddSkillEffectKoukaPacket(s32 start, s32 length, s32 uniqueid, struct effBTLCut_t *cut);
-extern struct nbKoukaPacket_t *nbAddSkillEffectKoukaPacket2(s32 start, s32 length, s32 uniqueid, struct effBTL_t *effect, s32 cut, nbFormation_t *form, s32 type);
-extern struct nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 start, s32 uniqueid, nbFormation_t *form, s32 sw, u32 flag);
-extern struct nbKoukaPacket_t *nbAddJyokyoHelpPacket(s32 start, s32 uniqueid, s32 no, s32 var_id, s32 var_ind);
-extern struct nbKoukaPacket_t *nbAddSkillColorOffPacket(s32 start, s32 uniqueid);
-extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 start, s32 uniqueid, nbFormation_t *form);
-extern void nbAddHatudoEffectEndPacket(s32 start, s32 uniqueid);
-extern void nbAddHitStopPacket(s32 start, s32 uniqueid);
+extern struct nbKoukaPacket_t *nbAddSkillEffectKoukaPacket(s32 start, s32 length, ps2AddrS_t uniqueid, struct effBTLCut_t *cut);
+extern struct nbKoukaPacket_t *nbAddSkillEffectKoukaPacket2(s32 start, s32 length, ps2AddrS_t uniqueid, struct effBTL_t *effect, s32 cut, nbFormation_t *form, s32 type);
+extern struct nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 start, ps2AddrS_t uniqueid, nbFormation_t *form, s32 sw, u32 flag);
+extern struct nbKoukaPacket_t *nbAddJyokyoHelpPacket(s32 start, ps2AddrS_t uniqueid, s32 no, s32 var_id, s32 var_ind);
+extern struct nbKoukaPacket_t *nbAddSkillColorOffPacket(s32 start, ps2AddrS_t uniqueid);
+extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 start, ps2AddrS_t uniqueid, nbFormation_t *form);
+extern void nbAddHatudoEffectEndPacket(s32 start, ps2AddrS_t uniqueid);
+extern void nbAddHitStopPacket(s32 start, ps2AddrS_t uniqueid);
 extern void nbDispSkillName(s32 skill);
 
 void SetAction_SKILL(nbActionProcessData_t *a)
@@ -4033,13 +4033,13 @@ s32 CheckAction_INVISIBLE(nbActionProcessData_t *a)
 }
 
 
-extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeUnitFadeInPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                   u32 col, s32 delay, s32 aframe, s32 colframe);
-extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, s32 uniqueid,
+extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, ps2AddrS_t uniqueid,
                                                           nbFormation_t *form);
-extern void nbAddHatudoEffectEndPacket(s32 startframe, s32 uniqueid);
+extern void nbAddHatudoEffectEndPacket(s32 startframe, ps2AddrS_t uniqueid);
 extern void nbAddPanelStockFadeOutPacket(s32 startframe, s32 uniqueid);
-extern void nbAddPanelStockEndPacket(s32 startframe, s32 uniqueid);
+extern void nbAddPanelStockEndPacket(s32 startframe, ps2AddrS_t uniqueid);
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
 

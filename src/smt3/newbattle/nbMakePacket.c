@@ -260,7 +260,7 @@ extern s32 effBTLGetCutEndFrame(effBTL_t *hBTLEffect, u16 CutNum);
 
 #include "sdk_libc.h"
 
-extern nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se);
+extern nbKoukaPacket_t *nbAddSePacket(s32 startframe, ps2AddrS_t uniqueid, s32 se);
 
 extern s32 nbCheckSePacket(s32 start, s32 se, s32 frame);
 
@@ -303,17 +303,17 @@ extern f32 nbMakeUnitMoveGetCyDist(nbFormation_t *i_form, nbFormation_t *t_form)
 
 
 
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
-extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 se);
+extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, ps2AddrS_t uniqueid, s32 se);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern s32 nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                s32 type, s32 hp, s32 mp, u32 badstat);
 
-extern s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type, s32 hp,
+extern s32 nbMakeDamagePacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 type, s32 hp,
                               s32 mp, s32 badstat, s32 hiteff, s32 dead, s32 deadtype, s32 moji,
                               s32 animeoff);
 
@@ -362,7 +362,7 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-nbKoukaPacket_t *nbAddSkillEffectKoukaPacket(s32 startframe, s32 framelength, s32 uniqueid,
+nbKoukaPacket_t *nbAddSkillEffectKoukaPacket(s32 startframe, s32 framelength, ps2AddrS_t uniqueid,
                                              effBTLCutHandle_t *cuteff)
 {
     nbKoukaPacket_t *p;
@@ -393,7 +393,7 @@ nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *
     return p;
 }
 
-nbKoukaPacket_t *nbAddSkillEffectKoukaPacket2(s32 startframe, s32 framelength, s32 uniqueid, effBTL_t *hbtl,
+nbKoukaPacket_t *nbAddSkillEffectKoukaPacket2(s32 startframe, s32 framelength, ps2AddrS_t uniqueid, effBTL_t *hbtl,
                                   s32 cutno, nbFormation_t *form, s32 j)
 {
     nbKoukaPacket_t *p;
@@ -422,7 +422,7 @@ nbKoukaPacket_t *nbAddSkillEffectKoukaPacket1(s32 startframe, s32 framelength, s
     return p;
 }
 
-void nbAddHatudoEffectEndPacket(s32 startframe, s32 uniqueid)
+void nbAddHatudoEffectEndPacket(s32 startframe, ps2AddrS_t uniqueid)
 {
     nbAddKoukaPacket(nbGetKoukaProcessData(), startframe, 0, uniqueid)->type = 58;
 }
@@ -430,12 +430,12 @@ void nbAddHatudoEffectEndPacket(s32 startframe, s32 uniqueid)
 extern void *effBTLSystemCut1Create(nbFormation_t *form, s32 index);
 struct effBTLCut_t;
 extern void effBTLCutSetCutEndFrame(struct effBTLCut_t *cut, s32 frame);
-extern nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se);
+extern nbKoukaPacket_t *nbAddSePacket(s32 startframe, ps2AddrS_t uniqueid, s32 se);
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00544890);
 
 nbKoukaPacket_t *nbAddHatudoEffectKoukaPacket(s32 startframe, s32 framelength,
-    s32 uniqueid, nbFormation_t *form, s32 type, s32 mottype, s32 skillid)
+    ps2AddrS_t uniqueid, nbFormation_t *form, s32 type, s32 mottype, s32 skillid)
 {
     s32 sound;
     void *cut;
@@ -626,7 +626,7 @@ nbKoukaPacket_t *nbAddMotionStopPacket(s32 startframe, s32 uniqueid, nbFormation
     return p;
 }
 
-nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, s32 uniqueid, nbFormation_t *form)
+nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form)
 {
     nbKoukaPacket_t *p;
 
@@ -636,7 +636,7 @@ nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, s32 uniqueid, nbForm
     return p;
 }
 
-nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                         s32 motion)
 {
     nbKoukaPacket_t *p;
@@ -648,7 +648,7 @@ nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormatio
     return p;
 }
 
-nbKoukaPacket_t *nbAddSkillMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+nbKoukaPacket_t *nbAddSkillMotionKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                              s32 motion, s32 endtype, f32 ritu)
 {
     nbKoukaPacket_t *p;
@@ -747,7 +747,7 @@ nbKoukaPacket_t *nbAddSkillColorOnPacket(s32 startframe, s32 uniqueid, s32 skill
     return p;
 }
 
-nbKoukaPacket_t *nbAddSkillColorOffPacket(s32 startframe, s32 uniqueid)
+nbKoukaPacket_t *nbAddSkillColorOffPacket(s32 startframe, ps2AddrS_t uniqueid)
 {
     nbKoukaPacket_t *p;
 
@@ -756,7 +756,7 @@ nbKoukaPacket_t *nbAddSkillColorOffPacket(s32 startframe, s32 uniqueid)
     return p;
 }
 
-nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type)
+nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 type)
 {
     nbKoukaPacket_t *p;
     s32 sysid;
@@ -910,7 +910,7 @@ nbKoukaPacket_t *nbAddNumEffKoukaPacket(s32 startframe, s32 frame, s32 uniqueid,
     return p;
 }
 
-nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame, s32 uniqueid,
+nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame, ps2AddrS_t uniqueid,
                                          nbFormation_t *form, s32 type)
 {
     nbKoukaProcessData_t *k;
@@ -940,7 +940,7 @@ nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame, s32 uniqueid
     return p;
 }
 
-nbKoukaPacket_t *nbAddHpMpKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 n,
+nbKoukaPacket_t *nbAddHpMpKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 n,
                                       s32 type)
 {
     nbKoukaPacket_t *p;
@@ -1017,7 +1017,7 @@ nbKoukaPacket_t *nbAddDeadPcmPacket(s32 startframe, s32 uniqueid, nbFormation_t 
     return p;
 }
 
-nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se)
+nbKoukaPacket_t *nbAddSePacket(s32 startframe, ps2AddrS_t uniqueid, s32 se)
 {
     nbKoukaPacket_t *p;
 
@@ -1030,7 +1030,7 @@ nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se)
     return p;
 }
 
-nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 se)
+nbKoukaPacket_t *nbAddSePacket2(s32 startframe, ps2AddrS_t uniqueid, s32 se)
 {
     nbKoukaPacket_t *p;
 
@@ -1056,7 +1056,7 @@ nbKoukaPacket_t *nbAddSePacketLock(s32 startframe, s32 uniqueid, s32 se)
     return p;
 }
 
-void nbAddHitStopPacket(s32 startframe, s32 uniqueid)
+void nbAddHitStopPacket(s32 startframe, ps2AddrS_t uniqueid)
 {
     nbKoukaPacket_t *p;
 
@@ -1074,7 +1074,7 @@ nbKoukaPacket_t *nbAddAnalyzePacket(s32 startframe, s32 uniqueid, nbFormation_t 
     return p;
 }
 
-nbKoukaPacket_t *nbAddJyokyoHelpPacket(s32 startframe, s32 uniqueid, s32 no, s32 var_id, s32 var_ind)
+nbKoukaPacket_t *nbAddJyokyoHelpPacket(s32 startframe, ps2AddrS_t uniqueid, s32 no, s32 var_id, s32 var_ind)
 {
     nbKoukaPacket_t *p;
 
@@ -1086,7 +1086,7 @@ nbKoukaPacket_t *nbAddJyokyoHelpPacket(s32 startframe, s32 uniqueid, s32 no, s32
     return p;
 }
 
-nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, s32 uniqueid, s32 id)
+nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, ps2AddrS_t uniqueid, s32 id)
 {
     nbKoukaPacket_t *p;
 
@@ -1096,7 +1096,7 @@ nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, s32 uniqueid, s32 id)
     return p;
 }
 
-nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 sw)
+nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 sw)
 {
     nbKoukaPacket_t *p;
 
@@ -1107,7 +1107,7 @@ nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, s32 uniqueid, nbFormation_
     return p;
 }
 
-nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 sw,
+nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 sw,
                                           u32 flag)
 {
     nbKoukaPacket_t *p;
@@ -1149,7 +1149,7 @@ nbKoukaPacket_t *nbAddOngBunshinPacket(s32 startframe, s32 uniqueid, nbFormation
     return p;
 }
 
-nbKoukaPacket_t *nbAddOngBunshin2Packet(s32 startframe, s32 uniqueid, nbFormation_t *sform,
+nbKoukaPacket_t *nbAddOngBunshin2Packet(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *sform,
                                         nbFormation_t *form1, nbFormation_t *form2,
                                         nbFormation_t *form3)
 {
@@ -1241,7 +1241,7 @@ nbKoukaPacket_t *nbAddFadeInKoukaPacket(s32 startframe, s32 uniqueid, s32 length
     return p;
 }
 
-nbKoukaPacket_t *nbAddHojoKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+nbKoukaPacket_t *nbAddHojoKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                       u32 hojotype, s32 hojopoint)
 {
     nbKoukaPacket_t *p;
@@ -1284,7 +1284,7 @@ void nbAddPanelStockFadeOutPacket(s32 startframe, s32 uniqueid)
     p->type = 56;
 }
 
-void nbAddPanelStockEndPacket(s32 startframe, s32 uniqueid)
+void nbAddPanelStockEndPacket(s32 startframe, ps2AddrS_t uniqueid)
 {
     nbKoukaPacket_t *p;
 
@@ -1293,7 +1293,7 @@ void nbAddPanelStockEndPacket(s32 startframe, s32 uniqueid)
 }
 
 #ifdef NON_MATCHING
-extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 col, s32 delay, s32 aframe, s32 colframe);
+extern s32 nbMakeUnitFadeInPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, u32 col, s32 delay, s32 aframe, s32 colframe);
 #endif
 
 s32 nbMakeSummonPacket(s32 startframe, s32 uniqueid, s32 side, s32 stockno, s32 formindex)
@@ -1321,7 +1321,7 @@ s32 nbMakeReturnPacket(s32 startframe, s32 uniqueid, nbParty_t *party)
     return 1;
 }
 
-s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 col, s32 delay,
+s32 nbMakeUnitFadeInPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, u32 col, s32 delay,
                            s32 aframe, s32 colframe)
 {
     nbAddUnitColKoukaPacket(startframe, uniqueid, form, col, 0);
@@ -1340,14 +1340,14 @@ s32 nbMakeUnitFadeOutPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u
 
 #ifdef NON_MATCHING
 extern s32 mdlGetNumOfCut(struct mdlObj_t *model, s32 group);
-extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form);
 extern s32 nbCheckDeadEvent(nbFormation_t *form);
 extern s32 nbGetDeadEventFadeTime(s32 eventno);
 extern s32 nbGetDeadEventFadeOutFrame(s32 eventno);
 extern s32 nbGetDeadEventFadeStopFrame(s32 eventno);
 extern s32 nbGetDeadEventFadeInFrame(s32 eventno);
 
-s32 nbMakeDeadVisualPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+s32 nbMakeDeadVisualPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                            s32 deadtype, s32 deadpcm)
 {
     s32 sound = 0;
@@ -1420,7 +1420,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDeadVisualPacket);
 extern s32 nbMakeFlyBadPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
 extern s32 nbMakeBadDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 bad);
 
-s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type, s32 hp,
+s32 nbMakeDamagePacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 type, s32 hp,
                        s32 mp, s32 badstat, s32 hiteff, s32 dead, s32 deadtype, s32 moji,
                        s32 animeoff)
 {
@@ -1489,9 +1489,9 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDamagePacket);
 #endif
 
 #ifdef NON_MATCHING
-extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form);
 
-s32 nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+s32 nbMakeKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                         s32 type, s32 hp, s32 mp, u32 badstat)
 {
     s32 hidden = form->formindex >= 16;
@@ -1533,7 +1533,7 @@ s32 nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeKaifukuPacket);
 #endif
 
-s32 nbMakeDeadPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 deadchk)
+s32 nbMakeDeadPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 deadchk)
 {
     nbMainProcessData_t *data;
     nbParty_t *party;
@@ -1559,7 +1559,7 @@ s32 nbMakeDeadPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 dead
     return 1;
 }
 
-s32 nbMakePressPacket(s32 startframe, s32 uniqueid, f32 press)
+s32 nbMakePressPacket(s32 startframe, ps2AddrS_t uniqueid, f32 press)
 {
     nbMainProcessData_t *data;
     s32 pcnt;
@@ -1575,7 +1575,7 @@ s32 nbMakePressPacket(s32 startframe, s32 uniqueid, f32 press)
 }
 
 /* Action callers supply a formation in argument four; native does not read it. */
-s32 nbMakeNewPressPacket(s32 startframe, s32 uniqueid, s32 type, nbFormation_t *form)
+s32 nbMakeNewPressPacket(s32 startframe, ps2AddrS_t uniqueid, s32 type, nbFormation_t *form)
 {
     nbMainProcessData_t *data;
     s32 press, turns;
@@ -1666,7 +1666,7 @@ s32 nbMakeBadDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32
     return 1;
 }
 
-s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form)
+s32 nbMakeBadKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form)
 {
     u32 bad;
     s32 formindex;
@@ -1759,7 +1759,7 @@ extern f32 sdfAcos(f32 value);
 extern void dds3RotationArc(void);
 extern void Lerp(f32 ratio);
 
-s32 nbMakeUnitMovePacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+s32 nbMakeUnitMovePacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                          u32 select, s32 movetype, f32 ritu)
 {
     nbMainProcessData_t *data;
@@ -1956,7 +1956,7 @@ s32 nbMakeUnitMovePacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMovePacket);
 #endif
 
-s32 nbMakeNegoWorkPosPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+s32 nbMakeNegoWorkPosPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                             nbFormation_t *target)
 {
     sdfVector4_t direction;
@@ -1994,7 +1994,7 @@ s32 nbMakeNegoWorkPosPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
     return 1;
 }
 
-s32 nbMakeNegoBackPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+s32 nbMakeNegoBackPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                          nbFormation_t *target)
 {
     sdfVector4_t v;
@@ -2020,7 +2020,7 @@ s32 nbMakeNegoBackPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
     return 1;
 }
 
-s32 nbMakeNegoForwardPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+s32 nbMakeNegoForwardPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                             nbFormation_t *target)
 {
     sdfVector4_t v;

@@ -223,7 +223,7 @@ extern void nbSetNextOrder(void);
 
 extern void nbSetNextPhase(s32 phase);
 
-extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form);
 
 extern void nbAddKagututiMoon(nbMainProcessData_t *data);
 

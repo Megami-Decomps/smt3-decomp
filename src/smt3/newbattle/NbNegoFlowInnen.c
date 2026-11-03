@@ -321,7 +321,7 @@ s32 Flow5_2(nbNegoProcessData_t *n)
 }
 
 typedef struct nbKoukaPacket_t nbKoukaPacket_t;
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, ps2AddrS_t uniqueid,
                                                nbFormation_t *form, s32 motion);
 
 s32 Flow5_3(nbNegoProcessData_t *n)

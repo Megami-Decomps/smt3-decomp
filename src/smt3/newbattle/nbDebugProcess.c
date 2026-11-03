@@ -618,7 +618,7 @@ s32 SelectHpMp(nbDebugProcessData_t *d)
 }
 
 extern s32 badcur;
-extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form);
 extern s32 nbMakeBadDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 bad);
 
 s32 SelectBad(nbDebugProcessData_t *d)

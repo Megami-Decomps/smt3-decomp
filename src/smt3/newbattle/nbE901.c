@@ -261,7 +261,7 @@ extern void func_0024D938(void *e);
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
 extern void effBTLSkillEnd(void);
@@ -296,7 +296,7 @@ extern s32 sdfModelGetMarkPos(struct sdfModelRootNode_t *aRoot, s32 aId);
 
 extern s32 evtUnitRotationTarget(evtUnitHandle_t *h, f32 *pos, f32 radio);
 
-extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                                s32 type);
 
 extern void dds3SetQuake(s32 frame, s32 range);

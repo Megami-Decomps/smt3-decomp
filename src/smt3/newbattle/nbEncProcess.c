@@ -425,7 +425,7 @@ void *nbEncProcess2_55(dds3ProcessID_t *id)
 
 
 typedef struct nbKoukaPacket_t nbKoukaPacket_t;
-extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid,
+extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, ps2AddrS_t uniqueid,
                                                nbFormation_t *form, s32 type);
 extern u32 dds3GetProcessRunTime(dds3ProcessID_t *id);
 
