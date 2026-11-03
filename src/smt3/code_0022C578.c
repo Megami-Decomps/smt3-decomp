@@ -493,7 +493,7 @@ extern void mdlSetRotate(void *aHandle);
 
 
 
-extern s32 PlayingNo;
+extern ps2AddrS_t PlayingNo;
 
 extern s32 fclChkMessage(void);
 

@@ -475,13 +475,13 @@ typedef struct {
 
 
 
-extern u32 hnbPnlFile1;
+extern ps2Addr_t hnbPnlFile1;
 
-extern u32 hnbPnlFile2;
+extern ps2Addr_t hnbPnlFile2;
 
-extern u32 hnbPnlFile3;
+extern ps2Addr_t hnbPnlFile3;
 
-extern u32 hnbPnlFile4;
+extern ps2Addr_t hnbPnlFile4;
 
 extern char D_00545230[];
 

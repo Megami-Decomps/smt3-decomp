@@ -64,9 +64,9 @@ typedef struct {
 extern u8 D_00599C40[0xC0] __attribute__((section(".data")));
 extern u8 D_00599D00[0x400] __attribute__((section(".data")));
 
-extern s32 D_00599768 __attribute__((section(".data")));
-extern s32 D_0059976C __attribute__((section(".data")));
-extern s32 D_00599770 __attribute__((section(".data")));
+extern ps2AddrS_t D_00599768 __attribute__((section(".data")));
+extern ps2AddrS_t D_0059976C __attribute__((section(".data")));
+extern ps2AddrS_t D_00599770 __attribute__((section(".data")));
 /* The shared reply begins with result/version words. The client accessor
  * also publishes the command semaphore at the end of its 0x40-byte buffer. */
 typedef struct mcReply {

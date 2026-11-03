@@ -43,7 +43,7 @@ void *sdfChipAllocDirect(s32 aSize);
 
 extern s32 EIntr(void);
 
-extern s32 D_005520A8[2];
+extern ps2AddrS_t D_005520A8[2];
 
 extern s32 DIntr(void);
 

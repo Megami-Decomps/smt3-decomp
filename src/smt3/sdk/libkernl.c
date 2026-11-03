@@ -3069,7 +3069,7 @@ extern s32 D_0052C354;
 extern u8 D_0059E840[0x40];
 extern s32 D_0059E880;
 /* Shared heap request storage is 0x40 bytes in the BSS map. */
-extern u32 D_0059E8C0[16];
+extern ps2Addr_t D_0059E8C0[16];
 extern s32 sceSifCallRpc(void *client, s32 function, s32 mode, void *send,
                          s32 sendBytes, void *receive, s32 receiveBytes,
                          void *endFunction, void *endParameter);

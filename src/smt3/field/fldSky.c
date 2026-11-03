@@ -177,13 +177,13 @@ sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 u32 sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern u32 fldItemBoxObjBuf;
+extern ps2Addr_t fldItemBoxObjBuf;
 
-extern u32 fldMatterTable;
+extern ps2Addr_t fldMatterTable;
 
-extern u32 D_0054EDA8;
+extern ps2Addr_t D_0054EDA8;
 
-extern u32 D_0054EDAC;
+extern ps2Addr_t D_0054EDAC;
 
 void sdfMemUnlock(sdfMemHandle_t *aHandle);
 

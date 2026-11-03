@@ -40,7 +40,7 @@ struct fldWallMeshRecord_t {
 
 extern void *memset(void *, int, ps2Size_t);
 
-extern u32 fldItemBoxObjBuf;
+extern ps2Addr_t fldItemBoxObjBuf;
 
 extern collision_s *fldMatterTable;
 

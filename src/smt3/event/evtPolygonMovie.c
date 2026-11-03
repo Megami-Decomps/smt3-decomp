@@ -161,7 +161,7 @@ typedef void (*evtFrameFunc_t)(evtPolygonMovieWork_t *, pmdFrameTable_t *, pmdFr
 extern evtFrameFunc_t nowcamera[];
 extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 extern void dds3SetScreenFovy(f32 fovy);
-extern s32 evtCameraFrameState;
+extern ps2AddrS_t evtCameraFrameState;
 extern f32 nowfovy;
 extern s32 D_0054F8E0;
 

@@ -57,7 +57,7 @@ extern void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descrip
 
 extern u16 dds3VblanksPerFrame;
 
-extern s32 PlayingNo;
+extern ps2AddrS_t PlayingNo;
 
 extern void sdfIpuRunDecode(s32 frames);
 

@@ -82,7 +82,7 @@ typedef struct sdfCorePacketFaceDivParm_t {
 
 #define SDF_VU_TEXTURED_FLAG 0x10
 
-extern u32 corePktCurrLight;
+extern ps2Addr_t corePktCurrLight;
 
 extern u128 *corePktFaceList[][3];
 
@@ -184,7 +184,7 @@ static inline sdfCorePacketPointBuff_tag *AllocNode(sdfCorePacketCb_t *work) {
     return node;
 }
 
-extern s32 corePktPointBuff;
+extern ps2AddrS_t corePktPointBuff;
 
 extern void corePktRelightBackFaces(u32 cb, s32 count);
 

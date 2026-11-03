@@ -70,11 +70,11 @@ sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *aTex);
 
 extern u32 D_0054EC44;
 
-extern u32 fldDrawEnv;
+extern ps2Addr_t fldDrawEnv;
 
 extern sdfTexHandle_t *D_0054EC60;
 
-extern u32 D_00551C9C;
+extern ps2Addr_t D_00551C9C;
 
 extern u8 sdfTexEmbedded_2FC4A0[];
 
@@ -90,7 +90,7 @@ void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 s32 sdfGrAllocPacketBuff(s32 aSize);
 
-extern s32 sdf2DGetPrimPtr(s32);
+extern ps2AddrS_t sdf2DGetPrimPtr(ps2AddrS_t);
 
 void sdfPrimLinkGt4(
     sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0,

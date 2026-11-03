@@ -23,7 +23,7 @@ typedef struct devState_t devState_t;
 
 extern u32 D_0054EC44;
 
-extern u32 fldDrawEnv;
+extern ps2Addr_t fldDrawEnv;
 
 extern sdfTexHandle_t *D_0054EC60;
 
@@ -99,13 +99,13 @@ extern f32 fldSkyFilterTime;
 
 extern s32 fldGb __attribute__((section(".data")));
 
-extern u32 fldItemBoxObjBuf;
+extern ps2Addr_t fldItemBoxObjBuf;
 
-extern u32 fldMatterTable;
+extern ps2Addr_t fldMatterTable;
 
-extern u32 D_0054EDA8;
+extern ps2Addr_t D_0054EDA8;
 
-extern u32 D_0054EDAC;
+extern ps2Addr_t D_0054EDAC;
 
 extern s32 fldValueRecordCount;
 

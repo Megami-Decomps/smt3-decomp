@@ -138,7 +138,7 @@ fileRequest_t *fileLoad(const char *filename);
 
 extern sdfMemHandle_t *D_00551D44;
 
-extern u32 baseIconFileHandle;
+extern ps2Addr_t baseIconFileHandle;
 
 s32 sdfMcGetFreeBytes(s32 request);
 
@@ -210,7 +210,7 @@ extern char D_005328F0[];
 
 extern s32 slSaveWriteEnd_baseIcon(void);
 
-extern u32 D_00551D48;
+extern ps2Addr_t D_00551D48;
 
 extern u32 D_00551D4C;
 
@@ -442,7 +442,7 @@ extern s32 evtBitCheck(s32 no);
 
 extern s32 gSlSaveMode;
 
-extern u32 D_00551D30;
+extern ps2Addr_t D_00551D30;
 
 extern u32 D_00551D34;
 

@@ -8,6 +8,8 @@ in every unit that calls it, so the edit has to reach all of them at once.
 
   param <function> <index> <type>    parameter <index>, counting from 0
   ret <function> <type>              the return type
+  global <name> <type>               a file-scope object, declaration and
+                                     definition alike
 
 A type of "auto" keeps each declaration's own signedness: u32 becomes
 ps2Addr_t and s32 becomes ps2AddrS_t. The two differ in later arithmetic and
@@ -111,6 +113,22 @@ def rewrite_ret(text, func, newtype):
     return pattern.sub(sub, text), hits
 
 
+GLOBAL = re.compile(
+    r"(?m)^([ \t]*(?:extern[ \t]+|static[ \t]+|volatile[ \t]+|const[ \t]+)*)"
+    r"(u32|s32)([ \t]+)(%s)\b(?![ \t]*\()")
+
+
+def rewrite_global(text, name, newtype):
+    pattern = re.compile(GLOBAL.pattern % re.escape(name), re.M)
+    hits = []
+
+    def sub(m):
+        hits.append(m.group(2))
+        return m.group(1) + pick(newtype, m.group(2)) + m.group(3) + m.group(4)
+
+    return pattern.sub(sub, text), hits
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="mode", required=True)
@@ -121,17 +139,23 @@ def main():
     r = sub.add_parser("ret")
     r.add_argument("func")
     r.add_argument("type")
+    g = sub.add_parser("global")
+    g.add_argument("name")
+    g.add_argument("type")
     args = ap.parse_args()
 
     total = 0
     for path in units():
         text = path.read_text()
-        if args.func not in text:
+        target = args.name if args.mode == "global" else args.func
+        if target not in text:
             continue
         if args.mode == "param":
             out, hits = rewrite_param(text, args.func, args.index, args.type)
-        else:
+        elif args.mode == "ret":
             out, hits = rewrite_ret(text, args.func, args.type)
+        else:
+            out, hits = rewrite_global(text, args.name, args.type)
         if not hits:
             continue
         path.write_text(out)

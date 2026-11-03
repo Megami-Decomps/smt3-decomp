@@ -119,9 +119,9 @@ void sdfMatInitSystem(void);
 /* Initialize the buffered object-list release queue with its object destructor. */
 void sdfModelInitSystem(void);
 
-extern u32 sdf3DLightDefault;
+extern ps2Addr_t sdf3DLightDefault;
 
-extern u32 sdf3DFogDefault;
+extern ps2Addr_t sdf3DFogDefault;
 
 extern f32 sdf3DEyeOffset[4];
 

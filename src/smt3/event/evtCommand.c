@@ -44,7 +44,7 @@ struct dds3Basic_t *dds3GetActiveScene(void);
 
 extern void *memset(void *a, s32 b, ps2Size_t c);
 
-extern u32 D_0054F754;
+extern ps2Addr_t D_0054F754;
 
 extern void evtRunUnitKutiMotion(ps2Addr_t h);
 

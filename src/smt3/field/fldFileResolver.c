@@ -296,7 +296,7 @@ extern sdfMemHandle_t *D_0055DA98[];
 
 extern void *D_0055DAA8[];
 
-extern u32 D_0054EBCC;
+extern ps2Addr_t D_0054EBCC;
 
 extern fileRequest_t *fldFileBuf1;
 
@@ -355,7 +355,8 @@ extern void fldAutoMapSetField(s32 fld, s32 area, s32 block);
 
 extern s32 sdfTexSetTB(void *aData);
 
-extern u32 D_0054EB98, D_0054EBD0, D_0054EBD4, fldFileBuf2;
+extern u32 D_0054EB98;
+extern ps2Addr_t D_0054EBD0, D_0054EBD4, fldFileBuf2;
 
 extern u8 *FildMaskObj, *mat_black, *mat_white, *mat_line;
 

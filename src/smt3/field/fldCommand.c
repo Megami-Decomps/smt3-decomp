@@ -95,7 +95,7 @@ extern u32 gSlNowCardCheck;
 
 extern u32 gslDrawFlagBg;
 
-extern u32 baseIconFileHandle;
+extern ps2Addr_t baseIconFileHandle;
 
 extern u32 gslErrorKeyFlag;
 
