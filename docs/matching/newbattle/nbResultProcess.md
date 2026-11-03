@@ -50,3 +50,18 @@ Remaining differences include an extra divide-by-zero check generated for the re
 All 13 already matched functions in the complete owner remain exact. Strict compilation of all retained nonmatching bodies succeeds. Plain and dump-enabled pinned target compiler output agrees across allocated sections, symbols, ordered relocation contracts and normalized assembly. These are target compiler dumps, not debugger-hook evidence; no internal causal decision or original spelling is claimed.
 
 The native initialization loops independently establish four 0x34-byte score rows at [0x574E80, 0x574F50) and 64 0x10-byte caption rows at [0x574F50, 0x575350). The existing score symbol's `size:0x30` annotation does not describe that full array. This cleanup changes neither symbol metadata nor object ownership and does not claim that annotation is fixed. Valid stock and unit indices remain inherited caller preconditions, not newly proven bounds.
+
+### Loader declaration visibility
+
+A later declaration-only follow-up exposes the existing
+`extern void nbResultLoadTextures(void);` contract before the production caller.
+The retained provider already has that type; native takes no arguments and
+the caller ignores its result. No body, fallback, ownership or compiler flag
+changes. This is declaration visibility, not a demonstrated runtime ABI bug.
+
+Before this follow-up, production and SKIP_ASM strict implicit-declaration
+checks failed for the missing declaration while retained-C mode passed.
+The candidate passes all three strict modes. Independent paired full-object
+and normalized assembly comparisons are unchanged in each mode. Historical
+failure receipts remain valid for their earlier source. The loader remains
+nonmatching with its assembly fallback; no matching credit is claimed.

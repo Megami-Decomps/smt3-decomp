@@ -47,6 +47,7 @@ extern s32 nbResultTobiwarpLabel;
 extern s32 nbResultState;
 extern s32 D_005510E8;
 extern s32 GetAddExp(s32 index, s32 cap);
+extern void nbResultLoadTextures(void);
 
 #ifdef NON_MATCHING
 void nbResultLoadTextures(void)
