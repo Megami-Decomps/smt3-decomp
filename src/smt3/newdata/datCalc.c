@@ -889,7 +889,8 @@ s32 datCheckPlayerDead(void)
 s32 datGetPlayerParam(s32 id)
 {
     u8 hearts = DDS3_GBWK->heartsequip;
-    s32 param = ((s8 *)((u8 *)id + (u32)DDS3_GBWK))[0xA6A];
+    /* Address the actual work object with the full parameter byte offset. */
+    s32 param = ((s8 *)DDS3_GBWK)[(s32)((u32)id + 0xA6Au)];
 
     if (hearts == 0) {
         return param;

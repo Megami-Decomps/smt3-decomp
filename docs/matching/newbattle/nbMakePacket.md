@@ -161,32 +161,45 @@ Confirmed on the way: `nbInnenRec_t`'s `phase[13]` entries are
 `{u16 item; u16 cnt;}`, not `{u16 item; u16 pad;}`: retail passes the second
 halfword as `datAddItem`'s count argument.
 
-## Flow6_37 (newbattle/nbMakePacket, 0x10C)
+## Flow6_37 (newbattle/NbNegoFlowTwo, 0x10C)
 
-58 of 67 words match, at the exact 268-byte size.
+67 of 67 words match at the native 268-byte size. The former `nbMakePacket`
+owner label is historical; the configured owner is `NbNegoFlowTwo`.
 
-Settled: two `nbAddNegoIdKouho` calls, a four-way `||` on `n->ework->id` over
-`0x5C`, `0x3D`, `0x61` and `0x5B`, then
-`evtBitCheck(8) == 0 && n->negoreqtype == 0 && n->cnt6_36 >= 3` with its own
-`return 0` (retail reuses `evtBitCheck`'s zero result as that path's return
-value, so the function has only two textual `daddu $2, $0, $0`), then
-`n->nextnegoid = n->nextkouho[0];` followed by the two level reads and the
-`n->cnt6_36 == 3` block. The level test has to be written
-`if (evtBitCheck(8) != 0) { if (!(plevel - 0x11 < elevel)) { ... return 0; } }`
-with `n->nextnegoid = n->nextkouho[0];` after the inner nest: the `&&`
-spelling with an `else` is 22 words out, the nested form with its own
-`return 0` is 9.
+The ordinary draft already recovered the two candidate-registration calls,
+four-way enemy-ID test, early event/type/count guard, level snapshots and
+nested event/level test. It matched 58/67 words. The six previously tested
+statement orders remain negative controls (9, 10, 10, 10, 12, 12 differences);
+combining the nested event/level test into `&&` with `else` regressed to 22.
 
-The nine remaining words are a rotation of three block-local temps: retail
-gives `$4` to the `nextkouho[0]` value, `$3` to the compare constant `3` and
-`$2` to the `pwork` pointer, and ee-gcc gives them `$2`, `$4`, `$3`. All six
-orders of the three statements between the guard and the `cnt6_36 == 3` test
-were measured (9, 10, 10, 10, 12, 12), so the order the draft uses is the
-best of them and the rotation is below the source.
+The remaining nine words are local register allocation: the first choice
+load/store uses native `$4`, while the compare constant 3 uses `$3` and the
+player-work pointer uses `$2`. An ordinary scoped `u32` choice retains the
+58/67 baseline. Binding only that first actual choice load/store to `$4`
+fixes the six early words (64/67); independently binding only the final
+post-event choice load/store fixes the three late words (61/67). Both
+separate scopes are required for 67/67. No pointer or compare constant is
+bound, and no empty operand template is needed.
 
-Confirmed on the way: `nbNegoProcessData_t + 0x8C` is `cnt6_36`, not
-`cnt6_58`; the three counters at `0x8C`, `0x90` and `0x94` are `cnt6_36`,
-`cnt6_37` and `cnt6_58`.
+Both choice fields are `u32`; each initialized local is consumed by the
+actual `nextnegoid` store. Qualified compiler snapshots show the initial
+choice dying at that store, before the next `evtBitCheck` argument setup,
+and the final choice freshly loaded after the callback and dying at its
+store. No fixed-register value survives a call. Level reads remain zero-
+extended `u16` snapshots, and the signed `plevel - 17` comparison is safe
+for their entire range. Callback reloads, native access widths, branch paths
+and early returns are preserved. These bindings are target-specific compiler
+constraints, not evidence of the original source spelling.
+
+Whole-owner verification reports 72 matching C functions, no differences.
+Plain versus diagnostic builds agree on all four allocated sections,
+451 non-file symbols, 358 ordered relocations and normalized assembly;
+all non-text allocated sections, symbols and relocations also remain
+identical to baseline. `-Wuninitialized` is silent and preserves output.
+Strict implicit-declaration checking still fails on the unchanged unrelated
+`Flow6_22` call to `datCheckMaka`, in baseline and candidate alike; no global
+strict-warning-clean claim is made. Full retail checksum, byte comparison,
+repository regressions and fresh guarded-owner checks pass.
 
 ## Flow6_43 (newbattle/nbMakePacket, 0x10C)
 

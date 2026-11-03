@@ -1278,8 +1278,6 @@ s32 Flow6_36(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 9 of 67 words differ (first at +0x9C). */
-#ifdef NON_MATCHING
 s32 Flow6_37(nbNegoProcessData_t *n)
 {
     s32 plevel;
@@ -1294,7 +1292,13 @@ s32 Flow6_37(nbNegoProcessData_t *n)
             return 0;
         }
     }
-    n->nextnegoid = n->nextkouho[0];
+    /* Keep each real choice load/store in its native $4 lifetime. Ordinary
+     * locals rotate these temporaries; neither bound value crosses a call.
+     * This is a target-specific compiler constraint, not original spelling. */
+    {
+        FAKEMATCH_ASM_REG(u32, choice, "$4") = n->nextkouho[0];
+        n->nextnegoid = choice;
+    }
     plevel = n->pwork->level;
     elevel = n->ework->level;
     if (n->cnt6_36 == 3) {
@@ -1304,13 +1308,14 @@ s32 Flow6_37(nbNegoProcessData_t *n)
                 return 0;
             }
         }
-        n->nextnegoid = n->nextkouho[0];
+        {
+            /* Reload after evtBitCheck; it may have changed the choice. */
+            FAKEMATCH_ASM_REG(u32, choice, "$4") = n->nextkouho[0];
+            n->nextnegoid = choice;
+        }
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_37);
-#endif
 
 s32 Flow6_38(nbNegoProcessData_t *n)
 {

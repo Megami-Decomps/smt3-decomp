@@ -2,13 +2,16 @@
 
 ## datGetPlayerParam (newdata/datCalc, 0x50)
 
-7 of 20 words differ, exact size. The structure is right and the remaining
-difference is which register holds the hearts bonus. Retail puts it in `$2`:
+13 of 20 words match at the native 80-byte size; the target remains guarded.
+The earlier ordinary trials highlighted the hearts-bonus register; the
+qualified controls below also expose a call-argument dependency. Retail puts
+the bonus in `$2`:
 the `beqz` that skips `cmbGetHeartsParam` carries `daddu $2, $0, $0` in its
 delay slot and falls into a single `subu $2, $16, $2`, so the zero and the
 call result share the return register and the `$gp`-relative `DDS3_GBWK` load
-has to avoid `$2` and lands in `$3`. Every shape tried either puts the bonus
-in `$6` with a copy after the call (12 of 20) or duplicates the `subu` and the
+has to avoid `$2` and lands in `$3`. The historical shared-tail forms put the
+bonus
+in `$6` with a copy after the call (12 of 20) or duplicate the `subu` and the
 epilogue into both arms (88 bytes against retail's 80).
 
 Ruled out: `bonus = 0` before the `if`; `if`/`else` in both polarities; a
@@ -17,6 +20,59 @@ arm; duplicating `return param - bonus` in both arms to invite cross-jumping;
 `hearts` as `u8`, as `s8` and as an `s32` with the cast at the read; and all
 36 combinations of declaration order and initialisation order of the three
 locals.
+
+
+### Qualified return-value and argument controls
+
+The original address spelling manufactures a pointer from the integer index.
+The guarded cleanup instead indexes the actual global work object's byte
+representation using `(s32)((u32)id + 0xA6Au)` as its byte offset. The unsigned
+sum wraps modulo 2^32 without signed overflow. Conversion to `s32` is
+implementation-defined in ISO C; the pinned compiler retains the low-word
+interpretation. This avoids a new signed-overflow assumption for unchecked
+script integers, not invalid-address behavior. It preserves the 13/20 score
+and native signed byte access, though the address addition operands commute. The genuine player
+parameter field is six bytes at unit offset `0x16`, with the player unit at
+work offset `0xA54`. Known native callers use indices zero, four and five;
+the script wrapper forwards an unchecked integer, so no new bounds or safety
+promise is inferred. No adjacent helper is changed.
+
+An initialized bonus held in the native return register, assigned zero in the
+no-call arm or the actual call result in the other, emits 76 bytes: four fewer
+than retail. It does not keep a caller-clobbered zero live across the call.
+A direct typed parameter-field control also emits 76 bytes. Both preserve the
+79 existing C functions and owned data. Ordinary bonus and shared-subtraction
+source emits 80 bytes with nine matching words; genuine signed-argument-to-
+result scalar reuse emits 88 bytes and is not retained.
+
+The qualified if-conversion dump moves the zero assignment before the branch.
+The signed call-argument conversion is still in the call arm at that stage;
+later scheduling and delay filling place its shifts into the branch and call
+slots. Native instead converts before the branch, uses zero in the branch
+slot and leaves the call slot empty. Thus a return-register assignment alone
+does not recover the native dependency.
+
+A final control captures one unsigned hearts byte, derives its real signed
+call argument, and places a localized volatile operand on that argument before
+the guard. It emits 88 bytes, eight too many. Initial RTL through life has one
+field observation and a register conversion, but combine replaces those
+consumers with separate signed and unsigned loads of the same field. The
+provider argument is also narrowed again after the opaque operand. The zero
+and empty-call slots are recovered, but the extra accesses and size are not
+native. This is a compiler-created duplicate load, not two source observations;
+no operand from this control is retained and the family is retired.
+
+Plain and diagnostic builds qualify all five allocated sections, non-file
+symbols, 359 ordered relocations and normalized assembly for each control.
+The minimal guarded address cleanup also has identical output with
+uninitialized-value diagnostics; the owner's existing `memset` built-in-type
+warning remains. Strict implicit-declaration diagnostics reject both the
+baseline and cleanup for existing undeclared `datCheckSyojiSkill` and
+`datAddHearts` calls. Those unrelated declarations are not changed here.
+The final explicit low-word offset has identical whole-owner output to the
+earlier signed-offset cleanup. Diagnostic flags are not production settings.
+These observations locate the unresolved argument/lifetime boundary, not an
+instrumented allocator decision or proof of original source spelling.
 
 ## datGetSkillKouka (newdata/datCalc, 0x3F8)
 
