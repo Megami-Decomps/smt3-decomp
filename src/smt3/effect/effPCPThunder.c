@@ -999,7 +999,7 @@ effPCP_ThunderColumnPolyLow_t *eff_177850(effPCP_ThunderColumnPolyLowParam_t *pa
     delaySpread = work->param.startDelaySpread;
     for (sparkIndex = 0; sparkIndex < work->param.sparkCount; sparkIndex++) {
         work->pPart[sparkIndex].hPoly = dds3TrackPolyCreate(EFF_THUNDER_SINGLE_CELL, work->param.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_PAIR);
-        dds3TrackPolyVCSet(work->pPart[sparkIndex].hPoly, 2, (u32)work->param.dispatchArg, (u32)work->param.dispatchArg);
+        dds3TrackPolyVCSet(work->pPart[sparkIndex].hPoly, 2, EE_ADDR(work->param.dispatchArg), EE_ADDR(work->param.dispatchArg));
         dds3TrackPolySetMode(work->pPart[sparkIndex].hPoly, work->param.systemParam);
         func_00177AC8(work, sparkIndex);
         work->pPart[sparkIndex].frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);

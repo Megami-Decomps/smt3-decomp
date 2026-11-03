@@ -6639,7 +6639,7 @@ effPCPRadiateThunder_tag *effPCPRadiateThunderCopy(effPCPRadiateThunder_tag *wor
             effPartHandle_t **destinationHandles = (effPartHandle_t **)((u8 *)groupSet->phAttach + groupByteOffset);
 
             if (*activeGroupFlags != 0) {
-                effPartHandle_t *sourceHandle = *(effPartHandle_t **)(groupByteOffset + (u32)work->phAttach);
+                effPartHandle_t *sourceHandle = *(effPartHandle_t **)(groupByteOffset + EE_ADDR(work->phAttach));
                 for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
                     *destinationHandles++ = dds3EffectPartCopy(sourceHandle);
                 }

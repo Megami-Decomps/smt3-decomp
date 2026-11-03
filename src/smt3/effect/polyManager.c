@@ -554,7 +554,7 @@ void dds3TrackPolyDelete(dds3TrackPoly_t *hTrackPoly) {
 
 void dds3TrackPolyListInit(dds3TrackPoly_t *hTrackPoly, s32 number)
 {
-    dds3TrackPolyList_t *list = (dds3TrackPolyList_t *)(number * 20 + (u32)hTrackPoly->trackList);
+    dds3TrackPolyList_t *list = (dds3TrackPolyList_t *)(number * 20 + EE_ADDR(hTrackPoly->trackList));
 
     list->color = 0x80808080;
     list->rec = 0;
@@ -665,7 +665,7 @@ void dds3TrackPolyVCRefresh_ParType1(dds3TrackPoly_t *hTrackPoly, s32 index) {
     u32 startCarrier[4];
     u32 cellCarrier[4];
     u32 packed[4];
-    dds3TrackPolyList_t *cell = (dds3TrackPolyList_t *)((u8 *)(index * sizeof(dds3TrackPolyList_t)) + (u32)hTrackPoly->trackList);
+    dds3TrackPolyList_t *cell = (dds3TrackPolyList_t *)((u8 *)(index * sizeof(dds3TrackPolyList_t)) + EE_ADDR(hTrackPoly->trackList));
     u32 *vc = cell->pVC;
     u32 perCell = cell->count >> 1;
     u32 color = vc[0];
@@ -700,7 +700,7 @@ void dds3TrackPolyVCRefresh_ParType1(dds3TrackPoly_t *hTrackPoly, s32 index) {
 void dds3TrackPolyVCRefresh_ParType2(dds3TrackPoly_t *hTrackPoly, s32 index);
 
 void dds3TrackPolyVCRefresh_ParType2(dds3TrackPoly_t *hTrackPoly, s32 index) {
-    dds3TrackPolyList_t *cell = (dds3TrackPolyList_t *)((u8 *)(index * sizeof(dds3TrackPolyList_t)) + (u32)hTrackPoly->trackList);
+    dds3TrackPolyList_t *cell = (dds3TrackPolyList_t *)((u8 *)(index * sizeof(dds3TrackPolyList_t)) + EE_ADDR(hTrackPoly->trackList));
     u32 count = cell->count / 3;
     trackTriangleColors_t *vertex;
     u32 middleWord;
@@ -2506,7 +2506,7 @@ void dds3PolygonTriangleSet(dds3Polygon_t *hPolygon, const f32 *center) {
     u16 flags;
 
     SDF_VU0_COPYVECTOR(point, center);
-    positions = (f32 (*)[4])(((u32)count << 4) + (u32)hPolygon->pVertex);
+    positions = (f32 (*)[4])(((u32)count << 4) + EE_ADDR(hPolygon->pVertex));
     SDF_VU0_COPYVECTOR(positions[0], point);
     point[1] += 5.0f;
     SDF_VU0_COPYVECTOR(positions[1], point);
@@ -2514,13 +2514,13 @@ void dds3PolygonTriangleSet(dds3Polygon_t *hPolygon, const f32 *center) {
     SDF_VU0_COPYVECTOR(positions[2], point);
     flags = hPolygon->flags;
     if (flags & 2) {
-        f32 (*normals)[4] = (f32 (*)[4])(((u32)count << 4) + (u32)hPolygon->pNormal);
+        f32 (*normals)[4] = (f32 (*)[4])(((u32)count << 4) + EE_ADDR(hPolygon->pNormal));
         SDF_VU0_COPYVECTOR(normals[0], dds3PolygonTriangleParam);
         SDF_VU0_COPYVECTOR(normals[1], dds3PolygonTriangleParam);
         SDF_VU0_COPYVECTOR(normals[2], dds3PolygonTriangleParam);
     }
     if (flags & 4) {
-        u32 *colors = (u32 *)(((u32)count << 2) + (u32)hPolygon->pVertexColor);
+        u32 *colors = (u32 *)(((u32)count << 2) + EE_ADDR(hPolygon->pVertexColor));
         colors[0] = 0x80000080;
         colors[1] = 0x80000080;
         colors[2] = 0x80000080;

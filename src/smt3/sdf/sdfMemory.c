@@ -46,8 +46,8 @@ void sdfMemInit(u32 aSize)
     cb->allocPtr = malloc(aSize);
     cb->allocSize = aSize;
     freeHandle = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
-    alignedTop = ((u32)cb->allocPtr + SDF_MEM_ALIGN_MASK) & ~SDF_MEM_ALIGN_MASK;
-    alignedEnd = ((u32)cb->allocPtr + aSize) & ~SDF_MEM_ALIGN_MASK;
+    alignedTop = (EE_ADDR(cb->allocPtr) + SDF_MEM_ALIGN_MASK) & ~SDF_MEM_ALIGN_MASK;
+    alignedEnd = (EE_ADDR(cb->allocPtr) + aSize) & ~SDF_MEM_ALIGN_MASK;
     cb->headGuard.prev = NULL;
     cb->headGuard.next = freeHandle;
     cb->headGuard.stat = SDF_MEM_STAT_END;

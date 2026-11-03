@@ -879,7 +879,7 @@ void dds3Billboard_P2ADraw(billHandle_t *hData) {
         savedRotation = hData->rot;
         records = (billPluralEntry_t *)(data->pHeader + entry->spranm);
         for (i = 0; i < hData->entryCount; i++) {
-            dds3BillAnim_tag *out = (dds3BillAnim_tag *)((u8 *)(i * sizeof(dds3BillAnim_tag)) + (u32)hData->resolvedEntries);
+            dds3BillAnim_tag *out = (dds3BillAnim_tag *)((u8 *)(i * sizeof(dds3BillAnim_tag)) + EE_ADDR(hData->resolvedEntries));
             s32 frameIndex = out->key;
 
             if (frameIndex >= 0) {

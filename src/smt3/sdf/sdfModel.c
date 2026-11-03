@@ -581,7 +581,7 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
                 (sdfModelShapeEntry_t *)((u8 *)(out[m].targetId * 8) + EE_ADDR(list));
 
             *(u64 *)&tag->dat0 = 0;
-            *(u64 *)tag = SDF_DMA_TAG((u32)entry[1].dataPtr,
+            *(u64 *)tag = SDF_DMA_TAG(EE_ADDR(entry[1].dataPtr),
                                       entry[1].qwc | 0x30000000);
             tag++;
         }
@@ -1096,7 +1096,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                     packed &= 0xFFFF;
                     body = sdfModelSetMatRefPacket(root, matIndex, buf, frame);
                     *(u64 *)&body->dat0 = 0;
-                    *(u64 *)body = SDF_DMA_TAG((u32)pkt->dataBody,
+                    *(u64 *)body = SDF_DMA_TAG(EE_ADDR(pkt->dataBody),
                                                packed | 0x30000000);
                     body++;
                     *(u64 *)body = 0x20000000;

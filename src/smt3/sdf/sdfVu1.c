@@ -1766,8 +1766,8 @@ u64 *corePktClosePacket(sdfCorePacketCb_t *cb) {
         return NULL;
     }
 
-    cursor = (u32)cb->packetPtr;
-    start = (u32)cb->packetStartPtr;
+    cursor = EE_ADDR(cb->packetPtr);
+    start = EE_ADDR(cb->packetStartPtr);
     if (cursor == start) {
         sdfGrClosePacketBuff(cb->packetOpenPtr);
         return NULL;

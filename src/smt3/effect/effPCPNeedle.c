@@ -175,7 +175,7 @@ effPCPNeedleSpiral_tag *effPCPNeedleSpiralCreate(effPCPNeedleSpiralParam_t *pPar
     dds3NeedleModelVNCListCreate(resource, pParam->n_split, pParam->centerColor,
                             pParam->outerColor, pParam->radiusScale, pParam->viewOffset);
     work->hTrackPoly = dds3TrackPolyCreate(work->number, work->param.t_length, 0, PAR_CELL_TOPOLOGY_PAIR);
-    dds3TrackPolyVCSet((u32)work->hTrackPoly, 1, work->param.t_abgr, work->param.t_abgr);
+    dds3TrackPolyVCSet(EE_ADDR(work->hTrackPoly), 1, work->param.t_abgr, work->param.t_abgr);
     dds3TrackPolySetMode(work->hTrackPoly, (u16)work->param.mode);
     count = work->number;
     delayRange = pParam->timing;
@@ -360,11 +360,11 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
                     SDF_VU0_STOREVECTOR_B_NOMEM(vertices[1]);
                     dds3TrackPolySet(hData->hTrackPoly, i, (const u128 *)vertices);
                     dds3TrackPolyVCRefresh_ParType1(hData->hTrackPoly, i);
-                    dds3TrackPolyColorSet((u32)hData->hTrackPoly, i, (color & 0xFF000000) | 0x808080);
+                    dds3TrackPolyColorSet(EE_ADDR(hData->hTrackPoly), i, (color & 0xFF000000) | 0x808080);
                 }
             } else {
                 dds3NeedleModelSetColor(hData->hNModel, i, 0);
-                dds3TrackPolyColorSet((u32)hData->hTrackPoly, i, 0);
+                dds3TrackPolyColorSet(EE_ADDR(hData->hTrackPoly), i, 0);
                 dds3TrackPolyListInit(hData->hTrackPoly, i);
             }
             slot->frame++;
