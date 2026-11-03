@@ -70,6 +70,15 @@ void *evtGetResorceData(u32 eventno, s32 rid);
 
 #include "sdk_libc.h"
 
+/* Declared here because no header carries these. */
+extern s32 datGetKotowariLank(s32 lank);
+extern s32 p2sdBgmVolDown(void);
+extern s32 p2sdBgmVolUp(void);
+extern void Eve_DistortionBlurSetDefTex(void);
+extern void dds3AdminiExitSequence(void);
+extern void evtSetBokasi(s32 sw);
+extern void nbBgmStop(void);
+
 extern void dds3EffectObjectBasicStatOn(void *basic, s32 s);
 
 extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(struct effPCPAgiraoFirePartList_t *effdata, void *pos, void *rot);

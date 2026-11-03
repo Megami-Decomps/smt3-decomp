@@ -14,6 +14,12 @@
 #include "newdata.h"
 #include "event.h"
 #include "effect.h"
+#include "font.h"
+
+/* Declared here because no header carries these. */
+extern frFontHandle_t *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, const char *pStr, frFontHandle_t *pFRQ);
+extern void sdfMatFreeDelayed(sdfMat_t *aMat);
+extern void sdfMatSetTex(sdfMat_t *aMat, sdfTexHandle_t *aTex);
 
 typedef struct fldSpriteCorner_t fldSpriteCorner_t;
 

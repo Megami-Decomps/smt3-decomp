@@ -1,6 +1,10 @@
 #include "common.h"
 #include "sdf_types.h"
 
+/* Declared here because no header carries these. */
+extern s32 SignalSema(s32 aSemaId);
+extern s32 WaitSema(s32 sema);
+
 #define SDF_PENDING_LAST_SLOT 1
 
 struct sdfDelayedResrcCB_t;

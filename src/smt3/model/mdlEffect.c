@@ -6,6 +6,9 @@
 #include "ps2asm.h"
 #include "motion.h"
 
+/* Declared here because no header carries these. */
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+
 
 typedef struct mdlBillboard_t mdlBillboard_t;
 

@@ -4,6 +4,9 @@
 #include "sdf_resource.h"
 #include "eeregs.h"
 
+/* Declared here because no header carries these. */
+extern sdfDmaTag_t *sdfMatMakePacket(sdfMat_t *aMat, sdfDmaTag_t *aBuffer, s32 aId);
+
 struct sdfDrawTag_t;
 
 union sdfMatUvwParm_t;

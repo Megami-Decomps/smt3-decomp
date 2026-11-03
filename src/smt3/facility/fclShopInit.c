@@ -7,6 +7,12 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
+#include "interface.h"
+
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, u32 c);
+extern void evtDisableMoonDraw(void);
+extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, lstWork_t *work);
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 

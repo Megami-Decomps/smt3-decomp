@@ -7,6 +7,10 @@
 #include "field.h"
 #include "fpu.h"
 
+/* Declared here because no header carries these. */
+extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memset(void *a, s32 b, u32 c);
+
 extern s32 evtBitCheck(s32 no);
 
 extern void dds3GlobalWorkUserInit2(s32 mode);

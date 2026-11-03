@@ -3,6 +3,9 @@
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
 
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, u32 c);
+
 struct sdfPadCb_t;
 
 struct sdfTexPacket_t;

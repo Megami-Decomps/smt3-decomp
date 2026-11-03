@@ -33,6 +33,11 @@ extern char D_0053D390[];
 
 #include "sdk_libc.h"
 
+/* Declared here because no header carries these. */
+extern s32 fclSetWorkValue(s8 index, s32 value);
+extern s32 p2sdPlayBGM(s32 MidiNo);
+extern void evtDisableMoonCalc(void);
+
 extern void sdfTexFree(s32 aHandle);
 
 extern char D_0054FBD8[];

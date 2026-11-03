@@ -2,6 +2,9 @@
 #include "sdf_types.h"
 #include "sdf_resource.h"
 
+/* Declared here because no header carries these. */
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+
 struct sdfMemHandle_t;
 
 #define SDF_QWORD_ALIGNMENT_MASK 0xF

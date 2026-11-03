@@ -76,6 +76,9 @@ extern char *sdfModelGetNodeName(sdfModelRootNode_t *aRoot, s32 aIndex);
 extern s32 strcmp(const char *a, const char *b);
 #include "sdk_libc.h"
 
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, u32 c);
+
 typedef struct
 {
     dds3ObjectBaseControlWorkData_t *control;

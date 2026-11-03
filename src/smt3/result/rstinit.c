@@ -28,6 +28,10 @@ extern rstData_t *GBWK_1;
 
 #include "sdk_libc.h"
 
+/* Declared here because no header carries these. */
+extern s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp);
+extern void *memset(void *a, s32 b, u32 c);
+
 extern char D_0053DA28[];
 
 extern s8 gProcessStat_4;

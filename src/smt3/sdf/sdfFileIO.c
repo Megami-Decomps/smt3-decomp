@@ -117,6 +117,9 @@ enum sdf_stream_playback {
 
 #include "sdk_libkernl.h"
 
+/* Declared here because no header carries these. */
+extern s32 sdfCdImageLoadStart(const char *filename);
+
 extern void *memcpy(void *, const void *, unsigned int);
 
 

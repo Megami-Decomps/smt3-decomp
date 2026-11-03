@@ -2,6 +2,9 @@
 #include "nb.h"
 #include "effBattle.h"
 
+/* Declared here because no header carries these. */
+extern void *memcpy(void *a, const void *b, u32 c);
+
 const char D_005431A8[] = "STOCKCNT :%d";
 const char D_005431B8[] = "STOCKLIST:";
 

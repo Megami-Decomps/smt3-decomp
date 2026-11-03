@@ -3,6 +3,9 @@
 #include "sdf_types.h"
 #include "eeregs.h"
 
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, u32 c);
+
 enum sdfDecomp_enum {
     SDF_DECOMP_STAT_END = 0,
     SDF_DECOMP_STAT_IDLE = 1,

@@ -135,6 +135,9 @@ extern s32 SignalSema(s32);
 
 #include "sdk_libkernl.h"
 
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, u32 c);
+
 extern s32 sceSifDmaStat(s32);
 
 extern s32 GetThreadId(void);
