@@ -204,7 +204,7 @@ void sdfImageSetReq(sdfImageSetReqParam_t *parm)
     setup[10] = 0;
     setup[11] = 0x53ULL;
 
-    src = EE_PHYSICAL((u32)parm->data);
+    src = EE_PHYSICAL(EE_ADDR(parm->data));
     remaining = qwc;
     last = 0;
     do {
@@ -235,7 +235,7 @@ void sdfImageSetReq(sdfImageSetReqParam_t *parm)
     }
     cb->packetTail = release;
 
-    setup = (u64 *)EE_PHYSICAL((u32)setup);
+    setup = (u64 *)EE_PHYSICAL(EE_ADDR(setup));
     tagTail = cb->tagTail;
     if (tagTail != NULL) {
         tagTail->vifCodes = 0;

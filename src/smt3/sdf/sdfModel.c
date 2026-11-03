@@ -378,7 +378,7 @@ sdfModelNode_t *sdfModelSearchNode(sdfModelRootNode_t *aRoot, s32 aId)
 
 sdfDmaTag_t *sdfModelSetTmRefPacket(sdfModelNode_t *aNode, sdfDmaTag_t *aBuffer, s32 aId)
 {
-    u32 addr = EE_PHYSICAL((u32)((u8 *)aNode->tmPacket + (aId << 7)));
+    u32 addr = EE_PHYSICAL(EE_ADDR((u8 *)aNode->tmPacket + (aId << 7)));
 
     *(u64 *)aBuffer = ((u64)addr << 32) | 0x30000008;
     aBuffer->dat1 = 0x6C07C000;
@@ -461,7 +461,7 @@ sdfDmaTag_t *sdfModelSetNormalDrawPacket(sdfModelNode_t *aNode, sdfShapePacket_t
     body = sdfModelSetMatRefPacket(aNode->root, matIndex, aBuffer, aId);
     body->id = 0x30;
     body->qwc = qwc;
-    body->addr = (void *)EE_PHYSICAL((u32)aDataPtr->dataBody);
+    body->addr = (void *)EE_PHYSICAL(EE_ADDR(aDataPtr->dataBody));
     body->dat0 = 0;
     body->dat1 = 0;
     return body + 1;
@@ -517,7 +517,7 @@ sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkin
     tag->id = 0x30;
     tag->dat0 = 0;
     tag->dat1 = 0;
-    tag->addr = (void *)EE_PHYSICAL((u32)aDataPtr->dataBody);
+    tag->addr = (void *)EE_PHYSICAL(EE_ADDR(aDataPtr->dataBody));
     return tag + 1;
 }
 #else
@@ -1246,7 +1246,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
 
                     QUAD_ZERO(*(u128 *)&ref[1]);
                     ref->qwc = 0;
-                    ref->addr = (void *)EE_PHYSICAL((u32)(header + 1));
+                    ref->addr = (void *)EE_PHYSICAL(EE_ADDR(header + 1));
                     *(u64 *)&ref->dat0 = 0;
                     sdfDrawTagLinkCall(tag, (u32)ref);
                 }

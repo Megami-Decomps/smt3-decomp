@@ -158,7 +158,7 @@ void sdfGrSetDisp(s32 aEvenOdd)
     sdfGsMemSlice_t *buff = D_00529388.frameHandle[aEvenOdd];
     u32 fbp;
 
-    sceGsSetDefDispEnv((sceGsDispEnv *)EE_UNCACHED(EE_PHYSICAL((u32)&D_00580FF0)), 0,
+    sceGsSetDefDispEnv((sceGsDispEnv *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&D_00580FF0))), 0,
                        D_00529388.w, D_00529388.buffH, 0, 0);
     fbp = (buff->addr >> 11) & 0x1FF;
     D_00580FF0.dispfb = (D_00580FF0.dispfb & ~0x1FF) | fbp;
@@ -230,7 +230,7 @@ void sdfGrCapture(void) {
         allocation = sdfMemAllocDirect(rowBytes * height);
         pixels = (u8 *)sdfMemLock(allocation);
         sceGsSetDefStoreImage(
-            (sceGsStoreImage *)EE_UNCACHED(EE_PHYSICAL((u32)&D_00577F80)),
+            (sceGsStoreImage *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&D_00577F80))),
             D_00529388.frameHandle[1]->addr >> 6,
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&D_00577F80, pixels);
@@ -244,7 +244,7 @@ void sdfGrCapture(void) {
             source += rowBytes;
         } while (--rows != 0);
         sceGsSetDefStoreImage(
-            (sceGsStoreImage *)EE_UNCACHED(EE_PHYSICAL((u32)&D_00577F80)),
+            (sceGsStoreImage *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&D_00577F80))),
             D_00529388.frameHandle[0]->addr >> 6,
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&D_00577F80, pixels);

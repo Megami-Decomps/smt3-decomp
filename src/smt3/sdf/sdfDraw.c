@@ -566,7 +566,7 @@ link:
 sdfGrRefPacketHeader_t *sdfGrNewExPacket(SdfDmaTag *ex) {
     sdfGrRefPacketHeader_t *referenceNode = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(SDF_DMA_REFERENCE_NODE_BYTES);
     u64 dmaHeader = ex->quadwordCount;
-    u32 payloadAddress = EE_PHYSICAL((u32)ex + SDF_QWORD_BYTES);
+    u32 payloadAddress = EE_PHYSICAL(EE_ADDR(ex) + SDF_QWORD_BYTES);
     s64 packedAddress = (s64)payloadAddress << 32;
 
     dmaHeader |= SDF_DMA_TAG_REF_WORD;
@@ -582,7 +582,7 @@ SdfDmaTag *sdfGrAddExPacket(SdfDmaTag *p, SdfDmaTag *ex) {
 
     referenceNode = sdfGrNewExPacket(ex);
     p->kind = SDF_DMA_TAG_NEXT_BYTE;
-    p->address = EE_PHYSICAL((u32)referenceNode);
+    p->address = EE_PHYSICAL(EE_ADDR(referenceNode));
     return (SdfDmaTag *)((u32)referenceNode + SDF_QWORD_BYTES);
 }
 

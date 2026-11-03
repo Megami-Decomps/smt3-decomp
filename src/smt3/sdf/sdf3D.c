@@ -473,7 +473,7 @@ void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng) {
 }
 
 void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket) {
-    aPacket->address = EE_PHYSICAL((u32)vu1MicroPacket);
+    aPacket->address = EE_PHYSICAL(EE_ADDR(vu1MicroPacket));
     aPacket->quadwords = (D_002F5600 - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
     aPacket->tag = 0;
     aPacket->command = 0;
