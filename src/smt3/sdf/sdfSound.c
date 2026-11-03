@@ -293,7 +293,7 @@ extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(
     const char *path,
-    void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
+    void (*callback)(sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32),
     s32 callbackContext);
 extern s32 sdfFileCmdClearError(sdfFileCmd_t *handle);
 extern s32 sdfFileCmdFree(sdfFileCmd_t *handle);
@@ -1053,7 +1053,7 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
         p2sdPcmState = 1;
         sdfSndMakeFilename(path, D_00529BE8);
         state = sdfFileCmdReadOpen(path,
-            (void (*)(sdfFileCmdHandle_t *, s32, s32, s32, s32))sdfFileRpcCallback, 0);
+            (void (*)(sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32))sdfFileRpcCallback, 0);
         sdfFileRpcArg = state;
         if (state != NULL) {
             WaitSema(sifRpcServerSema);

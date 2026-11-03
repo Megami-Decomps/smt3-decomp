@@ -66,7 +66,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 errorCode;
     s32 currentOffset;
     u8 remainder[4];
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, s32, s32, s32);
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32);
     s32 userData;
 } sdfFileCmdHandle_t;
 
