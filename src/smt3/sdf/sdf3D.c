@@ -141,6 +141,11 @@ extern u8 sdf3DScreenParam[];
 
 extern u8 vu1MicroPacket[];
 
+/* One past the last byte of the vu1MicroPacket VIF packet, so the packet's
+ * length is the distance between the two. */
+extern u8 vu1MicroPacketEnd[];
+FAKEMATCH_ASM_NAME("vu1MicroPacketEnd = vu1MicroPacket + 0x3D20");
+
 extern u8 sdf3DScreenTm[];
 
 extern u8 sdfCameraTm[];
@@ -163,8 +168,6 @@ typedef struct sdf3DFogPacket_t {
     u32 reservedB;
     u32 reservedC;
 } sdf3DFogPacket_t;
-
-extern u8 D_002F5600[];
 
 extern u64 sdf3DRefMapParam;
 
@@ -474,7 +477,7 @@ void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng) {
 
 void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket) {
     aPacket->address = EE_PHYSICAL(EE_ADDR(vu1MicroPacket));
-    aPacket->quadwords = (D_002F5600 - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
+    aPacket->quadwords = (vu1MicroPacketEnd - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
     aPacket->tag = 0;
     aPacket->command = 0;
     aPacket->unknown10 = 0;
