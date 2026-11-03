@@ -937,8 +937,7 @@ void sdfGrReqDraw(sdfDrawTag_t *aTag, sdfPreDrawChain_t *aPreDraw) {
     s32 index;
     sdfDrawReqRec_t *slot;
 
-    while (sdfReqDrawDelayCount != 0) {
-    }
+    SDF_FLAG_WAIT(&sdfReqDrawDelayCount, sdfReqDrawDelayCount != 0);
     sdfReqDrawDelaySleepCount = sdfGetRunTimeCount(start);
     interrupts = DIntr();
     index = sdfDrawReqQueueIndex + 1;
@@ -968,10 +967,12 @@ void sdfGrReqDraw(sdfDrawTag_t *aTag, sdfPreDrawChain_t *aPreDraw) {
 }
 
 void sdfGrReqDrawDelay(s32 count) {
-    sdfReqDrawDelayCount = (count < 0) ? 0 : count;
+    SDF_FLAG_SET(&sdfReqDrawDelayCount, sdfReqDrawDelayCount,
+                 (count < 0) ? 0 : count);
 }
 
 void sdfGrInitDraw(void) {
+    /* Plain: runs before the draw thread exists, so no waiter. */
     sdfReqDrawDelayCount = 0;
     sdfGrDrawState[0].drawTag = NULL;
     sdfDrawReqQueueIndex = 0;
@@ -1125,8 +1126,7 @@ void sdfDrawSync(void) {
     sdfDrawReqRec_t *table = sdfGrDrawState;
 
     for (;;) {
-        while (sdfDrawSyncFlag != 0) {
-        }
+        SDF_FLAG_WAIT(&sdfDrawSyncFlag, sdfDrawSyncFlag != 0);
         if (table[sdfDrawReqQueueIndex].drawTag == NULL) {
             break;
         }

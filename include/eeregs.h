@@ -61,6 +61,19 @@
 #define SDF_VU0_DATA_MEMORY ((volatile u128 *)0x11004000)
 #endif
 
+/* A cross-thread flag another thread writes, polled for lack of a scheduler.
+ * addr keys a host wait and wake table; cast to void so the target still
+ * type-checks it against the flag SDF_FLAG_SET writes. A host redefinition
+ * must wake under the wait's lock and publish the value first; SET does both.
+ * Writes that run before any thread exists stay plain assignments: no waiter
+ * can be blocked yet, and a host's primitives may not be created yet either. */
+#ifndef SDF_FLAG_WAIT
+#define SDF_FLAG_WAIT(addr, cond) do { (void)(addr); while (cond) { } } while (0)
+#endif
+#ifndef SDF_FLAG_SET
+#define SDF_FLAG_SET(addr, lvalue, value) do { (void)(addr); (lvalue) = (value); } while (0)
+#endif
+
 /* The EE's plain physical addressing, which is what a DMA engine reads: the
  * low 28 bits name RAM and the top nibble is the cache mode. Off target there
  * is no cache mode and no 28-bit RAM, so the address passes through. */

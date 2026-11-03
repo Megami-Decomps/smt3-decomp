@@ -273,7 +273,7 @@ void sdfDeliverDrawStart(s32 frameId, s32 buffId)
     if (sdfDispFrameId[1] == frameId) {
         sdfDispFrameId[1] = frameId ^ 1;
     }
-    sdfGrDrawBusy = buffId;
+    SDF_FLAG_SET(&sdfGrDrawBusy, sdfGrDrawBusy, buffId);
 }
 
 void sdfDeliverDrawEnd(s32 mode, s32 frameId, s32 halfOffset) {
@@ -283,7 +283,7 @@ void sdfDeliverDrawEnd(s32 mode, s32 frameId, s32 halfOffset) {
     } else {
         sdfDispFrameId[halfOffset] = frameId;
     }
-    sdfGrDrawBusy = -1;
+    SDF_FLAG_SET(&sdfGrDrawBusy, sdfGrDrawBusy, -1);
 }
 
 void sdfDrawThread(void) {
@@ -306,9 +306,9 @@ void sdfDrawThread(void) {
             reqGsReset = 0;
             sdfGrGsReset();
         }
-        sdfDrawSyncFlag = 1;
+        SDF_FLAG_SET(&sdfDrawSyncFlag, sdfDrawSyncFlag, 1);
         sdfGrDrawFrame();
-        sdfDrawSyncFlag = 0;
+        SDF_FLAG_SET(&sdfDrawSyncFlag, sdfDrawSyncFlag, 0);
         if (sdfDrawFrameFlag != 0) {
             /* Preserve the controller enable state while stopping VIF1. */
             u32 enabledChannels = HW_READ(D_ENABLER);
@@ -344,7 +344,8 @@ void sdfDispThread(void) {
             sdfGrSetDisp(bufferIndex);
         }
         if (sdfReqDrawDelayCount != 0) {
-            sdfReqDrawDelayCount--;
+            SDF_FLAG_SET(&sdfReqDrawDelayCount, sdfReqDrawDelayCount,
+                         sdfReqDrawDelayCount - 1);
         }
     }
 }
@@ -359,6 +360,7 @@ void sdfGrInit(s32 aPacketBuffSize) {
     sdfGrMakeFrameSet(graph);
     sdfGrGsResetDone = 0;
     sdfDispFrameId[0] = sdfDispFrameId[1] = -1;
+    /* Plain: runs before the draw thread exists, so no waiter. */
     sdfGrDrawBusy = -1;
     reqGsReset = 1;
     sdfGrMakePacketBuff(aPacketBuffSize);
@@ -377,8 +379,7 @@ void sdfGrInitNewFrame(void) {
     s8 nextBuffer = sdfFrameId ^ 1;
 
     /* Do not select a buffer while its index is the busy-buffer status. */
-    while (sdfGrDrawBusy == nextBuffer) {
-    }
+    SDF_FLAG_WAIT(&sdfGrDrawBusy, sdfGrDrawBusy == nextBuffer);
     sdfFrameId = nextBuffer;
     sdfGrSetupPacketBuff((s8)sdfFrameId);
     sdfCoreDrawReset();
