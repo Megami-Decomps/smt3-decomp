@@ -536,11 +536,11 @@ void nbDrawRotatedModelX(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
     SDF_VU0_COPYMATRIX_A_TO_C();
-    sdfDrawTagLink(tag, (u32)sdfDrawRotatedModel(D_003FA880, D_003FACA0, 0x42, 0x80));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FA880, D_003FACA0, 0x42, 0x80)));
     SDF_VU0_COPYMATRIX_C_TO_A();
     SetRotateMatrixX_B(3.1415925f);
     MultMatrixNoArg();
-    sdfDrawTagLink(tag, (u32)sdfDrawRotatedModel(D_003FA880, D_003FACA0, 0x40, 0x80));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FA880, D_003FACA0, 0x40, 0x80)));
 }
 
 void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
@@ -564,7 +564,7 @@ void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
     SDF_VU0_SCALEVECTOR(scl);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
-    sdfDrawTagLink(tag, (u32)sdfDrawRotatedModel(D_003FAF20, D_003FB220, 0x30, 0x80));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FAF20, D_003FB220, 0x30, 0x80)));
     SDF_VU0_LOADVECTOR(rot);
     ToMatrix();
     SDF_VU0_COPYMATRIX_A_TO_B();
@@ -581,7 +581,7 @@ void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
     SDF_VU0_SCALEVECTOR(scl);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
-    sdfDrawTagLink(tag, (u32)sdfDrawRotatedModel(D_003FADB0, D_003FAED0, 0x12, 0x80));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FADB0, D_003FAED0, 0x12, 0x80)));
 }
 #else
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawRotatedModelX);

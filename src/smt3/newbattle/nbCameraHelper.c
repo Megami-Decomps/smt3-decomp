@@ -370,29 +370,29 @@ s32 dds3EffectFileListWindowDraw(nbCameraHelper_effFLWinHandle_t *a) {
 
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
-    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(
+    sdfDrawTagLink(packetList, EE_ADDR(dds3PrimFrameRect(
         0x8000 - (a->x << 4), 0x8000 - (a->y << 3),
-        0xFEFFFF, 0xC00, 0x620, a->fillColor, a->borderColor));
+        0xFEFFFF, 0xC00, 0x620, a->fillColor, a->borderColor)));
     if (a->previewActive != 0) {
-        sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(
+        sdfDrawTagLink(packetList, EE_ADDR(dds3PrimFrameRect(
             0x8000 - (a->x << 4),
             0x8000 - ((a->y - 0xC4) << 3),
-            0xFEFFFF, 0x800, 0x400, 0, 0x40806020));
+            0xFEFFFF, 0x800, 0x400, 0, 0x40806020)));
     }
     contentRow = a->y - 2;
-    sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+    sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(
         0x8000 - ((a->x - 2) << 4),
         0x8000 - (contentRow << 3), 0xFF0000, 5,
-        a->resourceList->directoryPath));
+        a->resourceList->directoryPath)));
     contentRow -= 0xC;
     visibleEntry = a->firstVisibleEntry;
     drawnRows = 0;
     while (visibleEntry != NULL) {
         s32 selectionFlags = visibleEntry == a->selectedEntry ? 4 : 0;
-        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(
             0x8000 - ((a->x - 2) << 4),
             0x8000 - (contentRow << 3), 0xFF0000,
-            selectionFlags, visibleEntry->name));
+            selectionFlags, visibleEntry->name)));
         drawnRows++;
         contentRow -= 0xC;
         if (drawnRows >= 0xF) {
@@ -496,7 +496,7 @@ void dds3EffectFileListWindowDrawSprite(nbCameraHelper_effFLWinHandle_t *work)
     vertex->corner[1].mask = 0xFF0000;
     vertex->corner[1].flag = 0;
     sdf2DLinkTexPacket(list, work->textureHandle, 0);
-    sdfDrawTagLink(list, (u32)sprite);
+    sdfDrawTagLink(list, EE_ADDR(sprite));
     {
         sdfGrOt_t *ot = &sdfGrOtTable[71];
 

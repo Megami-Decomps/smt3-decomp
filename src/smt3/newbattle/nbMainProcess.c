@@ -452,7 +452,7 @@ void nbDebugCamera(nbMainProcessData_t *data)
     }
     if (data->debug == 1) {
         tag = dds3FontReqAllocDrawTag();
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8680, 0x79C0, 0xFF0000, 5, D_00550F88, name));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8680, 0x79C0, 0xFF0000, 5, D_00550F88, name)));
         D_002F6978.regFunc(&D_002F6978, tag);
     }
 }
@@ -480,129 +480,129 @@ void nbDebugMainProcess(nbMainProcessData_t *data)
         tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
         sdfDrawTagInit(tag);
         y = 0x7980;
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7880, y, 0xFFFF80, 0, "STAT:%08X", data->stat));
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, "Phase:%d", data->phase));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7880, y, 0xFFFF80, 0, "STAT:%08X", data->stat)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, "Phase:%d", data->phase)));
         y += 0x60;
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551060, data->turn));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551060, data->turn)));
         if (data->stat & 8) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7880, y, 0xFFFF80, 6, D_00551068, data->turn));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7880, y, 0xFFFF80, 6, D_00551068, data->turn)));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7880, y, 0xFFFF80, 5, D_00551070, data->turn));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7880, y, 0xFFFF80, 5, D_00551070, data->turn)));
         }
         y += 0x60;
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, "Press:%2.3f", data->press3));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, "Press:%2.3f", data->press3)));
         y += 0x60;
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, "NewPress:%d/%d", data->press4_p, data->press4_ten));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, "NewPress:%d/%d", data->press4_p, data->press4_ten)));
         y += 0x60;
         if (data->maeProcess != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Mae Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Mae Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->AtoProcessID != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Ato Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Ato Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->ResultProcessID != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Result Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Result Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->StageProcessID != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Stage Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Stage Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->UnitProcessID != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Unit Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Unit Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->CommSelProcessID != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "CommSel Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "CommSel Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->tarSelProcess != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "TarSel Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "TarSel Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->EffectProcessID != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Effect Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Effect Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->KoukaProcessID != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Kouka Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Kouka Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->NegoProcessID != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Nego Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Nego Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->camera != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Camera Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Camera Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->DebugProcessID != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Debug Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Debug Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->AiScriptProcessID != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "AiScr Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "AiScr Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y += 0x60;
         if (data->panelProcess != NULL) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Panel Process"));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 4, "Panel Process")));
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551078)));
         }
         y = 0x7B00;
         for (i = 0; i < 4; i++) {
             if (data->ActionProcessID[i] != NULL) {
-                sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, y, 0xFFFF80, 4, "Act Proc_%d [%s]", i,
-                    nbDebugPhaseNameTable[nbGetActionSeq(data->ActionProcessID[i])]));
+                sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, y, 0xFFFF80, 4, "Act Proc_%d [%s]", i,
+                    nbDebugPhaseNameTable[nbGetActionSeq(data->ActionProcessID[i])])));
             } else {
-                sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, y, 0xFFFF80, 0, D_00551078));
+                sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, y, 0xFFFF80, 0, D_00551078)));
             }
             y += 0x60;
         }
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, 0x7D40, 0xFFFF80, 0, D_00551080, data->exp));
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, 0x7DA0, 0xFFFF80, 0, D_00551088, data->maka));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, 0x7D40, 0xFFFF80, 0, D_00551080, data->exp)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, 0x7DA0, 0xFFFF80, 0, D_00551088, data->maka)));
         y = 0x7E00;
         for (i = 0; i < 4; i++) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, y, 0xFFFF80, 0, "ITEM:0x%02X", data->item[i]));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, y, 0xFFFF80, 0, "ITEM:0x%02X", data->item[i])));
             y += 0x60;
         }
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7D00, y + 0x60, 0xFFFF80, 0, D_00551090, data->nakamayobi));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, y + 0x60, 0xFFFF80, 0, D_00551090, data->nakamayobi)));
         y = 0x7D40;
         for (i = 0; i < 8; i++) {
             if (i < data->actionstackp) {
-                sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8480, y, 0xFFFF80, 0, "%d:%s %d->%d %d", i,
+                sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8480, y, 0xFFFF80, 0, "%d:%s %d->%d %d", i,
                     D_003FA748[data->actionstack[i].type], data->actionstack[i].from,
-                    data->actionstack[i].to, data->actionstack[i].data));
+                    data->actionstack[i].to, data->actionstack[i].data)));
             } else {
-                sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8480, y, 0xFFFF80, 0, "%d:-----", i));
+                sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8480, y, 0xFFFF80, 0, "%d:-----", i)));
             }
             y += 0x60;
         }
@@ -628,14 +628,14 @@ void DebugDisp2(nbMainProcessData_t *data)
     dds3ProcessID_t *eventProcess;
 
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x80A0, 0xFFFF80, 0,
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x80A0, 0xFFFF80, 0,
                                             D_005433C8, data->playerpcnt,
-                                            data->enemypcnt, data->activeunit));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x8100, 0xFFFF80, 0xE,
-                                            D_005433D8));
+                                            data->enemypcnt, data->activeunit)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x8100, 0xFFFF80, 0xE,
+                                            D_005433D8)));
 
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x8160, 0xFFFF80, 0xE,
-                                            D_00551098));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x8160, 0xFFFF80, 0xE,
+                                            D_00551098)));
     for (i = 0; i < 14; i++) {
         s32 formindex;
         u16 flags;
@@ -651,12 +651,12 @@ void DebugDisp2(nbMainProcessData_t *data)
                 glyph = formindex < 10 ? formindex + 0x30 : formindex + 0x37;
             }
         }
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7280 + i * 0xC0, 0x8160,
-                                                0xFFFF80, 0, D_005510A0, glyph));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7280 + i * 0xC0, 0x8160,
+                                                0xFFFF80, 0, D_005510A0, glyph)));
     }
 
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x81C0, 0xFFFF80, 0xE,
-                                            D_005510A8));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x81C0, 0xFFFF80, 0xE,
+                                            D_005510A8)));
     for (i = 0; i < 16; i++) {
         form = data->form + i;
         stat = form->stat;
@@ -676,31 +676,31 @@ void DebugDisp2(nbMainProcessData_t *data)
         if ((form->stat & 0x700) == 0) {
             attr = 2;
         }
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7280 + i * 0xC0, 0x81C0,
-                                                0xFFFF80, attr, D_005510A0, glyph));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7280 + i * 0xC0, 0x81C0,
+                                                0xFFFF80, attr, D_005510A0, glyph)));
     }
 
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x8220, 0xFFFF80, 0xE,
-                                            D_005510B0));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x8220, 0xFFFF80, 0xE,
+                                            D_005510B0)));
     for (i = 0; i < 12; i++) {
         s32 order = data->order[i];
         s32 selected = data->orderindex;
 
         glyph = order < 0 ? '.' : (order < 10 ? order + 0x30 : order + 0x37);
         attr = i == selected ? 4 : 0;
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7280 + i * 0xC0, 0x8220,
-                                                0xFFFF80, attr, D_005510A0, glyph));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7280 + i * 0xC0, 0x8220,
+                                                0xFFFF80, attr, D_005510A0, glyph)));
     }
 
     eventProcess = data->EventProcessID;
     if (eventProcess != NULL) {
         event = dds3GetProcessData(eventProcess);
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x82E0, 0xFFFF80, 0,
-                                                D_005433F0, event->time));
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x8340, 0xFFFF80, 0,
-                                                D_00543408, event->seq));
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7100, 0x83A0, 0xFFFF80, 0,
-                                                D_00543420, event->seqtime));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x82E0, 0xFFFF80, 0,
+                                                D_005433F0, event->time)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x8340, 0xFFFF80, 0,
+                                                D_00543408, event->seq)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x83A0, 0xFFFF80, 0,
+                                                D_00543420, event->seqtime)));
     }
 
     D_002F67F8.regFunc(&D_002F67F8, tag);

@@ -719,7 +719,7 @@ void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 r
     command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     sdf2DLinkTexPacket(command, th, 0);
-    sdfDrawTagLink(command, (u32)handle);
+    sdfDrawTagLink(command, EE_ADDR(handle));
     ot = &sdfGrOtTable[gnbPnlOtOfs];
     ot->regFunc(ot, command);
 }

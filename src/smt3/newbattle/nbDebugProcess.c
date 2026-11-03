@@ -404,8 +404,8 @@ s32 nbDebugStockSelect(void)
             frDrawFont((frFontHandle_t *)request);
             frDestroyFontRequestAfter((frFontHandle_t *)request);
         } else {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7FA0, (y + 4) * 8 + 0x7900,
-                                                  0xFFFF80, attr, D_005512F8, 0, 0xFF));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7FA0, (y + 4) * 8 + 0x7900,
+                                                  0xFFFF80, attr, D_005512F8, 0, 0xFF)));
         }
         y += 20;
         base = *(volatile s32 *)&D_005512F0;
@@ -439,15 +439,15 @@ void DispBadStatus(s32 x, s32 y, u32 status, s32 color)
     name = nbBadStatusNames;
     while (i < 12) {
         if ((status & (bit << i)) != 0) {
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, color,
-                                                  D_00551358, *name));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, color,
+                                                  D_00551358, *name)));
             break;
         }
         name++;
         i++;
     }
     if (i == 12) {
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, color, D_00551360));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, color, D_00551360)));
     }
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
@@ -481,18 +481,18 @@ void DispHpMpBad2(nbDebugProcessData_t *d, nbFormation_t *form)
     tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     request = frwGetSmallFontFRQ(0x80, 0x270, 0xFFFF80, -0x80, text2[work->id], NULL);
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, 0x7C30, 0xFEFFFF, 0, D_00545658, work->id));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, 0x7C90, 0xFEFFFF, 0, D_00545668, work->level));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, 0x7CF0, 0xFEFFFF, d->seq == 5 ? 4 : 0,
-                                         D_00545678, work->hp, work->maxhp));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, 0x7D50, 0xFEFFFF, d->seq == 6 ? 4 : 0,
-                                         D_00545688, work->mp, work->maxmp));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, 0x7DB0, 0xFEFFFF, 0, D_00551488));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7C30, 0xFEFFFF, 0, D_00545658, work->id)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7C90, 0xFEFFFF, 0, D_00545668, work->level)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7CF0, 0xFEFFFF, d->seq == 5 ? 4 : 0,
+                                         D_00545678, work->hp, work->maxhp)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7D50, 0xFEFFFF, d->seq == 6 ? 4 : 0,
+                                         D_00545688, work->mp, work->maxmp)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7DB0, 0xFEFFFF, 0, D_00551488)));
     DispBadStatus(0x50, 0x96, work->badstatus, 0);
     y = 0x7E70;
     for (i = 0; i < 20; i++) {
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7080, y, 0xFEFFFF, 0,
-                                             D_00551490, labels.count[i], party->count[i]));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, y, 0xFEFFFF, 0,
+                                             D_00551490, labels.count[i], party->count[i])));
         y += 0x60;
     }
     y = 0x80D0;
@@ -505,9 +505,9 @@ void DispHpMpBad2(nbDebugProcessData_t *d, nbFormation_t *form)
         if (aisyo & 0x100000) flags[n++] = 'B';
         if ((s32)aisyo < 0) flags[n++] = 'W';
         flags[n] = '\0';
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7820, y, 0xFEFFFF, 0,
-                                             D_00551490, labels.aisyo[i], aisyo & 0xFFFF));
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7E20, y, 0xFEFFFF, 0, D_00551358, flags));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7820, y, 0xFEFFFF, 0,
+                                             D_00551490, labels.aisyo[i], aisyo & 0xFFFF)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7E20, y, 0xFEFFFF, 0, D_00551358, flags)));
         y += 0x60;
     }
     frDrawFont((frFontHandle_t *)request);
@@ -700,20 +700,20 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
         attr = active && i == selected ? 4 : 0;
         switch (i) {
         case 0:
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
-                                                 D_005514B8, typeNames.name[motion->type]));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+                                                 D_005514B8, typeNames.name[motion->type])));
             break;
         case 1:
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
-                                                 D_005514C0, motion->data));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+                                                 D_005514C0, motion->data)));
             break;
         case 2:
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
-                                                 D_005514C8, motion->bframe));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+                                                 D_005514C8, motion->bframe)));
             break;
         case 3:
-            sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
-                                                 D_005514D0, motion->hframe));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+                                                 D_005514D0, motion->hframe)));
             break;
         }
         y += 0x60;
@@ -813,8 +813,8 @@ s32 SelectMot(nbDebugProcessData_t *d, s32 active)
                 color = 0xFFFF00;
             }
         }
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8900, y, 0xFFFF80, attr,
-                                             D_005514D8, slSelectMotIndex + i));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8900, y, 0xFFFF80, attr,
+                                             D_005514D8, slSelectMotIndex + i)));
         y += 0xB0;
         request = frwGetSmallFontFRQ(0x1AE * 16, yText * 8, 0xFF0005, color,
                                      D_004F06F0[slSelectMotIndex + i], NULL);
@@ -890,8 +890,8 @@ s32 SelectDevil(nbDebugProcessData_t *d)
         /* Keep the real coordinates unscaled until their call arguments.
          * Both are live through the loop; this emits no memory barrier. */
         FAKEMATCH_ASM_LIVE_PAIR(xText, x);
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(x + 0x7000, y, 0xFFFF80, attr,
-                                             D_005514E0, devilbase + i));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x + 0x7000, y, 0xFFFF80, attr,
+                                             D_005514E0, devilbase + i)));
         y += 0xB0;
         request = frwGetSmallFontFRQ(xText << 4, yText * 8, 0xFF0005, color,
                                      text2[devilbase + i], NULL);
