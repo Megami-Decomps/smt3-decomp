@@ -496,7 +496,7 @@ s32 evtFileNameHead(void *tag, s32 ox, s32 oy)
 {
     char text[16];
 
-    sprintf(text, D_0054F9C8, (s32)viewerinfo + 0x22D4, (s32)viewerinfo + 0x22E0);
+    sprintf(text, D_0054F9C8, EE_ADDR_S(viewerinfo) + 0x22D4, EE_ADDR_S(viewerinfo) + 0x22E0);
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(ox, oy, 0xFEFFFF, 0, D_0054F9B8, text)));
     return 2;
 }
@@ -1123,7 +1123,7 @@ void evtEventPosItem(void *tag, s32 ox, s32 oy, s32 no)
     if (viewerinfo->eventpos_y != no) {
         color = 0;
     }
-    slot = ((s8 *)((u8 *)no + (u32)evtGetSelectFrameInfo()))[0xC];
+    slot = ((s8 *)(EE_ADDR_AS(u8 *, no) + EE_ADDR(evtGetSelectFrameInfo())))[0xC];
     if (slot >= 0) {
         basic = dds3SceneBasicSearchName(dds3GetActiveScene(), viewerinfo->nametable[slot]);
     }
@@ -1883,7 +1883,7 @@ s32 evtMakeMotionName(evtPolygonMovieWork_t *work)
     if (work->stageTable != NULL) {
         major = work->stageTable->MajorNum;
         minor = work->stageTable->MinorNum;
-        evtLoadArea_FromMemory(major, minor, (s32)work->stageF1, (s32)work->stageF2, work->stageTB, 0);
+        evtLoadArea_FromMemory(major, minor, EE_ADDR_S(work->stageF1), EE_ADDR_S(work->stageF2), work->stageTB, 0);
         group = evtAddViewerObject(0);
         group->entryHeader = evtAddNameTable(work->nameTable1[work->stageTable->NameIndex]);
         group->resource.major = major;

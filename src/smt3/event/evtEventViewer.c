@@ -1241,7 +1241,7 @@ void RunFrame3(s32 nowframe) {
         unit = evtGetUnitHandle2(outerBasic);
         if (bestFrame != NULL) {
             if ((s16)bestFrame->param.sh[1] != 0) {
-                if (unit->currentTransitionValue != (s32)lightBasic ||
+                if (unit->currentTransitionValue != EE_ADDR_S(lightBasic) ||
                     (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION) == 0) {
                     evtLinkLightObjectBasic(unit, lightBasic, bestFrame->index);
                 }
@@ -2409,7 +2409,7 @@ s32 evtEventViewerProcess4(void)
             case 0:
                 break;
             case 1:
-                return (s32)evtEventViewerProcess5_0;
+                return EE_ADDR_S(evtEventViewerProcess5_0);
             }
             break;
         }
@@ -2450,7 +2450,7 @@ pop_menu:
         viewerinfo->nowmenu = 0;
         viewerinfo->sp = 0;
         viewerinfo->menusw = 0;
-        return (s32)evtEventViewerProcess3;
+        return EE_ADDR_S(evtEventViewerProcess3);
     }
     return 0;
 }
@@ -2470,7 +2470,7 @@ s32 evtEventViewerProcess3(void)
         viewerinfo->sp = 0;
         viewerinfo->menusw = 0;
         PushMenu(1, 0x24, 0x18);
-        return (s32)evtEventViewerProcess4;
+        return EE_ADDR_S(evtEventViewerProcess4);
     }
     SelectActiveCamera();
     if (viewerinfo->menusw == 0) {
@@ -2510,13 +2510,13 @@ s32 evtEventViewerProcess2(void *id)
 {
     evtRunFrame(viewerinfo->nowframe);
     dds3LinkProcess(id, evtInitFrameVar());
-    return (s32)evtEventViewerProcess3;
+    return EE_ADDR_S(evtEventViewerProcess3);
 }
 
 s32 evtEventViewerProcess1(void)
 {
     evtInitViewerInfo();
-    return (s32)evtEventViewerProcess2;
+    return EE_ADDR_S(evtEventViewerProcess2);
 }
 
 void evtEventViewerShutdown(void *id)

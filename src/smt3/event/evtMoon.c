@@ -855,7 +855,7 @@ s32 evtMoonProcess1(dds3ProcessID_t *id)
     }
     pacFileHandleFree_(request);
     dds3SetProcessData(id, work);
-    return (s32)evtMoonProcess2;
+    return EE_ADDR_S(evtMoonProcess2);
 }
 
 void evtMoonShutdown(dds3ProcessID_t *id)
