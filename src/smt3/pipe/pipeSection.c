@@ -385,18 +385,22 @@ void pipeOffset(void)
     u8 countBits;
     s32 next;
 
-    while ((u32)position >= (u32)(start + part->frame) && position >= start && id != 0xFFFF) {
-        node = node->next;
-        start = (s32)((u32)start + part->frame);
-        part = getPartsInfo(node->partsID)->data;
-        id = node->id;
-        position = offsetCount;
+    if ((u32)position >= part->frame && position >= 0 && id != 0xFFFF) {
+        do {
+            tagPipePartsInfo *info;
+            node = node->next;
+            start = (s32)((u32)start + part->frame);
+            info = getPartsInfo(node->partsID);
+            id = node->id;
+            part = info->data;
+            position = offsetCount;
+        } while ((u32)position >= (u32)start + part->frame && position >= start && id != 0xFFFF);
     }
     step = *(s8 *)&offsetStep;
     count = *(s8 *)&offsetStepCount;
     D_00551740 = id;
     next = (s32)((u32)position + (u32)(s32)step + 7);
-    countBits = *(volatile u8 *)&offsetStepCount;
+    countBits = offsetStepCount;
     if (count > 0) {
         offsetStepCount = countBits - 1;
         offsetStep = (u8)-3;

@@ -143,3 +143,45 @@ all 29 peers and owned data. Retail checksum, 427 tests, 148 guarded owners /
 `4ae367bfb3cbd56cb48a0a17e21ded7851769ca5`. Exact-source CI
 [41067611880](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41067611880)
 completed successfully, with every actual step passing and none skipped.
+
+## pipeOffset (pipe/pipeSection, 0x108)
+
+23 of 66 words match at the native 264-byte size. The guarded
+reconstruction remains assembly-backed. Its ordinary signed and
+unsigned offsetStepCount observations retain the native byte-load widths and
+the intervening selected-ID store without a false volatile qualifier. The
+explicit entry guard and advancing do-loop state the traversal phases directly;
+the old generic while already compiled to that general loop shape, so this is
+not evidence of a newly recovered compiler control-flow requirement.
+
+The retained draft occupies the native 264 bytes but differs in 43 of 66
+instruction words. The previous volatile draft occupied 272 bytes and differed
+in 54 of the 66 native-window words. These are aligned-word comparisons, not
+exact credit. All 31 other C functions and owner data remain exact under the
+complete-owner check.
+
+The full u32 descriptor-frame range is retained. Accumulated frame totals and
+next position wrap in u32 before target signed interpretation; positive,
+negative and zero signed-byte count paths preserve their low-byte stores,
+steps -3/+3/0 and negative-position fallback to 10. This assumes the inherited
+initialized head, valid reached links, matching provider rows and valid
+descriptors, including for a reached sentinel node. It is not an invalid-input
+recovery guarantee, a positive-frame restriction or an asynchronous-memory
+model.
+
+Native memory-access parity is still incomplete: the compiler caches the
+previous frame instead of rereading it at 0x29D788. Qualified stock GCSE dumps
+identify load UID75 as PRE-redundant, replacing it with register 134 supplied by
+entry/later observations through UID242/243. Plain and dump-producing compiles
+agree in assembly, allocated sections, relocation contracts and function sizes.
+No debugger/hooked trace or original-source claim is made. Independent review
+accepts this only as a NON_MATCHING draft; the native fallback must remain.
+
+Final integrated qualification: complete owners 157/0 (Boss), 31/0 (Pipe)
+and preserved peer StageLoad 16/0 pass. Canonical three-mode strict and
+plain/dump object/assembly checks pass; retained Boss pointer and Pipe
+limited-range comparison warnings remain. Fresh stable 140-owner/480-draft
+qualification, 450 tests, 817 layout assertions, inline/shell checks, seven
+IRX modules, retail SHA1/byte comparison/no-op and reconciled reports pass.
+Game coverage is 8594 functions / 1485744 bytes, including the separate peer
+StageLoad addition; this batch adds no exact matching credit.

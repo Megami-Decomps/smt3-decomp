@@ -408,3 +408,81 @@ that byte comparison alone did not establish defined C behavior. No truthful
 initialized-input correction was supported by the native evidence, and no
 such behavioral repair was adopted. The provider, callback table, signatures
 and data layout are unchanged.
+
+## effPCPDANTE_ShowTime_Bingo_Draw (effect/effPCPBoss, 0x370)
+
+107 of 220 words match in the retained draft: 876 emitted bytes versus
+880 native bytes, with 4 uncovered bytes, at 0x19FF88. The original guarded source
+remains unchanged; this investigation contributes no matching credit.
+At base ebdef479fa77eb5b66a40f1cd070e506b178d041, the unsigned draft emits
+876 bytes, with 107 matching / 112 differing prefix words and 4 uncovered bytes.
+All 157 existing exact owner functions remain exact in every control below.
+
+A signed frame snapshot with unsigned entry guard, signed inner comparison,
+and absolute hold 10..26 still caches the hold/glow predicate when unsigned
+age is computed before hold: 876 bytes, 108 / 111 prefix words, 4 uncovered.
+Moving the real unsigned age derivation to glow, following matched
+AreYouReady, preserves the separate native comparisons but emits 884 bytes:
+102 / 118 native-prefix words and 4 excess bytes. No source rewrite is retained.
+
+Qualified stock compiler stages identify the dependency. In the baseline,
+CSE UIDs 228/404 compare age pseudo 86; GCSE replaces 404 with a copy of the
+first predicate. With late age, GCSE retains distinct UIDs 227/406 on
+temporary 124 and age 86. Full-owner plain/-da assembly, allocated sections,
+symbols and relocation contracts agree for each source. These are unhooked
+stage observations, not GDB decision traces or recovered source spelling.
+
+A separate real phase-reuse diagnostic consumes the original frame before
+redefining pseudo 85 as the wrapping exit age at UID 292, with independent
+age 86. Baseline instead copies exit temporary 133 to variable 135 at UID 298;
+its last original-frame consumer is exit subtraction UID 290. The reuse
+control emits 876 bytes, 111 / 108 prefix words, 4 uncovered. CSE still has hold
+UID 227 and glow UID 403; PRE in 08.gcse explicitly marks 403/expression 17
+redundant in block 19 and creates 606 copying the earlier predicate to 207.
+GCSE copy propagation replaces 207 with 125 at 403. This demonstrably caches
+the predicate again. Shared pseudo ownership is established, but no exact
+solution is established; no register or float grid was attempted.
+
+Unsigned wrapping subtraction, signed interpretation, all four independent
+guards, frame 10 overlap, native float conversion paths, callback ordering,
+texture reloads and final fresh-frame wrapping increment are preserved.
+nbPnl_rsetAlpha may call ot->regFunc, so purity is not assumed. 402,048
+host differential executions, with callbacks mutating frame and texture,
+test source-transformation equivalence only. They do not execute or prove
+the native PS2 routine or its floating-point rounding behavior.
+
+At the investigation baseline, inherited strict production and SKIP_ASM
+diagnostics were unchanged:
+effPCPBossBUNSINDraw is implicitly declared at 1626, and
+effPCPDANTE_Thunder_Draw at 3954; at 3983 the latter additionally conflicts
+with its earlier implicit int return. BUNSINDraw's real definition at 1473
+is under NON_MATCHING, without a separate ordinary prototype. Thunder's
+forward declaration at 3934 is under NON_MATCHING although its later void
+definition is unconditional. Strict retained mode passes. No declarations
+were edited in those controls; these are separate visibility issues, not
+a Bingo match.
+
+No full retail build, global regression run or publication is claimed for
+these unmatched diagnostics. Do not repeat these controls without new
+causal evidence. All pre-existing source, fallback and owned data remain.
+
+### Declaration visibility follow-up
+
+The integrated owner now adds only the existing typed void BUNSINDraw
+prototype and exposes the existing typed void Thunder declaration. No body,
+fallback, signature, layout or Bingo control changes are retained. Independent
+provider/caller/native review confirms ignored return values and existing work
+pointer contracts. Baseline strict production/SKIP_ASM/retained statuses were
+33/33/0; the approved candidate passes all three with unchanged full object
+contracts and normalized assembly. The inherited retained-mode argument-3
+incompatible pointer warning in effPCPBossBUNSINDrawPoly remains; this is a
+visibility correction, not a demonstrated runtime bug or warning-free claim.
+
+Final integrated qualification: complete owners 157/0 (Boss), 31/0 (Pipe)
+and preserved peer StageLoad 16/0 pass. Canonical three-mode strict and
+plain/dump object/assembly checks pass; retained Boss pointer and Pipe
+limited-range comparison warnings remain. Fresh stable 140-owner/480-draft
+qualification, 450 tests, 817 layout assertions, inline/shell checks, seven
+IRX modules, retail SHA1/byte comparison/no-op and reconciled reports pass.
+Game coverage is 8594 functions / 1485744 bytes, including the separate peer
+StageLoad addition; this batch adds no exact matching credit.

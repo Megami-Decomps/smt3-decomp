@@ -1466,6 +1466,8 @@ void effPCPBossBUNSINDrawPoly2(void *tag, void *asset, const u128 *center, u32 c
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDrawPoly2);
 #endif
 
+void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work);
+
 #ifdef NON_MATCHING
 extern effPCPBossVector_t D_00533DC0;
 extern void nbFormDispOff2(nbFormation_t *form);
@@ -3930,9 +3932,7 @@ effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Pa
     return work;
 }
 
-#ifdef NON_MATCHING
 extern void effPCPDANTE_Thunder_Draw(effPCPDANTE_Thunder_tag *hData);
-#endif
 
 s32 effPCPDANTE_Thunder_ProcessDraw(dds3ProcessID_t *process)
 {

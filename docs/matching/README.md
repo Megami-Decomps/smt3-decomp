@@ -14,7 +14,7 @@ both native and emitted sizes when they differ.
 | 37 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
-| 13 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
+| 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 12 |  | [sdk/libkernl.md](sdk/libkernl.md) |
 | 12 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 12 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
@@ -30,6 +30,7 @@ both native and emitted sizes when they differ.
 | 6 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 6 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
+| 5 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
@@ -37,7 +38,6 @@ both native and emitted sizes when they differ.
 | 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
-| 4 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 4 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |

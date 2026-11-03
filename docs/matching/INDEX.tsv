@@ -80,6 +80,7 @@ effPCPBossKAGUAttackDraw	effect/effPCPBoss	0x35C	215 of 215 words match	docs/mat
 effPCPDANTE_ShowTime_ShowTime_Draw	effect/effPCPBoss	0x358	214 of 214 words match	docs/matching/effect/effPCPBoss.md	325
 dds3EffectBlurDrawQuad	effect/effPCPBoss	640 bytes	55 of 160 words match	docs/matching/effect/effPCPBoss.md	363
 effPCPScreenCrackModelCopy	effect/effPCPBoss	72 bytes	18 of 18 words match	docs/matching/effect/effPCPBoss.md	375
+effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370	107 of 220 words match	docs/matching/effect/effPCPBoss.md	412
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790	462 of 484 words match	docs/matching/effect/parManager.md	3
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/matching/effect/parManager.md	33
 evtEventViewerProcess3	event/evtEventViewer	0x16C	91 of 91 words match	docs/matching/event/evtEventViewer.md	3
@@ -325,6 +326,7 @@ ActionZMotion	pipe/pipeSection	0x140	74 of 80 words match	docs/matching/pipe/pip
 EmTask	pipe/pipeSection	0x34C	211 of 211 words match	docs/matching/pipe/pipeSection.md	27
 MyAction	pipe/pipeSection	0x21C		docs/matching/pipe/pipeSection.md	72
 ActionKey	pipe/pipeSection	0x5EC	379 of 379 words match	docs/matching/pipe/pipeSection.md	97
+pipeOffset	pipe/pipeSection	0x108	23 of 66 words match	docs/matching/pipe/pipeSection.md	147
 cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/matching/result/rstcalc.md	3
 cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/matching/result/rstcalc.md	25
 datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/matching/result/rstcalc.md	47
