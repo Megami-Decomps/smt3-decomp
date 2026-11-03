@@ -307,7 +307,7 @@ s32 pbGetMyCharcterRot(pbProcHandle_t *p) {
 void pbSetPanelModel(pbProcHandle_t *panel, s32 index) {
     pbMyChar_t *chara = panel->data.chara;
     if (panel != NULL) {
-        pbSetModelRotate((mdlObj_t *)pbGetPanelField(panel), 0.0f, D_00326C60[index], 0.0f);
+        pbSetModelRotate(EE_ADDR_AS(mdlObj_t *, pbGetPanelField(panel)), 0.0f, D_00326C60[index], 0.0f);
         chara->dir = index;
     }
 }
@@ -342,7 +342,7 @@ s32 pb_draw_exit_Process(dds3ProcessID_t *id)
         return -1;
     }
     if (work->flg != 0) {
-        tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+        tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
         sdfDrawTagInit(tag);
         sdf3DPrimLinkMat(tag, work->mat, NULL);
         angle = (f64)D_00327248.y + 0.02;
@@ -400,7 +400,7 @@ s32 pb_draw_mapbase_Process(dds3ProcessID_t *id)
         return -1;
     }
 
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdf3DPrimLinkMat(tag, work->mat, NULL);
 

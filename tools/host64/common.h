@@ -36,6 +36,8 @@ typedef __SIZE_TYPE__ ps2Size_t;
 typedef unsigned long long ee_addr_t;
 #define EE_ADDR(ptr) ((ee_addr_t)(__UINTPTR_TYPE__)(ptr))
 #define EE_ADDR_PTR(addr) ((void *)(__UINTPTR_TYPE__)(addr))
+#define EE_ADDR_S(ptr) ((ee_addr_t)(__UINTPTR_TYPE__)(ptr))
+#define EE_ADDR_AS(type, addr) ((type)(__UINTPTR_TYPE__)(addr))
 
 #define PS2_SYMBOL_AT(type, name, base, offset) extern type name
 

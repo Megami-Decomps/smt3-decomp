@@ -216,7 +216,7 @@ void movieViewerSetFlags(void)
 
 void movieViewerInitRegs(void)
 {
-    movieViewerDebugFlag.regAddr = (u32)IPU_CTRL;
+    movieViewerDebugFlag.regAddr = EE_ADDR(IPU_CTRL);
     movieViewerDebugFlag.buffer = (u8 *)&D_00343E40;
     movieViewerSetFlags();
 }
@@ -241,12 +241,12 @@ void movieViewerDrawInfo(void)
         } else
 #endif
         {
-            movieViewerDebugFlag.word = *(s32 *)movieViewerDebugFlag.regAddr;
+            movieViewerDebugFlag.word = *EE_ADDR_AS(s32 *, movieViewerDebugFlag.regAddr);
         }
     }
     if (movieViewerDebugFlag.blockPending != 0) {
 #ifdef NON_MATCHING
-        u32 base = (u32)movieViewerDebugFlag.buffer;
+        u32 base = EE_ADDR(movieViewerDebugFlag.buffer);
         u64 end = (u64)base + sizeof(movieViewerDebugFlag.block);
         if (((u64)base < EE_REG_RANGE_END && end > EE_REG_RANGE_BASE) ||
             ((u64)base < GS_PRIV_REG_RANGE_END && end > GS_PRIV_REG_RANGE_BASE)) {
@@ -263,7 +263,7 @@ void movieViewerDrawInfo(void)
                     }
                     movieViewerDebugFlag.block[i] = value >> ((address & 3) * 8);
                 } else {
-                    movieViewerDebugFlag.block[i] = *(u8 *)address;
+                    movieViewerDebugFlag.block[i] = *EE_ADDR_AS(u8 *, address);
                 }
             }
         } else

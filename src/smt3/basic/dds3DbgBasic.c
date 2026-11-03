@@ -109,7 +109,7 @@ s32 dds3DebugBasic(dds3ProcessID_t *id) {
     }
     node = (dds3Basic_t *)dds3GetProcessData(id);
     if (dds3SceneBasicExistBasic(dds3GetActiveScene(), (dds3Basic_t *)node) == 0) {
-        return (s32)evtSceneDispProcess;
+        return EE_ADDR_S(evtSceneDispProcess);
     }
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
@@ -126,7 +126,7 @@ s32 dds3DebugBasic(dds3ProcessID_t *id) {
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, spriteList);
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
     if (dds3PadButtonState[0x33] < 0) {
-        return (s32)evtSceneDispProcess;
+        return EE_ADDR_S(evtSceneDispProcess);
     }
     return 0;
 }

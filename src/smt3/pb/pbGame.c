@@ -2057,9 +2057,9 @@ s32 pb_proc_block_DB_Process(dds3ProcessID_t *id)
         return -1;
     }
 
-    mapTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    mapTag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(mapTag);
-    outlineTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    outlineTag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(outlineTag);
     sdf3DPrimLinkMat(mapTag, db->mat, NULL);
     for (i = 0; i < db->count; i++) {
@@ -2141,7 +2141,7 @@ s32 pb_draw_map_cursor_Process(dds3ProcessID_t *id)
     case 5:
         return -1;
     }
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     amplitude = (s32)((f64)sdfSin(pbMapCursorWork) * 50.0);
     for (side = 0; side < 4; side++) {

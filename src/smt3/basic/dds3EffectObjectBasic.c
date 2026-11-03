@@ -515,7 +515,7 @@ dds3Basic_t *AddP2AEffect(void *p2a, void *pos, s32 rot)
     dds3Basic_t *area;
 
     memset(&vector, 0, sizeof(vector));
-    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), pos, (void *)rot);
+    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), pos, EE_ADDR_AS(void *, rot));
     if (basic == NULL) {
         return NULL;
     }
@@ -574,7 +574,7 @@ dds3Basic_t *AddTMXEffect(void *tmx, void *pos, s32 rot)
     dds3Basic_t *area;
 
     memset(&vector, 0, sizeof(vector));
-    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), pos, (void *)rot);
+    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), pos, EE_ADDR_AS(void *, rot));
     if (basic == NULL) {
         return NULL;
     }
@@ -722,7 +722,7 @@ void *dds3AddBEDEffectObjectBasic(void *file, void *pos, void *rot) {
 
     resolvedId = 0;
     resourceHandle = sdfDevLoadFileEx(file, &resolvedId, 0);
-    created = AddBEDEffect((effBTL_t *)resolvedId, pos, rot);
+    created = AddBEDEffect(EE_ADDR_AS(effBTL_t *, resolvedId), pos, rot);
     sdfMemFreeDirect(resourceHandle);
     return created;
 }

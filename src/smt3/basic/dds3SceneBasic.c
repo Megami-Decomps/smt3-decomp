@@ -322,7 +322,7 @@ s32 dds3SceneBasicLoadScriptFile(dds3Basic_t *scene, char *name)
         return 0;
     }
     work->hScrFileHandle = handle;
-    work->pScrFileData = (void *)resolved;
+    work->pScrFileData = EE_ADDR_AS(void *, resolved);
     return 1;
 }
 
@@ -385,7 +385,7 @@ s32 dds3SceneBasicStartScript(dds3Basic_t *scene, char *procname)
      * trigger by). The nesting keeps ee-gcc from turning this into a
      * sibling call (calls.c tries none inside a loop). */
     do {
-        return (s32)scrStartScript2(0x3EA, script, procedure);
+        return EE_ADDR_S(scrStartScript2(0x3EA, script, procedure));
     } while (0);
 }
 

@@ -698,7 +698,7 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
             dds3ObjectBaseModelLinkOtSvs(pModelOt, pObjectBasic);
             return;
         }
-        light = (void *)((dds3UnitObjectBasicWorkData_t *)pObjectBasic->workdata)->hUnit->value;
+        light = EE_ADDR_AS(void *, ((dds3UnitObjectBasicWorkData_t *)pObjectBasic->workdata)->hUnit->value);
         if (light != NULL) {
             *(void **)&((mdlObj_t *)control->pModel)->inner->light = light;
         } else {

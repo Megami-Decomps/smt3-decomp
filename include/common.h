@@ -43,6 +43,19 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 #ifndef EE_ADDR_PTR
 #define EE_ADDR_PTR(addr) ((void *)(u32)(addr))
 #endif
+/* The same narrowing where the site spells the signed type. 422 sites do, so
+ * the signedness is kept rather than folded into EE_ADDR: on the EE the two
+ * differ in later arithmetic and comparisons, not in the address. */
+#ifndef EE_ADDR_S
+#define EE_ADDR_S(ptr) ((s32)(ptr))
+#endif
+/* An EE address widened back to a typed pointer. Unlike EE_ADDR_PTR there is
+ * no (u32) in the expansion, because these sites spell none: the cast to the
+ * pointer type is the whole of the target conversion and adding a step could
+ * change it. */
+#ifndef EE_ADDR_AS
+#define EE_ADDR_AS(type, addr) ((type)(addr))
+#endif
 
 typedef float f32;
 typedef double f64;
