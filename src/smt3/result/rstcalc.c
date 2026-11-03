@@ -1190,9 +1190,7 @@ s32 datFindCommentEntry(u16 devilId)
 }
 
 /* Callers supply a unit; the classification currently uses global state. */
-#ifdef NON_MATCHING
 extern s32 datGetPlayerLNDList(u8 *list);
-#endif
 
 s32 datGetPlayerLNDLevel(datUnitWork_t *unit)
 {

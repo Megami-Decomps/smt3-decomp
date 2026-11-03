@@ -343,3 +343,29 @@ with normal owned-data checks.
 Combined local gates pass the retail checksum, 26 tooling test files / 427
 cases, all 147 guarded owners / 533 drafts with stable source/compiler inputs,
 seven IRX owners, and reconciled production reports.
+
+### Production list-provider declaration
+
+The exact `s32 datGetPlayerLNDList(u8 *list)` declaration is now visible in
+production as well as guarded builds. Its same-owner provider conditionally
+writes one byte through the actual list pointer and returns an `s32`
+classification; `datGetPlayerLNDLevel` passes its real byte local and consumes
+that classification. Only the declaration guard is removed. Provider and caller
+bodies, call targets, memory accesses and ABI are unchanged.
+
+Independent complete-owner verification gives 89 match, 0 differ. Across
+production, NON_MATCHING and NON_MATCHING plus SKIP_ASM contexts, complete
+allocated sections, non-file symbols, ordered relocations and normalized
+assembly are identical before and after the change; plain/dump parity also
+passes. No matching credit is added. The production implicit-declaration
+diagnostic now has two inherited failures, `rstSetSkillActFlag` and
+`cmpGetEncycWork`, rather than three. Both guarded contexts pass. This is not
+a complete production strict-declaration repair. A paired setter declaration
+control changes an exact caller and was rejected; the pointer-return chain
+is unchanged.
+
+Canonical qualification passes owner 89/0 with unchanged allocated data, fresh
+139-owner / 479-draft compilation, 459 tests and 817 layout assertions, seven
+IRX modules, inline/shell checks, retail checksum/byte comparison and build/report
+no-ops. The 21,252 runtime inputs remain stable during these gates. Game
+coverage remains 8595 functions and 1485932 bytes.
