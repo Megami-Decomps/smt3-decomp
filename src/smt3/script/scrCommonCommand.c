@@ -5,7 +5,7 @@
 #include "ps2asm.h"
 
 
-static inline f32 ffabsf(f32 x)
+static inline f32 scrFabsf(f32 x)
 {
     f32 r;
     r = sdfFabs(x);
@@ -403,7 +403,7 @@ s32 scrCommand_SCENE_LIGHT_DIR(void)
     dir.y = scrGetFloatPara(2);
     dir.z = scrGetFloatPara(3);
     dir.w = 0;
-    if (ffabsf(dir.x) <= 0.01f && ffabsf(dir.y) <= 0.01f && ffabsf(dir.z) <= 0.01f)
+    if (scrFabsf(dir.x) <= 0.01f && scrFabsf(dir.y) <= 0.01f && scrFabsf(dir.z) <= 0.01f)
     {
         datDebugPrintf("WARNING: SCENE_LIGHT_DIR length zero\n");
         return 1;

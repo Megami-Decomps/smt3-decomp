@@ -2903,10 +2903,6 @@ s32 nbGetKakutokuMaka(nbMainProcessData_t *data)
     return maka;
 }
 
-
-
-
-
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D30);
 
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D58);
@@ -2918,3 +2914,4 @@ INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DA8);
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DE0);
 
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DF0);
+

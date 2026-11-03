@@ -2218,7 +2218,7 @@ typedef struct
     u32 header[4];
     u64 words[32];
 } frFontDumpSlot_t;
-typedef char frFontDumpSlotSizeCheck[(sizeof(frFontDumpSlot_t) == 0x110) ? 1 : -1];
+PS2_SIZE_CHECK(frFontDumpSlotSizeCheck, frFontDumpSlot_t, 0x110);
 
 extern sdfDrawTag_t D_0056B690[2];
 extern frFontGsPacket_t D_0056B6D0[2];

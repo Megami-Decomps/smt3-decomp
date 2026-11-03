@@ -29,8 +29,7 @@ typedef struct dds3ConfigWork_t {
     void *textureHandle;
 } dds3ConfigWork_t;
 
-typedef char dds3ConfigWork_size_must_be_0x10A8[
-    sizeof(dds3ConfigWork_t) == 0x10A8 ? 1 : -1];
+PS2_SIZE_CHECK(dds3ConfigWork_size_must_be_0x10A8, dds3ConfigWork_t, 0x10A8);
 
 extern void dds3FreeConfigTexture(void *texture);
 

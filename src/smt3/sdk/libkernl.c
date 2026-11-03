@@ -947,8 +947,7 @@ typedef struct sifDmaTransfer_t {
     u32 attributes;
 } sifDmaTransfer_t;
 
-typedef char sifDmaTransfer_size_must_be_16[
-    sizeof(sifDmaTransfer_t) == 16 ? 1 : -1];
+PS2_SIZE_CHECK(sifDmaTransfer_size_must_be_16, sifDmaTransfer_t, 16);
 
 #include "sdk_libkernl.h"
 extern s32 isceSifSetDma(sifDmaTransfer_t *transfers, s32 count);
@@ -962,8 +961,7 @@ typedef struct sifCommandHeader_t {
     u32 option;
 } sifCommandHeader_t;
 
-typedef char sifCommandHeader_size_must_be_16[
-    sizeof(sifCommandHeader_t) == 16 ? 1 : -1];
+PS2_SIZE_CHECK(sifCommandHeader_size_must_be_16, sifCommandHeader_t, 16);
 
 s32 _sceSifSendCmd(s32 command, s32 interruptMode, void *packet, s32 packetBytes,
                     void *source, void *destination, s32 dataBytes)
@@ -3583,8 +3581,7 @@ typedef struct sifResetPacket_t {
     char arguments[80];
 } sifResetPacket_t;
 
-typedef char sifResetPacket_size_must_be_0x68[
-    sizeof(sifResetPacket_t) == 0x68 ? 1 : -1];
+PS2_SIZE_CHECK(sifResetPacket_size_must_be_0x68, sifResetPacket_t, 0x68);
 
 extern sifResetPacket_t D_0059EC40;
 extern void sceSifStopDma(void);

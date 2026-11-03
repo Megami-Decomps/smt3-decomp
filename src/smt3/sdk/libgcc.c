@@ -1115,8 +1115,7 @@ typedef struct {
     u8 indirect;
 } frameState_t;
 
-typedef char frameState_size_must_be_0x478[
-    sizeof(frameState_t) == 0x478 ? 1 : -1];
+PS2_SIZE_CHECK(frameState_size_must_be_0x478, frameState_t, 0x478);
 
 u8 *libc_2D2C70(u8 *p, frameState_t *state)
 {
@@ -1163,8 +1162,7 @@ typedef struct frameStateInternal {
     struct frameStateInternal *savedState;
 } frameStateInternal_t;
 
-typedef char frameStateInternal_size_must_be_0x480[
-    sizeof(frameStateInternal_t) == 0x480 ? 1 : -1];
+PS2_SIZE_CHECK(frameStateInternal_size_must_be_0x480, frameStateInternal_t, 0x480);
 
 
 typedef union __attribute__((packed)) {

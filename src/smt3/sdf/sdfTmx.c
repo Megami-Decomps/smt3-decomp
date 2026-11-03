@@ -568,8 +568,7 @@ typedef struct {
     u32 privateData[6];
 } sdfSceIoStat_t;
 
-typedef char sdfSceIoStat_size_must_be_0x40[
-    sizeof(sdfSceIoStat_t) == 0x40 ? 1 : -1];
+PS2_SIZE_CHECK(sdfSceIoStat_size_must_be_0x40, sdfSceIoStat_t, 0x40);
 
 extern s32 sdfCreateSema(s32 initCount, s32 maxCount, s32 option);
 extern s32 sceGetstat(const char *path, sdfSceIoStat_t *stat);

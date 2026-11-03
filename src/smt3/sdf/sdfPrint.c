@@ -115,10 +115,8 @@ struct sifPrintRpcServerData_t {
     sifRpcDataQueue_t *queue;
 };
 
-typedef char sifRpcDataQueue_size_must_be_0x20[
-    sizeof(sifRpcDataQueue_t) == 0x20 ? 1 : -1];
-typedef char sifPrintRpcServerData_size_must_be_0x44[
-    sizeof(sifPrintRpcServerData_t) == 0x44 ? 1 : -1];
+PS2_SIZE_CHECK(sifRpcDataQueue_size_must_be_0x20, sifRpcDataQueue_t, 0x20);
+PS2_SIZE_CHECK(sifPrintRpcServerData_size_must_be_0x44, sifPrintRpcServerData_t, 0x44);
 
 extern void *sdfPrintRpcFunc(s32 unused, sifCommand_t *packet);
 extern s32 GetThreadId(void);
