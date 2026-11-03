@@ -2484,7 +2484,6 @@ s32 nbCheckSensei(nbMainProcessData_t *data)
 extern s32 datCheckSkillInParty(s32 skill);
 extern const char D_00544DA8[];
 
-#ifdef NON_MATCHING
 s32 nbCheckBackAttack(nbMainProcessData_t *data)
 {
     datUnitWork_t *player;
@@ -2496,9 +2495,12 @@ s32 nbCheckBackAttack(nbMainProcessData_t *data)
     s32 playerParam5;
     s32 playerScore;
     s32 enemyScore;
-    s32 rate = 12;
+    s32 rate;
     s32 roll;
-    s8 backAttack = nbEncountFormTable[data->encno].backAttack;
+    /* Keep the observed encounter choice in its native comparison register.
+     * The value is dead before the first average-provider call; this is a
+     * local reconstruction aid, not evidence of original source spelling. */
+    FAKEMATCH_ASM_REG(s32, backAttack, "$4") = nbEncountFormTable[data->encno].backAttack;
 
     if (backAttack == -1) return 0;
     if (backAttack == 1) return 1;
@@ -2506,6 +2508,7 @@ s32 nbCheckBackAttack(nbMainProcessData_t *data)
     enemyParam4 = nbGetParamAvg2(data, 1, 4);
     enemyParam5 = nbGetParamAvg2(data, 1, 5);
     player = (datUnitWork_t *)&DDS3_GBWK->akuma[0].flag;
+    rate = 12;
     playerLevel = player->level;
     playerParam4 = datGetParam(player, 4);
     playerParam5 = datGetParam(player, 5);
@@ -2518,9 +2521,7 @@ s32 nbCheckBackAttack(nbMainProcessData_t *data)
     printf(D_00544DA8, playerScore, enemyScore, rate, roll);
     return roll < rate;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbCheckBackAttack);
-#endif
+
 
 extern s32 datCheckSkillInParty(s32 skill);
 extern const char D_00544DE0[];
