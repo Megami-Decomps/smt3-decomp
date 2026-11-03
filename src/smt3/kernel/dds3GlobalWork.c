@@ -455,9 +455,9 @@ void dds3GlobalWorkUserInit2(s32 mode)
 
     if (mode == 1) {
         NewGame2Push();
-        saved = DDS3_GBWK->memHandle;
+        saved = EE_ADDR(DDS3_GBWK->memHandle);
         memset(DDS3_GBWK, 0, 0x1A510);
-        DDS3_GBWK->memHandle = saved;
+        DDS3_GBWK->memHandle = EE_ADDR_PTR(saved);
     }
     DDS3_GBWK->unk38 = 0;
     DDS3_GBWK->playtime = 0;

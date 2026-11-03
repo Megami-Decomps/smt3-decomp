@@ -39,8 +39,11 @@ BASE = [
 # so accept mode demotes exactly those two and nothing else.
 ACCEPT = ["-w", "-Wno-error=int-conversion",
           "-Wno-error=incompatible-pointer-types"]
+# No -w here: -w outranks -Werror=<name> and silences the very diagnostics
+# this mode exists to count, which is how a first attempt at this measurement
+# reported zero pointer-width casts in a tree that has hundreds.
 WIDTH = [
-    "-w",
+    "-Wno-all", "-Wno-extra",
     "-Werror=pointer-to-int-cast", "-Werror=int-to-pointer-cast",
     "-Werror=int-conversion", "-Werror=incompatible-pointer-types",
 ]

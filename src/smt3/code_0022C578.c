@@ -4002,7 +4002,7 @@ void campDhCheckTextures(void)
         void **tex = (void **)((u8 *)campInfoWork + ofs + 0xC);
 
         if (*tex != NULL && *(s32 *)((u8 *)campInfoWork + ofs) == 0) {
-            *(s32 *)((u8 *)campInfoWork + ofs) = sdfTexSet(*tex);
+            *(s32 *)((u8 *)campInfoWork + ofs) = EE_ADDR(sdfTexSet(*tex));
             printf(D_0053FCE8, i);
         }
     }
@@ -7196,7 +7196,7 @@ void cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
     u64 *prim;
     void *tag;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1)));
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     prim = sdf2DGetPrimPtr(packet);
     prim[0] = id != 0;
@@ -7207,7 +7207,7 @@ void cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
     }
     tag = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7225,7 +7225,7 @@ void cmpDrawSprite(s32 id, s32 flag, s32 ot)
     u64 *prim;
     void *tag;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1)));
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     prim = sdf2DGetPrimPtr(packet);
     prim[0] = id;
@@ -7236,7 +7236,7 @@ void cmpDrawSprite(s32 id, s32 flag, s32 ot)
     }
     tag = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7253,7 +7253,7 @@ void cmpDrawSprite2(s32 id, s32 flag, s32 ot)
     u64 *prim;
     void *tag;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1)));
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     prim = sdf2DGetPrimPtr(packet);
     prim[0] = id;
@@ -7264,7 +7264,7 @@ void cmpDrawSprite2(s32 id, s32 flag, s32 ot)
     }
     tag = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7281,14 +7281,14 @@ void cmpDrawSpriteIndexed(s32 id, s32 ot)
     u64 *prim;
     void *tag;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1)));
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     prim = sdf2DGetPrimPtr(packet);
     prim[1] = 0x49;
     prim[0] = id;
     tag = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7300,14 +7300,14 @@ void cmpDrawSpriteIndexed2(s32 id, s32 ot)
     u64 *prim;
     void *tag;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1)));
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     prim = sdf2DGetPrimPtr(packet);
     prim[1] = 0x14;
     prim[0] = id;
     tag = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7337,7 +7337,7 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot)
     sdfDrawTag_t *tag;
     sdfGrOt_t *otp;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(6, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(6, 1)));
     sdf2DMakePrimPacketHeader(packet, 0x14B, 6, 0x515151, 1);
     prim = sdf2DGetPrimPtr(packet);
     cmpExpandColor(prim[0].colorChannels, colors[0]);
@@ -7351,7 +7351,7 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot)
     prim[2].depth = z;
     tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7456,7 +7456,7 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     void *packet;
     u64 *prim;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, 1)));
     sdf2DMakePrimPacketHeader(packet, 0x149, 4, 0x5151, 1);
     prim = sdf2DGetPrimPtr(packet);
     cmpExpandColor(prim, colors[0]);
@@ -7467,7 +7467,7 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     prim[7] = z1;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    sdfDrawTagLink(list, packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     surface = &sdfGrOtTable[surfaceIndex];
     surface->regFunc(surface, list);
 }
@@ -7666,7 +7666,7 @@ void cmpDrawDebugPrint(s32 x, s32 y, s32 z, u32 attr, const char *str, s32 ot)
     tag = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     sdfDevSetPrintCB(&cb, x * 16 + 0x7000, y * 8 + 0x7900, z, attr);
-    sdfDrawTagLink(tag, sdfDevPrintfEx(&cb, str));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintfEx(&cb, str)));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7682,7 +7682,7 @@ void cmpDrawFrameRect(s32 x, s32 y, s32 c, s32 w, s32 h, s32 f, s32 g, s32 ot)
     tag = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     packet = dds3PrimFrameRect(x * 16 + 0x7000, y * 8 + 0x7900, c, w * 16, h * 8, f, g);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }

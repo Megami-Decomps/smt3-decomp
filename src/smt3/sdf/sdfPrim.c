@@ -618,7 +618,7 @@ void sdfPrimLinkSimplePacket(s32 aTag, void (*aFunc)(s32), s32 aPacketSize, s32 
     }
     packetAddress = aAllocator(aPacketSize);
     aFunc(packetAddress);
-    sdfDrawTagLink(aTag, packetAddress);
+    sdfDrawTagLink(EE_ADDR_PTR(aTag), packetAddress);
 }
 
 void sdfPrimSetOpaqueElem(sdfPrimTransElem_t *aElem) {
@@ -800,7 +800,7 @@ void sdfPrimLinkBitBltPacket(s32 aTag, u32 aDstGsAddr, s32 aDstBuffWidth,
     sdfPrimSetBitBltPacket((sdfPrimBitBltPacket_t *)packetAddress, aDstGsAddr, aDstBuffWidth,
                                     aDstPixelFormat, aDstX, aDstY, aSrcGsAddr, aSrcBuffWidth,
                                     aSrcPixelFormat, aSrcX, aSrcY, aWidth, aHeight, aDirMode);
-    sdfDrawTagLink(aTag, packetAddress);
+    sdfDrawTagLink(EE_ADDR_PTR(aTag), packetAddress);
 }
 
 void sdfPrimFrameMovePredraw(sdfPrimFrameMovePacket_t *aPre, s32 aEvenOdd) {
@@ -967,7 +967,7 @@ void sdfPrimLinkG4(s32 aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aColor0, s32 aX1,
     packet->dmatag = 0x20000006;
     packet->vifCommands = (((u64)0x50000006 << 16) | 0x1000) << 16;
     sdfPrimSetG4Elem(&packet->elem, aPrim, aX0, aY0, aColor0, aX1, aY1, aColor1, aX2, aY2, aColor2, aX3, aY3, aColor3, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(EE_ADDR_PTR(aTag), (s32)packet);
 }
 
 void sdfPrimSetFt3Elem(sdfPrimFt3Elem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0, s32 aX1, s32 aY1, s32 aU1, s32 aV1, s32 aX2, s32 aY2, s32 aU2, s32 aV2, s32 aZ) {
@@ -996,7 +996,7 @@ void sdfPrimLinkFt3(s32 aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0,
     packet->dmatag = 0x20000005;
     packet->vifCommands = (((u64)0x50000005 << 16) | 0x1000) << 16;
     sdfPrimSetFt3Elem(&packet->elem, aColor, aPrim, aX0, aY0, aU0, aV0, aX1, aY1, aU1, aV1, aX2, aY2, aU2, aV2, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(EE_ADDR_PTR(aTag), (s32)packet);
 }
 
 void sdfPrimSetFt4Elem(sdfPrimFt4Elem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0,
@@ -1064,7 +1064,7 @@ void sdfPrimLinkGt3(s32 aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0,
     packet->dmatag = 0x20000006;
     packet->vifCommands = (((u64)0x50000006 << 16) | 0x1000) << 16;
     sdfPrimSetGt3Elem(&packet->elem, aPrim, aX0, aY0, aU0, aV0, aColor0, aX1, aY1, aU1, aV1, aColor1, aX2, aY2, aU2, aV2, aColor2, aZ);
-    sdfDrawTagLink(aTag, (s32)packet);
+    sdfDrawTagLink(EE_ADDR_PTR(aTag), (s32)packet);
 }
 
 void sdfPrimSetGt4Elem(sdfPrimGt4Elem_t *aElem, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0, s32 aColor0,

@@ -222,7 +222,7 @@ void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSpri
     tag = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     sdf2DLinkTexPacket(tag, pSprite->tex, 0);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[OtNo];
     otp->regFunc(otp, tag);
     fclDrawPanelSprite2(0x44, OtNo);
@@ -371,7 +371,7 @@ void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
     tag = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     sdf2DLinkTexPacket(tag, pSprite->tex, 0);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[OtNo];
     otp->regFunc(otp, tag);
     fclDrawPanelSprite2(0x44, OtNo);

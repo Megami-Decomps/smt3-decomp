@@ -393,7 +393,7 @@ void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
         sdf3DMakeDirectRefPacket(packet,
             (u32)sdfTexGetPacket(child->hTex),
             sdfTexGetPacketLength(child->hTex));
-        sdfDrawTagLinkRef(child->pBillTag[selected], packet);
+        sdfDrawTagLinkRef(child->pBillTag[selected], EE_ADDR(packet));
         if ((u16)(child->type & 1) != 0) {
             SDF_VU0_LOADVECTOR(aViewTarget);
             SDF_VU0_LOADVECTOR_B(aViewEye);

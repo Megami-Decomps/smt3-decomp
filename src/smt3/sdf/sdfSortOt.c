@@ -494,7 +494,7 @@ void sdfSortOtAvlRegist(sdfSortOtNode_tag **root_p, sdfDrawTag_t *tag) {
         cur = *link;
     }
     tag->next = NULL;
-    node = sdfGrAllocPacketBuff(0x10);
+    node = EE_ADDR_PTR(sdfGrAllocPacketBuff(0x10));
     node->right = NULL;
     node->left = NULL;
     node->tag = tag;
