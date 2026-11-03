@@ -26,7 +26,7 @@ extern s32 sdfGrAllocPacketBuff(s32 aSize);
 
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *, s32, s32, s32, s32);
 
@@ -48,7 +48,7 @@ extern void evtBitAllOff(void);
 
 extern void evtDebugPrintCamera(void);
 
-ps2AddrS_t EventDebugProcess1(dds3ProcessID_t *id);
+addrS_t EventDebugProcess1(dds3ProcessID_t *id);
 
 extern dds3Basic_t *dds3GetActiveScene(void);
 extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *scene);
@@ -59,7 +59,7 @@ extern void *dds3FontReqAllocDrawTag(void);
 extern const char D_0054F790[];
 extern const char *D_0054F788;
 extern u32 evtDebugCameraPage;
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
 void evtDebugPrintCamera(void)
 {
@@ -133,7 +133,7 @@ void *evtGetDebugProcess(void)
     return (void *)EventDebugProcess1;
 }
 
-ps2AddrS_t EventDebugProcess1(dds3ProcessID_t *id)
+addrS_t EventDebugProcess1(dds3ProcessID_t *id)
 {
     char path[0x40];
     sdfDrawTag_t *tag;
@@ -228,10 +228,10 @@ extern s32 evtSceneDispTimer, evtSceneDispState;
 extern s8 dds3PadBitTable[];
 extern const char D_0054F810[], D_0054F818[];
 extern sdfGrOt_t D_002F6938;
-extern ps2AddrS_t dds3DebugBasic(dds3ProcessID_t *id);
+extern addrS_t dds3DebugBasic(dds3ProcessID_t *id);
 extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
 
-ps2AddrS_t evtSceneDispProcess(dds3ProcessID_t *id)
+addrS_t evtSceneDispProcess(dds3ProcessID_t *id)
 {
     evtSceneDispRows_t rows = D_0053B348;
     evtSceneDispRow_t *row;

@@ -207,8 +207,8 @@ typedef struct rcvCalcWork_t {
 
 typedef struct cmpInfoWindow_t cmpInfoWindow_t;
 extern rcvCalcWork_t *rcvCalcState;
-extern void *memset(void *dst, s32 value, ps2Size_t size);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
+extern void *memset(void *dst, s32 value, size_t size);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, addrS_t layout);
 extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
 
 void rcvCreateLocalStock(rcvStockList_t *list, s8 mask)
@@ -251,7 +251,7 @@ void rcvCreateLocalStock(rcvStockList_t *list, s8 mask)
                        (u8)((u8)list->partyCount + (u8)list->reserveCount), 5, 0);
     cmpResetCursorInfo(&rcvCalcState->listCursor);
 }
-extern void *dds3GetProcessData(ps2AddrS_t id);
+extern void *dds3GetProcessData(addrS_t id);
 extern s32 dds3GetProcessStat(s32 id);
 extern void cmpClearCursorSlots(cmpCursorInfo_t *cursor);
 extern s32 fclScriptStart(s32 script, s32 entry, void *process);

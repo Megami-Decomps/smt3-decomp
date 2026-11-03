@@ -38,9 +38,9 @@ struct fldWallMeshRecord_t {
     fldCollisionDescriptor_t geometry;
 };
 
-extern void *memset(void *, int, ps2Size_t);
+extern void *memset(void *, int, size_t);
 
-extern ps2Addr_t fldItemBoxObjBuf;
+extern addr_t fldItemBoxObjBuf;
 
 extern collision_s *fldMatterTable;
 

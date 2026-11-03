@@ -122,7 +122,7 @@ typedef struct
 extern char *strcpy(char *dst, const char *src);
 extern void pacFileHandleFree_(void *pacHandle);
 
-ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+addrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 void mdlFreeMotionCtrlr(mdlObj_t *aHandle, sdfMotionCtrlr_t *aCtrlr);
 
 
@@ -254,14 +254,14 @@ extern const char _ctype_[]; /* newlib character classes: EOF slot, then 256 byt
 extern s32 sceDopen(const char *name);
 extern s32 sceDread(s32 handle, mdlDirectoryEntry_t *entry);
 extern s32 sceDclose(s32 handle);
-extern s32 memcmp(const void *first, const void *second, ps2Size_t size);
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern s32 memcmp(const void *first, const void *second, size_t size);
+extern void *memcpy(void *a, const void *b, size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 extern char *strcat(char *dst, const char *src);
 extern char *strrchr(const char *text, s32 character);
 extern s32 strcasecmp(const char *first, const char *second);
 extern void sdfDummyFunc(void);
-extern fileRequest_t *fileLoadEx(const char *filename, s32 headOrTail, ps2Addr_t endCallback, ps2Addr_t callbackParm);
+extern fileRequest_t *fileLoadEx(const char *filename, s32 headOrTail, addr_t endCallback, addr_t callbackParm);
 extern void sdfModelCopyStat(sdfModelRootNode_t *aDstRoot, sdfModelRootNode_t *aSrcRoot);
 extern void sdfMotionChangeBlend(sdfMotionCtrlr_t *aCtrlr, s32 aCutNum, s32 aType, f32 aPreFrame, f32 aBlendLeng);
 extern void mdlStopEffect(mdlObj_t *aHandle, s32 aPlayGroup);
@@ -661,7 +661,7 @@ char *mdlSetFileName(char *buff, const char *fname) {
     return strcat(buff, fname);
 }
 
-ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode) {
+addrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode) {
     char requestPath[0x80];
     dds3ModelResrc_t *entity;
     dds3ModelFileIndex_t *selection;

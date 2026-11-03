@@ -64,7 +64,7 @@ enum sdf_stream_playback {
     SDF_STREAM_PLAYBACK_CADENCED = 2
 };
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 #include "sdk_libmrpc.h"
 
@@ -115,8 +115,8 @@ struct sifPrintRpcServerData_t {
     sifRpcDataQueue_t *queue;
 };
 
-PS2_SIZE_CHECK(sifRpcDataQueue_size_must_be_0x20, sifRpcDataQueue_t, 0x20);
-PS2_SIZE_CHECK(sifPrintRpcServerData_size_must_be_0x44, sifPrintRpcServerData_t, 0x44);
+SIZE_CHECK(sifRpcDataQueue_size_must_be_0x20, sifRpcDataQueue_t, 0x20);
+SIZE_CHECK(sifPrintRpcServerData_size_must_be_0x44, sifPrintRpcServerData_t, 0x44);
 
 extern void *sdfPrintRpcFunc(s32 unused, sifCommand_t *packet);
 extern s32 GetThreadId(void);

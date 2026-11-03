@@ -62,7 +62,7 @@ sdfMat_t *sdfMatNew(void);
 void sdfMatSetConstant(sdfMat_t *aMat, f32 aRatio);
 void sdf3DPrimLinkTm(void *aTag, void *aAllocator);
 void sdf3DPrimLinkMat(void *aTag, sdfMat_t *aMat, void *aAllocator);
-void *memset(void *a, s32 b, ps2Size_t c);
+void *memset(void *a, s32 b, size_t c);
 void *effPkt3DPrimMakePoly(effDebugPolyParams_t *aParm);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */

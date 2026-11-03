@@ -2,8 +2,8 @@
 #include "libsdf.h"
 
 /* Declared here because no header carries these. */
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *sdfChipAllocDirect(s32 aSize);
 extern void *sdfChipAllocZeroDirect(s32 aSize);
@@ -20,7 +20,7 @@ extern sdfItemArray_t *sdfTexListNew(s32 aInitCapa);
 
 extern void sdfDecompInit(struct sdfDecomp_t *cb, u8 *dst);
 extern s32 sdfDecomp(struct sdfDecomp_t *cb, const u8 *src, s32 length);
-extern void sdfAddressResolver(s32 *aDataBody, ps2AddrS_t aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
+extern void sdfAddressResolver(s32 *aDataBody, addrS_t aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
 s32 sdfPacStdCallback(sdfPacDecodeCb_t *cb, s32 cause, sdfPacStdBlockHeader_t *hdr);
 void sdfPacNewBlock(sdfPacDecodeCb_t *cb);

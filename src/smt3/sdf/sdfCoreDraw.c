@@ -8,13 +8,13 @@
 #define SDF_DMA_QWORD_SHIFT 4
 #define SDF_DMA_CHCR_TTE 0x40
 
-extern ps2Addr_t corePktCurrLight;
+extern addr_t corePktCurrLight;
 extern f32 corePktZBias;
-extern ps2Addr_t corePktCurrFog;
+extern addr_t corePktCurrFog;
 extern u128 corePktFogParm;
 extern u8 vu0MicroPacket[];
 extern u8 vu1MicroPacket[];
-extern ps2AddrS_t corePktPointBuff;
+extern addrS_t corePktPointBuff;
 extern sdfMemHandle_t *sdfCoreDrawBuffHandle;
 
 extern void *sceDmaGetChan(s32);

@@ -1925,7 +1925,7 @@ struct sdfFileCmdHandle_t {
     s32 errorCode; /* 0x2C */
     s32 currentOffset; /* 0x30 */
     u8 remainder[4]; /* 0x34 */
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32); /* 0x38 */
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, addrS_t, s32, s32); /* 0x38 */
     s32 userData; /* 0x3C: opaque callback-context word */
 };
 
@@ -2404,9 +2404,9 @@ void mdlLink(dds3ModelHandle_t *aHandle, struct sdfGrOt_t **aModelOt);
 
 void mdlSetPosition(dds3ModelHandle_t *aHandle);
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
-extern void *memset(void *a, int b, ps2Size_t c);
+extern void *memset(void *a, int b, size_t c);
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -2416,7 +2416,7 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* Load axis-angle rotation into VU0 vf28-vf31. */
 void SetRotateMatrixAxis(f32 aAngle, const sdfVector3_t *aAxis);

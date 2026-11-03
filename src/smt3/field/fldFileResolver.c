@@ -60,7 +60,7 @@ extern dds3Basic_t *dds3AddMatterObjectBasic(s32 serialID, f32 *pos, f32 *rot);
 
 extern u32 dds3AllocObjectId(void);
 
-extern void dds3SetUnitObjectId(dds3Basic_t *node, ps2Addr_t value);
+extern void dds3SetUnitObjectId(dds3Basic_t *node, addr_t value);
 
 dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 modelRangeID);
 
@@ -147,11 +147,11 @@ u8 *fldGetInfoHeader(fldTransferChunk_t *pData);
 
 void sdfAddressResolverReset(u32 *aDataBody, u32 aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
-void fldAddressResolver(ps2Addr_t pFileTop, fldTransferChunk_t *pData);
+void fldAddressResolver(addr_t pFileTop, fldTransferChunk_t *pData);
 
-extern void sdfAddressResolver(s32 *aDataBody, ps2AddrS_t aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
+extern void sdfAddressResolver(s32 *aDataBody, addrS_t aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
-void fldAddressResolverReset(ps2Addr_t pFileTop, fldTransferChunk_t *pData);
+void fldAddressResolverReset(addr_t pFileTop, fldTransferChunk_t *pData);
 
 void fldLoadNextFile_SetId_BtlRet(u32 field, u32 area);
 
@@ -184,7 +184,7 @@ sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 extern u32 sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 sdfMemHandle_t *fldLoadNextFileF1(void **pData, s32 field, s32 area);
 
@@ -225,7 +225,7 @@ extern s32 sdfMemGetSize(const sdfMemHandle_t *aHandle);
 
 extern u8 *sdfMemGetPtr(const sdfMemHandle_t *aHandle);
 
-extern void fldAmbLoadFromMem(u8 *data, ps2AddrS_t mh);
+extern void fldAmbLoadFromMem(u8 *data, addrS_t mh);
 
 extern void fldAutoMapFontInit(s32 bank);
 
@@ -296,7 +296,7 @@ extern sdfMemHandle_t *D_0055DA98[];
 
 extern void *D_0055DAA8[];
 
-extern ps2Addr_t D_0054EBCC;
+extern addr_t D_0054EBCC;
 
 extern fileRequest_t *fldFileBuf1;
 
@@ -344,7 +344,7 @@ extern void fldFileResolverFL1(fldFileInfoHeaderFL1_t *info);
 extern void fldSetFileResolverIdx(u32 index);
 extern char *fldResolverFL1Data[4];
 extern char D_0054EBC0[]; /* "%s%s", shared with fldMakeResouceBasicFL1. */
-extern void *memset(void *buffer, s32 value, ps2Size_t size);
+extern void *memset(void *buffer, s32 value, size_t size);
 extern void fldMakeResouceBasicFL1(void *typeTable, u32 typeCount);
 
 u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, void *textureBuffer);
@@ -356,7 +356,7 @@ extern void fldAutoMapSetField(s32 fld, s32 area, s32 block);
 extern s32 sdfTexSetTB(void *aData);
 
 extern u32 D_0054EB98;
-extern ps2Addr_t D_0054EBD0, D_0054EBD4, fldFileBuf2;
+extern addr_t D_0054EBD0, D_0054EBD4, fldFileBuf2;
 
 extern u8 *FildMaskObj, *mat_black, *mat_white, *mat_line;
 
@@ -512,10 +512,10 @@ typedef struct fldResourceLight_t {
     f32 AmbientR, AmbientG, AmbientB;
 } fldResourceLight_t;
 
-extern dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *, void *, ps2AddrS_t);
-extern dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *, void *, ps2AddrS_t);
-extern dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *, void *, ps2AddrS_t);
-extern dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *, void *, ps2AddrS_t);
+extern dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *, void *, addrS_t);
+extern dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *, void *, addrS_t);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *, void *, addrS_t);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *, void *, addrS_t);
 extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *, void *, void *);
 extern dds3Basic_t *dds3AddESPEffectObjectBasic(const char *, void *, void *, f32);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, s32);
@@ -1146,11 +1146,11 @@ void sdfAddressResolverReset(u32 *aDataBody, u32 aOffset, const u8 *aAddrInfoPtr
 }
 
 /* Relocate the words described by this packed-resource transfer chunk. */
-void fldAddressResolver(ps2Addr_t pFileTop, fldTransferChunk_t *pData) {
+void fldAddressResolver(addr_t pFileTop, fldTransferChunk_t *pData) {
     sdfAddressResolver(EE_ADDR_AS(s32 *, pFileTop), (s32)pFileTop, EE_ADDR_AS(const u8 *, ((s32)pFileTop + pData->offset)), pData->size);
 }
 
-void fldAddressResolverReset(ps2Addr_t pFileTop, fldTransferChunk_t *pData) {
+void fldAddressResolverReset(addr_t pFileTop, fldTransferChunk_t *pData) {
     sdfAddressResolverReset(EE_ADDR_AS(u32 *, pFileTop), pFileTop, EE_ADDR_AS(u8 *, ((s32)pFileTop + pData->offset)), pData->size);
 }
 

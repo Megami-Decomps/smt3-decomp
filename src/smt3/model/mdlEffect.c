@@ -174,7 +174,7 @@ typedef struct { u8 hasAudio, stereo, loopMode, playbackCadenceStep; } mdlIpuPar
 
 struct mdlEffectResrc_IPU_t
 {
-    ps2Addr_t data; /* EE byte address handed to the IPU stream initializer. */
+    addr_t data; /* EE byte address handed to the IPU stream initializer. */
     sdfMemHandle_t *dataMemHandle;
     u8 inUse, playing;
     u8 unk0A[6];
@@ -243,7 +243,7 @@ extern void sdfChipFreeDirect(void *aPtr);
 
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-extern void *dds3BillboardCreate(s32, ps2Addr_t);
+extern void *dds3BillboardCreate(s32, addr_t);
 
 extern void dds3BillboardDelete(mdlBillboard_t *);
 
@@ -295,7 +295,7 @@ extern void dds3EffectSetScale(mdlEffect_t *, f32);
 
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t);
+extern void sdfDrawTagLink(sdfDrawTag_t *, addr_t);
 
 extern void *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 

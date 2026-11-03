@@ -91,7 +91,7 @@ effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pPa
 extern s8 D_0054F2C5;
 /* The result slot must be valid whenever the create callback is present. */
 extern effDebugMenu_t D_003203E0;
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 extern void effDebugAllocDrawTag(void);
 extern void effDebugLinkDrawTag(void);
 extern s8 D_005298CB[];
@@ -268,8 +268,8 @@ void MultMatrixNoArg(void);
 u32 sdfMemLock(sdfMemHandle_t *aHandle);
 extern s32 EffEveCPSmokeCount;
 extern dds3Billboard_t *dds3BillboardFileLoad(s32 kind, const char *path);
-extern ps2Addr_t hEffEveCPSmokeBill01Tex;
-extern ps2Addr_t hEffEveCPSmokeBill02Tex;
+extern addr_t hEffEveCPSmokeBill01Tex;
+extern addr_t hEffEveCPSmokeBill02Tex;
 void dds3BillboardDelete(struct dds3Billboard_t *hData);
 void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 extern effRandState_t dds3EffectBase[];
@@ -1196,12 +1196,12 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
-extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
-extern ps2AddrS_t dds3BillboardGetTex(void *hBillboard);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
+extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, addr_t aPacket);
+extern addrS_t dds3BillboardGetTex(void *hBillboard);
 extern sdfTexPacket_t *sdfTexGetPacket(sdfTexHandle_t *aHandle);
 extern s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle);
-extern void sdf3DMakeDirectRefPacket(void *aPacket, ps2Addr_t aData, s32 aLeng);
+extern void sdf3DMakeDirectRefPacket(void *aPacket, addr_t aData, s32 aLeng);
 extern void sdfBillBoardMakeTMPacket(void *aPacket, const f32 *aTM);
 extern u32 *sdfBillBoardMakeN(const sdfVector4_t *aCenter, const void *aColor,
                               const void *aUVList, const void *aXYOffsetList, s32 aNum,
@@ -1218,7 +1218,7 @@ typedef struct effEveBillBatch_t {
 
 extern sdfGrOt_t sdfGrOtTable[85];
 
-PS2_SYMBOL_AT(sdfGrOt_t, effEveCPSmokeOt1, sdfGrOtTable, 0x600);
+SYMBOL_AT(sdfGrOt_t, effEveCPSmokeOt1, sdfGrOtTable, 0x600);
 
 /* vu0 routine: advance every live particle of one smoke set and batch two
  * textured quads per particle into the two ordering tables. VIF consumes XYZ;

@@ -90,7 +90,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 errorCode; /* 0x2C */
     s32 currentOffset; /* 0x30 */
     u8 remainder[4]; /* 0x34 */
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32); /* 0x38 */
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, addrS_t, s32, s32); /* 0x38 */
     s32 userData; /* 0x3C: opaque callback-context word */
 } sdfFileCmdHandle_t;
 
@@ -122,7 +122,7 @@ extern sdfFileRpcCb_t sdfFileRpcState;
 extern s32 sdfFileRpcBuf[];
 
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
-                                          s32 (*callback)(sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32),
+                                          s32 (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32),
                                           s32 callbackContext);
 
 extern s32 sdfFileCmdFileSize();
@@ -136,7 +136,7 @@ extern s32 SignalSema(s32);
 #include "sdk_libkernl.h"
 
 /* Declared here because no header carries these. */
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern s32 sceSifDmaStat(s32);
 
@@ -434,7 +434,7 @@ extern void *__deregister_frame_info(void *fn);
 
 extern void free(void *ptr);
 
-extern void *malloc(ps2Size_t size);
+extern void *malloc(size_t size);
 
 extern void __malloc_lock(_reent *r);
 
@@ -488,7 +488,7 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
@@ -571,7 +571,7 @@ typedef struct {
     u32 privateData[6];
 } sdfSceIoStat_t;
 
-PS2_SIZE_CHECK(sdfSceIoStat_size_must_be_0x40, sdfSceIoStat_t, 0x40);
+SIZE_CHECK(sdfSceIoStat_size_must_be_0x40, sdfSceIoStat_t, 0x40);
 
 extern s32 sdfCreateSema(s32 initCount, s32 maxCount, s32 option);
 extern s32 sceGetstat(const char *path, sdfSceIoStat_t *stat);

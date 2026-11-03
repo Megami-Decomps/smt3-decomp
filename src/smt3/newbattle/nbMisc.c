@@ -131,13 +131,13 @@ void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag
 void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
                         sdfVector4_t *center, f32 r, f32 scl, f32 h);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 s32 nbClipEffectNum(s32 screenPosition[4]);
 
 void nbLoadKoukaPos(nbFormation_t *form);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern u32 effBTLSystemGetRGBA(s32 id);
 
@@ -510,7 +510,7 @@ extern const f32 D_003FADB0[][4];
 extern const u32 D_003FAED0[];
 extern sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors,
                                                 s32 vertexCount, u32 primitiveFlags);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void MultMatrixNoArg(void);
 extern void SetRotateMatrixX_B(f32 angle);
 

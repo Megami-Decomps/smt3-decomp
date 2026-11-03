@@ -206,7 +206,7 @@ typedef struct nbNegoProcessData_t
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern char D_00545B78[];
 

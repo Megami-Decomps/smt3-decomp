@@ -6,7 +6,7 @@ extern s8 dds3PadButtonState[64];
 
 extern u64 *dds3PrimFrameRect(s32 aX, s32 aY, s32 aZ, s32 aW, s32 aH, u32 aBgCol, u32 aFrameCol);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 void SelectSub(s32 *pbase, s32 *pm, s32 list, s32 win, s32 pad, s32 pluskey, s32 minuskey) {
     s32 backwardState;

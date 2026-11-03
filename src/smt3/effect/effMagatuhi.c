@@ -459,7 +459,7 @@ extern s8 dds3PadStickStatusState[2][2];
 extern effDebugMenu_t *D_0054F224;
 
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
 extern struct sdfDrawTag_t *effDebugDrawTag;
 
@@ -472,7 +472,7 @@ extern s32 effDebugPosX;
 
 extern u32 effDebugPosY;
 
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 /* Fixed-scale form of the SDK's four-word RGBA packing scratch buffer. */
 static inline u32 PackMagatuhiTrailColor(void) {
@@ -495,9 +495,9 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
-void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* Build XYZ and attribute VIF streams; return the packet address.
  * vertexCount must be positive; n retains its native count/byte-size reuse. */
@@ -505,7 +505,7 @@ void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor, const void *aUVList, const void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
 
 /* Round payloadBytes up to quadwords and pair FLUSHA with VIF DIRECT. */
-void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *aPacket, ps2Addr_t aData, s32 aLeng);
+void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *aPacket, addr_t aData, s32 aLeng);
 
 f32 sdfCos(f32 aRadius);
 
@@ -2286,7 +2286,7 @@ void InitMagatuhiEditorProcess(void) {
 
 #ifdef NON_MATCHING
 extern u8 D_005518E2[];
-extern void *memcpy(void *dst, const void *src, ps2Size_t size);
+extern void *memcpy(void *dst, const void *src, size_t size);
 
 effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
 {

@@ -455,7 +455,7 @@ enum trackPolyTopology {
 extern sdfMemHandle_t *sdfMemAllocDirect(u32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 extern void *sdfChipAllocDirect(u32 aSize);
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 extern parSystem_t *dds3TrackPolyCreate(s32 number, s32 face, s32 rec, u32 type);
 extern void dds3TrackPolySetMode(parSystem_t *hTrackPoly, u16 mode);
 extern void dds3TrackPolyVCSet(parSystem_t *hTrackPoly, s32 type, u32 abgr_in, u32 abgr_out);

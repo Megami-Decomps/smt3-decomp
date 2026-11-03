@@ -616,8 +616,8 @@ extern u8 aViewDown[];
 extern void (*dds3ParticleAllBuffInitTable[])();
 extern void (*dds3ParticleSetScaleTable[])(dds3Particle_Basic_t *, f32);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 void dds3ParticleManagerInit(void);
 dds3Particle_Physics_t *dds3Particle_PhysicsCreate(s32 number);
@@ -770,7 +770,7 @@ void dds3TrackPolyVCRefresh_ParType2(parSystem_t *hTrackPoly, s32 index);
 void dds3TrackPolyDraw(parSystem_t *node);
 void Eff_ModelTrackPolyListDrawOnly(effTrackPolyList_t *hMTPolyList);
 void MultMatrixNoArg(void);
-struct billHandle_t *dds3BillboardCreate(s32 kind, ps2Addr_t data);
+struct billHandle_t *dds3BillboardCreate(s32 kind, addr_t data);
 void dds3BillboardSetAnimColorAdvMode(billHandle_t *hBillboard);
 struct billHandle_t *dds3BillboardCopy(const struct billHandle_t *hBillboard);
 void dds3BillboardSetAnimKey(billHandle_t *hBillboard, u32 frame);

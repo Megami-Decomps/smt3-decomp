@@ -60,46 +60,55 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 typedef float f32;
 typedef double f64;
 
-/* The EE's size_t. ee-gcc is invoked with -D__SIZE_TYPE__=unsigned int, so
- * this is a 32-bit unsigned here; on a target whose size_t is wider it
- * follows that compiler. The C library declarations in this tree spell their
- * length parameter with it, the one width that differs between targets with
- * no cast at the call site to mark it. */
-typedef __SIZE_TYPE__ ps2Size_t;
+/* size_t, spelled here because the retail build compiles with -nostdinc and
+ * has no system header to take it from. ee-gcc is invoked with
+ * -D__SIZE_TYPE__=unsigned int, so it is a 32-bit unsigned here and follows
+ * the compiler on a target whose own is wider. The C library declarations in
+ * this tree spell their length parameter with it, the one width that differs
+ * between targets with no cast at the call site to mark it.
+ *
+ * The right-hand side has to stay __SIZE_TYPE__ rather than a concrete type.
+ * Where a host does see <stddef.h>, this typedef is then a redundant
+ * identical one, which gcc and clang both accept; a concrete spelling
+ * conflicts instead. This build cannot tell the two apart, because on MIPS
+ * o32 unsigned int and unsigned long are both 32 bits and the image is
+ * byte-identical either way. Measured on i386: unsigned long gives
+ * "conflicting types for size_t" out of stddef.h under both compilers. */
+typedef __SIZE_TYPE__ size_t;
 
 /* A guest address held in an integer, which is how this engine passes a
  * packet, buffer or callback address through a field, parameter or return
  * type rather than through a pointer. EE_ADDR produces one and EE_ADDR_PTR
  * takes one back. On this target it is exactly u32, so every layout, every
  * promotion and every byte of output is what it was when these declarations
- * spelled u32; a build with wider pointers defines PS2_ADDR_TYPE to an
+ * spelled u32; a build with wider pointers defines ADDR_TYPE to an
  * integer that holds its own pointers.
  *
  * It is deliberately not spelled on a hardware packet word. A DMA tag, VIF
  * code or GIF register field is 32 bits because the hardware reads 32 bits
  * there, and widening one would describe the packet wrongly. Those stay u32
  * and a host truncates into them on purpose. */
-#ifndef PS2_ADDR_TYPE
-#define PS2_ADDR_TYPE u32
+#ifndef ADDR_TYPE
+#define ADDR_TYPE u32
 #endif
-typedef PS2_ADDR_TYPE ps2Addr_t;
+typedef ADDR_TYPE addr_t;
 
 /* The same, where the declaration spells the signed type. The signedness is
- * kept rather than folded into ps2Addr_t for the reason EE_ADDR_S exists:
+ * kept rather than folded into addr_t for the reason EE_ADDR_S exists:
  * unsigned is not a free substitution, it changes comparisons, division and
  * promotion, which on this target is codegen. */
-#ifndef PS2_ADDR_S_TYPE
-#define PS2_ADDR_S_TYPE s32
+#ifndef ADDR_S_TYPE
+#define ADDR_S_TYPE s32
 #endif
-typedef PS2_ADDR_S_TYPE ps2AddrS_t;
+typedef ADDR_S_TYPE addrS_t;
 
 /* Asserts a structure's retail size, by the negative-array-size trick ee-gcc
  * 2.96 accepts. The typedef emits nothing, so this costs no code. The check
  * applies only where a pointer is four bytes: a wider pointer moves every
  * member after one, so the retail size is the wrong question there and the
  * members' own types stay the record of the layout. */
-#ifndef PS2_SIZE_CHECK
-#define PS2_SIZE_CHECK(name, type, size) \
+#ifndef SIZE_CHECK
+#define SIZE_CHECK(name, type, size) \
     typedef char name[(sizeof(void *) != 4 || sizeof(type) == (size)) ? 1 : -1]
 #endif
 
@@ -109,15 +118,15 @@ typedef PS2_ADDR_S_TYPE ps2AddrS_t;
  * arithmetic, so nothing is allocated and the reference stays gp-relative.
  * A build whose assembler cannot resolve the expression, which is every
  * target but the EE, defines this differently. */
-#ifndef PS2_SYMBOL_AT
-#define PS2_SYMBOL_AT(type, name, base, offset) \
+#ifndef SYMBOL_AT
+#define SYMBOL_AT(type, name, base, offset) \
     extern type name; \
     __asm__(#name " = " #base " + " #offset)
 #endif
 
 /* The same for a symbol naming a region rather than an object, so the
  * declaration is an array and a difference against another such symbol stays
- * pointer arithmetic. PS2_SYMBOL_AT cannot serve: it puts the type before the
+ * pointer arithmetic. SYMBOL_AT cannot serve: it puts the type before the
  * name and an array's brackets go after it.
  *
  * Structured rather than a raw asm string, for a reason measured on a
@@ -129,8 +138,8 @@ typedef PS2_ADDR_S_TYPE ps2AddrS_t;
  * tree, so the alias belongs behind its own name. A build whose assembler
  * cannot resolve the expression redefines this to the declaration alone and
  * supplies the symbol itself. */
-#ifndef PS2_SYMBOL_AT_REGION
-#define PS2_SYMBOL_AT_REGION(type, name, base, offset) \
+#ifndef SYMBOL_AT_REGION
+#define SYMBOL_AT_REGION(type, name, base, offset) \
     extern type name[]; \
     __asm__(#name " = " #base " + " #offset)
 #endif

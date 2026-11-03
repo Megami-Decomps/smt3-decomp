@@ -72,7 +72,7 @@ typedef struct sdf2DTexPacket_t {
     sdfGrTagStdReg_t clamp;
 } sdf2DTexPacket_t;
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* Per-texture reference count and non-owning clone source (0x8). */
 /* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
@@ -146,7 +146,7 @@ sdf2DTexPacket_t *sdf2DMakeTexPacket(sdf2DTexPacket_t *aPacket, sdfTexHandle_t *
 s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx) {
     s32 packetBytes = sdf2DGetTexPacketSize(aTexHndl);
     sdf2DTexPacket_t *packet = EE_ADDR_AS(sdf2DTexPacket_t *, sdfGrAllocPacketBuff(packetBytes));
-    ps2AddrS_t packetAddress = EE_ADDR_S(sdf2DMakeTexPacket(packet, aTexHndl, aCtx));
+    addrS_t packetAddress = EE_ADDR_S(sdf2DMakeTexPacket(packet, aTexHndl, aCtx));
     sdfDrawTagLink(aTag, packetAddress);
     return packetAddress;
 }

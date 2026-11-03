@@ -202,7 +202,7 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -396,7 +396,7 @@ u32 nbPow10(u32 v, s32 n)
 #ifdef NON_MATCHING
 /* NON_MATCHING: 37 of 173 words differ; the loop body is exact and the only
    real difference is where the scheduler puts the i = 6 load. */
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 alpha)
 {

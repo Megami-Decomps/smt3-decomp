@@ -24,7 +24,7 @@ typedef struct
     /* 0x30 */ s32 TimerSpd;
 } cmpHeartsIcon_t;
 
-PS2_SIZE_CHECK(cmpHeartsIconSizeCheck, cmpHeartsIcon_t, 0x34);
+SIZE_CHECK(cmpHeartsIconSizeCheck, cmpHeartsIcon_t, 0x34);
 
 typedef struct
 {

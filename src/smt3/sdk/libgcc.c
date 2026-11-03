@@ -80,7 +80,7 @@ extern s32 sceSifDmaStat(s32);
 
 extern s32 GetThreadId(void);
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
 
@@ -256,7 +256,7 @@ extern void *__deregister_frame_info(void *fn);
 
 extern void free(void *ptr);
 
-extern void *malloc(ps2Size_t size);
+extern void *malloc(size_t size);
 
 extern void __malloc_lock(_reent *r);
 
@@ -310,7 +310,7 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
@@ -1115,7 +1115,7 @@ typedef struct {
     u8 indirect;
 } frameState_t;
 
-PS2_SIZE_CHECK(frameState_size_must_be_0x478, frameState_t, 0x478);
+SIZE_CHECK(frameState_size_must_be_0x478, frameState_t, 0x478);
 
 u8 *libc_2D2C70(u8 *p, frameState_t *state)
 {
@@ -1162,7 +1162,7 @@ typedef struct frameStateInternal {
     struct frameStateInternal *savedState;
 } frameStateInternal_t;
 
-PS2_SIZE_CHECK(frameStateInternal_size_must_be_0x480, frameStateInternal_t, 0x480);
+SIZE_CHECK(frameStateInternal_size_must_be_0x480, frameStateInternal_t, 0x480);
 
 
 typedef union __attribute__((packed)) {

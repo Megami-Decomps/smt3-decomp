@@ -4,7 +4,7 @@
 #include "eeregs.h"
 
 /* Declared here because no header carries these. */
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 enum sdfDecomp_enum {
     SDF_DECOMP_STAT_END = 0,
@@ -65,11 +65,11 @@ typedef struct sdfDecompCb_t {
 /* Read the active packet cursor or restore it at a quadword boundary. */
 s32 sdfGrOpenPacketBuff(void);
 
-void sdfGrClosePacketBuff(ps2AddrS_t aBuffPtr);
+void sdfGrClosePacketBuff(addrS_t aBuffPtr);
 
 extern s32 D_00552170;
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length);
 
@@ -85,7 +85,7 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
     s32 count;
     s32 offset;
     u8 *output;
-    ps2Addr_t sourceAddress;
+    addr_t sourceAddress;
 
     if (cb->stat == 0) {
         return 1;

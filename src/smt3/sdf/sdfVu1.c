@@ -82,7 +82,7 @@ typedef struct sdfCorePacketFaceDivParm_t {
 
 #define SDF_VU_TEXTURED_FLAG 0x10
 
-extern ps2Addr_t corePktCurrLight;
+extern addr_t corePktCurrLight;
 
 extern u128 *corePktFaceList[][3];
 
@@ -138,7 +138,7 @@ extern void corePktXfmUV(void *vertices, s32 count, void *uv, void *transform);
 
 extern void corePktApplyFaceDivColor(sdfCorePacketCb_t *cb, void *parameters);
 
-extern void sdfGrClosePacketBuff(ps2Addr_t aBuffPtr);
+extern void sdfGrClosePacketBuff(addr_t aBuffPtr);
 
 void corePktEmitTexTrisCtx2(sdfCorePacketCb_t *cb, u64 samplingState, u64 textureState,
                           u64 clampState, u64 alphaState, s32 clearPrimitiveFlags);
@@ -184,7 +184,7 @@ static inline sdfCorePacketPointBuff_tag *AllocNode(sdfCorePacketCb_t *work) {
     return node;
 }
 
-extern ps2AddrS_t corePktPointBuff;
+extern addrS_t corePktPointBuff;
 
 extern void corePktRelightBackFaces(u32 cb, s32 count);
 
@@ -1755,8 +1755,8 @@ void corePktOpenAndEmit(sdfCorePacketCb_t *cb) {
 }
 
 u64 *corePktClosePacket(sdfCorePacketCb_t *cb) {
-    ps2Addr_t cursor;
-    ps2Addr_t start;
+    addr_t cursor;
+    addr_t start;
     s32 quadwords;
     u32 descriptor;
     u64 gifTag;
@@ -1797,7 +1797,7 @@ u64 *corePktClosePacket(sdfCorePacketCb_t *cb) {
 u8 *corePktVu0Run(sdfCorePacketPointBuff_tag *output, const void *source, s32 count,
                   s32 transferCount, s32 transferStride)
 {
-    ps2Addr_t input = EE_ADDR(source);
+    addr_t input = EE_ADDR(source);
     s32 done = 0;
     s32 batch, i, qwc;
 

@@ -30,7 +30,7 @@ extern rstData_t *GBWK_1;
 
 /* Declared here because no header carries these. */
 extern s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp);
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern char D_0053DA28[];
 
@@ -176,7 +176,7 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void cmpInitSeqInfo(void *work, void *parent);
 extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
-extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, ps2AddrS_t layout);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, addrS_t layout);
 extern void cmpModelInit(void);
 extern void rstClearHeartsMasterPhase(void);
 extern void fclInitMessage(void *message);

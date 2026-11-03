@@ -82,7 +82,7 @@ extern void sdfMatSetConstant(sdfMat_t *aMat, f32 aRatio);
 extern void sdfMatSetTex(sdfMat_t *aMat, sdfTexHandle_t *aTex);
 extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag, s32 aAllocator);
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);
@@ -285,8 +285,8 @@ typedef struct
     u8 oldLoop;
 } dds3SpPolyLoopWork_t;
 
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 extern dds3SpPolyEntry_t dds3SpPolyTable[];
 extern void (*D_003176A0[])(void *work);
 extern void (*D_003176B0[])(f32 scale, void *work);
@@ -425,7 +425,7 @@ void dds3PolygonDraw(dds3Polygon_t *hPolygon) {
 }
 
 extern sdfGrOt_t sdfGrOtTable[85];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F64B8, sdfGrOtTable, 0x5A0);
+SYMBOL_AT(sdfGrOt_t, D_002F64B8, sdfGrOtTable, 0x5A0);
 
 static inline void parAppendDrawSurfacePool(sdfGrOt_t *pool, sdfDrawTag_t *packet) {
     pool->regFunc(pool, packet);

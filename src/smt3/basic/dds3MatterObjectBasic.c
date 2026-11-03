@@ -24,7 +24,7 @@ extern void sdfChipFreeDirect(void *aPtr);
 
 extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void dds3InitPoseSet(dds3Basic_t *basic);
 

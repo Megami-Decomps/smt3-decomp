@@ -268,7 +268,7 @@ extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_
 
 
 
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
 typedef struct { u16 item; u16 cnt; } nbInnenPhase_t;
@@ -286,7 +286,7 @@ extern nbInnenRec_t D_003E3158[];
 
 extern s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type);
 
-extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, ps2AddrS_t uniqueid, s32 se);
+extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, addrS_t uniqueid, s32 se);
 
 extern s32 evtBitCheck(s32 no);
 
@@ -1067,10 +1067,10 @@ s32 nbFlowFindUnitEntry(nbNegoProcessData_t *n)
 
 extern void *sdfGrAllocPacketBuff(u32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
+SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern char D_00544E98[];
 extern char D_00544EA8[];
 extern char D_00551148[];
@@ -1079,7 +1079,7 @@ extern char D_00551150[];
 void nbNegoDebugPrint(nbNegoProcessData_t *n)
 {
     sdfDrawTag_t *tag;
-    ps2Addr_t packet;
+    addr_t packet;
     s32 index;
     s32 i;
     s32 message;
@@ -1124,7 +1124,7 @@ extern char D_00551158[];
 void nbNegoDebugPrint2(nbNegoProcessData_t *n)
 {
     sdfDrawTag_t *tag;
-    ps2Addr_t packet;
+    addr_t packet;
     s32 i;
     u32 id;
 
@@ -1226,7 +1226,7 @@ s32 nbNegoSetProcessData(dds3ProcessID_t *id)
     return -1;
 }
 
-extern s32 nbGetUniqueIdKoukaPacketCnt(ps2AddrS_t uniqueid);
+extern s32 nbGetUniqueIdKoukaPacketCnt(addrS_t uniqueid);
 extern s32 (*D_004EF468[])(nbNegoProcessData_t *n);
 
 void *nbNegoProcess1(dds3ProcessID_t *id)
@@ -1365,7 +1365,7 @@ extern nbNegoMsgEntry_t negoMsgTable[];
 extern u8 itfMesEmbedded_4EB810[], itfMesEmbedded_4EE8B0[];
 extern u8 itfMesEmbedded_4EF0C8[], itfMesEmbedded_4E3DD8[];
 extern void *sdfChipAllocDirect(s32 size);
-extern void *memset(void *dest, s32 value, ps2Size_t size);
+extern void *memset(void *dest, s32 value, size_t size);
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 index);
 extern nbParty_t *nbGetPartyFromFormindex(s32 index);
 typedef struct itfMesResource_t itfMesResource_t;

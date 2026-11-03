@@ -205,7 +205,7 @@ typedef struct nbNegoProcessData_t
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -259,7 +259,7 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 extern void *nbEventProcess3(dds3ProcessID_t *id);
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
-extern s32 nbMakeBadKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form);
 extern void nbGetEventEntry(nbMainProcessData_t *data);
 
 extern char D_00545DB0[];

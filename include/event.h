@@ -259,13 +259,13 @@ typedef struct evtUnit_t {
     };
     f32 targetVector[4];           /* 0x70 */
     dds3Basic_t *effObj;           /* 0x80 */
-    ps2AddrS_t currentTransitionValue;
+    addrS_t currentTransitionValue;
     s32 previousTransitionValue;
     struct mdlObj_t *owner;
     void *linkedUnit;
     s32 (*motionCallback)(struct evtUnit_t *, s32);
     f32 wobblePhase;
-    ps2AddrS_t pathHandle;         /* 0x9C */
+    addrS_t pathHandle;         /* 0x9C */
     f32 pathSpeed;
     u32 flags;                     /* 0xA4 */
     s16 motionState;               /* 0xA8 */

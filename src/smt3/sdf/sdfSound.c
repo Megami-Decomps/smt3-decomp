@@ -193,7 +193,7 @@ enum sdf_stream_playback {
 
 extern void sdfSndTransToIOP(s32 aIOPAddr, void *aEEAddr, s32 aSize);
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 extern void sdfDelayThread(s32 delay);
 
@@ -296,7 +296,7 @@ extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(
     const char *path,
-    void (*callback)(sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32),
+    void (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32),
     s32 callbackContext);
 extern s32 sdfFileCmdClearError(sdfFileCmd_t *handle);
 extern s32 sdfFileCmdFree(sdfFileCmd_t *handle);
@@ -807,7 +807,7 @@ u64 p2sd_2C1D78(const char *aName)
     return sdfSndSendSyncCmd(0xA0, 0, (void *)aName, strlen(aName));
 }
 
-void p2sdSetPcmBuffer(ps2AddrS_t data, s32 size) {
+void p2sdSetPcmBuffer(addrS_t data, s32 size) {
     s32 *packet;
     D_00593E20.size = size;
     D_00593E20.pending = 1;
@@ -976,7 +976,7 @@ s32 p2sd_2C21D8(u32 aCh)
     return sdfSndSendSyncCmd((aCh - 1) | 0x1D0, 0, NULL, 0);
 }
 
-u32 p2sdSetPcmCallback(ps2Addr_t aCallback)
+u32 p2sdSetPcmCallback(addr_t aCallback)
 {
     if (p2sdPcmBusy != 0) {
         return 0;
@@ -1056,7 +1056,7 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
         p2sdPcmState = 1;
         sdfSndMakeFilename(path, D_00529BE8);
         state = sdfFileCmdReadOpen(path,
-            (void (*)(sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32))sdfFileRpcCallback, 0);
+            (void (*)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32))sdfFileRpcCallback, 0);
         sdfFileRpcArg = state;
         if (state != NULL) {
             WaitSema(sifRpcServerSema);

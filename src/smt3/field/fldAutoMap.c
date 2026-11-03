@@ -32,7 +32,7 @@ extern fldAmAreaData_t *fldAutoMapHeader;
 
 extern s32 fldAutoMapData;
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void sdfModelMakeLocalTm(sdfModelNode_t *aNode);
 

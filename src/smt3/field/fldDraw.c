@@ -70,11 +70,11 @@ sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *aTex);
 
 extern u32 D_0054EC44;
 
-extern ps2Addr_t fldDrawEnv;
+extern addr_t fldDrawEnv;
 
 extern sdfTexHandle_t *D_0054EC60;
 
-extern ps2Addr_t D_00551C9C;
+extern addr_t D_00551C9C;
 
 extern u8 sdfTexEmbedded_2FC4A0[];
 
@@ -86,11 +86,11 @@ sdfGrPacketHeader_t *sdf2DAllocSprite(s32 aNumOfSpr);
 
 void sdfDrawTagInit(sdfDrawTag_t *a);
 
-void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 s32 sdfGrAllocPacketBuff(s32 aSize);
 
-extern ps2AddrS_t sdf2DGetPrimPtr(ps2AddrS_t);
+extern addrS_t sdf2DGetPrimPtr(addrS_t);
 
 void sdfPrimLinkGt4(
     sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0,
@@ -124,9 +124,9 @@ s32 sdfTexGetPacketLength(const sdfTexHandle_t *aHandle);
 
 void SetRotateMatrixZ(f32 aAngle);
 
-void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, addr_t aPacket);
 
-extern void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *, ps2Addr_t, s32);
+extern void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *, addr_t, s32);
 
 extern void sdfBillBoardMakeTMPacket(u8 *, const f32 *);
 
@@ -147,13 +147,13 @@ void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat,
 
 u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);
 
-extern void *memset(void *, int, ps2Size_t);
+extern void *memset(void *, int, size_t);
 
 void sdfFreeAutoDelayed(void *data);
 
 void sdfLinkStoreImage(
     sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle, s32 aSrcX, s32 aSrcY,
-    s32 aWidth, s32 aHeight, ps2AddrS_t aBuffer, s32 aCallback, s32 aCallbackParam,
+    s32 aWidth, s32 aHeight, addrS_t aBuffer, s32 aCallback, s32 aCallbackParam,
     s32 (*aAllocator)(s32));
 
 sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*aAllocator)(s32));
@@ -162,7 +162,7 @@ extern sdfGrFrameSet_t D_00529388;
 
 void sdfLinkLoadImage(
     sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle, s32 aDstX,
-    s32 aDstY, s32 aWidth, s32 aHeight, ps2AddrS_t aBuffer,
+    s32 aDstY, s32 aWidth, s32 aHeight, addrS_t aBuffer,
     s32 (*aAllocator)(s32));
 
 s32 frDestroyFontRequestAfter(struct frFontGlyph_t *pFRQ);
@@ -185,7 +185,7 @@ f32 sdfSin(f32 aRadius);
 
 f32 sdfCos(f32 aRadius);
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 extern void *fldDrwZBuf;
 
@@ -215,9 +215,9 @@ extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, addr_t aPacket);
 
-extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, ps2Addr_t aEnv, void *aPkt);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, addr_t aEnv, void *aPkt);
 
 void fldDrawInit(void) {
     if (D_0054EC44 == 0) {
@@ -910,7 +910,7 @@ void rsetFrameMaskRgbOff(void) {
 
 void ooyTestLine3D(u32 x0, u32 y0, f32 z0, f32 col0, f32 x1, f32 y1, f32 z1, f32 col1) {
     sdfDrawTag_t *list;
-    ps2AddrS_t record;
+    addrS_t record;
     sdfGrOt_t *descriptor;
     D_002FC720[0][0] = z0;
     D_002FC720[0][1] = col0;

@@ -68,7 +68,7 @@ extern void dds3MultiBillboardLinkOt(void);
 extern void dds3CrossfadeRun(void);
 extern void Eve_EffectDraw(void);
 
-effNode_t *dds3EffectCreate(u16 type, u16 arg, ps2AddrS_t param);
+effNode_t *dds3EffectCreate(u16 type, u16 arg, addrS_t param);
 void dds3EffectDataRevision(effResourceHeader_t *header);
 
 extern u8 dds3EffectBase[];
@@ -85,7 +85,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          dds3ProcessFunc_t deleteExit, void *p);
 extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 s32 dds3EffectManagerRunF(dds3ProcessID_t *ProcessID);
 s32 dds3EffectManagerRun(dds3ProcessID_t *ProcessID);
 void dds3EffectManagerExit(void);
@@ -156,7 +156,7 @@ u32 dds3EffectPCFGetState(void) {
     return 1;
 }
 
-effNode_t *dds3EffectCreate(u16 type, u16 arg, ps2AddrS_t param)
+effNode_t *dds3EffectCreate(u16 type, u16 arg, addrS_t param)
 {
     effNode_t *node = sdfChipAllocDirect(sizeof(effNode_t));
 

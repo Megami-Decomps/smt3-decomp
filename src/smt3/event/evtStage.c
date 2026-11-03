@@ -22,7 +22,7 @@ extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 serialID, f32 *pos, f32
 
 struct dds3Basic_t *dds3GetControlScene(void);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 
 void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
@@ -71,7 +71,7 @@ struct BfFlw0Header;
 
 void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
-void dds3SceneBasicMakeScene(dds3Basic_t *object, ps2Addr_t resourceId);
+void dds3SceneBasicMakeScene(dds3Basic_t *object, addr_t resourceId);
 
 void dds3SetActiveScene(struct dds3Basic_t *scene);
 
@@ -303,7 +303,7 @@ s32 evtLoadArea(s32 fld, s32 area)
 }
 
 /* Build a field world object from the supplied resource parameters. */
-s32 evtLoadArea_FromMemory(s32 fld, s32 area, ps2AddrS_t pF1, ps2AddrS_t pF2,
+s32 evtLoadArea_FromMemory(s32 fld, s32 area, addrS_t pF1, addrS_t pF2,
                                      const sdfTextureOffsetListHeader_t *pTB, s32 pBF)
 {
     dds3Basic_t *worldObject;

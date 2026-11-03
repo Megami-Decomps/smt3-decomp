@@ -73,19 +73,19 @@ extern f32 atan2f(f32 y, f32 x);
 
 extern sdfTexPacket_t *sdfTexGetPacket(sdfTexHandle_t *aHandle);
 extern s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle);
-extern void sdf3DMakeDirectRefPacket(void *aPacket, ps2Addr_t aData, s32 aLeng);
-extern void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdf3DMakeDirectRefPacket(void *aPacket, addr_t aData, s32 aLeng);
+extern void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdfBillBoardMakeTMPacket(void *aPacket, const f32 *aTM);
 extern f32 sdfCos(f32 aRadius);
 extern f32 sdfSin(f32 aRadius);
 extern f64 fabs(f64 value);
-PS2_SYMBOL_AT(sdfGrOt_t, dds3MultiBillboardOt, sdfGrOtTable, 0x580);
+SYMBOL_AT(sdfGrOt_t, dds3MultiBillboardOt, sdfGrOtTable, 0x580);
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
 extern u32 dds3GetFrameID(void);
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
-extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, addr_t aPacket);
 
 extern u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor,
                               const void *aUVList, const void *aXYOffsetList,
@@ -186,7 +186,7 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node);
 billHandle_t *dds3BillboardCopy(const billHandle_t *hBillboard);
 
 
-billHandle_t *dds3BillboardCreate(s32 index, ps2Addr_t data);
+billHandle_t *dds3BillboardCreate(s32 index, addr_t data);
 
 void dds3BillboardDelete(billHandle_t *hData);
 
@@ -201,12 +201,12 @@ void dds3Billboard_P2ASetNumber(billHandle_t *pP2A, s32 number);
 dds3BillResource_tag *dds3Billboard_P2AAnimDraw(billHandle_t *pP2A, dds3BillAnim_tag *pBillAnim);
 
 
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* Build a quad packet from paired colors and per-corner UV sets. */
 u32 *sdfMultiBillBoardMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
@@ -1078,7 +1078,7 @@ void dds3BillboardCopyO(billHandle_t *obj, s32 *out) {
     }
 }
 
-billHandle_t *dds3BillboardCreate(s32 index, ps2Addr_t data) {
+billHandle_t *dds3BillboardCreate(s32 index, addr_t data) {
     billHandle_t *newobj;
 
     newobj = dds3BillboardFuncTable[index].create(data);
@@ -1236,7 +1236,7 @@ void dds3BillboardSetCondition(billHandle_t *hBillboard, s32 condition) {
     }
 }
 
-ps2AddrS_t dds3BillboardGetTex(billHandle_t *hBillboard) {
+addrS_t dds3BillboardGetTex(billHandle_t *hBillboard) {
     if (hBillboard->type == 0) {
         return EE_ADDR_S(hBillboard->u.child->hTex);
     }
@@ -1518,7 +1518,7 @@ extern void sdfMatSetMultiTex(sdfMat_t *, sdfTexHandle_t *);
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 #endif
 
 void dds3P2APolygonDraw(dds3P2APolygon_tag *instance) {

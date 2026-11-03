@@ -4,7 +4,7 @@
 #include "sdf_lighting.h"
 
 /* Declared here because no header carries these. */
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 #define SDF_DMA_QWORD_SHIFT 4
 
@@ -22,7 +22,7 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 s32 sdfBillBoardGetPacketSize(s32 aNum);
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 void sdfBillBoardMakeTMPacket(u8 *aPacket, const f32 *aTM);
 
@@ -38,7 +38,7 @@ u32 sdfMultiBillBoardGetPacketSize(s32 aNum);
 
 u32 *sdfMultiBillBoardMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
 
-ps2Addr_t sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
+addr_t sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
                   const void *aUVList, const void *aXYOffsetList,
                   s32 aNum, void *(*aAllocator)(s32));
 
@@ -47,7 +47,7 @@ void sdfMultiBillBoardVcMake1(u8 *aPacket, const f32 *aCenter, const void *aColo
 
 u32 sdfMultiBillBoardVcGetPacketSize(s32 aNum);
 
-ps2Addr_t sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
+addr_t sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
 
 void sdfBillBoardMakeTMPacket(u8 *aPacket, const f32 *aTM) {
     sdfBillBoardTMPacket_t *p = (sdfBillBoardTMPacket_t *)aPacket;
@@ -316,7 +316,7 @@ u32 sdfBillBoardVcGetPacketSize(s32 aNum) {
     return (aNum * 0x4c + 0x4bU) & 0xfffffff0;
 }
 
-ps2Addr_t sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
+addr_t sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
                   const void *aUVList, const void *aXYOffsetList,
                   s32 aNum, void *(*aAllocator)(s32)) {
     s32 bytes;
@@ -417,7 +417,7 @@ u32 sdfMultiBillBoardVcGetPacketSize(s32 aNum) {
 }
 
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-ps2Addr_t sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32)) {
+addr_t sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32)) {
     s32 packetBytes;
     u32 *packet;
     u32 *cursor;

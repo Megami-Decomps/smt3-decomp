@@ -388,7 +388,7 @@ does not, each of which broke a build rather than the checksum:
 - `__asm__("fptodp = sdfFloatToULong")`. Without it every float reaching a
   variadic call fails to link, and the error names `fptodp` rather than the
   file that lost the alias.
-- a `PS2_SYMBOL_AT` binding, and the type it names.
+- a `SYMBOL_AT` binding, and the type it names.
 - `.lit4` and `.sdata` ownership. The row stays with whichever part inherited
   the container name, and the linker then discards the section for every other
   part that emits one. Measure each object (`objdump -h`) and split the row in

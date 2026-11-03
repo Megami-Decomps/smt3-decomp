@@ -66,7 +66,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 errorCode;
     s32 currentOffset;
     u8 remainder[4];
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32);
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, addrS_t, s32, s32);
     s32 userData;
 } sdfFileCmdHandle_t;
 
@@ -145,7 +145,7 @@ extern s32 DIntr();
 
 #include "sdk_libkernl.h"
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 extern s8 sdfPrintIopFlag;
 
@@ -226,7 +226,7 @@ extern sdfIpuDecodeCb_t *sdfIpuQueueTail;
 
 void *sdfAllocAuto(s32 size);
 
-extern void * memset(void *, s32, ps2Size_t);
+extern void * memset(void *, s32, size_t);
 
 extern sdfGsMemSlice_t *sdfGsMemAllocRect(s32, s32, s32, s32, s32);
 
@@ -236,7 +236,7 @@ extern s32 sceIpuSync(s32, s32);
 
 extern sdfIpuDecodeCb_t *sdfCurrIpuDecodeCb;
 
-extern void sdfImageSetChainReleaseMem(ps2AddrS_t);
+extern void sdfImageSetChainReleaseMem(addrS_t);
 
 extern void sdfGsMemFreeDelayed(sdfGsMemSlice_t *aHandle);
 
@@ -374,7 +374,7 @@ void sdfIpuAllocBuff(sdfIpuDecodeCb_t *cb) {
 void sdfIpuMakeToIpuDmaTag(sdfIpuDecodeCb_t *cb, u8 *data, s32 leng) {
     s32 remaining = (leng + 15) & ~15;
     struct sdfIpuDmaTag_t *tag;
-    ps2Addr_t address;
+    addr_t address;
     tag = sdfAllocAuto(((remaining + 0xFFEFF) / 0xFFF00) * 16);
     cb->inputDmaChain = tag;
     address = EE_PHYSICAL(EE_ADDR(data));
@@ -407,7 +407,7 @@ void sdfIpuMakeBltPacket(sdfIpuDecodeCb_t *cb)
     s32 x;
     s32 y;
     s32 endOfPacket;
-    ps2Addr_t sourceAddress;
+    addr_t sourceAddress;
     u64 bitblt;
     u32 sourceTag;
     u64 imageTag;
@@ -498,7 +498,7 @@ void sdfIpuInitCb(sdfIpuDecodeCb_t *cb, struct sdfIpuInitParm_t *parm) {
 
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
 void sdfIpuSetDecodeParams(sdfIpuDecodeCb_t *cb, struct sdfIpuInitParm_t *parm, SdfStreamRead hdr, struct sdfMovieCb_t *leng) {
-    ps2AddrS_t sourceSize = EE_ADDR_S(leng);
+    addrS_t sourceSize = EE_ADDR_S(leng);
     s32 interruptsEnabled;
     u8 *frameBytes = (u8 *)hdr;
     sdfIpuInitCb(cb, parm);
@@ -620,7 +620,7 @@ void sdfIpuHandleDmaEnd(sdfIpuDecodeCb_t *feed) {
     s32 writeSlot;
     s32 filledSlots;
     s32 availableBytes;
-    ps2Addr_t destinationAddress;
+    addr_t destinationAddress;
     s32 endOfStream;
     filledSlots = feed->filledSlots;
     if (feed->done == 0 && filledSlots < 7) {

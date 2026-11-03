@@ -7,7 +7,7 @@
 #include "ps2asm.h"
 
 /* Declared here because no header carries these. */
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern u32 effBTLPointLightProcess;
 extern u32 effColorBlend(u32 first, u32 second, f32 rate);

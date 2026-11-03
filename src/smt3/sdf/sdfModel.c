@@ -49,7 +49,7 @@ extern f32 sdfFaceDivBias;
 extern const char D_00529428[];
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
-extern void sdfDrawTagLink2(sdfDrawTag_t *aTag, ps2Addr_t aHeadPacket, ps2Addr_t aTailPacket);
+extern void sdfDrawTagLink2(sdfDrawTag_t *aTag, addr_t aHeadPacket, addr_t aTailPacket);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
@@ -66,7 +66,7 @@ extern sdfModelRootNode_t *sdfModelRootNew(void);
 extern void sdfModelAllocNodeList(sdfModelRootNode_t *aRoot, s32 aLeng);
 
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdfPrimSetOpaquePacket(sdfPrimTransPacket_t *aPkt);
 extern void sdfPrimSetSemiTransPacket(sdfPrimTransPacket_t *aPkt);
 extern void sdfPrimSetAddTransPacket(sdfPrimTransPacket_t *aPkt);
@@ -380,7 +380,7 @@ sdfModelNode_t *sdfModelSearchNode(sdfModelRootNode_t *aRoot, s32 aId)
 
 sdfDmaTag_t *sdfModelSetTmRefPacket(sdfModelNode_t *aNode, sdfDmaTag_t *aBuffer, s32 aId)
 {
-    ps2Addr_t addr = EE_PHYSICAL(EE_ADDR((u8 *)aNode->tmPacket + aId * sizeof(sdfModelTmImage_t)));
+    addr_t addr = EE_PHYSICAL(EE_ADDR((u8 *)aNode->tmPacket + aId * sizeof(sdfModelTmImage_t)));
 
     *(u64 *)aBuffer = ((u64)addr << 32) | 0x30000008;
     aBuffer->dat1 = 0x6C07C000;
@@ -939,8 +939,8 @@ extern void *sdf3DFogDefault;
 extern u8 corePktSoftenBias;
 extern u8 sdf3DScreenTm[];
 extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*aAllocator)(s32));
-extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
-extern void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, addr_t aPacket);
+extern void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdfCoreDrawSetZBias(f32 z);
 extern void sdfCoreDrawSetLight(void *light);
 extern void sdfCoreDrawSetFog(void *fog);
@@ -1291,7 +1291,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
 }
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 #endif
 
 void sdfModelMorphListCopyStat(sdfModelMorphList_t *aDst, sdfModelMorphList_t *aSrc)
@@ -1410,7 +1410,7 @@ void *sdfModelGetExtraChunk(sdfModelRootNode_t *aRoot, u32 aChunkId)
 }
 
 #ifdef NON_MATCHING
-extern s32 memcmp(const void *first, const void *second, ps2Size_t size);
+extern s32 memcmp(const void *first, const void *second, size_t size);
 extern u32 strlen(const char *text);
 #endif
 

@@ -12,7 +12,7 @@ typedef struct { u8 unk00[8]; f32 degrees; u8 unk0C[4]; } pbFovWork_t;
 /* The native FOV workspace is an unnamed view at pinst + 0xA34. Bind its
  * assembler address without redefining pinst's message-instance array type
  * or inventing an overlapping allocation in the generated BSS split. */
-PS2_SYMBOL_AT(pbFovWork_t, pbDebugFovWork, pinst, 0xA34);
+SYMBOL_AT(pbFovWork_t, pbDebugFovWork, pinst, 0xA34);
 
 typedef struct { s32 x, y, z; u32 style; } pbPrintState_t;
 
@@ -58,7 +58,7 @@ extern void *dds3FontReqAllocDrawTag(void);
 
 extern void *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t);
+extern void sdfDrawTagLink(sdfDrawTag_t *, addr_t);
 
 extern void sdfDevSetPrintCB(pbPrintState_t *, s32, s32, s32, s32);
 

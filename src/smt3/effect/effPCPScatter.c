@@ -656,18 +656,18 @@ f32 dds3GetRandFloatA(effRandState_t *name);
 
 /* Constructors copy one serialized parameter variant into its runtime owner. */
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(
-    effPCPWhirlwindPolyParam_t *pParam, ps2Addr_t pTex);
+    effPCPWhirlwindPolyParam_t *pParam, addr_t pTex);
 
 effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreate(
-    effPCPWwSpherePolyParam_t *pParam, ps2Addr_t pTex);
+    effPCPWwSpherePolyParam_t *pParam, addr_t pTex);
 
 extern dds3ScatterPolyListTexResource_tag *dds3ScatterPolyListTexResourceCopy(dds3ScatterPolyListTexResource_tag *hSplTexResSrc);
 
 effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(
-    effPCPWhirlwind2PolyParam_t *pParam, ps2Addr_t pTex);
+    effPCPWhirlwind2PolyParam_t *pParam, addr_t pTex);
 
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(
-    effPCPWhirlwind3PolyParam_t *pParam, ps2Addr_t pTex);
+    effPCPWhirlwind3PolyParam_t *pParam, addr_t pTex);
 
 extern effDebugPolyParams_t D_0056AD58;
 
@@ -683,7 +683,7 @@ extern u32 D_0031F2C0[];
 
 extern u8 D_0031F3E0[];
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -693,7 +693,7 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* Apply the primary VU0 matrix bank vf28-vf31 to basis vectors vf24-vf27,
  * then replace vf28-vf31 with the four transformed vectors. */
@@ -755,10 +755,10 @@ extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 extern s32 effMagaCylinderCalcColor(s32 color, s32 tint);
 extern f32 sdfAtan(f32 aX);
 extern void SetRotateMatrixAxis(f32 aAngle, const void *aAxis);
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
-effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(const effPCPHamaCardSpiralParam_t *pParam, ps2Addr_t pTex, void *pData);
-effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(const effPCPHamaCardSphereParam_t *pParam, ps2Addr_t pTex, void *pData);
-effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(const effPCPHamaCardScatterParam_t *pParam, ps2Addr_t pTex, void *pData);
+extern void *memcpy(void *a, const void *b, size_t c);
+effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(const effPCPHamaCardSpiralParam_t *pParam, addr_t pTex, void *pData);
+effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(const effPCPHamaCardSphereParam_t *pParam, addr_t pTex, void *pData);
+effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(const effPCPHamaCardScatterParam_t *pParam, addr_t pTex, void *pData);
 dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(u32 number, u32 face);
 void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *hPoly, const void *pMatrix);
 dds3ScatterPolyList_tag *dds3ScatterPolyListCreate(s32 face);
@@ -788,7 +788,7 @@ f32 *dds3WhirlwindPolyListGetUV(dds3WhirlwindPolyList_tag *hPoly, s32 index);
 
 effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(params, resource, particleParams)
     const effPCPHamaCardSpiralParam_t *params;
-    ps2Addr_t resource;
+    addr_t resource;
     void *particleParams;
 {
     effPCPHamaCardSpiral_tag *work;
@@ -1112,7 +1112,7 @@ void effPCPHamaCardSpiralSetScale(f32 hData, effPCPHamaCardSpiral_tag *scale)
 
 effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(params, resource, particleParams)
     const effPCPHamaCardSphereParam_t *params;
-    ps2Addr_t resource;
+    addr_t resource;
     void *particleParams;
 {
     effPCPHamaCardSphere_tag *work;
@@ -1429,7 +1429,7 @@ void effPCPHamaCardSphereSetScale(f32 hData, effPCPHamaCardSphere_tag *scale)
 
 effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(params, resource, particleParams)
     const effPCPHamaCardScatterParam_t *params;
-    ps2Addr_t resource;
+    addr_t resource;
     void *particleParams;
 {
     effPCPHamaCardScatter_tag *work;
@@ -1868,7 +1868,7 @@ dds3ScatterPolyListTexResource_tag *dds3ScatterPolyListTexResourceCopy(dds3Scatt
 
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(src, resource)
     effPCPWhirlwindPolyParam_t *src;
-    ps2Addr_t resource;
+    addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->particleCount * sizeof(effPCPWhirlwindPolyPart_tag) + sizeof(effPCPWhirlwindPoly_tag));
     effPCPWhirlwindPoly_tag *inst = EE_ADDR_AS(effPCPWhirlwindPoly_tag *, sdfMemLock(allocation));
@@ -2115,7 +2115,7 @@ void effPCPWhirlwindPolySetRotateMatrix(effPCPWhirlwindPoly_tag *hData, void *pM
 
 effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(src, resource)
     effPCPWhirlwind2PolyParam_t *src;
-    ps2Addr_t resource;
+    addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->number * sizeof(effPCPWhirlwindPolyPart_tag) + sizeof(effPCPWhirlwind2Poly_tag));
     effPCPWhirlwind2Poly_tag *inst = EE_ADDR_AS(effPCPWhirlwind2Poly_tag *, sdfMemLock(allocation));
@@ -2386,7 +2386,7 @@ void effPCPWhirlwind2PolySetRotateMatrix(effPCPWhirlwind2Poly_tag *hData, void *
 
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(src, resource)
     effPCPWhirlwind3PolyParam_t *src;
-    ps2Addr_t resource;
+    addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->number * sizeof(effPCPWhirlwindPolyPart_tag) + sizeof(effPCPWhirlwind3Poly_tag));
     effPCPWhirlwind3Poly_tag *inst = EE_ADDR_AS(effPCPWhirlwind3Poly_tag *, sdfMemLock(allocation));
@@ -2664,7 +2664,7 @@ void effPCPWhirlwind3PolySetRotateMatrix(effPCPWhirlwind3Poly_tag *hData, void *
 
 effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreate(src, resource)
     effPCPWwSpherePolyParam_t *src;
-    ps2Addr_t resource;
+    addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->number * sizeof(effPCPWwSpherePolyPart_tag) + sizeof(effPCPWwSpherePoly_tag));
     effPCPWwSpherePoly_tag *inst = EE_ADDR_AS(effPCPWwSpherePoly_tag *, sdfMemLock(allocation));

@@ -56,7 +56,7 @@ TRUNC = ["-Wno-all", "-Wno-extra", "-Werror=conversion",
          "-Wno-error=sign-conversion"]
 # gcc prints a cast's result as its underlying type and a declared variable as
 # its typedef name plus {aka ...}, so anchoring on `from '<type>' to` selects
-# the EE_ADDR expansions and rejects u64 and ps2Size_t variables, which are
+# the EE_ADDR expansions and rejects u64 and size_t variables, which are
 # the two classes that would otherwise be counted here. Keyed on ee_addr_t's
 # spelling: `long unsigned int` would also match every sizeof.
 TRUNC_RE = re.compile(r"error: conversion from .long long unsigned int. to")

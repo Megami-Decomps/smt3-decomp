@@ -57,7 +57,7 @@ extern void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descrip
 
 extern u16 dds3VblanksPerFrame;
 
-extern ps2AddrS_t PlayingNo;
+extern addrS_t PlayingNo;
 
 extern void sdfIpuRunDecode(s32 frames);
 
@@ -226,7 +226,7 @@ extern s32 strcasecmp(const char *first, const char *second);
 
 extern void *sdfChipAllocDirect(s32 aSize);
 
-extern void *memcpy(void *destination, const void *source, ps2Size_t bytes);
+extern void *memcpy(void *destination, const void *source, size_t bytes);
 
 void movieViewerScanDir(void)
 {

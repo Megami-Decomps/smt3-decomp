@@ -74,7 +74,7 @@ extern u16 D_0031B8C0[];
 extern sdfVector4_t D_00319FA0[];
 extern sdfVector4_t D_0031B8F0[];
 extern s32 fldSkyGetAlpha(void);
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 typedef struct effBTLSkillInfo_t {
     nbFormation_t *invokeForm;
@@ -180,7 +180,7 @@ extern effBTLLightParams_t dds3LightParam;
 
 typedef f32 effBTLVector4_t[4];
 
-PS2_SYMBOL_AT(effBTLVector4_t, effBTLSceneAmbient, dds3LightParam, 0x10);
+SYMBOL_AT(effBTLVector4_t, effBTLSceneAmbient, dds3LightParam, 0x10);
 
 #ifdef NON_MATCHING
 extern void effBTLPartCreate(effBTL_t *pSkill, effBTL_t *pData);

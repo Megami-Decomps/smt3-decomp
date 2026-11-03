@@ -99,7 +99,7 @@ struct instanceMes_tag {
     window_tag window;
     variable_tag variable;
     curctr_tag curctr;
-    ps2Addr_t func_kuti;
+    addr_t func_kuti;
 };
 
 /* pinst[window].mes: NULL while the window is free. */

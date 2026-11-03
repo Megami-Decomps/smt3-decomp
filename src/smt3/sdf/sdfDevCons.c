@@ -87,15 +87,15 @@ extern s32 sceGsSyncPath(s32 mode, s32 timeout);
 extern void *sceDmaGetChan(s32 channel);
 extern u64 sdfTexGetTex0Reg(sdfTexHandle_t *aHandle);
 extern void *sdfGrOpenPacketBuff(void);
-extern void sdfGrClosePacketBuff(ps2AddrS_t aBuffPtr);
+extern void sdfGrClosePacketBuff(addrS_t aBuffPtr);
 void sdfDevConsDrawBG(sdfDevConsCB_tag *aHndl, sdfDevConsDrawCB_t *aCB);
 
 extern void sdfDevConsDrawInit(sdfDevConsDrawCB_t *aCB, void *aPacketBuffer, s32 aBufferSize);
 extern void sdfDevConsDraw(sdfDevConsCB_tag *aHndl, sdfDevConsDrawCB_t *aBuf);
 extern void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *aCB);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
-extern void *memmove(void *a, const void *b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
+extern void *memmove(void *a, const void *b, size_t c);
 extern s32 vsprintf(char *buf, const char *fmt, void *args);
 
 extern void *sdfChipAllocDirect(s32 aSize);
@@ -443,7 +443,7 @@ void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *buffers) {
 }
 
 void sdfDevConsDrawInit(sdfDevConsDrawCB_t *aCB, void *aPacketBuffer, s32 aBufferSize) {
-    ps2Addr_t ringAddress;
+    addr_t ringAddress;
     u8 *ring;
     vu64 *packet;
     u64 textureState;

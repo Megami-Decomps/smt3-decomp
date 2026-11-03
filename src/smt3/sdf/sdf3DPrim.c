@@ -125,9 +125,9 @@ typedef struct sdfMatPacket_t {
     u32 vifMscalCommand;   /* 0x9C: VIF MSCAL with microprogram index zero */
 } sdfMatPacket_t;
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
-void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* Per-texture reference count and non-owning clone source (0x8). */
 /* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
@@ -172,7 +172,7 @@ typedef struct sdf3DPrimPolyParm_t {
  * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
 s32 sdfGrAllocPacketBuff(s32 aSize);
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag,
                              s32 (*aAllocator)(s32));

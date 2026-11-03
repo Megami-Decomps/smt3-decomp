@@ -243,7 +243,7 @@ typedef struct nbKoukaPacket_t
     sdfVector4_t v;
 } nbKoukaPacket_t;
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -261,7 +261,7 @@ extern void func_0024D938(void *e);
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
 extern void effBTLSkillEnd(void);
@@ -296,7 +296,7 @@ extern s32 sdfModelGetMarkPos(struct sdfModelRootNode_t *aRoot, s32 aId);
 
 extern s32 evtUnitRotationTarget(evtUnitHandle_t *h, f32 *pos, f32 radio);
 
-extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form,
                                                s32 type);
 
 extern void dds3SetQuake(s32 frame, s32 range);
@@ -369,7 +369,7 @@ extern s32 D_005515C0;
 extern char *text1[];
 extern void nbPanelAllShow(void);
 extern s32 dds3GetRandIntA(s32 minimum, s32 range);
-extern ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern addrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 s32 RunUgou(nbEventProcessData_t *e)
 {

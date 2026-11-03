@@ -206,7 +206,7 @@ typedef struct
     };
     u8 reserved19D10[0x800];
 } dds3GlobalWork_t;
-PS2_SIZE_CHECK(dds3GlobalWorkSizeCheck, dds3GlobalWork_t, 0x1A510);
+SIZE_CHECK(dds3GlobalWorkSizeCheck, dds3GlobalWork_t, 0x1A510);
 
 extern dds3GlobalWork_t *DDS3_GBWK;
 
@@ -283,7 +283,7 @@ typedef struct {
     u32 reserved[3];
 } nbUnitVisualMotions_t;
 
-PS2_SIZE_CHECK(nbUnitVisualMotions_size_must_be_0x310, nbUnitVisualMotions_t, 0x310);
+SIZE_CHECK(nbUnitVisualMotions_size_must_be_0x310, nbUnitVisualMotions_t, 0x310);
 
 
 

@@ -8,8 +8,8 @@
 #include "fpu.h"
 
 /* Declared here because no header carries these. */
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern s32 evtBitCheck(s32 no);
 
@@ -451,7 +451,7 @@ void NewGame2Pop(void)
 
 void dds3GlobalWorkUserInit2(s32 mode)
 {
-    ps2AddrS_t saved;
+    addrS_t saved;
 
     if (mode == 1) {
         NewGame2Push();

@@ -172,7 +172,7 @@ void func_001D2B70(void) {
 }
 
 extern void *sdfChipAllocDirect(s32 size);
-extern void *memset(void *dst, s32 value, ps2Size_t size);
+extern void *memset(void *dst, s32 value, size_t size);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
     s32 shutdownTimer, dds3ProcessFunc_t process, dds3ProcessFunc_t shutdown, void *data);
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
@@ -637,7 +637,7 @@ INCLUDE_ASM(const s32, "pb/pbModel", func_001D35F0);
 
 extern sdfVector2_t D_00326D78[];
 extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 
 #ifdef NON_MATCHING
 void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag)

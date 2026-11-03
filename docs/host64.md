@@ -61,7 +61,7 @@ attributed to a class that did not fail the unit.
 source type gcc names, so the host view's `ee_addr_t` spelling is part of the
 instrument. A draft spelled it `unsigned long`, which is also how LP64 spells
 `size_t` and the type of every `sizeof`, and reported 1120 sites where the
-clean count is 1050: 70 were `sizeof` and `ps2Size_t` conversions with no
+clean count is 1050: 70 were `sizeof` and `size_t` conversions with no
 address in them. `unsigned long long` is the spelling that collides with
 nothing, because gcc prints a cast's result as its underlying type and a
 declared variable as its typedef name plus `{aka ...}`, so anchoring on
@@ -141,10 +141,10 @@ is the answer to that and no host view of it was written here.
 Each is `#ifndef`-guarded where it is a macro, with a default expansion that
 emits exactly what the open-coded code it replaced emitted.
 
-### `PS2_SIZE_CHECK(name, type, size)`, `include/common.h`
+### `SIZE_CHECK(name, type, size)`, `include/common.h`
 
 ```c
-#define PS2_SIZE_CHECK(name, type, size) \
+#define SIZE_CHECK(name, type, size) \
     typedef char name[(sizeof(void *) != 4 || sizeof(type) == (size)) ? 1 : -1]
 ```
 
@@ -160,22 +160,34 @@ A typedef emits nothing, so this cannot move codegen.
 `interface/frFont.c`, `newbattle/NbNegoFlowInnen.c` x3, `sdf/sdfPrint.c` x2,
 `sdf/sdfTmx.c`, `sdk/libgcc.c` x2, `sdk/libkernl.c` x3).
 
-### `ps2Size_t`, `include/common.h`
+### `size_t`, `include/common.h`
 
 ```c
-typedef __SIZE_TYPE__ ps2Size_t;
+typedef __SIZE_TYPE__ size_t;
 ```
 
-The EE's `size_t`. ee-gcc is invoked with `-D__SIZE_TYPE__=unsigned int`
-(see the `cc` rule in `build.ninja`), so this is a 32-bit unsigned there and
-the host's own `size_t` here. It is not a macro because it needs no override:
-each compiler defines `__SIZE_TYPE__` for its own target.
+Spelled here because the retail build compiles with `-nostdinc` and has no
+system header to take it from. ee-gcc is invoked with
+`-D__SIZE_TYPE__=unsigned int` (see the `cc` rule in `build.ninja`), so it is
+a 32-bit unsigned there and the compiler's own width here. It is not a macro
+because it needs no override: each compiler defines `__SIZE_TYPE__` for its
+own target.
+
+The right-hand side has to stay `__SIZE_TYPE__` rather than a concrete type,
+and this build cannot check that. Where a host does see `<stddef.h>` the
+typedef is a redundant identical one, which gcc and clang both accept even
+under `-pedantic-errors`; a concrete spelling conflicts there instead. On MIPS
+o32 `unsigned int` and `unsigned long` are both 32 bits, so the image is
+byte-identical either way and the checksum gate cannot tell them apart.
+Measured on i386, force-included ahead of a unit that includes `stdio.h`,
+`string.h` and `stdlib.h`: `unsigned long` gives "conflicting types for
+`size_t`" out of `stddef.h` under both gcc and clang.
 
 This is the one width in the tree that differs between targets with no cast
 anywhere to mark it. 152 files declared `memset`, `memcpy`, `memmove`,
 `memcmp`, `strncpy`, `strncmp` or `malloc` with a `u32` length, 243 sites, and
 gcc reports every one as `-Wbuiltin-declaration-mismatch` against the builtin's
-`unsigned long`. 231 sites now spell `ps2Size_t` (230 declarations plus
+`unsigned long`. 231 sites now spell `size_t` (230 declarations plus
 `sdk/libc.c`'s `malloc` definition); the remaining 30 are listed under open
 items.
 
@@ -266,18 +278,18 @@ nine. It composes the way `include/eeregs.h`'s `EE_UNCACHED` hook does, but
 spells the mirror bit as the literal it already was, because `libcdvd.c` does
 not include that header and adding one to an SDK unit buys less than it risks.
 
-### `ps2Addr_t` and `ps2AddrS_t`, `include/common.h`
+### `addr_t` and `addrS_t`, `include/common.h`
 
 ```c
-#ifndef PS2_ADDR_TYPE
-#define PS2_ADDR_TYPE u32
+#ifndef ADDR_TYPE
+#define ADDR_TYPE u32
 #endif
-typedef PS2_ADDR_TYPE ps2Addr_t;
+typedef ADDR_TYPE addr_t;
 
-#ifndef PS2_ADDR_S_TYPE
-#define PS2_ADDR_S_TYPE s32
+#ifndef ADDR_S_TYPE
+#define ADDR_S_TYPE s32
 #endif
-typedef PS2_ADDR_S_TYPE ps2AddrS_t;
+typedef ADDR_S_TYPE addrS_t;
 ```
 
 A guest address held in an integer: the field, parameter, local, global or
@@ -303,7 +315,7 @@ get the typedef, however much it looks like its neighbour. The classes left as
 address words, 32-bit word arrays in data, and script VM values, and widening
 one would describe the packet or the data wrongly rather than fix anything.
 `sdfDrawTag_t` is the pair in one struct: `head`, `tail`, `lightPacket`,
-`fogPacket` and `texPacket` are now `ps2Addr_t` because they hold the addresses
+`fogPacket` and `texPacket` are now `addr_t` because they hold the addresses
 of packets, while `z` stays `u32` because it is an integer the packet builders
 write, and the DMA tag words the DMAC itself reads stay `u32` wherever they
 appear.
@@ -442,7 +454,7 @@ Ordered by how much a host consumer would gain from closing them.
    marshals across it rather than widening it.
 3. **`dds3ProcessFunc_t` is the wrong return type and cannot be fixed in
    isolation.** A process step returns the address of the next step: 66 return
-   types now spell `ps2AddrS_t` for exactly that reason, `return
+   types now spell `addrS_t` for exactly that reason, `return
    EE_ADDR_S(evtMoonProcess2)` and its kin. But `include/kernel.h` types the
    function pointer as `s32 (*)(dds3ProcessID_t *)`, so the three units that
    pass a widened step to `dds3StartProcess` (`event/evtMoon.c`,
@@ -508,7 +520,7 @@ Ordered by how much a host consumer would gain from closing them.
 
    The typedef mechanism does not change this, and was considered against both.
    `datAddKotowariPoint`'s parameters are two script integers, not addresses,
-   so `ps2Addr_t` would be as false a type as `u64` was and false in the same
+   so `addr_t` would be as false a type as `u64` was and false in the same
    way: it would be chosen to move the bytes rather than because the parameter
    holds an address. `sdfPackQuad` returns `f32`, and no typedef makes the
    implicit `int` the call was compiled against honest. Both judgments stand as
@@ -523,7 +535,7 @@ Ordered by how much a host consumer would gain from closing them.
    signedness change at every call site and wants its own gated pass.
 10. **Three struct sizes genuinely differ at LP64** and cannot be made to
    agree: `dds3GlobalWork_t` (0x1A510), `sifRpcDataQueue_t` (0x18) and
-   `sifRpcServerData_t` (0x44). `PS2_SIZE_CHECK` stops asserting them off the
+   `sifRpcServerData_t` (0x44). `SIZE_CHECK` stops asserting them off the
    EE rather than pretending otherwise. A consumer that needs these layouts to
    match the EE's has to change the member types, which is item 2.
 11. **The probe compiles, it does not link or run.** sdfport's

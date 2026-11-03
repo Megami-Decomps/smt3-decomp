@@ -193,7 +193,7 @@ void fclScriptForcedEnd(u8 *PID)
 
 s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID)
 {
-    ps2AddrS_t handle;
+    addrS_t handle;
 
     if (pPID != NULL)
     {
@@ -498,7 +498,7 @@ void fclUpdateMessage(void)
     }
 }
 
-void fclSetMessageVar_20743088(s8 Index, ps2AddrS_t pStr)
+void fclSetMessageVar_20743088(s8 Index, addrS_t pStr)
 {
     itfMesMngSetVarImmediate(gMsgID, Index, pStr);
 }

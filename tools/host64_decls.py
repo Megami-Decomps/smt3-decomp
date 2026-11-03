@@ -37,7 +37,7 @@ BASE = [
     "-fdiagnostics-format=json",
 ]
 # The source type of the conversion, as gcc prints ee_addr_t's underlying
-# type. Anchored on the source so a u64 or ps2Size_t destination cannot be
+# type. Anchored on the source so a u64 or size_t destination cannot be
 # counted here; see the traps in docs/host64.md.
 MESSAGE = "conversion from ‘long long unsigned int’ to"
 

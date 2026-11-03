@@ -10,7 +10,7 @@ extern void (*D_00551828)(void);
 
 extern void *dds3AllocConfigWork(s32 mode);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern s32 dds3GetGlobalConfigFlag(s32 index);
 
@@ -29,7 +29,7 @@ typedef struct dds3ConfigWork_t {
     void *textureHandle;
 } dds3ConfigWork_t;
 
-PS2_SIZE_CHECK(dds3ConfigWork_size_must_be_0x10A8, dds3ConfigWork_t, 0x10A8);
+SIZE_CHECK(dds3ConfigWork_size_must_be_0x10A8, dds3ConfigWork_t, 0x10A8);
 
 extern void dds3FreeConfigTexture(void *texture);
 
@@ -38,7 +38,7 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void fclSetSprite(ps2AddrS_t pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2, s32 V2, s32 Col, s32 TexHandle);
+extern void fclSetSprite(addrS_t pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2, s32 V2, s32 Col, s32 TexHandle);
 
 extern void fclDrawBG(void *pSprite, s32 OtNo);
 
@@ -90,7 +90,7 @@ extern void *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(void *aHandle);
 extern void cmpInitSeqInfo(void *work, s32 seq);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, addrS_t layout);
 
 void slKillLoadProcess(void)
 {
@@ -370,7 +370,7 @@ void dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
 }
 
 extern const s32 D_00548888[3][4];
-extern void *memcpy(void *destination, const void *source, ps2Size_t size);
+extern void *memcpy(void *destination, const void *source, size_t size);
 
 extern void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot);
 

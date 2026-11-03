@@ -20,8 +20,8 @@ typedef void (*fileTransferCallback_t)(void *request, u32 arg);
     Callback callback; \
     void *arg; \
     sdfMemHandle_t *handle; \
-    ps2Addr_t top; \
-    ps2Addr_t ptr; \
+    addr_t top; \
+    addr_t ptr; \
     Link *donenext; \
     sdfPacDecodeCb_t pac; \
     u16 pacrest; \
@@ -101,7 +101,7 @@ s32 sdfFileCmdClose(void *aHandle);
 s32 sdfFileCmdFree(void *aHandle);
 void sdfFileCmdThreadSetHiPrio(void);
 s32 sdfPrintf(const char *str, ...);
-void *memset(void *a, s32 b, ps2Size_t c);
+void *memset(void *a, s32 b, size_t c);
 void sdfChipFreeDirect(void *aPtr);
 void sdfPacFree(sdfPacDecodeCb_t *cb);
 s32 sdfPacDecode(sdfPacDecodeCb_t *cb, const u8 *data, s32 length);
@@ -236,7 +236,7 @@ fileRequest_t *pacLoadUseTail(const char *filename) {
     return pacLoadEx(filename, 1, 0, 0, 0);
 }
 
-fileRequest_t *fileLoadEx(const char *filename, u32 headOrTail, ps2Addr_t endCallback, ps2Addr_t callbackParm) {
+fileRequest_t *fileLoadEx(const char *filename, u32 headOrTail, addr_t endCallback, addr_t callbackParm) {
     fileRequest_t *req = sdfChipAllocZeroDirect(0x30);
 
     req->mode = headOrTail;

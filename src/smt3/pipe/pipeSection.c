@@ -9,7 +9,7 @@ extern void (*D_00551828)(void);
 
 extern dds3Basic_t *dds3GetControlScene(void);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void sdfMemFreeDirect(void *aHandle);
 

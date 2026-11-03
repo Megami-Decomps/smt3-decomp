@@ -479,10 +479,10 @@ typedef struct effPCP_HBED2_tag
 
 extern u8 dds3EffectBase[];
 
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void *sdfChipAllocZeroDirect(u32 aSize);
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 extern void *sdfMatNew(void);
 extern void sdfMatSetConstant(void *aMat, f32 aRatio);
 extern void *dds3BillboardCreate(s32 count, void *params);
@@ -522,7 +522,7 @@ extern void LookAtMatrix(const void *aTarget, const void *aEye, const void *aDow
 extern void ReverseMatrix(void);
 extern void sdf3DPrimLinkTm(void *aTag, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(effPCPBossWork_t *aParm);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern u8 D_002F5C20[], D_002F5C30[];
 extern u8 effPCPBossTexRect[];
 extern u8 D_0031FF80[];

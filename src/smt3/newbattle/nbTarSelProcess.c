@@ -43,7 +43,7 @@ extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern void sdfChipFreeDirect(void *ptr);
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, struct nbParty_t *party);
 extern void *sdfChipAllocDirect(u32 size);
-extern void *memset(void *dest, s32 value, ps2Size_t size);
+extern void *memset(void *dest, s32 value, size_t size);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 mode,
                                          s32 flag, dds3ProcessFunc_t process,
                                          dds3ProcessFunc_t shutdown, void *data);

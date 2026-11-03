@@ -184,7 +184,7 @@ extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, u32, void *);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern s32 pb_draw_map_cursor_Process(dds3ProcessID_t *id);
 
@@ -2025,7 +2025,7 @@ extern void StoreMatrix(void *matrix);
 extern void LoadMatrix(const void *matrix);
 extern sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors,
                                                s32 count, u32 flags);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern sdfGrOt_t sdfGrOtTable[85];
 
 s32 pb_proc_block_DB_Process(dds3ProcessID_t *id)
@@ -2114,7 +2114,7 @@ void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id) {
 extern s32 D_00536000[4][4];
 extern s32 D_00327800[4][4], D_00327840[4][4], D_00327880[4][4];
 extern f32 pbMapCursorWork;
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
+SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern f32 sdfSin(f32 angle);
 extern void itfMiscDrawSpritePrim(void *vertices, void *uv, void *color, s32 z,
                                   sdfTexHandle_t *texture, s32 context, sdfDrawTag_t *tag);

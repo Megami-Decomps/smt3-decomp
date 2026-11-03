@@ -13,10 +13,10 @@ typedef struct
 #define SDF_IOP_FILE_RPC_OVERHEAD 0xC
 #define SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK 0x3F
 
-extern void *malloc(ps2Size_t size);
+extern void *malloc(size_t size);
 extern s32 DIntr(void);
 extern void EIntr(void);
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 extern u32 strlen(const char *s);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
@@ -40,8 +40,8 @@ void sdfMemInit(u32 aSize)
 {
     sdfMemHandleCB_tag *cb = &sdfMemCB;
     sdfMemHandle_t *freeHandle;
-    ps2Addr_t alignedTop;
-    ps2Addr_t alignedEnd;
+    addr_t alignedTop;
+    addr_t alignedEnd;
 
     cb->allocPtr = malloc(aSize);
     cb->allocSize = aSize;
@@ -92,7 +92,7 @@ sdfMemHandle_t *sdfMemGetNext(sdfMemHandle_t *aHandle)
 s32 sdfMemGetSize(const sdfMemHandle_t *aHandle)
 {
     const sdfMemHandle_t *next;
-    ps2AddrS_t size;
+    addrS_t size;
     s32 intrEnabled;
 
     intrEnabled = DIntr();
@@ -131,7 +131,7 @@ sdfMemHandle_t *sdfMemAllocDirect(s32 aSize)
                 }
             }
         } else {
-            ps2AddrS_t have = EE_ADDR_S(handle->next->ptr) - EE_ADDR_S(handle->ptr);
+            addrS_t have = EE_ADDR_S(handle->next->ptr) - EE_ADDR_S(handle->ptr);
 
             if (have >= want) {
                 if (want < have) {
@@ -173,7 +173,7 @@ sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 aSize)
                 }
             }
         } else {
-            ps2AddrS_t have = EE_ADDR_S(handle->next->ptr) - EE_ADDR_S(handle->ptr);
+            addrS_t have = EE_ADDR_S(handle->next->ptr) - EE_ADDR_S(handle->ptr);
 
             if (have >= want) {
                 if (want < have) {
@@ -216,7 +216,7 @@ sdfMemHandle_t *sdfMemAlloc2Direct(s32 aSize)
                 return NULL;
             }
         } else {
-            ps2AddrS_t have = EE_ADDR_S(handle->next->ptr) - EE_ADDR_S(handle->ptr);
+            addrS_t have = EE_ADDR_S(handle->next->ptr) - EE_ADDR_S(handle->ptr);
 
             if (have >= want) {
                 if (want < have) {
@@ -247,10 +247,10 @@ void sdfMemReallocRecord(sdfMemHandle_t *aHandle, s32 aSize)
 {
     sdfMemHandle_t *next;
     sdfMemHandle_t *replacement;
-    ps2AddrS_t ptr;
+    addrS_t ptr;
     s32 intrEnabled;
-    ps2AddrS_t currentSize;
-    ps2AddrS_t available;
+    addrS_t currentSize;
+    addrS_t available;
 
     intrEnabled = DIntr();
     next = aHandle->next;
@@ -274,7 +274,7 @@ void sdfMemReallocRecord(sdfMemHandle_t *aHandle, s32 aSize)
                 next->ptr = EE_ADDR_AS(void *, (ptr + aSize));
             }
         } else {
-            ps2AddrS_t oldPtr;
+            addrS_t oldPtr;
 
             replacement = sdfMemAllocDirect(aSize);
             memcpy(replacement->ptr, aHandle->ptr, currentSize);
@@ -425,7 +425,7 @@ void sdfMemGetInfo(sdfMemInfo_t *aInfo)
     s32 minFreeSize = 0;
     s32 handleCount = 0;
     s32 freeHandleCount = 0;
-    ps2AddrS_t size;
+    addrS_t size;
     u16 stat;
 
     for (; handle->stat != SDF_MEM_STAT_END; handle = handle->next) {

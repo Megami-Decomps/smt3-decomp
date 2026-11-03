@@ -117,7 +117,7 @@ extern void *sdfChipAllocDirect(u32 aSize);
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void nbFreeAllFormResources(nbMainProcessData_t *data);
 
@@ -223,7 +223,7 @@ extern void nbSetNextOrder(void);
 
 extern void nbSetNextPhase(s32 phase);
 
-extern s32 nbMakeBadKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form);
 
 extern void nbAddKagututiMoon(nbMainProcessData_t *data);
 
@@ -387,9 +387,9 @@ extern char *D_00550F7C;
 extern char D_00550F88[];
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
 void nbDebugCamera(nbMainProcessData_t *data)
 {
@@ -459,7 +459,7 @@ void nbDebugCamera(nbMainProcessData_t *data)
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
+SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern char *nbDebugPhaseNameTable[];
 extern char *D_003FA748[];
 extern char D_00551060[]; /* "Turn:%d", shared small-data strings. */

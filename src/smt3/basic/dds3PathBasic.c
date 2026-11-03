@@ -12,7 +12,7 @@
 #define DDS3_PATH_SCALAR_CHANNEL 0x4
 #define DDS3_PATH_WORLD_TRANSFORM_CHANNEL 0x10
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern s32 dds3AllocSplineHandle(f32 (*points)[3], u32 count, s32 mode);

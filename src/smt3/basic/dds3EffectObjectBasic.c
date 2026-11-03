@@ -34,7 +34,7 @@ typedef struct
 extern const dds3EffectEventParameters_t D_00530E20;
 extern const effMagaSCArea_t D_00530E50;
 extern const effMagaP4Point_t D_00530E78;
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 extern void dds3BillboardSetPosition(void *hBillboard, const void *pPos);
 extern void dds3BillboardSetAnimNumber(void *hBillboard, u32 number);
 extern void dds3EffectSetPosition(void *pData, const void *pPos);
@@ -104,9 +104,9 @@ typedef struct
 
 
 struct billHandle_t *dds3BillboardCopy(struct billHandle_t *hBillboard);
-struct billHandle_t *dds3BillboardCreate(s32 kind, ps2Addr_t id);
+struct billHandle_t *dds3BillboardCreate(s32 kind, addr_t id);
 void effMagaP4Randomize(void *hEffect);
-void *memset(void *a, s32 b, ps2Size_t c);
+void *memset(void *a, s32 b, size_t c);
 
 
 struct dds3BillResource_tag;
@@ -539,7 +539,7 @@ dds3Basic_t *AddP2AEffect(void *p2a, void *pos, s32 rot)
     return basic;
 }
 
-dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *ebasic, void *pos, ps2AddrS_t rot) {
+dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *ebasic, void *pos, addrS_t rot) {
     struct billHandle_t *bill;
 
     bill = dds3BillboardCopy((struct billHandle_t *)((dds3EffectObjectBasicWorkData_t *)ebasic->workdata)->handle);
@@ -553,7 +553,7 @@ void dds3AddP2AEffectObjectBasic2(u32 effdata, void *pos, s32 rot) {
     AddP2AEffect(bill, pos, rot);
 }
 
-dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *path, void *firstVector, ps2AddrS_t secondVectorAddress) {
+dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *path, void *firstVector, addrS_t secondVectorAddress) {
     void *bill;
 
     bill = dds3BillboardFileLoad(1, path);
@@ -598,7 +598,7 @@ dds3Basic_t *AddTMXEffect(void *tmx, void *pos, s32 rot)
     return basic;
 }
 
-dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *ebasic, void *pos, ps2AddrS_t rot) {
+dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *ebasic, void *pos, addrS_t rot) {
     struct billHandle_t *bill;
 
     bill = dds3BillboardCopy((struct billHandle_t *)((dds3EffectObjectBasicWorkData_t *)ebasic->workdata)->handle);
@@ -613,7 +613,7 @@ void dds3AddTMXEffectObjectBasic2(u32 effdata, void *pos, s32 rot)
     AddTMXEffect(bill, pos, rot);
 }
 
-dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *path, void *firstVector, ps2AddrS_t secondVectorAddress)
+dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *path, void *firstVector, addrS_t secondVectorAddress)
 {
     void *bill;
 

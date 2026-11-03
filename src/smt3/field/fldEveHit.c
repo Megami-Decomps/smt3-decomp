@@ -182,7 +182,7 @@ struct fldInfTable_t {
     fldInfSet_t sets[40];
 };
 
-extern void *memset(void *, int, ps2Size_t);
+extern void *memset(void *, int, size_t);
 
 dds3Basic_t *dds3GetActiveScene(void);
 
@@ -226,7 +226,7 @@ s32 dds3ExistProcess(dds3ProcessID_t *id);
 
 s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
-ps2AddrS_t dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
+addrS_t dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
 
 extern s8 fldDoorExitMode[];
 
@@ -1420,7 +1420,7 @@ void fldPurgeEveRngProcesses(void) {
     }
 }
 
-s32 fldEveHitResID_Find(ps2Addr_t pid) {
+s32 fldEveHitResID_Find(addr_t pid) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         if (gEvnRngPid[slotIndex] == pid) {
@@ -1430,7 +1430,7 @@ s32 fldEveHitResID_Find(ps2Addr_t pid) {
     return -1;
 }
 
-s32 fldFindEveRngIndex(ps2Addr_t task) {
+s32 fldFindEveRngIndex(addr_t task) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
@@ -1441,7 +1441,7 @@ s32 fldFindEveRngIndex(ps2Addr_t task) {
     return -1;
 }
 
-const char *fldEveHitResName_Find(ps2Addr_t pid) {
+const char *fldEveHitResName_Find(addr_t pid) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         if (gEvnRngPid[slotIndex] == pid) {

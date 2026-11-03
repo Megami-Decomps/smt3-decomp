@@ -305,7 +305,7 @@ void fldFirstInit(void)
 }
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 #endif
 
 void fldInitAllValue(void)
@@ -629,7 +629,7 @@ void fldPlayerAFree(void)
 }
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 #endif
 
 void fldJDataLoad(void)

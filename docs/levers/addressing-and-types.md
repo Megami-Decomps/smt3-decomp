@@ -351,7 +351,7 @@
   each site's own braced block. One function-scope local for both leaves gcc
   holding `%hi` in one register and adding `%lo + offset` into another
   (`lui $2` then `addiu $4, $2, 0x40`), where retail's single `la` pair writes
-  one register; `PS2_SYMBOL_AT` on the element does not reach it, since the
+  one register; `SYMBOL_AT` on the element does not reach it, since the
   assembler folds the alias back into the table symbol anyway. That was the
   last four words of `dds3CrossfadeRun`, and it is the two-site reading of the
   `effSwordTrackDraw` row above.
@@ -878,11 +878,11 @@
   from 16 differing words to exact on that one change.
 - Where retail materialises `%hi`/`%lo` of `symbol + offset` fresh while the
   C holds the bare symbol's address in a register, declare the sub-object with
-  `PS2_SYMBOL_AT`. In `effBTLFieldColorRun` a `SDF_VU0_COPYVECTOR` from
+  `SYMBOL_AT`. In `effBTLFieldColorRun` a `SDF_VU0_COPYVECTOR` from
   `dds3LightParam.ambient` shared its base with the `dds3LightParam.sources[0]`
   load two statements earlier, so gcc kept the full address in a register,
   derived the ambient address with an `addiu +0x10`, and ran one word short.
-  `PS2_SYMBOL_AT(effBTLVector4_t, effBTLSceneAmbient, dds3LightParam, 0x10)`
+  `SYMBOL_AT(effBTLVector4_t, effBTLSceneAmbient, dds3LightParam, 0x10)`
   gives the member its own relocation, which also lets the `%lo` of the
   pointer load fold back into the `lw`. That took the function from 13
   differing words to exact.
@@ -980,7 +980,7 @@
   loads a member at a small displacement, `&table[n]` is not enough: both
   `&sdfGrOtTable[44]` and `sdfGrOtTable[44].regFunc` leave gcc holding the bare
   symbol and spending the `0x580` in the displacements, and a
-  `(T *)((u8 *)table + 0x580)` pointer local is worse. `PS2_SYMBOL_AT(sdfGrOt_t,
+  `(T *)((u8 *)table + 0x580)` pointer local is worse. `SYMBOL_AT(sdfGrOt_t,
   dds3MultiBillboardOt, sdfGrOtTable, 0x580)` and the member read through the
   alias is what gives retail's `addiu rd, $18, %lo(sym + 0x580)` with a shared
   `%hi` in a saved register. `dds3MultiBillboardLinkOt` went from 15 of 90
@@ -1366,7 +1366,7 @@
   it out of small data. `dds3RunQuake`'s pair of axis gains needs this.
 - Two references to one symbol with different addends that retail materialises
   as two independent `lui`/`addiu` pairs are two symbols in the source. Give
-  the second one a `PS2_SYMBOL_AT` name and pass that: `dds3InitDrawEnvSub`
+  the second one a `SYMBOL_AT` name and pass that: `dds3InitDrawEnvSub`
   hands `sdf3DMakeLightParallelPacket` the light record and its ambient term,
   and sharing the `%hi` through `&dds3LightParam.ambient` runs a word short per
   call.
@@ -1470,7 +1470,7 @@
   it was not the address spelling but the store order: five of the field
   copies' 120 store permutations get the shared register and the rest emit
   `lui`/`addiu` into a second register.
-- `PS2_SYMBOL_AT` for `dds3LightParam + 0x10` confirmed a third time, and the
+- `SYMBOL_AT` for `dds3LightParam + 0x10` confirmed a third time, and the
   two halves of one unit disagree. In `basic/dds3LightObjectBasic`,
   `lightmainprocedure` shares the `%hi(dds3LightParam)` it already formed for
   the parallel-light pointer and derives the ambient with an `addiu +0x10`,

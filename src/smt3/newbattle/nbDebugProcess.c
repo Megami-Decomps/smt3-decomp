@@ -203,7 +203,7 @@ extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -340,13 +340,13 @@ void SetMotion(nbMainProcessData_t *data, nbFormation_t *form, s32 motion, s32 m
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
 extern const char *nbBadStatusNames[12];
 extern const char D_00551358[];
 extern const char D_00551360[];
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
+SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 
 
 extern const char *D_004F06D8[];
@@ -618,7 +618,7 @@ s32 SelectHpMp(nbDebugProcessData_t *d)
 }
 
 extern s32 badcur;
-extern s32 nbMakeBadKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form);
 extern s32 nbMakeBadDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 bad);
 
 s32 SelectBad(nbDebugProcessData_t *d)

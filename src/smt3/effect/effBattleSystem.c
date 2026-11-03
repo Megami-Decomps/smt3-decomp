@@ -465,7 +465,7 @@ f32 effBTLSystem_GetScalePtr(nbFormation_t *pFormation)
     }
 }
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 void effBTLSystem_Part_DataLoad(effBattleSystem_effBTLSystem_Part_tag *pPartList, u32 count)
 {
@@ -3056,7 +3056,7 @@ typedef struct
 extern void mdlSetColor(mdlObj_t *model, u32 color);
 extern u32 effColorBlend(u32 color1, u32 color2, f32 ratio);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 void *effCAMPBadCreate(effCAMPBadParams_t *params, s32 id)
 {
@@ -3441,7 +3441,7 @@ typedef struct {
 } dds3LightState_t;
 
 extern dds3LightState_t dds3LightParam;
-PS2_SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 extern sdfVector4_t D_0056AC40;
 extern sdfVector4_t D_0056AC50;
 extern u8 D_0054F18A;

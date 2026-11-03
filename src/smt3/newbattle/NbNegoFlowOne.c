@@ -831,7 +831,7 @@ s32 Flow1_24(nbNegoProcessData_t *n)
 }
 
 extern struct nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame,
-                                                  ps2AddrS_t uniqueid, nbFormation_t *form,
+                                                  addrS_t uniqueid, nbFormation_t *form,
                                                   s32 type);
 extern void nbCameraSetBougai(nbFormation_t *form);
 extern s32 nbMemoryLoadNegoSe(nbFormation_t *form);
@@ -959,7 +959,7 @@ s32 Flow1_30(nbNegoProcessData_t *n)
 }
 
 extern s32 nbGetMotionNo(nbFormation_t *form, s32 motion);
-extern s32 nbMakeUnitMovePacket(s32 startframe, ps2AddrS_t uniqueid,
+extern s32 nbMakeUnitMovePacket(s32 startframe, addrS_t uniqueid,
                                 nbFormation_t *form, u16 targetMask, s32 type,
                                 f32 speed);
 extern void nbCameraSetTaizi(nbFormation_t *invoke, nbFormation_t *target);

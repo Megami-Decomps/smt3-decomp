@@ -138,7 +138,7 @@ extern cmpInfoWindow_t *cmpInfoWindow;
 
 extern cmbWork_t *D_0054FB20;
 
-extern ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern addrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
@@ -457,7 +457,7 @@ extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern void sdfDrawTagLinkRefGif(void *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLinkRefGif(void *aTag, addr_t aPacket);
 
 extern void cmpReCalcStockCursorPos(s8 index);
 
@@ -493,7 +493,7 @@ extern void mdlSetRotate(void *aHandle);
 
 
 
-extern ps2AddrS_t PlayingNo;
+extern addrS_t PlayingNo;
 
 extern s32 fclChkMessage(void);
 
@@ -585,7 +585,7 @@ extern campStatusPanel_t *campDhUpdateWork;
 
 extern s8 cmpGetHeartsIconId(s8 index);
 
-extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, ps2AddrS_t layout);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, addrS_t layout);
 
 extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
@@ -858,12 +858,12 @@ extern char *D_00343F48[];
 extern u8 D_00551F98[4];
 extern void cmpInitSeqInfo(cmpSeqInfo_t *work, cmpSeqInfo_t *parent);
 extern s8 fclInitMessage(void *data);
-extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, ps2AddrS_t flags);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, addrS_t flags);
 extern void cmpDebugDumpCount(void);
 extern void camp_H_cmpGlobalWork_t__ctor(void);
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 #endif
 
 void cmpinit(void)
@@ -1167,10 +1167,10 @@ typedef struct {
 } cmpSavedNameView_t;
 
 extern char *text2[];
-extern void fclSetMessageVar_20743088(s8 index, ps2AddrS_t value);
+extern void fclSetMessageVar_20743088(s8 index, addrS_t value);
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 #endif
 
 void cmpSetItSkMessageVar(datUnitWork_t *unit)
@@ -1472,7 +1472,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpStartItemMsg);
 
 extern s32 datGetItemSkillNo(s32 itemid);
 extern s32 cmpStartItemMsg(u16 item, s32 errorFlags);
-extern s32 cmpUseItemTokusyu(u16 item, ps2AddrS_t target, ps2AddrS_t user);
+extern s32 cmpUseItemTokusyu(u16 item, addrS_t target, addrS_t user);
 extern void cmpRecover(u16 skill, datUnitWork_t *stock, datUnitWork_t *target);
 #ifdef NON_MATCHING
 extern void cmpSetStockRecoverEff(s8 effect, u16 skill, cmpLocalStock_t *stock);
@@ -1525,7 +1525,7 @@ u16 cmpGetSelectSkillID(void)
 extern s32 cmpAddCost(u16 skill, datUnitWork_t *unit);
 extern s32 cmpGetSkillEntry(u16 skill, datUnitWork_t *unit);
 extern s32 cmpStartSkillMsg(u16 skill, s32 errorFlags);
-extern s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, ps2AddrS_t target);
+extern s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, addrS_t target);
 
 s32 cmpUseSkill(void)
 {
@@ -7155,14 +7155,14 @@ extern sdf3DLightParallelPacket_t D_00574B20[2];
 extern sdf3DViewportPacket_t D_00574CE0[2];
 extern sdfMatrix4_t D_002FA240;
 extern dds3LightState_t dds3LightParam;
-PS2_SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 extern f32 aViewDown[4];
 extern void LookAtMatrix(f32 *, f32 *, f32 *);
 extern void sdf3DMakeScreenParam(sdf3DScreenParam_t *);
 extern void sdfDrawTagInit(sdfDrawTag_t *);
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, sdf3DInitPacket_t *);
 extern void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *, sdf3DScreenParam_t *, sdfMatrix4_t *);
-extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t);
+extern void sdfDrawTagLink(sdfDrawTag_t *, addr_t);
 
 void cmpDrawSetup3DView(void)
 {
@@ -7983,7 +7983,7 @@ extern s32 camp_update_info_Process(s32 id);
 
 s32 cmpStartProcessInfo(s32 text, s32 flag)
 {
-    ps2AddrS_t proc;
+    addrS_t proc;
 
     if (cmpInfoWindow != NULL) {
         return 0;
@@ -10569,7 +10569,7 @@ s32 cmpUseItemKou(u16 item, datUnitWork_t *unit)
     return -1;
 }
 
-s32 cmpUseItemTokusyu(u16 item, ps2AddrS_t target, ps2AddrS_t user)
+s32 cmpUseItemTokusyu(u16 item, addrS_t target, addrS_t user)
 {
     if (cmpUseItemKou(item, EE_ADDR_AS(datUnitWork_t *, user)) >= 0)
     {
@@ -10593,7 +10593,7 @@ extern void fldRiberaMaStart(void);
 extern void fldRifutoMaStart(void);
 extern void fldLightMaStart(void);
 
-s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, ps2AddrS_t unused)
+s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, addrS_t unused)
 {
     s32 se = 0x10;
 
@@ -10946,7 +10946,7 @@ void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode)
 INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorLayout);
 #endif
 
-void cmpInitCursorRange(void *cursor, u8 index, u8 rows, ps2AddrS_t flag)
+void cmpInitCursorRange(void *cursor, u8 index, u8 rows, addrS_t flag)
 {
     cmpPadStopWork_t *work = cursor;
     s32 last;
@@ -11003,7 +11003,7 @@ void cmpUpdateCursorScroll(cmpCursorInfo_t *cursor, s8 mode)
     }
 }
 
-void cmpSetCursorFlag(cmpCursorInfo_t *cur, ps2AddrS_t flag)
+void cmpSetCursorFlag(cmpCursorInfo_t *cur, addrS_t flag)
 {
     cur->flagsData.value = flag;
     cmpUpdateCursorScroll(cur, 1);

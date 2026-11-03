@@ -64,9 +64,9 @@ typedef struct {
 extern u8 D_00599C40[0xC0] __attribute__((section(".data")));
 extern u8 D_00599D00[0x400] __attribute__((section(".data")));
 
-extern ps2AddrS_t D_00599768 __attribute__((section(".data")));
-extern ps2AddrS_t D_0059976C __attribute__((section(".data")));
-extern ps2AddrS_t D_00599770 __attribute__((section(".data")));
+extern addrS_t D_00599768 __attribute__((section(".data")));
+extern addrS_t D_0059976C __attribute__((section(".data")));
+extern addrS_t D_00599770 __attribute__((section(".data")));
 /* The shared reply begins with result/version words. The client accessor
  * also publishes the command semaphore at the end of its 0x40-byte buffer. */
 typedef struct mcReply {
@@ -89,7 +89,7 @@ extern s32 sceSifCallRpc(void *cd, u32 fno, u32 mode, void *send, s32 ssize,
 extern s32 sceMcOpen(s32 a, s32 b, char *c, s32 d);
 extern s32 sceSifCheckStatRpc(void *cd);
 extern void mcDelayThread(u16 ticks);
-extern char *strncpy(char *dst, const char *src, ps2Size_t n);
+extern char *strncpy(char *dst, const char *src, size_t n);
 extern int scePrintf(const char *fmt, ...);
 
 /* The chunk this string opens also carries the float constants the next
@@ -377,8 +377,8 @@ s32 sceMcWrite(s32 a, const void *b, s32 c)
     } else {
         /* The IOP side wants the bulk transfer 16-byte aligned, so the leading
          * bytes up to the next boundary travel inside the request itself. */
-        ps2Addr_t top = (EE_ADDR(b) - 1) & ~15;
-        ps2Addr_t bot = EE_ADDR(b) - 16;
+        addr_t top = (EE_ADDR(b) - 1) & ~15;
+        addr_t bot = EE_ADDR(b) - 16;
         s32 head = top - bot;
 
         D_005997C0.write.bulkBuffer = (const u8 *)b + head;
@@ -559,7 +559,7 @@ s32 sceMcGetDir(s32 a, s32 b, char *c, s32 d, s32 e, void *f)
 }
 
 extern u32 strlen(const char *str);
-extern void *memcpy(void *dest, const void *src, ps2Size_t size);
+extern void *memcpy(void *dest, const void *src, size_t size);
 
 void mceStorePwd(char *dest)
 {

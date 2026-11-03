@@ -21,7 +21,7 @@ u32 dds3GetRandA(u8 *name);
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
 f32 dds3GetRandFloatA(u8 *name);
 
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -31,7 +31,7 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 void sdfDrawTagInit(struct sdfDrawTag_t *a);
 
@@ -47,9 +47,9 @@ extern u32 dds3NullDrawProc(void);
 
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, addr_t aPacket);
 
-extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, ps2Addr_t aEnv, void *aPkt);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, addr_t aEnv, void *aPkt);
 
 extern void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 

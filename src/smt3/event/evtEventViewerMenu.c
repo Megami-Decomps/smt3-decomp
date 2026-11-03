@@ -32,10 +32,10 @@ extern void *sdfDevPrintf(u32 aX, u32 aY, u32 aZ, s32 aAttr, const char *aStr, .
 
 #include "sdk_libkernl.h"
 
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
 extern void *dds3FontReqAllocDrawTag(void);
 
@@ -805,7 +805,7 @@ extern char D_0054FA60[], D_0054FA68[], D_0054FA70[], D_0054FA78[];
 extern char D_0054FA80[], D_0054FA88[];
 extern char *evtItemFadeNames[];
 extern char *D_0032CB30[];
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C230);
 
@@ -1851,7 +1851,7 @@ s32 evtMakeViewerPath(s32 kind)
 
 extern dds3Basic_t *dds3GetControlScene(void);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, s32 serial, s32 type);
-extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, ps2AddrS_t pF1, ps2AddrS_t pF2, const void *pTB, s32 pBF);
+extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, addrS_t pF1, addrS_t pF2, const void *pTB, s32 pBF);
 extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
 extern s32 evtSetRegistUnit(s32 major, s32 minor);
 extern evtUnit_t *evtGetUnitHandle(s32 serial);
@@ -1863,7 +1863,7 @@ extern s32 evtAddNameTable(const char *name);
 extern evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *group, s32 frame);
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *camera, f32 fovy);
 extern s32 strcmp(const char *a, const char *b);
-extern void *memcpy(void *dest, const void *src, ps2Size_t size);
+extern void *memcpy(void *dest, const void *src, size_t size);
 
 s32 evtMakeMotionName(evtPolygonMovieWork_t *work)
 {

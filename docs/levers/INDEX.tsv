@@ -162,7 +162,7 @@ docs/levers/addressing-and-types.md	860		Copy a vector quadword with SDF_VU0_COP
 docs/levers/addressing-and-types.md	865		A loop-invariant float constant that retail materialises into a saved fp register ahead of the loop index's init comes from a named local assigned before the…
 docs/levers/addressing-and-types.md	869	slti sltiu	sltiu on a function result comes from a u32 at the use site, either an unsigned return type or a cast.
 docs/levers/addressing-and-types.md	872	sqc2	Where retail forms a global's address twice, once into a temp for an sqc2 and again as the following call's argument, use SDF_VU0_STOREVECTOR_NOMEM(g) rather…
-docs/levers/addressing-and-types.md	879	addiu lw	Where retail materialises %hi/%lo of symbol + offset fresh while the C holds the bare symbol's address in a register, declare the sub-object with PS2_SYMBOL_AT.
+docs/levers/addressing-and-types.md	879	addiu lw	Where retail materialises %hi/%lo of symbol + offset fresh while the C holds the bare symbol's address in a register, declare the sub-object with SYMBOL_AT.
 docs/levers/addressing-and-types.md	889	$2 $3	A u16 struct field used both as a loop bound test and as the loop counter's initial value needs **two** locals, and the bound one has to be u16.
 docs/levers/addressing-and-types.md	897	movz	A movz selecting between two member addresses takes its two temporaries in the order the statement appears relative to its neighbours, not from how the…
 docs/levers/addressing-and-types.md	906		A varargs format string that retail keeps in a callee-saved register across the calls computing its arguments can be a named local assigned before them.
@@ -230,7 +230,7 @@ docs/levers/addressing-and-types.md	1445		A .lit4 constant whose decimal is obvi
 docs/levers/addressing-and-types.md	1451	addiu lbu	A byte counter decremented in place gives addiu rd, rs, 0xFF when the global is u8 and addiu rd, rs, -1 when it is s8, since the unsigned form stays in QImode.
 docs/levers/addressing-and-types.md	1458	andi dsll32 dsra32 sltiu xori	!x on a value that reached s32 through a 64-bit truncation emits sltiu rd, rs, 1, because the dsll32/dsra32 pair hides the andi 1's range from the expander.
 docs/levers/addressing-and-types.md	1464	$1 $2 $at addiu addu lui	A row pointer that shares the scaled index's own register is visible in the assembly as the %hi/%lo pair landing in $1:
-docs/levers/addressing-and-types.md	1473	addiu	PS2_SYMBOL_AT for dds3LightParam + 0x10 confirmed a third time, and the two halves of one unit disagree.
+docs/levers/addressing-and-types.md	1473	addiu	SYMBOL_AT for dds3LightParam + 0x10 confirmed a third time, and the two halves of one unit disagree.
 docs/levers/addressing-and-types.md	1481	$0 $2 daddu	One reused handle local for two successive allocate-and-lock pairs is what gives retail's single callee-saved register and its daddu rd, $2, $0 per pair.
 docs/levers/addressing-and-types.md	1486	$5 jal sll sra	**A callee with no prototype in scope drops every argument conversion**, so on a unit that leaves most callees implicit, a caller sitting above its callee's…
 docs/levers/addressing-and-types.md	1498	sll sra	**A narrow parameter forwarded to a narrow parameter inside a loop wants to be declared s32**, with the prototype doing the conversion.

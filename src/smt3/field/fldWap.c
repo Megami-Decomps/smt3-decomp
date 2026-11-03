@@ -23,11 +23,11 @@ typedef struct devState_t devState_t;
 
 extern u32 D_0054EC44;
 
-extern ps2Addr_t fldDrawEnv;
+extern addr_t fldDrawEnv;
 
 extern sdfTexHandle_t *D_0054EC60;
 
-extern void *memset(void *, int, ps2Size_t);
+extern void *memset(void *, int, size_t);
 
 extern u8 D_0054EC50[];
 
@@ -99,13 +99,13 @@ extern f32 fldSkyFilterTime;
 
 extern s32 fldGb __attribute__((section(".data")));
 
-extern ps2Addr_t fldItemBoxObjBuf;
+extern addr_t fldItemBoxObjBuf;
 
-extern ps2Addr_t fldMatterTable;
+extern addr_t fldMatterTable;
 
-extern ps2Addr_t D_0054EDA8;
+extern addr_t D_0054EDA8;
 
-extern ps2Addr_t D_0054EDAC;
+extern addr_t D_0054EDAC;
 
 extern s32 fldValueRecordCount;
 
@@ -146,7 +146,7 @@ void sdfFileClose(devState_t *aHandle);
 
 #include "sdk_libc.h"
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 extern s32 gFldInf_HitIdx;
 
@@ -297,7 +297,7 @@ extern s32 fldEveHitCount;
 
 void fldClearDoorEvents(void);
 
-const char *fldEveHitResName_Find(ps2Addr_t pid);
+const char *fldEveHitResName_Find(addr_t pid);
 
 extern u8 D_00302FA0[];
 

@@ -21,7 +21,7 @@ typedef struct {
 
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern dds3Basic_t *dds3GetControlScene(void);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);

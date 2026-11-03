@@ -437,7 +437,7 @@ extern void rstSetLevelUpFlag(void);
 extern void p2sdStopSe(u32 id);
 extern void p2sdPlayBGM(s32 id);
 extern void dds3FadeOut(s32, s32, s32, s32);
-extern void fclSetMessageVar_20743088(s8 index, ps2AddrS_t str);
+extern void fclSetMessageVar_20743088(s8 index, addrS_t str);
 extern char *text2[];
 
 s32 rstCalcSeqDevilLevelUp(void)
@@ -1219,7 +1219,7 @@ s32 datGetDevilRace(s8 index)
     return D_00339E00[index].race & 7;
 }
 
-extern void *memset(void *dst, s32 value, ps2Size_t size);
+extern void *memset(void *dst, s32 value, size_t size);
 extern s8 datCountPlayerLND(void);
 
 #ifdef NON_MATCHING

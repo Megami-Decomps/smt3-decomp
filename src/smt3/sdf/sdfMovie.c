@@ -12,12 +12,12 @@ void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 void sdfChipFreeDirect(void *aPtr);
 void sdfIpuFree(sdfIpuDecodeCb_t *cb);
 s32 p2sdSyncMovie(void);
-void *memcpy(void *a, const void *b, ps2Size_t c);
+void *memcpy(void *a, const void *b, size_t c);
 s32 sdfFileCmdFileSize(void *aHandle);
 s32 sdfFileCmdFree(void *aHandle);
 s32 DIntr(void);
 s32 EIntr(void);
-void *memset(void *a, s32 b, ps2Size_t c);
+void *memset(void *a, s32 b, size_t c);
 char *strrchr(const char *aStr, s32 aChar);
 s32 strcasecmp(const char *aLeft, const char *aRight);
 void *sdfChipAllocZeroDirect(s32 aSize);
@@ -96,8 +96,8 @@ typedef struct sdfMovieDrawPacket_t {
 extern u8 *movieWaitSema(s32 size);
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*allocator)(s32));
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
-extern u32 p2sdSetPcmCallback(ps2Addr_t callback);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
+extern u32 p2sdSetPcmCallback(addr_t callback);
 extern s32 p2sdPlayPcm(u8 channel);
 
 void release_movieobj2(sdfMovieCb_t *obj, sdfGrOt_t *ot)

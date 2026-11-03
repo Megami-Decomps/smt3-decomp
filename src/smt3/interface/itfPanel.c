@@ -200,7 +200,7 @@ extern itfDrawColor_t D_003264D0;
 
 extern u32 sdf2DMakeStdPacket(u32, s32);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 extern void (*D_00326428[])();
 extern void (*CreateColorTable[])();
@@ -219,7 +219,7 @@ extern s32 D_003264E0[];
 
 /* Allocate the common record and the kind's payload; kinds 6 to 8 take the
  * caller's value as the first payload word. */
-itfpanel_t *itfPnlRegist2(s32 type, ps2AddrS_t texhandle) {
+itfpanel_t *itfPnlRegist2(s32 type, addrS_t texhandle) {
     sdfMemHandle_t *allocation;
     itfpanel_t *panel;
     u32 *payload;

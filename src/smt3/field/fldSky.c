@@ -69,7 +69,7 @@ enum {
 
 typedef struct devState_t devState_t;
 
-extern void *memset(void *, int, ps2Size_t);
+extern void *memset(void *, int, size_t);
 
 f32 sdfSin(f32 aRadius);
 
@@ -177,13 +177,13 @@ sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 u32 sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern ps2Addr_t fldItemBoxObjBuf;
+extern addr_t fldItemBoxObjBuf;
 
-extern ps2Addr_t fldMatterTable;
+extern addr_t fldMatterTable;
 
-extern ps2Addr_t D_0054EDA8;
+extern addr_t D_0054EDA8;
 
-extern ps2Addr_t D_0054EDAC;
+extern addr_t D_0054EDAC;
 
 void sdfMemUnlock(sdfMemHandle_t *aHandle);
 
@@ -199,7 +199,7 @@ void sdfFileClose(devState_t *aHandle);
 
 #include "sdk_libc.h"
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 s32 evtBitCheck(s32 no);
 

@@ -246,10 +246,10 @@ extern u32 f;
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern s32 nbMakeKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
+extern s32 nbMakeKaifukuPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form,
                                s32 type, s32 hp, s32 mp, u32 badstat);
 
-extern s32 nbMakeDamagePacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 type, s32 hp,
+extern s32 nbMakeDamagePacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form, s32 type, s32 hp,
                               s32 mp, s32 badstat, s32 hiteff, s32 dead, s32 deadtype, s32 moji,
                               s32 animeoff);
 
@@ -303,11 +303,11 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 type);
+nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form, s32 type);
 
-nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, ps2AddrS_t uniqueid, s32 id);
+nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, addrS_t uniqueid, s32 id);
 
-s32 nbMakeDeadPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 deadchk);
+s32 nbMakeDeadPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form, s32 deadchk);
 
 s32 nbCheckKuisibari2Skill(s32 formindex);
 

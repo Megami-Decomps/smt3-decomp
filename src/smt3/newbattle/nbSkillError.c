@@ -247,7 +247,7 @@ extern s32 (*D_00527688[])(nbEventProcessData_t *e);
 
 extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 extern s32 pacCheckEnd(nbPacHandle_t *pacHandle);
 
@@ -255,7 +255,7 @@ extern void nbAddFormEntry(void *buf, s32 group, s32 id);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
-extern ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern addrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern s32 nbLoadMidiFile(s32 no);
 

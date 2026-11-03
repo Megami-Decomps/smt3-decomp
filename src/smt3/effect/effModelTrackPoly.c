@@ -75,7 +75,7 @@ typedef struct
 extern s32 mdlGetMotionNum(mdlObj_t *model, s32 group);
 extern s32 mdlGetMinorNum(mdlObj_t *model);
 extern s32 mdlGetMajorNum(mdlObj_t *model);
-extern void *memset(void *destination, int value, ps2Size_t size);
+extern void *memset(void *destination, int value, size_t size);
 void pMeshDelete(dds3HermitianTrackPoly_tag *hPoly);
 void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *hPoly, u32 *colors);
 void dds3HermitianTrackPolySetBlend(dds3HermitianTrackPoly_tag *hPoly, u32 blend);
@@ -86,11 +86,11 @@ extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 extern void sdfChipFreeDirect(void *aPtr);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F64B8, sdfGrOtTable, 0x5A0);
+SYMBOL_AT(sdfGrOt_t, D_002F64B8, sdfGrOtTable, 0x5A0);
 extern u32 dds3GetFrameID(void);
 extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
-extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* dds3DrawBank_t stride; only the held frame texture block at 0x1300 is used here. */
 typedef struct
@@ -105,7 +105,7 @@ extern void sdfMatFreeDelayed(sdfMat_t *aMat);
 extern void sdfMatSetConstant(sdfMat_t *aMat, f32 aRatio);
 extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag, s32 aAllocator);
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);

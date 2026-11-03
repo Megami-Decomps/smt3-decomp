@@ -463,7 +463,7 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void sdfDrawTagInit(sdfDrawTag_t *a);
 
-void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 void sdfPreDrawTagLink(sdfPreDrawTag_t *aTag, sdfPreDrawHook_t *aHook);
 

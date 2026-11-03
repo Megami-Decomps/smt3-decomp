@@ -42,11 +42,11 @@ f32 scrGetFloatPara(s32 n);
 
 struct dds3Basic_t *dds3GetActiveScene(void);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
-extern ps2Addr_t D_0054F754;
+extern addr_t D_0054F754;
 
-extern void evtRunUnitKutiMotion(ps2Addr_t h);
+extern void evtRunUnitKutiMotion(addr_t h);
 
 void itfMesMngSetKutiCallback(s32 id, void (*func)(void));
 
@@ -114,7 +114,7 @@ typedef struct evtModelHeader_t {
 } evtModelHeader_t;
 
 
-void dds3AdminiCallSequence(s32 sequence, ps2AddrS_t data, s32 datasize, s32 restore);
+void dds3AdminiCallSequence(s32 sequence, addrS_t data, s32 datasize, s32 restore);
 
 enum {
     EVT_SCALAR_REQUEST_SIZE = 4,
@@ -135,11 +135,11 @@ char *scrGetStrPara(s32 n);
 
 void fldBgmFadeOut(void);
 
-void fldSetSceneParam2(ps2AddrS_t pParam, s32 loadField, s32 loadArea, char *pointResName);
+void fldSetSceneParam2(addrS_t pParam, s32 loadField, s32 loadArea, char *pointResName);
 
 extern s32 fldGb[];
 
-void fldSetSceneParam3(ps2AddrS_t pParam, s32 loadField, s32 loadArea, char *pointResName);
+void fldSetSceneParam3(addrS_t pParam, s32 loadField, s32 loadArea, char *pointResName);
 
 
 

@@ -67,7 +67,7 @@ typedef struct
     u8 data[1];
 } dds3EffectPartModelData_t;
 
-void *dds3BillboardCreate(s32 kind, ps2Addr_t data);
+void *dds3BillboardCreate(s32 kind, addr_t data);
 
 void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
 

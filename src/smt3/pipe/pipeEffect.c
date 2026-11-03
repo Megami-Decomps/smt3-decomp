@@ -295,7 +295,7 @@ void pipeLoadEffect(s32 effectID, PIPE_EFF_t *effects, u8 maxSize, f32 x, f32 y)
     }
 }
 
-extern void *memset(void *dest, s32 value, ps2Size_t size);
+extern void *memset(void *dest, s32 value, size_t size);
 extern s32 dds3EffectGetState(void *effect);
 extern void dds3EffectSetPosition(void *effect, const void *position);
 extern void dds3EffectDraw(void *effect);

@@ -58,7 +58,7 @@ typedef struct sdfImageSetCB
     s32 semaId;
     sdfImageSetPacket_tag *packetHead;
     sdfImageSetPacket_tag *packetTail;
-    ps2Addr_t tagHead;
+    addr_t tagHead;
     sdfImageSetTag_t *tagTail;
 } sdfImageSetCb_t;
 
@@ -162,7 +162,7 @@ void sdfImageSetReq(sdfImageSetReqParam_t *parm)
     s32 remaining;
     s32 widthUnits;
     s32 last;
-    ps2Addr_t src;
+    addr_t src;
     u64 formatAndAddr;
     u64 coords;
     u64 size;
@@ -264,7 +264,7 @@ void sdfImageSetChainTag(u32 head, sdfImageSetTag_t *tail)
     SignalSema(cb->semaId);
 }
 
-void sdfImageSetChainReleaseMem(ps2AddrS_t p)
+void sdfImageSetChainReleaseMem(addrS_t p)
 {
     sdfImageSetCb_t *cb = &sdfImageSetCb;
     sdfImageSetPacket_tag *release;

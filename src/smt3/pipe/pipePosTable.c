@@ -36,7 +36,7 @@ extern s32 fileHandleFree(fileRequest_t *fileHandle);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
-extern void *memcpy(void *dst, const void *src, ps2Size_t size);
+extern void *memcpy(void *dst, const void *src, size_t size);
 extern s32 LoadLinkData(tagPipeLinkInfo *table, pipeLinkSource_t *source, s32 mode);
 
 s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
@@ -114,7 +114,7 @@ tagPipePartsInfo *getPartsInfo(s16 partsID)
 }
 
 
-ps2AddrS_t getPartsType(s32 id)
+addrS_t getPartsType(s32 id)
 {
     s32 shiftedId = id >> 6;
     tagPipePartsInfo *pInfo = getPartsInfo((s16)id);

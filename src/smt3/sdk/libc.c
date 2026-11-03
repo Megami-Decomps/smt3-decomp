@@ -83,7 +83,7 @@ extern s32 sceSifDmaStat(s32);
 
 extern s32 GetThreadId(void);
 
-extern void *memcpy(void *, const void *, ps2Size_t);
+extern void *memcpy(void *, const void *, size_t);
 
 sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
 
@@ -263,7 +263,7 @@ extern void *__deregister_frame_info(void *fn);
 
 extern void free(void *ptr);
 
-extern void *malloc(ps2Size_t size);
+extern void *malloc(size_t size);
 
 extern void __malloc_lock(_reent *r);
 
@@ -318,7 +318,7 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
@@ -414,7 +414,7 @@ s32 atoi(const char *s) {
     return strtol(s, NULL, 10);
 }
 
-void *malloc(ps2Size_t size) {
+void *malloc(size_t size) {
     void *result;
 
     __malloc_lock(_impure_ptr);
@@ -479,7 +479,7 @@ void gcc2_compiled_(_reent *r, u32 needed)
     mallocChunkPrefix_t *oldTop = __malloc_av_.top;
     u32 oldSize = oldTop->size & ~3U;
     u8 *oldEnd = (u8 *)oldTop + oldSize;
-    ps2AddrS_t increment = needed + __malloc_top_pad + 16;
+    addrS_t increment = needed + __malloc_top_pad + 16;
     s32 correction;
     u32 misalignment;
     u8 *newTop;
@@ -1142,7 +1142,7 @@ s32 func_002D6678(_reent *r, FILE *fp, const char *format, va_list ap)
     s32 base;
     s32 nonzero;
     u16 unsignedShort;
-    ps2AddrS_t signedWord;
+    addrS_t signedWord;
     u32 unsignedWord;
     s64 signedLong;
     u64 unsignedLong;
@@ -2635,7 +2635,7 @@ s32 _malloc_trim_r(_reent *r, u32 pad)
     return 1;
 }
 
-extern void *memmove(void *destination, const void *source, ps2Size_t size);
+extern void *memmove(void *destination, const void *source, size_t size);
 extern void *memchr(const void *source, s32 character, u32 size);
 
 s32 __sfvwrite(FILE *fp, __suio *uio)

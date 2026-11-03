@@ -37,7 +37,7 @@ extern void dds3DeleteSceneBasicData(void *basic);
 extern void evtInitViewerInfo(void);
 extern s32 dds3KillProcessName(const char *name, s32 shutdowntimer);
 extern evtViewerInfo_t *viewerinfo;
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 extern void *sdfChipAllocDirect(s32 aSize);
 extern void evtFreePolygonMovieWorkData(void *wdata);
 extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
@@ -111,13 +111,13 @@ extern char *D_0054F830;
 extern char *D_0054F834;
 extern char D_0054F838[];
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 extern void *dds3FontReqAllocDrawTag(void);
 extern s32 sdfDevPrintf(s32 aX, s32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
-extern void sdfDrawTagLink(void *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLink(void *aTag, addr_t aPacket);
 extern void SetActiveCamera(void);
-extern ps2AddrS_t evtEventViewerProcess3(void);
-extern ps2AddrS_t evtEventViewerProcess4(void);
+extern addrS_t evtEventViewerProcess3(void);
+extern addrS_t evtEventViewerProcess4(void);
 void LinkViewerObject(evtViewerObject_s *obj);
 void UnlinkViewerObject(evtViewerObject_s *obj);
 void DelFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f);
@@ -2381,7 +2381,7 @@ extern s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y);
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 extern s32 (*D_0032C750[])(s32 action, s32 previousMenu);
 
-ps2AddrS_t evtEventViewerProcess4(void)
+addrS_t evtEventViewerProcess4(void)
 {
     s32 index;
     s32 previousMenu = 0;
@@ -2459,7 +2459,7 @@ pop_menu:
     return 0;
 }
 
-ps2AddrS_t evtEventViewerProcess3(void)
+addrS_t evtEventViewerProcess3(void)
 {
     if (viewerinfo->nowframe != viewerinfo->oldframe) {
         evtRunFrame(viewerinfo->nowframe);
@@ -2510,14 +2510,14 @@ ps2AddrS_t evtEventViewerProcess3(void)
     return 0;
 }
 
-ps2AddrS_t evtEventViewerProcess2(void *id)
+addrS_t evtEventViewerProcess2(void *id)
 {
     evtRunFrame(viewerinfo->nowframe);
     dds3LinkProcess(id, evtInitFrameVar());
     return EE_ADDR_S(evtEventViewerProcess3);
 }
 
-ps2AddrS_t evtEventViewerProcess1(void)
+addrS_t evtEventViewerProcess1(void)
 {
     evtInitViewerInfo();
     return EE_ADDR_S(evtEventViewerProcess2);

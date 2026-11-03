@@ -40,7 +40,7 @@ extern frFontHandle_t *frCombineFontRequestEx(frFontHandle_t *, frFontHandle_t *
 
 extern u32 strlen(const char *text);
 
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(u32 aSize);
 
@@ -374,7 +374,7 @@ u32 fr_1CA9B8(void) {
     return frFontRowBuf;
 }
 
-u32 frGetFontHeader(ps2Addr_t resourceBase) {
+u32 frGetFontHeader(addr_t resourceBase) {
     return resourceBase;
 }
 

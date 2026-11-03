@@ -77,7 +77,7 @@ extern s32 sceGsSetDefStoreImage(sceGsStoreImage *, s16, s16, s16, s16, s16, s16
 extern s32 sceGsExecStoreImage(sceGsStoreImage *, void *);
 extern s32 sceGsSyncPath(s32 mode, s32 timeout);
 extern void sceGsResetPath(void);
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 extern void sdfGrDrawFrame(void);
 extern void sdfGrMakePacketBuff(s32 aPacketBuffSize);
 extern void sdfGrInitDraw(void);

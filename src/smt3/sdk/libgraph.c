@@ -596,7 +596,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
     u32 timeout = 0;
     s32 i;
     u32 value;
-    ps2Addr_t dmaAddress;
+    addr_t dmaAddress;
     u64 csr;
     u64 restoreImr;
     u128 fifoWord;

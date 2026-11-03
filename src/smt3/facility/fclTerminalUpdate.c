@@ -21,7 +21,7 @@ extern void fclScriptForcedEnd(u8 *PID);
 
 extern s32 trmGetJumpTerminalNo(void);
 
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, addrS_t layout);
 
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
 

@@ -25,7 +25,7 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 typedef float f32;
 typedef double f64;
 
-typedef __SIZE_TYPE__ ps2Size_t;
+typedef __SIZE_TYPE__ size_t;
 
 #define QWORD_ALIGNED __attribute__((aligned(16)))
 #define QUAD_ZERO(lvalue) __builtin_memset(&(lvalue), 0, sizeof(lvalue))
@@ -45,22 +45,22 @@ typedef unsigned long long ee_addr_t;
 
 /* Host view of the guest-address types. This header stands in front of
  * include/common.h's guard, so the typedefs are repeated here rather than
- * reached through PS2_ADDR_TYPE; a consumer that includes the real header
+ * reached through ADDR_TYPE; a consumer that includes the real header
  * defines that macro instead and gets the same two types. Pointer-wide here,
  * which is the whole point: the decompilation spells these where an address
  * is stored and the retail expansion is u32, so nothing moves on target.
  * The unsigned one is ee_addr_t itself, so an EE_ADDR result lands in it with
  * no conversion, which is also what makes the probe's trunc mode stop
  * counting the site. */
-typedef ee_addr_t ps2Addr_t;
-typedef long long ps2AddrS_t;
+typedef ee_addr_t addr_t;
+typedef long long addrS_t;
 
-#define PS2_SYMBOL_AT(type, name, base, offset) extern type name
+#define SYMBOL_AT(type, name, base, offset) extern type name
 
 /* Repeated from include/common.h because this header stands in front of that
  * one's guard: anything that file gains has to be carried here too. The
  * expansion is the same, and on LP64 the first term makes it vacuous. */
-#define PS2_SIZE_CHECK(name, type, size) \
+#define SIZE_CHECK(name, type, size) \
     typedef char name[(sizeof(void *) != 4 || sizeof(type) == (size)) ? 1 : -1]
 
 #define FAKEMATCH_ASM_NAME(symbol) __asm__(symbol)

@@ -11,7 +11,7 @@ extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
-extern ps2AddrS_t stfShutDown(void);
+extern addrS_t stfShutDown(void);
 
 extern char D_0053F100[];
 
@@ -352,7 +352,7 @@ extern s32 stfMain2(dds3ProcessID_t *id);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer, s32 drawTimer,
                               dds3ProcessFunc_t drawExit, dds3ProcessFunc_t deleteExit, void *work);
 
-ps2AddrS_t stfShutDown(void) {
+addrS_t stfShutDown(void) {
     sdfMemHandle_t *handle;
     stfUiWork_t *work;
 

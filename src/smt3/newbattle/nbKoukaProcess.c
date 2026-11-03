@@ -214,7 +214,7 @@ s32 nbGetKoukaPacketCnt(void)
     return work->packetcnt;
 }
 
-s32 nbGetUniqueIdKoukaPacketCnt(ps2AddrS_t uniqueid)
+s32 nbGetUniqueIdKoukaPacketCnt(addrS_t uniqueid)
 {
     nbKoukaPacket_t *p = nbGetKoukaProcessData()->first;
     s32 cnt = 0;
@@ -604,7 +604,7 @@ void nbRunKoukaCase1(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 extern void ToMatrix(void);
 extern void dds3RotationArc(void);
 extern void evtSetUnitRot1(evtUnit_t *unit, s128 *rotation, s32 parameter);
-extern void *memset(void *dst, s32 value, ps2Size_t size);
+extern void *memset(void *dst, s32 value, size_t size);
 
 void RunNumEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {

@@ -426,7 +426,7 @@ void InitializeDebug_fclEncyc(void);
 extern void *sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, fclEncycDebugOt81, sdfGrOtTable, 0xA20);
+SYMBOL_AT(sdfGrOt_t, fclEncycDebugOt81, sdfGrOtTable, 0xA20);
 
 s32 fclEncycDebugProc(void)
 {
@@ -1795,7 +1795,7 @@ extern void lstInitListWindow(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 color, s8 style, lstListWindow_t *work);
 extern void cmpInitCursorLayout(void *cursor, s32 x, s32 y, s32 width,
                                 s32 height, s32 mode);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, addrS_t layout);
 extern void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 width,
                          s32 height, s32 color, s8 type, s8 speed);
 
@@ -2102,7 +2102,7 @@ void FillIndex(s16 *pout, s32 num)
     }
 }
 
-extern void *memset(void *dst, int value, ps2Size_t size);
+extern void *memset(void *dst, int value, size_t size);
 
 void SetElem(fclencyceelem_t *pelem, datUnitWork_t *punit)
 {
@@ -3086,7 +3086,7 @@ void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
     model->first->speed = speed;
 }
 
-extern void *memset(void *dst, s32 value, ps2Size_t size);
+extern void *memset(void *dst, s32 value, size_t size);
 extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode);
 extern void ChangeDevilObjectReadMain(s32 index, fclEncyc_instance_tag *pinst);
 
@@ -3284,7 +3284,7 @@ typedef struct { s32 left, right; } fclEncycStrip_t;
 extern itfColor_t D_00332330;
 extern fclEncycStrip_t D_00332340[5];
 extern itfColor_t g_uv_summon_back[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
+SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *, itfColor_t *, u32, s32, sdfDrawTag_t *);
 extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 extern void itfMiscDrawSpritePrim2(sdfIVector2_t *, itfColor_t *, itfColor_t *, u32, s32, sdfDrawTag_t *);
@@ -3887,7 +3887,7 @@ void ReleaseDebug_fclEncyc(void)
 extern s8 dds3PadButtonState[];
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 width, s32 height);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr, const char *format, ...);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern const char *D_003323D8[4];
 extern char D_0054FCE0[];
 
@@ -4050,7 +4050,7 @@ extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,
                                   s32 width, s32 height);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr,
                           const char *format, ...);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern char D_0053D898[];
 
 s32 DebugProcViewkey(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
@@ -4122,7 +4122,7 @@ s32 DebugProcDispBound(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *debugW
     return 0;
 }
 
-extern void *memmove(void *dest, const void *source, ps2Size_t size);
+extern void *memmove(void *dest, const void *source, size_t size);
 
 void DebugRemoveRecord(s32 id)
 {

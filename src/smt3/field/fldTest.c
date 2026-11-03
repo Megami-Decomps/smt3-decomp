@@ -642,7 +642,7 @@ extern s32 fldShadowWork, D_0054EA8C, D_0054EA90;
 extern sdfMat_t *fldDrawEnv;
 extern sdfGrOt_t sdfGrOtTable[];
 extern s32 rsetFrameMaskOtOffset;
-extern void *memset(void *destination, int value, ps2Size_t size);
+extern void *memset(void *destination, int value, size_t size);
 extern dds3Basic_t *dds3GetActiveScene(void);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serialID, s32 type);
 extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
@@ -651,7 +651,7 @@ extern void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY,
                                f32 *normalZ, f32 *planeConstant);
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *tag, s32 (*allocator)(s32));
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *tag, sdfMat_t *material, s32 (*allocator)(s32));
 extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *parameters);
@@ -1227,7 +1227,7 @@ void fldRunDanteClear(void)
 }
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 #endif
 
 void fldRunTamaInit(void)
@@ -1633,7 +1633,7 @@ void fldMakeFroFileName(void) {
     char directory[0x20];
     char path[0x40];
     fldRunMapHeader_t *resource;
-    ps2Addr_t base;
+    addr_t base;
     u32 first;
     u32 second;
     u32 third;
@@ -2985,7 +2985,7 @@ void fldRunDanteFacePlayer(void)
 }
 
 #ifdef NON_MATCHING
-extern void *memset(void *dst, int value, ps2Size_t size);
+extern void *memset(void *dst, int value, size_t size);
 extern void FromRotation(f32 angle);
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 flag);

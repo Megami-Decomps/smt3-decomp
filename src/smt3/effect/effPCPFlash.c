@@ -788,9 +788,9 @@ extern sdfGrOt_t *D_0031F2A8[];
 
 extern sdfGrOt_t *D_0031F238[];
 
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
-extern void *memset(void *, s32, ps2Size_t);
+extern void *memset(void *, s32, size_t);
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -798,7 +798,7 @@ struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
  * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
 s32 sdfGrAllocPacketBuff(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* Load axis-angle rotation into VU0 vf28-vf31. */
 void SetRotateMatrixAxis(f32 aAngle, const sdfVector3_t *aAxis);

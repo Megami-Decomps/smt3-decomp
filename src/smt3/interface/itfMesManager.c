@@ -315,7 +315,7 @@ extern char *D_0054F4D0[2];
 
 extern char D_0054F4F0[];
 
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr,
                                   const char *aStr, ...);
@@ -349,11 +349,11 @@ extern u32 strlen(const char *text);
 
 #define ITF_MES_COPY_ALIGN_MASK 3
 
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 #define ITF_MES_BINARY_COPY_ROUND_BIAS 5
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 frFontHandle_t *UnchainFontHandleUnit(frFontHandle_t *pfont, s32 index, s32 lines);
 
@@ -367,7 +367,7 @@ void OpenMessageWindow(instanceMes_tag *pinst);
 
 void ReadytoMessage(instanceMes_tag *panel);
 
-extern itfpanel_t *itfPnlRegist2(s32 type, ps2Addr_t texhandle);
+extern itfpanel_t *itfPnlRegist2(s32 type, addr_t texhandle);
 
 void itfPnlSetPosition(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
@@ -444,7 +444,7 @@ extern u8 D_0054F508[5];
 
 void itfPnlSetPositionOffset(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
-void sdfAddressResolver(s32 *aDataBody, ps2AddrS_t aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
+void sdfAddressResolver(s32 *aDataBody, addrS_t aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 void frSetVariableRequest(s32 VarNo, s32 pStr);
 void itfMesMngSetSelect(s32 id, s32 selno);
 void itfMesMngMarkBitStat(s32 id, u32 flag);

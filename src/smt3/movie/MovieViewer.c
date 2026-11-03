@@ -85,7 +85,7 @@ extern u16 D_00551F96;
 extern s32 movieViewerPhase;
 
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
+SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 
 extern void *movieViewerStep(void);
 
@@ -221,7 +221,7 @@ void movieViewerInitRegs(void)
     movieViewerSetFlags();
 }
 
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 #ifdef NON_MATCHING
 static s32 movieViewerIsRegister(u32 address)
@@ -246,7 +246,7 @@ void movieViewerDrawInfo(void)
     }
     if (movieViewerDebugFlag.blockPending != 0) {
 #ifdef NON_MATCHING
-        ps2Addr_t base = EE_ADDR(movieViewerDebugFlag.buffer);
+        addr_t base = EE_ADDR(movieViewerDebugFlag.buffer);
         u64 end = (u64)base + sizeof(movieViewerDebugFlag.block);
         if (((u64)base < EE_REG_RANGE_END && end > EE_REG_RANGE_BASE) ||
             ((u64)base < GS_PRIV_REG_RANGE_END && end > GS_PRIV_REG_RANGE_BASE)) {
@@ -281,7 +281,7 @@ extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 extern void sdfPrimLinkRect(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0,
                             s32 aX1, s32 aY1, s32 aZ, s32 (*aAllocator)(s32));
 
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
+SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
 
 /* "%08X", "%02X" and "**", in .sdata where a literal cannot go. */
 extern char D_0054FDB8[];

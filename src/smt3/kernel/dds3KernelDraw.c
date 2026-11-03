@@ -76,7 +76,7 @@ typedef struct
 extern dds3LightState_t dds3LightParam;
 /* Native fog setters address the record at +0x20 as a separate base.
  * This typed view allocates no storage; the enclosing light state is unchanged. */
-PS2_SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
+SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
 extern dds3Filter2Param_t dds3Filter2Buf;
 extern dds3Filter2Param_t filter2target;
 extern u16 filter2now;
@@ -237,7 +237,7 @@ void *Eve_FilterGetParams(void);
 void Eve_FilterSetParam(void *pParam);
 void Eve_FilterON(void);
 void Eve_FilterOFF(void);
-void *memcpy(void *a, const void *b, ps2Size_t c);
+void *memcpy(void *a, const void *b, size_t c);
 
 void dds3FadeClear(void);
 s32 dds3FadeCheck(void);
@@ -274,8 +274,8 @@ extern sdfMatrix4_t aProjMatrix;
 extern dds3LightState_t dds3LightParam2;
 /* Retail addresses each light record's ambient term as its own symbol, so the
  * parallel array and the ambient reach sdf3DMakeLightParallelPacket apart. */
-PS2_SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
-PS2_SYMBOL_AT(sdfVector4_t, dds3AmbientColor2, dds3LightParam2, 0x10);
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor2, dds3LightParam2, 0x10);
 extern u32 dds3BackColor;
 void eglInit(void);
 
@@ -313,11 +313,11 @@ extern dds3DistBlurParam_t D_00556BC0;
 extern dds3RipBlurParam_t dds3BlurState;
 /* The rectangular frame body follows the ripple body in the same storage.
  * Bind its typed view without defining or extending the imported BSS symbol. */
-PS2_SYMBOL_AT(dds3Blur2Param_t, dds3Blur2State, dds3BlurState, 0x30);
+SYMBOL_AT(dds3Blur2Param_t, dds3Blur2State, dds3BlurState, 0x30);
 extern dds3Filter2Param_t dds3BlurParam;
 extern dds3MFilterParam_t D_00556C70;
 
-void *memset(void *a, s32 b, ps2Size_t c);
+void *memset(void *a, s32 b, size_t c);
 f32 fabsf(f32 value);
 u32 dds3GetFrameID(void);
 void dds3FreeRenderTexture(void);

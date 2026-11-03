@@ -149,7 +149,7 @@ extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 extern void InitializeDebug_pbDebugMode(void);
 
 /* D_002F6938 is sdfGrOtTable[81]; its regFunc accepts this draw tag. */
-PS2_SYMBOL_AT(sdfGrOt_t, pbDebugModeOt81, sdfGrOtTable, 0xA20);
+SYMBOL_AT(sdfGrOt_t, pbDebugModeOt81, sdfGrOtTable, 0xA20);
 
 dds3ProcessFunc_t *pbDebugProc(dds3ProcessID_t *proc_id)
 {

@@ -50,7 +50,7 @@ void sdfGrSetupPacketBuff(s32 aFrameId);
 
 s32 sdfGrAllocPacketBuff(s32 aSize);
 
-void sdfGrClosePacketBuff(ps2AddrS_t aBuffPtr);
+void sdfGrClosePacketBuff(addrS_t aBuffPtr);
 
 void sdfGrMakePacketBuff(s32 aPacketBuffSize) {
     s32 allocationAddress;
@@ -87,6 +87,6 @@ s32 sdfGrOpenPacketBuff(void) {
     return sdfGrPacketBuffPtr;
 }
 
-void sdfGrClosePacketBuff(ps2AddrS_t aBuffPtr) {
+void sdfGrClosePacketBuff(addrS_t aBuffPtr) {
     sdfGrPacketBuffPtr = (aBuffPtr + SDF_QWORD_ALIGNMENT_MASK) & ~SDF_QWORD_ALIGNMENT_MASK;
 }

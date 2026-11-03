@@ -161,7 +161,7 @@ extern void sortSkillList(cmbUnit_t *unit);
 
 extern s32 p2sdStopBGM(s32 id);
 
-extern ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern addrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
@@ -203,7 +203,7 @@ extern void cmpModelInitCore2(void);
 
 extern s8 dds3PadButtonState[];
 
-extern void *dds3GetProcessData(ps2AddrS_t id);
+extern void *dds3GetProcessData(addrS_t id);
 
 typedef struct
 {
@@ -355,7 +355,7 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void cmpInitCursorRange(cmpCursorInfo_t *cur, u8 count, u8 visible, ps2AddrS_t layout);
+extern void cmpInitCursorRange(cmpCursorInfo_t *cur, u8 count, u8 visible, addrS_t layout);
 
 extern void cmpInitCursorLayout(cmpCursorInfo_t *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
@@ -372,7 +372,7 @@ extern void fclEncycSetExplainData(void *pbmd);
 extern s32 frDestroyFontRequestAfter(void *pFRQ);
 
 extern u8 D_00551F18[4];
-extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, ps2AddrS_t flags);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, addrS_t flags);
 
 void fclCombineDisableCmdZensyo(void)
 {
@@ -390,7 +390,7 @@ void fclCombineDisableCmdZensyo(void)
 }
 
 extern u8 cmbMenuEntryTable[8];
-extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, ps2AddrS_t flags);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, addrS_t flags);
 
 void cmbEnableMenuEntry5(void)
 {
@@ -567,7 +567,7 @@ extern u8 D_0032D1B8[];
 extern u8 D_0032D1C8[];
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 #endif
 
 void fclUpdateInit(void)
@@ -1074,7 +1074,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSetupBirthPanel);
 
 
 extern void cmbSetupBirthPanel(s32 index);
-extern void *memcpy(void *dst, const void *src, ps2Size_t size);
+extern void *memcpy(void *dst, const void *src, size_t size);
 extern s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
                             cmbUnit_t *third, datUnitWork_t *result,
                             s32 available, s8 mode, s8 flag, cmpSkillList_t *skills);
@@ -2319,7 +2319,7 @@ void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst)
 }
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, size_t c);
 #endif
 
 void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src)
@@ -4571,7 +4571,7 @@ extern void mdlGetFilebase(s32 aMajor, u16 aMinor, char *aName, s32 aNameLeng);
 
 extern char D_0053CD68[];
 
-ps2AddrS_t cmbMakeModelPath(u16 id, s32 *size)
+addrS_t cmbMakeModelPath(u16 id, s32 *size)
 {
     char path[0x80];
     char base[0x10];
@@ -5298,7 +5298,7 @@ typedef struct effEVECombParSmokeParam_t {
 typedef struct effEVECombParSmoke_t effEVECombParSmoke_t;
 extern effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *params);
 
-ps2AddrS_t cmbStartSmokeEffect(u16 devilId)
+addrS_t cmbStartSmokeEffect(u16 devilId)
 {
     effEVECombParSmokeParam_t params;
     f32 modelSize = datModelParamTable[devilId].formsize / 50.0f;

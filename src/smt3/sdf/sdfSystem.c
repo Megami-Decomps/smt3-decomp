@@ -99,7 +99,7 @@ extern void sdfCoreDrawInit(s32 buffSize);
 
 extern void sdfRandomizeByTime(void *aCB);
 
-extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 void FatalError(const char *format, ...) __attribute__((noreturn));
 
@@ -347,7 +347,7 @@ void FatalError(const char *format, ...) {
     }
 }
 
-sdfHandlerNode_t *DmacAddHandler(s32 kind, s32 channel, ps2AddrS_t handler, s32 arg, s32 next) {
+sdfHandlerNode_t *DmacAddHandler(s32 kind, s32 channel, addrS_t handler, s32 arg, s32 next) {
     sdfHandlerNode_t *node;
     s32 id;
 

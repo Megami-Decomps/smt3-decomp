@@ -80,8 +80,8 @@ typedef struct sdfGrFrameSet_t {
 } sdfGrFrameSet_t;
 
 
-void sdfDrawTagLink2(struct sdfDrawTag_t *aTag, ps2Addr_t aHeadPacket,
-                          ps2Addr_t aTailPacket);
+void sdfDrawTagLink2(struct sdfDrawTag_t *aTag, addr_t aHeadPacket,
+                          addr_t aTailPacket);
 
 /* Resource upload payload and its terminal primitive-reset tag (0xF0). */
 typedef struct sdfStoreImagePacket_t {
@@ -132,7 +132,7 @@ void sdfSetStoreImage(sdfStoreImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle
     s32 aSrcX, s32 aSrcY, s32 aWidth, s32 aHeight, u32 aBuffer, u32 aCallback, u32 aCallbackParam);
 
 void sdfLinkStoreImage(sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle, s32 aSrcX,
-                   s32 aSrcY, s32 aWidth, s32 aHeight, ps2AddrS_t aBuffer, s32 aCallback,
+                   s32 aSrcY, s32 aWidth, s32 aHeight, addrS_t aBuffer, s32 aCallback,
                    s32 aCallbackParam, s32 (*aAllocator)(s32));
 
 void sdfLinkStoreFrameImagePredraw(sdfStoreFrameImagePacket_t *aPre, s32 aEvenOdd);
@@ -147,7 +147,7 @@ void sdfSetLoadImage(sdfLoadImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle,
 
 void sdfLinkLoadImage(sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle,
                    s32 aDstX, s32 aDstY, s32 aWidth, s32 aHeight,
-                   ps2AddrS_t aBuffer, s32 (*aAllocator)(s32));
+                   addrS_t aBuffer, s32 (*aAllocator)(s32));
 
 s32 sdfGrAllocPacketBuff(s32 aSize);
 
@@ -193,7 +193,7 @@ void sdfSetStoreImage(sdfStoreImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle
 }
 
 void sdfLinkStoreImage(sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle, s32 aSrcX,
-                   s32 aSrcY, s32 aWidth, s32 aHeight, ps2AddrS_t aBuffer, s32 aCallback,
+                   s32 aSrcY, s32 aWidth, s32 aHeight, addrS_t aBuffer, s32 aCallback,
                    s32 aCallbackParam, s32 (*aAllocator)(s32)) {
     s32 packetAddress;
 
@@ -259,7 +259,7 @@ void sdfSetLoadImage(sdfLoadImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle,
 
 void sdfLinkLoadImage(sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle,
                    s32 aDstX, s32 aDstY, s32 aWidth, s32 aHeight,
-                   ps2AddrS_t aBuffer, s32 (*aAllocator)(s32)) {
+                   addrS_t aBuffer, s32 (*aAllocator)(s32)) {
     s32 packetAddress;
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;

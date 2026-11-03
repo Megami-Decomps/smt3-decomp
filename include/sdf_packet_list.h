@@ -3,6 +3,6 @@
 
 #include "libsdf.h"
 
-void sdfGrLinkDispFrameTex(sdfDrawTag_t *list, ps2Addr_t source, sdfGrRefPacketHeader_t *packet);
+void sdfGrLinkDispFrameTex(sdfDrawTag_t *list, addr_t source, sdfGrRefPacketHeader_t *packet);
 
 #endif /* SDF_PACKET_LIST_H */
