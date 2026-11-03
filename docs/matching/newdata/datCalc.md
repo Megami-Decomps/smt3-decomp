@@ -144,3 +144,17 @@ also agrees in every mode. Complete retail owner checking remains 79 match,
 This is an ordinary truthful declaration correction, with no new matching
 credit or compiler-constraint dependency. The paired negotiation-owner
 correction is recorded in [NbNegoFlowTwo](../newbattle/NbNegoFlowTwo.md).
+
+## datGetSkillBadKouka (newdata/datCalc, 0x238)
+
+103 of 142 words match at the native 568-byte extent.
+
+The draft remains behind `NON_MATCHING`. Target-only compilation produces the native 568-byte extent, with 103 of 142 words equal; the production owner remains 79 matches / 0 differences. Equal total extent does not mean an exact frame: native reserves 128 bytes, while this draft reserves 112. Its 12-entry candidate array is unchanged; no unexplained padding or larger capacity was invented.
+
+Ordinary indexed observations, a late success flag, zero-default affinity, and a real promoted badlevel snapshot replace the earlier pointer/volatile formulation. The source-side flag branch is live: only one arm applies 0.7. Both arms preserve division by 100, affinity multiplication, multiplication by 100, and optional 0.7 in that order. RNG100 still precedes the native CVT.W.S comparison; badtype and target status are observed afterward. The exact owned 0.7 cell is represented by its literal.
+
+Dense enumeration initializes every selected candidate for nonempty 12-bit masks. All 288 initialized normal records were audited; the 12 random-status records have nonempty masks. The inspected dynamic normal-skill writer does not alter their badtype/status/level fields. This is not a global table-writer or valid-index proof. The native zero-count path calls the state-mutating RNG before its divide trap; the draft does not invent a safe return, and portable C modulo-zero semantics or exception-handler recovery are outside the proof. Valid work pointers and normal-table indices remain caller preconditions. The bounded low 16-bit affinity and u8 level ensure the chance conversion is finite and in signed 32-bit range on those inputs.
+
+A separate ordinary shared-float alternative produces 560 bytes, 78 equal words and 8 uncovered native bytes. Its qualified unmodified compiler dumps preserve the second badlevel load through local allocation, then show its deletion by the global-allocation/reload stage; the conversion consumes the first byte value instead. The retained integer-snapshot draft has two exclusive conversion sites, one executed per path, with different float allocation from native. Neither alternative reconstructs the native redundant reload or explains the 16-byte local-frame difference. No constraint, false volatile, compiler flag or ownership change is retained. Original source spelling is unknown.
+
+Final production and target-active plain/dump output parity, full-owner/data checks, and strict retained-C checks are recorded in the review packet. The inherited `memset` built-in diagnostic remains; this is not a warning-clean claim. Independent review approved this guarded reconstruction. Final owners, three strict modes, production/retained plain-dump parity, retail byte comparison/checksum/no-op, 450 tests, 817 layout assertions, fresh stable 141-owner/481-draft checks and seven IRX checks pass. Reports remain unchanged. No new matching credit is claimed.

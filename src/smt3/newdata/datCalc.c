@@ -361,44 +361,52 @@ s32 datGetSkillKouka(s32 nskill, s32 kind, datUnitWork_t *s, datUnitWork_t *d)
 
 #ifdef NON_MATCHING
 extern s32 datGetBadStatusAttr(s32 bad);
-extern f32 D_0054E4B0;
 
 s32 datGetSkillBadKouka(s32 nskill, datUnitWork_t *source, datUnitWork_t *target)
 {
-    datNormalSkill_t *skill = &datSkillTable.normal[nskill];
-    u32 status = skill->basstatus & 0xFFF;
+    u32 status = datSkillTable.normal[nskill].basstatus & 0xFFF;
     f32 affinity;
-    s32 success = 1;
+    s32 success, statusRandom;
 
-    if (skill->badtype == 3) {
+    if (datSkillTable.normal[nskill].badtype == 3) {
         s32 candidates[12];
         s32 count = 0;
         s32 i;
-        candidates[0] = 0; /* Retail leaves this unset; no random-status skill has an empty mask. */
         for (i = 0; i < 12; i++) {
             if (status & (1U << i)) {
                 candidates[count++] = i;
             }
         }
-        status = 1U << candidates[dds3GetRandIntA(NULL, count)];
+        /* Valid nonempty masks initialize every selected slot. Retail calls
+         * the RNG even for count zero; do not invent a safe fallback. */
+        statusRandom = dds3GetRandIntA(NULL, count);
+        status = 1U << candidates[statusRandom];
     }
-    if (skill->badtype == 1) {
+    if (datSkillTable.normal[nskill].badtype == 1) {
         s32 element = datGetBadStatusAttr(status);
         u32 value = datGetAisyo(target, element);
-        affinity = (value & 0x170000) != 0 ? 0.0f : (f32)(s32)(value & 0xFFFF) / 100.0f;
+        affinity = 0.0f;
+        if (!(value & 0x170000)) {
+            affinity = (f32)(s32)(value & 0xFFFF) / 100.0f;
+        }
     } else {
         affinity = 1.0f;
     }
-    if (skill->badlevel != 0xFF) {
-        f32 chance = (f32)*(volatile u8 *)&skill->badlevel / 100.0f;
-        if (source->flag & 0x20) {
-            chance = chance * affinity * 100.0f * D_0054E4B0;
+    success = 1;
+    if (datSkillTable.normal[nskill].badlevel != 0xFF) {
+        /* Ordinary RAM snapshots; the native redundant byte reload and
+         * larger frame remain unresolved, so this draft stays guarded. */
+        u32 flags = source->flag;
+        s32 level = datSkillTable.normal[nskill].badlevel;
+        f32 chance;
+        if (flags & 0x20) {
+            chance = (f32)level / 100.0f * affinity * 100.0f * 0.7f;
         } else {
-            chance = chance * affinity * 100.0f;
+            chance = (f32)level / 100.0f * affinity * 100.0f;
         }
         success = (s32)dds3GetRandIntA(NULL, 100) < (s32)chance;
     }
-    if (success != 0 && skill->badtype == 1 && (u32)(target->badstatus & 0xFFF) >= status) {
+    if (success != 0 && datSkillTable.normal[nskill].badtype == 1 && (u32)(target->badstatus & 0xFFF) >= status) {
         success = 0;
     }
     return success != 0 ? status : 0;

@@ -28,6 +28,7 @@ both native and emitted sizes when they differ.
 | 6 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 6 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
+| 5 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
@@ -37,14 +38,13 @@ both native and emitted sizes when they differ.
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
-| 4 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
+| 4 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 3 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 3 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
-| 3 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 3 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 3 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 3 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |

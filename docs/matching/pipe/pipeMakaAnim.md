@@ -102,3 +102,35 @@ files. The private candidate sources intentionally differ. The final ordinary so
 still differs in 74 words, including saved-register roles and initialization,
 size/color/coordinate scheduling. It is not an exact match or a single residual
 allocation tie. No register grid or volatile substitute was attempted.
+
+## makaDrawBar (pipe/pipeMakaAnim, 0x2F8)
+
+143 of 190 words match at the native 760-byte extent; the draft remains guarded.
+
+The retained draft now uses the actual two-float origin, ordinary s8 cell and
+s16 position arrays, and body-first build/draw loops. Signed conversion and
+signed halfwidth behavior differ from NormalGauge and remain intact. A single
+empty operand on the initialized 20-pixel s16 spacing retains a separate
+conversion tail: qualified whole-owner RTL shows jump2 merging it without the
+operand, while retail keeps it separate from the 14/16 path. This is a local
+compiler reconstruction aid, not original-source evidence. It has no fixed
+register, memory barrier or call-spanning binding.
+
+Target-only output is 143/190 words at the native 760-byte extent. The 47-word
+residual remains guarded and earns no matching credit. All 9 exact peers and
+owned data remain intact; NormalGauge stays 110/184 at 736 bytes. Three strict
+compilation modes pass, and final plain/dump parity plus unchanged production
+object contracts were checked.
+
+The full u16 domain gives width 0..5; digit 0 is the -1 cell value, not a negative
+index. Both arrays retain their actual 16 elements. Signed narrow step/position,
+LB/LBU observations, the 13-argument sprite ABI, and per-call MakaTex[1].th reloads
+are preserved. The inspected callers use scales 1.3..1.8 and normal negative-maka
+animation coordinates; arbitrary scales, malformed caller lifecycle and
+out-of-range float casts remain outside the safety claim.
+
+Final integration preserves both guarded targets and all nine exact peers.
+Production and retained-C plain/dump parity, three strict modes, full retail
+byte comparison/checksum/no-op, 450 tests, 817 layout assertions, fresh stable
+141-owner/481-draft qualification and seven IRX checks pass. Reports are
+unchanged; this batch claims zero exact functions or bytes.
