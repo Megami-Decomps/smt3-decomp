@@ -22,7 +22,7 @@ views of the three headers that cannot survive a host compiler, force-included
 ahead of the tree's own copies, because a quoted `#include "common.h"` from
 inside `include/` finds its sibling before anything on `-I`.
 
-Two modes, because they answer different questions.
+Three modes, because they answer different questions.
 
 `accept` asks whether an LP64 compiler takes the unit at all. gcc 14 makes the
 two pointer/integer mismatch classes hard errors; this mode demotes exactly
@@ -40,12 +40,37 @@ python3 tools/host64_probe.py accept [--cc clang] [--list-failures]
 python3 tools/host64_probe.py width
 ```
 
+`trunc` asks what survives naming every cast. Once a site spells `EE_ADDR`
+the cast no longer truncates, but the declaration the result lands in still
+does, and only widening that declaration can fix it. The mode promotes
+`-Wconversion` and counts the conversions whose source is an `EE_ADDR`
+expansion.
+
+```
+python3 tools/host64_probe.py trunc
+```
+
 **A trap this measurement fell into once.** `-w` outranks
 `-Werror=pointer-to-int-cast`. The first version of `width` carried `-w` from
 sdfport's flag set and reported **zero** pointer-width casts in a tree that has
 1470 of them. `width` now carries `-Wno-all -Wno-extra` instead, and the
 classifier counts error lines only, not warnings, so a warning cannot be
 attributed to a class that did not fail the unit.
+
+**A second trap, in `trunc`.** The mode recognizes a truncated address by the
+source type gcc names, so the host view's `ee_addr_t` spelling is part of the
+instrument. A draft spelled it `unsigned long`, which is also how LP64 spells
+`size_t` and the type of every `sizeof`, and reported 1120 sites where the
+clean count is 1050: 70 were `sizeof` and `ps2Size_t` conversions with no
+address in them. `unsigned long long` is the spelling that collides with
+nothing, because gcc prints a cast's result as its underlying type and a
+declared variable as its typedef name plus `{aka ...}`, so anchoring on
+`from '<type>' to` also rejects `u64` variables. Both exclusions were checked
+against a file holding all four cases at once, not reasoned about.
+
+Each measuring run starts by pointing the instrument at a site confirmed to
+have the property and requiring a non-zero answer, because the clean result is
+the one nobody re-examines.
 
 ## Before
 
@@ -75,13 +100,17 @@ and `sifRpcServerData_t`. The other seven in headers hold at LP64 as written.
 
 ## After
 
-`018a0927`, same commands.
+Current branch head, same commands.
 
-| Command | Units compiling | Was |
-| --- | --- | --- |
-| `python3 tools/host64_probe.py accept` | **307 / 309** | 144 |
-| `python3 tools/host64_probe.py accept --cc clang` | **225 / 309** | 101 |
-| `python3 tools/host64_probe.py width` | **141 / 309** | 70 |
+| Command | Units compiling | At `018a0927` | Was |
+| --- | --- | --- | --- |
+| `python3 tools/host64_probe.py accept` | **307 / 309** | 307 | 144 |
+| `python3 tools/host64_probe.py accept --cc clang` | **225 / 309** | 225 | 101 |
+| `python3 tools/host64_probe.py width` | **252 / 309** | 141 | 70 |
+
+`width` moved from 141 to 252 with the cast sweep below. `accept` did not move,
+because a pointer-width cast is well-formed C: a unit that narrows an address
+compiles, it is just wrong.
 
 clang stays well behind gcc for one reason that is not this tree's C: clang
 validates inline-asm register names under `-fsyntax-only` and gcc does not, so
@@ -152,6 +181,69 @@ difference is that a host now has a name to redefine. These are the five units
 sdfport's `docs/reference/engine-compile.md` filed as upstream reports
 (`sdf3DPrim.c`, `sdfPacketBuff.c`, `sdfPrim.c`, `sdfSortOt.c`, `sdfVu1.c`).
 
+### `EE_ADDR_AS(type, addr)`, `include/common.h`
+
+```c
+#define EE_ADDR_AS(type, addr) ((type)(addr))
+```
+
+An EE address widened back to a typed pointer, which is what the widening half
+of the cast population is. The default expansion is the cast that was there,
+with parentheses around the operand and around the whole expression, so the
+preprocessed token stream differs from the original only in parentheses.
+
+That it is byte-identical at **every** covered site, rather than at the ones
+somebody read, rests on two mechanical checks rather than on inspection.
+`tools/host64_casts.py verify` un-expands every `EE_ADDR*` call in the working
+tree and in `HEAD` to a fixed point and compares the whitespace-stripped
+results, reporting each file as token-identical, differing in parentheses only,
+or differing. Only the last is a defect: a parenthesis around a complete
+unary-expression operand, which is all a cast binds to, and around a complete
+cast expression cannot change the parse. The checksum then confirms the output
+over the whole image. The converter is the reason the scope is right in the
+first place: it finds the cast's operand by walking the unary-expression
+grammar, prefix operators, calls, subscripts and member selection included, and
+refuses the site rather than guessing when the walk does not settle. Wrapping
+one token too many would turn a byte offset into pointer arithmetic, which the
+checksum would catch but a reader would not.
+
+### The cast sweep
+
+`tools/host64_casts.py` finds the sites and rewrites them. It keys on gcc's
+`-Werror=pointer-to-int-cast` and `-Werror=int-to-pointer-cast` diagnostics,
+read as JSON, so the site is identified by its operand's type and never by the
+cast's text: 412 of the narrowing sites are spelled `(s32)`, which is exactly
+why the earlier `(u32)`-matching sweep reported none of them.
+
+1470 sites at `9d0a5ce0`, 14 now. Narrowing casts became `EE_ADDR` or
+`EE_ADDR_S`, keeping the signedness because the two differ on a host; widening
+casts became `EE_ADDR_AS`. The converted sites are spread over the eleven
+commits from `5a21da68`, grouped by directory so each batch could be gated on
+its own, with `src/smt3/sdk/` last.
+
+The 14 that remain are the two classes with no macro to go to, and they are
+listed rather than counted because they are not a backlog:
+
+- **Nine casts to a function or array pointer**: `(s32 (*)())` on a stored
+  function address in `mc/slMain.c` (3), `(void (*)(void))`, `(u8 *(*)(s32))`
+  and `(s32 (*)(s32, void *, void *))` on callbacks in `interface/itfMesManager.c`,
+  `sdf/sdfSound.c`, `sdf/sdfGraph.c` and `sdf/sdfSystem.c`, and `(f32 (*)[4])`
+  on a row-of-four array in `effect/effMagatuhi.c` (2). A declarator is not a
+  type name followed by stars, so it cannot be an `EE_ADDR_AS` argument at all.
+  A host needs a typedef for each, which is per-site work, not a macro.
+- **Five `(u32)&((T *)0)->field` offsets** in `model/mdlManager.c`,
+  `newbattle/NbNegoFlowOne.c` (2) and `sdf/sdfModel.c` (2). The operand is a
+  field address at a null base, so the value is an offset and not an address,
+  and the cast truncates nothing. The converter skips these by name. What does
+  change at LP64 is the offset itself, once a pointer member ahead of the field
+  grows, which is open item 2 and not something a cast spelling can reach.
+
+`sdk/libcdvd.c` contributed nine sites through one macro, `UNCACHED`, whose
+body held the cast. Naming the address conversion in the definition closed all
+nine. It composes the way `include/eeregs.h`'s `EE_UNCACHED` hook does, but
+spells the mirror bit as the literal it already was, because `libcdvd.c` does
+not include that header and adding one to an SDK unit buys less than it risks.
+
 ### Declarations, not hooks
 
 38 `extern` prototypes in 22 units, for functions the unit calls with no
@@ -170,40 +262,37 @@ include, so on target there was no conflict and on a host there is. A
 ## The gate
 
 ```
-$ date -u +%s > stamp && touch include/common.h && ninja
-[345/345] check config/smt3/checksum.sha1          # ninja exit 0
+$ date +%s > stamp && touch include/common.h && ninja
+[317/318] check config/smt3/checksum.sha1          # ninja exit 0
 $ sha1sum build/smt3/SLUS_209.11
 5facfbf7916836613449c922e26a4ec412207b32  build/smt3/SLUS_209.11
 $ stat -c '%s %Y' build/smt3/SLUS_209.11
-4551696 1793722924
+4551696 1793724850
 $ cat stamp
-1793722917
+1793724843
 ```
 
-345 steps, so the build did the work rather than reporting nothing to do, and
-the image's mtime is later than the stamp taken before it, so it is this
-build's image and not the previous one left in place by a failure. Every commit
-on the branch was gated this way, and `tools/check_unit.py` was run per unit on
-each batch before the link.
+Roughly 312 steps for a `touch include/common.h`, so the build did the work
+rather than reporting nothing to do, and the image's mtime is later than the
+stamp taken before it, so it is this build's image and not the previous one
+left in place by a failure. A "no work to do" ninja is not a verification.
+Every commit batch on the branch was gated this way, and
+`tools/check_unit.py` was run per unit on each batch before the link.
 
-Three changes were reverted because they broke it, below.
+Four changes were reverted because they broke it, below.
 
 ## Open items
 
 Ordered by how much a host consumer would gain from closing them.
 
-1. **1470 pointer-width cast sites remain**: 658 narrowing a pointer to a
-   32-bit integer across 107 files, 812 widening a 32-bit integer to a pointer
-   across 122 files (144 of the 1470 in `src/smt3/sdk/`). Measured by the
-   `width` probe; distinct `file:line` pairs, not error lines.
-   **412 of the 658 narrowing sites are spelled `(s32)`, not `(u32)`**, which
-   is why the earlier sweep did not see them: its extractor matched `(u32)`
-   only. The widening sites are dominated by `(T *)<u32-returning allocator>`,
-   for which no macro exists yet; `EE_ADDR_AS(type, addr)` expanding to
-   `((type *)(u32)(addr))` would be identity on target and would cover most of
-   them. Neither sweep was attempted here: at that size it needs its own
-   session and the same operand-scope care
-   `docs/pointer-assumptions.md` records, which the checksum does not catch.
+1. **14 pointer-width cast sites remain**, down from 1470 at `9d0a5ce0`:
+   5 narrowing and 9 widening, over 9 files. Measured by
+   `python3 tools/host64_casts.py list`, which reports distinct
+   `file:line:col` triples. Both remaining classes are described under the
+   cast sweep above and neither is closed by a macro: casts to a function or
+   array pointer need a per-site typedef, and `(u32)&((T *)0)->field` offsets
+   are already correct on a host as written. Nothing here is pending work;
+   the next thing a host consumer gains is open item 2.
 2. **The `u32` signatures themselves are unchanged.** `aPacket` is still `u32`
    in all five `sdfDrawTagLink` declarations, and `lightPacket`, `tagHead`,
    `corePktPointBuff` and their kind are still `u32` fields. This is the one
@@ -213,6 +302,17 @@ Ordered by how much a host consumer would gain from closing them.
    macros mark where the narrowing happens and a host redefines them, but the
    host still has to widen these declarations in its own staged copy. Nothing
    upstream can close this.
+
+   This is now the largest open item and it has a measured size.
+   `python3 tools/host64_probe.py trunc` reports **1074 sites over 120 units**
+   where an `EE_ADDR` result is stored into a 32-bit declaration. That is what
+   the cast sweep could not fix and by construction could not: naming the cast
+   stops the cast truncating, and then the declaration truncates instead. Every
+   one of the 1074 is a `u32` field, parameter, local or return type that would
+   have to widen, and each widening moves a struct layout or an ABI. So the
+   number is not a backlog to work through here; it is the size of the staged
+   copy a host consumer has to maintain, and the reason the hooks are macros
+   rather than edits.
 3. **A host view of `include/ps2asm.h` is missing**, which is what keeps clang
    at 225 rather than near 307, and what would be needed for `-c` rather than
    `-fsyntax-only` on either compiler. sdfport has one
@@ -227,7 +327,7 @@ Ordered by how much a host consumer would gain from closing them.
    process id where the declaration says `dds3ProcessID_t *`. Whether the id
    is an address at all is a type question for the IDB, not a conversion to
    name, so none were touched.
-6. **Three declarations are load-bearing for the match and had to be
+6. **Four declarations are load-bearing for the match and had to be
    reverted.** Each compiled fine and moved codegen:
    - `evtCommand.c`, `datAddKotowariPoint`. `evt_1E91A8` reads two `u64`s from
      `scrGetIntPara` and passes them to a function whose real parameters are
@@ -245,8 +345,26 @@ Ordered by how much a host consumer would gain from closing them.
    compile. `evtCommand.c` also calls four functions still in assembly with no
    declaration anywhere (`evtSetUnitMove3`, `evtSetUnitRot2`,
    `fldCamSyukanSuriawase`, `func_001FA310`); their signatures would have to
-   come from the IDB, and given the three reverts above each one is as likely
+   come from the IDB, and given the reverts above each one is as likely
    to be load-bearing as not.
+
+   The `datAddKotowariPoint` revert was re-measured rather than taken on
+   trust: adding the `(s32, s32)` prototype still gives
+   `DIFF evt_1E91A8 @ 0x001E91A8: 8 of 16 words differ`, the same figure
+   recorded above.
+
+   The obvious way around it does not survive the policy. Declaring
+   `extern void datAddKotowariPoint(u64 type, u64 point);` in `evtCommand.c`
+   restores the match exactly, 162 functions matching and 0 differing, because
+   a `u64` parameter needs no promotion and ee-gcc passes the register whole.
+   But the provider in `newdata/datCalc.c` is `(s32, s32)`, and
+   `docs/CONTRIBUTING.md`'s same-symbol ABI-view allowance requires a
+   declaration to match the provider's canonical type exactly and closes by
+   excluding false types. A declaration that matches the bytes by misdescribing
+   the function is the thing that allowance forbids, so it was reverted too.
+   The same objection kills the equivalent move on `libgcc.c`'s `sdfPackQuad`,
+   where the false type would be an `int` return on a function returning `f32`.
+   These two units stay uncompiled, which is the cheaper price.
 7. **`libgcc.c` has two `return` with no value in non-void functions**
    (`:856`, `:877`). A real defect in the decompiled source rather than a
    portability one; left for whoever owns that unit.
