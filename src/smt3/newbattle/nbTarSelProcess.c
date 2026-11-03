@@ -455,68 +455,82 @@ extern void nbPlaySe(s32 no);
 #ifdef NON_MATCHING
 void CursorSelect(nbTarSelProcessData_t *process)
 {
-    volatile nbTarSelProcessData_t *selection = process;
-    volatile u8 *pad = dds3PadButtonState;
     s32 count = 0;
+    s32 state;
     s32 both;
-    s32 moved = 0;
+    s32 moved;
     s32 area;
-    s8 friendCount;
+    u8 friendCount;
 
-    if ((process->data->stat & 0x200000) || process->stat != 1) {
+    if (process->data->stat & 0x200000) {
         return;
     }
-    if (pad[0x21] & 2) {
+    /* Retail keeps this initial state across nbPlaySe and uses it again
+     * when selecting the current area's count. */
+    state = process->stat;
+    if (state != 1) {
+        return;
+    }
+    if (dds3PadButtonState[0x21] & 2) {
         MemoryCommand_nbTarSelProcess(process);
         process->stat = 0;
         return;
     }
-    if ((s8)pad[0x23] < 0) {
+    if ((s8)dds3PadButtonState[0x23] < 0) {
         process->stat = 2;
         nbPlaySe(10);
     }
     if (process->ctype == 2) {
         return;
     }
-    area = selection->nowcarea;
-    if (area == 1) {
-        count = selection->friendcnt;
+    moved = 0;
+    area = process->nowcarea;
+    if (area == state) {
+        count = process->friendcnt;
     } else if (area == 2) {
-        count = selection->enemycnt;
+        count = process->enemycnt;
     }
-    friendCount = selection->friendcnt;
-    both = friendCount > 0 && selection->enemycnt > 0;
+    /* Preserve the raw byte snapshot; both later tests interpret it as s8. */
+    friendCount = process->friendcnt;
+    both = 0;
+    if ((s8)friendCount > 0 && process->enemycnt > 0) {
+        both = 1;
+    }
     if (count >= 2) {
-        if (((s8)pad[0x25] < 0 || ((s8)pad[0x27] < 0 && !both)) &&
-            selection->nowno == count - 1) {
-            selection->nowno = 0;
+        if (((s8)dds3PadButtonState[0x25] < 0 || ((s8)dds3PadButtonState[0x27] < 0 && !both)) &&
+            process->nowno == count - 1) {
+            process->nowno = 0;
             moved = 1;
-        } else if ((pad[0x25] & 2) || ((pad[0x27] & 2) && !both)) {
-            if (selection->nowno < count - 1) {
-                selection->nowno++;
+        } else if ((dds3PadButtonState[0x25] & 2) || ((dds3PadButtonState[0x27] & 2) && !both)) {
+            if (process->nowno < count - 1) {
+                process->nowno++;
                 moved = 1;
             }
         }
-        if (((s8)pad[0x24] < 0 || ((s8)pad[0x26] < 0 && !both)) &&
-            selection->nowno == 0) {
-            selection->nowno = count - 1;
+        if (((s8)dds3PadButtonState[0x24] < 0 || ((s8)dds3PadButtonState[0x26] < 0 && !both)) &&
+            process->nowno == 0) {
+            process->nowno = count - 1;
             moved = 1;
-        } else if ((pad[0x24] & 2) || ((pad[0x26] & 2) && !both)) {
-            if (selection->nowno > 0) {
-                selection->nowno--;
+        } else if ((dds3PadButtonState[0x24] & 2) || ((dds3PadButtonState[0x26] & 2) && !both)) {
+            if (process->nowno > 0) {
+                process->nowno--;
                 moved = 1;
             }
         }
     }
-    if ((s8)pad[0x26] < 0 || (s8)pad[0x27] < 0) {
-        if (area == 1 && selection->enemycnt > 0) {
-            selection->nowno = 0;
-            selection->nowcarea = 2;
-            moved = 1;
-        } else if (area == 2 && friendCount > 0) {
-            selection->nowcarea = 1;
-            selection->nowno = 0;
-            moved = 1;
+    if ((s8)dds3PadButtonState[0x26] < 0 || (s8)dds3PadButtonState[0x27] < 0) {
+        if (area == 1) {
+            if (process->enemycnt > 0) {
+                process->nowno = 0;
+                process->nowcarea = 2;
+                moved = 1;
+            }
+        } else if (area == 2) {
+            if ((s8)friendCount > 0) {
+                process->nowcarea = 1;
+                process->nowno = 0;
+                moved = 1;
+            }
         }
     }
     if (moved) {

@@ -67,6 +67,8 @@ both native and emitted sizes when they differ.
 | 2 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
 | 2 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 2 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
+| 2 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
+| 2 | newbattle/nbResultProcess | [newbattle/nbResultProcess.md](newbattle/nbResultProcess.md) |
 | 2 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 2 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
 | 2 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
@@ -97,9 +99,8 @@ both native and emitted sizes when they differ.
 | 1 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
 | 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 |  | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
-| 1 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
+| 1 | newbattle/nbTest | [newbattle/nbTest.md](newbattle/nbTest.md) |
 | 1 | newbattle/nbSkillError | [newbattle/nbSkillError.md](newbattle/nbSkillError.md) |
-| 1 | newbattle/nbResultProcess | [newbattle/nbResultProcess.md](newbattle/nbResultProcess.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |

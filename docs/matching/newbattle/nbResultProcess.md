@@ -36,3 +36,17 @@ claim.
 Further work needs a truthful explanation for the native reload as well as
 the remaining allocation/scheduling differences. No fabricated memory
 barrier, aliasing store or replacement volatile access is warranted.
+
+## nbResultLoadTextures (newbattle/nbResultProcess, 0x1F4)
+
+18 of 125 words match in the ordinary guarded draft. It emits 512 bytes against 500 native bytes and has 12 excess bytes. It remains under `NON_MATCHING` with its assembly fallback and earns no matching credit. The reproduced inherited draft emitted 528 bytes and matched 6 of 125 native words.
+
+Three edits remove unjustified `volatile` qualifiers from the score and global pointers and replace the cast through `global->akuma[index].flag` with the existing `&global->unitwork[index]` overlay. Both expressions address the native record at global + 0xA54 + 0xEC * index. The typed unit view preserves the unsigned halfword level at record + 0x14; the legacy akuma level field is not an interchangeable substitute. Calls, selected-entry initialization, signed quotient/remainder arithmetic and the minimum-one result are retained. No new bounds, types, register constraints, barriers or calls are added.
+
+Actual assembled output retains dynamic division by 45, its first divide-by-zero check, and the fresh `resultadd` load after the quotient and optional increment stores. It also retains the fresh `DDS3_GBWK` load after `GetAddExp` when another result slot may be selected. Not all native reads survive: rejected entries reuse the cached `stockCount`, whereas native reloads that field at the shared loop tail. There is no intervening call or write on the rejected path; ordinary RAM semantics are assumed, not asynchronous mutation.
+
+Remaining differences include an extra divide-by-zero check generated for the repeated quotient expression, an 80-byte rather than 48-byte frame, register allocation, the combined flag predicate, and scheduling of independent level/experience stores. Direct global field reads, score-pointer iteration, incrementing `resultadd`, and delaying construction of the unit pointer were tested in bounded controls. Pointer iteration reached the native 500-byte size but matched only 6 words; none of these controls matched or justified complicating the minimal cleanup. The repeated quotient was retained rather than choosing a shape merely for its size.
+
+All 13 already matched functions in the complete owner remain exact. Strict compilation of all retained nonmatching bodies succeeds. Plain and dump-enabled pinned target compiler output agrees across allocated sections, symbols, ordered relocation contracts and normalized assembly. These are target compiler dumps, not debugger-hook evidence; no internal causal decision or original spelling is claimed.
+
+The native initialization loops independently establish four 0x34-byte score rows at [0x574E80, 0x574F50) and 64 0x10-byte caption rows at [0x574F50, 0x575350). The existing score symbol's `size:0x30` annotation does not describe that full array. This cleanup changes neither symbol metadata nor object ownership and does not claim that annotation is fixed. Valid stock and unit indices remain inherited caller preconditions, not newly proven bounds.

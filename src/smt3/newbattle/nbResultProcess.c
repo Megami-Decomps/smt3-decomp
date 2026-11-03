@@ -51,9 +51,9 @@ extern s32 GetAddExp(s32 index, s32 cap);
 #ifdef NON_MATCHING
 void nbResultLoadTextures(void)
 {
-    volatile nbResultScore_t *score;
+    nbResultScore_t *score;
     datUnitWork_t *unit;
-    volatile dds3GlobalWork_t *global;
+    dds3GlobalWork_t *global;
     u32 index;
     u32 flags;
     s32 i;
@@ -85,7 +85,7 @@ void nbResultLoadTextures(void)
     global = DDS3_GBWK;
     while (i < (s32)global->stockCount) {
         index = global->stockOrder[i++];
-        unit = (datUnitWork_t *)&global->akuma[index].flag;
+        unit = &global->unitwork[index];
         flags = unit->flag;
         if ((flags & 1) && (flags & 2)) {
             score = &nbResultScoreTable[count];

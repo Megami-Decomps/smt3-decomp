@@ -51,3 +51,48 @@ all 24 owner dependencies, all 781 tracked blobs and final Ninja no-op checks.
 Source commit `4a723899b0e4392df56dbb089ee06745496c3e60` has exact-source hosted CI
 [41008129760](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41008129760):
 build and deploy both passed.
+
+## CursorSelect (newbattle/nbTarSelProcess, 0x294)
+
+40 of 165 words match in the native extent; 115 differ and 40 native bytes remain uncovered.
+The draft emits 620 bytes against the native 660-byte extent.
+The C remains `NON_MATCHING`. Unsupported volatile process and pad RAM views
+are replaced by ordinary typed accesses. The initial unsigned state snapshot
+has a real later area-count consumer and stays live across the optional sound
+call; ctype and selection fields are still read after that call. The raw
+friend-count byte snapshot is interpreted as signed for its two positivity
+tests. Both movement directions and the final area-switch stores retain their
+native order. No bounds, pointer-distinctness promise, helper, constraint or
+compiler option was added.
+
+The reproduced earlier draft emitted 728 bytes against 660 native bytes:
+7 positional matching and 158 differing native-prefix words, with 68 excess
+bytes. The new draft emits 620 bytes: 40 matching and 115 differing words,
+with 40 native bytes uncovered. The native extent is 165 words, excluding
+alignment. This is a source-quality cleanup, not an exact match or new
+matching credit; shorter output alone is not the justification.
+
+Qualified full-owner ordinary/-da dumps identify two remaining dependencies.
+The initial jump pass contracts the enemy-positive branch into a conditional
+assignment; later combine yields a single comparison. GCSE explicitly marks
+the second friend-byte left shift redundant and reuses the first shifted
+value across movement logic. Native retains the branch and two shifts.
+Localized snapshot-binding and live-operand controls did not resolve these
+residuals and are not retained. Area-branch layout also remains different.
+These are actual RTL-stage observations, not hooked-compiler or original-source
+claims.
+
+Independent semantic review covers all signed-byte count/cursor domains,
+local arithmetic bounds, callback and store order, and snapshot lifetimes.
+On area 1 the ordinary compiler reads the signed count before the raw byte,
+where native reverses those reads; they commute with no intervening call or
+write. No asynchronous-memory or identical-access-trace claim is made.
+Local exhaustive byte-domain checks supplement the review without proving
+whole-program valid indexes for UpdateSelect.
+
+The guarded production owner remains 18 match, 0 differ. Target-active
+checks preserve all 18 peers and owned data. Production object contracts
+remain identical to the earlier guarded owner. Strict production, SKIP_ASM,
+and NON_MATCHING/SKIP_ASM compilations pass. Full-owner plain/dump parity
+covers all four allocated sections, including the 152-byte owned rodata,
+148 non-file symbols and 66 ordered relocations in production.
