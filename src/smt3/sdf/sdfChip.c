@@ -139,7 +139,7 @@ void sdfChipFreeDirect(void *aPtr)
     if (aPtr == NULL) {
         return;
     }
-    heapByteOffset = (s32)aPtr - (s32)sdfChipPageTop;
+    heapByteOffset = EE_ADDR_S(aPtr) - EE_ADDR_S(sdfChipPageTop);
     if (heapByteOffset < 0) {
         heapByteOffset += SDF_CHIP_PAGE_BYTES - 1;
     }
@@ -186,8 +186,8 @@ s32 sdfChipCheck(s32 aPtr)
     s32 inRange;
 
     inRange = 0;
-    if (aPtr >= (s32)sdfChipPageTop) {
-        inRange = aPtr < (s32)sdfChipPageEnd;
+    if (aPtr >= EE_ADDR_S(sdfChipPageTop)) {
+        inRange = aPtr < EE_ADDR_S(sdfChipPageEnd);
     }
     return inRange;
 }
@@ -217,7 +217,7 @@ void sdfChipInit(u32 aSize)
     recordEnd = (u8 *)allocation + recordBytes;
     record = allocation;
     sdfChipPageFreeLink = record;
-    align = -(s32)recordEnd & 0x3F;
+    align = -EE_ADDR_S(recordEnd) & 0x3F;
     remaining = (aSize - recordBytes) - align;
     heapTop = recordEnd + align;
     sdfChipPageTop = heapTop;

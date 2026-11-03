@@ -397,7 +397,7 @@ void sdfFileCmdThread(sdfFileDeviceCB_t *aCB) {
             continue;
         case SDF_FILE_CMD_READ - SDF_FILE_CMD_READOPEN:
             state->stat = SDF_FILE_CMD_STAT_READ;
-            result = sceRead(state->fd, (s32)state->buffer,
+            result = sceRead(state->fd, EE_ADDR_S(state->buffer),
                            state->length);
             if (result < 0) {
                 sdfFileCmdFinish(state, result);
@@ -407,7 +407,7 @@ void sdfFileCmdThread(sdfFileDeviceCB_t *aCB) {
             state->currentOffset += result;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 5, (s32)state->buffer, result,
+                callback(state, 5, EE_ADDR_S(state->buffer), result,
                                 state->userData);
             }
             continue;
@@ -422,7 +422,7 @@ void sdfFileCmdThread(sdfFileDeviceCB_t *aCB) {
             state->currentOffset += result;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 6, (s32)state->buffer, result,
+                callback(state, 6, EE_ADDR_S(state->buffer), result,
                                 state->userData);
             }
             continue;
@@ -467,11 +467,11 @@ void sdfFileCmdThread(sdfFileDeviceCB_t *aCB) {
             if (transferResult != 0) {
                 buffer = state->buffer;
                 if (buffer == NULL) {
-                    buffer = (void *)sdfMemLock((sdfMemHandle_t *)(sdfMemAllocDirect(transferResult)));
+                    buffer = EE_ADDR_AS(void *, sdfMemLock((sdfMemHandle_t *)(sdfMemAllocDirect(transferResult))));
                 }
                 state->buffer = buffer;
                 state->stat = SDF_FILE_CMD_STAT_READ;
-                transferResult = sceRead(state->fd, (s32)buffer, transferResult);
+                transferResult = sceRead(state->fd, EE_ADDR_S(buffer), transferResult);
                 if (transferResult < 0) {
                     sdfFileCmdFinish(state, transferResult);
                     continue;
@@ -484,7 +484,7 @@ void sdfFileCmdThread(sdfFileDeviceCB_t *aCB) {
             state->stat = SDF_FILE_CMD_STAT_DONE;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 8, (s32)state->buffer, transferResult,
+                callback(state, 8, EE_ADDR_S(state->buffer), transferResult,
                          state->userData);
             }
             SignalSema(aCB->semaId);
@@ -517,7 +517,7 @@ void sdfFileCmdThread(sdfFileDeviceCB_t *aCB) {
         state->stat = SDF_FILE_CMD_STAT_DONE;
         callback = state->callback;
         if (callback != NULL) {
-            callback(state, 8, (s32)state->buffer, transferResult,
+            callback(state, 8, EE_ADDR_S(state->buffer), transferResult,
                             state->userData);
         }
         SignalSema(aCB->semaId);
@@ -574,7 +574,7 @@ void sdfFileCdImageCmdThread(sdfFileDeviceCB_t *aCB) {
             state->currentOffset += result;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 5, (s32)state->buffer, result,
+                callback(state, 5, EE_ADDR_S(state->buffer), result,
                                 state->userData);
             }
             continue;
@@ -602,7 +602,7 @@ void sdfFileCdImageCmdThread(sdfFileDeviceCB_t *aCB) {
             if (transferResult != 0) {
                 readBuffer = state->buffer;
                 if (readBuffer == NULL) {
-                    readBuffer = (void *)sdfMemLock((sdfMemHandle_t *)(sdfMemAllocDirect(transferResult)));
+                    readBuffer = EE_ADDR_AS(void *, sdfMemLock((sdfMemHandle_t *)(sdfMemAllocDirect(transferResult))));
                 }
                 state->buffer = readBuffer;
                 state->stat = SDF_FILE_CMD_STAT_READ;
@@ -619,7 +619,7 @@ void sdfFileCdImageCmdThread(sdfFileDeviceCB_t *aCB) {
             state->stat = SDF_FILE_CMD_STAT_DONE;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 8, (s32)state->buffer, transferResult,
+                callback(state, 8, EE_ADDR_S(state->buffer), transferResult,
                                 state->userData);
             }
             continue;
@@ -866,7 +866,7 @@ sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, s32 buffer, s32 byteCou
     }
     state = sdfFileCmdNewHandle(resolvedPath, workerIndex, SDF_FILE_CMD_READFILE, callback, callbackContext);
     state->length = byteCount;
-    state->buffer = (void *)buffer;
+    state->buffer = EE_ADDR_AS(void *, buffer);
     state->offset = 0;
     sdfFileCmdAllocHandle(state);
     return state;
@@ -884,7 +884,7 @@ sdfFileCmdHandle_t *sdfFileCmdWriteFile(const char *path, s32 buffer, s32 byteCo
     }
     state = sdfFileCmdNewHandle(resolvedPath, workerIndex, SDF_FILE_CMD_WRITEFILE, callback, callbackContext);
     state->length = byteCount;
-    state->buffer = (void *)buffer;
+    state->buffer = EE_ADDR_AS(void *, buffer);
     state->cmdParm = options != 0 ? options : sdfFileCmdDefaultCreateMode;
     state->offset = 0;
     sdfFileCmdAllocHandle(state);

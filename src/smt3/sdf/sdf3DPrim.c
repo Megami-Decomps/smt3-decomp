@@ -193,7 +193,7 @@ void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag,
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    referencePacket = (u64 *)aAllocator(0x20);
+    referencePacket = EE_ADDR_AS(u64 *, aAllocator(0x20));
     referencePacket[0] = SDF_DMA_TAG(EE_ADDR(sdf3DPrimIdentityTm), 0x30000008);
     referencePacket[1] = 0x6C07C000ULL << 32;
     QUAD_ZERO(*(u128 *)&referencePacket[2]);
@@ -215,7 +215,7 @@ void sdf3DPrimLinkTm(sdfDrawTag_t *aTag,
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    dmaPacket = (u64 *)aAllocator(0x90);
+    dmaPacket = EE_ADDR_AS(u64 *, aAllocator(0x90));
     dmaPacket[0] = SDF_DMA_TAG(EE_ADDR(dmaPacket + 2), 0x20000008);
     dmaPacket[1] = 0x6C07C000ULL << 32;
     sdf3DPrimSetTmPacket((sdf3DTmPacketData_t *)(dmaPacket + 2));
@@ -229,7 +229,7 @@ void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat,
         aAllocator = sdfGrAllocPacketBuff;
     }
     sdfMatUpdatePacket(aMat, (s8)sdfFrameId);
-    referencePacket = (u64 *)aAllocator(0x20);
+    referencePacket = EE_ADDR_AS(u64 *, aAllocator(0x20));
     sdfMatMakePacket(aMat, (struct SdfDmaTagHeader *)referencePacket, (s8)sdfFrameId);
     QUAD_ZERO(*(u128 *)&referencePacket[2]);
     sdfDrawTagLinkRef(aTag, EE_ADDR(referencePacket));

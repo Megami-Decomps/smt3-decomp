@@ -356,7 +356,7 @@ sdfHandlerNode_t *DmacAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s3
         id = AddIntcHandler2(channel, handler, arg, next);
         break;
     case 1:
-        id = AddDmacHandler2(channel, (s32 (*)(s32, void *, void *))handler, arg, (void *)next);
+        id = AddDmacHandler2(channel, (s32 (*)(s32, void *, void *))handler, arg, EE_ADDR_AS(void *, next));
         break;
     case 2:
         id = AddSbusIntcHandler(channel, handler);
@@ -419,7 +419,7 @@ void sdfAlarmWakeup(s32 arg0, s32 arg1, s32 thid)
 void sdfDelayThread(u32 delay) {
     s32 threadId = GetThreadId();
     CancelWakeupThread(threadId);
-    SetAlarm(delay & 0xFFFF, sdfAlarmWakeup, (void *)threadId);
+    SetAlarm(delay & 0xFFFF, sdfAlarmWakeup, EE_ADDR_AS(void *, threadId));
     SleepThread();
 }
 
@@ -470,7 +470,7 @@ void sdfStartThreadAndWait(sdfThCB_t *node, void (*entry)(void), void *stack, s6
     node->next = sdfVblankThreadId;
     sdfVblankThreadId = node;
     SignalSema(sdfThreadSema);
-    _StartThread(node->thId, (void *)threadArgument);
+    _StartThread(node->thId, EE_ADDR_AS(void *, threadArgument));
 }
 
 void sdfWaitVblank(s32 count)
@@ -546,7 +546,7 @@ s32 VblankIntcHandler(s32 cause)
 void VblankThreadProc(void) {
     sdfThCB_t *threadEntry;
 
-    DmacAddHandler(0, 2, (s32)VblankIntcHandler, -1, 0);
+    DmacAddHandler(0, 2, EE_ADDR_S(VblankIntcHandler), -1, 0);
     EnableIntc(2);
     for (;;) {
         SleepThread();

@@ -80,7 +80,7 @@ void sdfTexListFree(sdfItemArray_t *aList, s32 aReleaseItems)
     if (aReleaseItems != 0) {
         count = aList->count;
         for (i = 0; i < count; i++) {
-            sdfTexFreeDelayed((sdfTexHandle_t *)((u32 *)aList->items)[i]);
+            sdfTexFreeDelayed(EE_ADDR_AS(sdfTexHandle_t *, ((u32 *)aList->items)[i]));
         }
     }
     sdfItemArrayFree(aList);
@@ -125,7 +125,7 @@ sdfItemArray_t *sdfTexListDup(sdfItemArray_t *aList)
     count = aList->count;
     dup = sdfTexListNew(count);
     for (i = 0; i < count; i++) {
-        ((u32 *)dup->items)[i] = (u32)sdfTexDup((sdfTexHandle_t *)((u32 *)aList->items)[i]);
+        ((u32 *)dup->items)[i] = EE_ADDR(sdfTexDup(EE_ADDR_AS(sdfTexHandle_t *, ((u32 *)aList->items)[i])));
     }
     dup->count = count;
     return dup;
@@ -387,7 +387,7 @@ u8 *sdfMatSet(sdfMat_t *aMatPtr, sdfItemArray_t *aTexList, u8 *aDef)
         cursor += 4;
     }
     if (flags & 0x4) {
-        sdfMatSetTex(aMatPtr, (sdfTexHandle_t *)((u32 *)aTexList->items)[*(u16 *)cursor]);
+        sdfMatSetTex(aMatPtr, EE_ADDR_AS(sdfTexHandle_t *, ((u32 *)aTexList->items)[*(u16 *)cursor]));
         cursor += 4;
     }
     if (flags & 0x8) {
@@ -402,7 +402,7 @@ u8 *sdfMatSet(sdfMat_t *aMatPtr, sdfItemArray_t *aTexList, u8 *aDef)
     if (flags & 0x20) {
         packed = *(u32 *)cursor;
         cursor += 4;
-        sdfMatSetMultiTex(aMatPtr, (sdfTexHandle_t *)((u32 *)aTexList->items)[packed & 0xFFFF]);
+        sdfMatSetMultiTex(aMatPtr, EE_ADDR_AS(sdfTexHandle_t *, ((u32 *)aTexList->items)[packed & 0xFFFF]));
         sdfMatSetMultiMethod(aMatPtr, packed >> 16);
     }
     if (flags & 0x40) {
@@ -624,6 +624,6 @@ void sdfMatListCopyStat(sdfItemArray_t *aDst, sdfItemArray_t *aSrc)
     u32 *dst = aDst->items;
 
     for (i = 0; i < count; i++) {
-        sdfMatCopyStat((sdfMat_t *)dst[i], (sdfMat_t *)src[i]);
+        sdfMatCopyStat(EE_ADDR_AS(sdfMat_t *, dst[i]), EE_ADDR_AS(sdfMat_t *, src[i]));
     }
 }

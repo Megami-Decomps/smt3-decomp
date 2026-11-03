@@ -182,11 +182,11 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
                     cb->stat = SDF_DECOMP_STAT_IDLE;
                     break;
                 case SDF_DECOMP_STAT_DEC_SD_STEP0:
-                    sourceAddress = (u32)(output - *src++);
+                    sourceAddress = EE_ADDR((output - *src++));
                     count = cb->direcLeng;
                     length--;
                     do {
-                        *output++ = *(u8 *)sourceAddress++;
+                        *output++ = *EE_ADDR_AS(u8 *, sourceAddress++);
                     } while (--count != 0);
                     cb->stat = SDF_DECOMP_STAT_IDLE;
                     break;
@@ -205,10 +205,10 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
                     sourceAddress = cb->sdOfs;
                     length--;
                     combinedOffset = sourceAddress | offset;
-                    sourceAddress = (u32)(output - combinedOffset);
+                    sourceAddress = EE_ADDR((output - combinedOffset));
                     count = cb->direcLeng;
                     do {
-                        *output++ = *(u8 *)sourceAddress++;
+                        *output++ = *EE_ADDR_AS(u8 *, sourceAddress++);
                     } while (--count != 0);
                     cb->stat = SDF_DECOMP_STAT_IDLE;
                     break;
@@ -255,7 +255,7 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
     u32 secondClip;
     u32 quadwordCount;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrOpenPacketBuff();
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrOpenPacketBuff());
     cursor = (u128 *)(packet + 1);
     viewport = sdfDrawFaceListParam;
     VU0_LOAD_VF14(viewport);

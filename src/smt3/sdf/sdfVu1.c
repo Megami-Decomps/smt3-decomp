@@ -268,7 +268,7 @@ void corePktInitCb(sdfCorePacketCb_t *cb, u16 *packetHdr, u32 attrMask) {
 
 /* vu0 routine: rotate the basis at vectors+0x40 into vf24-vf26 and cache the original vectors. */
 void corePktLoadWorldLightMtx(void *vectors) {
-    void *m = (void *)corePktCurrLight;
+    void *m = EE_ADDR_AS(void *, corePktCurrLight);
     VU0_ROTATE_BASIS_AND_CACHE(vectors, m, corePktWorldLightMtxCache);
 }
 
@@ -734,7 +734,7 @@ INCLUDE_ASM(const s32, "sdf/sdfVu1", corePktXfmLightClipUVPB);
 #ifdef NON_MATCHING
 void corePktRelightBackFaces(u32 pointBuff, s32 count)
 {
-    sdfCorePacketPointBuff_tag *dst = (sdfCorePacketPointBuff_tag *)pointBuff;
+    sdfCorePacketPointBuff_tag *dst = EE_ADDR_AS(sdfCorePacketPointBuff_tag *, pointBuff);
 
     /* The position and its clip flags are left alone; only the normal is
      * flipped and the shade and the over/under bits recomputed from it. */
@@ -958,7 +958,7 @@ void corePktLerpUVColorChain(sdfCorePacketPointBuff_tag *node) {
 void corePktApplyFaceDivColor(sdfCorePacketCb_t *cb, void *parameters)
 {
     const sdfCorePacketFaceDivParm_t *parm = parameters;
-    sdfCorePacketPointBuff_tag *point = (sdfCorePacketPointBuff_tag *)cb->pointBuff;
+    sdfCorePacketPointBuff_tag *point = EE_ADDR_AS(sdfCorePacketPointBuff_tag *, cb->pointBuff);
     sdfCorePacketPointBuff_tag *node;
     s32 count = cb->pointCount;
 
@@ -1001,7 +1001,7 @@ void corePktSetConstColor(sdfCorePacketCb_t *cb, u32 color) {
     EE_MMI_RGBA_MULTIPLY_VECTOR(scaledColor, cb->color, color, colorScale);
 
     remaining = cb->pointCount;
-    node = (sdfCorePacketPointBuff_tag *)cb->pointBuff;
+    node = EE_ADDR_AS(sdfCorePacketPointBuff_tag *, cb->pointBuff);
     if (remaining != 0) {
         do {
             remaining--;
@@ -1042,7 +1042,7 @@ void corePktClipFace(sdfCorePacketCb_t *cb) {
     scale = cb->backfaceSign;
     acceptAll = corePktSoftenBias;
     triangles = (u16 *)cb->facePtr;
-    nodes = (sdfCorePacketPointBuff_tag *)cb->pointBuff;
+    nodes = EE_ADDR_AS(sdfCorePacketPointBuff_tag *, cb->pointBuff);
     for (i = 0; i != triangleCount; i++) {
         u16 *triangle = triangles;
         sdfCorePacketPointBuff_tag *a = nodes + triangle[0];
@@ -1198,7 +1198,7 @@ void corePktBuildFaceList(sdfCorePacketCb_t *cb) {
     acceptAll = corePktSoftenBias;
     out = corePktFaceList;
     triangles = (u16 *)cb->facePtr;
-    nodes = (sdfCorePacketPointBuff_tag *)cb->pointBuff;
+    nodes = EE_ADDR_AS(sdfCorePacketPointBuff_tag *, cb->pointBuff);
     for (; triangleCount != 0; triangleCount--) {
         u16 *triangle = triangles;
         sdfCorePacketPointBuff_tag *a = nodes + triangle[0];
@@ -1349,7 +1349,7 @@ void corePktBuildBackFaceList(sdfCorePacketCb_t *cb) {
     remaining = cb->backfaceCount;
     indices = corePktBackFaceList;
     triangles = (u16 *)cb->facePtr;
-    nodes = (sdfCorePacketPointBuff_tag *)cb->pointBuff;
+    nodes = EE_ADDR_AS(sdfCorePacketPointBuff_tag *, cb->pointBuff);
     out = (u128 *(*)[3])corePktFaceList;
     if (remaining != 0) {
         do {
@@ -1542,7 +1542,7 @@ void corePktEmitTexTrisCtx2(sdfCorePacketCb_t *cb, u64 samplingState, u64 textur
         do {
             s32 batchTriangles = (remainingTriangles <= 0x10) ? remainingTriangles : 0x10;
             remainingTriangles -= batchTriangles;
-            while (((u32)packetCursor & 0xC) != 4) {
+            while ((EE_ADDR(packetCursor) & 0xC) != 4) {
                 *packetCursor++ = 0;
             }
             if (firstBatch) {
@@ -1658,7 +1658,7 @@ void corePktEmitMultiTexPass(sdfCorePacketCb_t *cb) {
     u32 secondaryColor;
     u32 primaryStateWordSecond;
 
-    corePktXfmUV((void *)cb->pointBuff, cb->pointCount, cb->uv2Ptr,
+    corePktXfmUV(EE_ADDR_AS(void *, cb->pointBuff), cb->pointCount, cb->uv2Ptr,
                   (u8 *)cb->matPacketPtr + 0x80);
     corePktLerpUVChain(cb->extPointTop);
     node = cb->matPacketPtr;
@@ -1692,8 +1692,8 @@ extern u64 sdf3DRefMapParam;
 
 void corePktEmitRefMapPass(sdfCorePacketCb_t *work)
 {
-    sdf3DLightParallelPacket_t *light = (sdf3DLightParallelPacket_t *)corePktCurrLight;
-    sdfCorePacketPointBuff_tag *point = (sdfCorePacketPointBuff_tag *)work->pointBuff;
+    sdf3DLightParallelPacket_t *light = EE_ADDR_AS(sdf3DLightParallelPacket_t *, corePktCurrLight);
+    sdfCorePacketPointBuff_tag *point = EE_ADDR_AS(sdfCorePacketPointBuff_tag *, work->pointBuff);
     u32 count = (u16)work->pointCount;
     u32 materialColor = work->matPacketPtr->primaryStateWordThird;
     u64 scale = 0x3C0000003C000000ULL;
@@ -1736,8 +1736,8 @@ void corePktOpenAndEmit(sdfCorePacketCb_t *cb) {
     u32 ringAddress = EE_UNCACHED_RING(EE_PHYSICAL(alignedStart + 0x40));
     cb->packetOpenPtr = packetStart;
     cb->packetTopPtr = alignedStart + 0x30;
-    cb->packetStartPtr = (u32 *)ringAddress;
-    cb->packetPtr = (u32 *)ringAddress;
+    cb->packetStartPtr = EE_ADDR_AS(u32 *, ringAddress);
+    cb->packetPtr = EE_ADDR_AS(u32 *, ringAddress);
     if ((cb->attrBits & 0x4000) != 0) {
         u8 savedVectors[0x30];
         VU0_STORE_VF24_VF25_VF26(savedVectors);
@@ -1774,7 +1774,7 @@ u64 *corePktClosePacket(sdfCorePacketCb_t *cb) {
     }
 
     while (((u32)cursor & 0xC) != 0) {
-        *(u32 *)cursor = 0;
+        *EE_ADDR_AS(u32 *, cursor) = 0;
         cursor += 4;
     }
     quadwords = (s32)(cursor - start) >> 4;
@@ -1785,7 +1785,7 @@ u64 *corePktClosePacket(sdfCorePacketCb_t *cb) {
     }
 
     sdfGrClosePacketBuff(EE_PHYSICAL(cursor));
-    header = (u64 *)cb->packetTopPtr;
+    header = EE_ADDR_AS(u64 *, cb->packetTopPtr);
     descriptor = 0x20000000 | (quadwords & 0xFFFF);
     gifTag = 0x1100000000000000ULL;
     header[0] = descriptor;
@@ -1817,7 +1817,7 @@ u8 *corePktVu0Run(sdfCorePacketPointBuff_tag *output, const void *source, s32 co
             output++;
         }
     }
-    return (u8 *)input;
+    return EE_ADDR_AS(u8 *, input);
 }
 #else
 INCLUDE_ASM(const s32, "sdf/sdfVu1", corePktVu0Run);

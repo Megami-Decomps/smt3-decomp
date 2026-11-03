@@ -235,7 +235,7 @@ void sdfGrCapture(void) {
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&D_00577F80, pixels);
         sceGsSyncPath(0, 0);
-        destination = (u8 *)sdfGrCaptureReq;
+        destination = EE_ADDR_AS(u8 *, sdfGrCaptureReq);
         source = pixels;
         rows = height;
         do {
@@ -249,7 +249,7 @@ void sdfGrCapture(void) {
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&D_00577F80, pixels);
         sceGsSyncPath(0, 0);
-        destination = (u8 *)sdfGrCaptureReq + rowBytes;
+        destination = EE_ADDR_AS(u8 *, sdfGrCaptureReq) + rowBytes;
         source = pixels;
         rows = height;
         do {
@@ -260,7 +260,7 @@ void sdfGrCapture(void) {
         sdfMemFreeDirect(allocation);
         sdfGrCaptureBuff = 0;
         if (sdfGrCaptureTarget) {
-            ((void (*)(u8 *))sdfGrCaptureTarget)((u8 *)sdfGrCaptureReq);
+            ((void (*)(u8 *))sdfGrCaptureTarget)(EE_ADDR_AS(u8 *, sdfGrCaptureReq));
         }
     }
 }

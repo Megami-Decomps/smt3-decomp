@@ -200,7 +200,7 @@ s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *deviceState, s32 command, s32 sou
 
         FlushCache(0);
         transfer.source = sourceAddress;
-        transfer.destination = (s32)stream->destination;
+        transfer.destination = EE_ADDR_S(stream->destination);
         transfer.size = byteCount;
         transfer.attributes = 0;
         dmaId = sceSifSetDma(&transfer, 1);
@@ -253,17 +253,17 @@ void *sdfFileRpcHandler(s32 function, void *request, s32 requestSize) {
         } else {
             deviceState = 0;
         }
-        sdfFileRpcBuf[0] = (s32)deviceState;
+        sdfFileRpcBuf[0] = EE_ADDR_S(deviceState);
         break;
     case SDF_STREAM_COMMAND_CONTROL:
-        sdfFileCmdFileSize(state->deviceState, (s32)request, (s32)request);
+        sdfFileCmdFileSize(state->deviceState, EE_ADDR_S(request), EE_ADDR_S(request));
         WaitSema(state->semaphore);
         sdfFileRpcBuf[0] = state->readResult;
         break;
     case SDF_STREAM_COMMAND_READ:
         state->remainingBytes = ((sdfFileRpcReadReq_t *)request)->byteCount;
         state->transferredBytes = 0;
-        state->destination = (u8 *)((sdfFileRpcReadReq_t *)request)->destinationAddress;
+        state->destination = EE_ADDR_AS(u8 *, ((sdfFileRpcReadReq_t *)request)->destinationAddress);
         sdfFileRpcContinueRead();
         WaitSema(state->semaphore);
         sdfFileRpcBuf[0] = state->transferredBytes;

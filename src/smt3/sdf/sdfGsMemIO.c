@@ -201,7 +201,7 @@ void sdfLinkStoreImage(sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle, s32 a
         aAllocator = sdfGrAllocPacketBuff;
     }
     packetAddress = aAllocator(0xf0);
-    sdfSetStoreImage((sdfStoreImagePacket_t *)packetAddress, aGsHandle,
+    sdfSetStoreImage(EE_ADDR_AS(sdfStoreImagePacket_t *, packetAddress), aGsHandle,
         aSrcX, aSrcY, aWidth, aHeight, aBuffer, aCallback, aCallbackParam);
     sdfDrawTagLink2(aDrawTag, packetAddress, packetAddress + 0xc0);
 }
@@ -220,7 +220,7 @@ void sdfLinkStoreFrameImage(sdfDrawTag_t *aDrawTag, sdfPreDrawTag_t *aPreDrawTag
     if (aAllocator == NULL) {
         aAllocator = sdfGrAllocPacketBuff;
     }
-    packet = (sdfStoreFrameImagePacket_t *)aAllocator(SDF_PATCHABLE_PACKET_BYTES);
+    packet = EE_ADDR_AS(sdfStoreFrameImagePacket_t *, aAllocator(SDF_PATCHABLE_PACKET_BYTES));
     packet->worker.predrawFunc = sdfLinkStoreFrameImagePredraw;
     sdfSetStoreImage(&packet->packet,
         D_00529388.buffers[0], aSrcX, aSrcY, aWidth, aHeight,
@@ -265,7 +265,7 @@ void sdfLinkLoadImage(sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle,
         aAllocator = sdfGrAllocPacketBuff;
     }
     packetAddress = aAllocator(SDF_DESCRIPTOR_PACKET_BYTES);
-    sdfSetLoadImage((sdfLoadImagePacket_t *)packetAddress, aGsHandle,
+    sdfSetLoadImage(EE_ADDR_AS(sdfLoadImagePacket_t *, packetAddress), aGsHandle,
                   aDstX, aDstY, aWidth, aHeight, aBuffer);
     sdfDrawTagLink2(aDrawTag, packetAddress, packetAddress + SDF_DESCRIPTOR_PACKET_TAIL_OFFSET);
 }

@@ -117,11 +117,11 @@ void release_movieobj2(sdfMovieCb_t *obj, sdfGrOt_t *ot)
     if (obj->sndActive != 0 && obj->sndPlaying == 0 && obj->readCb.pac->ringLength >= 0x1000) {
         obj->sndPlaying = 1;
         movieSemaId = obj;
-        p2sdSetPcmCallback((u32)movieWaitSema);
+        p2sdSetPcmCallback(EE_ADDR(movieWaitSema));
         p2sdPlayPcm(obj->sndVolume);
     }
 
-    packet = (sdfMovieDrawPacket_t *)sdfGrAllocPacketBuff(sizeof(sdfMovieDrawPacket_t));
+    packet = EE_ADDR_AS(sdfMovieDrawPacket_t *, sdfGrAllocPacketBuff(sizeof(sdfMovieDrawPacket_t)));
     packet->dmaTag = 0x100000A;
     height = obj->decodeCb.height;
     width = obj->decodeCb.width;

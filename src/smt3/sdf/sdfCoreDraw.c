@@ -105,9 +105,9 @@ void *sdfCorePacketGen(sdfModelNode_t *node, void *packetData, u32 attrMask,
         vu[0xDD] = ((const u128 *)&sdf3DScreenTm)[1];
         vu[0xDE] = ((const u128 *)&sdf3DScreenTm)[2];
         vu[0xDF] = ((const u128 *)&sdf3DScreenTm)[3];
-        vu[0xE0] = ((const u128 *)corePktCurrLight)[1];
-        vu[0xE1] = ((const u128 *)corePktCurrLight)[2];
-        vu[0xE2] = ((const u128 *)corePktCurrLight)[3];
+        vu[0xE0] = (EE_ADDR_AS(const u128 *, corePktCurrLight))[1];
+        vu[0xE1] = (EE_ADDR_AS(const u128 *, corePktCurrLight))[2];
+        vu[0xE2] = (EE_ADDR_AS(const u128 *, corePktCurrLight))[3];
         PS2_STORE_QUAD_GPR(&vu[0xE6], matPacket2->texTm.q[0]);
         PS2_STORE_QUAD_GPR(&vu[0xE7], matPacket2->texTm.q[1]);
         PS2_STORE_QUAD_GPR(&vu[0xE8], matPacket2->texTm.q[2]);

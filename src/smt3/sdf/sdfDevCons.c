@@ -450,7 +450,7 @@ void sdfDevConsDrawInit(sdfDevConsDrawCB_t *aCB, void *aPacketBuffer, s32 aBuffe
     s32 halfBufferBytes = aBufferSize >> 1;
 
     ringAddress = EE_UNCACHED_RING(EE_PHYSICAL(EE_ADDR(aPacketBuffer)));
-    ring = (u8 *)ringAddress;
+    ring = EE_ADDR_AS(u8 *, ringAddress);
     aCB->buffSize = halfBufferBytes;
     aCB->buf[0] = ring;
     aCB->buf[1] = ring + halfBufferBytes;
@@ -554,7 +554,7 @@ void *sdfDevVprintf(u32 *aCB, const char *aStr, void *LegacyParamArray) {
         header->glyphTag = 0x5400000000008000ULL | glyphCount;
         header->glyphRegisters = 0x53531;
     }
-    sdfGrClosePacketBuff((s32)cursor);
+    sdfGrClosePacketBuff(EE_ADDR_S(cursor));
     return start;
 }
 

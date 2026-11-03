@@ -1256,7 +1256,7 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
     while (size > 0) {
         if (column == 0) {
             sdfPrintf(D_00551A20, data);
-            column = (u32)data & 0xF;
+            column = EE_ADDR(data) & 0xF;
             for (i = column; i > 0; i--) {
                 sdfPrintf(D_00551A28);
             }
@@ -1318,7 +1318,7 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
             cursor += tagCount;
             break;
         case 2:
-            cursor = (sdfDmaDumpTag_t *)tagAddress;
+            cursor = EE_ADDR_AS(sdfDmaDumpTag_t *, tagAddress);
             break;
         case 3:
         case 4:
@@ -1329,7 +1329,7 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
                 return;
             }
             callStack[depth++] = cursor;
-            cursor = (sdfDmaDumpTag_t *)tagAddress;
+            cursor = EE_ADDR_AS(sdfDmaDumpTag_t *, tagAddress);
             break;
         case 6:
             if (depth == 0) {
@@ -1408,7 +1408,7 @@ void sdfGrFlushOtChain(u32 *source) {
                 case 0:
                 case 3:
                 case 4:
-                    wordCursor = (u32 *)tagAddress;
+                    wordCursor = EE_ADDR_AS(u32 *, tagAddress);
                     break;
                 default:
                     wordCursor = cursor;
@@ -1426,7 +1426,7 @@ void sdfGrFlushOtChain(u32 *source) {
                     cursor += qwc * 4;
                     break;
                 case 2:
-                    cursor = (u32 *)tagAddress;
+                    cursor = EE_ADDR_AS(u32 *, tagAddress);
                     break;
                 case 3:
                 case 4:
@@ -1437,7 +1437,7 @@ void sdfGrFlushOtChain(u32 *source) {
                         return;
                     }
                     returnStack[depth++] = cursor + qwc * 4;
-                    cursor = (u32 *)tagAddress;
+                    cursor = EE_ADDR_AS(u32 *, tagAddress);
                     break;
                 case 6:
                     if (depth == 0) {
@@ -1464,7 +1464,7 @@ void sdfGrFlushOtChain(u32 *source) {
                 s32 format;
                 s32 unpackFormat;
 
-                sdfPrintf("%08X %c%08X : ", (u32)(wordCursor - 1),
+                sdfPrintf("%08X %c%08X : ", EE_ADDR((wordCursor - 1)),
                                            interrupt, value);
                 switch (opcode) {
                 case 0x00:

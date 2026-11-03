@@ -403,7 +403,7 @@ s32 sdfCdImageRead(void *buff, s32 length) {
     }
     if (bytes > 0) {
         transferBytes = bytes;
-        if (((u32)destination & 15) == 0) {
+        if ((EE_ADDR(destination) & 15) == 0) {
             t = transferBytes >> 11;
             t = transferBytes - t * 0x800;
             transferBytes -= t;
@@ -488,7 +488,7 @@ void sdfCdImageLoadDir(const char *dirFile) {
     sceLseek(fileHandle, 0, 0);
     buffer = malloc(fileBytes);
     sdfCdImageDirData = buffer;
-    sceRead(fileHandle, (s32)buffer, fileBytes);
+    sceRead(fileHandle, EE_ADDR_S(buffer), fileBytes);
     sceClose(fileHandle);
 }
 

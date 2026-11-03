@@ -118,7 +118,7 @@ u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor, const void *aUVL
 
     packetBytes = sdfBillBoardGetPacketSize(aNum);
     if (aAllocator == NULL) {
-        cursor = (u32 *)sdfGrAllocPacketBuff(packetBytes);
+        cursor = EE_ADDR_AS(u32 *, sdfGrAllocPacketBuff(packetBytes));
     } else {
         cursor = aAllocator(packetBytes);
     }
@@ -224,7 +224,7 @@ u32 *sdfMultiBillBoardMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aX
 
     bytes = sdfMultiBillBoardGetPacketSize(aNum);
     if (aAllocator == NULL) {
-        cursor = (u32 *)sdfGrAllocPacketBuff(bytes);
+        cursor = EE_ADDR_AS(u32 *, sdfGrAllocPacketBuff(bytes));
     } else {
         cursor = aAllocator(bytes);
     }
@@ -329,7 +329,7 @@ u32 sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
 
     bytes = sdfBillBoardGetPacketSize(aNum);
     if (aAllocator == NULL) {
-        cursor = (u32 *)sdfGrAllocPacketBuff(bytes);
+        cursor = EE_ADDR_AS(u32 *, sdfGrAllocPacketBuff(bytes));
     } else {
         cursor = aAllocator(bytes);
     }
@@ -428,7 +428,7 @@ u32 sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *a
 
     packetBytes = sdfMultiBillBoardVcGetPacketSize(aNum);
     if (aAllocator == NULL) {
-        cursor = (u32 *)sdfGrAllocPacketBuff(packetBytes);
+        cursor = EE_ADDR_AS(u32 *, sdfGrAllocPacketBuff(packetBytes));
     } else {
         cursor = aAllocator(packetBytes);
     }

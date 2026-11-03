@@ -374,7 +374,7 @@ void sdfPacModelDecoderEndFunc(sdfPacDecodeCb_t *cb)
 
     aWork->data = payload;
     if (bytes != 0) {
-        sdfAddressResolver((s32 *)payload, (s32)payload, payload + reloc->tableOffset, bytes);
+        sdfAddressResolver((s32 *)payload, EE_ADDR_S(payload), payload + reloc->tableOffset, bytes);
         reloc->tableBytes = 0;
     }
     sdfPacEndBlock(cb);
@@ -395,7 +395,7 @@ void sdfPacMotionDecoderEndFunc(sdfPacDecodeCb_t *cb)
 
     aWork->data = payload;
     if (bytes != 0) {
-        sdfAddressResolver((s32 *)payload, (s32)payload, payload + reloc->tableOffset, bytes);
+        sdfAddressResolver((s32 *)payload, EE_ADDR_S(payload), payload + reloc->tableOffset, bytes);
         reloc->tableBytes = 0;
     }
     sdfPacEndBlock(cb);

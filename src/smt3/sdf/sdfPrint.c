@@ -84,7 +84,7 @@ extern s32 (*p2sdSmgBuf)(void);
 void *sdfPrintRpcFunc(s32 unused, sifCommand_t *packet) {
     s32 copyBytes = packet->end - packet->source;
     if (copyBytes > 0) {
-        memcpy(packet, (void *)packet->source, copyBytes);
+        memcpy(packet, EE_ADDR_AS(void *, packet->source), copyBytes);
         return packet;
     }
     return NULL;
@@ -179,7 +179,7 @@ void sdfPuts(const char *str) {
     if (sdfPrintIopFlag != 0) {
         length = strlen(str);
         if (length != 0) {
-            alignedBuffer = (u8 *)(((u32)&buffer[0x3F]) & ~0x3F);
+            alignedBuffer = EE_ADDR_AS(u8 *, ((EE_ADDR(&buffer[0x3F])) & ~0x3F));
             memcpy(alignedBuffer, str, length);
             sceSifMCallRpc((sceSifMClientData *)&D_0058F310.client, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
         }

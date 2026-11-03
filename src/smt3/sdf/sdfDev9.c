@@ -95,7 +95,7 @@ u64 sdf_2BFC58(void *dst, s32 size)
     u32 entry;
 
     if (size <= 0) return (u64)(s64)size | address;
-    if (((address | (u32)size) & 15) != 0) return (u32)memset(dst, 0, size);
+    if (((address | (u32)size) & 15) != 0) return EE_ADDR(memset(dst, 0, size));
 
     /* Retail overwrites the aligned-path counter with its jump-table address. */
     index = (-(size >> 8)) & 7;
