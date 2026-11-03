@@ -186,7 +186,7 @@ void sdfDelayedResrcProc(void) {
 
 u64 sdfDelayedResrcCheckFunc(void) {
     u32 slotIndex;
-    s32 *slotCursor;
+    ps2AddrS_t *slotCursor;
     if (sdfDelayedResrcFlag != 0) {
         return 1;
     }

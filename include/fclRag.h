@@ -45,7 +45,7 @@ typedef union {
     };
     struct {
         u8 calcPrefix[0x4654];
-        ps2AddrS_t texHandle[2];
+        s32 texHandle[2];
         fclSprite_t messageSprite;
         fclPanel_t panel[3];
     };
