@@ -172,7 +172,7 @@ void sdfSetStoreImage(sdfStoreImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle
     aPacket->header[7] = 0xE;
     aPacket->header[8] = 0;
     aPacket->header[9] = 0x61;
-    aPacket->header[10] = ((u64)EE_PHYSICAL((u32)aPacket->tail) << 32) | 0xA0000005ULL;
+    aPacket->header[10] = SDF_DMA_TAG((u32)aPacket->tail, 0xA0000005ULL);
     aPacket->header[11] = 0x5000000500000000ULL;
     aPacket->header[12] = 0x1000000000000004ULL;
     aPacket->header[13] = 0xE;
@@ -246,6 +246,8 @@ void sdfSetLoadImage(sdfLoadImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle,
     qwc = (sdfGetTexelBitCount(aGsHandle->pixelFormat) * aWidth * aHeight) >> 7;
     aPacket->imageReferenceTag = 0x0800000000000000 | qwc;
     aPacket->imageReferencePad = 0;
+    /* Not SDF_DMA_TAG, for sdfDraw.c:708's reason: the low word is emitted
+     * first here and the macro would reorder it. */
     aPacket->imageGifTag0 = (u32)((qwc & SDF_DMA_QWC_MASK) | 0x30000000) |
                            ((u64)EE_PHYSICAL(aBuffer) << 32);
     aPacket->imageGifTag1 = (u64)(0x51000000 | qwc) << 32;

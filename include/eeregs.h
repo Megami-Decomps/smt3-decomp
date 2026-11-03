@@ -61,6 +61,21 @@
 #define SDF_VU0_DATA_MEMORY ((volatile u128 *)0x11004000)
 #endif
 
+/* A DMA tag: the address in the high word, the control word in the low one.
+ * Absorbs the physical conversion, so a consumer that redefines EE_PHYSICAL
+ * gets every tag with it and never meets the mask at a tag site.
+ *
+ * word is widened without narrowing first, which preserves what the
+ * open-coded sites did including sign extension. Three callers pass a
+ * computed word rather than a literal (sdfModel.c's qwc, count and packed,
+ * each OR-ed with 0x30000000), so if one of those ever had bit 31 set the
+ * widening would reach into the address half. That is the existing
+ * behaviour, not a change, and it is named here because the macro hides a
+ * shift the open-coded form showed. */
+#ifndef SDF_DMA_TAG
+#define SDF_DMA_TAG(addr, word) (((u64)EE_PHYSICAL(addr) << 32) | (u64)(word))
+#endif
+
 /* A cross-thread flag another thread writes, polled for lack of a scheduler.
  * addr keys a host wait and wake table; cast to void so the target still
  * type-checks it against the flag SDF_FLAG_SET writes. A host redefinition

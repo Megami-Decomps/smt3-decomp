@@ -191,7 +191,7 @@ void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag,
         aAllocator = sdfGrAllocPacketBuff;
     }
     referencePacket = (u64 *)aAllocator(0x20);
-    referencePacket[0] = ((u64)EE_PHYSICAL((u32)sdf3DPrimIdentityTm) << 32) | 0x30000008;
+    referencePacket[0] = SDF_DMA_TAG((u32)sdf3DPrimIdentityTm, 0x30000008);
     referencePacket[1] = 0x6C07C000ULL << 32;
     QUAD_ZERO(*(u128 *)&referencePacket[2]);
     sdfDrawTagLinkRef(aTag, (u32)referencePacket);
@@ -213,7 +213,7 @@ void sdf3DPrimLinkTm(sdfDrawTag_t *aTag,
         aAllocator = sdfGrAllocPacketBuff;
     }
     dmaPacket = (u64 *)aAllocator(0x90);
-    dmaPacket[0] = ((u64)EE_PHYSICAL((u32)(dmaPacket + 2)) << 32) | 0x20000008;
+    dmaPacket[0] = SDF_DMA_TAG((u32)(dmaPacket + 2), 0x20000008);
     dmaPacket[1] = 0x6C07C000ULL << 32;
     sdf3DPrimSetTmPacket((sdf3DTmPacketData_t *)(dmaPacket + 2));
     sdfDrawTagLink(aTag, (u32)dmaPacket);

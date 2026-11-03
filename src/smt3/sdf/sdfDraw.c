@@ -705,6 +705,8 @@ void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, u32 aRegs, s32 aNu
     aPacket->dmatag.reg = SDF_VIF_DIRECT_ONE_FLUSHE;
     aPacket->giftag.data = (u64)aNumRegs | SDF_GIF_PACKED_AD_BITS;
     aPacket->giftag.reg = SDF_GIF_REGISTER_AD;
+    /* Not SDF_DMA_TAG: the macro puts the address first and this compiler
+     * emits the zero-extended low word first, so the order is load-bearing. */
     aPacket->reftag.data = (u32)((aNumRegs & SDF_DMA_QWC_MASK) | SDF_DMA_TAG_REF_WORD) | ((u64)EE_PHYSICAL(aRegs) << 32);
     aPacket->reftag.reg = SDF_VIF_DIRECT_ONE_NOP;
     aPacket->linktag.data = SDF_DMA_TAG_NEXT_WORD;
@@ -887,14 +889,14 @@ void sdfGrSetFrameMaskReset(const u8 *aEnv, sdfGrRefGifPacketHeader_t *aHdr, s32
 
 void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt) {
     aPkt->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    aPkt->dmaTag = ((u64)EE_PHYSICAL(aEnv + 0x1a0) << 32) | 0x30000004;
+    aPkt->dmaTag = SDF_DMA_TAG(aEnv + 0x1a0, 0x30000004);
     QUAD_ZERO(aPkt->nextTag);
     sdfDrawTagLinkRef(aTag, (u32)aPkt);
 }
 
 void sdfGrLinkDrawFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt) {
     aPkt->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    aPkt->dmaTag = ((u64)EE_PHYSICAL(aEnv + 0x1e0) << 32) | 0x30000004;
+    aPkt->dmaTag = SDF_DMA_TAG(aEnv + 0x1e0, 0x30000004);
     QUAD_ZERO(aPkt->nextTag);
     sdfDrawTagLinkRef(aTag, (u32)aPkt);
 }

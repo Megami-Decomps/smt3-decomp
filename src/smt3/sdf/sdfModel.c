@@ -579,13 +579,12 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
                 (sdfModelShapeEntry_t *)((u8 *)(out[m].targetId * 8) + (u32)list);
 
             *(u64 *)&tag->dat0 = 0;
-            *(u64 *)tag = (entry[1].qwc | 0x30000000) |
-                          ((u64)EE_PHYSICAL((u32)entry[1].dataPtr) << 32);
+            *(u64 *)tag = SDF_DMA_TAG((u32)entry[1].dataPtr,
+                                      entry[1].qwc | 0x30000000);
             tag++;
         }
         *(u64 *)&tag->dat0 = 0;
-        *(u64 *)tag = (list->count | 0x30000000) |
-                      ((u64)EE_PHYSICAL((u32)list->next) << 32);
+        *(u64 *)tag = SDF_DMA_TAG((u32)list->next, list->count | 0x30000000);
         tag++;
         i++;
     } while (i != listCount);
@@ -1095,8 +1094,8 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                     packed &= 0xFFFF;
                     body = sdfModelSetMatRefPacket(root, matIndex, buf, frame);
                     *(u64 *)&body->dat0 = 0;
-                    *(u64 *)body = (packed | 0x30000000) |
-                                   ((u64)EE_PHYSICAL((u32)pkt->dataBody) << 32);
+                    *(u64 *)body = SDF_DMA_TAG((u32)pkt->dataBody,
+                                               packed | 0x30000000);
                     body++;
                     *(u64 *)body = 0x20000000;
                     *(u64 *)&body->dat0 = 0;
