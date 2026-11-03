@@ -94,28 +94,28 @@ s32 dds3BitEditorProcess(void) {
     packets = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(*packets));
     sdfDrawTagInit(packets);
     dds3ConsPanelTagLink(packets, 50, 50, 23, 20);
-    sdfDrawTagLink(packets, (u32)sdfDevPrintf(
-        0x7320, 0x7A90, 0xFF0000, 0, "BitEditor"));
+    sdfDrawTagLink(packets, EE_ADDR(sdfDevPrintf(
+        0x7320, 0x7A90, 0xFF0000, 0, "BitEditor")));
     if (evtBitCheck((D_0054F728 + dds3BitEditorTable2) * 16 + dds3BitEditorTable)) {
-        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packets, EE_ADDR(sdfDevPrintf(
             0x7AA0, 0x7A90, 0xFF0000, 7, "%04X = ON",
-            (D_0054F728 + dds3BitEditorTable2) * 16 + dds3BitEditorTable));
+            (D_0054F728 + dds3BitEditorTable2) * 16 + dds3BitEditorTable)));
     } else {
-        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packets, EE_ADDR(sdfDevPrintf(
             0x7AA0, 0x7A90, 0xFF0000, 7, "%04X = OFF",
-            (D_0054F728 + dds3BitEditorTable2) * 16 + dds3BitEditorTable));
+            (D_0054F728 + dds3BitEditorTable2) * 16 + dds3BitEditorTable)));
     }
     for (column = 0; column < 16; column++) {
         style = dds3BitEditorTable == column ? 14 : 7;
-        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packets, EE_ADDR(sdfDevPrintf(
             0x7320 + (column + 6) * cellWidth, 0x7A90 + cellHeight * 2,
-            0xFF0000, style, D_0054F740, column));
+            0xFF0000, style, D_0054F740, column)));
     }
     for (row = 0; row < 16; row++) {
         style = dds3BitEditorTable2 == row ? 14 : 7;
-        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
+        sdfDrawTagLink(packets, EE_ADDR(sdfDevPrintf(
             0x73E0, 0x7A90 + (row + 3) * cellHeight, 0xFF0000,
-            style, D_0054F748, (D_0054F728 + row) * 16));
+            style, D_0054F748, (D_0054F728 + row) * 16)));
         for (column = 0; column < 16; column++) {
             if (evtBitCheck((D_0054F728 + row) * 16 + column)) {
                 glyph[0] = 'O';
@@ -127,9 +127,9 @@ s32 dds3BitEditorProcess(void) {
             if (dds3BitEditorTable == column && dds3BitEditorTable2 == row) {
                 style = 4;
             }
-            sdfDrawTagLink(packets, (u32)sdfDevPrintf(
+            sdfDrawTagLink(packets, EE_ADDR(sdfDevPrintf(
                 0x7320 + (column + 6) * cellWidth,
-                0x7A90 + (row + 3) * cellHeight, 0xFF0000, style, glyph));
+                0x7A90 + (row + 3) * cellHeight, 0xFF0000, style, glyph)));
         }
     }
     { sdfGrOt_t *ot = &sdfGrOtTable[81]; ((mdlOtRegFunc_t)ot->regFunc)(ot, packets); }

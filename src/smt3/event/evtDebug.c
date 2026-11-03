@@ -115,8 +115,8 @@ void evtDebugPrintCamera(void)
         cameraName = camera->name;
     }
     tag = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8680, 0x79C0, 0x00FF0000, 5,
-                                     D_0054F790, cameraName));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8680, 0x79C0, 0x00FF0000, 5,
+                                     D_0054F790, cameraName)));
     D_002F6978.regFunc(&D_002F6978, tag);
 }
 
@@ -142,14 +142,14 @@ s32 EventDebugProcess1(dds3ProcessID_t *id)
     tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     dds3ConsPanelTagLink(tag, 0x84, 0x54, 0x15, 10);
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7840, 0x7BA0, 0xFEFFFF, 0, "Event Debug"));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7A80, 0x7C60, 0xFEFFFF, 6, "E%03d.BF", evtDebugState));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R  = EVENT SELECT"));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7D80, 0xFEFFFF, 0, "RR   = ENTER"));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7DE0, 0xFEFFFF, 0, "RU   = SET E500"));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7E40, 0xFEFFFF, 0, "RL   = SET E600"));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7EA0, 0xFEFFFF, 0, "RD   = RESET FLAG"));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7900, 0x7F00, 0xFEFFFF, 0, "L1R1 = +-100"));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7840, 0x7BA0, 0xFEFFFF, 0, "Event Debug")));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7A80, 0x7C60, 0xFEFFFF, 6, "E%03d.BF", evtDebugState)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R  = EVENT SELECT")));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7900, 0x7D80, 0xFEFFFF, 0, "RR   = ENTER")));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7900, 0x7DE0, 0xFEFFFF, 0, "RU   = SET E500")));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7900, 0x7E40, 0xFEFFFF, 0, "RL   = SET E600")));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7900, 0x7EA0, 0xFEFFFF, 0, "RD   = RESET FLAG")));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7900, 0x7F00, 0xFEFFFF, 0, "L1R1 = +-100")));
     ot = &sdfGrOtTable[81];
     ((evtOtRegFunc_t)ot->regFunc)(ot, tag);
 
@@ -247,8 +247,8 @@ s32 evtSceneDispProcess(dds3ProcessID_t *id)
     scene = dds3GetActiveScene();
     if (scene == NULL) {
         rowIndex = 0;
-        sdfDrawTagLink(textTag, (u32)sdfDevPrintf(0x7180, (4 - evtSceneDispWork) * 0x60 + 0x7900,
-                                             0xFEFFFF, 0, "NO SCENE"));
+        sdfDrawTagLink(textTag, EE_ADDR(sdfDevPrintf(0x7180, (4 - evtSceneDispWork) * 0x60 + 0x7900,
+                                             0xFEFFFF, 0, "NO SCENE")));
         sceneWork = NULL;
         line = 3;
     } else {
@@ -268,11 +268,11 @@ s32 evtSceneDispProcess(dds3ProcessID_t *id)
                 }
             }
             column = 0;
-            sdfDrawTagLink(textTag, (u32)sdfDevPrintf(0x7180, (line - evtSceneDispWork) * 0x60 + 0x7900,
-                                                 0xFEFFFF, attr, row->name));
-            sdfDrawTagLink(textTag, (u32)sdfDevPrintf(0x7900, (line - evtSceneDispWork) * 0x60 + 0x7900,
+            sdfDrawTagLink(textTag, EE_ADDR(sdfDevPrintf(0x7180, (line - evtSceneDispWork) * 0x60 + 0x7900,
+                                                 0xFEFFFF, attr, row->name)));
+            sdfDrawTagLink(textTag, EE_ADDR(sdfDevPrintf(0x7900, (line - evtSceneDispWork) * 0x60 + 0x7900,
                                                  0xFEFFFF, attr, D_0054F810,
-                                                 sceneWork->basictable[row->type].linkcount));
+                                                 sceneWork->basictable[row->type].linkcount)));
             basic = sceneWork->basictable[row->type].firstbasic;
             if (basic != NULL) {
                 x = 0x7CC0;
@@ -283,8 +283,8 @@ s32 evtSceneDispProcess(dds3ProcessID_t *id)
                         selected = 1;
                     }
                     column++;
-                    sdfDrawTagLink(textTag, (u32)sdfDevPrintf(x, (line - evtSceneDispWork) * 0x60 + 0x7900,
-                                                         0xFEFFFF, attr, D_0054F818, basic->serialID));
+                    sdfDrawTagLink(textTag, EE_ADDR(sdfDevPrintf(x, (line - evtSceneDispWork) * 0x60 + 0x7900,
+                                                         0xFEFFFF, attr, D_0054F818, basic->serialID)));
                     x += 0x480;
                     if (column >= 4) {
                         x = 0x7CC0;

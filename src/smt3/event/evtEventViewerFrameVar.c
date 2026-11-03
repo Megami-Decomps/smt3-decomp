@@ -60,8 +60,8 @@ s32 FrameVarProcess(dds3ProcessID_t *id)
     }
     tag = dds3FontReqAllocDrawTag();
     dds3ConsPanelTagLink(tag, 0x1E, 0x190, 0x26, 2);
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x71E0, 0x8580, 0xFEFFFF, 0, D_0054F910,
-                                          viewerinfo->firstframe));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x71E0, 0x8580, 0xFEFFFF, 0, D_0054F910,
+                                          viewerinfo->firstframe)));
     sdfPrimLinkRect(tag, 0x80009000, 0, 0x74E0, 0x85A0, 0x8B60, 0x85B8, 0xFEFFFF, NULL);
     if (viewerinfo->firstframe > 0) {
         sdfPrimLinkRect(tag, 0x80909090, 0, 0x74E0, 0x85A0,
@@ -78,11 +78,11 @@ s32 FrameVarProcess(dds3ProcessID_t *id)
     x = span * 16 + 0x74E0;
     sdfPrimLinkRect(tag, (viewerinfo->flags & 1) ? 0x80FFFF00 : 0x8000FFFF, 0, x, 0x8588,
                     ((span + 2) << 4) + 0x74E0, 0x85D8, 0xFEFFFF, NULL);
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(x, 0x85E0, 0xFEFFFF,
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, 0x85E0, 0xFEFFFF,
                                           (viewerinfo->flags & 1) ? 5 : 6, D_0054F910,
-                                          viewerinfo->nowframe));
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8B60, 0x8580, 0xFEFFFF, 0, D_0054F910,
-                                          viewerinfo->lastframe));
+                                          viewerinfo->nowframe)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8B60, 0x8580, 0xFEFFFF, 0, D_0054F910,
+                                          viewerinfo->lastframe)));
     if (viewerinfo->framelist_target != NULL && viewerinfo->menusw == 1) {
         frame = viewerinfo->framelist_target->children;
         i = 0;

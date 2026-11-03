@@ -1417,7 +1417,7 @@ void DrawActiveCameraName(void)
         name = D_0054F834;
     }
     tag = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x8680, 0x79C0, 0xFEFFFF, 5, D_0054F838, name));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8680, 0x79C0, 0xFEFFFF, 5, D_0054F838, name)));
     D_002F6978.regFunc(&D_002F6978, tag);
 }
 
