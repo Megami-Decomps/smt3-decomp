@@ -43,6 +43,18 @@ typedef unsigned long long ee_addr_t;
 #define EE_ADDR_S(ptr) ((ee_addr_t)(__UINTPTR_TYPE__)(ptr))
 #define EE_ADDR_AS(type, addr) ((type)(__UINTPTR_TYPE__)(addr))
 
+/* Host view of the guest-address types. This header stands in front of
+ * include/common.h's guard, so the typedefs are repeated here rather than
+ * reached through PS2_ADDR_TYPE; a consumer that includes the real header
+ * defines that macro instead and gets the same two types. Pointer-wide here,
+ * which is the whole point: the decompilation spells these where an address
+ * is stored and the retail expansion is u32, so nothing moves on target.
+ * The unsigned one is ee_addr_t itself, so an EE_ADDR result lands in it with
+ * no conversion, which is also what makes the probe's trunc mode stop
+ * counting the site. */
+typedef ee_addr_t ps2Addr_t;
+typedef long long ps2AddrS_t;
+
 #define PS2_SYMBOL_AT(type, name, base, offset) extern type name
 
 /* Repeated from include/common.h because this header stands in front of that
