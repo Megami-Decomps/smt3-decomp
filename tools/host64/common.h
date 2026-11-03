@@ -57,6 +57,12 @@ typedef long long addrS_t;
 
 #define SYMBOL_AT(type, name, base, offset) extern type name
 
+/* The region form, which include/common.h gained after this header was
+ * written. The alias is dropped here for the reason that file's own comment
+ * gives, so the host has to supply the symbol itself; the declaration alone
+ * is what the probe needs, since it only asks whether the unit compiles. */
+#define SYMBOL_AT_REGION(type, name, base, offset) extern type name[]
+
 /* Repeated from include/common.h because this header stands in front of that
  * one's guard: anything that file gains has to be carried here too. The
  * expansion is the same, and on LP64 the first term makes it vacuous. */
