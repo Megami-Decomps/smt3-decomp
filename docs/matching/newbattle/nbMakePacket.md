@@ -223,31 +223,52 @@ Ruled out: nested `if`s in place of the `&&` chain (identical), and the two
 `nbDispNegoMessage` calls shared through a `mes` local, which hoists the
 argument setup above the test.
 
-## Flow7_20 (newbattle/nbMakePacket, 0x130)
+## Flow7_20 (newbattle/NbNegoFlowQuestion, 0x130)
 
-49 of 76 words match, three words over retail's 304.
+48 of 76 words match in the November 3 complete-owner baseline. It emits
+316 bytes against 304 native bytes, with 12 excess bytes. This supersedes
+the historical 49/76 score. The historical owner label was nbMakePacket;
+the actual owner is now NbNegoFlowQuestion. The function remains guarded
+and receives no match credit.
 
-The table read is confirmed: `D_003E2540` is a `[][7]` array of
-`{u16 type; u8 lo; u8 hi;}`, indexed `[n->ekucyo][n->qindex]`, and the three
-fields are read `type`, `hi`, `lo` with `hi` and `lo` in callee-saved
-registers. `type` dispatches a `switch` with `case 0` comparing
-`datGetParam(n->pwork, 1)` against `datGetParam(n->ework, 1)`, `case 1`
-comparing the two `level` fields with `sltu`, and `default: rate = 0x32;`.
-The tail is `dds3GetRandIntA(0, 0x64) < rate` selecting `nextkouho[0]` over
-`nextkouho[1]`.
+The table is a truthful `[][7]` array of `{u16 type; u8 lo; u8 hi;}`,
+indexed `[n->ekucyo][n->qindex]`. Retail loads `type`, `hi`, then `lo`;
+`hi` and `lo` survive calls in callee-saved registers. Type 0 compares the
+signed `datGetParam` results; type 1 compares unsigned `level` fields;
+default selects rate 50. The final random-result comparison is signed.
 
-Both comparisons have to be written inverted, `if (!(a < b)) { lo arm } else
-{ hi arm }`, so the `hi` arm is the branch target, and each `nowselect`
-selection written `if (n->nowselect != 0) { rate = 0x64 - x; } else { rate =
-x; }` so the one-instruction arm lands in the branch delay slot.
+The current baseline already shares the low and high selection tails
+between the two switch cases. The unresolved difference is the selection
+block topology: retail initializes the selected rate in the `nowselect`
+branch delay slot and retains separate low/high complement blocks. The
+baseline's conditional assignment produces extra branches instead. The
+old diagnosis of missing shared selection tails is not supported by this
+baseline.
 
-What is left is that retail reaches **one** shared pair of selection blocks
-from both `switch` arms: `jump2` cross-jumps the two arms' identical tails
-down to the `bnez`, so `case 0` ends in a bare `b` to the shared `lo` block
-and `case 1` falls into it. The draft keeps a `nop` and an extra `b` instead,
-three words. Writing the selection out in both arms is what should produce the
-merge and does not here; a `use_hi` flag local and a `goto` funnel were not
-tried and are the next things to measure.
+Bounded ordinary-C controls did not match: explicit shared low/high gotos
+emit 316 bytes (47/76), a real comparison-result selector emits 308 bytes
+(39/76), and initializing `rate` from the selected byte before conditionally
+complementing it emits 296 bytes (47/74 compared words, 8 bytes uncovered).
+The latter merges the two complement blocks into one; using the original
+`lo`/`hi` in the subtraction produces identical output. Applying this rate
+initialization only to low selections emits 308 bytes (48/76), and only
+to high selections emits 312 bytes (48/76). These are rejected controls,
+not source promotions. Plain/diagnostic compilation parity was checked;
+all ten peer text functions remain exact. Initial goto/selector checks
+also reported three jump-table padding diagnostics; unchanged-source
+serial repeats did not reproduce them. Final serial complete-owner checks
+of all seven controls use stable
+before/after input hashes and report only the target text mismatch, with no data
+diagnostics. The initial padding errors remain preserved with cause unknown.
+
+Preserve callback-sensitive reloads in further work: table values after
+candidate registration, enemy work after the first parameter call,
+`nowselect` after parameter calls, and candidate IDs after the random call.
+The byte-derived rate is 0..255 or -155..100 after complement, so the
+ordinary signed subtraction is defined without extra range assumptions.
+Further work needs new evidence for retaining two complement blocks while
+placing real rate initialization in the native branch slots, not another
+selector/goto or syntax-only sweep.
 
 ## Flow10_1 (newbattle/nbMakePacket, 0x100)
 
