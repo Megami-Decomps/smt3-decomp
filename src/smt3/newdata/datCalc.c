@@ -1427,7 +1427,7 @@ s32 datAddHearts(s32 id)
             return 0;
         }
     }
-    ((u8 *)(u32)DDS3_GBWK->heartscnt + (u32)DDS3_GBWK)[0x1CFB] = id;
+    ((u8 *)EE_ADDR_PTR(DDS3_GBWK->heartscnt) + EE_ADDR(DDS3_GBWK))[0x1CFB] = id;
     DDS3_GBWK->heartscnt++;
     ((u8 *)id + (u32)DDS3_GBWK)[0x1D3B] = 0;
     if (datCountRegisteredHearts() != 0) {

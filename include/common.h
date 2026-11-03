@@ -28,6 +28,22 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 #define QUAD_ZERO(lvalue) ((lvalue) = 0)
 #endif
 
+/* A pointer in the EE's 32-bit address representation, which is how this
+ * engine passes a packet or buffer address through a u32 field or argument.
+ * It lives here rather than in eeregs.h because 60 units need it and almost
+ * every unit already includes this header. On target the cast is the whole
+ * of it; a build with wider pointers redefines both of these and must keep
+ * them inverse to each other. */
+#ifndef EE_ADDR
+#define EE_ADDR(ptr) ((u32)(ptr))
+#endif
+/* The same address back as a pointer. The (u32) is kept because the sites
+ * spell it: dropping it would change the target conversion, not only the
+ * host one. */
+#ifndef EE_ADDR_PTR
+#define EE_ADDR_PTR(addr) ((void *)(u32)(addr))
+#endif
+
 typedef float f32;
 typedef double f64;
 

@@ -433,7 +433,7 @@ s32 evtMotionSeProcess1(dds3ProcessID_t *id) {
 /* Free the three-word parameter block owned by the motion-SE task. */
 void evtFreeScriptProcessData(dds3ProcessID_t *task)
 {
-    sdfChipFreeDirect((void *)(u32)dds3GetProcessData(task));
+    sdfChipFreeDirect(EE_ADDR_PTR(dds3GetProcessData(task)));
 }
 
 const char D_0053C668[0x10] __attribute__((aligned(8))) = "mse_%d_%d";

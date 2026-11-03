@@ -853,7 +853,7 @@ void DispComm1Item(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32
 
     cmpSetSkillListRows(0x13);
     frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, pStr[d], NULL);
-    sprintf(buf, D_00551130, ((u8 *)(u32)d + (u32)DDS3_GBWK)[0x1928]);
+    sprintf(buf, D_00551130, ((u8 *)EE_ADDR_PTR(d) + EE_ADDR(DDS3_GBWK))[0x1928]);
     frq = frwGetSmallNumFontFRQ((ox + 0x8E) << 4, (oy + 4) << 3, 0xFF0051, col, buf, frq);
     frDrawFontEx(frq, 1);
     frDestroyFontRequestAfter(frq);

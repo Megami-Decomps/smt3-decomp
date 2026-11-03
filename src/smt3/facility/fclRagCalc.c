@@ -91,7 +91,7 @@ s32 ragCalc(dds3ProcessID_t *id)
     case 0:
         ragCalcWork->panel[2].Timer = 0;
         if (ragCalcWork->workStatus == 1) {
-            dds3ProcessID_t *process = (dds3ProcessID_t *)(u32)ragCalcWork->scriptArg;
+            dds3ProcessID_t *process = (dds3ProcessID_t *)EE_ADDR_PTR(ragCalcWork->scriptArg);
 
             if (dds3GetProcessStat(process) != 2) {
                 ragCalcWork->scriptArg = fclScriptStart(ragCalcWork->script, 0, NULL);

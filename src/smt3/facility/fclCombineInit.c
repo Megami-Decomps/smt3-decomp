@@ -1039,8 +1039,8 @@ void cmbSetupBirthPanel(s32 mode)
     s32 i;
 
     CMB_GBWK->ribbon = fclRbnInit(ribbons[mode][0], active,
-                                   (sdfTexHandle_t *)(u32)CMB_GBWK->texHandle[2],
-                                   (sdfTexHandle_t *)(u32)CMB_GBWK->texHandle[3]);
+                                   (sdfTexHandle_t *)EE_ADDR_PTR(CMB_GBWK->texHandle[2]),
+                                   (sdfTexHandle_t *)EE_ADDR_PTR(CMB_GBWK->texHandle[3]));
     for (i = 0; i < 4; i++) {
         s32 width = ribbons[mode][i + 1];
         cmbRibbonImage_t *image = &images[i];
@@ -1064,8 +1064,8 @@ void cmbSetupBirthPanel(s32 mode)
         uv1.pm[2] = (image->u0 + image->width0) << 4;
         uv1.pm[3] = (image->v0 + image->height0) << 4;
         fclRbnSetPara(CMB_GBWK->ribbon, count++, &pos0, &pos1, &uv0, &uv1,
-                      (sdfTexHandle_t *)(u32)CMB_GBWK->texHandle[(s8)image->texture0],
-                      (sdfTexHandle_t *)(u32)CMB_GBWK->texHandle[(s8)image->texture1]);
+                      (sdfTexHandle_t *)EE_ADDR_PTR(CMB_GBWK->texHandle[(s8)image->texture0]),
+                      (sdfTexHandle_t *)EE_ADDR_PTR(CMB_GBWK->texHandle[(s8)image->texture1]));
     }
 }
 #else

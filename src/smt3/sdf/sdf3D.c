@@ -488,7 +488,7 @@ extern void *memset(void *dst, s32 value, u32 size);
 
 void sdf3DInitSpecularTex2(void) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x2440);
-    sdf3DSpecularTexImage_t *texture = (sdf3DSpecularTexImage_t *)(u32)sdfMemLock(allocation);
+    sdf3DSpecularTexImage_t *texture = (sdf3DSpecularTexImage_t *)EE_ADDR_PTR(sdfMemLock(allocation));
     s32 i;
     s32 j;
 

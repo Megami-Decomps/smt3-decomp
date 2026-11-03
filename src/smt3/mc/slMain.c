@@ -2602,10 +2602,10 @@ s32 slCalc(dds3ProcessID_t *id) {
     proc_func_ans = cur;
     if (job != 0 && pacFileCheckEnd((fileRequest_t *)job) != 0) {
         baseIconFileHandle = 0;
-        D_00551D44 = fileGetMemHandle((fileRequest_t *)(u32)job);
-        D_00551D48 = (u32)fileGetLoadPtr((fileRequest_t *)(u32)job);
-        D_00551D4C = fileGetLoadSize((fileRequest_t *)(u32)job);
-        fileHandleFree((fileRequest_t *)(u32)job);
+        D_00551D44 = fileGetMemHandle((fileRequest_t *)EE_ADDR_PTR(job));
+        D_00551D48 = (u32)fileGetLoadPtr((fileRequest_t *)EE_ADDR_PTR(job));
+        D_00551D4C = fileGetLoadSize((fileRequest_t *)EE_ADDR_PTR(job));
+        fileHandleFree((fileRequest_t *)EE_ADDR_PTR(job));
     }
     return 0;
 }

@@ -917,7 +917,7 @@ s32 fldCommand_FLD_MODEL_ON(void) {
         if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)list) != 0) {
             dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
             do {
-                node = (dds3Basic_t *)(u32)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
+                node = (dds3Basic_t *)EE_ADDR_PTR(dds3GetBasicArray((dds3BasicArrayHandle_t *)list));
                 if (((fldMatterWork_t *)node->workdata)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:
@@ -979,7 +979,7 @@ s32 fldCommand_FLD_MODEL_OFF(void) {
         if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)list) != 0) {
             dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
             do {
-                node = (dds3Basic_t *)(u32)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
+                node = (dds3Basic_t *)EE_ADDR_PTR(dds3GetBasicArray((dds3BasicArrayHandle_t *)list));
                 if (((fldMatterWork_t *)node->workdata)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:
