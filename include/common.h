@@ -97,10 +97,10 @@ typedef ADDR_TYPE addr_t;
  * kept rather than folded into addr_t for the reason EE_ADDR_S exists:
  * unsigned is not a free substitution, it changes comparisons, division and
  * promotion, which on this target is codegen. */
-#ifndef ADDR_S_TYPE
-#define ADDR_S_TYPE s32
+#ifndef SADDR_TYPE
+#define SADDR_TYPE s32
 #endif
-typedef ADDR_S_TYPE saddr_t;
+typedef SADDR_TYPE saddr_t;
 
 /* Asserts a structure's retail size, by the negative-array-size trick ee-gcc
  * 2.96 accepts. The typedef emits nothing, so this costs no code. The check
