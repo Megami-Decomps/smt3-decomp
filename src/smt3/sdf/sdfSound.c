@@ -475,7 +475,7 @@ void sdfSndTransToIOP(s32 aIOPAddr, void *aEEAddr, s32 aSize)
     s32 dmaId;
     s32 delay;
 
-    sdfSndTransBuf.source = (u32)aEEAddr;
+    sdfSndTransBuf.source = EE_ADDR(aEEAddr);
     sdfSndTransBuf.destination = aIOPAddr;
     sdfSndTransBuf.size = aSize;
     sdfSndTransBuf.attributes = 0;
@@ -603,7 +603,7 @@ void sdfSndInit(char *aVoiceInfo, s32 aVoiceCount, char *aSequenceInfo, s32 aSeq
     sdfSndSeqMapInit((u32 *)aSequenceInfo, aSequenceCount);
     printf("sizeof(sdfSndMap)\n");
     iopAddress = sdfSndIopAlloc(0x5A0);
-    sdfSndMap[0x72] = (u32)sdfSndMap;
+    sdfSndMap[0x72] = EE_ADDR(sdfSndMap);
     sdfSndMap[0x73] = 0x5A0;
     D_0055213C = iopAddress;
     sdfSndTransToIOP(iopAddress, sdfSndMap, 0x5A0);
@@ -1065,7 +1065,7 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
                 state = NULL;
             }
         }
-        sdfFileRpcQueue[0] = (u32)state;
+        sdfFileRpcQueue[0] = EE_ADDR(state);
         break;
     }
     case 1: {
@@ -1300,7 +1300,7 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
     sdfPrintf(D_00549B50, source);
     cursor = source;
     for (;;) {
-        if ((u32)cursor & 0xF) {
+        if (EE_ADDR(cursor) & 0xF) {
             sdfPrintf(D_00549B70, cursor);
             return;
         }
@@ -1386,7 +1386,7 @@ void sdfGrFlushOtChain(u32 *source) {
             switch (phase) {
             case 0: {
                 u32 tag;
-                if ((u32)cursor & 0xF) {
+                if (EE_ADDR(cursor) & 0xF) {
                     sdfPrintf(D_00549B70, cursor);
                     return;
                 }

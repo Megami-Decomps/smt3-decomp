@@ -30,7 +30,7 @@ extern u8 *sdfModelAllocTmPacket(sdfModelNode_t *node);
 #ifdef NON_MATCHING
 typedef struct sdfCorePacketPointBuff_tag sdfCorePacketPointBuff_tag;
 typedef struct sdfCorePacketFaceDivParm_t sdfCorePacketFaceDivParm_t;
-#define CORE_ALIGN16(p) ((u8 *)(((u32)(p) + 15) & ~15))
+#define CORE_ALIGN16(p) ((u8 *)((EE_ADDR(p) + 15) & ~15))
 extern sdfCorePacketFaceDivParm_t corePktFaceDivParm;
 extern sdfMatrix4_t sdf3DScreenTm;
 extern u128 coreLightConst1, coreLightConst2;
@@ -321,12 +321,12 @@ void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *root, sdfCorePacket_t *p) {
 }
 
 void sdfCoreDrawSetLight(u8 *light) {
-    corePktCurrLight = (u32)light;
+    corePktCurrLight = EE_ADDR(light);
 }
 
 void sdfCoreDrawSetFog(u8 *fog) {
-    if (corePktCurrFog != (u32)fog) {
-        corePktCurrFog = (u32)fog;
+    if (corePktCurrFog != EE_ADDR(fog)) {
+        corePktCurrFog = EE_ADDR(fog);
         SDF_VU0_COPYVECTOR(&corePktFogParm, fog + 0x10);
     }
 }
@@ -347,5 +347,5 @@ void sdfCoreDrawInit(s32 buffSize) {
     sceDmaSync((sceDmaChan *)dmaChannel, 0, 0);
     sdfMemFreeHandleDirect(&sdfCoreDrawBuffHandle);
     sdfCoreDrawBuffHandle = sdfMemAllocDirect(buffSize);
-    corePktPointBuff = (u32)sdfMemLock(sdfCoreDrawBuffHandle);
+    corePktPointBuff = EE_ADDR(sdfMemLock(sdfCoreDrawBuffHandle));
 }

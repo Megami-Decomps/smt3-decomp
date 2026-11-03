@@ -294,11 +294,11 @@ void sdf3DSetCamera(sdf3DScreenParam_t *aParam, void *aCamera) {
 }
 
 void sdf3DSetDefaultLight(u8 *aLight) {
-    sdf3DLightDefault = (u32)aLight;
+    sdf3DLightDefault = EE_ADDR(aLight);
 }
 
 void sdf3DSetDefaultFog(u8 *aFog) {
-    sdf3DFogDefault = (u32)aFog;
+    sdf3DFogDefault = EE_ADDR(aFog);
 }
 
 extern f32 tanf(f32 angle);
@@ -480,7 +480,7 @@ void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket) {
     aPacket->unknown10 = 0;
     aPacket->unknown18 = 0;
     aPacket->unknown1C = 0;
-    sdfDrawTagLinkRef(aTag, (u32)aPacket);
+    sdfDrawTagLinkRef(aTag, EE_ADDR(aPacket));
 }
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
