@@ -40,9 +40,7 @@ extern void frLoadFontData(s32 style, const char *filename);
 extern void nmeInitNameRows(s8 target, nmeWork_t *work);
 extern char D_00548768[];
 
-#ifdef NON_MATCHING
 extern void *memset(void *a, s32 b, u32 c);
-#endif
 
 void frAllocNameData(void)
 {
@@ -155,11 +153,9 @@ s32 nmeGetRowCount(s8 mode)
     }
 }
 
-#ifdef NON_MATCHING
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
 extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
 extern void nmeInitNameCursor(s8 mode, nmeWork_t *work);
-#endif
 
 void nmeInitNameBuffer(s8 mode, nmeWork_t *work) {
     work->inputMode = mode;

@@ -318,9 +318,7 @@ f32 effBTLModelGroupGetLineMaxLength(sdfVector4_t *pVec, sdfVector4_t *pPos, u32
     return max;
 }
 
-#ifdef NON_MATCHING
 extern void effBTLGetGroupPos(nbFormation_t *form, f32 *out);
-#endif
 
 f32 effBTLModelGroupGetWidthX(u32 group) {
     sdfVector4_t pos;
