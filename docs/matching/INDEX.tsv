@@ -89,6 +89,7 @@ evtRunFrame	event/evtEventViewer	0x2BC	175 of 175 words match	docs/matching/even
 evtStopFrame	event/evtEventViewer	0x2A4	169 of 169 words match	docs/matching/event/evtEventViewer.md	100
 evtEventViewerProcess4	event/evtEventViewer	0x280	160 of 160 words match	docs/matching/event/evtEventViewer.md	138
 EnterData	event/evtEventViewer	0x378	189 of 222 words match	docs/matching/event/evtEventViewer.md	182
+evtAddFrameInfo	event/evtEventViewer	0x540	302 of 336 words match	docs/matching/event/evtEventViewer.md	206
 FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
 func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
 evtFrameListHead	event/evtEventViewerMenu	0x138	39 of 78 words differ	docs/matching/event/evtEventViewerMenu.md	22
@@ -297,6 +298,7 @@ datSetAutoKaifukuSkill	newdata/datCalc	0x140	61 of 80 words match	docs/matching/
 nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_Calc.md	3
 nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
 nmeDrawNameText	nme/Nme_Calc	0x3E4	18 of 249 words match	docs/matching/nme/Nme_Calc.md	49
+nmeMoveCursorBy	nme/Nme_Draw	0x10C	2 of 67 words match	docs/matching/nme/Nme_Draw.md	3
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_Init.md	3
 nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Init.md	22
 nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_Init.md	141

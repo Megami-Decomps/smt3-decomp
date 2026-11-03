@@ -202,3 +202,47 @@ This is not a portable ISO C, overlapping/corrupt-storage or asynchronous
 mutation claim. No source ownership or literal changes are made.
 
 Final owner 55/0 and ordinary target-active 55/1 checks pass with data intact. Three strict modes, production/retained plain-dump parity, fresh stable 141-owner/481-draft qualification, 450 tests, 817 layout assertions, seven IRX modules, retail checksum/byte comparison/no-op and reconciled unchanged reports pass.
+
+## evtAddFrameInfo (event/evtEventViewer, 0x540)
+
+302 of 336 words match at the native 1344-byte size. The ordinary reconstruction
+remains guarded, with 55 exact peer functions and valid owned data and jump table.
+There is no matching credit or source promotion.
+
+The explicit type-0 no-op is supported by the real stage-track constructor and
+native 24-entry dispatch table. It restores the table's lower bound without
+inventing a case or claiming historical spelling. Six memcpy calls copy actual
+provider subobjects into distinct live allocations: 0x28 blur parameter bytes, 0x2c
+multi-blur, distortion and ripple parameter bytes, 0x18 filter bytes and 0x24
+multi-filter parameter bytes. Allocate, publish the work pointer, call the getter,
+copy, and initialize the frame flag remain separate ordered operations. The
+normal live-object contract excludes overlap, malformed pointers and asynchronous
+mutation; these are representation-byte copies, not numerical reinterpretations.
+
+The shorter decimal 0.52359874f emits native binary32 0x3f060a91. Both it and the
+previous long spelling mathematically round to that value, but the pinned compiler
+emits 0x3f060a90 for the long spelling. Raw retail bytes, compiler assembly and
+object data establish the discrepancy; no internal parser cause is inferred.
+
+Type 18 initializes the real end-frame halfword normally. The unexplained
+redundant low-byte write is omitted rather than justified by false volatile or
+native presence alone. Final initialized state agrees under the ordinary-object
+contract, but the draft does not reproduce the complete native memory-write
+sequence. A separate 305/336-word diagnostic retaining that store is not retained
+or approved under the dead-code exception. Remaining differences include store
+ordering, registers, lighting/fog addresses and scheduling.
+
+The allocator declaration now agrees with the provider's signed s32 parameter.
+All local requests are small positive constants; paired production, SKIP_ASM and
+retained output contracts are unchanged by that declaration correction. This is
+not a demonstrated runtime bug. Independent semantic review, strict compilation
+and complete allocated-section, non-file-symbol, ordered-relocation and normalized
+assembly comparisons support guarded retention, not an exact match. No invented
+allocation checks, extra fog-tail initialization, layout changes or constraints
+are introduced.
+
+Integrated qualification: owner 55/0 and target-active 55/1 with owned data intact;
+three strict modes and complete plain/dump parity pass. Fresh stable 140-owner /
+480-draft sweep, 459 tests, 817 layout assertions, inline/shell checks, seven IRX
+modules, retail SHA1/byte comparison/no-op and reconciled reports pass. Game
+coverage remains 8594 functions and 1485744 bytes; this batch earns zero credit.
