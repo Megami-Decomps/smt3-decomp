@@ -298,6 +298,7 @@ pbAddRecord_char	pb/pbRecord	0x144		docs/matching/pb/pbRecord.md	3
 pbPopRecord	pb/pbRecord	0x2F0	188 of 188 words match	docs/matching/pb/pbRecord.md	26
 makaDrawMulti	pipe/pipeMakaAnim	0x494	293 of 293 words match	docs/matching/pipe/pipeMakaAnim.md	3
 makaDrawSingle	pipe/pipeMakaAnim	0x3D0	244 of 244 words match	docs/matching/pipe/pipeMakaAnim.md	34
+makaDrawNormalGauge	pipe/pipeMakaAnim	0x2E0	110 of 184 words match	docs/matching/pipe/pipeMakaAnim.md	50
 objOption				docs/matching/pipe/pipeObject.md	3
 pipeFileLoad	pipe/pipePosTable	424 bytes	106 of 106 words match	docs/matching/pipe/pipePosTable.md	3
 ActionZMotion	pipe/pipeSection	0x140	74 of 80 words match	docs/matching/pipe/pipeSection.md	3

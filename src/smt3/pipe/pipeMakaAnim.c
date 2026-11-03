@@ -369,11 +369,19 @@ void makaDrawMultiGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha)
                   MakaTex[3].th);
 }
 
+/* NON_MATCHING: 110 of 184 words match, at the native 736-byte size.
+ * Ordinary local cells retain the native signed/unsigned reloads. The real
+ * two-float origin pair occupies the native x/y stack slots. Both loops run
+ * through digit zero: makaGetBarWidth(value) is 0..5 for u16 value, and
+ * digit zero returns
+ * the -1 cell value, not a negative array index. Keep total-width conversion
+ * before the sprite-size phase, as in the native instruction order. */
 #ifdef NON_MATCHING
 void makaDrawNormalGauge(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
 {
+    f32 origin[2];
     s16 positions[16];
-    volatile s8 cells[16];
+    s8 cells[16];
     s32 width = makaGetBarWidth(value);
     s32 i;
     s32 previous = 0;
@@ -381,9 +389,12 @@ void makaDrawNormalGauge(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
     f32 spriteWidth;
     f32 spriteHeight;
     u16 totalWidth;
-    u32 color = ((u32)alpha << 24) | 0x808080;
+    u32 color;
+    origin[0] = (f32)x;
+    origin[1] = (f32)y;
 
-    for (i = width; i >= 0; i--) {
+    i = width;
+    do {
         s16 step = 0;
         cells[i] = makaGetBarCell(value, i);
         if (i != width) {
@@ -397,19 +408,21 @@ void makaDrawNormalGauge(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
         positions[i] = position;
         previous = cells[i];
         cells[i]++;
-    }
+    } while (--i >= 0);
 
+    totalWidth = (u16)(u32)((f32)position + sx * 22.0f);
     spriteWidth = sx * 22.0f;
     spriteHeight = sy * 26.0f;
-    totalWidth = (u16)(u32)((f32)position + spriteWidth);
-    for (i = width; i >= 0; i--) {
+    color = ((u32)alpha << 24) | 0x808080;
+    i = width;
+    do {
         s32 cell = cells[i];
-        eglLinkSprite((s32)(((f32)x + (f32)positions[i]) - (f32)(totalWidth >> 1)),
-                      (s32)((f32)y - spriteHeight * 0.5f),
+        eglLinkSprite((s32)((origin[0] + (f32)positions[i]) - (f32)(totalWidth >> 1)),
+                      (s32)(origin[1] - spriteHeight * 0.5f),
                       (s32)spriteWidth, (s32)spriteHeight,
                       cell % 5 * 22 + 1, cell / 5 * 26 + 2, 22, 26,
                       color, color, color, color, MakaTex[0].th);
-    }
+    } while (--i >= 0);
 }
 #else
 INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawNormalGauge);

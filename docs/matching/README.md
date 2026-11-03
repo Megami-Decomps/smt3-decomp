@@ -42,6 +42,7 @@ both native and emitted sizes when they differ.
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 3 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
+| 3 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 3 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 3 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 3 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
@@ -60,7 +61,6 @@ both native and emitted sizes when they differ.
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | historical code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
-| 2 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
 | 2 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
 | 2 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
