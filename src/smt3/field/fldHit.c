@@ -153,9 +153,7 @@ void fldClearMatterFlags(void) {
     }
 }
 
-#ifdef NON_MATCHING
 extern void fldAllocPlaneTable(void);
-#endif
 
 void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex) {

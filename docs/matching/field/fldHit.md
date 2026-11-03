@@ -87,12 +87,24 @@ and nonfatal implicit-declaration diagnostics agree on normalized assembly,
 all allocated sections, non-file symbols and ordered relocations. The
 pinned compiler SHA-256 is
 `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
-GDB is unavailable, so no hooked decision trace is claimed. Guarded production
-output is identical to the original owner; guarded `NON_MATCHING`/`SKIP_ASM`
-strict implicit-declaration compilation succeeds. Strict `SKIP_ASM` alone
-fails identically before and after this change because the existing
-`fldMakePlane` path lacks the guarded `fldAllocPlaneTable` declaration; that
-mode is not reported as passing.
+GDB is unavailable, so no hooked decision trace is claimed. In that
+pre-cleanup damage comparison, guarded production output was identical to
+the original owner and strict `NON_MATCHING`/`SKIP_ASM` compilation passed.
+Strict `SKIP_ASM` alone failed before and after the damage change because
+`fldMakePlane` could not see the guarded `fldAllocPlaneTable` declaration.
+
+A subsequent declaration-only cleanup exposes the existing `void(void)`
+prototype before that call. It corrects the former implicit int-returning
+C declaration's mismatch with the unchanged void provider; the caller
+ignores the return value, and no native runtime or ABI defect is demonstrated.
+Strict implicit-declaration compilation now passes in production, `SKIP_ASM`,
+and `NON_MATCHING`/`SKIP_ASM`. Ordinary baseline/candidate and candidate
+ordinary/strict comparisons preserve allocated-section bytes and metadata,
+ordered non-file symbols, ordered relocations and normalized assembly in
+all three modes. Production remains 16/0, and the guarded target remains 219/220 words at 880 bytes with
+the same branch residual. Matching coverage is unchanged. The 92 inherited
+`fldVecDot` incompatible-pointer warnings per mode remain separate; this is
+not a warning-clean owner claim.
 
 ### Rejected structural controls
 

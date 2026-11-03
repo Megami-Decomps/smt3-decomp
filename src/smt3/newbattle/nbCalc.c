@@ -737,12 +737,10 @@ f32 nbGetAisyoRitu(s32 nskill, s32 sformindex, s32 dformindex)
     return ritu;
 }
 
-#ifdef NON_MATCHING
 extern s32 nbGetButuriKaifuku(s32 nskill, s32 sformindex, s32 dformindex, s32 waza);
 extern s32 nbGetMagicKaifuku(s32 nskill, s32 sformindex, s32 dformindex, s32 waza);
 extern s32 nbGetMaxHpWazaPoint(s32 nskill, s32 sformindex, s32 dformindex, s32 waza);
 extern s32 nbCheckFormationPlayerSide(s32 formindex);
-#endif
 
 s32 nbGetKoukaHp(s32 sw, s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s32 cnt)
 {
@@ -1872,9 +1870,7 @@ f32 nbGetHojoRitu(s32 formindex, s32 type)
     return ritu;
 }
 
-#ifdef NON_MATCHING
 extern s32 datGetDefPow(datUnitWork_t *work);
-#endif
 
 s32 nbGetButuriAttack(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
 {
@@ -2013,9 +2009,7 @@ s32 nbGetMagicKaifuku(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
     return ret;
 }
 
-#ifdef NON_MATCHING
 extern s32 datGetBaseMaxHp(datUnitWork_t *work);
-#endif
 
 s32 nbGetMaxHpWazaPoint(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
 {
@@ -2136,9 +2130,7 @@ s32 nbGetVirtualKoukaPoint(s32 nskill, s32 sformindex, s32 dformindex)
     return result + hojo;
 }
 
-#ifdef NON_MATCHING
 extern s32 datGetSkillCost(datUnitWork_t *w, s32 nskill);
-#endif
 
 s32 nbCheckSkillCost(s32 formindex, s32 nskill)
 {
@@ -2191,9 +2183,7 @@ s32 nbCheckSkillUse(s32 formindex, s32 nskill)
     return 0;
 }
 
-#ifdef NON_MATCHING
 extern s32 datBossRashChk(s32 eid);
-#endif
 
 void nbGetEncountTableItem(nbMainProcessData_t *data)
 {

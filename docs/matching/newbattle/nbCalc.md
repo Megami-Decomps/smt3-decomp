@@ -149,8 +149,19 @@ used to bridge those differences.
 Independent review of the final source and native/provider semantics passed.
 The complete owner/data check is 59/0; plain/dump parity covers six allocated
 sections, 587 non-file symbols and 698 ordered relocations, plus normalized
-assembly. Strict NON_MATCHING/SKIP_ASM compilation passes. Normal owner
-diagnostics retain the same eight unrelated implicit declarations as its
-baseline, so no warning-clean whole-owner claim is made. Full retail
-rebuild/checksum, repository regressions and guard sweeps remain the
+assembly. At this function's landing, strict NON_MATCHING/SKIP_ASM
+compilation passed, while normal production and SKIP_ASM retained eight
+inherited implicit declarations.
+
+A subsequent declaration-only cleanup removes five NON_MATCHING guard pairs
+around those eight existing, provider-compatible prototypes. Their s32/int
+returns and default-promoted int/pointer arguments were already compatible
+with the GNU89 implicit contracts; no runtime or ABI defect is demonstrated.
+Strict implicit-declaration compilation now passes in production, SKIP_ASM,
+and NON_MATCHING/SKIP_ASM. Ordinary baseline/candidate and candidate
+ordinary/strict comparisons preserve allocated-section bytes and metadata,
+ordered non-file symbols, ordered relocations and normalized assembly in
+all three modes. The owner remains 59/0, including nbGetKoukaType and nbCheckBackAttack, with unchanged
+matching coverage. This is not a repository-wide warning-clean claim. Full
+retail rebuild/checksum, repository regressions and guard sweeps remain the
 integration gates, not replaced by these focused results.
