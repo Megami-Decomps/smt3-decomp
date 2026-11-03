@@ -350,80 +350,112 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-#ifdef NON_MATCHING
 s32 nbGetHitType(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s32 dformindex)
 {
     datUnitWork_t *source, *target;
-    datNormalSkill_t *skill;
     s32 skillattr, aisyo, status, sourceParam, targetParam, point;
     s32 autoSkill = 0;
-    f32 factor = 1.0f;
-    f32 sourceRate, targetRate, baseRate, hitRate;
+    f32 factor;
+    f32 sourceRate, targetRate, baseRate, hitRate, criticalChance;
 
     source = nbGetUnitWorkFromFormindex(sformindex);
     target = nbGetUnitWorkFromFormindex(dformindex);
     skillattr = nbGetNormalSkillAttr(nskill);
-    if (skillattr == -1 || (skillattr >= 12 && skillattr < 16)) {
-        return 0;
-    }
-    aisyo = nbGetAisyo(nskill, dformindex, skillattr);
-    if (nskill == 0) {
-        if (nbHatudoCheckSkill(source, 0x12C)) {
-            a->autoskill = 0x12C;
+    switch (skillattr) {
+    case -1:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+        break;
+    default:
+        aisyo = nbGetAisyo(nskill, dformindex, skillattr);
+        if (nskill == 0) {
+            if (nbHatudoCheckSkill(source, 0x12C)) {
+                a->autoskill = 0x12C;
+                return 1;
+            }
+            if (nbHatudoCheckSkill(source, 0x12D)) {
+                a->autoskill = 0x12D;
+                return 1;
+            }
+        }
+        if (aisyo < 0) {
+            return 2;
+        }
+        if (nbGetPartyFromFormindex(sformindex)->flag & 0x100) {
             return 1;
         }
-        if (nbHatudoCheckSkill(source, 0x12D)) {
-            a->autoskill = 0x12D;
-            return 1;
+        factor = 1.0f;
+        status = target->badstatus & 0xFFF;
+        switch (status) {
+        case 1:
+        case 2:
+            factor = 100.0f;
+            break;
+        case 4:
+        case 16:
+            factor = 8.0f;
+            break;
         }
-    }
-    if (aisyo < 0) {
-        return 2;
-    }
-    if (nbGetPartyFromFormindex(sformindex)->flag & 0x100) {
-        return 1;
-    }
-    status = target->badstatus & 0xFFF;
-    if (status == 1 || status == 2) {
-        factor = 100.0f;
-    } else if (status == 4 || status == 16) {
-        factor = 8.0f;
-    }
-    if ((a->data->form[dformindex].stat & 0x2000) && evtBitCheck(0xAF2) == 0) {
-        factor = 100.0f;
-    }
-    if (nskill == 0 && nbHatudoCheckSkill(source, 0x12B)) {
-        autoSkill = 1;
-        factor *= (f32)datSkillTable.special[11].n / 100.0f;
-    }
-    skill = &datSkillTable.normal[nskill];
-    if (skill->koukatype != 0) {
-        return 0;
-    }
-    (void)((volatile datUnitWork_t *)source)->flag;
-    sourceParam = datGetParam(source, 4);
-    sourceRate = (f32)((sourceParam / (source->level / 5 + 3)) * 100);
-    targetParam = datGetParam(target, 4);
-    targetRate = (f32)((targetParam / (target->level / 5 + 3)) * 100);
-    baseRate = (f32)(100 - skill->failpoint);
-    hitRate = baseRate + (sourceRate - targetRate) * 0.0625f;
-    if (hitRate < 50.0f) {
-        hitRate = 50.0f;
-    }
-    point = (s32)((hitRate / baseRate) * (f32)skill->criticalpoint * factor);
-    printf("critical p:%d, z = %d, a = %d\n",
-           ((volatile datNormalSkill_t *)skill)->criticalpoint, (s32)hitRate, point);
-    if ((s32)dds3GetRandIntA(NULL, 100) < point) {
-        if (autoSkill) {
-            a->autoskill = 0x12B;
+        if ((a->data->form[dformindex].stat & 0x2000) && evtBitCheck(0xAF2) == 0) {
+            factor = 100.0f;
         }
-        return 1;
+        if (nskill == 0 && nbHatudoCheckSkill(source, 0x12B)) {
+            datSpecialSkill_t *criticalSkill = &datSkillTable.special[11];
+            autoSkill = 1;
+            factor *= (f32)criticalSkill->n / 100.0f;
+        }
+        switch (datSkillTable.normal[nskill].koukatype) {
+        case 0:
+            /* This copies nbGetKoukaType's physical side-case shape, also
+             * used by its live magic split. Exactly one real calculation runs.
+             * Retail retains the unused source flag load/mask at +0x200/+0x204.
+             * Qualified whole-owner dumps delete the branch and duplicate arm
+             * between 25.sched2 and 27.jump2 while retaining those instructions.
+             * This is a mechanistic reconstruction, not original spelling;
+             * see docs/matching/newbattle/nbCalc.md. */
+            if (source->flag & 0x20) {
+                sourceParam = datGetParam(source, 4);
+                sourceRate = (f32)((sourceParam / (source->level / 5 + 3)) * 100);
+                targetParam = datGetParam(target, 4);
+                targetRate = (f32)((targetParam / (target->level / 5 + 3)) * 100);
+                baseRate = (f32)(100 - datSkillTable.normal[nskill].failpoint);
+                hitRate = baseRate + (sourceRate - targetRate) * 0.0625f;
+                if (hitRate < 50.0f) {
+                    hitRate = 50.0f;
+                }
+                criticalChance = (hitRate / baseRate) * (f32)datSkillTable.normal[nskill].criticalpoint * factor;
+            } else {
+                sourceParam = datGetParam(source, 4);
+                sourceRate = (f32)((sourceParam / (source->level / 5 + 3)) * 100);
+                targetParam = datGetParam(target, 4);
+                targetRate = (f32)((targetParam / (target->level / 5 + 3)) * 100);
+                baseRate = (f32)(100 - datSkillTable.normal[nskill].failpoint);
+                hitRate = baseRate + (sourceRate - targetRate) * 0.0625f;
+                if (hitRate < 50.0f) {
+                    hitRate = 50.0f;
+                }
+                criticalChance = (hitRate / baseRate) * (f32)datSkillTable.normal[nskill].criticalpoint * factor;
+            }
+            point = (s32)criticalChance;
+            printf("critical p:%d, z = %d, a = %d\n",
+                   datSkillTable.normal[nskill].criticalpoint, (s32)hitRate, point);
+            if ((s32)dds3GetRandIntA(NULL, 100) < point) {
+                if (autoSkill) {
+                    a->autoskill = 0x12B;
+                }
+                return 1;
+            }
+            break;
+        case 1:
+            break;
+        default:
+            return 0;
+        }
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetHitType);
-#endif
 
 s32 nbGet3Zokusei(s32 formindex)
 {
@@ -1208,37 +1240,45 @@ extern const char D_00544BE8[];
 #ifdef NON_MATCHING
 u32 nbGetKoukaBadKaifuku(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s32 nvirtual)
 {
-    volatile datNormalSkill_t *skill = &datSkillTable.normal[nskill];
     datUnitWork_t *source;
     datUnitWork_t *target;
     u32 status;
     s32 sourceParam;
     s32 targetParam;
-    s32 success = 1;
+    s32 success;
     f32 chance;
 
-    if (skill->badtype != 2) {
+    if (datSkillTable.normal[nskill].badtype != 2) {
         return 0;
     }
     source = nbGetUnitWorkFromFormindex(sformindex);
     target = nbGetUnitWorkFromFormindex(dformindex);
-    status = skill->basstatus & 0xFFF;
-    if (skill->badlevel != 0xFF && nvirtual == 0) {
-        chance = (f32)skill->badlevel;
+    status = datSkillTable.normal[nskill].basstatus & 0xFFF;
+    success = 1;
+    if (datSkillTable.normal[nskill].badlevel != 0xFF && nvirtual == 0) {
+        chance = (f32)datSkillTable.normal[nskill].badlevel;
         sourceParam = datGetParam(source, 2);
         sourceParam += datGetParam(source, 5) / 4;
         chance *= (f32)sourceParam;
+        chance /= 100.0f;
         targetParam = datGetParam(target, 2);
         targetParam += datGetParam(target, 5) / 4;
-        chance = (chance / 100.0f) * ((ritu * 100.0f) / (f32)targetParam);
-        printf(D_00544BE8, (double)chance);
+        chance *= ((ritu * 100.0f) / (f32)targetParam);
+        printf("bad ritu:%f\n", (double)chance);
         success = (s32)dds3GetRandIntA(NULL, 100) < (s32)chance;
     }
-    if (success && (status & (target->badstatus & 0xFFF))) {
-        return status;
+    /* Retail retains separate virtual and actual status-test tails at
+       0x267300..0x267334; both return the complete skill status mask. */
+    if (success) {
+        if (nvirtual) {
+            if (status & (target->badstatus & 0xFFF)) return status;
+        } else {
+            if (status & (target->badstatus & 0xFFF)) return status;
+        }
     }
     return 0;
 }
+
 #else
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544BA8);
 

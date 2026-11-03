@@ -165,3 +165,209 @@ all three modes. The owner remains 59/0, including nbGetKoukaType and nbCheckBac
 matching coverage. This is not a repository-wide warning-clean claim. Full
 retail rebuild/checksum, repository regressions and guard sweeps remain the
 integration gates, not replaced by these focused results.
+
+## nbGetHitType (newbattle/nbCalc, 0x3AC)
+
+235 of 235 words match at the full 940-byte native body, excluding the
+alignment nop after endlabel. The function begins at 0x002654B8. The complete
+owner and owned data pass with 60 match, 0 differ on clean 46b4591c, preserving
+the independently matched 1908-byte nbGetKoukaType and 376-byte nbCheckBackAttack.
+No header, provider contract, compiler option, other body or unit boundary is
+changed. This reconstruction adds no volatile, barrier, register binding,
+compiler constraint, dummy consumer or assembly.
+
+### Real state, observations and numeric domain
+
+The initial attribute switch excludes -1 and 12..15. Skill-zero auto-critical
+checks 0x12C and 0x12D occur before the negative-affinity and party exits, with
+the original autoskill write only on their successful paths. Status factors,
+formation stat/event observation, optional 0x12B factor, effect dispatch,
+diagnostic, signed random comparison and final conditional write preserve
+native ordering. The source and target pointers may alias; both parameter
+calls remain, each followed by that work object's level observation.
+
+The table is ordinary mutable initialized storage, not volatile or globally
+const. A real pointer to special[11] names the activated skill record and
+produces the native halfword relocation at datSkillTable+0x4860. The native
+normal record is 0x3C bytes with signed-halfword criticalpoint/failpoint.
+Across all 288 initialized records, criticalpoint is 0..50 and failpoint is
+0..45; special[11].n is 300. Native/source writer inspection identifies
+nbSetNormalSkill0 changing only targettype, target count and visual/attribute
+fields, not these numeric fields. These are verified retail-data/provider
+invariants, not a fabricated signed-halfword bound.
+
+The actual parameter provider clamps to 1..40, and levels retain the full u16
+domain. Integer denominators are therefore 3..13110, quotients 0..13 and
+scaled source/target rates 0..1300. The base 100-failpoint is 55..100, and the
+lower-clamped hit rate is 50..181.25. The status/event factor is 1, 8 or 100;
+only normal skill zero can multiply by three. Even the loose independent
+bound (181.25/55)*50*300 is below 49,433, far inside s32. This proves safe
+conversions for valid initialized records with the audited providers/writers,
+without assuming ordinary gameplay levels or counters. Arbitrary modified
+s16 tables are not covered: failpoint=100 permits a zero denominator and
+other full-range replacements can overflow the conversion. Invalid indices,
+invalid pointers or memory corruption are not given new handling.
+
+All float operations remain in native order: source minus target, times
+0.0625f, base addition, lower clamp, division by base, multiplication by the
+critical field and then by the factor. The final f32 criticalChance has a
+real consumer in the shared s32 point conversion. The two ordinary casts
+emit the native CVT.W.S operations under the pinned EE compiler; no claim is
+made about different host FPU behavior.
+
+Native criticalpoint is loaded at 0x2657AC from entry+0x30+4 for the formula,
+then independently at 0x2657E8 from entry+0x34 for printf. Keeping the physical
+floating calculation in its side arm and the conversion/diagnostic in the
+shared phase preserves both observations with ordinary indexed fields.
+The owned diagnostic is an actual string literal and passes the complete
+owner's code/data/relocation checks.
+
+### Qualified copied-case reconstruction
+
+At +0x200/+0x204, retail reads source->flag and masks 0x20 into v0; no consumer
+uses the result before datGetParam overwrites v0. The provider consumes only
+its real a0/a1 arguments. The copied side-case shape is corroborated by the
+adjacent matched nbGetKoukaType physical case and its live magic side split.
+This uses the canonical sibling/copied-case exception, not the alternative
+rule for a predicate already consumed by live computation in this function.
+Exactly one of the equal real physical calculation sequences executes.
+
+Qualified whole-owner ee-gcc 2.96 snapshots retain flag load UID366, mask
+UID368, branch UID369 and four datGetParam call sites through 25.sched2. In
+27.jump2, the branch and duplicate calculation arm are removed; two provider
+call sites remain and the load/mask survive with the native operands and
+ordering. 28.mach and 29.dbr retain them. This brackets the observed deletion
+between those passes; no internal breakpoint or unobserved hook decision is
+claimed. The source comment identifies the native residual, corroborating
+sibling and mechanistic rather than historical nature of the reconstruction.
+
+The no-side-split control emits 896 bytes, omits the native residual and has
+16 matching words in its 224-word emitted prefix. It preserves the other
+59 C functions but is not a clean target/owned-data result. Moving the entire
+point calculation outside the copied branches emits 932 bytes and loses the
+required observation shape; it is not retained.
+
+### Shared conversion and diagnostic scheduling
+
+A qualified control converting criticalChance to s32 inside each arm is
+940 bytes and 229/235 words: only the six diagnostic preparation words at
++0x31C..+0x330 differ. Diagnostic pointer, value and format locals do not fix
+that schedule. Separating the real floating result from the common point
+conversion closes the six words without extra operations or constraints.
+In the exact 25.sched2, common block 34 contains point conversion UID719,
+index subtraction UID765, diagnostic conversion UID784, table-low UID759,
+index shift UID767, format-high UID756, index add UID771, format-low UID780
+and criticalpoint load UID782 in native order. The prior control instead
+keeps the point conversions in the arms. This is measured block/dependency
+and scheduling evidence from actual pass snapshots, not a claim to know the
+original variable names or source spelling.
+
+Plain/-da -fsched-verbose=5 builds of the final full owner agree in six
+allocated sections and their metadata, 585 non-file symbols, 698 ordered
+relocations and normalized assembly. The same categories pass for the
+no-side-split and prior conversion-placement controls. Production, SKIP_ASM
+and NON_MATCHING/SKIP_ASM strict implicit-declaration compiles pass for the
+final source. Independent review, full retail checksum/build, regressions
+and repository-wide guard sweeps remain integration gates, not replaced by
+these focused checks.
+
+## nbGetKoukaBadKaifuku (newbattle/nbCalc, 0x1EC)
+
+98 of 123 words match at the full 492-byte native size. The function remains
+`NON_MATCHING` with its assembly fallback; this work adds no matching credit.
+Native code runs from `0x267180` through `0x267368`, excluding the alignment
+word at `0x26736C`. This is distinct from `nbCheckBadKaifuku`.
+
+### Ordinary reconstruction and native behavior
+
+The draft uses indexed, ordinary normal-skill fields instead of the old
+unsupported volatile table view. The record stride remains 0x3C; badtype and
+badlevel are bytes at +0x24/+0x25, and basstatus is a halfword at +0x26.
+Both work-pointer calls precede the status and level reads. No type, provider
+contract, table ownership or translation-unit boundary changes.
+
+The real parameter sums use source parameter 2 plus parameter 5 divided by 4, then the
+same target calculation. `datGetParam` and `datGetBaseParam` establish 1..40
+per parameter, so each sum is 1..50 and the target divisor is nonzero for
+valid work pointers. Signed quarter arithmetic and the native float
+multiply/divide dependencies remain intact. The cast emits native CVT.W.S;
+no new clamp, guessed input bound or portable-host conversion guarantee is
+introduced. Retail's initialized table has all 288 normal-skill minus fields
+set to 100, and all 13 badtype-2 records have badlevel 255, bypassing this
+arithmetic. The identified writer, nbSetNormalSkill0, changes target fields
+rather than minus, badtype or badlevel. This is evidence for the initialized
+data and identified writer, not formal closure over every possible alias or
+writer.
+
+For modified inputs, float-to-s32 conversion safety remains unresolved.
+SetAction_SKILL starts power at 1 and repeatedly multiplies it by
+nbGetGensyoRitu; that provider reads an unsigned-halfword minus field and
+divides by 100.0f. The declared field domain alone permits factors up to
+655.35, so repeated multiplication does not prove a bounded, finite chance.
+The affinity provider alone also cannot establish the complete input range.
+Nonfinite or out-of-range chance would retain the old draft's language-level
+conversion risk; emitting native CVT.W.S does not prove that cast safe for
+arbitrary inputs. No reachable failure is established for the observed retail
+data. The draft stays guarded and unpromoted, without a clamp or a claim of
+complete arbitrary-input semantic qualification.
+
+Badlevel 0xFF or nonzero nvirtual bypasses the parameter calls, diagnostic,
+RNG and conversion. Otherwise the native source 2/source 5/target 2/target 5,
+float promotion, printf and RNG ordering is preserved. The target status
+halfword is reread after those calls, including when source and target alias.
+The native virtual/actual tails both return the complete skill status mask
+on overlap, not the intersection. These two live tails are visible at
+`0x267300..0x267334`; no dead calculation or artificial barrier was added.
+
+### Qualified compiler blocker
+
+With this ordinary draft, the second badlevel load survives through the real
+compiler's `19.lreg` snapshot as insn 144, but becomes a copy from a0 to v0
+in `20.greg`. Retail instead reloads the byte at `0x26721C`. There is no
+intervening call or write requiring the reload; the ordinary table has no
+supported volatile contract. This local-register to global/reload-stage
+interval is the measured blocker, not an early-CSE explanation or evidence
+for restoring false volatility. No internal compiler hook was observed.
+
+The real 100.0f constant is still positioned before the first source provider
+call in `19.lreg` and `20.greg`; `25.sched2` places it after the second source
+call, unlike retail. Remaining differences include target-rate allocation
+and related scheduling. These are actual `-da -fsched-verbose=5` pass
+snapshots, not a hooked decision trace or a recovered original spelling.
+
+Plain versus dump builds agree on normalized assembly, all six allocated
+sections and their metadata, 587 non-file symbols and 698 ordered relocation
+contracts. The activated draft's complete owner check is 59 match, 1 differ,
+with no owned-data difference. Its diagnostic literal is placed after the
+preceding D_00544BA8 data; leaving it as an external reference while removing
+the target assembly would omit the native string. The guarded production
+view remains 59 match, 0 differ and strict NON_MATCHING/SKIP_ASM compilation
+with implicit-declaration errors enabled passes.
+
+### Controls already measured
+
+In the same owner, activating the old guarded draft emitted 460 bytes and
+matched 9 of its 115 emitted words against the native prefix; it did not cover
+all 123 native words. That historical baseline is not an alternative native
+size or matching denominator.
+
+Nonvolatile pointer and indexed-field controls, native split tails, later
+success initialization, staged percentage division, direct format literal,
+separate/compound target-rate expressions, source and target inline parameter
+expressions, mixed pointer/indexed access, and fully inline chance/percentage
+forms were checked. A shared scale scalar reached 99/123 but did not resolve
+the reload/scheduling dependency and was not retained. The old volatile
+shape was measured only as a diagnostic, never proposed for publication.
+No register/initializer grid, fabricated bound, inline assembly, fake barrier,
+new dead computation or compiler-flag change was used. The next useful work
+is an evidence-backed ordinary live source shape for the identified
+reload/scheduler dependency, not repeating these controls blindly.
+
+Integrated qualification after nbGetHitType promotion: the production owner
+now has 60 matching C functions and no differences. Activating only the
+BadKaifuku draft still gives 98/123 words at 492 bytes, with all 60 peers
+and owned data preserved. The standalone 59-peer receipts above retain
+their original compilation context. Final combined production/plain/dump
+parity covers six allocated sections, 585 non-file symbols and 698 ordered
+relocations; plain/dump normalized assembly also agrees. Full retail
+checksum/byte comparison, regressions and fresh guard checks pass.

@@ -208,6 +208,8 @@ Sel_AI	newbattle/nbAi	0x358	214 of 214 words match	docs/matching/newbattle/nbAi.
 nbGetVirtualAisyo	newbattle/nbCalc	0xAC	43 of 43 words match	docs/matching/newbattle/nbCalc.md	3
 nbCheckBackAttack	newbattle/nbCalc	0x178	94 of 94 words match	docs/matching/newbattle/nbCalc.md	28
 nbGetKoukaType	newbattle/nbCalc	0x774	477 of 477 words match	docs/matching/newbattle/nbCalc.md	61
+nbGetHitType	newbattle/nbCalc	0x3AC	235 of 235 words match	docs/matching/newbattle/nbCalc.md	169
+nbGetKoukaBadKaifuku	newbattle/nbCalc	0x1EC	98 of 123 words match	docs/matching/newbattle/nbCalc.md	274
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	9 of 119 words differing	docs/matching/newbattle/nbCameraBoss.md	3
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	125 of 125 words match	docs/matching/newbattle/nbCameraBoss.md	23
 nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	68
