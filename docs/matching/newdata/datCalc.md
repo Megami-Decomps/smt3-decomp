@@ -144,3 +144,63 @@ also agrees in every mode. Complete retail owner checking remains 79 match,
 This is an ordinary truthful declaration correction, with no new matching
 credit or compiler-constraint dependency. The paired negotiation-owner
 correction is recorded in [NbNegoFlowTwo](../newbattle/NbNegoFlowTwo.md).
+
+## datGetSkillBadKouka (newdata/datCalc, 0x238)
+
+103 of 142 words match at the native 568-byte extent.
+
+The draft remains behind `NON_MATCHING`. Target-only compilation produces the native 568-byte extent, with 103 of 142 words equal; the production owner remains 79 matches / 0 differences. Equal total extent does not mean an exact frame: native reserves 128 bytes, while this draft reserves 112. Its 12-entry candidate array is unchanged; no unexplained padding or larger capacity was invented.
+
+Ordinary indexed observations, a late success flag, zero-default affinity, and a real promoted badlevel snapshot replace the earlier pointer/volatile formulation. The source-side flag branch is live: only one arm applies 0.7. Both arms preserve division by 100, affinity multiplication, multiplication by 100, and optional 0.7 in that order. RNG100 still precedes the native CVT.W.S comparison; badtype and target status are observed afterward. The exact owned 0.7 cell is represented by its literal.
+
+Dense enumeration initializes every selected candidate for nonempty 12-bit masks. All 288 initialized normal records were audited; the 12 random-status records have nonempty masks. The inspected dynamic normal-skill writer does not alter their badtype/status/level fields. This is not a global table-writer or valid-index proof. The native zero-count path calls the state-mutating RNG before its divide trap; the draft does not invent a safe return, and portable C modulo-zero semantics or exception-handler recovery are outside the proof. Valid work pointers and normal-table indices remain caller preconditions. The bounded low 16-bit affinity and u8 level ensure the chance conversion is finite and in signed 32-bit range on those inputs.
+
+A separate ordinary shared-float alternative produces 560 bytes, 78 equal words and 8 uncovered native bytes. Its qualified unmodified compiler dumps preserve the second badlevel load through local allocation, then show its deletion by the global-allocation/reload stage; the conversion consumes the first byte value instead. The retained integer-snapshot draft has two exclusive conversion sites, one executed per path, with different float allocation from native. Neither alternative reconstructs the native redundant reload or explains the 16-byte local-frame difference. No constraint, false volatile, compiler flag or ownership change is retained. Original source spelling is unknown.
+
+Final production and target-active plain/dump output parity, full-owner/data checks, and strict retained-C checks are recorded in the review packet. The inherited `memset` built-in diagnostic remains; this is not a warning-clean claim. Independent review approved this guarded reconstruction. Final owners, three strict modes, production/retained plain-dump parity, retail byte comparison/checksum/no-op, 450 tests, 817 layout assertions, fresh stable 141-owner/481-draft checks and seven IRX checks pass. Reports remain unchanged. No new matching credit is claimed.
+
+## datSetAutoKaifukuSkill (newdata/datCalc, 0x140)
+
+61 of 80 words match at the native 320-byte extent; the draft remains guarded.
+
+The retained `NON_MATCHING` draft puts the genuine dual HP/MP recovery arm
+(0x15C) first, matching the native block layout, ahead of HP-only (0x15A/0x15D)
+and MP-only (0x15B/0x15E). Both divisor guards, independent initialized outputs,
+pre-switch signed table observations and shared HP-then-MP call tail are unchanged.
+This is an ordinary source reconstruction, not evidence of original spelling.
+
+On the 2026-11-03 owner, activating only this target improves from 42/80 to
+61/80 matching words at the exact 320-byte extent. All 79 existing exact code
+peers remain exact. The five target jump-table destinations now match; the
+complete 24-byte table-plus-zero region, all 231 emitted owner rodata bytes,
+the final one-byte native alignment pad and all 60 owned literal bytes are
+qualified against retail. The extra native MFLO reads arise naturally, without
+dummy operations. Saved work/skill register allocation, table addressing/load
+schedule and the final MP branch still differ. The fallback remains assembly;
+this change receives no exact matching credit.
+
+An ordinary explicit typed special-table base and a paired empty operand
+constraint on that real initialized pointer were negative controls. Both
+shortened the function to 312 bytes and disturbed table destinations. Neither
+is retained; no register or arbitrary case-order sweep was used.
+
+For defined C accesses, successful skill ownership must still be accompanied
+by a valid special-table index (288 through 382), a valid work object and
+bounded skill inventory/devil indices. Identified field/battle callers use
+346 through 350; this is not a claim of global writer or arbitrary-call closure.
+The ownership check does not itself prove the index bounds. Both signed 16-bit
+parameters are read before switch gating, including unrecognized but owned
+special skills. Positive denominator guards and unsigned 16-bit maxima make every
+reached quotient defined and every positive HP/MP addition fit signed 32-bit.
+Truthful existing s32 provider returns and native call ordering are preserved.
+
+Complete-owner ordinary and unhooked diagnostic dump outputs agree in normalized
+assembly, allocated sections, symbol contracts and ordered relocations. This
+is pass-snapshot/output-parity evidence, not a GDB or hooked-decision claim.
+Production, SKIP_ASM and NON_MATCHING/SKIP_ASM strict-declaration modes compile,
+and each has full plain/dump parity; the guarded change has identical production
+and SKIP_ASM output to the starting owner. The inherited memset built-in declaration warning remains; no warning-clean
+claim is made. Final integrated owner 79/0, target-only 61/80, all three strict-mode
+plain/dump comparisons, retail checksum/byte comparison/no-op, 450 tests,
+817 layout assertions, fresh stable 141-owner/481-draft qualification and
+seven IRX checks pass. Reports are unchanged.

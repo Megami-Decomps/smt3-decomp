@@ -431,7 +431,8 @@ INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawNormalGauge);
 #ifdef NON_MATCHING
 void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
 {
-    volatile s8 cells[16];
+    f32 origin[2];
+    s8 cells[16];
     s16 positions[16];
     s32 width = makaGetBarWidth(value);
     s32 i;
@@ -441,14 +442,24 @@ void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
     f32 spriteWidth;
     f32 spriteHeight;
     s16 totalWidth;
-    u32 color = ((u32)alpha << 24) | 0x808080;
+    u32 color;
 
-    for (i = width; i >= 0; i--) {
+    origin[0] = x;
+    origin[1] = y;
+
+    i = width;
+    do {
         cells[i] = makaGetBarCell(value, i);
         if (i == width) {
             step = 0;
         } else if (previous == 9 && cells[i] == 9) {
             step = (s16)(s32)(sx * 20.0f);
+            /* SMT3 reconstruction constraint: preserve this live narrowed
+             * spacing through the distinct 20-pixel conversion tail. Qualified
+             * full-owner RTL shows jump2 merging it without this operand;
+             * retail keeps that conversion separate from the 14/16 path.
+             * The value feeds position below; no fixed register or barrier. */
+            FAKEMATCH_ASM_LIVE(step);
         } else if ((previous > 0 && cells[i] > 0) ||
                    (previous == 0 && cells[i] == 0)) {
             step = (s16)(s32)(sx * 14.0f);
@@ -459,19 +470,21 @@ void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
         positions[i] = position;
         previous = cells[i];
         cells[i]++;
-    }
+    } while (--i >= 0);
 
     spriteWidth = sx * 25.0f;
     spriteHeight = sy * 30.0f;
     totalWidth = (s16)(s32)((f32)position + spriteWidth);
-    for (i = width; i >= 0; i--) {
+    color = ((u32)alpha << 24) | 0x808080;
+    i = width;
+    do {
         s32 cell = cells[i];
-        eglLinkSprite((s32)(((f32)x + (f32)positions[i]) - (f32)(totalWidth >> 1)),
-                      (s32)((f32)y - spriteHeight * 0.5f),
+        eglLinkSprite((s32)((origin[0] + (f32)positions[i]) - (f32)(totalWidth >> 1)),
+                      (s32)(origin[1] - spriteHeight * 0.5f),
                       (s32)spriteWidth, (s32)spriteHeight,
                       cell % 5 * 25 + 1, cell / 5 * 30 + 2, 25, 30,
                       color, color, color, color, MakaTex[1].th);
-    }
+    } while (--i >= 0);
 }
 #else
 INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawBar);

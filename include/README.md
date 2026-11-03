@@ -1475,8 +1475,10 @@ these offsets with the EE compiler.
 The allocator clears the three signed input-row flags at `0x514D`. Cursor
 initialization clears the alternate-cursor flag at `0x514C`; input dispatch
 uses it to select the alternate movement handler. Input helpers index three
-`0x20`-byte rows of two-byte character codes at `0x5152`, ending before the
-texture handles. The shared layout checks these boundaries as well.
+`0x20`-byte rows of two-byte character codes starting at `0x5151`, ending
+before the texture handles. The native row initializer carries the trailing-byte
+address (`0x5152` for row zero), storing the lead byte at offset -1 and the
+trail byte at offset 0. The shared layout checks the row origin and boundaries.
 
 `nmeInitNameBuffer` initializes the mode cursor at `0x1C` and clears the
 primary movement-handler flag at `0x30D0`. Input dispatch tests that flag

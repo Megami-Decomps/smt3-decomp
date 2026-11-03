@@ -61,6 +61,7 @@ effBTLCutDraw	effect/effBattle	0x420	264 of 264 words match	docs/matching/effect
 effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270	6 of 156 words differ	docs/matching/effect/effBattleMisc.md	3
 effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/matching/effect/effBattleMisc.md	39
 effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	4 of 146 words differ	docs/matching/effect/effBattleMisc.md	70
+effBTLSys_Hansya_Draw	effect/effBattleSystem	0x2D0	9 of 180 words match	docs/matching/effect/effBattleSystem.md	3
 dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/matching/effect/effBlur_Filter.md	3
 effEveBEDCutDraw	effect/effEvent	0x1DC	119 of 119 words match	docs/matching/effect/effEvent.md	3
 effDebugDrawRectLine	effect/effMagatuhi	0x154	72 of 85 words match	docs/matching/effect/effMagatuhi.md	3
@@ -86,6 +87,7 @@ RunFrameUnit	event/evtEventViewer	0x94	37 of 37 words match	docs/matching/event/
 evtRunFrame	event/evtEventViewer	0x2BC	175 of 175 words match	docs/matching/event/evtEventViewer.md	66
 evtStopFrame	event/evtEventViewer	0x2A4	169 of 169 words match	docs/matching/event/evtEventViewer.md	100
 evtEventViewerProcess4	event/evtEventViewer	0x280	160 of 160 words match	docs/matching/event/evtEventViewer.md	138
+EnterData	event/evtEventViewer	0x378	189 of 222 words match	docs/matching/event/evtEventViewer.md	182
 FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
 func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
 evtFrameListHead	event/evtEventViewerMenu	0x138	39 of 78 words differ	docs/matching/event/evtEventViewerMenu.md	22
@@ -279,7 +281,7 @@ nbDrawKoukaSprite	newbattle/nbStageProcess	0x108	24 of 66 words differ	docs/matc
 RunSake	newbattle/nbStageProcess	0x104	45 of 65 words match	docs/matching/newbattle/nbStageProcess.md	122
 CheckAction_TARSEL	newbattle/nbActionProcess	0x1CC	115 of 115 words	docs/matching/newbattle/nbStageProcess.md	151
 SetDamagePacket	newbattle/nbActionProcess	0x1E0	120 of 120 words	docs/matching/newbattle/nbStageProcess.md	174
-StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/matching/newbattle/nbStageProcess.md	193
+StageLoad	newbattle/nbStageProcess	0x1B4	109 of 109 words match	docs/matching/newbattle/nbStageProcess.md	193
 UpdateSelect	newbattle/nbTarSelProcess	0x174	93 of 93 words match	docs/matching/newbattle/nbTarSelProcess.md	3
 CursorSelect	newbattle/nbTarSelProcess	0x294	40 of 165 words match	docs/matching/newbattle/nbTarSelProcess.md	55
 nbSetBattleDummy	newbattle/nbTest	0x2B4		docs/matching/newbattle/nbTest.md	3
@@ -289,8 +291,11 @@ datGetPlayerParam	newdata/datCalc	0x50	13 of 20 words match	docs/matching/newdat
 datGetSkillKouka	newdata/datCalc	0x3F8	254 of 254 words match	docs/matching/newdata/datCalc.md	79
 datBossRashGetRec	newdata/datCalc	0x108	66 of 66 words match	docs/matching/newdata/datCalc.md	95
 Unconditional forward declarations				docs/matching/newdata/datCalc.md	120
+datGetSkillBadKouka	newdata/datCalc	0x238	103 of 142 words match	docs/matching/newdata/datCalc.md	148
+datSetAutoKaifukuSkill	newdata/datCalc	0x140	61 of 80 words match	docs/matching/newdata/datCalc.md	162
 nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_Calc.md	3
 nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
+nmeDrawNameText	nme/Nme_Calc	0x3E4	18 of 249 words match	docs/matching/nme/Nme_Calc.md	49
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_Init.md	3
 nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Init.md	22
 nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_Init.md	39
@@ -309,9 +314,11 @@ pbDrawMapPolyTransformed			10 of 262 words matching	docs/matching/pb/pbModel.md	
 pb_draw_exit_Process	pb/pbModel	0x1C0	112 of 112 words match	docs/matching/pb/pbModel.md	66
 pbAddRecord_char	pb/pbRecord	0x144		docs/matching/pb/pbRecord.md	3
 pbPopRecord	pb/pbRecord	0x2F0	188 of 188 words match	docs/matching/pb/pbRecord.md	26
+pipeMakeNodeLink	pipe/mnMyLink	0x80	25 of 32 words match	docs/matching/pipe/mnMyLink.md	3
 makaDrawMulti	pipe/pipeMakaAnim	0x494	293 of 293 words match	docs/matching/pipe/pipeMakaAnim.md	3
 makaDrawSingle	pipe/pipeMakaAnim	0x3D0	244 of 244 words match	docs/matching/pipe/pipeMakaAnim.md	34
 makaDrawNormalGauge	pipe/pipeMakaAnim	0x2E0	110 of 184 words match	docs/matching/pipe/pipeMakaAnim.md	50
+makaDrawBar	pipe/pipeMakaAnim	0x2F8	143 of 190 words match	docs/matching/pipe/pipeMakaAnim.md	106
 objOption				docs/matching/pipe/pipeObject.md	3
 pipeFileLoad	pipe/pipePosTable	424 bytes	106 of 106 words match	docs/matching/pipe/pipePosTable.md	3
 ActionZMotion	pipe/pipeSection	0x140	74 of 80 words match	docs/matching/pipe/pipeSection.md	3
