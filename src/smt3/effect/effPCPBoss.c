@@ -898,7 +898,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     if (work->frame >= 12) {
         return;
     }
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     origin.f[1] -= height;
     SDF_VU0_LOADIDENTITY();
@@ -1095,7 +1095,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
     if (work->frame >= 17) {
         return;
     }
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     origin.f[1] -= height;
     SDF_VU0_LOADIDENTITY();
@@ -1517,7 +1517,7 @@ void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
         target.f[1] -= 340.0f;
         effPCPBossONGYModelTexRender(&target, form, 340.0f);
     }
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdfMatSetTex(work->matrix, dds3GetRenderTexture());
     sdf3DPrimLinkMat(tag, work->matrix, 0);
@@ -3763,9 +3763,9 @@ void effPCPScreenCrackModelDraw(effPCPScreenCrackModel_t *hData)
     SDF_VU0_ADDVECTOR();
     mdlSetPosition(model);
 
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+    packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
     packet[4] = 0x31801;
     packet[0] = 2;
     packet[1] = 0x5000000210000000ULL;
@@ -3777,9 +3777,9 @@ void effPCPScreenCrackModelDraw(effPCPScreenCrackModel_t *hData)
     ot->regFunc(ot, tag);
     mdlLink(model, &D_002F69B8[7]);
 
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+    packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
     packet[4] = 0x717FB;
     packet[0] = 2;
     packet[1] = 0x5000000210000000ULL;

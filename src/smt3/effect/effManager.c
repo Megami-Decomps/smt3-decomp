@@ -109,12 +109,12 @@ void dds3EffectManagerExit(void) {
 
 s32 dds3EffectManagerRunF(dds3ProcessID_t *ProcessID)
 {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfGrOt_t *ot;
 
     sdfDrawTagInit(list);
     {
-        u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+        u64 *packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
 
         packet[0] = 3;
         packet[1] = 0x5000000310000000ULL;
@@ -228,16 +228,16 @@ effNode_t *dds3EffectLoad(effResourceHeader_t *pD3P)
         printf("old version!![%f]\n", pD3P->version);
         dds3EffectDataRevision(pD3P);
     }
-    node = dds3EffectCreate((u16)pD3P->type, (u16)pD3P->arg, (s32)pD3P->payload);
+    node = dds3EffectCreate((u16)pD3P->type, (u16)pD3P->arg, EE_ADDR_S(pD3P->payload));
     if (pD3P->version <= 1.02f) {
         switch (node->type) {
         case 0:
         case 1:
-            instance = (effLegacyInstance_t *)node->instance;
+            instance = EE_ADDR_AS(effLegacyInstance_t *, node->instance);
             SDF_VU0_STOREIDENTITY(&instance->matrixB0);
             break;
         case 2:
-            instance = (effLegacyInstance_t *)node->instance;
+            instance = EE_ADDR_AS(effLegacyInstance_t *, node->instance);
             SDF_VU0_STOREIDENTITY(&instance->matrix20);
             break;
         }
@@ -253,7 +253,7 @@ effNode_t *dds3EffectFileLoad(const char *pFilename) {
 
     printf("d3p file read...[%s]\n", pFilename);
     resourceHandle = sdfDevLoadFileEx(pFilename, &resolvedId, 0);
-    node = dds3EffectLoad((effResourceHeader_t *)resolvedId);
+    node = dds3EffectLoad(EE_ADDR_AS(effResourceHeader_t *, resolvedId));
     sdfMemFreeDirect(resourceHandle);
     return node;
 }

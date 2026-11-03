@@ -840,7 +840,7 @@ void dds3BezierTrackPolyDraw(dds3BezierTrackPoly_tag *hPoly) {
     if (hPoly->count == 0) {
         return;
     }
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
     sdf3DPrimLinkResetTm(list, 0);
     sdf3DPrimLinkMat(list, hPoly->pMat, 0);

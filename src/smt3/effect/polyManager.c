@@ -384,7 +384,7 @@ dds3Polygon_t *dds3PolygonCreate(s32 face, s16 type, s16 attr) {
     if (type & 2) bytes += vertexCount * sizeof(u128);
     if (type & 4) bytes += vertexCount * sizeof(u32);
     allocation = sdfMemAllocDirect(bytes + sizeof(*record));
-    buffer = (u8 *)sdfMemLock(allocation);
+    buffer = EE_ADDR_AS(u8 *, sdfMemLock(allocation));
     record = (dds3Polygon_t *)(buffer + bytes);
     memset(record, 0, sizeof(*record));
     record->pVertex = (u128 *)buffer;
@@ -442,7 +442,7 @@ void dds3PolygonLinkOt(void) {
         priorityPool = &sdfGrOtTable[43];
         do {
             if (record->drawCount != 0 && record->flags != 1) {
-                packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+                packet = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
                 sdfDrawTagInit(packet);
                 sdf3DPrimLinkResetTm(packet, 0);
                 sdf3DPrimLinkMat(packet, record->pMat, 0);
@@ -521,15 +521,15 @@ dds3TrackPoly_t *dds3TrackPolyCreate(s32 number, s32 face, s32 rec, u32 type) {
     cellsSize = (total + number) * 0x14;
     allocation = sdfMemAllocDirect(cellsSize + 0x2C);
     base = sdfMemLock(allocation);
-    system = (dds3TrackPoly_t *)(base + cellsSize);
+    system = EE_ADDR_AS(dds3TrackPoly_t *, (base + cellsSize));
     memset(system, 0, 0x2C);
-    system->pVertex = (u128 *)base;
+    system->pVertex = EE_ADDR_AS(u128 *, base);
     base += total * 0x10;
-    system->pVC = (u32 *)base;
+    system->pVC = EE_ADDR_AS(u32 *, base);
     base += total * 4;
-    system->trackList = (dds3TrackPolyList_t *)base;
+    system->trackList = EE_ADDR_AS(dds3TrackPolyList_t *, base);
     for (i = 0; i < number; i++) {
-        dds3TrackPolyList_t *cell = (dds3TrackPolyList_t *)(i * sizeof(dds3TrackPolyList_t) + (s32)system->trackList);
+        dds3TrackPolyList_t *cell = (dds3TrackPolyList_t *)(i * sizeof(dds3TrackPolyList_t) + EE_ADDR_S(system->trackList));
         cell->pVertex = (u128 *)((u8 *)system->pVertex + i * face * 0x10);
         cell->pVC = system->pVC + i * face;
         dds3TrackPolyListInit(system, i);
@@ -1392,7 +1392,7 @@ void dds3TrackPolyLinkOt(void) {
         slot = &lists[system->mode];
         list = *slot;
         if (list == 0) {
-            *slot = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+            *slot = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
             sdfDrawTagInit(*slot);
             sdf3DPrimLinkResetTm(*slot, 0);
             list = *slot;
@@ -1502,9 +1502,9 @@ void dds3TrackPolyLinkOt(void) {
         }
     }
     if (lists[4] != 0) {
-        specialList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+        specialList = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
         sdfDrawTagInit(specialList);
-        packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+        packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
@@ -1513,7 +1513,7 @@ void dds3TrackPolyLinkOt(void) {
         packet[5] = 0x42;
         sdfDrawTagLink(specialList, EE_ADDR(packet));
         D_002F64B8.regFunc(&D_002F64B8, specialList);
-        packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+        packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
@@ -1531,13 +1531,13 @@ dds3TrianglePoly_t *dds3TrianglePolyCreate(s32 number) {
     s32 colorBytes = points * 4;
     sdfMemHandle_t *allocation = sdfMemAllocDirect((colorBytes + points) * 4 + 0x18);
     s32 base = sdfMemLock(allocation);
-    u8 *vertices = (u8 *)base + points * 16;
+    u8 *vertices = EE_ADDR_AS(u8 *, base) + points * 16;
     dds3TrianglePoly_t *block = (dds3TrianglePoly_t *)(vertices + colorBytes);
     block->abgr = 0x80808080;
     block->number = number;
     block->pVC = (u32 *)vertices;
     block->hMem = allocation;
-    block->pVertex = (u128 *)base;
+    block->pVertex = EE_ADDR_AS(u128 *, base);
     block->pMat = sdfMatNew();
     sdfMatSetConstant(block->pMat, 1.0f);
     return block;
@@ -1549,7 +1549,7 @@ void dds3TrianglePolyDelete(dds3TrianglePoly_t *hTriPoly) {
 }
 
 void dds3TrianglePolyLinkOt(sdfGrOt_t *pOt, dds3TrianglePoly_t *hTriPoly) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdf3DPrimPolyParm_t state;
     s32 remaining;
     sdfDrawTagInit(list);
@@ -1785,7 +1785,7 @@ dds3SpPoly_Ring_t3 *dds3SpPoly_RingCreate(dds3SpPoly_Basic_t *templateHead) {
     s32 tailSize = sizeof(dds3SpPoly_Ring_t3) - sizeof(dds3SpPoly_Basic_t);
     u32 size = templateHead->number * sizeof(dds3SpPoly_RingPhysics_t) + sizeof(dds3SpPoly_Ring_t3);
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
-    dds3SpPoly_Ring_t3 *band = (dds3SpPoly_Ring_t3 *)sdfMemLock(allocation);
+    dds3SpPoly_Ring_t3 *band = EE_ADDR_AS(dds3SpPoly_Ring_t3 *, sdfMemLock(allocation));
 
     memset(band, 0, size);
     memcpy(band, templateHead, templateHead->templateSize);
@@ -2031,7 +2031,7 @@ dds3SpPoly_SphereRing_t3 *dds3SpPoly_SphereRingCreate(dds3SpPoly_SphereRing_t3 *
     s32 tailBytes = sizeof(dds3SpPoly_SphereRing_t3) - sizeof(dds3SpPoly_Basic_t);
     s32 size = source->head.number * sizeof(dds3SpPoly_SphereRingPhysics_t) + sizeof(dds3SpPoly_Basic_t) + tailBytes;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
-    dds3SpPoly_SphereRing_t3 *clone = (dds3SpPoly_SphereRing_t3 *)sdfMemLock(allocation);
+    dds3SpPoly_SphereRing_t3 *clone = EE_ADDR_AS(dds3SpPoly_SphereRing_t3 *, sdfMemLock(allocation));
 
     memset(clone, 0, size);
     memcpy(clone, source, source->head.templateSize);
@@ -2214,7 +2214,7 @@ dds3SpPoly_RollRing_t3 *dds3SpPoly_RollRingCreate(dds3SpPoly_Basic_t *templateHe
     s32 tailSize = sizeof(dds3SpPoly_RollRing_t3) - sizeof(dds3SpPoly_Basic_t);
     u32 size = templateHead->number * sizeof(dds3SpPoly_RollRingPhysics_t) + sizeof(dds3SpPoly_RollRing_t3);
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
-    dds3SpPoly_RollRing_t3 *band = (dds3SpPoly_RollRing_t3 *)sdfMemLock(allocation);
+    dds3SpPoly_RollRing_t3 *band = EE_ADDR_AS(dds3SpPoly_RollRing_t3 *, sdfMemLock(allocation));
 
     memset(band, 0, size);
     memcpy(band, templateHead, templateHead->templateSize);

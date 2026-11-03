@@ -175,7 +175,7 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
         cursor += vertexCount;
     }
     *cursor = 0x1400000C;
-    while ((u32)++cursor & 15) {
+    while (EE_ADDR(++cursor) & 15) {
         *cursor = 0;
     }
     return packet;
@@ -270,7 +270,7 @@ void dds3CrossfadeRun(void)
         sdfDrawTagInit(list);
         reference = (void *)sdfGrAllocPacketBuff(0x20);
         frame = dds3GetFrameID();
-        sdfGrLinkDispFrameTex(list, (u32)dds3DrawEnv[frame].frameMaskSource, reference);
+        sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[frame].frameMaskSource), reference);
         {
             u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
 

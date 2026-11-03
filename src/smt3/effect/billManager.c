@@ -282,7 +282,7 @@ void dds3BillboardManagerInit(void) {
         row = D_00316FF0;
         do {
             void *data = sdfMemGetPtr(work->resrc);
-            *slot = dds3BillboardCreate(row->kind, (u32)data);
+            *slot = dds3BillboardCreate(row->kind, EE_ADDR(data));
             row++;
             sdfMemFreeDirect(work->resrc);
             slot++;
@@ -315,7 +315,7 @@ dds3BillResource_tag *BillboardLoadTex(void *pTex) {
     s32 i;
 
     allocation = sdfMemAllocDirect(0x44C);
-    batch = (sdfBillBoardBatch_t *)sdfMemLock(allocation);
+    batch = EE_ADDR_AS(sdfBillBoardBatch_t *, sdfMemLock(allocation));
     child = (dds3BillResource_tag *)((u8 *)batch + 0x400);
     child->count = 0;
     child->hMem = allocation;
@@ -391,7 +391,7 @@ void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
         sdfDrawTagInit(child->pBillTag[selected]);
         packet = sdfGrAllocPacketBuff(0x20);
         sdf3DMakeDirectRefPacket(packet,
-            (u32)sdfTexGetPacket(child->hTex),
+            EE_ADDR(sdfTexGetPacket(child->hTex)),
             sdfTexGetPacketLength(child->hTex));
         sdfDrawTagLinkRef(child->pBillTag[selected], EE_ADDR(packet));
         if ((u16)(child->type & 1) != 0) {
@@ -1020,7 +1020,7 @@ dds3BillAnimResource_tag *dds3BillAnimLoadP2A(void *resourceData) {
     childCount = *texOffsets;
     texOffsets++;
     allocation = sdfMemAllocDirect(headerSize + childCount * sizeof(dds3BillResource_tag) + 0x1C);
-    block = (dds3BillAnimResource_tag *)sdfMemLock(allocation);
+    block = EE_ADDR_AS(dds3BillAnimResource_tag *, sdfMemLock(allocation));
     base = (u8 *)block + 0x1C;
     block->hMem = allocation;
     memcpy(base, resourceData, *(s32 *)resourceData);
@@ -1073,7 +1073,7 @@ void dds3BillboardCopyO(billHandle_t *obj, s32 *out) {
 
     if (obj->type == 1) {
         child = dds3Billboard_P2AAnimDraw(obj, obj->resolvedEntries);
-        out[0] = (s32)child->hTex;
+        out[0] = EE_ADDR_S(child->hTex);
         out[1] = *(s32 *)&child->uv;
     }
 }
@@ -1238,7 +1238,7 @@ void dds3BillboardSetCondition(billHandle_t *hBillboard, s32 condition) {
 
 s32 dds3BillboardGetTex(billHandle_t *hBillboard) {
     if (hBillboard->type == 0) {
-        return (s32)hBillboard->u.child->hTex;
+        return EE_ADDR_S(hBillboard->u.child->hTex);
     }
     return 0;
 }
@@ -1461,7 +1461,7 @@ void dds3P2APolygonSetPosition(dds3P2APolygon_tag *hData, s128 *pPos) {
 }
 
 void dds3P2APolygonSetScale(s32 hData, float scale) {
-    dds3BillboardSetScale(((dds3P2APolygon_tag *)hData)->hBillboard, scale, scale);
+    dds3BillboardSetScale((EE_ADDR_AS(dds3P2APolygon_tag *, hData))->hBillboard, scale, scale);
 }
 
 /* vu0 routine: copy the supplied 4x4 matrix to the instance's second matrix. */

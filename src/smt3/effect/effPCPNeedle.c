@@ -247,7 +247,7 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
     viewOffset[2] = value;
 
     if (effBTLSkillCheckRun() != 0) {
-        effBTLModelGetSphereCenter((struct BtlUnit *)effBTLSkillGetInvokeFormation());
+        effBTLModelGetSphereCenter(EE_ADDR_AS(struct BtlUnit *, effBTLSkillGetInvokeFormation()));
         SDF_VU0_STOREVECTOR_NOMEM(position);
         LookAtMatrix(hData->param.position, position, D_0031F450);
         ReverseMatrix();
@@ -566,7 +566,7 @@ void dds3NeedleModelVNCListDelete(dds3NeedleModel_tag *hNModel)
 
 void dds3NeedleModelSetPosition(dds3NeedleModel_tag *hNModel, s32 index, f32 *pPos)
 {
-    f32 *dst = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + (s32)hNModel->pPart);
+    f32 *dst = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + EE_ADDR_S(hNModel->pPart));
 
     dst[0] = pPos[0];
     dst[1] = pPos[1];
@@ -575,7 +575,7 @@ void dds3NeedleModelSetPosition(dds3NeedleModel_tag *hNModel, s32 index, f32 *pP
 
 void dds3NeedleModelGetPosition(dds3NeedleModel_tag *hNModel, s32 index, f32 *pPos)
 {
-    f32 *src = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + (s32)hNModel->pPart);
+    f32 *src = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + EE_ADDR_S(hNModel->pPart));
 
     pPos[0] = src[0];
     pPos[1] = src[1];

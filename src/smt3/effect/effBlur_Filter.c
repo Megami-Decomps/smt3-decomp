@@ -139,14 +139,14 @@ void dds3EffectBlur(const dds3Effect_Blur_t *source) {
     if (dds3NullDrawProc() != 0) {
         return;
     }
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
-    reference = (void *)sdfGrAllocPacketBuff(0x20);
+    reference = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     frame = dds3GetFrameID();
-    sdfGrLinkDispFrameTex(list, (u32)dds3DrawEnv[frame].frameMaskSource, reference);
+    sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[frame].frameMaskSource), reference);
 
     {
-        u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+        u64 *packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
 
         packet[0] = 3;
         packet[1] = 0x5000000310000000ULL;
@@ -160,7 +160,7 @@ void dds3EffectBlur(const dds3Effect_Blur_t *source) {
     }
 
     {
-        u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+        u64 *packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
 
         packet[0] = 3;
         packet[1] = 0x5000000310000000ULL;
@@ -174,7 +174,7 @@ void dds3EffectBlur(const dds3Effect_Blur_t *source) {
     }
 
     {
-        u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+        u64 *packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
 
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -200,12 +200,12 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
     void *reference;
     u32 frame;
 
-    mask = (void *)sdfGrAllocPacketBuff(0x40);
+    mask = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
     frame = dds3GetFrameID();
     sdfGrSetFrameMaskRGB(dds3DrawEnv[frame].frameMaskSource, mask, 1);
     sdfDrawTagLinkRefGif(list, EE_ADDR(mask));
 
-    packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+    packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
     packet[0] = 3;
     packet[1] = 0x5000000310000000ULL;
     packet[2] = 0x1000000000008002ULL;
@@ -217,7 +217,7 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
     sdfDrawTagLink(list, EE_ADDR(packet));
     sdf2DLinkTexPacket(list, texture, 1);
 
-    packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+    packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
     packet[0] = 3;
     packet[1] = 0x5000000310000000ULL;
     packet[2] = 0x1000000000008002ULL;
@@ -228,11 +228,11 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
     packet[7] = 0x42;
     sdfDrawTagLink(list, EE_ADDR(packet));
 
-    reference = (void *)sdfGrAllocPacketBuff(0x20);
+    reference = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     frame = dds3GetFrameID();
-    sdfGrLinkDispFrameTex(list, (u32)dds3DrawEnv[frame].frameMaskSource, reference);
+    sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[frame].frameMaskSource), reference);
     {
-        u64 *last = (u64 *)sdfGrAllocPacketBuff(0x40);
+        u64 *last = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
 
         last[0] = 3;
         last[1] = 0x5000000310000000ULL;
@@ -245,7 +245,7 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
         sdfDrawTagLink(list, EE_ADDR(last));
     }
     {
-        u64 *last = (u64 *)sdfGrAllocPacketBuff(0x30);
+        u64 *last = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
 
         last[0] = 2;
         last[1] = 0x5000000210000000ULL;
@@ -275,7 +275,7 @@ void dds3EffectBlurDrawFrameMaskReset(sdfDrawTag_t *list) {
     u32 frame;
     sdfGrOt_t *ot;
 
-    packet = (void *)sdfGrAllocPacketBuff(0x40);
+    packet = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
     frame = dds3GetFrameID();
     sdfGrSetFrameMaskReset(dds3DrawEnv[frame].frameMaskSource, packet, 1);
     sdfDrawTagLinkRefGif(list, EE_ADDR(packet));
@@ -289,7 +289,7 @@ void dds3EffectBlurDraw(const dds3Effect_Blur_t *source, sdfTexHandle_t *texture
     if (dds3NullDrawProc() != 0) {
         return;
     }
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
     dds3EffectBlurDrawFrameMask(list, source->blend, texture);
     dds3EffectBlurDrawAlphaMulti(list, source);
@@ -388,7 +388,7 @@ effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurPa
     s32 slotIndex;
 
     allocation = sdfMemAllocDirect(sizeof(effBlurScatterWork_t) + 100 * sizeof(effBlurScatterSlot_t));
-    work = (effBlurScatterWork_t *)sdfMemLock(allocation);
+    work = EE_ADDR_AS(effBlurScatterWork_t *, sdfMemLock(allocation));
     work->params = *pParam;
     work->allocation = allocation;
     work->slots = (effBlurScatterSlot_t *)(work + 1);
@@ -420,7 +420,7 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work)
     f64 angle;
 
     if (dds3NullDrawProc() == 0) {
-        list = (void *)sdfGrAllocPacketBuff(0x20);
+        list = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
         sdfDrawTagInit(list);
         dds3EffectBlurDrawFrameMask(list, work->params.blend, work->texture);
         slot = work->slots;
@@ -513,7 +513,7 @@ void dds3EffectRippleBlurReset(effBlurScaleWork_t *hRippleBlur) {
 effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam) {
     s32 count = pParam->number;
     void *allocation = sdfMemAllocDirect(count * 0x30 + 0x38);
-    effBlurScaleWork_t *work = (effBlurScaleWork_t *)sdfMemLock(allocation);
+    effBlurScaleWork_t *work = EE_ADDR_AS(effBlurScaleWork_t *, sdfMemLock(allocation));
     effBlurScaleSlot_t *slot;
     s32 i = 0;
 
@@ -549,7 +549,7 @@ void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work)
     u32 alpha;
 
     if (dds3NullDrawProc() == 0) {
-        list = (void *)sdfGrAllocPacketBuff(0x20);
+        list = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
         sdfDrawTagInit(list);
         dds3EffectBlurDrawFrameMask(list, work->params.blend, work->texture);
         slot = work->slots;
@@ -594,9 +594,9 @@ void dds3EffectFilter(dds3Effect_Filter_t *source) {
     s32 x[4];
     s32 y[4];
 
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
-    blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+    blendPacket = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
     blendPacket[0] = 3;
     blendPacket[1] = 0x5000000310000000ULL;
     blendPacket[2] = 0x1000000000008002ULL;
@@ -644,9 +644,9 @@ void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHand
     s32 x1;
     s32 y1;
 
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
-    packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+    packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
     packet[0] = 3;
     packet[1] = 0x5000000310000000ULL;
     packet[2] = 0x1000000000008002ULL;
