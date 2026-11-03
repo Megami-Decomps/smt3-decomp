@@ -479,10 +479,10 @@ typedef struct effPCP_HBED2_tag
 
 extern u8 dds3EffectBase[];
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void *sdfChipAllocZeroDirect(u32 aSize);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 extern void *sdfMatNew(void);
 extern void sdfMatSetConstant(void *aMat, f32 aRatio);
 extern void *dds3BillboardCreate(s32 count, void *params);
@@ -522,7 +522,7 @@ extern void LookAtMatrix(const void *aTarget, const void *aEye, const void *aDow
 extern void ReverseMatrix(void);
 extern void sdf3DPrimLinkTm(void *aTag, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(effPCPBossWork_t *aParm);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 extern u8 D_002F5C20[], D_002F5C30[];
 extern u8 effPCPBossTexRect[];
 extern u8 D_0031FF80[];
@@ -898,7 +898,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     if (work->frame >= 12) {
         return;
     }
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     origin.f[1] -= height;
     SDF_VU0_LOADIDENTITY();
@@ -1095,7 +1095,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
     if (work->frame >= 17) {
         return;
     }
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     origin.f[1] -= height;
     SDF_VU0_LOADIDENTITY();
@@ -1517,7 +1517,7 @@ void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
         target.f[1] -= 340.0f;
         effPCPBossONGYModelTexRender(&target, form, 340.0f);
     }
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdfMatSetTex(work->matrix, dds3GetRenderTexture());
     sdf3DPrimLinkMat(tag, work->matrix, 0);
@@ -3763,9 +3763,9 @@ void effPCPScreenCrackModelDraw(effPCPScreenCrackModel_t *hData)
     SDF_VU0_ADDVECTOR();
     mdlSetPosition(model);
 
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+    packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
     packet[4] = 0x31801;
     packet[0] = 2;
     packet[1] = 0x5000000210000000ULL;
@@ -3777,9 +3777,9 @@ void effPCPScreenCrackModelDraw(effPCPScreenCrackModel_t *hData)
     ot->regFunc(ot, tag);
     mdlLink(model, &D_002F69B8[7]);
 
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+    packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
     packet[4] = 0x717FB;
     packet[0] = 2;
     packet[1] = 0x5000000210000000ULL;

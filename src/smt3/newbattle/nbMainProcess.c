@@ -117,7 +117,7 @@ extern void *sdfChipAllocDirect(u32 aSize);
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void nbFreeAllFormResources(nbMainProcessData_t *data);
 
@@ -223,7 +223,7 @@ extern void nbSetNextOrder(void);
 
 extern void nbSetNextPhase(s32 phase);
 
-extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form);
 
 extern void nbAddKagututiMoon(nbMainProcessData_t *data);
 
@@ -387,7 +387,7 @@ extern char *D_00550F7C;
 extern char D_00550F88[];
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern sdfGrOt_t sdfGrOtTable[];
 PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
@@ -477,7 +477,7 @@ void nbDebugMainProcess(nbMainProcessData_t *data)
     s32 i;
 
     if (data->debug == 1) {
-        tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
+        tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t)));
         sdfDrawTagInit(tag);
         y = 0x7980;
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7880, y, 0xFFFF80, 0, "STAT:%08X", data->stat)));
@@ -617,7 +617,7 @@ extern char D_00551098[], D_005510A0[], D_005510A8[], D_005510B0[];
 #ifdef NON_MATCHING
 void DebugDisp2(nbMainProcessData_t *data)
 {
-    sdfDrawTag_t *tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     nbParty_t *party;
     volatile nbFormation_t *form;
     s32 i;
@@ -788,7 +788,7 @@ s32 CheckErrorActionStack(nbMainProcessData_t *data, s32 index)
     s32 type;
 
     act = (nbActionStack_t *)((u8 *)(index * sizeof(nbActionStack_t)) + EE_ADDR(data->actionstack));
-    party = (nbParty_t *)((u8 *)(act->to * sizeof(nbParty_t)) + (u32)data->party);
+    party = (nbParty_t *)((u8 *)(act->to * sizeof(nbParty_t)) + EE_ADDR(data->party));
     if ((party->flag & 1) == 0) {
         return 1;
     }
@@ -1447,7 +1447,7 @@ void SetJyocyuData(nbMainProcessData_t *data)
 {
     sdfMemHandle_t *handle;
 
-    handle = sdfDevLoadFileEx((const char *)D_0054F0F4, 0, 0);
+    handle = sdfDevLoadFileEx(EE_ADDR_AS(const char *, D_0054F0F4), 0, 0);
     data->HatudoEff = effBTLCreate(sdfMemLock(handle));
     sdfMemFreeDirect(handle);
 }

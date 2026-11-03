@@ -110,7 +110,7 @@ void sdfHddPowerOffTh(s32 aSemaId)
 
 void sdfHddPowerOffHandler(void *aArg)
 {
-    iSignalSema((s32)aArg);
+    iSignalSema(EE_ADDR_S(aArg));
 }
 
 void sdfHddInit(void)
@@ -148,8 +148,8 @@ void sdfHddInit(void)
         return;
     }
     sema = sdfCreateSema(0, 1, 0);
-    _StartThread(CreateThreadSimple(sdfHddPowerOffTh, D_0058FFC0, 0x800, 1), (void *)sema);
-    sceCdPOffCallback(sdfHddPowerOffHandler, (void *)sema);
+    _StartThread(CreateThreadSimple(sdfHddPowerOffTh, D_0058FFC0, 0x800, 1), EE_ADDR_AS(void *, sema));
+    sceCdPOffCallback(sdfHddPowerOffHandler, EE_ADDR_AS(void *, sema));
     sceFsInit();
     sceMount(D_005519A0, "hdd0:dds3,", 0, NULL, 0);
     sdfHddValid = 1;

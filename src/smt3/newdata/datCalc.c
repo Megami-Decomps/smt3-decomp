@@ -772,7 +772,7 @@ void datAddItem(s32 id, s32 num)
         if (id != 0x8D) {
             return;
         }
-        count = ((u8 *)id + (u32)DDS3_GBWK)[0x1928];
+        count = (EE_ADDR_AS(u8 *, id) + EE_ADDR(DDS3_GBWK))[0x1928];
         if (num > 0) {
             count += num;
             if (count >= 0x64) {
@@ -785,7 +785,7 @@ void datAddItem(s32 id, s32 num)
                 evtBitOff(0x3ED);
             }
         }
-        ((u8 *)id + (u32)DDS3_GBWK)[0x1928] = count;
+        (EE_ADDR_AS(u8 *, id) + EE_ADDR(DDS3_GBWK))[0x1928] = count;
     } else {
         u32 ofs = id + 0x1920;
 
@@ -809,7 +809,7 @@ void datAddItem(s32 id, s32 num)
 
 s32 datCheckItem(s32 id, s32 num)
 {
-    if (((u8 *)id + (u32)DDS3_GBWK)[0x1928] < num) {
+    if ((EE_ADDR_AS(u8 *, id) + EE_ADDR(DDS3_GBWK))[0x1928] < num) {
         return 0;
     }
     return 1;
@@ -817,7 +817,7 @@ s32 datCheckItem(s32 id, s32 num)
 
 s32 datCheckItemFull(s32 id)
 {
-    s32 count = ((u8 *)id + (u32)DDS3_GBWK)[0x1928];
+    s32 count = (EE_ADDR_AS(u8 *, id) + EE_ADDR(DDS3_GBWK))[0x1928];
 
     if (id >= 0x70) {
         if (count > 0) {
@@ -907,7 +907,7 @@ INCLUDE_ASM(const s32, "newdata/datCalc", datGetPlayerParam);
 
 void datAddPlayerParam(s32 id, s32 add)
 {
-    s8 *param = (s8 *)((u8 *)id + (u32)DDS3_GBWK) + 0xA6A;
+    s8 *param = (s8 *)(EE_ADDR_AS(u8 *, id) + EE_ADDR(DDS3_GBWK)) + 0xA6A;
     s32 value = *param + add;
 
     if (value >= 0x29) {
@@ -924,7 +924,7 @@ void datAddPlayerParam(s32 id, s32 add)
 s32 datGetNakamaParam(s32 did, s32 id)
 {
     u16 *devilid = &((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + 1)->id;
-    s8 *param = (s8 *)((u8 *)id + (u32)DDS3_GBWK) + 0xB56;
+    s8 *param = (s8 *)(EE_ADDR_AS(u8 *, id) + EE_ADDR(DDS3_GBWK)) + 0xB56;
     s32 value = 0;
     s32 i;
 
@@ -1429,7 +1429,7 @@ s32 datAddHearts(s32 id)
     }
     ((u8 *)EE_ADDR_PTR(DDS3_GBWK->heartscnt) + EE_ADDR(DDS3_GBWK))[0x1CFB] = id;
     DDS3_GBWK->heartscnt++;
-    ((u8 *)id + (u32)DDS3_GBWK)[0x1D3B] = 0;
+    (EE_ADDR_AS(u8 *, id) + EE_ADDR(DDS3_GBWK))[0x1D3B] = 0;
     if (datCountRegisteredHearts() != 0) {
         evtBitOn(0x860);
     }
@@ -1621,7 +1621,7 @@ void datAddKotowariPoint(s32 type, s32 point)
     s32 value;
 
     if (type != 0) {
-        slot = (u8 *)type + (u32)DDS3_GBWK + 0x1CEC;
+        slot = EE_ADDR_AS(u8 *, type) + EE_ADDR(DDS3_GBWK) + 0x1CEC;
         value = *slot + point;
         if (value < 0) {
             value = 0;
@@ -1708,7 +1708,7 @@ void datInitPlayer(void)
     gbwk[0x1914] = 0;
     DDS3_GBWK->maka = 0;
     for (i = 0; i < 0xA0; i++) {
-        ((u8 *)i + (u32)DDS3_GBWK)[0x1928] = 0;
+        (EE_ADDR_AS(u8 *, i) + EE_ADDR(DDS3_GBWK))[0x1928] = 0;
     }
     evtBitOn(0xC04);
 }
@@ -1850,10 +1850,10 @@ void datBossRashUpdRec(s32 eid, s32 press)
             if (evtBitCheck(rec->flag) == 0) {
                 return;
             }
-            *(s16 *)((u8 *)(i * 4) + (u32)DDS3_GBWK + 0x19CA) = value;
+            *(s16 *)(EE_ADDR_AS(u8 *, (i * 4)) + EE_ADDR(DDS3_GBWK) + 0x19CA) = value;
             best = datBossRashGetRec(eid, 0);
             if (value < best) {
-                *(s16 *)((u8 *)(i * 4) + (u32)DDS3_GBWK + 0x19C8) = value;
+                *(s16 *)(EE_ADDR_AS(u8 *, (i * 4)) + EE_ADDR(DDS3_GBWK) + 0x19C8) = value;
                 evtBitOn(rec->flag2);
             }
             return;

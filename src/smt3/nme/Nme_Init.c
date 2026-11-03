@@ -40,7 +40,7 @@ extern void frLoadFontData(s32 style, const char *filename);
 extern void nmeInitNameRows(s8 target, nmeWork_t *work);
 extern char D_00548768[];
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 void frAllocNameData(void)
 {
@@ -154,7 +154,7 @@ s32 nmeGetRowCount(s8 mode)
 }
 
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
 extern void nmeInitNameCursor(s8 mode, nmeWork_t *work);
 
 void nmeInitNameBuffer(s8 mode, nmeWork_t *work) {
@@ -179,7 +179,7 @@ void nmeInitNameBuffer(s8 mode, nmeWork_t *work) {
 
 extern const char *D_005276C4 __attribute__((section(".data")));
 extern u32 strlen(const char *string);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 void nmeInitNameCursor(s8 mode, nmeWork_t *work)
@@ -243,13 +243,13 @@ extern s32 evtBitCheck(s32 bit);
 
 void nmeTexLoad(s8 mode, nmeWork_t *work)
 {
-    work->textures[0] = (sdfTexHandle_t *)fclLoadTexture(D_00548780);
-    work->textures[1] = (sdfTexHandle_t *)fclLoadTexture(D_00548798);
-    work->textures[2] = (sdfTexHandle_t *)fclLoadTexture(D_005487B0);
+    work->textures[0] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_00548780));
+    work->textures[1] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_00548798));
+    work->textures[2] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_005487B0));
     if (evtBitCheck(0x8B0) != 0 && mode == 0) {
-        work->textures[3] = (sdfTexHandle_t *)fclLoadTexture(D_005276B0);
+        work->textures[3] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_005276B0));
     } else {
-        work->textures[3] = (sdfTexHandle_t *)fclLoadTexture(nmeCharTexFile[mode]);
+        work->textures[3] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(nmeCharTexFile[mode]));
     }
 }
 

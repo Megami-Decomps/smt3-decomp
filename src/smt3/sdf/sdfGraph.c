@@ -36,6 +36,9 @@ extern s32 WakeupThread(s32 thread);
 extern void sdfWaitVblank(s32 mode);
 extern volatile s8 sdfGrDrawBusy;
 extern s32 sdfGrCaptureReq;
+/* The capture hook, held as an address and called through a cast. */
+typedef void (*sdfGrCaptureFunc_t)(u8 *);
+
 extern s32 sdfGrCaptureTarget;
 extern s8 sdfGrCaptureBuff;
 
@@ -74,7 +77,7 @@ extern s32 sceGsSetDefStoreImage(sceGsStoreImage *, s16, s16, s16, s16, s16, s16
 extern s32 sceGsExecStoreImage(sceGsStoreImage *, void *);
 extern s32 sceGsSyncPath(s32 mode, s32 timeout);
 extern void sceGsResetPath(void);
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 extern void sdfGrDrawFrame(void);
 extern void sdfGrMakePacketBuff(s32 aPacketBuffSize);
 extern void sdfGrInitDraw(void);
@@ -235,7 +238,7 @@ void sdfGrCapture(void) {
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&D_00577F80, pixels);
         sceGsSyncPath(0, 0);
-        destination = (u8 *)sdfGrCaptureReq;
+        destination = EE_ADDR_AS(u8 *, sdfGrCaptureReq);
         source = pixels;
         rows = height;
         do {
@@ -249,7 +252,7 @@ void sdfGrCapture(void) {
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&D_00577F80, pixels);
         sceGsSyncPath(0, 0);
-        destination = (u8 *)sdfGrCaptureReq + rowBytes;
+        destination = EE_ADDR_AS(u8 *, sdfGrCaptureReq) + rowBytes;
         source = pixels;
         rows = height;
         do {
@@ -260,7 +263,7 @@ void sdfGrCapture(void) {
         sdfMemFreeDirect(allocation);
         sdfGrCaptureBuff = 0;
         if (sdfGrCaptureTarget) {
-            ((void (*)(u8 *))sdfGrCaptureTarget)((u8 *)sdfGrCaptureReq);
+            EE_ADDR_AS(sdfGrCaptureFunc_t, sdfGrCaptureTarget)(EE_ADDR_AS(u8 *, sdfGrCaptureReq));
         }
     }
 }

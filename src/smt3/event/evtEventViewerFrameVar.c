@@ -29,7 +29,7 @@ extern void dds3ConsPanelTagLink(void *aTag, s32 aX, s32 aY, s32 aSx, s32 aSy);
 
 extern s32 sdfDevPrintf(s32 aX, s32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
 
-extern void sdfDrawTagLink(void *aTag, u32 aPacket);
+extern void sdfDrawTagLink(void *aTag, ps2Addr_t aPacket);
 
 extern void sdfPrimLinkRect(void *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aX1,
                             s32 aY1, s32 aZ, s32 (*aAllocator)(s32));

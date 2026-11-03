@@ -119,9 +119,9 @@ void sdfMatInitSystem(void);
 /* Initialize the buffered object-list release queue with its object destructor. */
 void sdfModelInitSystem(void);
 
-extern u32 sdf3DLightDefault;
+extern ps2Addr_t sdf3DLightDefault;
 
-extern u32 sdf3DFogDefault;
+extern ps2Addr_t sdf3DFogDefault;
 
 extern f32 sdf3DEyeOffset[4];
 
@@ -197,7 +197,7 @@ typedef struct sdf3DScreenParam_t {
     f32 cameraPos[4]; /* 0x90 */
 } sdf3DScreenParam_t;
 
-void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 
 
@@ -241,7 +241,7 @@ extern s32 vu1Tex0Slot2[];
 
 extern s32 vu1Tex0Slot1[];
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 void ReverseMatrix(void);
 
@@ -253,7 +253,7 @@ void sdf3DSetCamera(sdf3DScreenParam_t *aParam, void *aCamera);
 
 void sdf3DMakeFogPacket(sdf3DFogPacket_t *aPacket, sdf3DFogParam_t *aParam);
 
-void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng);
+void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, ps2Addr_t aData, s32 aLeng);
 
 void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket);
 
@@ -355,7 +355,7 @@ void sdf3DMakeScreenParam(sdf3DScreenParam_t *camera)
 extern f32 D_00529630[];
 extern void DiagMatrix(void);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 
 /* vu0 routine: parallel-light packet and lighting basis construction */
 void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdf3DLight_t **aLights, sdfVector4_t *aAmbient) {
@@ -463,7 +463,7 @@ void sdf3DMakeFogPacket(sdf3DFogPacket_t *aPacket, sdf3DFogParam_t *aParam) {
     aPacket->scale = ((farZ * nearZ) * (rangeMin - rangeMax)) / depthRange;
 }
 
-void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng) {
+void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, ps2Addr_t aData, s32 aLeng) {
     s32 quadwordCount = (aLeng + 15) >> SDF_DMA_QWORD_SHIFT;
     aPacket->quadwords = quadwordCount;
     aPacket->address = EE_PHYSICAL(aData);
@@ -486,7 +486,7 @@ void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket) {
 }
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 
 void sdf3DInitSpecularTex2(void) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x2440);

@@ -23,11 +23,11 @@ typedef struct devState_t devState_t;
 
 extern u32 D_0054EC44;
 
-extern u32 fldDrawEnv;
+extern ps2Addr_t fldDrawEnv;
 
 extern sdfTexHandle_t *D_0054EC60;
 
-extern void *memset(void *, int, unsigned int);
+extern void *memset(void *, int, ps2Size_t);
 
 extern u8 D_0054EC50[];
 
@@ -99,13 +99,13 @@ extern f32 fldSkyFilterTime;
 
 extern s32 fldGb __attribute__((section(".data")));
 
-extern u32 fldItemBoxObjBuf;
+extern ps2Addr_t fldItemBoxObjBuf;
 
-extern u32 fldMatterTable;
+extern ps2Addr_t fldMatterTable;
 
-extern u32 D_0054EDA8;
+extern ps2Addr_t D_0054EDA8;
 
-extern u32 D_0054EDAC;
+extern ps2Addr_t D_0054EDAC;
 
 extern s32 fldValueRecordCount;
 
@@ -146,7 +146,7 @@ void sdfFileClose(devState_t *aHandle);
 
 #include "sdk_libc.h"
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 extern s32 gFldInf_HitIdx;
 
@@ -297,7 +297,7 @@ extern s32 fldEveHitCount;
 
 void fldClearDoorEvents(void);
 
-const char *fldEveHitResName_Find(u32 pid);
+const char *fldEveHitResName_Find(ps2Addr_t pid);
 
 extern u8 D_00302FA0[];
 
@@ -1596,7 +1596,7 @@ s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
         return 0;
     }
     for (i = 0; i < 256; i++) {
-        e = (doormovework_s *)((u8 *)(i * 0x54) + (u32)fldDoorEventTable);
+        e = (doormovework_s *)(EE_ADDR_AS(u8 *, (i * 0x54)) + EE_ADDR(fldDoorEventTable));
         if (e->matter_resid1 == matter_resid) {
             if (e->stat == 2) {
                 s32 count = e->cnt1;

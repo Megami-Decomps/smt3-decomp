@@ -44,6 +44,9 @@ s32 sdfSndSendCmd(s32 aCmd, s32 aParam, void *aExDataPtr, s32 aExDataSize);
 
 extern s32 SignalSema(s32 aSemaId);
 
+/* The PCM fill hook, held as an address and called through a cast. */
+typedef u8 *(*p2sdPcmFunc_t)(s32);
+
 extern u32 p2sdPcmCallback;
 
 extern u32 sdfSndMap[];
@@ -190,7 +193,7 @@ enum sdf_stream_playback {
 
 extern void sdfSndTransToIOP(s32 aIOPAddr, void *aEEAddr, s32 aSize);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 extern void sdfDelayThread(s32 delay);
 
@@ -293,7 +296,7 @@ extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(
     const char *path,
-    void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
+    void (*callback)(sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32),
     s32 callbackContext);
 extern s32 sdfFileCmdClearError(sdfFileCmd_t *handle);
 extern s32 sdfFileCmdFree(sdfFileCmd_t *handle);
@@ -804,7 +807,7 @@ u64 p2sd_2C1D78(const char *aName)
     return sdfSndSendSyncCmd(0xA0, 0, (void *)aName, strlen(aName));
 }
 
-void p2sdSetPcmBuffer(s32 data, s32 size) {
+void p2sdSetPcmBuffer(ps2AddrS_t data, s32 size) {
     s32 *packet;
     D_00593E20.size = size;
     D_00593E20.pending = 1;
@@ -973,7 +976,7 @@ s32 p2sd_2C21D8(u32 aCh)
     return sdfSndSendSyncCmd((aCh - 1) | 0x1D0, 0, NULL, 0);
 }
 
-u32 p2sdSetPcmCallback(u32 aCallback)
+u32 p2sdSetPcmCallback(ps2Addr_t aCallback)
 {
     if (p2sdPcmBusy != 0) {
         return 0;
@@ -1053,7 +1056,7 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
         p2sdPcmState = 1;
         sdfSndMakeFilename(path, D_00529BE8);
         state = sdfFileCmdReadOpen(path,
-            (void (*)(sdfFileCmdHandle_t *, s32, s32, s32, s32))sdfFileRpcCallback, 0);
+            (void (*)(sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32))sdfFileRpcCallback, 0);
         sdfFileRpcArg = state;
         if (state != NULL) {
             WaitSema(sifRpcServerSema);
@@ -1125,7 +1128,7 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
         void *buffer;
 
         sdfFileRpcResult = request;
-        buffer = ((u8 *(*)(s32))p2sdPcmCallback)(request->byteCount);
+        buffer = EE_ADDR_AS(p2sdPcmFunc_t, p2sdPcmCallback)(request->byteCount);
         if (buffer != NULL) {
             sdfSndTransToIOP(sdfFileRpcResult->destination, buffer,
                              sdfFileRpcResult->byteCount);
@@ -1256,7 +1259,7 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
     while (size > 0) {
         if (column == 0) {
             sdfPrintf(D_00551A20, data);
-            column = (u32)data & 0xF;
+            column = EE_ADDR(data) & 0xF;
             for (i = column; i > 0; i--) {
                 sdfPrintf(D_00551A28);
             }
@@ -1318,7 +1321,7 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
             cursor += tagCount;
             break;
         case 2:
-            cursor = (sdfDmaDumpTag_t *)tagAddress;
+            cursor = EE_ADDR_AS(sdfDmaDumpTag_t *, tagAddress);
             break;
         case 3:
         case 4:
@@ -1329,7 +1332,7 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
                 return;
             }
             callStack[depth++] = cursor;
-            cursor = (sdfDmaDumpTag_t *)tagAddress;
+            cursor = EE_ADDR_AS(sdfDmaDumpTag_t *, tagAddress);
             break;
         case 6:
             if (depth == 0) {
@@ -1408,7 +1411,7 @@ void sdfGrFlushOtChain(u32 *source) {
                 case 0:
                 case 3:
                 case 4:
-                    wordCursor = (u32 *)tagAddress;
+                    wordCursor = EE_ADDR_AS(u32 *, tagAddress);
                     break;
                 default:
                     wordCursor = cursor;
@@ -1426,7 +1429,7 @@ void sdfGrFlushOtChain(u32 *source) {
                     cursor += qwc * 4;
                     break;
                 case 2:
-                    cursor = (u32 *)tagAddress;
+                    cursor = EE_ADDR_AS(u32 *, tagAddress);
                     break;
                 case 3:
                 case 4:
@@ -1437,7 +1440,7 @@ void sdfGrFlushOtChain(u32 *source) {
                         return;
                     }
                     returnStack[depth++] = cursor + qwc * 4;
-                    cursor = (u32 *)tagAddress;
+                    cursor = EE_ADDR_AS(u32 *, tagAddress);
                     break;
                 case 6:
                     if (depth == 0) {
@@ -1464,7 +1467,7 @@ void sdfGrFlushOtChain(u32 *source) {
                 s32 format;
                 s32 unpackFormat;
 
-                sdfPrintf("%08X %c%08X : ", (u32)(wordCursor - 1),
+                sdfPrintf("%08X %c%08X : ", EE_ADDR((wordCursor - 1)),
                                            interrupt, value);
                 switch (opcode) {
                 case 0x00:

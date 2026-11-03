@@ -64,7 +64,7 @@ extern void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *, sdf3DScreenParam_t 
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 extern s32 sdfGrAllocPacketBuff(s32);
 extern void sdf3DMakeFogPacket(sdf3DFogPacket_t *, sdf3DFogParam_t *);
-extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
+extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t);
 extern void sdf3DSetCamera(sdf3DScreenParam_t *, void *);
 extern void sdfPreDrawChainLink(sdfPreDrawChain_t *, sdfPreDrawTag_t *);
 extern void sdfModelOtInit(sdfModelOt_t *, sdfGrOt_t *, sdfGrOt_t *, sdfGrOt_t *, sdfGrOt_t *);
@@ -95,7 +95,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
             sdf3DMakeViewportPacket(&dds3DrawEnv[frame].renderViewport, &D_002F5B80, &D_002FA2A0);
             sdfGrOtTable[1].regFunc(&sdfGrOtTable[1], &dds3DrawEnv[frame].renderTag);
             renderTag = dds3FontReqAllocDrawTag();
-            renderFog = (sdf3DFogPacket_t *)sdfGrAllocPacketBuff(0x50);
+            renderFog = EE_ADDR_AS(sdf3DFogPacket_t *, sdfGrAllocPacketBuff(0x50));
             sdf3DMakeFogPacket(renderFog, &D_002F5D30);
             sdfDrawTagLink(renderTag, EE_ADDR(renderFog));
             sdfGrOtTable[1].regFunc(&sdfGrOtTable[1], renderTag);
@@ -111,7 +111,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
         sdf3DMakeViewportPacket(&dds3DrawEnv[frame].subViewport, &dds3ScreenParam2, &aProjMatrix);
         sdfGrOtTable[73].regFunc(&sdfGrOtTable[73], &dds3DrawEnv[frame].subTag);
         subTag = dds3FontReqAllocDrawTag();
-        subFog = (sdf3DFogPacket_t *)sdfGrAllocPacketBuff(0x50);
+        subFog = EE_ADDR_AS(sdf3DFogPacket_t *, sdfGrAllocPacketBuff(0x50));
         sdf3DMakeFogPacket(subFog, &dds3FogParam2);
         sdfDrawTagLink(subTag, EE_ADDR(subFog));
         sdfGrOtTable[73].regFunc(&sdfGrOtTable[73], subTag);
@@ -137,7 +137,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
     sdf3DSetCamera(&dds3ScreenParam, &D_002FA240);
     sdfGrOtTable[7].regFunc(&sdfGrOtTable[7], &dds3DrawEnv[frame].drawTag);
     sceneTag = dds3FontReqAllocDrawTag();
-    sceneFog = (sdf3DFogPacket_t *)sdfGrAllocPacketBuff(0x50);
+    sceneFog = EE_ADDR_AS(sdf3DFogPacket_t *, sdfGrAllocPacketBuff(0x50));
     sdf3DMakeFogPacket(sceneFog, &dds3FogParamMain);
     sdfDrawTagLink(sceneTag, EE_ADDR(sceneFog));
     sdfGrOtTable[7].regFunc(&sdfGrOtTable[7], sceneTag);
@@ -198,8 +198,8 @@ extern u32 dds3NullDrawProc(void);
 extern void sdfModelDrawEnvLinkOt(sdfGrOt_t **, sdfModelDrawEnv_t *);
 extern s32 sdfGrAllocPacketBuff(s32);
 extern void sdfDrawTagInit(sdfDrawTag_t *);
-extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
-extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *, u32, sdfGrRefPacketHeader_t *);
+extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *, ps2Addr_t, sdfGrRefPacketHeader_t *);
 extern sdfGrPacketHeader_t *sdf2DAllocSprite(s32);
 extern void *sdf2DGetPrimPtr(sdfGrPacketHeader_t *);
 extern sdfDrawTag_t *sdfGrOtClose(sdfGrOt_t *);
@@ -232,10 +232,10 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
         packetGroups++;
     }
     if (dds3ScreenBlurFlag != 0 && dds3NullDrawProc() == 0) {
-        packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+        packetList = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
         sdfDrawTagInit(packetList);
-        sdfGrLinkDispFrameTex(packetList, (u32)&dds3DrawEnv[bufferIndex].stdEnv, (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(0x20));
-        texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+        sdfGrLinkDispFrameTex(packetList, EE_ADDR(&dds3DrawEnv[bufferIndex].stdEnv), EE_ADDR_AS(sdfGrRefPacketHeader_t *, sdfGrAllocPacketBuff(0x20)));
+        texturePacket = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
         texturePacket[0] = 3;
         /* VIF FLUSHA, then DIRECT for the three following quadwords. */
         texturePacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
@@ -246,7 +246,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
         texturePacket[6] = 0;
         texturePacket[7] = 0x3F;
         sdfDrawTagLink(packetList, EE_ADDR(texturePacket));
-        blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+        blendPacket = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
         blendPacket[0] = 3;
         blendPacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
         blendPacket[2] = ((u64)0x10000000 << 32) | 0x8002;
@@ -288,7 +288,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
     poolHead = sdfGrOtClose(sdfGrOtTable);
     dds3ClosedDrawTag = poolHead;
     if (dds3DrawProcessFlag != 0) {
-        sdfGrFlushOtChain((u32 *)poolHead->head);
+        sdfGrFlushOtChain(EE_ADDR_AS(u32 *, poolHead->head));
         dds3DrawProcessFlag = 0;
     }
     if (!(dds3DrawFlag & 0x2000000)) {

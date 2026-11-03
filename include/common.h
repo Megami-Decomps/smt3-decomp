@@ -43,9 +43,66 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 #ifndef EE_ADDR_PTR
 #define EE_ADDR_PTR(addr) ((void *)(u32)(addr))
 #endif
+/* The same narrowing where the site spells the signed type. 422 sites do, so
+ * the signedness is kept rather than folded into EE_ADDR: on the EE the two
+ * differ in later arithmetic and comparisons, not in the address. */
+#ifndef EE_ADDR_S
+#define EE_ADDR_S(ptr) ((s32)(ptr))
+#endif
+/* An EE address widened back to a typed pointer. Unlike EE_ADDR_PTR there is
+ * no (u32) in the expansion, because these sites spell none: the cast to the
+ * pointer type is the whole of the target conversion and adding a step could
+ * change it. */
+#ifndef EE_ADDR_AS
+#define EE_ADDR_AS(type, addr) ((type)(addr))
+#endif
 
 typedef float f32;
 typedef double f64;
+
+/* The EE's size_t. ee-gcc is invoked with -D__SIZE_TYPE__=unsigned int, so
+ * this is a 32-bit unsigned here; on a target whose size_t is wider it
+ * follows that compiler. The C library declarations in this tree spell their
+ * length parameter with it, the one width that differs between targets with
+ * no cast at the call site to mark it. */
+typedef __SIZE_TYPE__ ps2Size_t;
+
+/* A guest address held in an integer, which is how this engine passes a
+ * packet, buffer or callback address through a field, parameter or return
+ * type rather than through a pointer. EE_ADDR produces one and EE_ADDR_PTR
+ * takes one back. On this target it is exactly u32, so every layout, every
+ * promotion and every byte of output is what it was when these declarations
+ * spelled u32; a build with wider pointers defines PS2_ADDR_TYPE to an
+ * integer that holds its own pointers.
+ *
+ * It is deliberately not spelled on a hardware packet word. A DMA tag, VIF
+ * code or GIF register field is 32 bits because the hardware reads 32 bits
+ * there, and widening one would describe the packet wrongly. Those stay u32
+ * and a host truncates into them on purpose. */
+#ifndef PS2_ADDR_TYPE
+#define PS2_ADDR_TYPE u32
+#endif
+typedef PS2_ADDR_TYPE ps2Addr_t;
+
+/* The same, where the declaration spells the signed type. The signedness is
+ * kept rather than folded into ps2Addr_t for the reason EE_ADDR_S exists:
+ * unsigned is not a free substitution, it changes comparisons, division and
+ * promotion, which on this target is codegen. */
+#ifndef PS2_ADDR_S_TYPE
+#define PS2_ADDR_S_TYPE s32
+#endif
+typedef PS2_ADDR_S_TYPE ps2AddrS_t;
+
+/* Asserts a structure's retail size, by the negative-array-size trick ee-gcc
+ * 2.96 accepts. The typedef emits nothing, so this costs no code. The check
+ * applies only where a pointer is four bytes: a wider pointer moves every
+ * member after one, so the retail size is the wrong question there and the
+ * members' own types stay the record of the layout. */
+#ifndef PS2_SIZE_CHECK
+#define PS2_SIZE_CHECK(name, type, size) \
+    typedef char name[(sizeof(void *) != 4 || sizeof(type) == (size)) ? 1 : -1]
+#endif
+
 
 /* Binds NAME as an assembler alias for BASE + OFFSET, for a view into
  * another object that has no symbol of its own. The assembler does the

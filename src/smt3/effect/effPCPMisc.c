@@ -1925,7 +1925,7 @@ struct sdfFileCmdHandle_t {
     s32 errorCode; /* 0x2C */
     s32 currentOffset; /* 0x30 */
     u8 remainder[4]; /* 0x34 */
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, s32, s32, s32); /* 0x38 */
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, ps2AddrS_t, s32, s32); /* 0x38 */
     s32 userData; /* 0x3C: opaque callback-context word */
 };
 
@@ -2404,9 +2404,9 @@ void mdlLink(dds3ModelHandle_t *aHandle, struct sdfGrOt_t **aModelOt);
 
 void mdlSetPosition(dds3ModelHandle_t *aHandle);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t);
 
-extern void *memset(void *a, int b, u32 c);
+extern void *memset(void *a, int b, ps2Size_t c);
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -2416,7 +2416,7 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 /* Load axis-angle rotation into VU0 vf28-vf31. */
 void SetRotateMatrixAxis(f32 aAngle, const sdfVector3_t *aAxis);
@@ -3070,7 +3070,7 @@ void effPCPMudoPartInit(effPCPMudo_tag *pPCPMudo) {
 
 effPCPMudo_tag *effPCPMudoCreate(void *source) {
     sdfMemHandle_t *resource = sdfMemAllocDirect(0x1354);
-    effPCPMudo_tag *work = (void *)sdfMemLock(resource);
+    effPCPMudo_tag *work = EE_ADDR_AS(void *, sdfMemLock(resource));
     work->allocationHandle = resource;
     work->primaryHandle = dds3EffectPCPDataPartCreate(source, 0);
     work->secondaryHandle = dds3EffectPCPDataPartCreate(source, 1);
@@ -3091,7 +3091,7 @@ void effPCPMudoDelete(effPCPMudo_tag *hData) {
 
 effPCPMudo_tag *effPCPMudoCopy(effPCPMudo_tag *source) {
     sdfMemHandle_t *resource = sdfMemAllocDirect(0x1354);
-    effPCPMudo_tag *work = (void *)sdfMemLock(resource);
+    effPCPMudo_tag *work = EE_ADDR_AS(void *, sdfMemLock(resource));
     effPartHandle_t *firstHandle = source->primaryHandle;
     work->allocationHandle = resource;
     work->primaryHandle = dds3EffectPartCopy(firstHandle);
@@ -5043,7 +5043,7 @@ effPCPAgiFireball_tag *effPCPAgiFireballCreate(
         if (work->param.TrackCount[i] > 0) {
             n = work->count * work->param.TrackCount[i];
             work->alloc[i] = sdfMemAllocDirect(n * 4);
-            work->list[i] = (effPartHandle_t **)sdfMemLock(work->alloc[i]);
+            work->list[i] = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(work->alloc[i]));
             work->list[i][0] = dds3EffectPartCreate(
                 EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pTrack[i]);
             for (j = 1; j < n; j++) {
@@ -5099,7 +5099,7 @@ void effPCPAgiFireballCopySub(effPCPAgiFireball_tag *pPCPAgiFireball, effPCPAgiF
         if (pPCPAgiFireball->param.TrackCount[groupIndex] > 0) {
             groupHandleCount = pPCPAgiFireball->count * pPCPAgiFireball->param.TrackCount[groupIndex];
             pPCPAgiFireball->alloc[groupIndex] = sdfMemAllocDirect(groupHandleCount * 4);
-            pPCPAgiFireball->list[groupIndex] = (effPartHandle_t **)sdfMemLock(pPCPAgiFireball->alloc[groupIndex]);
+            pPCPAgiFireball->list[groupIndex] = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(pPCPAgiFireball->alloc[groupIndex]));
             pPCPAgiFireball->list[groupIndex][0] = dds3EffectPartCopy(pPCPAgiFireballSrc->list[groupIndex][0]);
             for (handleIndex = 1; handleIndex < groupHandleCount; handleIndex++) {
                 pPCPAgiFireball->list[groupIndex][handleIndex] = 0;
@@ -6129,7 +6129,7 @@ dds3RingPolyExpList_tag *dds3RingPolyExpListCreate(u32 face) {
     u32 count = face * 4 + 4;
     dds3RingPolyExpList_tag *node = sdfChipAllocDirect(sizeof(dds3RingPolyExpList_tag));
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * 20);
-    f32 *points = (void *)sdfMemLock(allocation);
+    f32 *points = EE_ADDR_AS(void *, sdfMemLock(allocation));
 
     memset(points, 0, count * 20);
     node->pVertex = points;
@@ -6164,7 +6164,7 @@ void dds3RingPolyExpListDraw(dds3RingPolyExpList_tag *hData) {
     if (hData->vertexCount == 0) {
         return;
     }
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
     SDF_VU0_STOREIDENTITY(scaleMatrix);
     scaleMatrix[2][2] = scaleMatrix[1][1] = scaleMatrix[0][0] = hData->scale;
@@ -6542,7 +6542,7 @@ effPCPRadiateThunder_tag *effPCPRadiateThunderCreate(const effPCPRadiateThunderP
     void **sourceResources = pData;
     u32 entryCount = header->number;
     sdfMemHandle_t *workResource = sdfMemAllocDirect(entryCount * 0x18 + 0x180);
-    effPCPRadiateThunder_tag *groupSet = (void *)sdfMemLock(workResource);
+    effPCPRadiateThunder_tag *groupSet = EE_ADDR_AS(void *, sdfMemLock(workResource));
     effPCPRadiateThunderPart_tag *groupEntryCursor;
     u32 index;
     u32 duplicateIndex;
@@ -6567,7 +6567,7 @@ effPCPRadiateThunder_tag *effPCPRadiateThunderCreate(const effPCPRadiateThunderP
         activeGroupFlags = header->activeGroups;
         groupByteOffset = 0;
         groupByteWidth = entryCount * 4;
-        groupSet->phAttach = (effPartHandle_t **)sdfMemLock(groupSet->hAttachMem);
+        groupSet->phAttach = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(groupSet->hAttachMem));
         memset(groupSet->phAttach, 0, allocationBytes);
         for (; index < 4; index++) {
             effPartHandle_t **destinationHandles = (effPartHandle_t **)((u8 *)groupSet->phAttach + groupByteOffset);
@@ -6633,7 +6633,7 @@ effPCPRadiateThunder_tag *effPCPRadiateThunderCopy(effPCPRadiateThunder_tag *wor
         activeGroupFlags = work->param.activeGroups;
         groupByteOffset = 0;
         groupSet->hAttachMem = sdfMemAllocDirect(allocationBytes);
-        groupSet->phAttach = (effPartHandle_t **)sdfMemLock(groupSet->hAttachMem);
+        groupSet->phAttach = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(groupSet->hAttachMem));
         memset(groupSet->phAttach, 0, allocationBytes);
         for (; groupIndex < 4; groupIndex++) {
             effPartHandle_t **destinationHandles = (effPartHandle_t **)((u8 *)groupSet->phAttach + groupByteOffset);
@@ -6980,7 +6980,7 @@ void effPCPMakkaSetScale(effPCPMakka_tag *hData, f32 scale) {
 effPCPRadiateBED_tag *effPCPRadiateBEDCreate(effPCPRadiateBEDParam_t *pParam, void *pBEDData) {
     u32 count = pParam->count;
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * 24 + 0x11C);
-    effPCPRadiateBED_tag *work = (void *)sdfMemLock(handle);
+    effPCPRadiateBED_tag *work = EE_ADDR_AS(void *, sdfMemLock(handle));
     effEveBEDParams_t place;
     effPCPRadiateBEDPart_tag *entry;
     s32 life;
@@ -7028,7 +7028,7 @@ effPCPRadiateBED_tag *effPCPRadiateBEDCreatePCF(void *data) {
 effPCPRadiateBED_tag *effPCPRadiateBEDCopy(effPCPRadiateBED_tag *src) {
     u32 count = src->param.count;
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * 24 + 0x11C);
-    effPCPRadiateBED_tag *work = (void *)sdfMemLock(handle);
+    effPCPRadiateBED_tag *work = EE_ADDR_AS(void *, sdfMemLock(handle));
     effEveBEDParams_t place;
     effPCPRadiateBEDPart_tag *entry;
     s32 life;
@@ -7180,7 +7180,7 @@ void effPCPRadiateBEDSetColor(effPCPRadiateBED_tag *hData, u32 abgr) {
 effPCPRadiateTB_tag *effPCPRadiateTBCreate(effPCPRadiateTBParam_t *pParam, void *pBEDData0, void *pBEDData1) {
     u32 count = pParam->count;
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xA4);
-    effPCPRadiateTB_tag *work = (void *)sdfMemLock(handle);
+    effPCPRadiateTB_tag *work = EE_ADDR_AS(void *, sdfMemLock(handle));
     effEveBEDParams_t place;
     effPCPRadiateTBPart_tag *entry;
     s32 life;
@@ -7230,7 +7230,7 @@ effPCPRadiateTB_tag *effPCPRadiateTBCreatePCF(void *data) {
 effPCPRadiateTB_tag *effPCPRadiateTBCopy(effPCPRadiateTB_tag *src) {
     u32 count = src->param.count;
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xA4);
-    effPCPRadiateTB_tag *work = (void *)sdfMemLock(handle);
+    effPCPRadiateTB_tag *work = EE_ADDR_AS(void *, sdfMemLock(handle));
     effEveBEDParams_t place;
     effPCPRadiateTBPart_tag *entry;
     s32 life;
@@ -7429,7 +7429,7 @@ void effPCPRadiateTBSetColor(effPCPRadiateTB_tag *hData, u32 abgr) {
 effPCPSpiralBED_tag *effPCPSpiralBEDCreate(effPCPSpiralBEDParam_t *pParam, void *pBEDData) {
     u32 count = pParam->count;
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xAC);
-    effPCPSpiralBED_tag *work = (void *)sdfMemLock(handle);
+    effPCPSpiralBED_tag *work = EE_ADDR_AS(void *, sdfMemLock(handle));
     effEveBEDParams_t place;
     effPCPSpiralBEDPart_tag *entry;
     s32 life;
@@ -7477,7 +7477,7 @@ effPCPSpiralBED_tag *effPCPSpiralBEDCreatePCF(void *data) {
 effPCPSpiralBED_tag *effPCPSpiralBEDCopy(effPCPSpiralBED_tag *src) {
     u32 count = src->param.count;
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xAC);
-    effPCPSpiralBED_tag *work = (void *)sdfMemLock(handle);
+    effPCPSpiralBED_tag *work = EE_ADDR_AS(void *, sdfMemLock(handle));
     effEveBEDParams_t place;
     effPCPSpiralBEDPart_tag *entry;
     s32 life;
@@ -7647,7 +7647,7 @@ void effPCPHelperInit(effPCPHelperBED_tag *pHelperBED) {
     count = sdfModelGetMarkPosCount(model->modelRoot);
     pHelperBED->count = count;
     pHelperBED->hPartMem = sdfMemAllocDirect(count << 5);
-    entry = (void *)sdfMemLock(pHelperBED->hPartMem);
+    entry = EE_ADDR_AS(void *, sdfMemLock(pHelperBED->hPartMem));
     pHelperBED->pPart = entry;
     place.center[0] = 0;
     place.center[1] = 0;

@@ -947,8 +947,7 @@ typedef struct sifDmaTransfer_t {
     u32 attributes;
 } sifDmaTransfer_t;
 
-typedef char sifDmaTransfer_size_must_be_16[
-    sizeof(sifDmaTransfer_t) == 16 ? 1 : -1];
+PS2_SIZE_CHECK(sifDmaTransfer_size_must_be_16, sifDmaTransfer_t, 16);
 
 #include "sdk_libkernl.h"
 extern s32 isceSifSetDma(sifDmaTransfer_t *transfers, s32 count);
@@ -962,8 +961,7 @@ typedef struct sifCommandHeader_t {
     u32 option;
 } sifCommandHeader_t;
 
-typedef char sifCommandHeader_size_must_be_16[
-    sizeof(sifCommandHeader_t) == 16 ? 1 : -1];
+PS2_SIZE_CHECK(sifCommandHeader_size_must_be_16, sifCommandHeader_t, 16);
 
 s32 _sceSifSendCmd(s32 command, s32 interruptMode, void *packet, s32 packetBytes,
                     void *source, void *destination, s32 dataBytes)
@@ -977,12 +975,12 @@ s32 _sceSifSendCmd(s32 command, s32 interruptMode, void *packet, s32 packetBytes
     }
     count = 0;
     if (dataBytes > 0) {
-        transfers[count].source = (u32)source;
-        transfers[count].destination = (u32)destination;
+        transfers[count].source = EE_ADDR(source);
+        transfers[count].destination = EE_ADDR(destination);
         transfers[count].size = dataBytes;
         transfers[count].attributes = 0;
         header->dataSize = dataBytes;
-        header->destination = (u32)destination;
+        header->destination = EE_ADDR(destination);
         count++;
         if (interruptMode & 4) {
             sceSifWriteBackDCache(source, dataBytes);
@@ -991,8 +989,8 @@ s32 _sceSifSendCmd(s32 command, s32 interruptMode, void *packet, s32 packetBytes
         header->dataSize = 0;
         header->destination = 0;
     }
-    transfers[count].source = (u32)packet;
-    transfers[count].destination = (u32)D_0059BA98.remoteAddress;
+    transfers[count].source = EE_ADDR(packet);
+    transfers[count].destination = EE_ADDR(D_0059BA98.remoteAddress);
     transfers[count].size = packetBytes;
     header->command = command;
     header->packetSize = packetBytes;
@@ -1077,11 +1075,11 @@ void sceSifInitRpc(s32 mode)
     queue = &D_0059D440;
     queue->indexedCount = queue->forwardCount = queue->count = 32;
     queue->seq = 1;
-    queue->base = (rpcPacket *)((u32)packets | 0x20000000);
+    queue->base = EE_ADDR_AS(rpcPacket *, (EE_ADDR(packets) | 0x20000000));
     queue->unk_C = 0;
     queue->unk_10 = 0;
-    queue->forwardBase = (rpcPacket *)((u32)D_0059C440 | 0x20000000);
-    queue->indexedBase = (rpcPacket *)((u32)D_0059CC40 | 0x20000000);
+    queue->forwardBase = (rpcPacket *)(EE_ADDR(D_0059C440) | 0x20000000);
+    queue->indexedBase = (rpcPacket *)(EE_ADDR(D_0059CC40) | 0x20000000);
     queue->forwardIndex = 0;
     sceSifAddCmdHandler(0x80000008, _request_end_0, queue);
     sceSifAddCmdHandler(0x80000009, _request_bind, queue);
@@ -1133,7 +1131,7 @@ rpcPacket *_sceRpcGetPacket_0(rpcQueue *queue)
             } else {
                 seq = queue->seq;
             }
-            packet->w[5] = (u32)packet;
+            packet->w[5] = EE_ADDR(packet);
             packet->w[6] = seq;
             EIntr();
             return packet;
@@ -1181,8 +1179,8 @@ void _request_rdata(rpcPacket *request, rpcQueue *queue)
     packet->w[5] = packetAddress;
     packet->w[7] = client;
     packet->w[8] = 0x8000000C;
-    isceSifSendCmd(0x80000008, packet, 0x40, (void *)request->w[8],
-                   (void *)request->w[9], request->w[10]);
+    isceSifSendCmd(0x80000008, packet, 0x40, EE_ADDR_AS(void *, request->w[8]),
+                   EE_ADDR_AS(void *, request->w[9]), request->w[10]);
 }
 
 /* Shared transaction fields used by read-data completion. */
@@ -1219,11 +1217,11 @@ s32 sceSifGetOtherData(rpcTransactionPrefix *client, void *source, void *destina
     }
     client->packet = packet;
     client->sequence = packet->w[6];
-    packet->w[8] = (u32)source;
-    packet->w[9] = (u32)destination;
+    packet->w[8] = EE_ADDR(source);
+    packet->w[9] = EE_ADDR(destination);
     packet->w[10] = size;
-    packet->w[5] = (u32)packet;
-    packet->w[7] = (u32)client;
+    packet->w[5] = EE_ADDR(packet);
+    packet->w[7] = EE_ADDR(client);
     if ((mode & 1) == 0) {
         param.maxCount = 1;
         param.initCount = 0;
@@ -1280,8 +1278,8 @@ s32 sceSifBindRpc(rpcClient *client, u32 serverId, s32 mode)
     client->packet = packet;
     client->sequence = packet->w[6];
     packet->w[8] = serverId;
-    packet->w[5] = (u32)packet;
-    packet->w[7] = (u32)client;
+    packet->w[5] = EE_ADDR(packet);
+    packet->w[7] = EE_ADDR(client);
     if ((mode & 1) == 0) {
         param.maxCount = 1;
         param.initCount = 0;
@@ -1484,7 +1482,7 @@ void sceSifExecRequest(sifRpcServerData_t *server)
     }
     EIntr();
     packet->w[8] = 0x8000000A;
-    packet->w[7] = (u32)server->client;
+    packet->w[7] = EE_ADDR(server->client);
     if (server->mode != 0) {
         while (sceSifSendCmd(0x80000008, packet, 0x40, reply, server->receiveBuffer, replySize) == 0) {
         }
@@ -1494,14 +1492,14 @@ void sceSifExecRequest(sifRpcServerData_t *server)
     count = 0;
     packet->w[4] = 0;
     if (replySize > 0) {
-        transfers[0].source = (u32)reply;
-        transfers[0].destination = (u32)server->receiveBuffer;
+        transfers[0].source = EE_ADDR(reply);
+        transfers[0].destination = EE_ADDR(server->receiveBuffer);
         transfers[0].size = replySize;
         transfers[0].attributes = 0;
         count++;
     }
-    transfers[count].source = (u32)packet;
-    transfers[count].destination = (u32)server->packetAddress;
+    transfers[count].source = EE_ADDR(packet);
+    transfers[count].destination = EE_ADDR(server->packetAddress);
     transfers[count].size = 0x40;
     transfers[count].attributes = 0;
     count++;
@@ -1624,7 +1622,7 @@ typedef struct fsOutputCompletion_t {
 extern u8 D_0059E140[];
 extern u8 D_0059E154[];
 extern s32 D_0052C2C0[32];
-extern void *memcpy(void *destination, const void *source, u32 size);
+extern void *memcpy(void *destination, const void *source, ps2Size_t size);
 extern s32 iSignalSema(s32 sema);
 
 /* NON_MATCHING: 948/960 bytes; the final pending-semaphore search differs
@@ -1636,17 +1634,17 @@ void _sceFs_Rcv_Intr(void *packet, void *argument)
     fsOutputCompletion_t output;
     s32 index;
 
-    memcpy(&completion.sema, (void *)((u32)D_0059E140 | 0x20000000), 4);
-    memcpy(&completion.command, (void *)((u32)(D_0059E140 + 4) | 0x20000000), 4);
-    memcpy(&completion.result, (void *)((u32)(D_0059E140 + 8) | 0x20000000), 4);
-    memcpy(&completion.resultSize, (void *)((u32)(D_0059E140 + 12) | 0x20000000), 4);
+    memcpy(&completion.sema, (void *)(EE_ADDR(D_0059E140) | 0x20000000), 4);
+    memcpy(&completion.command, (void *)(EE_ADDR((D_0059E140 + 4)) | 0x20000000), 4);
+    memcpy(&completion.result, (void *)(EE_ADDR((D_0059E140 + 8)) | 0x20000000), 4);
+    memcpy(&completion.resultSize, (void *)(EE_ADDR((D_0059E140 + 12)) | 0x20000000), 4);
     if (completion.sema >= 0) {
-        memcpy(completion.result, (void *)((u32)(D_0059E140 + 16) | 0x20000000),
+        memcpy(completion.result, (void *)(EE_ADDR((D_0059E140 + 16)) | 0x20000000),
                completion.resultSize);
     }
     switch (completion.command) {
     case 2: {
-        fsReadFragments_t *fragments = (void *)((u32)D_0059E154 | 0x20000000);
+        fsReadFragments_t *fragments = (void *)(EE_ADDR(D_0059E154) | 0x20000000);
         u8 *destination;
         s32 i;
 
@@ -1665,22 +1663,22 @@ void _sceFs_Rcv_Intr(void *packet, void *argument)
         break;
     }
     case 11: {
-        memcpy(&output.destination, (void *)((u32)D_0059E154 | 0x20000000), 4);
-        memcpy(output.destination, (void *)((u32)(D_0059E154 + 4) | 0x20000000),
+        memcpy(&output.destination, (void *)(EE_ADDR(D_0059E154) | 0x20000000), 4);
+        memcpy(output.destination, (void *)(EE_ADDR((D_0059E154 + 4)) | 0x20000000),
                sizeof(fsDirectoryEntry_t));
         break;
     }
     case 12: {
-        memcpy(&output.destination, (void *)((u32)D_0059E154 | 0x20000000), 4);
-        memcpy(output.destination, (void *)((u32)(D_0059E154 + 4) | 0x20000000),
+        memcpy(&output.destination, (void *)(EE_ADDR(D_0059E154) | 0x20000000), 4);
+        memcpy(output.destination, (void *)(EE_ADDR((D_0059E154 + 4)) | 0x20000000),
                sizeof(fsStat_t));
         break;
     }
     case 23:
     case 25:
     case 26: {
-        const void *destinationSource = (void *)((u32)D_0059E154 | 0x20000000);
-        const void *sizeSource = (void *)((u32)(D_0059E154 + 4) | 0x20000000);
+        const void *destinationSource = (void *)(EE_ADDR(D_0059E154) | 0x20000000);
+        const void *sizeSource = (void *)(EE_ADDR((D_0059E154 + 4)) | 0x20000000);
         u32 size;
 
         memcpy(&output.destination, destinationSource, 4);
@@ -1690,7 +1688,7 @@ void _sceFs_Rcv_Intr(void *packet, void *argument)
             output.size = 0x400;
             size = 0x400;
         }
-        memcpy(output.destination, (void *)((u32)(D_0059E154 + 8) | 0x20000000),
+        memcpy(output.destination, (void *)(EE_ADDR((D_0059E154 + 8)) | 0x20000000),
                size);
         break;
     }
@@ -1832,7 +1830,7 @@ s32 sceFsInit(void)
                       D_0059E100, 4, NULL, NULL) < 0)
         return -0x10001;
     *(fsVersionTag_t *)D_0059E7A8 =
-        *(const fsVersionTag_t *)((u32)D_0059E100 | 0x20000000);
+        *(const fsVersionTag_t *)(EE_ADDR(D_0059E100) | 0x20000000);
     D_0052C340 = 1;
     return 0;
 }
@@ -1841,7 +1839,7 @@ s32 sceFsInit(void)
 extern u8 D_0059E7A8[0x18];
 extern u8 D_0052C2A0[4] __attribute__((section(".data")));
 extern const void *D_0052C350 __attribute__((section(".data")));
-extern s32 memcmp(const void *left, const void *right, u32 count);
+extern s32 memcmp(const void *left, const void *right, ps2Size_t count);
 
 s32 _fs_version(void)
 {
@@ -1857,7 +1855,7 @@ s32 _fs_version(void)
 }
 
 extern s32 D_0052C340 __attribute__((section(".data")));
-extern void *memset(void *destination, s32 value, u32 count);
+extern void *memset(void *destination, s32 value, ps2Size_t count);
 
 s32 sceFsReset(void)
 {
@@ -2057,7 +2055,7 @@ s32 sceOpen(const char *name, s32 flags, ...)
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2119,7 +2117,7 @@ s32 sceClose(s32 descriptor)
         return -11;
     }
     entry->active = 0;
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2151,7 +2149,7 @@ typedef union fsIoctlStatus_t {
 extern fsIoctlStatus_t D_0059E150;
 extern void *D_0059D484;
 extern s32 D_0052C2C0[32];
-extern void *memcpy(void *destination, const void *source, u32 size);
+extern void *memcpy(void *destination, const void *source, ps2Size_t size);
 
 /* NON_MATCHING: native 844-byte size; early switch allocation and
  * pending-table setup differ in 46 instruction words. */
@@ -2193,11 +2191,11 @@ s32 sceIoctl(s32 descriptor, s32 command, void *argument)
         _sceFsSigSema();
         return 0;
     case 2:
-        *(s32 *)argument = ((fsIoctlStatus_t *)((u32)&D_0059E150 | 0x20000000))->word;
+        *(s32 *)argument = ((fsIoctlStatus_t *)(EE_ADDR(&D_0059E150) | 0x20000000))->word;
         _sceFsSigSema();
         return 0;
     case 3:
-        *(s64 *)argument = ((fsIoctlStatus_t *)((u32)&D_0059E150 | 0x20000000))->doubleword;
+        *(s64 *)argument = ((fsIoctlStatus_t *)(EE_ADDR(&D_0059E150) | 0x20000000))->doubleword;
         _sceFsSigSema();
         return 0;
     }
@@ -2224,7 +2222,7 @@ s32 sceIoctl(s32 descriptor, s32 command, void *argument)
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2287,7 +2285,7 @@ s32 sceIoctl2(s32 descriptor, s32 command, const void *args, u32 argSize,
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2331,7 +2329,7 @@ s32 _sceCallCode(const char *path, s32 command)
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2381,7 +2379,7 @@ s32 sceMkdir(const char *path, s32 mode)
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2453,7 +2451,7 @@ s32 sceFormat(const char *device, const char *blockDevice, const void *args, s32
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2476,7 +2474,7 @@ s32 sceAddDrv(void *driver)
     if (D_0052C340 == 0) {
         sceFsInit();
     }
-    request->descriptor = (u32)driver;
+    request->descriptor = EE_ADDR(driver);
     param.maxCount = 1;
     param.initCount = 0;
     param.option = 0;
@@ -2490,7 +2488,7 @@ s32 sceAddDrv(void *driver)
         _sceFsSigSema();
         return -1;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2572,7 +2570,7 @@ s32 sceDclose(s32 descriptor)
         return -11;
     }
     entry->active = 0;
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2626,7 +2624,7 @@ s32 sceDread(s32 descriptor, void *directoryEntry)
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2671,7 +2669,7 @@ s32 sceGetstat(const char *path, void *stat)
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2721,7 +2719,7 @@ s32 sceChstat(const char *path, const fsStat_t *stat, u32 mask)
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2775,7 +2773,7 @@ s32 sceRename(const char *oldPath, const char *newPath)
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2824,7 +2822,7 @@ s32 sceSync(const char *path, s32 mode)
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2887,7 +2885,7 @@ s32 sceMount(const char *device, const char *blockDevice, s32 mode, const void *
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2955,7 +2953,7 @@ s32 sceDevctl(const char *device, s32 command, const void *args, u32 argSize,
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -3005,7 +3003,7 @@ s32 sceSymlink(const char *oldPath, const char *newPath)
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -3055,7 +3053,7 @@ s32 sceReadlink(const char *path, char *buffer, u32 count)
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)((u32)D_0059E100 | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -3071,7 +3069,7 @@ extern s32 D_0052C354;
 extern u8 D_0059E840[0x40];
 extern s32 D_0059E880;
 /* Shared heap request storage is 0x40 bytes in the BSS map. */
-extern u32 D_0059E8C0[16];
+extern ps2Addr_t D_0059E8C0[16];
 extern s32 sceSifCallRpc(void *client, s32 function, s32 mode, void *send,
                          s32 sendBytes, void *receive, s32 receiveBytes,
                          void *endFunction, void *endParameter);
@@ -3121,10 +3119,10 @@ void *sceSifAllocSysMemory(s32 mode, s32 size, void *address)
     }
     D_0059E8C0[0] = size;
     D_0059E8C0[1] = mode;
-    D_0059E8C0[2] = (u32)address;
+    D_0059E8C0[2] = EE_ADDR(address);
     if (sceSifCallRpc(D_0059E840, 4, 0, D_0059E8C0, 12,
                       &D_0059E880, 4, NULL, NULL) >= 0) {
-        return (void *)D_0059E880;
+        return EE_ADDR_AS(void *, D_0059E880);
     }
     return NULL;
 }
@@ -3134,7 +3132,7 @@ s32 sceSifFreeSysMemory(void *address)
     if (D_0052C354 < 0) {
         return 0;
     }
-    D_0059E8C0[0] = (u32)address;
+    D_0059E8C0[0] = EE_ADDR(address);
     if (sceSifCallRpc(D_0059E840, 2, 0, D_0059E8C0, 4,
                       &D_0059E880, 4, NULL, NULL) >= 0) {
         return D_0059E880;
@@ -3251,14 +3249,14 @@ extern lfRequest_t D_0059EA00;
 extern rpcClient D_0059EC00;
 extern s32 _lf_bind(void);
 extern s32 _lf_version(void);
-extern char *strncpy(char *destination, const char *source, u32 count);
+extern char *strncpy(char *destination, const char *source, ps2Size_t count);
 
 extern s32 D_0052C358;
 extern u8 D_0059EC28[0x18];
 extern u8 D_0052C2A0[4];
 extern void *D_0052C35C;
-extern void *memcpy(void *destination, const void *source, u32 size);
-extern s32 memcmp(const void *a, const void *b, u32 size);
+extern void *memcpy(void *destination, const void *source, ps2Size_t size);
+extern s32 memcmp(const void *a, const void *b, ps2Size_t size);
 
 s32 _lf_bind(void)
 {
@@ -3299,7 +3297,7 @@ s32 _lf_version(void)
     return mismatch;
 }
 
-extern void *memset(void *destination, s32 value, u32 size);
+extern void *memset(void *destination, s32 value, ps2Size_t size);
 
 s32 sceSifLoadFileReset(void)
 {
@@ -3318,7 +3316,7 @@ s32 _sceSifLoadModuleBuffer(void *buffer, s32 argumentSize, const void *argument
     if (_lf_version() != 0) {
         return -65540;
     }
-    D_0059EA00.value = (s32)buffer;
+    D_0059EA00.value = EE_ADDR_S(buffer);
     if (arguments != NULL) {
         if (argumentSize > 0xFC) {
             memcpy(D_0059EA00.arguments, arguments, 0xFC);
@@ -3411,7 +3409,7 @@ s32 sceSifSearchModuleByAddress(void *address)
     if (_lf_version() != 0) {
         return -65540;
     }
-    D_0059EA00.value = (s32)address;
+    D_0059EA00.value = EE_ADDR_S(address);
     if (sceSifCallRpc(&D_0059EC00, 10, 0, &D_0059EA00, 4,
                       &D_0059EA00, 4, NULL, NULL) < 0) {
         return -65537;
@@ -3528,7 +3526,7 @@ s32 sceSifGetIopAddr(void *address, void *output, u32 kind)
     if (kind >= 3) {
         return -65538;
     }
-    D_0059EA00.value = (s32)address;
+    D_0059EA00.value = EE_ADDR_S(address);
     D_0059EA00.moduleResult = kind;
     if (sceSifCallRpc(&D_0059EC00, 3, 0, &D_0059EA00, 32,
                       &D_0059EA00, 32, NULL, NULL) < 0) {
@@ -3554,7 +3552,7 @@ s32 sceSifSetIopAddr(void *address, const void *input, u32 kind)
     if (_lf_bind() < 0) {
         return -65536;
     }
-    D_0059EA00.value = (s32)address;
+    D_0059EA00.value = EE_ADDR_S(address);
     D_0059EA00.moduleResult = kind;
     if (kind == 0) {
         *(u8 *)D_0059EA00.name = *(const u8 *)input;
@@ -3583,8 +3581,7 @@ typedef struct sifResetPacket_t {
     char arguments[80];
 } sifResetPacket_t;
 
-typedef char sifResetPacket_size_must_be_0x68[
-    sizeof(sifResetPacket_t) == 0x68 ? 1 : -1];
+PS2_SIZE_CHECK(sifResetPacket_size_must_be_0x68, sifResetPacket_t, 0x68);
 
 extern sifResetPacket_t D_0059EC40;
 extern void sceSifStopDma(void);
@@ -3610,7 +3607,7 @@ s32 sceSifResetIop(const char *arguments, s32 mode)
     D_0059EC40.command = 0x80000003;
     D_0059EC40.dataSize = 0;
     D_0059EC40.packetSize = 104;
-    transfer.source = (u32)&D_0059EC40;
+    transfer.source = EE_ADDR(&D_0059EC40);
     transfer.destination = destination;
     transfer.size = 104;
     transfer.attributes = 0x44;
@@ -3728,19 +3725,19 @@ void GetSystemCallTableEntry(void)
     setup(D_0052C368[0].index, D_0052C368[0].entry);
     setup(D_0052C368[1].index, D_0052C368[1].entry);
     searchEntry = FindAddress((u32 *)0x80000000, (u32 *)0x80080000,
-                              (u32)kFindAddress);
+                              EE_ADDR(kFindAddress));
     copyEntry = FindAddress((u32 *)0x80000000, (u32 *)0x80080000,
-                            (u32)kCopy);
+                            EE_ADDR(kCopy));
     searchBase = searchEntry - 0x83;
     copyBase = copyEntry - 0x5A;
     while (searchBase != copyBase) {
         if (searchBase < copyBase) {
             searchEntry = FindAddress(searchEntry + 1, (u32 *)0x80080000,
-                                      (u32)kFindAddress);
+                                      EE_ADDR(kFindAddress));
             searchBase = searchEntry - 0x83;
         } else {
             copyEntry = FindAddress(copyEntry + 1, (u32 *)0x80080000,
-                                    (u32)kCopy);
+                                    EE_ADDR(kCopy));
             copyBase = copyEntry - 0x5A;
         }
     }
@@ -3995,7 +3992,7 @@ s32 sceDeci2Open(u16 protocol, void *argument, deci2Handler_t handler)
     packet.protocol = protocol;
     packet.argument = argument;
     packet.handler = handler;
-    packet.storage = (void *)((u32)D_0059ECA8 | 0x20000000);
+    packet.storage = (void *)(EE_ADDR(D_0059ECA8) | 0x20000000);
     return Deci2Call(1, &packet);
 }
 

@@ -122,7 +122,7 @@ typedef struct
 extern char *strcpy(char *dst, const char *src);
 extern void pacFileHandleFree_(void *pacHandle);
 
-s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 void mdlFreeMotionCtrlr(mdlObj_t *aHandle, sdfMotionCtrlr_t *aCtrlr);
 
 
@@ -254,14 +254,14 @@ extern const char _ctype_[]; /* newlib character classes: EOF slot, then 256 byt
 extern s32 sceDopen(const char *name);
 extern s32 sceDread(s32 handle, mdlDirectoryEntry_t *entry);
 extern s32 sceDclose(s32 handle);
-extern s32 memcmp(const void *first, const void *second, u32 size);
-extern void *memcpy(void *a, const void *b, u32 c);
-extern void *memset(void *a, s32 b, u32 c);
+extern s32 memcmp(const void *first, const void *second, ps2Size_t size);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 extern char *strcat(char *dst, const char *src);
 extern char *strrchr(const char *text, s32 character);
 extern s32 strcasecmp(const char *first, const char *second);
 extern void sdfDummyFunc(void);
-extern fileRequest_t *fileLoadEx(const char *filename, s32 headOrTail, u32 endCallback, u32 callbackParm);
+extern fileRequest_t *fileLoadEx(const char *filename, s32 headOrTail, ps2Addr_t endCallback, ps2Addr_t callbackParm);
 extern void sdfModelCopyStat(sdfModelRootNode_t *aDstRoot, sdfModelRootNode_t *aSrcRoot);
 extern void sdfMotionChangeBlend(sdfMotionCtrlr_t *aCtrlr, s32 aCutNum, s32 aType, f32 aPreFrame, f32 aBlendLeng);
 extern void mdlStopEffect(mdlObj_t *aHandle, s32 aPlayGroup);
@@ -661,7 +661,7 @@ char *mdlSetFileName(char *buff, const char *fname) {
     return strcat(buff, fname);
 }
 
-s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode) {
+ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode) {
     char requestPath[0x80];
     dds3ModelResrc_t *entity;
     dds3ModelFileIndex_t *selection;
@@ -674,12 +674,12 @@ s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode) {
     entity = mdlSearchResrc(aMajor, aMinor);
     if (entity != NULL) {
         SignalSema(mdlManagerWork);
-        return (s32)entity;
+        return EE_ADDR_S(entity);
     }
     if (mdlCheckLoading(aMajor, aMinor)) {
         SignalSema(mdlManagerWork);
         if (aBlockMode != 0) {
-            return (s32)mdlWaitLoadEnd(aMajor, aMinor);
+            return EE_ADDR_S(mdlWaitLoadEnd(aMajor, aMinor));
         }
         return -1;
     }
@@ -708,25 +708,25 @@ s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode) {
         if (paths->texFile != NULL) {
             request->resourceListRequested = 1;
             mdlSetFileName(requestPath, paths->texFile);
-            fileLoadEx(requestPath, 0, (u32)TbLoadCallback, (u32)request);
+            fileLoadEx(requestPath, 0, EE_ADDR(TbLoadCallback), EE_ADDR(request));
         }
         request->itemsRequested = 1;
         mdlSetFileName(requestPath, paths->modelFile);
-        fileLoadEx(requestPath, 0, (u32)MbLoadCallback, (u32)request);
+        fileLoadEx(requestPath, 0, EE_ADDR(MbLoadCallback), EE_ADDR(request));
         if (paths->motionFile != NULL) {
             mdlSetFileName(requestPath, paths->motionFile);
-            fileLoadEx(requestPath, 0, (u32)AbLoadCallback, (u32)request);
+            fileLoadEx(requestPath, 0, EE_ADDR(AbLoadCallback), EE_ADDR(request));
         }
     }
     if (aBlockMode != 0) {
-        return (s32)mdlWaitLoadEnd(aMajor, aMinor);
+        return EE_ADDR_S(mdlWaitLoadEnd(aMajor, aMinor));
     }
     return 0;
 }
 
 dds3ModelResrc_t *mdlLoadPrepare(u32 group, u32 id)
 {
-    return (dds3ModelResrc_t *)mdlPrepare(group, id, 1);
+    return EE_ADDR_AS(dds3ModelResrc_t *, mdlPrepare(group, id, 1));
 }
 
 void mdlUnlinkResrc(mdlObj_t *aHandle)

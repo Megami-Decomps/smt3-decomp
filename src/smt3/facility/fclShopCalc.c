@@ -140,7 +140,7 @@ s32 shop_Process(dds3ProcessID_t *id)
     case 0:
         shopProcWork->unk_23F4 = 0;
         if (shopProcWork->step == 1) {
-            if (dds3GetProcessStat((void *)shopProcWork->scriptProc) != 2) {
+            if (dds3GetProcessStat(EE_ADDR_AS(void *, shopProcWork->scriptProc)) != 2) {
                 shopProcWork->scriptProc =
                     fclScriptStart(shopProcWork->script, 0, NULL);
             }

@@ -264,7 +264,7 @@ extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh
 extern s32 strlen(const char *str);
 extern sdfDrawTag_t *sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern void sdfPrimSetOpaquePacket(sdfDrawTag_t *packet);
 extern u32 dds3PrimFrameRect(s32 x, s32 y, s32 z, s32 w, s32 h, u32 bg, u32 frame);
 extern u32 sdfDevPrintf(s32 x, s32 y, u32 z, s32 attr, const char *format, ...);

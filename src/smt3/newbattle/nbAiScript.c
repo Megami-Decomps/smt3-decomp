@@ -235,7 +235,7 @@ extern void nbRunAi(nbActionProcessData_t *a);
 
 extern void nbRunAiSub(nbActionProcessData_t *a, s32 tbl);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern f32 scrGetFloatPara(s32 n);
 

@@ -62,13 +62,13 @@ extern s32 sdfGrAllocPacketBuff(u32 aSize);
 
 extern void sdf2DMakePrimPacketHeader(void *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, u64 aGifRegs, s32 aNumOfPrim);
 
-extern s32 sdf2DGetPrimPtr(s32 aPacketPtr);
+extern ps2AddrS_t sdf2DGetPrimPtr(ps2AddrS_t aPacketPtr);
 
 extern u32 sdf2DMakeStdPacket(u32 aPacket, s32 aLeng);
 
 extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *, sdfTexHandle_t *, s32);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t aPacket);
 
 extern void dds3AdminiExitSequence(void);
 
@@ -258,7 +258,7 @@ sdfTexHandle_t *itfMiscLoadTexture(const char *filename) {
     u32 assetInfo[ITF_VECTOR_WORD_COUNT];
 
     fileAllocation = sdfDevLoadFileEx(filename, assetInfo, 0);
-    textureHandle = sdfTexSet((void *)(assetInfo[0]));
+    textureHandle = sdfTexSet(EE_ADDR_AS(void *, (assetInfo[0])));
     sdfMemFreeDirect(fileAllocation);
     return textureHandle;
 }
@@ -270,9 +270,9 @@ void itfMiscDrawTrianglePrim(sdfIVector2_t *pvertex, itfColor_t *pcolor, s32 x, 
     u64 *dst;
     s32 i;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, ITF_TRIANGLE_VERTEX_COUNT));
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, ITF_TRIANGLE_VERTEX_COUNT)));
     sdf2DMakePrimPacketHeader(packet, ITF_TRIANGLE_PRIMITIVE_BITS, 2, 0x51, ITF_TRIANGLE_VERTEX_COUNT);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = EE_ADDR_AS(u64 *, sdf2DGetPrimPtr(EE_ADDR_S(packet)));
     for (i = 0; i < ITF_TRIANGLE_VERTEX_COUNT; i++) {
         dst[0] = (u64)pcolor->components[0] | ((u64)pcolor->components[1] << 32);
         dst[1] = (u64)pcolor->components[2] | ((u64)pcolor->components[3] << 32);
@@ -292,9 +292,9 @@ void itfMiscDrawRectanglePrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *v
     u64 *dst;
     s32 i;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, ITF_QUAD_VERTEX_COUNT));
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, ITF_QUAD_VERTEX_COUNT)));
     sdf2DMakePrimPacketHeader(packet, ITF_QUAD_FAN_PRIMITIVE_BITS, 2, 0x51, ITF_QUAD_VERTEX_COUNT);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = EE_ADDR_AS(u64 *, sdf2DGetPrimPtr(EE_ADDR_S(packet)));
     for (i = 0; i < ITF_QUAD_VERTEX_COUNT; i++) {
         sdfIVector2_t *vertex = &vertices[*vertexIndex++];
         itfColor_t *color = &colors[*colorIndex++];
@@ -316,9 +316,9 @@ void itfMiscDrawTexPoly(sdfIVector2_t *pvertex, f32 *pstq, itfColor_t *pcolor, u
     u64 *dst;
     s32 i;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, ITF_QUAD_VERTEX_COUNT));
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, ITF_QUAD_VERTEX_COUNT)));
     sdf2DMakePrimPacketHeader(packet, (context << 9) | ITF_TEXTURED_FAN_PRIMITIVE_BITS, 3, 0x512, ITF_QUAD_VERTEX_COUNT);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = EE_ADDR_AS(u64 *, sdf2DGetPrimPtr(EE_ADDR_S(packet)));
     for (i = 0; i < ITF_QUAD_VERTEX_COUNT; i++) {
         f32 *uvDst = (f32 *)dst;
 
@@ -349,13 +349,13 @@ void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 
     u64 *dst;
     s32 x0, y0, x1, y1;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1));
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1)));
     sdf2DMakePrimPacketHeader(packet, (flag << 9) | ITF_TEXTURED_SPRITE_PRIMITIVE_BITS, 5, 0x53531, 1);
     x0 = vertices[0].x + ITF_GS_X_BIAS;
     y0 = vertices[0].y + ITF_GS_Y_BIAS;
     x1 = vertices[1].x + ITF_GS_X_BIAS;
     y1 = vertices[1].y + ITF_GS_Y_BIAS;
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = EE_ADDR_AS(u64 *, sdf2DGetPrimPtr(EE_ADDR_S(packet)));
     dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
     dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
     dst[2] = (u64)uv->components[0] | ((u64)uv->components[1] << 32);
@@ -374,13 +374,13 @@ void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv, itfColor_t *colo
     u64 *dst;
     s32 x0, y0, x1, y1;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1));
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1)));
     sdf2DMakePrimPacketHeader(packet, (context << 9) | ITF_COLORED_SPRITE_PRIMITIVE_BITS, 5, 0x53531, 1);
     x0 = pos[0].x + ITF_GS_X_BIAS;
     y0 = pos[0].y + ITF_GS_Y_BIAS;
     x1 = pos[1].x + ITF_GS_X_BIAS;
     y1 = pos[1].y + ITF_GS_Y_BIAS;
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = EE_ADDR_AS(u64 *, sdf2DGetPrimPtr(EE_ADDR_S(packet)));
     dst[0] = (u64)color->components[0] | ((u64)color->components[1] << 32);
     dst[1] = (u64)color->components[2] | ((u64)color->components[3] << 32);
     dst[2] = (u64)uv->components[0] | ((u64)uv->components[1] << 32);
@@ -397,9 +397,9 @@ void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, itfColor_t *color, u32 z, s3
     sdfGrPacketHeader_t *packet;
     u64 *dst;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 1));
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 1)));
     sdf2DMakePrimPacketHeader(packet, (context << 9) | ITF_SPRITE_PRIMITIVE_BITS, 3, 0x551, 1);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = EE_ADDR_AS(u64 *, sdf2DGetPrimPtr(EE_ADDR_S(packet)));
     dst[0] = (u64)color->components[0] | ((u64)color->components[1] << 32);
     dst[1] = (u64)color->components[2] | ((u64)color->components[3] << 32);
     dst += 2;
@@ -419,9 +419,9 @@ void itfMiscDrawTriangleStripPrim(sdfIVector2_t *vertices, itfColor_t *colors, u
     s32 pairCount = count >> 1;
     s32 i;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, pairCount));
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, pairCount)));
     sdf2DMakePrimPacketHeader(packet, ITF_TRIANGLE_STRIP_PRIMITIVE_BITS, 4, 0x5151, pairCount);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = EE_ADDR_AS(u64 *, sdf2DGetPrimPtr(EE_ADDR_S(packet)));
     for (i = 0; i < count; i++) {
         sdfIVector2_t *vertex = &vertices[*vertexIndex++];
         itfColor_t *color = &colors[*colorIndex++];
@@ -442,9 +442,9 @@ void itfMiscDrawLineStripPrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *v
     u64 *dst;
     s32 i;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, count));
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, count)));
     sdf2DMakePrimPacketHeader(packet, ITF_LINE_STRIP_PRIMITIVE_BITS, 2, 0x51, count);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = EE_ADDR_AS(u64 *, sdf2DGetPrimPtr(EE_ADDR_S(packet)));
     for (i = 0; i < count; i++) {
         sdfIVector2_t *vertex = &vertices[*vertexIndex++];
         itfColor_t *color = &colors[*colorIndex++];
@@ -465,9 +465,9 @@ void itfMiscDrawLinePrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *vertex
     u64 *dst;
     s32 i;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, count));
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, count)));
     sdf2DMakePrimPacketHeader(packet, ITF_LINES_PRIMITIVE_BITS, 2, 0x51, count);
-    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    dst = EE_ADDR_AS(u64 *, sdf2DGetPrimPtr(EE_ADDR_S(packet)));
     for (i = 0; i < count; i++) {
         sdfIVector2_t *vertex = &vertices[*vertexIndex++];
         itfColor_t *color = &colors[*colorIndex++];
@@ -485,7 +485,7 @@ void itfMiscDrawLinePrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *vertex
 /* Write TEST for the selected GS context, not the ALPHA blend register. */
 void itfMiscDrawTestPrim(sdfDrawTag_t *pdrawtag, u64 para, s32 context) {
     s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
-    itfGsState_t *dst = (itfGsState_t *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
+    itfGsState_t *dst = EE_ADDR_AS(itfGsState_t *, sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES));
 
     dst->value = para;
     dst->registerCode = context ? ITF_TEST_SECOND_CONTEXT : ITF_TEST_FIRST_CONTEXT;
@@ -495,7 +495,7 @@ void itfMiscDrawTestPrim(sdfDrawTag_t *pdrawtag, u64 para, s32 context) {
 /* Write an unchecked table entry to ALPHA for the selected GS context. */
 void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context) {
     s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
-    itfGsState_t *dst = (itfGsState_t *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
+    itfGsState_t *dst = EE_ADDR_AS(itfGsState_t *, sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES));
 
     dst->value = D_003263C0[tp];
     dst->registerCode = context ? ITF_ALPHA_SECOND_CONTEXT : ITF_ALPHA_FIRST_CONTEXT;
@@ -505,7 +505,7 @@ void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context) {
 /* Write CLAMP for the selected GS context. */
 void itfMiscDrawClampPrim(sdfDrawTag_t *pdrawtag, s32 context, s32 wms, s32 wmt, s32 min_u, s32 max_u, s32 min_v, s32 max_v) {
     s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
-    itfGsState_t *dst = (itfGsState_t *)sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES);
+    itfGsState_t *dst = EE_ADDR_AS(itfGsState_t *, sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES));
 
     dst->value = ((u64)max_v << 34) | ((u64)min_v << 24) | (max_u << 14) | (min_u << 4) | (wmt << 2) | wms;
     dst->registerCode = context ? 9 : 8;

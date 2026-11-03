@@ -91,7 +91,7 @@ effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pPa
 extern s8 D_0054F2C5;
 /* The result slot must be valid whenever the create callback is present. */
 extern effDebugMenu_t D_003203E0;
-extern void *memcpy(void *, const void *, u32);
+extern void *memcpy(void *, const void *, ps2Size_t);
 extern void effDebugAllocDrawTag(void);
 extern void effDebugLinkDrawTag(void);
 extern s8 D_005298CB[];
@@ -268,8 +268,8 @@ void MultMatrixNoArg(void);
 u32 sdfMemLock(sdfMemHandle_t *aHandle);
 extern s32 EffEveCPSmokeCount;
 extern dds3Billboard_t *dds3BillboardFileLoad(s32 kind, const char *path);
-extern u32 hEffEveCPSmokeBill01Tex;
-extern u32 hEffEveCPSmokeBill02Tex;
+extern ps2Addr_t hEffEveCPSmokeBill01Tex;
+extern ps2Addr_t hEffEveCPSmokeBill02Tex;
 void dds3BillboardDelete(struct dds3Billboard_t *hData);
 void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 extern effRandState_t dds3EffectBase[];
@@ -990,7 +990,7 @@ effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *pParam
     u32 particleCount = pParam->number;
     u32 particleBytes = particleCount * sizeof(effEVECombParSmokePart_t);
     sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(particleBytes + sizeof(effEVECombParSmoke_t));
-    effEVECombParSmokePart_t *particle = (effEVECombParSmokePart_t *)sdfMemLock(allocationHandle);
+    effEVECombParSmokePart_t *particle = EE_ADDR_AS(effEVECombParSmokePart_t *, sdfMemLock(allocationHandle));
     effEVECombParSmoke_t *work = (effEVECombParSmoke_t *)((u8 *)particle + particleBytes);
     u32 particleIndex;
 
@@ -1009,8 +1009,8 @@ effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *pParam
     }
     EffEveCPSmokeCount = EffEveCPSmokeCount + 1;
     if (EffEveCPSmokeCount == 1) {
-        hEffEveCPSmokeBill01Tex = (u32)dds3BillboardFileLoad(0, "/efftool/bill/dbball01.tmx");
-        hEffEveCPSmokeBill02Tex = (u32)dds3BillboardFileLoad(0, "/efftool/bill/dbball02.tmx");
+        hEffEveCPSmokeBill01Tex = EE_ADDR(dds3BillboardFileLoad(0, "/efftool/bill/dbball01.tmx"));
+        hEffEveCPSmokeBill02Tex = EE_ADDR(dds3BillboardFileLoad(0, "/efftool/bill/dbball02.tmx"));
     }
     particleCount = work->head.number;
     for (particleIndex = 0; particleIndex < particleCount; particleIndex++) {
@@ -1025,8 +1025,8 @@ effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *pParam
 void effEVECombParSmokeDelete(effEVECombParSmoke_t *pCombParSmoke) {
     EffEveCPSmokeCount = EffEveCPSmokeCount - 1;
     if (EffEveCPSmokeCount == 0) {
-        dds3BillboardDelete((dds3Billboard_t *)hEffEveCPSmokeBill01Tex);
-        dds3BillboardDelete((dds3Billboard_t *)hEffEveCPSmokeBill02Tex);
+        dds3BillboardDelete(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex));
+        dds3BillboardDelete(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex));
     }
     sdfMemFreeDirect(pCombParSmoke->hMem);
 }
@@ -1126,8 +1126,8 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
     swayAmplitudeStep = work->head.swayAmplitudeStep;
     SDF_VU0_COPYVECTOR(origin, work);
     i = 0;
-    dds3BillboardSetMode((dds3Billboard_t *)hEffEveCPSmokeBill01Tex, work->head.drawMode);
-    dds3BillboardSetMode((dds3Billboard_t *)hEffEveCPSmokeBill02Tex, 3);
+    dds3BillboardSetMode(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), work->head.drawMode);
+    dds3BillboardSetMode(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), 3);
     for (; i < count; i++, particle++) {
         age = particle->frame;
         if (age == 0) {
@@ -1172,16 +1172,16 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
             SDF_VU0_LOADVECTOR_B(origin);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR_MEMOPS(offset[0]);
-            dds3BillboardSetPosition((dds3Billboard_t *)hEffEveCPSmokeBill01Tex, offset);
-            dds3BillboardSetScale((dds3Billboard_t *)hEffEveCPSmokeBill01Tex, scaleX, scaleY);
-            dds3BillboardSetRGBA((dds3Billboard_t *)hEffEveCPSmokeBill01Tex, rgba);
-            dds3BillboardSetRotate((dds3Billboard_t *)hEffEveCPSmokeBill01Tex, particle->roll);
-            dds3BillboardDraw((dds3Billboard_t *)hEffEveCPSmokeBill01Tex);
-            dds3BillboardSetPosition((dds3Billboard_t *)hEffEveCPSmokeBill02Tex, offset);
-            dds3BillboardSetScale((dds3Billboard_t *)hEffEveCPSmokeBill02Tex, scaleX, scaleY);
-            dds3BillboardSetRGBA((dds3Billboard_t *)hEffEveCPSmokeBill02Tex, rgba);
-            dds3BillboardSetRotate((dds3Billboard_t *)hEffEveCPSmokeBill02Tex, particle->roll);
-            dds3BillboardDraw((dds3Billboard_t *)hEffEveCPSmokeBill02Tex);
+            dds3BillboardSetPosition(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), offset);
+            dds3BillboardSetScale(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), scaleX, scaleY);
+            dds3BillboardSetRGBA(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), rgba);
+            dds3BillboardSetRotate(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), particle->roll);
+            dds3BillboardDraw(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex));
+            dds3BillboardSetPosition(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), offset);
+            dds3BillboardSetScale(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), scaleX, scaleY);
+            dds3BillboardSetRGBA(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), rgba);
+            dds3BillboardSetRotate(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), particle->roll);
+            dds3BillboardDraw(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex));
             particle->s_w_r += particle->scalePhaseStepX;
             particle->s_h_r += particle->scalePhaseStepY;
             particle->roll += particle->roll_s;
@@ -1196,12 +1196,12 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
-extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, u32 aPacket);
-extern s32 dds3BillboardGetTex(void *hBillboard);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern ps2AddrS_t dds3BillboardGetTex(void *hBillboard);
 extern sdfTexPacket_t *sdfTexGetPacket(sdfTexHandle_t *aHandle);
 extern s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle);
-extern void sdf3DMakeDirectRefPacket(void *aPacket, u32 aData, s32 aLeng);
+extern void sdf3DMakeDirectRefPacket(void *aPacket, ps2Addr_t aData, s32 aLeng);
 extern void sdfBillBoardMakeTMPacket(void *aPacket, const f32 *aTM);
 extern u32 *sdfBillBoardMakeN(const sdfVector4_t *aCenter, const void *aColor,
                               const void *aUVList, const void *aXYOffsetList, s32 aNum,
@@ -1248,17 +1248,17 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
     sdfDrawTagInit(primaryList);
     secondaryList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(secondaryList);
-    primaryTexture = (sdfTexHandle_t *)dds3BillboardGetTex((void *)hEffEveCPSmokeBill01Tex);
+    primaryTexture = EE_ADDR_AS(sdfTexHandle_t *, dds3BillboardGetTex(EE_ADDR_AS(void *, hEffEveCPSmokeBill01Tex)));
     texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     textureBuffer = sdfTexGetPacket(primaryTexture);
     textureBytes = sdfTexGetPacketLength(primaryTexture);
-    sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
+    sdf3DMakeDirectRefPacket(texturePacket, EE_ADDR(textureBuffer), textureBytes);
     sdfDrawTagLinkRef(primaryList, EE_ADDR(texturePacket));
-    secondaryTexture = (sdfTexHandle_t *)dds3BillboardGetTex((void *)hEffEveCPSmokeBill02Tex);
+    secondaryTexture = EE_ADDR_AS(sdfTexHandle_t *, dds3BillboardGetTex(EE_ADDR_AS(void *, hEffEveCPSmokeBill02Tex)));
     texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     textureBuffer = sdfTexGetPacket(secondaryTexture);
     textureBytes = sdfTexGetPacketLength(secondaryTexture);
-    sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
+    sdf3DMakeDirectRefPacket(texturePacket, EE_ADDR(textureBuffer), textureBytes);
     sdfDrawTagLinkRef(secondaryList, EE_ADDR(texturePacket));
     SDF_VU0_STOREIDENTITY(matrix);
     geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
@@ -1526,7 +1526,7 @@ effAPPoint4_tag *effAPPoint4Create(const effAPPoint4Param_t *pParams, u16 type, 
     const effAPPoint4Param_t *head = pParams;
     u32 recordCount = head->count;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(recordCount * sizeof(effAPPoint4Part_tag) + sizeof(effAPPoint4_tag));
-    effAPPoint4_tag *work = (effAPPoint4_tag *)sdfMemLock(allocation);
+    effAPPoint4_tag *work = EE_ADDR_AS(effAPPoint4_tag *, sdfMemLock(allocation));
     effAPPoint4Part_tag *record = (effAPPoint4Part_tag *)(work + 1);
     dds3EffectPart_t *parameterTemplate;
     s32 delayModulus;
@@ -1567,7 +1567,7 @@ effAPPoint4_tag *effAPPoint4CreatePCF(void *data) {
 effAPPoint4_tag *effAPPoint4Copy(effChanSource_t *source) {
     u32 recordCount = source->head.count;
     sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(recordCount * sizeof(effAPPoint4Part_tag) + sizeof(effAPPoint4_tag));
-    effAPPoint4_tag *work = (effAPPoint4_tag *)sdfMemLock(allocationHandle);
+    effAPPoint4_tag *work = EE_ADDR_AS(effAPPoint4_tag *, sdfMemLock(allocationHandle));
     effAPPoint4Part_tag *recordCursor = (effAPPoint4Part_tag *)(work + 1);
     dds3EffectPart_t *parameterTemplate;
     s32 delayModulus;

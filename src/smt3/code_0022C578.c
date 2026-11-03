@@ -138,7 +138,7 @@ extern cmpInfoWindow_t *cmpInfoWindow;
 
 extern cmbWork_t *D_0054FB20;
 
-extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
@@ -457,7 +457,7 @@ extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern void sdfDrawTagLinkRefGif(void *aTag, u32 aPacket);
+extern void sdfDrawTagLinkRefGif(void *aTag, ps2Addr_t aPacket);
 
 extern void cmpReCalcStockCursorPos(s8 index);
 
@@ -493,7 +493,7 @@ extern void mdlSetRotate(void *aHandle);
 
 
 
-extern s32 PlayingNo;
+extern ps2AddrS_t PlayingNo;
 
 extern s32 fclChkMessage(void);
 
@@ -585,7 +585,7 @@ extern campStatusPanel_t *campDhUpdateWork;
 
 extern s8 cmpGetHeartsIconId(s8 index);
 
-extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, ps2AddrS_t layout);
 
 extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
@@ -858,12 +858,12 @@ extern char *D_00343F48[];
 extern u8 D_00551F98[4];
 extern void cmpInitSeqInfo(cmpSeqInfo_t *work, cmpSeqInfo_t *parent);
 extern s8 fclInitMessage(void *data);
-extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, ps2AddrS_t flags);
 extern void cmpDebugDumpCount(void);
 extern void camp_H_cmpGlobalWork_t__ctor(void);
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 #endif
 
 void cmpinit(void)
@@ -877,15 +877,15 @@ void cmpinit(void)
     fclSetSelMessagePos(1);
     campWork->unk_0001 = 0;
     campWork->unk_0004 = 1;
-    cmpInitCursorRange((u8 *)campWork + 0x1C, 7, 7, (s32)D_00343F08);
+    cmpInitCursorRange((u8 *)campWork + 0x1C, 7, 7, EE_ADDR_S(D_00343F08));
     cmpInitCursorLayout((u8 *)campWork + 0x1C, 0, 0, 0, 0, 0x17);
-    cmpInitCursorRange(&campWork->page[0].cursor, 4, 4, (s32)D_00343F28);
+    cmpInitCursorRange(&campWork->page[0].cursor, 4, 4, EE_ADDR_S(D_00343F28));
     cmpInitCursorLayout(&campWork->page[0].cursor, 0, 0, 0, 0, 0x17);
-    cmpInitCursorRange(&campWork->page[1].cursor, 3, 3, (s32)D_00343F38);
+    cmpInitCursorRange(&campWork->page[1].cursor, 3, 3, EE_ADDR_S(D_00343F38));
     cmpInitCursorLayout(&campWork->page[1].cursor, 0, 0, 0, 0, 0x17);
-    cmpInitCursorRange(&campWork->page[2].cursor, 2, 2, (s32)D_00343F48);
+    cmpInitCursorRange(&campWork->page[2].cursor, 2, 2, EE_ADDR_S(D_00343F48));
     cmpInitCursorLayout(&campWork->page[2].cursor, 0, 0, 0, 0, 0x17);
-    cmpSetCursorFlag(&campWork->page[2].cursor, (s32)D_00551F98);
+    cmpSetCursorFlag(&campWork->page[2].cursor, EE_ADDR_S(D_00551F98));
     cmpDebugDumpCount();
     camp_H_cmpGlobalWork_t__ctor();
     campWork->effectStep = 0x2B3;
@@ -1167,10 +1167,10 @@ typedef struct {
 } cmpSavedNameView_t;
 
 extern char *text2[];
-extern void fclSetMessageVar_20743088(s8 index, s32 value);
+extern void fclSetMessageVar_20743088(s8 index, ps2AddrS_t value);
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 #endif
 
 void cmpSetItSkMessageVar(datUnitWork_t *unit)
@@ -1181,9 +1181,9 @@ void cmpSetItSkMessageVar(datUnitWork_t *unit)
            ((cmpSavedNameView_t *)DDS3_GBWK)->nameLength * 2);
     name[((cmpSavedNameView_t *)DDS3_GBWK)->nameLength * 2] = 0;
     if (unit->id != 0) {
-        fclSetMessageVar_20743088(0, (s32)text2[unit->id]);
+        fclSetMessageVar_20743088(0, EE_ADDR_S(text2[unit->id]));
     } else {
-        fclSetMessageVar_20743088(0, (s32)name);
+        fclSetMessageVar_20743088(0, EE_ADDR_S(name));
     }
 }
 
@@ -1472,7 +1472,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpStartItemMsg);
 
 extern s32 datGetItemSkillNo(s32 itemid);
 extern s32 cmpStartItemMsg(u16 item, s32 errorFlags);
-extern s32 cmpUseItemTokusyu(u16 item, s32 target, s32 user);
+extern s32 cmpUseItemTokusyu(u16 item, ps2AddrS_t target, ps2AddrS_t user);
 extern void cmpRecover(u16 skill, datUnitWork_t *stock, datUnitWork_t *target);
 #ifdef NON_MATCHING
 extern void cmpSetStockRecoverEff(s8 effect, u16 skill, cmpLocalStock_t *stock);
@@ -1505,7 +1505,7 @@ s32 cmpUseItem(void)
     default:
         break;
     }
-    effect = cmpUseItemTokusyu(itemId, (s32)stock, (s32)target);
+    effect = cmpUseItemTokusyu(itemId, EE_ADDR_S(stock), EE_ADDR_S(target));
     if (effect == 0 && skill != 0) {
         cmpRecover(skill, stock, target);
     }
@@ -1525,7 +1525,7 @@ u16 cmpGetSelectSkillID(void)
 extern s32 cmpAddCost(u16 skill, datUnitWork_t *unit);
 extern s32 cmpGetSkillEntry(u16 skill, datUnitWork_t *unit);
 extern s32 cmpStartSkillMsg(u16 skill, s32 errorFlags);
-extern s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, s32 target);
+extern s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, ps2AddrS_t target);
 
 s32 cmpUseSkill(void)
 {
@@ -1553,7 +1553,7 @@ s32 cmpUseSkill(void)
     if (cmpAddCost(skill, user) == 0) {
         return 0;
     }
-    effect = cmpUseSkillTokusyu(skill, user, (s32)target);
+    effect = cmpUseSkillTokusyu(skill, user, EE_ADDR_S(target));
     if (effect == 0) {
         cmpRecover(skill, user, target);
     }
@@ -1975,9 +1975,9 @@ s32 cmpCalcDestroyItem(void)
         return 0;
     }
     campWork->stockMessagePhase = 0;
-    fclSetMessageVar_20743088(2, (s32)pStr[id]);
+    fclSetMessageVar_20743088(2, EE_ADDR_S(pStr[id]));
     sprintf(buf, D_0054FE40, D_00330914[0], DDS3_GBWK->stocklist[id + 4]);
-    fclSetMessageVar_20743088(0xB, (s32)buf);
+    fclSetMessageVar_20743088(0xB, EE_ADDR_S(buf));
     fclSetMessageInvalid(0);
     fclStartMessage(9);
     fclStartSelMessage(0xB);
@@ -2219,7 +2219,7 @@ s32 cmpCalcParty(void)
                 if ((DDS3_GBWK->party[selectedIndex].unit.flag & 0x800) != 0) {
                     datUnitWork_t *unit = cmpGetSelectSrcStock();
 
-                    fclSetMessageVar_20743088(0, (s32)text2[unit->id]);
+                    fclSetMessageVar_20743088(0, EE_ADDR_S(text2[unit->id]));
                     fclStartMessage(0xA);
                     campWork->unk_0001 = 8;
                     goto finish;
@@ -2380,7 +2380,7 @@ s32 cmpCalcSequence(void)
             datUnitWork_t *unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + index;
 
             cmpSetIniStockRecoverEff((u8 *)campWork->stock);
-            fclSetMessageVar_20743088(0, (s32)text2[unit->id]);
+            fclSetMessageVar_20743088(0, EE_ADDR_S(text2[unit->id]));
             fclSetMessageInvalid(1);
             if ((unit->badstatus & 0x800) != 0) {
                 fclStartMessage(8);
@@ -3884,7 +3884,7 @@ s32 camp_draw_stock_Process(s32 id)
         return -1;
     }
     if ((window->flags & 2) != 0) {
-        campDrawStockPanel((cmpLocalStock_t *)window->unk_1C, 0);
+        campDrawStockPanel(EE_ADDR_AS(cmpLocalStock_t *, window->unk_1C), 0);
     }
     return 0;
 }
@@ -4002,7 +4002,7 @@ void campDhCheckTextures(void)
         void **tex = (void **)((u8 *)campInfoWork + ofs + 0xC);
 
         if (*tex != NULL && *(s32 *)((u8 *)campInfoWork + ofs) == 0) {
-            *(s32 *)((u8 *)campInfoWork + ofs) = sdfTexSet(*tex);
+            *(s32 *)((u8 *)campInfoWork + ofs) = EE_ADDR(sdfTexSet(*tex));
             printf(D_0053FCE8, i);
         }
     }
@@ -4059,7 +4059,7 @@ void campDhFreeResources(campInfoWork_t *work)
     tex = &work->unk_116C;
     for (i = 0; i < 3; i++)
     {
-        sdfMemFreePtrDirect((void *)tex[i]);
+        sdfMemFreePtrDirect(EE_ADDR_AS(void *, tex[i]));
         tex[i] = 0;
     }
     printf(D_0053FD78);
@@ -4083,7 +4083,7 @@ s32 cmpSetHeartsSequenceRemove(void)
     if ((DDS3_GBWK->party[0].unit.badstatus & 0x8000) == 0)
     {
         campInfoWork->unk_18 = 0;
-        fclSetMessageVar_20743088(0xC, (s32)pstr[DDS3_GBWK->equipHearts]);
+        fclSetMessageVar_20743088(0xC, EE_ADDR_S(pstr[DDS3_GBWK->equipHearts]));
         fclSetMessageInvalid(0);
         fclStartMessage(4);
         campInfoWork->unk_01 = 3;
@@ -5220,7 +5220,7 @@ void cmpUpdateHeartsAttachStatus(void)
     case 1:
         if (((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts != 0) {
             if (DDS3_GBWK->heartsequip == ((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts) {
-                fclSetMessageVar_20743088(0xC, (s32)pstr[DDS3_GBWK->heartsequip]);
+                fclSetMessageVar_20743088(0xC, EE_ADDR_S(pstr[DDS3_GBWK->heartsequip]));
                 fclSetMessageInvalid(1);
                 fclStartMessage(0);
                 campDhUpdateWork->unk_01[0] = 4;
@@ -5234,7 +5234,7 @@ void cmpUpdateHeartsAttachStatus(void)
                 break;
             }
         }
-        fclSetMessageVar_20743088(0xC, (s32)pstr[DDS3_GBWK->heartsequip]);
+        fclSetMessageVar_20743088(0xC, EE_ADDR_S(pstr[DDS3_GBWK->heartsequip]));
         fclSetMessageInvalid(0);
         fclStartMessage(2);
         fclStartSelMessage(0xB);
@@ -5323,7 +5323,7 @@ void cmpUpdateHeartsAttachConfirm(void)
         if (((s8 *)campDhUpdateWork)[0x18] == 1) {
             cmpStepHeartsAttachCursor(0);
             p2sdPlaySE(0x18, 0x7F, 0x3F);
-            fclSetMessageVar_20743088(0xC, (s32)pstr[DDS3_GBWK->heartsequip]);
+            fclSetMessageVar_20743088(0xC, EE_ADDR_S(pstr[DDS3_GBWK->heartsequip]));
             fclSetMessageInvalid(1);
             fclStartMessage(3);
             ((s8 *)campDhUpdateWork)[0x18] = 2;
@@ -5366,7 +5366,7 @@ void cmpUpdateHeartsRemoveConfirm(void)
 
     if (phase > 0) {
         if (phase == 1) {
-            fclSetMessageVar_20743088(0xC, (s32)pstr[*((u8 *)DDS3_GBWK + 0x1CFA)]);
+            fclSetMessageVar_20743088(0xC, EE_ADDR_S(pstr[*((u8 *)DDS3_GBWK + 0x1CFA)]));
             fclSetMessageInvalid(1);
             fclStartMessage(5);
             datRemoveHearts();
@@ -7162,7 +7162,7 @@ extern void sdf3DMakeScreenParam(sdf3DScreenParam_t *);
 extern void sdfDrawTagInit(sdfDrawTag_t *);
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, sdf3DInitPacket_t *);
 extern void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *, sdf3DScreenParam_t *, sdfMatrix4_t *);
-extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
+extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t);
 
 void cmpDrawSetup3DView(void)
 {
@@ -7196,7 +7196,7 @@ void cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
     u64 *prim;
     void *tag;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1)));
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     prim = sdf2DGetPrimPtr(packet);
     prim[0] = id != 0;
@@ -7205,9 +7205,9 @@ void cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
     } else {
         prim[1] = 0x4B;
     }
-    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7225,7 +7225,7 @@ void cmpDrawSprite(s32 id, s32 flag, s32 ot)
     u64 *prim;
     void *tag;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1)));
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     prim = sdf2DGetPrimPtr(packet);
     prim[0] = id;
@@ -7234,9 +7234,9 @@ void cmpDrawSprite(s32 id, s32 flag, s32 ot)
     } else {
         prim[1] = 0x48;
     }
-    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7253,7 +7253,7 @@ void cmpDrawSprite2(s32 id, s32 flag, s32 ot)
     u64 *prim;
     void *tag;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1)));
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     prim = sdf2DGetPrimPtr(packet);
     prim[0] = id;
@@ -7262,9 +7262,9 @@ void cmpDrawSprite2(s32 id, s32 flag, s32 ot)
     } else {
         prim[1] = 0x43;
     }
-    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7281,14 +7281,14 @@ void cmpDrawSpriteIndexed(s32 id, s32 ot)
     u64 *prim;
     void *tag;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1)));
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     prim = sdf2DGetPrimPtr(packet);
     prim[1] = 0x49;
     prim[0] = id;
-    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7300,14 +7300,14 @@ void cmpDrawSpriteIndexed2(s32 id, s32 ot)
     u64 *prim;
     void *tag;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1)));
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     prim = sdf2DGetPrimPtr(packet);
     prim[1] = 0x14;
     prim[0] = id;
-    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7337,7 +7337,7 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot)
     sdfDrawTag_t *tag;
     sdfGrOt_t *otp;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(6, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(6, 1)));
     sdf2DMakePrimPacketHeader(packet, 0x14B, 6, 0x515151, 1);
     prim = sdf2DGetPrimPtr(packet);
     cmpExpandColor(prim[0].colorChannels, colors[0]);
@@ -7349,9 +7349,9 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot)
     cmpExpandColor(prim[2].colorChannels, colors[2]);
     prim[2].packedXY = (xs[2] + 0x7000) | ((u64)(ys[2] + 0x7900) << 32);
     prim[2].depth = z;
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t)));
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7388,7 +7388,7 @@ void cmpDrawBoxG(s32 x, s32 y, s32 z, s32 width, s32 height,
     u32 bottom = top + height * 8;
     u32 color;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(8, 1));
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(8, 1)));
     sdf2DMakePrimPacketHeader(packet, (mode << 9) | 0x14C, 8, 0x51515151, 1);
     prim = sdf2DGetPrimPtr(packet);
     livePrim = prim;
@@ -7406,7 +7406,7 @@ void cmpDrawBoxG(s32 x, s32 y, s32 z, s32 width, s32 height,
     cmpExpandColor(prim + 12, color);
     livePrim[15] = (u32)z;
     livePrim[14] = right | ((u64)bottom << 32);
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdfDrawTagLink(tag, EE_ADDR(packet));
     surface->regFunc(surface, tag);
@@ -7456,7 +7456,7 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     void *packet;
     u64 *prim;
 
-    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, 1));
+    packet = EE_ADDR_PTR(sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, 1)));
     sdf2DMakePrimPacketHeader(packet, 0x149, 4, 0x5151, 1);
     prim = sdf2DGetPrimPtr(packet);
     cmpExpandColor(prim, colors[0]);
@@ -7465,9 +7465,9 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     cmpExpandColor(prim + 4, colors[1]);
     prim[6] = (x1 + 0x7000) | ((u64)(y1 + 0x7900) << 32);
     prim[7] = z1;
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
-    sdfDrawTagLink(list, packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     surface = &sdfGrOtTable[surfaceIndex];
     surface->regFunc(surface, list);
 }
@@ -7489,7 +7489,7 @@ void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
     sdfGrOt_t *surface;
     u32 firstColor, secondColor, thirdColor;
 
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t)));
     sdfDrawTagInit(list);
     sdf3DPrimLinkResetTm(list, 0);
     if (asset != NULL) {
@@ -7529,9 +7529,9 @@ void cmpDisableRGB(s32 ot)
     void *tag;
     void *mask;
 
-    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    mask = (void *)sdfGrAllocPacketBuff(0x40);
+    mask = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
     sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
     sdfDrawTagLinkRefGif(tag, EE_ADDR(mask));
     otp = &sdfGrOtTable[ot];
@@ -7544,9 +7544,9 @@ void cmpAllocRefGifTag(s32 ot)
     void *tag;
     void *mask;
 
-    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    mask = (void *)sdfGrAllocPacketBuff(0x40);
+    mask = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
     sdfGrSetFrameMaskReset(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
     sdfDrawTagLinkRefGif(tag, EE_ADDR(mask));
     otp = &sdfGrOtTable[ot];
@@ -7663,10 +7663,10 @@ void cmpDrawDebugPrint(s32 x, s32 y, s32 z, u32 attr, const char *str, s32 ot)
     sdfGrOt_t *otp;
     void *tag;
 
-    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdfDevSetPrintCB(&cb, x * 16 + 0x7000, y * 8 + 0x7900, z, attr);
-    sdfDrawTagLink(tag, sdfDevPrintfEx(&cb, str));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintfEx(&cb, str)));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7679,10 +7679,10 @@ void cmpDrawFrameRect(s32 x, s32 y, s32 c, s32 w, s32 h, s32 f, s32 g, s32 ot)
     void *tag;
     void *packet;
 
-    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     packet = dds3PrimFrameRect(x * 16 + 0x7000, y * 8 + 0x7900, c, w * 16, h * 8, f, g);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7983,14 +7983,14 @@ extern s32 camp_update_info_Process(s32 id);
 
 s32 cmpStartProcessInfo(s32 text, s32 flag)
 {
-    s32 proc;
+    ps2AddrS_t proc;
 
     if (cmpInfoWindow != NULL) {
         return 0;
     }
-    cmpInfoWindow = cmpAllocInfoProcess((void *)text, flag);
-    proc = (s32)dds3StartProcess("camp_calc_info", 0x3F2, 1, 1, camp_calc_info_Process, NULL,
-                                 cmpInfoWindow);
+    cmpInfoWindow = cmpAllocInfoProcess(EE_ADDR_AS(void *, text), flag);
+    proc = EE_ADDR_S(dds3StartProcess("camp_calc_info", 0x3F2, 1, 1, camp_calc_info_Process, NULL,
+                                 cmpInfoWindow));
     dds3StartProcess("camp_draw_info", 0x2B07, 1, 1, camp_draw_info_Process, NULL, cmpInfoWindow);
     dds3StartProcess("camp_update_info", 0x520B, 1, 1, camp_update_info_Process,
                      camp_update_info_Shutdown, cmpInfoWindow);
@@ -8035,7 +8035,7 @@ s32 camp_draw_info_Process(s32 id)
         cmpUpdateTerminate(cmpInfoWindow);
         return -1;
     }
-    frq = frwGetSmallFontFRQ2(0x100, 0xA0, 0xFFFFF, 0xA09DC380, (char *)cmpInfoWindow->unk_18, 0);
+    frq = frwGetSmallFontFRQ2(0x100, 0xA0, 0xFFFFF, 0xA09DC380, EE_ADDR_AS(char *, cmpInfoWindow->unk_18), 0);
     campDrawInfoText(0, 0x80, 0xFFFFF, *(s32 *)((u8 *)frq + 0xC) + 0x10, 0x18, 0x30303080, 0x47);
     func_001C7E38(frq, 1, 0x47);
     frDestroyFontRequestAfter(frq);
@@ -8147,7 +8147,7 @@ void fclInitCursorWindow(void *work, void *data, u8 count)
 {
     cmpCursorInfo_t *cursor = (cmpCursorInfo_t *)((u8 *)work + 4);
 
-    cmpInitCursorRange(cursor, count, count, (s32)data);
+    cmpInitCursorRange(cursor, count, count, EE_ADDR_S(data));
     cmpInitCursorLayout(cursor, 0, 0, 0, 0, 0x17);
 }
 
@@ -9732,13 +9732,13 @@ void cmpFindPanelEffSlot(s32 arg)
         case 2:
         case 5:
         case 6:
-            cmpDrawPanelEffBox((void *)(i * 0x2E4 + (s32)cmpPanelEffList + 0x18), arg);
+            cmpDrawPanelEffBox(EE_ADDR_AS(void *, (i * 0x2E4 + EE_ADDR_S(cmpPanelEffList) + 0x18)), arg);
             break;
         case 3:
-            cmpDrawPanelEffRing((void *)(i * 0x2E4 + (s32)cmpPanelEffList + 0x18), arg);
+            cmpDrawPanelEffRing(EE_ADDR_AS(void *, (i * 0x2E4 + EE_ADDR_S(cmpPanelEffList) + 0x18)), arg);
             break;
         case 4:
-            cmpDrawPanelEffQuad((void *)(i * 0x2E4 + (s32)cmpPanelEffList + 0x18), arg);
+            cmpDrawPanelEffQuad(EE_ADDR_AS(void *, (i * 0x2E4 + EE_ADDR_S(cmpPanelEffList) + 0x18)), arg);
             break;
         }
     }
@@ -9765,7 +9765,7 @@ void cmpUpdatePanelEffSlots(void)
             eff->delay = eff->delay - 1;
             continue;
         }
-        alpha = (s32 *)(i * 0x2E4 + (s32)cmpPanelEffList + 0x34);
+        alpha = EE_ADDR_AS(s32 *, (i * 0x2E4 + EE_ADDR_S(cmpPanelEffList) + 0x34));
         value = *alpha + eff->step;
         if (value >= 0x101) {
             eff->state = 0;
@@ -10569,9 +10569,9 @@ s32 cmpUseItemKou(u16 item, datUnitWork_t *unit)
     return -1;
 }
 
-s32 cmpUseItemTokusyu(u16 item, s32 target, s32 user)
+s32 cmpUseItemTokusyu(u16 item, ps2AddrS_t target, ps2AddrS_t user)
 {
-    if (cmpUseItemKou(item, (datUnitWork_t *)user) >= 0)
+    if (cmpUseItemKou(item, EE_ADDR_AS(datUnitWork_t *, user)) >= 0)
     {
         p2sdPlaySE(0x10, 0x7F, 0x3F);
         return 3;
@@ -10593,7 +10593,7 @@ extern void fldRiberaMaStart(void);
 extern void fldRifutoMaStart(void);
 extern void fldLightMaStart(void);
 
-s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, s32 unused)
+s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, ps2AddrS_t unused)
 {
     s32 se = 0x10;
 
@@ -10946,7 +10946,7 @@ void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode)
 INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorLayout);
 #endif
 
-void cmpInitCursorRange(void *cursor, u8 index, u8 rows, s32 flag)
+void cmpInitCursorRange(void *cursor, u8 index, u8 rows, ps2AddrS_t flag)
 {
     cmpPadStopWork_t *work = cursor;
     s32 last;
@@ -11003,7 +11003,7 @@ void cmpUpdateCursorScroll(cmpCursorInfo_t *cursor, s8 mode)
     }
 }
 
-void cmpSetCursorFlag(cmpCursorInfo_t *cur, s32 flag)
+void cmpSetCursorFlag(cmpCursorInfo_t *cur, ps2AddrS_t flag)
 {
     cur->flagsData.value = flag;
     cmpUpdateCursorScroll(cur, 1);
@@ -11635,17 +11635,17 @@ void cmpInitSeqInfo(cmpSeqInfo_t *pSeq, cmpSeqInfo_t *pParent)
     pSeq->unk_02 = -1;
     pSeq->unk_05 = 0;
     pSeq->unk_0C = 0;
-    pSeq->unk_10 = (s32)pParent;
+    pSeq->unk_10 = EE_ADDR_S(pParent);
 }
 
 s32 cmpChkSeqInfo(cmbGbWork_t *work)
 {
     if (work->unk_00005 != 0) {
-        if (dds3GetProcessStat((void *)work->unk_00008) == 3) {
+        if (dds3GetProcessStat(EE_ADDR_AS(void *, work->unk_00008)) == 3) {
             work->unk_00005 = 0;
             return 2;
         }
-        if (dds3GetProcessStat((void *)work->unk_00008) == 0) {
+        if (dds3GetProcessStat(EE_ADDR_AS(void *, work->unk_00008)) == 0) {
             work->unk_00005 = 0;
         }
         return 1;

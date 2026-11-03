@@ -214,7 +214,7 @@ s32 nbGetKoukaPacketCnt(void)
     return work->packetcnt;
 }
 
-s32 nbGetUniqueIdKoukaPacketCnt(s32 uniqueid)
+s32 nbGetUniqueIdKoukaPacketCnt(ps2AddrS_t uniqueid)
 {
     nbKoukaPacket_t *p = nbGetKoukaProcessData()->first;
     s32 cnt = 0;
@@ -586,7 +586,7 @@ void RunSkillEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 void nbRunKoukaCase1(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
     s32 partyno = p->partyno;
-    nbParty_t *party = (nbParty_t *)((u8 *)(partyno * 0x80) + (u32)k->data->party);
+    nbParty_t *party = (nbParty_t *)(EE_ADDR_AS(u8 *, (partyno * 0x80)) + EE_ADDR(k->data->party));
 
     if ((party->flag & 1) == 0) {
         return;
@@ -604,7 +604,7 @@ void nbRunKoukaCase1(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 extern void ToMatrix(void);
 extern void dds3RotationArc(void);
 extern void evtSetUnitRot1(evtUnit_t *unit, s128 *rotation, s32 parameter);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 
 void RunNumEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
@@ -621,7 +621,7 @@ void RunNumEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
      * later VU load / RotationArc. The verified native schedule places its
      * store before party lookup; this empty operand is not a memory barrier. */
     FAKEMATCH_ASM_READ_MEM(forward.z);
-    party = (nbParty_t *)((u8 *)(p->partyno * 0x80) + (u32)data->party);
+    party = (nbParty_t *)(EE_ADDR_AS(u8 *, (p->partyno * 0x80)) + EE_ADDR(data->party));
     if ((u16)(party->flag & 1) != 0) {
         form = &data->form[party->formindex];
         switch (p->type) {

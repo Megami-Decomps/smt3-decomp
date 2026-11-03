@@ -290,7 +290,7 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame, s32 uniqueid, nbFormation_t *form, s32 type);
+nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame, ps2AddrS_t uniqueid, nbFormation_t *form, s32 type);
 
 s32 Flow16_1(nbNegoProcessData_t *n)
 {
@@ -298,7 +298,7 @@ s32 Flow16_1(nbNegoProcessData_t *n)
 
     nbAddNegoIdKouho(n, 0x100002);
     nbAddNegoIdKouho(n, 0x100003);
-    nbAddMojiEffKoukaPacket(0, 0x1E, (s32)n->actdata, n->eform, 0);
+    nbAddMojiEffKoukaPacket(0, 0x1E, EE_ADDR_S(n->actdata), n->eform, 0);
     nbCameraSetBougai(n->eform);
     race = datGetRace(n->ework);
     if (race < 0x18) {

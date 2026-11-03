@@ -1,6 +1,10 @@
 #include "common.h"
 #include "sdf_types.h"
 
+/* Declared here because no header carries these. */
+extern s32 SignalSema(s32 aSemaId);
+extern s32 WaitSema(s32 sema);
+
 #define SDF_PENDING_LAST_SLOT 1
 
 struct sdfDelayedResrcCB_t;
@@ -39,7 +43,7 @@ void *sdfChipAllocDirect(s32 aSize);
 
 extern s32 EIntr(void);
 
-extern s32 D_005520A8[2];
+extern ps2AddrS_t D_005520A8[2];
 
 extern s32 DIntr(void);
 
@@ -171,18 +175,18 @@ void sdfDelayedResrcProc(void) {
 
     sdfDelayedResrcFlag = 1;
     WaitSema(sdfDelayedResrcSemaId);
-    sdfDelayedResrcRelease((sdfDelayedResrcChunk_t *)D_005520A8[0]);
+    sdfDelayedResrcRelease(EE_ADDR_AS(sdfDelayedResrcChunk_t *, D_005520A8[0]));
     for (slotIndex = 0; slotIndex < SDF_PENDING_LAST_SLOT; slotIndex++) {
         D_005520A8[slotIndex] = D_005520A8[slotIndex + 1];
     }
-    D_005520A8[SDF_PENDING_LAST_SLOT] = (s32)sdfDelayedResrcClose();
+    D_005520A8[SDF_PENDING_LAST_SLOT] = EE_ADDR_S(sdfDelayedResrcClose());
     SignalSema(sdfDelayedResrcSemaId);
     sdfDelayedResrcFlag = 0;
 }
 
 u64 sdfDelayedResrcCheckFunc(void) {
     u32 slotIndex;
-    s32 *slotCursor;
+    ps2AddrS_t *slotCursor;
     if (sdfDelayedResrcFlag != 0) {
         return 1;
     }

@@ -16,8 +16,8 @@ typedef struct fileRequest {
     void *callback;
     void *arg;
     sdfMemHandle_t *handle;
-    u32 top;
-    u32 ptr;
+    ps2Addr_t top;
+    ps2Addr_t ptr;
     struct fileRequest *donenext;
     sdfPacDecodeCb_t pac;
     u16 pacrest;

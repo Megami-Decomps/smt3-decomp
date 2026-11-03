@@ -74,7 +74,7 @@ extern u16 D_0031B8C0[];
 extern sdfVector4_t D_00319FA0[];
 extern sdfVector4_t D_0031B8F0[];
 extern s32 fldSkyGetAlpha(void);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 typedef struct effBTLSkillInfo_t {
     nbFormation_t *invokeForm;

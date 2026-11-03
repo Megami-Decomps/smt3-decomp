@@ -60,7 +60,7 @@ extern dds3Basic_t *dds3AddMatterObjectBasic(s32 serialID, f32 *pos, f32 *rot);
 
 extern u32 dds3AllocObjectId(void);
 
-extern void dds3SetUnitObjectId(dds3Basic_t *node, u32 value);
+extern void dds3SetUnitObjectId(dds3Basic_t *node, ps2Addr_t value);
 
 dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 modelRangeID);
 
@@ -147,11 +147,11 @@ u8 *fldGetInfoHeader(fldTransferChunk_t *pData);
 
 void sdfAddressResolverReset(u32 *aDataBody, u32 aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
-void fldAddressResolver(u32 pFileTop, fldTransferChunk_t *pData);
+void fldAddressResolver(ps2Addr_t pFileTop, fldTransferChunk_t *pData);
 
-extern void sdfAddressResolver(s32 *aDataBody, s32 aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
+extern void sdfAddressResolver(s32 *aDataBody, ps2AddrS_t aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
-void fldAddressResolverReset(u32 pFileTop, fldTransferChunk_t *pData);
+void fldAddressResolverReset(ps2Addr_t pFileTop, fldTransferChunk_t *pData);
 
 void fldLoadNextFile_SetId_BtlRet(u32 field, u32 area);
 
@@ -184,7 +184,7 @@ sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 extern u32 sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 sdfMemHandle_t *fldLoadNextFileF1(void **pData, s32 field, s32 area);
 
@@ -225,7 +225,7 @@ extern s32 sdfMemGetSize(const sdfMemHandle_t *aHandle);
 
 extern u8 *sdfMemGetPtr(const sdfMemHandle_t *aHandle);
 
-extern void fldAmbLoadFromMem(u8 *data, s32 mh);
+extern void fldAmbLoadFromMem(u8 *data, ps2AddrS_t mh);
 
 extern void fldAutoMapFontInit(s32 bank);
 
@@ -296,7 +296,7 @@ extern sdfMemHandle_t *D_0055DA98[];
 
 extern void *D_0055DAA8[];
 
-extern u32 D_0054EBCC;
+extern ps2Addr_t D_0054EBCC;
 
 extern fileRequest_t *fldFileBuf1;
 
@@ -344,7 +344,7 @@ extern void fldFileResolverFL1(fldFileInfoHeaderFL1_t *info);
 extern void fldSetFileResolverIdx(u32 index);
 extern char *fldResolverFL1Data[4];
 extern char D_0054EBC0[]; /* "%s%s", shared with fldMakeResouceBasicFL1. */
-extern void *memset(void *buffer, s32 value, u32 size);
+extern void *memset(void *buffer, s32 value, ps2Size_t size);
 extern void fldMakeResouceBasicFL1(void *typeTable, u32 typeCount);
 
 u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, void *textureBuffer);
@@ -355,7 +355,8 @@ extern void fldAutoMapSetField(s32 fld, s32 area, s32 block);
 
 extern s32 sdfTexSetTB(void *aData);
 
-extern u32 D_0054EB98, D_0054EBD0, D_0054EBD4, fldFileBuf2;
+extern u32 D_0054EB98;
+extern ps2Addr_t D_0054EBD0, D_0054EBD4, fldFileBuf2;
 
 extern u8 *FildMaskObj, *mat_black, *mat_white, *mat_line;
 
@@ -407,7 +408,7 @@ dds3Basic_t *fldMakeDmyMatter(void) {
     rotation[2] = 0.0f;
     rotation[3] = 0.0f;
     matter = dds3AddMatterObjectBasic(dds3AllocObjectId(), position, rotation);
-    dds3SetUnitObjectId(matter, (u32)"FLD_DMY_MATTER");
+    dds3SetUnitObjectId(matter, EE_ADDR("FLD_DMY_MATTER"));
     return matter;
 }
 
@@ -511,10 +512,10 @@ typedef struct fldResourceLight_t {
     f32 AmbientR, AmbientG, AmbientB;
 } fldResourceLight_t;
 
-extern dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *, void *, s32);
-extern dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *, void *, s32);
-extern dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *, void *, s32);
-extern dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *, void *, s32);
+extern dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *, void *, ps2AddrS_t);
+extern dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *, void *, ps2AddrS_t);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *, void *, ps2AddrS_t);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *, void *, ps2AddrS_t);
 extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *, void *, void *);
 extern dds3Basic_t *dds3AddESPEffectObjectBasic(const char *, void *, void *, f32);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, s32);
@@ -596,13 +597,13 @@ void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
                         fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor);
                         sprintf(path, D_0054EBC0, directory,
                                      resourcePathSuffixes[((fldBillConfigView_t *)resource->data)->resourceIndex]);
-                        spawnedObject = dds3AddTMXEffectObjectBasic(path, position, (s32)rotation);
+                        spawnedObject = dds3AddTMXEffectObjectBasic(path, position, EE_ADDR_S(rotation));
                         dds3EffectObjectBasicStatOn(spawnedObject, 1);
                         dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
                         loaded[((fldBillConfigView_t *)resource->data)->resourceIndex] = 1;
                         cached[((fldBillConfigView_t *)resource->data)->resourceIndex] = spawnedObject;
                     } else {
-                        spawnedObject = dds3AddTMXEffectObjectBasic3(*(void **)((u8 *)&cached + cacheByteOffset), position, (s32)rotation);
+                        spawnedObject = dds3AddTMXEffectObjectBasic3(*(void **)((u8 *)&cached + cacheByteOffset), position, EE_ADDR_S(rotation));
                         dds3EffectObjectBasicStatOn(spawnedObject, 1);
                         dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
                     }
@@ -614,13 +615,13 @@ void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
                         fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor);
                         sprintf(path, D_0054EBC0, directory,
                                      resourcePathSuffixes[((fldBillConfigView_t *)resource->data)->resourceIndex]);
-                        spawnedObject = dds3AddP2AEffectObjectBasic(path, position, (s32)rotation);
+                        spawnedObject = dds3AddP2AEffectObjectBasic(path, position, EE_ADDR_S(rotation));
                         dds3EffectObjectBasicStatOn(spawnedObject, 1);
                         loaded[((fldBillConfigView_t *)resource->data)->resourceIndex] = 1;
                         cached[((fldBillConfigView_t *)resource->data)->resourceIndex] = spawnedObject;
                         dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
                     } else {
-                        spawnedObject = dds3AddP2AEffectObjectBasic3(*(void **)((u8 *)&cached + cacheByteOffset), position, (s32)rotation);
+                        spawnedObject = dds3AddP2AEffectObjectBasic3(*(void **)((u8 *)&cached + cacheByteOffset), position, EE_ADDR_S(rotation));
                         dds3EffectObjectBasicStatOn(spawnedObject, 1);
                         dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
                     }
@@ -661,14 +662,14 @@ void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
                     rotation[3] = 0.0f;
                 }
                 spawnedObject = dds3AddLightObjectBasic(resource->id);
-                dds3SetUnitObjectId(spawnedObject, (u32)resource->name);
+                dds3SetUnitObjectId(spawnedObject, EE_ADDR(resource->name));
                 dds3SetPosPoseSet(spawnedObject, (const sdfVector4_t *)position);
                 /* The light resource also supplies the pose's outer radius. */
                 dds3GetRadiusPoseSet(spawnedObject, ((fldResourceLight_t *)resource->data)->OutsideR);
                 dds3SetLightObjectResoruce(spawnedObject, resource->data);
                 if ((u32)fldGlobalBase.area - 200U < 300U) {
                     ((fldLightDataView_t *)spawnedObject->workdata)->flags |= 8;
-                    dds3SetUnitObjectId(spawnedObject, (u32)"BTL_DEF_LIGHT");
+                    dds3SetUnitObjectId(spawnedObject, EE_ADDR("BTL_DEF_LIGHT"));
                 }
             }
             break;
@@ -876,7 +877,7 @@ void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
                 spawnedObject = dds3AddCameraObjectBasicTypeFree(resource->id, (const sdfVector4_t *)position,
                                                                 (const sdfVector4_t *)rotation);
                 ((dds3CameraObjectBasicWorkData_t *)spawnedObject->workdata)->fovy = *(f32 *)resource->data;
-                dds3SetUnitObjectId(spawnedObject, (u32)resource->name);
+                dds3SetUnitObjectId(spawnedObject, EE_ADDR(resource->name));
             }
             break;
         case FLD_SPAWN_BATCH_KIND_UNSUPPORTED:
@@ -938,7 +939,7 @@ void fldMakeObjectBasic2(void) {
                 rotation[3] = 0.0f;
             }
             matter = dds3AddMatterObjectBasic(resource->id, position, rotation);
-            dds3SetUnitObjectId(matter, (u32)resource->name);
+            dds3SetUnitObjectId(matter, EE_ADDR(resource->name));
             if (fldGlobalBase.area >= 200 && fldGlobalBase.area < 500) {
                 switch (resourceIndex) {
                 case 0:
@@ -977,7 +978,7 @@ void fldMakeObjectBasic2(void) {
                     }
                 }
             }
-            areaRef = (fldResourceAreaRef_t *)resource->word14;
+            areaRef = EE_ADDR_AS(fldResourceAreaRef_t *, resource->word14);
             if (matter != NULL) {
                 dds3ObjectBaseSetControlBasic(matter,
                     dds3SceneBasicSearchNameAndType(secondaryWorld, 2, areaRef->name));
@@ -1145,12 +1146,12 @@ void sdfAddressResolverReset(u32 *aDataBody, u32 aOffset, const u8 *aAddrInfoPtr
 }
 
 /* Relocate the words described by this packed-resource transfer chunk. */
-void fldAddressResolver(u32 pFileTop, fldTransferChunk_t *pData) {
-    sdfAddressResolver((s32 *)pFileTop, (s32)pFileTop, (const u8 *)((s32)pFileTop + pData->offset), pData->size);
+void fldAddressResolver(ps2Addr_t pFileTop, fldTransferChunk_t *pData) {
+    sdfAddressResolver(EE_ADDR_AS(s32 *, pFileTop), (s32)pFileTop, EE_ADDR_AS(const u8 *, ((s32)pFileTop + pData->offset)), pData->size);
 }
 
-void fldAddressResolverReset(u32 pFileTop, fldTransferChunk_t *pData) {
-    sdfAddressResolverReset((u32 *)pFileTop, pFileTop, (u8 *)((s32)pFileTop + pData->offset), pData->size);
+void fldAddressResolverReset(ps2Addr_t pFileTop, fldTransferChunk_t *pData) {
+    sdfAddressResolverReset(EE_ADDR_AS(u32 *, pFileTop), pFileTop, EE_ADDR_AS(u8 *, ((s32)pFileTop + pData->offset)), pData->size);
 }
 
 void fldLoadNextFile_SetId_BtlRet(u32 field, u32 area) {
@@ -1262,9 +1263,9 @@ sdfMemHandle_t *fldLoadNextFileTB(void **pData, s32 field, s32 area) {
     if (fldGlobalBase.resourceArea == field) {
         if (fldGlobalBase.resourceFloor == area) {
             sdfMemHandle_t *allocation = sdfMemAllocDirect(D_0054EBE8);
-            void *data = (void *)sdfMemLock(allocation);
+            void *data = EE_ADDR_AS(void *, sdfMemLock(allocation));
             *pData = data;
-            memcpy(data, (void *)D_0054EBDC, D_0054EBE8);
+            memcpy(data, EE_ADDR_AS(void *, D_0054EBDC), D_0054EBE8);
             return allocation;
         }
     }
@@ -1275,9 +1276,9 @@ sdfMemHandle_t *fldLoadNextFileF1(void **pData, s32 field, s32 area) {
     if (fldGlobalBase.resourceArea == field) {
         if (fldGlobalBase.resourceFloor == area) {
             sdfMemHandle_t *allocation = sdfMemAllocDirect(D_0054EBEC);
-            void *data = (void *)sdfMemLock(allocation);
+            void *data = EE_ADDR_AS(void *, sdfMemLock(allocation));
             *pData = data;
-            memcpy(data, (void *)D_0054EBE0, D_0054EBEC);
+            memcpy(data, EE_ADDR_AS(void *, D_0054EBE0), D_0054EBEC);
             return allocation;
         }
     }
@@ -1288,9 +1289,9 @@ sdfMemHandle_t *fldLoadNextFileF2(void **pData, s32 field, s32 area) {
     if (fldGlobalBase.resourceArea == field) {
         if (fldGlobalBase.resourceFloor == area) {
             sdfMemHandle_t *allocation = sdfMemAllocDirect(D_0054EBF0);
-            void *data = (void *)sdfMemLock(allocation);
+            void *data = EE_ADDR_AS(void *, sdfMemLock(allocation));
             *pData = data;
-            memcpy(data, (void *)D_0054EBE4, D_0054EBF0);
+            memcpy(data, EE_ADDR_AS(void *, D_0054EBE4), D_0054EBF0);
             return allocation;
         }
     }
@@ -1396,7 +1397,7 @@ void fldLoadFieldPack(void) {
                     (sdfMemHandle_t *)work->resrc);
                 break;
             case FLD_PACKED_RESOURCE_SCENE_RECORD_CHUNK:
-                fldAmbLoadFromMem(work->data, (s32)work->resrc);
+                fldAmbLoadFromMem(work->data, EE_ADDR_S(work->resrc));
                 break;
             }
         }
@@ -1490,7 +1491,7 @@ u32 fldLoadFile(const char *name) {
                     chunk = (fldTransferChunk_t *)((u8 *)fileData + 8);
                     mat_line = fileData;
                     mat_white = (u8 *)chunk;
-                    fldAddressResolver((u32)fileData, chunk);
+                    fldAddressResolver(EE_ADDR(fileData), chunk);
                     fldFileResolverFL2((fldFileInfoHeaderFL2_t *)fldGetInfoHeader(chunk));
                     break;
                 case 2:
@@ -1499,7 +1500,7 @@ u32 fldLoadFile(const char *name) {
                     chunk = (fldTransferChunk_t *)((u8 *)fileData + 8);
                     mat_black = fileData;
                     FildMaskObj = (u8 *)chunk;
-                    fldAddressResolver((u32)fileData, chunk);
+                    fldAddressResolver(EE_ADDR(fileData), chunk);
                     fldFileResolverFL1(fldGetInfoHeader(chunk));
                     break;
                 }
@@ -1509,36 +1510,36 @@ u32 fldLoadFile(const char *name) {
         }
     }
     if (resident == 0) {
-        D_0054EBD0 = (u32)fldLoadNextFileTB(&textureData, field, area);
+        D_0054EBD0 = EE_ADDR(fldLoadNextFileTB(&textureData, field, area));
         if (D_0054EBD0 == 0) {
             sprintf(path, D_0054EC08, name);
             D_0054EB98 = sdfDevLoadTexList(path);
         } else {
             D_0054EB98 = sdfTexSetTB(textureData);
-            sdfMemFreeDelayedDirect((sdfMemHandle_t *)D_0054EBD0);
+            sdfMemFreeDelayedDirect(EE_ADDR_AS(sdfMemHandle_t *, D_0054EBD0));
             D_0054EBD0 = 0;
         }
     }
     if (resident == 0) {
         sprintf(path, D_0054EC10, name);
-        fldFileBuf2 = (u32)fldLoadNextFileF2(&fileData, field, area);
+        fldFileBuf2 = EE_ADDR(fldLoadNextFileF2(&fileData, field, area));
         if (fldFileBuf2 == 0) {
-            fldFileBuf2 = (u32)sdfDevLoadFileEx(path, (u32 *)&fileData, 0);
+            fldFileBuf2 = EE_ADDR(sdfDevLoadFileEx(path, (u32 *)&fileData, 0));
         }
         chunk = (fldTransferChunk_t *)((u8 *)fileData + 8);
         mat_line = fileData;
         mat_white = (u8 *)chunk;
-        fldAddressResolver((u32)fileData, chunk);
+        fldAddressResolver(EE_ADDR(fileData), chunk);
         fldFileResolverFL2((fldFileInfoHeaderFL2_t *)fldGetInfoHeader(chunk));
         sprintf(path, D_0054EC18, name);
-        D_0054EBD4 = (u32)fldLoadNextFileF1(&fileData, field, area);
+        D_0054EBD4 = EE_ADDR(fldLoadNextFileF1(&fileData, field, area));
         if (D_0054EBD4 == 0) {
-            D_0054EBD4 = (u32)sdfDevLoadFileEx(path, (u32 *)&fileData, 0);
+            D_0054EBD4 = EE_ADDR(sdfDevLoadFileEx(path, (u32 *)&fileData, 0));
         }
         chunk = (fldTransferChunk_t *)((u8 *)fileData + 8);
         mat_black = fileData;
         FildMaskObj = (u8 *)chunk;
-        fldAddressResolver((u32)fileData, chunk);
+        fldAddressResolver(EE_ADDR(fileData), chunk);
         fldFileResolverFL1(fldGetInfoHeader(chunk));
     }
     fldMakeObjectBasic2();
@@ -1547,11 +1548,11 @@ u32 fldLoadFile(const char *name) {
         u8 *destination;
         u8 *source;
 
-        D_0054EBCC = (u32)sdfMemAllocDirect(sdfMemGetSize(fldFieldPackData));
-        destination = sdfMemGetPtr((sdfMemHandle_t *)D_0054EBCC);
+        D_0054EBCC = EE_ADDR(sdfMemAllocDirect(sdfMemGetSize(fldFieldPackData)));
+        destination = sdfMemGetPtr(EE_ADDR_AS(sdfMemHandle_t *, D_0054EBCC));
         source = sdfMemGetPtr(fldFieldPackData);
         memcpy(destination, source, sdfMemGetSize(fldFieldPackData));
-        dds3SceneBasicLoadScriptFile_FromMem(dds3GetControlScene(), (void *)D_0054EBCC);
+        dds3SceneBasicLoadScriptFile_FromMem(dds3GetControlScene(), EE_ADDR_AS(void *, D_0054EBCC));
     }
     fldSetupDoorScenes();
     fldGlobalBase.reuseAreaResources = 0;
@@ -1576,7 +1577,7 @@ u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, vo
     chunk = (fldTransferChunk_t *)(fl2Buffer + 8);
     mat_white = (u8 *)chunk;
     mat_line = fl2Buffer;
-    fldAddressResolver((u32)fl2Buffer, chunk);
+    fldAddressResolver(EE_ADDR(fl2Buffer), chunk);
     fldFileResolverFL2((fldFileInfoHeaderFL2_t *)fldGetInfoHeader(chunk));
     if (fl1Buffer != NULL) {
         fl2Buffer = fl1Buffer;
@@ -1584,7 +1585,7 @@ u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, vo
     chunk = (fldTransferChunk_t *)(fl2Buffer + 8);
     FildMaskObj = (u8 *)chunk;
     mat_black = fl2Buffer;
-    fldAddressResolver((u32)fl2Buffer, chunk);
+    fldAddressResolver(EE_ADDR(fl2Buffer), chunk);
     fldFileResolverFL1(fldGetInfoHeader(chunk));
     fldMakeObjectBasic2();
     fldJDataHandle[0] = 0;
@@ -1633,27 +1634,27 @@ void fldFreeFile(void) {
     }
     if (gFldFileResetMode != 0) {
         if (FildMaskObj != NULL) {
-            fldAddressResolverReset((u32)mat_black, (fldTransferChunk_t *)FildMaskObj);
+            fldAddressResolverReset(EE_ADDR(mat_black), (fldTransferChunk_t *)FildMaskObj);
             FildMaskObj = NULL;
             mat_black = NULL;
         }
         if (mat_white != NULL) {
-            fldAddressResolverReset((u32)mat_line, (fldTransferChunk_t *)mat_white);
+            fldAddressResolverReset(EE_ADDR(mat_line), (fldTransferChunk_t *)mat_white);
             mat_white = NULL;
             mat_line = NULL;
         }
     }
     D_0054EBCC = 0;
     if (D_0054EBD0 != 0) {
-        sdfMemFreeDelayedDirect((sdfMemHandle_t *)D_0054EBD0);
+        sdfMemFreeDelayedDirect(EE_ADDR_AS(sdfMemHandle_t *, D_0054EBD0));
         D_0054EBD0 = 0;
     }
     if (D_0054EBD4 != 0) {
-        sdfMemFreeDelayedDirect((sdfMemHandle_t *)D_0054EBD4);
+        sdfMemFreeDelayedDirect(EE_ADDR_AS(sdfMemHandle_t *, D_0054EBD4));
         D_0054EBD4 = 0;
     }
     if (fldFileBuf2 != 0) {
-        sdfMemFreeDelayedDirect((sdfMemHandle_t *)fldFileBuf2);
+        sdfMemFreeDelayedDirect(EE_ADDR_AS(sdfMemHandle_t *, fldFileBuf2));
         fldFileBuf2 = 0;
     }
     if (fldGlobalBase.area < 200) {

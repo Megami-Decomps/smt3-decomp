@@ -254,7 +254,7 @@ extern void nbResetFormPosRot(nbFormation_t *form);
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
 extern void evtSetUnitMotion(evtUnit_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
@@ -337,12 +337,12 @@ s32 Parts1(nbEventProcessData_t *ed)
 
 extern const s32 D_00546518[4];
 extern const s32 D_00546528[4];
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, ps2Size_t size);
 extern s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formindex);
 extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
 extern void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect);
 extern s32 nbCheckLoadGroup(s32 side);
-extern nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 sw);
+extern nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 sw);
 extern nbKoukaPacket_t *nbAddUnitAKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                               u32 a, s32 frame);
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);

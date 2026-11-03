@@ -41,15 +41,15 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          dds3ProcessFunc_t deleteExit, void *p);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 extern s32 dds3ExistProcess(dds3ProcessID_t *id);
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
 dds3AdminiData_t *GetAdminiProcessData(void);
 void dds3AdminiCallSequence(s32 sequence, void *data, u32 datasize, s32 restore);
-s32 dds3AdminiStartSequence(dds3ProcessID_t *id);
-s32 dds3AdminiNeoProcess(dds3ProcessID_t *id);
-s32 dds3AdminiEndCheck(dds3ProcessID_t *id);
+ps2AddrS_t dds3AdminiStartSequence(dds3ProcessID_t *id);
+ps2AddrS_t dds3AdminiNeoProcess(dds3ProcessID_t *id);
+ps2AddrS_t dds3AdminiEndCheck(dds3ProcessID_t *id);
 void dds3AdminiNeoShutdown(dds3ProcessID_t *id);
 s32 fclEncycFreeEntry(const char *name);
 
@@ -148,7 +148,7 @@ s32 dds3AdminiGetPrevHistoryFlag(void)
     return work->FlagHistory[(work->HistoryPointer + 7) & 7];
 }
 
-s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
+ps2AddrS_t dds3AdminiStartSequence(dds3ProcessID_t *id)
 {
     dds3AdminiData_t *work;
     s32 (*startfunc)(s32 restored, void *reqdata);
@@ -204,10 +204,10 @@ s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
             printf(D_0054E8E0);
         }
     }
-    return (s32)dds3AdminiNeoProcess;
+    return EE_ADDR_S(dds3AdminiNeoProcess);
 }
 
-s32 dds3AdminiEndCheck(dds3ProcessID_t *id)
+ps2AddrS_t dds3AdminiEndCheck(dds3ProcessID_t *id)
 {
     dds3AdminiData_t *work = dds3GetProcessData(id);
     s32 sequence = work->NowSequence;
@@ -225,10 +225,10 @@ s32 dds3AdminiEndCheck(dds3ProcessID_t *id)
             work->NowSequence = -1;
         }
     }
-    return (s32)dds3AdminiStartSequence;
+    return EE_ADDR_S(dds3AdminiStartSequence);
 }
 
-s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
+ps2AddrS_t dds3AdminiNeoProcess(dds3ProcessID_t *id)
 {
     dds3AdminiData_t *work;
     s32 (*mainfunc)(void);
@@ -269,7 +269,7 @@ s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
     }
     if (work->Stat & 1) {
         if (work->NextSequence >= 0) {
-            return (s32)dds3AdminiEndCheck;
+            return EE_ADDR_S(dds3AdminiEndCheck);
         }
     }
     return 0;

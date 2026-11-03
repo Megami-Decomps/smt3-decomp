@@ -254,7 +254,7 @@ extern s32 nbGetHojoSkillWorkCnt(nbNegoProcessData_t *n);
 
 extern void nbPanelDraw(s32 flag);
 
-extern s32 nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeKaifukuPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                s32 type, s32 hp, s32 mp, u32 badstat);
 
 extern s32 nbCheckFlowUnit(nbNegoProcessData_t *n);
@@ -316,9 +316,9 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type);
+nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form, s32 type);
 
-nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame, s32 uniqueid, nbFormation_t *form, s32 type);
+nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame, ps2AddrS_t uniqueid, nbFormation_t *form, s32 type);
 
 s32 nbMakeBadDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 bad);
 

@@ -59,7 +59,7 @@ struct frFontData_t {
     void *ysht;
     GsFont_t **trans;
     struct frFontResource_t *resource;
-    u32 data;
+    ps2Addr_t data;
 };
 
 /* Free-list header stored immediately before each interface-pool payload. */
@@ -195,7 +195,7 @@ void frCreateUserFontPacket(s32 X, s32 Y, s32 Z, frTextHandle_t *pText,
 
 #define FR_FONT_GLYPH_HEIGHT_SHIFT 1
 
-void frCopyFontClutToVram(s32 GS_LocalAddr, s32 pClut);
+void frCopyFontClutToVram(s32 GS_LocalAddr, ps2AddrS_t pClut);
 
 extern void sceGsSetDefLoadImage(void *, s16, s16, s32, s32, s32, s16, s16);
 
@@ -205,7 +205,7 @@ extern volatile s32 dds3GsSema; /* semaphore handle shared with the IOP/interrup
 
 extern void FlushCache(s32);
 
-extern void sceGsExecLoadImage(void *, s32);
+extern void sceGsExecLoadImage(void *, ps2AddrS_t);
 
 extern s32 sceGsSyncPath(s32, s32);
 
@@ -422,7 +422,7 @@ void frSetMessageStepY(u32 StepY);
 
 u8 *MessageNumSearch(s32 Index, frTextBank_t *pData, s32 Size);
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 void frMessageReturnCode(frMsgInfo_t *pMsgInfo);
 
@@ -470,7 +470,7 @@ void frCreateVariableRequest(u8 VarNo, frMsgInfo_t *pMsgInfo);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern u32 strlen(const char *text);
 
@@ -584,7 +584,7 @@ extern u32 frFontEntryTable[];
 extern sdfGrOt_t sdfGrOtTable[];
 extern void *sdfGrAllocPacketBuff(u32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 
 void frCreateDrawFontPacket_20550848(s32 x, s32 y, s32 width, s32 height, u8 style,
     u32 color, u32 depth, s32 filtered, const frFontUvRect_t *uv,
@@ -653,7 +653,7 @@ void frCreateUserFontPacket(s32 X, s32 Y, s32 Z, frTextHandle_t *pText,
 }
 
 /* Upload an image to GS memory at the given buffer, serialized by the GS semaphore. */
-void frCopyFontClutToVram(s32 GS_LocalAddr, s32 pClut) {
+void frCopyFontClutToVram(s32 GS_LocalAddr, ps2AddrS_t pClut) {
     u8 loadImage[0x60];
 
     sceGsSetDefLoadImage(loadImage, (s16)GS_LocalAddr, 1, 0, 0, 0, 8, 2);
@@ -672,13 +672,13 @@ void frClearTexBuf(void) {
 
     byteCount = (u32)byteCount >> 1;
     allocation = sdfMemAllocDirect(byteCount);
-    pixels = (u8 *)sdfMemLock(allocation);
+    pixels = EE_ADDR_AS(u8 *, sdfMemLock(allocation));
     memset(pixels, 0x11, byteCount);
     sceGsSetDefLoadImage(loadImage, gFT.atlas.bufferBase, gFT.atlas.bufferWidth,
                          FR_FONT_PIXEL_FORMAT, 0, 0, gFT.atlas.width, gFT.atlas.height);
     WaitSema(dds3GsSema);
     FlushCache(0);
-    sceGsExecLoadImage(loadImage, (s32)pixels);
+    sceGsExecLoadImage(loadImage, EE_ADDR_S(pixels));
     sceGsSyncPath(0, 0);
     SignalSema(dds3GsSema);
     sdfMemFreeDirect(allocation);
@@ -769,7 +769,7 @@ void frAddFontStyle(
 
     if (pFontData == NULL) {
         if (DataMh != NULL) {
-            pFontData = (u8 *)sdfMemLock(DataMh);
+            pFontData = EE_ADDR_AS(u8 *, sdfMemLock(DataMh));
         }
     }
     entry = &gFT.entries[StyleNo];
@@ -805,7 +805,7 @@ void frAddFontStyle(
     entry->resource = (struct frFontResource_t *)(pFontData + sectionOffset);
     lookupOffset = entry->resourceHeader->lookupOffset;
     if (lookupOffset != 0) {
-        entry->data = (u32)(pFontData + lookupOffset);
+        entry->data = EE_ADDR((pFontData + lookupOffset));
     } else {
         entry->data = 0;
     }
@@ -859,7 +859,7 @@ void frSetFontClut(void) {
 
     do {
         u32 *outputWord = imageWords;
-        const u8 *sourceBytes = (const u8 *)(sourceWordOffset * FR_FONT_IMAGE_WORD_BYTES + (u32)sourceTable);
+        const u8 *sourceBytes = EE_ADDR_AS(const u8 *, (sourceWordOffset * FR_FONT_IMAGE_WORD_BYTES + EE_ADDR(sourceTable)));
         s32 wordCountdown = FR_FONT_IMAGE_LAST_WORD;
 
         do {
@@ -870,7 +870,7 @@ void frSetFontClut(void) {
             wordCountdown--;
         } while (wordCountdown >= 0);
 
-        frCopyFontClutToVram(*imageBuffer++, (s32)imageWords);
+        frCopyFontClutToVram(*imageBuffer++, EE_ADDR_S(imageWords));
         bufferIndex++;
         sourceWordOffset += FR_FONT_IMAGE_WORD_COUNT;
     } while (bufferIndex < FR_FONT_IMAGE_BUFFER_COUNT);
@@ -1776,7 +1776,7 @@ u8 *MessageNumSearch(s32 Index, frTextBank_t *pData, s32 Size) {
 
 void frCreateVariableRequest(u8 VarNo, frMsgInfo_t *pMsgInfo) {
     u8 encoded[3];
-    u8 *text = (u8 *)gVarStr[VarNo];
+    u8 *text = EE_ADDR_AS(u8 *, gVarStr[VarNo]);
     s32 length;
     u32 code;
     s32 i;
@@ -2218,7 +2218,7 @@ typedef struct
     u32 header[4];
     u64 words[32];
 } frFontDumpSlot_t;
-typedef char frFontDumpSlotSizeCheck[(sizeof(frFontDumpSlot_t) == 0x110) ? 1 : -1];
+PS2_SIZE_CHECK(frFontDumpSlotSizeCheck, frFontDumpSlot_t, 0x110);
 
 extern sdfDrawTag_t D_0056B690[2];
 extern frFontGsPacket_t D_0056B6D0[2];

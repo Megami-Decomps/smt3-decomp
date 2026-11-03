@@ -73,8 +73,8 @@ extern f32 atan2f(f32 y, f32 x);
 
 extern sdfTexPacket_t *sdfTexGetPacket(sdfTexHandle_t *aHandle);
 extern s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle);
-extern void sdf3DMakeDirectRefPacket(void *aPacket, u32 aData, s32 aLeng);
-extern void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdf3DMakeDirectRefPacket(void *aPacket, ps2Addr_t aData, s32 aLeng);
+extern void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 extern void sdfBillBoardMakeTMPacket(void *aPacket, const f32 *aTM);
 extern f32 sdfCos(f32 aRadius);
 extern f32 sdfSin(f32 aRadius);
@@ -85,7 +85,7 @@ extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
 extern u32 dds3GetFrameID(void);
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
-extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 extern u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor,
                               const void *aUVList, const void *aXYOffsetList,
@@ -186,7 +186,7 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node);
 billHandle_t *dds3BillboardCopy(const billHandle_t *hBillboard);
 
 
-billHandle_t *dds3BillboardCreate(s32 index, u32 data);
+billHandle_t *dds3BillboardCreate(s32 index, ps2Addr_t data);
 
 void dds3BillboardDelete(billHandle_t *hData);
 
@@ -201,12 +201,12 @@ void dds3Billboard_P2ASetNumber(billHandle_t *pP2A, s32 number);
 dds3BillResource_tag *dds3Billboard_P2AAnimDraw(billHandle_t *pP2A, dds3BillAnim_tag *pBillAnim);
 
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 /* Build a quad packet from paired colors and per-corner UV sets. */
 u32 *sdfMultiBillBoardMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
@@ -282,7 +282,7 @@ void dds3BillboardManagerInit(void) {
         row = D_00316FF0;
         do {
             void *data = sdfMemGetPtr(work->resrc);
-            *slot = dds3BillboardCreate(row->kind, (u32)data);
+            *slot = dds3BillboardCreate(row->kind, EE_ADDR(data));
             row++;
             sdfMemFreeDirect(work->resrc);
             slot++;
@@ -315,7 +315,7 @@ dds3BillResource_tag *BillboardLoadTex(void *pTex) {
     s32 i;
 
     allocation = sdfMemAllocDirect(0x44C);
-    batch = (sdfBillBoardBatch_t *)sdfMemLock(allocation);
+    batch = EE_ADDR_AS(sdfBillBoardBatch_t *, sdfMemLock(allocation));
     child = (dds3BillResource_tag *)((u8 *)batch + 0x400);
     child->count = 0;
     child->hMem = allocation;
@@ -391,9 +391,9 @@ void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
         sdfDrawTagInit(child->pBillTag[selected]);
         packet = sdfGrAllocPacketBuff(0x20);
         sdf3DMakeDirectRefPacket(packet,
-            (u32)sdfTexGetPacket(child->hTex),
+            EE_ADDR(sdfTexGetPacket(child->hTex)),
             sdfTexGetPacketLength(child->hTex));
-        sdfDrawTagLinkRef(child->pBillTag[selected], packet);
+        sdfDrawTagLinkRef(child->pBillTag[selected], EE_ADDR(packet));
         if ((u16)(child->type & 1) != 0) {
             SDF_VU0_LOADVECTOR(aViewTarget);
             SDF_VU0_LOADVECTOR_B(aViewEye);
@@ -1020,7 +1020,7 @@ dds3BillAnimResource_tag *dds3BillAnimLoadP2A(void *resourceData) {
     childCount = *texOffsets;
     texOffsets++;
     allocation = sdfMemAllocDirect(headerSize + childCount * sizeof(dds3BillResource_tag) + 0x1C);
-    block = (dds3BillAnimResource_tag *)sdfMemLock(allocation);
+    block = EE_ADDR_AS(dds3BillAnimResource_tag *, sdfMemLock(allocation));
     base = (u8 *)block + 0x1C;
     block->hMem = allocation;
     memcpy(base, resourceData, *(s32 *)resourceData);
@@ -1073,12 +1073,12 @@ void dds3BillboardCopyO(billHandle_t *obj, s32 *out) {
 
     if (obj->type == 1) {
         child = dds3Billboard_P2AAnimDraw(obj, obj->resolvedEntries);
-        out[0] = (s32)child->hTex;
+        out[0] = EE_ADDR_S(child->hTex);
         out[1] = *(s32 *)&child->uv;
     }
 }
 
-billHandle_t *dds3BillboardCreate(s32 index, u32 data) {
+billHandle_t *dds3BillboardCreate(s32 index, ps2Addr_t data) {
     billHandle_t *newobj;
 
     newobj = dds3BillboardFuncTable[index].create(data);
@@ -1236,9 +1236,9 @@ void dds3BillboardSetCondition(billHandle_t *hBillboard, s32 condition) {
     }
 }
 
-s32 dds3BillboardGetTex(billHandle_t *hBillboard) {
+ps2AddrS_t dds3BillboardGetTex(billHandle_t *hBillboard) {
     if (hBillboard->type == 0) {
-        return (s32)hBillboard->u.child->hTex;
+        return EE_ADDR_S(hBillboard->u.child->hTex);
     }
     return 0;
 }
@@ -1461,7 +1461,7 @@ void dds3P2APolygonSetPosition(dds3P2APolygon_tag *hData, s128 *pPos) {
 }
 
 void dds3P2APolygonSetScale(s32 hData, float scale) {
-    dds3BillboardSetScale(((dds3P2APolygon_tag *)hData)->hBillboard, scale, scale);
+    dds3BillboardSetScale((EE_ADDR_AS(dds3P2APolygon_tag *, hData))->hBillboard, scale, scale);
 }
 
 /* vu0 routine: copy the supplied 4x4 matrix to the instance's second matrix. */
@@ -1518,7 +1518,7 @@ extern void sdfMatSetMultiTex(sdfMat_t *, sdfTexHandle_t *);
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 #endif
 
 void dds3P2APolygonDraw(dds3P2APolygon_tag *instance) {

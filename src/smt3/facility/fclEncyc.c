@@ -269,7 +269,7 @@ void fclEncycSetTexHandle(s32 *texhandle)
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        g_pinst->texHandle[i] = (sdfTexHandle_t *)texhandle[i];
+        g_pinst->texHandle[i] = EE_ADDR_AS(sdfTexHandle_t *, texhandle[i]);
     }
 }
 
@@ -1795,7 +1795,7 @@ extern void lstInitListWindow(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 color, s8 style, lstListWindow_t *work);
 extern void cmpInitCursorLayout(void *cursor, s32 x, s32 y, s32 width,
                                 s32 height, s32 mode);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
 extern void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 width,
                          s32 height, s32 color, s8 type, s8 speed);
 
@@ -2102,7 +2102,7 @@ void FillIndex(s16 *pout, s32 num)
     }
 }
 
-extern void *memset(void *dst, int value, unsigned int size);
+extern void *memset(void *dst, int value, ps2Size_t size);
 
 void SetElem(fclencyceelem_t *pelem, datUnitWork_t *punit)
 {
@@ -3086,7 +3086,7 @@ void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
     model->first->speed = speed;
 }
 
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode);
 extern void ChangeDevilObjectReadMain(s32 index, fclEncyc_instance_tag *pinst);
 
@@ -3887,7 +3887,7 @@ void ReleaseDebug_fclEncyc(void)
 extern s8 dds3PadButtonState[];
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 width, s32 height);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr, const char *format, ...);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern const char *D_003323D8[4];
 extern char D_0054FCE0[];
 
@@ -4050,7 +4050,7 @@ extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,
                                   s32 width, s32 height);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr,
                           const char *format, ...);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 extern char D_0053D898[];
 
 s32 DebugProcViewkey(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
@@ -4122,7 +4122,7 @@ s32 DebugProcDispBound(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *debugW
     return 0;
 }
 
-extern void *memmove(void *dest, const void *source, unsigned int size);
+extern void *memmove(void *dest, const void *source, ps2Size_t size);
 
 void DebugRemoveRecord(s32 id)
 {

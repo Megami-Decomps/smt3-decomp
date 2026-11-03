@@ -656,18 +656,18 @@ f32 dds3GetRandFloatA(effRandState_t *name);
 
 /* Constructors copy one serialized parameter variant into its runtime owner. */
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(
-    effPCPWhirlwindPolyParam_t *pParam, u32 pTex);
+    effPCPWhirlwindPolyParam_t *pParam, ps2Addr_t pTex);
 
 effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreate(
-    effPCPWwSpherePolyParam_t *pParam, u32 pTex);
+    effPCPWwSpherePolyParam_t *pParam, ps2Addr_t pTex);
 
 extern dds3ScatterPolyListTexResource_tag *dds3ScatterPolyListTexResourceCopy(dds3ScatterPolyListTexResource_tag *hSplTexResSrc);
 
 effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(
-    effPCPWhirlwind2PolyParam_t *pParam, u32 pTex);
+    effPCPWhirlwind2PolyParam_t *pParam, ps2Addr_t pTex);
 
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(
-    effPCPWhirlwind3PolyParam_t *pParam, u32 pTex);
+    effPCPWhirlwind3PolyParam_t *pParam, ps2Addr_t pTex);
 
 extern effDebugPolyParams_t D_0056AD58;
 
@@ -683,7 +683,7 @@ extern u32 D_0031F2C0[];
 
 extern u8 D_0031F3E0[];
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -693,7 +693,7 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 /* Apply the primary VU0 matrix bank vf28-vf31 to basis vectors vf24-vf27,
  * then replace vf28-vf31 with the four transformed vectors. */
@@ -755,10 +755,10 @@ extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 extern s32 effMagaCylinderCalcColor(s32 color, s32 tint);
 extern f32 sdfAtan(f32 aX);
 extern void SetRotateMatrixAxis(f32 aAngle, const void *aAxis);
-extern void *memcpy(void *a, const void *b, u32 c);
-effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(const effPCPHamaCardSpiralParam_t *pParam, u32 pTex, void *pData);
-effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(const effPCPHamaCardSphereParam_t *pParam, u32 pTex, void *pData);
-effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(const effPCPHamaCardScatterParam_t *pParam, u32 pTex, void *pData);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
+effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(const effPCPHamaCardSpiralParam_t *pParam, ps2Addr_t pTex, void *pData);
+effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(const effPCPHamaCardSphereParam_t *pParam, ps2Addr_t pTex, void *pData);
+effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(const effPCPHamaCardScatterParam_t *pParam, ps2Addr_t pTex, void *pData);
 dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(u32 number, u32 face);
 void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *hPoly, const void *pMatrix);
 dds3ScatterPolyList_tag *dds3ScatterPolyListCreate(s32 face);
@@ -788,7 +788,7 @@ f32 *dds3WhirlwindPolyListGetUV(dds3WhirlwindPolyList_tag *hPoly, s32 index);
 
 effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(params, resource, particleParams)
     const effPCPHamaCardSpiralParam_t *params;
-    u32 resource;
+    ps2Addr_t resource;
     void *particleParams;
 {
     effPCPHamaCardSpiral_tag *work;
@@ -802,7 +802,7 @@ effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(params, resource, particleP
     u32 segments;
 
     handle = sdfMemAllocDirect(sizeof(effPCPHamaCardSpiral_tag) + params->number * sizeof(effPCPHamaCardSpiralPart_tag));
-    work = (effPCPHamaCardSpiral_tag *)sdfMemLock(handle);
+    work = EE_ADDR_AS(effPCPHamaCardSpiral_tag *, sdfMemLock(handle));
     work->pPart = (effPCPHamaCardSpiralPart_tag *)(work + 1);
     work->param = *params;
     work->abgr = EFF_SCATTER_NEUTRAL_COLOR;
@@ -825,7 +825,7 @@ effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(params, resource, particleP
         }
         count = work->AttachNum;
         handle = sdfMemAllocDirect(count * sizeof(u32));
-        handles = (effPartHandle_t **)sdfMemLock(handle);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(handle));
         work->hAttachMem = handle;
         work->pAttach = handles;
         work->pAttach[0] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, particleParams);
@@ -854,7 +854,7 @@ effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreatePCF(void *parameterTable)
 {
     return effPCPHamaCardSpiralCreate(
         dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK),
-        (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK),
+        EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)),
         dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
 
@@ -876,7 +876,7 @@ effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCopy(source)
         }
         count = work->AttachNum;
         allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
-        handles = (effPartHandle_t **)sdfMemLock(allocation);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(allocation));
         work->hAttachMem = allocation;
         work->pAttach = handles;
         for (i = 0; i < count; i++) {
@@ -1112,7 +1112,7 @@ void effPCPHamaCardSpiralSetScale(f32 hData, effPCPHamaCardSpiral_tag *scale)
 
 effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(params, resource, particleParams)
     const effPCPHamaCardSphereParam_t *params;
-    u32 resource;
+    ps2Addr_t resource;
     void *particleParams;
 {
     effPCPHamaCardSphere_tag *work;
@@ -1124,7 +1124,7 @@ effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(params, resource, particleP
     s32 delaySpread;
 
     allocation = sdfMemAllocDirect(sizeof(effPCPHamaCardSphere_tag) + params->number * sizeof(effPCPHamaCardSpherePart_tag));
-    work = (effPCPHamaCardSphere_tag *)sdfMemLock(allocation);
+    work = EE_ADDR_AS(effPCPHamaCardSphere_tag *, sdfMemLock(allocation));
     work->pPart = (effPCPHamaCardSpherePart_tag *)(work + 1);
     work->param = *params;
     work->abgr = EFF_SCATTER_NEUTRAL_COLOR;
@@ -1147,7 +1147,7 @@ effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(params, resource, particleP
         }
         count = work->AttachNum;
         allocation = sdfMemAllocDirect(count * sizeof(u32));
-        handles = (effPartHandle_t **)sdfMemLock(allocation);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(allocation));
         work->hAttachMem = allocation;
         work->pAttach = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -1170,7 +1170,7 @@ effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(params, resource, particleP
 
 effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreatePCF(void *parameterTable)
 {
-    return effPCPHamaCardSphereCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
+    return effPCPHamaCardSphereCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
 
 effPCPHamaCardSphere_tag *effPCPHamaCardSphereCopy(source)
@@ -1191,7 +1191,7 @@ effPCPHamaCardSphere_tag *effPCPHamaCardSphereCopy(source)
         }
         count = work->AttachNum;
         allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
-        handles = (effPartHandle_t **)sdfMemLock(allocation);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(allocation));
         work->hAttachMem = allocation;
         work->pAttach = handles;
         for (i = 0; i < count; i++) {
@@ -1429,7 +1429,7 @@ void effPCPHamaCardSphereSetScale(f32 hData, effPCPHamaCardSphere_tag *scale)
 
 effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(params, resource, particleParams)
     const effPCPHamaCardScatterParam_t *params;
-    u32 resource;
+    ps2Addr_t resource;
     void *particleParams;
 {
     effPCPHamaCardScatter_tag *work;
@@ -1441,7 +1441,7 @@ effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(params, resource, particl
     s32 delaySpread;
 
     allocation = sdfMemAllocDirect(sizeof(effPCPHamaCardScatter_tag) + params->particleCount * sizeof(effPCPHamaCardScatterPart_tag));
-    work = (effPCPHamaCardScatter_tag *)sdfMemLock(allocation);
+    work = EE_ADDR_AS(effPCPHamaCardScatter_tag *, sdfMemLock(allocation));
     work->pPart = (effPCPHamaCardScatterPart_tag *)(work + 1);
     work->param = *params;
     work->abgr = EFF_SCATTER_NEUTRAL_COLOR;
@@ -1464,7 +1464,7 @@ effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(params, resource, particl
         }
         count = work->AttachNum;
         allocation = sdfMemAllocDirect(count * sizeof(u32));
-        handles = (effPartHandle_t **)sdfMemLock(allocation);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(allocation));
         work->hAttachMem = allocation;
         work->pAttach = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -1487,7 +1487,7 @@ effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(params, resource, particl
 
 void effPCPHamaCardScatterCreatePCF(void *parameterTable)
 {
-    effPCPHamaCardScatterCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
+    effPCPHamaCardScatterCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)), dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
 
 effPCPHamaCardScatter_tag *effPCPHamaCardScatterCopy(source)
@@ -1511,7 +1511,7 @@ effPCPHamaCardScatter_tag *effPCPHamaCardScatterCopy(source)
         }
         count = work->AttachNum;
         allocation = sdfMemAllocDirect(count * EFF_SCATTER_WORD_BYTES);
-        handles = (effPartHandle_t **)sdfMemLock(allocation);
+        handles = EE_ADDR_AS(effPartHandle_t **, sdfMemLock(allocation));
         work->hAttachMem = allocation;
         work->pAttach = handles;
         for (i = 0; i < count; i++) {
@@ -1747,7 +1747,7 @@ dds3ScatterPolyList_tag *dds3ScatterPolyListCreate(s32 face) {
     auxWords = slotCount * EFF_SCATTER_POOL_AUX_WORDS_PER_SLOT;
     allocationBytes = (recordWords + auxWords) * EFF_SCATTER_WORD_BYTES + EFF_SCATTER_POOL_CONTROL_BYTES;
     allocation = sdfMemAllocDirect(allocationBytes);
-    recordBlock = (u32 *)sdfMemLock(allocation);
+    recordBlock = EE_ADDR_AS(u32 *, sdfMemLock(allocation));
     memset(recordBlock, 0, allocationBytes);
     pool = (dds3ScatterPolyList_tag *)(recordBlock + (recordWords + auxWords));
     pool->recordBase = (u8 *)recordBlock;
@@ -1776,7 +1776,7 @@ void dds3ScatterPolyListDelete(dds3ScatterPolyList_tag *hPoly)
 
 void dds3ScatterPolyListDraw(dds3ScatterPolyList_tag *hPoly) {
     f32 matrix[16];
-    sdfDrawTag_t *packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *packet = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     s32 remainingVertices;
     sdfGrOt_t *surface;
 
@@ -1847,7 +1847,7 @@ dds3ScatterPolyListTexResource_tag *dds3ScatterPolyListTexResourceCreate(u32 pTe
     dds3ScatterPolyListTexResource_tag *res;
 
     res = sdfChipAllocDirect(sizeof(dds3ScatterPolyListTexResource_tag));
-    res->textureHandle = sdfTexSet((TMX_HEADER_t *)(pTex));
+    res->textureHandle = sdfTexSet(EE_ADDR_AS(TMX_HEADER_t *, (pTex)));
     res->refCount = 1;
     return res;
 }
@@ -1868,10 +1868,10 @@ dds3ScatterPolyListTexResource_tag *dds3ScatterPolyListTexResourceCopy(dds3Scatt
 
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(src, resource)
     effPCPWhirlwindPolyParam_t *src;
-    u32 resource;
+    ps2Addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->particleCount * sizeof(effPCPWhirlwindPolyPart_tag) + sizeof(effPCPWhirlwindPoly_tag));
-    effPCPWhirlwindPoly_tag *inst = (effPCPWhirlwindPoly_tag *)sdfMemLock(allocation);
+    effPCPWhirlwindPoly_tag *inst = EE_ADDR_AS(effPCPWhirlwindPoly_tag *, sdfMemLock(allocation));
     effPCPWhirlwindPolyPart_tag *particle;
     u32 delayModulus;
     u32 count;
@@ -1908,7 +1908,7 @@ effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(src, resource)
 
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreatePCF(void *parameterTable)
 {
-    return effPCPWhirlwindPolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effPCPWhirlwindPolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)));
 }
 
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCopy(effPCPWhirlwindPoly_tag *work) {
@@ -2115,10 +2115,10 @@ void effPCPWhirlwindPolySetRotateMatrix(effPCPWhirlwindPoly_tag *hData, void *pM
 
 effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(src, resource)
     effPCPWhirlwind2PolyParam_t *src;
-    u32 resource;
+    ps2Addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->number * sizeof(effPCPWhirlwindPolyPart_tag) + sizeof(effPCPWhirlwind2Poly_tag));
-    effPCPWhirlwind2Poly_tag *inst = (effPCPWhirlwind2Poly_tag *)sdfMemLock(allocation);
+    effPCPWhirlwind2Poly_tag *inst = EE_ADDR_AS(effPCPWhirlwind2Poly_tag *, sdfMemLock(allocation));
     effPCPWhirlwindPolyPart_tag *particle;
     u32 delayModulus;
     u32 count;
@@ -2159,7 +2159,7 @@ effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(src, resource)
 
 effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreatePCF(void *parameterTable)
 {
-    return effPCPWhirlwind2PolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effPCPWhirlwind2PolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)));
 }
 
 effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCopy(effPCPWhirlwind2Poly_tag *work)
@@ -2386,10 +2386,10 @@ void effPCPWhirlwind2PolySetRotateMatrix(effPCPWhirlwind2Poly_tag *hData, void *
 
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(src, resource)
     effPCPWhirlwind3PolyParam_t *src;
-    u32 resource;
+    ps2Addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->number * sizeof(effPCPWhirlwindPolyPart_tag) + sizeof(effPCPWhirlwind3Poly_tag));
-    effPCPWhirlwind3Poly_tag *inst = (effPCPWhirlwind3Poly_tag *)sdfMemLock(allocation);
+    effPCPWhirlwind3Poly_tag *inst = EE_ADDR_AS(effPCPWhirlwind3Poly_tag *, sdfMemLock(allocation));
     effPCPWhirlwindPolyPart_tag *particle;
     u32 delayModulus;
     u32 count;
@@ -2430,7 +2430,7 @@ effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(src, resource)
 
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreatePCF(void *parameterTable)
 {
-    return effPCPWhirlwind3PolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effPCPWhirlwind3PolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)));
 }
 
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCopy(effPCPWhirlwind3Poly_tag *work)
@@ -2664,10 +2664,10 @@ void effPCPWhirlwind3PolySetRotateMatrix(effPCPWhirlwind3Poly_tag *hData, void *
 
 effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreate(src, resource)
     effPCPWwSpherePolyParam_t *src;
-    u32 resource;
+    ps2Addr_t resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->number * sizeof(effPCPWwSpherePolyPart_tag) + sizeof(effPCPWwSpherePoly_tag));
-    effPCPWwSpherePoly_tag *inst = (effPCPWwSpherePoly_tag *)sdfMemLock(allocation);
+    effPCPWwSpherePoly_tag *inst = EE_ADDR_AS(effPCPWwSpherePoly_tag *, sdfMemLock(allocation));
     effPCPWwSpherePolyPart_tag *particle;
     u32 delayModulus;
     u32 count;
@@ -2704,7 +2704,7 @@ effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreate(src, resource)
 
 effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreatePCF(void *parameterTable)
 {
-    return effPCPWwSpherePolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK));
+    return effPCPWwSpherePolyCreate(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK), EE_ADDR(dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK)));
 }
 
 effPCPWwSpherePoly_tag *effPCPWwSpherePolyCopy(effPCPWwSpherePoly_tag *work)
@@ -2896,7 +2896,7 @@ dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(u32 number, u32 face) {
 
     object = sdfChipAllocDirect(sizeof(dds3WhirlwindPolyList_tag));
     allocation = sdfMemAllocDirect(bytes);
-    cursor = (u8 *)sdfMemLock(allocation);
+    cursor = EE_ADDR_AS(u8 *, sdfMemLock(allocation));
     memset(cursor, 0, bytes);
     object->points = (f32 *)cursor;
     cursor += totalVectors * 16;
@@ -2958,7 +2958,7 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
     s32 particleIndex;
     sdfGrOt_t *surface;
 
-    packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    packet = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(packet);
     SDF_VU0_STOREIDENTITY(matrix);
     matrix[10] = matrix[5] = matrix[0] = object->scale;

@@ -267,10 +267,10 @@ typedef struct SdfDmaTag {
     u64 vifCommands;
 } QWORD_ALIGNED SdfDmaTag;
 
-void sdfDrawTagLink2(struct sdfDrawTag_t *aTag, u32 aHeadPacket,
-                          u32 aTailPacket);
+void sdfDrawTagLink2(struct sdfDrawTag_t *aTag, ps2Addr_t aHeadPacket,
+                          ps2Addr_t aTailPacket);
 
-void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 /* One 0x10-byte entry in the three-slot frame packet submission ring. */
 typedef struct sdfDrawReqRec_t {
@@ -325,7 +325,7 @@ typedef struct sdfGrStdDrawEnv_t {
 
 void sdfGrStdDrawEnvPredraw(sdfGrStdDrawEnv_t *aPre, s32 aEvenOdd);
 
-void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, u32 aRegs, s32 aNumRegs);
+void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, ps2Addr_t aRegs, s32 aNumRegs);
 
 void sdfGrSetDrawDefParmPacket(sdfGrRefGifPacketHeader_t *aDef);
 
@@ -357,11 +357,11 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void sdfDrawTagInit(sdfDrawTag_t *a);
 
-void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
-void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
-void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 void sdfGrOtFuncLinkToHead(sdfGrOt_t *aOt, sdfDrawTag_t *aTag);
 
@@ -398,7 +398,7 @@ void sdfGrSetDrawFrame(sdfGrDrawFrame_t *aFrame, s32 aFrameAddr, s32 aW, s32 aH,
 
 void sdfGrLinkStdDrawEnv(sdfDrawTag_t *aTag, sdfPreDrawTag_t *aPreDrawTag, sdfPreDrawHook_t *aEnv);
 
-void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt);
+void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, ps2Addr_t aEnv, sdfGrRefPacketHeader_t *aPkt);
 
 void sdfGrLinkDrawFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt);
 
@@ -421,7 +421,7 @@ void sdfDrawTagInit(sdfDrawTag_t *a) {
     a->texPacket[1] = 0;
 }
 
-void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket) {
+void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket) {
     s32 last;
 
     last = aTag->tail;
@@ -429,13 +429,13 @@ void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket) {
         aTag->head = aPacket;
     }
     else {
-        ((SdfDmaTag *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)last)->address = EE_PHYSICAL(aPacket);
+        (EE_ADDR_AS(SdfDmaTag *, last))->kind = SDF_DMA_TAG_NEXT_BYTE;
+        (EE_ADDR_AS(SdfDmaTag *, last))->address = EE_PHYSICAL(aPacket);
     }
     aTag->tail = aPacket;
 }
 
-void sdfDrawTagLink2(sdfDrawTag_t *aTag, u32 aHeadPacket, u32 aTailPacket) {
+void sdfDrawTagLink2(sdfDrawTag_t *aTag, ps2Addr_t aHeadPacket, ps2Addr_t aTailPacket) {
     s32 previousTailAddress;
 
     previousTailAddress = aTag->tail;
@@ -443,28 +443,28 @@ void sdfDrawTagLink2(sdfDrawTag_t *aTag, u32 aHeadPacket, u32 aTailPacket) {
         aTag->head = aHeadPacket;
     }
     else {
-        ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)previousTailAddress)->address = EE_PHYSICAL(aHeadPacket);
+        (EE_ADDR_AS(SdfDmaTag *, previousTailAddress))->kind = SDF_DMA_TAG_NEXT_BYTE;
+        (EE_ADDR_AS(SdfDmaTag *, previousTailAddress))->address = EE_PHYSICAL(aHeadPacket);
     }
     aTag->tail = aTailPacket;
 }
 
-void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, u32 aPacket) {
+void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, ps2Addr_t aPacket) {
     s32 previousTailAddress;
 
-    ((SdfDmaTag *)aPacket)->kind = SDF_DMA_TAG_REF_BYTE;
+    (EE_ADDR_AS(SdfDmaTag *, aPacket))->kind = SDF_DMA_TAG_REF_BYTE;
     previousTailAddress = aTag->tail;
     if (previousTailAddress == 0) {
         aTag->head = aPacket;
     }
     else {
-        ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)previousTailAddress)->address = EE_PHYSICAL(aPacket);
+        (EE_ADDR_AS(SdfDmaTag *, previousTailAddress))->kind = SDF_DMA_TAG_NEXT_BYTE;
+        (EE_ADDR_AS(SdfDmaTag *, previousTailAddress))->address = EE_PHYSICAL(aPacket);
     }
     aTag->tail = aPacket + SDF_QWORD_BYTES;
 }
 
-void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket) {
+void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket) {
     s32 previousTailAddress;
 
     previousTailAddress = aTag->tail;
@@ -472,23 +472,23 @@ void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket) {
         aTag->head = aPacket;
     }
     else {
-        ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)previousTailAddress)->address = EE_PHYSICAL(aPacket);
+        (EE_ADDR_AS(SdfDmaTag *, previousTailAddress))->kind = SDF_DMA_TAG_NEXT_BYTE;
+        (EE_ADDR_AS(SdfDmaTag *, previousTailAddress))->address = EE_PHYSICAL(aPacket);
     }
     aTag->tail = aPacket + SDF_DMA_EXTENDED_TAIL_OFFSET;
 }
 
-void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, u32 aPacket) {
+void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, ps2Addr_t aPacket) {
     s32 previousTailAddress;
 
-    ((SdfDmaTag *)aPacket)->kind = SDF_DMA_TAG_CALL_BYTE;
+    (EE_ADDR_AS(SdfDmaTag *, aPacket))->kind = SDF_DMA_TAG_CALL_BYTE;
     previousTailAddress = aTag->tail;
     if (previousTailAddress == 0) {
         aTag->head = aPacket;
     }
     else {
-        ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)previousTailAddress)->address = EE_PHYSICAL(aPacket);
+        (EE_ADDR_AS(SdfDmaTag *, previousTailAddress))->kind = SDF_DMA_TAG_NEXT_BYTE;
+        (EE_ADDR_AS(SdfDmaTag *, previousTailAddress))->address = EE_PHYSICAL(aPacket);
     }
     aTag->tail = aPacket + SDF_QWORD_BYTES;
 }
@@ -564,9 +564,9 @@ link:
 }
 
 sdfGrRefPacketHeader_t *sdfGrNewExPacket(SdfDmaTag *ex) {
-    sdfGrRefPacketHeader_t *referenceNode = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(SDF_DMA_REFERENCE_NODE_BYTES);
+    sdfGrRefPacketHeader_t *referenceNode = EE_ADDR_AS(sdfGrRefPacketHeader_t *, sdfGrAllocPacketBuff(SDF_DMA_REFERENCE_NODE_BYTES));
     u64 dmaHeader = ex->quadwordCount;
-    u32 payloadAddress = EE_PHYSICAL(EE_ADDR(ex) + SDF_QWORD_BYTES);
+    ps2Addr_t payloadAddress = EE_PHYSICAL(EE_ADDR(ex) + SDF_QWORD_BYTES);
     s64 packedAddress = (s64)payloadAddress << 32;
 
     dmaHeader |= SDF_DMA_TAG_REF_WORD;
@@ -587,7 +587,7 @@ SdfDmaTag *sdfGrAddExPacket(SdfDmaTag *p, SdfDmaTag *ex) {
 }
 
 void sdfGrJoinDrawTag(sdfDrawTag_t *aFore, sdfDrawTag_t *aBack) {
-    SdfDmaTag *tailTag = (SdfDmaTag *)aFore->tail;
+    SdfDmaTag *tailTag = EE_ADDR_AS(SdfDmaTag *, aFore->tail);
     u32 previousSource;
     u32 incomingSource;
 
@@ -595,7 +595,7 @@ void sdfGrJoinDrawTag(sdfDrawTag_t *aFore, sdfDrawTag_t *aBack) {
     incomingSource = aBack->lightPacket;
     if (previousSource != incomingSource) {
         if (incomingSource != 0) {
-            tailTag = sdfGrAddExPacket(tailTag, (SdfDmaTag *)incomingSource);
+            tailTag = sdfGrAddExPacket(tailTag, EE_ADDR_AS(SdfDmaTag *, incomingSource));
         } else {
             aBack->lightPacket = previousSource;
         }
@@ -604,7 +604,7 @@ void sdfGrJoinDrawTag(sdfDrawTag_t *aFore, sdfDrawTag_t *aBack) {
     incomingSource = aBack->fogPacket;
     if (previousSource != incomingSource) {
         if (incomingSource != 0) {
-            tailTag = sdfGrAddExPacket(tailTag, (SdfDmaTag *)incomingSource);
+            tailTag = sdfGrAddExPacket(tailTag, EE_ADDR_AS(SdfDmaTag *, incomingSource));
         } else {
             aBack->fogPacket = previousSource;
         }
@@ -620,14 +620,14 @@ void sdfGrInitExPacket(sdfDrawTag_t *p) {
 
     sourceTagAddress = p->fogPacket;
     if (sourceTagAddress != 0) {
-        referenceNode = sdfGrNewExPacket((SdfDmaTag *)sourceTagAddress);
+        referenceNode = sdfGrNewExPacket(EE_ADDR_AS(SdfDmaTag *, sourceTagAddress));
         priorHeadAddress = EE_PHYSICAL(p->head);
         p->head = EE_ADDR(referenceNode);
         *(u64 *)&referenceNode->nextTag = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
     }
     sourceTagAddress = p->lightPacket;
     if (sourceTagAddress != 0) {
-        referenceNode = sdfGrNewExPacket((SdfDmaTag *)sourceTagAddress);
+        referenceNode = sdfGrNewExPacket(EE_ADDR_AS(SdfDmaTag *, sourceTagAddress));
         priorHeadAddress = EE_PHYSICAL(p->head);
         p->head = EE_ADDR(referenceNode);
         *(u64 *)&referenceNode->nextTag = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
@@ -651,8 +651,8 @@ sdfDrawTag_t *sdfGrOtClose(sdfGrOt_t *aOt) {
         }
     }
     if (tail != NULL) {
-        ((SdfDmaTag *)tail->tail)->kind = SDF_DMA_TAG_END_BYTE;
-        ((SdfDmaTag *)tail->tail)->address = 0;
+        (EE_ADDR_AS(SdfDmaTag *, tail->tail))->kind = SDF_DMA_TAG_END_BYTE;
+        (EE_ADDR_AS(SdfDmaTag *, tail->tail))->address = 0;
     }
     return head;
 }
@@ -700,7 +700,7 @@ void sdfGrSetRegsPacketHeader(sdfGrPacketHeader_t *header, s32 payloadQwords) {
     header->giftag.regs = SDF_GIF_REGISTER_AD;
 }
 
-void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, u32 aRegs, s32 aNumRegs) {
+void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, ps2Addr_t aRegs, s32 aNumRegs) {
     aPacket->dmatag.data = SDF_DMA_CNT_ONE_WORD;
     aPacket->dmatag.reg = SDF_VIF_DIRECT_ONE_FLUSHE;
     aPacket->giftag.data = (u64)aNumRegs | SDF_GIF_PACKED_AD_BITS;
@@ -867,26 +867,26 @@ void sdfGrSetStdDrawEnv(sdfGrStdDrawEnv_t *aEnv, sdfGrFrameSet_t *aFrameSet) {
 
 void sdfGrLinkStdDrawEnv(sdfDrawTag_t *aTag, sdfPreDrawTag_t *aPreDrawTag, sdfPreDrawHook_t *aEnv) {
     sdfPreDrawTagLink(aPreDrawTag, aEnv);
-    sdfDrawTagLink(aTag, (s32)aEnv + SDF_QWORD_BYTES);
+    sdfDrawTagLink(aTag, EE_ADDR_S(aEnv) + SDF_QWORD_BYTES);
 }
 
 void sdfGrSetFrameMaskRGB(const u8 *aEnv, sdfGrRefGifPacketHeader_t *aHdr, s32 aContext) {
     if (aContext == 0) {
-        sdfGrSetRefGifPacket(aHdr, (u32)(aEnv + 0x180), 1);
+        sdfGrSetRefGifPacket(aHdr, EE_ADDR((aEnv + 0x180)), 1);
         return;
     }
-    sdfGrSetRefGifPacket(aHdr, (u32)(aEnv + 400), 1);
+    sdfGrSetRefGifPacket(aHdr, EE_ADDR((aEnv + 400)), 1);
 }
 
 void sdfGrSetFrameMaskReset(const u8 *aEnv, sdfGrRefGifPacketHeader_t *aHdr, s32 aContext) {
     if (aContext == 0) {
-        sdfGrSetRefGifPacket(aHdr, (u32)(aEnv + 0x70), 1);
+        sdfGrSetRefGifPacket(aHdr, EE_ADDR((aEnv + 0x70)), 1);
         return;
     }
-    sdfGrSetRefGifPacket(aHdr, (u32)(aEnv + 0xb0), 1);
+    sdfGrSetRefGifPacket(aHdr, EE_ADDR((aEnv + 0xb0)), 1);
 }
 
-void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt) {
+void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, ps2Addr_t aEnv, sdfGrRefPacketHeader_t *aPkt) {
     aPkt->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
     aPkt->dmaTag = SDF_DMA_TAG(aEnv + 0x1a0, 0x30000004);
     QUAD_ZERO(aPkt->nextTag);
@@ -1048,7 +1048,7 @@ void sdfGrDrawFrame(void)
         channel = sceDmaGetChan(1);
         HW_FIELD_OR(channel->chcr, 0xC0);
         sdfDispThreadFlag = 3;
-        sceDmaSend(channel, (void *)EE_PHYSICAL(drawTag->head));
+        sceDmaSend(channel, EE_ADDR_AS(void *, EE_PHYSICAL(drawTag->head)));
         sdfGrDrawFrameTagHead = drawTag->head;
         for (;;) {
             SleepThread();
@@ -1074,7 +1074,7 @@ void sdfGrDrawFrame(void)
             HW_FIELD_OR(channel->chcr, 0x100);
             SleepThread();
             resumeAddress = HW_FIELD_READ(channel->tadr);
-            transfer = (sdfStoreTransfer_t *)HW_FIELD_READ(channel->madr);
+            transfer = EE_ADDR_AS(sdfStoreTransfer_t *, HW_FIELD_READ(channel->madr));
             while ((HW_READ(VIF1_STAT) & 3) != 0) {
                 if (sdfDrawFrameFlag != 0) return;
             }
@@ -1093,7 +1093,7 @@ void sdfGrDrawFrame(void)
                     count = 0xF000;
                 }
                 remaining -= count;
-                sceDmaRecvN(channel, (void *)address, count);
+                sceDmaRecvN(channel, EE_ADDR_AS(void *, address), count);
                 SleepThread();
                 if (sdfDrawFrameFlag != 0) break;
                 address += count * 16;
@@ -1103,7 +1103,7 @@ void sdfGrDrawFrame(void)
             HW_FIELD_AND(channel->chcr, ~1);
             if (sdfDrawFrameFlag != 0) return;
             if (transfer->callback != NULL) transfer->callback(transfer->callbackParameter);
-            sceDmaSend(channel, (void *)resumeAddress);
+            sceDmaSend(channel, EE_ADDR_AS(void *, resumeAddress));
         }
         while ((HW_READ(VIF1_STAT) & 3) != 0) {
         }

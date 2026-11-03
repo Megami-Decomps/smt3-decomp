@@ -172,7 +172,7 @@ void func_001D2B70(void) {
 }
 
 extern void *sdfChipAllocDirect(s32 size);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
     s32 shutdownTimer, dds3ProcessFunc_t process, dds3ProcessFunc_t shutdown, void *data);
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
@@ -307,7 +307,7 @@ s32 pbGetMyCharcterRot(pbProcHandle_t *p) {
 void pbSetPanelModel(pbProcHandle_t *panel, s32 index) {
     pbMyChar_t *chara = panel->data.chara;
     if (panel != NULL) {
-        pbSetModelRotate((mdlObj_t *)pbGetPanelField(panel), 0.0f, D_00326C60[index], 0.0f);
+        pbSetModelRotate(EE_ADDR_AS(mdlObj_t *, pbGetPanelField(panel)), 0.0f, D_00326C60[index], 0.0f);
         chara->dir = index;
     }
 }
@@ -342,7 +342,7 @@ s32 pb_draw_exit_Process(dds3ProcessID_t *id)
         return -1;
     }
     if (work->flg != 0) {
-        tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+        tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
         sdfDrawTagInit(tag);
         sdf3DPrimLinkMat(tag, work->mat, NULL);
         angle = (f64)D_00327248.y + 0.02;
@@ -400,7 +400,7 @@ s32 pb_draw_mapbase_Process(dds3ProcessID_t *id)
         return -1;
     }
 
-    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdf3DPrimLinkMat(tag, work->mat, NULL);
 
@@ -637,7 +637,7 @@ INCLUDE_ASM(const s32, "pb/pbModel", func_001D35F0);
 
 extern sdfVector2_t D_00326D78[];
 extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
 
 #ifdef NON_MATCHING
 void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag)

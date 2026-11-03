@@ -8,8 +8,8 @@ extern u32 dds3CrossfadeFrame;
 extern u32 dds3CrossfadeFrameMax;
 extern sdfGrOt_t sdfGrOtTable[];
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
-extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, void *aPkt);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, ps2Addr_t aEnv, void *aPkt);
 extern void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 extern void *sdf2DAllocSprite(s32 aNumOfSpr);
 extern void *sdf2DGetPrimPtr(void *aPacketPtr);
@@ -27,7 +27,7 @@ extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s64 aGifRegs, s32 aNumOfPrim);
 extern void dds3RenderTextureOFF(void);
 extern void dds3FreeRenderTexture(void);
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 #include "sdk_libc.h"
 
 void *effPkt2DGetPrimPtr(void *pPkt) {
@@ -175,7 +175,7 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
         cursor += vertexCount;
     }
     *cursor = 0x1400000C;
-    while ((u32)++cursor & 15) {
+    while (EE_ADDR(++cursor) & 15) {
         *cursor = 0;
     }
     return packet;
@@ -270,7 +270,7 @@ void dds3CrossfadeRun(void)
         sdfDrawTagInit(list);
         reference = (void *)sdfGrAllocPacketBuff(0x20);
         frame = dds3GetFrameID();
-        sdfGrLinkDispFrameTex(list, (u32)dds3DrawEnv[frame].frameMaskSource, reference);
+        sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[frame].frameMaskSource), reference);
         {
             u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
 

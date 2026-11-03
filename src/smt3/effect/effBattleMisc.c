@@ -50,7 +50,7 @@ extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, s32 aId);
 extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *aRoot, s32 aId);
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 extern void effDebugPointDraw(sdfVector4_t *pPos);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 extern void effBTLModelLook(nbFormation_t *pFormation, sdfVector4_t *pTargetPos);
 extern void LookAtMatrix(const void *aTarget, const void *aEye, const void *aDown);
 extern void ReverseMatrix(void);

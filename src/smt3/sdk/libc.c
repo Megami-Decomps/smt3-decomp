@@ -83,7 +83,7 @@ extern s32 sceSifDmaStat(s32);
 
 extern s32 GetThreadId(void);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
 
@@ -263,7 +263,7 @@ extern void *__deregister_frame_info(void *fn);
 
 extern void free(void *ptr);
 
-extern void *malloc(u32 size);
+extern void *malloc(ps2Size_t size);
 
 extern void __malloc_lock(_reent *r);
 
@@ -318,7 +318,7 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
@@ -414,7 +414,7 @@ s32 atoi(const char *s) {
     return strtol(s, NULL, 10);
 }
 
-void *malloc(u32 size) {
+void *malloc(ps2Size_t size) {
     void *result;
 
     __malloc_lock(_impure_ptr);
@@ -479,7 +479,7 @@ void gcc2_compiled_(_reent *r, u32 needed)
     mallocChunkPrefix_t *oldTop = __malloc_av_.top;
     u32 oldSize = oldTop->size & ~3U;
     u8 *oldEnd = (u8 *)oldTop + oldSize;
-    s32 increment = needed + __malloc_top_pad + 16;
+    ps2AddrS_t increment = needed + __malloc_top_pad + 16;
     s32 correction;
     u32 misalignment;
     u8 *newTop;
@@ -491,7 +491,7 @@ void gcc2_compiled_(_reent *r, u32 needed)
     }
     newTop = _sbrk_r(r, increment);
     if (newTop == (void *)-1 ||
-        ((u32)newTop < (u32)oldEnd && oldTop != (void *)&__malloc_av_)) {
+        (EE_ADDR(newTop) < EE_ADDR(oldEnd) && oldTop != (void *)&__malloc_av_)) {
         return;
     }
     __malloc_current_mallinfo.arena += increment;
@@ -501,21 +501,21 @@ void gcc2_compiled_(_reent *r, u32 needed)
         if (__malloc_sbrk_base == (void *)-1) {
             __malloc_sbrk_base = newTop;
         } else {
-            __malloc_current_mallinfo.arena += (u32)newTop - (u32)oldEnd;
+            __malloc_current_mallinfo.arena += EE_ADDR(newTop) - EE_ADDR(oldEnd);
         }
-        misalignment = ((u32)newTop + 8) & 15;
+        misalignment = (EE_ADDR(newTop) + 8) & 15;
         if (misalignment != 0) {
             correction = 16 - misalignment;
             newTop += correction;
         } else {
             correction = 0;
         }
-        correction += (s32)(0x1000UL - (((u32)newTop + increment) & 0xFFF));
+        correction += (s32)(0x1000UL - ((EE_ADDR(newTop) + increment) & 0xFFF));
         secondBreak = _sbrk_r(r, correction);
         if (secondBreak == (void *)-1) return;
         __malloc_current_mallinfo.arena += correction;
         __malloc_av_.top = (mallocChunkPrefix_t *)newTop;
-        __malloc_av_.top->size = ((u32)secondBreak - (u32)newTop + correction) | 1;
+        __malloc_av_.top->size = (EE_ADDR(secondBreak) - EE_ADDR(newTop) + correction) | 1;
         if (oldTop != (void *)&__malloc_av_) {
             if (oldSize < 16) {
                 __malloc_av_.top->size = 1;
@@ -670,7 +670,7 @@ void qsort(void *array, u32 count, u32 size, qsortCompare_t compare)
     s32 sampleStep;
 
 sortLoop:
-    swapType = ((u32)base % sizeof(s64) || size % sizeof(s64)) ? 2 :
+    swapType = (EE_ADDR(base) % sizeof(s64) || size % sizeof(s64)) ? 2 :
                (size == sizeof(s64) ? 0 : 1);
     swapped = 0;
     if (count < 7) {
@@ -1142,7 +1142,7 @@ s32 func_002D6678(_reent *r, FILE *fp, const char *format, va_list ap)
     s32 base;
     s32 nonzero;
     u16 unsignedShort;
-    s32 signedWord;
+    ps2AddrS_t signedWord;
     u32 unsignedWord;
     s64 signedLong;
     u64 unsignedLong;
@@ -1337,7 +1337,7 @@ dispatch_conversion:
         case 'p':
             signByte = 0;
             flags |= 2;
-            signedWord = (s32)__builtin_va_arg(ap, void *);
+            signedWord = EE_ADDR_S(__builtin_va_arg(ap, void *));
             unsignedLong = (u64)(s64)signedWord;
             base = 2;
             conversion = 'x';
@@ -2543,7 +2543,7 @@ void _free_r(_reent *r, void *memory)
     if ((((mallocChunkPrefix_t *)((u8 *)next + nextSize))->size & 1) == 0) {
         size += nextSize;
         if (!isRemainder && next->forward ==
-            (mallocChunkPrefix_t *)((u32)&__malloc_av_.bins[0] - 8)) {
+            (mallocChunkPrefix_t *)(EE_ADDR(&__malloc_av_.bins[0]) - 8)) {
             forward = next->forward;
             forward->backward = chunk;
             isRemainder = 1;
@@ -2576,7 +2576,7 @@ void _free_r(_reent *r, void *memory)
             else if (scaled < 0x155) index = (size >> 15) + 0x77;
             else if (scaled < 0x555) index = (size >> 18) + 0x7C;
             else index = 0x7E;
-            bin = (mallocChunkPrefix_t *)((u32)&__malloc_av_.top + index * 8 - 8);
+            bin = EE_ADDR_AS(mallocChunkPrefix_t *, (EE_ADDR(&__malloc_av_.top) + index * 8 - 8));
             forward = bin->forward;
             if (forward == bin) {
                 __malloc_av_.bitmap |= (u32)(1L << (index / 4));
@@ -2620,10 +2620,10 @@ s32 _malloc_trim_r(_reent *r, u32 pad)
     }
     if (_sbrk_r(r, -(s32)extra) == (void *)-1) {
         newBreak = _sbrk_r(r, 0);
-        topSize = (s32)((u32)newBreak - (u32)__malloc_av_.top);
+        topSize = (s32)(EE_ADDR(newBreak) - EE_ADDR(__malloc_av_.top));
         if (topSize >= 16) {
             __malloc_current_mallinfo.arena =
-                (u32)newBreak - (u32)__malloc_sbrk_base;
+                EE_ADDR(newBreak) - EE_ADDR(__malloc_sbrk_base);
             __malloc_av_.top->size = topSize | 1;
         }
         __malloc_unlock(r);
@@ -2635,7 +2635,7 @@ s32 _malloc_trim_r(_reent *r, u32 pad)
     return 1;
 }
 
-extern void *memmove(void *destination, const void *source, u32 size);
+extern void *memmove(void *destination, const void *source, ps2Size_t size);
 extern void *memchr(const void *source, s32 character, u32 size);
 
 s32 __sfvwrite(FILE *fp, __suio *uio)

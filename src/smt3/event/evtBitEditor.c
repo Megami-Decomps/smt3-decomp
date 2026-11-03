@@ -18,7 +18,7 @@ extern char D_0054F738[];
 
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
+extern void sdfDrawTagLink(sdfDrawTag_t *, ps2Addr_t);
 
 extern void *sdfGrAllocPacketBuff(u32);
 
@@ -28,7 +28,7 @@ extern void dds3ConsPanelTagLink(sdfDrawTag_t *, s32, s32, s32, s32);
 
 extern s32 dds3SelectMenu(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
 
-extern void *memcpy(void *, const void *, u32);
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 void evtBitOff(s32 no);
 

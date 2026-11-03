@@ -216,12 +216,12 @@ void movieViewerSetFlags(void)
 
 void movieViewerInitRegs(void)
 {
-    movieViewerDebugFlag.regAddr = (u32)IPU_CTRL;
+    movieViewerDebugFlag.regAddr = EE_ADDR(IPU_CTRL);
     movieViewerDebugFlag.buffer = (u8 *)&D_00343E40;
     movieViewerSetFlags();
 }
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 #ifdef NON_MATCHING
 static s32 movieViewerIsRegister(u32 address)
@@ -237,16 +237,16 @@ void movieViewerDrawInfo(void)
     if (movieViewerDebugFlag.wordPending != 0) {
 #ifdef NON_MATCHING
         if (movieViewerIsRegister(movieViewerDebugFlag.regAddr)) {
-            movieViewerDebugFlag.word = HW_READ((volatile s32 *)movieViewerDebugFlag.regAddr);
+            movieViewerDebugFlag.word = HW_READ(EE_ADDR_AS(volatile s32 *, movieViewerDebugFlag.regAddr));
         } else
 #endif
         {
-            movieViewerDebugFlag.word = *(s32 *)movieViewerDebugFlag.regAddr;
+            movieViewerDebugFlag.word = *EE_ADDR_AS(s32 *, movieViewerDebugFlag.regAddr);
         }
     }
     if (movieViewerDebugFlag.blockPending != 0) {
 #ifdef NON_MATCHING
-        u32 base = (u32)movieViewerDebugFlag.buffer;
+        ps2Addr_t base = EE_ADDR(movieViewerDebugFlag.buffer);
         u64 end = (u64)base + sizeof(movieViewerDebugFlag.block);
         if (((u64)base < EE_REG_RANGE_END && end > EE_REG_RANGE_BASE) ||
             ((u64)base < GS_PRIV_REG_RANGE_END && end > GS_PRIV_REG_RANGE_BASE)) {
@@ -258,12 +258,12 @@ void movieViewerDrawInfo(void)
                 if (movieViewerIsRegister(address)) {
                     u32 aligned = address & ~3U;
                     if (aligned != lastRegister) {
-                        value = HW_READ((volatile u32 *)aligned);
+                        value = HW_READ(EE_ADDR_AS(volatile u32 *, aligned));
                         lastRegister = aligned;
                     }
                     movieViewerDebugFlag.block[i] = value >> ((address & 3) * 8);
                 } else {
-                    movieViewerDebugFlag.block[i] = *(u8 *)address;
+                    movieViewerDebugFlag.block[i] = *EE_ADDR_AS(u8 *, address);
                 }
             }
         } else

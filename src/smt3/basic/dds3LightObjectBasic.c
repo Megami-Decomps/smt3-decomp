@@ -58,7 +58,7 @@ typedef struct fldResourceLight_t
 } fldResourceLight_t;
 
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern s32 dds3InitPoseSet(dds3Basic_t *basic);

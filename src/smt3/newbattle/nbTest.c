@@ -347,7 +347,7 @@ extern datDevilAIData_t D_00527070;
 extern datDevilAIData_t D_00527114;
 extern datDevilAIData_t D_005271B8;
 
-extern void *memcpy(void *dest, const void *src, u32 size);
+extern void *memcpy(void *dest, const void *src, ps2Size_t size);
 
 void SetBossDummy(void)
 {
@@ -389,7 +389,7 @@ typedef union {
 } nbTestSkillId_t;
 
 extern void datSetDevilWork(s32 id, datUnitWork_t *work);
-extern void *memset(void *dest, s32 value, u32 size);
+extern void *memset(void *dest, s32 value, ps2Size_t size);
 
 #ifdef NON_MATCHING
 void nbSetBattleDummy(s32 count, void *devilList, void *skillList, void *passiveSkills,

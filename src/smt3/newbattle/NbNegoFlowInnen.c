@@ -321,7 +321,7 @@ s32 Flow5_2(nbNegoProcessData_t *n)
 }
 
 typedef struct nbKoukaPacket_t nbKoukaPacket_t;
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, ps2AddrS_t uniqueid,
                                                nbFormation_t *form, s32 motion);
 
 s32 Flow5_3(nbNegoProcessData_t *n)
@@ -495,9 +495,9 @@ s32 nbNegoFlowInnen(nbNegoProcessData_t *n)
 }
 
 /* Target-compiler checks of both complete record interpretations. */
-typedef char nbInnenRecSizeCheck[sizeof(nbInnenRec_t) == 60 ? 1 : -1];
-typedef char nbInnenPhaseSizeCheck[sizeof(nbInnenPhase_t) == 4 ? 1 : -1];
-typedef char nbInnenMotionSizeCheck[sizeof(nbInnenMotion_t) == 6 ? 1 : -1];
+PS2_SIZE_CHECK(nbInnenRecSizeCheck, nbInnenRec_t, 60);
+PS2_SIZE_CHECK(nbInnenPhaseSizeCheck, nbInnenPhase_t, 4);
+PS2_SIZE_CHECK(nbInnenMotionSizeCheck, nbInnenMotion_t, 6);
 typedef char nbInnenOffset_phase_record_id[((unsigned long)&((nbInnenRec_t *)0)->phase_record.id) == 0 ? 1 : -1];
 typedef char nbInnenOffset_phase_record_pid[((unsigned long)&((nbInnenRec_t *)0)->phase_record.pid) == 2 ? 1 : -1];
 typedef char nbInnenOffset_phase_record_eid[((unsigned long)&((nbInnenRec_t *)0)->phase_record.eid) == 4 ? 1 : -1];

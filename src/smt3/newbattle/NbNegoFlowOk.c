@@ -465,7 +465,7 @@ s32 Flow9_15(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0xA001C);
     datAddMaka(n->getmakka);
     if (n->negoskillid == 0x191) {
-        p = (u8 *)(datDevilTable[n->ework->id].race + (s32)DDS3_GBWK + 0x1CA8);
+        p = EE_ADDR_AS(u8 *, (datDevilTable[n->ework->id].race + EE_ADDR_S(DDS3_GBWK) + 0x1CA8));
         if (*p < 0xFF) {
             *p = *p + 1;
         }

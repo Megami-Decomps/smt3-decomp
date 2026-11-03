@@ -68,7 +68,7 @@ extern void dds3MultiBillboardLinkOt(void);
 extern void dds3CrossfadeRun(void);
 extern void Eve_EffectDraw(void);
 
-effNode_t *dds3EffectCreate(u16 type, u16 arg, s32 param);
+effNode_t *dds3EffectCreate(u16 type, u16 arg, ps2AddrS_t param);
 void dds3EffectDataRevision(effResourceHeader_t *header);
 
 extern u8 dds3EffectBase[];
@@ -85,7 +85,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          dds3ProcessFunc_t deleteExit, void *p);
 extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 s32 dds3EffectManagerRunF(dds3ProcessID_t *ProcessID);
 s32 dds3EffectManagerRun(dds3ProcessID_t *ProcessID);
 void dds3EffectManagerExit(void);
@@ -109,12 +109,12 @@ void dds3EffectManagerExit(void) {
 
 s32 dds3EffectManagerRunF(dds3ProcessID_t *ProcessID)
 {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfGrOt_t *ot;
 
     sdfDrawTagInit(list);
     {
-        u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+        u64 *packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
 
         packet[0] = 3;
         packet[1] = 0x5000000310000000ULL;
@@ -156,7 +156,7 @@ u32 dds3EffectPCFGetState(void) {
     return 1;
 }
 
-effNode_t *dds3EffectCreate(u16 type, u16 arg, s32 param)
+effNode_t *dds3EffectCreate(u16 type, u16 arg, ps2AddrS_t param)
 {
     effNode_t *node = sdfChipAllocDirect(sizeof(effNode_t));
 
@@ -228,16 +228,16 @@ effNode_t *dds3EffectLoad(effResourceHeader_t *pD3P)
         printf("old version!![%f]\n", pD3P->version);
         dds3EffectDataRevision(pD3P);
     }
-    node = dds3EffectCreate((u16)pD3P->type, (u16)pD3P->arg, (s32)pD3P->payload);
+    node = dds3EffectCreate((u16)pD3P->type, (u16)pD3P->arg, EE_ADDR_S(pD3P->payload));
     if (pD3P->version <= 1.02f) {
         switch (node->type) {
         case 0:
         case 1:
-            instance = (effLegacyInstance_t *)node->instance;
+            instance = EE_ADDR_AS(effLegacyInstance_t *, node->instance);
             SDF_VU0_STOREIDENTITY(&instance->matrixB0);
             break;
         case 2:
-            instance = (effLegacyInstance_t *)node->instance;
+            instance = EE_ADDR_AS(effLegacyInstance_t *, node->instance);
             SDF_VU0_STOREIDENTITY(&instance->matrix20);
             break;
         }
@@ -253,7 +253,7 @@ effNode_t *dds3EffectFileLoad(const char *pFilename) {
 
     printf("d3p file read...[%s]\n", pFilename);
     resourceHandle = sdfDevLoadFileEx(pFilename, &resolvedId, 0);
-    node = dds3EffectLoad((effResourceHeader_t *)resolvedId);
+    node = dds3EffectLoad(EE_ADDR_AS(effResourceHeader_t *, resolvedId));
     sdfMemFreeDirect(resourceHandle);
     return node;
 }

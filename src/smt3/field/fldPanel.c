@@ -97,7 +97,7 @@ ret0:
     return 0;
 }
 
-s32 fldInputPanelProcess1(dds3ProcessID_t *id)
+ps2AddrS_t fldInputPanelProcess1(dds3ProcessID_t *id)
 {
     fldInputPanelProcessData_t *work = sdfChipAllocDirect(8);
 
@@ -106,7 +106,7 @@ s32 fldInputPanelProcess1(dds3ProcessID_t *id)
     work->Draw = 0;
     work->reserved = 0;
     dds3SetProcessData(id, work);
-    return (s32)fldInputPanelProcess2;
+    return EE_ADDR_S(fldInputPanelProcess2);
 }
 
 void fldInputPanelShutdown(dds3ProcessID_t *id)
@@ -226,7 +226,7 @@ s32 fldAddressProcess2(dds3ProcessID_t *id)
     return 0;
 }
 
-s32 fldAddressProcess1(dds3ProcessID_t *id)
+ps2AddrS_t fldAddressProcess1(dds3ProcessID_t *id)
 {
     fldAddressProcessData_t *work;
 
@@ -236,7 +236,7 @@ s32 fldAddressProcess1(dds3ProcessID_t *id)
     work->unk08 = 0;
     work->unk0C = 0;
     dds3SetProcessData(id, work);
-    return (s32)fldAddressProcess2;
+    return EE_ADDR_S(fldAddressProcess2);
 }
 
 void fldAddressShutdown(dds3ProcessID_t *id)

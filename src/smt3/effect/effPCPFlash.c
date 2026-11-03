@@ -788,9 +788,9 @@ extern sdfGrOt_t *D_0031F2A8[];
 
 extern sdfGrOt_t *D_0031F238[];
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
-extern void *memset(void *, s32, u32);
+extern void *memset(void *, s32, ps2Size_t);
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -798,7 +798,7 @@ struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
  * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
 s32 sdfGrAllocPacketBuff(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 /* Load axis-angle rotation into VU0 vf28-vf31. */
 void SetRotateMatrixAxis(f32 aAngle, const sdfVector3_t *aAxis);
@@ -1008,7 +1008,7 @@ void dds3FlashPolyListHDelete(dds3FlashPolyList_t *hPoly);
 effPCPFlashPolySphere2_tag *effPCPFlashPolySphere2Create(effPCPFlashPolySphere2Param_t *pParam)
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(pParam->number * sizeof(effPCPFlashPolySphere2Part_tag) + sizeof(effPCPFlashPolySphere2_tag));
-    effPCPFlashPolySphere2_tag *work = (effPCPFlashPolySphere2_tag *)sdfMemLock(allocation);
+    effPCPFlashPolySphere2_tag *work = EE_ADDR_AS(effPCPFlashPolySphere2_tag *, sdfMemLock(allocation));
     dds3FlashPolyList_t *record;
     u32 i;
 
@@ -1191,7 +1191,7 @@ void effPCPFlashPolySphere2Draw(effPCPFlashPolySphere2_tag *hData) {
 
 effPCPFlashPolySphere_tag *effPCPFlashPolySphereCreate(effPCPFlashPolySphereParam_t *src) {
     sdfMemHandle_t *handle = sdfMemAllocDirect(src->number * sizeof(effPCPFlashPolySpherePart_tag) + sizeof(effPCPFlashPolySphere_tag));
-    effPCPFlashPolySphere_tag *work = (effPCPFlashPolySphere_tag *)sdfMemLock(handle);
+    effPCPFlashPolySphere_tag *work = EE_ADDR_AS(effPCPFlashPolySphere_tag *, sdfMemLock(handle));
     dds3FlashPolyList_t *record;
     u32 range;
     u32 particleIndex;
@@ -1453,7 +1453,7 @@ void effPCPFlashPolySphereDraw(effPCPFlashPolySphere_tag *hData) {
 effPCPFlashPolyRing_tag *effPCPFlashPolyRingCreate(effPCPFlashPolyRingParam_t *pParam)
 {
     sdfMemHandle_t *handle = sdfMemAllocDirect(pParam->number * sizeof(effPCPFlashPolyRingExp2Part_tag) + sizeof(effPCPFlashPolyRing_tag));
-    effPCPFlashPolyRing_tag *work = (effPCPFlashPolyRing_tag *)sdfMemLock(handle);
+    effPCPFlashPolyRing_tag *work = EE_ADDR_AS(effPCPFlashPolyRing_tag *, sdfMemLock(handle));
     dds3FlashPolyList_t *record;
     f32 angle;
     f32 step;
@@ -1692,7 +1692,7 @@ void effPCPFlashPolyRingDraw(effPCPFlashPolyRing_tag *hData) {
 effPCPFlashPolyPipe_tag *effPCPFlashPolyPipeCreate(effPCPFlashPolyPipeParam_t *params)
 {
     sdfMemHandle_t *handle = sdfMemAllocDirect(params->particleCount * sizeof(effPCPFlashPolyPipePart_tag) + sizeof(effPCPFlashPolyPipe_tag));
-    effPCPFlashPolyPipe_tag *work = (effPCPFlashPolyPipe_tag *)sdfMemLock(handle);
+    effPCPFlashPolyPipe_tag *work = EE_ADDR_AS(effPCPFlashPolyPipe_tag *, sdfMemLock(handle));
     dds3FlashPolyList_t *record;
     f32 angle;
     f32 step;
@@ -1945,7 +1945,7 @@ effPCPFlashPolyRingExp_tag *effPCPFlashPolyRingExpCreate(effPCPFlashPolyRingExpP
     u32 i;
 
     handle = sdfMemAllocDirect((u32)pParam->number * 16 + 0x80);
-    block = (effFlashOrbitArcBlock_t *)sdfMemLock(handle);
+    block = EE_ADDR_AS(effFlashOrbitArcBlock_t *, sdfMemLock(handle));
     ring = &block->header;
     memcpy(ring, pParam, 0x58);
     ring->pPart = block->parts;
@@ -2204,7 +2204,7 @@ void effPCPFlashPolyRingExpDraw(effPCPFlashPolyRingExp_tag *hData)
 effPCPFlashPolySphereExp_tag *effPCPFlashPolySphereExpCreate(effPCPFlashPolySphereExpParam_t *pParam)
 {
     sdfMemHandle_t *handle = sdfMemAllocDirect(pParam->particleCount * sizeof(effPCPFlashPolySphereExpPart_tag) + sizeof(effPCPFlashPolySphereExp_tag));
-    effPCPFlashPolySphereExp_tag *work = (effPCPFlashPolySphereExp_tag *)sdfMemLock(handle);
+    effPCPFlashPolySphereExp_tag *work = EE_ADDR_AS(effPCPFlashPolySphereExp_tag *, sdfMemLock(handle));
     dds3FlashPolyList_t *record;
     u32 range;
     u32 i;
@@ -2459,7 +2459,7 @@ void effPCPFlashPolySphereExpDraw(effPCPFlashPolySphereExp_tag *hData) {
 effPCPFlashPolySphere2Exp_tag *effPCPFlashPolySphere2ExpCreate(effPCPFlashPolySphere2ExpParam_t *pParam)
 {
     sdfMemHandle_t *handle = sdfMemAllocDirect(pParam->particleCount * sizeof(effPCPFlashPolyRingExpPart_tag) + sizeof(effPCPFlashPolySphere2Exp_tag));
-    effPCPFlashPolySphere2Exp_tag *work = (effPCPFlashPolySphere2Exp_tag *)sdfMemLock(handle);
+    effPCPFlashPolySphere2Exp_tag *work = EE_ADDR_AS(effPCPFlashPolySphere2Exp_tag *, sdfMemLock(handle));
     dds3FlashPolyList_t *record;
     u32 i;
 
@@ -2649,7 +2649,7 @@ void effPCPFlashPolySphere2ExpDraw(effPCPFlashPolySphere2Exp_tag *hData) {
 effPCPFlashPolySphere3_tag *effPCPFlashPolySphere3Create(effFlashRadialStripParam_t *pParam)
 {
     sdfMemHandle_t *handle = sdfMemAllocDirect(pParam->particleCount * sizeof(effPCPFlashPolySphere3Part_tag) + sizeof(effPCPFlashPolySphere3_tag));
-    effPCPFlashPolySphere3_tag *work = (effPCPFlashPolySphere3_tag *)sdfMemLock(handle);
+    effPCPFlashPolySphere3_tag *work = EE_ADDR_AS(effPCPFlashPolySphere3_tag *, sdfMemLock(handle));
     dds3FlashPolyList_t *record;
     u32 range;
     u32 i;
@@ -2908,7 +2908,7 @@ void effPCPFlashPolySphere3Draw(effPCPFlashPolySphere3_tag *hData) {
 effPCPFlashPolyRingExp2_tag *effPCPFlashPolyRingExp2Create(effPCPFlashPolyRingExp2Param_t *pParam)
 {
     sdfMemHandle_t *handle = sdfMemAllocDirect(pParam->number * sizeof(effPCPFlashPolyRingExp2Part_tag) + sizeof(effPCPFlashPolyRingExp2_tag));
-    effPCPFlashPolyRingExp2_tag *work = (effPCPFlashPolyRingExp2_tag *)sdfMemLock(handle);
+    effPCPFlashPolyRingExp2_tag *work = EE_ADDR_AS(effPCPFlashPolyRingExp2_tag *, sdfMemLock(handle));
     dds3FlashPolyList_t *record;
     f32 angle;
     f32 step;
@@ -3155,7 +3155,7 @@ void effPCPFlashPolyRingExp2Draw(effPCPFlashPolyRingExp2_tag *hData) {
 effPCPFlashPolyCircle_tag *effPCPFlashPolyCircleCreate(effPCPFlashPolyCircleParam_t *pParam)
 {
     sdfMemHandle_t *handle = sdfMemAllocDirect(pParam->particleCount * sizeof(effPCPFlashPolyRingExpPart_tag) + sizeof(effPCPFlashPolyCircle_tag));
-    effPCPFlashPolyCircle_tag *work = (effPCPFlashPolyCircle_tag *)sdfMemLock(handle);
+    effPCPFlashPolyCircle_tag *work = EE_ADDR_AS(effPCPFlashPolyCircle_tag *, sdfMemLock(handle));
     dds3FlashPolyList_t *record;
     u32 i;
 
@@ -3355,7 +3355,7 @@ effPCPFlashPolyRingExpH_tag *effPCPFlashPolyRingExpHCreate(effPCPFlashPolyRingEx
     u32 i;
 
     allocation = sdfMemAllocDirect(pParam->count * EFF_RING_VERTEX_BYTES + EFF_RING_HEADER_BYTES);
-    block = (effRingBlock_t *)sdfMemLock(allocation);
+    block = EE_ADDR_AS(effRingBlock_t *, sdfMemLock(allocation));
     ring = &block->header;
     memcpy(ring, pParam, EFF_RING_PARAM_BYTES);
     ring->pPart = &block->vertices[0];
@@ -3629,7 +3629,7 @@ dds3FlashPolyList_t *dds3FlashPolyListCreate(u32 face) {
     recordBytes = ((recordBytes & 0xF) != 0 ? quads + 1 : quads) << 4;
     size = recordBytes + EFF_POOL_HEADER_BYTES;
     handle = sdfMemAllocDirect(size);
-    block = (u8 *)sdfMemLock(handle);
+    block = EE_ADDR_AS(u8 *, sdfMemLock(handle));
     memset(block, 0, size);
     pool = (dds3FlashPolyList_t *)(block + recordBytes);
     pool->pVertex = (u8 *)block;
@@ -3660,7 +3660,7 @@ void dds3FlashPolyListDraw(dds3FlashPolyList_t *work)
     u64 *packet;
     sdfDrawTag_t *stateList;
 
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES));
     sdfDrawTagInit(list);
     SDF_VU0_STOREIDENTITY(matrix);
     matrix[0] = work->scale;
@@ -3694,9 +3694,9 @@ void dds3FlashPolyListDraw(dds3FlashPolyList_t *work)
     if (work->blend < EFF_DIRECT_SURFACE_COUNT) {
         D_0031F228[work->blend]->regFunc(D_0031F228[work->blend], list);
     } else {
-        stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+        stateList = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES));
         sdfDrawTagInit(stateList);
-        packet = (u64 *)sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES);
+        packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES));
         packet[4] = 6;
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -3705,7 +3705,7 @@ void dds3FlashPolyListDraw(dds3FlashPolyList_t *work)
         packet[5] = 0x42;
         sdfDrawTagLink(stateList, EE_ADDR(packet));
         (*effFlashOtNode).regFunc(&(*effFlashOtNode), stateList);
-        packet = (u64 *)sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES);
+        packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES));
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
@@ -3751,7 +3751,7 @@ dds3FlashPolyList_t *dds3FlashPolyList2Create(s32 face) {
     colorWordCount = vertexCount;
     size = (positionWordCount + colorWordCount) * 4 + EFF_POOL_HEADER_BYTES;
     handle = sdfMemAllocDirect(size);
-    block = (u32 *)sdfMemLock(handle);
+    block = EE_ADDR_AS(u32 *, sdfMemLock(handle));
     memset(block, 0, size);
     pool = (dds3FlashPolyList_t *)(block + (positionWordCount + colorWordCount));
     pool->pVertex = (u8 *)block;
@@ -3776,7 +3776,7 @@ void dds3FlashPolyList2Delete(dds3FlashPolyList_t *hPoly) {
 void dds3FlashPolyList2Draw(dds3FlashPolyList_t *pool)
 {
     f32 matrix[EFF_MATRIX_WORD_COUNT];
-    sdfDrawTag_t *packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+    sdfDrawTag_t *packet = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES));
     s32 remainingVertices;
     sdfGrOt_t *surface;
 
@@ -3833,7 +3833,7 @@ dds3FlashPolyList_t *dds3FlashPolyList3Create(s32 face) {
     colorWordCount = face * EFF_QUAD_VERTEX_COUNT;
     size = (positionWordCount + colorWordCount) * 4 + EFF_POOL_HEADER_BYTES;
     handle = sdfMemAllocDirect(size);
-    block = (u32 *)sdfMemLock(handle);
+    block = EE_ADDR_AS(u32 *, sdfMemLock(handle));
     memset(block, 0, size);
     pool = (dds3FlashPolyList_t *)(block + (positionWordCount + colorWordCount));
     pool->pVertex = (u8 *)block;
@@ -3858,7 +3858,7 @@ void dds3FlashPolyList3Delete(dds3FlashPolyList_t *hPoly) {
 void dds3FlashPolyList3Draw(dds3FlashPolyList_t *pool)
 {
     f32 matrix[EFF_MATRIX_WORD_COUNT];
-    sdfDrawTag_t *packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+    sdfDrawTag_t *packet = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES));
     s32 remainingVertices;
     sdfGrOt_t *surface;
 
@@ -3923,7 +3923,7 @@ void dds3FlashPolyListHDraw(dds3FlashPolyList_t *work)
     u64 *packet;
     sdfDrawTag_t *stateList;
 
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES));
     sdfDrawTagInit(list);
     VU0_COPY_MATRIX(matrix, work->matrix);
     matrix[12] = work->pos[0];
@@ -3954,9 +3954,9 @@ void dds3FlashPolyListHDraw(dds3FlashPolyList_t *work)
     if (work->blend < EFF_DIRECT_SURFACE_COUNT) {
         D_0031F2A8[work->blend]->regFunc(D_0031F2A8[work->blend], list);
     } else {
-        stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
+        stateList = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES));
         sdfDrawTagInit(stateList);
-        packet = (u64 *)sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES);
+        packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES));
         packet[4] = 6;
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -3965,7 +3965,7 @@ void dds3FlashPolyListHDraw(dds3FlashPolyList_t *work)
         packet[5] = 0x42;
         sdfDrawTagLink(stateList, EE_ADDR(packet));
         (*effFlashOtNode).regFunc(&(*effFlashOtNode), stateList);
-        packet = (u64 *)sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES);
+        packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(EFF_STATE_PACKET_BYTES));
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;

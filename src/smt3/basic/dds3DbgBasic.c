@@ -11,7 +11,7 @@ extern s8 dds3PadButtonState[];
 
 extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, ...);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 extern void *sdfGrAllocPacketBuff(u32 aSize);
 
@@ -25,7 +25,7 @@ extern s32 dds3SceneBasicExistBasic(dds3Basic_t *scene, dds3Basic_t *target);
 
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
 
-extern s32 evtSceneDispProcess(void *id);
+extern ps2AddrS_t evtSceneDispProcess(void *id);
 
 extern s32 DispBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *tag);
 
@@ -97,7 +97,7 @@ u32 DispObjectBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *tag) {
     return 1;
 }
 
-s32 dds3DebugBasic(dds3ProcessID_t *id) {
+ps2AddrS_t dds3DebugBasic(dds3ProcessID_t *id) {
     s32 width;
     dds3Basic_t *node;
     sdfGrOt_t *surface;
@@ -109,7 +109,7 @@ s32 dds3DebugBasic(dds3ProcessID_t *id) {
     }
     node = (dds3Basic_t *)dds3GetProcessData(id);
     if (dds3SceneBasicExistBasic(dds3GetActiveScene(), (dds3Basic_t *)node) == 0) {
-        return (s32)evtSceneDispProcess;
+        return EE_ADDR_S(evtSceneDispProcess);
     }
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
@@ -126,7 +126,7 @@ s32 dds3DebugBasic(dds3ProcessID_t *id) {
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, spriteList);
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
     if (dds3PadButtonState[0x33] < 0) {
-        return (s32)evtSceneDispProcess;
+        return EE_ADDR_S(evtSceneDispProcess);
     }
     return 0;
 }

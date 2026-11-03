@@ -175,6 +175,10 @@ typedef struct effMagatuhiHistoryParams_t {
 } effMagatuhiHistoryParams_t;
 
 /* History arrays precede this 0x38-byte owner in one retained allocation. */
+/* One row of the position and angle tables, so an address can be cast to a
+ * row pointer through a type name. */
+typedef f32 effMagatuhiRow_t[4];
+
 typedef struct dds3MagatuhiBill_tag {
     s32 count;
     u16 historyCount;
@@ -468,7 +472,7 @@ extern s32 effDebugPosX;
 
 extern u32 effDebugPosY;
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 /* Fixed-scale form of the SDK's four-word RGBA packing scratch buffer. */
 static inline u32 PackMagatuhiTrailColor(void) {
@@ -491,9 +495,9 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
-void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 /* Build XYZ and attribute VIF streams; return the packet address.
  * vertexCount must be positive; n retains its native count/byte-size reuse. */
@@ -501,7 +505,7 @@ void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
 u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor, const void *aUVList, const void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
 
 /* Round payloadBytes up to quadwords and pair FLUSHA with VIF DIRECT. */
-void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *aPacket, u32 aData, s32 aLeng);
+void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *aPacket, ps2Addr_t aData, s32 aLeng);
 
 f32 sdfCos(f32 aRadius);
 
@@ -762,20 +766,20 @@ dds3MagatuhiBill_tag *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 h
     writeIndices = values + (count << 2);
     validCounts = writeIndices + (count << 1);
     angleValues = validCounts + (count << 1);
-    resource = (dds3MagatuhiBill_tag *)(angleValues + (count << 4));
+    resource = EE_ADDR_AS(dds3MagatuhiBill_tag *, (angleValues + (count << 4)));
 
     resource->count = count;
     resource->historyCount = historyCount;
     resource->historyAngleStep = historyAngleStep;
     resource->historyDistanceScale = historyDistanceScale;
     resource->drawBucket = param;
-    resource->positions = (f32 (*)[4])positions;
-    resource->colorTable = (u32 *)colorTable;
-    resource->historyScalars = (f32 *)historyScalars;
-    resource->slotColors = (u32 *)values;
-    resource->writeIndices = (u16 *)writeIndices;
-    resource->validCounts = (u16 *)validCounts;
-    resource->angleRows = (f32 (*)[4])angleValues;
+    resource->positions = EE_ADDR_AS(effMagatuhiRow_t *, positions);
+    resource->colorTable = EE_ADDR_AS(u32 *, colorTable);
+    resource->historyScalars = EE_ADDR_AS(f32 *, historyScalars);
+    resource->slotColors = EE_ADDR_AS(u32 *, values);
+    resource->writeIndices = EE_ADDR_AS(u16 *, writeIndices);
+    resource->validCounts = EE_ADDR_AS(u16 *, validCounts);
+    resource->angleRows = EE_ADDR_AS(effMagatuhiRow_t *, angleValues);
     resource->allocationHandle = allocation;
     resource->texture = dds3BillboardGetGeneralTex(0);
 
@@ -836,17 +840,17 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
     f32 size, widthScale;
     u32 packed;
 
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
     packet = sdfGrAllocPacketBuff(0x20);
-    sdf3DMakeDirectRefPacket((dmaPacketHeader_t *)packet,
-        (u32)sdfTexGetPacket(work->texture),
+    sdf3DMakeDirectRefPacket(EE_ADDR_AS(dmaPacketHeader_t *, packet),
+        EE_ADDR(sdfTexGetPacket(work->texture)),
         sdfTexGetPacketLength((sdfTexHandle_t *)work->texture));
     sdfDrawTagLinkRef(list, packet);
     SDF_VU0_STOREIDENTITY(matrix);
     historyOffset = 0;
     packet = sdfGrAllocPacketBuff(0x38);
-    sdfBillBoardMakeTMPacket((u8 *)packet, matrix);
+    sdfBillBoardMakeTMPacket(EE_ADDR_AS(u8 *, packet), matrix);
     sdfDrawTagLink(list, packet);
     pendingCount = 0;
     particleCount = work->count;
@@ -1038,7 +1042,7 @@ effMagaSmokeConv_tag *effMagaSmokeConvCreate(effMagaSmokeConvParam_t *src) {
     u32 count = src->reserve;
     u32 size = count * sizeof(effMagaSmokePart_tag);
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size + sizeof(effMagaSmokeConv_tag));
-    effMagaSmokePart_tag *particle = (effMagaSmokePart_tag *)sdfMemLock(allocation);
+    effMagaSmokePart_tag *particle = EE_ADDR_AS(effMagaSmokePart_tag *, sdfMemLock(allocation));
     effMagaSmokeConv_tag *work = (effMagaSmokeConv_tag *)((u8 *)particle + size);
     s32 spread;
     u32 particleIndex;
@@ -1248,7 +1252,7 @@ void effMagaSCSetArea(effMagatuhiCallback_t *hEffect, effMagatuhiFloatParams_t *
 effMagaPoint4_tag *effMagaPoint4Create(effMagaPoint4Param_t *src) {
     u32 count = src->reserve;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(effMagaPoint4_tag));
-    effMagaPoint4_tag *work = (effMagaPoint4_tag *)sdfMemLock(allocation);
+    effMagaPoint4_tag *work = EE_ADDR_AS(effMagaPoint4_tag *, sdfMemLock(allocation));
     s32 *delays = (s32 *)(work + 1);
     s32 spread;
     u32 i;
@@ -1481,7 +1485,7 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
 effMagaCylinder_tag *effMagaCylinderCreate(effMagaCylinderParam_t *src) {
     u32 count = src->particleCount;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(effMagaCylinderPart_tag) + sizeof(effMagaCylinder_tag));
-    effMagaCylinder_tag *work = (effMagaCylinder_tag *)sdfMemLock(allocation);
+    effMagaCylinder_tag *work = EE_ADDR_AS(effMagaCylinder_tag *, sdfMemLock(allocation));
     effMagaCylinderPart_tag *particle = (effMagaCylinderPart_tag *)(work + 1);
     s32 spread;
     u32 i;
@@ -1679,7 +1683,7 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
 effMagaSpiral_tag *effMagaSpiralCreate(effMagaSpiralParam_t *src) {
     u32 count = src->particleCount;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(effMagaSpiralPart_tag) + sizeof(effMagaSpiral_tag));
-    effMagaSpiral_tag *work = (effMagaSpiral_tag *)sdfMemLock(allocation);
+    effMagaSpiral_tag *work = EE_ADDR_AS(effMagaSpiral_tag *, sdfMemLock(allocation));
     effMagaSpiralPart_tag *particle = (effMagaSpiralPart_tag *)(work + 1);
     s32 spread;
     u32 i;
@@ -1885,7 +1889,7 @@ effMagaSmoke_tag *effMagaSmokeCreate(effMagaSmokeParam_t *src) {
     u32 count = src->particleCount;
     u32 size = count * sizeof(effMagaSmokePart_tag);
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size + sizeof(effMagaSmoke_tag));
-    effMagaSmokePart_tag *particle = (effMagaSmokePart_tag *)sdfMemLock(allocation);
+    effMagaSmokePart_tag *particle = EE_ADDR_AS(effMagaSmokePart_tag *, sdfMemLock(allocation));
     effMagaSmoke_tag *work = (effMagaSmoke_tag *)((u8 *)particle + size);
     s32 spread;
     u32 i;
@@ -2282,7 +2286,7 @@ void InitMagatuhiEditorProcess(void) {
 
 #ifdef NON_MATCHING
 extern u8 D_005518E2[];
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, ps2Size_t size);
 
 effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
 {
@@ -2815,7 +2819,7 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
 }
 
 void effDebugAllocDrawTag(void) {
-    effDebugDrawTag = (struct sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    effDebugDrawTag = EE_ADDR_AS(struct sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(effDebugDrawTag);
 }
 

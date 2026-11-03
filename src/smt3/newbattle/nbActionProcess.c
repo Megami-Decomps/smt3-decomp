@@ -147,11 +147,11 @@ extern char D_005440D8[];
 
 extern void nbPlaySe(s32 no);
 
-extern struct nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se);
+extern struct nbKoukaPacket_t *nbAddSePacket(s32 startframe, ps2AddrS_t uniqueid, s32 se);
 
 extern void nbPanelStockEnd(void);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void dds3FadeOut(u32 r, u32 g, u32 b, u32 frame);
 
@@ -161,11 +161,11 @@ extern void SetTarget_nbActionProcess(nbActionProcessData_t *a);
 
 extern s32 AddTimeListHp(nbActionProcessData_t *a, s32 formindex, s32 add);
 
-extern s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeDamagePacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                               s32 type, s32 hp, s32 mp, s32 badstat, s32 hiteff, s32 dead,
                               s32 deadtype, s32 moji, s32 animeoff);
 
-extern struct nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, s32 uniqueid,
+extern struct nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, ps2AddrS_t uniqueid,
                                                     s32 id);
 
 extern s32 nbCheckKuisibariSkill(s32 formindex);
@@ -202,21 +202,21 @@ extern s32 nbAddReturnKoukaPacket(s32 startframe, nbActionProcessData_t *uniquei
 
 extern s32 nbCheckEscape(nbMainProcessData_t *data);
 
-extern s32 nbMakePressPacket(s32 startframe, s32 uniqueid, f32 press);
+extern s32 nbMakePressPacket(s32 startframe, ps2AddrS_t uniqueid, f32 press);
 
-extern s32 nbMakeNewPressPacket(s32 startframe, s32 uniqueid, s32 ptype,
+extern s32 nbMakeNewPressPacket(s32 startframe, ps2AddrS_t uniqueid, s32 ptype,
                                 nbFormation_t *form);
 
 extern struct nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame,
-                                                       s32 uniqueid,
+                                                       ps2AddrS_t uniqueid,
                                                        nbFormation_t *form, s32 type);
 
-extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, s32 uniqueid,
+extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, ps2AddrS_t uniqueid,
                                                     nbFormation_t *form, s32 sw);
 
 s32 CheckKoketaNego(nbActionProcessData_t *a);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern char D_00543768[]; /* "nb_unitdraw" */
 
@@ -235,7 +235,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern s32 nbMakeDeadVisualPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeDeadVisualPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                    s32 deadtype, s32 deadpcm);
 
 void SetDeadPacket(nbActionProcessData_t *a, s32 formindex);
@@ -491,7 +491,7 @@ void SetTorafuPacket(nbActionProcessData_t *a, s32 dformindex, s32 sframe)
     nbFormation_t *form = &a->data->form[dformindex];
 
     nbMakeUnitFadeOutPacket(sframe, a, form, 0, 6, 6, 6);
-    nbAddFormOnOffPacket(sframe + 12, (s32)a, form, 0);
+    nbAddFormOnOffPacket(sframe + 12, EE_ADDR_S(a), form, 0);
     a->data->endtype = 3;
 }
 
@@ -573,7 +573,7 @@ void SetSakePacket(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s32 dfo
 void SetMissPacket(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s32 dformindex,
                    s32 cnt, s32 frame)
 {
-    nbAddMojiEffKoukaPacket(frame, 0x2D, (s32)a, &a->data->form[dformindex], 3);
+    nbAddMojiEffKoukaPacket(frame, 0x2D, EE_ADDR_S(a), &a->data->form[dformindex], 3);
     SetTimeList(a, dformindex, frame, 10, 20);
     SetPress(a, -2.0f);
     SetNewPress(a, 4);
@@ -584,7 +584,7 @@ void SetOngShadowPacket(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s3
 {
     s32 i;
 
-    nbAddMojiEffKoukaPacket(frame, 0x2D, (s32)a, &a->data->form[dformindex], 4);
+    nbAddMojiEffKoukaPacket(frame, 0x2D, EE_ADDR_S(a), &a->data->form[dformindex], 4);
     nbAddOngOutPacket(frame, a, &a->data->form[dformindex]);
     nbAddUnitAKoukaPacket(frame + 1, a, &a->data->form[dformindex], 0, 0);
     nbMakeDeadPacket(frame + effPCPBossONGYGetLength(), a, &a->data->form[dformindex], 1);
@@ -661,12 +661,12 @@ extern u32 nbGetBadStat(s32 formindex);
 extern f32 nbGetGensyoRitu(s32 skill, s32 source, s32 target);
 extern s32 nbCheckBadKaifuku(datUnitWork_t *work, s32 type);
 extern void nbSetBadStat(s32 formindex, s32 sw, s32 bad);
-extern s32 nbMakeBadKaifukuPacket(s32 frame, s32 uniqueid, nbFormation_t *form);
-extern s32 nbMakeKaifukuPacket(s32 frame, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeBadKaifukuPacket(s32 frame, ps2AddrS_t uniqueid, nbFormation_t *form);
+extern s32 nbMakeKaifukuPacket(s32 frame, ps2AddrS_t uniqueid, nbFormation_t *form,
                                 s32 type, s32 hp, s32 mp, u32 bad);
-extern struct nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 frame, s32 uniqueid,
+extern struct nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 frame, ps2AddrS_t uniqueid,
                                                      nbFormation_t *form, s32 type);
-extern struct nbKoukaPacket_t *nbAddHojoKoukaPacket(s32 frame, s32 uniqueid,
+extern struct nbKoukaPacket_t *nbAddHojoKoukaPacket(s32 frame, ps2AddrS_t uniqueid,
                                                     nbFormation_t *form, u32 type, s32 point);
 extern datDevilFormat_t datDevilTable[];
 s32 GetTimeListHp(nbActionProcessData_t *a, s32 formindex);
@@ -714,7 +714,7 @@ void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sform
             nbGetMainProcessData()->d31_andahansya = 1;
         }
         if (target < 16) {
-            nbAddHitEffKoukaPacket(frame, (s32)a, &a->data->form[target], 1);
+            nbAddHitEffKoukaPacket(frame, EE_ADDR_S(a), &a->data->form[target], 1);
         }
         SetHitStopFrame(a, frame);
         SetTimeList(a, target, frame, 15, 30);
@@ -768,7 +768,7 @@ void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sform
             frame += 90;
         }
         if (target < 16) {
-            nbAddHitEffKoukaPacket(frame, (s32)a, &a->data->form[target], 2);
+            nbAddHitEffKoukaPacket(frame, EE_ADDR_S(a), &a->data->form[target], 2);
         }
         SetHitStopFrame(a, frame);
         SetTimeList(a, target, frame, 15, 30);
@@ -848,7 +848,7 @@ void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sform
         blocked = 0;
         if (type == 0x10000) {
             if (!hidden) {
-                nbAddMojiEffKoukaPacket(frame, 45, (s32)a, &a->data->form[target], 4);
+                nbAddMojiEffKoukaPacket(frame, 45, EE_ADDR_S(a), &a->data->form[target], 4);
                 blocked = 1;
             }
             hpDamage = mpDamage = -1;
@@ -880,22 +880,22 @@ void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sform
                         appliedBad = 0;
                     }
                     hpDamage = GetTimeListHp(a, target) - 1;
-                    nbAddSkillNamePacket(frame, (s32)a, 0x168);
+                    nbAddSkillNamePacket(frame, EE_ADDR_S(a), 0x168);
                 } else if (nbCheckKuisibariSkill(target)) {
                     dead = 0;
                     if (appliedBad == 0x800) {
                         appliedBad = 0;
                     }
                     hpDamage = GetTimeListHp(a, target) - 1;
-                    nbAddSkillNamePacket(frame, (s32)a, 0x159);
+                    nbAddSkillNamePacket(frame, EE_ADDR_S(a), 0x159);
                 }
             } else if (hpDamage > 0 && hpDamage >= GetTimeListHp(a, target)) {
                 if (nbCheckKuisibariSkill(target)) {
                     hpDamage = GetTimeListHp(a, target) - 1;
-                    nbAddSkillNamePacket(frame, (s32)a, 0x159);
+                    nbAddSkillNamePacket(frame, EE_ADDR_S(a), 0x159);
                 } else if (nbCheckKuisibari2Skill(target)) {
                     hpDamage = GetTimeListHp(a, target) - 1;
-                    nbAddSkillNamePacket(frame, (s32)a, 0x168);
+                    nbAddSkillNamePacket(frame, EE_ADDR_S(a), 0x168);
                 }
             }
             if (hpDamage > 0) {
@@ -937,13 +937,13 @@ void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sform
             if (nbSetAllGetDevilFormatFlag(target) & 0x100) {
                 dead = 0;
             }
-            nbMakeDamagePacket(frame, (s32)a, &a->data->form[target], hit, hpDamage, mpDamage,
+            nbMakeDamagePacket(frame, EE_ADDR_S(a), &a->data->form[target], hit, hpDamage, mpDamage,
                                appliedBad, hitEffect, dead, deadType, 1, koukatype == 1 ? 2 : 0);
             if (koukatype == 1) {
-                nbAddSePacket(frame, (s32)a, 0x10002);
+                nbAddSePacket(frame, EE_ADDR_S(a), 0x10002);
             } else if ((koukatype >= 3 || koukatype <= 0) &&
                        (nskill == 0 || (nskill >= 0xA4 && nskill < 0xA7))) {
-                nbAddSePacket(frame, (s32)a, hit == 1 ? 0x10003 : 0x10002);
+                nbAddSePacket(frame, EE_ADDR_S(a), hit == 1 ? 0x10003 : 0x10002);
             }
             if (dead) {
                 before = frame;
@@ -969,7 +969,7 @@ void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sform
             }
             if (!dead && appliedBad == 0 && !hidden &&
                 nbCheckBadKaifuku(nbGetUnitWorkFromFormindex(target), 2)) {
-                nbMakeBadKaifukuPacket(frame, (s32)a, &a->data->form[target]);
+                nbMakeBadKaifukuPacket(frame, EE_ADDR_S(a), &a->data->form[target]);
             }
         }
         if (hpHeal > 0) {
@@ -985,7 +985,7 @@ void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sform
         if (!damage && hpHeal <= 0 && mpHeal <= 0 && skill->hojotype == 0 && !blocked && badHeal == 0) {
             hit = 0;
             printf("MISS!!!\n");
-            nbAddMojiEffKoukaPacket(frame, 45, (s32)a, &a->data->form[target], 3);
+            nbAddMojiEffKoukaPacket(frame, 45, EE_ADDR_S(a), &a->data->form[target], 3);
             SetHitStopFrame(a, frame);
             break;
         }
@@ -998,7 +998,7 @@ void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sform
             if (totalHpHeal <= 0) {
                 totalHpHeal = -1;
             }
-            nbMakeKaifukuPacket(frame, (s32)a, &a->data->form[target], 0, totalHpHeal,
+            nbMakeKaifukuPacket(frame, EE_ADDR_S(a), &a->data->form[target], 0, totalHpHeal,
                                 totalMpHeal > 0 ? totalMpHeal : -1, badHeal);
             if (badHeal) {
                 nbSetBadStat(target, 0, badHeal);
@@ -1011,7 +1011,7 @@ void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sform
             SetTimeList(a, target, before, 15, 20);
         }
         if (!dead && !hidden && skill->hojotype) {
-            nbAddHojoKoukaPacket(frame, (s32)a, &a->data->form[target],
+            nbAddHojoKoukaPacket(frame, EE_ADDR_S(a), &a->data->form[target],
                                   skill->hojotype, skill->hojopoint);
             SetTimeList(a, target, frame, 10, 15);
         }
@@ -1021,7 +1021,7 @@ void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sform
         if (hpDrain <= 0) {
             hpDrain = -1;
         }
-        nbMakeKaifukuPacket(before + 10, (s32)a, &a->data->form[sformindex], 2, hpDrain,
+        nbMakeKaifukuPacket(before + 10, EE_ADDR_S(a), &a->data->form[sformindex], 2, hpDrain,
                             mpDrain > 0 ? mpDrain : -1, 0);
         if (hpDrain > 0) {
             AddTimeListHp(a, sformindex, hpDrain);
@@ -1570,7 +1570,7 @@ s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to)
             /* Keep the real subarray base and skill-number offset separate in
                the EE's 32-bit address arithmetic. Only the final, in-range
                element address is converted back to a pointer. */
-            u32 address = (u32)datSkillTable.special + (u32)skills[i] * sizeof(datSpecialSkill_t);
+            ps2Addr_t address = EE_ADDR(datSkillTable.special) + (u32)skills[i] * sizeof(datSpecialSkill_t);
             datSpecialSkill_t *special = (datSpecialSkill_t *)(address - 0x120u * sizeof(datSpecialSkill_t));
             rate = 100 / special->n;
             if ((s32)dds3GetRandIntA(NULL, 100) < rate) {
@@ -1804,9 +1804,9 @@ s32 CheckBinjoNego(nbActionProcessData_t *a)
         {
             /* On the EE's 32-bit ABI, sum the real array base and byte offset
                as integers, then form only the final party pointer. */
-            struct nbParty_t *partyAddress = (struct nbParty_t *)(
+            struct nbParty_t *partyAddress = EE_ADDR_AS(struct nbParty_t *, (
                 (u32)((s32)form->partyindex * sizeof(struct nbParty_t)) +
-                (u32)a->data->party);
+                EE_ADDR(a->data->party)));
             u16 partyFlags;
             partyFlags = partyAddress->flag;
             partyStatus = (u16)(partyFlags & 1);
@@ -1929,7 +1929,7 @@ void DokodemoPoa(nbActionProcessData_t *a)
 
         if ((form->stat & 1) != 0) {
             if ((form->stat & 0x40) != 0) {
-                nbMakeDeadVisualPacket(0, (s32)a, form, 0, 1);
+                nbMakeDeadVisualPacket(0, EE_ADDR_S(a), form, 0, 1);
                 SetTimeList(a, i, 0, 30, 30);
                 SetDeadPacket(a, i);
             }
@@ -2030,7 +2030,7 @@ void SetDamagePacket(nbActionProcessData_t *a, s32 hp)
         if (hp > 0) {
             if (hp >= GetTimeListHp(a, a->form->formindex)) {
                 hp = GetTimeListHp(a, a->form->formindex) - 1;
-                nbAddSkillNamePacket(start, (s32)a, 0x159);
+                nbAddSkillNamePacket(start, EE_ADDR_S(a), 0x159);
                 nbSetKuisibariStop(a->form->formindex);
             }
         }
@@ -2038,7 +2038,7 @@ void SetDamagePacket(nbActionProcessData_t *a, s32 hp)
         if (hp > 0) {
             if (hp >= GetTimeListHp(a, a->form->formindex)) {
                 hp = GetTimeListHp(a, a->form->formindex) - 1;
-                nbAddSkillNamePacket(start, (s32)a, 0x168);
+                nbAddSkillNamePacket(start, EE_ADDR_S(a), 0x168);
                 nbSetKuisibariStop(a->form->formindex);
             }
         }
@@ -2047,7 +2047,7 @@ void SetDamagePacket(nbActionProcessData_t *a, s32 hp)
     dead = CheckTimeListDead(a, a->form->formindex) != 0;
     {
         s32 moji = 1;
-        nbMakeDamagePacket(start, (s32)a, a->form, 3, hp, -1, 0, 0, dead, 0, moji, 0);
+        nbMakeDamagePacket(start, EE_ADDR_S(a), a->form, 3, hp, -1, 0, 0, dead, 0, moji, 0);
     }
     if (dead != 0) {
         SetTimeList(a, a->form->formindex, start, 0x1E, 0x1E);
@@ -2362,8 +2362,8 @@ void SetAction_BAD(nbActionProcessData_t *a)
     nbPanelPressGaugeShow();
 }
 
-extern s32 nbMakeBadKaifukuPacket(s32 frame, s32 id, nbFormation_t *form);
-extern s32 nbMakeKaifukuPacket(s32 frame, s32 id,
+extern s32 nbMakeBadKaifukuPacket(s32 frame, ps2AddrS_t id, nbFormation_t *form);
+extern s32 nbMakeKaifukuPacket(s32 frame, ps2AddrS_t id,
     nbFormation_t *form, s32 type, s32 hp, s32 mp, u32 badstat);
 extern s32 nbApplyBadCurse(nbActionProcessData_t *a);
 extern s32 nbCheckBadCurse(s32 formindex);
@@ -2376,9 +2376,9 @@ s32 CheckAction_BAD(nbActionProcessData_t *a)
     switch (nbGetBadStat(a->form->formindex)) {
     case 1:
     case 2:
-        nbMakePressPacket(0, (s32)a, -1.0f);
-        nbMakeNewPressPacket(0, (s32)a, 0, a->form);
-        nbMakeBadKaifukuPacket(5, (s32)a, a->form);
+        nbMakePressPacket(0, EE_ADDR_S(a), -1.0f);
+        nbMakeNewPressPacket(0, EE_ADDR_S(a), 0, a->form);
+        nbMakeBadKaifukuPacket(5, EE_ADDR_S(a), a->form);
         if ((a->data->stat & 8) != 0) {
             nbCameraSetState(0x19);
         }
@@ -2391,9 +2391,9 @@ s32 CheckAction_BAD(nbActionProcessData_t *a)
         SetNextActionSeq(a, 0xB);
         break;
     case 4:
-        nbMakePressPacket(0, (s32)a, -1.0f);
-        nbMakeNewPressPacket(0, (s32)a, 0, a->form);
-        nbMakeKaifukuPacket(10, (s32)a, a->form, 0, a->work->maxhp >> 3,
+        nbMakePressPacket(0, EE_ADDR_S(a), -1.0f);
+        nbMakeNewPressPacket(0, EE_ADDR_S(a), 0, a->form);
+        nbMakeKaifukuPacket(10, EE_ADDR_S(a), a->form, 0, a->work->maxhp >> 3,
                             a->work->maxmp >> 3, 0);
         if ((a->data->stat & 8) != 0) {
             nbCameraSetState(0x19);
@@ -2403,8 +2403,8 @@ s32 CheckAction_BAD(nbActionProcessData_t *a)
         break;
     case 0x10:
     case 0x400:
-        nbMakePressPacket(0, (s32)a, -1.0f);
-        nbMakeNewPressPacket(0, (s32)a, 0, a->form);
+        nbMakePressPacket(0, EE_ADDR_S(a), -1.0f);
+        nbMakeNewPressPacket(0, EE_ADDR_S(a), 0, a->form);
         if ((a->data->stat & 8) != 0) {
             nbCameraSetState(0x19);
         }
@@ -2648,27 +2648,27 @@ extern struct fileRequest *fileLoad(const char *filename);
 extern char D_00575360[];
 extern void nbDelAllMojiNumEffectKoukaPacket(nbFormation_t *form);
 extern struct nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 startframe,
-    s32 uniqueid, nbFormation_t *form, s32 sw, u32 flag);
+    ps2AddrS_t uniqueid, nbFormation_t *form, s32 sw, u32 flag);
 extern s32 nbCalcUnitVisual(nbFormation_t *form, s32 part);
 extern s32 nbCalcUnitVisual2(nbFormation_t *form, s32 part);
 extern s32 nbGetMotionNo(nbFormation_t *form, s32 motion);
 extern struct nbKoukaPacket_t *nbAddSkillMotionKoukaPacket(s32 startframe,
-    s32 uniqueid, nbFormation_t *form, s32 motion, s32 endtype, f32 rate);
+    ps2AddrS_t uniqueid, nbFormation_t *form, s32 motion, s32 endtype, f32 rate);
 extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 rate);
 extern s32 nbGetMotionActframe(nbFormation_t *form, s32 motion, f32 rate);
 extern s32 nbMemoryLoadMotionSe(nbFormation_t *form, s32 motion);
 extern s32 datGetSkillCost(datUnitWork_t *work, s32 nskill);
 extern struct nbKoukaPacket_t *nbAddHpMpKoukaPacket(s32 startframe,
-    s32 uniqueid, nbFormation_t *form, s32 n, s32 type);
+    ps2AddrS_t uniqueid, nbFormation_t *form, s32 n, s32 type);
 extern struct nbKoukaPacket_t *nbAddHatudoEffectKoukaPacket(s32 startframe, s32 framelength,
-    s32 uniqueid, nbFormation_t *form, s32 type, s32 mottype, s32 skillid);
+    ps2AddrS_t uniqueid, nbFormation_t *form, s32 type, s32 mottype, s32 skillid);
 extern struct nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe,
-    s32 uniqueid, nbFormation_t *form, s32 type);
+    ps2AddrS_t uniqueid, nbFormation_t *form, s32 type);
 extern void nbSetNormalSkill0(datUnitWork_t *work);
 extern void effBTLSkillEnd(void);
 extern void effBTLSkillSetFormationInfo(s32 invokeId, u32 targetBit);
 extern void effBTLSkillStart(u32 id, u32 stat);
-extern s32 nbMakeUnitMovePacket(s32 startframe, s32 uniqueid,
+extern s32 nbMakeUnitMovePacket(s32 startframe, ps2AddrS_t uniqueid,
     nbFormation_t *form, u32 targetMask, s32 type, f32 speed);
 extern void cmpSetSkillListRows(s32 rows);
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 nskill);
@@ -2829,14 +2829,14 @@ void SetAction_READY(nbActionProcessData_t *a)
     motion = -1;
     if (motionType >= 0) {
         nbDelAllMojiNumEffectKoukaPacket(a->form);
-        nbAddFormFlagOnOffPacket(0, (s32)a, a->form, 0, 0x2000);
+        nbAddFormFlagOnOffPacket(0, EE_ADDR_S(a), a->form, 0, 0x2000);
         if ((a->form->stat & 0x4000) != 0) {
             a->form->stat &= ~0x4000;
         }
         a->form->motendtype = nbCalcUnitVisual(a->form, motionType);
         a->form->motenddata = nbCalcUnitVisual2(a->form, motionType);
         motion = nbGetMotionNo(a->form, motionType);
-        nbAddSkillMotionKoukaPacket(0, (s32)a, a->form, motionType, a->form->motendtype, motionRate);
+        nbAddSkillMotionKoukaPacket(0, EE_ADDR_S(a), a->form, motionType, a->form->motendtype, motionRate);
         if (a->form->motendtype == 2 && a->form->motenddata >= 0) {
             f32 speed = nbGetMotionSpeed(a->form, motionType, motionRate);
             nbMakeUnitFadeOutPacket(a->form->motenddata / speed, a, a->form, 0, 2, 4, 4);
@@ -2861,12 +2861,12 @@ void SetAction_READY(nbActionProcessData_t *a)
         case 2:
             a->timer = 0x23;
             nbCameraSetState(0x15);
-            nbAddMojiEffKoukaPacket(0, 0x1E, (s32)a, a->form, 0);
+            nbAddMojiEffKoukaPacket(0, 0x1E, EE_ADDR_S(a), a->form, 0);
             break;
         case 1: case 3: case 4:
             a->timer = 0x23;
             nbCameraSetState(3);
-            nbAddMojiEffKoukaPacket(0, 0x1E, (s32)a, a->form, 0);
+            nbAddMojiEffKoukaPacket(0, 0x1E, EE_ADDR_S(a), a->form, 0);
             break;
         case 5: a->timer = 0; break;
         case 6: a->timer = 0; break;
@@ -2890,29 +2890,29 @@ void SetAction_READY(nbActionProcessData_t *a)
                     i = skill < 0x75 ? 83 : 60;
                 }
                 hp = -0x7FFF;
-                nbAddHpMpKoukaPacket(a->timer + i, (s32)a, a->form, hp, 0);
+                nbAddHpMpKoukaPacket(a->timer + i, EE_ADDR_S(a), a->form, hp, 0);
             } else {
                 hp = -cost;
-                nbAddHpMpKoukaPacket(1, (s32)a, a->form, hp, 0);
+                nbAddHpMpKoukaPacket(1, EE_ADDR_S(a), a->form, hp, 0);
             }
             AddTimeListHp(a, a->form->formindex, hp);
             break;
         case 2:
-            nbAddHpMpKoukaPacket(1, (s32)a, a->form, -datGetSkillCost(a->work, skill), 1);
+            nbAddHpMpKoukaPacket(1, EE_ADDR_S(a), a->form, -datGetSkillCost(a->work, skill), 1);
             break;
         }
     }
     switch (a->work->nowcommand) {
     case 0: break;
     case 1: case 5: case 6:
-        nbAddHatudoEffectKoukaPacket(0, a->timer, (s32)a, a->form,
+        nbAddHatudoEffectKoukaPacket(0, a->timer, EE_ADDR_S(a), a->form,
             datSkillTable.visual[skill].hatudo, a->form->motcate, skill);
         break;
     case 2: break;
     case 3: break;
     case 4: break;
     case 7:
-        nbAddHitEffKoukaPacket(0, (s32)a, a->form, 5);
+        nbAddHitEffKoukaPacket(0, EE_ADDR_S(a), a->form, 5);
         break;
     }
     switch (a->work->nowcommand) {
@@ -2946,19 +2946,19 @@ void SetAction_READY(nbActionProcessData_t *a)
             case 1: case 2: moveType = 5; break;
             }
         }
-        nbMakeUnitMovePacket(1, (s32)a, a->form, (u16)a->select, moveType, moveRate);
+        nbMakeUnitMovePacket(1, EE_ADDR_S(a), a->form, (u16)a->select, moveType, moveRate);
     }
     for (i = 0; i < 16; i++) {
         if ((a->select & (1 << i)) != 0) {
             form = &a->data->form[i];
             switch (a->work->nowcommand) {
             case 4:
-                nbMakeUnitMovePacket(0, (s32)a, form, 1 << a->form->formindex, 1, 1.0f);
+                nbMakeUnitMovePacket(0, EE_ADDR_S(a), form, 1 << a->form->formindex, 1, 1.0f);
                 break;
             case 6:
                 if ((form->stat & 0x41) == 0x41) {
                     nbMakeReturnPacket(0, a, &a->data->party[form->partyindex]);
-                    nbAddHitEffKoukaPacket(0, (s32)a, form, 5);
+                    nbAddHitEffKoukaPacket(0, EE_ADDR_S(a), form, 5);
                 }
                 break;
             }
@@ -3056,14 +3056,14 @@ extern char D_00551128[];
 extern void datDebugPrintf(const char *format, ...);
 extern s32 nbGetUnitFromAction(nbFormation_t *form, s32 motion);
 extern s32 p2sdLoadCheckMidi(s32 midi);
-extern struct nbKoukaPacket_t *nbAddSePacket2(s32 frame, s32 uniqueid, s32 midi);
+extern struct nbKoukaPacket_t *nbAddSePacket2(s32 frame, ps2AddrS_t uniqueid, s32 midi);
 extern s32 pacFileCheckEnd(const struct fileRequest *file);
 extern sdfMemHandle_t *fileGetMemHandle(const struct fileRequest *file);
 extern u32 fileGetLoadSize(const struct fileRequest *file);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern s32 fileHandleFree(struct fileRequest *file);
-extern void p2sdSetPcmBuffer(s32 data, s32 size);
+extern void p2sdSetPcmBuffer(ps2AddrS_t data, s32 size);
 extern struct effBTL_t *effBTLCreate(void *data);
 
 s32 CheckAction_READY(nbActionProcessData_t *a)
@@ -3079,7 +3079,7 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
         if (a->motse) {
             if (p2sdLoadCheckMidi(nbGetUnitFromAction(a->form, a->motion))) {
                 a->data->stat &= ~0x200;
-                nbAddSePacket2(0, (s32)a, nbGetUnitFromAction(a->form, a->motion));
+                nbAddSePacket2(0, EE_ADDR_S(a), nbGetUnitFromAction(a->form, a->motion));
             } else {
                 printf("mot se wait(1)..\n");
                 break;
@@ -3103,7 +3103,7 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
             buffer = sdfMemLock(a->midibuf);
             printf("se size = %d\n", size);
             if (p2sdLoadCheckMidi(a->midino) == 0) {
-                p2sdSetPcmBuffer((s32)buffer, size);
+                p2sdSetPcmBuffer(EE_ADDR_S(buffer), size);
                 a->data->stat |= 0x200;
             }
             datDebugPrintf("load end\n");
@@ -3186,14 +3186,14 @@ extern u32 effBTLCutGetCutEndFrame(struct effBTLCut_t *cut);
 extern void effBTLCutSetDrawEndFrame(struct effBTLCut_t *cut, u32 frame);
 extern void effBTLCutSetCameraState(struct effBTLCut_t *cut);
 extern f64 fptodp(f32 value);
-extern struct nbKoukaPacket_t *nbAddSkillEffectKoukaPacket(s32 start, s32 length, s32 uniqueid, struct effBTLCut_t *cut);
-extern struct nbKoukaPacket_t *nbAddSkillEffectKoukaPacket2(s32 start, s32 length, s32 uniqueid, struct effBTL_t *effect, s32 cut, nbFormation_t *form, s32 type);
-extern struct nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 start, s32 uniqueid, nbFormation_t *form, s32 sw, u32 flag);
-extern struct nbKoukaPacket_t *nbAddJyokyoHelpPacket(s32 start, s32 uniqueid, s32 no, s32 var_id, s32 var_ind);
-extern struct nbKoukaPacket_t *nbAddSkillColorOffPacket(s32 start, s32 uniqueid);
-extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 start, s32 uniqueid, nbFormation_t *form);
-extern void nbAddHatudoEffectEndPacket(s32 start, s32 uniqueid);
-extern void nbAddHitStopPacket(s32 start, s32 uniqueid);
+extern struct nbKoukaPacket_t *nbAddSkillEffectKoukaPacket(s32 start, s32 length, ps2AddrS_t uniqueid, struct effBTLCut_t *cut);
+extern struct nbKoukaPacket_t *nbAddSkillEffectKoukaPacket2(s32 start, s32 length, ps2AddrS_t uniqueid, struct effBTL_t *effect, s32 cut, nbFormation_t *form, s32 type);
+extern struct nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 start, ps2AddrS_t uniqueid, nbFormation_t *form, s32 sw, u32 flag);
+extern struct nbKoukaPacket_t *nbAddJyokyoHelpPacket(s32 start, ps2AddrS_t uniqueid, s32 no, s32 var_id, s32 var_ind);
+extern struct nbKoukaPacket_t *nbAddSkillColorOffPacket(s32 start, ps2AddrS_t uniqueid);
+extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 start, ps2AddrS_t uniqueid, nbFormation_t *form);
+extern void nbAddHatudoEffectEndPacket(s32 start, ps2AddrS_t uniqueid);
+extern void nbAddHitStopPacket(s32 start, ps2AddrS_t uniqueid);
 extern void nbDispSkillName(s32 skill);
 
 void SetAction_SKILL(nbActionProcessData_t *a)
@@ -3306,7 +3306,7 @@ void SetAction_SKILL(nbActionProcessData_t *a)
         }
         startframe += cutFrame;
         frame += cutFrame;
-        nbAddFormFlagOnOffPacket(startframe, (s32)a, &a->data->form[list[i][0]], 0, 0x2000);
+        nbAddFormFlagOnOffPacket(startframe, EE_ADDR_S(a), &a->data->form[list[i][0]], 0, 0x2000);
         if ((u32)(type - 1) >= 2) {
             reflectOnly = 0;
         }
@@ -3394,9 +3394,9 @@ void SetAction_SKILL(nbActionProcessData_t *a)
                     if (dead) {
                         effectType = 3;
                     }
-                    nbAddSkillEffectKoukaPacket2(startframe - cutFrame, cutEnd, (s32)a, a->hEffBTL, 2,
+                    nbAddSkillEffectKoukaPacket2(startframe - cutFrame, cutEnd, EE_ADDR_S(a), a->hEffBTL, 2,
                                                  &a->data->form[list[i][0]], effectType);
-                    nbAddSePacket(startframe - cutFrame, (s32)a, ((skill + 0x200) << 16) | 1);
+                    nbAddSePacket(startframe - cutFrame, EE_ADDR_S(a), ((skill + 0x200) << 16) | 1);
                 }
                 break;
             }
@@ -3425,7 +3425,7 @@ void SetAction_SKILL(nbActionProcessData_t *a)
             nbSetHojoCounter(list[i][0], 0xB, 0);
         }
         if (type == 1) {
-            nbAddHatudoEffectEndPacket(startframe, (s32)a);
+            nbAddHatudoEffectEndPacket(startframe, EE_ADDR_S(a));
         }
         switch (datSkillTable.visual[skill].animetype) {
         case 0:
@@ -3502,7 +3502,7 @@ void SetAction_SKILL(nbActionProcessData_t *a)
             mp = -1;
         }
         if (hp > 0 || mp > 0) {
-            nbMakeKaifukuPacket(autoFrame, (s32)a, a->form, 3, hp, mp, 0);
+            nbMakeKaifukuPacket(autoFrame, EE_ADDR_S(a), a->form, 3, hp, mp, 0);
             if (hp > 0) {
                 AddTimeListHp(a, a->form->formindex, hp);
             }
@@ -3520,7 +3520,7 @@ void SetAction_SKILL(nbActionProcessData_t *a)
             hp = -1;
         }
         if (hp > 0) {
-            nbMakeKaifukuPacket(autoFrame, (s32)a, a->form, 0, hp, -1, 0);
+            nbMakeKaifukuPacket(autoFrame, EE_ADDR_S(a), a->form, 0, hp, -1, 0);
             AddTimeListHp(a, a->form->formindex, hp);
             amount = (s32)(20.0f / speed);
             SetTimeList(a, a->form->formindex, autoFrame, amount, amount);
@@ -3536,7 +3536,7 @@ void SetAction_SKILL(nbActionProcessData_t *a)
             mp = -1;
         }
         if (mp > 0) {
-            nbMakeKaifukuPacket(autoFrame, (s32)a, a->form, 0, -1, mp, 0);
+            nbMakeKaifukuPacket(autoFrame, EE_ADDR_S(a), a->form, 0, -1, mp, 0);
             amount = (s32)(20.0f / speed);
             SetTimeList(a, a->form->formindex, autoFrame, amount, amount);
         }
@@ -3545,7 +3545,7 @@ void SetAction_SKILL(nbActionProcessData_t *a)
     autoFrame = GetAllEndTime(a);
     OverwriteTimeList(a, a->form->formindex, 0, (s32)((f32)autoFrame * 0.79999996f), -1);
     if (CheckTimeListDead(a, a->form->formindex) && !(a->party->flag & 0x20)) {
-        nbMakeDeadVisualPacket(frame, (s32)a, a->form, 0, 1);
+        nbMakeDeadVisualPacket(frame, EE_ADDR_S(a), a->form, 0, 1);
         SetTimeList(a, a->form->formindex, frame, 30, 30);
         SetDeadPacket(a, a->form->formindex);
     }
@@ -3626,45 +3626,45 @@ void SetAction_SKILL(nbActionProcessData_t *a)
             help = a->jyokyomes;
             break;
         }
-        nbAddJyokyoHelpPacket(frame, (s32)a, help, a->jyo_varid, a->jyo_varind);
+        nbAddJyokyoHelpPacket(frame, EE_ADDR_S(a), help, a->jyo_varid, a->jyo_varind);
         a->jyokyomes = 0;
     }
     if (cut != NULL) {
         effBTLCutSetDrawEndFrame(cut, autoFrame);
-        nbAddSkillColorOffPacket(autoFrame, (s32)a);
+        nbAddSkillColorOffPacket(autoFrame, EE_ADDR_S(a));
         if (showCut) {
-            nbAddSkillEffectKoukaPacket(0, autoFrame, (s32)a, cut);
+            nbAddSkillEffectKoukaPacket(0, autoFrame, EE_ADDR_S(a), cut);
             if (absorbOnly && skill == 0x106) {
-                nbAddSePacket(0, (s32)a, 0x03060001);
+                nbAddSePacket(0, EE_ADDR_S(a), 0x03060001);
             } else {
-                nbAddSePacket(0, (s32)a, (skill + 0x200) << 16);
+                nbAddSePacket(0, EE_ADDR_S(a), (skill + 0x200) << 16);
             }
         } else {
             effBTLCutSetCameraState(cut);
         }
     } else {
-        nbAddSkillColorOffPacket(autoFrame, (s32)a);
+        nbAddSkillColorOffPacket(autoFrame, EE_ADDR_S(a));
     }
     if (a->form->motendtype == 1) {
-        nbAddMotionStopClearPacket(autoFrame * 60 / 100, (s32)a, a->form);
+        nbAddMotionStopClearPacket(autoFrame * 60 / 100, EE_ADDR_S(a), a->form);
     }
     if (count > 0) {
         if (a->type == 0) {
-            nbMakePressPacket(frame, (s32)a, a->press);
-            nbMakeNewPressPacket(frame, (s32)a, a->newpresstype, a->form);
+            nbMakePressPacket(frame, EE_ADDR_S(a), a->press);
+            nbMakeNewPressPacket(frame, EE_ADDR_S(a), a->newpresstype, a->form);
             printf("press %f\n", fptodp(a->press));
         }
     } else {
-        nbMakePressPacket(frame, (s32)a, -1.0f);
-        nbMakeNewPressPacket(frame, (s32)a, 0, a->form);
+        nbMakePressPacket(frame, EE_ADDR_S(a), -1.0f);
+        nbMakeNewPressPacket(frame, EE_ADDR_S(a), 0, a->form);
     }
     if (a->newaddpresstype > 0) {
-        nbMakeNewPressPacket(frame + 20, (s32)a, a->newaddpresstype, a->form);
+        nbMakeNewPressPacket(frame + 20, EE_ADDR_S(a), a->newaddpresstype, a->form);
     }
     if (a->hitstopframe > 0 && evtBitCheck(0xC09)) {
         amount = (a->data->stat & 8) ? a->data->enemypcnt : a->data->playerpcnt;
         if ((s32)((a->data->press3 + a->press / (f32)amount) * 100.0f) <= 0) {
-            nbAddHitStopPacket(a->hitstopframe, (s32)a);
+            nbAddHitStopPacket(a->hitstopframe, EE_ADDR_S(a));
         }
     }
 }
@@ -3891,8 +3891,8 @@ void SetAction_NEGORESULT(nbActionProcessData_t *a)
         break;
     }
     if (pressPacket != 0) {
-        nbMakePressPacket(0, (s32)a, a->press);
-        nbMakeNewPressPacket(0, (s32)a, pressType, a->form);
+        nbMakePressPacket(0, EE_ADDR_S(a), a->press);
+        nbMakeNewPressPacket(0, EE_ADDR_S(a), pressType, a->form);
     }
 
     if (setMotion != 0) {
@@ -3930,17 +3930,17 @@ void SetAction_WAIT(nbActionProcessData_t *a)
     switch (a->work->nowcommand) {
     case 10:
         SetDamagePacket(a, a->work->maxhp * 15 / 100);
-        nbMakePressPacket(0, (s32)a, -1.0f);
-        nbMakeNewPressPacket(0, (s32)a, 0, a->form);
+        nbMakePressPacket(0, EE_ADDR_S(a), -1.0f);
+        nbMakeNewPressPacket(0, EE_ADDR_S(a), 0, a->form);
         return;
     case 8:
-        nbMakePressPacket(0, (s32)a, -1.0f);
-        nbMakeNewPressPacket(0, (s32)a, 0, a->form);
+        nbMakePressPacket(0, EE_ADDR_S(a), -1.0f);
+        nbMakeNewPressPacket(0, EE_ADDR_S(a), 0, a->form);
         SetTimeList(a, a->form->formindex, 0, 5, 5);
         return;
     case 3:
-        nbMakePressPacket(0, (s32)a, -0.5f);
-        nbMakeNewPressPacket(0, (s32)a, 1, a->form);
+        nbMakePressPacket(0, EE_ADDR_S(a), -0.5f);
+        nbMakeNewPressPacket(0, EE_ADDR_S(a), 1, a->form);
         SetTimeList(a, a->form->formindex, 0, 5, 5);
         break;
     case 9:
@@ -3959,8 +3959,8 @@ void SetAction_ESCAPE(nbActionProcessData_t *a)
     if (a->data->esccnt < 255) {
         a->data->esccnt++;
     }
-    nbMakePressPacket(0, (s32)a, -10.0f);
-    nbMakeNewPressPacket(0, (s32)a, 8, a->form);
+    nbMakePressPacket(0, EE_ADDR_S(a), -10.0f);
+    nbMakeNewPressPacket(0, EE_ADDR_S(a), 8, a->form);
     if (nbCheckEscape(a->data) != 0) {
         a->data->endtype = 3;
         return;
@@ -3987,7 +3987,7 @@ s32 CheckAction_ESCAPE(nbActionProcessData_t *a)
         }
         a->packettime = 0x1E;
         dds3FadeOut(0xFF, 0xFF, 0xFF, 0x14);
-        nbAddSePacket(0, (s32)a, 0x10000);
+        nbAddSePacket(0, EE_ADDR_S(a), 0x10000);
         SetTimeList(a, a->form->formindex, 0, 0x11, 0x11);
         break;
     default:
@@ -4013,8 +4013,8 @@ void SetAction_RETURN(nbActionProcessData_t *a)
     }
     nbMakeReturnPacket(0, a, a->party);
     SetTimeList(a, a->form->formindex, 0, 40, 40);
-    nbMakePressPacket(10, (s32)a, -0.5f);
-    nbMakeNewPressPacket(10, (s32)a, 9, a->form);
+    nbMakePressPacket(10, EE_ADDR_S(a), -0.5f);
+    nbMakeNewPressPacket(10, EE_ADDR_S(a), 9, a->form);
 }
 
 s32 CheckAction_RETURN(nbActionProcessData_t *a)
@@ -4033,13 +4033,13 @@ s32 CheckAction_INVISIBLE(nbActionProcessData_t *a)
 }
 
 
-extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeUnitFadeInPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                   u32 col, s32 delay, s32 aframe, s32 colframe);
-extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, s32 uniqueid,
+extern struct nbKoukaPacket_t *nbAddMotionStopClearPacket(s32 startframe, ps2AddrS_t uniqueid,
                                                           nbFormation_t *form);
-extern void nbAddHatudoEffectEndPacket(s32 startframe, s32 uniqueid);
+extern void nbAddHatudoEffectEndPacket(s32 startframe, ps2AddrS_t uniqueid);
 extern void nbAddPanelStockFadeOutPacket(s32 startframe, s32 uniqueid);
-extern void nbAddPanelStockEndPacket(s32 startframe, s32 uniqueid);
+extern void nbAddPanelStockEndPacket(s32 startframe, ps2AddrS_t uniqueid);
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
 
@@ -4071,7 +4071,7 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
         if (CheckTimeListDead(a, i) &&
             !(a->data->party[a->data->form[i].partyindex].flag & 0x20)) {
             printf("dead formindex = %d!!\n", i);
-            nbMakeDeadVisualPacket(unlock, (s32)a, &a->data->form[i], 0, 1);
+            nbMakeDeadVisualPacket(unlock, EE_ADDR_S(a), &a->data->form[i], 0, 1);
             SetTimeList(a, i, unlock, 30, 30);
             SetDeadPacket(a, i);
             SetTimeList(a, i, unlock, 20, 20);
@@ -4101,20 +4101,20 @@ void SetAction_CHECK1(nbActionProcessData_t *a)
             }
             if (a->form->motendtype == 2) {
                 end = (s32)((u32)end + (u32)frameScratch);
-                nbMakeUnitFadeInPacket(end, (s32)a, a->form, 0, 2, 4, 4);
-                nbAddFormOnOffPacket(end, (s32)a, a->form, 0);
+                nbMakeUnitFadeInPacket(end, EE_ADDR_S(a), a->form, 0, 2, 4, 4);
+                nbAddFormOnOffPacket(end, EE_ADDR_S(a), a->form, 0);
                 if (a->form->motendtype == 2) {
-                    nbAddMotionStopClearPacket(end, (s32)a, a->form);
+                    nbAddMotionStopClearPacket(end, EE_ADDR_S(a), a->form);
                 }
             }
         }
     }
     a->packettime = GetAllEndTime(a);
-    nbAddHatudoEffectEndPacket(a->packettime * 70 / 100, (s32)a);
+    nbAddHatudoEffectEndPacket(a->packettime * 70 / 100, EE_ADDR_S(a));
     if (a->stat & 0x400) {
         frameScratch = (s32)(a->packettime - 10);
-        nbAddPanelStockFadeOutPacket(frameScratch < 0 ? 0 : frameScratch, (s32)a);
-        nbAddPanelStockEndPacket(a->packettime - 1, (s32)a);
+        nbAddPanelStockFadeOutPacket(frameScratch < 0 ? 0 : frameScratch, EE_ADDR_S(a));
+        nbAddPanelStockEndPacket(a->packettime - 1, EE_ADDR_S(a));
     }
     printf("allframe %d\n", a->packettime);
 }

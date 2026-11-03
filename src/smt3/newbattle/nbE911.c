@@ -321,7 +321,7 @@ extern dds3Basic_t *D_00551628;
 
 extern dds3Basic_t *D_0055162C;
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void nbPanelAllHide(void);
 
@@ -331,7 +331,7 @@ extern s8 D_00527530[];
 
 extern sdfVector4_t D_00527640;
 
-extern struct nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern struct nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
 extern void nbSetFormRot(nbFormation_t *form, sdfVector4_t *rot);
@@ -361,9 +361,9 @@ extern s32 nbCheckLoad(nbFormation_t *form);
 extern void nbFormDispOn(s32 formindex);
 extern void nbAddUnitAKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                   s32 a, s32 b);
-extern void nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern void nbMakeUnitFadeInPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                    s32 a, s32 b, s32 c, s32 d);
-extern void nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern void nbAddHitEffKoukaPacket(s32 startframe, ps2AddrS_t uniqueid, nbFormation_t *form,
                                    s32 a);
 extern void dds3SetQuake(s32 power, s32 time);
 

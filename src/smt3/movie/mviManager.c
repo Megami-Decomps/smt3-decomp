@@ -57,7 +57,7 @@ extern void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descrip
 
 extern u16 dds3VblanksPerFrame;
 
-extern s32 PlayingNo;
+extern ps2AddrS_t PlayingNo;
 
 extern void sdfIpuRunDecode(s32 frames);
 
@@ -83,7 +83,7 @@ void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descriptor)
     {
         movieOpenStream(&D_00343E40, descriptor, path);
         PlayingNo =
-            (s32)dds3StartProcess(D_0053F3C8, 0x2AFB, 1, 1, movieDrawProc, NULL, NULL);
+            EE_ADDR_S(dds3StartProcess(D_0053F3C8, 0x2AFB, 1, 1, movieDrawProc, NULL, NULL));
     }
 }
 
@@ -226,7 +226,7 @@ extern s32 strcasecmp(const char *first, const char *second);
 
 extern void *sdfChipAllocDirect(s32 aSize);
 
-extern void *memcpy(void *destination, const void *source, u32 bytes);
+extern void *memcpy(void *destination, const void *source, ps2Size_t bytes);
 
 void movieViewerScanDir(void)
 {

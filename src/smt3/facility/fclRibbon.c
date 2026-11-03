@@ -120,7 +120,7 @@ void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index)
 }
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t);
 #endif
 
 void fclRbnSetPara(fclRibbon_t *handle, s32 index,

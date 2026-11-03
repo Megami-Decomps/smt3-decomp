@@ -366,7 +366,7 @@ void rstAutoAsignDevilParam(void)
             if (param >= 0) {
                 value = datGetParam(&work, param);
                 /* Integer address form: docs/levers/addressing-and-types.md. */
-                bonus = (u8 *)((u32)param + (u32)EventStart + 0x129F);
+                bonus = EE_ADDR_AS(u8 *, ((u32)param + EE_ADDR(EventStart) + 0x129F));
                 if (value + (s8)*bonus < 0x28) {
                     (*bonus)++;
                 }
@@ -437,7 +437,7 @@ extern void rstSetLevelUpFlag(void);
 extern void p2sdStopSe(u32 id);
 extern void p2sdPlayBGM(s32 id);
 extern void dds3FadeOut(s32, s32, s32, s32);
-extern void fclSetMessageVar_20743088(s8 index, s32 str);
+extern void fclSetMessageVar_20743088(s8 index, ps2AddrS_t str);
 extern char *text2[];
 
 s32 rstCalcSeqDevilLevelUp(void)
@@ -451,7 +451,7 @@ s32 rstCalcSeqDevilLevelUp(void)
         rstSetMotionReqFromTbl(0);
         p2sdStopSe(0x2B0000);
         p2sdPlayBGM(0x2B0000);
-        fclSetMessageVar_20743088(1, (s32)text2[EventStart->unit->id]);
+        fclSetMessageVar_20743088(1, EE_ADDR_S(text2[EventStart->unit->id]));
     } else {
         EventStart->phase = 0x13;
         rstSetLevelUpFlag();
@@ -723,7 +723,7 @@ static inline s32 rstFinishEvoCandidate(s32 index)
         return 0;
     }
     EventStart->evoResult = 0;
-    fclSetMessageVar_20743088(1, (s32)text2[EventStart->unit->id]);
+    fclSetMessageVar_20743088(1, EE_ADDR_S(text2[EventStart->unit->id]));
     fclStartMessage(0x15);
     fclStartSelMessage(0x2B);
     return 1;
@@ -999,7 +999,7 @@ s32 rstCalc(dds3ProcessID_t *id)
                     }
                     EventStart->unk_129D[1] = 0;
                     rstShakePad();
-                    fclSetMessageVar_20743088(12, (s32)pstr[DDS3_GBWK->equipHearts]);
+                    fclSetMessageVar_20743088(12, EE_ADDR_S(pstr[DDS3_GBWK->equipHearts]));
                     fclStartMessage(28);
                     fclStartSelMessage(43);
                 }
@@ -1036,8 +1036,8 @@ s32 rstCalc(dds3ProcessID_t *id)
             EventStart->powerState = rstCalcSkillPowerUp();
             if (EventStart->powerState != 0) {
                 EventStart->unk_129D[1] = 0;
-                fclSetMessageVar_20743088(15, (s32)text1[EventStart->unit->skill[EventStart->powerSlot]]);
-                fclSetMessageVar_20743088(16, (s32)text1[EventStart->powerSkill]);
+                fclSetMessageVar_20743088(15, EE_ADDR_S(text1[EventStart->unit->skill[EventStart->powerSlot]]));
+                fclSetMessageVar_20743088(16, EE_ADDR_S(text1[EventStart->powerSkill]));
                 fclStartMessage(13);
                 fclStartSelMessage(43);
             }
@@ -1048,7 +1048,7 @@ s32 rstCalc(dds3ProcessID_t *id)
             EventStart->phase = (u8)EventStart->phase + 1;
         case 11:
             if (rstPickRandomComment() != 0) {
-                fclSetMessageVar_20743088(1, (s32)text2[EventStart->unit->id]);
+                fclSetMessageVar_20743088(1, EE_ADDR_S(text2[EventStart->unit->id]));
                 fclStartMessage(24);
                 break;
             }
@@ -1076,7 +1076,7 @@ s32 rstCalc(dds3ProcessID_t *id)
         case 16:
             rstInitWorkStock(0);
             if (rstCalcEvo() == 0) {
-                fclSetMessageVar_20743088(1, (s32)text2[EventStart->unit->id]);
+                fclSetMessageVar_20743088(1, EE_ADDR_S(text2[EventStart->unit->id]));
                 if (rstCalcSeqEvoAt() >= 0) {
                     fclStartMessage(18);
                     EventStart->drawFlag = 1;
@@ -1219,7 +1219,7 @@ s32 datGetDevilRace(s8 index)
     return D_00339E00[index].race & 7;
 }
 
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 extern s8 datCountPlayerLND(void);
 
 #ifdef NON_MATCHING
@@ -1304,16 +1304,16 @@ s8 datCountPlayerLND(void)
     s32 count = 0;
     s32 i = 0;
 
-    if (*(u8 *)((s32)DDS3_GBWK + 0x1D7B) != 0)
+    if (*EE_ADDR_AS(u8 *, (EE_ADDR_S(DDS3_GBWK) + 0x1D7B)) != 0)
     {
         do
         {
-            if (datDevilIsRegistered(*(u8 *)(i + (s32)DDS3_GBWK + 0x1CFB)) != 0)
+            if (datDevilIsRegistered(*EE_ADDR_AS(u8 *, (i + EE_ADDR_S(DDS3_GBWK) + 0x1CFB))) != 0)
             {
                 count++;
             }
             i++;
-        } while (i < *(u8 *)((s32)DDS3_GBWK + 0x1D7B));
+        } while (i < *EE_ADDR_AS(u8 *, (EE_ADDR_S(DDS3_GBWK) + 0x1D7B)));
     }
     return count;
 }
@@ -1429,7 +1429,7 @@ void datAddHeartsSlot(s8 id, u16 value)
     u8 *gbwk = (u8 *)DDS3_GBWK;
 
     *(u16 *)(gbwk + (id * 12 + state) * 2 + 0x11AC0) = value;
-    (*(u8 *)(id + (s32)gbwk + 0x1D3B))++;
+    (*EE_ADDR_AS(u8 *, (id + EE_ADDR_S(gbwk) + 0x1D3B)))++;
 }
 
 s32 datAddHeartsEntry(u8 id, datUnitWork_t *work)
@@ -2307,7 +2307,7 @@ s32 rstFindUnitScene(s32 work)
     if (unit->value == 0) {
         return 0;
     }
-    *(u32 *)(*(u8 **)((u8 *)work + 0x18) + 0x80) = unit->value;
+    *(u32 *)(*(u8 **)(EE_ADDR_AS(u8 *, work) + 0x18) + 0x80) = unit->value;
     return 1;
 }
 
@@ -2336,7 +2336,7 @@ s32 rstResetEncycPanel(void)
             return rstGetEncycPanel();
         }
     }
-    *(s32 *)(*(u8 **)((u8 *)cmpGetEncycWork() + 0x18) + 0x80) = 0;
+    *(s32 *)(*(u8 **)(EE_ADDR_AS(u8 *, cmpGetEncycWork()) + 0x18) + 0x80) = 0;
 }
 
 s32 rstResetEncycPanel2(void)
@@ -2344,5 +2344,5 @@ s32 rstResetEncycPanel2(void)
     if (rstDrawWork->unk_7C < 5) {
         return rstGetEncycPanel();
     }
-    *(s32 *)(*(u8 **)((u8 *)cmpGetEncycWork() + 0x18) + 0x80) = 0;
+    *(s32 *)(*(u8 **)(EE_ADDR_AS(u8 *, cmpGetEncycWork()) + 0x18) + 0x80) = 0;
 }

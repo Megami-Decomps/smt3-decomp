@@ -310,19 +310,19 @@ void fldTitleStart(s32 fld, s32 waittime)
     D_0054EF8C = 0;
     sprintf(path, "/fld/f/pnl/df%03d.tmx", fld);
     allocation = (sdfMemHandle_t *)sdfDevLoadFileEx(path, &data, NULL);
-    D_0054EF98 = sdfTexSet((const TMX_HEADER_t *)data);
+    D_0054EF98 = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
     sdfMemFreeDirect(allocation);
 
     allocation = (sdfMemHandle_t *)sdfDevLoadFileEx("/fld/f/pnl/dun_01.tmx", &data, NULL);
-    D_0054EF9C = sdfTexSet((const TMX_HEADER_t *)data);
+    D_0054EF9C = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
     sdfMemFreeDirect(allocation);
 
     allocation = (sdfMemHandle_t *)sdfDevLoadFileEx("/fld/f/pnl/dun_02.tmx", &data, NULL);
-    D_0054EFA0 = sdfTexSet((const TMX_HEADER_t *)data);
+    D_0054EFA0 = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
     sdfMemFreeDirect(allocation);
 
     allocation = (sdfMemHandle_t *)sdfDevLoadFileEx("/fld/f/pnl/dun_03.tmx", &data, NULL);
-    D_0054EFA4 = sdfTexSet((const TMX_HEADER_t *)data);
+    D_0054EFA4 = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
     sdfMemFreeDirect(allocation);
 
     if (!fldTitleChk()) {
@@ -570,11 +570,11 @@ void fldTitleMiniStart(s32 fld)
     fldSnowActive = 0;
     sprintf(path, "/fld/f/pnl/ds%03d.tmx", fld);
     allocation = sdfDevLoadFileEx(path, &data, NULL);
-    fldTitleMiniTex = sdfTexSet((const TMX_HEADER_t *)data);
+    fldTitleMiniTex = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
     sdfMemFreeDirect((sdfMemHandle_t *)allocation);
 
     allocation = sdfDevLoadFileEx("/fld/f/pnl/dun_04.tmx", &data, NULL);
-    fldTitleMiniWork = sdfTexSet((const TMX_HEADER_t *)data);
+    fldTitleMiniWork = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
     sdfMemFreeDirect((sdfMemHandle_t *)allocation);
 
     if (fldTitleChk() == 0) {

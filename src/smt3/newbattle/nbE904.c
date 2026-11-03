@@ -536,7 +536,7 @@ s32 Model1Start(nbEventProcessData_t *ed)
     }
     nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x389, 1), 2, form);
     if (evtBitCheck(0xC0F)) {
-        ed->pfile = (nbPacHandle_t *)nbMakeModelPackName(0x102);
+        ed->pfile = EE_ADDR_AS(nbPacHandle_t *, nbMakeModelPackName(0x102));
     } else {
         sprintf(D_005754E0, D_005467C0, 0x102);
         ed->file = fileLoad(D_005754E0);

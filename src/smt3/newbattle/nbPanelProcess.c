@@ -475,13 +475,13 @@ typedef struct {
 
 
 
-extern u32 hnbPnlFile1;
+extern ps2Addr_t hnbPnlFile1;
 
-extern u32 hnbPnlFile2;
+extern ps2Addr_t hnbPnlFile2;
 
-extern u32 hnbPnlFile3;
+extern ps2Addr_t hnbPnlFile3;
 
-extern u32 hnbPnlFile4;
+extern ps2Addr_t hnbPnlFile4;
 
 extern char D_00545230[];
 
@@ -560,10 +560,10 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 void nbPnlLoad(void)
 {
-    hnbPnlFile1 = (u32)sdfDevLoadFileEx(D_00545230, (u32 *)&pnbPnlFile1, 0);
-    hnbPnlFile2 = (u32)sdfDevLoadFileEx(D_00545250, (u32 *)&pnbPnlFile2, 0);
-    hnbPnlFile3 = (u32)sdfDevLoadFileEx(D_00545270, (u32 *)&pnbPnlFile3, 0);
-    hnbPnlFile4 = (u32)sdfDevLoadFileEx(D_00545290, (u32 *)&pnbPnlFile4, 0);
+    hnbPnlFile1 = EE_ADDR(sdfDevLoadFileEx(D_00545230, (u32 *)&pnbPnlFile1, 0));
+    hnbPnlFile2 = EE_ADDR(sdfDevLoadFileEx(D_00545250, (u32 *)&pnbPnlFile2, 0));
+    hnbPnlFile3 = EE_ADDR(sdfDevLoadFileEx(D_00545270, (u32 *)&pnbPnlFile3, 0));
+    hnbPnlFile4 = EE_ADDR(sdfDevLoadFileEx(D_00545290, (u32 *)&pnbPnlFile4, 0));
 }
 
 void nbPnlTexSet(nbMainProcessData_t *p)
@@ -692,7 +692,7 @@ void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 r
                  sdfTexHandle_t *th)
 {
     void *handle = sdf2DAllocSprite(1);
-    nbSpriteVertex_t *vtx = (nbSpriteVertex_t *)sdf2DGetPrimPtr((s32)handle);
+    nbSpriteVertex_t *vtx = (nbSpriteVertex_t *)sdf2DGetPrimPtr(EE_ADDR_S(handle));
     s32 ubase = u * 16;
     s32 xl = x * 16 + 0x7000;
     s32 vbase = v * 16;

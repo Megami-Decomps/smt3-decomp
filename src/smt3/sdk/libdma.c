@@ -47,7 +47,7 @@ extern int EIntr(void);
 
 void WaitDma(sceDmaChan *chan);
 void WatchDma(sceDmaChan *chan, u32 addr, int timeout);
-u32 CheckAddress(u32 addr);
+u32 CheckAddress(ps2Addr_t addr);
 void memclr(void *p, int n);
 int sceDmaPause(sceDmaChan *chan);
 int sceDmaPutEnv(sceDmaEnv *env);
@@ -76,7 +76,7 @@ void WatchDma(sceDmaChan *chan, u32 addr, int timeout)
     }
 }
 
-u32 CheckAddress(u32 addr)
+u32 CheckAddress(ps2Addr_t addr)
 {
     if ((addr >> 28) == 7) {
         addr &= 0x0FFFFFFF;
@@ -205,7 +205,7 @@ u32 sceDmaPutStallAddr(u32 addr)
 
 void sceDmaSend(sceDmaChan *chan, void *tag)
 {
-    u32 addr = CheckAddress((u32)tag);
+    u32 addr = CheckAddress(EE_ADDR(tag));
 
     WaitDma(chan);
     if (chan->tadr != 0xFFFFFFFF) {
@@ -217,7 +217,7 @@ void sceDmaSend(sceDmaChan *chan, void *tag)
 
 void sceDmaSendN(sceDmaChan *chan, void *data, u32 qwc)
 {
-    u32 addr = CheckAddress((u32)data);
+    u32 addr = CheckAddress(EE_ADDR(data));
 
     WaitDma(chan);
     if (chan->madr != 0xFFFFFFFF) {
@@ -229,7 +229,7 @@ void sceDmaSendN(sceDmaChan *chan, void *data, u32 qwc)
 
 void sceDmaSendI(sceDmaChan *chan, void *data, u32 qwc)
 {
-    u32 addr = CheckAddress((u32)data);
+    u32 addr = CheckAddress(EE_ADDR(data));
 
     WaitDma(chan);
     if (chan->madr != 0xFFFFFFFF) {
@@ -255,7 +255,7 @@ void sceDmaRecv(sceDmaChan *chan)
 
 void sceDmaRecvN(sceDmaChan *chan, void *data, u32 qwc)
 {
-    u32 addr = CheckAddress((u32)data);
+    u32 addr = CheckAddress(EE_ADDR(data));
 
     WaitDma(chan);
     if (chan->madr != 0xFFFFFFFF) {
@@ -267,7 +267,7 @@ void sceDmaRecvN(sceDmaChan *chan, void *data, u32 qwc)
 
 void sceDmaRecvI(sceDmaChan *chan, void *data, u32 qwc)
 {
-    u32 addr = CheckAddress((u32)data);
+    u32 addr = CheckAddress(EE_ADDR(data));
 
     WaitDma(chan);
     if (chan->madr != 0xFFFFFFFF) {

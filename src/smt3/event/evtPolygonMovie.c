@@ -77,14 +77,14 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
 evtPolygonMovieWork_t *evtGetPolygonMovieWorkData1(evtPolygonMovieWork_t *wdata, void *pm1data, void *pm2data);
-s32 evtPolygonMovieProcess1(dds3ProcessID_t *id);
+ps2AddrS_t evtPolygonMovieProcess1(dds3ProcessID_t *id);
 
 typedef struct pmdCameraTable_t {
     s32 NameIndex, Reserve1, Reserve2, Reserve3;
 } pmdCameraTable_t;
 
 extern s32 dds3GetMapNo(dds3Basic_t *scene);
-extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, s32 pF1, s32 pF2, const void *pTB, s32 pBF);
+extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, ps2AddrS_t pF1, ps2AddrS_t pF2, const void *pTB, s32 pBF);
 extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
 extern s32 evtSetRegistUnit(s32 major, s32 minor);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serial, s32 type);
@@ -161,12 +161,12 @@ typedef void (*evtFrameFunc_t)(evtPolygonMovieWork_t *, pmdFrameTable_t *, pmdFr
 extern evtFrameFunc_t nowcamera[];
 extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 extern void dds3SetScreenFovy(f32 fovy);
-extern s32 evtCameraFrameState;
+extern ps2AddrS_t evtCameraFrameState;
 extern f32 nowfovy;
 extern s32 D_0054F8E0;
 
 extern void *sdfChipAllocDirect(u32 aSize);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 /* vu0 routine: blend two RGBA8888 colours by t */
 u32 evtHokanColor(s32 hokan, f32 ratio, u32 c1, u32 c2);
@@ -238,7 +238,7 @@ u32 sdfMemLock(struct sdfMemHandle_t *aHandle);
 
 sdfMemHandle_t *evtAllocMovieWork(pmdHeader_t **out);
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 static inline void UnpackRGBAWordFloat(u32 color, f32 unit) {
     u32 rgba[4];
@@ -284,7 +284,7 @@ void CameraFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
             }
             if (D_0054F8E0 < f->Frame) {
                 D_0054F8E0 = f->Frame;
-                evtCameraFrameState = (s32)basic;
+                evtCameraFrameState = EE_ADDR_S(basic);
                 nowfovy = f->data.f[0];
             }
         }
@@ -1041,7 +1041,7 @@ void FrameRun(evtPolygonMovieWork_t *wdata)
         prev = f;
     }
     if (evtCameraFrameState != 0) {
-        dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), (dds3Basic_t *)evtCameraFrameState);
+        dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), EE_ADDR_AS(dds3Basic_t *, evtCameraFrameState));
         dds3SetScreenFovy(nowfovy);
     }
 }
@@ -1069,7 +1069,7 @@ void CheckLoad_evtPolygonMovie(evtPolygonMovieWork_t *work)
             if (work->file04 != NULL) {
                 if (pacFileCheckEnd(work->file04) != 0) {
                     work->mem08 = fileGetMemHandle(work->file04);
-                    work->pm1data = (void *)sdfMemLock(work->mem08);
+                    work->pm1data = EE_ADDR_AS(void *, sdfMemLock(work->mem08));
                     fileHandleFree(work->file04);
                     work->file04 = NULL;
                     work->movieFlags &= ~2;
@@ -1079,7 +1079,7 @@ void CheckLoad_evtPolygonMovie(evtPolygonMovieWork_t *work)
             if (work->file4C != NULL) {
                 if (pacFileCheckEnd(work->file4C) != 0) {
                     work->mem50 = fileGetMemHandle(work->file4C);
-                    work->pm2data = (void *)sdfMemLock(work->mem50);
+                    work->pm2data = EE_ADDR_AS(void *, sdfMemLock(work->mem50));
                     fileHandleFree(work->file4C);
                     work->file4C = NULL;
                     work->movieFlags &= ~4;
@@ -1111,7 +1111,7 @@ INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BAF8);
 
 INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BB20);
 
-s32 evtPolygonMovieProcess1(dds3ProcessID_t *id)
+ps2AddrS_t evtPolygonMovieProcess1(dds3ProcessID_t *id)
 {
     evtPolygonMovieWork_t *work;
     dds3Basic_t *basic;
@@ -1143,7 +1143,7 @@ s32 evtPolygonMovieProcess1(dds3ProcessID_t *id)
         mapNo = (major << 16) + minor;
         printf(D_0053BB20, major, minor);
         if (dds3GetMapNo(dds3GetControlScene()) != mapNo) {
-            evtLoadArea_FromMemory(major, minor, (s32)work->stageF1, (s32)work->stageF2,
+            evtLoadArea_FromMemory(major, minor, EE_ADDR_S(work->stageF1), EE_ADDR_S(work->stageF2),
                                    work->stageTB, 0);
         }
     }
@@ -1211,7 +1211,7 @@ s32 evtPolygonMovieProcess1(dds3ProcessID_t *id)
         }
     }
     dds3DrawFlag |= 0x02000000;
-    return (s32)evtPolygonMovieProcess2;
+    return EE_ADDR_S(evtPolygonMovieProcess2);
 
 }
 
@@ -1811,7 +1811,7 @@ sdfMemHandle_t *evtAllocMovieWork(pmdHeader_t **out)
 
     headerBytes = 0x40;
     handle = sdfMemAllocDirect(headerBytes);
-    block = (void *)sdfMemLock(handle);
+    block = EE_ADDR_AS(void *, sdfMemLock(handle));
     memcpy(block, header, headerBytes);
     *out = block;
     return handle;

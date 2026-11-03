@@ -80,7 +80,7 @@ extern s32 sceSifDmaStat(s32);
 
 extern s32 GetThreadId(void);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
 
@@ -256,7 +256,7 @@ extern void *__deregister_frame_info(void *fn);
 
 extern void free(void *ptr);
 
-extern void *malloc(u32 size);
+extern void *malloc(ps2Size_t size);
 
 extern void __malloc_lock(_reent *r);
 
@@ -310,7 +310,7 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
@@ -1002,8 +1002,8 @@ void libc_2D2850(object *entry)
     sorted = libc_2D1FA0(&vectors, count);
     if (sorted != NULL)
         entry->fde_array = sorted;
-    entry->pc_begin = (void *)minimum;
-    entry->pc_end = (void *)maximum;
+    entry->pc_begin = EE_ADDR_AS(void *, minimum);
+    entry->pc_end = EE_ADDR_AS(void *, maximum);
 }
 
 
@@ -1018,7 +1018,7 @@ u32 *libc_2D29B8(u32 pc)
     for (entry = D_0059AD60; entry != NULL; entry = entry->next) {
         if (entry->pc_begin == NULL)
             libc_2D2850(entry);
-        if (pc >= (u32)entry->pc_begin && pc < (u32)entry->pc_end)
+        if (pc >= EE_ADDR(entry->pc_begin) && pc < EE_ADDR(entry->pc_end))
             break;
     }
     if (entry == NULL) {
@@ -1115,8 +1115,7 @@ typedef struct {
     u8 indirect;
 } frameState_t;
 
-typedef char frameState_size_must_be_0x478[
-    sizeof(frameState_t) == 0x478 ? 1 : -1];
+PS2_SIZE_CHECK(frameState_size_must_be_0x478, frameState_t, 0x478);
 
 u8 *libc_2D2C70(u8 *p, frameState_t *state)
 {
@@ -1163,8 +1162,7 @@ typedef struct frameStateInternal {
     struct frameStateInternal *savedState;
 } frameStateInternal_t;
 
-typedef char frameStateInternal_size_must_be_0x480[
-    sizeof(frameStateInternal_t) == 0x480 ? 1 : -1];
+PS2_SIZE_CHECK(frameStateInternal_size_must_be_0x480, frameStateInternal_t, 0x480);
 
 
 typedef union __attribute__((packed)) {

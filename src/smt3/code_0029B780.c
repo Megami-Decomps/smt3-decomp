@@ -10,7 +10,7 @@ extern void (*D_00551828)(void);
 
 extern void *dds3AllocConfigWork(s32 mode);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern s32 dds3GetGlobalConfigFlag(s32 index);
 
@@ -29,8 +29,7 @@ typedef struct dds3ConfigWork_t {
     void *textureHandle;
 } dds3ConfigWork_t;
 
-typedef char dds3ConfigWork_size_must_be_0x10A8[
-    sizeof(dds3ConfigWork_t) == 0x10A8 ? 1 : -1];
+PS2_SIZE_CHECK(dds3ConfigWork_size_must_be_0x10A8, dds3ConfigWork_t, 0x10A8);
 
 extern void dds3FreeConfigTexture(void *texture);
 
@@ -39,7 +38,7 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void fclSetSprite(s32 pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2, s32 V2, s32 Col, s32 TexHandle);
+extern void fclSetSprite(ps2AddrS_t pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2, s32 V2, s32 Col, s32 TexHandle);
 
 extern void fclDrawBG(void *pSprite, s32 OtNo);
 
@@ -91,7 +90,7 @@ extern void *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(void *aHandle);
 extern void cmpInitSeqInfo(void *work, s32 seq);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
 
 void slKillLoadProcess(void)
 {
@@ -371,7 +370,7 @@ void dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
 }
 
 extern const s32 D_00548888[3][4];
-extern void *memcpy(void *destination, const void *source, u32 size);
+extern void *memcpy(void *destination, const void *source, ps2Size_t size);
 
 extern void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot);
 
@@ -500,7 +499,7 @@ s32 dds3DrawConfigBackground(s32 flags)
         GBWK[0x19] = ret;
         return ret;
     }
-    fclSetSprite((s32)sprite, 0x200, 0x1C0, 0, 0, 0, 0xFF, 0x7F, 0x80808080,
+    fclSetSprite(EE_ADDR_S(sprite), 0x200, 0x1C0, 0, 0, 0, 0xFF, 0x7F, 0x80808080,
                  *(s32 *)(GBWK + 0x10A4));
     fclDrawBG(sprite, flags);
 }

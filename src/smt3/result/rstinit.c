@@ -28,6 +28,10 @@ extern rstData_t *GBWK_1;
 
 #include "sdk_libc.h"
 
+/* Declared here because no header carries these. */
+extern s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp);
+extern void *memset(void *a, s32 b, ps2Size_t c);
+
 extern char D_0053DA28[];
 
 extern s8 gProcessStat_4;
@@ -172,7 +176,7 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void cmpInitSeqInfo(void *work, void *parent);
 extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
-extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, ps2AddrS_t layout);
 extern void cmpModelInit(void);
 extern void rstClearHeartsMasterPhase(void);
 extern void fclInitMessage(void *message);
@@ -191,7 +195,7 @@ rstData_t *rstInit(s32 parent)
 
     memset(work, 0, 0x2318);
     work->allocation = allocation;
-    cmpInitSeqInfo(work, (void *)parent);
+    cmpInitSeqInfo(work, EE_ADDR_AS(void *, parent));
     work->unk_0001 = 0;
     work->unk_22E5 = -1;
     work->unk_22E4 = -0x80;
@@ -347,7 +351,7 @@ void rstDrawEvoModel(void)
     if (EventStart->unk_22E5 < 0 || EventStart->unit->id == 0) {
         return;
     }
-    model = (mdlObj_t *)cmpGetEncycWork();
+    model = EE_ADDR_AS(mdlObj_t *, cmpGetEncycWork());
     if (model == NULL) {
         return;
     }

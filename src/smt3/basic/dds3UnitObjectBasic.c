@@ -5,6 +5,9 @@
 #include "model.h"
 #include "ps2asm.h"
 
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, ps2Size_t c);
+
 typedef struct {
     u8 unk00[0x64];
     u32 flag;
