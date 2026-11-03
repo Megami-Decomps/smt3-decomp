@@ -188,3 +188,51 @@ reports, report-scope check and progress-site deployment all completed
 successfully rather than being skipped. The recorded landing check was
 113 match, 0 differ for the complete owner. This historical owner result
 and hosted evidence do not claim a new local build in the recovery workspace.
+
+## InitPhaseReadStatus (facility/fclEncyc, 0x334)
+
+195 of 205 words match at the native 820 bytes. A fresh private promotion
+checks 113 existing C peers exactly, with this target the sole difference
+and no reported owned-data failures. The production assembly fallback stays
+in place; this investigation earns no matching credit.
+
+The ribbon provider copies each of the four complete 16-byte vectors
+synchronously, using two unaligned 64-bit reads per vector. It retains the
+texture pointers, not the vector pointers. All four components of each
+vector are initialized before each call, and the same 64-byte stack area
+can be reused after return. The provider's complete owner checks 13 match,
+0 differ. Private layout assertions confirm the current 16-byte vector,
+72-byte ribbon element and 380-byte work type against native accesses and
+allocation; this is not a reconstruction of the original type spelling.
+
+All ten residual words lie in early work-field initialization, before the
+already-exact vector construction. Status alpha 128 and message ID -1 use
+interchanged registers. The two speed-32 stores and intervening zero stores
+are scheduled differently. Qualified RTL snapshots show CSE sharing the
+speed constant and sched1 placing the message-ID store before both speed
+stores; the native order is help[1] speed, message ID, zeros, help[0] speed.
+The existing source already expresses that native store order. The snapshots
+locate the observed differences, not an internal scheduler tie-break cause.
+
+One bounded ordinary control names the actual status-alpha and message-ID
+values, each feeding only its original store. It regresses to 192 of 205
+words at 820 bytes, preserving all 113 peers: alpha gets the native register,
+but the earlier message-ID birth displaces the speed constant and leaves the
+store-order problem. No vector-constructor or initializer-order sweep follows.
+Both baseline and control have qualified plain/diagnostic parity for all
+allocated sections, non-file symbols, ordered relocations and normalized
+assembly. Layout assertions plus uninitialized diagnostics also preserve
+baseline output; no uninitialized warning appears, although existing
+unrelated declaration and callback-argument warnings remain. Further work
+needs a genuine initialization/liveness premise or deeper compiler evidence,
+not fabricated layout, dummy dependencies or vector-lifetime changes.
+
+A separate bounded speed-value premise is also rejected. Naming one initialized
+`s32` speed for its two existing stores gives 186 of 205 words. Adding one
+`FAKEMATCH_ASM_LIVE_VOLATILE(speed)` between those stores gives 184 of 205;
+both retain 820 bytes and all 113 exact peers. The value has no address escape
+or call within its lifetime. This empty read/write register operand pins no
+register and clobbers no memory; it is not a memory barrier. Removing it
+reproduces the ordinary shared-speed source byte-for-byte. Both controls have
+qualified plain/diagnostic parity and unchanged non-text allocated sections,
+non-file symbols and relocations relative to baseline. Neither is retained.

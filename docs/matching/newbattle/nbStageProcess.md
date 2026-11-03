@@ -64,21 +64,33 @@ Qualification: complete owner 87/0, with the nine remaining guarded drafts
 still compiling. The clear loop visits exactly sixteen `u32 stat` fields and
 preserves the native mask, pointer stride and memory access order.
 
-## CheckAction_ESCAPE (newbattle/nbStageProcess, 0xE4)
+## CheckAction_ESCAPE (newbattle/nbActionProcess, 0xE4)
 
-9 of 57 words differ, at the exact 228-byte size.
+48 of 57 words match, at the exact 228-byte size. Fresh complete-owner
+qualification retains the other 89 C matches.
 
 A `switch ((u16)((u16)a->seqtime / 15))` over cases 1 and 2 with a `goto` to
 one trailing `return 0` gives retail's divide trap, dispatch and both arms.
 
-The remaining words are which register holds the compared constants: retail
-uses `$5` for the 1 and the 3, the draft uses `$4`. That also moves
-`daddu $4, $16, $0` out of the `jal SetTimeList` delay slot, where retail puts
-it, and shifts the default arm's branch by one word.
+Retail uses `$5` for dispatch constant 1 and the first arm's endtype constant
+3; the draft uses `$4`. The second arm's constant 3 already correctly uses
+`$4`. Qualified compiler dumps establish separate real comparison consumers
+and deaths before calls, not a common constant lifetime.
 
-Ruled out: early `return 0` per arm instead of the `goto`; no `default` arm;
-an `s32`, `u16` and `u32` local for the switch value; and swapping the two
-case bodies' source order.
+The `SetTimeList` argument setup is an independently unresolved residual:
+retail puts `daddu $4, $16, $0` in the call delay slot, whereas the draft moves
+that real argument earlier and puts the final constant argument in the slot.
+A scoped binding of only the first arm's actual `u32` comparison constant to
+`$5` leaves this setup unchanged, swaps the data/endtype load registers, and
+worsens the result to 47/57 at 228 bytes. An ordinary `u16` stage local with
+`if`/`else if` dispatch yields 14/55 at 220 bytes. Both controls retain the
+other 89 C matches. Plain versus diagnostic compiler outputs agree on
+allocated sections, non-file symbols, relocations and normalized assembly for the
+baseline and both controls; neither control is a publishable match.
+
+Historical negatives remain: early `return 0` per arm instead of the `goto`;
+no `default` arm; an `s32`, `u16` and `u32` local for the switch value; and
+swapping the two case bodies' source order.
 
 ## nbDrawKoukaSprite (newbattle/nbStageProcess, 0x108)
 
