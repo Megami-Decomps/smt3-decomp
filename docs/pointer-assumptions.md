@@ -80,29 +80,68 @@ class 2.
 
 ## What was converted
 
-`include/eeregs.h` gains two macros, guarded and identity on target:
+`include/common.h` gains two macros, guarded and identity on target. They
+live there rather than in `eeregs.h` beside `EE_PHYSICAL` because 60 units
+need them and 305 of the 309 units already include `common.h`, where
+`QWORD_ALIGNED` and `QUAD_ZERO` already serve as the same kind of
+layout hook; `eeregs.h` itself includes `common.h`, so nothing is lost.
 
-- `EE_ADDR(ptr)`, a pointer in the EE's 32-bit address representation.
-- `EE_ADDR_PTR(addr)`, the same address back as a `void *`. It keeps the
-  `(u32)` the sites spell, because dropping it would change the target
-  conversion, not just the host one.
+- `EE_ADDR(ptr)` is `((u32)(ptr))`, a pointer in the EE's 32-bit address
+  representation.
+- `EE_ADDR_PTR(addr)` is `((void *)(u32)(addr))`, the same address back as a
+  pointer. It keeps the `(u32)` the sites spell, because dropping it would
+  change the target conversion, not only the host one.
 
-Converted, one commit each, each verified byte-identical:
+Converted, one commit each, each built to the retail SHA-1:
 
-1. `EE_ADDR_PTR` at the 16 `(T *)(u32)` sites.
-2. `EE_ADDR` composed under `EE_PHYSICAL` at the 22 `EE_PHYSICAL((u32)p)`
-   sites.
-3. `EE_ADDR` through the `sdf/` core units.
-4. `sizeof(sdfModelTmImage_t)` for the three `<< 7` strides.
+| Commit | Change | Sites |
+| --- | --- | --- |
+| `b0d54a0d` | `EE_ADDR_PTR` at every `(T *)(u32)` site, and the macros themselves | 16 in 9 files |
+| `57f47f6f` | `EE_ADDR` composed under `EE_PHYSICAL` | 22 in 8 files |
+| `6ad4aa90` | `EE_ADDR` in the sdf draw and packet units | 18 in 5 files |
+| `7da4aeeb` | `EE_ADDR` for the light, fog and sound buffer pointers | 12 in 3 files |
+| `d2a6f2a5` | `sizeof(sdfModelTmImage_t)` for the VU1 transform packet stride | 2 of 4 |
 
-## What was left, and why
+Two conversions needed their operand scope corrected before they would have
+been right, and both were caught by reading the diff rather than by the
+checksum: `EE_PHYSICAL((u32)ex + SDF_QWORD_BYTES)` in `sdf/sdfDraw.c:569` and
+`EE_PHYSICAL((u32)cb->scratchBuffer + (cb->firstSlot << 13))` in
+`sdf/sdfIpu.c:681` cast only the pointer, so wrapping the whole argument in
+`EE_ADDR` would have turned a byte offset into typed pointer arithmetic. The
+image still matched either way, because `EE_ADDR` is identity on target and
+`ex + 16` is `ex + 256` only once a host widens it. A conversion of this
+class can be wrong without the checksum saying so, which is the reason to
+read each one.
+
+## Sites that could not be converted
+
+- **`sdfModelCopyStat`, `sdf/sdfModel.c:1349-1350`.** The two strides in the
+  transform packet copy stay `(frame << 7)`. Replacing them with
+  `sizeof(sdfModelTmImage_t)` changes two of that function's 154 words from
+  `+0x198`, with or without an `(s32)` on the `sizeof`, so signedness is not
+  the cause: ee-gcc 2.96 shares the one shift between the two addresses and
+  will not share the multiply. The other two strides in the same unit, at
+  `:381` and `:879`, take the `sizeof` and match. A source comment at the
+  type records this.
+- **`(u32)aParm->zBias` and its two neighbours, `sdf/sdf3DPrim.c:285-287`.**
+  Not pointer casts at all: `zBias`, `sdfFaceDivSoften` and
+  `sdfFaceDivBias` are `f32`, so these are float-to-integer conversions that
+  happen to sit among packet-address stores. Left alone, and named here so a
+  later sweep does not mistake them.
+- **`(u32)fogColor`, `sdf/sdf3D.c:452`**, and **`(u32)function`,
+  `sdf/sdfSound.c:1043`**, for the same reason: `s32` values, not pointers.
+
+No site was left out because it broke the match except the one stride pair
+above.
+
+## What was deferred
 
 - **The ~350 remaining `(u32)` packet-address casts in game code**, led by
   `event/evtEventViewerMenu.c` (74), `newbattle/nbMainProcess.c` (55),
   `model/mdlEffect.c` (33), `interface/itfTestMesManager.c` (19),
   `newbattle/nbDebugProcess.c` (17). One mechanical pattern repeated, mostly
-  in debug and viewer units. Deferred rather than rejected: the diff is large
-  enough to need its own review pass, and the macro is the same one, so
-  nothing is learned by landing it here.
+  in debug and viewer units, and the macro they need is the one that now
+  exists. Deferred rather than rejected: the diff is large enough to want its
+  own review pass, and landing it here would teach nothing new.
 - **Field offsets, quadword shifts, GS packet byte offsets and class 3**, for
-  the reasons in each row: they are already correct on a host.
+  the reasons in each row above: they are already correct on a host.
