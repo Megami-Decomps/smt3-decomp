@@ -214,8 +214,9 @@ array until that unit is reconstructed too.
 ## nbPanelPressGauge (newbattle/nbPanelProcess, 0x1518)
 
 The target remains assembly-backed. The corrected privately promoted draft
-emits 5320 of the native 5400 bytes: 102 matching and 1228 differing words in
-the 1330-word emitted prefix. This is a diagnostic score, not matching credit.
+emits 5320 of the native 5400 bytes: 102 of 1330 words match, 1228 differ,
+and 80 native bytes are uncovered. This is a diagnostic score, not matching
+credit.
 
 `D_00551178` is a single eight-byte signed XY point containing 77 and 37,
 bounded by the independent `nbPanelBaseABGR` object at `0x00551180`.
@@ -250,3 +251,30 @@ stable inputs, 7 IRX checks and reconciled reports. Source commit
 `655853776250951c1ec39b1484ded04ec0c186fd`; exact-source
 [CI 41407188989](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41407188989)
 attempt 1 passed build and Pages deployment. No exact-match credit is added.
+
+A qualified shared-UV control assigns each of the three birth-animation
+`nbPanelSpriteScaleDraw` UV arguments to the actual `uv` pointer before
+passing it to the same call. This preserves index loads, calls and consumers;
+it adds no alias, volatile access, constraint or memory barrier. The result
+is entirely codegen-inert, not merely equally scored: baseline and control
+have identical six allocated sections, 746 non-file symbol contracts,
+1507 ordered relocations and normalized assembly. Both independently have
+plain versus `-da -fsched-verbose=5` output parity. The target remains
+5320 bytes with 102 of 1330 words matching; all 59 C peers and owned data
+remain exact. This control differs from the earlier lexical scopes around
+ordinary sprite-draw temporaries, which also did not recover the native frame.
+
+The real shared pointer survives through the life dump, but the table's full
+base address is a separate invariant. In this control, loop optimization
+moves its definition UID859/pseudo282 to the outer-loop preheader UID3586
+with reported life 2 and savings 2; the next table-base construction is
+recognized as the same invariant. Combine folds the shared pointer assignment
+and argument copy into a direct address addition, so that source-level
+pointer identity does not survive to allocation at these calls.
+
+Native outer birth draws instead form the table address inside their draw
+paths at `0x27C844` and `0x27C8A4`. The nested trail loop *does* hoist it at
+`0x27C934` and reuses it across draws. The unresolved property is therefore
+outer versus inner loop placement, not a blanket absence of native table
+hoisting. Repeating pointer spellings or lexical scopes without new evidence
+about the separate base-address dependency is not a useful next control.

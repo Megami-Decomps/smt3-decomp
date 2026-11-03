@@ -150,3 +150,55 @@ the matched indexed form.
 The allocator declaration remains its real pointer-returning contract from
 `sdf/sdfChip.c`. An initial draft without that declaration happened to emit
 488 bytes; its implicit integer return is not a permissible matching lever.
+
+## frCreateNameHandle (interface/frName, 0xC0)
+
+48 of 48 words match at the native 192-byte size in ordinary C. The complete
+owner checks nine exact functions with no code or owned-data discrepancy.
+
+`nameGlyphCodes` is viewed as 64 two-byte slots rather than four rows of sixteen
+pairs. Both views occupy the same 128 bytes at offset `0x6584`; all subsequent
+field offsets and the enclosing layout are unchanged. The two initialization
+addresses use `i * 16`, and the handle creator uses `target * 16 + glyph`.
+This is a truthful linear view of the existing storage, not a claim about the
+original array dimensions or an IDB type correction. `pFont` remains the
+four-by-sixteen pointer table, loaded after `frGetMessageCode` as in retail.
+
+One real scalar successively holds the unsigned high byte, the combined glyph
+code, and the code minus `0x20` used by the metric providers. Its full-code value
+is consumed before the subtraction. A child pointer supplies the glyph-code
+store and X-shift call without an intervening callback; the child is reloaded
+after the metric callbacks for the Y-result store. Signed-byte inputs, byte-load
+and store widths, call order and callback reloads are preserved.
+
+Qualified compiler dumps establish the addressing dependency. Direct typed
+slot reads initially expand to an index/displacement part (`slot * 2 + 0x6580`
+or `0x6581`) and a global-work base plus four. CSE shares the base and index;
+combine folds the displacements into the byte loads but leaves two equal
+base-plus-index sums. By the post-allocation dump, the second sum becomes the
+native address copy. The source needs no manual base adjustment or pointer
+constraint. This typed-field shape is also present in the matched
+`frGetCNameFRQ` reads.
+
+The shared slot eliminates the separate target/glyph address calculations, and
+successive scalar phases avoid retaining both the full code and shift index
+across calls. The native saved-register roles and 32-byte frame result. In the
+old 216-byte draft, first CSE forwarded the full code into the later glyph-code
+store, retaining it alongside the shift index. Scheduling also left the font
+index calculation after the first call through allocation; hoisting it later
+did not remove the already allocated extra saved register.
+
+Plain and `-da -fsched-verbose=5` builds have identical allocated section bytes,
+non-file symbols, ordered relocations and normalized assembly. The source also
+compiles cleanly with uninitialized-value and implicit-declaration diagnostics,
+with identical output. These diagnostic options are not production flags.
+
+Historical controls remain nonmatching. A reconstructed ordinary byte-view
+control with a common slot, scalar-phase reuse and child snapshot emits 188
+bytes. Advancing a real byte cursor between the high and low reads instead
+emits 184 bytes: CSE separates the two addresses and combine folds their full
+`0x6584`/`0x6585` offsets into the loads, without the native address copy.
+Splitting the indexed loads into two scalar statements is inert at 188 bytes.
+An older summarized pointer study also reported nonmatching 188/192-byte
+forms; its exact source was not retained, so it does not establish which typed
+field spellings were tested. No pointer constraints are retained here.

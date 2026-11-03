@@ -191,13 +191,15 @@ extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0
                       u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2,
                       u32 r3, u32 g3, u32 b3, u32 a3);
 
-/* NON_MATCHING: 303 of 321 words match at retail's size. The clamp ties its
- * cmov to the constant's register, so movn where retail has movz. */
+/* NON_MATCHING: 311 of 321 words match at retail's size. Remaining
+ * differences are separate constant, product, predicate and scheduling phases. */
 #ifdef NON_MATCHING
 void ObjDispOff(void)
 {
     s32 step;
-    s32 cover;
+    /* Keep the live clamp input/result together through regmove. This value
+     * dies at the first cover test, before any call; no empty operand is needed. */
+    FAKEMATCH_ASM_REG(s32, cover, "$2");
     s32 width;
     s32 x;
     s32 fade;
@@ -218,19 +220,19 @@ void ObjDispOff(void)
     rsetOtOfs(0x47);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     rsetAlpha(0);
-    cover = oStaff_UI->unk_0100 * 3;
+    cover = (s32)((u32)oStaff_UI->unk_0100 * 3u);
     if (cover > 0x200) {
         cover = 0x200;
     }
     if (cover >= 0x200) {
-        oStaff_UI->unk_0104 = oStaff_UI->unk_0104 + 2;
+        oStaff_UI->unk_0104 = (s32)((u32)oStaff_UI->unk_0104 + 2u);
         if (oStaff_UI->unk_0104 > 0x80) {
             oStaff_UI->unk_0104 = 0x80;
         }
         alpha = oStaff_UI->unk_0104;
         rsetAlpha(0);
         DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
-                    (alpha << 24) | 0xA0A0A0, (sdfTexHandle_t *)oStaff_UI->unk_000C);
+                    ((u32)alpha << 24) | 0xA0A0A0, (sdfTexHandle_t *)oStaff_UI->unk_000C);
         DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
                     0x80A0A0A0, (sdfTexHandle_t *)oStaff_UI->unk_0008);
     }
@@ -238,7 +240,7 @@ void ObjDispOff(void)
     if (oStaff_UI->unk_010C < 0) {
         width = 0x100;
         fade = 0;
-        x = 0x200 - oStaff_UI->unk_0100 * 3;
+        x = (s32)(0x200u - (u32)oStaff_UI->unk_0100 * 3u);
         if (x >= -0xFF) {
             if (x < 0) {
                 fade = -x;
@@ -247,12 +249,12 @@ void ObjDispOff(void)
                 fade = fade / 2;
             }
             DrwSprite2DC(x, 0, width, 0x1C0, x, 0, width, 0x1C0,
-                         (fade << 24) | 0xFFFFFF, 0x80FFFFFF, 0x80FFFFFF,
-                         (fade << 24) | 0xFFFFFF,
+                         ((u32)fade << 24) | 0xFFFFFF, 0x80FFFFFF, 0x80FFFFFF,
+                         ((u32)fade << 24) | 0xFFFFFF,
                          (sdfTexHandle_t *)oStaff_UI->unk_0004);
-            if (x + width < 0x200) {
-                DrwSprite2D(x + width, 0, 0x200 - (x + width), 0x1C0,
-                            x + width, 0, 0x200 - (x + width), 0x1C0,
+            if ((s32)((u32)x + (u32)width) < 0x200) {
+                DrwSprite2D((s32)((u32)x + (u32)width), 0, (s32)(0x200u - ((u32)x + (u32)width)), 0x1C0,
+                            (s32)((u32)x + (u32)width), 0, (s32)(0x200u - ((u32)x + (u32)width)), 0x1C0,
                             0x80FFFFFF, (sdfTexHandle_t *)oStaff_UI->unk_0004);
             }
         } else {
@@ -262,26 +264,28 @@ void ObjDispOff(void)
     } else {
         fade = 0;
         width = 0x300;
-        if (oStaff_UI->unk_0100 * 3 <= 0x300) {
-            width = oStaff_UI->unk_0100 * 3;
+        if ((s32)((u32)oStaff_UI->unk_0100 * 3u) <= 0x300) {
+            width = (s32)((u32)oStaff_UI->unk_0100 * 3u);
         }
         if (width < 0x100) {
             fade = width / 2;
             DrwSprite2DC(0, 0, width, 0x1C0, 0, 0, width, 0x1C0,
-                         (fade << 24) | 0xFFFFFF, 0xFFFFFF, 0xFFFFFF,
-                         (fade << 24) | 0xFFFFFF,
+                         ((u32)fade << 24) | 0xFFFFFF, 0xFFFFFF, 0xFFFFFF,
+                         ((u32)fade << 24) | 0xFFFFFF,
                          (sdfTexHandle_t *)oStaff_UI->unk_0004);
         } else if (width < 0x300) {
             x = width - 0x100;
             if (width >= 0x201) {
-                fade = (width - 0x200) / 2;
+                /* The real numerator becomes the draw opacity. */
+                fade = width - 0x200;
+                fade /= 2;
                 width = 0x200 - x;
             } else {
                 width = 0x100;
             }
             DrwSprite2DC(x, 0, width, 0x1C0, x, 0, width, 0x1C0,
-                         0x80FFFFFF, (fade << 24) | 0xFFFFFF,
-                         (fade << 24) | 0xFFFFFF, 0x80FFFFFF,
+                         0x80FFFFFF, ((u32)fade << 24) | 0xFFFFFF,
+                         ((u32)fade << 24) | 0xFFFFFF, 0x80FFFFFF,
                          (sdfTexHandle_t *)oStaff_UI->unk_0004);
             DrwSprite2D(0, 0, x, 0x1C0, 0, 0, x, 0x1C0, 0x80FFFFFF,
                         (sdfTexHandle_t *)oStaff_UI->unk_0004);
@@ -307,7 +311,7 @@ void ObjDispOff(void)
         aDrawBoxG(0, 0, 0x200, 0xE0, 0, 0, 0, alpha, 0, 0, 0, alpha,
                   0, 0, 0, alpha, 0, 0, 0, alpha);
     }
-    oStaff_UI->unk_0100 = oStaff_UI->unk_0100 + 1;
+    oStaff_UI->unk_0100 = (s32)((u32)oStaff_UI->unk_0100 + 1u);
 }
 #else
 INCLUDE_ASM(const s32, "staff/stfMain", ObjDispOff);
