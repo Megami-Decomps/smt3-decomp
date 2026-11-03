@@ -2967,7 +2967,7 @@ u32 evt_1E91E8(void)
     u8 *gb;
 
     gb = DDS3_GBWK;
-    scrSetIntReturnValue(((u8 *)scrGetIntPara(0) + (u32)gb)[0x1CEC]);
+    scrSetIntReturnValue(((u8 *)scrGetIntPara(0) + EE_ADDR(gb))[0x1CEC]);
     return 1;
 }
 

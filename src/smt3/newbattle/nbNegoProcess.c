@@ -1169,12 +1169,12 @@ s32 NegoDebug(nbNegoProcessData_t *n)
     }
     if (dds3SelectMenu(0, n->nextkouhocnt, 0, n->nextkouhocnt, 0, NULL, NULL, &n->selectcur,
                        NULL) == 1) {
-        n->nextnegoid = *(u32 *)((u8 *)(n->selectcur * 4) + (u32)n + 0x24);
+        n->nextnegoid = *(u32 *)((u8 *)(n->selectcur * 4) + EE_ADDR(n) + 0x24);
         return 1;
     }
     if ((s8)dds3PadButtonState[0x20] < 0) {
         sel = dds3GetRandIntA(0, n->nextkouhocnt);
-        n->nextnegoid = *(u32 *)((u8 *)(sel * 4) + (u32)n + 0x24);
+        n->nextnegoid = *(u32 *)((u8 *)(sel * 4) + EE_ADDR(n) + 0x24);
         return 1;
     }
     return 0;

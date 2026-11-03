@@ -164,7 +164,7 @@ void dumpCursorInfo(fclRibbon_t *handle)
         printf("  uv_deact = %3d, %3d, %3d, %3d\n",
                entry->uv_deact.pm[0] >> 4, entry->uv_deact.pm[1] >> 4,
                entry->uv_deact.pm[2] >> 4, entry->uv_deact.pm[3] >> 4);
-        printf("  texhandle = %08x\n", (u32)&entry->tex[0]);
+        printf("  texhandle = %08x\n", EE_ADDR(&entry->tex[0]));
     }
 }
 #else

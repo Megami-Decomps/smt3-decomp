@@ -658,7 +658,7 @@ s32 ragFindItemSlot(ragItemReq_t *req)
     for (i = 0; i < 3; i++) {
         u32 item = req->item;
 
-        if (item != 0 && ((u8 *)item + (u32)base)[0x1920] < req->count) {
+        if (item != 0 && ((u8 *)item + EE_ADDR(base))[0x1920] < req->count) {
             return 0;
         }
         req++;

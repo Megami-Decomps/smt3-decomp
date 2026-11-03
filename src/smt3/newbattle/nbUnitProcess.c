@@ -374,7 +374,7 @@ void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 ritu)
     do {
         visual = nbGetUnitVisual(work);
         motionRecord = (nbUnitMotion_t *)(selectedMotion * sizeof(nbUnitMotion_t) +
-                                         (u32)visual + 0x2C);
+                                         EE_ADDR(visual) + 0x2C);
         speed = motionRecord->motionsp * ritu;
     } while (0);
     evtSetWaitMotion(form->hunit, motionNo);

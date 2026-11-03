@@ -776,7 +776,7 @@ s32 Flow1_23(nbNegoProcessData_t *n)
             /* Form the byte offset within the actual negotiation work first. */
             messageOffset = mt->kucyo * sizeof(n->flowmsg[0]) +
                             (u32)&((nbNegoProcessData_t *)0)->flowmsg;
-            msg = (s32 *)((u32)n + messageOffset);
+            msg = (s32 *)(EE_ADDR(n) + messageOffset);
             nbSetNegoMesVar(*msg, n->pwork, work);
             nbDispNegoMessage(n, *msg, 0x10, 0);
         }
@@ -861,7 +861,7 @@ s32 Flow1_25(nbNegoProcessData_t *n)
         /* Keep the message-array offset grouped before adding the work base. */
         messageOffset = mt->kucyo * sizeof(n->flowmsg[0]) +
                         (u32)&((nbNegoProcessData_t *)0)->flowmsg;
-        msg = (s32 *)((u32)n + messageOffset);
+        msg = (s32 *)(EE_ADDR(n) + messageOffset);
         nbSetNegoMesVar(*msg, n->pwork, work);
         nbDispNegoMessage(n, *msg, 0x11, 0);
         return 4;

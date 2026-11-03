@@ -550,12 +550,12 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
         packet = sdfGrAllocPacketBuff(0x20);
         texture = sdfTexGetPacket(node->children[0]->hTex);
         length = sdfTexGetPacketLength(node->children[0]->hTex);
-        sdf3DMakeDirectRefPacket(packet, (u32)texture, length);
+        sdf3DMakeDirectRefPacket(packet, EE_ADDR(texture), length);
         sdfDrawTagLinkRef(node->packetList, EE_ADDR(packet));
         packet = sdfGrAllocPacketBuff(0x20);
         texture = sdfTexGetPacketCtx2(node->children[1]->hTex);
         length = sdfTexGetPacketCtx2Length(node->children[1]->hTex);
-        sdf3DMakeDirectRefPacket(packet, (u32)texture, length);
+        sdf3DMakeDirectRefPacket(packet, EE_ADDR(texture), length);
         sdfDrawTagLinkRef(node->packetList, EE_ADDR(packet));
         packet = sdfGrAllocPacketBuff(0x38);
         if (node->cameraFacingMode == 1) {
