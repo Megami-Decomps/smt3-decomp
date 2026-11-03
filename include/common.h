@@ -58,6 +58,26 @@ typedef double f64;
     __asm__(#name " = " #base " + " #offset)
 #endif
 
+/* The same for a symbol naming a region rather than an object, so the
+ * declaration is an array and a difference against another such symbol stays
+ * pointer arithmetic. PS2_SYMBOL_AT cannot serve: it puts the type before the
+ * name and an array's brackets go after it.
+ *
+ * Structured rather than a raw asm string, for a reason measured on a
+ * supported compiler. LLVM's integrated assembler refuses symbol arithmetic
+ * against an undefined extern, with "expected relocatable expression", as
+ * soon as the symbol is referenced; GNU as defers the relocation and accepts
+ * it. A site that spells the alias as a raw string gives a host no way to
+ * neutralise that one alias without neutralising every raw asm string in the
+ * tree, so the alias belongs behind its own name. A build whose assembler
+ * cannot resolve the expression redefines this to the declaration alone and
+ * supplies the symbol itself. */
+#ifndef PS2_SYMBOL_AT_REGION
+#define PS2_SYMBOL_AT_REGION(type, name, base, offset) \
+    extern type name[]; \
+    __asm__(#name " = " #base " + " #offset)
+#endif
+
 /* Localized compiler constraints on a real live value. None of them emits an
  * instruction: the binding only fixes which register cc1 keeps the value in,
  * and the empty template only forces it into a register, or into its storage,

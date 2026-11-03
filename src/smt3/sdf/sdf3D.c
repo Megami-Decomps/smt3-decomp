@@ -143,8 +143,7 @@ extern u8 vu1MicroPacket[];
 
 /* One past the last byte of the vu1MicroPacket VIF packet, so the packet's
  * length is the distance between the two. */
-extern u8 vu1MicroPacketEnd[];
-FAKEMATCH_ASM_NAME("vu1MicroPacketEnd = vu1MicroPacket + 0x3D20");
+PS2_SYMBOL_AT_REGION(u8, vu1MicroPacketEnd, vu1MicroPacket, 0x3D20);
 
 extern u8 sdf3DScreenTm[];
 
