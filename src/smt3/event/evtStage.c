@@ -71,7 +71,7 @@ struct BfFlw0Header;
 
 void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
-void dds3SceneBasicMakeScene(dds3Basic_t *object, u32 resourceId);
+void dds3SceneBasicMakeScene(dds3Basic_t *object, ps2Addr_t resourceId);
 
 void dds3SetActiveScene(struct dds3Basic_t *scene);
 
@@ -303,7 +303,7 @@ s32 evtLoadArea(s32 fld, s32 area)
 }
 
 /* Build a field world object from the supplied resource parameters. */
-s32 evtLoadArea_FromMemory(s32 fld, s32 area, s32 pF1, s32 pF2,
+s32 evtLoadArea_FromMemory(s32 fld, s32 area, ps2AddrS_t pF1, ps2AddrS_t pF2,
                                      const sdfTextureOffsetListHeader_t *pTB, s32 pBF)
 {
     dds3Basic_t *worldObject;

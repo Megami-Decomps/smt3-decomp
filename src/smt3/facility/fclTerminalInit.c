@@ -345,7 +345,7 @@ void fclTerminalScanCommands(trmTerminalWork_t *work)
 
 extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, void *work);
 extern void fclSetPanelTex(void *panel, s32 a2, s32 a3, s32 a4, s32 a5, s32 tex);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 void fclTerminalInitList(void *list, s8 count, s32 handle)

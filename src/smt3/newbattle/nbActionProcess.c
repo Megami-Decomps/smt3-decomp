@@ -3063,7 +3063,7 @@ extern u32 fileGetLoadSize(const struct fileRequest *file);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern s32 fileHandleFree(struct fileRequest *file);
-extern void p2sdSetPcmBuffer(s32 data, s32 size);
+extern void p2sdSetPcmBuffer(ps2AddrS_t data, s32 size);
 extern struct effBTL_t *effBTLCreate(void *data);
 
 s32 CheckAction_READY(nbActionProcessData_t *a)

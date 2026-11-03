@@ -236,7 +236,7 @@ extern s32 sceIpuSync(s32, s32);
 
 extern sdfIpuDecodeCb_t *sdfCurrIpuDecodeCb;
 
-extern void sdfImageSetChainReleaseMem(s32);
+extern void sdfImageSetChainReleaseMem(ps2AddrS_t);
 
 extern void sdfGsMemFreeDelayed(sdfGsMemSlice_t *aHandle);
 

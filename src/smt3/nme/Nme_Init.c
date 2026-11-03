@@ -154,7 +154,7 @@ s32 nmeGetRowCount(s8 mode)
 }
 
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
 extern void nmeInitNameCursor(s8 mode, nmeWork_t *work);
 
 void nmeInitNameBuffer(s8 mode, nmeWork_t *work) {
@@ -179,7 +179,7 @@ void nmeInitNameBuffer(s8 mode, nmeWork_t *work) {
 
 extern const char *D_005276C4 __attribute__((section(".data")));
 extern u32 strlen(const char *string);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 void nmeInitNameCursor(s8 mode, nmeWork_t *work)

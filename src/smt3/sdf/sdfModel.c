@@ -940,7 +940,7 @@ extern u8 corePktSoftenBias;
 extern u8 sdf3DScreenTm[];
 extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*aAllocator)(s32));
 extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
-extern void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 extern void sdfCoreDrawSetZBias(f32 z);
 extern void sdfCoreDrawSetLight(void *light);
 extern void sdfCoreDrawSetFog(void *fog);

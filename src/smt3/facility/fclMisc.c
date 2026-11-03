@@ -498,7 +498,7 @@ void fclUpdateMessage(void)
     }
 }
 
-void fclSetMessageVar_20743088(s8 Index, s32 pStr)
+void fclSetMessageVar_20743088(s8 Index, ps2AddrS_t pStr)
 {
     itfMesMngSetVarImmediate(gMsgID, Index, pStr);
 }

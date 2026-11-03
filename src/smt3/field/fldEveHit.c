@@ -1420,7 +1420,7 @@ void fldPurgeEveRngProcesses(void) {
     }
 }
 
-s32 fldEveHitResID_Find(u32 pid) {
+s32 fldEveHitResID_Find(ps2Addr_t pid) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         if (gEvnRngPid[slotIndex] == pid) {
@@ -1430,7 +1430,7 @@ s32 fldEveHitResID_Find(u32 pid) {
     return -1;
 }
 
-s32 fldFindEveRngIndex(u32 task) {
+s32 fldFindEveRngIndex(ps2Addr_t task) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
@@ -1441,7 +1441,7 @@ s32 fldFindEveRngIndex(u32 task) {
     return -1;
 }
 
-const char *fldEveHitResName_Find(u32 pid) {
+const char *fldEveHitResName_Find(ps2Addr_t pid) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         if (gEvnRngPid[slotIndex] == pid) {

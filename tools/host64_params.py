@@ -9,6 +9,11 @@ in every unit that calls it, so the edit has to reach all of them at once.
   param <function> <index> <type>    parameter <index>, counting from 0
   ret <function> <type>              the return type
 
+A type of "auto" keeps each declaration's own signedness: u32 becomes
+ps2Addr_t and s32 becomes ps2AddrS_t. The two differ in later arithmetic and
+comparisons, so one function's parameter declared u32 in one unit and s32 in
+another must stay that way in both.
+
 Only a declaration can match: a parameter slot is rewritten solely when its
 text is a bare integer type with an optional name, which a call argument never
 is. Every rewrite is reported, so nothing lands unseen.
@@ -21,6 +26,14 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PARAM = re.compile(r"\A\s*(u32|s32|unsigned int|int)(\s+(?:const\s+)?[A-Za-z_][A-Za-z_0-9]*)?\s*\Z")
+
+
+AUTO = {"u32": "ps2Addr_t", "unsigned int": "ps2Addr_t",
+        "s32": "ps2AddrS_t", "int": "ps2AddrS_t"}
+
+
+def pick(newtype, old):
+    return AUTO[old] if newtype == "auto" else newtype
 
 
 def units():
@@ -78,7 +91,7 @@ def rewrite_param(text, func, index, newtype):
         pm = PARAM.match(piece)
         if not pm:
             continue
-        new = piece[:pm.start(1)] + newtype + piece[pm.end(1):]
+        new = piece[:pm.start(1)] + pick(newtype, pm.group(1)) + piece[pm.end(1):]
         out = out[:lo + a] + new + out[lo + b:]
         hits.append(piece.strip())
         pos = lo + a + len(new)
@@ -93,7 +106,7 @@ def rewrite_ret(text, func, newtype):
 
     def sub(m):
         hits.append(m.group(2))
-        return m.group(1) + newtype + m.group(3) + m.group(4) + "("
+        return m.group(1) + pick(newtype, m.group(2)) + m.group(3) + m.group(4) + "("
 
     return pattern.sub(sub, text), hits
 

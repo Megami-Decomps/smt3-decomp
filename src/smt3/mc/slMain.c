@@ -72,7 +72,7 @@ void *sdfMemLock(sdfMemHandle_t *aHandle);
 
 extern sdfMemHandle_t *slLoadFileFd;
 
-extern void sdfMcFuncRead(s32, u32, s32);
+extern void sdfMcFuncRead(s32, ps2Addr_t, s32);
 
 extern void *slLoadFileHandle;
 
@@ -1620,7 +1620,7 @@ s32 slHitAnyKeyNoChkProc(void) {
     return 0;
 }
 
-s32 slHitAnyKey(u32 nextFunc) {
+s32 slHitAnyKey(ps2Addr_t nextFunc) {
     slHitAnyKeyNextFunc = nextFunc;
     gslErrorKeyFlag = 0;
     sdfMcRegetInfo(mccb);

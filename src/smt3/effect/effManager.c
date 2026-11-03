@@ -68,7 +68,7 @@ extern void dds3MultiBillboardLinkOt(void);
 extern void dds3CrossfadeRun(void);
 extern void Eve_EffectDraw(void);
 
-effNode_t *dds3EffectCreate(u16 type, u16 arg, s32 param);
+effNode_t *dds3EffectCreate(u16 type, u16 arg, ps2AddrS_t param);
 void dds3EffectDataRevision(effResourceHeader_t *header);
 
 extern u8 dds3EffectBase[];
@@ -156,7 +156,7 @@ u32 dds3EffectPCFGetState(void) {
     return 1;
 }
 
-effNode_t *dds3EffectCreate(u16 type, u16 arg, s32 param)
+effNode_t *dds3EffectCreate(u16 type, u16 arg, ps2AddrS_t param)
 {
     effNode_t *node = sdfChipAllocDirect(sizeof(effNode_t));
 

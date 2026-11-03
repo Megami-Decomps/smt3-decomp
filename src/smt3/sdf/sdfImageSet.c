@@ -264,7 +264,7 @@ void sdfImageSetChainTag(u32 head, sdfImageSetTag_t *tail)
     SignalSema(cb->semaId);
 }
 
-void sdfImageSetChainReleaseMem(s32 p)
+void sdfImageSetChainReleaseMem(ps2AddrS_t p)
 {
     sdfImageSetCb_t *cb = &sdfImageSetCb;
     sdfImageSetPacket_tag *release;

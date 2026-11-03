@@ -96,7 +96,7 @@ extern void sceCdDelayThread(u16 ticks);
 extern s32 EIntr(void);
 extern s32 sceCdSync(s32 mode);
 extern s32 sceCdStream(u32 lsn, u32 sectors, void *buf, s32 cmd, void *arg);
-extern s32 sceCdLayerSearchFile(u32 file, const char *name, s32 layer);
+extern s32 sceCdLayerSearchFile(ps2Addr_t file, const char *name, s32 layer);
 
 void gcc2_compiled__6(s32 cause, s32 address, s32 argument)
 {

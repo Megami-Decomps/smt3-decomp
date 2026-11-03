@@ -126,7 +126,7 @@ extern s32 pbLoadSystemDataDone(s32 handle, s32 status);
 
 extern pbProcHandle_t *pbGetMoveChar(void);
 
-extern void dds3AdminiCallSequence(s32, s32, s32, s32);
+extern void dds3AdminiCallSequence(s32, ps2AddrS_t, s32, s32);
 
 extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 

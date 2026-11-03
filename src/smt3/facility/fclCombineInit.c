@@ -203,7 +203,7 @@ extern void cmpModelInitCore2(void);
 
 extern s8 dds3PadButtonState[];
 
-extern void *dds3GetProcessData(s32 id);
+extern void *dds3GetProcessData(ps2AddrS_t id);
 
 typedef struct
 {
@@ -355,7 +355,7 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void cmpInitCursorRange(cmpCursorInfo_t *cur, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(cmpCursorInfo_t *cur, u8 count, u8 visible, ps2AddrS_t layout);
 
 extern void cmpInitCursorLayout(cmpCursorInfo_t *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
@@ -372,7 +372,7 @@ extern void fclEncycSetExplainData(void *pbmd);
 extern s32 frDestroyFontRequestAfter(void *pFRQ);
 
 extern u8 D_00551F18[4];
-extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, ps2AddrS_t flags);
 
 void fclCombineDisableCmdZensyo(void)
 {
@@ -390,7 +390,7 @@ void fclCombineDisableCmdZensyo(void)
 }
 
 extern u8 cmbMenuEntryTable[8];
-extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, ps2AddrS_t flags);
 
 void cmbEnableMenuEntry5(void)
 {

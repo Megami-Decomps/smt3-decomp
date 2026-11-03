@@ -243,7 +243,7 @@ extern void sdfChipFreeDirect(void *aPtr);
 
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-extern void *dds3BillboardCreate(s32, u32);
+extern void *dds3BillboardCreate(s32, ps2Addr_t);
 
 extern void dds3BillboardDelete(mdlBillboard_t *);
 

@@ -60,7 +60,7 @@ extern dds3Basic_t *dds3AddMatterObjectBasic(s32 serialID, f32 *pos, f32 *rot);
 
 extern u32 dds3AllocObjectId(void);
 
-extern void dds3SetUnitObjectId(dds3Basic_t *node, u32 value);
+extern void dds3SetUnitObjectId(dds3Basic_t *node, ps2Addr_t value);
 
 dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 modelRangeID);
 
@@ -147,11 +147,11 @@ u8 *fldGetInfoHeader(fldTransferChunk_t *pData);
 
 void sdfAddressResolverReset(u32 *aDataBody, u32 aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
-void fldAddressResolver(u32 pFileTop, fldTransferChunk_t *pData);
+void fldAddressResolver(ps2Addr_t pFileTop, fldTransferChunk_t *pData);
 
-extern void sdfAddressResolver(s32 *aDataBody, s32 aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
+extern void sdfAddressResolver(s32 *aDataBody, ps2AddrS_t aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
-void fldAddressResolverReset(u32 pFileTop, fldTransferChunk_t *pData);
+void fldAddressResolverReset(ps2Addr_t pFileTop, fldTransferChunk_t *pData);
 
 void fldLoadNextFile_SetId_BtlRet(u32 field, u32 area);
 
@@ -225,7 +225,7 @@ extern s32 sdfMemGetSize(const sdfMemHandle_t *aHandle);
 
 extern u8 *sdfMemGetPtr(const sdfMemHandle_t *aHandle);
 
-extern void fldAmbLoadFromMem(u8 *data, s32 mh);
+extern void fldAmbLoadFromMem(u8 *data, ps2AddrS_t mh);
 
 extern void fldAutoMapFontInit(s32 bank);
 
@@ -511,10 +511,10 @@ typedef struct fldResourceLight_t {
     f32 AmbientR, AmbientG, AmbientB;
 } fldResourceLight_t;
 
-extern dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *, void *, s32);
-extern dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *, void *, s32);
-extern dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *, void *, s32);
-extern dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *, void *, s32);
+extern dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *, void *, ps2AddrS_t);
+extern dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *, void *, ps2AddrS_t);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *, void *, ps2AddrS_t);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *, void *, ps2AddrS_t);
 extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *, void *, void *);
 extern dds3Basic_t *dds3AddESPEffectObjectBasic(const char *, void *, void *, f32);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, s32);
@@ -1145,11 +1145,11 @@ void sdfAddressResolverReset(u32 *aDataBody, u32 aOffset, const u8 *aAddrInfoPtr
 }
 
 /* Relocate the words described by this packed-resource transfer chunk. */
-void fldAddressResolver(u32 pFileTop, fldTransferChunk_t *pData) {
+void fldAddressResolver(ps2Addr_t pFileTop, fldTransferChunk_t *pData) {
     sdfAddressResolver(EE_ADDR_AS(s32 *, pFileTop), (s32)pFileTop, EE_ADDR_AS(const u8 *, ((s32)pFileTop + pData->offset)), pData->size);
 }
 
-void fldAddressResolverReset(u32 pFileTop, fldTransferChunk_t *pData) {
+void fldAddressResolverReset(ps2Addr_t pFileTop, fldTransferChunk_t *pData) {
     sdfAddressResolverReset(EE_ADDR_AS(u32 *, pFileTop), pFileTop, EE_ADDR_AS(u8 *, ((s32)pFileTop + pData->offset)), pData->size);
 }
 

@@ -97,7 +97,7 @@ extern u8 *movieWaitSema(s32 size);
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*allocator)(s32));
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, ps2Addr_t packet);
-extern u32 p2sdSetPcmCallback(u32 callback);
+extern u32 p2sdSetPcmCallback(ps2Addr_t callback);
 extern s32 p2sdPlayPcm(u8 channel);
 
 void release_movieobj2(sdfMovieCb_t *obj, sdfGrOt_t *ot)

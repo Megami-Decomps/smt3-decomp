@@ -297,7 +297,7 @@ extern s32 fldEveHitCount;
 
 void fldClearDoorEvents(void);
 
-const char *fldEveHitResName_Find(u32 pid);
+const char *fldEveHitResName_Find(ps2Addr_t pid);
 
 extern u8 D_00302FA0[];
 

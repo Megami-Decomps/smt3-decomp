@@ -367,7 +367,7 @@ void OpenMessageWindow(instanceMes_tag *pinst);
 
 void ReadytoMessage(instanceMes_tag *panel);
 
-extern itfpanel_t *itfPnlRegist2(s32 type, u32 texhandle);
+extern itfpanel_t *itfPnlRegist2(s32 type, ps2Addr_t texhandle);
 
 void itfPnlSetPosition(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
@@ -444,7 +444,7 @@ extern u8 D_0054F508[5];
 
 void itfPnlSetPositionOffset(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
-void sdfAddressResolver(s32 *aDataBody, s32 aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
+void sdfAddressResolver(s32 *aDataBody, ps2AddrS_t aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 void frSetVariableRequest(s32 VarNo, s32 pStr);
 void itfMesMngSetSelect(s32 id, s32 selno);
 void itfMesMngMarkBitStat(s32 id, u32 flag);

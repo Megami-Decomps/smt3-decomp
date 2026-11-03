@@ -186,7 +186,7 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node);
 billHandle_t *dds3BillboardCopy(const billHandle_t *hBillboard);
 
 
-billHandle_t *dds3BillboardCreate(s32 index, u32 data);
+billHandle_t *dds3BillboardCreate(s32 index, ps2Addr_t data);
 
 void dds3BillboardDelete(billHandle_t *hData);
 
@@ -1078,7 +1078,7 @@ void dds3BillboardCopyO(billHandle_t *obj, s32 *out) {
     }
 }
 
-billHandle_t *dds3BillboardCreate(s32 index, u32 data) {
+billHandle_t *dds3BillboardCreate(s32 index, ps2Addr_t data) {
     billHandle_t *newobj;
 
     newobj = dds3BillboardFuncTable[index].create(data);

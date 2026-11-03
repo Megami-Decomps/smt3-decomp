@@ -804,7 +804,7 @@ u64 p2sd_2C1D78(const char *aName)
     return sdfSndSendSyncCmd(0xA0, 0, (void *)aName, strlen(aName));
 }
 
-void p2sdSetPcmBuffer(s32 data, s32 size) {
+void p2sdSetPcmBuffer(ps2AddrS_t data, s32 size) {
     s32 *packet;
     D_00593E20.size = size;
     D_00593E20.pending = 1;
@@ -973,7 +973,7 @@ s32 p2sd_2C21D8(u32 aCh)
     return sdfSndSendSyncCmd((aCh - 1) | 0x1D0, 0, NULL, 0);
 }
 
-u32 p2sdSetPcmCallback(u32 aCallback)
+u32 p2sdSetPcmCallback(ps2Addr_t aCallback)
 {
     if (p2sdPcmBusy != 0) {
         return 0;

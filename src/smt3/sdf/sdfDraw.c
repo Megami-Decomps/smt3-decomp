@@ -361,7 +361,7 @@ void sdfDrawTagLink(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
-void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, ps2Addr_t aPacket);
 
 void sdfGrOtFuncLinkToHead(sdfGrOt_t *aOt, sdfDrawTag_t *aTag);
 
@@ -478,7 +478,7 @@ void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, ps2Addr_t aPacket) {
     aTag->tail = aPacket + SDF_DMA_EXTENDED_TAIL_OFFSET;
 }
 
-void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, u32 aPacket) {
+void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, ps2Addr_t aPacket) {
     s32 previousTailAddress;
 
     (EE_ADDR_AS(SdfDmaTag *, aPacket))->kind = SDF_DMA_TAG_CALL_BYTE;

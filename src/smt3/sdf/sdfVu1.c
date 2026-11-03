@@ -138,7 +138,7 @@ extern void corePktXfmUV(void *vertices, s32 count, void *uv, void *transform);
 
 extern void corePktApplyFaceDivColor(sdfCorePacketCb_t *cb, void *parameters);
 
-extern void sdfGrClosePacketBuff(u32 aBuffPtr);
+extern void sdfGrClosePacketBuff(ps2Addr_t aBuffPtr);
 
 void corePktEmitTexTrisCtx2(sdfCorePacketCb_t *cb, u64 samplingState, u64 textureState,
                           u64 clampState, u64 alphaState, s32 clearPrimitiveFlags);

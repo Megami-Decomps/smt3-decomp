@@ -47,7 +47,7 @@ extern int EIntr(void);
 
 void WaitDma(sceDmaChan *chan);
 void WatchDma(sceDmaChan *chan, u32 addr, int timeout);
-u32 CheckAddress(u32 addr);
+u32 CheckAddress(ps2Addr_t addr);
 void memclr(void *p, int n);
 int sceDmaPause(sceDmaChan *chan);
 int sceDmaPutEnv(sceDmaEnv *env);
@@ -76,7 +76,7 @@ void WatchDma(sceDmaChan *chan, u32 addr, int timeout)
     }
 }
 
-u32 CheckAddress(u32 addr)
+u32 CheckAddress(ps2Addr_t addr)
 {
     if ((addr >> 28) == 7) {
         addr &= 0x0FFFFFFF;

@@ -374,7 +374,7 @@ u32 fr_1CA9B8(void) {
     return frFontRowBuf;
 }
 
-u32 frGetFontHeader(u32 resourceBase) {
+u32 frGetFontHeader(ps2Addr_t resourceBase) {
     return resourceBase;
 }
 

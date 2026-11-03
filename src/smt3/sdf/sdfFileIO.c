@@ -125,7 +125,7 @@ extern void *memcpy(void *, const void *, ps2Size_t);
 
 extern s32 sceLseek(s32 fileHandle, s32 offset, s32 origin);
 
-extern s32 sceRead(s32 fileHandle, s32 buffer, s32 byteCount);
+extern s32 sceRead(s32 fileHandle, ps2AddrS_t buffer, s32 byteCount);
 
 extern char * strcpy(char *, const char *);
 

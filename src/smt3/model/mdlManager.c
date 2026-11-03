@@ -261,7 +261,7 @@ extern char *strcat(char *dst, const char *src);
 extern char *strrchr(const char *text, s32 character);
 extern s32 strcasecmp(const char *first, const char *second);
 extern void sdfDummyFunc(void);
-extern fileRequest_t *fileLoadEx(const char *filename, s32 headOrTail, u32 endCallback, u32 callbackParm);
+extern fileRequest_t *fileLoadEx(const char *filename, s32 headOrTail, ps2Addr_t endCallback, ps2Addr_t callbackParm);
 extern void sdfModelCopyStat(sdfModelRootNode_t *aDstRoot, sdfModelRootNode_t *aSrcRoot);
 extern void sdfMotionChangeBlend(sdfMotionCtrlr_t *aCtrlr, s32 aCutNum, s32 aType, f32 aPreFrame, f32 aBlendLeng);
 extern void mdlStopEffect(mdlObj_t *aHandle, s32 aPlayGroup);

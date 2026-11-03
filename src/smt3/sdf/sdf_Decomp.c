@@ -65,7 +65,7 @@ typedef struct sdfDecompCb_t {
 /* Read the active packet cursor or restore it at a quadword boundary. */
 s32 sdfGrOpenPacketBuff(void);
 
-void sdfGrClosePacketBuff(s32 aBuffPtr);
+void sdfGrClosePacketBuff(ps2AddrS_t aBuffPtr);
 
 extern s32 D_00552170;
 

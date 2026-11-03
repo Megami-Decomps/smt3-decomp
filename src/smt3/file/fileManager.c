@@ -236,7 +236,7 @@ fileRequest_t *pacLoadUseTail(const char *filename) {
     return pacLoadEx(filename, 1, 0, 0, 0);
 }
 
-fileRequest_t *fileLoadEx(const char *filename, u32 headOrTail, u32 endCallback, u32 callbackParm) {
+fileRequest_t *fileLoadEx(const char *filename, u32 headOrTail, ps2Addr_t endCallback, ps2Addr_t callbackParm) {
     fileRequest_t *req = sdfChipAllocZeroDirect(0x30);
 
     req->mode = headOrTail;

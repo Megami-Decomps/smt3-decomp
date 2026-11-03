@@ -38,7 +38,7 @@ s8 rstFindSkillSlot(u16 skill, cmbUnit_t *unit);
 
 extern char *text2[];
 
-void fclSetMessageVar_20743088(s8 Index, s32 pStr);
+void fclSetMessageVar_20743088(s8 Index, ps2AddrS_t pStr);
 
 s32 fclStartMessage(s32 MsgNo);
 

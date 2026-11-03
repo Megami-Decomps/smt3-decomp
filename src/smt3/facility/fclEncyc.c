@@ -1795,7 +1795,7 @@ extern void lstInitListWindow(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 color, s8 style, lstListWindow_t *work);
 extern void cmpInitCursorLayout(void *cursor, s32 x, s32 y, s32 width,
                                 s32 height, s32 mode);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, ps2AddrS_t layout);
 extern void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 width,
                          s32 height, s32 color, s8 type, s8 speed);
 

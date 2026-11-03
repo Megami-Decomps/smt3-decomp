@@ -656,18 +656,18 @@ f32 dds3GetRandFloatA(effRandState_t *name);
 
 /* Constructors copy one serialized parameter variant into its runtime owner. */
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(
-    effPCPWhirlwindPolyParam_t *pParam, u32 pTex);
+    effPCPWhirlwindPolyParam_t *pParam, ps2Addr_t pTex);
 
 effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreate(
-    effPCPWwSpherePolyParam_t *pParam, u32 pTex);
+    effPCPWwSpherePolyParam_t *pParam, ps2Addr_t pTex);
 
 extern dds3ScatterPolyListTexResource_tag *dds3ScatterPolyListTexResourceCopy(dds3ScatterPolyListTexResource_tag *hSplTexResSrc);
 
 effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(
-    effPCPWhirlwind2PolyParam_t *pParam, u32 pTex);
+    effPCPWhirlwind2PolyParam_t *pParam, ps2Addr_t pTex);
 
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(
-    effPCPWhirlwind3PolyParam_t *pParam, u32 pTex);
+    effPCPWhirlwind3PolyParam_t *pParam, ps2Addr_t pTex);
 
 extern effDebugPolyParams_t D_0056AD58;
 
@@ -756,9 +756,9 @@ extern s32 effMagaCylinderCalcColor(s32 color, s32 tint);
 extern f32 sdfAtan(f32 aX);
 extern void SetRotateMatrixAxis(f32 aAngle, const void *aAxis);
 extern void *memcpy(void *a, const void *b, ps2Size_t c);
-effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(const effPCPHamaCardSpiralParam_t *pParam, u32 pTex, void *pData);
-effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(const effPCPHamaCardSphereParam_t *pParam, u32 pTex, void *pData);
-effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(const effPCPHamaCardScatterParam_t *pParam, u32 pTex, void *pData);
+effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(const effPCPHamaCardSpiralParam_t *pParam, ps2Addr_t pTex, void *pData);
+effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(const effPCPHamaCardSphereParam_t *pParam, ps2Addr_t pTex, void *pData);
+effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(const effPCPHamaCardScatterParam_t *pParam, ps2Addr_t pTex, void *pData);
 dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(u32 number, u32 face);
 void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *hPoly, const void *pMatrix);
 dds3ScatterPolyList_tag *dds3ScatterPolyListCreate(s32 face);
