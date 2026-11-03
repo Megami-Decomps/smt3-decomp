@@ -36,6 +36,7 @@ both native and emitted sizes when they differ.
 | 4 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
+| 4 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 3 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
@@ -45,9 +46,10 @@ both native and emitted sizes when they differ.
 | 3 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 3 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 3 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
-| 3 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 3 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
+| 3 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 3 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
+| 3 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
 | 3 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
@@ -68,8 +70,6 @@ both native and emitted sizes when they differ.
 | 2 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 2 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
 | 2 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
-| 2 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
-| 2 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
@@ -122,6 +122,7 @@ both native and emitted sizes when they differ.
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
 | 1 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 1 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
+| 1 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 1 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 1 | event/evtMoon | [event/evtMoon.md](event/evtMoon.md) |

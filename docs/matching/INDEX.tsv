@@ -152,6 +152,7 @@ fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/match
 fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/matching/field/fldDraw.md	197
 fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/matching/field/fldDraw.md	235
 fldEveHit_AddEveHit	field/fldEveHit	0x1868		docs/matching/field/fldEveHit.md	3
+fldHitChkUnitDamage	field/fldHit	0x370	219 of 220 words match	docs/matching/field/fldHit.md	3
 fldReadyScene	field/fldMain	0x594	357 of 357 words match	docs/matching/field/fldMain.md	3
 fldPlayerMotionSe	field/fldPlayer	0x5B0		docs/matching/field/fldPlayer.md	2
 fldBgmBitChk	field/fldSe	0x7C	31 of 31 words match	docs/matching/field/fldSe.md	3
@@ -194,6 +195,7 @@ Flow15_5	newbattle/NbNegoFlowInoti	0x148	82 of 82 words match	docs/matching/newb
 nbFlowGetUnitEntry	newbattle/NbNegoFlowOne	0x384	225 of 225 words match	docs/matching/newbattle/NbNegoFlowOne.md	3
 Flow6_24	newbattle/NbNegoFlowTwo	0x4FC	319 of 319 words match	docs/matching/newbattle/NbNegoFlowTwo.md	3
 Flow6_20	newbattle/NbNegoFlowTwo	0x1A0	104 of 104 words match	docs/matching/newbattle/NbNegoFlowTwo.md	49
+Flow6_22 declaration visibility				docs/matching/newbattle/NbNegoFlowTwo.md	76
 CheckAction_READY	newbattle/nbActionProcess	0x3EC	251 of 251 words match	docs/matching/newbattle/nbActionProcess.md	3
 CheckAction_COMM	newbattle/nbActionProcess	0x354	213 of 213 words match	docs/matching/newbattle/nbActionProcess.md	26
 CheckAction_CHECK1	newbattle/nbActionProcess	0x28C	163 of 163 words match	docs/matching/newbattle/nbActionProcess.md	60
@@ -205,6 +207,7 @@ SetSingleTarget2	newbattle/nbAi	0x26C	143 of 155 words match	docs/matching/newba
 Sel_AI	newbattle/nbAi	0x358	214 of 214 words match	docs/matching/newbattle/nbAi.md	43
 nbGetVirtualAisyo	newbattle/nbCalc	0xAC	43 of 43 words match	docs/matching/newbattle/nbCalc.md	3
 nbCheckBackAttack	newbattle/nbCalc	0x178	94 of 94 words match	docs/matching/newbattle/nbCalc.md	28
+nbGetKoukaType	newbattle/nbCalc	0x774	477 of 477 words match	docs/matching/newbattle/nbCalc.md	61
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	9 of 119 words differing	docs/matching/newbattle/nbCameraBoss.md	3
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	125 of 125 words match	docs/matching/newbattle/nbCameraBoss.md	23
 nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	68
@@ -275,8 +278,9 @@ UpdateSelect	newbattle/nbTarSelProcess	0x174	93 of 93 words match	docs/matching/
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	152 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
 nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	40
 datGetPlayerParam	newdata/datCalc	0x50	13 of 20 words match	docs/matching/newdata/datCalc.md	3
-datGetSkillKouka	newdata/datCalc	0x3F8	254 of 254 words match	docs/matching/newdata/datCalc.md	77
-datBossRashGetRec	newdata/datCalc	0x108	66 of 66 words match	docs/matching/newdata/datCalc.md	93
+datGetSkillKouka	newdata/datCalc	0x3F8	254 of 254 words match	docs/matching/newdata/datCalc.md	79
+datBossRashGetRec	newdata/datCalc	0x108	66 of 66 words match	docs/matching/newdata/datCalc.md	95
+Unconditional forward declarations				docs/matching/newdata/datCalc.md	120
 nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_Calc.md	3
 nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_Init.md	3

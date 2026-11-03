@@ -971,74 +971,101 @@ void fldHitChkUnitDamage(f32 *phys_pos)
     sdfVector4_t current;
     sdfVector4_t previous;
     sdfVector4_t delta;
+    sdfVector4_t currentSave;
+    sdfVector4_t previousSave;
+    sdfVector4_t travel;
     s32 axis;
     s32 pass;
     s32 index;
     s32 count;
     f32 radius;
-    volatile s32 *damageFlag = &fldGlobalBase.wordB0;
-    volatile f32 *position = phys_pos;
 
-    *damageFlag = 0;
-    current.x = position[0];
-    current.y = position[1];
-    current.z = position[2];
+    fldGlobalBase.wordB0 = 0;
+    current.x = phys_pos[0];
+    current.y = phys_pos[1];
+    current.z = phys_pos[2];
     previous.x = fldHitChkWork[0];
     previous.y = fldHitChkWork[1];
     previous.z = fldHitChkWork[2];
     if (fldGlobalBase.area == 1) {
         radius = 25.0f;
+        current.y = phys_pos[1] - 35.0f;
     } else if (fldGlobalBase.area < 10) {
         radius = 30.0f;
+        current.y = phys_pos[1] - 35.0f;
     } else {
         radius = 45.0f;
+        current.y = phys_pos[1] - 35.0f;
     }
-    current.y -= 35.0f;
     delta.x = current.x - previous.x;
     delta.y = current.y - previous.y;
     delta.z = current.z - previous.z;
     if (MATH_VectorLength(&delta) < 0.099999997f) {
         phys_pos[0] = previous.x;
-        phys_pos[2] = previous.z;
         phys_pos[1] = previous.y;
+        phys_pos[2] = previous.z;
         return;
     }
-    axis = sdfFabs(current.z - previous.z) < sdfFabs(current.x - previous.x) ? 0 : 2;
+    travel.x = sdfFabs(current.x - previous.x);
+    travel.z = sdfFabs(current.z - previous.z);
+    axis = travel.z < travel.x ? 0 : 2;
     fldHitChkUnitElvOnly(phys_pos);
     count = fldValueRecordCount;
     for (pass = 0; pass < 2; pass++) {
         for (index = 0; index < count; index++) {
-            collision_s *face = &fldMatterTable[index];
             f32 distance;
-            f32 inside;
+            f32 clearance;
+            s32 inside;
 
             if (fldGlobalBase.area >= 11) {
-                radius = face->mode2D == 1 ? 45.0f : 60.0f;
+                radius = fldMatterTable[index].mode2D == 1 ? 45.0f : 60.0f;
             }
-            if ((pass == 0 && face->mode2D == axis) || (pass != 0 && face->mode2D != axis)) {
+            if (pass == 0) {
+                if (fldMatterTable[index].mode2D == axis) {
+                    continue;
+                }
+            } else if (fldMatterTable[index].mode2D != axis) {
                 continue;
             }
-            if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1, face->hojiID) != 0) {
+            if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                            fldMatterTable[index].hojiID) != 0) {
                 count = fldValueRecordCount;
                 continue;
             }
-            face = &fldMatterTable[index];
-            if (face->matter != NULL) {
-                dds3PoseSet_t *pose = face->matter->poseset;
-                current.x -= pose->pos.x;
-                current.y -= pose->pos.y;
-                current.z -= pose->pos.z;
-                previous.x -= pose->pos.x;
-                previous.y -= pose->pos.y;
-                previous.z -= pose->pos.z;
+            /* Retail snapshots both positions and never restores them here.
+             * The translated previous-position chain has no later gameplay
+             * consumer; retain its native copied stores/subtractions, matching
+             * fldHitChkUnitElvOnly's snapshot/translation source shape. */
+            currentSave.x = current.x;
+            currentSave.y = current.y;
+            currentSave.z = current.z;
+            previousSave.x = previous.x;
+            previousSave.y = previous.y;
+            previousSave.z = previous.z;
+            if (fldMatterTable[index].matter != NULL) {
+                dds3PoseSet_t *pose = fldMatterTable[index].matter->poseset;
+                current.x = currentSave.x - pose->pos.x;
+                current.y = currentSave.y - pose->pos.y;
+                current.z = currentSave.z - pose->pos.z;
+                previous.x = previousSave.x - pose->pos.x;
+                previous.y = previousSave.y - pose->pos.y;
+                previous.z = previousSave.z - pose->pos.z;
             }
-            distance = fldVecDot(&current, (sdfVector4_t *)face->normal);
-            face = &fldMatterTable[index];
-            distance = sdfFabs(distance - face->num);
-            if ((face->pFace->attributes & 0x4000) && distance < radius) {
-                HitPositionInside2(&inside, face->mode2D, face->numedges, &current.x, face, radius);
-                if (!(inside < 0.0f)) {
-                    fldGlobalBase.wordB0 = 1;
+            distance = fldVecDot(&current,
+                                 (sdfVector4_t *)fldMatterTable[index].normal);
+            distance = sdfFabs(distance - fldMatterTable[index].num);
+            if (fldMatterTable[index].pFace->attributes & 0x4000) {
+                inside = 0;
+                if (distance < radius) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode2D,
+                                       fldMatterTable[index].numedges, &current.x,
+                                       &fldMatterTable[index], radius);
+                    if (!(clearance < 0.0f)) {
+                        inside = 1;
+                    }
+                }
+                if (inside == 1) {
+                    fldGlobalBase.wordB0 = inside;
                 }
             }
             count = fldValueRecordCount;

@@ -66,9 +66,11 @@ Plain and diagnostic builds qualify all five allocated sections, non-file
 symbols, 359 ordered relocations and normalized assembly for each control.
 The minimal guarded address cleanup also has identical output with
 uninitialized-value diagnostics; the owner's existing `memset` built-in-type
-warning remains. Strict implicit-declaration diagnostics reject both the
-baseline and cleanup for existing undeclared `datCheckSyojiSkill` and
-`datAddHearts` calls. Those unrelated declarations are not changed here.
+warning remains. At the time of these controls, strict implicit-declaration
+diagnostics rejected the production/SKIP_ASM baseline and cleanup for
+`datCheckSyojiSkill` and `datAddHearts`: their existing prototypes were guarded
+by `NON_MATCHING`. The address cleanup did not change those declarations;
+the later declaration correction is recorded below.
 The final explicit low-word offset has identical whole-owner output to the
 earlier signed-offset cleanup. Diagnostic flags are not production settings.
 These observations locate the unresolved argument/lifetime boundary, not an
@@ -114,3 +116,31 @@ this is a bounded selection check, not a whole-function execution proof.
 Combined local gates pass the retail checksum, 26 tooling test files / 427
 cases, all 147 guarded owners / 537 drafts with stable source/compiler inputs,
 seven IRX owners, and reconciled production reports.
+
+## Unconditional forward declarations
+
+The existing `s32 datCheckSyojiSkill(datUnitWork_t *, s32)` and
+`s32 datAddHearts(s32)` prototypes now apply in every build, rather than only
+under `NON_MATCHING`. They exactly match their same-unit providers. Native
+skill comparison uses the full integer argument and returns 0 or 1. Hearts
+insertion likewise compares the full ID before its byte stores and returns
+0 for an existing entry or 1 for an insertion. Ignoring that return in
+`datAddItem` does not make the provider `void`.
+
+Only `datGetMaxHp`, `datGetMaxMp` and `datAddItem` gain declaration visibility
+before their calls; their existing pointer/integer arguments require no new
+conversion. Function bodies, fallback guards, call targets, provider types,
+headers and flags are unchanged. Production and SKIP_ASM previously failed
+`-Werror-implicit-function-declaration`; NON_MATCHING/SKIP_ASM already passed.
+All three complete-owner modes now pass this strict check. The separate
+`memset` built-in-type warning remains, so this is not a warning-clean claim.
+
+Paired baseline/corrected builds preserve all five allocated sections,
+normalized assembly, ordered non-file symbols and ordered relocations in each
+mode: production has 415 symbols / 358 relocations, SKIP_ASM 388 / 334, and
+NON_MATCHING/SKIP_ASM 414 / 355. Plain and strict-diagnostic candidate output
+also agrees in every mode. Complete retail owner checking remains 79 match,
+0 differ, with owned data unchanged; all three guarded drafts still compile.
+This is an ordinary truthful declaration correction, with no new matching
+credit or compiler-constraint dependency. The paired negotiation-owner
+correction is recorded in [NbNegoFlowTwo](../newbattle/NbNegoFlowTwo.md).

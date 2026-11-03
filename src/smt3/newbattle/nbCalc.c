@@ -465,23 +465,19 @@ s32 nbCheckKoukaJyoken(s32 nskill, s32 sformindex, s32 dformindex)
     return 0;
 }
 
-extern char D_005449E0[], D_005449F8[], D_00551140[];
-extern const volatile f32 D_0054E528, D_0054E52C;
 extern u32 nbGetDevilFormatFlag(s32 formindex);
 extern s32 datGetSakePow(datUnitWork_t *work);
 extern s32 datGetMagicHitPow(datUnitWork_t *work);
 
-#ifdef NON_MATCHING
 s32 nbGetKoukaType(s32 nskill, s32 sformindex, s32 dformindex)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
-    volatile datNormalSkill_t *skill = &datSkillTable.normal[nskill];
     datUnitWork_t *source;
     datUnitWork_t *target;
     u32 formatFlag;
     u32 battleStat;
     u32 aisyo;
-    u32 bad;
+    s32 bad;
     s32 attr;
     s32 hit;
     u32 program;
@@ -489,15 +485,14 @@ s32 nbGetKoukaType(s32 nskill, s32 sformindex, s32 dformindex)
     f32 sourceRate;
     f32 targetRate;
     f32 chance;
-    char *format;
 
-    switch (skill->program) {
+    switch (datSkillTable.normal[nskill].program) {
     case 1: return 7;
     case 2:
     case 3: return 6;
     case 4: return 8;
-    case 5: return 9;
     case 7: return 10;
+    case 5: return 9;
     case 12: return 12;
     case 13: return 13;
     case 14: return 14;
@@ -521,15 +516,23 @@ s32 nbGetKoukaType(s32 nskill, s32 sformindex, s32 dformindex)
         return 5;
     }
     attr = nbGetNormalSkillAttr(nskill);
-    if (attr != -1 && (attr < 12 || attr >= 15)) {
+    switch (attr) {
+    case -1:
+    case 12:
+    case 13:
+    case 14:
+        break;
+    default:
         aisyo = nbGetAisyo(nskill, dformindex, attr);
-        if ((target->badstatus & 0xFFF) == 2 && skill->koukatype == 0) {
-            aisyo &= ~0x70000;
+        if ((target->badstatus & 0xFFF) == 2 && datSkillTable.normal[nskill].koukatype == 0) {
+            aisyo &= ~0x10000;
+            aisyo &= ~0x20000;
+            aisyo &= ~0x40000;
         }
         if (aisyo & 0x20000) {
             return 1;
         }
-        if (datCheckSyojiSkill(source, 0x165) != 0 && skill->koukatype == 0) {
+        if (datCheckSyojiSkill(source, 0x165) != 0 && datSkillTable.normal[nskill].koukatype == 0) {
             if (aisyo & 0x50000) {
                 data->d31_kantuu = 1;
             }
@@ -540,78 +543,107 @@ s32 nbGetKoukaType(s32 nskill, s32 sformindex, s32 dformindex)
     }
 
     if ((data->stat & 0x400) && (target->flag & 0x20)) {
-        if (skill->targettype != 0) {
+        if (datSkillTable.normal[nskill].targettype != 0) {
             if (attr != 14 && data->enemypcnt != 1) return 5;
         } else if (data->form[dformindex].stat & 0x1000) {
             return 11;
         }
     }
-    program = skill->program;
+    program = datSkillTable.normal[nskill].program;
+    switch (program) {
+    case 6:
+        if ((target->badstatus & 0xFFF) != 4) return 5;
+        break;
+    case 15:
+        if ((target->badstatus & 0xFFF) != 0x40) return 5;
+        break;
+    }
     bad = target->badstatus & 0xFFF;
-    if (program == 6 && bad != 4) return 5;
-    if (program == 15 && bad != 0x40) return 5;
-    if (bad == 1 || bad == 2 || bad == 4 || bad == 0x10 ||
-        bad == 0x100 || bad == 0x400) {
+    switch (bad) {
+    case 1:
+    case 2:
+    case 4:
+    case 0x10:
+    case 0x100:
+    case 0x400:
         return 0;
     }
     if (nbCheckKoukaJyoken(nskill, sformindex, dformindex) == 0) {
-        printf(D_00551140);
+        printf("MISS!!\n");
         return 5;
     }
-    if (skill->hitlevel == 0xFF) return 0;
-    levelRate = (f32)skill->hitlevel * D_0054E528;
-    if (evtBitCheck(0xAF2) != 0 && skill->hptype == 3 && skill->hpn == 1 &&
+    if (datSkillTable.normal[nskill].hitlevel == 0xFF) return 0;
+    levelRate = (f32)datSkillTable.normal[nskill].hitlevel * 0.01f;
+    if (evtBitCheck(0xAF2) != 0 && datSkillTable.normal[nskill].hptype == 3 && datSkillTable.normal[nskill].hpn == 1 &&
         !(target->flag & 0x20)) {
-        levelRate *= D_0054E52C;
+        levelRate *= 0.7f;
     }
     sourceRate = nbGetHojoRitu(sformindex, 8);
     targetRate = nbGetHojoRitu(dformindex, 6);
-    switch (skill->koukatype) {
+    switch (datSkillTable.normal[nskill].koukatype) {
     case 0: {
         s32 sourceParam;
         s32 targetParam;
-        s32 failpoint;
-        (void)((volatile datUnitWork_t *)source)->flag;
-        sourceParam = datGetParam(source, 4);
-        sourceParam = (sourceParam / (source->level / 5 + 3)) * 100;
-        targetParam = datGetParam(target, 4);
-        targetParam = (targetParam / (target->level / 5 + 3)) * 100;
-        failpoint = skill->failpoint;
-        chance = ((f32)(100 - failpoint) +
-                  ((f32)sourceParam - (f32)targetParam) * 0.0625f) *
-                 sourceRate * targetRate * levelRate;
-        format = D_005449E0;
-        break;
+        f32 sourceHitRate;
+        f32 targetHitRate;
+        /* The source-side split is live in the magic case below. Keeping
+         * that case shape here with equal physical calculations preserves
+         * retail's otherwise unused flag load/mask at +0x4B0/+0x4B4. Qualified
+         * whole-owner ee-gcc 2.96 dumps show the branch and duplicate arm
+         * removed between 25.sched2 and 27.jump2, with the load/mask retained.
+         * Exactly one call/calculation sequence executes. This is a mechanistic
+         * reconstruction, not recovered original spelling; see the nbCalc note. */
+        if (source->flag & 0x20) {
+            sourceParam = datGetParam(source, 4);
+            sourceHitRate = (f32)((sourceParam / (source->level / 5 + 3)) * 100);
+            targetParam = datGetParam(target, 4);
+            targetHitRate = (f32)((targetParam / (target->level / 5 + 3)) * 100);
+            chance = (f32)(100 - datSkillTable.normal[nskill].failpoint) +
+                     (sourceHitRate - targetHitRate) * 0.0625f;
+        } else {
+            sourceParam = datGetParam(source, 4);
+            sourceHitRate = (f32)((sourceParam / (source->level / 5 + 3)) * 100);
+            targetParam = datGetParam(target, 4);
+            targetHitRate = (f32)((targetParam / (target->level / 5 + 3)) * 100);
+            chance = (f32)(100 - datSkillTable.normal[nskill].failpoint) +
+                     (sourceHitRate - targetHitRate) * 0.0625f;
+        }
+        chance = chance * sourceRate * targetRate * levelRate;
+        if (chance < 50.0f) chance = 50.0f;
+        if (chance > 100.0f) chance = 100.0f;
+        if (nbGetBadStat(sformindex) == 0x100) chance *= 0.25f;
+        hit = (s32)chance;
+        printf("\312\252\315\375\245\322\245\303\245\310\316\250 = %d\n", hit);
+        if ((s32)dds3GetRandIntA(NULL, 100) >= hit) {
+            return (formatFlag & 0x800) ? 5 : 4;
+        }
+        return 0;
     }
     case 1: {
-        f32 base = (source->flag & 0x20) ? 95.0f : 100.0f;
-        s32 evasion = datGetSakePow(target);
-        s32 accuracy = datGetMagicHitPow(source);
-        chance = ((f32)(100 - (evasion * 100) / accuracy) * 0.5f + base) *
-                 sourceRate * targetRate * levelRate;
-        format = D_005449F8;
-        break;
+        s32 evasion;
+        if (source->flag & 0x20) {
+            evasion = datGetSakePow(target);
+            chance = (f32)(100 - (evasion * 100) / datGetMagicHitPow(source)) * 0.5f + 95.0f;
+        } else {
+            evasion = datGetSakePow(target);
+            chance = (f32)(100 - (evasion * 100) / datGetMagicHitPow(source)) * 0.5f + 100.0f;
+        }
+        chance = chance * sourceRate * targetRate * levelRate;
+        if (chance < 50.0f) chance = 50.0f;
+        if (chance > 100.0f) chance = 100.0f;
+        if (nbGetBadStat(sformindex) == 0x100) chance *= 0.25f;
+        hit = (s32)chance;
+        printf("\313\342\313\241\245\322\245\303\245\310\316\250 = %d\n", hit);
+        if ((s32)dds3GetRandIntA(NULL, 100) >= hit) {
+            return (formatFlag & 0x800) ? 5 : 4;
+        }
+        return 0;
     }
     default:
         return 0;
     }
-    if (chance < 50.0f) chance = 50.0f;
-    if (chance > 100.0f) chance = 100.0f;
-    if (nbGetBadStat(sformindex) == 0x100) chance *= 0.25f;
-    hit = (s32)chance;
-    printf(format, hit);
-    if ((s32)dds3GetRandIntA(NULL, 100) >= hit) {
-        return (formatFlag & 0x800) ? 5 : 4;
-    }
-    return 0;
 }
-#else
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_005449E0);
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_005449F8);
-
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaType);
-#endif
 
 void nbAddHpMp(s32 formindex, s32 type, s32 n)
 {
@@ -2867,6 +2899,3 @@ INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DA8);
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DE0);
 
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DF0);
-
-INCLUDE_SDATA(const s32, "newbattle/nbCalc", D_00551140);
-

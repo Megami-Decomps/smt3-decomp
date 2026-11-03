@@ -72,3 +72,24 @@ for the forward completion branch, not historical-source recovery.
 Combined local gates pass the retail checksum, 26 tooling test files / 427
 cases, all 147 guarded owners / 533 drafts with stable source/compiler inputs,
 seven IRX owners, and reconciled production reports.
+
+## Flow6_22 declaration visibility
+
+The existing `s32 datCheckMaka(s32)` declaration now applies in every build,
+not only under `NON_MATCHING`. Its provider in `newdata/datCalc` loads the
+signed 32-bit currency field, performs a signed comparison with its argument,
+and returns 0 or 1. Both source calls in `Flow6_22` pass the existing signed
+`requestdata` field and consume that Boolean result. Retail shares those calls
+at 0x2701B8; the post-call request-data reload and currency deduction remain
+unchanged. No body, fallback guard, conversion, header or flag changes.
+
+Production and SKIP_ASM previously failed
+`-Werror-implicit-function-declaration` for this callee;
+NON_MATCHING/SKIP_ASM already passed. All three complete-owner modes now pass.
+The paired baseline/corrected objects retain all four allocated sections,
+normalized assembly, ordered non-file symbols and ordered relocations:
+production 451 symbols / 358 relocations, SKIP_ASM 403 / 325, and
+NON_MATCHING/SKIP_ASM 453 / 358. Plain and strict-diagnostic candidate output
+also agrees in every mode. Complete retail owner checking remains 72 match,
+0 differ, with owned data unchanged; all four guarded drafts still compile.
+This adds no matching credit or compiler constraint.
