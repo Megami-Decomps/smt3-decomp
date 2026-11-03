@@ -192,6 +192,38 @@ the live arm. Native callback reloads, stack-argument spacing, and the final
 
 ## StageLoad (newbattle/nbStageProcess, 0x1B4)
 
+109 of 109 words match at the native 436-byte size. The complete owner checks
+16 match / 0 differ, including owned data. The existing ordinary reconstruction
+is promoted with one target-specific VU0 handoff adjustment; no register binding,
+empty operand, new macro, layout, ABI or scalar computation is added.
+
+`FromEuler` produces the actual quaternion in VU0. The existing
+`SDF_VU0_STOREVECTOR_NOMEM(&q)` writes its four lanes to the real stack object
+immediately before `dds3SetRotPoseSet(camera, &q)`. That external provider uses an EE `lq`/`sq` copy (not a VU0 copy)
+to read all four lanes into the pose rotation. `FromEuler` produces all four
+lanes, and the store precedes this consumer without an intervening clobber.
+There are no later C reads of `q` elements. The actual distinct frame slots
+are position at 0x00, rotation at 0x10 and quaternion at 0x20; this confirms
+the emitted alignment without claiming the type itself requires 16-byte alignment.
+The bare-address macro declares no memory output; this local memory audit and
+exact output are essential to the target-specific qualification. This is a
+qualified bare-address hardware handoff, not a general memory-barrier guarantee
+or evidence of original source spelling. The earlier `memset` and `q.w` store,
+all callbacks, state observations and native vector accesses remain intact.
+
+The paired memory-clobbered store emits 436 bytes with 97/109 words matching.
+The explicit full-vector output `SDF_VU0_STOREVECTOR_F32(&q)` also gives
+97/109 at 436 bytes, with the same twelve residuals; the modeled-output
+alternative therefore does not remove this target-specific dependency.
+The bare-address form retains the native store address and separately materialized
+call argument, resolving the two saved-register choices and all twelve residual
+words. Whole-owner plain and diagnostic builds have identical allocated and
+relocation sections and normalized assembly. Independent native/provider and
+handoff review plus final retail and current regression gates are required
+before publication.
+
+### Historical residual and rejected controls
+
 97 of 109 words match, at the exact 436-byte size and with zero instruction
 differences in the multiset.
 

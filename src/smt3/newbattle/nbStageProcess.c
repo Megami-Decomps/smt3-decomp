@@ -227,9 +227,8 @@ void nbFreeStage(void)
     }
 }
 
-/* NON_MATCHING: 12 of 109 words differ (first at +0x8). */
 
-#ifdef NON_MATCHING
+
 
 extern void nbLoadStageSky(void);
 
@@ -258,7 +257,11 @@ void StageLoad(void)
         dds3SetPosPoseSet(camera, &pos);
         SDF_VU0_LOADVECTOR(&rot);
         FromEuler(-0.26179937f, -0.34906585f, 0.0f);
-        SDF_VU0_STOREVECTOR(&q);
+        /* Target-specific VU0 handoff: write the quaternion for the next
+         * external consumer, with no intervening C access to q. Keep the
+         * bare address here; the memory-clobbered control shares
+         * its call address and changes the native register allocation. */
+        SDF_VU0_STOREVECTOR_NOMEM(&q);
         dds3SetRotPoseSet(camera, &q);
         dds3CameraObjectBasicSetFovy(camera, 0.69813165f);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
@@ -277,11 +280,7 @@ void StageLoad(void)
     }
 }
 
-#else
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", StageLoad);
-
-#endif
 
 void StageFree(void)
 {

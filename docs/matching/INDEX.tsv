@@ -281,7 +281,7 @@ nbDrawKoukaSprite	newbattle/nbStageProcess	0x108	24 of 66 words differ	docs/matc
 RunSake	newbattle/nbStageProcess	0x104	45 of 65 words match	docs/matching/newbattle/nbStageProcess.md	122
 CheckAction_TARSEL	newbattle/nbActionProcess	0x1CC	115 of 115 words	docs/matching/newbattle/nbStageProcess.md	151
 SetDamagePacket	newbattle/nbActionProcess	0x1E0	120 of 120 words	docs/matching/newbattle/nbStageProcess.md	174
-StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/matching/newbattle/nbStageProcess.md	193
+StageLoad	newbattle/nbStageProcess	0x1B4	109 of 109 words match	docs/matching/newbattle/nbStageProcess.md	193
 UpdateSelect	newbattle/nbTarSelProcess	0x174	93 of 93 words match	docs/matching/newbattle/nbTarSelProcess.md	3
 CursorSelect	newbattle/nbTarSelProcess	0x294	40 of 165 words match	docs/matching/newbattle/nbTarSelProcess.md	55
 nbSetBattleDummy	newbattle/nbTest	0x2B4		docs/matching/newbattle/nbTest.md	3
