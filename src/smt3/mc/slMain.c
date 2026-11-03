@@ -154,6 +154,10 @@ extern s8 dds3PadButtonState[];
 
 void p2sdPlaySE(s32 trackId, s32 volume, s32 pan);
 
+/* One step of the save and load state machine, which this unit holds as an
+ * address and calls through a cast. */
+typedef s32 (*slProcFunc_t)();
+
 extern u32 slHitAnyKeyNextFunc;
 
 extern s32 slHitAnyKeyNoChkProc(void);
@@ -1615,7 +1619,7 @@ s32 slHitAnyKeyNoChkProc(void) {
         if (slHitAnyKeyNextFunc == -1) {
             return slExitWait((void *)-1);
         }
-        return ((s32 (*)())slHitAnyKeyNextFunc)();
+        return EE_ADDR_AS(slProcFunc_t, slHitAnyKeyNextFunc)();
     }
     return 0;
 }
@@ -1646,7 +1650,7 @@ s32 slHitAnyKeyProc(void) {
             if (slHitAnyKeyNextFunc == -1) {
                 return slExitWait((void *)-1);
             }
-            return ((s32 (*)())slHitAnyKeyNextFunc)();
+            return EE_ADDR_AS(slProcFunc_t, slHitAnyKeyNextFunc)();
         }
         switch (sdfMcGetFileInfoReady(mccb)) {
         case 1:
@@ -2597,7 +2601,7 @@ s32 slCalc(dds3ProcessID_t *id) {
     job = baseIconFileHandle;
     cur = proc_func_ans;
     if (next != 0) {
-        cur = (s32 (*)())next;
+        cur = EE_ADDR_AS(slProcFunc_t, next);
     }
     proc_func_ans = cur;
     if (job != 0 && pacFileCheckEnd(EE_ADDR_AS(fileRequest_t *, job)) != 0) {

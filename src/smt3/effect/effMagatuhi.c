@@ -175,6 +175,10 @@ typedef struct effMagatuhiHistoryParams_t {
 } effMagatuhiHistoryParams_t;
 
 /* History arrays precede this 0x38-byte owner in one retained allocation. */
+/* One row of the position and angle tables, so an address can be cast to a
+ * row pointer through a type name. */
+typedef f32 effMagatuhiRow_t[4];
+
 typedef struct dds3MagatuhiBill_tag {
     s32 count;
     u16 historyCount;
@@ -769,13 +773,13 @@ dds3MagatuhiBill_tag *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 h
     resource->historyAngleStep = historyAngleStep;
     resource->historyDistanceScale = historyDistanceScale;
     resource->drawBucket = param;
-    resource->positions = (f32 (*)[4])positions;
+    resource->positions = EE_ADDR_AS(effMagatuhiRow_t *, positions);
     resource->colorTable = EE_ADDR_AS(u32 *, colorTable);
     resource->historyScalars = EE_ADDR_AS(f32 *, historyScalars);
     resource->slotColors = EE_ADDR_AS(u32 *, values);
     resource->writeIndices = EE_ADDR_AS(u16 *, writeIndices);
     resource->validCounts = EE_ADDR_AS(u16 *, validCounts);
-    resource->angleRows = (f32 (*)[4])angleValues;
+    resource->angleRows = EE_ADDR_AS(effMagatuhiRow_t *, angleValues);
     resource->allocationHandle = allocation;
     resource->texture = dds3BillboardGetGeneralTex(0);
 

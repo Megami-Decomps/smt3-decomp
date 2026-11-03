@@ -44,6 +44,9 @@ s32 sdfSndSendCmd(s32 aCmd, s32 aParam, void *aExDataPtr, s32 aExDataSize);
 
 extern s32 SignalSema(s32 aSemaId);
 
+/* The PCM fill hook, held as an address and called through a cast. */
+typedef u8 *(*p2sdPcmFunc_t)(s32);
+
 extern u32 p2sdPcmCallback;
 
 extern u32 sdfSndMap[];
@@ -1125,7 +1128,7 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
         void *buffer;
 
         sdfFileRpcResult = request;
-        buffer = ((u8 *(*)(s32))p2sdPcmCallback)(request->byteCount);
+        buffer = EE_ADDR_AS(p2sdPcmFunc_t, p2sdPcmCallback)(request->byteCount);
         if (buffer != NULL) {
             sdfSndTransToIOP(sdfFileRpcResult->destination, buffer,
                              sdfFileRpcResult->byteCount);

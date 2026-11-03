@@ -36,6 +36,9 @@ extern s32 WakeupThread(s32 thread);
 extern void sdfWaitVblank(s32 mode);
 extern volatile s8 sdfGrDrawBusy;
 extern s32 sdfGrCaptureReq;
+/* The capture hook, held as an address and called through a cast. */
+typedef void (*sdfGrCaptureFunc_t)(u8 *);
+
 extern s32 sdfGrCaptureTarget;
 extern s8 sdfGrCaptureBuff;
 
@@ -260,7 +263,7 @@ void sdfGrCapture(void) {
         sdfMemFreeDirect(allocation);
         sdfGrCaptureBuff = 0;
         if (sdfGrCaptureTarget) {
-            ((void (*)(u8 *))sdfGrCaptureTarget)(EE_ADDR_AS(u8 *, sdfGrCaptureReq));
+            EE_ADDR_AS(sdfGrCaptureFunc_t, sdfGrCaptureTarget)(EE_ADDR_AS(u8 *, sdfGrCaptureReq));
         }
     }
 }
