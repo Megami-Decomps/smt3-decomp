@@ -636,7 +636,7 @@ void frCreateDrawFontPacket_20550848(s32 x, s32 y, s32 width, s32 height, u8 sty
     packet->sprite.corners[1].xyz = (u32)((x & 0xFFFF) | (y << 16)) | z;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
     sdfDrawTagInit(list);
-    sdfDrawTagLink(list, (u32)packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     drawSurface = &sdfGrOtTable[surface];
     drawSurface->regFunc(drawSurface, list);
 }
@@ -2320,10 +2320,10 @@ void frDumpFontTexture(s32 x, s32 y, s32 depth)
 
     frCreateDrawEnvPacket(drawEnv);
     sdfDrawTagInit(drawEnvTag);
-    sdfDrawTagLink(drawEnvTag, (u32)drawEnv);
+    sdfDrawTagLink(drawEnvTag, EE_ADDR(drawEnv));
     D_002F67F8.regFunc(&D_002F67F8, drawEnvTag);
     sdfDrawTagInit(textureTag);
-    sdfDrawTagLink(textureTag, (u32)slot);
+    sdfDrawTagLink(textureTag, EE_ADDR(slot));
     D_002F67F8.regFunc(&D_002F67F8, textureTag);
 }
 #else

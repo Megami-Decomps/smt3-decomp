@@ -283,7 +283,7 @@ void itfMiscDrawTrianglePrim(sdfIVector2_t *pvertex, itfColor_t *pcolor, s32 x, 
         pvertex++;
         dst += 2;
     }
-    sdfDrawTagLink(pdrawtag, (u32)packet);
+    sdfDrawTagLink(pdrawtag, EE_ADDR(packet));
 }
 
 /* Emit an indexed four-vertex triangle fan with a color record per vertex. */
@@ -306,7 +306,7 @@ void itfMiscDrawRectanglePrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *v
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfDrawTagLink(command, (u32)packet);
+    sdfDrawTagLink(command, EE_ADDR(packet));
 }
 
 /* Emit a textured triangle fan: each four-float input supplies S/T/Q only.
@@ -336,7 +336,7 @@ void itfMiscDrawTexPoly(sdfIVector2_t *pvertex, f32 *pstq, itfColor_t *pcolor, u
         pvertex++;
         dst += 2;
     }
-    sdfDrawTagLink(pdrawtag, (u32)packet);
+    sdfDrawTagLink(pdrawtag, EE_ADDR(packet));
 }
 
 /* Bind the texture and emit one two-corner sprite using two packed UV pairs.
@@ -365,7 +365,7 @@ void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 
     dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
     dst[9] = (u64)(u32)tail;
     sdf2DLinkTexPacket(command, texture, flag);
-    sdfDrawTagLink(command, (u32)packet);
+    sdfDrawTagLink(command, EE_ADDR(packet));
 }
 
 /* Emit a colored textured sprite without binding a texture in this function. */
@@ -389,7 +389,7 @@ void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv, itfColor_t *colo
     dst[6] = (u64)uv->components[2] | ((u64)uv->components[3] << 32);
     dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
     dst[9] = (u64)z;
-    sdfDrawTagLink(pdrawtag, (u32)packet);
+    sdfDrawTagLink(pdrawtag, EE_ADDR(packet));
 }
 
 /* Emit an untextured two-corner GS sprite. */
@@ -408,7 +408,7 @@ void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, itfColor_t *color, u32 z, s3
     dst += 2;
     dst[1] = (u64)z;
     dst[0] = (u64)(u32)(pos[1].x + ITF_GS_X_BIAS) | ((u64)(pos[1].y + ITF_GS_Y_BIAS) << 32);
-    sdfDrawTagLink(pdrawtag, (u32)packet);
+    sdfDrawTagLink(pdrawtag, EE_ADDR(packet));
 }
 
 /* Emit an indexed triangle strip, packing two vertices per GIF loop.
@@ -433,7 +433,7 @@ void itfMiscDrawTriangleStripPrim(sdfIVector2_t *vertices, itfColor_t *colors, u
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfDrawTagLink(command, (u32)packet);
+    sdfDrawTagLink(command, EE_ADDR(packet));
 }
 
 /* Emit indexed RGBA/XYZ2 records with the line-strip primitive. */
@@ -456,7 +456,7 @@ void itfMiscDrawLineStripPrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *v
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfDrawTagLink(command, (u32)packet);
+    sdfDrawTagLink(command, EE_ADDR(packet));
 }
 
 /* Emit indexed RGBA/XYZ2 records with independent line primitives. */
@@ -479,7 +479,7 @@ void itfMiscDrawLinePrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *vertex
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfDrawTagLink(command, (u32)packet);
+    sdfDrawTagLink(command, EE_ADDR(packet));
 }
 
 /* Write TEST for the selected GS context, not the ALPHA blend register. */

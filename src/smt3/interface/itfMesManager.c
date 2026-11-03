@@ -1438,32 +1438,32 @@ s32 itfMesMngDebugProc(void) {
             selectionMarker = D_0054F4F0;
         }
         sdfDrawTagLink(packetList,
-                        (u32)sdfDevPrintf(0x7180, menuItemY, 0xFFFFF0, 0,
-                                                     menuItemFormat, selectionMarker, D_00326710[menuItemIndex]));
+                        EE_ADDR(sdfDevPrintf(0x7180, menuItemY, 0xFFFFF0, 0,
+                                                     menuItemFormat, selectionMarker, D_00326710[menuItemIndex])));
     }
 
     coordinateFormat = "( %3d, %3d )";
     panelSprite = panel->mes;
     bounds = &panelSprite->left;
     sdfDrawTagLink(packetList,
-                    (u32)sdfDevPrintf(0x7E00, 0x7A00, 0xFFFFF0, 0,
+                    EE_ADDR(sdfDevPrintf(0x7E00, 0x7A00, 0xFFFFF0, 0,
                                                  coordinateFormat, bounds[0] >> 4,
-                                                 bounds[1] >> 3));
+                                                 bounds[1] >> 3)));
     sdfDrawTagLink(packetList,
-                    (u32)sdfDevPrintf(0x7E00, 0x7A60, 0xFFFFF0, 0,
+                    EE_ADDR(sdfDevPrintf(0x7E00, 0x7A60, 0xFFFFF0, 0,
                                                  coordinateFormat, bounds[2] >> 4,
-                                                 bounds[3] >> 3));
+                                                 bounds[3] >> 3)));
     sdfDrawTagLink(packetList,
-                    (u32)sdfDevPrintf(0x7E00, 0x7B20, 0xFFFFF0, 0,
-                                                 D_0054F4F8, panel->fadeLimit));
+                    EE_ADDR(sdfDevPrintf(0x7E00, 0x7B20, 0xFFFFF0, 0,
+                                                 D_0054F4F8, panel->fadeLimit)));
     bounds = D_00326700.pmesflow->state->window.mes_offset;
     sdfDrawTagLink(packetList,
-                    (u32)sdfDevPrintf(0x7180, 0x7C40, 0xFFFFF0, 0,
+                    EE_ADDR(sdfDevPrintf(0x7180, 0x7C40, 0xFFFFF0, 0,
                                                  "OFFSET : %3d, %3d - %3d, %3d",
                                                  bounds[0] >> 4,
                                                  bounds[1] >> 3,
                                                  bounds[2] >> 4,
-                                                 bounds[3] >> 3));
+                                                 bounds[3] >> 3)));
     packetOwner = &sdfGrOtTable[83];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))packetOwner->regFunc)(packetOwner, packetList);
     return 0;

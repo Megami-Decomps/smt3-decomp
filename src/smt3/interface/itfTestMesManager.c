@@ -224,12 +224,12 @@ s32 pbDebugPrintPanel(void) {
 
     list = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(list,
-                    (u32)dds3PrimFrameRect(0x8500, 0x79C0, 0xFEFFFF,
-                                  0xA80, 0x120, 0x60000000, 0x40806020));
+                    EE_ADDR(dds3PrimFrameRect(0x8500, 0x79C0, 0xFEFFFF,
+                                  0xA80, 0x120, 0x60000000, 0x40806020)));
     sdfDevSetPrintCB(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
     sdfDrawTagLink(list,
-                    (u32)sdfDevPrintfEx(&packet, "FOVY: %6.2f",
-                        dds3ScreenParam.fovy * radiansToDegrees));
+                    EE_ADDR(sdfDevPrintfEx(&packet, "FOVY: %6.2f",
+                        dds3ScreenParam.fovy * radiansToDegrees)));
     { sdfGrOt_t *ot = &sdfGrOtTable[81]; ((sdfGrOtRegFunc_t)ot->regFunc)(ot, list); }
     if (((s8)dds3PadButtonState[0x33]) < 0) {
         return -1;
@@ -327,24 +327,24 @@ s32 pbDebugPrintPanel2(void) {
 
     list = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(list,
-        (u32)dds3PrimFrameRect(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
+        EE_ADDR(dds3PrimFrameRect(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020)));
     sdfDevSetPrintCB(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
-    sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet,
-        "BLUR:        %s", dds3ScreenBlurFlag ? D_0054F530 : D_0054F538));
+    sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&packet,
+        "BLUR:        %s", dds3ScreenBlurFlag ? D_0054F530 : D_0054F538)));
 
     y = 0x7A20;
     if (pbDebugPanel2Pos.editing == 0) {
         sdfDevSetPrintCB(&packet, 0x82C0, pbDebugPanel2Pos.selection * 0x60 + 0x7A20, 0xFF0000, 0);
         pbDebugPanel2Pos.blink++;
         if (pbDebugPanel2Pos.blink < 32 || (pbDebugPanel2Pos.blink & 31) < 18) {
-            sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_0054F540));
+            sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&packet, D_0054F540)));
         }
     }
 
     for (row = 0; row != 3; row++) {
         sdfDevSetPrintCB(&packet, 0x82C0, y, 0xFF0000, 0);
         sdfDrawTagLink(list,
-            (u32)sdfDevPrintfEx(&packet, D_0054F548, D_00326C08[row]));
+            EE_ADDR(sdfDevPrintfEx(&packet, D_0054F548, D_00326C08[row])));
         highlight = 0;
         if (pbDebugPanel2Pos.editing != 0 && row == pbDebugPanel2Pos.selection) {
             highlight = 6;
@@ -353,22 +353,22 @@ s32 pbDebugPrintPanel2(void) {
         switch (row) {
         case 0:
             sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_0054F550, dds3ScreenBlurAlpha));
+                EE_ADDR(sdfDevPrintfEx(&packet, D_0054F550, dds3ScreenBlurAlpha)));
             break;
         case 1:
             sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_0054F550, dds3ScreenBlurScale));
+                EE_ADDR(sdfDevPrintfEx(&packet, D_0054F550, dds3ScreenBlurScale)));
             break;
         case 2:
             sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_0054F558, dds3ScreenBlurOfsX[0], dds3ScreenBlurOfsX[1]));
+                EE_ADDR(sdfDevPrintfEx(&packet, D_0054F558, dds3ScreenBlurOfsX[0], dds3ScreenBlurOfsX[1])));
             break;
         }
         y += 0x60;
     }
     sdfDrawTagLink(list,
-        (u32)dds3PrimFrameRect((dds3ScreenBlurOfsX[0] * 16) + 0x7FC0, (dds3ScreenBlurOfsX[1] * 8) + 0x7FE0,
-            0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
+        EE_ADDR(dds3PrimFrameRect((dds3ScreenBlurOfsX[0] * 16) + 0x7FC0, (dds3ScreenBlurOfsX[1] * 8) + 0x7FE0,
+            0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000)));
     { sdfGrOt_t *ot = &sdfGrOtTable[83]; ((sdfGrOtRegFunc_t)ot->regFunc)(ot, list); }
 
     if ((s8)((s8)dds3PadButtonState[0x32]) < 0) {
@@ -471,20 +471,20 @@ s32 pbDebugPrintPanel3(void) {
 
     list = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(list,
-        (u32)dds3PrimFrameRect(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
+        EE_ADDR(dds3PrimFrameRect(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020)));
     sdfDevSetPrintCB(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
-    sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_0054F588));
+    sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&packet, D_0054F588)));
     if (pbDebugPanel3X.editing == 0) {
         sdfDevSetPrintCB(&packet, 0x8980, pbDebugPanel3X.selection * 0x60 + 0x7A20, 0xFF0000, 0);
         pbDebugPanel3X.blink++;
         if (pbDebugPanel3X.blink < 32 || (pbDebugPanel3X.blink & 31) < 18) {
-            sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_0054F590));
+            sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&packet, D_0054F590)));
         }
     }
     for (row = 0; row != 4; row++) {
         sdfDevSetPrintCB(&packet, 0x8980, y, 0xFF0000, D_00326C20[row].highlight);
         sdfDrawTagLink(list,
-            (u32)sdfDevPrintfEx(&packet, D_0054F598, D_00326C20[row].title));
+            EE_ADDR(sdfDevPrintfEx(&packet, D_0054F598, D_00326C20[row].title)));
         highlight = 0;
         if (pbDebugPanel3X.editing != 0 && row == pbDebugPanel3X.selection) {
             highlight = 6;
@@ -492,10 +492,10 @@ s32 pbDebugPrintPanel3(void) {
         sdfDevSetPrintCB(&packet, 0x8C80, y, 0xFF0000, highlight);
         if (row < 4) {
             sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_0054F5A0, D_00326C50.channels[row]));
+                EE_ADDR(sdfDevPrintfEx(&packet, D_0054F5A0, D_00326C50.channels[row])));
         } else {
             sdfDrawTagLink(list,
-                (u32)sdfDevPrintfEx(&packet, D_0054F5A8, D_00551EA8));
+                EE_ADDR(sdfDevPrintfEx(&packet, D_0054F5A8, D_00551EA8)));
         }
         y += 0x60;
     }
@@ -627,9 +627,9 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     }
     color |= (u32)alpha << 24;
     list = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(list, (u32)pbMakeSpritePacket(0x33001, 0));
-    sdfDrawTagLink(list, (u32)pbMakePrimPacket(6, 0));
-    sdfDrawTagLink(list, (u32)pbAllocPrimPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
+    sdfDrawTagLink(list, EE_ADDR(pbMakeSpritePacket(0x33001, 0)));
+    sdfDrawTagLink(list, EE_ADDR(pbMakePrimPacket(6, 0)));
+    sdfDrawTagLink(list, EE_ADDR(pbAllocPrimPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color)));
     surface = &sdfGrOtTable[surfaceIndex];
     ((sdfGrOtRegFunc_t)surface->regFunc)(surface, list);
 }

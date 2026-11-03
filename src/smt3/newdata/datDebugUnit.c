@@ -24,22 +24,22 @@ void DispList(s32 listX, s32 listY, sdfDrawTag_t *tag)
     s32 count = ((datDebugStockWorkView_t *)DDS3_GBWK)->stockCount;
     s32 i;
 
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + x * 0xC0,
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + x * 0xC0,
                                            0x7900 + y * 0x60,
-                                           0xFEFFFF, 0, D_005431A8, count));
+                                           0xFEFFFF, 0, D_005431A8, count)));
     y++;
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + x * 0xC0,
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + x * 0xC0,
                                            0x7900 + y * 0x60,
-                                           0xFEFFFF, 0, D_005431B8));
+                                           0xFEFFFF, 0, D_005431B8)));
     y++;
 
     for (i = 0; i < 16; i++) {
         u8 item = ((datDebugStockWorkView_t *)DDS3_GBWK)->stock[i];
         s32 attr = i < count ? 5 : 0xE;
 
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + x * 0xC0,
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + x * 0xC0,
                                                0x7900 + y * 0x60,
-                                               0xFEFFFF, attr, D_00550EB0, item));
+                                               0xFEFFFF, attr, D_00550EB0, item)));
         item = ((datDebugStockWorkView_t *)DDS3_GBWK)->stock[i];
         if (item >= 10) {
             x += 3;
@@ -66,33 +66,33 @@ void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag)
     s32 badstatus;
     s32 badStatusIndex;
 
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                           0xFEFFFF, 0, D_00550F20, unit));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                           0xFEFFFF, 0, D_00550F20, unit)));
     column += 5;
     if ((work->flag & 1) == 0) {
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                               0xFEFFFF, 0xE, D_00550F28));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                               0xFEFFFF, 0xE, D_00550F28)));
         return;
     }
 
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                           0xFEFFFF, 0, D_00550F30, work->id));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                           0xFEFFFF, 0, D_00550F30, work->id)));
     column += 4;
     if (work->flag & 2) {
-        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                               0xFEFFFF, 5, D_00550F38));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                               0xFEFFFF, 5, D_00550F38)));
     }
     column += 2;
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                           0xFEFFFF, 0, D_00550F40, work->level));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+                                           0xFEFFFF, 0, D_00550F40, work->level)));
     column += 4;
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
                                            0xFEFFFF, 0, D_00550F48,
-                                           work->hp, work->maxhp));
+                                           work->hp, work->maxhp)));
     column += 8;
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0, baseY,
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
                                            0xFEFFFF, 0, D_00550F48,
-                                           work->mp, work->maxmp));
+                                           work->mp, work->maxmp)));
     column += 8;
 
     badstatus = work->badstatus;
@@ -101,10 +101,10 @@ void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag)
             break;
         }
     }
-    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + column * 0xC0,
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0,
                                            0x7900 + y * 0x60,
                                            0xFEFFFF, 0, D_00550F50,
-                                           nbUnitBadStatusNames[badStatusIndex]));
+                                           nbUnitBadStatusNames[badStatusIndex])));
 }
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
@@ -127,7 +127,7 @@ s32 datDebugUnitProcess(dds3ProcessID_t *id)
 
     sdfDrawTagInit(unitList);
     DispList(2, 10, unitList);
-    sdfDrawTagLink(unitList, (u32)sdfDevPrintf(0x7180, 0x7E40, 0xFEFFFF, 4, D_005431C8));
+    sdfDrawTagLink(unitList, EE_ADDR(sdfDevPrintf(0x7180, 0x7E40, 0xFEFFFF, 4, D_005431C8)));
 
     for (i = 0, entry = 15; i < 16; i++, entry++) {
         DispUnit1(i, 2, entry, unitList);
@@ -164,7 +164,7 @@ s32 datDebugDrawSelectMenu(void)
     memcpy(labels, D_005431F0, sizeof(labels));
     listTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(listTag);
-    sdfDrawTagLink(listTag, (u32)sdfDevPrintf(0x82C0, 0x7AE0, 0xFEFFFF, 0xE, D_00543200));
+    sdfDrawTagLink(listTag, EE_ADDR(sdfDevPrintf(0x82C0, 0x7AE0, 0xFEFFFF, 0xE, D_00543200)));
 
     for (i = 1, x = 27, y = 0x7B40; i < 4; i++, y += 0x60) {
         const char *name = labels[i - 1];
@@ -173,8 +173,8 @@ s32 datDebugDrawSelectMenu(void)
             attr = 4;
         }
         sdfDrawTagLink(listTag,
-                       (u32)sdfDevPrintf(0x7000 + x * 0xC0, y, 0xFEFFFF, attr, D_00550F70,
-                                         name, DDS3_GBWK->kotowari[i]));
+                       EE_ADDR(sdfDevPrintf(0x7000 + x * 0xC0, y, 0xFEFFFF, attr, D_00550F70,
+                                         name, DDS3_GBWK->kotowari[i])));
     }
 
     panelTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
