@@ -455,7 +455,7 @@ void dds3PolygonLinkOt(void) {
                 record->parm.faceCount = 16;
                 record->parm.pointCount = 48;
                 while (remaining >= 48) {
-                    sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&record->parm));
+                    sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&record->parm)));
                     record->parm.vertex += 48;
                     if (flags & 1) record->parm.uv += 48;
                     if (flags & 2) record->parm.normal += 48;
@@ -465,7 +465,7 @@ void dds3PolygonLinkOt(void) {
                 if (remaining > 0) {
                     record->parm.faceCount = remaining / 3;
                     record->parm.pointCount = remaining;
-                    sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&record->parm));
+                    sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&record->parm)));
                 }
                 record->drawCount = 0;
                 if (flags & 0x10) parAppendDrawSurfacePool(priorityPool, packet);
@@ -1411,14 +1411,14 @@ void dds3TrackPolyLinkOt(void) {
                 D_005698B0.color = cell->color;
                 while (remaining >= 18) {
                     remaining -= 16;
-                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_005698B0));
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
                     D_005698B0.vertex += 16;
                     D_005698B0.vertexColor += 16;
                 }
                 if (remaining >= 4) {
                     D_005698B0.faceCount = remaining - 2;
                     D_005698B0.pointCount = remaining;
-                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_005698B0));
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
                 }
             }
         } else if (system->type == TRACK_TOPOLOGY_TRIANGLE) {
@@ -1433,14 +1433,14 @@ void dds3TrackPolyLinkOt(void) {
                 D_005698B0.color = cell->color;
                 while (remaining >= 15) {
                     remaining -= 12;
-                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_005698B0));
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
                     D_005698B0.vertex += 12;
                     D_005698B0.vertexColor += 12;
                 }
                 if (remaining >= 6) {
                     D_005698B0.faceCount = (remaining / 3) * 4 - 4;
                     D_005698B0.pointCount = remaining;
-                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_005698B0));
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
                 }
             }
         } else if (system->type == TRACK_TOPOLOGY_FIVE_VECTOR) {
@@ -1455,7 +1455,7 @@ void dds3TrackPolyLinkOt(void) {
                 D_005698B0.color = cell->color;
                 while (remaining >= 10) {
                     remaining -= 5;
-                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_005698B0));
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
                     D_005698B0.vertex += 5;
                     D_005698B0.vertexColor += 5;
                 }
@@ -1472,7 +1472,7 @@ void dds3TrackPolyLinkOt(void) {
                 D_005698B0.color = cell->color;
                 while (remaining >= 12) {
                     remaining -= 6;
-                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_005698B0));
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
                     D_005698B0.vertex += 6;
                     D_005698B0.vertexColor += 6;
                 }
@@ -1489,7 +1489,7 @@ void dds3TrackPolyLinkOt(void) {
                 D_005698B0.color = cell->color;
                 while (remaining >= 16) {
                     remaining -= 12;
-                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_005698B0));
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
                     D_005698B0.vertex += 12;
                     D_005698B0.vertexColor += 12;
                 }
@@ -1511,7 +1511,7 @@ void dds3TrackPolyLinkOt(void) {
         packet[3] = 0xE;
         packet[4] = 0x8000000026ULL;
         packet[5] = 0x42;
-        sdfDrawTagLink(specialList, (u32)packet);
+        sdfDrawTagLink(specialList, EE_ADDR(packet));
         D_002F64B8.regFunc(&D_002F64B8, specialList);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
@@ -1520,7 +1520,7 @@ void dds3TrackPolyLinkOt(void) {
         packet[3] = 0xE;
         packet[4] = 0x42;
         packet[5] = 0x42;
-        sdfDrawTagLink(lists[4], (u32)packet);
+        sdfDrawTagLink(lists[4], EE_ADDR(packet));
         D_002F64B8.regFunc(&D_002F64B8, lists[4]);
     }
     dds3TrackPolyTag = NULL;
@@ -1564,12 +1564,12 @@ void dds3TrianglePolyLinkOt(sdfGrOt_t *pOt, dds3TrianglePoly_t *hTriPoly) {
     state.color = hTriPoly->abgr;
     while (remaining >= 0x30) {
         remaining -= 0x30;
-        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&state));
+        sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&state)));
     }
     if (remaining > 0) {
         D_005698B0.faceCount = remaining / 3;
         D_005698B0.pointCount = remaining;
-        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&state));
+        sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&state)));
     }
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))pOt->regFunc)(pOt, list);
 }

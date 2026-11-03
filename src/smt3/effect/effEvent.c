@@ -1253,20 +1253,20 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
     textureBuffer = sdfTexGetPacket(primaryTexture);
     textureBytes = sdfTexGetPacketLength(primaryTexture);
     sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
-    sdfDrawTagLinkRef(primaryList, (u32)texturePacket);
+    sdfDrawTagLinkRef(primaryList, EE_ADDR(texturePacket));
     secondaryTexture = (sdfTexHandle_t *)dds3BillboardGetTex((void *)hEffEveCPSmokeBill02Tex);
     texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     textureBuffer = sdfTexGetPacket(secondaryTexture);
     textureBytes = sdfTexGetPacketLength(secondaryTexture);
     sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
-    sdfDrawTagLinkRef(secondaryList, (u32)texturePacket);
+    sdfDrawTagLinkRef(secondaryList, EE_ADDR(texturePacket));
     SDF_VU0_STOREIDENTITY(matrix);
     geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
-    sdfDrawTagLink(primaryList, (u32)geometryPacket);
+    sdfDrawTagLink(primaryList, EE_ADDR(geometryPacket));
     geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
-    sdfDrawTagLink(secondaryList, (u32)geometryPacket);
+    sdfDrawTagLink(secondaryList, EE_ADDR(geometryPacket));
     SDF_VU0_LOADVECTOR(aViewTarget);
     SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
@@ -1429,13 +1429,13 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
             secondary.count++;
             }
             if (primary.count == 15) {
-                sdfDrawTagLink(primaryList, (u32)sdfBillBoardMakeN(primary.centre,
-                    primary.color, primary.uv, primary.corner[0], 15, 0));
+                sdfDrawTagLink(primaryList, EE_ADDR(sdfBillBoardMakeN(primary.centre,
+                    primary.color, primary.uv, primary.corner[0], 15, 0)));
                 primary.count = 0;
             }
             if (secondary.count == 15) {
-                sdfDrawTagLink(secondaryList, (u32)sdfBillBoardMakeN(secondary.centre,
-                    secondary.color, secondary.uv, secondary.corner[0], 15, 0));
+                sdfDrawTagLink(secondaryList, EE_ADDR(sdfBillBoardMakeN(secondary.centre,
+                    secondary.color, secondary.uv, secondary.corner[0], 15, 0)));
                 secondary.count = 0;
             }
             particle->s_w_r += particle->scalePhaseStepX;
@@ -1446,12 +1446,12 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
         else particle->frame++;
     }
     if (primary.count > 0) {
-        sdfDrawTagLink(primaryList, (u32)sdfBillBoardMakeN(primary.centre,
-            primary.color, primary.uv, primary.corner[0], primary.count, 0));
+        sdfDrawTagLink(primaryList, EE_ADDR(sdfBillBoardMakeN(primary.centre,
+            primary.color, primary.uv, primary.corner[0], primary.count, 0)));
     }
     if (secondary.count > 0) {
-        sdfDrawTagLink(secondaryList, (u32)sdfBillBoardMakeN(secondary.centre,
-            secondary.color, secondary.uv, secondary.corner[0], secondary.count, 0));
+        sdfDrawTagLink(secondaryList, EE_ADDR(sdfBillBoardMakeN(secondary.centre,
+            secondary.color, secondary.uv, secondary.corner[0], secondary.count, 0)));
     }
     stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(stateList);
@@ -1465,7 +1465,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
     statePacket[5] = 0x47;
     statePacket[6] = 0x44;
     statePacket[7] = 0x42;
-    sdfDrawTagLink(stateList, (u32)statePacket);
+    sdfDrawTagLink(stateList, EE_ADDR(statePacket));
     effEveCPSmokeOt1.regFunc(&effEveCPSmokeOt1, stateList);
     stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(stateList);
@@ -1479,7 +1479,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
     statePacket[5] = 0x47;
     statePacket[6] = 0x42;
     statePacket[7] = 0x42;
-    sdfDrawTagLink(stateList, (u32)statePacket);
+    sdfDrawTagLink(stateList, EE_ADDR(statePacket));
     surface = &sdfGrOtTable[49];
     surface->regFunc(surface, stateList);
     (surface - 1)->regFunc(surface - 1, primaryList);

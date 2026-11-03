@@ -466,7 +466,7 @@ void dds3NeedleModelDraw(dds3NeedleModel_tag *hNModel)
         D_0056AD88.primCount = 16;
         D_0056AD88.vertexCount = 48;
         while (remaining >= 48) {
-            sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&D_0056AD88));
+            sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&D_0056AD88)));
             if (hNModel->hVNMem == NULL) {
                 D_0056AD88.colors += 48;
                 D_0056AD88.positions += 48;
@@ -480,7 +480,7 @@ void dds3NeedleModelDraw(dds3NeedleModel_tag *hNModel)
         if (remaining >= 3) {
             D_0056AD88.primCount = remaining / perPrim;
             D_0056AD88.vertexCount = remaining;
-            sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&D_0056AD88));
+            sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&D_0056AD88)));
         }
     }
     D_0031F550[hNModel->blend]->append(D_0031F550[hNModel->blend], packet);

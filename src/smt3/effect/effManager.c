@@ -124,7 +124,7 @@ s32 dds3EffectManagerRunF(dds3ProcessID_t *ProcessID)
         packet[5] = 0x47;
         packet[6] = 0x44;
         packet[7] = 0x42;
-        sdfDrawTagLink(list, (u32)packet);
+        sdfDrawTagLink(list, EE_ADDR(packet));
     }
     ot = &sdfGrOtTable[43];
     ot->regFunc(ot, list);

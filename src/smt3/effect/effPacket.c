@@ -282,7 +282,7 @@ void dds3CrossfadeRun(void)
             packet[5] = 0x3B;
             packet[6] = 0;
             packet[7] = 0x3F;
-            sdfDrawTagLink(list, (u32)packet);
+            sdfDrawTagLink(list, EE_ADDR(packet));
         }
         {
             u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
@@ -295,7 +295,7 @@ void dds3CrossfadeRun(void)
             packet[5] = 0x47;
             packet[6] = 0x44;
             packet[7] = 0x42;
-            sdfDrawTagLink(list, (u32)packet);
+            sdfDrawTagLink(list, EE_ADDR(packet));
         }
         sprite = sdf2DAllocSprite(1);
         vertex = (effPacketSpriteVertex_t *)sdf2DGetPrimPtr(sprite);
@@ -315,7 +315,7 @@ void dds3CrossfadeRun(void)
         vertex->corner[1].y = 0x86F8;
         vertex->corner[1].mask = 0xFF0000;
         vertex->corner[1].flag = 0;
-        sdfDrawTagLink(list, (u32)sprite);
+        sdfDrawTagLink(list, EE_ADDR(sprite));
         {
             sdfGrOt_t *ot = &sdfGrOtTable[2];
 
@@ -347,7 +347,7 @@ void dds3CrossfadeRun(void)
     vertex->corner[1].y = 0x8700;
     vertex->corner[1].mask = 0xFF0000;
     vertex->corner[1].flag = 0;
-    sdfDrawTagLink(list, (u32)sprite);
+    sdfDrawTagLink(list, EE_ADDR(sprite));
     {
         sdfGrOt_t *ot = &sdfGrOtTable[70];
 

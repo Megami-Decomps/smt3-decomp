@@ -1803,14 +1803,14 @@ void dds3ScatterPolyListDraw(dds3ScatterPolyList_tag *hPoly) {
     D_0056AD28->parameters = D_0031F2C0;
     while (remainingVertices >= 24) {
         remainingVertices -= 24;
-        sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(D_0056AD28));
+        sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(D_0056AD28)));
         D_0056AD28->positions += 24;
         D_0056AD28->colors += 24;
     }
     if (remainingVertices >= 6) {
         D_0056AD28->parameterCount = remainingVertices / 6 * 4;
         D_0056AD28->vertexCount = remainingVertices;
-        sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(D_0056AD28));
+        sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(D_0056AD28)));
     }
     surface = D_0031F3D0[hPoly->poolMode];
     surface->regFunc(surface, packet);
@@ -2988,7 +2988,7 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
         if ((draw->color & 0xFF000000) != 0) {
             while (remaining >= 18) {
                 remaining -= 16;
-                sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&D_0056AD58));
+                sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&D_0056AD58)));
                 D_0056AD58.positions += 16;
                 D_0056AD58.colors += 16;
                 D_0056AD58.texcoords += 32;
@@ -2996,7 +2996,7 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
             if (remaining >= 4) {
                 draw->parameterCount = remaining - 2;
                 draw->vertexCount = remaining;
-                sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(draw));
+                sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(draw)));
             }
         }
     }

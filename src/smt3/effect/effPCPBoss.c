@@ -985,7 +985,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
         y += yStep;
         angle += angleStep;
         if (count >= 32) {
-            sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+            sdfDrawTagLink(tag, EE_ADDR(effPkt3DPrimMakePoly(&effPCPBossWork)));
             color = colors;
             point = points;
             st = uv;
@@ -996,7 +996,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     if (count >= 4) {
         effPCPBossWork.primCount = count >> 1;
         effPCPBossWork.vertexCount = count;
-        sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+        sdfDrawTagLink(tag, EE_ADDR(effPkt3DPrimMakePoly(&effPCPBossWork)));
     }
     ot = &sdfGrOtTable[43];
     ot->regFunc(ot, tag);
@@ -1159,7 +1159,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
         colors[1] = 0x80808080;
         colors[2] = 0x80808080;
         effPCPBossWork.primCount = 2;
-        sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+        sdfDrawTagLink(tag, EE_ADDR(effPkt3DPrimMakePoly(&effPCPBossWork)));
     }
     ot = &sdfGrOtTable[43];
     if (rate < 1.0f) {
@@ -1234,7 +1234,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
             fade += -0.01f;
             angle += 0.18849553167819977f;
             if (count >= 32) {
-                sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+                sdfDrawTagLink(tag, EE_ADDR(effPkt3DPrimMakePoly(&effPCPBossWork)));
                 count = 0;
                 point = points;
                 st = uv;
@@ -1244,7 +1244,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
         if (count >= 4) {
             effPCPBossWork.primCount = count >> 1;
             effPCPBossWork.vertexCount = count;
-            sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+            sdfDrawTagLink(tag, EE_ADDR(effPkt3DPrimMakePoly(&effPCPBossWork)));
         }
     }
     ot->regFunc(ot, tag);
@@ -1385,7 +1385,7 @@ void effPCPBossBUNSINDrawPoly(sdfDrawTag_t *tag, effPCPBossBUNSIN_t *work,
         angle += angleStep;
         if (count >= 32) {
             st = uv;
-            sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+            sdfDrawTagLink(tag, EE_ADDR(effPkt3DPrimMakePoly(&effPCPBossWork)));
             count = 0;
             point = points;
         }
@@ -1394,7 +1394,7 @@ void effPCPBossBUNSINDrawPoly(sdfDrawTag_t *tag, effPCPBossBUNSIN_t *work,
     if (count >= 4) {
         effPCPBossWork.primCount = count >> 1;
         effPCPBossWork.vertexCount = count;
-        sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+        sdfDrawTagLink(tag, EE_ADDR(effPkt3DPrimMakePoly(&effPCPBossWork)));
     }
 }
 #else
@@ -1460,7 +1460,7 @@ void effPCPBossBUNSINDrawPoly2(void *tag, void *asset, const u128 *center, u32 c
     SDF_VU0_LOADVECTOR(&points[3]);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_STOREVECTOR(&points[3]);
-    sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+    sdfDrawTagLink(tag, EE_ADDR(effPkt3DPrimMakePoly(&effPCPBossWork)));
 }
 #else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDrawPoly2);
@@ -3772,7 +3772,7 @@ void effPCPScreenCrackModelDraw(effPCPScreenCrackModel_t *hData)
     packet[2] = 0x1000000000008001ULL;
     packet[3] = 0xE;
     packet[5] = 0x47;
-    sdfDrawTagLink(tag, (u32)packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     ot = D_002F69B8[7].ot[1];
     ot->regFunc(ot, tag);
     mdlLink(model, &D_002F69B8[7]);
@@ -3786,7 +3786,7 @@ void effPCPScreenCrackModelDraw(effPCPScreenCrackModel_t *hData)
     packet[2] = 0x1000000000008001ULL;
     packet[3] = 0xE;
     packet[5] = 0x47;
-    sdfDrawTagLink(tag, (u32)packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     ot = D_002F69B8[7].ot[1];
     ot->regFunc(ot, tag);
     hData->frame++;

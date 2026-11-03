@@ -900,7 +900,7 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
                     if (pendingCount == 15) {
                         vertexPacket = sdfBillBoardMakeN((u128 *)positions,
                             colors, D_0056AF30, offsets, 15, 0);
-                        sdfDrawTagLink(list, (u32)vertexPacket);
+                        sdfDrawTagLink(list, EE_ADDR(vertexPacket));
                         pendingCount = 0;
                     }
                     historyIndex++;
@@ -911,7 +911,7 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
     if (pendingCount != 0) {
         vertexPacket = sdfBillBoardMakeN((u128 *)positions,
             colors, D_0056AF30, offsets, pendingCount, 0);
-        sdfDrawTagLink(list, (u32)vertexPacket);
+        sdfDrawTagLink(list, EE_ADDR(vertexPacket));
     }
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))D_00320030[work->drawBucket]->regFunc)(D_00320030[work->drawBucket], list);
 }
@@ -2573,12 +2573,12 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", dblurUpdateHandle);
 
 void effDebugDrawRect3(s32 x, s32 y, u32 fillColor) {
     sdfDrawTagLink(effDebugDrawTag,
-                   (u32)dds3PrimFrameRect(x * 16 + 0x7000, y * 8 + 0x7900, 0xFF0000, 0x200, 0x100, fillColor, 0x80000000));
+                   EE_ADDR(dds3PrimFrameRect(x * 16 + 0x7000, y * 8 + 0x7900, 0xFF0000, 0x200, 0x100, fillColor, 0x80000000)));
 }
 
 void effDebugDrawRect2(s32 x, s32 y) {
     sdfDrawTagLink(effDebugDrawTag,
-                   (u32)dds3PrimFrameRect(x * 16 + 0x8000, y * 8 + 0x8000, 0xFF0000, 0x60, 0x30, 0x80008080, 0x80000000));
+                   EE_ADDR(dds3PrimFrameRect(x * 16 + 0x8000, y * 8 + 0x8000, 0xFF0000, 0x60, 0x30, 0x80008080, 0x80000000)));
 }
 
 /* NON_MATCHING: 13 of 85 words differ (first at +0x84). */
@@ -2592,7 +2592,7 @@ void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross) {
     s32 y1;
 
     sdfDrawTagLink(effDebugDrawTag,
-                   (u32)dds3PrimFrameRect(x0, y0, 0xFF0000, radius * 32, radius * 16, 0, 0x60008080));
+                   EE_ADDR(dds3PrimFrameRect(x0, y0, 0xFF0000, radius * 32, radius * 16, 0, 0x60008080)));
     radius *= 2;
     left += radius;
     top += radius;
@@ -2600,9 +2600,9 @@ void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross) {
     y1 = top * 8 + 0x7900;
     if (drawCross != 0) {
         sdfDrawTagLink(effDebugDrawTag,
-                       (u32)dds3PrimLine(x0, y0, 0xFF0000, 0x60008080, x1, y1, 0xFF0000, 0x60008080, 0));
+                       EE_ADDR(dds3PrimLine(x0, y0, 0xFF0000, 0x60008080, x1, y1, 0xFF0000, 0x60008080, 0)));
         sdfDrawTagLink(effDebugDrawTag,
-                       (u32)dds3PrimLine(x1, y0, 0xFF0000, 0x60008080, x0, y1, 0xFF0000, 0x60008080, 0));
+                       EE_ADDR(dds3PrimLine(x1, y0, 0xFF0000, 0x60008080, x0, y1, 0xFF0000, 0x60008080, 0)));
     }
 }
 #else
@@ -2834,21 +2834,21 @@ void effDebugSetAttr(u32 attributes) {
 
 void effDebugPrintf(const char *text) {
     sdfDrawTagLink(effDebugDrawTag,
-                   (u32)sdfDevPrintf(effDebugPosX * 16 + 0x7000, effDebugPosY * 8 + 0x7900, 0xFF0000, D_00551DDC, text));
+                   EE_ADDR(sdfDevPrintf(effDebugPosX * 16 + 0x7000, effDebugPosY * 8 + 0x7900, 0xFF0000, D_00551DDC, text)));
     effDebugPosY += 0xC;
 }
 
 void effDebugDrawRectFull(void) {
     sdfDrawTagLink(effDebugDrawTag,
-                   (u32)dds3PrimFrameRect(effDebugPosX * 16 + 0x7000, effDebugPosY * 8 + 0x7930, 0xFF0000, 0xBE0, 0,
-                                          0x80806020, 0x80806020));
+                   EE_ADDR(dds3PrimFrameRect(effDebugPosX * 16 + 0x7000, effDebugPosY * 8 + 0x7930, 0xFF0000, 0xBE0, 0,
+                                          0x80806020, 0x80806020)));
     effDebugPosY += 0xC;
 }
 
 void effDebugDrawRect4(s32 x, s32 y, s32 width, s32 height) {
     sdfDrawTagLink(effDebugDrawTag,
-                   (u32)dds3PrimFrameRect(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, width * 16, height * 8, 0x80000000,
-                                          0x80806020));
+                   EE_ADDR(dds3PrimFrameRect(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, width * 16, height * 8, 0x80000000,
+                                          0x80806020)));
 }
 
 effDebugMenu_t *func_001AA310(effDebugMenu_t *viewer) {

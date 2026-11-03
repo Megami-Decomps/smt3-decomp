@@ -6185,14 +6185,14 @@ void dds3RingPolyExpListDraw(dds3RingPolyExpList_tag *hData) {
     D_0056ADB8.parameters = (u32 *)D_0031FEB0;
     while (count >= 12) {
         count -= 8;
-        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_0056ADB8));
+        sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_0056ADB8)));
         D_0056ADB8.positions += 8;
         D_0056ADB8.colors += 8;
     }
     if (count >= 8) {
         D_0056ADB8.parameterCount = 6;
         D_0056ADB8.vertexCount = 8;
-        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_0056ADB8));
+        sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_0056ADB8)));
     }
     entry = D_0031FEF8[hData->blend];
     entry->regFunc(entry, list);

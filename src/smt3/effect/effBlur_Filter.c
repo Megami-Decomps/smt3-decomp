@@ -156,7 +156,7 @@ void dds3EffectBlur(const dds3Effect_Blur_t *source) {
         packet[5] = 0x3B;
         packet[6] = 0;
         packet[7] = 0x3F;
-        sdfDrawTagLink(list, (u32)packet);
+        sdfDrawTagLink(list, EE_ADDR(packet));
     }
 
     {
@@ -170,7 +170,7 @@ void dds3EffectBlur(const dds3Effect_Blur_t *source) {
         packet[5] = 0x47;
         packet[6] = source->blend;
         packet[7] = 0x42;
-        sdfDrawTagLink(list, (u32)packet);
+        sdfDrawTagLink(list, EE_ADDR(packet));
     }
 
     {
@@ -182,12 +182,12 @@ void dds3EffectBlur(const dds3Effect_Blur_t *source) {
         packet[3] = 0xE;
         packet[4] = 0x37C00000009ULL;
         packet[5] = 8;
-        sdfDrawTagLink(list, (u32)packet);
+        sdfDrawTagLink(list, EE_ADDR(packet));
     }
 
     prim = effPkt2DAllocTriStrip(1, 0);
     dds3EffectBlurDrawQuad(source, effPkt2DGetPrimPtr(prim));
-    sdfDrawTagLink(list, (u32)prim);
+    sdfDrawTagLink(list, EE_ADDR(prim));
     ot = &sdfGrOtTable[58];
     ot->regFunc(ot, list);
 }
@@ -203,7 +203,7 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
     mask = (void *)sdfGrAllocPacketBuff(0x40);
     frame = dds3GetFrameID();
     sdfGrSetFrameMaskRGB(dds3DrawEnv[frame].frameMaskSource, mask, 1);
-    sdfDrawTagLinkRefGif(list, (u32)mask);
+    sdfDrawTagLinkRefGif(list, EE_ADDR(mask));
 
     packet = (u64 *)sdfGrAllocPacketBuff(0x40);
     packet[0] = 3;
@@ -214,7 +214,7 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
     packet[5] = 0x48;
     packet[6] = 0x44;
     packet[7] = 0x43;
-    sdfDrawTagLink(list, (u32)packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     sdf2DLinkTexPacket(list, texture, 1);
 
     packet = (u64 *)sdfGrAllocPacketBuff(0x40);
@@ -226,7 +226,7 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
     packet[5] = 0x47;
     packet[6] = blendControl | 0x10;
     packet[7] = 0x42;
-    sdfDrawTagLink(list, (u32)packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
 
     reference = (void *)sdfGrAllocPacketBuff(0x20);
     frame = dds3GetFrameID();
@@ -242,7 +242,7 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
         last[5] = 0x3B;
         last[6] = 0;
         last[7] = 0x3F;
-        sdfDrawTagLink(list, (u32)last);
+        sdfDrawTagLink(list, EE_ADDR(last));
     }
     {
         u64 *last = (u64 *)sdfGrAllocPacketBuff(0x30);
@@ -253,7 +253,7 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
         last[3] = 0xE;
         last[4] = 0x37C00000009ULL;
         last[5] = 8;
-        sdfDrawTagLink(list, (u32)last);
+        sdfDrawTagLink(list, EE_ADDR(last));
     }
 }
 
@@ -263,10 +263,10 @@ void dds3EffectBlurDrawAlphaMulti(sdfDrawTag_t *list, const dds3Effect_Blur_t *s
 
     packet = effPkt2DAllocTriStrip(1, 0x200);
     dds3EffectBlur_AlphaMultiParmSet(source, effPkt2DGetPrimPtr(packet));
-    sdfDrawTagLink(list, (u32)packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     packet = effPkt2DAllocTriStrip(1, 0);
     dds3EffectBlurDrawQuad(source, effPkt2DGetPrimPtr(packet));
-    sdfDrawTagLink(list, (u32)packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
 }
 
 /* Restore the frame mask this frame's blur borrowed, then queue the list. */
@@ -278,7 +278,7 @@ void dds3EffectBlurDrawFrameMaskReset(sdfDrawTag_t *list) {
     packet = (void *)sdfGrAllocPacketBuff(0x40);
     frame = dds3GetFrameID();
     sdfGrSetFrameMaskReset(dds3DrawEnv[frame].frameMaskSource, packet, 1);
-    sdfDrawTagLinkRefGif(list, (u32)packet);
+    sdfDrawTagLinkRefGif(list, EE_ADDR(packet));
     ot = &sdfGrOtTable[58];
     ot->regFunc(ot, list);
 }
@@ -605,7 +605,7 @@ void dds3EffectFilter(dds3Effect_Filter_t *source) {
     blendPacket[5] = 0x47;
     blendPacket[6] = source->blend;
     blendPacket[7] = 0x42;
-    sdfDrawTagLink(list, (u32)blendPacket);
+    sdfDrawTagLink(list, EE_ADDR(blendPacket));
 
     drawPacket = effPkt2DAllocF4(0);
     color = source->abgr | 0x3F80000000000000ULL;
@@ -625,7 +625,7 @@ void dds3EffectFilter(dds3Effect_Filter_t *source) {
     drawPacket[8] = 0xFF000000000000ULL | bottomLeft;
     drawPacket[10] = 0xFF000000000000ULL | topRight;
     drawPacket[12] = 0xFF000000000000ULL | bottomRight;
-    sdfDrawTagLink(list, (u32)drawPacket);
+    sdfDrawTagLink(list, EE_ADDR(drawPacket));
     ot = &sdfGrOtTable[57];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))ot->regFunc)(ot, list);
 }
@@ -655,7 +655,7 @@ void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHand
     packet[5] = 0x48;
     packet[6] = source->blendControl;
     packet[7] = 0x43;
-    sdfDrawTagLink(list, (u32)packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     sdf2DLinkTexPacket(list, texture, 1);
 
     primPacket = effPkt2DAllocTriStrip(1, 0x200);
@@ -700,7 +700,7 @@ void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHand
     prim->vtx[2].adc = 0;
     prim->vtx[3].z = 0;
     prim->vtx[3].adc = 0;
-    sdfDrawTagLink(list, (u32)primPacket);
+    sdfDrawTagLink(list, EE_ADDR(primPacket));
     ot = &sdfGrOtTable[57];
     ot->regFunc(ot, list);
 }

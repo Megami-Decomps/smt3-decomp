@@ -688,14 +688,14 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
         pointsRemaining = runPointCount[runIndex];
         while (pointsRemaining >= 0x12) {
             pointsRemaining -= 0x10;
-            sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_0056AF00));
+            sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_0056AF00)));
             D_0056AF00.vertex += 0x10;
             D_0056AF00.vertexColor += 0x10;
         }
         if (pointsRemaining >= 4) {
             draw->pointCount = pointsRemaining;
             draw->faceCount = pointsRemaining - 2;
-            sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(draw));
+            sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(draw)));
             draw->vertexColor += pointsRemaining;
         }
     }
@@ -711,7 +711,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
         packet[3] = 0xE;
         packet[4] = 6;
         packet[5] = 0x42;
-        sdfDrawTagLink(list2, (u32)packet);
+        sdfDrawTagLink(list2, EE_ADDR(packet));
         D_002F64B8.regFunc(&D_002F64B8, list2);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
@@ -720,7 +720,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
         packet[3] = 0xE;
         packet[4] = 0x42;
         packet[5] = 0x42;
-        sdfDrawTagLink(list, (u32)packet);
+        sdfDrawTagLink(list, EE_ADDR(packet));
         D_002F64B8.regFunc(&D_002F64B8, list);
     }
 }
@@ -820,13 +820,13 @@ void effSwordTrackPolygonDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
         pointsRemaining = runPointCount[runIndex];
         while (pointsRemaining >= 0x12) {
             pointsRemaining -= 0x10;
-            sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_0056AF00));
+            sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_0056AF00)));
             D_0056AF00.vertex += 0x10;
         }
         if (pointsRemaining >= 4) {
             draw->pointCount = pointsRemaining;
             draw->faceCount = pointsRemaining - 2;
-            sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(draw));
+            sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(draw)));
         }
     }
     ot = &sdfGrOtTable[hSwordTrack->otIndex];
@@ -881,7 +881,7 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
     packet[5] = 0x47;
     packet[6] = 0x44;
     packet[7] = 0x42;
-    sdfDrawTagLink(list, (u32)packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     tex = (void *)sdfGrAllocPacketBuff(0x20);
     sdfGrLinkDrawFrameTex(list, dds3DrawEnv[dds3GetFrameID()].frameTex, tex);
     testPacket = (u64 *)sdfGrAllocPacketBuff(0x30);
@@ -891,7 +891,7 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
     testPacket[3] = 0xE;
     testPacket[4] = ((u64)0x37C << 32) | 8;
     testPacket[5] = 8;
-    sdfDrawTagLink(list, (u32)testPacket);
+    sdfDrawTagLink(list, EE_ADDR(testPacket));
     texPacket = (u64 *)sdfGrAllocPacketBuff(0x30);
     texPacket[0] = 2;
     texPacket[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
@@ -899,7 +899,7 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
     texPacket[3] = 0xE;
     texPacket[4] = 0x60;
     texPacket[5] = 0x14;
-    sdfDrawTagLink(list, (u32)texPacket);
+    sdfDrawTagLink(list, EE_ADDR(texPacket));
 
     pointCount = history->count;
     starts[0] = history->current - pointCount;
@@ -1033,7 +1033,7 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
                 quad->vtx[1].adc = 0;
                 quad->vtx[3].adc = 0;
                 quad->vtx[2].adc = 0;
-                sdfDrawTagLink(list, (u32)quadPacket);
+                sdfDrawTagLink(list, EE_ADDR(quadPacket));
             }
             screen[0][0] = screen[2][0];
             screen[0][1] = screen[2][1];
@@ -1068,7 +1068,7 @@ void effSwordTrackDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
     sdfDrawTagInit(list);
     mask = (void *)sdfGrAllocPacketBuff(0x40);
     sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
-    sdfDrawTagLinkRefGif(list, (u32)mask);
+    sdfDrawTagLinkRefGif(list, EE_ADDR(mask));
     packet = (u64 *)sdfGrAllocPacketBuff(0x40);
     packet[0] = 3;
     packet[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
@@ -1078,7 +1078,7 @@ void effSwordTrackDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
     packet[5] = 0x47;
     packet[6] = 0x44;
     packet[7] = 0x42;
-    sdfDrawTagLink(list, (u32)packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     {
         sdfGrOt_t *ot = &sdfGrOtTable[hSwordTrack->otIndex];
 
@@ -1089,7 +1089,7 @@ void effSwordTrackDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
     sdfDrawTagInit(list);
     mask = (void *)sdfGrAllocPacketBuff(0x40);
     sdfGrSetFrameMaskReset(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
-    sdfDrawTagLinkRefGif(list, (u32)mask);
+    sdfDrawTagLinkRefGif(list, EE_ADDR(mask));
     {
         sdfGrOt_t *ot = &sdfGrOtTable[hSwordTrack->otIndex];
 
@@ -1107,7 +1107,7 @@ void effSwordTrackDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
     packet[5] = 0x47;
     packet[6] = 0x44;
     packet[7] = 0x42;
-    sdfDrawTagLink(list, (u32)packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     {
         sdfGrOt_t *ot = &sdfGrOtTable[hSwordTrack->otIndex];
 

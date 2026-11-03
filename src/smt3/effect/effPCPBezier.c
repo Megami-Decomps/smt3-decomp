@@ -866,14 +866,14 @@ void dds3BezierTrackPolyDraw(dds3BezierTrackPoly_tag *hPoly) {
         draw->pointCount = 15;
         while (remaining >= 15) {
             remaining -= 12;
-            sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&dds3BezierVertexCount));
+            sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&dds3BezierVertexCount)));
             dds3BezierVertexCount.points += 12;
             dds3BezierVertexCount.colors += 12;
         }
         if (remaining >= 6) {
             draw->primitiveCount = (remaining / 3) * 4 - 4;
             draw->pointCount = remaining;
-            sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(draw));
+            sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(draw)));
             draw->colors += remaining;
         }
     }
@@ -886,7 +886,7 @@ void dds3BezierTrackPolyDraw(dds3BezierTrackPoly_tag *hPoly) {
     dds3BezierTrackPolyVertex.colors = colors;
     dds3BezierTrackPolyVertex.points = hPoly->pHeadVertex;
     dds3BezierTrackPolyVertex.color = hPoly->abgr;
-    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&dds3BezierTrackPolyVertex));
+    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&dds3BezierTrackPolyVertex)));
     surface = dds3BezierTrackPolyParam[hPoly->blend];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
 }

@@ -7175,10 +7175,10 @@ void cmpDrawSetup3DView(void)
         sdfDrawTagInit(&D_00574A60[i]);
         sdf3DLinkInitPacket(&D_00574A60[i], &D_00574AA0[i]);
         sdf3DMakeViewportPacket(&D_00574CE0[i], (sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
-        sdfDrawTagLink(&D_00574A60[i], (u32)&D_00574CE0[i]);
+        sdfDrawTagLink(&D_00574A60[i], EE_ADDR(&D_00574CE0[i]));
         sdfDrawTagInit(&D_00574AE0[i]);
         sdf3DMakeLightParallelPacket(&D_00574B20[i], dds3LightParam.parallel, &dds3AmbientColor);
-        sdfDrawTagLink(&D_00574AE0[i], (u32)&D_00574B20[i]);
+        sdfDrawTagLink(&D_00574AE0[i], EE_ADDR(&D_00574B20[i]));
     }
 }
 
@@ -7408,7 +7408,7 @@ void cmpDrawBoxG(s32 x, s32 y, s32 z, s32 width, s32 height,
     livePrim[14] = right | ((u64)bottom << 32);
     tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    sdfDrawTagLink(tag, (u32)packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     surface->regFunc(surface, tag);
 }
 #else
@@ -7518,7 +7518,7 @@ void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
     textureCoordinates[1][1] = 0.0f;
     textureCoordinates[2][0] = 0.0f;
     textureCoordinates[2][1] = 0.0f;
-    sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(&request));
+    sdfDrawTagLink(list, EE_ADDR(sdf3DPrimMakePoly(&request)));
     surface = &sdfGrOtTable[surfaceIndex];
     surface->regFunc(surface, list);
 }
@@ -7533,7 +7533,7 @@ void cmpDisableRGB(s32 ot)
     sdfDrawTagInit(tag);
     mask = (void *)sdfGrAllocPacketBuff(0x40);
     sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
-    sdfDrawTagLinkRefGif(tag, (u32)mask);
+    sdfDrawTagLinkRefGif(tag, EE_ADDR(mask));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }
@@ -7548,7 +7548,7 @@ void cmpAllocRefGifTag(s32 ot)
     sdfDrawTagInit(tag);
     mask = (void *)sdfGrAllocPacketBuff(0x40);
     sdfGrSetFrameMaskReset(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
-    sdfDrawTagLinkRefGif(tag, (u32)mask);
+    sdfDrawTagLinkRefGif(tag, EE_ADDR(mask));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
 }

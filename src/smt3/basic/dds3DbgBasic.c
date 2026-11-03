@@ -48,35 +48,35 @@ s32 DispBaseData(dds3Basic_t *node, s32 x, s32 y, sdfDrawTag_t *list) {
 
     x *= 12;
     labelX = (x << 4) + 0x7000;
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
-        (y++ * 6 << 4) + 0x7900, 0xFEFFFF, 0, "ID    : 0x%05X", node->serialID));
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
-        (y++ * 6 << 4) + 0x7900, 0xFEFFFF, 0, "NAME  : %s", node->name));
+    sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(labelX,
+        (y++ * 6 << 4) + 0x7900, 0xFEFFFF, 0, "ID    : 0x%05X", node->serialID)));
+    sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(labelX,
+        (y++ * 6 << 4) + 0x7900, 0xFEFFFF, 0, "NAME  : %s", node->name)));
     transform = node->poseset;
     lines = 2;
     if (transform != NULL) {
         y++;
         positionY = (y * 6 << 4) + 0x7900;
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
-            positionY, 0xFEFFFF, 0, D_0054E9A8));
+        sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(labelX,
+            positionY, 0xFEFFFF, 0, D_0054E9A8)));
         valueX = ((x + 84) << 4) + 0x7000;
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(valueX,
+        sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(valueX,
             positionY, 0xFEFFFF, 0xE, "%3.2f %3.2f %3.2f",
-            transform->pos.x, transform->pos.y, transform->pos.z));
+            transform->pos.x, transform->pos.y, transform->pos.z)));
         y += 2;
         rotationY = (y * 6 << 4) + 0x7900;
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
-            rotationY, 0xFEFFFF, 0, D_0054E9B0));
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(valueX,
+        sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(labelX,
+            rotationY, 0xFEFFFF, 0, D_0054E9B0)));
+        sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(valueX,
             rotationY, 0xFEFFFF, 0xE, "%3.2f %3.2f %3.2f %3.2f",
-            transform->rot.x, transform->rot.y, transform->rot.z, transform->rot.w));
+            transform->rot.x, transform->rot.y, transform->rot.z, transform->rot.w)));
         y += 2;
         scaleY = (y * 6 << 4) + 0x7900;
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
-            scaleY, 0xFEFFFF, 0, D_0054E9B8));
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(valueX,
+        sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(labelX,
+            scaleY, 0xFEFFFF, 0, D_0054E9B8)));
+        sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(valueX,
             scaleY, 0xFEFFFF, 0xE, "%3.1f %3.1f %3.1f",
-            transform->scl.x, transform->scl.y, transform->scl.z));
+            transform->scl.x, transform->scl.y, transform->scl.z)));
         lines = 8;
     }
     return lines;
@@ -93,7 +93,7 @@ u32 DispObjectBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *tag) {
                                            0,
                                            "FLAG  : 0x%08X",
                                            handle->flag);
-    sdfDrawTagLink(tag, (u32)command);
+    sdfDrawTagLink(tag, EE_ADDR(command));
     return 1;
 }
 

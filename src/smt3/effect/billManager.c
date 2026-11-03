@@ -380,7 +380,7 @@ void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
         if (work->count > 0) {
             vertexPacket = sdfBillBoardMakeN((const u128 *)work->centre, work->color,
                 work->uv, work->offset, work->count, 0);
-            sdfDrawTagLink(child->pBillTag[selected], (u32)vertexPacket);
+            sdfDrawTagLink(child->pBillTag[selected], EE_ADDR(vertexPacket));
             work->count = 0;
         }
         selected = obj->mode;
@@ -413,7 +413,7 @@ void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
         }
         geometry = (u8 *)sdfGrAllocPacketBuff(0x38);
         sdfBillBoardMakeTMPacket(geometry, matrix);
-        sdfDrawTagLink(child->pBillTag[selected], (u32)geometry);
+        sdfDrawTagLink(child->pBillTag[selected], EE_ADDR(geometry));
         if (child->next == child) {
             child->next = dds3BillboardTag;
             dds3BillboardTag = child;
@@ -461,7 +461,7 @@ void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
     if (work->count == 15) {
         vertexPacket = sdfBillBoardMakeN((const u128 *)work->centre, work->color,
             work->uv, work->offset, 15, 0);
-        sdfDrawTagLink(child->pBillTag[selected], (u32)vertexPacket);
+        sdfDrawTagLink(child->pBillTag[selected], EE_ADDR(vertexPacket));
         work->count = 0;
     }
 }
@@ -479,7 +479,7 @@ void dds3BillboardLinkOt(void) {
             if (count > 0) {
                 u32 *packet = sdfBillBoardMakeN(batch->centre, batch->color, batch->uv,
                                                 batch->offset, count, NULL);
-                sdfDrawTagLink(res->pBillTag[res->current_mode], (u32)packet);
+                sdfDrawTagLink(res->pBillTag[res->current_mode], EE_ADDR(packet));
                 batch->count = 0;
             }
             for (i = 0; i < 4; i++) {
@@ -522,7 +522,7 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
         sdfDrawTagInit(node->packetList);
         packet = sdfGrAllocPacketBuff(0x40);
         sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameMaskSource, packet, 0);
-        sdfDrawTagLinkRefGif(node->packetList, (u32)packet);
+        sdfDrawTagLinkRefGif(node->packetList, EE_ADDR(packet));
         blend = sdfGrAllocPacketBuff(0x40);
         blend->elem.test.reg = 0x47;
         blend->elem.alpha.data = 0x44;
@@ -532,7 +532,7 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
         blend->header.giftag.parm = 0x1000000000008002ULL;
         blend->header.giftag.regs = 0xE;
         blend->elem.test.data = 0x51001;
-        sdfDrawTagLink(node->packetList, (u32)blend);
+        sdfDrawTagLink(node->packetList, EE_ADDR(blend));
         blend = sdfGrAllocPacketBuff(0x40);
         blend->header.dmaWords.tag = 3;
         blend->header.dmaWords.vif = 0x5000000310000000ULL;
@@ -546,17 +546,17 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
         case 3: blend->elem.alpha.data = 0x52; break;
         }
         blend->elem.alpha.reg = 0x43;
-        sdfDrawTagLink(node->packetList, (u32)blend);
+        sdfDrawTagLink(node->packetList, EE_ADDR(blend));
         packet = sdfGrAllocPacketBuff(0x20);
         texture = sdfTexGetPacket(node->children[0]->hTex);
         length = sdfTexGetPacketLength(node->children[0]->hTex);
         sdf3DMakeDirectRefPacket(packet, (u32)texture, length);
-        sdfDrawTagLinkRef(node->packetList, (u32)packet);
+        sdfDrawTagLinkRef(node->packetList, EE_ADDR(packet));
         packet = sdfGrAllocPacketBuff(0x20);
         texture = sdfTexGetPacketCtx2(node->children[1]->hTex);
         length = sdfTexGetPacketCtx2Length(node->children[1]->hTex);
         sdf3DMakeDirectRefPacket(packet, (u32)texture, length);
-        sdfDrawTagLinkRef(node->packetList, (u32)packet);
+        sdfDrawTagLinkRef(node->packetList, EE_ADDR(packet));
         packet = sdfGrAllocPacketBuff(0x38);
         if (node->cameraFacingMode == 1) {
             SDF_VU0_LOADVECTOR(aViewTarget);
@@ -576,7 +576,7 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
             SDF_VU0_STOREIDENTITY(matrix);
         }
         sdfBillBoardMakeTMPacket(packet, matrix);
-        sdfDrawTagLink(node->packetList, (u32)packet);
+        sdfDrawTagLink(node->packetList, EE_ADDR(packet));
         node->next = D_00551D78;
         D_00551D78 = node;
     }
@@ -659,7 +659,7 @@ void dds3MultiBillboardPktLink(billRenderPair_t *hResource) {
         uv[i][15] = batch[1]->uv[i][3].v;
     }
     packet = sdfMultiBillBoardMakeN((const u128 *)batch[1]->centre, colors, uv, batch[1]->offset, count, NULL);
-    sdfDrawTagLink(hResource->packetList, (u32)packet);
+    sdfDrawTagLink(hResource->packetList, EE_ADDR(packet));
     batch[0]->count = 0;
     batch[1]->count = 0;
 }
@@ -686,7 +686,7 @@ void dds3MultiBillboardLinkOt(void) {
     buffer = sdfGrAllocPacketBuff(0x40);
     frame = dds3GetFrameID();
     sdfGrSetFrameMaskReset(dds3DrawEnv[frame].frameMaskSource, buffer, 0);
-    sdfDrawTagLinkRefGif(tag, (u32)buffer);
+    sdfDrawTagLinkRefGif(tag, EE_ADDR(buffer));
     packet = sdfGrAllocPacketBuff(0x40);
     packet[0] = 3;
     packet[1] = 0x5000000310000000;
@@ -696,7 +696,7 @@ void dds3MultiBillboardLinkOt(void) {
     packet[5] = 0x47;
     packet[6] = 0x48;
     packet[7] = 0x42;
-    sdfDrawTagLink(tag, (u32)packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     dds3MultiBillboardOt.regFunc(&dds3MultiBillboardOt, tag);
     D_00551D78 = NULL;
 }
@@ -1653,7 +1653,7 @@ void dds3P2APolygonDraw(dds3P2APolygon_tag *instance) {
         break;
     }
     sdf3DPrimLinkMat(list, instance->pMat, 0);
-    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&params));
+    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&params)));
     surface = D_003170D0[instance->hBillboard->mode];
     surface->regFunc(surface, list);
 }
