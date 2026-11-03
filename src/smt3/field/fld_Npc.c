@@ -34,7 +34,7 @@ enum sl_slot_flag
     SL_SLOT_FLAG_DELETE_BEFORE_WRITE = 8
 };
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern s32 fldTakaraCount;
 
@@ -64,7 +64,7 @@ extern u8 D_003129D0[0x100];
 
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t );
 
 extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 

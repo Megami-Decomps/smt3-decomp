@@ -11,9 +11,9 @@ extern f32 sdfSin(f32 aRadius);
 
 extern f32 sdfCos(f32 aRadius);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 extern void *sdfMemGetPtr(void *aHandle);
 

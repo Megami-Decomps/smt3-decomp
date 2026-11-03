@@ -226,7 +226,7 @@ extern s32 strcasecmp(const char *first, const char *second);
 
 extern void *sdfChipAllocDirect(s32 aSize);
 
-extern void *memcpy(void *destination, const void *source, u32 bytes);
+extern void *memcpy(void *destination, const void *source, ps2Size_t bytes);
 
 void movieViewerScanDir(void)
 {

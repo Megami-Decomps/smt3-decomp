@@ -221,7 +221,7 @@ void movieViewerInitRegs(void)
     movieViewerSetFlags();
 }
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 #ifdef NON_MATCHING
 static s32 movieViewerIsRegister(u32 address)

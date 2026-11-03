@@ -172,7 +172,7 @@ void func_001D2B70(void) {
 }
 
 extern void *sdfChipAllocDirect(s32 size);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
     s32 shutdownTimer, dds3ProcessFunc_t process, dds3ProcessFunc_t shutdown, void *data);
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);

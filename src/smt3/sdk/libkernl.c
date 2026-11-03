@@ -1622,7 +1622,7 @@ typedef struct fsOutputCompletion_t {
 extern u8 D_0059E140[];
 extern u8 D_0059E154[];
 extern s32 D_0052C2C0[32];
-extern void *memcpy(void *destination, const void *source, u32 size);
+extern void *memcpy(void *destination, const void *source, ps2Size_t size);
 extern s32 iSignalSema(s32 sema);
 
 /* NON_MATCHING: 948/960 bytes; the final pending-semaphore search differs
@@ -1839,7 +1839,7 @@ s32 sceFsInit(void)
 extern u8 D_0059E7A8[0x18];
 extern u8 D_0052C2A0[4] __attribute__((section(".data")));
 extern const void *D_0052C350 __attribute__((section(".data")));
-extern s32 memcmp(const void *left, const void *right, u32 count);
+extern s32 memcmp(const void *left, const void *right, ps2Size_t count);
 
 s32 _fs_version(void)
 {
@@ -1855,7 +1855,7 @@ s32 _fs_version(void)
 }
 
 extern s32 D_0052C340 __attribute__((section(".data")));
-extern void *memset(void *destination, s32 value, u32 count);
+extern void *memset(void *destination, s32 value, ps2Size_t count);
 
 s32 sceFsReset(void)
 {
@@ -2149,7 +2149,7 @@ typedef union fsIoctlStatus_t {
 extern fsIoctlStatus_t D_0059E150;
 extern void *D_0059D484;
 extern s32 D_0052C2C0[32];
-extern void *memcpy(void *destination, const void *source, u32 size);
+extern void *memcpy(void *destination, const void *source, ps2Size_t size);
 
 /* NON_MATCHING: native 844-byte size; early switch allocation and
  * pending-table setup differ in 46 instruction words. */
@@ -3249,14 +3249,14 @@ extern lfRequest_t D_0059EA00;
 extern rpcClient D_0059EC00;
 extern s32 _lf_bind(void);
 extern s32 _lf_version(void);
-extern char *strncpy(char *destination, const char *source, u32 count);
+extern char *strncpy(char *destination, const char *source, ps2Size_t count);
 
 extern s32 D_0052C358;
 extern u8 D_0059EC28[0x18];
 extern u8 D_0052C2A0[4];
 extern void *D_0052C35C;
-extern void *memcpy(void *destination, const void *source, u32 size);
-extern s32 memcmp(const void *a, const void *b, u32 size);
+extern void *memcpy(void *destination, const void *source, ps2Size_t size);
+extern s32 memcmp(const void *a, const void *b, ps2Size_t size);
 
 s32 _lf_bind(void)
 {
@@ -3297,7 +3297,7 @@ s32 _lf_version(void)
     return mismatch;
 }
 
-extern void *memset(void *destination, s32 value, u32 size);
+extern void *memset(void *destination, s32 value, ps2Size_t size);
 
 s32 sceSifLoadFileReset(void)
 {

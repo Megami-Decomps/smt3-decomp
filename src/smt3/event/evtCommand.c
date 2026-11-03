@@ -42,7 +42,7 @@ f32 scrGetFloatPara(s32 n);
 
 struct dds3Basic_t *dds3GetActiveScene(void);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern u32 D_0054F754;
 

@@ -99,7 +99,7 @@ extern void sdfCoreDrawInit(s32 buffSize);
 
 extern void sdfRandomizeByTime(void *aCB);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 void FatalError(const char *format, ...) __attribute__((noreturn));
 

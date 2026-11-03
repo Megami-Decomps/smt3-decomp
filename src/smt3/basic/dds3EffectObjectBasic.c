@@ -34,7 +34,7 @@ typedef struct
 extern const dds3EffectEventParameters_t D_00530E20;
 extern const effMagaSCArea_t D_00530E50;
 extern const effMagaP4Point_t D_00530E78;
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 extern void dds3BillboardSetPosition(void *hBillboard, const void *pPos);
 extern void dds3BillboardSetAnimNumber(void *hBillboard, u32 number);
 extern void dds3EffectSetPosition(void *pData, const void *pPos);
@@ -106,7 +106,7 @@ typedef struct
 struct billHandle_t *dds3BillboardCopy(struct billHandle_t *hBillboard);
 struct billHandle_t *dds3BillboardCreate(s32 kind, u32 id);
 void effMagaP4Randomize(void *hEffect);
-void *memset(void *a, s32 b, u32 c);
+void *memset(void *a, s32 b, ps2Size_t c);
 
 
 struct dds3BillResource_tag;

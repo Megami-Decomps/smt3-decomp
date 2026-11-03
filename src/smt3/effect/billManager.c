@@ -201,7 +201,7 @@ void dds3Billboard_P2ASetNumber(billHandle_t *pP2A, s32 number);
 dds3BillResource_tag *dds3Billboard_P2AAnimDraw(billHandle_t *pP2A, dds3BillAnim_tag *pBillAnim);
 
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -1518,7 +1518,7 @@ extern void sdfMatSetMultiTex(sdfMat_t *, sdfTexHandle_t *);
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 #endif
 
 void dds3P2APolygonDraw(dds3P2APolygon_tag *instance) {

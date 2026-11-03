@@ -117,7 +117,7 @@ extern void *sdfChipAllocDirect(u32 aSize);
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void nbFreeAllFormResources(nbMainProcessData_t *data);
 

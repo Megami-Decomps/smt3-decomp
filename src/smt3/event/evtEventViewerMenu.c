@@ -805,7 +805,7 @@ extern char D_0054FA60[], D_0054FA68[], D_0054FA70[], D_0054FA78[];
 extern char D_0054FA80[], D_0054FA88[];
 extern char *evtItemFadeNames[];
 extern char *D_0032CB30[];
-extern void *memcpy(void *, const void *, u32);
+extern void *memcpy(void *, const void *, ps2Size_t );
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C230);
 
@@ -1863,7 +1863,7 @@ extern s32 evtAddNameTable(const char *name);
 extern evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *group, s32 frame);
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *camera, f32 fovy);
 extern s32 strcmp(const char *a, const char *b);
-extern void *memcpy(void *dest, const void *src, u32 size);
+extern void *memcpy(void *dest, const void *src, ps2Size_t size);
 
 s32 evtMakeMotionName(evtPolygonMovieWork_t *work)
 {

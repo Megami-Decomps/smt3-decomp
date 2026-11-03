@@ -166,7 +166,7 @@ extern f32 nowfovy;
 extern s32 D_0054F8E0;
 
 extern void *sdfChipAllocDirect(u32 aSize);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 /* vu0 routine: blend two RGBA8888 colours by t */
 u32 evtHokanColor(s32 hokan, f32 ratio, u32 c1, u32 c2);
@@ -238,7 +238,7 @@ u32 sdfMemLock(struct sdfMemHandle_t *aHandle);
 
 sdfMemHandle_t *evtAllocMovieWork(pmdHeader_t **out);
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 static inline void UnpackRGBAWordFloat(u32 color, f32 unit) {
     u32 rgba[4];

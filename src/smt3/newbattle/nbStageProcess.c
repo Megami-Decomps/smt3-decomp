@@ -34,7 +34,7 @@ extern char D_00543698[];
 
 extern u8 D_003FA760[];
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern struct dds3Basic_t *dds3GetControlScene(void);
 
@@ -75,7 +75,7 @@ extern void evtFreeStage(void);
 
 extern s32 sdfDelayedResrcCheck(void);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, void *drawExit,
@@ -105,7 +105,7 @@ extern char D_00543668[];
 
 extern char D_00543678[];
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 extern dds3Basic_t *dds3GetActiveScene(void);
 

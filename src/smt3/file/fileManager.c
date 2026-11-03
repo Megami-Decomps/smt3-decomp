@@ -101,7 +101,7 @@ s32 sdfFileCmdClose(void *aHandle);
 s32 sdfFileCmdFree(void *aHandle);
 void sdfFileCmdThreadSetHiPrio(void);
 s32 sdfPrintf(const char *str, ...);
-void *memset(void *a, s32 b, u32 c);
+void *memset(void *a, s32 b, ps2Size_t c);
 void sdfChipFreeDirect(void *aPtr);
 void sdfPacFree(sdfPacDecodeCb_t *cb);
 s32 sdfPacDecode(sdfPacDecodeCb_t *cb, const u8 *data, s32 length);

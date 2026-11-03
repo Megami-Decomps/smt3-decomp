@@ -231,7 +231,7 @@ extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 
 extern datDevilFormat_t datDevilTable[];
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 

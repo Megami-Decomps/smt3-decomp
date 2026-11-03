@@ -75,7 +75,7 @@ typedef struct
 extern s32 mdlGetMotionNum(mdlObj_t *model, s32 group);
 extern s32 mdlGetMinorNum(mdlObj_t *model);
 extern s32 mdlGetMajorNum(mdlObj_t *model);
-extern void *memset(void *destination, int value, unsigned int size);
+extern void *memset(void *destination, int value, ps2Size_t size);
 void pMeshDelete(dds3HermitianTrackPoly_tag *hPoly);
 void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *hPoly, u32 *colors);
 void dds3HermitianTrackPolySetBlend(dds3HermitianTrackPoly_tag *hPoly, u32 blend);

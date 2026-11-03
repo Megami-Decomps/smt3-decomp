@@ -69,7 +69,7 @@ enum {
 
 typedef struct devState_t devState_t;
 
-extern void *memset(void *, int, unsigned int);
+extern void *memset(void *, int, ps2Size_t );
 
 f32 sdfSin(f32 aRadius);
 
@@ -199,7 +199,7 @@ void sdfFileClose(devState_t *aHandle);
 
 #include "sdk_libc.h"
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t );
 
 s32 evtBitCheck(s32 no);
 

@@ -33,7 +33,7 @@ extern void evtBitOn(s32 no);
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
-extern void *memset(void *ptr, s32 value, u32 size);
+extern void *memset(void *ptr, s32 value, ps2Size_t size);
 extern void *sdfChipAllocZeroDirect(s32 size);
 extern void sdfChipFreeDirect(void *ptr);
 extern u32 dds3GetRandIntA(void *state, u32 limit);
@@ -267,7 +267,7 @@ void mselFreeResources(s32 arg)
 
 const char D_0053DF08[] = "mselProc";
 
-extern void *memcpy(void *dest, const void *src, u32 size);
+extern void *memcpy(void *dest, const void *src, ps2Size_t size);
 extern s8 dds3PadButtonState[];
 extern void rsetOtOfs(s32 offset);
 extern void rsetAlpha(s32 alpha);

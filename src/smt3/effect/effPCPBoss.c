@@ -479,10 +479,10 @@ typedef struct effPCP_HBED2_tag
 
 extern u8 dds3EffectBase[];
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void *sdfChipAllocZeroDirect(u32 aSize);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 extern void *sdfMatNew(void);
 extern void sdfMatSetConstant(void *aMat, f32 aRatio);
 extern void *dds3BillboardCreate(s32 count, void *params);

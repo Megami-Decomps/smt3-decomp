@@ -22,7 +22,7 @@ extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 serialID, f32 *pos, f32
 
 struct dds3Basic_t *dds3GetControlScene(void);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 
 void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);

@@ -94,8 +94,8 @@ extern void sdfDevConsDrawInit(sdfDevConsDrawCB_t *aCB, void *aPacketBuffer, s32
 extern void sdfDevConsDraw(sdfDevConsCB_tag *aHndl, sdfDevConsDrawCB_t *aBuf);
 extern void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *aCB);
 
-extern void *memset(void *a, s32 b, u32 c);
-extern void *memmove(void *a, const void *b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memmove(void *a, const void *b, ps2Size_t c);
 extern s32 vsprintf(char *buf, const char *fmt, void *args);
 
 extern void *sdfChipAllocDirect(s32 aSize);

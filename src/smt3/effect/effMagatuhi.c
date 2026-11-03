@@ -468,7 +468,7 @@ extern s32 effDebugPosX;
 
 extern u32 effDebugPosY;
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 /* Fixed-scale form of the SDK's four-word RGBA packing scratch buffer. */
 static inline u32 PackMagatuhiTrailColor(void) {
@@ -2282,7 +2282,7 @@ void InitMagatuhiEditorProcess(void) {
 
 #ifdef NON_MATCHING
 extern u8 D_005518E2[];
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, ps2Size_t size);
 
 effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
 {

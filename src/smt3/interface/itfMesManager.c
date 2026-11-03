@@ -349,11 +349,11 @@ extern u32 strlen(const char *text);
 
 #define ITF_MES_COPY_ALIGN_MASK 3
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 #define ITF_MES_BINARY_COPY_ROUND_BIAS 5
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 frFontHandle_t *UnchainFontHandleUnit(frFontHandle_t *pfont, s32 index, s32 lines);
 

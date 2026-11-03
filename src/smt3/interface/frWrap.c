@@ -40,7 +40,7 @@ extern frFontHandle_t *frCombineFontRequestEx(frFontHandle_t *, frFontHandle_t *
 
 extern u32 strlen(const char *text);
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(u32 aSize);
 

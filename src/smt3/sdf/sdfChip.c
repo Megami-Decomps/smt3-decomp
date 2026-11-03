@@ -14,7 +14,7 @@ typedef struct sdfChip_t
 #define SDF_CHIP_PAGE_BYTES (1 << SDF_CHIP_PAGE_SHIFT)
 
 
-extern void *malloc(u32 size);
+extern void *malloc(ps2Size_t size);
 extern s32 DIntr(void);
 extern void EIntr(void);
 extern void *sdfZeroMemQuad(void *ptr, s32 quadCount);

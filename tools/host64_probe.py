@@ -71,7 +71,9 @@ def compile_one(cc, extra, path):
 def classify(stderr):
     hits = set()
     for line in stderr.splitlines():
-        if ": error:" not in line and ": warning:" not in line:
+        # Errors only: a warning does not fail the unit, so counting one
+        # would attribute a failure to the wrong class.
+        if ": error:" not in line:
             continue
         for name, pattern in CLASSES:
             if re.search(pattern, line):

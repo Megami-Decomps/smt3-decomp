@@ -52,7 +52,7 @@ enum sdf_stream_playback {
     SDF_STREAM_PLAYBACK_CADENCED = 2
 };
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t );
 
 void *sdfChipAllocDirect(s32 aSize);
 
@@ -86,7 +86,7 @@ void sdfDev9LoadModule(void) {
 }
 
 #ifdef NON_MATCHING
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 
 u64 sdf_2BFC58(void *dst, s32 size)
 {

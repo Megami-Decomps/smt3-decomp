@@ -1291,7 +1291,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
 }
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 #endif
 
 void sdfModelMorphListCopyStat(sdfModelMorphList_t *aDst, sdfModelMorphList_t *aSrc)
@@ -1410,7 +1410,7 @@ void *sdfModelGetExtraChunk(sdfModelRootNode_t *aRoot, u32 aChunkId)
 }
 
 #ifdef NON_MATCHING
-extern s32 memcmp(const void *first, const void *second, u32 size);
+extern s32 memcmp(const void *first, const void *second, ps2Size_t size);
 extern u32 strlen(const char *text);
 #endif
 

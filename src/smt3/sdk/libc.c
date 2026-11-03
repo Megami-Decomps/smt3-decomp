@@ -83,7 +83,7 @@ extern s32 sceSifDmaStat(s32);
 
 extern s32 GetThreadId(void);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t );
 
 sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
 
@@ -263,7 +263,7 @@ extern void *__deregister_frame_info(void *fn);
 
 extern void free(void *ptr);
 
-extern void *malloc(u32 size);
+extern void *malloc(ps2Size_t size);
 
 extern void __malloc_lock(_reent *r);
 
@@ -318,7 +318,7 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
@@ -2635,7 +2635,7 @@ s32 _malloc_trim_r(_reent *r, u32 pad)
     return 1;
 }
 
-extern void *memmove(void *destination, const void *source, u32 size);
+extern void *memmove(void *destination, const void *source, ps2Size_t size);
 extern void *memchr(const void *source, s32 character, u32 size);
 
 s32 __sfvwrite(FILE *fp, __suio *uio)

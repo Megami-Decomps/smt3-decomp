@@ -203,7 +203,7 @@ extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 

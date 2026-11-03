@@ -2102,7 +2102,7 @@ void FillIndex(s16 *pout, s32 num)
     }
 }
 
-extern void *memset(void *dst, int value, unsigned int size);
+extern void *memset(void *dst, int value, ps2Size_t size);
 
 void SetElem(fclencyceelem_t *pelem, datUnitWork_t *punit)
 {
@@ -3086,7 +3086,7 @@ void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
     model->first->speed = speed;
 }
 
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode);
 extern void ChangeDevilObjectReadMain(s32 index, fclEncyc_instance_tag *pinst);
 
@@ -4122,7 +4122,7 @@ s32 DebugProcDispBound(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *debugW
     return 0;
 }
 
-extern void *memmove(void *dest, const void *source, unsigned int size);
+extern void *memmove(void *dest, const void *source, ps2Size_t size);
 
 void DebugRemoveRecord(s32 id)
 {

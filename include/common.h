@@ -47,6 +47,13 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 typedef float f32;
 typedef double f64;
 
+/* The EE's size_t. ee-gcc is invoked with -D__SIZE_TYPE__=unsigned int, so
+ * this is a 32-bit unsigned here; on a target whose size_t is wider it
+ * follows that compiler. The C library declarations in this tree spell their
+ * length parameter with it, the one width that differs between targets with
+ * no cast at the call site to mark it. */
+typedef __SIZE_TYPE__ ps2Size_t;
+
 /* Asserts a structure's retail size, by the negative-array-size trick ee-gcc
  * 2.96 accepts. The typedef emits nothing, so this costs no code. The check
  * applies only where a pointer is four bytes: a wider pointer moves every

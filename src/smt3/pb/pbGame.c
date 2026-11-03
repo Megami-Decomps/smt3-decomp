@@ -184,7 +184,7 @@ extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, u32, void *);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern s32 pb_draw_map_cursor_Process(dds3ProcessID_t *id);
 

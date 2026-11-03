@@ -604,7 +604,7 @@ void nbRunKoukaCase1(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 extern void ToMatrix(void);
 extern void dds3RotationArc(void);
 extern void evtSetUnitRot1(evtUnit_t *unit, s128 *rotation, s32 parameter);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 
 void RunNumEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {

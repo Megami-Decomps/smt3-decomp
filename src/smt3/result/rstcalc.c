@@ -1219,7 +1219,7 @@ s32 datGetDevilRace(s8 index)
     return D_00339E00[index].race & 7;
 }
 
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 extern s8 datCountPlayerLND(void);
 
 #ifdef NON_MATCHING

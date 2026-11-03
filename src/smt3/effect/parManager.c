@@ -616,8 +616,8 @@ extern u8 aViewDown[];
 extern void (*dds3ParticleAllBuffInitTable[])();
 extern void (*dds3ParticleSetScaleTable[])(dds3Particle_Basic_t *, f32);
 
-extern void *memset(void *a, s32 b, u32 c);
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 void dds3ParticleManagerInit(void);
 dds3Particle_Physics_t *dds3Particle_PhysicsCreate(s32 number);

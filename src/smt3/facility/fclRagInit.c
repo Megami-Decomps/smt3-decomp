@@ -473,7 +473,7 @@ extern char D_0053D1B0[];
 extern char D_0053D1C0[];
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 #endif
 
 void fclRagUpdateInit(s8 type, fclRagWork_t *owner)

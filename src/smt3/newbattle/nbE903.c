@@ -337,7 +337,7 @@ s32 Parts1(nbEventProcessData_t *ed)
 
 extern const s32 D_00546518[4];
 extern const s32 D_00546528[4];
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, ps2Size_t size);
 extern s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formindex);
 extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
 extern void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect);

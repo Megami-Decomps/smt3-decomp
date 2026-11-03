@@ -77,7 +77,7 @@ extern s32 strcmp(const char *a, const char *b);
 #include "sdk_libc.h"
 
 /* Declared here because no header carries these. */
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 typedef struct
 {

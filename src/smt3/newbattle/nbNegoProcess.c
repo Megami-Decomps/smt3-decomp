@@ -1365,7 +1365,7 @@ extern nbNegoMsgEntry_t negoMsgTable[];
 extern u8 itfMesEmbedded_4EB810[], itfMesEmbedded_4EE8B0[];
 extern u8 itfMesEmbedded_4EF0C8[], itfMesEmbedded_4E3DD8[];
 extern void *sdfChipAllocDirect(s32 size);
-extern void *memset(void *dest, s32 value, u32 size);
+extern void *memset(void *dest, s32 value, ps2Size_t size);
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 index);
 extern nbParty_t *nbGetPartyFromFormindex(s32 index);
 typedef struct itfMesResource_t itfMesResource_t;

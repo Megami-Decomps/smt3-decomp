@@ -10,7 +10,7 @@ extern void (*D_00551828)(void);
 
 extern void *dds3AllocConfigWork(s32 mode);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern s32 dds3GetGlobalConfigFlag(s32 index);
 
@@ -370,7 +370,7 @@ void dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
 }
 
 extern const s32 D_00548888[3][4];
-extern void *memcpy(void *destination, const void *source, u32 size);
+extern void *memcpy(void *destination, const void *source, ps2Size_t size);
 
 extern void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot);
 

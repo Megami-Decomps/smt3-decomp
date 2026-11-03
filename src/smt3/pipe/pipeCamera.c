@@ -37,8 +37,8 @@ extern s32 pipeCheckLevel(s32 level, s32 type);
 
 extern void CalcCamera(void);
 
-extern void *memset(void *, s32, u32);
-extern void *memcpy(void *, const void *, u32);
+extern void *memset(void *, s32, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t );
 extern f32 vecNormalize(f32 *);
 extern void vecTranslate(f32 *, f32 *, f32 *);
 extern f32 vecDot(f32 *, f32 *);

@@ -89,7 +89,7 @@ extern s32 sceSifCallRpc(void *cd, u32 fno, u32 mode, void *send, s32 ssize,
 extern s32 sceMcOpen(s32 a, s32 b, char *c, s32 d);
 extern s32 sceSifCheckStatRpc(void *cd);
 extern void mcDelayThread(u16 ticks);
-extern char *strncpy(char *dst, const char *src, u32 n);
+extern char *strncpy(char *dst, const char *src, ps2Size_t n);
 extern int scePrintf(const char *fmt, ...);
 
 /* The chunk this string opens also carries the float constants the next
@@ -559,7 +559,7 @@ s32 sceMcGetDir(s32 a, s32 b, char *c, s32 d, s32 e, void *f)
 }
 
 extern u32 strlen(const char *str);
-extern void *memcpy(void *dest, const void *src, u32 size);
+extern void *memcpy(void *dest, const void *src, ps2Size_t size);
 
 void mceStorePwd(char *dest)
 {

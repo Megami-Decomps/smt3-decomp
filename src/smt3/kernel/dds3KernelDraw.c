@@ -237,7 +237,7 @@ void *Eve_FilterGetParams(void);
 void Eve_FilterSetParam(void *pParam);
 void Eve_FilterON(void);
 void Eve_FilterOFF(void);
-void *memcpy(void *a, const void *b, u32 c);
+void *memcpy(void *a, const void *b, ps2Size_t c);
 
 void dds3FadeClear(void);
 s32 dds3FadeCheck(void);
@@ -317,7 +317,7 @@ PS2_SYMBOL_AT(dds3Blur2Param_t, dds3Blur2State, dds3BlurState, 0x30);
 extern dds3Filter2Param_t dds3BlurParam;
 extern dds3MFilterParam_t D_00556C70;
 
-void *memset(void *a, s32 b, u32 c);
+void *memset(void *a, s32 b, ps2Size_t c);
 f32 fabsf(f32 value);
 u32 dds3GetFrameID(void);
 void dds3FreeRenderTexture(void);

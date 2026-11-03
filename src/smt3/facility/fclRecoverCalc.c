@@ -207,7 +207,7 @@ typedef struct rcvCalcWork_t {
 
 typedef struct cmpInfoWindow_t cmpInfoWindow_t;
 extern rcvCalcWork_t *rcvCalcState;
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
 extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
 

@@ -44,7 +44,7 @@ extern char D_0054FD18[]; /* "/sound/" */
 
 extern char *strcat(char *dst, const char *src);
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 char *sdfSndMakeFilename(char *aDstName, const char *aSrcName)
 {

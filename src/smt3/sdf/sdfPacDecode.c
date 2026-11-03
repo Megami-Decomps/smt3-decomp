@@ -2,8 +2,8 @@
 #include "libsdf.h"
 
 /* Declared here because no header carries these. */
-extern void *memcpy(void *a, const void *b, u32 c);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void *sdfChipAllocDirect(s32 aSize);
 extern void *sdfChipAllocZeroDirect(s32 aSize);

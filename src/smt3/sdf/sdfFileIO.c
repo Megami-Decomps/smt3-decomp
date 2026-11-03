@@ -120,7 +120,7 @@ enum sdf_stream_playback {
 /* Declared here because no header carries these. */
 extern s32 sdfCdImageLoadStart(const char *filename);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t );
 
 
 extern s32 sceLseek(s32 fileHandle, s32 offset, s32 origin);
@@ -165,7 +165,7 @@ extern char D_00551988[];
 
 extern u8 sdfFileCmdDefaultDevice;
 
-extern s32 memcmp(const void *aFirst, const void *aSecond, u32 aSize);
+extern s32 memcmp(const void *aFirst, const void *aSecond, ps2Size_t aSize);
 
 extern char *strchr(const char *aString, s32 aCharacter);
 

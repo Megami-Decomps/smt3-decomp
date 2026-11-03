@@ -56,7 +56,7 @@ extern void mcMakeFileName(char *path, s32 num);
 
 extern u32 strlen(const char *s);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t );
 
 void sdfMcFuncOpen(u32 context, const char *path, s32 openFlags);
 
@@ -386,7 +386,7 @@ extern s32 gSlFileErroeFlg;
 
 extern s32 slFileSelCalc(void);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 typedef struct slFileName_t {
     s8 ch[20];

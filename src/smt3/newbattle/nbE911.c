@@ -321,7 +321,7 @@ extern dds3Basic_t *D_00551628;
 
 extern dds3Basic_t *D_0055162C;
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void nbPanelAllHide(void);
 

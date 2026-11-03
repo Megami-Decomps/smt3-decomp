@@ -261,7 +261,7 @@ void func_00151018(s32 index) {
 
 extern fldUnitControl_t *fldGetUnitControl(void);
 extern void dds3GetPosPoseSet(dds3Basic_t *basic);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 
 void fldSnowSeedReset(void)
 {

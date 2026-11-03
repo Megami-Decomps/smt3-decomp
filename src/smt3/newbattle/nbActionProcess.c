@@ -151,7 +151,7 @@ extern struct nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 s
 
 extern void nbPanelStockEnd(void);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void dds3FadeOut(u32 r, u32 g, u32 b, u32 frame);
 
@@ -216,7 +216,7 @@ extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, s32 uniqueid
 
 s32 CheckKoketaNego(nbActionProcessData_t *a);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern char D_00543768[]; /* "nb_unitdraw" */
 

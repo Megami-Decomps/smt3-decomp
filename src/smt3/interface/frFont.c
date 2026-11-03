@@ -422,7 +422,7 @@ void frSetMessageStepY(u32 StepY);
 
 u8 *MessageNumSearch(s32 Index, frTextBank_t *pData, s32 Size);
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 void frMessageReturnCode(frMsgInfo_t *pMsgInfo);
 
@@ -470,7 +470,7 @@ void frCreateVariableRequest(u8 VarNo, frMsgInfo_t *pMsgInfo);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern u32 strlen(const char *text);
 

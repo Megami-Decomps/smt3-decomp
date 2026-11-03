@@ -4,7 +4,7 @@
 #include "sdf_resource.h"
 
 /* Declared here because no header carries these. */
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 struct sdfPadCb_t;
 
@@ -124,7 +124,7 @@ extern s32 scePadInit(s32);
 
 extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t );
 
 void sdfPadControl(sdfPadCb_t *entry);
 

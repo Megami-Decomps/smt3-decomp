@@ -4,7 +4,7 @@
 #include "ps2asm.h"
 
 /* Declared here because no header carries these. */
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern u8 dds3PadVibrationState[2];
 

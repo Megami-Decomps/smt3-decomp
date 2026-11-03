@@ -40,7 +40,7 @@ extern void frLoadFontData(s32 style, const char *filename);
 extern void nmeInitNameRows(s8 target, nmeWork_t *work);
 extern char D_00548768[];
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 void frAllocNameData(void)
 {

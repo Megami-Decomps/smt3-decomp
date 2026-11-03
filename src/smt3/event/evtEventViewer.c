@@ -37,7 +37,7 @@ extern void dds3DeleteSceneBasicData(void *basic);
 extern void evtInitViewerInfo(void);
 extern s32 dds3KillProcessName(const char *name, s32 shutdowntimer);
 extern evtViewerInfo_t *viewerinfo;
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void evtFreePolygonMovieWorkData(void *wdata);
 extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);

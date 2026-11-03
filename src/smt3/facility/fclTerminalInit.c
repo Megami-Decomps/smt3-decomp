@@ -402,7 +402,7 @@ s32 fclTerminalDumpJump(trmTerminalWork_t *work)
     return 0;
 }
 
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 extern void cmpSetCursorFlag(void *cursor, u8 *flags);
 extern void fclTerminalInitMenu(s32 id, void *commands, void *work);
 
@@ -471,7 +471,7 @@ void fclTerminalSetMode(s32 mode, s32 id, trmUpdateWork_t *work)
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 extern void cmpInitSeqInfo(void *work, s32 seq);
 extern void fclTerminalLoadTextures(void *work);
 extern void fclClearTerminalState(void);

@@ -29,7 +29,7 @@ extern s32 fclUpdatePanel(lstWork_t *pPanel);
 
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 #endif
 
 void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, lstWork_t *work)

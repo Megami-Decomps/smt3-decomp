@@ -788,9 +788,9 @@ extern sdfGrOt_t *D_0031F2A8[];
 
 extern sdfGrOt_t *D_0031F238[];
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
-extern void *memset(void *, s32, u32);
+extern void *memset(void *, s32, ps2Size_t );
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 

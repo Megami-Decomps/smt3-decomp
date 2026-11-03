@@ -642,7 +642,7 @@ extern s32 fldShadowWork, D_0054EA8C, D_0054EA90;
 extern sdfMat_t *fldDrawEnv;
 extern sdfGrOt_t sdfGrOtTable[];
 extern s32 rsetFrameMaskOtOffset;
-extern void *memset(void *destination, int value, unsigned int size);
+extern void *memset(void *destination, int value, ps2Size_t size);
 extern dds3Basic_t *dds3GetActiveScene(void);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serialID, s32 type);
 extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
@@ -1227,7 +1227,7 @@ void fldRunDanteClear(void)
 }
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 #endif
 
 void fldRunTamaInit(void)
@@ -2985,7 +2985,7 @@ void fldRunDanteFacePlayer(void)
 }
 
 #ifdef NON_MATCHING
-extern void *memset(void *dst, int value, unsigned int size);
+extern void *memset(void *dst, int value, ps2Size_t size);
 extern void FromRotation(f32 angle);
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 flag);

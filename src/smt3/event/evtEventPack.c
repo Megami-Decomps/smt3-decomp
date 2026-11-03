@@ -164,7 +164,7 @@ dds3ProcessID_t *evtLoadEventPack(s32 eventno);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 void evtKillEventPack(s32 eventno);
 

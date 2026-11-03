@@ -10,7 +10,7 @@
 #include "interface.h"
 
 /* Declared here because no header carries these. */
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 extern void evtDisableMoonDraw(void);
 extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, lstWork_t *work);
 

@@ -148,7 +148,7 @@ extern void *sdfFileOpen(const char *path);
 extern u32 sdfFileLength(void *file);
 extern s32 sdfFileRead(void *file, void *buffer, s32 size);
 extern void sdfFileClose(void *file);
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, ps2Size_t size);
 extern effPartHandle_t *dds3EffectPartCreate(u16 type, void *data);
 extern void mdlSingleMotion(mdlObj_t *model, s32 group, s32 number);
 

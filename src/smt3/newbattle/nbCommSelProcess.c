@@ -145,7 +145,7 @@ extern void sdfPrimLinkG4(sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, u32 a
                           s32 aY1, u32 aColor1, s32 aX2, s32 aY2, u32 aColor2, s32 aX3, s32 aY3,
                           u32 aColor3, s32 aZ, void *aAllocator);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -155,7 +155,7 @@ extern void sdfMemFreeDirect(void *aHandle);
 
 extern void SetCommCursor2(nbCommSelProcessData_t *s);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern char D_00551118[];
 

@@ -147,7 +147,7 @@ void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat,
 
 u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);
 
-extern void *memset(void *, int, unsigned int);
+extern void *memset(void *, int, ps2Size_t );
 
 void sdfFreeAutoDelayed(void *data);
 
@@ -185,7 +185,7 @@ f32 sdfSin(f32 aRadius);
 
 f32 sdfCos(f32 aRadius);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t );
 
 extern void *fldDrwZBuf;
 

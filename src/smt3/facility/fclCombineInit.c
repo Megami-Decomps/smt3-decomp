@@ -567,7 +567,7 @@ extern u8 D_0032D1B8[];
 extern u8 D_0032D1C8[];
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 #endif
 
 void fclUpdateInit(void)
@@ -1074,7 +1074,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSetupBirthPanel);
 
 
 extern void cmbSetupBirthPanel(s32 index);
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, ps2Size_t size);
 extern s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
                             cmbUnit_t *third, datUnitWork_t *result,
                             s32 available, s8 mode, s8 flag, cmpSkillList_t *skills);
@@ -2319,7 +2319,7 @@ void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst)
 }
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 #endif
 
 void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src)

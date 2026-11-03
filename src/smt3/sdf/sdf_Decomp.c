@@ -4,7 +4,7 @@
 #include "eeregs.h"
 
 /* Declared here because no header carries these. */
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 enum sdfDecomp_enum {
     SDF_DECOMP_STAT_END = 0,
@@ -69,7 +69,7 @@ void sdfGrClosePacketBuff(s32 aBuffPtr);
 
 extern s32 D_00552170;
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t );
 
 s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length);
 

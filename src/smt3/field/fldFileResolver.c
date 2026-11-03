@@ -184,7 +184,7 @@ sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 extern u32 sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 sdfMemHandle_t *fldLoadNextFileF1(void **pData, s32 field, s32 area);
 
@@ -344,7 +344,7 @@ extern void fldFileResolverFL1(fldFileInfoHeaderFL1_t *info);
 extern void fldSetFileResolverIdx(u32 index);
 extern char *fldResolverFL1Data[4];
 extern char D_0054EBC0[]; /* "%s%s", shared with fldMakeResouceBasicFL1. */
-extern void *memset(void *buffer, s32 value, u32 size);
+extern void *memset(void *buffer, s32 value, ps2Size_t size);
 extern void fldMakeResouceBasicFL1(void *typeTable, u32 typeCount);
 
 u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, void *textureBuffer);

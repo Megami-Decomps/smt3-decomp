@@ -4,7 +4,7 @@
 #include "ps2asm.h"
 
 #ifdef NON_MATCHING
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 #endif
 
 

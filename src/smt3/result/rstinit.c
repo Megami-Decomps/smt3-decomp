@@ -30,7 +30,7 @@ extern rstData_t *GBWK_1;
 
 /* Declared here because no header carries these. */
 extern s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern char D_0053DA28[];
 

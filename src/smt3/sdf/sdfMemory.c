@@ -13,10 +13,10 @@ typedef struct
 #define SDF_IOP_FILE_RPC_OVERHEAD 0xC
 #define SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK 0x3F
 
-extern void *malloc(u32 size);
+extern void *malloc(ps2Size_t size);
 extern s32 DIntr(void);
 extern void EIntr(void);
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 extern u32 strlen(const char *s);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);

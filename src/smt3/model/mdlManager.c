@@ -254,9 +254,9 @@ extern const char _ctype_[]; /* newlib character classes: EOF slot, then 256 byt
 extern s32 sceDopen(const char *name);
 extern s32 sceDread(s32 handle, mdlDirectoryEntry_t *entry);
 extern s32 sceDclose(s32 handle);
-extern s32 memcmp(const void *first, const void *second, u32 size);
-extern void *memcpy(void *a, const void *b, u32 c);
-extern void *memset(void *a, s32 b, u32 c);
+extern s32 memcmp(const void *first, const void *second, ps2Size_t size);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 extern char *strcat(char *dst, const char *src);
 extern char *strrchr(const char *text, s32 character);
 extern s32 strcasecmp(const char *first, const char *second);

@@ -68,7 +68,7 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void cmpInitSeqInfo(void *work, s32 seq);
 

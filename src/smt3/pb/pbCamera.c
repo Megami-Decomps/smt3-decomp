@@ -139,7 +139,7 @@ void pbSetViewRotation(f32 angle, f32 radius, f32 degree)
     aViewEye.z = offset.z + aViewTarget.z;
 }
 
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, ps2Size_t size);
 extern void pbSetModelPos(mdlObj_t *model, const f32 *pos);
 extern void mdlLink(mdlObj_t *model, void *ot);
 extern void mdlGetPosition(mdlObj_t *model);

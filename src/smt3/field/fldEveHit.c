@@ -182,7 +182,7 @@ struct fldInfTable_t {
     fldInfSet_t sets[40];
 };
 
-extern void *memset(void *, int, unsigned int);
+extern void *memset(void *, int, ps2Size_t );
 
 dds3Basic_t *dds3GetActiveScene(void);
 

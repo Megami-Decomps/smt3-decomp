@@ -25,6 +25,8 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 typedef float f32;
 typedef double f64;
 
+typedef __SIZE_TYPE__ ps2Size_t;
+
 #define QWORD_ALIGNED __attribute__((aligned(16)))
 #define QUAD_ZERO(lvalue) __builtin_memset(&(lvalue), 0, sizeof(lvalue))
 

@@ -863,7 +863,7 @@ extern void cmpDebugDumpCount(void);
 extern void camp_H_cmpGlobalWork_t__ctor(void);
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 #endif
 
 void cmpinit(void)
@@ -1170,7 +1170,7 @@ extern char *text2[];
 extern void fclSetMessageVar_20743088(s8 index, s32 value);
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 #endif
 
 void cmpSetItSkMessageVar(datUnitWork_t *unit)

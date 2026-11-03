@@ -129,7 +129,7 @@ void sdfFileClose(devState_t *aHandle);
 
 extern const char D_00531E98[];
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, ps2Size_t );
 
 extern s32 gFldInf_HitIdx;
 

@@ -108,7 +108,7 @@ extern void pb_load_mapdata_Shutdown(dds3ProcessID_t *id);
 
 extern u8 pbMapPathIdx, pbMenuIndex, pbMenuState;
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern s32 pb_proc_menu_Process(dds3ProcessID_t *id);
 
@@ -357,7 +357,7 @@ void pb_proc_menu_Shutdown(dds3ProcessID_t *id) {
     D_0054F5C4->menuState = 0;
 }
 
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, ps2Size_t size);
 typedef struct { u16 cells[20][20]; } pbMapBlock_t;
 extern pbMapBlock_t D_00327458;
 

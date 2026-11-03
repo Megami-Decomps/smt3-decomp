@@ -14,7 +14,7 @@ extern void (*D_00551828)(void);
 
 extern sdfTexHandle_t *sdfTexSet(struct pipeTextureFile_t *aTex);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 
 
@@ -440,7 +440,7 @@ u8 objMake(tagPipeObject *objPtr, s32 offset, u8 id, u8 way, u8 action, u8 value
 
 
 extern const u8 D_00548B50[16];
-extern void *memcpy(void *dest, const void *src, u32 size);
+extern void *memcpy(void *dest, const void *src, ps2Size_t size);
 extern void objCopy2(s32 offset, f32 x, f32 y, u8 id, u8 action,
                      s16 count, s16 num, s32 range);
 extern u32 dds3GetRandA(void *state);

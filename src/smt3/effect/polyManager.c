@@ -285,8 +285,8 @@ typedef struct
     u8 oldLoop;
 } dds3SpPolyLoopWork_t;
 
-extern void *memcpy(void *a, const void *b, u32 c);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 extern dds3SpPolyEntry_t dds3SpPolyTable[];
 extern void (*D_003176A0[])(void *work);
 extern void (*D_003176B0[])(f32 scale, void *work);

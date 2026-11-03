@@ -15,7 +15,7 @@ extern void *sdfAllocAuto(s32 size);
 extern void sdfFreeAuto(void *ptr);
 extern void sdfGsMemFree(sdfGsMemSlice_t *aHandle);
 extern sdfGsMemSlice_t *sdfGsMemAllocFromTail(s32 aSize, s32 aType);
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, ps2Size_t c);
 
 extern sdfTexHandle_t *sdfTexSetEx(TMX_HEADER_t *aTex, s32 aMemMode);
 

@@ -136,7 +136,7 @@ extern s32 SignalSema(s32);
 #include "sdk_libkernl.h"
 
 /* Declared here because no header carries these. */
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern s32 sceSifDmaStat(s32);
 
@@ -434,7 +434,7 @@ extern void *__deregister_frame_info(void *fn);
 
 extern void free(void *ptr);
 
-extern void *malloc(u32 size);
+extern void *malloc(ps2Size_t size);
 
 extern void __malloc_lock(_reent *r);
 
@@ -488,7 +488,7 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, ps2Size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
