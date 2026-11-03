@@ -138,7 +138,7 @@ extern cmpInfoWindow_t *cmpInfoWindow;
 
 extern cmbWork_t *D_0054FB20;
 
-extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern void sdfMemFreeDirect(void *aHandle);
 

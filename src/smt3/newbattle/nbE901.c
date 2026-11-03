@@ -369,7 +369,7 @@ extern s32 D_005515C0;
 extern char *text1[];
 extern void nbPanelAllShow(void);
 extern s32 dds3GetRandIntA(s32 minimum, s32 range);
-extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 s32 RunUgou(nbEventProcessData_t *e)
 {

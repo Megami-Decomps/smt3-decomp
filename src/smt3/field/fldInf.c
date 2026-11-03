@@ -107,7 +107,7 @@ extern scrProcessWork_s *scrSearchScriptName(char *scriptname);
 
 extern fldResHead_t *gEvnRng[];
 
-s32 dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
+ps2AddrS_t dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
 
 extern s32 strcmp(const char *left, const char *right);
 

@@ -161,7 +161,7 @@ extern void sortSkillList(cmbUnit_t *unit);
 
 extern s32 p2sdStopBGM(s32 id);
 
-extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
@@ -4571,7 +4571,7 @@ extern void mdlGetFilebase(s32 aMajor, u16 aMinor, char *aName, s32 aNameLeng);
 
 extern char D_0053CD68[];
 
-s32 cmbMakeModelPath(u16 id, s32 *size)
+ps2AddrS_t cmbMakeModelPath(u16 id, s32 *size)
 {
     char path[0x80];
     char base[0x10];
@@ -5298,7 +5298,7 @@ typedef struct effEVECombParSmokeParam_t {
 typedef struct effEVECombParSmoke_t effEVECombParSmoke_t;
 extern effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *params);
 
-s32 cmbStartSmokeEffect(u16 devilId)
+ps2AddrS_t cmbStartSmokeEffect(u16 devilId)
 {
     effEVECombParSmokeParam_t params;
     f32 modelSize = datModelParamTable[devilId].formsize / 50.0f;

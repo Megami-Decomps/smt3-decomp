@@ -255,7 +255,7 @@ extern void nbAddFormEntry(void *buf, s32 group, s32 id);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
-extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern s32 nbLoadMidiFile(s32 no);
 

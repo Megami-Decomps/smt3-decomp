@@ -48,7 +48,7 @@ extern void evtBitAllOff(void);
 
 extern void evtDebugPrintCamera(void);
 
-s32 EventDebugProcess1(dds3ProcessID_t *id);
+ps2AddrS_t EventDebugProcess1(dds3ProcessID_t *id);
 
 extern dds3Basic_t *dds3GetActiveScene(void);
 extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *scene);
@@ -133,7 +133,7 @@ void *evtGetDebugProcess(void)
     return (void *)EventDebugProcess1;
 }
 
-s32 EventDebugProcess1(dds3ProcessID_t *id)
+ps2AddrS_t EventDebugProcess1(dds3ProcessID_t *id)
 {
     char path[0x40];
     sdfDrawTag_t *tag;
@@ -228,10 +228,10 @@ extern s32 evtSceneDispTimer, evtSceneDispState;
 extern s8 dds3PadBitTable[];
 extern const char D_0054F810[], D_0054F818[];
 extern sdfGrOt_t D_002F6938;
-extern s32 dds3DebugBasic(dds3ProcessID_t *id);
+extern ps2AddrS_t dds3DebugBasic(dds3ProcessID_t *id);
 extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
 
-s32 evtSceneDispProcess(dds3ProcessID_t *id)
+ps2AddrS_t evtSceneDispProcess(dds3ProcessID_t *id)
 {
     evtSceneDispRows_t rows = D_0053B348;
     evtSceneDispRow_t *row;

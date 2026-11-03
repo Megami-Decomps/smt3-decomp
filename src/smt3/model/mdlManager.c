@@ -122,7 +122,7 @@ typedef struct
 extern char *strcpy(char *dst, const char *src);
 extern void pacFileHandleFree_(void *pacHandle);
 
-s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 void mdlFreeMotionCtrlr(mdlObj_t *aHandle, sdfMotionCtrlr_t *aCtrlr);
 
 
@@ -661,7 +661,7 @@ char *mdlSetFileName(char *buff, const char *fname) {
     return strcat(buff, fname);
 }
 
-s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode) {
+ps2AddrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode) {
     char requestPath[0x80];
     dds3ModelResrc_t *entity;
     dds3ModelFileIndex_t *selection;

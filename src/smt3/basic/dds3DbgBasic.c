@@ -25,7 +25,7 @@ extern s32 dds3SceneBasicExistBasic(dds3Basic_t *scene, dds3Basic_t *target);
 
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
 
-extern s32 evtSceneDispProcess(void *id);
+extern ps2AddrS_t evtSceneDispProcess(void *id);
 
 extern s32 DispBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *tag);
 
@@ -97,7 +97,7 @@ u32 DispObjectBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *tag) {
     return 1;
 }
 
-s32 dds3DebugBasic(dds3ProcessID_t *id) {
+ps2AddrS_t dds3DebugBasic(dds3ProcessID_t *id) {
     s32 width;
     dds3Basic_t *node;
     sdfGrOt_t *surface;

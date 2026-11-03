@@ -9,9 +9,9 @@ extern void nbSetMaeFlag(s32 flag);
 nbMainProcessData_t *nbGetMainProcessData(void);
 extern void nbSetStageParam(s16 major, s16 minor);
 extern void effBTLEncountStart(void);
-extern s32 nbMaeProcess01(void);
-extern s32 nbMaeProcess02(void);
-extern s32 nbMaeProcess02Step(void);
+extern ps2AddrS_t nbMaeProcess01(void);
+extern ps2AddrS_t nbMaeProcess02(void);
+extern ps2AddrS_t nbMaeProcess02Step(void);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
                                          s32 shutdownTimer,
                                          dds3ProcessFunc_t processFunc,
@@ -32,7 +32,7 @@ s32 nbMaeProcess02Wait(void)
     return -1;
 }
 
-s32 nbMaeProcess02Loop(void)
+ps2AddrS_t nbMaeProcess02Loop(void)
 {
     if (nbMaeCheckDone() == 1) {
         return EE_ADDR_S(nbMaeProcess02Wait);
@@ -40,13 +40,13 @@ s32 nbMaeProcess02Loop(void)
     return 0;
 }
 
-s32 nbMaeProcess02Step(void)
+ps2AddrS_t nbMaeProcess02Step(void)
 {
     nbSetMaeFlag(0);
     return EE_ADDR_S(nbMaeProcess02Loop);
 }
 
-s32 nbMaeProcess02(void)
+ps2AddrS_t nbMaeProcess02(void)
 {
     nbMainProcessData_t *data;
 
@@ -60,7 +60,7 @@ s32 nbMaeProcess02(void)
     return 0;
 }
 
-s32 nbMaeProcess01(void)
+ps2AddrS_t nbMaeProcess01(void)
 {
     nbMainProcessData_t *data;
 
@@ -71,7 +71,7 @@ s32 nbMaeProcess01(void)
     return EE_ADDR_S(nbMaeProcess02);
 }
 
-s32 nbMaeProcess0(void)
+ps2AddrS_t nbMaeProcess0(void)
 {
     nbMainProcessData_t *data;
 

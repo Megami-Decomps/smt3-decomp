@@ -38,7 +38,7 @@ u32 sdfMultiBillBoardGetPacketSize(s32 aNum);
 
 u32 *sdfMultiBillBoardMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
 
-u32 sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
+ps2Addr_t sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
                   const void *aUVList, const void *aXYOffsetList,
                   s32 aNum, void *(*aAllocator)(s32));
 
@@ -47,7 +47,7 @@ void sdfMultiBillBoardVcMake1(u8 *aPacket, const f32 *aCenter, const void *aColo
 
 u32 sdfMultiBillBoardVcGetPacketSize(s32 aNum);
 
-u32 sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
+ps2Addr_t sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
 
 void sdfBillBoardMakeTMPacket(u8 *aPacket, const f32 *aTM) {
     sdfBillBoardTMPacket_t *p = (sdfBillBoardTMPacket_t *)aPacket;
@@ -316,7 +316,7 @@ u32 sdfBillBoardVcGetPacketSize(s32 aNum) {
     return (aNum * 0x4c + 0x4bU) & 0xfffffff0;
 }
 
-u32 sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
+ps2Addr_t sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
                   const void *aUVList, const void *aXYOffsetList,
                   s32 aNum, void *(*aAllocator)(s32)) {
     s32 bytes;
@@ -417,7 +417,7 @@ u32 sdfMultiBillBoardVcGetPacketSize(s32 aNum) {
 }
 
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32)) {
+ps2Addr_t sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32)) {
     s32 packetBytes;
     u32 *packet;
     u32 *cursor;

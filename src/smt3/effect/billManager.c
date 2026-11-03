@@ -1236,7 +1236,7 @@ void dds3BillboardSetCondition(billHandle_t *hBillboard, s32 condition) {
     }
 }
 
-s32 dds3BillboardGetTex(billHandle_t *hBillboard) {
+ps2AddrS_t dds3BillboardGetTex(billHandle_t *hBillboard) {
     if (hBillboard->type == 0) {
         return EE_ADDR_S(hBillboard->u.child->hTex);
     }

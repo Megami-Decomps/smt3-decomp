@@ -77,7 +77,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
 evtPolygonMovieWork_t *evtGetPolygonMovieWorkData1(evtPolygonMovieWork_t *wdata, void *pm1data, void *pm2data);
-s32 evtPolygonMovieProcess1(dds3ProcessID_t *id);
+ps2AddrS_t evtPolygonMovieProcess1(dds3ProcessID_t *id);
 
 typedef struct pmdCameraTable_t {
     s32 NameIndex, Reserve1, Reserve2, Reserve3;
@@ -1111,7 +1111,7 @@ INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BAF8);
 
 INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BB20);
 
-s32 evtPolygonMovieProcess1(dds3ProcessID_t *id)
+ps2AddrS_t evtPolygonMovieProcess1(dds3ProcessID_t *id)
 {
     evtPolygonMovieWork_t *work;
     dds3Basic_t *basic;

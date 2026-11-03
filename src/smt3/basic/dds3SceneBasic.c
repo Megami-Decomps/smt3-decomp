@@ -359,7 +359,7 @@ void dds3SceneBasicReleaseScriptFile(dds3Basic_t *scene)
     work->pScrFileData = NULL;
 }
 
-s32 dds3SceneBasicStartScript(dds3Basic_t *scene, char *procname)
+ps2AddrS_t dds3SceneBasicStartScript(dds3Basic_t *scene, char *procname)
 {
     void *script = ((dds3SceneBasic_t *)scene->workdata)->pScrFileData;
     s32 procedure;

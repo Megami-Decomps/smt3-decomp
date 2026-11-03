@@ -114,7 +114,7 @@ tagPipePartsInfo *getPartsInfo(s16 partsID)
 }
 
 
-s32 getPartsType(s32 id)
+ps2AddrS_t getPartsType(s32 id)
 {
     s32 shiftedId = id >> 6;
     tagPipePartsInfo *pInfo = getPartsInfo((s16)id);
