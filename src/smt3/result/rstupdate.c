@@ -254,14 +254,14 @@ void rstUpdateSeqDevilParam(void)
     if (fclChkMessage() != 0) {
         return;
     }
-    fclSetMessageVar_20743088(1, (s32)text2[startPos->pCurrentStock->id]);
+    fclSetMessageVar_20743088(1, EE_ADDR_S(text2[startPos->pCurrentStock->id]));
     index = startPos->Flag;
     if (index < 6) {
         do {
             if ((s8)startPos->unk_129F[index] > 0) {
-                fclSetMessageVar_20743088(8, (s32)cmpGetParamName((s8)index));
+                fclSetMessageVar_20743088(8, EE_ADDR_S(cmpGetParamName((s8)index)));
                 sprintf(buffer, D_0054FD00, (s8)startPos->unk_129F[index]);
-                fclSetMessageVar_20743088(9, (s32)buffer);
+                fclSetMessageVar_20743088(9, EE_ADDR_S(buffer));
                 if (startPos->Flag == 0) {
                     fclStartMessage(3);
                 } else {
@@ -331,12 +331,12 @@ void rstUpdateSeqGift(void)
         switch (fclGetSelMessagePos()) {
         case 0:
             fclEndMessage();
-            fclSetMessageVar_20743088(1, (s32)text2[startPos->pCurrentStock->id]);
+            fclSetMessageVar_20743088(1, EE_ADDR_S(text2[startPos->pCurrentStock->id]));
             if (startPos->giftKind == 0) {
-                fclSetMessageVar_20743088(2, (s32)pStr[startPos->giftId]);
+                fclSetMessageVar_20743088(2, EE_ADDR_S(pStr[startPos->giftId]));
                 datAddItem(startPos->giftId, 1);
             } else {
-                fclSetMessageVar_20743088(2, (s32)pstr[startPos->giftId]);
+                fclSetMessageVar_20743088(2, EE_ADDR_S(pstr[startPos->giftId]));
                 datAddHearts(startPos->giftId);
             }
             startPos->Flag = 1;
@@ -375,7 +375,7 @@ void rstUpdateSeqDefaultSkill(void)
         return;
     }
     if (state == 2) {
-        fclSetMessageVar_20743088(10, (s32)text1[startPos->EventParam]);
+        fclSetMessageVar_20743088(10, EE_ADDR_S(text1[startPos->EventParam]));
         fclStartMessage(6);
         rstClearFlag(1);
         return;
@@ -474,7 +474,7 @@ extern s32 datExplainTable[];
 
 void rstStartIntroduce(u16 DevilID)
 {
-    fclSetMessageVar_20743088(0, (s32)text2[DevilID]);
+    fclSetMessageVar_20743088(0, EE_ADDR_S(text2[DevilID]));
     fclSetMessageVar_20743088(4, datExplainTable[datDevilTable[DevilID].race]);
     if (DevilID == 0xCF) {
         fclStartMessage(0xC6);
@@ -578,8 +578,8 @@ void rstUpdateSeqEvoAct(void)
         cmpModelInitCore2();
         dds3FadeIn(0, 0, 0, 0xF);
         fclSetMessageVar_20743088(0x11,
-                                  (s32)text2[startPos->pCurrentStock->id]);
-        fclSetMessageVar_20743088(0x12, (s32)text2[startPos->evoWork.id]);
+                                  EE_ADDR_S(text2[startPos->pCurrentStock->id]));
+        fclSetMessageVar_20743088(0x12, EE_ADDR_S(text2[startPos->evoWork.id]));
         rstChkResult2Process((u8 *)startPos);
         cmbCopyEvoDevilToStock(startPos->pCurrentStock, &startPos->evoWork);
         fclEncycRegist(startPos->pCurrentStock, 0);
@@ -609,7 +609,7 @@ void rstUpdateSeqEvo(void)
             startPos->unk_0005[0] = state;
             break;
         case 2:
-            fclSetMessageVar_20743088(1, (s32)text2[startPos->pCurrentStock->id]);
+            fclSetMessageVar_20743088(1, EE_ADDR_S(text2[startPos->pCurrentStock->id]));
             fclStartMessage(0x17);
             startPos->unk_0005[0] = 1;
             break;
@@ -733,7 +733,7 @@ s32 rstUpdateSeqDestroySkill(void)
         startPos->selectedSkill =
             rstSkillSlotIsFull(startPos->pCurrentStock,
                                (void *)&startPos->cursorInfo);
-        fclSetMessageVar_20743088(10, (s32)text1[startPos->selectedSkill]);
+        fclSetMessageVar_20743088(10, EE_ADDR_S(text1[startPos->selectedSkill]));
         fclStartMessage(8);
         fclStartSelMessage(0x2B);
         startPos->unk_0001 = 0x16;
@@ -861,7 +861,7 @@ s32 rstUpdateSeqDestroyConfirm(void)
             }
             startPos->Flag = 2;
         }
-        fclSetMessageVar_20743088(10, (s32)text1[startPos->selectedSkill]);
+        fclSetMessageVar_20743088(10, EE_ADDR_S(text1[startPos->selectedSkill]));
         break;
     case 2:
         break;
@@ -889,7 +889,7 @@ void rstUpdateSeqHeartsSkill(void)
         return;
     }
     if (state == 2) {
-        fclSetMessageVar_20743088(10, (s32)text1[startPos->GetHeartsSkill]);
+        fclSetMessageVar_20743088(10, EE_ADDR_S(text1[startPos->GetHeartsSkill]));
         fclStartMessage(6);
         rstClearFlag(1);
         return;
@@ -960,8 +960,8 @@ s32 rstStandbyHeartsSkillPowerUp(void)
     }
 
     fclSetMessageVar_20743088(
-        15, (s32)text1[startPos->pCurrentStock->skill[startPos->powerSlot]]);
-    fclSetMessageVar_20743088(16, (s32)text1[startPos->powerSkill]);
+        15, EE_ADDR_S(text1[startPos->pCurrentStock->skill[startPos->powerSlot]]));
+    fclSetMessageVar_20743088(16, EE_ADDR_S(text1[startPos->powerSkill]));
 
     result = startPos->powerState;
     switch (result) {
@@ -1029,9 +1029,9 @@ s32 rstStandbyHeartsEvent(s8 event)
             if (rstStandbyHeartsAddPoint() == 0) {
                 event = 7;
             } else {
-                fclSetMessageVar_20743088(12, (s32)pstr[DDS3_GBWK->heartsequip]);
-                fclSetMessageVar_20743088(8, (s32)cmpGetParamName((s8)startPos->bonusParamIndex));
-                fclSetMessageVar_20743088(9, (s32)D_0054FD08);
+                fclSetMessageVar_20743088(12, EE_ADDR_S(pstr[DDS3_GBWK->heartsequip]));
+                fclSetMessageVar_20743088(8, EE_ADDR_S(cmpGetParamName((s8)startPos->bonusParamIndex)));
+                fclSetMessageVar_20743088(9, EE_ADDR_S(D_0054FD08));
                 fclStartMessage(0x1E);
             }
             break;
@@ -1171,7 +1171,7 @@ void rstUpdateSeqHeartsMaster(void)
         return;
     switch (startPos->Flag) {
     case 0:
-        fclSetMessageVar_20743088(12, (s32)pstr[DDS3_GBWK->heartsequip]);
+        fclSetMessageVar_20743088(12, EE_ADDR_S(pstr[DDS3_GBWK->heartsequip]));
         fclStartMessage(39);
         before = datGetPlayerLNDLevel(startPos->pCurrentStock);
         rstSetDevilRegistered((s8)DDS3_GBWK->heartsequip);

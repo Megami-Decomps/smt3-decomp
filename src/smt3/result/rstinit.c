@@ -195,7 +195,7 @@ rstData_t *rstInit(s32 parent)
 
     memset(work, 0, 0x2318);
     work->allocation = allocation;
-    cmpInitSeqInfo(work, (void *)parent);
+    cmpInitSeqInfo(work, EE_ADDR_AS(void *, parent));
     work->unk_0001 = 0;
     work->unk_22E5 = -1;
     work->unk_22E4 = -0x80;
@@ -351,7 +351,7 @@ void rstDrawEvoModel(void)
     if (EventStart->unk_22E5 < 0 || EventStart->unit->id == 0) {
         return;
     }
-    model = (mdlObj_t *)cmpGetEncycWork();
+    model = EE_ADDR_AS(mdlObj_t *, cmpGetEncycWork());
     if (model == NULL) {
         return;
     }

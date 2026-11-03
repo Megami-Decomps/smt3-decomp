@@ -1071,7 +1071,7 @@ s32 slHeadLoad(void) {
     memcpy(&path[len + 2], &path[1], len);
     path[len * 2 + 2] = 0;
     sdfMcFuncOpen(ctx, path, 1);
-    return (s32)slHeadLoadProc_openFile;
+    return EE_ADDR_S(slHeadLoadProc_openFile);
 }
 
 s32 slHeadLoadProc_openFile(void) {
@@ -1083,8 +1083,8 @@ s32 slHeadLoadProc_openFile(void) {
     if (status == SL_MC_RESULT_SUCCESS) {
         slLoadFileFd = sdfMemAllocDirect(0x34);
         slLoadFileHandle = sdfMemLock(slLoadFileFd);
-        sdfMcFuncRead(D_00551D50, (u32)slLoadFileHandle, 0x34);
-        return (s32)slHeadLoadProc_readFile;
+        sdfMcFuncRead(D_00551D50, EE_ADDR(slLoadFileHandle), 0x34);
+        return EE_ADDR_S(slHeadLoadProc_readFile);
     }
     return slNoCard();
 }
@@ -1096,7 +1096,7 @@ s32 slHeadLoadProc_readFile(void) {
     }
     if (status == SL_MC_RESULT_SUCCESS) {
         sdfMcFuncClose(D_00551D50);
-        return (s32)slHeadLoadProc_closeFile;
+        return EE_ADDR_S(slHeadLoadProc_closeFile);
     }
     sdfMemFreeDirect(slLoadFileFd);
     return slNoCard();
@@ -1129,7 +1129,7 @@ s32 slExitWait(void *nextFunc) {
     dds3FadeOut(0, 0, 0, 15);
     slExitWaitNextFunc = nextFunc;
     slExitWaitCnt = 20;
-    return (s32)slExitWaitProc;
+    return EE_ADDR_S(slExitWaitProc);
 }
 
 s32 slEndingTop(void) {
@@ -1159,7 +1159,7 @@ s32 slEndingExit(void) {
 s32 slBootTop(void) {
     slSetInfo(0);
     gslDrawFlagFile = 0;
-    return (s32)slBootProc_CheckCard;
+    return EE_ADDR_S(slBootProc_CheckCard);
 }
 
 s32 slBootRetry(void) {
@@ -1168,7 +1168,7 @@ s32 slBootRetry(void) {
     gSlNowCardCheck = 1;
     slSetInfo(1);
     gslDrawFlagFile = 1;
-    return (s32)slBootProc_CheckCardR;
+    return EE_ADDR_S(slBootProc_CheckCardR);
 }
 
 s32 slBootError(void) {
@@ -1196,7 +1196,7 @@ s32 slNoCard(void) {
     gslErrorCode = 1;
     gslErrorKeyFlag = 0;
     sdfMcRegetInfo(mccb);
-    return (s32)slErrorWaitMc;
+    return EE_ADDR_S(slErrorWaitMc);
 }
 
 s32 slTop(void) {
@@ -1217,7 +1217,7 @@ s32 slTop(void) {
     gSlNowCardCheck = 1;
     slSetInfo(1);
     gslDrawFlagFile = 1;
-    return (s32)slSaveProc_CheckCard;
+    return EE_ADDR_S(slSaveProc_CheckCard);
 }
 
 s32 slExit(void) {
@@ -1300,7 +1300,7 @@ s32 slFileSel(void) {
         }
     }
     sdfMcRegetInfo(mccb);
-    return (s32)slFileSelCalc;
+    return EE_ADDR_S(slFileSelCalc);
 }
 
 s32 slCancel(void) {
@@ -1313,7 +1313,7 @@ s32 slCancel(void) {
 
 s32 slSaveProc1st(void) {
     D_00551D44 = 0;
-    baseIconFileHandle = (u32)fileLoad(D_005328D0);
+    baseIconFileHandle = EE_ADDR(fileLoad(D_005328D0));
     return slTop();
 }
 
@@ -1323,7 +1323,7 @@ s32 slLoadProc1st(void) {
 
 s32 slEndingProc1st(void) {
     D_00551D44 = 0;
-    baseIconFileHandle = (u32)fileLoad(D_005328D0);
+    baseIconFileHandle = EE_ADDR(fileLoad(D_005328D0));
     return slEndingTop();
 }
 
@@ -1365,7 +1365,7 @@ s32 slSaveProc_CheckCard(void) {
         gslErrorCode = 7;
         gslErrorKeyFlag = 0;
         sdfMcRegetInfo(mccb);
-        return (s32)slErrorWaitMc;
+        return EE_ADDR_S(slErrorWaitMc);
     case 3:
         sdfMcSetCardStat(mccb);
         sdfMcClearSlotFlags(mccb, 0);
@@ -1377,7 +1377,7 @@ s32 slSaveProc_CheckCard(void) {
         gslErrorCode = 2;
         gslErrorKeyFlag = 0;
         sdfMcRegetInfo(mccb);
-        return (s32)slErrorWaitMc;
+        return EE_ADDR_S(slErrorWaitMc);
     case 1:
         return slChooseData();
     }
@@ -1603,7 +1603,7 @@ s32 slExitWaitProc(void) {
 s32 slHitAnyKeyNoChk(u32 nextFunc) {
     slHitAnyKeyNextFunc = nextFunc;
     gslErrorKeyFlag = 0;
-    return (s32)slHitAnyKeyNoChkProc;
+    return EE_ADDR_S(slHitAnyKeyNoChkProc);
 }
 
 s32 slHitAnyKeyNoChkProc(void) {
@@ -1624,7 +1624,7 @@ s32 slHitAnyKey(u32 nextFunc) {
     slHitAnyKeyNextFunc = nextFunc;
     gslErrorKeyFlag = 0;
     sdfMcRegetInfo(mccb);
-    return (s32)slHitAnyKeyProc;
+    return EE_ADDR_S(slHitAnyKeyProc);
 }
 
 s32 slHitAnyKeyProc(void) {
@@ -1718,7 +1718,7 @@ s32 slChooseData_getCardInfo(void) {
     buf[0] = 0x2F;
     mcMakeFileName(&buf[1], slChooseSaveIndex);
     sdfMcFuncChdir(mccb, (const char *)buf);
-    return (s32)slChooseData_getCardInfo2;
+    return EE_ADDR_S(slChooseData_getCardInfo2);
 }
 
 s32 slChooseData_getCardInfo2(void) {
@@ -1730,7 +1730,7 @@ s32 slChooseData_getCardInfo2(void) {
     if (t == SL_MC_RESULT_SUCCESS) {
         sdfMcSetSlotFlags(mccb, slChooseSaveIndex, SL_SLOT_FLAG_DIRECTORY_READY);
         sdfMcFuncGetDir(mccb, D_005328E0, D_005696C0, 1);
-        return (s32)slChooseData_getCardInfo3;
+        return EE_ADDR_S(slChooseData_getCardInfo3);
     }
     if (t == SL_MC_RESULT_ERROR) {
         return slNoCard();
@@ -1772,7 +1772,7 @@ s32 slChooseData_getCardInfoNext(void) {
                 gslErrorCode = 7;
                 gslErrorKeyFlag = 0;
                 sdfMcRegetInfo(mccb);
-                return (s32)slErrorWaitMc;
+                return EE_ADDR_S(slErrorWaitMc);
             }
             if (slSizeChk() == 0) {
                 slSetInfo(0);
@@ -1780,7 +1780,7 @@ s32 slChooseData_getCardInfoNext(void) {
                 gslErrorCode = 5;
                 gslErrorKeyFlag = 0;
                 sdfMcRegetInfo(mccb);
-                return (s32)slErrorWaitMc;
+                return EE_ADDR_S(slErrorWaitMc);
             }
         }
         slSetInfo(0);
@@ -1812,7 +1812,7 @@ s32 slChooseData_getCardInfo_B(void) {
     buf[0] = 0x2F;
     mcMakeFileName(&buf[1], slChooseSaveIndex);
     sdfMcFuncChdir(mccb, (const char *)buf);
-    return (s32)slChooseData_getCardInfo2_B;
+    return EE_ADDR_S(slChooseData_getCardInfo2_B);
 }
 
 s32 slChooseData_getCardInfo2_B(void) {
@@ -1824,7 +1824,7 @@ s32 slChooseData_getCardInfo2_B(void) {
     if (t == SL_MC_RESULT_SUCCESS) {
         sdfMcSetSlotFlags(mccb, slChooseSaveIndex, SL_SLOT_FLAG_DIRECTORY_READY);
         sdfMcFuncGetDir(mccb, D_005328E0, D_005696C0, 1);
-        return (s32)slChooseData_getCardInfo3_B;
+        return EE_ADDR_S(slChooseData_getCardInfo3_B);
     }
     if (t == SL_MC_RESULT_ERROR) {
         slSetInfo(0);
@@ -1913,7 +1913,7 @@ s32 slSaveData(void) {
     name[0] = '/';
     mcMakeFileName(name + 1, slot);
     sdfMcFuncMkdir(entry, (const char *)name);
-    return (s32)slSaveProc_Write_mkdir;
+    return EE_ADDR_S(slSaveProc_Write_mkdir);
 }
 
 s32 slSaveData_chdir(void) {
@@ -1924,7 +1924,7 @@ s32 slSaveData_chdir(void) {
     buf[0] = 0x2F;
     mcMakeFileName(&buf[1], slot);
     sdfMcFuncChdir(entry, (const char *)buf);
-    return (s32)slSaveProc_Write_chdir;
+    return EE_ADDR_S(slSaveProc_Write_chdir);
 }
 
 s32 slSaveProc_Write_mkdir(void) {
@@ -1938,7 +1938,7 @@ s32 slSaveProc_Write_mkdir(void) {
     }
     slSetInfo(0);
     gslErrorCode = 4;
-    return (s32)slErrorWait;
+    return EE_ADDR_S(slErrorWait);
 }
 
 s32 slSaveProc_Write_chdir(void) {
@@ -1953,7 +1953,7 @@ s32 slSaveProc_Write_chdir(void) {
     if (t == SL_MC_RESULT_ERROR) {
         slSetInfo(0);
         gslErrorCode = 4;
-        return (s32)slErrorWait;
+        return EE_ADDR_S(slErrorWait);
     }
     return 0;
 }
@@ -1970,7 +1970,7 @@ s32 slSaveProc_Write_deleteIconSys(void) {
     if (t == SL_MC_RESULT_ERROR) {
         slSetInfo(0);
         gslErrorCode = 4;
-        return (s32)slErrorWait;
+        return EE_ADDR_S(slErrorWait);
     }
     return 0;
 }
@@ -1979,12 +1979,12 @@ s32 slSaveProc_doNothing(void) {
     sdfMcSetSlotFlags(mccb, slFileSelError, SL_SLOT_FLAG_CAN_READ_SAVE);
     sdfMcSetSlotFlags(mccb, slFileSelError, SL_SLOT_FLAG_DELETE_BEFORE_WRITE);
     slSetInfo(4);
-    return slHitAnyKey((u32)slFileSel);
+    return slHitAnyKey(EE_ADDR(slFileSel));
 }
 
 s32 slSaveWriteEnd_iconSys(void) {
     slKillLoadProcess();
-    return (s32)slSaveProc_doNothing;
+    return EE_ADDR_S(slSaveProc_doNothing);
 }
 
 s32 slSaveWriteEnd_baseIcon(void) {
@@ -2039,7 +2039,7 @@ s32 slSaveData_writeFile(void) {
     rec[7] = hdr->mode;
     *(slFileName_t *)&SL_REC[slot][0x10] = *(slFileName_t *)&hdr->work;
     SL_REC[slot][0x24] = hdr->autoMapOpen;
-    D_00551D30 = (u32)DDS3_GBWK;
+    D_00551D30 = EE_ADDR(DDS3_GBWK);
     D_00551D34 = 0x1A510;
     if (gSlSaveMode == 0 || gSlSaveMode == 2) {
         return slSaveWriteFile(path, &D_00551D30, &D_00551D34, slSaveWriteEnd_saveData, 0);
@@ -2058,7 +2058,7 @@ s32 slSaveData_deleteIconSys(void) {
         return slSaveData_writeFile();
     }
     sdfMcFuncDelete(entry, D_005328E0);
-    return (s32)slSaveProc_Write_deleteIconSys;
+    return EE_ADDR_S(slSaveProc_Write_deleteIconSys);
 }
 
 s32 slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFunc, u32 *srcPtr) {
@@ -2067,7 +2067,7 @@ s32 slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFunc, u
     slSaveWriteFile_endFunc = endFunc;
     slSaveWriteFile_dataWaitPtr = srcPtr;
     sdfMcFuncOpen(mccb, filename, 0x203);
-    return (s32)slSaveProc_openFile;
+    return EE_ADDR_S(slSaveProc_openFile);
 }
 
 s32 slSaveProc_openFile(void) {
@@ -2078,15 +2078,15 @@ s32 slSaveProc_openFile(void) {
     }
     if (status == SL_MC_RESULT_SUCCESS) {
         if (slSaveWriteFile_dataWaitPtr != NULL && *slSaveWriteFile_dataWaitPtr != 0) {
-            return (s32)slSaveProc_waitDataReady;
+            return EE_ADDR_S(slSaveProc_waitDataReady);
         }
         sdfMcFuncWrite(D_00551D50, *slSaveWriteFile_buff, *slSaveWriteFile_size);
-        return (s32)slSaveProc_writeFile;
+        return EE_ADDR_S(slSaveProc_writeFile);
     }
     if (status == SL_MC_RESULT_ERROR) {
         slSetInfo(0);
         gslErrorCode = 4;
-        return (s32)slErrorWait;
+        return EE_ADDR_S(slErrorWait);
     }
     return 0;
 }
@@ -2098,12 +2098,12 @@ s32 slSaveProc_writeFile(void) {
     }
     if (status == SL_MC_RESULT_SUCCESS) {
         sdfMcFuncClose(D_00551D50);
-        return (s32)slSaveProc_closeFile;
+        return EE_ADDR_S(slSaveProc_closeFile);
     }
     if (status == SL_MC_RESULT_ERROR) {
         slSetInfo(0);
         gslErrorCode = 4;
-        return (s32)slErrorWait;
+        return EE_ADDR_S(slErrorWait);
     }
     return 0;
 }
@@ -2119,7 +2119,7 @@ s32 slSaveProc_closeFile(void) {
     if (status == SL_MC_RESULT_ERROR) {
         slSetInfo(0);
         gslErrorCode = 4;
-        return (s32)slErrorWait;
+        return EE_ADDR_S(slErrorWait);
     }
     return 0;
 }
@@ -2129,7 +2129,7 @@ s32 slSaveProc_waitDataReady(void) {
         return 0;
     }
     sdfMcFuncWrite(D_00551D50, *slSaveWriteFile_buff, *slSaveWriteFile_size);
-    return (s32)slSaveProc_writeFile;
+    return EE_ADDR_S(slSaveProc_writeFile);
 }
 
 s32 slProc_Format(void) {
@@ -2141,17 +2141,17 @@ s32 slProc_Format(void) {
     if (status < 0) {
         slSetInfo(0);
         gslErrorCode = 6;
-        return (s32)slErrorWait;
+        return EE_ADDR_S(slErrorWait);
     }
     slSetInfo(6);
-    return slHitAnyKey((u32)slCardChk);
+    return slHitAnyKey(EE_ADDR(slCardChk));
 }
 
 s32 slFormatStart(void) {
     slSetInfo(5);
     dds3SoftResetOff();
     sdfMcFuncFormat(mccb);
-    return (s32)slProc_Format;
+    return EE_ADDR_S(slProc_Format);
 }
 
 s32 slFormatCancel(void) {
@@ -2182,7 +2182,7 @@ s32 slLoadData(void) {
     memcpy(&path[len + 2], &path[1], len);
     path[len * 2 + 2] = 0;
     sdfMcFuncOpen(ctx, path, 1);
-    return (s32)slLoadProc_openFile;
+    return EE_ADDR_S(slLoadProc_openFile);
 }
 
 s32 slLoadProc_openFile(void) {
@@ -2196,12 +2196,12 @@ s32 slLoadProc_openFile(void) {
     slLoadFileFd = sdfMemAllocDirect(size);
     slLoadFileHandle = sdfMemLock(slLoadFileFd);
     if (status == SL_MC_RESULT_SUCCESS) {
-        sdfMcFuncRead(D_00551D50, (u32)slLoadFileHandle, size);
-        return (s32)slLoadProc_readFile;
+        sdfMcFuncRead(D_00551D50, EE_ADDR(slLoadFileHandle), size);
+        return EE_ADDR_S(slLoadProc_readFile);
     }
     slSetInfo(0);
     gslErrorCode = 3;
-    return (s32)slErrorWait;
+    return EE_ADDR_S(slErrorWait);
 }
 
 s32 slLoadProc_readFile(void) {
@@ -2211,12 +2211,12 @@ s32 slLoadProc_readFile(void) {
     }
     if (status == SL_MC_RESULT_SUCCESS) {
         sdfMcFuncClose(D_00551D50);
-        return (s32)slLoadProc_closeFile;
+        return EE_ADDR_S(slLoadProc_closeFile);
     }
     sdfMemFreeDirect(slLoadFileFd);
     slSetInfo(0);
     gslErrorCode = 3;
-    return (s32)slErrorWait;
+    return EE_ADDR_S(slErrorWait);
 }
 
 s32 slLoadProc_closeFile(void) {
@@ -2240,7 +2240,7 @@ s32 slLoadProc_closeFile(void) {
     sdfMemFreeDirect(slLoadFileFd);
     slSetInfo(0);
     gslErrorCode = 3;
-    return (s32)slErrorWait;
+    return EE_ADDR_S(slErrorWait);
 }
 
 s32 slFileSelCalc(void)
@@ -2331,7 +2331,7 @@ s32 slFileSelCalc(void)
             gslErrorCode = 5;
             gslErrorKeyFlag = 0;
             sdfMcRegetInfo(mccb);
-            return (s32)slErrorWaitToFileMc;
+            return EE_ADDR_S(slErrorWaitToFileMc);
         }
         sdfMcSetSlotIndex(mccb, slFileSelError);
         if (sdfMcGetSlotFlags(mccb, slFileSelError) & 1) {
@@ -2589,7 +2589,7 @@ s32 slCalc(dds3ProcessID_t *id) {
     u32 job;
     s32 (*cur)();
     gslAnimCnt++;
-    slDraw((s32)id);
+    slDraw(EE_ADDR_S(id));
     next = proc_func_ans(id);
     if (next == -1) {
         return next;
@@ -2600,10 +2600,10 @@ s32 slCalc(dds3ProcessID_t *id) {
         cur = (s32 (*)())next;
     }
     proc_func_ans = cur;
-    if (job != 0 && pacFileCheckEnd((fileRequest_t *)job) != 0) {
+    if (job != 0 && pacFileCheckEnd(EE_ADDR_AS(fileRequest_t *, job)) != 0) {
         baseIconFileHandle = 0;
         D_00551D44 = fileGetMemHandle((fileRequest_t *)EE_ADDR_PTR(job));
-        D_00551D48 = (u32)fileGetLoadPtr((fileRequest_t *)EE_ADDR_PTR(job));
+        D_00551D48 = EE_ADDR(fileGetLoadPtr((fileRequest_t *)EE_ADDR_PTR(job)));
         D_00551D4C = fileGetLoadSize((fileRequest_t *)EE_ADDR_PTR(job));
         fileHandleFree((fileRequest_t *)EE_ADDR_PTR(job));
     }
@@ -2753,9 +2753,9 @@ void func_00157058(void) {
         }
     }
     if (baseIconFileHandle != 0) {
-        fileSync((fileRequest_t *)baseIconFileHandle);
-        D_00551D44 = fileGetMemHandle((fileRequest_t *)baseIconFileHandle);
-        fileHandleFree((fileRequest_t *)baseIconFileHandle);
+        fileSync(EE_ADDR_AS(fileRequest_t *, baseIconFileHandle));
+        D_00551D44 = fileGetMemHandle(EE_ADDR_AS(fileRequest_t *, baseIconFileHandle));
+        fileHandleFree(EE_ADDR_AS(fileRequest_t *, baseIconFileHandle));
         baseIconFileHandle = 0;
     }
     sdfMemFreeHandleDirect(&D_00551D44);
@@ -2890,7 +2890,7 @@ s32 slQueryYesNoProc(void)
         gslErrorCode = 1;
         gslErrorKeyFlag = 0;
         sdfMcRegetInfo(mccb);
-        return (s32)slErrorWaitMc;
+        return EE_ADDR_S(slErrorWaitMc);
     }
     if (slQueryYesNoKeyFlag == 0) {
         sdfMcRegetInfo(mccb);
@@ -2917,7 +2917,7 @@ s32 slQueryYesNo(s32 (*yesFunc)(void), s32 (*noFunc)(void), s32 yesNoDefault) {
     if (slQueryYesNoMsg != 4 && slQueryYesNoMsg != 8) {
         sdfMcRegetInfo(mccb);
     }
-    return (s32)slQueryYesNoProc;
+    return EE_ADDR_S(slQueryYesNoProc);
 }
 
 extern char D_00528360[];

@@ -672,13 +672,13 @@ void frClearTexBuf(void) {
 
     byteCount = (u32)byteCount >> 1;
     allocation = sdfMemAllocDirect(byteCount);
-    pixels = (u8 *)sdfMemLock(allocation);
+    pixels = EE_ADDR_AS(u8 *, sdfMemLock(allocation));
     memset(pixels, 0x11, byteCount);
     sceGsSetDefLoadImage(loadImage, gFT.atlas.bufferBase, gFT.atlas.bufferWidth,
                          FR_FONT_PIXEL_FORMAT, 0, 0, gFT.atlas.width, gFT.atlas.height);
     WaitSema(dds3GsSema);
     FlushCache(0);
-    sceGsExecLoadImage(loadImage, (s32)pixels);
+    sceGsExecLoadImage(loadImage, EE_ADDR_S(pixels));
     sceGsSyncPath(0, 0);
     SignalSema(dds3GsSema);
     sdfMemFreeDirect(allocation);
@@ -769,7 +769,7 @@ void frAddFontStyle(
 
     if (pFontData == NULL) {
         if (DataMh != NULL) {
-            pFontData = (u8 *)sdfMemLock(DataMh);
+            pFontData = EE_ADDR_AS(u8 *, sdfMemLock(DataMh));
         }
     }
     entry = &gFT.entries[StyleNo];
@@ -805,7 +805,7 @@ void frAddFontStyle(
     entry->resource = (struct frFontResource_t *)(pFontData + sectionOffset);
     lookupOffset = entry->resourceHeader->lookupOffset;
     if (lookupOffset != 0) {
-        entry->data = (u32)(pFontData + lookupOffset);
+        entry->data = EE_ADDR((pFontData + lookupOffset));
     } else {
         entry->data = 0;
     }
@@ -859,7 +859,7 @@ void frSetFontClut(void) {
 
     do {
         u32 *outputWord = imageWords;
-        const u8 *sourceBytes = (const u8 *)(sourceWordOffset * FR_FONT_IMAGE_WORD_BYTES + (u32)sourceTable);
+        const u8 *sourceBytes = EE_ADDR_AS(const u8 *, (sourceWordOffset * FR_FONT_IMAGE_WORD_BYTES + EE_ADDR(sourceTable)));
         s32 wordCountdown = FR_FONT_IMAGE_LAST_WORD;
 
         do {
@@ -870,7 +870,7 @@ void frSetFontClut(void) {
             wordCountdown--;
         } while (wordCountdown >= 0);
 
-        frCopyFontClutToVram(*imageBuffer++, (s32)imageWords);
+        frCopyFontClutToVram(*imageBuffer++, EE_ADDR_S(imageWords));
         bufferIndex++;
         sourceWordOffset += FR_FONT_IMAGE_WORD_COUNT;
     } while (bufferIndex < FR_FONT_IMAGE_BUFFER_COUNT);
@@ -1776,7 +1776,7 @@ u8 *MessageNumSearch(s32 Index, frTextBank_t *pData, s32 Size) {
 
 void frCreateVariableRequest(u8 VarNo, frMsgInfo_t *pMsgInfo) {
     u8 encoded[3];
-    u8 *text = (u8 *)gVarStr[VarNo];
+    u8 *text = EE_ADDR_AS(u8 *, gVarStr[VarNo]);
     s32 length;
     u32 code;
     s32 i;

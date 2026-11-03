@@ -301,7 +301,7 @@ void itfPnlSetColor(itfpanel_t *handle, s32 r, s32 g, s32 b, s32 a) {
 
 /* Build the panel list and append it to the SDK draw-surface pool. */
 void itfPnlDraw(itfpanel_t *handle, sdfGrOt_t *pot) {
-    sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(ITF_PANEL_PACKET_LIST_BYTES);
+    sdfDrawTag_t *packetList = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(ITF_PANEL_PACKET_LIST_BYTES));
 
     sdfDrawTagInit(packetList);
     DrawTestAlphaPrim(packetList);
@@ -767,7 +767,7 @@ void DrawFacility(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 /* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */
 void DrawTestAlphaPrim(sdfDrawTag_t *pdrawtag) {
     s32 packet = sdfGrAllocPacketBuff(ITF_PANEL_STATE_PACKET_BYTES);
-    u64 *stateWords = (u64 *)sdf2DMakeStdPacket(packet, ITF_PANEL_STATE_PACKET_BYTES);
+    u64 *stateWords = EE_ADDR_AS(u64 *, sdf2DMakeStdPacket(packet, ITF_PANEL_STATE_PACKET_BYTES));
 
     stateWords[4] = 0x5101B;
     stateWords[5] = 0x47;

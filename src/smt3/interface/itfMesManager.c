@@ -733,7 +733,7 @@ s32 itfMesMngInitialize(itfMesResource_t *sub) {
 
     handle = sdfMemAllocDirect(sizeof(instanceMes_tag));
     node->resourceHandle = handle;
-    mes = (instanceMes_tag *)sdfMemLock(handle);
+    mes = EE_ADDR_AS(instanceMes_tag *, sdfMemLock(handle));
     node->state = mes;
     mes->pdata = NULL;
     itfMesMngSetResourcePtr(window, sub);
@@ -1076,7 +1076,7 @@ s16 itfMesMngGetMesCurrentPage(s32 id) {
 
 /* Return the replacement text stored in a window slot. */
 u8 *itfMesMngGetVar(s32 id, s32 index) {
-    return (u8 *)pinst[id].mes->variable.pptr[index];
+    return EE_ADDR_AS(u8 *, pinst[id].mes->variable.pptr[index]);
 }
 
 extern u8 *DDS3_GBWK;
@@ -1314,7 +1314,7 @@ void itfMesMngSetDefaultSpeed(s32 id, u8 speed) {
 
 /* Store the optional callback address invoked without arguments during glyph building. */
 void itfMesMngSetKutiCallback(s32 id, void (*func)(void)) {
-    pinst[id].mes->func_kuti = (u32)func;
+    pinst[id].mes->func_kuti = EE_ADDR(func);
 }
 
 /* Initialize the fixed window pool, load its texture and register the named
@@ -1500,7 +1500,7 @@ void ResolveResourceAddress(itfMesResource_t *pdata)
     s32 *payload = (s32 *)pdata->entries;
 
     if (pdata->relocated == 0) {
-        sdfAddressResolver(payload, (s32)payload, (u8 *)pdata + pdata->fixupTableOffset, pdata->fixupTableBytes);
+        sdfAddressResolver(payload, EE_ADDR_S(payload), (u8 *)pdata + pdata->fixupTableOffset, pdata->fixupTableBytes);
         pdata->relocated = 1;
     }
 }
@@ -1537,7 +1537,7 @@ u8 *GetMessagePagePtr(itfMesBinMesHeader_t *table, s32 index)
     if (index < 0 || index >= count) {
         return NULL;
     }
-    return (u8 *)table->addr[index];
+    return EE_ADDR_AS(u8 *, table->addr[index]);
 }
 
 /* Called above its definition, where ee-gcc assumed int. */
@@ -1606,14 +1606,14 @@ void SetVar(mes, slotIndex, source, byteCount)
         slots->pmh[slotIndex] = sdfMemAllocDirect(allocationBytes);
         *textAddress = sdfMemLock(slots->pmh[slotIndex]);
         /* String mode copies the padded span, rather than only strlen + 1. */
-        memcpy((void *)*textAddress, source, allocationBytes);
+        memcpy(EE_ADDR_AS(void *, *textAddress), source, allocationBytes);
         return;
     }
     allocationBytes = (byteCount + ITF_MES_BINARY_COPY_ROUND_BIAS) & ~ITF_MES_COPY_ALIGN_MASK;
     slots->pmh[slotIndex] = sdfMemAllocDirect(allocationBytes);
     *textAddress = sdfMemLock(slots->pmh[slotIndex]);
-    memset((void *)*textAddress, 0, allocationBytes);
-    memcpy((void *)*textAddress, source, byteCount);
+    memset(EE_ADDR_AS(void *, *textAddress), 0, allocationBytes);
+    memcpy(EE_ADDR_AS(void *, *textAddress), source, byteCount);
 }
 
 void CommitVarTable(s32 *pvar)
@@ -1629,7 +1629,7 @@ u8 *GetSpeakerName(instanceMes_tag *pinst)
 {
     u32 *items = GetTypeHeader2(pinst->pdata)->type;
 
-    return (u8 *)items[pinst->speaker.num];
+    return EE_ADDR_AS(u8 *, items[pinst->speaker.num]);
 }
 
 s32 GetNumSelectItem(s32 allitem, u32 mask)
@@ -1658,7 +1658,7 @@ frFontHandle_t *GetFontHandleUnit(u32 *list, s32 count, u32 mask, s32 x, s32 y, 
             mask >>= 1;
             continue;
         }
-        chain = MessageRequestEx(x, y, 0, 0, 0, 0x80, (u8 *)*list, chain);
+        chain = MessageRequestEx(x, y, 0, 0, 0, 0x80, EE_ADDR_AS(u8 *, *list), chain);
         y += (s16)chain->parentDimensionsOrRenderWord.parentDimensions.cellHeight * 8;
         y += 0xA;
         mask >>= 1;
@@ -2465,7 +2465,7 @@ void DrawSelectCursor(instanceMes_tag *pinst) {
     if (index == -1) {
         return;
     }
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
     x = sel->x;
     rowOfs = sel->lines * 160 - 0xC0;
@@ -2539,7 +2539,7 @@ void DrawRetPageCursor(instanceMes_tag *pinst) {
     rect[2] = 0x1B60;
     rect[3] = 0xD28;
     D_00326788[3] = fade->ctr0;
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
     itfMiscDrawSpritePrim(rect, D_00326778, D_00326788, pinst->z, itfMesMngManager.windowTexture, 0, list);
     timer = fade->ctr1;
@@ -2604,7 +2604,7 @@ void DebugDrawWindowLine(itfpanel_t *meswin) {
     sdfDrawTag_t *list;
     sdfGrOt_t *packetOwner;
 
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
     itfMiscDrawLineStripPrim(vertices, D_00326798, D_0054F500, D_0054F508, 5, 0xFFFFFF, list);
     packetOwner = &sdfGrOtTable[81];
