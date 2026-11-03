@@ -184,7 +184,7 @@ static inline sdfCorePacketPointBuff_tag *AllocNode(sdfCorePacketCb_t *work) {
     return node;
 }
 
-extern addrS_t corePktPointBuff;
+extern saddr_t corePktPointBuff;
 
 extern void corePktRelightBackFaces(u32 cb, s32 count);
 

@@ -38,7 +38,7 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void fclSetSprite(addrS_t pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2, s32 V2, s32 Col, s32 TexHandle);
+extern void fclSetSprite(saddr_t pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2, s32 V2, s32 Col, s32 TexHandle);
 
 extern void fclDrawBG(void *pSprite, s32 OtNo);
 
@@ -90,7 +90,7 @@ extern void *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(void *aHandle);
 extern void cmpInitSeqInfo(void *work, s32 seq);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, addrS_t layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, saddr_t layout);
 
 void slKillLoadProcess(void)
 {

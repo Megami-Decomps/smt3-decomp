@@ -62,7 +62,7 @@ extern s32 sdfGrAllocPacketBuff(u32 aSize);
 
 extern void sdf2DMakePrimPacketHeader(void *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, u64 aGifRegs, s32 aNumOfPrim);
 
-extern addrS_t sdf2DGetPrimPtr(addrS_t aPacketPtr);
+extern saddr_t sdf2DGetPrimPtr(saddr_t aPacketPtr);
 
 extern u32 sdf2DMakeStdPacket(u32 aPacket, s32 aLeng);
 

@@ -32,7 +32,7 @@ typedef struct
 } evtMoonProcessData_t;
 
 
-addrS_t evtMoonProcess1(dds3ProcessID_t *id);
+saddr_t evtMoonProcess1(dds3ProcessID_t *id);
 extern s32 evtMoonProcess2(dds3ProcessID_t *id);
 void evtMoonShutdown(dds3ProcessID_t *id);
 
@@ -811,7 +811,7 @@ void evtMoonAddMove(f32 delta)
 
 INCLUDE_RODATA(const s32, "event/evtMoon", D_0053B1F8);
 
-addrS_t evtMoonProcess1(dds3ProcessID_t *id)
+saddr_t evtMoonProcess1(dds3ProcessID_t *id)
 {
     evtMoonProcessData_t *work = sdfChipAllocDirect(sizeof(*work));
     fileRequest_t *request;

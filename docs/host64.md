@@ -278,7 +278,7 @@ nine. It composes the way `include/eeregs.h`'s `EE_UNCACHED` hook does, but
 spells the mirror bit as the literal it already was, because `libcdvd.c` does
 not include that header and adding one to an SDK unit buys less than it risks.
 
-### `addr_t` and `addrS_t`, `include/common.h`
+### `addr_t` and `saddr_t`, `include/common.h`
 
 ```c
 #ifndef ADDR_TYPE
@@ -289,7 +289,7 @@ typedef ADDR_TYPE addr_t;
 #ifndef ADDR_S_TYPE
 #define ADDR_S_TYPE s32
 #endif
-typedef ADDR_S_TYPE addrS_t;
+typedef ADDR_S_TYPE saddr_t;
 ```
 
 A guest address held in an integer: the field, parameter, local, global or
@@ -454,7 +454,7 @@ Ordered by how much a host consumer would gain from closing them.
    marshals across it rather than widening it.
 3. **`dds3ProcessFunc_t` is the wrong return type and cannot be fixed in
    isolation.** A process step returns the address of the next step: 66 return
-   types now spell `addrS_t` for exactly that reason, `return
+   types now spell `saddr_t` for exactly that reason, `return
    EE_ADDR_S(evtMoonProcess2)` and its kin. But `include/kernel.h` types the
    function pointer as `s32 (*)(dds3ProcessID_t *)`, so the three units that
    pass a widened step to `dds3StartProcess` (`event/evtMoon.c`,

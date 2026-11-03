@@ -347,7 +347,7 @@ void FatalError(const char *format, ...) {
     }
 }
 
-sdfHandlerNode_t *DmacAddHandler(s32 kind, s32 channel, addrS_t handler, s32 arg, s32 next) {
+sdfHandlerNode_t *DmacAddHandler(s32 kind, s32 channel, saddr_t handler, s32 arg, s32 next) {
     sdfHandlerNode_t *node;
     s32 id;
 

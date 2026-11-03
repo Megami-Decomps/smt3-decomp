@@ -73,7 +73,7 @@ extern void mdlPackDecode(s32, s32, s32, void *, s32);
 extern s32 evtSetRegistUnit(s32 major, s32 minor);
 
 
-extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, addrS_t pF1, addrS_t pF2,
+extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, saddr_t pF1, saddr_t pF2,
                                             const sdfTextureOffsetListHeader_t *pTB, s32 pBF);
 
 extern void fldFileAddrResetMode(u32 mode);
@@ -607,7 +607,7 @@ typedef struct evtCmbWork_t {
 extern evtCmbWork_t *CMB_GBWK;
 extern u8 cmbMenuEntryTable[8];
 extern s32 evtBitCheck(s32 no);
-extern void cmpSetCursorFlag(void *cur, addrS_t flag);
+extern void cmpSetCursorFlag(void *cur, saddr_t flag);
 
 void cmbEnableMenuEntry2(void) {
     if (evtBitCheck(0x25) == 0) {

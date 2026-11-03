@@ -1851,7 +1851,7 @@ s32 evtMakeViewerPath(s32 kind)
 
 extern dds3Basic_t *dds3GetControlScene(void);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, s32 serial, s32 type);
-extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, addrS_t pF1, addrS_t pF2, const void *pTB, s32 pBF);
+extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, saddr_t pF1, saddr_t pF2, const void *pTB, s32 pBF);
 extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
 extern s32 evtSetRegistUnit(s32 major, s32 minor);
 extern evtUnit_t *evtGetUnitHandle(s32 serial);

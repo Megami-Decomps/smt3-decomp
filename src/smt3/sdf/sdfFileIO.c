@@ -56,7 +56,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 errorCode;
     s32 currentOffset;
     u8 remainder[4];
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, addrS_t, s32, s32);
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, saddr_t, s32, s32);
     s32 userData;
 } sdfFileCmdHandle_t;
 
@@ -125,7 +125,7 @@ extern void *memcpy(void *, const void *, size_t);
 
 extern s32 sceLseek(s32 fileHandle, s32 offset, s32 origin);
 
-extern s32 sceRead(s32 fileHandle, addrS_t buffer, s32 byteCount);
+extern s32 sceRead(s32 fileHandle, saddr_t buffer, s32 byteCount);
 
 extern char * strcpy(char *, const char *);
 
@@ -185,7 +185,7 @@ sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 void sdfCdImageClose(void);
 
-sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32),
+sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32),
                         s32 callbackContext);
 
 s32 sdfFileCmdClearError(sdfFileCmd_t *aHandle);
@@ -310,7 +310,7 @@ void sdfFileCmdFinish(sdfFileCmdHandle_t *state, s32 result) {
 
 void sdfFileCmdThread(sdfFileDeviceCB_t *aCB) {
     sdfFileCmdHandle_t *state;
-    void (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32);
+    void (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32);
     s32 fileHandle;
     s32 result;
     s32 position;
@@ -527,7 +527,7 @@ void sdfFileCmdThread(sdfFileDeviceCB_t *aCB) {
 /* Worker slot 3 services disc-backed requests through serialized disc operations. */
 void sdfFileCdImageCmdThread(sdfFileDeviceCB_t *aCB) {
     sdfFileCmdHandle_t *state;
-    void (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32);
+    void (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32);
     s32 result;
     s32 transferResult;
     void *readBuffer;
@@ -732,7 +732,7 @@ s32 sdfFileCmdAnalyzeFileName(const char *aFileName, char **aRealNamePtr)
 
 /* Allocate a request state and retain the callback's opaque context word. */
 sdfFileCmdHandle_t *sdfFileCmdNewHandle(void *resource, s32 workerIndex, s32 operation,
-                        void (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32), s32 callbackContext) {
+                        void (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32), s32 callbackContext) {
     sdfFileCmdHandle_t *state = (sdfFileCmdHandle_t *)sdfChipAllocZeroDirect(sizeof(sdfFileCmdHandle_t));
     state->filename = resource;
     state->device = workerIndex;
@@ -745,7 +745,7 @@ sdfFileCmdHandle_t *sdfFileCmdNewHandle(void *resource, s32 workerIndex, s32 ope
 }
 
 /* Resolve a path to its worker and enqueue an asynchronous read-only open. */
-sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32),
+sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32),
                         s32 callbackContext) {
     char *resolvedPath;
     s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
@@ -759,7 +759,7 @@ sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFil
 }
 
 /* Enqueue a write open; zero options select the device's default creation options. */
-sdfFileCmdHandle_t *sdfFileCmdWriteOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32),
+sdfFileCmdHandle_t *sdfFileCmdWriteOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32),
                         s32 callbackContext, s32 options) {
     char *resolvedPath;
     s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
@@ -857,7 +857,7 @@ s32 sdfFileCmdFree(sdfFileCmd_t *aHandle)
 
 /* Enqueue a one-shot read: negative byte count requests the whole file. */
 sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, s32 buffer, s32 byteCount,
-                        void (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32), s32 callbackContext) {
+                        void (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32), s32 callbackContext) {
     char *resolvedPath;
     s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     sdfFileCmdHandle_t *state;
@@ -874,7 +874,7 @@ sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, s32 buffer, s32 byteCou
 
 /* Enqueue a one-shot write using the supplied buffer, byte count and creation options. */
 sdfFileCmdHandle_t *sdfFileCmdWriteFile(const char *path, s32 buffer, s32 byteCount,
-                        void (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32),
+                        void (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32),
                         s32 callbackContext, s32 options) {
     char *resolvedPath;
     s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);

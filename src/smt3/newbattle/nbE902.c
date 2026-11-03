@@ -277,7 +277,7 @@ extern void nbSetEnemyFormation(nbMainProcessData_t *data);
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
 extern u8 datModelParamTable[];
@@ -355,7 +355,7 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-nbKoukaPacket_t *nbAddOngBunshin2Packet(s32 startframe, addrS_t uniqueid, nbFormation_t *sform, nbFormation_t *form1, nbFormation_t *form2, nbFormation_t *form3);
+nbKoukaPacket_t *nbAddOngBunshin2Packet(s32 startframe, saddr_t uniqueid, nbFormation_t *sform, nbFormation_t *form1, nbFormation_t *form2, nbFormation_t *form3);
 
 void nbMoveFormation(void *data, s32 sindex, s32 dindex);
 

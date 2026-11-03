@@ -149,7 +149,7 @@ void sdfAddressResolverReset(u32 *aDataBody, u32 aOffset, const u8 *aAddrInfoPtr
 
 void fldAddressResolver(addr_t pFileTop, fldTransferChunk_t *pData);
 
-extern void sdfAddressResolver(s32 *aDataBody, addrS_t aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
+extern void sdfAddressResolver(s32 *aDataBody, saddr_t aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
 void fldAddressResolverReset(addr_t pFileTop, fldTransferChunk_t *pData);
 
@@ -225,7 +225,7 @@ extern s32 sdfMemGetSize(const sdfMemHandle_t *aHandle);
 
 extern u8 *sdfMemGetPtr(const sdfMemHandle_t *aHandle);
 
-extern void fldAmbLoadFromMem(u8 *data, addrS_t mh);
+extern void fldAmbLoadFromMem(u8 *data, saddr_t mh);
 
 extern void fldAutoMapFontInit(s32 bank);
 
@@ -512,10 +512,10 @@ typedef struct fldResourceLight_t {
     f32 AmbientR, AmbientG, AmbientB;
 } fldResourceLight_t;
 
-extern dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *, void *, addrS_t);
-extern dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *, void *, addrS_t);
-extern dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *, void *, addrS_t);
-extern dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *, void *, addrS_t);
+extern dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *, void *, saddr_t);
+extern dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *, void *, saddr_t);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *, void *, saddr_t);
+extern dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *, void *, saddr_t);
 extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *, void *, void *);
 extern dds3Basic_t *dds3AddESPEffectObjectBasic(const char *, void *, void *, f32);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, s32);

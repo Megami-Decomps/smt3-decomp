@@ -14,7 +14,7 @@ extern addr_t corePktCurrFog;
 extern u128 corePktFogParm;
 extern u8 vu0MicroPacket[];
 extern u8 vu1MicroPacket[];
-extern addrS_t corePktPointBuff;
+extern saddr_t corePktPointBuff;
 extern sdfMemHandle_t *sdfCoreDrawBuffHandle;
 
 extern void *sceDmaGetChan(s32);

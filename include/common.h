@@ -100,7 +100,7 @@ typedef ADDR_TYPE addr_t;
 #ifndef ADDR_S_TYPE
 #define ADDR_S_TYPE s32
 #endif
-typedef ADDR_S_TYPE addrS_t;
+typedef ADDR_S_TYPE saddr_t;
 
 /* Asserts a structure's retail size, by the negative-array-size trick ee-gcc
  * 2.96 accepts. The typedef emits nothing, so this costs no code. The check

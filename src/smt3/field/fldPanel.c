@@ -97,7 +97,7 @@ ret0:
     return 0;
 }
 
-addrS_t fldInputPanelProcess1(dds3ProcessID_t *id)
+saddr_t fldInputPanelProcess1(dds3ProcessID_t *id)
 {
     fldInputPanelProcessData_t *work = sdfChipAllocDirect(8);
 
@@ -226,7 +226,7 @@ s32 fldAddressProcess2(dds3ProcessID_t *id)
     return 0;
 }
 
-addrS_t fldAddressProcess1(dds3ProcessID_t *id)
+saddr_t fldAddressProcess1(dds3ProcessID_t *id)
 {
     fldAddressProcessData_t *work;
 

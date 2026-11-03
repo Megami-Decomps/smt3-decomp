@@ -138,7 +138,7 @@ extern cmpInfoWindow_t *cmpInfoWindow;
 
 extern cmbWork_t *D_0054FB20;
 
-extern addrS_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern saddr_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
@@ -493,7 +493,7 @@ extern void mdlSetRotate(void *aHandle);
 
 
 
-extern addrS_t PlayingNo;
+extern saddr_t PlayingNo;
 
 extern s32 fclChkMessage(void);
 
@@ -585,7 +585,7 @@ extern campStatusPanel_t *campDhUpdateWork;
 
 extern s8 cmpGetHeartsIconId(s8 index);
 
-extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, addrS_t layout);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, saddr_t layout);
 
 extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
@@ -858,7 +858,7 @@ extern char *D_00343F48[];
 extern u8 D_00551F98[4];
 extern void cmpInitSeqInfo(cmpSeqInfo_t *work, cmpSeqInfo_t *parent);
 extern s8 fclInitMessage(void *data);
-extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, addrS_t flags);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, saddr_t flags);
 extern void cmpDebugDumpCount(void);
 extern void camp_H_cmpGlobalWork_t__ctor(void);
 
@@ -1167,7 +1167,7 @@ typedef struct {
 } cmpSavedNameView_t;
 
 extern char *text2[];
-extern void fclSetMessageVar_20743088(s8 index, addrS_t value);
+extern void fclSetMessageVar_20743088(s8 index, saddr_t value);
 
 #ifdef NON_MATCHING
 extern void *memcpy(void *a, const void *b, size_t c);
@@ -1472,7 +1472,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpStartItemMsg);
 
 extern s32 datGetItemSkillNo(s32 itemid);
 extern s32 cmpStartItemMsg(u16 item, s32 errorFlags);
-extern s32 cmpUseItemTokusyu(u16 item, addrS_t target, addrS_t user);
+extern s32 cmpUseItemTokusyu(u16 item, saddr_t target, saddr_t user);
 extern void cmpRecover(u16 skill, datUnitWork_t *stock, datUnitWork_t *target);
 #ifdef NON_MATCHING
 extern void cmpSetStockRecoverEff(s8 effect, u16 skill, cmpLocalStock_t *stock);
@@ -1525,7 +1525,7 @@ u16 cmpGetSelectSkillID(void)
 extern s32 cmpAddCost(u16 skill, datUnitWork_t *unit);
 extern s32 cmpGetSkillEntry(u16 skill, datUnitWork_t *unit);
 extern s32 cmpStartSkillMsg(u16 skill, s32 errorFlags);
-extern s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, addrS_t target);
+extern s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, saddr_t target);
 
 s32 cmpUseSkill(void)
 {
@@ -7983,7 +7983,7 @@ extern s32 camp_update_info_Process(s32 id);
 
 s32 cmpStartProcessInfo(s32 text, s32 flag)
 {
-    addrS_t proc;
+    saddr_t proc;
 
     if (cmpInfoWindow != NULL) {
         return 0;
@@ -10569,7 +10569,7 @@ s32 cmpUseItemKou(u16 item, datUnitWork_t *unit)
     return -1;
 }
 
-s32 cmpUseItemTokusyu(u16 item, addrS_t target, addrS_t user)
+s32 cmpUseItemTokusyu(u16 item, saddr_t target, saddr_t user)
 {
     if (cmpUseItemKou(item, EE_ADDR_AS(datUnitWork_t *, user)) >= 0)
     {
@@ -10593,7 +10593,7 @@ extern void fldRiberaMaStart(void);
 extern void fldRifutoMaStart(void);
 extern void fldLightMaStart(void);
 
-s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, addrS_t unused)
+s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, saddr_t unused)
 {
     s32 se = 0x10;
 
@@ -10946,7 +10946,7 @@ void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode)
 INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorLayout);
 #endif
 
-void cmpInitCursorRange(void *cursor, u8 index, u8 rows, addrS_t flag)
+void cmpInitCursorRange(void *cursor, u8 index, u8 rows, saddr_t flag)
 {
     cmpPadStopWork_t *work = cursor;
     s32 last;
@@ -11003,7 +11003,7 @@ void cmpUpdateCursorScroll(cmpCursorInfo_t *cursor, s8 mode)
     }
 }
 
-void cmpSetCursorFlag(cmpCursorInfo_t *cur, addrS_t flag)
+void cmpSetCursorFlag(cmpCursorInfo_t *cur, saddr_t flag)
 {
     cur->flagsData.value = flag;
     cmpUpdateCursorScroll(cur, 1);

@@ -479,7 +479,7 @@ void gcc2_compiled_(_reent *r, u32 needed)
     mallocChunkPrefix_t *oldTop = __malloc_av_.top;
     u32 oldSize = oldTop->size & ~3U;
     u8 *oldEnd = (u8 *)oldTop + oldSize;
-    addrS_t increment = needed + __malloc_top_pad + 16;
+    saddr_t increment = needed + __malloc_top_pad + 16;
     s32 correction;
     u32 misalignment;
     u8 *newTop;
@@ -1142,7 +1142,7 @@ s32 func_002D6678(_reent *r, FILE *fp, const char *format, va_list ap)
     s32 base;
     s32 nonzero;
     u16 unsignedShort;
-    addrS_t signedWord;
+    saddr_t signedWord;
     u32 unsignedWord;
     s64 signedLong;
     u64 unsignedLong;

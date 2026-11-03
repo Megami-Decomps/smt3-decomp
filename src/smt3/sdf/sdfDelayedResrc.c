@@ -43,7 +43,7 @@ void *sdfChipAllocDirect(s32 aSize);
 
 extern s32 EIntr(void);
 
-extern addrS_t D_005520A8[2];
+extern saddr_t D_005520A8[2];
 
 extern s32 DIntr(void);
 
@@ -186,7 +186,7 @@ void sdfDelayedResrcProc(void) {
 
 u64 sdfDelayedResrcCheckFunc(void) {
     u32 slotIndex;
-    addrS_t *slotCursor;
+    saddr_t *slotCursor;
     if (sdfDelayedResrcFlag != 0) {
         return 1;
     }

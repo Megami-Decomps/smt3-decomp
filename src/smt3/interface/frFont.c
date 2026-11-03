@@ -195,7 +195,7 @@ void frCreateUserFontPacket(s32 X, s32 Y, s32 Z, frTextHandle_t *pText,
 
 #define FR_FONT_GLYPH_HEIGHT_SHIFT 1
 
-void frCopyFontClutToVram(s32 GS_LocalAddr, addrS_t pClut);
+void frCopyFontClutToVram(s32 GS_LocalAddr, saddr_t pClut);
 
 extern void sceGsSetDefLoadImage(void *, s16, s16, s32, s32, s32, s16, s16);
 
@@ -205,7 +205,7 @@ extern volatile s32 dds3GsSema; /* semaphore handle shared with the IOP/interrup
 
 extern void FlushCache(s32);
 
-extern void sceGsExecLoadImage(void *, addrS_t);
+extern void sceGsExecLoadImage(void *, saddr_t);
 
 extern s32 sceGsSyncPath(s32, s32);
 
@@ -653,7 +653,7 @@ void frCreateUserFontPacket(s32 X, s32 Y, s32 Z, frTextHandle_t *pText,
 }
 
 /* Upload an image to GS memory at the given buffer, serialized by the GS semaphore. */
-void frCopyFontClutToVram(s32 GS_LocalAddr, addrS_t pClut) {
+void frCopyFontClutToVram(s32 GS_LocalAddr, saddr_t pClut) {
     u8 loadImage[0x60];
 
     sceGsSetDefLoadImage(loadImage, (s16)GS_LocalAddr, 1, 0, 0, 0, 8, 2);

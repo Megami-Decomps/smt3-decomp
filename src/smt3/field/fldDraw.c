@@ -90,7 +90,7 @@ void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 s32 sdfGrAllocPacketBuff(s32 aSize);
 
-extern addrS_t sdf2DGetPrimPtr(addrS_t);
+extern saddr_t sdf2DGetPrimPtr(saddr_t);
 
 void sdfPrimLinkGt4(
     sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0,
@@ -153,7 +153,7 @@ void sdfFreeAutoDelayed(void *data);
 
 void sdfLinkStoreImage(
     sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle, s32 aSrcX, s32 aSrcY,
-    s32 aWidth, s32 aHeight, addrS_t aBuffer, s32 aCallback, s32 aCallbackParam,
+    s32 aWidth, s32 aHeight, saddr_t aBuffer, s32 aCallback, s32 aCallbackParam,
     s32 (*aAllocator)(s32));
 
 sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*aAllocator)(s32));
@@ -162,7 +162,7 @@ extern sdfGrFrameSet_t D_00529388;
 
 void sdfLinkLoadImage(
     sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle, s32 aDstX,
-    s32 aDstY, s32 aWidth, s32 aHeight, addrS_t aBuffer,
+    s32 aDstY, s32 aWidth, s32 aHeight, saddr_t aBuffer,
     s32 (*aAllocator)(s32));
 
 s32 frDestroyFontRequestAfter(struct frFontGlyph_t *pFRQ);
@@ -910,7 +910,7 @@ void rsetFrameMaskRgbOff(void) {
 
 void ooyTestLine3D(u32 x0, u32 y0, f32 z0, f32 col0, f32 x1, f32 y1, f32 z1, f32 col1) {
     sdfDrawTag_t *list;
-    addrS_t record;
+    saddr_t record;
     sdfGrOt_t *descriptor;
     D_002FC720[0][0] = z0;
     D_002FC720[0][1] = col0;

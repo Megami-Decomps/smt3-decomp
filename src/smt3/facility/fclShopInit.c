@@ -97,7 +97,7 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, addrS_t layout);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, saddr_t layout);
 
 extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 

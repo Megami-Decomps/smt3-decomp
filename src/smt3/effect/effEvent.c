@@ -1198,7 +1198,7 @@ extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, addr_t aPacket);
-extern addrS_t dds3BillboardGetTex(void *hBillboard);
+extern saddr_t dds3BillboardGetTex(void *hBillboard);
 extern sdfTexPacket_t *sdfTexGetPacket(sdfTexHandle_t *aHandle);
 extern s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle);
 extern void sdf3DMakeDirectRefPacket(void *aPacket, addr_t aData, s32 aLeng);

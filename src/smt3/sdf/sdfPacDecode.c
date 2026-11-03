@@ -20,7 +20,7 @@ extern sdfItemArray_t *sdfTexListNew(s32 aInitCapa);
 
 extern void sdfDecompInit(struct sdfDecomp_t *cb, u8 *dst);
 extern s32 sdfDecomp(struct sdfDecomp_t *cb, const u8 *src, s32 length);
-extern void sdfAddressResolver(s32 *aDataBody, addrS_t aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
+extern void sdfAddressResolver(s32 *aDataBody, saddr_t aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
 s32 sdfPacStdCallback(sdfPacDecodeCb_t *cb, s32 cause, sdfPacStdBlockHeader_t *hdr);
 void sdfPacNewBlock(sdfPacDecodeCb_t *cb);

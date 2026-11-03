@@ -112,7 +112,7 @@ extern s32 sceLseek(s32 fileHandle, s32 offset, s32 origin);
 
 extern void *malloc(size_t size);
 
-extern s32 sceRead(s32 fileHandle, addrS_t buffer, s32 byteCount);
+extern s32 sceRead(s32 fileHandle, saddr_t buffer, s32 byteCount);
 
 extern const char *dds3ImgPath;
 

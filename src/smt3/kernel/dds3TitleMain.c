@@ -451,7 +451,7 @@ extern void *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, s32 pStr, s32 
 
 extern void frDrawFontEx(void *pFRQ, s32 Mode);
 
-void mselDrawMenuText(s32 x, s32 y, s32 text, addrS_t arg)
+void mselDrawMenuText(s32 x, s32 y, s32 text, saddr_t arg)
 {
     void *frq = frwGetSmallFontFRQ(x * 16, y * 16, 0, text, arg, 0);
 
@@ -461,7 +461,7 @@ void mselDrawMenuText(s32 x, s32 y, s32 text, addrS_t arg)
 
 extern void *frwGetSmallNumFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, s32 pStr, s32 pFRQ);
 
-void mselDrawSaveNum(s32 x, s32 y, s32 text, addrS_t arg)
+void mselDrawSaveNum(s32 x, s32 y, s32 text, saddr_t arg)
 {
     void *frq = frwGetSmallNumFontFRQ(x * 16, y * 16, 0, text, arg, 0);
 

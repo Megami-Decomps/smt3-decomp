@@ -53,7 +53,7 @@ typedef unsigned long long ee_addr_t;
  * no conversion, which is also what makes the probe's trunc mode stop
  * counting the site. */
 typedef ee_addr_t addr_t;
-typedef long long addrS_t;
+typedef long long saddr_t;
 
 #define SYMBOL_AT(type, name, base, offset) extern type name
 

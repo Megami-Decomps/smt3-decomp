@@ -90,7 +90,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 errorCode; /* 0x2C */
     s32 currentOffset; /* 0x30 */
     u8 remainder[4]; /* 0x34 */
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, addrS_t, s32, s32); /* 0x38 */
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, saddr_t, s32, s32); /* 0x38 */
     s32 userData; /* 0x3C: opaque callback-context word */
 } sdfFileCmdHandle_t;
 
@@ -122,7 +122,7 @@ extern sdfFileRpcCb_t sdfFileRpcState;
 extern s32 sdfFileRpcBuf[];
 
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
-                                          s32 (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32),
+                                          s32 (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32),
                                           s32 callbackContext);
 
 extern s32 sdfFileCmdFileSize();

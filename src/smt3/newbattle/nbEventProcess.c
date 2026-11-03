@@ -259,7 +259,7 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 extern void *nbEventProcess3(dds3ProcessID_t *id);
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
-extern s32 nbMakeBadKaifukuPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form);
 extern void nbGetEventEntry(nbMainProcessData_t *data);
 
 extern char D_00545DB0[];

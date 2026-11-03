@@ -134,7 +134,7 @@ void sdfChipFreeDirect(void *aPtr)
     sdfChipPageInfo_tag **link;
     s32 intrEnabled;
     s16 allocCount;
-    addrS_t heapByteOffset;
+    saddr_t heapByteOffset;
 
     if (aPtr == NULL) {
         return;

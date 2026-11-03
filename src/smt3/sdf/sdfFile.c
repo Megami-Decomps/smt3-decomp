@@ -67,7 +67,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 errorCode;
     s32 currentOffset;
     u8 remainder[4];
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, addrS_t, s32, s32);
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, saddr_t, s32, s32);
     s32 userData;
 } sdfFileCmdHandle_t;
 
@@ -163,7 +163,7 @@ extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
 extern s16 sdfFileCmdFreeCount;
 
-sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32),
+sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32),
                         s32 callbackContext);
 
 s32 sdfFileCmdClearError(sdfFileCmd_t *aHandle);
@@ -282,7 +282,7 @@ sdfFileCmdHandle_t *sdfFileOpen(const char *aFileName) {
     if (sdfFileSemaId < 0) {
         sdfFileSemaId = sdfCreateSema(0, 0x80, 0);
     }
-    state = sdfFileCmdReadOpen(aFileName, (void (*)(sdfFileCmdHandle_t *, s32, addrS_t, s32, s32))sdfFileCallback, 0);
+    state = sdfFileCmdReadOpen(aFileName, (void (*)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32))sdfFileCallback, 0);
     WaitSema(sdfFileSemaId);
     sdfFileCmdClearError((sdfFileCmd_t *)state);
     return state;

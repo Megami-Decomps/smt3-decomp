@@ -47,9 +47,9 @@ extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
 dds3AdminiData_t *GetAdminiProcessData(void);
 void dds3AdminiCallSequence(s32 sequence, void *data, u32 datasize, s32 restore);
-addrS_t dds3AdminiStartSequence(dds3ProcessID_t *id);
-addrS_t dds3AdminiNeoProcess(dds3ProcessID_t *id);
-addrS_t dds3AdminiEndCheck(dds3ProcessID_t *id);
+saddr_t dds3AdminiStartSequence(dds3ProcessID_t *id);
+saddr_t dds3AdminiNeoProcess(dds3ProcessID_t *id);
+saddr_t dds3AdminiEndCheck(dds3ProcessID_t *id);
 void dds3AdminiNeoShutdown(dds3ProcessID_t *id);
 s32 fclEncycFreeEntry(const char *name);
 
@@ -148,7 +148,7 @@ s32 dds3AdminiGetPrevHistoryFlag(void)
     return work->FlagHistory[(work->HistoryPointer + 7) & 7];
 }
 
-addrS_t dds3AdminiStartSequence(dds3ProcessID_t *id)
+saddr_t dds3AdminiStartSequence(dds3ProcessID_t *id)
 {
     dds3AdminiData_t *work;
     s32 (*startfunc)(s32 restored, void *reqdata);
@@ -207,7 +207,7 @@ addrS_t dds3AdminiStartSequence(dds3ProcessID_t *id)
     return EE_ADDR_S(dds3AdminiNeoProcess);
 }
 
-addrS_t dds3AdminiEndCheck(dds3ProcessID_t *id)
+saddr_t dds3AdminiEndCheck(dds3ProcessID_t *id)
 {
     dds3AdminiData_t *work = dds3GetProcessData(id);
     s32 sequence = work->NowSequence;
@@ -228,7 +228,7 @@ addrS_t dds3AdminiEndCheck(dds3ProcessID_t *id)
     return EE_ADDR_S(dds3AdminiStartSequence);
 }
 
-addrS_t dds3AdminiNeoProcess(dds3ProcessID_t *id)
+saddr_t dds3AdminiNeoProcess(dds3ProcessID_t *id)
 {
     dds3AdminiData_t *work;
     s32 (*mainfunc)(void);

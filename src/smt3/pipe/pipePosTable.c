@@ -114,7 +114,7 @@ tagPipePartsInfo *getPartsInfo(s16 partsID)
 }
 
 
-addrS_t getPartsType(s32 id)
+saddr_t getPartsType(s32 id)
 {
     s32 shiftedId = id >> 6;
     tagPipePartsInfo *pInfo = getPartsInfo((s16)id);

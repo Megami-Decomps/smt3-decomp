@@ -214,7 +214,7 @@ s32 nbGetKoukaPacketCnt(void)
     return work->packetcnt;
 }
 
-s32 nbGetUniqueIdKoukaPacketCnt(addrS_t uniqueid)
+s32 nbGetUniqueIdKoukaPacketCnt(saddr_t uniqueid)
 {
     nbKoukaPacket_t *p = nbGetKoukaProcessData()->first;
     s32 cnt = 0;

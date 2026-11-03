@@ -114,7 +114,7 @@ typedef struct evtModelHeader_t {
 } evtModelHeader_t;
 
 
-void dds3AdminiCallSequence(s32 sequence, addrS_t data, s32 datasize, s32 restore);
+void dds3AdminiCallSequence(s32 sequence, saddr_t data, s32 datasize, s32 restore);
 
 enum {
     EVT_SCALAR_REQUEST_SIZE = 4,
@@ -135,11 +135,11 @@ char *scrGetStrPara(s32 n);
 
 void fldBgmFadeOut(void);
 
-void fldSetSceneParam2(addrS_t pParam, s32 loadField, s32 loadArea, char *pointResName);
+void fldSetSceneParam2(saddr_t pParam, s32 loadField, s32 loadArea, char *pointResName);
 
 extern s32 fldGb[];
 
-void fldSetSceneParam3(addrS_t pParam, s32 loadField, s32 loadArea, char *pointResName);
+void fldSetSceneParam3(saddr_t pParam, s32 loadField, s32 loadArea, char *pointResName);
 
 
 

@@ -303,7 +303,7 @@ s32 evtLoadArea(s32 fld, s32 area)
 }
 
 /* Build a field world object from the supplied resource parameters. */
-s32 evtLoadArea_FromMemory(s32 fld, s32 area, addrS_t pF1, addrS_t pF2,
+s32 evtLoadArea_FromMemory(s32 fld, s32 area, saddr_t pF1, saddr_t pF2,
                                      const sdfTextureOffsetListHeader_t *pTB, s32 pBF)
 {
     dds3Basic_t *worldObject;

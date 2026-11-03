@@ -319,10 +319,10 @@ extern s32 evtUnitRotationTarget(evtUnitHandle_t *h, f32 *pos, f32 radio);
 extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32 unused,
                             s32 frames, s32 directionOffset, void *callback, s32 unusedLast);
 
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
-extern nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                              s32 sw);
 
 extern nbKoukaPacket_t *nbAddUnitAKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,

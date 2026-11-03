@@ -50,7 +50,7 @@ s8 sdfMcGetSlotIndex(s32 request);
 
 u32 sdfMcGetSlotFlags(s32 request, s32 slot);
 
-extern addrS_t slChooseData_getCardInfoNext(void);
+extern saddr_t slChooseData_getCardInfoNext(void);
 
 extern void mcMakeFileName(char *path, s32 num);
 
@@ -60,7 +60,7 @@ extern void *memcpy(void *, const void *, size_t);
 
 void sdfMcFuncOpen(u32 context, const char *path, s32 openFlags);
 
-addrS_t slHeadLoadProc_openFile(void);
+saddr_t slHeadLoadProc_openFile(void);
 
 extern s32 D_00551D50;
 
@@ -76,9 +76,9 @@ extern void sdfMcFuncRead(s32, addr_t, s32);
 
 extern void *slLoadFileHandle;
 
-addrS_t slHeadLoadProc_readFile(void);
+saddr_t slHeadLoadProc_readFile(void);
 
-extern addrS_t slNoCard(void);
+extern saddr_t slNoCard(void);
 
 slMcResult_t sdfMcFuncRead1(void);
 
@@ -96,7 +96,7 @@ extern s32 slExitWaitCnt;
 
 extern s32 gslMode;
 
-extern addrS_t slTop(void);
+extern saddr_t slTop(void);
 
 s32 slEndingExit(void);
 
@@ -106,11 +106,11 @@ extern u32 slQueryYesNoMsg;
 
 extern u32 gslDrawFlagFile;
 
-addrS_t slQueryYesNo(s32 (*yesFunc)(void), s32 (*noFunc)(void), s32 yesNoDefault);
+saddr_t slQueryYesNo(s32 (*yesFunc)(void), s32 (*noFunc)(void), s32 yesNoDefault);
 
-addrS_t slSaveData(void);
+saddr_t slSaveData(void);
 
-extern addrS_t slFileSel(void);
+extern saddr_t slFileSel(void);
 
 s32 slExitToTitle(void);
 
@@ -166,7 +166,7 @@ extern s32 slHitAnyKeyProc(void);
 
 void sdfMcFuncChdir(u32 context, const char *path);
 
-addrS_t slChooseData_getCardInfo2(void);
+saddr_t slChooseData_getCardInfo2(void);
 
 slMcResult_t sdfMcFuncChdir1(void);
 
@@ -182,7 +182,7 @@ s32 slChooseData_getCardInfo3(void);
 
 slMcResult_t sdfMcFuncGetDir1(s32 *resultOut);
 
-addrS_t slChooseData_getCardInfo2_B(void);
+saddr_t slChooseData_getCardInfo2_B(void);
 
 s32 slChooseData_getCardInfo3_B(void);
 
@@ -190,19 +190,19 @@ s32 slChooseData_getCardInfoNext_B(void);
 
 void sdfMcSetCardStat(s32 request);
 
-addrS_t slSaveData_chdir(void);
+saddr_t slSaveData_chdir(void);
 
 void sdfMcFuncMkdir(u32 mccb, const char *cb);
 
-addrS_t slSaveProc_Write_mkdir(void);
+saddr_t slSaveProc_Write_mkdir(void);
 
-addrS_t slSaveProc_Write_chdir(void);
+saddr_t slSaveProc_Write_chdir(void);
 
 slMcResult_t sdfMcFuncMkdir1(void);
 
 extern s32 slFileSelError;
 
-addrS_t slSaveData_deleteIconSys(void);
+saddr_t slSaveData_deleteIconSys(void);
 
 slMcResult_t sdfMcFuncDelete1(void);
 
@@ -218,7 +218,7 @@ extern addr_t D_00551D48;
 
 extern u32 D_00551D4C;
 
-addrS_t slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFunc, u32 *srcPtr);
+saddr_t slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFunc, u32 *srcPtr);
 
 void sdfMcFuncDelete(u32 context, const char *path);
 
@@ -230,17 +230,17 @@ extern void *slSaveWriteFile_endFunc;
 
 extern u32 *slSaveWriteFile_dataWaitPtr;
 
-addrS_t slSaveProc_openFile(void);
+saddr_t slSaveProc_openFile(void);
 
-addrS_t slSaveProc_waitDataReady(void);
+saddr_t slSaveProc_waitDataReady(void);
 
 extern void sdfMcFuncWrite(s32 request, u32 first, u32 second);
 
-addrS_t slSaveProc_writeFile(void);
+saddr_t slSaveProc_writeFile(void);
 
 slMcResult_t sdfMcFuncWrite1(void);
 
-addrS_t slSaveProc_closeFile(void);
+saddr_t slSaveProc_closeFile(void);
 
 slMcResult_t sdfMcFuncClose1(void);
 
@@ -258,11 +258,11 @@ extern u32 gSlEndingMode;
 
 void slVersionConvert_Step1(void);
 
-addrS_t slLoadProc_openFile(void);
+saddr_t slLoadProc_openFile(void);
 
-addrS_t slLoadProc_readFile(void);
+saddr_t slLoadProc_readFile(void);
 
-addrS_t slLoadProc_closeFile(void);
+saddr_t slLoadProc_closeFile(void);
 
 void slVersionConvert_Step3(void);
 
@@ -300,7 +300,7 @@ extern s32 slQueryYesNoCursor;
 
 extern s32 slQueryYesNoKeyFlag;
 
-extern addrS_t slQueryYesNoProc(void);
+extern saddr_t slQueryYesNoProc(void);
 
 extern u32 gSlExitMode;
 
@@ -340,7 +340,7 @@ extern void frSetFontDrawOT(s32 OtType);
 
 extern void sdfMcClearSlotFlags(s32 request, s32 slot);
 
-extern addrS_t slChooseData_getCardInfo_B(void);
+extern saddr_t slChooseData_getCardInfo_B(void);
 
 extern s32 slTopMenuSel[];
 
@@ -357,11 +357,11 @@ extern s32 slErrorWaitMc(void);
 
 extern s32 gSlSelCnt;
 
-extern addrS_t slSaveProc_CheckCard(void);
+extern saddr_t slSaveProc_CheckCard(void);
 
 extern s32 slChooseData(void);
 
-extern addrS_t slFormatStart(void);
+extern saddr_t slFormatStart(void);
 
 extern s32 slFormatCancel(void);
 
@@ -388,7 +388,7 @@ extern void sdfMcClearCardStat(u32 request);
 
 extern s32 gSlFileErroeFlg;
 
-extern addrS_t slFileSelCalc(void);
+extern saddr_t slFileSelCalc(void);
 
 extern void *memset(void *a, s32 b, size_t c);
 
@@ -1056,7 +1056,7 @@ void slDrawInfo(void) {
     }
 }
 
-addrS_t slHeadLoad(void) {
+saddr_t slHeadLoad(void) {
     char path[0x50];
     u32 ctx;
     s32 slot;
@@ -1078,7 +1078,7 @@ addrS_t slHeadLoad(void) {
     return EE_ADDR_S(slHeadLoadProc_openFile);
 }
 
-addrS_t slHeadLoadProc_openFile(void) {
+saddr_t slHeadLoadProc_openFile(void) {
     slMcResult_t status = sdfMcFuncOpen1(&D_00551D50);
 
     if (status == SL_MC_RESULT_PENDING) {
@@ -1093,7 +1093,7 @@ addrS_t slHeadLoadProc_openFile(void) {
     return slNoCard();
 }
 
-addrS_t slHeadLoadProc_readFile(void) {
+saddr_t slHeadLoadProc_readFile(void) {
     slMcResult_t status = sdfMcFuncRead1();
     if (status == SL_MC_RESULT_PENDING) {
         return 0;
@@ -1129,7 +1129,7 @@ s32 slHeadLoadProc_closeFile(void) {
     return slNoCard();
 }
 
-addrS_t slExitWait(void *nextFunc) {
+saddr_t slExitWait(void *nextFunc) {
     dds3FadeOut(0, 0, 0, 15);
     slExitWaitNextFunc = nextFunc;
     slExitWaitCnt = 20;
@@ -1160,13 +1160,13 @@ s32 slEndingExit(void) {
     return slQueryYesNo(&slExitToTitle, &slEndingTop, 1);
 }
 
-addrS_t slBootTop(void) {
+saddr_t slBootTop(void) {
     slSetInfo(0);
     gslDrawFlagFile = 0;
     return EE_ADDR_S(slBootProc_CheckCard);
 }
 
-addrS_t slBootRetry(void) {
+saddr_t slBootRetry(void) {
     sdfMcRegetInfo(0);
     gslCheckCardWait = 30;
     gSlNowCardCheck = 1;
@@ -1189,7 +1189,7 @@ s32 slBootError2(void) {
     return slQueryYesNo(&slExitToTitle, &slBootRetry, 1);
 }
 
-addrS_t slNoCard(void) {
+saddr_t slNoCard(void) {
     sdfMcSetCardStat(mccb);
     sdfMcClearSlotFlags(mccb, 0);
     sdfMcClearSlotFlags(mccb, 1);
@@ -1203,7 +1203,7 @@ addrS_t slNoCard(void) {
     return EE_ADDR_S(slErrorWaitMc);
 }
 
-addrS_t slTop(void) {
+saddr_t slTop(void) {
     gSlSelCnt = 0;
     sdfMcSetCardStat(mccb);
     sdfMcClearSlotFlags(mccb, 0);
@@ -1275,7 +1275,7 @@ s32 slCardChk(void) {
     return slTop();
 }
 
-addrS_t slFileSel(void) {
+saddr_t slFileSel(void) {
     s32 i;
 
     if (gslMode == 0) {
@@ -1340,7 +1340,7 @@ s32 slBootProc1st(void) {
     return slBootTop();
 }
 
-addrS_t slSaveProc_CheckCard(void) {
+saddr_t slSaveProc_CheckCard(void) {
     if (sdfMcFuncGetInfo1() == 0) {
         return 0;
     }
@@ -1604,7 +1604,7 @@ s32 slExitWaitProc(void) {
     return 0;
 }
 
-addrS_t slHitAnyKeyNoChk(u32 nextFunc) {
+saddr_t slHitAnyKeyNoChk(u32 nextFunc) {
     slHitAnyKeyNextFunc = nextFunc;
     gslErrorKeyFlag = 0;
     return EE_ADDR_S(slHitAnyKeyNoChkProc);
@@ -1624,7 +1624,7 @@ s32 slHitAnyKeyNoChkProc(void) {
     return 0;
 }
 
-addrS_t slHitAnyKey(addr_t nextFunc) {
+saddr_t slHitAnyKey(addr_t nextFunc) {
     slHitAnyKeyNextFunc = nextFunc;
     gslErrorKeyFlag = 0;
     sdfMcRegetInfo(mccb);
@@ -1716,7 +1716,7 @@ done:
     return 0;
 }
 
-addrS_t slChooseData_getCardInfo(void) {
+saddr_t slChooseData_getCardInfo(void) {
     u8 buf[0x50];
 
     buf[0] = 0x2F;
@@ -1725,7 +1725,7 @@ addrS_t slChooseData_getCardInfo(void) {
     return EE_ADDR_S(slChooseData_getCardInfo2);
 }
 
-addrS_t slChooseData_getCardInfo2(void) {
+saddr_t slChooseData_getCardInfo2(void) {
     slMcResult_t t = sdfMcFuncChdir1();
 
     if (t == SL_MC_RESULT_PENDING) {
@@ -1761,7 +1761,7 @@ s32 slChooseData_getCardInfo3(void) {
     return slHeadLoad();
 }
 
-addrS_t slChooseData_getCardInfoNext(void) {
+saddr_t slChooseData_getCardInfoNext(void) {
     s32 index = slChooseSaveIndex + 1;
 
     slChooseSaveIndex = index;
@@ -1810,7 +1810,7 @@ s32 slChooseData(void) {
     return slFileSel();
 }
 
-addrS_t slChooseData_getCardInfo_B(void) {
+saddr_t slChooseData_getCardInfo_B(void) {
     u8 buf[0x50];
 
     buf[0] = 0x2F;
@@ -1819,7 +1819,7 @@ addrS_t slChooseData_getCardInfo_B(void) {
     return EE_ADDR_S(slChooseData_getCardInfo2_B);
 }
 
-addrS_t slChooseData_getCardInfo2_B(void) {
+saddr_t slChooseData_getCardInfo2_B(void) {
     slMcResult_t t = sdfMcFuncChdir1();
 
     if (t == SL_MC_RESULT_PENDING) {
@@ -1904,7 +1904,7 @@ s32 slChooseData_B(void) {
     return slChooseData_getCardInfo_B();
 }
 
-addrS_t slSaveData(void) {
+saddr_t slSaveData(void) {
     u8 name[0x50];
     u32 entry = mccb;
     s32 slot = sdfMcGetSlotIndex(entry);
@@ -1920,7 +1920,7 @@ addrS_t slSaveData(void) {
     return EE_ADDR_S(slSaveProc_Write_mkdir);
 }
 
-addrS_t slSaveData_chdir(void) {
+saddr_t slSaveData_chdir(void) {
     u8 buf[0x50];
     u32 entry = mccb;
     s32 slot = sdfMcGetSlotIndex(entry);
@@ -1931,7 +1931,7 @@ addrS_t slSaveData_chdir(void) {
     return EE_ADDR_S(slSaveProc_Write_chdir);
 }
 
-addrS_t slSaveProc_Write_mkdir(void) {
+saddr_t slSaveProc_Write_mkdir(void) {
     slMcResult_t status = sdfMcFuncMkdir1();
     if (status == SL_MC_RESULT_PENDING) {
         return 0;
@@ -1945,7 +1945,7 @@ addrS_t slSaveProc_Write_mkdir(void) {
     return EE_ADDR_S(slErrorWait);
 }
 
-addrS_t slSaveProc_Write_chdir(void) {
+saddr_t slSaveProc_Write_chdir(void) {
     slMcResult_t t = sdfMcFuncChdir1();
 
     if (t == SL_MC_RESULT_PENDING) {
@@ -1962,7 +1962,7 @@ addrS_t slSaveProc_Write_chdir(void) {
     return 0;
 }
 
-addrS_t slSaveProc_Write_deleteIconSys(void) {
+saddr_t slSaveProc_Write_deleteIconSys(void) {
     slMcResult_t t = sdfMcFuncDelete1();
 
     if (t == SL_MC_RESULT_PENDING) {
@@ -1986,7 +1986,7 @@ s32 slSaveProc_doNothing(void) {
     return slHitAnyKey(EE_ADDR(slFileSel));
 }
 
-addrS_t slSaveWriteEnd_iconSys(void) {
+saddr_t slSaveWriteEnd_iconSys(void) {
     slKillLoadProcess();
     return EE_ADDR_S(slSaveProc_doNothing);
 }
@@ -2054,7 +2054,7 @@ s32 slSaveData_writeFile(void) {
 INCLUDE_ASM(const s32, "mc/slMain", slSaveData_writeFile);
 #endif
 
-addrS_t slSaveData_deleteIconSys(void) {
+saddr_t slSaveData_deleteIconSys(void) {
     u32 entry = mccb;
     s32 slot = sdfMcGetSlotIndex(entry);
     u32 flags = sdfMcGetSlotFlags(entry, slot);
@@ -2065,7 +2065,7 @@ addrS_t slSaveData_deleteIconSys(void) {
     return EE_ADDR_S(slSaveProc_Write_deleteIconSys);
 }
 
-addrS_t slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFunc, u32 *srcPtr) {
+saddr_t slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFunc, u32 *srcPtr) {
     slSaveWriteFile_buff = buff;
     slSaveWriteFile_size = size;
     slSaveWriteFile_endFunc = endFunc;
@@ -2074,7 +2074,7 @@ addrS_t slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFun
     return EE_ADDR_S(slSaveProc_openFile);
 }
 
-addrS_t slSaveProc_openFile(void) {
+saddr_t slSaveProc_openFile(void) {
     slMcResult_t status = sdfMcFuncOpen1(&D_00551D50);
 
     if (status == SL_MC_RESULT_PENDING) {
@@ -2095,7 +2095,7 @@ addrS_t slSaveProc_openFile(void) {
     return 0;
 }
 
-addrS_t slSaveProc_writeFile(void) {
+saddr_t slSaveProc_writeFile(void) {
     slMcResult_t status = sdfMcFuncWrite1();
     if (status == SL_MC_RESULT_PENDING) {
         return 0;
@@ -2112,7 +2112,7 @@ addrS_t slSaveProc_writeFile(void) {
     return 0;
 }
 
-addrS_t slSaveProc_closeFile(void) {
+saddr_t slSaveProc_closeFile(void) {
     slMcResult_t status = sdfMcFuncClose1();
     if (status == SL_MC_RESULT_PENDING) {
         return 0;
@@ -2128,7 +2128,7 @@ addrS_t slSaveProc_closeFile(void) {
     return 0;
 }
 
-addrS_t slSaveProc_waitDataReady(void) {
+saddr_t slSaveProc_waitDataReady(void) {
     if (baseIconFileHandle != 0) {
         return 0;
     }
@@ -2136,7 +2136,7 @@ addrS_t slSaveProc_waitDataReady(void) {
     return EE_ADDR_S(slSaveProc_writeFile);
 }
 
-addrS_t slProc_Format(void) {
+saddr_t slProc_Format(void) {
     slMcResult_t status = sdfMcFuncFormat1();
     if (status == SL_MC_RESULT_PENDING) {
         return 0;
@@ -2151,7 +2151,7 @@ addrS_t slProc_Format(void) {
     return slHitAnyKey(EE_ADDR(slCardChk));
 }
 
-addrS_t slFormatStart(void) {
+saddr_t slFormatStart(void) {
     slSetInfo(5);
     dds3SoftResetOff();
     sdfMcFuncFormat(mccb);
@@ -2167,7 +2167,7 @@ s32 slFormatCancel(void) {
     return slQueryYesNo(slExit, slTop, 1);
 }
 
-addrS_t slLoadData(void) {
+saddr_t slLoadData(void) {
     char path[0x50];
     u32 ctx = mccb;
     s32 slot = sdfMcGetSlotIndex(ctx);
@@ -2189,7 +2189,7 @@ addrS_t slLoadData(void) {
     return EE_ADDR_S(slLoadProc_openFile);
 }
 
-addrS_t slLoadProc_openFile(void) {
+saddr_t slLoadProc_openFile(void) {
     slMcResult_t status = sdfMcFuncOpen1(&D_00551D50);
     u32 size;
 
@@ -2208,7 +2208,7 @@ addrS_t slLoadProc_openFile(void) {
     return EE_ADDR_S(slErrorWait);
 }
 
-addrS_t slLoadProc_readFile(void) {
+saddr_t slLoadProc_readFile(void) {
     slMcResult_t status = sdfMcFuncRead1();
     if (status == SL_MC_RESULT_PENDING) {
         return 0;
@@ -2223,7 +2223,7 @@ addrS_t slLoadProc_readFile(void) {
     return EE_ADDR_S(slErrorWait);
 }
 
-addrS_t slLoadProc_closeFile(void) {
+saddr_t slLoadProc_closeFile(void) {
     slMcResult_t status = sdfMcFuncClose1();
     if (status == SL_MC_RESULT_PENDING) {
         return 0;
@@ -2247,7 +2247,7 @@ addrS_t slLoadProc_closeFile(void) {
     return EE_ADDR_S(slErrorWait);
 }
 
-addrS_t slFileSelCalc(void)
+saddr_t slFileSelCalc(void)
 {
     s32 selectionCount;
     s32 selectionRange;
@@ -2807,7 +2807,7 @@ static inline void slQueryYesNoReadKeys(void)
     }
 }
 
-addrS_t slQueryYesNoProc(void)
+saddr_t slQueryYesNoProc(void)
 {
     s32 cardStatus;
     if (slQueryYesNoMsg == 4 || slQueryYesNoMsg == 8) {
@@ -2913,7 +2913,7 @@ addrS_t slQueryYesNoProc(void)
 INCLUDE_ASM(const s32, "mc/slMain", slQueryYesNoProc);
 #endif
 
-addrS_t slQueryYesNo(s32 (*yesFunc)(void), s32 (*noFunc)(void), s32 yesNoDefault) {
+saddr_t slQueryYesNo(s32 (*yesFunc)(void), s32 (*noFunc)(void), s32 yesNoDefault) {
     slQueryYesFunc = yesFunc;
     slQueryNoFunc = noFunc;
     slQueryYesNoCursor = yesNoDefault;

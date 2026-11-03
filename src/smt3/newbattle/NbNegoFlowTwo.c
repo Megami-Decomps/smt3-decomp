@@ -213,13 +213,13 @@ extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_
 
 extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 struct nbKoukaPacket_t;
-extern s32 nbMakeNegoBackPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form,
+extern s32 nbMakeNegoBackPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                 nbFormation_t *target);
-extern s32 nbMakeNegoWorkPosPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form,
+extern s32 nbMakeNegoWorkPosPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                    nbFormation_t *target);
-extern s32 nbMakeNegoForwardPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form,
+extern s32 nbMakeNegoForwardPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                   nbFormation_t *target);
-extern s32 nbMakeUnitFadeInPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form, u32 col,
+extern s32 nbMakeUnitFadeInPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form, u32 col,
                                  s32 delay, s32 aframe, s32 colframe);
 extern struct nbKoukaPacket_t *nbAddHomeMoveKoukaPacket(s32 startframe, s32 uniqueid, s32 partyno,
                                                 f32 speed);

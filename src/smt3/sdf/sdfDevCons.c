@@ -87,7 +87,7 @@ extern s32 sceGsSyncPath(s32 mode, s32 timeout);
 extern void *sceDmaGetChan(s32 channel);
 extern u64 sdfTexGetTex0Reg(sdfTexHandle_t *aHandle);
 extern void *sdfGrOpenPacketBuff(void);
-extern void sdfGrClosePacketBuff(addrS_t aBuffPtr);
+extern void sdfGrClosePacketBuff(saddr_t aBuffPtr);
 void sdfDevConsDrawBG(sdfDevConsCB_tag *aHndl, sdfDevConsDrawCB_t *aCB);
 
 extern void sdfDevConsDrawInit(sdfDevConsDrawCB_t *aCB, void *aPacketBuffer, s32 aBufferSize);

@@ -268,7 +268,7 @@ extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_
 
 
 
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, addrS_t uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
 typedef struct { u16 item; u16 cnt; } nbInnenPhase_t;
@@ -286,7 +286,7 @@ extern nbInnenRec_t D_003E3158[];
 
 extern s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type);
 
-extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, addrS_t uniqueid, s32 se);
+extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, saddr_t uniqueid, s32 se);
 
 extern s32 evtBitCheck(s32 no);
 
@@ -1226,7 +1226,7 @@ s32 nbNegoSetProcessData(dds3ProcessID_t *id)
     return -1;
 }
 
-extern s32 nbGetUniqueIdKoukaPacketCnt(addrS_t uniqueid);
+extern s32 nbGetUniqueIdKoukaPacketCnt(saddr_t uniqueid);
 extern s32 (*D_004EF468[])(nbNegoProcessData_t *n);
 
 void *nbNegoProcess1(dds3ProcessID_t *id)

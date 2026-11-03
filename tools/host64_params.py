@@ -2,7 +2,7 @@
 """Rewrite one parameter's or one return type's integer type, tree-wide.
 
 The 32-bit integer types that hold a guest address are named addr_t and
-addrS_t (include/common.h), so a host can widen them without editing the
+saddr_t (include/common.h), so a host can widen them without editing the
 decompilation. A function's parameter is declared in its definition and again
 in every unit that calls it, so the edit has to reach all of them at once.
 
@@ -12,7 +12,7 @@ in every unit that calls it, so the edit has to reach all of them at once.
                                      definition alike
 
 A type of "auto" keeps each declaration's own signedness: u32 becomes
-addr_t and s32 becomes addrS_t. The two differ in later arithmetic and
+addr_t and s32 becomes saddr_t. The two differ in later arithmetic and
 comparisons, so one function's parameter declared u32 in one unit and s32 in
 another must stay that way in both.
 
@@ -31,7 +31,7 @@ PARAM = re.compile(r"\A\s*(u32|s32|unsigned int|int)(\s+(?:const\s+)?[A-Za-z_][A
 
 
 AUTO = {"u32": "addr_t", "unsigned int": "addr_t",
-        "s32": "addrS_t", "int": "addrS_t"}
+        "s32": "saddr_t", "int": "saddr_t"}
 
 
 def pick(newtype, old):

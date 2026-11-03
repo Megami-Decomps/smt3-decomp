@@ -55,7 +55,7 @@ extern void sdfDrawTagInit(sdfDrawTag_t *a);
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void *dds3PrimFrameRect(s32 aX, s32 aY, s32 aZ, s32 aW, s32 aH, u32 aBgCol, u32 aFrameCol);
 extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, ...);
-extern void dds3AdminiCallSequence(s32 sequence, addrS_t data, s32 datasize, s32 restore);
+extern void dds3AdminiCallSequence(s32 sequence, saddr_t data, s32 datasize, s32 restore);
 extern u8 sdfHddValid;
 extern u32 strlen(const char *s);
 extern char *strcpy(char *dst, const char *src);

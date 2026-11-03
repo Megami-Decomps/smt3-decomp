@@ -116,8 +116,8 @@ extern void *dds3FontReqAllocDrawTag(void);
 extern s32 sdfDevPrintf(s32 aX, s32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
 extern void sdfDrawTagLink(void *aTag, addr_t aPacket);
 extern void SetActiveCamera(void);
-extern addrS_t evtEventViewerProcess3(void);
-extern addrS_t evtEventViewerProcess4(void);
+extern saddr_t evtEventViewerProcess3(void);
+extern saddr_t evtEventViewerProcess4(void);
 void LinkViewerObject(evtViewerObject_s *obj);
 void UnlinkViewerObject(evtViewerObject_s *obj);
 void DelFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f);
@@ -2381,7 +2381,7 @@ extern s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y);
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 extern s32 (*D_0032C750[])(s32 action, s32 previousMenu);
 
-addrS_t evtEventViewerProcess4(void)
+saddr_t evtEventViewerProcess4(void)
 {
     s32 index;
     s32 previousMenu = 0;
@@ -2459,7 +2459,7 @@ pop_menu:
     return 0;
 }
 
-addrS_t evtEventViewerProcess3(void)
+saddr_t evtEventViewerProcess3(void)
 {
     if (viewerinfo->nowframe != viewerinfo->oldframe) {
         evtRunFrame(viewerinfo->nowframe);
@@ -2510,14 +2510,14 @@ addrS_t evtEventViewerProcess3(void)
     return 0;
 }
 
-addrS_t evtEventViewerProcess2(void *id)
+saddr_t evtEventViewerProcess2(void *id)
 {
     evtRunFrame(viewerinfo->nowframe);
     dds3LinkProcess(id, evtInitFrameVar());
     return EE_ADDR_S(evtEventViewerProcess3);
 }
 
-addrS_t evtEventViewerProcess1(void)
+saddr_t evtEventViewerProcess1(void)
 {
     evtInitViewerInfo();
     return EE_ADDR_S(evtEventViewerProcess2);

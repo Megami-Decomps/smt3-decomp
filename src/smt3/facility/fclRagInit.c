@@ -74,7 +74,7 @@ extern void fclRagTexCalcSizes();
 
 extern u8 ragHeartsTable[];
 
-extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, addrS_t layout);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, saddr_t layout);
 
 extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
@@ -338,7 +338,7 @@ extern u8 ragListFlags[5];
 extern s32 ragBuildHeartsList(u8 type, ragListWork_t *work);
 extern s8 ragBuildList2(u8 type, u8 *work);
 extern s8 ragBuildList3(u8 type, u8 *work);
-extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, addrS_t flags);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, saddr_t flags);
 
 #ifdef NON_MATCHING
 extern s32 evtBitCheck(s32 no);

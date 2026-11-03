@@ -444,7 +444,7 @@ extern u8 D_0054F508[5];
 
 void itfPnlSetPositionOffset(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
-void sdfAddressResolver(s32 *aDataBody, addrS_t aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
+void sdfAddressResolver(s32 *aDataBody, saddr_t aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 void frSetVariableRequest(s32 VarNo, s32 pStr);
 void itfMesMngSetSelect(s32 id, s32 selno);
 void itfMesMngMarkBitStat(s32 id, u32 flag);

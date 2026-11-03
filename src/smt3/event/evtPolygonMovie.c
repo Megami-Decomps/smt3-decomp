@@ -77,14 +77,14 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
 evtPolygonMovieWork_t *evtGetPolygonMovieWorkData1(evtPolygonMovieWork_t *wdata, void *pm1data, void *pm2data);
-addrS_t evtPolygonMovieProcess1(dds3ProcessID_t *id);
+saddr_t evtPolygonMovieProcess1(dds3ProcessID_t *id);
 
 typedef struct pmdCameraTable_t {
     s32 NameIndex, Reserve1, Reserve2, Reserve3;
 } pmdCameraTable_t;
 
 extern s32 dds3GetMapNo(dds3Basic_t *scene);
-extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, addrS_t pF1, addrS_t pF2, const void *pTB, s32 pBF);
+extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, saddr_t pF1, saddr_t pF2, const void *pTB, s32 pBF);
 extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
 extern s32 evtSetRegistUnit(s32 major, s32 minor);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serial, s32 type);
@@ -161,7 +161,7 @@ typedef void (*evtFrameFunc_t)(evtPolygonMovieWork_t *, pmdFrameTable_t *, pmdFr
 extern evtFrameFunc_t nowcamera[];
 extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 extern void dds3SetScreenFovy(f32 fovy);
-extern addrS_t evtCameraFrameState;
+extern saddr_t evtCameraFrameState;
 extern f32 nowfovy;
 extern s32 D_0054F8E0;
 
@@ -1111,7 +1111,7 @@ INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BAF8);
 
 INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BB20);
 
-addrS_t evtPolygonMovieProcess1(dds3ProcessID_t *id)
+saddr_t evtPolygonMovieProcess1(dds3ProcessID_t *id)
 {
     evtPolygonMovieWork_t *work;
     dds3Basic_t *basic;

@@ -66,7 +66,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 errorCode;
     s32 currentOffset;
     u8 remainder[4];
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, addrS_t, s32, s32);
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, saddr_t, s32, s32);
     s32 userData;
 } sdfFileCmdHandle_t;
 
@@ -236,7 +236,7 @@ extern s32 sceIpuSync(s32, s32);
 
 extern sdfIpuDecodeCb_t *sdfCurrIpuDecodeCb;
 
-extern void sdfImageSetChainReleaseMem(addrS_t);
+extern void sdfImageSetChainReleaseMem(saddr_t);
 
 extern void sdfGsMemFreeDelayed(sdfGsMemSlice_t *aHandle);
 
@@ -498,7 +498,7 @@ void sdfIpuInitCb(sdfIpuDecodeCb_t *cb, struct sdfIpuInitParm_t *parm) {
 
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
 void sdfIpuSetDecodeParams(sdfIpuDecodeCb_t *cb, struct sdfIpuInitParm_t *parm, SdfStreamRead hdr, struct sdfMovieCb_t *leng) {
-    addrS_t sourceSize = EE_ADDR_S(leng);
+    saddr_t sourceSize = EE_ADDR_S(leng);
     s32 interruptsEnabled;
     u8 *frameBytes = (u8 *)hdr;
     sdfIpuInitCb(cb, parm);

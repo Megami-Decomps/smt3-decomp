@@ -186,7 +186,7 @@ extern void fldPlayerMotReset(void);
 
 extern void cmpProcessStart(void);
 
-extern addrS_t dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
+extern saddr_t dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
 
 extern s32 fldLightMaState __attribute__((section(".data")));
 

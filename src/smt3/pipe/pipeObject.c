@@ -1155,7 +1155,7 @@ void partsInit(void)
 
 typedef struct tagPipeLinkInput { u16 id; s16 partsID; } tagPipeLinkInput;
 typedef struct tagPipePartsInfo tagPipePartsInfo;
-extern addrS_t getPartsType(s32);
+extern saddr_t getPartsType(s32);
 extern tagPipePartsInfo *getPartsInfo(s16);
 extern s32 mymdlAddObject(tagpipeBasic *, u16);
 extern void PipemdlRot(tagpipeBasic *, tagPipePartsInfo *);
