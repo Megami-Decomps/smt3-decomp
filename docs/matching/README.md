@@ -25,11 +25,11 @@ both native and emitted sizes when they differ.
 | 8 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 7 |  | [sdk/libc.md](sdk/libc.md) |
 | 6 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
+| 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 6 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 6 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 6 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
-| 5 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
@@ -97,6 +97,7 @@ both native and emitted sizes when they differ.
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
 | 1 | pipe/pipePosTable | [pipe/pipePosTable.md](pipe/pipePosTable.md) |
 | 1 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
+| 1 | pipe/mnMyLink | [pipe/mnMyLink.md](pipe/mnMyLink.md) |
 | 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 |  | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
 | 1 | newbattle/nbTest | [newbattle/nbTest.md](newbattle/nbTest.md) |

@@ -292,6 +292,7 @@ datGetSkillKouka	newdata/datCalc	0x3F8	254 of 254 words match	docs/matching/newd
 datBossRashGetRec	newdata/datCalc	0x108	66 of 66 words match	docs/matching/newdata/datCalc.md	95
 Unconditional forward declarations				docs/matching/newdata/datCalc.md	120
 datGetSkillBadKouka	newdata/datCalc	0x238	103 of 142 words match	docs/matching/newdata/datCalc.md	148
+datSetAutoKaifukuSkill	newdata/datCalc	0x140	61 of 80 words match	docs/matching/newdata/datCalc.md	162
 nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_Calc.md	3
 nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
 nmeDrawNameText	nme/Nme_Calc	0x3E4	18 of 249 words match	docs/matching/nme/Nme_Calc.md	49
@@ -313,6 +314,7 @@ pbDrawMapPolyTransformed			10 of 262 words matching	docs/matching/pb/pbModel.md	
 pb_draw_exit_Process	pb/pbModel	0x1C0	112 of 112 words match	docs/matching/pb/pbModel.md	66
 pbAddRecord_char	pb/pbRecord	0x144		docs/matching/pb/pbRecord.md	3
 pbPopRecord	pb/pbRecord	0x2F0	188 of 188 words match	docs/matching/pb/pbRecord.md	26
+pipeMakeNodeLink	pipe/mnMyLink	0x80	25 of 32 words match	docs/matching/pipe/mnMyLink.md	3
 makaDrawMulti	pipe/pipeMakaAnim	0x494	293 of 293 words match	docs/matching/pipe/pipeMakaAnim.md	3
 makaDrawSingle	pipe/pipeMakaAnim	0x3D0	244 of 244 words match	docs/matching/pipe/pipeMakaAnim.md	34
 makaDrawNormalGauge	pipe/pipeMakaAnim	0x2E0	110 of 184 words match	docs/matching/pipe/pipeMakaAnim.md	50

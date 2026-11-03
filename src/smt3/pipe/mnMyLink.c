@@ -137,7 +137,7 @@ s32 pipeInitLink(tagPipeLinkInfo *pInfo)
 }
 
 
-/* NON_MATCHING: 7 of 32 words, exact size; two registers are swapped. */
+/* NON_MATCHING: 25 of 32 words match at the native 128-byte size. */
 #ifdef NON_MATCHING
 tagPipeLinkData *pipeMakeNodeLink(tagPipeLinkInfo *pInfo)
 {
@@ -151,7 +151,7 @@ tagPipeLinkData *pipeMakeNodeLink(tagPipeLinkInfo *pInfo)
 
             pNode->next = NULL;
             pNode->id = id;
-            *pNextId = id + 1;
+            *pNextId = (s32)((u32)id + 1U);
             pNode->prev = NULL;
             return pNode;
         }

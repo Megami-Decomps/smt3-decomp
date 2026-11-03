@@ -1478,6 +1478,14 @@ void datSetAutoKaifukuSkill(datUnitWork_t *work, s32 skill)
     n = datSkillTable.special[skill - 288].n;
     m = datSkillTable.special[skill - 288].m;
     switch (skill) {
+    case 0x15C:
+        if (n > 0) {
+            hp = work->maxhp / n;
+        }
+        if (m > 0) {
+            mp = work->maxmp / m;
+        }
+        break;
     case 0x15A:
     case 0x15D:
         if (n > 0) {
@@ -1488,14 +1496,6 @@ void datSetAutoKaifukuSkill(datUnitWork_t *work, s32 skill)
     case 0x15E:
         if (n > 0) {
             mp = work->maxmp / n;
-        }
-        break;
-    case 0x15C:
-        if (n > 0) {
-            hp = work->maxhp / n;
-        }
-        if (m > 0) {
-            mp = work->maxmp / m;
         }
         break;
     }
