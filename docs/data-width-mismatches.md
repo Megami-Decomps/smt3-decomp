@@ -303,7 +303,21 @@ because of the first.
 So the rule to apply when touching any data entry: **a pointer-bearing object
 wants an explicit word-wide type**, and a `size:` correction that enlarges an
 object into the pointer-bearing class creates that requirement where none
-existed. An explicit word type closes all three paths at once, which is why
+existed.
+
+**And the converse, which is the same mechanism read backwards: an object that
+holds no pointers wants byte emission, because bytes are never relocated.**
+`type:u8` was the defect on `dds3LightParam2` and is the fix on
+`sdfTexEmbedded_2FC4A0` at `0x002FC4A0`, an embedded TMX whose `size:0x10` left
+0x270 bytes in an auto-pad. A consumer's relocator found two header words
+there, `0x00200001` and `0x00140020`, both inside the retail address range,
+rewrote them as pointers, and the texture's `pixelFormat` read back `0xf3`.
+Sized `u8[0x280]` the blob is immune, for the reason that made the same token
+wrong on a pointer array.
+
+Same annotation, opposite polarity, and the discriminator is only ever whether
+the object holds pointers. Neither half of that rule is safe to state without
+the other. An explicit word type closes all three paths at once, which is why
 the fix does not depend on knowing which one fired.
 
 The third path also widens the instability. A `size:` change alters the extent
