@@ -2963,7 +2963,7 @@ s32 func_001AA5A0(void) {
     return 0;
 }
 
-/* NON_MATCHING: emits 1564/native 1576 bytes; input-address lifetime and frame differ. */
+/* NON_MATCHING: native size/frame; 17 words still differ. */
 #ifdef NON_MATCHING
 extern u8 D_005518E0[8];
 extern void SetRotateMatrixAxis(f32 angle, const sdfVector3_t *axis);
@@ -2975,11 +2975,15 @@ void func_001AA6D0(void)
     /* XYZ is handed to VU0 by address; native leaves W uninitialized. */
     volatile f32 scale[4];
     /* Right stick pair; the left pair precedes it in the same pad buffer. */
-    const u8 *stick = &D_005518E0[2];
-    s32 y = stick[1];
-    s32 x = stick[0];
+    s32 y;
+    s32 x;
     f32 angle;
     f32 step;
+    const u8 *stick = &D_005518E0[2];
+    /* Keep this real across-call address live; target-specific CSE constraint, not original spelling. */
+    FAKEMATCH_ASM_LIVE(stick);
+    y = stick[1];
+    x = stick[0];
 
     if ((u8)(y + 0xC0) > 0x80) {
         step = (128 - y) * (1.0f / 128.0f) * 22.5f;

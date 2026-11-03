@@ -14,8 +14,9 @@ compiler evidence, not measurements of SMT3 functions.
 
 ## Requirements and use
 
-Run `python3 tools/download_tools.py` first. The probe requires GDB with
-Python and refuses a compiler whose SHA-256 differs from
+Run `python3 tools/download_tools.py` first. Hooked mode requires GDB with
+Python; `--nohook` does not require a debugger. Both modes refuse a compiler
+whose SHA-256 differs from
 `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
 It also refuses units assigned another compiler in `compilers.txt`; the hooks
 are specific to 2.96. Use `check_unit.py` and the integrated build for the
@@ -48,7 +49,12 @@ unhooked compile. When dumping is enabled it also compares the unhooked
 `-da` assembly with plain `tools/cc.sh`, since dumping can itself change the
 compiler's heap and decisions. Both compiler runs must succeed. Require the
 final `verify: OK` result before citing a trace. `--no-verify` produces
-unqualified diagnostics, and `--nohook` only produces ordinary compiler dumps.
+unqualified diagnostics. `--nohook` only produces ordinary assembly and, unless
+`--no-dumps` is selected, compiler dumps. It still validates the selected
+compiler and its pinned hash, but produces no decision trace or `verify: OK`
+result. Its exit status 0 means the compiler runs completed, not that dumped
+and plain assembly matched: compare those outputs independently before
+claiming parity.
 
 If dumping changes code, rerun with `--no-dumps`. The log's instruction IDs
 then describe the plain compilation, without corresponding RTL files.

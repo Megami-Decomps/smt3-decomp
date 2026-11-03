@@ -27,6 +27,26 @@ a word of size).
 match, from `room`, `index`, `bit` locals in that order. The extra `nor` in
 the close path is what moves the allocation.
 
+### Initialized-index sibling control (closed negative)
+
+A bounded recheck on c61f8129 reproduced the retained 40/42-word draft at
+168 bytes, with 34 exact peers. The matched OpenBlock2 sibling's ordinary
+initializer order gave 24/42; binding only the genuinely initialized index
+locally to its native register gave 26/42, still 168 bytes. The binding
+restored setup through +0x28 and the low-offset arm, but not the high arm's
+branch, mask and pointer allocation. Both controls were rejected. Original
+source and assembly fallback remain unchanged; no further binding grid is
+justified by this result.
+
+Whole-owner plain/dump assembly, allocated sections, non-file symbols and
+ordered relocations agree for each control, with owned data and peers exact.
+Qualified RTL confirms the real index definition and annulled branch/shift
+behavior, not an internal ranking or eligibility cause; no hooked debugger
+trace was available. The inherited contract still requires valid aligned
+storage, representable signed address arithmetic and reached shift counts
+in 0..63. The script caller does not establish global input bounds. No new
+checks, truncation, input restrictions or matching credit were introduced.
+
 ## fldAutoMapDrawIconOfsR (field/fldAutoMap, 0x244)
 
 10 of 146 words match, at the exact 584-byte size.

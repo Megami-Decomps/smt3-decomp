@@ -36,7 +36,8 @@
 # which CSE hashes, so in a heap-sensitive unit `-da` can change the code itself; then the
 # trace is not of the build's compile, and --no-dumps traces it without dumps.
 # Nothing in the repo, the vendor binary or the build is modified, and the build does not use this
-# tool. Scratch trees live under $TMPDIR (see docs/cc1probe.md). Requires gdb with Python.
+# tool. Scratch trees live under $TMPDIR (see docs/cc1probe.md). Hooked mode requires gdb
+# with Python. --nohook needs no debugger; exit 0 means compilation completed, not parity.
 #
 # The whole script lives in one function so bash has parsed all of it before running anything:
 # editing this file while a run is in progress can no longer corrupt that run.
@@ -101,7 +102,9 @@ cc1="$REPO/tools/compilers/ee-gcc2.96/lib/gcc-lib/ee/2.96-ee-001003-1/cc1"
 want=d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1
 [ -f "$cc1" ] || { echo "no compiler at $cc1 (run tools/download_tools.py)" >&2; exit 3; }
 [ "$(sha256sum "$cc1" | cut -d' ' -f1)" = "$want" ] || { echo "cc1 sha256 mismatch: the probe addresses are for $want" >&2; exit 3; }
-command -v gdb >/dev/null || { echo "gdb (with Python) is required" >&2; exit 3; }
+if [ "$nohook" != 1 ]; then
+    command -v gdb >/dev/null || { echo "gdb (with Python) is required" >&2; exit 3; }
+fi
 
 # The loader cc.sh will use (SMT3_I386_LIBDIR, else tools/glibc32). Only needed so the hooked run can
 # start the same loader under gdb; the unhooked baseline is plain tools/cc.sh.
