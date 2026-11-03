@@ -329,18 +329,18 @@ EmTask	pipe/pipeSection	0x34C	211 of 211 words match	docs/matching/pipe/pipeSect
 MyAction	pipe/pipeSection	0x21C		docs/matching/pipe/pipeSection.md	72
 ActionKey	pipe/pipeSection	0x5EC	379 of 379 words match	docs/matching/pipe/pipeSection.md	97
 pipeOffset	pipe/pipeSection	0x108	23 of 66 words match	docs/matching/pipe/pipeSection.md	147
-cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/matching/result/rstcalc.md	3
-cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/matching/result/rstcalc.md	25
-datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/matching/result/rstcalc.md	47
-cmbGetHeartsParamByIndex	rstcalc	0x58	22 of 22 words match	docs/matching/result/rstcalc.md	70
-cmbCountEvoReady	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	92
-cmbGetLevelUpCount	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	113
-rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/matching/result/rstcalc.md	137
-cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	157
-rstSetCurrentDevil	176 bytes	matched		docs/matching/result/rstcalc.md	186
-rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	219
-cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	255
-cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	296
+cmpFindKugatatiMsgEntry	rstcalc	0x60	14 of 24 words differ	docs/matching/result/rstcalc.md	3
+cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/matching/result/rstcalc.md	49
+datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/matching/result/rstcalc.md	71
+cmbGetHeartsParamByIndex	rstcalc	0x58	22 of 22 words match	docs/matching/result/rstcalc.md	94
+cmbCountEvoReady	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	116
+cmbGetLevelUpCount	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	137
+rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/matching/result/rstcalc.md	161
+cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	181
+rstSetCurrentDevil	176 bytes	matched		docs/matching/result/rstcalc.md	210
+rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	243
+cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	279
+cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	320
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3
