@@ -371,3 +371,77 @@ their original compilation context. Final combined production/plain/dump
 parity covers six allocated sections, 585 non-file symbols and 698 ordered
 relocations; plain/dump normalized assembly also agrees. Full retail
 checksum/byte comparison, regressions and fresh guard checks pass.
+
+## nbGetKoukaBadDamage (newbattle/nbCalc, 0x41C)
+
+263 of 263 words match at the full 1052-byte native size. Complete owner and
+owned data: 61 matches, 0 differences. The preceding HitType and guarded
+BadKaifuku changes are preserved and excluded from this target's credit.
+
+### Native observations and ordinary reconstruction
+
+Ordinary indexed fields replace the unsupported volatile skill view. The
+normal record remains 60 bytes, with u8 badtype/badlevel and u16 status.
+Main-data lookup still precedes the wrong-type return; source/target work
+lookups precede status and the second badtype observation. Status remains a
+snapshot across affinity, event, diagnostic and RNG calls. Target flags are
+loaded after the event query; source/target aliasing is not excluded.
+
+The status-selection RNG and final success RNG use separate ordinary locals.
+The final signed comparison follows the diagnostic in source, reproducing
+native saved-value lifetimes and its scheduled call delay slot. Diagnostic
+strings and 0.7/1.3 float literals are actual source-owned data. No provider
+contract, field width, compiler flag or translation-unit boundary changes.
+
+The type 3 candidate list has 14 signed-word cells, one per tested bit 0..13.
+The old guard's count-zero early return was not native: retail calls the RNG
+which updates its state and then executes DIVU/BREAK 7 for a zero limit.
+The reconstruction restores that call, not a new safe result or fabricated
+positive-count bound. All 12 initialized type 3 records have 1, 3 or 5 candidates;
+skill 272 follows its separate six-way random-selection path. This observed
+initialization is not a proof that no other code can modify the table.
+
+### Copied branch and localized live level
+
+Native 0x267008/0x26700C loads source->flag and masks 0x20, with no live consumer.
+The matched nbGetKoukaType/nbGetHitType copied-case shapes and the adjacent
+live source-side accuracy split corroborate retaining the same real
+percentage calculation in two exclusive source-side branches. This uses the
+copied-case exception, not an otherwise-live-predicate claim for this target.
+Exactly one conversion/divide/multiply sequence executes. Qualified compiler
+snapshots show the branch and both arms through 25.sched2; 27.jump2 deletes
+the branch/duplicate arm while retaining the native load/mask. This is a
+mechanistic reconstruction, not original spelling or a recovered macro.
+
+The ordinary level snapshot reaches 261/263 words. In 19.lreg it still reloads
+the unsigned byte; 20.greg substitutes a copy of the earlier loaded value
+from v1 to a0. 29.dbr places that redundant copy in the virtual-check delay slot
+and converts a0, whereas native leaves the slot empty and converts v1.
+A single localized binding keeps the real initialized s32 level in v1 only
+until its float conversion. It is initialized inside the nonvirtual,
+non-255 gate, consumed on each exclusive arm, and dead before evtBitCheck.
+No call clobbers a live bound value. There is no empty asm, memory barrier,
+artificial lifetime, fake volatile qualifier or register search grid.
+Deleting only the binding reproduces the two-word ordinary residual.
+
+Final ordinary/probed full-owner builds agree on all 6 allocated sections
+and metadata, 586 non-file symbols, 698 ordered relocation contracts and
+normalized assembly. These are real unhooked compiler-pass snapshots; no
+unobserved internal routine is asserted. The single-conversion control
+reaches 260/263, with only native-mask scheduling different. Pointer/indexed
+and scalar-lifetime controls remain retained as negative evidence.
+
+### Numeric scope
+
+The native arithmetic is level/100, times affinity, times100, followed by
+the event/status-dependent 0.5,0.7,1.3 or1.5 product. Non-0x800 status uses the
+masked low 16 affinity divided by 100, so chance and printed casts are safely
+bounded over those typed values. Status 0x800 uses caller ritu. The live
+caller multiplies affinity by a running power, which starts at 1 and is
+updated after each target by the table's u16 minus/100. All 288 initialized
+minus fields equal 100; the known normal-skill writer leaves these fields
+unchanged. This supports initialized retail bounds but does not establish
+global alias/writer closure. Arbitrary nonfinite/out-of-range incoming ritu
+or modified minus values retain the inherited conversion-domain limitation;
+exact pinned-target code is not a promise of portable total float-cast
+semantics. No clamp or fabricated gameplay bound was introduced.

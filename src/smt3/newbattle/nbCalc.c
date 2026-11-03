@@ -1130,57 +1130,51 @@ f32 nbGetGensyoRitu(s32 nskill, s32 sformindex, s32 dformindex)
     return datSkillTable.normal[nskill].minus / 100.0f;
 }
 
-#ifdef NON_MATCHING
 extern s32 datGetBadStatusAttr(s32 bad);
-extern const char D_00544BA8[];
 
 u32 nbGetKoukaBadDamage(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s32 nvirtual)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
-    volatile datNormalSkill_t *skill = &datSkillTable.normal[nskill];
     datUnitWork_t *source, *target;
     s32 status, aisyo, random, chanceInt, success;
-    s32 candidates[14], count, i;
+    s32 candidates[14], count, i, statusRandom;
     u32 targetFlags;
-    u8 badtype, badlevel;
+    s32 badtype;
     f32 affinity, baseChance, chance;
 
-    badtype = skill->badtype;
+    badtype = datSkillTable.normal[nskill].badtype;
     if (badtype != 1 && badtype != 3) {
         return 0;
     }
     source = nbGetUnitWorkFromFormindex(sformindex);
     target = nbGetUnitWorkFromFormindex(dformindex);
-    status = skill->basstatus & 0x7FFF;
+    status = datSkillTable.normal[nskill].basstatus & 0x7FFF;
     if (nskill == 0x110) {
-        random = dds3GetRandIntA(NULL, 100);
-        if (random < 40) {
+        statusRandom = dds3GetRandIntA(NULL, 100);
+        if (statusRandom < 40) {
             status = 0x1000;
-        } else if (random < 60) {
+        } else if (statusRandom < 60) {
             status = 0x2000;
-        } else if (random < 70) {
+        } else if (statusRandom < 70) {
             status = 0x4000;
-        } else if (random < 80) {
+        } else if (statusRandom < 80) {
             status = 0x20;
-        } else if (random < 90) {
+        } else if (statusRandom < 90) {
             status = 0x100;
         } else {
             status = 0x40;
         }
-    } else if (skill->badtype == 3) {
+    } else if (datSkillTable.normal[nskill].badtype == 3) {
         count = 0;
         for (i = 0; i < 14; i++) {
             if ((status >> i) & 1) {
                 candidates[count++] = i;
             }
         }
-        /* Retail leaves this unset; no table entry has zero candidates. */
-        status = 0;
-        if (count == 0) {
-            return status;
-        }
-        random = dds3GetRandIntA(NULL, count);
-        status = 1 << candidates[random];
+        /* Retail calls the RNG even for zero candidates; its zero-limit
+           divide trap is not replaced by an early return. */
+        statusRandom = dds3GetRandIntA(NULL, count);
+        status = 1 << candidates[statusRandom];
     }
     aisyo = nbGetAisyo(nskill, dformindex, datGetBadStatusAttr(status));
     if (aisyo & 0x170000) {
@@ -1194,7 +1188,7 @@ u32 nbGetKoukaBadDamage(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s3
         printf("DANTE SUTING BOSS NG...\n");
         return 0;
     }
-    if ((u32)(nskill - 0x103) < 2 && (nbGetAisyo(-1, dformindex, 7) & 0x70000)) {
+    if (((u32)nskill - 0x103) < 2 && (nbGetAisyo(-1, dformindex, 7) & 0x70000)) {
         printf("SIBAE JYUSATU TAISEI ARI NG...\n");
         return 0;
     }
@@ -1202,38 +1196,54 @@ u32 nbGetKoukaBadDamage(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s3
         printf("PESTO POISON NASI NG...\n");
         return 0;
     }
-    badlevel = skill->badlevel;
     success = 1;
-    if (badlevel != 0xFF && nvirtual == 0) {
-        baseChance = (f32)badlevel;
-        (void)((volatile datUnitWork_t *)source)->flag;
-        chance = (baseChance / 100.0f) * affinity * 100.0f;
+    if (datSkillTable.normal[nskill].badlevel != 0xFF && nvirtual == 0) {
+        /* The ordinary snapshot adds a v1-to-a0 copy. Keep this real level
+           in native v1 only through its conversion, before evtBitCheck.
+           This is a local allocation aid, not original source evidence. */
+        FAKEMATCH_ASM_REG(s32, badlevel, "$3") = datSkillTable.normal[nskill].badlevel;
+        /* The matched nbGetKoukaType/nbGetHitType copied-case shape explains
+           retail's flag load/mask at 0x267008/0x26700C. Qualified jump2
+           deletes this branch/duplicate calculation but keeps the mask.
+           This is mechanistic reconstruction, not historical spelling. */
+        if (source->flag & 0x20) {
+            baseChance = (f32)badlevel;
+            chance = (baseChance / 100.0f) * affinity * 100.0f;
+        } else {
+            baseChance = (f32)badlevel;
+            chance = (baseChance / 100.0f) * affinity * 100.0f;
+        }
         i = evtBitCheck(0xAF2);
         targetFlags = target->flag;
         if (i != 0) {
             if (!(targetFlags & 0x20)) {
                 if (status == 0x800) {
-                    chance *= targetFlags & 4 ? 0.5f : 0.7f;
+                    if (targetFlags & 4) {
+                        chance *= 0.5f;
+                    } else {
+                        chance *= 0.7f;
+                    }
                 } else {
                     chance *= 0.7f;
                 }
             }
         } else if (!(targetFlags & 0x20) && status == 0x800) {
-            chance *= targetFlags & 4 ? 1.3f : 1.5f;
+            if (targetFlags & 4) {
+                chance *= 1.3f;
+            } else {
+                chance *= 1.5f;
+            }
         }
         random = dds3GetRandIntA(NULL, 100);
         chanceInt = (s32)chance;
+        printf("\245\320\245\303\245\310\245\271\245\306\241\274\245\277\245\271\310\277\261\307\263\316\316\250 waza:%d  aisyo:%d  ritu:%d  rnd:%d\n", (s32)baseChance, (s32)(affinity * 100.0f), chanceInt, random);
         success = random < chanceInt;
-        printf(D_00544BA8, (s32)baseChance, (s32)(affinity * 100.0f), chanceInt, random);
     }
     if (success && (s32)nbGetBadStat(dformindex) < status) {
         return status;
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaBadDamage);
-#endif
 
 extern const char D_00544BE8[];
 
@@ -1280,8 +1290,6 @@ u32 nbGetKoukaBadKaifuku(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s
 }
 
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544BA8);
-
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaBadKaifuku);
 #endif
 
