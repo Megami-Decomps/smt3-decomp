@@ -83,7 +83,7 @@ extern s32 sceSifDmaStat(s32);
 
 extern s32 GetThreadId(void);
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
 
@@ -414,7 +414,7 @@ s32 atoi(const char *s) {
     return strtol(s, NULL, 10);
 }
 
-void *malloc(u32 size) {
+void *malloc(ps2Size_t size) {
     void *result;
 
     __malloc_lock(_impure_ptr);

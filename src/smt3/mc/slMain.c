@@ -56,7 +56,7 @@ extern void mcMakeFileName(char *path, s32 num);
 
 extern u32 strlen(const char *s);
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 void sdfMcFuncOpen(u32 context, const char *path, s32 openFlags);
 

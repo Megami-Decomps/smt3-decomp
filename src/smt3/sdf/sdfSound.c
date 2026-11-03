@@ -190,7 +190,7 @@ enum sdf_stream_playback {
 
 extern void sdfSndTransToIOP(s32 aIOPAddr, void *aEEAddr, s32 aSize);
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 extern void sdfDelayThread(s32 delay);
 

@@ -27,7 +27,7 @@ extern u32 fldDrawEnv;
 
 extern sdfTexHandle_t *D_0054EC60;
 
-extern void *memset(void *, int, ps2Size_t );
+extern void *memset(void *, int, ps2Size_t);
 
 extern u8 D_0054EC50[];
 
@@ -146,7 +146,7 @@ void sdfFileClose(devState_t *aHandle);
 
 #include "sdk_libc.h"
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 extern s32 gFldInf_HitIdx;
 

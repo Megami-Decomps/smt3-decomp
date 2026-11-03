@@ -91,7 +91,7 @@ effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pPa
 extern s8 D_0054F2C5;
 /* The result slot must be valid whenever the create callback is present. */
 extern effDebugMenu_t D_003203E0;
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 extern void effDebugAllocDrawTag(void);
 extern void effDebugLinkDrawTag(void);
 extern s8 D_005298CB[];

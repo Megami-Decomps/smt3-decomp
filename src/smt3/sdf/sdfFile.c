@@ -133,7 +133,7 @@ enum sdf_stream_playback {
 
 extern s32 DIntr();
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 #include "sdk_libkernl.h"
 
@@ -151,7 +151,7 @@ extern char * strchr(const char *, s32);
 
 extern char D_00551940[];
 
-extern s32 strncmp(const char *, const char *, ps2Size_t );
+extern s32 strncmp(const char *, const char *, ps2Size_t);
 
 extern sdfFileDeviceCB_t sdfFileDeviceCB[];
 

@@ -28,7 +28,7 @@ extern void dds3ConsPanelTagLink(sdfDrawTag_t *, s32, s32, s32, s32);
 
 extern s32 dds3SelectMenu(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 void evtBitOff(s32 no);
 

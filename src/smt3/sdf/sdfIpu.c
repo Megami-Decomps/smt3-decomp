@@ -145,7 +145,7 @@ extern s32 DIntr();
 
 #include "sdk_libkernl.h"
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 extern s8 sdfPrintIopFlag;
 
@@ -226,7 +226,7 @@ extern sdfIpuDecodeCb_t *sdfIpuQueueTail;
 
 void *sdfAllocAuto(s32 size);
 
-extern void * memset(void *, s32, ps2Size_t );
+extern void * memset(void *, s32, ps2Size_t);
 
 extern sdfGsMemSlice_t *sdfGsMemAllocRect(s32, s32, s32, s32, s32);
 

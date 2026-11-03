@@ -22,7 +22,7 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 s32 sdfBillBoardGetPacketSize(s32 aNum);
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 void sdfBillBoardMakeTMPacket(u8 *aPacket, const f32 *aTM);
 

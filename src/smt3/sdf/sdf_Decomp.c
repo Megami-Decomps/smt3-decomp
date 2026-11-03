@@ -69,7 +69,7 @@ void sdfGrClosePacketBuff(s32 aBuffPtr);
 
 extern s32 D_00552170;
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length);
 

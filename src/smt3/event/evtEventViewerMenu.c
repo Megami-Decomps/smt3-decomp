@@ -805,7 +805,7 @@ extern char D_0054FA60[], D_0054FA68[], D_0054FA70[], D_0054FA78[];
 extern char D_0054FA80[], D_0054FA88[];
 extern char *evtItemFadeNames[];
 extern char *D_0032CB30[];
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C230);
 

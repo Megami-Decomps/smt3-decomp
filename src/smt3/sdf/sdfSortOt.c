@@ -80,7 +80,7 @@ extern s32 sceSifDmaStat(s32);
 
 extern s32 GetThreadId(void);
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
 

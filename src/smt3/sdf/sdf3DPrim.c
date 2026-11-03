@@ -172,7 +172,7 @@ typedef struct sdf3DPrimPolyParm_t {
  * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
 s32 sdfGrAllocPacketBuff(s32 aSize);
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag,
                              s32 (*aAllocator)(s32));

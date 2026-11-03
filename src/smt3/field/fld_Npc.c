@@ -64,7 +64,7 @@ extern u8 D_003129D0[0x100];
 
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 

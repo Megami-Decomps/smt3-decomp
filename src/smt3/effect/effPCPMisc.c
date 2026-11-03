@@ -2404,7 +2404,7 @@ void mdlLink(dds3ModelHandle_t *aHandle, struct sdfGrOt_t **aModelOt);
 
 void mdlSetPosition(dds3ModelHandle_t *aHandle);
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 extern void *memset(void *a, int b, ps2Size_t c);
 

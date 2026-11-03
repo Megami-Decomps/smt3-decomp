@@ -124,7 +124,7 @@ extern s32 scePadInit(s32);
 
 extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 void sdfPadControl(sdfPadCb_t *entry);
 

@@ -465,7 +465,7 @@ f32 effBTLSystem_GetScalePtr(nbFormation_t *pFormation)
     }
 }
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 void effBTLSystem_Part_DataLoad(effBattleSystem_effBTLSystem_Part_tag *pPartList, u32 count)
 {

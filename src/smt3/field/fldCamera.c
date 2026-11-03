@@ -16,7 +16,7 @@
 #include "event.h"
 #include "effect.h"
 
-extern void *memset(void *, int, ps2Size_t );
+extern void *memset(void *, int, ps2Size_t);
 
 f32 sdfSin(f32 aRadius);
 

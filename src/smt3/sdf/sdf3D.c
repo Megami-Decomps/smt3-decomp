@@ -239,7 +239,7 @@ extern s32 vu1Tex0Slot2[];
 
 extern s32 vu1Tex0Slot1[];
 
-extern void *memcpy(void *, const void *, ps2Size_t );
+extern void *memcpy(void *, const void *, ps2Size_t);
 
 void ReverseMatrix(void);
 
