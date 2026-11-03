@@ -2,6 +2,7 @@
 #include "ps2asm.h"
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
+#include "eeregs.h"
 
 struct sdfDrawTag_t;
 
@@ -78,8 +79,6 @@ typedef struct sdf3DTmPacketData_t {
     u128 scaledRows[3];
     u32 tag[4];
 } sdf3DTmPacketData_t;
-
-#define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
 
 #define SDF_VIF_ITOP_LIGHTING 0x04000010
 
@@ -192,7 +191,7 @@ void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag,
         aAllocator = sdfGrAllocPacketBuff;
     }
     referencePacket = (u64 *)aAllocator(0x20);
-    referencePacket[0] = ((u64)((u32)sdf3DPrimIdentityTm & SDF_DMA_ADDRESS_MASK) << 32) | 0x30000008;
+    referencePacket[0] = ((u64)EE_PHYSICAL((u32)sdf3DPrimIdentityTm) << 32) | 0x30000008;
     referencePacket[1] = 0x6C07C000ULL << 32;
     QUAD_ZERO(*(u128 *)&referencePacket[2]);
     sdfDrawTagLinkRef(aTag, (u32)referencePacket);
@@ -214,7 +213,7 @@ void sdf3DPrimLinkTm(sdfDrawTag_t *aTag,
         aAllocator = sdfGrAllocPacketBuff;
     }
     dmaPacket = (u64 *)aAllocator(0x90);
-    dmaPacket[0] = ((u64)((u32)(dmaPacket + 2) & SDF_DMA_ADDRESS_MASK) << 32) | 0x20000008;
+    dmaPacket[0] = ((u64)EE_PHYSICAL((u32)(dmaPacket + 2)) << 32) | 0x20000008;
     dmaPacket[1] = 0x6C07C000ULL << 32;
     sdf3DPrimSetTmPacket((sdf3DTmPacketData_t *)(dmaPacket + 2));
     sdfDrawTagLink(aTag, (u32)dmaPacket);

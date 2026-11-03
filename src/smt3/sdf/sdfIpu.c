@@ -377,7 +377,7 @@ void sdfIpuMakeToIpuDmaTag(sdfIpuDecodeCb_t *cb, u8 *data, s32 leng) {
     u32 address;
     tag = sdfAllocAuto(((remaining + 0xFFEFF) / 0xFFF00) * 16);
     cb->inputDmaChain = tag;
-    address = (u32)data & 0x0FFFFFFF;
+    address = EE_PHYSICAL((u32)data);
     do {
         s32 chunk = remaining > 0xFFF00 ? 0xFFF00 : remaining;
         u32 id;
@@ -439,7 +439,7 @@ void sdfIpuMakeBltPacket(sdfIpuDecodeCb_t *cb)
     do {
         packet = sdfAllocAuto(packetBytes);
         cb->transferPacketBuffers[bufferIndex] = packet;
-        sourceAddress = (u32)cb->frameBuffers[bufferIndex] & 0x0FFFFFFF;
+        sourceAddress = EE_PHYSICAL((u32)cb->frameBuffers[bufferIndex]);
 
         packet[0] = 0x10000003;
         packet[1] = (u64)0x50000003 << 32;
@@ -633,7 +633,7 @@ void sdfIpuHandleDmaEnd(sdfIpuDecodeCb_t *feed) {
                 writeSlot -= 8;
             }
             destinationAddress += writeSlot << 13;
-            destinationAddress = EE_UNCACHED(destinationAddress & 0x0FFFFFFF);
+            destinationAddress = EE_UNCACHED(EE_PHYSICAL(destinationAddress));
             availableBytes = feed->read(feed, feed->strmCallbackParm, SDF_STREAM_READ_QUERY, &endOfStream, 0);
             if (availableBytes < 0x2000) {
                 if (endOfStream == 0) {
@@ -654,7 +654,7 @@ void sdfIpuHandleDmaEnd(sdfIpuDecodeCb_t *feed) {
                 filledSlots++;
             }
             if (writeSlot == 7) {
-                memcpy((void *)EE_UNCACHED((u32)(feed->scratchBuffer - 0x100) & 0x0FFFFFFF), (void *)(destinationAddress + 0x1F00), 0x100);
+                memcpy((void *)EE_UNCACHED(EE_PHYSICAL((u32)(feed->scratchBuffer - 0x100))), (void *)(destinationAddress + 0x1F00), 0x100);
             }
             feed->filledSlots = filledSlots;
             if (feed->done != 0) {
@@ -668,7 +668,7 @@ void sdfIpuHandleDmaEnd(sdfIpuDecodeCb_t *feed) {
 void sdfIpuSetToIpuDma(sdfIpuDecodeCb_t *cb) {
     if (cb->active == 0) {
         D_00552158 = cb;
-        HW_WRITE(D4_TADR, (u32)cb->inputDmaChain & 0x0FFFFFFF);
+        HW_WRITE(D4_TADR, EE_PHYSICAL((u32)cb->inputDmaChain));
         HW_WRITE(D4_QWC, 0);
         HW_WRITE(D4_CHCR, 0x105);
     } else {
@@ -678,7 +678,7 @@ void sdfIpuSetToIpuDma(sdfIpuDecodeCb_t *cb) {
         }
         D_00552158 = cb;
         cb->inputFeedDmaInFlight = 1;
-        HW_WRITE(D4_MADR, ((u32)cb->scratchBuffer + (cb->firstSlot << 13)) & 0x0FFFFFFF);
+        HW_WRITE(D4_MADR, EE_PHYSICAL((u32)cb->scratchBuffer + (cb->firstSlot << 13)));
         HW_WRITE(D4_QWC, 0x2000 / 16);
         HW_WRITE(D4_CHCR, 0x101);
     }
@@ -688,7 +688,7 @@ void sdfIpuSetToIpuDma(sdfIpuDecodeCb_t *cb) {
 /* Start DMA from the IPU into the selected buffer, then toggle the byte index. */
 void sdfIpuSetFromIpuDma(sdfIpuDecodeCb_t *cb) {
     u8 bufferIndex = cb->bufferIndex;
-    HW_WRITE(D3_MADR, (u32)cb->frameBuffers[bufferIndex] & 0x0FFFFFFF);
+    HW_WRITE(D3_MADR, EE_PHYSICAL((u32)cb->frameBuffers[bufferIndex]));
     HW_WRITE(D3_QWC, cb->buffSize / 16);
     HW_WRITE(D3_CHCR, 0x100);
     cb->bufferIndex = bufferIndex ^ 1;
@@ -740,7 +740,7 @@ s32 sdfIpuDecode(sdfIpuDecodeCb_t *cb)
 
     sdfCurrIpuDecodeCb = cb;
     D_00552158 = cb;
-    cb->dma.outputAddress = (u32)cb->frameBuffers[cb->bufferIndex] & 0x0FFFFFFF;
+    cb->dma.outputAddress = EE_PHYSICAL((u32)cb->frameBuffers[cb->bufferIndex]);
     cb->dma.outputQwords = cb->buffSize / 16;
     cb->dma.outputControl = 0x100;
     cb->bufferIndex ^= 1;

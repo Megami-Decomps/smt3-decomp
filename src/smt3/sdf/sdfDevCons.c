@@ -343,7 +343,7 @@ void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *aCB) {
         sceDmaSync((sceDmaChan *)channelRegisters, 0, 0);
         HW_WRITE((volatile u32 *)channelRegisters, HW_READ((volatile u32 *)channelRegisters) | 0x40); /* CHCR bit 6: tag-transfer enable */
         EE_SYNC_BARRIER();
-        sceDmaSendN(channelRegisters, (void *)((u32)aCB->start & 0x0FFFFFFF), packetBytes >> 4);
+        sceDmaSendN(channelRegisters, (void *)EE_PHYSICAL((u32)aCB->start), packetBytes >> 4);
         nextBufferIndex = aCB->dblBuffId ^ 1;
         aCB->dblBuffId = nextBufferIndex;
         aCB->tag = (u8 *)aCB->buf[nextBufferIndex];
@@ -449,7 +449,7 @@ void sdfDevConsDrawInit(sdfDevConsDrawCB_t *aCB, void *aPacketBuffer, s32 aBuffe
     u64 textureState;
     s32 halfBufferBytes = aBufferSize >> 1;
 
-    ringAddress = EE_UNCACHED_RING((u32)aPacketBuffer & 0x0FFFFFFF);
+    ringAddress = EE_UNCACHED_RING(EE_PHYSICAL((u32)aPacketBuffer));
     ring = (u8 *)ringAddress;
     aCB->buffSize = halfBufferBytes;
     aCB->buf[0] = ring;

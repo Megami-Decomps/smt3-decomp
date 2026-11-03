@@ -61,6 +61,13 @@
 #define SDF_VU0_DATA_MEMORY ((volatile u128 *)0x11004000)
 #endif
 
+/* The EE's plain physical addressing, which is what a DMA engine reads: the
+ * low 28 bits name RAM and the top nibble is the cache mode. Off target there
+ * is no cache mode and no 28-bit RAM, so the address passes through. */
+#ifndef EE_PHYSICAL
+#define EE_PHYSICAL(addr) ((addr) & 0x0FFFFFFF)
+#endif
+
 /* Forces an address into the EE's uncached mirror by setting one of the top
  * two address bits, for a DMA engine or coprocessor reading memory the CPU
  * just wrote: EE_UNCACHED (bit 29) for an ordinary buffer or struct,

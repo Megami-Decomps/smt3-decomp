@@ -1,5 +1,6 @@
 #include "common.h"
 #include "libsdf.h"
+#include "eeregs.h"
 
 extern void *sdfChipAllocDirect(s32 aSize);
 extern void *sdfChipAllocZeroDirect(s32 aSize);
@@ -451,7 +452,7 @@ void sdfMatFreeDelayed(sdfMat_t *aMat)
 sdfDmaTag_t *sdfMatMakePacket(sdfMat_t *aMat, sdfDmaTag_t *aBuffer, s32 aId)
 {
     aBuffer->id = 0x30;
-    aBuffer->addr = (void *)((u32)aMat->packet[aId] & 0x0FFFFFFF);
+    aBuffer->addr = (void *)EE_PHYSICAL((u32)aMat->packet[aId]);
     aBuffer->qwc = 0xA;
     aBuffer->dat0 = 0;
     aBuffer->dat1 = 0;

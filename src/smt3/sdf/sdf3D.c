@@ -5,6 +5,7 @@
 #include "sdf_lighting.h"
 #include "libsdf.h"
 #include "sdf_resource.h"
+#include "eeregs.h"
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
 enum {
@@ -125,8 +126,6 @@ extern u32 sdf3DFogDefault;
 extern f32 sdf3DEyeOffset[4];
 
 extern u8 sdf3DScreenParam[];
-
-#define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
 
 #define SDF_DMA_QWORD_SHIFT 4
 
@@ -465,7 +464,7 @@ void sdf3DMakeFogPacket(sdf3DFogPacket_t *aPacket, sdf3DFogParam_t *aParam) {
 void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng) {
     s32 quadwordCount = (aLeng + 15) >> SDF_DMA_QWORD_SHIFT;
     aPacket->quadwords = quadwordCount;
-    aPacket->address = aData & SDF_DMA_ADDRESS_MASK;
+    aPacket->address = EE_PHYSICAL(aData);
     aPacket->tag = SDF_VIF_FLUSHA_COMMAND;
     aPacket->command = quadwordCount | SDF_VIF_DIRECT_COMMAND;
     aPacket->unknown10 = 0;
@@ -474,7 +473,7 @@ void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng) {
 }
 
 void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket) {
-    aPacket->address = (u32)vu1MicroPacket & SDF_DMA_ADDRESS_MASK;
+    aPacket->address = EE_PHYSICAL((u32)vu1MicroPacket);
     aPacket->quadwords = (D_002F5600 - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
     aPacket->tag = 0;
     aPacket->command = 0;

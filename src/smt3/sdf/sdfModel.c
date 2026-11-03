@@ -3,6 +3,7 @@
 #include "model.h"
 #include "draw.h"
 #include "ps2asm.h"
+#include "eeregs.h"
 
 /* Audited SDK COP2/MMI operations: ee-gcc cannot express packed
  * vector transfers or the implicit VU matrix-register convention in C. */
@@ -377,7 +378,7 @@ sdfModelNode_t *sdfModelSearchNode(sdfModelRootNode_t *aRoot, s32 aId)
 
 sdfDmaTag_t *sdfModelSetTmRefPacket(sdfModelNode_t *aNode, sdfDmaTag_t *aBuffer, s32 aId)
 {
-    u32 addr = (u32)((u8 *)aNode->tmPacket + (aId << 7)) & 0x0FFFFFFF;
+    u32 addr = EE_PHYSICAL((u32)((u8 *)aNode->tmPacket + (aId << 7)));
 
     *(u64 *)aBuffer = ((u64)addr << 32) | 0x30000008;
     aBuffer->dat1 = 0x6C07C000;
@@ -460,7 +461,7 @@ sdfDmaTag_t *sdfModelSetNormalDrawPacket(sdfModelNode_t *aNode, sdfShapePacket_t
     body = sdfModelSetMatRefPacket(aNode->root, matIndex, aBuffer, aId);
     body->id = 0x30;
     body->qwc = qwc;
-    body->addr = (void *)((u32)aDataPtr->dataBody & 0x0FFFFFFF);
+    body->addr = (void *)EE_PHYSICAL((u32)aDataPtr->dataBody);
     body->dat0 = 0;
     body->dat1 = 0;
     return body + 1;
@@ -472,7 +473,6 @@ sdfDmaTag_t *sdfModelSetNormalDrawPacket(sdfModelNode_t *aNode, sdfShapePacket_t
 sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkinPacket_t *aDataPtr,
                                           sdfDmaTag_t *aBuffer, s32 aId)
 {
-    u32 mask = 0x0FFFFFFF;
     u32 packed = *(u32 *)&aDataPtr->packetSize;
     u16 matIndex = packed >> 16;
     s32 ofs;
@@ -499,7 +499,7 @@ sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkin
         addr = (u32)sdfModelAllocTmPacket(node);
         tag->dat0 = 0;
         tag->dat1 = vuAddr | 0x6C07C000;
-        tag->addr = (void *)((addr + ofs) & mask);
+        tag->addr = (void *)EE_PHYSICAL(addr + ofs);
         vuAddr += 7;
         tag++;
     } while (i != count);
@@ -517,7 +517,7 @@ sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkin
     tag->id = 0x30;
     tag->dat0 = 0;
     tag->dat1 = 0;
-    tag->addr = (void *)((u32)aDataPtr->dataBody & 0x0FFFFFFF);
+    tag->addr = (void *)EE_PHYSICAL((u32)aDataPtr->dataBody);
     return tag + 1;
 }
 #else
@@ -580,12 +580,12 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
 
             *(u64 *)&tag->dat0 = 0;
             *(u64 *)tag = (entry[1].qwc | 0x30000000) |
-                          ((u64)((u32)entry[1].dataPtr & 0x0FFFFFFF) << 32);
+                          ((u64)EE_PHYSICAL((u32)entry[1].dataPtr) << 32);
             tag++;
         }
         *(u64 *)&tag->dat0 = 0;
         *(u64 *)tag = (list->count | 0x30000000) |
-                      ((u64)((u32)list->next & 0x0FFFFFFF) << 32);
+                      ((u64)EE_PHYSICAL((u32)list->next) << 32);
         tag++;
         i++;
     } while (i != listCount);
@@ -1096,7 +1096,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                     body = sdfModelSetMatRefPacket(root, matIndex, buf, frame);
                     *(u64 *)&body->dat0 = 0;
                     *(u64 *)body = (packed | 0x30000000) |
-                                   ((u64)((u32)pkt->dataBody & 0x0FFFFFFF) << 32);
+                                   ((u64)EE_PHYSICAL((u32)pkt->dataBody) << 32);
                     body++;
                     *(u64 *)body = 0x20000000;
                     *(u64 *)&body->dat0 = 0;
@@ -1247,7 +1247,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
 
                     QUAD_ZERO(*(u128 *)&ref[1]);
                     ref->qwc = 0;
-                    ref->addr = (void *)((u32)(header + 1) & 0x0FFFFFFF);
+                    ref->addr = (void *)EE_PHYSICAL((u32)(header + 1));
                     *(u64 *)&ref->dat0 = 0;
                     sdfDrawTagLinkCall(tag, (u32)ref);
                 }

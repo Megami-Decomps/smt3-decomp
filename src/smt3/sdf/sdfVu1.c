@@ -101,8 +101,6 @@ extern u8 sdf3DScreenParam[];
 
 extern u8 corePktWorldLightMtxCache[];
 
-#define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
-
 /* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
 typedef struct sdfMatPacket_t {
     u32 pad00;             /* 0x00 */
@@ -1735,7 +1733,7 @@ void corePktEmitAllPasses(sdfCorePacketCb_t *cb) {
 void corePktOpenAndEmit(sdfCorePacketCb_t *cb) {
     u32 packetStart = sdfGrOpenPacketBuff();
     u32 alignedStart = (packetStart + 0x3F) & ~0x3F;
-    u32 ringAddress = EE_UNCACHED_RING((alignedStart + 0x40) & SDF_DMA_ADDRESS_MASK);
+    u32 ringAddress = EE_UNCACHED_RING(EE_PHYSICAL(alignedStart + 0x40));
     cb->packetOpenPtr = packetStart;
     cb->packetTopPtr = alignedStart + 0x30;
     cb->packetStartPtr = (u32 *)ringAddress;
@@ -1786,7 +1784,7 @@ u64 *corePktClosePacket(sdfCorePacketCb_t *cb) {
         cursor += 0x10;
     }
 
-    sdfGrClosePacketBuff(cursor & 0x0FFFFFFF);
+    sdfGrClosePacketBuff(EE_PHYSICAL(cursor));
     header = (u64 *)cb->packetTopPtr;
     descriptor = 0x20000000 | (quadwords & 0xFFFF);
     gifTag = 0x1100000000000000ULL;
@@ -1809,7 +1807,7 @@ u8 *corePktVu0Run(sdfCorePacketPointBuff_tag *output, const void *source, s32 co
         done += batch;
         qwc = (s32)((u32)transferStride * (u32)batch + (u32)transferCount + 15) >> 4;
         HW_WRITE(D0_QWC, qwc);
-        HW_WRITE(D0_MADR, input & SDF_DMA_ADDRESS_MASK);
+        HW_WRITE(D0_MADR, EE_PHYSICAL(input));
         input += (u32)qwc << 4;
         HW_WRITE(D0_CHCR, 0x101);
         while ((HW_READ(D0_CHCR) & 0x100) != 0 || (HW_READ(VIF0_STAT) & 0x0F000003) != 0) { }

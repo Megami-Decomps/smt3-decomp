@@ -204,7 +204,7 @@ void sdfImageSetReq(sdfImageSetReqParam_t *parm)
     setup[10] = 0;
     setup[11] = 0x53ULL;
 
-    src = (u32)parm->data & 0x0FFFFFFF;
+    src = EE_PHYSICAL((u32)parm->data);
     remaining = qwc;
     last = 0;
     do {
@@ -235,7 +235,7 @@ void sdfImageSetReq(sdfImageSetReqParam_t *parm)
     }
     cb->packetTail = release;
 
-    setup = (u64 *)((u32)setup & 0x0FFFFFFF);
+    setup = (u64 *)EE_PHYSICAL((u32)setup);
     tagTail = cb->tagTail;
     if (tagTail != NULL) {
         tagTail->vifCodes = 0;
@@ -256,7 +256,7 @@ void sdfImageSetChainTag(u32 head, sdfImageSetTag_t *tail)
     last = cb->tagTail;
     if (last != NULL) {
         last->vifCodes = 0;
-        last->tag = ((u64)(head & 0x0FFFFFFF) << 32) | 0x20000000;
+        last->tag = ((u64)EE_PHYSICAL(head) << 32) | 0x20000000;
     } else {
         cb->tagHead = head;
     }
@@ -321,7 +321,7 @@ void sdfImageSetTrans(void)
     if (dmaAddr != 0) {
         s32 threadId = GetThreadId();
         s32 handlerId = AddDmacHandler2(1, (s32 (*)(s32, void *, void *))sdfImageSetDmacHandler, 0, (void *)threadId);
-        u64 tag = ((u64)((u32)D_005293A0 & 0x0FFFFFFF) << 32) | 0x20000000;
+        u64 tag = ((u64)EE_PHYSICAL((u32)D_005293A0) << 32) | 0x20000000;
         u32 *chan;
 
         tagTail->vifCodes = 0;

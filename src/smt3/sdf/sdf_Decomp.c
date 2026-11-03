@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ps2asm.h"
 #include "sdf_types.h"
+#include "eeregs.h"
 
 enum sdfDecomp_enum {
     SDF_DECOMP_STAT_END = 0,
@@ -341,7 +342,7 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
         cursor += 4;
         emitted += 2;
     }
-    sdfGrClosePacketBuff((s32)cursor & 0x0FFFFFFF);
+    sdfGrClosePacketBuff(EE_PHYSICAL((s32)cursor));
     quadwordCount = emitted * 2 + 1;
     packet->dmaWords.tag = (quadwordCount & 0xFFFF) | 0x20000000;
     packet->dmaWords.vif = ((u64)(quadwordCount | 0x50000000) << 32) | 0x10000000;

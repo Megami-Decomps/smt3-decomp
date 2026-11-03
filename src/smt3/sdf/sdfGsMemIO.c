@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_types.h"
 #include "sdf_resource.h"
+#include "eeregs.h"
 
 struct sdfPreDrawHook_t;
 
@@ -25,8 +26,6 @@ struct sdfPreDrawTag_t;
 typedef void (*SdfPacketPatchCallback)();
 
 #define SDF_DMA_QWC_MASK 0xFFFF
-
-#define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
 
 #define SDF_PATCHABLE_PACKET_BYTES 0x100
 
@@ -173,7 +172,7 @@ void sdfSetStoreImage(sdfStoreImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle
     aPacket->header[7] = 0xE;
     aPacket->header[8] = 0;
     aPacket->header[9] = 0x61;
-    aPacket->header[10] = ((u64)((u32)aPacket->tail & SDF_DMA_ADDRESS_MASK) << 32) | 0xA0000005ULL;
+    aPacket->header[10] = ((u64)EE_PHYSICAL((u32)aPacket->tail) << 32) | 0xA0000005ULL;
     aPacket->header[11] = 0x5000000500000000ULL;
     aPacket->header[12] = 0x1000000000000004ULL;
     aPacket->header[13] = 0xE;
@@ -248,7 +247,7 @@ void sdfSetLoadImage(sdfLoadImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle,
     aPacket->imageReferenceTag = 0x0800000000000000 | qwc;
     aPacket->imageReferencePad = 0;
     aPacket->imageGifTag0 = (u32)((qwc & SDF_DMA_QWC_MASK) | 0x30000000) |
-                           ((u64)(aBuffer & SDF_DMA_ADDRESS_MASK) << 32);
+                           ((u64)EE_PHYSICAL(aBuffer) << 32);
     aPacket->imageGifTag1 = (u64)(0x51000000 | qwc) << 32;
     aPacket->flushTag0 = 0x20000002;
     aPacket->flushTag1 = 0x5000000200000000;
