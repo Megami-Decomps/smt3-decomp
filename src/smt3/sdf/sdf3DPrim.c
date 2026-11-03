@@ -191,10 +191,10 @@ void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag,
         aAllocator = sdfGrAllocPacketBuff;
     }
     referencePacket = (u64 *)aAllocator(0x20);
-    referencePacket[0] = SDF_DMA_TAG((u32)sdf3DPrimIdentityTm, 0x30000008);
+    referencePacket[0] = SDF_DMA_TAG(EE_ADDR(sdf3DPrimIdentityTm), 0x30000008);
     referencePacket[1] = 0x6C07C000ULL << 32;
     QUAD_ZERO(*(u128 *)&referencePacket[2]);
-    sdfDrawTagLinkRef(aTag, (u32)referencePacket);
+    sdfDrawTagLinkRef(aTag, EE_ADDR(referencePacket));
 }
 
 /* vu0 routine: store the resident matrix and inverse-column-length scaled rows, then VIF ITOP/MSCAL. */
@@ -213,10 +213,10 @@ void sdf3DPrimLinkTm(sdfDrawTag_t *aTag,
         aAllocator = sdfGrAllocPacketBuff;
     }
     dmaPacket = (u64 *)aAllocator(0x90);
-    dmaPacket[0] = SDF_DMA_TAG((u32)(dmaPacket + 2), 0x20000008);
+    dmaPacket[0] = SDF_DMA_TAG(EE_ADDR(dmaPacket + 2), 0x20000008);
     dmaPacket[1] = 0x6C07C000ULL << 32;
     sdf3DPrimSetTmPacket((sdf3DTmPacketData_t *)(dmaPacket + 2));
-    sdfDrawTagLink(aTag, (u32)dmaPacket);
+    sdfDrawTagLink(aTag, EE_ADDR(dmaPacket));
 }
 
 void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat,
@@ -229,7 +229,7 @@ void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat,
     referencePacket = (u64 *)aAllocator(0x20);
     sdfMatMakePacket(aMat, (struct SdfDmaTagHeader *)referencePacket, (s8)sdfFrameId);
     QUAD_ZERO(*(u128 *)&referencePacket[2]);
-    sdfDrawTagLinkRef(aTag, (u32)referencePacket);
+    sdfDrawTagLinkRef(aTag, EE_ADDR(referencePacket));
 }
 
 u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
@@ -347,7 +347,7 @@ u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
         cursor += count;
     }
     *cursor = 0x1400000C;
-    while ((u32)++cursor & 15) {
+    while (EE_ADDR(++cursor) & 15) {
         *cursor = 0;
     }
     return packet;

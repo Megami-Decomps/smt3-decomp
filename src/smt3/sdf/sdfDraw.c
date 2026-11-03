@@ -583,7 +583,7 @@ SdfDmaTag *sdfGrAddExPacket(SdfDmaTag *p, SdfDmaTag *ex) {
     referenceNode = sdfGrNewExPacket(ex);
     p->kind = SDF_DMA_TAG_NEXT_BYTE;
     p->address = EE_PHYSICAL(EE_ADDR(referenceNode));
-    return (SdfDmaTag *)((u32)referenceNode + SDF_QWORD_BYTES);
+    return (SdfDmaTag *)(EE_ADDR(referenceNode) + SDF_QWORD_BYTES);
 }
 
 void sdfGrJoinDrawTag(sdfDrawTag_t *aFore, sdfDrawTag_t *aBack) {
@@ -622,14 +622,14 @@ void sdfGrInitExPacket(sdfDrawTag_t *p) {
     if (sourceTagAddress != 0) {
         referenceNode = sdfGrNewExPacket((SdfDmaTag *)sourceTagAddress);
         priorHeadAddress = EE_PHYSICAL(p->head);
-        p->head = (u32)referenceNode;
+        p->head = EE_ADDR(referenceNode);
         *(u64 *)&referenceNode->nextTag = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
     }
     sourceTagAddress = p->lightPacket;
     if (sourceTagAddress != 0) {
         referenceNode = sdfGrNewExPacket((SdfDmaTag *)sourceTagAddress);
         priorHeadAddress = EE_PHYSICAL(p->head);
-        p->head = (u32)referenceNode;
+        p->head = EE_ADDR(referenceNode);
         *(u64 *)&referenceNode->nextTag = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
     }
 }

@@ -159,7 +159,7 @@ u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor, const void *aUVL
     cursor[0] = SDF_VIF_ITOP_COMPACT_VERTEX;
     cursor[1] = SDF_VIF_MSCAL_VERTICES;
     cursor += 2;
-    while (((u32)cursor & SDF_QWORD_ALIGNMENT_MASK) != 0) {
+    while ((EE_ADDR(cursor) & SDF_QWORD_ALIGNMENT_MASK) != 0) {
         *cursor++ = 0;
     }
     return packet;
@@ -262,7 +262,7 @@ u32 *sdfMultiBillBoardMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aX
     cursor[0] = 0x04000004;
     cursor[1] = 0x14000008;
     cursor += 2;
-    while (((u32)cursor & 0xF) != 0) {
+    while ((EE_ADDR(cursor) & 0xF) != 0) {
         *cursor++ = 0;
     }
     return packet;
@@ -368,10 +368,10 @@ u32 sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
     cursor[0] = 0x04000006;
     cursor[1] = 0x14000008;
     cursor += 2;
-    while (((u32)cursor & 0xF) != 0) {
+    while ((EE_ADDR(cursor) & 0xF) != 0) {
         *cursor++ = 0;
     }
-    return (u32)packet;
+    return EE_ADDR(packet);
 }
 
 void sdfMultiBillBoardVcMake1(u8 *aPacket, const f32 *aCenter, const void *aColor, const void *aUVList0,
@@ -466,8 +466,8 @@ u32 sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *a
     cursor[0] = SDF_VIF_ITOP_WIDE_VERTEX;
     cursor[1] = SDF_VIF_MSCAL_VERTICES;
     cursor += 2;
-    while (((u32)cursor & SDF_QWORD_ALIGNMENT_MASK) != 0) {
+    while ((EE_ADDR(cursor) & SDF_QWORD_ALIGNMENT_MASK) != 0) {
         *cursor++ = 0;
     }
-    return (u32)packet;
+    return EE_ADDR(packet);
 }

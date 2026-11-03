@@ -172,7 +172,7 @@ void sdfSetStoreImage(sdfStoreImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle
     aPacket->header[7] = 0xE;
     aPacket->header[8] = 0;
     aPacket->header[9] = 0x61;
-    aPacket->header[10] = SDF_DMA_TAG((u32)aPacket->tail, 0xA0000005ULL);
+    aPacket->header[10] = SDF_DMA_TAG(EE_ADDR(aPacket->tail), 0xA0000005ULL);
     aPacket->header[11] = 0x5000000500000000ULL;
     aPacket->header[12] = 0x1000000000000004ULL;
     aPacket->header[13] = 0xE;
@@ -226,8 +226,8 @@ void sdfLinkStoreFrameImage(sdfDrawTag_t *aDrawTag, sdfPreDrawTag_t *aPreDrawTag
         D_00529388.buffers[0], aSrcX, aSrcY, aWidth, aHeight,
         aBuffer, aCallback, aCallbackParam);
     sdfPreDrawTagLink(aPreDrawTag, &packet->worker);
-    sdfDrawTagLink2(aDrawTag, (u32)&packet->packet,
-        (u32)packet + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
+    sdfDrawTagLink2(aDrawTag, EE_ADDR(&packet->packet),
+        EE_ADDR(packet) + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
 }
 
 void sdfSetLoadImage(sdfLoadImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle,

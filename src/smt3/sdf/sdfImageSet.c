@@ -239,9 +239,9 @@ void sdfImageSetReq(sdfImageSetReqParam_t *parm)
     tagTail = cb->tagTail;
     if (tagTail != NULL) {
         tagTail->vifCodes = 0;
-        tagTail->tag = ((u64)(u32)setup << 32) | 0x20000000ULL;
+        tagTail->tag = ((u64)EE_ADDR(setup) << 32) | 0x20000000ULL;
     } else {
-        cb->tagHead = (u32)setup;
+        cb->tagHead = EE_ADDR(setup);
     }
     cb->tagTail = (sdfImageSetTag_t *)packet;
     SignalSema(cb->semaId);
@@ -321,7 +321,7 @@ void sdfImageSetTrans(void)
     if (dmaAddr != 0) {
         s32 threadId = GetThreadId();
         s32 handlerId = AddDmacHandler2(1, (s32 (*)(s32, void *, void *))sdfImageSetDmacHandler, 0, (void *)threadId);
-        u64 tag = SDF_DMA_TAG((u32)D_005293A0, 0x20000000);
+        u64 tag = SDF_DMA_TAG(EE_ADDR(D_005293A0), 0x20000000);
         u32 *chan;
 
         tagTail->vifCodes = 0;
