@@ -67,3 +67,30 @@ and merging the two arms into one `if` plus a shared second-byte store (120
 bytes). The `+4` split is gcc's own: retail folds it into the pair address
 but leaves it in the count's load displacement, from one uniform source
 expression.
+
+### Qualified typed-field control (2026-11-03)
+
+The native size remains 172 bytes. A direct typed view of the same four
+20-byte `cNames` rows and four count bytes emits 120 bytes, with only one
+word matching the emitted prefix; 52 native bytes remain uncovered. The
+full-owner check preserves all 119 existing C matches and their owned data.
+This view is supported by the native offsets and the matching `frName`
+readers and initializer, not evidence of original source dimensions. A
+second control exposing the already documented name-bitmap/code fields in
+the prefix is unchanged. Keeping a real output index, as in the matched
+`frGetCNameFRQ`, emits 140 bytes and remains 32 bytes short. None is promoted.
+
+Plain and diagnostic builds of the first typed control agree on all four
+allocated sections, 499 non-file symbols, 493 ordered relocations and
+normalized assembly. Initial RTL already contains the retail-like work-plus-
+four decomposition and offsets `0x6600`, `0x6601` and `0x6650`. Thus the
+missing operations are not evidence that the field layout is wrong.
+
+The loop dump identifies the loss: it hoists the work pointer, work-plus-four
+base and count address, then combines the two tail-byte address inductions
+with the lead-byte induction. The lead load becomes a minus-one displacement
+from the shared tail pointer. Retail instead retains three separate
+step-by-two inductions and repeats the base/count-address arithmetic in the
+loop. This is a qualified loop-optimization boundary, not a scheduling or
+register-order diagnosis. No artificial pointer anchor, volatile RAM access
+or compiler flag change is justified by this negative control.
