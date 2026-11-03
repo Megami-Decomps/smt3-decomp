@@ -374,7 +374,7 @@ void sdfIpuAllocBuff(sdfIpuDecodeCb_t *cb) {
 void sdfIpuMakeToIpuDmaTag(sdfIpuDecodeCb_t *cb, u8 *data, s32 leng) {
     s32 remaining = (leng + 15) & ~15;
     struct sdfIpuDmaTag_t *tag;
-    u32 address;
+    ps2Addr_t address;
     tag = sdfAllocAuto(((remaining + 0xFFEFF) / 0xFFF00) * 16);
     cb->inputDmaChain = tag;
     address = EE_PHYSICAL(EE_ADDR(data));
@@ -407,7 +407,7 @@ void sdfIpuMakeBltPacket(sdfIpuDecodeCb_t *cb)
     s32 x;
     s32 y;
     s32 endOfPacket;
-    u32 sourceAddress;
+    ps2Addr_t sourceAddress;
     u64 bitblt;
     u32 sourceTag;
     u64 imageTag;
@@ -498,7 +498,7 @@ void sdfIpuInitCb(sdfIpuDecodeCb_t *cb, struct sdfIpuInitParm_t *parm) {
 
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
 void sdfIpuSetDecodeParams(sdfIpuDecodeCb_t *cb, struct sdfIpuInitParm_t *parm, SdfStreamRead hdr, struct sdfMovieCb_t *leng) {
-    s32 sourceSize = EE_ADDR_S(leng);
+    ps2AddrS_t sourceSize = EE_ADDR_S(leng);
     s32 interruptsEnabled;
     u8 *frameBytes = (u8 *)hdr;
     sdfIpuInitCb(cb, parm);
@@ -620,7 +620,7 @@ void sdfIpuHandleDmaEnd(sdfIpuDecodeCb_t *feed) {
     s32 writeSlot;
     s32 filledSlots;
     s32 availableBytes;
-    u32 destinationAddress;
+    ps2Addr_t destinationAddress;
     s32 endOfStream;
     filledSlots = feed->filledSlots;
     if (feed->done == 0 && filledSlots < 7) {

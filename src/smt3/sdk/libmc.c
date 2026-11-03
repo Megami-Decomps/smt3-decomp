@@ -377,8 +377,8 @@ s32 sceMcWrite(s32 a, const void *b, s32 c)
     } else {
         /* The IOP side wants the bulk transfer 16-byte aligned, so the leading
          * bytes up to the next boundary travel inside the request itself. */
-        u32 top = (EE_ADDR(b) - 1) & ~15;
-        u32 bot = EE_ADDR(b) - 16;
+        ps2Addr_t top = (EE_ADDR(b) - 1) & ~15;
+        ps2Addr_t bot = EE_ADDR(b) - 16;
         s32 head = top - bot;
 
         D_005997C0.write.bulkBuffer = (const u8 *)b + head;

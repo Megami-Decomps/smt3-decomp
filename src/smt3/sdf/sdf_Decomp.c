@@ -85,7 +85,7 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
     s32 count;
     s32 offset;
     u8 *output;
-    u32 sourceAddress;
+    ps2Addr_t sourceAddress;
 
     if (cb->stat == 0) {
         return 1;

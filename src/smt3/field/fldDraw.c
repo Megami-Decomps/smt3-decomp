@@ -910,7 +910,7 @@ void rsetFrameMaskRgbOff(void) {
 
 void ooyTestLine3D(u32 x0, u32 y0, f32 z0, f32 col0, f32 x1, f32 y1, f32 z1, f32 col1) {
     sdfDrawTag_t *list;
-    s32 record;
+    ps2AddrS_t record;
     sdfGrOt_t *descriptor;
     D_002FC720[0][0] = z0;
     D_002FC720[0][1] = col0;

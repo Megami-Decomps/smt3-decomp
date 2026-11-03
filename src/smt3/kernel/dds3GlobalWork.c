@@ -451,7 +451,7 @@ void NewGame2Pop(void)
 
 void dds3GlobalWorkUserInit2(s32 mode)
 {
-    s32 saved;
+    ps2AddrS_t saved;
 
     if (mode == 1) {
         NewGame2Push();

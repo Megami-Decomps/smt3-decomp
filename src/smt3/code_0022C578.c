@@ -7983,7 +7983,7 @@ extern s32 camp_update_info_Process(s32 id);
 
 s32 cmpStartProcessInfo(s32 text, s32 flag)
 {
-    s32 proc;
+    ps2AddrS_t proc;
 
     if (cmpInfoWindow != NULL) {
         return 0;

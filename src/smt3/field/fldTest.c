@@ -1633,7 +1633,7 @@ void fldMakeFroFileName(void) {
     char directory[0x20];
     char path[0x40];
     fldRunMapHeader_t *resource;
-    u32 base;
+    ps2Addr_t base;
     u32 first;
     u32 second;
     u32 third;

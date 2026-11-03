@@ -443,7 +443,7 @@ void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *buffers) {
 }
 
 void sdfDevConsDrawInit(sdfDevConsDrawCB_t *aCB, void *aPacketBuffer, s32 aBufferSize) {
-    u32 ringAddress;
+    ps2Addr_t ringAddress;
     u8 *ring;
     vu64 *packet;
     u64 textureState;

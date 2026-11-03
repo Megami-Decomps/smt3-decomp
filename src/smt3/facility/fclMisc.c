@@ -193,7 +193,7 @@ void fclScriptForcedEnd(u8 *PID)
 
 s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID)
 {
-    s32 handle;
+    ps2AddrS_t handle;
 
     if (pPID != NULL)
     {

@@ -1079,7 +1079,7 @@ extern char D_00551150[];
 void nbNegoDebugPrint(nbNegoProcessData_t *n)
 {
     sdfDrawTag_t *tag;
-    u32 packet;
+    ps2Addr_t packet;
     s32 index;
     s32 i;
     s32 message;
@@ -1124,7 +1124,7 @@ extern char D_00551158[];
 void nbNegoDebugPrint2(nbNegoProcessData_t *n)
 {
     sdfDrawTag_t *tag;
-    u32 packet;
+    ps2Addr_t packet;
     s32 i;
     u32 id;
 

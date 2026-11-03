@@ -1755,8 +1755,8 @@ void corePktOpenAndEmit(sdfCorePacketCb_t *cb) {
 }
 
 u64 *corePktClosePacket(sdfCorePacketCb_t *cb) {
-    u32 cursor;
-    u32 start;
+    ps2Addr_t cursor;
+    ps2Addr_t start;
     s32 quadwords;
     u32 descriptor;
     u64 gifTag;
@@ -1797,7 +1797,7 @@ u64 *corePktClosePacket(sdfCorePacketCb_t *cb) {
 u8 *corePktVu0Run(sdfCorePacketPointBuff_tag *output, const void *source, s32 count,
                   s32 transferCount, s32 transferStride)
 {
-    u32 input = EE_ADDR(source);
+    ps2Addr_t input = EE_ADDR(source);
     s32 done = 0;
     s32 batch, i, qwc;
 

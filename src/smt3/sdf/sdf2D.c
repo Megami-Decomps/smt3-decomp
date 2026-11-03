@@ -146,7 +146,7 @@ sdf2DTexPacket_t *sdf2DMakeTexPacket(sdf2DTexPacket_t *aPacket, sdfTexHandle_t *
 s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx) {
     s32 packetBytes = sdf2DGetTexPacketSize(aTexHndl);
     sdf2DTexPacket_t *packet = EE_ADDR_AS(sdf2DTexPacket_t *, sdfGrAllocPacketBuff(packetBytes));
-    s32 packetAddress = EE_ADDR_S(sdf2DMakeTexPacket(packet, aTexHndl, aCtx));
+    ps2AddrS_t packetAddress = EE_ADDR_S(sdf2DMakeTexPacket(packet, aTexHndl, aCtx));
     sdfDrawTagLink(aTag, packetAddress);
     return packetAddress;
 }

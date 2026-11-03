@@ -1570,7 +1570,7 @@ s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to)
             /* Keep the real subarray base and skill-number offset separate in
                the EE's 32-bit address arithmetic. Only the final, in-range
                element address is converted back to a pointer. */
-            u32 address = EE_ADDR(datSkillTable.special) + (u32)skills[i] * sizeof(datSpecialSkill_t);
+            ps2Addr_t address = EE_ADDR(datSkillTable.special) + (u32)skills[i] * sizeof(datSpecialSkill_t);
             datSpecialSkill_t *special = (datSpecialSkill_t *)(address - 0x120u * sizeof(datSpecialSkill_t));
             rate = 100 / special->n;
             if ((s32)dds3GetRandIntA(NULL, 100) < rate) {

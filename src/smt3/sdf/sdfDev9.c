@@ -90,7 +90,7 @@ extern void *memset(void *dst, s32 value, ps2Size_t size);
 
 u64 sdf_2BFC58(void *dst, s32 size)
 {
-    u32 address = EE_ADDR(dst);
+    ps2Addr_t address = EE_ADDR(dst);
     s32 index, i, counter;
     u32 entry;
 

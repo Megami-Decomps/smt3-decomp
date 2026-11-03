@@ -162,7 +162,7 @@ void sdfImageSetReq(sdfImageSetReqParam_t *parm)
     s32 remaining;
     s32 widthUnits;
     s32 last;
-    u32 src;
+    ps2Addr_t src;
     u64 formatAndAddr;
     u64 coords;
     u64 size;
