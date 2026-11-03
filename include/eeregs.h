@@ -76,6 +76,16 @@
 #define SDF_DMA_TAG(addr, word) (((u64)EE_PHYSICAL(addr) << 32) | (u64)(word))
 #endif
 
+/* The same tag with the operands in the other order, for the two sites whose
+ * source order the compiler reproduces: both pass a (u32) control word, and
+ * writing the address first moves the zero extension and changes the
+ * instructions. Same value, same layout, order preserved. The word keeps
+ * whatever type the caller gives it rather than being widened here, because
+ * that is what those two sites do. */
+#ifndef SDF_DMA_TAG_WORD_FIRST
+#define SDF_DMA_TAG_WORD_FIRST(word, addr) ((word) | ((u64)EE_PHYSICAL(addr) << 32))
+#endif
+
 /* A cross-thread flag another thread writes, polled for lack of a scheduler.
  * addr keys a host wait and wake table; cast to void so the target still
  * type-checks it against the flag SDF_FLAG_SET writes. A host redefinition

@@ -705,9 +705,8 @@ void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, u32 aRegs, s32 aNu
     aPacket->dmatag.reg = SDF_VIF_DIRECT_ONE_FLUSHE;
     aPacket->giftag.data = (u64)aNumRegs | SDF_GIF_PACKED_AD_BITS;
     aPacket->giftag.reg = SDF_GIF_REGISTER_AD;
-    /* Not SDF_DMA_TAG: the macro puts the address first and this compiler
-     * emits the zero-extended low word first, so the order is load-bearing. */
-    aPacket->reftag.data = (u32)((aNumRegs & SDF_DMA_QWC_MASK) | SDF_DMA_TAG_REF_WORD) | ((u64)EE_PHYSICAL(aRegs) << 32);
+    aPacket->reftag.data = SDF_DMA_TAG_WORD_FIRST(
+        (u32)((aNumRegs & SDF_DMA_QWC_MASK) | SDF_DMA_TAG_REF_WORD), aRegs);
     aPacket->reftag.reg = SDF_VIF_DIRECT_ONE_NOP;
     aPacket->linktag.data = SDF_DMA_TAG_NEXT_WORD;
     aPacket->linktag.reg = 0;
