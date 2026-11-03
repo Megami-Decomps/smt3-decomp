@@ -847,7 +847,7 @@ dds3BillResource_tag *dds3Billboard_P2AAnimDraw(billHandle_t *pP2A, dds3BillAnim
 u32 dds3Billboard_P2AColorMul(u32 color0, u32 color1) {
     billColorWork_t work[3];
     u32 unit = 0x3C000000;
-    ps2Addr_t out;
+    u32 out;
 
     work[0].word = color0;
     MMI_RGBA_UNPACK(&work[0], unit);

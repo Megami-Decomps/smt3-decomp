@@ -20,8 +20,8 @@ typedef void (*fileTransferCallback_t)(void *request, u32 arg);
     Callback callback; \
     void *arg; \
     sdfMemHandle_t *handle; \
-    u32 top; \
-    u32 ptr; \
+    ps2Addr_t top; \
+    ps2Addr_t ptr; \
     Link *donenext; \
     sdfPacDecodeCb_t pac; \
     u16 pacrest; \

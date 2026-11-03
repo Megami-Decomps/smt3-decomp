@@ -59,7 +59,7 @@ struct frFontData_t {
     void *ysht;
     GsFont_t **trans;
     struct frFontResource_t *resource;
-    u32 data;
+    ps2Addr_t data;
 };
 
 /* Free-list header stored immediately before each interface-pool payload. */

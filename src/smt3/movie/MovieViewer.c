@@ -246,7 +246,7 @@ void movieViewerDrawInfo(void)
     }
     if (movieViewerDebugFlag.blockPending != 0) {
 #ifdef NON_MATCHING
-        u32 base = EE_ADDR(movieViewerDebugFlag.buffer);
+        ps2Addr_t base = EE_ADDR(movieViewerDebugFlag.buffer);
         u64 end = (u64)base + sizeof(movieViewerDebugFlag.block);
         if (((u64)base < EE_REG_RANGE_END && end > EE_REG_RANGE_BASE) ||
             ((u64)base < GS_PRIV_REG_RANGE_END && end > GS_PRIV_REG_RANGE_BASE)) {

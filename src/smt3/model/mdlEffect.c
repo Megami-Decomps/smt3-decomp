@@ -174,7 +174,7 @@ typedef struct { u8 hasAudio, stereo, loopMode, playbackCadenceStep; } mdlIpuPar
 
 struct mdlEffectResrc_IPU_t
 {
-    u32 data; /* EE byte address handed to the IPU stream initializer. */
+    ps2Addr_t data; /* EE byte address handed to the IPU stream initializer. */
     sdfMemHandle_t *dataMemHandle;
     u8 inUse, playing;
     u8 unk0A[6];
