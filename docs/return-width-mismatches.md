@@ -92,3 +92,25 @@ correcting that caller's declaration to the true type; the tenth,
 caller never reads the value at all, not because of anything about how it
 would have used it. The commits above also hold the per-symbol reasoning and
 the checksum confirmation.
+
+## A third kind: an arity mismatch
+
+The same mechanism that hides a width mismatch hides a parameter-count one.
+`sceDmaSync` is defined at `sdk/libdma.c:280` as
+`int sceDmaSync(sceDmaChan *chan, int mode)`, two parameters. Both callers
+declare and pass three: `sdf/sdfCoreDraw.c:19` spells it `(void *, s32, s32)`
+and calls `sceDmaSync(dmaChannel, 0, 0)` at `:347`, and
+`sdf/sdfDevCons.c:84` spells it `(void *channel, s32 mode, s32 timeout)` and
+calls it the same way at `:343`.
+
+Nothing reports it. C has no mangling, each unit carries its own `extern`, and
+the extra argument is discarded by the calling convention on the EE and on a
+host alike. It is harmless in retail and harmless in a port **only because
+both call sites pass 0**, so the correctness rests on an argument's value
+rather than on the interface. A third call site passing a real timeout would
+change nothing and be silently ignored.
+
+Recorded here rather than fixed: the definition is retail's and matching it is
+required. What a consumer should do is take the third parameter and ignore it,
+so no call site depends on the ABI dropping it, which is what
+sdfport's own override does.
