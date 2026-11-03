@@ -65,8 +65,10 @@
  * addr keys a host wait and wake table; cast to void so the target still
  * type-checks it against the flag SDF_FLAG_SET writes. A host redefinition
  * must wake under the wait's lock and publish the value first; SET does both.
- * Writes that run before any thread exists stay plain assignments: no waiter
- * can be blocked yet, and a host's primitives may not be created yet either. */
+ * Writes that run before any thread exists stay plain assignments, because
+ * there is no consumer to signal and a wake there would be meaningless rather
+ * than wrong. A consumer must not assume SDF_FLAG_SET can only run once its
+ * own wait table exists: nothing here guarantees that ordering. */
 #ifndef SDF_FLAG_WAIT
 #define SDF_FLAG_WAIT(addr, cond) do { (void)(addr); while (cond) { } } while (0)
 #endif
