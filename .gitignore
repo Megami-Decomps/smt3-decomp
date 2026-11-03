@@ -34,7 +34,7 @@ config/*/*.ld
 *.d
 __pycache__/
 *.pyc
-.venv/
+.venv
 
 # tools/cc.sh scratch directories
 /.[0-9a-f][0-9a-f]/
