@@ -2413,5 +2413,5 @@ INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532358);
 
 INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532478);
 
-INCLUDE_RODATA(const s32, "field/fldAutoMap", D_005326B8);
+INCLUDE_RODATA(const s32, "field/fldAutoMap", fldGenNpcPath);
 

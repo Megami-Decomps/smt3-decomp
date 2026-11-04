@@ -30,7 +30,7 @@ extern s32 encDrawState;
 
 extern void *hPartialMultiBlur;
 
-extern char D_0054EC80[];
+extern char fldEncDrawName[];
 
 extern void dds3EffectPartialMultiBlurDelete(void *hPartialMultiBlur);
 
@@ -153,7 +153,7 @@ void encStart(void) {
 
 void encInitProcess(void)
 {
-    dds3StartProcess(D_0054EC80, 0x2B0F, 0, 1, encDrawProc, NULL, NULL);
+    dds3StartProcess(fldEncDrawName, 0x2B0F, 0, 1, encDrawProc, NULL, NULL);
 }
 
 f32 fldCalcAngleBetween(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
@@ -189,5 +189,5 @@ INCLUDE_SDATA(const s32, "field/fldEnc", gencOn);
 
 INCLUDE_SDATA(const s32, "field/fldEnc", D_0054EC7C);
 
-INCLUDE_SDATA(const s32, "field/fldEnc", D_0054EC80);
+INCLUDE_SDATA(const s32, "field/fldEnc", fldEncDrawName);
 

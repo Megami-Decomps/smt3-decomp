@@ -47,7 +47,7 @@ extern sdfTexHandle_t *D_0054EFA0;
 extern sdfTexHandle_t *D_0054EFA4;
 
 
-extern char D_005327A0[];
+extern char fldNpcPlFormat[];
 
 s32 fldTitleChk(void) {
     return dds3SearchProcessName(D_005327B0) != 0;

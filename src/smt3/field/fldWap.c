@@ -213,7 +213,7 @@ extern f32 gSkyTblAnimeCntI;
 
 extern s32 gSkyTblBaseIdx;
 
-extern char D_0054EC80[];
+extern char fldEncDrawName[];
 
 extern s32 gencOn;
 
@@ -567,7 +567,7 @@ extern void fldPlayerCalc_FastStart(void);
 extern void fldSetSceneParam3(fldSceneParam_t *param, s32 field, s32 area, const char *name);
 extern void fldSetSceneParam5(fldSceneParam_t *param, s32 field, s32 area, const char *name,
                              s32 bgm, const char *script);
-extern char D_00531F18[], D_00531F28[];
+extern char fldElevatorPosName[], fldElevatorStartLabel[];
 
 void fldDoor_Warp(const char *name)
 {
@@ -683,7 +683,7 @@ void fldDoor_Warp(const char *name)
             gFldNowDZone = 0;
             fldAutoMapOpenBlock2(currentArea, fldGlobalBase.floor + 1,
                                  fldDoorParamTable.headers[slot].body.data[6 + entry->sequenceKind]);
-            fldSetSceneParam5(&record, currentArea, elevatorFloor, D_00531F18, 0, D_00531F28);
+            fldSetSceneParam5(&record, currentArea, elevatorFloor, fldElevatorPosName, 0, fldElevatorStartLabel);
             dds3AdminiCallSequence(6, &record, sizeof(record), 0);
             return;
         }
@@ -720,12 +720,12 @@ extern void fldSetSceneParam3(fldSceneParam_t *pParam, s32 loadField, s32 loadAr
 extern void fldSetSceneParam5(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
                             s32 bgm, const char *FoceScript);
 /* Shared with fldDoor_Warp; both native strings have retained padding. */
-extern char D_00531F18[]; /* "01pos_01" */
-extern char D_00531F28[]; /* "elvstart_label" */
+extern char fldElevatorPosName[]; /* "01pos_01" */
+extern char fldElevatorStartLabel[]; /* "elvstart_label" */
 
-INCLUDE_RODATA(const s32, "field/fldWap", D_00531F18);
+INCLUDE_RODATA(const s32, "field/fldWap", fldElevatorPosName);
 
-INCLUDE_RODATA(const s32, "field/fldWap", D_00531F28);
+INCLUDE_RODATA(const s32, "field/fldWap", fldElevatorStartLabel);
 
 INCLUDE_RODATA(const s32, "field/fldWap", jtbl_00531F40);
 
@@ -837,7 +837,7 @@ void fldDoor_WarpEx(s32 ex_no) {
             /* The second six halfwords of the header data are elevator blocks. */
             fldAutoMapOpenBlock2(nextArea, fldGlobalBase.floor + 1,
                 fldDoorParamTable.headers[gFld_ElvTakasa].body.data[6 + fldDoorWarpTarget]);
-            fldSetSceneParam5(&record, nextArea, nextFloor, D_00531F18, 0, D_00531F28);
+            fldSetSceneParam5(&record, nextArea, nextFloor, fldElevatorPosName, 0, fldElevatorStartLabel);
             dds3AdminiCallSequence(6, &record, sizeof(record), 0);
             return;
         }
