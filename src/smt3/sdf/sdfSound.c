@@ -38,7 +38,6 @@ typedef struct
     u16 unk6;
 } p2sdLoadEntry_t;
 
-extern p2sdLoadEntry_t LastLoad[];
 
 s32 sdfSndSendCmd(s32 aCmd, s32 aParam, void *aExDataPtr, s32 aExDataSize);
 
@@ -50,12 +49,12 @@ typedef u8 *(*p2sdPcmFunc_t)(s32);
 extern u32 p2sdPcmCallback;
 
 extern u32 sdfSndMap[];
+#define LastLoad ((p2sdLoadEntry_t *)((u8 *)sdfSndMap + 0x190))
 
 extern u32 p2sdPcmState;
 
 extern u32 p2sdPcmBusy;
 
-extern u8 D_00593890[];
 
 enum SdfFileIOCmdStat {
     SDF_FILE_CMD_STAT_INIT = 0,
@@ -868,7 +867,7 @@ s32 p2sd_2C1F28(s32 aIndex)
 
 u8 *p2sd_2C1F50(void)
 {
-    return D_00593890;
+    return (u8 *)sdfSndMap + 0x10;
 }
 
 p2sdLoadEntry_t *p2sd_2C1F60(void)

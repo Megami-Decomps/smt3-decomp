@@ -244,7 +244,6 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
 }
 
 extern sdfModelOt_t D_002F69B8[];
-extern sdfModelOt_t dds3MatterDrawParam;
 extern dds3Basic_t *D_0054EAE8;
 extern void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic);
 extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
@@ -274,7 +273,7 @@ s32 dds3MatterObjectBasicDrawProcedure(dds3Basic_t *basic)
                     dds3ObjectBaseModelLinkOt(&D_002F69B8[work->OtLinkIdx], basic);
                     basic->color = color;
                 } else {
-                    dds3ObjectBaseModelLinkOt(&dds3MatterDrawParam, basic);
+                    dds3ObjectBaseModelLinkOt(&D_002F69B8[7], basic);
                 }
             } else {
                 dds3ObjectBaseModelLinkOt(&D_002F69B8[work->OtLinkIdx], basic);

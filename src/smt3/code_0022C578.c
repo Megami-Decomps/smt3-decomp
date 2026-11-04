@@ -65,7 +65,6 @@ extern u16 cmpStatusModelId;
 
 extern u32 fclDbgPID;
 
-extern void *D_00345D9C[];
 
 extern s32 campStatusActive;
 
@@ -617,6 +616,7 @@ extern void cmpUpdateStatusModelLoad(u16 id);
 extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 arg);
 
 extern s32 D_00345D88[];
+#define D_00345D9C ((void **)(D_00345D88 + 5))
 
 extern fclSpriteTbl_t fclSpriteTable[];
 

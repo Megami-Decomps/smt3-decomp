@@ -82,10 +82,18 @@ def scan_text(b, secs, func_starts, gp):
                 clear.add(base_pc + (i + 1) * 4 + (sx16(w & 0xFFFF) << 2))
         regs = {}
         pending_call = False
+        jump_seen = 0  # 1 on a j/jr's delay slot, 2 on the first instruction after it
         for i, w in enumerate(words):
             pc = base_pc + i * 4
             if pc in clear:
                 regs = {}
+            if jump_seen == 2:
+                regs = {}
+                jump_seen = 0
+            elif jump_seen == 1:
+                jump_seen = 2
+            if w >> 26 == 2 or (w >> 26 == 0 and (w & 63) == 8):
+                jump_seen = 1
             op, rs, rt, imm = w >> 26, (w >> 21) & 31, (w >> 16) & 31, w & 0xFFFF
             rd = (w >> 11) & 31
             kill = []

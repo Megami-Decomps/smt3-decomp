@@ -3080,10 +3080,20 @@ void nbPanelAnalyzeDraw(datUnitWork_t *pUnitWork)
  * battle unknown realm savestate, covering only the paths those calls took.
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
-extern nbPanelProcess_nbPanelXYZ_t D_004F0268[], D_004F02A4[], D_004F02E0[];
-extern nbPanelProcess_nbPanelXYZ_t D_004F03A8[], D_004F0420[], D_004F045C[];
-extern nbPanelProcess_nbPanelXYZ_t D_004F0484[], D_004F0498[], D_004F04E8[];
-extern nbPanelProcess_nbPanelXYZ_t D_004F0510[], D_004F0574[], D_004F0588[];
+/* One 46-row array; the other panel tables are slices of it. */
+extern nbPanelProcess_nbPanelXYZ_t D_004F0268[];
+#define D_004F02A4 (D_004F0268 + 3)
+#define D_004F02E0 (D_004F0268 + 6)
+#define D_004F03A8 (D_004F0268 + 16)
+#define D_004F0420 (D_004F0268 + 22)
+#define D_004F045C (D_004F0268 + 25)
+#define D_004F0484 (D_004F0268 + 27)
+#define D_004F0498 (D_004F0268 + 28)
+#define D_004F04E8 (D_004F0268 + 32)
+#define D_004F0510 (D_004F0268 + 34)
+#define D_004F0574 (D_004F0268 + 39)
+#define D_004F0588 (D_004F0268 + 40)
+#define D_004F05D8 (D_004F0268 + 44)
 extern nbPanelProcess_nbPanelTMXuv_t D_004EFDD0[], D_004EFDE0[], D_004EFE00[];
 extern nbPanelProcess_nbPanelTMXuv_t D_004EFE10[], D_004EFE20[], D_004EFE30[], D_004EFE40[];
 extern datDevilFormat_t datDevilTable[];

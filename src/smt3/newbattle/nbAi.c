@@ -231,7 +231,7 @@ extern s32 nbRunAiSub(nbActionProcessData_t *a, s32 tbl);
 
 extern char D_00545728[];
 
-extern u8 D_00398A08[];
+#define D_00398A08 ((u8 *)D_003989E0 + 0x28)
 
 extern s32 datGetPlayerLevel(void);
 
