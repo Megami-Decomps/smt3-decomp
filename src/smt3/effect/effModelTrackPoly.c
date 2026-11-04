@@ -6,6 +6,7 @@
 #include "draw3d.h"
 #include "draw.h"
 #include "effect.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -238,18 +239,18 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
         sword = (Eff_ModelTrackPoly_tag *)hMTPoly->trackPoly;
         switch (mdlGetMotionNum(hMTPoly->params.hModel, 0)) {
         case 10:
-            if (sword->frame < 0x1A) {
+            if (sword->frame < SDF_FRAMES(0x1A)) {
                 sword->frame++;
             } else {
                 effSwordTrackDraw(sword);
             }
             break;
         case 9:
-            if (sword->frame < 0x15) {
+            if (sword->frame < SDF_FRAMES(0x15)) {
                 sword->frame++;
             } else if (minor >= 0x153 && minor < 0x156) {
                 saved = sword->param_dante.abgr;
-                if (sword->frame >= 0x31) {
+                if (sword->frame >= SDF_FRAMES(0x31)) {
                     sword->param_dante.abgr = 0;
                 }
                 effSwordTrackDraw(sword);
@@ -259,7 +260,7 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
             }
             break;
         case 0x10:
-            if (sword->frame < 0xB) {
+            if (sword->frame < SDF_FRAMES(0xB)) {
                 sword->frame++;
             } else {
                 effSwordTrackDraw(sword);
@@ -267,23 +268,23 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
             break;
         case 0x11:
             if (minor >= 0x153 && minor < 0x156) {
-                if (sword->frame < 0x1C) {
+                if (sword->frame < SDF_FRAMES(0x1C)) {
                     sword->frame++;
                 } else {
                     effSwordTrackDraw(sword);
                 }
-            } else if (sword->frame < 0x16) {
+            } else if (sword->frame < SDF_FRAMES(0x16)) {
                 sword->frame++;
             } else {
                 effSwordTrackDraw(sword);
             }
             break;
         case 0x12:
-            if ((minor >= 0x153 && minor < 0x156) ? (sword->frame < 0x11) : (sword->frame < 0xB)) {
+            if ((minor >= 0x153 && minor < 0x156) ? (sword->frame < SDF_FRAMES(0x11)) : (sword->frame < SDF_FRAMES(0xB))) {
                 sword->frame++;
             } else {
                 saved = sword->param_dante.abgr;
-                if (sword->frame - 0x48 < 0x35) {
+                if (sword->frame - SDF_FRAMES(0x48) < SDF_FRAMES(0x35)) {
                     sword->param_dante.abgr = 0;
                 }
                 effSwordTrackDraw(sword);
@@ -291,7 +292,7 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
             }
             break;
         default:
-            if (sword->frame >= 0xB) {
+            if (sword->frame >= SDF_FRAMES(0xB)) {
                 effSwordTrackDraw(sword);
             } else {
                 sword->frame++;
@@ -302,13 +303,13 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
         frame = hMTPoly->params.hModel->first->frame;
         if (hMTPoly->params.frame_s <= frame) {
             if (frame <= hMTPoly->params.frame_e) {
-                if (hMTPoly->updateCount % hMTPoly->params.record == 0) {
+                if (SDF_FRAME_DUE(hMTPoly->updateCount) && SDF_FRAME_TICK(hMTPoly->updateCount) % hMTPoly->params.record == 0) {
                     Eff_ModelTrackPolyGetMarkPosition(hMTPoly);
                 }
                 dds3HermitianTrackPolyDraw(hMTPoly->trackPoly);
             } else {
                 poly = hMTPoly->trackPoly;
-                if ((poly->abgr & 0xFF000000) != 0) {
+                if ((poly->abgr & 0xFF000000) != 0 && SDF_FRAME_DUE(hMTPoly->updateCount)) {
                     poly->abgr += 0xE0000000;
                 }
                 dds3HermitianTrackPolyDraw(poly);
@@ -1062,7 +1063,9 @@ void effSwordTrackDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
     if (frame < (f32)hSwordTrack->param_dante.startFrame) {
         return;
     }
-    effSwordTrackRecord(hSwordTrack);
+    if (SDF_FRAME_DUE(hSwordTrack->frame)) {
+        effSwordTrackRecord(hSwordTrack);
+    }
     hSwordTrack->otIndex = 0x2E;
     list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
