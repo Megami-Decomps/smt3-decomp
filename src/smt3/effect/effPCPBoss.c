@@ -8,6 +8,7 @@
 #include "effect.h"
 #include "event.h"
 #include "nb.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -895,7 +896,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
                   (form->hunit->owner)->first->frame);
     target.f[1] -= offset;
     effPCPBossONGYModelTexRender(&target, form, renderHeight);
-    if (work->frame >= 12) {
+    if (work->frame >= SDF_FRAMES(12)) {
         return;
     }
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
@@ -909,7 +910,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     sdf3DPrimLinkMat(tag, work->pMat, 0);
     LookAtMatrix(D_002F5C20, D_002F5C30, effPCPBossTexRect);
     ReverseMatrix();
-    rate = (f32)work->frame / 12.0f;
+    rate = (f32)work->frame / SDF_FRAMES_F(12.0f);
     effPCPBossWork.color = ((u32)((1.0f - rate) * 128.0f) << 24) | 0x808080;
     effPCPBossWork.vertexCount = 32;
     effPCPBossWork.positions = points;
@@ -919,7 +920,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     count = 0;
     phase = (u32)(rate * 15.0f);
     angle = work->radian;
-    work->radian = angle + 0.043633227f;
+    work->radian = angle + SDF_FRAME_STEP(0.043633227f);
     angleStep = ((f32)phase * 3.141592502593994140625f) / 300.0f;
     sway = rate * 67.99999237060546875f;
     uvStep = 0.0033333333f;
@@ -1092,7 +1093,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
     sdfMotionSeek(((mdlObj_t *)effPCPBossTexHandle)->first, form->hunit->owner->first->frame);
     target.f[1] -= offset;
     effPCPBossONGYModelTexRender(&target, form, height);
-    if (work->frame >= 17) {
+    if (work->frame >= SDF_FRAMES(17)) {
         return;
     }
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
@@ -1110,7 +1111,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
     effPCPBossWork.positions = points;
     effPCPBossWork.colors = colors;
     effPCPBossWork.uvs = uv;
-    rate = (1.0f - (f32)work->frame / 17.0f) * 0.800000011920929f;
+    rate = (1.0f - (f32)work->frame / SDF_FRAMES_F(17.0f)) * 0.800000011920929f;
     filledHeight = rate * 680.0f;
     if (rate > 0.0f) {
         uv[0] = 0.0f;
@@ -1167,7 +1168,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
         effPCPBossWork.vertexCount = 32;
         effPCPBossWork.primCount = 16;
         y = filledHeight - height;
-        work->radian = angle + 0.15707962214946747f;
+        work->radian = angle + SDF_FRAME_STEP(0.15707962214946747f);
         v = rate;
         initialSway = sdfSin(angle) * 27.199995040893555f;
         fade = 1.0f;
@@ -1332,7 +1333,7 @@ void effPCPBossBUNSINDrawPoly(sdfDrawTag_t *tag, effPCPBossBUNSIN_t *work,
     angleStep = (angleRange * 3.141592502593994140625f) / 100.0f;
     effPCPBossWork.colors = NULL;
     y = -(height * 0.5f);
-    work->radian = angle + 0.052359871566295624f;
+    work->radian = angle + SDF_FRAME_STEP(0.052359871566295624f);
     effPCPBossWork.uvs = uv;
     effPCPBossWork.color = color;
     point = points;
@@ -1525,20 +1526,20 @@ void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
     SDF_VU0_COPYVECTOR(&position, work->pos_s);
     position.f[1] -= 340.0f;
     effPCPBossBUNSINDrawPoly2(tag, work, &position.q, 0x80808080, 543.99993896484375f, 680.0f);
-    rate = frame < 10 ? (f32)frame / 10.0f : 1.0f;
+    rate = frame < SDF_FRAMES(10) ? (f32)frame / SDF_FRAMES_F(10.0f) : 1.0f;
     SDF_VU0_LOADVECTOR(work->pos_s);
     SDF_VU0_LOADVECTOR_B(work->pos_e);
     PS2_FLOAT_BITS(bits, rate);
     SDF_VU0_INTERPOLATE(bits);
     SDF_VU0_STOREVECTOR(&position);
     position.f[1] -= 340.0f;
-    if (frame >= 24) {
+    if (frame >= SDF_FRAMES(24)) {
         effPCPBossBUNSINDrawPoly2(tag, work, &position.q, 0x80808080, 543.99993896484375f, 680.0f);
     } else {
         startRate = 0.0f;
-        if (frame >= 11) {
-            if (frame < 20) {
-                startRate = (f32)(frame - 10) / 10.0f;
+        if (frame >= SDF_FRAMES(11)) {
+            if (frame < SDF_FRAMES(20)) {
+                startRate = (f32)(frame - SDF_FRAMES(10)) / SDF_FRAMES_F(10.0f);
             } else {
                 startRate = 1.0f;
             }
@@ -1551,7 +1552,7 @@ void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR(&direction);
-        width = (frame < 10 ? 1.0f : 1.0f - (f32)(frame - 10) / 14.0f) * 33.999997f;
+        width = (frame < SDF_FRAMES(10) ? 1.0f : 1.0f - (f32)(frame - SDF_FRAMES(10)) / SDF_FRAMES_F(14.0f)) * 33.999997f;
         SDF_VU0_LOADVECTOR(work->pos_s);
         y = work->pos_s[1] - 340.0f;
         SDF_VU0_SETVECTOR_Y(y);
@@ -1626,12 +1627,12 @@ void effPCPBossBUNSIN2Draw(effPCPBossBUNSIN2_t *pPCPBossBUNSIN2)
     switch (pPCPBossBUNSIN2->state) {
     case 0:
         effPCPBossBUNSINDraw(pPCPBossBUNSIN2->parts[0]);
-        if (pPCPBossBUNSIN2->frame >= length - 14) {
+        if (pPCPBossBUNSIN2->frame >= SDF_FRAMES(length - 14)) {
             pPCPBossBUNSIN2->state = 1;
         }
         break;
     case 1:
-        if (pPCPBossBUNSIN2->frame < length) {
+        if (pPCPBossBUNSIN2->frame < SDF_FRAMES(length)) {
             effPCPBossBUNSINDraw(pPCPBossBUNSIN2->parts[0]);
         }
         effPCPBossBUNSINDraw(pPCPBossBUNSIN2->parts[1]);
@@ -2625,9 +2626,9 @@ void effPCPBossKAGUInvokeDraw(effPCPBossKAGUInvoke_t *hData)
     }
 
     frame = hData->frame;
-    limit = hData->draw.limit;
-    fadeIn = hData->draw.fadeIn;
-    fadeOut = hData->draw.fadeOut;
+    limit = SDF_FRAMES(hData->draw.limit);
+    fadeIn = SDF_FRAMES(hData->draw.fadeIn);
+    fadeOut = SDF_FRAMES(hData->draw.fadeOut);
     if (frame < limit) {
         if (frame < fadeIn && fadeIn != 0) {
             blend = (f32)frame / (f32)fadeIn;
@@ -2864,9 +2865,9 @@ void effPCPBossKAGUAttackDraw(effPCPBossKAGUAttack_t *work)
         }
     }
     frame = work->frame;
-    limit = work->limit;
-    fadeIn = work->fadeIn;
-    fadeOut = work->fadeOut;
+    limit = SDF_FRAMES(work->limit);
+    fadeIn = SDF_FRAMES(work->fadeIn);
+    fadeOut = SDF_FRAMES(work->fadeOut);
     if (frame < limit) {
         if (frame < fadeIn && fadeIn != 0) {
             blend = (f32)frame / (f32)fadeIn;
@@ -3337,9 +3338,9 @@ void effPCPBossKAGU2AttackDraw(effPCPBossKAGU2Attack_t *work)
         }
     }
     frame = work->frame;
-    limit = work->duration;
-    fadeIn = work->fadeIn;
-    fadeOut = work->fadeOut;
+    limit = SDF_FRAMES(work->duration);
+    fadeIn = SDF_FRAMES(work->fadeIn);
+    fadeOut = SDF_FRAMES(work->fadeOut);
     if (frame < limit) {
         if (frame < fadeIn && fadeIn != 0) {
             blend = (f32)frame / (f32)fadeIn;
@@ -3600,10 +3601,10 @@ void effPCPBossMETATOBeamDraw(effPCPBossMETATOBeam_t *hData)
     effPCPBossVector_t pos;
     nbFormation_t *model;
     u128 *param;
-    s32 limit = hData->limit;
+    s32 limit = SDF_FRAMES(hData->limit);
     s32 frame = hData->frame;
-    s32 fadeIn = hData->fadeIn;
-    s32 fadeOut = hData->fadeOut;
+    s32 fadeIn = SDF_FRAMES(hData->fadeIn);
+    s32 fadeOut = SDF_FRAMES(hData->fadeOut);
     s32 rest;
     s32 id;
     s32 i;
@@ -3848,8 +3849,8 @@ void effPCPMuzzleFlashDraw(effPCPMuzzleFlash_tag *hData)
     f32 sc;
     f32 scale;
 
-    if (frame < animFrame) {
-        dds3BillboardSetAnimKey2(hData->hBillboard, frame);
+    if (frame < SDF_FRAMES(animFrame)) {
+        dds3BillboardSetAnimKey2(hData->hBillboard, SDF_FRAME_TICK(frame));
         if (effBTLSkillCheckRun() != 0) {
             model = effBTLSkillGetInvokeFormation();
             SDF_VU0_LOADVECTOR((u8 *)model + 0x30);
@@ -3981,7 +3982,7 @@ void effPCPDANTE_Thunder_DrawSub(effPCPDANTE_Thunder_tag *hData)
 
 void effPCPDANTE_Thunder_Draw(effPCPDANTE_Thunder_tag *hData)
 {
-    s32 limit = hData->params.limit;
+    s32 limit = SDF_FRAMES(hData->params.limit);
     s32 frame = hData->frame;
     s32 fadeIn;
     s32 fadeOut;
@@ -3991,8 +3992,8 @@ void effPCPDANTE_Thunder_Draw(effPCPDANTE_Thunder_tag *hData)
     u32 color;
 
     if (frame < limit) {
-        fadeIn = hData->params.fadeIn;
-        fadeOut = hData->params.fadeOut;
+        fadeIn = SDF_FRAMES(hData->params.fadeIn);
+        fadeOut = SDF_FRAMES(hData->params.fadeOut);
         param = effPCP_ThunderPolyGetParam(hData->poly);
         SDF_VU0_LOADMATRIX(hData->matrix);
         SDF_VU0_LOADVECTOR_B(D_00533E10);
@@ -4130,9 +4131,9 @@ void effPCPDANTE_Damage_Run(effPCPDANTE_Damage_tag *work)
     u32 i;
     u32 targetBits;
     u32 slot = 0;
-    s32 total = work->param.total;
-    s32 fadeIn = work->param.fadeIn;
-    s32 fadeOut = work->param.fadeOut;
+    s32 total = SDF_FRAMES(work->param.total);
+    s32 fadeIn = SDF_FRAMES(work->param.fadeIn);
+    s32 fadeOut = SDF_FRAMES(work->param.fadeOut);
     nbFormation_t *unit = nbGetMainProcessData()->form;
     targetBits = effBTLSkillGetTargetBit();
 
@@ -4152,7 +4153,7 @@ void effPCPDANTE_Damage_Run(effPCPDANTE_Damage_tag *work)
             scale = effBTLPartGetScalePtr(unit);
             place.payload[10] = scale;
 
-            if (work->delay[slot] != 0) {
+            if (work->delay[slot] != 0 && SDF_FRAME_DUE(dds3GetKernelCount())) {
                 work->delay[slot] = work->delay[slot] - 1;
                 if (work->delay[slot] == 0) {
                     nbSetUnitMotion(unit, 1, 0, 1.0f);
@@ -4260,7 +4261,7 @@ void effPCP_PBCamera_Run(effPCP_PBCamera_tag *work)
     u32 to;
     mdlObj_t *model;
 
-    if (work->life > work->frame) {
+    if (SDF_FRAMES(work->life) > work->frame) {
         from = 0;
         to = 1;
         target = NULL;
@@ -4435,7 +4436,7 @@ extern void nbPnl_rsetAlpha(s32 mode);
 #ifdef NON_MATCHING
 void effPCPDANTE_ShowTime_Bingo_Draw(effPCPDANTE_ShowTime_tag *work)
 {
-    u32 frame = work->frameParts[0];
+    u32 frame = SDF_FRAME_TICK(work->frameParts[0]);
     u32 age;
     u32 color;
     s32 x;
@@ -4492,7 +4493,7 @@ extern effPCPDANTE_UV_tag effPCPDANTE_AreYouReady_UV;
 
 void effPCPDANTE_ShowTime_AreYouReady_Draw(effPCPDANTE_ShowTime_tag *hData)
 {
-    s32 frame = hData->frameParts[1];
+    s32 frame = SDF_FRAME_TICK(hData->frameParts[1]);
     u32 i;
     s32 age;
     s32 y;
@@ -4566,7 +4567,7 @@ void effPCPDANTE_ShowTime_AreYouReady_Draw(effPCPDANTE_ShowTime_tag *hData)
 extern effPCPDANTE_UV_tag effPCPDANTE_ShowTime_UV;
 void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work)
 {
-    u32 frame = work->frameParts[2];
+    u32 frame = SDF_FRAME_TICK(work->frameParts[2]);
     u32 age = frame - 23;
     void *texture = work->hTex[1];
     u32 color;
@@ -4627,11 +4628,11 @@ void effPCPDANTE_ShowTime_Draw(effPCPDANTE_ShowTime_tag *hData)
         nbPanelFlashDraw(hData->flash[0], 0x80808080);
         effPCPDANTE_ShowTime_Bingo_Draw(hData);
     }
-    if (frame >= 0x16) {
+    if (frame >= SDF_FRAMES(0x16)) {
         nbPanelFlashDraw(hData->flash[1], 0x80808080);
         effPCPDANTE_ShowTime_AreYouReady_Draw(hData);
     }
-    if (frame >= 0x5C) {
+    if (frame >= SDF_FRAMES(0x5C)) {
         nbPanelFlashDraw(hData->flash[2], 0x80808080);
         effPCPDANTE_ShowTime_ShowTime_Draw(hData);
     }
@@ -4768,9 +4769,9 @@ void effPCP_BED_Draw(effPCP_BED_tag *hData)
 {
     effPCPBossPlace_t place;
     s32 frame = hData->frame;
-    s32 limit = hData->param.life;
-    s32 fadeIn = hData->param.fade_in;
-    s32 fadeOut = hData->param.fade_out;
+    s32 limit = SDF_FRAMES(hData->param.life);
+    s32 fadeIn = SDF_FRAMES(hData->param.fade_in);
+    s32 fadeOut = SDF_FRAMES(hData->param.fade_out);
     s32 rest;
     f32 blend;
     u32 color;
