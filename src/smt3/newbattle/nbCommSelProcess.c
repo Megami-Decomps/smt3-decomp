@@ -358,6 +358,9 @@ void DispPanelLabel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 col
     }
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void DispPanelSitaji(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 color)
 {
@@ -498,6 +501,9 @@ void DispComm1PanelSummon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy,
 
 /* NON_MATCHING: 29 of 97 words differ (first at +0x8). */
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 
 void DispCommCursor(s32 ox, s32 oy, s32 a)
@@ -601,6 +607,9 @@ void DispComm1PanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s
 
 extern s32 evtBitCheck(s32 no);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void DispHelpPanel(nbCommSelProcessData_t *s, u16 d, s32 x, s32 y, s32 oz,
                    u32 color, s32 helpa)
@@ -653,6 +662,9 @@ extern void DispComm1PanelComm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy,
                                 s32 oz, u32 color);
 
 /* NON_MATCHING: 203 of 207 words match with the command-row C draft visible. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void DispCommandPanel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 alpha)
 {
@@ -1151,6 +1163,9 @@ extern void evtBitOff(s32 bit);
 extern void evtBitOn(s32 bit);
 extern void nbPlaySe(s32 no);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void SelectCommandList(nbCommSelProcessData_t *s)
 {

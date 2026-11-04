@@ -315,6 +315,9 @@ extern void fldSeVol(s32 id, s32 volume);
 extern u32 dds3GetRandA(s32 stream);
 
 /* NON_MATCHING: 363 of 364 words match at the native 1456-byte size. */
+/* NON_MATCHING. Behaviour checked against retail: 6 PCSX2 call vectors give the same return and memory,
+ * field underground facility, field unknown realm savestates, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void fldPlayerMotionSe(s32 hisMotion, s32 upMotion)
 {
@@ -2463,6 +2466,9 @@ void fldPlayerMotReset2(void) {
                     9, 0.0f);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vectors give the same return and memory,
+ * field underground facility savestate, covering only the paths those calls took. 2 more refused at an unlinked callee.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern void dds3GetRotPoseSet(dds3Basic_t *basic);
 extern f32 EulerAngleAxisY(void);

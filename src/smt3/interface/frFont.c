@@ -952,6 +952,9 @@ s32 frGetYShiftLev(s8 Style, s32 FontNo) {
     return 0x18;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 12 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm, field underground facility, field unknown realm, menu main savestates, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern s32 D_0054F414;
 

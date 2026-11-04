@@ -1058,6 +1058,9 @@ extern frFontHandle_t *gnbPnlWork;
  * 3224-byte size; the body is structurally complete and the tail aligns at a
  * constant eight-word offset. See docs/matching/newbattle/nbPanelProcess.md. */
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 
 void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessData_t *p)
@@ -1555,6 +1558,9 @@ void nbPanelPressGaugeEncountHide(void)
 /* NON_MATCHING: the remaining differences include a spilled fade color,
  * table-address lifetimes and instruction scheduling. */
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern void nbPanelPressTurnGaugeAnimStart(void);
 extern s32 nbPanelPressTurnGaugeRun(void);
@@ -2038,6 +2044,9 @@ void nbPanelPressTurnGaugeAnimStart2(void)
     nbPanelPTAOnly = 1;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern nbPanelProcess_nbPanelXYZ_t nbPanelPTPartList[], nbPressTurnTable[], D_004F000C[];
 extern s32 D_004F0180[], D_004F0190[];
@@ -3067,6 +3076,9 @@ void nbPanelAnalyzeDraw(datUnitWork_t *pUnitWork)
     pNbPanelAnalyzeUnitWork = pUnitWork;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern nbPanelProcess_nbPanelXYZ_t D_004F0268[], D_004F02A4[], D_004F02E0[];
 extern nbPanelProcess_nbPanelXYZ_t D_004F03A8[], D_004F0420[], D_004F045C[];
@@ -3477,6 +3489,9 @@ void nbPanelAutoInit(void)
 /* NON_MATCHING: 226 of 232 words match at the native 928-byte size.
  * Six background-sprite argument loads remain reordered; see
  * docs/matching/newbattle/nbPanelProcess.md. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern f32 sdfSin(f32 angle);
 extern nbPanelProcess_nbPanelXYZ_t D_004F05D8[];
@@ -3605,6 +3620,9 @@ void nbPanelPartyHide(void)
 /* NON_MATCHING: 332 of 339 words match at the native 1356-byte size. The
  * branch form at +0x3FC needs nbPanelDrawPP1 as a visible C definition. */
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 
 void nbPanelPartyDraw(void)
@@ -3758,6 +3776,9 @@ INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPartyDraw);
  * after nbPanelStockCheckRun, which turns into bne once nbPanelPartyDraw is a
  * visible C definition in this unit. */
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 
 s32 nbPanelDrawProcess(void)

@@ -358,6 +358,9 @@ void fldSnowSeedReset(void)
     }
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 6 PCSX2 call vectors give the same return and memory,
+ * field underground facility, field unknown realm savestates, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern void rsetOtOfs(s32 offset);
 extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);

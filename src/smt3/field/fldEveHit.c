@@ -283,6 +283,9 @@ void fldKaifukuTest(void) {
     p2sdPlaySE(0x10, 0x7F, 0x3F);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vectors give the same return and memory,
+ * field underground facility savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern fldDanteGunState_t fldRunDanteGunFlag;
 extern s32 datCheckDying(datUnitWork_t *work);
