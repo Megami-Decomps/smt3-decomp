@@ -162,6 +162,19 @@ def load_jtbls(asm_root):
     return sorted(found)
 
 
+WORD_LINE = re.compile(r"^\s*/\* \w+ ([0-9A-F]{8}) [0-9A-F]{8} \*/ \.word ", re.M)
+
+
+def load_word_addrs(asm_root):
+    """Addresses splat emits as `.word` under asm_root; only those can be relocated. Exits if none."""
+    found = set()
+    for f in Path(asm_root).rglob("*.s"):
+        found.update(int(m, 16) for m in WORD_LINE.findall(f.read_text(errors="replace")))
+    if not found:
+        sys.exit("no .word lines under %s, so byte and short data cannot be told from words (configure first)" % asm_root)
+    return found
+
+
 def jtbl_crossings(extents, jtbls):
     """(addr, end, jtbl) for each extent (addr, size) that covers a jtbl start after its own start."""
     out = []
@@ -182,6 +195,7 @@ def main():
     ap.add_argument("--dump-universe", default=None, help="write the symbol universe and reference sets as JSON")
     a = ap.parse_args()
 
+    word_addrs = load_word_addrs(ROOT / "asm")
     b, secs = load_elf(a.elf)
     dsecs = [s for s in secs if s["name"] in DATA_SECS and s["size"]]
     dsecs.sort(key=lambda s: s["addr"])
@@ -287,7 +301,7 @@ def main():
             continue
         ext = extent(s)
         n = ext // 4
-        like = sum(1 for k in range(n) if (word_at(base + 4 * k) or 0) >= 0x100000 and sec_of(word_at(base + 4 * k)))
+        like = sum(1 for k in range(n) if base + 4 * k in word_addrs and (word_at(base + 4 * k) or 0) >= 0x100000 and sec_of(word_at(base + 4 * k)))
         if like:
             add("WORDS", s, "type %s, %d narrow accesses (min width %d), %d of %d words look like addresses" %
                 (s["type"], len(ws), min(ws), like, n))
@@ -322,7 +336,9 @@ def main():
         nz = sum(1 for v in raw if v)
         if nz and sum(1 for v in raw if all(0x20 <= (v >> sh & 255) < 0x7f or (v >> sh & 255) == 0 for sh in (0, 8, 16, 24))) * 2 > nz:
             continue
-        for v in raw:
+        for k, v in enumerate(raw):
+            if addr + 4 * k not in word_addrs:
+                continue
             if v >= 0x100000 and (sec_of(v) or in_text(v)):
                 like += 1
                 if v not in known and not (in_text(v) and v % 4 == 0):
