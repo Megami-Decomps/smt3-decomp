@@ -1104,11 +1104,11 @@ void effPCPHamaCardSpiralSetColor(effPCPHamaCardSpiral_tag *hData, u32 abgr)
     hData->abgr = abgr;
 }
 
-void effPCPHamaCardSpiralSetScale(f32 hData, effPCPHamaCardSpiral_tag *scale)
+void effPCPHamaCardSpiralSetScale(effPCPHamaCardSpiral_tag *hData, f32 scale)
 {
-    scale->param.up_s *= hData;
-    scale->param.radius_s *= hData;
-    scale->param.radius_e *= hData;
+    hData->param.up_s *= scale;
+    hData->param.radius_s *= scale;
+    hData->param.radius_e *= scale;
 }
 
 effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(params, resource, particleParams)
@@ -1422,10 +1422,10 @@ void effPCPHamaCardSphereSetColor(effPCPHamaCardSphere_tag *hData, u32 abgr)
     hData->abgr = abgr;
 }
 
-void effPCPHamaCardSphereSetScale(f32 hData, effPCPHamaCardSphere_tag *scale)
+void effPCPHamaCardSphereSetScale(effPCPHamaCardSphere_tag *hData, f32 scale)
 {
-    scale->param.radius_s *= hData;
-    scale->param.radius_e *= hData;
+    hData->param.radius_s *= scale;
+    hData->param.radius_e *= scale;
 }
 
 effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(params, resource, particleParams)
