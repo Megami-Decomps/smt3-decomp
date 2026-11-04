@@ -319,7 +319,7 @@ extern fldNpcTable_t D_003121D0[];
 extern fldNpcOverride_t D_00314100[];
 extern const fldNpcPathGroup1_t D_00532358;
 extern const fldNpcPathGroup2_t D_00532478;
-extern const volatile sdfVector4_t D_00532338, D_00532348;
+extern const volatile sdfVector4Unaligned_t D_00532338, D_00532348;
 extern const char D_005326B8[];
 extern sdfMemHandle_t *fldBlurEffectTable[];
 extern struct effNode_t *fldNpcLoadIdx;

@@ -177,7 +177,7 @@ extern dds3Basic_t *fldRunTama3Basic;
 
 extern s32 D_0054EABC;
 
-extern sdfVector4_t D_00531148;
+extern sdfVector4Unaligned_t D_00531148;
 
 extern sdfVector4_t D_00531040;
 
