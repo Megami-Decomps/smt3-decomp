@@ -1827,7 +1827,11 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EBF4);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EBF8);
 
+INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EBFC);
+
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EC00);
+
+INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EC01);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EC08);
 

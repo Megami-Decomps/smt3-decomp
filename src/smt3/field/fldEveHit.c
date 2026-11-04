@@ -242,7 +242,7 @@ extern fldInfTable_t fldInfTable;
 
 extern s32 gFldInfIdx;
 
-extern const char D_002FF3E0[];
+extern const char fldNpcTalkLabel[];
 
 s32 evtBitCheck(s32 no);
 
@@ -1624,7 +1624,7 @@ const char *fldCheckNpcTalk(const char *eventName) {
                     s32 candidateSet = fldInfTable.packs[packOrSetIndex].setIndex;
                     if (fldInfTable.sets[gFldInfIdx].kindArea.packed == 1) {
                         gFldInfIdx = candidateSet;
-                        return D_002FF3E0;
+                        return fldNpcTalkLabel;
                     }
                 }
             }
@@ -1635,7 +1635,7 @@ const char *fldCheckNpcTalk(const char *eventName) {
             fldInfTable.sets[packOrSetIndex].action == fldGlobalBase.floor + 1 &&
             strcmp(eventName, fldInfTable.sets[packOrSetIndex].eventName) == 0) {
             gFldInfIdx = packOrSetIndex;
-            return D_002FF3E0;
+            return fldNpcTalkLabel;
         }
     }
     return 0;
@@ -1653,7 +1653,7 @@ const char *fldCheckNpcTalk2(const char *eventName) {
                     s32 candidateSet = fldInfTable.packs[packOrSetIndex].setIndex;
                     if (fldInfTable.sets[gFldInfIdx].kindArea.packed == 0) {
                         gFldInfIdx = candidateSet;
-                        return D_002FF3E0;
+                        return fldNpcTalkLabel;
                     }
                 }
             }
@@ -1664,7 +1664,7 @@ const char *fldCheckNpcTalk2(const char *eventName) {
             fldInfTable.sets[packOrSetIndex].action == fldGlobalBase.floor + 1 &&
             strcmp(eventName, fldInfTable.sets[packOrSetIndex].eventName) == 0) {
             gFldInfIdx = packOrSetIndex;
-            return D_002FF3E0;
+            return fldNpcTalkLabel;
         }
     }
     return 0;

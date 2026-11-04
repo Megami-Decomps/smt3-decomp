@@ -479,3 +479,5 @@ INCLUDE_SDATA(const s32, "newbattle/nbE914", D_0055163C);
 
 INCLUDE_SDATA(const s32, "newbattle/nbE914", D_00551640);
 
+INCLUDE_SDATA(const s32, "newbattle/nbE914", D_00551644);
+

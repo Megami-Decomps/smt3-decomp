@@ -56,7 +56,7 @@ extern s8 fldDoorExitMode[];
 
 extern char pointResName[];
 
-extern char D_00531690[], D_00531950[];
+extern char fldProcSequenceName[], fldProcDrawName[];
 
 extern void fclClearTerminalState(void);
 
@@ -81,7 +81,7 @@ extern void dds3GlobalWorkUserInit2(s32 mode);
 
 extern dds3Basic_t *fldAnaBasic;
 
-extern char D_00531950[];
+extern char fldProcDrawName[];
 
 extern void datDelDevil(s32 id);
 
@@ -93,11 +93,11 @@ extern void dds3SetUnitObjectId(dds3Basic_t *basic, const char *name);
 
 extern void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor);
 
-extern char D_00531820[];
+extern char fldWaveUnitName[];
 
-extern char D_005316B0[];
+extern char fldPlayerAPath[];
 
-extern char D_005316D0[], D_005316F0[], D_00531710[], D_00531728[], D_00531740[], D_00531758[];
+extern char fldPlayerBPath[], fldPlayerCPath[], fldWpcPath[], fldHolePath[], fldWavePath[], fldWave02Path[];
 
 extern s32 gfldPlayerSize;
 
@@ -175,7 +175,7 @@ extern void dds3ObjectBaseSetPrimaryControl(dds3Basic_t *basic, s32 (*func)(dds3
 
 extern void fldEncountClearFlag(u32 flag);
 
-extern char D_0054EB40[];
+extern char fldCameraUnitName[];
 
 extern s32 fldUnitPad(dds3PoseSet_t *pUpdatePoseSet, dds3Basic_t *pBasic);
 
@@ -323,7 +323,7 @@ extern char * strcpy(char *, const char *);
 #endif
 
 void fldSetSceneParam2(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName) {
-    if (dds3SearchProcessName(D_00531690) != NULL) {
+    if (dds3SearchProcessName(fldProcSequenceName) != NULL) {
         if (fldGlobalBase.area == loadField) {
             fldGlobalBase.reuseAreaResources = 1;
         } else {
@@ -349,7 +349,7 @@ void fldSetSceneParam2(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, con
 }
 
 void fldSetSceneParam3(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName) {
-    if (dds3SearchProcessName(D_00531690) != NULL) {
+    if (dds3SearchProcessName(fldProcSequenceName) != NULL) {
         if (fldGlobalBase.area == loadField) {
             fldGlobalBase.reuseAreaResources = 1;
         } else {
@@ -374,7 +374,7 @@ void fldSetSceneParam3(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, con
 
 void fldSetSceneParam4(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
                     s32 bgm, s32 camMode, const char *camName) {
-    if (dds3SearchProcessName(D_00531690) != NULL) {
+    if (dds3SearchProcessName(fldProcSequenceName) != NULL) {
         if (fldGlobalBase.area == loadField) {
             fldGlobalBase.reuseAreaResources = 1;
         } else {
@@ -399,7 +399,7 @@ void fldSetSceneParam4(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, con
 
 void fldSetSceneParam5(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
                     s32 bgm, const char *FoceScript) {
-    if (dds3SearchProcessName(D_00531690) != NULL) {
+    if (dds3SearchProcessName(fldProcSequenceName) != NULL) {
         if (fldGlobalBase.area == loadField) {
             fldGlobalBase.reuseAreaResources = 1;
         } else {
@@ -616,7 +616,7 @@ void fldReadyScene(void)
 void fldPlayerALoad(void)
 {
     if (fldPlayerAnimData == NULL) {
-        fldPlayerAnimData = sdfDevLoadFileEx(D_005316B0, (u32 *)&gfldPlayerPtr, &gfldPlayerSizeBk);
+        fldPlayerAnimData = sdfDevLoadFileEx(fldPlayerAPath, (u32 *)&gfldPlayerPtr, &gfldPlayerSizeBk);
     }
 }
 
@@ -639,13 +639,13 @@ void fldJDataLoad(void)
 
     if (fldGlobalBase.area == 11 || fldGlobalBase.area == 14) {
         if (evtBitCheck(0x8B0) != 0) {
-            mhfldPlayerFile = sdfDevLoadFileEx(D_005316D0, (u32 *)&gfldPlayerPtr, &gfldPlayerSize);
+            mhfldPlayerFile = sdfDevLoadFileEx(fldPlayerBPath, (u32 *)&gfldPlayerPtr, &gfldPlayerSize);
         } else {
-            mhfldPlayerFile = sdfDevLoadFileEx(D_005316F0, (u32 *)&gfldPlayerPtr, &gfldPlayerSize);
+            mhfldPlayerFile = sdfDevLoadFileEx(fldPlayerCPath, (u32 *)&gfldPlayerPtr, &gfldPlayerSize);
         }
         mdlPackDecode(2, 0, 0x101, gfldPlayerPtr, gfldPlayerSize);
     } else if (fldGlobalBase.area < 10) {
-        mhfldPlayerFile = sdfDevLoadFileEx(D_00531710, (u32 *)&gfldPlayerPtr, &gfldPlayerSize);
+        mhfldPlayerFile = sdfDevLoadFileEx(fldWpcPath, (u32 *)&gfldPlayerPtr, &gfldPlayerSize);
         mdlPackDecode(2, 4, 0x101, gfldPlayerPtr, gfldPlayerSize);
     } else {
         fldPlayerALoad();
@@ -660,14 +660,14 @@ void fldJDataLoad(void)
         mhfldPlayerFile = NULL;
     }
     if (fldGlobalBase.area == 21 || fldGlobalBase.area == 26 || fldGlobalBase.area >= 36) {
-        mhfldAnaFile = sdfDevLoadFileEx(D_00531728, (u32 *)&gfldAnaPtr, &gfldAnaSize);
+        mhfldAnaFile = sdfDevLoadFileEx(fldHolePath, (u32 *)&gfldAnaPtr, &gfldAnaSize);
         mdlPackDecode(2, 5, 0x101, gfldAnaPtr, gfldAnaSize);
     }
     if (fldGlobalBase.area == 22) {
-        mhfldWaveFile = sdfDevLoadFileEx(D_00531740, (u32 *)&gfldWavePtr, &gfldWaveSize);
+        mhfldWaveFile = sdfDevLoadFileEx(fldWavePath, (u32 *)&gfldWavePtr, &gfldWaveSize);
         mdlPackDecode(2, 0x1B, 0x101, gfldWavePtr, gfldWaveSize);
     } else if (fldGlobalBase.area == 45) {
-        mhfldWaveFile = sdfDevLoadFileEx(D_00531758, (u32 *)&gfldWavePtr, &gfldWaveSize);
+        mhfldWaveFile = sdfDevLoadFileEx(fldWave02Path, (u32 *)&gfldWavePtr, &gfldWaveSize);
         mdlPackDecode(2, 0x1B, 0x101, gfldWavePtr, gfldWaveSize);
     }
 }
@@ -783,8 +783,8 @@ void fldReleaseUnitPad(void)
 #ifdef NON_MATCHING
 extern const fldPackedVector_t D_00531770, D_00531780, D_00531790, D_005317A0, D_005317B0;
 extern s32 l_UseCollision;
-extern dds3Basic_t *D_0054EAE8, *D_0054EAF0, *fldPlayerUnit;
-extern char D_0054EB38[];
+extern dds3Basic_t *fldUnitControlHandle, *fldDanteUnit, *fldPlayerUnit;
+extern char fldPlayerPosName[];
 extern void *mhfldAnaFile;
 extern void evtBitOff(s32 no);
 extern dds3Basic_t *dds3SetActiveUnitSceneBasic(dds3Basic_t *scene, dds3Basic_t *unit);
@@ -840,7 +840,7 @@ void fldSetUnit(fldResourcePoint_t *point)
     fldUnitControl.handle = dds3AddUnitObjectBasic(dds3AllocObjectId(), point, &rotation);
     dds3SetUnitObjectId(fldUnitControl.handle, "PLAYER_UNIT");
     dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldUnitControl.handle);
-    D_0054EAE8 = fldUnitControl.handle;
+    fldUnitControlHandle = fldUnitControl.handle;
     if (l_UseCollision != 0) dds3ObjectBaseOffFlag(fldUnitControl.handle, 0x20);
     if (fldGlobalBase.area < 10) {
         fldJDataLoad();
@@ -900,7 +900,7 @@ void fldSetUnit(fldResourcePoint_t *point)
     } else {
         dds3ObjectBaseOnFlag(fldUnitControl.handle, 0x200);
     }
-    D_0054EAF0 = NULL;
+    fldDanteUnit = NULL;
     oldDante = evtBitCheck(0xAF3);
     evtBitOff(0xAF3);
     evtBitOff(0xAF4);
@@ -931,16 +931,16 @@ void fldSetUnit(fldResourcePoint_t *point)
         SDF_VU0_LOADVECTOR_B(&point->rot);
         Mult();
         SDF_VU0_STOREVECTOR(&rotation);
-        D_0054EAF0 = dds3AddUnitObjectBasic(dds3AllocObjectId(), point, &rotation);
-        dds3SetUnitObjectId(D_0054EAF0, "DANTE_UNIT");
-        dds3ObjectBaseMakeUnit(D_0054EAF0, 2, 7);
-        dds3SetSclPoseSet(D_0054EAF0, &danteScale.vector);
-        model = dds3ObjectBaseGetModelHandle(D_0054EAF0);
-        dds3GetRadiusPoseSet(D_0054EAF0, 90.0f);
+        fldDanteUnit = dds3AddUnitObjectBasic(dds3AllocObjectId(), point, &rotation);
+        dds3SetUnitObjectId(fldDanteUnit, "DANTE_UNIT");
+        dds3ObjectBaseMakeUnit(fldDanteUnit, 2, 7);
+        dds3SetSclPoseSet(fldDanteUnit, &danteScale.vector);
+        model = dds3ObjectBaseGetModelHandle(fldDanteUnit);
+        dds3GetRadiusPoseSet(fldDanteUnit, 90.0f);
         mdlLoopMotion(model, 0, 3);
         sdfModelSetFaceDivParm(model->inner, 15.0f, 0.0f);
-        dds3ObjectBaseOffFlag(D_0054EAF0, 1);
-        dds3SetPosPoseSet(D_0054EAF0, &dantePosition.vector);
+        dds3ObjectBaseOffFlag(fldDanteUnit, 1);
+        dds3SetPosPoseSet(fldDanteUnit, &dantePosition.vector);
         fldRunDanteInit();
     } else {
         fldRunDanteClear();
@@ -984,26 +984,26 @@ void fldSetUnit(fldResourcePoint_t *point)
         dds3SetUnitObjectId(fldAnaBasic, "ANA_UNIT");
     }
     if (fldGlobalBase.area >= 11) fldWaveInit();
-    dds3AddPointBasic(dds3AllocObjectId(), &fldPlayerPosRotWork, D_0054EB38);
+    dds3AddPointBasic(dds3AllocObjectId(), &fldPlayerPosRotWork, fldPlayerPosName);
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531690);
+INCLUDE_RODATA(const s32, "field/fldMain", fldProcSequenceName);
 
 INCLUDE_RODATA(const s32, "field/fldMain", D_005316A0);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_005316B0);
+INCLUDE_RODATA(const s32, "field/fldMain", fldPlayerAPath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_005316D0);
+INCLUDE_RODATA(const s32, "field/fldMain", fldPlayerBPath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_005316F0);
+INCLUDE_RODATA(const s32, "field/fldMain", fldPlayerCPath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531710);
+INCLUDE_RODATA(const s32, "field/fldMain", fldWpcPath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531728);
+INCLUDE_RODATA(const s32, "field/fldMain", fldHolePath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531740);
+INCLUDE_RODATA(const s32, "field/fldMain", fldWavePath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531758);
+INCLUDE_RODATA(const s32, "field/fldMain", fldWave02Path);
 
 INCLUDE_RODATA(const s32, "field/fldMain", D_00531770);
 
@@ -1053,7 +1053,7 @@ void fldWaveInit(void)
         fldWaveBuff[i].cnt = 0;
         fldWaveBuff[i].pBasic = NULL;
         fldWaveBuff[i].pBasic = dds3AddUnitObjectBasic(dds3AllocObjectId(), pos, rot);
-        dds3SetUnitObjectId(fldWaveBuff[i].pBasic, D_00531820);
+        dds3SetUnitObjectId(fldWaveBuff[i].pBasic, fldWaveUnitName);
         dds3ObjectBaseMakeUnit(fldWaveBuff[i].pBasic, 2, 0x1B);
         dds3ObjectBaseOnFlag(fldWaveBuff[i].pBasic, 1);
     }
@@ -1120,7 +1120,7 @@ void fldSetUnitFollowCamera(void)
     ctrl = &fldFollowCameraControl;
     ctrl->handle =
         dds3AddCameraObjectBasicTypeLookAt(dds3AllocObjectId(), &campos, &tm, &lookat);
-    dds3SetUnitObjectId(ctrl->handle, D_0054EB40);
+    dds3SetUnitObjectId(ctrl->handle, fldCameraUnitName);
     dds3CameraObjectBasicGetCameraTM(ctrl->handle, &tm);
     dds3GetRadiusPoseSet(ctrl->handle, 2.0f);
     dds3SetActiveCameraSceneBasic(dds3GetControlScene(), ctrl->handle);
@@ -1131,7 +1131,7 @@ s32 fldUnitPad(dds3PoseSet_t *pUpdatePoseSet, dds3Basic_t *pBasic)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531820);
+INCLUDE_RODATA(const s32, "field/fldMain", fldWaveUnitName);
 
 INCLUDE_RODATA(const s32, "field/fldMain", D_00531830);
 
@@ -1497,9 +1497,9 @@ INCLUDE_SDATA(const s32, "field/fldMain", gfldWaveSize);
 
 INCLUDE_SDATA(const s32, "field/fldMain", pointResName);
 
-INCLUDE_SDATA(const s32, "field/fldMain", D_0054EB38);
+INCLUDE_SDATA(const s32, "field/fldMain", fldPlayerPosName);
 
-INCLUDE_SDATA(const s32, "field/fldMain", D_0054EB40);
+INCLUDE_SDATA(const s32, "field/fldMain", fldCameraUnitName);
 
 INCLUDE_SDATA(const s32, "field/fldMain", gFldAnahoriAkumaIdx);
 

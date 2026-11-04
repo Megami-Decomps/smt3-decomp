@@ -680,7 +680,7 @@ INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalcHasigo);
 
 #ifdef NON_MATCHING
 extern const volatile sdfVector4_t D_00531C60;
-extern const char D_00531C70[], D_00531C80[];
+extern const char fldDamageOnMsg[], fldDamageOffMsg[];
 #define D_0054E90A ((u8 *)dds3PadStickState + 2)
 extern u8 dds3PadStickState[2][2][2];
 extern s8 dds3PadButtonState[];
@@ -772,7 +772,7 @@ s32 fldPlayerCalc_Nml(void)
                 return 0;
             }
             if (model->current.h.motionIndex != 10) {
-                printf(D_00531C70);
+                printf(fldDamageOnMsg);
                 model->first->speed = 1.0f;
                 mdlSingleMotion(model, 0, 10);
                 fldDmgStart(fldGlobalBase.x, fldGlobalBase.y, fldGlobalBase.z);
@@ -784,7 +784,7 @@ s32 fldPlayerCalc_Nml(void)
             if (model->first->stat != 5) {
                 return 0;
             }
-            printf(D_00531C80);
+            printf(fldDamageOffMsg);
             fldPlayerStepDist = 0;
             fldEncountSetFlag(0x40);
         }
@@ -2151,9 +2151,9 @@ s32 fldPlayerCalc_Nml_syukan(void)
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Nml_syukan);
 #endif
 
-extern char D_00531D58[];
+extern char fldNoroiDamageOnMsg[];
 
-extern char D_00531D70[];
+extern char fldNoroiDamageOffMsg[];
 
 extern s32 fldEncountTestFlag(u32 mask);
 
@@ -2202,7 +2202,7 @@ s32 fldPlayerCalc(void)
         ctl = fldGetUnitControl();
         mdl = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
         if (mdl->current.h.motionIndex != 0xA) {
-            printf(D_00531D58);
+            printf(fldNoroiDamageOnMsg);
             mdl->first->speed = 1.0f;
             mdlSingleMotion(mdl, 0, 0xA);
             fldDmgStart(fldGlobalBase.x, fldGlobalBase.y, fldGlobalBase.z);
@@ -2212,7 +2212,7 @@ s32 fldPlayerCalc(void)
             fldStatusSet();
         }
         if (mdl->first->stat == 5) {
-            printf(D_00531D70);
+            printf(fldNoroiDamageOffMsg);
             fldGlobalBase.word80 = 0;
             fldEncountSetFlag(0x40);
         } else {

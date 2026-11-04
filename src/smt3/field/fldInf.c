@@ -115,7 +115,7 @@ extern fldInfTable_t fldInfTable;
 
 extern s32 gFldInfIdx;
 
-extern const char D_002FF3E0[];
+extern const char fldNpcTalkLabel[];
 
 void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
@@ -127,7 +127,7 @@ void sdfFileClose(devState_t *aHandle);
 
 #include "sdk_libc.h"
 
-extern const char D_00531E98[];
+extern const char fldInfPathFormat[];
 
 extern void *memcpy(void *, const void *, size_t);
 
@@ -159,7 +159,7 @@ const char *fldInf_FindTypeEveNpc(const char *evename) {
                 if (fldInfTable.packs[packOrSetIndex].hits[eventHitIndex].area == fldGlobalBase.floor + 1 &&
                     strcmp(evename, fldInfTable.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
                     gFldInfIdx = fldInfTable.packs[packOrSetIndex].setIndex;
-                    return D_002FF3E0;
+                    return fldNpcTalkLabel;
                 }
             }
         }
@@ -169,7 +169,7 @@ const char *fldInf_FindTypeEveNpc(const char *evename) {
             fldInfTable.sets[packOrSetIndex].action == fldGlobalBase.floor + 1 &&
             strcmp(evename, fldInfTable.sets[packOrSetIndex].eventName) == 0) {
             gFldInfIdx = packOrSetIndex;
-            return D_002FF3E0;
+            return fldNpcTalkLabel;
         }
     }
     return 0;
@@ -257,7 +257,7 @@ s32 fldInfChkFastPanel(s32 aline) {
 }
 
 /* INF actions consume the existing field, scene and event-unit contracts. */
-extern dds3Basic_t *D_0054EAE8;
+extern dds3Basic_t *fldUnitControlHandle;
 void evtBitOff(s32 no);
 void evtBitOn(s32 no);
 void fldKaifukuTest(void);
@@ -326,7 +326,7 @@ s32 fldInfNext(s32 messageId, s32 slot) {
         viewIndex = (s8)fldInfTable.sets[gFldInfIdx].messages[target - 10].view;
     }
     if (viewIndex != 0) {
-        unit = ((dds3UnitObjectBasicWorkData_t *)D_0054EAE8->workdata)->hUnit;
+        unit = ((dds3UnitObjectBasicWorkData_t *)fldUnitControlHandle->workdata)->hUnit;
         if (unit != NULL) {
             if (fldInfTable.views[viewIndex].player != 0) {
                 fldPlayerOn();
@@ -337,7 +337,7 @@ s32 fldInfNext(s32 messageId, s32 slot) {
         if (fldInfTable.views[viewIndex].positionName[0] != 0) {
             node = dds3SceneBasicSearchName(world, (const char *)fldInfTable.views[viewIndex].positionName);
             if (node != NULL) {
-                evtSetUnitPos(D_0054EAE8->serialID, node->serialID);
+                evtSetUnitPos(fldUnitControlHandle->serialID, node->serialID);
             }
         }
         if (fldInfTable.views[viewIndex].cameraName[0] != 0) {
@@ -382,7 +382,7 @@ s32 fldInfNext(s32 messageId, s32 slot) {
             }
         }
         /* The action callbacks can replace the player's transition work. */
-        unit = ((dds3UnitObjectBasicWorkData_t *)D_0054EAE8->workdata)->hUnit;
+        unit = ((dds3UnitObjectBasicWorkData_t *)fldUnitControlHandle->workdata)->hUnit;
         if (unit != NULL) {
             unit->owner->flags &= ~1;
         }
@@ -427,7 +427,7 @@ void fldInfLoad(s32 field) {
     devState_t *command;
     if (field < 200) {
         fldMakeFilePath(directory, field, 1);
-        sprintf(path, D_00531E98, directory, field);
+        sprintf(path, fldInfPathFormat, directory, field);
         command = sdfFileOpen(path);
         sdfFileRead(command, &fldInfTable, sizeof(fldInfTable));
         sdfFileClose(command);
@@ -452,7 +452,7 @@ void fldInfToWAP(void) {
 }
 
 /* The native format slot includes twelve trailing zero bytes. */
-const char D_00531E98[24] = "%sF%03d.INF";
+const char fldInfPathFormat[24] = "%sF%03d.INF";
 
 extern u8 D_00302FA0[];
 

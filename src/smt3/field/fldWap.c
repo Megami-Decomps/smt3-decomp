@@ -65,27 +65,27 @@ extern void *fldSkyDefault;
 
 extern s32 fldSkyTblUpperIdx;
 
-extern s32 D_0054ED5C;
+extern s32 fldSkyFilterAnimeSaved;
 
-extern f32 D_0054ED60;
+extern f32 fldSkyFilterAnimeCntFSaved;
 
-extern s32 D_0054ED64;
+extern s32 fldSkyFilterAnimeOfsASaved;
 
-extern s32 D_0054ED68;
+extern s32 fldSkyFilterPrevSaved;
 
-extern s32 D_0054ED6C;
+extern s32 fldSkyFilterSaved;
 
-extern f32 D_0054ED70;
+extern f32 fldSkyFilterRateSaved;
 
-extern f32 D_0054ED74;
+extern f32 fldSkyFilterTimeSaved;
 
-extern s32 D_0054ED7C;
+extern s32 fldSkyTblAnimeSaved;
 
-extern f32 D_0054ED80;
+extern f32 fldSkyTblAnimeCntISaved;
 
-extern s32 D_0054ED84;
+extern s32 fldSkyTblBaseIdxSaved;
 
-extern s32 D_0054ED8C;
+extern s32 fldSkyTableSaved;
 
 extern s32 fldSkyEnable;
 
