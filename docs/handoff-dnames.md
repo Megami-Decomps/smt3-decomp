@@ -11,3 +11,6 @@ Skipped as unproven: D_0033A540 (0x5AC0 blob), D_002FC1A2, D_0030A2D8, rstcalc D
 D_00345D88, D_00526B50 chain (11 AI records), sdata pool strings ("ON"/"OFF"/"END"...).
 main.elf IDB hangs on every call; not used.
 sdfport: branch dname-rename in /home/wsl/projects/sdfport-dnames, 9f8aea0, unmerged.
+
+## Resume 5
+Done: map10 (fld vectors, floats, shadow tables, 122) in decomp a7f2d560, map11-14 (131 strings: slMain, fclEncyc, effBattleSystem, fclCombineInit, fldAutoMap) in da577ece. Both on origin/main, gates green on the exact tree, IDB renamed and saved. D_00551888 stays unnamed (write-only). sdfport dname-bundle3 local: 5e300d4 and one commit for maps 11-14, unpushed. smt3-port hit (not edited): e2e/captures/f001_hold/scene/native/symbols.tsv.
