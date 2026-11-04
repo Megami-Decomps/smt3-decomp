@@ -10,6 +10,7 @@
 #include "event.h"
 #include "model.h"
 #include "motion.h"
+#include "sdfFrame.h"
 
 extern s32 fldDoor_ElvTakasaToFloor(s32 takasa);
 
@@ -604,7 +605,6 @@ void drawSceneBasicList(void) {
 
 #ifdef NON_MATCHING
 #include "draw3d.h"
-#include "sdfFrame.h"
 
 typedef struct {
     s32 vertex[3];

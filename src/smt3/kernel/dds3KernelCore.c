@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kernel.h"
+#include "sdfFrame.h"
 
 /* Two ports, two sticks per port, and two axes per stick. */
 extern s8 dds3PadButtonPrev[2][2][16];
@@ -39,7 +40,6 @@ void ChangeProcessFlagChild(s32 change, dds3ProcessID_t *parent, u32 flag);
 void *sdfChipAllocDirect(u32 aSize);
 void sdfChipFreeDirect(void *aPtr);
 #include "sdk_libc.h"
-#include "sdfFrame.h"
 
 extern char D_0054E878[];
 extern char D_0054E880[];

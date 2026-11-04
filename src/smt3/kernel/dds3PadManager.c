@@ -2,6 +2,7 @@
 #include "kernel.h"
 #include "libsdf.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 /* Declared here because no header carries these. */
 extern void *memset(void *a, s32 b, size_t c);
@@ -217,7 +218,6 @@ void dds3RunProcessList(void)
 extern u8 dds3PadVibrationLevel;
 extern u8 D_00551B91;
 #include "sdk_libc.h"
-#include "sdfFrame.h"
 
 void dds3GetVibrationLevel(void)
 {

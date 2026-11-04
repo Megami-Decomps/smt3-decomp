@@ -7,6 +7,7 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "field.h"
+#include "sdfFrame.h"
 
 extern dds3Basic_t *dds3GetControlScene(void);
 
@@ -461,7 +462,6 @@ s32 fldGetRestoreMode(void)
 }
 
 #include "encount.h"
-#include "sdfFrame.h"
 
 typedef struct __attribute__((packed, aligned(1))) {
     u64 part[2];
