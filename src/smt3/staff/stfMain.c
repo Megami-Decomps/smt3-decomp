@@ -6,6 +6,7 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
+#include "sdfFrame.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -16,6 +17,7 @@ extern saddr_t stfShutDown(void);
 extern char D_0053F100[];
 
 extern u16 dds3VblanksPerFrame;
+extern u32 dds3GetKernelCount(void);
 
 typedef struct
 {
@@ -128,7 +130,10 @@ s32 stfMain2(dds3ProcessID_t *id)
     }
 
 scroll:
-    oStaff_UI->scrollY = (s32)((u32)oStaff_UI->scrollY + 1u);
+    /* The roll ticks once per vblank, twice the logic rate. */
+    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        oStaff_UI->scrollY = (s32)((u32)oStaff_UI->scrollY + 1u);
+    }
     GetoStaffUI();
     if (oStaff_UI->scrollY ==
         (s32)((u32)((s32)((u32)D_00343018[0xB4].y + 0xE0u) / 0x1E)
@@ -233,7 +238,9 @@ void ObjDispOff(void)
         cover = 0x200;
     }
     if (cover >= 0x200) {
-        oStaff_UI->unk_0104 = (s32)((u32)oStaff_UI->unk_0104 + 2u);
+        if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+            oStaff_UI->unk_0104 = (s32)((u32)oStaff_UI->unk_0104 + 2u);
+        }
         if (oStaff_UI->unk_0104 > 0x80) {
             oStaff_UI->unk_0104 = 0x80;
         }
@@ -305,7 +312,9 @@ void ObjDispOff(void)
     rsetAlpha(0);
     if (oStaff_UI->unk_0100 >= 0x3BB) {
         if (oStaff_UI->unk_0114 < 0x80) {
-            oStaff_UI->unk_0114 = oStaff_UI->unk_0114 + 2 / step;
+            if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                oStaff_UI->unk_0114 = oStaff_UI->unk_0114 + 2 / step;
+            }
         } else {
             oStaff_UI->unk_0114 = 0x80;
         }
@@ -319,7 +328,9 @@ void ObjDispOff(void)
         aDrawBoxG(0, 0, 0x200, 0xE0, 0, 0, 0, alpha, 0, 0, 0, alpha,
                   0, 0, 0, alpha, 0, 0, 0, alpha);
     }
-    oStaff_UI->unk_0100 = (s32)((u32)oStaff_UI->unk_0100 + 1u);
+    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        oStaff_UI->unk_0100 = (s32)((u32)oStaff_UI->unk_0100 + 1u);
+    }
 }
 #else
 INCLUDE_ASM(const s32, "staff/stfMain", ObjDispOff);
