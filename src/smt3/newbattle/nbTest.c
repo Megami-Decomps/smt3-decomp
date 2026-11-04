@@ -227,13 +227,13 @@ extern u8 D_00526AD0[];
 
 extern u8 D_00526B48[];
 
-extern u8 D_00526530[];
+extern u8 test_devilIds[];
 
-extern u8 D_00526540[];
+extern u8 test_devilSkills[];
 
-extern u8 D_005267D0[];
+extern u8 test2_devilIds[];
 
-extern u8 D_005267E0[];
+extern u8 test2_devilSkills[];
 
 extern datUnitWork_t test2_pdummy;
 
@@ -454,7 +454,7 @@ INCLUDE_ASM(const s32, "newbattle/nbTest", nbSetBattleDummy);
 
 void nbInitPlayer(void)
 {
-    nbSetBattleDummy(D_00551500, D_00526530, D_00526540, test_pskill, &test_skilllist);
+    nbSetBattleDummy(D_00551500, test_devilIds, test_devilSkills, test_pskill, &test_skilllist);
     evtBitOn(0xC04);
 }
 
@@ -484,7 +484,7 @@ void *TestProcess5(void)
     evtBitOff(0xC0D);
     evtBitOff(0xC10);
     evtBitOff(0xC12);
-    nbSetBattleDummy(D_00551500, D_005267D0, D_005267E0, test2_dvllist, &test2_pdummy);
+    nbSetBattleDummy(D_00551500, test2_devilIds, test2_devilSkills, test2_dvllist, &test2_pdummy);
 
     ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))[7].hp = 0;
     DDS3_GBWK->maka = 0x15F90;
@@ -526,7 +526,7 @@ void *TestProcess4(void)
     evtBitOff(0xC0D);
     evtBitOff(0xC10);
     evtBitOff(0xC12);
-    nbSetBattleDummy(D_00551500, D_005267D0, D_005267E0, test2_dvllist, &test2_pdummy);
+    nbSetBattleDummy(D_00551500, test2_devilIds, test2_devilSkills, test2_dvllist, &test2_pdummy);
     ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->exp = rstCalcExpFromLevel(0, 0x32);
     DDS3_GBWK->maka = 0x15F90;
     DDS3_GBWK->akuma[7].badstatus = 0x800;
@@ -587,7 +587,7 @@ void *TestProcess3(void)
     evtBitOff(0xC0D);
     evtBitOff(0xC10);
     evtBitOff(0xC12);
-    nbSetBattleDummy(D_00551500, D_00526530, D_00526540, test_pskill, &test_skilllist);
+    nbSetBattleDummy(D_00551500, test_devilIds, test_devilSkills, test_pskill, &test_skilllist);
     if (test_phearts > 0) {
         printf(D_00545B78);
         datAddHearts(test_phearts);
@@ -645,7 +645,7 @@ void nbInitBattleTest(void)
     dds3GlobalWork_t *work;
 
     if (evtBitCheck(0xC08) == 0) {
-        nbSetBattleDummy(4, D_00526530, D_00526540, test_pskill, &test_skilllist);
+        nbSetBattleDummy(4, test_devilIds, test_devilSkills, test_pskill, &test_skilllist);
         evtBitOn(0xC08);
     }
 

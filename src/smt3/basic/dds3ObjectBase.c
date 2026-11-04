@@ -44,20 +44,20 @@ typedef struct
     char parts[17][20];
 } dds3UnitPartTable_t;
 
-extern const dds3UnitPartTable_t D_0052F850;
-extern const dds3UnitPartTable_t D_0052F9B8;
-extern const dds3UnitPartTable_t D_0052FB20;
-extern const dds3UnitPartTable_t D_0052FC88;
-extern const dds3UnitPartTable_t D_0052FDF0;
-extern const dds3UnitPartTable_t D_0052FF58;
-extern const dds3UnitPartTable_t D_005300C0;
-extern const dds3UnitPartTable_t D_00530228;
-extern const dds3UnitPartTable_t D_00530390;
-extern const dds3UnitPartTable_t D_005304F8;
-extern const dds3UnitPartTable_t D_00530660;
-extern const dds3UnitPartTable_t D_005307C8;
-extern const dds3UnitPartTable_t D_00530930;
-extern const dds3UnitPartTable_t D_00530A98;
+extern const dds3UnitPartTable_t dds3HijriParts;
+extern const dds3UnitPartTable_t dds3HijBParts;
+extern const dds3UnitPartTable_t dds3PlayerAParts;
+extern const dds3UnitPartTable_t dds3PlayerBParts;
+extern const dds3UnitPartTable_t dds3TiakiParts;
+extern const dds3UnitPartTable_t dds3YuukoParts;
+extern const dds3UnitPartTable_t dds3IsamuParts;
+extern const dds3UnitPartTable_t dds3IsamuFParts;
+extern const dds3UnitPartTable_t dds3IsamuFzParts;
+extern const dds3UnitPartTable_t dds3HikawaParts;
+extern const dds3UnitPartTable_t dds3Model113Parts;
+extern const dds3UnitPartTable_t dds3TiakiBParts;
+extern const dds3UnitPartTable_t dds3MajyoParts;
+extern const dds3UnitPartTable_t dds3HutomimiParts;
 extern char D_0054E9D0[];
 extern char D_0054E9D8[];
 extern char D_0054E9E0[];
@@ -249,19 +249,17 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *pObjectBasic)
 
 /* The loaded model is identified by its root node name, and the matching table
  * supplies the 17 part names whose node indices the control keeps. */
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052F850);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3HijriParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052F9B8);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3HijBParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052FB20);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3PlayerAParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052FC88);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3PlayerBParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052FDF0);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3TiakiParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052FF58);
-
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530000);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3YuukoParts);
 
 INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0053001C);
 
@@ -273,21 +271,21 @@ INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530054);
 
 INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530068);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_005300C0);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3IsamuParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530228);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3IsamuFParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530390);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3IsamuFzParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_005304F8);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3HikawaParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530660);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3Model113Parts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_005307C8);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3TiakiBParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530930);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3MajyoParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530A98);
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3HutomimiParts);
 
 void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
 {
@@ -319,20 +317,20 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         mdlFree(control->pModel);
     }
     obj = mdlLoad(major, minor);
-    hijriParts = D_0052F850;
-    hijBParts = D_0052F9B8;
-    playerAParts = D_0052FB20;
-    playerBParts = D_0052FC88;
-    tiakiParts = D_0052FDF0;
-    yuukoParts = D_0052FF58;
-    isamuParts = D_005300C0;
-    isamuFParts = D_00530228;
-    isamuFzParts = D_00530390;
-    hikawaParts = D_005304F8;
-    model113Parts = D_00530660;
-    tiakiBParts = D_005307C8;
-    majyoParts = D_00530930;
-    hutomimiParts = D_00530A98;
+    hijriParts = dds3HijriParts;
+    hijBParts = dds3HijBParts;
+    playerAParts = dds3PlayerAParts;
+    playerBParts = dds3PlayerBParts;
+    tiakiParts = dds3TiakiParts;
+    yuukoParts = dds3YuukoParts;
+    isamuParts = dds3IsamuParts;
+    isamuFParts = dds3IsamuFParts;
+    isamuFzParts = dds3IsamuFzParts;
+    hikawaParts = dds3HikawaParts;
+    model113Parts = dds3Model113Parts;
+    tiakiBParts = dds3TiakiBParts;
+    majyoParts = dds3MajyoParts;
+    hutomimiParts = dds3HutomimiParts;
     nodeName = sdfModelGetNodeName(obj->inner, 0);
     if (sdfModelGetNodeIndexByName(obj->inner, D_0054E9D0) > 0) {
         for (i = 0; i < 17; i++) {

@@ -1785,7 +1785,7 @@ s8 cmbCountSkills(cmbUnit_t *unit)
 }
 
 /* Race IDs index both matrices from one, not zero. */
-extern u8 D_0032D270[2][32][32];
+extern u8 cmbRaceCombineTable[2][32][32];
 
 s32 cmbLookupCombine(u16 devilA, u16 devilB, s8 flag)
 {
@@ -1808,9 +1808,9 @@ s32 cmbLookupCombine(u16 devilA, u16 devilB, s8 flag)
         race[0] = temp;
     }
     if (flag != 0) {
-        return D_0032D270[1][race[1] - 1][race[0] - 1];
+        return cmbRaceCombineTable[1][race[1] - 1][race[0] - 1];
     }
-    return D_0032D270[0][race[1] - 1][race[0] - 1];
+    return cmbRaceCombineTable[0][race[1] - 1][race[0] - 1];
 }
 
 s32 cmbCalcResultLevel(cmbUnit_t *unitA, cmbUnit_t *unitB, cmbUnit_t *unitC, s8 flag)

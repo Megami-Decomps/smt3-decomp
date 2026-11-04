@@ -96,7 +96,7 @@ extern void *memcpy(void *, const void *, size_t);
 extern void effDebugAllocDrawTag(void);
 extern void effDebugLinkDrawTag(void);
 extern s8 dds3PadBitTable[];
-extern effScreenDrawParams_t D_003202C8;
+extern effScreenDrawParams_t evtUnityCalcArea;
 extern s8 mblurDone;
 extern effDebugMenu_t mblurDebugMenu;
 extern dds3Effect_PartialMultiBlurParam_t D_00320420;
@@ -105,7 +105,7 @@ extern effDebugMenu_t dblurDebugMenu;
 extern dds3Effect_DistortionBlurParam_t D_00320598;
 extern s8 evtViewerDirty;
 extern effDebugMenu_t filterDebugMenu;
-extern dds3Effect_Filter_t D_00320770;
+extern dds3Effect_Filter_t dblurParam2;
 extern s8 mfilterDone;
 extern effDebugMenu_t mfilterDebugMenu;
 extern dds3Effect_PartialMultiFilterParam_t D_00320870;
@@ -524,12 +524,12 @@ s32 func_001AD6E8(void) {
 
 /* Expose this screen-draw setup block; no parameter copy is made. */
 effScreenDrawParams_t *evtGetUnityCalcArea(void) {
-    return &D_003202C8;
+    return &evtUnityCalcArea;
 }
 
 /* Replace the screen-draw source prefix while preserving the trailing bytes. */
 void evtSetUnityCalcArea(void *parameters) {
-    memcpy(&D_003202C8, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
+    memcpy(&evtUnityCalcArea, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
 /* Prepare the blur-template callback from its explicit parameter block,
@@ -645,12 +645,12 @@ s32 evtViewerCheckDirty(void) {
 
 /* Expose the solid-rectangle setup parameters by address. */
 dds3Effect_Filter_t *dblurGetParam2(void) {
-    return &D_00320770;
+    return &dblurParam2;
 }
 
 /* Replace the setup block rather than the active solid-rectangle parameters. */
 void dblurSetParam2(dds3Effect_Filter_t *parameters) {
-    D_00320770 = *parameters;
+    dblurParam2 = *parameters;
 }
 
 /* Prepare resource-template setup from its explicit body, then process the channel. */

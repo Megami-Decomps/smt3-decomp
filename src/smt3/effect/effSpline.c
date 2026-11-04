@@ -434,8 +434,6 @@ INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3C8);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSLUSI_Type);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3D0);
-
 INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3D4);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerMode);

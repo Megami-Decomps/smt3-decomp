@@ -224,8 +224,8 @@ f32 __ieee754_atan2f(f32 y, f32 x)
     }
 }
 
-extern const s32 D_0054AF60[198];
-extern const s32 D_0054B278[32];
+extern const s32 two_over_pi[198];
+extern const s32 npio2_hw[32];
 extern s32 __kernel_rem_pio2f(f32 *x, f32 *y, s32 e0, s32 nx, s32 precision,
                               const s32 *twoOverPi);
 
@@ -276,7 +276,7 @@ s32 __ieee754_rem_pio2f(f32 x, f32 *y)
         fn = (f32)n;
         r = t - fn * 0x1.921f000000000p+0f;
         w = fn * 0x1.6a88840000000p-17f;
-        if (n < 32 && (ix & 0xFFFFFF00) != (u32)D_0054B278[n - 1]) {
+        if (n < 32 && (ix & 0xFFFFFF00) != (u32)npio2_hw[n - 1]) {
             y[0] = r - w;
         } else {
             j = ix >> 23;
@@ -320,7 +320,7 @@ s32 __ieee754_rem_pio2f(f32 x, f32 *y)
     while (tx[nx - 1] == 0.0f) {
         nx--;
     }
-    n = __kernel_rem_pio2f(tx, y, e0, nx, 2, D_0054AF60);
+    n = __kernel_rem_pio2f(tx, y, e0, nx, 2, two_over_pi);
     if (hx < 0) {
         y[0] = -y[0];
         y[1] = -y[1];
@@ -830,9 +830,9 @@ f32 copysignf(f32 magnitude, f32 sign)
 #undef GET_FLOAT_WORD
 #undef SET_FLOAT_WORD
 
-INCLUDE_RODATA(const s32, "sdk/libm", D_0054AF60);
+INCLUDE_RODATA(const s32, "sdk/libm", two_over_pi);
 
-INCLUDE_RODATA(const s32, "sdk/libm", D_0054B278);
+INCLUDE_RODATA(const s32, "sdk/libm", npio2_hw);
 
 INCLUDE_RODATA(const s32, "sdk/libm", D_0054B348);
 
