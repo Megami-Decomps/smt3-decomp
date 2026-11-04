@@ -240,6 +240,8 @@ extern u8 dds3PadButtonState[];
 extern char D_00531860[];
 
 extern fldSequenceController_t fldAutoMapSeqFlags;
+/* The retail load is its own symbol, not a field of the controller. */
+extern s32 fldSequenceState;
 
 extern u32 fldEncountFlags;
 
@@ -498,7 +500,7 @@ extern effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_Distortio
 extern dds3ProcessID_t *dds3SearchProcessPriority(s32 priority);
 extern dds3Basic_t *D_0054EAE8;
 extern u32 dds3BackColor;
-extern s32 fldSequenceState, gFldStart, fldSkyEnable, gfldPlayerHasiCnt;
+extern s32 gFldStart, fldSkyEnable, gfldPlayerHasiCnt;
 extern s32 fldWmWarpMode;
 
 extern s32 fmProcessChk(void), fldGetRestoreMode(void), fldWaitBgmReload(void);
@@ -1202,6 +1204,9 @@ void fldProcNextJump(void)
     }
 }
 
+/* After the definition it offsets from, which the assembler needs. */
+SYMBOL_AT(s32, fldSequenceState, fldAutoMapSeqFlags, 4);
+
 INCLUDE_RODATA(const s32, "field/fldProcess", D_00531950);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldNextFieldId);
@@ -1229,8 +1234,6 @@ INCLUDE_SDATA(const s32, "field/fldProcess", fldNext_fld);
 INCLUDE_SDATA(const s32, "field/fldProcess", D_0054EB7C);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldAutoMapSeqFlags);
-
-INCLUDE_SDATA(const s32, "field/fldProcess", fldSequenceState);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldEncountFlags);
 
