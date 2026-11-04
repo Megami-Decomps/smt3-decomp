@@ -845,7 +845,7 @@ void dds3Filter2Swap(s32 frame)
 {
     memcpy(&dds3Filter2Buf, Eve_FilterGetParams(), 0x18);
     filter2swapnow = 0;
-    filter2swapmax = frame;
+    filter2swapmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x100000;
         setdraw_xy(filter2target.rect);
@@ -860,7 +860,7 @@ void dds3Filter2On(s32 frame)
     filter2abase = 0;
     filter2now = 0;
     filter2atarget = filter2target.rgba[3];
-    filter2max = frame;
+    filter2max = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x80000;
         setdraw_xy(filter2target.rect);
@@ -876,7 +876,7 @@ void dds3Filter2Off(s32 frame)
     filter2atarget = 0;
     filter2abase = filter2target.rgba[3];
     filter2now = 0;
-    filter2max = frame;
+    filter2max = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x80000;
         dds3DrawFlag &= ~0x100000;
@@ -907,7 +907,7 @@ void dds3MFilterSwap(s32 frame)
 {
     memcpy(&dds3MFilterBuf, Eve_PartialMultiFilterGetParams(), 0x24);
     mfilterswapnow = 0;
-    mfilterswapmax = frame;
+    mfilterswapmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x400000;
         Eve_PartialMultiFilterSetParam(&mfiltertarget);
@@ -921,7 +921,7 @@ void dds3MFilterOn(s32 frame)
     mfilterabase = 0;
     mfilternow = 0;
     mfilteratarget = mfiltertarget.rgba[3];
-    mfiltermax = frame;
+    mfiltermax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x200000;
         Eve_PartialMultiFilterSetParam(&mfiltertarget);
@@ -936,7 +936,7 @@ void dds3MFilterOff(s32 frame)
     mfilteratarget = 0;
     mfilterabase = mfiltertarget.rgba[3];
     mfilternow = 0;
-    mfiltermax = frame;
+    mfiltermax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x200000;
         dds3DrawFlag &= ~0x400000;
@@ -962,7 +962,7 @@ void dds3SetBlur(s32 frame, s32 alpha, s32 scale)
         blurscalebase = dds3ScreenBlurScale;
         bluralphatarget = alpha;
         blurscaletarget = scale;
-        blurmax = frame;
+        blurmax = SDF_FRAMES(frame);
         blurnow = 0;
         dds3DrawFlag |= 0x800;
     }
@@ -990,7 +990,7 @@ void dds3Blur2Swap(s32 frame)
 {
     memcpy(&ripblurtarget.blur2buf, Eve_BlurGetParam(), 0x28);
     blur2swapnow = 0;
-    blur2swapmax = frame;
+    blur2swapmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x40000;
         setdraw_xy(blur2target.rect);
@@ -1005,7 +1005,7 @@ void dds3Blur2On(s32 frame)
     blur2abase = 0;
     blur2now = 0;
     blur2atarget = blur2target.rgba[3];
-    blur2max = frame;
+    blur2max = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x20000;
         setdraw_xy(blur2target.rect);
@@ -1021,7 +1021,7 @@ void dds3Blur2Off(s32 frame)
     blur2atarget = 0;
     blur2abase = blur2target.rgba[3];
     blur2now = 0;
-    blur2max = frame;
+    blur2max = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x20000;
         dds3DrawFlag &= ~0x40000;
@@ -1054,7 +1054,7 @@ void dds3MultiBlurSwap(s32 frame)
 {
     memcpy(&dds3MultiBlurBuf, Eve_PartialMultiBlurGetParams(), 0x2C);
     mulblurswapnow = 0;
-    mulblurswapmax = frame;
+    mulblurswapmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x8000;
         Eve_PartialMultiBlurSetParam(&mulblurtarget);
@@ -1068,7 +1068,7 @@ void dds3MultiBlurOn(s32 frame)
     mulblurabase = 0;
     mulblurnow = 0;
     mulbluratarget = mulblurtarget.rgba[3];
-    mulblurmax = frame;
+    mulblurmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x1000;
         Eve_PartialMultiBlurSetParam(&mulblurtarget);
@@ -1083,7 +1083,7 @@ void dds3MultiBlurOff(s32 frame)
     mulbluratarget = 0;
     mulblurnow = 0;
     mulblurabase = mulblurtarget.rgba[3];
-    mulblurmax = frame;
+    mulblurmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x1000;
         dds3DrawFlag &= ~0x8000;
@@ -1127,7 +1127,7 @@ void dds3DistBlurSwap(s32 frame)
 {
     memcpy(&dds3DistBlurBuf, Eve_DistortionBlurGetParams(), 0x2C);
     distblurswapnow = 0;
-    distblurswapmax = frame;
+    distblurswapmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x10000;
         Eve_DistortionBlurSetParam(&distblurtarget);
@@ -1141,7 +1141,7 @@ void dds3DistBlurOn(s32 frame)
     distblurabase = 0;
     distblurnow = 0;
     distbluratarget = distblurtarget.rgba[3];
-    distblurmax = frame;
+    distblurmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x2000;
         Eve_DistortionBlurSetParam(&distblurtarget);
@@ -1158,7 +1158,7 @@ void dds3DistBlurOff(s32 frame)
     distbluratarget = 0;
     distblurabase = distblurtarget.rgba[3];
     distblurnow = 0;
-    distblurmax = frame;
+    distblurmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x2000;
         dds3DrawFlag &= ~0x10000;
@@ -1199,7 +1199,7 @@ void dds3RipBlurSwap(s32 frame)
 {
     memcpy(&dds3RipBlurBuf, Eve_RippleBlurGetParams(), 0x2C);
     ripblurswapnow = 0;
-    ripblurswapmax = frame;
+    ripblurswapmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x1000000;
         Eve_RippleBlurSetParam(&ripblurtarget);
@@ -1213,7 +1213,7 @@ void dds3RipBlurOn(s32 frame)
     ripblurabase = 0;
     ripblurnow = 0;
     ripbluratarget = ripblurtarget.ripple.rgba[3];
-    ripblurmax = frame;
+    ripblurmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x800000;
         Eve_RippleBlurSetParam(&ripblurtarget);
@@ -1230,7 +1230,7 @@ void dds3RipBlurOff(s32 frame)
     ripbluratarget = 0;
     ripblurabase = ripblurtarget.ripple.rgba[3];
     ripblurnow = 0;
-    ripblurmax = frame;
+    ripblurmax = SDF_FRAMES(frame);
     if (frame == 0) {
         dds3DrawFlag &= ~0x800000;
         dds3DrawFlag &= ~0x1000000;
@@ -1561,7 +1561,7 @@ void dds3SetLightColor(s32 frame, s32 no, f32 *col)
             SDF_VU0_VECTOR_W_SET_ZERO();
             SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[no]->color);
         } else {
-            lightcolormax[no] = frame;
+            lightcolormax[no] = SDF_FRAMES(frame);
             lightcolornow[no] = 0;
             dds3DrawFlag |= blendFlag;
             SDF_VU0_LOADVECTOR(light);
@@ -1590,7 +1590,7 @@ void dds3SetLightDir(s32 frame, s32 no, f32 *dir)
             SDF_VU0_VECTOR_W_SET_ZERO();
             SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[no]->v);
         } else {
-            lightdirmax[no] = frame;
+            lightdirmax[no] = SDF_FRAMES(frame);
             lightdirnow[no] = 0;
             dds3DrawFlag |= blendFlag;
             SDF_VU0_LOADVECTOR(dir);
@@ -1621,7 +1621,7 @@ void dds3SetAmbientColor(s32 frame, f32 *col)
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR(&dds3LightParam.ambient);
     } else {
-        ambientmax = frame;
+        ambientmax = SDF_FRAMES(frame);
         ambientnow = 0;
         dds3DrawFlag |= 0x100;
         SDF_VU0_LOADVECTOR(&dds3LightParam.ambient);
@@ -1651,7 +1651,7 @@ void dds3SetFogColor(s32 frame, f32 *col)
         dds3LightParam.fog.color = targetColorWords[0];
     } else {
         dds3DrawFlag |= 0x200;
-        fogrgbmax = frame;
+        fogrgbmax = SDF_FRAMES(frame);
         fogrgbtarget = targetColorWords[0];
         fogrgbbase = dds3LightParam.fog.color;
         fogrgbnow = 0;
@@ -1672,7 +1672,7 @@ void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 near, f32 far)
         f32 oldNear = dds3FogState.fogNear;
         f32 oldFar = dds3FogState.fogFar;
         dds3DrawFlag |= 0x400;
-        fogparamax = frame;
+        fogparamax = SDF_FRAMES(frame);
         dds3FogParam.fogMax = oldMax;
         dds3FogParam.fogMin = oldMin;
         dds3FogParam.fogNear = oldNear;
@@ -1803,7 +1803,7 @@ void dds3SetSoftenBias(s32 frame, f32 soften, f32 bias)
         f32 psoften = sdfFaceDivSoften;
         f32 pbias = sdfFaceDivBias;
         dds3DrawFlag |= 0x4000;
-        sbmax = frame;
+        sbmax = SDF_FRAMES(frame);
         softenbase = psoften;
         softentarget = soften;
         biasbase = pbias;
