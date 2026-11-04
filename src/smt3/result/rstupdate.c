@@ -10,6 +10,8 @@
 #include "kernel.h"
 #include "sdfFrame.h"
 
+extern u32 dds3GetKernelCount(void);
+
 
 
 extern s8 fclEndMessage(void);
@@ -538,7 +540,9 @@ void rstUpdateSeqEvoAct(void)
     case 0:
         startPos->unk_78 = 0;
         if (startPos->unk_22E4 != 0) {
-            startPos->unk_22E4 -= 4;
+            if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                startPos->unk_22E4 -= 4;
+            }
         } else {
             startPos->evoPhase++;
         }
