@@ -261,8 +261,6 @@ INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3TiakiParts);
 
 INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3YuukoParts);
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530000);
-
 INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0053001C);
 
 INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530020);
