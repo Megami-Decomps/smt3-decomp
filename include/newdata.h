@@ -186,7 +186,7 @@ typedef struct
         struct { u8 heartsPrefix[0x40]; u8 devilSlot[0x100]; }; /* 0x1D3B */
         struct { u8 unk_01CFB[0x40]; u8 heartsskcnt[64]; };
     };
-    u8 unk657C[0xDC];
+    u8 nameCode[0xDC];
     fldGbTypeBlock_t gb[48];       /* 0x6658 */
     u8 takaraOpen[0x20];           /* 0x11A58 */
     s16 previewX;                 /* 0x11A78: slSetTmnlID */

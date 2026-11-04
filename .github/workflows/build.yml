@@ -108,13 +108,9 @@ jobs:
           rm -rf .orig-src
           echo "5facfbf7916836613449c922e26a4ec412207b32  orig/smt3/SLUS_209.11" | sha1sum -c -
 
-      - name: Configure
-        if: steps.orig.outputs.available == 'true'
-        run: python3 configure.py
-
-      # configure rewrites INCLUDE_RODATA/INCLUDE_SDATA lines in src/; they must
-      # be committed. Includes a stale-line control.
-      - name: Check configure leaves src unchanged
+      # Check from the pristine checkout: the checker performs configure itself.
+      # An earlier configure would silently repair stale committed source lines.
+      - name: Configure and check generated sources
         if: steps.orig.outputs.available == 'true'
         run: python3 tools/check_generated_sources.py
 

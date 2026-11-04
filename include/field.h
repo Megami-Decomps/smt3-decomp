@@ -127,7 +127,7 @@ typedef struct fldResHead_t
     const char *name;
     u32 word0C;
     fldResourcePoint_t *transform;
-    u32 word14;
+    u32 areaName;
     fldFileNameTable_t *names;
     u32 word1C;
     void *data;

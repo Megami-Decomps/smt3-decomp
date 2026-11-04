@@ -1233,3 +1233,133 @@ The 0x40 bytes at 0x56C880 after `itfMesMngManager` are used: `itfMesMngGetVarLo
 Result over the 1414 IDB structs, compared by name with the 138 sizes `tools/header_layout.c` pins: mismatches 158 before, 131 after, none newly wrong. 115 structs changed size or offsets. The 29 holding an `sdfMatrix4_t` member (35 members) grew to fit it, among them `sdfModelNode_t` 160 to 256, `sdfModelRootNode_t` 104 to 152, `sdf3DViewportPacket_t` 112 to 208, `sdf3DLightParallelPacket_t` 176 to 224 and `dds3PoseSet_t` 160 to 208, all now equal to the decomp's. The `sdfVector4_t` change (8-aligned to 4-aligned) shrank about 85 more by 4 to 12 bytes each (`Sprite3D_t` stays 72). `dds3DrawEnv_t` 5760 to 6192. The remaining 131 mismatches are IDB structs whose HD layout is a different type from the decomp's (`nbMainProcessData_t`, `dds3AdminiData_t`, `scrProcessWork_s` and others) and were already wrong before.
 
 No decomp definition exists for 22 of the changed effect and particle structs (`effPCP*`, `effMaga*`, `dds3Particle_Basic_t`, ...), so their new sizes follow from the HD member list and are not checked against the retail compiler. Global data items typed with a changed struct were checked for overlap with the next named address: none.
+
+## Re-import of mismatching IDB structs, and what stays unverified
+
+`tools/header_layout.c` size claims that the IDB contradicted: 131 before, 0 after, over 145 checked sizes (the 158 of the original IDB fell to 131 with the `sdfMatrix4_t` fix). 106 structs were re-imported from the decomp's own declarations, with their missing dependencies created first. `sdf3DScreenParam_t.TM` is `sdfMatrix4_t` again. Only IDB types changed, so the ELF and smt3-port need nothing.
+
+### IDB names the decomp lacks (candidates for the decomp)
+
+The re-import replaced these IDB field names with the decomp's generic ones. Offset, IDB name, decomp name:
+
+- `dds3UnitObjectBasicWorkData_t` +28: `dmy` (decomp `reserved1C`)
+- `corePktCb_t` +144: `payload` (decomp `dataPtr`)
+- `fldResHead_t` +4: `resourceType` (decomp `word04`)
+- `fldResHead_t` +12: `flag` (decomp `word0C`)
+- `fldResHead_t` +20: `areaname` (decomp `word14`)
+- `fldResHead_t` +28: `SBlockName` (decomp `word1C`)
+- `dds3GlobalWork_t` +25980: `name_code` (decomp `unk657C`)
+- `dds3GlobalWork_t` +105744: `amapEX` (decomp `reserved19D10`)
+
+### Effect and particle structs with no decomp definition (unverified)
+
+The IDB holds these, nothing in `src/` or `include/` defines or mentions them, so their sizes are the IDB's alone and no header claim pins them. Sizes in bytes.
+
+Eff_* family (22):
+
+- `EffBTL_BillFireball_Part_t` 44
+- `EffBTL_BillFireball_t` 80
+- `EffBTL_BillTrack_Part_t` 64
+- `EffBTL_BillTrack_t` 116
+- `EffTable_t` 4
+- `Eff_FlashPolyParam_t` 48
+- `Eff_FlashPolyPart_t` 12
+- `Eff_FlashPoly_t` 28
+- `Eff_ModelTrackPolyABGR_t` 16
+- `Eff_RippleSprite_t` 20
+- `Eff_Ripple_t` 40
+- `Eff_SparkleSphereBillParam_t` 28
+- `Eff_SparkleSphereBill_t` 8
+- `Eff_ThunderPolyParam_t` 80
+- `Eff_ThunderPolyPart_t` 12
+- `Eff_ThunderPoly_t` 32
+- `Eff_ThunderRadiatePolyParam_t` 68
+- `Eff_ThunderRadiatePolyPart_t` 20
+- `Eff_ThunderRadiatePoly_t` 32
+- `Eff_ThunderSpherePolyParam_t` 72
+- `Eff_ThunderSpherePolyPart_t` 44
+- `Eff_ThunderSpherePoly_t` 60
+
+dds3 effect and particle types (17):
+
+- `dds3EffMajorFunc_t` 48
+- `dds3EffectTable_Reset_t` 4
+- `dds3EffectTable_Scale_t` 4
+- `dds3EffectTable_t` 12
+- `dds3EffectWork_t` 48
+- `dds3Effect_DistortionBlur_t` 16
+- `dds3Effect_PartialBlur_t` 8
+- `dds3Effect_t` 16
+- `dds3Particle_Blur_t` 8
+- `dds3Particle_EffItem_t` 16
+- `dds3Particle_Exp_t` 16
+- `dds3Particle_Expansion_t` 20
+- `dds3Particle_Nop_t3` 4
+- `dds3Particle_SphereAtom_t3` 28
+- `dds3Particle_Track2_t` 20
+- `dds3Particle_Track3_t` 20
+- `dds3Particle_Track_t` 16
+
+### Outcome of the name candidates
+
+Renamed in the decomp, where retail code proves the name: `dds3GlobalWork_t.unk657C` to `nameCode` (`nmeBuildNameFont` fills it with the entered name's glyph codes) and `fldResHead_t.word14` to `areaName` (`fldFileResolver.c` reads it as the area reference). Not renamed, no retail access proves them: `fldResHead_t` `word04`, `word0C`, `word1C`; `reserved19D10` (`amapEX`); `reserved1C` (`dmy`). `corePktCb_t.dataPtr` keeps its name over the IDB's `payload`.
+
+## Check of the 39 unverified effect structs against SLUS_209.11
+
+Method: the IDB applies none of these types to a retail function except `Eff_ModelTrackPolyABGR_t`, `dds3EffectWork_t` and `dds3Particle_SphereAtom_t3`, so each struct was matched to its creator or accessor by name, read in Hex-Rays, and sized from allocation sizes, strides and the largest offset. The `Eff_*` types are an older naming of the `effPCP*` types retail uses, with different sizes in five cases. main.elf (port 13339) did not answer `server_health` and was not used; a cross-check there is still owed, and field names on every verified entry need it.
+
+### Verified from retail
+
+- `Eff_ModelTrackPolyABGR_t` 16: `dds3HermitianTrackPolySetVC` reads `s0,s1,e0,e1` at +0,+4,+8,+12 as u32, so 16 from the largest offset. Field names need main.elf.
+- `dds3Effect_t` 16: `dds3EffectCreate` allocates 16 and writes major +0, minor +4, a work pointer +8 and the float 1.03 at +12. `dds3EffectLoad` reads the file header the same way and the payload starts at +16. Field names need main.elf.
+- `dds3EffMajorFunc_t` 48: `dds3EffectCreate` indexes `EffMajorTable` at 12 words per entry and calls the entry at +0, so 48. Slot names beyond create need main.elf.
+- `dds3EffectTable_t` 12: `dds3ParticleExpCreate` indexes `dds3ParticleFuncTable` at 3 words per entry and calls +0, so 12. Slots +4 and +8 are not read in the functions checked; their names need main.elf.
+- `dds3Particle_Exp_t` 16: `dds3ParticleExpCreate` reads type at +0 (compared with 3) and size at +4, and the payload starts at `pData + 16`. `reserve1`/`reserve2` are unread; names need main.elf.
+- `Eff_ThunderPolyPart_t` 12: Part stride is 12 in `effPCP_ThunderPolyCreate` (alloc `12*n + 104`). Verified as the size of the effPCP sibling, which retail uses; no retail code names the Eff_ type.
+- `Eff_ThunderRadiatePolyPart_t` 20: Part stride is 20 in `effPCP_ThunderRadiatePolyCreate` (alloc `20*n + 88`). Same caveat: the effPCP sibling is what retail uses.
+- `Eff_ThunderSpherePolyPart_t` 44: Part stride is 44 in `effPCPThunderSpherePolyCreate` (alloc `44*n + 100`). Same caveat: the effPCP sibling is what retail uses.
+
+### Contradicted by retail
+
+- `dds3EffectWork_t` 48: Retail allocates the object's work as 80 bytes (`dds3EffectObjectBasicConstructor`: `sdfChipAllocDirect(80)`, memset 0x50), IDB says 48. Only `control` at +0 is read by `dds3EffectObjectBasicDestructor`; other fields unverified.
+- `dds3Effect_DistortionBlur_t` 16: `dds3EffectDistortionBlurCreate` allocates 4856: the 44-byte param is copied inline at +0, texture at +44, memory handle at +48, parts pointer at +52, then 100 parts of 48 bytes from +56. IDB has a 16-byte pointer layout.
+- `dds3Particle_SphereAtom_t3` 28: `dds3Particle_SphereAtomCreate` copies 0x20 bytes after the 336-byte `dds3Particle_Basic_t` (alloc 368), IDB says 28. `SphereAtomBuffInit` tests a byte at ext+0 as the type and reads timing at ext+8, so the IDB's leading `basic` pointer is not there.
+- `Eff_ThunderSpherePolyParam_t` 72: `effPCPThunderSpherePolyCreate` copies 76 bytes of param (the effPCP sibling is 76), IDB Eff_ type says 72.
+
+### Still unverified
+
+- `EffBTL_BillFireball_Part_t` 44: No retail function found by name or by type reference (`effBTL*Bill*` does not exist in SLUS_209.11).
+- `EffBTL_BillFireball_t` 80: No retail function found by name or by type reference (`effBTL*Bill*` does not exist in SLUS_209.11).
+- `EffBTL_BillTrack_Part_t` 64: No retail function found by name or by type reference (`effBTL*Bill*` does not exist in SLUS_209.11).
+- `EffBTL_BillTrack_t` 116: No retail function found by name or by type reference (`effBTL*Bill*` does not exist in SLUS_209.11).
+- `EffTable_t` 4: No retail accessor found.
+- `Eff_FlashPolyParam_t` 48: Only effPCPFlashPoly* siblings exist in retail, with other sizes; no retail code names this type.
+- `Eff_FlashPolyPart_t` 12: Only effPCPFlashPoly* siblings exist in retail, with other sizes; no retail code names this type.
+- `Eff_FlashPoly_t` 28: Only effPCPFlashPoly* siblings exist in retail, with other sizes; no retail code names this type.
+- `Eff_RippleSprite_t` 20: Retail has only `effPCPRippleBlurExp` and `dds3EffectRippleBlur`, which are other types.
+- `Eff_Ripple_t` 40: Retail has only `effPCPRippleBlurExp` and `dds3EffectRippleBlur`, which are other types.
+- `Eff_SparkleSphereBillParam_t` 28: `effPCPSparkleSphereCreate` allocates 32 with a billboard handle; no retail object matches the 8-byte bill.
+- `Eff_SparkleSphereBill_t` 8: `effPCPSparkleSphereCreate` allocates 32 with a billboard handle; no retail object matches the 8-byte bill.
+- `Eff_ThunderPolyParam_t` 80: Retail uses the effPCP sibling, whose size differs or was not checked; no retail code names this type.
+- `Eff_ThunderPoly_t` 32: Retail uses the effPCP sibling, whose size differs or was not checked; no retail code names this type.
+- `Eff_ThunderRadiatePolyParam_t` 68: Retail uses the effPCP sibling, whose size differs or was not checked; no retail code names this type.
+- `Eff_ThunderRadiatePoly_t` 32: Retail uses the effPCP sibling, whose size differs or was not checked; no retail code names this type.
+- `Eff_ThunderSpherePoly_t` 60: Retail uses the effPCP sibling, whose size differs or was not checked; no retail code names this type.
+- `dds3EffectTable_Reset_t` 4: Single delegate slot; the slot is called through the particle/effect tables but the wrapper struct has no retail footprint.
+- `dds3EffectTable_Scale_t` 4: Single delegate slot; the slot is called through the particle/effect tables but the wrapper struct has no retail footprint.
+- `dds3Effect_PartialBlur_t` 8: `dds3EffectPartialMultiBlurCreate` allocates 48 with the blur inline and a texture at +44, a different type from this 8-byte pointer pair.
+- `dds3Particle_Blur_t` 8: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_EffItem_t` 16: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_Expansion_t` 20: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_Nop_t3` 4: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_Track2_t` 20: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_Track3_t` 20: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_Track_t` 16: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+
+### Size fixes applied to the IDB
+
+Replaced in place (ordinals kept), each from the retail evidence above:
+
+- `dds3EffectWork_t` 48 to 80: the existing fields are unchanged and `reserved30[32]` is added.
+- `dds3Effect_DistortionBlur_t` 16 to 4856: `param[44]` inline, `hAlphaTex` +44, `hMem` +48, `pwork` +52, `parts[4800]` +56 (100 parts of 48 bytes, element type not recovered).
+- `dds3Particle_SphereAtom_t3` 28 to 32: `type` moved to +0 (retail tests the byte there) and the `basic` pointer dropped. `loop` kept at +5 and `timing` at +8 (retail reads +8); `loop` is not proven by retail.

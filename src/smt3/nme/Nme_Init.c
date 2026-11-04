@@ -322,7 +322,7 @@ void nmeBuildNameFont(s8 target, nmeWork_t *work)
         s32 index;
         dds3GlobalWork_t *global = nmeFontGlobalWork;
         u8 count = live->inputRowEnabled[row];
-        global->unk657C[(s32)target * 2 + row] = count;
+        global->nameCode[(s32)target * 2 + row] = count;
         if (work->inputRowEnabled[row] <= 0) {
             continue;
         }
@@ -343,8 +343,8 @@ void nmeBuildNameFont(s8 target, nmeWork_t *work)
             } else {
                 decoded = code;
             }
-            nmeFontGlobalWork->unk657C[8 + (s32)target * 0x20 + (s32)glyphCodeIndex * 2] = decoded >> 8;
-            nmeFontGlobalWork->unk657C[9 + (s32)target * 0x20 + (s32)glyphCodeIndex * 2] = decoded;
+            nmeFontGlobalWork->nameCode[8 + (s32)target * 0x20 + (s32)glyphCodeIndex * 2] = decoded >> 8;
+            nmeFontGlobalWork->nameCode[9 + (s32)target * 0x20 + (s32)glyphCodeIndex * 2] = decoded;
             glyphCodeIndex = (s8)(glyphCodeIndex + 1);
             if (decoded < 0x80) {
                 fontNo = decoded - 0x20;
@@ -380,13 +380,13 @@ void nmeBuildNameFont(s8 target, nmeWork_t *work)
                 } else {
                     decoded = code;
                 }
-                nmeFontGlobalWork->unk657C[0x88 + index * 2] = decoded >> 8;
-                nmeFontGlobalWork->unk657C[0x89 + index * 2] = decoded;
+                nmeFontGlobalWork->nameCode[0x88 + index * 2] = decoded >> 8;
+                nmeFontGlobalWork->nameCode[0x89 + index * 2] = decoded;
                 index++;
                 count = work->inputRowEnabled[2];
                 byteCount = live->inputRowEnabled[2];
             } while (index < count);
-            nmeFontGlobalWork->unk657C[0xD8] = byteCount;
+            nmeFontGlobalWork->nameCode[0xD8] = byteCount;
         }
     }
 }
