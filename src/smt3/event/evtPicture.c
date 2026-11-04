@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kernel.h"
 #include "libsdf.h"
+#include "sdfFrame.h"
 
 /* 0x68-byte picture work block. InitPictureProcessData sets the defaults and
  * evtPictureProcess1 steps the three interpolators. */
@@ -214,8 +215,8 @@ void evtPictureSetPos(dds3ProcessID_t *id, s32 x0, s32 y0, s32 x1, s32 y1, s32 t
     work->pos_y0 = y0;
     work->pos_x1 = x1;
     work->pos_y1 = y1;
-    work->pos_time = time;
-    work->pos_cnt = time;
+    work->pos_time = SDF_FRAMES(time);
+    work->pos_cnt = SDF_FRAMES(time);
 }
 
 void evtPictureSetAlpha(dds3ProcessID_t *id, s32 alp0, s32 alp1, s32 time)
@@ -225,8 +226,8 @@ void evtPictureSetAlpha(dds3ProcessID_t *id, s32 alp0, s32 alp1, s32 time)
     work->alpha = alp0;
     work->alp_a0 = alp0;
     work->alp_a1 = alp1;
-    work->alp_time = time;
-    work->alp_cnt = time;
+    work->alp_time = SDF_FRAMES(time);
+    work->alp_cnt = SDF_FRAMES(time);
 }
 
 void evtPictureSetZoom(dds3ProcessID_t *id, s32 zoom0, s32 zoom1, s32 time)
@@ -236,8 +237,8 @@ void evtPictureSetZoom(dds3ProcessID_t *id, s32 zoom0, s32 zoom1, s32 time)
     work->zoom = zoom0;
     work->zoom_p0 = zoom0;
     work->zoom_p1 = zoom1;
-    work->zoom_time = time;
-    work->zoom_cnt = time;
+    work->zoom_time = SDF_FRAMES(time);
+    work->zoom_cnt = SDF_FRAMES(time);
 }
 
 void evtPictureSwap(void) {
