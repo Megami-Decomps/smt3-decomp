@@ -100,7 +100,7 @@ s32 sdfFileCmdWrite(void *aHandle, void *aBuffer, s32 aLength);
 s32 sdfFileCmdClose(void *aHandle);
 s32 sdfFileCmdFree(void *aHandle);
 void sdfFileCmdThreadSetHiPrio(void);
-#ifdef FIX_BUGS
+#ifdef NON_MATCHING
 s32 DIntr(void);
 void EIntr(void);
 #endif
@@ -632,7 +632,7 @@ void fileExecQueue(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->semaId);
-#ifdef FIX_BUGS
+#ifdef NON_MATCHING
             /* Retail's file thread runs at lower priority, so the callback that frees
              * the request cannot run before dev is stored. Hold it off here. */
             {
@@ -659,7 +659,7 @@ void fileExecQueue(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->semaId);
-#ifdef FIX_BUGS
+#ifdef NON_MATCHING
             /* Retail's file thread runs at lower priority, so the callback that frees
              * the request cannot run before dev is stored. Hold it off here. */
             {
