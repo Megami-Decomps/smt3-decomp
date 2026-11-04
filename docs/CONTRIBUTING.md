@@ -253,7 +253,12 @@ ninja     # fails unless the ELF is byte-identical to retail
 (for test in tools/test_*.py; do python3 "$test" || exit; done)
 python3 tools/check_nonmatching.py
 python3 tools/check_irx_nonmatching.py
+python3 tools/check_generated_sources.py   # needs the retail ELF, runs configure twice
 ```
+
+`configure.py` rewrites the INCLUDE_RODATA and INCLUDE_SDATA lines in `src/`.
+A change that moves the rodata split must commit the regenerated lines in the
+same commit; `tools/check_generated_sources.py` fails CI otherwise.
 
 A unit that checks clean on its own but breaks the build is usually a data
 placement problem, not a codegen one. [Building](building.md) covers reading the
