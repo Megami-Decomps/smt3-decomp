@@ -23,14 +23,40 @@ GUARD = "#ifdef NON_MATCHING"
 # INCLUDE_ASM names there name the functions the drafts are for. One block can
 # carry several, so every name in the #else counts: reading only the first made
 # four drafted functions in sdf/sdfVu1 look absent.
-BLOCK = re.compile(r'#ifdef NON_MATCHING\b(?:(?!#endif).)*?#else\b'
-                   r'((?:(?!#endif).)*)', re.S)
+DIRECTIVE = re.compile(r'^\s*#\s*(ifdef|ifndef|if|elif|else|endif)\b(.*)$')
+COMMENTS = re.compile(r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|/\*.*?\*/|//[^\n]*', re.S)
 ASM_NAME = re.compile(r'INCLUDE_ASM\([^,]+,\s*"[^"]+"\s*,\s*(\w+)\s*\)')
 
 
 def draft_names(text: str) -> list[str]:
     """Every function drafted in this unit, across all guarded blocks."""
-    return [n for block in BLOCK.findall(text) for n in ASM_NAME.findall(block)]
+    # Keep directive nesting separate from draft selection: FIX_BUGS and other
+    # conditionals inside a draft must not consume its outer #else/#endif.
+    text = COMMENTS.sub(lambda m: re.sub(r"[^\n]", " ", m.group())
+                        if m.group().startswith(("/*", "//")) else m.group(), text)
+    stack = []
+    fallback = []
+    for line in text.splitlines(keepends=True):
+        directive = DIRECTIVE.match(line)
+        if directive:
+            kind, argument = directive.groups()
+            if kind in ("if", "ifdef", "ifndef"):
+                stack.append([kind == "ifdef" and argument.strip() == "NON_MATCHING",
+                              False])
+            elif stack:
+                if kind == "endif":
+                    stack.pop()
+                elif kind == "else":
+                    stack[-1][1] = True
+                elif kind == "elif":
+                    stack[-1][1] = False
+            # Prevent text on either side of a directive joining into a macro.
+            fallback.append("\n")
+        elif any(guard and in_else for guard, in_else in stack):
+            fallback.append(line)
+        else:
+            fallback.append("\n")
+    return ASM_NAME.findall("".join(fallback))
 
 
 def units(args):
