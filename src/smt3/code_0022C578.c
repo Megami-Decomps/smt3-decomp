@@ -8131,7 +8131,7 @@ void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func, void *data, s32
 
 typedef struct campCrossPanel_t
 {
-    /* 0x00 */ void (*func)();
+    /* 0x00 */ void (*func)(void *, void *, s32, s32, s32, s32);
     /* 0x04 */ u8 pos[0x14];
     /* 0x18 */ cmpPadStopWork_t *cursor;
     /* 0x1C */ s32 unk_1C;
