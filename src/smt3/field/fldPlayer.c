@@ -640,7 +640,7 @@ s32 fldPlayerCalcHasigo(void) {
     if (gfldPlayerDamegeCnt > 0) {
         dds3GetPosPoseSet(ctl->handle);
         SDF_VU0_STOREVECTOR(pos);
-        pos[1] -= 2.0f;
+        pos[1] -= SDF_FRAME_STEP(2.0f);
         fldGlobalBase.prevX = fldGlobalBase.x;
         fldGlobalBase.prevY = fldGlobalBase.y;
         fldGlobalBase.prevZ = fldGlobalBase.z;
@@ -653,7 +653,7 @@ s32 fldPlayerCalcHasigo(void) {
     } else if (gfldPlayerDamegeCnt < 0) {
         dds3GetPosPoseSet(ctl->handle);
         SDF_VU0_STOREVECTOR(pos);
-        pos[1] += 2.0f;
+        pos[1] += SDF_FRAME_STEP(2.0f);
         fldGlobalBase.prevX = fldGlobalBase.x;
         fldGlobalBase.prevY = fldGlobalBase.y;
         fldGlobalBase.prevZ = fldGlobalBase.z;

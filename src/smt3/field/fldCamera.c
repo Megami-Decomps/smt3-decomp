@@ -15,6 +15,7 @@
 #include "newdata.h"
 #include "event.h"
 #include "effect.h"
+#include "sdfFrame.h"
 
 extern void *memset(void *, int, size_t);
 
@@ -661,8 +662,8 @@ void calcCamNormalNPC(void) {
     unit = fldGetUnitControl();
     dds3GetPosPoseSet(unit->handle);
     eye.f[3] = 1.0f;
-    fldGlobalBase.menuOpenFlag = 4;
-    fldGlobalBase.encountState = 5;
+    fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
+    fldGlobalBase.encountState = SDF_FRAMES(5);
     if (fldNpcCamTarget == 2) {
         fldCamResetOn = 2;
         eye.f[0] = D_0054EF6C;

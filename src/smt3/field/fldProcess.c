@@ -6,6 +6,7 @@
 #include "newdata.h"
 #include "field.h"
 #include "effect.h"
+#include "sdfFrame.h"
 
 extern s32 D_0054EB54;
 extern u32 fldEncountTimer;
@@ -411,7 +412,7 @@ s32 ProcRandomEncountCheck(void)
                 } else damageMode = 2;
             } else damageMode = 1;
             if (damageMode != 0) {
-                fldPlayerStepDist = 60;
+                fldPlayerStepDist = SDF_FRAMES(60);
                 fldGlobalBase.floatB4 = 0.0f;
                 datPartyDamageFld(damageMode);
             }
@@ -610,8 +611,8 @@ s32 ProcCampCheck(void)
     fldReleaseUnitPad();
     fldPlayerPosRot();
     evtDisableMoonDraw();
-    fldGlobalBase.menuOpenFlag = 4;
-    fldGlobalBase.encountState = 5;
+    fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
+    fldGlobalBase.encountState = SDF_FRAMES(5);
     fldEncountClearFlag(0x20);
     fldEncountSetFlag(0x80);
     dds3FadeOut(0, 0, 0, 4);
@@ -668,8 +669,8 @@ s32 ProcAmCheck(void)
             goto ret0;
         }
         if (trigger != 0) {
-            fldGlobalBase.menuOpenFlag = 4;
-            fldGlobalBase.encountState = 5;
+            fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
+            fldGlobalBase.encountState = SDF_FRAMES(5);
             fldReleaseUnitPad();
             dds3SceneBasicStartScript(dds3GetActiveScene(), "hirakenai_label");
         }
@@ -700,8 +701,8 @@ s32 ProcAmCheck(void)
         if (fldRunDanteGunFlag.unk48 != 0) {
             goto ret0;
         }
-        fldGlobalBase.menuOpenFlag = 4;
-        fldGlobalBase.encountState = 5;
+        fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
+        fldGlobalBase.encountState = SDF_FRAMES(5);
         fldReleaseUnitPad();
         fldPlayerPosRot();
         dds3FadeOut(0, 0, 0, 4);
