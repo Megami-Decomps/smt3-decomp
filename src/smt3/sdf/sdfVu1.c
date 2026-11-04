@@ -440,6 +440,9 @@ INCLUDE_ASM(const s32, "sdf/sdfVu1", corePktLoadVerts);
 
 /* NON_MATCHING: reference implementation, not a match candidate. The retail
  * body is assembly: two unaligned ldr/ldl pairs per entry and pcpyld. */
+/* NON_MATCHING. Behaviour checked against retail: 6 PCSX2 call vectors give the same return and memory,
+ * field underground facility, field unknown realm savestates, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void corePktLoadVertsNorms(sdfCorePacketPointBuff_tag *dst, s32 count, const u32 *vert,
                            const u32 *norm)
@@ -526,6 +529,9 @@ INCLUDE_ASM(const s32, "sdf/sdfVu1", corePktMorphVerts);
  * 1.0 the engine keeps there, and vrsqrt clamps where a C division would turn a
  * zero normal into NaN. vmulq is xyz only, so the fourth word survives. The C
  * draft this replaced is below in comment form. */
+/* NON_MATCHING. Behaviour checked against retail: 6 PCSX2 call vectors give the same return and memory,
+ * field underground facility, field unknown realm savestates, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void corePktNormalizeNorms(sdfCorePacketPointBuff_tag *dst, s32 count)
 {

@@ -1254,6 +1254,9 @@ void nbSetPhase(s32 phase)
 }
 
 /* NON_MATCHING: 150 of 263 words differ (first at +0xBC). */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 nbMainProcess1(dds3ProcessID_t *id)
 {

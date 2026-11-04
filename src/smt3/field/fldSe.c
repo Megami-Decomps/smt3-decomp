@@ -595,6 +595,9 @@ void fld_1457F8(s32 mode) {
     }
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vectors give the same return and memory,
+ * field underground facility savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void fldBgmLoad(void)
 {
