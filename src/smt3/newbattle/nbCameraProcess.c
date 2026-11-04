@@ -7,6 +7,7 @@
 #include "motion.h"
 #include "basic.h"
 #include "dds3obj.h"
+#include "sdfFrame.h"
 
 /* 16-byte rows indexed by camera state; +0xC selects the per-state reset. */
 typedef struct nbCameraStateEntry_t {
@@ -108,7 +109,7 @@ void nbCameraClearState(nbCamera_t *pCamera)
 
 void nbCameraAnim_RotateSet(nbCamera_t *pNbCamera, s32 frame, s32 rotate, f32 start_f)
 {
-    pNbCamera->anim.rotate_f = frame;
+    pNbCamera->anim.rotate_f = SDF_FRAMES(frame);
     pNbCamera->anim.rotate_s = start_f / frame;
     SetRotateMatrixY(pNbCamera->anim.rotate_s * rotate);
     SDF_VU0_LOADVECTOR(&pNbCamera->direction);
@@ -120,7 +121,7 @@ void func_001B1518(nbCamera_t *pCamera, s32 frames, s32 count, f32 angle)
 {
     f32 step = -angle / (f32)frames;
 
-    pCamera->anim.distance_f = frames;
+    pCamera->anim.distance_f = SDF_FRAMES(frames);
     pCamera->anim.distance_s = step;
     pCamera->distance += step * (f32)count;
 }
@@ -492,10 +493,10 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     if (pNbCamera.anim.rotate_f > 0) {
         pNbCamera.anim.rotate_f--;
     } else {
-        pNbCamera.anim.rotate_s *= 0.5f;
+        pNbCamera.anim.rotate_s *= SDF_FRAME_DECAY(0.5f);
     }
     if (pNbCamera.anim.rotate_s != 0.0f) {
-        SetRotateMatrixY(pNbCamera.anim.rotate_s);
+        SetRotateMatrixY(SDF_FRAME_STEP(pNbCamera.anim.rotate_s));
         SDF_VU0_LOADVECTOR(&pNbCamera.direction);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_STOREVECTOR(&pNbCamera.direction);
@@ -503,10 +504,10 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     if (pNbCamera.anim.distance_f > 0) {
         pNbCamera.anim.distance_f--;
     } else {
-        pNbCamera.anim.distance_s *= 0.5f;
+        pNbCamera.anim.distance_s *= SDF_FRAME_DECAY(0.5f);
     }
     if (pNbCamera.anim.distance_s != 0.0f) {
-        pNbCamera.distance += pNbCamera.anim.distance_s;
+        pNbCamera.distance += SDF_FRAME_STEP(pNbCamera.anim.distance_s);
     }
     distance = -pNbCamera.distance;
     scale.x = distance;
