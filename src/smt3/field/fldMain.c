@@ -56,7 +56,7 @@ extern s8 fldDoorExitMode[];
 
 extern char pointResName[];
 
-extern char fldProcSequenceName[], D_00531950[];
+extern char fldProcSequenceName[], fldProcDrawName[];
 
 extern void fclClearTerminalState(void);
 
@@ -81,7 +81,7 @@ extern void dds3GlobalWorkUserInit2(s32 mode);
 
 extern dds3Basic_t *fldAnaBasic;
 
-extern char D_00531950[];
+extern char fldProcDrawName[];
 
 extern void datDelDevil(s32 id);
 

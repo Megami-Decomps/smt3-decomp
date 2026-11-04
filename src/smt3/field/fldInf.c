@@ -115,7 +115,7 @@ extern fldInfTable_t fldInfTable;
 
 extern s32 gFldInfIdx;
 
-extern const char D_002FF3E0[];
+extern const char fldNpcTalkLabel[];
 
 void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
@@ -127,7 +127,7 @@ void sdfFileClose(devState_t *aHandle);
 
 #include "sdk_libc.h"
 
-extern const char D_00531E98[];
+extern const char fldInfPathFormat[];
 
 extern void *memcpy(void *, const void *, size_t);
 
@@ -159,7 +159,7 @@ const char *fldInf_FindTypeEveNpc(const char *evename) {
                 if (fldInfTable.packs[packOrSetIndex].hits[eventHitIndex].area == fldGlobalBase.floor + 1 &&
                     strcmp(evename, fldInfTable.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
                     gFldInfIdx = fldInfTable.packs[packOrSetIndex].setIndex;
-                    return D_002FF3E0;
+                    return fldNpcTalkLabel;
                 }
             }
         }
@@ -169,7 +169,7 @@ const char *fldInf_FindTypeEveNpc(const char *evename) {
             fldInfTable.sets[packOrSetIndex].action == fldGlobalBase.floor + 1 &&
             strcmp(evename, fldInfTable.sets[packOrSetIndex].eventName) == 0) {
             gFldInfIdx = packOrSetIndex;
-            return D_002FF3E0;
+            return fldNpcTalkLabel;
         }
     }
     return 0;
@@ -427,7 +427,7 @@ void fldInfLoad(s32 field) {
     devState_t *command;
     if (field < 200) {
         fldMakeFilePath(directory, field, 1);
-        sprintf(path, D_00531E98, directory, field);
+        sprintf(path, fldInfPathFormat, directory, field);
         command = sdfFileOpen(path);
         sdfFileRead(command, &fldInfTable, sizeof(fldInfTable));
         sdfFileClose(command);
@@ -452,7 +452,7 @@ void fldInfToWAP(void) {
 }
 
 /* The native format slot includes twelve trailing zero bytes. */
-const char D_00531E98[24] = "%sF%03d.INF";
+const char fldInfPathFormat[24] = "%sF%03d.INF";
 
 extern u8 D_00302FA0[];
 

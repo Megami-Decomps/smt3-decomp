@@ -1429,3 +1429,7 @@ The guarded file-manager declaration of `EIntr` now agrees with its `s32` provid
 | `D_0054EAF0`, `D_0054EAE8` | `fldDanteUnit`, `fldUnitControlHandle` | `D_0054EAF0` is the unit `fldMain` creates with id `DANTE_UNIT`; `D_0054EAE8` is copied from `fldUnitControl.handle` |
 | `D_00531690`, `D_005316B0` to `D_00531758` (7 strings) | `fldProcSequenceName`, `fldPlayerAPath` ... `fldWave02Path` | bytes are `fldProcSequence` and the `/model/field/*.PB` and `/fld/f/bin/*.PB` paths passed to `sdfDevLoadFileEx` |
 | `D_00531820`, `D_0054EB38`, `D_0054EB40` | `fldWaveUnitName`, `fldPlayerPosName`, `fldCameraUnitName` | bytes `WAVE_UNIT`, `ppos01`, `P_Cam`, passed to `dds3SetUnitObjectId` and `dds3AddPointBasic` |
+| `D_0054EA38`, `D_0054EA40`, `D_0054EA48`, `D_0054EA50`, `D_0054EA58` | `dds3DebugLabelB`, `dds3DebugLabelG`, `dds3DebugLabelR`, `dds3DebugFmtInt3`, `dds3DebugFmtFloat3` | bytes `B:`, `G:`, `R:`, `%3d`, `%5.3f`, used by the colour channel readout in `dds3DebugStuff.c` |
+| `D_002FF3E0`, `D_00531860`, `D_00531950` | `fldNpcTalkLabel`, `fldKiretaLabel`, `fldProcDrawName` | bytes `npctalk_label`, `kireta_label`, `fldProcDraw`; script labels and the draw process name |
+| `D_00531C70`, `D_00531C80`, `D_00531D58`, `D_00531D70` | `fldDamageOnMsg`, `fldDamageOffMsg`, `fldNoroiDamageOnMsg`, `fldNoroiDamageOffMsg` | debug `printf` strings in `fldPlayer.c` |
+| `D_00531E98` | `fldInfPathFormat` | bytes `%sF%03d.INF`, the format `fldInf.c` builds INF paths with |

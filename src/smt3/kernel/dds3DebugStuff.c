@@ -11,7 +11,7 @@ extern u8 D_002FA930[];
 
 extern char *D_002FA938[];
 
-extern char D_0054EA38[], D_0054EA40[], D_0054EA48[], D_0054EA50[], D_0054EA58[];
+extern char dds3DebugLabelB[], dds3DebugLabelG[], dds3DebugLabelR[], dds3DebugFmtInt3[], dds3DebugFmtFloat3[];
 
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
@@ -332,17 +332,17 @@ void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y, s32 selected,
         switch (i) {
         case 0:
             style = 2;
-            label = D_0054EA48;
+            label = dds3DebugLabelR;
             channel = color & 0xFF;
             break;
         case 1:
             style = 4;
-            label = D_0054EA40;
+            label = dds3DebugLabelG;
             channel = (color >> 8) & 0xFF;
             break;
         default:
             style = 5;
-            label = D_0054EA38;
+            label = dds3DebugLabelB;
             channel = (color >> 16) & 0xFF;
             break;
         }
@@ -350,13 +350,13 @@ void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y, s32 selected,
                         x, y, 0xFF0080, style, label)));
         sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(
                         x + 0x180, y, 0xFF0080, i == selected ? 6 : 0,
-                        D_0054EA50, channel)));
+                        dds3DebugFmtInt3, channel)));
         if (showNormalized != 0) {
             sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(
                             x, y + 0x180, 0xFF0080, style, label)));
             sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(
                             x + 0x240, y + 0x180, 0xFF0080, 0,
-                            D_0054EA58, fptodp(channel * (1.0f / 255.0f)))));
+                            dds3DebugFmtFloat3, fptodp(channel * (1.0f / 255.0f)))));
         }
         y += 0x60;
     }
@@ -425,15 +425,15 @@ void dds3DrawUnitObjectShadow(s32 fade, f32 x, f32 y, f32 z, f32 radius)
         rsetAlpha(0);
     }
 }
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", D_0054EA38);
+INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", dds3DebugLabelB);
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", D_0054EA40);
+INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", dds3DebugLabelG);
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", D_0054EA48);
+INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", dds3DebugLabelR);
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", D_0054EA50);
+INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", dds3DebugFmtInt3);
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", D_0054EA58);
+INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", dds3DebugFmtFloat3);
 
 INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", fldCamDirLock);
 

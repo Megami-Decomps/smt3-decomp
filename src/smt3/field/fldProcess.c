@@ -13,7 +13,7 @@ extern u32 dds3GetKernelCount(void);
 extern s32 D_0054EB54;
 extern u32 fldEncountTimer;
 
-extern char D_0054EA38[], D_0054EA40[], D_0054EA48[], D_0054EA50[], D_0054EA58[];
+extern char dds3DebugLabelB[], dds3DebugLabelG[], dds3DebugLabelR[], dds3DebugFmtInt3[], dds3DebugFmtFloat3[];
 
 extern dds3Basic_t *dds3GetControlScene(void);
 extern void dds3SetActiveScene(dds3Basic_t *scene);
@@ -87,7 +87,7 @@ extern s8 fldDoorExitMode[];
 
 extern char pointResName[];
 
-extern char fldProcSequenceName[], D_00531950[];
+extern char fldProcSequenceName[], fldProcDrawName[];
 
 extern s32 fldProcShutDownFlg;
 
@@ -115,7 +115,7 @@ extern dds3Basic_t *fldAnaBasic;
 
 extern effBlurScatterWork_t *hDistortionBlur;
 
-extern char D_00531950[];
+extern char fldProcDrawName[];
 
 extern s32 gfldPlayerSize;
 
@@ -235,7 +235,7 @@ extern dds3FontReqFunc_t D_0054EA30;
 
 extern u8 dds3PadButtonState[];
 
-extern char D_00531860[];
+extern char fldKiretaLabel[];
 
 extern fldSequenceController_t fldAutoMapSeqFlags;
 /* The retail load is its own symbol, not a field of the controller. */
@@ -384,7 +384,7 @@ s32 ProcRandomEncountCheck(void)
     else evtMoonAddMove(distance);
     if (fldGlobalBase.consumedFlags & 0xF) {
         fldReleaseUnitPad();
-        dds3SceneBasicStartScript(dds3GetActiveScene(), D_00531860);
+        dds3SceneBasicStartScript(dds3GetActiveScene(), fldKiretaLabel);
         fldPlayerPosRot();
         return 0;
     }
@@ -476,14 +476,14 @@ s32 ProcRandomEncountCheck(void)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldProcess", D_00531860);
+INCLUDE_RODATA(const s32, "field/fldProcess", fldKiretaLabel);
 
 INCLUDE_ASM(const s32, "field/fldProcess", ProcRandomEncountCheck);
 #endif
 
 s32 fldProcKiretaChk(void)
 {
-    return scrSearchScriptName(D_00531860) != NULL;
+    return scrSearchScriptName(fldKiretaLabel) != NULL;
 }
 
 s32 fldProcHirakenaiChk(void)
@@ -1105,7 +1105,7 @@ void fldProcTrigSequence(fldSceneParam_t *srcParam, u32 mode) {
         scene->loadMode = srcParam->loadMode;
     }
     dds3StartProcess("fldProcSequence", 0x3F7, 0, 0, ProcSequence, 0, 0);
-    dds3StartProcess(D_00531950, 0x2B0A, 0, 0, ProcDraw, 0, 0);
+    dds3StartProcess(fldProcDrawName, 0x2B0A, 0, 0, ProcDraw, 0, 0);
     fldProcShutDownFlg = 1;
     InitOoyTest();
 }
@@ -1123,7 +1123,7 @@ void fldProcShutDown(void)
     fldAutoMapSeqSetFlag(1);
     fldAutoMapSeqSetFlag(2);
     dds3KillProcessName("fldProcSequence", 1);
-    dds3KillProcessName(D_00531950, 1);
+    dds3KillProcessName(fldProcDrawName, 1);
     fldFreeInputPanel();
     evtDisableMoonDraw();
     fldFreeAddressProcess();
@@ -1203,7 +1203,7 @@ SYMBOL_AT(s32, fldSequenceState, fldAutoMapSeqFlags, 4);
 
 SYMBOL_AT(u32, D_0054EB94, fldEncountTimer, 4);
 
-INCLUDE_RODATA(const s32, "field/fldProcess", D_00531950);
+INCLUDE_RODATA(const s32, "field/fldProcess", fldProcDrawName);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldNextFieldId);
 
