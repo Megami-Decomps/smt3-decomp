@@ -515,8 +515,14 @@ u32 evtCommand_MODEL_BE(void) {
     if (motionSeTask != 0) {
         dds3LinkProcess(evtSearchEventPack(scrGetIntPara(0)), motionSeTask);
     }
-    /* The original success path ends in this void call, without a return. */
+    /* BUG: the success path ends in this void call with no return. Retail
+     * returns whatever v0 holds, which is nowpwork, a non-null pointer left by
+     * scrSetIntReturnValue. CodeFunc_Comm reads 0 as "command still pending",
+     * so a port that returns garbage can stall the script forever. */
     scrSetIntReturnValue(modelKey);
+#ifdef FIX_BUGS
+    return 1;
+#endif
 }
 
 u32 evtCommand_MODEL_POS(void) {
