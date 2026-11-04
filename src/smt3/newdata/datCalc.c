@@ -1430,6 +1430,12 @@ s32 datAddHearts(s32 id)
             return 0;
         }
     }
+#ifdef FIX_BUGS
+    /* BUG: hearts[] overlaps heartsPrefix[0x40] and the index is unchecked */
+    if (DDS3_GBWK->heartscnt >= 0x40 || id >= 0x40) {
+        return 0;
+    }
+#endif
     ((u8 *)EE_ADDR_PTR(DDS3_GBWK->heartscnt) + EE_ADDR(DDS3_GBWK))[0x1CFB] = id;
     DDS3_GBWK->heartscnt++;
     (EE_ADDR_AS(u8 *, id) + EE_ADDR(DDS3_GBWK))[0x1D3B] = 0;

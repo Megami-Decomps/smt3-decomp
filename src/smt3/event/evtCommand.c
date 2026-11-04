@@ -52,6 +52,17 @@ extern void evtRunUnitKutiMotion(addr_t h);
 void itfMesMngSetKutiCallback(s32 id, void (*func)(void));
 
 extern evtUnit_t *evtGetUnitHandle(s32 serial);
+extern void evtSetUnitMove3(evtUnit_t *h, s32 pathID, s32 para1, s32 para2, s32 movesys, s32 movedir, s32 rotsys);
+extern void evtSetUnitRot2(evtUnit_t *h, s32 posID, s32 para1);
+extern void fldCamSyukanSuriawase(void);
+/* The callers pass u64 values; an s32 prototype would add a sign extension. */
+extern s32 evtPlayEventBgm(u64 eventId, u64 variation);
+extern void evtTransEventBgm(u64 eventId, u64 variation);
+extern s32 evtStopEventBgm(u64 eventId, u64 variation);
+extern s32 evtPlaySe(u64 eventno, u64 seno);
+extern s32 func_001FA158(u64 eventId, u64 variation);
+extern void datAddKotowariPoint(u64 type, u64 point);
+extern void func_001FA310(u64 taskId, u64 key);
 
 extern s32 scrGetMessageHandle(void);
 

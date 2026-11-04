@@ -6452,7 +6452,6 @@ void cmpDrawSkillRowText(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillRowText);
 #endif
 
-extern s8 D_00551FB9;
 extern volatile s32 cmpStatusAnimLive[] FAKEMATCH_ASM_NAME("cmpStatusAnimCount");
 
 #ifdef NON_MATCHING
@@ -6463,7 +6462,7 @@ void cmpDrawSkillIcons(s32 x, s32 y, s8 index)
     s32 column;
     u8 i;
 
-    if (D_00551FB9 == 0) {
+    if (cmpParamGaugeState[1] == 0) {
         return;
     }
     row = index / 4;

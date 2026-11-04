@@ -583,6 +583,12 @@ s32 ragUpdateSeqConfirm(void)
             DDS3_GBWK->unitwork[4 + slot].mp = DDS3_GBWK->unitwork[4 + slot].maxmp;
             fclEncycRegist(unit, 0);
             for (i = 0; i < 3; i++) {
+#ifdef FIX_BUGS
+                /* BUG: items stays NULL when the update kind is not 1 to 3 */
+                if (items == NULL) {
+                    break;
+                }
+#endif
                 if (items[i].item != 0) {
                     fclAddItem(items[i].item, -items[i].count);
                 }
