@@ -195,7 +195,7 @@ extern void FlushCache(s32);
 
 extern s32 p2sdSmgHandle;
 
-extern char D_00551A20[];
+extern char sdfDumpAddrFmt[];
 
 extern char D_00551A28[];
 
@@ -203,22 +203,22 @@ extern char D_00551A30[];
 
 extern char D_00551A38[];
 
-extern char D_00551A40[];
+extern char sdfDumpByteFmt[];
 
 extern char sdfDumpLineBuf[];
 
 extern char D_00551A50[];
 
-extern char D_00551A58[];
+extern char sdfVifMaskedName[];
 
-extern char D_00551A60[];
+extern char sdfVifXferOkName[];
 
 extern char D_00551B10[];
 
 extern char D_00551B18[];
 
 
-extern char D_00551B40[];
+extern char sdfGsMemTypeFmt[];
 
 extern sdfIpuDecodeCb_t *sdfIpuQueueHead;
 
