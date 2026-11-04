@@ -9,6 +9,7 @@
 
 #include "billboard.h"
 #include "draw.h"
+#include "sdfFrame.h"
 
 typedef struct dds3P2APolygon_tag {
     f32 dir[4][4];
@@ -800,7 +801,7 @@ dds3BillResource_tag *dds3Billboard_P2AAnimDraw(billHandle_t *pP2A, dds3BillAnim
                 pBillAnim->key = 0;
             }
         }
-        pBillAnim->wait = pBillAnim->pTexAnim[pBillAnim->key].attr;
+        pBillAnim->wait = SDF_FRAMES(pBillAnim->pTexAnim[pBillAnim->key].attr + 1) - 1;
     } else {
         pBillAnim->wait--;
     }
@@ -962,7 +963,7 @@ void dds3Billboard_P2ASetAnim(dds3BillAnimResource_tag *hBillAnimRes, s32 number
     pBillAnim->key = 0;
     value = ((P2A_TEXANIM_tag *)base)->attr;
     pBillAnim->pTexAnim = (P2A_TEXANIM_tag *)base;
-    pBillAnim->wait = value;
+    pBillAnim->wait = SDF_FRAMES(value + 1) - 1;
 }
 
 void dds3Billboard_P2ASetNumber(billHandle_t *pP2A, s32 number) {
@@ -984,7 +985,7 @@ void dds3Billboard_P2ASetNumber(billHandle_t *pP2A, s32 number) {
         records = (billPluralEntry_t *)(data->pHeader + entry->spranm);
         for (; i < entry->times; i++) {
             dds3Billboard_P2ASetAnim(data, records[i].entryIndex, pP2A->resolvedEntries + i);
-            (pP2A->resolvedEntries)[i].key = -records[i].delay;
+            (pP2A->resolvedEntries)[i].key = -SDF_FRAMES(records[i].delay);
         }
     } else if (entry->attr & 0xC0) {
         printf("billAnim..(A)MTEX SET\n");
