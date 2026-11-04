@@ -6,6 +6,7 @@
 #include "field.h"
 #include "ps2asm.h"
 #include "billboard.h"
+#include "sdfFrame.h"
 
 enum sl_slot_flag
 {
@@ -74,6 +75,7 @@ extern f32 gFldSnowW;
 extern void fldSnowSeedReset(void);
 
 extern u32 dds3GetRandA(void *name);
+extern u32 dds3GetKernelCount(void);
 
 extern u32 sdfTexGetPacket(sdfTexHandle_t *aHandle);
 
@@ -382,26 +384,29 @@ void fldSnowTask(void)
     if (gFldSeedBuff == NULL) {
         return;
     }
-    if (gFldSnowMode == 0) {
-        for (i = 0; i < 2; i++) {
-            if ((dds3GetRandA(NULL) & 3) == 0) {
-                u32 random = dds3GetRandA(NULL) & 0xFF;
-                f32 x = gFldSnowX + (f32)random * gFldSnowW;
-                f32 z;
-                random = dds3GetRandA(NULL) & 0xFF;
-                z = gFldSnowZ + (f32)random * gFldSnowW;
-                fldInitSnowSeed(x, gFldSnowY, z);
+    /* Spawns are per retail tick; the fall below steps per host tick. */
+    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        if (gFldSnowMode == 0) {
+            for (i = 0; i < 2; i++) {
+                if ((dds3GetRandA(NULL) & 3) == 0) {
+                    u32 random = dds3GetRandA(NULL) & 0xFF;
+                    f32 x = gFldSnowX + (f32)random * gFldSnowW;
+                    f32 z;
+                    random = dds3GetRandA(NULL) & 0xFF;
+                    z = gFldSnowZ + (f32)random * gFldSnowW;
+                    fldInitSnowSeed(x, gFldSnowY, z);
+                }
             }
-        }
-    } else {
-        for (i = 0; i < 12; i++) {
-            if ((dds3GetRandA(NULL) & 3) == 0) {
-                u32 random = dds3GetRandA(NULL) & 0xFF;
-                f32 x = fldGlobalBase.x + gFldSnowX + (f32)random * gFldSnowW;
-                f32 z;
-                random = dds3GetRandA(NULL) & 0xFF;
-                z = fldGlobalBase.z + gFldSnowZ + (f32)random * gFldSnowW;
-                fldInitSnowSeed(x, gFldSnowY, z);
+        } else {
+            for (i = 0; i < 12; i++) {
+                if ((dds3GetRandA(NULL) & 3) == 0) {
+                    u32 random = dds3GetRandA(NULL) & 0xFF;
+                    f32 x = fldGlobalBase.x + gFldSnowX + (f32)random * gFldSnowW;
+                    f32 z;
+                    random = dds3GetRandA(NULL) & 0xFF;
+                    z = fldGlobalBase.z + gFldSnowZ + (f32)random * gFldSnowW;
+                    fldInitSnowSeed(x, gFldSnowY, z);
+                }
             }
         }
     }
@@ -439,10 +444,12 @@ void fldSnowTask(void)
         seed = gFldSeedBuff;
         for (i = 0; i < 700; i++, seed++) {
             if (seed->flg & 1) {
-                seed->life--;
-                seed->y += speed + (f32)seed->spdx * 0.125f;
-                if (seed->life < 0x40) {
-                    seed->alp -= 2;
+                seed->y += SDF_FRAME_STEP(speed + (f32)seed->spdx * 0.125f);
+                if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                    seed->life--;
+                    if (seed->life < 0x40) {
+                        seed->alp -= 2;
+                    }
                 }
                 if (seed->life <= 0) {
                     seed->flg = 0;
@@ -471,10 +478,12 @@ void fldSnowTask(void)
         seed = gFldSeedBuff;
         for (i = 0; i < 700; i++, seed++) {
             if (seed->flg & 1) {
-                seed->life--;
-                seed->y += speed - (f32)seed->spdx * 0.125f;
-                if (seed->life < 0x40) {
-                    seed->alp -= 2;
+                seed->y += SDF_FRAME_STEP(speed - (f32)seed->spdx * 0.125f);
+                if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                    seed->life--;
+                    if (seed->life < 0x40) {
+                        seed->alp -= 2;
+                    }
                 }
                 if (seed->life <= 0) {
                     seed->flg = 0;
