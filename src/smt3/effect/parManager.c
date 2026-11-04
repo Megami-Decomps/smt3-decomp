@@ -727,7 +727,11 @@ dds3Particle_Basic_t *dds3ParticleExpCopy(dds3Particle_Basic_t *source);
 void dds3ParticleExpDelete(dds3Particle_Basic_t *hData);
 void dds3ParticleExpDraw(dds3Particle_Basic_t *hData);
 void dds3ParticleExpReset(dds3Particle_Basic_t *hData);
+#ifdef FIX_BUGS
+void dds3ParticleExpSetScale(dds3Particle_Basic_t *hData, float scale);
+#else
 void dds3ParticleExpSetScale(float hData, dds3Particle_Basic_t *scale);
+#endif
 u16 dds3ParticleExpGetState(dds3Particle_Basic_t *hData);
 void dds3ParticleExpSetPosition(void *hData, void *pPos);
 void dds3ParticleExpSetRotateMatrix(dds3Particle_Basic_t *hData, void *pMatrix);
@@ -4066,10 +4070,18 @@ void dds3ParticleExpReset(dds3Particle_Basic_t *hData) {
     dds3ParticleReset(hData);
 }
 
+#ifdef FIX_BUGS
+/* BUG: parameters were declared swapped; the table passes (particle, scale). */
+void dds3ParticleExpSetScale(dds3Particle_Basic_t *hData, float scale) {
+    dds3ParticleSetScale(hData, scale);
+    hData->scaleEnd *= scale;
+}
+#else
 void dds3ParticleExpSetScale(float hData, dds3Particle_Basic_t *scale) {
     dds3ParticleSetScale(scale, hData);
     scale->scaleEnd *= hData;
 }
+#endif
 
 /* Descriptor query: return the complete 16-bit restart state. */
 u16 dds3ParticleExpGetState(dds3Particle_Basic_t *hData) {
