@@ -1363,3 +1363,5 @@ Replaced in place (ordinals kept), each from the retail evidence above:
 - `dds3EffectWork_t` 48 to 80: the existing fields are unchanged and `reserved30[32]` is added.
 - `dds3Effect_DistortionBlur_t` 16 to 4856: `param[44]` inline, `hAlphaTex` +44, `hMem` +48, `pwork` +52, `parts[4800]` +56 (100 parts of 48 bytes, element type not recovered).
 - `dds3Particle_SphereAtom_t3` 28 to 32: `type` moved to +0 (retail tests the byte there) and the `basic` pointer dropped. `loop` kept at +5 and `timing` at +8 (retail reads +8); `loop` is not proven by retail.
+
+Data names absorbed into the symbol that code indexes past (retail reads them through the owner's base, so they are fields, not objects): NM_PrimPolyParm, RPE_PrimPolyParm, SPL_PrimPolyParm, cmpSkillDrawWork, dds3BezierWork, dds3FlashPolyTag, dds3HermitianTag, fldAutoMapTexHandle, fldCamPhokanEyeW, fldCamPhokanSelZ, fldCamPhokanTgtW, g_debug, gencScale, sdfSndMapIop, and the unnamed D_002FA244, D_00529758, D_005519BE. Owners: the preceding symbol at each address.
