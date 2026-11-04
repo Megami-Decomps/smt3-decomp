@@ -217,6 +217,7 @@ void dds3RunProcessList(void)
 extern u8 dds3PadVibrationLevel;
 extern u8 D_00551B91;
 #include "sdk_libc.h"
+#include "sdfFrame.h"
 
 void dds3GetVibrationLevel(void)
 {
@@ -258,7 +259,7 @@ void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
         dds3PadVibrationMode[motor] = level;
         dds3GetVibrationLevel();
     }
-    dds3PadVibrationTable[motor] = duration;
+    dds3PadVibrationTable[motor] = SDF_FRAMES(duration);
     if (motor == 0) {
         sdfPadSetAct0(0, level);
     } else {
