@@ -520,9 +520,9 @@ void effPCPThunderSpherePolySetColor(effPCPThunderSpherePoly_t *hData, u32 abgr)
     hData->abgr = abgr;
 }
 
-void effPCPThunderSpherePolySetScale(f32 hData, effPCPThunderSpherePoly_t *scale) {
-    scale->head.width = scale->width_base * hData;
-    scale->head.height = scale->height_base * hData;
+void effPCPThunderSpherePolySetScale(effPCPThunderSpherePoly_t *hData, f32 scale) {
+    hData->head.width = hData->width_base * scale;
+    hData->head.height = hData->height_base * scale;
 }
 
 effPCPThunderSpherePolyParam_t *effPCPThunderSpherePolyGetParam(effPCPThunderSpherePoly_t *pThunderPoly) {
