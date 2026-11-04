@@ -68,7 +68,7 @@ extern void nbCameraCRSetPlayerFormRequest(void);
 
 extern void nbInitDebugProcess(nbMainProcessData_t *data);
 
-extern s32 D_0054F0F4;
+extern const char *D_0054F0F4;
 
 
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
@@ -1457,7 +1457,7 @@ void SetJyocyuData(nbMainProcessData_t *data)
 {
     sdfMemHandle_t *handle;
 
-    handle = sdfDevLoadFileEx(EE_ADDR_AS(const char *, D_0054F0F4), 0, 0);
+    handle = sdfDevLoadFileEx(D_0054F0F4, 0, 0);
     data->HatudoEff = effBTLCreate(sdfMemLock(handle));
     sdfMemFreeDirect(handle);
 }

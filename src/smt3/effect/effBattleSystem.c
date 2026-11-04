@@ -212,7 +212,7 @@ extern s8 effBTLFieldColorOn;
 
 extern s8 D_0054F0F1;
 
-extern s32 D_0054F0F4;
+extern const char *D_0054F0F4;
 
 extern u8 effBTLDebugCameraAllEdit;
 
@@ -3149,7 +3149,7 @@ s32 effBTLFieldColorIsOn(void)
 
 s32 eff_174898(void)
 {
-    return D_0054F0F4;
+    return EE_ADDR_S(D_0054F0F4);
 }
 
 #ifdef NON_MATCHING

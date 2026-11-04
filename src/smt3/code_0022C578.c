@@ -2705,16 +2705,16 @@ void cmpDrawHelp(fclPanelPos_t *pos, u16 index, s8 bank, s8 skipBackground, s32 
     frDestroyFontRequestAfter(font);
 }
 
-extern s32 cmpMenuTextTable[];
+extern const char *cmpMenuTextTable[];
 
 extern s32 cmpStartProcessInfo(s32 text, s32 flag);
 
 void cmp_2304C0(s8 index)
 {
-    s32 *entry = &cmpMenuTextTable[index];
+    const char **entry = &cmpMenuTextTable[index];
 
-    if (cmpStartProcessInfo(*entry, 0) == 0) {
-        func_0023B500(*entry);
+    if (cmpStartProcessInfo(EE_ADDR_S(*entry), 0) == 0) {
+        func_0023B500(EE_ADDR_S(*entry));
     }
 }
 
