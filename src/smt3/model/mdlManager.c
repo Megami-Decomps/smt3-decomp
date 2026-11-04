@@ -3,6 +3,7 @@
 #include "motion.h"
 #include "draw3d.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 #define MDL_GROUP_COUNT 8
 
@@ -778,9 +779,9 @@ void mdlSetBlur(mdlObj_t *aHandle, s32 interval, s32 count,
         aHandle->devList = deviceList;
         deviceList->spawnCount = count;
         deviceList->count = count;
-        deviceList->interval = interval;
+        deviceList->interval = SDF_FRAMES(interval);
         /* Final argument use: see docs/idioms.md, "Final argument use: mdlSetBlur". */
-        deviceList->keepCount = count * interval;
+        deviceList->keepCount = count * SDF_FRAMES(interval);
         inverseSpan = 1.0f / deviceList->keepCount;
         startCarrier[0] = endColor;
         EE_MMI_RGBA_UNPACK(startCarrier, 0.0078125f);
