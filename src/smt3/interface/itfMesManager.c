@@ -1080,11 +1080,14 @@ u8 *itfMesMngGetVar(s32 id, s32 index) {
 
 extern u8 *DDS3_GBWK;
 
+/* Localised name text, 0x40 bytes after the manager. */
+extern char itfMesMngVarText[];
+
 /* NON_MATCHING: 1 of 34 words, 136 bytes against 172; gcc shares the three address inductions retail keeps apart. */
 #ifdef NON_MATCHING
 void itfMesMngGetVarLocalize(s32 id)
 {
-    char *out = (char *)((u8 *)pinst + 0x9F4);
+    char *out = itfMesMngVarText;
     s32 lead = id * 20 + 0x6600;
     s32 tail = id * 20 + 0x6601;
     s32 count = id + 0x6650;
@@ -1186,7 +1189,7 @@ void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type) {
         itfMesMngSetVarImmediate(id, index, pstr[num]);
         break;
     case 10: {
-        char *buffer = (char *)((u8 *)pinst + 0x9F4);
+        char *buffer = itfMesMngVarText;
 
         itfMesMngGetVarLocalize(num);
         itfMesMngSetVarImmediate2(id, index, buffer, strlen(buffer));
