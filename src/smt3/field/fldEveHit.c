@@ -1473,7 +1473,7 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
     u32 pointId;
     s32 slot;
     s32 i = fldEveHitCount;
-    fldResourcePoint_t *sisei;
+    fldResourcePointUnaligned_t *sisei;
     fldEveRngBox_t *box;
     dds3Basic_t *event;
     dds3Basic_t *point;
@@ -1489,7 +1489,7 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
     D_002FCFA0[i].ball.r = r;
     D_002FCFA0[i].put.type = 1;
     D_002FCFA0[i].put.data.parameters = &D_002FCFA0[i].ball;
-    sisei = (fldResourcePoint_t *)&D_002FCFA0[i].sisei;
+    sisei = &D_002FCFA0[i].sisei;
     sisei->pos.x = x;
     sisei->pos.y = y;
     sisei->pos.z = z;
@@ -1502,7 +1502,7 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
     sisei->scl.y = 1.0f;
     sisei->scl.z = 1.0f;
     sisei->scl.w = 1.0f;
-    D_002FCFA0[i].hit.transform = sisei;
+    D_002FCFA0[i].hit.transform = (fldResourcePoint_t *)sisei;
     pointId = dds3AllocObjectId();
     D_002FCFA0[i].hit.id = pointId;
     D_002FCFA0[i].hit.name = D_002FCD70;
@@ -1528,7 +1528,7 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     s32 i = fldEveHitCount;
     fldEveRngBox_t *box;
     dds3Basic_t *point;
-    fldResourcePoint_t *sisei;
+    fldResourcePointUnaligned_t *sisei;
     D_002FCFA0[i].put.data.parameters = &D_002FCFA0[i].ball;
     D_002FCFA0[i].ball.Type = 0;
     D_002FCFA0[i].hit.data = &D_002FCFA0[i].put;
@@ -1536,7 +1536,7 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     D_002FCFA0[i].put.eventIndex = eveidx;
     D_002FCFA0[i].put.type = 1;
     D_002FCFA0[i].put.visible = 1;
-    sisei = (fldResourcePoint_t *)&D_002FCFA0[i].sisei;
+    sisei = &D_002FCFA0[i].sisei;
     sisei->pos.x = x;
     sisei->pos.y = y;
     sisei->pos.z = z;
@@ -1549,7 +1549,7 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     sisei->scl.y = 1.0f;
     sisei->scl.z = 1.0f;
     sisei->scl.w = 1.0f;
-    D_002FCFA0[i].hit.transform = sisei;
+    D_002FCFA0[i].hit.transform = (fldResourcePoint_t *)sisei;
     id = dds3AllocObjectId();
     D_002FCFA0[i].hit.id = id;
     D_002FCFA0[i].hit.name = resname;
