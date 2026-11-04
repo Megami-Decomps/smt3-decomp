@@ -3723,7 +3723,13 @@ effPCPScreenCrackModel_t *effPCPScreenCrackModelCopy(effPCPScreenCrackModel_t *h
 {
     effPCPScreenCrackModel_t *work;
 
+    /* BUG: retail passes whatever s1 held on entry as Create's source, which
+     * Create reads for ->param. The copy was meant to take hData's. */
+#ifdef FIX_BUGS
+    work = effPCPScreenCrackModelCreate(hData, NULL);
+#else
     work = effPCPScreenCrackModelCreate(work, NULL);
+#endif
     work->hModel = dds3EffectPartCopy(hData->hModel);
     return work;
 }
