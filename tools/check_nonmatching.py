@@ -15,6 +15,7 @@ import glob
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -63,7 +64,7 @@ def units(args):
     if args:
         return [Path(a) for a in args]
     return [Path(p) for p in sorted(glob.glob(str(ROOT / "src/smt3/**/*.c"), recursive=True))
-            if GUARD in Path(p).read_text()]
+            if GUARD in (t := Path(p).read_text()) or "FIX_BUGS" in t]
 
 
 def draft_functions(version: str = "smt3") -> dict[str, set[str]]:
@@ -77,8 +78,12 @@ def draft_functions(version: str = "smt3") -> dict[str, set[str]]:
     return drafts
 
 
-def compile_unit(path: Path) -> str:
-    """Return cc1's diagnostics, empty when the draft compiles."""
+def compile_unit(path: Path, fix_bugs: bool = False) -> str:
+    """Return cc1's diagnostics, empty when the draft compiles.
+
+    fix_bugs adds -DFIX_BUGS, which selects the corrections the matching build
+    never compiles either.
+    """
     cc1 = ROOT / "tools/compilers/ee-gcc2.96/lib/gcc-lib/ee/2.96-ee-001003-1/cc1"
     out = subprocess.run(
         [str(ROOT / "tools/glibc32/ld-linux.so.2"), "--library-path",
@@ -91,6 +96,7 @@ def compile_unit(path: Path) -> str:
          "-D__mips_single_float",
          "-I" + str(ROOT / "include"), "-I" + str(ROOT / "src"),
          "-DVERSION_SMT3", "-DSKIP_ASM", "-DNON_MATCHING",
+         *(["-DFIX_BUGS"] if fix_bugs else []),
          # Old GCC needs this spelling; -Werror=... is silently ignored.
          "-Werror-implicit-function-declaration",
          "-quiet", "-O2", str(path), "-o", "/dev/null"],
@@ -108,21 +114,65 @@ def compile_unit(path: Path) -> str:
     return diagnostics
 
 
+KNOWN_FILE = ROOT / "config" / "nonmatching_known_fail.txt"
+
+
+def known_failures() -> dict[str, list[str]]:
+    """Diagnostics the matching build tolerates: `unit` then a TAB and a substring."""
+    known: dict[str, list[str]] = {}
+    if KNOWN_FILE.exists():
+        for line in KNOWN_FILE.read_text().splitlines():
+            line = line.split("#", 1)[0].rstrip()
+            if "\t" in line:
+                unit, text = line.split("\t", 1)
+                known.setdefault(unit, []).append(text)
+    return known
+
+
+def unexplained(rel, err: str, known) -> list[str]:
+    """The diagnostic lines of err that the known list does not cover."""
+    return [l for l in err.split("\n")
+            if not any(t in l for t in known.get(str(rel), []))]
+
+
+def control() -> None:
+    """A dropped brace inside a FIX_BUGS block must fail, a whole one must pass."""
+    body = "int f(int a)\n{\n#ifdef FIX_BUGS\n    if (a) {\n        a++;\n%s#endif\n    return a;\n}\n"
+    with tempfile.TemporaryDirectory() as tmp:
+        for text, name, must_fail in ((body % "", "dropped.c", True),
+                                      (body % "    }\n", "whole.c", False)):
+            unit = Path(tmp) / name
+            unit.write_text(text)
+            failed = bool(compile_unit(unit, True))
+            if failed != must_fail:
+                sys.exit(f"control {name}: expected "
+                         f"{'failure' if must_fail else 'success'} from cc1, "
+                         f"so this check cannot be trusted")
+
+
 if __name__ == "__main__":
     todo = units(sys.argv[1:])
     if not todo:
         print("no NON_MATCHING drafts")
         sys.exit(0)
+    control()
+    known = known_failures()
     bad = 0
     for path in todo:
         text = path.read_text()
         names = draft_names(text)
-        err = compile_unit(path)
         rel = path.relative_to(ROOT) if path.is_absolute() else path
-        if err:
-            bad += 1
-            print(f"{rel}: {len(names)} draft(s), DOES NOT COMPILE")
-            print("\n".join("    " + l for l in err.split("\n")[:12]))
-        else:
-            print(f"{rel}: {len(names)} draft(s) compile")
+        for fix_bugs in (False, True):
+            if fix_bugs and "FIX_BUGS" not in text:
+                continue
+            label = "NON_MATCHING + FIX_BUGS" if fix_bugs else "NON_MATCHING"
+            err = compile_unit(path, fix_bugs)
+            if err:
+                err = "\n".join(unexplained(rel, err, known))
+            if err:
+                bad += 1
+                print(f"{rel}: {len(names)} draft(s), DOES NOT COMPILE with {label}")
+                print("\n".join("    " + l for l in err.split("\n")[:12]))
+            else:
+                print(f"{rel}: {len(names)} draft(s) compile with {label}")
     sys.exit(1 if bad else 0)
