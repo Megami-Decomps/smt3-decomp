@@ -13,6 +13,6 @@ typedef struct
     /* 0x6C */ s32 frameIndex;
 } movieDecodeWork_t;
 
-extern movieDecodeWork_t movieDecodeWork asm("D_00343E40");
+extern movieDecodeWork_t movieDecodeWork asm("movieCb");
 
 #endif
