@@ -416,12 +416,23 @@ typedef struct {
 } fldResPutEveBall_t;
 
 typedef struct {
-    fldResPutEveBall_t ball;  /* 0x00 */
-    fldResPut_t put;          /* 0x08 */
-    fldResourcePoint_t sisei; /* 0x18 */
-    fldResHead_t hit;         /* 0x48 */
-    fldResHead_t event;       /* 0x6C */
+    sdfVector4Unaligned_t pos;
+    sdfVector4Unaligned_t rot;
+    sdfVector4Unaligned_t scl;
+} fldResourcePointUnaligned_t;
+
+typedef struct {
+    fldResPutEveBall_t ball;           /* 0x00 */
+    fldResPut_t put;                   /* 0x08 */
+    fldResourcePointUnaligned_t sisei; /* 0x18 */
+    fldResHead_t hit;                  /* 0x48 */
+    fldResHead_t event;                /* 0x6C */
 } fldEveHitSource_t;
+
+typedef char fldEveHitSource_put[((u32)&((fldEveHitSource_t *)0)->put == 0x08) ? 1 : -1];
+typedef char fldEveHitSource_sisei[((u32)&((fldEveHitSource_t *)0)->sisei == 0x18) ? 1 : -1];
+typedef char fldEveHitSource_hit[((u32)&((fldEveHitSource_t *)0)->hit == 0x48) ? 1 : -1];
+typedef char fldEveHitSource_event[((u32)&((fldEveHitSource_t *)0)->event == 0x6C) ? 1 : -1];
 
 extern fldEveHitSource_t D_002FCFA0[];
 
@@ -1478,7 +1489,7 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
     D_002FCFA0[i].ball.r = r;
     D_002FCFA0[i].put.type = 1;
     D_002FCFA0[i].put.data.parameters = &D_002FCFA0[i].ball;
-    sisei = &D_002FCFA0[i].sisei;
+    sisei = (fldResourcePoint_t *)&D_002FCFA0[i].sisei;
     sisei->pos.x = x;
     sisei->pos.y = y;
     sisei->pos.z = z;
@@ -1525,7 +1536,7 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     D_002FCFA0[i].put.eventIndex = eveidx;
     D_002FCFA0[i].put.type = 1;
     D_002FCFA0[i].put.visible = 1;
-    sisei = &D_002FCFA0[i].sisei;
+    sisei = (fldResourcePoint_t *)&D_002FCFA0[i].sisei;
     sisei->pos.x = x;
     sisei->pos.y = y;
     sisei->pos.z = z;

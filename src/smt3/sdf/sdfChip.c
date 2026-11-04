@@ -34,6 +34,13 @@ sdfChip_t *sdfChipAllocGetFree(sdfChipCB_tag *aCB, sdfChipPageInfo_tag *aPageInf
 sdfChip_t *sdfChipAllocPageGrow(sdfChipCB_tag *aCB, sdfChipPageInfo_tag *aPageInfo);
 void *sdfChipAllocDirect(s32 aSize);
 void sdfChipFreeDirect(void *aPtr);
+#ifdef NON_MATCHING
+/* Port-only allocator checks, off unless the host switches them on. */
+void sdfxDevChipFreed(void *aChip, s32 aChipSize);
+void sdfxDevChipGrown(void *aChip, s32 aChipSize);
+void sdfxDevChipPopped(void *aChip, s32 aChipSize, const void *aPage, s32 aChipsPerPage,
+                       s32 aAllocCount, const void *aNextFree);
+#endif
 
 /* Promote the next page on the partial list to current; an empty list clears it. */
 void sdfChipAllocNextPage(sdfChipCB_tag *aCB)
@@ -54,6 +61,10 @@ sdfChip_t *sdfChipAllocGetFree(sdfChipCB_tag *aCB, sdfChipPageInfo_tag *aPageInf
 
     aPageInfo->allocCount++;
     aPageInfo->freeLink = chip->nextFree;
+#ifdef NON_MATCHING
+    sdfxDevChipPopped(chip, aCB->chipSize, aPageInfo->page, aCB->chipsPerPage,
+                      aPageInfo->allocCount, aPageInfo->freeLink);
+#endif
     if (aPageInfo->allocCount == aCB->chipsPerPage) {
         sdfChipAllocNextPage(aCB);
     }
@@ -72,6 +83,9 @@ sdfChip_t *sdfChipAllocPageGrow(sdfChipCB_tag *aCB, sdfChipPageInfo_tag *aPageIn
     aPageInfo->allocCount = allocCount;
     chip = (sdfChip_t *)((u8 *)aPageInfo->page + (chipsPerPage - growLeft) * aCB->chipSize);
     aPageInfo->growLeft = growLeft - 1;
+#ifdef NON_MATCHING
+    sdfxDevChipGrown(chip, aCB->chipSize);
+#endif
     if (aPageInfo->growLeft == 0) {
         aPageInfo->alloc = (void *)sdfChipAllocGetFree;
         if ((s16)allocCount == chipsPerPage) {
@@ -170,6 +184,9 @@ void sdfChipFreeDirect(void *aPtr)
         }
         chip->nextFree = page->freeLink;
         page->freeLink = chip;
+#ifdef NON_MATCHING
+        sdfxDevChipFreed(chip, cb->chipSize);
+#endif
     }
     if (intrEnabled != 0) {
         EIntr();
