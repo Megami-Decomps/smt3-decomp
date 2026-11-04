@@ -73,6 +73,8 @@ void nbSetTarSelJyokyoTime(s32 time)
     GetTarSelProcessData()->statusTime = SDF_FRAMES(time);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 4 of 4 PCSX2 call vectors
+ * give the same memory, floats bit-exact, battle savestate (sdfport a1f0fdd, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void AnimeTargetCursor(nbTarSelProcessData_t *process)
 {
@@ -394,6 +396,9 @@ selection_done:
     }
 }
 
+/* NON_MATCHING. Behaviour checked against retail only on the path that writes
+ * nothing: 4 of 4 PCSX2 call vectors, none of which changed memory, battle
+ * savestate (sdfport a1f0fdd, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void OnOffTargetCursor(nbTarSelProcessData_t *process)
 {
