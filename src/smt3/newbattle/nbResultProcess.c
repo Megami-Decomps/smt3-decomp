@@ -3,6 +3,9 @@
 #include "nb.h"
 #include "effBattle.h"
 #include "font.h"
+#include "sdfFrame.h"
+
+extern u32 dds3GetKernelCount(void);
 
 /* Four native 0x34-byte rows; member names follow typeNbResultWork. */
 typedef struct nbResultScore_t {
@@ -262,7 +265,9 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
     if (nbResultScoreTable[scoreIndex].stopcnt > 0) {
-        nbResultScoreTable[scoreIndex].stopcnt--;
+        if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+            nbResultScoreTable[scoreIndex].stopcnt--;
+        }
     }
     if (frame > 0) {
         if (frame < 8) {
@@ -516,7 +521,9 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
     s32 py;
 
     D_00551100 = D_00551100 + 0.099999995f;
-    nbResultTimer++;
+    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        nbResultTimer++;
+    }
     nbPnl_setOt(0x47);
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);

@@ -6,6 +6,9 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "font.h"
+#include "sdfFrame.h"
+
+extern u32 dds3GetKernelCount(void);
 
 typedef struct evtUnitHandle_t
 {
@@ -459,7 +462,9 @@ void nbMakaStep(nbMakaProcessData_t *w)
         return;
     case 2:
         if (w->offtime > 0) {
-            w->offtime--;
+            if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                w->offtime--;
+            }
             return;
         }
         if (w->alpha > 0) {

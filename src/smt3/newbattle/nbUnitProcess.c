@@ -7,6 +7,9 @@
 #include "event.h"
 #include "motion.h"
 #include "field.h"
+#include "sdfFrame.h"
+
+extern u32 dds3GetKernelCount(void);
 
 extern void Mult(void);
 
@@ -1434,7 +1437,9 @@ void *nbUnitProcess2(dds3ProcessID_t *id)
                     form->basic->poseset->flag = (form->basic->poseset->flag | 1) & ~2;
                 }
             }
-            form->time++;
+            if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                form->time++;
+            }
         }
     }
     return NULL;
