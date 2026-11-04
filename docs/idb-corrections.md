@@ -1442,3 +1442,8 @@ The guarded file-manager declaration of `EIntr` now agrees with its `s32` provid
 | `D_0053F3C8`, `D_0053F3D8`, `D_0053F3E8`, `D_0054FD98`, `D_0054FDA0` | `movieDrawProcName`, `movieManProcName`, `movieDirPath`, `movieExtIpu`, `movieExtIps` | bytes `movieDraw`, `movieMan`, `pfs0:/movie`, `.ipu`, `.ips` in `mviManager.c` |
 | `D_0054A360`, `D_0054A380` | `sdfIopModulePathCdrom`, `sdfIopModulePathHost` | bytes `cdrom0:\USERIRX\SDFIOPFL.IRX;1` and `pfs0:/userirx/sdfiopfl.irx`, tried in turn by the `sdfTmx.c` IOP loader |
 | `D_00343E40`, `D_00343BE8` | `movieCb`, `movieEntryTable` | the `sdfMovieCb_t` that `mviManager.c` opens, closes and queries; `dds3MovieEntry_t` rows indexed by `dds3PlayMovieByIndex` |
+| `D_00549A48`, `D_00549A60` | `sdfSndIopSizeMsg`, `sdfSndSeqMapInitMsg` | bytes `SDF_SND_IOP_SIZE` and `sdfSndSeqMapInit` in `sdfSound.c` |
+| `D_00549B50`, `D_00549B70`, `D_00549B88`, `D_00549BB0` | `sdfDmaDumpStartFmt`, `sdfDmaNotQwordFmt`, `sdfDmaTagLineFmt`, `sdfDmaNestOverflowMsg` | the DMA chain dump printf formats and nest overflow message |
+| `D_0054A088`, `D_0054A100`, `D_00551B40` | `sdfGsMemInfoTitle`, `sdfGsMemNodeFmt`, `sdfGsMemTypeFmt` | the GS memory information dump title and row formats |
+| `D_00551A20`, `D_00551A40` | `sdfDumpAddrFmt`, `sdfDumpByteFmt` | the `%08X : ` and `%02X` formats of the memory dump |
+| `D_00551A58`, `D_00551A60` | `sdfVifMaskedName`, `sdfVifXferOkName` | bytes `mask` and `xfer-ok`, the `%s` of the `VIF MSKPATH3` printf |
