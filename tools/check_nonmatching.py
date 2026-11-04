@@ -129,24 +129,35 @@ def symbol_extents() -> list[tuple[int, int]]:
     return extents
 
 
-ALIASED = re.compile(r"(?:SYMBOL_AT\(\s*[\w ]+?\s*,|INCLUDE_\w+\([^)]*,|#\s*define)\s*(D_[0-9A-F]{8})\b")
+ASM_STRING = re.compile(r'"(?:\\.|[^"\\])*"')
+DATA_NAME = re.compile(r"\bD_[0-9A-F]{8}\b")
+ASM_DEFINITION = re.compile(
+    r"^\s*(?:([.$A-Za-z_][.$A-Za-z_0-9]*)\s*(?::|=)|"
+    r"\.(?:comm|lcomm|equ|equiv|eqv|set)\s+([.$A-Za-z_][.$A-Za-z_0-9]*)\s*,)")
+ASM_DECLARATION = re.compile(r"^\s*\.(?:globl|global|weak|local|extern)\b")
 
 
 def undefined_data(asm: str, extents: list[tuple[int, int]], source: str = "") -> list[str]:
-    """D_ names the unit references that no symbol starts at but a sized one covers.
+    """Unresolved D_ operands covered by a sized symbol rather than starting one.
 
-    A consumer defines a label at every address symbol_addrs leaves uncovered.
-    A label inside a sized symbol is swallowed, so the extern has no definition.
-    Compiling to assembly never notices, because an extern is a promise.
+    Exempt only definitions in the active compiler output, including SYMBOL_AT
+    and SYMBOL_AT_REGION assignments. Source comments and disabled branches
+    cannot prove a definition. The source argument is retained for callers.
     """
-    used = set()
+    used, defined = set(), set()
     for line in asm.splitlines():
-        if SKIP_ASM_WORDS.match(line) or line.lstrip().startswith("#"):
+        # A symbol-looking string or comment is data, not a relocation.
+        line = ASM_STRING.sub('""', line).split("#", 1)[0]
+        definition = ASM_DEFINITION.match(line)
+        if definition:
+            defined.add(next(n for n in definition.groups() if n))
+            # Include assignment RHS operands, even for a .set directive.
+            line = line[definition.end():]
+        elif SKIP_ASM_WORDS.match(line) or ASM_DECLARATION.match(line):
             continue
-        used.update(re.findall(r"\bD_[0-9A-F]{8}\b", line))
+        used.update(DATA_NAME.findall(line))
     starts = {a for a, _ in extents}
-    used -= set(ALIASED.findall(source))
-    return sorted(n for n in used
+    return sorted(n for n in used - defined
                   if (a := int(n[2:], 16)) not in starts
                   and any(s < a < s + z for s, z in extents))
 

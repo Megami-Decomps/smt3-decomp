@@ -27,7 +27,41 @@ class SwallowedLabels(unittest.TestCase):
 
     def test_symbol_at_alias_is_not(self):
         src = "SYMBOL_AT(sdfGrOt_t, D_00000010, owner, 0x8);"
-        self.assertEqual(cn.undefined_data(self.asm, [(0x8, 0x20)], src), [])
+        self.assertEqual(cn.undefined_data("D_00000010 = owner + 0x8\n" + self.asm, [(0x8, 0x20)], src), [])
+
+
+class ActiveAssembly(unittest.TestCase):
+    extent = [(8, 32)]
+    use = '\tlw $2,%lo(D_00000010)($3)\n'
+    def missing(self, asm=None, source=''):
+        return cn.undefined_data(self.use if asm is None else asm, self.extent, source)
+    def test_real_reference_remains_rejected(self):
+        self.assertEqual(self.missing(), ['D_00000010'])
+    def test_comment_cannot_define_alias(self):
+        self.assertEqual(self.missing(source='/* SYMBOL_AT(int, D_00000010, owner, 8); */'), ['D_00000010'])
+    def test_disabled_define_cannot_define_alias(self):
+        self.assertEqual(self.missing(source='#if 0\n#define D_00000010 owner\n#endif'), ['D_00000010'])
+    def test_dropped_include_cannot_define_symbol(self):
+        self.assertEqual(self.missing(source='INCLUDE_RODATA(int, "u", D_00000010);'), ['D_00000010'])
+    def test_active_assignment_needs_no_source_exception(self):
+        self.assertEqual(self.missing('D_00000010 = owner + 8\n' + self.use), [])
+    def test_local_label_is_definition(self):
+        self.assertEqual(self.missing('D_00000010:\n.word 0\n' + self.use), [])
+    def test_common_is_definition(self):
+        for directive in ['comm','lcomm']:
+            self.assertEqual(self.missing('.'+directive+' D_00000010,4,4\n'+self.use), [])
+    def test_literal_and_comments_are_not_references(self):
+        self.assertEqual(self.missing('.ascii "D_00000010\\\\\\\" # data"\n# D_00000010\n'), [])
+    def test_declarations_are_not_references_or_definitions(self):
+        for directive in ['globl','global','weak','local','extern']:
+            prefix='.'+directive+' D_00000010\n'
+            self.assertEqual(self.missing(prefix), [])
+            self.assertEqual(self.missing(prefix+self.use), ['D_00000010'])
+    def test_alias_rhs_still_checked(self):
+        for assignment in ['D_00000020 = D_00000010 + 8', '.set D_00000020,D_00000010+8', '.equ D_00000020,D_00000010+8', '.set other,D_00000010+8']:
+            self.assertEqual(self.missing(assignment), ['D_00000010'])
+    def test_words_keep_reference(self):
+        self.assertEqual(self.missing('.word D_00000010\n'), ['D_00000010'])
 
 
 class CompilerFailures(unittest.TestCase):

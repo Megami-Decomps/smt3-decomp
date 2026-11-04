@@ -4134,6 +4134,8 @@ INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_005455B8);
 
 INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugUnitLabelTable);
 
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545618);
+
 INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545658);
 
 INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545668);
