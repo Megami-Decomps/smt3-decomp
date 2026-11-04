@@ -102,7 +102,7 @@ s32 sdfFileCmdFree(void *aHandle);
 void sdfFileCmdThreadSetHiPrio(void);
 #ifdef NON_MATCHING
 s32 DIntr(void);
-void EIntr(void);
+s32 EIntr(void);
 #endif
 s32 sdfPrintf(const char *str, ...);
 void *memset(void *a, s32 b, size_t c);

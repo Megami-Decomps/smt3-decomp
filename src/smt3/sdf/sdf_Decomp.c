@@ -2,7 +2,6 @@
 #include "ps2asm.h"
 #include "sdf_types.h"
 #include "eeregs.h"
-#include "draw3d.h"
 
 /* Declared here because no header carries these. */
 extern void *memset(void *a, s32 b, size_t c);
@@ -45,7 +44,9 @@ void MultMatrixRev(const void *aMatrix);
 
 extern const u8 *D_00594780[16];
 
-extern sdf3DScreenParam_t sdf3DScreenParam;
+/* sdf3DScreenParam + 0x70: the scale and trans rows. */
+/* Shared byte-storage view: the local screen structs are not compatible C types. */
+extern u8 sdf3DScreenParam[];
 
 extern u8 sdf3DScreenTm[];
 
@@ -258,7 +259,7 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
 
     packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrOpenPacketBuff());
     cursor = (u128 *)(packet + 1);
-    viewport = (f32 (*)[4])&sdf3DScreenParam.scale;
+    viewport = (f32 (*)[4])(sdf3DScreenParam + 0x70);
     VU0_LOAD_VF14(viewport);
     VU0_LOAD_VF15_AT16(viewport);
     emitted = 0;
