@@ -43,6 +43,20 @@
 #define SDF_FRAME_DUE(age) 1
 #endif
 
+/* Brackets the reads of positions recorded once per retail tick by parts
+ * that follow a moving mark: pos is the mark at the last retail tick and
+ * posOld the one before. A host running more ticks than retail may move the
+ * followers between retail ticks, reading the mark itself from root's node
+ * mark, and must put pos and posOld back at END so the next record still
+ * spans one retail tick. Retail reads the recorded positions, so both expand
+ * to nothing. */
+#ifndef SDF_FRAME_FOLLOW_BEGIN
+#define SDF_FRAME_FOLLOW_BEGIN(age, pos, posOld, root, mark)
+#endif
+#ifndef SDF_FRAME_FOLLOW_END
+#define SDF_FRAME_FOLLOW_END(pos, posOld)
+#endif
+
 /* Storage for a tick count. A host may widen one only where C defines the
  * storage: a symbol the data sections define keeps its retail width. */
 #ifndef SDF_FRAME_U8
