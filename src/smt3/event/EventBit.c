@@ -63,18 +63,25 @@ void evtBitAllOff_FieldDebug(void) {
     } while (i < 0x1000);
 }
 
+/* BUG: the shift count is the whole flag number; the EE masks it to 5 bits, C does not. */
+#ifdef FIX_BUGS
+#define BIT_SHIFT(no) ((no) & 31)
+#else
+#define BIT_SHIFT(no) (no)
+#endif
+
 /* Signed flag indices need a bias before arithmetic right shift divides by 32. */
 void evtBitOn(s32 no) {
     s32 adjustedFlag = (no < 0) ? no + 0x1f : no;
-    DDS3_GBWK->EventBit[adjustedFlag >> 5] |= 1 << no;
+    DDS3_GBWK->EventBit[adjustedFlag >> 5] |= 1 << BIT_SHIFT(no);
 }
 
 void evtBitOff(s32 no) {
     s32 adjustedFlag = (no < 0) ? no + 0x1f : no;
-    DDS3_GBWK->EventBit[adjustedFlag >> 5] &= ~(1 << no);
+    DDS3_GBWK->EventBit[adjustedFlag >> 5] &= ~(1 << BIT_SHIFT(no));
 }
 
 s32 evtBitCheck(s32 no) {
     s32 adjustedFlag = (no < 0) ? no + 0x1f : no;
-    return (((s32)DDS3_GBWK->EventBit[adjustedFlag >> 5] >> no) & 1);
+    return (((s32)DDS3_GBWK->EventBit[adjustedFlag >> 5] >> BIT_SHIFT(no)) & 1);
 }

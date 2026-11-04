@@ -1612,8 +1612,12 @@ void dds3Particle_RadiateBuffInit(dds3Particle_Radiate_t3 *pRadiate, u32 number)
         f32 lifetimeFrames = pRadiate->head.lifetimeFrames;
 
         scale = pRadiate->stepLength;
-        /* Native quirk: period was assigned only in mode zero and is still zero here. */
+#ifdef FIX_BUGS
+        /* BUG: period is still zero here, so the modulo is a divide by zero (a trap on the EE). */
+        angle = 0.0f;
+#else
         angle = (3.14159265f * 2.0f) / period * (number % period);
+#endif
         scale *= lifetimeFrames;
         angle += pRadiate->rotationStepDegrees * (3.14159265f / 180.0f) * lifetimeFrames;
         packet->vel[0] = sdfCos(angle);
