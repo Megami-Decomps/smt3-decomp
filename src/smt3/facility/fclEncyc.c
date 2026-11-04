@@ -13,6 +13,8 @@
 #include "kernel_draw.h"
 #include "sdfFrame.h"
 
+extern u32 dds3GetKernelCount(void);
+
 typedef struct
 {
     /* 0x0000 */ u8 ListNums;
@@ -2814,23 +2816,26 @@ void ControlModel(fclEncyc_instance_tag *pinst, mdlObj_t *model, s32 key)
     pinst->camera[0].z = -sdfCos(work->phase.cameraAngle) * work->phase.cameraRadius + pinst->camera[1].z;
 
     mdlGetPosition(model);
-    if ((key & 0x20) != 0 && work->viewOffsetX > work->positionMinX) {
-        SDF_VU0_LOADVECTOR_B(D_00332310);
-        SDF_VU0_SUBVECTOR();
-        work->viewOffsetX--;
-    } else if ((key & 0x40) != 0 && work->viewOffsetX < work->positionMaxX) {
-        SDF_VU0_LOADVECTOR_B(D_00332310);
-        SDF_VU0_ADDVECTOR();
-        work->viewOffsetX++;
-    }
-    if ((key & 0x80) != 0 && work->viewOffsetY > work->positionMinY) {
-        SDF_VU0_LOADVECTOR_B(D_00332320);
-        SDF_VU0_SUBVECTOR();
-        work->viewOffsetY--;
-    } else if ((key & 0x100) != 0 && work->viewOffsetY < work->positionMaxY) {
-        SDF_VU0_LOADVECTOR_B(D_00332320);
-        SDF_VU0_ADDVECTOR();
-        work->viewOffsetY++;
+    /* A held key pans one unit per retail tick. */
+    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        if ((key & 0x20) != 0 && work->viewOffsetX > work->positionMinX) {
+            SDF_VU0_LOADVECTOR_B(D_00332310);
+            SDF_VU0_SUBVECTOR();
+            work->viewOffsetX--;
+        } else if ((key & 0x40) != 0 && work->viewOffsetX < work->positionMaxX) {
+            SDF_VU0_LOADVECTOR_B(D_00332310);
+            SDF_VU0_ADDVECTOR();
+            work->viewOffsetX++;
+        }
+        if ((key & 0x80) != 0 && work->viewOffsetY > work->positionMinY) {
+            SDF_VU0_LOADVECTOR_B(D_00332320);
+            SDF_VU0_SUBVECTOR();
+            work->viewOffsetY--;
+        } else if ((key & 0x100) != 0 && work->viewOffsetY < work->positionMaxY) {
+            SDF_VU0_LOADVECTOR_B(D_00332320);
+            SDF_VU0_ADDVECTOR();
+            work->viewOffsetY++;
+        }
     }
     mdlSetPosition(model);
 }
