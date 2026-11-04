@@ -40,7 +40,6 @@ typedef struct
 } nbCameraHelper_effFLWinHandle_t;
 
 extern s8 dds3PadBitTable[];
-extern s8 D_005298CB[];
 extern char D_0054F268[];
 extern sdfGrOt_t sdfGrOtTable[];
 extern void *sdfChipAllocDirect(u32 aSize);
@@ -262,7 +261,7 @@ s32 dds3EffectFileListWindowDraw(nbCameraHelper_effFLWinHandle_t *a) {
     if (a->repeatDelay != 0) {
         a->repeatDelay--;
     } else if (a->firstVisibleEntry == NULL) {
-        if (D_005298CB[0] < 0) {
+        if (dds3PadBitTable[3] < 0) {
             a->result = 2;
         }
     } else if (a->result == 0) {

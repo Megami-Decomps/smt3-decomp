@@ -95,7 +95,7 @@ extern effDebugMenu_t D_003203E0;
 extern void *memcpy(void *, const void *, size_t);
 extern void effDebugAllocDrawTag(void);
 extern void effDebugLinkDrawTag(void);
-extern s8 D_005298CB[];
+extern s8 dds3PadBitTable[];
 extern effScreenDrawParams_t D_003202C8;
 extern s8 mblurDone;
 extern effDebugMenu_t mblurDebugMenu;
@@ -516,7 +516,7 @@ s32 func_001AD6E8(void) {
         effDebugDrawMenu(&D_003203E0);
         effDebugLinkDrawTag();
     }
-    if (D_005298CB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         D_0054F2C5 = 0;
     }
     return D_0054F2C5;
@@ -557,7 +557,7 @@ s32 mblurProcess(void) {
         effDebugDrawMenu(&mblurDebugMenu);
         effDebugLinkDrawTag();
     }
-    if (D_005298CB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         mblurDone = 0;
     }
     return mblurDone;
@@ -597,7 +597,7 @@ s32 dblurProcess(void) {
         effDebugDrawMenu(&dblurDebugMenu);
         effDebugLinkDrawTag();
     }
-    if (D_005298CB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         dblurDone = 0;
     }
     return dblurDone;
@@ -637,7 +637,7 @@ s32 evtViewerCheckDirty(void) {
         effDebugDrawMenu(&filterDebugMenu);
         effDebugLinkDrawTag();
     }
-    if (D_005298CB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         evtViewerDirty = 0;
     }
     return evtViewerDirty;
@@ -677,7 +677,7 @@ s32 mfilterRun(void) {
         effDebugDrawMenu(&mfilterDebugMenu);
         effDebugLinkDrawTag();
     }
-    if (D_005298CB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         mfilterDone = 0;
     }
     return mfilterDone;
@@ -717,7 +717,7 @@ s32 rblurProcess(void) {
         effDebugDrawMenu(&rblurDebugMenu);
         effDebugLinkDrawTag();
     }
-    if (D_005298CB[0] < 0) {
+    if (dds3PadBitTable[3] < 0) {
         rblurDone = 0;
     }
     return rblurDone;

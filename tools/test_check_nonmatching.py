@@ -55,6 +55,17 @@ class CompilerFailures(unittest.TestCase):
         self.assertEqual(self.irx_result(0, "unit.c:3: warning: unused variable\n"), 0)
 
 
+class FixBugsControl(unittest.TestCase):
+    def test_control_passes_with_the_real_compiler(self):
+        cn.control()
+
+    def test_known_failure_hides_only_its_own_diagnostic(self):
+        known = {"a.c": ["implicit declaration"]}
+        err = "a.c:1: implicit declaration of function `f'\na.c:2: parse error"
+        self.assertEqual(cn.unexplained("a.c", err, known), ["a.c:2: parse error"])
+        self.assertEqual(cn.unexplained("b.c", err, known), err.split("\n"))
+
+
 class DraftNames(unittest.TestCase):
     def test_nested_fix_bugs_does_not_hide_outer_fallback(self) -> None:
         text = ('#ifdef NON_MATCHING\nvoid a(void) {\n'

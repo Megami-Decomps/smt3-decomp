@@ -1,0 +1,4 @@
+# unit<TAB>diagnostic substring: tolerated by tools/check_nonmatching.py.
+# The matching build calls these without a prototype, and adding one could change codegen.
+src/smt3/event/evtCommand.c	implicit declaration of function
+src/smt3/sdk/libgcc.c	implicit declaration of function
