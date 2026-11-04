@@ -43,6 +43,17 @@
 #define SDF_FRAME_DUE(age) 1
 #endif
 
+/* Runs one statement on the first host tick of each retail tick. */
+#ifndef SDF_FRAME_WHEN
+#define SDF_FRAME_WHEN(age, stmt) stmt
+#endif
+
+/* The bits of a key mask, read only on the first host tick of each retail
+ * tick, so a held key repeats at the retail rate. */
+#ifndef SDF_FRAME_MASK
+#define SDF_FRAME_MASK(age, bits) (bits)
+#endif
+
 /* Brackets the reads of positions recorded once per retail tick by parts
  * that follow a moving mark: pos is the mark at the last retail tick and
  * posOld the one before. A host running more ticks than retail may move the

@@ -5279,11 +5279,9 @@ void effPCPAgiFireballDraw(effPCPAgiFireball_tag *work) {
     dds3EffectPartSetColor(work->headHandle, color);
     mdlLink(model, D_002F69B8);
     /* pos and pos_old hold the last two retail ticks' marks, so the trail segment spans one tick. */
-    if (SDF_FRAME_DUE(work->frame)) {
-        SDF_VU0_COPYVECTOR(work->pos_old, work->pos);
-        sdfModelGetMarkPos(model->modelRoot, 1);
-        SDF_VU0_STOREVECTOR(work->pos);
-    }
+    SDF_FRAME_WHEN(work->frame, SDF_VU0_COPYVECTOR(work->pos_old, work->pos));
+    SDF_FRAME_WHEN(work->frame, sdfModelGetMarkPos(model->modelRoot, 1));
+    SDF_FRAME_WHEN(work->frame, SDF_VU0_STOREVECTOR(work->pos));
     SDF_FRAME_FOLLOW_BEGIN(work->frame, work->pos, work->pos_old, model->modelRoot, 1);
     if (frame < count && frame > 0) {
         for (i = 0; i < 5; i++) {
