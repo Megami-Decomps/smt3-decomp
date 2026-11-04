@@ -498,6 +498,9 @@ void dds3BillboardLinkOt(void) {
     dds3BillboardTag = NULL;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * f045_1, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern f32 D_00317060[4];
 extern f32 dds3MultiBillboardTagParam[4];
@@ -745,6 +748,12 @@ billHandle_t *dds3Billboard_P2ACreate(void *resourceData) {
     if (resourceData != NULL) {
         data = dds3BillAnimLoadP2A(resourceData);
     }
+    /* BUG: a NULL resourceData leaves data NULL and retail reads AnimNum through it. */
+#ifdef FIX_BUGS
+    if (data == NULL) {
+        return NULL;
+    }
+#endif
     n = data->AnimNum;
     newobj = sdfChipAllocDirect(n * 20 + 0x6C);
     newobj->u.animationData = data;

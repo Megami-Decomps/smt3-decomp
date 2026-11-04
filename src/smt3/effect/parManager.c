@@ -3378,11 +3378,9 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
             if (kind != 0) {
                 u32 color;
 
-                if (SDF_FRAME_DUE(age)) {
-                    history->points[history->point][0] = packet->radialOffset[0];
-                    history->points[history->point][1] = packet->radialOffset[1];
-                    history->points[history->point][2] = packet->radialOffset[2];
-                }
+                SDF_FRAME_WHEN(age, history->points[history->point][0] = packet->radialOffset[0]);
+                SDF_FRAME_WHEN(age, history->points[history->point][1] = packet->radialOffset[1]);
+                SDF_FRAME_WHEN(age, history->points[history->point][2] = packet->radialOffset[2]);
                 color = (packet->color & 0xFF000000) | (hData->head.abgr & 0xFFFFFF);
                 history->point += SDF_FRAME_DUE(age);
                 if ((u32)history->point >= capacity) {
@@ -3569,16 +3567,14 @@ void dds3Particle_BlurSet(dds3Particle_BlurBuff_t *table, s32 slotIndex, u32 col
     u128 *point = slot->pPos + last;
     s32 i;
 
-    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
-        for (i = 0; i < last; i++) {
-            point--;
-            SDF_VU0_COPYVECTOR(point + 1, point);
-        }
-        if (slot->count <= last) {
-            slot->count++;
-        }
-        SDF_VU0_STOREVECTOR_C(point);
+    for (i = 0; i < last * SDF_FRAME_DUE(dds3GetKernelCount()); i++) {
+        point--;
+        SDF_VU0_COPYVECTOR(point + 1, point);
     }
+    if (slot->count <= last) {
+        slot->count += SDF_FRAME_DUE(dds3GetKernelCount());
+    }
+    SDF_FRAME_WHEN(dds3GetKernelCount(), SDF_VU0_STOREVECTOR_C(point));
     slot->abgr = color;
     slot->scale = billboardScale;
 }

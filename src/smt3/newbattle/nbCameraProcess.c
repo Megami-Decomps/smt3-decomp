@@ -434,9 +434,9 @@ void nbCameraCheckStateChange(void)
     }
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * battle unknown realm savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
+/* NON_MATCHING. Checked against retail with PCSX2 call vectors: 12 match and 5 differ in a byte, battle_0_1, capture_006.
+ * The differing bytes are float or packet low digits, the fldNpcCalc pattern (sdfport 73e010f, tools/funcvec,
+ * tests/funcvec.sh), unconfirmed. */
 #ifdef NON_MATCHING
 #include "sdk_libc.h"
 

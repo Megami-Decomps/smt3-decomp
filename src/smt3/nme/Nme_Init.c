@@ -87,6 +87,9 @@ s8 nmeGetModeFlag(nmeWork_t *work) {
 
 extern const char *D_005276C8[];
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq41, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void nmeInitNameRow(s8 mode, s32 rowValue, void *data)
 {
@@ -293,6 +296,9 @@ nmeWork_t *nmeLoadFont(s8 target, s8 mode, s32 parent)
     return work;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * seq41, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern dds3GlobalWork_t *volatile nmeFontGlobalWork FAKEMATCH_ASM_NAME("DDS3_GBWK");
 

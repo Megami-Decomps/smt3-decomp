@@ -279,6 +279,9 @@ void rstInitWorkStock(s8 IkenieChk)
 extern s32 datGetDevilSlotState(u8 devilId);
 
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void rstCreateBeforeSkillList(s8 heartsId, datUnitWork_t *stock, s8 levelOffset,
                               rstSkillInfo_t *info)
@@ -1220,6 +1223,9 @@ s32 datGetDevilRace(s8 index)
 extern void *memset(void *dst, s32 value, size_t size);
 extern s8 datCountPlayerLND(void);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 datGetPlayerLNDList(u8 *outCount)
 {
@@ -1371,6 +1377,9 @@ s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra)
 
 extern s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 cmbGetHeartsParamEx(s8 devilId, s8 index, s32 registered)
 {
@@ -1505,6 +1514,9 @@ u16 rstCheckHeartsSlot(u8 id, datUnitWork_t *unit)
 extern void cmbClearUnitSkills(datUnitWork_t *unit);
 
 
+/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
+ * seq26, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmbInitStockUnit(u16 id, datUnitWork_t *unit)
 {

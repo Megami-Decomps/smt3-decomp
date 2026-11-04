@@ -1558,9 +1558,9 @@ void nbPanelPressGaugeEncountHide(void)
 /* NON_MATCHING: the remaining differences include a spilled fade color,
  * table-address lifetimes and instruction scheduling. */
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * battle unknown realm savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
+/* NON_MATCHING. Checked against retail with PCSX2 call vectors: 17 match and 1 differ in a byte, capture_010.
+ * The differing bytes are float or packet low digits, the fldNpcCalc pattern (sdfport 73e010f, tools/funcvec,
+ * tests/funcvec.sh), unconfirmed. */
 #ifdef NON_MATCHING
 extern void nbPanelPressTurnGaugeAnimStart(void);
 extern s32 nbPanelPressTurnGaugeRun(void);
@@ -2044,9 +2044,9 @@ void nbPanelPressTurnGaugeAnimStart2(void)
     nbPanelPTAOnly = 1;
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * battle unknown realm savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
+/* NON_MATCHING. Checked against retail with PCSX2 call vectors: 14 match and 4 differ in a byte, capture_006, capture_015.
+ * The differing bytes are float or packet low digits, the fldNpcCalc pattern (sdfport 73e010f, tools/funcvec,
+ * tests/funcvec.sh), unconfirmed. */
 #ifdef NON_MATCHING
 extern nbPanelProcess_nbPanelXYZ_t nbPanelPTPartList[], nbPressTurnTable[], D_004F000C[];
 extern s32 D_004F0180[], D_004F0190[];
@@ -3776,9 +3776,9 @@ INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPartyDraw);
  * after nbPanelStockCheckRun, which turns into bne once nbPanelPartyDraw is a
  * visible C definition in this unit. */
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * battle unknown realm savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
+/* NON_MATCHING. Checked against retail with PCSX2 call vectors: 13 match and 4 differ in a byte, battle_0_1, capture_006.
+ * The differing bytes are float or packet low digits, the fldNpcCalc pattern (sdfport 73e010f, tools/funcvec,
+ * tests/funcvec.sh), unconfirmed. */
 #ifdef NON_MATCHING
 
 s32 nbPanelDrawProcess(void)

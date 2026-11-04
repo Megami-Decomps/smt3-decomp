@@ -1752,6 +1752,9 @@ f32 nbMakeUnitMoveGetCyDist(nbFormation_t *i_form, nbFormation_t *t_form)
     return result;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern void nbMakeUnitMatrix(nbFormation_t *form);
 extern f32 nbCameraGetBossDistance(void);
