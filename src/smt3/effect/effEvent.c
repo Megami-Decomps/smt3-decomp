@@ -5,6 +5,7 @@
 #include "model.h"
 #include "ps2asm.h"
 #include "effDebug.h"
+#include "sdfFrame.h"
 
 typedef struct effEveBEDParams_t {
     f32 center[4];
@@ -806,7 +807,7 @@ void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
         remaining = count;
         works = cut->parameterWorks;
         do {
-            if (entry->timing < frame) {
+            if (SDF_FRAMES(entry->timing) < frame) {
                 if (works[0] != NULL) {
                     u8 kind = entry->pos_ptr.scaleKind;
                     FAKEMATCH_ASM_REG(u32, markKind, "$2") = 5;
@@ -836,7 +837,7 @@ void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
             entry++;
         } while (remaining != 0);
     }
-    if (cut->triggerFrame == frame && cut->triggerFrameCallback != NULL) {
+    if (SDF_FRAMES(cut->triggerFrame) == frame && cut->triggerFrameCallback != NULL) {
         cut->triggerFrameCallback(cut);
     }
     cut->currentFrame++;
@@ -1041,8 +1042,8 @@ void effEVECombParSmokePartInit(effEVECombParSmoke_t *pCombParSmoke, s32 index) 
     s32 startDelaySpread = pCombParSmoke->head.wait;
     s32 motionDelaySpread = pCombParSmoke->head.motionDelaySpread;
 
-    particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % startDelaySpread);
-    particle->wait = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % motionDelaySpread);
+    particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % startDelaySpread);
+    particle->wait = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % motionDelaySpread);
     scaleFactor = dds3GetRandFloatA(dds3EffectBase) * pCombParSmoke->head.scaleRandomness + (1.0f - pCombParSmoke->head.scaleRandomness);
     particle->scale = pCombParSmoke->head.baseScale * scaleFactor;
     particle->s_w_r = dds3GetRandFloatA(dds3EffectBase) * (EFF_EVENT_HALF_TURN * 2.0f);
@@ -1114,16 +1115,16 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(side);
-    growth = work->head.accelerationPercent / 100.0f + 1.0f;
+    growth = SDF_FRAME_DECAY(work->head.accelerationPercent / 100.0f + 1.0f);
     particle = work->pPart;
     count = work->head.number;
     repeat = work->head.repeat;
-    duration = work->head.duration;
-    fadeIn = work->head.fade_in;
-    fadeOut = work->head.fade_out;
+    duration = SDF_FRAMES(work->head.duration);
+    fadeIn = SDF_FRAMES(work->head.fade_in);
+    fadeOut = SDF_FRAMES(work->head.fade_out);
     color = work->head.color;
-    swayPhaseStep = work->head.swayPhaseStep;
-    swayAmplitudeStep = work->head.swayAmplitudeStep;
+    swayPhaseStep = SDF_FRAME_STEP(work->head.swayPhaseStep);
+    swayAmplitudeStep = SDF_FRAME_STEP(work->head.swayAmplitudeStep);
     SDF_VU0_COPYVECTOR(origin, work);
     i = 0;
     dds3BillboardSetMode(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), work->head.drawMode);
@@ -1135,12 +1136,12 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
         }
         if (age > 0 && age <= duration) {
             if (particle->wait >= 0) {
-                drift = particle->shift_s;
+                drift = SDF_FRAME_STEP(particle->shift_s);
                 particle->pos[0] += side[0] * drift;
                 particle->pos[1] += side[1] * drift;
                 particle->pos[2] += side[2] * drift;
                 wave = particle->amplitude * sdfSin(particle->angle);
-                particle->motion[1] += particle->up_s;
+                particle->motion[1] += SDF_FRAME_STEP(particle->up_s);
                 offset[0] = particle->pos[0] + particle->motion[0] * wave;
                 offset[1] = particle->pos[1] + particle->motion[1];
                 offset[2] = particle->pos[2] + particle->motion[2] * wave;
@@ -1182,9 +1183,9 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
             dds3BillboardSetRGBA(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), rgba);
             dds3BillboardSetRotate(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), particle->roll);
             dds3BillboardDraw(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex));
-            particle->s_w_r += particle->scalePhaseStepX;
-            particle->s_h_r += particle->scalePhaseStepY;
-            particle->roll += particle->roll_s;
+            particle->s_w_r += SDF_FRAME_STEP(particle->scalePhaseStepX);
+            particle->s_h_r += SDF_FRAME_STEP(particle->scalePhaseStepY);
+            particle->roll += SDF_FRAME_STEP(particle->roll_s);
         }
         if (duration == age && repeat != 0) {
             particle->frame = 0;
@@ -1276,16 +1277,16 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
     SDF_VU0_STOREVECTOR(lateral);
     particle = work->pPart;
     particleCount = work->head.number;
-    acceleration = work->head.accelerationPercent / 100.0f + 1.0f;
+    acceleration = SDF_FRAME_DECAY(work->head.accelerationPercent / 100.0f + 1.0f);
     repeat = work->head.repeat;
-    duration = work->head.duration;
-    fadeIn = work->head.fade_in;
-    fadeOut = work->head.fade_out;
-    colorStart = work->head.colorStartAge;
-    colorFrames = work->head.colorTransitionFrames;
+    duration = SDF_FRAMES(work->head.duration);
+    fadeIn = SDF_FRAMES(work->head.fade_in);
+    fadeOut = SDF_FRAMES(work->head.fade_out);
+    colorStart = SDF_FRAMES(work->head.colorStartAge);
+    colorFrames = SDF_FRAMES(work->head.colorTransitionFrames);
     color = work->head.color;
-    swayPhaseStep = work->head.swayPhaseStep;
-    swayAmplitudeStep = work->head.swayAmplitudeStep;
+    swayPhaseStep = SDF_FRAME_STEP(work->head.swayPhaseStep);
+    swayAmplitudeStep = SDF_FRAME_STEP(work->head.swayAmplitudeStep);
     SDF_VU0_COPYVECTOR(origin, work->head.position);
     for (index = 0; index < particleCount; index++, particle++) {
         s32 age = particle->frame;
@@ -1300,13 +1301,13 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
             s32 slot;
             s16 u, v;
             if (particle->wait >= 0) {
-                f32 lateralSpeed = particle->shift_s;
+                f32 lateralSpeed = SDF_FRAME_STEP(particle->shift_s);
                 particle->pos[0] += lateral[0] * lateralSpeed;
                 particle->pos[1] += lateral[1] * lateralSpeed;
                 particle->pos[2] += lateral[2] * lateralSpeed;
                 swaySine = sdfSin(particle->angle);
                 sway = particle->amplitude * swaySine;
-                particle->motion[1] += particle->up_s;
+                particle->motion[1] += SDF_FRAME_STEP(particle->up_s);
                 position[0] = particle->pos[0] + particle->motion[0] * sway;
                 position[1] = particle->pos[1] + particle->motion[1];
                 position[2] = particle->pos[2] + particle->motion[2] * sway;
@@ -1438,9 +1439,9 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
                     secondary.color, secondary.uv, secondary.corner[0], 15, 0)));
                 secondary.count = 0;
             }
-            particle->s_w_r += particle->scalePhaseStepX;
-            particle->s_h_r += particle->scalePhaseStepY;
-            particle->roll += particle->roll_s;
+            particle->s_w_r += SDF_FRAME_STEP(particle->scalePhaseStepX);
+            particle->s_h_r += SDF_FRAME_STEP(particle->scalePhaseStepY);
+            particle->roll += SDF_FRAME_STEP(particle->roll_s);
         }
         if (duration == age && repeat) particle->frame = 0;
         else particle->frame++;
@@ -1543,11 +1544,11 @@ effAPPoint4_tag *effAPPoint4Create(const effAPPoint4Param_t *pParams, u16 type, 
         delayModulus = work->param.spread;
         parameterTemplate = dds3EffectPartCreate(type, pData);
         record->hPart = parameterTemplate;
-        record->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+        record->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         record++;
         for (recordIndex = 1; recordIndex < recordCount; recordIndex++) {
             record->hPart = dds3EffectPartCopy(parameterTemplate);
-            record->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+            record->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
             record++;
         }
     }
@@ -1585,7 +1586,7 @@ effAPPoint4_tag *effAPPoint4Copy(effChanSource_t *source) {
         delayModulus = work->param.spread;
         for (recordIndex = 0; recordIndex < recordCount; recordIndex++) {
             recordCursor->hPart = dds3EffectPartCopy(parameterTemplate);
-            recordCursor->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+            recordCursor->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
             recordCursor++;
         }
     }
@@ -1627,7 +1628,7 @@ void effAPPoint4PartInit(effAPPoint4_tag *pAPPoint4, u32 index) {
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(viewDirection);
-    cursorStep = 1.0f / (f32)pAPPoint4->param.steps;
+    cursorStep = 1.0f / (f32)SDF_FRAMES(pAPPoint4->param.steps);
     bezierSlot = dds3Bezier4PGetPart(pAPPoint4->pBezier4P, index);
     bezierSlot->t = 0;
     bezierSlot->step = cursorStep;
@@ -1714,10 +1715,10 @@ void effAPPoint4Draw(effAPPoint4_tag *hData) {
     u32 recordCount = hData->param.count;
     u32 recordIndex = 0;
     u8 cycleEnabled = hData->param.enabled;
-    s32 activeSteps = hData->param.steps;
+    s32 activeSteps = SDF_FRAMES(hData->param.steps);
     s32 delayModulus = hData->param.spread;
-    s32 fadeInSteps = hData->param.fade_in;
-    s32 fadeOutSteps = hData->param.fade_out;
+    s32 fadeInSteps = SDF_FRAMES(hData->param.fade_in);
+    s32 fadeOutSteps = SDF_FRAMES(hData->param.fade_out);
     f32 position[3];
 
     (void)dds3Bezier4PGetPart(bezierSlots, 0);
@@ -1757,7 +1758,7 @@ void effAPPoint4Draw(effAPPoint4_tag *hData) {
         if (recordTime < activeSteps) {
             recordCursor->frame++;
         } else if (cycleEnabled != 0) {
-            recordCursor->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+            recordCursor->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         } else {
             recordCursor->frame++;
         }
@@ -1807,7 +1808,7 @@ void effEveAPP4Randomize(effEmit_t *hEffect) {
     }
     do {
         effAPPoint4PartInit(channelWork, recordIndex);
-        recordCursor->frame = dds3GetRandA((effRandState_t *)dds3EffectBase) % stepModulus;
+        recordCursor->frame = SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % stepModulus);
         bezierSlot = dds3Bezier4PGetPart(channelWork->pBezier4P, recordIndex);
         recordIndex++;
         randomStep = recordCursor->frame;
