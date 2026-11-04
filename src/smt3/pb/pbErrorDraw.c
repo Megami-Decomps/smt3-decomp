@@ -6,6 +6,7 @@
 #include "model.h"
 #include "draw3d.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 typedef struct pbProcHandle_t pbProcHandle_t;
 
@@ -92,7 +93,7 @@ pbProcHandle_t *pbStartErrorDraw(pbProcHandle_t *parent, s32 eCode, s32 frame) {
     }
     work = sdfChipAllocDirect(0xC);
     work->code = eCode;
-    work->timer = frame;
+    work->timer = SDF_FRAMES(frame);
     work->unk04 = 0;
     panel->data.error = work;
     panel->flags = 0x10000;
