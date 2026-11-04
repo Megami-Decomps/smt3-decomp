@@ -1365,3 +1365,32 @@ Replaced in place (ordinals kept), each from the retail evidence above:
 - `dds3Particle_SphereAtom_t3` 28 to 32: `type` moved to +0 (retail tests the byte there) and the `basic` pointer dropped. `loop` kept at +5 and `timing` at +8 (retail reads +8); `loop` is not proven by retail.
 
 Data names absorbed into the symbol that code indexes past (retail reads them through the owner's base, so they are fields, not objects): NM_PrimPolyParm, RPE_PrimPolyParm, SPL_PrimPolyParm, cmpSkillDrawWork, dds3BezierWork, dds3FlashPolyTag, dds3HermitianTag, fldAutoMapTexHandle, fldCamPhokanEyeW, fldCamPhokanSelZ, fldCamPhokanTgtW, g_debug, gencScale, sdfSndMapIop, and the unnamed D_002FA244, D_00529758, D_005519BE. Owners: the preceding symbol at each address.
+
+## Data symbol renames
+
+Names given to `D_xxxxxxxx` data, each from a use that shows what the data holds.
+The IDB carries the same names. Types, sizes and `can_be_referenced` are untouched:
+the host data generator's output for the tree before and after is identical once the
+new names are mapped back.
+
+| Old | New | Evidence |
+| --- | --- | --- |
+| `D_0054AF60` | `two_over_pi` | 198 ints from `0xA2, 0xF9, 0x83, 0x6E`, passed as `twoOverPi` to `__kernel_rem_pio2f` |
+| `D_0054B278` | `npio2_hw` | `(ix & 0xFFFFFF00) != D[n - 1]` in `__ieee754_rem_pio2f`; words `0x3FC90F00`, `0x40490F00` |
+| `D_00551928`, `D_00551930`, `D_00551938`, `D_00551940` | `sdfFileCdromPrefix`, `sdfFileHostPrefix`, `sdfFileHddPrefix`, `sdfFileCdromName` | bytes `cdrom0:`, `host0:`, `pfs0:`, `cdrom`; copied by the `sdfFileSet*Filename` functions |
+| `D_00526530`, `D_00526540` | `test_devilIds`, `test_devilSkills` | the `devilList` and `skillList` arguments of `nbSetBattleDummy` (ids until a negative word; 30 skills per devil) |
+| `D_005267D0`, `D_005267E0` | `test2_devilIds`, `test2_devilSkills` | the same two arguments in the second call |
+| `D_0032D270` | `cmbRaceCombineTable` | `cmbLookupCombine` indexes `[flag][race - 1][race - 1]` with the two devils' races |
+| `D_0052F850` to `D_00530A98` (14 tables, `0x168` apart) | `dds3HijriParts`, `dds3HijBParts`, `dds3PlayerAParts`, `dds3PlayerBParts`, `dds3TiakiParts`, `dds3YuukoParts`, `dds3IsamuParts`, `dds3IsamuFParts`, `dds3IsamuFzParts`, `dds3HikawaParts`, `dds3Model113Parts`, `dds3TiakiBParts`, `dds3MajyoParts`, `dds3HutomimiParts` | each is a `dds3UnitPartTable_t` whose first field is that name (`hijri`, `hij_b`, `player_a`, ... `0x113`, ... `hutomimi`) |
+| `D_00529030` | `pipePartsInfoTable` | `getPartsInfo` scans 60 `tagPipePartsInfo` for a `partsID` |
+| `D_003202C8`, `D_00320770` | `evtUnityCalcArea`, `dblurParam2` | returned by `evtGetUnityCalcArea` and `dblurGetParam2`, written by their setters |
+| `D_00325B10`, `D_00325E50` | `frTagCodeTable`, `frTagCodeTable2` | `frFindTagCode` and `frFindTagCode2` search 0x1A0 `u16` codes |
+| `D_003278D4` | `pbMCardErrorRows` | `pbMCard` takes `text` from `0x84`-byte rows by error code |
+| `D_00551F80` | `fclFlags` | `fclClearFlag` and `fclGetFlag` index it by `s8` |
+| `D_0054F4D0` | `itfMesSelectionMarkers` | two string pointers (`"* "`, `"> "`) picked by `mode != 0` into `selectionMarker` |
+| `D_0054F200`, `D_0054F208`, `D_0054F210`, `D_0054F218` | `effPadVibeFrames`, `effPadVibeRemain`, `effPadVibePower`, `effPadVibeFadeIn` | `effPadVibeFadeIN/OUT` store frame, frame, power, flag; `effPadVibeFadeUpdate` scales power by remain / frames |
+| `D_0056AD58` | `effDebugPoly` | an `effDebugPolyParams_t`, zeroed with `primitive = 0x4000` |
+| `D_005311D0` | `fldTamaSeVol` | an `fldTamaSeVol_t` copied by value |
+| `D_00551EC4`, `D_00551EC6` | `pbMyCharPosX`, `pbMyCharPosY` | out parameters of `pbGetMyCharcterPos2`, then added to `pbKeyTable` offsets and bounded by 20 |
+| `D_0030FBD4`, `D_0030AB54` | `fldAutoMapFloorTable`, `fldAutoMapAreaTable` | 28-byte rows indexed by `fldAutoMapFindFloor` and `fldAutoMapFindArea`, `strlen`'d and drawn |
+| `D_0052D2F0` | `TLBFunctionsImage` | 0x330 bytes of MIPS code that `InitTLBFunctions` copies to `0x80075000` |
