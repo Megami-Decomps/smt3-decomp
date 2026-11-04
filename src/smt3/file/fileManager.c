@@ -100,6 +100,10 @@ s32 sdfFileCmdWrite(void *aHandle, void *aBuffer, s32 aLength);
 s32 sdfFileCmdClose(void *aHandle);
 s32 sdfFileCmdFree(void *aHandle);
 void sdfFileCmdThreadSetHiPrio(void);
+#ifdef FIX_BUGS
+s32 DIntr(void);
+void EIntr(void);
+#endif
 s32 sdfPrintf(const char *str, ...);
 void *memset(void *a, s32 b, size_t c);
 void sdfChipFreeDirect(void *aPtr);
@@ -628,7 +632,20 @@ void fileExecQueue(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->semaId);
+#ifdef FIX_BUGS
+            /* Retail's file thread runs at lower priority, so the callback that frees
+             * the request cannot run before dev is stored. Hold it off here. */
+            {
+                s32 intrEnabled = DIntr();
+
+                job->dev = sdfFileCmdReadOpen(job->name, pacLoadCallback, job);
+                if (intrEnabled != 0) {
+                    EIntr();
+                }
+            }
+#else
             job->dev = sdfFileCmdReadOpen(job->name, pacLoadCallback, job);
+#endif
             break;
         case 3:
             locked = 0;
@@ -642,7 +659,20 @@ void fileExecQueue(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->semaId);
+#ifdef FIX_BUGS
+            /* Retail's file thread runs at lower priority, so the callback that frees
+             * the request cannot run before dev is stored. Hold it off here. */
+            {
+                s32 intrEnabled = DIntr();
+
+                job->dev = sdfFileCmdWriteOpen(job->name, fileSaveCallback, job, 0x180);
+                if (intrEnabled != 0) {
+                    EIntr();
+                }
+            }
+#else
             job->dev = sdfFileCmdWriteOpen(job->name, fileSaveCallback, job, 0x180);
+#endif
         }
         break;
     }
