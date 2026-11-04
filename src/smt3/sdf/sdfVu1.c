@@ -96,7 +96,8 @@ extern f32 corePktZBias;
 
 extern f32 sdf3DEyeOffset[4];
 
-extern u8 sdf3DScreenParam[];
+struct sdf3DScreenParam_t;
+extern struct sdf3DScreenParam_t sdf3DScreenParam;
 
 
 extern u8 corePktWorldLightMtxCache[];
@@ -1194,7 +1195,7 @@ void corePktBuildFaceList(sdfCorePacketCb_t *cb) {
     f32 scale = cb->backfaceSign;
     f32 clipBias = corePktZBias;
     const f32 *clipPlane = sdf3DEyeOffset;
-    const u8 *projection = sdf3DScreenParam;
+    const struct sdf3DScreenParam_t *projection = &sdf3DScreenParam;
 
     VU0_SET_CLIP_PLANES(clipBias, clipPlane, projection);
     if (cb->attrBits & 0x4000) {
@@ -1348,7 +1349,7 @@ void corePktBuildBackFaceList(sdfCorePacketCb_t *cb) {
     s32 acceptAll;
     u128 *(*out)[3];
     const f32 *clipPlane = sdf3DEyeOffset;
-    const u8 *projection = sdf3DScreenParam;
+    const struct sdf3DScreenParam_t *projection = &sdf3DScreenParam;
 
     VU0_SET_CLIP_PLANES(scale, clipPlane, projection);
     acceptAll = corePktSoftenBias;

@@ -562,6 +562,7 @@ SZ(v09, sdfCorePacketHeader_t, 16);
 SZ(v10, sdfCorePrimHeader_t, 8);
 SZ(v11, sdfCorePacket_t, 24);
 
+OFF(v19, sdf3DScreenParam_t, flags, 0);
 OFF(v20, sdf3DScreenParam_t, aspect, 4);
 OFF(v21, sdf3DScreenParam_t, projDist, 8);
 OFF(v22, sdf3DScreenParam_t, fovy, 12);
