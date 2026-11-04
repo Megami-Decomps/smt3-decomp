@@ -1,6 +1,7 @@
 #include "common.h"
 #include "draw3d.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -579,7 +580,7 @@ void dds3TrackPolySet(dds3TrackPoly_t *hTrackPoly, s32 number, const u128 *pV) {
             vertex--;
             SDF_VU0_COPYVECTOR(vertex + 2, vertex);
         }
-        cell->rec = hTrackPoly->rec;
+        cell->rec = SDF_FRAMES(hTrackPoly->rec + 1) - 1;
         if (cell->count < shiftCount + 2) {
             cell->count += 2;
         }
@@ -622,7 +623,7 @@ void dds3TrackPolySet2(dds3TrackPoly_t *hTrackPoly, s32 number, const u128 *pV) 
             vertex--;
             SDF_VU0_COPYVECTOR(vertex + 3, vertex);
         }
-        cell->rec = hTrackPoly->rec;
+        cell->rec = SDF_FRAMES(hTrackPoly->rec + 1) - 1;
         if (cell->count < shiftCount + 3) {
             cell->count += 3;
         }
