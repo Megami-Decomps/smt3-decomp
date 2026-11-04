@@ -1083,30 +1083,33 @@ extern u8 *DDS3_GBWK;
 /* Localised name text, 0x40 bytes after the manager. */
 extern char itfMesMngVarText[];
 
-/* NON_MATCHING: 1 of 34 words, 136 bytes against 172; gcc shares the three address inductions retail keeps apart. */
+/* NON_MATCHING: 152 bytes against 172. Separate lead and tail variables give retail's three inductions; retail also re-copies the global pointer each iteration. */
 #ifdef NON_MATCHING
 void itfMesMngGetVarLocalize(s32 id)
 {
     char *out = itfMesMngVarText;
     s32 lead = id * 20 + 0x6600;
-    s32 tail = id * 20 + 0x6601;
+    s32 tailA = id * 20 + 0x6601;
+    s32 tailB = id * 20 + 0x6601;
     s32 count = id + 0x6650;
     s32 k = 0;
 
     if (((u8 *)DDS3_GBWK + 4)[count] != 0) {
         do {
-            u8 code = ((u8 *)DDS3_GBWK + 4)[lead];
+            u8 *gb = (u8 *)DDS3_GBWK + 4;
+            u8 code = gb[lead];
 
             if (code & 0x80) {
                 *out = code;
                 out++;
-                *out = ((u8 *)DDS3_GBWK + 4)[tail];
+                *out = gb[tailA];
             } else {
-                *out = ((u8 *)DDS3_GBWK + 4)[tail];
+                *out = gb[tailB];
             }
             out++;
             lead += 2;
-            tail += 2;
+            tailA += 2;
+            tailB += 2;
             k++;
         } while (k < ((u8 *)DDS3_GBWK + 4)[count]);
     }

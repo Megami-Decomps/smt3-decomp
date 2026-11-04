@@ -94,3 +94,7 @@ step-by-two inductions and repeats the base/count-address arithmetic in the
 loop. This is a qualified loop-optimization boundary, not a scheduling or
 register-order diagnosis. No artificial pointer anchor, volatile RAM access
 or compiler flag change is justified by this negative control.
+
+### itfMesMngGetVarLocalize, three inductions (2026-11-04)
+
+Separate `lead`, `tailA` and `tailB` variables for the two arms, each stepped by two, with the global read at every use, give retail's three inductions and a 152-byte function against 172 (the earlier draft was 136). Still missing: the per-iteration `daddu $9, $14, $0` copy of the global, and the count address (`$13`, constant) added to it inside the loop. A local `work` pointer, a per-iteration `w = work` copy, and `(work + count)[4]` as the bound each emitted 148 to 160 bytes and moved the inductions back together. The output buffer is now `itfMesMngVarText`.
