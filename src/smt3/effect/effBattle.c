@@ -4,6 +4,7 @@
 #include "nb.h"
 #include "basic.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 enum {
     EFF_BATTLE_COPY_TRIGGER_FRAME = 0,
@@ -330,7 +331,7 @@ u16 effBTLCutGetCutNumber(effBTLCut_t *hBTLCutEffect) {
 
 /* Read the frame counter that the native updater advances after callbacks. */
 u32 effBTLCutGetFrame(effBTLCut_t *hBTLCutEffect) {
-    return hBTLCutEffect->currentFrame;
+    return SDF_FRAME_TICK(hBTLCutEffect->currentFrame);
 }
 
 void *effBTLCutGetFormation(effBTLCut_t *hBTLCutEffect) {
@@ -408,12 +409,12 @@ u32 effBTLCutGetAllPartColor(u32 frame, u32 frame_end) {
     if (frame_end == 0 || frame >= frame_end) {
         return 0x808080;
     }
-    if (frame_end < 6) {
+    if (frame_end < SDF_FRAMES(6)) {
         ratio = (f32)(frame_end - frame) / (f32)frame_end;
     } else {
         ratio = 1.0f;
-        if (frame_end - 6 < frame) {
-            ratio = (f32)(frame_end - frame) / 6.0f;
+        if (frame_end - SDF_FRAMES(6) < frame) {
+            ratio = (f32)(frame_end - frame) / SDF_FRAMES_F(6.0f);
         }
     }
     SDF_VU0_LOADVECTOR(D_0031B8B0);
@@ -475,7 +476,7 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
         effBTLPointLightSet(list->colorKeys, formation);
         effBTLModelColorSet(list->rgbKeys, formation);
     }
-    if (list->shake != 0 && list->shakeFrame == frame) {
+    if (list->shake != 0 && SDF_FRAMES(list->shakeFrame) == frame) {
         if (list->shake < 0x1F) {
             dds3SetQuake(list->shakeFade, list->shake * 10);
         } else {
@@ -504,11 +505,11 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
         SDF_VU0_STOREMATRIX(&rotB);
     }
     entry = list->entries;
-    color = effBTLCutGetAllPartColor(frame, hBTLCutEffect->colorRampEndFrame);
+    color = effBTLCutGetAllPartColor(frame, SDF_FRAMES(hBTLCutEffect->colorRampEndFrame));
     count = list->count;
     flags = hBTLCutEffect->stat;
     for (i = 0; i < count; i++, entry++) {
-        if (entry->timing >= frame) {
+        if (SDF_FRAMES(entry->timing) >= frame) {
             continue;
         }
         kind = entry->reverberations;
@@ -559,13 +560,13 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
         dds3EffectPartSetColor(hBTLCutEffect->parameterWorks[i], color);
         dds3EffectPartDraw(hBTLCutEffect->parameterWorks[i]);
     }
-    if (list->callbackFrame == frame && hBTLCutEffect->sourceFrameCallback != NULL) {
+    if (SDF_FRAMES(list->callbackFrame) == frame && hBTLCutEffect->sourceFrameCallback != NULL) {
         hBTLCutEffect->sourceFrameCallback(hBTLCutEffect);
     }
-    if (hBTLCutEffect->triggerFrame == frame && hBTLCutEffect->triggerFrameCallback != NULL) {
+    if (SDF_FRAMES(hBTLCutEffect->triggerFrame) == frame && hBTLCutEffect->triggerFrameCallback != NULL) {
         hBTLCutEffect->triggerFrameCallback(hBTLCutEffect);
     }
-    effBTLCutSetMax(hBTLCutEffect->kind, hBTLCutEffect->currentFrame);
+    effBTLCutSetMax(hBTLCutEffect->kind, SDF_FRAME_TICK(hBTLCutEffect->currentFrame));
     hBTLCutEffect->currentFrame++;
 }
 
@@ -860,12 +861,12 @@ void effBTLFieldLightAxisSet(const f32 *pAxis) {
 
 void effBTLFieldLightAnimationSet(s32 frame, f32 angle) {
     effBTLFieldLightAnimFrame = 0;
-    effBTLFieldLightAnimFrameEnd = frame;
-    effBTLFieldLightAnimRotate = angle / frame;
+    effBTLFieldLightAnimFrameEnd = SDF_FRAMES(frame);
+    effBTLFieldLightAnimRotate = angle / SDF_FRAMES(frame);
 }
 
 void effBTLSkyFilterON(s32 alpha, u16 frame) {
-    s32 frameCount = frame;
+    s32 frameCount = SDF_FRAMES(frame);
 
     effBTLSkyFilterAlphaBase = fldSkyGetAlpha();
     effBTLSkyFilterAlphaTarget = alpha;
@@ -874,7 +875,7 @@ void effBTLSkyFilterON(s32 alpha, u16 frame) {
 }
 
 void effBTLSkyFilterOFF(u16 frame) {
-    s32 frameCount = frame;
+    s32 frameCount = SDF_FRAMES(frame);
 
     effBTLSkyFilterAlphaBase = fldSkyGetAlpha();
     effBTLSkyFilterAlphaTarget = 0x80;
@@ -900,8 +901,8 @@ void effBTLFieldFilterON(u32 abgr, u16 frame) {
         effBTLFieldColorFilter.frame = 0;
         return;
     }
-    effBTLFieldColorFilter.frame = frame;
-    effBTLFieldColorFilter.frameMax = frame;
+    effBTLFieldColorFilter.frame = SDF_FRAMES(frame);
+    effBTLFieldColorFilter.frameMax = SDF_FRAMES(frame);
     effBTLFieldColorFilter.baseColor = effBTLFieldColorFilter.rect.abgr;
     effBTLFieldColorFilter.targetColor = abgr;
 }
@@ -914,8 +915,8 @@ void effBTLFieldFilterOFF(u16 frame) {
     }
     effBTLFieldColorFilter.baseColor = effBTLFieldColorFilter.rect.abgr;
     effBTLFieldColorFilter.targetColor = 0;
-    effBTLFieldColorFilter.frame = frame;
-    effBTLFieldColorFilter.frameMax = frame;
+    effBTLFieldColorFilter.frame = SDF_FRAMES(frame);
+    effBTLFieldColorFilter.frameMax = SDF_FRAMES(frame);
 }
 
 void effBTLFieldFilterRun(void) {
