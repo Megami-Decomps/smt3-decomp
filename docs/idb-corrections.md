@@ -1233,3 +1233,69 @@ The 0x40 bytes at 0x56C880 after `itfMesMngManager` are used: `itfMesMngGetVarLo
 Result over the 1414 IDB structs, compared by name with the 138 sizes `tools/header_layout.c` pins: mismatches 158 before, 131 after, none newly wrong. 115 structs changed size or offsets. The 29 holding an `sdfMatrix4_t` member (35 members) grew to fit it, among them `sdfModelNode_t` 160 to 256, `sdfModelRootNode_t` 104 to 152, `sdf3DViewportPacket_t` 112 to 208, `sdf3DLightParallelPacket_t` 176 to 224 and `dds3PoseSet_t` 160 to 208, all now equal to the decomp's. The `sdfVector4_t` change (8-aligned to 4-aligned) shrank about 85 more by 4 to 12 bytes each (`Sprite3D_t` stays 72). `dds3DrawEnv_t` 5760 to 6192. The remaining 131 mismatches are IDB structs whose HD layout is a different type from the decomp's (`nbMainProcessData_t`, `dds3AdminiData_t`, `scrProcessWork_s` and others) and were already wrong before.
 
 No decomp definition exists for 22 of the changed effect and particle structs (`effPCP*`, `effMaga*`, `dds3Particle_Basic_t`, ...), so their new sizes follow from the HD member list and are not checked against the retail compiler. Global data items typed with a changed struct were checked for overlap with the next named address: none.
+
+## Re-import of mismatching IDB structs, and what stays unverified
+
+`tools/header_layout.c` size claims that the IDB contradicted: 131 before, 0 after, over 145 checked sizes (the 158 of the original IDB fell to 131 with the `sdfMatrix4_t` fix). 106 structs were re-imported from the decomp's own declarations, with their missing dependencies created first. `sdf3DScreenParam_t.TM` is `sdfMatrix4_t` again. Only IDB types changed, so the ELF and smt3-port need nothing.
+
+### IDB names the decomp lacks (candidates for the decomp)
+
+The re-import replaced these IDB field names with the decomp's generic ones. Offset, IDB name, decomp name:
+
+- `dds3UnitObjectBasicWorkData_t` +28: `dmy` (decomp `reserved1C`)
+- `corePktCb_t` +144: `payload` (decomp `dataPtr`)
+- `fldResHead_t` +4: `resourceType` (decomp `word04`)
+- `fldResHead_t` +12: `flag` (decomp `word0C`)
+- `fldResHead_t` +20: `areaname` (decomp `word14`)
+- `fldResHead_t` +28: `SBlockName` (decomp `word1C`)
+- `dds3GlobalWork_t` +25980: `name_code` (decomp `unk657C`)
+- `dds3GlobalWork_t` +105744: `amapEX` (decomp `reserved19D10`)
+
+### Effect and particle structs with no decomp definition (unverified)
+
+The IDB holds these, nothing in `src/` or `include/` defines or mentions them, so their sizes are the IDB's alone and no header claim pins them. Sizes in bytes.
+
+Eff_* family (22):
+
+- `EffBTL_BillFireball_Part_t` 44
+- `EffBTL_BillFireball_t` 80
+- `EffBTL_BillTrack_Part_t` 64
+- `EffBTL_BillTrack_t` 116
+- `EffTable_t` 4
+- `Eff_FlashPolyParam_t` 48
+- `Eff_FlashPolyPart_t` 12
+- `Eff_FlashPoly_t` 28
+- `Eff_ModelTrackPolyABGR_t` 16
+- `Eff_RippleSprite_t` 20
+- `Eff_Ripple_t` 40
+- `Eff_SparkleSphereBillParam_t` 28
+- `Eff_SparkleSphereBill_t` 8
+- `Eff_ThunderPolyParam_t` 80
+- `Eff_ThunderPolyPart_t` 12
+- `Eff_ThunderPoly_t` 32
+- `Eff_ThunderRadiatePolyParam_t` 68
+- `Eff_ThunderRadiatePolyPart_t` 20
+- `Eff_ThunderRadiatePoly_t` 32
+- `Eff_ThunderSpherePolyParam_t` 72
+- `Eff_ThunderSpherePolyPart_t` 44
+- `Eff_ThunderSpherePoly_t` 60
+
+dds3 effect and particle types (17):
+
+- `dds3EffMajorFunc_t` 48
+- `dds3EffectTable_Reset_t` 4
+- `dds3EffectTable_Scale_t` 4
+- `dds3EffectTable_t` 12
+- `dds3EffectWork_t` 48
+- `dds3Effect_DistortionBlur_t` 16
+- `dds3Effect_PartialBlur_t` 8
+- `dds3Effect_t` 16
+- `dds3Particle_Blur_t` 8
+- `dds3Particle_EffItem_t` 16
+- `dds3Particle_Exp_t` 16
+- `dds3Particle_Expansion_t` 20
+- `dds3Particle_Nop_t3` 4
+- `dds3Particle_SphereAtom_t3` 28
+- `dds3Particle_Track2_t` 20
+- `dds3Particle_Track3_t` 20
+- `dds3Particle_Track_t` 16
