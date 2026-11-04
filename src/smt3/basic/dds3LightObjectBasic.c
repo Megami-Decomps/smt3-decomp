@@ -1,6 +1,7 @@
 #include "common.h"
 #include "basic.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -212,7 +213,7 @@ void dds3LinkSceneLight(dds3Basic_t *basic, s32 frame)
         data->Flag &= ~2;
     } else {
         data->Flag |= 2;
-        data->SwitchFrame = frame;
+        data->SwitchFrame = SDF_FRAMES(frame);
         SDF_VU0_LOADVECTOR(dds3LightParam.sources[0]);
         MMI_RGBA_PACK_UNIT(lightColor, 128.0f);
         work[0].word = lightColor;
