@@ -11,7 +11,6 @@
 extern void *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
                               void *drawExit, void *deleteExit, void *p);
 
-extern u8 D_00343E74[];
 
 typedef struct
 {
@@ -111,7 +110,7 @@ s32 dds3WaitMovieEnd(void)
 
 u8 func_0022B7F8(void)
 {
-    return D_00343E74[0];
+    return D_00343E40.decodeCb.playbackPhase;
 }
 
 s32 movieMan_Process(void)

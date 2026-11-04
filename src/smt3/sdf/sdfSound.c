@@ -290,7 +290,6 @@ extern s32 sdfFileRpcCmdState;
 extern u32 sdfFileRpcQueue[];
 /* The first cell stores the PCM base pointer. This unsized view keeps the
  * non-small-data address form; see docs/levers/addressing-and-types.md. */
-extern u8 *p2sdPcmBuffer[];
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
@@ -1105,7 +1104,7 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
         s32 bytes;
 
         sdfFileRpcResult = request;
-        sdfSndTransToIOP(request->destination, p2sdPcmBuffer[0] + sdfFileRpcCmdState,
+        sdfSndTransToIOP(request->destination, (u8 *)D_00593E20.data + sdfFileRpcCmdState,
                          request->byteCount);
         bytes = sdfFileRpcResult->byteCount;
         sdfFileRpcQueue[0] = bytes;
