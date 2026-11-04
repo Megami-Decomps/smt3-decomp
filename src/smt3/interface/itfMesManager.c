@@ -313,7 +313,7 @@ extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,
 
 extern char D_0054F4E8[];
 
-extern char *D_0054F4D0[2];
+extern char *itfMesSelectionMarkers[2];
 
 extern char D_0054F4F0[];
 
@@ -1438,7 +1438,7 @@ s32 itfMesMngDebugProc(void) {
     menuItemY = 0x7A00;
     for (menuItemIndex = 0; menuItemIndex < 5; menuItemIndex++, menuItemY += 0x60) {
         if (D_00326700.cursor == menuItemIndex) {
-            selectionMarker = D_0054F4D0[D_00326700.mode != 0];
+            selectionMarker = itfMesSelectionMarkers[D_00326700.mode != 0];
         } else {
             selectionMarker = D_0054F4F0;
         }
@@ -2718,7 +2718,7 @@ INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4C0);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4C8);
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4D0);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesSelectionMarkers);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4D8);
 

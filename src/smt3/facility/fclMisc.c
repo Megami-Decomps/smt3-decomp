@@ -23,7 +23,7 @@ extern s8 gSelMsgPos;
 
 extern s8 gMsgInvFlag;
 
-extern s8 D_00551F80[8];
+extern s8 fclFlags[8];
 
 extern s32 gMsgID;
 
@@ -550,12 +550,12 @@ s32 fclChkMessageDraw(void *PID)
 
 void fclClearFlag(s8 index)
 {
-    D_00551F80[index] = 0;
+    fclFlags[index] = 0;
 }
 
 s32 fclGetFlag(s8 index)
 {
-    s8 flag = D_00551F80[index];
+    s8 flag = fclFlags[index];
 
     if (flag != 0) {
         return 1;
@@ -582,7 +582,7 @@ s8 fclGetWorkValue(s8 index)
 
 s32 fcl_214428(void)
 {
-    D_00551F80[scrGetIntPara(0)] = 1;
+    fclFlags[scrGetIntPara(0)] = 1;
     return 1;
 }
 

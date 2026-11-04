@@ -172,9 +172,9 @@ extern s16 D_00567EF8[];
 
 extern u16 D_00567F50[];
 
-extern char D_0030AB54[][28];
+extern char fldAutoMapAreaTable[][28];
 
-extern char D_0030FBD4[][28];
+extern char fldAutoMapFloorTable[][28];
 
 extern char D_0030D714[][28];
 
@@ -406,10 +406,10 @@ void fldAutoMapFontInit(s32 bank) {
     s32 i;
 
     for (i = 0; i < 0x29; i++) {
-        D_00567EA0[i] = strlen(D_0030AB54[fldAutoMapFindArea(bank, i)]);
+        D_00567EA0[i] = strlen(fldAutoMapAreaTable[fldAutoMapFindArea(bank, i)]);
     }
     for (i = 0; i < 0x29; i++) {
-        D_00567EF8[i] = strlen(D_0030FBD4[fldAutoMapFindFloor(bank, i)]);
+        D_00567EF8[i] = strlen(fldAutoMapFloorTable[fldAutoMapFindFloor(bank, i)]);
     }
     for (i = 0; i < 0x18; i++) {
         D_00567F50[i] = strlen(D_0030D714[fldAutoMapFindPlace(bank, i)]);
@@ -1309,7 +1309,7 @@ void fldAutoMapDrawOneArea(void)
     if (fldAutoMapDrawState != 0 && (u32)(D_0054EE7C - 1) < 40 && D_00567EF8[D_0054EE7C] >= 2) {
         s32 alpha = 0x80 - (D_0054EE90 < 0 ? -D_0054EE90 : D_0054EE90) * 8;
         s32 color = (alpha < 0 ? 0 : alpha) | 0x78759B00;
-        text = D_0030FBD4[fldAutoMapFindFloor(fldGlobalBase.area % 100, D_0054EE7C)];
+        text = fldAutoMapFloorTable[fldAutoMapFindFloor(fldGlobalBase.area % 100, D_0054EE7C)];
         request = frwGetSmallFontFRQ(0, 0, 0, color, text, NULL);
         font = (struct frFontHandle_t *)request;
         textX = (s32)((0x1ECu - frGetStrWidth2(font)) << 4);
@@ -1323,7 +1323,7 @@ void fldAutoMapDrawOneArea(void)
     if ((u32)(D_0054EE78 - 1) < 40 && D_00567EF8[D_0054EE78] >= 2) {
         s32 alpha = 0x80 - (fldAutoMapDrawState < 0 ? -fldAutoMapDrawState : fldAutoMapDrawState) * 8;
         s32 color = (alpha < 0 ? 0 : alpha) | 0x78759B00;
-        text = D_0030FBD4[fldAutoMapFindFloor(fldGlobalBase.area % 100, D_0054EE78)];
+        text = fldAutoMapFloorTable[fldAutoMapFindFloor(fldGlobalBase.area % 100, D_0054EE78)];
         request = frwGetSmallFontFRQ(0, 0, 0, color, text, NULL);
         font = (struct frFontHandle_t *)request;
         textX = (s32)((0x1ECu - frGetStrWidth2(font)) << 4);
@@ -2132,7 +2132,7 @@ void fldDrawAreaBlockFont(void) {
         if ((s16)D_00567EA0[fldGlobalBase.nameU] < 2) {
             return;
         }
-        str = D_0030AB54[fldAutoMapFindArea(fldGlobalBase.area % 100, fldGlobalBase.nameU)];
+        str = fldAutoMapAreaTable[fldAutoMapFindArea(fldGlobalBase.area % 100, fldGlobalBase.nameU)];
         frPreCalcStrWidth(str, 1, 0);
         frq = frwGetSmallFontFRQ(0, 0, 0, 0, str, 0);
         w = frGetStrWidth2(frq);

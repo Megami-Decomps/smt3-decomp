@@ -217,13 +217,13 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551921);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileSemaId);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551928);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCdromPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551930);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileHostPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551938);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileHddPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551940);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCdromName);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551948);
 

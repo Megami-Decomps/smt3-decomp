@@ -219,7 +219,7 @@ extern fldTamaSeFrame_t D_00531180;
 
 extern fldTamaSeFrame_t D_005311A8;
 
-extern fldTamaSeVol_t D_005311D0;
+extern fldTamaSeVol_t fldTamaSeVol;
 
 extern s32 fldRunDanteDistToTarget(f32 x, f32 y, f32 z);
 
@@ -1561,7 +1561,7 @@ void fldRunTamaSe(void)
     frame1 = D_00531158;
     frame2 = D_00531180;
     frame3 = D_005311A8;
-    vol = D_005311D0;
+    vol = fldTamaSeVol;
     model = dds3ObjectBaseGetModelHandle(D_0054EAB0);
     now = model->first->frame;
     for (i = 0; i < 10; i++) {
@@ -1632,7 +1632,7 @@ INCLUDE_RODATA(const s32, "field/fldTest", D_00531180);
 
 INCLUDE_RODATA(const s32, "field/fldTest", D_005311A8);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_005311D0);
+INCLUDE_RODATA(const s32, "field/fldTest", fldTamaSeVol);
 
 void fldMakeFroFileName(void) {
     char directory[0x20];

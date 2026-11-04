@@ -9,7 +9,7 @@ extern void (*D_00551828)(void);
 
 
 
-extern tagPipePartsInfo D_00529030[];
+extern tagPipePartsInfo pipePartsInfoTable[];
 
 s32 pipeFileSave(s8 filename, tagPipePosTable *posPtr, s8 index)
 {
@@ -101,7 +101,7 @@ s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
 
 tagPipePartsInfo *getPartsInfo(s16 partsID)
 {
-    tagPipePartsInfo *pInfo = D_00529030;
+    tagPipePartsInfo *pInfo = pipePartsInfoTable;
     s32 i;
 
     for (i = 0; i < 60; i++) {

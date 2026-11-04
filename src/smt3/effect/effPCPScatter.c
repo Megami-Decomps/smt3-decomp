@@ -670,7 +670,7 @@ effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(
 effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(
     effPCPWhirlwind3PolyParam_t *pParam, addr_t pTex);
 
-extern effDebugPolyParams_t D_0056AD58;
+extern effDebugPolyParams_t effDebugPoly;
 
 extern sdfGrOt_t *D_0031F440[];
 
@@ -2933,8 +2933,8 @@ dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(u32 number, u32 face) {
             right -= 2;
         }
     }
-    memset(&D_0056AD58, 0, sizeof(effDebugPolyParams_t));
-    D_0056AD58.primitive = 0x4000;
+    memset(&effDebugPoly, 0, sizeof(effDebugPolyParams_t));
+    effDebugPoly.primitive = 0x4000;
     return object;
 }
 
@@ -2976,9 +2976,9 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
     }
     sdf3DPrimLinkMat(packet, (sdfMat_t *)object->asset, 0);
     count = (s32)object->particleCount;
-    D_0056AD58.parameters = (const u32 *)D_0031F3E0;
+    effDebugPoly.parameters = (const u32 *)D_0031F3E0;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
-        draw = &D_0056AD58;
+        draw = &effDebugPoly;
         remaining = object->vectorsPerParticle;
         draw->positions = (u128 *)dds3WhirlwindPolyListGetVertex(object, particleIndex);
         draw->texcoords = dds3WhirlwindPolyListGetUV(object, particleIndex);
@@ -2989,10 +2989,10 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
         if ((draw->color & 0xFF000000) != 0) {
             while (remaining >= 18) {
                 remaining -= 16;
-                sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&D_0056AD58)));
-                D_0056AD58.positions += 16;
-                D_0056AD58.colors += 16;
-                D_0056AD58.texcoords += 32;
+                sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&effDebugPoly)));
+                effDebugPoly.positions += 16;
+                effDebugPoly.colors += 16;
+                effDebugPoly.texcoords += 32;
             }
             if (remaining >= 4) {
                 draw->parameterCount = remaining - 2;
