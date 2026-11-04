@@ -1212,3 +1212,7 @@ The five bases with a `D_` label inside, decided by whether code indexes across 
 Resizes that were skipped for a referenced `D_` label: `dds3PadBitTable` is now 0x20, with `D_005298C9`, `D_005298CB` and `D_005298D5` rewritten to `dds3PadBitTable[1]`, `[3]` and `[0xD]`, and `D_005298D8` to `&dds3PadBitTable[0x10]`. `fldEncountTimer` is 8 (the sequence call passes 8 bytes). `nbPanelPTPartList` stays 4: the code indexes it as a table, but `nbPressTurnTable` and `D_004F000C` are referenced as their own arrays right after it.
 
 Embedded blobs sized to their header length (u8): 81 scrEmbedded_*, itfMesEmbedded_* and similar symbols. Inner names dropped as parts of larger blobs: itfMesEmbedded_326858, itfMesEmbedded_522AF0, dds3ArcTable.
+
+IDB: the element merges above were applied to SLUS_209.11 (20 bases, 124 inner names cleared, each base recreated as a byte array of the merged size; `flt_56B350` renamed `D_0056B350`; the stale `sdfDrawFaceListParam2` name inside `sdf3DScreenParam` cleared). Field and struct types were not applied there.
+
+`nbPanelPTPartList` (0xB0, eleven 16-byte rows): merged. `nbPanelProcess.c` indexes `[0]` to `[10]`, past `nbPressTurnTable2` (+0x10) and `nbPressTurnTable` (+0x14), neither of which is a row boundary. Both names are dropped, and the one C use of `nbPressTurnTable[0]` (under NON_MATCHING) became a `SYMBOL_AT_REGION` alias at +0x14.
