@@ -1355,3 +1355,11 @@ Method: the IDB applies none of these types to a retail function except `Eff_Mod
 - `dds3Particle_Track2_t` 20: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
 - `dds3Particle_Track3_t` 20: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
 - `dds3Particle_Track_t` 16: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+
+### Size fixes applied to the IDB
+
+Replaced in place (ordinals kept), each from the retail evidence above:
+
+- `dds3EffectWork_t` 48 to 80: the existing fields are unchanged and `reserved30[32]` is added.
+- `dds3Effect_DistortionBlur_t` 16 to 4856: `param[44]` inline, `hAlphaTex` +44, `hMem` +48, `pwork` +52, `parts[4800]` +56 (100 parts of 48 bytes, element type not recovered).
+- `dds3Particle_SphereAtom_t3` 28 to 32: `type` moved to +0 (retail tests the byte there) and the `basic` pointer dropped. `loop` kept at +5 and `timing` at +8 (retail reads +8); `loop` is not proven by retail.
