@@ -2,6 +2,7 @@
 #include "kernel.h"
 #include "scr.h"
 #include "event.h"
+#include "field.h"
 
 extern u32 abcd;
 extern u32 dds3KernelDebugSign;
@@ -74,7 +75,6 @@ extern void evtSetUnitMotion(evtUnit_t *h, s32 motion, s32 before, s32 smooth, s
 extern void mdlSmoothLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber, f32 aBeforeLeng,
                                 f32 aSmoothLeng);
 extern s32 evtNextEventNo;
-extern s32 fldGb __attribute__((section(".data")));
 extern void *sdfChipAllocDirect(u32 aSize);
 extern s32 itfMesMngInitialize(void *sub);
 
@@ -853,7 +853,7 @@ void CallPipe(u32 flg, s32 *data)
         return;
     }
     InitPipe(data[0], data[1]);
-    fldGb = 0x3E7;
+    fldGlobalBase.area = 0x3E7;
 }
 
 s32 ExitPipe(void)

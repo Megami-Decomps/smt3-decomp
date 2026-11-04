@@ -9,10 +9,10 @@
 
 typedef struct { u8 unk00[8]; f32 degrees; u8 unk0C[4]; } pbFovWork_t;
 
-/* The native FOV workspace is an unnamed view at pinst + 0xA34. Bind its
- * assembler address without redefining pinst's message-instance array type
- * or inventing an overlapping allocation in the generated BSS split. */
-SYMBOL_AT(pbFovWork_t, pbDebugFovWork, pinst, 0xA34);
+/* The native FOV workspace is an unnamed view at itfMesMngManager + 0xA60. Bind its
+ * assembler address without redefining the manager's type or inventing an
+ * overlapping allocation in the generated BSS split. */
+SYMBOL_AT(pbFovWork_t, pbDebugFovWork, itfMesMngManager, 0xA60);
 
 typedef struct { s32 x, y, z; u32 style; } pbPrintState_t;
 

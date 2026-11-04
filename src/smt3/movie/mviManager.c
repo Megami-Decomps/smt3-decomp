@@ -172,14 +172,11 @@ typedef struct movieViewerChip_t
     /* 0x04 */ char path[1];
 } movieViewerChip_t;
 
-/* Also declared above as void *movieViewerWork[], which is how the loader
- * paths use it; this is the chip list the viewer walks. One object, two
- * readings, so the alias stays. */
-extern movieViewerChipList_t movieViewerChips FAKEMATCH_ASM_NAME("movieViewerWork");
+extern movieViewerChipList_t movieViewerWork;
 
 void movieViewerFree(void)
 {
-    void *chip = movieViewerChips.chip;
+    void *chip = movieViewerWork.chip;
 
     if (chip != NULL) {
         do {
@@ -188,10 +185,10 @@ void movieViewerFree(void)
             sdfChipFreeDirect(chip);
             chip = next;
         } while (chip != NULL);
-        movieViewerChips.chip = NULL;
-        movieViewerChips.top = 0;
-        movieViewerChips.cursor = 0;
-        movieViewerChips.unk_0C = 0;
+        movieViewerWork.chip = NULL;
+        movieViewerWork.top = 0;
+        movieViewerWork.cursor = 0;
+        movieViewerWork.unk_0C = 0;
     }
 }
 
@@ -210,10 +207,6 @@ extern char D_0053F3E8[];
 extern char D_0054FD98[];
 
 extern char D_0054FDA0[];
-
-extern movieViewerChip_t *movieViewerFileList[];
-
-extern u16 movieViewerFileCount[];
 
 extern s32 sceDopen(const char *name);
 
@@ -248,7 +241,7 @@ void movieViewerScanDir(void)
         return;
     }
     count = 0;
-    link = movieViewerFileList;
+    link = (movieViewerChip_t **)&movieViewerWork.chip;
     while ((length = sceDread(handle, &entry)) > 0) {
         if ((entry.mode & 0xF000) == 0x1000) {
             continue;
@@ -268,15 +261,15 @@ void movieViewerScanDir(void)
         link = &chip->next;
     }
     *link = NULL;
-    movieViewerFileCount[0] = count;
+    movieViewerWork.unk_0C = count;
     sceDclose(handle);
 }
 
 /* The entry the cursor sits on, walked from the head. */
 void *movieViewerStep(void)
 {
-    movieViewerChip_t *chip = movieViewerChips.chip;
-    s32 remaining = movieViewerChips.cursor;
+    movieViewerChip_t *chip = movieViewerWork.chip;
+    s32 remaining = movieViewerWork.cursor;
 
     if (chip != NULL && remaining > 0) {
         do {
@@ -308,15 +301,15 @@ void movieDebugDrawInfo(void)
     s32 selected;
     s32 i;
 
-    if (movieViewerChips.chip == NULL || movieViewerChips.playing != 0) {
+    if (movieViewerWork.chip == NULL || movieViewerWork.playing != 0) {
         return;
     }
-    tag = movieViewerChips.packets;
+    tag = movieViewerWork.packets;
     sdfDrawTagLink(tag, dds3PrimFrameRect(0x7150, 0x7948, 0xFF0080, 0xF60, 0x3F0, 0x30000000,
                                           0x60404040));
-    selected = movieViewerChips.cursor;
-    i = movieViewerChips.top;
-    chip = movieViewerChips.chip;
+    selected = movieViewerWork.cursor;
+    i = movieViewerWork.top;
+    chip = movieViewerWork.chip;
     selected -= i;
     for (; i > 0; i--) {
         chip = chip->next;
@@ -325,7 +318,7 @@ void movieDebugDrawInfo(void)
         sdfDrawTagLink(tag, sdfDevPrintf(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, D_0054FDA8,
                                          (i == selected) ? '>' : ' ', chip->path));
     }
-    if (movieViewerChips.top != 0) {
+    if (movieViewerWork.top != 0) {
         sdfPrimLinkF3(tag, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8,
                       0xFF0080, 0);
     }

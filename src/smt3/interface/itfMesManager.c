@@ -105,7 +105,8 @@ s32 itfMesMngMessage(void);
 
 extern u32 scrGetMessageHandle(void);
 
-extern itfMesInstance_t pinst[];
+/* The message instances are the state words of itfMesMngManager.nodes. */
+SYMBOL_AT_REGION(itfMesInstance_t, pinst, itfMesMngManager, 0x2C);
 
 extern s32 scrGetIntPara(s32);
 
@@ -328,9 +329,6 @@ extern char D_0054F4F8[];
 extern sdfGrOt_t sdfGrOtTable[];
 
 void itfMesMngDebugShutdown(void);
-
-/* Slot record reached through the pool base, one 0x14 bytes per window. */
-extern itfMesLink_t D_0056BE80[];
 
 extern void ReleaseAllWindow(struct instanceMes_tag *pinst);
 
@@ -1480,7 +1478,7 @@ void itfMesMngDebugShutdown(void) {
 /* Tear down installed content/resources, return the pool record and decrement
  * the pool-array-relative counter. An empty record is a no-op. */
 void DestructFlow(s32 id) {
-    itfMesLink_t *windowRecord = &D_0056BE80[id];
+    itfMesLink_t *windowRecord = &itfMesMngManager.nodes[id];
     instanceMes_tag *mes = windowRecord->state;
 
     if (mes != NULL) {
@@ -1491,8 +1489,8 @@ void DestructFlow(s32 id) {
         mes->stat = 0;
         sdfMemFreeDirect(windowRecord->resourceHandle);
         windowRecord->state = NULL;
-        itfMiscLinkGive(windowRecord, (itfMesLinkControl_t *)((u8 *)D_0056BE80 - 0x10));
-        ((itfMesManager_t *)((u8 *)D_0056BE80 - 0x20))->activeWindowCount -= 1;
+        itfMiscLinkGive(windowRecord, &itfMesMngManager.pool);
+        itfMesMngManager.activeWindowCount -= 1;
     }
 }
 

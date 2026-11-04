@@ -8,6 +8,8 @@
 extern void *memset(void *a, s32 b, size_t c);
 
 extern u8 dds3PadVibrationState[2];
+/* Second view of dds3PadVibrationState[1]: the retail load is its own, not the pointer's. */
+SYMBOL_AT(u8, dds3PadVibrationCurrent, dds3PadVibrationState, 1);
 
 extern u8 dds3PadVibrationMode[2];
 
@@ -216,13 +218,11 @@ void dds3RunProcessList(void)
     effPadVibeFadeUpdate();
 }
 
-extern u8 dds3PadVibrationLevel;
-extern u8 D_00551B91;
 #include "sdk_libc.h"
 
 void dds3GetVibrationLevel(void)
 {
-    u8 target = dds3PadVibrationLevel;
+    u8 target = dds3PadVibrationMode[1];
     u8 *level = dds3PadVibrationState + 1;
     if (target > *level) {
         if (target - *level > 0x20) {
@@ -239,7 +239,7 @@ void dds3GetVibrationLevel(void)
     } else {
         *level = target;
     }
-    printf("PadActPow:%02x/%02x\n", D_00551B91, target);
+    printf("PadActPow:%02x/%02x\n", dds3PadVibrationCurrent, target);
 }
 
 void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {

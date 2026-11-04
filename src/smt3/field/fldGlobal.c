@@ -6,7 +6,6 @@
 #include "newdata.h"
 #include "field.h"
 
-extern s32 fldGb __attribute__((section(".data")));
 
 extern s32 dds3EffectFldTypeIsSpecial(s32 charId);
 
@@ -291,7 +290,7 @@ void fldSetModelFlag(s32 charId, s32 idx, s32 bit, s32 on)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         if (on != 0) {
             DDS3_GBWK->gb[type].flags[idx].modelFlag |= 1 << bit;
@@ -315,7 +314,7 @@ s32 fldGetModelFlag(s32 charId, s32 idx, s32 bit)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return 0;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         return ((u32)DDS3_GBWK->gb[type].flags[idx].modelFlag >> bit) & 1;
     }
@@ -330,7 +329,7 @@ void fldSetAnimeFlag(s32 charId, s32 idx, s32 bit, s32 on)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         if (on != 0) {
             DDS3_GBWK->gb[type].flags[idx].animeFlag |= 1 << bit;
@@ -354,7 +353,7 @@ s32 fldGetAnimeFlag(s32 charId, s32 idx, s32 bit)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return 0;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         return ((u32)DDS3_GBWK->gb[type].flags[idx].animeFlag >> bit) & 1;
     }
@@ -369,7 +368,7 @@ void fldSetAtariFlag(s32 charId, s32 idx, s32 bit, s32 on)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         if (on != 0) {
             DDS3_GBWK->gb[type].flags[idx].atariFlag |= 1 << bit;
@@ -393,7 +392,7 @@ s32 fldGbChkHit(s32 fld, s32 area, s32 blk)
     if (dds3EffectFldTypeIsSpecial(fld) != 0) {
         return 0;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = fld % 100;
         return ((u32)DDS3_GBWK->gb[type].flags[area].atariFlag >> blk) & 1;
     }
@@ -408,7 +407,7 @@ void fldSetModelFlag2(s32 charId, s32 idx, s32 bit, s32 on)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         if (on != 0) {
             DDS3_GBWK->gb[type].flags[idx].modelFlag2 |= 1 << bit;
@@ -432,7 +431,7 @@ s32 fldGetModelFlag2(s32 charId, s32 idx, s32 bit)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return 0;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         return ((u32)DDS3_GBWK->gb[type].flags[idx].modelFlag2 >> bit) & 1;
     }
@@ -447,7 +446,7 @@ void fldSetAnimeFlag2(s32 charId, s32 idx, s32 bit, s32 on)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         if (on != 0) {
             DDS3_GBWK->gb[type].flags[idx].animeFlag2 |= 1 << bit;
@@ -471,7 +470,7 @@ s32 fldGetAnimeFlag2(s32 charId, s32 idx, s32 bit)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return 0;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         return ((u32)DDS3_GBWK->gb[type].flags[idx].animeFlag2 >> bit) & 1;
     }
@@ -486,7 +485,7 @@ void fldSetAnimeId2(s32 charId, s32 idx, s32 slot, s32 id)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         DDS3_GBWK->gb[type].flags[idx].animeId2[slot] = id;
         return;
@@ -503,7 +502,7 @@ s32 fldGetAnimeId2(s32 charId, s32 idx, s32 slot)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return -1;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         id = DDS3_GBWK->gb[type].flags[idx].animeId2[slot];
     } else {
@@ -520,7 +519,7 @@ void fldSetNpcFlag(s32 charId, s32 idx, s32 bit, s32 on)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         if (on != 0) {
             DDS3_GBWK->gb[type].flags[idx].npcFlag |= 1 << bit;
@@ -544,7 +543,7 @@ s32 fldGbChkNpc(s32 fld, s32 area, s32 hojiID)
     if (dds3EffectFldTypeIsSpecial(fld) != 0) {
         return 0;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = fld % 100;
         return ((u32)DDS3_GBWK->gb[type].flags[area].npcFlag >> hojiID) & 1;
     }
@@ -559,7 +558,7 @@ void fldGbSetGimic(s32 fld, s32 area, s32 hojiID, s32 toplast)
     if (dds3EffectFldTypeIsSpecial(fld) != 0) {
         return;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = fld % 100;
         if (toplast != 0) {
             DDS3_GBWK->gb[type].flags[area].hojiFlag |= 1 << hojiID;
@@ -583,7 +582,7 @@ s32 fldGetHojiFlag(s32 charId, s32 idx, s32 bit)
     if (dds3EffectFldTypeIsSpecial(charId) != 0) {
         return 0;
     }
-    if (fldGb < 0x28) {
+    if (fldGlobalBase.area < 0x28) {
         type = charId % 100;
         return ((u32)DDS3_GBWK->gb[type].flags[idx].hojiFlag >> bit) & 1;
     }

@@ -6,8 +6,8 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
-/* Unused: shifts the compiler's declaration count; nbGetHojoCounterMin only matches with it. */
-extern s32 nbCalcDeclPad;
+/* FAKEMATCH: unused; shifts the compiler's declaration count, without it nbGetHojoCounterMin does not match. */
+extern s32 nbCalcFakematchDeclPad;
 
 typedef struct evtUnitHandle_t
 {

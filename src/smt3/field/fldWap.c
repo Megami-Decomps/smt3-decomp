@@ -97,7 +97,6 @@ extern f32 fldSkyFilterRate;
 
 extern f32 fldSkyFilterTime;
 
-extern s32 fldGb __attribute__((section(".data")));
 
 extern addr_t fldItemBoxObjBuf;
 
@@ -240,7 +239,6 @@ extern s32 gFldWapPanel;
 
 extern s32 gFldKyouseiTalk;
 
-extern s32 fldArea[];
 
 extern u8 D_00303020[];
 
@@ -375,7 +373,7 @@ u8 *fldDoor_Find3(void) {
     s32 idx = gFldWap_after_nextidx;
     doormovetbl_s *entry = &fldDoorTable[idx];
 
-    if (entry->floor == fldArea[0] + 1) {
+    if (entry->floor == fldGlobalBase.floor + 1) {
         if (entry->kind == 10) {
             scriptlabel = idx;
             gFldWapPanel = 8;
@@ -1077,7 +1075,7 @@ void fldDoor_EveBtlExit(s32 field, s32 eveno) {
             nextArea = entry->variant;
         }
         nextKind = entry->sequenceKind;
-        if (fldGb != nextArea) {
+        if (fldGlobalBase.area != nextArea) {
             fldBgmFadeOut();
         }
         fldWap_SetBgm(entry);
@@ -1452,7 +1450,7 @@ void fldSetupDoorScenes(void)
         door = &fldDoorTable[index];
         work = &fldDoorEventTable[index];
         if (door->kind == 2) {
-            if (door->floor != fldArea[0] + 1) continue;
+            if (door->floor != fldGlobalBase.floor + 1) continue;
             for (i = 0; i < fldEveRngCount; i++) {
                 if (gEvnRng[i]->name != NULL && strcmp(gEvnRng[i]->name, door->name) == 0) {
                     resource = gEvnRng[i];
@@ -1469,7 +1467,7 @@ void fldSetupDoorScenes(void)
             work->x2 = 0.0f;
             work->y2 = 0.0f;
             work->z2 = 0.0f;
-        } else if (door->kind == 1 && door->floor == fldArea[0] + 1) {
+        } else if (door->kind == 1 && door->floor == fldGlobalBase.floor + 1) {
             work->matter_resid1 = -1;
             if (door->motion != 0) {
                 matter = dds3SceneBasicSearchNameAndType(scene, 6, door->motionName);
@@ -1592,7 +1590,7 @@ s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
     doormovework_s *e;
     s32 i;
 
-    if (fldGb >= 200) {
+    if (fldGlobalBase.area >= 200) {
         return 0;
     }
     for (i = 0; i < 256; i++) {
