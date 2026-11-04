@@ -729,6 +729,9 @@ f64 __make_dp(s32 kind, s32 sign, s32 exp, s64 mant) {
 
 #ifdef FIX_BUGS
 f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant);
+#else
+/* The retail call has no prototype in scope, so it takes the int return. */
+extern s32 sdfPackQuadInt() FAKEMATCH_ASM_NAME("sdfPackQuad");
 #endif
 
 u32 dptofp(double x) {
@@ -745,7 +748,11 @@ u32 dptofp(double x) {
      * $v0. So what comes back is not the packed value at all. Retail does
      * this, and declaring the function moves the image, so the behaviour is
      * kept and the declaration sits behind FIX_BUGS. */
+#ifdef FIX_BUGS
     return sdfPackQuad(u.class, u.sign, u.normal_exp, m);
+#else
+    return sdfPackQuadInt(u.class, u.sign, u.normal_exp, m);
+#endif
 }
 
 u32 dptoul(f64 value) {
