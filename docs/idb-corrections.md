@@ -1439,3 +1439,6 @@ The guarded file-manager declaration of `EIntr` now agrees with its `s32` provid
 | `D_0054EC80` | `fldEncDrawName` | bytes `encProc`, the process name `fldEnc.c` starts `encDrawProc` under |
 | `D_00532780`, `D_00532790`, `D_005327A0`, `D_005326B8` | `fldNpcUnitName`, `fldNpcPlFormatB`, `fldNpcPlFormat`, `fldGenNpcPath` | bytes `NPC_UNIT`, `%sF%03db.NPL`, `%sF%03d.NPL`, `/fld/f/bin/gen_npc.PB` |
 | `D_003121D0`, `D_00314100` | `fldNpcDefaults`, `fldNpcOverrides` | `fldNpcTable_t` defaults indexed by NPC id; override records read from file (0x2A00 bytes) in `fldGlobal.c` |
+| `D_0053F3C8`, `D_0053F3D8`, `D_0053F3E8`, `D_0054FD98`, `D_0054FDA0` | `movieDrawProcName`, `movieManProcName`, `movieDirPath`, `movieExtIpu`, `movieExtIps` | bytes `movieDraw`, `movieMan`, `pfs0:/movie`, `.ipu`, `.ips` in `mviManager.c` |
+| `D_0054A360`, `D_0054A380` | `sdfIopModulePathCdrom`, `sdfIopModulePathHost` | bytes `cdrom0:\USERIRX\SDFIOPFL.IRX;1` and `pfs0:/userirx/sdfiopfl.irx`, tried in turn by the `sdfTmx.c` IOP loader |
+| `D_00343E40`, `D_00343BE8` | `movieCb`, `movieEntryTable` | the `sdfMovieCb_t` that `mviManager.c` opens, closes and queries; `dds3MovieEntry_t` rows indexed by `dds3PlayMovieByIndex` |

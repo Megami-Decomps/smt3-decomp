@@ -28,7 +28,7 @@ typedef struct
 
 extern rcvWork_t *shutdownfunc;
 
-extern sdfMovieCb_t D_00343E40;
+extern sdfMovieCb_t movieCb;
 
 extern void movieStop(void);
 
@@ -111,8 +111,8 @@ void MovieViewerDrawFrameInfo(void)
         sdfDrawTagLink(tag, dds3PrimFrameRect(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90,
                                               0x30000000, 0x60404040));
         sdfDrawTagLink(tag, sdfDevPrintf(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d",
-                                         D_00343E40.decodeCb.frame,
-                                         D_00343E40.decodeCb.frameCount));
+                                         movieCb.decodeCb.frame,
+                                         movieCb.decodeCb.frameCount));
     }
 }
 
@@ -123,9 +123,9 @@ s32 MovieViewerProc(dds3ProcessID_t *process)
     s32 nextTop;
 
     if (dds3PadButtonState[0x2D] != 0) {
-        D_00343E40.decodeCb.fps = 1;
+        movieCb.decodeCb.fps = 1;
     } else {
-        D_00343E40.decodeCb.fps = 0x1E;
+        movieCb.decodeCb.fps = 0x1E;
     }
     if (movieViewerWork.playing != 0) {
         if (dds3WaitMovieEnd() != 0) {
@@ -214,7 +214,7 @@ void movieViewerSetFlags(void)
 void movieViewerInitRegs(void)
 {
     movieViewerDebugFlag.regAddr = EE_ADDR(IPU_CTRL);
-    movieViewerDebugFlag.buffer = (u8 *)&D_00343E40;
+    movieViewerDebugFlag.buffer = (u8 *)&movieCb;
     movieViewerSetFlags();
 }
 

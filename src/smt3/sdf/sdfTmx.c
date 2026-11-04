@@ -578,8 +578,8 @@ extern s32 sceGetstat(const char *path, sdfSceIoStat_t *stat);
 extern s32 SdfIopFileRpc(const char *name, s32 dataSize, const void *data, s32 *outSize);
 extern s32 WakeupThread(s32 threadId);
 extern u8 sdfHddValid;
-extern char D_0054A360[];
-extern char D_0054A380[];
+extern char sdfIopModulePathCdrom[];
+extern char sdfIopModulePathHost[];
 extern u8 D_00594800[];
 
 void SdfFileRpcServerThreadProc(void)
@@ -593,11 +593,11 @@ void SdfFileRpcServerThreadProc(void)
     state->semaphore = sdfCreateSema(0, 1, 0);
     sceSifSetRpcQueue(&queue, GetThreadId());
     sceSifRegisterRpc((struct sifRpcServerData_t *)&server, 0x66504F49, (sceSifRpcFunc)sdfFileRpcHandler, D_00594800, NULL, NULL, (struct sifRpcDataQueue_t *)&queue);
-    modulePath = D_0054A360;
+    modulePath = sdfIopModulePathCdrom;
     if (sdfHddValid != 0) {
-        if (sceGetstat(D_0054A380, &stat) == 0) {
+        if (sceGetstat(sdfIopModulePathHost, &stat) == 0) {
             if ((stat.mode & 0xF000) == 0x2000) {
-                modulePath = D_0054A380;
+                modulePath = sdfIopModulePathHost;
             }
         }
     }
@@ -628,9 +628,9 @@ void LoadMcModules(const char *prefix, s32 moduleGroup) {
     sceMcInit();
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_0054A360);
+INCLUDE_RODATA(const s32, "sdf/sdfTmx", sdfIopModulePathCdrom);
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_0054A380);
+INCLUDE_RODATA(const s32, "sdf/sdfTmx", sdfIopModulePathHost);
 
 INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_0054A3A0);
 

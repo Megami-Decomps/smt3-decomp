@@ -27,7 +27,7 @@ extern rcvWork_t *shutdownfunc;
 
 extern void sdfChipFreeDirect(void *aPtr);
 
-extern sdfMovieCb_t D_00343E40;
+extern sdfMovieCb_t movieCb;
 
 extern s32 sdfMovieIsFinished(sdfMovieCb_t *movie);
 
@@ -51,7 +51,7 @@ typedef struct
     /* 0x04 */ sdfMovieInitParm_t descriptor;
 } dds3MovieEntry_t;
 
-extern dds3MovieEntry_t D_00343BE8[];
+extern dds3MovieEntry_t movieEntryTable[];
 
 extern void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descriptor);
 
@@ -69,27 +69,27 @@ extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 s32 movieDrawProc(void)
 {
-    release_movieobj2(&D_00343E40, &sdfGrOtTable[57]);
+    release_movieobj2(&movieCb, &sdfGrOtTable[57]);
     return 0;
 }
 
 extern void movieOpenStream(sdfMovieCb_t *stream, sdfMovieInitParm_t *descriptor, const char *path);
 
-extern char D_0053F3C8[];
+extern char movieDrawProcName[];
 
 void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descriptor)
 {
     if (PlayingNo == 0)
     {
-        movieOpenStream(&D_00343E40, descriptor, path);
+        movieOpenStream(&movieCb, descriptor, path);
         PlayingNo =
-            EE_ADDR_S(dds3StartProcess(D_0053F3C8, 0x2AFB, 1, 1, movieDrawProc, NULL, NULL));
+            EE_ADDR_S(dds3StartProcess(movieDrawProcName, 0x2AFB, 1, 1, movieDrawProc, NULL, NULL));
     }
 }
 
 void dds3PlayMovieByIndex(s32 index)
 {
-    dds3MovieEntry_t *entry = &D_00343BE8[index];
+    dds3MovieEntry_t *entry = &movieEntryTable[index];
 
     moviePlayFile_27041744(entry->path, &entry->descriptor);
 }
@@ -97,7 +97,7 @@ void dds3PlayMovieByIndex(s32 index)
 void movieStop(void)
 {
     if (PlayingNo != 0) {
-        movieCloseStream(&D_00343E40);
+        movieCloseStream(&movieCb);
         dds3KillProcess(PlayingNo, 0);
         PlayingNo = 0;
     }
@@ -105,12 +105,12 @@ void movieStop(void)
 
 s32 dds3WaitMovieEnd(void)
 {
-    return sdfMovieIsFinished(&D_00343E40);
+    return sdfMovieIsFinished(&movieCb);
 }
 
 u8 func_0022B7F8(void)
 {
-    return D_00343E40.decodeCb.playbackPhase;
+    return movieCb.decodeCb.playbackPhase;
 }
 
 s32 movieMan_Process(void)
@@ -121,12 +121,12 @@ s32 movieMan_Process(void)
 
 extern void sdfIpuInit(void);
 
-extern char D_0053F3D8[];
+extern char movieManProcName[];
 
 void *dds3StartMovieManager(void)
 {
     sdfIpuInit();
-    return dds3StartProcess(D_0053F3D8, 0x385, 1, 0, movieMan_Process, NULL, NULL);
+    return dds3StartProcess(movieManProcName, 0x385, 1, 0, movieMan_Process, NULL, NULL);
 }
 
 s32 dds3_22B880(void)
@@ -201,11 +201,11 @@ typedef struct
 
 extern u8 sdfHddValid;
 
-extern char D_0053F3E8[];
+extern char movieDirPath[];
 
-extern char D_0054FD98[];
+extern char movieExtIpu[];
 
-extern char D_0054FDA0[];
+extern char movieExtIps[];
 
 extern s32 sceDopen(const char *name);
 
@@ -235,7 +235,7 @@ void movieViewerScanDir(void)
     if (sdfHddValid == 0) {
         return;
     }
-    handle = sceDopen(D_0053F3E8);
+    handle = sceDopen(movieDirPath);
     if (handle < 0) {
         return;
     }
@@ -249,7 +249,7 @@ void movieViewerScanDir(void)
         if (ext == NULL) {
             continue;
         }
-        if (strcasecmp(ext, D_0054FD98) != 0 && strcasecmp(ext, D_0054FDA0) != 0) {
+        if (strcasecmp(ext, movieExtIpu) != 0 && strcasecmp(ext, movieExtIps) != 0) {
             continue;
         }
         count++;
@@ -326,17 +326,17 @@ void movieDebugDrawInfo(void)
                       0xFF0080, 0);
     }
 }
-INCLUDE_RODATA(const s32, "movie/mviManager", D_0053F3C8);
+INCLUDE_RODATA(const s32, "movie/mviManager", movieDrawProcName);
 
-INCLUDE_RODATA(const s32, "movie/mviManager", D_0053F3D8);
+INCLUDE_RODATA(const s32, "movie/mviManager", movieManProcName);
 
-INCLUDE_RODATA(const s32, "movie/mviManager", D_0053F3E8);
+INCLUDE_RODATA(const s32, "movie/mviManager", movieDirPath);
 
 INCLUDE_SDATA(const s32, "movie/mviManager", PlayingNo);
 
-INCLUDE_SDATA(const s32, "movie/mviManager", D_0054FD98);
+INCLUDE_SDATA(const s32, "movie/mviManager", movieExtIpu);
 
-INCLUDE_SDATA(const s32, "movie/mviManager", D_0054FDA0);
+INCLUDE_SDATA(const s32, "movie/mviManager", movieExtIps);
 
 INCLUDE_SDATA(const s32, "movie/mviManager", D_0054FDA8);
 
