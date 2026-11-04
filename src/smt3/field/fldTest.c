@@ -169,23 +169,23 @@ extern void FromRotation(f32 aAngle);
 
 
 
-extern dds3Basic_t *D_0054EAB0;
+extern dds3Basic_t *fldRunTama1Basic;
 
 extern dds3Basic_t *fldRunTama2Basic;
 
 extern dds3Basic_t *fldRunTama3Basic;
 
-extern s32 D_0054EABC;
+extern s32 fldRunTamaNext;
 
-extern sdfVector4Unaligned_t D_00531148;
+extern sdfVector4Unaligned_t fldRunTamaSetAxis;
 
 extern sdfVector4_t D_00531040;
 
-extern char D_00531050[], D_00531060[], D_00531070[];
+extern char fldTama1UnitName[], fldTama2UnitName[], fldTama3UnitName[];
 
-extern char D_00531080[], D_00531098[], D_005310B0[], D_005310C8[];
+extern char fldDsparkPcfPath[], fldDsmoke2Path[], fldDspark02Path[], fldGun02aPath[];
 
-extern char D_005310E0[], D_005310F8[], D_00531118[], D_00531130[];
+extern char fldGun01a0Path[], fldMuzzleB010Path[], fldDsmoke1Path[], fldDflash1Path[];
 
 extern fldTest_FLDRUN_EFF_t fldDspark01File;
 
@@ -213,11 +213,11 @@ typedef struct {
     s16 v[10];
 } fldTamaSeVol_t;
 
-extern fldTamaSeFrame_t D_00531158;
+extern fldTamaSeFrame_t fldRunTamaSeFrames1;
 
-extern fldTamaSeFrame_t D_00531180;
+extern fldTamaSeFrame_t fldRunTamaSeFrames2;
 
-extern fldTamaSeFrame_t D_005311A8;
+extern fldTamaSeFrame_t fldRunTamaSeFrames3;
 
 extern fldTamaSeVol_t fldTamaSeVol;
 
@@ -302,7 +302,7 @@ typedef struct
     s32 old_status;
 } fldTest_FLDRUN_DANTE_t;
 
-extern char D_00530F30[];
+extern char fldTestDrawName[];
 
 extern fldTest_FLDRUN_DANTE_t fldRun_Dante;
 
@@ -380,12 +380,12 @@ s32 ooyTestDrawProc(dds3ProcessID_t *aProcId)
 
 void InitOoyTest(void)
 {
-    dds3StartProcess(D_00530F30, DDS3_USERDRAW_PRIORITY, 0, 0, ooyTestDrawProc, NULL, NULL);
+    dds3StartProcess(fldTestDrawName, DDS3_USERDRAW_PRIORITY, 0, 0, ooyTestDrawProc, NULL, NULL);
 }
 
 void KillOoyTest(void)
 {
-    dds3KillProcessName(D_00530F30, 1);
+    dds3KillProcessName(fldTestDrawName, 1);
 }
 
 void fldElvGetFloorDigits(s32 x, s32 y, s32 floor)
@@ -568,7 +568,7 @@ void fldElvDrawFloorNum(void)
     fldElvGetFloorDigits(380, 26, display);
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldTest", D_00530F30);
+INCLUDE_RODATA(const s32, "field/fldTest", fldTestDrawName);
 
 INCLUDE_ASM(const s32, "field/fldTest", fldElvDrawFloorNum);
 #endif
@@ -625,22 +625,22 @@ typedef union {
     u32 indices[16];
 } fldSdwIndices_t;
 
-extern sdfVector3_t D_002FA950[], D_002FACC8[], D_002FADB8[], D_002FAED0[];
-extern sdfVector3_t D_002FB008[], D_002FB0B0[], D_002FB1C8[], D_002FB300[];
-extern sdfVector3_t D_002FB420[], D_002FB528[], D_002FB618[], D_002FB738[];
-extern sdfVector3_t D_002FB840[], D_002FB930[], D_002FBAC0[], D_002FBBC0[];
-extern fldSdwFace_t D_002FAA88[], D_002FAD28[], D_002FAE28[], D_002FAF48[];
-extern fldSdwFace_t D_002FB050[], D_002FB120[], D_002FB240[], D_002FB378[];
-extern fldSdwFace_t D_002FB498[], D_002FB588[], D_002FB690[], D_002FB7B0[];
-extern fldSdwFace_t D_002FB8A0[], D_002FB9D0[], D_002FBB30[], D_002FBC50[];
+extern sdfVector3_t fldSdwVertices04[], fldSdwVertices03[], fldSdwVertices08[], fldSdwVertices09[];
+extern sdfVector3_t fldSdwVertices07[], fldSdwVertices05[], fldSdwVertices06[], fldSdwVertices14[];
+extern sdfVector3_t fldSdwVertices15[], fldSdwVertices16[], fldSdwVertices11[], fldSdwVertices12[];
+extern sdfVector3_t fldSdwVertices13[], fldSdwVertices02[], fldSdwVertices01[], fldSdwVertices00[];
+extern fldSdwFace_t fldSdwFaces04[], fldSdwFaces03[], fldSdwFaces08[], fldSdwFaces09[];
+extern fldSdwFace_t fldSdwFaces07[], fldSdwFaces05[], fldSdwFaces06[], fldSdwFaces14[];
+extern fldSdwFace_t fldSdwFaces15[], fldSdwFaces16[], fldSdwFaces11[], fldSdwFaces12[];
+extern fldSdwFace_t fldSdwFaces13[], fldSdwFaces02[], fldSdwFaces01[], fldSdwFaces00[];
 extern volatile fldSdwIndices_t fldSdwTriIndices, fldSdwQuadIndices;
-extern fldSdwTriangle_t D_005574E0[50];
+extern fldSdwTriangle_t fldSdwTriangles[50];
 extern fldSdwEdge_t fldShadowVertexTable[26][26];
-extern sdfVector4_t fldShadowTable[26][26], D_0055AB70[26][26];
+extern sdfVector4_t fldShadowTable[26][26], fldShadowTableB[26][26];
 extern sdfVector4_t fldSdwDrawVec, aViewEye, aViewTarget;
-extern f32 D_002F5A80[], D_002FCA60[];
-extern f32 D_0054C1E8, D_0054C1EC, D_0054C1F0, D_0054C1F4, D_0054C1F8, D_0054C1FC;
-extern s32 fldShadowWork, D_0054EA8C, D_0054EA90;
+extern f32 fldFixedLight[], fldSkyLight[];
+extern f32 fldSdwLightNearDist, fldSdwLightNearDir, fldSdwSkyNearDist, fldSdwSkyNearX, fldSdwSkyNearZ, fldSdwSkyBias;
+extern s32 fldShadowWork, fldSdwBoxAlpha, fldSdwLightTracking;
 extern sdfMat_t *fldDrawEnv;
 extern sdfGrOt_t sdfGrOtTable[];
 extern s32 rsetFrameMaskOtOffset;
@@ -669,20 +669,20 @@ static inline s32 fldSdwShape(s32 part, s32 area, sdfVector3_t **vertices,
 {
     switch (part) {
     case 0:
-        *vertices = D_002FBBC0;
-        *faces = D_002FBC50;
+        *vertices = fldSdwVertices00;
+        *faces = fldSdwFaces00;
         *faceCount = 20;
         *edgeCount = 12;
         break;
     case 1:
-        *vertices = D_002FBAC0;
-        *faces = D_002FBB30;
+        *vertices = fldSdwVertices01;
+        *faces = fldSdwFaces01;
         *faceCount = 12;
         *edgeCount = 9;
         break;
     case 2:
-        *vertices = D_002FB930;
-        *faces = D_002FB9D0;
+        *vertices = fldSdwVertices02;
+        *faces = fldSdwFaces02;
         *faceCount = 20;
         *edgeCount = 13;
         break;
@@ -690,57 +690,57 @@ static inline s32 fldSdwShape(s32 part, s32 area, sdfVector3_t **vertices,
         if (area >= 500) {
             return 0;
         }
-        *vertices = D_002FACC8;
-        *faces = D_002FAD28;
+        *vertices = fldSdwVertices03;
+        *faces = fldSdwFaces03;
         *faceCount = 12;
         *edgeCount = 8;
         break;
     case 4:
-        *vertices = D_002FA950;
-        *faces = D_002FAA88;
+        *vertices = fldSdwVertices04;
+        *faces = fldSdwFaces04;
         *faceCount = 48;
         *edgeCount = 26;
         break;
     case 5:
-        *vertices = D_002FB0B0;
-        *faces = D_002FB120;
+        *vertices = fldSdwVertices05;
+        *faces = fldSdwFaces05;
         *faceCount = 14;
         *edgeCount = 9;
         break;
     case 6:
-        *vertices = D_002FB1C8;
-        *faces = D_002FB240;
+        *vertices = fldSdwVertices06;
+        *faces = fldSdwFaces06;
         *faceCount = 16;
         *edgeCount = 10;
         break;
     case 7:
     case 10:
-        *vertices = D_002FB008;
-        *faces = D_002FB050;
+        *vertices = fldSdwVertices07;
+        *faces = fldSdwFaces07;
         *faceCount = 8;
         *edgeCount = 6;
         break;
     case 8:
-        *vertices = D_002FADB8;
-        *faces = D_002FAE28;
+        *vertices = fldSdwVertices08;
+        *faces = fldSdwFaces08;
         *faceCount = 14;
         *edgeCount = 9;
         break;
     case 9:
-        *vertices = D_002FAED0;
-        *faces = D_002FAF48;
+        *vertices = fldSdwVertices09;
+        *faces = fldSdwFaces09;
         *faceCount = 16;
         *edgeCount = 10;
         break;
     case 11:
-        *vertices = D_002FB618;
-        *faces = D_002FB690;
+        *vertices = fldSdwVertices11;
+        *faces = fldSdwFaces11;
         *faceCount = 14;
         *edgeCount = 10;
         break;
     case 12:
-        *vertices = D_002FB738;
-        *faces = D_002FB7B0;
+        *vertices = fldSdwVertices12;
+        *faces = fldSdwFaces12;
         *faceCount = 12;
         *edgeCount = 10;
         break;
@@ -748,20 +748,20 @@ static inline s32 fldSdwShape(s32 part, s32 area, sdfVector3_t **vertices,
         if (area >= 500) {
             return 0;
         }
-        *vertices = D_002FB840;
-        *faces = D_002FB8A0;
+        *vertices = fldSdwVertices13;
+        *faces = fldSdwFaces13;
         *faceCount = 12;
         *edgeCount = 8;
         break;
     case 14:
-        *vertices = D_002FB300;
-        *faces = D_002FB378;
+        *vertices = fldSdwVertices14;
+        *faces = fldSdwFaces14;
         *faceCount = 14;
         *edgeCount = 10;
         break;
     case 15:
-        *vertices = D_002FB420;
-        *faces = D_002FB498;
+        *vertices = fldSdwVertices15;
+        *faces = fldSdwFaces15;
         *faceCount = 12;
         *edgeCount = 10;
         break;
@@ -769,8 +769,8 @@ static inline s32 fldSdwShape(s32 part, s32 area, sdfVector3_t **vertices,
         if (area >= 500) {
             return 0;
         }
-        *vertices = D_002FB528;
-        *faces = D_002FB588;
+        *vertices = fldSdwVertices16;
+        *faces = fldSdwFaces16;
         *faceCount = 12;
         *edgeCount = 8;
         break;
@@ -798,10 +798,10 @@ static inline void fldSdwRecordEdge(s32 first, s32 second, sdfVector4_t *a, sdfV
     edge->reverse = reverse;
     if (reverse == 0) {
         SDF_VU0_COPYVECTOR(&fldShadowTable[low][high], a);
-        SDF_VU0_COPYVECTOR(&D_0055AB70[low][high], b);
+        SDF_VU0_COPYVECTOR(&fldShadowTableB[low][high], b);
     } else {
         SDF_VU0_COPYVECTOR(&fldShadowTable[low][high], b);
-        SDF_VU0_COPYVECTOR(&D_0055AB70[low][high], a);
+        SDF_VU0_COPYVECTOR(&fldShadowTableB[low][high], a);
     }
 }
 
@@ -862,12 +862,12 @@ void fldSdwDraw(dds3Basic_t *basic)
     if (fldGlobalBase.area < 500) {
         dds3UnitObjectBasicWorkData_t *work = basic->workdata;
         if (work->EL_serialID != -1) {
-            if (D_0054EA90 == 0) {
-                if (D_0054EA8C >= 21) {
-                    D_0054EA8C -= 2;
+            if (fldSdwLightTracking == 0) {
+                if (fldSdwBoxAlpha >= 21) {
+                    fldSdwBoxAlpha -= 2;
                 } else {
-                    D_0054EA90 = 1;
-                    D_0054EA8C = 8;
+                    fldSdwLightTracking = 1;
+                    fldSdwBoxAlpha = 8;
                 }
             } else {
                 dds3Basic_t *light = dds3SearchSceneBasic(dds3GetActiveScene(), work->EL_serialID, 9);
@@ -882,55 +882,55 @@ void fldSdwDraw(dds3Basic_t *basic)
                     fldSdwDrawVec.z = mark.z - light->poseset->pos.z;
                 }
                 distance = sdfSqrt(fldSdwDrawVec.x * fldSdwDrawVec.x + fldSdwDrawVec.z * fldSdwDrawVec.z);
-                if (distance < D_0054C1E8) {
-                    fldSdwDrawVec.z = D_0054C1EC;
+                if (distance < fldSdwLightNearDist) {
+                    fldSdwDrawVec.z = fldSdwLightNearDir;
                     fldSdwDrawVec.y = 2.0f;
-                    fldSdwDrawVec.x = D_0054C1EC;
+                    fldSdwDrawVec.x = fldSdwLightNearDir;
                 } else {
                     fldSdwDrawVec.y = 1.0f;
                     fldSdwDrawVec.z /= distance;
                     fldSdwDrawVec.x /= distance;
                 }
-                if (D_0054EA8C < 48) {
-                    D_0054EA8C += 2;
+                if (fldSdwBoxAlpha < 48) {
+                    fldSdwBoxAlpha += 2;
                 }
             }
             length = 200.0f;
-        } else if (D_0054EA90 == 0) {
-            f32 *light = fldGlobalBase.area >= 200 ? D_002F5A80 : D_002FCA60;
+        } else if (fldSdwLightTracking == 0) {
+            f32 *light = fldGlobalBase.area >= 200 ? fldFixedLight : fldSkyLight;
             f32 distance, extra;
             s32 alpha;
             fldSdwDrawVec.z = light[6];
             fldSdwDrawVec.x = light[4];
             fldSdwDrawVec.y = light[5];
             distance = sdfSqrt(fldSdwDrawVec.x * fldSdwDrawVec.x + fldSdwDrawVec.z * fldSdwDrawVec.z);
-            if (distance < D_0054C1F0) {
-                fldSdwDrawVec.x = D_0054C1F4;
-                extra = D_0054C1F8;
+            if (distance < fldSdwSkyNearDist) {
+                fldSdwDrawVec.x = fldSdwSkyNearX;
+                extra = fldSdwSkyNearZ;
                 fldSdwDrawVec.z = extra;
                 fldSdwDrawVec.y = 2.0f;
             } else {
                 fldSdwDrawVec.y = 2.0f;
                 fldSdwDrawVec.z /= distance;
                 fldSdwDrawVec.x /= distance;
-                extra = D_0054C1FC;
+                extra = fldSdwSkyBias;
             }
             fldSdwDrawVec.x += extra;
-            alpha = D_0054EA8C;
+            alpha = fldSdwBoxAlpha;
             if (alpha >= 21) {
                 alpha -= 2;
-                D_0054EA8C = alpha;
+                fldSdwBoxAlpha = alpha;
             }
             if (alpha < 20) {
-                D_0054EA8C = alpha + 2;
+                fldSdwBoxAlpha = alpha + 2;
             }
             length = 200.0f;
         } else {
-            if (D_0054EA8C < 21) {
-                D_0054EA90 = 0;
-                D_0054EA8C = 6;
+            if (fldSdwBoxAlpha < 21) {
+                fldSdwLightTracking = 0;
+                fldSdwBoxAlpha = 6;
             } else {
-                D_0054EA8C -= 4;
+                fldSdwBoxAlpha -= 4;
             }
             length = 200.0f;
         }
@@ -1004,9 +1004,9 @@ void fldSdwDraw(dds3Basic_t *basic)
         fldShadowWork = 0;
         for (i = 0; i < 50; i++) {
             for (j = 0; j < 3; j++) {
-                D_005574E0[i].vertex[j].x = 0.0f;
-                D_005574E0[i].vertex[j].y = 0.0f;
-                D_005574E0[i].vertex[j].z = 0.0f;
+                fldSdwTriangles[i].vertex[j].x = 0.0f;
+                fldSdwTriangles[i].vertex[j].y = 0.0f;
+                fldSdwTriangles[i].vertex[j].z = 0.0f;
             }
         }
         if (control->modelParts[part] < 0) {
@@ -1055,28 +1055,28 @@ void fldSdwDraw(dds3Basic_t *basic)
                 fldSdwRecordEdge(indices->vertex[0], indices->vertex[1], &v0, &v1);
                 fldSdwRecordEdge(indices->vertex[1], indices->vertex[2], &v1, &v2);
                 fldSdwRecordEdge(indices->vertex[2], indices->vertex[0], &v2, &v0);
-                D_005574E0[fldShadowWork].vertex[0].x = v0.x;
-                D_005574E0[fldShadowWork].vertex[0].y = v0.y;
-                D_005574E0[fldShadowWork].vertex[0].z = v0.z;
-                D_005574E0[fldShadowWork].vertex[1].x = v1.x;
-                D_005574E0[fldShadowWork].vertex[1].y = v1.y;
-                D_005574E0[fldShadowWork].vertex[1].z = v1.z;
-                D_005574E0[fldShadowWork].vertex[2].x = v2.x;
-                D_005574E0[fldShadowWork].vertex[2].y = v2.y;
-                D_005574E0[fldShadowWork].vertex[2].z = v2.z;
+                fldSdwTriangles[fldShadowWork].vertex[0].x = v0.x;
+                fldSdwTriangles[fldShadowWork].vertex[0].y = v0.y;
+                fldSdwTriangles[fldShadowWork].vertex[0].z = v0.z;
+                fldSdwTriangles[fldShadowWork].vertex[1].x = v1.x;
+                fldSdwTriangles[fldShadowWork].vertex[1].y = v1.y;
+                fldSdwTriangles[fldShadowWork].vertex[1].z = v1.z;
+                fldSdwTriangles[fldShadowWork].vertex[2].x = v2.x;
+                fldSdwTriangles[fldShadowWork].vertex[2].y = v2.y;
+                fldSdwTriangles[fldShadowWork].vertex[2].z = v2.z;
                 fldShadowWork++;
             } else if (fldGlobalBase.area < 500 || part == 2 || part == 3 || part == 4 ||
                        part == 7 || part == 10 || part == 11 || part == 12 || part == 13 ||
                        part == 14 || part == 15 || part == 16) {
-                D_005574E0[fldShadowWork].vertex[0].x = v0.x + extrusion[part].x;
-                D_005574E0[fldShadowWork].vertex[0].y = v0.y + extrusion[part].y;
-                D_005574E0[fldShadowWork].vertex[0].z = v0.z + extrusion[part].z;
-                D_005574E0[fldShadowWork].vertex[1].x = v1.x + extrusion[part].x;
-                D_005574E0[fldShadowWork].vertex[1].y = v1.y + extrusion[part].y;
-                D_005574E0[fldShadowWork].vertex[1].z = v1.z + extrusion[part].z;
-                D_005574E0[fldShadowWork].vertex[2].x = v2.x + extrusion[part].x;
-                D_005574E0[fldShadowWork].vertex[2].y = v2.y + extrusion[part].y;
-                D_005574E0[fldShadowWork].vertex[2].z = v2.z + extrusion[part].z;
+                fldSdwTriangles[fldShadowWork].vertex[0].x = v0.x + extrusion[part].x;
+                fldSdwTriangles[fldShadowWork].vertex[0].y = v0.y + extrusion[part].y;
+                fldSdwTriangles[fldShadowWork].vertex[0].z = v0.z + extrusion[part].z;
+                fldSdwTriangles[fldShadowWork].vertex[1].x = v1.x + extrusion[part].x;
+                fldSdwTriangles[fldShadowWork].vertex[1].y = v1.y + extrusion[part].y;
+                fldSdwTriangles[fldShadowWork].vertex[1].z = v1.z + extrusion[part].z;
+                fldSdwTriangles[fldShadowWork].vertex[2].x = v2.x + extrusion[part].x;
+                fldSdwTriangles[fldShadowWork].vertex[2].y = v2.y + extrusion[part].y;
+                fldSdwTriangles[fldShadowWork].vertex[2].z = v2.z + extrusion[part].z;
                 fldShadowWork++;
             }
         }
@@ -1109,7 +1109,7 @@ void fldSdwDraw(dds3Basic_t *basic)
             }
             rsetTest(1, 0, 0x80, 1, 0, 0, 1, 3);
             for (i = 0; i < fldShadowWork; i++) {
-                fldSdwTriangle_t *faceData = &D_005574E0[i];
+                fldSdwTriangle_t *faceData = &fldSdwTriangles[i];
                 v0.x = faceData->vertex[0].x;
                 v0.y = faceData->vertex[0].y;
                 v0.z = faceData->vertex[0].z;
@@ -1152,7 +1152,7 @@ void fldSdwDraw(dds3Basic_t *basic)
                     fldSdwEdge_t *edge = &fldShadowVertexTable[i][j];
                     if (edge->count == 1) {
                         SDF_VU0_COPYVECTOR(&v0, &fldShadowTable[i][j]);
-                        SDF_VU0_COPYVECTOR(&v1, &D_0055AB70[i][j]);
+                        SDF_VU0_COPYVECTOR(&v1, &fldShadowTableB[i][j]);
                         SDF_VU0_COPYVECTOR(&quad[0], &v0);
                         SDF_VU0_COPYVECTOR(&quad[1], &v1);
                         quad[2].x = v1.x + extrusion[part].x;
@@ -1214,7 +1214,7 @@ void fldSdwDraw(dds3Basic_t *basic)
         rsetAlpha(0);
         aDrawBoxF_Direct((s32)(minX * 16.0f), (s32)(minY * 16.0f),
                          (s32)(maxX * 16.0f), (s32)(maxY * 16.0f),
-                         0, 0, 0, D_0054EA8C < 0 ? 0 : D_0054EA8C);
+                         0, 0, 0, fldSdwBoxAlpha < 0 ? 0 : fldSdwBoxAlpha);
     }
     rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
     rsetAlpha(0);
@@ -1249,18 +1249,18 @@ void fldRunTamaInit(void)
     SDF_VU0_LOADVECTOR_B(&rot);
     Mult();
     SDF_VU0_STOREVECTOR_NOMEM(&rot);
-    D_0054EAB0 = dds3AddUnitObjectBasic(dds3AllocObjectId(), &pos, &rot);
-    dds3SetUnitObjectId(D_0054EAB0, D_00531050);
-    dds3ObjectBaseMakeUnit(D_0054EAB0, 2, 0x11);
-    dds3ObjectBaseOnFlag(D_0054EAB0, 1);
-    dds3ObjectBaseOnFlag(D_0054EAB0, 0x100);
+    fldRunTama1Basic = dds3AddUnitObjectBasic(dds3AllocObjectId(), &pos, &rot);
+    dds3SetUnitObjectId(fldRunTama1Basic, fldTama1UnitName);
+    dds3ObjectBaseMakeUnit(fldRunTama1Basic, 2, 0x11);
+    dds3ObjectBaseOnFlag(fldRunTama1Basic, 1);
+    dds3ObjectBaseOnFlag(fldRunTama1Basic, 0x100);
     fldRunTama2Basic = dds3AddUnitObjectBasic(dds3AllocObjectId(), &pos, &rot);
-    dds3SetUnitObjectId(fldRunTama2Basic, D_00531060);
+    dds3SetUnitObjectId(fldRunTama2Basic, fldTama2UnitName);
     dds3ObjectBaseMakeUnit(fldRunTama2Basic, 2, 0x12);
     dds3ObjectBaseOnFlag(fldRunTama2Basic, 1);
     dds3ObjectBaseOnFlag(fldRunTama2Basic, 0x100);
     fldRunTama3Basic = dds3AddUnitObjectBasic(dds3AllocObjectId(), &pos, &rot);
-    dds3SetUnitObjectId(fldRunTama3Basic, D_00531070);
+    dds3SetUnitObjectId(fldRunTama3Basic, fldTama3UnitName);
     dds3ObjectBaseMakeUnit(fldRunTama3Basic, 2, 0x13);
     dds3ObjectBaseOnFlag(fldRunTama3Basic, 1);
     dds3ObjectBaseOnFlag(fldRunTama3Basic, 0x100);
@@ -1274,7 +1274,7 @@ void fldRunTamaInit(void)
     res->x = 0.0f;
     res->y = 0.0f;
     res->z = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_00531080, (u32 *)&res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(fldDsparkPcfPath, (u32 *)&res->ptr, &res->size);
     res = &fldDsmoke2File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1286,7 +1286,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_00531098, (u32 *)&res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(fldDsmoke2Path, (u32 *)&res->ptr, &res->size);
     res = &fldDspark02File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1298,7 +1298,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_005310B0, (u32 *)&res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(fldDspark02Path, (u32 *)&res->ptr, &res->size);
     res = &fldGun02aFile;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1310,7 +1310,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_005310C8, (u32 *)&res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(fldGun02aPath, (u32 *)&res->ptr, &res->size);
     res = &fldGun01a0File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1322,7 +1322,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_005310E0, (u32 *)&res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(fldGun01a0Path, (u32 *)&res->ptr, &res->size);
     res = &fldMuzzleB010File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1334,7 +1334,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_005310F8, (u32 *)&res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(fldMuzzleB010Path, (u32 *)&res->ptr, &res->size);
     res = &fldDsmoke1File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1346,7 +1346,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_00531118, (u32 *)&res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(fldDsmoke1Path, (u32 *)&res->ptr, &res->size);
     res = &fldDflash1File;
     res->mhFile = NULL;
     res->ptr = NULL;
@@ -1358,7 +1358,7 @@ void fldRunTamaInit(void)
     res->y = 0.0f;
     res->z = 0.0f;
     res->r = 0.0f;
-    res->mhFile = sdfDevLoadFileEx(D_00531130, (u32 *)&res->ptr, &res->size);
+    res->mhFile = sdfDevLoadFileEx(fldDflash1Path, (u32 *)&res->ptr, &res->size);
 }
 
 /* NON_MATCHING: 27 of 47 words differ (first at +0x2C). */
@@ -1511,7 +1511,7 @@ void fldRunTamaSet(f32 x, f32 y, f32 z, f32 r)
     pos.w = 1.0f;
     memset(&rot, 0, sizeof(rot));
     rot.w = 1.0f;
-    axis = D_00531148;
+    axis = fldRunTamaSetAxis;
     pos.x = x;
     pos.y = y;
     pos.z = z;
@@ -1519,12 +1519,12 @@ void fldRunTamaSet(f32 x, f32 y, f32 z, f32 r)
     r = r * 3.14f;
     FromRotation(r / 180.0f);
     SDF_VU0_STOREVECTOR(&rot);
-    switch (D_0054EABC) {
+    switch (fldRunTamaNext) {
     case 0:
-        dds3ObjectBaseOffFlag(D_0054EAB0, 1);
-        mdlSingleMotion(dds3ObjectBaseGetModelHandle(D_0054EAB0), 0, 0);
-        dds3SetRotPoseSet(D_0054EAB0, &rot);
-        dds3SetPosPoseSet(D_0054EAB0, &pos);
+        dds3ObjectBaseOffFlag(fldRunTama1Basic, 1);
+        mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldRunTama1Basic), 0, 0);
+        dds3SetRotPoseSet(fldRunTama1Basic, &rot);
+        dds3SetPosPoseSet(fldRunTama1Basic, &pos);
         break;
     case 1:
         dds3ObjectBaseOffFlag(fldRunTama2Basic, 1);
@@ -1539,8 +1539,8 @@ void fldRunTamaSet(f32 x, f32 y, f32 z, f32 r)
         dds3SetPosPoseSet(fldRunTama3Basic, &pos);
         break;
     }
-    D_0054EABC = D_0054EABC + 1;
-    D_0054EABC = D_0054EABC % 3;
+    fldRunTamaNext = fldRunTamaNext + 1;
+    fldRunTamaNext = fldRunTamaNext % 3;
 }
 
 /* NON_MATCHING: 165 of 230 words differ (first at +0x34). */
@@ -1558,15 +1558,15 @@ void fldRunTamaSe(void)
 
     memset(&pos, 0, sizeof(pos));
     pos.w = 1.0f;
-    frame1 = D_00531158;
-    frame2 = D_00531180;
-    frame3 = D_005311A8;
+    frame1 = fldRunTamaSeFrames1;
+    frame2 = fldRunTamaSeFrames2;
+    frame3 = fldRunTamaSeFrames3;
     vol = fldTamaSeVol;
-    model = dds3ObjectBaseGetModelHandle(D_0054EAB0);
+    model = dds3ObjectBaseGetModelHandle(fldRunTama1Basic);
     now = model->first->frame;
     for (i = 0; i < 10; i++) {
         if (frame1.f[i] - 0.5f < now && now < frame1.f[i] + 0.5f) {
-            dds3GetPosPoseSet(D_0054EAB0);
+            dds3GetPosPoseSet(fldRunTama1Basic);
             SDF_VU0_STOREVECTOR_MEMOPS(pos);
             p2sdPlaySE(0x6F0006,
                        fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128 / 2, 0x3F);
@@ -1602,35 +1602,35 @@ INCLUDE_ASM(const s32, "field/fldTest", fldRunTamaSe);
 
 INCLUDE_RODATA(const s32, "field/fldTest", D_00531040);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531050);
+INCLUDE_RODATA(const s32, "field/fldTest", fldTama1UnitName);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531060);
+INCLUDE_RODATA(const s32, "field/fldTest", fldTama2UnitName);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531070);
+INCLUDE_RODATA(const s32, "field/fldTest", fldTama3UnitName);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531080);
+INCLUDE_RODATA(const s32, "field/fldTest", fldDsparkPcfPath);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531098);
+INCLUDE_RODATA(const s32, "field/fldTest", fldDsmoke2Path);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_005310B0);
+INCLUDE_RODATA(const s32, "field/fldTest", fldDspark02Path);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_005310C8);
+INCLUDE_RODATA(const s32, "field/fldTest", fldGun02aPath);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_005310E0);
+INCLUDE_RODATA(const s32, "field/fldTest", fldGun01a0Path);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_005310F8);
+INCLUDE_RODATA(const s32, "field/fldTest", fldMuzzleB010Path);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531118);
+INCLUDE_RODATA(const s32, "field/fldTest", fldDsmoke1Path);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531130);
+INCLUDE_RODATA(const s32, "field/fldTest", fldDflash1Path);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531148);
+INCLUDE_RODATA(const s32, "field/fldTest", fldRunTamaSetAxis);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531158);
+INCLUDE_RODATA(const s32, "field/fldTest", fldRunTamaSeFrames1);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531180);
+INCLUDE_RODATA(const s32, "field/fldTest", fldRunTamaSeFrames2);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_005311A8);
+INCLUDE_RODATA(const s32, "field/fldTest", fldRunTamaSeFrames3);
 
 INCLUDE_RODATA(const s32, "field/fldTest", fldTamaSeVol);
 
@@ -1789,8 +1789,8 @@ f32 fldTurnToward(f32 cur, f32 target, f32 speed, f32 minStep) {
 
 extern u32 dds3GetRandA(void *name);
 extern s32 fldHitChkEnemy(const f32 *position, const f32 *target, f32 *hitPosition);
-extern char D_0054EAC0[];
-extern char D_0054EAC8[];
+extern char fldDataNgMsg[];
+extern char fldMsg1KO[];
 
 void fldRunAiCng(s32 mode)
 {
@@ -1850,7 +1850,7 @@ void fldRunAiCng(s32 mode)
             fldRun_Dante.RouteDataTop = route;
             fldRun_Dante.angleToPlayer = route->angle;
         } else {
-            printf(D_0054EAC0);
+            printf(fldDataNgMsg);
             fldRun_Dante.RouteDataTop = NULL;
             fldRun_Dante.speed = 0.0f;
             fldRun_Dante.nextframe = 20;
@@ -1935,7 +1935,7 @@ void fldRunAiCng(s32 mode)
                 if (fldHitChkEnemy(position, targetPos, hitPosition) != -1) {
                     route = routeBase;
                 } else {
-                    printf(D_0054EAC8);
+                    printf(fldMsg1KO);
                     fldRun_Dante.now++;
                 }
             }
@@ -2285,7 +2285,7 @@ void fldRunDanteSoba(void)
 }
 
 /* Native "Re1KO\n" string: seven bytes including NUL; keep its .sdata slot. */
-extern const char D_0054EAD0[];
+extern const char fldMsgRe1KO[];
 
 void fldRunDantePatr(void)
 {
@@ -2338,7 +2338,7 @@ void fldRunDantePatr(void)
             if (fldHitChkEnemy(position, target, hitPosition) != -1) {
                 routeEntry = routeBase;
             } else {
-                printf(D_0054EAD0);
+                printf(fldMsgRe1KO);
                 fldRun_Dante.now++;
                 fldRun_Dante.tikamiti = 1;
             }
@@ -3259,9 +3259,9 @@ s32 fldRunEncountChk(void)
 }
 
 #ifdef NON_MATCHING
-extern fldDanteDoor_t D_002FBF00, D_002FBF10, D_002FBF20;
-extern fldDanteDoor_t D_002FBF40, D_002FBF50, D_002FBF60;
-extern char D_0054EAE0[];
+extern fldDanteDoor_t fldDanteDoor0, fldDanteDoor1, fldDanteDoor2;
+extern fldDanteDoor_t fldDanteDoor4, fldDanteDoor5, fldDanteDoor6;
+extern char fldMsg2A[];
 extern s32 fldGetRestoreMode(void);
 
 static inline void fldRunDanteDoorPosition(void)
@@ -3279,10 +3279,10 @@ static inline void fldRunDanteDoorPosition(void)
 
 static inline void fldRunDanteSpecialDoor(void)
 {
-    fldRun_Dante.angleToPlayer = D_002FBF00.angle;
-    fldRun_Dante.ix = D_002FBF00.ix;
-    fldRun_Dante.iz = D_002FBF00.iz;
-    fldRun_Dante.turn = 180.0f - D_002FBF00.angle;
+    fldRun_Dante.angleToPlayer = fldDanteDoor0.angle;
+    fldRun_Dante.ix = fldDanteDoor0.ix;
+    fldRun_Dante.iz = fldDanteDoor0.iz;
+    fldRun_Dante.turn = 180.0f - fldDanteDoor0.angle;
     fldRun_Dante.pDoor = NULL;
     fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
     fldRun_Dante.flag |= 0x20;
@@ -3331,16 +3331,16 @@ void fldRunDanteStanceSet(s32 stance)
             fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
             fldRunAiCng(6);
             fldRunDanteSetModel();
-            printf(D_0054EAE0);
+            printf(fldMsg2A);
             break;
         }
         if (evtBitCheck(0x7B1) && evtBitCheck(0x7B2)) {
             fldRunDanteSpecialDoor();
         } else {
             if (fldGlobalBase.previousFloor == 3 || !(fldGlobalBase.z < -4000.0f)) {
-                fldRun_Dante.pDoor = &D_002FBF20;
+                fldRun_Dante.pDoor = &fldDanteDoor2;
             } else {
-                fldRun_Dante.pDoor = &D_002FBF10;
+                fldRun_Dante.pDoor = &fldDanteDoor1;
             }
             fldRunDanteDoorPosition();
         }
@@ -3354,7 +3354,7 @@ void fldRunDanteStanceSet(s32 stance)
             fldRunDanteSetModel();
             break;
         }
-        fldRun_Dante.pDoor = fldGlobalBase.z < -4000.0f ? &D_002FBF40 : &D_002FBF50;
+        fldRun_Dante.pDoor = fldGlobalBase.z < -4000.0f ? &fldDanteDoor4 : &fldDanteDoor5;
         fldRunDanteDoorPosition();
         break;
     case 6:
@@ -3366,7 +3366,7 @@ void fldRunDanteStanceSet(s32 stance)
             fldRunDanteSetModel();
             break;
         }
-        fldRun_Dante.pDoor = &D_002FBF60;
+        fldRun_Dante.pDoor = &fldDanteDoor6;
         fldRunDanteDoorPosition();
         break;
     case 9:
@@ -3392,11 +3392,11 @@ void fldRunDanteStanceSet(s32 stance)
         break;
     case 11:
     case 12:
-        fldRun_Dante.pDoor = &D_002FBF20;
-        fldRun_Dante.ix = D_002FBF20.ix;
-        fldRun_Dante.iz = D_002FBF20.iz;
-        fldRun_Dante.turn = 180.0f - D_002FBF20.angle;
-        fldRun_Dante.angleToPlayer = D_002FBF20.angle;
+        fldRun_Dante.pDoor = &fldDanteDoor2;
+        fldRun_Dante.ix = fldDanteDoor2.ix;
+        fldRun_Dante.iz = fldDanteDoor2.iz;
+        fldRun_Dante.turn = 180.0f - fldDanteDoor2.angle;
+        fldRun_Dante.angleToPlayer = fldDanteDoor2.angle;
         fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
         fldRunAiCng(2);
         if (stance == 11) {
@@ -3427,9 +3427,9 @@ INCLUDE_SDATA(const s32, "field/fldTest", fldElvState);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldShadowWork);
 
-INCLUDE_SDATA(const s32, "field/fldTest", D_0054EA8C);
+INCLUDE_SDATA(const s32, "field/fldTest", fldSdwBoxAlpha);
 
-INCLUDE_SDATA(const s32, "field/fldTest", D_0054EA90);
+INCLUDE_SDATA(const s32, "field/fldTest", fldSdwLightTracking);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldRun_MAP_OX);
 
@@ -3449,25 +3449,25 @@ INCLUDE_SDATA(const s32, "field/fldTest", pFroMapHead);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldRunMapScale);
 
-INCLUDE_SDATA(const s32, "field/fldTest", D_0054EAB0);
+INCLUDE_SDATA(const s32, "field/fldTest", fldRunTama1Basic);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldRunTama2Basic);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldRunTama3Basic);
 
-INCLUDE_SDATA(const s32, "field/fldTest", D_0054EABC);
+INCLUDE_SDATA(const s32, "field/fldTest", fldRunTamaNext);
 
-INCLUDE_SDATA(const s32, "field/fldTest", D_0054EAC0);
+INCLUDE_SDATA(const s32, "field/fldTest", fldDataNgMsg);
 
-INCLUDE_SDATA(const s32, "field/fldTest", D_0054EAC8);
+INCLUDE_SDATA(const s32, "field/fldTest", fldMsg1KO);
 
-INCLUDE_SDATA(const s32, "field/fldTest", D_0054EAD0);
+INCLUDE_SDATA(const s32, "field/fldTest", fldMsgRe1KO);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldRunDanteSe_asise);
 
 INCLUDE_SDATA(const s32, "field/fldTest", D_0054EADC);
 
-INCLUDE_SDATA(const s32, "field/fldTest", D_0054EAE0);
+INCLUDE_SDATA(const s32, "field/fldTest", fldMsg2A);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldUnitControlHandle);
 

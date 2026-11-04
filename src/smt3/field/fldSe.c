@@ -879,7 +879,7 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldAreaFontWork);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamTarget);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EEB0);
+INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamSlot);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldNpcModelTable);
 
@@ -895,13 +895,13 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldSnowBlurHandle);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldNpcLoadIdx);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EED0);
+INCLUDE_SDATA(const s32, "field/fldSe", fldDmgBlurEffect);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldDmgBlurHandle);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldNpcBlurHandle);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EEDC);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTDmgEffect);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldNpcFreeCount);
 
@@ -933,11 +933,11 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldTakara2Data);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldTakara2Size);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF1C);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTakara1Mem);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF20);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTakara3Mem);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF24);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTakara2Mem);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF28);
 
@@ -957,33 +957,33 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldTakaraSlotCount);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldTakaraCount);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF4C);
+INCLUDE_SDATA(const s32, "field/fldSe", fldHudSlide);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldEADrawState);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF54);
+INCLUDE_SDATA(const s32, "field/fldSe", fldEAPrevAlpha);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF58);
+INCLUDE_SDATA(const s32, "field/fldSe", fldEAAlphaRising);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldEADrawWork);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF60);
+INCLUDE_SDATA(const s32, "field/fldSe", fldVLPulsePhase);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF64);
+INCLUDE_SDATA(const s32, "field/fldSe", fldWaveDistance);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF68);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF6C);
+INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamPosX);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF70);
+INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamPosY);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF74);
+INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamPosZ);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF78);
+INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamAngle);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldCamNpcTarget);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF80);
+INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamTargetY);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldCamNpcTarget2);
 
@@ -1111,7 +1111,7 @@ INCLUDE_SDATA(const s32, "field/fldSe", slFileSelWork);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054F07C);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054F080);
+INCLUDE_SDATA(const s32, "field/fldSe", slNum2dFmt);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054F088);
 

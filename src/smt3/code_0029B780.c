@@ -597,11 +597,11 @@ INCLUDE_SDATA(const s32, "code_0029B780", D_005516C1);
 
 INCLUDE_SDATA(const s32, "code_0029B780", D_005516C4);
 
-INCLUDE_SDATA(const s32, "code_0029B780", D_005516C8);
+INCLUDE_SDATA(const s32, "code_0029B780", slYesLabel);
 
-INCLUDE_SDATA(const s32, "code_0029B780", D_005516D0);
+INCLUDE_SDATA(const s32, "code_0029B780", slNoLabel);
 
-INCLUDE_SDATA(const s32, "code_0029B780", D_005516D8);
+INCLUDE_SDATA(const s32, "code_0029B780", slNoFileLabel);
 
 INCLUDE_SDATA(const s32, "code_0029B780", D_005516E0);
 

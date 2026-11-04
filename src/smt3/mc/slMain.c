@@ -129,11 +129,11 @@ extern u32 gslDrawFlagBg;
 
 s32 slExitToTitleSub(void);
 
-extern char D_005328C0[];
+extern char slFldProcSequenceName[];
 
 s32 slExitToTitle2(void);
 
-extern char D_005328D0[];
+extern char slIconPath[];
 
 fileRequest_t *fileLoad(const char *filename);
 
@@ -173,7 +173,7 @@ slMcResult_t sdfMcFuncChdir1(void);
 
 void sdfMcSetSlotFlags(s32 request, s32 slot, s32 mask);
 
-extern char D_005328E0[];
+extern char slIconSysName[];
 
 extern u8 D_005696C0[];
 
@@ -211,7 +211,7 @@ extern s32 slSaveData_writeFile(void);
 
 void slKillLoadProcess(void);
 
-extern char D_005328F0[];
+extern char slBaseIconName[];
 
 extern s32 slSaveWriteEnd_baseIcon(void);
 
@@ -289,7 +289,7 @@ u32 fileGetLoadSize(const fileRequest_t *fileHandle);
 
 s32 fileHandleFree(fileRequest_t *fileHandle);
 
-extern char D_00532948[];
+extern char slCalcName[];
 
 extern u32 gslExitType;
 
@@ -323,7 +323,7 @@ extern s32 slDDS3To31Flg;
 
 #include "sdk_libc.h"
 
-extern char D_00532860[];
+extern char slSaveDirFmt[];
 
 extern s8 D_00569743[];
 
@@ -452,29 +452,29 @@ extern addr_t D_00551D30;
 extern u32 D_00551D34;
 
 
-extern char D_00528510[];
+extern char slCheckingMsg0[];
 
-extern char D_00528548[];
+extern char slCheckingMsg1[];
 
-extern char D_005285A8[];
+extern char slSavingMsg[];
 
-extern char D_005285F8[];
+extern char slDoNotRemoveMsg0[];
 
-extern char D_00528608[];
+extern char slDoNotRemoveMsg1[];
 
-extern char D_00528598[];
+extern char slLoadingMsg[];
 
-extern char D_00528738[];
+extern char slSaveDoneMsg[];
 
-extern char D_005285B8[];
+extern char slFormattingMsg[];
 
-extern char D_00528748[];
+extern char slFormatDoneMsg[];
 
-extern char D_005287D8[];
+extern char slSelectSaveMsg[];
 
-extern char D_005287C0[];
+extern char slSelectLoadMsg[];
 
-extern char D_00528728[];
+extern char slLoadDoneMsg[];
 
 extern s32 slDrawWindow(void);
 
@@ -484,65 +484,65 @@ extern void slMcAccessDraw(void);
 extern s32 slExitToTitle2(void);
 
 
-extern char D_00528280[];
+extern char slNoCardSaveMsg0[];
 
-extern char D_005282B8[];
+extern char slNoCardSaveMsg1[];
 
-extern char D_005282D0[];
+extern char slNoCardSaveMsg2[];
 
-extern char D_00528308[];
+extern char slNoCardSaveMsg3[];
 
-extern char D_00528330[];
+extern char slNoCardSaveMsg4[];
 
-extern char D_00528340[];
+extern char slNoCardSaveMsg5[];
 
-extern char D_005281D8[];
+extern char slNoCardMsg0[];
 
-extern char D_00528210[];
+extern char slNoCardMsg1[];
 
-extern char D_00528228[];
+extern char slNoCardMsg2[];
 
-extern char D_00528260[];
+extern char slNoCardMsg3[];
 
-extern char D_00528448[];
+extern char slNotCardSaveMsg0[];
 
-extern char D_00528480[];
+extern char slNotCardSaveMsg1[];
 
-extern char D_005284B8[];
+extern char slNotCardSaveMsg2[];
 
-extern char D_005284E0[];
+extern char slNotCardSaveMsg3[];
 
-extern char D_005284F0[];
+extern char slNotCardSaveMsg4[];
 
-extern char D_005283B8[];
+extern char slNotCardMsg0[];
 
-extern char D_005283F0[];
+extern char slNotCardMsg1[];
 
-extern char D_00528428[];
+extern char slNotCardMsg2[];
 
-extern char D_005285C8[];
+extern char slLoadFailedMsg[];
 
-extern char D_005285D8[];
+extern char slSaveFailedMsg[];
 
-extern char D_00528638[];
+extern char slNoSpaceMsg0[];
 
-extern char D_00528658[];
+extern char slNoSpaceMsg1[];
 
-extern char D_00528678[];
+extern char slNoSpaceMsg2[];
 
-extern char D_00528690[];
+extern char slNoSpaceMsg3[];
 
-extern char D_005285E8[];
+extern char slFormatFailedMsg[];
 
-extern char D_005288A0[];
+extern char slNoSaveDataMsg0[];
 
-extern char D_005288C0[];
+extern char slNoSaveDataMsg1[];
 
-extern char D_00528820[];
+extern char slNoNocturneDataMsg0[];
 
-extern char D_00528850[];
+extern char slNoNocturneDataMsg1[];
 
-extern char D_00528888[];
+extern char slNoNocturneDataMsg2[];
 
 extern s32 gslInfoLoadFlg;
 
@@ -570,9 +570,9 @@ extern void dds3VisibleSceneBasic(void *basic, s32 visible);
 
 void mcMakeFileName(char *path, s32 num) {
     if (slDDS3To31Flg != 0) {
-        sprintf(path, D_00532860, 0xFEDA, num);
+        sprintf(path, slSaveDirFmt, 0xFEDA, num);
     } else {
-        sprintf(path, D_00532860, 0x51AF, num);
+        sprintf(path, slSaveDirFmt, 0x51AF, num);
     }
 }
 
@@ -606,8 +606,8 @@ typedef struct {
     fclencyceelem_t encyclopedia[184];
 } slConvertWork_t;
 
-extern char D_00532878[];
-extern char D_005328A0[];
+extern char slConvert03Msg[];
+extern char slConvert04Msg[];
 
 void slVersionConvert_Step3(void)
 {
@@ -634,7 +634,7 @@ void slVersionConvert_Step3(void)
         bytes = 0xFA30;
         memcpy(DDS3_GBWK, slLoadFileHandle, bytes);
     } else if (version_convert_ver == 3) {
-        printf(D_00532878);
+        printf(slConvert03Msg);
         work = DDS3_GBWK;
         src = slLoadFileHandle;
         bytes = 0x1A510;
@@ -670,7 +670,7 @@ void slVersionConvert_Step3(void)
             }
         }
     } else if (version_convert_ver == 4) {
-        printf(D_005328A0);
+        printf(slConvert04Msg);
         work = DDS3_GBWK;
         src = slLoadFileHandle;
         bytes = 0x1A510;
@@ -906,17 +906,17 @@ void slDrawError(void) {
         slFileSelError = 0;
         if (slDrawWindow() != 0) {
             if (slDDS3To31Flg != 0) {
-                slKanjiDrawH(0xA, 0x4C, 0x64618780, D_00528280);
-                slKanjiDrawH(0xA, 0x58, 0x64618780, D_005282B8);
-                slKanjiDrawH(0xA, 0x64, 0x64618780, D_005282D0);
-                slKanjiDrawH(0xA, 0x70, 0x64618780, D_00528308);
-                slKanjiDrawH(0xA, 0x7C, 0x64618780, D_00528330);
-                slKanjiDrawH(0xA, 0x88, 0x64618780, D_00528340);
+                slKanjiDrawH(0xA, 0x4C, 0x64618780, slNoCardSaveMsg0);
+                slKanjiDrawH(0xA, 0x58, 0x64618780, slNoCardSaveMsg1);
+                slKanjiDrawH(0xA, 0x64, 0x64618780, slNoCardSaveMsg2);
+                slKanjiDrawH(0xA, 0x70, 0x64618780, slNoCardSaveMsg3);
+                slKanjiDrawH(0xA, 0x7C, 0x64618780, slNoCardSaveMsg4);
+                slKanjiDrawH(0xA, 0x88, 0x64618780, slNoCardSaveMsg5);
             } else {
-                slKanjiDrawH(0xA, 0x4C, 0x64618780, D_005281D8);
-                slKanjiDrawH(0xA, 0x58, 0x64618780, D_00528210);
-                slKanjiDrawH(0xA, 0x64, 0x64618780, D_00528228);
-                slKanjiDrawH(0xA, 0x70, 0x64618780, D_00528260);
+                slKanjiDrawH(0xA, 0x4C, 0x64618780, slNoCardMsg0);
+                slKanjiDrawH(0xA, 0x58, 0x64618780, slNoCardMsg1);
+                slKanjiDrawH(0xA, 0x64, 0x64618780, slNoCardMsg2);
+                slKanjiDrawH(0xA, 0x70, 0x64618780, slNoCardMsg3);
             }
             slNextPageDraw();
             gslDrawFlagFile = 0;
@@ -925,15 +925,15 @@ void slDrawError(void) {
     if (gslErrorCode == 2) {
         if (slDrawWindow() != 0) {
             if (slDDS3To31Flg != 0) {
-                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528448);
-                slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528480);
-                slKanjiDrawH(0x28, 0x64, 0x64618780, D_005284B8);
-                slKanjiDrawH(0x28, 0x70, 0x64618780, D_005284E0);
-                slKanjiDrawH(0x28, 0x7C, 0x64618780, D_005284F0);
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, slNotCardSaveMsg0);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, slNotCardSaveMsg1);
+                slKanjiDrawH(0x28, 0x64, 0x64618780, slNotCardSaveMsg2);
+                slKanjiDrawH(0x28, 0x70, 0x64618780, slNotCardSaveMsg3);
+                slKanjiDrawH(0x28, 0x7C, 0x64618780, slNotCardSaveMsg4);
             } else {
-                slKanjiDrawH(0x1D, 0x4C, 0x64618780, D_005283B8);
-                slKanjiDrawH(0x1D, 0x58, 0x64618780, D_005283F0);
-                slKanjiDrawH(0x1D, 0x64, 0x64618780, D_00528428);
+                slKanjiDrawH(0x1D, 0x4C, 0x64618780, slNotCardMsg0);
+                slKanjiDrawH(0x1D, 0x58, 0x64618780, slNotCardMsg1);
+                slKanjiDrawH(0x1D, 0x64, 0x64618780, slNotCardMsg2);
             }
             slNextPageDraw();
             gslDrawFlagFile = 0;
@@ -941,31 +941,31 @@ void slDrawError(void) {
     }
     if (gslErrorCode == 3) {
         if (slDrawWindow() != 0) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005285C8);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slLoadFailedMsg);
             slNextPageDraw();
             gslDrawFlagFile = 0;
         }
     }
     if (gslErrorCode == 4) {
         if (slDrawWindow() != 0) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005285D8);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slSaveFailedMsg);
             slNextPageDraw();
             gslDrawFlagFile = 0;
         }
     }
     if (gslErrorCode == 5) {
         if (slDrawWindow() != 0) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528638);
-            slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528658);
-            slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528678);
-            slKanjiDrawH(0x28, 0x70, 0x64618780, D_00528690);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slNoSpaceMsg0);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, slNoSpaceMsg1);
+            slKanjiDrawH(0x28, 0x64, 0x64618780, slNoSpaceMsg2);
+            slKanjiDrawH(0x28, 0x70, 0x64618780, slNoSpaceMsg3);
             slNextPageDraw();
             gslDrawFlagFile = 0;
         }
     }
     if (gslErrorCode == 6) {
         if (slDrawWindow() != 0) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005285E8);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slFormatFailedMsg);
             slNextPageDraw();
             gslDrawFlagFile = 0;
         }
@@ -973,12 +973,12 @@ void slDrawError(void) {
     if (gslErrorCode == 7) {
         if (slDrawWindow() != 0) {
             if (slDDS3To31Flg != 0) {
-                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005288A0);
-                slKanjiDrawH(0x28, 0x58, 0x64618780, D_005288C0);
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, slNoSaveDataMsg0);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, slNoSaveDataMsg1);
             } else {
-                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528820);
-                slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528850);
-                slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528888);
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, slNoNocturneDataMsg0);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, slNoNocturneDataMsg1);
+                slKanjiDrawH(0x28, 0x64, 0x64618780, slNoNocturneDataMsg2);
             }
             slNextPageDraw();
             gslDrawFlagFile = 0;
@@ -1002,55 +1002,55 @@ void slDrawInfo(void) {
     }
     if (gslInfoCode == 1) {
         if (slDrawWindow() != 0) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528510);
-            slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528548);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slCheckingMsg0);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, slCheckingMsg1);
         }
     }
     if (gslInfoCode == 2) {
         if (slDrawWindow() != 0) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005285A8);
-            slKanjiDrawH(0x28, 0x58, 0x64618780, D_005285F8);
-            slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528608);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slSavingMsg);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, slDoNotRemoveMsg0);
+            slKanjiDrawH(0x28, 0x64, 0x64618780, slDoNotRemoveMsg1);
             slMcAccessDraw();
         }
     }
     if (gslInfoCode == 3) {
         if (slDrawWindow() != 0) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528598);
-            slKanjiDrawH(0x28, 0x58, 0x64618780, D_005285F8);
-            slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528608);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slLoadingMsg);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, slDoNotRemoveMsg0);
+            slKanjiDrawH(0x28, 0x64, 0x64618780, slDoNotRemoveMsg1);
         }
     }
     if (gslInfoCode == 4) {
         if (slDrawWindow() != 0) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528738);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slSaveDoneMsg);
             slNextPageDraw();
         }
         gSlExitMode = 1;
     }
     if (gslInfoCode == 5) {
         if (slDrawWindow() != 0) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005285B8);
-            slKanjiDrawH(0x28, 0x58, 0x64618780, D_005285F8);
-            slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528608);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slFormattingMsg);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, slDoNotRemoveMsg0);
+            slKanjiDrawH(0x28, 0x64, 0x64618780, slDoNotRemoveMsg1);
             slMcAccessDraw();
         }
     }
     if (gslInfoCode == 6) {
         if (slDrawWindow() != 0) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528748);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slFormatDoneMsg);
             slNextPageDraw();
         }
     }
     if (gslInfoCode == 0xB) {
-        slKanjiDraw(0x14, 0x1C, 0x64618780, D_005287D8);
+        slKanjiDraw(0x14, 0x1C, 0x64618780, slSelectSaveMsg);
     }
     if (gslInfoCode == 0xC) {
-        slKanjiDraw(0x14, 0x1C, 0x64618780, D_005287C0);
+        slKanjiDraw(0x14, 0x1C, 0x64618780, slSelectLoadMsg);
     }
     if (gslInfoCode == 0xD) {
         if (slDrawWindow() != 0) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528728);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slLoadDoneMsg);
             slNextPageDraw();
         }
         gSlExitMode = 2;
@@ -1235,7 +1235,7 @@ s32 slExit(void) {
 s32 slExitToTitleSub(void) {
     s32 argument = 0;
 
-    if (dds3SearchProcessName(D_005328C0) != NULL) {
+    if (dds3SearchProcessName(slFldProcSequenceName) != NULL) {
         return -1;
     }
     if (slDDS3To31Flg != 0) {
@@ -1253,7 +1253,7 @@ s32 slExitToTitle2(void) {
     s32 argument = 2;
 
     gslExitType = 1;
-    if (dds3SearchProcessName(D_005328C0) != NULL) {
+    if (dds3SearchProcessName(slFldProcSequenceName) != NULL) {
         return -1;
     }
     if (slDDS3To31Flg != 0) {
@@ -1309,7 +1309,7 @@ saddr_t slFileSel(void) {
 }
 
 s32 slCancel(void) {
-    if (gslMode == 1 && dds3SearchProcessName(D_005328C0) == NULL) {
+    if (gslMode == 1 && dds3SearchProcessName(slFldProcSequenceName) == NULL) {
         return slExitToTitle2();
     }
     slSetInfo(0);
@@ -1318,7 +1318,7 @@ s32 slCancel(void) {
 
 s32 slSaveProc1st(void) {
     D_00551D44 = 0;
-    baseIconFileHandle = EE_ADDR(fileLoad(D_005328D0));
+    baseIconFileHandle = EE_ADDR(fileLoad(slIconPath));
     return slTop();
 }
 
@@ -1328,7 +1328,7 @@ s32 slLoadProc1st(void) {
 
 s32 slEndingProc1st(void) {
     D_00551D44 = 0;
-    baseIconFileHandle = EE_ADDR(fileLoad(D_005328D0));
+    baseIconFileHandle = EE_ADDR(fileLoad(slIconPath));
     return slEndingTop();
 }
 
@@ -1734,7 +1734,7 @@ saddr_t slChooseData_getCardInfo2(void) {
     }
     if (t == SL_MC_RESULT_SUCCESS) {
         sdfMcSetSlotFlags(mccb, slChooseSaveIndex, SL_SLOT_FLAG_DIRECTORY_READY);
-        sdfMcFuncGetDir(mccb, D_005328E0, D_005696C0, 1);
+        sdfMcFuncGetDir(mccb, slIconSysName, D_005696C0, 1);
         return EE_ADDR_S(slChooseData_getCardInfo3);
     }
     if (t == SL_MC_RESULT_ERROR) {
@@ -1828,7 +1828,7 @@ saddr_t slChooseData_getCardInfo2_B(void) {
     }
     if (t == SL_MC_RESULT_SUCCESS) {
         sdfMcSetSlotFlags(mccb, slChooseSaveIndex, SL_SLOT_FLAG_DIRECTORY_READY);
-        sdfMcFuncGetDir(mccb, D_005328E0, D_005696C0, 1);
+        sdfMcFuncGetDir(mccb, slIconSysName, D_005696C0, 1);
         return EE_ADDR_S(slChooseData_getCardInfo3_B);
     }
     if (t == SL_MC_RESULT_ERROR) {
@@ -1997,11 +1997,11 @@ s32 slSaveWriteEnd_baseIcon(void) {
     D_00316B00[0xE3] = slFileSelError + 0x50;
     D_00316B00[0xE4] = 0;
     D_00316B00[0xE5] = 0;
-    return slSaveWriteFile(D_005328E0, &D_0054F06C, &D_0054F070, slSaveWriteEnd_iconSys, 0);
+    return slSaveWriteFile(slIconSysName, &D_0054F06C, &D_0054F070, slSaveWriteEnd_iconSys, 0);
 }
 
 s32 slSaveWriteEnd_saveData(void) {
-    return slSaveWriteFile(D_005328F0, &D_00551D48, &D_00551D4C,
+    return slSaveWriteFile(slBaseIconName, &D_00551D48, &D_00551D4C,
                           slSaveWriteEnd_baseIcon, &baseIconFileHandle);
 }
 
@@ -2062,7 +2062,7 @@ saddr_t slSaveData_deleteIconSys(void) {
     if (!(flags & SL_SLOT_FLAG_DELETE_BEFORE_WRITE)) {
         return slSaveData_writeFile();
     }
-    sdfMcFuncDelete(entry, D_005328E0);
+    sdfMcFuncDelete(entry, slIconSysName);
     return EE_ADDR_S(slSaveProc_Write_deleteIconSys);
 }
 
@@ -2359,9 +2359,9 @@ no_action:
 }
 
 extern f32 D_0054F074, D_0054C58C, slFileSelWork;
-extern char D_005287F0[], D_00528800[], D_00528810[];
-extern char D_005516D8[], D_005516E8[];
-extern char D_0054F080[], D_0054F088[], D_0054F090[], D_0054F098[], D_0054F0A0[];
+extern char slNewFileLabel[], slCorruptedFileLabel[], slNewCycleLabel[];
+extern char slNoFileLabel[], D_005516E8[];
+extern char slNum2dFmt[], D_0054F088[], D_0054F090[], D_0054F098[], D_0054F0A0[];
 extern char D_00311450[][0x20], D_00311850[][0x20];
 extern void cmpSetSkillListRows(s32 rows);
 extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const u8 *text);
@@ -2451,11 +2451,11 @@ s32 slFileSelDraw(s32 id)
             state = slTopMenuSel[row];
             if (state == 0) {
                 slKanjiDraw(offset + 0xCD, (y + 0xD) / 2, 0x6C81BB80,
-                            gslMode == 1 ? D_005516D8 : D_005287F0);
+                            gslMode == 1 ? slNoFileLabel : slNewFileLabel);
             } else if (state == 2) {
-                slKanjiDraw(offset + 0xCD, (y + 0xD) / 2, 0xCB819A80, D_00528800);
+                slKanjiDraw(offset + 0xCD, (y + 0xD) / 2, 0xCB819A80, slCorruptedFileLabel);
             } else if (*(volatile s16 *)&info->newfile != 0) {
-                slKanjiDraw(offset + 0x52, (y + 6) / 2, 0xA09DC380, D_00528810);
+                slKanjiDraw(offset + 0x52, (y + 6) / 2, 0xA09DC380, slNewCycleLabel);
             }
 
             selected = slFileSelError == row;
@@ -2510,7 +2510,7 @@ s32 slFileSelDraw(s32 id)
                             record->tmnlMode == 0 ? D_00311450[record->tmnlId] : D_00311850[record->tmnlId]);
                 cmpSetSkillListRows(-1);
                 level = *(volatile u8 *)&record->level;
-                sprintf(number, D_0054F080, level >= 100 ? 99 : level);
+                sprintf(number, slNum2dFmt, level >= 100 ? 99 : level);
                 slKanjiDrawN(0x6D, (y + 5) / 2, color, number);
             }
             {
@@ -2537,7 +2537,7 @@ s32 slFileSelDraw(s32 id)
                     cycle = 99;
                 }
                 if (cycle >= 2) {
-                    sprintf(number, D_0054F080, cycle);
+                    sprintf(number, slNum2dFmt, cycle);
                     slKanjiDrawN(0x1D9, (y + 0x21) / 2, color, number);
                     slKanjiDraw(0x1AE, (y + 0x1E) / 2,
                                 slFileSelError == row ? color : 0x50505080, D_005516E8);
@@ -2572,19 +2572,19 @@ s32 slFileSelDraw(s32 id)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "mc/slMain", D_00532860);
+INCLUDE_RODATA(const s32, "mc/slMain", slSaveDirFmt);
 
-INCLUDE_RODATA(const s32, "mc/slMain", D_00532878);
+INCLUDE_RODATA(const s32, "mc/slMain", slConvert03Msg);
 
-INCLUDE_RODATA(const s32, "mc/slMain", D_005328A0);
+INCLUDE_RODATA(const s32, "mc/slMain", slConvert04Msg);
 
-INCLUDE_RODATA(const s32, "mc/slMain", D_005328C0);
+INCLUDE_RODATA(const s32, "mc/slMain", slFldProcSequenceName);
 
-INCLUDE_RODATA(const s32, "mc/slMain", D_005328D0);
+INCLUDE_RODATA(const s32, "mc/slMain", slIconPath);
 
-INCLUDE_RODATA(const s32, "mc/slMain", D_005328E0);
+INCLUDE_RODATA(const s32, "mc/slMain", slIconSysName);
 
-INCLUDE_RODATA(const s32, "mc/slMain", D_005328F0);
+INCLUDE_RODATA(const s32, "mc/slMain", slBaseIconName);
 
 INCLUDE_ASM(const s32, "mc/slMain", slFileSelDraw);
 #endif
@@ -2684,7 +2684,7 @@ void fmProcTrigSequence(s32 mode) {
             proc_func_ans = (s32 (*)(dds3ProcessID_t *))slBootProc1st;
         }
     }
-    dds3StartProcess(D_00532948, 0x2B0A, 0, 0, slCalc,
+    dds3StartProcess(slCalcName, 0x2B0A, 0, 0, slCalc,
                      (s32 (*)(dds3ProcessID_t *))slShutDownProcess, NULL);
     slProcShutDownFlg = 1;
     dds3FadeIn(0, 0, 0, 8);
@@ -2751,7 +2751,7 @@ void func_00157058(void) {
         sdfTexFreeDelayed(slProcPtr);
         slProcPtr = NULL;
     }
-    if (dds3SearchProcessName(D_005328C0) == NULL) {
+    if (dds3SearchProcessName(slFldProcSequenceName) == NULL) {
         scene = dds3GetActiveScene();
         if (scene != NULL) {
             dds3VisibleSceneBasic(scene, 1);
@@ -2764,7 +2764,7 @@ void func_00157058(void) {
         baseIconFileHandle = 0;
     }
     sdfMemFreeHandleDirect(&D_00551D44);
-    dds3KillProcessName(D_00532948, 1);
+    dds3KillProcessName(slCalcName, 1);
     dds3SoftResetOn();
 }
 
@@ -2773,7 +2773,7 @@ u32 fmShutDown2(void) {
 }
 
 s32 fmProcessChk(void) {
-    return dds3SearchProcessName(D_00532948) != 0;
+    return dds3SearchProcessName(slCalcName) != 0;
 }
 
 u32 slGetExitType(void) {
@@ -2925,44 +2925,44 @@ saddr_t slQueryYesNo(s32 (*yesFunc)(void), s32 (*noFunc)(void), s32 yesNoDefault
     return EE_ADDR_S(slQueryYesNoProc);
 }
 
-extern char D_00528360[];
-extern char D_00528390[];
-extern char D_00528560[];
-extern char D_00528578[];
-extern char D_005286A0[];
-extern char D_005286C0[];
-extern char D_005286E8[];
-extern char D_00528760[];
-extern char D_00528770[];
-extern char D_00528780[];
-extern char D_00528790[];
-extern char D_005287A0[];
-extern char D_005287B0[];
-extern char D_005288E0[];
-extern char D_005288F0[];
-extern char D_00528918[];
-extern char D_00528940[];
-extern char D_00528960[];
-extern char D_00528978[];
-extern char D_005289A0[];
-extern char D_005289B0[];
-extern char D_005289E8[];
-extern char D_00528A10[];
-extern char D_00528A28[];
-extern char D_00528A60[];
-extern char D_00528A88[];
-extern char D_00528AA0[];
-extern char D_00528AC0[];
-extern char D_00528AF0[];
-extern char D_00528B08[];
-extern char D_00528B20[];
-extern char D_00528B58[];
-extern char D_00528B80[];
-extern char D_005516C8[];
-extern char D_005516D0[];
+extern char slNotFormattedMsg0[];
+extern char slNotFormattedMsg1[];
+extern char slNotFormattedMsg2[];
+extern char slCancelSaveMsg[];
+extern char slOverwriteMsg0[];
+extern char slOverwriteMsg1[];
+extern char slOverwriteMsg2[];
+extern char slLoadingFileMsg1[];
+extern char slLoadingFileMsg2[];
+extern char slLoadingFileMsg3[];
+extern char slLoadingFileMsg4[];
+extern char slLoadingFileMsg5[];
+extern char slIsOkMsg[];
+extern char slNewCycleMsg0[];
+extern char slNewCycleMsg1[];
+extern char slNewCycleMsg2[];
+extern char slReturnTitleMsg[];
+extern char slOverwriteWarnMsg0[];
+extern char slOverwriteWarnMsg1[];
+extern char slOverwriteWarnMsg2[];
+extern char slNoCardStartMsg0[];
+extern char slNoCardStartMsg1[];
+extern char slNoCardStartMsg2[];
+extern char slNoCardStartMsg3[];
+extern char slNoCardStartMsg4[];
+extern char slNoCardStartMsg5[];
+extern char slNoSpaceStartMsg0[];
+extern char slNoSpaceStartMsg1[];
+extern char slNoSpaceStartMsg2[];
+extern char slNoSpaceStartMsg3[];
+extern char slNoSpaceStartMsg4[];
+extern char slNoSpaceStartMsg5[];
+extern char slNoSpaceStartMsg6[];
+extern char slYesLabel[];
+extern char slNoLabel[];
 extern char D_005516E0[];
 
-INCLUDE_RODATA(const s32, "mc/slMain", D_00532948);
+INCLUDE_RODATA(const s32, "mc/slMain", slCalcName);
 
 void slQueryYesNoDraw(void)
 {
@@ -2978,83 +2978,83 @@ void slQueryYesNoDraw(void)
         rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
         if (slQueryYesNoMsg == 1) {
             if (slDrawWindow() != 0) {
-                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005286A0);
-                slKanjiDrawH(0x28, 0x58, 0x64618780, D_005286C0);
-                slKanjiDrawH(0x28, 0x64, 0x64618780, D_005286E8);
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, slOverwriteMsg0);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, slOverwriteMsg1);
+                slKanjiDrawH(0x28, 0x64, 0x64618780, slOverwriteMsg2);
             }
         }
         if (slQueryYesNoMsg == 2) {
             if (slDrawWindow() != 0) {
-                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528360);
-                slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528390);
-                slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528560);
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, slNotFormattedMsg0);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, slNotFormattedMsg1);
+                slKanjiDrawH(0x28, 0x64, 0x64618780, slNotFormattedMsg2);
             }
         }
         if (slQueryYesNoMsg == 3) {
             if (slDrawWindow() != 0) {
                 switch (slFileSelError) {
                 case 0:
-                    slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528760);
+                    slKanjiDrawH(0x28, 0x4C, 0x64618780, slLoadingFileMsg1);
                     break;
                 case 1:
-                    slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528770);
+                    slKanjiDrawH(0x28, 0x4C, 0x64618780, slLoadingFileMsg2);
                     break;
                 case 2:
-                    slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528780);
+                    slKanjiDrawH(0x28, 0x4C, 0x64618780, slLoadingFileMsg3);
                     break;
                 case 3:
-                    slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528790);
+                    slKanjiDrawH(0x28, 0x4C, 0x64618780, slLoadingFileMsg4);
                     break;
                 case 4:
-                    slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005287A0);
+                    slKanjiDrawH(0x28, 0x4C, 0x64618780, slLoadingFileMsg5);
                     break;
                 }
-                slKanjiDrawH(0x28, 0x58, 0x64618780, D_005287B0);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, slIsOkMsg);
             }
         }
         if (slQueryYesNoMsg == 4) {
             if (slDrawWindow() != 0) {
-                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005288E0);
-                slKanjiDrawH(0x28, 0x58, 0x64618780, D_005288F0);
-                slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528918);
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, slNewCycleMsg0);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, slNewCycleMsg1);
+                slKanjiDrawH(0x28, 0x64, 0x64618780, slNewCycleMsg2);
                 slKanjiDrawH(0x28, 0x70, 0x64618780, D_005516E0);
             }
         }
         if (slQueryYesNoMsg == 5) {
             if (slDrawWindow() != 0) {
-                slKanjiDrawH(0x28, 0x3C, 0x64618780, D_005289B0);
-                slKanjiDrawH(0x28, 0x48, 0x64618780, D_005289E8);
-                slKanjiDrawH(0x28, 0x54, 0x64618780, D_00528A10);
-                slKanjiDrawH(0x28, 0x60, 0x64618780, D_00528A28);
-                slKanjiDrawH(0x28, 0x6C, 0x64618780, D_00528A60);
-                slKanjiDrawH(0x28, 0x78, 0x64618780, D_00528A88);
+                slKanjiDrawH(0x28, 0x3C, 0x64618780, slNoCardStartMsg0);
+                slKanjiDrawH(0x28, 0x48, 0x64618780, slNoCardStartMsg1);
+                slKanjiDrawH(0x28, 0x54, 0x64618780, slNoCardStartMsg2);
+                slKanjiDrawH(0x28, 0x60, 0x64618780, slNoCardStartMsg3);
+                slKanjiDrawH(0x28, 0x6C, 0x64618780, slNoCardStartMsg4);
+                slKanjiDrawH(0x28, 0x78, 0x64618780, slNoCardStartMsg5);
             }
         }
         if (slQueryYesNoMsg == 6) {
             if (slDrawWindow() != 0) {
-                slKanjiDrawH(0x28, 0x3C, 0x64618780, D_00528AA0);
-                slKanjiDrawH(0x28, 0x48, 0x64618780, D_00528AC0);
-                slKanjiDrawH(0x28, 0x54, 0x64618780, D_00528AF0);
-                slKanjiDrawH(0x28, 0x60, 0x64618780, D_00528B08);
-                slKanjiDrawH(0x28, 0x6C, 0x64618780, D_00528B20);
-                slKanjiDrawH(0x28, 0x78, 0x64618780, D_00528B58);
-                slKanjiDrawH(0x28, 0x84, 0x64618780, D_00528B80);
+                slKanjiDrawH(0x28, 0x3C, 0x64618780, slNoSpaceStartMsg0);
+                slKanjiDrawH(0x28, 0x48, 0x64618780, slNoSpaceStartMsg1);
+                slKanjiDrawH(0x28, 0x54, 0x64618780, slNoSpaceStartMsg2);
+                slKanjiDrawH(0x28, 0x60, 0x64618780, slNoSpaceStartMsg3);
+                slKanjiDrawH(0x28, 0x6C, 0x64618780, slNoSpaceStartMsg4);
+                slKanjiDrawH(0x28, 0x78, 0x64618780, slNoSpaceStartMsg5);
+                slKanjiDrawH(0x28, 0x84, 0x64618780, slNoSpaceStartMsg6);
             }
         }
         if (slQueryYesNoMsg == 7) {
             if (slDrawWindow() != 0) {
-                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528578);
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, slCancelSaveMsg);
             }
         }
         if (slQueryYesNoMsg == 8) {
             if (slDrawWindow() != 0) {
-                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528940);
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, slReturnTitleMsg);
             }
         }
         if ((slQueryYesNoMsg == 9) && (slDrawWindow() != 0)) {
-            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528960);
-            slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528978);
-            slKanjiDrawH(0x28, 0x64, 0x64618780, D_005289A0);
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, slOverwriteWarnMsg0);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, slOverwriteWarnMsg1);
+            slKanjiDrawH(0x28, 0x64, 0x64618780, slOverwriteWarnMsg2);
         }
         if (slChkWindowOpenDone() != 0) {
             if ((s32)SDF_FRAME_STEP(gslAnimCnt) & 8) {
@@ -3088,8 +3088,8 @@ void slQueryYesNoDraw(void)
             /* Qualified allocation traces retain the label row in the live Y.
              * See docs/levers/cross-block-locals.md. */
             y++;
-            slKanjiDrawH(0x28, y, 0xA09DC380, D_005516C8);
-            slKanjiDrawH(0x28, y + 0xC, 0xA09DC380, D_005516D0);
+            slKanjiDrawH(0x28, y, 0xA09DC380, slYesLabel);
+            slKanjiDrawH(0x28, y + 0xC, 0xA09DC380, slNoLabel);
         }
         rsetOtOfs(0x47);
         rsetAlpha(0);

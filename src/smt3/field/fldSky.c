@@ -84,7 +84,7 @@ extern u32 fldDanteUnit;
 
 extern u32 fldPlayerUnit;
 
-extern f32 D_002FCA60[];
+extern f32 fldSkyLight[];
 
 extern evtUnit_t *evtGetUnitHandle2(dds3Basic_t *unit);
 
@@ -663,12 +663,12 @@ void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
         evtSetUnitLightDir(secondUnit, 0);
     }
 
-    D_002FCA60[0] = r0;
-    D_002FCA60[1] = g0;
-    D_002FCA60[2] = b0;
-    D_002FCA60[4] = x0;
-    D_002FCA60[5] = y0;
-    D_002FCA60[6] = z0;
+    fldSkyLight[0] = r0;
+    fldSkyLight[1] = g0;
+    fldSkyLight[2] = b0;
+    fldSkyLight[4] = x0;
+    fldSkyLight[5] = y0;
+    fldSkyLight[6] = z0;
     fldSkyPlayerIdx[0] = r3;
     fldSkyPlayerIdx[1] = g3;
     fldSkyPlayerIdx[2] = b3;

@@ -1449,3 +1449,42 @@ The guarded file-manager declaration of `EIntr` now agrees with its `s32` provid
 | `D_00551A58`, `D_00551A60` | `sdfVifMaskedName`, `sdfVifXferOkName` | bytes `mask` and `xfer-ok`, the `%s` of the `VIF MSKPATH3` printf |
 | `D_00529388`, `D_00580FF0`, `D_00577F80`, `D_0055188A` | `sdfGrFrameSet`, `sdfGrDispEnv`, `sdfGrStoreImage`, `sdfGrBufferSlot` | the `sdfGrFrameSet_t` every render unit reads, the `sceGsDispEnv` and `sceGsStoreImage` that `sdfGraph.c` fills, and the slot `sdfDraw.c` sets from `bufferSlot` |
 | `D_00552080`, `D_00578FF0`, `D_00577FF0` | `sdfDispThreadCB`, `sdfDrawThreadStack`, `sdfDispThreadStack` | the control block and the 0x1000 stack passed to `sdfStartThreadAndWait`, and the 0x8000 stack of `sdfDrawThread` |
+| `D_002FBBC0` to `D_002FBC50` (17 vertex and face tables) | `fldSdwVertices00` to `fldSdwVertices16`, `fldSdwFaces00` to `fldSdwFaces16` | the pair `fldSdwShape` selects for shadow part N (parts 7 and 10 share one pair) |
+| `D_002FCA60`, `D_002F5A80` | `fldSkyLight`, `fldFixedLight` | `fldSky` writes colour at 0..2 and direction at 4..6 of the first; `fldSdwDraw` reads direction from it below area 200 and from the second at 200 and above |
+| `D_0054C1E8` to `D_0054C1FC`, `D_0054EA8C`, `D_0054EA90`, `D_005574E0`, `D_0055AB70` | `fldSdwLightNearDist` ... `fldSdwSkyBias`, `fldSdwBoxAlpha`, `fldSdwLightTracking`, `fldSdwTriangles`, `fldShadowTableB` | shadow direction fallbacks and thresholds in `fldSdwDraw`, the alpha of the box it draws, the flag set while the shadow follows a light unit, the triangle list, and the second endpoint of each recorded edge |
+| `D_002FBF00` to `D_002FBF60` | `fldDanteDoor0`, `1`, `2`, `4`, `5`, `6` | elements of a 16-byte `fldDanteDoor_t` table (`D_002FBF30` is unreferenced and unnamed) |
+| `D_0054EAB0`, `D_0054EABC`, `D_00531050`, `D_00531060`, `D_00531070`, `D_00531148`, `D_00531158`, `D_00531180`, `D_005311A8` | `fldRunTama1Basic`, `fldRunTamaNext`, `fldTama1UnitName` to `fldTama3UnitName`, `fldRunTamaSetAxis`, `fldRunTamaSeFrames1` to `3` | the first of three tama objects, the index `fldRunTamaSet` cycles mod 3, their `TAMA<n>_UNIT` ids, the axis and the frame tables of `fldRunTamaSe` |
+| `D_00531080` to `D_00531130` (8), `D_00530F30`, `D_0054EAC0`, `D_0054EAC8`, `D_0054EAD0`, `D_0054EAE0` | `fldDsparkPcfPath` ... `fldDflash1Path`, `fldTestDrawName`, `fldDataNgMsg`, `fldMsg1KO`, `fldMsgRe1KO`, `fldMsg2A` | the `/fld/f/bin` effect files `fldRunTamaInit` loads, the process name `fldTestDraw`, and the four printf strings (contents) |
+| `D_0054EF6C`, `D_0054EF70`, `D_0054EF74`, `D_0054EF78`, `D_0054EF80` | `fldNpcCamPosX`, `Y`, `Z`, `fldNpcCamAngle`, `fldNpcCamTargetY` | the item box position and yaw in degrees `fld_Npc` stores, and the target height; `fldCamera` builds the NPC camera from them |
+| `D_0054EF1C`, `D_0054EF20`, `D_0054EF24`, `D_0054EEDC`, `D_0054EED0`, `D_0054EEB0` | `fldTakara1Mem`, `fldTakara3Mem`, `fldTakara2Mem`, `fldTDmgEffect`, `fldDmgBlurEffect`, `fldNpcCamSlot` | the buffers holding `fldTakara<n>Data`, the effects reset by `fldTDmgStart` and drawn with `fldDmgBlurHandle`, and the model slot index that selects the blur draw |
+| `D_0054EF4C`, `D_0054EF60`, `D_0054EF54`, `D_0054EF58`, `D_0054EF64` | `fldHudSlide`, `fldVLPulsePhase`, `fldEAPrevAlpha`, `fldEAAlphaRising`, `fldWaveDistance` | the 0..1 HUD slide stepped by 0.2, the sine phase of the VL sprite, the previous alpha and rising flag of the EA sprite, and the distance sum that fires `fldWaveStart` at 100 |
+| `D_005326F0`, `D_00532700`, `D_00532710`, `D_00532720`, `D_00532770`, `D_00532338`, `D_00532348`, `D_00532358`, `D_00532478` | `fldItemBoxAddScale`, `fldItemBoxAddAxis`, `fldTakaraUnitName`, `fldItemBoxCalcAxis`, `fldNpcModelStartAxis`, `fldNpcLoadScale`, `fldNpcLoadAxis`, `fldNpcLoadPathsFirst`, `fldNpcLoadPathsSecond` | per-function constant vectors (1,1,1,1 and 0,1,0,1), the string `TAKARA_UNIT`, and the two `/fld/f/bin/npc*.PB` path groups |
+| `D_003129D0`, `D_00568E90`, `D_00568F90` | `fldNpcLightTable`, `fldModelResPtr`, `fldModelResSize` | the 0x100-byte per-floor light rows `fldNpcLightSet` reads, and the pointer and size `sdfDevLoadFileEx` returns per model resource; `D_003129D8` is the row-1 interior of the table and stays unnamed |
+| `D_0054EDF4`, `D_0054EDFC`, `D_0054EE00` | `fldDoorSiseArea`, `fldDoorSiseZone`, `fldDoorSiseSub` | the saved area, variant and sequence kind `fldDoor_SiseExit` matches against the door table and clears |
+| `D_00531C50`, `D_00531C60`, `D_00531D08`, `D_00531D18`, `D_00531D28`, `D_00531D38`, `D_00531D48` | `fldWarpRunAxis`, `fldNmlAxis`, `fldWm3Scale`, `fldWm4Scale`, `fldWm2Scale`, `fldWm2WorkInit`, `fldNmlSyukanAxis` | per-function constant vectors in `fldPlayer`, each named for the function that copies it |
+| `D_0054C3D4` to `D_0054C3F0`, `D_0054C414` to `D_0054C420` | `fldNmlGunSpeedScale0`, `fldNmlPi0` ... `fldNmlPitchStep`, `fldSyukanGunSpeedScale`, `fldSyukanPi0` ... | float constants `fldPlayerCalc_Nml` and `_syukan` read: 3.14 (used as `angle * k / 180`), the 0.7 speed scale applied when `word50 & 2`, and the 0.2 pitch step |
+| `D_005281D8` to `D_005516D8` (90 strings in `slMain.c`, listed in `symbol_addrs.txt`) | `slFldProcSequenceName`, `slIconPath`, `slNoCardSaveMsg0` ... `slNoLabel` | the memory card screen's file names, `%02d` format and message lines, each named for the message it prints; the `0`..`6` suffix is the line index within one message |
+| `D_0053D718` to `D_0054FCE0` (13 strings) | `fclEncycRecordFmt`, `fclEncycCalcName` ... `fclEncycMarkerOn` | the process names, formats and markers `fclEncyc.c` passes to `sdfProcCreate`, `sprintf` and the text draw |
+| `D_003322D0` to `D_00332300` | `fclEncycLightColor`, `fclEncycLightDir`, `fclEncycAmbientColor`, `fclEncycFogColor` | the four vectors `fclEncyc.c` hands to the light and fog setters |
+| `D_00533300`, `D_0054F100` to `D_0054F128`, `D_00533990`, `D_005339A0` | `effBTLFileFmt`, `effBedDirName`, `effBTLCutAllFmt` ... `effBTLSysPath` | the battle effect file path formats and system log strings in `effBattleSystem.c` |
+| `D_0053C938` to `D_0053CE48`, `D_0054FB00` to `D_0054FB18`, `D_0053CF10` (16 symbols) | `fclCombineUpdateName` ... `fclCombineTargetModelName`, `fclE807MainName` | the process names, script paths and printf formats of the fusion init in `fclCombineInit.c` |
+| `D_005321C0` | `fldAutoMapFullOpenMsg` | the `FullOpen` string `fldAutoMap.c` passes to `fldDbgPrint2D` |
+
+`D_00551888` stays unnamed. `sdfGrDrawFrame` stores 1 and `dds3DrawProcess` stores 0, and a scan of the retail ELF for every `sb`, `lb` or other gp-relative access at offset 0xD718 and for the address as a word or `lui`/`addiu` pair finds only those two stores. With no reader, its meaning is not proven.
+
+## Native-covered OT and movie owner spans
+
+`D_002F69B8` covers at least 0xB0 bytes: `dds3DrawFirstProcess` passes
+base+0x90 and base+0xA0 to `sdfModelOtInit` (argument setup at 0x102390
+and 0x1023A8; calls at 0x1023A0 and 0x1023B8). The provider writes four
+words at +0/+4/+8/+0xC (0x2B1818..0x2B1828). `fldAutoMapDrawMdl1`
+uses the same row9 at 0x2F6A48, and `effPCPBossONGYModelTexRender`
+uses row10 at 0x2F6A58; their C now uses the owner rows. The metadata
+records this proven covered span, not an inferred historical array bound.
+
+`movieCb` covers the complete 0xB0-byte provider record: `movieOpenStream`
+loads that clear size at 0x2C5D4C and calls `memset` at 0x2C5D58. Its
+inline 0x8C-byte IPU decoder begins at +0x24. The existing title read
+at 0x343EAC is decoder.frame at +0x6C, not independent table storage;
+the C title view already names the same movie owner. These corrections
+do not establish the AI table capacity or change other neighboring owners.

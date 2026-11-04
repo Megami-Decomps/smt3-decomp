@@ -362,19 +362,19 @@ INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F0F8);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F0FC);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F100);
+INCLUDE_SDATA(const s32, "effect/effBattleLight", effBedDirName);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCutCount);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F10C);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F110);
+INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCutAllFmt);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F118);
+INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCut1Fmt);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F120);
+INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCut2Fmt);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F128);
+INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCut3Fmt);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F130);
 
