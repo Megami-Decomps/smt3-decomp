@@ -233,11 +233,11 @@ s32 pbWriteMCard(s32 port, s32 slot, char *fileName, s32 flags,
     return writeSync;
 }
 
-/* The error strings start at D_003278D4; each 0x84-byte row is preceded by its
+/* The error strings start at pbMCardErrorRows; each 0x84-byte row is preceded by its
  * own attribute word, which is why the row before supplies it. */
 typedef struct { char text[0x80]; s32 attr; } pbErrorRow_t;
 
-extern pbErrorRow_t D_003278D4[];
+extern pbErrorRow_t pbMCardErrorRows[];
 
 typedef struct
 {
@@ -301,7 +301,7 @@ s32 pb_draw_error_Process(dds3ProcessID_t *id)
         DrwSprite2D(0, 0xC3, 0x200, 0x3A, 0, 0x1C4, 0x200, 0x3A, 0x80808080,
                     D_0054F5C4->tex344);
     } else {
-        len = strlen(D_003278D4[error->code].text);
+        len = strlen(pbMCardErrorRows[error->code].text);
         half = (0x200 - len * 12) >> 1;
         x = half << 4;
         tag = sdfGrAllocPacketBuff(0x20);
@@ -313,8 +313,8 @@ s32 pb_draw_error_Process(dds3ProcessID_t *id)
                                               len * pitch + 0x60, 0x90,
                                               0x20000000, 0x40008000));
         sdfDrawTagLink(tag, sdfDevPrintf(x + 0x7000, 0x7FD0, 0xFFFF80,
-                                         D_003278D4[error->code - 1].attr,
-                                         D_003278D4[error->code].text));
+                                         pbMCardErrorRows[error->code - 1].attr,
+                                         pbMCardErrorRows[error->code].text));
         pbErrorOt39.regFunc(&pbErrorOt39, tag);
     }
     error->unk04++;

@@ -218,7 +218,7 @@ extern u32 RotateBit(u32 val, s32 loop);
 
 extern void pbRoundCamera(s32 dir);
 
-extern s16 D_00551EC4, D_00551EC6;
+extern s16 pbMyCharPosX, pbMyCharPosY;
 
 extern sdfVector4_t D_0056CDD0[2];
 
@@ -692,7 +692,7 @@ s32 gameKey1(void) {
     if (dds3PadButtonState[0x22] < 0) {
         p2sdPlaySE(0x340009, 0x7F, 0x3F);
         if (pbGameKeyState == 0) {
-            pbGetMyCharcterPos2(mychar[current_char], &D_00551EC4, &D_00551EC6);
+            pbGetMyCharcterPos2(mychar[current_char], &pbMyCharPosX, &pbMyCharPosY);
             SDF_VU0_COPYVECTOR(&D_0056CDD0[0], &aViewEye);
             SDF_VU0_COPYVECTOR(&D_0056CDD0[1], &aViewTarget);
             pbGameKeyState = 1;
@@ -721,24 +721,24 @@ s32 gameKey1(void) {
     }
     if (pbGameKeyState != 0) {
         u32 flags;
-        if ((u32)(D_00551EC4 + pbKeyTable[ret][0]) < 20) {
-            D_00551EC4 += pbKeyTable[ret][0];
+        if ((u32)(pbMyCharPosX + pbKeyTable[ret][0]) < 20) {
+            pbMyCharPosX += pbKeyTable[ret][0];
         }
-        if ((u32)(D_00551EC6 + pbKeyTable[ret][1]) < 20) {
-            D_00551EC6 += pbKeyTable[ret][1];
+        if ((u32)(pbMyCharPosY + pbKeyTable[ret][1]) < 20) {
+            pbMyCharPosY += pbKeyTable[ret][1];
         }
-        pbSetGameCamera4(D_00551EC4, D_00551EC6);
+        pbSetGameCamera4(pbMyCharPosX, pbMyCharPosY);
         flags = 0;
-        if (D_00551EC6 < 0x13) {
+        if (pbMyCharPosY < 0x13) {
             flags |= 1;
         }
-        if (D_00551EC4 > 0) {
+        if (pbMyCharPosX > 0) {
             flags |= 2;
         }
-        if (D_00551EC6 > 0) {
+        if (pbMyCharPosY > 0) {
             flags |= 4;
         }
-        if (D_00551EC4 < 0x13) {
+        if (pbMyCharPosX < 0x13) {
             flags |= 8;
         }
         ret = -1;

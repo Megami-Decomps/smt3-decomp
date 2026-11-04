@@ -3942,7 +3942,7 @@ extern kernelEntryPair_t D_0052D670[8];
 extern void *D_0052D668;
 extern const u8 D_0052CB48[0x740];
 extern const u8 D_0052D288[0x28];
-extern const u8 D_0052D2F0[0x330];
+extern const u8 TLBFunctionsImage[0x330];
 extern void gcc2_compiled__17(u32 index, void *entry);
 extern s32 Copy_1(void *destination, const void *source, u32 size);
 extern s32 Copy_2(void *destination, const void *source, u32 size);
@@ -4140,7 +4140,7 @@ void InitTLBFunctions(void)
     void *entry;
 
     setup_0(D_0052D670[0].index, D_0052D670[0].entry);
-    Copy_2((void *)0x80075000, D_0052D2F0, 0x330);
+    Copy_2((void *)0x80075000, TLBFunctionsImage, 0x330);
     FlushCache(0);
     FlushCache(2);
     setup_0(D_0052D670[1].index, D_0052D670[1].entry);

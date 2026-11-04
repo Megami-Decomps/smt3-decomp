@@ -125,13 +125,13 @@ extern s8 sdfPrintIopFlag;
 
 extern char D_00551908[];
 
-extern char D_00551928[];
+extern char sdfFileCdromPrefix[];
 
-extern sdfHostPrefix_t D_00551930[];
+extern sdfHostPrefix_t sdfFileHostPrefix[];
 
-extern u8 D_00551938[];
+extern u8 sdfFileHddPrefix[];
 
-extern char D_00551940[];
+extern char sdfFileCdromName[];
 
 extern sdfFileCmdHandle_t *D_00551948;
 
