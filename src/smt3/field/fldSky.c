@@ -160,9 +160,7 @@ extern f32 fldSkyFilterRate;
 
 extern f32 fldSkyFilterTime;
 
-extern s32 fldLightMaState __attribute__((section(".data")));
 
-extern s32 fldGb __attribute__((section(".data")));
 
 extern void dds3SetFogColor(s32, f32 *);
 
@@ -481,7 +479,7 @@ INCLUDE_ASM(const s32, "field/fldSky", fldSkyDrawFilter);
 #endif
 
 void fldSkySetFilter(s32 idx, s32 mode, s32 hokan) {
-    if (fldSkyEnable == 0 && fldGb < 0x32) {
+    if (fldSkyEnable == 0 && fldGlobalBase.area < 0x32) {
         hokan = 0;
     }
     if (hokan == 0) {
@@ -763,11 +761,11 @@ void fldSkySetTbl(s32 idx, s32 hokan) {
 }
 
 void fldSkySetTblModosu(s32 hokan) {
-    if (fldSkyEnable == 0 && fldGb < 0x32) {
+    if (fldSkyEnable == 0 && fldGlobalBase.area < 0x32) {
         hokan = 0;
     }
     if (fldSkyTableIdx != 0 && fldSkyTable != fldSkyTableIdx) {
-        if (fldLightMaState == 0) {
+        if (fldGlobalBase.lightMaIdx == 0) {
             D_002FC0EC = fldSkyTableIdx;
         }
         fldSkySetTbl(fldSkyTableIdx, hokan);
@@ -894,8 +892,8 @@ void fldSkySetTblLightMa(s32 idx, s32 hokan) {
     s32 area;
     s32 value;
 
-    if (fldGb < 200) {
-        if (fldSkyEnable == 0 && fldGb < 0x32) {
+    if (fldGlobalBase.area < 200) {
+        if (fldSkyEnable == 0 && fldGlobalBase.area < 0x32) {
             hokan = 0;
         }
         defaultDuration = 15;
@@ -996,7 +994,7 @@ void fldSkyRefreshTbl(void) {
     s32 r, g, b;
     u32 lightColor, ambientColor;
 
-    if (fldGb < 200) {
+    if (fldGlobalBase.area < 200) {
         if (fldSkyLightMaTbl != 0) {
             light = &((fldLightSet_t *)fldSkyDefault)[fldSkyLightMaTbl];
         } else {

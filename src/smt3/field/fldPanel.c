@@ -51,7 +51,6 @@ extern void dds3FadeIn2(s32 frame);
 extern s32 fldRunDanteGunFlag[];
 extern s32 gFldInf_WpExit;
 extern s8 D_005298C9[];
-extern u32 fldInputPanelState[];
 extern s32 D_003095B0[];
 extern char D_003094F0[][16];
 extern void fldDrawInputPanel(void);
@@ -80,7 +79,7 @@ s32 fldInputPanelProcess2(dds3ProcessID_t *id)
     if (fldProcHirakenaiChk() != 0) {
         return 0;
     }
-    if (fldInputPanelState[0] != 0) {
+    if (fldGlobalBase.word80 != 0) {
         return 0;
     }
     work = dds3GetProcessData(id);

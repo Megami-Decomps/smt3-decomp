@@ -141,7 +141,6 @@ extern s32 gFldNowDZone;
 
 extern s32 fldProcCampWait;
 
-extern s32 fldJDataHandle __attribute__((section(".data")));
 
 extern s32 campCheckExitState(void);
 
@@ -191,7 +190,6 @@ extern void cmpProcessStart(void);
 
 extern saddr_t dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
 
-extern s32 fldLightMaState __attribute__((section(".data")));
 
 extern s32 fldChkVortex(void);
 
@@ -567,7 +565,7 @@ s32 ProcCampCheck(void)
             fldAutoMapSeqClearFlag(1);
             fldRegistUnitPad();
             evtEnableMoonDraw();
-            if (fldLightMaState != 0) {
+            if (fldGlobalBase.lightMaIdx != 0) {
                 fldSkyRefreshTbl();
             } else {
                 fldSkyRefreshTbl();
@@ -1143,7 +1141,7 @@ void fldProcShutDown(void)
 
 s32 fldProcShutDown2(void)
 {
-    if (fldJDataHandle == 0) {
+    if (fldGlobalBase.reuseAreaResources == 0) {
         if (fldLoadNextGetStatus2() != 0) {
             fldLoadNextTask();
             if (fldLoadNextGetStatus() == 1) {

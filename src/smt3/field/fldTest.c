@@ -36,7 +36,6 @@ extern f32 R360_LR(f32 a, f32 b);
 
 extern sdfVector4_t fldCamTarget;
 
-extern s32 fldGb __attribute__((section(".data")));
 
 extern f32 sdfAtan2(f32 aY, f32 aX);
 
@@ -131,7 +130,6 @@ extern void fldFindDoorEvent(void *event);
 
 extern void evtBitOn(s32 no);
 
-extern s32 fldJDataHandle __attribute__((section(".data")));
 
 extern void fldRunTamaFree(void);
 
@@ -596,7 +594,7 @@ void drawSceneBasicList(void) {
         }
         dds3FreeBasicArrayHandle(objectChain);
     }
-    if (fldGb == 1) {
+    if (fldGlobalBase.area == 1) {
         hasEligibleBackground = 0;
     }
     if (hasEligibleBackground != 0) {
@@ -2916,7 +2914,7 @@ void fldRunDanteShutdown(void)
 {
     fldFreeRunMapData();
     fldRunTamaFree();
-    if (fldJDataHandle != 0) {
+    if (fldGlobalBase.reuseAreaResources != 0) {
         fldRun_Dante.old_status = fldRun_Dante.status;
     } else {
         fldRunDanteHandle = -1;

@@ -31,7 +31,6 @@ enum sl_slot_flag
 
 extern s32 gFldSe3DNum;
 
-extern s32 D_002FC020[];
 
 extern u32 fldSeLastBgm;
 
@@ -59,7 +58,6 @@ extern s32 fldAutoMapBBox;
 
 extern s32 fldTakaraCount;
 
-extern s32 fldGb[];
 
 extern sdfTexHandle_t *fldUiTexture;
 
@@ -131,7 +129,6 @@ extern s32 dds3ObjectBaseSetPrimaryControl(dds3Basic_t *basic, void *func);
 
 extern void fldRegistUnitPad(void);
 
-extern s32 fldCamMode[];
 
 dds3Basic_t *fldGetUnitFollowCamera(void);
 
@@ -164,7 +161,6 @@ extern char D_0054F0A8[];
 
 extern char *strstr(const char *, const char *);
 
-extern s32 fldCamUnit[];
 
 extern fldDanteGunState_t fldRunDanteGunFlag;
 
@@ -192,7 +188,6 @@ extern void fldSetAnimeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *pObjectBasic, u32 mode);
 
-extern s32 fldArea[];
 
 extern void fldSetNpcFlag(s32 world, s32 stage, s32 room, s32 value);
 
@@ -244,7 +239,6 @@ extern void fldSeStop(s32 seid);
 
 extern void fldMotionSePlay(s32 seid, s32 subid);
 
-extern s32 fldEncountRate[];
 
 extern const char *fldEveHitResName_Find(addr_t pid);
 
@@ -462,7 +456,7 @@ s32 fldCommand_ACT_WIN_DSP(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    if (fldGb[0] >= 0xB && fldEveHit_ChkDir(unit, hit) == 0) {
+    if (fldGlobalBase.area >= 0xB && fldEveHit_ChkDir(unit, hit) == 0) {
         scrSetIntReturnValue(0);
         return 1;
     }
@@ -495,7 +489,7 @@ s32 fldCommand_ACT_WIN_DSP2(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    if (fldGb[0] >= 0xB && fldEveHit_ChkDir2(unit, hit) == 0) {
+    if (fldGlobalBase.area >= 0xB && fldEveHit_ChkDir2(unit, hit) == 0) {
         scrSetIntReturnValue(0);
         return 1;
     }
@@ -539,7 +533,7 @@ s32 fldCommand_DIR_HIT_CNTR(void) {
     dds3Basic_t *unit;
     dds3Basic_t *hit;
 
-    if (fldGb[0] < 0xA) {
+    if (fldGlobalBase.area < 0xA) {
         scrSetIntReturnValue(1);
         return 1;
     }
@@ -675,7 +669,7 @@ s32 fldCommand_SET_CHASE_CAMERA(void) {
 }
 
 s32 func_00158548(void) {
-    fldCamMode[0] = 3;
+    fldGlobalBase.mode = 3;
     return 1;
 }
 
@@ -750,7 +744,7 @@ s32 fldCommand_CAM_SEL_PHOKAN(void) {
         D_002FC9F0[2] = rot[2];
         fldCamPhokanState = 0;
         fldCamPHokanMode = scrGetIntPara(1);
-        fldCamMode[0] = 4;
+        fldGlobalBase.mode = 4;
     } else {
         world = dds3GetActiveScene();
         target = dds3SearchSceneBasic(world, scrGetIntPara(0), 4);
@@ -829,7 +823,7 @@ s32 fldCommand_SET_CASH_F(void) {
 }
 
 s32 fldCommand_FREE_CASH_F(void) {
-    if (fldGb[0] < 10) {
+    if (fldGlobalBase.area < 10) {
         return 1;
     }
     fldFreeNextFile();
@@ -861,7 +855,7 @@ s32 fldCommand_SET_CAMTBL(void) {
     s32 value;
 
     value = scrGetIntPara(0);
-    fldCamUnit[0] = value;
+    fldGlobalBase.cameraParamIndex = value;
     return 1;
 }
 
@@ -1099,11 +1093,11 @@ s32 fldCommand_FLD_ATARI_ON(void) {
 
     world = scrGetIntPara(0);
     if (world == 0) {
-        world = fldGb[0];
+        world = fldGlobalBase.area;
     }
     stage = scrGetIntPara(1);
     if (stage == 0) {
-        stage = fldArea[0] + 1;
+        stage = fldGlobalBase.floor + 1;
     }
     name = scrGetStrPara(2);
     if (name == NULL) {
@@ -1124,11 +1118,11 @@ s32 fldCommand_FLD_ATARI_OFF(void) {
 
     world = scrGetIntPara(0);
     if (world == 0) {
-        world = fldGb[0];
+        world = fldGlobalBase.area;
     }
     stage = scrGetIntPara(1);
     if (stage == 0) {
-        stage = fldArea[0] + 1;
+        stage = fldGlobalBase.floor + 1;
     }
     name = scrGetStrPara(2);
     if (name == NULL) {
@@ -1144,9 +1138,9 @@ s32 fldCommand_FLD_ATARI_OFF(void) {
 s32 fldCommand_FLD_MODEL_ON2(void) {
     s32 area = scrGetIntPara(0);
     s32 floor, target;
-    if (area == 0) area = fldGb[0];
+    if (area == 0) area = fldGlobalBase.area;
     floor = scrGetIntPara(1);
-    if (floor == 0) floor = fldArea[0] + 1;
+    if (floor == 0) floor = fldGlobalBase.floor + 1;
     target = scrGetIntPara(2);
     if (target == 0) return 1;
     fldSetModelFlag2(area, floor, target, 0);
@@ -1156,9 +1150,9 @@ s32 fldCommand_FLD_MODEL_ON2(void) {
 s32 fldCommand_FLD_MODEL_OFF2(void) {
     s32 area = scrGetIntPara(0);
     s32 floor, target;
-    if (area == 0) area = fldGb[0];
+    if (area == 0) area = fldGlobalBase.area;
     floor = scrGetIntPara(1);
-    if (floor == 0) floor = fldArea[0] + 1;
+    if (floor == 0) floor = fldGlobalBase.floor + 1;
     target = scrGetIntPara(2);
     if (target == 0) return 1;
     fldSetModelFlag2(area, floor, target, 1);
@@ -1168,9 +1162,9 @@ s32 fldCommand_FLD_MODEL_OFF2(void) {
 s32 fldCommand_FLD_ANIME_ON2(void) {
     s32 area = scrGetIntPara(0);
     s32 floor, target;
-    if (area == 0) area = fldGb[0];
+    if (area == 0) area = fldGlobalBase.area;
     floor = scrGetIntPara(1);
-    if (floor == 0) floor = fldArea[0] + 1;
+    if (floor == 0) floor = fldGlobalBase.floor + 1;
     target = scrGetIntPara(2);
     if (target == 0) return 1;
     fldSetAnimeFlag2(area, floor, target, 0);
@@ -1180,9 +1174,9 @@ s32 fldCommand_FLD_ANIME_ON2(void) {
 s32 fldCommand_FLD_ANIME_OFF2(void) {
     s32 area = scrGetIntPara(0);
     s32 floor, target;
-    if (area == 0) area = fldGb[0];
+    if (area == 0) area = fldGlobalBase.area;
     floor = scrGetIntPara(1);
-    if (floor == 0) floor = fldArea[0] + 1;
+    if (floor == 0) floor = fldGlobalBase.floor + 1;
     target = scrGetIntPara(2);
     if (target == 0) return 1;
     fldSetAnimeFlag2(area, floor, target, 1);
@@ -1196,11 +1190,11 @@ s32 fldCommand_FLD_ANIME_ID2(void) {
 
     world = scrGetIntPara(0);
     if (world == 0) {
-        world = fldGb[0];
+        world = fldGlobalBase.area;
     }
     stage = scrGetIntPara(1);
     if (stage == 0) {
-        stage = fldArea[0] + 1;
+        stage = fldGlobalBase.floor + 1;
     }
     slot = scrGetIntPara(2);
     if (slot == 0) {
@@ -1213,9 +1207,9 @@ s32 fldCommand_FLD_ANIME_ID2(void) {
 s32 fldCommand_FLD_MAP_ON(void) {
     s32 area = scrGetIntPara(0);
     s32 floor, flagNumber;
-    if (area == 0) area = fldGb[0];
+    if (area == 0) area = fldGlobalBase.area;
     floor = scrGetIntPara(1);
-    if (floor == 0) floor = fldArea[0] + 1;
+    if (floor == 0) floor = fldGlobalBase.floor + 1;
     flagNumber = scrGetIntPara(2);
     if (flagNumber == 0) return 1;
     fldAutoMapOpenBlock2(area, floor, flagNumber);
@@ -1225,9 +1219,9 @@ s32 fldCommand_FLD_MAP_ON(void) {
 s32 fldCommand_FLD_MAP_OFF(void) {
     s32 area = scrGetIntPara(0);
     s32 floor, flagNumber;
-    if (area == 0) area = fldGb[0];
+    if (area == 0) area = fldGlobalBase.area;
     floor = scrGetIntPara(1);
-    if (floor == 0) floor = fldArea[0] + 1;
+    if (floor == 0) floor = fldGlobalBase.floor + 1;
     flagNumber = scrGetIntPara(2);
     if (flagNumber == 0) return 1;
     fldAutoMapCloseBlock2(area, floor, flagNumber);
@@ -1308,11 +1302,11 @@ s32 fldCommand_FLD_GIMIC_HOJI(void) {
            scrGetIntPara(2), scrGetIntPara(3));
     world = scrGetIntPara(0);
     if (world == 0) {
-        world = fldGb[0];
+        world = fldGlobalBase.area;
     }
     stage = scrGetIntPara(1);
     if (stage == 0) {
-        stage = fldArea[0] + 1;
+        stage = fldGlobalBase.floor + 1;
     }
     index = scrGetIntPara(2);
     if (index == 0) {
@@ -1554,14 +1548,14 @@ s32 fldCommand_FLD_BGM_RELOAD_WAIT(void)
 s32 fldCommand_FLD_BGM_PLAY(void) {
     s32 track = scrGetIntPara(0);
 
-    D_002FC020[0] = track;
+    fldGlobalBase.sequenceCode = track;
     printf("FLD_BGM_PLAY:%d\n", track);
     fldBgmPlay();
     return 1;
 }
 
 s32 fldCommand_FLD_BGM_CONTINUE(void) {
-    D_002FC020[0] = scrGetIntPara(0);
+    fldGlobalBase.sequenceCode = scrGetIntPara(0);
     fldBgmContinue();
     return 1;
 }
@@ -1636,7 +1630,7 @@ s32 fldCommand_FLD_SET_ENCOUNT(void) {
     s32 value;
 
     value = scrGetIntPara(0);
-    fldEncountRate[0] = value;
+    fldGlobalBase.defaultEncounterId = value;
     return 1;
 }
 

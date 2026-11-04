@@ -35,7 +35,6 @@ typedef struct fldNpcPalette_t fldNpcPalette_t;
 
 typedef struct fldSkyBuffer_t fldSkyBuffer_t;
 
-extern u32 fldLoadNextStatus[];
 
 
 /* Kind 3 allocates 0x10 bytes in dds3AllocateClearedObjectWork. */
@@ -360,7 +359,6 @@ extern addr_t D_0054EBD0, D_0054EBD4, fldFileBuf2;
 
 extern u8 *FildMaskObj, *mat_black, *mat_white, *mat_line;
 
-extern u32 fldJDataHandle[];
 
 typedef struct fldConstruntAreaFL2_t {
     u32 flag; /* 0x00 */
@@ -389,7 +387,6 @@ typedef struct fldFileInfoHeaderFL2_t {
 
 extern void fldMakeResouceBasicFL2(void *typeTable, u32 typeCount);
 
-extern s32 fldRetryFileId[];
 
 void fldFileResolverFL2(fldFileInfoHeaderFL2_t *info);
 
@@ -1111,7 +1108,7 @@ void fldFileResolverFL1(fldFileInfoHeaderFL1_t *info)
 void fldFileResolverFL2(fldFileInfoHeaderFL2_t *info) {
     fldMakeBlockBasicFL2(info->pAreaTable, info->nArea);
     fldMakeResouceBasicFL2(info->pResourceTypeTable, info->nResourceTypeTable);
-    fldRetryFileId[0] = info->pAreaData->label;
+    fldGlobalBase.retryScript = (char *)info->pAreaData->label;
 }
 
 u8 *fldGetInfoHeader(fldTransferChunk_t *pData) {
@@ -1237,7 +1234,7 @@ s32 fldLoadNextTask(void) {
 }
 
 u32 fldLoadNextGetStatus(void) {
-    return fldLoadNextStatus[0];
+    return fldGlobalBase.resourceFlag;
 }
 
 u8 fldLoadNextGetStatus2(void) {
@@ -1246,7 +1243,7 @@ u8 fldLoadNextGetStatus2(void) {
             return 1;
         }
     }
-    return fldLoadNextStatus[0] != 0;
+    return fldGlobalBase.resourceFlag != 0;
 }
 
 s32 fldLoadNextGetStatus3(s32 field, s32 area) {
@@ -1588,7 +1585,7 @@ u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, vo
     fldAddressResolver(EE_ADDR(fl2Buffer), chunk);
     fldFileResolverFL1(fldGetInfoHeader(chunk));
     fldMakeObjectBasic2();
-    fldJDataHandle[0] = 0;
+    fldGlobalBase.reuseAreaResources = 0;
     return D_0054EBD4;
 }
 

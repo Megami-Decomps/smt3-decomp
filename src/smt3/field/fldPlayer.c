@@ -33,7 +33,6 @@ extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
 
 extern s32 fldAutoMapChkMode(void);
 
-extern s32 fldGb __attribute__((section(".data")));
 
 s32 evtBitCheck(s32 no);
 
@@ -2441,7 +2440,7 @@ INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerFastSet);
 void fldPlayerMotReset(void) {
     dds3Basic_t *unit;
 
-    if (fldGb < 10) {
+    if (fldGlobalBase.area < 10) {
         return;
     }
     unit = dds3GetActiveUnitSceneBasic(dds3GetActiveScene());
@@ -2455,7 +2454,7 @@ void fldPlayerMotReset(void) {
 void fldPlayerMotReset2(void) {
     dds3Basic_t *unit;
 
-    if (fldGb < 10) {
+    if (fldGlobalBase.area < 10) {
         return;
     }
     unit = dds3GetActiveUnitSceneBasic(dds3GetActiveScene());

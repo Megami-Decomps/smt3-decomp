@@ -40,7 +40,6 @@ extern s32 fldTakaraCount;
 
 extern fldTakaraSlot_t fldTakaraSlotTable[32];
 
-extern s32 fldGb[];
 
 extern void rsetOtOfs(u32);
 
@@ -150,7 +149,6 @@ extern f32 sdfSin(f32 aRadius);
 
 extern f32 sdfCos(f32 aRadius);
 
-extern s32 fldArea[];
 
 
 
@@ -231,7 +229,7 @@ void fldNpcLightSet(evtUnit_t *hEveUnit) {
     object = hEveUnit->effObj;
     model = dds3ObjectBaseGetModelHandle(object);
     SDF_VU0_LOADVECTOR(&object->poseset->rot);
-    row = &D_003129D0[(fldArea[0] + 1) * 8];
+    row = &D_003129D0[(fldGlobalBase.floor + 1) * 8];
     dir = -EulerAngleAxisY();
     if (row[7] == 0) {
         dir = dir * 180.0f / 3.14f;
@@ -658,7 +656,7 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
     fldTakaraSlotTable[fldTakaraCount].tableIndex = id;
     fldTakaraCount = fldTakaraCount + 1;
     fldAddItemBoxObject(-1, x, y, z, 20.0f, 100.0f);
-    row = &D_003129D8[fldArea[0] * 8];
+    row = &D_003129D8[fldGlobalBase.floor * 8];
     SDF_VU0_LOADVECTOR(&rotation);
     dir = EulerAngleAxisY() * 180.0f / 3.14f + 80.0f;
     unit = evtGetUnitHandle2(object);
@@ -966,7 +964,7 @@ void fldDrawAddressPanel(s32 width, s32 x, s32 y) {
 }
 
 void fldDrawInputPanel(void) {
-    if (fldGb[0] >= 0xC8) {
+    if (fldGlobalBase.area >= 0xC8) {
         return;
     }
     rsetOtOfs(0x47);
@@ -980,7 +978,7 @@ void fldDrawInputPanel(void) {
 }
 
 void fldDrawInputCursor(s32 x, s32 y) {
-    if (fldGb[0] < 200) {
+    if (fldGlobalBase.area < 200) {
         rsetOtOfs(0x47);
         rsetAlpha(0);
         rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);

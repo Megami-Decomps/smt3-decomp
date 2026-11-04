@@ -139,9 +139,7 @@ extern u8 D_002FC480[];
 
 extern s32 gFldNowDZone;
 
-extern s32 fldEncountCheckCount __attribute__((section(".data")));
 
-extern s32 fldJDataHandle __attribute__((section(".data")));
 
 extern void fldEsutoMaClear(void);
 
@@ -687,7 +685,7 @@ void fldJDataClear(void)
         sdfMemFreeDelayedDirect((sdfMemHandle_t *)mhfldWaveFile);
         mhfldWaveFile = NULL;
     }
-    if (fldJDataHandle == 0 && gFldRndEncBtl == 0) {
+    if (fldGlobalBase.reuseAreaResources == 0 && gFldRndEncBtl == 0) {
         fldPlayerAFree();
         fldLoadNextFile_SetId_BtlRet(0, 0);
     }
@@ -778,14 +776,13 @@ void fldReleaseUnitPad(void)
         fldEncountClearFlag(0x40);
         dds3ObjectBaseSetPrimaryControl(ctl->handle, 0);
     }
-    fldEncountCheckCount = 4;
+    fldGlobalBase.word5C = 4;
 }
 
 #ifdef NON_MATCHING
 extern const fldPackedVector_t D_00531770, D_00531780, D_00531790, D_005317A0, D_005317B0;
 extern s32 D_002FC41C;
 extern s32 l_UseCollision;
-extern s32 fldCamUnit[];
 extern dds3Basic_t *D_0054EAE8, *D_0054EAF0, *fldPlayerUnit;
 extern char D_0054EB38[];
 extern void *mhfldAnaFile;
@@ -925,7 +922,7 @@ void fldSetUnit(fldResourcePoint_t *point)
         if (enableDante) {
             evtBitOn(0xAF3);
             evtBitOn(0xAF4);
-            fldCamUnit[0] = 24;
+            fldGlobalBase.cameraParamIndex = 24;
         }
     }
     if (evtBitCheck(0xAF3) != 0) {

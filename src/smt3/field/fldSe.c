@@ -60,7 +60,6 @@ extern s32 fldBgmLoadStep;
 
 extern s32 fldBgmSmgAddr;
 
-extern s32 fldGb __attribute__((section(".data")));
 
 void p2sdPlaySE(s32 trackId, s32 volume, s32 pan);
 
@@ -447,8 +446,8 @@ void fldBgmFadeOut(void) {
 }
 
 s32 fldBgmTransChk(s32 id1, s32 id2) {
-    s8 first = gFldBgmTop[fldGb].trans[id1];
-    s8 second = gFldBgmTop[fldGb].trans[id2];
+    s8 first = gFldBgmTop[fldGlobalBase.area].trans[id1];
+    s8 second = gFldBgmTop[fldGlobalBase.area].trans[id2];
 
     if (first != 0 && second != 0) {
         return 1;
@@ -693,7 +692,7 @@ s32 fldWaitBgmReload(void) {
 /* Exact with the real fldBgmPlay C provider visible; see matching notes. */
 void fldBgmBitChk(void)
 {
-    if (fldGb != 0x22) {
+    if (fldGlobalBase.area != 0x22) {
         return;
     }
     if (gFldBgmBit == 0) {
@@ -803,7 +802,7 @@ void fld_145DC0(s32 soundId, f32 x, f32 y, f32 z, f32 limit)
     }
     p2sdSetStandPos(listenerX, D_002FC9C0[1], listenerZ,
                     D_002FC9C0[0], D_002FC9C0[1], D_002FC9C0[2]);
-    p2sdPlaySe3DEx(gFldBgmTop[fldGb].smgId + soundId, (s32)(x / 100.0f), y, z, limit);
+    p2sdPlaySe3DEx(gFldBgmTop[fldGlobalBase.area].smgId + soundId, (s32)(x / 100.0f), y, z, limit);
 }
 #else
 INCLUDE_ASM(const s32, "field/fldSe", fld_145DC0);

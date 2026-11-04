@@ -44,9 +44,7 @@ extern void sdfModelLinkOt(sdfModelOt_t *aOt, sdfModelRootNode_t *aRoot);
 
 extern u32 AutoMapSeq;
 
-extern s32 fldAreaNameUpper[];
 
-extern s32 fldAreaNameLower[];
 
 extern s32 fldAutoMapField;
 
@@ -58,7 +56,6 @@ extern s32 fldTakaraCount;
 
 extern fldTakaraSlot_t fldTakaraSlotTable[32];
 
-extern s32 fldGb[];
 
 extern void rsetOtOfs(u32);
 
@@ -144,7 +141,6 @@ extern void fldAutoMapSeqClearFlag(s32 flag);
 
 extern void evtEnableMoonDraw(void);
 
-extern s32 fldMenuOpenFlag[];
 
 extern void frSetFontDrawOT(u32 OtType);
 
@@ -418,8 +414,8 @@ void fldAutoMapFontInit(s32 bank) {
         D_00567F50[i] = strlen(D_0030D714[fldAutoMapFindPlace(bank, i)]);
     }
     i = 0;
-    if (fldGb[0] < 50) {
-        i = fldGb[0];
+    if (fldGlobalBase.area < 50) {
+        i = fldGlobalBase.area;
     }
     D_00551CC8 = strlen(D_0030A670[i]);
 }
@@ -468,7 +464,7 @@ void fldAmModelLoadFile(void) {
 
 
 void fldAmbLoadFromMem(u8 *data, sdfMemHandle_t *mh) {
-    s32 field = fldGb[0];
+    s32 field = fldGlobalBase.area;
     u32 *info;
 
     if (field < 200) {
@@ -1496,7 +1492,7 @@ void fldAutoMapSeqEnd(void) {
     fldAutoMapSeqClearFlag(1);
     fldRegistUnitPad();
     evtEnableMoonDraw();
-    fldMenuOpenFlag[0] = 4;
+    fldGlobalBase.menuOpenFlag = 4;
     frSetFontDrawOT(0x48);
     dds3VisibleSceneBasic(dds3GetActiveScene(), 1);
 }
@@ -1820,17 +1816,17 @@ INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapCloseBlock2);
 
 void fldAutoMapNameU(s32 nameID) {
     if (nameID >= 0x40) {
-        fldAreaNameUpper[0] = -1;
+        fldGlobalBase.nameU = -1;
     } else {
-        fldAreaNameUpper[0] = nameID;
+        fldGlobalBase.nameU = nameID;
     }
 }
 
 void fldAutoMapNameD(s32 nameID) {
     if (nameID >= 0x40) {
-        fldAreaNameLower[0] = -1;
+        fldGlobalBase.nameD = -1;
     } else {
-        fldAreaNameLower[0] = nameID;
+        fldGlobalBase.nameD = nameID;
     }
 }
 
@@ -1955,10 +1951,10 @@ void fldAutoMapGetBBox(f32 *getX0, f32 *getZ0, f32 *getX1, f32 *getZ1) {
 }
 
 void fldAutoMapProc(void) {
-    if (fldGb[0] < 10) {
+    if (fldGlobalBase.area < 10) {
         return;
     }
-    if (fldGb[0] >= 200) {
+    if (fldGlobalBase.area >= 200) {
         return;
     }
     if (AutoMapSeq == 1) {
