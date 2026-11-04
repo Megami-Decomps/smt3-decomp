@@ -59,9 +59,6 @@ extern s16 fldRun_MAP_BZ;
 extern s32 fldRunAiTimer __attribute__((section(".bss")));
 extern u32 dds3GetKernelCount(void);
 
-/* Dante's run timers count retail ticks, so they step on the due ones. */
-#define DANTE_TICK_DUE SDF_FRAME_DUE(dds3GetKernelCount())
-
 extern s32 evtBitCheck(s32 no);
 
 extern void fldSetElvCameraScene(s32 dir);
@@ -1998,18 +1995,14 @@ void func_0011C790(void) {
 void func_0011C798(void)
 {
     if (fldRun_Dante.nextframe > 0) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.nextframe--;
-        }
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
     }
 }
 
 void func_0011C7B8(void)
 {
     if (fldRun_Dante.nextframe > 0) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.nextframe--;
-        }
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
     }
     if (fldRun_Dante.bgm_mode != 0) {
         fldRun_Dante.bgm_mode = 0;
@@ -2026,9 +2019,7 @@ void fldRunDanteDoin(void)
     void **basic;
 
     if (fldRun_Dante.nextframe > 0) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.nextframe--;
-        }
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
     }
     if (fldRun_Dante.nextframe == 0x4E && fldRun_Dante.pDoor != NULL) {
         basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x11, fldRun_Dante.pDoor->name);
@@ -2061,14 +2052,10 @@ void fldRunDanteMove(void)
     u8 *routeEntry;
 
     if (fldRun_Dante.cnt_ex < 300) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.cnt_ex++;
-        }
+        fldRun_Dante.cnt_ex += SDF_FRAME_DUE(dds3GetKernelCount());
     }
     if (fldRun_Dante.nextframe > 0) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.nextframe--;
-        }
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
     }
 
     routeEntry = fldRun_Dante.RouteDataTop;
@@ -2174,14 +2161,10 @@ void fldRunDantePwak(void)
     u8 *routeEntry;
 
     if (fldRun_Dante.cnt_ex < 300) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.cnt_ex++;
-        }
+        fldRun_Dante.cnt_ex += SDF_FRAME_DUE(dds3GetKernelCount());
     }
     if (fldRun_Dante.nextframe > 0) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.nextframe--;
-        }
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
     }
 
     routeEntry = fldRun_Dante.RouteDataTop;
@@ -2279,9 +2262,7 @@ void fldRunDanteSoba(void)
     f32 dist;
 
     if (fldRun_Dante.nextframe > 0) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.nextframe--;
-        }
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
     }
     dist = fldRun_Dante.d_p_len;
     fldRun_Dante.angleToPlayer = fldRun_Dante.d_p_dir;
@@ -2320,14 +2301,10 @@ void fldRunDantePatr(void)
     f32 angle;
 
     if (fldRun_Dante.cnt_ex < 300) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.cnt_ex++;
-        }
+        fldRun_Dante.cnt_ex += SDF_FRAME_DUE(dds3GetKernelCount());
     }
     if (fldRun_Dante.nextframe > 0) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.nextframe--;
-        }
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
     }
 
     FroFtoI(fldRun_Dante.x, fldRun_Dante.z, (u16 *)&fldRun_Dante.ix, (u16 *)&fldRun_Dante.iz);
@@ -2423,14 +2400,10 @@ void fldRunDanteGun1(void)
     s32 i;
 
     if (fldRun_Dante.cnt_ex < 300) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.cnt_ex++;
-        }
+        fldRun_Dante.cnt_ex += SDF_FRAME_DUE(dds3GetKernelCount());
     }
     if (fldRun_Dante.nextframe > 0) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.nextframe--;
-        }
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
     }
     fldRun_Dante.angleToPlayer = fldRun_Dante.d_p_dir;
     distance = fldRun_Dante.d_p_len;
@@ -2518,14 +2491,10 @@ void fldRunDanteGun2(void)
     s32 i;
 
     if (fldRun_Dante.cnt_ex < 300) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.cnt_ex++;
-        }
+        fldRun_Dante.cnt_ex += SDF_FRAME_DUE(dds3GetKernelCount());
     }
     if (fldRun_Dante.nextframe > 0) {
-        if (DANTE_TICK_DUE) {
-            fldRun_Dante.nextframe--;
-        }
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
     }
     fldRun_Dante.angleToPlayer = fldRun_Dante.d_p_dir;
     distance = fldRun_Dante.d_p_len;

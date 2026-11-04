@@ -181,7 +181,7 @@ void nbResultInitLabels(void)
     for (i = 0; i < 64; i++) {
         caption = &D_00574F50[i];
         if (caption->flag != 0) {
-            caption->life--;
+            caption->life -= SDF_FRAME_DUE(dds3GetKernelCount());
             if (caption->life <= 0) {
                 caption->flag = 0;
             } else {
@@ -265,9 +265,7 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
     if (nbResultScoreTable[scoreIndex].stopcnt > 0) {
-        if (SDF_FRAME_DUE(dds3GetKernelCount())) {
-            nbResultScoreTable[scoreIndex].stopcnt--;
-        }
+        nbResultScoreTable[scoreIndex].stopcnt -= SDF_FRAME_DUE(dds3GetKernelCount());
     }
     if (frame > 0) {
         if (frame < 8) {
@@ -521,9 +519,7 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
     s32 py;
 
     D_00551100 = D_00551100 + 0.099999995f;
-    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
-        nbResultTimer++;
-    }
+    nbResultTimer += SDF_FRAME_DUE(dds3GetKernelCount());
     nbPnl_setOt(0x47);
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);

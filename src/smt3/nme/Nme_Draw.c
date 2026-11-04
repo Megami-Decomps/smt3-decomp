@@ -30,14 +30,14 @@ void nmeDrawInputUBar(s8 mode)
 
 
 
-extern fclSpriteTbl_t GBWK_2 __attribute__((section(".data")));
+extern fclSpriteTbl_t GBWK_2[4] __attribute__((section(".data")));
 extern nmeWork_t *namelist_buttonAnim_end;
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page, s32 spriteId,
                              s32 *texList, fclSpriteTbl_t *table, s32 ot);
 
 void nmeDrawFuncIcon(void)
 {
-    fclSpriteTbl_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = GBWK_2;
     s32 ot = 0x47;
 
     fclDrawSpriteRes(0, 0x1E0, 0, 0, 1, 0,
@@ -90,7 +90,7 @@ void nmeDrawInputPanel(void)
     s32 ot = 0x47;
 
     nmeDrawPanelSprites();
-    table = &GBWK_2;
+    table = GBWK_2;
     fclDrawSpriteRes(0xE40, 0xCE0, 0, 0, 3, 3,
                      (s32 *)namelist_buttonAnim_end->textures, table, ot);
     fclDrawSpriteRes(0xE40, 0xCE0, 0, 0, 3, 4,
@@ -132,7 +132,7 @@ s32 nmeDraw(dds3ProcessID_t *id)
         return -1;
     }
     cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, 0x80, 0x47);
-    table = &GBWK_2;
+    table = GBWK_2;
     nmeDrawBlendText(2, 1, namelist_buttonAnim_end->textures, table,
                      0x80808080, namelist_buttonAnim_end->animation, 0x47);
     fclDrawSpriteRes(0, 0, 0, 0, 2, 0,

@@ -1143,3 +1143,53 @@ referenced from both.
 
 Writing the literal in the source removes the extern and gains a word in each
 case. These auto-named addresses should not be declared as globals.
+
+## Element symbols merged into the object code indexes
+
+The IDB split 39 objects into one symbol per element, but retail code indexes from the first name across the rest. `config/smt3/symbol_addrs.txt` now carries one sized symbol per object under the first name (the name the C uses), and the element names below are dropped from it. `tools/check_data_sizes.py` finds them (BEYOND and C size classes). The IDB itself is not edited from this tree: merge the names there too, and note that an `ida_symbols.py` export from the unmerged IDB would re-add the dropped lines.
+
+Format: base (size in bytes): dropped element names.
+
+- `fldCamPhokanSelX` (0x8): `fldCamPhokanSelY`
+- `fldCamPhokanEyeX` (0x8): `fldCamPhokanEyeY`
+- `fldCamPhokanTgtX` (0x8): `fldCamPhokanTgtY`
+- `fldHitChkWork` (0xC): `fldHitChkWork2`, `fldHitChkWork3`
+- `effBTLFieldColorFilter` (0x24): `effBTLFieldFilterAlpha`, `effBTLFieldFilterFlag`
+- `effBTLSystem_Kyusyuu_PartList` (0x14): `effBTLKyusyuuParam`
+- `nbCameraHelperViewerPBParam` (0x3C): `nbCameraHelperViewerPBTable`
+- `cmpStatusAnimCount` (0x8): `cmpStatusAnimFrame`
+- `pipeCamShake` (0xC): `pipeCameraQuakeX`, `pipeCameraQuakeY`
+- `pipeCamShakeVec` (0x10): `pipeCamViewport`
+- `sdfCameraTm` (0x20): 
+- `fldRunDanteStartX` (0x4): `fldRunDanteStartZ`
+- `blur2target` (0x28): 
+- `filter2target` (0x18): 
+- `slNewGameBit2561` (0x18): `slNewGameBit2563`, `slNewGameBit2565`, `slNewGameBit2567`, `slNewGameBit2569`, `slNewGameBit2571`, `slNewGameBit2573`, `slNewGameBit2575`, `slNewGameBit2577`, `slNewGameBit2579`, `slNewGameBit2581`, `slNewGameBit2583`, `slNewGameBit2585`, `slNewGameBit2587`, `slNewGameBit2589`, `slNewGameBit2591`, `slNewGameBit2593`, `slNewGameBit2595`, `slNewGameBit2597`, `slNewGameBit2599`, `slNewGameBit2601`, `slNewGameBit2603`, `slNewGameBit2605`, `slNewGameBit2607`
+- `fldDspark01File` (0x28): `fldDspark01Data`, `fldDspark01Size`
+- `fldDsmoke2File` (0x28): `fldDsmoke2Data`, `fldDsmoke2Size`
+- `fldDspark02File` (0x28): `fldDspark02Data`, `fldDspark02Size`
+- `fldGun02aFile` (0x28): `fldGun02aData`, `fldGun02aSize`
+- `fldGun01a0File` (0x28): `fldGun01a0Data`, `fldGun01a0Size`
+- `fldMuzzleB010File` (0x28): `fldMuzzleB010Data`, `fldMuzzleB010Size`
+- `fldDsmoke1File` (0x28): `fldDsmoke1Data`, `fldDsmoke1Size`
+- `fldDflash1File` (0x28): `fldDflash1Data`, `fldDflash1Size`
+- `nbCameraBAState` (0x38): `nbCameraBATimer`
+- `gFGC` (0x20): `fmFontMemHandle`, `fmRestBufNum`, `fmFontMemPool`
+- `pbDebugPanel3X` (0x4): `pbDebugPanel3Y`
+- `mdlDebugScaleWork` (0xC): `mdlDebugScaleFlag`, `mdlDebugScaleIndex`, `mdlDebugTextColor`
+- `movieViewerDebugFlag` (0x50): `movieViewerDrawFlag`, `movieViewerDrawMode`, `movieViewerCtrlPtr`, `movieViewerRegPtr`, `movieViewerInfoLine`
+- `fileQueueHead` (0x40): `pacReadState`, `fileLoadQueue`, `fileCallbackState`, `fileSysBuf`
+- `sdfFileRpcState` (0x18): `sdfFileRpcSema`, `sdfFileRpcReadSize`, `sdfFileRpcReadRest`
+- `dds3BlurState` (0x58): 
+- `dds3MultiBlurBuf` (0x2C): `mulblurbase`
+- `dds3DistBlurBuf` (0x2C): `distblurbase`
+- `dds3RipBlurBuf` (0x2C): `ripblurbase`
+- `ripblurtarget` (0x58): 
+- `dds3MFilterBuf` (0x24): `mfilterbase`
+- `fldAutoMapPosX` (0x10): `fldAutoMapPosY`
+- `nbCamera_DOUTYO_B4P` (0x38): `nbCameraDoutyoMode`, `nbCameraDoutyoStep`
+- `softenBiasWork` (0x38): `softenBiasState`
+
+27 further bases are not merged yet (C uses the element names, or a `D_` label inside is referenced); see the datasizes handoff.
+
+Four more bases, merged the same way (C never names the dropped elements): `sdfDrawFaceListParam` (0x20: `sdfDrawFaceListParam2`), `dds3ScreenBlurOfsX` (0x8: `dds3ScreenBlurOfsY`), `fadergba` (0x4: `dds3FadeColorG`, `dds3FadeColorB`, `dds3FadeState`), `nbStageState` (0xC: `StageData`, `nbStageNo`, `nbStageSub`, `nbStageParam`).

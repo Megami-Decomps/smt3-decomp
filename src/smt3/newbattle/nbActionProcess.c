@@ -1,4 +1,7 @@
 #include "common.h"
+#include "sdfFrame.h"
+
+extern u32 dds3GetKernelCount(void);
 #include "newbattle.h"
 #include "newdata.h"
 #include "kernel.h"
@@ -4143,7 +4146,7 @@ s32 CheckAction_CHECK1(nbActionProcessData_t *a)
         return 0;
     }
     if (a->packettime >= 16) {
-        a->packettime--;
+        a->packettime -= SDF_FRAME_DUE(dds3GetKernelCount());
         return 0;
     }
     nbUpdateOrder();

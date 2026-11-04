@@ -12,7 +12,7 @@ extern void cmpUpdateTerminate(void *work);
 
 
 /* This descriptor is in .data, outside the GP-relative range. */
-extern fclSpriteTbl_t GBWK_2 __attribute__((section(".data")));
+extern fclSpriteTbl_t GBWK_2[4] __attribute__((section(".data")));
 extern nmeWork_t *namelist_buttonAnim_end;
 extern void frSetFontColor(frFontHandle_t *font, u32 color);
 extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
@@ -36,7 +36,7 @@ s32 nmeCalc(dds3ProcessID_t *id)
 
 void nmeDrawCharRow(s32 x, s32 y, s32 unused)
 {
-    fclSpriteTbl_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = GBWK_2;
     s32 ot = 0x47;
 
     fclDrawSpriteRes(x, y, 0, 0, 3, 0x12,
@@ -49,7 +49,7 @@ void nmeDrawCharRow(s32 x, s32 y, s32 unused)
 
 void nmeDrawSymbolRow(s32 x, s32 y, s32 unused)
 {
-    fclSpriteTbl_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = GBWK_2;
     s32 ot = 0x47;
 
     fclDrawSpriteRes(x, y, 0, 0, 3, 0x12,
@@ -95,7 +95,7 @@ void nmeDrawNameText(s32 x, s32 y, s32 secondX, s32 secondY, u32 color, s32 mode
         }
         fclDrawSpriteRes(x * 16 + 0xF0 + i * 0x150, (y + 0x16) * 8,
                          0, NULL, 0, sprite, (s32 *)namelist_buttonAnim_end->textures,
-                         &GBWK_2, 0x47);
+                         GBWK_2, 0x47);
     }
     for (i = 0; i < 8; i++) {
         s32 sprite = 8;
@@ -104,11 +104,11 @@ void nmeDrawNameText(s32 x, s32 y, s32 secondX, s32 secondY, u32 color, s32 mode
         }
         fclDrawSpriteRes(secondX * 16 + 0xF0 + i * 0x150, (secondY + 0x16) * 8,
                          0, NULL, 0, sprite, (s32 *)namelist_buttonAnim_end->textures,
-                         &GBWK_2, 0x47);
+                         GBWK_2, 0x47);
     }
     cmpSetSkillListRows(0x18);
     fclDrawSpriteRes((x - 0x13) * 16, (y + 9) * 8, 0, NULL, 0, 0x12,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     frDisableMode(1);
     for (i = 0; i < namelist_buttonAnim_end->inputRowEnabled[0]; i++) {
         frFontHandle_t *font;
@@ -122,7 +122,7 @@ void nmeDrawNameText(s32 x, s32 y, s32 secondX, s32 secondY, u32 color, s32 mode
         frDestroyFontRequestAfter(font);
     }
     fclDrawSpriteRes((secondX - 0x13) * 16, (secondY + 9) * 8, 0, NULL, 0, 0x11,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     for (i = 0; i < namelist_buttonAnim_end->inputRowEnabled[1]; i++) {
         frFontHandle_t *font;
         text[0] = namelist_buttonAnim_end->inputChars[1][i][0];
@@ -163,7 +163,7 @@ void nmeDrawNameString(s32 x, s32 y, u32 color, s32 mode)
         }
         fclDrawSpriteRes((x + 0x10) * 16 + i * 0x120, (y + 0x12) * 8,
                          0, NULL, 0, sprite, (s32 *)namelist_buttonAnim_end->textures,
-                         &GBWK_2, 0x47);
+                         GBWK_2, 0x47);
     }
     for (i = 0; i < namelist_buttonAnim_end->inputRowEnabled[2]; i++) {
         frFontHandle_t *font;
@@ -185,7 +185,7 @@ INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameString);
 void nmeDrawEditIcons(void)
 {
     s32 colors[4];
-    fclSpriteTbl_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = GBWK_2;
 
     colors[0] = 0x80808079;
     colors[1] = 0x80808079;
@@ -270,13 +270,13 @@ extern void nmeDrawColoredText(s8 color);
 void nmeDrawButtonGuide(void)
 {
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0x17,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0x1D,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     nmeDrawNameText(0x2A, 0x64, 0xF4, 0x64, 0xFFD19280, 1);
     if (namelist_buttonAnim_end->entryMode == 0) {
         fclDrawSpriteRes(0, 0, 0, 0, 3, 0x18,
-                         (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                         (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
         nmeDrawNameString(0x83, 0x9A, 0xFFD19280, 1);
     }
     nmeDrawEditIcons();
@@ -289,21 +289,21 @@ void nmeDrawPanelSprites(void)
     s32 colors[4];
 
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0x5,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0x6,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0x7,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0x8,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0x9,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0xA,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0xB,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0xC,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
 
     colors[0] = 0x80808053;
     colors[1] = 0x80808053;
@@ -311,14 +311,14 @@ void nmeDrawPanelSprites(void)
     colors[3] = 0x80808053;
 
     fclDrawSpriteRes(0, 0, 0, colors, 3, 0xD,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
     fclDrawSpriteRes(0, 0, 0, colors, 3, 0xE,
-                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
 }
 
 void nmeDrawNamePanel(void)
 {
-    fclSpriteTbl_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = GBWK_2;
     s32 ot = 0x47;
 
     fclDrawSpriteRes(0, 0, 0, 0, 3, 0,
@@ -355,7 +355,7 @@ void nmeDrawCharCell(s32 x, s32 y, u16 index, s8 row, frFontHandle_t *font)
         goto done;
     }
     fclDrawSpriteRes(drawX << 4, drawY << 3, 0, 0, 0, spriteId,
-                     (s32 *)work->textures, &GBWK_2, 0x47);
+                     (s32 *)work->textures, GBWK_2, 0x47);
     frSetFontColor(font, 0xFFD19280);
 done:
     return;
@@ -391,7 +391,7 @@ void nmeDrawCursorAt(s32 x, s32 y, s32 z, s8 mode, s32 ot)
             frFontHandle_t *font;
 
             fclDrawSpriteRes(drawX * 16, drawY * 8, 0, NULL, 0, 0x2B,
-                             (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                             (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
             character = D_005276B8[mode] + index * 2;
             text[0] = character[0];
             text[1] = character[1];
@@ -417,7 +417,7 @@ void nmeDrawCursor(void)
 
 void nmeDrawTabSprite(s32 x, s32 y, s32 unused)
 {
-    fclSpriteTbl_t *table = &GBWK_2;
+    fclSpriteTbl_t *table = GBWK_2;
     s32 ot = 0x47;
 
     fclDrawSpriteRes(x, y, 0, 0, 3, 0xF,
@@ -435,11 +435,11 @@ void nmeDrawModeTabs(s8 mode)
     case 0:
     case 1:
         fclDrawSpriteRes(0, 0, 0, 0, 3, 0x15,
-                         (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                         (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
         break;
     case 2:
         fclDrawSpriteRes(0, 0, 0, 0, 3, 0x16,
-                         (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+                         (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
         break;
     default:
         break;

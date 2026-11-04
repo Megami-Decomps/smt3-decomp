@@ -2073,9 +2073,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
                             colorWords[4] = colorWords[2];
                         }
                     }
-                    if (SDF_FRAME_DUE(work->frame)) {
-                        cell->frame++;
-                    }
+                    cell->frame += SDF_FRAME_DUE(work->frame);
                 }
                 dds3FlashPolyListDraw(group->hFlash);
             }

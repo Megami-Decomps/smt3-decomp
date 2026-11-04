@@ -3384,14 +3384,12 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
                     history->points[history->point][2] = packet->radialOffset[2];
                 }
                 color = (packet->color & 0xFF000000) | (hData->head.abgr & 0xFFFFFF);
-                if (SDF_FRAME_DUE(age)) {
-                    history->point++;
-                    if ((u32)history->point >= capacity) {
-                        history->point = 0;
-                    }
-                    if ((u32)history->count < capacity) {
-                        history->count++;
-                    }
+                history->point += SDF_FRAME_DUE(age);
+                if ((u32)history->point >= capacity) {
+                    history->point = 0;
+                }
+                if ((u32)history->count < capacity) {
+                    history->count += SDF_FRAME_DUE(age);
                 }
                 switch (hData->head.kindState.type) {
                 case 1:

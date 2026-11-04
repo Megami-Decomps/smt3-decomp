@@ -2238,8 +2238,6 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_0054E966);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3ScreenBlurOfsX);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3ScreenBlurOfsY);
-
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3QuakeFlag);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3QuakeFrame);
@@ -2249,12 +2247,6 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3QuakeXRange);
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3QuakeYRange);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", fadergba);
-
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3FadeColorG);
-
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3FadeColorB);
-
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3FadeState);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", distblurovercnt);
 

@@ -1,4 +1,7 @@
 #include "common.h"
+#include "sdfFrame.h"
+
+extern u32 dds3GetKernelCount(void);
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -489,6 +492,7 @@ s32 nbE903Process_1(dds3ProcessID_t *id)
     s32 serial;
     dds3Basic_t *scene;
 
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
     if (D_00527470[event->seq](event) != 0) {
         D_005515C4 = NULL;
         if (D_005515C8 != NULL) {

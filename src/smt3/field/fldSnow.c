@@ -447,12 +447,10 @@ void fldSnowTask(void)
         seed = gFldSeedBuff;
         for (i = 0; i < 700; i++, seed++) {
             if (seed->flg & 1) {
+                seed->life -= SDF_FRAME_DUE(dds3GetKernelCount());
                 seed->y += SDF_FRAME_STEP(speed + (f32)seed->spdx * 0.125f);
-                if (SDF_FRAME_DUE(dds3GetKernelCount())) {
-                    seed->life--;
-                    if (seed->life < 0x40) {
-                        seed->alp -= 2;
-                    }
+                if (seed->life < 0x40) {
+                    seed->alp -= 2 * SDF_FRAME_DUE(dds3GetKernelCount());
                 }
                 if (seed->life <= 0) {
                     seed->flg = 0;
@@ -481,12 +479,10 @@ void fldSnowTask(void)
         seed = gFldSeedBuff;
         for (i = 0; i < 700; i++, seed++) {
             if (seed->flg & 1) {
+                seed->life -= SDF_FRAME_DUE(dds3GetKernelCount());
                 seed->y += SDF_FRAME_STEP(speed - (f32)seed->spdx * 0.125f);
-                if (SDF_FRAME_DUE(dds3GetKernelCount())) {
-                    seed->life--;
-                    if (seed->life < 0x40) {
-                        seed->alp -= 2;
-                    }
+                if (seed->life < 0x40) {
+                    seed->alp -= 2 * SDF_FRAME_DUE(dds3GetKernelCount());
                 }
                 if (seed->life <= 0) {
                     seed->flg = 0;
