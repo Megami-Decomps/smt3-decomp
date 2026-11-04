@@ -14,6 +14,7 @@ Classes:
   STRADDLE an access starts in one symbol and ends in the next
   CSIZE    sizeof in C differs from the splat extent (or C views disagree)
   WORDS    narrow (1/2 byte) accesses to a symbol splat emits as words, with address-like words
+  JTBL     a data symbol's extent runs over the start of a jump table (jtbl_ label)
   TAIL     gap after a sized symbol that no code or data pointer references
 Usage: check_data_sizes.py [--symbols FILE] [--elf FILE] [--csizes JSON] [--only A,B]
 """
@@ -148,6 +149,27 @@ def scan_text(b, secs, func_starts, gp):
             elif pending_call:
                 pass
     return accesses, consts
+
+
+def load_jtbls(asm_root):
+    """Addresses of every `dlabel jtbl_XXXXXXXX` under asm_root; exits if there are none."""
+    pat = re.compile(r"^dlabel jtbl_([0-9A-F]{8})\b", re.M)
+    found = set()
+    for f in Path(asm_root).rglob("*.s"):
+        found.update(int(m, 16) for m in pat.findall(f.read_text(errors="replace")))
+    if not found:
+        sys.exit("no jtbl_ labels under %s, so jump tables cannot be checked (configure first)" % asm_root)
+    return sorted(found)
+
+
+def jtbl_crossings(extents, jtbls):
+    """(addr, end, jtbl) for each extent (addr, size) that covers a jtbl start after its own start."""
+    out = []
+    for addr, size in extents:
+        for j in jtbls:
+            if addr < j < addr + size:
+                out.append((addr, addr + size, j))
+    return out
 
 
 def main():
@@ -353,6 +375,14 @@ def main():
                 add("CSIZE", s, "C sizeof 0x%X > gap 0x%X to next symbol, no splat size" % (hi, gap))
             elif s["size"] is None and sizes[0] < gap - 15:
                 add("CSIZE", s, "C sizeof 0x%X < gap 0x%X to next symbol, no splat size" % (sizes[0], gap))
+    jtbls = load_jtbls(ROOT / "asm")
+    for u in uni.values():
+        if u.get("size") is None:
+            continue
+        crossed = jtbl_crossings([(u["addr"], extent(u))], jtbls)
+        if crossed:
+            add("JTBL", u, "extent ends 0x%X, over %d jtbl_ label(s) from jtbl_%08X" %
+                (crossed[0][1], len(crossed), crossed[0][2]))
     # dedupe
     seen, out = set(), []
     for f in findings:
