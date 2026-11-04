@@ -975,7 +975,7 @@ void fldMakeObjectBasic2(void) {
                     }
                 }
             }
-            areaRef = EE_ADDR_AS(fldResourceAreaRef_t *, resource->word14);
+            areaRef = EE_ADDR_AS(fldResourceAreaRef_t *, resource->areaName);
             if (matter != NULL) {
                 dds3ObjectBaseSetControlBasic(matter,
                     dds3SceneBasicSearchNameAndType(secondaryWorld, 2, areaRef->name));

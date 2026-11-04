@@ -1299,3 +1299,7 @@ dds3 effect and particle types (17):
 - `dds3Particle_Track2_t` 20
 - `dds3Particle_Track3_t` 20
 - `dds3Particle_Track_t` 16
+
+### Outcome of the name candidates
+
+Renamed in the decomp, where retail code proves the name: `dds3GlobalWork_t.unk657C` to `nameCode` (`nmeBuildNameFont` fills it with the entered name's glyph codes) and `fldResHead_t.word14` to `areaName` (`fldFileResolver.c` reads it as the area reference). Not renamed, no retail access proves them: `fldResHead_t` `word04`, `word0C`, `word1C`; `reserved19D10` (`amapEX`); `reserved1C` (`dmy`). `corePktCb_t.dataPtr` keeps its name over the IDB's `payload`.
