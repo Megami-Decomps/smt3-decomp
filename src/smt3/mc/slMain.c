@@ -6,6 +6,7 @@
 #include "scr.h"
 #include "field.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 typedef struct fileRequest fileRequest_t;
 
@@ -1168,7 +1169,7 @@ saddr_t slBootTop(void) {
 
 saddr_t slBootRetry(void) {
     sdfMcRegetInfo(0);
-    gslCheckCardWait = 30;
+    gslCheckCardWait = SDF_FRAMES(30);
     gSlNowCardCheck = 1;
     slSetInfo(1);
     gslDrawFlagFile = 1;
@@ -1217,7 +1218,7 @@ saddr_t slTop(void) {
     slTopMenuSel[3] = 0;
     slTopMenuSel[4] = 0;
     sdfMcRegetInfo(0);
-    gslCheckCardWait = 15;
+    gslCheckCardWait = SDF_FRAMES(15);
     gSlNowCardCheck = 1;
     slSetInfo(1);
     gslDrawFlagFile = 1;
@@ -3056,7 +3057,7 @@ void slQueryYesNoDraw(void)
             slKanjiDrawH(0x28, 0x64, 0x64618780, D_005289A0);
         }
         if (slChkWindowOpenDone() != 0) {
-            if (gslAnimCnt & 8) {
+            if ((s32)SDF_FRAME_STEP(gslAnimCnt) & 8) {
                 red = 0xA6;
                 green = 0x1B;
                 blue = 0x15;
