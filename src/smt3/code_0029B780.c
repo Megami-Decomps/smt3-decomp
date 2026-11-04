@@ -34,7 +34,7 @@ SIZE_CHECK(dds3ConfigWork_size_must_be_0x10A8, dds3ConfigWork_t, 0x10A8);
 extern void dds3FreeConfigTexture(void *texture);
 
 extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f,
-                          void (*calc)());
+                          void (*calc)(void *));
 
 extern void fclRagTexCalcSizes();
 

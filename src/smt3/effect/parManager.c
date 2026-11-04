@@ -117,9 +117,9 @@ typedef struct dds3Particle_Effect_t {
 } dds3Particle_Effect_t;
 
 typedef struct parDispatch_t {
-    void *(*func)();
+    void *(*func)(void *);
     void (*update)(struct dds3Particle_Basic_t *);
-    void (*destroy)();
+    void (*destroy)(void *);
 } parDispatch_t;
 
 typedef struct effectBufferRecord_t {
@@ -626,74 +626,74 @@ void dds3Particle_PhysicsDelete(dds3Particle_Physics_t *hPhysics);
 void dds3Particle_BasicCreate(void *effect);
 void dds3Particle_BasicDelete(void *pParBasic);
 void dds3Particle_SpiralAllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_SpiralSetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_SpiralSetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_SpiralCreate(effTemplatePacketList_t *source);
 void dds3Particle_SpiralDelete(void *hData);
 void dds3Particle_SpiralBuffInit(dds3Particle_Spiral_t3 *pSpiral, u32 number);
 void dds3Particle_SpiralDraw(dds3Particle_Spiral_t3 *hData);
 void dds3Particle_SmokeAllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_SmokeSetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_SmokeSetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_SmokeCreate(effTemplatePacketList_t *source);
 void dds3Particle_SmokeDelete(void *hData);
 void dds3Particle_SmokeBuffInit(dds3Particle_Smoke_t3 *pSmoke, u32 number);
 void dds3Particle_SmokeDraw(dds3Particle_Smoke_t3 *hData);
 void dds3Particle_SparkAllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_SparkSetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_SparkSetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_SparkCreate(effTemplatePacketList_t *source);
 void dds3Particle_SparkDelete(void *hData);
 void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number);
 void dds3Particle_SparkDraw(dds3Particle_Spark_t3 *hData);
 void dds3Particle_RadiateAllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_RadiateSetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_RadiateSetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_RadiateCreate(effTemplatePacketList_t *source);
 void dds3Particle_RadiateDelete(void *hData);
 void dds3Particle_RadiateBuffInit(dds3Particle_Radiate_t3 *pRadiate, u32 number);
 void dds3Particle_RadiateDraw(dds3Particle_Radiate_t3 *hData);
 void dds3Particle_SphereSpiralAllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_SphereSpiralSetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_SphereSpiralSetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_SphereSpiralCreate(effTemplatePacketList_t *source);
 void dds3Particle_SphereSpiralDelete(void *hData);
 void dds3Particle_SphereSpiralBuffInit(dds3Particle_SphereSpiral_t3 *pSphereSpiral, u32 number);
 void dds3Particle_SphereSpiralDraw(dds3Particle_SphereSpiral_t3 *hData);
 void dds3Particle_SphereSmokeAllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_SphereSmokeSetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_SphereSmokeSetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_SphereSmokeCreate(effTemplatePacketList_t *source);
 void dds3Particle_SphereSmokeDelete(void *hData);
 void dds3Particle_SphereSmokeBuffInit(dds3Particle_SphereSmoke_t3 *pSphereSmoke, u32 number);
 void dds3Particle_SphereSmokeDraw(dds3Particle_SphereSmoke_t3 *hData);
 void dds3Particle_SphereRingAllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_SphereRingSetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_SphereRingSetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_SphereRingCreate(effTemplatePacketList_t *source);
 void dds3Particle_SphereRingDelete(void *hData);
 void dds3Particle_SphereRingBuffInit(dds3Particle_SphereRing_t3 *pSphereRing, u32 number);
 void dds3Particle_SphereRingDraw(dds3Particle_SphereRing_t3 *hData);
 void dds3Particle_Spark2AllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_Spark2SetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_Spark2SetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_Spark2Create(effTemplatePacketList_t *source);
 void dds3Particle_Spark2Delete(void *hData);
 void dds3Particle_Spark2BuffInit(dds3Particle_Spark2_t3 *pSpark2, s32 number);
 void dds3Particle_Spark2Draw(dds3Particle_Spark2_t3 *hData);
 void dds3Particle_SphereAtomAllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_SphereAtomSetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_SphereAtomSetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_SphereAtomCreate(effTemplatePacketList_t *source);
 void dds3Particle_SphereAtomDelete(void *hData);
 void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 number);
 void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData);
 void dds3Particle_SpiralBlendColor(effParticleOverlay_t *effect);
 void dds3Particle_SparkOffsetAllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_SparkOffsetSetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_SparkOffsetSetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_SparkOffsetCreate(effTemplatePacketList_t *source);
 void dds3Particle_SparkOffsetDelete(void *hData);
 void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset, s32 number);
 void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData);
 void dds3Particle_SmokeOffsetAllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_SmokeOffsetSetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_SmokeOffsetSetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_SmokeOffsetCreate(effTemplatePacketList_t *source);
 void dds3Particle_SmokeOffsetDelete(effTemplatePacketList_t *hData);
 void dds3Particle_SmokeOffsetBuffInit(dds3Particle_SmokeOffset_t3 *pSmokeOffset, u32 number);
 void dds3Particle_SmokeOffsetDraw(dds3Particle_SmokeOffset_t3 *hData);
 void dds3Particle_SphereSpiral2AllBuffInit(effTemplatePacketList_t *hData);
-void dds3Particle_SphereSpiral2SetScale(float hData, effTemplatePacketList_t *scale);
+void dds3Particle_SphereSpiral2SetScale(effTemplatePacketList_t *hData, float scale);
 effTemplatePacketList_t *dds3Particle_SphereSpiral2Create(effTemplatePacketList_t *source);
 void dds3Particle_SphereSpiral2Delete(dds3Particle_SphereSpiral2_t3 *hData);
 void dds3Particle_SphereSpiral2BuffInit(dds3Particle_SphereSpiral2_t3 *pSphereSpiral2, u32 number);
@@ -727,7 +727,7 @@ dds3Particle_Basic_t *dds3ParticleExpCopy(dds3Particle_Basic_t *source);
 void dds3ParticleExpDelete(dds3Particle_Basic_t *hData);
 void dds3ParticleExpDraw(dds3Particle_Basic_t *hData);
 void dds3ParticleExpReset(dds3Particle_Basic_t *hData);
-void dds3ParticleExpSetScale(float hData, dds3Particle_Basic_t *scale);
+void dds3ParticleExpSetScale(dds3Particle_Basic_t *hData, float scale);
 u16 dds3ParticleExpGetState(dds3Particle_Basic_t *hData);
 void dds3ParticleExpSetPosition(void *hData, void *pPos);
 void dds3ParticleExpSetRotateMatrix(dds3Particle_Basic_t *hData, void *pMatrix);
@@ -940,13 +940,13 @@ void dds3Particle_SpiralAllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale the position, record scale, and this variant's two tail floats. */
-void dds3Particle_SpiralSetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->recordScale = scale->recordScale * hData;
-    scale->tailValues[1] = scale->tailValues[1] * hData;
-    scale->tailValues[3] = scale->tailValues[3] * hData;
+void dds3Particle_SpiralSetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->recordScale = hData->recordScale * scale;
+    hData->tailValues[1] = hData->tailValues[1] * scale;
+    hData->tailValues[3] = hData->tailValues[3] * scale;
 }
 
 /* Clone the template prefix and appended tail, then allocate its packet records. */
@@ -1109,13 +1109,13 @@ void dds3Particle_SmokeAllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale template position, record scale, and this variant's two tail values. */
-void dds3Particle_SmokeSetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->recordScale = scale->recordScale * hData;
-    scale->tailValues[0] = scale->tailValues[0] * hData;
-    scale->tailValues[2] = scale->tailValues[2] * hData;
+void dds3Particle_SmokeSetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->recordScale = hData->recordScale * scale;
+    hData->tailValues[0] = hData->tailValues[0] * scale;
+    hData->tailValues[2] = hData->tailValues[2] * scale;
 }
 
 /* Clone the disc prefix/tail, allocate packet records, and initialize their native age tags. */
@@ -1279,13 +1279,13 @@ void dds3Particle_SparkAllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale the position and three variant-specific tail values. */
-void dds3Particle_SparkSetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->tailValues[0] = scale->tailValues[0] * hData;
-    scale->tailValues[2] = scale->tailValues[2] * hData;
-    scale->tailValues[3] = scale->tailValues[3] * hData;
+void dds3Particle_SparkSetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->tailValues[0] = hData->tailValues[0] * scale;
+    hData->tailValues[2] = hData->tailValues[2] * scale;
+    hData->tailValues[3] = hData->tailValues[3] * scale;
 }
 
 /* Clone the ballistic prefix/tail, allocate packet records, and initialize their native age tags. */
@@ -1559,11 +1559,11 @@ void dds3Particle_RadiateAllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale position and the third variant-specific tail value. */
-void dds3Particle_RadiateSetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->tailValues[2] = scale->tailValues[2] * hData;
+void dds3Particle_RadiateSetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->tailValues[2] = hData->tailValues[2] * scale;
 }
 
 /* Clone the look-at ring prefix/tail and spawn its staggered packet schedule. */
@@ -1721,12 +1721,12 @@ void dds3Particle_SphereSpiralAllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale position, record scale, and the second tail value. */
-void dds3Particle_SphereSpiralSetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->recordScale = scale->recordScale * hData;
-    scale->tailValues[1] = scale->tailValues[1] * hData;
+void dds3Particle_SphereSpiralSetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->recordScale = hData->recordScale * scale;
+    hData->tailValues[1] = hData->tailValues[1] * scale;
 }
 
 /* Clone the burst prefix/tail, allocate packet records, and initialize their native age tags. */
@@ -1905,13 +1905,13 @@ void dds3Particle_SphereSmokeAllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale template position, record scale, and this variant's tail values. */
-void dds3Particle_SphereSmokeSetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->recordScale = scale->recordScale * hData;
-    scale->tailValues[0] = scale->tailValues[0] * hData;
-    scale->tailValues[2] = scale->tailValues[2] * hData;
+void dds3Particle_SphereSmokeSetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->recordScale = hData->recordScale * scale;
+    hData->tailValues[0] = hData->tailValues[0] * scale;
+    hData->tailValues[2] = hData->tailValues[2] * scale;
 }
 
 /* Clone the sphere prefix/tail, allocate packet records, and initialize their native age tags. */
@@ -2084,11 +2084,11 @@ void dds3Particle_SphereRingAllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale the position and record scale of a short template. */
-void dds3Particle_SphereRingSetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->recordScale = scale->recordScale * hData;
+void dds3Particle_SphereRingSetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->recordScale = hData->recordScale * scale;
 }
 
 /* Clone the expanding-ring prefix/tail and initialize its period-grouped packet tags. */
@@ -2245,13 +2245,13 @@ void dds3Particle_Spark2AllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale template position and three variant-specific tail values. */
-void dds3Particle_Spark2SetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->tailValues[0] = scale->tailValues[0] * hData;
-    scale->tailValues[2] = scale->tailValues[2] * hData;
-    scale->tailValues[3] = scale->tailValues[3] * hData;
+void dds3Particle_Spark2SetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->tailValues[0] = hData->tailValues[0] * scale;
+    hData->tailValues[2] = hData->tailValues[2] * scale;
+    hData->tailValues[3] = hData->tailValues[3] * scale;
 }
 
 /* Clone the cone prefix/tail, allocate packet records, and initialize their native age tags. */
@@ -2400,13 +2400,13 @@ void dds3Particle_SphereAtomAllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale the position, record scale, and first two tail values. */
-void dds3Particle_SphereAtomSetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->recordScale = scale->recordScale * hData;
-    scale->tailValues[0] = scale->tailValues[0] * hData;
-    scale->tailValues[1] = scale->tailValues[1] * hData;
+void dds3Particle_SphereAtomSetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->recordScale = hData->recordScale * scale;
+    hData->tailValues[0] = hData->tailValues[0] * scale;
+    hData->tailValues[1] = hData->tailValues[1] * scale;
 }
 
 /* Clone the prefix/tail and initialize each packet record with the template's uniform scale. */
@@ -2706,13 +2706,13 @@ void dds3Particle_SparkOffsetAllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale the position and three variant-specific tail values. */
-void dds3Particle_SparkOffsetSetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->tailValues[0] = scale->tailValues[0] * hData;
-    scale->tailValues[2] = scale->tailValues[2] * hData;
-    scale->tailValues[3] = scale->tailValues[3] * hData;
+void dds3Particle_SparkOffsetSetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->tailValues[0] = hData->tailValues[0] * scale;
+    hData->tailValues[2] = hData->tailValues[2] * scale;
+    hData->tailValues[3] = hData->tailValues[3] * scale;
 }
 
 /* Clone the offset-gravity prefix/tail, allocate records, and initialize their native age tags. */
@@ -2979,13 +2979,13 @@ void dds3Particle_SmokeOffsetAllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale position, record scale, and two tail values. */
-void dds3Particle_SmokeOffsetSetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->recordScale = scale->recordScale * hData;
-    scale->tailValues[0] = scale->tailValues[0] * hData;
-    scale->tailValues[2] = scale->tailValues[2] * hData;
+void dds3Particle_SmokeOffsetSetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->recordScale = hData->recordScale * scale;
+    hData->tailValues[0] = hData->tailValues[0] * scale;
+    hData->tailValues[2] = hData->tailValues[2] * scale;
 }
 
 /* Clone the disc prefix/tail plus a separate 16-byte-per-packet auxiliary allocation. */
@@ -3158,12 +3158,12 @@ void dds3Particle_SphereSpiral2AllBuffInit(effTemplatePacketList_t *hData) {
 }
 
 /* Scale template position, record scale, and the second tail value. */
-void dds3Particle_SphereSpiral2SetScale(float hData, effTemplatePacketList_t *scale) {
-    scale->head.scale[0] = scale->head.scale[0] * hData;
-    scale->head.scale[1] = scale->head.scale[1] * hData;
-    scale->head.scale[2] = scale->head.scale[2] * hData;
-    scale->recordScale = scale->recordScale * hData;
-    scale->tailValues[1] = scale->tailValues[1] * hData;
+void dds3Particle_SphereSpiral2SetScale(effTemplatePacketList_t *hData, float scale) {
+    hData->head.scale[0] = hData->head.scale[0] * scale;
+    hData->head.scale[1] = hData->head.scale[1] * scale;
+    hData->head.scale[2] = hData->head.scale[2] * scale;
+    hData->recordScale = hData->recordScale * scale;
+    hData->tailValues[1] = hData->tailValues[1] * scale;
 }
 
 /* Allocate one 12-byte descriptor per packet and its attached 16-byte records. */
@@ -4066,9 +4066,9 @@ void dds3ParticleExpReset(dds3Particle_Basic_t *hData) {
     dds3ParticleReset(hData);
 }
 
-void dds3ParticleExpSetScale(float hData, dds3Particle_Basic_t *scale) {
-    dds3ParticleSetScale(scale, hData);
-    scale->scaleEnd *= hData;
+void dds3ParticleExpSetScale(dds3Particle_Basic_t *hData, float scale) {
+    dds3ParticleSetScale(hData, scale);
+    hData->scaleEnd *= scale;
 }
 
 /* Descriptor query: return the complete 16-bit restart state. */

@@ -390,7 +390,7 @@ struct billHandle_t {
     f32 unk1C;
     f32 rot;  /* 0x20: radian angle used to rotate the quad corners. */
     u32 abgr;   /* 0x24: set by dds3BillboardSetRGBA */
-    void (*callback)(); /* 0x28: called by dds3BillboardDraw; set from the
+    void (*callback)(struct billHandle_t *); /* 0x28: called by dds3BillboardDraw; set from the
                           per-index table by dds3BillboardCreate */
     u16 type;         /* 0x2C: type 0/3 child, type 1 animation list */
     u16 mode; /* 0x2E: selected child packet-list pool */
@@ -2520,7 +2520,7 @@ void effScreenOffset(void);
 effHandle_t *dds3EffectLoad(effPCPAgiraoFirePartList_t *pD3P);
 void effPCPThunderSpherePolySetColor(effPCPThunderSpherePoly_t *hData, u32 abgr);
 void effPCPThunderSpherePolySetPosition(void *hData, const void *pPos);
-void effPCPThunderSpherePolySetScale(f32 hData, effPCPThunderSpherePoly_t *scale);
+void effPCPThunderSpherePolySetScale(effPCPThunderSpherePoly_t *hData, f32 scale);
 void effPCPThunderSpherePolyDraw(effPCPThunderSpherePoly_t *hData);
 void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
 void dds3EffectRippleBlurReset(effBlurScaleWork_t *hRippleBlur);
@@ -6113,7 +6113,7 @@ void effPCPThunderSphereExpDraw(effPCPThunderSphereExp_tag *hData) {
     color = hData->abgr;
     effPCPThunderSpherePolySetColor(hData->pThunderSpherePoly, effColorBlend(color & 0xFFFFFF, color, opacity));
     effPCPThunderSpherePolySetPosition(hData->pThunderSpherePoly, hData->pos);
-    effPCPThunderSpherePolySetScale(hData->scale * scale, hData->pThunderSpherePoly);
+    effPCPThunderSpherePolySetScale(hData->pThunderSpherePoly, hData->scale * scale);
     effPCPThunderSpherePolyDraw(hData->pThunderSpherePoly);
     hData->frame = (s32)((u32)hData->frame + 1);
 }

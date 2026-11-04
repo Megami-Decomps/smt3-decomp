@@ -19,9 +19,9 @@ typedef struct dds3P2APolygon_tag {
 } dds3P2APolygon_tag;
 
 typedef struct dds3EffectFunc3_t {
-    struct billHandle_t *(*create)();
-    void (*draw)();
-    void (*destroy)();
+    struct billHandle_t *(*create)(void *);
+    void (*draw)(struct billHandle_t *);
+    void (*destroy)(struct billHandle_t *);
 } dds3EffectFunc3_t;
 
 extern dds3EffectFunc3_t dds3BillboardFuncTable[];
@@ -1114,7 +1114,7 @@ billHandle_t *dds3BillboardCopy(const billHandle_t *hBillboard) {
     billHandle_t *copy;
     dds3BillResource_tag *data;
     u16 sourceKind;
-    void (*sourceCallback)();
+    void (*sourceCallback)(struct billHandle_t *);
 
     if (hBillboard->type == 1) {
         copy = dds3Billboard_P2ACopy(hBillboard);
