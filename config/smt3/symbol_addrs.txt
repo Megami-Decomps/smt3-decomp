@@ -942,7 +942,7 @@ sdfFileCmdCacheHead = 0x00551954; // size:0x4
 // beyfields
 D_005698E0 = 0x005698E0; // size:0x8C
 D_00593E20 = 0x00593E20; // size:0x10C
-movieCb = 0x00343E40; // size:0x70
+movieCb = 0x00343E40; // size:0xB0
 
 // BEYOND struct sizes and merged inner names
 D_0052E340 = 0x0052E340; // size:0x10
@@ -965,7 +965,7 @@ sdfSndMap = 0x00593880; // type:u32 size:0x5A0
 D_003989E0 = 0x003989E0; // size:0x7620
 D_003989EC = 0x003989EC; // size:0x1C
 D_00398A80 = 0x00398A80; // size:0x7580
-D_002F69B8 = 0x002F69B8; // size:0x90
+D_002F69B8 = 0x002F69B8; // size:0xB0
 D_004F0268 = 0x004F0268; // size:0x398
 
 // BEYOND struct sizes, second pass

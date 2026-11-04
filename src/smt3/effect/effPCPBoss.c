@@ -692,7 +692,7 @@ void effPCPBossONGYTexRenderEnd(void)
 #ifdef NON_MATCHING
 extern f32 D_002F5B8C;
 extern f32 aViewDown[4];
-extern sdfModelOt_t D_002F6A58[];
+extern sdfModelOt_t D_002F69B8[];
 extern sdf3DLightParallelPacket_t D_0056ADF0;
 extern f32 sdfAtan(f32 value);
 extern u32 mdlGetColor(mdlObj_t *model);
@@ -773,7 +773,7 @@ void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32
         model->inner->light = &D_0056ADF0;
         mdlSetColor(model, 0x80808080);
     }
-    mdlLink(effPCPBossTexHandle, D_002F6A58);
+    mdlLink(effPCPBossTexHandle, &D_002F69B8[10]);
 }
 #else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYModelTexRender);

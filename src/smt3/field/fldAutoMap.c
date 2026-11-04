@@ -38,7 +38,7 @@ extern void sdfModelMakeLocalTm(sdfModelNode_t *aNode);
 
 extern void sdfModelEvalTm(sdfModelRootNode_t *aRoot);
 
-extern sdfModelOt_t D_002F6A48;
+extern sdfModelOt_t D_002F69B8[];
 
 extern void sdfModelLinkOt(sdfModelOt_t *aOt, sdfModelRootNode_t *aRoot);
 
@@ -555,7 +555,7 @@ void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
     SDF_VU0_STOREVECTOR(&emitter->tm.m[12]);
     sdfModelMakeLocalTm(handle);
     sdfModelEvalTm(emitter);
-    sdfModelLinkOt(&D_002F6A48, emitter);
+    sdfModelLinkOt(&D_002F69B8[9], emitter);
 }
 
 /* NON_MATCHING: 10 of 146 words, exact size; the two saved fp registers hold x

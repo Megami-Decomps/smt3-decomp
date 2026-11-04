@@ -1471,3 +1471,20 @@ The guarded file-manager declaration of `EIntr` now agrees with its `s32` provid
 | `D_005321C0` | `fldAutoMapFullOpenMsg` | the `FullOpen` string `fldAutoMap.c` passes to `fldDbgPrint2D` |
 
 `D_00551888` stays unnamed. `sdfGrDrawFrame` stores 1 and `dds3DrawProcess` stores 0, and a scan of the retail ELF for every `sb`, `lb` or other gp-relative access at offset 0xD718 and for the address as a word or `lui`/`addiu` pair finds only those two stores. With no reader, its meaning is not proven.
+
+## Native-covered OT and movie owner spans
+
+`D_002F69B8` covers at least 0xB0 bytes: `dds3DrawFirstProcess` passes
+base+0x90 and base+0xA0 to `sdfModelOtInit` (argument setup at 0x102390
+and 0x1023A8; calls at 0x1023A0 and 0x1023B8). The provider writes four
+words at +0/+4/+8/+0xC (0x2B1818..0x2B1828). `fldAutoMapDrawMdl1`
+uses the same row9 at 0x2F6A48, and `effPCPBossONGYModelTexRender`
+uses row10 at 0x2F6A58; their C now uses the owner rows. The metadata
+records this proven covered span, not an inferred historical array bound.
+
+`movieCb` covers the complete 0xB0-byte provider record: `movieOpenStream`
+loads that clear size at 0x2C5D4C and calls `memset` at 0x2C5D58. Its
+inline 0x8C-byte IPU decoder begins at +0x24. The existing title read
+at 0x343EAC is decoder.frame at +0x6C, not independent table storage;
+the C title view already names the same movie owner. These corrections
+do not establish the AI table capacity or change other neighboring owners.
