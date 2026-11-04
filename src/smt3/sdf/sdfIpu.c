@@ -173,11 +173,11 @@ extern sdfFileCmdHandle_t *sdfFileCmdCacheHead;
 
 extern sdfFileCmdHandle_t *sdfFileCmdCacheTail;
 
-extern char D_00551968[];
+extern char sdfFileCmdCdromPrefix[];
 
-extern char D_00551970[];
+extern char sdfFileCmdHostPrefix[];
 
-extern char D_00551978[];
+extern char sdfFileCmdPfsPrefix[];
 
 extern u16 sdfFileCmdDefaultCreateMode;
 

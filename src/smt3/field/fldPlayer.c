@@ -2585,6 +2585,8 @@ INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerMoveState);
 
 INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerSyukanState);
 
+INCLUDE_SDATA(const s32, "field/fldPlayer", D_0054ECFC);
+
 INCLUDE_SDATA(const s32, "field/fldPlayer", D_0054ED00);
 
 INCLUDE_SDATA(const s32, "field/fldPlayer", D_0054ED04);

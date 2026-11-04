@@ -1401,3 +1401,25 @@ new names are mapped back.
 | `D_00551948`, `D_00551954`, `D_00551958` | `sdfFileCmdActiveHead`, `sdfFileCmdCacheHead`, `sdfFileCmdCacheTail` | `sdfFileCmdDequeue` unlinks from the active list and appends to the cache list |
 
 More data names absorbed the same way: fldCamPhokanEyeZ (fldCamPhokanEyeX+8), fldCamPhokanTgtZ (fldCamPhokanTgtX+8), itfMesMngDebugState (D_00326700+4), cmpAnalyzeTexHandle (D_00345D88+8), WPL_PrimPolyParm (effDebugPoly+4), dds3NeedleWork and dds3NeedleDrawCount (D_0056AD88+0x10, +0x14), dds3BezierTrackPolyCount (dds3BezierVertexCount+0x10), gencArea (D_0055DAD8+0x1C), LastLoad (sdfSndMap+0x190), dds3MatterDrawParam (D_002F69B8[7]), effBTLSkillTargetNumber and effBTLSkillTargetBit (fields of D_005698E0), p2sdPcmBuffer (D_00593E20), D_00343E74 (D_00343E40). D_004F0268 is one 46-row `nbPanelXYZ_t` array and the other D_004F02xx to D_004F05D8 panel tables are slices of it.
+
+| `D_00551968`, `D_00551970`, `D_00551978`, `D_00551980`, `D_00551988` | `sdfFileCmdCdromPrefix`, `sdfFileCmdHostPrefix`, `sdfFileCmdPfsPrefix`, `sdfFileCmdMoviePath`, `sdfFileCmdCdimgPrefix` | bytes are `cdrom0:`, `host0:`, `pfs0:`, `/movie/`, `cdimg:`, compared and copied by `sdfFileCmdAnalyzeFileName` and `sdfFileCmdMakeRealFileName` |
+| `D_0054F634`, `D_00551F04`, `D_0054F638` | `mdlHddFileIndexHandle`, `mdlHddFileIndex`, `mdlHddFileListHandle` | memory handles and the locked index pointer allocated in `mdlManager` for the HDD file index and list |
+| `D_00551650` | `fileManagerProcName` | bytes `fileMan`, the name passed to `dds3StartProcess` for `fileManagerProc` |
+
+### Preserve independently used adjacent objects
+
+Eighteen high-offset extent extensions are withdrawn because the following word is an independently used object. `fldEncountTimer` remains eight bytes; the other bases listed below remain four bytes. Native accesses and distinct scalar consumers establish these boundaries. Seeing an access immediately after a symbol does not establish that it belongs to that symbol.
+
+- `fldEncountTimer`: the following `D_0054EB98` is the file resolver's texture handle, not its +4 sequence word.
+- `nbPanelPTP_0_Process`: `D_005511D8` is panel tint.
+- `cameraDegreeInit`: `D_00551EF4` is an integer cooldown, not another float angle.
+- `nbResultTexHandle`: `D_00551110` is a camera-name pointer, not another texture handle.
+- The remaining independently used scalar pairs start at `rsetFrameMaskOtOffset`, `fldPlayerSyukanState`, `fldAutoMapBuf`, `fldAutoMapBBox`, `fldAutoMapDrawState`, `fldNpcCamTarget`, `evtNextEventNo`, `moonprocess_id`, `dds3TitleFadeLevel`, `nbTobiwarpLabelIdx`, `nbFormEnemyInterval`, `sdf3DFogDefault`, `BSARI_Cut1_Rate` and `nbPressGaugeState`.
+
+The other three entries in that batch (`dds3YuukoParts`, `sdfModelShapeWeightEpsilon`, `nbCameraBoss_BSLUSI_Type`) are unchanged: this review does not establish an independent tail object for them. This is not a certification of all remaining high-offset metadata as complete ownership. Generated source includes are kept in their canonical post-split positions.
+
+### Screen global declaration compatibility safeguard
+
+The IDB screen type and pinned 0xA0 layout remain valid. The three C owners use a shared `u8[]` storage view for `sdf3DScreenParam`: the local tagged screen struct in `sdf3D.c` and the anonymous matrix/vector struct in `draw3d.h` have equal EE offsets but incompatible C member types. Declaring the same external object with both types creates a cross-unit type mismatch, reproduced by a native LTO diagnostic. This restores the consistent byte view without changing the 0xA0 copy, +0x70/+0x80 VU rows, or clip-plane base address. A future shared typed declaration must first unify the actual struct definitions; equal sizes alone are insufficient.
+
+The guarded file-manager declaration of `EIntr` now agrees with its `s32` provider result. Callers still ignore that result. The correction neither changes the peer's interrupt-masking behavior nor certifies its host scheduling assumptions.

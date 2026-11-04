@@ -175,15 +175,15 @@ typedef struct
 
 extern mdlFileSlot_t modelFileTable[];
 extern mdlFileKindSlot_t modelFileKindTable[];
-extern dds3ModelFileIndex_t *D_00551F04;
+extern dds3ModelFileIndex_t *mdlHddFileIndex;
 extern dds3ModelFileTable_t *mdlHddFileList;
 extern sdfMemHandle_t *sdfMemAllocDirect(u32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 extern s32 strlen(const char *s);
 
 void mdlReleaseHddFileList(void);
-extern sdfMemHandle_t *D_0054F634;
-extern sdfMemHandle_t *D_0054F638;
+extern sdfMemHandle_t *mdlHddFileIndexHandle;
+extern sdfMemHandle_t *mdlHddFileListHandle;
 extern void sdfMemFreeHandleDirect(sdfMemHandle_t **aHandlePtr);
 
 typedef struct
@@ -1591,8 +1591,8 @@ void mdlReleaseHddFileList(void)
     modelFileKindTable[5].count = 0;
     modelFileTable[5].entries = NULL;
     modelFileTable[5].count = 0;
-    sdfMemFreeHandleDirect(&D_0054F634);
-    sdfMemFreeHandleDirect(&D_0054F638);
+    sdfMemFreeHandleDirect(&mdlHddFileIndexHandle);
+    sdfMemFreeHandleDirect(&mdlHddFileListHandle);
 }
 
 void mdlMakeHddFileListDummy(void)
@@ -1602,14 +1602,14 @@ void mdlMakeHddFileListDummy(void)
     s32 i;
 
     mdlReleaseHddFileList();
-    D_0054F634 = sdfMemAllocDirect(sizeof(dds3ModelFileIndex_t));
-    D_00551F04 = sdfMemLock(D_0054F634);
-    D_00551F04->major = 5;
-    D_00551F04->minor = 0;
-    D_00551F04->scale = 0x1000;
-    D_00551F04->radius = 1000;
-    D_0054F638 = sdfMemAllocDirect(sizeof(dds3ModelFileTable_t));
-    mdlHddFileList = sdfMemLock(D_0054F638);
+    mdlHddFileIndexHandle = sdfMemAllocDirect(sizeof(dds3ModelFileIndex_t));
+    mdlHddFileIndex = sdfMemLock(mdlHddFileIndexHandle);
+    mdlHddFileIndex->major = 5;
+    mdlHddFileIndex->minor = 0;
+    mdlHddFileIndex->scale = 0x1000;
+    mdlHddFileIndex->radius = 1000;
+    mdlHddFileListHandle = sdfMemAllocDirect(sizeof(dds3ModelFileTable_t));
+    mdlHddFileList = sdfMemLock(mdlHddFileListHandle);
     for (i = 0; i != 3; i++)
     {
         switch (i)
@@ -1643,7 +1643,7 @@ void mdlMakeHddFileListDummy(void)
             break;
         }
     }
-    modelFileKindTable[5].entries = D_00551F04;
+    modelFileKindTable[5].entries = mdlHddFileIndex;
     modelFileKindTable[5].count = 1;
     modelFileTable[5].entries = mdlHddFileList;
     modelFileTable[5].count = 1;
@@ -1726,20 +1726,20 @@ void mdlMakeHddFileList(void) {
         }
         if (count != 0) {
             index = 0;
-            D_0054F634 = sdfMemAllocDirect(count * sizeof(dds3ModelFileIndex_t));
-            D_00551F04 = sdfMemLock(D_0054F634);
-            D_0054F638 = sdfMemAllocDirect(count * sizeof(dds3ModelFileTable_t));
-            mdlHddFileList = sdfMemLock(D_0054F638);
+            mdlHddFileIndexHandle = sdfMemAllocDirect(count * sizeof(dds3ModelFileIndex_t));
+            mdlHddFileIndex = sdfMemLock(mdlHddFileIndexHandle);
+            mdlHddFileListHandle = sdfMemAllocDirect(count * sizeof(dds3ModelFileTable_t));
+            mdlHddFileList = sdfMemLock(mdlHddFileListHandle);
             memset(mdlHddFileList, 0, count * sizeof(dds3ModelFileTable_t));
             file = mdlHddFileCount;
             while (file != NULL) {
                 const char *name = file->name;
                 s32 kind;
 
-                D_00551F04[index].major = 5;
-                D_00551F04[index].minor = index;
-                D_00551F04[index].scale = 0x1000;
-                D_00551F04[index].radius = 1000;
+                mdlHddFileIndex[index].major = 5;
+                mdlHddFileIndex[index].minor = index;
+                mdlHddFileIndex[index].scale = 0x1000;
+                mdlHddFileIndex[index].radius = 1000;
                 length = strlen(name);
                 end = length + 5;
                 for (kind = 0; kind != 3; kind++) {
@@ -1767,7 +1767,7 @@ void mdlMakeHddFileList(void) {
                 file = file->next;
                 index++;
             }
-            modelFileKindTable[5].entries = D_00551F04;
+            modelFileKindTable[5].entries = mdlHddFileIndex;
             modelFileKindTable[5].count = count;
             modelFileTable[5].entries = mdlHddFileList;
             modelFileTable[5].count = count;
@@ -1780,9 +1780,9 @@ INCLUDE_SDATA(const s32, "model/mdlManager", D_0054F628);
 
 INCLUDE_SDATA(const s32, "model/mdlManager", D_0054F630);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_0054F634);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlHddFileIndexHandle);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_0054F638);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlHddFileListHandle);
 
 INCLUDE_SDATA(const s32, "model/mdlManager", D_0054F640);
 

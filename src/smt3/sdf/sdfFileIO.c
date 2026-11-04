@@ -153,15 +153,15 @@ extern s16 sdfFileCmdFreeCount;
 
 u32 sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern char D_00551968[];
+extern char sdfFileCmdCdromPrefix[];
 
-extern char D_00551970[];
+extern char sdfFileCmdHostPrefix[];
 
-extern char D_00551978[];
+extern char sdfFileCmdPfsPrefix[];
 
-extern char D_00551980[];
+extern char sdfFileCmdMoviePath[];
 
-extern char D_00551988[];
+extern char sdfFileCmdCdimgPrefix[];
 
 extern u8 sdfFileCmdDefaultDevice;
 
@@ -646,7 +646,7 @@ char *sdfFileCmdMakeRealFileName(const char *aSrcName, s32 aDeviceType) {
     switch (aDeviceType) {
     case 0:
         result = sdfChipAllocDirect(length + 10);
-        memcpy(result, D_00551968, 7);
+        memcpy(result, sdfFileCmdCdromPrefix, 7);
         index = 0;
         character = aSrcName[index];
         while (character != 0) {
@@ -663,7 +663,7 @@ char *sdfFileCmdMakeRealFileName(const char *aSrcName, s32 aDeviceType) {
     case 1:
         if (aSrcName[0] != '/') {
             result = sdfChipAllocDirect(length + 7);
-            memcpy(result, D_00551970, 6);
+            memcpy(result, sdfFileCmdHostPrefix, 6);
             memcpy(result + 6, aSrcName, length);
             result[length + 6] = 0;
         } else {
@@ -676,7 +676,7 @@ char *sdfFileCmdMakeRealFileName(const char *aSrcName, s32 aDeviceType) {
         break;
     case 2:
         result = sdfChipAllocDirect(length + 6);
-        memcpy(result, D_00551978, 5);
+        memcpy(result, sdfFileCmdPfsPrefix, 5);
         memcpy(result + 5, aSrcName, length);
         result[length + 5] = 0;
         break;
@@ -700,22 +700,22 @@ s32 sdfFileCmdAnalyzeFileName(const char *aFileName, char **aRealNamePtr)
     const char *name;
 
     if (strchr(aFileName, ':') != NULL) {
-        if (memcmp(aFileName, D_00551968, 7) == 0) {
+        if (memcmp(aFileName, sdfFileCmdCdromPrefix, 7) == 0) {
             suffix = aFileName + 7;
-            if (memcmp(suffix, D_00551980, 7) == 0) {
+            if (memcmp(suffix, sdfFileCmdMoviePath, 7) == 0) {
                 device = 3;
                 prefixLength = 0;
             } else {
                 device = 0;
                 prefixLength = 7;
             }
-        } else if (memcmp(aFileName, D_00551970, 6) == 0) {
+        } else if (memcmp(aFileName, sdfFileCmdHostPrefix, 6) == 0) {
             device = 1;
             prefixLength = 6;
-        } else if (memcmp(aFileName, D_00551978, 5) == 0) {
+        } else if (memcmp(aFileName, sdfFileCmdPfsPrefix, 5) == 0) {
             device = 2;
             prefixLength = 5;
-        } else if (memcmp(aFileName, D_00551988, 6) == 0) {
+        } else if (memcmp(aFileName, sdfFileCmdCdimgPrefix, 6) == 0) {
             device = 3;
             prefixLength = 6;
         } else {
