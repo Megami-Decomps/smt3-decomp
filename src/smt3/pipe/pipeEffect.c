@@ -5,6 +5,7 @@
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
+#include "sdfFrame.h"
 
 extern void (*D_00551828)(void);
 
@@ -70,7 +71,7 @@ extern tagPipeObject *objMyData(void);
 
 void pipeBulrSetLimit(s32 frame)
 {
-    pipeBulrLimitValue = frame;
+    pipeBulrLimitValue = SDF_FRAMES(frame);
 }
 
 void pipeBulrLimit(void)
@@ -288,7 +289,7 @@ void pipeLoadEffect(s32 effectID, PIPE_EFF_t *effects, u8 maxSize, f32 x, f32 y)
             effects->d3p = handle;
             effects->pos2[1] = y;
             effects->offset = effectID;
-            effects->count = 14;
+            effects->count = SDF_FRAMES(14);
             break;
         }
         effects++;
