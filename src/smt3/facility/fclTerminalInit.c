@@ -67,7 +67,6 @@ extern trmTerminalWork_t *GBWK_3;
 
 extern void sdfTexFree(s32 aHandle);
 
-extern u8 fclTerminalCommandCount[1];
 
 extern char D_0053D640[];
 
@@ -375,7 +374,7 @@ void fclTerminalInitMenu(s32 id, void *commands, void *work)
     }
     fclInitCursorWindow(commands, table, 4);
     fclSetCursorList(commands, 0x19);
-    fclTerminalCommandCount[0] |= 2;
+    gCommandFlag[2] |= 2;
     *((s8 *)commands + 0x25) = 1;
 }
 
@@ -631,7 +630,7 @@ s32 func_00210B68(void)
 {
     s32 count;
 
-    fclTerminalCommandCount[0] &= 0xFD;
+    gCommandFlag[2] &= 0xFD;
     count = GBWK_3->terminalReferenceCount;
     GBWK_3->terminalReferenceCount = count - 1;
     return 1;
@@ -641,7 +640,7 @@ s32 func_00210B90(void)
 {
     s32 count;
 
-    fclTerminalCommandCount[0] |= 2;
+    gCommandFlag[2] |= 2;
     count = GBWK_3->terminalReferenceCount;
     GBWK_3->terminalReferenceCount = count + 1;
     return 1;
