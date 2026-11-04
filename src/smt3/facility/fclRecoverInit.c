@@ -76,7 +76,7 @@ extern void fclInitCursorWindow(void *cur, u8 *data, s32 count);
 
 extern void fclSetCursorList(void *cur, s32 count);
 
-extern void cmpSetCursorFlag(void *cur, u8 *flags);
+extern void cmpSetCursorFlag(void *cur, saddr_t flags);
 
 extern void fclRecoverInitItemList(void *list);
 
@@ -189,7 +189,7 @@ rcvWork_t *fclRecoverUpdateInit(s8 mode, s32 seq)
     D_00551F51[0] |= 2;
     D_00551F51[1] |= 2;
     work[0x41] = 2;
-    cmpSetCursorFlag(work + 0x20, D_00551F51 - 1);
+    cmpSetCursorFlag(work + 0x20, EE_ADDR_S(D_00551F51) - 1);
     fclRecoverInitItemList(work + 0x1130);
     fclRecoverInitTargetList(work + 0x22C8);
     fclInitPanel(work + 0x44E0, 0, 0x298, 0xFFFFF, 0x200, 0xE4, 0, 0, 0x1D);

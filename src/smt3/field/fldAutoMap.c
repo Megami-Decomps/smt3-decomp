@@ -120,6 +120,14 @@ extern s32 fldNpcCamTarget;
 
 #include "sdk_libc.h"
 
+/* BUG: retail prints a u64 with %lx, which is right where long is 64 bits and
+ * reads half of it where long is 32. %llx is right on both. */
+#ifdef FIX_BUGS
+#define BIT_ROW_FORMAT "%2d %016llx"
+#else
+#define BIT_ROW_FORMAT "%2d %016lx"
+#endif
+
 extern void fldAddressResolver(u8 *pFileTop, void *pData);
 
 extern u8 *fldGetInfoHeader(void *pData);
@@ -1982,14 +1990,14 @@ void fldAutoMapDraw(void) {
     fldDbgPrint2D(0xC80, -0x2E0, buf);
     if (fldAutoMapField - 10 > 0 && fldAutoMapField - 10 < 30) {
         for (i = 0; i < 32; i++) {
-            sprintf(buf, "%2d %016lx", i,
+            sprintf(buf, BIT_ROW_FORMAT, i,
                     *(u64 *)((u8 *)DDS3_GBWK + 0xFC58 +
                              ((fldAutoMapField - 10) * 32 + i) * 8));
             fldDbgPrint2D(0xC80, i * 96 - 640, buf);
         }
     } else {
         for (i = 0; i < 32; i++) {
-            sprintf(buf, "%2d %016lx", i,
+            sprintf(buf, BIT_ROW_FORMAT, i,
                     *(u64 *)((u8 *)DDS3_GBWK + 0x17F10 +
                              ((fldAutoMapField - 10) * 32 + i) * 8));
             fldDbgPrint2D(0xC80, i * 96 - 640, buf);
