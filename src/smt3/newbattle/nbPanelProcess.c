@@ -2049,7 +2049,6 @@ void nbPanelPressTurnGaugeAnimStart2(void)
  * tests/funcvec.sh), unconfirmed. */
 #ifdef NON_MATCHING
 extern nbPanelProcess_nbPanelXYZ_t nbPanelPTPartList[], D_004F000C[];
-SYMBOL_AT_REGION(nbPanelProcess_nbPanelXYZ_t, nbPressTurnTable, nbPanelPTPartList, 0x14);
 extern s32 D_004F0180[], D_004F0190[];
 extern const volatile f32 D_0054E5BC, D_0054E5C0, D_0054E5C4, D_0054E5C8, D_0054E5CC;
 extern const volatile f32 D_0054E5D0, D_0054E5D4, D_0054E5D8, D_0054E5DC, D_0054E5E0, D_0054E5E4, D_0054E5E8, D_0054E5EC;
@@ -2610,8 +2609,8 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
             alpha = (u32)((1.0f - rate) * 128.0f) << 24;
             uv = &nbPanelParamTable[titleUV[1]];
             tint = effMagaCylinderCalcColor(color | alpha, nbPanelBaseABGR);
-            nbPnlSprite(nbPressTurnTable[0].x, nbPressTurnTable[0].y + 0x57 + (s32)(rate * 26.0f),
-                        nbPressTurnTable[0].w, nbPressTurnTable[0].h,
+            nbPnlSprite(nbPanelPTPartList[1].x, nbPanelPTPartList[1].y + 0x57 + (s32)(rate * 26.0f),
+                        nbPanelPTPartList[1].w, nbPanelPTPartList[1].h,
                         uv->u0, uv->v0, uv->u1, uv->v1, tint, texture);
             frame = nbPanelPTP_1_Frame;
         }
