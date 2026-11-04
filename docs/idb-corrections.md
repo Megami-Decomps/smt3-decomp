@@ -1191,3 +1191,5 @@ Format: base (size in bytes): dropped element names.
 - `softenBiasWork` (0x38): `softenBiasState`
 
 27 further bases are not merged yet (C uses the element names, or a `D_` label inside is referenced); see the datasizes handoff.
+
+Four more bases, merged the same way (C never names the dropped elements): `sdfDrawFaceListParam` (0x20: `sdfDrawFaceListParam2`), `dds3ScreenBlurOfsX` (0x8: `dds3ScreenBlurOfsY`), `fadergba` (0x4: `dds3FadeColorG`, `dds3FadeColorB`, `dds3FadeState`), `nbStageState` (0xC: `StageData`, `nbStageNo`, `nbStageSub`, `nbStageParam`).

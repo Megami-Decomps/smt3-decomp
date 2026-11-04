@@ -318,6 +318,12 @@ void nbCameraHelperViewer_PB_Draw(void *pData)
         if (nbCameraHelperViewerPBParam.replacement != NULL) {
             viewer = nbCameraHelperViewerPBParam.replacement;
         }
+        /* BUG: with no replacement viewer is still NULL here and retail reads through it. */
+#ifdef FIX_BUGS
+        if (viewer == NULL) {
+            return;
+        }
+#endif
         create = viewer->create;
         if (create != NULL) {
             if (viewer->createParam != NULL) {

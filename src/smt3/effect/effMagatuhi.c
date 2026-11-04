@@ -2545,6 +2545,12 @@ effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
             }
             if (menu->create != NULL) {
                 if (menu->source != NULL) {
+#ifdef FIX_BUGS
+                    /* BUG: param may be NULL (the destroy calls above test it) and retail stores through it. */
+                    if (menu->param == NULL) {
+                        menu->create(menu->source);
+                    } else
+#endif
                     *menu->param = menu->create(menu->source);
                 } else {
                     menu->create(NULL);
@@ -2562,6 +2568,12 @@ effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
         }
         if (menu->create != NULL) {
             if (menu->source != NULL) {
+#ifdef FIX_BUGS
+                /* BUG: param may be NULL (the destroy calls above test it) and retail stores through it. */
+                if (menu->param == NULL) {
+                    menu->create(menu->source);
+                } else
+#endif
                 *menu->param = menu->create(menu->source);
             } else {
                 menu->create(NULL);
@@ -2874,6 +2886,12 @@ effDebugMenu_t *func_001AA310(effDebugMenu_t *viewer) {
     create = viewer->create;
     if (create != NULL) {
         if (viewer->source != NULL) {
+#ifdef FIX_BUGS
+            /* BUG: param may be NULL (the destroy calls above test it) and retail stores through it. */
+            if (viewer->param == NULL) {
+                create(viewer->source);
+            } else
+#endif
             *viewer->param = create(viewer->source);
         } else {
             create(NULL);
