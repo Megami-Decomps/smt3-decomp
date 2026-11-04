@@ -2353,6 +2353,22 @@ oneDigit:
     goto bigintDone;
 }
 #else
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B698);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B6A0);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B6B8);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B6C0);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B6D8);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B6F8);
+
+INCLUDE_RODATA(const s32, "sdk/libc", D_0054B700);
+
+INCLUDE_RODATA(const s32, "sdk/libc", jtbl_0054B710);
+
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B880);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B890);
