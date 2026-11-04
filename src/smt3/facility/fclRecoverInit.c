@@ -72,7 +72,7 @@ extern void *memset(void *a, s32 b, size_t c);
 
 extern void cmpInitSeqInfo(void *work, s32 seq);
 
-extern void fclInitCursorWindow(void *cur, u8 *data, s32 count);
+extern void fclInitCursorWindow(void *cur, void *data, u8 count);
 
 extern void fclSetCursorList(void *cur, s32 count);
 
