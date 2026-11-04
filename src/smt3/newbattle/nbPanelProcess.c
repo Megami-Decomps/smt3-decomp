@@ -2665,7 +2665,12 @@ void nbPanelPartySelect(nbMainProcessData_t *data)
     }
     party = data->party;
     form = data->form;
+#ifdef FIX_BUGS
+    /* orderindex -1 reads order[-1], the top byte of endtype, which is 0. */
+    active = party[data->orderindex < 0 ? 0 : data->order[data->orderindex]].statindex;
+#else
     active = party[data->order[data->orderindex]].statindex;
+#endif
     for (i = 0; i < 4; i++, form++, y += 0x17) {
         stat = form->stat;
         base = *(volatile u32 *)&nbPanelBaseABGR;
