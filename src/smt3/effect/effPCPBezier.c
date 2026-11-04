@@ -2,6 +2,7 @@
 #include "libsdf.h"
 #include "ps2asm.h"
 #include "effect.h"
+#include "sdfFrame.h"
 
 typedef struct effBezierBED_t effBezierBED_t;
 typedef struct effBezierCut_t effBezierCut_t;
@@ -581,10 +582,13 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *group)
             slot->pos[0] = point[0];
             slot->pos[1] = point[1];
             slot->pos[2] = point[2];
-            slot->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayRange);
+            slot->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayRange);
             dds3BezierTrackPolyReset(slot->hBztp);
         } else if (slot->frame++ >= 0) {
-            if (slot->Bezier7P.t >= 1.0f && slot->Bezier7P.pointIndex >= 3) {
+            /* The ribbon records subdivisions + 1 segments a step into a fixed
+               ring, so the curve and its fade step once per retail tick. */
+            if (!SDF_FRAME_DUE(slot->frame - 1)) {
+            } else if (slot->Bezier7P.t >= 1.0f && slot->Bezier7P.pointIndex >= 3) {
                 if (slot->alpha > fadeStep) {
                     slot->alpha -= fadeStep;
                     slot->hBztp->abgr = ((u32)(slot->alpha * 128.0f) << 24) | 0x808080;
