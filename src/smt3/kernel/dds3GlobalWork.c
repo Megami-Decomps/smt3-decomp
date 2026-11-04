@@ -794,7 +794,5 @@ INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA24);
 
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", dds3FontReqTable);
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA2C);
-
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA30);
 

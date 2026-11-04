@@ -245,8 +245,6 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdThreadPrioCheckCounter);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdThreadPrio);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551962);
-
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdDefaultCreateMode);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551966);

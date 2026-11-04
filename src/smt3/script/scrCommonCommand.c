@@ -29,7 +29,6 @@ typedef struct
     f32 w;
 } scrVec4_t;
 
-extern s8 D_005298C9[];
 extern s8 dds3PadBitTable[];
 extern char D_0052F5E8[];
 
@@ -121,7 +120,7 @@ s32 scrCommand_KEY(void)
     {
         return 0;
     }
-    if (D_005298C9[0] < 0)
+    if (dds3PadBitTable[1] < 0)
     {
         return 1;
     }
