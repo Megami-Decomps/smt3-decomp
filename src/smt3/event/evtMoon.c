@@ -921,6 +921,8 @@ INCLUDE_SDATA(const s32, "event/evtMoon", evtDeadMoonDraw_a_cnt);
 
 INCLUDE_SDATA(const s32, "event/evtMoon", moonprocess_id);
 
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F770);
+
 INCLUDE_SDATA(const s32, "event/evtMoon", evtMoonTimer);
 
 INCLUDE_SDATA(const s32, "event/evtMoon", evtMoonPhase);

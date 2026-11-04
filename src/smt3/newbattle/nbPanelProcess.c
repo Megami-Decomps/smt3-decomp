@@ -4195,6 +4195,8 @@ INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_0_Frame);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_0_Process);
 
+INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005511D8);
+
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_1_Frame);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_1_Process);

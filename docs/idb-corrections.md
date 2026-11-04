@@ -1399,3 +1399,15 @@ new names are mapped back.
 | `D_0030D714`, `D_0030A670`, `D_00551CC8` | `fldAutoMapPlaceTable`, `fldAutoMapTitleTable`, `fldAutoMapTitleLen` | 28-byte string rows indexed by `fldAutoMapFindPlace` and the title lookup |
 | `D_00551CA0`, `D_0054EE78`, `D_0054EE7C` | `fldAutoMapFontReq`, `fldAutoMapFloorCur`, `fldAutoMapFloorOld` | font request and the current and previous floor index in `fldAutoMap.c` |
 | `D_00551948`, `D_00551954`, `D_00551958` | `sdfFileCmdActiveHead`, `sdfFileCmdCacheHead`, `sdfFileCmdCacheTail` | `sdfFileCmdDequeue` unlinks from the active list and appends to the cache list |
+
+### Preserve independently used adjacent objects
+
+Eighteen high-offset extent extensions are withdrawn because the following word is an independently used object. `fldEncountTimer` remains eight bytes; the other bases listed below remain four bytes. Native accesses and distinct scalar consumers establish these boundaries. Seeing an access immediately after a symbol does not establish that it belongs to that symbol.
+
+- `fldEncountTimer`: the following `D_0054EB98` is the file resolver's texture handle, not its +4 sequence word.
+- `nbPanelPTP_0_Process`: `D_005511D8` is panel tint.
+- `cameraDegreeInit`: `D_00551EF4` is an integer cooldown, not another float angle.
+- `nbResultTexHandle`: `D_00551110` is a camera-name pointer, not another texture handle.
+- The remaining independently used scalar pairs start at `rsetFrameMaskOtOffset`, `fldPlayerSyukanState`, `fldAutoMapBuf`, `fldAutoMapBBox`, `fldAutoMapDrawState`, `fldNpcCamTarget`, `evtNextEventNo`, `moonprocess_id`, `dds3TitleFadeLevel`, `nbTobiwarpLabelIdx`, `nbFormEnemyInterval`, `sdf3DFogDefault`, `BSARI_Cut1_Rate` and `nbPressGaugeState`.
+
+The other three entries in that batch (`dds3YuukoParts`, `sdfModelShapeWeightEpsilon`, `nbCameraBoss_BSLUSI_Type`) are unchanged: this review does not establish an independent tail object for them. This is not a certification of all remaining high-offset metadata as complete ownership. Generated source includes are kept in their canonical post-split positions.

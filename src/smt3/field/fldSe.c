@@ -847,6 +847,8 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapData);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBuf);
 
+INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE70);
+
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBBox);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapFloorCur);
@@ -861,6 +863,8 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapDrawY);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapDrawState);
 
+INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE90);
+
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE94);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE98);
@@ -874,6 +878,8 @@ INCLUDE_SDATA(const s32, "field/fldSe", D_0054EEA4);
 INCLUDE_SDATA(const s32, "field/fldSe", fldAreaFontWork);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamTarget);
+
+INCLUDE_SDATA(const s32, "field/fldSe", D_0054EEB0);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldNpcModelTable);
 
