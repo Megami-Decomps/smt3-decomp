@@ -158,7 +158,7 @@ void sdfLinkStoreImage(
 
 sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*aAllocator)(s32));
 
-extern sdfGrFrameSet_t D_00529388;
+extern sdfGrFrameSet_t sdfGrFrameSet;
 
 void sdfLinkLoadImage(
     sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle, s32 aDstX,
@@ -1318,7 +1318,7 @@ void fldDrwZSave(void) {
     if (fldDrwZBuf != 0) {
         sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
         sdfGrOt_t *descriptor;
-        sdfLinkStoreImage(packet, D_00529388.zbuffHandle,
+        sdfLinkStoreImage(packet, sdfGrFrameSet.zbuffHandle,
                                 0, 0, 0x200, 0xE0, EE_ADDR_S(fldDrwZBuf), 0, 0, 0);
         descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
         ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, packet);
@@ -1329,7 +1329,7 @@ void fldDrwZLoad(void) {
     if (fldDrwZBuf != 0) {
         sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
         sdfGrOt_t *descriptor;
-        sdfLinkLoadImage(packet, D_00529388.zbuffHandle,
+        sdfLinkLoadImage(packet, sdfGrFrameSet.zbuffHandle,
                                   0, 0, 0x200, 0xE0, EE_ADDR_S(fldDrwZBuf), 0);
         descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
         ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, packet);

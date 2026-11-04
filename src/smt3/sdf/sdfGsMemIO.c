@@ -108,7 +108,7 @@ typedef struct sdfPreDrawTag_t {
     u32 pad;
 } sdfPreDrawTag_t;
 
-extern sdfGrFrameSet_t D_00529388;
+extern sdfGrFrameSet_t sdfGrFrameSet;
 
 s32 sdfGetTexelBitCount(u32 aFormat);
 
@@ -209,7 +209,7 @@ void sdfLinkStoreImage(sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle, s32 a
 void sdfLinkStoreFrameImagePredraw(sdfStoreFrameImagePacket_t *aPre, s32 aEvenOdd) {
     aPre->packet.bitblt.bitbltbuf.data =
         (aPre->packet.bitblt.bitbltbuf.data & ~0x3FFF) |
-        (u64)(u32)(D_00529388.buffers[aEvenOdd]->addr >> 6);
+        (u64)(u32)(sdfGrFrameSet.buffers[aEvenOdd]->addr >> 6);
 }
 
 void sdfLinkStoreFrameImage(sdfDrawTag_t *aDrawTag, sdfPreDrawTag_t *aPreDrawTag, s32 aSrcX, s32 aSrcY,
@@ -223,7 +223,7 @@ void sdfLinkStoreFrameImage(sdfDrawTag_t *aDrawTag, sdfPreDrawTag_t *aPreDrawTag
     packet = EE_ADDR_AS(sdfStoreFrameImagePacket_t *, aAllocator(SDF_PATCHABLE_PACKET_BYTES));
     packet->worker.predrawFunc = sdfLinkStoreFrameImagePredraw;
     sdfSetStoreImage(&packet->packet,
-        D_00529388.buffers[0], aSrcX, aSrcY, aWidth, aHeight,
+        sdfGrFrameSet.buffers[0], aSrcX, aSrcY, aWidth, aHeight,
         aBuffer, aCallback, aCallbackParam);
     sdfPreDrawTagLink(aPreDrawTag, &packet->worker);
     sdfDrawTagLink2(aDrawTag, EE_ADDR(&packet->packet),
@@ -293,7 +293,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", D_00551888);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfGrDrawFrameId);
 
-INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", D_0055188A);
+INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfGrBufferSlot);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfReqDrawDelayCount);
 

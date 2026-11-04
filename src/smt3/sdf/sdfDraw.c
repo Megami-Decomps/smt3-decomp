@@ -65,7 +65,7 @@ extern u8 sdfFrameId;
 
 #define SDF_GRAPH_DEPTH_BUFFER_INDEX 2
 
-extern u8 D_0055188A;
+extern u8 sdfGrBufferSlot;
 
 extern u16 sdfReqDrawDelaySleepCount;
 
@@ -796,8 +796,8 @@ void sdfGrSetDrawEnv(sdfGrDrawEnv_t *aEnv, sdfGrFrameSet_t *aFrameSet, s32 aEven
     frameFormat = aFrameSet->bufferFormat;
     height = aFrameSet->height;
     depthFormat = aFrameSet->auxiliaryFormat;
-    sdfGrSetDrawFramePacket(&aEnv->frame1, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_0055188A, 0);
-    sdfGrSetDrawFramePacket(&aEnv->frame2, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_0055188A, 1);
+    sdfGrSetDrawFramePacket(&aEnv->frame1, frameAddress, width, height, frameFormat, depthAddress, depthFormat, sdfGrBufferSlot, 0);
+    sdfGrSetDrawFramePacket(&aEnv->frame2, frameAddress, width, height, frameFormat, depthAddress, depthFormat, sdfGrBufferSlot, 1);
     sdfGrSetClearPacket(&aEnv->clear, aFrameSet->width, aFrameSet->height, aFrameSet->bufferFormat, aFrameSet->auxiliaryFormat);
     aEnv->test1.data = SDF_GS_SCENE_TEST;
     aEnv->test1.reg = SDF_GS_TEST_1;
@@ -830,9 +830,9 @@ void sdfGrStdDrawEnvPredraw(sdfGrStdDrawEnv_t *env, s32 evenOdd)
     s64 frame;
 
     sdfGrSetDrawFramePacket(&env->frame1, frameAddress, width, height, frameFormat,
-                            depthAddress, depthFormat, D_0055188A, 0);
+                            depthAddress, depthFormat, sdfGrBufferSlot, 0);
     sdfGrSetDrawFramePacket(&env->frame2, frameAddress, width, height, frameFormat,
-                            depthAddress, depthFormat, D_0055188A, 1);
+                            depthAddress, depthFormat, sdfGrBufferSlot, 1);
     frame = (s64)(s32)((u32)(frameAddress >> 11) | ((u32)frameFormat << 24) |
                        ((u32)(width >> 6) << 16)) | 0x00FFFFFF00000000ULL;
     env->frameContextOne.data = frame;
@@ -1028,11 +1028,11 @@ void sdfGrDrawFrame(void)
         if (request->drawCount == 0) {
             bufferSlot = sdfFrameEvenOdd ^ 1;
             request->bufferSlotIndex = bufferSlot;
-            D_0055188A = bufferSlot;
+            sdfGrBufferSlot = bufferSlot;
         } else {
             bufferSlot = request->bufferSlotIndex ^ 1;
             request->bufferSlotIndex = bufferSlot;
-            D_0055188A = bufferSlot;
+            sdfGrBufferSlot = bufferSlot;
         }
         request->bufferIndex = sdfGrDrawFrameId;
         sdfDeliverDrawStart(request->bufferIndex, request->queuedBufferIndex);

@@ -270,7 +270,7 @@ void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, sdf3DInitPacket_t *aPacket);
 void sdfPreDrawTagInit(sdfPreDrawTag_t *aTag);
 void sdfGrSetStdDrawEnv(dds3StdDrawEnv_t *aEnv, sdfGrFrameSet_t *aFrameSet);
 void sdfGrLinkStdDrawEnv(sdfDrawTag_t *aTag, sdfPreDrawTag_t *aPreDrawTag, dds3StdDrawEnv_t *aEnv);
-extern sdfGrFrameSet_t D_00529388;
+extern sdfGrFrameSet_t sdfGrFrameSet;
 extern sdfMatrix4_t aProjMatrix;
 extern dds3LightState_t dds3LightParam2;
 /* Retail addresses each light record's ambient term as its own symbol, so the
@@ -371,7 +371,7 @@ void dds3InitDrawEnvSub(s32 i)
     sdf3DLinkInitPacket(&dds3DrawEnv[i].initTag, &dds3DrawEnv[i].initPacket);
     sdfDrawTagInit(&dds3DrawEnv[i].drawTag);
     sdfPreDrawTagInit(&dds3DrawEnv[i].preDrawTag);
-    sdfGrSetStdDrawEnv(&dds3DrawEnv[i].stdEnv, &D_00529388);
+    sdfGrSetStdDrawEnv(&dds3DrawEnv[i].stdEnv, &sdfGrFrameSet);
     /* The byte offset is what associates the sum as base plus index; the
      * member path reaches stdEnv.env.clear.clearColor and associates it the
      * other way round. */
