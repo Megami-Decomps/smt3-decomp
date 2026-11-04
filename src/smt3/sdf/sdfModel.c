@@ -471,6 +471,9 @@ sdfDmaTag_t *sdfModelSetNormalDrawPacket(sdfModelNode_t *aNode, sdfShapePacket_t
 
 /* NON_MATCHING: 82 of 96 words match at the exact size (first differing word
  * at +0x38); aDataPtr and the 0x6C07C000 constant swap $23 and $30. */
+/* NON_MATCHING. Behaviour checked against retail: 4 PCSX2 call vectors give the same return and memory,
+ * battle_0_1, seq28, seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkinPacket_t *aDataPtr,
                                           sdfDmaTag_t *aBuffer, s32 aId)
@@ -528,6 +531,9 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelSetOneSkinDrawPacket);
 
 /* NON_MATCHING: 63 of 150 words match (first differing word at +0x0); eight
  * saved registers where retail fits seven. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * capture_009, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t *aDataPtr,
                                   sdfDrawTag_t *aDrawTag, s32 aId)

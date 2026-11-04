@@ -478,6 +478,9 @@ void pbSetPrimMatrix(sdfVector4_t *rot, f32 *pos, void *prim) {
     sdf3DPrimLinkTm(prim, 0);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq38, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern s8 D_0054F5B8[4][2];
 extern s32 D_00535C88[];
@@ -689,6 +692,9 @@ void pb_1D3940(s32 x, s32 y, sdfDrawTag_t *tag)
 }
 
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq38, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern sdfVector2_t D_00326E68[], D_00326F58[], D_00327048[], D_00327138[];
 extern u32 D_00327228[];

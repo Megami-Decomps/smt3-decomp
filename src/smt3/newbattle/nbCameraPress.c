@@ -68,6 +68,9 @@ void nbCameraPressProcessRun(void)
 INCLUDE_ASM(const s32, "newbattle/nbCameraPress", nbCameraPressProcessRun);
 #endif
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle_0_1, capture_006, capture_010, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void nbCameraPressProcessInit(void)
 {

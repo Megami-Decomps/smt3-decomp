@@ -1627,6 +1627,9 @@ s32 CheckMukanNego(nbActionProcessData_t *a)
 
 /* NON_MATCHING: 57 of 74 words differ (first at +0x4). */
 
+/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
+ * capture_006, capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 
 s32 CheckSenseiNego(nbActionProcessData_t *a)
@@ -1682,6 +1685,9 @@ INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckSenseiNego);
 
 #endif
 
+/* NON_MATCHING. Behaviour checked against retail: 4 PCSX2 call vectors give the same return and memory,
+ * capture_006, capture_009, capture_010, capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 CheckInotiNego(nbActionProcessData_t *a)
 {

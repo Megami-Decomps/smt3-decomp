@@ -1100,6 +1100,9 @@ s32 nbGetAiEntry(nbActionProcessData_t *a, s32 index)
 }
 
 /* NON_MATCHING: 2 of 70 words differ (first at +0xB8). */
+/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
+ * capture_006, capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 nbPickAiAction(nbActionProcessData_t *a, s32 tbl)
 {
@@ -1507,6 +1510,9 @@ void Sel_RND(nbActionProcessData_t *a, s32 n)
     }
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * capture_006, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 SetSingleTarget2(nbActionProcessData_t *a, s32 code, s32 n)
 {
@@ -1610,6 +1616,9 @@ s32 SetGroupTarget2(nbActionProcessData_t *a, s32 code, s32 n)
 }
 
 /* NON_MATCHING: 15 of 49 words differ (first at +0x3C). */
+/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
+ * capture_006, capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 ChkCost(nbActionProcessData_t *a)
 {

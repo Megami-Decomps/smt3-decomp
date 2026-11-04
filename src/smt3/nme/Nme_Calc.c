@@ -60,6 +60,9 @@ void nmeDrawSymbolRow(s32 x, s32 y, s32 unused)
                      (s32 *)namelist_buttonAnim_end->textures, table, ot);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq33, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern void *memcpy(void *dest, const void *src, size_t size);
 extern const s8 D_00551698[];

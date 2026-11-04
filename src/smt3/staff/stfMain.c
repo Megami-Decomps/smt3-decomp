@@ -203,6 +203,9 @@ extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0
 
 /* NON_MATCHING: 311 of 321 words match at retail's size. Remaining
  * differences are separate constant, product, predicate and scheduling phases. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq16, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void ObjDispOff(void)
 {

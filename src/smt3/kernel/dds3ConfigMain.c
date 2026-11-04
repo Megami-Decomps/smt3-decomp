@@ -134,6 +134,9 @@ s32 dds3DrawConfig(void *PID)
 
 /* NON_MATCHING: 27 of 119 overlapping words match; 476 bytes against retail's 492;
  * entry read of GBWK[0] is reused in the switch arms instead of reloaded. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq17, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 dds3UpdateConfig(void *PID)
 {

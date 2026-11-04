@@ -889,6 +889,9 @@ s32 datCheckPlayerDead(void)
 }
 
 /* NON_MATCHING: 7 of 20 words differ (first at +0x4). */
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * seq18, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 datGetPlayerParam(s32 id)
 {
@@ -1701,6 +1704,9 @@ s32 datGetSkillCost(datUnitWork_t *w, s32 nskill)
 }
 
 /* NON_MATCHING: 7 of 75 words differ (first at +0xE4). */
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * seq41, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void datInitPlayer(void)
 {
