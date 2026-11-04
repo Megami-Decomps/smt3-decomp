@@ -157,7 +157,7 @@ void p2sdPlaySE(s32 trackId, s32 volume, s32 pan);
 
 /* One step of the save and load state machine, which this unit holds as an
  * address and calls through a cast. */
-typedef s32 (*slProcFunc_t)();
+typedef s32 (*slProcFunc_t)(void);
 
 extern u32 slHitAnyKeyNextFunc;
 
@@ -2592,7 +2592,7 @@ INCLUDE_ASM(const s32, "mc/slMain", slFileSelDraw);
 s32 slCalc(dds3ProcessID_t *id) {
     s32 next;
     u32 job;
-    s32 (*cur)();
+    s32 (*cur)(void);
     gslAnimCnt++;
     slDraw(EE_ADDR_S(id));
     next = proc_func_ans(id);
