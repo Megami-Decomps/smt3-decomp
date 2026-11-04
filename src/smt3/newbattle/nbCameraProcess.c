@@ -9,6 +9,8 @@
 #include "dds3obj.h"
 #include "sdfFrame.h"
 
+extern u32 dds3GetKernelCount(void);
+
 /* The tail halves its step every retail tick. Applying the decayed step
  * (1 - r) / r times as large each host tick sums to the retail total. */
 #define CAMERA_STEP(aStep, aTail)                                                                 \
@@ -487,7 +489,7 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
             nbCameraStateTable[pNbCamera.state].init();
         }
     }
-    if (nbCameraStateTable[pNbCamera.state].calc != NULL) {
+    if (nbCameraStateTable[pNbCamera.state].calc != NULL && SDF_FRAME_DUE(dds3GetKernelCount())) {
         nbCameraStateTable[pNbCamera.state].calc();
     }
     if (effBTLDebug_CameraAllEditCheck() != 0) {
@@ -537,7 +539,9 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     dds3SetPosPoseSet(camera, &eye);
     dds3CameraObjectBasicSetFovy(camera, pNbCamera.fovy);
     work->flag |= 1;
-    pNbCamera.frame++;
+    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        pNbCamera.frame++;
+    }
     return 0;
 }
 #else
