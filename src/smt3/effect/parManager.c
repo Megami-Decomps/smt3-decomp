@@ -117,9 +117,9 @@ typedef struct dds3Particle_Effect_t {
 } dds3Particle_Effect_t;
 
 typedef struct parDispatch_t {
-    void *(*func)();
+    void *(*func)(void *);
     void (*update)(struct dds3Particle_Basic_t *);
-    void (*destroy)();
+    void (*destroy)(void *);
 } parDispatch_t;
 
 typedef struct effectBufferRecord_t {

@@ -19,9 +19,9 @@ typedef struct dds3P2APolygon_tag {
 } dds3P2APolygon_tag;
 
 typedef struct dds3EffectFunc3_t {
-    struct billHandle_t *(*create)();
-    void (*draw)();
-    void (*destroy)();
+    struct billHandle_t *(*create)(void *);
+    void (*draw)(struct billHandle_t *);
+    void (*destroy)(struct billHandle_t *);
 } dds3EffectFunc3_t;
 
 extern dds3EffectFunc3_t dds3BillboardFuncTable[];
