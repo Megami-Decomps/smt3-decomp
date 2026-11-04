@@ -92,7 +92,7 @@ void fclSetTerminalMode(s8 mode)
     trmMode = mode;
 }
 
-extern void cmpSetCursorFlag(void *cursor, u8 *flags);
+extern void cmpSetCursorFlag(void *cursor, saddr_t flags);
 
 #ifdef NON_MATCHING
 extern s32 evtBitCheck(s32 no);
@@ -179,7 +179,7 @@ s32 trmGetEventNo(s32 update, trmTerminalWork_t *work)
             }
         }
     }
-    cmpSetCursorFlag((u8 *)work + 0x1C, gCommandFlag);
+    cmpSetCursorFlag((u8 *)work + 0x1C, EE_ADDR_S(gCommandFlag));
     return event;
 }
 
@@ -403,7 +403,7 @@ s32 fclTerminalDumpJump(trmTerminalWork_t *work)
 }
 
 extern void *memset(void *dst, s32 value, size_t size);
-extern void cmpSetCursorFlag(void *cursor, u8 *flags);
+extern void cmpSetCursorFlag(void *cursor, saddr_t flags);
 extern void fclTerminalInitMenu(s32 id, void *commands, void *work);
 
 void fclTerminalResetCommands(s8 mode, u16 id, void *commands, void *work)
@@ -420,7 +420,7 @@ void fclTerminalResetCommands(s8 mode, u16 id, void *commands, void *work)
         gCommandFlag[2] |= 2;
         *((u8 *)commands + 0x25) = 1;
     }
-    cmpSetCursorFlag((u8 *)commands + 4, gCommandFlag);
+    cmpSetCursorFlag((u8 *)commands + 4, EE_ADDR_S(gCommandFlag));
 }
 
 extern char *D_00330808[];
