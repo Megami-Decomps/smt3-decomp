@@ -2,6 +2,7 @@
 #include "sdk_libgcc.h"
 #include "libsdf.h"
 #include "effect.h"
+#include "sdfFrame.h"
 
 extern sdfGrOt_t sdfGrOtTable[];
 
@@ -360,7 +361,7 @@ void dds3EffectDistBlurPartInit(effBlurScatterWork_t *pParam, effBlurScatterSlot
     s32 halfSize;
     s32 centerX;
     s32 centerY;
-    pPart->delay = dds3GetRandA((u8 *)dds3EffectBase) % (pParam->params.interval + 1);
+    pPart->delay = SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % (pParam->params.interval + 1));
     pPart->angle = -3.14159265f;
     quad->rotate = pParam->params.rotate;
     quad->abgr = pParam->params.abgr;
@@ -442,7 +443,7 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work)
                     alpha = dptoul(level);
                     slot->quad.abgr = (slot->quad.abgr & 0xFFFFFF) | (alpha << 24);
                     dds3EffectBlurDrawAlphaMulti(list, &slot->quad);
-                    slot->angle += work->params.speed;
+                    slot->angle += SDF_FRAME_STEP(work->params.speed);
                 } else {
                     slot->delay--;
                 }
@@ -564,13 +565,13 @@ void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work)
                     slot->quad.abgr = (slot->quad.abgr & 0xFFFFFF) | (alpha << 24);
                     dds3EffectRipBlurPartAreaSet(work, slot);
                     dds3EffectBlurDrawAlphaMulti(list, &slot->quad);
-                    slot->angle += work->params.frequency;
-                    slot->phase += work->params.speed;
+                    slot->angle += SDF_FRAME_STEP(work->params.frequency);
+                    slot->phase += SDF_FRAME_STEP(work->params.speed);
                     if (slot->phase > 1.0f) {
                         dds3EffectRipBlurPartInit(work, slot);
                     }
                 } else {
-                    slot->phase += work->params.speed;
+                    slot->phase += SDF_FRAME_STEP(work->params.speed);
                 }
                 count--;
                 slot++;
