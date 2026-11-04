@@ -1399,3 +1399,6 @@ new names are mapped back.
 | `D_0030D714`, `D_0030A670`, `D_00551CC8` | `fldAutoMapPlaceTable`, `fldAutoMapTitleTable`, `fldAutoMapTitleLen` | 28-byte string rows indexed by `fldAutoMapFindPlace` and the title lookup |
 | `D_00551CA0`, `D_0054EE78`, `D_0054EE7C` | `fldAutoMapFontReq`, `fldAutoMapFloorCur`, `fldAutoMapFloorOld` | font request and the current and previous floor index in `fldAutoMap.c` |
 | `D_00551948`, `D_00551954`, `D_00551958` | `sdfFileCmdActiveHead`, `sdfFileCmdCacheHead`, `sdfFileCmdCacheTail` | `sdfFileCmdDequeue` unlinks from the active list and appends to the cache list |
+| `D_00551968`, `D_00551970`, `D_00551978`, `D_00551980`, `D_00551988` | `sdfFileCmdCdromPrefix`, `sdfFileCmdHostPrefix`, `sdfFileCmdPfsPrefix`, `sdfFileCmdMoviePath`, `sdfFileCmdCdimgPrefix` | bytes are `cdrom0:`, `host0:`, `pfs0:`, `/movie/`, `cdimg:`, compared and copied by `sdfFileCmdAnalyzeFileName` and `sdfFileCmdMakeRealFileName` |
+| `D_0054F634`, `D_00551F04`, `D_0054F638` | `mdlHddFileIndexHandle`, `mdlHddFileIndex`, `mdlHddFileListHandle` | memory handles and the locked index pointer allocated in `mdlManager` for the HDD file index and list |
+| `D_00551650` | `fileManagerProcName` | bytes `fileMan`, the name passed to `dds3StartProcess` for `fileManagerProc` |

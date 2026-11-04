@@ -249,15 +249,15 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdDefaultCreateMode);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551966);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551968);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdCdromPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551970);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdHostPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551978);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdPfsPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551980);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdMoviePath);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551988);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdCdimgPrefix);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551990);
 

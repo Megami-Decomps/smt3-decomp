@@ -63,7 +63,7 @@ typedef struct fileQueue {
 extern fileMngCb_tag fileQueueHead;
 extern u32 fileCallbackStatus;
 extern s32 (*p2sdSmgBuf)(void);
-extern char D_00551650[];
+extern char fileManagerProcName[];
 
 void fileLinkQueue(fileRequest_t *req, s32 kind, const char *name, void *callback, void *arg);
 void fileLinkCloseWait(fileMngCb_tag *cb, fileRequest_t *fileHandle);
@@ -760,7 +760,7 @@ void fileSysInit(void) {
     fileQueueHead.freeCount = 4;
     fileQueueHead.semaId = sdfCreateSema(1, 0x7F, 0);
     fileQueueHead.buffer = EE_ADDR_AS(u8 *, sdfMemLock(sdfMemAllocDirect(0x40000)));
-    dds3StartProcess(D_00551650, 0x384, 1, 0, fileManagerProc, 0, 0);
+    dds3StartProcess(fileManagerProcName, 0x384, 1, 0, fileManagerProc, 0, 0);
     p2sdSmgBuf = fileManager;
 }
 
@@ -788,5 +788,5 @@ INCLUDE_SDATA(const s32, "file/fileManager", fileCallbackStatus);
 
 INCLUDE_SDATA(const s32, "file/fileManager", D_0055164C);
 
-INCLUDE_SDATA(const s32, "file/fileManager", D_00551650);
+INCLUDE_SDATA(const s32, "file/fileManager", fileManagerProcName);
 
