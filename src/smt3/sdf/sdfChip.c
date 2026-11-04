@@ -35,15 +35,11 @@ sdfChip_t *sdfChipAllocPageGrow(sdfChipCB_tag *aCB, sdfChipPageInfo_tag *aPageIn
 void *sdfChipAllocDirect(s32 aSize);
 void sdfChipFreeDirect(void *aPtr);
 #ifdef NON_MATCHING
-/* Optional allocator checks. A host that wants them sets the pointers; all stay NULL otherwise. */
-typedef struct sdfChipDebugHook_t
-{
-    void (*freed)(void *aChip, s32 aChipSize);
-    void (*grown)(void *aChip, s32 aChipSize);
-    void (*popped)(void *aChip, s32 aChipSize, const void *aPage, s32 aChipsPerPage, s32 aAllocCount, const void *aNextFree);
-} sdfChipDebugHook_t;
-
-sdfChipDebugHook_t sdfChipDebugHook;
+/* Port-only allocator checks, off unless the host switches them on. */
+void sdfxDevChipFreed(void *aChip, s32 aChipSize);
+void sdfxDevChipGrown(void *aChip, s32 aChipSize);
+void sdfxDevChipPopped(void *aChip, s32 aChipSize, const void *aPage, s32 aChipsPerPage,
+                       s32 aAllocCount, const void *aNextFree);
 #endif
 
 /* Promote the next page on the partial list to current; an empty list clears it. */
@@ -66,7 +62,8 @@ sdfChip_t *sdfChipAllocGetFree(sdfChipCB_tag *aCB, sdfChipPageInfo_tag *aPageInf
     aPageInfo->allocCount++;
     aPageInfo->freeLink = chip->nextFree;
 #ifdef NON_MATCHING
-    if (sdfChipDebugHook.popped != NULL) sdfChipDebugHook.popped(chip, aCB->chipSize, aPageInfo->page, aCB->chipsPerPage, aPageInfo->allocCount, aPageInfo->freeLink);
+    sdfxDevChipPopped(chip, aCB->chipSize, aPageInfo->page, aCB->chipsPerPage,
+                      aPageInfo->allocCount, aPageInfo->freeLink);
 #endif
     if (aPageInfo->allocCount == aCB->chipsPerPage) {
         sdfChipAllocNextPage(aCB);
@@ -87,7 +84,7 @@ sdfChip_t *sdfChipAllocPageGrow(sdfChipCB_tag *aCB, sdfChipPageInfo_tag *aPageIn
     chip = (sdfChip_t *)((u8 *)aPageInfo->page + (chipsPerPage - growLeft) * aCB->chipSize);
     aPageInfo->growLeft = growLeft - 1;
 #ifdef NON_MATCHING
-    if (sdfChipDebugHook.grown != NULL) sdfChipDebugHook.grown(chip, aCB->chipSize);
+    sdfxDevChipGrown(chip, aCB->chipSize);
 #endif
     if (aPageInfo->growLeft == 0) {
         aPageInfo->alloc = (void *)sdfChipAllocGetFree;
@@ -188,7 +185,7 @@ void sdfChipFreeDirect(void *aPtr)
         chip->nextFree = page->freeLink;
         page->freeLink = chip;
 #ifdef NON_MATCHING
-        if (sdfChipDebugHook.freed != NULL) sdfChipDebugHook.freed(chip, cb->chipSize);
+        sdfxDevChipFreed(chip, cb->chipSize);
 #endif
     }
     if (intrEnabled != 0) {
