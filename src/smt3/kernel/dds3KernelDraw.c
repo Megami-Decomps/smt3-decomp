@@ -554,7 +554,7 @@ void dds3SetQuake(s32 frame, s32 range)
     if (frame == 0) {
         dds3QuakeFrame = -1;
     } else {
-        dds3QuakeFrame = frame;
+        dds3QuakeFrame = SDF_FRAMES(frame);
     }
     dds3QuakeYRange = range * 10;
     dds3QuakeXRange = dds3QuakeYRange * 4 / 10;
