@@ -7,7 +7,8 @@
  * first, scaling a duration in ticks up and a per-tick step down by the same
  * ratio, so a timer lasts as long and a walk covers as much ground. */
 
-/* A duration in ticks, an integer. */
+/* A duration in ticks, an integer. A count of vblanks scales by the same
+ * ratio, since a host keeps two vblanks to a tick. */
 #ifndef SDF_FRAMES
 #define SDF_FRAMES(n) (n)
 #endif

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
 
@@ -307,7 +308,7 @@ void sdfPadWork(void) {
         pressed = changed & current;
         entry->lastPadData = current;
         if (current != previous) {
-            entry->repeatDeadline = vblank + 15;
+            entry->repeatDeadline = vblank + SDF_FRAMES(15);
             repeat = pressed;
         } else {
             repeat = 0;
@@ -316,7 +317,7 @@ void sdfPadWork(void) {
 
                 if (elapsed >= 0) {
                     repeat = current;
-                    entry->repeatDeadline = vblank + elapsed + 4;
+                    entry->repeatDeadline = vblank + elapsed + SDF_FRAMES(4);
                 }
             }
         }
