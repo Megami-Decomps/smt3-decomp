@@ -11,6 +11,7 @@
 #include "kernel.h"
 #include "font.h"
 #include "kernel_draw.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -1205,7 +1206,7 @@ void InitPhaseReadStatus(fclEncyc_instance_tag *pinst)
     work->phase.statusAlpha = 0x80;
     work->boardY = 0xC00;
     work->help[0].y = 0xCE8;
-    work->viewIdleTimer = 0x14;
+    work->viewIdleTimer = SDF_FRAMES(0x14);
     work->help[1].x = 0x1370;
     work->help[1].y = 0xD20;
     work->help[1].speed = 0x20;
@@ -1600,7 +1601,7 @@ void CalcPhaseReadView(fclEncyc_instance_tag *pinst)
                 work->viewIdleTimer--;
             }
         } else {
-            work->viewIdleTimer = 0x14;
+            work->viewIdleTimer = SDF_FRAMES(0x14);
             work->phase.flags = (work->phase.flags & ~8) | 0x20;
         }
     }
