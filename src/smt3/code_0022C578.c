@@ -10,6 +10,7 @@
 #include "event.h"
 #include "draw3d.h"
 #include "kernel_draw.h"
+#include "sdfFrame.h"
 
 typedef struct frFontHandle_t frFontHandle_t;
 typedef struct frFontRequest_t frFontRequest_t;
@@ -888,7 +889,7 @@ void cmpinit(void)
     cmpSetCursorFlag(&campWork->page[2].cursor, EE_ADDR_S(D_00551F98));
     cmpDebugDumpCount();
     camp_H_cmpGlobalWork_t__ctor();
-    campWork->effectStep = 0x2B3;
+    campWork->effectStep = SDF_FRAMES(0x2B3);
     cmpInitStockTable();
     cmpLoadState = 0;
 }
@@ -3013,7 +3014,7 @@ extern void cmpFindPanelEffSlot(s32 ot);
 s32 camp_draw_Process(void)
 {
     if (campWork->unk_0001 != 7) {
-        nmeDrawFrame(0x10, campWork->effectStep);
+        nmeDrawFrame(0x10, (s32)SDF_FRAME_STEP(campWork->effectStep));
     }
     if ((campWork->unk_0000 & 0x20) != 0) {
         cmpUpdateTerminate((cmpInfoWindow_t *)campWork);
@@ -3594,7 +3595,7 @@ void campUpdateEffectStep(void)
     campWork_t *work = campWork;
 
     work->effectStep++;
-    if (work->effectStep >= 0x900) {
+    if (work->effectStep >= SDF_FRAMES(0x900)) {
         work->effectStep = 0;
     }
 }

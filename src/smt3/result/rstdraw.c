@@ -7,6 +7,7 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
+#include "sdfFrame.h"
 
 
 
@@ -56,7 +57,7 @@ s32 rstDraw(dds3ProcessID_t *id)
             cmpUpdateTerminate(rstDrawWork);
             return -1;
         }
-        nmeDrawFrame(0x10, frameWork->unk_2310);
+        nmeDrawFrame(0x10, (s32)SDF_FRAME_STEP(frameWork->unk_2310));
     }
     rstDrawEvoBgFade();
     if (rstDrawWork->flags & 2) {

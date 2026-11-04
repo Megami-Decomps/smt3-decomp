@@ -8,6 +8,7 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
+#include "sdfFrame.h"
 
 
 
@@ -1198,7 +1199,7 @@ void rstUpdateSeqHeartsMaster(void)
 void rstUpdateBgTimer(void)
 {
     startPos->unk_2310++;
-    if (startPos->unk_2310 >= 0x900) {
+    if (startPos->unk_2310 >= SDF_FRAMES(0x900)) {
         startPos->unk_2310 = 0;
     }
 }

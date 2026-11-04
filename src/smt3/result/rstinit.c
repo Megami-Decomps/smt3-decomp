@@ -7,6 +7,7 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
+#include "sdfFrame.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -218,7 +219,7 @@ rstData_t *rstInit(s32 parent)
     work->texture = fclLoadTexture(D_0053DA70);
     rstSetResultWork(work->texture);
     rstCreateTargetList(work);
-    work->unk_2310 = 0x2B3;
+    work->unk_2310 = SDF_FRAMES(0x2B3);
     dds3FadeIn(0, 0, 0, 0xF);
     p2sdPlayBGM(0x2B0000);
     return work;
