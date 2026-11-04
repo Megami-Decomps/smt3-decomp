@@ -7,42 +7,49 @@
  * Subset of the Sony SDK eeregs.h: the EE and GS registers retail code
  * touches, by their SDK names.
  */
-#define T0_COUNT ((volatile u32 *)0x10000000)
-#define T0_MODE ((volatile u32 *)0x10000010)
 
-#define IPU_CMD ((volatile u32 *)0x10002000)
-#define IPU_CTRL ((volatile u32 *)0x10002010)
+/* A register as a pointer to its address. A build with no register space at
+ * these addresses defines this to point into storage of its own. */
+#ifndef SDF_HW_REG
+#define SDF_HW_REG(type, addr) ((volatile type *)(addr))
+#endif
 
-#define GIF_CTRL ((volatile u32 *)0x10003000)
-#define GIF_STAT ((volatile u32 *)0x10003020)
-#define VIF0_STAT ((volatile u32 *)0x10003800)
-#define VIF1_STAT ((volatile u32 *)0x10003C00)
+#define T0_COUNT SDF_HW_REG(u32, 0x10000000)
+#define T0_MODE SDF_HW_REG(u32, 0x10000010)
+
+#define IPU_CMD SDF_HW_REG(u32, 0x10002000)
+#define IPU_CTRL SDF_HW_REG(u32, 0x10002010)
+
+#define GIF_CTRL SDF_HW_REG(u32, 0x10003000)
+#define GIF_STAT SDF_HW_REG(u32, 0x10003020)
+#define VIF0_STAT SDF_HW_REG(u32, 0x10003800)
+#define VIF1_STAT SDF_HW_REG(u32, 0x10003C00)
 
 /* D0 and D1 are the VIF DMA channels, D3 fromIPU and D4 toIPU. */
-#define D0_CHCR ((volatile u32 *)0x10008000)
-#define D0_MADR ((volatile u32 *)0x10008010)
-#define D0_QWC ((volatile u32 *)0x10008020)
-#define D1_CHCR ((volatile u32 *)0x10009000)
-#define D1_MADR ((volatile u32 *)0x10009010)
-#define D1_TADR ((volatile u32 *)0x10009030)
+#define D0_CHCR SDF_HW_REG(u32, 0x10008000)
+#define D0_MADR SDF_HW_REG(u32, 0x10008010)
+#define D0_QWC SDF_HW_REG(u32, 0x10008020)
+#define D1_CHCR SDF_HW_REG(u32, 0x10009000)
+#define D1_MADR SDF_HW_REG(u32, 0x10009010)
+#define D1_TADR SDF_HW_REG(u32, 0x10009030)
 /* Channel 2 is the GIF's. sdk/libgraph.c spells this register itself, as a
  * dereference rather than a pointer, because it includes no eeregs.h; a
  * consumer transcribing sceGsSyncPath reads it through HW_READ and needs the
  * pointer form here. */
-#define D2_CHCR ((volatile u32 *)0x1000A000)
-#define D3_CHCR ((volatile u32 *)0x1000B000)
-#define D3_MADR ((volatile u32 *)0x1000B010)
-#define D3_QWC ((volatile u32 *)0x1000B020)
-#define D4_CHCR ((volatile u32 *)0x1000B400)
-#define D4_MADR ((volatile u32 *)0x1000B410)
-#define D4_QWC ((volatile u32 *)0x1000B420)
-#define D4_TADR ((volatile u32 *)0x1000B430)
-#define D_ENABLER ((volatile u32 *)0x1000F520)
-#define D_ENABLEW ((volatile u32 *)0x1000F590)
+#define D2_CHCR SDF_HW_REG(u32, 0x1000A000)
+#define D3_CHCR SDF_HW_REG(u32, 0x1000B000)
+#define D3_MADR SDF_HW_REG(u32, 0x1000B010)
+#define D3_QWC SDF_HW_REG(u32, 0x1000B020)
+#define D4_CHCR SDF_HW_REG(u32, 0x1000B400)
+#define D4_MADR SDF_HW_REG(u32, 0x1000B410)
+#define D4_QWC SDF_HW_REG(u32, 0x1000B420)
+#define D4_TADR SDF_HW_REG(u32, 0x1000B430)
+#define D_ENABLER SDF_HW_REG(u32, 0x1000F520)
+#define D_ENABLEW SDF_HW_REG(u32, 0x1000F590)
 
 /* GS privileged registers. */
-#define GS_CSR ((volatile u64 *)0x12001000)
-#define GS_BUSDIR ((volatile u64 *)0x12001040)
+#define GS_CSR SDF_HW_REG(u64, 0x12001000)
+#define GS_BUSDIR SDF_HW_REG(u64, 0x12001040)
 
 /* Scratchpad RAM: 16KB of on-chip memory with no cache, mapped at a fixed
  * physical address. sdfVu1.c's point buffer uses one fixed region of it as
