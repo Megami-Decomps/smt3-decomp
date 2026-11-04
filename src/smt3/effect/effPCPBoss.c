@@ -1825,7 +1825,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
     f32 taperRange;
     f32 baseExtent, tipExtent;
 
-    frame = work->frame;
+    frame = SDF_FRAME_TICK(work->frame);
     mode = work->directionMode;
     model = dds3EffectPartGetHandle(work->part);
     map = model->inner;
@@ -1898,11 +1898,13 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
             }
             sdfModelGetMarkPos(map, i);
             if (frame < work->cellCount) {
-                historyCount = historyCell->vertexCount;
-                SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount);
-                SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 1);
-                SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 2);
-                historyCell->vertexCount += 3;
+                if (SDF_FRAME_DUE(work->frame)) {
+                    historyCount = historyCell->vertexCount;
+                    SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount);
+                    SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 1);
+                    SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 2);
+                    historyCell->vertexCount += 3;
+                }
                 taperStep = taperRange / frame;
                 blend = 1.0f;
                 SDF_VU0_LOADVECTOR_C(D_0031FF70);
@@ -1999,7 +2001,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
                             SDF_VU0_LOADVECTOR(displacement);
                             SDF_VU0_APPLYMATRIX_XYZ();
                             SDF_VU0_STOREVECTOR(displacement);
-                            group->rotate += group->rotate_add;
+                            group->rotate += SDF_FRAME_STEP(group->rotate_add);
                         }
                         baseExtent = cell->width_in;
                         baseVector[0] = baseExtent;
@@ -2071,7 +2073,9 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
                             colorWords[4] = colorWords[2];
                         }
                     }
-                    cell->frame++;
+                    if (SDF_FRAME_DUE(work->frame)) {
+                        cell->frame++;
+                    }
                 }
                 dds3FlashPolyListDraw(group->hFlash);
             }
@@ -3068,10 +3072,10 @@ void effPCPBossKAGUThunderboltDrawSub(effPCPBossKAGUThunderbolt_t *pPCPBossKAGUT
             return;
         }
     }
-    limit = pPCPBossKAGUThunderbolt->limit;
+    limit = SDF_FRAMES(pPCPBossKAGUThunderbolt->limit);
     frame = pPCPBossKAGUThunderbolt->frame;
-    fadeIn = pPCPBossKAGUThunderbolt->fadeIn;
-    fadeOut = pPCPBossKAGUThunderbolt->fadeOut;
+    fadeIn = SDF_FRAMES(pPCPBossKAGUThunderbolt->fadeIn);
+    fadeOut = SDF_FRAMES(pPCPBossKAGUThunderbolt->fadeOut);
     effPCPCrackSetPosition(pPCPBossKAGUThunderbolt->pCrack, pPCPBossKAGUThunderbolt);
     effPCPCrackSetColor(pPCPBossKAGUThunderbolt->pCrack, pPCPBossKAGUThunderbolt->color);
     effPCPCrackDraw(pPCPBossKAGUThunderbolt->pCrack);
