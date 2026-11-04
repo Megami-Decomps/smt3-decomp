@@ -1394,3 +1394,8 @@ new names are mapped back.
 | `D_00551EC4`, `D_00551EC6` | `pbMyCharPosX`, `pbMyCharPosY` | out parameters of `pbGetMyCharcterPos2`, then added to `pbKeyTable` offsets and bounded by 20 |
 | `D_0030FBD4`, `D_0030AB54` | `fldAutoMapFloorTable`, `fldAutoMapAreaTable` | 28-byte rows indexed by `fldAutoMapFindFloor` and `fldAutoMapFindArea`, `strlen`'d and drawn |
 | `D_0052D2F0` | `TLBFunctionsImage` | 0x330 bytes of MIPS code that `InitTLBFunctions` copies to `0x80075000` |
+| `D_00312150`, `D_00551CC0` | `fldAutoMapModels`, `fldAutoMapSpriteTex` | model root list and sprite texture handle used by the automap draw |
+| `D_00567EA0`, `D_00567EF8`, `D_00567F50` | `fldAutoMapAreaNameLen`, `fldAutoMapFloorNameLen`, `fldAutoMapPlaceNameLen` | `strlen` results cached per row of the area, floor and place tables |
+| `D_0030D714`, `D_0030A670`, `D_00551CC8` | `fldAutoMapPlaceTable`, `fldAutoMapTitleTable`, `fldAutoMapTitleLen` | 28-byte string rows indexed by `fldAutoMapFindPlace` and the title lookup |
+| `D_00551CA0`, `D_0054EE78`, `D_0054EE7C` | `fldAutoMapFontReq`, `fldAutoMapFloorCur`, `fldAutoMapFloorOld` | font request and the current and previous floor index in `fldAutoMap.c` |
+| `D_00551948`, `D_00551954`, `D_00551958` | `sdfFileCmdActiveHead`, `sdfFileCmdCacheHead`, `sdfFileCmdCacheTail` | `sdfFileCmdDequeue` unlinks from the active list and appends to the cache list |
