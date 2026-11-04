@@ -30,6 +30,19 @@
 #define SDF_FRAME_DECAY(k) (k)
 #endif
 
+/* The retail tick a host tick count falls in, an integer: the inverse of
+ * SDF_FRAMES, for a key or a parity that must advance at the retail rate. */
+#ifndef SDF_FRAME_TICK
+#define SDF_FRAME_TICK(age) (age)
+#endif
+
+/* True on the first host tick of each retail tick, given a count of host
+ * ticks from 0. Gates a step that cannot be scaled, such as a record into a
+ * history ring or an integer ramp, so it runs at the retail rate. */
+#ifndef SDF_FRAME_DUE
+#define SDF_FRAME_DUE(age) 1
+#endif
+
 /* Storage for a tick count. A host may widen one only where C defines the
  * storage: a symbol the data sections define keeps its retail width. */
 #ifndef SDF_FRAME_U8
