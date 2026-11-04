@@ -781,7 +781,6 @@ void fldReleaseUnitPad(void)
 
 #ifdef NON_MATCHING
 extern const fldPackedVector_t D_00531770, D_00531780, D_00531790, D_005317A0, D_005317B0;
-extern s32 D_002FC41C;
 extern s32 l_UseCollision;
 extern dds3Basic_t *D_0054EAE8, *D_0054EAF0, *fldPlayerUnit;
 extern char D_0054EB38[];
@@ -849,7 +848,7 @@ void fldSetUnit(fldResourcePoint_t *point)
         else dds3UnitObjectBasicSetOt(fldUnitControl.handle, 7);
     } else {
         fldJDataLoad();
-        dds3ObjectBaseMakeUnit(fldUnitControl.handle, 2, D_002FC41C);
+        dds3ObjectBaseMakeUnit(fldUnitControl.handle, 2, fldSceneParam.pointResrcID);
     }
     dds3SetSclPoseSet(fldUnitControl.handle, &scale.vector);
     model = dds3ObjectBaseGetModelHandle(fldUnitControl.handle);
@@ -889,7 +888,7 @@ void fldSetUnit(fldResourcePoint_t *point)
         fldUnitControl.handle2 = dds3AddUnitObjectBasic(dds3AllocObjectId(), point, &rotation);
         dds3SetUnitObjectId(fldUnitControl.handle2, "PLAYER_UNIT2");
         fldPlayerUnit = fldUnitControl.handle2;
-        dds3ObjectBaseMakeUnit(fldUnitControl.handle2, 2, D_002FC41C);
+        dds3ObjectBaseMakeUnit(fldUnitControl.handle2, 2, fldSceneParam.pointResrcID);
         dds3SetSclPoseSet(fldUnitControl.handle2, &mirrorScale.vector);
         model = dds3ObjectBaseGetModelHandle(fldUnitControl.handle2);
         dds3GetRadiusPoseSet(fldUnitControl.handle, 90.0f);
