@@ -1,6 +1,7 @@
 #include "interface.h"
 #include "itfMesManager.h"
 #include "kernel.h"
+#include "sdfFrame.h"
 
 typedef struct itfMesBinTypeHeader_t itfMesBinTypeHeader_t;
 typedef struct itfMesLink_t itfMesLink_t;
@@ -2135,7 +2136,7 @@ void CalcMessage(instanceMes_tag *pinst) {
             pinst->curctr.isdraw = 1;
         }
         if (dds3PadButtonState.confirm >= 0 && dds3PadButtonState.primaryCancel >= 0 &&
-            (dds3PadButtonState.primaryTriangle == 0 || pinst->curctr.ctr_key < 5)) {
+            (dds3PadButtonState.primaryTriangle == 0 || pinst->curctr.ctr_key < SDF_FRAMES(5))) {
             if (mes->textInterfaceMask != 0) {
                 return;
             }
