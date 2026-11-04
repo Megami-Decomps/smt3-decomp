@@ -23,8 +23,8 @@ extern void sdfGsMemFree(sdfGsMemSlice_t *aHandle);
 extern sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 aW, s32 aH, s32 aPixelFormat);
 
 extern sdfGrScreenDef_t sdfGrFrameModes[4];
-extern sdfGrFrameSet_t D_00529388;
-extern sceGsDispEnv D_00580FF0;
+extern sdfGrFrameSet_t sdfGrFrameSet;
+extern sceGsDispEnv sdfGrDispEnv;
 
 extern u8 reqMakeFrameBuff;
 extern u8 sdfGrScreenMode;
@@ -47,10 +47,10 @@ void sdfGrFreeFrameSet(sdfGrFrameSet_t *aFrame);
 
 /* GS store-image packet and tracked-thread node are only passed to the SDK. */
 typedef struct sceGsStoreImage sceGsStoreImage;
-extern sceGsStoreImage D_00577F80;
-extern sdfThCB_t D_00552080;
-extern u8 D_00578FF0[0x8000];
-extern u8 D_00577FF0[0x1000];
+extern sceGsStoreImage sdfGrStoreImage;
+extern sdfThCB_t sdfDispThreadCB;
+extern u8 sdfDrawThreadStack[0x8000];
+extern u8 sdfDispThreadStack[0x1000];
 extern volatile u8 sdfDispThreadFlag;
 extern volatile u8 sdfFrameId;
 extern s8 reqGsReset;
@@ -127,7 +127,7 @@ INCLUDE_ASM(const s32, "sdf/sdfGraph", sdfGrSetFrameSetMode);
 void sdfGrSetScreen(s32 aMode)
 {
     sdfGrScreenMode = aMode;
-    sdfGrSetFrameSetMode(&D_00529388, aMode, 0);
+    sdfGrSetFrameSetMode(&sdfGrFrameSet, aMode, 0);
     reqMakeFrameBuff = 1;
 }
 
@@ -158,14 +158,14 @@ void sdfGrMakeFrameSet(sdfGrFrameSet_t *aFrame)
 
 void sdfGrSetDisp(s32 aEvenOdd)
 {
-    sdfGsMemSlice_t *buff = D_00529388.frameHandle[aEvenOdd];
+    sdfGsMemSlice_t *buff = sdfGrFrameSet.frameHandle[aEvenOdd];
     u32 fbp;
 
-    sceGsSetDefDispEnv((sceGsDispEnv *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&D_00580FF0))), 0,
-                       D_00529388.w, D_00529388.buffH, 0, 0);
+    sceGsSetDefDispEnv((sceGsDispEnv *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&sdfGrDispEnv))), 0,
+                       sdfGrFrameSet.w, sdfGrFrameSet.buffH, 0, 0);
     fbp = (buff->addr >> 11) & 0x1FF;
-    D_00580FF0.dispfb = (D_00580FF0.dispfb & ~0x1FF) | fbp;
-    sceGsPutDispEnv(&D_00580FF0);
+    sdfGrDispEnv.dispfb = (sdfGrDispEnv.dispfb & ~0x1FF) | fbp;
+    sceGsPutDispEnv(&sdfGrDispEnv);
 }
 
 void sdfGrGsReset(void)
@@ -220,9 +220,9 @@ void sdfGrCapture(void) {
     u8 *destination;
 
     if (*(u8 *)&sdfGrCaptureBuff) {
-        width = D_00529388.w;
-        height = D_00529388.buffH;
-        format = D_00529388.pixelFormat;
+        width = sdfGrFrameSet.w;
+        height = sdfGrFrameSet.buffH;
+        format = sdfGrFrameSet.pixelFormat;
         pixelBytes = 4;
         if (format == 2) {
             pixelBytes = 2;
@@ -233,10 +233,10 @@ void sdfGrCapture(void) {
         allocation = sdfMemAllocDirect(rowBytes * height);
         pixels = (u8 *)sdfMemLock(allocation);
         sceGsSetDefStoreImage(
-            (sceGsStoreImage *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&D_00577F80))),
-            D_00529388.frameHandle[1]->addr >> 6,
+            (sceGsStoreImage *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&sdfGrStoreImage))),
+            sdfGrFrameSet.frameHandle[1]->addr >> 6,
             width / 64, format, 0, 0, width, height);
-        sceGsExecStoreImage(&D_00577F80, pixels);
+        sceGsExecStoreImage(&sdfGrStoreImage, pixels);
         sceGsSyncPath(0, 0);
         destination = EE_ADDR_AS(u8 *, sdfGrCaptureReq);
         source = pixels;
@@ -247,10 +247,10 @@ void sdfGrCapture(void) {
             source += rowBytes;
         } while (--rows != 0);
         sceGsSetDefStoreImage(
-            (sceGsStoreImage *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&D_00577F80))),
-            D_00529388.frameHandle[0]->addr >> 6,
+            (sceGsStoreImage *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&sdfGrStoreImage))),
+            sdfGrFrameSet.frameHandle[0]->addr >> 6,
             width / 64, format, 0, 0, width, height);
-        sceGsExecStoreImage(&D_00577F80, pixels);
+        sceGsExecStoreImage(&sdfGrStoreImage, pixels);
         sceGsSyncPath(0, 0);
         destination = EE_ADDR_AS(u8 *, sdfGrCaptureReq) + rowBytes;
         source = pixels;
@@ -303,7 +303,7 @@ void sdfDrawThread(void) {
         WaitSema(dds3GsSema);
         if (*(s8 *)&reqMakeFrameBuff != 0) {
             reqMakeFrameBuff = 0;
-            sdfGrMakeFrameSet(&D_00529388);
+            sdfGrMakeFrameSet(&sdfGrFrameSet);
         }
         if (reqGsReset != 0) {
             reqGsReset = 0;
@@ -355,7 +355,7 @@ void sdfDispThread(void) {
 
 void sdfGrInit(s32 aPacketBuffSize) {
     s32 thread;
-    sdfGrFrameSet_t *graph = &D_00529388;
+    sdfGrFrameSet_t *graph = &sdfGrFrameSet;
 
     sceGsResetPath();
     sdfGrScreenMode = 1;
@@ -371,10 +371,10 @@ void sdfGrInit(s32 aPacketBuffSize) {
     sdfTexInit();
     dds3GsSema = sdfCreateSema(1, 0x20, 0);
     dds3GsThreadId = sdfCreateSema(0, 0x20, 0);
-    thread = CreateThreadSimple((void *)sdfDrawThread, D_00578FF0, 0x8000, 0x44);
+    thread = CreateThreadSimple((void *)sdfDrawThread, sdfDrawThreadStack, 0x8000, 0x44);
     sdfDrawThreadId = thread;
     _StartThread(thread, 0);
-    sdfStartThreadAndWait(&D_00552080, sdfDispThread, D_00577FF0,
+    sdfStartThreadAndWait(&sdfDispThreadCB, sdfDispThread, sdfDispThreadStack,
                           0x1000, 0x40, 0);
 }
 

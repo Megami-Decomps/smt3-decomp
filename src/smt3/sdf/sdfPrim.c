@@ -37,7 +37,7 @@ enum {
     SDF_GS_TRXDIR = 0x53
 };
 
-extern u8 D_0055188A;
+extern u8 sdfGrBufferSlot;
 
 extern u16 sdfReqDrawDelaySleepCount;
 
@@ -441,7 +441,7 @@ extern s32 sdfDelayedResrcSemaId;
 
 extern s32 sdfDrawReqQueueIndex;
 
-extern sdfGrFrameSet_t D_00529388;
+extern sdfGrFrameSet_t sdfGrFrameSet;
 
 typedef struct effDebugPolyParams_t {
     s16 parameterCount;
@@ -806,7 +806,7 @@ void sdfPrimLinkBitBltPacket(s32 aTag, u32 aDstGsAddr, s32 aDstBuffWidth,
 void sdfPrimFrameMovePredraw(sdfPrimFrameMovePacket_t *aPre, s32 aEvenOdd) {
     aPre->packet.bitblt.bitbltbuf.data =
         (aPre->packet.bitblt.bitbltbuf.data & ~0x3FFF) |
-        (u64)(u32)(D_00529388.buffers[aEvenOdd ^ aPre->worker.option0]->addr >> 6);
+        (u64)(u32)(sdfGrFrameSet.buffers[aEvenOdd ^ aPre->worker.option0]->addr >> 6);
 }
 
 void sdfPrimLinkFrameMovePacket(sdfDrawTag_t *aDrawTag, sdfPreDrawTag_t *aPreDrawTag,
@@ -826,8 +826,8 @@ void sdfPrimLinkFrameMovePacket(sdfDrawTag_t *aDrawTag, sdfPreDrawTag_t *aPreDra
 
     sdfPrimSetBitBltPacket(
         drawPacket, aBuffHandle->addr, aBuffHandle->w,
-        aBuffHandle->pixelFormat, aDstX, aDstY, D_00529388.buffers[0]->addr,
-        D_00529388.width, D_00529388.bufferFormat, aSrcX, aSrcY, aWidth,
+        aBuffHandle->pixelFormat, aDstX, aDstY, sdfGrFrameSet.buffers[0]->addr,
+        sdfGrFrameSet.width, sdfGrFrameSet.bufferFormat, aSrcX, aSrcY, aWidth,
         aHeight, 2);
     sdfPreDrawTagLink(aPreDrawTag, &packet->worker);
     sdfDrawTagLink(aDrawTag, EE_ADDR_S(drawPacket));

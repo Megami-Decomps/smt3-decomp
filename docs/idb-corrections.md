@@ -1447,3 +1447,5 @@ The guarded file-manager declaration of `EIntr` now agrees with its `s32` provid
 | `D_0054A088`, `D_0054A100`, `D_00551B40` | `sdfGsMemInfoTitle`, `sdfGsMemNodeFmt`, `sdfGsMemTypeFmt` | the GS memory information dump title and row formats |
 | `D_00551A20`, `D_00551A40` | `sdfDumpAddrFmt`, `sdfDumpByteFmt` | the `%08X : ` and `%02X` formats of the memory dump |
 | `D_00551A58`, `D_00551A60` | `sdfVifMaskedName`, `sdfVifXferOkName` | bytes `mask` and `xfer-ok`, the `%s` of the `VIF MSKPATH3` printf |
+| `D_00529388`, `D_00580FF0`, `D_00577F80`, `D_0055188A` | `sdfGrFrameSet`, `sdfGrDispEnv`, `sdfGrStoreImage`, `sdfGrBufferSlot` | the `sdfGrFrameSet_t` every render unit reads, the `sceGsDispEnv` and `sceGsStoreImage` that `sdfGraph.c` fills, and the slot `sdfDraw.c` sets from `bufferSlot` |
+| `D_00552080`, `D_00578FF0`, `D_00577FF0` | `sdfDispThreadCB`, `sdfDrawThreadStack`, `sdfDispThreadStack` | the control block and the 0x1000 stack passed to `sdfStartThreadAndWait`, and the 0x8000 stack of `sdfDrawThread` |
