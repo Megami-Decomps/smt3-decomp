@@ -1402,3 +1402,15 @@ new names are mapped back.
 | `D_00551968`, `D_00551970`, `D_00551978`, `D_00551980`, `D_00551988` | `sdfFileCmdCdromPrefix`, `sdfFileCmdHostPrefix`, `sdfFileCmdPfsPrefix`, `sdfFileCmdMoviePath`, `sdfFileCmdCdimgPrefix` | bytes are `cdrom0:`, `host0:`, `pfs0:`, `/movie/`, `cdimg:`, compared and copied by `sdfFileCmdAnalyzeFileName` and `sdfFileCmdMakeRealFileName` |
 | `D_0054F634`, `D_00551F04`, `D_0054F638` | `mdlHddFileIndexHandle`, `mdlHddFileIndex`, `mdlHddFileListHandle` | memory handles and the locked index pointer allocated in `mdlManager` for the HDD file index and list |
 | `D_00551650` | `fileManagerProcName` | bytes `fileMan`, the name passed to `dds3StartProcess` for `fileManagerProc` |
+
+### Preserve independently used adjacent objects
+
+Eighteen high-offset extent extensions are withdrawn because the following word is an independently used object. `fldEncountTimer` remains eight bytes; the other bases listed below remain four bytes. Native accesses and distinct scalar consumers establish these boundaries. Seeing an access immediately after a symbol does not establish that it belongs to that symbol.
+
+- `fldEncountTimer`: the following `D_0054EB98` is the file resolver's texture handle, not its +4 sequence word.
+- `nbPanelPTP_0_Process`: `D_005511D8` is panel tint.
+- `cameraDegreeInit`: `D_00551EF4` is an integer cooldown, not another float angle.
+- `nbResultTexHandle`: `D_00551110` is a camera-name pointer, not another texture handle.
+- The remaining independently used scalar pairs start at `rsetFrameMaskOtOffset`, `fldPlayerSyukanState`, `fldAutoMapBuf`, `fldAutoMapBBox`, `fldAutoMapDrawState`, `fldNpcCamTarget`, `evtNextEventNo`, `moonprocess_id`, `dds3TitleFadeLevel`, `nbTobiwarpLabelIdx`, `nbFormEnemyInterval`, `sdf3DFogDefault`, `BSARI_Cut1_Rate` and `nbPressGaugeState`.
+
+The other three entries in that batch (`dds3YuukoParts`, `sdfModelShapeWeightEpsilon`, `nbCameraBoss_BSLUSI_Type`) are unchanged: this review does not establish an independent tail object for them. This is not a certification of all remaining high-offset metadata as complete ownership. Generated source includes are kept in their canonical post-split positions.
