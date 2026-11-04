@@ -254,7 +254,7 @@ extern fldAmXYZ_t fldAutoMapModelPos[32];
 
 extern sdfTexHandle_t *D_00551CC0[2];
 
-extern sdfTexHandle_t *fldAutoMapWindowTex[];
+extern sdfTexHandle_t *fldAutoMapWindowTex[3];
 
 extern void sdfModelRootFree(void *aRoot, s32 aReleaseNodes, s32 aReleaseMatList);
 
@@ -656,7 +656,6 @@ INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsR);
 extern f32 sdfSin(f32 aRadius);
 extern void SetRotateMatrixY(f32 aAngle);
 extern f32 D_0054EE70;
-extern sdfTexHandle_t *fldAutoMapBgTex[];
 
 /* NON_MATCHING: 187 of 207 words, exact size; the four texture-coordinate
  * locals hold the other register of each pair ($16 with $17, $18 with $19). */
@@ -763,7 +762,7 @@ void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 r) {
 
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    sdf2DLinkTexPacket(tag, fldAutoMapBgTex[0], 0);
+    sdf2DLinkTexPacket(tag, fldAutoMapWindowTex[2], 0);
     v0.x = -4800.0f;
     v0.y = 0.0f;
     v0.z = -4800.0f;
