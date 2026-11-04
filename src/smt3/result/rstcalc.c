@@ -2285,7 +2285,7 @@ extern void *dds3SearchSceneBasic(void *pBasic, u32 serialID, s32 type);
 
 extern evtUnit_t *evtGetUnitHandle2(void *unit);
 
-s32 rstFindUnitScene(s32 work)
+s32 rstFindUnitScene(mdlObj_t *work)
 {
     void *scene = dds3GetActiveScene();
     void *basic;
@@ -2305,17 +2305,15 @@ s32 rstFindUnitScene(s32 work)
     if (unit->value == 0) {
         return 0;
     }
-    *(u32 *)(*(u8 **)(EE_ADDR_AS(u8 *, work) + 0x18) + 0x80) = unit->value;
+    *(u32 *)(*(u8 **)((u8 *)work + 0x18) + 0x80) = unit->value;
     return 1;
 }
 
-#ifdef NON_MATCHING
-extern s32 cmpGetEncycWork(void);
-#endif
+extern mdlObj_t *cmpGetEncycWork(void);
 
 s32 rstGetEncycPanel(void)
 {
-    s32 work;
+    mdlObj_t *work;
 
     if (rstDrawWork->unk_7D == 0) {
         work = cmpGetEncycWork();
@@ -2334,7 +2332,7 @@ s32 rstResetEncycPanel(void)
             return rstGetEncycPanel();
         }
     }
-    *(s32 *)(*(u8 **)(EE_ADDR_AS(u8 *, cmpGetEncycWork()) + 0x18) + 0x80) = 0;
+    *(s32 *)(*(u8 **)((u8 *)cmpGetEncycWork() + 0x18) + 0x80) = 0;
 }
 
 s32 rstResetEncycPanel2(void)
@@ -2342,5 +2340,5 @@ s32 rstResetEncycPanel2(void)
     if (rstDrawWork->unk_7C < 5) {
         return rstGetEncycPanel();
     }
-    *(s32 *)(*(u8 **)(EE_ADDR_AS(u8 *, cmpGetEncycWork()) + 0x18) + 0x80) = 0;
+    *(s32 *)(*(u8 **)((u8 *)cmpGetEncycWork() + 0x18) + 0x80) = 0;
 }

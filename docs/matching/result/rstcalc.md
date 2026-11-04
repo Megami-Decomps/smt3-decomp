@@ -362,10 +362,33 @@ diagnostic now has two inherited failures, `rstSetSkillActFlag` and
 `cmpGetEncycWork`, rather than three. Both guarded contexts pass. This is not
 a complete production strict-declaration repair. A paired setter declaration
 control changes an exact caller and was rejected; the pointer-return chain
-is unchanged.
+was unchanged in that earlier landing; the following repair addresses it.
 
 Canonical qualification passes owner 89/0 with unchanged allocated data, fresh
 139-owner / 479-draft compilation, 459 tests and 817 layout assertions, seven
 IRX modules, inline/shell checks, retail checksum/byte comparison and build/report
 no-ops. The 21,252 runtime inputs remain stable during these gates. Game
 coverage remains 8595 functions and 1485932 bytes.
+
+### Encyclopedia model pointer contract
+
+The real `cmpGetEncycWork` provider returns `mdlObj_t *`. Its declaration is
+now visible in every build, and the local in `rstGetEncycPanel` and parameter
+of `rstFindUnitScene` carry that pointer type rather than an `s32` address.
+The three consumers use ordinary byte-pointer views for the actual model
+subobject pointer at offset 0x18 and preserve the native access at offset 0x80.
+Calls, ordering, widths and values are unchanged. This fixes the local pointer
+contract; it does not establish general host portability or new model layouts.
+
+Independent provider/caller review and three-context complete-output checks
+verify unchanged allocated sections, non-file symbols, ordered relocations and
+normalized assembly. Six plain/dump pairs agree. Production owner remains
+89/0; guarded comparison retains its existing 88/17 result. The production
+implicit-declaration diagnostic now retains only `rstSetSkillActFlag`; both
+guarded contexts pass. The rejected setter-declaration control is not included.
+No matching credit is added.
+
+Fresh canonical gates pass 459 tests, 817 layout assertions, 139 guarded owners /
+479 drafts, seven IRX modules, inline/shell checks and exact retail checksum/byte
+comparison. Complete owner data and output parity remain unchanged; build and
+report are true no-ops after qualification, with stable runtime inputs.
