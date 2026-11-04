@@ -752,22 +752,41 @@ def owned_rom_range(yaml_text, unit, section):
 
 
 def drop_nonmatching(text, *, preserve_lines=False):
-    """Remove the drafts kept behind `#ifdef NON_MATCHING`.
+    """Remove branches disabled in the normal retail build's text scans.
 
-    The normal build takes the `#else` branch, so for every text scan here the
-    draft is not part of the unit: leaving it in makes a kept draft look like a
-    second definition of its own function.
+    NON_MATCHING and FIX_BUGS are both unset. Track nested conditionals so
+    an inner #else cannot expose a disabled C definition as a duplicate of
+    its retail INCLUDE_ASM fallback. Other conditions remain conservative:
+    retain their alternatives rather than guessing their build settings.
     """
-    out, skipping = [], False
-    for line in text.split("\n"):
-        head = line.strip()
-        if head == "#ifdef NON_MATCHING":
-            skipping = True
-            if preserve_lines:
-                out.append("")
-            continue
-        if skipping and head in ("#else", "#endif"):
-            skipping = False
+    # Commented directives must not hide live definitions or expose drafts.
+    tokens = re.compile(r"\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|/\*.*?\*/|//[^\n]*", re.S)
+    masked = tokens.sub(lambda m: re.sub(r"[^\n]", " ", m.group())
+                        if m.group().startswith(("/*", "//")) else m.group(), text)
+    out, stack = [], []
+    skipping = False
+    for line, scan_line in zip(text.split("\n"), masked.split("\n")):
+        directive = re.match(r"^\s*#\s*(ifdef|ifndef|if|elif|else|endif)\b(.*)", scan_line)
+        if directive:
+            kind, argument = directive.groups()
+            if kind in ("ifdef", "ifndef", "if"):
+                name = re.match(r"\s*(\w+)\b", argument)
+                known = (kind != "if" and name is not None
+                         and name.group(1) in ("NON_MATCHING", "FIX_BUGS"))
+                disabled = kind == "ifdef" if known else None
+                stack.append([skipping, disabled])
+                skipping = skipping or disabled is True
+            elif stack:
+                parent, disabled = stack[-1]
+                if kind == "endif":
+                    stack.pop()
+                    skipping = parent
+                elif kind == "else":
+                    skipping = parent or disabled is False
+                elif kind == "elif":
+                    # An arbitrary expression is not evaluated by this scan.
+                    stack[-1][1] = None
+                    skipping = parent
             if preserve_lines:
                 out.append("")
             continue

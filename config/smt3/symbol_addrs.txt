@@ -352,7 +352,7 @@ sdfMotGenMatTable = 0x005294E8; // type:u32 size:0x28
 sdfDevConsColorTable = 0x00529A80; // type:u32 size:0x3c
 sdfDmaTagNameTable = 0x00529C08; // type:u32 size:0x60
 mcModuleNames = 0x00529F00; // type:u32 size:0x20
-sceDmaChanRegs = 0x00529F70; // size:0x38
+sceDmaChanRegs = 0x00529F70; // size:0x28
 scrCommandTable = 0x0052E350; // type:u32 size:0x8
 
 // Size function-pointer tables to their run of code addresses.

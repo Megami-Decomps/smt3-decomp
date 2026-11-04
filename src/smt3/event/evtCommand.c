@@ -55,14 +55,14 @@ extern evtUnit_t *evtGetUnitHandle(s32 serial);
 extern void evtSetUnitMove3(evtUnit_t *h, s32 pathID, s32 para1, s32 para2, s32 movesys, s32 movedir, s32 rotsys);
 extern void evtSetUnitRot2(evtUnit_t *h, s32 posID, s32 para1);
 extern void fldCamSyukanSuriawase(void);
-/* The callers pass u64 values; an s32 prototype would add a sign extension. */
-extern s32 evtPlayEventBgm(u64 eventId, u64 variation);
-extern void evtTransEventBgm(u64 eventId, u64 variation);
-extern s32 evtStopEventBgm(u64 eventId, u64 variation);
-extern s32 evtPlaySe(u64 eventno, u64 seno);
-extern s32 func_001FA158(u64 eventId, u64 variation);
-extern void datAddKotowariPoint(u64 type, u64 point);
-extern void func_001FA310(u64 taskId, u64 key);
+/* Canonical provider signatures; callers retain their s32 parameter values. */
+extern s32 evtPlayEventBgm(s32 eventId, s32 variation);
+extern void evtTransEventBgm(s32 eventId, s32 variation);
+extern s32 evtStopEventBgm(s32 eventId, s32 variation);
+extern s32 evtPlaySe(s32 eventno, s32 seno);
+extern s32 func_001FA158(s32 eventId, s32 variation);
+extern void datAddKotowariPoint(s32 type, s32 point);
+extern void func_001FA310(s32 taskId, s32 key);
 
 extern s32 scrGetMessageHandle(void);
 
@@ -2917,8 +2917,8 @@ u32 evtCommand_LOAD_SOUND_E(void)
 }
 
 u32 evtCommand_BGM_PLAY_E(void) {
-    u64 eventId;
-    u64 fade;
+    s32 eventId;
+    s32 fade;
 
     eventId = scrGetIntPara(0);
     fade = scrGetIntPara(1);
@@ -2927,8 +2927,8 @@ u32 evtCommand_BGM_PLAY_E(void) {
 }
 
 u32 evtCommand_BGM_TRANS_E(void) {
-    u64 eventId;
-    u64 fade;
+    s32 eventId;
+    s32 fade;
 
     eventId = scrGetIntPara(0);
     fade = scrGetIntPara(1);
@@ -2937,8 +2937,8 @@ u32 evtCommand_BGM_TRANS_E(void) {
 }
 
 u32 evtCommand_FADEOUT_E(void) {
-    u64 eventId;
-    u64 fade;
+    s32 eventId;
+    s32 fade;
 
     eventId = scrGetIntPara(0);
     fade = scrGetIntPara(1);
@@ -2959,8 +2959,8 @@ u32 evtCommand_BGM_VOL_UP(void) {
 }
 
 u32 evtCommand_SE_PLAY_E(void) {
-    u64 id;
-    u64 fade;
+    s32 id;
+    s32 fade;
 
     id = scrGetIntPara(0);
     fade = scrGetIntPara(1);
@@ -2969,8 +2969,8 @@ u32 evtCommand_SE_PLAY_E(void) {
 }
 
 u32 evt_1E9168(void) {
-    u64 eventId;
-    u64 fade;
+    s32 eventId;
+    s32 fade;
 
     eventId = scrGetIntPara(0);
     fade = scrGetIntPara(1);
@@ -2979,8 +2979,8 @@ u32 evt_1E9168(void) {
 }
 
 u32 evt_1E91A8(void) {
-    u64 task;
-    u64 value;
+    s32 task;
+    s32 value;
 
     task = scrGetIntPara(0);
     value = scrGetIntPara(1);
@@ -3016,8 +3016,8 @@ s32 evt_1E9270(void)
 }
 
 u32 evt_1E9298(void) {
-    u64 task;
-    u64 value;
+    s32 task;
+    s32 value;
 
     task = scrGetIntPara(0);
     value = scrGetIntPara(1);
