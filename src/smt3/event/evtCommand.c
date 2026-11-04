@@ -4,6 +4,7 @@
 #include "kernel.h"
 #include "scr.h"
 #include "field.h"
+#include "sdfFrame.h"
 
 struct effPCPAgiraoFirePartList_t;
 extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 type, const struct effPCPAgiraoFirePartList_t *effdata);
@@ -3019,7 +3020,7 @@ u32 evt_1E92F8(void)
         dds3DrawFlag |= 0x2000000;
         return 1;
     }
-    if (scrGetCommandTimer() < scrGetIntPara(0)) {
+    if (scrGetCommandTimer() < SDF_FRAMES(scrGetIntPara(0))) {
         dds3DrawFlag |= 0x2000000;
         return 0;
     }
