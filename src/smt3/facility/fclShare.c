@@ -30,7 +30,7 @@ extern sdfGrOt_t sdfGrOtTable[85];
 
 
 extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f,
-                          void (*calc)());
+                          void (*calc)(void *));
 
 extern void fclRagTexCalcSizes();
 
@@ -413,7 +413,7 @@ void fclRagTexCalcSizes(fclRagTex_t *tex)
     tex->unk_08 = fclRagCalcTexSize(tex->unk_10, mode);
 }
 
-void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, void (*calc)())
+void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, void (*calc)(void *))
 {
     tex->unk_00 = 0;
     tex->unk_04 = a;

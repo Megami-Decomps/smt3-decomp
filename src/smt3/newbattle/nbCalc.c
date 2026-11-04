@@ -6,6 +6,8 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
+/* Unused: shifts the compiler's declaration count; nbGetHojoCounterMin only matches with it. */
+extern s32 nbCalcDeclPad;
 
 typedef struct evtUnitHandle_t
 {
