@@ -390,7 +390,7 @@ struct billHandle_t {
     f32 unk1C;
     f32 rot;  /* 0x20: radian angle used to rotate the quad corners. */
     u32 abgr;   /* 0x24: set by dds3BillboardSetRGBA */
-    void (*callback)(); /* 0x28: called by dds3BillboardDraw; set from the
+    void (*callback)(struct billHandle_t *); /* 0x28: called by dds3BillboardDraw; set from the
                           per-index table by dds3BillboardCreate */
     u16 type;         /* 0x2C: type 0/3 child, type 1 animation list */
     u16 mode; /* 0x2E: selected child packet-list pool */

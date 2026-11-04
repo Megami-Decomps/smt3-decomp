@@ -1114,7 +1114,7 @@ billHandle_t *dds3BillboardCopy(const billHandle_t *hBillboard) {
     billHandle_t *copy;
     dds3BillResource_tag *data;
     u16 sourceKind;
-    void (*sourceCallback)();
+    void (*sourceCallback)(struct billHandle_t *);
 
     if (hBillboard->type == 1) {
         copy = dds3Billboard_P2ACopy(hBillboard);
