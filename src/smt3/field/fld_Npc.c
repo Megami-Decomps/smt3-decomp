@@ -81,6 +81,8 @@ extern void dds3DeleteUnitObjectBasic(dds3Basic_t *aPtr);
 
 #include "sdk_libc.h"
 
+extern fldDanteGunState_t fldRunDanteGunFlag;
+
 extern void dds3EffectReset(void *hEffect);
 
 extern void dds3EffectSetPosition(void *pData, const sdfVector4_t *pPos);
@@ -988,7 +990,6 @@ void fldDrawInputCursor(s32 x, s32 y) {
 }
 
 extern s32 gFldElvFloorNow;
-extern s32 fldPlayerStatus[];
 extern f32 fldEADrawState;
 extern s32 fldEADrawWork;
 extern s32 D_0054EF54;
@@ -1049,7 +1050,7 @@ void fldEADraw(void) {
     if (fldGlobalBase.area != 1) {
         DrwSprite2D(offset + 0x199, offset + 0x156, 0x57, 0x5A, 0x5D, 1, 0x57, 0x5A, 0x80808080, fldUiTexture);
     }
-    if (fldGlobalBase.area != 1 && (fldPlayerStatus[0] & 0x1D)) {
+    if (fldGlobalBase.area != 1 && (fldRunDanteGunFlag.word50 & 0x1D)) {
         DrwSprite2D(offset + 0x1DA, offset + 0x197, 0x14, 0x15, 0x19, 0x47, 0x14, 0x15, 0x80808080, fldUiTexture);
     }
     if (fldGlobalBase.area == 11 || fldGlobalBase.area == 14) {

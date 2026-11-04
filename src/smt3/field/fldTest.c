@@ -72,6 +72,8 @@ extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
 #include "sdk_libc.h"
 
+extern fldDanteGunState_t fldRunDanteGunFlag;
+
 extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 
 extern void dds3ObjectBaseOffFlag(dds3Basic_t *pObjectBasic, u32 flag);
@@ -112,7 +114,6 @@ extern void fldSkyDrawFilter(void);
 
 extern void fldDrawFrameSprite(void);
 
-extern u32 fldDbg_BlurOn[];
 
 extern u32 dds3AllocObjectId(void);
 
@@ -362,7 +363,7 @@ s32 ooyTestDrawProc(dds3ProcessID_t *aProcId)
     rsetTest(1, 0, 0x81, 3, 0, 0, 1, 1);
     rsetAlpha(0);
     fldSkyDrawFilter();
-    if (fldDbg_BlurOn[0] != 0) {
+    if (fldRunDanteGunFlag.word24 != 0) {
         if (fldAutoMapChkMode() == 0) {
             rsetOtOfs(0x47);
         } else {
@@ -2377,7 +2378,6 @@ void fldRunDantePatr(void)
     }
 }
 
-extern fldDanteGunState_t fldRunDanteGunFlag;
 extern dds3Basic_t *D_0054EAF0;
 extern s32 fldPlayerStepDist;
 extern u32 dds3GetRandA(void *name);

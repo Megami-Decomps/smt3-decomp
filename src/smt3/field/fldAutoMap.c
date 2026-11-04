@@ -117,6 +117,8 @@ extern s32 fldNpcCamTarget;
 
 #include "sdk_libc.h"
 
+extern fldDanteGunState_t fldRunDanteGunFlag;
+
 /* BUG: retail prints a u64 with %lx, which is right where long is 64 bits and
  * reads half of it where long is 32. %llx is right on both. */
 #ifdef FIX_BUGS
@@ -256,7 +258,6 @@ extern void sdfModelRootFree(void *aRoot, s32 aReleaseNodes, s32 aReleaseMatList
 
 extern s32 sdfDelayedResrcCheck(void);
 
-extern s32 fldDrawFlag[];
 
 extern s8 dds3PadButtonState[64];
 
@@ -895,7 +896,7 @@ extern s32 frDrawFont(struct frFontHandle_t *font);
 extern s32 frDrawFontEx(struct frFontHandle_t *font, s8 mode);
 extern struct frFontHandle_t *D_00551CA0;
 extern const char D_005321C0[];
-extern s32 fldWmapMode, gFldNowDZone;
+extern s32 gFldNowDZone;
 extern s32 fldAutoMapDrawState, fldAutoMapDrawY;
 extern f32 fldAutoMapDrawX, fldCamPitch;
 extern s32 D_0054EE78, D_0054EE7C, D_0054EE90;
@@ -973,7 +974,7 @@ void fldAutoMapDrawOneArea(void)
     s32 textX;
     const char *text;
 
-    if (fldWmapMode != 0) {
+    if (fldRunDanteGunFlag.counter != 0) {
         s32 showAll = fldAutoMapBBox;
         if ((dds3PadButtonState[0x29] != 0 && dds3PadButtonState[0x2B] < 0) ||
             (dds3PadButtonState[0x2B] != 0 && dds3PadButtonState[0x29] < 0)) {
@@ -1502,7 +1503,6 @@ u32 fldAutoMapChkMode(void) {
 }
 
 /* These are the existing native .data flag and camera/vector records. */
-extern s32 fldAutoMapEnable __attribute__((section(".data")));
 extern u8 dds3PadStickStatusState[2][2];
 extern sdfVector4_t D_00532240;
 extern sdfVector4_t aViewEye;
@@ -1523,7 +1523,7 @@ void fldAutoMapCalc(void) {
     if (fldAutoMapChkMode() == 0) {
         return;
     }
-    if (fldAutoMapEnable != 0) {
+    if (fldRunDanteGunFlag.unk58 != 0) {
         if ((s8)dds3PadButtonState[0x22] != 0) {
             closeRequested = 1;
         }
@@ -1975,7 +1975,7 @@ void fldAutoMapDraw(void) {
     }
     fldAutoMapDrawWindow();
     fldAutoMapDrawOneArea();
-    if (fldDrawFlag[0] == 0) {
+    if (fldRunDanteGunFlag.word20 == 0) {
         return;
     }
     if (dds3PadButtonState[0x2B] == 0) {

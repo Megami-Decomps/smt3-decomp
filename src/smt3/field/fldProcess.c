@@ -324,9 +324,7 @@ void fldRegistUnitPad(void);
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern sdfVector4_t D_002FC490;
-extern s32 fldPlayerStatus[];
 extern s32 fldPlayerStepDist;
-extern s32 fldSequenceMode;
 extern s32 fldEncountCheckWork;
 extern s32 fldEncountSagasiFlag;
 extern u32 D_0054EB94;
@@ -394,7 +392,7 @@ s32 ProcRandomEncountCheck(void)
     specialFloor = (fldGlobalBase.area == 42 && (fldGlobalBase.floor == 13 || fldGlobalBase.floor == 25)) ||
                    (fldGlobalBase.area == 44 && (fldGlobalBase.floor == 2 || fldGlobalBase.floor == 4 || fldGlobalBase.floor == 24));
     if (specialFloor) {
-        if (fldSequenceMode != 0) {
+        if (fldRunDanteGunFlag.word5C != 0) {
             fldGlobalBase.floatB4 += distance;
             if (fldGlobalBase.floatB4 > 450.0f) {
                 fldEncountClearFlag(0x40);
@@ -404,10 +402,10 @@ s32 ProcRandomEncountCheck(void)
                 return 0;
             }
         }
-    } else if (fldGlobalBase.wordB0 != 0 || (fldPlayerStatus[0] & 1)) {
+    } else if (fldGlobalBase.wordB0 != 0 || (fldRunDanteGunFlag.word50 & 1)) {
         damageDistance = 450.0f;
         fldGlobalBase.floatB4 += distance;
-        if (fldGlobalBase.wordB0 == 0 && (fldPlayerStatus[0] & 1)) damageDistance = 1000.0f;
+        if (fldGlobalBase.wordB0 == 0 && (fldRunDanteGunFlag.word50 & 1)) damageDistance = 1000.0f;
         if (damageDistance < fldGlobalBase.floatB4) {
             if (fldGlobalBase.wordB0 != 0) {
                 if (DDS3_GBWK->maFlags & 4) {
@@ -953,8 +951,6 @@ s32 ProcSequence(dds3ProcessID_t *id)
 }
 
 
-extern s32 fldDrawFlag[];
-extern u32 fldDbg_ExBlurOn[];
 extern s32 nbGetEncountOn(void);
 extern void fldDbgPrint2D(s32 x, s32 y, const char *text);
 extern void fldNpcDraw(void);
@@ -992,7 +988,7 @@ s32 ProcDraw(dds3ProcessID_t *id)
     if (dds3AdminiGetNextSequence() != -1) return 0;
     status = fldLoadNextGetStatus();
     if (status == 1) {
-        if (fldDrawFlag[0] == status) fldDbgPrint2D(0x40, 0xC0, "NowLoading...");
+        if (fldRunDanteGunFlag.word20 == status) fldDbgPrint2D(0x40, 0xC0, "NowLoading...");
         if (controller->stage == 0) return 0;
     }
     if (nbGetEncountOn() != 0 || fmProcessChk() != 0 ||
@@ -1002,7 +998,7 @@ s32 ProcDraw(dds3ProcessID_t *id)
     fldAutoMapDraw();
     fldSnowTask();
     fldElvDrawFloorNum();
-    if (controller->stage < 2 || fldDbg_ExBlurOn[0] == 0 || nbGetEncountOn() != 0) return 0;
+    if (controller->stage < 2 || fldRunDanteGunFlag.word28 == 0 || nbGetEncountOn() != 0) return 0;
 
     if (fldGlobalBase.area == 0x12 || fldGlobalBase.area == 0x1C || fldGlobalBase.area == 0x1E)
         DRAW_FIELD_BLUR(0x3C8080AA, 0x44, 0.02f, 0.986f);
