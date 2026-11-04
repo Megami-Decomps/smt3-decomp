@@ -6,6 +6,7 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "font.h"
+#include "sdfFrame.h"
 
 typedef struct evtUnitHandle_t
 {
@@ -367,7 +368,7 @@ void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color)
         }
         break;
     }
-    w->time = time;
+    w->time = SDF_FRAMES(time);
     w->type = type;
     w->text3 = 0;
 }

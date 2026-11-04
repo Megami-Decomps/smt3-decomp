@@ -5,6 +5,7 @@
 #include "event.h"
 #include "ps2asm.h"
 #include "fpu.h"
+#include "sdfFrame.h"
 
 
 
@@ -281,8 +282,8 @@ nbKoukaPacket_t *nbAddKoukaPacket(nbKoukaProcessData_t *k, s32 startframe, s32 f
 {
     nbKoukaPacket_t *p = sdfChipAllocDirect(sizeof(nbKoukaPacket_t));
 
-    p->startframe = startframe;
-    p->framelength = framelength;
+    p->startframe = SDF_FRAMES(startframe);
+    p->framelength = SDF_FRAMES(framelength);
     p->uniqueid = uniqueid;
     p->partyno = -1;
     p->type = 0;
@@ -507,7 +508,7 @@ s32 nbCheckSePacket(s32 start, s32 se, s32 frame)
     nbKoukaPacket_t *p = work->first;
 
     while (p != NULL) {
-        if (start >= p->startframe && start - frame < p->startframe) {
+        if (SDF_FRAMES(start) >= p->startframe && SDF_FRAMES(start) - SDF_FRAMES(frame) < p->startframe) {
             if (p->type == SE) {
                 goto check;
             }
@@ -1069,8 +1070,8 @@ void nbClipKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     case 3: color = 0x80808020; break;
     case 5: color = 0x80308030; color2 = 0x80808020; break;
     }
-    if (p->time >= 16 && p->framelength < 7) {
-        alpha = (u32)(p->framelength * 21) << 24;
+    if (p->time >= SDF_FRAMES(16) && p->framelength < SDF_FRAMES(7)) {
+        alpha = (u32)SDF_FRAME_STEP(p->framelength * 21) << 24;
         color = (color & 0xFFFFFF) | alpha;
         color2 = (color2 & 0xFFFFFF) | alpha;
     }
@@ -1085,14 +1086,14 @@ void nbClipKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         case 2:
         case 3:
             nbDrawKoukaSprite(k->data->pnltex[2], p->data2.i, screen[0],
-                              screen[1] - p->time * 4, color, 0);
+                              screen[1] - SDF_FRAME_STEP(p->time * 4), color, 0);
             break;
         case 4:
         case 5:
             nbDrawKoukaSprite(k->data->pnltex[2], p->data2.i, screen[0],
-                              screen[1] - ((u32)(p->time + 12) << 2), color, -1);
+                              screen[1] - ((u32)(SDF_FRAME_STEP(p->time) + 12) << 2), color, -1);
             nbDrawKoukaSprite(k->data->pnltex[2], p->partyno, screen[0],
-                              screen[1] - p->time * 4, color2, 1);
+                              screen[1] - SDF_FRAME_STEP(p->time * 4), color2, 1);
             break;
         }
     }
@@ -1134,9 +1135,9 @@ void nbDrawKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     color = 0x80808080;
     if (p->data1.i < 5) {
         if (p->data1.i > 0) {
-            if (p->time >= 16) {
-                if (p->framelength < 7) {
-                    color = ((u32)(p->framelength * 21) << 24) | 0x808080;
+            if (p->time >= SDF_FRAMES(16)) {
+                if (p->framelength < SDF_FRAMES(7)) {
+                    color = ((u32)SDF_FRAME_STEP(p->framelength * 21) << 24) | 0x808080;
                 }
             }
         }
@@ -1154,19 +1155,19 @@ void nbDrawKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
                 20, 38, 235, 89, 20, 38, color, k->data->pnltex[2]);
             break;
         case 2:
-            nbPnlSprite((screen[0] >> 4) - 36, ((screen[1] - (p->time << 2)) >> 3) - 19,
+            nbPnlSprite((screen[0] >> 4) - 36, ((screen[1] - ((s32)SDF_FRAME_STEP(p->time) << 2)) >> 3) - 19,
                 72, 19, 159, 1, 72, 19, color, k->data->pnltex[3]);
             break;
         case 1:
-            nbPnlSprite((screen[0] >> 4) - 44, ((screen[1] - (p->time << 2)) >> 3) - 18,
+            nbPnlSprite((screen[0] >> 4) - 44, ((screen[1] - ((s32)SDF_FRAME_STEP(p->time) << 2)) >> 3) - 18,
                 88, 18, 1, 25, 88, 18, color, k->data->pnltex[3]);
             break;
         case 3:
-            nbPnlSprite((screen[0] >> 4) - 21, ((screen[1] - (p->time << 2)) >> 3) - 18,
+            nbPnlSprite((screen[0] >> 4) - 21, ((screen[1] - ((s32)SDF_FRAME_STEP(p->time) << 2)) >> 3) - 18,
                 42, 18, 1, 1, 42, 18, color, k->data->pnltex[3]);
             break;
         case 4:
-            nbPnlSprite((screen[0] >> 4) - 28, ((screen[1] - (p->time << 2)) >> 3) - 17,
+            nbPnlSprite((screen[0] >> 4) - 28, ((screen[1] - ((s32)SDF_FRAME_STEP(p->time) << 2)) >> 3) - 17,
                 56, 17, 101, 1, 56, 17, color, k->data->pnltex[3]);
             break;
         }

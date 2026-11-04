@@ -8,6 +8,7 @@
 #include "newdata.h"
 #include "event.h"
 #include "effect.h"
+#include "sdfFrame.h"
 
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
@@ -893,8 +894,8 @@ nbKoukaPacket_t *nbAddNumEffKoukaPacket(s32 startframe, s32 frame, s32 uniqueid,
     while (p != NULL) {
         next = p->next;
         if (p->type == 16 && p->uniqueid == uniqueid && p->form == form &&
-            startframe < p->startframe + p->framelength) {
-            p->framelength = startframe - p->startframe;
+            SDF_FRAMES(startframe) < p->startframe + p->framelength) {
+            p->framelength = SDF_FRAMES(startframe) - p->startframe;
             if (p->framelength < 0) {
                 p->framelength = 0;
             }
@@ -922,8 +923,8 @@ nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame, saddr_t uniq
     while (p != NULL) {
         next = p->next;
         if (p->type == 22 && p->uniqueid == uniqueid && p->form == form &&
-            startframe < p->startframe + p->framelength) {
-            p->framelength = startframe - p->startframe;
+            SDF_FRAMES(startframe) < p->startframe + p->framelength) {
+            p->framelength = SDF_FRAMES(startframe) - p->startframe;
             if (p->framelength < 0) {
                 p->framelength = 0;
             }

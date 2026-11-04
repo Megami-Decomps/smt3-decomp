@@ -6,6 +6,7 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "font.h"
+#include "sdfFrame.h"
 
 typedef struct evtUnitHandle_t
 {
@@ -2209,7 +2210,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
     switch (nbPanelPT_1_Process) {
     case 1:
         nbPnl_rsetAlpha(1);
-        rate = (f32)nbPanelPT_1_Frame / 14.0f;
+        rate = (f32)nbPanelPT_1_Frame / SDF_FRAMES_F(14.0f);
         alpha = (u32)(rate * 32.0f) << 24;
         nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[2].x + (nbPanelPTPartList[2].w >> 1),
                                 nbPanelPTPartList[2].y + (nbPanelPTPartList[2].h >> 1),
@@ -2217,7 +2218,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                                 nbPanelPTPartList[2].h + (s32)(((f32)nbPanelPTPartList[5].h - (f32)nbPanelPTPartList[2].h) * rate),
                                 flashColor | alpha, flashColor);
         frame = nbPanelPT_1_Frame + 1;
-        if (frame >= 14) {
+        if (frame >= SDF_FRAMES(14)) {
             nbPanelPT_1_Frame = 0;
             nbPanelPT_1_Process = 2;
         } else {
@@ -2230,7 +2231,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                                 nbPanelPTPartList[2].y + (nbPanelPTPartList[2].h >> 1),
                                 nbPanelPTPartList[5].w, nbPanelPTPartList[5].h, flashColor | 0x20000000, flashColor);
         frame = nbPanelPT_1_Frame + 1;
-        if (frame >= 20) {
+        if (frame >= SDF_FRAMES(20)) {
             nbPanelPT_1_Frame = 0;
             nbPanelPT_1_Process = 3;
         } else {
@@ -2239,7 +2240,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
         break;
     case 3:
         nbPnl_rsetAlpha(1);
-        rate = 1.0f - (f32)nbPanelPT_1_Frame / 20.0f;
+        rate = 1.0f - (f32)nbPanelPT_1_Frame / SDF_FRAMES_F(20.0f);
         alpha = (u32)(rate * 32.0f) << 24;
         rate = 1.0f - rate;
         nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[2].x + (nbPanelPTPartList[2].w >> 1),
@@ -2248,7 +2249,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                                 nbPanelPTPartList[5].h + (s32)(((f32)nbPanelPTPartList[8].h - (f32)nbPanelPTPartList[5].h) * rate),
                                 flashColor | alpha, flashColor);
         frame = nbPanelPT_1_Frame + 1;
-        if (frame >= 20) {
+        if (frame >= SDF_FRAMES(20)) {
             nbPanelPT_1_Frame = 0;
             nbPanelPT_1_Process = 4;
         } else {
@@ -2262,12 +2263,12 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
     switch (nbPanelPT_2_Process) {
     case 1:
         nbPnl_rsetAlpha(1);
-        alpha = (u32)(((f32)nbPanelPT_2_Frame / 6.0f) * 128.0f) << 24;
+        alpha = (u32)(((f32)nbPanelPT_2_Frame / SDF_FRAMES_F(6.0f)) * 128.0f) << 24;
         nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[3].x + (nbPanelPTPartList[3].w >> 1),
                                 nbPanelPTPartList[3].y + (nbPanelPTPartList[3].h >> 1),
                                 nbPanelPTPartList[3].w, nbPanelPTPartList[3].h, color | alpha, flashColor);
         frame = nbPanelPT_2_Frame + 1;
-        if (frame >= 6) {
+        if (frame >= SDF_FRAMES(6)) {
             nbPanelPT_2_Frame = 0;
             nbPanelPT_2_Process = 2;
         } else {
@@ -2280,7 +2281,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                                 nbPanelPTPartList[3].y + (nbPanelPTPartList[3].h >> 1),
                                 nbPanelPTPartList[3].w, nbPanelPTPartList[3].h, color | 0x80000000, flashColor);
         frame = nbPanelPT_2_Frame + 1;
-        if (frame >= 6) {
+        if (frame >= SDF_FRAMES(6)) {
             value = D_0054E5C4;
             nbPanelPT_2_Process = 3;
             nbPanelPT_2_Rate = value;
@@ -2293,7 +2294,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
         nbPnl_rsetAlpha(1);
         rate = nbPanelPT_2_Rate;
         value = rate * D_0054E5C8;
-        rate = ((f32)nbPanelPT_2_Frame / 10.0f) * rate;
+        rate = ((f32)nbPanelPT_2_Frame / SDF_FRAMES_F(10.0f)) * rate;
         nbPanelPT_2_Rate = value > 1.0f ? 1.0f : value;
         nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[3].x + (nbPanelPTPartList[3].w >> 1),
                                 nbPanelPTPartList[3].y + (nbPanelPTPartList[3].h >> 1),
@@ -2301,7 +2302,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                                 nbPanelPTPartList[3].h + (s32)(((f32)nbPanelPTPartList[6].h - (f32)nbPanelPTPartList[3].h) * rate),
                                 color | 0x80000000, flashColor);
         frame = nbPanelPT_2_Frame + 1;
-        if (frame >= 10) {
+        if (frame >= SDF_FRAMES(10)) {
             nbPanelPT_2_Frame = 0;
             nbPanelPT_2_Process = 4;
         } else {
@@ -2310,7 +2311,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
         break;
     case 4:
         nbPnl_rsetAlpha(1);
-        rate = 1.0f - (f32)nbPanelPT_2_Frame / 33.0f;
+        rate = 1.0f - (f32)nbPanelPT_2_Frame / SDF_FRAMES_F(33.0f);
         alpha = (u32)(rate * 128.0f) << 24;
         rate = 1.0f - rate;
         nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[3].x + (nbPanelPTPartList[3].w >> 1),
@@ -2319,7 +2320,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                                 nbPanelPTPartList[6].h + (s32)(((f32)nbPanelPTPartList[9].h - (f32)nbPanelPTPartList[6].h) * rate),
                                 color | alpha, flashColor);
         frame = nbPanelPT_2_Frame + 1;
-        if (frame >= 33) {
+        if (frame >= SDF_FRAMES(33)) {
             nbPanelPT_2_Frame = 0;
             nbPanelPT_2_Process = 5;
         } else {
@@ -2334,7 +2335,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
     case 1:
         nbPnl_rsetAlpha(1);
         value = nbPanelPT_3_Rate * D_0054E5CC;
-        rate = (f32)nbPanelPT_3_Frame / 20.0f;
+        rate = (f32)nbPanelPT_3_Frame / SDF_FRAMES_F(20.0f);
         nbPanelPT_3_Rate = value > 1.0f ? 1.0f : value;
         alpha = (u32)(rate * 64.0f) << 24;
         nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[4].x + (nbPanelPTPartList[4].w >> 1),
@@ -2343,7 +2344,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                                 nbPanelPTPartList[4].h + (s32)(((f32)nbPanelPTPartList[7].h - (f32)nbPanelPTPartList[4].h) * rate),
                                 flashColor | alpha, flashColor);
         frame = nbPanelPT_3_Frame + 1;
-        if (frame >= 20) {
+        if (frame >= SDF_FRAMES(20)) {
             nbPanelPT_3_Frame = 0;
             nbPanelPT_3_Process = 2;
         } else {
@@ -2352,7 +2353,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
         break;
     case 2:
         nbPnl_rsetAlpha(1);
-        rate = 1.0f - (f32)nbPanelPT_3_Frame / 20.0f;
+        rate = 1.0f - (f32)nbPanelPT_3_Frame / SDF_FRAMES_F(20.0f);
         alpha = (u32)(rate * 64.0f) << 24;
         rate = 1.0f - rate;
         nbPanelPolygonFlashDraw(0, 0x57, nbPanelPTPartList[4].x + (nbPanelPTPartList[4].w >> 1),
@@ -2361,7 +2362,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                                 nbPanelPTPartList[7].h + (s32)(((f32)nbPanelPTPartList[10].h - (f32)nbPanelPTPartList[7].h) * rate),
                                 flashColor | alpha, flashColor);
         frame = nbPanelPT_3_Frame + 1;
-        if (frame >= 20) {
+        if (frame >= SDF_FRAMES(20)) {
             nbPanelPT_3_Frame = 0;
             nbPanelPT_3_Process = 3;
         } else {
@@ -3711,7 +3712,7 @@ void nbPanelPartyDraw(void)
                         ((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->hp;
                 }
             } else {
-                nbPnlWork[i].HpAnmCnt = 8;
+                nbPnlWork[i].HpAnmCnt = SDF_FRAMES(8);
             }
             if (nbPnlWork[i].OldMp == -1) {
                 nbPnlWork[i].OldMp =
@@ -3726,7 +3727,7 @@ void nbPanelPartyDraw(void)
             } else {
                 if (((datUnitWork_t *)&DDS3_GBWK->akuma[si].flag)->mp <
                     nbPnlWork[i].OldMp) {
-                    nbPnlWork[i].MpAnmCnt = 8;
+                    nbPnlWork[i].MpAnmCnt = SDF_FRAMES(8);
                 }
             }
             nbPanelDrawPP1(x, yy, i, statindex[i], jun[i], nbPnlWork[i].ActiveMode, data);
@@ -3903,7 +3904,7 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
         break;
     case 1:
         nbPnl_rsetAlpha(1);
-        rate = (f32)pFlash->PT_1_Frame / 7.0f;
+        rate = (f32)pFlash->PT_1_Frame / SDF_FRAMES_F(7.0f);
         color = nbPanelFlashRGBAMulti(color0 | ((u32)(rate * 32.0f) << 24), abgrBase);
         nbPanelPolygonFlashDraw(x, y, nbPanelPTPartList[2].x + (nbPanelPTPartList[2].w >> 1),
                                 nbPanelPTPartList[2].y + (nbPanelPTPartList[2].h >> 1),
@@ -3912,7 +3913,7 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
                                 (s32)((nbPanelPTPartList[2].h +
                                        (s32)(((f32)nbPanelPTPartList[5].h - (f32)nbPanelPTPartList[2].h) * rate)) * scaleY),
                                 color, color0);
-        if (++pFlash->PT_1_Frame >= 7) {
+        if (++pFlash->PT_1_Frame >= SDF_FRAMES(7)) {
             pFlash->PT_1_Frame = 0;
             pFlash->PT_1_Process = 2;
         }
@@ -3924,14 +3925,14 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
                                 nbPanelPTPartList[2].y + (nbPanelPTPartList[2].h >> 1),
                                 (s32)(nbPanelPTPartList[5].w * scaleX), (s32)(nbPanelPTPartList[5].h * scaleY),
                                 color, color0);
-        if (++pFlash->PT_1_Frame >= 10) {
+        if (++pFlash->PT_1_Frame >= SDF_FRAMES(10)) {
             pFlash->PT_1_Frame = 0;
             pFlash->PT_1_Process = 3;
         }
         break;
     case 3:
         nbPnl_rsetAlpha(1);
-        rate = 1.0f - (f32)pFlash->PT_1_Frame / 15.0f;
+        rate = 1.0f - (f32)pFlash->PT_1_Frame / SDF_FRAMES_F(15.0f);
         color = nbPanelFlashRGBAMulti(color0 | ((u32)(rate * 32.0f) << 24), abgrBase);
         rate = 1.0f - rate;
         nbPanelPolygonFlashDraw(x, y, nbPanelPTPartList[2].x + (nbPanelPTPartList[2].w >> 1),
@@ -3941,7 +3942,7 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
                                 (s32)((nbPanelPTPartList[5].h +
                                        (s32)(((f32)nbPanelPTPartList[8].h - (f32)nbPanelPTPartList[5].h) * rate)) * scaleY),
                                 color, color0);
-        if (++pFlash->PT_1_Frame >= 15) {
+        if (++pFlash->PT_1_Frame >= SDF_FRAMES(15)) {
             pFlash->PT_1_Frame = 0;
             pFlash->PT_1_Process = 4;
         }
@@ -3959,13 +3960,13 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
         break;
     case 1:
         nbPnl_rsetAlpha(1);
-        rate = (f32)pFlash->PT_2_Frame / 3.0f;
+        rate = (f32)pFlash->PT_2_Frame / SDF_FRAMES_F(3.0f);
         color = nbPanelFlashRGBAMulti(color1 | ((u32)(rate * 128.0f) << 24), abgrBase);
         nbPanelPolygonFlashDraw(x, y, nbPanelPTPartList[3].x + (nbPanelPTPartList[3].w >> 1),
                                 nbPanelPTPartList[3].y + (nbPanelPTPartList[3].h >> 1),
                                 (s32)(nbPanelPTPartList[3].w * scaleX), (s32)(nbPanelPTPartList[3].h * scaleY),
                                 color, color0);
-        if (++pFlash->PT_2_Frame >= 3) {
+        if (++pFlash->PT_2_Frame >= SDF_FRAMES(3)) {
             pFlash->PT_2_Frame = 0;
             pFlash->PT_2_Process = 2;
         }
@@ -3977,7 +3978,7 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
                                 nbPanelPTPartList[3].y + (nbPanelPTPartList[3].h >> 1),
                                 (s32)(nbPanelPTPartList[3].w * scaleX), (s32)(nbPanelPTPartList[3].h * scaleY),
                                 color, color0);
-        if (++pFlash->PT_2_Frame >= 3) {
+        if (++pFlash->PT_2_Frame >= SDF_FRAMES(3)) {
             pFlash->PT_2_Frame = 0;
             pFlash->PT_2_Process = 3;
             pFlash->PT_2_Rate = 0.1f;
@@ -3985,7 +3986,7 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
         break;
     case 3:
         nbPnl_rsetAlpha(1);
-        rate = (f32)pFlash->PT_2_Frame / 5.0f;
+        rate = (f32)pFlash->PT_2_Frame / SDF_FRAMES_F(5.0f);
         rate *= pFlash->PT_2_Rate;
         pFlash->PT_2_Rate *= 1.35f;
         if (pFlash->PT_2_Rate > 1.0f) {
@@ -3999,14 +4000,14 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
                                 (s32)((nbPanelPTPartList[3].h +
                                        (s32)(((f32)nbPanelPTPartList[6].h - (f32)nbPanelPTPartList[3].h) * rate)) * scaleY),
                                 color, color0);
-        if (++pFlash->PT_2_Frame >= 5) {
+        if (++pFlash->PT_2_Frame >= SDF_FRAMES(5)) {
             pFlash->PT_2_Frame = 0;
             pFlash->PT_2_Process = 4;
         }
         break;
     case 4:
         nbPnl_rsetAlpha(1);
-        rate = 1.0f - (f32)pFlash->PT_2_Frame / 23.0f;
+        rate = 1.0f - (f32)pFlash->PT_2_Frame / SDF_FRAMES_F(23.0f);
         color = nbPanelFlashRGBAMulti(color1 | ((u32)(rate * 128.0f) << 24), abgrBase);
         rate = 1.0f - rate;
         nbPanelPolygonFlashDraw(x, y, nbPanelPTPartList[3].x + (nbPanelPTPartList[3].w >> 1),
@@ -4016,7 +4017,7 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
                                 (s32)((nbPanelPTPartList[6].h +
                                        (s32)(((f32)nbPanelPTPartList[9].h - (f32)nbPanelPTPartList[6].h) * rate)) * scaleY),
                                 color, color0);
-        if (++pFlash->PT_2_Frame >= 23) {
+        if (++pFlash->PT_2_Frame >= SDF_FRAMES(23)) {
             pFlash->PT_2_Frame = 0;
             pFlash->PT_2_Process = 5;
         }
@@ -4034,7 +4035,7 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
         break;
     case 1:
         nbPnl_rsetAlpha(1);
-        rate = (f32)pFlash->PT_3_Frame / 10.0f;
+        rate = (f32)pFlash->PT_3_Frame / SDF_FRAMES_F(10.0f);
         pFlash->PT_3_Rate *= 1.35f;
         if (pFlash->PT_3_Rate > 1.0f) {
             pFlash->PT_3_Rate = 1.0f;
@@ -4047,14 +4048,14 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
                                 (s32)((nbPanelPTPartList[4].h +
                                        (s32)(((f32)nbPanelPTPartList[7].h - (f32)nbPanelPTPartList[4].h) * rate)) * scaleY),
                                 color, color0);
-        if (++pFlash->PT_3_Frame >= 10) {
+        if (++pFlash->PT_3_Frame >= SDF_FRAMES(10)) {
             pFlash->PT_3_Frame = 0;
             pFlash->PT_3_Process = 2;
         }
         break;
     case 2:
         nbPnl_rsetAlpha(1);
-        rate = 1.0f - (f32)pFlash->PT_3_Frame / 15.0f;
+        rate = 1.0f - (f32)pFlash->PT_3_Frame / SDF_FRAMES_F(15.0f);
         color = nbPanelFlashRGBAMulti(color0 | ((u32)(rate * 96.0f) << 24), abgrBase);
         rate = 1.0f - rate;
         nbPanelPolygonFlashDraw(x, y, nbPanelPTPartList[4].x + (nbPanelPTPartList[4].w >> 1),
@@ -4064,7 +4065,7 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
                                 (s32)((nbPanelPTPartList[7].h +
                                        (s32)(((f32)nbPanelPTPartList[10].h - (f32)nbPanelPTPartList[7].h) * rate)) * scaleY),
                                 color, color0);
-        if (++pFlash->PT_3_Frame >= 15) {
+        if (++pFlash->PT_3_Frame >= SDF_FRAMES(15)) {
             pFlash->PT_3_Frame = 0;
             pFlash->PT_3_Process = 3;
         }

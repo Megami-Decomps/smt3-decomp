@@ -2,6 +2,7 @@
 #include "newbattle.h"
 #include "kernel.h"
 #include "nb.h"
+#include "sdfFrame.h"
 
 
 
@@ -69,7 +70,7 @@ void nbSetTarSelStat(s32 stat)
 
 void nbSetTarSelJyokyoTime(s32 time)
 {
-    GetTarSelProcessData()->statusTime = time;
+    GetTarSelProcessData()->statusTime = SDF_FRAMES(time);
 }
 
 #ifdef NON_MATCHING
