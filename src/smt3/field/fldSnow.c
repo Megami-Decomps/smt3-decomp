@@ -409,6 +409,7 @@ void fldSnowTask(void)
                 fldInitSnowSeed(x, gFldSnowY, z);
             }
         }
+    }
     rsetOtOfs(0x2C);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 2);
     rsetAlpha(1);
