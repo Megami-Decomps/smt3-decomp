@@ -1,6 +1,7 @@
 #include "common.h"
 #include "effPCPData.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 
 /* One needle instance: position plus the colour the draw loop stamps. */
@@ -178,7 +179,7 @@ effPCPNeedleSpiral_tag *effPCPNeedleSpiralCreate(effPCPNeedleSpiralParam_t *pPar
     dds3TrackPolyVCSet(EE_ADDR(work->hTrackPoly), 1, work->param.t_abgr, work->param.t_abgr);
     dds3TrackPolySetMode(work->hTrackPoly, (u16)work->param.mode);
     count = work->number;
-    delayRange = pParam->timing;
+    delayRange = SDF_FRAMES(pParam->timing);
     slot = work->pPart;
     if (delayRange == 0) delayRange = 1;
     radiusBase = work->param.radius;
@@ -271,10 +272,10 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
     slot = hData->pPart;
     speed = hData->param.speed;
     acceleration = hData->param.accele;
-    duration = hData->param.life;
-    fadeIn = hData->param.fade_in;
-    fadeOut = hData->param.fade_out;
-    angleStep = hData->param.roll_s;
+    duration = SDF_FRAMES(hData->param.life);
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeOut = SDF_FRAMES(hData->param.fade_out);
+    angleStep = SDF_FRAME_STEP(hData->param.roll_s);
     baseColor = hData->abgr;
     if (count != 0) {
         do {
@@ -311,11 +312,11 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
                 SDF_VU0_STOREVECTOR_NOMEM(position);
 
                 {
-                    f32 elapsed = (f32)slot->frame;
+                    f32 elapsed = SDF_FRAME_STEP((f32)slot->frame);
                     f32 halfAcceleration = acceleration * 0.5f;
                     f32 distance = speed * elapsed + halfAcceleration * elapsed * elapsed;
 
-                    elapsed = (f32)duration;
+                    elapsed = SDF_FRAME_STEP((f32)duration);
                     distance -= speed * elapsed + halfAcceleration * elapsed * elapsed;
                     position[0] += axis[0] * distance;
                     position[1] += axis[1] * distance;
