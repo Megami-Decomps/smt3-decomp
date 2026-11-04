@@ -11,6 +11,7 @@
 #include "effThunder.h"
 #include "ps2asm.h"
 #include "draw3d.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -1509,7 +1510,7 @@ void effBTLSys_Stone_Dead_Draw(effBattleSystem_effBTLSystem_Stone_Dead_tag *hDat
     dds3EffectPartSetPosition(hData->hPart, &position);
     dds3EffectPartDraw(hData->hPart3);
     dds3EffectPartDraw(hData->hPart2);
-    if (hData->frame >= 2) {
+    if (hData->frame >= SDF_FRAMES(2)) {
         dds3EffectPartDraw(hData->hPart);
     }
     hData->frame++;
@@ -1606,8 +1607,8 @@ void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work)
     initial.lights[1] = NULL;
     initial.lights[2] = NULL;
     lights = initial;
-    if (frame >= 3) {
-        if (frame == 3) {
+    if (frame >= SDF_FRAMES(3)) {
+        if (frame == SDF_FRAMES(3)) {
             s32 skill = effBTLSkillGetID();
             if (datSkillTable.normal[skill].koukatype == 0) {
                 pointLight.ambient = 0x80231E1E;
@@ -1794,7 +1795,7 @@ void effBTLSys_Kyusyuu_Draw(effBattleSystem_effBTLSystem_Kyusyuu_tag *hData) {
     dds3EffectPartDraw(hData->hPart);
 
     frame = hData->frame;
-    if (frame >= 4) {
+    if (frame >= SDF_FRAMES(4)) {
         aim.scaleKind = 0;
         aim.aimMode = 4;
         aim.directionMode = 9;
@@ -1807,7 +1808,7 @@ void effBTLSys_Kyusyuu_Draw(effBattleSystem_effBTLSystem_Kyusyuu_tag *hData) {
         dds3EffectPartDraw(hData->hPart2);
         frame = hData->frame;
     }
-    if (frame >= 8) {
+    if (frame >= SDF_FRAMES(8)) {
         aim.scaleKind = 0;
         aim.aimMode = 4;
         aim.directionMode = 9;
@@ -2071,7 +2072,7 @@ void effBTLSys_Attack_Draw(effBattleSystem_effBTLSystem_Attack_tag *hData) {
     dds3EffectPartSetDirection(hData->hPart5, &direction);
     dds3EffectPartDraw(hData->hPart5);
 
-    if (hData->frame >= 2) {
+    if (hData->frame >= SDF_FRAMES(2)) {
         aim.scaleKind = 0;
         aim.aimMode = 1;
         aim.directionMode = 8;
@@ -2282,7 +2283,7 @@ void effBTLSys_AttackC_Draw(effBattleSystem_effBTLSystem_AttackC_tag *hData) {
     dds3EffectPartSetDirection(hData->hPart5, &direction);
     dds3EffectPartDraw(hData->hPart5);
 
-    if (hData->frame >= 2) {
+    if (hData->frame >= SDF_FRAMES(2)) {
         aim.scaleKind = 0;
         aim.aimMode = 1;
         aim.directionMode = 8;
@@ -2327,7 +2328,7 @@ void effBTLSys_AttackC_Draw(effBattleSystem_effBTLSystem_AttackC_tag *hData) {
     dds3EffectPartSetDirection(hData->hPart9, &direction);
     dds3EffectPartDraw(hData->hPart9);
 
-    if (hData->frame >= 3) {
+    if (hData->frame >= SDF_FRAMES(3)) {
         aim.scaleKind = 0;
         aim.aimMode = 1;
         aim.directionMode = 9;
@@ -2340,7 +2341,7 @@ void effBTLSys_AttackC_Draw(effBattleSystem_effBTLSystem_AttackC_tag *hData) {
         dds3EffectPartDraw(hData->hPart10);
     }
 
-    if (hData->frame >= 3) {
+    if (hData->frame >= SDF_FRAMES(3)) {
         aim.scaleKind = 0;
         aim.aimMode = 1;
         aim.directionMode = 9;
@@ -3096,8 +3097,8 @@ void effCAMPBadDraw(effBattleSystem_effCAMPBad_tag *work)
     }
     if (work->params.hModel != NULL) {
         color = D_0031BF00[work->id].rgba;
-        if (work->frame < 8) {
-            color = effColorBlend(0x80808080, color, work->frame * 0.125f);
+        if (work->frame < SDF_FRAMES(8)) {
+            color = effColorBlend(0x80808080, color, work->frame * SDF_FRAME_STEP(0.125f));
         }
         mdlSetColor(work->params.hModel, color);
     }
