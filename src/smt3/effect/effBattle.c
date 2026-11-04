@@ -24,8 +24,6 @@ extern f32 D_0031B8B0[4];
 extern f32 D_0031B8A0[4];
 /* Non-GP BSS words: incomplete extern arrays preserve the native lui/lw
  * accesses (DDS idioms.md, "Declaring non-GP data"). */
-extern u32 effBTLSkillTargetNumber[];
-extern u32 effBTLSkillTargetBit[];
 extern s8 effBTLSkillRun;
 extern s32 effBTLSkillState;
 extern s32 effBTLSkillID;
@@ -744,11 +742,11 @@ u32 effBTLSkillGetTargetParty(void) {
 }
 
 u32 effBTLSkillGetTargetNumber(void) {
-    return effBTLSkillTargetNumber[0];
+    return D_005698E0.targetNumber;
 }
 
 u32 effBTLSkillGetTargetBit(void) {
-    return effBTLSkillTargetBit[0];
+    return D_005698E0.targetBit;
 }
 
 s32 effBTLSkillCheckRun(void) {
