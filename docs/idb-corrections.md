@@ -1411,3 +1411,9 @@ Eighteen high-offset extent extensions are withdrawn because the following word 
 - The remaining independently used scalar pairs start at `rsetFrameMaskOtOffset`, `fldPlayerSyukanState`, `fldAutoMapBuf`, `fldAutoMapBBox`, `fldAutoMapDrawState`, `fldNpcCamTarget`, `evtNextEventNo`, `moonprocess_id`, `dds3TitleFadeLevel`, `nbTobiwarpLabelIdx`, `nbFormEnemyInterval`, `sdf3DFogDefault`, `BSARI_Cut1_Rate` and `nbPressGaugeState`.
 
 The other three entries in that batch (`dds3YuukoParts`, `sdfModelShapeWeightEpsilon`, `nbCameraBoss_BSLUSI_Type`) are unchanged: this review does not establish an independent tail object for them. This is not a certification of all remaining high-offset metadata as complete ownership. Generated source includes are kept in their canonical post-split positions.
+
+### Screen global declaration compatibility safeguard
+
+The IDB screen type and pinned 0xA0 layout remain valid. The three C owners use a shared `u8[]` storage view for `sdf3DScreenParam`: the local tagged screen struct in `sdf3D.c` and the anonymous matrix/vector struct in `draw3d.h` have equal EE offsets but incompatible C member types. Declaring the same external object with both types creates a cross-unit type mismatch, reproduced by a native LTO diagnostic. This restores the consistent byte view without changing the 0xA0 copy, +0x70/+0x80 VU rows, or clip-plane base address. A future shared typed declaration must first unify the actual struct definitions; equal sizes alone are insufficient.
+
+The guarded file-manager declaration of `EIntr` now agrees with its `s32` provider result. Callers still ignore that result. The correction neither changes the peer's interrupt-masking behavior nor certifies its host scheduling assumptions.
