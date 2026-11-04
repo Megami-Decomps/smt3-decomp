@@ -1194,6 +1194,7 @@ Format: base (size in bytes): dropped element names.
 
 Four more bases, merged the same way (C never names the dropped elements): `sdfDrawFaceListParam` (0x20: `sdfDrawFaceListParam2`), `dds3ScreenBlurOfsX` (0x8: `dds3ScreenBlurOfsY`), `fadergba` (0x4: `dds3FadeColorG`, `dds3FadeColorB`, `dds3FadeState`), `nbStageState` (0xC: `StageData`, `nbStageNo`, `nbStageSub`, `nbStageParam`).
 
+Embedded blobs sized to their header length (u8): 81 scrEmbedded_*, itfMesEmbedded_* and similar symbols. Inner names dropped as parts of larger blobs: itfMesEmbedded_326858, itfMesEmbedded_522AF0, dds3ArcTable, D_005004D8.
 Element merges whose C used the dropped names, rewritten to `base[i]` or `base.field` (the field names are the existing struct's):
 
 - `gCommandFlag` (`fclTerminalCommandCount`), `dds3ConfigValue` (`dds3ConfigBackup`), `dds3PadVibrationMode` (`dds3PadVibrationLevel`), `fldAutoMapWindowTex[3]`, `gFT` (`frFontHandleNum`, `frFontEntryTable`), the pb camera rows (`pbCameraVec`, `pbGameCameraParam`), `sdf3DScreenParam` (`sdfDrawFaceListParam`).

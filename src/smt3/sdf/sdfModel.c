@@ -619,7 +619,10 @@ sdfModelPacketHeader_tag *sdfModelNewPacketHeader(sdfModelNode_t *aNode, s32 aOt
     return packet;
 }
 
-/* NON_MATCHING: 104 of 122 words differ (first at +0x14). */
+/* NON_MATCHING: 104 of 122 words differ (first at +0x14).
+ * Behaviour checked against retail: 34 PCSX2 call vectors give the same return and memory,
+ * a battle, field and event scenes, covering only the paths those calls took.
+ * (sdfport a0afdc1, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void sdfModelLinkDrawPacket(sdfModelNode_t *aNode, void *aShape, s32 aOtIndex, s32 aIndexFrom, s32 aId)
 {
