@@ -9,6 +9,12 @@
 #include "dds3obj.h"
 #include "sdfFrame.h"
 
+/* The tail halves its step every retail tick. Applying the decayed step
+ * (1 - r) / r times as large each host tick sums to the retail total. */
+#define CAMERA_STEP(aStep, aTail)                                                                 \
+    ((aTail) ? (aStep) * ((1.0f - SDF_FRAME_DECAY(0.5f)) / SDF_FRAME_DECAY(0.5f))                 \
+             : SDF_FRAME_STEP(aStep))
+
 /* 16-byte rows indexed by camera state; +0xC selects the per-state reset. */
 typedef struct nbCameraStateEntry_t {
     char *name;
@@ -450,6 +456,8 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     sdfVector4_t scale;
     sdfVector4_t eye;
     f32 distance;
+    s32 rotateTail;
+    s32 distanceTail;
 
     nbCameraCheckStateChange();
     if (pNbCamera.state != pNbCamera.state_change) {
@@ -493,24 +501,26 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     }
     camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
     work = camera->workdata;
-    if (pNbCamera.anim.rotate_f > 0) {
+    rotateTail = pNbCamera.anim.rotate_f <= 0;
+    if (!rotateTail) {
         pNbCamera.anim.rotate_f--;
     } else {
         pNbCamera.anim.rotate_s *= SDF_FRAME_DECAY(0.5f);
     }
     if (pNbCamera.anim.rotate_s != 0.0f) {
-        SetRotateMatrixY(SDF_FRAME_STEP(pNbCamera.anim.rotate_s));
+        SetRotateMatrixY(CAMERA_STEP(pNbCamera.anim.rotate_s, rotateTail));
         SDF_VU0_LOADVECTOR(&pNbCamera.direction);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_STOREVECTOR(&pNbCamera.direction);
     }
-    if (pNbCamera.anim.distance_f > 0) {
+    distanceTail = pNbCamera.anim.distance_f <= 0;
+    if (!distanceTail) {
         pNbCamera.anim.distance_f--;
     } else {
         pNbCamera.anim.distance_s *= SDF_FRAME_DECAY(0.5f);
     }
     if (pNbCamera.anim.distance_s != 0.0f) {
-        pNbCamera.distance += SDF_FRAME_STEP(pNbCamera.anim.distance_s);
+        pNbCamera.distance += CAMERA_STEP(pNbCamera.anim.distance_s, distanceTail);
     }
     distance = -pNbCamera.distance;
     scale.x = distance;
